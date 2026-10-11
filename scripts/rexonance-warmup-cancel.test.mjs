@@ -641,6 +641,7 @@ for (const reason of ["go", "hidden"]) {
         createImageBitmap: undefined,
         require(name) {
           if (name === "./rexonance-suit.ts") return suit;
+          if (name === "./rexonance-site-artwork.ts") return { REXONANCE_SITE_ARTWORK: {} };
           if (name === "./rexonance-transition-loader.ts")
             return { prepareRexonanceTransition: { prefetch: () => Promise.resolve(null) } };
           if (name === "../components/rexonance-saga/rexonance-suit-plan") {

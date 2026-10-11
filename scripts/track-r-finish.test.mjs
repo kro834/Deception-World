@@ -179,7 +179,8 @@ test("the components carry the vetted copy shape: lede sentences, keyboard hint,
   assert.match(rexonance, /title\.split\("\\u200B"\)/);
   assert.match(rexonance, /<h3>\{renderStageTitle\(activeStage\.title\)\}<\/h3>/);
   // rx2/COPY2.md C3: the stages h2 pays off 「これで、まだ標準。」.
-  assert.match(rexonance, /標準の上に、\s*<br \/>\s*あと二段。/);
+  // Owner (2026-10-12): EXCELSIOR makes it three.
+  assert.match(rexonance, /標準の上に、\s*<br \/>\s*あと3段。/);
   // The performance intro preserves phrase spans and its live baseline;
   // the standard-value comparison and unpublished stages stay explicit.
   assert.match(
@@ -195,7 +196,7 @@ test("the components carry the vetted copy shape: lede sentences, keyboard hint,
   // rx2 fix (COPY2.md L6): 必要部位 joins SA-GA OS 5.5 as a nowrap unit.
   assert.match(rexonance, /const STAGE_LEDE_UNITS = \/\(SA-GA OS 5\\\.5\|必要部位\)\/;/);
   assert.match(rexonance, /className="rxp-nowrap"/);
-  assert.match(rexonance, /<p>\{renderStageLede\(activeStage\.lede\)\}<\/p>/);
+  assert.match(rexonance, /<p key=\{paragraph\}>\{renderStageLede\(paragraph\)\}<\/p>/);
   assert.match(rexonanceCss, /\.rxp-nowrap \{\s*white-space: nowrap;/);
   assert.match(rexonanceCss, /\.rxs-p14-copy > p \{\s*word-break: auto-phrase;/);
   // rx2/COPY2.md C8: the spec joint is a textless hairline, CanvasText in

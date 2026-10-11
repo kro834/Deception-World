@@ -4,6 +4,7 @@ import {
   REXONANCE_SUIT_GOLD_ATLAS,
 } from "./rexonance-suit.ts";
 import { prepareRexonanceTransition } from "./rexonance-transition-loader.ts";
+import { REXONANCE_SITE_ARTWORK } from "./rexonance-site-artwork.ts";
 
 type Connection = { saveData?: boolean; effectiveType?: string };
 type Priority = "low" | "high";
@@ -387,3 +388,83 @@ export function scheduleRexonanceSuitWarm(delayMs = 1000) {
     abortWarmup(true);
   };
 }
+
+/** Owner (2026-10-11): the Rexonance call must not stutter, so the page it
+ * lands on is preloaded too — not when the link is tapped (its chunk would
+ * then be parsed and its art decoded in the middle of the call), but in
+ * idle time after each public page has settled: the route's chunk (through
+ * `preload`, the router's own preloadRoute), its stylesheets (rel=preload,
+ * so its hand-over never waits on them) and its hero artwork. The same skips
+ * as the suit's warm-up; straight after it, so the two never compete.
+ * Returns its cancel. */
+export function scheduleRexonancePagePreload(preload: () => Promise<unknown>, delayMs = 2500) {
+  if (typeof window === "undefined" || pagePreloaded) return () => {};
+  if (window.location.pathname === "/" || window.location.pathname.startsWith("/rexonance-saga"))
+    return () => {};
+  let timer = 0;
+  let idleId = 0;
+  let cancelled = false;
+  const run = () => {
+    idleId = 0;
+    if (cancelled || pagePreloaded || document.hidden || saving()) return;
+    pagePreloaded = true;
+    void preload()
+      .then((matches) => {
+        // The route's head links (its stylesheets), once each.
+        const list = Array.isArray(matches) ? matches : [];
+        for (const match of list as { links?: { rel?: string; href?: string }[] }[]) {
+          for (const link of match.links ?? []) {
+            if (link.rel !== "stylesheet" || !link.href) continue;
+            if (document.head.querySelector(`link[href="${CSS.escape(link.href)}"]`)) continue;
+            const hint = Object.assign(document.createElement("link"), {
+              rel: "preload",
+              as: "style",
+              href: link.href,
+            });
+            hint.setAttribute("fetchpriority", "low");
+            document.head.append(hint);
+          }
+        }
+      })
+      .catch(() => {
+        pagePreloaded = false;
+      });
+    // Its artwork, fetched and decoded ahead: the hero first, then the forms.
+    for (const source of [
+      REXONANCE_SITE_ARTWORK.standard,
+      REXONANCE_SITE_ARTWORK.max,
+      REXONANCE_SITE_ARTWORK.ultra,
+    ]) {
+      const image = new Image();
+      image.decoding = "async";
+      image.fetchPriority = "low";
+      image.src = source;
+      held.push(image);
+      void image.decode?.().catch(() => undefined);
+    }
+  };
+  // Owner (2026-10-11, "load it in a bigger way"): no fixed wait of its own —
+  // it follows the suit's warm-up straight on (it shares that warm-up, which
+  // starts it if nothing has), in the next idle slot.
+  const afterLoad = () => {
+    if (cancelled) return;
+    timer = window.setTimeout(() => {
+      timer = 0;
+      if (cancelled) return;
+      void warmRexonanceSuit().then(() => {
+        if (cancelled) return;
+        if (window.requestIdleCallback) idleId = window.requestIdleCallback(run, { timeout: 800 });
+        else run();
+      });
+    }, delayMs);
+  };
+  if (document.readyState === "complete") afterLoad();
+  else window.addEventListener("load", afterLoad, { once: true });
+  return () => {
+    cancelled = true;
+    window.removeEventListener("load", afterLoad);
+    if (timer) window.clearTimeout(timer);
+    if (idleId) window.cancelIdleCallback?.(idleId);
+  };
+}
+let pagePreloaded = false;

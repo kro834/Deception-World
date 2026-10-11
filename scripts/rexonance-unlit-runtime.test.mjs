@@ -65,6 +65,10 @@ function fixture(pixels, width, height, failures = {}) {
         drawImage(...args) {
           calls.draw.push(args);
           if (failures.draw) throw new Error("closed bitmap");
+          if (args[0].pixels) canvas.pixels = Uint8ClampedArray.from(args[0].pixels);
+        },
+        clearRect() {
+          canvas.pixels = null;
         },
         getImageData(...args) {
           calls.read.push(args);
@@ -125,7 +129,8 @@ test("synchronous compatibility preserves every original byte across seeded RGBA
   const expected = originalBytes(pixels);
   const ui = fixture(pixels, width, height);
   assertBytes(ui.api.splitLights(ui.image, 11, 13, width, height), expected);
-  assert.deepEqual(ui.calls.draw, [[ui.image, 11, 13, width, height, 0, 0, width, height]]);
+  assert.deepEqual(ui.calls.draw[0], [ui.image, 11, 13, width, height, 0, 0, width, height]);
+  assert.equal(ui.calls.draw.length, 3, "one snapshot, two GPU-friendly output copies");
   assert.deepEqual(ui.calls.read, [[0, 0, width, height]]);
   assert.deepEqual(ui.calls.create, [[width, height]]);
   assert.equal(ui.calls.put.length, 2);
@@ -237,7 +242,7 @@ for (const slicing of ["one-row", "six-ms", "idle-expired", "infinite"]) {
     if (slicing === "one-row" || slicing === "idle-expired") assert.equal(slices, height);
     if (slicing === "infinite") assert.equal(slices, 1);
     assertBytes(job.commit(), originalBytes(pixels));
-    assert.equal(ui.calls.draw.length, 1);
+    assert.equal(ui.calls.draw.length, 3);
     assert.equal(ui.calls.read.length, 1);
     assert.equal(ui.calls.create.length, 1);
     assert.equal(ui.calls.put.length, 2);
@@ -285,7 +290,7 @@ for (const started of [false, true]) {
     assert.equal(JSON.stringify(ui.calls), before);
     assert.deepEqual(
       ui.canvases.map((canvas) => canvas.width),
-      [0, 0],
+      [0, 0, 0],
     );
     assert.equal(ui.calls.close, 0);
   });
@@ -308,7 +313,7 @@ for (const failures of [
   });
 }
 
-for (const failures of [{ context: 1 }, { put: 0 }, { put: 1 }]) {
+for (const failures of [{ context: 1 }, { context: 2 }, { put: 0 }]) {
   test(`unavailable commit returns null with no partial result and remains terminal: ${JSON.stringify(failures)}`, () => {
     const ui = fixture(randomPixels(3, 4), 3, 4, failures);
     const job = ui.api.createSplitLightsJob(ui.image, 0, 0, 3, 4);
@@ -322,7 +327,7 @@ for (const failures of [{ context: 1 }, { put: 0 }, { put: 1 }]) {
     assert.equal(JSON.stringify(ui.calls), before);
     assert.deepEqual(
       ui.canvases.map((canvas) => canvas.width),
-      [0, 0],
+      [0, 0, 0],
     );
     assert.equal(ui.calls.close, 0);
   });
@@ -342,12 +347,12 @@ test("a broken deadline settles safely instead of stranding private image buffer
   assert.equal(job.commit(), null);
   assert.deepEqual(
     ui.canvases.map((canvas) => canvas.width),
-    [0, 0],
+    [0, 0, 0],
   );
 });
 
 test("absent documents and synchronous setup or commit failure preserve null fallback", () => {
-  const ui = fixture(randomPixels(3, 4), 3, 4, { put: 1 });
+  const ui = fixture(randomPixels(3, 4), 3, 4, { put: 0 });
   assert.equal(ui.api.createSplitLightsJob(ui.image, 0, 0, 3, 4, null), null);
   assert.equal(ui.api.splitLights(ui.image, 0, 0, 3, 4), null);
   assert.equal(ui.calls.close, 0);

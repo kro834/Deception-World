@@ -312,7 +312,17 @@ async function verifyStageSwipe(page, context) {
   }
   await session.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
   await session.detach();
-  await page.waitForFunction(() => document.querySelector(".rxs-stage-tabs")?.getAttribute("data-stage") === "ultra");
+  // The swipe ends on whichever form's tab lies under the finger (four
+  // forms since EXCELSIOR, owner 2026-10-11; a 2 x 2 grid on phones).
+  const target = await page.evaluate(
+    ([x, y]) => document.elementFromPoint(x, y)?.closest('[role="tab"]')?.id?.replace("rxs-stage-tab-", ""),
+    [endX, y],
+  );
+  assert.ok(target && target !== "standard", `swipe target ${target}`);
+  await page.waitForFunction(
+    (stage) => document.querySelector(".rxs-stage-tabs")?.getAttribute("data-stage") === stage,
+    target,
+  );
   const result = await page.evaluate(() => ({
     stage: document.querySelector(".rxs-stage-tabs")?.getAttribute("data-stage"),
     selected: document.querySelector('.rxs-stage-tabs [role="tab"][aria-selected="true"]')?.id,
@@ -320,9 +330,9 @@ async function verifyStageSwipe(page, context) {
     overlayCount: document.querySelectorAll('.rx-call-sequence[data-mode="stage"]').length,
     scrollY,
   }));
-  assert.equal(result.stage, "ultra");
-  assert.equal(result.selected, "rxs-stage-tab-ultra");
-  assert.match(result.imageAlt, /ウルトラ/);
+  assert.equal(result.stage, target);
+  assert.equal(result.selected, `rxs-stage-tab-${target}`);
+  assert.match(result.imageAlt, { max: /マックス/, ultra: /ウルトラ/, excelsior: /エクセルシア/ }[target]);
   assert.ok(result.overlayCount <= 1);
   assert.ok(Math.abs(result.scrollY - beforeScrollY) <= 2, "horizontal stage swipe must not scroll the document vertically");
   return result;

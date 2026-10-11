@@ -25,11 +25,13 @@ export function splitLights(source, sx, sy, w, h, document = globalThis.document
 export function createSplitLightsJob(source, sx, sy, w, h, document = globalThis.document) {
   let unlit;
   let lights;
+  let scratch;
   try {
     const make = () => Object.assign(document.createElement("canvas"), { width: w, height: h });
+    scratch = make();
     unlit = make();
     lights = make();
-    const uc = unlit.getContext("2d", { willReadFrequently: true });
+    const uc = scratch.getContext("2d", { willReadFrequently: true });
     if (!uc) throw new Error("unavailable light separation context");
     uc.drawImage(source, sx, sy, w, h, 0, 0, w, h);
     let art = uc.getImageData(0, 0, w, h);
@@ -48,6 +50,7 @@ export function createSplitLightsJob(source, sx, sy, w, h, document = globalThis
     const release = () => {
       art = glow = a = g = null;
       unlit.width = lights.width = 0;
+      scratch.width = scratch.height = 0;
     };
     return {
       step(until, idleDeadline) {
@@ -74,9 +77,15 @@ export function createSplitLightsJob(source, sx, sy, w, h, document = globalThis
         if (cancelled || at < a.length) return null;
         try {
           uc.putImageData(art, 0, 0);
+          const output = unlit.getContext("2d");
+          if (!output) throw new Error("unavailable unlit output context");
+          output.drawImage(scratch, 0, 0);
           const lc = lights.getContext("2d");
           if (!lc) throw new Error("unavailable light overlay context");
-          lc.putImageData(glow, 0, 0);
+          uc.clearRect(0, 0, w, h);
+          uc.putImageData(glow, 0, 0);
+          lc.drawImage(scratch, 0, 0);
+          scratch.width = scratch.height = 0;
           result = { unlit, lights };
           art = glow = a = g = null;
           return result;
@@ -96,6 +105,7 @@ export function createSplitLightsJob(source, sx, sy, w, h, document = globalThis
     // Releasing owned canvases never closes a borrowed image or bitmap.
     if (unlit) unlit.width = 0;
     if (lights) lights.width = 0;
+    if (scratch) scratch.width = scratch.height = 0;
     return null;
   }
 }

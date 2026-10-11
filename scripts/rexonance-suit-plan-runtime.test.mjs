@@ -24,8 +24,12 @@ function planRuntime({ idle = true, decoded = true, canCancelIdle = true } = {})
   const lightSplits = [];
   const lightJobs = [];
   const stages = [];
-  const options = { failDraw: false, contextAvailable: true, lightsAvailable: true,
-    lightCommitAvailable: true };
+  const options = {
+    failDraw: false,
+    contextAvailable: true,
+    lightsAvailable: true,
+    lightCommitAvailable: true,
+  };
   const art = { kind: "atlas", close: () => closeCount++ };
   const raw = { kind: "raw-gold", close: () => closeCount++ };
   const unlit = { kind: "unlit-atlas" };
@@ -45,6 +49,7 @@ function planRuntime({ idle = true, decoded = true, canCancelIdle = true } = {})
     },
     drawImage(image) {
       if (options.failDraw) throw new Error("invalidated bitmap");
+      if (image === lights) return; // Precomputed figure glow is not a working-atlas draw.
       drawn.push(image.kind);
     },
   };
@@ -72,7 +77,16 @@ function planRuntime({ idle = true, decoded = true, canCancelIdle = true } = {})
     // Each clock read consumes a small deterministic slice; no test depends
     // on this machine's actual CPU, garbage collector or frame cadence.
     performance: { now: () => (now += 2) },
-    document: { createElement: () => canvas },
+    document: {
+      createElement: () => ({
+        getContext() {
+          // The full-figure light overlay has its own canvas; working-atlas
+          // faults below must not accidentally invalidate this separate buffer.
+          if (this.width === suit.REXONANCE_SUIT_SIZE.width) return { drawImage() {} };
+          return canvas.getContext();
+        },
+      }),
+    },
     requestAnimationFrame: (callback) => schedule("frame", () => callback(now)),
     cancelAnimationFrame: cancel,
     require(name) {
@@ -89,7 +103,11 @@ function planRuntime({ idle = true, decoded = true, canCancelIdle = true } = {})
             stages.push("light-setup");
             lightSplits.push(args);
             if (!options.lightsAvailable) return null;
-            const job = { cursor: 0, cancelled: false, committed: false, slices: [],
+            const job = {
+              cursor: 0,
+              cancelled: false,
+              committed: false,
+              slices: [],
               step(until, deadline) {
                 stages.push("light-rows");
                 const first = job.cursor;
@@ -107,7 +125,9 @@ function planRuntime({ idle = true, decoded = true, canCancelIdle = true } = {})
                 job.committed = true;
                 return options.lightCommitAvailable ? { unlit, lights } : null;
               },
-              cancel() { job.cancelled = true; },
+              cancel() {
+                job.cancelled = true;
+              },
             };
             lightJobs.push(job);
             return job;
@@ -596,7 +616,11 @@ test("light readback, budgeted rows, commit and working atlas each occupy separa
   const ui = planRuntime();
   const preparing = ui.plan.prepareRexonanceSuit();
   ui.flushUntil(() => ui.plan.__buildState().complete);
-  assert.equal(ui.lightJobs.length, 0, "plate generation never starts the pixel pass in its final slice");
+  assert.equal(
+    ui.lightJobs.length,
+    0,
+    "plate generation never starts the pixel pass in its final slice",
+  );
   assert.deepEqual(ui.stages, []);
   ui.queued.shift()();
   const job = ui.lightJobs[0];
@@ -608,7 +632,11 @@ test("light readback, budgeted rows, commit and working atlas each occupy separa
   ui.flushUntil(() => job.cursor === 12);
   assert.ok(job.slices.length >= 4, "the full pass is split under the six-ms budget");
   assert.ok(job.slices.every((rows) => rows > 0 && rows <= 3));
-  assert.equal(ui.plan.plateLights(), null, "complete private buffers are not public before commit");
+  assert.equal(
+    ui.plan.plateLights(),
+    null,
+    "complete private buffers are not public before commit",
+  );
   assert.deepEqual(ui.drawn, []);
   ui.queued.shift()();
   assert.equal(ui.plan.plateLights().unlit, ui.unlit);
@@ -618,8 +646,12 @@ test("light readback, budgeted rows, commit and working atlas each occupy separa
   ui.queued.shift()();
   assert.equal(await preparing, true);
   assert.equal(ui.plan.isRexonanceSuitPlanReady(), true);
-  assert.deepEqual(ui.stages, ["light-setup", ...job.slices.map(() => "light-rows"),
-    "light-commit", "atlas"]);
+  assert.deepEqual(ui.stages, [
+    "light-setup",
+    ...job.slices.map(() => "light-rows"),
+    "light-commit",
+    "atlas",
+  ]);
   assert.deepEqual(ui.drawn, ["clear", "unlit-atlas", "raw-gold"]);
   assert.equal(ui.queued.length, 0);
 });
@@ -654,12 +686,16 @@ test("a live call taking over a partial or committed light job never resets its 
     ui.plan.plates();
     ui.plan.forming(ui.art, ui.raw);
     const preparing = ui.plan.prepareRexonanceSuit();
-    assert.equal(ui.plan.isRexonanceSuitPlanReady(), false,
-      "a previous raw fallback is not ready during a new private light pass");
+    assert.equal(
+      ui.plan.isRexonanceSuitPlanReady(),
+      false,
+      "a previous raw fallback is not ready during a new private light pass",
+    );
     ui.flushUntil(() => {
       const job = ui.lightJobs[0];
-      return phase === "committed" ? Boolean(ui.plan.plateLights()) :
-        Boolean(job && (phase === "rows" ? job.cursor > 0 : job.cursor === 12));
+      return phase === "committed"
+        ? Boolean(ui.plan.plateLights())
+        : Boolean(job && (phase === "rows" ? job.cursor > 0 : job.cursor === 12));
     });
     const published = ui.plan.plateLights();
     ui.plan.work.drawing = 1;
@@ -715,16 +751,33 @@ test("a finite entry timeout may fire between pixel slices without cancelling th
   const ui = planRuntime();
   const timers = new Map();
   const exports = {};
-  const entrySource = readFileSync(new URL("../src/lib/rexonance-entry-preparation.ts", import.meta.url), "utf8");
-  runInNewContext(ts.transpileModule(entrySource, {
-    compilerOptions: { module: ts.ModuleKind.CommonJS },
-  }).outputText, { exports, window: {
-    setTimeout(callback, duration) { timers.set(1, { callback, duration }); return 1; },
-    clearTimeout(id) { timers.delete(id); },
-  } });
+  const entrySource = readFileSync(
+    new URL("../src/lib/rexonance-entry-preparation.ts", import.meta.url),
+    "utf8",
+  );
+  runInNewContext(
+    ts.transpileModule(entrySource, {
+      compilerOptions: { module: ts.ModuleKind.CommonJS },
+    }).outputText,
+    {
+      exports,
+      window: {
+        setTimeout(callback, duration) {
+          timers.set(1, { callback, duration });
+          return 1;
+        },
+        clearTimeout(id) {
+          timers.delete(id);
+        },
+      },
+    },
+  );
   let shared;
-  const entry = exports.prepareRexonanceEntry({ decoded: Promise.resolve(true),
-    prepare: () => (shared = ui.plan.prepareRexonanceSuit("high")), deadlineMs: 120 });
+  const entry = exports.prepareRexonanceEntry({
+    decoded: Promise.resolve(true),
+    prepare: () => (shared = ui.plan.prepareRexonanceSuit("high")),
+    deadlineMs: 120,
+  });
   await flushPromises();
   ui.flushUntil(() => (ui.lightJobs[0]?.cursor ?? 0) > 0);
   assert.equal(ui.plan.plateLights(), null);
@@ -733,7 +786,11 @@ test("a finite entry timeout may fire between pixel slices without cancelling th
   timers.get(1).callback();
   assert.equal(await entry.promise, false);
   assert.equal(timers.size, 0);
-  assert.equal(ui.lightJobs[0].cancelled, false, "one expired intent cannot destroy shared row progress");
+  assert.equal(
+    ui.lightJobs[0].cancelled,
+    false,
+    "one expired intent cannot destroy shared row progress",
+  );
   ui.flush();
   assert.equal(await shared, true);
   assert.equal(await entry.promise, false, "late plan completion cannot revive an expired intent");

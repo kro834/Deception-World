@@ -149,6 +149,16 @@ const SUIT_CRESTS = {
     mirror(SUIT_BLADE),
     "120,40 124,49 120,58 116,49",
   ],
+  // EXCELSIOR: ULTRA's crown with its temple fins and a larger jewel.
+  excelsior: [
+    SUIT_CREST,
+    mirror(SUIT_CREST),
+    SUIT_BLADE,
+    mirror(SUIT_BLADE),
+    SUIT_FIN,
+    mirror(SUIT_FIN),
+    "120,36 126,49 120,62 114,49",
+  ],
 } as const;
 const SUIT_FACE = curve("120,61 112,59 103,59* 105,68 110,77 116,85 120,91*");
 const SUIT_EYE = "103,61 109,63 116,72 120,79 120,86 115,79 108,70";
@@ -237,7 +247,7 @@ function SuitBadge() {
         <path className="rx-suit-badge-visor" d={outline([SUIT_FACE, mirror(SUIT_FACE)])} />
       </svg>
       {/* The form's crest plate swaps in and seats with a rim glint. */}
-      {(["standard", "max", "ultra"] as const).map((form) => (
+      {(["standard", "max", "ultra", "excelsior"] as const).map((form) => (
         <div key={form} className={`rx-suit-crest is-${form}`}>
           <svg viewBox={view}>
             <path d={outline(SUIT_CRESTS[form])} />

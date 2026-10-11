@@ -62,7 +62,8 @@ const STAGES: Record<
     image: string;
     alt: string;
     title: string;
-    lede: string;
+    /** One paragraph, or several (EXCELSIOR's 概要). */
+    lede: string | readonly string[];
     points: readonly string[];
     accent: string;
   }
@@ -99,6 +100,19 @@ const STAGES: Record<
     lede: "身体、武装、リアクター、極小主権宇宙を一つの巨大な攻撃機関へ統合し、60秒間、全演算・神属権限・出力を現在の一動作へ集中します。",
     points: ["単一実在収束", "SCALER《ULTRA》", "60秒間の最上位状態"],
     accent: "#ff72da",
+  },
+  // Owner (2026-10-11/12): above ULTRA, also 60 s. The lede is a summary
+  // of the owner's 概要, as the owner asked ("説明は端折って要約した物を").
+  excelsior: {
+    label: "エクセルシア",
+    code: "EXCELSIOR 60s",
+    image: REXONANCE_SITE_ARTWORK.excelsior,
+    alt: "仮面ライダーレクソナンスサーガ・エクセルシアの全身ビジュアル",
+    // Zero-width markers (renderStageTitle → <wbr />) only: it breaks at its words.
+    title: "仮面ライダー\u200Bレクソナンスサーガ・\u200Bエクセルシア",
+    lede: "レクソナンスサーガの《超自己進化》が生んだ新たな構造を、REALMSの科学者『フェイブル』が独立した強化形態として完成させた、ウルトラを超える到達点。最大稼働時間は同じく60秒間。",
+    points: ["《超自己進化》", "フェイブルの技術", "最大稼働時間60秒間"],
+    accent: "#7dffb8",
   },
 };
 
@@ -553,99 +567,150 @@ function FormMorph({
         image.onerror = reject;
         image.src = src;
       });
-    const steps: { a: RexonanceStage; b: RexonanceStage; ms: number; extra: boolean }[] =
+    // A source is a form's panel art (drawn as the panel draws it) or, for
+    // the run up to EXCELSIOR, a form's full figure (owner, 2026-10-11).
+    type Source = `panel:${RexonanceStage}` | "suit:max" | "suit:ultra";
+    type Step = {
+      a: Source;
+      b: Source;
+      ms: number;
+      extra?: "emerald" | "difference";
+      style?: "square" | "shard";
+      order?: "radial" | "descend";
+      tone: string;
+    };
+    const panel = (stage: RexonanceStage) => `panel:${stage}` as Source;
+    const steps: Step[] =
       to === "max"
-        ? [{ a: from, b: "max", ms: FORM_CHANGE_MS.max, extra: false }]
-        : [
-            ...(from === "standard"
-              ? [
-                  {
-                    a: "standard" as const,
-                    b: "max" as const,
-                    ms: FORM_CHANGE_MS.quick,
-                    extra: false,
-                  },
-                ]
-              : []),
-            {
-              a: from === "standard" ? "max" : from,
-              b: "ultra",
-              ms: FORM_CHANGE_MS.ultra,
-              extra: true,
-            },
-          ];
+        ? [{ a: panel(from), b: "panel:max", ms: FORM_CHANGE_MS.max, tone: FORM_TONES.max }]
+        : to === "ultra"
+          ? [
+              ...(from === "standard"
+                ? [
+                    {
+                      a: "panel:standard",
+                      b: "panel:max",
+                      ms: FORM_CHANGE_MS.quick,
+                      tone: FORM_TONES.max,
+                    } as Step,
+                  ]
+                : []),
+              {
+                a: from === "standard" ? "panel:max" : panel(from),
+                b: "panel:ultra",
+                ms: FORM_CHANGE_MS.ultra,
+                extra: "emerald",
+                tone: FORM_TONES.ultra,
+              },
+            ]
+          : [
+              // EXCELSIOR: from MAX to ULTRA, then its own nanites (prism
+              // shards, coming down from the crown) add its decoration.
+              ...(from === "standard"
+                ? ([
+                    { a: "panel:standard", b: "panel:max", ms: 360, tone: FORM_TONES.max },
+                    { a: "panel:max", b: "panel:ultra", ms: 460, tone: FORM_TONES.ultra },
+                  ] as Step[])
+                : from === "max"
+                  ? ([
+                      { a: "panel:max", b: "panel:ultra", ms: 460, tone: FORM_TONES.ultra },
+                    ] as Step[])
+                  : []),
+              {
+                a: "panel:ultra",
+                b: "panel:excelsior",
+                ms: FORM_CHANGE_MS.excelsior,
+                extra: "difference",
+                style: "shard",
+                order: "descend",
+                tone: FORM_TONES.excelsior,
+              },
+            ];
     const sources = [...new Set(steps.flatMap(({ a, b }) => [a, b]))];
+    const url = (source: Source) =>
+      source.startsWith("panel:")
+        ? STAGES[source.slice(6) as RexonanceStage].image
+        : REXONANCE_FORM_FIGURES[source.slice(5) as "max" | "ultra"];
     // The old form shows at once (it is cached), so the new picture never flashes first.
     canvas.style.opacity = "1";
     Promise.all(
-      sources.map((key) => load(STAGES[key].image).then((image) => [key, image] as const)),
+      sources.map((source) => load(url(source)).then((image) => [source, image] as const)),
     )
       .then((loaded) => {
         if (cancelled) return;
-        const pictures = Object.fromEntries(loaded) as Record<RexonanceStage, HTMLImageElement>;
         // The picture's layout box (offsets ignore its entrance transform).
-        const box = { width: img.offsetWidth, height: img.offsetHeight };
+        const width = img.offsetWidth;
+        const height = img.offsetHeight;
         const parent = img.offsetParent === canvas.offsetParent;
         const ratio = Math.min(2, window.devicePixelRatio || 1);
         canvas.style.left = `${parent ? img.offsetLeft : 0}px`;
         canvas.style.top = `${parent ? img.offsetTop : 0}px`;
-        canvas.style.width = `${box.width}px`;
-        canvas.style.height = `${box.height}px`;
-        canvas.width = Math.max(1, Math.round(box.width * ratio));
-        canvas.height = Math.max(1, Math.round(box.height * ratio));
+        canvas.style.width = `${width}px`;
+        canvas.style.height = `${height}px`;
+        const W = Math.max(1, Math.round(width * ratio));
+        const H = Math.max(1, Math.round(height * ratio));
+        canvas.width = W;
+        canvas.height = H;
         const context = canvas.getContext("2d");
         if (!context) return;
-        // The picture's own fit and position (object-fit / object-position).
+        // Each source drawn once, as it will stand: the panel art with the
+        // picture's own fit and position; a figure whole, on the stage's dark.
         const style = getComputedStyle(img);
-        const naturalW = img.naturalWidth || 1086;
-        const naturalH = img.naturalHeight || 1448;
-        const fit = style.objectFit === "contain" ? Math.min : Math.max;
-        const scale = fit(box.width / naturalW, box.height / naturalH);
         const [px, py] = style.objectPosition
           .split(" ")
           .map((part) => (part.endsWith("%") ? Number.parseFloat(part) / 100 : 0.5));
-        const offsetX = (box.width - naturalW * scale) * (px ?? 0.5);
-        const offsetY = (box.height - naturalH * scale) * (py ?? 0.5);
-        const cell = 22;
-        const plans = steps.map(({ a, b, extra }, index) => {
+        const prepared = new Map<Source, HTMLCanvasElement>();
+        for (const [source, image] of loaded) {
+          const sheet = Object.assign(document.createElement("canvas"), { width: W, height: H });
+          const c = sheet.getContext("2d")!;
+          const nw = image.naturalWidth || 1;
+          const nh = image.naturalHeight || 1;
+          if (source.startsWith("panel:")) {
+            // The panel's own object-fit (contain on this page): drawn any
+            // other way, the change showed the art enlarged (owner, 2026-10-12).
+            const scale = (style.objectFit === "cover" ? Math.max : Math.min)(W / nw, H / nh);
+            c.drawImage(
+              image,
+              (W - nw * scale) * (px ?? 0.5),
+              (H - nh * scale) * (py ?? 0.5),
+              nw * scale,
+              nh * scale,
+            );
+          } else {
+            c.fillStyle = "#04070d";
+            c.fillRect(0, 0, W, H);
+            const scale = Math.min(W / nw, (H * 0.96) / nh);
+            c.drawImage(image, (W - nw * scale) / 2, H - nh * scale, nw * scale, nh * scale);
+          }
+          prepared.set(source, sheet);
+        }
+        const cell = Math.max(8, Math.round(Math.min(W, H) / 34));
+        const plans = steps.map((step, index) => {
           const base = {
-            width: naturalW,
-            height: naturalH,
+            width: W,
+            height: H,
             cell,
-            origin: [naturalW * MORPH_ORIGIN[0], naturalH * MORPH_ORIGIN[1]] as const,
+            origin: [W * MORPH_ORIGIN[0], H * MORPH_ORIGIN[1]] as const,
             seed: 31 + index,
+            order: step.order ?? "radial",
+            extraBy: step.extra ?? "emerald",
           };
-          if (!extra) return planOverwrite(base);
+          if (!step.extra) return planOverwrite(base);
           const grid = planOverwrite(base);
-          const fromCells = sampleCells(pictures[a], grid);
-          const toCells = sampleCells(pictures[b], grid);
+          const fromCells = sampleCells(prepared.get(step.a)!, grid);
+          const toCells = sampleCells(prepared.get(step.b)!, grid);
           return fromCells && toCells
             ? planOverwrite({ ...base, samples: { from: fromCells, to: toCells } })
             : grid;
         });
-        const total =
-          steps.reduce((sum, step) => sum + step.ms, 0) +
-          (steps.at(-1)!.extra ? FORM_CHANGE_MS.extra * 0.6 : 0);
+        const tail = steps.at(-1)!.extra ? FORM_CHANGE_MS.extra * 0.6 : 0;
+        const total = steps.reduce((sum, step) => sum + step.ms, 0) + tail;
         let start = 0;
         const tick = (now: number) => {
           frame = 0;
           if (cancelled) return;
           if (!start) start = now + delay;
           let t = Math.max(0, now - start);
-          context.setTransform(
-            ratio * scale,
-            0,
-            0,
-            ratio * scale,
-            ratio * offsetX,
-            ratio * offsetY,
-          );
-          context.clearRect(
-            -offsetX / scale,
-            -offsetY / scale,
-            box.width / scale,
-            box.height / scale,
-          );
           let index = 0;
           while (index < steps.length - 1 && t >= steps[index].ms) {
             t -= steps[index].ms;
@@ -656,17 +721,22 @@ function FormMorph({
           const v = step.extra
             ? Math.min(1, Math.max(0, (t - step.ms * 0.6) / FORM_CHANGE_MS.extra))
             : 1;
+          context.setTransform(1, 0, 0, 1, 0, 0);
+          context.clearRect(0, 0, W, H);
           drawOverwrite(
             context,
             plans[index],
-            pictures[step.a],
-            pictures[step.b],
+            prepared.get(step.a)!,
+            prepared.get(step.b)!,
             u,
             v,
-            FORM_TONES[step.b],
+            step.tone,
+            false,
+            step.style ?? "square",
           );
           if (now - start >= total) {
             canvas.style.opacity = "0";
+            for (const sheet of prepared.values()) sheet.width = sheet.height = 0;
             return;
           }
           frame = requestAnimationFrame(tick);
@@ -1046,7 +1116,8 @@ export function RexonanceSaga() {
       timer = window.setTimeout(() => {
         timer = 0;
         if (window.requestIdleCallback) idle = window.requestIdleCallback(show, { timeout: 700 });
-        else show();
+        // Safari has no idle callback: leave the reveal's last frames alone.
+        else timer = window.setTimeout(show, 400);
       }, REXONANCE_ENTRY_TIMINGS.reveal + 80);
     };
     const observer = new MutationObserver(() => {
@@ -1629,7 +1700,7 @@ export function RexonanceSaga() {
               <h2>
                 標準の上に、
                 <br />
-                あと二段。
+                あと3段。
               </h2>
             </header>
 
@@ -1718,7 +1789,12 @@ export function RexonanceSaga() {
                 <div key={`${stage}-copy`}>
                   <small>{activeStage.code}</small>
                   <h3>{renderStageTitle(activeStage.title)}</h3>
-                  <p>{renderStageLede(activeStage.lede)}</p>
+                  {(typeof activeStage.lede === "string"
+                    ? [activeStage.lede]
+                    : activeStage.lede
+                  ).map((paragraph) => (
+                    <p key={paragraph}>{renderStageLede(paragraph)}</p>
+                  ))}
                   <ul>
                     {activeStage.points.map((point) => (
                       <li key={point}>{point}</li>

@@ -65,6 +65,9 @@ html body:has(.rx-call-sequence[data-mode="stage"]) .zeus-button {
 .rx-call-sequence[data-stage="ultra"] {
   --rx-call-accent: var(--rx-call-pink);
 }
+.rx-call-sequence[data-stage="excelsior"] {
+  --rx-call-accent: #7dffb8;
+}
 .rx-call-ground,
 .rx-call-frame,
 .rx-call-words {
@@ -2380,7 +2383,8 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
 
 .rx-call-sequence[data-stage="standard"] .rx-suit-badge > .rx-suit-crest.is-standard,
 .rx-call-sequence[data-stage="max"] .rx-suit-badge > .rx-suit-crest.is-max,
-.rx-call-sequence[data-stage="ultra"] .rx-suit-badge > .rx-suit-crest.is-ultra {
+.rx-call-sequence[data-stage="ultra"] .rx-suit-badge > .rx-suit-crest.is-ultra,
+.rx-call-sequence[data-stage="excelsior"] .rx-suit-badge > .rx-suit-crest.is-excelsior {
   display: block;
 }
 
@@ -2461,6 +2465,11 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
 .rx-call-sequence .rx-suit-crest.is-ultra {
   --rx-suit-from: translate3d(0, 30%, 0) scaleY(0.6);
   transform-origin: 50% 40%;
+}
+
+.rx-call-sequence .rx-suit-crest.is-excelsior {
+  --rx-suit-from: scale(0.4);
+  transform-origin: 50% 45%;
 }
 
 /* In over the card's first 80 ms, out from 330 ms (its words' leave) to

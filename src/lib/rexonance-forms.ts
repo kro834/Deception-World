@@ -4,4 +4,6 @@
 export const REXONANCE_FORM_FIGURES = {
   max: "/rexonance-forms-20261011/max.webp",
   ultra: "/rexonance-forms-20261011/ultra.webp",
+  // Fitted to the figure by its bounds (another pose).
+  excelsior: "/rexonance-forms-20261011/excelsior.webp",
 } as const;

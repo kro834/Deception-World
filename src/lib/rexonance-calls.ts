@@ -8,12 +8,14 @@ export const REXONANCE_CALLS = [
   "REXONANCE DEUS！",
 ] as const;
 
-export type RexonanceStage = "standard" | "max" | "ultra";
+// EXCELSIOR (owner, 2026-10-11): above ULTRA, also 60 s.
+export type RexonanceStage = "standard" | "max" | "ultra" | "excelsior";
 
 export const REXONANCE_STAGE_LABELS: Record<RexonanceStage, string> = {
   standard: "HIGH",
   max: "MAX",
   ultra: "ULTRA",
+  excelsior: "EXCELSIOR",
 };
 
 // rx12 (owner, 2026-10-10): the face holds its pixel squares ~0.6 s before

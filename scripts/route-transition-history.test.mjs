@@ -272,6 +272,8 @@ function mount(
               suitWarmHolds -= 1;
             };
           },
+          // The page preload (owner, 2026-10-11) never runs here either.
+          scheduleRexonancePagePreload: () => () => {},
         };
       if (name === "./rexonance-saga/rexonance-suit-plan")
         return loadPlan

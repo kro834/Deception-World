@@ -2517,3 +2517,16 @@ html .rxs-page.rxs-page .rxs-scroll-cue::before {
     grid-column-start: 2;
   }
 }
+
+/* Four forms on a phone (owner, 2026-10-11: EXCELSIOR above ULTRA): a 2 x 2
+   grid over the shared single-row pill (styles-frosted-controls.css), a
+   rounded panel, so every code stays whole at its 12px floor. */
+@media (max-width: 600px) {
+  html body .rxs-page.rxs-page.rxs-rexonance-page .rxs-stage-tabs.liquid-swipe-tabs {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr);
+    --liquid-shell-radius: 22px !important;
+    --liquid-control-radius: 16px !important;
+    border-radius: 22px !important;
+  }
+}

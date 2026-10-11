@@ -29,6 +29,7 @@ import { prepareRexonanceEntry } from "@/lib/rexonance-entry-preparation";
 import {
   isRexonanceSuitReady,
   pauseRexonanceSuitWarmup,
+  scheduleRexonancePagePreload,
   scheduleRexonanceSuitWarm,
   warmRexonanceSuit,
 } from "@/lib/rexonance-suit-warmup";
@@ -887,6 +888,11 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
   // after that destination's own load; route changes cancel stale idle jobs.
   // rx17 (owner): soon after each page's load, with the call's own chunk.
   useEffect(() => scheduleRexonanceSuitWarm(), [pathname]);
+  // Owner (2026-10-11): the Rexonance page itself (chunk, styles, hero) too.
+  useEffect(
+    () => scheduleRexonancePagePreload(() => router.preloadRoute({ to: "/rexonance-saga" })),
+    [pathname, router],
+  );
   const rexonanceCoverCancel = useRef<(() => void) | null>(null);
   const openingHandoff = useRef<OpeningHandoffRuntime | null>(null);
   const openingFocusFrames = useRef<number[]>([]);

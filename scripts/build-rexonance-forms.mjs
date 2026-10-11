@@ -14,7 +14,10 @@ const FIG = { width: 571, height: 1040 };
 const SUIT = "public/rexonance-suit-20261010";
 const OUT = "public/rexonance-forms-20261011";
 
-const base = await sharp(root(`${SUIT}/figure.webp`)).ensureAlpha().raw().toBuffer();
+const base = await sharp(root(`${SUIT}/figure.webp`))
+  .ensureAlpha()
+  .raw()
+  .toBuffer();
 
 for (const form of ["max", "ultra"]) {
   // sharp extracts before it resizes within one pipeline: two passes.
@@ -32,9 +35,11 @@ for (const form of ["max", "ultra"]) {
     const r = data[i * 3];
     const g = data[i * 3 + 1];
     const b = data[i * 3 + 2];
-    // The ground is black: the light and the armour stand off it; the
-    // finished figure's own silhouette keeps the dark plates opaque.
-    const lit = Math.min(1, Math.max(0, (Math.max(r, g, b) - 10) / 34));
+    // The silhouette is the owner's cut-out of the figure (HIGH's alpha):
+    // the forms share its pose to the pixel. Only real light beyond it (a
+    // bright glow, not the black ground's noise) adds to it, so no dark rim
+    // of the ground comes along (owner, 2026-10-11).
+    const lit = Math.min(1, Math.max(0, (Math.max(r, g, b) - 70) / 60));
     const alpha = Math.max(lit, base[i * 4 + 3] / 255);
     out[i * 4] = r;
     out[i * 4 + 1] = g;
@@ -46,4 +51,53 @@ for (const form of ["max", "ultra"]) {
     .webp({ quality: 70, alphaQuality: 80, effort: 6 })
     .toFile(root(file));
   console.log(file);
+}
+
+// EXCELSIOR (owner, 2026-10-11): its art is not drawn in the same pose, so it
+// is fitted to the figure by its bounds — the same height head to toe, the
+// same centre, standing on the same ground — on the same black-ground alpha.
+{
+  const src = root("design/rexonance-suit/rexonance-excelsior-20261011.webp");
+  const { data, info } = await sharp(src).removeAlpha().raw().toBuffer({ resolveWithObject: true });
+  const bounds = (pixels, width, height, channels, test) => {
+    let x0 = width, y0 = height, x1 = 0, y1 = 0;
+    for (let y = 0; y < height; y += 1)
+      for (let x = 0; x < width; x += 1) {
+        if (!test(pixels, (y * width + x) * channels)) continue;
+        if (x < x0) x0 = x;
+        if (x > x1) x1 = x;
+        if (y < y0) y0 = y;
+        if (y > y1) y1 = y;
+      }
+    return { x0, y0, x1, y1 };
+  };
+  const art = bounds(data, info.width, info.height, 3, (p, i) => Math.max(p[i], p[i + 1], p[i + 2]) > 40);
+  const fig = bounds(base, FIG.width, FIG.height, 4, (p, i) => p[i + 3] > 40);
+  const scale = (fig.y1 - fig.y0) / (art.y1 - art.y0);
+  const width = Math.round(info.width * scale);
+  const height = Math.round(info.height * scale);
+  const left = Math.round((fig.x0 + fig.x1) / 2 - ((art.x0 + art.x1) / 2) * scale);
+  const top = Math.round(fig.y1 - art.y1 * scale);
+  const scaled = await sharp(src).removeAlpha().resize(width, height, { kernel: "lanczos3" }).raw().toBuffer();
+  const out = Buffer.alloc(FIG.width * FIG.height * 4);
+  for (let y = 0; y < FIG.height; y += 1)
+    for (let x = 0; x < FIG.width; x += 1) {
+      const sx = x - left;
+      const sy = y - top;
+      if (sx < 0 || sy < 0 || sx >= width || sy >= height) continue;
+      const j = (sy * width + sx) * 3;
+      const o = (y * FIG.width + x) * 4;
+      const r = scaled[j];
+      const g = scaled[j + 1];
+      const b = scaled[j + 2];
+      out[o] = r;
+      out[o + 1] = g;
+      out[o + 2] = b;
+      out[o + 3] = Math.round(Math.min(1, Math.max(0, (Math.max(r, g, b) - 14) / 30)) * 255);
+    }
+  const file = `${OUT}/excelsior.webp`;
+  await sharp(out, { raw: { width: FIG.width, height: FIG.height, channels: 4 } })
+    .webp({ quality: 70, alphaQuality: 80, effort: 6 })
+    .toFile(root(file));
+  console.log(file, { scale: scale.toFixed(3), left, top });
 }

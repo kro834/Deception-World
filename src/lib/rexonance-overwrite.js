@@ -26,12 +26,27 @@ const random = (seed) => {
 /** `samples` (optional): { from, to } RGBA of the two pictures drawn down to
  * cols × rows; cells the next form adds (its emerald crystals, or paint where
  * the old form had none) become extra cells. */
-export function planOverwrite({ width, height, cell, origin, seed = 1, samples = null }) {
+/** `order`: "radial" (from the reactor out) or "descend" (EXCELSIOR's: a
+ * light that comes down the figure from the crown). `extraBy`: "emerald"
+ * (the next form's crystals) or "difference" (whatever the next form adds
+ * or changes most). */
+export function planOverwrite({
+  width,
+  height,
+  cell,
+  origin,
+  seed = 1,
+  samples = null,
+  order = "radial",
+  extraBy = "emerald",
+}) {
   const cols = Math.ceil(width / cell);
   const rows = Math.ceil(height / cell);
   const n = cols * rows;
   const key = new Float32Array(n);
   const extra = new Uint8Array(n);
+  // A cell the next form no longer has: its nanites break away as it flips.
+  const gone = new Uint8Array(n);
   const flight = new Float32Array(n * 2);
   const next = random(seed);
   const [ox, oy] = origin;
@@ -43,13 +58,21 @@ export function planOverwrite({ width, height, cell, origin, seed = 1, samples =
       const index = row * cols + col;
       const cx = (col + 0.5) * cell;
       const cy = (row + 0.5) * cell;
-      key[index] = clamp01((Math.hypot(cx - ox, cy - oy) / reach) * 0.86 + next() * 0.14);
+      key[index] =
+        order === "descend"
+          ? clamp01((cy / height) * 0.88 + next() * 0.12)
+          : clamp01((Math.hypot(cx - ox, cy - oy) / reach) * 0.86 + next() * 0.14);
       if (samples) {
         const i = index * 4;
+        const lum = (data) => 0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2];
         const added =
-          (emerald(samples.to, i) && !emerald(samples.from, i)) ||
-          samples.to[i + 3] - samples.from[i + 3] > 90;
+          extraBy === "difference"
+            ? samples.to[i + 3] - samples.from[i + 3] > 70 ||
+              (samples.to[i + 3] > 120 && Math.abs(lum(samples.to) - lum(samples.from)) > 70)
+            : (emerald(samples.to, i) && !emerald(samples.from, i)) ||
+              samples.to[i + 3] - samples.from[i + 3] > 90;
         extra[index] = added ? 1 : 0;
+        gone[index] = samples.from[i + 3] > 120 && samples.to[i + 3] < 40 ? 1 : 0;
       }
       // Where an extra cell's nanites come from: out from the reactor.
       const angle = Math.atan2(cy - oy, cx - ox) + (next() - 0.5) * 0.9;
@@ -58,14 +81,24 @@ export function planOverwrite({ width, height, cell, origin, seed = 1, samples =
       flight[index * 2 + 1] = Math.sin(angle) * distance;
     }
   }
-  return { cols, rows, cell, width, height, key, extra, flight };
+  return { cols, rows, cell, width, height, key, extra, gone, flight };
 }
 
 /** Draws the change at `u` (0–1, the overwrite) and `v` (0–1, the extra
  * cells' generation; ignored without extra cells). `tone`: the new form's
  * light (CSS colour). */
-export function drawOverwrite(context, plan, from, to, u, v = 1, tone = "#8cf5e0") {
-  const { cols, rows, cell, width, height, key, extra, flight } = plan;
+export function drawOverwrite(
+  context,
+  plan,
+  from,
+  to,
+  u,
+  v = 1,
+  tone = "#8cf5e0",
+  calm = false,
+  style = "square",
+) {
+  const { cols, rows, cell, width, height, key, extra, gone, flight } = plan;
   const hot = 0.08;
   const lead = 0.05;
   context.globalAlpha = 1;
@@ -85,9 +118,18 @@ export function drawOverwrite(context, plan, from, to, u, v = 1, tone = "#8cf5e0
   }
   if (any) {
     context.clip();
+    // The old form's paint is taken away first (the forms differ in shape:
+    // a part the new form does not have is not left standing under it).
+    context.clearRect(0, 0, width, height);
     context.drawImage(to, 0, 0, width, height);
   }
   context.restore();
+  // `calm`: the change is held still (a scroll at rest): no transient
+  // squares stay standing on it.
+  if (calm) {
+    context.globalAlpha = 1;
+    return;
+  }
   // Hot squares on the cells flipping now; hairlines on the next ones.
   context.beginPath();
   for (let index = 0; index < key.length; index += 1) {
@@ -116,6 +158,62 @@ export function drawOverwrite(context, plan, from, to, u, v = 1, tone = "#8cf5e0
     context.strokeStyle = tone;
     context.lineWidth = Math.max(0.6, cell * 0.06);
     context.stroke();
+  }
+  // The parts that go: their nanites break away outward and fade.
+  if (gone && !calm) {
+    context.beginPath();
+    for (let index = 0; index < key.length; index += 1) {
+      if (!gone[index]) continue;
+      const age = (u - key[index]) / 0.12;
+      if (age <= 0 || age >= 1) continue;
+      const col = index % cols;
+      const row = (index - col) / cols;
+      const size = cell * 0.5 * (1 - age);
+      const x = (col + 0.5) * cell - flight[index * 2] * age - size / 2;
+      const y = (row + 0.5) * cell - flight[index * 2 + 1] * age - size / 2;
+      context.rect(x, y, size, size);
+    }
+    context.globalAlpha = 0.7;
+    context.fillStyle = tone;
+    context.fill();
+    context.globalAlpha = 1;
+  }
+  // EXCELSIOR's nanites are of another kind: prism shards (emerald and
+  // violet diamonds) that spiral in round the reactor and seat edge-on.
+  if (style === "shard" && v > 0 && v < 1) {
+    for (const [tint, parity] of [
+      ["#7dffb8", 0],
+      ["#c79bff", 1],
+    ]) {
+      context.beginPath();
+      for (let index = parity; index < key.length; index += 2) {
+        if (!extra[index]) continue;
+        const w = (v - key[index] * 0.94) / 0.06;
+        if (w <= 0 || w >= 1.4) continue;
+        const col = index % cols;
+        const row = (index - col) / cols;
+        const e = w >= 1 ? 1 : 1 - (1 - w) * (1 - w) * (1 - w);
+        const turn = (1 - e) * 2.4;
+        const fx = flight[index * 2] * 1.6;
+        const fy = flight[index * 2 + 1] * 1.6;
+        const cx = (col + 0.5) * cell + (fx * Math.cos(turn) - fy * Math.sin(turn)) * (1 - e);
+        const cy = (row + 0.5) * cell + (fx * Math.sin(turn) + fy * Math.cos(turn)) * (1 - e);
+        const r = cell * (w >= 1 ? (0.7 * (1.4 - w)) / 0.4 : 0.35 + 0.35 * e);
+        const a = turn + Math.PI / 4;
+        const dx = Math.cos(a) * r;
+        const dy = Math.sin(a) * r;
+        context.moveTo(cx + dx, cy + dy);
+        context.lineTo(cx - dy * 0.55, cy + dx * 0.55);
+        context.lineTo(cx - dx, cy - dy);
+        context.lineTo(cx + dy * 0.55, cy - dx * 0.55);
+        context.closePath();
+      }
+      context.globalAlpha = 0.9;
+      context.fillStyle = tint;
+      context.fill();
+    }
+    context.globalAlpha = 1;
+    return;
   }
   // The additional parts: their nanites fly in from the reactor's side and
   // lock (a bright square that settles into the new form's cell).
@@ -159,8 +257,13 @@ export function sampleCells(picture, plan, document = globalThis.document) {
 }
 
 /** The forms' order and lights. */
-export const FORM_TONES = { standard: "#bfe8ff", max: "#7ff5d8", ultra: "#c79bff" };
+export const FORM_TONES = {
+  standard: "#bfe8ff",
+  max: "#7ff5d8",
+  ultra: "#c79bff",
+  excelsior: "#7dffb8",
+};
 /** A change's timing (ms, the 03 viewer): to MAX one overwrite; to ULTRA from
  * Rexonance a short run to MAX first, then the overwrite to ULTRA and its
  * additional parts. */
-export const FORM_CHANGE_MS = { max: 1100, quick: 420, ultra: 900, extra: 560 };
+export const FORM_CHANGE_MS = { max: 1100, quick: 420, ultra: 900, extra: 560, excelsior: 1100 };

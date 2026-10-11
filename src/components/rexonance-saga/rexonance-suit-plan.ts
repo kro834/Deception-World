@@ -26,7 +26,14 @@ import { rexonanceSuitSource } from "@/lib/rexonance-suit-warmup";
    (prepareRexonanceSuit, which the warm-up runs once the layers decode), or
    whatever is left when the call starts. */
 
-export const T = REXONANCE_SUIT_TILE;
+// Touch screens (owner, 2026-10-11: the call felt heavy on an iPad) draw the
+// nanites in 2 x 2 blocks of the art's micro-tiles: a quarter of the draws a
+// frame, the same art and the same order.
+const TOUCH =
+  typeof globalThis.matchMedia === "function" &&
+  globalThis.matchMedia("(pointer: coarse), (any-pointer: coarse)").matches;
+const BLOCK = TOUCH ? 2 : 1;
+export const T = REXONANCE_SUIT_TILE * BLOCK;
 export const G = REXONANCE_SUIT_GOLD_CELL;
 export const FIG = REXONANCE_SUIT_SIZE;
 export const GOLD = REXONANCE_SUIT_GOLD;
@@ -42,6 +49,10 @@ export type Tile = {
   sy: number;
   dx: number;
   dy: number;
+  /** Its size, clipped to the plate's box (a tile never reads its
+   * neighbour's art in the atlas). */
+  tw: number;
+  th: number;
   land: number;
   ox: number;
   oy: number;
@@ -117,10 +128,22 @@ function tilesOf(piece: RexonanceSuitPiece, index: number, fit: number) {
   const cols = Math.ceil(piece.w / T);
   const rows = Math.ceil(piece.h / T);
   const bits = bitsOf(piece.tiles);
+  // The micro-tiles' own grid (the bitmask's), and whether a block holds art.
+  const mcols = Math.ceil(piece.w / REXONANCE_SUIT_TILE);
+  const mrows = Math.ceil(piece.h / REXONANCE_SUIT_TILE);
+  const painted = (row: number, col: number) => {
+    for (let dy = 0; dy < BLOCK; dy += 1)
+      for (let dx = 0; dx < BLOCK; dx += 1) {
+        const r = row * BLOCK + dy;
+        const c = col * BLOCK + dx;
+        if (r < mrows && c < mcols && has(bits, r * mcols + c)) return true;
+      }
+    return false;
+  };
   const tiles: Tile[] = [];
   for (let row = 0; row < rows; row += 1) {
     for (let col = 0; col < cols; col += 1) {
-      if (!has(bits, row * cols + col)) continue;
+      if (!painted(row, col)) continue;
       const cx = (col + 0.5) * T;
       const cy = (row + 0.5) * T;
       const along =
@@ -142,6 +165,8 @@ function tilesOf(piece: RexonanceSuitPiece, index: number, fit: number) {
         sy: piece.ay + row * T,
         dx: piece.x + col * T,
         dy: piece.y + row * T,
+        tw: Math.min(T, piece.w - col * T),
+        th: Math.min(T, piece.h - row * T),
         land: fit - REXONANCE_SUIT_REVEAL_MS + progress * REXONANCE_SUIT_REVEAL_MS,
         ox: -gx * reach + gy * side,
         oy: -gy * reach + gx * side,
@@ -323,13 +348,41 @@ export const isRexonanceSuitPlanReady = () =>
 // The plates' lights held back (owner, 2026-10-11): the atlas's art half with
 // its ice-cyan and pink light in monochrome, and that light alone, to light
 // the suit once it is whole. Made once, in idle time, from the decoded atlas.
-let LIGHTS: { unlit: HTMLCanvasElement; lights: HTMLCanvasElement } | null = null;
+let LIGHTS: {
+  unlit: HTMLCanvasElement;
+  lights: HTMLCanvasElement;
+  figure: HTMLCanvasElement;
+} | null = null;
 export const plateLights = () => LIGHTS;
+function layOutLights(split: { unlit: HTMLCanvasElement; lights: HTMLCanvasElement }) {
+  const figure = Object.assign(globalThis.document.createElement("canvas"), {
+    width: FIG.width,
+    height: FIG.height,
+  });
+  const context = figure.getContext("2d");
+  if (!context) throw new Error("unavailable figure light context");
+  for (const piece of REXONANCE_SUIT_PIECES)
+    context.drawImage(
+      split.lights,
+      piece.ax,
+      piece.ay,
+      piece.w,
+      piece.h,
+      piece.x,
+      piece.y,
+      piece.w,
+      piece.h,
+    );
+  return { ...split, figure };
+}
 export function prepareLights(art: CanvasImageSource) {
   if (!LIGHTS && !work.drawing) {
     const { width, height } = REXONANCE_SUIT_GOLD_ATLAS;
-    LIGHTS = splitLights(art, 0, 0, width, height);
-    if (LIGHTS) work.dirty = true;
+    const split = splitLights(art, 0, 0, width, height);
+    if (split) {
+      LIGHTS = layOutLights(split);
+      work.dirty = true;
+    }
   }
   return LIGHTS;
 }
@@ -441,7 +494,8 @@ export function prepareRexonanceSuit(priority: "low" | "high" = "low") {
       if (stage === "light-commit") {
         // Only complete layers are published. Commit and the working-atlas
         // draw are separate tasks, not added after a six-ms pixel slice.
-        LIGHTS = lightJob!.commit();
+        const split = lightJob!.commit();
+        LIGHTS = split ? layOutLights(split) : null;
         lightJob!.cancel();
         lightJob = null;
         lightSource = null;
