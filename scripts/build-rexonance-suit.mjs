@@ -61,15 +61,19 @@ const circle = (cx, cy, r, n = 28) =>
 
 // The bodysuit: a slim figure inside the armour (no tail, no ribbons, no
 // armour volume), left half from the crown down to the crotch.
+// The head is a rounded helmet-sized head (owner, 2026-10-11: the long,
+// pointed one read too narrow and its chin jutted below the face's lights).
 const BODY_LEFT = [
-  [527, 172],
-  [498, 178],
-  [474, 198],
-  [460, 232],
-  [456, 280],
-  [462, 330],
-  [476, 372],
-  [496, 400],
+  [527, 186],
+  [496, 191],
+  [472, 208],
+  [458, 238],
+  [454, 276],
+  [458, 314],
+  [470, 346],
+  [490, 368],
+  [508, 380],
+  [500, 404],
   [492, 420],
   [452, 430],
   [402, 440],
