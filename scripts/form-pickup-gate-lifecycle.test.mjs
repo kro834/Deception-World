@@ -76,7 +76,8 @@ function mount() {
         };
       if (name === "@tanstack/react-router") return { useRouter: () => router };
       if (name === "@/lib/name-breaks") return { withWordBreaks: (value) => value };
-      if (name === "@/lib/dossier-images") return { formPickupImage: () => ({}) };
+      if (name === "@/lib/dossier-images")
+        return { formPickupImage: () => ({}), dossierImage: () => ({}) };
       if (name === "./slide-open-control") return { SlideOpenControl: "slide-control" };
       if (name === "./pickup-scroll-reset")
         return {

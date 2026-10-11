@@ -16,11 +16,12 @@ import { settlePickupScroll } from "@/components/world/pickup-scroll-reset";
 import { SideMenuLayer, SideMenuTrigger } from "@/components/world/world-chrome";
 import { useWorldMode } from "@/components/world/use-world-mode";
 import { mountFilmMotion } from "@/lib/film-motion";
-import { mountStableFragmentNavigation } from "@/lib/stable-fragment-navigation";
+import { holdFragmentPath, mountStableFragmentNavigation } from "@/lib/stable-fragment-navigation";
 import { DisplayName } from "@/components/name-text";
 import { acquireViewportScrollLock } from "@/lib/viewport-scroll-lock.js";
 import { posterImage, preparePosterImage } from "@/lib/thumbnail-images";
 import { createReadyPosterLoader } from "@/lib/ready-poster-loader";
+import { dossierImage } from "@/lib/dossier-images";
 import { useUltraArtworkReady } from "@/lib/use-ultra-artwork-ready";
 import { FilmTextScan } from "@/components/cinematic/film-text-scan";
 import {
@@ -243,6 +244,7 @@ function DossierContent({ character }: { character: DreamCharacter }) {
         <figure>
           <img
             src={character.portrait}
+            {...dossierImage(character.portrait)}
             alt={character.portraitAlt}
             width={character.id === "ciel" ? 1022 : character.id === "keiya" ? 736 : 638}
             height={character.id === "ciel" ? 1539 : character.id === "keiya" ? 976 : 630}
@@ -255,6 +257,7 @@ function DossierContent({ character }: { character: DreamCharacter }) {
           <figure>
             <img
               src={character.secondary}
+              {...dossierImage(character.secondary)}
               alt={character.secondaryAlt}
               width={character.id === "ciel" ? 846 : 1089}
               height={character.id === "ciel" ? 1219 : 1445}
@@ -434,6 +437,7 @@ function DolminenceContent({ record }: { record: DreamDolminence }) {
         <figure>
           <img
             src={record.image}
+            {...dossierImage(record.image)}
             alt={record.imageAlt}
             width={record.imageWidth}
             height={record.imageHeight}
@@ -446,6 +450,7 @@ function DolminenceContent({ record }: { record: DreamDolminence }) {
           <figure>
             <img
               src={record.secondary}
+              {...dossierImage(record.secondary)}
               alt={record.secondaryAlt}
               width={record.secondaryWidth}
               height={record.secondaryHeight}
@@ -674,6 +679,45 @@ export function DreamChapter() {
     }
   }, [dossierHash]);
 
+  // A search result that names a record inside a section (a roster plate, a
+  // faction, a term) lands on it whole: the skipped sections above it are
+  // laid out at their real heights while the landing aligns, its block is
+  // shown at once instead of waiting for its reveal, and a roster plate opens
+  // its PROFILE (the matched words are in it).
+  useLayoutEffect(() => {
+    const page = pageRef.current;
+    let id: string;
+    try {
+      id = decodeURIComponent(dossierHash.replace(/^#/, ""));
+    } catch {
+      return;
+    }
+    if (!page || !id || id === "top") return;
+    if (id.startsWith("dream-character-") || id.startsWith("dream-dolminence-")) return;
+    const target = document.getElementById(id);
+    if (!target || !page.contains(target) || !target.closest(".dream-section, .dream-annex")) {
+      return;
+    }
+    const release = holdFragmentPath(page, target);
+    const reveal = target.closest<HTMLElement>("[data-dream-reveal]");
+    let frame = 0;
+    if (reveal && reveal.dataset.dreamVisible !== "true") {
+      reveal.style.transition = "none";
+      reveal.dataset.dreamVisible = "true";
+      frame = window.requestAnimationFrame(() => reveal.style.removeProperty("transition"));
+    }
+    const rosterEntry = DREAM_CAST_ROSTER.find((entry) => id === `dream-roster-${entry.id}`);
+    if (rosterEntry) {
+      setOpenProfiles((current) =>
+        current.has(rosterEntry.id) ? current : new Set(current).add(rosterEntry.id),
+      );
+    }
+    return () => {
+      window.cancelAnimationFrame(frame);
+      release();
+    };
+  }, [dossierHash]);
+
   const cancelShuffle = useCallback(() => {
     posterSelectionId.current += 1;
     setPosterLoading(false);
@@ -710,7 +754,10 @@ export function DreamChapter() {
     const reveals = Array.from(page.querySelectorAll<HTMLElement>("[data-dream-reveal]"));
     html.dataset.dreamRevealReady = "true";
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reducedMotion || typeof IntersectionObserver === "undefined") {
+    // Economy rendering shows every block at once, as reduced motion does
+    // (styles-dream-chapter.css also covers a switch made after this runs).
+    const economy = html.dataset.worldEffects === "economy";
+    if (reducedMotion || economy || typeof IntersectionObserver === "undefined") {
       reveals.forEach((element) => {
         element.dataset.dreamVisible = "true";
       });
@@ -718,6 +765,10 @@ export function DreamChapter() {
         delete html.dataset.dreamRevealReady;
       };
     }
+    // A block reveals when its top crosses the line 12% above the foot of
+    // the screen, however tall it is: a ratio threshold never fired for a
+    // block taller than the screen over that ratio (the glossary on a short
+    // landscape phone stayed blank).
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -726,7 +777,7 @@ export function DreamChapter() {
           observer.unobserve(entry.target);
         });
       },
-      { rootMargin: "0px 0px -12%", threshold: 0.08 },
+      { rootMargin: "0px 0px -12%", threshold: 0 },
     );
     reveals.forEach((element) => observer.observe(element));
     return () => {
@@ -1344,6 +1395,7 @@ export function DreamChapter() {
                 <LiquidPointerGlow />
                 <img
                   src={item.portrait}
+                  {...dossierImage(item.portrait)}
                   alt={item.portraitAlt}
                   width={item.id === "ciel" ? 1022 : item.id === "keiya" ? 736 : 638}
                   height={item.id === "ciel" ? 1539 : item.id === "keiya" ? 976 : 630}
@@ -1456,6 +1508,7 @@ export function DreamChapter() {
                 <LiquidPointerGlow />
                 <img
                   src={record.image}
+                  {...dossierImage(record.image)}
                   alt={record.imageAlt}
                   width={record.imageWidth}
                   height={record.imageHeight}
@@ -1467,7 +1520,9 @@ export function DreamChapter() {
                 <span className="dream-dolminence-number">{record.order}</span>
                 <span className="dream-dolminence-copy">
                   <small>{record.agent}</small>
-                  <b><DisplayName value={record.name} /></b>
+                  <b>
+                    <DisplayName value={record.name} />
+                  </b>
                   <i>{record.roman}</i>
                   <em>機密記録を開く</em>
                 </span>

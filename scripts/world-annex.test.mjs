@@ -38,7 +38,9 @@ test("world-home preserves its layout and copy outside explicitly approved edits
   // /world#world-column-NN search links.
   assert.deepEqual(worldViewContract(homeView), {
     records: "75248085b518563223b7a6a8b8237a8889c3044e7d62fbda436bc6e763cc74ed",
-    markup: "29648a801361c1a6c4c859f6857854b220b9d40a30a6f36592a5d489e04568c0",
+    // rx14 F3/F29: responsive poster and WebP related-image attributes only.
+    // The owner's records and exact copy above remain unchanged.
+    markup: "cff99e231c28f3c41881d8d2881a01b94b99367628ba577fe3dbb3862d0489e2",
   });
   // The WorldAnnexRiders hook stays where it was (this file is pinned), but
   // renders nothing: 02 RIDERS and 03 RECORDS sit back to back, and the
@@ -115,11 +117,18 @@ test("the view contract still detects changes to story data, copy and layout", (
   );
   // This readiness marker changes GPU timing, not artwork or rendered layout.
   assert.deepEqual(
-    worldViewContract(homeView.replace(/\s*data-ultra-artwork-ready=\{artworkReady \? "true" : undefined\}/, "")),
+    worldViewContract(
+      homeView.replace(/\s*data-ultra-artwork-ready=\{artworkReady \? "true" : undefined\}/, ""),
+    ),
     original,
   );
   assert.notEqual(
-    worldViewContract(homeView.replace('className="riders-section"', 'className="riders-section" data-ultra-artwork-ready="true"')).markup,
+    worldViewContract(
+      homeView.replace(
+        'className="riders-section"',
+        'className="riders-section" data-ultra-artwork-ready="true"',
+      ),
+    ).markup,
     original.markup,
   );
 });

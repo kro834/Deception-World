@@ -1400,6 +1400,7 @@ export function RiderPage({ id }: { id: string }) {
             <div className="rider-archive-civilian-visual">
               <img
                 src={rider.partner.image}
+                {...dossierImage(rider.partner.image)}
                 alt={`${rider.partner.name}の人物ビジュアル`}
                 style={{ objectPosition: rider.partner.pos }}
                 loading="lazy"
@@ -1537,6 +1538,7 @@ export function RiderPage({ id }: { id: string }) {
             <div className="rider-special-site-visual">
               <img
                 src={rider.special.img}
+                {...dossierImage(rider.special.img)}
                 alt={`仮面ライダー${rider.special.name}のビジュアル`}
                 style={{ objectPosition: rider.special.pos }}
                 width="1080"
@@ -1552,7 +1554,9 @@ export function RiderPage({ id }: { id: string }) {
               <small>{rider.special.en}</small>
               <h2 id="rider-special-site-title">
                 <span>仮面ライダー</span>
-                <b><DisplayName value={rider.special.name} /></b>
+                <b>
+                  <DisplayName value={rider.special.name} />
+                </b>
               </h2>
               {rider.special.sub ? <em>{rider.special.sub}</em> : null}
               <q>{rider.special.quote}</q>

@@ -396,7 +396,7 @@ export function GalleryPage() {
           observer.unobserve(entry.target);
         }
       },
-      { threshold: 0.08 },
+      { rootMargin: "0px 0px -8%", threshold: 0 },
     );
     grid
       .querySelectorAll("[data-gallery-artwork]:not([data-gallery-enter])")

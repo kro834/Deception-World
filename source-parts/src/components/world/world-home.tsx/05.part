@@ -1,3 +1,14 @@
+                      />
+                    </svg>
+                  ) : (
+                    <svg viewBox="0 0 24 24" width="14" height="14">
+                      <path
+                        d="M8 10V8a4 4 0 0 1 7.5-2"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                        strokeLinecap="round"
+                      />
                       <rect
                         x="6"
                         y="10"
@@ -354,6 +365,7 @@
                   >
                     <img
                       src="/character-terra-thumb.jpeg"
+                      {...dossierImage("/character-terra-thumb.jpeg")}
                       alt="テラ・アレインのキャラクタービジュアル"
                       width={720}
                       height={954}
@@ -383,6 +395,7 @@
                   >
                     <img
                       src="/character-luna-thumb.jpeg"
+                      {...dossierImage("/character-luna-thumb.jpeg")}
                       alt="ルナ・アレインのキャラクタービジュアル"
                       width={720}
                       height={1260}
@@ -411,6 +424,7 @@
                   >
                     <img
                       src="/character-yoake-mamori.jpeg"
+                      {...dossierImage("/character-yoake-mamori.jpeg")}
                       alt="夜明護尊のキャラクタービジュアル"
                       width={736}
                       height={976}
@@ -485,9 +499,3 @@
               <SlideOpenControl
                 ariaControls="world-column-pickup"
                 ariaLabel="世界観コラムのピックアップを開く"
-                buttonRef={pickupBtnRef}
-                className="world-column-slide-open"
-                expanded={pickupOpen}
-                label="ピックアップ"
-                onOpen={openPickup}
-              />

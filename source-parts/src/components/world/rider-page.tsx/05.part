@@ -1,6 +1,3 @@
-              <div key={f.dt}>
-                <dt>{f.dt}</dt>
-                <dd>
                   <NameText value={f.dd} seams />
                 </dd>
               </div>
@@ -46,6 +43,7 @@
             <div className="rider-archive-civilian-visual">
               <img
                 src={rider.partner.image}
+                {...dossierImage(rider.partner.image)}
                 alt={`${rider.partner.name}の人物ビジュアル`}
                 style={{ objectPosition: rider.partner.pos }}
                 loading="lazy"
@@ -183,6 +181,7 @@
             <div className="rider-special-site-visual">
               <img
                 src={rider.special.img}
+                {...dossierImage(rider.special.img)}
                 alt={`仮面ライダー${rider.special.name}のビジュアル`}
                 style={{ objectPosition: rider.special.pos }}
                 width="1080"
@@ -198,7 +197,9 @@
               <small>{rider.special.en}</small>
               <h2 id="rider-special-site-title">
                 <span>仮面ライダー</span>
-                <b><DisplayName value={rider.special.name} /></b>
+                <b>
+                  <DisplayName value={rider.special.name} />
+                </b>
               </h2>
               {rider.special.sub ? <em>{rider.special.sub}</em> : null}
               <q>{rider.special.quote}</q>

@@ -191,7 +191,7 @@ export function SagaCinema() {
     if (!heroRef.current || !("IntersectionObserver" in window)) return;
     const observer = new IntersectionObserver(
       (entries) => setHeroVisible(entries.some((entry) => entry.isIntersecting)),
-      { threshold: 0.08 },
+      { rootMargin: "0px 0px -8%", threshold: 0 },
     );
     observer.observe(heroRef.current);
     return () => observer.disconnect();

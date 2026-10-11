@@ -8,6 +8,7 @@ import { NameText, RELATED_NAV, RIDER_NAV, RIKUEI_NAV } from "./dossier-nav";
 import { UiVectorIcon } from "./ui-vector-icon";
 import { QuoteTranscript } from "./quote-transcript";
 import { mountQuoteTranscript } from "@/lib/quote-transcript.js";
+import { WorldBriefArt } from "./world-brief-art";
 import {
   WORLD_BRIEF,
   WORLD_CAST_ROSTER,
@@ -248,7 +249,15 @@ function Lines({ lines }: { lines: readonly WorldAnnexLine[] }) {
 
 function CastPortrait({ entry }: { entry: WorldCastEntry }) {
   const portrait = CAST_PORTRAITS[entry.id];
-  if (!portrait) return <span className="wa-portrait is-vacant" aria-hidden="true" />;
+  if (!portrait)
+    return (
+      <span className="wa-portrait is-vacant" aria-hidden="true">
+        <b>
+          <NameText value={entry.name} />
+        </b>
+        <small lang="en">NO FILE</small>
+      </span>
+    );
   return (
     <span
       className={portrait.pale ? "wa-portrait is-pale" : "wa-portrait"}
@@ -396,98 +405,103 @@ function WorldFiles() {
           title="世界と組織"
           count={`${pad(WORLD_BRIEF.length)} FILES`}
         />
-        <div className="wa-brief-grid">
-          {WORLD_BRIEF.map((entry) => (
-            <article
-              key={entry.id}
-              className={`wa-plate wa-brief is-${entry.id}`}
-              aria-labelledby={`wa-brief-${entry.id}`}
-            >
-              <p className="wa-code">{entry.code}</p>
-              <h3 id={`wa-brief-${entry.id}`}>{entry.name}</h3>
-              {entry.id === "rikuei" ? (
-                <span className="wa-signals" aria-hidden="true">
-                  {RIKUEI_KEYS.map((key) => (
-                    <img
-                      key={key}
-                      src={`/manager-${key}-thumb.jpeg`}
-                      {...managerThumbnail(key)}
-                      alt=""
-                      width={44}
-                      height={44}
-                      loading="lazy"
-                      decoding="async"
-                    />
+        <div className="wa-brief-stage">
+          <WorldBriefArt />
+          <div className="wa-brief-documents">
+            <div className="wa-brief-grid">
+              {WORLD_BRIEF.map((entry) => (
+                <article
+                  key={entry.id}
+                  className={`wa-plate wa-brief is-${entry.id}`}
+                  aria-labelledby={`wa-brief-${entry.id}`}
+                >
+                  <p className="wa-code">{entry.code}</p>
+                  <h3 id={`wa-brief-${entry.id}`}>{entry.name}</h3>
+                  {entry.id === "rikuei" ? (
+                    <span className="wa-signals" aria-hidden="true">
+                      {RIKUEI_KEYS.map((key) => (
+                        <img
+                          key={key}
+                          src={`/manager-${key}-thumb.jpeg`}
+                          {...managerThumbnail(key)}
+                          alt=""
+                          width={44}
+                          height={44}
+                          loading="lazy"
+                          decoding="async"
+                        />
+                      ))}
+                    </span>
+                  ) : null}
+                  {entry.id === "code" ? (
+                    <span className="wa-id-photo" aria-hidden="true">
+                      <img
+                        src="/character-james-20260829.webp"
+                        {...portraitThumbnail("/character-james-20260829.webp")}
+                        alt=""
+                        width={720}
+                        height={1165}
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    </span>
+                  ) : null}
+                  {entry.body.map((paragraph) => (
+                    <p key={paragraph} className="wa-prose">
+                      {paragraph}
+                    </p>
                   ))}
-                </span>
-              ) : null}
-              {entry.id === "code" ? (
-                <span className="wa-id-photo" aria-hidden="true">
-                  <img
-                    src="/character-james-20260829.webp"
-                    {...portraitThumbnail("/character-james-20260829.webp")}
-                    alt=""
-                    width={720}
-                    height={1165}
-                    loading="lazy"
-                    decoding="async"
-                  />
-                </span>
-              ) : null}
-              {entry.body.map((paragraph) => (
-                <p key={paragraph} className="wa-prose">
-                  {paragraph}
-                </p>
-              ))}
-              {entry.mission ? (
-                <p className="wa-mission">
-                  <b lang="en">{entry.mission.code}</b>
-                  <span>{entry.mission.text}</span>
-                </p>
-              ) : null}
-              <Lines lines={entry.said} />
-              {entry.hud?.length ? (
-                <ul className="wa-readout" lang="en">
-                  {entry.hud.map((line) => (
-                    <li key={line}>{line}</li>
+                  {entry.mission ? (
+                    <p className="wa-mission">
+                      <b lang="en">{entry.mission.code}</b>
+                      <span>{entry.mission.text}</span>
+                    </p>
+                  ) : null}
+                  <Lines lines={entry.said} />
+                  {entry.hud?.length ? (
+                    <ul className="wa-readout" lang="en">
+                      {entry.hud.map((line) => (
+                        <li key={line}>{line}</li>
+                      ))}
+                    </ul>
+                  ) : null}
+                  {entry.docs?.map((doc) => (
+                    <details key={doc.office} className="wa-doc" aria-label={doc.office}>
+                      <summary>
+                        <span className="wa-doc-office">{doc.office}</span>
+                        <i aria-hidden="true" />
+                      </summary>
+                      <p className="wa-doc-subject">
+                        <b>件名</b>
+                        <span>{doc.subject}</span>
+                      </p>
+                      <AnnexQuote text={doc.excerpt} />
+                      <p className="wa-doc-verdict">
+                        <b>最終判定</b>
+                        <span>{doc.verdict}</span>
+                      </p>
+                    </details>
                   ))}
-                </ul>
-              ) : null}
-              {entry.docs?.map((doc) => (
-                <details key={doc.office} className="wa-doc" aria-label={doc.office}>
-                  <summary>
-                    <span className="wa-doc-office">{doc.office}</span>
-                    <i aria-hidden="true" />
-                  </summary>
-                  <p className="wa-doc-subject">
-                    <b>件名</b>
-                    <span>{doc.subject}</span>
-                  </p>
-                  <AnnexQuote text={doc.excerpt} />
-                  <p className="wa-doc-verdict">
-                    <b>最終判定</b>
-                    <span>{doc.verdict}</span>
-                  </p>
-                </details>
+                </article>
               ))}
-            </article>
-          ))}
+            </div>
+            <section className="wa-locations" aria-labelledby="wa-locations-title">
+              <p className="wa-code">LOCATIONS</p>
+              <h3 id="wa-locations-title">舞台</h3>
+              <ol>
+                {WORLD_LOCATIONS.map((place, index) => (
+                  <li key={place.name} id={`wa-location-${place.name}`}>
+                    <span className="wa-index" aria-hidden="true">
+                      {pad(index + 1)}
+                    </span>
+                    <b>{place.name}</b>
+                    <p>{place.text}</p>
+                  </li>
+                ))}
+              </ol>
+            </section>
+          </div>
         </div>
-        <section className="wa-locations" aria-labelledby="wa-locations-title">
-          <p className="wa-code">LOCATIONS</p>
-          <h3 id="wa-locations-title">舞台</h3>
-          <ol>
-            {WORLD_LOCATIONS.map((place, index) => (
-              <li key={place.name} id={`wa-location-${place.name}`}>
-                <span className="wa-index" aria-hidden="true">
-                  {pad(index + 1)}
-                </span>
-                <b>{place.name}</b>
-                <p>{place.text}</p>
-              </li>
-            ))}
-          </ol>
-        </section>
       </div>
     </section>
   );
@@ -682,7 +696,11 @@ function ArchiveLog() {
             {WORLD_EPISODE_NOTES.map((episode) => {
               const art = EPISODE_ART[episode.no];
               return (
-                <li key={episode.no} id={`wa-episode-${episode.no}`} className={`wa-plate wa-episode is-ep-${episode.no}`}>
+                <li
+                  key={episode.no}
+                  id={`wa-episode-${episode.no}`}
+                  className={`wa-plate wa-episode is-ep-${episode.no}`}
+                >
                   {art ? (
                     <span
                       className="wa-episode-art"

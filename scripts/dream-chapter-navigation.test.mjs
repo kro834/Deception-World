@@ -148,6 +148,25 @@ test("focusing the next link cancels the previous frame before Enter can be stol
   h.cleanup();
 });
 
+test("a delayed hashchange after a keyboard return does not undo the next native close", () => {
+  const h = setup("#dream-chronicle-case-3");
+  h.click("#dream-case-3", { detail: 0 });
+  h.environment.location.hash = "#dream-case-3";
+  h.flush();
+  h.chapters[3].open = false;
+  h.rootListeners.get("toggle")({ target: { matches: () => true } });
+  h.historyListeners.get("popstate")();
+  h.historyListeners.get("hashchange")();
+  assert.equal(h.chapters[3].open, false);
+  assert.deepEqual(h.state(), { current: "3", open: [] });
+  h.environment.location.hash = "#dream-case-2";
+  h.historyListeners.get("popstate")();
+  assert.equal(h.chapters[2].open, true, "a genuinely new history target still opens");
+  h.click("#dream-case-3", { detail: 0 });
+  assert.equal(h.chapters[3].open, true, "an explicit revisit still opens the chapter");
+  h.cleanup();
+});
+
 test("modified and new-tab clicks leave the current reader alone", () => {
   const h = setup();
   for (const options of [

@@ -1,0 +1,86 @@
+{
+  "branch": "codex/rx14-repair-20261011",
+  "commits": ["87e0b95", "c3a79f1", "df364c3", "b73922c", "1823b22", "3258e6a"],
+  "checks": {
+    "reference": "../../verification.json"
+  },
+  "integrationNotes": [
+    "Reading was reapplied from 3bd6b33 / the inverse of 1c635c8, excluding its broken all-rail pan-y policy.",
+    "Upstream main through 8b5968b was merged, including the owner's finished driver and nanite/gold formation work, without discarding opening, native Dream focus, heap-cleanup, image-containment or Fight Card fixes.",
+    "src/components/world/world-home.tsx, manager-stub.tsx and rider-page.tsx match their generated source-parts.",
+    "No owner source, archive rows, IDs or shared-gallery data were rewritten. The dirty primary checkout and the separate rx17 branch were left untouched.",
+    "The listed package changes are rx14 work; separately authored incoming main changes remain attributed to their original commits.",
+    "New image generators and image-unit tests use fileURLToPath, verified through a Japanese/space-containing path."
+  ],
+  "package": "dossier",
+  "filesChanged": [
+    "src/components/world/world-chrome.tsx",
+    "src/styles-stage-shell.css",
+    "src/lib/thumbnail-images.ts",
+    "src/lib/dossier-images.ts",
+    "scripts/build-thumbnail-variants.mjs",
+    "scripts/build-dossier-images.mjs",
+    "src/components/world/manager-stub.tsx",
+    "src/components/world/rider-page.tsx",
+    "src/components/world/world-swap-warmups.ts",
+    "src/lib/world-head.ts"
+  ],
+  "fixed": [
+    {
+      "finding": "F4",
+      "how": "Six RIKUEI and RELATED file tiles use the existing navigation definitions. SECTIONS mirrors the dossier's own chapter anchors. Ciel's unlock rule and all menu histories/guards remain intact."
+    },
+    {
+      "finding": "F8",
+      "how": "Menu opening scrolls the current row into view; when its group fits below the sticky header, the group heading is included. Oversized groups retain the current row."
+    },
+    {
+      "finding": "F9",
+      "how": "World, dossier, Dream, library/search and special command bars share the 76px/64px lane and gutter tokens. Existing ResizeObserver reservations are preserved."
+    },
+    {
+      "finding": "F28",
+      "how": "Eight rider menu tiles use 240w/400w WebP candidates; file tiles use 240w. Images mount only while the menu is open."
+    },
+    {
+      "finding": "F29",
+      "how": "24 remaining JPEG image references receive same-resolution WebP delivery copies; original files stay available. Responsive portrait helpers are reused for related art and warmups."
+    },
+    {
+      "finding": "F32",
+      "how": "Saga/Ciel pickup cards use lazy/auto priority on initial rendering. High priority remains only for explicit pickup opening."
+    },
+    {
+      "finding": "F35",
+      "how": "Leddic's partner image uses the portrait helper's 360w/720w/full candidates rather than a single full-size JPEG."
+    }
+  ],
+  "opportunitiesDone": [],
+  "skipped": [
+    "F13 — series-end destinations need owner approval; do not change the reading order.",
+    "opp1 — launcher CONTINUE plate is proposal-only as requested.",
+    "opp7 — extra mobile dossier art bands are proposal-only as requested."
+  ],
+  "newStrings": [
+    "RIKUEI",
+    "RELATED",
+    "FILE",
+    "SECTION; existing chapter/name strings are reused, not rewritten."
+  ],
+  "pinsUpdated": [
+    "scripts/side-menu-history.test.mjs: preserve the initial state-hook ordering in the VM harness.",
+    "scripts/image-delivery.test.mjs and delivery/warmup tests: assert the actual responsive candidates.",
+    "scripts/rx14-reading-delivery.test.mjs: candidate dimensions, retained originals and pickup priority."
+  ],
+  "shots": [
+    "/private/tmp/rx14-completion/320-world-menu.png",
+    "/private/tmp/rx14-completion/1440-world-menu.png",
+    "/private/tmp/rx14-completion/320-zeus-menu.png"
+  ],
+  "designNote": "Minimal additions to the existing launcher, not a replacement shell; the real chapter list remains the single source of navigation.",
+  "openIssues": [
+    "Owner decides Cipher → Zeus, Reemu → Ciel, Yoake → Dante, Dante → Saga, or a different end-card sequence.",
+    "Owner decides whether to add CONTINUE and mobile portrait bands.",
+    "Physical Safari/PWA rail checks remain with the owner."
+  ]
+}

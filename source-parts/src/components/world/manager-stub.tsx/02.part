@@ -1,3 +1,18 @@
+                        <b>
+                          <DisplayName value={f.name} />
+                        </b>
+                      </figcaption>
+                    </figure>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+          </div>
+          {weaponGallery.length ? (
+            <section className="rexonance-weapon-gallery" aria-label="レクソナンス追加武装">
+              <header>
+                <div>
+                  <small>LINKED ARMAMENTS / REXONANCE DRIVE</small>
                   <h3>共鳴武装群</h3>
                 </div>
                 <span>{String(weaponGallery.length).padStart(2, "0")} SYSTEMS</span>
@@ -20,7 +35,9 @@
                     </div>
                     <figcaption>
                       <small>{weapon.label}</small>
-                      <b><DisplayName value={weapon.name} /></b>
+                      <b>
+                        <DisplayName value={weapon.name} />
+                      </b>
                       <span>{String(index + 1).padStart(2, "0")}</span>
                     </figcaption>
                   </figure>
@@ -402,11 +419,3 @@ export const REX_LOI: Profile = {
       {
         name: "デアグローブ",
         body: "接触対象を拳撃が最も効率よく伝わる組成へ再錬成し、観測・解析可能な対象を硬度や性質によらず破壊する。十分な解析後には、装甲効果、結界、空間構造といった非物質的防御も一時的に破壊可能な構造体として再定義する。",
-      },
-      {
-        name: "デアブーツ",
-        body: "腕部とともに膨大な回数の再錬成を続け、必要な組成・形状へ変化する。飛行や潜航などの推進機能を錬成し、深海から宇宙までを活動範囲とする。",
-      },
-    ],
-    finishers: [
-      {

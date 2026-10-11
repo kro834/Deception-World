@@ -33,7 +33,10 @@ import {
 const read = (path) =>
   readFileSync(new URL(`../${path}`, import.meta.url), "utf8").replaceAll("\r\n", "\n");
 const file = (path) => new URL(`../public${path.split("?")[0]}`, import.meta.url);
-const sha = (path) => createHash("sha256").update(readFileSync(file(path))).digest("hex");
+const sha = (path) =>
+  createHash("sha256")
+    .update(readFileSync(file(path)))
+    .digest("hex");
 
 function webpSize(bytes) {
   assert.equal(bytes.subarray(0, 4).toString("ascii"), "RIFF");
@@ -48,10 +51,11 @@ function webpSize(bytes) {
   throw new Error(`unknown WebP chunk ${chunk}`);
 }
 function jpegSize(bytes) {
-  for (let i = 2; i < bytes.length; ) {
+  for (let i = 2; i < bytes.length;) {
     const marker = bytes[i + 1];
     const length = bytes.readUInt16BE(i + 2);
-    if (marker >= 0xc0 && marker <= 0xc2) return [bytes.readUInt16BE(i + 7), bytes.readUInt16BE(i + 5)];
+    if (marker >= 0xc0 && marker <= 0xc2)
+      return [bytes.readUInt16BE(i + 7), bytes.readUInt16BE(i + 5)];
     i += 2 + length;
   }
   throw new Error("no SOF");
@@ -59,7 +63,10 @@ function jpegSize(bytes) {
 
 test("the Dream dive warms exactly the files the hero, its preloads and the console show", () => {
   assert.deepEqual([...DREAM_CHAPTER_ENTER_ASSETS], [DREAM_CHAPTER_LOGO, DREAM_CHAPTER_HERO_ART]);
-  assert.equal(DREAM_CHAPTER_HERO_ART, POSTER_IMAGES["/dream-chapter-poster-05.jpeg"].variants[0].path);
+  assert.equal(
+    DREAM_CHAPTER_HERO_ART,
+    POSTER_IMAGES["/dream-chapter-poster-05.jpeg"].variants[0].path,
+  );
   assert.equal(DREAM_CHAPTER_LOGO, TITLE_LOGO_IMAGES["/dream-chapter-logo.jpeg"].variants[0].path);
   const page = read("src/components/dream-chapter/dream-chapter.tsx");
   assert.match(page, /className="dream-hero-art"\s+src=\{DREAM_CHAPTER_HERO_ART\}/);
@@ -70,7 +77,10 @@ test("the Dream dive warms exactly the files the hero, its preloads and the cons
   assert.match(route, /rel: "preload",\s*as: "image",\s*href: DREAM_CHAPTER_LOGO/);
   assert.doesNotMatch(route, /href: "\/dream-chapter-(?:logo|poster-05)/);
   // The console's poster 05 asks for the hero's own WebP (a cache hit).
-  assert.deepEqual(posterImage("/dream-chapter-poster-05.jpeg"), { src: DREAM_CHAPTER_HERO_ART, srcSet: DREAM_CHAPTER_HERO_ART });
+  assert.deepEqual(posterImage("/dream-chapter-poster-05.jpeg"), {
+    src: DREAM_CHAPTER_HERO_ART,
+    srcSet: DREAM_CHAPTER_HERO_ART,
+  });
   // The loader's byte estimates match the files it warms.
   const loader = read("src/lib/asset-loader.ts");
   for (const asset of DREAM_CHAPTER_ENTER_ASSETS) {
@@ -95,8 +105,14 @@ test("the Dream hero's WebPs keep the art's pixels and ratio; the JPEGs stay as 
   assert.match(page, /src=\{DREAM_CHAPTER_HERO_ART\}\s+alt=""\s+width=\{1448\}\s+height=\{1086\}/);
   assert.match(page, /src=\{DREAM_CHAPTER_LOGO\}[\s\S]{0,80}width="1280"\s+height="731"/);
   assert.ok(posterWebp.length + logoWebp.length < (poster.length + logo.length) * 0.4);
-  assert.equal(sha("/dream-chapter-poster-05.jpeg"), "e8daa3d13d92b5253ba20ddbefc6cb70508e0781ee929b57f2f0c6580da157f9");
-  assert.equal(sha("/dream-chapter-logo.jpeg"), "e68cdeacfbed77067efb2a9fe152aeb3d28afea7bdf7b092527fdcb5192fa675");
+  assert.equal(
+    sha("/dream-chapter-poster-05.jpeg"),
+    "e8daa3d13d92b5253ba20ddbefc6cb70508e0781ee929b57f2f0c6580da157f9",
+  );
+  assert.equal(
+    sha("/dream-chapter-logo.jpeg"),
+    "e68cdeacfbed77067efb2a9fe152aeb3d28afea7bdf7b092527fdcb5192fa675",
+  );
 });
 
 test("dossier heroes: width candidates of their stated widths, the old file still the largest", () => {
@@ -125,7 +141,10 @@ test("dossier heroes: width candidates of their stated widths, the old file stil
     assert.ok(Math.abs(set.aspect - full[0] / full[1]) < 0.001, key);
     // A 1x desktop's frame (517 x 716 at 1440 x 900) needs at most 720 px.
     assert.ok(Math.max(517, 716 * set.aspect) <= 720, key);
-    assert.ok(set.variants.some((variant) => variant.width === 720), key);
+    assert.ok(
+      set.variants.some((variant) => variant.width === 720),
+      key,
+    );
   }
   // The 720 px files are drawn from the managers' JPEGs, which stay as supplied.
   for (const [source, hash] of Object.entries({
@@ -198,7 +217,9 @@ test("each hero and its navigation warm-ups ask with one srcset and sizes", () =
     assert.ok(DOSSIER_HERO_IMAGES[asset.split("?")[0]], name);
   }
   const nav = read("src/components/world/dossier-nav.tsx");
-  for (const [, href, asset] of nav.matchAll(/href: "(\/(?:managers|characters)\/[^"]+)",[\s\S]*?assets: \["([^"]+)"\]/g)) {
+  for (const [, href, asset] of nav.matchAll(
+    /href: "(\/(?:managers|characters)\/[^"]+)",[\s\S]*?assets: \["([^"]+)"\]/g,
+  )) {
     if (href === "/characters/ciel") {
       assert.equal(asset, CIEL_PORTRAIT.source);
       assert.deepEqual(dossierImage(asset), cielPortrait());
@@ -226,7 +247,12 @@ test("the Rexonance pickup: card, record and gate warm-up on one candidate", () 
     assert.equal(webpSize(readFileSync(file(path)))[0], Number.parseInt(width), path);
   }
   const stub = read("src/components/world/manager-stub.tsx");
-  assert.equal(stub.match(/src=\{rider\.img\}\s*\{\.\.\.formPickupImage\(rider\.img\)\}/g)?.length, 2);
+  assert.equal(
+    stub.match(
+      /src=\{rider\.img\}\s*\{\.\.\.dossierImage\(rider\.img\)\}\s*\{\.\.\.formPickupImage\(rider\.img\)\}/g,
+    )?.length,
+    2,
+  );
   assert.match(
     stub,
     /const \{ srcSet, sizes \} = formPickupImage\(rider\.img\);\s*if \(sizes\) preload\.sizes = sizes;\s*if \(srcSet\) preload\.srcset = srcSet;\s*preload\.src = rider\.img;/,

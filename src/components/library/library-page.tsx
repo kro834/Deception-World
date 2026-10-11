@@ -13,6 +13,7 @@ import {
   type LibraryKind,
 } from "@/lib/library-data";
 import { pathArt, RIDER_ART, titleRunStyle } from "@/lib/record-art";
+import { watchRecordArrival } from "@/lib/record-arrival";
 import { toggleBookmark, useLibraryStore } from "./library-store";
 import { LibraryHub } from "./library-hub";
 import { RecordArtFrame } from "./record-art";
@@ -38,13 +39,27 @@ function EntryCard({
       <RecordArtFrame art={pathArt(entry.path, entry.hash)} title={entry.title} />
       <p className="library-card-kind">{LIBRARY_KINDS[entry.kind]}</p>
       <h3 style={titleRunStyle(entry.title)}>
-        <GuardedLink to={entry.path} hash={entry.hash} assets={[]}>
+        <GuardedLink
+          to={entry.path}
+          hash={entry.hash}
+          assets={[]}
+          beforeNavigate={() => {
+            watchRecordArrival(entry.path, entry.hash);
+          }}
+        >
           <DisplayName value={entry.title} />
         </GuardedLink>
       </h3>
       <p className="library-card-description">{entry.description}</p>
       <div className="library-card-actions">
-        <GuardedLink to={entry.path} hash={entry.hash} assets={[]}>
+        <GuardedLink
+          to={entry.path}
+          hash={entry.hash}
+          assets={[]}
+          beforeNavigate={() => {
+            watchRecordArrival(entry.path, entry.hash);
+          }}
+        >
           資料を開く <span aria-hidden="true">↗</span>
         </GuardedLink>
         <button
