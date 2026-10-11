@@ -25,6 +25,10 @@ const completed = new Set<string>();
 const schedules = new Set<{ suspend: () => void; resume: () => void }>();
 // The decoded images stay referenced, so the CSS layers stay warm for the call.
 const held: HTMLImageElement[] = [];
+// CSS can decode successfully while its canvas bitmap fails. Keep one
+// successful image per source so a missing-bitmap retry does not download
+// and hold another copy of the already-warm fallback layer.
+const decodedPictures = new Map<string, HTMLImageElement>();
 // rx17: what the nanite engine draws, decoded once and shared with it.
 const sources = new Map<string, CanvasImageSource>();
 const DRAWN: readonly string[] = [REXONANCE_SUIT_ATLAS.src, REXONANCE_SUIT_GOLD_ATLAS.src];
@@ -71,6 +75,8 @@ function warmPlanWhenIdle() {
 // A layer as an image, fetched and decoded off the main thread (it stays
 // referenced, so the CSS layers paint it at once). Null if it failed.
 function picture(source: string, priority: Priority, batch: WarmBatch) {
+  const decoded = decodedPictures.get(source);
+  if (decoded) return Promise.resolve(decoded);
   return new Promise<HTMLImageElement | null>((resolve) => {
     const image = new Image();
     image.decoding = "async";
@@ -83,7 +89,8 @@ function picture(source: string, priority: Priority, batch: WarmBatch) {
       batch.controller.signal.removeEventListener("abort", abort);
       image.onload = null;
       image.onerror = null;
-      if (!value) {
+      if (value) decodedPictures.set(source, value);
+      else {
         const index = held.indexOf(image);
         if (index !== -1) held.splice(index, 1);
       }
@@ -138,11 +145,17 @@ async function decode(source: string, priority: Priority, batch: WarmBatch) {
       // Both use the already-fetched file. Keep CSS readiness in the same
       // contract, without serializing its decode behind the canvas bitmap.
       const [bitmap, cssReady] = await Promise.all([
-        createImageBitmap(blob),
+        // A bitmap rejection must not abandon an in-flight CSS image and
+        // retry it in parallel. Let that valid work finish and stay cached;
+        // no renderer source/readiness is published without both results.
+        Promise.resolve()
+          .then(() => createImageBitmap(blob))
+          .catch(() => null),
         source === REXONANCE_SUIT_GOLD_ATLAS.src
           ? Promise.resolve(true)
           : picture(source, priority, batch).then(Boolean),
       ]);
+      if (!bitmap) return false;
       // Decoding itself is not abortable. Close an abandoned decode rather
       // than letting it replace a later high-priority batch's source.
       if (!current()) {
@@ -228,7 +241,7 @@ export function warmRexonanceSuit(priority: Priority = "low"): Promise<boolean> 
   }
   if (pending) {
     // Intent/the call adopts the existing low-priority requests; it does not
-    // download them again. A later unrelated go cancels only background work.
+    // download them again. A later unrelated go may cancel even unused intent.
     if (priority === "high" && activeBatch) {
       activeBatch.priority = "high";
       retryFailed(activeBatch);

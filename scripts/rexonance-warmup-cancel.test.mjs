@@ -355,6 +355,81 @@ test("rx17: the plate CSS decode and bitmap decode run together without declarin
   }
 });
 
+test("rx17: repeated bitmap rejection reuses one decoded CSS image and keeps completed sources", async () => {
+  const f = await fixture();
+  try {
+    const bitmapImage = globalThis.createImageBitmap;
+    let rejecting = true;
+    globalThis.createImageBitmap = (blob) =>
+      rejecting && blob.src === REXONANCE_SUIT_ATLAS.src
+        ? Promise.reject(new Error("Injected bitmap failure"))
+        : bitmapImage(blob);
+    const first = f.module.warmRexonanceSuit();
+    f.requests.forEach((request) => request.resolve());
+    await settle();
+    const plateImage = f.images.find((image) => image.src === REXONANCE_SUIT_ATLAS.src);
+    assert.ok(plateImage);
+    let settled = false;
+    void first.then(() => {
+      settled = true;
+    });
+    await settle();
+    assert.equal(settled, false, "bitmap rejection still collects its valid in-flight CSS work");
+    f.loadImages();
+    assert.equal(await first, false);
+    const keptGold = f.module.rexonanceSuitSource(REXONANCE_SUIT_GOLD_ATLAS.src);
+    assert.ok(keptGold);
+    const imageCount = f.images.length;
+    for (let attempt = 0; attempt < 6; attempt++) {
+      const retry = f.module.warmRexonanceSuit();
+      assert.equal(f.requests.at(-1).src, REXONANCE_SUIT_ATLAS.src);
+      f.requests.at(-1).resolve();
+      assert.equal(await retry, false);
+      assert.equal(f.images.length, imageCount, "CSS image requests/retained copies do not grow");
+      assert.equal(f.module.rexonanceSuitSource(REXONANCE_SUIT_ATLAS.src), null);
+      assert.equal(f.module.isRexonanceSuitReady(), false);
+      assert.equal(f.module.rexonanceSuitSource(REXONANCE_SUIT_GOLD_ATLAS.src), keptGold);
+      assert.equal(keptGold.closed, false);
+    }
+    rejecting = false;
+    const recovered = f.module.warmRexonanceSuit("high");
+    f.requests.at(-1).resolve();
+    assert.equal(await recovered, true);
+    assert.equal(f.images.length, imageCount, "successful recovery also reuses the warm CSS image");
+    assert.equal(f.images.filter((image) => image.src === plateImage.src).length, 1);
+    assert.equal(f.module.rexonanceSuitSource(REXONANCE_SUIT_GOLD_ATLAS.src), keptGold);
+    assert.equal(keptGold.closed, false);
+  } finally {
+    f.restore();
+  }
+});
+
+test("rx17: CSS failure collects and closes a late bitmap without publishing it", async () => {
+  const f = await fixture({ delayedBitmaps: true });
+  try {
+    const warm = f.module.warmRexonanceSuit();
+    f.requests.forEach((request) => request.resolve());
+    await settle();
+    const plateImage = f.images.find((image) => image.src === REXONANCE_SUIT_ATLAS.src);
+    plateImage.onerror();
+    f.loadImages();
+    f.bitmaps[1].resolve();
+    await settle();
+    assert.equal(f.module.isRexonanceSuitReady(), false);
+    assert.equal(f.module.rexonanceSuitSource(REXONANCE_SUIT_ATLAS.src), null);
+    f.bitmaps[0].resolve();
+    assert.equal(await warm, false);
+    assert.equal(
+      f.bitmaps[0].closed,
+      true,
+      "an unusable bitmap is released even after CSS failure",
+    );
+    assert.equal(f.bitmaps[1].closed, false, "successful gold is not closed");
+  } finally {
+    f.restore();
+  }
+});
+
 test("rx17: a hidden page does not start a high retry when an adopted request fails", async () => {
   const f = await fixture();
   try {

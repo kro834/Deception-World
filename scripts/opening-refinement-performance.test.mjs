@@ -288,6 +288,12 @@ test("the ready control deck passes empty pointer hits through while enabled chi
   );
 });
 
+test("SKIP has its own row above early ENTER at narrow portrait and short landscape sizes", () => {
+  assert.match(css, /bottom: calc\(max\(10vh, 72px\) \+ 52px \+ 12px\);/);
+  assert.match(css, /bottom: calc\(max\(8vh, 56px\) \+ 48px \+ 12px\);/);
+  assert.match(css, /bottom: calc\(30px \+ 44px \+ 12px\);/);
+});
+
 test("real opening gestures, M presses and repeated replays have no sound control or stage unlock", () => {
   const ui = entryRuntime({ runEffects: true, profileDevice: { connection: { saveData: true } } });
   for (let run = 0; run < 3; run++) {

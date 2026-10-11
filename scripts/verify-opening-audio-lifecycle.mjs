@@ -8,6 +8,8 @@ const soundFile = /\.(?:mp3|wav|ogg|m4a|aac)(?:[?#]|$)/i;
 const scenarios = [
   { name: "desktop-replays", viewport: { width: 1440, height: 900 }, replays: 3 },
   { name: "phone-replays", viewport: { width: 390, height: 844 }, replays: 3 },
+  { name: "narrow-portrait", viewport: { width: 320, height: 568 }, replays: 3 },
+  { name: "short-landscape", viewport: { width: 568, height: 320 }, replays: 3 },
   { name: "early-entry", viewport: { width: 1024, height: 1366 }, replays: 0 },
   {
     name: "reduced-motion",
@@ -32,14 +34,29 @@ async function assertOpeningHitTargets(page, skipExpected = false) {
     });
     const blank = document.elementFromPoint(rect.left + 4, rect.top + rect.height / 2);
     const skip = document.querySelector(".cine-skip");
+    const skipBox = skip.getBoundingClientRect();
     return {
+      viewport: { width: innerWidth, height: innerHeight },
+      phase: document.querySelector(".cine-stage").className,
       deckPointerEvents: getComputedStyle(deck).pointerEvents,
       blankHitsDeck: blank?.closest(".cine-replay-slot") === deck,
-      buttons: buttons.map((button) => ({
-        label: button.textContent.trim(),
-        ownsPoint: ownsPoint(button),
-      })),
+      buttons: buttons.map((button) => {
+        const box = button.getBoundingClientRect();
+        return {
+          label: button.textContent.trim(),
+          ownsPoint: ownsPoint(button),
+          width: box.width,
+          height: box.height,
+          overlapsSkip:
+            !skip.disabled &&
+            box.left < skipBox.right &&
+            box.right > skipBox.left &&
+            box.top < skipBox.bottom &&
+            box.bottom > skipBox.top,
+        };
+      }),
       skipOwnsPoint: !skip.disabled && ownsPoint(skip),
+      skipSize: { width: skipBox.width, height: skipBox.height },
     };
   });
   assert.equal(hits.deckPointerEvents, "none");
@@ -50,10 +67,17 @@ async function assertOpeningHitTargets(page, skipExpected = false) {
   );
   assert.ok(hits.buttons.length > 0, "early ENTER remains an available pointer target");
   assert.ok(
-    hits.buttons.every((button) => button.ownsPoint),
+    hits.buttons.every((button) => button.ownsPoint && button.width >= 44 && button.height >= 44),
     JSON.stringify(hits),
   );
-  if (skipExpected) assert.equal(hits.skipOwnsPoint, true, JSON.stringify(hits));
+  if (skipExpected) {
+    assert.equal(hits.skipOwnsPoint, true, JSON.stringify(hits));
+    assert.ok(hits.skipSize.width >= 44 && hits.skipSize.height >= 44, JSON.stringify(hits));
+    assert.ok(
+      hits.buttons.every((button) => !button.overlapsSkip),
+      JSON.stringify(hits),
+    );
+  }
   return hits;
 }
 

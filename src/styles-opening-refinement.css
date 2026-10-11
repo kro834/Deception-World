@@ -239,6 +239,18 @@ html[data-world-effects="economy"] .cine-stage .cine-logo-wrap {
   .cine-stage .cine-replay-slot {
     gap: 12px;
   }
+
+  /* Early ENTER uses the final deck's full plate width. Give SKIP a separate
+     row above it rather than moving ENTER when the sequence completes. */
+  .cine-stage .cine-skip {
+    bottom: calc(max(10vh, 72px) + 52px + 12px);
+  }
+}
+
+@media (max-width: 360px) and (orientation: portrait) {
+  .cine-stage .cine-skip {
+    bottom: calc(max(8vh, 56px) + 48px + 12px);
+  }
 }
 
 @media (max-height: 560px) and (orientation: landscape) {
@@ -248,6 +260,10 @@ html[data-world-effects="economy"] .cine-stage .cine-logo-wrap {
 
   .cine-stage .cine-title-caption {
     line-height: 1.45;
+  }
+
+  .cine-stage .cine-skip {
+    bottom: calc(30px + 44px + 12px);
   }
 }
 
