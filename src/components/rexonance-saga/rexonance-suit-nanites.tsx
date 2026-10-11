@@ -380,12 +380,12 @@ export function prepareRexonanceSuit() {
 // its cell (so the front glitters, cell by cell, instead of washing over
 // the trim); the glints' head and trail. [colour, alpha, size of the cell].
 const HEAT = [
-  ["#fff3c4", 0.92, 0.94],
-  ["#ffc642", 0.62, 0.78],
-  ["#e08a1e", 0.34, 0.62],
+  ["#fff3c4", 0.9, 0.94],
+  ["#ffc642", 0.52, 0.78],
+  ["#e08a1e", 0.26, 0.62],
 ] as const;
 // The molten front's glow: the white-hot cells' union, grown, faint.
-const BLOOM = ["#ffb02e", 0.2, 2.6] as const;
+const BLOOM = ["#ffb02e", 0.14, 2.2] as const;
 const GLINT = [
   ["#fffdf3", 0.62, 1],
   ["#ffe39a", 0.26, 1],
@@ -396,297 +396,305 @@ export function SuitNanites({ onReady }: { onReady: () => void }) {
   const ready = useRef(onReady);
   ready.current = onReady;
   useEffect(() => {
-    const box = host.current;
-    const build = box?.parentElement;
-    const meter = box?.closest(".rx-call-sequence")?.querySelector(".rx-call-meter > i");
-    if (!box || !build || !meter || getComputedStyle(build).display === "none") return;
-    const clock = () => {
-      const animation = meter.getAnimations()[0];
-      return animation ? Number(animation.currentTime) : null;
-    };
     let cancelled = false;
     let frame = 0;
     let stop = () => {};
-    const start = () => {
-      const now = clock();
-      if (cancelled || now === null || now > START_BY || !box.clientWidth) return;
-      const atlas = rexonanceSuitSource(REXONANCE_SUIT_ATLAS.src);
-      const raw = rexonanceSuitSource(REXONANCE_SUIT_GOLD_ATLAS.src);
-      if (!atlas || !raw) return;
-      const work = forming(atlas, raw);
-      const scale = Math.min(2, globalThis.devicePixelRatio || 1);
-      const width = Math.round(box.clientWidth * scale);
-      const height = Math.round(box.clientHeight * scale);
-      const make = () => {
-        const canvas = Object.assign(globalThis.document.createElement("canvas"), {
-          width,
-          height,
-        });
-        box.append(canvas);
-        return canvas.getContext("2d");
-      };
-      const settled = make();
-      const flight = make();
-      if (!work || !FORMING || !settled || !flight) {
-        box.replaceChildren();
+    // rx17: the engine begins on the overlay's next frame, never inside the
+    // task that mounts it (its style and layout reads would force the whole
+    // overlay's style there).
+    const begin = () => {
+      frame = 0;
+      const box = host.current;
+      const build = box?.parentElement;
+      const meter = box?.closest(".rx-call-sequence")?.querySelector(".rx-call-meter > i");
+      if (cancelled || !box || !build || !meter || getComputedStyle(build).display === "none")
         return;
-      }
-      const source = FORMING;
-      formingDirty = true;
-      const s = width / FIG.width;
-      const all = plates();
-      const surges = SURGES!;
-      const gold = cells();
-      // Per plate: settled (its art painted whole), and its gold cells
-      // locked into the working atlas so far.
-      const done = new Uint8Array(all.length);
-      const locked = Int32Array.from(all, (plate) => plate.first);
-      // The batches (cell indices; the motes' own boxes).
-      const heat = HEAT.map(() => new Int32Array(GOLD_TOTAL));
-      const heats = new Int32Array(HEAT.length);
-      const glint = GLINT.map(() => new Int32Array(GOLD_TOTAL));
-      const glints = new Int32Array(GLINT.length);
-      const motes = new Float32Array(GOLD_TOTAL * 3);
-      let moteCount = 0;
-      let last = -1;
-      const settle = (index: number) => {
-        const { piece } = all[index];
-        settled.drawImage(
-          atlas,
-          piece.ax,
-          piece.ay,
-          piece.w,
-          piece.h,
-          piece.x * s,
-          piece.y * s,
-          piece.w * s,
-          piece.h * s,
-        );
-        done[index] = 1;
+      const clock = () => {
+        const animation = meter.getAnimations()[0];
+        return animation ? Number(animation.currentTime) : null;
       };
-      const reset = () => {
-        settled.clearRect(0, 0, width, height);
-        done.fill(0);
-        for (let p = 0; p < all.length; p += 1) locked[p] = all[p].first;
-        formingDirty = true;
-        forming(atlas, raw);
-        formingDirty = true;
-      };
-      const glow = (
-        list: Int32Array,
-        count: number,
-        [colour, alpha, size]: readonly [string, number, number],
-      ) => {
-        if (!count) return;
-        flight.globalAlpha = alpha;
-        flight.fillStyle = colour;
-        flight.beginPath();
-        for (let k = 0; k < count; k += 1) {
-          const i = list[k];
-          const w = gold.cw[i] * size;
-          const h = gold.ch[i] * size;
-          flight.rect(
-            (gold.fx[i] + (gold.cw[i] - w) / 2) * s,
-            (gold.fy[i] + (gold.ch[i] - h) / 2) * s,
-            w * s,
-            h * s,
-          );
+      const start = () => {
+        const now = clock();
+        if (cancelled || now === null || now > START_BY || !box.clientWidth) return;
+        const atlas = rexonanceSuitSource(REXONANCE_SUIT_ATLAS.src);
+        const raw = rexonanceSuitSource(REXONANCE_SUIT_GOLD_ATLAS.src);
+        if (!atlas || !raw) return;
+        const work = forming(atlas, raw);
+        const scale = Math.min(2, globalThis.devicePixelRatio || 1);
+        const width = Math.round(box.clientWidth * scale);
+        const height = Math.round(box.clientHeight * scale);
+        const make = () => {
+          const canvas = Object.assign(globalThis.document.createElement("canvas"), {
+            width,
+            height,
+          });
+          box.append(canvas);
+          return canvas.getContext("2d");
+        };
+        const settled = make();
+        const flight = make();
+        if (!work || !FORMING || !settled || !flight) {
+          box.replaceChildren();
+          return;
         }
-        flight.fill();
-      };
-      const draw = (t: number) => {
-        if (t < last) reset();
-        last = t;
-        flight.clearRect(0, 0, width, height);
-        heats.fill(0);
-        glints.fill(0);
-        moteCount = 0;
-        for (let p = 0; p < all.length; p += 1) {
-          const plate = all[p];
-          if (t < plate.spawn || (done[p] && t >= plate.last)) continue;
-          const { piece } = plate;
-          if (t < plate.fit) {
-            for (const tile of plate.tiles) {
-              const u = (t - tile.land + FLIGHT) / FLIGHT;
-              if (u <= 0) continue;
-              if (u >= 1) {
+        const source = FORMING;
+        formingDirty = true;
+        const s = width / FIG.width;
+        const all = plates();
+        const surges = SURGES!;
+        const gold = cells();
+        // Per plate: settled (its art painted whole), and its gold cells
+        // locked into the working atlas so far.
+        const done = new Uint8Array(all.length);
+        const locked = Int32Array.from(all, (plate) => plate.first);
+        // The batches (cell indices; the motes' own boxes).
+        const heat = HEAT.map(() => new Int32Array(GOLD_TOTAL));
+        const heats = new Int32Array(HEAT.length);
+        const glint = GLINT.map(() => new Int32Array(GOLD_TOTAL));
+        const glints = new Int32Array(GLINT.length);
+        const motes = new Float32Array(GOLD_TOTAL * 3);
+        let moteCount = 0;
+        let last = -1;
+        const settle = (index: number) => {
+          const { piece } = all[index];
+          settled.drawImage(
+            atlas,
+            piece.ax,
+            piece.ay,
+            piece.w,
+            piece.h,
+            piece.x * s,
+            piece.y * s,
+            piece.w * s,
+            piece.h * s,
+          );
+          done[index] = 1;
+        };
+        const reset = () => {
+          settled.clearRect(0, 0, width, height);
+          done.fill(0);
+          for (let p = 0; p < all.length; p += 1) locked[p] = all[p].first;
+          formingDirty = true;
+          forming(atlas, raw);
+          formingDirty = true;
+        };
+        const glow = (
+          list: Int32Array,
+          count: number,
+          [colour, alpha, size]: readonly [string, number, number],
+        ) => {
+          if (!count) return;
+          flight.globalAlpha = alpha;
+          flight.fillStyle = colour;
+          flight.beginPath();
+          for (let k = 0; k < count; k += 1) {
+            const i = list[k];
+            const w = gold.cw[i] * size;
+            const h = gold.ch[i] * size;
+            flight.rect(
+              (gold.fx[i] + (gold.cw[i] - w) / 2) * s,
+              (gold.fy[i] + (gold.ch[i] - h) / 2) * s,
+              w * s,
+              h * s,
+            );
+          }
+          flight.fill();
+        };
+        const draw = (t: number) => {
+          if (t < last) reset();
+          last = t;
+          flight.clearRect(0, 0, width, height);
+          heats.fill(0);
+          glints.fill(0);
+          moteCount = 0;
+          for (let p = 0; p < all.length; p += 1) {
+            const plate = all[p];
+            if (t < plate.spawn || (done[p] && t >= plate.last)) continue;
+            const { piece } = plate;
+            if (t < plate.fit) {
+              for (const tile of plate.tiles) {
+                const u = (t - tile.land + FLIGHT) / FLIGHT;
+                if (u <= 0) continue;
+                if (u >= 1) {
+                  flight.globalAlpha = 1;
+                  flight.drawImage(
+                    source,
+                    tile.sx,
+                    tile.sy,
+                    T,
+                    T,
+                    tile.dx * s,
+                    tile.dy * s,
+                    T * s,
+                    T * s,
+                  );
+                  continue;
+                }
+                const e = 1 - (1 - u) ** 3;
+                const x = (tile.dx + tile.ox * (1 - e)) * s;
+                const y = (tile.dy + tile.oy * (1 - e)) * s;
+                if (u < 0.62) {
+                  // A nanite mote, streaming in.
+                  const size = T * s * (0.3 + 0.4 * (u / 0.62));
+                  flight.globalAlpha = Math.min(1, u * 5) * 0.85;
+                  flight.fillStyle = tile.tone;
+                  flight.fillRect(x + (T * s - size) / 2, y + (T * s - size) / 2, size, size);
+                } else {
+                  // It turns into its piece of the plate (gold unformed) and locks.
+                  const v = (u - 0.62) / 0.38;
+                  const size = T * s * (0.72 + 0.28 * v);
+                  flight.globalAlpha = 0.55 + 0.45 * v;
+                  flight.drawImage(
+                    source,
+                    tile.sx,
+                    tile.sy,
+                    T,
+                    T,
+                    x + (T * s - size) / 2,
+                    y + (T * s - size) / 2,
+                    size,
+                    size,
+                  );
+                }
+              }
+              continue;
+            }
+            // Seated. Its gold cells lock as they are due (into the working
+            // atlas, unless the plate settles this frame anyway).
+            if (!done[p]) {
+              if (t >= plate.to) {
+                locked[p] = plate.end;
+                settle(p);
+              } else {
+                while (locked[p] < plate.end && gold.lock[locked[p]] <= t) {
+                  const i = locked[p];
+                  work.drawImage(
+                    atlas,
+                    gold.ax[i],
+                    gold.ay[i],
+                    gold.cw[i],
+                    gold.ch[i],
+                    gold.ax[i],
+                    gold.ay[i],
+                    gold.cw[i],
+                    gold.ch[i],
+                  );
+                  locked[p] += 1;
+                }
                 flight.globalAlpha = 1;
                 flight.drawImage(
                   source,
-                  tile.sx,
-                  tile.sy,
-                  T,
-                  T,
-                  tile.dx * s,
-                  tile.dy * s,
-                  T * s,
-                  T * s,
-                );
-                continue;
-              }
-              const e = 1 - (1 - u) ** 3;
-              const x = (tile.dx + tile.ox * (1 - e)) * s;
-              const y = (tile.dy + tile.oy * (1 - e)) * s;
-              if (u < 0.62) {
-                // A nanite mote, streaming in.
-                const size = T * s * (0.3 + 0.4 * (u / 0.62));
-                flight.globalAlpha = Math.min(1, u * 5) * 0.85;
-                flight.fillStyle = tile.tone;
-                flight.fillRect(x + (T * s - size) / 2, y + (T * s - size) / 2, size, size);
-              } else {
-                // It turns into its piece of the plate (gold unformed) and locks.
-                const v = (u - 0.62) / 0.38;
-                const size = T * s * (0.72 + 0.28 * v);
-                flight.globalAlpha = 0.55 + 0.45 * v;
-                flight.drawImage(
-                  source,
-                  tile.sx,
-                  tile.sy,
-                  T,
-                  T,
-                  x + (T * s - size) / 2,
-                  y + (T * s - size) / 2,
-                  size,
-                  size,
+                  piece.ax,
+                  piece.ay,
+                  piece.w,
+                  piece.h,
+                  piece.x * s,
+                  piece.y * s,
+                  piece.w * s,
+                  piece.h * s,
                 );
               }
             }
-            continue;
-          }
-          // Seated. Its gold cells lock as they are due (into the working
-          // atlas, unless the plate settles this frame anyway).
-          if (!done[p]) {
-            if (t >= plate.to) {
-              locked[p] = plate.end;
-              settle(p);
-            } else {
-              while (locked[p] < plate.end && gold.lock[locked[p]] <= t) {
-                const i = locked[p];
-                work.drawImage(
-                  atlas,
-                  gold.ax[i],
-                  gold.ay[i],
-                  gold.cw[i],
-                  gold.ch[i],
-                  gold.ax[i],
-                  gold.ay[i],
-                  gold.cw[i],
-                  gold.ch[i],
-                );
-                locked[p] += 1;
+            if (plate.end === plate.first) continue;
+            // The gold's light: motes in flight, cells cooling, the glint.
+            const sweep = (t - plate.to) / GOLD.glint;
+            const head = sweep * 1.3 - 0.1;
+            for (let i = plate.first; i < plate.end; i += 1) {
+              const lock = gold.lock[i];
+              if (lock > t + GOLD.approach) break;
+              if (lock > t) {
+                const u = 1 - (lock - t) / GOLD.approach;
+                const e = 1 - (1 - u) * (1 - u);
+                const size = G * (0.3 + 0.5 * e);
+                motes[moteCount * 3] = gold.fx[i] + gold.ox[i] * (1 - e) + (G - size) / 2;
+                motes[moteCount * 3 + 1] = gold.fy[i] + gold.oy[i] * (1 - e) + (G - size) / 2;
+                motes[moteCount * 3 + 2] = size;
+                moteCount += 1;
+              } else if (t - lock < GOLD.cool) {
+                const v = (t - lock) / GOLD.cool;
+                const k = v < 0.22 ? 0 : v < 0.55 ? 1 : 2;
+                heat[k][heats[k]++] = i;
+              } else if (sweep > 0 && sweep < 1) {
+                const behind = head - gold.order[i];
+                if (behind >= 0 && behind < 0.12) {
+                  const k = behind < 0.04 ? 0 : 1;
+                  glint[k][glints[k]++] = i;
+                }
               }
-              flight.globalAlpha = 1;
-              flight.drawImage(
-                source,
-                piece.ax,
-                piece.ay,
-                piece.w,
-                piece.h,
-                piece.x * s,
-                piece.y * s,
-                piece.w * s,
-                piece.h * s,
+            }
+          }
+          // The accents' surges: a band of light out from the DEUS！ seat
+          // through the group's formed gold.
+          for (const surge of surges) {
+            if (t < surge.from || t >= surge.to) continue;
+            const head = ((t - surge.from) / (surge.to - surge.from)) * 1.2;
+            for (let k = 0; k < surge.cells.length; k += 1) {
+              const behind = head - surge.reach[k];
+              if (behind < 0) break;
+              if (behind >= 0.12) continue;
+              const i = surge.cells[k];
+              if (gold.lock[i] + GOLD.cool > t) continue;
+              const bucket = behind < 0.04 ? 0 : 1;
+              glint[bucket][glints[bucket]++] = i;
+            }
+          }
+          glow(heat[0], heats[0], BLOOM);
+          for (let k = HEAT.length - 1; k >= 0; k -= 1) glow(heat[k], heats[k], HEAT[k]);
+          for (let k = GLINT.length - 1; k >= 0; k -= 1) glow(glint[k], glints[k], GLINT[k]);
+          if (moteCount) {
+            flight.globalAlpha = 0.95;
+            flight.fillStyle = "#fff8de";
+            flight.beginPath();
+            for (let k = 0; k < moteCount; k += 1)
+              flight.rect(
+                motes[k * 3] * s,
+                motes[k * 3 + 1] * s,
+                motes[k * 3 + 2] * s,
+                motes[k * 3 + 2] * s,
               );
-            }
+            flight.fill();
           }
-          if (plate.end === plate.first) continue;
-          // The gold's light: motes in flight, cells cooling, the glint.
-          const sweep = (t - plate.to) / GOLD.glint;
-          const head = sweep * 1.3 - 0.1;
-          for (let i = plate.first; i < plate.end; i += 1) {
-            const lock = gold.lock[i];
-            if (lock > t + GOLD.approach) break;
-            if (lock > t) {
-              const u = 1 - (lock - t) / GOLD.approach;
-              const e = 1 - (1 - u) * (1 - u);
-              const size = G * (0.3 + 0.5 * e);
-              motes[moteCount * 3] = gold.fx[i] + gold.ox[i] * (1 - e) + (G - size) / 2;
-              motes[moteCount * 3 + 1] = gold.fy[i] + gold.oy[i] * (1 - e) + (G - size) / 2;
-              motes[moteCount * 3 + 2] = size;
-              moteCount += 1;
-            } else if (t - lock < GOLD.cool) {
-              const v = (t - lock) / GOLD.cool;
-              const k = v < 0.22 ? 0 : v < 0.55 ? 1 : 2;
-              heat[k][heats[k]++] = i;
-            } else if (sweep > 0 && sweep < 1) {
-              const behind = head - gold.order[i];
-              if (behind >= 0 && behind < 0.12) {
-                const k = behind < 0.04 ? 0 : 1;
-                glint[k][glints[k]++] = i;
-              }
-            }
+          flight.globalAlpha = 1;
+        };
+        let finished = false;
+        const finish = () => {
+          if (finished) return;
+          finished = true;
+          drawing -= 1;
+          flight.clearRect(0, 0, width, height);
+          for (let p = 0; p < all.length; p += 1) if (!done[p]) settle(p);
+        };
+        stop = () => {
+          if (!finished) drawing -= 1;
+          finished = true;
+        };
+        const tick = () => {
+          frame = 0;
+          if (cancelled) return;
+          const t = clock();
+          // The meter's covering clock ends at the hand-over: all plates seat
+          // and the last gold has formed and cooled long before.
+          if (t === null || t >= END) {
+            finish();
+            return;
           }
-        }
-        // The accents' surges: a band of light out from the DEUS！ seat
-        // through the group's formed gold.
-        for (const surge of surges) {
-          if (t < surge.from || t >= surge.to) continue;
-          const head = ((t - surge.from) / (surge.to - surge.from)) * 1.2;
-          for (let k = 0; k < surge.cells.length; k += 1) {
-            const behind = head - surge.reach[k];
-            if (behind < 0) break;
-            if (behind >= 0.12) continue;
-            const i = surge.cells[k];
-            if (gold.lock[i] + GOLD.cool > t) continue;
-            const bucket = behind < 0.04 ? 0 : 1;
-            glint[bucket][glints[bucket]++] = i;
-          }
-        }
-        glow(heat[0], heats[0], BLOOM);
-        for (let k = HEAT.length - 1; k >= 0; k -= 1) glow(heat[k], heats[k], HEAT[k]);
-        for (let k = GLINT.length - 1; k >= 0; k -= 1) glow(glint[k], glints[k], GLINT[k]);
-        if (moteCount) {
-          flight.globalAlpha = 0.95;
-          flight.fillStyle = "#fff8de";
-          flight.beginPath();
-          for (let k = 0; k < moteCount; k += 1)
-            flight.rect(
-              motes[k * 3] * s,
-              motes[k * 3 + 1] * s,
-              motes[k * 3 + 2] * s,
-              motes[k * 3 + 2] * s,
-            );
-          flight.fill();
-        }
-        flight.globalAlpha = 1;
-      };
-      let finished = false;
-      const finish = () => {
-        if (finished) return;
-        finished = true;
-        drawing -= 1;
-        flight.clearRect(0, 0, width, height);
-        for (let p = 0; p < all.length; p += 1) if (!done[p]) settle(p);
-      };
-      stop = () => {
-        if (!finished) drawing -= 1;
-        finished = true;
-      };
-      const tick = () => {
-        frame = 0;
-        if (cancelled) return;
-        const t = clock();
-        // The meter's covering clock ends at the hand-over: all plates seat
-        // and the last gold has formed and cooled long before.
-        if (t === null || t >= END) {
-          finish();
-          return;
-        }
-        draw(t);
+          draw(t);
+          frame = globalThis.requestAnimationFrame(tick);
+        };
+        drawing += 1;
+        ready.current();
+        draw(now);
         frame = globalThis.requestAnimationFrame(tick);
       };
-      drawing += 1;
-      ready.current();
-      draw(now);
-      frame = globalThis.requestAnimationFrame(tick);
+      if (
+        rexonanceSuitSource(REXONANCE_SUIT_ATLAS.src) &&
+        rexonanceSuitSource(REXONANCE_SUIT_GOLD_ATLAS.src)
+      )
+        start();
+      // A late start: the warm-up already in flight (at high priority now).
+      else void warmRexonanceSuit("high").then((decoded) => decoded && start());
     };
-    if (
-      rexonanceSuitSource(REXONANCE_SUIT_ATLAS.src) &&
-      rexonanceSuitSource(REXONANCE_SUIT_GOLD_ATLAS.src)
-    )
-      start();
-    // A late start: the warm-up already in flight (at high priority now).
-    else void warmRexonanceSuit("high").then((decoded) => decoded && start());
+    frame = globalThis.requestAnimationFrame(begin);
     return () => {
       cancelled = true;
       stop();

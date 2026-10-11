@@ -4,7 +4,8 @@
 //
 //   node scripts/build-rexonance-suit.mjs [--debug=<dir>]
 //
-// writes public/rexonance-suit-20261010/*.webp and src/lib/rexonance-suit.ts.
+// writes public/rexonance-suit-20261010/*.webp, src/lib/rexonance-suit.ts and
+// (rx17) src/lib/rexonance-suit-gold.ts.
 // The figure keeps the artwork's own pixels: the black background is flood-
 // filled away from the image edges (never entering the body, so the black
 // armour stays opaque) and the edge is feathered by a pixel. The armour is
@@ -14,7 +15,11 @@
 // piece ships as one sprite of three panels: its art, the coarse nanite
 // mosaic it forms out of, and the faint cyan rim it floats with. The face's
 // cyan and pink lights are cut out separately (the helmet carries them
-// unlit) for the final call's pixel burst.
+// unlit) for the final call's pixel burst. rx17: the bronze trims are
+// classified from the artwork's colours; each plate's gold, unformed (a
+// raw gunmetal channel over the trims' soft mask), ships in gold.webp at
+// the same atlas places as the art, and its gold cells (4 px squares the
+// trims touch) in rexonance-suit-gold.ts, for the nanite engine to form.
 import { mkdirSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { join } from "node:path";

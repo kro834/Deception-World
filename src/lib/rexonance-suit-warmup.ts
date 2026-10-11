@@ -36,43 +36,59 @@ const idle = (run: () => void, timeout: number) => {
   else window.setTimeout(run, 0);
 };
 
-// One layer: fetched, decoded off the main thread, and (for the engine's
-// canvases) turned into an ImageBitmap where supported, else the decoded
-// image itself (older Safari).
-function decode(source: string, priority: Priority, fetched: () => void) {
-  return new Promise<boolean>((resolve) => {
+// A layer as an image, fetched and decoded off the main thread (it stays
+// referenced, so the CSS layers paint it at once). Null if it failed.
+function picture(source: string, priority: Priority, fetched: () => void) {
+  return new Promise<HTMLImageElement | null>((resolve) => {
     const image = new Image();
     image.decoding = "async";
     image.fetchPriority = priority;
     held.push(image);
-    const done = () => {
-      if (!DRAWN.includes(source)) return resolve(true);
-      if (typeof createImageBitmap !== "function") {
-        sources.set(source, image);
-        return resolve(true);
-      }
-      void createImageBitmap(image).then(
-        (bitmap) => {
-          sources.set(source, bitmap);
-          resolve(true);
-        },
-        () => {
-          sources.set(source, image);
-          resolve(true);
-        },
-      );
-    };
     image.onload = () => {
       fetched();
-      if (typeof image.decode === "function") void image.decode().then(done, () => resolve(false));
-      else done();
+      if (typeof image.decode === "function")
+        void image.decode().then(
+          () => resolve(image),
+          () => resolve(null),
+        );
+      else resolve(image);
     };
     image.onerror = () => {
       fetched();
-      resolve(false);
+      resolve(null);
     };
     image.src = source;
   });
+}
+
+// One layer. What the nanite engine draws (rx17) becomes an ImageBitmap
+// decoded off the main thread from the fetched file (a bitmap made from
+// an <img> would decode again on the main thread); the atlas is also a CSS
+// layer (the DOM plates, when the engine cannot run), so its image is
+// warmed after. Without createImageBitmap (older Safari) the engine draws
+// the decoded image itself.
+async function decode(source: string, priority: Priority, fetched: () => void) {
+  if (
+    DRAWN.includes(source) &&
+    typeof createImageBitmap === "function" &&
+    typeof fetch === "function"
+  ) {
+    try {
+      const response = await fetch(source, { priority });
+      if (!response.ok) throw new Error(String(response.status));
+      const blob = await response.blob();
+      fetched();
+      sources.set(source, await createImageBitmap(blob));
+    } catch {
+      fetched();
+      return false;
+    }
+    if (source === REXONANCE_SUIT_GOLD_ATLAS.src) return true;
+    return Boolean(await picture(source, priority, () => undefined));
+  }
+  const image = await picture(source, priority, fetched);
+  if (image && DRAWN.includes(source)) sources.set(source, image);
+  return Boolean(image);
 }
 
 function start(priority: Priority, oneByOne: boolean) {
@@ -160,14 +176,14 @@ export const rexonanceSuitSource = (source: string) => sources.get(source) ?? nu
  * load and in idle time: the call's own chunk first, then each layer one
  * at a time at low priority, then the engine's plan and canvases, sliced
  * into idle time. The same skips apply (Save-Data, 2G, reduced motion,
- * economy); /rexonance-saga itself, where the call does not play, waits
- * until the visitor leaves it (or for intent). Returns its cancel. */
+ * economy). On /rexonance-saga itself, where the call does not play until
+ * the visitor leaves and comes back, it waits a little longer, so the
+ * page's own artwork goes first. Returns its cancel. */
 export function scheduleRexonanceSuitWarm(
   pathname = typeof window === "undefined" ? "" : window.location.pathname,
-  delayMs = 300,
 ) {
   if (typeof window === "undefined" || ready || pending) return () => {};
-  if (pathname.startsWith("/rexonance-saga")) return () => {};
+  const delayMs = pathname.startsWith("/rexonance-saga") ? 900 : 300;
   let timer = 0;
   let idleId = 0;
   let cancelled = false;
