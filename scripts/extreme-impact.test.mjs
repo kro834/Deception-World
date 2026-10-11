@@ -276,6 +276,19 @@ test("the one-two plays on its hits: the punch stage holds no runway", () => {
     assert.ok(!timed(rule.body), target);
     assert.ok(!rule.context.some((at) => at.startsWith("@supports")), target);
   }
+  // rx15 pass 2: the time follows the punch (data-exi-chain), and until its
+  // hit the overdrive's dash on the same figure stands down; that dash's
+  // timeline is gone, so it held the figure drawn over the wait.
+  assert.match(
+    component,
+    /data-exi-hit=""\s+data-exi-line="mid"\s+data-exi-chain="380"\s*>\s*<i className="exi-streaks"/,
+  );
+  const standDown = rules.find(({ selector }) =>
+    selector.endsWith('article:nth-child(2):not([data-exi-hit="true"]) > strong'),
+  );
+  assert.ok(standDown);
+  assert.match(standDown.body, /^\s*animation: none;\s*$/);
+  assert.match(standDown.selector, FULL_GATE);
 });
 
 test("unreached arrivals are held back only while the engine is armed", () => {
@@ -507,6 +520,10 @@ class Node {
       return is ? this.matches(is[1]) : this.matchesCompound(part);
     });
   }
+  get nextElementSibling() {
+    const siblings = this.parentElement?.children ?? [];
+    return siblings[siblings.indexOf(this) + 1] ?? null;
+  }
   closest(selector) {
     if (this.matches(selector)) return this;
     return this.parentElement ? this.parentElement.closest(selector) : null;
@@ -569,6 +586,12 @@ function setup({ reduced = false, fine = true, loading = false, saveData = false
     { "data-exi-hit": "", "data-exi-line": "mid" },
     h("strong", {}, tally("205.6")),
   );
+  // rx15 pass 2: the time follows the punch as a combination.
+  const time = h("article", {
+    "data-exi-hit": "",
+    "data-exi-line": "mid",
+    "data-exi-chain": "380",
+  });
   const comparison = h("div", {
     class: "rxs-comparison",
     "data-exi-hit": "",
@@ -579,6 +602,7 @@ function setup({ reduced = false, fine = true, loading = false, saveData = false
     { class: "rxs-section", id: "performance" },
     heading,
     punch,
+    time,
     comparison,
   );
   const rail = h("div", { class: "rxs-stage-tabs exs-stage-tabs", "data-stage": "middle" });
@@ -665,6 +689,7 @@ function setup({ reduced = false, fine = true, loading = false, saveData = false
     rays,
     heading,
     punch,
+    time,
     comparison,
     panel,
     rail,
@@ -737,6 +762,53 @@ test("the engine arms the page, keys scenes it owns and lands a hit once, as a o
   // Unobserved after landing: a second crossing does nothing.
   assert.equal(t.live((o) => o.targets.has(t.heading)).length, 0);
   cleanup();
+});
+
+// rx15 pass 2: ROUND 1 lands as a one-two. The time used to answer only to
+// its own line, so a slow scroll showed it before the punch; it now follows
+// the punch by its own delay, and is still keyed by its line if reached first.
+test("a chained hit follows the one before it once, by its own delay, and never replays", () => {
+  const t = setup();
+  const cleanup = t.mount();
+  const mid = () => t.live((o) => /-45%/.test(o.options?.rootMargin ?? ""))[0];
+  assert.ok(mid().targets.has(t.time));
+  t.reach(t.punch);
+  assert.equal(t.punch.getAttribute("data-exi-hit"), "true");
+  assert.equal(t.time.getAttribute("data-exi-hit"), "");
+  t.tick(379);
+  assert.equal(t.time.getAttribute("data-exi-hit"), "");
+  t.tick(1);
+  assert.equal(t.time.getAttribute("data-exi-hit"), "true");
+  // Landed by the chain: its own line no longer watches it.
+  assert.equal(mid().targets.has(t.time), false);
+  t.tick(BEATS.hit);
+  assert.equal(t.time.getAttribute("data-exi-hit"), "done");
+  cleanup();
+
+  // Reached first on its own line, it lands there and the punch does not re-key it.
+  const u = setup();
+  const cleanupU = u.mount();
+  u.reach(u.time);
+  assert.equal(u.time.getAttribute("data-exi-hit"), "true");
+  u.tick(BEATS.hit);
+  u.reach(u.punch);
+  u.tick(400);
+  assert.equal(u.time.getAttribute("data-exi-hit"), "done");
+  cleanupU();
+
+  // A hidden page drops the pending follow-up; the time waits for its line again.
+  const v = setup();
+  const cleanupV = v.mount();
+  v.reach(v.punch);
+  v.document.hidden = true;
+  v.document.emit("visibilitychange");
+  v.tick(400);
+  assert.equal(v.time.getAttribute("data-exi-hit"), "");
+  v.document.hidden = false;
+  v.document.emit("visibilitychange");
+  assert.ok(v.live((o) => o.targets.has(v.time)).length > 0);
+  cleanupV();
+  assert.equal(v.timers.size, 0);
 });
 
 test("a tally counts up from zero over the owner's figure, lands on it and never runs twice", () => {

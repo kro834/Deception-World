@@ -167,10 +167,7 @@ test("keyframes are its own, move only opacity and transforms, end, and turn opa
   );
   assert.ok(used.size >= 8, String(used.size));
   for (const name of used)
-    assert.ok(
-      name.startsWith("exf-") && keyframes.some((frame) => frame.name === name),
-      name,
-    );
+    assert.ok(name.startsWith("exf-") && keyframes.some((frame) => frame.name === name), name);
 });
 
 test("every beat plays from a one-shot key behind every gate and ends by 2 s", () => {
@@ -188,7 +185,8 @@ test("every beat plays from a one-shot key behind every gate and ends by 2 s", (
         const times = [...layer.matchAll(/(\d+)ms/g)].map((match) => Number(match[1]));
         const [duration, ...offsets] = times;
         assert.ok(Number.isFinite(duration), `${selector}: ${layer}`);
-        const delay = offsets.reduce((sum, ms) => sum + ms, 0) + (/--exf-row/.test(layer) ? ROW : 0);
+        const delay =
+          offsets.reduce((sum, ms) => sum + ms, 0) + (/--exf-row/.test(layer) ? ROW : 0);
         assert.ok(duration <= 1500, `${selector}: ${layer}`);
         assert.ok(duration + delay <= 2000, `${selector}: ${layer}`);
         beats += 1;
@@ -199,9 +197,7 @@ test("every beat plays from a one-shot key behind every gate and ends by 2 s", (
   // The engine's key outlives the latest beat it starts.
   assert.ok(CLASH_MS >= ROW + 400 + 520, String(CLASH_MS));
   // The rules that stand the overdrive's comparator beats down only stop.
-  const stops = rules.filter(
-    ({ body }) => declarations(body, "animation").length && !moving(body),
-  );
+  const stops = rules.filter(({ body }) => declarations(body, "animation").length && !moving(body));
   assert.ok(stops.length >= 2);
   for (const { selector } of stops)
     for (const part of splitTopLevel(selector)) assert.match(part, FULL_GATE, part);
@@ -212,7 +208,9 @@ test("unreached beats are held back only while an engine waits on them", () => {
   const rows = rules.filter(({ selector }) => /\[data-exf-clash=""\]/.test(selector));
   assert.equal(rows.length, 2);
   // The sliver: only while the IMPACT engine is armed and the stage unreached.
-  const sliver = rules.filter(({ selector }) => /#exs-stage-panel\[data-exi-hit=""\]/.test(selector));
+  const sliver = rules.filter(({ selector }) =>
+    /#exs-stage-panel\[data-exi-hit=""\]/.test(selector),
+  );
   assert.equal(sliver.length, 2);
   for (const { selector, context, body } of [...rows, ...sliver]) {
     assert.ok(context.includes("@media (prefers-reduced-motion: no-preference)"), selector);
@@ -220,8 +218,17 @@ test("unreached beats are held back only while an engine waits on them", () => {
     for (const part of splitTopLevel(selector)) assert.match(part, FULL_GATE, part);
   }
   for (const { selector } of sliver) assert.match(selector, /\[data-exi-armed="true"\]/);
+  // Pass 2: the end card's billing waits off the slab until the card is reached.
+  const billing = rules.filter(({ selector }) =>
+    /> \.rxs-footer\[data-exi-hit=""\] > \.exf-billing$/.test(selector),
+  );
+  assert.equal(billing.length, 1);
+  assert.match(billing[0].body, /^\s*opacity: 0;\s*$/);
+  assert.match(billing[0].selector, FULL_GATE);
+  assert.match(billing[0].selector, /\[data-exi-armed="true"\]/);
+  assert.ok(billing[0].context.includes("@media (prefers-reduced-motion: no-preference)"));
   // Nothing else waits on a scene key.
-  assert.equal(rules.filter(({ selector }) => /data-exi-hit=""/.test(selector)).length, 2);
+  assert.equal(rules.filter(({ selector }) => /data-exi-hit=""/.test(selector)).length, 3);
 });
 
 test("the seam's art stands still while it travels, and always shows the other form", () => {
@@ -268,7 +275,9 @@ test("the seam's art stands still while it travels, and always shows the other f
           `${box}/${art} ${step} @${s}`,
         );
     for (const form of ["middle", "ultra"])
-      assert.ok(Math.abs(evaluate(rest(form, false), s) * 2 + evaluate(rest(form, true), s)) < 1e-9);
+      assert.ok(
+        Math.abs(evaluate(rest(form, false), s) * 2 + evaluate(rest(form, true), s)) < 1e-9,
+      );
     // Each journey ends where its form rests; a change of form starts where the
     // other form rested (the seam the reader saw).
     assert.equal(frames["exf-seam-ultra"][1], rest("ultra", false));
@@ -298,6 +307,83 @@ test("the seam's art stands still while it travels, and always shows the other f
   const blades = rules.filter(({ body }) => /exf-blade/.test(body));
   assert.equal(blades.length, 1);
   assert.match(blades[0].selector, /figure\[data-form="ultra"\]\[data-exi-impact="true"\]/);
+  // Pass 2: the overdrive's clipped wipe of the art never plays, before or
+  // after the quake (as the impact key retired, the image fell back to the
+  // wipe and was wiped in a second time a second after the change).
+  const wipe = rules.find(({ selector }) =>
+    selector.endsWith(
+      '#exs-stage-panel[data-exo-cut="true"] > figure:not([data-exi-impact="true"]) > img',
+    ),
+  );
+  assert.ok(wipe);
+  assert.match(wipe.body, /^\s*animation: none;\s*$/);
+  assert.match(wipe.selector, FULL_GATE);
+});
+
+// Pass 2: the corners. On wide screens the form switch stands inside the duel
+// at the head of its copy column; the rows are shared through subgrid, the
+// markup keeps its order, and without subgrid the tabs stand above the scene.
+test("on wide screens the form switch stands inside the duel, in markup order, on the wrap", () => {
+  const corner = rules.filter(({ context }) =>
+    context.some((at) => at === "@supports (grid-template-rows: subgrid)"),
+  );
+  assert.ok(corner.length >= 6, String(corner.length));
+  for (const { selector, context } of corner)
+    assert.ok(context.includes("@media (min-width: 1100px)"), selector);
+  const find = (end) => corner.find(({ selector }) => selector.endsWith(end));
+  const switcher = find("> #stages .rxs-stage-switcher");
+  assert.match(switcher.body, /grid-template-rows: auto auto minmax\(0, 1fr\);/);
+  assert.match(
+    switcher.body,
+    /--exf-corner: max\(var\(--ext-gutter\), calc\(\(100vw - var\(--dxs-wrap\)\) \/ 2\)\);/,
+  );
+  const tabs = find("> .rxs-stage-tabs.liquid-swipe-tabs");
+  const hint = find("> .rxs-stage-hint");
+  for (const [rule, row] of [
+    [tabs, 1],
+    [hint, 2],
+  ]) {
+    assert.match(rule.body, new RegExp(`grid-column: 1;\\s*grid-row: ${row};`));
+    assert.match(rule.body, /z-index: 5;/);
+    assert.match(rule.body, /var\(--exf-corner\)/);
+  }
+  const panel = find("> #stages #exs-stage-panel");
+  assert.match(
+    panel.body,
+    /grid-row: 1 \/ -1;\s*grid-template-columns: subgrid;\s*grid-template-rows: subgrid;/,
+  );
+  assert.match(find("#exs-stage-panel > figure").body, /grid-column: 2;\s*grid-row: 1 \/ -1;/);
+  assert.match(find("#exs-stage-panel > div").body, /grid-column: 1;\s*grid-row: 3;/);
+  // Geometry only: no motion rides the corners.
+  for (const { body } of corner) assert.doesNotMatch(body, /animation|transition/);
+  // The markup order the rail, the panel and the tests read is unchanged.
+  const order = [
+    "ref={stageTabsRef}",
+    'id="exs-stage-hint" className="rxs-stage-hint"',
+    'id="exs-stage-panel"',
+  ].map((needle) => component.indexOf(needle));
+  assert.ok(order[0] > 0 && order[0] < order[1] && order[1] < order[2], String(order));
+});
+
+// Pass 2: the cuts between rounds are one bell, not a long walk.
+test("the cuts between rounds keep the slant's runway and lose the long walk", () => {
+  const atTop = (end, property) =>
+    rules.find(
+      ({ selector, body, context }) =>
+        !context.length && selector.endsWith(end) && new RegExp(`${property}:`).test(body),
+    );
+  assert.match(
+    atTop("> :is(#performance, #p14, #stages, #system)", "padding-top").body,
+    /padding-top: calc\(clamp\(48px, 6\.2vw, 92px\) \+ var\(--ext-slant\)\);/,
+  );
+  assert.match(
+    atTop("> :is(#performance, #p14, #system)", "padding-bottom").body,
+    /padding-bottom: clamp\(56px, 7\.4vw, 108px\);/,
+  );
+  assert.match(
+    atTop(" > .rxs-footer", "padding-top").body,
+    /padding-top: calc\(clamp\(64px, 8vw, 116px\) \+ var\(--ext-slant\)\);/,
+  );
 });
 
 test("12px floor, no !important, no blur, glow or blend, silent generated text", () => {
@@ -332,8 +418,15 @@ test("forced colours drop the ornaments and keep the figures; reduced transparen
 });
 
 test("the component adds only silent boxes, keeps one image per form and the owner's figures", () => {
-  // The billing and the other form beyond the seam are silent.
-  assert.match(component, /<b className="exf-billing" aria-hidden="true">\s*EXTREME\s*<\/b>/);
+  // The billing (the poster's, and the end card's answer) and the other form
+  // beyond the seam are silent.
+  const billings = [
+    ...component.matchAll(/<b className="exf-billing" aria-hidden="true">\s*EXTREME\s*<\/b>/g),
+  ];
+  assert.equal(billings.length, 2);
+  const footer = component.slice(component.indexOf('<footer className="rxs-footer">'));
+  assert.ok(billings[1].index > component.indexOf('<footer className="rxs-footer">'));
+  assert.ok(footer.indexOf("exf-billing") < footer.indexOf("<h2>"));
   const figure = component.match(
     /<figure key=\{shownStage\} data-form=\{shownStage\}>[\s\S]*?<\/figure>/,
   )?.[0];
@@ -565,8 +658,14 @@ test("the engine stands down for reduced motion, economy rendering, the load gat
   assert.equal(second.getAttribute("data-exf-clash"), "");
   assert.equal(t.live(t.comparison).length, 1);
   cleanup();
-  assert.equal(t.watchers.every((watcher) => watcher.disconnected), true);
-  assert.equal(t.observers.every((observer) => observer.disconnected), true);
+  assert.equal(
+    t.watchers.every((watcher) => watcher.disconnected),
+    true,
+  );
+  assert.equal(
+    t.observers.every((observer) => observer.disconnected),
+    true,
+  );
   assert.equal(second.getAttribute("data-exf-clash"), null);
   assert.equal(t.document.listeners.size, 0);
   assert.equal(t.environment.listeners.size, 0);

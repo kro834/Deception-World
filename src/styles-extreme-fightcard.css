@@ -25,6 +25,10 @@
      the lines ignite white-hot for Ultra and cool back for Middle. The
      other form's art is this sheet's backdrop of a silent box in the
      figure, so the figure keeps one image.
+   - The corners: on wide screens the form switch stands inside the duel,
+     at the head of its copy column (subgrid; the markup keeps its order).
+   - The cuts between rounds are one bell, not a long walk; the end card
+     answers the poster with the same billing, inked into the gold.
 
    Loaded on /extreme-saga after the IMPACT sheet and before the cinematic
    sheet, scoped to html[data-family="special"] and the doubled Extreme
@@ -59,13 +63,29 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page {
 }
 
 /* ================================================================
-   Bout plates: the round number on a gold plate under its label
+   The cuts between rounds: one bell, not a long walk (pass 2). The STAGE
+   scenes left 330px of ink between rounds on a wide screen and 190px on a
+   phone; the slant keeps its own runway on top.
    ================================================================ */
 html[data-family="special"]
   body
   .rxs-page.rxs-page.exs-page
-  > .rxs-section
-  > .rxs-section-heading {
+  > :is(#performance, #p14, #stages, #system) {
+  padding-top: calc(clamp(48px, 6.2vw, 92px) + var(--ext-slant));
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.exs-page > :is(#performance, #p14, #system) {
+  padding-bottom: clamp(56px, 7.4vw, 108px);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer {
+  padding-top: calc(clamp(64px, 8vw, 116px) + var(--ext-slant));
+}
+
+/* ================================================================
+   Bout plates: the round number on a gold plate under its label
+   ================================================================ */
+html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-section > .rxs-section-heading {
   grid-template-rows: auto auto;
   align-items: end;
 }
@@ -83,8 +103,7 @@ html[data-family="special"]
   font: 700 clamp(38px, 4.6vw, 66px) / 0.9 var(--dx-mono);
   letter-spacing: -0.01em;
   -webkit-text-stroke: 0;
-  background:
-    linear-gradient(180deg, #fff3cf, var(--ext-gold) 46%, #d99a3a);
+  background: linear-gradient(180deg, #fff3cf, var(--ext-gold) 46%, #d99a3a);
   clip-path: polygon(0 0, 100% 0, calc(100% - 0.26em) 100%, 0 100%);
 }
 
@@ -265,8 +284,16 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-inde
 /* ================================================================
    Screentone: the print of the manga panels
    ================================================================ */
-html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-hero > .rxs-hero-ambient::before,
-html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-hero > .rxs-hero-ambient::after {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > .exs-hero
+  > .rxs-hero-ambient::before,
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > .exs-hero
+  > .rxs-hero-ambient::after {
   content: "";
   position: absolute;
   display: block;
@@ -278,12 +305,20 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-hero > .rxs-
   pointer-events: none;
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-hero > .rxs-hero-ambient::before {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > .exs-hero
+  > .rxs-hero-ambient::before {
   bottom: -18%;
   left: -12%;
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-hero > .rxs-hero-ambient::after {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > .exs-hero
+  > .rxs-hero-ambient::after {
   top: -22%;
   right: -10%;
 }
@@ -312,6 +347,25 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-hero > .exf-
     top: clamp(40px, 9svh, 120px);
     font-size: clamp(64px, 22vw, 220px);
   }
+}
+
+/* The end card answers the poster: the same billing across the foot of the
+   gold slab, inked, standing on its edge. */
+html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer > .exf-billing {
+  position: absolute;
+  z-index: -1;
+  bottom: -0.1em;
+  left: 50%;
+  display: block;
+  margin: 0;
+  color: transparent;
+  font: 400 clamp(72px, 19vw, 300px) / 1 var(--dx-hud);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  -webkit-text-stroke: 1.5px rgb(5 4 3 / 22%);
+  translate: -50% 0;
+  pointer-events: none;
+  user-select: none;
 }
 
 /* ================================================================
@@ -588,7 +642,12 @@ html[data-family="special"]
   rotate: 45deg;
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.exs-page > #performance .rxs-comparison > .rxs-comparison-selector {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #performance
+  .rxs-comparison
+  > .rxs-comparison-selector {
   grid-column: 2;
   grid-row: 1;
   align-self: stretch;
@@ -649,7 +708,12 @@ html[data-family="special"]
   box-shadow: none;
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.exs-page > #performance .rxs-comparison > .rxs-comparison-formula {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #performance
+  .rxs-comparison
+  > .rxs-comparison-formula {
   grid-row: 2;
   justify-self: center;
   margin: clamp(14px, 1.6vw, 20px) 0 clamp(6px, 1vw, 12px);
@@ -670,7 +734,12 @@ html[data-family="special"]
 }
 
 /* The rows: a clash each. */
-html[data-family="special"] body .rxs-page.rxs-page.exs-page > #performance .rxs-comparison > .rxs-comparison-metrics {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #performance
+  .rxs-comparison
+  > .rxs-comparison-metrics {
   grid-row: 3;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -829,7 +898,12 @@ html[data-family="special"]
    share of the two bar widths (each keeps its own width as its basis and
    both shrink in proportion). The fills are the bars' ::before, the burst
    where they meet Extreme's ::after, so the bars themselves never move. */
-html[data-family="special"] body .rxs-page.rxs-page.exs-page > #performance .rxs-comparison .rxs-bars {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #performance
+  .rxs-comparison
+  .rxs-bars {
   position: relative;
   display: flex;
   flex-wrap: nowrap;
@@ -1176,7 +1250,12 @@ html[data-family="special"]
     padding-right: 30px;
   }
 
-  html[data-family="special"] body .rxs-page.rxs-page.exs-page > #performance .rxs-comparison > .rxs-comparison-selector {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #performance
+    .rxs-comparison
+    > .rxs-comparison-selector {
     grid-column: 1;
     grid-row: 2;
     min-height: 0;
@@ -1196,7 +1275,12 @@ html[data-family="special"]
     text-align: start;
   }
 
-  html[data-family="special"] body .rxs-page.rxs-page.exs-page > #performance .rxs-comparison > .rxs-comparison-metrics {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #performance
+    .rxs-comparison
+    > .rxs-comparison-metrics {
     grid-row: 4;
   }
 
@@ -1265,7 +1349,6 @@ html[data-family="special"]
   html[data-family="special"] body .rxs-page.rxs-page.exs-page > #p14 .rxs-p14-overview figure {
     width: min(78%, 300px);
   }
-
 }
 
 /* From a large phone up the two processors read side by side. */
@@ -1354,7 +1437,12 @@ html[data-family="special"]
    its art box is the figure's own, turned back by the same slant and
    moved back by the same distance, so the art stands still while the
    seam travels. */
-html[data-family="special"] body .rxs-page.rxs-page.exs-page #exs-stage-panel > figure > .exf-rival {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  #exs-stage-panel
+  > figure
+  > .exf-rival {
   position: absolute;
   z-index: 2;
   top: 0;
@@ -1575,6 +1663,75 @@ html[data-family="special"]
   display: none;
 }
 
+/* The corners (pass 2): on wide screens the form switch stands inside the
+   duel, at the head of its copy column, so choosing a form, its words and
+   the colossus are one frame. The switcher's rows (the tabs, the hint,
+   the rest) are shared with the panel and its copy through subgrid; the
+   tabs and the hint keep their place in the markup and simply overlap the
+   panel's ink half. Every column starts on the page's wrap. */
+@supports (grid-template-rows: subgrid) {
+  @media (min-width: 1100px) {
+    html[data-family="special"] body .rxs-page.rxs-page.exs-page > #stages .rxs-stage-switcher {
+      grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr);
+      grid-template-rows: auto auto minmax(0, 1fr);
+      --exf-corner: max(var(--ext-gutter), calc((100vw - var(--dxs-wrap)) / 2));
+    }
+
+    html[data-family="special"]
+      body
+      .rxs-page.rxs-page.exs-page
+      > #stages
+      .rxs-stage-switcher
+      > .rxs-stage-tabs.liquid-swipe-tabs {
+      grid-column: 1;
+      grid-row: 1;
+      align-self: start;
+      position: relative;
+      z-index: 5;
+      width: min(440px, calc(100% - var(--exf-corner) - 24px));
+      margin: clamp(36px, 6svh, 64px) 0 10px var(--exf-corner);
+    }
+
+    html[data-family="special"]
+      body
+      .rxs-page.rxs-page.exs-page
+      > #stages
+      .rxs-stage-switcher
+      > .rxs-stage-hint {
+      grid-column: 1;
+      grid-row: 2;
+      position: relative;
+      z-index: 5;
+      margin: 0 0 0 var(--exf-corner);
+    }
+
+    html[data-family="special"] body .rxs-page.rxs-page.exs-page > #stages #exs-stage-panel {
+      grid-column: 1 / -1;
+      grid-row: 1 / -1;
+      grid-template-columns: subgrid;
+      grid-template-rows: subgrid;
+    }
+
+    html[data-family="special"]
+      body
+      .rxs-page.rxs-page.exs-page
+      > #stages
+      #exs-stage-panel
+      > figure {
+      grid-column: 2;
+      grid-row: 1 / -1;
+    }
+
+    html[data-family="special"] body .rxs-page.rxs-page.exs-page > #stages #exs-stage-panel > div {
+      grid-column: 1;
+      grid-row: 3;
+      align-self: center;
+      padding: clamp(24px, 3vw, 40px) clamp(12px, 2vw, 32px) clamp(40px, 5vw, 72px)
+        var(--exf-corner);
+    }
+  }
+}
+
 @media (max-width: 1099.98px) {
   html[data-family="special"] body .rxs-page.rxs-page.exs-page > #stages #exs-stage-panel {
     grid-template-columns: minmax(0, 1fr);
@@ -1648,6 +1805,28 @@ html[data-family="special"]
     > .exs-hero
     > .exf-billing {
     animation: exf-bill 900ms var(--exi-out) 260ms both;
+  }
+
+  /* The end card's billing waits off the slab, then slides in under its
+     headline. */
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"][data-exi-armed="true"]
+    > .rxs-footer[data-exi-hit=""]
+    > .exf-billing {
+    opacity: 0;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    > .rxs-footer[data-exi-hit="true"]
+    > .exf-billing {
+    animation: exf-bill-end 900ms var(--exi-out) 160ms both;
   }
 
   /* The bout plate is punched in as its round arrives. */
@@ -1773,7 +1952,6 @@ html[data-family="special"]
     --exf-row: 270ms;
   }
 
-
   /* The duel. The other form's sliver waits beyond the edge until the
      stage is reached, then slides in. */
   html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
@@ -1820,6 +1998,21 @@ html[data-family="special"]
     > .exf-rival
     > span {
     animation: exf-sliver-in-art 620ms var(--exi-out) 200ms both;
+  }
+
+  /* The overdrive's clipped wipe of the art never plays: the seam carries
+     the change (before and after the art's quake, which would otherwise
+     hand the image back to the wipe as its key retires and wipe it in a
+     second time). */
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    #exs-stage-panel[data-exo-cut="true"]
+    > figure:not([data-exi-impact="true"])
+    > img {
+    animation: none;
   }
 
   /* A change of form drives the seam across the whole body; on the way
@@ -1891,6 +2084,17 @@ html[data-family="special"]
   from {
     opacity: 0;
     transform: translateX(-9%) scaleX(1.12);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes exf-bill-end {
+  from {
+    opacity: 0;
+    transform: translateX(9%) scaleX(1.12);
   }
   to {
     opacity: 1;
@@ -2030,8 +2234,17 @@ html[data-family="special"]
     background: none;
   }
 
-  html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-hero > .exf-billing,
-  html[data-family="special"] body .rxs-page.rxs-page.exs-page #exs-stage-panel > figure > .exf-rival,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > :is(.exs-hero, .rxs-footer)
+    > .exf-billing,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    #exs-stage-panel
+    > figure
+    > .exf-rival,
   html[data-family="special"]
     body
     .rxs-page.rxs-page.exs-page

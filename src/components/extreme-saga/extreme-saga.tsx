@@ -310,7 +310,12 @@ const ExtremePerformance = memo(function ExtremePerformance() {
             </strong>
             <p>標準状態のパンチ力</p>
           </article>
-          <article className="rxs-reveal" data-exi-hit="" data-exi-line="mid">
+          <article
+            className="rxs-reveal"
+            data-exi-hit=""
+            data-exi-line="mid"
+            data-exi-chain="380"
+          >
             <i className="exi-streaks" aria-hidden="true">
               <svg
                 viewBox="0 0 200 100"
@@ -950,6 +955,11 @@ export function ExtremeSaga() {
             <use href="#exi-rays" x="-100" y="-100" width="200" height="200" />
           </svg>
         </i>
+        {/* FIGHT CARD (rx15): the poster's billing again, inked into the
+            gold slab. */}
+        <b className="exf-billing" aria-hidden="true">
+          EXTREME
+        </b>
         <div>
           <p>EXTREME SAGA / SUPREME ARRIVAL</p>
           <h2>
