@@ -15,7 +15,8 @@
    land, the HIGH stamp when the call completes), a prism stage behind.
 
    Layout: pinned (a tall runway, a sticky frame) under the persistent
-   preferences only — motion allowed, not economy, forced colours off —
+   preferences only — motion allowed, not economy, forced colours off,
+   and the pre-layout Save-Data/2G snapshot allows a long runway —
    so the menu or a dialog never moves the page. Everywhere else the
    scene is one screen with the finished figure and every line lit.
    Motion: opacity and transforms only, finite transitions answering
@@ -779,14 +780,14 @@ html[data-family="special"]
    Layout: the pinned runway (persistent preferences only)
    ================================================================ */
 @media (prefers-reduced-motion: no-preference) and (forced-colors: none) {
-  html[data-family="special"]:not([data-world-effects="economy"])
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-rzn-constrained])
     body
     .rxs-page.rxs-page.rxs-rexonance-page
     > .rzn-suitup {
     height: max(1700px, 300svh);
   }
 
-  html[data-family="special"]:not([data-world-effects="economy"])
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-rzn-constrained])
     body
     .rxs-page.rxs-page.rxs-rexonance-page
     > .rzn-suitup
@@ -798,7 +799,7 @@ html[data-family="special"]
 
 @media (prefers-reduced-motion: no-preference) and (forced-colors: none) and (max-width: 760px),
   (prefers-reduced-motion: no-preference) and (forced-colors: none) and (max-width: 1099.98px) and (orientation: portrait) {
-  html[data-family="special"]:not([data-world-effects="economy"])
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-rzn-constrained])
     body
     .rxs-page.rxs-page.rxs-rexonance-page
     > .rzn-suitup {
