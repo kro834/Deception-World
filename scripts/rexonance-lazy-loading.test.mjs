@@ -77,3 +77,20 @@ for (const reason of ["deadline", "cancel"]) {
     assert.equal(await prepare().promise, renderer);
   });
 }
+
+test("rx17: prefetch starts the same import ahead of the call; a failure still retries", async () => {
+  let imports = 0;
+  const renderer = () => null;
+  const prepare = createRexonanceTransitionLoader(() => {
+    imports++;
+    if (imports === 1) return Promise.reject(new Error("offline"));
+    return Promise.resolve({ RexonanceCallSequence: renderer });
+  });
+  assert.equal(imports, 0, "nothing until asked");
+  assert.equal(await prepare.prefetch(), null, "a failed prefetch resolves empty");
+  const module = await prepare.prefetch();
+  assert.equal(module.RexonanceCallSequence, renderer);
+  // The call then finds it ready, without a second request.
+  assert.equal(await prepare().promise, renderer);
+  assert.equal(imports, 2);
+});

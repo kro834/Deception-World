@@ -20,6 +20,7 @@ import {
 import {
   REXONANCE_SUIT_ASSETS,
   REXONANCE_SUIT_ATLAS,
+  REXONANCE_SUIT_GOLD_ATLAS,
   REXONANCE_SUIT_TILE,
   REXONANCE_SUIT_FACE_GLOW,
   REXONANCE_SUIT_FIGURE,
@@ -672,7 +673,9 @@ test("rx12/rx13: the raster suit — the artwork's plates, delivery-sized, decod
     assert.match(file, /^\/rexonance-suit-\d{8}\/[\w-]+\.webp$/);
     const path = new URL(`../public${file}`, import.meta.url);
     assert.ok(existsSync(path), file);
-    bytes += statSync(path).size;
+    // rx17 (owner request 2026-10-11): the gold atlas has its own budget
+    // (scripts/rexonance-gold.test.mjs); the rx12/rx13 set keeps its own.
+    if (file !== REXONANCE_SUIT_GOLD_ATLAS.src) bytes += statSync(path).size;
   }
   const directory = new URL(
     `../public${REXONANCE_SUIT_FIGURE.replace(/\/[^/]+$/, "")}/`,
