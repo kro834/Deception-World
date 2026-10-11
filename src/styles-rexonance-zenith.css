@@ -409,12 +409,15 @@ html[data-family="special"]
   box-shadow: 0 0 0 3px rgb(var(--rzn-pink) / 18%);
 }
 
+/* The stamp lands under the parts, high in the column: the Zeus button
+   keeps the frame's bottom right corner. */
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-stamp {
-  grid-row: 5;
+  grid-row: 4;
+  align-self: start;
   display: grid;
   justify-items: end;
   gap: 4px;
-  margin: 0;
+  margin: clamp(18px, 3.4vh, 34px) 0 0;
   color: var(--dx-text-2);
   font: 400 12px / 1.4 var(--dx-hud);
   letter-spacing: 0.24em;
@@ -602,20 +605,24 @@ html[data-family="special"]
     text-align: start;
   }
 
-  /* The parts in one row above the read-out. */
+  /* The parts in two rows above the read-out, clear of the Zeus button's
+     column at the right (it sits level with them on short phones). */
   html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-parts {
     grid-column: 1 / -1;
     grid-row: 1;
-    grid-template-columns: repeat(3, auto);
+    grid-template-columns: repeat(3, max-content);
     justify-content: start;
     width: 100%;
-    gap: 4px 16px;
+    max-width: calc(100% - 84px);
+    gap: 4px clamp(10px, 3.4vw, 16px);
     margin: 0;
   }
 
+  /* Cell first, name after, each at the start of its column (in a
+     reversed row the start is flex-end). */
   html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-part {
     flex-direction: row-reverse;
-    justify-content: flex-start;
+    justify-content: flex-end;
     gap: 4px;
     letter-spacing: 0.06em;
   }
@@ -654,6 +661,7 @@ html[data-family="special"]
   html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-stamp {
     grid-column: 3;
     grid-row: 2;
+    align-self: end;
     justify-items: end;
     margin: 0 0 4px;
   }
@@ -678,6 +686,57 @@ html[data-family="special"]
 
   html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-hint {
     margin-top: 10px;
+  }
+}
+
+/* Narrow phones: the read-out row (percent, nanites, stamp) fits 320px. */
+@media (max-width: 420px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rzn-suitup
+    .rzn-readout {
+    font-size: clamp(40px, 12.5vw, 50px);
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-hud {
+    column-gap: 8px;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rzn-suitup
+    .rzn-nanites
+    > small {
+    letter-spacing: 0.12em;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rzn-suitup
+    .rzn-stamp
+    > b {
+    padding: 3px 8px 2px;
+    font-size: 13px;
+  }
+}
+
+/* The narrowest phones: the parts take two columns (three rows) to stay
+   clear of the Zeus button, and the figure stands a little higher. */
+@media (max-width: 349.98px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rzn-suitup
+    > .rzn-frame {
+    --rzn-fig-h: 0.55;
+    --rzn-fig-b: 0.21;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-parts {
+    grid-template-columns: repeat(2, max-content);
   }
 }
 
@@ -1682,7 +1741,11 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #system
 }
 
 /* The phase axis: the line the three marks come to stand on. */
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #system > .rzn-trinity::before {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #system
+  > .rzn-trinity::before {
   content: "";
   position: absolute;
   top: 0;
@@ -1694,7 +1757,11 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #system
 }
 
 /* A faint horizon through the core. */
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #system > .rzn-trinity::after {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #system
+  > .rzn-trinity::after {
   content: "";
   position: absolute;
   top: 50%;
@@ -1713,7 +1780,12 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #system
 
 /* Each system: a carrier at the centre (it travels), the ring on it
    (it takes its radius and turns). */
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #system > .rzn-trinity > .rzn-tri {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #system
+  > .rzn-trinity
+  > .rzn-tri {
   --rzn-c: var(--rzn-ice);
   --rzn-r: 0.17;
   --rzn-x: -0.14;
@@ -1850,7 +1922,12 @@ html[data-family="special"]
   height: 12px;
   margin: -6px 0 0 -6px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgb(var(--rzn-white)), rgb(var(--rzn-ice)) 60%, rgb(var(--rzn-violet)));
+  background: radial-gradient(
+    circle,
+    rgb(var(--rzn-white)),
+    rgb(var(--rzn-ice)) 60%,
+    rgb(var(--rzn-violet))
+  );
   box-shadow:
     0 0 18px rgb(var(--rzn-ice) / 80%),
     0 0 40px rgb(var(--rzn-violet) / 40%);

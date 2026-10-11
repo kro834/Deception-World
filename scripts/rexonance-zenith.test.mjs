@@ -692,13 +692,20 @@ test("near the view it goes live, scrubs with the scroll, writes the HUD on chan
 
 test("04: the trinity is a scene — three rings fall into phase, at rest locked", () => {
   // Decorative, one ring per system, drawn from the systems' own list.
-  const trinity = page.match(/<div className="rzn-trinity" aria-hidden="true">[\s\S]*?<\/div>/)?.[0];
+  const trinity = page.match(
+    /<div className="rzn-trinity" aria-hidden="true">[\s\S]*?<\/div>/,
+  )?.[0];
   assert.ok(trinity);
   assert.match(trinity, /CORE_SYSTEMS\.map\(\(system\) => \(/);
   assert.match(trinity, /<b>\{system\.number\}<\/b>/);
-  assert.ok(page.indexOf('className="rzn-trinity"') < page.indexOf('<div className="rxs-system-grid">'));
+  assert.ok(
+    page.indexOf('className="rzn-trinity"') < page.indexOf('<div className="rxs-system-grid">'),
+  );
   // Its time-based fallback rides the RESONANCE scene flag.
-  assert.match(read("src/lib/rexonance-resonance.js"), /const SCENES =\s*"[^"]*\.rzn-trinity[^"]*";/);
+  assert.match(
+    read("src/lib/rexonance-resonance.js"),
+    /const SCENES =\s*"[^"]*\.rzn-trinity[^"]*";/,
+  );
   // The rest is the finished picture: no base rule moves a ring; the
   // motion lives only in the gated rules (checked above).
   const base = sheet.rules.filter(
@@ -719,8 +726,26 @@ test("04: the trinity is a scene — three rings fall into phase, at rest locked
   );
   assert.equal(scroll.length, 6);
   // Wide screens set the rings beside the heading, in its grid row.
-  assert.match(
-    css,
-    /> #system > \.rzn-trinity \{[^}]*grid-area: 1 \/ 1;[^}]*justify-self: end;/,
+  assert.match(css, /> #system > \.rzn-trinity \{[^}]*grid-area: 1 \/ 1;[^}]*justify-self: end;/);
+});
+
+test("the suit-up's read-out keeps clear of the Zeus button", () => {
+  // Desktop: the stamp lands under the parts, high in the column, never in
+  // the frame's bottom right corner where the button sits.
+  const stamp = sheet.rules.find(
+    ({ selector, context }) => /> \.rzn-suitup \.rzn-stamp$/.test(selector) && !context.length,
+  );
+  assert.match(stamp.body, /grid-row: 4;/);
+  assert.match(stamp.body, /align-self: start;/);
+  // Stacked: the parts stop short of the button's column; the narrowest
+  // phones take two columns.
+  const parts = sheet.rules.filter(({ selector }) => /> \.rzn-suitup \.rzn-parts$/.test(selector));
+  assert.ok(parts.some(({ body }) => /max-width: calc\(100% - 84px\);/.test(body)));
+  assert.ok(
+    parts.some(
+      ({ body, context }) =>
+        /repeat\(2, max-content\)/.test(body) &&
+        context.some((at) => /max-width: 349\.98px/.test(at)),
+    ),
   );
 });
