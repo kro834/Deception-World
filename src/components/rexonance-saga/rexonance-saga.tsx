@@ -666,7 +666,9 @@ function FormMorph({
           const nw = image.naturalWidth || 1;
           const nh = image.naturalHeight || 1;
           if (source.startsWith("panel:")) {
-            const scale = Math.max(W / nw, H / nh);
+            // The panel's own object-fit (contain on this page): drawn any
+            // other way, the change showed the art enlarged (owner, 2026-10-12).
+            const scale = (style.objectFit === "cover" ? Math.max : Math.min)(W / nw, H / nh);
             c.drawImage(
               image,
               (W - nw * scale) * (px ?? 0.5),
