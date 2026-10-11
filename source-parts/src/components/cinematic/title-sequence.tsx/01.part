@@ -725,31 +725,8 @@ export function TitleSequence() {
     if (divePrimeTimerRef.current) primeDiveNow();
   };
 
-  // ENTER is available from the first painted frame. During the reveal,
-  // use the ordinary guarded route cover rather than measuring the unseen
-  // final logo or forcing visitors to wait for the seven-second sequence.
-  const enterBeforeTitleCompletes = useCallback(async () => {
-    finish();
-    phaseRef.current = "diving";
-    setPhase("diving");
-    try {
-      await go({ to: "/world", assets: WORLD_ENTER_ASSETS });
-    } catch {
-      // The same cancellation recovery as the full cinematic handoff.
-    } finally {
-      if (mountedRef.current && window.location.pathname === "/") {
-        phaseRef.current = "complete";
-        setPhase("complete");
-      }
-    }
-  }, [finish, go]);
-
   const enterWorld = useCallback(async () => {
-    if (phaseRef.current === "diving") return;
-    if (phaseRef.current !== "complete") {
-      void enterBeforeTitleCompletes();
-      return;
-    }
+    if (phaseRef.current !== "complete") return;
 
     const logo = logoRef.current;
     const hud = hudRef.current;
@@ -798,7 +775,7 @@ export function TitleSequence() {
         setPhase("complete");
       }
     }
-  }, [beginOpeningHandoff, economyOpening, enterBeforeTitleCompletes, go]);
+  }, [beginOpeningHandoff, economyOpening, go]);
 
   useEffect(() => {
     const restoreTitleIfNeeded = () => {
@@ -981,7 +958,7 @@ export function TitleSequence() {
       }
       aria-label="仮面ライダーサーガ Deception World オープニング"
       aria-busy={isWorldTransitioning}
-      data-opening-entry={isWorldTransitioning ? "leaving" : "ready"}
+      data-opening-entry={isWorldTransitioning ? "leaving" : phase === "complete" ? "ready" : "pending"}
     >
       <div className="cine-camera" aria-hidden="true">
         <video
@@ -1119,18 +1096,14 @@ export function TitleSequence() {
 
       <div
         className="cine-chrome cine-replay-slot absolute inset-x-0 flex justify-center gap-3"
-        aria-hidden={isWorldTransitioning}
+        aria-hidden={phase !== "complete"}
       >
         <button
           ref={enterRef}
           type="button"
           className="cine-btn cine-btn-primary"
-          disabled={isWorldTransitioning}
-          aria-label={
-            phase === "complete"
-              ? "ディセプションワールドへ入る"
-              : "オープニングを待たずにディセプションワールドへ入る"
-          }
+          disabled={phase !== "complete"}
+          aria-label="ディセプションワールドへ入る"
           onPointerDown={primeDive}
           onPointerUp={primeDivePending}
           onPointerCancel={cancelDivePrime}

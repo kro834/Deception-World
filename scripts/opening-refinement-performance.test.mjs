@@ -204,6 +204,7 @@ function entryRuntime({
       return {
         tree,
         enter: all.find((node) => node.props?.className === "cine-btn cine-btn-primary").props,
+        skip: all.find((node) => node.props?.className === "cine-ghost cine-skip").props,
         replay: all.find((node) => node.props?.className === "cine-btn cine-btn-secondary").props,
         particles: all.find((node) => node.type === Particles).props,
       };
@@ -253,63 +254,48 @@ function diveBitmapRuntime() {
   return { engine: exports, pendingImages, closedImages, resolveImages };
 }
 
-test("the first frame has an enabled entry, with replay hidden until completion", () => {
+test("the entrance is hidden and disabled throughout idle and playing", () => {
   const ui = entryRuntime();
-  const view = ui.render();
-  assert.equal(view.enter.disabled, false);
-  assert.equal(view.replay.hidden, true);
-  assert.equal(view.replay.disabled, true);
-  assert.equal(view.tree.props["data-opening-entry"], "ready");
+  for (const phase of ["idle", "playing"]) {
+    ui.state[0] = phase;
+    const view = ui.render();
+    assert.equal(view.enter.disabled, true);
+    assert.equal(view.replay.hidden, true);
+    assert.equal(view.replay.disabled, true);
+    assert.equal(view.tree.props["data-opening-entry"], "pending");
+    view.enter.onClick();
+    assert.equal(ui.navigations.length, 0);
+    assert.equal(ui.handoffs.length, 0);
+  }
+  assert.match(css, /:not\(\[data-opening-entry="ready"\]\) \.cine-replay-slot\s*\{[^}]*visibility: hidden;[^}]*pointer-events: none;/);
 });
 
-test("early entry cancels the score and navigates once without an unseen-logo handoff", async () => {
+test("skip reveals the final entrance and replay deck", () => {
   const ui = entryRuntime();
   ui.state[0] = "playing";
   const view = ui.render();
-  view.enter.onClick();
-  view.enter.onClick();
-  assert.equal(ui.navigations.length, 1);
-  assert.equal(ui.navigations[0].options.to, "/world");
-  assert.equal(ui.handoffs.length, 0);
-  assert.equal(ui.stored.get("dw-opening-seen"), "1");
-  assert.equal(ui.render().enter.disabled, true);
-  ui.navigations[0].resolve();
-  await flush();
-  assert.equal(ui.render().enter.disabled, false, "a cancelled navigation restores the entry");
-});
-
-test("the committed delayed start cannot restart an idle title after first-frame entry", async () => {
-  const ui = entryRuntime({ runEffects: true });
-  const view = ui.render();
-  assert.equal(ui.state[0], "idle");
-  assert.equal([...ui.timers.values()].filter((timer) => timer.at === 120).length, 1);
-  ui.advance(80);
-  view.enter.onClick();
-  assert.equal(ui.state[0], "diving");
-  assert.equal(ui.render().enter.disabled, true);
-  assert.equal([...ui.timers.values()].filter((timer) => timer.at === 120).length, 1,
-    "the real idle-start effect is still pending during navigation");
-  ui.advance(40);
-  const leaving = ui.render();
-  assert.equal(ui.state[0], "diving", "the elapsed 120 ms callback must not set playing");
-  assert.equal(leaving.enter.disabled, true);
-  assert.equal(leaving.tree.props["data-opening-entry"], "leaving");
-  leaving.enter.onClick();
-  assert.equal(ui.navigations.length, 1, "a second activation cannot start another navigation");
-  assert.equal(ui.handoffs.length, 0);
-  ui.runtime.location.pathname = "/world";
-  ui.navigations[0].resolve();
-  await flush();
-  assert.equal(ui.state[0], "diving");
-});
-
-test("a refused early navigation restores controls instead of rejecting or becoming inert", async () => {
-  const ui = entryRuntime();
-  ui.render().enter.onClick();
-  ui.navigations[0].reject(new Error("navigation refused"));
-  await flush();
+  view.skip.onClick({ detail: 1 });
+  const complete = ui.render();
   assert.equal(ui.state[0], "complete");
-  assert.equal(ui.render().enter.disabled, false);
+  assert.equal(complete.enter.disabled, false);
+  assert.equal(complete.replay.hidden, false);
+  assert.equal(complete.replay.disabled, false);
+  assert.equal(complete.tree.props["data-opening-entry"], "ready");
+});
+
+test("the delayed start preserves the hidden entrance until the score completes", () => {
+  const ui = entryRuntime({ runEffects: true });
+  ui.render();
+  ui.advance(120);
+  const playing = ui.render();
+  assert.equal(ui.state[0], "playing");
+  assert.equal(playing.enter.disabled, true);
+  assert.equal(playing.tree.props["data-opening-entry"], "pending");
+  ui.advance(10000);
+  const complete = ui.render();
+  assert.equal(ui.state[0], "complete");
+  assert.equal(complete.enter.disabled, false);
+  assert.equal(complete.tree.props["data-opening-entry"], "ready");
 });
 
 for (const [name, profileDevice] of [

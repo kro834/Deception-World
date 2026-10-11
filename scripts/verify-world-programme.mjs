@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { mkdir } from "node:fs/promises";
 import { chromium, webkit } from "playwright";
+import { DREAM_CASES } from "../src/components/dream-chapter/dream-chapter-data.ts";
 
 // Run only against a fresh production preview.
 const base = process.env.BASE_URL || "http://127.0.0.1:8082";
@@ -273,10 +274,11 @@ async function verifyDreamStory(page, viewport) {
       "",
       `${viewport.name}: Enter opens Case ${index}`,
     );
-    assert.equal(
-      await detail.locator(".dream-story-case-body > p").count(),
-      2,
-      `${viewport.name}: Case ${index} has two paragraphs`,
+    // Owner confirmed the expanded source-led copy, not the old two-paragraph layout.
+    assert.deepEqual(
+      await detail.locator(".dream-story-case-body > p").allTextContents(),
+      [...DREAM_CASES[index].paragraphs],
+      `${viewport.name}: Case ${index} renders every approved paragraph in order`,
     );
     if (index === 0) {
       const paragraph = detail.locator(".dream-story-case-body > p").first();

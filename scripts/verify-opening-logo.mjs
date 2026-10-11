@@ -64,7 +64,7 @@ try {
     if (process.env.SAVE_SCREENSHOTS) {
       await page.screenshot({ path: `/tmp/logo-${engine}-${width}.png` });
     }
-    await page.getByRole("button", { name: "ENTER THE WORLD", exact: true }).tap();
+    await page.getByRole("button", { name: "ディセプションワールドへ入る", exact: true }).tap();
     const handoff = page.locator("[data-opening-handoff-logo] img");
     await handoff.waitFor({ state: "attached" });
     assert.equal(new URL(await handoff.getAttribute("src"), origin).pathname, state.src);

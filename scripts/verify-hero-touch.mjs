@@ -17,22 +17,30 @@ const surfaces = [
 
 async function swipe(page, cdp, x, y) {
   const before = await page.evaluate(() => scrollY);
+  // At the fixed brand's y=31.5, an upward swipe has only 23.5px before
+  // leaving the viewport. Chrome consumes ~12px as touch slop: comparing
+  // that gesture to >12px of scroll tests rounding, not scroll ownership.
+  // Start at the same actual control, but travel into the viewport instead.
+  const downward = y < 96 && before > 48;
+  const distance = downward ? Math.min(160, before) : Math.min(160, y - 8);
+  const direction = downward ? 1 : -1;
   if (cdp) {
     await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x, y }] });
-    const distance = Math.min(160, y - 8);
     for (let i = 1; i <= 10; i++) {
       await cdp.send("Input.dispatchTouchEvent", {
-        type: "touchMove", touchPoints: [{ x, y: y - distance * i / 10 }],
+        type: "touchMove", touchPoints: [{ x, y: y + direction * distance * i / 10 }],
       });
       await page.waitForTimeout(16);
     }
     await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
   } else {
     await page.mouse.move(x, y);
-    await page.mouse.wheel(0, 180);
+    await page.mouse.wheel(0, downward ? -180 : 180);
   }
   await page.waitForTimeout(200);
-  assert.ok(await page.evaluate(() => scrollY) > before + 12, `scroll blocked at ${x}, ${y}`);
+  const after = await page.evaluate(() => scrollY);
+  const moved = downward ? before - after : after - before;
+  assert.ok(moved > 12, `scroll blocked at ${x}, ${y}; before=${before}, after=${after}, distance=${distance}`);
 }
 
 async function geometry(rail) {
@@ -80,6 +88,10 @@ try {
       if (selector === ".hero .text-action" && width <= 767 && !(await target.isVisible())) continue;
       await target.evaluate(e => e.scrollIntoView({ block: "center", behavior: "instant" }));
       await page.waitForTimeout(160);
+      if (await target.evaluate(e => e.getBoundingClientRect().bottom < 96)) {
+        await page.evaluate(() => window.scrollTo({ top: Math.max(240, scrollY), behavior: "instant" }));
+        await page.waitForTimeout(160);
+      }
       const point = await target.evaluate(e => {
         const r = e.getBoundingClientRect();
         const y = Math.min(innerHeight - 20, Math.max(20, r.y + r.height / 2));

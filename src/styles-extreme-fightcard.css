@@ -161,6 +161,33 @@ html[data-family="special"]
 
 /* Phones: the bout is billed on one line, ROUND, the plate, the kicker;
    the title takes the full width under it. */
+/* A wide bout has a right-hand corner too: the existing introduction
+   occupies it, without changing the title's slam or adding filler copy. */
+@media (min-width: 1100px) {
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-section > .rxs-section-heading {
+    grid-template-columns: auto minmax(0, 1.3fr) minmax(240px, 0.7fr);
+  }
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-section > .rxs-section-heading > span {
+    grid-column: 3;
+    grid-row: 1 / span 2;
+    align-self: end;
+    margin: 0 0 0.2em;
+    padding-inline-start: clamp(20px, 2.4vw, 40px);
+    border-inline-start: 1px solid rgb(var(--ext-gold-rgb) / 32%);
+  }
+}
+
+@media (max-width: 359px) {
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-stage-tabs > button[role="tab"] {
+    padding-inline: 6px;
+  }
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page > #stages .exs-stage-tabs > button[role="tab"] > small {
+    white-space: nowrap;
+    font-size: 12px;
+    letter-spacing: 0;
+  }
+}
+
 @media (max-width: 560px) {
   html[data-family="special"]
     body
