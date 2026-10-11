@@ -1570,6 +1570,12 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     const form = runway.dataset.form;
     if ((form === "max" || form === "ultra" || form === "excelsior") && progress > B.form[0]) {
       const forms = formFigures();
+      // The forms live on sheets PAD px wider either side than the figure
+      // (EXCELSIOR is broader; it is never shrunk — owner, 2026-10-12).
+      if (forms) {
+        context.save();
+        context.translate(-forms.pad, 0);
+      }
       if (forms && form === "excelsior" && forms.excelsior) {
         // EXCELSIOR (owner): MAX, then ULTRA, briefly; then its own nanites
         // (prism shards, coming down from the crown) add its decoration.
@@ -1580,7 +1586,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
           drawOverwrite(
             context,
             forms.plans.max,
-            figure,
+            forms.fig,
             forms.max,
             span(progress, [a, toMax]),
             1,
@@ -1603,17 +1609,18 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
           // 2026-10-12): their limbs are carried over a little at a time.
           const u = span(progress, [toUltra, toUltra + (b - toUltra) * 0.6]);
           const e = u * u * (3 - 2 * u);
-          const own = FORM_LANDMARKS.figure.ultra;
-          const goal = FORM_LANDMARKS.figure.excelsior;
+          const wide = ([x, y]) => [(x * W + forms.pad) / forms.width, y];
+          const own = FORM_LANDMARKS.figure.ultra.map(wide);
+          const goal = FORM_LANDMARKS.figure.excelsior.map(wide);
           const mid = own.map(([x, y], i) => [x + (goal[i][0] - x) * e, y + (goal[i][1] - y) * e]);
-          const box = { x: 0, y: 0, w: W, h: H };
+          const box = { x: 0, y: 0, w: forms.width, h: H };
           for (const [sheetCanvas, picture, landmarks] of [
             [forms.warp[0], forms.ultra, own],
             [forms.warp[1], forms.excelsior, goal],
           ]) {
             const c = sheetCanvas.getContext("2d");
             c.setTransform(1, 0, 0, 1, 0, 0);
-            c.clearRect(0, 0, W, H);
+            c.clearRect(0, 0, forms.width, H);
             warpPicture(c, picture, box, landmarks, mid);
           }
           drawOverwrite(
@@ -1634,7 +1641,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
           drawOverwrite(
             context,
             forms.plans.max,
-            figure,
+            forms.fig,
             forms.max,
             span(progress, [a, b - 0.005]),
             1,
@@ -1647,7 +1654,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
             drawOverwrite(
               context,
               forms.plans.max,
-              figure,
+              forms.fig,
               forms.max,
               span(progress, [a, quick]),
               1,
@@ -1667,6 +1674,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
             );
         }
       }
+      if (forms) context.restore();
     }
 
     // Motes, flights and welds of the tiles still to land.
@@ -1962,20 +1970,46 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       picture(config.forms.ultra),
       config.forms.excelsior ? picture(config.forms.excelsior).catch(() => null) : null,
     ])
-      .then(([max, ultra, excelsior]) => {
+      .then(([maxImage, ultraImage, excelsiorImage]) => {
         if (disposed) return;
-        const base = { width: W, height: H, cell: 8, origin: config.core, seed: 77 };
+        // Every form on one wide sheet: the figure's frame at x = pad (the
+        // EXCELSIOR picture is that wide already).
+        const pad = config.forms.pad || 0;
+        const wide = W + pad * 2;
+        const sheet = (image, at) => {
+          const canvas = Object.assign(document.createElement("canvas"), {
+            width: wide,
+            height: H,
+          });
+          if (image)
+            canvas.getContext("2d").drawImage(image, at, 0, image === excelsiorImage ? wide : W, H);
+          return canvas;
+        };
+        const fig = sheet(images.figure, pad);
+        const max = sheet(maxImage, pad);
+        const ultra = sheet(ultraImage, pad);
+        const excelsior = excelsiorImage ? sheet(excelsiorImage, 0) : null;
+        const base = {
+          width: wide,
+          height: H,
+          cell: 8,
+          origin: [config.core[0] + pad, config.core[1]],
+          seed: 77,
+        };
         const grid = planOverwrite(base);
         const fromCells = sampleCells(max, grid, document);
         const toCells = sampleCells(ultra, grid, document);
         const ultraCells = toCells;
         const excelsiorCells = excelsior ? sampleCells(excelsior, grid, document) : null;
         formsState = {
+          pad,
+          width: wide,
+          fig,
           max,
           ultra,
           excelsior,
           warp: [0, 1].map(() =>
-            Object.assign(document.createElement("canvas"), { width: W, height: H }),
+            Object.assign(document.createElement("canvas"), { width: wide, height: H }),
           ),
           plans: {
             max: grid,

@@ -7,3 +7,6 @@ export const REXONANCE_FORM_FIGURES = {
   // Fitted to the figure by its bounds (another pose).
   excelsior: "/rexonance-forms-20261011/excelsior.webp",
 } as const;
+/** EXCELSIOR's picture is this much wider either side than the figure's
+ * frame (it is broader and never shrunk; owner, 2026-10-12). */
+export const REXONANCE_FORM_PAD = 120;

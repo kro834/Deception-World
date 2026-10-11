@@ -35,7 +35,7 @@ import {
   REXONANCE_SUIT_UNDERSUIT,
 } from "@/lib/rexonance-suit";
 import { rexonanceImage } from "@/lib/rexonance-images";
-import { REXONANCE_FORM_FIGURES } from "@/lib/rexonance-forms";
+import { REXONANCE_FORM_FIGURES, REXONANCE_FORM_PAD } from "@/lib/rexonance-forms";
 import {
   FORM_CHANGE_MS,
   FORM_LANDMARKS,
@@ -408,7 +408,7 @@ const CORE_SYSTEMS = [
 
 // ZENITH: use the suit atlas's shape masks, not the overlapping part boxes.
 const SUIT_UP: RexonanceAssemblyConfig = {
-  forms: REXONANCE_FORM_FIGURES,
+  forms: { ...REXONANCE_FORM_FIGURES, pad: REXONANCE_FORM_PAD },
   figure: REXONANCE_SUIT_FIGURE,
   undersuit: REXONANCE_SUIT_UNDERSUIT,
   size: REXONANCE_SUIT_SIZE,

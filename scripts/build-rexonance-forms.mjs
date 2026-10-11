@@ -73,25 +73,26 @@ for (const form of ["max", "ultra"]) {
   };
   const art = bounds(data, info.width, info.height, 3, (p, i) => Math.max(p[i], p[i + 1], p[i + 2]) > 40);
   const fig = bounds(base, FIG.width, FIG.height, 4, (p, i) => p[i + 3] > 40);
-  // The same height as the figure — unless its ribbons would then run past
-  // the frame's sides (owner, 2026-10-12): then it fits the width, centred.
-  const scale = Math.min(
-    (fig.y1 - fig.y0) / (art.y1 - art.y0),
-    (FIG.width - 8) / (art.x1 - art.x0),
-  );
+  // The same height as the figure, never shrunk (owner, 2026-10-12); it is
+  // broader, so its picture carries PAD px of room either side of the
+  // figure's frame (its ribbons stay whole): 571 + 2 PAD wide, the figure's
+  // frame at x = PAD (src/lib/rexonance-forms.ts, REXONANCE_FORM_PAD).
+  const PAD = 120;
+  const scale = (fig.y1 - fig.y0) / (art.y1 - art.y0);
   const width = Math.round(info.width * scale);
   const height = Math.round(info.height * scale);
-  const left = Math.round(FIG.width / 2 - ((art.x0 + art.x1) / 2) * scale);
+  const left = Math.round((fig.x0 + fig.x1) / 2 - ((art.x0 + art.x1) / 2) * scale) + PAD;
   const top = Math.round(fig.y1 - art.y1 * scale);
+  const OUTW = FIG.width + PAD * 2;
   const scaled = await sharp(src).removeAlpha().resize(width, height, { kernel: "lanczos3" }).raw().toBuffer();
-  const out = Buffer.alloc(FIG.width * FIG.height * 4);
+  const out = Buffer.alloc(OUTW * FIG.height * 4);
   for (let y = 0; y < FIG.height; y += 1)
-    for (let x = 0; x < FIG.width; x += 1) {
+    for (let x = 0; x < OUTW; x += 1) {
       const sx = x - left;
       const sy = y - top;
       if (sx < 0 || sy < 0 || sx >= width || sy >= height) continue;
       const j = (sy * width + sx) * 3;
-      const o = (y * FIG.width + x) * 4;
+      const o = (y * OUTW + x) * 4;
       const r = scaled[j];
       const g = scaled[j + 1];
       const b = scaled[j + 2];
@@ -101,8 +102,8 @@ for (const form of ["max", "ultra"]) {
       out[o + 3] = Math.round(Math.min(1, Math.max(0, (Math.max(r, g, b) - 14) / 30)) * 255);
     }
   const file = `${OUT}/excelsior.webp`;
-  await sharp(out, { raw: { width: FIG.width, height: FIG.height, channels: 4 } })
+  await sharp(out, { raw: { width: OUTW, height: FIG.height, channels: 4 } })
     .webp({ quality: 70, alphaQuality: 80, effort: 6 })
     .toFile(root(file));
-  console.log(file, { scale: scale.toFixed(3), left, top });
+  console.log(file, { scale: scale.toFixed(3), left, top, width: OUTW });
 }
