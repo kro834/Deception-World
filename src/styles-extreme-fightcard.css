@@ -1197,8 +1197,12 @@ html[data-family="special"]
 /* Wide screens: the tape on the left, the architectures on the right,
    under their corners. */
 @media (min-width: 1100px) {
+  /* The rows track takes up the architectures' extra height, so the tape
+     starts right under its formula (review: as an auto track, the formula's
+     row was stretched by 70-90px of empty ink above the first clash). */
   html[data-family="special"] body .rxs-page.rxs-page.exs-page > #performance .rxs-comparison {
     grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.88fr);
+    grid-template-rows: auto auto 1fr;
   }
 
   html[data-family="special"]
@@ -1674,6 +1678,39 @@ html[data-family="special"]
   color: #cfefff;
 }
 
+/* The waiting form stands in the shade of its corner (review): the two
+   arts share one pose and the sliver holds no visor, so unshaded it read
+   as the same picture behind a gold line. The chosen form is the lit one;
+   the label above the shade stays bright. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  #exs-stage-panel
+  > figure
+  > .exf-rival
+  > span::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  display: block;
+  background: rgb(5 4 3 / 46%);
+  pointer-events: none;
+}
+
+/* On wide screens Middle waits where the art already melts into the copy
+   column's ink, so its shade is lighter (it would otherwise go black). */
+@media (min-width: 1100px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    #exs-stage-panel
+    > figure[data-form="ultra"]
+    > .exf-rival
+    > span::before {
+    background: rgb(5 4 3 / 20%);
+  }
+}
+
 /* The overdrive's slash and its clipped cut give way to the seam. */
 html[data-family="special"]
   body
@@ -2096,6 +2133,22 @@ html[data-family="special"]
     > span {
     animation: exf-seam-middle-art 640ms var(--exi-blade) both;
   }
+
+  /* The form that loses the stage keeps its light while the seam crosses
+     the body, and only steps into the shade of its corner once the seam
+     has nearly come to rest (one way, on the sliver alone: never a dip
+     and a rise across the body). */
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    #exs-stage-panel
+    > figure[data-exi-impact="true"]
+    > .exf-rival
+    > span::before {
+    animation: exf-shade 360ms var(--exi-out) 560ms both;
+  }
 }
 
 /* ================================================================
@@ -2232,6 +2285,16 @@ html[data-family="special"]
   }
   to {
     translate: calc((var(--exf-sliver) - 1) * 100%) 0;
+  }
+}
+
+/* The waiting form steps into its corner's shade. */
+@keyframes exf-shade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 

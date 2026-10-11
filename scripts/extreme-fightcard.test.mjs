@@ -303,6 +303,30 @@ test("the seam's art stands still while it travels, and always shows the other f
         : /url\("\/saga-extreme-middle-20261006\.webp"\)/,
     );
   }
+  // Review: the waiting form stands in its corner's shade (one pose in both
+  // arts, so unshaded the sliver read as the same picture). On a change of
+  // form the losing form keeps its light while the seam crosses the body and
+  // steps into the shade only as the seam comes to rest, inside the impact
+  // key (1000 ms), so the body never dips and rises.
+  const shade = rules.find(
+    ({ selector, context }) =>
+      !context.length && selector.endsWith("> figure > .exf-rival > span::before"),
+  );
+  assert.ok(shade);
+  assert.match(shade.body, /background: rgb\(5 4 3 \/ \d+%\);/);
+  assert.doesNotMatch(shade.body, /animation|opacity/);
+  const shadeIn = rules.filter(({ body }) => /exf-shade/.test(body));
+  assert.equal(shadeIn.length, 1);
+  assert.match(
+    shadeIn[0].selector,
+    /figure\[data-exi-impact="true"\] > \.exf-rival > span::before$/,
+  );
+  const [shadeMs, shadeDelay] = [...shadeIn[0].body.matchAll(/(\d+)ms/g)].map((m) => Number(m[1]));
+  assert.ok(shadeDelay >= 500 && shadeMs + shadeDelay < 1000, `${shadeMs} @ ${shadeDelay}`);
+  assert.match(
+    keyframes.find(({ name }) => name === "exf-shade").body,
+    /from\s*\{\s*opacity: 0;\s*\}\s*to\s*\{\s*opacity: 1;\s*\}/,
+  );
   // The lit blade runs only on the way to Ultra (the way back darkens the art).
   const blades = rules.filter(({ body }) => /exf-blade/.test(body));
   assert.equal(blades.length, 1);
@@ -363,6 +387,26 @@ test("on wide screens the form switch stands inside the duel, in markup order, o
     'id="exs-stage-panel"',
   ].map((needle) => component.indexOf(needle));
   assert.ok(order[0] > 0 && order[0] < order[1] && order[1] < order[2], String(order));
+});
+
+// Review: on wide screens the architectures span the formula's row and the
+// rows' row; the rows' track is flexible so it takes their extra height (an
+// auto track left 70-90px of ink between the formula and the first clash).
+test("on wide screens the tape starts right under its formula", () => {
+  const wide = rules.find(
+    ({ selector, context }) =>
+      context.length === 1 &&
+      context[0] === "@media (min-width: 1100px)" &&
+      selector.endsWith("> #performance .rxs-comparison"),
+  );
+  assert.ok(wide);
+  assert.match(wide.body, /grid-template-rows: auto auto 1fr;/);
+  const architectures = rules.find(
+    ({ selector, context }) =>
+      context[0] === "@media (min-width: 1100px)" &&
+      selector.endsWith(".rxs-comparison > .rxs-processing-comparison"),
+  );
+  assert.match(architectures.body, /grid-row: 2 \/ span 2;/);
 });
 
 // Pass 2: the cuts between rounds are one bell, not a long walk.
