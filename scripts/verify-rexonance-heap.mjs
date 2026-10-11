@@ -133,6 +133,17 @@ try {
     for (const row of rows) {
       assert.equal(row.detachedMains, 0, `cycle ${row.cycle}: detached Rexonance page retained`);
       assert.equal(row.retainedPageNodes, 0, `cycle ${row.cycle}: former page DOM retained`);
+      assert.equal(
+        row.retainers.length,
+        row.detachedNodes,
+        `cycle ${row.cycle}: inspect every remaining off-document resource`,
+      );
+      assert.ok(
+        row.retainers.every(({ path }) =>
+          path.every(({ owner }) => !owner.includes("HTMLImageElement::ViewportChangeListener")),
+        ),
+        `cycle ${row.cycle}: an abandoned responsive-image listener retained a native node`,
+      );
       if (row.cycle > 1)
         assert.deepEqual(
           row.histogram,

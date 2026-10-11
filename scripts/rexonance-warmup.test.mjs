@@ -28,11 +28,23 @@ function fixture(connection = {}) {
   class Image {
     constructor() {
       this.removed = [];
+      this.srcAssignments = [];
       images.push(this);
+    }
+    set src(value) {
+      this.srcAssignments.push(value);
+      this._src = value;
+    }
+    get src() {
+      return this._src;
+    }
+    get currentSrc() {
+      return this.srcset ? this.srcset.split(/[,\s]/)[0] : this.src;
     }
     removeAttribute(key) {
       this.removed.push(key);
-      delete this[key];
+      if (key === "src") delete this._src;
+      else delete this[key];
     }
     decode() {
       return Promise.resolve();
@@ -184,7 +196,14 @@ test("A resolver warms the visible element's own candidates, sizes only when it 
   }
 });
 
-for (const outcome of ["load", "error", "timeout", "dispose"]) {
+for (const outcome of [
+  "load",
+  "load-without-decode",
+  "decode-error",
+  "error",
+  "timeout",
+  "dispose",
+]) {
   test(`Alternate warm-up ${outcome} releases responsive viewport listeners`, async () => {
     const f = fixture();
     let cleanup;
@@ -196,7 +215,12 @@ for (const outcome of ["load", "error", "timeout", "dispose"]) {
       const image = f.images[0];
       assert.ok(image.srcset);
       assert.ok(image.sizes);
-      if (outcome === "load") {
+      const selected = image.currentSrc;
+      const loaded = outcome.startsWith("load");
+      if (loaded || outcome === "decode-error") {
+        if (outcome === "load-without-decode") image.decode = undefined;
+        if (outcome === "decode-error")
+          image.decode = () => Promise.reject(new Error("decode failed"));
         image.onload();
         await Promise.resolve();
       } else if (outcome === "error") image.onerror();
@@ -206,10 +230,11 @@ for (const outcome of ["load", "error", "timeout", "dispose"]) {
       assert.equal(image.sizes, undefined);
       assert.equal(image.onload, null);
       assert.equal(image.onerror, null);
-      assert.equal(image.src, undefined);
+      assert.equal(image.src, loaded ? selected : undefined);
+      assert.deepEqual(image.srcAssignments, loaded ? [source, selected] : [source]);
       assert.deepEqual(
         image.removed,
-        ["src", "srcset", "sizes"],
+        loaded ? ["srcset", "sizes"] : ["src", "srcset", "sizes"],
         "never fall back to the original source during cleanup",
       );
       assert.equal(f.timers.size, 0);
@@ -220,6 +245,34 @@ for (const outcome of ["load", "error", "timeout", "dispose"]) {
     }
   });
 }
+
+test("A disposed alternate warm-up cannot pin its source after a late decode", async () => {
+  const f = fixture();
+  let cleanup;
+  try {
+    const source = "/rider-rexonance-max-20260922.webp";
+    cleanup = warmRexonanceStages({}, [source]);
+    f.near();
+    f.flush();
+    const image = f.images[0];
+    let finishDecode;
+    image.decode = () =>
+      new Promise((resolve) => {
+        finishDecode = resolve;
+      });
+    image.onload();
+    cleanup();
+    finishDecode();
+    await Promise.resolve();
+    assert.equal(image.src, undefined);
+    assert.deepEqual(image.srcAssignments, [source]);
+    assert.deepEqual(image.removed, ["src", "srcset", "sizes"]);
+    assert.equal(f.idle.size, 0);
+  } finally {
+    cleanup?.();
+    f.restore();
+  }
+});
 
 // rx12: the entry call's suit-up pieces decode on intent, once, and never
 // gate navigation; the call builds the suit only once they all decoded.

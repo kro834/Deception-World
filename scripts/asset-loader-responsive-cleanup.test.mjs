@@ -16,6 +16,7 @@ async function fixture(t, mode) {
     constructor() {
       this.attributes = new Map();
       this.removed = [];
+      this.srcAssignments = [];
       this.naturalWidth = 1000;
       if (mode === "events") this.decode = undefined;
       images.push(this);
@@ -33,6 +34,7 @@ async function fixture(t, mode) {
       return this.attributes.get("srcset") || "";
     }
     set src(value) {
+      this.srcAssignments.push(value);
       this.attributes.set("src", value);
       if (mode === "events") queueMicrotask(() => this.onload?.());
     }
@@ -69,12 +71,13 @@ for (const mode of ["decode", "events"]) {
     const image = f.images[0];
     assert.deepEqual(
       image.removed,
-      ["src", "srcset", "sizes"],
-      "remove fallback src before the responsive candidates",
+      ["srcset", "sizes"],
+      "drop responsive selection while retaining the decoded source",
     );
     assert.equal(image.sizes, "");
     assert.equal(image.srcset, "");
-    assert.equal(image.src, "", "the completed temporary element has no further image requests");
+    assert.equal(image.src, selected, "pin the decoded candidate, never the original fallback");
+    assert.deepEqual(image.srcAssignments, [source, selected]);
     assert.equal(image.onload, null);
     assert.equal(image.onerror, null);
     assert.equal(f.loader.assetsWarmed([source]), true);
@@ -108,6 +111,12 @@ test("a cancelled decode releases all request attributes and cannot record a lat
   assert.equal(f.images[0].src, "");
   f.finishDecode();
   await Promise.resolve();
+  assert.deepEqual(f.images[0].removed, ["src", "srcset", "sizes"]);
+  assert.deepEqual(
+    f.images[0].srcAssignments,
+    [source],
+    "late decode cannot restart an image request",
+  );
   assert.equal(f.loader.assetsWarmed([source]), false);
   assert.equal(f.loader.warmedSource(source), source);
 });

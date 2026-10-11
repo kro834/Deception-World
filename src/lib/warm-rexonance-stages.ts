@@ -45,25 +45,31 @@ export function warmRexonanceStages(
       next.srcset = responsive.srcSet;
     }
     let settled = false;
-    const finish = () => {
-      if (settled) return;
+    const finish = (loaded = false) => {
+      if (settled || disposed) return;
       settled = true;
       window.clearTimeout(timeout);
       next.onload = null;
       next.onerror = null;
-      // This Image only warms HTTP cache, so release all candidates. Remove
-      // src first: removing srcset first can fetch the original fallback.
-      next.removeAttribute("src");
+      const selected = loaded ? next.currentSrc : "";
+      // Pin the decoded candidate: Chromium drops its native viewport
+      // listener with no new request; clearing every source leaves it alive.
+      if (selected) next.src = selected;
+      else next.removeAttribute("src");
       next.removeAttribute("srcset");
       next.removeAttribute("sizes");
       image = null;
       schedule();
     };
     next.onload = () => {
-      if (typeof next.decode === "function") void next.decode().then(finish, finish);
-      else finish();
+      if (typeof next.decode === "function")
+        void next.decode().then(
+          () => finish(true),
+          () => finish(),
+        );
+      else finish(true);
     };
-    next.onerror = finish;
+    next.onerror = () => finish();
     timeout = window.setTimeout(finish, 6000);
     next.src = source;
   };

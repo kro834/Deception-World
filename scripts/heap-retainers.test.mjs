@@ -61,6 +61,28 @@ function snapshotFor(records, { detachedness = true, reorderFields = false } = {
 
 const mainName = '<main id="top" class="rxs-page rxs-rexonance-page">';
 
+test("allRetainers also diagnoses a standalone responsive warm-up with no detached page", () => {
+  const report = detachedDOMReport(
+    snapshotFor([
+      { name: "(root)", type: "synthetic", edges: [["property", "document", 1]] },
+      { name: "HTMLDocument", edges: [["internal", "listener", 2]] },
+      {
+        name: "HTMLImageElement::ViewportChangeListener",
+        edges: [["internal", "image", 3]],
+      },
+      { name: "<img>", detachedness: 2 },
+    ]),
+    { allRetainers: true },
+  );
+  assert.equal(report.detachedMains, 0);
+  assert.equal(report.detachedNodes, 1);
+  assert.equal(report.retainers.length, 1);
+  assert.deepEqual(
+    report.retainers[0].path.map(({ owner }) => owner),
+    ["(root)", "HTMLDocument", "HTMLImageElement::ViewportChangeListener", "<img>"],
+  );
+});
+
 test("an attached page and detached JavaScript wrappers are not detached native DOM", () => {
   const report = detachedDOMReport(
     snapshotFor([
