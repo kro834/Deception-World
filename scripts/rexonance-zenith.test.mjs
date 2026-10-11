@@ -145,6 +145,7 @@ test("browser QA captures the requested viewports and both directions with canva
   ])
     assert.match(browserHarness, new RegExp(`name: \\"?${profile}\\"?`), profile);
   assert.match(browserHarness, /CAPTURE=1/);
+  assert.match(browserHarness, /CAPTURE_BASELINE=1/);
   assert.match(browserHarness, /CAPTURE_PROFILES/);
   assert.match(browserHarness, /BROWSER=webkit/);
   assert.match(browserHarness, /direction: "forward"/);

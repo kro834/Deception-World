@@ -1,6 +1,7 @@
 // Disposable browser QA; never uses a signed-in browser profile.
 // BASE_URL=... BASELINE_URL=... BENCH_RUNS=5 node scripts/verify-rexonance-zenith.mjs
 // CAPTURE=1 [CAPTURE_PROFILES=desktop1440,phone390] captures only visual profiles.
+// CAPTURE_BASELINE=1 records pre-phase builds without asserting new phase/form attributes.
 // BROWSER=webkit selects WebKit; ZENITH_WEBKIT=1 adds WebKit to Chromium's full run.
 // ZENITH_TRACE=1 saves the end-of-scroll trace.
 import assert from "node:assert/strict";
@@ -87,6 +88,7 @@ const snapshot = (page) =>
       phase: r.dataset.rznPhase || null,
       form: r.dataset.form || null,
       formComplete: r.dataset.rznFormComplete || null,
+      sceneComplete: r.hasAttribute("data-rzn-complete") ? "true" : null,
       height: r.offsetHeight,
       frameHeight: f.offsetHeight,
       percent: r.querySelector(".rzn-percent").textContent,
@@ -285,12 +287,14 @@ async function functional(engine, label, profile, { connection, noTimeline = fal
       ];
       const phases = [];
       const forwardHashes = new Set();
-      const firstUnfinished = await snapshot(page);
-      assert.notEqual(
-        firstUnfinished.formComplete,
-        "true",
-        `${label}: nonstandard form cannot be complete before .975`,
-      );
+      if (process.env.CAPTURE_BASELINE !== "1") {
+        const firstUnfinished = await snapshot(page);
+        assert.notEqual(
+          firstUnfinished.formComplete,
+          "true",
+          `${label}: nonstandard form cannot be complete before .975`,
+        );
+      }
       for (const { direction, progress, name } of milestones) {
         await page.evaluate(
           ({ start, progress }) =>
@@ -320,10 +324,11 @@ async function functional(engine, label, profile, { connection, noTimeline = fal
         );
         const state = await snapshot(page);
         assert.equal(Number(state.percent), expectedPercent, `${label} scrub ${progress}`);
-        assert.ok(
-          ["prepare", "assemble", "seal", "ignite", "evolve", "complete"].includes(state.phase),
-          `${label} ${direction}/${progress}: unknown data-rzn-phase ${state.phase}`,
-        );
+        if (process.env.CAPTURE_BASELINE !== "1")
+          assert.ok(
+            ["prepare", "assemble", "seal", "ignite", "evolve", "complete"].includes(state.phase),
+            `${label} ${direction}/${progress}: unknown data-rzn-phase ${state.phase}`,
+          );
         const evidence = await canvasEvidence(page);
         assert.ok(
           evidence.drawCalls > 0,
@@ -339,20 +344,23 @@ async function functional(engine, label, profile, { connection, noTimeline = fal
         }
         phases.push({ direction, progress, phase: state.phase });
         if (progress >= 0.975) {
-          await page.waitForFunction(
-            () => document.querySelector(".rzn-suitup")?.dataset.rznFormComplete === "true",
-            undefined,
-            { timeout: 10000 },
-          );
-          state.formComplete = await page
-            .locator(".rzn-suitup")
-            .getAttribute("data-rzn-form-complete");
-          assert.equal(
-            state.formComplete,
-            "true",
-            `${label}: selected nonstandard form must resolve by .975`,
-          );
-          await page.waitForFunction(() => (window.__rznCanvasDraws || []).length > 0);
+          assert.equal(state.sceneComplete, "true", `${label}: assembly must complete by .975`);
+          if (process.env.CAPTURE_BASELINE !== "1") {
+            await page.waitForFunction(
+              () => document.querySelector(".rzn-suitup")?.dataset.rznFormComplete === "true",
+              undefined,
+              { timeout: 10000 },
+            );
+            state.formComplete = await page
+              .locator(".rzn-suitup")
+              .getAttribute("data-rzn-form-complete");
+            assert.equal(
+              state.formComplete,
+              "true",
+              `${label}: selected nonstandard form must resolve by .975`,
+            );
+            await page.waitForFunction(() => (window.__rznCanvasDraws || []).length > 0);
+          }
         }
         const settledEvidence = progress >= 0.975 ? await canvasEvidence(page) : evidence;
         if (direction === "forward" && progress >= 0.975)
@@ -369,10 +377,11 @@ async function functional(engine, label, profile, { connection, noTimeline = fal
           screenshot,
         });
       }
-      assert.ok(
-        phases.some(({ phase }) => phase === "complete"),
-        `${label}: phase sequence never reached complete`,
-      );
+      if (process.env.CAPTURE_BASELINE !== "1")
+        assert.ok(
+          phases.some(({ phase }) => phase === "complete"),
+          `${label}: phase sequence never reached complete`,
+        );
       assert.ok(
         forwardHashes.size >= 3,
         `${label}: canvas pixels did not change across forward scrub checkpoints`,
@@ -571,7 +580,7 @@ async function benchmark(url, label, trace = false) {
 }
 
 try {
-  const captureOnly = process.env.CAPTURE === "1";
+  const captureOnly = process.env.CAPTURE === "1" || process.env.CAPTURE_BASELINE === "1";
   if (!process.env.BENCH_ONLY) {
     for (const profile of selectedProfiles) await functional(browser, profile.name, profile);
     if (!captureOnly && browserKind === chromium) {
