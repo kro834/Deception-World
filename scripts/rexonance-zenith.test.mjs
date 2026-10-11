@@ -163,8 +163,13 @@ test("browser QA captures the requested viewports and both directions with canva
   assert.match(browserHarness, /Math\.abs\(frame\.getBoundingClientRect\(\)\.top - pin\)/);
   assert.match(browserHarness, /\.rzn-stamp/, "stamp bounds are captured");
   assert.match(browserHarness, /\.rzn-count/, "nanite count bounds are captured");
+  assert.match(browserHarness, /\.rzn-nanites/, "nanites row bounds are captured");
   assert.match(browserHarness, /\.zeus-button/, "Zeus bounds are captured");
   assert.match(browserHarness, /stamp\/count\/Zeus overlap/);
+  assert.match(browserHarness, /static call overlaps the artwork/);
+  assert.match(browserHarness, /static artwork overlaps the parts list/);
+  assert.match(browserHarness, /landscape stamp must clear Zeus/);
+  assert.match(browserHarness, /portrait stamp must occupy its own HUD row/);
   assert.match(browserHarness, /evidence\.drawCalls > 0/);
   assert.match(browserHarness, /evidence\.alphaPixels > 0/);
   assert.match(browserHarness, /waitForCanvasConvergence/);

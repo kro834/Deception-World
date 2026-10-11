@@ -221,8 +221,8 @@ const canvasEvidence = async (page) =>
 
 const hudGeometry = async (page) =>
   page.evaluate(() => {
-    const names = ["stamp", "count", "zeus"];
-    const selectors = [".rzn-stamp", ".rzn-count", ".zeus-button"];
+    const names = ["stamp", "nanites", "count", "zeus"];
+    const selectors = [".rzn-stamp", ".rzn-nanites", ".rzn-count", ".zeus-button"];
     const boxes = Object.fromEntries(
       selectors.map((selector, index) => {
         const element = document.querySelector(selector);
@@ -237,7 +237,7 @@ const hudGeometry = async (page) =>
       }),
     );
     const pairs = [
-      ["stamp", "count"],
+      ["stamp", "nanites"],
       ["stamp", "zeus"],
       ["count", "zeus"],
     ];
@@ -249,7 +249,27 @@ const hudGeometry = async (page) =>
       const height = Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top);
       return width > 1 && height > 1 ? [{ first, second, width, height }] : [];
     });
-    return { boxes, overlaps };
+    return {
+      boxes,
+      overlaps,
+      viewportWidth: innerWidth,
+      viewportHeight: innerHeight,
+      ancillaryStampHidden: (() => {
+        const name = document.querySelector(".rzn-stamp > span");
+        return !name || getComputedStyle(name).display === "none";
+      })(),
+    };
+  });
+
+const staticSceneGeometry = async (page) =>
+  page.evaluate(() => {
+    const rect = (selector) => {
+      const element = document.querySelector(selector);
+      if (!element) return null;
+      const { left, top, right, bottom } = element.getBoundingClientRect();
+      return { left, top, right, bottom };
+    };
+    return { call: rect(".rzn-call"), still: rect(".rzn-still"), parts: rect(".rzn-parts") };
   });
 
 async function functional(engine, label, profile, { connection, noTimeline = false } = {}) {
@@ -342,7 +362,32 @@ async function functional(engine, label, profile, { connection, noTimeline = fal
         return Math.abs(frame.getBoundingClientRect().top - pin) <= 2;
       });
       const staticHud = await hudGeometry(page);
+      const staticScene = await staticSceneGeometry(page);
       assert.deepEqual(staticHud.overlaps, [], `${label}: static stamp/count/Zeus overlap`);
+      assert.ok(
+        staticHud.boxes.stamp && staticHud.boxes.nanites && staticHud.boxes.zeus,
+        `${label}: missing static HUD geometry`,
+      );
+      assert.ok(
+        staticHud.boxes.count.right <= staticHud.viewportWidth + 1,
+        `${label}: static nanite count exceeds viewport ${JSON.stringify(staticHud)}`,
+      );
+      assert.ok(
+        staticScene.call && staticScene.still && staticScene.parts,
+        `${label}: missing static call/art/parts geometry ${JSON.stringify(staticScene)}`,
+      );
+      assert.ok(
+        staticScene.call.bottom <= staticScene.still.top + 1,
+        `${label}: static call overlaps the artwork ${JSON.stringify(staticScene)}`,
+      );
+      assert.ok(
+        staticScene.still.bottom <= staticScene.parts.top + 1,
+        `${label}: static artwork overlaps the parts list ${JSON.stringify(staticScene)}`,
+      );
+      assert.ok(
+        staticHud.boxes.nanites.bottom <= staticHud.boxes.stamp.top + 1,
+        `${label}: static nanites overlap the stamp ${JSON.stringify(staticHud)}`,
+      );
       assert.equal(start.state, undefined, `${label}: reduced motion must keep the static scene`);
       const evidence = await canvasEvidence(page);
       assert.equal(
@@ -372,6 +417,7 @@ async function functional(engine, label, profile, { connection, noTimeline = fal
         form: captureForm,
         geometry,
         hud: staticHud,
+        staticScene,
         ...start,
         evidence,
         motion,
@@ -566,6 +612,28 @@ async function functional(engine, label, profile, { connection, noTimeline = fal
             [],
             `${label} ${direction}/${progress}: stamp/count/Zeus overlap ${JSON.stringify(hud)}`,
           );
+        if (hud) {
+          assert.ok(hud.boxes.stamp && hud.boxes.nanites && hud.boxes.count && hud.boxes.zeus);
+          assert.ok(
+            hud.boxes.count.right <= hud.viewportWidth + 1,
+            `${label}: nanite count exceeds viewport ${JSON.stringify(hud)}`,
+          );
+          if (hud.viewportWidth >= hud.viewportHeight) {
+            assert.ok(
+              hud.ancillaryStampHidden,
+              `${label}: landscape stamp name should be hidden ${JSON.stringify(hud)}`,
+            );
+            assert.ok(
+              hud.boxes.stamp.bottom <= hud.boxes.zeus.top + 1,
+              `${label}: landscape stamp must clear Zeus ${JSON.stringify(hud)}`,
+            );
+          } else {
+            assert.ok(
+              hud.boxes.nanites.bottom <= hud.boxes.stamp.top + 1,
+              `${label}: portrait stamp must occupy its own HUD row ${JSON.stringify(hud)}`,
+            );
+          }
+        }
         if (direction === "forward" && progress >= 0.975)
           forwardHashes.add(settledEvidence.pixelHash);
         const screenshot = `${label}-${captureForm}-${direction}-${name}.png`;
