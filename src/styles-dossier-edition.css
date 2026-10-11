@@ -1209,7 +1209,9 @@ main.manager-page:not(.is-sovereign)
     > img {
     height: 100%;
     object-fit: contain;
-    object-position: 50% 50% !important;
+    /* No forced centre: the STAGE sheet covers the art, and each record's
+       own framing (its inline object-position, set from the head) keeps the
+       helmet in the window as it does on phones. */
   }
 
   main.manager-page:not(.is-sovereign)

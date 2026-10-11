@@ -404,6 +404,152 @@ html[data-family="dossier"]
   transform: none;
 }
 
+/* Pale grounds (the white and grey studio portraits: 悠真, ベル, ヴァンダル,
+   テラ, ジェームズ, ダンテ and the first rank): the dark-art fades read as
+   grey pillars and a soft white box, and the top feather sat on the faces.
+   These stand as a lit cyclorama instead: the art keeps its own light to a
+   crisp edge with a hairline in the person's colour, and only the floor
+   falls off into the stage. (The edition sheet's light-ground list, with
+   ダンテ and the first rank.) */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #dossier-profile
+  .manager-portrait-frame:has(
+    > img:is(
+        [src*="civilian-yuma"],
+        [src*="civilian-bell"],
+        [src*="civilian-vandal"],
+        [src*="character-terra"],
+        [src*="character-james"],
+        [src*="character-dante"],
+        [src*="manager-zeus"]
+      )
+  )
+  > img {
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page.is-sovereign
+  #dossier-profile
+  .manager-portrait-frame:has(> img[src*="manager-zeus"])
+  > .sovereign-portrait-effects {
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #dossier-profile
+  .manager-portrait-frame:has(
+    > img:is(
+        [src*="civilian-yuma"],
+        [src*="civilian-bell"],
+        [src*="civilian-vandal"],
+        [src*="character-terra"],
+        [src*="character-james"],
+        [src*="character-dante"],
+        [src*="manager-zeus"]
+      )
+  )::before {
+  -webkit-mask-image: none;
+  mask-image: none;
+  background: linear-gradient(180deg, transparent 64%, rgb(3 5 10 / 46%) 84%, #03050a 100%);
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #dossier-profile
+  .manager-portrait-frame:has(
+    > img:is(
+        [src*="civilian-yuma"],
+        [src*="civilian-bell"],
+        [src*="civilian-vandal"],
+        [src*="character-terra"],
+        [src*="character-james"],
+        [src*="character-dante"],
+        [src*="manager-zeus"]
+      )
+  )::after {
+  -webkit-mask-image: none;
+  mask-image: none;
+  /* The hairline: along the top on a phone (the sides are the screen's),
+     all round where the art stands narrower than the stage. */
+  background:
+    linear-gradient(90deg, transparent, var(--sd-rule) 18%, var(--sd-rule) 82%, transparent) 0 0 /
+      100% 1px no-repeat,
+    radial-gradient(
+      64% 22% at 50% 0%,
+      color-mix(in srgb, var(--sd-accent) 18%, transparent),
+      transparent 72%
+    ),
+    radial-gradient(
+      84% 20% at 50% 104%,
+      color-mix(in srgb, var(--sd-accent) 46%, transparent),
+      transparent 72%
+    );
+}
+
+@media (min-width: 561px) {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    #dossier-profile
+    .manager-portrait-frame:has(
+      > img:is(
+          [src*="civilian-yuma"],
+          [src*="civilian-bell"],
+          [src*="civilian-vandal"],
+          [src*="character-terra"],
+          [src*="character-james"],
+          [src*="character-dante"],
+          [src*="manager-zeus"]
+        )
+    )::after {
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--sd-accent) 46%, transparent);
+  }
+}
+
+/* The split stage is the whole column: no frame, the rim light on the
+   words' side as on every file. */
+@supports (grid-template-rows: subgrid) {
+  @media (min-width: 1100px) and (min-height: 540px),
+    (min-width: 900px) and (min-height: 600px) and (orientation: landscape) {
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      #dossier-profile
+      .manager-portrait-frame:has(
+        > img:is(
+            [src*="civilian-yuma"],
+            [src*="civilian-bell"],
+            [src*="civilian-vandal"],
+            [src*="character-terra"],
+            [src*="character-james"],
+            [src*="character-dante"],
+            [src*="manager-zeus"]
+          )
+      )::after {
+      box-shadow: none;
+      background:
+        linear-gradient(
+          270deg,
+          color-mix(in srgb, var(--sd-accent) 26%, transparent),
+          transparent 84px
+        ),
+        radial-gradient(
+          64% 22% at 50% 0%,
+          color-mix(in srgb, var(--sd-accent) 18%, transparent),
+          transparent 72%
+        ),
+        radial-gradient(
+          84% 20% at 50% 104%,
+          color-mix(in srgb, var(--sd-accent) 46%, transparent),
+          transparent 72%
+        );
+    }
+  }
+}
+
 /* The file's number: a small HUD chip on the stage, not a numeral block. */
 html[data-family="dossier"]
   main.manager-page.manager-page.manager-page
@@ -2311,12 +2457,16 @@ html[data-family="dossier"]
     margin: 0;
   }
 
+  /* The board's line hangs from the slate's midline by its foot (bottom,
+     not translate: the arrival's rise animates translate and would drop it
+     onto the file label). */
   html[data-family="dossier"]
     main.manager-page.manager-page.manager-page:not(.is-sovereign)
     #dossier-profile
     .dossier-identity:has(> .manager-eyebrow)
     > .manager-eyebrow {
-    translate: 0 calc(-100% - 4px);
+    top: auto;
+    bottom: calc(100% - var(--sd-head) - var(--sd-headroom) / 2 + 4px);
   }
 
   html[data-family="dossier"]
