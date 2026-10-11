@@ -69,7 +69,7 @@ export async function buildExcelsior() {
     const output = `public/${EXCELSIOR_STAGE}${size ? `-delivery-${size}` : ""}.webp`;
     await sharp(source)
       .resize({ width: size ?? width, withoutEnlargement: true })
-      .webp({ quality: 88, alphaQuality: 100, effort: 6 })
+      .webp({ quality: size ? 84 : 90, alphaQuality: 100, effort: 6 })
       .toFile(root(output));
   }
   console.log("EXCELSIOR: owner alpha preserved", fitted.frame, fitted.placement);
