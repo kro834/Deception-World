@@ -1,4 +1,4 @@
-/* One title, one light path. Preserve the seven-second score, approved logo
+/* One title, one light path. Preserve the seven-second sequence, approved logo
    geometry and control deck; let the background recede as the prism arrives.
    The entrance appears when the title completes or the visitor skips it. */
 .cine-stage.cine-stage {
@@ -110,13 +110,19 @@
   pointer-events: none;
 }
 
+/* Once ready, only enabled buttons take pointer hits: the full-width deck's
+   empty space must pass through to SKIP, including during a replay. */
 .cine-stage[data-opening-entry="ready"] .cine-replay-slot {
   visibility: visible;
   opacity: 1;
-  pointer-events: auto;
+  pointer-events: none;
   transform: none;
   filter: none;
   transition: none;
+}
+
+.cine-stage[data-opening-entry="ready"] .cine-replay-slot > .cine-btn:not(:disabled) {
+  pointer-events: auto;
 }
 
 .cine-stage .cine-btn-secondary[hidden] {
@@ -238,6 +244,18 @@ html[data-world-effects="economy"] .cine-stage .cine-logo-wrap {
   .cine-stage .cine-replay-slot {
     gap: 12px;
   }
+
+  /* The entrance uses the final deck's full plate width. Give SKIP a separate
+     row above it rather than moving ENTER when the sequence completes. */
+  .cine-stage .cine-skip {
+    bottom: calc(max(10vh, 72px) + 52px + 12px);
+  }
+}
+
+@media (max-width: 360px) and (orientation: portrait) {
+  .cine-stage .cine-skip {
+    bottom: calc(max(8vh, 56px) + 48px + 12px);
+  }
 }
 
 @media (max-height: 560px) and (orientation: landscape) {
@@ -247,6 +265,10 @@ html[data-world-effects="economy"] .cine-stage .cine-logo-wrap {
 
   .cine-stage .cine-title-caption {
     line-height: 1.45;
+  }
+
+  .cine-stage .cine-skip {
+    bottom: calc(30px + 44px + 12px);
   }
 }
 

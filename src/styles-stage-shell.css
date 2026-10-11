@@ -2481,14 +2481,6 @@ html[data-family]
     > .side-panel-links {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-
-  html[data-family]
-    body
-    #site-side-panel.side-panel
-    > .side-panel-group:last-child
-    .ultra-mode-setting {
-    grid-column: 1 / -1;
-  }
 }
 
 @media (min-width: 1000px) {
@@ -2588,9 +2580,7 @@ html[data-family]
     --sh-tile-h: clamp(96px, 12vh, 132px);
   }
 
-  /* SYSTEM: the plates in two even rows on the left (フォームアーカイブ and
-     the Zeus switch, then オープニング), the Ultra setting beside them as
-     one block as tall as both rows. The reading order is the source's.
+  /* SYSTEM: retain the archive, Zeus switch and opening in source order.
      Four columns leave the switch and the archive's name room at 1180. */
   html[data-family]
     body
@@ -2606,23 +2596,12 @@ html[data-family]
     #site-side-panel.side-panel
     > .side-panel-group:last-child
     > .side-panel-links
-    > .ultra-mode-setting {
-    grid-column: 3 / span 2;
-    grid-row: 1 / span 2;
-    align-self: start;
-  }
-
-  html[data-family]
-    body
-    #site-side-panel.side-panel
-    > .side-panel-group:last-child
-    > .side-panel-links
     > a[href="/"] {
     grid-column: 1 / span 2;
   }
 
-  /* With the iPad's own setting: the three switches share the first row,
-     the Ultra setting and オープニング the second. */
+  /* With the iPad's own setting: the three controls share the first row,
+     followed by オープニング. */
   html[data-family]
     body
     #site-side-panel.side-panel
@@ -2639,16 +2618,6 @@ html[data-family]
     > .side-panel-links:has(> .ipad-menu-setting)
     > :is(a, .side-panel-zeus-toggle, .ipad-menu-setting) {
     grid-column: span 2;
-  }
-
-  html[data-family]
-    body
-    #site-side-panel.side-panel
-    > .side-panel-group:last-child
-    > .side-panel-links:has(> .ipad-menu-setting)
-    > .ultra-mode-setting {
-    grid-column: 1 / span 4;
-    grid-row: auto;
   }
 
   html[data-family]

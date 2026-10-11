@@ -20,11 +20,11 @@ import { ZeusButtonProvider } from "@/components/zeus-button";
 import { ContentProtection } from "@/components/content-protection";
 import { SkipLink } from "@/components/skip-link";
 import { IpadMenuMode } from "@/components/ipad-menu-mode";
-import { UltraModeRuntime } from "@/components/ultra/ultra-mode-runtime";
-import { ULTRA_MODE_BOOTSTRAP_SCRIPT } from "@/lib/ultra-mode.js";
+import { RETIRED_ULTRA_MODE_SCRIPT } from "@/lib/retired-ultra-mode";
 import { REXONANCE_LAYOUT_BOOT_SCRIPT } from "@/lib/rexonance-layout-gate.js";
 import { watchOpenDialogs } from "@/lib/dialog-open-flag.js";
 import { watchPresses } from "@/lib/press-feedback.js";
+import { SIDE_MENU_EARLY_INPUT_SCRIPT } from "@/lib/side-menu-early-input.js";
 import androidPerformanceCss from "../styles-android-performance.css?url";
 import ios18PerformanceCss from "../styles-ios18-performance.css?url";
 import ios27EnhancementsCss from "../styles-ios27-enhancements.css?url";
@@ -40,10 +40,6 @@ import chromeElevationCss from "../styles-chrome-elevation.css?url";
 import transitionCinemaCss from "../styles-transition-cinema.css?url";
 import rexonanceCallsCss from "../styles-rexonance-calls.css?url";
 import viewportChromeCss from "../styles-viewport-chrome.css?url";
-import ultraModeCss from "../styles-ultra-mode.css?url";
-import ultraEffectsCss from "../styles-ultra-effects.css?url";
-import ultraMaterialsCss from "../styles-ultra-materials.css?url";
-import ultraTransitionsCss from "../styles-ultra-transitions.css?url";
 import stageCss from "../styles-stage.css?url";
 import stageShellCss from "../styles-stage-shell.css?url";
 import { DEVICE_PROFILE_SCRIPT } from "@/lib/device-profile-gate";
@@ -141,8 +137,9 @@ export const Route = createRootRoute({
     scripts: [
       { children: IPAD_STANDALONE_VIEWPORT_SCRIPT },
       { children: DEVICE_PROFILE_SCRIPT },
-      { children: ULTRA_MODE_BOOTSTRAP_SCRIPT },
+      { children: RETIRED_ULTRA_MODE_SCRIPT },
       { children: REXONANCE_LAYOUT_BOOT_SCRIPT },
+      { children: SIDE_MENU_EARLY_INPUT_SCRIPT },
     ],
     links: [
       // The Zeus button's image, for every route that shows the button. The
@@ -187,10 +184,6 @@ export const Route = createRootRoute({
       { rel: "stylesheet", href: rexonanceCallsCss },
       { rel: "stylesheet", href: viewportChromeCss },
       { rel: "stylesheet", href: inquiryNavigationCss },
-      { rel: "stylesheet", href: ultraModeCss },
-      { rel: "stylesheet", href: ultraEffectsCss },
-      { rel: "stylesheet", href: ultraMaterialsCss },
-      { rel: "stylesheet", href: ultraTransitionsCss },
       // The site-wide interface tokens; each page family scopes its own
       // stage sheet to html[data-family].
       { rel: "stylesheet", href: stageCss },
@@ -246,7 +239,6 @@ function RootDocument() {
               <QuickSearchHost />
               <GalleryStickerWarmup />
               <IpadMenuMode />
-              <UltraModeRuntime />
             </ZeusButtonProvider>
           </LoadGateProvider>
         </AuthProvider>

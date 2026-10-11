@@ -47,7 +47,11 @@ test("rx17: each plate's gold forms right after it seats, quickly, and is done i
   );
   for (const { id } of REXONANCE_SUIT_PIECES) {
     // Owner (2026-10-11): the driver is finished from the start; no gold forms.
-    if (REXONANCE_SUIT_DRIVER.includes(id)) continue;
+    if (REXONANCE_SUIT_DRIVER.includes(id)) {
+      assert.equal(REXONANCE_SUIT_FIT[id], 0, `${id}: driver is finished from the start`);
+      assert.deepEqual(REXONANCE_SUIT_GOLD_AT[id], [0, 0], `${id}: no driver gold formation`);
+      continue;
+    }
     const [from, to] = REXONANCE_SUIT_GOLD_AT[id];
     const fit = REXONANCE_SUIT_FIT[id];
     // It starts within 0-40 ms of the plate's clank.
@@ -81,6 +85,12 @@ test("rx17: each plate's gold forms right after it seats, quickly, and is done i
   // The nanites' flight and cooling are short beats of the formation.
   assert.ok(REXONANCE_SUIT_GOLD.approach < REXONANCE_SUIT_GOLD.form / 2);
   assert.ok(REXONANCE_SUIT_GOLD.cool < REXONANCE_SUIT_GOLD.form / 2);
+  // Keep the published short-cover clocks while retaining the material
+  // repair. No merge may silently restore the earlier long face hold.
+  assert.equal(Math.max(...Object.values(REXONANCE_SUIT_GOLD_AT).map(([, to]) => to)), 1986);
+  assert.equal(REXONANCE_SUIT_PIXELS.fill, 1990);
+  assert.equal(REXONANCE_SUIT_PIXELS.scatter, 2520);
+  assert.equal(REXONANCE_ENTRY_TIMINGS.cover, 2730);
 });
 
 test("rx17: the gold atlas and the gold cells, generated with the plates", async () => {
@@ -160,6 +170,10 @@ test("rx17: the gold mask holds the bronze trims, not the crystals; unformed, it
   let under = 0;
   let underLight = 0;
   let underChroma = 0;
+  let underVoid = 0;
+  const criticalRaw = Object.fromEntries(
+    ["helm", "tail", "ribbon"].map((group) => [group, { pixels: 0, light: 0, voids: 0 }]),
+  );
   for (const piece of REXONANCE_SUIT_PIECES) {
     for (let y = piece.ay; y < piece.ay + piece.h; y += 1) {
       for (let x = piece.ax; x < piece.ax + piece.w; x += 1) {
@@ -178,8 +192,16 @@ test("rx17: the gold mask holds the bronze trims, not the crystals; unformed, it
         if (gold.data[g + 3] > 230) {
           const [r, gg, b] = [gold.data[g], gold.data[g + 1], gold.data[g + 2]];
           under += 1;
-          underLight += (0.2126 * r + 0.7152 * gg + 0.0722 * b) / 255;
+          const luminance = (0.2126 * r + 0.7152 * gg + 0.0722 * b) / 255;
+          underLight += luminance;
+          if (luminance < 40 / 255) underVoid += 1;
           underChroma += (Math.max(r, gg, b) - Math.min(r, gg, b)) / 255;
+          const critical = criticalRaw[groupOf[piece.id]];
+          if (critical) {
+            critical.pixels += 1;
+            critical.light += luminance;
+            if (luminance < 40 / 255) critical.voids += 1;
+          }
         }
       }
     }
@@ -193,6 +215,45 @@ test("rx17: the gold mask holds the bronze trims, not the crystals; unformed, it
   // Unformed metal: dark and nearly neutral (a cool gunmetal), never gold.
   assert.ok(underLight / under < 0.3, `raw light ${(underLight / under).toFixed(3)}`);
   assert.ok(underChroma / under < 0.12, `raw chroma ${(underChroma / under).toFixed(3)}`);
+  // It is dark steel, not absent geometry: preserve a material floor under
+  // the forming gold instead of broad near-black holes on the black suit.
+  assert.ok(underLight / under > 0.2, `raw metal floor ${(underLight / under).toFixed(3)}`);
+  assert.ok(underVoid / under < 0.15, `void-like raw pixels ${(underVoid / under).toFixed(3)}`);
+  for (const [group, { pixels, light, voids }] of Object.entries(criticalRaw)) {
+    assert.ok(pixels > 0, `${group}: raw metal present`);
+    assert.ok(light / pixels > 0.2, `${group}: raw metal floor ${(light / pixels).toFixed(3)}`);
+    assert.ok(
+      voids / pixels < 0.15,
+      `${group}: void-like raw pixels ${(voids / pixels).toFixed(3)}`,
+    );
+  }
+});
+
+test("rx17: the molten grains contract inside their cells and leave the trim and crystals legible", () => {
+  const heat = nanites.slice(
+    nanites.indexOf("const HEAT = ["),
+    nanites.indexOf("] as const;", nanites.indexOf("const HEAT = [")),
+  );
+  const glints = nanites.slice(
+    nanites.indexOf("const GLINT = ["),
+    nanites.indexOf("] as const;", nanites.indexOf("const GLINT = [")),
+  );
+  const values = (source) =>
+    [...source.matchAll(/\["#[0-9a-f]+", ([\d.]+), ([\d.]+)\]/g)].map(([, alpha, size]) => [
+      Number(alpha),
+      Number(size),
+    ]);
+  const hot = values(heat);
+  const sparkle = values(glints);
+  assert.equal(hot.length, 3);
+  assert.equal(sparkle.length, 2);
+  for (const [alpha, size] of [...hot, ...sparkle]) {
+    assert.ok(alpha > 0 && alpha < 0.8, String(alpha));
+    assert.ok(size > 0 && size <= 0.7, String(size));
+  }
+  assert.ok(hot[0][1] > hot[1][1] && hot[1][1] > hot[2][1], "grains shrink as they cool");
+  assert.match(nanites, /const size = G \* \(0\.22 \+ 0\.42 \* e\)/);
+  assert.match(nanites, /const BLOOM = \["#[0-9a-f]+", 0\.1, 1\.4\]/);
 });
 
 test("rx17: the engine forms each plate's gold on it right after it seats and ends on the art", () => {
@@ -242,8 +303,11 @@ test("rx17: the engine forms each plate's gold on it right after it seats and en
   // Only what is still forming is drawn: settled plates skip the frame.
   assert.match(draw, /if \(t < plate\.spawn \|\| \(done\[p\] && t >= plate\.last\)\) continue;/);
   // The plan and the working atlas are prepared in idle slices ahead of the call.
-  assert.match(plan, /export function prepareRexonanceSuit\(\)/);
-  assert.match(plan, /requestIdleCallback\(slice, \{ timeout: 600 \}\)/);
+  assert.match(plan, /export function prepareRexonanceSuit\(priority: "low" \| "high" = "low"\)/);
+  // Background preparation keeps its idle budget; foreground intent can
+  // promote that same plan without creating a second build.
+  assert.match(plan, /if \(!urgent && globalThis\.requestIdleCallback\)/);
+  assert.match(plan, /requestIdleCallback\(resume, \{ timeout: 600 \}\)/);
   assert.match(nanites, /from "\.\/rexonance-suit-plan";/);
 });
 
@@ -257,7 +321,7 @@ test("rx17: the call's chunk, layers and plan are prepared ahead of the tap", ()
   );
   assert.match(
     warmup,
-    /import\("\.\.\/components\/rexonance-saga\/rexonance-suit-plan"\)\.then\(\s*\(plan\) => plan\.prepareRexonanceSuit\(\),/,
+    /import\("\.\.\/components\/rexonance-saga\/rexonance-suit-plan"\)\.then\(\s*\(plan\) => \{[^]*?if \(document\.hidden \|\| backgroundPauses\) \{\s*planWaiting = true;\s*return;\s*\}[^]*?return plan\.prepareRexonanceSuit\(\);/,
   );
   // On every route (the owner's [pathname] schedule; leaving /rexonance-saga warms it).
   assert.match(gate, /useEffect\(\(\) => scheduleRexonanceSuitWarm\(\), \[pathname\]\);/);

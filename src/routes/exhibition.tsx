@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { GALLERY_ARTWORKS } from "@/components/gallery/gallery-data";
-import { ExhibitionStudio } from "@/components/ultra/exhibition-studio";
-import { useUltraArtworkReady } from "@/lib/use-ultra-artwork-ready";
+import { ExhibitionStudio } from "@/components/exhibition/exhibition-studio";
+import { useExhibitionArtworkReady } from "@/lib/use-exhibition-artwork-ready";
 import { createWorldHead, WORLD_CORE_STYLESHEET_LINKS } from "@/lib/world-head";
 import studioCssUrl from "@/styles-exhibition-studio.css?url";
 
@@ -24,7 +24,7 @@ export const Route = createFileRoute("/exhibition")({
 function ExhibitionRoom() {
   const { work } = Route.useSearch();
   const navigate = Route.useNavigate();
-  const ready = useUltraArtworkReady();
+  const ready = useExhibitionArtworkReady();
   const index = Math.max(
     0,
     GALLERY_ARTWORKS.findIndex((art) => art.id === work),

@@ -342,8 +342,8 @@ export async function createExhibitionStudio(
     decodedSize = [artwork.bitmap.width, artwork.bitmap.height];
     dimensions = getExhibitionDimensions(...decodedSize);
     const optionalMaps = await Promise.allSettled([
-      imageTexture("/ultra-materials/brushed-alloy-normal.png", false),
-      imageTexture("/ultra-materials/brushed-alloy-roughness.png", false),
+      imageTexture("/exhibition-metal/brushed-alloy-normal.png", false),
+      imageTexture("/exhibition-metal/brushed-alloy-roughness.png", false),
       studioEnvironment(),
       imageTexture("/exhibition-studio/plaster-normal.png", false),
       imageTexture("/exhibition-studio/plaster-roughness.png", false),

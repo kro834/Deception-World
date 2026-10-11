@@ -34,6 +34,9 @@ function entryRuntime({
   const navigations = [];
   const handoffs = [];
   const chunkRequests = [];
+  class Element {
+    closest() { return null; }
+  }
   const events = new EventTarget();
   const document = new EventTarget();
   Object.assign(document, {
@@ -130,6 +133,7 @@ function entryRuntime({
     window: runtime,
     document,
     navigator,
+    Element,
     performance: { now: () => now, getEntriesByType: () => [] },
     URLSearchParams,
     require: (name) => {
@@ -168,6 +172,16 @@ function entryRuntime({
     document,
     video,
     chunkRequests,
+    key(key) {
+      const event = new Event("keydown", { cancelable: true });
+      Object.defineProperties(event, {
+        key: { value: key },
+        repeat: { value: false },
+        target: { value: new Element() },
+      });
+      events.dispatchEvent(event);
+      return event;
+    },
     unmount() {
       for (const effect of effects) effect?.cleanup?.();
       effects.length = 0;
@@ -270,6 +284,45 @@ test("the entrance is hidden and disabled throughout idle and playing", () => {
   assert.match(css, /:not\(\[data-opening-entry="ready"\]\) \.cine-replay-slot\s*\{[^}]*visibility: hidden;[^}]*pointer-events: none;/);
 });
 
+test("the ready control deck passes empty pointer hits through while enabled child buttons remain live", () => {
+  assert.match(
+    css,
+    /\.cine-stage\[data-opening-entry="ready"\] \.cine-replay-slot \{[^}]*opacity: 1;[^}]*pointer-events: none;/,
+  );
+  assert.match(
+    css,
+    /\.cine-stage\[data-opening-entry="ready"\] \.cine-replay-slot > \.cine-btn:not\(:disabled\) \{\s*pointer-events: auto;/,
+  );
+});
+
+test("SKIP has its own row above the final entrance at narrow portrait and short landscape sizes", () => {
+  assert.match(css, /bottom: calc\(max\(10vh, 72px\) \+ 52px \+ 12px\);/);
+  assert.match(css, /bottom: calc\(max\(8vh, 56px\) \+ 48px \+ 12px\);/);
+  assert.match(css, /bottom: calc\(30px \+ 44px \+ 12px\);/);
+});
+
+test("real opening gestures, M presses and repeated replays have no sound control or stage unlock", () => {
+  const ui = entryRuntime({ runEffects: true, profileDevice: { connection: { saveData: true } } });
+  for (let run = 0; run < 3; run++) {
+    ui.render();
+    ui.advance(120);
+    const playing = ui.render();
+    assert.equal(ui.state[0], "playing");
+    assert.equal(playing.tree.props.onPointerDown, undefined, "background taps no longer unlock sound");
+    const before = [...ui.state];
+    const m = ui.key("m");
+    assert.deepEqual(ui.state, before, "M does not mutate any opening state");
+    assert.equal(m.defaultPrevented, false, "M is not an opening shortcut");
+    playing.skip.onClick({ detail: 0 });
+    const complete = ui.render();
+    assert.equal(ui.state[0], "complete");
+    assert.equal(complete.replay.hidden, false);
+    complete.replay.onClick({ detail: 0 });
+    assert.equal(ui.state[0], "idle");
+  }
+  ui.unmount();
+});
+
 test("skip reveals the final entrance and replay deck", () => {
   const ui = entryRuntime();
   ui.state[0] = "playing";
@@ -307,7 +360,7 @@ for (const [name, profileDevice] of [
     const first = ui.render();
     assert.equal(ui.document.documentElement.dataset.worldEffects, "economy");
     assert.equal(first.particles.active, false, "the first SSR-compatible idle frame starts no particles");
-    assert.equal(ui.state[3], true, "the committed mount effect adopts the pre-paint profile");
+    assert.equal(ui.state[1], true, "the committed mount effect adopts the pre-paint profile");
     ui.render();
     ui.advance(120);
     const playing = ui.render();

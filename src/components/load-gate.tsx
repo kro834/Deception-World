@@ -25,8 +25,10 @@ import {
   type RexonanceTransitionRenderer,
 } from "@/lib/rexonance-transition-loader";
 import { REXONANCE_ENTRY_TIMINGS, REXONANCE_SUIT_LATE_MS } from "@/lib/rexonance-calls";
+import { prepareRexonanceEntry } from "@/lib/rexonance-entry-preparation";
 import {
   isRexonanceSuitReady,
+  pauseRexonanceSuitWarmup,
   scheduleRexonancePagePreload,
   scheduleRexonanceSuitWarm,
   warmRexonanceSuit,
@@ -403,6 +405,7 @@ function composeScene({
   timings,
   assets,
   to,
+  callOnly = false,
 }: {
   tier: CineScene["tier"];
   kind: CineScene["kind"];
@@ -410,7 +413,32 @@ function composeScene({
   timings: { cover: number; reveal: number };
   assets: readonly string[];
   to: string;
+  callOnly?: boolean;
 }): CineScene {
+  // The Rexonance call carries no pressed portrait. Keep only its timing
+  // and tier metadata; measuring the closing menu would force a document
+  // layout that the call never uses.
+  if (callOnly) {
+    lastPress = null;
+    const frame = centredRect(0, 0);
+    return {
+      kind,
+      dir: 1,
+      tier,
+      origin: frame,
+      frame,
+      landing: null,
+      plate: null,
+      platePosition: null,
+      hold: null,
+      art: null,
+      artRect: null,
+      artPosition: "center",
+      file: null,
+      cover: timings.cover,
+      reveal: timings.reveal,
+    };
+  }
   const target = takePress();
   // The ink closes onto the pressed card's picture; only a file frame
   // carries it.
@@ -876,6 +904,20 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
   const [delayedRoute, setDelayedRoute] = useState<{ href: string; focus: boolean } | null>(null);
   const delayRetryRef = useRef<HTMLAnchorElement>(null);
   const scrollMotionReleases = useRef(new Set<() => void>());
+  const suitWarmReleases = useRef(new Set<() => void>());
+  const holdSuitWarmup = useCallback((preserveIntent = false) => {
+    const releases = suitWarmReleases.current;
+    const resume = pauseRexonanceSuitWarmup(preserveIntent);
+    let released = false;
+    const release = () => {
+      if (released) return;
+      released = true;
+      releases.delete(release);
+      resume();
+    };
+    releases.add(release);
+    return release;
+  }, []);
   const holdManagedScrollMotion = useCallback(() => {
     const release = holdRouteScrollMotion();
     const releaseManaged = () => {
@@ -1023,6 +1065,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
       rexonanceCoverCancel.current = null;
       routeHashSettle += 1;
       pendingScrollReleases.forEach((release) => release());
+      pendingSuitWarmReleases.forEach((release) => release());
       window.clearTimeout(signalTimer.current);
       window.clearTimeout(arrivalTimer.current);
       for (const frame of openingFocusFrames.current) {
@@ -1043,6 +1086,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
       setSignal("idle");
       setDelayedRoute(null);
     };
+    const pendingSuitWarmReleases = suitWarmReleases.current;
     document.addEventListener("deception-world:cancel-route-transition", cancelTransition);
     window.addEventListener("pagehide", cancelTransition);
     const cancelHiddenRexonance = () => {
@@ -1069,6 +1113,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
       rexonanceCoverCancel.current = null;
       routeHashSettle += 1;
       pendingScrollReleases.forEach((release) => release());
+      pendingSuitWarmReleases.forEach((release) => release());
       window.clearTimeout(signalTimer.current);
       window.clearTimeout(arrivalTimer.current);
       stopHistory();
@@ -1125,376 +1170,475 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
       transitionCovered,
       focusDestination,
     }: GoOptions) => {
-      const navigationSearch = search ? () => search : undefined;
-      if (transitionCovered) {
-        const runtime = openingHandoff.current;
-        if (!runtime || to !== "/world") return;
-        const requestId = runtime.token;
-        const isCurrent = () =>
-          transitionId.current === requestId && openingHandoff.current?.token === requestId;
+      if (!transitionCovered && busy.current) return;
+      const releaseSuitWarmup = holdSuitWarmup(to === "/rexonance-saga");
+      try {
+        const navigationSearch = search ? () => search : undefined;
+        if (transitionCovered) {
+          const runtime = openingHandoff.current;
+          if (!runtime || to !== "/world") return;
+          const requestId = runtime.token;
+          const isCurrent = () =>
+            transitionId.current === requestId && openingHandoff.current?.token === requestId;
 
-        try {
-          // Build both warmups inside the guarded region. Besides turning a
-          // synchronous router/preloader failure into a handled rejection,
-          // this guarantees the shared handoff is released by `finally`.
-          const routeWarmup = Promise.resolve()
-            .then(() => router.preloadRoute({ to: to as never }))
-            .catch(() => undefined);
-          const assetWarmup = assets.length
-            ? Promise.resolve()
-                .then(() => preloadAssets(assets, () => undefined))
-                .catch(() => undefined)
-            : Promise.resolve();
+          try {
+            // Build both warmups inside the guarded region. Besides turning a
+            // synchronous router/preloader failure into a handled rejection,
+            // this guarantees the shared handoff is released by `finally`.
+            const routeWarmup = Promise.resolve()
+              .then(() => router.preloadRoute({ to: to as never }))
+              .catch(() => undefined);
+            const assetWarmup = assets.length
+              ? Promise.resolve()
+                  .then(() => preloadAssets(assets, () => undefined))
+                  .catch(() => undefined)
+              : Promise.resolve();
 
-          // The opening owns the screen until the shared layer has painted its
-          // complete cover: the dive lands on a still of the world (about
-          // 1.45 s, plus up to 0.45 s for GL). A fail-safe prevents a
-          // permanently stuck route if the browser aborts animation callbacks
-          // while backgrounded.
-          await Promise.race([runtime.covered.promise, wait(2600)]);
-          if (!isCurrent()) return;
-          await Promise.race([Promise.all([routeWarmup, assetWarmup]), wait(2400)]);
-          if (!isCurrent()) return;
-          await navigate({ to, hash, search: navigationSearch });
-          if (!isCurrent()) return;
-          const destination = await Promise.race([
-            runtime.destination.promise,
-            wait(2200).then(() => null),
-          ]);
-          if (!isCurrent() || !destination) return;
-          setOpeningSnapshot({
-            token: requestId,
-            phase: "arriving",
-            source: runtime.source,
-            destination,
-          });
-          // The destination now owns document scrolling. Keep the handoff
-          // artwork alive for its arrival animation, but release the global
-          // loading lock before waiting for that animation to complete.
-          document.documentElement.removeAttribute("data-loading");
-          // The destination must paint twice before FLIP reads its geometry.
-          // This prevents zero-sized target rects during iOS viewport changes.
-          await nextFrame();
-          await nextFrame();
-          if (!isCurrent()) return;
-          await Promise.race([runtime.animation.promise, wait(1800)]);
-          if (!isCurrent()) return;
-        } finally {
-          if (isCurrent()) finishOpeningHandoff(requestId);
-        }
-        return;
-      }
-      if (busy.current) return;
-      setDelayedRoute(null);
-      const changesDocument = pathname !== to;
-      const isGalleryTransition = changesDocument && to === "/gallery";
-      const isArchiveTransition =
-        changesDocument &&
-        to !== "/rexonance-saga" &&
-        (pathname === "/form-archive" || to === "/form-archive");
-      const isZeusTransition = changesDocument && to === "/managers/zeus";
-      const isDreamTransition =
-        pathname !== to && (to === "/dream-chapter" || transition === "dream");
-      const diveVariant = isDreamTransition
-        ? "dream"
-        : changesDocument
-          ? RIDER_DIVE_ROUTES[to as keyof typeof RIDER_DIVE_ROUTES]
-          : undefined;
-      const cutInVariant = changesDocument
-        ? RIDER_CUT_IN_ROUTES[to as keyof typeof RIDER_CUT_IN_ROUTES]
-        : undefined;
-      const riderTransitionVariant = diveVariant ?? cutInVariant;
-      const requestId = ++transitionId.current;
-      const isCurrent = () => transitionId.current === requestId;
-      const warmCoveredDestination = async () => {
-        const ready = await preloadRouteWithDeadline(() =>
-          router.preloadRoute({ to: to as never }),
-        );
-        if (!isCurrent()) return false;
-        if (!ready)
-          setDelayedRoute({ href: guardedHref(to, hash, search), focus: Boolean(focusDestination) });
-        return ready;
-      };
-      if (
-        !isArchiveTransition &&
-        !isZeusTransition &&
-        !isGalleryTransition &&
-        !riderTransitionVariant
-      ) {
-        const releaseScrollMotion = changesDocument || hash ? holdManagedScrollMotion() : null;
-        const assetWarmup = assets.length
-          ? preloadAssets(assets, () => undefined).catch(() => undefined)
-          : null;
-        // The signal paints before the route's work starts (one frame).
-        const signalled =
-          changesDocument && !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-        lastPress = null;
-        try {
-          if (signalled) {
-            window.clearTimeout(signalTimer.current);
-            setSignal("running");
+            // The opening owns the screen until the shared layer has painted its
+            // complete cover: the dive lands on a still of the world (about
+            // 1.45 s, plus up to 0.45 s for GL). A fail-safe prevents a
+            // permanently stuck route if the browser aborts animation callbacks
+            // while backgrounded.
+            await Promise.race([runtime.covered.promise, wait(2600)]);
+            if (!isCurrent()) return;
+            await Promise.race([Promise.all([routeWarmup, assetWarmup]), wait(2400)]);
+            if (!isCurrent()) return;
+            await navigate({ to, hash, search: navigationSearch });
+            if (!isCurrent()) return;
+            const destination = await Promise.race([
+              runtime.destination.promise,
+              wait(2200).then(() => null),
+            ]);
+            if (!isCurrent() || !destination) return;
+            setOpeningSnapshot({
+              token: requestId,
+              phase: "arriving",
+              source: runtime.source,
+              destination,
+            });
+            // The destination now owns document scrolling. Keep the handoff
+            // artwork alive for its arrival animation, but release the global
+            // loading lock before waiting for that animation to complete.
+            document.documentElement.removeAttribute("data-loading");
+            // The destination must paint twice before FLIP reads its geometry.
+            // This prevents zero-sized target rects during iOS viewport changes.
             await nextFrame();
+            await nextFrame();
+            if (!isCurrent()) return;
+            await Promise.race([runtime.animation.promise, wait(1800)]);
+            if (!isCurrent()) return;
+          } finally {
+            if (isCurrent()) finishOpeningHandoff(requestId);
           }
-          if (!isCurrent()) return;
-          // A section jump stays in the current document, including its
-          // selected archive. Only a new document starts with fresh search.
-          await navigate({ to, hash, search: navigationSearch ?? (changesDocument ? undefined : true) });
-          if (!isCurrent()) return;
-          if (focusDestination) focusRouteDestination(hash);
-          if (hash) await settleRouteHash(hash);
-        } finally {
-          void assetWarmup;
-          if (releaseScrollMotion) window.setTimeout(releaseScrollMotion, 360);
-          if (signalled && isCurrent()) {
-            setSignal("done");
-            signalTimer.current = window.setTimeout(() => setSignal("idle"), 320);
-          }
+          return;
         }
-        return;
-      }
-      busy.current = true;
-      let startedAt = performance.now();
-      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      const tier = cineTier(reduceMotion);
+        if (busy.current) return;
+        setDelayedRoute(null);
+        const changesDocument = pathname !== to;
+        const isGalleryTransition = changesDocument && to === "/gallery";
+        const isArchiveTransition =
+          changesDocument &&
+          to !== "/rexonance-saga" &&
+          (pathname === "/form-archive" || to === "/form-archive");
+        const isZeusTransition = changesDocument && to === "/managers/zeus";
+        const isDreamTransition =
+          pathname !== to && (to === "/dream-chapter" || transition === "dream");
+        const diveVariant = isDreamTransition
+          ? "dream"
+          : changesDocument
+            ? RIDER_DIVE_ROUTES[to as keyof typeof RIDER_DIVE_ROUTES]
+            : undefined;
+        const cutInVariant = changesDocument
+          ? RIDER_CUT_IN_ROUTES[to as keyof typeof RIDER_CUT_IN_ROUTES]
+          : undefined;
+        const riderTransitionVariant = diveVariant ?? cutInVariant;
+        const requestId = ++transitionId.current;
+        const isCurrent = () => transitionId.current === requestId;
+        const warmCoveredDestination = async () => {
+          const ready = await preloadRouteWithDeadline(() =>
+            router.preloadRoute({ to: to as never }),
+          );
+          if (!isCurrent()) return false;
+          if (!ready)
+            setDelayedRoute({ href: guardedHref(to, hash, search), focus: Boolean(focusDestination) });
+          return ready;
+        };
+        if (
+          !isArchiveTransition &&
+          !isZeusTransition &&
+          !isGalleryTransition &&
+          !riderTransitionVariant
+        ) {
+          const releaseScrollMotion = changesDocument || hash ? holdManagedScrollMotion() : null;
+          const assetWarmup = assets.length
+            ? preloadAssets(assets, () => undefined).catch(() => undefined)
+            : null;
+          // The signal paints before the route's work starts (one frame).
+          const signalled =
+            changesDocument && !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+          lastPress = null;
+          try {
+            if (signalled) {
+              window.clearTimeout(signalTimer.current);
+              setSignal("running");
+              await nextFrame();
+            }
+            if (!isCurrent()) return;
+            // A section jump stays in the current document, including its
+            // selected archive. Only a new document starts with fresh search.
+            await navigate({ to, hash, search: navigationSearch ?? (changesDocument ? undefined : true) });
+            if (!isCurrent()) return;
+            if (focusDestination) focusRouteDestination(hash);
+            if (hash) await settleRouteHash(hash);
+          } finally {
+            void assetWarmup;
+            if (releaseScrollMotion) window.setTimeout(releaseScrollMotion, 360);
+            if (signalled && isCurrent()) {
+              setSignal("done");
+              signalTimer.current = window.setTimeout(() => setSignal("idle"), 320);
+            }
+          }
+          return;
+        }
+        busy.current = true;
+        let startedAt = performance.now();
+        const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        const tier = cineTier(reduceMotion);
 
-      if (isGalleryTransition) {
-        const releaseScrollMotion = holdManagedScrollMotion();
-        const timings =
-          tier === "full" ? { cover: 720, reveal: 1120 } : { cover: 100, reveal: 240 };
-        document.documentElement.dataset.loading = "true";
-        markRouteCover("covering");
-        setGate({ active: true, percent: 100, variant: "gallery", phase: "covering", scene: null });
-        try {
-          await nextFrame();
-          await nextFrame();
-          if (!isCurrent() || !(await warmCoveredDestination())) return;
-          const remaining = timings.cover - (performance.now() - startedAt);
-          if (remaining > 0) await wait(remaining);
-          if (!isCurrent()) return;
-          await navigateUnderCover(router, () => navigate({ to, hash, search: navigationSearch }), to);
-          if (!isCurrent()) return;
-          if (focusDestination) focusRouteDestination(hash);
-          await settleUnderCover();
-          if (!isCurrent()) return;
-          document.documentElement.removeAttribute("data-loading");
-          markRouteCover("revealing");
+        if (isGalleryTransition) {
+          const releaseScrollMotion = holdManagedScrollMotion();
+          const timings =
+            tier === "full" ? { cover: 720, reveal: 1120 } : { cover: 100, reveal: 240 };
+          document.documentElement.dataset.loading = "true";
+          markRouteCover("covering");
           setGate({
             active: true,
             percent: 100,
             variant: "gallery",
-            phase: "revealing",
+            phase: "covering",
             scene: null,
           });
-          await revealRan(timings.reveal);
-        } finally {
-          window.setTimeout(releaseScrollMotion, 360);
-          if (isCurrent()) {
+          try {
+            await nextFrame();
+            await nextFrame();
+            if (!isCurrent() || !(await warmCoveredDestination())) return;
+            const remaining = timings.cover - (performance.now() - startedAt);
+            if (remaining > 0) await wait(remaining);
+            if (!isCurrent()) return;
+            await navigateUnderCover(router, () => navigate({ to, hash, search: navigationSearch }), to);
+            if (!isCurrent()) return;
+            if (focusDestination) focusRouteDestination(hash);
+            await settleUnderCover();
+            if (!isCurrent()) return;
             document.documentElement.removeAttribute("data-loading");
-            markRouteCover("settling");
-            setGate({ active: false, percent: 0, variant: "archive", phase: "covering" });
-            busy.current = false;
-          }
-        }
-        return;
-      }
-
-      if (riderTransitionVariant && !isArchiveTransition) {
-        const releaseScrollMotion = holdManagedScrollMotion();
-        if (diveVariant === "rexonance") rexonanceTransition.current = requestId;
-        let rexonanceCall: RexonanceTransitionRenderer | null = null;
-        // rx12: the suit-up's pieces decode beside the call's chunk (most
-        // often already warm from the link's intent); the call never waits
-        // for them.
-        const rexonanceSuitWarm =
-          diveVariant === "rexonance" && tier === "full" ? warmRexonanceSuit("high") : null;
-        let rexonanceSuit: "build" | "whole" = "whole";
-        if (diveVariant === "rexonance") {
-          const preparation = prepareRexonanceTransition();
-          rexonanceCoverCancel.current = preparation.cancel;
-          rexonanceCall = await preparation.promise;
-          if (rexonanceCoverCancel.current === preparation.cancel)
-            rexonanceCoverCancel.current = null;
-          if (!isCurrent()) return;
-          startedAt = performance.now();
-          if (isRexonanceSuitReady()) rexonanceSuit = "build";
-        }
-        // PREV / NEXT between dossiers flips the file; entry from anywhere
-        // else keeps the rider's own dive or cut-in.
-        const flip =
-          DETAIL_ROUTE.test(pathname) &&
-          DETAIL_ROUTE.test(to) &&
-          Boolean(lastPress?.target.closest(".manager-pagination"));
-        const timings = reduceMotion
-          ? { cover: 100, reveal: 160 }
-          : tier === "calm"
-            ? CALM_TIMINGS
-            : flip
-              ? FILE_FLIP_TIMINGS
-              : diveVariant
-                ? diveVariant === "rexonance" && !rexonanceCall
-                  ? CALM_TIMINGS
-                  : RIDER_DIVE_TIMINGS[diveVariant]
-                : cutInVariant
-                  ? RIDER_CUT_IN_TIMINGS[cutInVariant]
-                  : CALM_TIMINGS;
-        const scene =
-          cutInVariant === "ciel"
-            ? null
-            : composeScene({
-                tier,
-                kind: flip ? "flip" : "iris",
-                frameKind: diveVariant || flip ? "file" : "screen",
-                timings,
-                assets,
-                to,
-              });
-        document.documentElement.dataset.loading = "true";
-        markRouteCover("covering");
-        setGate({
-          active: true,
-          percent: 100,
-          variant: riderTransitionVariant,
-          phase: "covering",
-          scene,
-          rexonanceCall,
-          rexonanceSuit,
-        });
-        try {
-          if (assets.length) {
-            void preloadAssets(assets, () => undefined).catch(() => undefined);
-          }
-          // rx12: pieces that finish decoding while FAR UP！'s scan still
-          // runs switch the call to the build (its clock is already
-          // running unseen); later, the finished figure stays.
-          if (rexonanceCall && rexonanceSuit === "whole" && rexonanceSuitWarm) {
-            void rexonanceSuitWarm.then((decoded) => {
-              if (
-                !decoded ||
-                !isCurrent() ||
-                performance.now() - startedAt > REXONANCE_SUIT_LATE_MS
-              )
-                return;
-              rexonanceSuit = "build";
-              setGate((current) =>
-                current.active && current.phase === "covering" && current.rexonanceCall
-                  ? { ...current, rexonanceSuit }
-                  : current,
-              );
+            markRouteCover("revealing");
+            setGate({
+              active: true,
+              percent: 100,
+              variant: "gallery",
+              phase: "revealing",
+              scene: null,
             });
+            await revealRan(timings.reveal);
+          } finally {
+            window.setTimeout(releaseScrollMotion, 360);
+            if (isCurrent()) {
+              document.documentElement.removeAttribute("data-loading");
+              markRouteCover("settling");
+              setGate({ active: false, percent: 0, variant: "archive", phase: "covering" });
+              busy.current = false;
+            }
           }
-          // Mobile Safari may coalesce the state update with route/module work.
-          // Paint both cinematic entries before loading their route chunk.
-          if (diveVariant === "dream" || diveVariant === "rexonance") {
+          return;
+        }
+
+        if (riderTransitionVariant && !isArchiveTransition) {
+          const releaseScrollMotion = holdManagedScrollMotion();
+          if (diveVariant === "rexonance") rexonanceTransition.current = requestId;
+          let rexonanceCall: RexonanceTransitionRenderer | null = null;
+          // The suit's pieces decode beside the call chunk. A cold entry has
+          // a finite, cancellable preparation window before its clock begins;
+          // the five calls and face-pixel hold keep their original timing.
+          const rexonanceSuitWarm =
+            diveVariant === "rexonance" && tier === "full" ? warmRexonanceSuit("high") : null;
+          let rexonanceSuit: "build" | "whole" = "whole";
+          if (diveVariant === "rexonance") {
+            const preparation = prepareRexonanceTransition();
+            rexonanceCoverCancel.current = preparation.cancel;
+            rexonanceCall = await preparation.promise;
+            if (rexonanceCoverCancel.current === preparation.cancel)
+              rexonanceCoverCancel.current = null;
+            if (!isCurrent()) return;
+            // A cached chunk must not join the tap, menu close and overlay
+            // render into one long task. Paint the close first. Prepare the
+            // real engine in short slices before mounting it. A cold phone
+            // gets a bounded preparation window rather than losing the
+            // nanite engine simply because the atlas misses the first 300 ms.
+            // No preparation changes the call's clock or can hold go forever.
+            if (rexonanceCall && tier === "full") setSignal("running");
             await nextFrame();
             await nextFrame();
             if (!isCurrent()) return;
-            // Rexonance's five calls run from the first painted frame, not
-            // from the click (which may have included a long layout task).
-            if (diveVariant === "rexonance") startedAt = performance.now();
+            if (rexonanceCall && tier === "full" && rexonanceSuitWarm) {
+              const entry = prepareRexonanceEntry({
+                decoded: rexonanceSuitWarm,
+                prepare: () =>
+                  import("./rexonance-saga/rexonance-suit-plan").then((plan) =>
+                    isCurrent() ? plan.prepareRexonanceSuit("high") : false,
+                  ),
+                // Decoded bitmaps do not mean the sliced light/atlas plan is
+                // finished. Give both one finite preparation budget; a cached
+                // plan resolves immediately, without adding a warm-entry delay.
+                deadlineMs: 1800,
+              });
+              rexonanceCoverCancel.current = entry.cancel;
+              await entry.promise;
+              if (rexonanceCoverCancel.current === entry.cancel)
+                rexonanceCoverCancel.current = null;
+              if (!isCurrent()) return;
+            }
+            setSignal("idle");
+            startedAt = performance.now();
+            if (isRexonanceSuitReady()) rexonanceSuit = "build";
           }
-          // Images warm independently of the route chunk. A stalled chunk
-          // releases the cover before navigation, rather than locking the page.
-          if (!(await warmCoveredDestination())) return;
-          const coverTimeLeft = Math.max(0, timings.cover - (performance.now() - startedAt));
-          if (coverTimeLeft > 0) {
-            if (diveVariant === "rexonance" && rexonanceCall) {
-              const hold = waitForRexonanceCover(coverTimeLeft);
-              rexonanceCoverCancel.current = hold.cancel;
-              await hold.promise;
-              if (rexonanceCoverCancel.current === hold.cancel) rexonanceCoverCancel.current = null;
-            } else await wait(coverTimeLeft);
-          }
-          if (!isCurrent()) return;
-          await navigateUnderCover(router, () => navigate({ to, hash, search: navigationSearch }), to);
-          if (!isCurrent()) return;
-          if (focusDestination) focusRouteDestination(hash);
-          await settleUnderCover();
-          if (!isCurrent()) return;
-          const callOnly = Boolean(rexonanceCall);
-          let landed = scene;
-          // The call renderer has no carried portrait or docking layers. Keep
-          // its tier/timing metadata without measuring unused destination art.
-          if (!callOnly) {
-            const rects = landingRects();
-            landed = scene && {
-              ...scene,
-              ...rects,
-              hold: scene.kind === "iris" && cutInVariant ? rects.plate : null,
-            };
-          }
-          // The shutter lifts: the destination owns scrolling again, and its
-          // own entrance (keyed to data-loading) starts with the hand-over.
-          document.documentElement.removeAttribute("data-loading");
-          markRouteCover("revealing");
-          if (!callOnly && landed && (landed.hold || !dockGeometry(landed))) await entranceLead();
-          if (!isCurrent()) return;
+          // PREV / NEXT between dossiers flips the file; entry from anywhere
+          // else keeps the rider's own dive or cut-in.
+          const flip =
+            DETAIL_ROUTE.test(pathname) &&
+            DETAIL_ROUTE.test(to) &&
+            Boolean(lastPress?.target.closest(".manager-pagination"));
+          const timings = reduceMotion
+            ? { cover: 100, reveal: 160 }
+            : tier === "calm"
+              ? CALM_TIMINGS
+              : flip
+                ? FILE_FLIP_TIMINGS
+                : diveVariant
+                  ? diveVariant === "rexonance" && !rexonanceCall
+                    ? CALM_TIMINGS
+                    : RIDER_DIVE_TIMINGS[diveVariant]
+                  : cutInVariant
+                    ? RIDER_CUT_IN_TIMINGS[cutInVariant]
+                    : CALM_TIMINGS;
+          const scene =
+            cutInVariant === "ciel"
+              ? null
+              : composeScene({
+                  tier,
+                  kind: flip ? "flip" : "iris",
+                  frameKind: diveVariant || flip ? "file" : "screen",
+                  timings,
+                  assets,
+                  to,
+                  callOnly: Boolean(rexonanceCall),
+                });
+          document.documentElement.dataset.loading = "true";
+          markRouteCover("covering");
           setGate({
             active: true,
             percent: 100,
             variant: riderTransitionVariant,
-            phase: "revealing",
-            scene: landed,
+            phase: "covering",
+            scene,
             rexonanceCall,
             rexonanceSuit,
           });
-          await revealRan(
-            timings.reveal,
-            callOnly
-              ? undefined
-              : () => {
-                  if (landed) handOverDockedFile(landed);
-                },
-          );
-        } finally {
-          window.setTimeout(releaseScrollMotion, 360);
-          if (isCurrent()) {
-            if (rexonanceTransition.current === requestId) rexonanceTransition.current = null;
+          try {
+            if (assets.length) {
+              void preloadAssets(assets, () => undefined).catch(() => undefined);
+            }
+            // rx12: pieces that finish decoding while FAR UP！'s scan still
+            // runs switch the call to the build (its clock is already
+            // running unseen); later, the finished figure stays.
+            if (rexonanceCall && rexonanceSuit === "whole" && rexonanceSuitWarm) {
+              void rexonanceSuitWarm.then((decoded) => {
+                if (
+                  !decoded ||
+                  !isCurrent() ||
+                  performance.now() - startedAt > REXONANCE_SUIT_LATE_MS
+                )
+                  return;
+                rexonanceSuit = "build";
+                setGate((current) =>
+                  current.active && current.phase === "covering" && current.rexonanceCall
+                    ? { ...current, rexonanceSuit }
+                    : current,
+                );
+              });
+            }
+            // Mobile Safari may coalesce the state update with route/module work.
+            // Paint both cinematic entries before loading their route chunk.
+            if (diveVariant === "dream" || diveVariant === "rexonance") {
+              await nextFrame();
+              await nextFrame();
+              if (!isCurrent()) return;
+              // Rexonance's five calls run from the first painted frame, not
+              // from the click (which may have included a long layout task).
+              if (diveVariant === "rexonance") startedAt = performance.now();
+            }
+            // Images warm independently of the route chunk. A stalled chunk
+            // releases the cover before navigation, rather than locking the page.
+            if (!(await warmCoveredDestination())) return;
+            const coverTimeLeft = Math.max(0, timings.cover - (performance.now() - startedAt));
+            if (coverTimeLeft > 0) {
+              if (diveVariant === "rexonance" && rexonanceCall) {
+                const hold = waitForRexonanceCover(coverTimeLeft);
+                rexonanceCoverCancel.current = hold.cancel;
+                await hold.promise;
+                if (rexonanceCoverCancel.current === hold.cancel)
+                  rexonanceCoverCancel.current = null;
+              } else await wait(coverTimeLeft);
+            }
+            if (!isCurrent()) return;
+            await navigateUnderCover(router, () => navigate({ to, hash, search: navigationSearch }), to);
+            if (!isCurrent()) return;
+            if (focusDestination) focusRouteDestination(hash);
+            await settleUnderCover();
+            if (!isCurrent()) return;
+            const callOnly = Boolean(rexonanceCall);
+            let landed = scene;
+            // The call renderer has no carried portrait or docking layers. Keep
+            // its tier/timing metadata without measuring unused destination art.
+            if (!callOnly) {
+              const rects = landingRects();
+              landed = scene && {
+                ...scene,
+                ...rects,
+                hold: scene.kind === "iris" && cutInVariant ? rects.plate : null,
+              };
+            }
+            // The shutter lifts: the destination owns scrolling again, and its
+            // own entrance (keyed to data-loading) starts with the hand-over.
             document.documentElement.removeAttribute("data-loading");
-            markRouteCover("settling");
-            setGate({ active: false, percent: 0, variant: "archive", phase: "covering" });
-            busy.current = false;
+            markRouteCover("revealing");
+            if (!callOnly && landed && (landed.hold || !dockGeometry(landed))) await entranceLead();
+            if (!isCurrent()) return;
+            setGate({
+              active: true,
+              percent: 100,
+              variant: riderTransitionVariant,
+              phase: "revealing",
+              scene: landed,
+              rexonanceCall,
+              rexonanceSuit,
+            });
+            await revealRan(
+              timings.reveal,
+              callOnly
+                ? undefined
+                : () => {
+                    if (landed) handOverDockedFile(landed);
+                  },
+            );
+          } finally {
+            window.setTimeout(releaseScrollMotion, 360);
+            if (isCurrent()) {
+              if (rexonanceTransition.current === requestId) rexonanceTransition.current = null;
+              document.documentElement.removeAttribute("data-loading");
+              markRouteCover("settling");
+              setGate({ active: false, percent: 0, variant: "archive", phase: "covering" });
+              busy.current = false;
+            }
           }
+          return;
         }
-        return;
-      }
 
-      if (isZeusTransition && !isArchiveTransition) {
-        const timings = reduceMotion
-          ? { cover: 180, reveal: 140 }
-          : tier === "calm"
-            ? CALM_TIMINGS
-            : SOVEREIGN_TIMINGS;
-        const scene = composeScene({ tier, kind: "iris", frameKind: "seal", timings, assets, to });
+        if (isZeusTransition && !isArchiveTransition) {
+          const timings = reduceMotion
+            ? { cover: 180, reveal: 140 }
+            : tier === "calm"
+              ? CALM_TIMINGS
+              : SOVEREIGN_TIMINGS;
+          const scene = composeScene({
+            tier,
+            kind: "iris",
+            frameKind: "seal",
+            timings,
+            assets,
+            to,
+          });
+          document.documentElement.dataset.loading = "true";
+          markRouteCover("covering");
+          setGate({ active: true, percent: 0, variant: "zeus", phase: "covering", scene });
+          try {
+            if (assets.length) {
+              void preloadAssets(assets, () => undefined).catch(() => undefined);
+            }
+            if (!(await warmCoveredDestination())) return;
+            const coverTimeLeft = Math.max(0, timings.cover - (performance.now() - startedAt));
+            if (coverTimeLeft > 0) await wait(coverTimeLeft);
+            if (!isCurrent()) return;
+            await navigateUnderCover(router, () => navigate({ to, hash, search: navigationSearch }), to);
+            if (!isCurrent()) return;
+            if (focusDestination) focusRouteDestination(hash);
+            await settleUnderCover();
+            if (!isCurrent()) return;
+            const landed = { ...scene, ...landingRects() };
+            document.documentElement.removeAttribute("data-loading");
+            markRouteCover("revealing");
+            await entranceLead();
+            if (!isCurrent()) return;
+            setGate({
+              active: true,
+              percent: 0,
+              variant: "zeus",
+              phase: "revealing",
+              scene: landed,
+            });
+            await revealRan(timings.reveal);
+          } finally {
+            if (isCurrent()) {
+              document.documentElement.removeAttribute("data-loading");
+              markRouteCover("settling");
+              setGate({ active: false, percent: 0, variant: "archive", phase: "covering" });
+              busy.current = false;
+            }
+          }
+          return;
+        }
+
+        const timings = reduceMotion ? { cover: 180, reveal: 120 } : { cover: 900, reveal: 520 };
+        const scene = composeScene({
+          tier,
+          kind: "iris",
+          frameKind: "screen",
+          timings,
+          assets: [],
+          to,
+        });
+        let progressTimer = 0;
         document.documentElement.dataset.loading = "true";
         markRouteCover("covering");
-        setGate({ active: true, percent: 0, variant: "zeus", phase: "covering", scene });
+        setGate({ active: true, percent: 4, variant: "archive", phase: "covering", scene });
         try {
-          if (assets.length) {
-            void preloadAssets(assets, () => undefined).catch(() => undefined);
+          if (!reduceMotion) {
+            progressTimer = window.setInterval(() => {
+              if (!isCurrent()) return;
+              const elapsed = performance.now() - startedAt;
+              const next = Math.min(88, 4 + (elapsed / timings.cover) * 84);
+              setGate((state) => ({ ...state, percent: Math.max(state.percent, next) }));
+            }, 120);
           }
+
+          // Preload only the route module. The archive iframe remains the sole
+          // owner of its multi-megabyte document, avoiding duplicate downloads.
           if (!(await warmCoveredDestination())) return;
           const coverTimeLeft = Math.max(0, timings.cover - (performance.now() - startedAt));
           if (coverTimeLeft > 0) await wait(coverTimeLeft);
           if (!isCurrent()) return;
-          await navigateUnderCover(router, () => navigate({ to, hash, search: navigationSearch }), to);
+          if (progressTimer) window.clearInterval(progressTimer);
+          setGate({ active: true, percent: 100, variant: "archive", phase: "covering", scene });
+          await navigate({ to, hash, search: navigationSearch });
           if (!isCurrent()) return;
           if (focusDestination) focusRouteDestination(hash);
           await settleUnderCover();
           if (!isCurrent()) return;
-          const landed = { ...scene, ...landingRects() };
           document.documentElement.removeAttribute("data-loading");
           markRouteCover("revealing");
-          await entranceLead();
-          if (!isCurrent()) return;
-          setGate({
-            active: true,
-            percent: 0,
-            variant: "zeus",
-            phase: "revealing",
-            scene: landed,
-          });
+          setGate({ active: true, percent: 100, variant: "archive", phase: "revealing", scene });
           await revealRan(timings.reveal);
         } finally {
+          if (progressTimer) window.clearInterval(progressTimer);
           if (isCurrent()) {
             document.documentElement.removeAttribute("data-loading");
             markRouteCover("settling");
@@ -1502,60 +1646,19 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
             busy.current = false;
           }
         }
-        return;
-      }
-
-      const timings = reduceMotion ? { cover: 180, reveal: 120 } : { cover: 900, reveal: 520 };
-      const scene = composeScene({
-        tier,
-        kind: "iris",
-        frameKind: "screen",
-        timings,
-        assets: [],
-        to,
-      });
-      let progressTimer = 0;
-      document.documentElement.dataset.loading = "true";
-      markRouteCover("covering");
-      setGate({ active: true, percent: 4, variant: "archive", phase: "covering", scene });
-      try {
-        if (!reduceMotion) {
-          progressTimer = window.setInterval(() => {
-            if (!isCurrent()) return;
-            const elapsed = performance.now() - startedAt;
-            const next = Math.min(88, 4 + (elapsed / timings.cover) * 84);
-            setGate((state) => ({ ...state, percent: Math.max(state.percent, next) }));
-          }, 120);
-        }
-
-        // Preload only the route module. The archive iframe remains the sole
-        // owner of its multi-megabyte document, avoiding duplicate downloads.
-        if (!(await warmCoveredDestination())) return;
-        const coverTimeLeft = Math.max(0, timings.cover - (performance.now() - startedAt));
-        if (coverTimeLeft > 0) await wait(coverTimeLeft);
-        if (!isCurrent()) return;
-        if (progressTimer) window.clearInterval(progressTimer);
-        setGate({ active: true, percent: 100, variant: "archive", phase: "covering", scene });
-        await navigate({ to, hash, search: navigationSearch });
-        if (!isCurrent()) return;
-        if (focusDestination) focusRouteDestination(hash);
-        await settleUnderCover();
-        if (!isCurrent()) return;
-        document.documentElement.removeAttribute("data-loading");
-        markRouteCover("revealing");
-        setGate({ active: true, percent: 100, variant: "archive", phase: "revealing", scene });
-        await revealRan(timings.reveal);
       } finally {
-        if (progressTimer) window.clearInterval(progressTimer);
-        if (isCurrent()) {
-          document.documentElement.removeAttribute("data-loading");
-          markRouteCover("settling");
-          setGate({ active: false, percent: 0, variant: "archive", phase: "covering" });
-          busy.current = false;
-        }
+        releaseSuitWarmup();
       }
     },
-    [finishOpeningHandoff, holdManagedScrollMotion, markRouteCover, navigate, pathname, router],
+    [
+      finishOpeningHandoff,
+      holdManagedScrollMotion,
+      holdSuitWarmup,
+      markRouteCover,
+      navigate,
+      pathname,
+      router,
+    ],
   );
 
   const api = useMemo(
@@ -1963,7 +2066,9 @@ export function GuardedLink({
 
   const preloadDestination = useCallback(() => {
     // rx12: the Rexonance call's suit-up pieces decode on intent.
-    if (to === "/rexonance-saga") void warmRexonanceSuit();
+    // Actual hover/focus/touch owns this warm-up. go() may suspend
+    // speculative work, but must not abort the visitor's intended call.
+    if (to === "/rexonance-saga") void warmRexonanceSuit("high");
     if (preloadedRoute.current !== to) {
       preloadedRoute.current = to;
       void router.preloadRoute({ to }).catch(() => {

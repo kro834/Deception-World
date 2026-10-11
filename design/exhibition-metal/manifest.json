@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "generator": "scripts/build-exhibition-metal.py",
+  "generatorSha256": "786ed3ed08fbac9779a6608c93cac42273347cdb3faff84365d44fe441f9cfca",
+  "generatorRole": "material reproduction; preserved bake was not regenerated",
+  "blenderVersion": "5.2.0 LTS",
+  "engine": "CYCLES",
+  "device": "CPU",
+  "seed": 271828,
+  "samples": 64,
+  "resolution": 1024,
+  "purpose": "Repeatable surface detail for metal artwork mounts; no artwork baked",
+  "material": {
+    "baseColorLinear": [0.018, 0.026, 0.037],
+    "metallic": 1.0,
+    "anisotropy": 0.62,
+    "roughnessRange": [0.311, 0.459],
+    "normalConvention": "Tangent OpenGL +X +Y +Z",
+    "uvBrushDirection": "U; rotate UV for vertical frame rails"
+  },
+  "maps": {
+    "normal": {
+      "file": "brushed-alloy-normal.png",
+      "sha256": "88bc4dbcfda2058c45ca6fededb0f809b4be42514a1a3cfd79f7fd2cf2b294a3",
+      "colorSpace": "linear",
+      "repeat": true
+    },
+    "roughness": {
+      "file": "brushed-alloy-roughness.png",
+      "sha256": "86cb3b0cf5b79c0cc723570d436964d488a1dbb474fe0519b15f22bff61e3b8d",
+      "colorSpace": "linear",
+      "channel": "R",
+      "repeat": true
+    }
+  },
+  "provenance": {
+    "blend": "exhibition-metal.blend",
+    "blendSha256": "b1eb21cb2ca6fc8b1333a1e74c10e9da35aa67800dbe77a47fcd5957f85c06a5",
+    "preview": "brushed-alloy-studio-preview.png",
+    "previewSha256": "3a167e880df6aeddbb32ca565a781f76b974bec27bf0d7c82531cb3c779e81f9"
+  },
+  "preservedBake": {
+    "generatorSha256": "173ca046a9fd094eda2d49694e6644cf47c60463e34a4ec965967e2631bad1e6",
+    "bytesUnchanged": true,
+    "scope": "maps, packed source scene and studio preview"
+  }
+}

@@ -11,8 +11,25 @@ type Priority = "low" | "high";
 
 let pending: Promise<boolean> | null = null;
 let ready = false;
+type WarmBatch = {
+  controller: AbortController;
+  priority: Priority;
+  jobs: Map<string, Promise<boolean>>;
+  failed: Set<string>;
+  retried: Set<string>;
+};
+let activeBatch: WarmBatch | null = null;
+let backgroundPauses = 0;
+let planWaiting = false;
+let planIdlePending = false;
+const completed = new Set<string>();
+const schedules = new Set<{ suspend: () => void; resume: () => void }>();
 // The decoded images stay referenced, so the CSS layers stay warm for the call.
 const held: HTMLImageElement[] = [];
+// CSS can decode successfully while its canvas bitmap fails. Keep one
+// successful image per source so a missing-bitmap retry does not download
+// and hold another copy of the already-warm fallback layer.
+const decodedPictures = new Map<string, HTMLImageElement>();
 // rx17: what the nanite engine draws, decoded once and shared with it.
 const sources = new Map<string, CanvasImageSource>();
 const DRAWN: readonly string[] = [REXONANCE_SUIT_ATLAS.src, REXONANCE_SUIT_GOLD_ATLAS.src];
@@ -34,23 +51,74 @@ const idle = (run: () => void, timeout: number) => {
   else window.setTimeout(run, 0);
 };
 
+function warmPlanWhenIdle() {
+  if (!planWaiting || planIdlePending || document.hidden || backgroundPauses) return;
+  planIdlePending = true;
+  idle(() => {
+    planIdlePending = false;
+    if (document.hidden || backgroundPauses) return;
+    planWaiting = false;
+    void import("../components/rexonance-saga/rexonance-suit-plan").then(
+      (plan) => {
+        // Importing cannot be aborted. A page may hide or go() may acquire
+        // the network while its chunk resolves; retain the deferred work.
+        if (document.hidden || backgroundPauses) {
+          planWaiting = true;
+          return;
+        }
+        return plan.prepareRexonanceSuit();
+      },
+      () => undefined,
+    );
+  }, 2000);
+}
+
 // A layer as an image, fetched and decoded off the main thread (it stays
 // referenced, so the CSS layers paint it at once). Null if it failed.
-function picture(source: string, priority: Priority) {
+function picture(source: string, priority: Priority, batch: WarmBatch) {
+  const decoded = decodedPictures.get(source);
+  if (decoded) return Promise.resolve(decoded);
   return new Promise<HTMLImageElement | null>((resolve) => {
     const image = new Image();
     image.decoding = "async";
     image.fetchPriority = priority;
     held.push(image);
+    let settled = false;
+    const finish = (value: HTMLImageElement | null) => {
+      if (settled) return;
+      settled = true;
+      batch.controller.signal.removeEventListener("abort", abort);
+      image.onload = null;
+      image.onerror = null;
+      if (value) decodedPictures.set(source, value);
+      else {
+        const index = held.indexOf(image);
+        if (index !== -1) held.splice(index, 1);
+      }
+      resolve(value);
+    };
+    const abort = () => {
+      // Image requests do not accept a signal. Release their source too on
+      // older Safari; the fetch-backed atlas requests use this same signal.
+      image.removeAttribute?.("src");
+      finish(null);
+    };
+    batch.controller.signal.addEventListener("abort", abort, { once: true });
     image.onload = () => {
       if (typeof image.decode === "function")
-        void image.decode().then(
-          () => resolve(image),
-          () => resolve(null),
-        );
-      else resolve(image);
+        void Promise.resolve()
+          .then(() => image.decode())
+          .then(
+            () => finish(batch.controller.signal.aborted ? null : image),
+            () => finish(null),
+          );
+      else finish(batch.controller.signal.aborted ? null : image);
     };
-    image.onerror = () => resolve(null);
+    image.onerror = () => finish(null);
+    if (batch.controller.signal.aborted) {
+      abort();
+      return;
+    }
     image.src = source;
   });
 }
@@ -59,35 +127,103 @@ function picture(source: string, priority: Priority) {
 // decoded off the main thread from the fetched file (a bitmap made from
 // an <img> would decode again on the main thread); the atlas is also a CSS
 // layer (the DOM plates, when the engine cannot run), so its image is
-// warmed after. Without createImageBitmap (older Safari) the engine draws
+// warmed from the fetched file's cache alongside the bitmap decode, not
+// after it. Without createImageBitmap (older Safari) the engine draws
 // the decoded image itself.
-async function decode(source: string, priority: Priority) {
+async function decode(source: string, priority: Priority, batch: WarmBatch) {
+  if (completed.has(source)) return true;
+  const current = () => activeBatch === batch && !batch.controller.signal.aborted;
   if (
     DRAWN.includes(source) &&
     typeof createImageBitmap === "function" &&
     typeof fetch === "function"
   ) {
     try {
-      const response = await fetch(source, { priority });
+      const response = await fetch(source, { priority, signal: batch.controller.signal });
       if (!response.ok) throw new Error(String(response.status));
       const blob = await response.blob();
-      sources.set(source, await createImageBitmap(blob));
+      if (!current()) return false;
+      // Both use the already-fetched file. Keep CSS readiness in the same
+      // contract, without serializing its decode behind the canvas bitmap.
+      const [bitmap, cssReady] = await Promise.all([
+        // A bitmap rejection must not abandon an in-flight CSS image and
+        // retry it in parallel. Let that valid work finish and stay cached;
+        // no renderer source/readiness is published without both results.
+        Promise.resolve()
+          .then(() => createImageBitmap(blob))
+          .catch(() => null),
+        source === REXONANCE_SUIT_GOLD_ATLAS.src
+          ? Promise.resolve(true)
+          : picture(source, priority, batch).then(Boolean),
+      ]);
+      if (!bitmap) return false;
+      // Decoding itself is not abortable. Close an abandoned decode rather
+      // than letting it replace a later high-priority batch's source.
+      if (!current()) {
+        bitmap.close?.();
+        return false;
+      }
+      if (!cssReady || !current()) {
+        bitmap.close?.();
+        return false;
+      }
+      sources.set(source, bitmap);
+      completed.add(source);
     } catch {
       return false;
     }
-    if (source === REXONANCE_SUIT_GOLD_ATLAS.src) return true;
-    return Boolean(await picture(source, priority));
+    return true;
   }
-  const image = await picture(source, priority);
-  if (image && DRAWN.includes(source)) sources.set(source, image);
-  return Boolean(image);
+  const image = await picture(source, priority, batch);
+  if (!image || !current()) return false;
+  if (DRAWN.includes(source)) sources.set(source, image);
+  completed.add(source);
+  return true;
 }
 
-// Every layer at once, at the given priority (the browser orders them).
-function start(priority: Priority) {
-  return Promise.all(REXONANCE_SUIT_ASSETS.map((source) => decode(source, priority))).then(
-    (results) => results.every(Boolean),
-  );
+const currentBatch = (batch: WarmBatch) =>
+  activeBatch === batch && !batch.controller.signal.aborted;
+
+function retryFailed(batch: WarmBatch) {
+  if (!currentBatch(batch) || batch.priority !== "high" || document.hidden || saving() || still())
+    return;
+  for (const source of batch.failed) {
+    if (batch.retried.has(source)) continue;
+    // One immediate retry per missing source, never another download of a
+    // successful or still-running source. A later intent may start a new
+    // batch if this retry also fails; a failed file cannot create a loop.
+    batch.retried.add(source);
+    queue(source, "high", batch);
+  }
+}
+
+function queue(source: string, priority: Priority, batch: WarmBatch) {
+  batch.failed.delete(source);
+  const job = decode(source, priority, batch).then((decoded) => {
+    if (currentBatch(batch) && !decoded) {
+      batch.failed.add(source);
+      retryFailed(batch);
+    }
+    return decoded;
+  });
+  batch.jobs.set(source, job);
+}
+
+// Every initial layer starts together at the requested priority. Intent
+// adopts live jobs, but replaces a known failure immediately rather than
+// waiting for unrelated images to decode before it can retry the file.
+async function start(priority: Priority, batch: WarmBatch) {
+  REXONANCE_SUIT_ASSETS.forEach((source) => queue(source, priority, batch));
+  while (currentBatch(batch)) {
+    const jobs = [...batch.jobs.entries()];
+    await Promise.all(jobs.map(([, job]) => job));
+    if (!currentBatch(batch)) return false;
+    if (jobs.every(([source, job]) => batch.jobs.get(source) === job))
+      return REXONANCE_SUIT_ASSETS.every((source) => completed.has(source));
+    // A failed source was retried while the other jobs were settling. Keep
+    // the same public pending promise, now waiting for that replacement.
+  }
+  return false;
 }
 
 /** rx12: fetch and decode every layer the Rexonance suit-up paints, once,
@@ -96,29 +232,47 @@ function start(priority: Priority) {
  * and when the call starts at high priority. Never on Save-Data or 2G, nor where the call rests on
  * a still (reduced motion, economy rendering): those show the finished
  * figure only. Resolves true once every layer has decoded; a failure lets a
- * later intent try again. It never gates navigation: the call reads
- * isRexonanceSuitReady() when it starts and otherwise stands the finished
- * figure whole. */
+ * later intent try again. The entry owns a short cancellable preparation
+ * deadline before its clock starts; a stalled decoder never holds navigation
+ * indefinitely, and the finished figure remains the safe fallback. */
 export function warmRexonanceSuit(priority: Priority = "low"): Promise<boolean> {
-  if (ready) return Promise.resolve(true);
-  if (pending) return pending;
+  if (ready) {
+    warmPlanWhenIdle();
+    return Promise.resolve(true);
+  }
+  if (pending) {
+    // Intent/the call adopts the existing low-priority requests; it does not
+    // download them again. A later unrelated go may cancel even unused intent.
+    if (priority === "high" && activeBatch) {
+      activeBatch.priority = "high";
+      retryFailed(activeBatch);
+    }
+    return pending;
+  }
   if (typeof Image === "undefined" || typeof window === "undefined") return Promise.resolve(false);
   if (saving() || still()) return Promise.resolve(false);
-  pending = start(priority).then((decoded) => {
+  if (document.hidden || (priority === "low" && backgroundPauses)) return Promise.resolve(false);
+  const batch: WarmBatch = {
+    controller: new AbortController(),
+    priority,
+    jobs: new Map(),
+    failed: new Set(),
+    retried: new Set(),
+  };
+  activeBatch = batch;
+  pending = start(priority, batch).then((decoded) => {
+    if (activeBatch !== batch || batch.controller.signal.aborted) return false;
     ready = decoded;
+    activeBatch = null;
     if (!ready) {
       pending = null;
-      held.length = 0;
-      sources.clear();
+      // Keep successful layers/bitmaps. Retry only missing work, never tear
+      // down sources a completed renderer may already be using.
     } else {
       // Then the engine's plan and working atlas, in idle time (rx17); the
       // plan is its own small chunk, shared with the call's.
-      idle(() => {
-        void import("../components/rexonance-saga/rexonance-suit-plan").then(
-          (plan) => plan.prepareRexonanceSuit(),
-          () => undefined,
-        );
-      }, 2000);
+      planWaiting = true;
+      warmPlanWhenIdle();
     }
     return ready;
   });
@@ -132,6 +286,34 @@ export const isRexonanceSuitReady = () => ready;
  * supported, else the decoded image), once the warm-up has it. */
 export const rexonanceSuitSource = (source: string) => sources.get(source) ?? null;
 
+function abortWarmup(preserveIntent = false) {
+  if (!activeBatch || (preserveIntent && activeBatch.priority === "high")) return;
+  const batch = activeBatch;
+  activeBatch = null;
+  pending = null;
+  batch.controller.abort();
+}
+
+/** Give unrelated navigation the network, even after hover/touch intent.
+ * Rexonance navigation may preserve its own high-priority intent; a new
+ * call otherwise fetches missing layers at high priority. Each go owns
+ * one idempotent release, including cancellation and unmount. */
+export function pauseRexonanceSuitWarmup(preserveIntent = false) {
+  backgroundPauses += 1;
+  schedules.forEach((schedule) => schedule.suspend());
+  abortWarmup(preserveIntent);
+  let released = false;
+  return () => {
+    if (released) return;
+    released = true;
+    backgroundPauses = Math.max(0, backgroundPauses - 1);
+    if (!backgroundPauses) {
+      schedules.forEach((schedule) => schedule.resume());
+      warmPlanWhenIdle();
+    }
+  };
+}
+
 /** rx13 (owner): the suit-up's layers are warmed in advance, not only on
  * intent. rx17 (owner, 2026-10-11): "preload it" — soon after each public
  * page's own load (it re-runs on every route), in idle time: the call's own
@@ -140,20 +322,27 @@ export const rexonanceSuitSource = (source: string) => sources.get(source) ?? nu
  * reduced motion, economy); the opening preserves its network budget, a
  * hidden (suspended) page does no work, and /rexonance-saga itself, where
  * the call does not play, waits for intent — leaving it schedules the warm
- * on the next route. It keeps the owner's 2.5 s after load, so it never
- * competes with the visitor's first navigation on a phone's bandwidth (the
- * call's own warm on intent and at its start covers earlier taps). Returns
+ * on the next route. It waits about 1 s after load; go() suspends speculative
+ * requests so they do not compete with another route. The call's warm on
+ * intent and bounded entry preparation cover earlier taps. Returns
  * its cancel. */
-export function scheduleRexonanceSuitWarm(delayMs = 2500) {
-  if (typeof window === "undefined" || ready || pending) return () => {};
+export function scheduleRexonanceSuitWarm(delayMs = 1000) {
+  if (typeof window === "undefined" || ready) return () => {};
   if (window.location.pathname === "/" || window.location.pathname.startsWith("/rexonance-saga"))
     return () => {};
   let timer = 0;
   let idleId = 0;
   let cancelled = false;
+  let loaded = document.readyState === "complete";
+  const pathname = window.location.pathname;
+  const suspend = () => {
+    if (timer) window.clearTimeout(timer);
+    if (idleId) window.cancelIdleCallback?.(idleId);
+    timer = idleId = 0;
+  };
   const run = () => {
     idleId = 0;
-    if (cancelled) return;
+    if (cancelled || backgroundPauses || pathname !== window.location.pathname) return;
     // A suspended Home Screen app must not decode a second scene offscreen.
     if (document.hidden || saving() || still()) return;
     // The call's own chunk (its retry on failure is the loader's), and the
@@ -162,21 +351,41 @@ export function scheduleRexonanceSuitWarm(delayMs = 2500) {
     void warmRexonanceSuit();
   };
   const afterLoad = () => {
-    if (cancelled) return;
+    loaded = true;
+    if (cancelled || backgroundPauses || document.hidden || pathname !== window.location.pathname)
+      return;
+    suspend();
     timer = window.setTimeout(() => {
       timer = 0;
-      if (cancelled) return;
+      if (cancelled || backgroundPauses) return;
       if (window.requestIdleCallback) idleId = window.requestIdleCallback(run, { timeout: 1200 });
       else run();
     }, delayMs);
   };
-  if (document.readyState === "complete") afterLoad();
+  const resume = () => {
+    if (loaded && !ready) afterLoad();
+    if (ready) warmPlanWhenIdle();
+  };
+  const onVisibility = () => {
+    if (document.hidden) {
+      suspend();
+      abortWarmup();
+    } else resume();
+  };
+  const schedule = { suspend, resume };
+  schedules.add(schedule);
+  document.addEventListener?.("visibilitychange", onVisibility);
+  if (loaded) afterLoad();
   else window.addEventListener("load", afterLoad, { once: true });
   return () => {
     cancelled = true;
+    schedules.delete(schedule);
+    document.removeEventListener?.("visibilitychange", onVisibility);
     window.removeEventListener("load", afterLoad);
-    if (timer) window.clearTimeout(timer);
-    if (idleId) window.cancelIdleCallback?.(idleId);
+    suspend();
+    // Route reservation cleanup is not a call cancellation. An explicit
+    // Rexonance intent/call may still own its shared batch across this cleanup.
+    abortWarmup(true);
   };
 }
 

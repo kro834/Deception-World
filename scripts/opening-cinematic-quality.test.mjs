@@ -33,10 +33,16 @@ test("the richer opening keeps its runtime (now with the logo burn) and adaptive
   assert.match(styles, /\.cine-impact-bloom,[\s\S]*?\.cine-logo-echo,[\s\S]*?\.cine-hud-orbits/);
 });
 
-test("the synthesized score follows the visual reveal without new media assets", () => {
-  assert.match(audio, /compact logo-impact transient/);
-  assert.match(audio, /impact\.frequency\.setValueAtTime\(86, t0 \+ 1\.5\)/);
-  assert.match(audio, /sparkFilter\.frequency\.value = 1280/);
-  assert.match(audio, /shimmerGain\.gain\.setValueAtTime\(0, t0 \+ 3\.15\)/);
+test("the visual reveal is sound-free and the retired adapter cannot start playback", () => {
+  assert.doesNotMatch(
+    title,
+    /cinematic-audio|createCinematicScore|unlockAudio|SOUND|音声を(?:オン|オフ)/,
+  );
+  assert.doesNotMatch(
+    audio,
+    /AudioContext|webkitAudioContext|createOscillator|createBuffer|fetch\(|setTimeout|window|navigator/,
+  );
+  assert.match(audio, /unlock: async \(\) => false/);
+  assert.match(audio, /start: \(\) => undefined/);
   assert.equal(audioPart, audio);
 });

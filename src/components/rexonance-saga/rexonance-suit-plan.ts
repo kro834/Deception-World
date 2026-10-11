@@ -15,7 +15,7 @@ import {
   type RexonanceSuitPiece,
 } from "@/lib/rexonance-suit";
 import { REXONANCE_SUIT_GOLD_CELL, REXONANCE_SUIT_GOLD_CELLS } from "@/lib/rexonance-suit-gold";
-import { splitLights } from "@/lib/rexonance-unlit.js";
+import { createSplitLightsJob, splitLights } from "@/lib/rexonance-unlit.js";
 import { rexonanceSuitSource } from "@/lib/rexonance-suit-warmup";
 
 /* rx17: the nanite engine's plan and working atlas (rexonance-suit-nanites
@@ -85,7 +85,10 @@ const has = (bits: Uint8Array, bit: number) => (bits[bit >> 3] & (1 << (bit & 7)
 // The gold cells, flat: the cell's place in the figure, in the atlas, its
 // size (clipped to its plate's box), when it locks, its place along its
 // plate's flow (0..1) and where its mote flies in from (figure px).
-export const GOLD_TOTAL = Object.values(REXONANCE_SUIT_GOLD_CELLS).reduce((sum, base64) => {
+export const GOLD_TOTAL = Object.entries(REXONANCE_SUIT_GOLD_CELLS).reduce((sum, [id, base64]) => {
+  // The driver's trim is already finished. Reserve only cells that goldOf
+  // initializes, otherwise its skipped mask leaves phantom cells at the end.
+  if (REXONANCE_SUIT_DRIVER.includes(id)) return sum;
   let count = 0;
   for (const byte of bitsOf(base64))
     for (let bit = 0; bit < 8; bit += 1) count += (byte >> bit) & 1;
@@ -336,6 +339,12 @@ export const planEnd = () => END;
 // `drawing`: calls drawing into it now (the idle preparation then leaves
 // it alone); `dirty`: it holds a call's formed gold (reset before the next).
 export const work = { canvas: null as HTMLCanvasElement | null, dirty: true, drawing: 0 };
+let preparingLights = false;
+/** Decoded layers alone do not mean the first frame's plan/atlas are warm.
+ * A live call owns its formed atlas; a subsequent call must reset it first. */
+export const isRexonanceSuitPlanReady = () =>
+  Boolean(PLATES && work.canvas && (work.drawing > 0 || (!preparingLights && !work.dirty)));
+
 // The plates' lights held back (owner, 2026-10-11): the atlas's art half with
 // its ice-cyan and pink light in monochrome, and that light alone, to light
 // the suit once it is whole. Made once, in idle time, from the decoded atlas.
@@ -345,30 +354,34 @@ let LIGHTS: {
   figure: HTMLCanvasElement;
 } | null = null;
 export const plateLights = () => LIGHTS;
+function layOutLights(split: { unlit: HTMLCanvasElement; lights: HTMLCanvasElement }) {
+  const figure = Object.assign(globalThis.document.createElement("canvas"), {
+    width: FIG.width,
+    height: FIG.height,
+  });
+  const context = figure.getContext("2d");
+  if (!context) throw new Error("unavailable figure light context");
+  for (const piece of REXONANCE_SUIT_PIECES)
+    context.drawImage(
+      split.lights,
+      piece.ax,
+      piece.ay,
+      piece.w,
+      piece.h,
+      piece.x,
+      piece.y,
+      piece.w,
+      piece.h,
+    );
+  return { ...split, figure };
+}
 export function prepareLights(art: CanvasImageSource) {
-  if (!LIGHTS) {
+  if (!LIGHTS && !work.drawing) {
     const { width, height } = REXONANCE_SUIT_GOLD_ATLAS;
     const split = splitLights(art, 0, 0, width, height);
     if (split) {
-      // The lights laid out on the figure once (one draw a frame as it lights).
-      const figure = Object.assign(globalThis.document.createElement("canvas"), {
-        width: FIG.width,
-        height: FIG.height,
-      });
-      const context = figure.getContext("2d");
-      for (const piece of REXONANCE_SUIT_PIECES)
-        context?.drawImage(
-          split.lights,
-          piece.ax,
-          piece.ay,
-          piece.w,
-          piece.h,
-          piece.x,
-          piece.y,
-          piece.w,
-          piece.h,
-        );
-      LIGHTS = { ...split, figure };
+      LIGHTS = layOutLights(split);
+      work.dirty = true;
     }
   }
   return LIGHTS;
@@ -390,31 +403,160 @@ export function forming(art: CanvasImageSource, gold: CanvasImageSource) {
   return context;
 }
 
+let preparation: Promise<boolean> | null = null;
+let promotePreparation: (() => void) | null = null;
 /** rx17: builds the engine's plan and its working atlas in idle time, a
- * few plates a slice, so the call's first frame costs nothing. Resolves
- * true once both are ready (false if the layers are not decoded). */
-export function prepareRexonanceSuit() {
-  return new Promise<boolean>((resolve) => {
-    const finish = () => {
+ * few plates a slice. When completed before the call, its first frame needs
+ * no plan generation. Resolves true once both are ready (false if the
+ * layers or drawing context are unavailable); later calls can retry. High
+ * priority promotes a queued idle slice to rAF without duplicating its job.
+ * Navigation deadlines/cancellation belong to the awaiting caller: this
+ * shared plan may still be useful for the next intent. */
+export function prepareRexonanceSuit(priority: "low" | "high" = "low") {
+  // Intent, the page's idle warm-up and a call can overlap. They must share
+  // one sliced build, not start several idle queues against the same plan.
+  if (preparation) {
+    if (priority === "high") promotePreparation?.();
+    return preparation;
+  }
+  const pending = new Promise<boolean>((resolve) => {
+    let urgent = priority === "high";
+    let settled = false;
+    let generation = 0;
+    let queued: { kind: "idle" | "frame"; id: number } | null = null;
+    let stage: "plan" | "light-setup" | "light-rows" | "light-commit" | "atlas" = "plan";
+    let lightJob: ReturnType<typeof createSplitLightsJob> = null;
+    let lightSource: CanvasImageSource | null = null;
+    const cancelQueued = () => {
+      generation += 1;
+      if (queued?.kind === "idle") globalThis.cancelIdleCallback?.(queued.id);
+      else if (queued?.kind === "frame") globalThis.cancelAnimationFrame(queued.id);
+      queued = null;
+    };
+    const settle = (prepared: boolean) => {
+      if (settled) return;
+      settled = true;
+      cancelQueued();
+      lightJob?.cancel();
+      lightJob = null;
+      lightSource = null;
+      preparingLights = false;
+      resolve(prepared);
+    };
+    const finish = (until: number, deadline?: IdleDeadline) => {
       const art = rexonanceSuitSource(REXONANCE_SUIT_ATLAS.src);
       const gold = rexonanceSuitSource(REXONANCE_SUIT_GOLD_ATLAS.src);
-      if (art && !work.drawing && !LIGHTS) {
-        prepareLights(art);
-        work.dirty = true;
+      if (!art || !gold) {
+        settle(false);
+        return;
       }
-      resolve(Boolean(art && gold && (work.drawing || forming(art, gold))));
+      // A foreground call can take over between any two slices. Leave its
+      // formed atlas and light choice alone; unpublished buffers are ours.
+      if (work.drawing) {
+        settle(true);
+        return;
+      }
+      if (LIGHTS && stage !== "plan" && stage !== "atlas") {
+        lightJob?.cancel();
+        lightJob = null;
+        stage = "atlas";
+        schedule();
+        return;
+      }
+      if (lightJob && art !== lightSource) {
+        // A decoder retry replaced the borrowed bitmap while we yielded.
+        lightJob.cancel();
+        lightJob = null;
+        lightSource = null;
+        stage = "light-setup";
+        schedule();
+        return;
+      }
+      if (!LIGHTS && stage === "plan") {
+        preparingLights = true;
+        stage = "light-setup";
+        schedule();
+        return;
+      }
+      if (stage === "light-setup") {
+        const { width, height } = REXONANCE_SUIT_GOLD_ATLAS;
+        lightJob = createSplitLightsJob(art, 0, 0, width, height);
+        lightSource = art;
+        stage = lightJob ? "light-rows" : "atlas";
+        schedule();
+        return;
+      }
+      if (stage === "light-rows") {
+        if (lightJob!.step(until, deadline)) stage = "light-commit";
+        schedule();
+        return;
+      }
+      if (stage === "light-commit") {
+        // Only complete layers are published. Commit and the working-atlas
+        // draw are separate tasks, not added after a six-ms pixel slice.
+        const split = lightJob!.commit();
+        LIGHTS = split ? layOutLights(split) : null;
+        lightJob!.cancel();
+        lightJob = null;
+        lightSource = null;
+        work.dirty = true;
+        stage = "atlas";
+        schedule();
+        return;
+      }
+      settle(Boolean(forming(art, gold)));
+    };
+    const schedule = () => {
+      const ticket = generation;
+      const resume = (deadline?: IdleDeadline) => {
+        // Some older hosts cannot cancel idle callbacks. A stale callback
+        // must not clear or duplicate the promoted frame's current queue.
+        if (settled || ticket !== generation) return;
+        queued = null;
+        slice(deadline);
+      };
+      if (!urgent && globalThis.requestIdleCallback)
+        queued = { kind: "idle", id: globalThis.requestIdleCallback(resume, { timeout: 600 }) };
+      else
+        queued = {
+          kind: "frame",
+          id: globalThis.requestAnimationFrame(() => resume()),
+        };
     };
     const slice = (deadline?: IdleDeadline) => {
-      const until = performance.now() + 6;
-      while (!PLATES) {
-        step();
-        if (deadline ? deadline.timeRemaining() < 2 : performance.now() > until) break;
+      try {
+        const until = performance.now() + 6;
+        while (!PLATES) {
+          step();
+          // An idle callback may offer almost 50 ms. Keep our own short
+          // budget too, so preparation cannot spend that whole frame when a
+          // navigation or first call arrives on a throttled phone.
+          if (performance.now() > until || (deadline && deadline.timeRemaining() < 2)) break;
+        }
+        if (PLATES) finish(until, deadline);
+        else schedule();
+      } catch {
+        // A lost/unavailable 2D context or a decode invalidated by a retry
+        // must settle even from a later idle callback. The immutable plan is
+        // retained; a new preparation can retry only its working atlas.
+        work.dirty = true;
+        settle(false);
       }
-      if (PLATES) finish();
-      else if (globalThis.requestIdleCallback)
-        globalThis.requestIdleCallback(slice, { timeout: 600 });
-      else globalThis.requestAnimationFrame(() => slice());
+    };
+    promotePreparation = () => {
+      if (settled || urgent) return;
+      urgent = true;
+      cancelQueued();
+      schedule();
     };
     slice();
   });
+  preparation = pending;
+  void pending.then(() => {
+    if (preparation === pending) {
+      preparation = null;
+      promotePreparation = null;
+    }
+  });
+  return pending;
 }

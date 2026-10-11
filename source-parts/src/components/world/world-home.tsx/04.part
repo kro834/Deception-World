@@ -1,3 +1,6 @@
+    const finalPoster = posterSequence.pop() ?? (poster + 1) % POSTERS.length;
+    const previewPool = [
+      poster,
       prevPoster ?? poster,
       (poster + 1) % POSTERS.length,
       (poster + 2) % POSTERS.length,
@@ -374,10 +377,7 @@
                 fetchPriority="low"
               />
             </div>
-            <div
-              className="poster-frame"
-              data-ultra-artwork-ready={artworkReady ? "true" : undefined}
-            >
+            <div className="poster-frame">
               <span className="poster-holo-ring" aria-hidden="true" />
               <div className="poster-media">
                 {previous ? (

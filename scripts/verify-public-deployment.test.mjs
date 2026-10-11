@@ -54,12 +54,11 @@ import {
   verifyPublicDeployment,
 } from "./verify-public-deployment.mjs";
 
-test("public verification hashes Blender frame and exhibition assets and rejects changed bytes or unknown paths", async () => {
+test("public verification hashes exhibition material and studio assets and rejects changed bytes or unknown paths", async () => {
   const paths = [
-    "/ultra-materials/manifest.json",
-    "/ultra-materials/brushed-alloy-normal.png",
-    "/ultra-materials/brushed-alloy-roughness.png",
-    "/ultra-materials/frame-rim.png",
+    "/exhibition-metal/manifest.json",
+    "/exhibition-metal/brushed-alloy-normal.png",
+    "/exhibition-metal/brushed-alloy-roughness.png",
     "/exhibition-studio/manifest.json",
     "/exhibition-studio/studio-light.hdr",
     "/exhibition-studio/plaster-normal.png",
@@ -108,9 +107,10 @@ test("public verification hashes Blender frame and exhibition assets and rejects
   );
   for (const changed of paths) assert.equal((await run({ changed })).report.ok, false, changed);
   for (const unknown of [
-    "/ultra-materials/unknown.png",
-    "/ultra-materials/frame-rim.png/extra",
-    "/ultra-materials/../secret.png",
+    "/exhibition-metal/unknown.png",
+    "/exhibition-metal/brushed-alloy-normal.png/extra",
+    "/exhibition-metal/brushed-alloy-roughness.png%2fextra",
+    "/exhibition-metal/../secret.png",
     "/exhibition-studio/unknown.hdr",
     "/exhibition-studio/studio-light.hdr/extra",
     "/exhibition-studio/../secret.png",
@@ -124,11 +124,53 @@ test("public verification hashes Blender frame and exhibition assets and rejects
     assert.equal(
       invalid.seen.some(
         (path) =>
-          path.startsWith("/ultra-materials/") ||
+          path.startsWith("/exhibition-metal/") ||
           path.startsWith("/exhibition-studio/") ||
           path.startsWith("/saga-cinema-assets/"),
       ),
       false,
+    );
+  }
+});
+
+test("retired Ultra material paths and frame assets cannot be requested by a release identity", async () => {
+  for (const retiredPath of [
+    "/ultra-materials/manifest.json",
+    "/ultra-materials/brushed-alloy-normal.png",
+    "/ultra-materials/brushed-alloy-roughness.png",
+    "/ultra-materials/frame-rim.png",
+    "/exhibition-metal/frame-rim.png",
+  ]) {
+    const seen = [];
+    const report = await verifyPublicDeployment({
+      baseUrl: "https://example.test",
+      expectedSha: "a".repeat(40),
+      fetchImpl: async (input) => {
+        const path = new URL(input).pathname;
+        seen.push(path);
+        if (path === "/release-identity.json")
+          return Response.json({
+            sha: "a".repeat(40),
+            assets: [{ path: retiredPath, sha256: "0".repeat(64) }],
+          });
+        if (RETIRED_AI_ROUTES.includes(path)) return new Response("Not Found", { status: 404 });
+        return new Response("Deception World");
+      },
+    });
+    assert.equal(report.ok, false, retiredPath);
+    assert.equal(
+      report.results.some(
+        ({ kind, ok, error }) =>
+          kind === "identity" && !ok && error.includes("Invalid release asset path"),
+      ),
+      true,
+      retiredPath,
+    );
+    assert.equal(seen.includes(retiredPath), false, `must reject before fetching ${retiredPath}`);
+    assert.equal(
+      report.results.some(({ kind }) => kind === "asset"),
+      false,
+      retiredPath,
     );
   }
 });
@@ -291,11 +333,16 @@ test("new release identity requires shared gallery readiness and preserves artwo
   assert.equal(written.artworks, 113);
   assert.ok(written.assets.some((asset) => asset.path === "/gallery/g79-1672.webp"));
   assert.ok(written.assets.some((asset) => asset.path === "/gallery/g113-1800.webp"));
+  assert.ok(written.assets.some((asset) => asset.path === "/saga-extreme-ultra-20261006.jpeg"));
+  assert.ok(
+    written.assets.every(
+      ({ path }) => !path.startsWith("/ultra-materials/") && !path.endsWith("/frame-rim.png"),
+    ),
+  );
   for (const path of [
-    "/ultra-materials/manifest.json",
-    "/ultra-materials/brushed-alloy-normal.png",
-    "/ultra-materials/brushed-alloy-roughness.png",
-    "/ultra-materials/frame-rim.png",
+    "/exhibition-metal/manifest.json",
+    "/exhibition-metal/brushed-alloy-normal.png",
+    "/exhibition-metal/brushed-alloy-roughness.png",
     "/exhibition-studio/manifest.json",
     "/exhibition-studio/studio-light.hdr",
     "/exhibition-studio/plaster-normal.png",

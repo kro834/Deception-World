@@ -769,7 +769,7 @@ test("rx12/rx13: the raster suit — the artwork's plates, delivery-sized, decod
   // builds only if they are decoded (else the finished figure stands), and
   // switches late only inside FAR UP！'s scan.
   const gate = read("src/components/load-gate.tsx");
-  assert.match(gate, /if \(to === "\/rexonance-saga"\) void warmRexonanceSuit\(\);/);
+  assert.match(gate, /if \(to === "\/rexonance-saga"\) void warmRexonanceSuit\("high"\);/);
   assert.match(gate, /if \(isRexonanceSuitReady\(\)\) rexonanceSuit = "build";/);
   assert.match(gate, /performance\.now\(\) - startedAt > REXONANCE_SUIT_LATE_MS/);
   assert.match(gate, /suit=\{rexonanceSuit\}/);

@@ -33,7 +33,8 @@ test("World section indicator includes the hash landing on short landscape scree
   assert.ok(start >= 0 && end > start);
   const sync = worldHome.slice(start, end);
   assert.match(sync, /const landing = parseFloat\(getComputedStyle\(section\)\.scrollMarginTop\) \|\| 0/);
-  assert.match(sync, /section\.getBoundingClientRect\(\)\.top <= Math\.max\(marker, landing \+ 8\)/);
+  assert.match(sync, /const rect = section\.getBoundingClientRect\(\);/);
+  assert.match(sync, /rect\.top <= Math\.max\(marker, landing \+ 8\)/);
 });
 
 test("World primary hash targets do not shift when preceding sections leave deferred layout", () => {

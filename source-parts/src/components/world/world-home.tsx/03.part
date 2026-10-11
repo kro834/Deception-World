@@ -1,3 +1,5 @@
+      const destination = {
+        path: "/world",
         brand: openingBrandRef.current,
         sigil: openingSigilRef.current,
         hero: openingHeroRef.current,
@@ -496,6 +498,3 @@
         posterSequence[index],
       ];
     }
-    const finalPoster = posterSequence.pop() ?? (poster + 1) % POSTERS.length;
-    const previewPool = [
-      poster,

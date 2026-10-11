@@ -255,9 +255,11 @@ function readAvoidText(button: HTMLElement, zones: ZeusRect[], pageEnd: boolean)
     for (const element of root.querySelectorAll<HTMLElement>(selector)) {
       if (element === button || button.contains(element)) continue;
       if (!drawn(element)) continue;
-      if (!meetsAny(element.getBoundingClientRect(), zones)) continue;
       // A title inside a card link is walked once, with the link.
+      // Reject that duplicate before reading its box: the parent test is
+      // independent of the candidate zones and does not need layout.
       if (walked.has(element) || element.parentElement?.closest(selector)) continue;
+      if (!meetsAny(element.getBoundingClientRect(), zones)) continue;
       const style = window.getComputedStyle(element);
       if (style.visibility === "hidden" || style.opacity === "0") continue;
       if (accept && !accept(element)) continue;
@@ -745,6 +747,9 @@ function ZeusButton({
       const controls = Array.from(controlRoot.querySelectorAll<HTMLElement>(ZEUS_AVOID_SELECTOR))
         .filter((control) => control !== button && !button.contains(control))
         .filter((control) => !(control instanceof HTMLButtonElement && control.disabled))
+        // Closed/disconnected controls have no drawn box. Keep the no-option
+        // check so auto content entering the view still counts before paint.
+        .filter(drawn)
         .map((control) => ({ control, rect: control.getBoundingClientRect() }))
         .filter(({ control, rect: controlRect }) => {
           if (controlRect.width < 1 || controlRect.height < 1) return false;

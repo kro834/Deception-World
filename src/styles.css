@@ -2279,7 +2279,6 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
 }
 
 .is-diving .cine-chrome,
-.is-diving .cine-always,
 .is-diving .cine-sequence-meta,
 .is-diving .cine-progress,
 .is-diving .cine-cue,
@@ -2288,7 +2287,7 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
   animation: world-dive-interface 0.16s ease-in both;
 }
 
-/* The quiet base for SKIP and SOUND. It comes before .cine-skip, which shares
+/* The quiet base for SKIP. It comes before .cine-skip, which shares
    its specificity, so SKIP keeps its own pill (fill, border, 48 px). */
 .cine-ghost {
   font-family: var(--font-sans);
@@ -2363,22 +2362,6 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
 .cine-skip:focus-visible {
   outline: 2px solid var(--color-ice);
   outline-offset: 3px;
-}
-
-.cine-always {
-  position: absolute;
-  top: max(3rem, calc(env(safe-area-inset-top) + 2.2rem));
-  left: max(0.75rem, env(safe-area-inset-left));
-  z-index: 30;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.is-playing .cine-always,
-.is-complete .cine-always {
-  opacity: 1;
-  pointer-events: auto;
-  transition: opacity 0.3s ease 0.2s;
 }
 
 .cine-replay-slot {
@@ -3490,10 +3473,6 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
     letter-spacing: 0.18em;
   }
 
-  .cine-always {
-    top: max(2.65rem, calc(env(safe-area-inset-top) + 1.9rem));
-  }
-
   .cine-title-caption {
     right: 4%;
     bottom: 4%;
@@ -3822,16 +3801,13 @@ html[data-android-renderer]
   }
 
   .cine-chrome,
-  .cine-always,
   .cine-skip {
     transition: none !important;
   }
 
-  /* The title is already still here: a replay would only finish at once, and
-     the score plays only during the opening, so neither control would do
-     anything. ENTER THE WORLD stands alone. */
-  .cine-replay-slot .cine-btn-secondary,
-  .cine-always {
+  /* The title is already still here: a replay would only finish at once.
+     ENTER THE WORLD stands alone. */
+  .cine-replay-slot .cine-btn-secondary {
     display: none;
   }
 
@@ -3860,7 +3836,6 @@ html[data-android-renderer]
   .is-diving .cine-particles,
   .is-diving .cine-vignette,
   .is-diving .cine-chrome,
-  .is-diving .cine-always,
   .is-diving .cine-sequence-meta,
   .is-diving .cine-progress,
   .is-diving .cine-cue,

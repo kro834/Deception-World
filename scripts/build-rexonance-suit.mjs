@@ -1378,9 +1378,10 @@ const FACE = await writeWebp(
 );
 
 // rx17: the gold, unformed — a dark gunmetal channel where the trim will
-// be: the art's own light, smoothed, desaturated and sunk (so the plate
-// keeps its form; unformed metal has no detail), with the channel's walls
-// catching a faint steel line.
+// be: the art's own light, desaturated into neutral steel. Keep a readable
+// material floor and its local bevel detail: near-black channels look like
+// missing plate pixels while the gold flows in. The channel walls catch a
+// cool reflection, but this substrate is never the finished bronze.
 const goldLight = await blurField(
   Float32Array.from(
     { length: N },
@@ -1399,8 +1400,10 @@ for (let y = 1; y < H - 1; y += 1) {
       1,
       Math.hypot(goldSoft[i + 1] - goldSoft[i - 1], goldSoft[i + W] - goldSoft[i - W]) * 0.9,
     );
-    const base = [14 + 44 * k, 17 + 49 * k, 22 + 58 * k];
-    const steel = [96, 110, 126];
+    const local = (0.2126 * rgb[i * 3] + 0.7152 * rgb[i * 3 + 1] + 0.0722 * rgb[i * 3 + 2]) / 255;
+    const detail = Math.max(-5, Math.min(6, (local - goldLight[i]) * 20));
+    const base = [31 + 38 * k + detail, 36 + 41 * k + detail, 43 + 46 * k + detail];
+    const steel = [112, 126, 144];
     for (let c = 0; c < 3; c += 1)
       rawGold[i * 3 + c] = Math.round(base[c] + (steel[c] - base[c]) * wall);
   }

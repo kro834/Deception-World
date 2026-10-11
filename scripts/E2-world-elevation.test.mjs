@@ -156,9 +156,10 @@ test("no chapter is current once the last one has scrolled past the marker", () 
   const start = home.indexOf("const syncActiveSection = () => {");
   const sync = home.slice(start, home.indexOf("const requestSectionSync = () => {", start));
   const cleared = sync.indexOf(
-    "if (sections[sections.length - 1].getBoundingClientRect().bottom <= marker) current = null;",
+    "if (lastBottom <= marker) current = null;",
   );
   assert.ok(cleared > sync.indexOf("sections.forEach((section) => {"), "after the chapter loop");
+  assert.match(sync, /lastBottom = rect\.bottom/);
   assert.ok(cleared < sync.indexOf("if (current === lastActiveRef.current) return;"));
 });
 
