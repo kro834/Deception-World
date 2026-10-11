@@ -1,3 +1,11 @@
+.app-not-found.app-not-found:has(> .recovery-tiles) {
+  /* Give the recovery strip its own auto row. Sharing the bottom 1fr
+     spacer would make the top spacer grow to the strip's height too. */
+  grid-template-rows:
+    minmax(24px, 1fr) [plate-start] var(--lr-pad-y) [slot-start] auto [slot-end head-start] auto
+    auto [head-end] auto auto auto auto var(--lr-pad-y) [plate-end] auto [recovery-end]
+    minmax(24px, 1fr);
+}
 .app-not-found.app-not-found > .recovery-tiles {
   grid-column: 2 / -2;
   grid-row: plate-end;

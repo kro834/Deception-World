@@ -1,0 +1,112 @@
+{
+  "branch": "codex/rx14-repair-20261011",
+  "commits": ["87e0b95", "c3a79f1", "df364c3", "b73922c"],
+  "checks": {
+    "reference": "../../verification.json"
+  },
+  "integrationNotes": [
+    "Reading was reapplied from 3bd6b33 / the inverse of 1c635c8, excluding its broken all-rail pan-y policy.",
+    "Upstream main through 00a3c72 was merged without discarding opening, native Dream focus, heap-cleanup, image-containment or Fight Card fixes.",
+    "src/components/world/world-home.tsx, manager-stub.tsx and rider-page.tsx match their generated source-parts.",
+    "No owner source, archive rows, IDs or shared-gallery data were rewritten. The dirty primary checkout and the separate rx17 branch were left untouched."
+  ],
+  "package": "reading",
+  "filesChanged": [
+    "src/components/dream-chapter/dream-chapter.tsx",
+    "src/components/dream-chapter/dream-story-navigation.tsx",
+    "src/lib/dream-chapter-navigation.js",
+    "src/lib/stable-fragment-navigation.js",
+    "src/components/final-stage/final-stage.tsx",
+    "src/lib/local-nav-current.ts",
+    "src/components/library/library-page.tsx",
+    "src/components/library/record-art.tsx",
+    "src/components/library/recovery-tiles.tsx",
+    "src/components/search/use-open-result.ts",
+    "src/lib/record-arrival.ts",
+    "src/lib/record-images.ts",
+    "src/lib/record-form-images.ts",
+    "scripts/build-record-art.mjs",
+    "src/routes/__root.tsx",
+    "src/lib/error-component.tsx",
+    "src/styles-world-annex.css",
+    "src/styles-stage-library.css",
+    "src/styles-not-found.css",
+    "src/styles-download.css",
+    "src/styles-recovery-tiles.css",
+    "src/components/rexonance-saga/rexonance-saga.tsx",
+    "src/components/extreme-saga/extreme-saga.tsx",
+    "src/components/gallery/gallery-page.tsx",
+    "src/components/saga-cinema/saga-cinema.tsx"
+  ],
+  "fixed": [
+    {
+      "finding": "verify-rexonance-operability",
+      "how": "Do not reinstate the broken all-rail pan-y overrides in liquid/boot.js or frosted controls. Non-rider horizontal rails retain native-compatible drag locking; the owner rider rail retains long-press selection plus ordinary vertical page scrolling. Existing verifiers were not weakened."
+    },
+    {
+      "finding": "verify-dream-scroll-work",
+      "how": "Reference-count temporary content-visibility holds per section. The first hold records the original inline value and the last owner restores it; each release is idempotent, including cleanup on unmount. Both overlapping release orders have regressions."
+    },
+    {
+      "finding": "verify-dream-reader-navigation",
+      "how": "A native fragment emits popstate followed by delayed hashchange; the second event reopened a chapter the reader had closed. Repeated synchronized hashes no longer reopen it. Upstream native-summary keyboard focus and cancellation are retained."
+    },
+    {
+      "finding": "safe reading changes",
+      "how": "Dream glossary threshold 0 and economy visibility, World/library scroll margins, 404 tab title, Dream Zeus focus ring, Final Stage current-section aria-current and lazy noncritical imagery are reinstated."
+    },
+    {
+      "finding": "f12",
+      "how": "Library/search cards select the published full/source art instead of archive thumbnail chips. Ten high-resolution forms receive 20 responsive candidates; 16 small originals stay at their real 373–434px resolution instead of fake upscaling."
+    }
+  ],
+  "opportunitiesDone": [
+    {
+      "finding": "o3",
+      "how": "Download and 404 have a published-art backdrop and complete recovery choices. The 404 recovery row has its own auto-sized lane, avoiding inflated mobile top spacing."
+    },
+    {
+      "finding": "o8",
+      "how": "Explicit search/library arrivals wait for the route cover, focus without scrolling, and briefly mark the destination. Observers, timers and input listeners are bounded/cancelled; motion-limited modes do not receive the animated cue."
+    },
+    {
+      "finding": "o10",
+      "how": "dream-roster deep links expand the matching PROFILE, including search arrivals, while temporary materialization is released."
+    },
+    {
+      "finding": "o14",
+      "how": "CASE navigation landmarks distinguish chapter documents, chapter words and events instead of repeating one label."
+    },
+    {
+      "finding": "o11",
+      "how": "Dream and the specified special/gallery/cinema reveal observers use threshold 0 with bottom insets. A 568x320 DOM-only stress test reveals artificially tall blocks at ratios below the former 0.08–0.12 gate."
+    }
+  ],
+  "skipped": [
+    "f11 — repeated library entries belong to owner source data and were not deduplicated."
+  ],
+  "newStrings": [
+    "次に開く資料",
+    "WORLD / CONTINUE / LIBRARY / SEARCH (utility recovery codes)",
+    "CASE n の章資料 / 章の言葉 / 出来事 (distinct accessibility labels); owner story/dialogue strings and canonical IDs are unchanged."
+  ],
+  "pinsUpdated": [
+    "scripts/stable-fragment-navigation.test.mjs: overlapping and unmount cleanup regressions.",
+    "scripts/dream-chapter-navigation.test.mjs: delayed hash event regression plus upstream keyboard cancellation tests.",
+    "scripts/record-arrival.test.mjs: cover, motion guards, input cancellation, focus and cleanup.",
+    "scripts/rx14-reading-delivery.test.mjs: no invented image pixels or changed archive data.",
+    "scripts/verify-rx14-completion.mjs: new additional probe; the eight requested verifiers remain unchanged except stronger incoming main checks."
+  ],
+  "shots": [
+    "/private/tmp/rx14-completion/390-search-arrival.png",
+    "/private/tmp/rx14-completion/320-library.png",
+    "/private/tmp/rx14-completion/1440-search.png",
+    "/private/tmp/rx14-completion/320-no-such-record.png",
+    "/private/tmp/rx14-completion/1440-no-such-record.png"
+  ],
+  "designNote": "Reading/navigation fixes keep native history, fragment scrolling and owner long-press behavior rather than replacing them with a new interaction policy.",
+  "openIssues": [
+    "Old 373–434px source images cannot gain genuine detail without better owner-supplied originals.",
+    "The owner will perform the final physical-phone rail checks; Chrome touch emulation is not a Safari/PWA attestation."
+  ]
+}

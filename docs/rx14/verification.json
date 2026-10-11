@@ -1,0 +1,123 @@
+{
+  "unit": {
+    "command": "npm test",
+    "total": 1972,
+    "passed": 1970,
+    "failed": 0,
+    "skipped": 2
+  },
+  "lint": {
+    "command": "npm run lint",
+    "errors": 0,
+    "warnings": 12
+  },
+  "typecheck": {
+    "command": "npm run typecheck",
+    "result": "pass"
+  },
+  "generatedSource": {
+    "command": "node scripts/sync-source-parts.mjs --check",
+    "groups": 15,
+    "result": "pass"
+  },
+  "recordArt": {
+    "command": "node scripts/build-record-art.mjs --check",
+    "forms": 26,
+    "responsiveCandidates": 20,
+    "upscaledSources": 0,
+    "result": "pass"
+  },
+  "build": {
+    "command": "npx vite build",
+    "result": "pass",
+    "databaseWrites": false
+  },
+  "browser": "Chrome; production preview at http://127.0.0.1:8134",
+  "requiredVerifiers": [
+    {
+      "command": "BASE_URL=http://127.0.0.1:8134 ENFORCE_DREAM_SCROLL_WORK=1 node scripts/verify-rexonance-operability.mjs",
+      "result": "pass",
+      "log": "/private/tmp/rx14-final-rexonance-operability.log"
+    },
+    {
+      "command": "BASE_URL=http://127.0.0.1:8134 ENFORCE_DREAM_SCROLL_WORK=1 node scripts/verify-dream-scroll-work.mjs",
+      "result": "pass",
+      "log": "/private/tmp/rx14-final-dream-scroll-work.log"
+    },
+    {
+      "command": "BASE_URL=http://127.0.0.1:8134 ENFORCE_DREAM_SCROLL_WORK=1 node scripts/verify-dream-reader-navigation.mjs",
+      "result": "pass",
+      "log": "/private/tmp/rx14-final-dream-reader-navigation.log"
+    },
+    {
+      "command": "BASE_URL=http://127.0.0.1:8134 ENFORCE_DREAM_SCROLL_WORK=1 node scripts/verify-site-health.mjs",
+      "result": "pass",
+      "log": "/private/tmp/rx14-final-site-health.log"
+    },
+    {
+      "command": "BASE_URL=http://127.0.0.1:8134 ENFORCE_DREAM_SCROLL_WORK=1 node scripts/verify-liquid-grid.mjs",
+      "result": "pass",
+      "log": "/private/tmp/rx14-final-liquid-grid.log"
+    },
+    {
+      "command": "BASE_URL=http://127.0.0.1:8134 ENFORCE_DREAM_SCROLL_WORK=1 node scripts/verify-rider-hold-navigation.mjs",
+      "result": "pass",
+      "log": "/private/tmp/rx14-final-rider-hold-navigation.log"
+    },
+    {
+      "command": "BASE_URL=http://127.0.0.1:8134 ENFORCE_DREAM_SCROLL_WORK=1 node scripts/verify-rail-work.mjs",
+      "result": "pass",
+      "log": "/private/tmp/rx14-final-rail-work.log"
+    },
+    {
+      "command": "BASE_URL=http://127.0.0.1:8134 ENFORCE_DREAM_SCROLL_WORK=1 node scripts/verify-hero-touch.mjs",
+      "result": "pass",
+      "log": "/private/tmp/rx14-final-hero-touch.log"
+    }
+  ],
+  "additionalVerifiers": [
+    {
+      "command": "node scripts/verify-rx14-completion.mjs",
+      "result": "pass",
+      "profiles": ["320x640", "390x844", "1024x1366", "1280x800", "1440x900"],
+      "routeLayouts": 35,
+      "tallRevealProfiles": 3,
+      "log": "/private/tmp/rx14-final-rx14-completion.log"
+    },
+    {
+      "command": "node scripts/verify-navigation-polish.mjs",
+      "result": "pass",
+      "log": "/private/tmp/rx14-final-navigation-polish.log"
+    },
+    {
+      "command": "node scripts/verify-content-readability.mjs",
+      "result": "pass",
+      "log": "/private/tmp/rx14-final-content-readability.log"
+    },
+    {
+      "command": "node scripts/verify-scroll-surfaces.mjs",
+      "result": "pass",
+      "passed": 68,
+      "total": 68,
+      "log": "/private/tmp/rx14-final-scroll-surfaces.log"
+    },
+    {
+      "command": "node scripts/verify-extreme-fightcard.mjs",
+      "result": "pass",
+      "profiles": 5,
+      "log": "/private/tmp/rx14-final-extreme-fightcard.log"
+    }
+  ],
+  "physicalDevices": "not tested; the owner will test phone rails",
+  "publication": "Use the normal exact-main-SHA deployment workflow; this local report is not a publication attestation.",
+  "artifactNote": "The JSON/Markdown reports live in Git. /private/tmp logs and screenshots are temporary and can be reproduced with the listed commands.",
+  "verifiedSourceBase": "b73922cd01fcfb0ff52acb5c73e6367ec51980d8",
+  "workingChangesAtVerification": [
+    "src/styles-recovery-tiles.css",
+    "scripts/record-arrival.test.mjs",
+    "scripts/rx14-reading-delivery.test.mjs",
+    "scripts/verify-rx14-completion.mjs",
+    "docs/rx14-completion.md",
+    "docs/rx14/"
+  ]
+}

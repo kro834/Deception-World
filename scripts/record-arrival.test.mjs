@@ -75,16 +75,17 @@ function setup({ reduce = false, economy = false, interactive = false } = {}) {
     addEventListener: (name, callback) => listeners.set(name, callback),
     removeEventListener: (name) => listeners.delete(name),
   };
-  class Observer {
-    constructor(callback) {
-      this.callback = callback;
-      this.active = true;
-      observer = this;
-    }
-    observe() {}
-    disconnect() {
-      this.active = false;
-    }
+  function Observer(callback) {
+    const instance = {
+      callback,
+      active: true,
+      observe() {},
+      disconnect() {
+        instance.active = false;
+      },
+    };
+    observer = instance;
+    return instance;
   }
   const exports = {};
   vm.runInNewContext(compiled, { exports, window, document, MutationObserver: Observer });
