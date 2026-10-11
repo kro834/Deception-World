@@ -78,6 +78,32 @@ try {
       assert.ok(label.font >= 12);
     }
     if (width >= 1100) {
+      for (const id of ["stages", "system"]) {
+        await page.locator(`#${id}`).evaluate((el) => el.scrollIntoView({ behavior: "instant" }));
+        await page.waitForTimeout(600);
+        const lines = await page.locator(`#${id} > .rxs-section-heading`).evaluate((el) => {
+          const box = el.getBoundingClientRect();
+          const nodes = [...el.querySelectorAll(".exo-line")];
+          const [left, right] = nodes.map((line) => line.getBoundingClientRect());
+          return {
+            sameRow: Math.abs(left.top - right.top) < 1,
+            rightCorner: right.left >= box.left + box.width / 2,
+            fits:
+              left.right <= right.left + 1 &&
+              right.right <= box.right + 1 &&
+              nodes.every(
+                (line) =>
+                  line.scrollWidth <= line.clientWidth + 1 &&
+                  line.getBoundingClientRect().height <=
+                    parseFloat(getComputedStyle(line).lineHeight) + 1,
+              ),
+          };
+        });
+        assert.ok(
+          lines.sameRow && lines.rightCorner && lines.fits,
+          `${width}px ${id} headline must fill both corners: ${JSON.stringify(lines)}`,
+        );
+      }
       for (const id of ["performance", "p14"]) {
         await page.locator(`#${id}`).evaluate((el) => el.scrollIntoView({ behavior: "instant" }));
         await page.waitForTimeout(600);
