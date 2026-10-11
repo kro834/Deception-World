@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 import sharp from "sharp";
+import { fileURLToPath } from "node:url";
 
 const read = async (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 const flat = (text) => text.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\s+/g, " ");
@@ -40,7 +41,9 @@ test("rx14 #6 bounds every Extreme form layer to the delivered portrait pixels",
     ["saga-extreme-middle-20261006.webp", 1023],
     ["saga-extreme-ultra-20261006.jpeg", 1022],
   ]) {
-    const metadata = await sharp(new URL(`../public/${file}`, import.meta.url).pathname).metadata();
+    const metadata = await sharp(
+      fileURLToPath(new URL(`../public/${file}`, import.meta.url)),
+    ).metadata();
     assert.deepEqual([metadata.width, metadata.height], [width, 1538]);
     assert.ok(impact.includes(`url("/${file}") 50% 0 / contain no-repeat`));
   }
@@ -48,7 +51,7 @@ test("rx14 #6 bounds every Extreme form layer to the delivered portrait pixels",
 
 test("rx14 #6 keeps the World print contained with no extra scale or scroll settle", async () => {
   const metadata = await sharp(
-    new URL("../public/deception-world-poster-delivery.webp", import.meta.url).pathname,
+    fileURLToPath(new URL("../public/deception-world-poster-delivery.webp", import.meta.url)),
   ).metadata();
   assert.deepEqual([metadata.width, metadata.height], [1024, 1536]);
   assert.match(
