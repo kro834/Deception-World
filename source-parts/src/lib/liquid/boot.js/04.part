@@ -1,8 +1,12 @@
+  window.addEventListener('pointerup', finish, true);
+  window.addEventListener('pointercancel', cancel, true);
+  window.addEventListener('blur', cancel);
+  window.addEventListener('pagehide', cancel);
   const cancelOtherTouch = (event) => {
-    if (holdToDrag && gesture?.pointerType === 'touch' && event.pointerType === 'touch' && event.pointerId !== gesture.pointerId) cancel();
+    if (touchRail && gesture?.pointerType === 'touch' && event.pointerType === 'touch' && event.pointerId !== gesture.pointerId) cancel();
   };
   const cancelWithEscape = (event) => {
-    if (holdToDrag && gesture && event.key === 'Escape') {
+    if (touchRail && gesture && event.key === 'Escape') {
       event.preventDefault();
       cancel();
     }

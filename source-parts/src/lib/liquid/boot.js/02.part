@@ -1,8 +1,3 @@
-
-    // Droplet lag: chase the requested geometry instead of snapping to it.
-    let settling = false;
-    const target = this.targetGeometry;
-    if (target) {
       const follow = 1 - Math.exp(-elapsed / 52);
       const d = Math.abs(target.x - g0.x) + Math.abs(target.y - g0.y)
               + Math.abs(target.width - g0.width) + Math.abs(target.height - g0.height);
@@ -194,6 +189,12 @@ function initRail(root) {
   // tabs selects as before. A quick tap still selects the tapped tab. Mouse
   // and pen keep the immediate press-and-drag.
   const holdToDrag = root.classList.contains('rider-tabs');
+  // rx14: every rail now leaves a vertical swipe to the page on touch
+  // (touch-action: pan-y, styles-frosted-controls.css). A grid or a column
+  // is long-press-to-drag like the rider grid; a single row still follows a
+  // sideways drag at once, and takes the page only once the finger has
+  // moved sideways (a vertical move is the browser's page scroll).
+  const touchRail = lockScroll;
   const TOUCH_HOLD_MS = 220;
   const TOUCH_SLOP = 11;
   let releasePageLock = null;
@@ -269,3 +270,5 @@ function initRail(root) {
         const width = geo.width.toFixed(2) + 'px', height = geo.height.toFixed(2) + 'px';
         if (lens.style.width !== width) lens.style.width = width;
         if (lens.style.height !== height) lens.style.height = height;
+        lens.style.transform = 'translate3d(' + geo.x.toFixed(2) + 'px,' + geo.y.toFixed(2) + 'px,0)';
+      }
