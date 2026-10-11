@@ -24,6 +24,7 @@ export interface RexonanceAssemblyPiece {
   readonly w: number;
   readonly h: number;
   readonly seat: readonly [number, number];
+  readonly tiles?: string;
 }
 
 export interface RexonanceAssemblyConfig {
@@ -31,6 +32,7 @@ export interface RexonanceAssemblyConfig {
   undersuit: string;
   size: { readonly width: number; readonly height: number };
   pieces: readonly RexonanceAssemblyPiece[];
+  maskTile?: number;
   core: readonly [number, number];
   visor: readonly [number, number];
   glow: readonly (readonly [number, number])[];
@@ -53,6 +55,7 @@ export interface RexonanceAssemblyTile {
   tone: number;
   fill: string;
   spin: number;
+  pieceId: string | null;
 }
 
 export const ASSEMBLY_BEATS: {
@@ -68,12 +71,14 @@ export const ASSEMBLY_BEATS: {
 };
 
 export const ASSEMBLY_PARTS: readonly string[];
+export const ASSEMBLY_TOUCH_ART_BUDGET: number;
 
 export function planAssembly(options: {
   size: { readonly width: number; readonly height: number };
   pieces: readonly RexonanceAssemblyPiece[];
   core: readonly [number, number];
   tile: number;
+  maskTile?: number;
   sample?: { data: ArrayLike<number> } | null;
   seed?: number;
 }): {

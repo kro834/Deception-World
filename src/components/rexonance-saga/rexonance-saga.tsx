@@ -26,6 +26,7 @@ import {
   REXONANCE_SUIT_MARKS,
   REXONANCE_SUIT_PIECES,
   REXONANCE_SUIT_SIZE,
+  REXONANCE_SUIT_TILE,
   REXONANCE_SUIT_UNDERSUIT,
 } from "@/lib/rexonance-suit";
 import { rexonanceImage } from "@/lib/rexonance-images";
@@ -376,15 +377,13 @@ const CORE_SYSTEMS = [
   },
 ] as const;
 
-// ZENITH (rx15): the suit-up the reader plays with the scroll. Only the
-// fields every revision of the suit module keeps are read (a piece's id,
-// group, box and seat, the figure, the undersuit and the marks), so a
-// finer piece list re-cuts the scene by itself.
+// ZENITH: use the suit atlas's shape masks, not the overlapping part boxes.
 const SUIT_UP: RexonanceAssemblyConfig = {
   figure: REXONANCE_SUIT_FIGURE,
   undersuit: REXONANCE_SUIT_UNDERSUIT,
   size: REXONANCE_SUIT_SIZE,
-  pieces: REXONANCE_SUIT_PIECES.map(({ id, group, x, y, w, h, seat }) => ({
+  maskTile: REXONANCE_SUIT_TILE,
+  pieces: REXONANCE_SUIT_PIECES.map(({ id, group, x, y, w, h, seat, tiles }) => ({
     id,
     group,
     x,
@@ -392,6 +391,7 @@ const SUIT_UP: RexonanceAssemblyConfig = {
     w,
     h,
     seat,
+    tiles,
   })),
   core: REXONANCE_SUIT_MARKS.core,
   visor: REXONANCE_SUIT_MARKS.visor,

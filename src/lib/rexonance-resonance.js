@@ -81,7 +81,7 @@ export function mountRexonanceResonance(page, environment = window) {
   const connection = environment.navigator?.connection;
   const timelines = Boolean(
     environment.CSS?.supports?.("animation-timeline", "view()") &&
-      environment.CSS.supports("animation-range", "entry 0% entry 100%"),
+    environment.CSS.supports("animation-range", "entry 0% entry 100%"),
   );
   const clock = () => environment.performance.now();
   let disposed = false;
@@ -512,6 +512,7 @@ const BEAT_OF_GROUP = {
 };
 const FLASH = 0.018;
 const WELDS_PER_FRAME = 160;
+export const ASSEMBLY_TOUCH_ART_BUDGET = 64;
 const PIXEL_BUDGET = 2_600_000;
 const TONES = [
   [121, 232, 255],
@@ -559,7 +560,15 @@ const beatWindow = (beat) => {
  * lands (t1, sorted) and, for the helmet, hovers. `sample` holds one RGBA
  * texel per tile (the figure drawn down to cols × rows), or null.
  */
-export function planAssembly({ size, pieces, core, tile, sample = null, seed = 1510 }) {
+function* assemblyPlanSteps({
+  size,
+  pieces,
+  core,
+  tile,
+  maskTile = 9,
+  sample = null,
+  seed = 1510,
+}) {
   const { width, height } = size;
   const cols = Math.ceil(width / tile);
   const rows = Math.ceil(height / tile);
@@ -568,10 +577,20 @@ export function planAssembly({ size, pieces, core, tile, sample = null, seed = 1
     piece,
     index,
     beat: beatOfPiece(piece, size),
-    area: piece.w * piece.h,
+    mask: piece.tiles ? Uint8Array.from(atob(piece.tiles), (c) => c.charCodeAt(0)) : null,
     rank: 0,
     reach: 1,
   }));
+  const masked = ranked.some((entry) => entry.mask);
+  const covers = (entry, x, y) => {
+    const p = entry.piece;
+    if (x < p.x || x >= p.x + p.w || y < p.y || y >= p.y + p.h) return false;
+    if (!entry.mask) return !masked;
+    const bit =
+      Math.floor((y - p.y) / maskTile) * Math.ceil(p.w / maskTile) +
+      Math.floor((x - p.x) / maskTile);
+    return Boolean(entry.mask[bit >> 3] & (1 << (bit & 7)));
+  };
   const byBeat = new Map();
   for (const entry of ranked) {
     if (!byBeat.has(entry.beat)) byBeat.set(entry.beat, []);
@@ -595,6 +614,7 @@ export function planAssembly({ size, pieces, core, tile, sample = null, seed = 1
   }
   const tiles = [];
   for (let row = 0; row < rows; row += 1) {
+    if (row && row % 4 === 0) yield;
     for (let col = 0; col < cols; col += 1) {
       const sx = col * tile;
       const sy = row * tile;
@@ -609,12 +629,22 @@ export function planAssembly({ size, pieces, core, tile, sample = null, seed = 1
       const cx = sx + tw / 2;
       const cy = sy + th / 2;
       let owner = null;
+      // The atlas is front-first. Vote over the actual painted mask, not
+      // the smallest rectangle (a gauntlet's box also contains ribbons).
+      let coverage = 0;
       for (const entry of ranked) {
-        const { x, y, w, h } = entry.piece;
-        if (cx >= x && cx < x + w && cy >= y && cy < y + h && (!owner || entry.area < owner.area))
+        const score =
+          Number(covers(entry, cx, cy)) * 2 +
+          Number(covers(entry, sx + tw * 0.25, sy + th * 0.25)) +
+          Number(covers(entry, sx + tw * 0.75, sy + th * 0.25)) +
+          Number(covers(entry, sx + tw * 0.25, sy + th * 0.75)) +
+          Number(covers(entry, sx + tw * 0.75, sy + th * 0.75));
+        if (score > coverage) {
+          coverage = score;
           owner = entry;
+        }
       }
-      if (!owner) {
+      if (!owner && !masked) {
         let best = Number.POSITIVE_INFINITY;
         for (const entry of ranked) {
           const distance = (entry.piece.seat[0] - cx) ** 2 + (entry.piece.seat[1] - cy) ** 2;
@@ -626,13 +656,14 @@ export function planAssembly({ size, pieces, core, tile, sample = null, seed = 1
       }
       const reach = owner ? Math.hypot(cx - owner.piece.seat[0], cy - owner.piece.seat[1]) : 0;
       if (owner) owner.reach = Math.max(owner.reach, reach);
-      tiles.push({ sx, sy, tw, th, cx, cy, owner, reach, rgb });
+      tiles.push({ sx, sy, tw, th, cx, cy, owner, pieceId: owner?.piece.id ?? null, reach, rgb });
     }
   }
   const [coreX, coreY] = core;
   const partDone = ASSEMBLY_PARTS.map(() => 0);
   const centroids = ASSEMBLY_PARTS.map(() => [0, 0, 0]);
-  tiles.forEach((item, index) => {
+  for (const [index, item] of tiles.entries()) {
+    if (index && index % 128 === 0) yield;
     const beat = item.owner
       ? item.owner.beat
       : item.cy < height * 0.2
@@ -684,7 +715,7 @@ export function planAssembly({ size, pieces, core, tile, sample = null, seed = 1
     delete item.owner;
     delete item.reach;
     delete item.rgb;
-  });
+  }
   tiles.sort((a, b) => a.t1 - b.t1);
   return {
     tiles,
@@ -694,6 +725,17 @@ export function planAssembly({ size, pieces, core, tile, sample = null, seed = 1
     partDone,
     centroids: centroids.map(([x, y, n]) => (n ? [x / n, y / n] : [coreX, coreY])),
   };
+}
+
+/** Pure synchronous plan for callers/tests; the live scene advances this
+ * same generator in small idle slices instead of one monolithic task. */
+export function planAssembly(options) {
+  const steps = assemblyPlanSteps(options);
+  let step;
+  do {
+    step = steps.next();
+  } while (!step.done);
+  return step.value;
 }
 
 // Pixel squares inside the face's lights (figure px), in burst groups.
@@ -770,8 +812,10 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   };
   const { width: W, height: H } = config.size;
   let disposed = false;
+  let pageActive = true;
   let live = false;
   let near = false;
+  let warm = false;
   let frame = 0;
   let images = null;
   let loading = null;
@@ -824,6 +868,11 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         );
     loading = Promise.all([decode(config.figure), decode(config.undersuit)]).then(
       ([figure, undersuit]) => {
+        if (disposed) {
+          figure.close?.();
+          undersuit.close?.();
+          return null;
+        }
         images = { figure, undersuit };
         return images;
       },
@@ -879,37 +928,94 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     }
   };
 
-  // Cut in steps, each its own task, so no step is long on a slow phone:
-  // the sample, then the plan, then the weld canvas.
+  // Each preparation phase gets an idle slot, 3.5 viewports before the
+  // scene. Timeout/fallback still guarantees progress during a fast fling.
+  // Cancelling resolves waiters so an old build cannot activate after exit.
   let building = null;
-  const nextTask = () => new Promise((resolve) => environment.setTimeout(resolve, 0));
+  let generation = 0;
+  const idleJobs = new Map();
+  const idleTask = (work) =>
+    new Promise((resolve, reject) => {
+      if (disposed || !pageActive || document.hidden || !motionAllowed()) return resolve(null);
+      const run = (deadline) => {
+        idleJobs.delete(id);
+        if (disposed || !pageActive || document.hidden || !motionAllowed()) return resolve(null);
+        try {
+          resolve(work(deadline));
+        } catch (error) {
+          reject(error);
+        }
+      };
+      const idle = typeof environment.requestIdleCallback === "function";
+      const id = idle
+        ? environment.requestIdleCallback(run, { timeout: 1000 })
+        : environment.setTimeout(run, 16);
+      idleJobs.set(id, () => {
+        if (idle) environment.cancelIdleCallback?.(id);
+        else environment.clearTimeout(id);
+        resolve(null);
+      });
+    });
+  const cancelPreparation = () => {
+    generation += 1;
+    for (const cancel of idleJobs.values()) cancel();
+    idleJobs.clear();
+    building = null;
+    preparing = null;
+  };
   const build = () => {
     if (building) return building;
+    const token = generation;
     const tile = coarse.matches ? 15 : 12;
-    building = sampleFigure(tile)
-      .then((sample) => nextTask().then(() => sample))
-      .then((sample) => {
-        if (disposed) return;
-        plan = planAssembly({
-          size: config.size,
-          pieces: config.pieces,
-          core: config.core,
-          tile,
-          sample,
-        });
-        pixels = facePixels(config.glow, config.visor);
-        return nextTask();
-      })
-      .then(() => {
-        if (disposed) return;
-        settled = document.createElement("canvas");
-        settled.width = W;
-        settled.height = H;
-        settledCount = 0;
-        allocate();
-      })
+    building = idleTask(() => sampleFigure(tile))
+      .then((sample) =>
+        idleTask(async () => {
+          if (disposed || token !== generation) return;
+          const steps = assemblyPlanSteps({
+            size: config.size,
+            pieces: config.pieces,
+            core: config.core,
+            maskTile: config.maskTile,
+            tile,
+            sample,
+          });
+          let result;
+          while (
+            !disposed &&
+            pageActive &&
+            token === generation &&
+            !document.hidden &&
+            motionAllowed()
+          ) {
+            await idleTask((deadline) => {
+              const start = environment.performance?.now?.() ?? Date.now();
+              do {
+                result = steps.next();
+              } while (
+                !result.done &&
+                (environment.performance?.now?.() ?? Date.now()) - start < 4 &&
+                (!deadline || deadline.timeRemaining() > 4)
+              );
+            });
+            if (result?.done) break;
+          }
+          if (disposed || token !== generation || !result?.done) return;
+          plan = result.value;
+          pixels = facePixels(config.glow, config.visor);
+        }),
+      )
+      .then(() =>
+        idleTask(() => {
+          if (disposed || token !== generation || !plan) return;
+          settled = document.createElement("canvas");
+          settled.width = W;
+          settled.height = H;
+          settledCount = 0;
+          allocate();
+        }),
+      )
       .finally(() => {
-        building = null;
+        if (token === generation) building = null;
       });
     return building;
   };
@@ -1156,7 +1262,15 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       const h = item.th * grow;
       const left = x - w / 2;
       const top = y - h / 2;
-      if (u < 0.62) {
+      if (u < 0.62 && coarse.matches) {
+        const slot = item.tone + 3;
+        const at = moteCounts[slot];
+        motes[slot][at] = left;
+        motes[slot][at + 1] = top;
+        motes[slot][at + 2] = w * 0.84;
+        motes[slot][at + 3] = h * 0.84;
+        moteCounts[slot] = at + 4;
+      } else if (u < 0.62) {
         // The mosaic: a nanite square of the plate's colour, a hair apart.
         context.globalAlpha = 0.45 + 0.5 * u;
         context.fillStyle = item.fill;
@@ -1170,11 +1284,29 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         arts += 1;
       }
     }
+    const artCount = coarse.matches ? Math.min(arts, ASSEMBLY_TOUCH_ART_BUDGET) : arts;
+    // Omitted texture draws remain luminous tiles, batched in three paths.
+    // Every tile still welds into the complete, full-resolution figure.
+    if (artCount < arts) {
+      let selected = 0;
+      for (let i = 0; i < arts; i += 1) {
+        if (i === Math.floor((selected * arts) / artCount)) {
+          selected += 1;
+          continue;
+        }
+        const slot = tiles[art[i]].tone + 3;
+        const at = moteCounts[slot];
+        const o = i * 4;
+        for (let j = 0; j < 4; j += 1) motes[slot][at + j] = artRects[o + j];
+        moteCounts[slot] = at + 4;
+      }
+    }
     for (let slot = 0; slot < 6; slot += 1) {
       fillRects(context, motes[slot], moteCounts[slot], TONE_CSS[slot % 3], slot < 3 ? 0.36 : 0.78);
     }
     context.globalAlpha = 1;
-    for (let i = 0; i < arts; i += 1) {
+    for (let n = 0; n < artCount; n += 1) {
+      const i = Math.floor((n * arts) / artCount);
       const item = tiles[art[i]];
       const o = i * 4;
       context.drawImage(
@@ -1194,8 +1326,10 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       context.strokeStyle = TONE_CSS[0];
       context.lineWidth = 0.9;
       context.beginPath();
-      for (let i = 0; i < arts * 4; i += 4)
+      for (let n = 0; n < artCount; n += 1) {
+        const i = Math.floor((n * arts) / artCount) * 4;
         context.rect(artRects[i], artRects[i + 1], artRects[i + 2], artRects[i + 3]);
+      }
       context.stroke();
     }
     // Welds: a hot core in each cell that has just landed, cooling to ice.
@@ -1371,7 +1505,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     }
   };
   const schedule = () => {
-    if (!frame && live && near && !document.hidden)
+    if (!frame && live && near && pageActive && !document.hidden)
       frame = environment.requestAnimationFrame(render);
   };
   const onScroll = () => schedule();
@@ -1403,11 +1537,9 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   };
 
   const goLive = () => {
-    if (disposed || live || !images || !motionAllowed()) return;
-    if (!plan || !settled || !buffers) {
-      build().then(goLive, () => {});
+    if (disposed || !pageActive || live || !near || document.hidden || !images || !motionAllowed())
       return;
-    }
+    if (!plan || !settled || !buffers) return;
     live = true;
     runway.dataset.rznState = "live";
     lastProgress = -1;
@@ -1420,7 +1552,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     } else if (measure()) schedule();
   };
   const goStill = () => {
-    if (!live && !runway.dataset.rznState) return;
+    cancelPreparation();
     live = false;
     listen(false);
     resizeObserver?.disconnect();
@@ -1445,19 +1577,30 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     view = null;
   };
 
-  // Near the view with motion allowed: fetch the two pictures (the call's
-  // warm-up has usually cached them), cut the tiles, go live.
+  let preparing = null;
   const wake = () => {
-    if (disposed || live || !motionAllowed() || document.hidden) return;
-    if (images) {
+    if (disposed || !pageActive || live || !motionAllowed() || document.hidden) return;
+    if (plan && settled && buffers) {
       goLive();
       return;
     }
-    if (!runway.dataset.rznState) runway.dataset.rznState = "loading";
-    load().then(goLive, () => {
-      loading = null;
-      if (!disposed && !live) delete runway.dataset.rznState;
-    });
+    if (preparing) return;
+    const token = generation;
+    if (near) runway.dataset.rznState = "loading";
+    preparing = idleTask(() => images || load())
+      .then(() => {
+        if (token === generation && images) return build();
+      })
+      .then(() => {
+        if (token === generation) goLive();
+      })
+      .catch(() => {
+        loading = null;
+        if (!disposed && !live) delete runway.dataset.rznState;
+      })
+      .finally(() => {
+        if (token === generation) preparing = null;
+      });
   };
   const nearObserver =
     typeof environment.IntersectionObserver === "function"
@@ -1469,9 +1612,24 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
             listen(near && live);
             schedule();
           },
-          { rootMargin: "120% 0px 120% 0px" },
+          { rootMargin: "25% 0px 25% 0px" },
         )
       : null;
+  let warmObserver = null;
+  const observeWarmup = () => {
+    warmObserver?.disconnect();
+    if (!environment.IntersectionObserver) return;
+    // IO percentages are relative to width, not height: use viewport px.
+    warmObserver = new environment.IntersectionObserver(
+      (entries) => {
+        if (disposed) return;
+        warm = entries.some((entry) => entry.isIntersecting);
+        if (warm) wake();
+      },
+      { rootMargin: `${Math.round((environment.innerHeight || 900) * 3.5)}px 0px` },
+    );
+    warmObserver.observe(runway);
+  };
 
   const sync = () => {
     if (disposed) return;
@@ -1480,17 +1638,24 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       return;
     }
     if (document.hidden) {
+      cancelPreparation();
       if (frame) environment.cancelAnimationFrame(frame);
       frame = 0;
       return;
     }
-    if (near) wake();
+    if (warm || near) wake();
     lastProgress = -1;
     schedule();
   };
   const onPageHide = () => {
+    pageActive = false;
+    cancelPreparation();
     if (frame) environment.cancelAnimationFrame(frame);
     frame = 0;
+  };
+  const onPageShow = () => {
+    pageActive = true;
+    sync();
   };
   const htmlObserver = new environment.MutationObserver(sync);
   htmlObserver.observe(html, { attributes: true, attributeFilter: ["data-world-effects"] });
@@ -1499,20 +1664,28 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   connection?.addEventListener?.("change", sync);
   document.addEventListener("visibilitychange", sync);
   environment.addEventListener("pagehide", onPageHide);
-  environment.addEventListener("pageshow", sync);
+  environment.addEventListener("pageshow", onPageShow);
+  environment.addEventListener("resize", observeWarmup);
   nearObserver?.observe(runway);
+  observeWarmup();
+  if (!nearObserver) {
+    near = warm = true;
+    wake();
+  }
 
   return () => {
     disposed = true;
     goStill();
     nearObserver?.disconnect();
+    warmObserver?.disconnect();
     htmlObserver.disconnect();
     reduced.removeEventListener?.("change", sync);
     forcedColors.removeEventListener?.("change", sync);
     connection?.removeEventListener?.("change", sync);
     document.removeEventListener("visibilitychange", sync);
     environment.removeEventListener("pagehide", onPageHide);
-    environment.removeEventListener("pageshow", sync);
+    environment.removeEventListener("pageshow", onPageShow);
+    environment.removeEventListener("resize", observeWarmup);
     images?.figure?.close?.();
     images?.undersuit?.close?.();
     images = null;

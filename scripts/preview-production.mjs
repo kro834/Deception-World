@@ -27,7 +27,7 @@ const mime = {
   ".mp4": "video/mp4",
   ".ico": "image/x-icon",
 };
-const port = 8082;
+const port = Number(process.env.PREVIEW_PORT || 8082);
 createServer(async (req, res) => {
   try {
     if (!["GET", "HEAD"].includes(req.method)) {
