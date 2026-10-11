@@ -66,6 +66,14 @@ const selectedScenarios = process.env.RX17_SCENARIOS
     ])
   : scenarios;
 const traceEnabled = process.env.RX17_TRACE === "1";
+const requireEarlyBuffer = process.env.RX17_REQUIRE_EARLY_BUFFER === "1";
+const menuClaimProbe = process.env.RX17_MENU_CLAIM_PROBE === "1";
+if (menuClaimProbe)
+  assert.deepEqual(
+    selectedScenarios,
+    ["bootstrap-held-native-menu"],
+    "claim instrumentation is a separate controlled diagnostic, not primary timing",
+  );
 if (traceEnabled)
   assert.equal(selectedProfiles.length * selectedScenarios.length, 1, "trace exactly one case");
 const drawn = [REXONANCE_SUIT_ATLAS.src, REXONANCE_SUIT_GOLD_ATLAS.src];
@@ -90,6 +98,9 @@ const report = {
     firstVisibilityNote:
       "first rAF observing SSR hero DOM without a cover, not a pixel-paint guarantee",
     earlyInputToleranceMs: 100,
+    earlyInputDeliveryWaitMs: 2500,
+    requirePreHydrationInputHandledWithoutRetry: requireEarlyBuffer,
+    diagnosticMenuClaimProbe: menuClaimProbe,
     earlyInputPassNote:
       "earlyInputVerified is separate from passed, which only asserts the later UI-ready engine flow",
     controlledBootstrapHoldNote:
@@ -98,7 +109,7 @@ const report = {
   cases: [],
 };
 
-function installRecorder({ saveData, traceEnabled }) {
+function installRecorder({ saveData, traceEnabled, menuClaimProbe }) {
   // Only the network preference is simulated. Neither readiness, rendering
   // tier, DOM suit state nor renderer capabilities are forced.
   const connection = {
@@ -120,7 +131,78 @@ function installRecorder({ saveData, traceEnabled }) {
     resources: [],
     longTasks: [],
     routeChanges: [],
+    menuEarlyDiagnostics: [],
   });
+  const menuState = (opener, input) => {
+    const ancestor = opener?.closest?.('[inert], [hidden], [disabled], [aria-disabled="true"]');
+    return {
+      documentHidden: document.hidden,
+      pathname: location.pathname,
+      href: location.href,
+      openerPresent: Boolean(opener),
+      openerConnected: opener?.isConnected ?? false,
+      openerDisabled: opener?.disabled ?? null,
+      openerTag: opener?.tagName ?? null,
+      openerClass: opener?.getAttribute?.("class") ?? null,
+      openerMatchesCurrent: document.querySelector(".side-panel-trigger") === opener,
+      pointerOpenerStored: Boolean(window.__rx17MenuOpenerRef),
+      openerMatchesPointerRef: window.__rx17MenuOpenerRef === opener,
+      invalidAncestorTag: ancestor?.tagName ?? null,
+      invalidAncestorClass: ancestor?.getAttribute?.("class") ?? null,
+      packetPresent: Boolean(input),
+      packetPathname: input?.pathname ?? null,
+      packetUrl: input?.url ?? null,
+      packetKeyboard: input?.keyboard ?? null,
+    };
+  };
+  let observedMenuOwner = null;
+  const observeMenuOwner = () => {
+    if (!menuClaimProbe) return;
+    const owner = window.__dwSideMenuEarlyInput;
+    if (!owner || owner === observedMenuOwner) return;
+    observedMenuOwner = owner;
+    log.menuEarlyDiagnostics.push({ kind: "owner-observed", at: performance.now() });
+    const claim = owner.claim;
+    const valid = owner.valid;
+    // Transparent wrappers: same receiver, arguments, return values and
+    // exceptions. Never create, change, force, or retry an application packet.
+    owner.claim = function (...args) {
+      const at = performance.now();
+      const before = menuState(args[0]);
+      const input = Reflect.apply(claim, this, args);
+      log.menuEarlyDiagnostics.push({
+        kind: "claim",
+        at,
+        returnedAt: performance.now(),
+        before,
+        after: menuState(args[0], input),
+      });
+      return input;
+    };
+    owner.valid = function (...args) {
+      const at = performance.now();
+      const result = Reflect.apply(valid, this, args);
+      log.menuEarlyDiagnostics.push({
+        kind: "valid",
+        at,
+        result,
+        state: menuState(args[0]?.opener, args[0]),
+      });
+      return result;
+    };
+  };
+  if (menuClaimProbe)
+    window.addEventListener(
+      "deception-world:side-menu-open-input",
+      (event) =>
+        log.menuEarlyDiagnostics.push({
+          kind: "open-input-event",
+          at: performance.now(),
+          state: menuState(event.detail?.opener),
+          keyboard: event.detail?.keyboard ?? null,
+        }),
+      { capture: true, passive: true },
+    );
   const suitUrl = (value) => {
     try {
       const url = new URL(String(value), location.href).href;
@@ -271,11 +353,16 @@ function installRecorder({ saveData, traceEnabled }) {
     );
   };
   for (const type of ["pointerdown", "touchstart", "click"]) {
-    document.addEventListener(
+    // Installed by addInitScript before the HTML head's early-menu capture.
+    // A document listener cannot see a click that that capture consumes.
+    window.addEventListener(
       type,
       (event) => {
         const link = event.target?.closest?.("a[href],.side-panel-trigger");
-        if (link)
+        if (link) {
+          observeMenuOwner();
+          if (type === "pointerdown" && link.matches(".side-panel-trigger"))
+            window.__rx17MenuOpenerRef = link;
           log.taps.push({
             type,
             href: link.getAttribute("href"),
@@ -283,7 +370,37 @@ function installRecorder({ saveData, traceEnabled }) {
             at: performance.now(),
             pathname: location.pathname,
             pressReady: document.documentElement.hasAttribute("data-press-ready"),
+            isTrusted: event.isTrusted,
+            button: event.button ?? null,
+            defaultPrevented: event.defaultPrevented,
+            targetClass: event.target?.getAttribute?.("class") ?? null,
+            controlClass: link.getAttribute("class"),
+            earlyMenuCapturePresent: Boolean(window.__dwSideMenuEarlyInput),
+            ...(menuClaimProbe
+              ? {
+                  modifiers: {
+                    alt: event.altKey ?? false,
+                    ctrl: event.ctrlKey ?? false,
+                    meta: event.metaKey ?? false,
+                    shift: event.shiftKey ?? false,
+                  },
+                  menuState: menuState(link),
+                }
+              : {}),
           });
+          if (menuClaimProbe && type === "click")
+            setTimeout(
+              () =>
+                log.menuEarlyDiagnostics.push({
+                  kind: "click-after-dispatch",
+                  at: performance.now(),
+                  defaultPrevented: event.defaultPrevented,
+                  cancelBubble: event.cancelBubble,
+                  state: menuState(link),
+                }),
+              0,
+            );
+        }
       },
       { capture: true, passive: true },
     );
@@ -295,6 +412,7 @@ function installRecorder({ saveData, traceEnabled }) {
   let callMeter = null;
   let routeState = null;
   const sample = () => {
+    observeMenuOwner();
     if (traceEnabled) {
       const state = `${location.pathname}:${document.documentElement.getAttribute("data-route-cover")}`;
       if (state !== routeState) {
@@ -394,7 +512,7 @@ async function runCase(browser, profileName, scenario) {
       connectionType: "cellular4g",
     });
   }
-  await context.addInitScript(installRecorder, { saveData, traceEnabled });
+  await context.addInitScript(installRecorder, { saveData, traceEnabled, menuClaimProbe });
   const result = {
     profile: profileName,
     scenario,
@@ -699,6 +817,7 @@ async function runCase(browser, profileName, scenario) {
         firstVisibleAt: window.__rx17.worldDisplays.at(-1).at,
         at: performance.now(),
         tapCount: window.__rx17.taps.length,
+        href: location.href,
       }));
       const snapshotReceivedHostAt = Date.now();
       const firstVisibleAt = snapshot.firstVisibleAt;
@@ -789,9 +908,29 @@ async function runCase(browser, profileName, scenario) {
           false,
           "controlled native input must precede hydration readiness",
         );
+        // touchEnd delivery is not itself evidence that Chrome's trusted
+        // compatibility click has been dispatched. Keep the client held
+        // until that click is seen above the application's head capture.
+        await page.waitForFunction(
+          (count) =>
+            window.__rx17.taps
+              .slice(count)
+              .some(
+                (tap) => tap.control === "menu-trigger" && tap.type === "click" && tap.isTrusted,
+              ),
+          beforeCount,
+          { timeout: 2000 },
+        );
         result.bootstrapReleasedAfterNativeInputAt = await now();
         releaseHeldRequests();
       }
+      const actualClick = await page.evaluate(
+        (count) =>
+          window.__rx17.taps
+            .slice(count)
+            .find((tap) => tap.control === "menu-trigger" && tap.type === "click"),
+        beforeCount,
+      );
       const initialPanelCheckStartedAt = await now();
       const panelOpenedBeforeSettledCheck = await page
         .waitForFunction(
@@ -808,9 +947,17 @@ async function runCase(browser, profileName, scenario) {
         firstVisibleAt,
         targetAt,
         actualTapAt: actual.at,
+        hrefAtEarlyObservation: snapshot.href,
         actualDelayFromFirstVisibleMs: actual.at - firstVisibleAt,
         latenessMs: actual.at - targetAt,
         pressReadyAtActualTap: actual.pressReady,
+        actualClickAt: actualClick?.at ?? null,
+        pressReadyAtActualClick: actualClick?.pressReady ?? null,
+        trustedClickDelivered: actualClick?.isTrusted ?? false,
+        clickBeforeBootstrapRelease:
+          actualClick && result.bootstrapReleasedAfterNativeInputAt !== undefined
+            ? actualClick.at < result.bootstrapReleasedAfterNativeInputAt
+            : null,
         inputMethod: nativeEarlyInput
           ? "CDP native touch at observed SSR button center"
           : "Playwright actionability-checked real tap",
@@ -867,19 +1014,94 @@ async function runCase(browser, profileName, scenario) {
       result.firstVisibleInput.panelOpenedAtWorldReady =
         !result.firstVisibleInput.menuRetryRequired;
       result.firstVisibleInput.panelWorldReadyObservedAt = await now();
+      result.firstVisibleInput.openerAtWorldReady = await page.evaluate(() => ({
+        isConnected: window.__rx17MenuOpenerRef?.isConnected ?? false,
+        matchesCurrentTrigger:
+          document.querySelector(".side-panel-trigger") === window.__rx17MenuOpenerRef,
+        pathname: location.pathname,
+        href: location.href,
+        earlyMenuCapturePresent: Boolean(window.__dwSideMenuEarlyInput),
+      }));
+      result.firstVisibleInput.openerAtWorldReady.hrefChanged =
+        result.firstVisibleInput.openerAtWorldReady.href !==
+        result.firstVisibleInput.hrefAtEarlyObservation;
       const first = result.firstVisibleInput;
+      first.menuRetryRequiredAtWorldReady = first.menuRetryRequired;
+      // Root readiness can precede the menu Trigger's own layout claim.
+      // Preserve that initial false, then observe asynchronous delivery with
+      // a host deadline. No retry tap, packet injection or app state change.
+      first.deliveryWaitStartedHostAt = Date.now();
+      first.deliveryWaitTimeoutMs = report.settings.earlyInputDeliveryWaitMs;
+      let delivered = first.panelOpenedAtWorldReady;
+      let deadlineTimer;
+      const expired = new Promise((resolveExpired) => {
+        deadlineTimer = setTimeout(
+          () => resolveExpired(null),
+          report.settings.earlyInputDeliveryWaitMs,
+        );
+      });
+      try {
+        while (!delivered) {
+          const observed = await Promise.race([
+            page
+              .locator("#site-side-panel")
+              .getAttribute("data-open")
+              .then((value) => value === "true"),
+            expired,
+          ]);
+          if (observed === null) break;
+          delivered = observed;
+          if (!delivered) {
+            const again = await Promise.race([
+              new Promise((resolveNext) => setTimeout(() => resolveNext(true), 50)),
+              expired,
+            ]);
+            if (again === null) break;
+          }
+        }
+      } finally {
+        clearTimeout(deadlineTimer);
+      }
+      first.deliveryWaitCompletedHostAt = Date.now();
+      first.deliveryWaitHostMs =
+        first.deliveryWaitCompletedHostAt - first.deliveryWaitStartedHostAt;
+      first.panelOpenedAfterDeliveryWait = delivered;
+      first.deliveryWaitFinalObservedAt = await now();
+      first.menuRetryRequired = !delivered;
       first.initialEarlyInputStatus = first.earlyInputStatus;
       const onTime = first.latenessMs <= report.settings.earlyInputToleranceMs;
       first.earlyInputStatus = onTime
-        ? first.panelOpenedAtWorldReady
+        ? delivered
           ? "on-time-and-handled"
           : "on-time-and-unhandled"
-        : first.panelOpenedAtWorldReady
+        : delivered
           ? "late-and-handled"
           : "late-and-unhandled";
-      first.earlyInputVerified = onTime && first.panelOpenedAtWorldReady;
-      first.inputHandledWithoutRetry = first.panelOpenedAtWorldReady;
-      if (bootstrapHeld) result.controlledEarlyBufferVerified = first.panelOpenedAtWorldReady;
+      first.earlyInputVerified = onTime && delivered;
+      first.inputHandledWithoutRetry = delivered;
+      if (bootstrapHeld) result.controlledEarlyBufferVerified = delivered;
+      first.preHydrationClickHandledWithoutRetry =
+        first.trustedClickDelivered &&
+        first.pressReadyAtActualClick === false &&
+        first.inputHandledWithoutRetry;
+      if (bootstrapHeld)
+        assert.equal(
+          first.pressReadyAtActualClick,
+          false,
+          "controlled native click must arrive before hydration readiness",
+        );
+      if (nativeEarlyInput && requireEarlyBuffer) {
+        assert.equal(
+          first.pressReadyAtActualTap,
+          false,
+          "native buffer verification must deliver input before hydration readiness",
+        );
+        assert.equal(
+          first.inputHandledWithoutRetry,
+          true,
+          "early native menu input must survive hydration without another menu tap",
+        );
+      }
     }
     if (scenario === "abort-resume" || scenario === "abort-intent-resume") {
       await page.waitForFunction(
