@@ -27,6 +27,10 @@ import {
 } from "@/lib/rexonance-suit";
 import { SuitNanites } from "./rexonance-suit-nanites";
 
+// rx17: the warm-up prepares the nanite engine's plan in idle time once
+// this chunk is prefetched (rexonance-transition-loader).
+export { prepareRexonanceSuit } from "./rexonance-suit-nanites";
+
 type RexonanceCallSequenceProps = {
   mode: "entry" | "stage";
   phase: "covering" | "revealing";
@@ -520,8 +524,11 @@ function Suit({ suit, animate }: { suit: "build" | "whole"; animate: boolean }) 
               <i className="rx-suit-art" style={atlasCell(piece, 0)} />
             </i>
           ))}
-          {/* ... or, at full motion, its micro-tiles stream in and lock. */}
-          {animate ? <SuitNanites onReady={onNanites} /> : null}
+          {/* ... or, at full motion, its micro-tiles stream in and lock, and
+              (rx17) gold nanites form its gold right after it seats. The
+              engine runs only while the suit builds (a late switch inside
+              FAR UP！ mounts it then). */}
+          {animate && suit === "build" ? <SuitNanites onReady={onNanites} /> : null}
           {/* The face's lights, lit: they come on under the pixel squares. */}
           <i
             className="rx-suit-face"

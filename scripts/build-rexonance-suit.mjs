@@ -30,6 +30,7 @@ const SOURCE = fileURLToPath(
 const OUT_DIR = fileURLToPath(new URL(`../public/rexonance-suit-${VERSION}/`, import.meta.url));
 const PUBLIC_PATH = `/rexonance-suit-${VERSION}`;
 const MODULE = fileURLToPath(new URL("../src/lib/rexonance-suit.ts", import.meta.url));
+const GOLD_MODULE = fileURLToPath(new URL("../src/lib/rexonance-suit-gold.ts", import.meta.url));
 const debugArg = process.argv.find((arg) => arg.startsWith("--debug="));
 const DEBUG = debugArg ? debugArg.slice("--debug=".length) : null;
 
@@ -760,6 +761,142 @@ async function blurField(field, sigma, width = W, height = H) {
   return out;
 }
 
+// --- rx17: the gold trims -------------------------------------------------
+// (owner, 2026-10-11) The plates seat without their gold, and gold nanites
+// form it right after. The trims are classified from the artwork's own
+// colours, before anything below touches them: the bronze (hue 17-54°,
+// saturated), its shadowed browns, then the specular highlights the trims
+// carry (blown near-white, any hue, flooded a few px in from the bronze),
+// then the trims' small holes are closed and lone specks dropped. The pink
+// and cyan crystals, their white glints and the black plates stay out.
+const GOLD_CELL = 4; // delivery px: the gold nanites (much finer than TILE)
+const boxFraction = (mask, radius) => {
+  const stride = W + 1;
+  const sums = new Float64Array(stride * (H + 1));
+  for (let y = 0; y < H; y += 1) {
+    let row = 0;
+    for (let x = 0; x < W; x += 1) {
+      row += mask[y * W + x];
+      sums[(y + 1) * stride + x + 1] = sums[y * stride + x + 1] + row;
+    }
+  }
+  const out = new Float32Array(N);
+  for (let y = 0; y < H; y += 1) {
+    const y0 = Math.max(0, y - radius);
+    const y1 = Math.min(H, y + radius + 1);
+    for (let x = 0; x < W; x += 1) {
+      const x0 = Math.max(0, x - radius);
+      const x1 = Math.min(W, x + radius + 1);
+      out[y * W + x] =
+        (sums[y1 * stride + x1] -
+          sums[y0 * stride + x1] -
+          sums[y1 * stride + x0] +
+          sums[y0 * stride + x0]) /
+        ((x1 - x0) * (y1 - y0));
+    }
+  }
+  return out;
+};
+const goldTrim = (() => {
+  const hue = new Float32Array(N);
+  const sat = new Float32Array(N);
+  const val = new Float32Array(N);
+  for (let i = 0; i < N; i += 1) {
+    const r = rgb[i * 3] / 255;
+    const g = rgb[i * 3 + 1] / 255;
+    const b = rgb[i * 3 + 2] / 255;
+    const max = Math.max(r, g, b);
+    const d = max - Math.min(r, g, b);
+    let h = 0;
+    if (d > 1e-6) {
+      h = max === r ? ((g - b) / d) % 6 : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
+      h = h * 60 + (h < 0 ? 360 : 0);
+    }
+    hue[i] = h;
+    sat[i] = max ? d / max : 0;
+    val[i] = max;
+  }
+  const gold = new Float32Array(N);
+  for (let i = 0; i < N; i += 1) {
+    const warm = hue[i] >= 17 && hue[i] <= 54;
+    if (warm && ((sat[i] >= 0.3 && val[i] >= 0.16) || (sat[i] >= 0.42 && val[i] >= 0.07)))
+      gold[i] = 1;
+    // Deep red-brown shadow on the bronze.
+    else if (hue[i] >= 9 && hue[i] < 17 && sat[i] >= 0.5 && val[i] >= 0.07 && val[i] < 0.45)
+      gold[i] = 1;
+  }
+  const near = boxFraction(gold, 3);
+  for (let i = 0; i < N; i += 1) {
+    if (gold[i]) continue;
+    const [r, g, b] = [rgb[i * 3], rgb[i * 3 + 1], rgb[i * 3 + 2]];
+    const notPink = !(hue[i] > 280 || hue[i] < 12) || sat[i] < 0.16;
+    // Pale tan and highlights on the trims, and their lower-saturation mid-tones.
+    if (
+      val[i] > 0.42 &&
+      sat[i] < 0.36 &&
+      b <= r * 1.02 &&
+      b <= g * 1.08 &&
+      notPink &&
+      near[i] > 0.3
+    )
+      gold[i] = 1;
+    else if (hue[i] >= 12 && hue[i] <= 60 && sat[i] >= 0.16 && val[i] >= 0.12 && near[i] > 0.25)
+      gold[i] = 1;
+  }
+  // Specular highlights blown to white: flood in from the bronze, 7 px deep.
+  {
+    const depth = new Uint8Array(N).fill(255);
+    const queue = new Int32Array(N);
+    let head = 0;
+    let tail = 0;
+    for (let i = 0; i < N; i += 1) {
+      if (!gold[i]) continue;
+      depth[i] = 0;
+      queue[tail++] = i;
+    }
+    const pale = (i) =>
+      val[i] > 0.62 &&
+      sat[i] < 0.3 &&
+      rgb[i * 3 + 2] <= rgb[i * 3] + 12 &&
+      rgb[i * 3 + 2] <= rgb[i * 3 + 1] + 14;
+    while (head < tail) {
+      const i = queue[head++];
+      if (depth[i] >= 7) continue;
+      const x = i % W;
+      for (const j of [x > 0 ? i - 1 : -1, x < W - 1 ? i + 1 : -1, i - W, i + W]) {
+        if (j < 0 || j >= N || depth[j] !== 255 || !pale(j)) continue;
+        depth[j] = depth[i] + 1;
+        gold[j] = 1;
+        queue[tail++] = j;
+      }
+    }
+  }
+  // Close the trims' holes (shadow, highlight and reflections; the dim
+  // mauve of a trim's shadowed face that mirrors the pink crystals), in
+  // passes that grow in from the bronze.
+  for (let pass = 0; pass < 4; pass += 1) {
+    const around = boxFraction(gold, 2);
+    const wide = boxFraction(gold, 4);
+    for (let i = 0; i < N; i += 1) {
+      if (gold[i]) continue;
+      const cool = sat[i] > 0.28 && hue[i] > 170 && hue[i] < 300;
+      const pink = sat[i] > 0.28 && (hue[i] >= 300 || hue[i] < 12);
+      const mauve = (hue[i] >= 300 || hue[i] < 17) && sat[i] < 0.5 && val[i] < 0.45;
+      if (!cool && !pink && (around[i] > 0.55 || (val[i] < 0.3 && wide[i] > 0.6))) gold[i] = 1;
+      else if (pink && sat[i] < 0.55 && val[i] > 0.5 && around[i] > 0.7) gold[i] = 1;
+      else if (mauve && wide[i] > 0.34) gold[i] = 1;
+    }
+  }
+  const specks = boxFraction(gold, 2);
+  for (let i = 0; i < N; i += 1) if (gold[i] && specks[i] < 0.2) gold[i] = 0;
+  return gold;
+})();
+// Soft, a pixel wider than the trims, so the raw state covers their fringe.
+const goldSoft = await blurField(
+  Float32Array.from(boxFraction(goldTrim, 1), (v) => (v > 0 ? 1 : 0)),
+  0.8,
+);
+
 // --- The figure's alpha ---------------------------------------------------
 const protect = await rasterise([BODY], 6);
 const background = new Uint8Array(N);
@@ -1144,13 +1281,44 @@ const FACE = await writeWebp(
   { quality: 86 },
 );
 
+// rx17: the gold, unformed — a dark gunmetal channel where the trim will
+// be: the art's own light, smoothed, desaturated and sunk (so the plate
+// keeps its form; unformed metal has no detail), with the channel's walls
+// catching a faint steel line.
+const goldLight = await blurField(
+  Float32Array.from(
+    { length: N },
+    (_, i) => (0.2126 * rgb[i * 3] + 0.7152 * rgb[i * 3 + 1] + 0.0722 * rgb[i * 3 + 2]) / 255,
+  ),
+  2,
+);
+const rawGold = Buffer.alloc(N * 3);
+for (let y = 1; y < H - 1; y += 1) {
+  for (let x = 1; x < W - 1; x += 1) {
+    const i = y * W + x;
+    const m = goldSoft[i];
+    if (!m) continue;
+    const k = Math.min(1, goldLight[i] ** 0.9);
+    const wall = Math.min(
+      1,
+      Math.hypot(goldSoft[i + 1] - goldSoft[i - 1], goldSoft[i + W] - goldSoft[i - W]) * 0.9,
+    );
+    const base = [14 + 44 * k, 17 + 49 * k, 22 + 58 * k];
+    const steel = [96, 110, 126];
+    for (let c = 0; c < 3; c += 1)
+      rawGold[i * 3 + c] = Math.round(base[c] + (steel[c] - base[c]) * wall);
+  }
+}
+
 // The plates: one atlas, its art on the left half and each plate's coarse
 // nanite mosaic at the same place on the right half (one file, one decode).
 const MARGIN = 2; // delivery px of air round each plate (and the atlas gutter)
 const TILE = 9; // delivery px: the nanite micro-tiles the plates assemble from
 let tileCount = 0;
+let goldCount = 0;
 const pieces = [];
 const cells = [];
+const goldCells = {};
 for (const [index, plate] of plates.entries()) {
   const found = bounds(plate.field);
   if (!found) throw new Error(`${plate.id}: the clip claims nothing`);
@@ -1158,6 +1326,36 @@ for (const [index, plate] of plates.entries()) {
   const colours = plate.region === "helmet" ? unlit : rgb;
   const art = extractRaw(await toDelivery(rgba(plate.field, colours)), box);
   const { width: w, height: h } = box;
+  // rx17: its gold, unformed (the raw channel; alpha: the trims' soft
+  // mask), at the same place as its art, and its gold cells: the
+  // GOLD_CELL squares the trims touch, a bitmask over its box.
+  const gold = extractRaw(
+    await toDelivery(
+      rgba(
+        Float32Array.from(plate.field, (v, i) => v * goldSoft[i]),
+        rawGold,
+      ),
+    ),
+    box,
+  );
+  {
+    const cols = Math.ceil(w / GOLD_CELL);
+    const rows = Math.ceil(h / GOLD_CELL);
+    const bits = new Uint8Array(Math.ceil((cols * rows) / 8));
+    for (let row = 0; row < rows; row += 1) {
+      for (let col = 0; col < cols; col += 1) {
+        let sum = 0;
+        for (let y = row * GOLD_CELL; y < Math.min(h, (row + 1) * GOLD_CELL); y += 1)
+          for (let x = col * GOLD_CELL; x < Math.min(w, (col + 1) * GOLD_CELL); x += 1)
+            sum += gold[(y * w + x) * 4 + 3] / 255;
+        if (sum < 2) continue;
+        const bit = row * cols + col;
+        bits[bit >> 3] |= 1 << (bit & 7);
+        goldCount += 1;
+      }
+    }
+    if (bits.some(Boolean)) goldCells[plate.id] = Buffer.from(bits).toString("base64");
+  }
   const cover = new Float32Array(w * h);
   for (let i = 0; i < w * h; i += 1) cover[i] = art[i * 4 + 3] / 255;
   // The mosaic: blocks on the figure's grid (so neighbouring plates' blocks
@@ -1241,7 +1439,7 @@ for (const [index, plate] of plates.entries()) {
       }
     }
   }
-  cells.push({ w, h, art, mosaic });
+  cells.push({ w, h, art, mosaic, gold });
   pieces.push({
     id: plate.id,
     group: plate.group,
@@ -1283,6 +1481,18 @@ for (const [i, { w, h, art, mosaic }] of cells.entries()) {
   }
 }
 const ATLAS = await writeWebp("plates.webp", atlasRaw, ATLAS_W * 2, ATLAS_H, { quality: 78 });
+// rx17: the gold atlas — each plate's raw gold channel at its art's place
+// (ax, ay), the size of the art half. Mostly empty; one small file.
+const goldAtlasRaw = Buffer.alloc(ATLAS_W * ATLAS_H * 4);
+for (const [i, { w, h, gold }] of cells.entries()) {
+  const { ax, ay } = pieces[i];
+  for (let y = 0; y < h; y += 1)
+    gold.copy(goldAtlasRaw, ((ay + y) * ATLAS_W + ax) * 4, y * w * 4, (y + 1) * w * 4);
+}
+const GOLD_ATLAS = await writeWebp("gold.webp", goldAtlasRaw, ATLAS_W, ATLAS_H, {
+  quality: 60,
+  alphaQuality: 70,
+});
 
 // --- The module -------------------------------------------------------------------
 const point = ([x, y]) => `[${fx(x)}, ${fy(y)}]`;
@@ -1351,6 +1561,12 @@ export const REXONANCE_SUIT_PIECES: readonly RexonanceSuitPiece[] = [
 ${pieces.map((piece) => `  ${JSON.stringify(piece)},`).join("\n")}
 ];
 
+/** rx17: the plates' gold, unformed: at each plate's art cell (ax, ay) the
+ * raw gunmetal channel where its gold will form; its alpha is the trims'
+ * soft mask. The size of the atlas's art half. Its gold cells are in
+ * src/lib/rexonance-suit-gold.ts (only the nanite engine reads them). */
+export const REXONANCE_SUIT_GOLD_ATLAS = ${JSON.stringify({ src: GOLD_ATLAS, width: ATLAS_W, height: ATLAS_H })} as const;
+
 export const REXONANCE_SUIT_MARKS = {
   core: ${point(MARKS.core)},
   visor: ${point(MARKS.visor)},
@@ -1358,19 +1574,42 @@ export const REXONANCE_SUIT_MARKS = {
   joints: [${MARKS.joints.map(point).join(", ")}],
 } as const;
 
-/** Every file the suit-up paints, for the warm-up. */
+/** Every file the suit-up paints, for the warm-up — in the order it
+ * fetches them when it runs one at a time (rx17): the nanite engine's
+ * atlas and gold first, then the layers under and over the plates. */
 export const REXONANCE_SUIT_ASSETS = [
-  REXONANCE_SUIT_UNDERSUIT,
   REXONANCE_SUIT_ATLAS.src,
+  REXONANCE_SUIT_GOLD_ATLAS.src,
+  REXONANCE_SUIT_UNDERSUIT,
   REXONANCE_SUIT_BODY.src,
   REXONANCE_SUIT_FACE.src,
 ] as const;
 `;
+// rx17: the gold cells, in their own module, so they load with the call's
+// chunk (the engine) and not with every page (the warm-up reads the files).
+const goldTs = `// Generated by scripts/build-rexonance-suit.mjs from
+// design/rexonance-suit/rexonance-full-${VERSION}.jpg — do not edit by hand.
+
+/** rx17: the gold nanite cell, in delivery px (${goldCount} cells in all). */
+export const REXONANCE_SUIT_GOLD_CELL = ${GOLD_CELL};
+/** Each plate's gold cells (by id; plates without gold are absent): the
+ * REXONANCE_SUIT_GOLD_CELL px squares of its box (REXONANCE_SUIT_PIECES)
+ * that its trims touch, row-major, LSB-first bitmask, base64. */
+export const REXONANCE_SUIT_GOLD_CELLS: Readonly<Record<string, string>> = {
+${Object.entries(goldCells)
+  .map(([id, bits]) => `  ${JSON.stringify(id)}: ${JSON.stringify(bits)},`)
+  .join("\n")}
+};
+`;
 const prettier = await import("prettier");
-writeFileSync(
-  MODULE,
-  await prettier.format(ts, { ...(await prettier.resolveConfig(MODULE)), filepath: MODULE }),
-);
+for (const [path, source] of [
+  [MODULE, ts],
+  [GOLD_MODULE, goldTs],
+])
+  writeFileSync(
+    path,
+    await prettier.format(source, { ...(await prettier.resolveConfig(path)), filepath: path }),
+  );
 for (const file of files) console.log(`${file.name}\t${file.bytes}`);
 console.log(`total\t${total} bytes in ${files.length} files; figure ${FIG_W}x${FIG_H}, crop`, CROP);
 
@@ -1427,4 +1666,21 @@ if (DEBUG) {
     .composite([{ input: Buffer.from(outline) }])
     .jpeg({ quality: 84 })
     .toFile(`${DEBUG}/partition.jpg`);
+  // rx17: the trims (the rest dimmed), and the figure with its gold unformed.
+  const trims = Buffer.alloc(N * 3);
+  const unformed = Buffer.alloc(N * 3);
+  for (let i = 0; i < N; i += 1) {
+    const m = goldSoft[i];
+    for (let c = 0; c < 3; c += 1) {
+      trims[i * 3 + c] = goldTrim[i] ? rgb[i * 3 + c] : Math.round(rgb[i * 3 + c] * 0.18);
+      unformed[i * 3 + c] = Math.round(rgb[i * 3 + c] * (1 - m) + rawGold[i * 3 + c] * m);
+    }
+  }
+  for (const [name, buffer] of [
+    ["gold-trims", trims],
+    ["gold-unformed", unformed],
+  ])
+    await sharp(buffer, { raw: { width: W, height: H, channels: 3 } })
+      .jpeg({ quality: 86 })
+      .toFile(`${DEBUG}/${name}.jpg`);
 }

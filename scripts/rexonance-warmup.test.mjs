@@ -272,9 +272,12 @@ test("The suit-up's pieces decode once on intent, then the call may build", asyn
 });
 
 test("The suit-up never warms on data saving or where the call rests on a still", async () => {
+  // rx17 (owner request 2026-10-11, "preload it"): 3G now warms; only
+  // Save-Data and 2G wait (alongside the still tiers).
   for (const options of [
     { connection: { saveData: true } },
-    { connection: { effectiveType: "3g" } },
+    { connection: { effectiveType: "2g" } },
+    { connection: { effectiveType: "slow-2g" } },
     { reduced: true },
     { economy: true },
   ]) {
@@ -331,5 +334,127 @@ test("rx13: the suit-up warms in advance, at idle after the page has loaded", as
     } finally {
       g.restore();
     }
+  }
+});
+
+test("rx17: 3G preloads the suit-up too", async () => {
+  const f = await suitFixture({ connection: { effectiveType: "3g" } });
+  try {
+    const first = f.module.warmRexonanceSuit();
+    assert.equal(
+      f.images.length,
+      (await import("../src/lib/rexonance-suit.ts")).REXONANCE_SUIT_ASSETS.length,
+    );
+    f.load();
+    assert.equal(await first, true);
+  } finally {
+    f.restore();
+  }
+});
+
+test("rx17: the idle warm-up fetches one layer at a time; an intent or the call overtakes it", async () => {
+  const { REXONANCE_SUIT_ASSETS, REXONANCE_SUIT_ATLAS, REXONANCE_SUIT_GOLD_ATLAS } =
+    await import("../src/lib/rexonance-suit.ts");
+  // The engine's atlas and its gold come first.
+  assert.deepEqual(REXONANCE_SUIT_ASSETS.slice(0, 2), [
+    REXONANCE_SUIT_ATLAS.src,
+    REXONANCE_SUIT_GOLD_ATLAS.src,
+  ]);
+  const f = await suitFixture();
+  try {
+    f.module.scheduleRexonanceSuitWarm("/world");
+    f.timers.shift()(); // the short delay after load
+    f.idles.shift()(); // an idle slot
+    assert.equal(f.images.length, 1, "one request at a time");
+    assert.equal(f.images[0].src, REXONANCE_SUIT_ATLAS.src);
+    assert.equal(f.images[0].fetchPriority, "low");
+    f.images[0].onload();
+    assert.equal(f.images.length, 1, "the next waits for an idle slot");
+    f.idles.shift()();
+    assert.equal(f.images.length, 2);
+    assert.equal(f.images[1].src, REXONANCE_SUIT_GOLD_ATLAS.src);
+    // The call starts: whatever is left starts at once, at high priority,
+    // and shares the same warm-up.
+    const call = f.module.warmRexonanceSuit("high");
+    assert.equal(f.images.length, REXONANCE_SUIT_ASSETS.length);
+    assert.ok(f.images.slice(2).every((image) => image.fetchPriority === "high"));
+    for (const image of f.images.slice(1)) image.onload();
+    assert.equal(await call, true);
+    assert.equal(f.module.isRexonanceSuitReady(), true);
+    for (const run of [...f.idles]) run();
+    assert.equal(f.images.length, REXONANCE_SUIT_ASSETS.length, "never fetched twice");
+  } finally {
+    f.restore();
+  }
+});
+
+test("rx17: the engine draws the warm-up's own decoded layers (bitmaps where supported)", async () => {
+  const { REXONANCE_SUIT_ATLAS, REXONANCE_SUIT_GOLD_ATLAS, REXONANCE_SUIT_BODY } =
+    await import("../src/lib/rexonance-suit.ts");
+  const original = Object.getOwnPropertyDescriptor(globalThis, "createImageBitmap");
+  for (const bitmaps of [false, true]) {
+    if (bitmaps)
+      Object.defineProperty(globalThis, "createImageBitmap", {
+        configurable: true,
+        value: async (image) => ({ bitmapOf: image.src }),
+      });
+    const f = await suitFixture();
+    try {
+      const warm = f.module.warmRexonanceSuit();
+      assert.equal(f.module.rexonanceSuitSource(REXONANCE_SUIT_ATLAS.src), null);
+      f.load();
+      assert.equal(await warm, true);
+      const atlas = f.module.rexonanceSuitSource(REXONANCE_SUIT_ATLAS.src);
+      const gold = f.module.rexonanceSuitSource(REXONANCE_SUIT_GOLD_ATLAS.src);
+      if (bitmaps) {
+        assert.deepEqual(atlas, { bitmapOf: REXONANCE_SUIT_ATLAS.src });
+        assert.deepEqual(gold, { bitmapOf: REXONANCE_SUIT_GOLD_ATLAS.src });
+      } else {
+        assert.equal(
+          atlas,
+          f.images.find((image) => image.src === REXONANCE_SUIT_ATLAS.src),
+        );
+        assert.equal(
+          gold,
+          f.images.find((image) => image.src === REXONANCE_SUIT_GOLD_ATLAS.src),
+        );
+      }
+      // Only the canvases' layers; the CSS layers stay as warm images.
+      assert.equal(f.module.rexonanceSuitSource(REXONANCE_SUIT_BODY.src), null);
+    } finally {
+      f.restore();
+      if (original) Object.defineProperty(globalThis, "createImageBitmap", original);
+      else delete globalThis.createImageBitmap;
+    }
+  }
+});
+
+test("rx17: it warms on every route the visitor reaches; /rexonance-saga waits until they leave", async () => {
+  const f = await suitFixture({ pathname: "/rexonance-saga" });
+  try {
+    const stay = f.module.scheduleRexonanceSuitWarm("/rexonance-saga");
+    for (const run of [...f.timers, ...f.idles]) run();
+    assert.equal(f.images.length, 0, "not on the page itself");
+    stay();
+    // The visitor goes to the World: the route's warm-up runs there.
+    f.timers.length = 0;
+    f.idles.length = 0;
+    const cancel = f.module.scheduleRexonanceSuitWarm("/world");
+    f.timers.shift()();
+    f.idles.shift()();
+    assert.equal(f.images.length, 1);
+    cancel();
+    // A cancelled schedule never starts.
+    const g = await suitFixture();
+    try {
+      const off = g.module.scheduleRexonanceSuitWarm("/world");
+      off();
+      for (const run of [...g.timers, ...g.idles]) run();
+      assert.equal(g.images.length, 0);
+    } finally {
+      g.restore();
+    }
+  } finally {
+    f.restore();
   }
 });

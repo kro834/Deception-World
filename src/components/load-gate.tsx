@@ -855,8 +855,9 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
   const rexonanceTransition = useRef<number | null>(null);
 
   // rx13: the Rexonance call's suit-up decodes in advance, at idle after the
-  // first page has loaded (low priority; the same data-saving skips).
-  useEffect(() => scheduleRexonanceSuitWarm(), []);
+  // first page has loaded (low priority; the same data-saving skips). rx17:
+  // on every route the visitor reaches, so leaving /rexonance-saga warms it.
+  useEffect(() => scheduleRexonanceSuitWarm(pathname), [pathname]);
   const rexonanceCoverCancel = useRef<(() => void) | null>(null);
   const openingHandoff = useRef<OpeningHandoffRuntime | null>(null);
   const openingFocusFrames = useRef<number[]>([]);
