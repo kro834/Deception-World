@@ -2,6 +2,7 @@
 // BASE_URL=... BASELINE_URL=... BENCH_RUNS=5 node scripts/verify-rexonance-zenith.mjs
 // CAPTURE=1 [CAPTURE_PROFILES=desktop1440,phone390] captures only visual profiles.
 // CAPTURE_BASELINE=1 records pre-phase builds without asserting new phase/form attributes.
+// CAPTURE_FORM=standard|max|ultra|excelsior selects the displayed form; new captures default to excelsior.
 // BROWSER=webkit selects WebKit; ZENITH_WEBKIT=1 adds WebKit to Chromium's full run.
 // ZENITH_TRACE=1 saves the end-of-scroll trace.
 import assert from "node:assert/strict";
@@ -12,6 +13,12 @@ const base = process.env.BASE_URL || "http://127.0.0.1:8564";
 const baseline = process.env.BASELINE_URL;
 const out = process.env.OUT_DIR || "/private/tmp/rexonance-zenith-verification";
 await mkdir(out, { recursive: true });
+const captureBaseline = process.env.CAPTURE_BASELINE === "1";
+const captureForm = process.env.CAPTURE_FORM || (captureBaseline ? "max" : "excelsior");
+assert.ok(
+  ["standard", "max", "ultra", "excelsior"].includes(captureForm),
+  `unknown CAPTURE_FORM: ${captureForm}`,
+);
 const pixel = {
   viewport: { width: 412, height: 915 },
   deviceScaleFactor: 2.625,
@@ -114,10 +121,51 @@ const installCanvasDrawProbe = async (context) => {
           t: performance.now(),
           source: args[0]?.constructor?.name || typeof args[0],
         });
+        window.__rznLastCanvasDrawAt = performance.now();
       }
       return original.apply(this, args);
     };
   });
+};
+
+const waitForCanvasConvergence = async (page, label) => {
+  const handle = await page.waitForFunction(
+    () => {
+      const source = document.querySelector("canvas.rzn-canvas");
+      if (!source?.width || !source.height || !window.__rznCanvasDraws?.length) return false;
+      const sample = document.createElement("canvas");
+      sample.width = 32;
+      sample.height = 48;
+      const context = sample.getContext("2d", { willReadFrequently: true });
+      context.drawImage(source, 0, 0, sample.width, sample.height);
+      const pixels = context.getImageData(0, 0, sample.width, sample.height).data;
+      let hash = 2166136261;
+      for (let index = 0; index < pixels.length; index += 4) {
+        hash ^= pixels[index];
+        hash = Math.imul(hash, 16777619);
+        hash ^= pixels[index + 1];
+        hash = Math.imul(hash, 16777619);
+        hash ^= pixels[index + 2];
+        hash = Math.imul(hash, 16777619);
+        hash ^= pixels[index + 3];
+        hash = Math.imul(hash, 16777619);
+      }
+      const pixelHash = (hash >>> 0).toString(16).padStart(8, "0");
+      const previous = window.__rznConvergence || { hash: null, frames: 0 };
+      const frames = previous.hash === pixelHash ? previous.frames + 1 : 1;
+      window.__rznConvergence = { hash: pixelHash, frames };
+      const quietFor = performance.now() - (window.__rznLastCanvasDrawAt || 0);
+      // The scene's calm redraw is scheduled 260ms after scroll input. Require
+      // its draw stream to settle, then three matching frame samples.
+      return quietFor >= 320 && frames >= 3 ? { pixelHash, frames, quietFor } : false;
+    },
+    undefined,
+    { timeout: 10000, polling: "raf" },
+  );
+  const result = await handle.jsonValue();
+  await handle.dispose();
+  assert.ok(result.frames >= 3 && result.quietFor >= 320, `${label}: canvas did not converge`);
+  return result;
 };
 
 const canvasEvidence = async (page) =>
@@ -254,15 +302,19 @@ async function functional(engine, label, profile, { connection, noTimeline = fal
         screenshot: `${label}-reduced-motion-static.png`,
       });
     } else {
-      const formTab = page.locator("#rxs-stage-tab-max");
-      if (await formTab.count()) {
+      const formTab = page.locator(`#rxs-stage-tab-${captureForm}`);
+      assert.equal(await formTab.count(), 1, `${label}: missing ${captureForm} form tab`);
+      if ((await formTab.getAttribute("aria-selected")) !== "true") {
         await formTab.click();
         await page.waitForFunction(
-          () =>
-            document.querySelector("#rxs-stage-tab-max")?.getAttribute("aria-selected") === "true",
+          (form) =>
+            document.querySelector(`#rxs-stage-tab-${form}`)?.getAttribute("aria-selected") ===
+            "true",
+          captureForm,
         );
         await page.waitForFunction(
-          () => document.querySelector(".rzn-suitup")?.dataset.form === "max",
+          (form) => document.querySelector(".rzn-suitup")?.dataset.form === form,
+          captureForm,
         );
       }
       // Trigger warm-up while still 3.4 screens outside the viewport.
@@ -289,12 +341,14 @@ async function functional(engine, label, profile, { connection, noTimeline = fal
       const forwardHashes = new Set();
       if (process.env.CAPTURE_BASELINE !== "1") {
         const firstUnfinished = await snapshot(page);
-        assert.notEqual(
-          firstUnfinished.formComplete,
-          "true",
-          `${label}: nonstandard form cannot be complete before .975`,
-        );
+        if (captureForm !== "standard")
+          assert.notEqual(
+            firstUnfinished.formComplete,
+            "true",
+            `${label}: nonstandard form cannot be complete before .975`,
+          );
       }
+      let reverseArmsHash = null;
       for (const { direction, progress, name } of milestones) {
         await page.evaluate(
           ({ start, progress }) =>
@@ -329,6 +383,10 @@ async function functional(engine, label, profile, { connection, noTimeline = fal
             ["prepare", "assemble", "seal", "ignite", "evolve", "complete"].includes(state.phase),
             `${label} ${direction}/${progress}: unknown data-rzn-phase ${state.phase}`,
           );
+        const convergence =
+          progress === 0.35 && direction === "reverse"
+            ? await waitForCanvasConvergence(page, `${label}/${direction}/${progress}`)
+            : null;
         const evidence = await canvasEvidence(page);
         assert.ok(
           evidence.drawCalls > 0,
@@ -339,13 +397,21 @@ async function functional(engine, label, profile, { connection, noTimeline = fal
           `${label} ${direction}/${progress}: sampled canvas is empty`,
         );
         if (direction === "forward" && progress < 0.975) {
-          assert.notEqual(state.formComplete, "true", `${label}: form completed before .975`);
+          if (captureForm !== "standard")
+            assert.notEqual(state.formComplete, "true", `${label}: form completed before .975`);
           forwardHashes.add(evidence.pixelHash);
         }
+        if (convergence)
+          assert.equal(
+            convergence.pixelHash,
+            evidence.pixelHash,
+            `${label}: canvas changed after its convergence sample`,
+          );
+        if (direction === "reverse" && progress === 0.35) reverseArmsHash = evidence.pixelHash;
         phases.push({ direction, progress, phase: state.phase });
         if (progress >= 0.975) {
           assert.equal(state.sceneComplete, "true", `${label}: assembly must complete by .975`);
-          if (process.env.CAPTURE_BASELINE !== "1") {
+          if (process.env.CAPTURE_BASELINE !== "1" && captureForm !== "standard") {
             await page.waitForFunction(
               () => document.querySelector(".rzn-suitup")?.dataset.rznFormComplete === "true",
               undefined,
@@ -365,7 +431,7 @@ async function functional(engine, label, profile, { connection, noTimeline = fal
         const settledEvidence = progress >= 0.975 ? await canvasEvidence(page) : evidence;
         if (direction === "forward" && progress >= 0.975)
           forwardHashes.add(settledEvidence.pixelHash);
-        const screenshot = `${label}-${direction}-${name}.png`;
+        const screenshot = `${label}-${captureForm}-${direction}-${name}.png`;
         await page.screenshot({ path: `${out}/${screenshot}` });
         report.functional.push({
           label,
@@ -374,6 +440,7 @@ async function functional(engine, label, profile, { connection, noTimeline = fal
           ...state,
           geometry,
           canvas: settledEvidence,
+          convergence,
           screenshot,
         });
       }
@@ -386,6 +453,46 @@ async function functional(engine, label, profile, { connection, noTimeline = fal
         forwardHashes.size >= 3,
         `${label}: canvas pixels did not change across forward scrub checkpoints`,
       );
+      await page.evaluate(
+        ({ start, progress }) =>
+          scrollTo({
+            top: start.top - start.pin + progress * (start.height - start.frameHeight),
+            behavior: "instant",
+          }),
+        { start, progress: 0.35 },
+      );
+      await page.waitForFunction(
+        () => Number(document.querySelector(".rzn-suitup .rzn-percent")?.textContent) === 38,
+        undefined,
+        { timeout: 5000 },
+      );
+      const repeatConvergence = await waitForCanvasConvergence(
+        page,
+        `${label}/repeat-forward/0.35`,
+      );
+      const repeatEvidence = await canvasEvidence(page);
+      assert.equal(
+        repeatEvidence.pixelHash,
+        repeatConvergence.pixelHash,
+        `${label}: repeat-forward canvas changed after convergence`,
+      );
+      assert.equal(
+        repeatEvidence.pixelHash,
+        reverseArmsHash,
+        `${label}: canvas pixels must match at .35 after reverse and forward catchup`,
+      );
+      const repeatScreenshot = `${label}-${captureForm}-repeat-forward-arms.png`;
+      await page.screenshot({ path: `${out}/${repeatScreenshot}` });
+      report.functional.push({
+        label,
+        direction: "repeat-forward",
+        milestone: "arms",
+        form: captureForm,
+        progress: 0.35,
+        canvas: repeatEvidence,
+        convergence: repeatConvergence,
+        screenshot: repeatScreenshot,
+      });
       await page.evaluate(() =>
         document.querySelector("#system").scrollIntoView({ behavior: "instant" }),
       );

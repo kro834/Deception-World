@@ -146,6 +146,8 @@ test("browser QA captures the requested viewports and both directions with canva
     assert.match(browserHarness, new RegExp(`name: \\"?${profile}\\"?`), profile);
   assert.match(browserHarness, /CAPTURE=1/);
   assert.match(browserHarness, /CAPTURE_BASELINE=1/);
+  assert.match(browserHarness, /CAPTURE_FORM=standard\|max\|ultra\|excelsior/);
+  assert.match(browserHarness, /captureBaseline \? "max" : "excelsior"/);
   assert.match(browserHarness, /CAPTURE_PROFILES/);
   assert.match(browserHarness, /BROWSER=webkit/);
   assert.match(browserHarness, /direction: "forward"/);
@@ -158,6 +160,12 @@ test("browser QA captures the requested viewports and both directions with canva
   assert.match(browserHarness, /reduced-motion-static\.png/);
   assert.match(browserHarness, /evidence\.drawCalls > 0/);
   assert.match(browserHarness, /evidence\.alphaPixels > 0/);
+  assert.match(browserHarness, /waitForCanvasConvergence/);
+  assert.match(browserHarness, /quietFor >= 320 && frames >= 3/);
+  assert.match(
+    browserHarness,
+    /canvas pixels must match at \.35 after reverse and forward catchup/,
+  );
 });
 
 test("every rule is scoped to the Rexonance page and leaves the bar, the menu and the calls alone", () => {
