@@ -216,7 +216,11 @@ test("rx17: the engine forms each plate's gold on it right after it seats and en
   assert.match(nanites, /flight\.drawImage\(\s*source,\s*tile\.sx,\s*tile\.sy,/);
   // ... their gold cells lock into it on the gold's own clock ...
   assert.match(plan, /REXONANCE_SUIT_GOLD_AT\[piece\.id\]/);
-  assert.match(nanites, /atlasWork\.drawImage\(\s*art,\s*gold\.ax\[i\],/);
+  // Owner (2026-10-11): the working atlas is never written during the call
+  // (Safari copies a canvas that is drawn into and from in one frame); the
+  // locked cells are drawn from the art through one clip.
+  assert.doesNotMatch(nanites, /atlasWork\.drawImage/);
+  assert.match(nanites, /flight\.rect\(gold\.fx\[i\] \* s, gold\.fy\[i\] \* s, gold\.cw\[i\] \* s, gold\.ch\[i\] \* s\);\s*flight\.clip\(\);/);
   // ... and a finished plate is painted whole from the art itself, so the
   // finished suit equals the artwork.
   assert.match(

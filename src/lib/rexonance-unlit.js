@@ -18,9 +18,14 @@ export function splitLights(source, sx, sy, w, h, document = globalThis.document
 
 function split(source, sx, sy, w, h, document) {
   const make = () => Object.assign(document.createElement("canvas"), { width: w, height: h });
+  // The pixels are read and written once on a scratch canvas (kept in main
+  // memory for that). The results are ordinary canvases: drawn from on every
+  // frame of the call, a main-memory canvas would be uploaded to the GPU at
+  // each draw (Safari), which made the call heavy (owner, 2026-10-11).
+  const scratch = make();
   const unlit = make();
   const lights = make();
-  const uc = unlit.getContext("2d", { willReadFrequently: true });
+  const uc = scratch.getContext("2d", { willReadFrequently: true });
   uc.drawImage(source, sx, sy, w, h, 0, 0, w, h);
   const art = uc.getImageData(0, 0, w, h);
   const glow = uc.createImageData(w, h);
@@ -57,6 +62,10 @@ function split(source, sx, sy, w, h, document) {
     a[i + 2] = Math.round(b + (grey * 1.1 - b) * k);
   }
   uc.putImageData(art, 0, 0);
-  lights.getContext("2d").putImageData(glow, 0, 0);
+  unlit.getContext("2d").drawImage(scratch, 0, 0);
+  uc.clearRect(0, 0, w, h);
+  uc.putImageData(glow, 0, 0);
+  lights.getContext("2d").drawImage(scratch, 0, 0);
+  scratch.width = scratch.height = 0;
   return { unlit, lights };
 }

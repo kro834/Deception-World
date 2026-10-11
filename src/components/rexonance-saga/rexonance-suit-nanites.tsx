@@ -221,12 +221,12 @@ export function SuitNanites({ onReady }: { onReady: () => void }) {
                     source,
                     tile.sx,
                     tile.sy,
-                    T,
-                    T,
+                    tile.tw,
+                    tile.th,
                     tile.dx * s,
                     tile.dy * s,
-                    T * s,
-                    T * s,
+                    tile.tw * s,
+                    tile.th * s,
                   );
                   continue;
                 }
@@ -248,39 +248,28 @@ export function SuitNanites({ onReady }: { onReady: () => void }) {
                     source,
                     tile.sx,
                     tile.sy,
-                    T,
-                    T,
-                    x + (T * s - size) / 2,
-                    y + (T * s - size) / 2,
-                    size,
-                    size,
+                    tile.tw,
+                    tile.th,
+                    x + (tile.tw * s - size * (tile.tw / T)) / 2,
+                    y + (tile.th * s - size * (tile.th / T)) / 2,
+                    size * (tile.tw / T),
+                    size * (tile.th / T),
                   );
                 }
               }
               continue;
             }
-            // Seated. Its gold cells lock as they are due (into the working
-            // atlas, unless the plate settles this frame anyway).
+            // Seated. Its gold cells lock as they are due. The working atlas
+            // is never written during the call (owner, 2026-10-11: a canvas
+            // drawn into and drawn from in the same frame is copied whole by
+            // Safari each time): the plate is drawn raw, then its locked
+            // cells from the art, through one clip.
             if (!done[p]) {
               if (t >= plate.to) {
                 locked[p] = plate.end;
                 settle(p);
               } else {
-                while (locked[p] < plate.end && gold.lock[locked[p]] <= t) {
-                  const i = locked[p];
-                  atlasWork.drawImage(
-                    art,
-                    gold.ax[i],
-                    gold.ay[i],
-                    gold.cw[i],
-                    gold.ch[i],
-                    gold.ax[i],
-                    gold.ay[i],
-                    gold.cw[i],
-                    gold.ch[i],
-                  );
-                  locked[p] += 1;
-                }
+                while (locked[p] < plate.end && gold.lock[locked[p]] <= t) locked[p] += 1;
                 flight.globalAlpha = 1;
                 flight.drawImage(
                   source,
@@ -293,6 +282,25 @@ export function SuitNanites({ onReady }: { onReady: () => void }) {
                   piece.w * s,
                   piece.h * s,
                 );
+                if (locked[p] > plate.first) {
+                  flight.save();
+                  flight.beginPath();
+                  for (let i = plate.first; i < locked[p]; i += 1)
+                    flight.rect(gold.fx[i] * s, gold.fy[i] * s, gold.cw[i] * s, gold.ch[i] * s);
+                  flight.clip();
+                  flight.drawImage(
+                    art,
+                    piece.ax,
+                    piece.ay,
+                    piece.w,
+                    piece.h,
+                    piece.x * s,
+                    piece.y * s,
+                    piece.w * s,
+                    piece.h * s,
+                  );
+                  flight.restore();
+                }
               }
             }
             if (plate.end === plate.first) continue;

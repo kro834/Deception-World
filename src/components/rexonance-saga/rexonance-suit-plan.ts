@@ -49,6 +49,10 @@ export type Tile = {
   sy: number;
   dx: number;
   dy: number;
+  /** Its size, clipped to the plate's box (a tile never reads its
+   * neighbour's art in the atlas). */
+  tw: number;
+  th: number;
   land: number;
   ox: number;
   oy: number;
@@ -158,6 +162,8 @@ function tilesOf(piece: RexonanceSuitPiece, index: number, fit: number) {
         sy: piece.ay + row * T,
         dx: piece.x + col * T,
         dy: piece.y + row * T,
+        tw: Math.min(T, piece.w - col * T),
+        th: Math.min(T, piece.h - row * T),
         land: fit - REXONANCE_SUIT_REVEAL_MS + progress * REXONANCE_SUIT_REVEAL_MS,
         ox: -gx * reach + gy * side,
         oy: -gy * reach + gx * side,
