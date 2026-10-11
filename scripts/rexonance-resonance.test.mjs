@@ -10,6 +10,8 @@ import {
   assemblyTilePose,
   assemblyCacheStep,
   assemblyPhase,
+  rewindAssemblyGold,
+  planAssemblyGold,
   ASSEMBLY_BEATS,
 } from "../src/lib/rexonance-resonance.js";
 
@@ -134,6 +136,59 @@ test("cache work is bounded and reverse jumps discard future paint before conver
   assert.equal(small.pending, false);
 });
 
+test("minor reverse restores overlapping retained gold under a shared operation budget", () => {
+  const gold = planAssemblyGold({
+    pieces: [
+      { id: "a", group: "legs", x: 0, y: 0, w: 4, h: 4, seat: [2, 2] },
+      { id: "b", group: "legs", x: 2, y: 0, w: 4, h: 4, seat: [4, 2] },
+    ],
+    gold: { cell: 4, cells: { a: btoa("\x01"), b: btoa("\x01") } },
+    landed: new Map([
+      ["a", 0.1],
+      ["b", 0.2],
+    ]),
+  });
+  assert.deepEqual([...gold.overlaps[0]], [1]);
+  assert.deepEqual([...gold.overlaps[1]], [0]);
+  const paint = new Uint8Array(8 * 4);
+  const rect = (x, y, w, h, value) => {
+    for (let row = y; row < y + h; row += 1)
+      for (let col = x; col < x + w; col += 1) paint[row * 8 + col] = value;
+  };
+  rect(0, 0, 6, 4, 1);
+  const operations = [];
+  const context = {
+    clearRect(x, y, w, h) {
+      operations.push("clear");
+      rect(x, y, w, h, 0);
+    },
+    drawImage(_art, x, y, w, h) {
+      operations.push("repair");
+      rect(x, y, w, h, 1);
+    },
+  };
+  const state = { count: 2, dirty: -1, at: 0 };
+  assert.equal(rewindAssemblyGold(context, {}, gold, state, 1, 1), 0);
+  assert.deepEqual(operations, ["clear"]);
+  assert.equal(state.count, 1);
+  assert.ok(state.dirty >= 0, "repair remains queued when the frame's budget is exhausted");
+  assert.equal(rewindAssemblyGold(context, {}, gold, state, 1, 1), 0);
+  assert.deepEqual(operations, ["clear", "repair"]);
+  assert.equal(state.dirty, -1);
+  for (let y = 0; y < 4; y += 1)
+    for (let x = 0; x < 8; x += 1) assert.equal(paint[y * 8 + x], Number(x < 4));
+  // Continued reversal clears the remaining cell instead of restarting a
+  // large cache rebuild; even a one-operation budget reaches an empty past.
+  for (let i = 0; i < 4 && (state.count || state.dirty >= 0); i += 1) {
+    const before = operations.length;
+    rewindAssemblyGold(context, {}, gold, state, 0, 1);
+    assert.ok(operations.length - before <= 1);
+  }
+  assert.equal(state.count, 0);
+  assert.equal(state.dirty, -1);
+  assert.ok(paint.every((value) => value === 0));
+});
+
 test("stage illumination follows the seal and final forms finish after base assembly", () => {
   assert.ok(ASSEMBLY_BEATS.light[0] >= ASSEMBLY_BEATS.seal[1]);
   assert.equal(ASSEMBLY_BEATS.form[0], ASSEMBLY_BEATS.light[1]);
@@ -220,6 +275,7 @@ function scrollAssemblyEnvironment() {
   const frames = new Map();
   const observers = [];
   const imageSources = [];
+  const mutationObservers = [];
   let frameId = 0;
   class IntersectionObserver {
     constructor(callback) {
@@ -230,6 +286,10 @@ function scrollAssemblyEnvironment() {
     disconnect() {}
   }
   class MutationObserver {
+    constructor(callback) {
+      this.callback = callback;
+      mutationObservers.push(this);
+    }
     observe() {}
     disconnect() {}
   }
@@ -281,7 +341,18 @@ function scrollAssemblyEnvironment() {
     listeners.get("window:scroll")?.();
     return frame();
   };
-  return { env, runway, canvas, observers, canvases, frames, frame, scroll, imageSources };
+  return {
+    env,
+    runway,
+    canvas,
+    observers,
+    canvases,
+    frames,
+    frame,
+    scroll,
+    imageSources,
+    mutationObservers,
+  };
 }
 
 test("reactor glow waits for sealed armor and advanced art waits for the ignition wave", async () => {
@@ -327,6 +398,108 @@ test("reactor glow waits for sealed armor and advanced art waits for the ignitio
     assert.equal(t.runway.dataset.rznPhase, "ignite");
   } finally {
     dispose();
+  }
+});
+
+test("changing form remeasures CSS figure limits even when canvas dimensions do not change", async () => {
+  const t = scrollAssemblyEnvironment();
+  t.env.getComputedStyle = () => ({
+    top: "0",
+    getPropertyValue: (property) =>
+      property === "--rzn-fig-h"
+        ? "0.99"
+        : property === "--rzn-fig-w"
+          ? t.runway.dataset.form === "excelsior"
+            ? "0.45"
+            : "0.9"
+          : "",
+  });
+  const dispose = mountRexonanceAssembly(
+    t.runway,
+    {
+      figure: "/figure",
+      undersuit: "/undersuit",
+      size: { width: 300, height: 300 },
+      pieces: [{ id: "leg", group: "legs", x: 0, y: 0, w: 300, h: 300, seat: [150, 220] }],
+      core: [150, 150],
+      visor: [150, 30],
+      glow: [],
+    },
+    t.env,
+  );
+  try {
+    t.observers[0].callback([{ isIntersecting: true }]);
+    for (let i = 0; i < 100 && t.runway.dataset.rznState !== "live"; i += 1)
+      await new Promise((resolve) => setTimeout(resolve, 5));
+    const before = t
+      .scroll(0.5)
+      .find((c) => c.target === t.canvas && c.method === "setTransform" && c.args[0] !== 1);
+    assert.equal(before.args[0], 1.8);
+    const dimensions = [t.canvas.width, t.canvas.height];
+    t.runway.dataset.form = "excelsior";
+    t.mutationObservers[0].callback();
+    const after = t
+      .frame()
+      .find((c) => c.target === t.canvas && c.method === "setTransform" && c.args[0] !== 1);
+    assert.equal(after.args[0], 0.9);
+    assert.deepEqual([t.canvas.width, t.canvas.height], dimensions);
+  } finally {
+    dispose();
+  }
+});
+
+test("completed advanced forms draw exact prepared art without loose particles or mesh warping", async () => {
+  for (const form of ["max", "ultra", "excelsior"]) {
+    const t = scrollAssemblyEnvironment();
+    t.runway.dataset.form = form;
+    const dispose = mountRexonanceAssembly(
+      t.runway,
+      {
+        figure: "/figure",
+        undersuit: "/undersuit",
+        size: { width: 60, height: 120 },
+        pieces: [{ id: "leg", group: "legs", x: 0, y: 0, w: 60, h: 120, seat: [30, 90] }],
+        core: [30, 60],
+        visor: [30, 10],
+        glow: [],
+        forms: { max: "/max", ultra: "/ultra", excelsior: "/excelsior", pad: 120 },
+      },
+      t.env,
+    );
+    try {
+      t.observers[0].callback([{ isIntersecting: true }]);
+      for (let i = 0; i < 100 && t.runway.dataset.rznState !== "live"; i += 1)
+        await new Promise((resolve) => setTimeout(resolve, 5));
+      t.scroll(1);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      const complete = t.frame();
+      assert.equal(t.runway.dataset.rznFormComplete, "true", form);
+      assert.equal(
+        complete.filter((c) => c.method === "transform").length,
+        0,
+        `${form}: no mesh warp`,
+      );
+      assert.equal(
+        complete.filter((c) => c.target === t.canvas && c.method === "fill").length,
+        0,
+        `${form}: no particle fills`,
+      );
+      const artwork = complete
+        .filter((c) => c.target === t.canvas && c.method === "drawImage")
+        .at(-1);
+      assert.deepEqual(artwork.args.slice(1), [0, 0, 300, 120]);
+      assert.ok(
+        complete.some(
+          (c) =>
+            c.target === t.canvas &&
+            c.method === "clearRect" &&
+            c.args[2] === 300 &&
+            c.args[3] === 120,
+        ),
+      );
+    } finally {
+      dispose();
+    }
   }
 });
 

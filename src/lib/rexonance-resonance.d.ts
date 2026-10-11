@@ -61,7 +61,23 @@ export function planAssemblyGold(options: {
   lock: Float32Array;
   ux: Float32Array;
   uy: Float32Array;
+  overlaps: Int32Array[];
 } | null;
+
+export function rewindAssemblyGold(
+  context: Pick<CanvasRenderingContext2D, "clearRect" | "drawImage">,
+  art: CanvasImageSource,
+  gold: {
+    x: Float32Array;
+    y: Float32Array;
+    w: Float32Array;
+    h: Float32Array;
+    overlaps: Int32Array[];
+  },
+  state: { count: number; dirty: number; at: number },
+  target: number,
+  budget: number,
+): number;
 
 export interface RexonanceAssemblyConfig {
   figure: string;

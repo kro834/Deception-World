@@ -865,6 +865,68 @@ export const ASSEMBLY_GOLD = {
   cool: 0.012,
   glint: 0.006,
 };
+
+// Trims from different plate grids overlap even when each individual grid
+// is disjoint. Prepare their neighbors once, never search the suit per frame.
+const goldOverlaps = (g, cell) => {
+  const lists = Array.from({ length: g.count }, () => []);
+  const bins = new Map();
+  for (let i = 0; i < g.count; i += 1) {
+    const bx = Math.floor(g.x[i] / cell);
+    const by = Math.floor(g.y[i] / cell);
+    for (let dy = -1; dy <= 1; dy += 1)
+      for (let dx = -1; dx <= 1; dx += 1) {
+        const bucket = bins.get(`${bx + dx},${by + dy}`);
+        if (!bucket) continue;
+        for (const j of bucket) {
+          if (
+            g.x[i] >= g.x[j] + g.w[j] ||
+            g.x[j] >= g.x[i] + g.w[i] ||
+            g.y[i] >= g.y[j] + g.h[j] ||
+            g.y[j] >= g.y[i] + g.h[i]
+          )
+            continue;
+          lists[i].push(j);
+          lists[j].push(i);
+        }
+      }
+    const key = `${bx},${by}`;
+    if (!bins.has(key)) bins.set(key, []);
+    bins.get(key).push(i);
+  }
+  return lists.map((list) => Int32Array.from(list));
+};
+
+/** Remove future cells and repair only their overlaps with retained paint.
+ * A persistent cursor allows even one operation per frame to converge.
+ * The returned budget is available for forward gold formation. */
+export function rewindAssemblyGold(context, art, g, state, target, budget) {
+  while (budget > 0 && (state.count > target || state.dirty >= 0)) {
+    if (state.dirty < 0) {
+      state.count -= 1;
+      state.dirty = state.count;
+      state.at = 0;
+      const i = state.dirty;
+      context.clearRect(g.x[i], g.y[i], g.w[i], g.h[i]);
+      budget -= 1;
+    }
+    const i = state.dirty;
+    const neighbors = g.overlaps[i];
+    while (state.at < neighbors.length && budget > 0) {
+      const j = neighbors[state.at++];
+      if (j >= Math.min(state.count, target)) continue;
+      const x = Math.max(g.x[i], g.x[j]);
+      const y = Math.max(g.y[i], g.y[j]);
+      const w = Math.min(g.x[i] + g.w[i], g.x[j] + g.w[j]) - x;
+      const h = Math.min(g.y[i] + g.h[i], g.y[j] + g.h[j]) - y;
+      context.drawImage(art, x, y, w, h, x, y, w, h);
+      budget -= 1;
+    }
+    if (state.at === neighbors.length) state.dirty = -1;
+  }
+  return budget;
+}
+
 export function planAssemblyGold({ pieces, gold, landed }) {
   if (!gold?.cells) return null;
   const G = gold.cell;
@@ -953,7 +1015,7 @@ export function planAssemblyGold({ pieces, gold, landed }) {
   });
   list.sort((a, b) => a[4] - b[4]);
   const field = (k) => Float32Array.from(list, (entry) => entry[k]);
-  return {
+  const result = {
     count: list.length,
     x: field(0),
     y: field(1),
@@ -963,6 +1025,8 @@ export function planAssemblyGold({ pieces, gold, landed }) {
     ux: field(5),
     uy: field(6),
   };
+  result.overlaps = goldOverlaps(result, G);
+  return result;
 }
 
 // Pixel squares inside the face's lights (figure px), in burst groups.
@@ -1052,6 +1116,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   let goldArt = null;
   let goldLayer = null;
   let goldCount = 0;
+  const goldReverse = { count: 0, dirty: -1, at: 0 };
   let driver = null;
   let lights = null;
   let settled = null;
@@ -1514,19 +1579,19 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     if (step.reset) {
       context.clearRect(0, 0, W, H);
       goldCount = 0;
+      goldReverse.dirty = -1;
+      goldReverse.at = 0;
     }
-    while (goldCount > target) {
-      goldCount -= 1;
-      context.clearRect(g.x[goldCount], g.y[goldCount], g.w[goldCount], g.h[goldCount]);
-    }
-    let budget = GOLD_PER_FRAME;
+    goldReverse.count = goldCount;
+    let budget = rewindAssemblyGold(context, goldArt, g, goldReverse, target, GOLD_PER_FRAME);
+    goldCount = goldReverse.count;
     while (goldCount < target && budget > 0) {
       const i = goldCount;
       context.drawImage(goldArt, g.x[i], g.y[i], g.w[i], g.h[i], g.x[i], g.y[i], g.w[i], g.h[i]);
       goldCount += 1;
       budget -= 1;
     }
-    behind ||= goldCount < target;
+    behind ||= goldCount !== target || goldReverse.dirty >= 0;
   };
   // The molten front: each cell's mote flies in from the cell it flowed
   // from, white-hot, locks and cools through bright gold to the painted
@@ -1667,7 +1732,13 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         context.save();
         context.translate(-forms.pad, 0);
       }
-      if (forms && form === "excelsior" && forms.excelsior) {
+      if (forms && progress >= B.form[1] && forms[form]) {
+        // The final pose is its exact prepared artwork. No overwrite heat,
+        // disappearing cells or mesh seams survive the completed form.
+        context.clearRect(0, 0, forms.width, H);
+        context.globalAlpha = 1;
+        context.drawImage(forms[form], 0, 0, forms.width, H);
+      } else if (forms && form === "excelsior" && forms.excelsior) {
         // EXCELSIOR (owner): MAX, then ULTRA, briefly; then its own nanites
         // (prism shards, coming down from the crown) add its decoration.
         const [a, b] = B.form;
@@ -2167,6 +2238,9 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   const formObserver =
     typeof environment.MutationObserver === "function"
       ? new environment.MutationObserver(() => {
+          // A selected form changes CSS figure limits without changing the
+          // canvas's border box, so ResizeObserver alone cannot update fit.
+          if (live) measure();
           lastProgress = -1;
           schedule();
         })
@@ -2296,6 +2370,8 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       if (sheet) sheet.width = sheet.height = 0;
     raw = goldArt = goldLayer = goldPlan = driver = lights = null;
     goldCount = 0;
+    goldReverse.dirty = -1;
+    goldReverse.at = 0;
     buffers = null;
     view = null;
   };
