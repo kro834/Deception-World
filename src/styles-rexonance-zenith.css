@@ -2461,3 +2461,9 @@ html[data-family="special"]
     display: none;
   }
 }
+
+/* Until the lower sections render after a covered arrival, the page keeps
+   room below the fold (the reader is at the top, under the reveal). */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-lower-pending {
+  height: 200vh;
+}

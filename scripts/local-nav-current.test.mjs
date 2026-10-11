@@ -224,9 +224,13 @@ test("both saga pages mount the shared rx14 helper as an independently cleaned-u
   for (const name of ["rexonance", "extreme"]) {
     const source = read(`src/components/${name}-saga/${name}-saga.tsx`);
     assert.match(source, /import \{ mountLocalNavCurrent \} from "@\/lib\/local-nav-current"/);
+    // Rexonance mounts it once its lower sections render (owner, 2026-10-11:
+    // a covered arrival renders the hero first, so the call never stutters).
     assert.match(
       source,
-      /useEffect\(\(\) => mountLocalNavCurrent\(pageRef\.current\?\.querySelector\("\.rxs-local-nav nav"\)\), \[\]\)/,
+      name === "rexonance"
+        ? /mountLocalNavCurrent\(pageRef\.current\?\.querySelector\("\.rxs-local-nav nav"\)\)\s*: undefined,\s*\[lower\],/
+        : /useEffect\(\(\) => mountLocalNavCurrent\(pageRef\.current\?\.querySelector\("\.rxs-local-nav nav"\)\), \[\]\)/,
     );
   }
   const css = read("src/styles-rexonance-saga.css");

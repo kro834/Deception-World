@@ -345,7 +345,7 @@ test("each figure keeps the owner's value as its own text; its counter is a hidd
   }
   assert.match(page, /<div className="rxs-hero-visual" aria-hidden="true">[\s\S]*?<span className="rsn-depth">/);
   // One mount, never restarted by a form, menu or baseline change.
-  assert.match(page, /useEffect\(\(\) => mountRexonanceResonance\(pageRef\.current\), \[\]\);/);
+  assert.match(page, /useEffect\(\(\) => \(lower \? mountRexonanceResonance\(pageRef\.current\) : undefined\), \[lower\]\);/);
 });
 
 test("the counter prints the owner's figures at every step without reflowing", () => {
