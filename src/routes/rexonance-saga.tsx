@@ -24,8 +24,12 @@ import rexonanceResonanceCssUrl from "@/styles-rexonance-resonance.css?url";
 import rexonanceZenithCssUrl from "@/styles-rexonance-zenith.css?url";
 import { rexonanceImage } from "@/lib/rexonance-images";
 import { REXONANCE_SITE_ARTWORK } from "@/lib/rexonance-site-artwork";
+import { syncRexonanceLayoutGate } from "@/lib/rexonance-layout-gate.js";
 
 export const Route = createFileRoute("/rexonance-saga")({
+  beforeLoad: ({ cause, preload }) => {
+    if (typeof window !== "undefined" && !preload && cause === "enter") syncRexonanceLayoutGate();
+  },
   component: RexonanceSaga,
   head: () => ({
     meta: [
