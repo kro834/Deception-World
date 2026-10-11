@@ -7,6 +7,12 @@
 // Optional: RX17_PROFILES=desktop,pixel RX17_SCENARIOS=world-1000,roundtrip
 // Additional probes: after-menu-1000,after-menu-1500,abort-intent-resume,
 // failure-pending-retry (one failed low atlas, early high intent).
+// first-visible-menu-1000 and first-visible-native-menu-1000 are separate
+// early SSR input probes, not one-second Rexonance entry tests. The latter
+// dispatches native CDP touch at the observed button center without waiting
+// for Playwright's animation stability. RX17_TRACE=1 writes one diagnostic trace.
+// bootstrap-held-native-menu holds only the client entry module until real
+// early touch/click, then releases it; this is not a natural cold-load timing.
 // These are sequential local UI probes, not a production load test.
 import assert from "node:assert/strict";
 import { mkdir, writeFile } from "node:fs/promises";
@@ -54,8 +60,14 @@ const selectedScenarios = process.env.RX17_SCENARIOS
       "after-menu-1500",
       "abort-intent-resume",
       "failure-pending-retry",
+      "first-visible-menu-1000",
+      "first-visible-native-menu-1000",
+      "bootstrap-held-native-menu",
     ])
   : scenarios;
+const traceEnabled = process.env.RX17_TRACE === "1";
+if (traceEnabled)
+  assert.equal(selectedProfiles.length * selectedScenarios.length, 1, "trace exactly one case");
 const drawn = [REXONANCE_SUIT_ATLAS.src, REXONANCE_SUIT_GOLD_ATLAS.src];
 const isSuitUrl = (url) => /\/rexonance-suit-[^/]+\//.test(url);
 const isRelevantUrl = (url) =>
@@ -73,11 +85,20 @@ const report = {
     stopOnFirstFailure: true,
     pixelCpuRate: 4,
     pixelNetwork: { latencyMs: 60, downMbps: 9, upMbps: 1.5 },
+    diagnosticTraceEnabled: traceEnabled,
+    traceTimingNote: "diagnostic tracing overhead; never combined with primary performance results",
+    firstVisibilityNote:
+      "first rAF observing SSR hero DOM without a cover, not a pixel-paint guarantee",
+    earlyInputToleranceMs: 100,
+    earlyInputPassNote:
+      "earlyInputVerified is separate from passed, which only asserts the later UI-ready engine flow",
+    controlledBootstrapHoldNote:
+      "separate hydration-race evidence: only /assets/index-*.js held; SSR HTML/CSS never held",
   },
   cases: [],
 };
 
-function installRecorder({ saveData }) {
+function installRecorder({ saveData, traceEnabled }) {
   // Only the network preference is simulated. Neither readiness, rendering
   // tier, DOM suit state nor renderer capabilities are forced.
   const connection = {
@@ -98,6 +119,7 @@ function installRecorder({ saveData }) {
     bitmapDecodes: [],
     resources: [],
     longTasks: [],
+    routeChanges: [],
   });
   const suitUrl = (value) => {
     try {
@@ -252,13 +274,15 @@ function installRecorder({ saveData }) {
     document.addEventListener(
       type,
       (event) => {
-        const link = event.target?.closest?.("a[href]");
+        const link = event.target?.closest?.("a[href],.side-panel-trigger");
         if (link)
           log.taps.push({
             type,
             href: link.getAttribute("href"),
+            control: link.matches(".side-panel-trigger") ? "menu-trigger" : "link",
             at: performance.now(),
             pathname: location.pathname,
+            pressReady: document.documentElement.hasAttribute("data-press-ready"),
           });
       },
       { capture: true, passive: true },
@@ -268,7 +292,22 @@ function installRecorder({ saveData }) {
   let interactiveWorldVisible = false;
   let activeCall = null;
   let callRecord = null;
+  let callMeter = null;
+  let routeState = null;
   const sample = () => {
+    if (traceEnabled) {
+      const state = `${location.pathname}:${document.documentElement.getAttribute("data-route-cover")}`;
+      if (state !== routeState) {
+        routeState = state;
+        log.routeChanges.push({
+          at: performance.now(),
+          pathname: location.pathname,
+          cover: document.documentElement.getAttribute("data-route-cover"),
+          loading: document.documentElement.hasAttribute("data-loading"),
+          rexonanceHeroPresent: Boolean(document.querySelector(".rxs-hero")),
+        });
+      }
+    }
     const world =
       location.pathname === "/world" &&
       Boolean(document.querySelector("main .hero#top")) &&
@@ -286,14 +325,31 @@ function installRecorder({ saveData }) {
     interactiveWorldVisible = interactiveWorld;
     const call = document.querySelector('.rx-call-sequence[data-mode="entry"]');
     if (call && call !== activeCall) {
+      const observedAt = performance.now();
       activeCall = call;
-      callRecord = { at: performance.now(), goneAt: null, suit: [], nanites: [], canvases: [] };
+      // Keep the DocumentTimeline meter once found. Calling getAnimations()
+      // on every rAF flushes pending style/layout and can move destination
+      // layout into the recorder's task, corrupting hand-over attribution.
+      callMeter = call.querySelector(".rx-call-meter > i")?.getAnimations()[0] ?? null;
+      callRecord = {
+        at: observedAt,
+        initialMeterQueryDoneAt: performance.now(),
+        goneAt: null,
+        suit: [],
+        nanites: [],
+        canvases: [],
+      };
       log.calls.push(callRecord);
     }
     if (call && callRecord) {
       const suit = call.querySelector(".rx-suit");
-      const meter = call.querySelector(".rx-call-meter > i")?.getAnimations()[0];
-      const state = { at: performance.now(), clock: meter ? Number(meter.currentTime) : null };
+      // A cold stylesheet can arrive after the first DOM observation. Retry
+      // until its animation exists, then retain it without per-frame flushing.
+      callMeter ??= call.querySelector(".rx-call-meter > i")?.getAnimations()[0] ?? null;
+      const state = {
+        at: performance.now(),
+        clock: callMeter ? Number(callMeter.currentTime) : null,
+      };
       if (suit && callRecord.suit.at(-1)?.value !== suit.dataset.suit)
         callRecord.suit.push({ value: suit.dataset.suit, ...state });
       if (suit && callRecord.nanites.at(-1)?.value !== suit.dataset.nanites) {
@@ -308,6 +364,7 @@ function installRecorder({ saveData }) {
       callRecord.goneAt = performance.now();
       activeCall = null;
       callRecord = null;
+      callMeter = null;
     }
     requestAnimationFrame(sample);
   };
@@ -337,7 +394,7 @@ async function runCase(browser, profileName, scenario) {
       connectionType: "cellular4g",
     });
   }
-  await context.addInitScript(installRecorder, { saveData });
+  await context.addInitScript(installRecorder, { saveData, traceEnabled });
   const result = {
     profile: profileName,
     scenario,
@@ -345,7 +402,9 @@ async function runCase(browser, profileName, scenario) {
     engineVerified: false,
     profileOptions: profile,
     httpCacheDisabledByFaultRouting:
-      scenario.startsWith("failure-") || scenario.startsWith("abort-"),
+      scenario.startsWith("failure-") ||
+      scenario.startsWith("abort-") ||
+      scenario === "bootstrap-held-native-menu",
     taps: [],
     consoleErrors: [],
     pageErrors: [],
@@ -389,6 +448,42 @@ async function runCase(browser, profileName, scenario) {
       result.consoleErrors.push({ text: message.text(), location: message.location() });
   });
   const now = () => page.evaluate(() => performance.now());
+  let tracing = false;
+  const startTrace = async () => {
+    if (!traceEnabled) return;
+    await cdp.send("Tracing.start", {
+      categories:
+        "devtools.timeline,v8.execute,disabled-by-default-devtools.timeline,disabled-by-default-devtools.timeline.stack,blink.user_timing",
+      transferMode: "ReturnAsStream",
+    });
+    tracing = true;
+    result.trace = {
+      file: output.replace(/\.json$/, "") + ".trace.json",
+      anchorName: "rx17-probe-trace-anchor",
+      anchorAt: await page.evaluate(() => performance.mark("rx17-probe-trace-anchor").startTime),
+    };
+  };
+  const stopTrace = async () => {
+    if (!tracing) return;
+    const completion = new Promise((resolveTrace) =>
+      cdp.once("Tracing.tracingComplete", resolveTrace),
+    );
+    await cdp.send("Tracing.end");
+    const { stream } = await completion;
+    assert.ok(stream, "CDP must return a trace stream");
+    let chunks = "";
+    try {
+      for (;;) {
+        const chunk = await cdp.send("IO.read", { handle: stream, size: 1024 * 1024 });
+        chunks += chunk.base64Encoded ? Buffer.from(chunk.data, "base64").toString() : chunk.data;
+        if (chunk.eof) break;
+      }
+    } finally {
+      await cdp.send("IO.close", { handle: stream });
+    }
+    await writeFile(result.trace.file, chunks);
+    tracing = false;
+  };
   const tap = async (selector, label) => {
     const target = page.locator(selector).first();
     await target.waitFor({ state: "visible" });
@@ -514,6 +609,28 @@ async function runCase(browser, profileName, scenario) {
   };
   let releaseHeldRequests = () => {};
   try {
+    const bootstrapHeld = scenario === "bootstrap-held-native-menu";
+    if (bootstrapHeld) {
+      let released = false;
+      const held = new Promise((resolveHeld) => {
+        releaseHeldRequests = () => {
+          released = true;
+          resolveHeld();
+        };
+      });
+      await page.route("**/assets/index-*.js", async (route) => {
+        const fault = {
+          kind: "hold-client-bootstrap-module-until-native-input",
+          url: route.request().url(),
+          at: await now(),
+          releasedAt: null,
+        };
+        result.injectedFaults.push(fault);
+        if (!released) await held;
+        fault.releasedAt = await now().catch(() => null);
+        await route.continue().catch(() => undefined);
+      });
+    }
     if (scenario === "failure-retry" || scenario === "failure-pending-retry") {
       if (scenario === "failure-pending-retry") {
         // Hold only the valid gold request until ordinary high intent
@@ -570,9 +687,160 @@ async function runCase(browser, profileName, scenario) {
           await route.continue().catch(() => undefined);
         });
     }
+    const nativeEarlyInput = scenario === "first-visible-native-menu-1000" || bootstrapHeld;
+    const earlyInput = scenario === "first-visible-menu-1000" || nativeEarlyInput;
     await page.goto(new URL(scenario === "roundtrip" ? "/rexonance-saga" : "/world", base).href, {
-      waitUntil: "load",
+      waitUntil: earlyInput ? "commit" : "load",
     });
+    if (earlyInput) {
+      await page.waitForFunction(() => window.__rx17?.worldDisplays.length > 0);
+      const snapshotRequestedHostAt = Date.now();
+      const snapshot = await page.evaluate(() => ({
+        firstVisibleAt: window.__rx17.worldDisplays.at(-1).at,
+        at: performance.now(),
+        tapCount: window.__rx17.taps.length,
+      }));
+      const snapshotReceivedHostAt = Date.now();
+      const firstVisibleAt = snapshot.firstVisibleAt;
+      const targetAt = firstVisibleAt + 1000;
+      if (nativeEarlyInput)
+        assert.ok(profile.hasTouch, "the native early input fixture requires a touch profile");
+      // Do not ask the busy renderer for another evaluation at the deadline:
+      // it can block before touch is enqueued. Observe the visible button now
+      // and use the host timer; report enqueue and delivery lateness separately.
+      let buttonBounds = nativeEarlyInput
+        ? await page.locator(".side-panel-trigger").first().boundingBox()
+        : null;
+      const initialObservedButtonBounds = buttonBounds;
+      if (nativeEarlyInput && !(buttonBounds?.width > 0 && buttonBounds.height > 0)) {
+        result.firstVisibleInput = {
+          firstVisibleAt,
+          targetAt,
+          observedButtonBounds: buttonBounds,
+          actualTapAt: null,
+          nativeInputSubmittedHostAt: null,
+          earlyInputStatus: "control-unavailable-at-initial-observation",
+          earlyInputVerified: false,
+          entryIsAfterUiReady: false,
+        };
+        // Hero SSR DOM can precede a laid-out menu control. Poll only that
+        // visible control, never hydration/readiness/engine state, retaining
+        // the original SSR+1000 target and reporting any unavoidable lateness.
+        await page.locator(".side-panel-trigger").first().waitFor({ state: "visible" });
+        buttonBounds = await page.locator(".side-panel-trigger").first().boundingBox();
+      }
+      if (nativeEarlyInput && !(buttonBounds?.width > 0 && buttonBounds.height > 0))
+        result.firstVisibleInput = {
+          firstVisibleAt,
+          targetAt,
+          observedButtonBounds: buttonBounds,
+          actualTapAt: null,
+          nativeInputSubmittedHostAt: null,
+          earlyInputStatus: "control-unavailable-at-observation",
+          earlyInputVerified: false,
+          entryIsAfterUiReady: false,
+        };
+      if (nativeEarlyInput)
+        assert.ok(
+          buttonBounds?.width > 0 && buttonBounds.height > 0,
+          "observe the SSR button before touch",
+        );
+      const coordinatesReadyHostAt = Date.now();
+      const targetHostAt = snapshotReceivedHostAt + targetAt - snapshot.at;
+      await page.waitForTimeout(Math.max(0, targetHostAt - Date.now()));
+      const beforeCount = snapshot.tapCount;
+      let nativeInputSubmittedHostAt = null;
+      if (nativeEarlyInput) {
+        nativeInputSubmittedHostAt = Date.now();
+        const requestedAt = snapshot.at + nativeInputSubmittedHostAt - snapshotReceivedHostAt;
+        await cdp.send("Input.dispatchTouchEvent", {
+          type: "touchStart",
+          touchPoints: [
+            {
+              x: buttonBounds.x + buttonBounds.width / 2,
+              y: buttonBounds.y + buttonBounds.height / 2,
+            },
+          ],
+        });
+        await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+        result.taps.push({
+          label: "first-visible-native-menu-open",
+          requestedAt,
+          completedAt: await now(),
+        });
+      } else await tap(".side-panel-trigger", "first-visible-early-menu-open");
+      const actual = await page.evaluate(
+        (count) =>
+          window.__rx17.taps
+            .slice(count)
+            .find((tap) => tap.control === "menu-trigger" && tap.type === "pointerdown"),
+        beforeCount,
+      );
+      assert.ok(actual, "the early probe must use an actual menu pointer event");
+      if (bootstrapHeld) {
+        assert.ok(
+          result.injectedFaults.some(
+            (fault) => fault.kind === "hold-client-bootstrap-module-until-native-input",
+          ),
+          "hold the client entry module, not SSR or CSS",
+        );
+        assert.equal(
+          actual.pressReady,
+          false,
+          "controlled native input must precede hydration readiness",
+        );
+        result.bootstrapReleasedAfterNativeInputAt = await now();
+        releaseHeldRequests();
+      }
+      const initialPanelCheckStartedAt = await now();
+      const panelOpenedBeforeSettledCheck = await page
+        .waitForFunction(
+          () => document.querySelector("#site-side-panel")?.dataset.open === "true",
+          null,
+          { timeout: 1500 },
+        )
+        .then(
+          () => true,
+          () => false,
+        );
+      const initialPanelCheckCompletedAt = await now();
+      result.firstVisibleInput = {
+        firstVisibleAt,
+        targetAt,
+        actualTapAt: actual.at,
+        actualDelayFromFirstVisibleMs: actual.at - firstVisibleAt,
+        latenessMs: actual.at - targetAt,
+        pressReadyAtActualTap: actual.pressReady,
+        inputMethod: nativeEarlyInput
+          ? "CDP native touch at observed SSR button center"
+          : "Playwright actionability-checked real tap",
+        observedButtonBounds: buttonBounds,
+        initialObservedButtonBounds,
+        snapshotRequestedHostAt,
+        snapshotReceivedHostAt,
+        clockSnapshotRoundTripMs: snapshotReceivedHostAt - snapshotRequestedHostAt,
+        coordinatesReadyHostAt,
+        targetHostAt,
+        nativeInputSubmittedHostAt,
+        requestSubmissionLatenessMs:
+          nativeInputSubmittedHostAt === null ? null : nativeInputSubmittedHostAt - targetHostAt,
+        panelOpenedBeforeSettledCheck,
+        initialPanelCheckStartedAt,
+        initialPanelCheckCompletedAt,
+        entryIsAfterUiReady: true,
+        earlyInputStatus:
+          actual.at - targetAt > report.settings.earlyInputToleranceMs
+            ? panelOpenedBeforeSettledCheck
+              ? "late-and-handled"
+              : "late-and-unhandled"
+            : panelOpenedBeforeSettledCheck
+              ? "on-time-and-handled"
+              : "on-time-and-unhandled",
+        earlyInputVerified:
+          actual.at - targetAt <= report.settings.earlyInputToleranceMs &&
+          panelOpenedBeforeSettledCheck,
+      };
+    }
     result.loadEventAt = await page.evaluate(
       () => performance.getEntriesByType("navigation")[0]?.loadEventEnd ?? null,
     );
@@ -589,6 +857,30 @@ async function runCase(browser, profileName, scenario) {
     }
     let world = await worldDisplayed();
     result.worldTiming = world;
+    await startTrace();
+    if (earlyInput) {
+      result.loadEventAt = await page.evaluate(
+        () => performance.getEntriesByType("navigation")[0]?.loadEventEnd ?? null,
+      );
+      result.firstVisibleInput.menuRetryRequired =
+        (await page.locator("#site-side-panel").getAttribute("data-open")) !== "true";
+      result.firstVisibleInput.panelOpenedAtWorldReady =
+        !result.firstVisibleInput.menuRetryRequired;
+      result.firstVisibleInput.panelWorldReadyObservedAt = await now();
+      const first = result.firstVisibleInput;
+      first.initialEarlyInputStatus = first.earlyInputStatus;
+      const onTime = first.latenessMs <= report.settings.earlyInputToleranceMs;
+      first.earlyInputStatus = onTime
+        ? first.panelOpenedAtWorldReady
+          ? "on-time-and-handled"
+          : "on-time-and-unhandled"
+        : first.panelOpenedAtWorldReady
+          ? "late-and-handled"
+          : "late-and-unhandled";
+      first.earlyInputVerified = onTime && first.panelOpenedAtWorldReady;
+      first.inputHandledWithoutRetry = first.panelOpenedAtWorldReady;
+      if (bootstrapHeld) result.controlledEarlyBufferVerified = first.panelOpenedAtWorldReady;
+    }
     if (scenario === "abort-resume" || scenario === "abort-intent-resume") {
       await page.waitForFunction(
         () =>
@@ -645,8 +937,19 @@ async function runCase(browser, profileName, scenario) {
         ? Number(scenario.slice(11))
         : scenario === "failure-pending-retry"
           ? 1000
-          : 3500;
+          : earlyInput
+            ? 0
+            : 3500;
     await enterRexonance(world, delayMs);
+    if (earlyInput)
+      result.verdict =
+        "BUILD_CANVAS_ENGINE (early SSR menu input separate; entry after UI readiness)";
+    if (bootstrapHeld)
+      assert.equal(
+        result.controlledEarlyBufferVerified,
+        true,
+        "pre-hydration native menu click must be handled without a second menu tap",
+      );
     if (scenario === "failure-retry" || scenario === "failure-pending-retry") {
       assert.equal(
         result.injectedFaults.filter((fault) => fault.kind === "one-atlas-failure").length,
@@ -692,6 +995,10 @@ async function runCase(browser, profileName, scenario) {
     result.verdict ??= "FAIL (DOM/still/no-call never promoted to an engine pass)";
   } finally {
     releaseHeldRequests();
+    await stopTrace().catch((error) => {
+      result.traceError = error.message;
+      result.passed = false;
+    });
     result.observed = await page.evaluate(() => window.__rx17).catch(() => null);
     result.requests = [...requests.values()].map((request) => ({
       ...request,

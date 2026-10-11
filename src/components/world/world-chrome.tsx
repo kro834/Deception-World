@@ -30,6 +30,11 @@ import { SPECIAL_SITE_SECTIONS } from "@/lib/special-site-sections";
 import { openQuickSearch, prefetchQuickSearch } from "@/components/search/quick-search-events";
 import { IpadMenuToggle } from "@/components/ipad-menu-mode";
 import { CinemaLink } from "./external-cinema-link";
+import {
+  claimSideMenuEarlyInput,
+  isSideMenuEarlyInputValid,
+  type SideMenuEarlyInput,
+} from "@/lib/side-menu-early-input.js";
 
 type SiteAnnouncementMetric = {
   value: string;
@@ -126,8 +131,40 @@ export function SideMenuTrigger({
   onOpenChange?: (open: boolean) => void;
   className?: string;
 } = {}) {
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const earlyInputRef = useRef<SideMenuEarlyInput | null>(null);
+  useLayoutEffect(() => {
+    const opener = triggerRef.current;
+    if (opener && onOpenChange) earlyInputRef.current ??= claimSideMenuEarlyInput(opener);
+  }, [onOpenChange]);
+  useEffect(() => {
+    let cancelled = false;
+    const input = earlyInputRef.current;
+    if (input && onOpenChange) {
+      // The menu's input listener is a passive effect. Deliver after all
+      // mount effects, so early keyboard activation retains focus metadata.
+      // StrictMode cancels its first microtask; the shared ref lets the real
+      // setup deliver the consumed packet exactly once, not lose or replay it.
+      queueMicrotask(() => {
+        if (cancelled || earlyInputRef.current !== input) return;
+        earlyInputRef.current = null;
+        if (!isSideMenuEarlyInputValid(input)) return;
+        window.dispatchEvent(
+          new CustomEvent(SIDE_MENU_OPEN_INPUT_EVENT, {
+            detail: { keyboard: input.keyboard, opener: input.opener },
+          }),
+        );
+        if (!input.keyboard) input.opener.blur();
+        onOpenChange(true);
+      });
+    }
+    return () => {
+      cancelled = true;
+    };
+  }, [onOpenChange]);
   return (
     <button
+      ref={triggerRef}
       className={`side-panel-trigger ios26-glass${className ? ` ${className}` : ""}`}
       data-liquid-pointer="true"
       type="button"
@@ -138,6 +175,7 @@ export function SideMenuTrigger({
       onClick={
         onOpenChange
           ? (event) => {
+              earlyInputRef.current = null;
               const openedByKeyboard = event.detail === 0;
               window.dispatchEvent(
                 new CustomEvent(SIDE_MENU_OPEN_INPUT_EVENT, {

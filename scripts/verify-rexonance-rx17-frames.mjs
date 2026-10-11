@@ -5,6 +5,7 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { chromium } from "playwright";
 import sharp from "sharp";
+import { REXONANCE_SUIT_PIECES, REXONANCE_SUIT_SIZE } from "../src/lib/rexonance-suit.ts";
 
 const base = process.env.BASE_URL ?? "http://127.0.0.1:8082";
 const output = process.env.RX17_OUTPUT ?? "/private/tmp/rx17-review/baseline";
@@ -17,8 +18,77 @@ const profiles = {
     deviceScaleFactor: 3,
   },
 };
+// This is also isolated by the unit audit without importing/launching Chrome.
+// It validates actual recorded CSS state, not idealized source timing values.
+export function assertRexonanceFaceHold({ shots, supplements }, name) {
+  const faceAt = (time) => {
+    const shot = [...shots, ...supplements].find((candidate) => candidate.clock === time);
+    assert.ok(shot, `${name}: actual face evidence is missing at ${time}ms`);
+    assert.equal(shot.faceGroups.length, 6, `${name}: six face groups at ${time}ms`);
+    return shot.faceGroups;
+  };
+  assert.ok(faceAt(1990).every((group) => Number(group.opacity) === 0));
+  assert.ok(Number(faceAt(2000)[0].opacity) > 0 && Number(faceAt(2000)[0].opacity) < 1);
+  assert.ok(faceAt(2120).every((group) => Number(group.opacity) === 1));
+  assert.deepEqual(faceAt(2640), faceAt(2120), `${name}: filled squares hold on the face`);
+  assert.deepEqual(faceAt(2670), faceAt(2640), `${name}: scatter does not start early`);
+  assert.notDeepEqual(faceAt(2710), faceAt(2670), `${name}: squares scatter after the hold`);
+  assert.ok(faceAt(2800).every((group) => Number(group.opacity) < 0.09));
+}
+
 const browser = await chromium.launch({ channel: process.env.PW_BROWSER_CHANNEL ?? "chrome" });
 const reports = [];
+const partRegions = Object.fromEntries(
+  ["helm", "tail", "ribbon"].map((group) => {
+    const pieces = REXONANCE_SUIT_PIECES.filter((piece) => piece.group === group);
+    const left = Math.max(0, Math.min(...pieces.map((piece) => piece.x)) - 12);
+    const top = Math.max(0, Math.min(...pieces.map((piece) => piece.y)) - 12);
+    const right = Math.min(
+      REXONANCE_SUIT_SIZE.width,
+      Math.max(...pieces.map((piece) => piece.x + piece.w)) + 12,
+    );
+    const bottom = Math.min(
+      REXONANCE_SUIT_SIZE.height,
+      Math.max(...pieces.map((piece) => piece.y + piece.h)) + 12,
+    );
+    return [group, { left, top, width: right - left, height: bottom - top }];
+  }),
+);
+
+async function contactSheet(shots, path, { cellW = 220, cellH = 370, columns = 8 } = {}) {
+  const composites = [];
+  for (let i = 0; i < shots.length; i += 1) {
+    const shot = shots[i];
+    const tile = await sharp(shot.file)
+      .resize(cellW, cellH - 24, { fit: "contain", background: "#080a10" })
+      .png()
+      .toBuffer();
+    composites.push({
+      input: tile,
+      left: (i % columns) * cellW,
+      top: Math.floor(i / columns) * cellH + 24,
+    });
+    composites.push({
+      input: Buffer.from(
+        `<svg width="${cellW}" height="24"><text x="10" y="18" fill="white" font-size="16">${shot.clock} ms</text></svg>`,
+      ),
+      left: (i % columns) * cellW,
+      top: Math.floor(i / columns) * cellH,
+    });
+  }
+  await sharp({
+    create: {
+      width: cellW * columns,
+      height: cellH * Math.ceil(shots.length / columns),
+      channels: 3,
+      background: "#080a10",
+    },
+  })
+    .composite(composites)
+    .png()
+    .toFile(path);
+}
+
 try {
   for (const [name, profile] of Object.entries(profiles)) {
     const dir = join(output, name);
@@ -78,8 +148,7 @@ try {
       width: Math.min(vp.width - x, box.width + 24),
       height: Math.min(vp.height - y, box.height + 24),
     };
-    const shots = [];
-    for (let ms = 600; ms <= 2400; ms += 40) {
+    const capture = async (ms, supplement = false) => {
       await page.evaluate((target) => window.rx17Freeze(target), ms);
       // Two rAFs paint the real engine from this exact, paused meter time.
       await page.clock.runFor(34);
@@ -90,51 +159,107 @@ try {
           clock: Number(meter?.currentTime),
           suit: suit?.dataset.suit,
           nanites: suit?.dataset.nanites,
+          tier: suit?.closest(".rx-call-sequence")?.dataset.tier,
+          canvases: [...(suit?.querySelectorAll(".rx-suit-nanites > canvas") ?? [])].map(
+            (canvas) => ({ width: canvas.width, height: canvas.height }),
+          ),
+          faceGroups: [...(suit?.querySelectorAll(".rx-suit-pixels") ?? [])].map((group) => ({
+            opacity: getComputedStyle(group).opacity,
+            transform: getComputedStyle(group).transform,
+          })),
         };
       });
       assert.equal(state.clock, ms);
       assert.equal(state.nanites, "canvas", `${name} ${ms}: DOM fallback is not proof`);
-      const file = join(dir, `${String(ms).padStart(4, "0")}.png`);
+      assert.equal(state.suit, "build");
+      assert.equal(state.tier, "full");
+      assert.equal(state.canvases.length, 2);
+      assert.ok(state.canvases.every((canvas) => canvas.width > 0 && canvas.height > 0));
+      assert.equal(state.faceGroups.length, 6);
+      const prefix = supplement ? "supplement-" : "";
+      const file = join(dir, `${prefix}${String(ms).padStart(4, "0")}.png`);
       await page.screenshot({ path: file, clip });
-      shots.push({ file, ...state });
+      const meta = await sharp(file).metadata();
+      const densityX = meta.width / clip.width;
+      const densityY = meta.height / clip.height;
+      const parts = {};
+      for (const [part, region] of Object.entries(partRegions)) {
+        const left = Math.max(
+          0,
+          Math.floor(
+            (box.x - clip.x + (region.left * box.width) / REXONANCE_SUIT_SIZE.width) * densityX,
+          ),
+        );
+        const top = Math.max(
+          0,
+          Math.floor(
+            (box.y - clip.y + (region.top * box.height) / REXONANCE_SUIT_SIZE.height) * densityY,
+          ),
+        );
+        const width = Math.min(
+          meta.width - left,
+          Math.ceil(((region.width * box.width) / REXONANCE_SUIT_SIZE.width) * densityX),
+        );
+        const height = Math.min(
+          meta.height - top,
+          Math.ceil(((region.height * box.height) / REXONANCE_SUIT_SIZE.height) * densityY),
+        );
+        assert.ok(width > 0 && height > 0, `${name} ${part}: actual screenshot region`);
+        const partFile = join(dir, `${prefix}${String(ms).padStart(4, "0")}-${part}.png`);
+        await sharp(file).extract({ left, top, width, height }).png().toFile(partFile);
+        parts[part] = { file: partFile, left, top, width, height };
+      }
+      return { file, ...state, parts };
+    };
+    // Separate evidence around the final gold lock, face fill, 0.6s hold,
+    // and scatter. These do not alter the owner's 46-frame audit contract.
+    // Capture monotonically: the real engine releases its rAF after the
+    // last glint, so rewinding it after 2400ms would fabricate gold evidence.
+    const regularTimes = Array.from({ length: 46 }, (_, index) => 600 + index * 40);
+    const supplementTimes = [1986, 1990, 2000, 2060, 2640, 2670, 2710, 2800];
+    const moments = [...new Set([...regularTimes, ...supplementTimes])].sort((a, b) => a - b);
+    const shots = [];
+    const supplements = [];
+    for (const ms of moments) {
+      if (regularTimes.includes(ms)) shots.push(await capture(ms));
+      if (supplementTimes.includes(ms)) {
+        if (regularTimes.includes(ms)) {
+          // At shared moments use the exact same painted frame, without
+          // advancing the page clock for another screenshot.
+          supplements.push(shots.at(-1));
+        } else supplements.push(await capture(ms, true));
+      }
     }
     assert.equal(shots.length, 46);
+    assert.equal(supplements.length, 8);
+    assertRexonanceFaceHold({ shots, supplements }, name);
     assert.deepEqual(errors, []);
-    const cellW = 220,
-      cellH = 370,
-      columns = 8;
-    const composites = [];
-    for (let i = 0; i < shots.length; i += 1) {
-      const shot = shots[i];
-      const tile = await sharp(shot.file)
-        .resize(cellW, cellH - 24, { fit: "contain", background: "#080a10" })
-        .png()
-        .toBuffer();
-      composites.push({
-        input: tile,
-        left: (i % columns) * cellW,
-        top: Math.floor(i / columns) * cellH + 24,
-      });
-      composites.push({
-        input: Buffer.from(
-          `<svg width="${cellW}" height="24"><text x="10" y="18" fill="white" font-size="16">${shot.clock} ms</text></svg>`,
-        ),
-        left: (i % columns) * cellW,
-        top: Math.floor(i / columns) * cellH,
-      });
+    await contactSheet(shots, join(output, `${name}-timeline.png`));
+    for (const part of Object.keys(partRegions)) {
+      const relevant = shots.filter(
+        (shot) => shot.clock >= (part === "helm" ? 1600 : 1400) && shot.clock <= 2040,
+      );
+      await contactSheet(
+        relevant.map((shot) => ({ file: shot.parts[part].file, clock: shot.clock })),
+        join(output, `${name}-${part}.png`),
+        { cellW: 220, cellH: 240, columns: 6 },
+      );
     }
-    await sharp({
-      create: {
-        width: cellW * columns,
-        height: cellH * Math.ceil(shots.length / columns),
-        channels: 3,
-        background: "#080a10",
-      },
-    })
-      .composite(composites)
-      .png()
-      .toFile(join(output, `${name}-timeline.png`));
-    reports.push({ profile: name, ...profile, engine: "canvas", shots, errors });
+    await contactSheet(
+      supplements.map((shot) => ({ file: shot.parts.helm.file, clock: shot.clock })),
+      join(output, `${name}-face-supplements.png`),
+      { cellW: 220, cellH: 240, columns: 4 },
+    );
+    reports.push({
+      profile: name,
+      ...profile,
+      engine: "canvas",
+      box,
+      clip,
+      shots,
+      supplements,
+      errors,
+    });
     await context.close();
   }
   writeFileSync(join(output, "frames.json"), JSON.stringify({ base, reports }, null, 2));

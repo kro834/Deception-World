@@ -24,6 +24,7 @@ import { RETIRED_ULTRA_MODE_SCRIPT } from "@/lib/retired-ultra-mode";
 import { REXONANCE_LAYOUT_BOOT_SCRIPT } from "@/lib/rexonance-layout-gate.js";
 import { watchOpenDialogs } from "@/lib/dialog-open-flag.js";
 import { watchPresses } from "@/lib/press-feedback.js";
+import { SIDE_MENU_EARLY_INPUT_SCRIPT } from "@/lib/side-menu-early-input.js";
 import androidPerformanceCss from "../styles-android-performance.css?url";
 import ios18PerformanceCss from "../styles-ios18-performance.css?url";
 import ios27EnhancementsCss from "../styles-ios27-enhancements.css?url";
@@ -129,6 +130,7 @@ export const Route = createRootRoute({
       { children: DEVICE_PROFILE_SCRIPT },
       { children: RETIRED_ULTRA_MODE_SCRIPT },
       { children: REXONANCE_LAYOUT_BOOT_SCRIPT },
+      { children: SIDE_MENU_EARLY_INPUT_SCRIPT },
     ],
     links: [
       // The Zeus button's image, for every route that shows the button. The
