@@ -5,6 +5,12 @@ import {
   countTemplate,
   formatCount,
   mountRexonanceResonance,
+  mountRexonanceAssembly,
+  planAssembly,
+  assemblyTilePose,
+  assemblyCacheStep,
+  assemblyPhase,
+  ASSEMBLY_BEATS,
 } from "../src/lib/rexonance-resonance.js";
 
 /* 2026-10-10 rx11: Rexonance, RESONANCE — the page made dynamic
@@ -88,8 +94,263 @@ const declaration = (body, property) =>
   body.match(new RegExp(`(?:^|;)\\s*${property}\\s*:\\s*([^;]+)`))?.[1].trim();
 
 const sheet = parse(css);
+
+test("scroll tile depth is seeded, reversible and lands exactly on its texture rectangle", () => {
+  const options = {
+    size: { width: 300, height: 300 },
+    core: [150, 150],
+    tile: 15,
+    pieces: [{ id: "leg", group: "legs", x: 0, y: 0, w: 300, h: 300, seat: [150, 220] }],
+  };
+  const plan = planAssembly(options);
+  assert.deepEqual(plan, planAssembly(options));
+  for (const item of plan.tiles) {
+    const mid = item.t0 + (item.t1 - item.t0) * 0.7;
+    const a = assemblyTilePose(item, mid);
+    assemblyTilePose(item, item.t1);
+    assert.deepEqual(assemblyTilePose(item, mid), a, "reverse restores identical geometry");
+    assert.deepEqual([...assemblyTilePose(item, item.t1)], [item.sx, item.sy, item.tw, item.th, 1]);
+    assert.ok(a.every(Number.isFinite));
+    assert.ok(item.depth >= 0.35 && item.depth <= 1);
+  }
+});
+
+test("cache work is bounded and reverse jumps discard future paint before converging", () => {
+  let current = 5000;
+  const reverse = assemblyCacheStep(current, 1200, 160);
+  assert.equal(reverse.reset, true);
+  assert.equal(reverse.remove, 0);
+  assert.equal(reverse.end, 160);
+  current = reverse.end;
+  for (let i = 0; i < 20 && current !== 1200; i += 1) {
+    const step = assemblyCacheStep(current, 1200, 160);
+    assert.ok(step.end - step.start <= 160);
+    current = step.end;
+  }
+  assert.equal(current, 1200);
+  const small = assemblyCacheStep(current, 1100, 160);
+  assert.equal(small.reset, false);
+  assert.equal(small.remove, 100);
+  assert.equal(small.pending, false);
+});
+
+test("stage illumination follows the seal and final forms finish after base assembly", () => {
+  assert.ok(ASSEMBLY_BEATS.light[0] >= ASSEMBLY_BEATS.seal[1]);
+  assert.equal(assemblyPhase(0.1).phase, "prepare");
+  assert.equal(assemblyPhase(0.4).phase, "assemble");
+  assert.equal(assemblyPhase(0.88).phase, "seal");
+  assert.equal(assemblyPhase(0.905).phase, "ignite");
+  assert.deepEqual(assemblyPhase(0.93), { phase: "complete", complete: true });
+  for (const form of ["max", "ultra", "excelsior"]) {
+    assert.deepEqual(assemblyPhase(0.93, form), { phase: "evolve", complete: false });
+    assert.deepEqual(assemblyPhase(0.975, form), { phase: "complete", complete: true });
+    assert.equal(assemblyPhase(1, form, false).complete, false, "missing artwork is not completed");
+    assert.equal(assemblyPhase(0.974, form).complete, false, "reverse clears final completion");
+  }
+});
+
+function scrollAssemblyEnvironment() {
+  const listeners = new Map();
+  const eventTarget = (name) => ({
+    addEventListener: (type, callback) => listeners.set(`${name}:${type}`, callback),
+    removeEventListener: (type) => listeners.delete(`${name}:${type}`),
+  });
+  const node = (extra = {}) => {
+    const attrs = new Map();
+    return {
+      dataset: new Proxy(
+        {},
+        {
+          get: (_, key) => attrs.get(key),
+          set: (_, key, value) => (attrs.set(key, value), true),
+          deleteProperty: (_, key) => (attrs.delete(key), true),
+        },
+      ),
+      hasAttribute: (name) => attrs.has(name),
+      setAttribute: (name, value) => attrs.set(name, value),
+      removeAttribute: (name) => attrs.delete(name),
+      ...extra,
+    };
+  };
+  const calls = [];
+  const canvases = [];
+  const makeCanvas = () => {
+    const c = { width: 0, height: 0, clientWidth: 600, clientHeight: 600 };
+    const ctx = new Proxy(
+      {},
+      {
+        get: (_, key) =>
+          key === "getImageData" || key === "createImageData"
+            ? (...args) => ({
+                data: new Uint8ClampedArray(args.at(-2) * args.at(-1) * 4).fill(255),
+              })
+            : key === "createRadialGradient"
+              ? () => ({ addColorStop() {} })
+              : (...args) => calls.push({ target: c, method: key, args }),
+        set: () => true,
+      },
+    );
+    c.getContext = () => ctx;
+    canvases.push(c);
+    return c;
+  };
+  const document = {
+    documentElement: node(),
+    hidden: false,
+    createElement: makeCanvas,
+    ...eventTarget("document"),
+  };
+  const canvas = makeCanvas();
+  const frameBox = { offsetHeight: 600 };
+  let progress = 0;
+  const runway = node({
+    ownerDocument: document,
+    offsetHeight: 1800,
+    getBoundingClientRect: () => ({ top: -progress * 1200 }),
+    querySelector: (selector) =>
+      selector === "canvas.rzn-canvas" ? canvas : selector === ".rzn-frame" ? frameBox : null,
+    querySelectorAll: () => [],
+  });
+  runway.dataset.form = "standard";
+  const frames = new Map();
+  const observers = [];
+  let frameId = 0;
+  class IntersectionObserver {
+    constructor(callback) {
+      this.callback = callback;
+      observers.push(this);
+    }
+    observe() {}
+    disconnect() {}
+  }
+  class MutationObserver {
+    observe() {}
+    disconnect() {}
+  }
+  class ResizeObserver {
+    constructor(callback) {
+      this.callback = callback;
+    }
+    observe() {
+      this.callback();
+    }
+    disconnect() {}
+  }
+  class Image {
+    set src(value) {
+      this.url = value;
+      queueMicrotask(() => this.onload());
+    }
+  }
+  const env = {
+    ...eventTarget("window"),
+    document,
+    navigator: {},
+    innerHeight: 600,
+    matchMedia: (query) => ({ matches: query.includes("pointer: coarse"), ...eventTarget(query) }),
+    getComputedStyle: () => ({ top: "0", getPropertyValue: () => "" }),
+    requestAnimationFrame: (callback) => (frames.set(++frameId, callback), frameId),
+    cancelAnimationFrame: (id) => frames.delete(id),
+    requestIdleCallback: (callback) => setTimeout(() => callback({ timeRemaining: () => 20 }), 0),
+    cancelIdleCallback: clearTimeout,
+    setTimeout,
+    clearTimeout,
+    performance,
+    IntersectionObserver,
+    MutationObserver,
+    ResizeObserver,
+    Image,
+  };
+  const frame = () => {
+    calls.length = 0;
+    for (const [id, callback] of [...frames]) {
+      frames.delete(id);
+      callback();
+    }
+    return [...calls];
+  };
+  const scroll = (value) => {
+    progress = value;
+    listeners.get("window:scroll")?.();
+    return frame();
+  };
+  return { env, runway, canvas, observers, canvases, frames, frame, scroll };
+}
+
+test("gold converges while scroll rests, reverse work stays bounded, touch art remains capped", async () => {
+  const t = scrollAssemblyEnvironment();
+  const dispose = mountRexonanceAssembly(
+    t.runway,
+    {
+      figure: "/figure",
+      undersuit: "/undersuit",
+      size: { width: 300, height: 300 },
+      pieces: [
+        { id: "leg", group: "legs", x: 0, y: 0, w: 300, h: 300, ax: 0, ay: 0, seat: [150, 220] },
+      ],
+      core: [150, 150],
+      visor: [150, 30],
+      glow: [],
+      gold: {
+        atlas: "/gold",
+        cell: 3,
+        cells: { leg: btoa(String.fromCharCode(...new Uint8Array(1250).fill(255))) },
+      },
+    },
+    t.env,
+  );
+  try {
+    t.observers[0].callback([{ isIntersecting: true }]);
+    for (let i = 0; i < 100 && t.runway.dataset.rznState !== "live"; i += 1)
+      await new Promise((resolve) => setTimeout(resolve, 5));
+    assert.equal(t.runway.dataset.rznState, "live");
+    const first = t.scroll(0.5);
+    const byTarget = new Map();
+    for (const c of first.filter((c) => c.method === "drawImage" && c.target !== t.canvas))
+      byTarget.set(c.target, (byTarget.get(c.target) || 0) + 1);
+    const goldLayer = [...byTarget].find(([, count]) => count === 900)?.[0];
+    assert.ok(goldLayer, "gold starts with exactly its frame budget");
+    let goldDraws = 900;
+    let rounds = 0;
+    while (t.frames.size && rounds++ < 30) {
+      const batch = t.frame();
+      const count = batch.filter((c) => c.target === goldLayer && c.method === "drawImage").length;
+      assert.ok(count <= 900);
+      goldDraws += count;
+    }
+    assert.equal(goldDraws, 10000, "all gold cells converge without another scroll event");
+    assert.equal(t.frames.size, 0, "completed caches stop requesting frames");
+    const reverse = t.scroll(0.17);
+    assert.equal(
+      reverse.filter((c) => c.target === goldLayer && c.method === "clearRect").length,
+      1,
+      "large reverse clears future gold once",
+    );
+    assert.ok(reverse.filter((c) => c.method === "clearRect").length <= 3);
+    const flight = t.scroll(0.22);
+    const textured = flight.filter(
+      (c) =>
+        c.target === t.canvas &&
+        c.method === "drawImage" &&
+        c.args.length === 9 &&
+        c.args[0]?.getContext,
+    );
+    assert.ok(textured.length > 0 && textured.length <= 64);
+    t.scroll(1);
+    assert.equal(t.runway.dataset.rznPhase, "complete");
+    assert.equal(t.runway.dataset.rznFormComplete, "true");
+    t.scroll(0.8);
+    assert.equal(t.runway.dataset.rznPhase, "assemble");
+    assert.equal(t.runway.dataset.rznFormComplete, undefined);
+  } finally {
+    dispose();
+  }
+  assert.equal(t.runway.dataset.rznPhase, undefined);
+  assert.equal(t.runway.dataset.rznFormComplete, undefined);
+});
 const REDUCED = /prefers-reduced-motion:\s*no-preference/;
-const SUPPORTS = /^@supports \(animation-timeline: view\(\)\) and \(animation-range: entry 0% entry 100%\)$/;
+const SUPPORTS =
+  /^@supports \(animation-timeline: view\(\)\) and \(animation-range: entry 0% entry 100%\)$/;
 const FULL_GATE =
   /^html\[data-family="special"\]:not\(\[data-world-effects="economy"\]\):not\(\[data-side-menu-open\]\):not\(\[data-loading\]\):not\(\[data-dialog-open\]\) body \.rxs-page\.rxs-page\.rxs-rexonance-page\[data-motion-ready="true"\]/;
 const moves = (body) => {
@@ -276,7 +537,10 @@ test("the pinned cuts are a layout of the persistent preferences, never of the m
   const [{ selector, context }] = sticky;
   assert.ok(context.some((at) => REDUCED.test(at)));
   assert.match(selector, /:not\(\[data-world-effects="economy"\]\)/);
-  assert.doesNotMatch(selector, /data-side-menu-open|data-dialog-open|data-loading|data-motion-ready/);
+  assert.doesNotMatch(
+    selector,
+    /data-side-menu-open|data-dialog-open|data-loading|data-motion-ready/,
+  );
 });
 
 test("text keeps its 12px floor; generated text is silent; forced colours drop every ornament", () => {
@@ -343,9 +607,15 @@ test("each figure keeps the owner's value as its own text; its counter is a hidd
   for (const ornament of ["rsn-field", "rsn-form", "rsn-coda", "rsn-glint"]) {
     assert.match(page, new RegExp(`className="${ornament}" aria-hidden="true"`), ornament);
   }
-  assert.match(page, /<div className="rxs-hero-visual" aria-hidden="true">[\s\S]*?<span className="rsn-depth">/);
+  assert.match(
+    page,
+    /<div className="rxs-hero-visual" aria-hidden="true">[\s\S]*?<span className="rsn-depth">/,
+  );
   // One mount, never restarted by a form, menu or baseline change.
-  assert.match(page, /useEffect\(\(\) => \(lower \? mountRexonanceResonance\(pageRef\.current\) : undefined\), \[lower\]\);/);
+  assert.match(
+    page,
+    /useEffect\(\(\) => \(lower \? mountRexonanceResonance\(pageRef\.current\) : undefined\), \[lower\]\);/,
+  );
 });
 
 test("the counter prints the owner's figures at every step without reflowing", () => {
@@ -384,9 +654,14 @@ function environment({ reduced = false, economy = false, fine = false, timelines
       {},
       {
         get: (_, key) =>
-          node.attributes.get(`data-${String(key).replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`)}`),
+          node.attributes.get(
+            `data-${String(key).replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`)}`,
+          ),
         set: (_, key, value) => {
-          node.attributes.set(`data-${String(key).replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`)}`, String(value));
+          node.attributes.set(
+            `data-${String(key).replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`)}`,
+            String(value),
+          );
           return true;
         },
       },
@@ -460,7 +735,10 @@ function environment({ reduced = false, economy = false, fine = false, timelines
     ...target("window"),
     navigator: {},
     matchMedia: (query) =>
-      media(query.includes("reduce") ? reduced : query.includes("pointer: fine") ? fine : false, query),
+      media(
+        query.includes("reduce") ? reduced : query.includes("pointer: fine") ? fine : false,
+        query,
+      ),
     CSS: { supports: () => timelines },
     performance: { now: () => now },
     requestAnimationFrame: (callback) => {
@@ -494,7 +772,19 @@ function environment({ reduced = false, economy = false, fine = false, timelines
       }
     }
   };
-  return { env, pageNode, html, document, figures, observers, mutationObservers, listeners, advance, frames, timers };
+  return {
+    env,
+    pageNode,
+    html,
+    document,
+    figures,
+    observers,
+    mutationObservers,
+    listeners,
+    advance,
+    frames,
+    timers,
+  };
 }
 
 test("reduced motion and economy never arm a figure, and leave nothing behind", () => {

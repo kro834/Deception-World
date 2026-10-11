@@ -103,6 +103,9 @@ export interface RexonanceAssemblyTile {
   tone: number;
   fill: string;
   spin: number;
+  depth: number;
+  curveX: number;
+  curveY: number;
   pieceId: string | null;
 }
 
@@ -113,6 +116,8 @@ export const ASSEMBLY_BEATS: {
   rexonance: [number, number];
   clamp: number;
   seal: [number, number];
+  light: [number, number];
+  form: [number, number];
   pixels: [number, number];
   rings: [number, number];
   complete: number;
@@ -120,6 +125,32 @@ export const ASSEMBLY_BEATS: {
 
 export const ASSEMBLY_PARTS: readonly string[];
 export const ASSEMBLY_TOUCH_ART_BUDGET: number;
+
+export function assemblyCacheStep(
+  current: number,
+  target: number,
+  budget: number,
+): {
+  reset: boolean;
+  start: number;
+  end: number;
+  remove: number;
+  pending: boolean;
+};
+export function assemblyPhase(
+  progress: number,
+  form?: string,
+  ready?: boolean,
+): {
+  phase: "prepare" | "assemble" | "seal" | "ignite" | "evolve" | "complete";
+  complete: boolean;
+};
+export function assemblyTilePose(
+  item: RexonanceAssemblyTile,
+  progress: number,
+  out?: Float32Array,
+  offset?: number,
+): Float32Array;
 
 export function planAssembly(options: {
   size: { readonly width: number; readonly height: number };

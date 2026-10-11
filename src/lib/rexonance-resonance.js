@@ -499,7 +499,7 @@ export const ASSEMBLY_BEATS = {
   clamp: 0.86,
   seal: [0.86, 0.9],
   // The lights, held back until the suit is whole, run out from the reactor.
-  light: [0.86, 0.89],
+  light: [0.9, 0.915],
   // The form chosen in 03 takes over (MAX / ULTRA) once the suit is lit.
   form: [0.9, 0.975],
   pixels: [0.855, 0.95],
@@ -537,6 +537,7 @@ const GOLD_HEAT = [
   ["rgb(255 253 243)", 0.42],
 ];
 export const ASSEMBLY_TOUCH_ART_BUDGET = 64;
+const CONTACT_BUDGET = 64;
 const PIXEL_BUDGET = 2_600_000;
 const TONES = [
   [121, 232, 255],
@@ -558,6 +559,69 @@ const seededRandom = (seed) => {
     return state / 4294967296;
   };
 };
+
+/** A large reverse scrub discards the future in one clear, then rebuilds
+ * only the requested past. Forward and reverse work stays bounded. */
+export function assemblyCacheStep(current, target, budget) {
+  const reset = current - target > budget;
+  const start = reset ? 0 : Math.min(current, target);
+  const end = Math.min(target, start + budget);
+  return {
+    reset,
+    start,
+    end,
+    remove: reset ? 0 : Math.max(0, current - target),
+    pending: end < target,
+  };
+}
+
+/** Pure scrub state. Base assembly keeps its published .93 readout; a
+ * selected advanced form is finished only when its prepared art is ready. */
+export function assemblyPhase(progress, form = "standard", ready = true) {
+  const advanced = form === "max" || form === "ultra" || form === "excelsior";
+  const complete =
+    ready && progress >= (advanced ? ASSEMBLY_BEATS.form[1] : ASSEMBLY_BEATS.complete);
+  const phase = complete
+    ? "complete"
+    : progress < ASSEMBLY_BEATS.deus[0]
+      ? "prepare"
+      : progress < ASSEMBLY_BEATS.seal[0]
+        ? "assemble"
+        : progress < ASSEMBLY_BEATS.seal[1]
+          ? "seal"
+          : progress < ASSEMBLY_BEATS.light[1]
+            ? "ignite"
+            : advanced
+              ? "evolve"
+              : "ignite";
+  return { phase, complete };
+}
+
+/** Perspective and a curved approach, sampled entirely from progress.
+ * Writing into a reusable buffer keeps the live scrub allocation-free. */
+export function assemblyTilePose(item, progress, out = new Float32Array(5), offset = 0) {
+  const u = clamp01((progress - item.t0) / (item.t1 - item.t0));
+  const e = smooth(u);
+  const arc = Math.sin(Math.PI * u);
+  const angle = (1 - e) * item.spin;
+  const cos = Math.cos(angle);
+  const sin = Math.sin(angle);
+  const dx = (item.ox - item.cx) * (1 - e);
+  const dy = (item.oy - item.cy) * (1 - e);
+  const depth = (item.depth || 0) * arc;
+  const perspective = 1 + depth * 0.38;
+  const grow = (0.32 + 0.68 * easeOut(Math.min(1, u * 1.15))) * perspective;
+  const w = item.tw * grow;
+  const h = item.th * grow * (1 - depth * 0.2);
+  const x = item.cx + dx * cos - dy * sin + (item.curveX || 0) * arc * (1 - e);
+  const y = item.cy + dx * sin + dy * cos + (item.curveY || 0) * arc * (1 - e);
+  out[offset] = x - w / 2;
+  out[offset + 1] = y - h / 2;
+  out[offset + 2] = w;
+  out[offset + 3] = h;
+  out[offset + 4] = u;
+  return out;
+}
 
 const beatOfPiece = (piece, size) => {
   const known = BEAT_OF_GROUP[piece.group];
@@ -748,6 +812,12 @@ function* assemblyPlanSteps({
     const mix = (channel) => Math.round(item.rgb[channel] * 0.55 + tint[channel] * 0.45);
     item.fill = `rgb(${mix(0)} ${mix(1)} ${mix(2)})`;
     item.spin = (random() - 0.5) * 1.2;
+    // Each plate shares an approach plane. Tile-local variation is seeded
+    // without consuming the timing PRNG, preserving every landing beat.
+    const plane = ((Math.imul((item.owner?.index ?? beat) + 1, 2654435761) >>> 0) % 997) / 997;
+    item.depth = 0.35 + plane * 0.65;
+    item.curveX = (item.cx < width / 2 ? -1 : 1) * height * (0.025 + plane * 0.035);
+    item.curveY = -height * (0.018 + plane * 0.018);
     partDone[beat] = Math.max(partDone[beat], item.t1);
     centroids[beat][0] += item.cx;
     centroids[beat][1] += item.cy;
@@ -990,7 +1060,16 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   let view = null;
   let lastProgress = -1;
   let calmTimer = 0;
-  const hud = { line: -1, chips: "", parts: -1, percent: "", count: "", complete: null };
+  const hud = {
+    line: -1,
+    chips: "",
+    parts: -1,
+    percent: "",
+    count: "",
+    complete: null,
+    phase: "",
+    formComplete: null,
+  };
 
   const motionAllowed = () => {
     const constrained =
@@ -1347,12 +1426,16 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   let behind = false;
   const syncSettled = (landed, sealed) => {
     const { tiles } = plan;
+    const step = assemblyCacheStep(settledCount, landed, WELDS_PER_FRAME);
+    if (step.reset) {
+      settled.getContext("2d").clearRect(0, 0, W, H);
+      settledCount = 0;
+    }
     while (settledCount > landed) {
       settledCount -= 1;
       unweld(tiles[settledCount]);
     }
     if (sealed) {
-      behind = false;
       return;
     }
     let budget = WELDS_PER_FRAME;
@@ -1361,7 +1444,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       settledCount += 1;
       budget -= 1;
     }
-    behind = settledCount < landed;
+    behind ||= settledCount < landed;
   };
 
   // Per-frame buffers, allocated once per plan: a scrub draws thousands
@@ -1393,6 +1476,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       moteCounts: new Int32Array(6),
       art: new Int32Array(plan.tiles.length),
       artRects: new Float32Array(n),
+      pose: new Float32Array(5),
       flashes: Array.from({ length: 3 }, () => new Float32Array(n)),
       flashCounts: new Int32Array(3),
       faces,
@@ -1426,6 +1510,11 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     const g = goldPlan;
     const target = goldBy(progress);
     const context = goldLayer.getContext("2d");
+    const step = assemblyCacheStep(goldCount, target, GOLD_PER_FRAME);
+    if (step.reset) {
+      context.clearRect(0, 0, W, H);
+      goldCount = 0;
+    }
     while (goldCount > target) {
       goldCount -= 1;
       context.clearRect(g.x[goldCount], g.y[goldCount], g.w[goldCount], g.h[goldCount]);
@@ -1437,6 +1526,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       goldCount += 1;
       budget -= 1;
     }
+    behind ||= goldCount < target;
   };
   // The molten front: each cell's mote flies in from the cell it flowed
   // from, white-hot, locks and cools through bright gold to the painted
@@ -1491,6 +1581,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     const context = canvas.getContext("2d");
     const { figure, undersuit } = images;
     const B = ASSEMBLY_BEATS;
+    behind = false;
     context.setTransform(1, 0, 0, 1, 0, 0);
     context.globalAlpha = 1;
     context.globalCompositeOperation = "source-over";
@@ -1699,32 +1790,8 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         moteCounts[slot] = at + 4;
         continue;
       }
-      const end = item.hover || item.t1;
-      let x = item.cx;
-      let y = item.cy;
-      let u = 1;
-      if (progress < end) {
-        u = (progress - item.t0) / (end - item.t0);
-        const e = smooth(u);
-        // Swirl the last stretch round the seat, then home in.
-        const angle = (1 - e) * item.spin;
-        const cos = Math.cos(angle);
-        const sin = Math.sin(angle);
-        const dx = (item.ox - item.cx) * (1 - e);
-        const dy = (item.oy - item.cy) * (1 - e);
-        x = item.cx + dx * cos - dy * sin;
-        y = item.cy + dx * sin + dy * cos;
-        if (item.hover) y -= H * 0.055 * e;
-      } else if (item.hover) {
-        // The helmet hovers above the head, then clamps down.
-        const clamp = easeOut(clamp01((progress - (B.clamp - 0.014)) / 0.014));
-        y = item.cy - H * 0.055 * (1 - clamp);
-      }
-      const grow = 0.32 + 0.68 * easeOut(Math.min(1, u * 1.15));
-      const w = item.tw * grow;
-      const h = item.th * grow;
-      const left = x - w / 2;
-      const top = y - h / 2;
+      assemblyTilePose(item, progress, buffers.pose);
+      const [left, top, w, h, u] = buffers.pose;
       if (u < 0.62 && coarse.matches) {
         const slot = item.tone + 3;
         const at = moteCounts[slot];
@@ -1786,6 +1853,39 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         artRects[o + 3],
       );
     }
+    // A restrained bevel catches the approaching plate's edge. Two batched
+    // paths, at most 64 tiles: no shadows, filters, or per-tile state stack.
+    if (!calm && arts) {
+      const count = Math.min(artCount, CONTACT_BUDGET);
+      for (let edge = 0; edge < 2; edge += 1) {
+        context.beginPath();
+        for (let n = 0; n < count; n += 1) {
+          const i = Math.floor((n * arts) / count);
+          const item = tiles[art[i]];
+          const u = clamp01((progress - item.t0) / (item.t1 - item.t0));
+          if (u < 0.65 || u > 0.96) continue;
+          const o = i * 4;
+          const x = artRects[o];
+          const y = artRects[o + 1];
+          const w = artRects[o + 2];
+          const h = artRects[o + 3];
+          const inset = Math.min(w, h) * 0.14;
+          if (edge === 0) {
+            context.moveTo(x + inset, y + h - inset);
+            context.lineTo(x + w - inset, y + h - inset);
+            context.lineTo(x + w - inset, y + inset);
+          } else {
+            context.moveTo(x + inset, y + h * 0.45);
+            context.lineTo(x + inset, y + inset);
+            context.lineTo(x + w * 0.65, y + inset);
+          }
+        }
+        context.globalAlpha = edge ? 0.5 : 0.55;
+        context.strokeStyle = edge ? "rgb(228 248 255)" : "rgb(8 15 25)";
+        context.lineWidth = edge ? 0.85 : 1.6;
+        context.stroke();
+      }
+    }
     if (arts && !calm) {
       context.globalAlpha = 0.55;
       context.strokeStyle = TONE_CSS[0];
@@ -1818,18 +1918,34 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     fillRects(context, flashes[1], flashCounts[1], "rgb(190 244 255)", 0.36);
     fillRects(context, flashes[2], flashCounts[2], TONE_CSS[0], 0.18);
 
-    // Each DEUS！: a ring from the group that has just landed.
-    context.lineWidth = 3;
+    // Each DEUS！: contact rolls across the landing plane, rather than a
+    // front-facing circle covering the armor. Its duration is scroll-bound.
+    context.lineWidth = 1.8;
     for (let beat = 0; beat < 5; beat += 1) {
       const done = plan.partDone[beat];
       const u = (progress - done) / 0.045;
-      if (!done || u < 0 || u >= 1) continue;
+      if (!done || u < 0 || u >= 1 || calm) continue;
       const [cx, cy] = plan.centroids[beat];
-      context.globalAlpha = (1 - u) * 0.8;
+      context.globalAlpha = (1 - u) * 0.5;
       context.strokeStyle = RING_TONES[beat % 3];
       context.beginPath();
-      context.arc(cx, cy, 30 + 260 * easeOut(u), 0, Math.PI * 2);
+      context.save();
+      context.translate(cx, cy);
+      context.rotate(beat % 2 ? -0.12 : 0.12);
+      context.scale(1, beat === 0 ? 0.25 : 0.48);
+      context.arc(0, 0, 18 + 190 * easeOut(u), 0, Math.PI * 2);
       context.stroke();
+      context.restore();
+      // One short seam glint per landed group, bounded to five contacts.
+      const contact = Math.max(0, 1 - u * 3);
+      if (contact > 0) {
+        context.globalAlpha = contact * 0.6;
+        context.strokeStyle = "rgb(235 248 255)";
+        context.beginPath();
+        context.moveTo(cx - 10 - 18 * u, cy);
+        context.lineTo(cx + 10 + 18 * u, cy);
+        context.stroke();
+      }
     }
 
     // REXONANCE DEUS！: the face fills with pixel squares, which scatter.
@@ -1858,8 +1974,9 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     // The core ignites and rings out.
     const [coreX, coreY] = config.core;
     const rings = B.rings;
-    if (progress >= rings[0] && progress < rings[1]) {
-      const glow = Math.sin(Math.PI * span(progress, rings));
+    const ringEnd = form === "standard" || !form ? B.complete : B.form[1];
+    if (!calm && progress >= rings[0] && progress < ringEnd) {
+      const glow = Math.sin(Math.PI * span(progress, [rings[0], ringEnd]));
       if (!buffers.glow) {
         buffers.glow = context.createRadialGradient(coreX, coreY, 0, coreX, coreY, 150);
         buffers.glow.addColorStop(0, "rgb(244 251 255 / 0.9)");
@@ -1873,7 +1990,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       context.globalCompositeOperation = "source-over";
       for (let ring = 0; ring < 3; ring += 1) {
         const from = rings[0] + ring * 0.025;
-        const u = clamp01((progress - from) / 0.075);
+        const u = clamp01((progress - from) / Math.min(0.075, ringEnd - from));
         if (u <= 0 || u >= 1) continue;
         context.globalAlpha = (1 - u) * 0.9;
         context.strokeStyle = RING_TONES[ring];
@@ -1947,6 +2064,17 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     if (complete !== hud.complete) {
       hud.complete = complete;
       setFlag(runway, "data-rzn-complete", complete);
+    }
+    const form = runway.dataset.form || "standard";
+    const state = assemblyPhase(progress, form, form === "standard" || Boolean(formsState?.[form]));
+    if (state.phase !== hud.phase) {
+      hud.phase = state.phase;
+      runway.dataset.rznPhase = state.phase;
+    }
+    if (state.complete !== hud.formComplete) {
+      hud.formComplete = state.complete;
+      if (state.complete) runway.dataset.rznFormComplete = "true";
+      else delete runway.dataset.rznFormComplete;
     }
   };
 
@@ -2063,7 +2191,17 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     environment.clearTimeout(calmTimer);
     calmTimer = environment.setTimeout(() => {
       calmTimer = 0;
-      if (!disposed && live && view && images && plan && lastProgress >= 0)
+      if (
+        !disposed &&
+        live &&
+        near &&
+        pageActive &&
+        !document.hidden &&
+        view &&
+        images &&
+        plan &&
+        lastProgress >= 0
+      )
         draw(lastProgress, true);
     }, CALM_MS);
     if (behind) {
@@ -2100,6 +2238,8 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       environment.removeEventListener("resize", onScroll);
       if (frame) environment.cancelAnimationFrame(frame);
       frame = 0;
+      environment.clearTimeout(calmTimer);
+      calmTimer = 0;
     }
   };
 
@@ -2125,6 +2265,8 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     resizeObserver?.disconnect();
     delete runway.dataset.rznState;
     delete runway.dataset.rznLine;
+    delete runway.dataset.rznPhase;
+    delete runway.dataset.rznFormComplete;
     setFlag(runway, "data-rzn-complete", false);
     for (const { line, chips } of lines) {
       setFlag(line, "data-on", false);
@@ -2132,7 +2274,16 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       chips.forEach((chip) => setFlag(chip, "data-on", false));
     }
     parts.forEach((part) => setFlag(part, "data-on", false));
-    Object.assign(hud, { line: -1, chips: "", parts: -1, percent: "", count: "", complete: null });
+    Object.assign(hud, {
+      line: -1,
+      chips: "",
+      parts: -1,
+      percent: "",
+      count: "",
+      complete: null,
+      phase: "",
+      formComplete: null,
+    });
     if (percent) writeText(percent, restPercent);
     if (counter) writeText(counter, restCount);
     pendingSize = null;
@@ -2212,6 +2363,8 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       cancelPreparation();
       if (frame) environment.cancelAnimationFrame(frame);
       frame = 0;
+      environment.clearTimeout(calmTimer);
+      calmTimer = 0;
       return;
     }
     if (warm || near) wake();
@@ -2223,6 +2376,8 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     cancelPreparation();
     if (frame) environment.cancelAnimationFrame(frame);
     frame = 0;
+    environment.clearTimeout(calmTimer);
+    calmTimer = 0;
   };
   const onPageShow = () => {
     pageActive = true;
