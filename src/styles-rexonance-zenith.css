@@ -1115,6 +1115,21 @@ html[data-family="special"]
   }
 }
 
+/* Where the viewer stacks (the art above the copy), the copy keeps its
+   own height: the two-column minimum of the polish layer would leave a
+   screen of empty stage under the points. */
+@media (min-width: 901px) and (max-width: 1099.98px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > #stages
+    .rxs-stage-panel
+    > div {
+    min-block-size: 0;
+    padding-block-start: clamp(24px, 3vw, 40px);
+  }
+}
+
 /* The nanite sweep: strips of cells over the art, at rest unseen. */
 html[data-family="special"]
   body
@@ -1641,6 +1656,539 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-fo
 }
 
 /* ================================================================
+   04 TRINITY: three rings, each its own, fall into phase
+   (三者三様のまま、一糸乱れず). The three systems enter as three
+   equal, overlapping rings, each with its mark at its own angle; as the
+   scene comes into the view they glide to one centre, take their own
+   radii (evolution inside, the order round it, the human will outside)
+   and turn until the three marks stand on one axis — phase lock — and
+   one wave rings out from the core. At rest (reduced motion, economy,
+   the menu, no scroll timelines before the scene plays) the rings stand
+   locked: the finished picture.
+   ================================================================ */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #system > .rzn-trinity {
+  --rzn-s: min(84vw, max(340px, 44vw));
+  --rzn-ice: 121 232 255;
+  --rzn-violet: 182 163 255;
+  --rzn-gold: 242 216 150;
+  --rzn-white: 244 251 255;
+  position: relative;
+  z-index: 0;
+  display: block;
+  width: var(--rzn-s);
+  height: var(--rzn-s);
+  margin: clamp(-12px, -1vw, 0px) auto clamp(28px, 5vw, 44px);
+  pointer-events: none;
+}
+
+/* The phase axis: the line the three marks come to stand on. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #system > .rzn-trinity::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 50%;
+  left: 50%;
+  width: 1px;
+  background: linear-gradient(180deg, transparent, rgb(var(--rzn-white) / 34%) 40%, transparent);
+  translate: -50% 0;
+}
+
+/* A faint horizon through the core. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #system > .rzn-trinity::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: -8%;
+  right: -8%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(var(--rzn-ice) / 22%) 30%,
+    rgb(var(--rzn-violet) / 18%) 50%,
+    rgb(var(--rzn-gold) / 22%) 70%,
+    transparent
+  );
+}
+
+/* Each system: a carrier at the centre (it travels), the ring on it
+   (it takes its radius and turns). */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #system > .rzn-trinity > .rzn-tri {
+  --rzn-c: var(--rzn-ice);
+  --rzn-r: 0.17;
+  --rzn-x: -0.14;
+  --rzn-y: -0.08;
+  --rzn-turn: -150deg;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #system
+  > .rzn-trinity
+  > .rzn-tri:nth-child(2) {
+  --rzn-c: var(--rzn-violet);
+  --rzn-r: 0.3;
+  --rzn-x: 0.14;
+  --rzn-y: -0.08;
+  --rzn-turn: 110deg;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #system
+  > .rzn-trinity
+  > .rzn-tri:nth-child(3) {
+  --rzn-c: var(--rzn-gold);
+  --rzn-r: 0.43;
+  --rzn-x: 0;
+  --rzn-y: 0.16;
+  --rzn-turn: -230deg;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #system
+  > .rzn-trinity
+  > .rzn-tri
+  > .rzn-tri-ring {
+  /* The scale that makes every ring the same size while they overlap. */
+  --rzn-k: calc(0.25 / var(--rzn-r));
+  position: absolute;
+  top: calc(var(--rzn-r) * var(--rzn-s) * -1);
+  left: calc(var(--rzn-r) * var(--rzn-s) * -1);
+  width: calc(var(--rzn-r) * var(--rzn-s) * 2);
+  height: calc(var(--rzn-r) * var(--rzn-s) * 2);
+  border: 1.5px solid rgb(var(--rzn-c) / 74%);
+  border-radius: 50%;
+  background: radial-gradient(
+    closest-side,
+    transparent 58%,
+    rgb(var(--rzn-c) / 8%) 84%,
+    rgb(var(--rzn-c) / 18%) 100%
+  );
+  box-shadow:
+    0 0 22px rgb(var(--rzn-c) / 20%),
+    inset 0 0 16px rgb(var(--rzn-c) / 12%);
+}
+
+/* The ring's mark: where it stands in phase. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #system
+  > .rzn-trinity
+  > .rzn-tri
+  > .rzn-tri-ring::before {
+  content: "";
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  width: 3px;
+  height: 15px;
+  background: rgb(var(--rzn-c));
+  box-shadow: 0 0 12px rgb(var(--rzn-c) / 70%);
+  translate: -50% 0;
+}
+
+/* Opposite the mark, a dim dot: the ring reads as turning. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #system
+  > .rzn-trinity
+  > .rzn-tri
+  > .rzn-tri-ring::after {
+  content: "";
+  position: absolute;
+  bottom: -3px;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgb(var(--rzn-c) / 60%);
+  translate: -50% 0;
+}
+
+/* The system's number rides beside its mark, upright. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #system
+  > .rzn-trinity
+  > .rzn-tri
+  > .rzn-tri-ring
+  > b {
+  position: absolute;
+  top: -10px;
+  left: calc(50% + 9px);
+  color: rgb(var(--rzn-c));
+  font: 600 12px / 1 var(--dx-mono);
+  letter-spacing: 0.14em;
+  text-shadow: 0 0 10px rgb(var(--rzn-c) / 60%);
+  transform-origin: -9px 10px;
+}
+
+/* The core between them, and the wave it sends once the three lock. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #system
+  > .rzn-trinity
+  > .rzn-tri-core {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 12px;
+  height: 12px;
+  margin: -6px 0 0 -6px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgb(var(--rzn-white)), rgb(var(--rzn-ice)) 60%, rgb(var(--rzn-violet)));
+  box-shadow:
+    0 0 18px rgb(var(--rzn-ice) / 80%),
+    0 0 40px rgb(var(--rzn-violet) / 40%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #system
+  > .rzn-trinity
+  > .rzn-tri-wave {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: calc(var(--rzn-s) * 0.86);
+  height: calc(var(--rzn-s) * 0.86);
+  margin: calc(var(--rzn-s) * -0.43) 0 0 calc(var(--rzn-s) * -0.43);
+  border: 1px solid rgb(var(--rzn-white) / 55%);
+  border-radius: 50%;
+  opacity: 0;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #system
+  > .rzn-trinity
+  > .rzn-tri-lock {
+  position: absolute;
+  top: calc(50% + 14px);
+  left: 50%;
+  color: rgb(var(--rzn-white) / 78%);
+  font: 400 12px / 1.4 var(--dx-hud);
+  letter-spacing: 0.22em;
+  white-space: nowrap;
+  translate: -50% 0;
+}
+
+/* The rings are the scene now: RESONANCE's concentric rings behind the
+   cards (the same three colours, already in phase) step aside. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #system
+  > .rxs-system-grid::before {
+  display: none;
+}
+
+/* Wide screens: the rings stand beside the heading, the cards below. */
+@media (min-width: 1100px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #system {
+    display: grid;
+    grid-template-columns: minmax(0, var(--dxs-wrap));
+    justify-content: center;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > #system
+    > .rxs-section-heading {
+    grid-area: 1 / 1;
+    align-self: end;
+    width: 100%;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #system > .rzn-trinity {
+    --rzn-s: min(470px, 34vw);
+    grid-area: 1 / 1;
+    justify-self: end;
+    margin: clamp(-56px, -3vw, -24px) clamp(24px, 5vw, 96px) 40px 0;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > #system
+    > :is(.rxs-system-grid, .rxs-specs) {
+    width: 100%;
+  }
+}
+
+/* ================================================================
+   Motion: the trinity falls into phase — with the scroll where scroll
+   timelines exist (its own named view timeline), otherwise once, by
+   time, on the transient data-rsn-in flag the RESONANCE script sets
+   ================================================================ */
+@supports (animation-timeline: view()) and (animation-range: entry 0% entry 100%) {
+  @media (prefers-reduced-motion: no-preference) {
+    html[data-family="special"]:not([data-world-effects="economy"])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      > #system
+      > .rzn-trinity {
+      view-timeline: --rzn-tri block;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      > #system
+      > .rzn-trinity
+      > .rzn-tri {
+      animation: rzn-tri-glide linear both;
+      animation-timeline: --rzn-tri;
+      animation-range: entry 35% cover 50%;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      > #system
+      > .rzn-trinity
+      > .rzn-tri
+      > .rzn-tri-ring {
+      animation: rzn-tri-tune linear both;
+      animation-timeline: --rzn-tri;
+      animation-range: entry 35% cover 50%;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      > #system
+      > .rzn-trinity
+      > .rzn-tri
+      > .rzn-tri-ring
+      > b {
+      animation: rzn-tri-upright linear both;
+      animation-timeline: --rzn-tri;
+      animation-range: entry 35% cover 50%;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      > #system
+      > .rzn-trinity
+      > .rzn-tri-core {
+      animation: rzn-tri-core linear both;
+      animation-timeline: --rzn-tri;
+      animation-range: entry 35% cover 50%;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      > #system
+      > .rzn-trinity
+      > .rzn-tri-lock {
+      animation: rzn-tri-lock linear both;
+      animation-timeline: --rzn-tri;
+      animation-range: cover 42% cover 54%;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      > #system
+      > .rzn-trinity
+      > .rzn-tri-wave {
+      animation: rzn-tri-wave linear both;
+      animation-timeline: --rzn-tri;
+      animation-range: cover 48% cover 70%;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    > #system
+    > .rzn-trinity[data-rsn-in]
+    > .rzn-tri {
+    animation: rzn-tri-glide 1100ms cubic-bezier(0.5, 0, 0.2, 1) both;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    > #system
+    > .rzn-trinity[data-rsn-in]
+    > .rzn-tri
+    > .rzn-tri-ring {
+    animation: rzn-tri-tune 1100ms cubic-bezier(0.5, 0, 0.2, 1) both;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    > #system
+    > .rzn-trinity[data-rsn-in]
+    > .rzn-tri
+    > .rzn-tri-ring
+    > b {
+    animation: rzn-tri-upright 1100ms cubic-bezier(0.5, 0, 0.2, 1) both;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    > #system
+    > .rzn-trinity[data-rsn-in]
+    > .rzn-tri-core {
+    animation: rzn-tri-core 1100ms cubic-bezier(0.5, 0, 0.2, 1) both;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    > #system
+    > .rzn-trinity[data-rsn-in]
+    > .rzn-tri-lock {
+    animation: rzn-tri-lock 1200ms linear both;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    > #system
+    > .rzn-trinity[data-rsn-in]
+    > .rzn-tri-wave {
+    animation: rzn-tri-wave 700ms cubic-bezier(0.16, 1, 0.3, 1) 1050ms both;
+  }
+}
+
+@keyframes rzn-tri-glide {
+  from {
+    translate: calc(var(--rzn-x) * var(--rzn-s)) calc(var(--rzn-y) * var(--rzn-s));
+  }
+
+  to {
+    translate: 0 0;
+  }
+}
+
+@keyframes rzn-tri-tune {
+  from {
+    rotate: var(--rzn-turn);
+    scale: var(--rzn-k);
+  }
+
+  to {
+    rotate: 0deg;
+    scale: 1;
+  }
+}
+
+/* The number counter-turns and counter-scales: it rides the mark upright
+   and at its own size. */
+@keyframes rzn-tri-upright {
+  from {
+    rotate: calc(var(--rzn-turn) * -1);
+    scale: calc(1 / var(--rzn-k));
+  }
+
+  to {
+    rotate: 0deg;
+    scale: 1;
+  }
+}
+
+@keyframes rzn-tri-core {
+  from {
+    opacity: 0.35;
+    scale: 0.5;
+  }
+
+  80% {
+    opacity: 0.6;
+    scale: 0.8;
+  }
+
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+@keyframes rzn-tri-lock {
+  from {
+    opacity: 0;
+    translate: -50% 6px;
+  }
+
+  70% {
+    opacity: 0;
+    translate: -50% 6px;
+  }
+
+  to {
+    opacity: 1;
+    translate: -50% 0;
+  }
+}
+
+@keyframes rzn-tri-wave {
+  from {
+    opacity: 0;
+    scale: 0.94;
+  }
+
+  25% {
+    opacity: 0.8;
+  }
+
+  to {
+    opacity: 0;
+    scale: 1.32;
+  }
+}
+
+/* ================================================================
    Forced colours and print: the finished figure, every line, plain
    ================================================================ */
 @media (forced-colors: active) {
@@ -1663,6 +2211,10 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-fo
   }
 
   html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup::before {
+    display: none;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #system > .rzn-trinity {
     display: none;
   }
 

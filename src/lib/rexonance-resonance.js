@@ -40,7 +40,9 @@ const FORM_MS = 1800;
 const SCENE_MS = 1800;
 const EASE = 0.085;
 const SETTLED = 0.002;
-const SCENES = ".rxs-section-heading, .rxs-p14-overview, .rxs-system-grid, .rxs-footer";
+// ZENITH (rx15): the trinity's rings fall into phase on the same flag.
+const SCENES =
+  ".rxs-section-heading, .rxs-p14-overview, .rxs-system-grid, .rzn-trinity, .rxs-footer";
 
 /** The number inside a figure's text and how to print it at any value. */
 export function countTemplate(text) {

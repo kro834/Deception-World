@@ -1468,6 +1468,20 @@ export function RexonanceSaga() {
           </h2>
         </header>
 
+        {/* ZENITH (rx15): the three, each its own ring, fall into phase. */}
+        <div className="rzn-trinity" aria-hidden="true">
+          {CORE_SYSTEMS.map((system) => (
+            <span key={system.number} className="rzn-tri">
+              <i className="rzn-tri-ring">
+                <b>{system.number}</b>
+              </i>
+            </span>
+          ))}
+          <i className="rzn-tri-wave" />
+          <i className="rzn-tri-core" />
+          <small className="rzn-tri-lock">PHASE LOCK</small>
+        </div>
+
         <div className="rxs-system-grid">
           {CORE_SYSTEMS.map((system) => (
             <article key={system.number} className="rxs-reveal">

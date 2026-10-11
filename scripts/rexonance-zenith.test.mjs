@@ -215,14 +215,20 @@ test("time-based motion is gated, keyed to the transient form flag, finite and q
     );
     for (const part of splitTopLevel(selector)) {
       assert.match(part, FULL_GATE, part);
-      assert.match(part, /\[data-rsn-form\]/, part);
+      // The form's transient flag, or the trinity's (its time-based
+      // fallback where scroll timelines are missing).
+      assert.match(part, /\[data-rsn-form\]|> \.rzn-trinity\[data-rsn-in\]/, part);
     }
     for (const layer of splitTopLevel(declaration(body, "animation") ?? "")) {
-      const [duration = 0] = [...layer.matchAll(/(\d+)ms/g)].map((match) => Number(match[1]));
+      const [duration = 0, delay = 0] = [...layer.matchAll(/(\d+)ms/g)].map((match) =>
+        Number(match[1]),
+      );
       assert.ok(duration > 0 && duration <= 1200, `${selector}: ${layer}`);
+      // The trinity plays inside the 1.8 s its flag is held.
+      assert.ok(duration + delay <= 1800, `${selector}: ${layer}`);
     }
   }
-  assert.ok(checked >= 2, String(checked));
+  assert.ok(checked >= 8, String(checked));
   // The mesh's diagonal stagger stays inside the transformation's window.
   const mesh = sheet.rules.find(
     ({ selector }) => /\.rzn-mesh > i$/.test(selector) && /data-rsn-form/.test(selector),
@@ -283,6 +289,7 @@ test("text keeps its 12px floor; generated text is silent; forced colours drop t
     .map(({ selector, body }) => `${selector} { ${body} }`)
     .join("\n");
   for (const ornament of [
+    ".rzn-trinity",
     ".rzn-canvas",
     ".rzn-light",
     ".rzn-floor",
@@ -681,4 +688,39 @@ test("near the view it goes live, scrubs with the scroll, writes the HUD on chan
   assert.equal([...t.listeners.keys()].length, 0, [...t.listeners.keys()].join());
   assert.equal(t.frames.size, 0);
   assert.ok(t.observers.every((observer) => observer.disconnected));
+});
+
+test("04: the trinity is a scene — three rings fall into phase, at rest locked", () => {
+  // Decorative, one ring per system, drawn from the systems' own list.
+  const trinity = page.match(/<div className="rzn-trinity" aria-hidden="true">[\s\S]*?<\/div>/)?.[0];
+  assert.ok(trinity);
+  assert.match(trinity, /CORE_SYSTEMS\.map\(\(system\) => \(/);
+  assert.match(trinity, /<b>\{system\.number\}<\/b>/);
+  assert.ok(page.indexOf('className="rzn-trinity"') < page.indexOf('<div className="rxs-system-grid">'));
+  // Its time-based fallback rides the RESONANCE scene flag.
+  assert.match(read("src/lib/rexonance-resonance.js"), /const SCENES =\s*"[^"]*\.rzn-trinity[^"]*";/);
+  // The rest is the finished picture: no base rule moves a ring; the
+  // motion lives only in the gated rules (checked above).
+  const base = sheet.rules.filter(
+    ({ selector, context }) =>
+      /\.rzn-tri\b|\.rzn-tri-/.test(selector) && !context.some((at) => REDUCED.test(at)),
+  );
+  assert.ok(base.length >= 6, String(base.length));
+  for (const { selector, body } of base) {
+    assert.doesNotMatch(body, /(?:^|; )(?:rotate|scale|transform):/, selector);
+    // (Centring offsets of the marks and the lock line are not motion.)
+    if (!/rzn-tri-lock$|::(?:before|after)$/.test(selector)) {
+      assert.doesNotMatch(body, /(?:^|; )translate:/, selector);
+    }
+  }
+  // The rings converge on their own named timeline, with the scroll.
+  const scroll = sheet.rules.filter(
+    ({ selector, body }) => /rzn-tri/.test(selector) && /animation-timeline: --rzn-tri;/.test(body),
+  );
+  assert.equal(scroll.length, 6);
+  // Wide screens set the rings beside the heading, in its grid row.
+  assert.match(
+    css,
+    /> #system > \.rzn-trinity \{[^}]*grid-area: 1 \/ 1;[^}]*justify-self: end;/,
+  );
 });
