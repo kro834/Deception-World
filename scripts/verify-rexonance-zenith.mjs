@@ -120,13 +120,23 @@ async function functional(engine, label, profile, { connection, noTimeline = fal
         await page.waitForFunction(
           () => document.querySelector(".rzn-suitup").dataset.rznState === "live",
         );
-        await page.waitForTimeout(350);
-        const state = await snapshot(page);
-        assert.equal(
-          Number(state.percent),
-          Math.round(Math.min(1, progress / 0.93) * 100),
-          `${label} scrub ${progress}`,
+        // `live` is set before ResizeObserver measures the newly displayed
+        // canvas. Wait for the first actual scrub paint, not a 350 ms guess
+        // (cold remote WebKit may still show the static "100" read-out).
+        const expectedPercent = Math.round(Math.min(1, progress / 0.93) * 100);
+        await page.waitForFunction(
+          (expected) => {
+            const runway = document.querySelector(".rzn-suitup");
+            return (
+              runway.querySelector("canvas").width > 0 &&
+              Number(runway.querySelector(".rzn-percent").textContent) === expected
+            );
+          },
+          expectedPercent,
+          { timeout: 5000 },
         );
+        const state = await snapshot(page);
+        assert.equal(Number(state.percent), expectedPercent, `${label} scrub ${progress}`);
         if (progress === 0.35) await page.screenshot({ path: `${out}/${label}-arms.png` });
       }
       await page.evaluate(() =>
