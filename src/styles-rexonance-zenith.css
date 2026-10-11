@@ -2467,3 +2467,14 @@ html[data-family="special"]
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-lower-pending {
   height: 200vh;
 }
+
+/* Four forms (owner, 2026-10-11: EXCELSIOR above ULTRA): one row of four
+   where it fits; on a phone a 2 x 2 grid (styles-rexonance-saga.css, over
+   the shared pill), so every code stays whole at its 12px floor. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rxs-stage-tabs.liquid-swipe-tabs {
+  grid-template-columns: repeat(4, 1fr);
+}
+

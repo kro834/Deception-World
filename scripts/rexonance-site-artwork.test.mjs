@@ -13,6 +13,8 @@ test("the special site maps the three supplied artworks to separately versioned 
     standard: "/rider-rexonance-saga-pickup-20260923.webp",
     max: "/rider-rexonance-max-20260923.webp",
     ultra: "/rider-rexonance-ultra-20260923.webp",
+    // Owner (2026-10-11): EXCELSIOR, above ULTRA, as supplied.
+    excelsior: "/rider-rexonance-excelsior-20261011.webp",
   });
   for (const stage of Object.keys(REXONANCE_SITE_ARTWORK)) {
     assert.match(
@@ -49,7 +51,7 @@ test("all new original and responsive images are local WebP below 600 KB", () =>
       assert.equal(bytes.toString("ascii", 0, 4), "RIFF", path);
       assert.equal(bytes.toString("ascii", 8, 12), "WEBP", path);
       assert.ok(bytes.length < 600_000, path);
-      assert.match(path, /20260923/);
+      assert.match(path, /20260923|20261011/);
     }
   }
 });

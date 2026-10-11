@@ -1561,9 +1561,49 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     // finished Rexonance with cells; ULTRA runs to MAX briefly, overwrites
     // it again and generates its additional parts.
     const form = runway.dataset.form;
-    if ((form === "max" || form === "ultra") && progress > B.form[0]) {
+    if ((form === "max" || form === "ultra" || form === "excelsior") && progress > B.form[0]) {
       const forms = formFigures();
-      if (forms) {
+      if (forms && form === "excelsior" && forms.excelsior) {
+        // EXCELSIOR (owner): MAX, then ULTRA, briefly; then its own nanites
+        // (prism shards, coming down from the crown) add its decoration.
+        const [a, b] = B.form;
+        const toMax = a + (b - a) * 0.16;
+        const toUltra = a + (b - a) * 0.34;
+        if (progress < toMax)
+          drawOverwrite(
+            context,
+            forms.plans.max,
+            figure,
+            forms.max,
+            span(progress, [a, toMax]),
+            1,
+            FORM_TONES.max,
+            calm,
+          );
+        else if (progress < toUltra)
+          drawOverwrite(
+            context,
+            forms.plans.max,
+            forms.max,
+            forms.ultra,
+            span(progress, [toMax, toUltra]),
+            1,
+            FORM_TONES.ultra,
+            calm,
+          );
+        else
+          drawOverwrite(
+            context,
+            forms.plans.excelsior,
+            forms.ultra,
+            forms.excelsior,
+            span(progress, [toUltra, toUltra + (b - toUltra) * 0.6]),
+            span(progress, [toUltra + (b - toUltra) * 0.38, b]),
+            FORM_TONES.excelsior,
+            calm,
+            "shard",
+          );
+      } else if (forms && form !== "excelsior") {
         const [a, b] = B.form;
         if (form === "max") {
           drawOverwrite(
@@ -1892,22 +1932,39 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         image.onerror = reject;
         image.src = src;
       });
-    Promise.all([picture(config.forms.max), picture(config.forms.ultra)])
-      .then(([max, ultra]) => {
+    Promise.all([
+      picture(config.forms.max),
+      picture(config.forms.ultra),
+      config.forms.excelsior ? picture(config.forms.excelsior).catch(() => null) : null,
+    ])
+      .then(([max, ultra, excelsior]) => {
         if (disposed) return;
         const base = { width: W, height: H, cell: 8, origin: config.core, seed: 77 };
         const grid = planOverwrite(base);
         const fromCells = sampleCells(max, grid, document);
         const toCells = sampleCells(ultra, grid, document);
+        const ultraCells = toCells;
+        const excelsiorCells = excelsior ? sampleCells(excelsior, grid, document) : null;
         formsState = {
           max,
           ultra,
+          excelsior,
           plans: {
             max: grid,
             ultra:
               fromCells && toCells
                 ? planOverwrite({ ...base, seed: 78, samples: { from: fromCells, to: toCells } })
                 : grid,
+            excelsior:
+              ultraCells && excelsiorCells
+                ? planOverwrite({
+                    ...base,
+                    seed: 79,
+                    order: "descend",
+                    extraBy: "difference",
+                    samples: { from: ultraCells, to: excelsiorCells },
+                  })
+                : planOverwrite({ ...base, seed: 79, order: "descend" }),
           },
         };
         lastProgress = -1;

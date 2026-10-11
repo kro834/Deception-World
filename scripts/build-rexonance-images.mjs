@@ -8,6 +8,7 @@ for (const file of [
   "rider-rexonance-saga-pickup-20260922.webp",
   "rider-rexonance-max-20260922.webp",
   "rider-rexonance-ultra-20260922.webp",
+  "rider-rexonance-excelsior-20261011.webp",
   "rexonance-p14-core.jpg",
 ]) {
   const input = new URL(file, root);

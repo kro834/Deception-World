@@ -38,7 +38,11 @@ async function verifyStage(page, stage) {
   assert.equal(await selected.count(), 1);
   assert.equal(await selected.getAttribute("id"), `rxs-stage-tab-${stage}`);
   assert.equal(await selected.getAttribute("tabindex"), "0");
-  assert.equal(await rail.locator('button[tabindex="-1"]').count(), 2);
+  // Every other form's tab is out of the tab order (four forms since EXCELSIOR).
+  assert.equal(
+    await rail.locator('button[tabindex="-1"]').count(),
+    (await rail.locator('button[role="tab"]').count()) - 1,
+  );
   assert.equal(
     await selected.evaluate((button) => document.activeElement === button),
     true,
@@ -149,9 +153,10 @@ try {
       const copyStarts = [];
       for (const [key, stage] of [
         ["ArrowRight", "max"],
-        ["End", "ultra"],
+        // EXCELSIOR (owner, 2026-10-11) is the last form now.
+        ["End", "excelsior"],
         ["ArrowRight", "standard"],
-        ["ArrowLeft", "ultra"],
+        ["ArrowLeft", "excelsior"],
         ["Home", "standard"],
       ]) {
         await page.keyboard.press(key);
@@ -259,7 +264,7 @@ try {
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
       await tabs.nth(2).focus();
       await page.keyboard.press("End");
-      await verifyStage(page, "ultra");
+      await verifyStage(page, "excelsior");
       assert.deepEqual(
         await verifyStageCopy(page),
         [],

@@ -64,6 +64,7 @@ test("entry and stage timings stay bounded and stage labels are not new calls", 
     standard: "HIGH",
     max: "MAX",
     ultra: "ULTRA",
+    excelsior: "EXCELSIOR",
   });
 
   let previousEnd = 0;

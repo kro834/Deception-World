@@ -3,4 +3,6 @@ export const REXONANCE_SITE_ARTWORK = {
   standard: "/rider-rexonance-saga-pickup-20260923.webp",
   max: "/rider-rexonance-max-20260923.webp",
   ultra: "/rider-rexonance-ultra-20260923.webp",
+  // The owner's EXCELSIOR art (2026-10-11), as supplied.
+  excelsior: "/rider-rexonance-excelsior-20261011.webp",
 } as const;
