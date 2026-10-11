@@ -1,6 +1,6 @@
 // Builds the MAX and ULTRA figures for the Rexonance form changes (owner,
 // 2026-10-11): the owner's full-body MAX and ULTRA art, in the same pose as
-// the suit-up's artwork, cut to the suit figure's frame (566 x 1040, the
+// the suit-up's artwork, cut to the suit figure's frame (571 x 1040, the
 // same crop as scripts/build-rexonance-suit.mjs) with an alpha from the
 // black ground, so they overlay the finished Rexonance pixel for pixel.
 // Run: node scripts/build-rexonance-forms.mjs
@@ -9,8 +9,8 @@ import { fileURLToPath } from "node:url";
 
 const root = (path) => fileURLToPath(new URL(`../${path}`, import.meta.url));
 const SOURCE = { width: 1055, height: 2000 };
-const CROP = { left: 19, top: 36, width: 1020, height: 1873 };
-const FIG = { width: 566, height: 1040 };
+const CROP = { left: 20, top: 41, width: 1019, height: 1855 };
+const FIG = { width: 571, height: 1040 };
 const SUIT = "public/rexonance-suit-20261010";
 const OUT = "public/rexonance-forms-20261011";
 

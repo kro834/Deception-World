@@ -18,7 +18,8 @@ export const REXONANCE_STAGE_LABELS: Record<RexonanceStage, string> = {
 
 // rx12 (owner, 2026-10-10): the face holds its pixel squares ~0.6 s before
 // they scatter, so the last call holds 580 ms longer (cover 2300 -> 2880).
-export const REXONANCE_ENTRY_TIMINGS = { cover: 2880, reveal: 480 } as const;
+// Owner, 2026-10-11: that hold a little shorter (~0.45 s): cover 2730.
+export const REXONANCE_ENTRY_TIMINGS = { cover: 2730, reveal: 480 } as const;
 export const REXONANCE_STAGE_DURATION_MS = 650;
 
 // Cover time is a minimum: the final call holds if the destination is late.
@@ -27,7 +28,7 @@ export const REXONANCE_CALL_BEATS = [
   { start: 330, duration: 320 },
   { start: 650, duration: 650 },
   { start: 1300, duration: 680 },
-  { start: 1980, duration: 900 },
+  { start: 1980, duration: 750 },
 ] as const;
 
 // rx3 suit-up HUD. The system check reads only what the page already states,
@@ -254,8 +255,8 @@ export const REXONANCE_SUIT_LIGHT = { from: SUIT_FINAL, spread: 380, bloom: 560 
 export const REXONANCE_SUIT_PIXELS = {
   fill: SUIT_FINAL + 10,
   fillStep: 14,
-  // The squares hold on the face ~0.6 s, then scatter (owner, rx12).
-  scatter: SUIT_FINAL + 690,
+  // The squares hold on the face ~0.45 s, then scatter (owner, rx12; shortened 2026-10-11).
+  scatter: SUIT_FINAL + 540,
   scatterStep: 10,
   scatterMs: 140,
   groups: 6,

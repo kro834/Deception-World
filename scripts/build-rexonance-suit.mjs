@@ -979,6 +979,28 @@ const hazeSoft = await blurField(solid, 2.2);
 const alpha = Float32Array.from({ length: N }, (_, i) =>
   haze[i] && !background[i] ? Math.min(feathered[i], hazeSoft[i] * 1.15) : feathered[i],
 );
+// Owner, 2026-10-11: the owner's own cut-out of the figure (the legs above
+// all were cut loosely from the black ground). Its alpha replaces the
+// derived one, placed on the artwork where it matches it (999 x 1835 at
+// 30, 51; mean RGB error ~21 over its opaque pixels).
+{
+  const CUT = { width: 999, height: 1835, left: 30, top: 51 };
+  const { data: cut } = await sharp(
+    fileURLToPath(new URL("../design/rexonance-suit/rexonance-cutout-20261011.webp", import.meta.url)),
+  )
+    .resize(CUT.width, CUT.height, { fit: "fill", kernel: "lanczos3" })
+    .ensureAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  for (let y = 0; y < H; y += 1) {
+    for (let x = 0; x < W; x += 1) {
+      const cx = x - CUT.left;
+      const cy = y - CUT.top;
+      const inside = cx >= 0 && cy >= 0 && cx < CUT.width && cy < CUT.height;
+      alpha[y * W + x] = inside ? cut[(cy * CUT.width + cx) * 4 + 3] / 255 : 0;
+    }
+  }
+}
 // Haze pixels carry their light as alpha: unpremultiplied against black, and
 // smoothed (it is a glow; its grain would only cost bytes).
 {

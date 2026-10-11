@@ -519,6 +519,8 @@ const BEAT_OF_GROUP = {
 const FLASH = 0.018;
 const WELDS_PER_FRAME = 160;
 const GOLD_PER_FRAME = 900;
+// The scroll has rested this long: the transient squares are cleared.
+const CALM_MS = 260;
 // The gold's heat: incoming motes, then a locked cell cooling, then the glint.
 const GOLD_HEAT = [
   ["rgb(255 246 216)", 0.9],
@@ -980,6 +982,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   let pixels = null;
   let view = null;
   let lastProgress = -1;
+  let calmTimer = 0;
   const hud = { line: -1, chips: "", parts: -1, percent: "", count: "", complete: null };
 
   const motionAllowed = () => {
@@ -1300,19 +1303,20 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   };
 
   /* ---------------- drawing ---------------- */
+  // A welded tile is the art itself, edge to edge: once a part has formed
+  // no cell grid stays on it (owner, 2026-10-11).
   const weld = (item) => {
     const context = settled.getContext("2d");
-    const inset = Math.min(0.8, item.tw * 0.07);
     context.drawImage(
       raw || lights?.unlit || images.figure,
-      item.sx + inset,
-      item.sy + inset,
-      item.tw - inset * 2,
-      item.th - inset * 2,
-      item.sx + inset,
-      item.sy + inset,
-      item.tw - inset * 2,
-      item.th - inset * 2,
+      item.sx,
+      item.sy,
+      item.tw,
+      item.th,
+      item.sx,
+      item.sy,
+      item.tw,
+      item.th,
     );
   };
   const unweld = (item) => {
@@ -1474,7 +1478,9 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     context.globalAlpha = 1;
   };
 
-  const draw = (progress) => {
+  // `calm`: the scroll has stopped: no transient squares (weld flashes, the
+  // gold's heat, the tiles' outlines) are left standing on the formed parts.
+  const draw = (progress, calm = false) => {
     const context = canvas.getContext("2d");
     const { figure, undersuit } = images;
     const B = ASSEMBLY_BEATS;
@@ -1521,7 +1527,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       if (goldLayer) {
         syncGold(progress);
         context.drawImage(goldLayer, 0, 0, W, H);
-        drawGold(context, progress);
+        if (!calm) drawGold(context, progress);
       }
       if (driver) context.drawImage(driver, 0, 0, W, H);
     }
@@ -1704,7 +1710,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         artRects[o + 3],
       );
     }
-    if (arts) {
+    if (arts && !calm) {
       context.globalAlpha = 0.55;
       context.strokeStyle = TONE_CSS[0];
       context.lineWidth = 0.9;
@@ -1731,6 +1737,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       buffer[at + 3] = item.th - inset * 2;
       flashCounts[slot] = at + 4;
     }
+    if (calm) flashCounts.fill(0);
     fillRects(context, flashes[0], flashCounts[0], TONE_CSS[2], 0.62);
     fillRects(context, flashes[1], flashCounts[1], "rgb(190 244 255)", 0.36);
     fillRects(context, flashes[2], flashCounts[2], TONE_CSS[0], 0.18);
@@ -1930,6 +1937,13 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     lastProgress = progress;
     draw(progress);
     updateHud(progress);
+    // Once the scroll rests, redraw the moment without its transient squares.
+    environment.clearTimeout(calmTimer);
+    calmTimer = environment.setTimeout(() => {
+      calmTimer = 0;
+      if (!disposed && live && view && images && plan && lastProgress >= 0)
+        draw(lastProgress, true);
+    }, CALM_MS);
     if (behind) {
       lastProgress = -1;
       schedule();
@@ -2126,6 +2140,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     images?.gold?.close?.();
     images?.atlas?.close?.();
     formObserver?.disconnect();
+    environment.clearTimeout(calmTimer);
     formsState = null;
     images = null;
     for (const sheet of [raw, goldArt, goldLayer, driver])
