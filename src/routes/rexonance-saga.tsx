@@ -21,6 +21,7 @@ import rexonanceArmourCssUrl from "@/styles-rexonance-armour.css?url";
 import stageSpecialCssUrl from "@/styles-stage-special.css?url";
 import stageRexonanceCssUrl from "@/styles-stage-rexonance.css?url";
 import rexonanceResonanceCssUrl from "@/styles-rexonance-resonance.css?url";
+import rexonanceZenithCssUrl from "@/styles-rexonance-zenith.css?url";
 import { rexonanceImage } from "@/lib/rexonance-images";
 import { REXONANCE_SITE_ARTWORK } from "@/lib/rexonance-site-artwork";
 
@@ -66,6 +67,9 @@ export const Route = createFileRoute("/rexonance-saga")({
       // RESONANCE (rx11): the trailer in motion — depth, pinned cuts, the
       // hits (styles-rexonance-resonance.css), over the STAGE scenes.
       { rel: "stylesheet", href: rexonanceResonanceCssUrl },
+      // ZENITH (rx15): the suit-up on the page — the call played with the
+      // scroll, the armour assembled from nanites (styles-rexonance-zenith.css).
+      { rel: "stylesheet", href: rexonanceZenithCssUrl },
       CINEMATIC_STYLESHEET_LINK,
       {
         rel: "preload",
