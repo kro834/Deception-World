@@ -16,10 +16,7 @@ import { settlePickupScroll } from "@/components/world/pickup-scroll-reset";
 import { SideMenuLayer, SideMenuTrigger } from "@/components/world/world-chrome";
 import { useWorldMode } from "@/components/world/use-world-mode";
 import { mountFilmMotion } from "@/lib/film-motion";
-import {
-  holdFragmentPath,
-  mountStableFragmentNavigation,
-} from "@/lib/stable-fragment-navigation";
+import { mountStableFragmentNavigation } from "@/lib/stable-fragment-navigation";
 import { DisplayName } from "@/components/name-text";
 import { acquireViewportScrollLock } from "@/lib/viewport-scroll-lock.js";
 import { posterImage, preparePosterImage } from "@/lib/thumbnail-images";
@@ -677,45 +674,6 @@ export function DreamChapter() {
     }
   }, [dossierHash]);
 
-  // A search result that names a record inside a section (a roster plate, a
-  // faction, a term) lands on it whole: the skipped sections above it are
-  // laid out at their real heights while the landing aligns, its block is
-  // shown at once instead of waiting for its reveal, and a roster plate opens
-  // its PROFILE (the matched words are in it).
-  useLayoutEffect(() => {
-    const page = pageRef.current;
-    let id: string;
-    try {
-      id = decodeURIComponent(dossierHash.replace(/^#/, ""));
-    } catch {
-      return;
-    }
-    if (!page || !id || id === "top") return;
-    if (id.startsWith("dream-character-") || id.startsWith("dream-dolminence-")) return;
-    const target = document.getElementById(id);
-    if (!target || !page.contains(target) || !target.closest(".dream-section, .dream-annex")) {
-      return;
-    }
-    const release = holdFragmentPath(page, target);
-    const reveal = target.closest<HTMLElement>("[data-dream-reveal]");
-    let frame = 0;
-    if (reveal && reveal.dataset.dreamVisible !== "true") {
-      reveal.style.transition = "none";
-      reveal.dataset.dreamVisible = "true";
-      frame = window.requestAnimationFrame(() => reveal.style.removeProperty("transition"));
-    }
-    const rosterEntry = DREAM_CAST_ROSTER.find((entry) => id === `dream-roster-${entry.id}`);
-    if (rosterEntry) {
-      setOpenProfiles((current) =>
-        current.has(rosterEntry.id) ? current : new Set(current).add(rosterEntry.id),
-      );
-    }
-    return () => {
-      window.cancelAnimationFrame(frame);
-      release();
-    };
-  }, [dossierHash]);
-
   const cancelShuffle = useCallback(() => {
     posterSelectionId.current += 1;
     setPosterLoading(false);
@@ -752,10 +710,7 @@ export function DreamChapter() {
     const reveals = Array.from(page.querySelectorAll<HTMLElement>("[data-dream-reveal]"));
     html.dataset.dreamRevealReady = "true";
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    // Economy rendering shows every block at once, as reduced motion does
-    // (styles-dream-chapter.css also covers a switch made after this runs).
-    const economy = html.dataset.worldEffects === "economy";
-    if (reducedMotion || economy || typeof IntersectionObserver === "undefined") {
+    if (reducedMotion || typeof IntersectionObserver === "undefined") {
       reveals.forEach((element) => {
         element.dataset.dreamVisible = "true";
       });
@@ -763,10 +718,6 @@ export function DreamChapter() {
         delete html.dataset.dreamRevealReady;
       };
     }
-    // A block reveals when its top crosses the line 12% above the foot of
-    // the screen, however tall it is: a ratio threshold never fired for a
-    // block taller than the screen over that ratio (the glossary on a short
-    // landscape phone stayed blank).
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -775,7 +726,7 @@ export function DreamChapter() {
           observer.unobserve(entry.target);
         });
       },
-      { rootMargin: "0px 0px -12%", threshold: 0 },
+      { rootMargin: "0px 0px -12%", threshold: 0.08 },
     );
     reveals.forEach((element) => observer.observe(element));
     return () => {

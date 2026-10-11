@@ -86,19 +86,6 @@ html[data-family="library"] :is(.library-page, .search-page) :is(a, button, inpu
   outline-offset: 3px;
 }
 
-/* The page bar sticks at the top (styles-stage-shell.css), inside the
-   root's 96px scroll padding (styles-world/21.css), so a control in it is
-   always in view. Focus arriving there mid-page (Shift+Tab back up, the
-   menu handing focus back to its trigger) scrolled the page up by about
-   460px to "reveal" it; with its scroll margin cancelling that padding, the
-   reader keeps their place. */
-html[data-family="library"]
-  body
-  :is(.library-page > header.library-topbar, .search-page > header.search-topbar)
-  :is(a[href], button, input, [tabindex]) {
-  scroll-margin-top: calc(-96px - env(safe-area-inset-top));
-}
-
 /* ================================================================
    The section head grammar: outlined number, HUD kicker, title, seam
    ================================================================ */

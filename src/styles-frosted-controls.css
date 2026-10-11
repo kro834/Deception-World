@@ -98,7 +98,7 @@ html body .rider-tabs > button[role="tab"] {
   color: #fff;
   font-weight: 600;
 }
-html body .liquid-swipe-tabs > button[data-liquid-arming="true"] {
+html body .rider-tabs > button[data-liquid-arming="true"] {
   outline: 1px solid #b9eaff;
   outline-offset: -4px;
 }
@@ -170,14 +170,17 @@ html body .liquid-selection-surface {
   transform-origin: center;
 }
 /* Decide touch ownership before pointerdown; changing touch-action on hold
-   is too late for Safari. A vertical swipe that starts on any rail pans the
-   page (and two fingers zoom it), the owner's rule for the rider grid, now
-   every rail's (rx14): on touch a grid or a column is long-press-to-select
-   and a single row follows a sideways drag (liquid/boot.js). Once the rail
-   owns the finger, its non-passive touchmove listener keeps the page still
-   while the finger drags across the tabs. */
-html body .liquid-swipe-tabs,
-html body .liquid-swipe-tabs * {
+   is too late for Safari. Only slider surfaces suppress page panning. */
+html body .liquid-swipe-tabs:not(.rider-tabs),
+html body .liquid-swipe-tabs:not(.rider-tabs) * {
+  touch-action: none !important;
+}
+/* The rider grid is the exception: on touch it is long-press-to-select
+   (liquid/boot.js), so a vertical swipe that starts on it pans the page.
+   Once a hold engages, the rail's non-passive touchmove listener keeps the
+   page still while the finger drags across the tabs. */
+html body .rider-tabs.liquid-swipe-tabs,
+html body .rider-tabs.liquid-swipe-tabs * {
   touch-action: pan-y pinch-zoom !important;
 }
 

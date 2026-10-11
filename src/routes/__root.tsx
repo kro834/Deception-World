@@ -85,11 +85,6 @@ function LibrarySession() {
   return <LibraryVisitTracker pathname={location.pathname} hash={location.hash} />;
 }
 
-// A missing record says so in the tab and to screen readers, as its heading
-// does (the HTTP status is already 404). A route head deeper than this one
-// still wins, so the rider route's own head names the same title.
-const MISSING_RECORD_TITLE = "記録が見つかりません｜Deception World";
-
 export const Route = createRootRoute({
   head: ({ matches }) => ({
     meta: [
@@ -99,11 +94,7 @@ export const Route = createRootRoute({
         content:
           "width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content",
       },
-      {
-        title: matches.some((match) => match.status === "notFound" || match._notFound)
-          ? MISSING_RECORD_TITLE
-          : APP_NAME,
-      },
+      { title: APP_NAME },
       { name: "description", content: "仮面ライダーサーガ Deception World — 映画オープニング" },
       // Keep native Home Screen chrome in the router-owned, initial head.
       // A manifest alone enables installation, but the Apple status-bar

@@ -11,7 +11,6 @@ import { initRail } from "@/lib/liquid/boot.js";
 import { dossierImage } from "@/lib/dossier-images";
 import { DisplayName } from "@/components/name-text";
 import { rexonanceImage } from "@/lib/rexonance-images";
-import { mountLocalNavCurrent } from "@/lib/local-nav-current";
 import { warmRexonanceStages } from "@/lib/warm-rexonance-stages";
 import { useDialogHistoryDismiss } from "@/components/world/use-dialog-history-dismiss";
 import {
@@ -370,12 +369,6 @@ export function FinalStage() {
     };
   }, []);
 
-  // The chapter in view is marked in the bar (aria-current="location").
-  useEffect(
-    () => mountLocalNavCurrent(pageRef.current?.querySelector(".rxs-local-nav nav")),
-    [],
-  );
-
   const releaseControlFocus = (control: HTMLElement) => {
     window.requestAnimationFrame(() => {
       if (document.activeElement === control) control.blur();
@@ -443,9 +436,7 @@ export function FinalStage() {
       connection?.saveData === true ||
       connection?.effectiveType === "slow-2g" ||
       connection?.effectiveType === "2g";
-    // Economy rendering keeps the page still, as reduced motion does.
-    const economy = document.documentElement.dataset.worldEffects === "economy";
-    const allowMotion = !media.matches && !constrained && !economy;
+    const allowMotion = !media.matches && !constrained;
     setMotionReady(allowMotion);
 
     const reveals = [...page.querySelectorAll<HTMLElement>(".rxs-reveal")];
@@ -462,9 +453,7 @@ export function FinalStage() {
           observer.unobserve(entry.target);
         });
       },
-      // The top crossing the line reveals a block whatever its height (a
-      // ratio never fired for a block taller than the screen over it).
-      { rootMargin: "0px 0px -8%", threshold: 0 },
+      { rootMargin: "0px 0px -8%", threshold: 0.1 },
     );
     reveals.forEach((element) => observer.observe(element));
     return () => observer.disconnect();
@@ -769,9 +758,7 @@ export function FinalStage() {
                   alt={activeStage.alt}
                   width={activeStage.width}
                   height={activeStage.height}
-                  // Lazy for every stage: the record opens from its card,
-                  // whose picture is this same file, already loaded by then.
-                  loading="lazy"
+                  loading={stage === "middle" ? "eager" : "lazy"}
                   decoding="async"
                 />
               </figure>
