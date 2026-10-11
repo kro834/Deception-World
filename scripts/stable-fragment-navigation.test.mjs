@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { mountStableFragmentNavigation } from "../src/lib/stable-fragment-navigation.js";
+import { holdFragmentPath, mountStableFragmentNavigation } from "../src/lib/stable-fragment-navigation.js";
 
 function setup() {
   const listeners = new Map();
@@ -62,6 +62,7 @@ function setup() {
       ...options,
     });
   return {
+    root,
     cleanup,
     event,
     sections,
@@ -107,6 +108,36 @@ test("revisiting the current fragment works without changing history", () => {
   h.event();
   assert.equal(h.revisits(), 1, "new fragments keep the browser's default navigation");
   h.cleanup();
+});
+
+test("overlapping click and search arrivals restore the original styles in either release order", () => {
+  for (const reverse of [false, true]) {
+    const h = setup();
+    const releases = [
+      holdFragmentPath(h.root, h.sections[1], h.environment),
+      holdFragmentPath(h.root, h.sections[1], h.environment),
+    ];
+    if (reverse) releases.reverse();
+    releases[0]();
+    releases[0]();
+    assert.deepEqual(h.sections.map((s) => s.style.contentVisibility), ["visible", "visible", ""]);
+    releases[1]();
+    assert.deepEqual(h.sections.map((s) => s.style.contentVisibility), ["auto", "", ""]);
+    assert.equal(h.timers.size, 0);
+    h.cleanup();
+  }
+});
+
+test("unmounting a native path leaves the search path held until its own release", () => {
+  const h = setup();
+  h.event();
+  const releaseSearch = holdFragmentPath(h.root, h.sections[1], h.environment);
+  h.cleanup();
+  assert.deepEqual(h.sections.map((s) => s.style.contentVisibility), ["visible", "visible", ""]);
+  releaseSearch();
+  h.flush();
+  assert.deepEqual(h.sections.map((s) => s.style.contentVisibility), ["auto", "", ""]);
+  assert.equal(h.timers.size, 0);
 });
 
 test("modified, cancelled, unknown and malformed fragment clicks leave layout alone", () => {

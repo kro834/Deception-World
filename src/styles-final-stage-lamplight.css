@@ -213,6 +213,18 @@ html .fst-page.fst-page .rxs-local-nav nav a:focus-visible::before {
   scale: 1 1;
 }
 
+/* The chapter in view is marked for assistive tech (aria-current, set by
+   the page); the mark lights the same lamp line, standing still, wherever
+   the scroll-linked light below does not run (reduced motion, economy, a
+   browser without timeline-scope). Where it runs, it keeps its own beat. */
+html .fst-page.fst-page .rxs-local-nav nav a[aria-current="location"] {
+  color: var(--fst-text);
+}
+
+html .fst-page.fst-page .rxs-local-nav nav a[aria-current="location"]::after {
+  opacity: 1;
+}
+
 @media (hover: hover) and (pointer: fine) {
   html .fst-page.fst-page .rxs-local-nav nav a:hover {
     color: var(--fsl-chalk);

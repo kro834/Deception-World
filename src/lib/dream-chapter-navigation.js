@@ -4,6 +4,7 @@ export function mountDreamChapterNavigation(root, onChange, environment = window
   if (!root) return () => {};
   let focusFrame = 0;
   let focusHash = "";
+  let preparedHash = environment.location.hash;
   const cancelFocus = () => {
     if (focusFrame) environment.cancelAnimationFrame(focusFrame);
     focusFrame = 0;
@@ -49,6 +50,7 @@ export function mountDreamChapterNavigation(root, onChange, environment = window
       return;
     cancelFocus();
     const location = sync(link.getAttribute("href"));
+    if (location) preparedHash = link.getAttribute("href");
     if (!location || event.detail !== 0) return;
     focusHash = link.getAttribute("href");
     focusFrame = environment.requestAnimationFrame(() => {
@@ -61,8 +63,14 @@ export function mountDreamChapterNavigation(root, onChange, environment = window
     });
   };
   const onHistory = () => {
-    if (environment.location.hash !== focusHash) cancelFocus();
-    sync();
+    const hash = environment.location.hash;
+    if (hash !== focusHash) cancelFocus();
+    // Native hashchange can arrive after the link's focus frame and a user's
+    // next summary toggle. The click already opened this destination; a late
+    // duplicate must not undo that close. New history destinations still open.
+    const openTarget = hash !== preparedHash;
+    preparedHash = hash;
+    sync(hash, openTarget);
   };
   const onToggle = (event) => {
     if (event.target.matches?.(".dream-story-case")) sync(environment.location.hash, false);
