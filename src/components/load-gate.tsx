@@ -1380,7 +1380,10 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
                   import("./rexonance-saga/rexonance-suit-plan").then((plan) =>
                     isCurrent() ? plan.prepareRexonanceSuit("high") : false,
                   ),
-                deadlineMs: isRexonanceSuitReady() ? 120 : 1800,
+                // Decoded bitmaps do not mean the sliced light/atlas plan is
+                // finished. Give both one finite preparation budget; a cached
+                // plan resolves immediately, without adding a warm-entry delay.
+                deadlineMs: 1800,
               });
               rexonanceCoverCancel.current = entry.cancel;
               await entry.promise;

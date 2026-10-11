@@ -15,7 +15,7 @@ import {
   type RexonanceSuitPiece,
 } from "@/lib/rexonance-suit";
 import { REXONANCE_SUIT_GOLD_CELL, REXONANCE_SUIT_GOLD_CELLS } from "@/lib/rexonance-suit-gold";
-import { splitLights } from "@/lib/rexonance-unlit.js";
+import { createSplitLightsJob, splitLights } from "@/lib/rexonance-unlit.js";
 import { rexonanceSuitSource } from "@/lib/rexonance-suit-warmup";
 
 /* rx17: the nanite engine's plan and working atlas (rexonance-suit-nanites
@@ -314,10 +314,11 @@ export const planEnd = () => END;
 // `drawing`: calls drawing into it now (the idle preparation then leaves
 // it alone); `dirty`: it holds a call's formed gold (reset before the next).
 export const work = { canvas: null as HTMLCanvasElement | null, dirty: true, drawing: 0 };
+let preparingLights = false;
 /** Decoded layers alone do not mean the first frame's plan/atlas are warm.
  * A live call owns its formed atlas; a subsequent call must reset it first. */
 export const isRexonanceSuitPlanReady = () =>
-  Boolean(PLATES && work.canvas && (work.drawing > 0 || !work.dirty));
+  Boolean(PLATES && work.canvas && (work.drawing > 0 || (!preparingLights && !work.dirty)));
 
 // The plates' lights held back (owner, 2026-10-11): the atlas's art half with
 // its ice-cyan and pink light in monochrome, and that light alone, to light
@@ -325,9 +326,10 @@ export const isRexonanceSuitPlanReady = () =>
 let LIGHTS: { unlit: HTMLCanvasElement; lights: HTMLCanvasElement } | null = null;
 export const plateLights = () => LIGHTS;
 export function prepareLights(art: CanvasImageSource) {
-  if (!LIGHTS) {
+  if (!LIGHTS && !work.drawing) {
     const { width, height } = REXONANCE_SUIT_GOLD_ATLAS;
     LIGHTS = splitLights(art, 0, 0, width, height);
+    if (LIGHTS) work.dirty = true;
   }
   return LIGHTS;
 }
@@ -369,6 +371,9 @@ export function prepareRexonanceSuit(priority: "low" | "high" = "low") {
     let settled = false;
     let generation = 0;
     let queued: { kind: "idle" | "frame"; id: number } | null = null;
+    let stage: "plan" | "light-setup" | "light-rows" | "light-commit" | "atlas" = "plan";
+    let lightJob: ReturnType<typeof createSplitLightsJob> = null;
+    let lightSource: CanvasImageSource | null = null;
     const cancelQueued = () => {
       generation += 1;
       if (queued?.kind === "idle") globalThis.cancelIdleCallback?.(queued.id);
@@ -379,16 +384,73 @@ export function prepareRexonanceSuit(priority: "low" | "high" = "low") {
       if (settled) return;
       settled = true;
       cancelQueued();
+      lightJob?.cancel();
+      lightJob = null;
+      lightSource = null;
+      preparingLights = false;
       resolve(prepared);
     };
-    const finish = () => {
+    const finish = (until: number, deadline?: IdleDeadline) => {
       const art = rexonanceSuitSource(REXONANCE_SUIT_ATLAS.src);
       const gold = rexonanceSuitSource(REXONANCE_SUIT_GOLD_ATLAS.src);
-      if (art && !work.drawing && !LIGHTS) {
-        prepareLights(art);
-        work.dirty = true;
+      if (!art || !gold) {
+        settle(false);
+        return;
       }
-      settle(Boolean(art && gold && (work.drawing || forming(art, gold))));
+      // A foreground call can take over between any two slices. Leave its
+      // formed atlas and light choice alone; unpublished buffers are ours.
+      if (work.drawing) {
+        settle(true);
+        return;
+      }
+      if (LIGHTS && stage !== "plan" && stage !== "atlas") {
+        lightJob?.cancel();
+        lightJob = null;
+        stage = "atlas";
+        schedule();
+        return;
+      }
+      if (lightJob && art !== lightSource) {
+        // A decoder retry replaced the borrowed bitmap while we yielded.
+        lightJob.cancel();
+        lightJob = null;
+        lightSource = null;
+        stage = "light-setup";
+        schedule();
+        return;
+      }
+      if (!LIGHTS && stage === "plan") {
+        preparingLights = true;
+        stage = "light-setup";
+        schedule();
+        return;
+      }
+      if (stage === "light-setup") {
+        const { width, height } = REXONANCE_SUIT_GOLD_ATLAS;
+        lightJob = createSplitLightsJob(art, 0, 0, width, height);
+        lightSource = art;
+        stage = lightJob ? "light-rows" : "atlas";
+        schedule();
+        return;
+      }
+      if (stage === "light-rows") {
+        if (lightJob!.step(until, deadline)) stage = "light-commit";
+        schedule();
+        return;
+      }
+      if (stage === "light-commit") {
+        // Only complete layers are published. Commit and the working-atlas
+        // draw are separate tasks, not added after a six-ms pixel slice.
+        LIGHTS = lightJob!.commit();
+        lightJob!.cancel();
+        lightJob = null;
+        lightSource = null;
+        work.dirty = true;
+        stage = "atlas";
+        schedule();
+        return;
+      }
+      settle(Boolean(forming(art, gold)));
     };
     const schedule = () => {
       const ticket = generation;
@@ -417,7 +479,7 @@ export function prepareRexonanceSuit(priority: "low" | "high" = "low") {
           // navigation or first call arrives on a throttled phone.
           if (performance.now() > until || (deadline && deadline.timeRemaining() < 2)) break;
         }
-        if (PLATES) finish();
+        if (PLATES) finish(until, deadline);
         else schedule();
       } catch {
         // A lost/unavailable 2D context or a decode invalidated by a retry

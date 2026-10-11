@@ -95,6 +95,8 @@ const report = {
     pixelNetwork: { latencyMs: 60, downMbps: 9, upMbps: 1.5 },
     diagnosticTraceEnabled: traceEnabled,
     traceTimingNote: "diagnostic tracing overhead; never combined with primary performance results",
+    canvasPixelTimingNote:
+      "trace-only native readback/allocation/commit spans for the 1024x866 atlas; the allocation-end to first-commit-start gap is the synchronous pixel-loop interval, not first engine draw",
     firstVisibilityNote:
       "first rAF observing SSR hero DOM without a cover, not a pixel-paint guarantee",
     earlyInputToleranceMs: 100,
@@ -133,6 +135,47 @@ function installRecorder({ saveData, traceEnabled, menuClaimProbe }) {
     routeChanges: [],
     menuEarlyDiagnostics: [],
   });
+  if (traceEnabled) {
+    log.canvasPixelStages = [];
+    const canvasIds = new WeakMap();
+    let nextCanvasId = 0;
+    let pixelStage = 0;
+    for (const method of ["getImageData", "createImageData", "putImageData"]) {
+      const native = CanvasRenderingContext2D.prototype[method];
+      CanvasRenderingContext2D.prototype[method] = function (...args) {
+        // Only the offscreen atlas's few preparation operations. Instrumenting
+        // every drawImage would distort the actual engine's thousands of draws.
+        if (this.canvas.width !== 1024 || this.canvas.height !== 866)
+          return Reflect.apply(native, this, args);
+        if (!canvasIds.has(this.canvas)) canvasIds.set(this.canvas, ++nextCanvasId);
+        const sequence = ++pixelStage;
+        const name = `rx17-canvas-pixel-${sequence}-${method}`;
+        const at = performance.now();
+        performance.mark(`${name}-start`);
+        let error = null;
+        try {
+          return Reflect.apply(native, this, args);
+        } catch (cause) {
+          error = String(cause);
+          throw cause;
+        } finally {
+          const doneAt = performance.now();
+          performance.mark(`${name}-end`);
+          log.canvasPixelStages.push({
+            method,
+            sequence,
+            canvasId: canvasIds.get(this.canvas),
+            at,
+            doneAt,
+            duration: doneAt - at,
+            width: this.canvas.width,
+            height: this.canvas.height,
+            error,
+          });
+        }
+      };
+    }
+  }
   const menuState = (opener, input) => {
     const ancestor = opener?.closest?.('[inert], [hidden], [disabled], [aria-disabled="true"]');
     return {

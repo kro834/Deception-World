@@ -22,7 +22,10 @@ function planRuntime({ idle = true, decoded = true, canCancelIdle = true } = {})
   const cancelled = [];
   const drawn = [];
   const lightSplits = [];
-  const options = { failDraw: false, contextAvailable: true, lightsAvailable: true };
+  const lightJobs = [];
+  const stages = [];
+  const options = { failDraw: false, contextAvailable: true, lightsAvailable: true,
+    lightCommitAvailable: true };
   const art = { kind: "atlas", close: () => closeCount++ };
   const raw = { kind: "raw-gold", close: () => closeCount++ };
   const unlit = { kind: "unlit-atlas" };
@@ -37,6 +40,7 @@ function planRuntime({ idle = true, decoded = true, canCancelIdle = true } = {})
   );
   const context = {
     clearRect() {
+      stages.push("atlas");
       drawn.push("clear");
     },
     drawImage(image) {
@@ -81,6 +85,33 @@ function planRuntime({ idle = true, decoded = true, canCancelIdle = true } = {})
             lightSplits.push(args);
             return options.lightsAvailable ? { unlit, lights } : null;
           },
+          createSplitLightsJob: (...args) => {
+            stages.push("light-setup");
+            lightSplits.push(args);
+            if (!options.lightsAvailable) return null;
+            const job = { cursor: 0, cancelled: false, committed: false, slices: [],
+              step(until, deadline) {
+                stages.push("light-rows");
+                const first = job.cursor;
+                do {
+                  job.cursor += 1;
+                  now += 2;
+                  if (now >= until || (deadline && deadline.timeRemaining() < 2)) break;
+                } while (job.cursor < 12);
+                job.slices.push(job.cursor - first);
+                return job.cursor >= 12;
+              },
+              commit() {
+                stages.push("light-commit");
+                assert.equal(job.cursor, 12, "only complete rows can publish light layers");
+                job.committed = true;
+                return options.lightCommitAvailable ? { unlit, lights } : null;
+              },
+              cancel() { job.cancelled = true; },
+            };
+            lightJobs.push(job);
+            return job;
+          },
         };
       if (name === "@/lib/rexonance-suit-warmup")
         return { rexonanceSuitSource: (url) => sources.get(url) ?? null };
@@ -99,6 +130,8 @@ function planRuntime({ idle = true, decoded = true, canCancelIdle = true } = {})
     cancelled,
     drawn,
     lightSplits,
+    lightJobs,
+    stages,
     options,
     sources,
     art,
@@ -106,6 +139,17 @@ function planRuntime({ idle = true, decoded = true, canCancelIdle = true } = {})
     unlit,
     lights,
     closed: () => closeCount,
+    flushUntil(predicate) {
+      for (let i = 0; !predicate(); i++) {
+        assert.ok(i < 100 && queued.length, "required preparation stage must be reached");
+        queued.shift()();
+      }
+    },
+    async prepare(priority) {
+      const preparing = exports.prepareRexonanceSuit(priority);
+      this.flush();
+      return preparing;
+    },
     flush() {
       for (let i = 0; queued.length; i++) {
         assert.ok(i < 100, "sliced preparation must finish");
@@ -423,7 +467,7 @@ test("missing decoded layers settle false and retry only the retained working at
   const all = ui.plan.plates();
   ui.sources.set(suit.REXONANCE_SUIT_ATLAS.src, ui.art);
   ui.sources.set(suit.REXONANCE_SUIT_GOLD_ATLAS.src, ui.raw);
-  assert.equal(await ui.plan.prepareRexonanceSuit(), true);
+  assert.equal(await ui.prepare(), true);
   assert.equal(ui.plan.plates(), all);
   assert.deepEqual(ui.drawn, ["clear", "unlit-atlas", "raw-gold"]);
   assert.equal(ui.closed(), 0, "the plan borrows warm-up bitmaps and never closes them");
@@ -438,7 +482,7 @@ test("a draw failure in a later idle slice settles and can safely retry", async 
   assert.equal(ui.plan.work.dirty, true);
   await flushPromises();
   ui.options.failDraw = false;
-  assert.equal(await ui.plan.prepareRexonanceSuit(), true);
+  assert.equal(await ui.prepare(), true);
   assert.equal(ui.plan.work.dirty, false);
   assert.equal(ui.closed(), 0);
 });
@@ -451,7 +495,7 @@ test("a temporarily unavailable 2D context does not poison subsequent preparatio
   assert.equal(await preparing, false);
   await flushPromises();
   ui.options.contextAvailable = true;
-  assert.equal(await ui.plan.prepareRexonanceSuit(), true);
+  assert.equal(await ui.prepare(), true);
 });
 
 test("idle preparation never resets formed gold while a live call owns the working atlas", async () => {
@@ -462,11 +506,11 @@ test("idle preparation never resets formed gold while a live call owns the worki
   await flushPromises();
   ui.plan.work.drawing = 1;
   ui.plan.work.dirty = true;
-  assert.equal(await ui.plan.prepareRexonanceSuit(), true);
+  assert.equal(await ui.prepare(), true);
   assert.equal(ui.drawn.length, 3);
   await flushPromises();
   ui.plan.work.drawing = 0;
-  assert.equal(await ui.plan.prepareRexonanceSuit(), true);
+  assert.equal(await ui.prepare(), true);
   assert.deepEqual(ui.drawn, [
     "clear",
     "unlit-atlas",
@@ -482,7 +526,7 @@ test("plan readiness distinguishes decoded layers, a warm atlas and a previous c
   assert.equal(ui.plan.isRexonanceSuitPlanReady(), false);
   ui.plan.plates();
   assert.equal(ui.plan.isRexonanceSuitPlanReady(), false, "metadata alone is not a prepared atlas");
-  assert.equal(await ui.plan.prepareRexonanceSuit(), true);
+  assert.equal(await ui.prepare(), true);
   assert.equal(ui.plan.isRexonanceSuitPlanReady(), true);
   await flushPromises();
   ui.plan.work.dirty = true;
@@ -490,7 +534,7 @@ test("plan readiness distinguishes decoded layers, a warm atlas and a previous c
   assert.equal(ui.plan.isRexonanceSuitPlanReady(), true, "the active call owns its working copy");
   ui.plan.work.drawing = 0;
   assert.equal(ui.plan.isRexonanceSuitPlanReady(), false, "a new call must reset formed gold");
-  assert.equal(await ui.plan.prepareRexonanceSuit(), true);
+  assert.equal(await ui.prepare(), true);
   assert.equal(ui.plan.isRexonanceSuitPlanReady(), true);
 });
 
@@ -525,7 +569,7 @@ test("unavailable light separation falls back safely and can retry before a late
   assert.equal(ui.plan.isRexonanceSuitPlanReady(), true);
   await flushPromises();
   ui.options.lightsAvailable = true;
-  assert.equal(await ui.plan.prepareRexonanceSuit(), true);
+  assert.equal(await ui.prepare(), true);
   assert.equal(ui.lightSplits.length, 2);
   assert.deepEqual(ui.drawn, ["clear", "atlas", "raw-gold", "clear", "unlit-atlas", "raw-gold"]);
   assert.equal(ui.closed(), 0);
@@ -537,13 +581,163 @@ test("light preparation cannot reset or split an atlas while a foreground call o
   ui.plan.forming(ui.art, ui.raw);
   ui.plan.work.drawing = 1;
   ui.plan.work.dirty = true;
-  assert.equal(await ui.plan.prepareRexonanceSuit("high"), true);
+  assert.equal(await ui.prepare("high"), true);
   assert.equal(ui.lightSplits.length, 0);
   assert.deepEqual(ui.drawn, ["clear", "atlas", "raw-gold"]);
   assert.equal(ui.plan.work.dirty, true, "the active call retains its formed gold");
   await flushPromises();
   ui.plan.work.drawing = 0;
-  assert.equal(await ui.plan.prepareRexonanceSuit("high"), true);
+  assert.equal(await ui.prepare("high"), true);
   assert.equal(ui.lightSplits.length, 1);
   assert.deepEqual(ui.drawn, ["clear", "atlas", "raw-gold", "clear", "unlit-atlas", "raw-gold"]);
+});
+
+test("light readback, budgeted rows, commit and working atlas each occupy separate tasks", async () => {
+  const ui = planRuntime();
+  const preparing = ui.plan.prepareRexonanceSuit();
+  ui.flushUntil(() => ui.plan.__buildState().complete);
+  assert.equal(ui.lightJobs.length, 0, "plate generation never starts the pixel pass in its final slice");
+  assert.deepEqual(ui.stages, []);
+  ui.queued.shift()();
+  const job = ui.lightJobs[0];
+  assert.equal(job.cursor, 0, "readback/setup must not also process rows");
+  assert.equal(ui.plan.plateLights(), null);
+  assert.equal(ui.plan.isRexonanceSuitPlanReady(), false);
+  ui.queued.shift()();
+  assert.ok(job.cursor > 0 && job.cursor < 12);
+  ui.flushUntil(() => job.cursor === 12);
+  assert.ok(job.slices.length >= 4, "the full pass is split under the six-ms budget");
+  assert.ok(job.slices.every((rows) => rows > 0 && rows <= 3));
+  assert.equal(ui.plan.plateLights(), null, "complete private buffers are not public before commit");
+  assert.deepEqual(ui.drawn, []);
+  ui.queued.shift()();
+  assert.equal(ui.plan.plateLights().unlit, ui.unlit);
+  assert.equal(job.cancelled, true, "private readback buffers are released after publication");
+  assert.deepEqual(ui.drawn, [], "commit must not draw the working atlas in the same task");
+  assert.equal(ui.plan.isRexonanceSuitPlanReady(), false);
+  ui.queued.shift()();
+  assert.equal(await preparing, true);
+  assert.equal(ui.plan.isRexonanceSuitPlanReady(), true);
+  assert.deepEqual(ui.stages, ["light-setup", ...job.slices.map(() => "light-rows"),
+    "light-commit", "atlas"]);
+  assert.deepEqual(ui.drawn, ["clear", "unlit-atlas", "raw-gold"]);
+  assert.equal(ui.queued.length, 0);
+});
+
+test("priority promotion retains a partial light-job cursor and rejects stale idle slices", async () => {
+  const ui = planRuntime({ canCancelIdle: false });
+  const preparing = ui.plan.prepareRexonanceSuit();
+  ui.flushUntil(() => (ui.lightJobs[0]?.cursor ?? 0) > 0);
+  const job = ui.lightJobs[0];
+  const cursor = job.cursor;
+  const idle = ui.queued[0];
+  assert.equal(ui.plan.prepareRexonanceSuit("high"), preparing);
+  assert.equal(ui.lightJobs.length, 1);
+  assert.equal(job.cursor, cursor, "promotion only changes scheduling, not row progress");
+  const frame = ui.queued[1];
+  assert.equal(frame.kind, "frame");
+  ui.queued.shift()();
+  assert.equal(job.cursor, cursor, "the stale idle cannot advance a promoted light job");
+  assert.equal(ui.queued[0], frame);
+  ui.flush();
+  assert.equal(await preparing, true);
+  assert.equal(ui.lightJobs.length, 1);
+  const stages = ui.stages.length;
+  idle();
+  assert.equal(ui.stages.length, stages);
+  assert.equal(ui.queued.length, 0);
+});
+
+test("a live call taking over a partial or committed light job never resets its atlas", async () => {
+  for (const phase of ["rows", "complete", "committed"]) {
+    const ui = planRuntime();
+    ui.plan.plates();
+    ui.plan.forming(ui.art, ui.raw);
+    const preparing = ui.plan.prepareRexonanceSuit();
+    assert.equal(ui.plan.isRexonanceSuitPlanReady(), false,
+      "a previous raw fallback is not ready during a new private light pass");
+    ui.flushUntil(() => {
+      const job = ui.lightJobs[0];
+      return phase === "committed" ? Boolean(ui.plan.plateLights()) :
+        Boolean(job && (phase === "rows" ? job.cursor > 0 : job.cursor === 12));
+    });
+    const published = ui.plan.plateLights();
+    ui.plan.work.drawing = 1;
+    ui.plan.work.dirty = true;
+    ui.flush();
+    assert.equal(await preparing, true);
+    assert.equal(ui.lightJobs[0].cancelled, true);
+    assert.equal(ui.plan.plateLights(), published, "a live call's light choice cannot be replaced");
+    assert.deepEqual(ui.drawn, ["clear", "atlas", "raw-gold"]);
+    assert.equal(ui.plan.work.dirty, true);
+    assert.equal(ui.plan.isRexonanceSuitPlanReady(), true, "live ownership remains ready");
+    await flushPromises();
+    ui.plan.work.drawing = 0;
+    assert.equal(await ui.prepare("high"), true);
+    assert.equal(ui.lightJobs.length, phase === "committed" ? 1 : 2);
+    assert.deepEqual(ui.drawn, ["clear", "atlas", "raw-gold", "clear", "unlit-atlas", "raw-gold"]);
+    assert.equal(ui.closed(), 0);
+  }
+});
+
+test("a failed light commit preserves raw fallback readiness and can retry later", async () => {
+  const ui = planRuntime();
+  ui.options.lightCommitAvailable = false;
+  assert.equal(await ui.prepare(), true);
+  assert.equal(ui.plan.plateLights(), null);
+  assert.equal(ui.lightJobs[0].cancelled, true);
+  assert.equal(ui.plan.isRexonanceSuitPlanReady(), true);
+  assert.deepEqual(ui.drawn, ["clear", "atlas", "raw-gold"]);
+  await flushPromises();
+  ui.options.lightCommitAvailable = true;
+  assert.equal(await ui.prepare("high"), true);
+  assert.equal(ui.lightJobs.length, 2);
+  assert.equal(ui.plan.isRexonanceSuitPlanReady(), true);
+  assert.equal(ui.closed(), 0);
+});
+
+test("a decoder replacing the borrowed atlas discards private rows before rebuilding", async () => {
+  const ui = planRuntime();
+  const preparing = ui.plan.prepareRexonanceSuit();
+  ui.flushUntil(() => (ui.lightJobs[0]?.cursor ?? 0) > 0);
+  const replaced = { kind: "replacement-atlas" };
+  ui.sources.set(suit.REXONANCE_SUIT_ATLAS.src, replaced);
+  ui.flush();
+  assert.equal(await preparing, true);
+  assert.equal(ui.lightJobs.length, 2);
+  assert.equal(ui.lightJobs[0].cancelled, true);
+  assert.equal(ui.lightJobs[0].committed, false);
+  assert.equal(ui.lightSplits[1][0], replaced);
+  assert.equal(ui.closed(), 0);
+});
+
+test("a finite entry timeout may fire between pixel slices without cancelling the shared plan", async () => {
+  const ui = planRuntime();
+  const timers = new Map();
+  const exports = {};
+  const entrySource = readFileSync(new URL("../src/lib/rexonance-entry-preparation.ts", import.meta.url), "utf8");
+  runInNewContext(ts.transpileModule(entrySource, {
+    compilerOptions: { module: ts.ModuleKind.CommonJS },
+  }).outputText, { exports, window: {
+    setTimeout(callback, duration) { timers.set(1, { callback, duration }); return 1; },
+    clearTimeout(id) { timers.delete(id); },
+  } });
+  let shared;
+  const entry = exports.prepareRexonanceEntry({ decoded: Promise.resolve(true),
+    prepare: () => (shared = ui.plan.prepareRexonanceSuit("high")), deadlineMs: 120 });
+  await flushPromises();
+  ui.flushUntil(() => (ui.lightJobs[0]?.cursor ?? 0) > 0);
+  assert.equal(ui.plan.plateLights(), null);
+  assert.equal(ui.queued.length, 1);
+  assert.equal(timers.get(1).duration, 120);
+  timers.get(1).callback();
+  assert.equal(await entry.promise, false);
+  assert.equal(timers.size, 0);
+  assert.equal(ui.lightJobs[0].cancelled, false, "one expired intent cannot destroy shared row progress");
+  ui.flush();
+  assert.equal(await shared, true);
+  assert.equal(await entry.promise, false, "late plan completion cannot revive an expired intent");
+  assert.equal(ui.queued.length, 0);
+  assert.equal(ui.plan.isRexonanceSuitPlanReady(), true);
+  assert.equal(ui.closed(), 0);
 });

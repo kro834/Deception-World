@@ -6,27 +6,104 @@
  * (the art with its lights turned to a cold, dim monochrome; gold, black
  * plates and everything else untouched) and `lights` (only the lit pixels,
  * the rest transparent), to be drawn back over the unlit art as it lights.
- * One pixel pass; callers run it in idle time. Null where the pixels
- * cannot be read (the suit then lights as it always did). */
+ * One pixel pass. The synchronous API remains for ZENITH; preparation can
+ * run the same pass in short row slices with createSplitLightsJob. Null
+ * where the pixels cannot be read (the suit then lights as it always did). */
 export function splitLights(source, sx, sy, w, h, document = globalThis.document) {
+  const job = createSplitLightsJob(source, sx, sy, w, h, document);
+  if (!job) return null;
+  job.step(Infinity);
+  return job.commit();
+}
+
+/** Setup borrows the decoded source and takes one snapshot. A caller can
+ * schedule setup, row slices, and commit separately; partial pixels never
+ * escape this job. A short deadline still advances one row, so a busy host
+ * cannot starve preparation forever. Native readback/put operations and one
+ * row are indivisible: the deadline bounds cooperative work, not those
+ * native operations' wall time. */
+export function createSplitLightsJob(source, sx, sy, w, h, document = globalThis.document) {
+  let unlit;
+  let lights;
   try {
-    return split(source, sx, sy, w, h, document);
+    const make = () => Object.assign(document.createElement("canvas"), { width: w, height: h });
+    unlit = make();
+    lights = make();
+    const uc = unlit.getContext("2d", { willReadFrequently: true });
+    if (!uc) throw new Error("unavailable light separation context");
+    uc.drawImage(source, sx, sy, w, h, 0, 0, w, h);
+    let art = uc.getImageData(0, 0, w, h);
+    let glow = uc.createImageData(w, h);
+    let a = art.data;
+    let g = glow.data;
+    // Native ImageData has width. Lightweight callers/tests may only expose
+    // its bytes, so use the requested region rather than creating a NaN
+    // cursor that could strand the synchronous compatibility pass forever.
+    const widthInBytes = Math.floor(art.width ?? w) * 4;
+    if (!Number.isFinite(widthInBytes)) throw new Error("invalid light separation row width");
+    const rowBytes = Math.max(4, widthInBytes);
+    let at = 0;
+    let cancelled = false;
+    let result = null;
+    const release = () => {
+      art = glow = a = g = null;
+      unlit.width = lights.width = 0;
+    };
+    return {
+      step(until, idleDeadline) {
+        if (cancelled || result || at >= a.length) return true;
+        try {
+          do {
+            const end = Math.min(at + rowBytes, a.length);
+            separate(a, g, at, end);
+            at = end;
+            if (at >= a.length) return true;
+          } while (
+            (until === Infinity || globalThis.performance.now() < until) &&
+            (!idleDeadline || idleDeadline.timeRemaining() >= 2)
+          );
+          return false;
+        } catch {
+          cancelled = true;
+          release();
+          return true;
+        }
+      },
+      commit() {
+        if (result) return result;
+        if (cancelled || at < a.length) return null;
+        try {
+          uc.putImageData(art, 0, 0);
+          const lc = lights.getContext("2d");
+          if (!lc) throw new Error("unavailable light overlay context");
+          lc.putImageData(glow, 0, 0);
+          result = { unlit, lights };
+          art = glow = a = g = null;
+          return result;
+        } catch {
+          cancelled = true;
+          release();
+          return null;
+        }
+      },
+      cancel() {
+        if (cancelled || result) return;
+        cancelled = true;
+        release();
+      },
+    };
   } catch {
+    // Releasing owned canvases never closes a borrowed image or bitmap.
+    if (unlit) unlit.width = 0;
+    if (lights) lights.width = 0;
     return null;
   }
 }
 
-function split(source, sx, sy, w, h, document) {
-  const make = () => Object.assign(document.createElement("canvas"), { width: w, height: h });
-  const unlit = make();
-  const lights = make();
-  const uc = unlit.getContext("2d", { willReadFrequently: true });
-  uc.drawImage(source, sx, sy, w, h, 0, 0, w, h);
-  const art = uc.getImageData(0, 0, w, h);
-  const glow = uc.createImageData(w, h);
-  const a = art.data;
-  const g = glow.data;
-  for (let i = 0; i < a.length; i += 4) {
+// Keep the original per-pixel arithmetic and rounding order: splitting rows
+// only changes when pixels are visited, never their resulting bytes.
+function separate(a, g, from, to) {
+  for (let i = from; i < to; i += 4) {
     if (!a[i + 3]) continue;
     const r = a[i];
     const gr = a[i + 1];
@@ -56,7 +133,4 @@ function split(source, sx, sy, w, h, document) {
     a[i + 1] = Math.round(gr + (grey * 0.97 - gr) * k);
     a[i + 2] = Math.round(b + (grey * 1.1 - b) * k);
   }
-  uc.putImageData(art, 0, 0);
-  lights.getContext("2d").putImageData(glow, 0, 0);
-  return { unlit, lights };
 }

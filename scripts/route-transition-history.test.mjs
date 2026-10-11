@@ -125,6 +125,7 @@ function mount(
   const effects = [],
     frames = new Map(),
     timers = new Map(),
+    timerDelays = new Map(),
     subscribers = new Set();
   const motion = new EventTarget();
   motion.matches = false;
@@ -180,8 +181,9 @@ function mount(
       return serial;
     },
     cancelAnimationFrame: (id) => frames.delete(id),
-    setTimeout: (callback) => {
+    setTimeout: (callback, delay) => {
       timers.set(++serial, callback);
+      timerDelays.set(serial, delay);
       return serial;
     },
     clearTimeout: (id) => timers.delete(id),
@@ -310,6 +312,7 @@ function mount(
     suitWarmHolds: () => suitWarmHolds,
     activeObservers: () => observers.size,
     pendingTimers: () => timers.size,
+    pendingTimerDelays: () => [...timers.keys()].map((id) => timerDelays.get(id)),
     reduceMotion: () => {
       motion.matches = true;
       motion.dispatchEvent(new Event("change"));
@@ -874,6 +877,15 @@ test("rx17: the decoded-layer plan wait is high priority and cannot hold navigat
   assert.deepEqual(priorities, ["high"]);
   assert.equal(ui.gates.filter((gate) => gate.active).length, 0);
   assert.ok(ui.pendingTimers() > 0, "the plan wait has a finite caller-owned deadline");
+  assert.ok(
+    ui.pendingTimerDelays().includes(1800),
+    "decoded images still need the full sliced-plan budget",
+  );
+  assert.equal(
+    ui.pendingTimerDelays().includes(120),
+    false,
+    "bitmap readiness must not shorten unfinished plan work",
+  );
   await ui.flushTimers();
   ui.releaseWarmup();
   await reachRexonanceHold(ui);
