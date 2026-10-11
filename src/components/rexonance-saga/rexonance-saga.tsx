@@ -23,6 +23,7 @@ import {
 } from "@/lib/rexonance-resonance.js";
 import { REXONANCE_SUIT_GOLD_CELL, REXONANCE_SUIT_GOLD_CELLS } from "@/lib/rexonance-suit-gold";
 import {
+  REXONANCE_SUIT_ATLAS,
   REXONANCE_SUIT_FACE_GLOW,
   REXONANCE_SUIT_FIGURE,
   REXONANCE_SUIT_GOLD_ATLAS,
@@ -33,6 +34,14 @@ import {
   REXONANCE_SUIT_UNDERSUIT,
 } from "@/lib/rexonance-suit";
 import { rexonanceImage } from "@/lib/rexonance-images";
+import { REXONANCE_FORM_FIGURES } from "@/lib/rexonance-forms";
+import {
+  FORM_CHANGE_MS,
+  FORM_TONES,
+  drawOverwrite,
+  planOverwrite,
+  sampleCells,
+} from "@/lib/rexonance-overwrite.js";
 import { autoSizedImageRef } from "@/lib/auto-sized-image";
 import { REXONANCE_SITE_ARTWORK } from "@/lib/rexonance-site-artwork";
 import { supportsIOS27Enhancements } from "@/lib/rendering-profile";
@@ -382,6 +391,7 @@ const CORE_SYSTEMS = [
 
 // ZENITH: use the suit atlas's shape masks, not the overlapping part boxes.
 const SUIT_UP: RexonanceAssemblyConfig = {
+  forms: REXONANCE_FORM_FIGURES,
   figure: REXONANCE_SUIT_FIGURE,
   undersuit: REXONANCE_SUIT_UNDERSUIT,
   size: REXONANCE_SUIT_SIZE,
@@ -404,6 +414,7 @@ const SUIT_UP: RexonanceAssemblyConfig = {
   visor: REXONANCE_SUIT_MARKS.visor,
   glow: REXONANCE_SUIT_FACE_GLOW,
   // The gold forms by nanites right after each plate seats (owner), as in the call.
+  atlas: REXONANCE_SUIT_ATLAS.src,
   gold: {
     atlas: REXONANCE_SUIT_GOLD_ATLAS.src,
     cell: REXONANCE_SUIT_GOLD_CELL,
@@ -423,7 +434,7 @@ const FORM_MESH = Array.from({ length: 12 }, (_, index) => (
   <i key={index} style={{ ["--rzn-d" as string]: index }} />
 ));
 
-const RexonanceSuitUp = memo(function RexonanceSuitUp() {
+const RexonanceSuitUp = memo(function RexonanceSuitUp({ stage }: { stage: RexonanceStage }) {
   const runwayRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => mountRexonanceAssembly(runwayRef.current, SUIT_UP), []);
   return (
@@ -431,6 +442,8 @@ const RexonanceSuitUp = memo(function RexonanceSuitUp() {
       ref={runwayRef}
       className="rzn-suitup"
       aria-hidden="true"
+      // The suit-up ends on the form chosen in 03 (owner, 2026-10-11).
+      data-form={stage}
       style={{
         ["--rzn-aspect" as string]: `${REXONANCE_SUIT_SIZE.width} / ${REXONANCE_SUIT_SIZE.height}`,
       }}
@@ -440,7 +453,7 @@ const RexonanceSuitUp = memo(function RexonanceSuitUp() {
         <i className="rzn-floor" />
         <img
           className="rzn-still"
-          src={REXONANCE_SUIT_FIGURE}
+          src={stage === "standard" ? REXONANCE_SUIT_FIGURE : REXONANCE_FORM_FIGURES[stage]}
           alt=""
           width={REXONANCE_SUIT_SIZE.width}
           height={REXONANCE_SUIT_SIZE.height}
@@ -484,7 +497,7 @@ const RexonanceSuitUp = memo(function RexonanceSuitUp() {
           </ol>
           <p className="rzn-stamp">
             <span>REXONANCE SAGA</span>
-            <b>{STAGES.standard.code}</b>
+            <b>{STAGES[stage].code}</b>
           </p>
         </div>
         <i className="rzn-rail">
@@ -494,6 +507,181 @@ const RexonanceSuitUp = memo(function RexonanceSuitUp() {
     </div>
   );
 });
+
+/* The form change over the 03 panel's art (owner, 2026-10-11): a canvas
+   laid exactly over the new form's picture (same fit and position) plays
+   the change, then clears to the picture itself. To MAX: the old form is
+   overwritten by cells from the reactor out. To ULTRA: from Rexonance a
+   short run to MAX first, then the overwrite to ULTRA and its additional
+   parts (its emerald crystals) generated last. Back to Rexonance: no morph.
+   Reduced motion, economy and Save-Data change quietly. */
+const MORPH_ORIGIN = [0.5, 0.38] as const;
+function FormMorph({
+  from,
+  to,
+  delay,
+}: {
+  from: RexonanceStage;
+  to: RexonanceStage;
+  delay: number;
+}) {
+  const ref = useRef<HTMLCanvasElement | null>(null);
+  useEffect(() => {
+    const canvas = ref.current;
+    const img = canvas?.parentElement?.querySelector("img");
+    if (!canvas || !img || to === "standard" || from === to) return;
+    const connection = (navigator as Navigator & { connection?: { saveData?: boolean } })
+      .connection;
+    if (
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+      document.documentElement.dataset.worldEffects === "economy" ||
+      connection?.saveData
+    )
+      return;
+    let cancelled = false;
+    let frame = 0;
+    const load = (src: string) =>
+      new Promise<HTMLImageElement>((resolve, reject) => {
+        const image = new Image();
+        image.decoding = "async";
+        image.onload = () =>
+          void image.decode().then(
+            () => resolve(image),
+            () => resolve(image),
+          );
+        image.onerror = reject;
+        image.src = src;
+      });
+    const steps: { a: RexonanceStage; b: RexonanceStage; ms: number; extra: boolean }[] =
+      to === "max"
+        ? [{ a: from, b: "max", ms: FORM_CHANGE_MS.max, extra: false }]
+        : [
+            ...(from === "standard"
+              ? [
+                  {
+                    a: "standard" as const,
+                    b: "max" as const,
+                    ms: FORM_CHANGE_MS.quick,
+                    extra: false,
+                  },
+                ]
+              : []),
+            {
+              a: from === "standard" ? "max" : from,
+              b: "ultra",
+              ms: FORM_CHANGE_MS.ultra,
+              extra: true,
+            },
+          ];
+    const sources = [...new Set(steps.flatMap(({ a, b }) => [a, b]))];
+    // The old form shows at once (it is cached), so the new picture never flashes first.
+    canvas.style.opacity = "1";
+    Promise.all(
+      sources.map((key) => load(STAGES[key].image).then((image) => [key, image] as const)),
+    )
+      .then((loaded) => {
+        if (cancelled) return;
+        const pictures = Object.fromEntries(loaded) as Record<RexonanceStage, HTMLImageElement>;
+        // The picture's layout box (offsets ignore its entrance transform).
+        const box = { width: img.offsetWidth, height: img.offsetHeight };
+        const parent = img.offsetParent === canvas.offsetParent;
+        const ratio = Math.min(2, window.devicePixelRatio || 1);
+        canvas.style.left = `${parent ? img.offsetLeft : 0}px`;
+        canvas.style.top = `${parent ? img.offsetTop : 0}px`;
+        canvas.style.width = `${box.width}px`;
+        canvas.style.height = `${box.height}px`;
+        canvas.width = Math.max(1, Math.round(box.width * ratio));
+        canvas.height = Math.max(1, Math.round(box.height * ratio));
+        const context = canvas.getContext("2d");
+        if (!context) return;
+        // The picture's own fit and position (object-fit / object-position).
+        const style = getComputedStyle(img);
+        const naturalW = img.naturalWidth || 1086;
+        const naturalH = img.naturalHeight || 1448;
+        const fit = style.objectFit === "contain" ? Math.min : Math.max;
+        const scale = fit(box.width / naturalW, box.height / naturalH);
+        const [px, py] = style.objectPosition
+          .split(" ")
+          .map((part) => (part.endsWith("%") ? Number.parseFloat(part) / 100 : 0.5));
+        const offsetX = (box.width - naturalW * scale) * (px ?? 0.5);
+        const offsetY = (box.height - naturalH * scale) * (py ?? 0.5);
+        const cell = 22;
+        const plans = steps.map(({ a, b, extra }, index) => {
+          const base = {
+            width: naturalW,
+            height: naturalH,
+            cell,
+            origin: [naturalW * MORPH_ORIGIN[0], naturalH * MORPH_ORIGIN[1]] as const,
+            seed: 31 + index,
+          };
+          if (!extra) return planOverwrite(base);
+          const grid = planOverwrite(base);
+          const fromCells = sampleCells(pictures[a], grid);
+          const toCells = sampleCells(pictures[b], grid);
+          return fromCells && toCells
+            ? planOverwrite({ ...base, samples: { from: fromCells, to: toCells } })
+            : grid;
+        });
+        const total =
+          steps.reduce((sum, step) => sum + step.ms, 0) +
+          (steps.at(-1)!.extra ? FORM_CHANGE_MS.extra * 0.6 : 0);
+        let start = 0;
+        const tick = (now: number) => {
+          frame = 0;
+          if (cancelled) return;
+          if (!start) start = now + delay;
+          let t = Math.max(0, now - start);
+          context.setTransform(
+            ratio * scale,
+            0,
+            0,
+            ratio * scale,
+            ratio * offsetX,
+            ratio * offsetY,
+          );
+          context.clearRect(
+            -offsetX / scale,
+            -offsetY / scale,
+            box.width / scale,
+            box.height / scale,
+          );
+          let index = 0;
+          while (index < steps.length - 1 && t >= steps[index].ms) {
+            t -= steps[index].ms;
+            index += 1;
+          }
+          const step = steps[index];
+          const u = Math.min(1, t / step.ms);
+          const v = step.extra
+            ? Math.min(1, Math.max(0, (t - step.ms * 0.6) / FORM_CHANGE_MS.extra))
+            : 1;
+          drawOverwrite(
+            context,
+            plans[index],
+            pictures[step.a],
+            pictures[step.b],
+            u,
+            v,
+            FORM_TONES[step.b],
+          );
+          if (now - start >= total) {
+            canvas.style.opacity = "0";
+            return;
+          }
+          frame = requestAnimationFrame(tick);
+        };
+        frame = requestAnimationFrame(tick);
+      })
+      .catch(() => {
+        canvas.style.opacity = "0";
+      });
+    return () => {
+      cancelled = true;
+      if (frame) cancelAnimationFrame(frame);
+    };
+  }, [from, to, delay]);
+  return <canvas ref={ref} className="rxs-form-morph" aria-hidden="true" />;
+}
 
 const releaseControlFocus = (control: HTMLElement) => {
   window.requestAnimationFrame(() => {
@@ -842,6 +1030,13 @@ export function RexonanceSaga() {
   // How the panel's new form arrives: under a card, or quietly (rx2 rest guard).
   const [stageEntrance, setStageEntrance] = useState<RexonanceStageEntrance | null>(null);
   const latestStageRef = useRef<RexonanceStage>("standard");
+  // The form shown before the latest change (what the morph starts from).
+  const morphFrom = useRef<RexonanceStage>("standard");
+  const shownStage = useRef<RexonanceStage>("standard");
+  if (shownStage.current !== stage) {
+    morphFrom.current = shownStage.current;
+    shownStage.current = stage;
+  }
   const stageCallId = useRef(0);
   const stageCallTimer = useRef(0);
   const stageCallStartedAt = useRef(0);
@@ -1377,7 +1572,7 @@ export function RexonanceSaga() {
         <P14Comparator nativeIOSSelection={nativeIOSSelection} />
       </section>
 
-      <RexonanceSuitUp />
+      <RexonanceSuitUp stage={stage} />
 
       <section id="stages" className="rxs-stages rxs-section">
         <header className="rxs-section-heading rxs-reveal">
@@ -1456,6 +1651,16 @@ export function RexonanceSaga() {
                 <i />
                 <i />
               </i>
+              {/* The form change (owner, 2026-10-11): MAX overwrites the
+                  finished Rexonance with cells; ULTRA runs to MAX briefly,
+                  overwrites it again and generates its additional parts. */}
+              {morphFrom.current !== stage ? (
+                <FormMorph
+                  from={morphFrom.current}
+                  to={stage}
+                  delay={stageEntrance?.delayMs ?? 0}
+                />
+              ) : null}
               {/* ZENITH (rx15): nanites re-forming over the new art. */}
               <i className="rzn-mesh" aria-hidden="true">
                 {FORM_MESH}

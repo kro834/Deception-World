@@ -211,17 +211,17 @@ test("rx17: the engine forms each plate's gold on it right after it seats and en
   // The plates arrive and seat from the working atlas (their gold raw) ...
   assert.match(
     plan,
-    /context\.drawImage\(art, 0, 0, width, height, 0, 0, width, height\);\s*context\.drawImage\(gold, 0, 0\);/,
+    /context\.drawImage\(LIGHTS\?\.unlit \?\? art, 0, 0, width, height, 0, 0, width, height\);\s*context\.drawImage\(gold, 0, 0\);/,
   );
   assert.match(nanites, /flight\.drawImage\(\s*source,\s*tile\.sx,\s*tile\.sy,/);
   // ... their gold cells lock into it on the gold's own clock ...
   assert.match(plan, /REXONANCE_SUIT_GOLD_AT\[piece\.id\]/);
-  assert.match(nanites, /atlasWork\.drawImage\(\s*atlas,\s*gold\.ax\[i\],/);
+  assert.match(nanites, /atlasWork\.drawImage\(\s*art,\s*gold\.ax\[i\],/);
   // ... and a finished plate is painted whole from the art itself, so the
   // finished suit equals the artwork.
   assert.match(
     nanites,
-    /settled\.drawImage\(\s*atlas,\s*piece\.ax,\s*piece\.ay,\s*piece\.w,\s*piece\.h,/,
+    /settled\.drawImage\(\s*art,\s*piece\.ax,\s*piece\.ay,\s*piece\.w,\s*piece\.h,/,
   );
   assert.match(
     nanites,

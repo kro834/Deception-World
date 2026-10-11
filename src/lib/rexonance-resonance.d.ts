@@ -73,6 +73,11 @@ export interface RexonanceAssemblyConfig {
   visor: readonly [number, number];
   glow: readonly (readonly [number, number])[];
   gold?: RexonanceAssemblyGold;
+  /** The plates' atlas (art | mosaic), for the driver's cut-outs. */
+  atlas?: string;
+  /** The MAX and ULTRA figures (same frame): the suit-up ends on the form
+   * named by the runway's data-form. */
+  forms?: { readonly max: string; readonly ultra: string };
 }
 
 export interface RexonanceAssemblyTile {

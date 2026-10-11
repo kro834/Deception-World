@@ -1,3 +1,5 @@
+import { FORM_TONES, drawOverwrite, planOverwrite, sampleCells } from "./rexonance-overwrite.js";
+import { splitLights } from "./rexonance-unlit.js";
 /** RESONANCE (rx11) for /rexonance-saga: the hits a stylesheet cannot time.
  *
  * Counts. Every [data-rsn-count] figure keeps the owner's value as its own
@@ -489,6 +491,10 @@ export const ASSEMBLY_BEATS = {
   rexonance: [0.62, 0.82],
   clamp: 0.86,
   seal: [0.86, 0.9],
+  // The lights, held back until the suit is whole, run out from the reactor.
+  light: [0.86, 0.89],
+  // The form chosen in 03 takes over (MAX / ULTRA) once the suit is lit.
+  form: [0.9, 0.975],
   pixels: [0.855, 0.95],
   rings: [0.865, 0.99],
   complete: 0.93,
@@ -667,6 +673,8 @@ function* assemblyPlanSteps({
           }
         }
       }
+      // The driver is drawn whole from its cut-outs, never as tiles.
+      if (owner?.preset) continue;
       const reach = owner ? Math.hypot(cx - owner.piece.seat[0], cy - owner.piece.seat[1]) : 0;
       if (owner) owner.reach = Math.max(owner.reach, reach);
       tiles.push({ sx, sy, tw, th, cx, cy, owner, pieceId: owner?.piece.id ?? null, reach, rgb });
@@ -705,9 +713,6 @@ function* assemblyPlanSteps({
     // Formed in place: the helmet no longer hovers and drops onto the head.
     item.hover = 0;
     item.t1 = item.t0 + flight;
-    // The driver at the waist is on the body, finished, from the start.
-    item.preset = Boolean(item.owner?.preset);
-    if (item.preset) item.t0 = item.t1 = -1;
     item.m =
       ASSEMBLY_BEATS.motes[0] +
       random() * (ASSEMBLY_BEATS.motes[1] - ASSEMBLY_BEATS.motes[0]) * 0.8;
@@ -734,12 +739,10 @@ function* assemblyPlanSteps({
     const mix = (channel) => Math.round(item.rgb[channel] * 0.55 + tint[channel] * 0.45);
     item.fill = `rgb(${mix(0)} ${mix(1)} ${mix(2)})`;
     item.spin = (random() - 0.5) * 1.2;
-    if (!item.preset) {
-      partDone[beat] = Math.max(partDone[beat], item.t1);
-      centroids[beat][0] += item.cx;
-      centroids[beat][1] += item.cy;
-      centroids[beat][2] += 1;
-    }
+    partDone[beat] = Math.max(partDone[beat], item.t1);
+    centroids[beat][0] += item.cx;
+    centroids[beat][1] += item.cy;
+    centroids[beat][2] += 1;
     delete item.owner;
     delete item.reach;
     delete item.rgb;
@@ -970,6 +973,8 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   let goldArt = null;
   let goldLayer = null;
   let goldCount = 0;
+  let driver = null;
+  let lights = null;
   let settled = null;
   let settledCount = 0;
   let pixels = null;
@@ -1020,14 +1025,16 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       decode(config.figure),
       decode(config.undersuit),
       config.gold?.atlas ? decode(config.gold.atlas).catch(() => null) : null,
-    ]).then(([figure, undersuit, gold]) => {
+      config.atlas ? decode(config.atlas).catch(() => null) : null,
+    ]).then(([figure, undersuit, gold, atlas]) => {
       if (disposed) {
         figure.close?.();
         undersuit.close?.();
         gold?.close?.();
+        atlas?.close?.();
         return null;
       }
-      images = { figure, undersuit, gold };
+      images = { figure, undersuit, gold, atlas };
       return images;
     });
     return loading;
@@ -1159,7 +1166,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
           // When each plate's last tile lands: its gold forms from there.
           const landed = new Map();
           for (const item of plan.tiles)
-            if (!item.preset && item.pieceId)
+            if (item.pieceId)
               landed.set(item.pieceId, Math.max(landed.get(item.pieceId) ?? 0, item.t1));
           goldPlan = images.gold
             ? planAssemblyGold({ pieces: config.pieces, gold: config.gold, landed })
@@ -1173,6 +1180,36 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
           settled.width = W;
           settled.height = H;
           settledCount = 0;
+          // The suit's lights are held back until it is whole (owner): the
+          // figure with its ice-cyan and pink in monochrome, and that light.
+          lights = splitLights(images.figure, 0, 0, W, H, document);
+          // The driver at the waist: on the body, finished and whole, from
+          // the start (its plates' own cut-outs from the atlas).
+          const preset = config.pieces.filter((piece) => piece.preset);
+          if (preset.length && images.atlas) {
+            driver = Object.assign(document.createElement("canvas"), { width: W, height: H });
+            const dc = driver.getContext("2d");
+            for (let i = preset.length - 1; i >= 0; i -= 1) {
+              const piece = preset[i];
+              dc.drawImage(
+                images.atlas,
+                piece.ax,
+                piece.ay,
+                piece.w,
+                piece.h,
+                piece.x,
+                piece.y,
+                piece.w,
+                piece.h,
+              );
+            }
+            const driverLights = splitLights(driver, 0, 0, W, H, document);
+            if (driverLights) {
+              dc.clearRect(0, 0, W, H);
+              dc.drawImage(driverLights.unlit, 0, 0);
+              driverLights.unlit.width = driverLights.lights.width = 0;
+            }
+          }
           if (goldPlan?.count) {
             // The plates as they seat (their gold raw gunmetal), the gold
             // alone (the art under the trims' mask), and the gold formed.
@@ -1184,7 +1221,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
             goldCount = 0;
             const rc = raw.getContext("2d");
             const gc = goldArt.getContext("2d");
-            rc.drawImage(images.figure, 0, 0, W, H);
+            rc.drawImage(lights?.unlit || images.figure, 0, 0, W, H);
             for (let i = config.pieces.length - 1; i >= 0; i -= 1) {
               const piece = config.pieces[i];
               if (piece.preset || !config.gold.cells[piece.id]) continue;
@@ -1267,7 +1304,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     const context = settled.getContext("2d");
     const inset = Math.min(0.8, item.tw * 0.07);
     context.drawImage(
-      (!item.preset && raw) || images.figure,
+      raw || lights?.unlit || images.figure,
       item.sx + inset,
       item.sy + inset,
       item.tw - inset * 2,
@@ -1486,10 +1523,76 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         context.drawImage(goldLayer, 0, 0, W, H);
         drawGold(context, progress);
       }
+      if (driver) context.drawImage(driver, 0, 0, W, H);
     }
     if (seal > 0) {
       context.globalAlpha = seal;
-      context.drawImage(figure, 0, 0, W, H);
+      context.drawImage(lights?.unlit || figure, 0, 0, W, H);
+    }
+    // The suit is whole: the reactor ignites and its light runs out through
+    // the whole body (the held-back ice-cyan and pink), with a bloom.
+    if (lights && progress >= B.light[0]) {
+      const u = span(progress, B.light);
+      const [coreX, coreY] = config.core;
+      const reach = Math.hypot(Math.max(coreX, W - coreX), Math.max(coreY, H - coreY));
+      context.save();
+      context.beginPath();
+      context.arc(coreX, coreY, Math.max(1, reach * easeOut(u)), 0, Math.PI * 2);
+      context.clip();
+      context.globalAlpha = 1;
+      context.drawImage(lights.lights, 0, 0, W, H);
+      const bloom = 1 - span(progress, [B.light[0], B.light[1] + 0.03]);
+      if (bloom > 0) {
+        context.globalCompositeOperation = "lighter";
+        context.globalAlpha = 0.55 * bloom;
+        context.drawImage(lights.lights, 0, 0, W, H);
+        context.globalCompositeOperation = "source-over";
+      }
+      context.restore();
+    }
+
+    // The form chosen in 03 (owner, 2026-10-11): MAX overwrites the
+    // finished Rexonance with cells; ULTRA runs to MAX briefly, overwrites
+    // it again and generates its additional parts.
+    const form = runway.dataset.form;
+    if ((form === "max" || form === "ultra") && progress > B.form[0]) {
+      const forms = formFigures();
+      if (forms) {
+        const [a, b] = B.form;
+        if (form === "max") {
+          drawOverwrite(
+            context,
+            forms.plans.max,
+            figure,
+            forms.max,
+            span(progress, [a, b - 0.005]),
+            1,
+            FORM_TONES.max,
+          );
+        } else {
+          const quick = a + (b - a) * 0.3;
+          if (progress < quick)
+            drawOverwrite(
+              context,
+              forms.plans.max,
+              figure,
+              forms.max,
+              span(progress, [a, quick]),
+              1,
+              FORM_TONES.max,
+            );
+          else
+            drawOverwrite(
+              context,
+              forms.plans.ultra,
+              forms.max,
+              forms.ultra,
+              span(progress, [quick, quick + (b - quick) * 0.62]),
+              span(progress, [quick + (b - quick) * 0.42, b]),
+              FORM_TONES.ultra,
+            );
+        }
+      }
     }
 
     // Motes, flights and welds of the tiles still to land.
@@ -1584,7 +1687,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     }
     context.globalAlpha = 1;
     // In flight, a plate's tiles carry its gold unformed.
-    const plates = raw || figure;
+    const plates = raw || lights?.unlit || figure;
     for (let n = 0; n < artCount; n += 1) {
       const i = Math.floor((n * arts) / artCount);
       const item = tiles[art[i]];
@@ -1764,6 +1867,54 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     }
   };
 
+  // The MAX / ULTRA figures and their overwrite plans, loaded the first time
+  // a form other than Rexonance is chosen (null until then).
+  let formsState = null;
+  let formsLoading = false;
+  const formFigures = () => {
+    if (formsState || formsLoading || !config.forms || !images) return formsState;
+    formsLoading = true;
+    const picture = (src) =>
+      new Promise((resolve, reject) => {
+        const image = new environment.Image();
+        image.decoding = "async";
+        image.onload = () => resolve(image);
+        image.onerror = reject;
+        image.src = src;
+      });
+    Promise.all([picture(config.forms.max), picture(config.forms.ultra)])
+      .then(([max, ultra]) => {
+        if (disposed) return;
+        const base = { width: W, height: H, cell: 8, origin: config.core, seed: 77 };
+        const grid = planOverwrite(base);
+        const fromCells = sampleCells(max, grid, document);
+        const toCells = sampleCells(ultra, grid, document);
+        formsState = {
+          max,
+          ultra,
+          plans: {
+            max: grid,
+            ultra:
+              fromCells && toCells
+                ? planOverwrite({ ...base, seed: 78, samples: { from: fromCells, to: toCells } })
+                : grid,
+          },
+        };
+        lastProgress = -1;
+        schedule();
+      })
+      .catch(() => undefined);
+    return null;
+  };
+  const formObserver =
+    typeof environment.MutationObserver === "function"
+      ? new environment.MutationObserver(() => {
+          lastProgress = -1;
+          schedule();
+        })
+      : null;
+  formObserver?.observe(runway, { attributes: true, attributeFilter: ["data-form"] });
+
   const render = () => {
     frame = 0;
     if (disposed || !live || document.hidden || !view) return;
@@ -1853,8 +2004,9 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     if (settled) settled.width = settled.height = 0;
     settled = null;
     plan = null;
-    for (const sheet of [raw, goldArt, goldLayer]) if (sheet) sheet.width = sheet.height = 0;
-    raw = goldArt = goldLayer = goldPlan = null;
+    for (const sheet of [raw, goldArt, goldLayer, driver])
+      if (sheet) sheet.width = sheet.height = 0;
+    raw = goldArt = goldLayer = goldPlan = driver = lights = null;
     goldCount = 0;
     buffers = null;
     view = null;
@@ -1972,8 +2124,12 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     images?.figure?.close?.();
     images?.undersuit?.close?.();
     images?.gold?.close?.();
+    images?.atlas?.close?.();
+    formObserver?.disconnect();
+    formsState = null;
     images = null;
-    for (const sheet of [raw, goldArt, goldLayer]) if (sheet) sheet.width = sheet.height = 0;
-    raw = goldArt = goldLayer = goldPlan = null;
+    for (const sheet of [raw, goldArt, goldLayer, driver])
+      if (sheet) sheet.width = sheet.height = 0;
+    raw = goldArt = goldLayer = goldPlan = driver = lights = null;
   };
 }

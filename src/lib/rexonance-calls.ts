@@ -244,6 +244,12 @@ export const REXONANCE_SUIT_GOLD_AT: Readonly<Record<string, readonly [number, n
   ]);
 /** RIDER！'s nanite motes gather from here (and are spent by the waist's snap). */
 export const REXONANCE_SUIT_MOTES = REXONANCE_CALL_BEATS[1].start;
+/** The suit's lights (owner, 2026-10-11): the ice-cyan and pink light
+ * stands monochrome while the suit assembles; once the whole suit is on,
+ * on REXONANCE DEUS！ the reactor ignites and the light runs out through
+ * the whole body from it (`spread` ms), with a bloom that settles by
+ * `from + bloom`, while the compound eyes fill with cells. */
+export const REXONANCE_SUIT_LIGHT = { from: SUIT_FINAL, spread: 380, bloom: 560 } as const;
 /** REXONANCE DEUS！: pixel squares fill the face's lights, then scatter. */
 export const REXONANCE_SUIT_PIXELS = {
   fill: SUIT_FINAL + 10,

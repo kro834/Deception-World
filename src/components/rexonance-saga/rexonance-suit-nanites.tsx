@@ -12,9 +12,12 @@ import {
   forming,
   planEnd,
   planSurges,
+  plateLights,
   plates,
   work,
 } from "./rexonance-suit-plan";
+import { REXONANCE_SUIT_LIGHT } from "@/lib/rexonance-calls";
+import { REXONANCE_SUIT_MARKS } from "@/lib/rexonance-suit";
 
 /* rx13 (owner, 2026-10-11): "subdivide extremely finely so it feels like
    nanomachines, and fit it on in turn". The armour assembles out of the
@@ -132,10 +135,35 @@ export function SuitNanites({ onReady }: { onReady: () => void }) {
         const motes = new Float32Array(GOLD_TOTAL * 3);
         let moteCount = 0;
         let last = -1;
+        // The lights are held back while the suit assembles (owner): its
+        // plates settle with their ice-cyan and pink in monochrome, and once
+        // the whole suit is on they light from the reactor out.
+        const held = plateLights();
+        const art = held?.unlit ?? atlas;
+        const [coreX, coreY] = REXONANCE_SUIT_MARKS.core;
+        const reach = Math.hypot(
+          Math.max(coreX, FIG.width - coreX),
+          Math.max(coreY, FIG.height - coreY),
+        );
+        let lit = !held;
+        const paintLights = (target: CanvasRenderingContext2D) => {
+          for (const { piece } of all)
+            target.drawImage(
+              held!.lights,
+              piece.ax,
+              piece.ay,
+              piece.w,
+              piece.h,
+              piece.x * s,
+              piece.y * s,
+              piece.w * s,
+              piece.h * s,
+            );
+        };
         const settle = (index: number) => {
           const { piece } = all[index];
           settled.drawImage(
-            atlas,
+            art,
             piece.ax,
             piece.ay,
             piece.w,
@@ -154,6 +182,7 @@ export function SuitNanites({ onReady }: { onReady: () => void }) {
           work.dirty = true;
           forming(atlas, raw);
           work.dirty = true;
+          lit = !held;
         };
         const glow = (
           list: Int32Array,
@@ -246,7 +275,7 @@ export function SuitNanites({ onReady }: { onReady: () => void }) {
                 while (locked[p] < plate.end && gold.lock[locked[p]] <= t) {
                   const i = locked[p];
                   atlasWork.drawImage(
-                    atlas,
+                    art,
                     gold.ax[i],
                     gold.ay[i],
                     gold.cw[i],
@@ -315,6 +344,36 @@ export function SuitNanites({ onReady }: { onReady: () => void }) {
               glint[bucket][glints[bucket]++] = i;
             }
           }
+          // The suit is whole: the reactor ignites and the light runs out
+          // through the body; a bloom rides it and settles.
+          if (held && t >= REXONANCE_SUIT_LIGHT.from) {
+            const u = Math.min(1, (t - REXONANCE_SUIT_LIGHT.from) / REXONANCE_SUIT_LIGHT.spread);
+            if (u >= 1 && !lit) {
+              lit = true;
+              paintLights(settled);
+            }
+            const radius = reach * (1 - (1 - u) ** 3) * s;
+            flight.save();
+            flight.beginPath();
+            flight.arc(coreX * s, coreY * s, Math.max(1, radius), 0, Math.PI * 2);
+            flight.clip();
+            if (!lit) {
+              flight.globalAlpha = 1;
+              paintLights(flight);
+            }
+            flight.restore();
+            // The light's front: a wave from the reactor, fading as it settles.
+            const bloom = 1 - (t - REXONANCE_SUIT_LIGHT.from) / REXONANCE_SUIT_LIGHT.bloom;
+            if (bloom > 0 && u < 1) {
+              flight.globalAlpha = 0.7 * bloom;
+              flight.strokeStyle = "#c8f5ff";
+              flight.lineWidth = 6 * s;
+              flight.beginPath();
+              flight.arc(coreX * s, coreY * s, Math.max(1, radius), 0, Math.PI * 2);
+              flight.stroke();
+              flight.globalAlpha = 1;
+            }
+          }
           glow(heat[0], heats[0], BLOOM);
           for (let k = HEAT.length - 1; k >= 0; k -= 1) glow(heat[k], heats[k], HEAT[k]);
           for (let k = GLINT.length - 1; k >= 0; k -= 1) glow(glint[k], glints[k], GLINT[k]);
@@ -340,6 +399,10 @@ export function SuitNanites({ onReady }: { onReady: () => void }) {
           work.drawing -= 1;
           flight.clearRect(0, 0, width, height);
           for (let p = 0; p < all.length; p += 1) if (!done[p]) settle(p);
+          if (!lit) {
+            lit = true;
+            paintLights(settled);
+          }
         };
         stop = () => {
           if (!finished) work.drawing -= 1;
@@ -351,7 +414,10 @@ export function SuitNanites({ onReady }: { onReady: () => void }) {
           const t = clock();
           // The meter's covering clock ends at the hand-over: all plates seat
           // and the last gold has formed and cooled long before.
-          if (t === null || t >= end) {
+          if (
+            t === null ||
+            t >= Math.max(end, REXONANCE_SUIT_LIGHT.from + REXONANCE_SUIT_LIGHT.bloom)
+          ) {
             finish();
             return;
           }

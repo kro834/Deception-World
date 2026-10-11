@@ -15,6 +15,7 @@ import {
   type RexonanceSuitPiece,
 } from "@/lib/rexonance-suit";
 import { REXONANCE_SUIT_GOLD_CELL, REXONANCE_SUIT_GOLD_CELLS } from "@/lib/rexonance-suit-gold";
+import { splitLights } from "@/lib/rexonance-unlit.js";
 import { rexonanceSuitSource } from "@/lib/rexonance-suit-warmup";
 
 /* rx17: the nanite engine's plan and working atlas (rexonance-suit-nanites
@@ -310,6 +311,18 @@ export const planEnd = () => END;
 // `drawing`: calls drawing into it now (the idle preparation then leaves
 // it alone); `dirty`: it holds a call's formed gold (reset before the next).
 export const work = { canvas: null as HTMLCanvasElement | null, dirty: true, drawing: 0 };
+// The plates' lights held back (owner, 2026-10-11): the atlas's art half with
+// its ice-cyan and pink light in monochrome, and that light alone, to light
+// the suit once it is whole. Made once, in idle time, from the decoded atlas.
+let LIGHTS: { unlit: HTMLCanvasElement; lights: HTMLCanvasElement } | null = null;
+export const plateLights = () => LIGHTS;
+export function prepareLights(art: CanvasImageSource) {
+  if (!LIGHTS) {
+    const { width, height } = REXONANCE_SUIT_GOLD_ATLAS;
+    LIGHTS = splitLights(art, 0, 0, width, height);
+  }
+  return LIGHTS;
+}
 export function forming(art: CanvasImageSource, gold: CanvasImageSource) {
   const { width, height } = REXONANCE_SUIT_GOLD_ATLAS;
   if (!work.canvas) {
@@ -320,7 +333,7 @@ export function forming(art: CanvasImageSource, gold: CanvasImageSource) {
   if (!context) return null;
   if (work.dirty) {
     context.clearRect(0, 0, width, height);
-    context.drawImage(art, 0, 0, width, height, 0, 0, width, height);
+    context.drawImage(LIGHTS?.unlit ?? art, 0, 0, width, height, 0, 0, width, height);
     context.drawImage(gold, 0, 0);
     work.dirty = false;
   }
@@ -335,6 +348,10 @@ export function prepareRexonanceSuit() {
     const finish = () => {
       const art = rexonanceSuitSource(REXONANCE_SUIT_ATLAS.src);
       const gold = rexonanceSuitSource(REXONANCE_SUIT_GOLD_ATLAS.src);
+      if (art && !work.drawing && !LIGHTS) {
+        prepareLights(art);
+        work.dirty = true;
+      }
       resolve(Boolean(art && gold && (work.drawing || forming(art, gold))));
     };
     const slice = (deadline?: IdleDeadline) => {

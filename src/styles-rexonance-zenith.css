@@ -1213,7 +1213,11 @@ html[data-family="special"]
    and mostly behind it. It stands behind the form's name and title
    instead — their two rows, under the art. */
 @media (max-width: 900px) {
-  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages .rxs-stage-panel {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > #stages
+    .rxs-stage-panel {
     isolation: isolate;
   }
 
@@ -2428,6 +2432,32 @@ html[data-family="special"]
     .rxs-page.rxs-page.rxs-rexonance-page
     > .rzn-suitup
     :is(.rzn-canvas, .rzn-rail, .rzn-hint) {
+    display: none;
+  }
+}
+
+/* The form change's canvas (owner, 2026-10-11): laid over the new form's
+   picture by the page while the change plays, then cleared. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rxs-stage-panel
+  figure
+  > .rxs-form-morph {
+  position: absolute;
+  z-index: 1;
+  display: block;
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (forced-colors: active) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    .rxs-stage-panel
+    figure
+    > .rxs-form-morph {
     display: none;
   }
 }

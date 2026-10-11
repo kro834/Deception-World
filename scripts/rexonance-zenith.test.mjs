@@ -1007,9 +1007,8 @@ test("the helmet forms from its outer layer inward, then the eyes fill (owner)",
 
 test("the gold forms by nanites right after each plate lands; the driver is on from the start", async () => {
   const { planAssemblyGold } = await import("../src/lib/rexonance-resonance.js");
-  const { REXONANCE_SUIT_GOLD_CELL, REXONANCE_SUIT_GOLD_CELLS } = await import(
-    "../src/lib/rexonance-suit-gold.ts"
-  );
+  const { REXONANCE_SUIT_GOLD_CELL, REXONANCE_SUIT_GOLD_CELLS } =
+    await import("../src/lib/rexonance-suit-gold.ts");
   const { REXONANCE_SUIT_DRIVER } = await import("../src/lib/rexonance-calls.ts");
   const pieces = REXONANCE_SUIT_PIECES.map((piece) => ({
     ...piece,
@@ -1023,13 +1022,12 @@ test("the gold forms by nanites right after each plate lands; the driver is on f
     maskTile: REXONANCE_SUIT_TILE,
     tile: 12,
   });
-  const preset = plan.tiles.filter((tile) => tile.preset);
-  assert.ok(preset.length > 0);
-  assert.ok(preset.every((tile) => tile.t1 < 0), "the driver is welded from the start");
+  // The driver is drawn whole from its cut-outs (never chopped into tiles).
+  const driverIds = new Set(REXONANCE_SUIT_DRIVER);
+  assert.ok(plan.tiles.every((tile) => !driverIds.has(tile.pieceId)));
   const landed = new Map();
   for (const tile of plan.tiles)
-    if (!tile.preset && tile.pieceId)
-      landed.set(tile.pieceId, Math.max(landed.get(tile.pieceId) ?? 0, tile.t1));
+    if (tile.pieceId) landed.set(tile.pieceId, Math.max(landed.get(tile.pieceId) ?? 0, tile.t1));
   const gold = planAssemblyGold({
     pieces,
     gold: { atlas: "", cell: REXONANCE_SUIT_GOLD_CELL, cells: REXONANCE_SUIT_GOLD_CELLS },
