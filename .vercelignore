@@ -1,1 +1,5 @@
 # Build inputs must remain available for archive regeneration and release gates.
+# Local verification captures and browser traces are not deployment inputs.
+artifacts/
+scratch/
+docs/rx17-publish-20261012.md
