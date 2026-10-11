@@ -195,6 +195,49 @@ export const REXONANCE_SUIT_FIT: Readonly<Record<string, number>> = Object.fromE
 export const REXONANCE_SUIT_ACCENTS: readonly string[] = REXONANCE_SUIT_CASCADE.filter(
   ({ group }) => group in REXONANCE_SUIT_SNAP,
 ).map(({ order }) => order[order.length - 1]);
+/** rx17 (owner, 2026-10-11): the gold is formed by nanomachines right
+ * after each plate is fitted. A plate seats without it (its trims raw
+ * gunmetal channels); from its clank, gold nanites much finer than the
+ * plate's micro-tiles run along the trims from the seat outward like
+ * molten metal through a channel, each a bright mote that settles into the
+ * painted gold, and a glint runs the finished trim. Each DEUS！ accent
+ * forms its gold as a surge that runs on through its whole group's gold.
+ * The helmet's gold is complete before the face's pixel squares fill.
+ * Times are ms on the overlay's clock. */
+export const REXONANCE_SUIT_GOLD = {
+  /** After the plate's fit (its clank). */
+  delay: 6,
+  /** A plate's gold forms over this long. */
+  form: 200,
+  /** The DEUS！ accents form theirs as a surge. */
+  accent: 240,
+  /** The helmet's plates: done before the face's pixel squares fill. */
+  helm: 90,
+  /** A gold mote's flight into its cell. */
+  approach: 45,
+  /** A formed cell cools from molten to the painted gold. */
+  cool: 70,
+  /** The glint along a finished trim. */
+  glint: 140,
+  /** An accent's surge on through its group's gold. */
+  surge: 260,
+} as const;
+/** When each plate's gold forms, by id: its first and last cell (ms). */
+export const REXONANCE_SUIT_GOLD_AT: Readonly<Record<string, readonly [number, number]>> =
+  Object.fromEntries(
+    REXONANCE_SUIT_CASCADE.flatMap(({ group, order }) =>
+      order.map((id) => {
+        const from = REXONANCE_SUIT_FIT[id] + REXONANCE_SUIT_GOLD.delay;
+        const span =
+          group === "helm"
+            ? REXONANCE_SUIT_GOLD.helm
+            : REXONANCE_SUIT_ACCENTS.includes(id)
+              ? REXONANCE_SUIT_GOLD.accent
+              : REXONANCE_SUIT_GOLD.form;
+        return [id, [from, from + span] as const];
+      }),
+    ),
+  );
 /** RIDER！'s nanite motes gather from here (and are spent by the waist's snap). */
 export const REXONANCE_SUIT_MOTES = REXONANCE_CALL_BEATS[1].start;
 /** REXONANCE DEUS！: pixel squares fill the face's lights, then scatter. */

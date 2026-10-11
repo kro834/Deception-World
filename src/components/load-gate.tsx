@@ -857,6 +857,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
   // Keep the suit ready on the public pages, but never compete with the
   // opening's title/video/World handoff. Leaving the opening schedules it
   // after that destination's own load; route changes cancel stale idle jobs.
+  // rx17 (owner): soon after each page's load, with the call's own chunk.
   useEffect(() => scheduleRexonanceSuitWarm(), [pathname]);
   const rexonanceCoverCancel = useRef<(() => void) | null>(null);
   const openingHandoff = useRef<OpeningHandoffRuntime | null>(null);

@@ -235,6 +235,7 @@ async function suitFixture({
   return {
     images,
     module,
+    window: globalThis.window,
     load: () => images.forEach((image) => image.onload?.()),
     timers,
     idles,
@@ -272,9 +273,12 @@ test("The suit-up's pieces decode once on intent, then the call may build", asyn
 });
 
 test("The suit-up never warms on data saving or where the call rests on a still", async () => {
+  // rx17 (owner request 2026-10-11, "preload it"): 3G now warms; only
+  // Save-Data and 2G wait (alongside the still tiers).
   for (const options of [
     { connection: { saveData: true } },
-    { connection: { effectiveType: "3g" } },
+    { connection: { effectiveType: "2g" } },
+    { connection: { effectiveType: "slow-2g" } },
     { reduced: true },
     { economy: true },
   ]) {
@@ -321,7 +325,9 @@ test("rx13: the suit-up warms in advance, at idle after the page has loaded", as
   } finally {
     f.restore();
   }
-  for (const options of [{ pathname: "/rexonance-saga" }, { reduced: true }]) {
+  // rx17 (owner request 2026-10-11, "preload it"): /rexonance-saga itself
+  // warms too (later; see below), so only the still tiers stay out here.
+  for (const options of [{ reduced: true }, { economy: true }]) {
     const g = await suitFixture(options);
     try {
       g.module.scheduleRexonanceSuitWarm();
@@ -331,5 +337,160 @@ test("rx13: the suit-up warms in advance, at idle after the page has loaded", as
     } finally {
       g.restore();
     }
+  }
+});
+
+test("rx17: 3G preloads the suit-up too", async () => {
+  const f = await suitFixture({ connection: { effectiveType: "3g" } });
+  try {
+    const first = f.module.warmRexonanceSuit();
+    assert.equal(
+      f.images.length,
+      (await import("../src/lib/rexonance-suit.ts")).REXONANCE_SUIT_ASSETS.length,
+    );
+    f.load();
+    assert.equal(await first, true);
+  } finally {
+    f.restore();
+  }
+});
+
+test("rx17: the idle warm-up starts every layer at low priority; the call shares it", async () => {
+  const { REXONANCE_SUIT_ASSETS, REXONANCE_SUIT_ATLAS, REXONANCE_SUIT_GOLD_ATLAS } =
+    await import("../src/lib/rexonance-suit.ts");
+  // The engine's atlas and its gold come first.
+  assert.deepEqual(REXONANCE_SUIT_ASSETS.slice(0, 2), [
+    REXONANCE_SUIT_ATLAS.src,
+    REXONANCE_SUIT_GOLD_ATLAS.src,
+  ]);
+  const f = await suitFixture();
+  try {
+    f.module.scheduleRexonanceSuitWarm();
+    f.timers.shift()(); // the delay after load
+    assert.equal(f.images.length, 0, "only in an idle slot");
+    f.idles.shift()();
+    // Owner's initial-load budget (2026-10-11): every layer at once, low.
+    assert.equal(f.images.length, REXONANCE_SUIT_ASSETS.length);
+    assert.ok(f.images.every((image) => image.fetchPriority === "low"));
+    // The call starts: it shares the same warm-up.
+    const call = f.module.warmRexonanceSuit("high");
+    for (const image of f.images) image.onload();
+    assert.equal(await call, true);
+    assert.equal(f.module.isRexonanceSuitReady(), true);
+    for (const run of [...f.idles]) run();
+    assert.equal(f.images.length, REXONANCE_SUIT_ASSETS.length, "never fetched twice");
+  } finally {
+    f.restore();
+  }
+});
+
+test("rx17: the engine draws the warm-up's own decoded layers (bitmaps where supported)", async () => {
+  const {
+    REXONANCE_SUIT_ASSETS,
+    REXONANCE_SUIT_ATLAS,
+    REXONANCE_SUIT_GOLD_ATLAS,
+    REXONANCE_SUIT_BODY,
+  } = await import("../src/lib/rexonance-suit.ts");
+  const saved = ["createImageBitmap", "fetch"].map((key) => [
+    key,
+    Object.getOwnPropertyDescriptor(globalThis, key),
+  ]);
+  const restore = () => {
+    for (const [key, descriptor] of saved) {
+      if (descriptor) Object.defineProperty(globalThis, key, descriptor);
+      else delete globalThis[key];
+    }
+  };
+  // Older Safari: no createImageBitmap — the decoded images themselves.
+  Object.defineProperty(globalThis, "createImageBitmap", { configurable: true, value: undefined });
+  let f = await suitFixture();
+  try {
+    const warm = f.module.warmRexonanceSuit();
+    assert.equal(f.module.rexonanceSuitSource(REXONANCE_SUIT_ATLAS.src), null);
+    f.load();
+    assert.equal(await warm, true);
+    for (const src of [REXONANCE_SUIT_ATLAS.src, REXONANCE_SUIT_GOLD_ATLAS.src])
+      assert.equal(
+        f.module.rexonanceSuitSource(src),
+        f.images.find((image) => image.src === src),
+      );
+    assert.equal(f.module.rexonanceSuitSource(REXONANCE_SUIT_BODY.src), null);
+  } finally {
+    f.restore();
+  }
+  // Where supported: bitmaps decoded from the fetched files (off the main
+  // thread); the atlas is warmed as an image too, for the CSS plates.
+  const fetched = [];
+  Object.defineProperty(globalThis, "fetch", {
+    configurable: true,
+    value: async (src, init) => {
+      fetched.push([src, init.priority]);
+      return { ok: true, blob: async () => ({ blobOf: src }) };
+    },
+  });
+  Object.defineProperty(globalThis, "createImageBitmap", {
+    configurable: true,
+    value: async (blob) => ({ bitmapOf: blob.blobOf }),
+  });
+  f = await suitFixture();
+  try {
+    const warm = f.module.warmRexonanceSuit();
+    for (let turn = 0; turn < 6; turn += 1) {
+      await new Promise((resolve) => setImmediate(resolve));
+      f.load();
+    }
+    assert.equal(await warm, true);
+    assert.deepEqual(fetched, [
+      [REXONANCE_SUIT_ATLAS.src, "low"],
+      [REXONANCE_SUIT_GOLD_ATLAS.src, "low"],
+    ]);
+    assert.deepEqual(f.module.rexonanceSuitSource(REXONANCE_SUIT_ATLAS.src), {
+      bitmapOf: REXONANCE_SUIT_ATLAS.src,
+    });
+    assert.deepEqual(f.module.rexonanceSuitSource(REXONANCE_SUIT_GOLD_ATLAS.src), {
+      bitmapOf: REXONANCE_SUIT_GOLD_ATLAS.src,
+    });
+    // Images: every CSS layer and the atlas; never the gold (no CSS uses it).
+    assert.deepEqual(
+      f.images.map((image) => image.src).sort(),
+      REXONANCE_SUIT_ASSETS.filter((src) => src !== REXONANCE_SUIT_GOLD_ATLAS.src).sort(),
+    );
+  } finally {
+    f.restore();
+    restore();
+  }
+});
+
+test("rx17: it warms on every route the visitor reaches; /rexonance-saga waits for intent", async () => {
+  // The owner (1be03ff): the opening and /rexonance-saga itself never warm;
+  // leaving them schedules the warm on the next route (LoadGate's [pathname]).
+  for (const pathname of ["/", "/rexonance-saga"]) {
+    const f = await suitFixture({ pathname });
+    try {
+      f.module.scheduleRexonanceSuitWarm();
+      for (const run of [...f.timers, ...f.idles]) run();
+      assert.equal(f.images.length, 0, pathname);
+    } finally {
+      f.restore();
+    }
+  }
+  const g = await suitFixture({ pathname: "/world" });
+  try {
+    g.module.scheduleRexonanceSuitWarm();
+    g.timers.shift()();
+    g.idles.at(-1)();
+    assert.ok(g.images.length > 0);
+  } finally {
+    g.restore();
+  }
+  // A cancelled schedule never starts.
+  const h = await suitFixture();
+  try {
+    const off = h.module.scheduleRexonanceSuitWarm();
+    off();
+    for (const run of [...h.timers, ...h.idles]) run();
+    assert.equal(h.images.length, 0);
+  } finally {
+    h.restore();
   }
 });
