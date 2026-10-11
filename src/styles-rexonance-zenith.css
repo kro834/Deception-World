@@ -561,6 +561,9 @@ html[data-family="special"]
     --rzn-fig-b: 0.17;
     --rzn-gutter: 18px;
     height: max(560px, calc(100svh - var(--dxs-nav)));
+    /* A portrait tablet (1024x1366) left a band of empty runway under the
+       read-out: stacked screens take the whole screen. */
+    max-height: none;
   }
 
   /* The call across the top, the read-out along the bottom. */
@@ -686,6 +689,18 @@ html[data-family="special"]
 
   html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-hint {
     margin-top: 10px;
+  }
+}
+
+/* Portrait tablets: the whole screen is the frame; the figure takes more
+   of it (the call needs no more room than on a phone). */
+@media (min-width: 761px) and (max-width: 1099.98px) and (orientation: portrait) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rzn-suitup
+    > .rzn-frame {
+    --rzn-fig-h: 0.66;
   }
 }
 
@@ -835,7 +850,10 @@ html[data-family="special"]
 
 /* ================================================================
    Motion: the HUD answers the engine's flags; the rail follows the
-   runway (named view timeline). Gated.
+   runway (named view timeline). Gated. The call's chips and the parts
+   switch on their beat (the scroll is their timing; a transition on
+   each of twenty cells started a compositor animation per beat and
+   re-layered the frame); only the stamp lands.
    ================================================================ */
 @media (prefers-reduced-motion: no-preference) {
   html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
@@ -844,7 +862,7 @@ html[data-family="special"]
     body
     .rxs-page.rxs-page.rxs-rexonance-page
     > .rzn-suitup[data-rzn-state="live"]
-    :is(.rzn-chip, .rzn-part, .rzn-stamp) {
+    .rzn-stamp {
     transition:
       opacity 160ms ease-out,
       scale 260ms cubic-bezier(0.18, 1.5, 0.32, 1);
@@ -964,6 +982,21 @@ html[data-family="special"]
   .rzn-callout.is-core {
   top: 32%;
   left: 56.8%;
+  /* PROCESSING CORE is the widest label: it stops short of the stage's
+     edge instead of running into it (1100–1440px). */
+  right: 0;
+}
+
+/* …and runs a little tighter, clear of its own lock-on ring. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rxs-hero
+  .rxs-hero-visual
+  .rzn-callout.is-core
+  > span
+  > em {
+  letter-spacing: 0.14em;
 }
 
 html[data-family="special"]
@@ -1171,6 +1204,39 @@ html[data-family="special"]
       > .rzn-form-code {
       font-size: clamp(40px, 5.6vw, 98px);
     }
+  }
+}
+
+/* Below 901px the copy block dissolves into the panel's grid (the
+   finish layer): the code took the panel's corner, on the art's top edge
+   and mostly behind it. It stands behind the form's name and title
+   instead — their two rows, under the art. */
+@media (max-width: 900px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages .rxs-stage-panel {
+    isolation: isolate;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > #stages
+    .rxs-stage-panel
+    > div
+    > .rzn-form-code {
+    grid-row: 2 / 4;
+    grid-column: 1;
+  }
+
+  /* ULTRA 60s fits beside its name chip. */
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > #stages
+    .rxs-stage-tabs[data-stage="ultra"]
+    ~ .rxs-stage-panel
+    > div
+    > .rzn-form-code {
+    font-size: clamp(26px, 8.4vw, 64px);
   }
 }
 
@@ -1447,6 +1513,10 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-fo
     height: 64%;
     translate: 50% 0;
     --rzn-end-o: 0.55;
+    /* The kicker and the last line sit over the figure's legs: the helmet,
+       shoulders and core stay, the rest fades under the copy. */
+    -webkit-mask-image: linear-gradient(180deg, #000 30%, rgb(0 0 0 / 40%) 58%, transparent 84%);
+    mask-image: linear-gradient(180deg, #000 30%, rgb(0 0 0 / 40%) 58%, transparent 84%);
   }
 
   html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-footer h2 {
@@ -1557,7 +1627,7 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-fo
    timeline-scope); the read-out box rides the armour's own push-in
    ================================================================ */
 @supports (animation-timeline: view()) and (animation-range: entry 0% entry 100%) {
-  @media (prefers-reduced-motion: no-preference) and (min-width: 1100px) {
+  @media (prefers-reduced-motion: no-preference) and (forced-colors: none) and (min-width: 1100px) {
     html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
         [data-loading]
       ):not([data-dialog-open])
@@ -2322,13 +2392,27 @@ html[data-family="special"]
     background: none;
   }
 
+  /* Every part's cell (the even ones were pink, which forced colours
+     paints out). */
   html[data-family="special"]
     body
     .rxs-page.rxs-page.rxs-rexonance-page
     > .rzn-suitup
-    .rzn-part::after {
+    .rzn-part:nth-child(n)::after {
     background: CanvasText;
     box-shadow: none;
+  }
+
+  /* On stacked screens the end figure stands behind the last line: in
+     forced colours the line stands alone. */
+  @media (max-width: 900px) {
+    html[data-family="special"]
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page
+      > .rxs-footer
+      > .rzn-end-figure {
+      display: none;
+    }
   }
 }
 

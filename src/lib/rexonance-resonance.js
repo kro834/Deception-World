@@ -766,6 +766,16 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   const counter = runway.querySelector(".rzn-count");
   const restPercent = percent?.textContent ?? "";
   const restCount = counter?.textContent ?? "";
+  // The read-outs change every frame of a scrub: rewrite their text node's
+  // data (as RESONANCE's count-ups do) rather than the element's content.
+  // A replaced node is a tree change, and the shell's :has() rules then
+  // restyle <html> and <body> on every frame.
+  const writeText = (element, text) => {
+    const node = element.firstChild;
+    if (node && node.nodeType === 3 && !node.nextSibling) {
+      if (node.data !== text) node.data = text;
+    } else element.textContent = text;
+  };
   const { width: W, height: H } = config.size;
   let disposed = false;
   let live = false;
@@ -1334,12 +1344,12 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     const share = String(Math.round(100 * clamp01(progress / B.complete))).padStart(3, "0");
     if (percent && share !== hud.percent) {
       hud.percent = share;
-      percent.textContent = share;
+      writeText(percent, share);
     }
     const count = `${grouped(landedBy(progress))} / ${grouped(plan.tiles.length)}`;
     if (counter && count !== hud.count) {
       hud.count = count;
-      counter.textContent = count;
+      writeText(counter, count);
     }
     const complete = progress >= B.complete;
     if (complete !== hud.complete) {
@@ -1432,8 +1442,8 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     }
     parts.forEach((part) => setFlag(part, "data-on", false));
     Object.assign(hud, { line: -1, chips: "", parts: -1, percent: "", count: "", complete: null });
-    if (percent) percent.textContent = restPercent;
-    if (counter) counter.textContent = restCount;
+    if (percent) writeText(percent, restPercent);
+    if (counter) writeText(counter, restCount);
     pendingSize = null;
     canvas.width = canvas.height = 0;
     if (settled) settled.width = settled.height = 0;

@@ -300,6 +300,19 @@ test("text keeps its 12px floor; generated text is silent; forced colours drop t
   ]) {
     assert.ok(forced.includes(ornament), ornament);
   }
+  // The lock-ons are shown only by their motion rules, and those leave
+  // forced colours out (a stronger selector there beat the hide above).
+  for (const { selector, body, context } of sheet.rules) {
+    if (selector.includes(".rzn-callouts") && /display:\s*block/.test(body))
+      assert.ok(
+        context.some((at) => /forced-colors:\s*none/.test(at)),
+        `${selector} shows the lock-ons in forced colours`,
+      );
+  }
+  // Every part's cell stays lit (the even cells' pink is painted out).
+  assert.match(forced, /\.rzn-part:nth-child\(n\)::after \{[^}]*background: CanvasText/);
+  // Where the end figure stands behind the last line, forced colours drop it.
+  assert.match(forced, /\.rzn-end-figure \{\s*display: none;/);
 });
 
 test("the scene is decorative and reads only the suit fields every revision keeps", () => {
@@ -494,8 +507,25 @@ function environment({ reduced = false, economy = false, forced = false } = {}) 
   const frameBox = element({ offsetHeight: 837 });
   const lines = [0, 1, 2, 3, 4].map(() => element({ querySelectorAll: () => [element()] }));
   const parts = ASSEMBLY_PARTS.map(() => element());
-  const percent = element({ textContent: "100" });
-  const counter = element({ textContent: "ONLINE" });
+  // The read-outs hold one text node, as React renders them; the engine
+  // must rewrite its data, never replace it (a tree change per frame
+  // restyles <html> and <body> through the shell's :has() rules).
+  const textHost = (text) => {
+    const host = element();
+    const node = { nodeType: 3, data: text, nextSibling: null };
+    host.replaced = 0;
+    host.firstChild = node;
+    Object.defineProperty(host, "textContent", {
+      get: () => node.data,
+      set: (value) => {
+        host.replaced += 1;
+        node.data = String(value);
+      },
+    });
+    return host;
+  };
+  const percent = textHost("100");
+  const counter = textHost("ONLINE");
   let top = 900;
   const runway = element({
     ownerDocument: document,
@@ -684,6 +714,7 @@ test("near the view it goes live, scrubs with the scroll, writes the HUD on chan
   assert.equal(t.runway.dataset.rznState, undefined);
   assert.equal(t.percent.textContent, "100");
   assert.equal(t.counter.textContent, "ONLINE");
+  assert.equal(t.percent.replaced + t.counter.replaced, 0, "the read-outs rewrite their text node");
   assert.equal(t.canvas.width, 0);
   assert.equal([...t.listeners.keys()].length, 0, [...t.listeners.keys()].join());
   assert.equal(t.frames.size, 0);
