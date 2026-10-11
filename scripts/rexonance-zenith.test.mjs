@@ -159,6 +159,12 @@ test("browser QA captures the requested viewports and both directions with canva
   assert.match(browserHarness, /alphaPixels/);
   assert.match(browserHarness, /pixelHash/);
   assert.match(browserHarness, /reduced-motion-static\.png/);
+  assert.match(browserHarness, /rxs-stage-tab-\$\{captureForm\}/);
+  assert.match(browserHarness, /Math\.abs\(frame\.getBoundingClientRect\(\)\.top - pin\)/);
+  assert.match(browserHarness, /\.rzn-stamp/, "stamp bounds are captured");
+  assert.match(browserHarness, /\.rzn-count/, "nanite count bounds are captured");
+  assert.match(browserHarness, /\.zeus-button/, "Zeus bounds are captured");
+  assert.match(browserHarness, /stamp\/count\/Zeus overlap/);
   assert.match(browserHarness, /evidence\.drawCalls > 0/);
   assert.match(browserHarness, /evidence\.alphaPixels > 0/);
   assert.match(browserHarness, /waitForCanvasConvergence/);

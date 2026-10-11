@@ -219,6 +219,39 @@ const canvasEvidence = async (page) =>
     };
   });
 
+const hudGeometry = async (page) =>
+  page.evaluate(() => {
+    const names = ["stamp", "count", "zeus"];
+    const selectors = [".rzn-stamp", ".rzn-count", ".zeus-button"];
+    const boxes = Object.fromEntries(
+      selectors.map((selector, index) => {
+        const element = document.querySelector(selector);
+        const rect = element?.getBoundingClientRect();
+        const style = element ? getComputedStyle(element) : null;
+        return [
+          names[index],
+          rect && style && style.display !== "none" && style.visibility !== "hidden"
+            ? { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom }
+            : null,
+        ];
+      }),
+    );
+    const pairs = [
+      ["stamp", "count"],
+      ["stamp", "zeus"],
+      ["count", "zeus"],
+    ];
+    const overlaps = pairs.flatMap(([first, second]) => {
+      const a = boxes[first];
+      const b = boxes[second];
+      if (!a || !b) return [];
+      const width = Math.min(a.right, b.right) - Math.max(a.left, b.left);
+      const height = Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top);
+      return width > 1 && height > 1 ? [{ first, second, width, height }] : [];
+    });
+    return { boxes, overlaps };
+  });
+
 async function functional(engine, label, profile, { connection, noTimeline = false } = {}) {
   const context = await engine.newContext(profile);
   await installCanvasDrawProbe(context);
@@ -277,6 +310,39 @@ async function functional(engine, label, profile, { connection, noTimeline = fal
       );
       report.functional.push({ label, hash, ...end });
     } else if (profile.reducedMotion === "reduce") {
+      const formTab = page.locator(`#rxs-stage-tab-${captureForm}`);
+      assert.equal(await formTab.count(), 1, `${label}: missing ${captureForm} form tab`);
+      if ((await formTab.getAttribute("aria-selected")) !== "true") {
+        await formTab.click();
+        await page.waitForFunction(
+          (form) =>
+            document.querySelector(`#rxs-stage-tab-${form}`)?.getAttribute("aria-selected") ===
+            "true",
+          captureForm,
+        );
+        await page.waitForFunction(
+          (form) => document.querySelector(".rzn-suitup")?.dataset.form === form,
+          captureForm,
+        );
+      }
+      await page.evaluate(() => {
+        const runway = document.querySelector(".rzn-suitup");
+        const frame = runway.querySelector(".rzn-frame");
+        const pin = parseFloat(getComputedStyle(frame).top) || 0;
+        scrollTo({
+          top: Math.max(0, runway.getBoundingClientRect().top + scrollY - pin),
+          behavior: "instant",
+        });
+      });
+      await page.waitForFunction(() => {
+        const runway = document.querySelector(".rzn-suitup");
+        const frame = runway?.querySelector(".rzn-frame");
+        if (!runway || !frame) return false;
+        const pin = parseFloat(getComputedStyle(frame).top) || 0;
+        return Math.abs(frame.getBoundingClientRect().top - pin) <= 2;
+      });
+      const staticHud = await hudGeometry(page);
+      assert.deepEqual(staticHud.overlaps, [], `${label}: static stamp/count/Zeus overlap`);
       assert.equal(start.state, undefined, `${label}: reduced motion must keep the static scene`);
       const evidence = await canvasEvidence(page);
       assert.equal(
@@ -300,14 +366,16 @@ async function functional(engine, label, profile, { connection, noTimeline = fal
         0,
         `${label}: reduced motion must not animate the scene`,
       );
-      await page.screenshot({ path: `${out}/${label}-reduced-motion-static.png` });
+      await page.screenshot({ path: `${out}/${label}-${captureForm}-reduced-motion-static.png` });
       report.functional.push({
         label,
+        form: captureForm,
         geometry,
+        hud: staticHud,
         ...start,
         evidence,
         motion,
-        screenshot: `${label}-reduced-motion-static.png`,
+        screenshot: `${label}-${captureForm}-reduced-motion-static.png`,
       });
     } else {
       const formTab = page.locator(`#rxs-stage-tab-${captureForm}`);
@@ -491,6 +559,13 @@ async function functional(engine, label, profile, { connection, noTimeline = fal
             ? await waitForCanvasConvergence(page, `${label}/${direction}/${progress}/final`)
             : null;
         const settledEvidence = finalConvergence ? await canvasEvidence(page) : evidence;
+        const hud = direction === "forward" && progress === 1 ? await hudGeometry(page) : null;
+        if (hud)
+          assert.deepEqual(
+            hud.overlaps,
+            [],
+            `${label} ${direction}/${progress}: stamp/count/Zeus overlap ${JSON.stringify(hud)}`,
+          );
         if (direction === "forward" && progress >= 0.975)
           forwardHashes.add(settledEvidence.pixelHash);
         const screenshot = `${label}-${captureForm}-${direction}-${name}.png`;
@@ -502,6 +577,7 @@ async function functional(engine, label, profile, { connection, noTimeline = fal
           ...state,
           geometry,
           canvas: settledEvidence,
+          hud,
           convergence: finalConvergence || convergence,
           screenshot,
         });
