@@ -13,6 +13,58 @@ const source = readFileSync(new URL("../src/components/load-gate.tsx", import.me
 const code = ts.transpileModule(source, {
   compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX },
 }).outputText;
+const entryPreparationCode = ts.transpileModule(
+  readFileSync(new URL("../src/lib/rexonance-entry-preparation.ts", import.meta.url), "utf8"),
+  { compilerOptions: { module: ts.ModuleKind.CommonJS } },
+).outputText;
+
+async function flushUntil(ui, ready, message, { timers = false, limit = 24 } = {}) {
+  for (let index = 0; index < limit && !ready(); index++) {
+    await ui.flushFrames();
+    if (timers) await ui.flushTimers();
+  }
+  assert.ok(ready(), message);
+}
+
+async function reachRexonanceHold(ui) {
+  await flushUntil(
+    ui,
+    () => {
+      const gate = ui.gates.at(-1);
+      return (
+        gate?.active &&
+        gate.phase === "covering" &&
+        gate.rexonanceCall &&
+        ui.activeObservers() === 1 &&
+        ui.pendingTimers() > 0
+      );
+    },
+    "the painted Rexonance call must reach its cancellable, timed hold",
+  );
+}
+
+// A missing frame, leaked hold or never-settling preparation must fail the
+// regression in a bounded flush budget, not leave the whole test run hung.
+async function settleGo(ui, pending) {
+  let settled = false;
+  let failure;
+  void pending.then(
+    () => {
+      settled = true;
+    },
+    (error) => {
+      failure = error;
+      settled = true;
+    },
+  );
+  await flushUntil(
+    ui,
+    () => settled,
+    "the route operation must settle without a stuck frame or hold",
+    { timers: true },
+  );
+  if (failure) throw failure;
+}
 
 test("a missing Rexonance renderer continues under the normal cover", async () => {
   const ui = mount("/world", {
@@ -25,7 +77,7 @@ test("a missing Rexonance renderer continues under the normal cover", async () =
     await ui.flushFrames();
     await ui.flushTimers();
   }
-  await pending;
+  await settleGo(ui, pending);
   assert.equal(ui.navigations.length, 1);
   assert.ok(ui.gates.some((gate) => gate.active && gate.rexonanceCall === null));
   assert.equal(ui.activeObservers(), 0);
@@ -49,7 +101,7 @@ for (const action of ["BACK", "hidden", "unmount"]) {
     if (action === "BACK") ui.history("BACK");
     else if (action === "hidden") ui.visibility(true);
     else ui.cleanup();
-    await pending;
+    await settleGo(ui, pending);
     release(() => null);
     assert.equal(ui.navigations.length, 0);
     assert.equal(ui.root.dataset.loading, undefined);
@@ -58,7 +110,10 @@ for (const action of ["BACK", "hidden", "unmount"]) {
   });
 }
 
-function mount(pathname = "/world", { preload, prepareCalls } = {}) {
+function mount(
+  pathname = "/world",
+  { preload, prepareCalls, suitReady = false, warmSuit, preparePlan } = {},
+) {
   class KeyboardEvent extends Event {
     constructor(type, options = {}) {
       super(type);
@@ -89,8 +144,11 @@ function mount(pathname = "/world", { preload, prepareCalls } = {}) {
     gates = [],
     alignments = [],
     fallbacks = [],
-    queries = [];
+    queries = [],
+    routePreloads = [],
+    signals = [];
   let serial = 0;
+  let suitWarmHolds = 0;
   let releaseWarmup;
   const warmup = new Promise((resolve) => {
     releaseWarmup = resolve;
@@ -134,7 +192,10 @@ function mount(pathname = "/world", { preload, prepareCalls } = {}) {
     clearInterval: (id) => timers.delete(id),
   });
   const router = {
-    preloadRoute: (destination) => (preload ? preload(destination) : warmup),
+    preloadRoute: (destination) => {
+      routePreloads.push(destination);
+      return preload ? preload(destination) : warmup;
+    },
     subscribe: () => () => undefined,
     history: {
       subscribe(callback) {
@@ -144,6 +205,8 @@ function mount(pathname = "/world", { preload, prepareCalls } = {}) {
     },
   };
   const exports = {};
+  const entryPreparation = {};
+  runInNewContext(entryPreparationCode, { exports: entryPreparation, window: win });
   runInNewContext(code, {
     exports,
     window: win,
@@ -168,6 +231,7 @@ function mount(pathname = "/world", { preload, prepareCalls } = {}) {
             (value) => {
               if (value && typeof value === "object" && "active" in value) gates.push(value);
               if (value && typeof value === "object" && "href" in value) fallbacks.push(value);
+              if (typeof value === "string") signals.push(value);
             },
           ],
         };
@@ -188,14 +252,27 @@ function mount(pathname = "/world", { preload, prepareCalls } = {}) {
       if (name === "@/lib/route-warmup-deadline") return { preloadRouteWithDeadline };
       if (name === "@/lib/rexonance-calls")
         return { REXONANCE_ENTRY_TIMINGS, REXONANCE_SUIT_LATE_MS: 300 };
-      // rx12: the suit-up's pieces never decode here, so the call stands whole.
+      if (name === "@/lib/rexonance-entry-preparation") return entryPreparation;
+      // Most cases keep layers cold. Prepared-layer cases exercise the
+      // bounded plan wait; explicit warmSuit cases hold the real decoder wait.
       if (name === "@/lib/rexonance-suit-warmup")
         return {
-          warmRexonanceSuit: () => new Promise(() => {}),
-          isRexonanceSuitReady: () => false,
+          warmRexonanceSuit: warmSuit ?? (() => Promise.resolve(suitReady)),
+          isRexonanceSuitReady: () => suitReady,
           // rx13: the idle warm-up never runs here.
           scheduleRexonanceSuitWarm: () => () => {},
+          pauseRexonanceSuitWarmup: () => {
+            suitWarmHolds += 1;
+            let released = false;
+            return () => {
+              if (released) return;
+              released = true;
+              suitWarmHolds -= 1;
+            };
+          },
         };
+      if (name === "./rexonance-saga/rexonance-suit-plan")
+        return { prepareRexonanceSuit: preparePlan ?? (() => Promise.resolve(true)) };
       if (name === "@/lib/rexonance-transition-loader")
         return {
           prepareRexonanceTransition:
@@ -222,7 +299,13 @@ function mount(pathname = "/world", { preload, prepareCalls } = {}) {
     alignments,
     fallbacks,
     queries,
+    routePreloads,
+    signals,
     releaseWarmup,
+    setSuitReady: (ready) => {
+      suitReady = ready;
+    },
+    suitWarmHolds: () => suitWarmHolds,
     activeObservers: () => observers.size,
     pendingTimers: () => timers.size,
     reduceMotion: () => {
@@ -269,7 +352,7 @@ for (const to of [
       await ui.flushFrames();
       await ui.flushTimers();
     }
-    await pending;
+    await settleGo(ui, pending);
     assert.equal(ui.navigations.length, 0, "an unmounted provider must not navigate");
     assert.equal(ui.gates.length, gateUpdates, "an unmounted provider must not update its cover");
     assert.equal(ui.root.dataset.loading, undefined);
@@ -291,7 +374,7 @@ for (const mode of ["full", "economy", "reduced"]) {
       await ui.flushFrames();
       await ui.flushTimers();
     }
-    await pending;
+    await settleGo(ui, pending);
     assert.deepEqual(
       ui.navigations.map(({ to }) => to),
       ["/gallery"],
@@ -334,7 +417,7 @@ for (const phase of ["warmup", "hold", "reveal"]) {
         await ui.flushFrames();
         await ui.flushTimers();
       }
-      await Promise.all([stale, latest]);
+      await settleGo(ui, Promise.all([stale, latest]));
       assert.equal(
         ui.navigations.filter(({ to }) => to === "/gallery").length,
         phase === "reveal" ? 1 : 0,
@@ -361,7 +444,7 @@ for (const action of ["BACK", "FORWARD", "GO"]) {
     );
     ui.releaseWarmup();
     for (let index = 0; index < 8; index++) await ui.flushTimers();
-    await pending;
+    await settleGo(ui, pending);
     assert.equal(ui.navigations.length, 0, "the superseded destination must not replace history");
     assert.equal(ui.gates.at(-1).active, false);
     ui.cleanup();
@@ -373,13 +456,12 @@ for (const action of ["BACK", "FORWARD", "GO", "pagehide", "unmount"]) {
     const ui = mount();
     const pending = ui.go({ to: "/rexonance-saga" });
     ui.releaseWarmup();
-    await ui.flushFrames();
-    await ui.flushFrames();
+    await reachRexonanceHold(ui);
     assert.equal(ui.activeObservers(), 1, "the live-preference hold is registered");
     if (action === "pagehide") ui.pagehide();
     else if (action === "unmount") ui.cleanup();
     else ui.history(action);
-    await pending;
+    await settleGo(ui, pending);
     await ui.flushTimers();
     assert.equal(ui.navigations.length, 0, "a cancelled call must never commit later");
     assert.equal(ui.activeObservers(), 0, "the preference observer is released");
@@ -394,15 +476,14 @@ test("enabling reduced motion during the Rexonance hold ends its cinematic wait"
   const ui = mount();
   const pending = ui.go({ to: "/rexonance-saga" });
   ui.releaseWarmup();
-  await ui.flushFrames();
-  await ui.flushFrames();
+  await reachRexonanceHold(ui);
   assert.equal(ui.activeObservers(), 1);
   ui.reduceMotion();
   for (let index = 0; index < 16; index++) {
     await ui.flushFrames();
     await ui.flushTimers();
   }
-  await pending;
+  await settleGo(ui, pending);
   assert.equal(ui.navigations.length, 1);
   assert.equal(ui.activeObservers(), 0);
   assert.equal(ui.gates.at(-1).active, false);
@@ -426,7 +507,7 @@ test("hiding Rexonance before its first painted cover cancels the queued navigat
       await ui.flushFrames();
       await ui.flushTimers();
     }
-    await pending;
+    await settleGo(ui, pending);
     assert.equal(ui.navigations.length, 0, "returning to the tab must not revive a cancelled call");
   } finally {
     ui.cleanup();
@@ -437,8 +518,7 @@ test("enabling economy rendering during the Rexonance hold ends its cinematic wa
   const ui = mount();
   const pending = ui.go({ to: "/rexonance-saga" });
   ui.releaseWarmup();
-  await ui.flushFrames();
-  await ui.flushFrames();
+  await reachRexonanceHold(ui);
   assert.equal(ui.activeObservers(), 1);
   ui.economy();
   assert.equal(ui.activeObservers(), 0, "the live preference releases the hold immediately");
@@ -446,7 +526,7 @@ test("enabling economy rendering during the Rexonance hold ends its cinematic wa
     await ui.flushFrames();
     await ui.flushTimers();
   }
-  await pending;
+  await settleGo(ui, pending);
   assert.equal(ui.navigations.length, 1);
   assert.equal(ui.gates.at(-1).active, false);
   assert.equal(ui.root.dataset.loading, undefined);
@@ -457,10 +537,13 @@ test("a stalled Rexonance warmup releases its cover and a late response cannot n
   t.mock.timers.enable({ apis: ["setTimeout"] });
   const ui = mount();
   const pending = ui.go({ to: "/rexonance-saga", hash: "stages" });
-  await ui.flushFrames();
-  await ui.flushFrames();
+  await flushUntil(
+    ui,
+    () => ui.routePreloads.length === 1,
+    "the covered call must start route warming before its deadline is advanced",
+  );
   t.mock.timers.tick(ROUTE_WARMUP_DEADLINE_MS);
-  await pending;
+  await settleGo(ui, pending);
   assert.equal(ui.gates.at(-1).active, false);
   assert.equal(ui.root.dataset.loading, undefined);
   assert.equal(ui.fallbacks.at(-1).href, "/rexonance-saga#stages");
@@ -478,7 +561,7 @@ test("a stalled Rexonance warmup releases its cover and a late response cannot n
     await ui.flushFrames();
     await ui.flushTimers();
   }
-  await retry;
+  await settleGo(ui, retry);
   assert.equal(ui.navigations.length, 1, "the expired operation must release the navigation guard");
   assert.equal(ui.gates.at(-1).active, false);
   ui.cleanup();
@@ -497,7 +580,7 @@ for (const failure of ["reject", "throw"]) {
       await ui.flushFrames();
       await ui.flushTimers();
     }
-    await pending;
+    await settleGo(ui, pending);
     assert.equal(ui.navigations.length, 1);
     assert.equal(ui.gates.at(-1).active, false);
     assert.equal(ui.root.dataset.loading, undefined);
@@ -518,7 +601,7 @@ test("repeated history cancellation permits the next route without reviving Rexo
     await ui.flushFrames();
     await ui.flushTimers();
   }
-  await Promise.all([stale, latest]);
+  await settleGo(ui, Promise.all([stale, latest]));
   assert.equal(ui.navigations.length, 1);
   assert.equal(ui.navigations[0].to, "/characters/ciel");
   assert.equal(ui.root.dataset.loading, undefined);
@@ -532,11 +615,14 @@ for (const phase of ["warmup", "hold", "reveal"]) {
     test(`${cancellation} during Rexonance ${phase} cannot erase a newer route's cover`, async () => {
       const ui = mount();
       const stale = ui.go({ to: "/rexonance-saga" });
-      await ui.flushFrames();
-      await ui.flushFrames();
+      await flushUntil(
+        ui,
+        () => ui.routePreloads.length === 1,
+        "the Rexonance cover must reach route warming before cancellation",
+      );
       if (phase !== "warmup") {
         ui.releaseWarmup();
-        await ui.flushFrames();
+        await reachRexonanceHold(ui);
         assert.equal(ui.activeObservers(), 1, "the call hold is active before advancing");
       }
       if (phase === "reveal") {
@@ -566,7 +652,7 @@ for (const phase of ["warmup", "hold", "reveal"]) {
         await ui.flushFrames();
         await ui.flushTimers();
       }
-      await Promise.all([stale, latest]);
+      await settleGo(ui, Promise.all([stale, latest]));
       assert.equal(ui.navigations.at(-1).to, "/characters/ciel");
       assert.equal(
         ui.navigations.filter(({ to }) => to === "/rexonance-saga").length,
@@ -588,7 +674,7 @@ test("a completed Rexonance entry does not leave its visibility policy on anothe
     await ui.flushFrames();
     await ui.flushTimers();
   }
-  await rexonance;
+  await settleGo(ui, rexonance);
   const ciel = ui.go({ to: "/characters/ciel" });
   ui.visibility(true);
   assert.equal(ui.root.dataset.loading, "true", "only an active Rexonance call uses this policy");
@@ -598,7 +684,7 @@ test("a completed Rexonance entry does not leave its visibility policy on anothe
     await ui.flushFrames();
     await ui.flushTimers();
   }
-  await ciel;
+  await settleGo(ui, ciel);
   assert.equal(ui.navigations.at(-1).to, "/characters/ciel");
   assert.equal(ui.gates.at(-1).active, false);
   ui.cleanup();
@@ -613,7 +699,7 @@ for (const to of ["/rexonance-saga", "/riders/saga"]) {
       await ui.flushFrames();
       await ui.flushTimers();
     }
-    await pending;
+    await settleGo(ui, pending);
     const hasDock = to !== "/rexonance-saga";
     assert.equal(ui.queries.includes("main .manager-portrait-frame"), hasDock);
     assert.equal(
@@ -637,7 +723,7 @@ test("Back before an immediate route's first frame also cancels its navigation",
   const pending = ui.go({ to: "/characters/dante" });
   ui.history("BACK");
   await ui.flushFrames();
-  await pending;
+  await settleGo(ui, pending);
   assert.equal(ui.navigations.length, 0);
   ui.cleanup();
 });
@@ -657,7 +743,7 @@ for (const pathname of [
       await ui.flushFrames();
       await ui.flushTimers();
     }
-    await pending;
+    await settleGo(ui, pending);
     assert.equal(ui.navigations.length, 1);
     assert.ok(ui.alignments.length >= 3, "the section must stay aligned while its layout settles");
     assert.equal(ui.gates.filter((gate) => gate.active).length, 0);
@@ -676,7 +762,7 @@ test("Back stops a pending in-page alignment before it can pull restored history
     await ui.flushFrames();
     await ui.flushTimers();
   }
-  await pending;
+  await settleGo(ui, pending);
   assert.equal(ui.alignments.length, 1);
   ui.cleanup();
 });
@@ -692,7 +778,7 @@ for (const shiftKey of [false, true]) {
       await ui.flushFrames();
       await ui.flushTimers();
     }
-    await pending;
+    await settleGo(ui, pending);
     assert.equal(
       ui.alignments.length,
       1,
@@ -701,3 +787,267 @@ for (const shiftKey of [false, true]) {
     ui.cleanup();
   });
 }
+
+for (const action of ["BACK", "pagehide", "unmount"]) {
+  test(`rx17: ${action} releases the go-owned background warmup pause immediately`, async () => {
+    let releasePreparation;
+    const ui = mount("/world", {
+      prepareCalls: () => ({
+        promise: new Promise((resolve) => {
+          releasePreparation = resolve;
+        }),
+        cancel: () => releasePreparation(null),
+      }),
+    });
+    const pending = ui.go({ to: "/rexonance-saga" });
+    assert.equal(ui.suitWarmHolds(), 1, "go pauses background work synchronously");
+    if (action === "BACK") ui.history("BACK");
+    else if (action === "pagehide") ui.pagehide();
+    else ui.cleanup();
+    assert.equal(ui.suitWarmHolds(), 0, "cancellation releases even before preparation settles");
+    await settleGo(ui, pending);
+    assert.equal(ui.suitWarmHolds(), 0, "finally cannot release another transition's ownership");
+    if (action !== "unmount") ui.cleanup();
+  });
+}
+
+test("rx17: a successful direct go resumes background warming once it has navigated", async () => {
+  const ui = mount();
+  ui.reduceMotion();
+  const pending = ui.go({ to: "/plain-destination" });
+  assert.equal(ui.suitWarmHolds(), 1);
+  await settleGo(ui, pending);
+  assert.equal(ui.navigations.length, 1);
+  assert.equal(ui.suitWarmHolds(), 0);
+  ui.cleanup();
+  assert.equal(ui.suitWarmHolds(), 0);
+});
+
+for (const action of ["BACK", "hidden", "pagehide", "unmount"]) {
+  test(`rx17: ${action} between menu-close frames releases busy and holds before the call mounts`, async () => {
+    const ui = mount();
+    const pending = ui.go({ to: "/rexonance-saga" });
+    await ui.flushFrames();
+    assert.equal(
+      ui.gates.filter((gate) => gate.active).length,
+      0,
+      "the closing menu paints before the cover mounts",
+    );
+    assert.equal(ui.suitWarmHolds(), 1);
+    if (action === "BACK") ui.history(action);
+    else if (action === "hidden") ui.visibility(true);
+    else if (action === "pagehide") ui.pagehide();
+    else ui.cleanup();
+    assert.equal(ui.suitWarmHolds(), 0);
+    assert.equal(ui.root.dataset.routeScrollSettling, undefined);
+    await settleGo(ui, pending);
+    assert.equal(ui.gates.filter((gate) => gate.active).length, 0);
+    assert.equal(ui.navigations.length, 0);
+    if (action !== "unmount") {
+      ui.visibility(false);
+      ui.releaseWarmup();
+      await settleGo(ui, ui.go({ to: "/characters/ciel" }));
+      assert.equal(
+        ui.navigations.at(-1).to,
+        "/characters/ciel",
+        "the cancelled prepaint operation must release the navigation guard",
+      );
+      assert.equal(ui.suitWarmHolds(), 0);
+      ui.cleanup();
+    }
+  });
+}
+
+test("rx17: the decoded-layer plan wait is high priority and cannot hold navigation past its budget", async () => {
+  const priorities = [];
+  const ui = mount("/world", {
+    suitReady: true,
+    preparePlan: (priority) => {
+      priorities.push(priority);
+      return new Promise(() => {});
+    },
+  });
+  const pending = ui.go({ to: "/rexonance-saga" });
+  await flushUntil(ui, () => priorities.length === 1, "decoded layers must prepare their plan");
+  assert.deepEqual(priorities, ["high"]);
+  assert.equal(ui.gates.filter((gate) => gate.active).length, 0);
+  assert.ok(ui.pendingTimers() > 0, "the plan wait has a finite caller-owned deadline");
+  await ui.flushTimers();
+  ui.releaseWarmup();
+  await reachRexonanceHold(ui);
+  assert.equal(ui.gates.at(-1).rexonanceSuit, "build");
+  await settleGo(ui, pending);
+  assert.equal(ui.navigations.at(-1).to, "/rexonance-saga");
+  assert.equal(ui.suitWarmHolds(), 0);
+  ui.cleanup();
+});
+
+test("rx17: Back during bounded plan preparation cannot revive a call over the next route", async () => {
+  let releasePlan;
+  const ui = mount("/world", {
+    suitReady: true,
+    preparePlan: () =>
+      new Promise((resolve) => {
+        releasePlan = resolve;
+      }),
+  });
+  const stale = ui.go({ to: "/rexonance-saga" });
+  await flushUntil(ui, () => Boolean(releasePlan), "the plan wait must begin before cancellation");
+  ui.history("BACK");
+  assert.equal(ui.suitWarmHolds(), 0);
+  assert.equal(ui.root.dataset.loading, undefined);
+  const latest = ui.go({ to: "/characters/ciel" });
+  ui.releaseWarmup();
+  releasePlan(true);
+  await ui.flushFrames();
+  assert.equal(ui.gates.at(-1).variant, "ciel");
+  assert.equal(ui.root.dataset.loading, "true");
+  await settleGo(ui, Promise.all([stale, latest]));
+  assert.equal(ui.navigations.filter(({ to }) => to === "/rexonance-saga").length, 0);
+  assert.equal(ui.navigations.at(-1).to, "/characters/ciel");
+  assert.equal(ui.suitWarmHolds(), 0);
+  ui.cleanup();
+});
+
+test("rx17: a rejected pre-gate plan preparation leaves the call's fallback and cleanup usable", async () => {
+  const ui = mount("/world", {
+    suitReady: true,
+    preparePlan: () => Promise.reject(new Error("plan unavailable")),
+  });
+  const pending = ui.go({ to: "/rexonance-saga" });
+  ui.releaseWarmup();
+  await reachRexonanceHold(ui);
+  await settleGo(ui, pending);
+  assert.equal(ui.navigations.at(-1).to, "/rexonance-saga");
+  assert.equal(ui.gates.at(-1).active, false);
+  assert.equal(ui.suitWarmHolds(), 0);
+  ui.cleanup();
+});
+
+for (const action of ["BACK", "hidden", "pagehide", "unmount"]) {
+  test(`rx17: ${action} cancels cold decoder preparation before the cinematic clock starts`, async () => {
+    let releaseDecode,
+      plans = 0;
+    const ui = mount("/world", {
+      warmSuit: () =>
+        new Promise((resolve) => {
+          releaseDecode = resolve;
+        }),
+      preparePlan: () => {
+        plans++;
+        return Promise.resolve(true);
+      },
+    });
+    const stale = ui.go({ to: "/rexonance-saga" });
+    await flushUntil(
+      ui,
+      () => ui.pendingTimers() > 0,
+      "cold decoding must have a bounded, caller-owned preparation timer",
+    );
+    assert.ok(ui.signals.includes("running"), "the source page shows preparation feedback");
+    assert.equal(ui.gates.filter((gate) => gate.active).length, 0);
+    assert.equal(ui.root.dataset.loading, undefined, "the cover and call clock have not started");
+    assert.equal(plans, 0, "plan preparation waits for real decoded sources");
+    if (action === "BACK") ui.history(action);
+    else if (action === "hidden") ui.visibility(true);
+    else if (action === "pagehide") ui.pagehide();
+    else ui.cleanup();
+    assert.equal(ui.pendingTimers(), 0, "cancellation clears the decoder deadline immediately");
+    assert.equal(ui.suitWarmHolds(), 0);
+    assert.equal(ui.root.dataset.routeScrollSettling, undefined);
+    await settleGo(ui, stale);
+    ui.setSuitReady(true);
+    releaseDecode(true);
+    await ui.flushFrames();
+    assert.equal(plans, 0, "a late decoder must never prepare or revive the cancelled call");
+    assert.equal(ui.gates.filter((gate) => gate.active).length, 0);
+    assert.equal(ui.navigations.length, 0);
+    if (action !== "unmount") {
+      ui.visibility(false);
+      ui.releaseWarmup();
+      await settleGo(ui, ui.go({ to: "/characters/ciel" }));
+      assert.equal(ui.navigations.at(-1).to, "/characters/ciel");
+      assert.equal(ui.suitWarmHolds(), 0);
+      ui.cleanup();
+    }
+  });
+}
+
+test("rx17: cold decoding and high-priority plan finish before the full-timing call mounts", async () => {
+  let releaseDecode, releasePlan;
+  const priorities = [];
+  const ui = mount("/world", {
+    warmSuit: () =>
+      new Promise((resolve) => {
+        releaseDecode = resolve;
+      }),
+    preparePlan: (priority) => {
+      priorities.push(priority);
+      return new Promise((resolve) => {
+        releasePlan = resolve;
+      });
+    },
+  });
+  const pending = ui.go({ to: "/rexonance-saga" });
+  await flushUntil(ui, () => ui.pendingTimers() > 0, "cold preparation must begin");
+  ui.setSuitReady(true);
+  releaseDecode(true);
+  await flushUntil(
+    ui,
+    () => Boolean(releasePlan),
+    "decoded layers must prepare the real engine plan",
+  );
+  assert.deepEqual(priorities, ["high"]);
+  assert.equal(ui.gates.filter((gate) => gate.active).length, 0);
+  releasePlan(true);
+  ui.releaseWarmup();
+  await reachRexonanceHold(ui);
+  assert.equal(ui.gates.at(-1).rexonanceSuit, "build");
+  assert.equal(
+    REXONANCE_ENTRY_TIMINGS.cover,
+    2880,
+    "preparation cannot shorten or extend the call beats",
+  );
+  await settleGo(ui, pending);
+  assert.equal(ui.navigations.at(-1).to, "/rexonance-saga");
+  assert.equal(ui.suitWarmHolds(), 0);
+  ui.cleanup();
+});
+
+test("rx17: stalled cold decoding reaches whole fallback after its preparation deadline", async () => {
+  let plans = 0;
+  const ui = mount("/world", {
+    warmSuit: () => new Promise(() => {}),
+    preparePlan: () => {
+      plans++;
+      return Promise.resolve(true);
+    },
+  });
+  const pending = ui.go({ to: "/rexonance-saga" });
+  await flushUntil(ui, () => ui.pendingTimers() > 0, "cold preparation must have a deadline");
+  assert.equal(ui.gates.filter((gate) => gate.active).length, 0);
+  await ui.flushTimers();
+  ui.releaseWarmup();
+  await reachRexonanceHold(ui);
+  assert.equal(ui.gates.at(-1).rexonanceSuit, "whole");
+  assert.equal(plans, 0);
+  await settleGo(ui, pending);
+  assert.equal(ui.navigations.at(-1).to, "/rexonance-saga");
+  assert.equal(ui.suitWarmHolds(), 0);
+  ui.cleanup();
+});
+
+test("the fixture rejects a stalled operation within its flush budget instead of awaiting forever", async () => {
+  let frames = 0;
+  const ui = {
+    flushFrames: async () => {
+      frames += 1;
+    },
+    flushTimers: async () => {},
+  };
+  await assert.rejects(
+    settleGo(ui, new Promise(() => {})),
+    /must settle without a stuck frame or hold/,
+  );
+  assert.equal(frames, 24);
+});

@@ -34,6 +34,9 @@ function entryRuntime({
   const navigations = [];
   const handoffs = [];
   const chunkRequests = [];
+  class Element {
+    closest() { return null; }
+  }
   const events = new EventTarget();
   const document = new EventTarget();
   Object.assign(document, {
@@ -130,6 +133,7 @@ function entryRuntime({
     window: runtime,
     document,
     navigator,
+    Element,
     performance: { now: () => now, getEntriesByType: () => [] },
     URLSearchParams,
     require: (name) => {
@@ -168,6 +172,16 @@ function entryRuntime({
     document,
     video,
     chunkRequests,
+    key(key) {
+      const event = new Event("keydown", { cancelable: true });
+      Object.defineProperties(event, {
+        key: { value: key },
+        repeat: { value: false },
+        target: { value: new Element() },
+      });
+      events.dispatchEvent(event);
+      return event;
+    },
     unmount() {
       for (const effect of effects) effect?.cleanup?.();
       effects.length = 0;
@@ -205,6 +219,7 @@ function entryRuntime({
         tree,
         enter: all.find((node) => node.props?.className === "cine-btn cine-btn-primary").props,
         replay: all.find((node) => node.props?.className === "cine-btn cine-btn-secondary").props,
+        skip: all.find((node) => node.props?.className === "cine-ghost cine-skip").props,
         particles: all.find((node) => node.type === Particles).props,
       };
     },
@@ -262,7 +277,29 @@ test("the first frame has an enabled entry, with replay hidden until completion"
   assert.equal(view.tree.props["data-opening-entry"], "ready");
 });
 
-test("early entry cancels the score and navigates once without an unseen-logo handoff", async () => {
+test("real opening gestures, M presses and repeated replays have no sound control or stage unlock", () => {
+  const ui = entryRuntime({ runEffects: true, profileDevice: { connection: { saveData: true } } });
+  for (let run = 0; run < 3; run++) {
+    ui.render();
+    ui.advance(120);
+    const playing = ui.render();
+    assert.equal(ui.state[0], "playing");
+    assert.equal(playing.tree.props.onPointerDown, undefined, "background taps no longer unlock sound");
+    const before = [...ui.state];
+    const m = ui.key("m");
+    assert.deepEqual(ui.state, before, "M does not mutate any opening state");
+    assert.equal(m.defaultPrevented, false, "M is not an opening shortcut");
+    playing.skip.onClick({ detail: 0 });
+    const complete = ui.render();
+    assert.equal(ui.state[0], "complete");
+    assert.equal(complete.replay.hidden, false);
+    complete.replay.onClick({ detail: 0 });
+    assert.equal(ui.state[0], "idle");
+  }
+  ui.unmount();
+});
+
+test("early entry stops the visual sequence and navigates once without an unseen-logo handoff", async () => {
   const ui = entryRuntime();
   ui.state[0] = "playing";
   const view = ui.render();
@@ -321,7 +358,7 @@ for (const [name, profileDevice] of [
     const first = ui.render();
     assert.equal(ui.document.documentElement.dataset.worldEffects, "economy");
     assert.equal(first.particles.active, false, "the first SSR-compatible idle frame starts no particles");
-    assert.equal(ui.state[3], true, "the committed mount effect adopts the pre-paint profile");
+    assert.equal(ui.state[1], true, "the committed mount effect adopts the pre-paint profile");
     ui.render();
     ui.advance(120);
     const playing = ui.render();

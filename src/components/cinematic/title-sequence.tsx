@@ -9,8 +9,7 @@ import {
   type SyntheticEvent,
 } from "react";
 import { useRouter } from "@tanstack/react-router";
-import { RotateCcw, SkipForward, Volume2, VolumeX } from "lucide-react";
-import { createCinematicScore } from "@/lib/cinematic-audio";
+import { RotateCcw, SkipForward } from "lucide-react";
 import { WORLD_ENTER_ASSETS, preloadAssets } from "@/lib/asset-loader";
 import {
   OPENING_LOGO_FINAL,
@@ -294,14 +293,9 @@ function LogoLayer({
 
 export function TitleSequence() {
   const [phase, setPhase] = useState<SequencePhase>("idle");
-  const [muted, setMuted] = useState(false);
-  // True once the score has actually started in this run: until then nothing
-  // is audible, whatever the preference says.
-  const [soundLive, setSoundLive] = useState(false);
   const [economyOpening, setEconomyOpening] = useState(false);
   const [replayKey, setReplayKey] = useState(0);
   const [audit] = useState(openingAuditRequested);
-  const scoreRef = useRef<ReturnType<typeof createCinematicScore> | null>(null);
   const stageRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const logoRef = useRef<HTMLImageElement>(null);
@@ -414,8 +408,6 @@ export function TitleSequence() {
       mountedRef.current = false;
       if (videoStartTimerRef.current != null) window.clearTimeout(videoStartTimerRef.current);
       window.clearTimeout(divePrimeTimerRef.current);
-      scoreRef.current?.stop();
-      scoreRef.current = null;
       stopBurn();
       burnModuleRef.current?.releaseOpeningBurn();
       // A dive that has started owns its uploaded textures; only the unused
@@ -507,14 +499,6 @@ export function TitleSequence() {
     window.__openingBurnStats = burnRunRef.current.stats;
   }, []);
 
-  const getScore = useCallback(() => {
-    if (!scoreRef.current) {
-      scoreRef.current = createCinematicScore();
-      scoreRef.current.setMuted(muted);
-    }
-    return scoreRef.current;
-  }, [muted]);
-
   const begin = useCallback(() => {
     // The initial delayed start can outlive an ENTER pressed on the first
     // frame. A departed/skipped title must never restart behind the route
@@ -557,9 +541,6 @@ export function TitleSequence() {
     stopBurn();
     // Anything primed and unused (a skip before the burn) is released.
     burnModuleRef.current?.releaseOpeningBurn();
-    scoreRef.current?.stop();
-    scoreRef.current = null;
-    setSoundLive(false);
     if (videoStartTimerRef.current != null) {
       window.clearTimeout(videoStartTimerRef.current);
       videoStartTimerRef.current = null;
@@ -611,8 +592,6 @@ export function TitleSequence() {
   }, [finish]);
 
   const replay = useCallback(() => {
-    scoreRef.current?.stop();
-    scoreRef.current = null;
     stopBurn();
     burnModuleRef.current?.releaseOpeningBurn();
     const video = videoRef.current;
@@ -624,23 +603,8 @@ export function TitleSequence() {
     if (video) video.currentTime = 0;
     phaseRef.current = "idle";
     setPhase("idle");
-    setSoundLive(false);
     setReplayKey((k) => k + 1);
-    const score = getScore();
-    if (!score.muted()) {
-      void score.unlock().then((ready) => {
-        if (
-          !ready ||
-          scoreRef.current !== score ||
-          phaseRef.current === "complete" ||
-          phaseRef.current === "diving"
-        )
-          return;
-        score.start();
-        setSoundLive(true);
-      });
-    }
-  }, [getScore, stopBurn]);
+  }, [stopBurn]);
 
   // The next control takes focus only after a keyboard press, so a tap or a
   // click never leaves a ring behind. It is enabled in the same commit.
@@ -876,31 +840,6 @@ export function TitleSequence() {
     };
   }, [audit, finish, startBurn]);
 
-  // SOUND shows what is audible. Before the score has started it reads SOUND
-  // OFF, so its first press starts the score instead of muting a silence.
-  const toggleMute = useCallback(() => {
-    const score = getScore();
-    const playing = phaseRef.current === "playing";
-    if (!muted && !soundLive && playing) {
-      void score.unlock().then((ready) => {
-        if (!ready || phaseRef.current !== "playing" || scoreRef.current !== score) return;
-        score.start();
-        setSoundLive(true);
-      });
-      return;
-    }
-    const next = !muted;
-    setMuted(next);
-    score.setMuted(next);
-    if (!next && playing) {
-      void score.unlock().then((ready) => {
-        if (!ready || phaseRef.current !== "playing" || scoreRef.current !== score) return;
-        score.start();
-        setSoundLive(true);
-      });
-    }
-  }, [getScore, muted, soundLive]);
-
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       // A held key repeats. A held Enter or Space would skip the opening and
@@ -932,23 +871,11 @@ export function TitleSequence() {
       } else if (phase === "complete" && letter === "r") {
         keyboardFocusRef.current = true;
         replay();
-      } else if (phase !== "diving" && letter === "m") {
-        toggleMute();
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [phase, replay, skip, toggleMute]);
-
-  const unlockAudio = () => {
-    const score = getScore();
-    void score.unlock().then((ready) => {
-      if (!ready || phaseRef.current !== "playing" || scoreRef.current !== score || score.muted())
-        return;
-      score.start();
-      setSoundLive(true);
-    });
-  };
+  }, [phase, replay, skip]);
 
   const stageStateClass =
     phase === "playing"
@@ -960,25 +887,11 @@ export function TitleSequence() {
           : "cine-stage";
   const stageClass = `${stageStateClass}${economyOpening ? " is-economy-opening" : ""}`;
   const isWorldTransitioning = phase === "diving";
-  // After the opening (and before it starts) nothing plays, so the control
-  // shows the preference that もう一度 will use.
-  const audible = !muted && (soundLive || phase !== "playing");
 
   return (
     <main
       ref={stageRef}
       className={stageClass}
-      onPointerDown={
-        phase === "playing"
-          ? (e) => {
-              // SKIP must not start the score only to fade it out, and SOUND
-              // decides for itself.
-              if ((e.target as Element).closest(".cine-skip, .cine-always")) return;
-              if ((e.target as Element).closest(".cine-btn")) return;
-              unlockAudio();
-            }
-          : undefined
-      }
       aria-label="仮面ライダーサーガ Deception World オープニング"
       aria-busy={isWorldTransitioning}
       data-opening-entry={isWorldTransitioning ? "leaving" : "ready"}
@@ -1102,20 +1015,6 @@ export function TitleSequence() {
         <span>スキップ</span>
         <kbd>ESC</kbd>
       </button>
-
-      <div className="cine-always" aria-hidden={phase === "idle" || isWorldTransitioning}>
-        <button
-          type="button"
-          className="cine-ghost inline-flex items-center gap-2"
-          disabled={phase === "idle" || isWorldTransitioning}
-          onClick={toggleMute}
-          aria-label={audible ? "音声をオフ" : "音声をオン"}
-          aria-keyshortcuts="M"
-        >
-          {audible ? <Volume2 className="size-4" /> : <VolumeX className="size-4" />}
-          <span className="hidden sm:inline">{audible ? "SOUND ON" : "SOUND OFF"}</span>
-        </button>
-      </div>
 
       <div
         className="cine-chrome cine-replay-slot absolute inset-x-0 flex justify-center gap-3"

@@ -144,8 +144,7 @@
 .cine-cue,
 .cine-editorial-kicker,
 .cine-editorial-caption,
-.cine-skip kbd,
-.cine-always .cine-ghost {
+.cine-skip kbd {
   font-family: var(--op-hud);
   font-weight: 400;
   font-synthesis: none;
@@ -435,22 +434,6 @@
   }
 }
 
-/* SOUND: inside the frame's top-left corner, a quiet ice plate ---------------- */
-.cine-always {
-  top: calc(var(--cine-bar) + var(--cine-gap-y) + 12px);
-  left: calc(var(--cine-inset-x) + 8px);
-}
-
-.cine-always .cine-ghost {
-  gap: 0.6rem;
-  border: 1px solid color-mix(in srgb, var(--op-ice) 22%, transparent);
-  border-radius: 4px;
-  background: color-mix(in srgb, var(--op-ink) 60%, transparent);
-  color: color-mix(in srgb, var(--op-ice-hi) 80%, transparent);
-  font-size: 12px;
-  letter-spacing: 0.16em;
-}
-
 /* The telemetry strip: SKIP, the cue and the rail on the bottom bar ------------
    SKIP sits 12 px above the bar, the cue on the same line to the left, and the
    progress rail inside the bar as a prism fill with diamond markers. The
@@ -637,12 +620,6 @@
     color: var(--op-text);
     border-color: color-mix(in srgb, var(--op-ice) 60%, transparent);
     background: color-mix(in srgb, var(--op-ink) 92%, transparent);
-  }
-
-  .cine-always .cine-ghost:hover {
-    color: var(--op-text);
-    border-color: color-mix(in srgb, var(--op-ice) 55%, transparent);
-    background: color-mix(in srgb, var(--op-ice) 8%, var(--op-plate));
   }
 }
 
@@ -1617,8 +1594,7 @@ html[data-world-effects="economy"] .cine-stage.is-complete .cine-editorial-word 
 
   .cine-btn,
   .cine-skip,
-  .cine-ghost,
-  .cine-always .cine-ghost {
+  .cine-ghost {
     forced-color-adjust: auto;
     background: ButtonFace;
     color: ButtonText;

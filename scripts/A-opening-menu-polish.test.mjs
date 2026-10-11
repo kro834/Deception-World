@@ -55,16 +55,19 @@ test("SKIP keeps its pill, ENTER THE WORLD leads and the intro type clears the l
   }
   assert.match(
     styles,
-    /@media \(prefers-reduced-motion: reduce\) \{[\s\S]*?\.cine-replay-slot \.cine-btn-secondary,\s*\.cine-always \{\s*display: none;/,
+    /@media \(prefers-reduced-motion: reduce\) \{[\s\S]*?\.cine-replay-slot \.cine-btn-secondary \{\s*display: none;/,
   );
 });
 
-test("SOUND shows what is audible and SKIP never starts the score", () => {
-  assert.match(title, /const audible = !muted && \(soundLive \|\| phase !== "playing"\);/);
-  assert.match(title, /aria-label=\{audible \? "音声をオフ" : "音声をオン"\}/);
-  assert.match(title, /closest\("\.cine-skip, \.cine-always"\)\) return;/);
-  assert.match(title, /if \(!muted && !soundLive && playing\) \{/);
-  assert.match(title, /phase !== "diving" && letter === "m"\) \{\s*toggleMute\(\);/);
+test("the opening has no sound control, setting, shortcut, or playback import", () => {
+  assert.doesNotMatch(
+    title,
+    /cinematic-audio|createCinematicScore|scoreRef|soundLive|toggleMute|unlockAudio|Volume2|VolumeX|SOUND|音声を(?:オン|オフ)|aria-keyshortcuts="M"|letter === "m"/,
+  );
+  assert.doesNotMatch(styles, /cine-always|SOUND/);
+  assert.match(title, /aria-label="オープニングをスキップ"/);
+  assert.match(title, /aria-keyshortcuts="Escape Enter Space S"/);
+  assert.match(title, /aria-keyshortcuts="R"/);
 });
 
 test("a keyboard skip hands focus on, and a held key presses once", () => {

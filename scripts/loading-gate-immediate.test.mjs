@@ -33,7 +33,8 @@ test("covered opening navigation is selected before immediate routes while rider
     gate,
     /if \(\s*!isArchiveTransition &&\s*!isZeusTransition &&\s*!isGalleryTransition &&\s*!riderTransitionVariant\s*\) \{[\s\S]*?await navigate\(\{ to, hash, search: navigationSearch \?\? \(changesDocument \? undefined : true\) \}\);[\s\S]*?return;/,
   );
-  const directEnd = goBlock.indexOf("\n        return;\n      }", directIndex);
+  const directTail = goBlock.slice(directIndex).search(/\n\s+return;\n\s+\}/);
+  const directEnd = directTail === -1 ? -1 : directIndex + directTail;
   assert.notEqual(directEnd, -1, "the immediate-route branch must return after navigation");
   const directBranch = goBlock.slice(directIndex, directEnd);
   assert.match(

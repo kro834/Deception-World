@@ -1,195 +1,178 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
+import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { runInNewContext } from "node:vm";
 import test from "node:test";
 import ts from "typescript";
 
-const source = readFileSync(new URL("../src/lib/cinematic-audio.ts", import.meta.url), "utf8");
+const root = new URL("../", import.meta.url);
+const read = (path) => readFileSync(new URL(path, root), "utf8");
+const source = read("src/lib/cinematic-audio.ts");
 const code = ts.transpileModule(source, {
   compilerOptions: { module: ts.ModuleKind.CommonJS },
 }).outputText;
-const flush = async () => {
-  for (let i = 0; i < 5; i++) await Promise.resolve();
-};
 
-function runtime({ suspended = false, rejectResume = false, available = true } = {}) {
-  const contexts = [];
-  const timers = new Map();
-  let nextTimer = 1;
-  class Param {
-    value = 0;
-    setValueAtTime() {}
-    linearRampToValueAtTime() {}
-    exponentialRampToValueAtTime() {}
-    cancelScheduledValues() {}
-    setTargetAtTime(value) {
-      this.value = value;
-    }
-  }
-  class Node {
-    gain = new Param();
-    frequency = new Param();
-    Q = new Param();
-    started = false;
-    stopped = false;
-    disconnected = false;
-    connect() {}
-    disconnect() {
-      this.disconnected = true;
-    }
-    start() {
-      this.started = true;
-    }
-    stop(at) {
-      if (at === undefined) this.stopped = true;
-    }
-  }
-  class Context {
-    state = suspended ? "suspended" : "running";
-    currentTime = 1;
-    sampleRate = 8;
-    destination = {};
-    nodes = [];
-    resumes = [];
-    constructor() {
-      contexts.push(this);
-    }
-    createGain() {
-      return this.node();
-    }
-    createOscillator() {
-      return this.node();
-    }
-    createBufferSource() {
-      return this.node();
-    }
-    createBiquadFilter() {
-      return this.node();
-    }
-    node() {
-      const node = new Node();
-      this.nodes.push(node);
-      return node;
-    }
-    createBuffer(_channels, length) {
-      return { getChannelData: () => new Float32Array(length) };
-    }
-    resume() {
-      if (rejectResume) return Promise.reject(new Error("audio unavailable"));
-      return new Promise((resolve) =>
-        this.resumes.push(() => {
-          this.state = "running";
-          resolve();
-        }),
-      );
-    }
-    close() {
-      this.state = "closed";
-      return Promise.resolve();
-    }
-  }
+// A mute-only regression would still open a graph, start timers, or request
+// media. Throw even on reading these APIs, not just on playing a source.
+function runtime({ ssr = false } = {}) {
+  const attempted = [];
   const exports = {};
-  runInNewContext(code, {
-    exports,
-    AudioContext: available ? Context : undefined,
-    window: {
-      setTimeout: (callback) => {
-        const id = nextTimer++;
-        timers.set(id, callback);
-        return id;
-      },
-      clearTimeout: (id) => timers.delete(id),
-    },
-  });
-  return {
-    score: exports.createCinematicScore(),
-    contexts,
-    finishFades: () => {
-      const callbacks = [...timers.values()];
-      timers.clear();
-      callbacks.forEach((callback) => callback());
-    },
-  };
+  const context = { exports };
+  if (!ssr) {
+    for (const name of [
+      "window",
+      "document",
+      "navigator",
+      "AudioContext",
+      "webkitAudioContext",
+      "OfflineAudioContext",
+      "Audio",
+      "fetch",
+      "setTimeout",
+      "clearTimeout",
+      "setInterval",
+      "clearInterval",
+      "requestAnimationFrame",
+      "localStorage",
+      "sessionStorage",
+      "speechSynthesis",
+    ]) {
+      Object.defineProperty(context, name, {
+        get() {
+          attempted.push(name);
+          throw new Error(`removed sound accessed ${name}`);
+        },
+      });
+    }
+  }
+  runInNewContext(code, context);
+  return { create: exports.createCinematicScore, attempted };
 }
 
-test("stopping while audio resumes cannot start a discarded opening score", async () => {
-  const ui = runtime({ suspended: true });
-  ui.score.start();
-  ui.score.stop();
-  ui.contexts[0].resumes.forEach((resolve) => resolve());
-  await flush();
-  assert.equal(ui.contexts[0].nodes.filter((node) => node.started).length, 0);
+test("the retired adapter is safe before hydration without browser APIs", async () => {
+  const ui = runtime({ ssr: true });
+  const score = ui.create();
+  assert.equal(await score.unlock(), false);
+  score.start();
+  score.stop();
+  assert.equal(score.muted(), true);
 });
 
-test("a fading old score cannot stop or mute a newer run", async () => {
+test("legacy start and unlock cannot construct any audio, request media, or schedule work", async () => {
   const ui = runtime();
-  ui.score.start();
-  await flush();
-  const oldContext = ui.contexts[0];
-  ui.score.stop();
-  ui.score.start();
-  await flush();
-  const newContext = ui.contexts.at(-1);
-  const newSources = newContext.nodes.filter((node) => node.started);
-  ui.finishFades();
-  assert.notEqual(newContext, oldContext);
-  assert.ok(newSources.length > 0);
-  assert.ok(newSources.every((node) => !node.stopped && !node.disconnected));
-  ui.score.setMuted(true);
-  assert.equal(newContext.nodes[0].gain.value, 0);
+  const score = ui.create();
+  score.start();
+  assert.equal(await score.unlock(), false);
+  score.stop();
+  assert.deepEqual(ui.attempted, []);
 });
 
-test("finishing a score disconnects its graph and releases the audio context", async () => {
+test("a legacy unmute call cannot re-enable sound or store a preference", async () => {
   const ui = runtime();
-  ui.score.start();
-  await flush();
-  const context = ui.contexts[0];
-  ui.score.stop();
-  ui.score.stop();
-  ui.finishFades();
-  assert.equal(context.state, "closed");
-  assert.ok(context.nodes.every((node) => node.disconnected));
-  assert.ok(context.nodes.filter((node) => node.started).every((node) => node.stopped));
+  const score = ui.create();
+  for (const muted of [false, true, false]) {
+    score.setMuted(muted);
+    assert.equal(score.muted(), true);
+    score.start();
+    assert.equal(await score.unlock(), false);
+  }
+  assert.deepEqual(ui.attempted, []);
 });
 
-test("unavailable or refused audio fails quietly instead of rejecting a gesture", async () => {
-  const missing = runtime({ available: false });
-  assert.equal(await missing.score.unlock(), false);
-  const refused = runtime({ suspended: true, rejectResume: true });
-  assert.equal(await refused.score.unlock(), false);
-  refused.score.start();
-  await flush();
-  assert.equal(refused.contexts[0].nodes.length, 0);
-});
-
-test("muted preference survives a restart and repeated start is idempotent", async () => {
+test("repeated legacy replays and stops stay inert without leaving timers or resources", async () => {
   const ui = runtime();
-  ui.score.setMuted(true);
-  ui.score.start();
-  ui.score.start();
-  await flush();
-  assert.equal(ui.contexts.length, 1);
-  assert.equal(ui.contexts[0].nodes[0].gain.value, 0);
-  const count = ui.contexts[0].nodes.length;
-  ui.score.start();
-  await flush();
-  assert.equal(ui.contexts[0].nodes.length, count);
-  ui.score.stop();
-  ui.finishFades();
-  ui.score.start();
-  await flush();
-  assert.equal(ui.contexts.at(-1).nodes[0].gain.value, 0);
+  const score = ui.create();
+  for (let run = 0; run < 50; run++) {
+    score.start();
+    score.start();
+    score.stop();
+    score.stop();
+    assert.equal(await score.unlock(), false);
+  }
+  assert.deepEqual(ui.attempted, []);
 });
 
-test("an interrupted audio context is resumed by the next user gesture", async () => {
+test("stopping before a pending legacy unlock resolves cannot revive a sound", async () => {
   const ui = runtime();
-  assert.equal(await ui.score.unlock(), true);
-  const context = ui.contexts[0];
-  context.state = "interrupted";
-  const pending = ui.score.unlock();
-  assert.equal(context.resumes.length, 1, "interrupted must not be mistaken for ready audio");
-  context.resumes[0]();
-  assert.equal(await pending, true);
-  assert.equal(context.state, "running");
-  assert.equal(ui.contexts.length, 1);
+  const score = ui.create();
+  const pending = score.unlock();
+  score.stop();
+  score.setMuted(false);
+  score.start();
+  assert.equal(await pending, false);
+  assert.deepEqual(ui.attempted, []);
+});
+
+test("separate stale consumers cannot share or retain an audio context", async () => {
+  const ui = runtime();
+  const scores = Array.from({ length: 20 }, () => ui.create());
+  for (const score of scores) {
+    score.setMuted(false);
+    score.start();
+    assert.equal(await score.unlock(), false);
+    score.stop();
+  }
+  assert.deepEqual(ui.attempted, []);
+});
+
+function sourceFiles(directory) {
+  return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+    const path = join(directory, entry.name);
+    return entry.isDirectory() ? sourceFiles(path) : /\.(?:[cm]?[jt]sx?)$/.test(path) ? [path] : [];
+  });
+}
+
+test("all active source has no audio engine imports, constructors, elements, speech, or media requests", () => {
+  for (const path of sourceFiles(fileURLToPath(new URL("src/", root)))) {
+    const text = readFileSync(path, "utf8");
+    assert.doesNotMatch(
+      text,
+      /(?:from\s*|import\s*\(|require\s*\()["'][^"']*cinematic-audio|\b(?:webkitAudioContext|AudioContext|OfflineAudioContext|speechSynthesis|mediaSession)\b|new\s+(?:window\.)?Audio\s*\(|<audio\b|["'][^"'\n]*\.(?:mp3|wav|ogg|m4a|aac)(?:[?#][^"'\n]*)?["']/i,
+      path,
+    );
+  }
+  assert.doesNotMatch(
+    read("src/components/cinematic/title-sequence.tsx"),
+    /cine-always|Volume[2X]|toggleMute|soundLive|unlockAudio|音声を(?:オン|オフ)|SOUND|aria-keyshortcuts="M"|letter === "m"/,
+  );
+});
+
+test("remaining cinematic video elements explicitly stay muted", () => {
+  for (const path of [
+    "src/components/cinematic/title-sequence.tsx",
+    "src/components/cinematic/opening-handoff.tsx",
+  ]) {
+    const text = read(path);
+    const videos = [...text.matchAll(/<video\b[\s\S]*?\/>/g)];
+    assert.ok(videos.length > 0, path);
+    for (const [video] of videos) assert.match(video, /\bmuted(?:\s|=)/, path);
+  }
+});
+
+test("the existing atmosphere video contains only a visual track, never an audio track", () => {
+  const mp4 = readFileSync(new URL("public/atmosphere.mp4", root));
+  const handlers = [];
+  function boxes(start, end) {
+    for (let offset = start; offset + 8 <= end;) {
+      let size = mp4.readUInt32BE(offset);
+      const type = mp4.toString("ascii", offset + 4, offset + 8);
+      let header = 8;
+      if (size === 1) {
+        assert.ok(offset + 16 <= end);
+        size = Number(mp4.readBigUInt64BE(offset + 8));
+        header = 16;
+      } else if (size === 0) size = end - offset;
+      assert.ok(size >= header && offset + size <= end, `valid ${type} MP4 atom`);
+      const payload = offset + header;
+      if (["moov", "trak", "mdia"].includes(type)) boxes(payload, offset + size);
+      if (type === "hdlr") {
+        assert.ok(size >= header + 12);
+        handlers.push(mp4.toString("ascii", payload + 8, payload + 12));
+      }
+      offset += size;
+    }
+  }
+  boxes(0, mp4.length);
+  assert.deepEqual(handlers, ["vide"]);
 });

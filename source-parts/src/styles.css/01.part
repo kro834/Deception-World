@@ -2219,16 +2219,3 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
 
 .is-diving .cine-dive-tunnel::before {
   animation: world-dive-ring-stream 0.36s linear 0.06s infinite;
-}
-
-.is-diving .cine-dive-tunnel::after {
-  animation: world-dive-vanishing-pulse 0.68s ease-in-out 0.08s infinite;
-}
-
-.is-diving .cine-dive-tunnel > i:nth-child(1) {
-  animation: world-dive-streak-stream 0.42s linear infinite;
-}
-
-.is-diving .cine-dive-tunnel > i:nth-child(2) {
-  animation: world-dive-streak-stream 0.54s linear -0.27s infinite;
-}

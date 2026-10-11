@@ -56,15 +56,17 @@ const START_BY = 420;
 // its cell (so the front glitters, cell by cell, instead of washing over
 // the trim); the glints' head and trail. [colour, alpha, size of the cell].
 const HEAT = [
-  ["#fff3c4", 0.9, 0.94],
-  ["#ffc642", 0.52, 0.78],
-  ["#e08a1e", 0.26, 0.62],
+  ["#fff3c4", 0.76, 0.6],
+  ["#ffc642", 0.46, 0.48],
+  ["#e08a1e", 0.2, 0.34],
 ] as const;
-// The molten front's glow: the white-hot cells' union, grown, faint.
-const BLOOM = ["#ffb02e", 0.14, 2.2] as const;
+// A tight, faint halo rather than a gold wash over neighbouring crystals.
+// A cell touching a thin trim is not itself entirely metal: keep the hot
+// grain smaller than the cell so the artwork's bevel remains legible.
+const BLOOM = ["#ffb02e", 0.1, 1.4] as const;
 const GLINT = [
-  ["#fffdf3", 0.62, 1],
-  ["#ffe39a", 0.26, 1],
+  ["#fffdf3", 0.44, 0.68],
+  ["#ffe39a", 0.22, 0.54],
 ] as const;
 
 export function SuitNanites({ onReady }: { onReady: () => void }) {
@@ -282,7 +284,7 @@ export function SuitNanites({ onReady }: { onReady: () => void }) {
               if (lock > t) {
                 const u = 1 - (lock - t) / GOLD.approach;
                 const e = 1 - (1 - u) * (1 - u);
-                const size = G * (0.3 + 0.5 * e);
+                const size = G * (0.22 + 0.42 * e);
                 motes[moteCount * 3] = gold.fx[i] + gold.ox[i] * (1 - e) + (G - size) / 2;
                 motes[moteCount * 3 + 1] = gold.fy[i] + gold.oy[i] * (1 - e) + (G - size) / 2;
                 motes[moteCount * 3 + 2] = size;
@@ -319,7 +321,7 @@ export function SuitNanites({ onReady }: { onReady: () => void }) {
           for (let k = HEAT.length - 1; k >= 0; k -= 1) glow(heat[k], heats[k], HEAT[k]);
           for (let k = GLINT.length - 1; k >= 0; k -= 1) glow(glint[k], glints[k], GLINT[k]);
           if (moteCount) {
-            flight.globalAlpha = 0.95;
+            flight.globalAlpha = 0.86;
             flight.fillStyle = "#fff8de";
             flight.beginPath();
             for (let k = 0; k < moteCount; k += 1)

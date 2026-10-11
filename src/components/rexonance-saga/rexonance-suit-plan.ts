@@ -308,6 +308,11 @@ export const planEnd = () => END;
 // `drawing`: calls drawing into it now (the idle preparation then leaves
 // it alone); `dirty`: it holds a call's formed gold (reset before the next).
 export const work = { canvas: null as HTMLCanvasElement | null, dirty: true, drawing: 0 };
+/** Decoded layers alone do not mean the first frame's plan/atlas are warm.
+ * A live call owns its formed atlas; a subsequent call must reset it first. */
+export const isRexonanceSuitPlanReady = () =>
+  Boolean(PLATES && work.canvas && (work.drawing > 0 || !work.dirty));
+
 export function forming(art: CanvasImageSource, gold: CanvasImageSource) {
   const { width, height } = REXONANCE_SUIT_GOLD_ATLAS;
   if (!work.canvas) {
@@ -325,27 +330,95 @@ export function forming(art: CanvasImageSource, gold: CanvasImageSource) {
   return context;
 }
 
+let preparation: Promise<boolean> | null = null;
+let promotePreparation: (() => void) | null = null;
 /** rx17: builds the engine's plan and its working atlas in idle time, a
- * few plates a slice, so the call's first frame costs nothing. Resolves
- * true once both are ready (false if the layers are not decoded). */
-export function prepareRexonanceSuit() {
-  return new Promise<boolean>((resolve) => {
+ * few plates a slice. When completed before the call, its first frame needs
+ * no plan generation. Resolves true once both are ready (false if the
+ * layers or drawing context are unavailable); later calls can retry. High
+ * priority promotes a queued idle slice to rAF without duplicating its job.
+ * Navigation deadlines/cancellation belong to the awaiting caller: this
+ * shared plan may still be useful for the next intent. */
+export function prepareRexonanceSuit(priority: "low" | "high" = "low") {
+  // Intent, the page's idle warm-up and a call can overlap. They must share
+  // one sliced build, not start several idle queues against the same plan.
+  if (preparation) {
+    if (priority === "high") promotePreparation?.();
+    return preparation;
+  }
+  const pending = new Promise<boolean>((resolve) => {
+    let urgent = priority === "high";
+    let settled = false;
+    let generation = 0;
+    let queued: { kind: "idle" | "frame"; id: number } | null = null;
+    const cancelQueued = () => {
+      generation += 1;
+      if (queued?.kind === "idle") globalThis.cancelIdleCallback?.(queued.id);
+      else if (queued?.kind === "frame") globalThis.cancelAnimationFrame(queued.id);
+      queued = null;
+    };
+    const settle = (prepared: boolean) => {
+      if (settled) return;
+      settled = true;
+      cancelQueued();
+      resolve(prepared);
+    };
     const finish = () => {
       const art = rexonanceSuitSource(REXONANCE_SUIT_ATLAS.src);
       const gold = rexonanceSuitSource(REXONANCE_SUIT_GOLD_ATLAS.src);
-      resolve(Boolean(art && gold && (work.drawing || forming(art, gold))));
+      settle(Boolean(art && gold && (work.drawing || forming(art, gold))));
+    };
+    const schedule = () => {
+      const ticket = generation;
+      const resume = (deadline?: IdleDeadline) => {
+        // Some older hosts cannot cancel idle callbacks. A stale callback
+        // must not clear or duplicate the promoted frame's current queue.
+        if (settled || ticket !== generation) return;
+        queued = null;
+        slice(deadline);
+      };
+      if (!urgent && globalThis.requestIdleCallback)
+        queued = { kind: "idle", id: globalThis.requestIdleCallback(resume, { timeout: 600 }) };
+      else
+        queued = {
+          kind: "frame",
+          id: globalThis.requestAnimationFrame(() => resume()),
+        };
     };
     const slice = (deadline?: IdleDeadline) => {
-      const until = performance.now() + 6;
-      while (!PLATES) {
-        step();
-        if (deadline ? deadline.timeRemaining() < 2 : performance.now() > until) break;
+      try {
+        const until = performance.now() + 6;
+        while (!PLATES) {
+          step();
+          // An idle callback may offer almost 50 ms. Keep our own short
+          // budget too, so preparation cannot spend that whole frame when a
+          // navigation or first call arrives on a throttled phone.
+          if (performance.now() > until || (deadline && deadline.timeRemaining() < 2)) break;
+        }
+        if (PLATES) finish();
+        else schedule();
+      } catch {
+        // A lost/unavailable 2D context or a decode invalidated by a retry
+        // must settle even from a later idle callback. The immutable plan is
+        // retained; a new preparation can retry only its working atlas.
+        work.dirty = true;
+        settle(false);
       }
-      if (PLATES) finish();
-      else if (globalThis.requestIdleCallback)
-        globalThis.requestIdleCallback(slice, { timeout: 600 });
-      else globalThis.requestAnimationFrame(() => slice());
+    };
+    promotePreparation = () => {
+      if (settled || urgent) return;
+      urgent = true;
+      cancelQueued();
+      schedule();
     };
     slice();
   });
+  preparation = pending;
+  void pending.then(() => {
+    if (preparation === pending) {
+      preparation = null;
+      promotePreparation = null;
+    }
+  });
+  return pending;
 }
