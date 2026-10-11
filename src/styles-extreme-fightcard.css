@@ -281,6 +281,27 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-inde
   clip-path: polygon(0 0, 100% 0, calc(100% - 7px) 100%, 0 100%);
 }
 
+/* The opening bout is billed too: the cold open's cue into ROUND 1 carries
+   its 01 plate, so the card reads 01 to 04 (pass 2). The cue's own ::before
+   is its 44px hit area, so the plate rides its text. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > .exs-hero
+  .rxs-scroll-cue
+  > span::before {
+  content: "01" / "";
+  display: inline-block;
+  margin: 0 12px 0 0;
+  padding: 0.14em 0.3em 0.06em 0.12em;
+  color: var(--ext-ink);
+  font: 700 22px / 1 var(--dx-mono);
+  letter-spacing: -0.01em;
+  vertical-align: middle;
+  background: linear-gradient(180deg, #fff3cf, var(--ext-gold) 46%, #d99a3a);
+  clip-path: polygon(0 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
+}
+
 /* ================================================================
    Screentone: the print of the manga panels
    ================================================================ */
@@ -2275,6 +2296,12 @@ html[data-family="special"]
     > .rxs-comparison-key
     > span:first-child,
   html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-index a::before,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > .exs-hero
+    .rxs-scroll-cue
+    > span::before,
   html[data-family="special"]
     body
     .rxs-page.rxs-page.exs-page

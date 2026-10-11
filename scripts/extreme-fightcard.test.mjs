@@ -399,7 +399,7 @@ test("12px floor, no !important, no blur, glow or blend, silent generated text",
   for (const value of declarations(css.replace(/\n/g, " "), "box-shadow"))
     assert.doesNotMatch(value, /\d+px\s+\d+px\s+[1-9]/, value);
   for (const [, value] of css.matchAll(/(?<![\w-])content:\s*([^;]+);/g))
-    assert.match(value.trim(), /^(?:""|none|"(?:ROUND|ULTRA|MIDDLE)" \/ "")$/, value);
+    assert.match(value.trim(), /^(?:""|none|"(?:ROUND|ULTRA|MIDDLE|01)" \/ "")$/, value);
   // Transitions: none here (presses keep the house spring).
   assert.doesNotMatch(css, /(?:^|;)\s*transition\s*:/m);
 });
