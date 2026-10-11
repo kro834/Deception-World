@@ -105,6 +105,11 @@
   :is(.dream-story-case, .dream-case-notes > li, .dream-chronicle-cases details) {
   scroll-margin-top: calc(var(--dream-nav-offset, 160px) + 20px);
 }
+/* Search results land on a roster plate's or a faction's name, clear of the
+   command bar and the act bar, as the case anchors do. */
+.dream-page.dream-page :is([id^="dream-roster-"], [id^="dream-faction-"]) {
+  scroll-margin-top: calc(var(--dream-nav-offset, 160px) + 20px);
+}
 .dream-page.dream-page .dream-reader-footer {
   margin-top: 28px;
   padding-top: 20px;

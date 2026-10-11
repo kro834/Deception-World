@@ -138,10 +138,12 @@ function mountRailRuntime(tabCount = 1) {
     window: win,
   };
   runInNewContext(`${initRailSource}; this.initRail = initRail;`, context);
+  // rx14: a touch on a single row locks the page only once it moves
+  // sideways, so the lock taken at contact is driven by a pen.
   const pointerDown = () =>
     root.dispatch("pointerdown", {
       isPrimary: true,
-      pointerType: "touch",
+      pointerType: "pen",
       button: 0,
       pointerId: 7,
       clientX: 20,

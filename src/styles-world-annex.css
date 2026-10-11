@@ -30,15 +30,28 @@
 }
 
 /* ---------------------------------------------------------------- frame */
-/* Search results land on individual records below the fixed topbar. */
+/* Search results land on individual records below the fixed topbar (the
+   briefs and the cast wall's names too: their headings landed under it). */
 .site-shell.film-edition.mirage-edition
-  :is([id^="wa-location-"], [id^="wa-episode-"], [id^="wa-term-"]) {
+  :is(
+    [id^="wa-location-"],
+    [id^="wa-episode-"],
+    [id^="wa-term-"],
+    [id^="wa-brief-"],
+    [id^="wa-person-"]
+  ) {
   scroll-margin-top: calc(var(--film-topbar-height, calc(76px + env(safe-area-inset-top))) + 14px);
 }
 
 @media (max-width: 760px), (max-width: 920px) and (max-height: 560px) and (orientation: landscape) {
   .site-shell.film-edition.mirage-edition
-    :is([id^="wa-location-"], [id^="wa-episode-"], [id^="wa-term-"]) {
+    :is(
+      [id^="wa-location-"],
+      [id^="wa-episode-"],
+      [id^="wa-term-"],
+      [id^="wa-brief-"],
+      [id^="wa-person-"]
+    ) {
     scroll-margin-top: calc(
       var(--film-topbar-height, calc(64px + env(safe-area-inset-top))) + 14px
     );

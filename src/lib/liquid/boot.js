@@ -462,6 +462,12 @@ function initRail(root) {
   // tabs selects as before. A quick tap still selects the tapped tab. Mouse
   // and pen keep the immediate press-and-drag.
   const holdToDrag = root.classList.contains('rider-tabs');
+  // rx14: every rail now leaves a vertical swipe to the page on touch
+  // (touch-action: pan-y, styles-frosted-controls.css). A grid or a column
+  // is long-press-to-drag like the rider grid; a single row still follows a
+  // sideways drag at once, and takes the page only once the finger has
+  // moved sideways (a vertical move is the browser's page scroll).
+  const touchRail = lockScroll;
   const TOUCH_HOLD_MS = 220;
   const TOUCH_SLOP = 11;
   let releasePageLock = null;
@@ -642,6 +648,7 @@ function initRail(root) {
     swallowClick = false;
     if (holdToDrag && e.pointerType === 'touch') { arm(e); return; }
     isFrosted(); // before lockPage(): a clean read, cached for activate()
+    const touch = touchRail && e.pointerType === 'touch';
     const list = tabs();
     let target = e.target.closest('button[role="tab"]');
     let start = target ? list.indexOf(target) : -1;
@@ -655,16 +662,20 @@ function initRail(root) {
     }
     if (start < 0 || !target) return;
     const rect = root.getBoundingClientRect();
+    const geos = measure();
+    const oneRow = geos.every(box => Math.abs(box.y - geos[0].y) < 2);
+    if (touch && !oneRow) { arm(e); return; }
     gesture = {
       axis: 'pending', start, raw: start, held: false, pointerId: e.pointerId, pointerType: e.pointerType,
       startX: e.clientX, startY: e.clientY, lastX: e.clientX, lastY: e.clientY, lastT: e.timeStamp,
-      vx: 0, vy: 0, geos: measure(), rect,
+      vx: 0, vy: 0, geos, rect, waitAxis: touch,
       sx: rect.width / Math.max(root.offsetWidth, 1) || 1,
       sy: rect.height / Math.max(root.offsetHeight, 1) || 1,
     };
     root.dataset.liquidPressed = 'true'; root.dataset.liquidHeld = 'false';
-    // Own the gesture from contact until release, including the hold delay.
-    lockPage();
+    // Own the gesture from contact until release, including the hold delay
+    // (a touch on a single row waits for the finger's axis instead).
+    if (!touch) lockPage();
     try { root.setPointerCapture(e.pointerId); } catch { /* Window handlers still release the lock. */ }
     setContact(start);
     if (!reduce() && getRenderer().activate(root)) {
@@ -711,6 +722,8 @@ function initRail(root) {
       if (!lockScroll && gesture.pointerType !== 'mouse' && !gesture.held && Math.abs(dy) > Math.abs(dx) * 1.12) {
         cancel(); return;
       }
+      // A single row under a finger: a vertical move is the page's scroll.
+      if (gesture.waitAxis && Math.abs(dy) > Math.abs(dx)) { cancel(); return; }
       if (lockScroll) {
         gesture.axis = 'free';
         const first = gesture.geos[0];
@@ -789,13 +802,15 @@ function initRail(root) {
     if (e.target === root && gesture) cancel();
   });
   on(root, 'contextmenu', (e) => e.preventDefault());
-  if (holdToDrag) {
+  if (touchRail) {
     // The browser decides at touchstart whether a touch sequence waits for the
-    // page, so the rider grid keeps one non-passive touchmove listener for the
+    // page, so every rail keeps one non-passive touchmove listener for the
     // page's life. It lets every move through until the rail owns the finger
-    // (a hold engaged, or a pen press), then keeps the page from panning.
+    // (a hold engaged, a single row dragged sideways, or a pen press), then
+    // keeps the page from panning.
     root.addEventListener('touchmove', (e) => {
-      if (gesture && gesture.hold !== 'armed' && e.cancelable) e.preventDefault();
+      if (!gesture || gesture.hold === 'armed' || (gesture.waitAxis && gesture.axis === 'pending')) return;
+      if (e.cancelable) e.preventDefault();
     }, { passive: false, signal: events.signal });
   }
 
@@ -808,10 +823,10 @@ function initRail(root) {
   window.addEventListener('blur', cancel);
   window.addEventListener('pagehide', cancel);
   const cancelOtherTouch = (event) => {
-    if (holdToDrag && gesture?.pointerType === 'touch' && event.pointerType === 'touch' && event.pointerId !== gesture.pointerId) cancel();
+    if (touchRail && gesture?.pointerType === 'touch' && event.pointerType === 'touch' && event.pointerId !== gesture.pointerId) cancel();
   };
   const cancelWithEscape = (event) => {
-    if (holdToDrag && gesture && event.key === 'Escape') {
+    if (touchRail && gesture && event.key === 'Escape') {
       event.preventDefault();
       cancel();
     }

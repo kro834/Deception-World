@@ -232,19 +232,23 @@ function mountRail(boxes, { classes = ["liquid-swipe-tabs"] } = {}) {
 
 const cell = (left, top) => ({ left, top, width: 50, height: 50 });
 
+// rx14: on touch every grid is long-press-to-select (below), so the
+// immediate press-and-drag of these cases is driven by a pen, which keeps it.
+const pen = (ui, type, x, y, target = ui.tabs[0]) => ui.pointer(type, x, y, target, "pen");
+
 test("a two-dimensional rail follows a bent drag across both axes", () => {
   const ui = mountRail([cell(0, 0), cell(50, 0), cell(0, 50), cell(50, 50)]);
   try {
-    ui.pointer("pointerdown", 25, 25);
-    ui.pointer("pointermove", 80, 20);
+    pen(ui, "pointerdown", 25, 25);
+    pen(ui, "pointermove", 80, 20);
     ui.flushFrames();
     assert.match(ui.lens.style.transform, /translate3d\(49\.00px,1\.00px,0\)/);
 
-    ui.pointer("pointermove", 80, 80);
+    pen(ui, "pointermove", 80, 80);
     ui.flushFrames();
     assert.match(ui.lens.style.transform, /translate3d\(49\.00px,49\.00px,0\)/);
 
-    ui.pointer("pointerup", 80, 80);
+    pen(ui, "pointerup", 80, 80);
     ui.flushFrames();
     assert.equal(ui.tabs[3].getAttribute("aria-selected"), "true");
     assert.equal(ui.root.dataset.railLock, undefined);
@@ -270,11 +274,11 @@ test("a one-row rail remains horizontally constrained", () => {
 test("a one-column rail remains vertically constrained", () => {
   const ui = mountRail([cell(0, 0), cell(0, 50), cell(0, 100)]);
   try {
-    ui.pointer("pointerdown", 25, 25);
-    ui.pointer("pointermove", 90, 125);
+    pen(ui, "pointerdown", 25, 25);
+    pen(ui, "pointermove", 90, 125);
     ui.flushFrames();
     assert.match(ui.lens.style.transform, /translate3d\(1\.00px,99\.00px,0\)/);
-    ui.pointer("pointerup", 90, 125);
+    pen(ui, "pointerup", 90, 125);
     assert.equal(ui.tabs[2].getAttribute("aria-selected"), "true");
   } finally {
     ui.dispose();
@@ -284,9 +288,9 @@ test("a one-column rail remains vertically constrained", () => {
 test("cancelling a grid drag releases the immediate page lock", () => {
   const ui = mountRail([cell(0, 0), cell(50, 0), cell(0, 50), cell(50, 50)]);
   try {
-    ui.pointer("pointerdown", 25, 25);
+    pen(ui, "pointerdown", 25, 25);
     assert.equal(ui.root.dataset.railLock, "true");
-    ui.pointer("pointermove", 80, 80);
+    pen(ui, "pointermove", 80, 80);
     ui.flushFrames();
     ui.win.dispatch("pointercancel", { pointerId: 7 });
     assert.equal(ui.root.dataset.railLock, undefined);
@@ -300,9 +304,9 @@ test("a sloppy tap counts when the finger lifts over the same tab", () => {
   const ui = mountRail([cell(0, 0), cell(50, 0), cell(0, 50), cell(50, 50)]);
   try {
     // No pointermove arrives before the lift (a fast tap), 21px from contact.
-    ui.pointer("pointerdown", 75, 25, ui.tabs[1]);
+    pen(ui, "pointerdown", 75, 25, ui.tabs[1]);
     assert.equal(ui.root.dataset.railLock, "true");
-    ui.pointer("pointerup", 90, 40, ui.tabs[1]);
+    pen(ui, "pointerup", 90, 40, ui.tabs[1]);
     assert.equal(ui.tabs[1].getAttribute("aria-selected"), "true");
     assert.equal(ui.root.dataset.railLock, undefined);
   } finally {
@@ -313,8 +317,8 @@ test("a sloppy tap counts when the finger lifts over the same tab", () => {
 test("a sloppy tap that lifts over another tab is cancelled", () => {
   const ui = mountRail([cell(0, 0), cell(50, 0), cell(0, 50), cell(50, 50)]);
   try {
-    ui.pointer("pointerdown", 75, 25, ui.tabs[1]);
-    ui.pointer("pointerup", 75, 80, ui.tabs[1]);
+    pen(ui, "pointerdown", 75, 25, ui.tabs[1]);
+    pen(ui, "pointerup", 75, 80, ui.tabs[1]);
     assert.equal(ui.tabs[0].getAttribute("aria-selected"), "true");
     assert.equal(ui.tabs[1].getAttribute("aria-selected"), "false");
     assert.equal(ui.tabs[3].getAttribute("aria-selected"), "false");
@@ -448,13 +452,69 @@ test("a pen on the rider grid keeps the immediate press-and-drag", () => {
   }
 });
 
-test("other rails keep owning a touch from contact", () => {
+// rx14: every rail leaves a vertical swipe to the page (touch-action:
+// pan-y). A single row under a finger waits for the finger's axis.
+test("a single row under a finger leaves a vertical swipe to the page", () => {
   const ui = mountRail([cell(0, 0), cell(50, 0), cell(100, 0)]);
   try {
     ui.pointer("pointerdown", 25, 25);
-    assert.equal(ui.root.dataset.railLock, "true");
-    assert.equal(ui.touchmove(), false, "no listener: touch-action: none owns their touches");
-    ui.pointer("pointerup", 25, 25);
+    assert.equal(ui.root.dataset.railLock, undefined, "the page is not locked at contact");
+    assert.equal(ui.touchmove(), false, "the browser may pan the page");
+    ui.pointer("pointermove", 27, 60);
+    assert.equal(ui.root.dataset.railLock, undefined);
+    ui.win.dispatch("pointercancel", { pointerId: 7 });
+    assert.equal(ui.tabs[0].getAttribute("aria-selected"), "true");
+    assert.equal(ui.root.dataset.railLock, undefined);
+  } finally {
+    ui.dispose();
+  }
+});
+
+test("a single row under a finger still follows a sideways drag at once", () => {
+  const ui = mountRail([cell(0, 0), cell(50, 0), cell(100, 0)]);
+  try {
+    ui.pointer("pointerdown", 25, 25);
+    ui.pointer("pointermove", 125, 30);
+    ui.flushFrames();
+    assert.equal(ui.root.dataset.railLock, "true", "a sideways drag takes the finger");
+    assert.equal(ui.touchmove(), true, "the page stays still under the drag");
+    assert.match(ui.lens.style.transform, /translate3d\(99\.00px,1\.00px,0\)/);
+    ui.pointer("pointerup", 125, 30);
+    assert.equal(ui.tabs[2].getAttribute("aria-selected"), "true");
+    assert.equal(ui.root.dataset.railLock, undefined);
+  } finally {
+    ui.dispose();
+  }
+});
+
+test("a tap on a single row selects without locking the page", () => {
+  const ui = mountRail([cell(0, 0), cell(50, 0), cell(100, 0)]);
+  try {
+    ui.pointer("pointerdown", 75, 25, ui.tabs[1]);
+    assert.equal(ui.root.dataset.railLock, undefined);
+    ui.pointer("pointerup", 76, 26, ui.tabs[1]);
+    assert.equal(ui.tabs[1].getAttribute("aria-selected"), "true");
+    assert.equal(ui.root.dataset.railLock, undefined);
+  } finally {
+    ui.dispose();
+  }
+});
+
+test("any other grid under a finger is long-press-to-select, as the rider grid is", () => {
+  const ui = mountRail([cell(0, 0), cell(50, 0), cell(0, 50), cell(50, 50)]);
+  try {
+    ui.pointer("pointerdown", 25, 25);
+    assert.equal(ui.root.dataset.railLock, undefined);
+    assert.equal(ui.touchmove(), false, "a swipe pans the page");
+    ui.advance(220);
+    assert.equal(ui.root.dataset.railLock, "true", "the hold takes the finger");
+    assert.equal(ui.touchmove(), true);
+    ui.pointer("pointermove", 80, 80);
+    ui.flushFrames();
+    ui.pointer("pointerup", 80, 80);
+    ui.flushFrames();
+    assert.equal(ui.tabs[3].getAttribute("aria-selected"), "true");
+    assert.equal(ui.root.dataset.railLock, undefined);
   } finally {
     ui.dispose();
   }
