@@ -163,6 +163,9 @@ test("browser QA captures the requested viewports and both directions with canva
   assert.match(browserHarness, /evidence\.alphaPixels > 0/);
   assert.match(browserHarness, /waitForCanvasConvergence/);
   assert.match(browserHarness, /quietFor >= 320 && frames >= 3/);
+  assert.match(browserHarness, /direction === "forward" && progress >= 0\.975/);
+  assert.match(browserHarness, /top: Math\.ceil\(/);
+  assert.match(browserHarness, /state\.actualProgress \+ 1e-6 >= progress/);
   assert.match(
     browserHarness,
     /canvas pixels must match at \.35 after reverse and forward catchup/,

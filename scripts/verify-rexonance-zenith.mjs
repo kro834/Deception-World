@@ -108,6 +108,7 @@ const snapshot = (page) =>
       percent: r.querySelector(".rzn-percent").textContent,
       constrained: document.documentElement.hasAttribute("data-rzn-constrained"),
       top: r.getBoundingClientRect().top + scrollY,
+      scrollY,
       pin: parseFloat(getComputedStyle(f).top) || 0,
       hashTop: location.hash
         ? document.querySelector(location.hash)?.getBoundingClientRect().top
@@ -360,7 +361,7 @@ async function functional(engine, label, profile, { connection, noTimeline = fal
         await page.evaluate(
           ({ start, progress }) =>
             scrollTo({
-              top: start.top - start.pin + progress * (start.height - start.frameHeight),
+              top: Math.ceil(start.top - start.pin + progress * (start.height - start.frameHeight)),
               behavior: "instant",
             }),
           { start, progress },
@@ -384,6 +385,16 @@ async function functional(engine, label, profile, { connection, noTimeline = fal
           { timeout: 5000 },
         );
         const state = await snapshot(page);
+        state.actualProgress =
+          (state.scrollY - (start.top - start.pin)) / (start.height - start.frameHeight);
+        assert.ok(
+          state.actualProgress + 1e-6 >= progress,
+          `${label} ${direction}/${progress}: scroll rounded below milestone (${state.actualProgress})`,
+        );
+        assert.ok(
+          state.actualProgress <= progress + 2 / (start.height - start.frameHeight),
+          `${label} ${direction}/${progress}: scroll overshot milestone (${state.actualProgress})`,
+        );
         assert.equal(Number(state.percent), expectedPercent, `${label} scrub ${progress}`);
         if (process.env.CAPTURE_BASELINE !== "1")
           assert.ok(
@@ -419,11 +430,51 @@ async function functional(engine, label, profile, { connection, noTimeline = fal
         if (progress >= 0.975) {
           assert.equal(state.sceneComplete, "true", `${label}: assembly must complete by .975`);
           if (process.env.CAPTURE_BASELINE !== "1" && captureForm !== "standard") {
-            await page.waitForFunction(
-              () => document.querySelector(".rzn-suitup")?.dataset.rznFormComplete === "true",
-              undefined,
-              { timeout: 10000 },
-            );
+            try {
+              await page.waitForFunction(
+                () => document.querySelector(".rzn-suitup")?.dataset.rznFormComplete === "true",
+                undefined,
+                { timeout: 10000 },
+              );
+            } catch (error) {
+              const diagnostic = await page.evaluate(() => {
+                const runway = document.querySelector(".rzn-suitup");
+                const frame = runway?.querySelector(".rzn-frame");
+                const rect = runway?.getBoundingClientRect();
+                const canvas = runway?.querySelector("canvas.rzn-canvas");
+                const runwayTop = rect ? rect.top + scrollY : null;
+                const travel = (runway?.offsetHeight ?? 0) - (frame?.offsetHeight ?? 0);
+                const pin = frame ? parseFloat(getComputedStyle(frame).top) || 0 : null;
+                return {
+                  scrollY,
+                  viewportHeight: innerHeight,
+                  viewportWidth: innerWidth,
+                  runwayTop,
+                  runwayHeight: runway?.offsetHeight ?? null,
+                  frameHeight: frame?.offsetHeight ?? null,
+                  pin,
+                  actualProgress:
+                    runwayTop !== null && travel > 0
+                      ? (scrollY - (runwayTop - pin)) / travel
+                      : null,
+                  percent: runway?.querySelector(".rzn-percent")?.textContent ?? null,
+                  state: runway?.dataset.rznState ?? null,
+                  phase: runway?.dataset.rznPhase ?? null,
+                  form: runway?.dataset.form ?? null,
+                  formComplete: runway?.dataset.rznFormComplete ?? null,
+                  sceneComplete: runway?.hasAttribute("data-rzn-complete") ?? false,
+                  formTabStates: Array.from(
+                    document.querySelectorAll('[id^="rxs-stage-tab-"]'),
+                    (tab) => ({ id: tab.id, selected: tab.getAttribute("aria-selected") }),
+                  ),
+                  canvas: canvas ? { width: canvas.width, height: canvas.height } : null,
+                  drawCalls: window.__rznCanvasDraws?.length ?? 0,
+                };
+              });
+              assert.fail(
+                `${label}: ${captureForm} form did not resolve at forward ${progress}; ${JSON.stringify(diagnostic)}; ${error.message}`,
+              );
+            }
             state.formComplete = await page
               .locator(".rzn-suitup")
               .getAttribute("data-rzn-form-complete");
@@ -435,7 +486,11 @@ async function functional(engine, label, profile, { connection, noTimeline = fal
             await page.waitForFunction(() => (window.__rznCanvasDraws || []).length > 0);
           }
         }
-        const settledEvidence = progress >= 0.975 ? await canvasEvidence(page) : evidence;
+        const finalConvergence =
+          direction === "forward" && progress >= 0.975
+            ? await waitForCanvasConvergence(page, `${label}/${direction}/${progress}/final`)
+            : null;
+        const settledEvidence = finalConvergence ? await canvasEvidence(page) : evidence;
         if (direction === "forward" && progress >= 0.975)
           forwardHashes.add(settledEvidence.pixelHash);
         const screenshot = `${label}-${captureForm}-${direction}-${name}.png`;
@@ -447,7 +502,7 @@ async function functional(engine, label, profile, { connection, noTimeline = fal
           ...state,
           geometry,
           canvas: settledEvidence,
-          convergence,
+          convergence: finalConvergence || convergence,
           screenshot,
         });
       }
@@ -463,7 +518,7 @@ async function functional(engine, label, profile, { connection, noTimeline = fal
       await page.evaluate(
         ({ start, progress }) =>
           scrollTo({
-            top: start.top - start.pin + progress * (start.height - start.frameHeight),
+            top: Math.ceil(start.top - start.pin + progress * (start.height - start.frameHeight)),
             behavior: "instant",
           }),
         { start, progress: 0.35 },
