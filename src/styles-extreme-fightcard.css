@@ -1406,9 +1406,35 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page > #stages #exs-stag
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > #stages #exs-stage-panel > figure {
+  /* rx14 #6: both supplied portraits are 1538px tall (the narrower is
+     1022px). Bound the shared canvas, not just the selected <img>, so the
+     old form and the moving seam never reveal a larger, softer crop. */
+  --exf-art-density: 1;
   grid-column: 2;
   grid-row: 1;
+  justify-self: center;
+  align-self: center;
+  width: min(100%, calc(1022px / var(--exf-art-density)));
+  max-height: calc(1538px / var(--exf-art-density));
   isolation: isolate;
+}
+
+@media (resolution > 1dppx) {
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page > #stages #exs-stage-panel > figure {
+    --exf-art-density: 2;
+  }
+}
+
+@media (resolution > 2dppx) {
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page > #stages #exs-stage-panel > figure {
+    --exf-art-density: 3;
+  }
+}
+
+@media (resolution > 3dppx) {
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page > #stages #exs-stage-panel > figure {
+    --exf-art-density: 4;
+  }
 }
 
 html[data-family="special"]
@@ -1418,7 +1444,10 @@ html[data-family="special"]
   #exs-stage-panel
   > figure
   > img {
+  object-fit: contain;
   object-position: 50% 0;
+  transform: none;
+  scale: none;
 }
 
 /* The art melts into the ink on its left and at its foot. */
@@ -1492,7 +1521,7 @@ html[data-family="special"]
   display: block;
   width: 50%;
   transform: skewX(calc(-1 * var(--exf-skew)));
-  background: var(--ext-ink) 50% 0 / cover no-repeat;
+  background: var(--ext-ink) 50% 0 / contain no-repeat;
 }
 
 /* Middle on stage: Ultra waits at the right edge. */

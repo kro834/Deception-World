@@ -109,12 +109,17 @@ async function decodeImageAsset(url: string, signal: AbortSignal, priority: Asse
       signal.removeEventListener("abort", abort);
       if (choosing.get(url) === image) choosing.delete(url);
       if (loaded && !signal.aborted && image.currentSrc) picked.set(url, image.currentSrc);
+      // This temporary Image is never painted. Save the selected URL, then
+      // drop src before srcset to avoid a new fallback request. The response
+      // remains in HTTP cache, while sizes/srcset no longer retain viewport
+      // listeners (and the otherwise unreachable Image) in Chromium.
+      image.removeAttribute?.("src");
+      image.removeAttribute?.("srcset");
+      image.removeAttribute?.("sizes");
       resolve(loaded && !signal.aborted);
     };
     const abort = () => {
       finish(false);
-      image.removeAttribute?.("srcset");
-      image.removeAttribute?.("src");
     };
     if (signal.aborted) {
       abort();

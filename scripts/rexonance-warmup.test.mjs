@@ -27,9 +27,11 @@ function fixture(connection = {}) {
   }
   class Image {
     constructor() {
+      this.removed = [];
       images.push(this);
     }
     removeAttribute(key) {
+      this.removed.push(key);
       delete this[key];
     }
     decode() {
@@ -181,6 +183,43 @@ test("A resolver warms the visible element's own candidates, sizes only when it 
     f.restore();
   }
 });
+
+for (const outcome of ["load", "error", "timeout", "dispose"]) {
+  test(`Alternate warm-up ${outcome} releases responsive viewport listeners`, async () => {
+    const f = fixture();
+    let cleanup;
+    try {
+      const source = "/rider-rexonance-max-20260922.webp";
+      cleanup = warmRexonanceStages({}, [source]);
+      f.near();
+      f.flush();
+      const image = f.images[0];
+      assert.ok(image.srcset);
+      assert.ok(image.sizes);
+      if (outcome === "load") {
+        image.onload();
+        await Promise.resolve();
+      } else if (outcome === "error") image.onerror();
+      else if (outcome === "timeout") [...f.timers.values()][0]();
+      else cleanup();
+      assert.equal(image.srcset, undefined);
+      assert.equal(image.sizes, undefined);
+      assert.equal(image.onload, null);
+      assert.equal(image.onerror, null);
+      assert.equal(image.src, undefined);
+      assert.deepEqual(
+        image.removed,
+        ["src", "srcset", "sizes"],
+        "never fall back to the original source during cleanup",
+      );
+      assert.equal(f.timers.size, 0);
+      assert.equal(f.idle.size, 0, "a single warm-up does not schedule another image");
+    } finally {
+      cleanup?.();
+      f.restore();
+    }
+  });
+}
 
 // rx12: the entry call's suit-up pieces decode on intent, once, and never
 // gate navigation; the call builds the suit only once they all decoded.

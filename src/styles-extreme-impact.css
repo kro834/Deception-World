@@ -699,15 +699,15 @@ html[data-family="special"]
 }
 
 /* The old form stands behind the cut (the STAGE scene's ink had covered
-   the overdrive's backdrop, so every change of form opened on black). The
-   same crop as the art: cover, 50% 18%. */
+   the overdrive's backdrop, so every change of form opened on black).
+   Match the contained portrait and seam in the pixel-bounded rx15 canvas. */
 html[data-family="special"]
   body
   .rxs-page.rxs-page.exs-page
   > #stages
   #exs-stage-panel[data-exo-cut="true"]
   > figure[data-form="ultra"] {
-  background: var(--ext-ink) url("/saga-extreme-middle-20261006.webp") 50% 18% / cover no-repeat;
+  background: var(--ext-ink) url("/saga-extreme-middle-20261006.webp") 50% 0 / contain no-repeat;
 }
 
 html[data-family="special"]
@@ -716,7 +716,7 @@ html[data-family="special"]
   > #stages
   #exs-stage-panel[data-exo-cut="true"]
   > figure[data-form="middle"] {
-  background: var(--ext-ink) url("/saga-extreme-ultra-20261006.jpeg") 50% 18% / cover no-repeat;
+  background: var(--ext-ink) url("/saga-extreme-ultra-20261006.jpeg") 50% 0 / contain no-repeat;
 }
 
 /* ================================================================

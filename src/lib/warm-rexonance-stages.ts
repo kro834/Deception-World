@@ -51,6 +51,11 @@ export function warmRexonanceStages(
       window.clearTimeout(timeout);
       next.onload = null;
       next.onerror = null;
+      // This Image only warms HTTP cache, so release all candidates. Remove
+      // src first: removing srcset first can fetch the original fallback.
+      next.removeAttribute("src");
+      next.removeAttribute("srcset");
+      next.removeAttribute("sizes");
       image = null;
       schedule();
     };
@@ -59,11 +64,7 @@ export function warmRexonanceStages(
       else finish();
     };
     next.onerror = finish;
-    timeout = window.setTimeout(() => {
-      next.removeAttribute("srcset");
-      next.removeAttribute("src");
-      finish();
-    }, 6000);
+    timeout = window.setTimeout(finish, 6000);
     next.src = source;
   };
   const schedule = () => {
@@ -99,8 +100,9 @@ export function warmRexonanceStages(
     if (image) {
       image.onload = null;
       image.onerror = null;
-      image.removeAttribute("srcset");
       image.removeAttribute("src");
+      image.removeAttribute("srcset");
+      image.removeAttribute("sizes");
       image = null;
     }
   };

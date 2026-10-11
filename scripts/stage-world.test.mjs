@@ -64,7 +64,12 @@ test("the sheet adds no text, no motion, no blur and nothing under 12px", () => 
   for (const [, value] of css.matchAll(/(?<![\w-])content:\s*([^;]+);/g)) {
     assert.ok(/^(?:""|none)$/.test(value.trim()), value);
   }
-  assert.doesNotMatch(css, /@keyframes|transition\s*:|backdrop-filter|filter\s*:\s*blur|animation/);
+  // The print-sized finale may cancel the older scroll-settle animation;
+  // this stage sheet still introduces no animation of its own.
+  assert.doesNotMatch(
+    css.replace(/animation:\s*none;/g, ""),
+    /@keyframes|transition\s*:|backdrop-filter|filter\s*:\s*blur|animation/,
+  );
   for (const [, size] of css.matchAll(/font(?:-size)?:\s*(?:\d{3}\s+)?(\d+(?:\.\d+)?)px/g)) {
     assert.ok(Number(size) >= 12, size);
   }
