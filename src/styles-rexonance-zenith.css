@@ -2549,7 +2549,7 @@ html[data-family="special"]
     radial-gradient(ellipse at 68% 43%, rgb(var(--rzn-pink) / 20%), transparent 48%),
     radial-gradient(ellipse at 50% 24%, rgb(var(--rzn-gold) / 10%), transparent 38%);
   opacity: 0.78;
-  transform: scale(1);
+  scale: 1;
 }
 
 html[data-family="special"]
@@ -2566,7 +2566,8 @@ html[data-family="special"]
   border-radius: 50%;
   background: radial-gradient(ellipse at 50% 0%, rgb(var(--rzn-gold) / 9%), transparent 38%);
   opacity: 0.7;
-  transform: translateX(-50%) scale(1);
+  translate: -50% 0;
+  scale: 1;
 }
 
 html[data-family="special"]
@@ -2706,7 +2707,7 @@ html[data-family="special"]
   > .rzn-frame
   > .rzn-aura {
   opacity: 0;
-  transform: scale(0.94);
+  scale: 0.94;
 }
 
 html[data-family="special"]
@@ -2716,7 +2717,7 @@ html[data-family="special"]
   > .rzn-frame
   > .rzn-crown {
   opacity: 0;
-  transform: translateX(-50%) scale(0.9);
+  scale: 0.9;
 }
 
 html[data-family="special"]
@@ -2836,27 +2837,12 @@ html[data-family="special"]
     :is(.rzn-light, .rzn-aura, .rzn-crown, .rzn-lines, .rzn-readout, .rzn-nanites, .rzn-parts) {
     transition:
       opacity 240ms ease-out,
-      transform 420ms ease-out;
+      scale 420ms ease-out;
   }
 }
 
-/* Menus, dialogs and loading stop the finite compositing transitions. */
-html[data-family="special"]:is([data-side-menu-open], [data-loading], [data-dialog-open])
-  body
-  .rxs-page.rxs-page.rxs-rexonance-page
-  > .rzn-suitup
-  :is(
-    .rzn-light,
-    .rzn-aura,
-    .rzn-crown,
-    .rzn-lines,
-    .rzn-readout,
-    .rzn-nanites,
-    .rzn-parts,
-    .rzn-stamp
-  ) {
-  transition: none;
-}
+/* The full gate above stops matching when menus, dialogs or loading open;
+   the decorative layers then return to their default transition: none. */
 
 @media (forced-colors: active), print {
   html[data-family="special"]
@@ -2866,5 +2852,194 @@ html[data-family="special"]:is([data-side-menu-open], [data-loading], [data-dial
     > .rzn-frame
     > :is(.rzn-depth, .rzn-aura, .rzn-crown) {
     display: none;
+  }
+}
+
+/* EXCELSIOR uses an 811 px sheet around the same 571 px body frame.
+   Matching the canvas's height/width limits keeps the quiet fallback at
+   the same scale as the live figure rather than shrinking its wider art. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup[data-form="excelsior"]
+  > .rzn-frame
+  > .rzn-still {
+  width: calc(var(--rzn-fig-w) * 100% * 811 / 571);
+  max-width: 100%;
+}
+
+/* Very tall, narrow screens can reach the width limit before the height
+   limit. Reserve room for the complete padded sheet in both render paths;
+   numeric values are deliberate because the renderer reads parseFloat. */
+@media (max-width: 760px), (max-width: 1099.98px) and (orientation: portrait) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rzn-suitup[data-form="excelsior"]
+    > .rzn-frame {
+    --rzn-fig-w: 0.64774;
+  }
+}
+
+/* A short landscape phone has one usable screen, with compact side
+   columns. Its figure remains whole between the call and the readout. */
+@media (orientation: landscape) and (max-height: 540px) and (max-width: 1099.98px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rzn-suitup
+    > .rzn-frame {
+    --rzn-fig-h: 0.88;
+    --rzn-fig-b: 0.035;
+    --rzn-gutter: 18px;
+    height: max(220px, calc(100svh - var(--dxs-nav)));
+    max-height: none;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-call {
+    top: 12px;
+    left: var(--rzn-gutter);
+    right: auto;
+    width: 31%;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-kicker {
+    gap: 4px 8px;
+    margin-bottom: 4px;
+    letter-spacing: 0.12em;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-phase {
+    margin-bottom: 10px;
+    letter-spacing: 0.06em;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-lines {
+    gap: 5px;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-line {
+    font-size: 15px;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rzn-suitup
+    .rzn-line:last-child {
+    font-size: 20px;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rzn-suitup[data-rzn-state="live"]
+    .rzn-lines {
+    grid-template-areas: "line";
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rzn-suitup[data-rzn-state="live"]
+    .rzn-line {
+    grid-area: line;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rzn-suitup[data-rzn-state="live"]
+    .rzn-line:not([data-on]) {
+    visibility: hidden;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-hud {
+    top: 14px;
+    right: var(--rzn-gutter);
+    bottom: 14px;
+    left: auto;
+    width: 24%;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto 1fr;
+    justify-items: end;
+    align-items: start;
+    gap: 0;
+    text-align: end;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rzn-suitup
+    .rzn-readout {
+    grid-column: 1;
+    grid-row: 1;
+    font-size: 44px;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rzn-suitup
+    .rzn-nanites {
+    grid-column: 1;
+    grid-row: 2;
+    margin: 8px 0 0;
+    font-size: 12px;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-parts {
+    grid-column: 1;
+    grid-row: 3;
+    grid-template-columns: repeat(2, max-content);
+    justify-content: end;
+    width: auto;
+    max-width: none;
+    margin-top: 12px;
+    gap: 6px 14px;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-part {
+    flex-direction: row;
+    justify-content: flex-end;
+    gap: 5px;
+    letter-spacing: 0.06em;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-stamp {
+    grid-column: 1;
+    grid-row: 4;
+    align-self: start;
+    margin-top: 12px;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rzn-suitup
+    .rzn-stamp
+    > b {
+    font-size: 16px;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rzn-suitup
+    > .rzn-frame
+    > .rzn-aura {
+    inset: 0 24%;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rzn-suitup
+    > .rzn-frame
+    > .rzn-crown {
+    top: 7%;
+    width: 25%;
+    height: 80%;
   }
 }
