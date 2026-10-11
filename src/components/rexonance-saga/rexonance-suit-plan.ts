@@ -1,5 +1,6 @@
 import {
   REXONANCE_SUIT_ACCENTS,
+  REXONANCE_SUIT_DRIVER,
   REXONANCE_SUIT_FIT,
   REXONANCE_SUIT_GOLD,
   REXONANCE_SUIT_GOLD_AT,
@@ -253,7 +254,8 @@ function step() {
   const fit = REXONANCE_SUIT_FIT[piece.id];
   const tiles = tilesOf(piece, index, fit);
   const first = goldAt;
-  goldAt = goldOf(piece, index, goldAt, cells());
+  // The driver is on the body finished: no gold forms there (owner).
+  if (!REXONANCE_SUIT_DRIVER.includes(piece.id)) goldAt = goldOf(piece, index, goldAt, cells());
   const [from, to] = REXONANCE_SUIT_GOLD_AT[piece.id] ?? [fit, fit];
   const spawn = Math.min(...tiles.map((tile) => tile.land)) - FLIGHT;
   building.push({
