@@ -195,6 +195,8 @@ function mount(pathname = "/world", { preload, prepareCalls } = {}) {
           isRexonanceSuitReady: () => false,
           // rx13: the idle warm-up never runs here.
           scheduleRexonanceSuitWarm: () => () => {},
+          // The page preload (owner, 2026-10-11) never runs here either.
+          scheduleRexonancePagePreload: () => () => {},
         };
       if (name === "@/lib/rexonance-transition-loader")
         return {

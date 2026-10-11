@@ -99,7 +99,12 @@ export function SuitNanites({ onReady }: { onReady: () => void }) {
         const raw = rexonanceSuitSource(REXONANCE_SUIT_GOLD_ATLAS.src);
         if (!atlas || !raw) return;
         const atlasWork = forming(atlas, raw);
-        const scale = Math.min(2, globalThis.devicePixelRatio || 1);
+        // Touch screens draw at up to 1.25x (the tiles are 9 px of art; a 2x
+        // backing store only doubled the fill work on a tablet).
+        const scale = Math.min(
+          globalThis.matchMedia?.("(pointer: coarse), (any-pointer: coarse)").matches ? 1.25 : 2,
+          globalThis.devicePixelRatio || 1,
+        );
         const width = Math.round(box.clientWidth * scale);
         const height = Math.round(box.clientHeight * scale);
         const make = () => {
@@ -146,20 +151,9 @@ export function SuitNanites({ onReady }: { onReady: () => void }) {
           Math.max(coreY, FIG.height - coreY),
         );
         let lit = !held;
-        const paintLights = (target: CanvasRenderingContext2D) => {
-          for (const { piece } of all)
-            target.drawImage(
-              held!.lights,
-              piece.ax,
-              piece.ay,
-              piece.w,
-              piece.h,
-              piece.x * s,
-              piece.y * s,
-              piece.w * s,
-              piece.h * s,
-            );
-        };
+        // The lights on the figure, composed once ahead of the call.
+        const paintLights = (target: CanvasRenderingContext2D) =>
+          target.drawImage(held!.figure, 0, 0, FIG.width * s, FIG.height * s);
         const settle = (index: number) => {
           const { piece } = all[index];
           settled.drawImage(

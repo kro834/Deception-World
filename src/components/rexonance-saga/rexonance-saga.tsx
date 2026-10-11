@@ -1046,7 +1046,8 @@ export function RexonanceSaga() {
       timer = window.setTimeout(() => {
         timer = 0;
         if (window.requestIdleCallback) idle = window.requestIdleCallback(show, { timeout: 700 });
-        else show();
+        // Safari has no idle callback: leave the reveal's last frames alone.
+        else timer = window.setTimeout(show, 400);
       }, REXONANCE_ENTRY_TIMINGS.reveal + 80);
     };
     const observer = new MutationObserver(() => {
