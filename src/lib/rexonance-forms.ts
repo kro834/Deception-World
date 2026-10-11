@@ -4,8 +4,8 @@
 export const REXONANCE_FORM_FIGURES = {
   max: "/rexonance-forms-20261011/max.webp",
   ultra: "/rexonance-forms-20261011/ultra.webp",
-  // Fitted to the figure by its bounds (another pose).
-  excelsior: "/rexonance-forms-20261011/excelsior.webp",
+  // Owner's frontal alpha cutout, head-to-toe aligned with room for both ribbons.
+  excelsior: "/rexonance-forms-20261011/excelsior-cutout-20261012.webp",
 } as const;
 /** EXCELSIOR's picture is this much wider either side than the figure's
  * frame (it is broader and never shrunk; owner, 2026-10-12). */

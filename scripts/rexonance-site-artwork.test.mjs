@@ -13,8 +13,8 @@ test("the special site maps the three supplied artworks to separately versioned 
     standard: "/rider-rexonance-saga-pickup-20260923.webp",
     max: "/rider-rexonance-max-20260923.webp",
     ultra: "/rider-rexonance-ultra-20260923.webp",
-    // Owner (2026-10-12): EXCELSIOR's stage art, above ULTRA, as supplied.
-    excelsior: "/rider-rexonance-excelsior-20261012.webp",
+    // Owner (2026-10-12): use the newly supplied transparent full figure.
+    excelsior: "/rider-rexonance-excelsior-cutout-20261012.webp",
   });
   for (const stage of Object.keys(REXONANCE_SITE_ARTWORK)) {
     assert.match(
