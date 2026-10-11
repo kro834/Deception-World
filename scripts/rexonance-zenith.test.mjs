@@ -39,6 +39,7 @@ const strip = (css) => css.replace(/\/\*[\s\S]*?\*\//g, "");
 const css = strip(read("src/styles-rexonance-zenith.css"));
 const route = read("src/routes/rexonance-saga.tsx");
 const page = read("src/components/rexonance-saga/rexonance-saga.tsx");
+const browserHarness = read("scripts/verify-rexonance-zenith.mjs");
 
 const flat = (text) =>
   text.replace(/\s+/g, " ").replace(/\(\s+/g, "(").replace(/\s+\)/g, ")").trim();
@@ -132,6 +133,30 @@ test("the ZENITH sheet loads after RESONANCE, before the cinematic sheet, on its
   ]) {
     assert.doesNotMatch(read(path), /rexonance-zenith/, path);
   }
+});
+
+test("browser QA captures the requested viewports and both directions with canvas evidence", () => {
+  for (const profile of [
+    "desktop1440",
+    "phone390",
+    "narrow320",
+    "tablet1024-landscape",
+    "reduced-motion390",
+  ])
+    assert.match(browserHarness, new RegExp(`name: \\"?${profile}\\"?`), profile);
+  assert.match(browserHarness, /CAPTURE=1/);
+  assert.match(browserHarness, /CAPTURE_PROFILES/);
+  assert.match(browserHarness, /BROWSER=webkit/);
+  assert.match(browserHarness, /direction: "forward"/);
+  assert.match(browserHarness, /direction: "reverse"/);
+  assert.match(browserHarness, /direction: "forward", progress: 0\.975, name: "form-complete"/);
+  assert.match(browserHarness, /dataset\.rznFormComplete === "true"/);
+  assert.match(browserHarness, /CanvasRenderingContext2D\.prototype\.drawImage/);
+  assert.match(browserHarness, /alphaPixels/);
+  assert.match(browserHarness, /pixelHash/);
+  assert.match(browserHarness, /reduced-motion-static\.png/);
+  assert.match(browserHarness, /evidence\.drawCalls > 0/);
+  assert.match(browserHarness, /evidence\.alphaPixels > 0/);
 });
 
 test("every rule is scoped to the Rexonance page and leaves the bar, the menu and the calls alone", () => {

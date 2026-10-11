@@ -1,6 +1,8 @@
 // Disposable browser QA; never uses a signed-in browser profile.
 // BASE_URL=... BASELINE_URL=... BENCH_RUNS=5 node scripts/verify-rexonance-zenith.mjs
-// ZENITH_WEBKIT=1 exercises WebKit too; ZENITH_TRACE=1 saves the end-of-scroll trace.
+// CAPTURE=1 [CAPTURE_PROFILES=desktop1440,phone390] captures only visual profiles.
+// BROWSER=webkit selects WebKit; ZENITH_WEBKIT=1 adds WebKit to Chromium's full run.
+// ZENITH_TRACE=1 saves the end-of-scroll trace.
 import assert from "node:assert/strict";
 import { mkdir, writeFile } from "node:fs/promises";
 import { chromium, webkit } from "playwright";
@@ -17,7 +19,48 @@ const pixel = {
   userAgent:
     "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Mobile Safari/537.36",
 };
-const browser = await chromium.launch({ channel: "chrome" });
+const profiles = [
+  { name: "desktop1440", viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 },
+  {
+    name: "phone390",
+    viewport: { width: 390, height: 844 },
+    deviceScaleFactor: 3,
+    isMobile: true,
+    hasTouch: true,
+  },
+  {
+    name: "narrow320",
+    viewport: { width: 320, height: 844 },
+    deviceScaleFactor: 3,
+    isMobile: true,
+    hasTouch: true,
+  },
+  {
+    name: "tablet1024-landscape",
+    viewport: { width: 1024, height: 768 },
+    deviceScaleFactor: 2,
+    isMobile: true,
+    hasTouch: true,
+  },
+  {
+    name: "reduced-motion390",
+    viewport: { width: 390, height: 844 },
+    deviceScaleFactor: 3,
+    isMobile: true,
+    hasTouch: true,
+    reducedMotion: "reduce",
+  },
+];
+const requestedProfiles = process.env.CAPTURE_PROFILES?.split(",")
+  .map((name) => name.trim())
+  .filter(Boolean);
+const selectedProfiles = requestedProfiles?.length
+  ? profiles.filter((profile) => requestedProfiles.includes(profile.name))
+  : profiles;
+assert.ok(selectedProfiles.length, "CAPTURE_PROFILES did not match any known profile");
+const browserKind = process.env.BROWSER === "webkit" ? webkit : chromium;
+assert.ok(!process.env.BROWSER || ["chromium", "chrome", "webkit"].includes(process.env.BROWSER));
+const browser = await browserKind.launch(browserKind === chromium ? { channel: "chrome" } : {});
 const errors = [];
 const ready = async (page, url) => {
   page.on("pageerror", (error) => errors.push(error.message));
@@ -41,6 +84,9 @@ const snapshot = (page) =>
     const f = r.querySelector(".rzn-frame");
     return {
       state: r.dataset.rznState,
+      phase: r.dataset.rznPhase || null,
+      form: r.dataset.form || null,
+      formComplete: r.dataset.rznFormComplete || null,
       height: r.offsetHeight,
       frameHeight: f.offsetHeight,
       percent: r.querySelector(".rzn-percent").textContent,
@@ -56,8 +102,68 @@ const snapshot = (page) =>
     };
   });
 
+const installCanvasDrawProbe = async (context) => {
+  await context.addInitScript(() => {
+    window.__rznCanvasDraws = [];
+    const original = CanvasRenderingContext2D.prototype.drawImage;
+    CanvasRenderingContext2D.prototype.drawImage = function (...args) {
+      if (this.canvas?.matches?.("canvas.rzn-canvas")) {
+        window.__rznCanvasDraws.push({
+          t: performance.now(),
+          source: args[0]?.constructor?.name || typeof args[0],
+        });
+      }
+      return original.apply(this, args);
+    };
+  });
+};
+
+const canvasEvidence = async (page) =>
+  page.evaluate(() => {
+    const source = document.querySelector("canvas.rzn-canvas");
+    const draws = window.__rznCanvasDraws || [];
+    if (!source || !source.width || !source.height) {
+      return {
+        width: source?.width || 0,
+        height: source?.height || 0,
+        drawCalls: draws.length,
+        drawEvents: draws.slice(-5),
+        alphaPixels: 0,
+        pixelHash: null,
+      };
+    }
+    const sample = document.createElement("canvas");
+    sample.width = 32;
+    sample.height = 48;
+    const context = sample.getContext("2d", { willReadFrequently: true });
+    context.drawImage(source, 0, 0, sample.width, sample.height);
+    const pixels = context.getImageData(0, 0, sample.width, sample.height).data;
+    let alphaPixels = 0;
+    let hash = 2166136261;
+    for (let index = 0; index < pixels.length; index += 4) {
+      if (pixels[index + 3] > 8) alphaPixels += 1;
+      hash ^= pixels[index];
+      hash = Math.imul(hash, 16777619);
+      hash ^= pixels[index + 1];
+      hash = Math.imul(hash, 16777619);
+      hash ^= pixels[index + 2];
+      hash = Math.imul(hash, 16777619);
+      hash ^= pixels[index + 3];
+      hash = Math.imul(hash, 16777619);
+    }
+    return {
+      width: source.width,
+      height: source.height,
+      drawCalls: draws.length,
+      drawEvents: draws.slice(-5),
+      alphaPixels,
+      pixelHash: (hash >>> 0).toString(16).padStart(8, "0"),
+    };
+  });
+
 async function functional(engine, label, profile, { connection, noTimeline = false } = {}) {
   const context = await engine.newContext(profile);
+  await installCanvasDrawProbe(context);
   if (connection)
     await context.addInitScript((value) => {
       Object.defineProperty(navigator, "connection", {
@@ -86,6 +192,19 @@ async function functional(engine, label, profile, { connection, noTimeline = fal
   const page = await context.newPage();
   for (const hash of connection ? ["p14", "stages", "system"] : [""]) {
     await ready(page, `${base}/rexonance-saga${hash ? `#${hash}` : ""}`);
+    const geometry = await page.evaluate(() => ({
+      viewport: { width: innerWidth, height: innerHeight },
+      document: {
+        width: document.documentElement.scrollWidth,
+        height: document.documentElement.scrollHeight,
+      },
+      overflowX: document.documentElement.scrollWidth > innerWidth,
+    }));
+    assert.equal(
+      geometry.overflowX,
+      false,
+      `${label}: horizontal overflow ${JSON.stringify(geometry)}`,
+    );
     const start = await snapshot(page);
     if (connection) {
       assert.equal(start.constrained, true, label);
@@ -99,7 +218,51 @@ async function functional(engine, label, profile, { connection, noTimeline = fal
         `${label} #${hash}: arrival ${start.hashTop}`,
       );
       report.functional.push({ label, hash, ...end });
+    } else if (profile.reducedMotion === "reduce") {
+      assert.equal(start.state, undefined, `${label}: reduced motion must keep the static scene`);
+      const evidence = await canvasEvidence(page);
+      assert.equal(
+        evidence.width,
+        0,
+        `${label}: reduced motion must not allocate the scene canvas`,
+      );
+      assert.equal(
+        evidence.drawCalls,
+        0,
+        `${label}: reduced motion must not draw the scene canvas`,
+      );
+      const motion = await page.locator(".rzn-suitup").evaluate((runway) => ({
+        complete: runway.hasAttribute("data-rzn-complete"),
+        activeAnimations: runway
+          .getAnimations({ subtree: true })
+          .filter((animation) => animation.playState === "running").length,
+      }));
+      assert.equal(
+        motion.activeAnimations,
+        0,
+        `${label}: reduced motion must not animate the scene`,
+      );
+      await page.screenshot({ path: `${out}/${label}-reduced-motion-static.png` });
+      report.functional.push({
+        label,
+        geometry,
+        ...start,
+        evidence,
+        motion,
+        screenshot: `${label}-reduced-motion-static.png`,
+      });
     } else {
+      const formTab = page.locator("#rxs-stage-tab-max");
+      if (await formTab.count()) {
+        await formTab.click();
+        await page.waitForFunction(
+          () =>
+            document.querySelector("#rxs-stage-tab-max")?.getAttribute("aria-selected") === "true",
+        );
+        await page.waitForFunction(
+          () => document.querySelector(".rzn-suitup")?.dataset.form === "max",
+        );
+      }
       // Trigger warm-up while still 3.4 screens outside the viewport.
       await page.evaluate(
         (top) => scrollTo({ top, behavior: "instant" }),
@@ -108,7 +271,27 @@ async function functional(engine, label, profile, { connection, noTimeline = fal
       await page.waitForTimeout(1600);
       const warm = await snapshot(page);
       assert.notEqual(warm.state, "live", "preparation alone must not activate the scene");
-      for (const progress of [0.1, 0.35, 0.72, 0.84, 1, 0.35]) {
+      const milestones = [
+        { direction: "forward", progress: 0.1, name: "opening" },
+        { direction: "forward", progress: 0.35, name: "arms" },
+        { direction: "forward", progress: 0.72, name: "torso" },
+        { direction: "forward", progress: 0.84, name: "near-complete" },
+        { direction: "forward", progress: 0.975, name: "form-complete" },
+        { direction: "forward", progress: 1, name: "complete" },
+        { direction: "reverse", progress: 0.84, name: "near-complete" },
+        { direction: "reverse", progress: 0.72, name: "torso" },
+        { direction: "reverse", progress: 0.35, name: "arms" },
+        { direction: "reverse", progress: 0.1, name: "opening" },
+      ];
+      const phases = [];
+      const forwardHashes = new Set();
+      const firstUnfinished = await snapshot(page);
+      assert.notEqual(
+        firstUnfinished.formComplete,
+        "true",
+        `${label}: nonstandard form cannot be complete before .975`,
+      );
+      for (const { direction, progress, name } of milestones) {
         await page.evaluate(
           ({ start, progress }) =>
             scrollTo({
@@ -137,8 +320,63 @@ async function functional(engine, label, profile, { connection, noTimeline = fal
         );
         const state = await snapshot(page);
         assert.equal(Number(state.percent), expectedPercent, `${label} scrub ${progress}`);
-        if (progress === 0.35) await page.screenshot({ path: `${out}/${label}-arms.png` });
+        assert.ok(
+          ["prepare", "assemble", "seal", "ignite", "evolve", "complete"].includes(state.phase),
+          `${label} ${direction}/${progress}: unknown data-rzn-phase ${state.phase}`,
+        );
+        const evidence = await canvasEvidence(page);
+        assert.ok(
+          evidence.drawCalls > 0,
+          `${label} ${direction}/${progress}: no canvas drawImage evidence`,
+        );
+        assert.ok(
+          evidence.alphaPixels > 0,
+          `${label} ${direction}/${progress}: sampled canvas is empty`,
+        );
+        if (direction === "forward" && progress < 0.975) {
+          assert.notEqual(state.formComplete, "true", `${label}: form completed before .975`);
+          forwardHashes.add(evidence.pixelHash);
+        }
+        phases.push({ direction, progress, phase: state.phase });
+        if (progress >= 0.975) {
+          await page.waitForFunction(
+            () => document.querySelector(".rzn-suitup")?.dataset.rznFormComplete === "true",
+            undefined,
+            { timeout: 10000 },
+          );
+          state.formComplete = await page
+            .locator(".rzn-suitup")
+            .getAttribute("data-rzn-form-complete");
+          assert.equal(
+            state.formComplete,
+            "true",
+            `${label}: selected nonstandard form must resolve by .975`,
+          );
+          await page.waitForFunction(() => (window.__rznCanvasDraws || []).length > 0);
+        }
+        const settledEvidence = progress >= 0.975 ? await canvasEvidence(page) : evidence;
+        if (direction === "forward" && progress >= 0.975)
+          forwardHashes.add(settledEvidence.pixelHash);
+        const screenshot = `${label}-${direction}-${name}.png`;
+        await page.screenshot({ path: `${out}/${screenshot}` });
+        report.functional.push({
+          label,
+          direction,
+          milestone: name,
+          ...state,
+          geometry,
+          canvas: settledEvidence,
+          screenshot,
+        });
       }
+      assert.ok(
+        phases.some(({ phase }) => phase === "complete"),
+        `${label}: phase sequence never reached complete`,
+      );
+      assert.ok(
+        forwardHashes.size >= 3,
+        `${label}: canvas pixels did not change across forward scrub checkpoints`,
+      );
       await page.evaluate(() =>
         document.querySelector("#system").scrollIntoView({ behavior: "instant" }),
       );
@@ -158,7 +396,7 @@ async function functional(engine, label, profile, { connection, noTimeline = fal
           "ZENITH fallback must not depend on scroll timelines",
         );
       }
-      report.functional.push({ label, ...(await snapshot(page)), fallback });
+      report.functional.push({ label, geometry, phases, ...(await snapshot(page)), fallback });
     }
   }
   await context.close();
@@ -333,22 +571,20 @@ async function benchmark(url, label, trace = false) {
 }
 
 try {
+  const captureOnly = process.env.CAPTURE === "1";
   if (!process.env.BENCH_ONLY) {
-    await functional(browser, "chromium-touch", pixel);
-    for (const [label, connection] of [
-      ["save-data", { saveData: true, effectiveType: "4g" }],
-      ["2g", { effectiveType: "2g" }],
-    ])
-      await functional(browser, label, pixel, { connection });
-    if (process.env.ZENITH_WEBKIT) {
+    for (const profile of selectedProfiles) await functional(browser, profile.name, profile);
+    if (!captureOnly && browserKind === chromium) {
+      for (const [label, connection] of [
+        ["save-data", { saveData: true, effectiveType: "4g" }],
+        ["2g", { effectiveType: "2g" }],
+      ])
+        await functional(browser, label, pixel, { connection });
+    }
+    if (!captureOnly && process.env.ZENITH_WEBKIT && browserKind === chromium) {
       const wk = await webkit.launch();
       try {
-        const ipad = {
-          viewport: { width: 1024, height: 768 },
-          isMobile: true,
-          hasTouch: true,
-          deviceScaleFactor: 2,
-        };
+        const ipad = profiles.find((profile) => profile.name === "tablet1024-landscape");
         await functional(wk, "webkit-native", ipad);
         await functional(wk, "webkit-no-timeline", ipad, { noTimeline: true });
       } finally {
@@ -356,7 +592,7 @@ try {
       }
     }
   }
-  if (baseline) {
+  if (baseline && !captureOnly) {
     for (let i = 0; i < Number(process.env.BENCH_RUNS || 5); i++) {
       // Alternate AB then BA to reduce temperature/order bias.
       const pair = [
@@ -367,7 +603,8 @@ try {
       for (const [url, label] of pair) report.runs.push(await benchmark(url, label));
     }
   }
-  if (process.env.ZENITH_TRACE) report.trace = await benchmark(base, "candidate-end", true);
+  if (process.env.ZENITH_TRACE && !captureOnly)
+    report.trace = await benchmark(base, "candidate-end", true);
   assert.deepEqual(errors, [], "browser runtime errors");
   await writeFile(`${out}/report.json`, JSON.stringify(report, null, 2));
   console.log(`ZENITH verification passed: ${out}/report.json`);
