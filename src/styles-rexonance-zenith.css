@@ -2493,3 +2493,378 @@ html[data-family="special"]
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-stage-panel > div > h3 {
   word-break: keep-all;
 }
+
+/* The assembly chamber: a quiet mechanical stage becomes a prism throne
+   only when the selected form is whole. These layers never change the
+   figure's fit, and phase changes use only opacity and transforms. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup {
+  background:
+    radial-gradient(ellipse at 50% 44%, rgb(33 46 73 / 32%), transparent 68%),
+    linear-gradient(180deg, #020409, #070b16 48%, #020409);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup
+  > .rzn-frame
+  > :is(.rzn-depth, .rzn-aura, .rzn-crown) {
+  position: absolute;
+  z-index: 0;
+  display: block;
+  pointer-events: none;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup
+  > .rzn-frame
+  > .rzn-depth {
+  inset: 0;
+  background:
+    linear-gradient(90deg, #020409 0%, transparent 28% 72%, #020409 100%),
+    radial-gradient(ellipse at 50% 105%, rgb(121 232 255 / 8%), transparent 44%),
+    linear-gradient(180deg, rgb(2 4 9 / 68%), transparent 24% 76%, rgb(2 4 9 / 72%));
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup
+  > .rzn-frame
+  > .rzn-light {
+  opacity: 0.44;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup
+  > .rzn-frame
+  > .rzn-aura {
+  inset: 4% 14% 0;
+  background:
+    radial-gradient(ellipse at 32% 43%, rgb(var(--rzn-ice) / 22%), transparent 48%),
+    radial-gradient(ellipse at 68% 43%, rgb(var(--rzn-pink) / 20%), transparent 48%),
+    radial-gradient(ellipse at 50% 24%, rgb(var(--rzn-gold) / 10%), transparent 38%);
+  opacity: 0.78;
+  transform: scale(1);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup
+  > .rzn-frame
+  > .rzn-crown {
+  top: 14%;
+  left: 50%;
+  width: min(42%, 580px);
+  height: 64%;
+  border: 1px solid rgb(var(--rzn-gold) / 24%);
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 0%, rgb(var(--rzn-gold) / 9%), transparent 38%);
+  opacity: 0.7;
+  transform: translateX(-50%) scale(1);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup
+  .rzn-crown::before,
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup
+  .rzn-crown::after {
+  content: "";
+  position: absolute;
+  inset: 8% -16%;
+  border: 1px solid rgb(var(--rzn-gold) / 16%);
+  border-radius: 50%;
+  transform: rotate(25deg);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup
+  .rzn-crown::after {
+  inset: 20% -28%;
+  border-color: rgb(var(--rzn-ice) / 15%);
+  transform: rotate(-25deg);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup
+  > .rzn-frame
+  > .rzn-floor {
+  border-color: rgb(var(--rzn-ice) / 24%);
+  background: radial-gradient(closest-side, rgb(var(--rzn-ice) / 13%), transparent);
+  box-shadow:
+    0 0 0 10px rgb(var(--rzn-ice) / 3%),
+    0 0 0 30px rgb(var(--rzn-gold) / 2%);
+}
+
+/* A single, honest phase caption. The static fallback shows completion;
+   the live engine exposes a phase only at the six phase boundaries. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-kicker {
+  margin-bottom: 12px;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-phase {
+  min-height: 22px;
+  margin: 0 0 clamp(18px, 2.6vh, 30px);
+  color: rgb(var(--rzn-white) / 76%);
+  font: 500 12px / 1.7 var(--dx-body);
+  letter-spacing: 0.12em;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup
+  .rzn-phase
+  > span {
+  display: none;
+  align-items: baseline;
+  gap: 12px;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-phase b {
+  color: rgb(var(--rzn-ice));
+  font: 500 12px / 1.7 var(--dx-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.1em;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup:not([data-rzn-state="live"])
+  .rzn-phase
+  > [data-phase="complete"],
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup[data-rzn-phase="prepare"]
+  .rzn-phase
+  > [data-phase="prepare"],
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup[data-rzn-phase="assemble"]
+  .rzn-phase
+  > [data-phase="assemble"],
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup[data-rzn-phase="seal"]
+  .rzn-phase
+  > [data-phase="seal"],
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup[data-rzn-phase="ignite"]
+  .rzn-phase
+  > [data-phase="ignite"],
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup[data-rzn-phase="evolve"]
+  .rzn-phase
+  > [data-phase="evolve"],
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup[data-rzn-phase="complete"]
+  .rzn-phase
+  > [data-phase="complete"] {
+  display: flex;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup[data-rzn-state="live"]
+  .rzn-line[data-done] {
+  opacity: 0.62;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-readout {
+  font-size: clamp(56px, 6.2vw, 106px);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup[data-rzn-state="live"]:not([data-rzn-form-complete])
+  > .rzn-frame
+  > .rzn-aura {
+  opacity: 0;
+  transform: scale(0.94);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup[data-rzn-state="live"]:not([data-rzn-form-complete])
+  > .rzn-frame
+  > .rzn-crown {
+  opacity: 0;
+  transform: translateX(-50%) scale(0.9);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup[data-rzn-state="live"]:is([data-rzn-phase="ignite"], [data-rzn-phase="evolve"])
+  > .rzn-frame
+  > .rzn-light {
+  opacity: 0.64;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup[data-rzn-state="live"]:not([data-rzn-form-complete])
+  .rzn-stamp {
+  opacity: 0;
+  scale: 1.12;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup[data-rzn-form-complete]
+  .rzn-stamp {
+  opacity: 1;
+  scale: 1;
+}
+
+/* Once the selected form has formed, the side information yields to its
+   silhouette. The call remains readable and the final form code stays lit. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup[data-rzn-form-complete]
+  :is(.rzn-readout, .rzn-nanites, .rzn-parts) {
+  opacity: 0.46;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup[data-rzn-form-complete]
+  .rzn-lines {
+  opacity: 0.65;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup[data-rzn-form-complete]
+  .rzn-stamp
+  > b {
+  color: rgb(var(--rzn-white));
+  background: rgb(var(--rzn-ice) / 9%);
+  border: 1px solid rgb(var(--rzn-ice) / 40%);
+  clip-path: none;
+}
+
+@media (max-width: 760px), (max-width: 1099.98px) and (orientation: portrait) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-kicker {
+    margin-bottom: 4px;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-phase {
+    margin-bottom: 8px;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rzn-suitup
+    > .rzn-frame
+    > .rzn-aura {
+    inset: 20% 0 15%;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rzn-suitup
+    > .rzn-frame
+    > .rzn-crown {
+    top: 27%;
+    width: 54%;
+    height: 46%;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rzn-suitup
+    .rzn-readout {
+    font-size: clamp(50px, 8vw, 84px);
+  }
+}
+
+@media (max-width: 420px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rzn-suitup
+    .rzn-readout {
+    font-size: clamp(40px, 12.5vw, 50px);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) and (forced-colors: none) {
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rzn-suitup[data-rzn-state="live"]
+    :is(.rzn-light, .rzn-aura, .rzn-crown, .rzn-lines, .rzn-readout, .rzn-nanites, .rzn-parts) {
+    transition:
+      opacity 240ms ease-out,
+      transform 420ms ease-out;
+  }
+}
+
+/* Menus, dialogs and loading stop the finite compositing transitions. */
+html[data-family="special"]:is([data-side-menu-open], [data-loading], [data-dialog-open])
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup
+  :is(
+    .rzn-light,
+    .rzn-aura,
+    .rzn-crown,
+    .rzn-lines,
+    .rzn-readout,
+    .rzn-nanites,
+    .rzn-parts,
+    .rzn-stamp
+  ) {
+  transition: none;
+}
+
+@media (forced-colors: active), print {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rzn-suitup
+    > .rzn-frame
+    > :is(.rzn-depth, .rzn-aura, .rzn-crown) {
+    display: none;
+  }
+}

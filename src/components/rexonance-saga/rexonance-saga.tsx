@@ -467,6 +467,9 @@ const RexonanceSuitUp = memo(function RexonanceSuitUp({ stage }: { stage: Rexona
     >
       <div className="rzn-frame">
         <i className="rzn-light" />
+        <i className="rzn-depth" />
+        <i className="rzn-aura" />
+        <i className="rzn-crown" />
         <i className="rzn-floor" />
         <img
           className="rzn-still"
@@ -482,6 +485,26 @@ const RexonanceSuitUp = memo(function RexonanceSuitUp({ stage }: { stage: Rexona
           <p className="rzn-kicker">
             <span>SUIT-UP</span>
             <span>NANITE ASSEMBLY</span>
+          </p>
+          <p className="rzn-phase">
+            <span data-phase="prepare">
+              <b>01</b>構成情報を読み込み
+            </span>
+            <span data-phase="assemble">
+              <b>02</b>装甲を装着
+            </span>
+            <span data-phase="seal">
+              <b>03</b>構造を固定
+            </span>
+            <span data-phase="ignite">
+              <b>04</b>出力を起動
+            </span>
+            <span data-phase="evolve">
+              <b>05</b>選択フォームへ進化
+            </span>
+            <span data-phase="complete">
+              <b>06</b>装着完了
+            </span>
           </p>
           <ol className="rzn-lines">
             {SUIT_UP_LINES.map((units, index) => (
