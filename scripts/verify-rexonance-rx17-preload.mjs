@@ -96,7 +96,7 @@ const report = {
     diagnosticTraceEnabled: traceEnabled,
     traceTimingNote: "diagnostic tracing overhead; never combined with primary performance results",
     canvasPixelTimingNote:
-      "trace-only native readback/allocation/commit spans for the 1024x866 atlas; the allocation-end to first-commit-start gap is the synchronous pixel-loop interval, not first engine draw",
+      "trace-only native readback/allocation/commit spans for the 1024x866 atlas; the allocation-end to first-commit-start gap includes cooperative slices plus scheduling wait, not CPU loop time or first engine draw",
     firstVisibilityNote:
       "first rAF observing SSR hero DOM without a cover, not a pixel-paint guarantee",
     earlyInputToleranceMs: 100,
