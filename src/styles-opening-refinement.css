@@ -1,4 +1,4 @@
-/* One title, one light path. Preserve the seven-second score, approved logo
+/* One title, one light path. Preserve the seven-second sequence, approved logo
    geometry and control deck; let the background recede as the prism arrives.
    The first frame is already an entrance, not a seven-second loading gate. */
 .cine-stage.cine-stage {
@@ -105,13 +105,19 @@
 
 /* The main plate is present and usable while the title plays. It reuses the
    final deck's exact geometry, so skipping never shifts the art or focus.
-   The disabled replay plate takes no space until there is a film to replay. */
+   The disabled replay plate takes no space until there is a film to replay.
+   Only enabled buttons take pointer hits: the full-width deck's empty space
+   must pass through to SKIP, including after returning from a replay. */
 .cine-stage[data-opening-entry="ready"] .cine-replay-slot {
   opacity: 1;
-  pointer-events: auto;
+  pointer-events: none;
   transform: none;
   filter: none;
   transition: none;
+}
+
+.cine-stage[data-opening-entry="ready"] .cine-replay-slot > .cine-btn:not(:disabled) {
+  pointer-events: auto;
 }
 
 .cine-stage .cine-btn-secondary[hidden] {

@@ -112,7 +112,7 @@ for (const action of ["BACK", "hidden", "unmount"]) {
 
 function mount(
   pathname = "/world",
-  { preload, prepareCalls, suitReady = false, warmSuit, preparePlan } = {},
+  { preload, prepareCalls, suitReady = false, warmSuit, preparePlan, loadPlan } = {},
 ) {
   class KeyboardEvent extends Event {
     constructor(type, options = {}) {
@@ -272,7 +272,9 @@ function mount(
           },
         };
       if (name === "./rexonance-saga/rexonance-suit-plan")
-        return { prepareRexonanceSuit: preparePlan ?? (() => Promise.resolve(true)) };
+        return loadPlan
+          ? loadPlan()
+          : { prepareRexonanceSuit: preparePlan ?? (() => Promise.resolve(true)) };
       if (name === "@/lib/rexonance-transition-loader")
         return {
           prepareRexonanceTransition:
@@ -1036,6 +1038,66 @@ test("rx17: stalled cold decoding reaches whole fallback after its preparation d
   assert.equal(ui.suitWarmHolds(), 0);
   ui.cleanup();
 });
+
+test("rx17: a plan chunk resolving after Back cannot start preparation over a newer route", async () => {
+  let releaseModule,
+    plans = 0;
+  const ui = mount("/world", {
+    suitReady: true,
+    loadPlan: () =>
+      new Promise((resolve) => {
+        releaseModule = resolve;
+      }),
+  });
+  const stale = ui.go({ to: "/rexonance-saga" });
+  await flushUntil(ui, () => Boolean(releaseModule), "the high-intent plan import must start");
+  assert.equal(ui.gates.filter((gate) => gate.active).length, 0);
+  ui.history("BACK");
+  assert.equal(ui.pendingTimers(), 0);
+  assert.equal(ui.suitWarmHolds(), 0);
+  await settleGo(ui, stale);
+  const latest = ui.go({ to: "/characters/ciel" });
+  releaseModule({
+    prepareRexonanceSuit: () => {
+      plans++;
+      return Promise.resolve(true);
+    },
+  });
+  ui.releaseWarmup();
+  await settleGo(ui, latest);
+  assert.equal(plans, 0, "an unabortable late import still checks transition ownership");
+  assert.equal(ui.navigations.at(-1).to, "/characters/ciel");
+  assert.equal(ui.navigations.filter(({ to }) => to === "/rexonance-saga").length, 0);
+  assert.equal(ui.suitWarmHolds(), 0);
+  ui.cleanup();
+});
+
+for (const mode of ["economy", "reduced"]) {
+  test(`rx17: ${mode} entries never wait for cold decoder or plan preparation`, async () => {
+    let warms = 0,
+      plans = 0;
+    const ui = mount("/world", {
+      warmSuit: () => {
+        warms++;
+        return new Promise(() => {});
+      },
+      preparePlan: () => {
+        plans++;
+        return new Promise(() => {});
+      },
+    });
+    if (mode === "economy") ui.economy();
+    else ui.reduceMotion();
+    const pending = ui.go({ to: "/rexonance-saga" });
+    ui.releaseWarmup();
+    await settleGo(ui, pending);
+    assert.equal(warms, 0, "a still entry must not create a decoder wait");
+    assert.equal(plans, 0);
+    assert.equal(ui.navigations.at(-1).to, "/rexonance-saga");
+    assert.equal(ui.suitWarmHolds(), 0);
+    ui.cleanup();
+  });
+}
 
 test("the fixture rejects a stalled operation within its flush budget instead of awaiting forever", async () => {
   let frames = 0;

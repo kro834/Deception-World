@@ -277,6 +277,17 @@ test("the first frame has an enabled entry, with replay hidden until completion"
   assert.equal(view.tree.props["data-opening-entry"], "ready");
 });
 
+test("the ready control deck passes empty pointer hits through while enabled child buttons remain live", () => {
+  assert.match(
+    css,
+    /\.cine-stage\[data-opening-entry="ready"\] \.cine-replay-slot \{[^}]*opacity: 1;[^}]*pointer-events: none;/,
+  );
+  assert.match(
+    css,
+    /\.cine-stage\[data-opening-entry="ready"\] \.cine-replay-slot > \.cine-btn:not\(:disabled\) \{\s*pointer-events: auto;/,
+  );
+});
+
 test("real opening gestures, M presses and repeated replays have no sound control or stage unlock", () => {
   const ui = entryRuntime({ runEffects: true, profileDevice: { connection: { saveData: true } } });
   for (let run = 0; run < 3; run++) {

@@ -16,6 +16,47 @@ const scenarios = [
     reducedMotion: "reduce",
   },
 ];
+
+async function assertOpeningHitTargets(page, skipExpected = false) {
+  const hits = await page.evaluate(() => {
+    const deck = document.querySelector(".cine-replay-slot");
+    const rect = deck.getBoundingClientRect();
+    const ownsPoint = (element) => {
+      const box = element.getBoundingClientRect();
+      const hit = document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2);
+      return hit?.closest("button") === element;
+    };
+    const buttons = [...deck.querySelectorAll("button")].filter((button) => {
+      const box = button.getBoundingClientRect();
+      return !button.disabled && box.width > 0 && box.height > 0;
+    });
+    const blank = document.elementFromPoint(rect.left + 4, rect.top + rect.height / 2);
+    const skip = document.querySelector(".cine-skip");
+    return {
+      deckPointerEvents: getComputedStyle(deck).pointerEvents,
+      blankHitsDeck: blank?.closest(".cine-replay-slot") === deck,
+      buttons: buttons.map((button) => ({
+        label: button.textContent.trim(),
+        ownsPoint: ownsPoint(button),
+      })),
+      skipOwnsPoint: !skip.disabled && ownsPoint(skip),
+    };
+  });
+  assert.equal(hits.deckPointerEvents, "none");
+  assert.equal(
+    hits.blankHitsDeck,
+    false,
+    "the full-width deck's blank space must not intercept SKIP",
+  );
+  assert.ok(hits.buttons.length > 0, "early ENTER remains an available pointer target");
+  assert.ok(
+    hits.buttons.every((button) => button.ownsPoint),
+    JSON.stringify(hits),
+  );
+  if (skipExpected) assert.equal(hits.skipOwnsPoint, true, JSON.stringify(hits));
+  return hits;
+}
+
 try {
   for (const scenario of scenarios) {
     const context = await browser.newContext({
@@ -57,6 +98,7 @@ try {
     });
     await page.goto(new URL("/", base).href);
     await page.locator(".cine-stage").waitFor();
+    await assertOpeningHitTargets(page);
     assert.equal(await page.locator(".cine-always, audio, [aria-keyshortcuts='M']").count(), 0);
     assert.equal(await page.getByRole("button", { name: /音声を(?:オン|オフ)|SOUND/i }).count(), 0);
     await page.keyboard.press("m");
@@ -71,6 +113,7 @@ try {
         }
         await page.mouse.click(12, scenario.viewport.height / 2);
         await page.keyboard.press("m");
+        const playingHits = await assertOpeningHitTargets(page, true);
         if (run === 0) {
           // Include a full visual sequence, not just an immediate SKIP.
           await page.locator(".cine-stage.is-complete").waitFor({ timeout: 15_000 });
@@ -80,12 +123,20 @@ try {
           await page.keyboard.press("s");
         }
         await page.locator(".cine-stage.is-complete").waitFor();
+        const completeHits = await assertOpeningHitTargets(page);
         const attempts = await page.evaluate(() => window.__soundAttempts);
         assert.deepEqual(attempts, []);
         assert.deepEqual(requests, []);
         assert.deepEqual(responses, []);
         assert.deepEqual(errors, []);
-        results.push({ scenario: scenario.name, run, soundAttempts: attempts.length, pass: true });
+        results.push({
+          scenario: scenario.name,
+          run,
+          playingHits,
+          completeHits,
+          soundAttempts: attempts.length,
+          pass: true,
+        });
       }
     }
     if (scenario.reducedMotion === "reduce") {

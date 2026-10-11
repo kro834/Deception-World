@@ -523,8 +523,11 @@ test("rx17: LoadGate owns warmup pause before every go and releases on settle, h
     gate.indexOf("const go = useCallback"),
     gate.indexOf("const api = useMemo"),
   );
-  assert.ok(go.indexOf("holdSuitWarmup()") < go.indexOf("router.preloadRoute"));
-  assert.ok(go.indexOf("holdSuitWarmup()") < go.indexOf('warmRexonanceSuit("high")'));
+  const pauseAt = go.indexOf('holdSuitWarmup(to === "/rexonance-saga")');
+  assert.ok(pauseAt >= 0, "only Rexonance go preserves its own high-priority intent");
+  assert.ok(pauseAt < go.indexOf("router.preloadRoute"));
+  assert.ok(pauseAt < go.indexOf('warmRexonanceSuit("high")'));
+  assert.match(gate, /pauseRexonanceSuitWarmup\(preserveIntent\)/);
   assert.match(go, /finally\s*\{\s*releaseSuitWarmup\(\);\s*\}\s*\},/);
   assert.match(
     gate,

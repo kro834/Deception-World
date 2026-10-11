@@ -106,6 +106,28 @@ function snapshot(plan) {
   });
 }
 
+// Decode generated occupancy independently of the runtime's atob/popcount
+// and BFS. Count only the plate's actual grid, and reject set padding bits:
+// otherwise GOLD_TOTAL could allocate cells the plan never initializes.
+function maskGrid(base64, piece, unit) {
+  if (!base64) return [];
+  const bytes = Buffer.from(base64, "base64");
+  const columns = Math.ceil(piece.w / unit);
+  const rows = Math.ceil(piece.h / unit);
+  const size = columns * rows;
+  assert.equal(bytes.length, Math.ceil(size / 8), `${piece.id}: mask fits its generated grid`);
+  const occupied = [];
+  for (let index = 0; index < bytes.length * 8; index++) {
+    if (!((bytes[Math.floor(index / 8)] >>> (index % 8)) & 1)) continue;
+    assert.ok(index < size, `${piece.id}: padding must not introduce phantom cells`);
+    occupied.push({ column: index % columns, row: Math.floor(index / columns) });
+  }
+  return occupied;
+}
+
+const expectedGoldCount = () => suit.REXONANCE_SUIT_PIECES.reduce((count, piece) =>
+  count + maskGrid(gold.REXONANCE_SUIT_GOLD_CELLS[piece.id], piece, gold.REXONANCE_SUIT_GOLD_CELL).length, 0);
+
 test("overlapping warm/intention preparations share one build and one queued slice", async () => {
   const ui = planRuntime();
   const first = ui.plan.prepareRexonanceSuit();
@@ -233,8 +255,54 @@ test("the rAF fallback builds the same deterministic gold/tile plan as synchrono
   assert.equal(await preparing, true);
   const direct = planRuntime();
   assert.equal(snapshot(sliced.plan), snapshot(direct.plan));
-  assert.equal(sliced.plan.GOLD_TOTAL, 9962);
+  assert.equal(sliced.plan.GOLD_TOTAL, expectedGoldCount());
   assert.equal(sliced.plan.planEnd(), direct.plan.planEnd());
+});
+
+test("the real plan covers every generated tile and gold mask cell without phantom padding", () => {
+  const { plan } = planRuntime();
+  const plates = plan.plates();
+  const cells = plan.cells();
+  const ids = new Set(suit.REXONANCE_SUIT_PIECES.map((piece) => piece.id));
+  for (const id of Object.keys(gold.REXONANCE_SUIT_GOLD_CELLS))
+    assert.ok(ids.has(id), `${id}: every generated gold mask belongs to a real plate`);
+  assert.equal(plates.length, suit.REXONANCE_SUIT_PIECES.length);
+  let tiles = 0, goldAt = 0;
+  for (let index = 0; index < plates.length; index++) {
+    const plate = plates[index];
+    const piece = suit.REXONANCE_SUIT_PIECES[index];
+    assert.equal(plate.piece.id, piece.id, "front-to-back art order is preserved");
+    const tileGrid = maskGrid(piece.tiles, piece, suit.REXONANCE_SUIT_TILE);
+    assert.ok(tileGrid.length > 0, `${piece.id}: a visible plate must carry artwork tiles`);
+    const tile = suit.REXONANCE_SUIT_TILE;
+    const expectedTiles = tileGrid.map(({ column, row }) =>
+      [piece.ax + column * tile, piece.ay + row * tile, piece.x + column * tile, piece.y + row * tile]);
+    assert.deepEqual(Array.from(plate.tiles, ({ sx, sy, dx, dy }) => [sx, sy, dx, dy]),
+      expectedTiles, `${piece.id}: each occupied artwork tile is carried exactly once`);
+    tiles += tileGrid.length;
+
+    const goldGrid = maskGrid(gold.REXONANCE_SUIT_GOLD_CELLS[piece.id], piece, gold.REXONANCE_SUIT_GOLD_CELL);
+    if (gold.REXONANCE_SUIT_GOLD_CELLS[piece.id])
+      assert.ok(goldGrid.length > 0, `${piece.id}: an emitted trim mask cannot be empty`);
+    const unit = gold.REXONANCE_SUIT_GOLD_CELL;
+    assert.equal(plate.first, goldAt, `${piece.id}: flat gold arrays have no gaps`);
+    assert.equal(plate.end - plate.first, goldGrid.length, `${piece.id}: all trim cells are formed`);
+    const expectedCells = goldGrid.map(({ column, row }) => [
+      piece.x + column * unit, piece.y + row * unit,
+      piece.ax + column * unit, piece.ay + row * unit,
+      Math.min(unit, piece.w - column * unit), Math.min(unit, piece.h - row * unit),
+    ].join(",")).sort();
+    const actualCells = Array.from({ length: goldGrid.length }, (_, offset) => {
+      const at = plate.first + offset;
+      return [cells.fx[at], cells.fy[at], cells.ax[at], cells.ay[at], cells.cw[at], cells.ch[at]].join(",");
+    }).sort();
+    assert.deepEqual(actualCells, expectedCells, `${piece.id}: BFS changes flow order, not the trim geometry`);
+    goldAt = plate.end;
+  }
+  assert.equal(plates.reduce((count, plate) => count + plate.tiles.length, 0), tiles);
+  assert.equal(goldAt, expectedGoldCount());
+  assert.equal(plan.GOLD_TOTAL, goldAt, "the allocation matches initialized gold cells exactly");
+  for (const array of Object.values(cells)) assert.equal(array.length, goldAt);
 });
 
 test("a foreground call may finish the plan before idle resumes without rebuilding it", async () => {
@@ -245,7 +313,7 @@ test("a foreground call may finish the plan before idle resumes without rebuildi
   assert.equal(await preparing, true);
   assert.equal(ui.plan.plates(), all);
   assert.equal(ui.queued.length, 0);
-  assert.equal(ui.plan.__buildState().count, 60);
+  assert.equal(ui.plan.__buildState().count, suit.REXONANCE_SUIT_PIECES.length);
 });
 
 test("missing decoded layers settle false and retry only the retained working atlas", async () => {
