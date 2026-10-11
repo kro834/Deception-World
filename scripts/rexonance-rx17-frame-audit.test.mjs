@@ -38,10 +38,14 @@ const valid = () => ({
       2000,
       heldGroups().map((group, i) => ({ ...group, opacity: i === 0 ? "0.174216" : "0" })),
     ),
-    frame(2640),
-    frame(2670),
+    frame(2480),
+    frame(2518),
     frame(
-      2710,
+      2520,
+      heldGroups().map((group, i) => (i === 0 ? { ...group, opacity: "0.985" } : group)),
+    ),
+    frame(
+      2560,
       heldGroups().map((group, i) =>
         i === 0
           ? {
@@ -53,7 +57,7 @@ const valid = () => ({
       ),
     ),
     frame(
-      2800,
+      2650,
       heldGroups().map((group) => ({ ...group, opacity: "0.0796586" })),
     ),
   ],
@@ -75,11 +79,11 @@ test("the live recorder invokes the same face contract tested without a browser"
 
 test("actual frame evidence must include all required times and all six face groups", () => {
   const missing = valid();
-  missing.supplements = missing.supplements.filter((shot) => shot.clock !== 2670);
-  assert.throws(() => audit(missing, "missing"), /actual face evidence is missing at 2670ms/);
+  missing.supplements = missing.supplements.filter((shot) => shot.clock !== 2520);
+  assert.throws(() => audit(missing, "missing"), /actual face evidence is missing at 2520ms/);
   const incomplete = valid();
-  at(incomplete, 2640).faceGroups.pop();
-  assert.throws(() => audit(incomplete, "incomplete"), /six face groups at 2640ms/);
+  at(incomplete, 2480).faceGroups.pop();
+  assert.throws(() => audit(incomplete, "incomplete"), /six face groups at 2480ms/);
 });
 
 test("face pixels remain dark at 1990ms, then begin a gradual fill at 2000ms", () => {
@@ -96,8 +100,8 @@ test("face pixels remain dark at 1990ms, then begin a gradual fill at 2000ms", (
   assert.throws(() => audit(late, "late"), assert.AssertionError);
 });
 
-test("the full face stays fixed through 2640ms and does not scatter before 2670ms", () => {
-  for (const time of [2640, 2670]) {
+test("the full face stays fixed through 2480ms and does not scatter before the published 2520ms boundary", () => {
+  for (const time of [2480, 2518]) {
     const moved = valid();
     at(moved, time).faceGroups[3].transform = "matrix(1, 0, 0, 1, 10, 0)";
     assert.throws(() => audit(moved, "moved"), /hold on the face|does not start early/);
@@ -107,12 +111,23 @@ test("the full face stays fixed through 2640ms and does not scatter before 2670m
   }
 });
 
-test("the face must scatter after its hold and leave only faint remnants by 2800ms", () => {
+test("the first group only begins scattering at 2520ms while later groups remain held", () => {
+  for (const opacity of ["0", "0.95", "1.01"]) {
+    const abrupt = valid();
+    at(abrupt, 2520).faceGroups[0].opacity = opacity;
+    assert.throws(() => audit(abrupt, "abrupt"), /only begins scattering at the boundary/);
+  }
+  const earlyGroup = valid();
+  at(earlyGroup, 2520).faceGroups[1].opacity = "0.99";
+  assert.throws(() => audit(earlyGroup, "later"), /later groups remain held/);
+});
+
+test("the face must scatter after its hold and leave only faint remnants by 2650ms", () => {
   const noScatter = valid();
-  at(noScatter, 2710).faceGroups = heldGroups();
+  at(noScatter, 2560).faceGroups = heldGroups();
   assert.throws(() => audit(noScatter, "static"), /squares scatter after the hold/);
   const stuck = valid();
-  at(stuck, 2800).faceGroups[5].opacity = "0.09";
+  at(stuck, 2650).faceGroups[5].opacity = "0.09";
   assert.throws(() => audit(stuck, "stuck"), assert.AssertionError);
 });
 
@@ -129,6 +144,10 @@ if (process.env.RX17_FRAMES_AUDIT_EVIDENCE) {
         Array.from({ length: 46 }, (_, i) => 600 + i * 40),
       );
       assert.equal(report.supplements.length, 8);
+      assert.deepEqual(
+        report.supplements.map((shot) => shot.clock),
+        [1986, 1990, 2000, 2480, 2518, 2520, 2560, 2650],
+      );
       assert.ok(
         [...report.shots, ...report.supplements].every(
           (shot) =>

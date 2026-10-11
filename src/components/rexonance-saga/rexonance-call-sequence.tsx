@@ -6,6 +6,7 @@ import {
   REXONANCE_STAGE_DURATION_MS,
   REXONANCE_STAGE_LABELS,
   REXONANCE_SUIT_ACCENTS,
+  REXONANCE_SUIT_DRIVER,
   REXONANCE_SUIT_FIT,
   REXONANCE_SUIT_PARTS,
   REXONANCE_SUIT_PIXELS,
@@ -502,7 +503,7 @@ function Suit({ suit, animate }: { suit: "build" | "whole"; animate: boolean }) 
             }}
           />
           {/* Each plate's nanites gather on the body first ... */}
-          {SUIT_STACK.map((piece) => (
+          {SUIT_STACK.filter((piece) => !REXONANCE_SUIT_DRIVER.includes(piece.id)).map((piece) => (
             <i
               key={piece.id}
               className={`rx-suit-mote is-${piece.group}`}
@@ -513,7 +514,7 @@ function Suit({ suit, animate }: { suit: "build" | "whole"; animate: boolean }) 
           {SUIT_STACK.map((piece) => (
             <i
               key={piece.id}
-              className={`rx-suit-plate is-${piece.group}`}
+              className={`rx-suit-plate is-${piece.group}${REXONANCE_SUIT_DRIVER.includes(piece.id) ? " is-driver" : ""}`}
               data-piece={piece.id}
               style={pieceClock(piece)}
             >

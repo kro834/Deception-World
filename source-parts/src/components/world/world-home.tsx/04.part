@@ -1,3 +1,25 @@
+    const finalPoster = posterSequence.pop() ?? (poster + 1) % POSTERS.length;
+    const previewPool = [
+      poster,
+      prevPoster ?? poster,
+      (poster + 1) % POSTERS.length,
+      (poster + 2) % POSTERS.length,
+    ].filter((value, index, values) => values.indexOf(value) === index);
+    for (let index = previewPool.length - 1; index > 0; index -= 1) {
+      const swapIndex = randomBelow(index + 1);
+      [previewPool[index], previewPool[swapIndex]] = [previewPool[swapIndex], previewPool[index]];
+    }
+    const previewPosters = Array.from(
+      { length: 9 },
+      (_, index) => previewPool[index % previewPool.length],
+    );
+    const finalReady = loadPoster(finalPoster);
+    if (motionReduced) {
+      void finalReady.then((ready) => {
+        if (!shuffleActive.current || shuffleRunId.current !== runId) return;
+        if (!heroInViewRef.current) {
+          cancelPosterShuffle();
+          return;
         }
         if (ready) goPoster(finalPoster);
         shuffleActive.current = false;
@@ -18,9 +40,7 @@
       const timer = window.setTimeout(async () => {
         const isFinalStep = index === steps.length - 1;
         const previewPoster = previewPosters[index % previewPosters.length];
-        const ready = isFinalStep
-          ? await finalReady
-          : previewReady.has(previewPoster);
+        const ready = isFinalStep ? await finalReady : previewReady.has(previewPoster);
         if (!shuffleActive.current || shuffleRunId.current !== runId) return;
         if (!heroInViewRef.current) {
           cancelPosterShuffle();
@@ -225,7 +245,7 @@
             >
               <img
                 src={previous.src}
-                {...posterImage(previous.src)}
+                {...posterImage(previous.src, reuseWarmedPoster)}
                 alt=""
                 style={{ objectPosition: previous.pos }}
                 decoding="async"
@@ -235,7 +255,7 @@
           <span className="hero-backdrop-layer hero-backdrop-current" key={`hb-${poster}`}>
             <img
               src={current.src}
-              {...posterImage(current.src)}
+              {...posterImage(current.src, reuseWarmedPoster)}
               alt=""
               style={{ objectPosition: current.pos }}
               fetchPriority="high"
@@ -317,7 +337,7 @@
               <img
                 key={nextPoster.src}
                 src={nextPoster.src}
-                {...posterImage(nextPoster.src)}
+                {...posterImage(nextPoster.src, reuseWarmedPoster)}
                 alt=""
                 loading="lazy"
                 decoding="async"
@@ -328,7 +348,7 @@
               <img
                 key={current.src}
                 src={current.src}
-                {...posterImage(current.src)}
+                {...posterImage(current.src, reuseWarmedPoster)}
                 alt=""
                 loading="lazy"
                 decoding="async"
@@ -339,7 +359,7 @@
               <img
                 key={current.src}
                 src={current.src}
-                {...posterImage(current.src)}
+                {...posterImage(current.src, reuseWarmedPoster)}
                 alt=""
                 loading="lazy"
                 decoding="async"
@@ -350,7 +370,7 @@
               <img
                 key={current.src}
                 src={current.src}
-                {...posterImage(current.src)}
+                {...posterImage(current.src, reuseWarmedPoster)}
                 alt=""
                 loading="lazy"
                 decoding="async"
@@ -365,7 +385,7 @@
                     className="poster-image poster-image-previous"
                     key={`poster-prev-${prevPoster}`}
                     src={previous.src}
-                    {...posterImage(previous.src)}
+                    {...posterImage(previous.src, reuseWarmedPoster)}
                     alt=""
                     style={{
                       objectPosition: previous.pos,
@@ -382,7 +402,7 @@
                   }
                   key={`poster-${poster}`}
                   src={current.src}
-                  {...posterImage(current.src)}
+                  {...posterImage(current.src, reuseWarmedPoster)}
                   alt={current.alt}
                   style={{
                     objectPosition: current.pos,
@@ -405,7 +425,8 @@
             className="poster-controls"
             onFocusCapture={() => setPosterControlsFocused(true)}
             onBlurCapture={(event) => {
-                if (!event.currentTarget.contains(event.relatedTarget)) setPosterControlsFocused(false);
+              if (!event.currentTarget.contains(event.relatedTarget))
+                setPosterControlsFocused(false);
             }}
           >
             <div className="poster-control-cluster" role="group" aria-label="キービジュアル操作">
@@ -478,15 +499,3 @@
                         fill="none"
                         stroke="currentColor"
                         strokeWidth="1.8"
-                      />
-                    </svg>
-                  ) : (
-                    <svg viewBox="0 0 24 24" width="14" height="14">
-                      <path
-                        d="M8 10V8a4 4 0 0 1 7.5-2"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.8"
-                        strokeLinecap="round"
-                      />
-                      <rect

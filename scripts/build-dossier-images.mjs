@@ -1,16 +1,19 @@
 import { createRequire } from "node:module";
 import { statSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { dossierImageSources, dossierImage } from "../src/lib/dossier-images.ts";
 const require = createRequire(import.meta.url);
 const sharp = require(process.env.SHARP_MODULE || "sharp");
 let original = 0,
   delivery = 0;
+const only = new Set(process.argv.slice(2));
 for (const source of dossierImageSources) {
+  if (only.size && !only.has(source)) continue;
   const input = new URL(`../public${source}`, import.meta.url);
   const output = new URL(`../public${dossierImage(source).srcSet}`, import.meta.url);
-  const result = await sharp(input.pathname)
+  const result = await sharp(fileURLToPath(input))
     .webp({ quality: 84, effort: 6 })
-    .toFile(output.pathname);
+    .toFile(fileURLToPath(output));
   original += statSync(input).size;
   delivery += result.size;
   console.log(`${source}: ${statSync(input).size} -> ${result.size}`);

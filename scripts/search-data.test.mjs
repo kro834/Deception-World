@@ -15,28 +15,43 @@ function loadData(path) {
   assert.ok(absolute.endsWith(".ts"), "search imports only pure TypeScript data");
   const exports = {};
   cache.set(absolute, exports);
-  runInNewContext(ts.transpileModule(readFileSync(absolute, "utf8"), {
-    compilerOptions: { module: ts.ModuleKind.CommonJS },
-  }).outputText, {
-    exports,
-    require: (specifier) => {
-      assert.ok(specifier.startsWith("."), "catalogue has no runtime framework dependencies");
-      return loadData(resolve(dirname(absolute), specifier.endsWith(".ts") ? specifier : `${specifier}.ts`));
+  runInNewContext(
+    ts.transpileModule(readFileSync(absolute, "utf8"), {
+      compilerOptions: { module: ts.ModuleKind.CommonJS },
+    }).outputText,
+    {
+      exports,
+      require: (specifier) => {
+        assert.ok(specifier.startsWith("."), "catalogue has no runtime framework dependencies");
+        return loadData(
+          resolve(dirname(absolute), specifier.endsWith(".ts") ? specifier : `${specifier}.ts`),
+        );
+      },
     },
-  });
+  );
   return exports;
 }
 
 function sourceValue(path, name, references = {}) {
-  const file = ts.createSourceFile(path, read(path), ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
-  const declaration = file.statements.filter(ts.isVariableStatement)
+  const file = ts.createSourceFile(
+    path,
+    read(path),
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.TSX,
+  );
+  const declaration = file.statements
+    .filter(ts.isVariableStatement)
     .flatMap((statement) => [...statement.declarationList.declarations])
     .find((item) => item.name.getText(file) === name);
   assert.ok(declaration?.initializer, `published source exports ${name}`);
   const exports = {};
-  runInNewContext(ts.transpileModule(`exports.value = ${declaration.initializer.getText(file)}`, {
-    compilerOptions: { module: ts.ModuleKind.CommonJS },
-  }).outputText, { exports, ...references });
+  runInNewContext(
+    ts.transpileModule(`exports.value = ${declaration.initializer.getText(file)}`, {
+      compilerOptions: { module: ts.ModuleKind.CommonJS },
+    }).outputText,
+    { exports, ...references },
+  );
   return exports.value;
 }
 
@@ -49,9 +64,14 @@ test("catalogue contains unique, complete records in the agreed categories", () 
   assert.equal(byId.size, SEARCH_DOCUMENTS.length);
   // rx6 widened coverage (columns, Terra/Luna/夜明護尊, Final Stage cast, Dream
   // factions and terms, archive forms, pages) and added the forms and pages kinds.
-  assert.ok(SEARCH_DOCUMENTS.length >= 150 && SEARCH_DOCUMENTS.length <= 320, String(SEARCH_DOCUMENTS.length));
-  assert.deepEqual(Array.from(SEARCH_CATEGORIES, (category) => category.id),
-    ["all", "people", "riders", "forms", "story", "world", "systems", "pages"]);
+  assert.ok(
+    SEARCH_DOCUMENTS.length >= 150 && SEARCH_DOCUMENTS.length <= 320,
+    String(SEARCH_DOCUMENTS.length),
+  );
+  assert.deepEqual(
+    Array.from(SEARCH_CATEGORIES, (category) => category.id),
+    ["all", "people", "riders", "forms", "story", "world", "systems", "pages"],
+  );
   const categories = new Set(SEARCH_CATEGORIES.slice(1).map((category) => category.id));
   for (const document of SEARCH_DOCUMENTS) {
     for (const field of ["id", "title", "description", "to", "hash"]) {
@@ -61,39 +81,64 @@ test("catalogue contains unique, complete records in the agreed categories", () 
     assert.ok(categories.has(document.category), document.id);
     assert.match(document.to, /^\/(?!\/)/);
     assert.doesNotMatch(document.hash, /[#\s]/);
-    assert.ok(!document.keywords || document.keywords.every((keyword) => typeof keyword === "string"));
+    assert.ok(
+      !document.keywords || document.keywords.every((keyword) => typeof keyword === "string"),
+    );
   }
-  for (const category of categories) assert.ok(SEARCH_DOCUMENTS.some((doc) => doc.category === category));
+  for (const category of categories)
+    assert.ok(SEARCH_DOCUMENTS.some((doc) => doc.category === category));
 });
 
 test("published manager and rider excerpts and names remain source accurate", () => {
   const path = "src/components/world/manager-stub.tsx";
-  const managers = ["ZEUS", "REX_LOI", "SHUZA", "OPUS", "REEMU"].map((name) => sourceValue(path, name));
+  const managers = ["ZEUS", "REX_LOI", "SHUZA", "OPUS", "REEMU"].map((name) =>
+    sourceValue(path, name),
+  );
   for (const manager of managers) {
     const document = byId.get(`manager-${manager.id}`);
     assert.equal(document.title, manager.name);
     assert.equal(document.description, manager.title);
-    assert.equal(document.body, manager.sections.map((section) => [section.title, ...section.body].join("\n")).join("\n"));
+    assert.equal(
+      document.body,
+      manager.sections.map((section) => [section.title, ...section.body].join("\n")).join("\n"),
+    );
   }
-  assert.ok(read("src/components/world/lejas-page.tsx").replace(/\s+/g, " ").includes(byId.get("manager-lejas").body));
+  assert.ok(
+    read("src/components/world/lejas-page.tsx")
+      .replace(/\s+/g, " ")
+      .includes(byId.get("manager-lejas").body),
+  );
   const riders = sourceValue("src/components/world/rider-page.tsx", "RIDER_DOSSIERS", {
-    REX_LOI: managers[1], REXONANCE_CALLS: [], FINAL_STAGE_ENTER_ASSETS: [],
+    REX_LOI: managers[1],
+    REXONANCE_CALLS: [],
+    FINAL_STAGE_ENTER_ASSETS: [],
   });
   assert.equal(riders.length, 8);
   for (const rider of riders) {
     const document = byId.get(`rider-${rider.id}`);
     assert.equal(document.title, `仮面ライダー${rider.ja}`);
     assert.equal(document.description, rider.title);
-    assert.equal(document.body, rider.sections.map((section) => [section.title, ...section.body].join("\n")).join("\n"));
+    assert.equal(
+      document.body,
+      rider.sections.map((section) => [section.title, ...section.body].join("\n")).join("\n"),
+    );
     assert.ok(document.keywords.includes(rider.person));
-    for (const form of rider.forms) assert.ok(document.keywords.includes(form.displayName ?? form.name));
+    for (const form of rider.forms)
+      assert.ok(document.keywords.includes(form.displayName ?? form.name));
   }
   assert.equal(byId.get("extreme-saga").title, "仮面ライダーエクスプリームサーガ");
   assert.ok(byId.get("rider-realm").keywords.includes("レルムレジェンズ"));
   const dante = loadData("src/components/world/dante-data.ts");
-  assert.equal(byId.get("person-dante").body, dante.DANTE_SECTIONS.flatMap(section => [section.title, ...section.body]).join("\n"));
+  assert.equal(
+    byId.get("person-dante").body,
+    dante.DANTE_SECTIONS.flatMap((section) => [section.title, ...section.body]).join("\n"),
+  );
   assert.equal(byId.get("person-ciel").body, byId.get("rider-saga").body);
-  assert.ok(read("src/components/world/ciel-page.tsx").includes('RIDER_DOSSIERS.find((rider) => rider.id === "saga")'));
+  assert.ok(
+    read("src/components/world/ciel-page.tsx").includes(
+      'RIDER_DOSSIERS.find((rider) => rider.id === "saga")',
+    ),
+  );
 });
 
 test("world records and six Dream chapters use the published text without invented continuations", () => {
@@ -103,7 +148,10 @@ test("world records and six Dream chapters use the published text without invent
     assert.equal(doc.body, entry.body.join("\n"));
   }
   for (const entry of world.WORLD_CAST_ROSTER) {
-    assert.equal(byId.get(`person-${entry.id}`).body, entry.profile.map((part) => part.text).join("\n"));
+    assert.equal(
+      byId.get(`person-${entry.id}`).body,
+      entry.profile.map((part) => part.text).join("\n"),
+    );
   }
   for (const entry of dream.DREAM_CASES) {
     const doc = byId.get(`dream-case-${entry.no}`);
@@ -152,11 +200,19 @@ test("every destination is an existing public route with its actual heading anch
       source = read("src/components/world/rider-page.tsx");
     } else if (doc.to.startsWith("/managers/")) {
       assert.ok(existsSync(resolve(root, `src/routes${doc.to}.tsx`)));
-      source = read(doc.to.endsWith("/lejas") ? "src/components/world/lejas-page.tsx" : "src/components/world/manager-stub.tsx");
+      source = read(
+        doc.to.endsWith("/lejas")
+          ? "src/components/world/lejas-page.tsx"
+          : "src/components/world/manager-stub.tsx",
+      );
     } else if (doc.to.startsWith("/characters/")) {
       assert.ok(existsSync(resolve(root, `src/routes${doc.to}.tsx`)));
       const id = doc.to.split("/").at(-1);
-      source = read(["terra", "luna"].includes(id) ? "src/components/world/related-page.tsx" : `src/components/world/${id}-page.tsx`);
+      source = read(
+        ["terra", "luna"].includes(id)
+          ? "src/components/world/related-page.tsx"
+          : `src/components/world/${id}-page.tsx`,
+      );
     } else {
       assert.ok(existsSync(resolve(root, `src/routes${doc.to}.tsx`)));
     }
@@ -166,15 +222,26 @@ test("every destination is an existing public route with its actual heading anch
     if (doc.hash === "top" && /<(?:section|main|div)[^>]*\bid="top"/.test(source)) continue;
     assert.ok(source.includes(`id="${doc.hash}"`), `${doc.id}: actual anchor ${doc.hash}`);
   }
-  for (const expression of ["wa-person-${entry.id}", "wa-brief-${entry.id}", "wa-episode-${episode.no}", "wa-term-${entry.term}", "wa-location-${place.name}"]) {
+  for (const expression of [
+    "wa-person-${entry.id}",
+    "wa-brief-${entry.id}",
+    "wa-episode-${episode.no}",
+    "wa-term-${entry.term}",
+    "wa-location-${place.name}",
+  ]) {
     assert.ok(annex.includes("id={`" + expression + "`}"), expression);
   }
-  for (const expression of ["dream-roster-${entry.id}", "dream-case-${episode.no}", "dream-character-${item.id}", "dream-dolminence-${record.id}"]) {
+  for (const expression of [
+    "dream-roster-${entry.id}",
+    "dream-case-${episode.no}",
+    "dream-character-${item.id}",
+    "dream-dolminence-${record.id}",
+  ]) {
     assert.ok(dreamPage.includes("id={`" + expression + "`}"), expression);
   }
   // World result anchors belong to visible plates/headings, not a closed detail body.
   assert.match(annex, /<li key=\{place.name\} id=\{`wa-location-\$\{place.name\}`\}>/);
-  assert.match(annex, /<li key=\{episode.no\} id=\{`wa-episode-\$\{episode.no\}`\}/);
+  assert.match(annex, /<li\s+key=\{episode.no\}\s+id=\{`wa-episode-\$\{episode.no\}`\}/);
   assert.match(annex, /<div key=\{entry.term\} id=\{`wa-term-\$\{entry.term\}`\}>/);
 });
 

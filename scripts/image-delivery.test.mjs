@@ -121,10 +121,15 @@ test("the supplied logos are preserved and their alpha-keyed files serve every o
   }
 });
 
-test("world preload and first poster use the same lightweight URL", () => {
+test("world preload and first poster share responsive and warmed image selection", () => {
   const route = readSource("../src/routes/world.tsx");
   const home = readSource("../src/components/world/world-home.tsx");
-  assert.match(route, /href: WORLD_ENTER_ASSETS\[0\]/);
+  assert.match(route, /posterImage\(\s*WORLD_ENTER_ASSETS\[0\],/);
+  assert.match(route, /assetsWarmed\(WORLD_ENTER_ASSETS\)/);
+  assert.match(route, /href: poster\.src/);
+  assert.match(route, /imageSrcSet: poster\.srcSet/);
+  assert.match(route, /imageSizes: poster\.sizes/);
+  assert.match(home, /posterImage\(current\.src, reuseWarmedPoster\)/);
   assert.match(home, /src: "\/deception-world-poster-delivery\.webp"/);
   assert.doesNotMatch(home, /["']\/deception-world-poster\.webp["']/);
   const original = statSync(new URL("../public/deception-world-poster.webp", import.meta.url)).size;

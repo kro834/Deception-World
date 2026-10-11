@@ -7,7 +7,9 @@ import { dirname, extname, resolve, sep } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { Readable } from "node:stream";
 
-const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+const root = process.env.PREVIEW_ROOT
+  ? resolve(process.env.PREVIEW_ROOT)
+  : resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const publicRoot = resolve(root, ".vercel/output/static");
 const handler = (
   await import(pathToFileURL(resolve(root, ".vercel/output/functions/__server.func/index.mjs")))
@@ -27,7 +29,7 @@ const mime = {
   ".mp4": "video/mp4",
   ".ico": "image/x-icon",
 };
-const port = Number(process.env.PREVIEW_PORT || 8082);
+const port = Number(process.env.PREVIEW_PORT || process.env.PORT || 8082);
 createServer(async (req, res) => {
   try {
     if (!["GET", "HEAD"].includes(req.method)) {

@@ -66,13 +66,15 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
   const gateImage = useRef<HTMLImageElement | null>(null);
   const [gateActive, setGateActive] = useState(false);
   const riderPrefix = rider.prefix ?? "仮面ライダー";
-  const formName = rider.nameParts
-    ? rider.nameParts.map((part) => (
-        <span className="form-name-part" key={part}>
-          <DisplayName value={part} />
-        </span>
-      ))
-    : <DisplayName value={record.name} />;
+  const formName = rider.nameParts ? (
+    rider.nameParts.map((part) => (
+      <span className="form-name-part" key={part}>
+        <DisplayName value={part} />
+      </span>
+    ))
+  ) : (
+    <DisplayName value={record.name} />
+  );
   const isRexonance = rider.theme === "rexonance";
   const resetScroll = () => {
     const dialog = dlg.current;
@@ -221,12 +223,13 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
         <div className="form-pickup-visual">
           <img
             src={rider.img}
+            {...dossierImage(rider.img)}
             {...formPickupImage(rider.img)}
             alt={`${riderPrefix}${record.name}のフォームビジュアル`}
             style={{ objectPosition: rider.pos }}
             decoding="async"
-            fetchPriority={isRexonance ? "high" : "auto"}
-            loading={isRexonance ? "eager" : "lazy"}
+            fetchPriority="auto"
+            loading="lazy"
           />
           <span>RIDER</span>
           <SlideOpenControl
@@ -244,7 +247,11 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
             <span>{riderPrefix}</span>
             <b>{formName}</b>
           </h2>
-          {rider.sub ? <em><DisplayName value={rider.sub} /></em> : null}
+          {rider.sub ? (
+            <em>
+              <DisplayName value={rider.sub} />
+            </em>
+          ) : null}
           <q>{rider.quote ?? rider.system}</q>
         </div>
       </article>
@@ -293,7 +300,11 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
               <span>{riderPrefix}</span>
               <b>{formName}</b>
             </h2>
-            {rider.sub ? <em><DisplayName value={rider.sub} /></em> : null}
+            {rider.sub ? (
+              <em>
+                <DisplayName value={rider.sub} />
+              </em>
+            ) : null}
             <div className="rider-call">
               {rider.calls.map((c, index) => (
                 <b key={`${c}-${index}`}>{c}</b>
@@ -304,6 +315,7 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
             <figure>
               <img
                 src={rider.img}
+                {...dossierImage(rider.img)}
                 {...formPickupImage(rider.img)}
                 alt=""
                 style={{ objectPosition: rider.pos }}
@@ -313,7 +325,9 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
               />
               <figcaption>
                 <span>FORM VISUAL</span>
-                <b><DisplayName value={record.name} /></b>
+                <b>
+                  <DisplayName value={record.name} />
+                </b>
               </figcaption>
             </figure>
             <div>
@@ -349,7 +363,9 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
                     </header>
                     {abilities.map((a) => (
                       <div key={a.name}>
-                        <h3><DisplayName value={a.name} /></h3>
+                        <h3>
+                          <DisplayName value={a.name} />
+                        </h3>
                         <p>{a.body}</p>
                       </div>
                     ))}
@@ -363,7 +379,9 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
                     </header>
                     {arsenal.map((a) => (
                       <div key={a.name}>
-                        <h3><DisplayName value={a.name} /></h3>
+                        <h3>
+                          <DisplayName value={a.name} />
+                        </h3>
                         <p>{a.body}</p>
                       </div>
                     ))}
@@ -377,7 +395,9 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
                     </header>
                     {finishers.map((a) => (
                       <div key={a.name}>
-                        <h3><DisplayName value={a.name} /></h3>
+                        <h3>
+                          <DisplayName value={a.name} />
+                        </h3>
                         <p>{a.body}</p>
                       </div>
                     ))}
@@ -390,6 +410,7 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
                     <figure key={`${f.name}-${f.sub ?? ""}`}>
                       <img
                         src={f.img}
+                        {...dossierImage(f.img)}
                         alt=""
                         style={{ objectPosition: f.pos }}
                         decoding="async"
@@ -397,7 +418,9 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
                       />
                       <figcaption>
                         <span>{f.sub ?? "FORM"}</span>
-                        <b><DisplayName value={f.name} /></b>
+                        <b>
+                          <DisplayName value={f.name} />
+                        </b>
                       </figcaption>
                     </figure>
                   ))}
@@ -432,7 +455,9 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
                     </div>
                     <figcaption>
                       <small>{weapon.label}</small>
-                      <b><DisplayName value={weapon.name} /></b>
+                      <b>
+                        <DisplayName value={weapon.name} />
+                      </b>
                       <span>{String(index + 1).padStart(2, "0")}</span>
                     </figcaption>
                   </figure>

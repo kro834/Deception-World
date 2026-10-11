@@ -118,8 +118,9 @@ export function isRiderRouteId(id: string): id is RiderRouteId {
 export function createRiderHead(id: string) {
   const rider = isRiderRouteId(id) ? RIDER_ROUTE_META[id] : null;
   if (!rider) {
+    // Only an unknown id reaches here, and its route throws notFound().
     return createWorldHead({
-      title: "ライダー資料｜Deception World",
+      title: "記録が見つかりません｜Deception World",
       description: "Deception Worldのライダー資料アーカイブ。",
       stylesheetLinks: DOSSIER_STYLESHEET_LINKS,
     });

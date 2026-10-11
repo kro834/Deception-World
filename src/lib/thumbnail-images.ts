@@ -14,6 +14,45 @@
 type Variant = { path: string; width: number; build?: boolean };
 type ImageSet = { source: string; variants: Variant[]; fallback?: string };
 
+const launcher = (stem: string, source = `${stem}.webp`): ImageSet => ({
+  source,
+  variants: [240, 400].map((width) => ({ path: `${stem}-${width}.webp`, width, build: true })),
+});
+export const LAUNCHER_TILE_IMAGES: Record<string, ImageSet> = {
+  "/riders/saga": launcher("/rider-saga-rexonance-thumbnail-20260827"),
+  "/riders/realm": launcher("/rider-realm"),
+  "/riders/lore": launcher("/rider-loa"),
+  "/riders/vandal": launcher("/rider-vandal-thumbnail-20260827"),
+  "/riders/leddic": launcher("/rider-leddic-home"),
+  "/riders/argenome": launcher("/rider-algenome"),
+  "/riders/over-zeztz": launcher("/rider-over-zeztz-thumbnail-20260829"),
+  "/riders/cipher": launcher("/rider-cipher-thumbnail-20260825"),
+  ...Object.fromEntries(
+    [
+      ["/managers/zeus", "/manager-zeus-detail"],
+      ["/managers/rex-loi", "/manager-rex-loi"],
+      ["/managers/shuza", "/manager-shuza"],
+      ["/managers/lejas", "/manager-lejas"],
+      ["/managers/opus", "/manager-opus"],
+      ["/managers/reemu", "/manager-reemu"],
+      ["/characters/ciel", "/ciel-illustration-20260924"],
+      ["/characters/terra", "/character-terra"],
+      ["/characters/luna", "/character-luna"],
+      ["/characters/yoake-mamori", "/character-yoake-mamori-delivery"],
+    ].map(([route, stem]) => [
+      route,
+      {
+        source: `${stem}.webp`,
+        variants: [{ path: `${stem}-240.webp`, width: 240, build: true }],
+      },
+    ]),
+  ),
+};
+
+export function launcherTile(route: string | null) {
+  return route ? LAUNCHER_TILE_IMAGES[route]?.variants[0].path : undefined;
+}
+
 const episode = (source: string, full: string, fullWidth: number): ImageSet => {
   const stem = full.replace(/\.webp$/, "");
   return {
@@ -124,7 +163,11 @@ export const PORTRAIT_THUMBNAILS: Record<string, ImageSet> = {
     853,
   ),
   "/civilian-lore.jpeg": portrait("/civilian-lore.jpeg", "/civilian-lore-delivery.webp", 1200),
-  "/civilian-leddic.jpeg": portrait("/civilian-leddic.jpeg", "/civilian-leddic-delivery.webp", 1086),
+  "/civilian-leddic.jpeg": portrait(
+    "/civilian-leddic.jpeg",
+    "/civilian-leddic-delivery.webp",
+    1086,
+  ),
   "/civilian-naikami-chigiri.jpeg": portrait(
     "/civilian-naikami-chigiri.jpeg",
     "/civilian-naikami-chigiri-delivery.webp",
@@ -223,14 +266,20 @@ const POSTER_SOURCES: readonly (readonly [string, number])[] = [
 ];
 
 export const POSTER_IMAGES: Record<string, ImageSet> = {
+  "/deception-world-poster-delivery.webp": {
+    source: "/deception-world-poster-delivery.webp",
+    variants: [
+      { path: "/deception-world-poster-delivery-640.webp", width: 640, build: true },
+      { path: "/deception-world-poster-delivery-720.webp", width: 720, build: true },
+      { path: "/deception-world-poster-delivery.webp", width: 1024 },
+    ],
+  },
   ...Object.fromEntries(
     POSTER_SOURCES.map(([source, width]) => [
       source,
       {
         source,
-        variants: [
-          { path: source.replace(/\.jpe?g$/, "-delivery.webp"), width, build: true },
-        ],
+        variants: [{ path: source.replace(/\.jpe?g$/, "-delivery.webp"), width, build: true }],
       },
     ]),
   ),
@@ -254,8 +303,18 @@ export const TITLE_LOGO_IMAGES: Record<string, ImageSet> = {
   },
 };
 
-export function posterImage(source: string) {
+export function posterImage(source: string, reuseWarmedFull = false) {
   const set = POSTER_IMAGES[source];
+  if (source === "/deception-world-poster-delivery.webp" && !reuseWarmedFull) {
+    return {
+      src: set.variants[0].path,
+      srcSet: srcSet(set),
+      sizes: "(max-width: 760px) 70vw, (max-width: 1100px) 40vw, min(31vw, 430px)",
+    };
+  }
+  if (source === "/deception-world-poster-delivery.webp" && reuseWarmedFull) {
+    return { src: source, srcSet: source };
+  }
   // Keep src and srcset identical: WebKit can otherwise start the original
   // JPEG while React changes a keyed poster, invalidating the decoded warmup.
   return set ? { src: set.variants[0].path, srcSet: set.variants[0].path } : {};
@@ -263,10 +322,15 @@ export function posterImage(source: string) {
 
 /* The deck warms and decodes the next poster in a detached Image before it
    turns: it asks for the same file the cards and the backdrop then show. */
-export function preparePosterImage(image: HTMLImageElement, source: string) {
-  const set = POSTER_IMAGES[source];
-  if (set) image.srcset = set.variants[0].path;
-  image.src = set?.variants[0].path ?? source;
+export function preparePosterImage(
+  image: HTMLImageElement,
+  source: string,
+  reuseWarmedFull = false,
+) {
+  const choice = posterImage(source, reuseWarmedFull);
+  if (choice.sizes) image.sizes = choice.sizes;
+  if (choice.srcSet) image.srcset = choice.srcSet;
+  image.src = choice.src ?? source;
 }
 
 // Card slots: phones about 40vw by 212 px; 561-820 px up to 190 x 212;

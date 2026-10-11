@@ -18,7 +18,8 @@ export const REXONANCE_STAGE_LABELS: Record<RexonanceStage, string> = {
 
 // rx12 (owner, 2026-10-10): the face holds its pixel squares ~0.6 s before
 // they scatter, so the last call holds 580 ms longer (cover 2300 -> 2880).
-export const REXONANCE_ENTRY_TIMINGS = { cover: 2880, reveal: 480 } as const;
+// Owner, 2026-10-11: that hold a little shorter (~0.45 s): cover 2730.
+export const REXONANCE_ENTRY_TIMINGS = { cover: 2730, reveal: 480 } as const;
 export const REXONANCE_STAGE_DURATION_MS = 650;
 
 // Cover time is a minimum: the final call holds if the destination is late.
@@ -27,7 +28,7 @@ export const REXONANCE_CALL_BEATS = [
   { start: 330, duration: 320 },
   { start: 650, duration: 650 },
   { start: 1300, duration: 680 },
-  { start: 1980, duration: 900 },
+  { start: 1980, duration: 750 },
 ] as const;
 
 // rx3 suit-up HUD. The system check reads only what the page already states,
@@ -109,16 +110,8 @@ export const REXONANCE_SUIT_CASCADE = [
     group: "waist",
     from: REXONANCE_SUIT_SNAP.legs + 18,
     to: REXONANCE_SUIT_SNAP.waist,
-    order: [
-      "tasset-pendant",
-      "tasset-low",
-      "tasset-top",
-      "belt-l2",
-      "belt-r2",
-      "belt-l1",
-      "belt-r1",
-      "belt-jewel",
-    ],
+    // The driver (belt-*) is on the body from the start (REXONANCE_SUIT_DRIVER).
+    order: ["tasset-pendant", "tasset-low", "tasset-top"],
   },
   {
     group: "arms",
@@ -185,12 +178,22 @@ export const REXONANCE_SUIT_CASCADE = [
     order: ["helmet-jaw", "helmet-visor", "helmet-crest"],
   },
 ] as const;
-/** When each plate seats (its clank), by id. */
-export const REXONANCE_SUIT_FIT: Readonly<Record<string, number>> = Object.fromEntries(
-  REXONANCE_SUIT_CASCADE.flatMap(({ from, to, order }) =>
+/** The driver at the waist (owner, 2026-10-11): finished from the start,
+ * in the call and on the page's suit-up alike; it never assembles. */
+export const REXONANCE_SUIT_DRIVER: readonly string[] = [
+  "belt-l2",
+  "belt-r2",
+  "belt-l1",
+  "belt-r1",
+  "belt-jewel",
+];
+/** When each plate seats (its clank), by id (the driver: 0, already on). */
+export const REXONANCE_SUIT_FIT: Readonly<Record<string, number>> = Object.fromEntries([
+  ...REXONANCE_SUIT_DRIVER.map((id) => [id, 0]),
+  ...REXONANCE_SUIT_CASCADE.flatMap(({ from, to, order }) =>
     order.map((id, k) => [id, Math.round(from + ((to - from) * k) / (order.length - 1))]),
   ),
-);
+]);
 /** The plates that seat on an accent (the strongest clank). */
 export const REXONANCE_SUIT_ACCENTS: readonly string[] = REXONANCE_SUIT_CASCADE.filter(
   ({ group }) => group in REXONANCE_SUIT_SNAP,
@@ -224,8 +227,10 @@ export const REXONANCE_SUIT_GOLD = {
 } as const;
 /** When each plate's gold forms, by id: its first and last cell (ms). */
 export const REXONANCE_SUIT_GOLD_AT: Readonly<Record<string, readonly [number, number]>> =
-  Object.fromEntries(
-    REXONANCE_SUIT_CASCADE.flatMap(({ group, order }) =>
+  Object.fromEntries([
+    // The driver's gold is formed already.
+    ...REXONANCE_SUIT_DRIVER.map((id) => [id, [0, 0] as const]),
+    ...REXONANCE_SUIT_CASCADE.flatMap(({ group, order }) =>
       order.map((id) => {
         const from = REXONANCE_SUIT_FIT[id] + REXONANCE_SUIT_GOLD.delay;
         const span =
@@ -237,15 +242,21 @@ export const REXONANCE_SUIT_GOLD_AT: Readonly<Record<string, readonly [number, n
         return [id, [from, from + span] as const];
       }),
     ),
-  );
+  ]);
 /** RIDER！'s nanite motes gather from here (and are spent by the waist's snap). */
 export const REXONANCE_SUIT_MOTES = REXONANCE_CALL_BEATS[1].start;
+/** The suit's lights (owner, 2026-10-11): the ice-cyan and pink light
+ * stands monochrome while the suit assembles; once the whole suit is on,
+ * on REXONANCE DEUS！ the reactor ignites and the light runs out through
+ * the whole body from it (`spread` ms), with a bloom that settles by
+ * `from + bloom`, while the compound eyes fill with cells. */
+export const REXONANCE_SUIT_LIGHT = { from: SUIT_FINAL, spread: 380, bloom: 560 } as const;
 /** REXONANCE DEUS！: pixel squares fill the face's lights, then scatter. */
 export const REXONANCE_SUIT_PIXELS = {
   fill: SUIT_FINAL + 10,
   fillStep: 14,
-  // The squares hold on the face ~0.6 s, then scatter (owner, rx12).
-  scatter: SUIT_FINAL + 690,
+  // The squares hold on the face ~0.45 s, then scatter (owner, rx12; shortened 2026-10-11).
+  scatter: SUIT_FINAL + 540,
   scatterStep: 10,
   scatterMs: 140,
   groups: 6,

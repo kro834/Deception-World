@@ -55,7 +55,8 @@ html[data-family] {
     sans-serif;
   --sh-display: "Zen Kaku Gothic New", var(--sh-jp-fallback);
   --sh-body: "Noto Sans JP", var(--sh-jp-fallback);
-  --sh-gutter: clamp(16px, 3.2vw, 48px);
+  --sh-gutter: clamp(16px, 4vw, 72px);
+  --sh-bar-h: 76px;
   --sh-ease: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -1874,7 +1875,7 @@ html[data-family]:not([data-world-effects="economy"])
   > .side-panel-riders
   > .side-panel-links
   > a[href="/riders/saga"] {
-  --sh-art: url("/rider-saga-rexonance-thumbnail-20260827.webp");
+  --sh-art: url("/rider-saga-rexonance-thumbnail-20260827-400.webp");
 }
 
 html[data-family]:not([data-world-effects="economy"])
@@ -1883,7 +1884,7 @@ html[data-family]:not([data-world-effects="economy"])
   > .side-panel-riders
   > .side-panel-links
   > a[href="/riders/realm"] {
-  --sh-art: url("/rider-realm.webp");
+  --sh-art: url("/rider-realm-400.webp");
 }
 
 html[data-family]:not([data-world-effects="economy"])
@@ -1892,7 +1893,7 @@ html[data-family]:not([data-world-effects="economy"])
   > .side-panel-riders
   > .side-panel-links
   > a[href="/riders/lore"] {
-  --sh-art: url("/rider-loa.webp");
+  --sh-art: url("/rider-loa-400.webp");
 }
 
 html[data-family]:not([data-world-effects="economy"])
@@ -1901,7 +1902,7 @@ html[data-family]:not([data-world-effects="economy"])
   > .side-panel-riders
   > .side-panel-links
   > a[href="/riders/vandal"] {
-  --sh-art: url("/rider-vandal-thumbnail-20260827.webp");
+  --sh-art: url("/rider-vandal-thumbnail-20260827-400.webp");
 }
 
 html[data-family]:not([data-world-effects="economy"])
@@ -1910,7 +1911,7 @@ html[data-family]:not([data-world-effects="economy"])
   > .side-panel-riders
   > .side-panel-links
   > a[href="/riders/leddic"] {
-  --sh-art: url("/rider-leddic-home.webp");
+  --sh-art: url("/rider-leddic-home-400.webp");
 }
 
 html[data-family]:not([data-world-effects="economy"])
@@ -1919,7 +1920,7 @@ html[data-family]:not([data-world-effects="economy"])
   > .side-panel-riders
   > .side-panel-links
   > a[href="/riders/argenome"] {
-  --sh-art: url("/rider-algenome.webp");
+  --sh-art: url("/rider-algenome-400.webp");
 }
 
 html[data-family]:not([data-world-effects="economy"])
@@ -1928,7 +1929,7 @@ html[data-family]:not([data-world-effects="economy"])
   > .side-panel-riders
   > .side-panel-links
   > a[href="/riders/over-zeztz"] {
-  --sh-art: url("/rider-over-zeztz-thumbnail-20260829.webp");
+  --sh-art: url("/rider-over-zeztz-thumbnail-20260829-400.webp");
 }
 
 html[data-family]:not([data-world-effects="economy"])
@@ -1937,7 +1938,7 @@ html[data-family]:not([data-world-effects="economy"])
   > .side-panel-riders
   > .side-panel-links
   > a[href="/riders/cipher"] {
-  --sh-art: url("/rider-cipher-thumbnail-20260825.webp");
+  --sh-art: url("/rider-cipher-thumbnail-20260825-400.webp");
 }
 
 /* The page the reader is on, among the tiles. */
@@ -2823,5 +2824,210 @@ html[data-family]
     forced-color-adjust: none;
     border-color: ButtonText;
     box-shadow: 5px 5px 0 -3.5px ButtonText;
+  }
+}
+
+/* rx14: file groups extend only the World/dossier launcher. Other menus
+   retain their grid areas, settings, empty-row compensation and gestures. */
+html[data-family] body #site-side-panel.side-panel[data-file-menu="true"][data-liquid-pointer] {
+  grid-template-areas: "head" "find" "sec" "spe" "sto" "rid" "rik" "rel" "unm" "inf" "sys";
+}
+html[data-family] body #site-side-panel.side-panel > .side-panel-rikuei {
+  grid-area: rik;
+}
+html[data-family] body #site-side-panel.side-panel > .side-panel-related {
+  grid-area: rel;
+}
+html[data-family] body #site-side-panel.side-panel > .side-panel-files > .side-panel-links {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+html[data-family] body #site-side-panel.side-panel > .side-panel-files > .side-panel-links > a {
+  position: relative;
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  min-height: 116px;
+  padding: 62px 12px 12px;
+  overflow: hidden;
+  isolation: isolate;
+  border: 1px solid rgb(var(--sh-l1-rgb) / 28%);
+  background: var(--sh-ink-2);
+}
+html[data-family] body #site-side-panel.side-panel > .side-panel-files a > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 16%;
+  z-index: -2;
+}
+html[data-family] body #site-side-panel.side-panel > .side-panel-files a::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(transparent, rgb(var(--sh-ink-rgb) / 96%));
+  z-index: -1;
+  pointer-events: none;
+}
+html[data-family] body #site-side-panel.side-panel > .side-panel-files a > span {
+  min-width: 0;
+  color: var(--sh-text);
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+html[data-family] body #site-side-panel.side-panel > .side-panel-files a > i {
+  flex-shrink: 0;
+  color: var(--sh-l1);
+  font: normal 12px var(--sh-mono);
+}
+html[data-family] body #site-side-panel.side-panel > .side-panel-files a[aria-current="page"] {
+  border-color: var(--sh-l1);
+  box-shadow: inset 0 -3px var(--sh-l1);
+}
+html[data-family] body #site-side-panel.side-panel > .side-panel-files a:focus-visible {
+  outline: 2px solid var(--sh-focus);
+  outline-offset: 3px;
+}
+@media (min-width: 761px) {
+  html[data-family] body #site-side-panel.side-panel[data-file-menu="true"][data-liquid-pointer] {
+    grid-template-areas:
+      "head head head head head head" "find find find find find find"
+      "sec sec sec sec sec sec" "spe spe sto sto sto sto"
+      "rid rid rid rid rid rid" "rik rik rik rik rik rik"
+      "rel rel rel rel rel rel" "unm unm inf inf inf inf" "sys sys sys sys sys sys";
+  }
+  html[data-family] body #site-side-panel.side-panel > .side-panel-rikuei > .side-panel-links {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+  html[data-family] body #site-side-panel.side-panel > .side-panel-related > .side-panel-links {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1180px) {
+  html[data-family] body #site-side-panel.side-panel[data-file-menu="true"][data-liquid-pointer] {
+    grid-template-areas:
+      "head head head head head head" "find find find find find find"
+      "sec spe spe sto sto sto" "sec rid rid rid rid rid"
+      "sec rik rik rik rik rik" "sec rel rel rel rel rel"
+      "sec unm inf inf inf inf" "sys sys sys sys sys sys sys";
+  }
+}
+@media (max-width: 760px) {
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    #site-side-panel.side-panel[data-open="true"]
+    > .side-panel-riders
+    > .side-panel-links
+    > a[href="/riders/saga"] {
+    --sh-art: url("/rider-saga-rexonance-thumbnail-20260827-240.webp");
+  }
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    #site-side-panel.side-panel[data-open="true"]
+    > .side-panel-riders
+    > .side-panel-links
+    > a[href="/riders/realm"] {
+    --sh-art: url("/rider-realm-240.webp");
+  }
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    #site-side-panel.side-panel[data-open="true"]
+    > .side-panel-riders
+    > .side-panel-links
+    > a[href="/riders/lore"] {
+    --sh-art: url("/rider-loa-240.webp");
+  }
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    #site-side-panel.side-panel[data-open="true"]
+    > .side-panel-riders
+    > .side-panel-links
+    > a[href="/riders/vandal"] {
+    --sh-art: url("/rider-vandal-thumbnail-20260827-240.webp");
+  }
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    #site-side-panel.side-panel[data-open="true"]
+    > .side-panel-riders
+    > .side-panel-links
+    > a[href="/riders/leddic"] {
+    --sh-art: url("/rider-leddic-home-240.webp");
+  }
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    #site-side-panel.side-panel[data-open="true"]
+    > .side-panel-riders
+    > .side-panel-links
+    > a[href="/riders/argenome"] {
+    --sh-art: url("/rider-algenome-240.webp");
+  }
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    #site-side-panel.side-panel[data-open="true"]
+    > .side-panel-riders
+    > .side-panel-links
+    > a[href="/riders/over-zeztz"] {
+    --sh-art: url("/rider-over-zeztz-thumbnail-20260829-240.webp");
+  }
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    #site-side-panel.side-panel[data-open="true"]
+    > .side-panel-riders
+    > .side-panel-links
+    > a[href="/riders/cipher"] {
+    --sh-art: url("/rider-cipher-thumbnail-20260825-240.webp");
+  }
+}
+@media (forced-colors: active) {
+  html[data-family] body #site-side-panel.side-panel > .side-panel-files a > img {
+    display: none;
+  }
+  html[data-family] body #site-side-panel.side-panel > .side-panel-files a[aria-current="page"] {
+    border: 2px solid Highlight;
+  }
+}
+
+/* rx14 F9: one command-bar lane. Keep the iPad compact trigger's own
+   geometry, and leave the special-site reserve driven by its ResizeObserver. */
+html[data-family]
+  body
+  :is(
+    main.site-shell.film-edition > header.topbar,
+    .manager-page > header.manager-topbar,
+    main.dream-page.dream-page > header.dream-site-header,
+    .library-page > header.library-topbar,
+    .search-page > header.search-topbar,
+    .form-archive-page > header.form-archive-toolbar
+  ) {
+  box-sizing: border-box;
+  min-height: calc(var(--sh-bar-h) + env(safe-area-inset-top, 0px));
+  padding-block: env(safe-area-inset-top, 0px) 0;
+  padding-inline: max(var(--sh-gutter), env(safe-area-inset-left, 0px))
+    max(var(--sh-gutter), env(safe-area-inset-right, 0px));
+  align-items: center;
+}
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page
+  > .rxs-local-nav
+  > .rxs-local-nav-inner {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: calc(var(--sh-bar-h) + env(safe-area-inset-top, 0px));
+  padding-block: env(safe-area-inset-top, 0px) 0;
+  padding-inline: max(var(--sh-gutter), env(safe-area-inset-left, 0px))
+    max(var(--sh-gutter), env(safe-area-inset-right, 0px));
+}
+@media (max-width: 760px) {
+  html[data-family] {
+    --sh-bar-h: 64px;
+  }
+}
+@media (max-width: 360px) {
+  html[data-family="library"] body .search-page > header.search-topbar > a.search-brand > span {
+    display: none;
   }
 }

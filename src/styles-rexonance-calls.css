@@ -1273,6 +1273,12 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   display: none;
 }
 
+/* The driver at the waist is on the body from the start, finished (owner,
+   2026-10-11); it stays a DOM plate even while the nanite engine runs. */
+.rx-call-sequence .rx-suit[data-nanites="canvas"] .rx-suit-build > .rx-suit-plate.is-driver {
+  display: block;
+}
+
 .rx-call-sequence .rx-suit-plate > .rx-suit-art {
   position: absolute;
   inset: 0;
@@ -1849,13 +1855,13 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
 
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
-    .rx-suit-plate {
+    .rx-suit-plate:not(.is-driver) {
     animation: rxSuitWipe 140ms linear var(--rx-suit-t) both;
   }
 
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
-    .rx-suit-plate
+    .rx-suit-plate:not(.is-driver)
     > .rx-suit-art {
     animation: rxSuitHold 100ms cubic-bezier(0.3, 0.55, 0.35, 1) var(--rx-suit-t) both;
   }
@@ -1950,20 +1956,20 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
     .rx-suit-pixels {
-    animation: rxSuitPixels calc(820ms - var(--rx-suit-i) * 4ms) linear
+    animation: rxSuitPixels calc(670ms - var(--rx-suit-i) * 4ms) linear
       calc(var(--rx-call-final-start) + 10ms + var(--rx-suit-i) * 14ms) both;
   }
 
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
     .rx-suit-face {
-    animation: rxSuitTick 60ms linear calc(var(--rx-call-final-start) + 700ms) both;
+    animation: rxSuitTick 60ms linear calc(var(--rx-call-final-start) + 550ms) both;
   }
 
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
     .rx-suit-halo.is-eyes {
-    animation: rxSuitHalo 140ms var(--rx-call-ease) calc(var(--rx-call-final-start) + 710ms) both;
+    animation: rxSuitHalo 140ms var(--rx-call-ease) calc(var(--rx-call-final-start) + 560ms) both;
   }
 
   /* The hand-over: the suit leaves with the caption and the frame. */
@@ -2214,8 +2220,8 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
     opacity: 1;
     transform: scale(calc(1 / var(--rx-suit-burst)));
   }
-  /* Held still on the face (~0.6 s, no pulse), then the burst. */
-  83% {
+  /* Held still on the face (~0.45 s, no pulse; owner 2026-10-11), then the burst. */
+  79% {
     animation-timing-function: cubic-bezier(0.2, 0.6, 0.3, 1);
     opacity: 1;
     transform: scale(calc(1 / var(--rx-suit-burst)));

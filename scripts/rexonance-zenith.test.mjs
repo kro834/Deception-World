@@ -12,6 +12,7 @@ import {
   REXONANCE_SUIT_MARKS,
   REXONANCE_SUIT_PIECES,
   REXONANCE_SUIT_SIZE,
+  REXONANCE_SUIT_TILE,
 } from "../src/lib/rexonance-suit.ts";
 import {
   REXONANCE_LAYOUT_BOOT_SCRIPT,
@@ -326,7 +327,8 @@ test("the scene is decorative and passes the generated shape masks to its plan",
   assert.match(page, /<div\s+ref=\{runwayRef\}\s+className="rzn-suitup"\s+aria-hidden="true"/);
   assert.match(
     page,
-    /REXONANCE_SUIT_PIECES\.map\(\(\{ id, group, x, y, w, h, seat, tiles \}\) => \(\{\s*id,\s*group,\s*x,\s*y,\s*w,\s*h,\s*seat,\s*tiles,\s*\}\)\)/,
+    // The atlas cell (ax, ay) is for the gold (owner, 2026-10-11); preset is the driver.
+    /REXONANCE_SUIT_PIECES\.map\(\(\{ id, group, x, y, w, h, seat, tiles, ax, ay \}\) => \(\{\s*id,\s*group,\s*x,\s*y,\s*w,\s*h,\s*seat,\s*tiles,\s*ax,\s*ay,[\s\S]*?preset: REXONANCE_SUIT_DRIVER\.includes\(id\),\s*\}\)\)/,
   );
   assert.match(page, /maskTile: REXONANCE_SUIT_TILE/);
   // No sprite, atlas or tile field of a piece is read by the page.
@@ -406,7 +408,8 @@ for (const [name, pieces] of [
       assert.ok(tile.m < tile.t0 && tile.t0 < tile.t1, JSON.stringify(tile));
       assert.ok(tile.t1 <= ASSEMBLY_BEATS.clamp + 1e-9);
       assert.ok(tile.t0 >= ASSEMBLY_BEATS.deus[0]);
-      if (tile.beat === 5) assert.equal(tile.t1, ASSEMBLY_BEATS.clamp);
+      // The helmet forms in place (owner, 2026-10-11): no hover, no drop.
+      if (tile.beat === 5) assert.equal(tile.hover, 0);
     }
     // Legs, arms, chest, waist land on the four DEUS！ in turn; the tail
     // and ribbons on REXONANCE！; the helmet clamps last.
@@ -981,4 +984,59 @@ test("the suit-up's read-out keeps clear of the Zeus button", () => {
         context.some((at) => /max-width: 349\.98px/.test(at)),
     ),
   );
+});
+
+test("the helmet forms from its outer layer inward, then the eyes fill (owner)", () => {
+  const plan = planAssembly({
+    size: REXONANCE_SUIT_SIZE,
+    pieces: realPieces,
+    core: REXONANCE_SUIT_MARKS.core,
+    visor: REXONANCE_SUIT_MARKS.visor,
+    tile: 12,
+  });
+  const [vx, vy] = REXONANCE_SUIT_MARKS.visor;
+  const helm = plan.tiles.filter((tile) => tile.beat === 5);
+  assert.ok(helm.length > 10);
+  const far = helm.filter((tile) => Math.hypot(tile.cx - vx, tile.cy - vy) > 40);
+  const near = helm.filter((tile) => Math.hypot(tile.cx - vx, tile.cy - vy) < 20);
+  const mean = (list) => list.reduce((sum, tile) => sum + tile.t1, 0) / list.length;
+  assert.ok(mean(far) < mean(near), "outer before inner");
+  // Every tile of the helmet is on before the face's cells fill.
+  assert.ok(Math.max(...helm.map((tile) => tile.t1)) < ASSEMBLY_BEATS.pixels[0]);
+});
+
+test("the gold forms by nanites right after each plate lands; the driver is on from the start", async () => {
+  const { planAssemblyGold } = await import("../src/lib/rexonance-resonance.js");
+  const { REXONANCE_SUIT_GOLD_CELL, REXONANCE_SUIT_GOLD_CELLS } =
+    await import("../src/lib/rexonance-suit-gold.ts");
+  const { REXONANCE_SUIT_DRIVER } = await import("../src/lib/rexonance-calls.ts");
+  const pieces = REXONANCE_SUIT_PIECES.map((piece) => ({
+    ...piece,
+    preset: REXONANCE_SUIT_DRIVER.includes(piece.id),
+  }));
+  const plan = planAssembly({
+    size: REXONANCE_SUIT_SIZE,
+    pieces,
+    core: REXONANCE_SUIT_MARKS.core,
+    visor: REXONANCE_SUIT_MARKS.visor,
+    maskTile: REXONANCE_SUIT_TILE,
+    tile: 12,
+  });
+  // The driver is drawn whole from its cut-outs (never chopped into tiles).
+  const driverIds = new Set(REXONANCE_SUIT_DRIVER);
+  assert.ok(plan.tiles.every((tile) => !driverIds.has(tile.pieceId)));
+  const landed = new Map();
+  for (const tile of plan.tiles)
+    if (tile.pieceId) landed.set(tile.pieceId, Math.max(landed.get(tile.pieceId) ?? 0, tile.t1));
+  const gold = planAssemblyGold({
+    pieces,
+    gold: { atlas: "", cell: REXONANCE_SUIT_GOLD_CELL, cells: REXONANCE_SUIT_GOLD_CELLS },
+    landed,
+  });
+  assert.ok(gold.count > 4000);
+  const earliest = Math.min(...landed.values());
+  for (let i = 1; i < gold.count; i += 1) assert.ok(gold.lock[i] >= gold.lock[i - 1]);
+  assert.ok(gold.lock[0] > earliest);
+  // Done before the seal into the finished figure.
+  assert.ok(gold.lock[gold.count - 1] < ASSEMBLY_BEATS.seal[1]);
 });

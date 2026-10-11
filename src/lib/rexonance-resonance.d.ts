@@ -25,7 +25,43 @@ export interface RexonanceAssemblyPiece {
   readonly h: number;
   readonly seat: readonly [number, number];
   readonly tiles?: string;
+  /** Its cell in the plates' atlas (and in the gold atlas). */
+  readonly ax?: number;
+  readonly ay?: number;
+  /** On the body, finished, from the start (the driver). */
+  readonly preset?: boolean;
 }
+
+export interface RexonanceAssemblyGold {
+  /** The gold atlas: each plate's raw gunmetal channel, alpha the trims' mask. */
+  atlas: string;
+  cell: number;
+  cells: Readonly<Record<string, string>>;
+}
+
+export const ASSEMBLY_GOLD: {
+  delay: number;
+  form: number;
+  helm: number;
+  approach: number;
+  cool: number;
+  glint: number;
+};
+
+export function planAssemblyGold(options: {
+  pieces: readonly RexonanceAssemblyPiece[];
+  gold: RexonanceAssemblyGold | undefined;
+  landed: Map<string, number>;
+}): {
+  count: number;
+  x: Float32Array;
+  y: Float32Array;
+  w: Float32Array;
+  h: Float32Array;
+  lock: Float32Array;
+  ux: Float32Array;
+  uy: Float32Array;
+} | null;
 
 export interface RexonanceAssemblyConfig {
   figure: string;
@@ -36,6 +72,12 @@ export interface RexonanceAssemblyConfig {
   core: readonly [number, number];
   visor: readonly [number, number];
   glow: readonly (readonly [number, number])[];
+  gold?: RexonanceAssemblyGold;
+  /** The plates' atlas (art | mosaic), for the driver's cut-outs. */
+  atlas?: string;
+  /** The MAX and ULTRA figures (same frame): the suit-up ends on the form
+   * named by the runway's data-form. */
+  forms?: { readonly max: string; readonly ultra: string };
 }
 
 export interface RexonanceAssemblyTile {

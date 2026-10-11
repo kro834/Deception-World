@@ -85,13 +85,16 @@ body:has(main.export-page) {
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  opacity: 0.09;
+  opacity: 0.22;
   background-image:
-    linear-gradient(rgb(122 232 255 / 14%) 1px, transparent 1px),
-    linear-gradient(90deg, rgb(122 232 255 / 14%) 1px, transparent 1px);
-  background-size: 96px 96px;
-  -webkit-mask-image: radial-gradient(circle at 50% 40%, #000, transparent 78%);
-  mask-image: radial-gradient(circle at 50% 40%, #000, transparent 78%);
+    linear-gradient(90deg, rgb(4 8 15 / 78%), rgb(4 8 15 / 36%), rgb(4 8 15 / 78%)),
+    url("/deception-world-poster-delivery-720.webp");
+  background-position:
+    center,
+    center 32%;
+  background-size: cover;
+  -webkit-mask-image: none;
+  mask-image: none;
 }
 
 .export-page ::selection {

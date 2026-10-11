@@ -21,7 +21,8 @@ import {
 import { GuardedLink } from "@/components/load-gate";
 import { ZeusButtonToggle } from "@/components/zeus-button";
 import { acquireViewportScrollLock } from "@/lib/viewport-scroll-lock.js";
-import { RIDER_NAV } from "./dossier-nav";
+import { RE_DIVE_RIKUEI_NAV, RELATED_NAV, RIDER_NAV, RIKUEI_NAV } from "./dossier-nav";
+import { launcherTile } from "@/lib/thumbnail-images";
 import { LiquidPointerGlow } from "./liquid-rail";
 import { UiVectorIcon } from "./ui-vector-icon";
 import { worldChapterLine } from "./world-chapter-marker";
@@ -104,6 +105,18 @@ const SITE_ANNOUNCEMENTS = [
 ] as const satisfies readonly SiteAnnouncement[];
 
 type AnnouncementId = (typeof SITE_ANNOUNCEMENTS)[number]["id"];
+
+const FILE_CHAPTER_CODES: Record<string, string> = {
+  "dossier-profile": "PROFILE",
+  "identity-records": "RECORDS",
+  "dossier-index": "DOSSIER",
+  "form-records": "FORMS",
+};
+const YOAKE_MAMORI_LINK = {
+  name: "夜明護尊",
+  href: "/characters/yoake-mamori",
+  assets: ["/character-yoake-mamori.jpeg"],
+} as const;
 
 const SIDE_MENU_OPEN_INPUT_EVENT = "deception-world:side-menu-open-input";
 
@@ -316,6 +329,35 @@ export function SideMenuLayer({
       setReDiveReached(false);
     }
   }, [isOpen]);
+  const [fileChapters, setFileChapters] = useState<readonly { id: string; label: string }[]>([]);
+  useEffect(() => {
+    const doc = panelRef.current?.ownerDocument;
+    if (!doc) return;
+    const rows = doc.querySelectorAll<HTMLAnchorElement>(
+      'main.manager-page .dossier-reader-links > a[href^="#"]',
+    );
+    setFileChapters(
+      Array.from(rows, (row) => ({
+        id: row.getAttribute("href")!.slice(1),
+        label: row.textContent?.trim() ?? "",
+      })),
+    );
+  }, [pathname, isOpen]);
+  useLayoutEffect(() => {
+    const panel = panelRef.current;
+    if (!isOpen || !panel || !fileChapters.length) return;
+    const current = panel.ownerDocument
+      .querySelector('main.manager-page .dossier-reader-links > a[aria-current="location"]')
+      ?.getAttribute("href");
+    panel.querySelectorAll(".side-panel-links > a").forEach((row) => {
+      if (!row.getAttribute("href")?.startsWith(`${pathname}#`)) return;
+      if (row.getAttribute("href") === `${pathname}${current}`) {
+        row.setAttribute("aria-current", "location");
+      } else {
+        row.removeAttribute("aria-current");
+      }
+    });
+  }, [isOpen, pathname, fileChapters]);
   // The World header marks the chapter in view (WorldSectionNav); its row in
   // SECTIONS repeats that mark as aria-current="location", read when the menu
   // opens (the page cannot scroll behind it). It is set on the rows directly:
@@ -399,6 +441,18 @@ export function SideMenuLayer({
       const overflow =
         current.getBoundingClientRect().bottom + clearance - panel.getBoundingClientRect().bottom;
       if (overflow > 0) panel.scrollTop += overflow;
+    }
+    // Show the group heading, not just the current tile, when that group
+    // fits under the sticky head. Taller groups keep the row-in-view rule.
+    const group = (
+      current ?? panel.querySelector('[aria-current="location"]')
+    )?.closest<HTMLElement>(".side-panel-group");
+    const head = panel.querySelector(".side-panel-head");
+    if (group && head) {
+      const bounds = group.getBoundingClientRect();
+      const top = head.getBoundingClientRect().bottom + 8;
+      const bottom = panel.getBoundingClientRect().bottom - 24;
+      if (bounds.height <= bottom - top) panel.scrollTop += bounds.top - top;
     }
     // Android's back gesture (and Esc from outside the menu) asks the
     // browser's CloseWatcher to close the menu instead of leaving the page.
@@ -768,6 +822,7 @@ export function SideMenuLayer({
         data-react-controlled={controlled ? "true" : undefined}
         data-open={String(isOpen)}
         role="dialog"
+        data-file-menu={context === "world" ? "true" : undefined}
         aria-modal={true}
         aria-hidden={!isOpen}
         aria-label="サイトメニュー"
@@ -875,7 +930,20 @@ export function SideMenuLayer({
         <div className="side-panel-group">
           <p>SECTIONS</p>
           <div className="side-panel-links">
-            {isSpecialSite ? (
+            {context === "world" && fileChapters.length > 0 ? (
+              <>
+                {fileChapters.map(({ id, label }) => (
+                  <GuardedLink key={id} to={pathname} hash={id} assets={[]} beforeNavigate={close}>
+                    <span>{label}</span>
+                    <i>{FILE_CHAPTER_CODES[id] ?? "SECTION"}</i>
+                  </GuardedLink>
+                ))}
+                <GuardedLink to="/world" assets={[]} beforeNavigate={close}>
+                  <span>ワールドへ戻る</span>
+                  <i>WORLD</i>
+                </GuardedLink>
+              </>
+            ) : isSpecialSite ? (
               <>
                 {SPECIAL_SITE_SECTIONS[
                   context === "rexonance"
@@ -1142,6 +1210,56 @@ export function SideMenuLayer({
               )}
             </div>
           </div>
+        ) : null}
+        {context === "world" ? (
+          <>
+            <div className="side-panel-group side-panel-files side-panel-rikuei">
+              <p>RIKUEI</p>
+              <div className="side-panel-links">
+                {RIKUEI_NAV.map((file) => (
+                  <GuardedLink
+                    key={file.href}
+                    to={file.href!}
+                    assets={file.assets}
+                    beforeNavigate={close}
+                    aria-current={pathname === file.href ? "page" : undefined}
+                  >
+                    {isOpen ? (
+                      <img src={launcherTile(file.href)} alt="" loading="lazy" decoding="async" />
+                    ) : null}
+                    <span>{file.name}</span>
+                    <i>{file.id}</i>
+                  </GuardedLink>
+                ))}
+              </div>
+            </div>
+            <div className="side-panel-group side-panel-files side-panel-related">
+              <p>RELATED</p>
+              <div className="side-panel-links">
+                {[
+                  ...(reDiveReached || pathname === "/characters/ciel"
+                    ? RE_DIVE_RIKUEI_NAV.filter((file) => file.href === "/characters/ciel")
+                    : []),
+                  ...RELATED_NAV,
+                  YOAKE_MAMORI_LINK,
+                ].map((file) => (
+                  <GuardedLink
+                    key={file.href}
+                    to={file.href!}
+                    assets={file.assets}
+                    beforeNavigate={close}
+                    aria-current={pathname === file.href ? "page" : undefined}
+                  >
+                    {isOpen ? (
+                      <img src={launcherTile(file.href)} alt="" loading="lazy" decoding="async" />
+                    ) : null}
+                    <span>{file.name}</span>
+                    <i>FILE</i>
+                  </GuardedLink>
+                ))}
+              </div>
+            </div>
+          </>
         ) : null}
         <div className="side-panel-group">
           <p>UNMANAGED</p>

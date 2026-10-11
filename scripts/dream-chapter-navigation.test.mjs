@@ -114,6 +114,56 @@ test("closing the URL chapter remains a native close and does not reopen it", ()
   h.rootListeners.get("toggle")({ target: { matches: () => true } });
   assert.deepEqual(h.state(), { current: "2", open: [] });
   assert.equal(h.chapters[2].open, false);
+  h.historyListeners.get("hashchange")();
+  assert.equal(h.chapters[2].open, false, "late duplicate history events cannot undo a native close");
+  h.cleanup();
+});
+
+test("late native fragment focus is repaired without stealing the next keyboard action", () => {
+  const h = setup();
+  h.click("#dream-chronicle-case-3", { detail: 0 });
+  h.environment.location.hash = "#dream-chronicle-case-3";
+  h.flush();
+  h.historyListeners.get("hashchange")();
+  h.flush();
+  assert.equal(h.focus(), 2, "the target receives focus after native fragment navigation settles");
+  h.rootListeners.get("keydown")();
+  h.historyListeners.get("hashchange")();
+  h.flush();
+  assert.equal(h.focus(), 2, "Tab/Space/Enter belongs to the reader, not a delayed focus callback");
+  h.cleanup();
+});
+
+test("focusing the next link cancels the previous frame before Enter can be stolen", () => {
+  const h = setup();
+  h.click("#dream-case-note-3", { detail: 0 });
+  h.environment.location.hash = "#dream-case-note-3";
+  h.rootListeners.get("focusin")({ target: { tagName: "A" } });
+  h.flush();
+  h.historyListeners.get("hashchange")();
+  h.flush();
+  assert.equal(h.focus(), 0, "the new link keeps focus through the old hashchange");
+  h.click("#dream-chronicle-case-3", { detail: 0 });
+  assert.equal(h.chronicle.open, true);
+  h.cleanup();
+});
+
+test("a delayed hashchange after a keyboard return does not undo the next native close", () => {
+  const h = setup("#dream-chronicle-case-3");
+  h.click("#dream-case-3", { detail: 0 });
+  h.environment.location.hash = "#dream-case-3";
+  h.flush();
+  h.chapters[3].open = false;
+  h.rootListeners.get("toggle")({ target: { matches: () => true } });
+  h.historyListeners.get("popstate")();
+  h.historyListeners.get("hashchange")();
+  assert.equal(h.chapters[3].open, false);
+  assert.deepEqual(h.state(), { current: "3", open: [] });
+  h.environment.location.hash = "#dream-case-2";
+  h.historyListeners.get("popstate")();
+  assert.equal(h.chapters[2].open, true, "a genuinely new history target still opens");
+  h.click("#dream-case-3", { detail: 0 });
+  assert.equal(h.chapters[3].open, true, "an explicit revisit still opens the chapter");
   h.cleanup();
 });
 

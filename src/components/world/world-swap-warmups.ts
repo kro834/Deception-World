@@ -1,5 +1,6 @@
 import { warmRexonanceStages } from "@/lib/warm-rexonance-stages";
 import { OTHER_ARTWORK } from "./other-artwork-card";
+import { dossierImage } from "@/lib/dossier-images";
 
 /* First views of the World's swaps paint their pictures at once (2026-10-03).
    The rider rail mounts a rider's art only when it is chosen, and REVERSE /
@@ -31,15 +32,11 @@ export const ARCHIVE_TAB_PICTURES: readonly string[] = [
   "/character-luna-thumb.jpeg",
 ];
 
-const plainSource = () => ({});
+const plainSource = (source: string) => dossierImage(source);
 
 /** Warm the riders after the shown one (in rail order, wrapping) and the
  * archive's other tabs. Returns the cleanup. */
-export function warmWorldSwaps(
-  root: ParentNode,
-  riderArt: readonly string[],
-  shownRider: number,
-) {
+export function warmWorldSwaps(root: ParentNode, riderArt: readonly string[], shownRider: number) {
   if (document.documentElement.dataset.worldEffects === "economy") return () => {};
   const cleanups: (() => void)[] = [];
   const riderConsole = root.querySelector(".riders-section .rider-console");

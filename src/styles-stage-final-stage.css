@@ -982,6 +982,10 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer h2 {
   text-align: center;
 }
 
+html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer h2::after {
+  margin-inline: auto;
+}
+
 html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer > a {
   display: inline-flex;
   align-items: center;

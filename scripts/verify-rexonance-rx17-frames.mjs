@@ -30,10 +30,23 @@ export function assertRexonanceFaceHold({ shots, supplements }, name) {
   assert.ok(faceAt(1990).every((group) => Number(group.opacity) === 0));
   assert.ok(Number(faceAt(2000)[0].opacity) > 0 && Number(faceAt(2000)[0].opacity) < 1);
   assert.ok(faceAt(2120).every((group) => Number(group.opacity) === 1));
-  assert.deepEqual(faceAt(2640), faceAt(2120), `${name}: filled squares hold on the face`);
-  assert.deepEqual(faceAt(2670), faceAt(2640), `${name}: scatter does not start early`);
-  assert.notDeepEqual(faceAt(2710), faceAt(2670), `${name}: squares scatter after the hold`);
-  assert.ok(faceAt(2800).every((group) => Number(group.opacity) < 0.09));
+  assert.deepEqual(faceAt(2480), faceAt(2120), `${name}: filled squares hold on the face`);
+  assert.deepEqual(faceAt(2518), faceAt(2480), `${name}: scatter does not start early`);
+  // The published CSS's 79% keyframe begins the first group's scatter at
+  // 2519.3ms (the nominal clock is 2520ms). Do not fabricate a static frame
+  // on that boundary: the first group may just begin, the other five hold.
+  const boundary = faceAt(2520);
+  assert.ok(
+    Number(boundary[0].opacity) > 0.95 && Number(boundary[0].opacity) <= 1,
+    `${name}: the first group only begins scattering at the boundary`,
+  );
+  assert.deepEqual(
+    boundary.slice(1),
+    faceAt(2518).slice(1),
+    `${name}: later groups remain held at the scatter boundary`,
+  );
+  assert.notDeepEqual(faceAt(2560), faceAt(2518), `${name}: squares scatter after the hold`);
+  assert.ok(faceAt(2650).every((group) => Number(group.opacity) < 0.09));
 }
 
 const browser = await chromium.launch({ channel: process.env.PW_BROWSER_CHANNEL ?? "chrome" });
@@ -211,12 +224,12 @@ try {
       }
       return { file, ...state, parts };
     };
-    // Separate evidence around the final gold lock, face fill, 0.6s hold,
+    // Separate evidence around the final gold lock, face fill, published hold,
     // and scatter. These do not alter the owner's 46-frame audit contract.
     // Capture monotonically: the real engine releases its rAF after the
     // last glint, so rewinding it after 2400ms would fabricate gold evidence.
     const regularTimes = Array.from({ length: 46 }, (_, index) => 600 + index * 40);
-    const supplementTimes = [1986, 1990, 2000, 2060, 2640, 2670, 2710, 2800];
+    const supplementTimes = [1986, 1990, 2000, 2480, 2518, 2520, 2560, 2650];
     const moments = [...new Set([...regularTimes, ...supplementTimes])].sort((a, b) => a - b);
     const shots = [];
     const supplements = [];

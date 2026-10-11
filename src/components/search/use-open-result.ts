@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import { useRouter } from "@tanstack/react-router";
 import { useLoadGate } from "@/components/load-gate";
 import type { SearchResult } from "./search-engine";
+import { watchRecordArrival } from "@/lib/record-arrival";
 
 /** Opens a result the way the site's own links do (load gate, transitions). */
 export function useOpenResult() {
@@ -11,6 +12,7 @@ export function useOpenResult() {
     (result: Pick<SearchResult, "document" | "hash">, fromKeyboard: boolean) => {
       const { document } = result;
       const hash = result.hash ?? document.hash;
+      watchRecordArrival(document.to, hash);
       if (document.search) {
         void router.navigate({ to: document.to, search: document.search as never, hash });
         return;

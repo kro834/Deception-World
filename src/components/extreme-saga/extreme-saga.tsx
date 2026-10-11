@@ -9,6 +9,7 @@ import { initRail } from "@/lib/liquid/boot.js";
 import { mountExtremeMotion, mountExtremeNavReserve } from "@/lib/extreme-motion.js";
 import { mountExtremeImpact } from "@/lib/extreme-impact.js";
 import { mountExtremeFightCard } from "@/lib/extreme-fightcard.js";
+import { mountLocalNavCurrent } from "@/lib/local-nav-current";
 import { ExtremeImpactDefs } from "./extreme-impact-art";
 
 type ExtremeStage = "middle" | "ultra";
@@ -310,12 +311,7 @@ const ExtremePerformance = memo(function ExtremePerformance() {
             </strong>
             <p>標準状態のパンチ力</p>
           </article>
-          <article
-            className="rxs-reveal"
-            data-exi-hit=""
-            data-exi-line="mid"
-            data-exi-chain="380"
-          >
+          <article className="rxs-reveal" data-exi-hit="" data-exi-line="mid" data-exi-chain="380">
             <i className="exi-streaks" aria-hidden="true">
               <svg
                 viewBox="0 0 200 100"
@@ -492,6 +488,7 @@ export function ExtremeSaga() {
   const shownArt = EXTREME_STAGES[shownStage];
 
   useEffect(() => mountExtremeNavReserve(pageRef.current), []);
+  useEffect(() => mountLocalNavCurrent(pageRef.current?.querySelector(".rxs-local-nav nav")), []);
   useEffect(() => mountExtremeMotion(pageRef.current, setMotionReady), []);
   useEffect(() => mountExtremeImpact(pageRef.current), []);
   useEffect(() => mountExtremeFightCard(pageRef.current), []);
@@ -561,7 +558,7 @@ export function ExtremeSaga() {
           observer.unobserve(entry.target);
         });
       },
-      { rootMargin: "0px 0px -8%", threshold: 0.1 },
+      { rootMargin: "0px 0px -8%", threshold: 0 },
     );
     reveals.forEach((element) => observer.observe(element));
     return () => observer.disconnect();
@@ -584,7 +581,9 @@ export function ExtremeSaga() {
             aria-label="ディセプションワールドへ戻る"
           >
             <span>EXTREME</span>
-            <b><DisplayName value="エクスプリームサーガ" /></b>
+            <b>
+              <DisplayName value="エクスプリームサーガ" />
+            </b>
           </GuardedLink>
           <nav aria-label="エクスプリームサーガ ページ内ナビゲーション">
             <a href="#performance">比較</a>

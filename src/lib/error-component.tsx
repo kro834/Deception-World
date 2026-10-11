@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { TriangleAlert } from "lucide-react";
 import notFoundCss from "@/styles-not-found.css?url";
 import loadErrorCss from "@/styles-load-error.css?url";
+import { RecoveryTiles } from "@/components/library/recovery-tiles";
 
 export function AppErrorComponent() {
   return (
@@ -51,6 +52,7 @@ export function NotFoundComponent() {
       <Link to="/search" className="app-not-found-search">
         資料検索で探す
       </Link>
+      <RecoveryTiles />
     </main>
   );
 }

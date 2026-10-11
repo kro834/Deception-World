@@ -2654,6 +2654,15 @@ html[data-world-effects="economy"] .dream-case-list li {
   }
 }
 
+/* Economy rendering reads like reduced motion: every block is shown, and
+   none waits to be revealed (also when economy is switched on later). */
+html[data-world-effects="economy"] [data-dream-reveal] {
+  clip-path: none !important;
+  opacity: 1 !important;
+  transform: none !important;
+  transition: none !important;
+}
+
 /* Keep chapter navigation and dossier captions legible on compact screens. */
 .dream-chapter-nav a {
   min-height: 48px;

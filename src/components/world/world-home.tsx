@@ -2,7 +2,7 @@ import { forwardRef, memo, useCallback, useEffect, useLayoutEffect, useRef, useS
 import { startTransition } from "react";
 import { useRouterState } from "@tanstack/react-router";
 import { bootLiquidGlass } from "@/lib/liquid/boot.js";
-import { MANAGER_ASSETS } from "@/lib/asset-loader";
+import { assetsWarmed, MANAGER_ASSETS, WORLD_ENTER_ASSETS } from "@/lib/asset-loader";
 import { GuardedLink, useLoadGate } from "@/components/load-gate";
 import { useWorldMode } from "./use-world-mode";
 import { LiquidLens, LiquidPointerGlow } from "./liquid-rail";
@@ -866,6 +866,11 @@ const WorldSectionNav = memo(function WorldSectionNav() {
 
 export function WorldHome() {
   useWorldMode();
+  // Opening already decoded the full poster for its WebGL handoff. Reuse
+  // that one resource; a direct /world entry selects a responsive print.
+  const [reuseWarmedPoster] = useState(
+    () => typeof window !== "undefined" && assetsWarmed(WORLD_ENTER_ASSETS),
+  );
   const { go, notifyOpeningDestination } = useLoadGate();
   const locationHash = useRouterState({ select: (state) => state.location.hash });
   const shellRef = useRef<HTMLDivElement>(null);
@@ -921,10 +926,15 @@ export function WorldHome() {
   const riderTransitionTimer = useRef<number | null>(null);
   const pausedAmbientAnimations = useRef<Animation[]>([]);
 
-  const loadPoster = useCallback((index: number, priority: "high" | "low" = "high") => {
-    posterLoader.current ??= createReadyPosterLoader(preparePosterImage);
-    return posterLoader.current.load(POSTERS[index].src, priority);
-  }, []);
+  const loadPoster = useCallback(
+    (index: number, priority: "high" | "low" = "high") => {
+      posterLoader.current ??= createReadyPosterLoader((image, source) =>
+        preparePosterImage(image, source, reuseWarmedPoster),
+      );
+      return posterLoader.current.load(POSTERS[index].src, priority);
+    },
+    [reuseWarmedPoster],
+  );
 
   const cancelPosterShuffle = useCallback(() => {
     shuffleRunId.current += 1;
@@ -1176,7 +1186,19 @@ export function WorldHome() {
       cancelled = true;
       window.clearInterval(t);
     };
-  }, [loadPoster, ambientPaused, heroVisible, locked, motionReduced, poster, sideMenuOpen, pickupOpen, episodePickup, shuffling, posterControlsFocused]);
+  }, [
+    loadPoster,
+    ambientPaused,
+    heroVisible,
+    locked,
+    motionReduced,
+    poster,
+    sideMenuOpen,
+    pickupOpen,
+    episodePickup,
+    shuffling,
+    posterControlsFocused,
+  ]);
 
   useEffect(() => {
     if (ambientPaused || motionReduced || !heroVisible) return;
@@ -1195,7 +1217,19 @@ export function WorldHome() {
       void loadPoster((poster + 1) % POSTERS.length, "low");
     }, 1200);
     return () => window.clearTimeout(timer);
-  }, [loadPoster, ambientPaused, heroVisible, motionReduced, poster, locked, sideMenuOpen, pickupOpen, episodePickup, shuffling, posterControlsFocused]);
+  }, [
+    loadPoster,
+    ambientPaused,
+    heroVisible,
+    motionReduced,
+    poster,
+    locked,
+    sideMenuOpen,
+    pickupOpen,
+    episodePickup,
+    shuffling,
+    posterControlsFocused,
+  ]);
 
   useEffect(() => {
     if (!ambientPaused) {
@@ -1233,9 +1267,23 @@ export function WorldHome() {
   }, [ambientPaused]);
 
   useEffect(() => {
-    const paused = ambientPaused || motionReduced || !heroVisible || sideMenuOpen || pickupOpen || episodePickup !== null;
+    const paused =
+      ambientPaused ||
+      motionReduced ||
+      !heroVisible ||
+      sideMenuOpen ||
+      pickupOpen ||
+      episodePickup !== null;
     if (paused && shuffleActive.current) cancelPosterShuffle();
-  }, [cancelPosterShuffle, ambientPaused, motionReduced, heroVisible, sideMenuOpen, pickupOpen, episodePickup]);
+  }, [
+    cancelPosterShuffle,
+    ambientPaused,
+    motionReduced,
+    heroVisible,
+    sideMenuOpen,
+    pickupOpen,
+    episodePickup,
+  ]);
 
   useEffect(() => {
     const shell = shellRef.current;
@@ -1384,12 +1432,10 @@ export function WorldHome() {
   // Only the selected classification's panel is rendered, so only its tab
   // names a panel; the others would point screen readers at nothing.
   useEffect(() => {
-    managerRail.current
-      ?.querySelectorAll<HTMLElement>('button[role="tab"]')
-      .forEach((tab, i) => {
-        if (i === managerTab) tab.setAttribute("aria-controls", `manager-panel-${i}`);
-        else tab.removeAttribute("aria-controls");
-      });
+    managerRail.current?.querySelectorAll<HTMLElement>('button[role="tab"]').forEach((tab, i) => {
+      if (i === managerTab) tab.setAttribute("aria-controls", `manager-panel-${i}`);
+      else tab.removeAttribute("aria-controls");
+    });
   }, [managerTab]);
 
   useEffect(() => {
@@ -1495,9 +1541,7 @@ export function WorldHome() {
       const timer = window.setTimeout(async () => {
         const isFinalStep = index === steps.length - 1;
         const previewPoster = previewPosters[index % previewPosters.length];
-        const ready = isFinalStep
-          ? await finalReady
-          : previewReady.has(previewPoster);
+        const ready = isFinalStep ? await finalReady : previewReady.has(previewPoster);
         if (!shuffleActive.current || shuffleRunId.current !== runId) return;
         if (!heroInViewRef.current) {
           cancelPosterShuffle();
@@ -1702,7 +1746,7 @@ export function WorldHome() {
             >
               <img
                 src={previous.src}
-                {...posterImage(previous.src)}
+                {...posterImage(previous.src, reuseWarmedPoster)}
                 alt=""
                 style={{ objectPosition: previous.pos }}
                 decoding="async"
@@ -1712,7 +1756,7 @@ export function WorldHome() {
           <span className="hero-backdrop-layer hero-backdrop-current" key={`hb-${poster}`}>
             <img
               src={current.src}
-              {...posterImage(current.src)}
+              {...posterImage(current.src, reuseWarmedPoster)}
               alt=""
               style={{ objectPosition: current.pos }}
               fetchPriority="high"
@@ -1794,7 +1838,7 @@ export function WorldHome() {
               <img
                 key={nextPoster.src}
                 src={nextPoster.src}
-                {...posterImage(nextPoster.src)}
+                {...posterImage(nextPoster.src, reuseWarmedPoster)}
                 alt=""
                 loading="lazy"
                 decoding="async"
@@ -1805,7 +1849,7 @@ export function WorldHome() {
               <img
                 key={current.src}
                 src={current.src}
-                {...posterImage(current.src)}
+                {...posterImage(current.src, reuseWarmedPoster)}
                 alt=""
                 loading="lazy"
                 decoding="async"
@@ -1816,7 +1860,7 @@ export function WorldHome() {
               <img
                 key={current.src}
                 src={current.src}
-                {...posterImage(current.src)}
+                {...posterImage(current.src, reuseWarmedPoster)}
                 alt=""
                 loading="lazy"
                 decoding="async"
@@ -1827,7 +1871,7 @@ export function WorldHome() {
               <img
                 key={current.src}
                 src={current.src}
-                {...posterImage(current.src)}
+                {...posterImage(current.src, reuseWarmedPoster)}
                 alt=""
                 loading="lazy"
                 decoding="async"
@@ -1842,7 +1886,7 @@ export function WorldHome() {
                     className="poster-image poster-image-previous"
                     key={`poster-prev-${prevPoster}`}
                     src={previous.src}
-                    {...posterImage(previous.src)}
+                    {...posterImage(previous.src, reuseWarmedPoster)}
                     alt=""
                     style={{
                       objectPosition: previous.pos,
@@ -1859,7 +1903,7 @@ export function WorldHome() {
                   }
                   key={`poster-${poster}`}
                   src={current.src}
-                  {...posterImage(current.src)}
+                  {...posterImage(current.src, reuseWarmedPoster)}
                   alt={current.alt}
                   style={{
                     objectPosition: current.pos,
@@ -1882,7 +1926,8 @@ export function WorldHome() {
             className="poster-controls"
             onFocusCapture={() => setPosterControlsFocused(true)}
             onBlurCapture={(event) => {
-                if (!event.currentTarget.contains(event.relatedTarget)) setPosterControlsFocused(false);
+              if (!event.currentTarget.contains(event.relatedTarget))
+                setPosterControlsFocused(false);
             }}
           >
             <div className="poster-control-cluster" role="group" aria-label="キービジュアル操作">
@@ -2322,6 +2367,7 @@ export function WorldHome() {
                   >
                     <img
                       src="/character-terra-thumb.jpeg"
+                      {...dossierImage("/character-terra-thumb.jpeg")}
                       alt="テラ・アレインのキャラクタービジュアル"
                       width={720}
                       height={954}
@@ -2351,6 +2397,7 @@ export function WorldHome() {
                   >
                     <img
                       src="/character-luna-thumb.jpeg"
+                      {...dossierImage("/character-luna-thumb.jpeg")}
                       alt="ルナ・アレインのキャラクタービジュアル"
                       width={720}
                       height={1260}
@@ -2379,6 +2426,7 @@ export function WorldHome() {
                   >
                     <img
                       src="/character-yoake-mamori.jpeg"
+                      {...dossierImage("/character-yoake-mamori.jpeg")}
                       alt="夜明護尊のキャラクタービジュアル"
                       width={736}
                       height={976}
@@ -2525,7 +2573,9 @@ export function WorldHome() {
               <h3 aria-label={`仮面ライダー${rider.ja}`}>
                 <span className="rider-name-line">仮面ライダー</span>
                 <br />
-                <span className="rider-name-line"><NameText value={rider.ja} seams /></span>
+                <span className="rider-name-line">
+                  <NameText value={rider.ja} seams />
+                </span>
               </h3>
               <p className="rider-description">{rider.desc}</p>
               <div className="rider-line">

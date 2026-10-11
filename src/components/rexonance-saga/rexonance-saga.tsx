@@ -5,6 +5,8 @@ import {
   REXONANCE_CALLS,
   REXONANCE_STAGE_DURATION_MS,
   type RexonanceStage,
+  REXONANCE_SUIT_DRIVER,
+  REXONANCE_ENTRY_TIMINGS,
 } from "@/lib/rexonance-calls";
 import { planStageCall, type RexonanceStageEntrance } from "@/lib/rexonance-stage-call";
 import { GuardedLink } from "@/components/load-gate";
@@ -20,9 +22,12 @@ import {
   mountRexonanceResonance,
   type RexonanceAssemblyConfig,
 } from "@/lib/rexonance-resonance.js";
+import { REXONANCE_SUIT_GOLD_CELL, REXONANCE_SUIT_GOLD_CELLS } from "@/lib/rexonance-suit-gold";
 import {
+  REXONANCE_SUIT_ATLAS,
   REXONANCE_SUIT_FACE_GLOW,
   REXONANCE_SUIT_FIGURE,
+  REXONANCE_SUIT_GOLD_ATLAS,
   REXONANCE_SUIT_MARKS,
   REXONANCE_SUIT_PIECES,
   REXONANCE_SUIT_SIZE,
@@ -30,12 +35,24 @@ import {
   REXONANCE_SUIT_UNDERSUIT,
 } from "@/lib/rexonance-suit";
 import { rexonanceImage } from "@/lib/rexonance-images";
+import { REXONANCE_FORM_FIGURES } from "@/lib/rexonance-forms";
+import {
+  FORM_CHANGE_MS,
+  FORM_TONES,
+  drawOverwrite,
+  planOverwrite,
+  sampleCells,
+} from "@/lib/rexonance-overwrite.js";
+import { autoSizedImageRef } from "@/lib/auto-sized-image";
 import { REXONANCE_SITE_ARTWORK } from "@/lib/rexonance-site-artwork";
 import { supportsIOS27Enhancements } from "@/lib/rendering-profile";
 import { warmRexonanceStages } from "@/lib/warm-rexonance-stages";
+import { mountLocalNavCurrent } from "@/lib/local-nav-current";
 
 type P14Baseline = "p1" | "p2";
 type PerformanceBaseline = "vertex" | "vinculum" | "extreme";
+
+const p14ImageRef = autoSizedImageRef(rexonanceImage("/rexonance-p14-core.jpg", true).sizes!);
 
 const STAGES: Record<
   RexonanceStage,
@@ -375,11 +392,12 @@ const CORE_SYSTEMS = [
 
 // ZENITH: use the suit atlas's shape masks, not the overlapping part boxes.
 const SUIT_UP: RexonanceAssemblyConfig = {
+  forms: REXONANCE_FORM_FIGURES,
   figure: REXONANCE_SUIT_FIGURE,
   undersuit: REXONANCE_SUIT_UNDERSUIT,
   size: REXONANCE_SUIT_SIZE,
   maskTile: REXONANCE_SUIT_TILE,
-  pieces: REXONANCE_SUIT_PIECES.map(({ id, group, x, y, w, h, seat, tiles }) => ({
+  pieces: REXONANCE_SUIT_PIECES.map(({ id, group, x, y, w, h, seat, tiles, ax, ay }) => ({
     id,
     group,
     x,
@@ -388,10 +406,21 @@ const SUIT_UP: RexonanceAssemblyConfig = {
     h,
     seat,
     tiles,
+    ax,
+    ay,
+    // The driver is on the body, finished, from the start (owner).
+    preset: REXONANCE_SUIT_DRIVER.includes(id),
   })),
   core: REXONANCE_SUIT_MARKS.core,
   visor: REXONANCE_SUIT_MARKS.visor,
   glow: REXONANCE_SUIT_FACE_GLOW,
+  // The gold forms by nanites right after each plate seats (owner), as in the call.
+  atlas: REXONANCE_SUIT_ATLAS.src,
+  gold: {
+    atlas: REXONANCE_SUIT_GOLD_ATLAS.src,
+    cell: REXONANCE_SUIT_GOLD_CELL,
+    cells: REXONANCE_SUIT_GOLD_CELLS,
+  },
 };
 // The published call, line by line; the chanted lines split into their
 // repeats, so each SA-GA！DEUS！ and REXONANCE！ lights on its own beat.
@@ -406,7 +435,7 @@ const FORM_MESH = Array.from({ length: 12 }, (_, index) => (
   <i key={index} style={{ ["--rzn-d" as string]: index }} />
 ));
 
-const RexonanceSuitUp = memo(function RexonanceSuitUp() {
+const RexonanceSuitUp = memo(function RexonanceSuitUp({ stage }: { stage: RexonanceStage }) {
   const runwayRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => mountRexonanceAssembly(runwayRef.current, SUIT_UP), []);
   return (
@@ -414,6 +443,8 @@ const RexonanceSuitUp = memo(function RexonanceSuitUp() {
       ref={runwayRef}
       className="rzn-suitup"
       aria-hidden="true"
+      // The suit-up ends on the form chosen in 03 (owner, 2026-10-11).
+      data-form={stage}
       style={{
         ["--rzn-aspect" as string]: `${REXONANCE_SUIT_SIZE.width} / ${REXONANCE_SUIT_SIZE.height}`,
       }}
@@ -423,7 +454,7 @@ const RexonanceSuitUp = memo(function RexonanceSuitUp() {
         <i className="rzn-floor" />
         <img
           className="rzn-still"
-          src={REXONANCE_SUIT_FIGURE}
+          src={stage === "standard" ? REXONANCE_SUIT_FIGURE : REXONANCE_FORM_FIGURES[stage]}
           alt=""
           width={REXONANCE_SUIT_SIZE.width}
           height={REXONANCE_SUIT_SIZE.height}
@@ -467,7 +498,7 @@ const RexonanceSuitUp = memo(function RexonanceSuitUp() {
           </ol>
           <p className="rzn-stamp">
             <span>REXONANCE SAGA</span>
-            <b>{STAGES.standard.code}</b>
+            <b>{STAGES[stage].code}</b>
           </p>
         </div>
         <i className="rzn-rail">
@@ -477,6 +508,181 @@ const RexonanceSuitUp = memo(function RexonanceSuitUp() {
     </div>
   );
 });
+
+/* The form change over the 03 panel's art (owner, 2026-10-11): a canvas
+   laid exactly over the new form's picture (same fit and position) plays
+   the change, then clears to the picture itself. To MAX: the old form is
+   overwritten by cells from the reactor out. To ULTRA: from Rexonance a
+   short run to MAX first, then the overwrite to ULTRA and its additional
+   parts (its emerald crystals) generated last. Back to Rexonance: no morph.
+   Reduced motion, economy and Save-Data change quietly. */
+const MORPH_ORIGIN = [0.5, 0.38] as const;
+function FormMorph({
+  from,
+  to,
+  delay,
+}: {
+  from: RexonanceStage;
+  to: RexonanceStage;
+  delay: number;
+}) {
+  const ref = useRef<HTMLCanvasElement | null>(null);
+  useEffect(() => {
+    const canvas = ref.current;
+    const img = canvas?.parentElement?.querySelector("img");
+    if (!canvas || !img || to === "standard" || from === to) return;
+    const connection = (navigator as Navigator & { connection?: { saveData?: boolean } })
+      .connection;
+    if (
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+      document.documentElement.dataset.worldEffects === "economy" ||
+      connection?.saveData
+    )
+      return;
+    let cancelled = false;
+    let frame = 0;
+    const load = (src: string) =>
+      new Promise<HTMLImageElement>((resolve, reject) => {
+        const image = new Image();
+        image.decoding = "async";
+        image.onload = () =>
+          void image.decode().then(
+            () => resolve(image),
+            () => resolve(image),
+          );
+        image.onerror = reject;
+        image.src = src;
+      });
+    const steps: { a: RexonanceStage; b: RexonanceStage; ms: number; extra: boolean }[] =
+      to === "max"
+        ? [{ a: from, b: "max", ms: FORM_CHANGE_MS.max, extra: false }]
+        : [
+            ...(from === "standard"
+              ? [
+                  {
+                    a: "standard" as const,
+                    b: "max" as const,
+                    ms: FORM_CHANGE_MS.quick,
+                    extra: false,
+                  },
+                ]
+              : []),
+            {
+              a: from === "standard" ? "max" : from,
+              b: "ultra",
+              ms: FORM_CHANGE_MS.ultra,
+              extra: true,
+            },
+          ];
+    const sources = [...new Set(steps.flatMap(({ a, b }) => [a, b]))];
+    // The old form shows at once (it is cached), so the new picture never flashes first.
+    canvas.style.opacity = "1";
+    Promise.all(
+      sources.map((key) => load(STAGES[key].image).then((image) => [key, image] as const)),
+    )
+      .then((loaded) => {
+        if (cancelled) return;
+        const pictures = Object.fromEntries(loaded) as Record<RexonanceStage, HTMLImageElement>;
+        // The picture's layout box (offsets ignore its entrance transform).
+        const box = { width: img.offsetWidth, height: img.offsetHeight };
+        const parent = img.offsetParent === canvas.offsetParent;
+        const ratio = Math.min(2, window.devicePixelRatio || 1);
+        canvas.style.left = `${parent ? img.offsetLeft : 0}px`;
+        canvas.style.top = `${parent ? img.offsetTop : 0}px`;
+        canvas.style.width = `${box.width}px`;
+        canvas.style.height = `${box.height}px`;
+        canvas.width = Math.max(1, Math.round(box.width * ratio));
+        canvas.height = Math.max(1, Math.round(box.height * ratio));
+        const context = canvas.getContext("2d");
+        if (!context) return;
+        // The picture's own fit and position (object-fit / object-position).
+        const style = getComputedStyle(img);
+        const naturalW = img.naturalWidth || 1086;
+        const naturalH = img.naturalHeight || 1448;
+        const fit = style.objectFit === "contain" ? Math.min : Math.max;
+        const scale = fit(box.width / naturalW, box.height / naturalH);
+        const [px, py] = style.objectPosition
+          .split(" ")
+          .map((part) => (part.endsWith("%") ? Number.parseFloat(part) / 100 : 0.5));
+        const offsetX = (box.width - naturalW * scale) * (px ?? 0.5);
+        const offsetY = (box.height - naturalH * scale) * (py ?? 0.5);
+        const cell = 22;
+        const plans = steps.map(({ a, b, extra }, index) => {
+          const base = {
+            width: naturalW,
+            height: naturalH,
+            cell,
+            origin: [naturalW * MORPH_ORIGIN[0], naturalH * MORPH_ORIGIN[1]] as const,
+            seed: 31 + index,
+          };
+          if (!extra) return planOverwrite(base);
+          const grid = planOverwrite(base);
+          const fromCells = sampleCells(pictures[a], grid);
+          const toCells = sampleCells(pictures[b], grid);
+          return fromCells && toCells
+            ? planOverwrite({ ...base, samples: { from: fromCells, to: toCells } })
+            : grid;
+        });
+        const total =
+          steps.reduce((sum, step) => sum + step.ms, 0) +
+          (steps.at(-1)!.extra ? FORM_CHANGE_MS.extra * 0.6 : 0);
+        let start = 0;
+        const tick = (now: number) => {
+          frame = 0;
+          if (cancelled) return;
+          if (!start) start = now + delay;
+          let t = Math.max(0, now - start);
+          context.setTransform(
+            ratio * scale,
+            0,
+            0,
+            ratio * scale,
+            ratio * offsetX,
+            ratio * offsetY,
+          );
+          context.clearRect(
+            -offsetX / scale,
+            -offsetY / scale,
+            box.width / scale,
+            box.height / scale,
+          );
+          let index = 0;
+          while (index < steps.length - 1 && t >= steps[index].ms) {
+            t -= steps[index].ms;
+            index += 1;
+          }
+          const step = steps[index];
+          const u = Math.min(1, t / step.ms);
+          const v = step.extra
+            ? Math.min(1, Math.max(0, (t - step.ms * 0.6) / FORM_CHANGE_MS.extra))
+            : 1;
+          drawOverwrite(
+            context,
+            plans[index],
+            pictures[step.a],
+            pictures[step.b],
+            u,
+            v,
+            FORM_TONES[step.b],
+          );
+          if (now - start >= total) {
+            canvas.style.opacity = "0";
+            return;
+          }
+          frame = requestAnimationFrame(tick);
+        };
+        frame = requestAnimationFrame(tick);
+      })
+      .catch(() => {
+        canvas.style.opacity = "0";
+      });
+    return () => {
+      cancelled = true;
+      if (frame) cancelAnimationFrame(frame);
+    };
+  }, [from, to, delay]);
+  return <canvas ref={ref} className="rxs-form-morph" aria-hidden="true" />;
+}
 
 const releaseControlFocus = (control: HTMLElement) => {
   window.requestAnimationFrame(() => {
@@ -818,6 +1024,45 @@ export function RexonanceSaga() {
   useWorldMode();
   const [menuOpen, setMenuOpen] = useState(false);
   const [stage, setStage] = useState<RexonanceStage>("standard");
+  // Owner (2026-10-11): the call must not stutter as it clears. Arriving
+  // under a route cover (a client transition, never a direct load, so the
+  // server's markup always matches), the page first renders its hero and
+  // 01 only; the rest (P14 on) renders in an idle slot once the reveal has
+  // run, so the hand-over lays out a short page. A hash arrival renders all.
+  const [lower, setLower] = useState(
+    () =>
+      typeof document === "undefined" ||
+      document.documentElement.dataset.loading !== "true" ||
+      // A hash arrival (not #top) needs its section at once.
+      (window.location.hash.length > 1 && window.location.hash !== "#top"),
+  );
+  useEffect(() => {
+    if (lower) return;
+    const root = document.documentElement;
+    let idle = 0;
+    let timer = 0;
+    const show = () => setLower(true);
+    const later = () => {
+      timer = window.setTimeout(() => {
+        timer = 0;
+        if (window.requestIdleCallback) idle = window.requestIdleCallback(show, { timeout: 700 });
+        else show();
+      }, REXONANCE_ENTRY_TIMINGS.reveal + 80);
+    };
+    const observer = new MutationObserver(() => {
+      if (root.hasAttribute("data-loading")) return;
+      observer.disconnect();
+      later();
+    });
+    if (root.hasAttribute("data-loading"))
+      observer.observe(root, { attributes: true, attributeFilter: ["data-loading"] });
+    else later();
+    return () => {
+      observer.disconnect();
+      if (timer) window.clearTimeout(timer);
+      if (idle) window.cancelIdleCallback?.(idle);
+    };
+  }, [lower]);
 
   const [nativeIOSSelection, setNativeIOSSelection] = useState(false);
   const [motionReady, setMotionReady] = useState(false);
@@ -825,6 +1070,13 @@ export function RexonanceSaga() {
   // How the panel's new form arrives: under a card, or quietly (rx2 rest guard).
   const [stageEntrance, setStageEntrance] = useState<RexonanceStageEntrance | null>(null);
   const latestStageRef = useRef<RexonanceStage>("standard");
+  // The form shown before the latest change (what the morph starts from).
+  const morphFrom = useRef<RexonanceStage>("standard");
+  const shownStage = useRef<RexonanceStage>("standard");
+  if (shownStage.current !== stage) {
+    morphFrom.current = shownStage.current;
+    shownStage.current = stage;
+  }
   const stageCallId = useRef(0);
   const stageCallTimer = useRef(0);
   const stageCallStartedAt = useRef(0);
@@ -995,7 +1247,7 @@ export function RexonanceSaga() {
       rail.removeEventListener("railselect", onSelect);
       dispose?.();
     };
-  }, [selectStage]);
+  }, [selectStage, lower]);
 
   useEffect(() => {
     const page = pageRef.current;
@@ -1037,20 +1289,28 @@ export function RexonanceSaga() {
           observer.unobserve(entry.target);
         });
       },
-      { rootMargin: "0px 0px -10%", threshold: 0.12 },
+      { rootMargin: "0px 0px -10%", threshold: 0 },
     );
     reveals.forEach((element) => observer.observe(element));
     return () => {
       observer.disconnect();
       cleanup();
     };
-  }, []);
+  }, [lower]);
 
   // RESONANCE (rx11): the figures' one-time count and lock, and the stage's
   // fine-pointer parallax. Mounted once; it follows reduced motion, economy
   // rendering and page visibility itself, so a form, menu or baseline change
   // never restarts it.
-  useEffect(() => mountRexonanceResonance(pageRef.current), []);
+  // (Once the whole page is rendered: it reads every section.)
+  useEffect(() => (lower ? mountRexonanceResonance(pageRef.current) : undefined), [lower]);
+  useEffect(
+    () =>
+      lower
+        ? mountLocalNavCurrent(pageRef.current?.querySelector(".rxs-local-nav nav"))
+        : undefined,
+    [lower],
+  );
 
   useEffect(() => {
     // Where view timelines run, the motion sheet's recede already follows the
@@ -1147,7 +1407,9 @@ export function RexonanceSaga() {
             aria-label="ディセプションワールドへ戻る"
           >
             <span>REXONANCE</span>
-            <b><DisplayName value="レクソナンスサーガ" /></b>
+            <b>
+              <DisplayName value="レクソナンスサーガ" />
+            </b>
           </GuardedLink>
           <nav aria-label="レクソナンスサーガ ページ内ナビゲーション">
             <a href="#performance">性能</a>
@@ -1285,287 +1547,304 @@ export function RexonanceSaga() {
 
       <RexonancePerformance />
 
-      <section id="p14" className="rxs-p14 rxs-section" aria-labelledby="rxs-p14-title">
-        <header className="rxs-section-heading rxs-reveal">
-          <p>PROCESSING CORE / P14</p>
-          <h2 id="rxs-p14-title">
-            同じエーテルで、
-            <br />
-            P1の9倍。
-          </h2>
-          <span>
-            P14は、出力変換・位相制御・能力間調停を
-            <span className="rxp-nowrap">一体化した</span>
-            <span className="rxp-nowrap">第14世代</span>
-            演算基盤です。同じエーテル量からP1の9倍に相当する性能を引き出し、熱・位相ノイズ・能力間干渉による損失を合計7%まで抑えます。
-          </span>
-        </header>
+      {lower ? (
+        <>
+          <section id="p14" className="rxs-p14 rxs-section" aria-labelledby="rxs-p14-title">
+            <header className="rxs-section-heading rxs-reveal">
+              <p>PROCESSING CORE / P14</p>
+              <h2 id="rxs-p14-title">
+                同じエーテルで、
+                <br />
+                P1の9倍。
+              </h2>
+              <span>
+                P14は、出力変換・位相制御・能力間調停を
+                <span className="rxp-nowrap">一体化した</span>
+                <span className="rxp-nowrap">第14世代</span>
+                演算基盤です。同じエーテル量からP1の9倍に相当する性能を引き出し、熱・位相ノイズ・能力間干渉による損失を合計7%まで抑えます。
+              </span>
+            </header>
 
-        <div className="rxs-p14-overview rxs-reveal">
-          <figure>
+            <div className="rxs-p14-overview rxs-reveal">
+              <figure>
+                <img
+                  src="/rexonance-p14-core.jpg"
+                  {...rexonanceImage("/rexonance-p14-core.jpg", true)}
+                  ref={p14ImageRef}
+                  alt="青い回路に接続されたP14演算コア"
+                  width="1000"
+                  height="1000"
+                  loading="lazy"
+                  decoding="async"
+                />
+                {/* RESONANCE (rx11): the light the chip catches as it turns. */}
+                <i className="rsn-glint" aria-hidden="true" />
+              </figure>
+              <div className="rxs-p14-copy">
+                <small>P14 / FOURTEENTH GENERATION</small>
+                <h3>最大出力を支える、安定性。</h3>
+                <p>
+                  入力されたエーテルを攻撃・機動・防御へ変換する際の損失を局所ごとに抑え、必要な部位へ出力を再配分します。急激な負荷変動にも99.4%で追従し、連続最大出力でも96%の安定率を維持します。マックスでは、このP14を完全加速して全神飾の連続実装を支えます。
+                </p>
+                <dl aria-label="P14の主要指標">
+                  <div>
+                    <dt>実効変換率</dt>
+                    <dd data-rsn-count="">
+                      90%
+                      <b className="rsn-count" aria-hidden="true">
+                        90%
+                      </b>
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>応答時間</dt>
+                    <dd data-rsn-count="">
+                      約0.06ms
+                      <b className="rsn-count" aria-hidden="true">
+                        約0.06ms
+                      </b>
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>最大出力安定率</dt>
+                    <dd data-rsn-count="">
+                      96%
+                      <b className="rsn-count" aria-hidden="true">
+                        96%
+                      </b>
+                    </dd>
+                  </div>
+                </dl>
+              </div>
+            </div>
+
+            <P14Comparator nativeIOSSelection={nativeIOSSelection} />
+          </section>
+
+          <RexonanceSuitUp stage={stage} />
+
+          <section id="stages" className="rxs-stages rxs-section">
+            <header className="rxs-section-heading rxs-reveal">
+              <p>THREE OPERATING STAGES</p>
+              <h2>
+                標準の上に、
+                <br />
+                あと二段。
+              </h2>
+            </header>
+
+            <div className="rxs-stage-switcher rxs-reveal">
+              <div
+                ref={stageTabsRef}
+                className="rxs-stage-tabs liquid-swipe-tabs"
+                role="tablist"
+                aria-label="レクソナンスの運用段階"
+                aria-describedby="rxs-stage-hint"
+                data-liquid-glass="true"
+                data-stage={stage}
+              >
+                <LiquidLens />
+                {(Object.keys(STAGES) as RexonanceStage[]).map((key) => (
+                  <button
+                    key={key}
+                    id={`rxs-stage-tab-${key}`}
+                    type="button"
+                    role="tab"
+                    aria-selected={stage === key}
+                    aria-controls="rxs-stage-panel"
+                    tabIndex={stage === key ? 0 : -1}
+                    className={stage === key ? "is-active" : ""}
+                    style={{ ["--liquid-accent" as string]: STAGES[key].accent }}
+                    onClick={() => selectStage(key)}
+                    onPointerUp={(event) => releaseControlFocus(event.currentTarget)}
+                  >
+                    <span>{STAGES[key].label}</span>
+                    <small>{STAGES[key].code}</small>
+                  </button>
+                ))}
+              </div>
+              <p id="rxs-stage-hint" className="rxs-stage-hint">
+                タップ・長押し・左右スライド・矢印キーで切り替え
+              </p>
+
+              <div
+                id="rxs-stage-panel"
+                className="rxs-stage-panel"
+                role="tabpanel"
+                aria-labelledby={`rxs-stage-tab-${stage}`}
+                aria-live="polite"
+                data-entrance={stageEntrance?.kind}
+                style={{
+                  ["--rxs-stage-accent" as string]: activeStage.accent,
+                  ["--rxp-entrance-delay" as string]: `${stageEntrance?.delayMs ?? 0}ms`,
+                }}
+              >
+                <figure key={stage}>
+                  <span aria-hidden="true" />
+                  <i className="rxs-stage-scan" aria-hidden="true" />
+                  <img
+                    src={activeStage.image}
+                    {...rexonanceImage(activeStage.image)}
+                    alt={activeStage.alt}
+                    width={1086}
+                    height={1448}
+                    loading={stage === "standard" ? "eager" : "lazy"}
+                    decoding="async"
+                  />
+                  {/* RESONANCE (rx11): the transformation, replayed with each
+                  form (the figure re-keys): three rings from the core and
+                  one refraction band, in the form's light. */}
+                  <i className="rsn-form" aria-hidden="true">
+                    <i />
+                    <i />
+                    <i />
+                    <i />
+                  </i>
+                  {/* The form change (owner, 2026-10-11): MAX overwrites the
+                  finished Rexonance with cells; ULTRA runs to MAX briefly,
+                  overwrites it again and generates its additional parts. */}
+                  {morphFrom.current !== stage ? (
+                    <FormMorph
+                      from={morphFrom.current}
+                      to={stage}
+                      delay={stageEntrance?.delayMs ?? 0}
+                    />
+                  ) : null}
+                  {/* ZENITH (rx15): nanites re-forming over the new art. */}
+                  <i className="rzn-mesh" aria-hidden="true">
+                    {FORM_MESH}
+                  </i>
+                </figure>
+                <div key={`${stage}-copy`}>
+                  <small>{activeStage.code}</small>
+                  <h3>{renderStageTitle(activeStage.title)}</h3>
+                  <p>{renderStageLede(activeStage.lede)}</p>
+                  <ul>
+                    {activeStage.points.map((point) => (
+                      <li key={point}>{point}</li>
+                    ))}
+                  </ul>
+                  {/* ZENITH (rx15): the form's code, outlined and huge. */}
+                  <i className="rzn-form-code" aria-hidden="true">
+                    {activeStage.code}
+                  </i>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section id="system" className="rxs-system rxs-section">
+            <header className="rxs-section-heading rxs-reveal">
+              <p>TRINITY RESONANCE</p>
+              <h2>
+                三者三様のまま、
+                <br />
+                一糸乱れず。
+              </h2>
+            </header>
+
+            {/* ZENITH (rx15): the three, each its own ring, fall into phase. */}
+            <div className="rzn-trinity" aria-hidden="true">
+              {CORE_SYSTEMS.map((system) => (
+                <span key={system.number} className="rzn-tri">
+                  <i className="rzn-tri-ring">
+                    <b>{system.number}</b>
+                  </i>
+                </span>
+              ))}
+              <i className="rzn-tri-wave" />
+              <i className="rzn-tri-core" />
+              <small className="rzn-tri-lock">PHASE LOCK</small>
+            </div>
+
+            <div className="rxs-system-grid">
+              {CORE_SYSTEMS.map((system) => (
+                <article key={system.number} className="rxs-reveal">
+                  <header>
+                    <span>{system.number}</span>
+                    <small>{system.code}</small>
+                  </header>
+                  <h3>{system.title}</h3>
+                  <p>{system.body}</p>
+                </article>
+              ))}
+            </div>
+
+            <div className="rxs-specs rxs-reveal">
+              <div>
+                <small>KHAOS DeuX</small>
+                <strong data-rsn-count="">
+                  50,000<span>YOPS</span>
+                  <b className="rsn-count" aria-hidden="true">
+                    50,000<span>YOPS</span>
+                  </b>
+                </strong>
+                <p>∞ CORE</p>
+              </div>
+              {/* A drawn hairline, not a multiplication sign: the two units stand
+              side by side and are never multiplied (rx2/COPY2.md C8). */}
+              <i aria-hidden="true" />
+              <div>
+                <small>KOSMOS DeuX</small>
+                <strong data-rsn-count="">
+                  9,000<span>TOPS</span>
+                  <b className="rsn-count" aria-hidden="true">
+                    9,000<span>TOPS</span>
+                  </b>
+                </strong>
+                <p>300 CORE</p>
+              </div>
+            </div>
+          </section>
+
+          <footer className="rxs-footer">
+            {/* ZENITH (rx15): the suit, finished, stands behind the last line. */}
             <img
-              src="/rexonance-p14-core.jpg"
-              {...rexonanceImage("/rexonance-p14-core.jpg", true)}
-              alt="青い回路に接続されたP14演算コア"
-              width="1000"
-              height="1000"
+              className="rzn-end-figure"
+              src={REXONANCE_SUIT_FIGURE}
+              alt=""
+              aria-hidden="true"
+              width={REXONANCE_SUIT_SIZE.width}
+              height={REXONANCE_SUIT_SIZE.height}
               loading="lazy"
               decoding="async"
             />
-            {/* RESONANCE (rx11): the light the chip catches as it turns. */}
-            <i className="rsn-glint" aria-hidden="true" />
-          </figure>
-          <div className="rxs-p14-copy">
-            <small>P14 / FOURTEENTH GENERATION</small>
-            <h3>最大出力を支える、安定性。</h3>
-            <p>
-              入力されたエーテルを攻撃・機動・防御へ変換する際の損失を局所ごとに抑え、必要な部位へ出力を再配分します。急激な負荷変動にも99.4%で追従し、連続最大出力でも96%の安定率を維持します。マックスでは、このP14を完全加速して全神飾の連続実装を支えます。
-            </p>
-            <dl aria-label="P14の主要指標">
-              <div>
-                <dt>実効変換率</dt>
-                <dd data-rsn-count="">
-                  90%
-                  <b className="rsn-count" aria-hidden="true">
-                    90%
-                  </b>
-                </dd>
-              </div>
-              <div>
-                <dt>応答時間</dt>
-                <dd data-rsn-count="">
-                  約0.06ms
-                  <b className="rsn-count" aria-hidden="true">
-                    約0.06ms
-                  </b>
-                </dd>
-              </div>
-              <div>
-                <dt>最大出力安定率</dt>
-                <dd data-rsn-count="">
-                  96%
-                  <b className="rsn-count" aria-hidden="true">
-                    96%
-                  </b>
-                </dd>
-              </div>
-            </dl>
-          </div>
-        </div>
-
-        <P14Comparator nativeIOSSelection={nativeIOSSelection} />
-      </section>
-
-      <RexonanceSuitUp />
-
-      <section id="stages" className="rxs-stages rxs-section">
-        <header className="rxs-section-heading rxs-reveal">
-          <p>THREE OPERATING STAGES</p>
-          <h2>
-            標準の上に、
-            <br />
-            あと二段。
-          </h2>
-        </header>
-
-        <div className="rxs-stage-switcher rxs-reveal">
-          <div
-            ref={stageTabsRef}
-            className="rxs-stage-tabs liquid-swipe-tabs"
-            role="tablist"
-            aria-label="レクソナンスの運用段階"
-            aria-describedby="rxs-stage-hint"
-            data-liquid-glass="true"
-            data-stage={stage}
-          >
-            <LiquidLens />
-            {(Object.keys(STAGES) as RexonanceStage[]).map((key) => (
-              <button
-                key={key}
-                id={`rxs-stage-tab-${key}`}
-                type="button"
-                role="tab"
-                aria-selected={stage === key}
-                aria-controls="rxs-stage-panel"
-                tabIndex={stage === key ? 0 : -1}
-                className={stage === key ? "is-active" : ""}
-                style={{ ["--liquid-accent" as string]: STAGES[key].accent }}
-                onClick={() => selectStage(key)}
-                onPointerUp={(event) => releaseControlFocus(event.currentTarget)}
-              >
-                <span>{STAGES[key].label}</span>
-                <small>{STAGES[key].code}</small>
-              </button>
-            ))}
-          </div>
-          <p id="rxs-stage-hint" className="rxs-stage-hint">
-            タップ・長押し・左右スライド・矢印キーで切り替え
-          </p>
-
-          <div
-            id="rxs-stage-panel"
-            className="rxs-stage-panel"
-            role="tabpanel"
-            aria-labelledby={`rxs-stage-tab-${stage}`}
-            aria-live="polite"
-            data-entrance={stageEntrance?.kind}
-            style={{
-              ["--rxs-stage-accent" as string]: activeStage.accent,
-              ["--rxp-entrance-delay" as string]: `${stageEntrance?.delayMs ?? 0}ms`,
-            }}
-          >
-            <figure key={stage}>
-              <span aria-hidden="true" />
-              <i className="rxs-stage-scan" aria-hidden="true" />
-              <img
-                src={activeStage.image}
-                {...rexonanceImage(activeStage.image)}
-                alt={activeStage.alt}
-                width={1086}
-                height={1448}
-                loading={stage === "standard" ? "eager" : "lazy"}
-                decoding="async"
-              />
-              {/* RESONANCE (rx11): the transformation, replayed with each
-                  form (the figure re-keys): three rings from the core and
-                  one refraction band, in the form's light. */}
-              <i className="rsn-form" aria-hidden="true">
-                <i />
-                <i />
-                <i />
-                <i />
-              </i>
-              {/* ZENITH (rx15): nanites re-forming over the new art. */}
-              <i className="rzn-mesh" aria-hidden="true">
-                {FORM_MESH}
-              </i>
-            </figure>
-            <div key={`${stage}-copy`}>
-              <small>{activeStage.code}</small>
-              <h3>{renderStageTitle(activeStage.title)}</h3>
-              <p>{renderStageLede(activeStage.lede)}</p>
-              <ul>
-                {activeStage.points.map((point) => (
-                  <li key={point}>{point}</li>
-                ))}
-              </ul>
-              {/* ZENITH (rx15): the form's code, outlined and huge. */}
-              <i className="rzn-form-code" aria-hidden="true">
-                {activeStage.code}
-              </i>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section id="system" className="rxs-system rxs-section">
-        <header className="rxs-section-heading rxs-reveal">
-          <p>TRINITY RESONANCE</p>
-          <h2>
-            三者三様のまま、
-            <br />
-            一糸乱れず。
-          </h2>
-        </header>
-
-        {/* ZENITH (rx15): the three, each its own ring, fall into phase. */}
-        <div className="rzn-trinity" aria-hidden="true">
-          {CORE_SYSTEMS.map((system) => (
-            <span key={system.number} className="rzn-tri">
-              <i className="rzn-tri-ring">
-                <b>{system.number}</b>
-              </i>
+            {/* RESONANCE (rx11): the last wave, gold — the decision is his. */}
+            <span className="rsn-coda" aria-hidden="true">
+              <i />
+              <i />
+              <i />
             </span>
-          ))}
-          <i className="rzn-tri-wave" />
-          <i className="rzn-tri-core" />
-          <small className="rzn-tri-lock">PHASE LOCK</small>
-        </div>
-
-        <div className="rxs-system-grid">
-          {CORE_SYSTEMS.map((system) => (
-            <article key={system.number} className="rxs-reveal">
-              <header>
-                <span>{system.number}</span>
-                <small>{system.code}</small>
-              </header>
-              <h3>{system.title}</h3>
-              <p>{system.body}</p>
-            </article>
-          ))}
-        </div>
-
-        <div className="rxs-specs rxs-reveal">
-          <div>
-            <small>KHAOS DeuX</small>
-            <strong data-rsn-count="">
-              50,000<span>YOPS</span>
-              <b className="rsn-count" aria-hidden="true">
-                50,000<span>YOPS</span>
-              </b>
-            </strong>
-            <p>∞ CORE</p>
-          </div>
-          {/* A drawn hairline, not a multiplication sign: the two units stand
-              side by side and are never multiplied (rx2/COPY2.md C8). */}
-          <i aria-hidden="true" />
-          <div>
-            <small>KOSMOS DeuX</small>
-            <strong data-rsn-count="">
-              9,000<span>TOPS</span>
-              <b className="rsn-count" aria-hidden="true">
-                9,000<span>TOPS</span>
-              </b>
-            </strong>
-            <p>300 CORE</p>
-          </div>
-        </div>
-      </section>
-
-      <footer className="rxs-footer">
-        {/* ZENITH (rx15): the suit, finished, stands behind the last line. */}
-        <img
-          className="rzn-end-figure"
-          src={REXONANCE_SUIT_FIGURE}
-          alt=""
-          aria-hidden="true"
-          width={REXONANCE_SUIT_SIZE.width}
-          height={REXONANCE_SUIT_SIZE.height}
-          loading="lazy"
-          decoding="async"
-        />
-        {/* RESONANCE (rx11): the last wave, gold — the decision is his. */}
-        <span className="rsn-coda" aria-hidden="true">
-          <i />
-          <i />
-          <i />
-        </span>
-        <div>
-          <p>REXONANCE SAGA / FINAL ARRIVAL</p>
-          <h2>
-            力は無限。
-            <br />
-            決めるのは悠真。
-          </h2>
-        </div>
-        <GuardedLink to="/riders/saga" assets={[]}>
-          <span>人物・能力の詳細を見る</span>
-          <i aria-hidden="true">↗</i>
-        </GuardedLink>
-        <GuardedLink to="/form-archive" assets={[]}>
-          <span>全形態を比較する</span>
-          <i aria-hidden="true">↗</i>
-        </GuardedLink>
-        <GuardedLink
-          to="/world"
-          hash="top"
-          assets={WORLD_ENTER_ASSETS}
-          className="rxs-footer-return"
-        >
-          <span>メインサイトへ戻る</span>
-          <i aria-hidden="true">←</i>
-        </GuardedLink>
-      </footer>
+            <div>
+              <p>REXONANCE SAGA / FINAL ARRIVAL</p>
+              <h2>
+                理不尽すら
+                <wbr />
+                殺して見せろ。
+              </h2>
+            </div>
+            <GuardedLink to="/riders/saga" assets={[]}>
+              <span>人物・能力の詳細を見る</span>
+              <i aria-hidden="true">↗</i>
+            </GuardedLink>
+            <GuardedLink to="/form-archive" assets={[]}>
+              <span>全形態を比較する</span>
+              <i aria-hidden="true">↗</i>
+            </GuardedLink>
+            <GuardedLink
+              to="/world"
+              hash="top"
+              assets={WORLD_ENTER_ASSETS}
+              className="rxs-footer-return"
+            >
+              <span>メインサイトへ戻る</span>
+              <i aria-hidden="true">←</i>
+            </GuardedLink>
+          </footer>
+        </>
+      ) : (
+        <div className="rxs-lower-pending" aria-hidden="true" />
+      )}
     </main>
   );
 }

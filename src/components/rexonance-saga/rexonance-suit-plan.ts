@@ -1,5 +1,6 @@
 import {
   REXONANCE_SUIT_ACCENTS,
+  REXONANCE_SUIT_DRIVER,
   REXONANCE_SUIT_FIT,
   REXONANCE_SUIT_GOLD,
   REXONANCE_SUIT_GOLD_AT,
@@ -14,6 +15,7 @@ import {
   type RexonanceSuitPiece,
 } from "@/lib/rexonance-suit";
 import { REXONANCE_SUIT_GOLD_CELL, REXONANCE_SUIT_GOLD_CELLS } from "@/lib/rexonance-suit-gold";
+import { splitLights } from "@/lib/rexonance-unlit.js";
 import { rexonanceSuitSource } from "@/lib/rexonance-suit-warmup";
 
 /* rx17: the nanite engine's plan and working atlas (rexonance-suit-nanites
@@ -72,7 +74,10 @@ const has = (bits: Uint8Array, bit: number) => (bits[bit >> 3] & (1 << (bit & 7)
 // The gold cells, flat: the cell's place in the figure, in the atlas, its
 // size (clipped to its plate's box), when it locks, its place along its
 // plate's flow (0..1) and where its mote flies in from (figure px).
-export const GOLD_TOTAL = Object.values(REXONANCE_SUIT_GOLD_CELLS).reduce((sum, base64) => {
+export const GOLD_TOTAL = Object.entries(REXONANCE_SUIT_GOLD_CELLS).reduce((sum, [id, base64]) => {
+  // The driver's trim is already finished. Reserve only cells that goldOf
+  // initializes, otherwise its skipped mask leaves phantom cells at the end.
+  if (REXONANCE_SUIT_DRIVER.includes(id)) return sum;
   let count = 0;
   for (const byte of bitsOf(base64))
     for (let bit = 0; bit < 8; bit += 1) count += (byte >> bit) & 1;
@@ -253,7 +258,8 @@ function step() {
   const fit = REXONANCE_SUIT_FIT[piece.id];
   const tiles = tilesOf(piece, index, fit);
   const first = goldAt;
-  goldAt = goldOf(piece, index, goldAt, cells());
+  // The driver is on the body finished: no gold forms there (owner).
+  if (!REXONANCE_SUIT_DRIVER.includes(piece.id)) goldAt = goldOf(piece, index, goldAt, cells());
   const [from, to] = REXONANCE_SUIT_GOLD_AT[piece.id] ?? [fit, fit];
   const spawn = Math.min(...tiles.map((tile) => tile.land)) - FLIGHT;
   building.push({
@@ -313,6 +319,18 @@ export const work = { canvas: null as HTMLCanvasElement | null, dirty: true, dra
 export const isRexonanceSuitPlanReady = () =>
   Boolean(PLATES && work.canvas && (work.drawing > 0 || !work.dirty));
 
+// The plates' lights held back (owner, 2026-10-11): the atlas's art half with
+// its ice-cyan and pink light in monochrome, and that light alone, to light
+// the suit once it is whole. Made once, in idle time, from the decoded atlas.
+let LIGHTS: { unlit: HTMLCanvasElement; lights: HTMLCanvasElement } | null = null;
+export const plateLights = () => LIGHTS;
+export function prepareLights(art: CanvasImageSource) {
+  if (!LIGHTS) {
+    const { width, height } = REXONANCE_SUIT_GOLD_ATLAS;
+    LIGHTS = splitLights(art, 0, 0, width, height);
+  }
+  return LIGHTS;
+}
 export function forming(art: CanvasImageSource, gold: CanvasImageSource) {
   const { width, height } = REXONANCE_SUIT_GOLD_ATLAS;
   if (!work.canvas) {
@@ -323,7 +341,7 @@ export function forming(art: CanvasImageSource, gold: CanvasImageSource) {
   if (!context) return null;
   if (work.dirty) {
     context.clearRect(0, 0, width, height);
-    context.drawImage(art, 0, 0, width, height, 0, 0, width, height);
+    context.drawImage(LIGHTS?.unlit ?? art, 0, 0, width, height, 0, 0, width, height);
     context.drawImage(gold, 0, 0);
     work.dirty = false;
   }
@@ -366,6 +384,10 @@ export function prepareRexonanceSuit(priority: "low" | "high" = "low") {
     const finish = () => {
       const art = rexonanceSuitSource(REXONANCE_SUIT_ATLAS.src);
       const gold = rexonanceSuitSource(REXONANCE_SUIT_GOLD_ATLAS.src);
+      if (art && !work.drawing && !LIGHTS) {
+        prepareLights(art);
+        work.dirty = true;
+      }
       settle(Boolean(art && gold && (work.drawing || forming(art, gold))));
     };
     const schedule = () => {

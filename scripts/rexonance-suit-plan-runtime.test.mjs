@@ -21,19 +21,30 @@ function planRuntime({ idle = true, decoded = true, canCancelIdle = true } = {})
   const queued = [];
   const cancelled = [];
   const drawn = [];
-  const options = { failDraw: false, contextAvailable: true };
+  const lightSplits = [];
+  const options = { failDraw: false, contextAvailable: true, lightsAvailable: true };
   const art = { kind: "atlas", close: () => closeCount++ };
   const raw = { kind: "raw-gold", close: () => closeCount++ };
-  const sources = new Map(decoded ? [[suit.REXONANCE_SUIT_ATLAS.src, art],
-    [suit.REXONANCE_SUIT_GOLD_ATLAS.src, raw]] : []);
+  const unlit = { kind: "unlit-atlas" };
+  const lights = { kind: "plate-lights" };
+  const sources = new Map(
+    decoded
+      ? [
+          [suit.REXONANCE_SUIT_ATLAS.src, art],
+          [suit.REXONANCE_SUIT_GOLD_ATLAS.src, raw],
+        ]
+      : [],
+  );
   const context = {
-    clearRect() { drawn.push("clear"); },
+    clearRect() {
+      drawn.push("clear");
+    },
     drawImage(image) {
       if (options.failDraw) throw new Error("invalidated bitmap");
       drawn.push(image.kind);
     },
   };
-  const canvas = { getContext: () => options.contextAvailable ? context : null };
+  const canvas = { getContext: () => (options.contextAvailable ? context : null) };
   const exports = {};
   const schedule = (kind, callback) => {
     const task = Object.assign(callback, { kind, id: ++taskId });
@@ -44,9 +55,13 @@ function planRuntime({ idle = true, decoded = true, canCancelIdle = true } = {})
     const index = queued.findIndex((task) => task.id === id);
     if (index >= 0) cancelled.push(...queued.splice(index, 1));
   };
-  const code = ts.transpileModule(source + `
+  const code = ts.transpileModule(
+    source +
+      `
     export const __buildState = () => ({ count: building.length, complete: Boolean(PLATES) });
-  `, { compilerOptions: { module: ts.ModuleKind.CommonJS } }).outputText;
+  `,
+    { compilerOptions: { module: ts.ModuleKind.CommonJS } },
+  ).outputText;
   const runtime = {
     exports,
     atob,
@@ -60,6 +75,13 @@ function planRuntime({ idle = true, decoded = true, canCancelIdle = true } = {})
       if (name === "@/lib/rexonance-calls") return calls;
       if (name === "@/lib/rexonance-suit") return suit;
       if (name === "@/lib/rexonance-suit-gold") return gold;
+      if (name === "@/lib/rexonance-unlit.js")
+        return {
+          splitLights: (...args) => {
+            lightSplits.push(args);
+            return options.lightsAvailable ? { unlit, lights } : null;
+          },
+        };
       if (name === "@/lib/rexonance-suit-warmup")
         return { rexonanceSuitSource: (url) => sources.get(url) ?? null };
       throw new Error(`unexpected module ${name}`);
@@ -76,10 +98,13 @@ function planRuntime({ idle = true, decoded = true, canCancelIdle = true } = {})
     queued,
     cancelled,
     drawn,
+    lightSplits,
     options,
     sources,
     art,
     raw,
+    unlit,
+    lights,
     closed: () => closeCount,
     flush() {
       for (let i = 0; queued.length; i++) {
@@ -97,10 +122,13 @@ const flushPromises = async () => {
 function snapshot(plan) {
   return JSON.stringify({
     plates: plan.plates(),
-    cells: Object.fromEntries(Object.entries(plan.cells()).map(([key, values]) =>
-      [key, Array.from(values)])),
+    cells: Object.fromEntries(
+      Object.entries(plan.cells()).map(([key, values]) => [key, Array.from(values)]),
+    ),
     surges: plan.planSurges().map((surge) => ({
-      ...surge, cells: Array.from(surge.cells), reach: Array.from(surge.reach),
+      ...surge,
+      cells: Array.from(surge.cells),
+      reach: Array.from(surge.reach),
     })),
     end: plan.planEnd(),
   });
@@ -125,8 +153,17 @@ function maskGrid(base64, piece, unit) {
   return occupied;
 }
 
-const expectedGoldCount = () => suit.REXONANCE_SUIT_PIECES.reduce((count, piece) =>
-  count + maskGrid(gold.REXONANCE_SUIT_GOLD_CELLS[piece.id], piece, gold.REXONANCE_SUIT_GOLD_CELL).length, 0);
+const expectedGoldCount = ({ includeDriver = false } = {}) =>
+  suit.REXONANCE_SUIT_PIECES.reduce((count, piece) => {
+    const grid = maskGrid(
+      gold.REXONANCE_SUIT_GOLD_CELLS[piece.id],
+      piece,
+      gold.REXONANCE_SUIT_GOLD_CELL,
+    );
+    return (
+      count + (includeDriver || !calls.REXONANCE_SUIT_DRIVER.includes(piece.id) ? grid.length : 0)
+    );
+  }, 0);
 
 test("overlapping warm/intention preparations share one build and one queued slice", async () => {
   const ui = planRuntime();
@@ -139,7 +176,7 @@ test("overlapping warm/intention preparations share one build and one queued sli
   ui.flush();
   assert.equal(await first, true);
   assert.equal(ui.plan.__buildState().count, suit.REXONANCE_SUIT_PIECES.length);
-  assert.deepEqual(ui.drawn, ["clear", "atlas", "raw-gold"]);
+  assert.deepEqual(ui.drawn, ["clear", "unlit-atlas", "raw-gold"]);
 });
 
 test("a generous idle deadline still respects the plan's own short slice budget", async () => {
@@ -148,8 +185,10 @@ test("a generous idle deadline still respects the plan's own short slice budget"
   const before = ui.plan.__buildState().count;
   ui.queued.shift()();
   const after = ui.plan.__buildState().count;
-  assert.ok(after > before && after < suit.REXONANCE_SUIT_PIECES.length,
-    "50 ms from requestIdleCallback must not force the remaining 60-plate build");
+  assert.ok(
+    after > before && after < suit.REXONANCE_SUIT_PIECES.length,
+    "50 ms from requestIdleCallback must not force the remaining 60-plate build",
+  );
   assert.equal(ui.queued.length, 1);
   ui.flush();
   assert.equal(await preparing, true);
@@ -162,7 +201,11 @@ test("high intent promotes a low idle job to one frame without rebuilding or for
   const idle = ui.queued[0];
   assert.equal(idle.kind, "idle");
   assert.equal(ui.plan.prepareRexonanceSuit("high"), preparing);
-  assert.equal(ui.plan.__buildState().count, before, "promotion must yield rather than rebuild now");
+  assert.equal(
+    ui.plan.__buildState().count,
+    before,
+    "promotion must yield rather than rebuild now",
+  );
   assert.equal(ui.cancelled[0], idle);
   assert.equal(ui.queued.length, 1);
   assert.equal(ui.queued[0].kind, "frame");
@@ -224,7 +267,7 @@ test("uncancellable stale idle callbacks cannot clear or duplicate a promoted fr
   assert.equal(await preparing, true);
   idle();
   assert.equal(ui.queued.length, 0);
-  assert.deepEqual(ui.drawn, ["clear", "atlas", "raw-gold"]);
+  assert.deepEqual(ui.drawn, ["clear", "unlit-atlas", "raw-gold"]);
 });
 
 test("a promoted job settles after a draw failure and can retry without reviving old callbacks", async () => {
@@ -267,7 +310,8 @@ test("the real plan covers every generated tile and gold mask cell without phant
   for (const id of Object.keys(gold.REXONANCE_SUIT_GOLD_CELLS))
     assert.ok(ids.has(id), `${id}: every generated gold mask belongs to a real plate`);
   assert.equal(plates.length, suit.REXONANCE_SUIT_PIECES.length);
-  let tiles = 0, goldAt = 0;
+  let tiles = 0,
+    goldAt = 0;
   for (let index = 0; index < plates.length; index++) {
     const plate = plates[index];
     const piece = suit.REXONANCE_SUIT_PIECES[index];
@@ -275,34 +319,88 @@ test("the real plan covers every generated tile and gold mask cell without phant
     const tileGrid = maskGrid(piece.tiles, piece, suit.REXONANCE_SUIT_TILE);
     assert.ok(tileGrid.length > 0, `${piece.id}: a visible plate must carry artwork tiles`);
     const tile = suit.REXONANCE_SUIT_TILE;
-    const expectedTiles = tileGrid.map(({ column, row }) =>
-      [piece.ax + column * tile, piece.ay + row * tile, piece.x + column * tile, piece.y + row * tile]);
-    assert.deepEqual(Array.from(plate.tiles, ({ sx, sy, dx, dy }) => [sx, sy, dx, dy]),
-      expectedTiles, `${piece.id}: each occupied artwork tile is carried exactly once`);
+    const expectedTiles = tileGrid.map(({ column, row }) => [
+      piece.ax + column * tile,
+      piece.ay + row * tile,
+      piece.x + column * tile,
+      piece.y + row * tile,
+    ]);
+    assert.deepEqual(
+      Array.from(plate.tiles, ({ sx, sy, dx, dy }) => [sx, sy, dx, dy]),
+      expectedTiles,
+      `${piece.id}: each occupied artwork tile is carried exactly once`,
+    );
     tiles += tileGrid.length;
 
-    const goldGrid = maskGrid(gold.REXONANCE_SUIT_GOLD_CELLS[piece.id], piece, gold.REXONANCE_SUIT_GOLD_CELL);
+    const maskedGold = maskGrid(
+      gold.REXONANCE_SUIT_GOLD_CELLS[piece.id],
+      piece,
+      gold.REXONANCE_SUIT_GOLD_CELL,
+    );
     if (gold.REXONANCE_SUIT_GOLD_CELLS[piece.id])
-      assert.ok(goldGrid.length > 0, `${piece.id}: an emitted trim mask cannot be empty`);
+      assert.ok(maskedGold.length > 0, `${piece.id}: an emitted trim mask cannot be empty`);
+    const driver = calls.REXONANCE_SUIT_DRIVER.includes(piece.id);
+    const goldGrid = driver ? [] : maskedGold;
+    if (driver) {
+      assert.equal(plate.fit, 0, `${piece.id}: the finished driver is on the body from the start`);
+      assert.equal(plate.from, 0);
+      assert.equal(plate.to, 0);
+      assert.equal(plate.last, 0);
+      assert.equal(plate.first, plate.end, `${piece.id}: finished driver does not form new gold`);
+    }
     const unit = gold.REXONANCE_SUIT_GOLD_CELL;
     assert.equal(plate.first, goldAt, `${piece.id}: flat gold arrays have no gaps`);
-    assert.equal(plate.end - plate.first, goldGrid.length, `${piece.id}: all trim cells are formed`);
-    const expectedCells = goldGrid.map(({ column, row }) => [
-      piece.x + column * unit, piece.y + row * unit,
-      piece.ax + column * unit, piece.ay + row * unit,
-      Math.min(unit, piece.w - column * unit), Math.min(unit, piece.h - row * unit),
-    ].join(",")).sort();
+    assert.equal(
+      plate.end - plate.first,
+      goldGrid.length,
+      `${piece.id}: all trim cells are formed`,
+    );
+    const expectedCells = goldGrid
+      .map(({ column, row }) =>
+        [
+          piece.x + column * unit,
+          piece.y + row * unit,
+          piece.ax + column * unit,
+          piece.ay + row * unit,
+          Math.min(unit, piece.w - column * unit),
+          Math.min(unit, piece.h - row * unit),
+        ].join(","),
+      )
+      .sort();
     const actualCells = Array.from({ length: goldGrid.length }, (_, offset) => {
       const at = plate.first + offset;
-      return [cells.fx[at], cells.fy[at], cells.ax[at], cells.ay[at], cells.cw[at], cells.ch[at]].join(",");
+      return [
+        cells.fx[at],
+        cells.fy[at],
+        cells.ax[at],
+        cells.ay[at],
+        cells.cw[at],
+        cells.ch[at],
+      ].join(",");
     }).sort();
-    assert.deepEqual(actualCells, expectedCells, `${piece.id}: BFS changes flow order, not the trim geometry`);
+    assert.deepEqual(
+      actualCells,
+      expectedCells,
+      `${piece.id}: BFS changes flow order, not the trim geometry`,
+    );
     goldAt = plate.end;
   }
-  assert.equal(plates.reduce((count, plate) => count + plate.tiles.length, 0), tiles);
+  assert.equal(
+    plates.reduce((count, plate) => count + plate.tiles.length, 0),
+    tiles,
+  );
   assert.equal(goldAt, expectedGoldCount());
   assert.equal(plan.GOLD_TOTAL, goldAt, "the allocation matches initialized gold cells exactly");
   for (const array of Object.values(cells)) assert.equal(array.length, goldAt);
+  const unusedDriverCells = expectedGoldCount({ includeDriver: true }) - goldAt;
+  assert.ok(
+    unusedDriverCells > 0,
+    "finished driver masks exist but must not allocate phantom cells",
+  );
+  // Every allocated cell has physical extent; a skipped driver mask must
+  // not leave zero-sized, uninitialized cells at the end of the gold arrays.
+  assert.ok(Array.from(cells.cw).every((width) => width > 0));
+  assert.ok(Array.from(cells.ch).every((height) => height > 0));
 });
 
 test("a foreground call may finish the plan before idle resumes without rebuilding it", async () => {
@@ -327,7 +425,7 @@ test("missing decoded layers settle false and retry only the retained working at
   ui.sources.set(suit.REXONANCE_SUIT_GOLD_ATLAS.src, ui.raw);
   assert.equal(await ui.plan.prepareRexonanceSuit(), true);
   assert.equal(ui.plan.plates(), all);
-  assert.deepEqual(ui.drawn, ["clear", "atlas", "raw-gold"]);
+  assert.deepEqual(ui.drawn, ["clear", "unlit-atlas", "raw-gold"]);
   assert.equal(ui.closed(), 0, "the plan borrows warm-up bitmaps and never closes them");
 });
 
@@ -369,7 +467,14 @@ test("idle preparation never resets formed gold while a live call owns the worki
   await flushPromises();
   ui.plan.work.drawing = 0;
   assert.equal(await ui.plan.prepareRexonanceSuit(), true);
-  assert.deepEqual(ui.drawn, ["clear", "atlas", "raw-gold", "clear", "atlas", "raw-gold"]);
+  assert.deepEqual(ui.drawn, [
+    "clear",
+    "unlit-atlas",
+    "raw-gold",
+    "clear",
+    "unlit-atlas",
+    "raw-gold",
+  ]);
 });
 
 test("plan readiness distinguishes decoded layers, a warm atlas and a previous call's dirty atlas", async () => {
@@ -387,4 +492,58 @@ test("plan readiness distinguishes decoded layers, a warm atlas and a previous c
   assert.equal(ui.plan.isRexonanceSuitPlanReady(), false, "a new call must reset formed gold");
   assert.equal(await ui.plan.prepareRexonanceSuit(), true);
   assert.equal(ui.plan.isRexonanceSuitPlanReady(), true);
+});
+
+test("single-flight preparation creates unlit layers once and retains them across retries", async () => {
+  const ui = planRuntime();
+  ui.options.failDraw = true;
+  const preparing = ui.plan.prepareRexonanceSuit();
+  assert.equal(ui.plan.prepareRexonanceSuit("high"), preparing);
+  ui.flush();
+  assert.equal(await preparing, false);
+  assert.deepEqual(ui.lightSplits, [
+    [ui.art, 0, 0, suit.REXONANCE_SUIT_GOLD_ATLAS.width, suit.REXONANCE_SUIT_GOLD_ATLAS.height],
+  ]);
+  assert.equal(ui.plan.plateLights().unlit, ui.unlit);
+  assert.equal(ui.plan.plateLights().lights, ui.lights);
+  await flushPromises();
+  ui.options.failDraw = false;
+  assert.equal(await ui.plan.prepareRexonanceSuit("high"), true);
+  assert.equal(ui.lightSplits.length, 1, "a working-atlas retry must not recreate light layers");
+  assert.deepEqual(ui.drawn, ["clear", "clear", "unlit-atlas", "raw-gold"]);
+  assert.equal(ui.closed(), 0, "light preparation only borrows decoded atlas bitmaps");
+});
+
+test("unavailable light separation falls back safely and can retry before a later call", async () => {
+  const ui = planRuntime();
+  ui.options.lightsAvailable = false;
+  const preparing = ui.plan.prepareRexonanceSuit();
+  ui.flush();
+  assert.equal(await preparing, true);
+  assert.equal(ui.plan.plateLights(), null);
+  assert.deepEqual(ui.drawn, ["clear", "atlas", "raw-gold"]);
+  assert.equal(ui.plan.isRexonanceSuitPlanReady(), true);
+  await flushPromises();
+  ui.options.lightsAvailable = true;
+  assert.equal(await ui.plan.prepareRexonanceSuit(), true);
+  assert.equal(ui.lightSplits.length, 2);
+  assert.deepEqual(ui.drawn, ["clear", "atlas", "raw-gold", "clear", "unlit-atlas", "raw-gold"]);
+  assert.equal(ui.closed(), 0);
+});
+
+test("light preparation cannot reset or split an atlas while a foreground call owns it", async () => {
+  const ui = planRuntime();
+  ui.plan.plates();
+  ui.plan.forming(ui.art, ui.raw);
+  ui.plan.work.drawing = 1;
+  ui.plan.work.dirty = true;
+  assert.equal(await ui.plan.prepareRexonanceSuit("high"), true);
+  assert.equal(ui.lightSplits.length, 0);
+  assert.deepEqual(ui.drawn, ["clear", "atlas", "raw-gold"]);
+  assert.equal(ui.plan.work.dirty, true, "the active call retains its formed gold");
+  await flushPromises();
+  ui.plan.work.drawing = 0;
+  assert.equal(await ui.plan.prepareRexonanceSuit("high"), true);
+  assert.equal(ui.lightSplits.length, 1);
+  assert.deepEqual(ui.drawn, ["clear", "atlas", "raw-gold", "clear", "unlit-atlas", "raw-gold"]);
 });

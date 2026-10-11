@@ -11,6 +11,7 @@ import {
   CIEL_PORTRAIT,
   CIEL_THUMBNAIL,
   EPISODE_THUMBNAILS,
+  LAUNCHER_TILE_IMAGES,
   MANAGER_THUMBNAILS,
   ZEUS_BUTTON_IMAGES,
 } from "../src/lib/thumbnail-images.ts";
@@ -22,13 +23,15 @@ const sets = [
   ...Object.values(MANAGER_THUMBNAILS).map((set) => [set, 0.84]),
   [CIEL_THUMBNAIL, 0.78],
   [CIEL_PORTRAIT, 0.8],
+  ...Object.values(LAUNCHER_TILE_IMAGES).map((set) => [set, 0.84]),
   ...Object.values(ZEUS_BUTTON_IMAGES).map((set) => [set, 0.86]),
 ];
 const only = process.argv[2];
 for (const [set, quality] of sets) {
   if (only && set.source !== only) continue;
   for (const variant of set.variants) {
-    if (variant.build) jobs.push({ source: set.source, output: variant.path, width: variant.width, quality });
+    if (variant.build)
+      jobs.push({ source: set.source, output: variant.path, width: variant.width, quality });
   }
 }
 
@@ -60,6 +63,8 @@ for (const job of jobs) {
   );
   const output = Buffer.from(encoded.data, "base64");
   writeFileSync(publicPath(job.output), output);
-  console.log(`${job.source} -> ${job.output} ${encoded.width}x${encoded.height} ${output.length} B`);
+  console.log(
+    `${job.source} -> ${job.output} ${encoded.width}x${encoded.height} ${output.length} B`,
+  );
 }
 await browser.close();

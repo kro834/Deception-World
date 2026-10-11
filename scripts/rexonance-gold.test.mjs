@@ -14,6 +14,7 @@ import {
   REXONANCE_SUIT_FIT,
   REXONANCE_SUIT_GOLD,
   REXONANCE_SUIT_GOLD_AT,
+  REXONANCE_SUIT_DRIVER,
   REXONANCE_SUIT_PIXELS,
 } from "../src/lib/rexonance-calls.ts";
 import {
@@ -45,6 +46,12 @@ test("rx17: each plate's gold forms right after it seats, quickly, and is done i
     REXONANCE_SUIT_PIECES.map(({ id }) => id).sort(),
   );
   for (const { id } of REXONANCE_SUIT_PIECES) {
+    // Owner (2026-10-11): the driver is finished from the start; no gold forms.
+    if (REXONANCE_SUIT_DRIVER.includes(id)) {
+      assert.equal(REXONANCE_SUIT_FIT[id], 0, `${id}: driver is finished from the start`);
+      assert.deepEqual(REXONANCE_SUIT_GOLD_AT[id], [0, 0], `${id}: no driver gold formation`);
+      continue;
+    }
     const [from, to] = REXONANCE_SUIT_GOLD_AT[id];
     const fit = REXONANCE_SUIT_FIT[id];
     // It starts within 0-40 ms of the plate's clank.
@@ -78,6 +85,12 @@ test("rx17: each plate's gold forms right after it seats, quickly, and is done i
   // The nanites' flight and cooling are short beats of the formation.
   assert.ok(REXONANCE_SUIT_GOLD.approach < REXONANCE_SUIT_GOLD.form / 2);
   assert.ok(REXONANCE_SUIT_GOLD.cool < REXONANCE_SUIT_GOLD.form / 2);
+  // Keep the published short-cover clocks while retaining the material
+  // repair. No merge may silently restore the earlier long face hold.
+  assert.equal(Math.max(...Object.values(REXONANCE_SUIT_GOLD_AT).map(([, to]) => to)), 1986);
+  assert.equal(REXONANCE_SUIT_PIXELS.fill, 1990);
+  assert.equal(REXONANCE_SUIT_PIXELS.scatter, 2520);
+  assert.equal(REXONANCE_ENTRY_TIMINGS.cover, 2730);
 });
 
 test("rx17: the gold atlas and the gold cells, generated with the plates", async () => {
@@ -259,17 +272,17 @@ test("rx17: the engine forms each plate's gold on it right after it seats and en
   // The plates arrive and seat from the working atlas (their gold raw) ...
   assert.match(
     plan,
-    /context\.drawImage\(art, 0, 0, width, height, 0, 0, width, height\);\s*context\.drawImage\(gold, 0, 0\);/,
+    /context\.drawImage\(LIGHTS\?\.unlit \?\? art, 0, 0, width, height, 0, 0, width, height\);\s*context\.drawImage\(gold, 0, 0\);/,
   );
   assert.match(nanites, /flight\.drawImage\(\s*source,\s*tile\.sx,\s*tile\.sy,/);
   // ... their gold cells lock into it on the gold's own clock ...
   assert.match(plan, /REXONANCE_SUIT_GOLD_AT\[piece\.id\]/);
-  assert.match(nanites, /atlasWork\.drawImage\(\s*atlas,\s*gold\.ax\[i\],/);
+  assert.match(nanites, /atlasWork\.drawImage\(\s*art,\s*gold\.ax\[i\],/);
   // ... and a finished plate is painted whole from the art itself, so the
   // finished suit equals the artwork.
   assert.match(
     nanites,
-    /settled\.drawImage\(\s*atlas,\s*piece\.ax,\s*piece\.ay,\s*piece\.w,\s*piece\.h,/,
+    /settled\.drawImage\(\s*art,\s*piece\.ax,\s*piece\.ay,\s*piece\.w,\s*piece\.h,/,
   );
   assert.match(
     nanites,
