@@ -23,7 +23,6 @@ import { RisingWorld } from "./rising-world";
 import { WorldAnnexRecords, WorldAnnexRiders } from "./world-annex";
 import { createViewportResizeFilter } from "@/lib/viewport-resize";
 import { createReadyPosterLoader } from "@/lib/ready-poster-loader";
-import { useUltraArtworkReady } from "@/lib/use-ultra-artwork-ready";
 import { warmWorldSwaps } from "./world-swap-warmups";
 import { useDialogHistoryDismiss } from "./use-dialog-history-dismiss";
 import { WorldAtmosphere } from "./world-atmosphere";
@@ -490,3 +489,4 @@ const EPISODES: EpisodeRecord[] = [
     title: "DEUS",
     src: "/episode-06-deus.webp",
     pos: "42% 38%",
+    alt: "夕暮れの崩壊した街で、傷ついた黒い衣装の人物が空を見上げるEP6 DEUSのビジュアル",

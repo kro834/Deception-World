@@ -1,7 +1,8 @@
 {
   "schemaVersion": 1,
-  "generator": "scripts/build-ultra-materials.py",
-  "generatorSha256": "173ca046a9fd094eda2d49694e6644cf47c60463e34a4ec965967e2631bad1e6",
+  "generator": "scripts/build-exhibition-metal.py",
+  "generatorSha256": "786ed3ed08fbac9779a6608c93cac42273347cdb3faff84365d44fe441f9cfca",
+  "generatorRole": "material reproduction; preserved bake was not regenerated",
   "blenderVersion": "5.2.0 LTS",
   "engine": "CYCLES",
   "device": "CPU",
@@ -10,17 +11,10 @@
   "resolution": 1024,
   "purpose": "Repeatable surface detail for metal artwork mounts; no artwork baked",
   "material": {
-    "baseColorLinear": [
-      0.018,
-      0.026,
-      0.037
-    ],
+    "baseColorLinear": [0.018, 0.026, 0.037],
     "metallic": 1.0,
     "anisotropy": 0.62,
-    "roughnessRange": [
-      0.311,
-      0.459
-    ],
+    "roughnessRange": [0.311, 0.459],
     "normalConvention": "Tangent OpenGL +X +Y +Z",
     "uvBrushDirection": "U; rotate UV for vertical frame rails"
   },
@@ -39,28 +33,15 @@
       "repeat": true
     }
   },
-  "frame": {
-    "file": "frame-rim.png",
-    "sha256": "e15371c12acdcef889aaf9714985590848450262899d25b73a3d92390f6671fb",
-    "colorSpace": "sRGB",
-    "transparent": true,
-    "borderImageSlice": 64,
-    "borderImageFill": false,
-    "outerSizeMeters": 2,
-    "apertureSizeMeters": 1.786,
-    "railWidthMeters": 0.107,
-    "depthMeters": 0.036,
-    "bevelMeters": 0.003,
-    "miterDegrees": 45,
-    "alphaChecks": {
-      "centerAlphaMax": 0.0,
-      "railAlphaMin": 1.0,
-      "centerCheckedInsetPx": 68
-    }
-  },
   "provenance": {
-    "blend": "ultra-brushed-alloy.blend",
+    "blend": "exhibition-metal.blend",
     "blendSha256": "b1eb21cb2ca6fc8b1333a1e74c10e9da35aa67800dbe77a47fcd5957f85c06a5",
-    "preview": "brushed-alloy-studio-preview.png"
+    "preview": "brushed-alloy-studio-preview.png",
+    "previewSha256": "3a167e880df6aeddbb32ca565a781f76b974bec27bf0d7c82531cb3c779e81f9"
+  },
+  "preservedBake": {
+    "generatorSha256": "173ca046a9fd094eda2d49694e6644cf47c60463e34a4ec965967e2631bad1e6",
+    "bytesUnchanged": true,
+    "scope": "maps, packed source scene and studio preview"
   }
 }

@@ -29,7 +29,6 @@ import { LibraryCurrentButton } from "@/components/library/library-controls";
 import { SPECIAL_SITE_SECTIONS } from "@/lib/special-site-sections";
 import { openQuickSearch, prefetchQuickSearch } from "@/components/search/quick-search-events";
 import { IpadMenuToggle } from "@/components/ipad-menu-mode";
-import { UltraModeToggle } from "@/components/ultra/ultra-mode-toggle";
 import { CinemaLink } from "./external-cinema-link";
 
 type SiteAnnouncementMetric = {
@@ -1167,7 +1166,6 @@ export function SideMenuLayer({
             )}
             <ZeusButtonToggle />
             <IpadMenuToggle />
-            <UltraModeToggle />
             <Link
               to="/"
               onClick={(e) => {

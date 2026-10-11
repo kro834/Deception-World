@@ -1,3 +1,5 @@
+    // LoadGate keeps the destination handshake open for 2.2s. Keep probing
+    // connected targets for almost that whole window instead of assuming a
     // fixed 24-frame budget, which can expire early on throttled devices.
     const destinationReadyDeadline = window.performance.now() + 2_000;
 
@@ -489,5 +491,3 @@
         if (!heroInViewRef.current) {
           cancelPosterShuffle();
           return;
-        }
-        if (ready) goPoster(finalPoster);

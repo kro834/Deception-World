@@ -131,7 +131,9 @@ test("World scroll milestones stay out of the page-wide render", () => {
   // Anchor jumps land a section at its scroll-margin-top: the marker reaches it
   // (related-return-navigation.test.mjs pins the exact comparison).
   assert.match(nav, /const landing = parseFloat\(getComputedStyle\(section\)\.scrollMarginTop\) \|\| 0/);
-  assert.match(nav, /section\.getBoundingClientRect\(\)\.top <= Math\.max\(marker, landing \+ 8\)/);
+  assert.match(nav, /const rect = section\.getBoundingClientRect\(\);/);
+  assert.match(nav, /rect\.top <= Math\.max\(marker, landing \+ 8\)/);
+  assert.match(nav, /if \(lastBottom <= marker\) current = null;/);
   const page = home.slice(home.indexOf("export function WorldHome()"));
   assert.doesNotMatch(page, /setActiveSection/);
   assert.match(page, /<WorldSectionNav \/>/);

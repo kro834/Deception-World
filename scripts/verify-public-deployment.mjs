@@ -292,7 +292,7 @@ export async function verifyPublicDeployment({
       });
       for (const asset of identity.assets) {
         if (
-          !/^\/(?:gallery\/|saga-extreme-|saga-cinema-assets\/(?:chapter-[1-4]\.jpg|saga-logo-original\.webp|menu-thumbnail\.webp|michroma-latin\.woff2)$|ultra-materials\/(?:brushed-alloy-(?:normal|roughness)\.png|frame-rim\.png|manifest\.json)$|exhibition-studio\/(?:studio-light\.hdr|plaster-(?:normal|roughness)\.png|manifest\.json)$)/u.test(
+          !/^\/(?:gallery\/|saga-extreme-|saga-cinema-assets\/(?:chapter-[1-4]\.jpg|saga-logo-original\.webp|menu-thumbnail\.webp|michroma-latin\.woff2)$|exhibition-metal\/(?:brushed-alloy-(?:normal|roughness)\.png|manifest\.json)$|exhibition-studio\/(?:studio-light\.hdr|plaster-(?:normal|roughness)\.png|manifest\.json)$)/u.test(
             asset.path,
           ) ||
           asset.path.includes("..")

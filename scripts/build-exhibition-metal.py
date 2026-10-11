@@ -2,7 +2,7 @@
 """Bake artwork-mount surface maps with Blender, without touching artwork pixels.
 
 Run with Blender 4.5 LTS or newer:
-  blender --background --factory-startup --python scripts/build-ultra-materials.py -- \
+  blender --background --factory-startup --python scripts/build-exhibition-metal.py -- \
     --resolution 1024
 
 The periodic shader is analytic, so all four tile boundaries join. Cycles performs
@@ -10,7 +10,6 @@ the actual normal and emission bakes; Python does not synthesize image pixels.
 """
 
 import argparse
-from array import array
 import hashlib
 import json
 import math
@@ -28,10 +27,9 @@ SEED = 271828
 def arguments():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--resolution", type=int, default=1024)
-    parser.add_argument("--output", type=Path, default=ROOT / "public/ultra-materials")
-    parser.add_argument("--provenance", type=Path, default=ROOT / "design/ultra-materials")
+    parser.add_argument("--output", type=Path, default=ROOT / "public/exhibition-metal")
+    parser.add_argument("--provenance", type=Path, default=ROOT / "design/exhibition-metal")
     parser.add_argument("--skip-preview", action="store_true")
-    parser.add_argument("--skip-frame-rim", action="store_true")
     args = parser.parse_args(sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else [])
     if args.resolution < 128 or args.resolution > 1024:
         parser.error("--resolution must be between 128 and 1024")
@@ -104,7 +102,7 @@ def create_surface():
     bpy.ops.mesh.primitive_plane_add(size=2, location=(0, 0, 0))
     plane = bpy.context.object
     plane.name = "BakeSurface_UV_Repeat_1m"
-    material = bpy.data.materials.new("Ultra_Dark_Brushed_Alloy")
+    material = bpy.data.materials.new("Exhibition_Dark_Brushed_Alloy")
     material.use_nodes = True
     material["purpose"] = "Artwork-bound metal mounts only; original artwork remains unchanged"
     plane.data.materials.append(material)
@@ -206,101 +204,6 @@ def preview_scene(plane, material):
     return sample
 
 
-def create_frame(material):
-    """Four 45-degree mitered trapezoid prisms, with a real open center.
-
-    Blender units are meters. The outside is 2m square, aperture 1.786m square,
-    rail width 107mm, depth 36mm, and bevel 3mm. A 2.04m orthographic span puts
-    each rail plus transparent outer margin inside a 64px slice at 1024px.
-    """
-    inner = 0.893
-    rings = (
-        ("Top", [(-1, 1), (-inner, inner), (inner, inner), (1, 1)]),
-        ("Right", [(1, 1), (inner, inner), (inner, -inner), (1, -1)]),
-        ("Bottom", [(1, -1), (inner, -inner), (-inner, -inner), (-1, -1)]),
-        ("Left", [(-1, -1), (-inner, -inner), (-inner, inner), (-1, 1)]),
-    )
-    objects = []
-    for name, outline in rings:
-        vertices = [(x, y, -0.018) for x, y in outline]
-        vertices += [(x, y, 0.018) for x, y in outline]
-        faces = [(3, 2, 1, 0), (4, 5, 6, 7)]
-        faces += [(index, (index + 1) % 4, (index + 1) % 4 + 4, index + 4)
-                  for index in range(4)]
-        mesh = bpy.data.meshes.new(f"Mitered_{name}_Rail_Mesh")
-        mesh.from_pydata(vertices, [], faces)
-        mesh.update()
-        rail = bpy.data.objects.new(f"Artwork_Mount_{name}_Rail", mesh)
-        bpy.context.collection.objects.link(rail)
-        mesh.materials.append(material)
-        uv_layer = mesh.uv_layers.new(name="Rail_Brush_U")
-        for polygon in mesh.polygons:
-            for loop_index in polygon.loop_indices:
-                vertex = mesh.vertices[mesh.loops[loop_index].vertex_index].co
-                if name == "Top":
-                    uv = ((vertex.x + 1) / 2, (vertex.y - inner) / (1 - inner))
-                elif name == "Bottom":
-                    uv = ((vertex.x + 1) / 2, (-vertex.y - inner) / (1 - inner))
-                elif name == "Right":
-                    uv = ((vertex.y + 1) / 2, (vertex.x - inner) / (1 - inner))
-                else:
-                    uv = ((vertex.y + 1) / 2, (-vertex.x - inner) / (1 - inner))
-                uv_layer.data[loop_index].uv = uv
-        bevel = rail.modifiers.new("Machined_bevel_3mm", "BEVEL")
-        bevel.width = 0.003
-        bevel.segments = 4
-        bevel.affect = "EDGES"
-        bevel.harden_normals = True
-        # Keep the long flat face flat; weighted normals soften the tiny bevels.
-        rail.modifiers.new("Weighted_machined_normals", "WEIGHTED_NORMAL")
-        rail["rail_width_m"] = 0.107
-        rail["depth_m"] = 0.036
-        rail["bevel_m"] = 0.003
-        rail["miter_degrees"] = 45
-        objects.append(rail)
-    return objects
-
-
-def verify_frame_alpha(path, resolution):
-    """Check the saved PNG, not an assumed transparent scene setting."""
-    image = bpy.data.images.load(str(path), check_existing=False)
-    if tuple(image.size) != (resolution, resolution) or image.channels != 4:
-        raise RuntimeError("Frame must be a square RGBA render at the requested resolution")
-    pixels = array("f", [0]) * (resolution * resolution * 4)
-    image.pixels.foreach_get(pixels)
-    # The CSS center slice is never painted; check its interior remains empty.
-    inset = resolution // 16 + 4
-    center_alpha_max = max(pixels[(y * resolution + x) * 4 + 3]
-                           for y in range(inset, resolution - inset)
-                           for x in range(inset, resolution - inset))
-    points = [(0.5, 0.969), (0.969, 0.5), (0.5, 0.031), (0.031, 0.5)]
-    rail_alpha_min = min(pixels[(int(y * resolution) * resolution + int(x * resolution)) * 4 + 3]
-                         for x, y in points)
-    bpy.data.images.remove(image)
-    if center_alpha_max > 1 / 255 or rail_alpha_min < 0.99:
-        raise RuntimeError(f"Invalid frame alpha: center {center_alpha_max}, rails {rail_alpha_min}")
-    return {"centerAlphaMax": center_alpha_max, "railAlphaMin": rail_alpha_min,
-            "centerCheckedInsetPx": inset}
-
-
-def render_frame(scene, sample, material, resolution, path):
-    sample.hide_render = True
-    rails = create_frame(material)
-    camera = scene.camera
-    camera.location = (0, 0, 4)
-    aim(camera, (0, 0, 0))
-    camera.data.ortho_scale = 2.04
-    scene.render.resolution_x = resolution
-    scene.render.resolution_y = resolution
-    scene.render.resolution_percentage = 100
-    scene.render.film_transparent = True
-    scene.render.image_settings.color_mode = "RGBA"
-    scene.render.filepath = str(path)
-    bpy.ops.render.render(write_still=True)
-    checks = verify_frame_alpha(path, resolution)
-    return rails, checks
-
-
 def digest(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
@@ -340,22 +243,18 @@ def main():
     roughness_path = args.output / "brushed-alloy-roughness.png"
     bake_map(plane, material, output, principled, roughness, "NORMAL", args.resolution, normal_path)
     bake_map(plane, material, output, principled, roughness, "EMIT", args.resolution, roughness_path)
-    sample = preview_scene(plane, material)
+    preview_scene(plane, material)
     if not args.skip_preview:
         scene.render.resolution_x = 768
         scene.render.resolution_y = 512
         scene.render.resolution_percentage = 100
         scene.render.filepath = str(args.provenance / "brushed-alloy-studio-preview.png")
         bpy.ops.render.render(write_still=True)
-    frame_path = args.output / "frame-rim.png"
-    frame_checks = None
-    if not args.skip_frame_rim:
-        _, frame_checks = render_frame(scene, sample, material, args.resolution, frame_path)
-    blend_path = args.provenance / "ultra-brushed-alloy.blend"
+    blend_path = args.provenance / "exhibition-metal.blend"
     bpy.ops.wm.save_as_mainfile(filepath=str(blend_path), compress=True)
     manifest = {
         "schemaVersion": 1,
-        "generator": "scripts/build-ultra-materials.py",
+        "generator": "scripts/build-exhibition-metal.py",
         "generatorSha256": digest(Path(__file__)),
         "blenderVersion": bpy.app.version_string,
         "engine": "CYCLES",
@@ -376,25 +275,11 @@ def main():
             "normal": {"file": normal_path.name, "sha256": digest(normal_path), "colorSpace": "linear", "repeat": True},
             "roughness": {"file": roughness_path.name, "sha256": digest(roughness_path), "colorSpace": "linear", "channel": "R", "repeat": True},
         },
-        "frame": None if args.skip_frame_rim else {
-            "file": frame_path.name,
-            "sha256": digest(frame_path),
-            "colorSpace": "sRGB",
-            "transparent": True,
-            "borderImageSlice": args.resolution // 16,
-            "borderImageFill": False,
-            "outerSizeMeters": 2,
-            "apertureSizeMeters": 1.786,
-            "railWidthMeters": 0.107,
-            "depthMeters": 0.036,
-            "bevelMeters": 0.003,
-            "miterDegrees": 45,
-            "alphaChecks": frame_checks,
-        },
         "provenance": {
             "blend": blend_path.name,
             "blendSha256": digest(blend_path),
             "preview": None if args.skip_preview else "brushed-alloy-studio-preview.png",
+            "previewSha256": None if args.skip_preview else digest(args.provenance / "brushed-alloy-studio-preview.png"),
         },
     }
     serialized = json.dumps(manifest, indent=2) + "\n"

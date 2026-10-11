@@ -5,8 +5,6 @@ import { Link, useRouter } from "@tanstack/react-router";
 import { SideMenuLayer, SideMenuTrigger } from "@/components/world/world-chrome";
 import { useWorldMode } from "@/components/world/use-world-mode";
 import { acquireViewportScrollLock } from "@/lib/viewport-scroll-lock";
-import { useUltraArtworkReady } from "@/lib/use-ultra-artwork-ready";
-import { ExhibitionStudio } from "@/components/ultra/exhibition-studio";
 import { GALLERY_ARTWORKS, GALLERY_CATEGORIES } from "./gallery-data";
 import {
   communityPostToArtwork,
@@ -73,7 +71,6 @@ function revealGalleryControl(control: HTMLElement | null) {
 
 export function GalleryPage() {
   useWorldMode();
-  const artworkReady = useUltraArtworkReady();
   const router = useRouter();
   const display = useGalleryDisplayPreferences();
   // The history entry the open viewer adds, so Back closes it in place.
@@ -1075,33 +1072,25 @@ export function GalleryPage() {
             </p>
           </div>
           <figure className="gallery-feature">
-            <ExhibitionStudio
-              artworkUrl={featured.full}
-              artworkWidth={featured.width}
-              artworkHeight={featured.height}
-              artworkReady={artworkReady}
+            <a
+              className="gallery-feature-open"
+              href={featured.full}
+              onClick={(event) => openWork(event, featured)}
+              aria-haspopup="dialog"
+              aria-controls="gallery-viewer"
+              aria-label={`${numberFor(featured)}を拡大して鑑賞`}
             >
-              <a
-                className="gallery-feature-open"
-                data-ultra-artwork-ready={artworkReady ? "true" : undefined}
-                href={featured.full}
-                onClick={(event) => openWork(event, featured)}
-                aria-haspopup="dialog"
-                aria-controls="gallery-viewer"
-                aria-label={`${numberFor(featured)}を拡大して鑑賞`}
-              >
-                <img
-                  src={featured.medium}
-                  srcSet={featured.srcSet}
-                  sizes="(max-width: 760px) 90vw, 56vw"
-                  alt={featured.alt}
-                  width={featured.width}
-                  height={featured.height}
-                  fetchPriority="high"
-                  decoding="async"
-                />
-              </a>
-            </ExhibitionStudio>
+              <img
+                src={featured.medium}
+                srcSet={featured.srcSet}
+                sizes="(max-width: 760px) 90vw, 56vw"
+                alt={featured.alt}
+                width={featured.width}
+                height={featured.height}
+                fetchPriority="high"
+                decoding="async"
+              />
+            </a>
             {!isCommunityGalleryId(featured.id) && (
               <Link
                 className="exhibition-room-entry"

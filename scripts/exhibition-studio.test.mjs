@@ -78,8 +78,8 @@ test("the immersive room only accepts known artwork IDs, never a supplied textur
   const { Route } = load("src/routes/exhibition.tsx", {
     "@tanstack/react-router": { createFileRoute: () => (config) => config, Link() {} },
     "@/components/gallery/gallery-data": { GALLERY_ARTWORKS: [{ id: "g19" }, { id: "g80" }] },
-    "@/components/ultra/exhibition-studio": { ExhibitionStudio() {} },
-    "@/lib/use-ultra-artwork-ready": { useUltraArtworkReady() {} },
+    "@/components/exhibition/exhibition-studio": { ExhibitionStudio() {} },
+    "@/lib/use-exhibition-artwork-ready": { useExhibitionArtworkReady() {} },
     "@/lib/world-head": { createWorldHead: (head) => head, WORLD_CORE_STYLESHEET_LINKS: [] },
     "@/styles-exhibition-studio.css?url": "studio.css",
   });
@@ -553,30 +553,15 @@ test("optional material map failures remain usable; source or draw failures clea
   }
 });
 
-test("SSR and disabled/accessibility/unready states preserve original link without loading Three or reading browser globals", () => {
+test("SSR and non-immersive/unready rooms preserve the original link without loading Three or reading browser globals", () => {
   const React = require("react");
   const { renderToStaticMarkup } = require("react-dom/server");
   for (const state of [
-    { enabled: false, motionAllowed: false },
-    { enabled: true, motionAllowed: false },
-    { enabled: true, motionAllowed: true, unready: true },
+    { immersive: false, artworkReady: true },
+    { immersive: true, artworkReady: true },
+    { immersive: true, artworkReady: false },
   ]) {
-    const module = load("src/components/ultra/exhibition-studio.tsx", {
-      "@/lib/ultra-mode.js": {
-        subscribeUltraMode() {},
-        getUltraModeSnapshot: () => state,
-        getUltraModeServerSnapshot: () => state,
-      },
-      "@/lib/ultra-quality.js": {
-        subscribeUltraQuality() {},
-        getUltraQualitySnapshot: () => ({ quality: "high" }),
-        getUltraQualityServerSnapshot: () => ({ quality: "high" }),
-      },
-      "@/lib/ultra-mode-visibility.js": {
-        isUltraSceneBlocked: () => false,
-        watchUltraSceneVisibility() {},
-      },
-    });
+    const module = load("src/components/exhibition/exhibition-studio.tsx");
     const html = renderToStaticMarkup(
       React.createElement(
         module.ExhibitionStudio,
@@ -584,12 +569,121 @@ test("SSR and disabled/accessibility/unready states preserve original link witho
           artworkUrl: "/unchanged-original.webp",
           artworkWidth: 1536,
           artworkHeight: 1024,
-          artworkReady: !state.unready,
+          ...state,
         },
         React.createElement("a", { href: "/unchanged-original.webp" }, "原画を拡大"),
       ),
     );
     assert.equal(html, '<a href="/unchanged-original.webp">原画を拡大</a>');
+  }
+});
+
+test("the independent room observes all accessibility preferences without reading retired mode/quality storage", () => {
+  const queries = [
+    "(prefers-reduced-motion: reduce)",
+    "(prefers-reduced-transparency: reduce)",
+    "(prefers-contrast: more)",
+    "(forced-colors: active)",
+  ];
+  for (const legacyListeners of [false, true]) {
+    let subscribe, snapshot, serverSnapshot;
+    const media = new Map(
+      queries.map((query) => {
+        const listeners = new Set();
+        return [
+          query,
+          {
+            matches: false,
+            listeners,
+            ...(legacyListeners
+              ? {
+                  addListener: (callback) => listeners.add(callback),
+                  removeListener: (callback) => listeners.delete(callback),
+                }
+              : {
+                  addEventListener: (_name, callback) => listeners.add(callback),
+                  removeEventListener: (_name, callback) => listeners.delete(callback),
+                }),
+          },
+        ];
+      }),
+    );
+    const module = load(
+      "src/components/exhibition/exhibition-studio.tsx",
+      {
+        react: {
+          useSyncExternalStore(first, second, third) {
+            [subscribe, snapshot, serverSnapshot] = [first, second, third];
+            return second();
+          },
+        },
+        "react/jsx-runtime": { jsx: (type, props) => ({ type, props }) },
+      },
+      {
+        window: {
+          matchMedia(query) {
+            assert.ok(media.has(query), query);
+            return media.get(query);
+          },
+          get localStorage() {
+            return assert.fail("retired preferences must not be read");
+          },
+        },
+      },
+    );
+    const props = {
+      artworkUrl: "/original.webp",
+      artworkWidth: 100,
+      artworkHeight: 200,
+      artworkReady: true,
+      immersive: true,
+      children: "original-link",
+    };
+    const outer = module.ExhibitionStudio(props);
+    assert.equal(outer.props.quality, "high", "fixed normal-room quality");
+    assert.equal(module.ExhibitionStudio({ ...props, immersive: false }), "original-link");
+    assert.equal(module.ExhibitionStudio({ ...props, artworkReady: false }), "original-link");
+    assert.equal(snapshot(), true);
+    assert.equal(serverSnapshot(), false, "SSR always returns the original fallback");
+    let updates = 0;
+    const stop = subscribe(() => updates++);
+    for (const query of queries) {
+      const entry = media.get(query);
+      assert.equal(entry.listeners.size, 1);
+      entry.matches = true;
+      entry.listeners.forEach((callback) => callback());
+      assert.equal(snapshot(), false, query);
+      assert.equal(module.ExhibitionStudio(props), "original-link", `${query}: no renderer`);
+      entry.matches = false;
+      entry.listeners.forEach((callback) => callback());
+      assert.equal(snapshot(), true);
+    }
+    assert.equal(updates, queries.length * 2);
+    stop();
+    assert.ok([...media.values()].every((entry) => entry.listeners.size === 0));
+  }
+});
+
+test("unavailable browser media preferences fail closed without activating the room", () => {
+  for (const window of [
+    {},
+    {
+      matchMedia() {
+        throw new Error("unavailable");
+      },
+    },
+  ]) {
+    const module = load(
+      "src/components/exhibition/exhibition-studio.tsx",
+      {
+        react: { useSyncExternalStore: (_subscribe, snapshot) => snapshot() },
+      },
+      { window },
+    );
+    assert.equal(
+      module.ExhibitionStudio({ immersive: true, artworkReady: true, children: "original-link" }),
+      "original-link",
+    );
   }
 });
 
@@ -601,7 +695,6 @@ function componentFixture({ deferAllocation = false, failAllocation = false } = 
   let cursor = 0;
   let blocked = false;
   let tree;
-  let visibility;
   let resolveAllocation;
   const deferred = new Promise((resolve) => {
     resolveAllocation = resolve;
@@ -611,6 +704,7 @@ function componentFixture({ deferAllocation = false, failAllocation = false } = 
   const effects = [];
   const pending = new Set();
   const observations = [];
+  const visibilityListeners = new Set();
   const calls = {
     imported: 0,
     allocated: 0,
@@ -682,29 +776,10 @@ function componentFixture({ deferAllocation = false, failAllocation = false } = 
       }
     };
   const module = load(
-    "src/components/ultra/exhibition-studio.tsx",
+    "src/components/exhibition/exhibition-studio.tsx",
     {
       react,
       "react/jsx-runtime": { jsx, jsxs: jsx },
-      "@/lib/ultra-mode.js": {
-        subscribeUltraMode() {},
-        getUltraModeSnapshot: () => ({ enabled: true, motionAllowed: true }),
-        getUltraModeServerSnapshot() {},
-      },
-      "@/lib/ultra-quality.js": {
-        subscribeUltraQuality() {},
-        getUltraQualitySnapshot: () => ({ quality: "high" }),
-        getUltraQualityServerSnapshot() {},
-      },
-      "@/lib/ultra-mode-visibility.js": {
-        isUltraSceneBlocked: () => blocked,
-        watchUltraSceneVisibility(callback) {
-          visibility = callback;
-          return () => {
-            calls.stopVisibility++;
-          };
-        },
-      },
       "@/lib/exhibition-studio-renderer": {
         async createExhibitionStudio(_canvas, options) {
           calls.imported++;
@@ -717,7 +792,29 @@ function componentFixture({ deferAllocation = false, failAllocation = false } = 
         },
       },
     },
-    { document: {}, ResizeObserver: observer(), IntersectionObserver: observer() },
+    {
+      document: {
+        visibilityState: "visible",
+        documentElement: {
+          getAttribute(name) {
+            return name === "data-side-menu-open" && blocked ? "true" : null;
+          },
+        },
+        addEventListener(name, callback) {
+          assert.equal(name, "visibilitychange");
+          visibilityListeners.add(callback);
+        },
+        removeEventListener(name, callback) {
+          assert.equal(name, "visibilitychange");
+          visibilityListeners.delete(callback);
+          calls.stopVisibility++;
+        },
+      },
+      window: { matchMedia: () => ({ matches: false }) },
+      ResizeObserver: observer(),
+      IntersectionObserver: observer(),
+      MutationObserver: observer(),
+    },
   );
   const walk = (node, visit) => {
     if (!node || typeof node !== "object") return;
@@ -731,6 +828,7 @@ function componentFixture({ deferAllocation = false, failAllocation = false } = 
       artworkWidth: 100,
       artworkHeight: 200,
       artworkReady: true,
+      immersive: true,
       children: "original-link",
     });
     cursor = 0;
@@ -759,7 +857,7 @@ function componentFixture({ deferAllocation = false, failAllocation = false } = 
     },
     setBlocked(value) {
       blocked = value;
-      visibility();
+      observations[2].callback();
     },
     button(label) {
       let found;
@@ -840,7 +938,7 @@ test("wrapper disposes late allocations after route unmount and retains original
 });
 
 test("component retains fallback and route cleanup contracts while the heavyweight module stays lazy", () => {
-  const source = read("src/components/ultra/exhibition-studio.tsx");
+  const source = read("src/components/exhibition/exhibition-studio.tsx");
   assert.match(source, /import\("@\/lib\/exhibition-studio-renderer"\)/);
   assert.doesNotMatch(
     source,
@@ -852,6 +950,9 @@ test("component retains fallback and route cleanup contracts while the heavyweig
   assert.match(source, /stopVisibility\(\)/);
   assert.match(source, /candidate\.dispose\(\)/);
   assert.match(source, /rendererRef\.current\?\.dispose\(\)/);
+  assert.doesNotMatch(source, /subscribeUltra|ultra-mode\.js|ultra-quality\.js|localStorage/);
+  assert.match(source, /if \(!props\.immersive \|\| !motionAllowed \|\| !props\.artworkReady\)/);
+  assert.match(source, /quality="high"/);
   assert.match(source, /className="exhibition-studio-original">\{children\}/);
   const css = read("src/styles-exhibition-studio.css");
   assert.match(css, /\.exhibition-studio-original img\s*\{[^}]*object-fit:\s*contain/);
@@ -859,6 +960,19 @@ test("component retains fallback and route cleanup contracts while the heavyweig
     css,
     /\[data-studio-ready="true"\][^{]*\.exhibition-studio-original img\s*\{[^}]*opacity:\s*0/,
   );
+});
+
+test("the regular gallery keeps its original enlargement link without a room or mode-readiness wrapper", () => {
+  const source = read("src/components/gallery/gallery-page.tsx");
+  assert.doesNotMatch(source, /ExhibitionStudio|useUltraArtworkReady|data-ultra-artwork-ready/);
+  assert.match(
+    source,
+    /<figure className="gallery-feature">\s*<a\s+className="gallery-feature-open"\s+href=\{featured\.full\}\s+onClick=\{\(event\) => openWork\(event, featured\)\}/,
+  );
+  assert.match(source, /aria-haspopup="dialog"\s+aria-controls="gallery-viewer"/);
+  assert.match(source, /src=\{featured\.medium\}\s+srcSet=\{featured\.srcSet\}/);
+  assert.match(source, /width=\{featured\.width\}\s+height=\{featured\.height\}/);
+  assert.match(source, /to="\/exhibition"\s+search=\{\{ work: featured\.id \}\}/);
 });
 
 // Geometry/lifecycle tests deliberately do not certify visual photorealism. That

@@ -1,15 +1,4 @@
 import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
-import {
-  getUltraModeSnapshot,
-  getUltraModeServerSnapshot,
-  subscribeUltraMode,
-} from "@/lib/ultra-mode.js";
-import {
-  getUltraQualitySnapshot,
-  getUltraQualityServerSnapshot,
-  subscribeUltraQuality,
-} from "@/lib/ultra-quality.js";
-import { isUltraSceneBlocked, watchUltraSceneVisibility } from "@/lib/ultra-mode-visibility.js";
 import type {
   ExhibitionStudio as StudioRenderer,
   ExhibitionStudioView,
@@ -26,22 +15,93 @@ interface ExhibitionStudioProps {
   children: ReactNode;
 }
 
+const STUDIO_ACCESSIBILITY_QUERIES = [
+  "(prefers-reduced-motion: reduce)",
+  "(prefers-reduced-transparency: reduce)",
+  "(prefers-contrast: more)",
+  "(forced-colors: active)",
+];
+const STUDIO_BLOCKING_ATTRIBUTES = [
+  "data-loading",
+  "data-route-cover",
+  "data-opening-handoff-active",
+  "data-side-menu-open",
+  "data-dialog-open",
+];
+
+function readStudioMotionAllowed() {
+  if (typeof window === "undefined") return false;
+  try {
+    return STUDIO_ACCESSIBILITY_QUERIES.every((query) => !window.matchMedia(query).matches);
+  } catch {
+    return false;
+  }
+}
+
+function subscribeStudioPreferences(notify: () => void) {
+  if (typeof window === "undefined") return () => {};
+  let preferences: MediaQueryList[];
+  try {
+    preferences = STUDIO_ACCESSIBILITY_QUERIES.map((query) => window.matchMedia(query));
+  } catch {
+    return () => {};
+  }
+  for (const media of preferences) {
+    if (media.addEventListener) media.addEventListener("change", notify);
+    else media.addListener(notify);
+  }
+  return () => {
+    for (const media of preferences) {
+      if (media.removeEventListener) media.removeEventListener("change", notify);
+      else media.removeListener(notify);
+    }
+  };
+}
+
+const studioServerSnapshot = () => false;
+
+function isStudioSceneBlocked(doc: Document) {
+  return (
+    doc.visibilityState === "hidden" ||
+    STUDIO_BLOCKING_ATTRIBUTES.some((name) => {
+      const value = doc.documentElement.getAttribute(name);
+      return value !== null && value !== "false";
+    })
+  );
+}
+
+function watchStudioSceneVisibility(notify: () => void, doc = document) {
+  let previous: boolean | undefined;
+  const update = () => {
+    const blocked = isStudioSceneBlocked(doc);
+    if (blocked !== previous) {
+      previous = blocked;
+      notify();
+    }
+  };
+  const observer = new MutationObserver(update);
+  observer.observe(doc.documentElement, {
+    attributes: true,
+    attributeFilter: STUDIO_BLOCKING_ATTRIBUTES,
+  });
+  doc.addEventListener("visibilitychange", update);
+  update();
+  return () => {
+    observer.disconnect();
+    doc.removeEventListener("visibilitychange", update);
+  };
+}
+
 /** The original image and its enlargement link remain the accessible fallback.
- * The heavy renderer is loaded only for a visible, explicitly enabled exhibit. */
+ * Only the independent immersive room may load the heavy renderer. */
 export function ExhibitionStudio(props: ExhibitionStudioProps) {
-  const mode = useSyncExternalStore(
-    subscribeUltraMode,
-    getUltraModeSnapshot,
-    getUltraModeServerSnapshot,
+  const motionAllowed = useSyncExternalStore(
+    subscribeStudioPreferences,
+    readStudioMotionAllowed,
+    studioServerSnapshot,
   );
-  const { quality } = useSyncExternalStore(
-    subscribeUltraQuality,
-    getUltraQualitySnapshot,
-    getUltraQualityServerSnapshot,
-  );
-  if ((!mode.enabled && !props.immersive) || !mode.motionAllowed || !props.artworkReady)
-    return props.children;
-  return <StudioView key={`${props.artworkUrl}:${quality}`} {...props} quality={quality} />;
+  if (!props.immersive || !motionAllowed || !props.artworkReady) return props.children;
+  return <StudioView key={props.artworkUrl} {...props} quality="high" />;
 }
 
 function StudioView({
@@ -72,7 +132,7 @@ function StudioView({
     let failed = false;
     let visible = false;
     const allowed = () =>
-      !disposed && visible && !originalRef.current && !isUltraSceneBlocked(document);
+      !disposed && visible && !originalRef.current && !isStudioSceneBlocked(document);
     const sync = () => {
       if (disposed) return;
       const renderer = rendererRef.current;
@@ -129,7 +189,7 @@ function StudioView({
       sync();
     });
     intersection.observe(host);
-    const stopVisibility = watchUltraSceneVisibility(sync);
+    const stopVisibility = watchStudioSceneVisibility(sync);
     return () => {
       disposed = true;
       controller.abort();

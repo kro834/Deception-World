@@ -113,13 +113,13 @@ test("the view contract still detects changes to story data, copy and layout", (
     worldViewContract(homeView.replace("onClick={shufflePoster}", "onClick={revisedHandler}")),
     original,
   );
-  // This readiness marker changes GPU timing, not artwork or rendered layout.
-  assert.deepEqual(
-    worldViewContract(homeView.replace(/\s*data-ultra-artwork-ready=\{artworkReady \? "true" : undefined\}/, "")),
-    original,
-  );
   assert.notEqual(
-    worldViewContract(homeView.replace('className="riders-section"', 'className="riders-section" data-ultra-artwork-ready="true"')).markup,
+    worldViewContract(
+      homeView.replace(
+        'className="riders-section"',
+        'className="riders-section" data-unreviewed-layout="true"',
+      ),
+    ).markup,
     original.markup,
   );
 });

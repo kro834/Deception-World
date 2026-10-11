@@ -1,3 +1,5 @@
+        }
+        if (ready) goPoster(finalPoster);
         shuffleActive.current = false;
         setShuffling(false);
       });
@@ -355,10 +357,7 @@
                 fetchPriority="low"
               />
             </div>
-            <div
-              className="poster-frame"
-              data-ultra-artwork-ready={artworkReady ? "true" : undefined}
-            >
+            <div className="poster-frame">
               <span className="poster-holo-ring" aria-hidden="true" />
               <div className="poster-media">
                 {previous ? (
@@ -490,3 +489,4 @@
                         strokeWidth="1.8"
                         strokeLinecap="round"
                       />
+                      <rect

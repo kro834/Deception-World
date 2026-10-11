@@ -286,7 +286,7 @@ test("wayfinding: the menu and the World header read one chapter line", () => {
     assert.ok(nav.includes(`const marker = ${formula};`), "WorldSectionNav marker drifted");
     assert.match(
       nav,
-      /const landing = parseFloat\(getComputedStyle\(section\)\.scrollMarginTop\) \|\| 0;\s*if \(section\.getBoundingClientRect\(\)\.top <= Math\.max\(marker, landing \+ 8\)\)/,
+      /const landing = parseFloat\(getComputedStyle\(section\)\.scrollMarginTop\) \|\| 0;\s*const rect = section\.getBoundingClientRect\(\);\s*lastBottom = rect\.bottom;\s*if \(rect\.top <= Math\.max\(marker, landing \+ 8\)\)/,
       "WorldSectionNav hash-landing allowance drifted",
     );
   }

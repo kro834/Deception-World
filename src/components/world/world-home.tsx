@@ -23,7 +23,6 @@ import { RisingWorld } from "./rising-world";
 import { WorldAnnexRecords, WorldAnnexRiders } from "./world-annex";
 import { createViewportResizeFilter } from "@/lib/viewport-resize";
 import { createReadyPosterLoader } from "@/lib/ready-poster-loader";
-import { useUltraArtworkReady } from "@/lib/use-ultra-artwork-ready";
 import { warmWorldSwaps } from "./world-swap-warmups";
 import { useDialogHistoryDismiss } from "./use-dialog-history-dismiss";
 import { WorldAtmosphere } from "./world-atmosphere";
@@ -784,18 +783,21 @@ const WorldSectionNav = memo(function WorldSectionNav() {
       }
       const marker = Math.max(92, Math.min(200, window.innerHeight * 0.22));
       let current: WorldSectionId | null = null;
+      let lastBottom = Infinity;
       sections.forEach((section) => {
         // Short landscape viewports can place the native hash landing (96px)
         // just below the visual marker (92px). Count that landing as active.
         // Read every sync, so a route stylesheet that applies late still counts.
         const landing = parseFloat(getComputedStyle(section).scrollMarginTop) || 0;
-        if (section.getBoundingClientRect().top <= Math.max(marker, landing + 8)) {
+        const rect = section.getBoundingClientRect();
+        lastBottom = rect.bottom;
+        if (rect.top <= Math.max(marker, landing + 8)) {
           current = section.id as WorldSectionId;
         }
       });
       // Past the end of the last chapter (the finale, the footer, the RISING
       // gate) no chapter is current, so RECORDS stops lighting the header.
-      if (sections[sections.length - 1].getBoundingClientRect().bottom <= marker) current = null;
+      if (lastBottom <= marker) current = null;
       // An identical update still schedules a render right after a real one.
       if (current === lastActiveRef.current) return;
       lastActiveRef.current = current;
@@ -864,7 +866,6 @@ const WorldSectionNav = memo(function WorldSectionNav() {
 
 export function WorldHome() {
   useWorldMode();
-  const artworkReady = useUltraArtworkReady();
   const { go, notifyOpeningDestination } = useLoadGate();
   const locationHash = useRouterState({ select: (state) => state.location.hash });
   const shellRef = useRef<HTMLDivElement>(null);
@@ -1833,10 +1834,7 @@ export function WorldHome() {
                 fetchPriority="low"
               />
             </div>
-            <div
-              className="poster-frame"
-              data-ultra-artwork-ready={artworkReady ? "true" : undefined}
-            >
+            <div className="poster-frame">
               <span className="poster-holo-ring" aria-hidden="true" />
               <div className="poster-media">
                 {previous ? (
