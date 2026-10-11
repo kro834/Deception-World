@@ -488,3 +488,5 @@ const EPISODES: EpisodeRecord[] = [
   {
     no: "06",
     title: "DEUS",
+    src: "/episode-06-deus.webp",
+    pos: "42% 38%",

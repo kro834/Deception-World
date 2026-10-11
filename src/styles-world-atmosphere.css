@@ -1,6 +1,20 @@
 /* The chapter's own paper and ground remain static. Reading-area changes
    travel through the fixed chrome and two shallow light layers, not a
    full-screen colour wash, filter or continuously running animation. */
+
+/* The chapter colours are written on the bar (and, as a copy for other
+   readers, on the shell). Non-inheriting, so the shell's copy restyles the
+   shell alone, not every element of the page. The bar hands the accent to
+   its own controls through --world-atmosphere-bar-accent below. */
+@property --world-atmosphere-accent {
+  syntax: "*";
+  inherits: false;
+}
+
+@property --world-atmosphere-base {
+  syntax: "*";
+  inherits: false;
+}
 .site-shell.film-edition.mirage-edition .world-atmosphere {
   position: fixed;
   inset: 0 0 auto;
@@ -41,6 +55,7 @@
 
 @media (forced-colors: none) {
   .site-shell.film-edition.mirage-edition[data-world-phase] .topbar {
+    --world-atmosphere-bar-accent: var(--world-atmosphere-accent, #7ae8ff);
     background-image: none;
     background-color: var(--world-atmosphere-base, #03060c);
     border-bottom-color: color-mix(
@@ -53,8 +68,8 @@
   .site-shell.film-edition.mirage-edition[data-world-phase]
     .topbar
     :is(.brand-sigil, .side-panel-trigger) {
-    color: var(--world-atmosphere-accent, #7ae8ff);
-    border-color: color-mix(in srgb, var(--world-atmosphere-accent, #7ae8ff) 54%, transparent);
+    color: var(--world-atmosphere-bar-accent, #7ae8ff);
+    border-color: color-mix(in srgb, var(--world-atmosphere-bar-accent, #7ae8ff) 54%, transparent);
   }
 }
 

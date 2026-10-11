@@ -963,31 +963,34 @@ main.site-shell.film-edition.mirage-edition .story-layout .story-heading .eyebro
     }
   }
 
-  /* 1024-1099: the chip closes up so the longest clears the menu trigger. */
-  @media (min-width: 1024px) and (max-width: 1099px) and (prefers-reduced-motion: no-preference) {
+  /* 1024-1279 (iPad landscape, small laptops): the full words ran under
+     the menu trigger ("05 WO[menu]LES"), so the chip shows the chapter
+     number alone, in the nav's own numbering, and clears the trigger. */
+  @media (min-width: 1024px) and (max-width: 1279px) and (prefers-reduced-motion: no-preference) {
     html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
         [data-dialog-open]
       )
       main.site-shell.film-edition.mirage-edition
       .topbar
-      nav::before,
+      nav::before {
+      content: "04" / "";
+    }
+
     html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
         [data-dialog-open]
       )
       main.site-shell.film-edition.mirage-edition
       .topbar
-      nav::after,
+      nav::after {
+      content: "05" / "";
+    }
+
     html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
         [data-dialog-open]
       )
       main.site-shell.film-edition.mirage-edition
       .topbar-actions::before {
-      left: calc(anchor(right) + 12px);
-      padding-left: 12px;
-      background:
-        linear-gradient(rgb(122 232 255 / 42%) 0 0) 0 50% / 1px 16px no-repeat,
-        linear-gradient(var(--mr-ice) 0 0) 12px 100% / calc(100% - 12px) 2px no-repeat;
-      letter-spacing: 0.02em;
+      content: "06" / "";
     }
   }
 }

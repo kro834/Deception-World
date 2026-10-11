@@ -337,10 +337,15 @@ test("the annex locator is one appended block, gated, silent and opacity-only", 
   const generated = [
     ...block.rules.flatMap((rule) => [...rule.body.matchAll(/content:\s*([^;]+);/g)]),
   ].map((match) => match[1].trim());
+  // rx14: below 1280px the chip shows the number alone ("04"-"06"), since
+  // the full words ran under the menu trigger at 1024-1279.
   assert.deepEqual(generated.sort(), [
     '"04 CAST FILES" / ""',
+    '"04" / ""',
     '"05 WORLD FILES" / ""',
+    '"05" / ""',
     '"06 ARCHIVE LOG" / ""',
+    '"06" / ""',
   ]);
   const annex = read("src/components/world/world-annex.tsx");
   for (const [no, label] of [
