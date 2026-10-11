@@ -136,6 +136,8 @@ test("cache work is bounded and reverse jumps discard future paint before conver
 
 test("stage illumination follows the seal and final forms finish after base assembly", () => {
   assert.ok(ASSEMBLY_BEATS.light[0] >= ASSEMBLY_BEATS.seal[1]);
+  assert.equal(ASSEMBLY_BEATS.form[0], ASSEMBLY_BEATS.light[1]);
+  assert.equal(ASSEMBLY_BEATS.form[1], 0.975);
   assert.equal(assemblyPhase(0.1).phase, "prepare");
   assert.equal(assemblyPhase(0.4).phase, "assemble");
   assert.equal(assemblyPhase(0.88).phase, "seal");
@@ -185,7 +187,10 @@ function scrollAssemblyEnvironment() {
                 data: new Uint8ClampedArray(args.at(-2) * args.at(-1) * 4).fill(255),
               })
             : key === "createRadialGradient"
-              ? () => ({ addColorStop() {} })
+              ? (...args) => {
+                  calls.push({ target: c, method: "createRadialGradient", args });
+                  return { addColorStop() {} };
+                }
               : (...args) => calls.push({ target: c, method: key, args }),
         set: () => true,
       },
@@ -214,6 +219,7 @@ function scrollAssemblyEnvironment() {
   runway.dataset.form = "standard";
   const frames = new Map();
   const observers = [];
+  const imageSources = [];
   let frameId = 0;
   class IntersectionObserver {
     constructor(callback) {
@@ -239,6 +245,7 @@ function scrollAssemblyEnvironment() {
   class Image {
     set src(value) {
       this.url = value;
+      imageSources.push(value);
       queueMicrotask(() => this.onload());
     }
   }
@@ -274,8 +281,54 @@ function scrollAssemblyEnvironment() {
     listeners.get("window:scroll")?.();
     return frame();
   };
-  return { env, runway, canvas, observers, canvases, frames, frame, scroll };
+  return { env, runway, canvas, observers, canvases, frames, frame, scroll, imageSources };
 }
+
+test("reactor glow waits for sealed armor and advanced art waits for the ignition wave", async () => {
+  const t = scrollAssemblyEnvironment();
+  t.runway.dataset.form = "max";
+  const dispose = mountRexonanceAssembly(
+    t.runway,
+    {
+      figure: "/figure",
+      undersuit: "/undersuit",
+      size: { width: 60, height: 120 },
+      pieces: [{ id: "leg", group: "legs", x: 0, y: 0, w: 60, h: 120, seat: [30, 90] }],
+      core: [30, 60],
+      visor: [30, 10],
+      glow: [],
+      forms: { max: "/max", ultra: "/ultra" },
+    },
+    t.env,
+  );
+  try {
+    t.observers[0].callback([{ isIntersecting: true }]);
+    for (let i = 0; i < 100 && t.runway.dataset.rznState !== "live"; i += 1)
+      await new Promise((resolve) => setTimeout(resolve, 5));
+    assert.equal(t.runway.dataset.rznState, "live");
+    const seal = t.scroll(0.89);
+    assert.equal(seal.filter((c) => c.method === "createRadialGradient").length, 0);
+    const ignition = t.scroll(0.905);
+    assert.equal(ignition.filter((c) => c.method === "createRadialGradient").length, 1);
+    assert.equal(t.runway.dataset.rznPhase, "ignite");
+    assert.deepEqual(
+      t.imageSources,
+      ["/figure", "/undersuit"],
+      "fully lit advanced art cannot cover ignition",
+    );
+    t.scroll(0.916);
+    assert.equal(t.runway.dataset.rznPhase, "evolve");
+    assert.deepEqual(t.imageSources, ["/figure", "/undersuit", "/max", "/ultra"]);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    t.scroll(0.975);
+    assert.equal(t.runway.dataset.rznFormComplete, "true");
+    t.scroll(0.914);
+    assert.equal(t.runway.dataset.rznFormComplete, undefined);
+    assert.equal(t.runway.dataset.rznPhase, "ignite");
+  } finally {
+    dispose();
+  }
+});
 
 test("gold converges while scroll rests, reverse work stays bounded, touch art remains capped", async () => {
   const t = scrollAssemblyEnvironment();

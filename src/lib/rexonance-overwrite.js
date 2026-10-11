@@ -366,9 +366,77 @@ export function warpPicture(context, picture, box, own, target) {
   void ph;
 }
 
+/** The supplied frontal EXCELSIOR cutout, inspected in source pixels.
+ * Head means the central forehead crest; shoulders mean their circular
+ * medallions; forearms, knees and feet use the armor/crystal centers.
+ * These are anatomical anchors, not outer silhouette extrema. The one
+ * tail endpoint is the pointed prism at the upper-right curl's lower tip.
+ * Both presentations derive their coordinates from this same reference. */
+export const EXCELSIOR_LANDMARK_REFERENCE = {
+  width: 1022,
+  height: 1880,
+  fit: {
+    left: 125,
+    top: 5,
+    width: 560,
+    height: 1030,
+    originX: 120,
+    frameWidth: 571,
+    frameHeight: 1040,
+  },
+  points: {
+    head: [512, 180],
+    leftShoulder: [324, 431],
+    rightShoulder: [701, 430],
+    core: [510, 495],
+    belt: [509, 750],
+    leftForearm: [165, 790],
+    rightForearm: [854, 790],
+    leftFist: [187, 1010],
+    rightFist: [839, 1000],
+    leftKnee: [325, 1244],
+    rightKnee: [672, 1242],
+    leftFoot: [228, 1750],
+    rightFoot: [772, 1750],
+    tailTip: [954, 550],
+  },
+};
+const EXCELSIOR_PANEL_ANCHORS = [
+  "head",
+  "leftShoulder",
+  "rightShoulder",
+  "core",
+  "belt",
+  "leftForearm",
+  "rightForearm",
+  "leftFist",
+  "rightFist",
+  "leftFoot",
+  "rightFoot",
+  "tailTip",
+];
+const EXCELSIOR_FIGURE_ANCHORS = [
+  ...EXCELSIOR_PANEL_ANCHORS.slice(0, 9),
+  "leftKnee",
+  "rightKnee",
+  ...EXCELSIOR_PANEL_ANCHORS.slice(9),
+];
+const excelsiorLandmarks = (anchors, figure) =>
+  anchors.map((name) => {
+    const { width, height, fit, points } = EXCELSIOR_LANDMARK_REFERENCE;
+    const [x, y] = points[name];
+    return figure
+      ? [
+          (fit.left + (x * fit.width) / width - fit.originX) / fit.frameWidth,
+          (fit.top + (y * fit.height) / height) / fit.frameHeight,
+        ]
+      : [x / width, y / height];
+  });
+
 /** Landmarks of the forms' art (normalised): the head, the shoulders, the
- * core, the belt, the forearms, the fists, the knees, the feet, the tail's
- * tip. `panel`: 03's stage art (1086 × 1448); `figure`: the suit figures
+ * core, the belt, the forearms, the fists, the feet, the tail's tip.
+ * `figure` adds left/right knees before the feet; `panel` has 12 anchors.
+ * `panel`: 03's own stage art; `figure`: the suit figures
  * (normalised to the figure's frame; EXCELSIOR's run past it, its picture
  * being wider — REXONANCE_FORM_PAD). */
 export const FORM_LANDMARKS = {
@@ -387,20 +455,7 @@ export const FORM_LANDMARKS = {
       [0.7, 0.83],
       [0.825, 0.25],
     ],
-    excelsior: [
-      [0.505, 0.145],
-      [0.37, 0.27],
-      [0.71, 0.31],
-      [0.58, 0.34],
-      [0.6, 0.51],
-      [0.165, 0.49],
-      [0.79, 0.525],
-      [0.265, 0.645],
-      [0.905, 0.605],
-      [0.37, 0.85],
-      [0.715, 0.82],
-      [0.865, 0.22],
-    ],
+    excelsior: excelsiorLandmarks(EXCELSIOR_PANEL_ANCHORS, false),
   },
   figure: {
     ultra: [
@@ -419,21 +474,6 @@ export const FORM_LANDMARKS = {
       [0.73, 0.93],
       [0.88, 0.28],
     ],
-    excelsior: [
-      [0.505, 0.095],
-      [0.31, 0.2],
-      [0.69, 0.2],
-      [0.5, 0.255],
-      [0.5, 0.4],
-      [0.08, 0.4],
-      [0.91, 0.4],
-      [0.12, 0.53],
-      [0.87, 0.53],
-      [0.31, 0.65],
-      [0.69, 0.65],
-      [0.23, 0.925],
-      [0.78, 0.93],
-      [0.97, 0.18],
-    ],
+    excelsior: excelsiorLandmarks(EXCELSIOR_FIGURE_ANCHORS, true),
   },
 };

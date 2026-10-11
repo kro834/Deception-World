@@ -501,7 +501,7 @@ export const ASSEMBLY_BEATS = {
   // The lights, held back until the suit is whole, run out from the reactor.
   light: [0.9, 0.915],
   // The form chosen in 03 takes over (MAX / ULTRA) once the suit is lit.
-  form: [0.9, 0.975],
+  form: [0.915, 0.975],
   pixels: [0.855, 0.95],
   rings: [0.865, 0.99],
   complete: 0.93,
@@ -1974,9 +1974,10 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     // The core ignites and rings out.
     const [coreX, coreY] = config.core;
     const rings = B.rings;
+    const ringFrom = Math.max(rings[0], B.light[0]);
     const ringEnd = form === "standard" || !form ? B.complete : B.form[1];
-    if (!calm && progress >= rings[0] && progress < ringEnd) {
-      const glow = Math.sin(Math.PI * span(progress, [rings[0], ringEnd]));
+    if (!calm && progress >= ringFrom && progress < ringEnd) {
+      const glow = Math.sin(Math.PI * span(progress, [ringFrom, ringEnd]));
       if (!buffers.glow) {
         buffers.glow = context.createRadialGradient(coreX, coreY, 0, coreX, coreY, 150);
         buffers.glow.addColorStop(0, "rgb(244 251 255 / 0.9)");
@@ -1989,8 +1990,8 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       context.fillRect(coreX - 150, coreY - 150, 300, 300);
       context.globalCompositeOperation = "source-over";
       for (let ring = 0; ring < 3; ring += 1) {
-        const from = rings[0] + ring * 0.025;
-        const u = clamp01((progress - from) / Math.min(0.075, ringEnd - from));
+        const from = ringFrom + ring * (ringEnd - ringFrom) * 0.18;
+        const u = clamp01((progress - from) / (ringEnd - from));
         if (u <= 0 || u >= 1) continue;
         context.globalAlpha = (1 - u) * 0.9;
         context.strokeStyle = RING_TONES[ring];

@@ -54,3 +54,17 @@ export const FORM_LANDMARKS: {
   panel: { ultra: [number, number][]; excelsior: [number, number][] };
   figure: { ultra: [number, number][]; excelsior: [number, number][] };
 };
+export const EXCELSIOR_LANDMARK_REFERENCE: {
+  width: number;
+  height: number;
+  fit: {
+    left: number;
+    top: number;
+    width: number;
+    height: number;
+    originX: number;
+    frameWidth: number;
+    frameHeight: number;
+  };
+  points: Readonly<Record<string, readonly [number, number]>>;
+};
