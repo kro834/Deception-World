@@ -14,7 +14,10 @@ const FIG = { width: 571, height: 1040 };
 const SUIT = "public/rexonance-suit-20261010";
 const OUT = "public/rexonance-forms-20261011";
 
-const base = await sharp(root(`${SUIT}/figure.webp`)).ensureAlpha().raw().toBuffer();
+const base = await sharp(root(`${SUIT}/figure.webp`))
+  .ensureAlpha()
+  .raw()
+  .toBuffer();
 
 for (const form of ["max", "ultra"]) {
   // sharp extracts before it resizes within one pipeline: two passes.
@@ -32,9 +35,11 @@ for (const form of ["max", "ultra"]) {
     const r = data[i * 3];
     const g = data[i * 3 + 1];
     const b = data[i * 3 + 2];
-    // The ground is black: the light and the armour stand off it; the
-    // finished figure's own silhouette keeps the dark plates opaque.
-    const lit = Math.min(1, Math.max(0, (Math.max(r, g, b) - 10) / 34));
+    // The silhouette is the owner's cut-out of the figure (HIGH's alpha):
+    // the forms share its pose to the pixel. Only real light beyond it (a
+    // bright glow, not the black ground's noise) adds to it, so no dark rim
+    // of the ground comes along (owner, 2026-10-11).
+    const lit = Math.min(1, Math.max(0, (Math.max(r, g, b) - 70) / 60));
     const alpha = Math.max(lit, base[i * 4 + 3] / 255);
     out[i * 4] = r;
     out[i * 4 + 1] = g;

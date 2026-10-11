@@ -64,7 +64,7 @@ export function planOverwrite({ width, height, cell, origin, seed = 1, samples =
 /** Draws the change at `u` (0–1, the overwrite) and `v` (0–1, the extra
  * cells' generation; ignored without extra cells). `tone`: the new form's
  * light (CSS colour). */
-export function drawOverwrite(context, plan, from, to, u, v = 1, tone = "#8cf5e0") {
+export function drawOverwrite(context, plan, from, to, u, v = 1, tone = "#8cf5e0", calm = false) {
   const { cols, rows, cell, width, height, key, extra, flight } = plan;
   const hot = 0.08;
   const lead = 0.05;
@@ -88,6 +88,12 @@ export function drawOverwrite(context, plan, from, to, u, v = 1, tone = "#8cf5e0
     context.drawImage(to, 0, 0, width, height);
   }
   context.restore();
+  // `calm`: the change is held still (a scroll at rest): no transient
+  // squares stay standing on it.
+  if (calm) {
+    context.globalAlpha = 1;
+    return;
+  }
   // Hot squares on the cells flipping now; hairlines on the next ones.
   context.beginPath();
   for (let index = 0; index < key.length; index += 1) {

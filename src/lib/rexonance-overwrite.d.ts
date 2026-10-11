@@ -24,6 +24,7 @@ export function drawOverwrite(
   u: number,
   v?: number,
   tone?: string,
+  calm?: boolean,
 ): void;
 export function sampleCells(
   picture: CanvasImageSource,

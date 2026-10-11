@@ -900,11 +900,24 @@ const goldTrim = (() => {
   for (let i = 0; i < N; i += 1) if (gold[i] && specks[i] < 0.2) gold[i] = 0;
   return gold;
 })();
-// Soft, a pixel wider than the trims, so the raw state covers their fringe.
-const goldSoft = await blurField(
-  Float32Array.from(boxFraction(goldTrim, 1), (v) => (v > 0 ? 1 : 0)),
-  0.8,
-);
+// Soft, wider than the trims, so the raw state covers their fringe. Owner,
+// 2026-10-11: a seated arm or leg showed a thin yellow rim before its gold
+// formed; the mask takes every warm gold-toned pixel within 4 px of a
+// trim (its shadows and highlights), and stays solid to its edge.
+const goldSoft = await (async () => {
+  const near = boxFraction(goldTrim, 4);
+  const grown = boxFraction(goldTrim, 1);
+  const field = new Float32Array(N);
+  for (let i = 0; i < N; i += 1) {
+    const r = rgb[i * 3];
+    const g = rgb[i * 3 + 1];
+    const b = rgb[i * 3 + 2];
+    const warm = Math.max(r, g, b) > 50 && r > b * 1.2 && g > b * 1.02;
+    field[i] = grown[i] > 0 || (near[i] > 0 && warm) ? 1 : 0;
+  }
+  const soft = await blurField(field, 0.8);
+  return Float32Array.from(soft, (v) => Math.min(1, v * 1.6));
+})();
 
 // --- The figure's alpha ---------------------------------------------------
 const protect = await rasterise([BODY], 6);
@@ -986,7 +999,9 @@ const alpha = Float32Array.from({ length: N }, (_, i) =>
 {
   const CUT = { width: 999, height: 1835, left: 30, top: 51 };
   const { data: cut } = await sharp(
-    fileURLToPath(new URL("../design/rexonance-suit/rexonance-cutout-20261011.webp", import.meta.url)),
+    fileURLToPath(
+      new URL("../design/rexonance-suit/rexonance-cutout-20261011.webp", import.meta.url),
+    ),
   )
     .resize(CUT.width, CUT.height, { fit: "fill", kernel: "lanczos3" })
     .ensureAlpha()
@@ -1214,39 +1229,9 @@ const formLight = await blurField(
     const l = (0.2126 * rgb[i * 3] + 0.7152 * rgb[i * 3 + 1] + 0.0722 * rgb[i * 3 + 2]) / 255;
     return l * bodyMask[i];
   }),
-  4,
+  9,
 );
 const inner = await blurField(bodyMask, 9);
-const hexSvg = (() => {
-  const size = 15;
-  const h = size * Math.sqrt(3);
-  let d = "";
-  for (let row = -1; row * h < H + h; row += 1) {
-    for (let col = -1; col * size * 3 < W + size * 3; col += 1) {
-      for (const [ox, oy] of [
-        [0, 0],
-        [size * 1.5, h / 2],
-      ]) {
-        const cx = col * size * 3 + ox;
-        const cy = row * h + oy;
-        d += `M${(cx + size).toFixed(1)} ${cy.toFixed(1)}`;
-        for (let k = 1; k <= 6; k += 1) {
-          const a = (k * Math.PI) / 3;
-          d += `L${(cx + Math.cos(a) * size).toFixed(1)} ${(cy + Math.sin(a) * size).toFixed(1)}`;
-        }
-      }
-    }
-  }
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}"><rect width="${W}" height="${H}" fill="#000"/><path d="${d}" fill="none" stroke="#fff" stroke-width="1.3"/></svg>`;
-})();
-const hex = await (async () => {
-  const { data } = await sharp(Buffer.from(hexSvg))
-    .greyscale()
-    .raw()
-    .toBuffer({ resolveWithObject: true });
-  const step = data.length / N;
-  return Float32Array.from({ length: N }, (_, i) => data[i * step] / 255);
-})();
 const seamSvg = (width, colour) =>
   `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}"><rect width="${W}" height="${H}" fill="#000"/>${SEAMS.map(
     (line) =>
@@ -1262,22 +1247,92 @@ const seamField = async (width, blur) => {
 const seamLine = await seamField(2.6, 0);
 const seamGlow = await seamField(9, 5);
 const suit = Buffer.alloc(N * 3);
+// Owner, 2026-10-11: the bare body before the armour has its own detail —
+// no ornament, but a muscle-fibre grain running the way each muscle runs
+// (pecs fanning to the armpit, deltoids from the shoulder, the arms along
+// their length, the abdomen's columns and bands, the thighs' long diagonal,
+// the calves), with a soft volume; its face is only its lights.
+const CX = MID / 2;
+const fibreNoise = (x, y) => {
+  const xi = Math.floor(x);
+  const yi = Math.floor(y);
+  const fx = x - xi;
+  const fy = y - yi;
+  const h = (a, b) => hash(a * 7 + 13, b * 11 + 5);
+  const sx = fx * fx * (3 - 2 * fx);
+  const sy = fy * fy * (3 - 2 * fy);
+  const top = h(xi, yi) + (h(xi + 1, yi) - h(xi, yi)) * sx;
+  const bottom = h(xi, yi + 1) + (h(xi + 1, yi + 1) - h(xi, yi + 1)) * sx;
+  return top + (bottom - top) * sy;
+};
+// The fibre's cross coordinate (px) and its spacing at a point of the body.
+const fibre = (x, y) => {
+  const ax = Math.abs(x - CX);
+  if (y < 380) return null; // the head: smooth
+  if (y < 440) return [ax, 6.5]; // the neck: upright
+  if (y < 640 && ax < 190) {
+    // The pecs fan from the sternum to the armpit.
+    return [Math.atan2(y - 500, 205 - ax) * 150, 7];
+  }
+  if (y < 660) {
+    // The deltoids fall from the top of the shoulder.
+    return [Math.atan2(y - 430, ax - 225) * 120, 6.5];
+  }
+  if (ax > 175 && y < 1110) {
+    // The arms, along their length (shoulder to wrist leans outward).
+    return [(ax * 500 - y * 160) / 525, 6];
+  }
+  if (y < 885) {
+    // The abdomen: two columns either side of the midline; obliques beyond.
+    if (ax < 105) return [ax, 7.5];
+    return [ax * 0.72 + y * 0.69, 7];
+  }
+  // The legs: the thigh's long diagonal to the knee, then the calf upright.
+  if (y < 1300) return [ax + (y - 885) * 0.22, 6.5];
+  return [ax, 6];
+};
+const bands = [700, 762, 824]; // the abdomen's tendinous bands
 for (let i = 0; i < N; i += 1) {
   const x = i % W;
+  const y = (i - x) / W;
   const m = bodyMask[i];
   if (!m) continue;
-  const form = formLight[i] / Math.max(0.05, inner[i] > 0.02 ? 1 : 1);
+  const form = formLight[i];
   // Lit from the top left, cool on the left and warm-violet on the right.
-  const side = x < MID / 2 ? 0 : 1;
+  const side = x < CX ? 0 : 1;
   const edge = Math.max(0, m - inner[i]) * 1.8;
-  const mesh = hex[i] * 0.16;
-  const seam = seamLine[i] * 0.85 + seamGlow[i] * 0.35;
-  const base = [9 + form * 70, 14 + form * 84, 24 + form * 108];
+  // Volume: brighter on the muscle's crown, darker toward the body's edge.
+  const volume = 0.72 + 0.4 * inner[i];
+  let grain = 1;
+  const f = fibre(x, y);
+  if (f) {
+    const [p, spacing] = f;
+    const warp = fibreNoise(x / 38, y / 38) * 2.2;
+    const wave = 0.5 + 0.5 * Math.cos((2 * Math.PI * p) / spacing + warp);
+    // Raised fibres with fine dark grooves between them.
+    grain = 0.66 + 0.5 * wave ** 1.6;
+    const ax = Math.abs(x - CX);
+    if (y > 650 && y < 885 && ax < 105) {
+      for (const band of bands) {
+        const d = Math.abs(y - band - (ax * ax) / 900);
+        if (d < 4) grain *= 0.55 + 0.45 * (d / 4);
+      }
+      if (ax < 3) grain *= 0.62; // the linea alba
+    }
+  }
+  const seam = seamLine[i] * 0.22 + seamGlow[i] * 0.08;
+  const base = [9 + form * 62, 13 + form * 74, 22 + form * 96];
   const rim = side ? [255, 150, 225] : CYAN;
   for (let c = 0; c < 3; c += 1) {
-    const value =
-      base[c] + mesh * 120 * (c === 0 ? 0.6 : 1) + edge * rim[c] * 0.42 + seam * CYAN[c];
+    const value = base[c] * grain * volume + edge * rim[c] * 0.36 + seam * CYAN[c];
     suit[i * 3 + c] = Math.round(Math.min(255, value));
+  }
+  // The face: only its lights (the cyan and pink V), lit.
+  const g = glow[i];
+  // (Not the helmet's gold that edges the V in the art.)
+  if (g && !(rgb[i * 3] > rgb[i * 3 + 2] * 1.2 && rgb[i * 3 + 1] > rgb[i * 3 + 2] * 1.02)) {
+    for (let c = 0; c < 3; c += 1)
+      suit[i * 3 + c] = Math.round(suit[i * 3 + c] * (1 - g) + rgb[i * 3 + c] * g);
   }
 }
 const UNDERSUIT = await writeWebp(

@@ -1574,6 +1574,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
             span(progress, [a, b - 0.005]),
             1,
             FORM_TONES.max,
+            calm,
           );
         } else {
           const quick = a + (b - a) * 0.3;
@@ -1586,6 +1587,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
               span(progress, [a, quick]),
               1,
               FORM_TONES.max,
+              calm,
             );
           else
             drawOverwrite(
@@ -1596,6 +1598,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
               span(progress, [quick, quick + (b - quick) * 0.62]),
               span(progress, [quick + (b - quick) * 0.42, b]),
               FORM_TONES.ultra,
+              calm,
             );
         }
       }
