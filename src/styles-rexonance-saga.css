@@ -94,6 +94,20 @@
   color: #fff;
 }
 
+/* The shared rx14 observer follows the chapter in view, independently of a
+   hash change or motion support. Underlining also identifies it without color. */
+html[data-family="special"]
+  body
+  .rxs-page:is(.rxs-rexonance-page, .exs-page)
+  > header.rxs-local-nav
+  nav
+  a[aria-current="location"] {
+  color: var(--rxs-gold);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.45em;
+}
+
 /* Hover answers a fine pointer only: after a tap, touch browsers keep :hover
    on the link, which would leave it lit (and the tabs and footer links below
    lifted) until the next tap elsewhere. */

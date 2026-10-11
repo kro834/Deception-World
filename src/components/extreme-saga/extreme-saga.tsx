@@ -9,6 +9,7 @@ import { initRail } from "@/lib/liquid/boot.js";
 import { mountExtremeMotion, mountExtremeNavReserve } from "@/lib/extreme-motion.js";
 import { mountExtremeImpact } from "@/lib/extreme-impact.js";
 import { mountExtremeFightCard } from "@/lib/extreme-fightcard.js";
+import { mountLocalNavCurrent } from "@/lib/local-nav-current";
 import { ExtremeImpactDefs } from "./extreme-impact-art";
 
 type ExtremeStage = "middle" | "ultra";
@@ -492,6 +493,7 @@ export function ExtremeSaga() {
   const shownArt = EXTREME_STAGES[shownStage];
 
   useEffect(() => mountExtremeNavReserve(pageRef.current), []);
+  useEffect(() => mountLocalNavCurrent(pageRef.current?.querySelector(".rxs-local-nav nav")), []);
   useEffect(() => mountExtremeMotion(pageRef.current, setMotionReady), []);
   useEffect(() => mountExtremeImpact(pageRef.current), []);
   useEffect(() => mountExtremeFightCard(pageRef.current), []);

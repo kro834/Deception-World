@@ -202,15 +202,21 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-hero > .exi-
   }
 }
 
-/* The figure turns against its light under a fine pointer (inline
-   transform from the engine): its plane is kept for the compositor. */
-@media (hover: hover) and (pointer: fine) {
+/* Isolate each round's counters and impact style invalidation without
+   clipping its blade or changing its intrinsic height / sticky stage. */
+html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-section {
+  contain: layout style;
+}
+
+/* The same three planes provide scroll depth on touch and pointer tilt
+   on desktop. Keep them composited in either input mode while armed. */
+@media (prefers-reduced-motion: no-preference) {
   html[data-family="special"]
     body
     .rxs-page.rxs-page.exs-page[data-exi-armed="true"]
     > .exs-hero
     :is(.rxs-hero-visual, .exi-rays, .exi-shards) {
-    will-change: transform;
+    will-change: transform, opacity;
   }
 }
 
@@ -699,15 +705,15 @@ html[data-family="special"]
 }
 
 /* The old form stands behind the cut (the STAGE scene's ink had covered
-   the overdrive's backdrop, so every change of form opened on black). The
-   same crop as the art: cover, 50% 18%. */
+   the overdrive's backdrop, so every change of form opened on black).
+   Match the contained portrait and seam in the pixel-bounded rx15 canvas. */
 html[data-family="special"]
   body
   .rxs-page.rxs-page.exs-page
   > #stages
   #exs-stage-panel[data-exo-cut="true"]
   > figure[data-form="ultra"] {
-  background: var(--ext-ink) url("/saga-extreme-middle-20261006.webp") 50% 18% / cover no-repeat;
+  background: var(--ext-ink) url("/saga-extreme-middle-20261006.webp") 50% 0 / contain no-repeat;
 }
 
 html[data-family="special"]
@@ -716,7 +722,7 @@ html[data-family="special"]
   > #stages
   #exs-stage-panel[data-exo-cut="true"]
   > figure[data-form="middle"] {
-  background: var(--ext-ink) url("/saga-extreme-ultra-20261006.jpeg") 50% 18% / cover no-repeat;
+  background: var(--ext-ink) url("/saga-extreme-ultra-20261006.jpeg") 50% 0 / contain no-repeat;
 }
 
 /* ================================================================
@@ -994,7 +1000,7 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer > .ex
     animation: exi-shock 560ms var(--exi-out) both;
   }
 
-  /* P14: once both counts land, the tuning is stamped. */
+  /* P14: the result stays readable while both counts land, then stamps. */
   html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
       [data-loading]
     ):not([data-dialog-open])
@@ -1003,7 +1009,7 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer > .ex
     .rxs-p14-overview[data-exi-hit=""]
     .exo-read:nth-child(3)
     dd {
-    opacity: 0;
+    opacity: 1;
   }
 
   html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
@@ -1015,7 +1021,7 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer > .ex
     .exo-read:nth-child(3)
     dd {
     transform-origin: 0 60%;
-    animation: exi-stamp 520ms var(--exi-hit) 950ms both;
+    animation: exi-stamp 520ms var(--exi-hit) 950ms forwards;
   }
 
   /* ROUND 2. When the core is reached the chip stands up from its board
@@ -1842,9 +1848,9 @@ html[data-press-ready][data-family="special"]
 
 @keyframes exi-stamp {
   0% {
-    opacity: 0;
-    scale: 2.2;
-    rotate: -9deg;
+    opacity: 1;
+    scale: 1.12;
+    rotate: -2deg;
   }
   55% {
     opacity: 1;

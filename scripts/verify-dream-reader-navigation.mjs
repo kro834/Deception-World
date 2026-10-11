@@ -38,6 +38,42 @@ try {
   ]) {
     const context = await browser.newContext({ viewport, reducedMotion: "reduce", hasTouch: true });
     const page = await context.newPage();
+    if (process.env.NAV_CPU_RATE && engine === "chromium") {
+      const cdp = await context.newCDPSession(page);
+      await cdp.send("Emulation.setCPUThrottlingRate", { rate: Number(process.env.NAV_CPU_RATE) });
+    }
+    if (process.env.DEBUG_NAV) {
+      await page.addInitScript(() => {
+        window.__navTrace = [];
+        for (const type of [
+          "keydown",
+          "keyup",
+          "click",
+          "focusin",
+          "hashchange",
+          "popstate",
+          "toggle",
+        ]) {
+          window.addEventListener(
+            type,
+            (event) =>
+              window.__navTrace.push({
+                type,
+                key: event.key,
+                target:
+                  event.target?.id || event.target?.getAttribute?.("href") || event.target?.tagName,
+                focus:
+                  document.activeElement?.id ||
+                  document.activeElement?.getAttribute?.("href") ||
+                  document.activeElement?.tagName,
+                hash: location.hash,
+                open: document.getElementById("dream-chronicle-case-3")?.open,
+              }),
+            true,
+          );
+        }
+      });
+    }
     const errors = [];
     page.on("pageerror", (error) => errors.push(error.message));
     await page.goto(`${base}/dream-chapter#dream-case-2`, { waitUntil: "domcontentloaded" });
@@ -67,7 +103,13 @@ try {
     await current(page, "3");
 
     await page.locator('#dream-case-note-3 a[href="#dream-chronicle-case-3"]').press("Enter");
-    await page.waitForFunction(() => document.getElementById("dream-chronicle-case-3")?.open);
+    try {
+      await page.waitForFunction(() => document.getElementById("dream-chronicle-case-3")?.open);
+    } catch (error) {
+      if (process.env.DEBUG_NAV)
+        console.log(JSON.stringify(await page.evaluate(() => window.__navTrace)));
+      throw error;
+    }
     await landed(page, "dream-chronicle-case-3");
     await current(page, "3");
     await page.goBack();

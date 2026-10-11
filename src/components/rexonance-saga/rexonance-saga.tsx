@@ -33,12 +33,16 @@ import {
   REXONANCE_SUIT_UNDERSUIT,
 } from "@/lib/rexonance-suit";
 import { rexonanceImage } from "@/lib/rexonance-images";
+import { autoSizedImageRef } from "@/lib/auto-sized-image";
 import { REXONANCE_SITE_ARTWORK } from "@/lib/rexonance-site-artwork";
 import { supportsIOS27Enhancements } from "@/lib/rendering-profile";
 import { warmRexonanceStages } from "@/lib/warm-rexonance-stages";
+import { mountLocalNavCurrent } from "@/lib/local-nav-current";
 
 type P14Baseline = "p1" | "p2";
 type PerformanceBaseline = "vertex" | "vinculum" | "extreme";
+
+const p14ImageRef = autoSizedImageRef(rexonanceImage("/rexonance-p14-core.jpg", true).sizes!);
 
 const STAGES: Record<
   RexonanceStage,
@@ -1064,6 +1068,7 @@ export function RexonanceSaga() {
   // rendering and page visibility itself, so a form, menu or baseline change
   // never restarts it.
   useEffect(() => mountRexonanceResonance(pageRef.current), []);
+  useEffect(() => mountLocalNavCurrent(pageRef.current?.querySelector(".rxs-local-nav nav")), []);
 
   useEffect(() => {
     // Where view timelines run, the motion sheet's recede already follows the
@@ -1321,6 +1326,7 @@ export function RexonanceSaga() {
             <img
               src="/rexonance-p14-core.jpg"
               {...rexonanceImage("/rexonance-p14-core.jpg", true)}
+              ref={p14ImageRef}
               alt="青い回路に接続されたP14演算コア"
               width="1000"
               height="1000"

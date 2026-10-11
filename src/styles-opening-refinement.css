@@ -1,6 +1,6 @@
 /* One title, one light path. Preserve the seven-second score, approved logo
    geometry and control deck; let the background recede as the prism arrives.
-   The first frame is already an entrance, not a seven-second loading gate. */
+   The entrance appears when the title completes or the visitor skips it. */
 .cine-stage.cine-stage {
   --op-halo-rest: 0.72;
   --op-rays-rest: 0.42;
@@ -103,10 +103,15 @@
   background-color: rgb(122 232 255 / 3%);
 }
 
-/* The main plate is present and usable while the title plays. It reuses the
-   final deck's exact geometry, so skipping never shifts the art or focus.
-   The disabled replay plate takes no space until there is a film to replay. */
+/* Keep the entrance outside the opening score and keyboard focus until the
+   title completes. Skip reveals the same final deck without shifting it. */
+.cine-stage:not([data-opening-entry="ready"]) .cine-replay-slot {
+  visibility: hidden;
+  pointer-events: none;
+}
+
 .cine-stage[data-opening-entry="ready"] .cine-replay-slot {
+  visibility: visible;
   opacity: 1;
   pointer-events: auto;
   transform: none;
