@@ -57,7 +57,7 @@ for (const form of ["max", "ultra"]) {
 // is fitted to the figure by its bounds — the same height head to toe, the
 // same centre, standing on the same ground — on the same black-ground alpha.
 {
-  const src = root("design/rexonance-suit/rexonance-excelsior-20261011.webp");
+  const src = root("design/rexonance-suit/rexonance-excelsior-20261012.webp");
   const { data, info } = await sharp(src).removeAlpha().raw().toBuffer({ resolveWithObject: true });
   const bounds = (pixels, width, height, channels, test) => {
     let x0 = width, y0 = height, x1 = 0, y1 = 0;

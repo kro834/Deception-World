@@ -267,3 +267,171 @@ export const FORM_TONES = {
  * Rexonance a short run to MAX first, then the overwrite to ULTRA and its
  * additional parts. */
 export const FORM_CHANGE_MS = { max: 1100, quick: 420, ultra: 900, extra: 560, excelsior: 1100 };
+
+/* The pose between two forms (owner, 2026-10-12): where two forms' art
+   stand a little differently (an arm, a leg, the tail), the change carries
+   the limbs over a little at a time. Landmarks are matched points of the two
+   pictures (normalised 0–1); warpPicture draws a picture with its landmarks
+   moved part of the way to the other's, through a coarse mesh of affine
+   triangles (displacement by inverse-distance weighting, the frame's edge
+   held still). */
+const MESH = { cols: 8, rows: 10 };
+const affine = (s, d) => {
+  // Maps source triangle s ([x,y]×3) onto destination triangle d.
+  const [[x0, y0], [x1, y1], [x2, y2]] = s;
+  const [[u0, v0], [u1, v1], [u2, v2]] = d;
+  const det = (x1 - x0) * (y2 - y0) - (x2 - x0) * (y1 - y0) || 1e-6;
+  const a = ((u1 - u0) * (y2 - y0) - (u2 - u0) * (y1 - y0)) / det;
+  const c = ((u2 - u0) * (x1 - x0) - (u1 - u0) * (x2 - x0)) / det;
+  const b = ((v1 - v0) * (y2 - y0) - (v2 - v0) * (y1 - y0)) / det;
+  const dd = ((v2 - v0) * (x1 - x0) - (v1 - v0) * (x2 - x0)) / det;
+  return [a, b, c, dd, u0 - a * x0 - c * y0, v0 - b * x0 - dd * y0];
+};
+/** Draws `picture` (box: x, y, w, h on the context) with its landmarks
+ * `own` moved to `target` (both normalised to the box). */
+export function warpPicture(context, picture, box, own, target) {
+  const { x, y, w, h } = box;
+  const anchors = [];
+  for (let i = 0; i <= 4; i += 1)
+    for (const [px, py] of [
+      [i / 4, 0],
+      [i / 4, 1],
+      [0, i / 4],
+      [1, i / 4],
+    ])
+      anchors.push([px, py, 0, 0]);
+  const points = own
+    .map(([px, py], i) => [px, py, target[i][0] - px, target[i][1] - py])
+    .concat(anchors);
+  const moved = (px, py) => {
+    let sx = 0;
+    let sy = 0;
+    let sw = 0;
+    for (const [qx, qy, dx, dy] of points) {
+      const d2 = (px - qx) ** 2 + ((py - qy) * (h / w)) ** 2;
+      const wgt = 1 / (d2 * d2 + 1e-7);
+      sx += dx * wgt;
+      sy += dy * wgt;
+      sw += wgt;
+    }
+    return [px + sx / sw, py + sy / sw];
+  };
+  const { cols, rows } = MESH;
+  const grid = [];
+  for (let r = 0; r <= rows; r += 1)
+    for (let c = 0; c <= cols; c += 1) {
+      const px = c / cols;
+      const py = r / rows;
+      const edge = c === 0 || r === 0 || c === cols || r === rows;
+      const [mx, my] = edge ? [px, py] : moved(px, py);
+      grid.push([
+        [x + px * w, y + py * h],
+        [x + mx * w, y + my * h],
+      ]);
+    }
+  const at = (r, c) => grid[r * (cols + 1) + c];
+  const base = context.getTransform();
+  const pw = picture.width || w;
+  const ph = picture.height || h;
+  for (let r = 0; r < rows; r += 1)
+    for (let c = 0; c < cols; c += 1) {
+      const quad = [at(r, c), at(r, c + 1), at(r + 1, c + 1), at(r + 1, c)];
+      for (const tri of [
+        [quad[0], quad[1], quad[2]],
+        [quad[0], quad[2], quad[3]],
+      ]) {
+        const [a, b, cc, d, e, f] = affine(
+          tri.map(([s]) => s),
+          tri.map(([, t]) => t),
+        );
+        context.save();
+        context.beginPath();
+        // A hair larger than the triangle, so the seams never show.
+        const [cx, cy] = tri.reduce(([sx, sy], [, [tx, ty]]) => [sx + tx / 3, sy + ty / 3], [0, 0]);
+        tri.forEach(([, [tx, ty]], i) => {
+          const gx = tx + Math.sign(tx - cx) * 0.6;
+          const gy = ty + Math.sign(ty - cy) * 0.6;
+          if (i) context.lineTo(gx, gy);
+          else context.moveTo(gx, gy);
+        });
+        context.closePath();
+        context.clip();
+        context.transform(a, b, cc, d, e, f);
+        context.drawImage(picture, x, y, w, h);
+        context.restore();
+      }
+    }
+  context.setTransform(base);
+  void pw;
+  void ph;
+}
+
+/** Landmarks of the forms' art (normalised): the head, the shoulders, the
+ * core, the belt, the forearms, the fists, the knees, the feet, the tail's
+ * tip. `panel`: 03's stage art (1086 × 1448); `figure`: the suit figures. */
+export const FORM_LANDMARKS = {
+  panel: {
+    ultra: [
+      [0.5, 0.175],
+      [0.375, 0.27],
+      [0.7, 0.32],
+      [0.58, 0.33],
+      [0.6, 0.51],
+      [0.21, 0.46],
+      [0.785, 0.525],
+      [0.25, 0.65],
+      [0.9, 0.61],
+      [0.38, 0.85],
+      [0.7, 0.83],
+      [0.825, 0.25],
+    ],
+    excelsior: [
+      [0.505, 0.145],
+      [0.37, 0.27],
+      [0.71, 0.31],
+      [0.58, 0.34],
+      [0.6, 0.51],
+      [0.165, 0.49],
+      [0.79, 0.525],
+      [0.265, 0.645],
+      [0.905, 0.605],
+      [0.37, 0.85],
+      [0.715, 0.82],
+      [0.865, 0.22],
+    ],
+  },
+  figure: {
+    ultra: [
+      [0.495, 0.1],
+      [0.3, 0.22],
+      [0.67, 0.22],
+      [0.49, 0.25],
+      [0.49, 0.39],
+      [0.15, 0.4],
+      [0.85, 0.4],
+      [0.17, 0.53],
+      [0.81, 0.53],
+      [0.3, 0.65],
+      [0.65, 0.65],
+      [0.3, 0.93],
+      [0.73, 0.93],
+      [0.88, 0.28],
+    ],
+    excelsior: [
+      [0.505, 0.095],
+      [0.31, 0.2],
+      [0.69, 0.2],
+      [0.5, 0.255],
+      [0.5, 0.4],
+      [0.08, 0.4],
+      [0.91, 0.4],
+      [0.12, 0.53],
+      [0.87, 0.53],
+      [0.31, 0.65],
+      [0.69, 0.65],
+      [0.23, 0.925],
+      [0.78, 0.93],
+      [0.97, 0.18],
+    ],
+  },
+};

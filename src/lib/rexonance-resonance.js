@@ -1,4 +1,11 @@
-import { FORM_TONES, drawOverwrite, planOverwrite, sampleCells } from "./rexonance-overwrite.js";
+import {
+  FORM_LANDMARKS,
+  FORM_TONES,
+  drawOverwrite,
+  planOverwrite,
+  sampleCells,
+  warpPicture,
+} from "./rexonance-overwrite.js";
 import { splitLights } from "./rexonance-unlit.js";
 /** RESONANCE (rx11) for /rexonance-saga: the hits a stylesheet cannot time.
  *
@@ -1591,18 +1598,36 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
             FORM_TONES.ultra,
             calm,
           );
-        else
+        else {
+          // ULTRA and EXCELSIOR stand a little differently (owner,
+          // 2026-10-12): their limbs are carried over a little at a time.
+          const u = span(progress, [toUltra, toUltra + (b - toUltra) * 0.6]);
+          const e = u * u * (3 - 2 * u);
+          const own = FORM_LANDMARKS.figure.ultra;
+          const goal = FORM_LANDMARKS.figure.excelsior;
+          const mid = own.map(([x, y], i) => [x + (goal[i][0] - x) * e, y + (goal[i][1] - y) * e]);
+          const box = { x: 0, y: 0, w: W, h: H };
+          for (const [sheetCanvas, picture, landmarks] of [
+            [forms.warp[0], forms.ultra, own],
+            [forms.warp[1], forms.excelsior, goal],
+          ]) {
+            const c = sheetCanvas.getContext("2d");
+            c.setTransform(1, 0, 0, 1, 0, 0);
+            c.clearRect(0, 0, W, H);
+            warpPicture(c, picture, box, landmarks, mid);
+          }
           drawOverwrite(
             context,
             forms.plans.excelsior,
-            forms.ultra,
-            forms.excelsior,
+            forms.warp[0],
+            forms.warp[1],
             span(progress, [toUltra, toUltra + (b - toUltra) * 0.6]),
             span(progress, [toUltra + (b - toUltra) * 0.38, b]),
             FORM_TONES.excelsior,
             calm,
             "shard",
           );
+        }
       } else if (forms && form !== "excelsior") {
         const [a, b] = B.form;
         if (form === "max") {
@@ -1949,6 +1974,9 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
           max,
           ultra,
           excelsior,
+          warp: [0, 1].map(() =>
+            Object.assign(document.createElement("canvas"), { width: W, height: H }),
+          ),
           plans: {
             max: grid,
             ultra:

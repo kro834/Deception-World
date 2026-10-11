@@ -43,3 +43,14 @@ export const FORM_CHANGE_MS: {
   extra: number;
   excelsior: number;
 };
+export function warpPicture(
+  context: CanvasRenderingContext2D,
+  picture: CanvasImageSource & { width?: number; height?: number },
+  box: { x: number; y: number; w: number; h: number },
+  own: readonly (readonly [number, number])[],
+  target: readonly (readonly [number, number])[],
+): void;
+export const FORM_LANDMARKS: {
+  panel: { ultra: [number, number][]; excelsior: [number, number][] };
+  figure: { ultra: [number, number][]; excelsior: [number, number][] };
+};

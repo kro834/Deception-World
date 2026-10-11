@@ -38,10 +38,12 @@ import { rexonanceImage } from "@/lib/rexonance-images";
 import { REXONANCE_FORM_FIGURES } from "@/lib/rexonance-forms";
 import {
   FORM_CHANGE_MS,
+  FORM_LANDMARKS,
   FORM_TONES,
   drawOverwrite,
   planOverwrite,
   sampleCells,
+  warpPicture,
 } from "@/lib/rexonance-overwrite.js";
 import { autoSizedImageRef } from "@/lib/auto-sized-image";
 import { REXONANCE_SITE_ARTWORK } from "@/lib/rexonance-site-artwork";
@@ -660,6 +662,9 @@ function FormMorph({
           .split(" ")
           .map((part) => (part.endsWith("%") ? Number.parseFloat(part) / 100 : 0.5));
         const prepared = new Map<Source, HTMLCanvasElement>();
+        // Where each panel picture stands in the canvas (for the pose warp).
+        const boxes = new Map<Source, { x: number; y: number; w: number; h: number }>();
+        const pictures = new Map(loaded);
         for (const [source, image] of loaded) {
           const sheet = Object.assign(document.createElement("canvas"), { width: W, height: H });
           const c = sheet.getContext("2d")!;
@@ -669,13 +674,14 @@ function FormMorph({
             // The panel's own object-fit (contain on this page): drawn any
             // other way, the change showed the art enlarged (owner, 2026-10-12).
             const scale = (style.objectFit === "cover" ? Math.max : Math.min)(W / nw, H / nh);
-            c.drawImage(
-              image,
-              (W - nw * scale) * (px ?? 0.5),
-              (H - nh * scale) * (py ?? 0.5),
-              nw * scale,
-              nh * scale,
-            );
+            const box = {
+              x: (W - nw * scale) * (px ?? 0.5),
+              y: (H - nh * scale) * (py ?? 0.5),
+              w: nw * scale,
+              h: nh * scale,
+            };
+            boxes.set(source, box);
+            c.drawImage(image, box.x, box.y, box.w, box.h);
           } else {
             c.fillStyle = "#04070d";
             c.fillRect(0, 0, W, H);
@@ -703,6 +709,13 @@ function FormMorph({
             ? planOverwrite({ ...base, samples: { from: fromCells, to: toCells } })
             : grid;
         });
+        // ULTRA and EXCELSIOR stand a little differently (owner, 2026-10-12):
+        // through their change the limbs are carried over a little at a time.
+        const posed = (step: Step) => step.a === "panel:ultra" && step.b === "panel:excelsior";
+        const sheet = () =>
+          Object.assign(document.createElement("canvas"), { width: W, height: H });
+        const warpA = steps.some(posed) ? sheet() : null;
+        const warpB = steps.some(posed) ? sheet() : null;
         const tail = steps.at(-1)!.extra ? FORM_CHANGE_MS.extra * 0.6 : 0;
         const total = steps.reduce((sum, step) => sum + step.ms, 0) + tail;
         let start = 0;
@@ -721,13 +734,42 @@ function FormMorph({
           const v = step.extra
             ? Math.min(1, Math.max(0, (t - step.ms * 0.6) / FORM_CHANGE_MS.extra))
             : 1;
+          // The canvas moves with the picture (its scroll settle and its
+          // lean), so nothing jumps when it hands back to the picture.
+          const live = getComputedStyle(img);
+          canvas.style.transform = live.transform;
+          canvas.style.scale = live.scale;
+          canvas.style.translate = live.translate;
+          canvas.style.transformOrigin = live.transformOrigin;
+          let fromSheet: HTMLCanvasElement = prepared.get(step.a)!;
+          let toSheet: HTMLCanvasElement = prepared.get(step.b)!;
+          if (posed(step) && warpA && warpB) {
+            const e = u * u * (3 - 2 * u);
+            const own = FORM_LANDMARKS.panel.ultra;
+            const goal = FORM_LANDMARKS.panel.excelsior;
+            const mid = own.map(
+              ([x, y], i) =>
+                [x + (goal[i][0] - x) * e, y + (goal[i][1] - y) * e] as [number, number],
+            );
+            for (const [target, source, landmarks] of [
+              [warpA, step.a, own],
+              [warpB, step.b, goal],
+            ] as const) {
+              const c = target.getContext("2d")!;
+              c.setTransform(1, 0, 0, 1, 0, 0);
+              c.clearRect(0, 0, W, H);
+              warpPicture(c, pictures.get(source)!, boxes.get(source)!, landmarks, mid);
+            }
+            fromSheet = warpA;
+            toSheet = warpB;
+          }
           context.setTransform(1, 0, 0, 1, 0, 0);
           context.clearRect(0, 0, W, H);
           drawOverwrite(
             context,
             plans[index],
-            prepared.get(step.a)!,
-            prepared.get(step.b)!,
+            fromSheet,
+            toSheet,
             u,
             v,
             step.tone,
@@ -736,7 +778,8 @@ function FormMorph({
           );
           if (now - start >= total) {
             canvas.style.opacity = "0";
-            for (const sheet of prepared.values()) sheet.width = sheet.height = 0;
+            for (const done of [...prepared.values(), warpA, warpB])
+              if (done) done.width = done.height = 0;
             return;
           }
           frame = requestAnimationFrame(tick);
