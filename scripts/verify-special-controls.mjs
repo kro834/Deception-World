@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { chromium, webkit } from "playwright";
+import { assertSpecialControlLayout } from "./special-control-layout.mjs";
 
 const engine = process.env.PW_ENGINE === "webkit" ? webkit : chromium;
 const browser = await engine.launch(engine === chromium ? { channel: "chrome" } : {});
@@ -64,8 +65,7 @@ async function checkTextEnlargement(route, width) {
     );
     await page.waitForFunction(
       (font) =>
-        parseFloat(getComputedStyle(document.querySelector(".rxs-brand b")).fontSize) >=
-        font * 1.9,
+        parseFloat(getComputedStyle(document.querySelector(".rxs-brand b")).fontSize) >= font * 1.9,
       baseMetrics.font,
     );
     const enlarged = await page.evaluate(() => {
@@ -112,7 +112,7 @@ async function checkTextEnlargement(route, width) {
 }
 
 try {
-  for (const width of [320, 390, 834, 1024]) {
+  for (const width of [320, 390, 834, 1024, 1440, 1920]) {
     const page = await browser.newPage({
       viewport: { width, height: 844 },
       hasTouch: true,
@@ -127,19 +127,19 @@ try {
       );
       const layout = await page.locator(".rxs-local-nav-inner").evaluate((inner) => {
         const edge = inner.getBoundingClientRect();
+        const style = getComputedStyle(inner);
         const menu = inner.querySelector(".side-panel-trigger").getBoundingClientRect();
         const brand = inner.querySelector(".rxs-brand").getBoundingClientRect();
         return {
           gap: edge.right - menu.right,
+          paddingRight: parseFloat(style.paddingRight),
+          borderRight: parseFloat(style.borderRightWidth),
           clear: brand.right < menu.left,
           size: menu.width,
           overflow: document.documentElement.scrollWidth - innerWidth,
         };
       });
-      assert.ok(
-        Math.abs(layout.gap) <= 1 && layout.clear && layout.size >= 48 && layout.overflow <= 1,
-        JSON.stringify(layout),
-      );
+      assertSpecialControlLayout(layout, `${width}px ${route}`);
       const comparisonSelect = page.locator(".rxs-comparison-selector select");
       if ((await comparisonSelect.count()) > 0) await checkSelect(comparisonSelect, page);
       if (route === "/rexonance-saga")
@@ -178,14 +178,18 @@ try {
         await checkTextEnlargement(route, width);
       }
     }
-    await page.goto(base + "/riders/saga");
+    await page.goto(base + "/riders/saga", { waitUntil: "networkidle" });
+    await page.locator(".dossier-reader-links a").first().waitFor();
     const links = await page.locator(".dossier-reader-links a").evaluateAll((items) =>
       items.map((item) => ({
         height: item.getBoundingClientRect().height,
         font: parseFloat(getComputedStyle(item).fontSize),
       })),
     );
-    assert.ok(links.length > 0 && links.every((link) => link.height >= 48 && link.font >= 13));
+    assert.ok(
+      links.length > 0 && links.every((link) => link.height >= 48 && link.font >= 13),
+      `${width}px dossier navigation targets: ${JSON.stringify(links)}`,
+    );
     await page.goto(base + "/form-archive");
     for (const kind of ["saga", "realm"]) {
       await page.waitForFunction(
