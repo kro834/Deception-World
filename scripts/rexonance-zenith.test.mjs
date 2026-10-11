@@ -139,6 +139,7 @@ test("browser QA captures the requested viewports and both directions with canva
   for (const profile of [
     "desktop1440",
     "phone390",
+    "phone844-landscape",
     "narrow320",
     "tablet1024-landscape",
     "reduced-motion390",

@@ -37,6 +37,13 @@ const profiles = [
     hasTouch: true,
   },
   {
+    name: "phone844-landscape",
+    viewport: { width: 844, height: 390 },
+    deviceScaleFactor: 3,
+    isMobile: true,
+    hasTouch: true,
+  },
+  {
     name: "narrow320",
     viewport: { width: 320, height: 844 },
     deviceScaleFactor: 3,
