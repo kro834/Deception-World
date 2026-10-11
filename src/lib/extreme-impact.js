@@ -12,6 +12,9 @@
      While the engine runs the page carries data-exi-armed="true", so the
      sheet holds an unreached arrival back only while something will
      release it; without the engine everything simply stands drawn.
+   - Combinations: an element marked data-exi-chain="<ms>" right after a
+     hit lands that long after it (ROUND 1: the time follows the punch),
+     still keyed by its own line if the reader gets there first.
    - Tallies: a decorative copy (aria-hidden, [data-exi-tally]) counts its
      figure up from zero when the nearest hit around it lands, on
      requestAnimationFrame for under a second, braking hard into the value.
@@ -41,6 +44,8 @@ const LINES = { base: "0px 0px -20% 0px", mid: "0px 0px -45% 0px" };
 // Scenes keyed by the engine itself (their opening tags stay as they are).
 const SCENES = ":scope > :is(.rxs-section, .rxs-footer), :scope :is(.rxs-system-grid, .rxs-specs)";
 const TALLY_MS = 900;
+// A chained hit follows the one before it by this much unless it says.
+const CHAIN_MS = 380;
 // A counter reads as rolling at twenty draws a second. Every draw is a text
 // change (layout, paint and a commit of its layer), the costliest beat on the
 // page, so it runs a third of the frames and stops braking sooner.
@@ -249,6 +254,20 @@ export function mountExtremeImpact(page, environment = window) {
     talliesIn(element)
       .filter((tally) => scopeOf(tally) === element)
       .forEach(startTally);
+    // A combination: the next element marked data-exi-chain follows this
+    // hit by its own delay (ROUND 1's time after the punch), however fast
+    // the reader scrolls; until then it still answers to its own line.
+    const next = element.nextElementSibling;
+    if (next?.hasAttribute("data-exi-chain") && next.getAttribute("data-exi-hit") === "") {
+      const delay = Number(next.getAttribute("data-exi-chain")) || CHAIN_MS;
+      const id = environment.setTimeout(() => {
+        timers.delete(id);
+        if (!running || next.getAttribute("data-exi-hit") !== "") return;
+        observers.forEach((observer) => observer.unobserve(next));
+        land(next);
+      }, delay);
+      timers.set(id, { element: next, name: "data-exi-chain" });
+    }
   };
   const onIntersect = (entries, observer) => {
     for (const entry of entries) {

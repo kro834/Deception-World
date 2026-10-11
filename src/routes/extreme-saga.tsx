@@ -17,6 +17,7 @@ import extremeOverdriveCssUrl from "@/styles-extreme-overdrive.css?url";
 import stageSpecialCssUrl from "@/styles-stage-special.css?url";
 import stageExtremeCssUrl from "@/styles-stage-extreme.css?url";
 import extremeImpactCssUrl from "@/styles-extreme-impact.css?url";
+import extremeFightCardCssUrl from "@/styles-extreme-fightcard.css?url";
 
 export const Route = createFileRoute("/extreme-saga")({
   validateSearch: validateInquirySearch,
@@ -53,6 +54,8 @@ export const Route = createFileRoute("/extreme-saga")({
       { rel: "stylesheet", href: stageExtremeCssUrl },
       // IMPACT (rx11): the fight's motion and the pinned punch meter.
       { rel: "stylesheet", href: extremeImpactCssUrl },
+      // FIGHT CARD (rx15): the bout plates, the tale of the tape, the duel.
+      { rel: "stylesheet", href: extremeFightCardCssUrl },
       CINEMATIC_STYLESHEET_LINK,
       {
         rel: "preload",

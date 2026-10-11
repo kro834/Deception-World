@@ -1,0 +1,2410 @@
+/* ================================================================
+   Extreme — FIGHT CARD (rx15, 2026-10-11)
+
+   IMPACT (styles-extreme-impact.css) made the rounds fight in motion;
+   this layer bills them as a fight night, a different film from
+   Rexonance's resonance. Gold is Extreme's corner, steel the
+   challenger's; manga screentone and focus lines are the print.
+   - Bout plates: every round's number stands on a gold plate under its
+     ROUND label, and is punched in when the round arrives.
+   - ROUND 1, the one-two: the punch and the time share one compact
+     panel on the diagonal (the runway hold is gone); each lands on its
+     own hit.
+   - The tale of the tape: the console is a bout. EXTREME VS the
+     challenger (the select is the challenger's plate); every metric is a
+     clash, Extreme's bar from the left and the challenger's from the
+     right meeting at their share (the two bar widths the component
+     already draws, shrunk in proportion by flex), with a burst where they
+     meet and the challenger's figure in its own corner. A row the
+     challenger wins pushes the gold back: nothing is hidden. The bars
+     slam in when the console is reached and whenever the challenger
+     changes.
+   - The form duel: the colossus stands in both forms at once. The
+     chosen form fills the body and the other waits beyond a slanted seam
+     at the edge; a change of form drives the seam across the body, so
+     the lines ignite white-hot for Ultra and cool back for Middle. The
+     other form's art is this sheet's backdrop of a silent box in the
+     figure, so the figure keeps one image.
+   - The corners: on wide screens the form switch stands inside the duel,
+     at the head of its copy column (subgrid; the markup keeps its order).
+   - The cuts between rounds are one bell, not a long walk; the end card
+     answers the poster with the same billing, inked into the gold.
+
+   Loaded on /extreme-saga after the IMPACT sheet and before the cinematic
+   sheet, scoped to html[data-family="special"] and the doubled Extreme
+   page class. Time-based beats play from the one-shot keys of
+   src/lib/extreme-impact.js and src/lib/extreme-fightcard.js behind
+   reduced motion, economy rendering and the side-menu, loading and dialog
+   flags; nothing here rides the scroll. Keyframes move transforms and
+   opacity only, end, and turn opacity at most once. Reduced motion,
+   economy rendering and Save-Data stand every scene drawn at rest;
+   forced colours drop the ornaments. Guard:
+   scripts/extreme-fightcard.test.mjs.
+   ================================================================ */
+
+/* ---------- Tokens ---------- */
+html[data-family="special"] body .rxs-page.rxs-page.exs-page {
+  --exf-steel: #b8c6d6;
+  --exf-steel-rgb: 184 198 214;
+  --exf-steel-deep: #3c4756;
+  --exf-hot: #fff6dc;
+  /* Screentone: a manga halftone of gold dots. */
+  --exf-tone: radial-gradient(
+      circle at 50% 50%,
+      rgb(var(--ext-gold-rgb) / 30%) 0 1.2px,
+      transparent 1.7px
+    )
+    0 0 / 7px 7px;
+  --exf-tone-ink: radial-gradient(circle at 50% 50%, rgb(5 4 3 / 26%) 0 1.4px, transparent 1.9px) 0
+    0 / 7px 7px;
+  /* The duel's seam: its slant and where it rests from the edge. */
+  --exf-skew: -11deg;
+  --exf-sliver: 0.24;
+}
+
+/* ================================================================
+   The cuts between rounds: one bell, not a long walk (pass 2). The STAGE
+   scenes left 330px of ink between rounds on a wide screen and 190px on a
+   phone; the slant keeps its own runway on top.
+   ================================================================ */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > :is(#performance, #p14, #stages, #system) {
+  padding-top: calc(clamp(48px, 6.2vw, 92px) + var(--ext-slant));
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.exs-page > :is(#performance, #p14, #system) {
+  padding-bottom: clamp(56px, 7.4vw, 108px);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer {
+  padding-top: calc(clamp(64px, 8vw, 116px) + var(--ext-slant));
+}
+
+/* ================================================================
+   Bout plates: the round number on a gold plate under its label
+   ================================================================ */
+html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-section > .rxs-section-heading {
+  grid-template-rows: auto auto;
+  align-items: end;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > .rxs-section
+  > .rxs-section-heading::before {
+  grid-row: 2;
+  align-self: end;
+  margin: 0 0 0.1em;
+  padding: 0.16em 0.3em 0.08em 0.16em;
+  color: var(--ext-ink);
+  font: 700 clamp(38px, 4.6vw, 66px) / 0.9 var(--dx-mono);
+  letter-spacing: -0.01em;
+  -webkit-text-stroke: 0;
+  background: linear-gradient(180deg, #fff3cf, var(--ext-gold) 46%, #d99a3a);
+  clip-path: polygon(0 0, 100% 0, calc(100% - 0.26em) 100%, 0 100%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > .rxs-section
+  > .rxs-section-heading::after {
+  content: "ROUND" / "";
+  grid-column: 1;
+  grid-row: 2;
+  align-self: end;
+  position: static;
+  display: block;
+  /* Stacked on the plate: its height is 1.14em of its own size. */
+  margin: 0 0 calc(clamp(38px, 4.6vw, 66px) * 1.26 + 12px);
+  padding: 0;
+  color: var(--ext-gold);
+  font: 400 12px / 1 var(--dx-hud);
+  letter-spacing: 0.42em;
+  text-align: start;
+  white-space: nowrap;
+  background: none;
+  opacity: 1;
+  transform: none;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > .rxs-section
+  > .rxs-section-heading
+  > p {
+  grid-row: 1;
+  align-self: end;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > .rxs-section
+  > .rxs-section-heading
+  > h2 {
+  grid-row: 2;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > .rxs-section
+  > .rxs-section-heading
+  > span {
+  grid-row: 3;
+}
+
+/* Phones: the bout is billed on one line, ROUND, the plate, the kicker;
+   the title takes the full width under it. */
+@media (max-width: 560px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > .rxs-section
+    > .rxs-section-heading {
+    grid-template-columns: auto auto minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    align-items: center;
+    column-gap: 10px;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > .rxs-section
+    > .rxs-section-heading::after {
+    grid-column: 1;
+    grid-row: 1;
+    align-self: center;
+    margin: 0;
+    letter-spacing: 0.3em;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > .rxs-section
+    > .rxs-section-heading::before {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: center;
+    margin: 0;
+    font-size: 26px;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > .rxs-section
+    > .rxs-section-heading
+    > p {
+    grid-column: 3;
+    grid-row: 1;
+    align-self: center;
+    margin: 0;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > .rxs-section
+    > .rxs-section-heading
+    > h2 {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    margin-top: 14px;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > .rxs-section
+    > .rxs-section-heading
+    > span {
+    grid-column: 1 / -1;
+  }
+}
+
+/* The narrowest phones give the kicker its own line under the bout. */
+@media (max-width: 420px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > .rxs-section
+    > .rxs-section-heading {
+    grid-template-rows: auto auto auto;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > .rxs-section
+    > .rxs-section-heading
+    > p {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    margin-top: 10px;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > .rxs-section
+    > .rxs-section-heading
+    > h2 {
+    grid-row: 3;
+    margin-top: 6px;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > .rxs-section
+    > .rxs-section-heading
+    > span {
+    grid-row: 4;
+  }
+}
+
+/* The card after the hero bills the rounds to come. */
+html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-index a::before {
+  padding: 0.12em 0.22em 0.06em 0.1em;
+  color: var(--ext-ink);
+  font-size: 30px;
+  -webkit-text-stroke: 0;
+  background: linear-gradient(180deg, #fff3cf, var(--ext-gold) 46%, #d99a3a);
+  clip-path: polygon(0 0, 100% 0, calc(100% - 7px) 100%, 0 100%);
+}
+
+/* The opening bout is billed too: the cold open's cue into ROUND 1 carries
+   its 01 plate, so the card reads 01 to 04 (pass 2). The cue's own ::before
+   is its 44px hit area, so the plate rides its text. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > .exs-hero
+  .rxs-scroll-cue
+  > span::before {
+  content: "01" / "";
+  display: inline-block;
+  margin: 0 12px 0 0;
+  padding: 0.14em 0.3em 0.06em 0.12em;
+  color: var(--ext-ink);
+  font: 700 22px / 1 var(--dx-mono);
+  letter-spacing: -0.01em;
+  vertical-align: middle;
+  background: linear-gradient(180deg, #fff3cf, var(--ext-gold) 46%, #d99a3a);
+  clip-path: polygon(0 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
+}
+
+/* ================================================================
+   Screentone: the print of the manga panels
+   ================================================================ */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > .exs-hero
+  > .rxs-hero-ambient::before,
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > .exs-hero
+  > .rxs-hero-ambient::after {
+  content: "";
+  position: absolute;
+  display: block;
+  width: min(46vw, 620px);
+  aspect-ratio: 1;
+  background: var(--exf-tone);
+  -webkit-mask: radial-gradient(closest-side, #000, transparent);
+  mask: radial-gradient(closest-side, #000, transparent);
+  pointer-events: none;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > .exs-hero
+  > .rxs-hero-ambient::before {
+  bottom: -18%;
+  left: -12%;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > .exs-hero
+  > .rxs-hero-ambient::after {
+  top: -22%;
+  right: -10%;
+}
+
+/* The poster's billing: EXTREME outlined across the cold open, behind the
+   colossus. */
+html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-hero > .exf-billing {
+  position: absolute;
+  z-index: 0;
+  top: 13%;
+  left: 50%;
+  display: block;
+  margin: 0;
+  color: transparent;
+  font: 400 clamp(88px, 19vw, 300px) / 1 var(--dx-hud);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  -webkit-text-stroke: 1px rgb(var(--ext-gold-rgb) / 32%);
+  translate: -50% 0;
+  pointer-events: none;
+  user-select: none;
+}
+
+@media (max-width: 1099.98px) {
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-hero > .exf-billing {
+    top: clamp(40px, 9svh, 120px);
+    font-size: clamp(64px, 22vw, 220px);
+  }
+}
+
+/* The end card answers the poster: the same billing across the foot of the
+   gold slab, inked, standing on its edge. */
+html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer > .exf-billing {
+  position: absolute;
+  z-index: -1;
+  bottom: -0.1em;
+  left: 50%;
+  display: block;
+  margin: 0;
+  color: transparent;
+  font: 400 clamp(72px, 19vw, 300px) / 1 var(--dx-hud);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  -webkit-text-stroke: 1.5px rgb(5 4 3 / 22%);
+  translate: -50% 0;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ================================================================
+   ROUND 1: the one-two (no runway: one compact panel on the diagonal)
+   ================================================================ */
+html[data-family="special"] body .rxs-page.rxs-page.exs-page #performance .exi-stage {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  row-gap: 0;
+  padding-block: clamp(44px, 7svh, 88px);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #performance
+  > .rxs-headline-metrics {
+  background:
+    radial-gradient(48% 60% at 26% 34%, rgb(var(--ext-gold-rgb) / 10%), transparent 72%),
+    radial-gradient(40% 50% at 80% 76%, rgb(var(--ext-amber-rgb) / 8%), transparent 72%),
+    var(--ext-ink);
+}
+
+/* Screentone fills the panel's corners behind the figures. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #performance
+  > .rxs-headline-metrics::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  display: block;
+  background: var(--exf-tone);
+  -webkit-mask:
+    radial-gradient(38% 52% at 8% 12%, #000, transparent),
+    radial-gradient(34% 48% at 94% 92%, #000, transparent);
+  mask:
+    radial-gradient(38% 52% at 8% 12%, #000, transparent),
+    radial-gradient(34% 48% at 94% 92%, #000, transparent);
+  pointer-events: none;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  #performance
+  .exi-stage
+  > article
+  > strong {
+  font-size: clamp(64px, min(12.5vw, 23svh), 196px);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  #performance
+  .exi-stage
+  > article:nth-child(2) {
+  grid-row: 2;
+  margin-top: clamp(-96px, -6vw, -12px);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  #performance
+  .exi-stage
+  > article:nth-child(2)
+  > strong {
+  font-size: clamp(54px, min(10.5vw, 19svh), 164px);
+}
+
+/* The time's caption reads from its left edge, clear of the right margin
+   where the Zeus button rests. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  #performance
+  .exi-stage
+  > article:nth-child(2)
+  > p {
+  justify-self: start;
+  text-align: start;
+}
+
+/* The cut runs between the two blows. */
+html[data-family="special"] body .rxs-page.rxs-page.exs-page #performance .exi-band {
+  grid-row: 1 / -1;
+  align-self: center;
+  translate: 0 clamp(12px, 2vw, 32px);
+}
+
+@media (max-width: 760px) {
+  /* On a phone the blows stack and the cut gets its own row between them. */
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page #performance .exi-stage {
+    grid-template-rows: auto auto auto;
+    row-gap: 22px;
+    padding-block: 40px 44px;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    #performance
+    .exi-stage
+    > article:nth-child(2) {
+    grid-row: 3;
+    margin-top: 0;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page #performance .exi-band {
+    grid-row: 2;
+    margin-block: 14px;
+    rotate: -6deg;
+    translate: none;
+  }
+
+  /* On a phone the time's captions read from its left edge, clear of the
+     right margin where the Zeus button rests. */
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    #performance
+    .exi-stage
+    > article:nth-child(2)
+    > :is(small, p) {
+    justify-self: start;
+    text-align: start;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    #performance
+    .exi-stage
+    > article:nth-child(2) {
+    justify-self: stretch;
+    justify-items: start;
+    text-align: start;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    #performance
+    .exi-stage
+    > article
+    > strong {
+    font-size: clamp(56px, 19vw, 96px);
+  }
+}
+
+/* ================================================================
+   The tale of the tape
+   ================================================================ */
+html[data-family="special"] body .rxs-page.rxs-page.exs-page > #performance .rxs-comparison {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-auto-flow: row;
+  align-items: start;
+  column-gap: 0;
+  padding: clamp(22px, 3vw, 40px) clamp(16px, 3vw, 40px) clamp(24px, 3vw, 40px);
+  background:
+    linear-gradient(
+      90deg,
+      rgb(var(--ext-gold-rgb) / 7%),
+      transparent 40%,
+      transparent 60%,
+      rgb(var(--exf-steel-rgb) / 7%)
+    ),
+    var(--ext-plate);
+  border: 0;
+  box-shadow:
+    var(--ext-bevel),
+    0 0 0 1px rgb(var(--ext-gold-rgb) / 18%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #performance
+  .rxs-comparison
+  > :is(.rxs-comparison-formula, .rxs-comparison-metrics, .rxs-processing-comparison) {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+
+/* The bout line: Extreme's corner, VS, the challenger's plate. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #performance
+  .rxs-comparison
+  > .rxs-comparison-key {
+  grid-column: 1;
+  grid-row: 1;
+  align-self: stretch;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  font: inherit;
+  background: none;
+  border: 0;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #performance
+  .rxs-comparison
+  > .rxs-comparison-key
+  > span:first-child {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 64px;
+  margin: 0;
+  padding: 10px 26px 10px 16px;
+  color: var(--ext-ink);
+  font: 700 clamp(18px, 2vw, 26px) / 1.2 var(--dx-display);
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  background: linear-gradient(180deg, #fff3cf, var(--ext-gold) 40%, #d99a3a);
+  clip-path: polygon(0 0, 100% 0, calc(100% - 18px) 100%, 0 100%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #performance
+  .rxs-comparison
+  > .rxs-comparison-key
+  > span:first-child
+  > i {
+  display: none;
+}
+
+/* The challenger's own name rides the select. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #performance
+  .rxs-comparison
+  > .rxs-comparison-key
+  > span:last-child {
+  display: none;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #performance
+  .rxs-comparison
+  > .rxs-comparison-key
+  > .exf-vs {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: clamp(52px, 5vw, 72px);
+  aspect-ratio: 1;
+  margin: 0 clamp(-26px, -2vw, -14px);
+  color: var(--exf-hot);
+  font: 700 clamp(20px, 2.2vw, 30px) / 1 var(--dx-mono);
+  letter-spacing: -0.02em;
+  font-style: italic;
+  background: var(--ext-ink);
+  border: 2px solid var(--ext-gold);
+  rotate: 45deg;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #performance
+  .rxs-comparison
+  > .rxs-comparison-selector {
+  grid-column: 2;
+  grid-row: 1;
+  align-self: stretch;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: center;
+  gap: 4px;
+  min-height: 64px;
+  margin: 0;
+  padding: 8px 12px 8px clamp(32px, 3.4vw, 48px);
+  background: linear-gradient(
+    90deg,
+    rgb(var(--exf-steel-rgb) / 8%),
+    rgb(var(--exf-steel-rgb) / 18%)
+  );
+  border: 0;
+  border-radius: 0;
+  box-shadow: inset 0 0 0 1px rgb(var(--exf-steel-rgb) / 34%);
+  clip-path: polygon(18px 0, 100% 0, 100% 100%, 0 100%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #performance
+  .rxs-comparison
+  > .rxs-comparison-selector
+  > span {
+  margin: 0;
+  color: var(--exf-steel);
+  font: 400 12px / 1.3 var(--dx-hud);
+  letter-spacing: 0.24em;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #performance
+  .rxs-comparison
+  > .rxs-comparison-selector
+  select {
+  width: 100%;
+  min-height: 44px;
+  margin: 0;
+  padding: 4px 34px 4px 0;
+  color: var(--dx-text);
+  font: 700 clamp(17px, 1.8vw, 22px) / 1.2 var(--dx-display);
+  letter-spacing: 0.04em;
+  background:
+    linear-gradient(45deg, transparent 50%, var(--exf-steel) 50%) calc(100% - 14px) 50% / 7px 7px
+      no-repeat,
+    linear-gradient(-45deg, transparent 50%, var(--exf-steel) 50%) calc(100% - 8px) 50% / 7px 7px
+      no-repeat,
+    transparent;
+  border: 0;
+  border-bottom: 1px solid rgb(var(--exf-steel-rgb) / 40%);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #performance
+  .rxs-comparison
+  > .rxs-comparison-formula {
+  grid-row: 2;
+  justify-self: center;
+  margin: clamp(14px, 1.6vw, 20px) 0 clamp(6px, 1vw, 12px);
+  color: var(--dx-text-3);
+  font: 500 13px / 1.5 var(--dx-body);
+  letter-spacing: 0.04em;
+  text-align: center;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #performance
+  .rxs-comparison
+  > .rxs-comparison-formula
+  b {
+  color: var(--dx-text);
+}
+
+/* The rows: a clash each. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #performance
+  .rxs-comparison
+  > .rxs-comparison-metrics {
+  grid-row: 3;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  background: none;
+  border: 0;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #performance
+  .rxs-comparison-metrics
+  > article {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  row-gap: 10px;
+  margin: 0;
+  padding: clamp(14px, 1.8vw, 22px) 0;
+  background: none;
+  border: 0;
+  border-top: 1px solid rgb(var(--ext-gold-rgb) / 12%);
+  box-shadow: none;
+  clip-path: none;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #performance
+  .rxs-comparison-metrics
+  > article
+  > header {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #performance
+  .rxs-comparison-metrics
+  > article
+  > header
+  > div {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  margin: 0;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #performance
+  .rxs-comparison-metrics
+  > article
+  > header
+  > div
+  > small {
+  margin: 0;
+  white-space: nowrap;
+  color: var(--ext-gold);
+  font: 600 13px / 1.4 var(--dx-display);
+  letter-spacing: 0.08em;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #performance
+  .rxs-comparison-metrics
+  > article
+  > header
+  > div
+  > strong {
+  margin: 0;
+  color: var(--dx-text);
+  font: 600 clamp(26px, 2.6vw, 38px) / 1 var(--dx-mono);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #performance
+  .rxs-comparison-metrics
+  .rxs-comparison-result {
+  display: grid;
+  justify-items: end;
+  gap: 2px;
+  margin: 0 0 0 auto;
+  text-align: end;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #performance
+  .rxs-comparison-metrics
+  .rxs-comparison-result
+  > i {
+  color: var(--dx-text-3);
+  font: 400 12px / 1.2 var(--dx-hud);
+  font-style: normal;
+  letter-spacing: 0.2em;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #performance
+  .rxs-comparison-metrics
+  .rxs-comparison-result
+  > b {
+  color: var(--ext-gold);
+  font: 700 clamp(28px, 3vw, 44px) / 1 var(--dx-mono);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #performance
+  .rxs-comparison-metrics
+  > article[data-exf-win="rival"]
+  .rxs-comparison-result
+  > b {
+  color: var(--exf-steel);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #performance
+  .rxs-comparison-metrics
+  .rxs-comparison-result
+  > em {
+  color: var(--dx-text-2);
+  font: 500 12px / 1.3 var(--dx-mono);
+  font-style: normal;
+  letter-spacing: 0.04em;
+}
+
+/* The clash: gold from the left, steel from the right, meeting at the
+   share of the two bar widths (each keeps its own width as its basis and
+   both shrink in proportion). The fills are the bars' ::before, the burst
+   where they meet Extreme's ::after, so the bars themselves never move. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #performance
+  .rxs-comparison
+  .rxs-bars {
+  position: relative;
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  gap: 0;
+  height: clamp(14px, 1.3vw, 18px);
+  margin: 0;
+  padding: 0;
+  overflow: visible;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  -webkit-mask: none;
+  mask: none;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #performance
+  .rxs-comparison
+  .rxs-bars
+  > i {
+  position: relative;
+  inset: auto;
+  display: block;
+  flex: 0 1 auto;
+  min-width: 0;
+  height: auto;
+  margin: 0;
+  padding: 0;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  opacity: 1;
+  transform: none;
+  translate: none;
+  scale: none;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #performance
+  .rxs-comparison
+  .rxs-bars
+  > i::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  display: block;
+  -webkit-mask: repeating-linear-gradient(90deg, #000 0 7px, transparent 7px 9px);
+  mask: repeating-linear-gradient(90deg, #000 0 7px, transparent 7px 9px);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #performance
+  .rxs-comparison
+  .rxs-bars
+  > i.is-rexonance::before {
+  background: linear-gradient(90deg, #8a5a1c, var(--ext-gold) 70%, var(--exf-hot));
+  transform-origin: 0 50%;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #performance
+  .rxs-comparison
+  .rxs-bars
+  > i.is-extreme::before {
+  background: linear-gradient(270deg, var(--exf-steel-deep), var(--exf-steel) 70%, #f2f7fc);
+  transform-origin: 100% 50%;
+}
+
+/* The burst where the blows meet: a white-hot star on the line. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #performance
+  .rxs-comparison
+  .rxs-bars
+  > i.is-rexonance::after {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  right: 0;
+  left: auto;
+  display: block;
+  width: clamp(26px, 2.4vw, 34px);
+  height: auto;
+  aspect-ratio: 1;
+  margin: 0;
+  background: radial-gradient(closest-side, #fff, var(--exf-hot) 40%, var(--ext-gold) 72%);
+  border: 0;
+  opacity: 1;
+  translate: 50% -50%;
+  clip-path: polygon(
+    50% 0,
+    61% 33%,
+    96% 18%,
+    72% 47%,
+    100% 64%,
+    64% 66%,
+    68% 100%,
+    48% 74%,
+    24% 98%,
+    32% 64%,
+    0 58%,
+    30% 44%,
+    8% 14%,
+    40% 30%
+  );
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #performance
+  .rxs-comparison
+  article[data-exf-win="rival"]
+  .rxs-bars
+  > i.is-rexonance::after {
+  background: radial-gradient(closest-side, #fff, #f2f7fc 40%, var(--exf-steel) 72%);
+}
+
+/* The challenger's figure stands in its corner. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #performance
+  .rxs-comparison-metrics
+  > article
+  > p {
+  justify-self: end;
+  max-width: 100%;
+  margin: 0;
+  color: var(--dx-text-3);
+  font: 400 12px / 1.5 var(--dx-body);
+  letter-spacing: 0.04em;
+  text-align: end;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #performance
+  .rxs-comparison-metrics
+  > article
+  > p
+  > b {
+  color: var(--exf-steel);
+  font: 600 14px / 1.4 var(--dx-mono);
+  letter-spacing: 0.02em;
+}
+
+/* The architectures face each other: Extreme's corner, then the
+   challenger's. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #performance
+  .rxs-comparison
+  > .rxs-processing-comparison {
+  grid-row: 4;
+  margin: clamp(18px, 2.4vw, 30px) 0 0;
+  padding: clamp(18px, 2.4vw, 28px) 0 0;
+  background: none;
+  border: 0;
+  border-top: 1px solid rgb(var(--ext-gold-rgb) / 18%);
+  box-shadow: none;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #performance
+  .rxs-processing-comparison
+  > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: clamp(10px, 1.6vw, 20px);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #performance
+  .rxs-processing-comparison
+  > div
+  > section {
+  margin: 0;
+  padding: 14px 16px 16px;
+  background: rgb(var(--exf-steel-rgb) / 5%);
+  border: 0;
+  border-top: 2px solid rgb(var(--exf-steel-rgb) / 60%);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #performance
+  .rxs-processing-comparison
+  > div
+  > section:last-child {
+  order: -1;
+  background: rgb(var(--ext-gold-rgb) / 6%);
+  border-top-color: var(--ext-gold);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #performance
+  .rxs-processing-comparison
+  > div
+  > section
+  > h4 {
+  margin: 0 0 8px;
+  padding: 0;
+  color: var(--exf-steel);
+  font: 700 15px / 1.4 var(--dx-display);
+  letter-spacing: 0.06em;
+  border: 0;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #performance
+  .rxs-processing-comparison
+  > div
+  > section:last-child
+  > h4 {
+  color: var(--ext-gold);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #performance
+  .rxs-processing-comparison
+  > div
+  > section
+  li {
+  margin: 0;
+  padding: 5px 0;
+  color: var(--dx-text-2);
+  font: 400 13px / 1.5 var(--dx-body);
+  border-top: 1px solid rgb(255 255 255 / 6%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #performance
+  .rxs-processing-comparison
+  > div
+  > section
+  li::before {
+  content: none;
+}
+
+/* Wide screens: the tape on the left, the architectures on the right,
+   under their corners. */
+@media (min-width: 1100px) {
+  /* The rows track takes up the architectures' extra height, so the tape
+     starts right under its formula (review: as an auto track, the formula's
+     row was stretched by 70-90px of empty ink above the first clash). */
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page > #performance .rxs-comparison {
+    grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.88fr);
+    grid-template-rows: auto auto 1fr;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #performance
+    .rxs-comparison
+    > :is(.rxs-comparison-formula, .rxs-comparison-metrics) {
+    grid-column: 1;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #performance
+    .rxs-comparison
+    > .rxs-comparison-formula {
+    justify-self: start;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #performance
+    .rxs-comparison
+    > .rxs-comparison-metrics {
+    padding-right: clamp(24px, 3vw, 44px);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #performance
+    .rxs-comparison
+    > .rxs-processing-comparison {
+    grid-column: 2;
+    grid-row: 2 / span 2;
+    margin: clamp(14px, 1.6vw, 20px) 0 0;
+    padding: 0 0 0 clamp(24px, 3vw, 44px);
+    border-top: 0;
+    border-left: 1px solid rgb(var(--exf-steel-rgb) / 18%);
+  }
+}
+
+@media (max-width: 760px) {
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page > #performance .rxs-comparison {
+    grid-template-columns: minmax(0, 1fr);
+    padding-inline: 14px;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #performance
+    .rxs-comparison
+    > .rxs-comparison-key {
+    grid-column: 1;
+    grid-row: 1;
+    justify-self: start;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #performance
+    .rxs-comparison
+    > .rxs-comparison-key
+    > span:first-child {
+    min-height: 48px;
+    padding-right: 30px;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #performance
+    .rxs-comparison
+    > .rxs-comparison-selector {
+    grid-column: 1;
+    grid-row: 2;
+    min-height: 0;
+    margin-top: -2px;
+    padding-left: 16px;
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #performance
+    .rxs-comparison
+    > .rxs-comparison-formula {
+    grid-row: 3;
+    justify-self: start;
+    text-align: start;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #performance
+    .rxs-comparison
+    > .rxs-comparison-metrics {
+    grid-row: 4;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #performance
+    .rxs-comparison
+    > .rxs-processing-comparison {
+    grid-row: 5;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #performance
+    .rxs-processing-comparison
+    > div
+    > section {
+    padding: 12px 10px;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #performance
+    .rxs-processing-comparison
+    > div
+    > section
+    li {
+    padding: 6px 0;
+    font-size: 12px;
+  }
+}
+
+/* The narrowest phones stack the two architectures; from 380px they face
+   each other like the corners. */
+@media (max-width: 379.98px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #performance
+    .rxs-processing-comparison
+    > div {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 360px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #performance
+    .rxs-comparison-metrics
+    > article
+    > header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+/* ================================================================
+   ROUND 2 on a phone: a smaller dial, the read-outs side by side
+   ================================================================ */
+@media (max-width: 760px) {
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page > #p14 .rxs-p14-overview figure {
+    width: min(78%, 300px);
+  }
+}
+
+/* From a large phone up the two processors read side by side. */
+@media (min-width: 420px) and (max-width: 760px) {
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page > #p14 .rxs-p14-copy dl {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #p14
+    .rxs-p14-copy
+    dl
+    > div:nth-child(3) {
+    grid-column: 1 / -1;
+  }
+}
+
+/* ================================================================
+   ROUND 3: the form duel
+   ================================================================ */
+html[data-family="special"] body .rxs-page.rxs-page.exs-page > #stages #exs-stage-panel {
+  grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr);
+  grid-template-rows: minmax(0, 1fr);
+  min-height: clamp(560px, calc(100svh - var(--dxs-nav) - 40px), 920px);
+  background:
+    radial-gradient(60% 70% at 70% 40%, rgb(var(--ext-gold-rgb) / 10%), transparent 72%),
+    var(--ext-ink);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.exs-page > #stages #exs-stage-panel > figure {
+  grid-column: 2;
+  grid-row: 1;
+  isolation: isolate;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #stages
+  #exs-stage-panel
+  > figure
+  > img {
+  object-position: 50% 0;
+}
+
+/* The art melts into the ink on its left and at its foot. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #stages
+  #exs-stage-panel
+  > figure::after {
+  background:
+    linear-gradient(90deg, rgb(5 4 3 / 92%) 0, rgb(5 4 3 / 0%) 22%),
+    linear-gradient(0deg, rgb(5 4 3 / 80%) 0, transparent 22%);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.exs-page > #stages #exs-stage-panel > div {
+  grid-column: 1;
+  grid-row: 1;
+  align-self: center;
+  width: auto;
+  padding: clamp(28px, 4vw, 56px) clamp(12px, 2vw, 32px) clamp(28px, 4vw, 56px)
+    max(var(--ext-gutter), calc((100vw - var(--dxs-wrap)) / 2));
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.exs-page > #stages #exs-stage-panel > div > h3 {
+  font-size: clamp(30px, 3.6vw, 56px);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #stages
+  #exs-stage-panel
+  > div
+  > h3
+  > .exo-title-line {
+  white-space: nowrap;
+}
+
+/* The other form, beyond the seam. The box is twice the figure's width,
+   anchored at the edge it rests by and slanted about that edge's middle;
+   its art box is the figure's own, turned back by the same slant and
+   moved back by the same distance, so the art stands still while the
+   seam travels. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  #exs-stage-panel
+  > figure
+  > .exf-rival {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  bottom: 0;
+  display: block;
+  width: 200%;
+  overflow: hidden;
+  pointer-events: none;
+  transform: skewX(var(--exf-skew));
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  #exs-stage-panel
+  > figure
+  > .exf-rival
+  > span {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  display: block;
+  width: 50%;
+  transform: skewX(calc(-1 * var(--exf-skew)));
+  background: var(--ext-ink) 50% 0 / cover no-repeat;
+}
+
+/* Middle on stage: Ultra waits at the right edge. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  #exs-stage-panel
+  > figure[data-form="middle"]
+  > .exf-rival {
+  right: auto;
+  left: 0;
+  transform-origin: 0 50%;
+  translate: calc((1 - var(--exf-sliver)) * 50%) 0;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  #exs-stage-panel
+  > figure[data-form="middle"]
+  > .exf-rival
+  > span {
+  right: auto;
+  left: 0;
+  transform-origin: 0 50%;
+  translate: calc((var(--exf-sliver) - 1) * 100%) 0;
+  background-image: url("/saga-extreme-ultra-20261006.jpeg");
+}
+
+/* Ultra on stage: Middle waits at the left edge. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  #exs-stage-panel
+  > figure[data-form="ultra"]
+  > .exf-rival {
+  right: 0;
+  left: auto;
+  transform-origin: 100% 50%;
+  translate: calc((var(--exf-sliver) - 1) * 50%) 0;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  #exs-stage-panel
+  > figure[data-form="ultra"]
+  > .exf-rival
+  > span {
+  right: 0;
+  left: auto;
+  transform-origin: 100% 50%;
+  translate: calc((1 - var(--exf-sliver)) * 100%) 0;
+  background-image: url("/saga-extreme-middle-20261006.webp");
+}
+
+/* The seam itself: a gold-white blade on the near edge of the other form
+   and a shadow it casts into it. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  #exs-stage-panel
+  > figure
+  > .exf-rival::before,
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  #exs-stage-panel
+  > figure
+  > .exf-rival::after {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  bottom: 0;
+  display: block;
+  pointer-events: none;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  #exs-stage-panel
+  > figure
+  > .exf-rival::before {
+  width: 4px;
+  background: linear-gradient(
+    180deg,
+    rgb(var(--ext-gold-rgb) / 0%),
+    var(--ext-gold) 12%,
+    var(--exf-hot) 50%,
+    var(--ext-gold) 88%,
+    rgb(var(--ext-gold-rgb) / 0%)
+  );
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  #exs-stage-panel
+  > figure
+  > .exf-rival::after {
+  width: clamp(28px, 4vw, 64px);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  #exs-stage-panel
+  > figure[data-form="middle"]
+  > .exf-rival::before {
+  left: 0;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  #exs-stage-panel
+  > figure[data-form="middle"]
+  > .exf-rival::after {
+  left: 4px;
+  background: linear-gradient(90deg, rgb(5 4 3 / 60%), transparent);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  #exs-stage-panel
+  > figure[data-form="ultra"]
+  > .exf-rival::before {
+  right: 0;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  #exs-stage-panel
+  > figure[data-form="ultra"]
+  > .exf-rival::after {
+  right: 4px;
+  background: linear-gradient(270deg, rgb(5 4 3 / 60%), transparent);
+}
+
+/* The other form's name, upright in its sliver. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  #exs-stage-panel
+  > figure
+  > .exf-rival
+  > span::after {
+  position: absolute;
+  top: clamp(24px, 6%, 64px);
+  display: block;
+  color: var(--exf-hot);
+  font: 400 12px / 1 var(--dx-hud);
+  letter-spacing: 0.4em;
+  writing-mode: vertical-rl;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  #exs-stage-panel
+  > figure[data-form="middle"]
+  > .exf-rival
+  > span::after {
+  content: "ULTRA" / "";
+  right: clamp(14px, 2vw, 28px);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  #exs-stage-panel
+  > figure[data-form="ultra"]
+  > .exf-rival
+  > span::after {
+  content: "MIDDLE" / "";
+  left: clamp(14px, 2vw, 28px);
+  color: #cfefff;
+}
+
+/* The waiting form stands in the shade of its corner (review): the two
+   arts share one pose and the sliver holds no visor, so unshaded it read
+   as the same picture behind a gold line. The chosen form is the lit one;
+   the label above the shade stays bright. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  #exs-stage-panel
+  > figure
+  > .exf-rival
+  > span::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  display: block;
+  background: rgb(5 4 3 / 46%);
+  pointer-events: none;
+}
+
+/* On wide screens Middle waits where the art already melts into the copy
+   column's ink, so its shade is lighter (it would otherwise go black). */
+@media (min-width: 1100px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    #exs-stage-panel
+    > figure[data-form="ultra"]
+    > .exf-rival
+    > span::before {
+    background: rgb(5 4 3 / 20%);
+  }
+}
+
+/* The overdrive's slash and its clipped cut give way to the seam. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  #exs-stage-panel
+  > figure
+  > .exo-slash {
+  display: none;
+}
+
+/* The corners (pass 2): on wide screens the form switch stands inside the
+   duel, at the head of its copy column, so choosing a form, its words and
+   the colossus are one frame. The switcher's rows (the tabs, the hint,
+   the rest) are shared with the panel and its copy through subgrid; the
+   tabs and the hint keep their place in the markup and simply overlap the
+   panel's ink half. Every column starts on the page's wrap. */
+@supports (grid-template-rows: subgrid) {
+  @media (min-width: 1100px) {
+    html[data-family="special"] body .rxs-page.rxs-page.exs-page > #stages .rxs-stage-switcher {
+      grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr);
+      grid-template-rows: auto auto minmax(0, 1fr);
+      --exf-corner: max(var(--ext-gutter), calc((100vw - var(--dxs-wrap)) / 2));
+    }
+
+    html[data-family="special"]
+      body
+      .rxs-page.rxs-page.exs-page
+      > #stages
+      .rxs-stage-switcher
+      > .rxs-stage-tabs.liquid-swipe-tabs {
+      grid-column: 1;
+      grid-row: 1;
+      align-self: start;
+      position: relative;
+      z-index: 5;
+      width: min(440px, calc(100% - var(--exf-corner) - 24px));
+      margin: clamp(36px, 6svh, 64px) 0 10px var(--exf-corner);
+    }
+
+    html[data-family="special"]
+      body
+      .rxs-page.rxs-page.exs-page
+      > #stages
+      .rxs-stage-switcher
+      > .rxs-stage-hint {
+      grid-column: 1;
+      grid-row: 2;
+      position: relative;
+      z-index: 5;
+      margin: 0 0 0 var(--exf-corner);
+    }
+
+    html[data-family="special"] body .rxs-page.rxs-page.exs-page > #stages #exs-stage-panel {
+      grid-column: 1 / -1;
+      grid-row: 1 / -1;
+      grid-template-columns: subgrid;
+      grid-template-rows: subgrid;
+    }
+
+    html[data-family="special"]
+      body
+      .rxs-page.rxs-page.exs-page
+      > #stages
+      #exs-stage-panel
+      > figure {
+      grid-column: 2;
+      grid-row: 1 / -1;
+    }
+
+    html[data-family="special"] body .rxs-page.rxs-page.exs-page > #stages #exs-stage-panel > div {
+      grid-column: 1;
+      grid-row: 3;
+      align-self: center;
+      padding: clamp(24px, 3vw, 40px) clamp(12px, 2vw, 32px) clamp(40px, 5vw, 72px)
+        var(--exf-corner);
+    }
+  }
+}
+
+@media (max-width: 1099.98px) {
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page > #stages #exs-stage-panel {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    min-height: 0;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page > #stages #exs-stage-panel > figure {
+    grid-column: 1;
+    grid-row: 1;
+    height: clamp(480px, 74svh, 1000px);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #stages
+    #exs-stage-panel
+    > figure::after {
+    background: linear-gradient(0deg, rgb(5 4 3 / 96%) 0, rgb(5 4 3 / 0%) 40%);
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page > #stages #exs-stage-panel > div {
+    grid-column: 1;
+    grid-row: 2;
+    align-self: start;
+    width: auto;
+    margin-top: clamp(-140px, -12vw, -80px);
+    padding: 0 var(--ext-gutter) clamp(40px, 8vw, 64px);
+  }
+}
+
+@media (max-width: 760px) {
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page {
+    --exf-skew: -7deg;
+    --exf-sliver: 0.2;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page > #stages #exs-stage-panel > figure {
+    height: clamp(440px, 72svh, 640px);
+  }
+}
+
+/* ================================================================
+   ROUND 4: the moves, each numbered on its own plate
+   ================================================================ */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #system
+  .rxs-system-grid
+  > article
+  .exo-number {
+  padding: 0.12em 0.3em 0.06em 0.12em;
+  color: var(--ext-ink);
+  font-size: clamp(38px, 4vw, 58px);
+  background: linear-gradient(180deg, #fff3cf, var(--ext-gold) 46%, #d99a3a);
+  clip-path: polygon(0 0, 100% 0, calc(100% - 0.26em) 100%, 0 100%);
+}
+
+/* ================================================================
+   Motion: the hits (time-based, one-shot keys)
+   ================================================================ */
+@media (prefers-reduced-motion: no-preference) {
+  /* The billing slides in behind the colossus as the card opens. */
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"][data-exi-arrival="true"]
+    > .exs-hero
+    > .exf-billing {
+    animation: exf-bill 900ms var(--exi-out) 260ms both;
+  }
+
+  /* The end card's billing waits off the slab, then slides in under its
+     headline. */
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"][data-exi-armed="true"]
+    > .rxs-footer[data-exi-hit=""]
+    > .exf-billing {
+    opacity: 0;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    > .rxs-footer[data-exi-hit="true"]
+    > .exf-billing {
+    animation: exf-bill-end 900ms var(--exi-out) 160ms both;
+  }
+
+  /* The bout plate is punched in as its round arrives. */
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    > .rxs-section
+    > .rxs-section-heading[data-exi-hit="true"]::before {
+    transform-origin: 30% 70%;
+    animation: exf-plate 440ms var(--exi-hit) both;
+  }
+
+  /* The overdrive's comparator beats (its bar strike, spark, readout and
+     row jabs) stand down for the clash: one beat per row instead of five. */
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    .rxs-comparison
+    :is(
+      .rxs-comparison-metrics > article,
+      .rxs-bars > i,
+      .rxs-comparison-result > b,
+      .rxs-processing-comparison > div > section
+    ) {
+    animation: none;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    .rxs-comparison
+    .rxs-bars
+    > i::after {
+    animation: none;
+  }
+
+  /* The tale of the tape: until a row is reached its bars stand back in
+     their corners (the engine marks it waiting); then both blows are thrown
+     and meet, and the burst goes off where they do. */
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    #performance
+    .rxs-comparison-metrics
+    > article[data-exf-clash=""]
+    .rxs-bars
+    > i::before {
+    scale: 0 1;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    #performance
+    .rxs-comparison-metrics
+    > article[data-exf-clash=""]
+    .rxs-bars
+    > i::after {
+    opacity: 0;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    .rxs-comparison-metrics
+    > article[data-exf-clash="true"]
+    .rxs-bars
+    > i::before {
+    animation: exf-blow 420ms var(--exi-wind) var(--exf-row, 0ms) both;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    .rxs-comparison-metrics
+    > article[data-exf-clash="true"]
+    .rxs-bars
+    > i.is-rexonance::after {
+    animation: exf-burst 520ms var(--exi-hit) calc(var(--exf-row, 0ms) + 400ms) both;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    .rxs-comparison-metrics
+    > article:nth-child(2) {
+    --exf-row: 90ms;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    .rxs-comparison-metrics
+    > article:nth-child(3) {
+    --exf-row: 180ms;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    .rxs-comparison-metrics
+    > article:nth-child(4) {
+    --exf-row: 270ms;
+  }
+
+  /* The duel. The other form's sliver waits beyond the edge until the
+     stage is reached, then slides in. */
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"][data-exi-armed="true"]
+    #exs-stage-panel[data-exi-hit=""]:not([data-exo-cut])
+    > figure[data-form="middle"]
+    > .exf-rival {
+    translate: 52% 0;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"][data-exi-armed="true"]
+    #exs-stage-panel[data-exi-hit=""]:not([data-exo-cut])
+    > figure[data-form="middle"]
+    > .exf-rival
+    > span {
+    translate: -104% 0;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    #exs-stage-panel[data-exi-hit="true"]:not([data-exo-cut])
+    > figure[data-form="middle"]
+    > .exf-rival {
+    animation: exf-sliver-in 620ms var(--exi-out) 200ms both;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    #exs-stage-panel[data-exi-hit="true"]:not([data-exo-cut])
+    > figure[data-form="middle"]
+    > .exf-rival
+    > span {
+    animation: exf-sliver-in-art 620ms var(--exi-out) 200ms both;
+  }
+
+  /* The overdrive's clipped wipe of the art never plays: the seam carries
+     the change (before and after the art's quake, which would otherwise
+     hand the image back to the wipe as its key retires and wipe it in a
+     second time). */
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    #exs-stage-panel[data-exo-cut="true"]
+    > figure:not([data-exi-impact="true"])
+    > img {
+    animation: none;
+  }
+
+  /* A change of form drives the seam across the whole body; on the way
+     to Ultra its blade runs white-hot (the way back to Middle darkens the
+     art, so a lit edge there would read as a second, opposite flash). */
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    #exs-stage-panel
+    > figure[data-form="ultra"][data-exi-impact="true"]
+    > .exf-rival::before {
+    transform-origin: 100% 50%;
+    animation: exf-blade 640ms var(--exi-blade) both;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    #exs-stage-panel
+    > figure[data-form="ultra"][data-exi-impact="true"]
+    > .exf-rival {
+    animation: exf-seam-ultra 640ms var(--exi-blade) both;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    #exs-stage-panel
+    > figure[data-form="ultra"][data-exi-impact="true"]
+    > .exf-rival
+    > span {
+    animation: exf-seam-ultra-art 640ms var(--exi-blade) both;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    #exs-stage-panel
+    > figure[data-form="middle"][data-exi-impact="true"]
+    > .exf-rival {
+    animation: exf-seam-middle 640ms var(--exi-blade) both;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    #exs-stage-panel
+    > figure[data-form="middle"][data-exi-impact="true"]
+    > .exf-rival
+    > span {
+    animation: exf-seam-middle-art 640ms var(--exi-blade) both;
+  }
+
+  /* The form that loses the stage keeps its light while the seam crosses
+     the body, and only steps into the shade of its corner once the seam
+     has nearly come to rest (one way, on the sliver alone: never a dip
+     and a rise across the body). */
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    #exs-stage-panel
+    > figure[data-exi-impact="true"]
+    > .exf-rival
+    > span::before {
+    animation: exf-shade 360ms var(--exi-out) 560ms both;
+  }
+}
+
+/* ================================================================
+   Keyframes
+   ================================================================ */
+@keyframes exf-bill {
+  from {
+    opacity: 0;
+    transform: translateX(-9%) scaleX(1.12);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes exf-bill-end {
+  from {
+    opacity: 0;
+    transform: translateX(9%) scaleX(1.12);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes exf-plate {
+  0% {
+    opacity: 0;
+    transform: scale(1.7) rotate(-8deg);
+  }
+  55% {
+    opacity: 1;
+    transform: scale(0.94) rotate(1deg);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes exf-blade {
+  0% {
+    scale: 1 1;
+  }
+  30% {
+    scale: 4 1;
+  }
+  100% {
+    scale: 1 1;
+  }
+}
+
+@keyframes exf-blow {
+  from {
+    scale: 0 1;
+  }
+  to {
+    scale: 1 1;
+  }
+}
+
+@keyframes exf-burst {
+  0% {
+    opacity: 0;
+    scale: 0.2;
+    rotate: -40deg;
+  }
+  40% {
+    opacity: 1;
+    scale: 1.7;
+    rotate: 8deg;
+  }
+  100% {
+    opacity: 1;
+    scale: 1;
+    rotate: 0deg;
+  }
+}
+
+/* The seam's travel: the box moves by the seam's distance, its art back
+   by the same, in the art box's own width (half the box's). */
+@keyframes exf-sliver-in {
+  from {
+    translate: 52% 0;
+  }
+  to {
+    translate: calc((1 - var(--exf-sliver)) * 50%) 0;
+  }
+}
+
+@keyframes exf-sliver-in-art {
+  from {
+    translate: -104% 0;
+  }
+  to {
+    translate: calc((var(--exf-sliver) - 1) * 100%) 0;
+  }
+}
+
+/* To Ultra: Middle (left of the seam) shrinks back to its sliver. */
+@keyframes exf-seam-ultra {
+  from {
+    translate: calc(-1 * var(--exf-sliver) * 50%) 0;
+  }
+  to {
+    translate: calc((var(--exf-sliver) - 1) * 50%) 0;
+  }
+}
+
+@keyframes exf-seam-ultra-art {
+  from {
+    translate: calc(var(--exf-sliver) * 100%) 0;
+  }
+  to {
+    translate: calc((1 - var(--exf-sliver)) * 100%) 0;
+  }
+}
+
+/* To Middle: Ultra (right of the seam) shrinks back to its sliver. */
+@keyframes exf-seam-middle {
+  from {
+    translate: calc(var(--exf-sliver) * 50%) 0;
+  }
+  to {
+    translate: calc((1 - var(--exf-sliver)) * 50%) 0;
+  }
+}
+
+@keyframes exf-seam-middle-art {
+  from {
+    translate: calc(-1 * var(--exf-sliver) * 100%) 0;
+  }
+  to {
+    translate: calc((var(--exf-sliver) - 1) * 100%) 0;
+  }
+}
+
+/* The waiting form steps into its corner's shade. */
+@keyframes exf-shade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ================================================================
+   Reduced transparency, increased contrast and forced colours
+   ================================================================ */
+@media (prefers-contrast: more), (prefers-reduced-transparency: reduce) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    :is(.exs-hero > .rxs-hero-ambient, #performance > .rxs-headline-metrics)::before {
+    background: none;
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    :is(.exs-hero > .rxs-hero-ambient, #performance > .rxs-headline-metrics)::before {
+    background: none;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > :is(.exs-hero, .rxs-footer)
+    > .exf-billing,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    #exs-stage-panel
+    > figure
+    > .exf-rival,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #performance
+    .rxs-comparison
+    > .rxs-comparison-key
+    > .exf-vs,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #performance
+    .rxs-comparison
+    .rxs-bars
+    > i.is-rexonance::after {
+    display: none;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > .rxs-section
+    > .rxs-section-heading::before,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #performance
+    .rxs-comparison
+    > .rxs-comparison-key
+    > span:first-child,
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-index a::before,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > .exs-hero
+    .rxs-scroll-cue
+    > span::before,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #system
+    .rxs-system-grid
+    > article
+    .exo-number {
+    color: CanvasText;
+    background: Canvas;
+    border: 1px solid CanvasText;
+    clip-path: none;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #performance
+    .rxs-comparison
+    .rxs-bars
+    > i:is(.is-rexonance, .is-extreme)::before {
+    background: CanvasText;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #performance
+    .rxs-comparison
+    .rxs-bars
+    > i.is-extreme::before {
+    background: GrayText;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #performance
+    .rxs-comparison
+    > .rxs-comparison-selector {
+    clip-path: none;
+    border: 1px solid CanvasText;
+  }
+}

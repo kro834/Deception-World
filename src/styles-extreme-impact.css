@@ -53,9 +53,6 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page {
      tallies' own curve, so the bar and the figure arrive together). */
   --exi-charge: cubic-bezier(0.25, 1, 0.5, 1);
   --exi-stage: calc(100svh - var(--dxs-nav));
-  /* The punch is thrown and its meter charged on the hit (time-based), so
-     the hold only carries the cut and the dash: a shorter runway. */
-  --exi-pin: 72svh;
   --exi-wrap: min(var(--dxs-wrap), calc(100% - 2 * var(--ext-gutter)));
 }
 
@@ -1184,8 +1181,8 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer > .ex
     animation: exi-converge 700ms var(--exi-out) both;
   }
 
-  /* The change of form: speed lines ride the slash, the focus lines go
-     off as it completes, the new form takes the hit. */
+  /* The change of form: speed lines ride the seam, the focus lines go
+     off as it lands, the new form takes the hit. */
   html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
       [data-loading]
     ):not([data-dialog-open])
@@ -1205,7 +1202,7 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer > .ex
     #exs-stage-panel
     > figure[data-exi-impact="true"]
     > .exi-rays {
-    animation: exi-impact-rays 520ms var(--exi-out) 340ms both;
+    animation: exi-impact-rays 520ms var(--exi-out) 560ms both;
   }
 
   html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
@@ -1216,9 +1213,10 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer > .ex
     #exs-stage-panel
     > figure[data-exi-impact="true"]
     > img {
-    animation:
-      exo-cut 420ms var(--exo-slash) backwards,
-      exi-quake 300ms linear 400ms both;
+    /* rx15: the seam (styles-extreme-fightcard.css) carries the change of
+       form across the body, so the art is no longer clipped in; it takes
+       the hit as the seam lands. */
+    animation: exi-quake 300ms linear 600ms both;
   }
 
   /* The chosen tab answers with a spring. */
@@ -1234,101 +1232,94 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer > .ex
   }
 }
 
-/* Browsers without view timelines: the punch stage plays its beats on
-   arrival instead of on the scroll. */
-@supports not ((animation-timeline: view()) and (animation-range: entry 0% entry 100%)) {
-  @media (prefers-reduced-motion: no-preference) {
-    /* The time waits off its lane until it is reached (never shown, then
-       taken back for the dash). */
-    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-        [data-loading]
-      ):not([data-dialog-open])
-      body
-      .rxs-page.rxs-page.exs-page[data-motion-ready="true"][data-exi-armed="true"]
-      #performance
-      .exi-stage
-      > article:nth-child(2)[data-exi-hit=""]
-      > strong {
-      opacity: 0;
-    }
+/* rx15 (FIGHT CARD): the one-two. The stage no longer pins (its hold
+   left frames of an empty lane), so every beat of ROUND 1 plays on a hit
+   and works the same with or without view timelines: the punch on its
+   own hit (above), then the time follows it as a combination (its
+   data-exi-chain: 380 ms after the punch, or on its own line if reached
+   first): the gold cut slashes across the stage and 0.002 SEC dashes in
+   on its speed lines. */
+@media (prefers-reduced-motion: no-preference) {
+  /* The time waits off its lane until it is reached (never shown, then
+     taken back for the dash). */
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"][data-exi-armed="true"]
+    #performance
+    .exi-stage
+    > article:nth-child(2)[data-exi-hit=""]
+    > strong {
+    opacity: 0;
+  }
 
-    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-        [data-loading]
-      ):not([data-dialog-open])
-      body
-      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
-      #performance
-      .exi-stage
-      > article:nth-child(2)[data-exi-hit="true"]
-      > strong {
-      animation: exi-dash 520ms var(--exi-hit) both;
-    }
+  /* The overdrive's dash on the same figure stands down (its timeline is
+     gone, so it held the figure drawn over the wait above). */
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    #performance
+    .exi-stage
+    > article:nth-child(2):not([data-exi-hit="true"])
+    > strong {
+    animation: none;
+  }
 
-    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-        [data-loading]
-      ):not([data-dialog-open])
-      body
-      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
-      #performance
-      .exi-stage
-      > article:nth-child(2)[data-exi-hit="true"]
-      > .exi-streaks {
-      animation: exi-streak-in 640ms var(--exi-out) both;
-    }
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"][data-exi-armed="true"]
+    #performance
+    .exi-stage
+    > article:nth-child(2)[data-exi-hit=""]
+    ~ .exi-band::before {
+    scale: 0 1;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    #performance
+    .exi-stage
+    > article:nth-child(2)[data-exi-hit="true"]
+    ~ .exi-band::before {
+    animation: exi-cut-across 420ms var(--exi-blade) both;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    #performance
+    .exi-stage
+    > article:nth-child(2)[data-exi-hit="true"]
+    > strong {
+    animation: exi-dash 520ms var(--exi-hit) 240ms both;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    #performance
+    .exi-stage
+    > article:nth-child(2)[data-exi-hit="true"]
+    > .exi-streaks {
+    animation: exi-streak-in 640ms var(--exi-out) 200ms both;
   }
 }
 
 /* ================================================================
    Motion: the scroll (named view timelines)
    ================================================================ */
-/* The punch stage pins (layout only, so a menu or a dialog never moves
-   the page): the stage holds the screen for --exi-pin of scroll while its
-   beats run, then the console follows. Short screens keep it in the flow. */
-@supports (animation-timeline: view()) and (animation-range: entry 0% entry 100%) {
-  @media (prefers-reduced-motion: no-preference) and (min-height: 560px) {
-    html[data-family="special"]:not([data-world-effects="economy"])
-      body
-      .rxs-page.rxs-page.exs-page
-      > #performance
-      > .rxs-headline-metrics {
-      height: calc(var(--exi-stage) + var(--exi-pin));
-    }
-
-    html[data-family="special"]:not([data-world-effects="economy"])
-      body
-      .rxs-page.rxs-page.exs-page
-      #performance
-      .exi-stage {
-      position: sticky;
-      top: var(--dxs-nav);
-      height: var(--exi-stage);
-      grid-template-rows: auto minmax(0, 1fr) auto;
-      padding-block: clamp(36px, 8svh, 96px);
-    }
-  }
-
-  /* A tall stage (a phone, a portrait tablet) sets each figure in the
-     middle of its half. */
-  @media (prefers-reduced-motion: no-preference) and (min-height: 560px) and (orientation: portrait) {
-    html[data-family="special"]:not([data-world-effects="economy"])
-      body
-      .rxs-page.rxs-page.exs-page
-      #performance
-      .exi-stage {
-      grid-template-rows: minmax(0, 1fr) auto minmax(0, 1fr);
-    }
-
-    html[data-family="special"]:not([data-world-effects="economy"])
-      body
-      .rxs-page.rxs-page.exs-page
-      #performance
-      .exi-stage
-      > article {
-      align-self: center;
-    }
-  }
-}
-
 @supports (animation-timeline: view()) and (animation-range: entry 0% entry 100%) {
   @media (prefers-reduced-motion: no-preference) {
     /* Named timelines. */
@@ -1339,26 +1330,6 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer > .ex
       .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
       > .exs-hero {
       view-timeline: --exi-hero block;
-    }
-
-    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-        [data-loading]
-      ):not([data-dialog-open])
-      body
-      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
-      > #performance
-      > .rxs-headline-metrics {
-      view-timeline: --exi-punch block;
-      view-timeline-inset: var(--dxs-nav) 0;
-    }
-
-    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-        [data-loading]
-      ):not([data-dialog-open])
-      body
-      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
-      #exs-stage-panel {
-      view-timeline: --exi-stage block;
     }
 
     /* The cold open falls away in depth: the focus lines lag furthest and
@@ -1420,77 +1391,6 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer > .ex
       .exi-stage
       > article {
       view-timeline: none;
-    }
-
-    /* The gold cut crosses the stage as it arrives. */
-    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-        [data-loading]
-      ):not([data-dialog-open])
-      body
-      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
-      #performance
-      .exi-stage
-      > .exi-band::before {
-      animation-name: exi-cut-across;
-      animation-duration: auto;
-      animation-timing-function: var(--exi-blade);
-      animation-fill-mode: both;
-      animation-timeline: --exi-punch;
-      animation-range: entry 70% contain 16%;
-    }
-
-    /* The time dashes into its lane (its tag, hairline and caption stand
-       ready from the start, so the lower half is never empty) and lands;
-       the speed lines fade to a trail. */
-    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-        [data-loading]
-      ):not([data-dialog-open])
-      body
-      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
-      #performance
-      .exi-stage
-      > article:nth-child(2)
-      > strong {
-      animation-name: exi-dash;
-      animation-duration: auto;
-      animation-timing-function: var(--exi-hit);
-      animation-fill-mode: both;
-      animation-timeline: --exi-punch;
-      animation-range: contain 10% contain 34%;
-    }
-
-    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-        [data-loading]
-      ):not([data-dialog-open])
-      body
-      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
-      #performance
-      .exi-stage
-      > article:nth-child(2)
-      > .exi-streaks {
-      animation-name: exi-streak-in;
-      animation-duration: auto;
-      animation-timing-function: var(--exi-out);
-      animation-fill-mode: both;
-      animation-timeline: --exi-punch;
-      animation-range: contain 6% contain 50%;
-    }
-
-    /* ROUND 3. The camera pulls back from the form. */
-    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-        [data-loading]
-      ):not([data-dialog-open])
-      body
-      .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
-      #exs-stage-panel
-      > figure {
-      transform-origin: 50% 24%;
-      animation-name: exi-dolly;
-      animation-duration: auto;
-      animation-timing-function: linear;
-      animation-fill-mode: both;
-      animation-timeline: --exi-stage;
-      animation-range: entry 0% contain 22%;
     }
   }
 }
@@ -1890,17 +1790,6 @@ html[data-press-ready][data-family="special"]
   }
   to {
     rotate: 0deg;
-  }
-}
-
-@keyframes exi-dolly {
-  from {
-    scale: 1.34;
-    translate: 0 5%;
-  }
-  to {
-    scale: 1;
-    translate: 0 0;
   }
 }
 
