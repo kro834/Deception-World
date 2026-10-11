@@ -1,5 +1,6 @@
 /* One title, one light path. Preserve the seven-second score, approved logo
-   geometry and control deck; let the background recede as the prism arrives. */
+   geometry and control deck; let the background recede as the prism arrives.
+   The first frame is already an entrance, not a seven-second loading gate. */
 .cine-stage.cine-stage {
   --op-halo-rest: 0.72;
   --op-rays-rest: 0.42;
@@ -54,6 +55,105 @@
 
 .cine-stage .cine-title-caption {
   color: #d8e3ed;
+}
+
+/* A photographic projection plane, not floating scene props. These are
+   existing DOM planes; the artwork stays full-frame and no raster is added.
+   Keep one quiet dial, the real logo and the physical-looking reflected light. */
+.cine-stage :is(.cine-prism-field, .cine-aperture, .cine-orbit-b, .cine-depth-grid) {
+  display: none;
+}
+
+.cine-stage .cine-editorial-word {
+  visibility: hidden;
+}
+
+.cine-stage .cine-editorial::before {
+  background:
+    linear-gradient(114deg, transparent 12%, rgb(122 232 255 / 5%) 39%, transparent 63%),
+    radial-gradient(ellipse 72% 28% at 50% 51%, rgb(122 232 255 / 10%), transparent 78%);
+}
+
+.cine-stage .cine-editorial::after {
+  background:
+    linear-gradient(
+        90deg,
+        transparent,
+        rgb(122 232 255 / 34%) 28%,
+        rgb(182 163 255 / 28%) 62%,
+        transparent
+      )
+      0 0 / 100% 1px no-repeat,
+    radial-gradient(ellipse 56% 34% at 50% 100%, rgb(122 232 255 / 9%), transparent 80%);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 24%, #000 76%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 24%, #000 76%, transparent);
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-position: 0 0;
+  mask-position: 0 0;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+.cine-stage .cine-hud {
+  opacity: 0.22;
+}
+
+.cine-stage .cine-editorial-frame > i {
+  background-color: rgb(122 232 255 / 3%);
+}
+
+/* The main plate is present and usable while the title plays. It reuses the
+   final deck's exact geometry, so skipping never shifts the art or focus.
+   The disabled replay plate takes no space until there is a film to replay. */
+.cine-stage[data-opening-entry="ready"] .cine-replay-slot {
+  opacity: 1;
+  pointer-events: auto;
+  transform: none;
+  filter: none;
+  transition: none;
+}
+
+.cine-stage .cine-btn-secondary[hidden] {
+  display: none;
+}
+
+.cine-stage .cine-btn {
+  min-height: 52px;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.cine-stage .cine-btn-primary {
+  border-radius: 8px;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 85%),
+    inset 0 -1px 0 rgb(154 125 70 / 22%),
+    0 12px 36px rgb(0 0 0 / 42%);
+}
+
+.cine-stage .cine-btn-secondary {
+  border-radius: 8px;
+}
+
+/* Paused at rest on every renderer, not only Android. The finished title
+   does not spend continuous frames rotating a dial or animating grain. */
+.cine-stage.is-complete :is(.cine-hud-spin, .cine-hud-spin-rev, .cine-hud-orbits, .cine-grain) {
+  animation-play-state: paused;
+}
+
+.cine-stage.is-complete :is(.cine-camera, .cine-depth-field, .cine-orbit, .cine-hud) {
+  will-change: auto;
+}
+
+.cine-stage.is-economy-opening :is(.cine-grain, .cine-logo-glow, .cine-rays) {
+  display: none;
+}
+
+html[data-world-effects="economy"] .cine-stage .cine-logo-wrap {
+  opacity: 1;
+  transform: none;
+  clip-path: none;
 }
 
 /* The only pale plane is the way into the film. Touch targets, type sizes
@@ -124,6 +224,27 @@
   }
 }
 
+@media (max-width: 700px) and (orientation: portrait) {
+  .cine-stage .cine-title-caption {
+    line-height: 1.6;
+    letter-spacing: 0.1em;
+  }
+
+  .cine-stage .cine-replay-slot {
+    gap: 12px;
+  }
+}
+
+@media (max-height: 560px) and (orientation: landscape) {
+  .cine-stage .cine-btn {
+    min-height: 44px;
+  }
+
+  .cine-stage .cine-title-caption {
+    line-height: 1.45;
+  }
+}
+
 @media (prefers-reduced-motion: reduce), (prefers-reduced-transparency: reduce) {
   .cine-stage.cine-stage {
     background: #04080f;
@@ -132,10 +253,13 @@
 
 @media (forced-colors: active) {
   .cine-stage.cine-stage {
-    background: Canvas;
+    /* Alpha-keyed light artwork needs its black photographic backing. */
+    forced-color-adjust: none;
+    background: #000;
   }
 
   .cine-stage :is(.cine-btn-primary, .cine-btn-secondary) {
+    forced-color-adjust: auto;
     background: ButtonFace;
     color: ButtonText;
     border-color: ButtonText;

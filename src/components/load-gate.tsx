@@ -854,9 +854,10 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
   const transitionId = useRef(0);
   const rexonanceTransition = useRef<number | null>(null);
 
-  // rx13: the Rexonance call's suit-up decodes in advance, at idle after the
-  // first page has loaded (low priority; the same data-saving skips).
-  useEffect(() => scheduleRexonanceSuitWarm(), []);
+  // Keep the suit ready on the public pages, but never compete with the
+  // opening's title/video/World handoff. Leaving the opening schedules it
+  // after that destination's own load; route changes cancel stale idle jobs.
+  useEffect(() => scheduleRexonanceSuitWarm(), [pathname]);
   const rexonanceCoverCancel = useRef<(() => void) | null>(null);
   const openingHandoff = useRef<OpeningHandoffRuntime | null>(null);
   const openingFocusFrames = useRef<number[]>([]);

@@ -1081,6 +1081,22 @@ function ZeusButton({
       }
       schedulePlacement();
     };
+    // Home Screen apps can resume with a different split-view, keyboard or
+    // viewport without delivering a resize while suspended. Reconcile once
+    // on return, without persisting this temporary safety placement.
+    const onResume = () => {
+      if (document.hidden) return;
+      cancelPointer.current();
+      cancelPlacement();
+      stepAway.current = null;
+      glideNext.current = false;
+      schedulePlacement();
+    };
+    const onVisibility = () => {
+      if (document.hidden) cancelPlacement();
+      else onResume();
+    };
+    const onSuspend = () => cancelPlacement();
     // The optional iPad launcher moves immediately when its root flags change.
     // Waiting for scroll-settle and then gliding would leave this higher-z
     // button over the new menu target. Reconcile only that footprint change,
@@ -1112,6 +1128,9 @@ function ZeusButton({
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("message", onFrameAvoid);
     window.addEventListener("orientationchange", onResize, { passive: true });
+    window.addEventListener("pageshow", onResume, { passive: true });
+    window.addEventListener("pagehide", onSuspend, { passive: true });
+    document.addEventListener("visibilitychange", onVisibility);
     window.visualViewport?.addEventListener("resize", onResize, { passive: true });
     window.visualViewport?.addEventListener("scroll", onScroll, { passive: true });
     document.addEventListener("toggle", onLayoutChange, { capture: true, passive: true });
@@ -1124,6 +1143,9 @@ function ZeusButton({
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("message", onFrameAvoid);
       window.removeEventListener("orientationchange", onResize);
+      window.removeEventListener("pageshow", onResume);
+      window.removeEventListener("pagehide", onSuspend);
+      document.removeEventListener("visibilitychange", onVisibility);
       window.visualViewport?.removeEventListener("resize", onResize);
       window.visualViewport?.removeEventListener("scroll", onScroll);
       if (placementTimer.current != null) window.clearTimeout(placementTimer.current);
@@ -1216,6 +1238,21 @@ function ZeusButton({
     const cancelWhenHidden = () => {
       if (document.hidden) cancelDanglingPointer();
     };
+    // Another finger belongs to native pinch/scroll immediately; do not
+    // leave the first finger's pending hold armed until its next movement.
+    const cancelOnAnotherPointer = (event: PointerEvent) => {
+      if (
+        activePointer.current != null &&
+        event.pointerId !== activePointer.current &&
+        event.pointerType !== "mouse"
+      ) {
+        cancelDanglingPointer();
+      }
+    };
+    window.addEventListener("pointerdown", cancelOnAnotherPointer, {
+      capture: true,
+      passive: true,
+    });
     window.addEventListener("pointerup", cancelDanglingPointer);
     window.addEventListener("pointercancel", cancelDanglingPointer);
     window.addEventListener("blur", cancelOnBlur);
@@ -1223,6 +1260,7 @@ function ZeusButton({
     document.addEventListener("visibilitychange", cancelWhenHidden);
     cancelPointer.current = cancelOnBlur;
     return () => {
+      window.removeEventListener("pointerdown", cancelOnAnotherPointer, { capture: true });
       window.removeEventListener("pointerup", cancelDanglingPointer);
       window.removeEventListener("pointercancel", cancelDanglingPointer);
       window.removeEventListener("blur", cancelOnBlur);
@@ -1250,10 +1288,7 @@ function ZeusButton({
      does not end up a few pixels short of it. A drop elsewhere stays. */
   const dockToEdge = (button: HTMLElement, spot: ZeusButtonPosition) => {
     const viewport = getViewport();
-    const bounds = readBounds(viewport, {
-      width: button.offsetWidth,
-      height: button.offsetHeight,
-    });
+    const bounds = readBounds(viewport, restingSize(button));
     const x = viewport.offsetLeft + spot.x * viewport.width;
     let dockX: number | null = null;
     if (x - bounds.minX < EDGE_SNAP_PX) dockX = bounds.minX;
@@ -1286,6 +1321,9 @@ function ZeusButton({
         pendingPosition.current = docked;
       }
       onPositionChange(pendingPosition.current);
+      // A touch drop may move/dock the button before WebKit hit-tests its
+      // compatibility click. Never let that click activate the card below.
+      if (event.pointerType !== "mouse") guardTapThrough();
     } else if (wasHeld && cancelled) {
       restoreGestureOrigin();
     }
@@ -1341,13 +1379,28 @@ function ZeusButton({
         if (navigating) return;
         if (!event.isPrimary || (event.pointerType === "mouse" && event.button !== 0)) return;
         if (activePointer.current != null) return;
+        const target = event.currentTarget;
         cancelPlacement();
         cancelDragFrame();
-        // A glide in flight lands now, so the grab measures the real spot.
+        // Freeze a relocation where it is actually drawn. Landing it at its
+        // destination first made an iPad-sized dodge jump out from under the
+        // finger before the hold even began.
+        const glidingRect =
+          target.dataset.relocating === "true" ? target.getBoundingClientRect() : null;
         endGlide();
+        if (glidingRect) {
+          const frozen = setVisualCenter(
+            glidingRect.left + glidingRect.width / 2,
+            glidingRect.top + glidingRect.height / 2,
+          );
+          const viewport = getViewport();
+          pendingPosition.current = {
+            x: (frozen.x - viewport.offsetLeft) / viewport.width,
+            y: (frozen.y - viewport.offsetTop) / viewport.height,
+          };
+        }
         gestureOrigin.current = { ...pendingPosition.current };
         pressStartedAt.current = event.timeStamp;
-        const target = event.currentTarget;
         activePointer.current = event.pointerId;
         start.current = { x: event.clientX, y: event.clientY };
         latestPointer.current = { x: event.clientX, y: event.clientY };
@@ -1479,7 +1532,7 @@ function ZeusButton({
         height={360}
         alt=""
         decoding="async"
-        fetchPriority="high"
+        fetchPriority="low"
         draggable={false}
       />
       <img
