@@ -6,7 +6,8 @@ import {
   PICKUP_CINEMA_STYLESHEET_LINK,
   WORLD_STYLESHEET_LINKS,
 } from "@/lib/world-head";
-import { WORLD_ENTER_ASSETS } from "@/lib/asset-loader";
+import { assetsWarmed, WORLD_ENTER_ASSETS } from "@/lib/asset-loader";
+import { posterImage } from "@/lib/thumbnail-images";
 import worldProgrammeCssUrl from "@/styles-world-programme.css?url";
 import worldProgrammeSectionsCssUrl from "@/styles-world-programme-sections.css?url";
 import worldNeoCssUrl from "@/styles-world-neo.css?url";
@@ -23,6 +24,7 @@ import worldPhasesCssUrl from "@/styles-world-phases.css?url";
 import worldAtmosphereCssUrl from "@/styles-world-atmosphere.css?url";
 import worldTranscriptCssUrl from "@/styles-world-transcript.css?url";
 import stageWorldCssUrl from "@/styles-stage-world.css?url";
+import worldReadingCssUrl from "@/styles-world-reading.css?url";
 import { MIRAGE_BOOT_GATE_SCRIPT } from "@/lib/mirage-boot-gate";
 
 // Michroma carries the Mirage HUD labels. The subset holds only the capitals,
@@ -34,6 +36,10 @@ export const Route = createFileRoute("/world")({
   validateSearch: validateInquirySearch,
   component: WorldHome,
   head: () => {
+    const poster = posterImage(
+      WORLD_ENTER_ASSETS[0],
+      typeof window !== "undefined" && assetsWarmed(WORLD_ENTER_ASSETS),
+    );
     const head = createWorldHead({
       title: "Deception World｜仮面ライダーサーガ",
       description:
@@ -60,6 +66,7 @@ export const Route = createFileRoute("/world")({
         { rel: "stylesheet", href: worldTranscriptCssUrl },
         // STAGE: the chapters as lit scenes, ahead of the HUD face and the last sheet.
         { rel: "stylesheet", href: stageWorldCssUrl },
+        { rel: "stylesheet", href: worldReadingCssUrl },
         { rel: "stylesheet", href: MIRAGE_FONTS_URL },
         { rel: "stylesheet", href: worldMirageCssUrl },
       ],
@@ -74,7 +81,9 @@ export const Route = createFileRoute("/world")({
           rel: "preload",
           as: "image",
           type: "image/webp",
-          href: WORLD_ENTER_ASSETS[0],
+          href: poster.src,
+          imageSrcSet: poster.srcSet,
+          imageSizes: poster.sizes,
           fetchPriority: "high",
         },
       ],

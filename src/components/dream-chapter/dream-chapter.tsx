@@ -16,14 +16,12 @@ import { settlePickupScroll } from "@/components/world/pickup-scroll-reset";
 import { SideMenuLayer, SideMenuTrigger } from "@/components/world/world-chrome";
 import { useWorldMode } from "@/components/world/use-world-mode";
 import { mountFilmMotion } from "@/lib/film-motion";
-import {
-  holdFragmentPath,
-  mountStableFragmentNavigation,
-} from "@/lib/stable-fragment-navigation";
+import { holdFragmentPath, mountStableFragmentNavigation } from "@/lib/stable-fragment-navigation";
 import { DisplayName } from "@/components/name-text";
 import { acquireViewportScrollLock } from "@/lib/viewport-scroll-lock.js";
 import { posterImage, preparePosterImage } from "@/lib/thumbnail-images";
 import { createReadyPosterLoader } from "@/lib/ready-poster-loader";
+import { dossierImage } from "@/lib/dossier-images";
 import { useUltraArtworkReady } from "@/lib/use-ultra-artwork-ready";
 import { FilmTextScan } from "@/components/cinematic/film-text-scan";
 import {
@@ -246,6 +244,7 @@ function DossierContent({ character }: { character: DreamCharacter }) {
         <figure>
           <img
             src={character.portrait}
+            {...dossierImage(character.portrait)}
             alt={character.portraitAlt}
             width={character.id === "ciel" ? 1022 : character.id === "keiya" ? 736 : 638}
             height={character.id === "ciel" ? 1539 : character.id === "keiya" ? 976 : 630}
@@ -258,6 +257,7 @@ function DossierContent({ character }: { character: DreamCharacter }) {
           <figure>
             <img
               src={character.secondary}
+              {...dossierImage(character.secondary)}
               alt={character.secondaryAlt}
               width={character.id === "ciel" ? 846 : 1089}
               height={character.id === "ciel" ? 1219 : 1445}
@@ -437,6 +437,7 @@ function DolminenceContent({ record }: { record: DreamDolminence }) {
         <figure>
           <img
             src={record.image}
+            {...dossierImage(record.image)}
             alt={record.imageAlt}
             width={record.imageWidth}
             height={record.imageHeight}
@@ -449,6 +450,7 @@ function DolminenceContent({ record }: { record: DreamDolminence }) {
           <figure>
             <img
               src={record.secondary}
+              {...dossierImage(record.secondary)}
               alt={record.secondaryAlt}
               width={record.secondaryWidth}
               height={record.secondaryHeight}
@@ -1393,6 +1395,7 @@ export function DreamChapter() {
                 <LiquidPointerGlow />
                 <img
                   src={item.portrait}
+                  {...dossierImage(item.portrait)}
                   alt={item.portraitAlt}
                   width={item.id === "ciel" ? 1022 : item.id === "keiya" ? 736 : 638}
                   height={item.id === "ciel" ? 1539 : item.id === "keiya" ? 976 : 630}
@@ -1505,6 +1508,7 @@ export function DreamChapter() {
                 <LiquidPointerGlow />
                 <img
                   src={record.image}
+                  {...dossierImage(record.image)}
                   alt={record.imageAlt}
                   width={record.imageWidth}
                   height={record.imageHeight}
@@ -1516,7 +1520,9 @@ export function DreamChapter() {
                 <span className="dream-dolminence-number">{record.order}</span>
                 <span className="dream-dolminence-copy">
                   <small>{record.agent}</small>
-                  <b><DisplayName value={record.name} /></b>
+                  <b>
+                    <DisplayName value={record.name} />
+                  </b>
                   <i>{record.roman}</i>
                   <em>機密記録を開く</em>
                 </span>

@@ -316,6 +316,8 @@ test("world-annex.tsx keeps its labels and accessibility with the approved episo
     .map((match) => match[1].replace(/\s+/g, " ").trim())
     .filter((text) => text && !/^[=&|;)(,.:?]/.test(text) && !/=>/.test(text));
   assert.deepEqual(texts, [
+    // rx14 F6: an honest, decorative unpublished-file label; no new lore.
+    "NO FILE",
     "PROFILE",
     "item.by ? (",
     "OPEN DOSSIER",
@@ -341,9 +343,9 @@ test("world-annex.tsx keeps its labels and accessibility with the approved episo
   // Search deep links add visible targets while preserving every original
   // reading and accessibility attribute in the refined annex contract.
   const searchAnchors = [
-    'id={`wa-location-${place.name}`}',
-    'id={`wa-episode-${episode.no}`}',
-    'id={`wa-term-${entry.term}`}',
+    "id={`wa-location-${place.name}`}",
+    "id={`wa-episode-${episode.no}`}",
+    "id={`wa-term-${entry.term}`}",
   ];
   for (const anchor of searchAnchors) assert.equal(count(anchor), 1, anchor);
   // 2026-10-09: source transcription adds its help ID and button's
@@ -351,14 +353,15 @@ test("world-annex.tsx keeps its labels and accessibility with the approved episo
   const voiceControls = [
     'id="world-transcript-help"',
     'aria-describedby="world-transcript-help"',
-    'aria-pressed={transcriptStopped}',
+    "aria-pressed={transcriptStopped}",
   ];
   for (const attr of voiceControls) assert.equal(count(attr), 1, attr);
   assert.equal(count('aria-controls="world-quotes-rail"'), 3);
-  assert.equal(attrs.filter((attr) => !searchAnchors.includes(attr)).length, 71);
+  // rx14 F6 adds only lang=en on the decorative NO FILE tab.
+  assert.equal(attrs.filter((attr) => !searchAnchors.includes(attr)).length, 72);
   assert.equal(count('aria-hidden="true"'), 12);
   assert.equal(count('alt=""'), 5);
-  assert.equal(count('lang="en"'), 5);
+  assert.equal(count('lang="en"'), 6);
   for (const attr of [
     'aria-labelledby="cast-roster-title"',
     'title="人物一覧"',

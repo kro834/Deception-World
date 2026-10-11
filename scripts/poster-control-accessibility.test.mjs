@@ -16,9 +16,9 @@ test("poster autoplay and speculative loading pause while controls have focus", 
   assert.match(home, /onFocusCapture=\{\(\) => setPosterControlsFocused\(true\)\}/);
   assert.match(
     home,
-    /if \(!event\.currentTarget\.contains\(event\.relatedTarget\)\) setPosterControlsFocused\(false\)/,
+    /if \(!event\.currentTarget\.contains\(event\.relatedTarget\)\)\s*setPosterControlsFocused\(false\)/,
   );
-  assert.equal(home.match(/shuffling, posterControlsFocused\]\)/g)?.length, 2);
+  assert.equal(home.match(/shuffling,\s*posterControlsFocused,?\s*\]\)/g)?.length, 2);
 });
 
 test("poster controls are named and automatic rotations do not create live announcements", () => {

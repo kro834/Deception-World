@@ -2,7 +2,7 @@ import { forwardRef, memo, useCallback, useEffect, useLayoutEffect, useRef, useS
 import { startTransition } from "react";
 import { useRouterState } from "@tanstack/react-router";
 import { bootLiquidGlass } from "@/lib/liquid/boot.js";
-import { MANAGER_ASSETS } from "@/lib/asset-loader";
+import { assetsWarmed, MANAGER_ASSETS, WORLD_ENTER_ASSETS } from "@/lib/asset-loader";
 import { GuardedLink, useLoadGate } from "@/components/load-gate";
 import { useWorldMode } from "./use-world-mode";
 import { LiquidLens, LiquidPointerGlow } from "./liquid-rail";
@@ -490,3 +490,12 @@ const EPISODES: EpisodeRecord[] = [
     title: "DEUS",
     src: "/episode-06-deus.webp",
     pos: "42% 38%",
+    alt: "夕暮れの崩壊した街で、傷ついた黒い衣装の人物が空を見上げるEP6 DEUSのビジュアル",
+  },
+];
+
+function scrollAxisX(scroller: HTMLElement | null, child: HTMLElement | null) {
+  if (!scroller || !child) return;
+  const left = child.offsetLeft - (scroller.clientWidth - child.clientWidth) / 2;
+  const behavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ? "auto"

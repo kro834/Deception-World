@@ -773,7 +773,9 @@ html[data-family="world"]:root
     --poster-width: min(40vw, 430px);
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     grid-template-rows: auto auto auto;
-    align-content: center;
+    align-content: start;
+    min-height: 0;
+    padding-bottom: 48px;
   }
 
   html[data-family="world"]:root

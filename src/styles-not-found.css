@@ -21,6 +21,8 @@
    flashes: the card is dark and the control is already lit. */
 
 .app-not-found.app-not-found {
+  position: relative;
+  isolation: isolate;
   --lr-ink: #03060c;
   --lr-deck: #08111c;
   --lr-ice: #7ae8ff;
@@ -57,6 +59,24 @@
     repeating-linear-gradient(90deg, rgb(122 232 255 / 3%) 0 1px, transparent 1px 28px),
     repeating-linear-gradient(0deg, rgb(122 232 255 / 3%) 0 1px, transparent 1px 28px),
     var(--lr-ink);
+}
+
+/* A restrained trace of the World's published key visual behind the
+   recovery card. The copy and controls remain on their opaque plate. */
+.app-not-found.app-not-found::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(90deg, rgb(3 6 12 / 80%), rgb(3 6 12 / 72%)),
+    url("/deception-world-poster-delivery-720.webp") center 32% / cover no-repeat;
+  pointer-events: none;
+}
+@media (forced-colors: active) {
+  .app-not-found.app-not-found::before {
+    display: none;
+  }
 }
 
 /* The card: deck ink, an ice rim, ice ticks over gold, the prism on top

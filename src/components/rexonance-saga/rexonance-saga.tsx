@@ -1037,7 +1037,7 @@ export function RexonanceSaga() {
           observer.unobserve(entry.target);
         });
       },
-      { rootMargin: "0px 0px -10%", threshold: 0.12 },
+      { rootMargin: "0px 0px -10%", threshold: 0 },
     );
     reveals.forEach((element) => observer.observe(element));
     return () => {
@@ -1147,7 +1147,9 @@ export function RexonanceSaga() {
             aria-label="ディセプションワールドへ戻る"
           >
             <span>REXONANCE</span>
-            <b><DisplayName value="レクソナンスサーガ" /></b>
+            <b>
+              <DisplayName value="レクソナンスサーガ" />
+            </b>
           </GuardedLink>
           <nav aria-label="レクソナンスサーガ ページ内ナビゲーション">
             <a href="#performance">性能</a>

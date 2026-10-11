@@ -1,0 +1,133 @@
+/* rx14 F6: no invented portrait. An unpublished file is a typographic
+   spine, not a failed image or a stretched two-column socket. */
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #cast-roster
+  .wa-roster
+  > li:has(> .wa-person.is-none):not(:has(.wa-profile[open])) {
+  grid-column: auto;
+}
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #cast-roster
+  .wa-person.is-none
+  > .wa-portrait.is-vacant {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  background:
+    linear-gradient(140deg, rgb(var(--sw-light-rgb) / 9%), transparent 70%), var(--sw-deck-2);
+}
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #cast-roster
+  .wa-person.is-none
+  > .wa-portrait.is-vacant::before,
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #cast-roster
+  .wa-person.is-none
+  > .wa-portrait.is-vacant::after {
+  content: none;
+}
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #cast-roster
+  .wa-portrait.is-vacant
+  > b {
+  writing-mode: vertical-rl;
+  font: 600 clamp(30px, 4vw, 56px) / 1.4 var(--sw-display);
+  letter-spacing: 0.2em;
+  color: var(--sw-text);
+}
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #cast-roster
+  .wa-portrait.is-vacant
+  > small {
+  position: absolute;
+  inset: auto 0 0 auto;
+  padding: 8px 14px 8px 20px;
+  clip-path: polygon(10px 0, 100% 0, 100% 100%, 0 100%);
+  background: var(--sw-light);
+  color: #04110c;
+  font: 700 12px / 1.4 var(--sw-mono);
+  letter-spacing: 0.12em;
+}
+
+/* rx14 O1: published episode art holds a quiet stage beside the files.
+   Small screens keep the complete reading lane and do not load this art. */
+.wa-brief-art {
+  display: none;
+}
+@media (min-width: 1101px) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #world-brief
+    .wa-brief-stage {
+    display: grid;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.8fr);
+    gap: clamp(24px, 3vw, 48px);
+    align-items: start;
+  }
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #world-brief
+    .wa-brief-art {
+    display: block;
+    position: sticky;
+    top: calc(var(--sh-bar-h, 76px) + env(safe-area-inset-top, 0px) + 24px);
+    height: min(65svh, 680px);
+    min-height: 260px;
+    border: 1px solid rgb(var(--sw-light-rgb) / 24%);
+    background: var(--sw-deck);
+    overflow: hidden;
+  }
+  .wa-brief-art > img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 28%;
+  }
+  .wa-brief-art::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(0deg, rgb(3 6 12 / 75%), transparent 45%);
+    pointer-events: none;
+  }
+  .wa-brief-documents {
+    min-width: 0;
+  }
+}
+@media (prefers-reduced-motion: no-preference) and (min-width: 1101px) {
+  html:not([data-world-effects="economy"]) .wa-brief-art > .is-current {
+    animation: sw-brief-art-in 360ms ease-out both;
+  }
+}
+@keyframes sw-brief-art-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@media (forced-colors: active) {
+  .wa-brief-art {
+    visibility: hidden;
+  }
+}

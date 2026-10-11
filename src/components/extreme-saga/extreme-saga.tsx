@@ -310,12 +310,7 @@ const ExtremePerformance = memo(function ExtremePerformance() {
             </strong>
             <p>標準状態のパンチ力</p>
           </article>
-          <article
-            className="rxs-reveal"
-            data-exi-hit=""
-            data-exi-line="mid"
-            data-exi-chain="380"
-          >
+          <article className="rxs-reveal" data-exi-hit="" data-exi-line="mid" data-exi-chain="380">
             <i className="exi-streaks" aria-hidden="true">
               <svg
                 viewBox="0 0 200 100"
@@ -561,7 +556,7 @@ export function ExtremeSaga() {
           observer.unobserve(entry.target);
         });
       },
-      { rootMargin: "0px 0px -8%", threshold: 0.1 },
+      { rootMargin: "0px 0px -8%", threshold: 0 },
     );
     reveals.forEach((element) => observer.observe(element));
     return () => observer.disconnect();
@@ -584,7 +579,9 @@ export function ExtremeSaga() {
             aria-label="ディセプションワールドへ戻る"
           >
             <span>EXTREME</span>
-            <b><DisplayName value="エクスプリームサーガ" /></b>
+            <b>
+              <DisplayName value="エクスプリームサーガ" />
+            </b>
           </GuardedLink>
           <nav aria-label="エクスプリームサーガ ページ内ナビゲーション">
             <a href="#performance">比較</a>

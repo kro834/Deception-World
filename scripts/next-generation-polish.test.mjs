@@ -59,7 +59,12 @@ test("world hero work pauses offscreen and primary navigation reports location",
 test("world motion and poster changes stay stable on constrained clients", () => {
   assert.match(worldHome, /prefers-reduced-motion: reduce/);
   assert.match(worldHome, /motionReduced/);
-  assert.match(worldHome, /createReadyPosterLoader\(preparePosterImage\)/);
+  // rx14: preserve the same decoded loader, with the first poster's warmed
+  // opening candidate carried through to responsive images.
+  assert.match(
+    worldHome,
+    /createReadyPosterLoader\(\(image, source\) =>\s*preparePosterImage\(image, source, reuseWarmedPoster\)/,
+  );
   assert.match(worldHome, /const finalReady = loadPoster\(finalPoster\)/);
   assert.match(worldHome, /if \(ready\) goPoster\(finalPoster\)/);
 });

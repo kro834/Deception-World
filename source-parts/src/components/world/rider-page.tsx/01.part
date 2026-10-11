@@ -336,3 +336,4 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
             pos: "50% 50%",
             name: "アクシスレイカー・マークⅦ　ランチャーモード",
             label: "AXIS RAKER / LAUNCHER MODE",
+          },

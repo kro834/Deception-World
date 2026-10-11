@@ -1,0 +1,73 @@
+.app-not-found.app-not-found > .recovery-tiles {
+  grid-column: 2 / -2;
+  grid-row: plate-end;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(8px, 2vw, 18px);
+  width: min(100%, 940px);
+  margin: 28px auto 20px;
+}
+.recovery-tiles.recovery-tiles > a {
+  position: relative;
+  isolation: isolate;
+  min-width: 0;
+  min-height: 132px;
+  display: flex;
+  flex-direction: column;
+  justify-content: end;
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid rgb(122 232 255 / 32%);
+  color: #eef9ff;
+  background: #08111c;
+  text-decoration: none;
+}
+.recovery-tiles > a > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 22%;
+  opacity: 0.42;
+  z-index: -2;
+}
+.recovery-tiles > a::before {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background: linear-gradient(transparent, #03060c);
+  z-index: -1;
+}
+.recovery-tiles > a > small {
+  font-size: 12px;
+  color: #7ae8ff;
+}
+.recovery-tiles > a > b {
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+.recovery-tiles > a:focus-visible {
+  outline: 2px solid #fff0b5;
+  outline-offset: 3px;
+}
+@media (max-width: 560px) {
+  .recovery-tiles.recovery-tiles > a {
+    padding: 10px 8px;
+    min-height: 110px;
+  }
+  .recovery-tiles > a > b {
+    font-size: 12px;
+  }
+}
+@media (forced-colors: active) {
+  .recovery-tiles.recovery-tiles > a {
+    color: LinkText;
+    border-color: LinkText;
+    background: Canvas;
+  }
+  .recovery-tiles > a > img,
+  .recovery-tiles > a::before {
+    display: none;
+  }
+}

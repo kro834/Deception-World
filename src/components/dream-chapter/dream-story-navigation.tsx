@@ -53,7 +53,7 @@ export function DreamStoryNavigation({ no }: { no: string }) {
   const next = DREAM_CASES[index + 1];
   return (
     <div className="dream-reader-footer">
-      <nav className="dream-reader-related" aria-label={`CASE ${no}の関連資料`}>
+      <nav className="dream-reader-related" aria-label={`CASE ${no}の章資料`}>
         <span>この章の資料</span>
         <a href={`#dream-case-note-${no}`}>章の言葉</a>
         <a href={`#dream-chronicle-case-${no}`}>出来事</a>
@@ -85,7 +85,10 @@ export function DreamStoryNavigation({ no }: { no: string }) {
 
 export function DreamStoryBacklinks({ no, from }: { no: string; from: "note" | "chronicle" }) {
   return (
-    <nav className="dream-reader-backlinks" aria-label={`CASE ${no}の関連資料`}>
+    <nav
+      className="dream-reader-backlinks"
+      aria-label={`CASE ${no}の${from === "note" ? "章の言葉" : "出来事"}から移動`}
+    >
       <a href={`#dream-case-${no}`}>CASE {no}のあらすじ</a>
       <a href={from === "note" ? `#dream-chronicle-case-${no}` : `#dream-case-note-${no}`}>
         {from === "note" ? "出来事" : "章の言葉"}

@@ -1,6 +1,3 @@
-      {
-        no: "02",
-        kicker: "支援装備",
         title: "戦闘・潜入・解析を支えるCODE装備。",
         body: [
           "ゼッツフォン、ゼッツカメラ、ゼッツセンサー、ゼッツライセンスを任務に用いる。エージェントとしての身分と装備を伴い、世界の境界を越えて活動する。",
@@ -337,3 +334,6 @@ export function RiderPage({ id }: { id: string }) {
           </div>
           <dl className="manager-facts">
             {rider.facts.map((f) => (
+              <div key={f.dt}>
+                <dt>{f.dt}</dt>
+                <dd>

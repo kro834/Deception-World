@@ -55,7 +55,9 @@ function mount({ open = true, announcementOpen = false } = {}) {
           useRouter: () => router,
           useRouterState: () => "/world",
         };
-      if (name === "./dossier-nav") return { RIDER_NAV: [] };
+      if (name === "./dossier-nav")
+        return { RIDER_NAV: [], RIKUEI_NAV: [], RELATED_NAV: [], RE_DIVE_RIKUEI_NAV: [] };
+      if (name === "@/lib/thumbnail-images") return { launcherTile: () => ({}) };
       return {};
     },
   });

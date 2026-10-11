@@ -60,20 +60,27 @@ test("cast wall portraits: WebP candidates of their stated widths, each smaller 
 
 test("the portraits' sources stay exactly as supplied", () => {
   const supplied = {
-    "/civilian-yuma-20260826.jpeg": "2f6aa15a18da44c1adac41b520622927e89f1b2a486172486504cad503024d4e",
-    "/civilian-bell-20260826.jpeg": "29475d030015c7b131df1d6e109001936c735a8c8d7d386efdf7e21047a6cca0",
+    "/civilian-yuma-20260826.jpeg":
+      "2f6aa15a18da44c1adac41b520622927e89f1b2a486172486504cad503024d4e",
+    "/civilian-bell-20260826.jpeg":
+      "29475d030015c7b131df1d6e109001936c735a8c8d7d386efdf7e21047a6cca0",
     "/civilian-lore.jpeg": "4e8eb62fe27320b7c5ace51ea6c2be12e3399d7a2f03a882c065986590c5370f",
     "/civilian-leddic.jpeg": "d334a4290e78c0a5f58e0716b634218dfa68cbf66d11f8b85cb2bcf5b05b003d",
-    "/civilian-naikami-chigiri.jpeg": "bb07970a7df556bc87fc46559e3b72c3842b562cc73d853c3eb51d44630bd6c8",
+    "/civilian-naikami-chigiri.jpeg":
+      "bb07970a7df556bc87fc46559e3b72c3842b562cc73d853c3eb51d44630bd6c8",
     "/civilian-argenome.jpeg": "88f2ef5d5dca8b7aebac08a591e9714b2bf58ca21801ad4bc1390d8c5f74b087",
-    "/character-james-20260829.jpg": "8cd498d105a1951bb698ff314e0728cefce1ec6cb3ad1649b08a4889bafcb0d9",
+    "/character-james-20260829.jpg":
+      "8cd498d105a1951bb698ff314e0728cefce1ec6cb3ad1649b08a4889bafcb0d9",
     "/character-luna.jpeg": "c2687852ed8ef23244ecb21c7e54c52474058ac253e3aa7268647e4a20955dd6",
     "/character-terra.jpeg": "6d48828c402fa86515a58b9fb877c791c3f3aa05874270844d8e95ff83593641",
     // 2026-10-11: the owner supplied the same portrait without the TikTok watermark.
-    "/character-yoake-mamori.jpeg": "30b2a3e4c886aeb0b73a74014d1fbe6a225bfdb2e6b0bb6c28ab81cd7f6376df",
+    "/character-yoake-mamori.jpeg":
+      "30b2a3e4c886aeb0b73a74014d1fbe6a225bfdb2e6b0bb6c28ab81cd7f6376df",
   };
   for (const set of Object.values(PORTRAIT_THUMBNAILS)) {
-    const hash = createHash("sha256").update(readFileSync(file(set.source))).digest("hex");
+    const hash = createHash("sha256")
+      .update(readFileSync(file(set.source)))
+      .digest("hex");
     assert.equal(hash, supplied[set.source], set.source);
   }
   // The 360 px step is a fraction of what the tile used to load.
@@ -114,7 +121,7 @@ test("the wall, its quote chips and the ID photo ask for the same candidates", (
 
 // Width and height of a baseline or progressive JPEG (the first SOFn marker).
 function jpegSize(bytes) {
-  for (let i = 2; i < bytes.length; ) {
+  for (let i = 2; i < bytes.length;) {
     const marker = bytes[i + 1];
     const length = bytes.readUInt16BE(i + 2);
     if (marker >= 0xc0 && marker <= 0xcf && ![0xc4, 0xc8, 0xcc].includes(marker)) {
@@ -127,10 +134,17 @@ function jpegSize(bytes) {
 
 test("the poster deck: one WebP per poster, the same pixels as the JPEG, a fraction of its bytes", () => {
   const home = read("src/components/world/world-home.tsx");
-  const posters = [...home.slice(home.indexOf("const POSTERS = ["), home.indexOf("const RIDERS = [")).matchAll(/src: "([^"]+)"/g)].map((m) => m[1]);
+  const posters = [
+    ...home
+      .slice(home.indexOf("const POSTERS = ["), home.indexOf("const RIDERS = ["))
+      .matchAll(/src: "([^"]+)"/g),
+  ].map((m) => m[1]);
   assert.equal(posters.length, 33);
-  // Every poster but the first (the handoff's shared delivery file) has one.
-  assert.deepEqual(posterImage(posters[0]), {});
+  // rx14: direct entries use responsive pixels; an opening handoff reuses
+  // its already decoded full candidate without starting another request.
+  assert.equal(posterImage(posters[0], true).src, posters[0]);
+  assert.equal(posterImage(posters[0], true).srcSet, posters[0]);
+  assert.ok(posterImage(posters[0]).srcSet.includes("640w"));
   let jpeg = 0;
   let webp = 0;
   for (const source of posters.slice(1)) {
@@ -155,9 +169,16 @@ test("the poster deck: one WebP per poster, the same pixels as the JPEG, a fract
   }
   assert.ok(webp < jpeg * 0.45, `${webp} of ${jpeg}`);
   // The deck, the backdrop and the warm-ups all ask through the helpers.
-  assert.equal(home.match(/\{\.\.\.posterImage\((?:current|previous|nextPoster)\.src\)\}/g)?.length, 8);
+  assert.equal(
+    home.match(/\{\.\.\.posterImage\((?:current|previous|nextPoster)\.src, reuseWarmedPoster\)\}/g)
+      ?.length,
+    8,
+  );
   // Autoplay, warmup and shuffle use the same delivery-aware loader as Dream.
-  assert.match(home, /createReadyPosterLoader\(preparePosterImage\)/);
+  assert.match(
+    home,
+    /createReadyPosterLoader\(\(image, source\) =>\s*preparePosterImage\(image, source, reuseWarmedPoster\)/,
+  );
   assert.match(home, /posterLoader\.current\.load\(POSTERS\[index\]\.src, priority\)/);
   assert.doesNotMatch(home, /new Image\(/);
   assert.doesNotMatch(home, /\.src = POSTERS\[/);
@@ -165,7 +186,12 @@ test("the poster deck: one WebP per poster, the same pixels as the JPEG, a fract
     const source = index === 1 ? "nextPoster" : "current";
     // Mutating a reused lazy back-card image can invalidate the front's
     // warmed resource during rapid transitions in WebKit.
-    assert.match(home, new RegExp(`className="poster-back-card poster-back-card-${index}"[^>]*>\\s*<img\\s+key=\\{${source}\\.src\\}\\s+src=\\{${source}\\.src\\}`));
+    assert.match(
+      home,
+      new RegExp(
+        `className="poster-back-card poster-back-card-${index}"[^>]*>\\s*<img\\s+key=\\{${source}\\.src\\}\\s+src=\\{${source}\\.src\\}`,
+      ),
+    );
   }
 });
 
@@ -193,7 +219,10 @@ test("the Dream Chapter's poster console asks for the same WebP copies", async (
     webp += delivery.length;
   }
   assert.ok(webp < jpeg * 0.6, `${webp} of ${jpeg}`);
-  assert.equal(dream.match(/\{\.\.\.posterImage\((?:activePoster|previousPoster)\.src\)\}/g)?.length, 2);
+  assert.equal(
+    dream.match(/\{\.\.\.posterImage\((?:activePoster|previousPoster)\.src\)\}/g)?.length,
+    2,
+  );
   assert.match(dream, /createReadyPosterLoader\(preparePosterImage\)/);
   assert.match(dream, /posterLoader\.current\.load\(DREAM_POSTERS\[index\]\.src, priority\)/);
   assert.doesNotMatch(dream, /new Image\(/, "all poster warmups share the delivery-aware loader");
@@ -215,7 +244,11 @@ test("the Saga file's nightmare art comes as its delivery WebP", async () => {
     "fe760641ed88a9b3eafb1df5aaa8d3c6cc3e3b973ca6bde3b00056f993ee5da0",
   );
   const rider = read("src/components/world/rider-page.tsx");
-  assert.equal(rider.match(/src=\{rider\.nightmare\.img\}\s*\{\.\.\.dossierImage\(rider\.nightmare\.img\)\}/g)?.length, 2);
+  assert.equal(
+    rider.match(/src=\{rider\.nightmare\.img\}\s*\{\.\.\.dossierImage\(rider\.nightmare\.img\)\}/g)
+      ?.length,
+    2,
+  );
 });
 
 test("dossier chrome: a 12px brand, an opaque reader bar, 12px arms on the list return", () => {
@@ -224,27 +257,35 @@ test("dossier chrome: a 12px brand, an opaque reader bar, 12px arms on the list 
     css,
     /main\.manager-page:not\(\.is-sovereign\) \.manager-topbar \.brand-sigil i,\s*main\.manager-page:not\(\.is-sovereign\) \.manager-topbar \.brand b,\s*main\.manager-page:not\(\.is-sovereign\) \.manager-topbar \.brand small \{\s*font-size: 12px;/,
   );
-  const reader = css.match(/main\.manager-page:not\(\.is-sovereign\) \.dossier-reader \{([^}]*)\}/)[1];
+  const reader = css.match(
+    /main\.manager-page:not\(\.is-sovereign\) \.dossier-reader \{([^}]*)\}/,
+  )[1];
   assert.match(reader, /background-color: #080e18;/);
   // The list return spells out its 12px bracket list: a local --dm-arm cannot
   // reach --dm-brackets, which is resolved on <main>.
-  const ret = css.match(
-    /\.manager-pagination \.dossier-index-return::after \{([^}]*)\}/,
-  )[1];
+  const ret = css.match(/\.manager-pagination \.dossier-index-return::after \{([^}]*)\}/)[1];
   assert.doesNotMatch(ret, /--dm-arm|var\(--dm-brackets\)/);
   assert.equal(ret.match(/ 12px 2px| 2px 12px/g)?.length, 8);
   // Forced colours: the ambient ring would be a line through the name.
   const forced = css.slice(css.indexOf("@media (forced-colors: active)"));
-  assert.match(forced, /main\.manager-page:not\(\.is-sovereign\) \.manager-glow \{\s*display: none;/);
+  assert.match(
+    forced,
+    /main\.manager-page:not\(\.is-sovereign\) \.manager-glow \{\s*display: none;/,
+  );
 });
 
 test("the World rails and HOLD + SLIDE labels meet the 12px floor without moving", () => {
   const mirage = strip(read("src/styles-world-mirage.css"));
-  const block = mirage.slice(mirage.indexOf(".manager-archive-tabs button small {\n  font-size: 12px;"));
+  const block = mirage.slice(
+    mirage.indexOf(".manager-archive-tabs button small {\n  font-size: 12px;"),
+  );
   assert.ok(block.length > 0);
   // Codes and names take 12px in the 11px labels' line boxes.
   assert.match(block, /button small \{\s*font-size: 12px;\s*line-height: 16\.5px;/);
-  assert.match(block, /@media \(min-width: 561px\) \{\s*[^{]*button b \{\s*font-size: 12px;\s*line-height: 14\.85px;/);
+  assert.match(
+    block,
+    /@media \(min-width: 561px\) \{\s*[^{]*button b \{\s*font-size: 12px;\s*line-height: 14\.85px;/,
+  );
   assert.match(
     block,
     /@media \(max-width: 899px\) \{[^{]*:is\(small, b\) \{\s*font-size: 12px;\s*line-height: 16\.5px;/,
@@ -299,7 +340,10 @@ test("the opening does not preload the Zeus button it never shows", () => {
     /\.\.\.\(matches\.some\(\(match\) => \(match\.routeId as string\) === "\/"\)\s*\? \[\]\s*: \[\s*\{\s*rel: "preload",\s*as: "image",\s*type: "image\/webp",\s*href: "\/zeus-button-360\.webp",/,
   );
   // The button itself still never renders on the opening.
-  assert.match(read("src/components/zeus-button.tsx"), /enabled && pathname !== "\/" && portalTarget/);
+  assert.match(
+    read("src/components/zeus-button.tsx"),
+    /enabled && pathname !== "\/" && portalTarget/,
+  );
 });
 
 test("economy rendering stills the Rexonance pickup card's loops", () => {

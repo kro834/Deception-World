@@ -1,5 +1,10 @@
 import { rexonanceImage } from "./rexonance-images.ts";
-import { CIEL_PORTRAIT, PORTRAIT_THUMBNAILS, cielPortrait } from "./thumbnail-images.ts";
+import {
+  CIEL_PORTRAIT,
+  CIEL_PORTRAIT_SIZES,
+  PORTRAIT_THUMBNAILS,
+  cielPortrait,
+} from "./thumbnail-images.ts";
 
 // Shared delivery choice for navigation warmup and visible image elements.
 export const dossierImageSources = [
@@ -18,6 +23,30 @@ export const dossierImageSources = [
   // The Saga file's nightmare pickup (and its Final Stage card): 721 KB as
   // supplied, for a card that stays under 600 px.
   "/nightmare-machiavel-gore.jpeg",
+  "/rider-profile-saga.jpeg",
+  "/rider-profile-realm.jpeg",
+  "/rider-profile-lore.jpeg",
+  "/rider-profile-vandal.jpeg",
+  "/rider-profile-leddic.jpeg",
+  "/rider-profile-argenome.jpeg",
+  "/rider-profile-over-zeztz.jpeg",
+  "/rider-leddic-ishihen.jpeg",
+  "/rider-leddic-hoko.jpeg",
+  "/rider-leddic-rekka-20260829.jpeg",
+  "/rider-cipher.jpeg",
+  "/rider-cipher-blacksite.jpeg",
+  "/rider-vandal-20260826.jpeg",
+  "/character-luna-thumb.jpeg",
+  "/character-terra-thumb.jpeg",
+  "/dream-chapter-ciel.jpeg",
+  "/dream-chapter-keiya.jpeg",
+  "/dream-chapter-keiya-awakened.jpeg",
+  "/dream-chapter-kaisaku.jpeg",
+  "/dream-chapter-lord-knight.jpeg",
+  "/dream-chapter-lord-chaos.jpeg",
+  "/dream-chapter-lord-chaos-spec.jpeg",
+  "/dream-chapter-dread.jpeg",
+  "/dream-chapter-lupin.jpeg",
 ] as const;
 const sources = new Set<string>(dossierImageSources);
 // レジャス's page draws its own two-layer hero (lejas-page.tsx, a 72 KB WebP):
@@ -99,5 +128,19 @@ export function dossierImage(source: string): { srcSet?: string; sizes?: string 
   // シエル's warm-up names his illustration as supplied: it resolves to his
   // hero's candidates (ciel-page.tsx).
   if (path === CIEL_PORTRAIT.source) return cielPortrait();
+  // Only the newly responsive partner/related slots. The James hero and
+  // its covered-navigation warm-up intentionally still share one WebP.
+  const portrait =
+    path === "/civilian-naikami-chigiri.jpeg" || path === "/character-yoake-mamori.jpeg"
+      ? PORTRAIT_THUMBNAILS[path]
+      : undefined;
+  if (portrait)
+    return {
+      srcSet: portrait.variants.map(({ path: file, width }) => `${file} ${width}w`).join(", "),
+      sizes: CIEL_PORTRAIT_SIZES,
+    };
+  if (path === "/saga-extreme-middle-20261006.jpeg") {
+    return { srcSet: "/saga-extreme-middle-20261006.webp" };
+  }
   return {};
 }

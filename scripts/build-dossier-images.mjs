@@ -5,7 +5,9 @@ const require = createRequire(import.meta.url);
 const sharp = require(process.env.SHARP_MODULE || "sharp");
 let original = 0,
   delivery = 0;
+const only = new Set(process.argv.slice(2));
 for (const source of dossierImageSources) {
+  if (only.size && !only.has(source)) continue;
   const input = new URL(`../public${source}`, import.meta.url);
   const output = new URL(`../public${dossierImage(source).srcSet}`, import.meta.url);
   const result = await sharp(input.pathname)

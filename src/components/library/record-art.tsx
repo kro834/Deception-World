@@ -1,4 +1,5 @@
 import { plateWords, type RecordArt } from "@/lib/record-art";
+import { recordImage } from "@/lib/record-images";
 
 /** The index card's art window (rx10 STAGE): the record's picture, or a
  * typographic plate of its name when it has none, with its HUD code.
@@ -23,7 +24,7 @@ export function RecordArtFrame({
     >
       {art.src ? (
         <img
-          src={art.src}
+          {...recordImage(art.src)}
           alt=""
           loading={eager ? "eager" : "lazy"}
           decoding="async"
