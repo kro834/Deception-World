@@ -1273,6 +1273,12 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   display: none;
 }
 
+/* The driver at the waist is on the body from the start, finished (owner,
+   2026-10-11); it stays a DOM plate even while the nanite engine runs. */
+.rx-call-sequence .rx-suit[data-nanites="canvas"] .rx-suit-build > .rx-suit-plate.is-driver {
+  display: block;
+}
+
 .rx-call-sequence .rx-suit-plate > .rx-suit-art {
   position: absolute;
   inset: 0;
@@ -1849,13 +1855,13 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
 
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
-    .rx-suit-plate {
+    .rx-suit-plate:not(.is-driver) {
     animation: rxSuitWipe 140ms linear var(--rx-suit-t) both;
   }
 
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
-    .rx-suit-plate
+    .rx-suit-plate:not(.is-driver)
     > .rx-suit-art {
     animation: rxSuitHold 100ms cubic-bezier(0.3, 0.55, 0.35, 1) var(--rx-suit-t) both;
   }

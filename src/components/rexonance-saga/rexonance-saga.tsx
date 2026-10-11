@@ -5,6 +5,7 @@ import {
   REXONANCE_CALLS,
   REXONANCE_STAGE_DURATION_MS,
   type RexonanceStage,
+  REXONANCE_SUIT_DRIVER,
 } from "@/lib/rexonance-calls";
 import { planStageCall, type RexonanceStageEntrance } from "@/lib/rexonance-stage-call";
 import { GuardedLink } from "@/components/load-gate";
@@ -20,9 +21,11 @@ import {
   mountRexonanceResonance,
   type RexonanceAssemblyConfig,
 } from "@/lib/rexonance-resonance.js";
+import { REXONANCE_SUIT_GOLD_CELL, REXONANCE_SUIT_GOLD_CELLS } from "@/lib/rexonance-suit-gold";
 import {
   REXONANCE_SUIT_FACE_GLOW,
   REXONANCE_SUIT_FIGURE,
+  REXONANCE_SUIT_GOLD_ATLAS,
   REXONANCE_SUIT_MARKS,
   REXONANCE_SUIT_PIECES,
   REXONANCE_SUIT_SIZE,
@@ -379,7 +382,7 @@ const SUIT_UP: RexonanceAssemblyConfig = {
   undersuit: REXONANCE_SUIT_UNDERSUIT,
   size: REXONANCE_SUIT_SIZE,
   maskTile: REXONANCE_SUIT_TILE,
-  pieces: REXONANCE_SUIT_PIECES.map(({ id, group, x, y, w, h, seat, tiles }) => ({
+  pieces: REXONANCE_SUIT_PIECES.map(({ id, group, x, y, w, h, seat, tiles, ax, ay }) => ({
     id,
     group,
     x,
@@ -388,10 +391,20 @@ const SUIT_UP: RexonanceAssemblyConfig = {
     h,
     seat,
     tiles,
+    ax,
+    ay,
+    // The driver is on the body, finished, from the start (owner).
+    preset: REXONANCE_SUIT_DRIVER.includes(id),
   })),
   core: REXONANCE_SUIT_MARKS.core,
   visor: REXONANCE_SUIT_MARKS.visor,
   glow: REXONANCE_SUIT_FACE_GLOW,
+  // The gold forms by nanites right after each plate seats (owner), as in the call.
+  gold: {
+    atlas: REXONANCE_SUIT_GOLD_ATLAS.src,
+    cell: REXONANCE_SUIT_GOLD_CELL,
+    cells: REXONANCE_SUIT_GOLD_CELLS,
+  },
 };
 // The published call, line by line; the chanted lines split into their
 // repeats, so each SA-GA！DEUS！ and REXONANCE！ lights on its own beat.
@@ -1147,7 +1160,9 @@ export function RexonanceSaga() {
             aria-label="ディセプションワールドへ戻る"
           >
             <span>REXONANCE</span>
-            <b><DisplayName value="レクソナンスサーガ" /></b>
+            <b>
+              <DisplayName value="レクソナンスサーガ" />
+            </b>
           </GuardedLink>
           <nav aria-label="レクソナンスサーガ ページ内ナビゲーション">
             <a href="#performance">性能</a>
@@ -1543,9 +1558,9 @@ export function RexonanceSaga() {
         <div>
           <p>REXONANCE SAGA / FINAL ARRIVAL</p>
           <h2>
-            力は無限。
-            <br />
-            決めるのは悠真。
+            理不尽すら
+            <wbr />
+            殺して見せろ。
           </h2>
         </div>
         <GuardedLink to="/riders/saga" assets={[]}>

@@ -7,6 +7,7 @@ import {
   REXONANCE_ENTRY_TIMINGS,
   REXONANCE_SUIT_ACCENTS,
   REXONANCE_SUIT_CASCADE,
+  REXONANCE_SUIT_DRIVER,
   REXONANCE_SUIT_CLANK_MS,
   REXONANCE_SUIT_FIT,
   REXONANCE_SUIT_GATHER_MS,
@@ -274,7 +275,10 @@ const covering = (fragment) =>
 
 // rx13: a plate's clock as the component sets it: --rx-suit-t, when it
 // starts to grow (its fit, its clank, REVEAL later); --rx-suit-s, its fit.
-const pieceClocks = REXONANCE_SUIT_PIECES.map((piece) => ({
+// The driver (belt-*) is on the body from the start (owner, 2026-10-11): no clock.
+const pieceClocks = REXONANCE_SUIT_PIECES.filter(
+  (piece) => !REXONANCE_SUIT_DRIVER.includes(piece.id),
+).map((piece) => ({
   piece,
   t: REXONANCE_SUIT_FIT[piece.id] - REXONANCE_SUIT_REVEAL_MS,
   s: REXONANCE_SUIT_FIT[piece.id],
@@ -303,7 +307,8 @@ test("the suit keeps the call clock and is finished before the hand-over", () =>
   // after another: legs, waist, arms, chest (each group's last plate on its
   // DEUS！, the accent), shoulders, the tail midway, the ribbons, the helmet
   // last (its crest clamping near the end of REXONANCE！).
-  const ids = REXONANCE_SUIT_CASCADE.flatMap(({ order }) => order);
+  // Owner (2026-10-11): the driver (belt-*) is on the body from the start.
+  const ids = [...REXONANCE_SUIT_CASCADE.flatMap(({ order }) => order), ...REXONANCE_SUIT_DRIVER];
   assert.deepEqual([...ids].sort(), REXONANCE_SUIT_PIECES.map(({ id }) => id).sort());
   assert.equal(new Set(ids).size, ids.length);
   assert.ok(REXONANCE_SUIT_PIECES.length >= 40, String(REXONANCE_SUIT_PIECES.length));
@@ -317,7 +322,7 @@ test("the suit keeps the call clock and is finished before the hand-over", () =>
   }
   assert.deepEqual(REXONANCE_SUIT_ACCENTS, [
     "thigh-top-r",
-    "belt-jewel",
+    "tasset-top",
     "arm-fist-r",
     "core-disc",
     "helmet-crest",
@@ -349,9 +354,12 @@ test("the suit keeps the call clock and is finished before the hand-over", () =>
   // over CLANK; the spark bites on the fit.
   const piece = { "--rx-suit-t": 1000, "--rx-suit-s": 1100 };
   const gather = layerTimes(declaration(covering(".rx-suit-mote").body, "animation"), piece);
-  const wipe = layerTimes(declaration(covering(".rx-suit-plate").body, "animation"), piece);
+  const wipe = layerTimes(
+    declaration(covering(".rx-suit-plate:not(.is-driver)").body, "animation"),
+    piece,
+  );
   const artHold = layerTimes(
-    declaration(covering(".rx-suit-plate > .rx-suit-art").body, "animation"),
+    declaration(covering(".rx-suit-plate:not(.is-driver) > .rx-suit-art").body, "animation"),
     piece,
   );
   assert.deepEqual(
@@ -371,7 +379,7 @@ test("the suit keeps the call clock and is finished before the hand-over", () =>
     frames.match(/animation-timing-function: (cubic-bezier\([^)]*\))/)?.[1];
   assert.equal(
     easing(wipeFrames),
-    declaration(covering(".rx-suit-plate > .rx-suit-art").body, "animation").match(
+    declaration(covering(".rx-suit-plate:not(.is-driver) > .rx-suit-art").body, "animation").match(
       /cubic-bezier\([^)]*\)/,
     )[0],
   );
@@ -725,7 +733,7 @@ test("rx12/rx13: the raster suit — the artwork's plates, delivery-sized, decod
   // drawn from the atlas; the face's squares are drawn once, from a seed,
   // so server and client render the same.
   assert.match(component, /className=\{`rx-suit-mote is-\$\{piece\.group\}`\}/);
-  assert.match(component, /className=\{`rx-suit-plate is-\$\{piece\.group\}`\}/);
+  assert.match(component, /className=\{`rx-suit-plate is-\$\{piece\.group\}\$\{/);
   assert.match(component, /<i className="rx-suit-art" style=\{atlasCell\(piece, 0\)\} \/>/);
   // rx13: the nanite engine is its own module (it reads the browser), the
   // overlay's own clock drives it, and the DOM plates stand down only once

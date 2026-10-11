@@ -109,16 +109,8 @@ export const REXONANCE_SUIT_CASCADE = [
     group: "waist",
     from: REXONANCE_SUIT_SNAP.legs + 18,
     to: REXONANCE_SUIT_SNAP.waist,
-    order: [
-      "tasset-pendant",
-      "tasset-low",
-      "tasset-top",
-      "belt-l2",
-      "belt-r2",
-      "belt-l1",
-      "belt-r1",
-      "belt-jewel",
-    ],
+    // The driver (belt-*) is on the body from the start (REXONANCE_SUIT_DRIVER).
+    order: ["tasset-pendant", "tasset-low", "tasset-top"],
   },
   {
     group: "arms",
@@ -185,12 +177,22 @@ export const REXONANCE_SUIT_CASCADE = [
     order: ["helmet-jaw", "helmet-visor", "helmet-crest"],
   },
 ] as const;
-/** When each plate seats (its clank), by id. */
-export const REXONANCE_SUIT_FIT: Readonly<Record<string, number>> = Object.fromEntries(
-  REXONANCE_SUIT_CASCADE.flatMap(({ from, to, order }) =>
+/** The driver at the waist (owner, 2026-10-11): finished from the start,
+ * in the call and on the page's suit-up alike; it never assembles. */
+export const REXONANCE_SUIT_DRIVER: readonly string[] = [
+  "belt-l2",
+  "belt-r2",
+  "belt-l1",
+  "belt-r1",
+  "belt-jewel",
+];
+/** When each plate seats (its clank), by id (the driver: 0, already on). */
+export const REXONANCE_SUIT_FIT: Readonly<Record<string, number>> = Object.fromEntries([
+  ...REXONANCE_SUIT_DRIVER.map((id) => [id, 0]),
+  ...REXONANCE_SUIT_CASCADE.flatMap(({ from, to, order }) =>
     order.map((id, k) => [id, Math.round(from + ((to - from) * k) / (order.length - 1))]),
   ),
-);
+]);
 /** The plates that seat on an accent (the strongest clank). */
 export const REXONANCE_SUIT_ACCENTS: readonly string[] = REXONANCE_SUIT_CASCADE.filter(
   ({ group }) => group in REXONANCE_SUIT_SNAP,
@@ -224,8 +226,10 @@ export const REXONANCE_SUIT_GOLD = {
 } as const;
 /** When each plate's gold forms, by id: its first and last cell (ms). */
 export const REXONANCE_SUIT_GOLD_AT: Readonly<Record<string, readonly [number, number]>> =
-  Object.fromEntries(
-    REXONANCE_SUIT_CASCADE.flatMap(({ group, order }) =>
+  Object.fromEntries([
+    // The driver's gold is formed already.
+    ...REXONANCE_SUIT_DRIVER.map((id) => [id, [0, 0] as const]),
+    ...REXONANCE_SUIT_CASCADE.flatMap(({ group, order }) =>
       order.map((id) => {
         const from = REXONANCE_SUIT_FIT[id] + REXONANCE_SUIT_GOLD.delay;
         const span =
@@ -237,7 +241,7 @@ export const REXONANCE_SUIT_GOLD_AT: Readonly<Record<string, readonly [number, n
         return [id, [from, from + span] as const];
       }),
     ),
-  );
+  ]);
 /** RIDER！'s nanite motes gather from here (and are spent by the waist's snap). */
 export const REXONANCE_SUIT_MOTES = REXONANCE_CALL_BEATS[1].start;
 /** REXONANCE DEUS！: pixel squares fill the face's lights, then scatter. */

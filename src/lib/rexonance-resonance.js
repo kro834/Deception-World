@@ -512,6 +512,15 @@ const BEAT_OF_GROUP = {
 };
 const FLASH = 0.018;
 const WELDS_PER_FRAME = 160;
+const GOLD_PER_FRAME = 900;
+// The gold's heat: incoming motes, then a locked cell cooling, then the glint.
+const GOLD_HEAT = [
+  ["rgb(255 246 216)", 0.9],
+  ["rgb(255 246 216)", 0.85],
+  ["rgb(255 198 66)", 0.6],
+  ["rgb(224 138 30)", 0.35],
+  ["rgb(255 253 243)", 0.42],
+];
 export const ASSEMBLY_TOUCH_ART_BUDGET = 64;
 const PIXEL_BUDGET = 2_600_000;
 const TONES = [
@@ -551,7 +560,9 @@ const beatWindow = (beat) => {
     return [from + beat * step, from + (beat + 1) * step];
   }
   if (beat === 4) return ASSEMBLY_BEATS.rexonance;
-  return [ASSEMBLY_BEATS.rexonance[0] + 0.03, ASSEMBLY_BEATS.rexonance[1]];
+  // The helmet forms last, from its outer layer in, and is whole just before
+  // the compound eyes fill with cells (owner, 2026-10-11).
+  return [ASSEMBLY_BEATS.rexonance[0] + 0.06, ASSEMBLY_BEATS.clamp - 0.012];
 };
 
 /**
@@ -568,6 +579,7 @@ function* assemblyPlanSteps({
   maskTile = 9,
   sample = null,
   seed = 1510,
+  visor = null,
 }) {
   const { width, height } = size;
   const cols = Math.ceil(width / tile);
@@ -578,6 +590,7 @@ function* assemblyPlanSteps({
     index,
     beat: beatOfPiece(piece, size),
     mask: piece.tiles ? Uint8Array.from(atob(piece.tiles), (c) => c.charCodeAt(0)) : null,
+    preset: Boolean(piece.preset),
     rank: 0,
     reach: 1,
   }));
@@ -660,6 +673,13 @@ function* assemblyPlanSteps({
     }
   }
   const [coreX, coreY] = core;
+  // The helmet forms from its outer layer inward (owner, 2026-10-11): the
+  // farther a tile from the compound eyes, the earlier it lands.
+  const [eyeX, eyeY] = visor ?? [width / 2, height * 0.14];
+  let helmReach = 1;
+  for (const item of tiles)
+    if (item.owner?.beat === 5)
+      helmReach = Math.max(helmReach, Math.hypot(item.cx - eyeX, item.cy - eyeY));
   const partDone = ASSEMBLY_PARTS.map(() => 0);
   const centroids = ASSEMBLY_PARTS.map(() => [0, 0, 0]);
   for (const [index, item] of tiles.entries()) {
@@ -674,14 +694,20 @@ function* assemblyPlanSteps({
     const [from, to] = beatWindow(beat);
     const flight = beat === 4 ? 0.045 : 0.05;
     const key = clamp01(
-      (item.owner?.rank ?? 0) * 0.52 +
-        (item.reach / (item.owner?.reach ?? 1)) * 0.38 +
-        random() * 0.1,
+      beat === 5
+        ? (1 - Math.hypot(item.cx - eyeX, item.cy - eyeY) / helmReach) * 0.9 + random() * 0.1
+        : (item.owner?.rank ?? 0) * 0.52 +
+            (item.reach / (item.owner?.reach ?? 1)) * 0.38 +
+            random() * 0.1,
     );
     item.beat = beat;
     item.t0 = from + key * (to - from - flight);
-    item.hover = beat === 5 ? item.t0 + flight : 0;
-    item.t1 = beat === 5 ? ASSEMBLY_BEATS.clamp : item.t0 + flight;
+    // Formed in place: the helmet no longer hovers and drops onto the head.
+    item.hover = 0;
+    item.t1 = item.t0 + flight;
+    // The driver at the waist is on the body, finished, from the start.
+    item.preset = Boolean(item.owner?.preset);
+    if (item.preset) item.t0 = item.t1 = -1;
     item.m =
       ASSEMBLY_BEATS.motes[0] +
       random() * (ASSEMBLY_BEATS.motes[1] - ASSEMBLY_BEATS.motes[0]) * 0.8;
@@ -708,10 +734,12 @@ function* assemblyPlanSteps({
     const mix = (channel) => Math.round(item.rgb[channel] * 0.55 + tint[channel] * 0.45);
     item.fill = `rgb(${mix(0)} ${mix(1)} ${mix(2)})`;
     item.spin = (random() - 0.5) * 1.2;
-    partDone[beat] = Math.max(partDone[beat], item.t1);
-    centroids[beat][0] += item.cx;
-    centroids[beat][1] += item.cy;
-    centroids[beat][2] += 1;
+    if (!item.preset) {
+      partDone[beat] = Math.max(partDone[beat], item.t1);
+      centroids[beat][0] += item.cx;
+      centroids[beat][1] += item.cy;
+      centroids[beat][2] += 1;
+    }
     delete item.owner;
     delete item.reach;
     delete item.rgb;
@@ -736,6 +764,123 @@ export function planAssembly(options) {
     step = steps.next();
   } while (!step.done);
   return step.value;
+}
+
+/**
+ * The gold, formed by nanites right after each plate seats (owner,
+ * 2026-10-11, as in the call): each plate's gold cells (`gold.cells`, by
+ * piece id: `gold.cell` px squares of its box, row-major, LSB-first,
+ * base64) lock in the order the gold runs, from the seat along each trim (a
+ * breadth-first walk, so it follows the channel round corners), over a
+ * short stretch of the scroll from the moment the plate's last tile lands.
+ * Returns flat, lock-sorted arrays (figure px, progress 0–1).
+ */
+export const ASSEMBLY_GOLD = {
+  delay: 0.003,
+  form: 0.03,
+  helm: 0.016,
+  approach: 0.007,
+  cool: 0.012,
+  glint: 0.006,
+};
+export function planAssemblyGold({ pieces, gold, landed }) {
+  if (!gold?.cells) return null;
+  const G = gold.cell;
+  const list = [];
+  pieces.forEach((piece, index) => {
+    const base64 = gold.cells[piece.id];
+    const done = landed.get(piece.id);
+    if (!base64 || piece.preset || done === undefined) return;
+    const bits = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
+    const cols = Math.ceil(piece.w / G);
+    const rows = Math.ceil(piece.h / G);
+    const grid = new Int32Array(cols * rows).fill(-1);
+    const col = [];
+    const row = [];
+    for (let r = 0; r < rows; r += 1)
+      for (let c = 0; c < cols; c += 1) {
+        const bit = r * cols + c;
+        if (!(bits[bit >> 3] & (1 << (bit & 7)))) continue;
+        grid[bit] = col.length;
+        col.push(c);
+        row.push(r);
+      }
+    const n = col.length;
+    if (!n) return;
+    const seatX = (piece.seat[0] - piece.x) / G - 0.5;
+    const seatY = (piece.seat[1] - piece.y) / G - 0.5;
+    const reach = new Float32Array(n).fill(-1);
+    const parent = new Int32Array(n).fill(-1);
+    const queue = new Int32Array(n);
+    let seen = 0;
+    while (seen < n) {
+      let entry = -1;
+      let best = Number.POSITIVE_INFINITY;
+      for (let i = 0; i < n; i += 1) {
+        if (reach[i] >= 0) continue;
+        const d = Math.hypot(col[i] - seatX, row[i] - seatY);
+        if (d < best) {
+          best = d;
+          entry = i;
+        }
+      }
+      let head = 0;
+      let tail = 0;
+      reach[entry] = best * 0.45;
+      queue[tail++] = entry;
+      seen += 1;
+      while (head < tail) {
+        const i = queue[head++];
+        for (let dy = -1; dy <= 1; dy += 1)
+          for (let dx = -1; dx <= 1; dx += 1) {
+            const c = col[i] + dx;
+            const r = row[i] + dy;
+            if ((!dx && !dy) || c < 0 || r < 0 || c >= cols || r >= rows) continue;
+            const j = grid[r * cols + c];
+            if (j < 0 || reach[j] >= 0) continue;
+            reach[j] = reach[i] + (dx && dy ? 1.41 : 1);
+            parent[j] = i;
+            queue[tail++] = j;
+            seen += 1;
+          }
+      }
+    }
+    let most = 0;
+    for (let i = 0; i < n; i += 1) most = Math.max(most, reach[i]);
+    const from = done + ASSEMBLY_GOLD.delay;
+    const span = piece.group === "helm" ? ASSEMBLY_GOLD.helm : ASSEMBLY_GOLD.form;
+    const random = seededRandom(7919 + index);
+    for (let i = 0; i < n; i += 1) {
+      const p = parent[i];
+      let ux = p >= 0 ? col[p] - col[i] : seatX - col[i];
+      let uy = p >= 0 ? row[p] - row[i] : seatY - row[i];
+      const length = Math.hypot(ux, uy) || 1;
+      ux /= length;
+      uy /= length;
+      const flow = clamp01((most ? reach[i] / most : 0) * 0.95 + random() * 0.05);
+      list.push([
+        piece.x + col[i] * G,
+        piece.y + row[i] * G,
+        Math.min(G, piece.w - col[i] * G),
+        Math.min(G, piece.h - row[i] * G),
+        from + flow * span,
+        ux * G * 2.6,
+        uy * G * 2.6,
+      ]);
+    }
+  });
+  list.sort((a, b) => a[4] - b[4]);
+  const field = (k) => Float32Array.from(list, (entry) => entry[k]);
+  return {
+    count: list.length,
+    x: field(0),
+    y: field(1),
+    w: field(2),
+    h: field(3),
+    lock: field(4),
+    ux: field(5),
+    uy: field(6),
+  };
 }
 
 // Pixel squares inside the face's lights (figure px), in burst groups.
@@ -820,6 +965,11 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   let images = null;
   let loading = null;
   let plan = null;
+  let goldPlan = null;
+  let raw = null;
+  let goldArt = null;
+  let goldLayer = null;
+  let goldCount = 0;
   let settled = null;
   let settledCount = 0;
   let pixels = null;
@@ -866,17 +1016,20 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
               )
             : image,
         );
-    loading = Promise.all([decode(config.figure), decode(config.undersuit)]).then(
-      ([figure, undersuit]) => {
-        if (disposed) {
-          figure.close?.();
-          undersuit.close?.();
-          return null;
-        }
-        images = { figure, undersuit };
-        return images;
-      },
-    );
+    loading = Promise.all([
+      decode(config.figure),
+      decode(config.undersuit),
+      config.gold?.atlas ? decode(config.gold.atlas).catch(() => null) : null,
+    ]).then(([figure, undersuit, gold]) => {
+      if (disposed) {
+        figure.close?.();
+        undersuit.close?.();
+        gold?.close?.();
+        return null;
+      }
+      images = { figure, undersuit, gold };
+      return images;
+    });
     return loading;
   };
 
@@ -976,6 +1129,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
             pieces: config.pieces,
             core: config.core,
             maskTile: config.maskTile,
+            visor: config.visor,
             tile,
             sample,
           });
@@ -1002,6 +1156,14 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
           if (disposed || token !== generation || !result?.done) return;
           plan = result.value;
           pixels = facePixels(config.glow, config.visor);
+          // When each plate's last tile lands: its gold forms from there.
+          const landed = new Map();
+          for (const item of plan.tiles)
+            if (!item.preset && item.pieceId)
+              landed.set(item.pieceId, Math.max(landed.get(item.pieceId) ?? 0, item.t1));
+          goldPlan = images.gold
+            ? planAssemblyGold({ pieces: config.pieces, gold: config.gold, landed })
+            : null;
         }),
       )
       .then(() =>
@@ -1011,6 +1173,38 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
           settled.width = W;
           settled.height = H;
           settledCount = 0;
+          if (goldPlan?.count) {
+            // The plates as they seat (their gold raw gunmetal), the gold
+            // alone (the art under the trims' mask), and the gold formed.
+            const sheet = () =>
+              Object.assign(document.createElement("canvas"), { width: W, height: H });
+            raw = sheet();
+            goldArt = sheet();
+            goldLayer = sheet();
+            goldCount = 0;
+            const rc = raw.getContext("2d");
+            const gc = goldArt.getContext("2d");
+            rc.drawImage(images.figure, 0, 0, W, H);
+            for (let i = config.pieces.length - 1; i >= 0; i -= 1) {
+              const piece = config.pieces[i];
+              if (piece.preset || !config.gold.cells[piece.id]) continue;
+              const cell = [
+                piece.ax,
+                piece.ay,
+                piece.w,
+                piece.h,
+                piece.x,
+                piece.y,
+                piece.w,
+                piece.h,
+              ];
+              rc.drawImage(images.gold, ...cell);
+              gc.drawImage(images.gold, ...cell);
+            }
+            gc.globalCompositeOperation = "source-in";
+            gc.drawImage(images.figure, 0, 0, W, H);
+            gc.globalCompositeOperation = "source-over";
+          }
           allocate();
         }),
       )
@@ -1073,7 +1267,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     const context = settled.getContext("2d");
     const inset = Math.min(0.8, item.tw * 0.07);
     context.drawImage(
-      images.figure,
+      (!item.preset && raw) || images.figure,
       item.sx + inset,
       item.sy + inset,
       item.tw - inset * 2,
@@ -1143,7 +1337,10 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         }),
       );
     }
+    const goldCells = goldPlan?.count ?? 0;
     buffers = {
+      heat: GOLD_HEAT.map(() => new Float32Array(goldCells * 4)),
+      heatCounts: new Int32Array(GOLD_HEAT.length),
       motes: Array.from({ length: 6 }, () => new Float32Array(n)),
       moteCounts: new Int32Array(6),
       art: new Int32Array(plan.tiles.length),
@@ -1162,6 +1359,82 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     for (let i = 0; i < count; i += 4)
       context.rect(rects[i], rects[i + 1], rects[i + 2], rects[i + 3]);
     context.fill();
+  };
+
+  // The gold formed by `progress` (cells are sorted by when they lock),
+  // caught up a budget a frame, both ways.
+  const goldBy = (progress) => {
+    const { lock } = goldPlan;
+    let low = 0;
+    let high = goldPlan.count;
+    while (low < high) {
+      const middle = (low + high) >> 1;
+      if (lock[middle] <= progress) low = middle + 1;
+      else high = middle;
+    }
+    return low;
+  };
+  const syncGold = (progress) => {
+    const g = goldPlan;
+    const target = goldBy(progress);
+    const context = goldLayer.getContext("2d");
+    while (goldCount > target) {
+      goldCount -= 1;
+      context.clearRect(g.x[goldCount], g.y[goldCount], g.w[goldCount], g.h[goldCount]);
+    }
+    let budget = GOLD_PER_FRAME;
+    while (goldCount < target && budget > 0) {
+      const i = goldCount;
+      context.drawImage(goldArt, g.x[i], g.y[i], g.w[i], g.h[i], g.x[i], g.y[i], g.w[i], g.h[i]);
+      goldCount += 1;
+      budget -= 1;
+    }
+  };
+  // The molten front: each cell's mote flies in from the cell it flowed
+  // from, white-hot, locks and cools through bright gold to the painted
+  // gold; a glint follows the front along the finished trim.
+  const drawGold = (context, progress) => {
+    const g = goldPlan;
+    const { approach, cool, glint } = ASSEMBLY_GOLD;
+    const { heat, heatCounts } = buffers;
+    heatCounts.fill(0);
+    let index = goldBy(progress - cool - glint);
+    for (; index < g.count; index += 1) {
+      const lock = g.lock[index];
+      if (lock > progress + approach) break;
+      const w = g.w[index];
+      const h = g.h[index];
+      let slot;
+      let size;
+      let x = g.x[index];
+      let y = g.y[index];
+      if (lock > progress) {
+        const u = 1 - (lock - progress) / approach;
+        x += g.ux[index] * (1 - u);
+        y += g.uy[index] * (1 - u);
+        slot = 0;
+        size = 0.45 + 0.35 * u;
+      } else if (progress - lock < cool) {
+        const age = (progress - lock) / cool;
+        slot = age < 0.34 ? 1 : age < 0.67 ? 2 : 3;
+        size = 1.5 - 0.5 * age;
+      } else {
+        slot = 4;
+        size = 1;
+      }
+      const buffer = heat[slot];
+      const at = heatCounts[slot];
+      buffer[at] = x + (w - w * size) / 2;
+      buffer[at + 1] = y + (h - h * size) / 2;
+      buffer[at + 2] = w * size;
+      buffer[at + 3] = h * size;
+      heatCounts[slot] = at + 4;
+    }
+    for (let slot = 0; slot < GOLD_HEAT.length; slot += 1) {
+      const [style, alpha] = GOLD_HEAT[slot];
+      fillRects(context, heat[slot], heatCounts[slot], style, alpha);
+    }
+    context.globalAlpha = 1;
   };
 
   const draw = (progress) => {
@@ -1207,6 +1480,11 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         const item = tiles[index];
         context.fillStyle = item.fill;
         context.fillRect(item.sx + 0.8, item.sy + 0.8, item.tw - 1.6, item.th - 1.6);
+      }
+      if (goldLayer) {
+        syncGold(progress);
+        context.drawImage(goldLayer, 0, 0, W, H);
+        drawGold(context, progress);
       }
     }
     if (seal > 0) {
@@ -1305,12 +1583,14 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       fillRects(context, motes[slot], moteCounts[slot], TONE_CSS[slot % 3], slot < 3 ? 0.36 : 0.78);
     }
     context.globalAlpha = 1;
+    // In flight, a plate's tiles carry its gold unformed.
+    const plates = raw || figure;
     for (let n = 0; n < artCount; n += 1) {
       const i = Math.floor((n * arts) / artCount);
       const item = tiles[art[i]];
       const o = i * 4;
       context.drawImage(
-        figure,
+        plates,
         item.sx,
         item.sy,
         item.tw,
@@ -1573,6 +1853,9 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     if (settled) settled.width = settled.height = 0;
     settled = null;
     plan = null;
+    for (const sheet of [raw, goldArt, goldLayer]) if (sheet) sheet.width = sheet.height = 0;
+    raw = goldArt = goldLayer = goldPlan = null;
+    goldCount = 0;
     buffers = null;
     view = null;
   };
@@ -1688,6 +1971,9 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     environment.removeEventListener("resize", observeWarmup);
     images?.figure?.close?.();
     images?.undersuit?.close?.();
+    images?.gold?.close?.();
     images = null;
+    for (const sheet of [raw, goldArt, goldLayer]) if (sheet) sheet.width = sheet.height = 0;
+    raw = goldArt = goldLayer = goldPlan = null;
   };
 }

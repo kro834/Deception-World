@@ -14,6 +14,7 @@ import {
   REXONANCE_SUIT_FIT,
   REXONANCE_SUIT_GOLD,
   REXONANCE_SUIT_GOLD_AT,
+  REXONANCE_SUIT_DRIVER,
   REXONANCE_SUIT_PIXELS,
 } from "../src/lib/rexonance-calls.ts";
 import {
@@ -45,6 +46,8 @@ test("rx17: each plate's gold forms right after it seats, quickly, and is done i
     REXONANCE_SUIT_PIECES.map(({ id }) => id).sort(),
   );
   for (const { id } of REXONANCE_SUIT_PIECES) {
+    // Owner (2026-10-11): the driver is finished from the start; no gold forms.
+    if (REXONANCE_SUIT_DRIVER.includes(id)) continue;
     const [from, to] = REXONANCE_SUIT_GOLD_AT[id];
     const fit = REXONANCE_SUIT_FIT[id];
     // It starts within 0-40 ms of the plate's clank.
