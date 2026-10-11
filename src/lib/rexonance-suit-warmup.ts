@@ -151,11 +151,13 @@ function warm(priority: Priority, oneByOne: boolean): Promise<boolean> {
       held.length = 0;
       sources.clear();
     } else {
-      // Then the engine's plan and canvases, in idle time (rx17).
+      // Then the engine's plan and working atlas, in idle time (rx17); the
+      // plan is its own small chunk, shared with the call's.
       idle(() => {
-        void prepareRexonanceTransition
-          .prefetch()
-          .then((module) => module?.prepareRexonanceSuit?.());
+        void import("../components/rexonance-saga/rexonance-suit-plan").then(
+          (plan) => plan.prepareRexonanceSuit(),
+          () => undefined,
+        );
       }, 2000);
     }
     return ready;

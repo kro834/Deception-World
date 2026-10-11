@@ -1,11 +1,7 @@
 import type { RexonanceCallSequence } from "../components/rexonance-saga/rexonance-call-sequence";
 
 export type RexonanceTransitionRenderer = typeof RexonanceCallSequence;
-type CallModule = {
-  RexonanceCallSequence: RexonanceTransitionRenderer;
-  /** rx17: builds the nanite engine's plan and canvases at idle. */
-  prepareRexonanceSuit?: () => Promise<boolean>;
-};
+type CallModule = { RexonanceCallSequence: RexonanceTransitionRenderer };
 
 /** Cache successful imports, but let a failed request be retried. Each caller
  * owns its deadline/cancellation, so history cannot revive an old transition.

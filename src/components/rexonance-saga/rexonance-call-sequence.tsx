@@ -27,10 +27,6 @@ import {
 } from "@/lib/rexonance-suit";
 import { SuitNanites } from "./rexonance-suit-nanites";
 
-// rx17: the warm-up prepares the nanite engine's plan in idle time once
-// this chunk is prefetched (rexonance-transition-loader).
-export { prepareRexonanceSuit } from "./rexonance-suit-nanites";
-
 type RexonanceCallSequenceProps = {
   mode: "entry" | "stage";
   phase: "covering" | "revealing";

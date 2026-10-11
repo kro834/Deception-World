@@ -31,6 +31,7 @@ import {
 
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 const nanites = read("src/components/rexonance-saga/rexonance-suit-nanites.tsx");
+const plan = read("src/components/rexonance-saga/rexonance-suit-plan.ts");
 const component = read("src/components/rexonance-saga/rexonance-call-sequence.tsx");
 const warmup = read("src/lib/rexonance-suit-warmup.ts");
 const gate = read("src/components/load-gate.tsx");
@@ -195,18 +196,24 @@ test("rx17: the engine forms each plate's gold on it right after it seats and en
   // It draws the warm-up's own decoded layers; it never decodes its own copy.
   assert.match(nanites, /rexonanceSuitSource\(REXONANCE_SUIT_ATLAS\.src\)/);
   assert.match(nanites, /rexonanceSuitSource\(REXONANCE_SUIT_GOLD_ATLAS\.src\)/);
-  assert.doesNotMatch(nanites, /new Image\(/);
+  assert.doesNotMatch(nanites + plan, /new Image\(/);
+  // Neither the engine nor its plan uses timers, randomness, filters or
+  // composite operations (as rx13's engine).
+  assert.doesNotMatch(
+    plan,
+    /setInterval|setTimeout|Math\.random|filter =|globalCompositeOperation/,
+  );
   // A late start rides the warm-up already in flight.
   assert.match(nanites, /warmRexonanceSuit\("high"\)\.then\(\(decoded\) => decoded && start\(\)\)/);
   // The plates arrive and seat from the working atlas (their gold raw) ...
   assert.match(
-    nanites,
+    plan,
     /context\.drawImage\(art, 0, 0, width, height, 0, 0, width, height\);\s*context\.drawImage\(gold, 0, 0\);/,
   );
   assert.match(nanites, /flight\.drawImage\(\s*source,\s*tile\.sx,\s*tile\.sy,/);
   // ... their gold cells lock into it on the gold's own clock ...
-  assert.match(nanites, /REXONANCE_SUIT_GOLD_AT\[piece\.id\]/);
-  assert.match(nanites, /work\.drawImage\(\s*atlas,\s*gold\.ax\[i\],/);
+  assert.match(plan, /REXONANCE_SUIT_GOLD_AT\[piece\.id\]/);
+  assert.match(nanites, /atlasWork\.drawImage\(\s*atlas,\s*gold\.ax\[i\],/);
   // ... and a finished plate is painted whole from the art itself, so the
   // finished suit equals the artwork.
   assert.match(
@@ -228,9 +235,9 @@ test("rx17: the engine forms each plate's gold on it right after it seats and en
   // Only what is still forming is drawn: settled plates skip the frame.
   assert.match(draw, /if \(t < plate\.spawn \|\| \(done\[p\] && t >= plate\.last\)\) continue;/);
   // The plan and the working atlas are prepared in idle slices ahead of the call.
-  assert.match(nanites, /export function prepareRexonanceSuit\(\)/);
-  assert.match(nanites, /requestIdleCallback\(slice, \{ timeout: 600 \}\)/);
-  assert.match(component, /export \{ prepareRexonanceSuit \} from "\.\/rexonance-suit-nanites";/);
+  assert.match(plan, /export function prepareRexonanceSuit\(\)/);
+  assert.match(plan, /requestIdleCallback\(slice, \{ timeout: 600 \}\)/);
+  assert.match(nanites, /from "\.\/rexonance-suit-plan";/);
 });
 
 test("rx17: the call's chunk, layers and plan are prepared ahead of the tap", () => {
@@ -240,7 +247,10 @@ test("rx17: the call's chunk, layers and plan are prepared ahead of the tap", ()
     warmup,
     /void prepareRexonanceTransition\.prefetch\(\);\s*void warm\("low", true\);/,
   );
-  assert.match(warmup, /module\?\.prepareRexonanceSuit\?\.\(\)/);
+  assert.match(
+    warmup,
+    /import\("\.\.\/components\/rexonance-saga\/rexonance-suit-plan"\)\.then\(\s*\(plan\) => plan\.prepareRexonanceSuit\(\),/,
+  );
   // On every route (leaving /rexonance-saga warms it).
   assert.match(gate, /useEffect\(\(\) => scheduleRexonanceSuitWarm\(pathname\), \[pathname\]\);/);
   // The engine runs only while the suit builds (a late switch mounts it).
