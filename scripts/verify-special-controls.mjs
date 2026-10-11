@@ -178,14 +178,18 @@ try {
         await checkTextEnlargement(route, width);
       }
     }
-    await page.goto(base + "/riders/saga");
+    await page.goto(base + "/riders/saga", { waitUntil: "networkidle" });
+    await page.locator(".dossier-reader-links a").first().waitFor();
     const links = await page.locator(".dossier-reader-links a").evaluateAll((items) =>
       items.map((item) => ({
         height: item.getBoundingClientRect().height,
         font: parseFloat(getComputedStyle(item).fontSize),
       })),
     );
-    assert.ok(links.length > 0 && links.every((link) => link.height >= 48 && link.font >= 13));
+    assert.ok(
+      links.length > 0 && links.every((link) => link.height >= 48 && link.font >= 13),
+      `${width}px dossier navigation targets: ${JSON.stringify(links)}`,
+    );
     await page.goto(base + "/form-archive");
     for (const kind of ["saga", "realm"]) {
       await page.waitForFunction(
