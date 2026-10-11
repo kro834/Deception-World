@@ -746,6 +746,9 @@ function* assemblyPlanSteps({
           }
         }
       }
+      // Failed sampling still has the authored plate silhouette; never
+      // turn its transparent background into a rectangular tile swarm.
+      if (!sample && masked && !owner) continue;
       // The driver is drawn whole from its cut-outs, never as tiles.
       if (owner?.preset) continue;
       const reach = owner ? Math.hypot(cx - owner.piece.seat[0], cy - owner.piece.seat[1]) : 0;
@@ -1224,20 +1227,34 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       bitmap?.close?.();
       return null;
     }
+    let probe = null;
     try {
-      const probe = document.createElement("canvas");
+      probe = document.createElement("canvas");
       probe.width = cols;
       probe.height = rows;
       const context = probe.getContext("2d", { willReadFrequently: true });
       context.imageSmoothingEnabled = true;
-      if (bitmap) context.drawImage(bitmap, 0, 0);
+      if (bitmap) context.drawImage(bitmap, 0, 0, cols, rows);
       else context.drawImage(images.figure, 0, 0, cols * tile, rows * tile, 0, 0, cols, rows);
-      const data = context.getImageData(0, 0, cols, rows).data;
-      probe.width = probe.height = 0;
-      return { data };
+      let data = context.getImageData(0, 0, cols, rows).data;
+      const covered = (pixels) => {
+        for (let i = 3; i < pixels.length; i += 4) if (pixels[i] >= 40) return true;
+        return false;
+      };
+      // A transient blank resized bitmap must not become a valid zero-tile
+      // plan. Retry the full decoded source once; no per-frame pixel reads.
+      if (!covered(data) && bitmap) {
+        context.clearRect(0, 0, cols, rows);
+        context.drawImage(images.figure, 0, 0, cols * tile, rows * tile, 0, 0, cols, rows);
+        data = context.getImageData(0, 0, cols, rows).data;
+      }
+      // The same conservative fallback used for failed reads preserves the
+      // assembly if both browser readbacks fail, rather than accepting 0/0.
+      return covered(data) ? { data } : null;
     } catch {
       return null;
     } finally {
+      if (probe) probe.width = probe.height = 0;
       bitmap?.close?.();
     }
   };

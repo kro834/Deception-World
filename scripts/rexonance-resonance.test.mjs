@@ -355,6 +355,106 @@ function scrollAssemblyEnvironment() {
   };
 }
 
+test("failed sampling falls back to authored masks, never the transparent background or preset driver", () => {
+  const plan = planAssembly({
+    size: { width: 60, height: 60 },
+    tile: 15,
+    maskTile: 15,
+    core: [30, 30],
+    visor: [30, 10],
+    sample: null,
+    pieces: [
+      { id: "plate", group: "legs", x: 0, y: 0, w: 60, h: 60, seat: [7, 7], tiles: "AQ==" },
+      {
+        id: "driver",
+        group: "waist",
+        x: 30,
+        y: 30,
+        w: 15,
+        h: 15,
+        seat: [37, 37],
+        tiles: "AQ==",
+        preset: true,
+      },
+    ],
+  });
+  assert.equal(plan.tiles.length, 1);
+  assert.equal(plan.tiles[0].pieceId, "plate");
+  assert.deepEqual([plan.tiles[0].sx, plan.tiles[0].sy], [0, 0]);
+});
+
+test("blank bitmap samples retry full decoded art once and never install a zero-tile plan", async () => {
+  for (const bothBlank of [false, true]) {
+    const t = scrollAssemblyEnvironment();
+    const counter = { textContent: "rest" };
+    const query = t.runway.querySelector;
+    t.runway.querySelector = (selector) => (selector === ".rzn-count" ? counter : query(selector));
+    const reads = [];
+    const bitmaps = [];
+    t.env.createImageBitmap = async (source, ...args) => {
+      const bitmap = {
+        source,
+        width: args.at(-1)?.resizeWidth || 61,
+        height: args.at(-1)?.resizeHeight || 121,
+        closed: false,
+        close() {
+          this.closed = true;
+        },
+      };
+      bitmaps.push(bitmap);
+      return bitmap;
+    };
+    const create = t.env.document.createElement;
+    t.env.document.createElement = (...args) => {
+      const canvas = create(...args);
+      const context = canvas.getContext();
+      canvas.getContext = () =>
+        new Proxy(context, {
+          get(target, key) {
+            if (key !== "getImageData") return target[key];
+            return (...dimensions) => {
+              if (canvas.width !== 5 || canvas.height !== 9) return target[key](...dimensions);
+              reads.push(canvas);
+              return {
+                data: new Uint8ClampedArray(5 * 9 * 4).fill(
+                  reads.length === 1 || bothBlank ? 0 : 255,
+                ),
+              };
+            };
+          },
+        });
+      return canvas;
+    };
+    const dispose = mountRexonanceAssembly(
+      t.runway,
+      {
+        figure: "/figure",
+        undersuit: "/undersuit",
+        size: { width: 61, height: 121 },
+        pieces: [{ id: "leg", group: "legs", x: 0, y: 0, w: 61, h: 121, seat: [30, 90] }],
+        core: [30, 60],
+        visor: [30, 10],
+        glow: [],
+      },
+      t.env,
+    );
+    try {
+      t.observers[0].callback([{ isIntersecting: true }]);
+      for (let i = 0; i < 100 && t.runway.dataset.rznState !== "live"; i += 1)
+        await new Promise((resolve) => setTimeout(resolve, 5));
+      assert.equal(t.runway.dataset.rznState, "live");
+      t.scroll(0.5);
+      assert.match(counter.textContent, / \/ 45$/, "a blank read cannot suppress assembly");
+      assert.equal(reads.length, 2, "one bounded retry, not a repeated preparation loop");
+      assert.equal(bitmaps.length, 3);
+      assert.equal(bitmaps[2].closed, true, "resized bitmap is released after either read result");
+      assert.equal(reads[0].width, 0, "probe backing store is released");
+    } finally {
+      dispose();
+    }
+  }
+});
+
 test("reactor glow waits for sealed armor and advanced art waits for the ignition wave", async () => {
   const t = scrollAssemblyEnvironment();
   t.runway.dataset.form = "max";
