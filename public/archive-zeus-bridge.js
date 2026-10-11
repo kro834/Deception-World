@@ -41,11 +41,15 @@
     const style = window.getComputedStyle(element);
     return style.visibility !== "hidden" && style.opacity !== "0";
   };
+  const drawn = (element) =>
+    typeof element.checkVisibility !== "function" ||
+    element.checkVisibility({ contentVisibilityAuto: true });
 
   const report = () => {
     timer = 0;
     const reason = pendingReason;
     pendingReason = "change";
+    if (document.hidden) return;
     const width = window.innerWidth;
     const height = window.innerHeight;
     const words = [];
@@ -55,6 +59,9 @@
     const collect = (selector, accept) => {
       for (const element of document.querySelectorAll(selector)) {
         if (words.length >= MAX_BOXES) return;
+        // Closed/content-visibility-skipped records must not be laid out
+        // merely to decide where the parent's floating button can rest.
+        if (!drawn(element)) continue;
         if (!inView(element.getBoundingClientRect(), width, height)) continue;
         // A title inside a card link is walked once, with the link.
         if (walked.has(element) || element.parentElement?.closest(selector)) continue;
@@ -63,6 +70,7 @@
         const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
         for (let node = walker.nextNode(); node; node = walker.nextNode()) {
           if (!node.nodeValue?.trim()) continue;
+          if (node.parentElement && !drawn(node.parentElement)) continue;
           // Words kept for screen readers only overflow a clipped 1px box.
           const holder = node.parentElement?.getBoundingClientRect();
           if (holder && (holder.width < 2 || holder.height < 2)) continue;
@@ -81,6 +89,7 @@
     const scroller = document.scrollingElement ?? document.documentElement;
     if (scroller.scrollTop + height >= scroller.scrollHeight - 2) collect(END);
     for (const control of document.querySelectorAll(CONTROLS)) {
+      if (!drawn(control)) continue;
       const rect = control.getBoundingClientRect();
       if (controls.length < MAX_BOXES && inView(rect, width, height) && shown(control)) {
         controls.push(box(rect));
@@ -102,6 +111,10 @@
   window.addEventListener("scroll", () => schedule("scroll", 90), { capture: true, passive: true });
   window.addEventListener("resize", () => schedule("resize", 120), { passive: true });
   window.addEventListener("click", () => schedule("change", 260), { capture: true, passive: true });
+  window.addEventListener("pageshow", () => schedule("load", 0), { passive: true });
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) schedule("change", 0);
+  });
   window.addEventListener("message", (event) => {
     if (
       event.source === window.parent &&

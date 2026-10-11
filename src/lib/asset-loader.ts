@@ -93,11 +93,14 @@ function assetKey(url: string) {
 const IMAGE_ASSET_PATTERN = /\.(?:avif|gif|jpe?g|png|svg|webp)(?:[?#]|$)/i;
 export const ASSET_REQUEST_TIMEOUT_MS = 12000;
 
-async function decodeImageAsset(url: string, signal: AbortSignal) {
+type AssetPriority = "auto" | "low" | "high";
+
+async function decodeImageAsset(url: string, signal: AbortSignal, priority: AssetPriority) {
   if (!IMAGE_ASSET_PATTERN.test(url) || typeof Image === "undefined") return true;
 
   const image = new Image();
   image.decoding = "async";
+  image.fetchPriority = priority;
 
   return new Promise<boolean>((resolve) => {
     const finish = (loaded: boolean) => {
@@ -170,6 +173,7 @@ async function pullOne(
   received: number[],
   totals: number[],
   onProgress: (percent: number) => void,
+  priority: AssetPriority,
 ) {
   if (assetReady(url)) {
     received[index] = totals[index];
@@ -184,7 +188,7 @@ async function pullOne(
         // Use the browser's image request/cache once. Fetching the same URL
         // first can cause a second request before the decoded image is used.
         if (IMAGE_ASSET_PATTERN.test(url) && typeof Image !== "undefined") {
-          return await decodeImageAsset(url, signal);
+          return await decodeImageAsset(url, signal, priority);
         }
         const res = await fetch(url, { cache: "force-cache", signal });
         if (signal.aborted) return false;
@@ -218,7 +222,7 @@ async function pullOne(
           received[index] = Math.max(received[index], totals[index]);
           emitProgress(received, totals, onProgress);
         }
-        const decoded = await decodeImageAsset(url, signal);
+        const decoded = await decodeImageAsset(url, signal, priority);
         return decoded;
       } catch {
         return false;
@@ -241,6 +245,7 @@ async function pullOne(
 export async function preloadAssets(
   urls: readonly string[],
   onProgress: (percent: number) => void,
+  priority: AssetPriority = "auto",
 ): Promise<void> {
   const unique = [...new Set(urls.filter(Boolean))];
   if (unique.length === 0) {
@@ -250,6 +255,8 @@ export async function preloadAssets(
   const received = unique.map(() => 0);
   const totals = unique.map((u) => KNOWN_BYTES[assetKey(u)] ?? 400000);
   onProgress(0);
-  await Promise.all(unique.map((url, i) => pullOne(url, i, received, totals, onProgress)));
+  await Promise.all(
+    unique.map((url, i) => pullOne(url, i, received, totals, onProgress, priority)),
+  );
   onProgress(100);
 }

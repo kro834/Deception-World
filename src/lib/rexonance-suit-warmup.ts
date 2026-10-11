@@ -63,19 +63,28 @@ export const isRexonanceSuitReady = () => ready;
  * intent: once the page has loaded and gone idle (after its own critical
  * images), the warm-up runs at low priority, so the call almost always
  * builds the suit. The same skips apply (Save-Data, 2G/3G, reduced motion,
- * economy); /rexonance-saga itself, where the call does not play, waits for
- * intent. Returns its cancel. */
+ * economy); the opening preserves its network budget and /rexonance-saga
+ * itself, where the call does not play, waits for intent. Returns its cancel. */
 export function scheduleRexonanceSuitWarm(delayMs = 2500) {
   if (typeof window === "undefined" || ready || pending) return () => {};
-  if (window.location.pathname.startsWith("/rexonance-saga")) return () => {};
+  if (window.location.pathname === "/" || window.location.pathname.startsWith("/rexonance-saga"))
+    return () => {};
   let timer = 0;
   let idle = 0;
   let cancelled = false;
   const run = () => {
     timer = 0;
     if (cancelled) return;
+    // A suspended Home Screen app must not decode a second scene offscreen.
+    if (document.hidden) return;
     if (window.requestIdleCallback)
-      idle = window.requestIdleCallback(() => void warmRexonanceSuit(), { timeout: 4000 });
+      idle = window.requestIdleCallback(
+        () => {
+          idle = 0;
+          if (!cancelled && !document.hidden) void warmRexonanceSuit();
+        },
+        { timeout: 4000 },
+      );
     else void warmRexonanceSuit();
   };
   const afterLoad = () => {

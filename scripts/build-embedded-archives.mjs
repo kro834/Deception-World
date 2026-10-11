@@ -11,7 +11,7 @@ const stabilityStylesheet =
 const stabilityScript = '<script src="/archive-scroll-stability.js?v=20260930-r48" defer></script>';
 // Reports the archive's titles and fixed controls to the page, so the
 // floating Zeus button keeps off them inside this sandboxed frame too.
-const zeusBridgeScript = '<script src="/archive-zeus-bridge.js?v=20260928-z1" defer></script>';
+const zeusBridgeScript = '<script src="/archive-zeus-bridge.js?v=20261011-z2" defer></script>';
 // Carries the reader's form and compared pair between the page URL and this
 // sandboxed frame (the page passes them in the frame's #fragment).
 const stateBridgeScript = '<script src="/archive-state-bridge.js?v=20261009-s1" defer></script>';

@@ -71,6 +71,12 @@ function consumeTitleReload() {
 const openingAuditRequested = () =>
   typeof window !== "undefined" && new URLSearchParams(window.location.search).has("opening-audit");
 
+// The shared pre-paint gate also selects economy for iOS/iPadOS 18 and
+// four-core Android. Keep runtime work aligned with that CSS renderer without
+// reading document state into the server/client hydration tree.
+const hasEconomyOpeningProfile = () =>
+  document.documentElement?.dataset.worldEffects === "economy";
+
 type OpeningTitleTestHook = {
   readonly phase: SequencePhase;
   readonly burn: BurnStats | null;
@@ -333,6 +339,7 @@ export function TitleSequence() {
       deviceMemory?: number;
     };
     const economy =
+      hasEconomyOpeningProfile() ||
       connection.connection?.saveData === true ||
       connection.connection?.effectiveType === "slow-2g" ||
       connection.connection?.effectiveType === "2g" ||
@@ -347,11 +354,18 @@ export function TitleSequence() {
       return;
     }
     let idleId: number | null = null;
+    let cancelled = false;
     const warm = () => {
-      void Promise.all([
-        preloadAssets(WORLD_ENTER_ASSETS, () => undefined),
-        router.preloadRoute({ to: "/world" }).catch(() => undefined),
-      ]);
+      // Decode the title before destination art can compete with its first
+      // visible frame. This is opportunistic preparation, never an entry gate.
+      const titleReady = firstLogoRef.current?.decode().catch(() => undefined);
+      void Promise.resolve(titleReady).then(() => {
+        if (cancelled || document.hidden) return;
+        void Promise.all([
+          preloadAssets(WORLD_ENTER_ASSETS, () => undefined, "low"),
+          router.preloadRoute({ to: "/world" }).catch(() => undefined),
+        ]);
+      });
     };
     // Let the title poster and controls paint before the larger world artwork
     // competes for network/decoding time, then use the first idle window so the
@@ -364,6 +378,7 @@ export function TitleSequence() {
       }
     }, 650);
     return () => {
+      cancelled = true;
       window.clearTimeout(timer);
       if (idleId != null) window.cancelIdleCallback(idleId);
     };
@@ -413,9 +428,24 @@ export function TitleSequence() {
   // resized ImageBitmaps (decoded off the main thread), then in an idle slice
   // the GL context, the uploads and the (parallel) shader compile.
   useEffect(() => {
+    // A skipped/returning or reduced-motion title does not need a burn
+    // engine at all. Preparing only after playing has painted removes shader
+    // fetch/compile work from hydration and cancels cleanly on an early entry.
+    if (
+      phase !== "playing" ||
+      economyOpening ||
+      hasEconomyOpeningProfile() ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      burnPrimeRef.current = Promise.resolve("not-playing");
+      return;
+    }
     let cancelled = false;
     let cancelIdle: () => void = () => undefined;
+    let settlePrime: (result: string) => void = () => undefined;
     const prime = async () => {
+      await waitForVisualPaint();
+      if (cancelled || phaseRef.current !== "playing") return "cancelled";
       const engine = await loadBurnEngine();
       if (cancelled) return "cancelled";
       burnModuleRef.current = engine;
@@ -446,12 +476,18 @@ export function TitleSequence() {
       }
       return engine.openingBurnReady() ? "webgl" : "not-ready";
     };
-    burnPrimeRef.current = prime().catch(() => "failed");
+    burnPrimeRef.current = new Promise<string>((resolve) => {
+      settlePrime = resolve;
+      cancelIdle = whenIdle(() => {
+        void prime().then(resolve, () => resolve("failed"));
+      }, 400);
+    });
     return () => {
       cancelled = true;
       cancelIdle();
+      settlePrime("cancelled");
     };
-  }, [replayKey]);
+  }, [economyOpening, phase, replayKey]);
 
   const startBurn = useCallback((auditRun = false) => {
     burnTimerRef.current = null;
@@ -480,6 +516,10 @@ export function TitleSequence() {
   }, [muted]);
 
   const begin = useCallback(() => {
+    // The initial delayed start can outlive an ENTER pressed on the first
+    // frame. A departed/skipped title must never restart behind the route
+    // cover and re-enable its entry while navigation is still pending.
+    if (phaseRef.current !== "idle") return;
     phaseRef.current = "playing";
     setPhase("playing");
     if (!audit) {
@@ -497,10 +537,15 @@ export function TitleSequence() {
       if (!economyOpening) {
         videoStartTimerRef.current = window.setTimeout(() => {
           videoStartTimerRef.current = null;
-          if (phaseRef.current === "playing" && document.visibilityState === "visible" && !audit) {
+          if (
+            phaseRef.current === "playing" &&
+            document.visibilityState === "visible" &&
+            !hasEconomyOpeningProfile() &&
+            !audit
+          ) {
             void video.play().catch(() => undefined);
           }
-        }, 90);
+        }, 900);
       }
     }
   }, [audit, economyOpening, startBurn]);
@@ -612,14 +657,35 @@ export function TitleSequence() {
   // The dive's images (the prism logo, the atmosphere still and the world key
   // visual) are decoded as ImageBitmaps once the title has settled.
   const prepareDive = useCallback(() => {
+    if (
+      phaseRef.current !== "complete" ||
+      economyOpening ||
+      hasEconomyOpeningProfile() ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    )
+      return;
     void loadDiveEngine()
       .then((engine) => {
+        // The import may arrive after focus has already navigated away or a
+        // replay has begun. A still-mounted handoff may adopt preparation, but
+        // an abandoned title must not create module-global decoded assets.
+        if (
+          !mountedRef.current ||
+          (phaseRef.current !== "complete" && phaseRef.current !== "diving") ||
+          economyOpening ||
+          hasEconomyOpeningProfile() ||
+          window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        )
+          return;
+        // Register ownership before the async decode: unmount's release
+        // invalidates the pending preparation, whose late bitmaps self-close
+        // inside opening-dive rather than leaking or clearing a newer run.
         diveModuleRef.current = engine;
         const logo = logoRef.current;
         return engine.prepareOpeningDive(logo?.currentSrc || logo?.src || OPENING_LOGO_FINAL.src);
       })
       .catch(() => undefined);
-  }, []);
+  }, [economyOpening]);
 
   useEffect(() => {
     if (phase !== "complete") return;
@@ -635,9 +701,18 @@ export function TitleSequence() {
   };
   const primeDiveNow = () => {
     cancelDivePrime();
+    if (
+      !mountedRef.current ||
+      phaseRef.current !== "complete" ||
+      economyOpening ||
+      hasEconomyOpeningProfile() ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    )
+      return;
     diveModuleRef.current?.primeOpeningDive();
   };
   const primeDive = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    if (phaseRef.current !== "complete") return;
     prepareDive();
     if (event.pointerType !== "touch") {
       primeDiveNow();
@@ -650,8 +725,31 @@ export function TitleSequence() {
     if (divePrimeTimerRef.current) primeDiveNow();
   };
 
+  // ENTER is available from the first painted frame. During the reveal,
+  // use the ordinary guarded route cover rather than measuring the unseen
+  // final logo or forcing visitors to wait for the seven-second sequence.
+  const enterBeforeTitleCompletes = useCallback(async () => {
+    finish();
+    phaseRef.current = "diving";
+    setPhase("diving");
+    try {
+      await go({ to: "/world", assets: WORLD_ENTER_ASSETS });
+    } catch {
+      // The same cancellation recovery as the full cinematic handoff.
+    } finally {
+      if (mountedRef.current && window.location.pathname === "/") {
+        phaseRef.current = "complete";
+        setPhase("complete");
+      }
+    }
+  }, [finish, go]);
+
   const enterWorld = useCallback(async () => {
-    if (phaseRef.current !== "complete") return;
+    if (phaseRef.current === "diving") return;
+    if (phaseRef.current !== "complete") {
+      void enterBeforeTitleCompletes();
+      return;
+    }
 
     const logo = logoRef.current;
     const hud = hudRef.current;
@@ -700,7 +798,7 @@ export function TitleSequence() {
         setPhase("complete");
       }
     }
-  }, [beginOpeningHandoff, economyOpening, go]);
+  }, [beginOpeningHandoff, economyOpening, enterBeforeTitleCompletes, go]);
 
   useEffect(() => {
     const restoreTitleIfNeeded = () => {
@@ -720,7 +818,12 @@ export function TitleSequence() {
         return;
       }
       restoreTitleIfNeeded();
-      if (phaseRef.current === "playing" && !economyOpening && !audit) {
+      if (
+        phaseRef.current === "playing" &&
+        !economyOpening &&
+        !hasEconomyOpeningProfile() &&
+        !audit
+      ) {
         void video?.play().catch(() => undefined);
       }
     };
@@ -871,12 +974,14 @@ export function TitleSequence() {
               // SKIP must not start the score only to fade it out, and SOUND
               // decides for itself.
               if ((e.target as Element).closest(".cine-skip, .cine-always")) return;
+              if ((e.target as Element).closest(".cine-btn")) return;
               unlockAudio();
             }
           : undefined
       }
       aria-label="仮面ライダーサーガ Deception World オープニング"
       aria-busy={isWorldTransitioning}
+      data-opening-entry={isWorldTransitioning ? "leaving" : "ready"}
     >
       <div className="cine-camera" aria-hidden="true">
         <video
@@ -898,7 +1003,7 @@ export function TitleSequence() {
       <div className="cine-scanline" aria-hidden="true" />
       <div className="cine-flare" aria-hidden="true" />
       <HudRings rootRef={hudRef} />
-      <Particles active={!audit && phase === "playing"} />
+      <Particles active={!audit && !economyOpening && phase === "playing"} />
 
       <div ref={lineRef} className="cine-line" />
 
@@ -1014,13 +1119,18 @@ export function TitleSequence() {
 
       <div
         className="cine-chrome cine-replay-slot absolute inset-x-0 flex justify-center gap-3"
-        aria-hidden={phase !== "complete"}
+        aria-hidden={isWorldTransitioning}
       >
         <button
           ref={enterRef}
           type="button"
           className="cine-btn cine-btn-primary"
-          disabled={phase !== "complete"}
+          disabled={isWorldTransitioning}
+          aria-label={
+            phase === "complete"
+              ? "ディセプションワールドへ入る"
+              : "オープニングを待たずにディセプションワールドへ入る"
+          }
           onPointerDown={primeDive}
           onPointerUp={primeDivePending}
           onPointerCancel={cancelDivePrime}
@@ -1033,6 +1143,7 @@ export function TitleSequence() {
           type="button"
           className="cine-btn cine-btn-secondary"
           disabled={phase !== "complete"}
+          hidden={phase !== "complete"}
           onClick={(e) => {
             if (e.detail > 0 && performance.now() - completedAtRef.current < REPLAY_GUARD_MS)
               return;

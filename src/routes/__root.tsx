@@ -148,6 +148,7 @@ export const Route = createRootRoute({
               href: "/zeus-button-360.webp",
               imageSrcSet: ZEUS_BUTTON_SRCSET,
               imageSizes: ZEUS_BUTTON_SIZES,
+              fetchPriority: "low" as const,
             },
           ]),
       { rel: "stylesheet", href: androidPerformanceCss },
