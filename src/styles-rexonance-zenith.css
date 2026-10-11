@@ -1,0 +1,2432 @@
+/* ================================================================
+   ZENITH — Rexonance, the suit-up on the page (rx15, 2026-10-11)
+
+   The owner asked for the suit-up to feel like nanomachines, cut very
+   fine and attached in turn, and for the special site to take a big
+   step with it. ZENITH puts the suit-up on the page: between 02 (P14)
+   and 03 (the forms) the reader plays the published call with the
+   scroll and the armour assembles out of nanite tiles over the bare
+   undersuit (src/lib/rexonance-resonance.js, mountRexonanceAssembly,
+   draws one canvas; the tiles are cut from the suit module's figure).
+
+   This sheet lays the scene out and dresses its HUD: the call's lines
+   at the left (each SA-GA！DEUS！ and REXONANCE！ lights on its beat),
+   the read-out at the right (percent, nanites welded, the parts as they
+   land, the HIGH stamp when the call completes), a prism stage behind.
+
+   Layout: pinned (a tall runway, a sticky frame) under the persistent
+   preferences only — motion allowed, not economy, forced colours off —
+   so the menu or a dialog never moves the page. Everywhere else the
+   scene is one screen with the finished figure and every line lit.
+   Motion: opacity and transforms only, finite transitions answering
+   the engine's state flags, one scroll-linked rail on a named view
+   timeline; all behind reduced motion, economy and the menu, dialog and
+   load flags. Scoped to the doubled Rexonance page class.
+   ================================================================ */
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup {
+  --rzn-ice: 121 232 255;
+  --rzn-violet: 182 163 255;
+  --rzn-pink: 255 143 216;
+  --rzn-gold: 242 216 150;
+  --rzn-white: 244 251 255;
+  --rzn-gutter: clamp(20px, 3.4vw, 56px);
+  position: relative;
+  z-index: 2;
+  isolation: isolate;
+  margin: 0;
+  background:
+    radial-gradient(60% 46% at 50% 44%, rgb(var(--rzn-violet) / 12%), transparent 70%),
+    radial-gradient(38% 30% at 50% 92%, rgb(var(--rzn-ice) / 16%), transparent 72%),
+    linear-gradient(180deg, #03060c, #050914 46%, #03060c);
+  border-block: 1px solid rgb(var(--rzn-ice) / 16%);
+}
+
+/* The prism cut across the scene's top edge, drawn. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: 0;
+  right: 0;
+  z-index: 3;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(var(--rzn-ice)) 18%,
+    rgb(var(--rzn-violet)) 42%,
+    rgb(var(--rzn-pink)) 66%,
+    rgb(var(--rzn-gold)) 86%,
+    transparent
+  );
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+/* ---------------- The frame: one screen, the figure in the middle ---------------- */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup > .rzn-frame {
+  /* Where the figure stands in the frame (shares; the engine reads them). */
+  --rzn-fig-h: 0.86;
+  --rzn-fig-w: 0.9;
+  --rzn-fig-x: 0.5;
+  --rzn-fig-b: 0.035;
+  position: relative;
+  height: max(620px, calc(100svh - var(--dxs-nav)));
+  max-height: 1100px;
+  overflow: clip;
+  contain: layout paint;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup
+  > .rzn-frame
+  > :is(.rzn-light, .rzn-floor) {
+  position: absolute;
+  display: block;
+  pointer-events: none;
+}
+
+/* The prism stage: three shafts falling on the figure, a lattice. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup
+  > .rzn-frame
+  > .rzn-light {
+  inset: 0;
+  z-index: 0;
+  background:
+    linear-gradient(101deg, transparent 0 41%, rgb(var(--rzn-ice) / 7%) 41% 44%, transparent 44%),
+    linear-gradient(79deg, transparent 0 55%, rgb(var(--rzn-pink) / 6%) 55% 58%, transparent 58%),
+    linear-gradient(94deg, transparent 0 49%, rgb(var(--rzn-white) / 5%) 49% 50%, transparent 50%),
+    repeating-linear-gradient(90deg, rgb(var(--rzn-ice) / 4%) 0 1px, transparent 1px 64px),
+    repeating-linear-gradient(0deg, rgb(var(--rzn-ice) / 3%) 0 1px, transparent 1px 64px);
+  -webkit-mask-image: radial-gradient(70% 80% at 50% 46%, #000 30%, transparent 86%);
+  mask-image: radial-gradient(70% 80% at 50% 46%, #000 30%, transparent 86%);
+}
+
+/* The floor: a lit ring under the boots. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup
+  > .rzn-frame
+  > .rzn-floor {
+  left: 50%;
+  bottom: calc(var(--rzn-fig-b) * 100% - 26px);
+  z-index: 0;
+  width: min(62%, 560px);
+  aspect-ratio: 5 / 1;
+  translate: -50% 0;
+  border: 1px solid rgb(var(--rzn-ice) / 34%);
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(var(--rzn-ice) / 22%), transparent);
+  box-shadow: 0 0 0 10px rgb(var(--rzn-ice) / 4%);
+}
+
+/* The finished figure: the still every mode shows until the scene is live. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup
+  > .rzn-frame
+  > .rzn-still {
+  position: absolute;
+  left: calc(var(--rzn-fig-x) * 100%);
+  bottom: calc(var(--rzn-fig-b) * 100%);
+  z-index: 1;
+  width: calc(var(--rzn-fig-w) * 100%);
+  max-width: none;
+  height: calc(var(--rzn-fig-h) * 100%);
+  margin: 0;
+  translate: -50% 0;
+  object-fit: contain;
+  object-position: 50% 100%;
+  pointer-events: none;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup
+  > .rzn-frame
+  > .rzn-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: none;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup[data-rzn-state="live"]
+  > .rzn-frame
+  > .rzn-canvas {
+  display: block;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup[data-rzn-state="live"]
+  > .rzn-frame
+  > .rzn-still {
+  visibility: hidden;
+}
+
+/* ---------------- The call (left) ---------------- */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-call {
+  position: absolute;
+  top: clamp(36px, 9%, 96px);
+  left: var(--rzn-gutter);
+  z-index: 2;
+  width: min(34%, 460px);
+  margin: 0;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-kicker {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 14px;
+  margin: 0 0 clamp(18px, 2.6vh, 30px);
+  color: rgb(var(--rzn-ice));
+  font: 400 12px / 1.5 var(--dx-hud);
+  letter-spacing: 0.24em;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup
+  .rzn-kicker
+  > span:last-child {
+  color: var(--dx-text-2);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup
+  .rzn-kicker
+  > span:first-child::before {
+  content: "";
+  display: inline-block;
+  width: 26px;
+  height: 1px;
+  margin: 0 12px 0 0;
+  vertical-align: middle;
+  background: rgb(var(--rzn-ice));
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-lines {
+  display: grid;
+  gap: clamp(8px, 1.4vh, 14px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 0.5em;
+  margin: 0;
+  padding: 0;
+  color: var(--dx-text);
+  font: 400 clamp(17px, 1.75vw, 30px) / 1.3 var(--dx-hud);
+  letter-spacing: 0.04em;
+}
+
+/* The chant runs two to a line; the final call is the largest. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup
+  .rzn-line:nth-child(3) {
+  font-size: clamp(14px, 1.2vw, 20px);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup
+  .rzn-line:nth-child(4) {
+  font-size: clamp(14px, 1.2vw, 20px);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup
+  .rzn-line:last-child {
+  margin-top: 0.2em;
+  font-size: clamp(20px, 2.2vw, 38px);
+  line-height: 1.15;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-chip {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+/* DEUS！ answers in pink, as in the call. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup
+  .rzn-line:last-child
+  .rzn-chip {
+  color: rgb(var(--rzn-white));
+  text-shadow:
+    0 0 1px rgb(var(--rzn-ice)),
+    0 0 18px rgb(var(--rzn-ice) / 45%);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-hint {
+  display: none;
+  align-items: center;
+  gap: 12px;
+  margin: clamp(18px, 3vh, 32px) 0 0;
+  color: var(--dx-text-2);
+  font: 500 13px / 1.5 var(--dx-body);
+  letter-spacing: 0.12em;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup
+  .rzn-hint::after {
+  content: "";
+  width: 1px;
+  height: 28px;
+  background: linear-gradient(180deg, rgb(var(--rzn-ice)), transparent);
+}
+
+/* ---------------- The read-out (right) ---------------- */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-hud {
+  position: absolute;
+  top: clamp(36px, 9%, 96px);
+  right: var(--rzn-gutter);
+  bottom: clamp(36px, 9%, 96px);
+  z-index: 2;
+  display: grid;
+  grid-template-rows: auto auto auto 1fr auto;
+  justify-items: end;
+  width: min(26%, 300px);
+  text-align: end;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-readout {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin: 0;
+  color: var(--dx-text);
+  font: 600 clamp(56px, 7.4vw, 128px) / 0.9 var(--dx-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup
+  .rzn-readout
+  > span {
+  color: rgb(var(--rzn-ice));
+  font-size: max(12px, 0.28em);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-nanites {
+  display: grid;
+  gap: 2px;
+  margin: clamp(10px, 1.6vh, 18px) 0 0;
+  color: var(--dx-text-2);
+  font: 500 14px / 1.3 var(--dx-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.06em;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup
+  .rzn-nanites
+  > small {
+  color: rgb(var(--rzn-ice));
+  font: 400 12px / 1.4 var(--dx-hud);
+  letter-spacing: 0.22em;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-parts {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  margin: clamp(22px, 4vh, 40px) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-part {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  color: var(--dx-text);
+  font: 400 12px / 1.4 var(--dx-hud);
+  letter-spacing: 0.22em;
+}
+
+/* A lit cell per part: filled once the part has landed. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup
+  .rzn-part::after {
+  content: "";
+  flex: none;
+  width: 9px;
+  height: 9px;
+  background: rgb(var(--rzn-ice));
+  box-shadow: 0 0 0 3px rgb(var(--rzn-ice) / 18%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup
+  .rzn-part:nth-child(even)::after {
+  background: rgb(var(--rzn-pink));
+  box-shadow: 0 0 0 3px rgb(var(--rzn-pink) / 18%);
+}
+
+/* The stamp lands under the parts, high in the column: the Zeus button
+   keeps the frame's bottom right corner. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-stamp {
+  grid-row: 4;
+  align-self: start;
+  display: grid;
+  justify-items: end;
+  gap: 4px;
+  margin: clamp(18px, 3.4vh, 34px) 0 0;
+  color: var(--dx-text-2);
+  font: 400 12px / 1.4 var(--dx-hud);
+  letter-spacing: 0.24em;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup
+  .rzn-stamp
+  > b {
+  padding: 4px 12px 3px;
+  color: #02050a;
+  font: 400 clamp(18px, 1.8vw, 28px) / 1.1 var(--dx-hud);
+  letter-spacing: 0.16em;
+  background: rgb(var(--rzn-ice));
+  clip-path: polygon(
+    10px 0,
+    100% 0,
+    100% calc(100% - 10px),
+    calc(100% - 10px) 100%,
+    0 100%,
+    0 10px
+  );
+}
+
+/* The progress rail: a hairline down the left edge. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-rail {
+  position: absolute;
+  top: clamp(36px, 9%, 96px);
+  bottom: clamp(36px, 9%, 96px);
+  left: calc(var(--rzn-gutter) - 14px);
+  z-index: 2;
+  display: none;
+  width: 1px;
+  background: rgb(var(--rzn-ice) / 16%);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-rail > i {
+  position: absolute;
+  inset: 0;
+  display: block;
+  background: linear-gradient(
+    180deg,
+    rgb(var(--rzn-ice)),
+    rgb(var(--rzn-pink)) 70%,
+    rgb(var(--rzn-gold))
+  );
+  transform-origin: 50% 0;
+}
+
+/* ---------------- The live state: unlit until the call reaches it ---------------- */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup[data-rzn-state="live"]
+  .rzn-chip:not([data-on]) {
+  opacity: 0.2;
+  translate: 0 0.14em;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup[data-rzn-state="live"]
+  .rzn-line[data-on]
+  .rzn-chip[data-on] {
+  color: rgb(var(--rzn-white));
+  text-shadow:
+    0 0 1px rgb(var(--rzn-ice)),
+    0 0 18px rgb(var(--rzn-ice) / 50%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup[data-rzn-state="live"]
+  .rzn-line[data-done]
+  .rzn-chip {
+  opacity: 0.5;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup[data-rzn-state="live"]
+  .rzn-part:not([data-on]) {
+  opacity: 0.32;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup[data-rzn-state="live"]
+  .rzn-part:not([data-on])::after {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px rgb(var(--rzn-ice) / 60%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup[data-rzn-state="live"]:not([data-rzn-complete])
+  .rzn-stamp {
+  opacity: 0;
+  scale: 1.35;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup[data-rzn-state="live"]:is([data-rzn-line="0"], [data-rzn-line="1"])
+  .rzn-hint {
+  display: flex;
+}
+
+/* ---------------- Tablets and phones ---------------- */
+@media (max-width: 1099.98px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rzn-suitup
+    > .rzn-frame {
+    --rzn-fig-h: 0.7;
+    --rzn-fig-b: 0.06;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-call {
+    width: min(33%, 340px);
+  }
+}
+
+@media (max-width: 760px), (max-width: 1099.98px) and (orientation: portrait) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rzn-suitup
+    > .rzn-frame {
+    --rzn-fig-h: 0.58;
+    --rzn-fig-w: 0.92;
+    --rzn-fig-b: 0.17;
+    --rzn-gutter: 18px;
+    height: max(560px, calc(100svh - var(--dxs-nav)));
+    /* A portrait tablet (1024x1366) left a band of empty runway under the
+       read-out: stacked screens take the whole screen. */
+    max-height: none;
+  }
+
+  /* The call across the top, the read-out along the bottom. */
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-call {
+    top: 20px;
+    left: var(--rzn-gutter);
+    right: var(--rzn-gutter);
+    width: auto;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-kicker {
+    margin-bottom: 10px;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-lines {
+    gap: 4px;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-line {
+    font-size: clamp(13px, 2vw, 20px);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rzn-suitup
+    .rzn-line:last-child {
+    font-size: clamp(18px, 3vw, 30px);
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-hud {
+    top: auto;
+    left: var(--rzn-gutter);
+    right: var(--rzn-gutter);
+    bottom: 14px;
+    width: auto;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-rows: auto auto;
+    align-items: end;
+    justify-items: start;
+    gap: 10px 12px;
+    text-align: start;
+  }
+
+  /* The parts in two rows above the read-out, clear of the Zeus button's
+     column at the right (it sits level with them on short phones). */
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-parts {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    grid-template-columns: repeat(3, max-content);
+    justify-content: start;
+    width: 100%;
+    max-width: calc(100% - 84px);
+    gap: 4px clamp(10px, 3.4vw, 16px);
+    margin: 0;
+  }
+
+  /* Cell first, name after, each at the start of its column (in a
+     reversed row the start is flex-end). */
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-part {
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+    gap: 4px;
+    letter-spacing: 0.06em;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rzn-suitup
+    .rzn-part::after {
+    width: 7px;
+    height: 7px;
+    box-shadow: none;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rzn-suitup
+    .rzn-readout {
+    grid-column: 1;
+    grid-row: 2;
+    font-size: clamp(50px, 8vw, 84px);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rzn-suitup
+    .rzn-nanites {
+    grid-column: 2;
+    grid-row: 2;
+    margin: 0 0 4px;
+    font-size: 12px;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-stamp {
+    grid-column: 3;
+    grid-row: 2;
+    align-self: end;
+    justify-items: end;
+    margin: 0 0 4px;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rzn-suitup
+    .rzn-stamp
+    > b {
+    font-size: 16px;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rzn-suitup
+    .rzn-stamp
+    > span {
+    display: none;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-hint {
+    margin-top: 10px;
+  }
+}
+
+/* Portrait tablets: the whole screen is the frame; the figure takes more
+   of it (the call needs no more room than on a phone). */
+@media (min-width: 761px) and (max-width: 1099.98px) and (orientation: portrait) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rzn-suitup
+    > .rzn-frame {
+    --rzn-fig-h: 0.66;
+  }
+}
+
+/* Narrow phones: the read-out row (percent, nanites, stamp) fits 320px. */
+@media (max-width: 420px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rzn-suitup
+    .rzn-readout {
+    font-size: clamp(40px, 12.5vw, 50px);
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-hud {
+    column-gap: 8px;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rzn-suitup
+    .rzn-nanites
+    > small {
+    letter-spacing: 0.12em;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rzn-suitup
+    .rzn-stamp
+    > b {
+    padding: 3px 8px 2px;
+    font-size: 13px;
+  }
+}
+
+/* The narrowest phones: the parts take two columns (three rows) to stay
+   clear of the Zeus button, and the figure stands a little higher. */
+@media (max-width: 349.98px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rzn-suitup
+    > .rzn-frame {
+    --rzn-fig-h: 0.55;
+    --rzn-fig-b: 0.21;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-parts {
+    grid-template-columns: repeat(2, max-content);
+  }
+}
+
+/* ---------------- Desktop: the scene takes the full width between 02 and 03 ---------------- */
+@media (min-width: 1100px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup {
+    grid-column: 1 / -1;
+    grid-row: 5;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages {
+    grid-row: 6;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #system {
+    grid-row: 7;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-footer {
+    grid-row: 8;
+  }
+}
+
+/* ================================================================
+   Layout: the pinned runway (persistent preferences only)
+   ================================================================ */
+@media (prefers-reduced-motion: no-preference) and (forced-colors: none) {
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rzn-suitup {
+    height: max(1700px, 300svh);
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rzn-suitup
+    > .rzn-frame {
+    position: sticky;
+    top: var(--dxs-nav);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) and (forced-colors: none) and (max-width: 760px),
+  (prefers-reduced-motion: no-preference) and (forced-colors: none) and (max-width: 1099.98px) and (orientation: portrait) {
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rzn-suitup {
+    height: max(1400px, 250svh);
+  }
+
+  /* One line of the call at a time, large, across the top. */
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rzn-suitup[data-rzn-state="live"]
+    .rzn-lines {
+    grid-template-areas: "line";
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rzn-suitup[data-rzn-state="live"]
+    .rzn-line {
+    grid-area: line;
+    font-size: clamp(20px, 4vw, 36px);
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rzn-suitup[data-rzn-state="live"]
+    .rzn-line:is(:nth-child(3), :nth-child(4)) {
+    font-size: clamp(14px, 2.9vw, 26px);
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rzn-suitup[data-rzn-state="live"]
+    .rzn-line:last-child {
+    font-size: clamp(20px, 4vw, 36px);
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rzn-suitup[data-rzn-state="live"]
+    .rzn-line:not([data-on]) {
+    visibility: hidden;
+  }
+}
+
+/* ================================================================
+   Motion: the HUD answers the engine's flags; the rail follows the
+   runway (named view timeline). Gated. The call's chips and the parts
+   switch on their beat (the scroll is their timing; a transition on
+   each of twenty cells started a compositor animation per beat and
+   re-layered the frame); only the stamp lands.
+   ================================================================ */
+@media (prefers-reduced-motion: no-preference) {
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rzn-suitup[data-rzn-state="live"]
+    .rzn-stamp {
+    transition:
+      opacity 160ms ease-out,
+      scale 260ms cubic-bezier(0.18, 1.5, 0.32, 1);
+  }
+}
+
+@supports (animation-timeline: view()) and (animation-range: entry 0% entry 100%) {
+  @media (prefers-reduced-motion: no-preference) and (forced-colors: none) {
+    html[data-family="special"]:not([data-world-effects="economy"])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      > .rzn-suitup {
+      view-timeline: --rzn-run block;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      > .rzn-suitup[data-rzn-state="live"]
+      .rzn-rail {
+      display: block;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      > .rzn-suitup[data-rzn-state="live"]
+      .rzn-rail
+      > i {
+      animation: rzn-rail linear both;
+      animation-timeline: --rzn-run;
+      animation-range: contain 0% contain 100%;
+    }
+  }
+}
+
+@keyframes rzn-rail {
+  from {
+    transform: scaleY(0);
+  }
+
+  to {
+    transform: scaleY(1);
+  }
+}
+
+/* ================================================================
+   The held stage reads out the script (desktop): while the armour
+   holds the screen beside 01 and 02, a lock-on marks what each beat is
+   about — the visor for reaction (650%+), the legs for mobility (900%),
+   the core for P14. Drawn only where scroll timelines play them.
+   ================================================================ */
+@media (min-width: 1100px) {
+  /* The box of the picture itself (the image is contained, bottom-centred). */
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rxs-hero
+    .rxs-hero-visual
+    > .rzn-callouts {
+    position: absolute;
+    left: 50%;
+    bottom: 2%;
+    z-index: 3;
+    display: none;
+    /* The stage is max(560px, 100svh - bar) tall; the picture is 90 % of
+       that at 3:4, or 92 % of the stage's width when that is narrower. */
+    width: min(92%, calc(max(560px, 100svh - var(--dxs-nav)) * 0.675));
+    aspect-ratio: 1086 / 1448;
+    translate: -50% 0;
+    pointer-events: none;
+  }
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rxs-hero
+  .rxs-hero-visual
+  > .rzn-callouts
+  > .rzn-callout {
+  position: absolute;
+  right: -2%;
+  height: 0;
+  opacity: 0;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rxs-hero
+  .rxs-hero-visual
+  .rzn-callout.is-reaction {
+  top: 17.6%;
+  left: 50.6%;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rxs-hero
+  .rxs-hero-visual
+  .rzn-callout.is-mobility {
+  top: 79%;
+  left: 37.5%;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rxs-hero
+  .rxs-hero-visual
+  .rzn-callout.is-core {
+  top: 32%;
+  left: 56.8%;
+  /* PROCESSING CORE is the widest label: it stops short of the stage's
+     edge instead of running into it (1100–1440px). */
+  right: 0;
+}
+
+/* …and runs a little tighter, clear of its own lock-on ring. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rxs-hero
+  .rxs-hero-visual
+  .rzn-callout.is-core
+  > span
+  > em {
+  letter-spacing: 0.14em;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rxs-hero
+  .rxs-hero-visual
+  .rzn-callout
+  > span {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+
+/* The leader: from the mark to the seam. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rxs-hero
+  .rxs-hero-visual
+  .rzn-callout
+  > span::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, rgb(var(--rzn-ice, 121 232 255)), rgb(255 143 216 / 80%));
+  transform-origin: 0 50%;
+}
+
+/* The lock-on: a ring with four ticks round the mark. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rxs-hero
+  .rxs-hero-visual
+  .rzn-callout
+  > span
+  > i {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  width: clamp(52px, 4.4vw, 72px);
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  border: 1.5px solid rgb(121 232 255);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, rgb(244 251 255) 0 2.5px, transparent 3px),
+    linear-gradient(rgb(121 232 255), rgb(121 232 255)) 50% 0 / 1.5px 22% no-repeat,
+    linear-gradient(rgb(121 232 255), rgb(121 232 255)) 50% 100% / 1.5px 22% no-repeat,
+    linear-gradient(rgb(121 232 255), rgb(121 232 255)) 0 50% / 22% 1.5px no-repeat,
+    linear-gradient(rgb(121 232 255), rgb(121 232 255)) 100% 50% / 22% 1.5px no-repeat;
+  box-shadow: 0 0 0 6px rgb(121 232 255 / 10%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rxs-hero
+  .rxs-hero-visual
+  .rzn-callout
+  > span
+  > :is(b, em) {
+  position: absolute;
+  right: 0;
+  white-space: nowrap;
+  text-align: end;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rxs-hero
+  .rxs-hero-visual
+  .rzn-callout
+  > span
+  > b {
+  bottom: 6px;
+  color: #f4fbff;
+  font: 600 clamp(30px, 3.4vw, 54px) / 1 var(--dx-mono);
+  letter-spacing: -0.01em;
+  text-shadow: 0 2px 14px #000;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rxs-hero
+  .rxs-hero-visual
+  .rzn-callout
+  > span
+  > b
+  > small {
+  margin-inline-start: 2px;
+  color: rgb(121 232 255);
+  font-size: max(12px, 0.36em);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rxs-hero
+  .rxs-hero-visual
+  .rzn-callout.is-mobility
+  > span
+  > b
+  > small {
+  color: rgb(255 143 216);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rxs-hero
+  .rxs-hero-visual
+  .rzn-callout
+  > span
+  > em {
+  top: 8px;
+  color: rgb(121 232 255);
+  font: 400 12px / 1.4 var(--dx-hud);
+  font-style: normal;
+  letter-spacing: 0.22em;
+  text-shadow: 0 1px 8px #000;
+}
+
+/* ================================================================
+   03: the form viewer — the art fills the screen beside the tabs
+   ================================================================ */
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #stages
+  .rxs-stage-panel
+  > div {
+  isolation: isolate;
+}
+
+/* The form's code, outlined and huge: a watermark behind the title, or,
+   on the desktop viewer, at the foot of the copy column. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #stages
+  .rxs-stage-panel
+  > div
+  > .rzn-form-code {
+  position: absolute;
+  top: -0.1em;
+  right: 0;
+  z-index: -1;
+  display: block;
+  max-width: 100%;
+  overflow: clip;
+  color: transparent;
+  font: 400 clamp(48px, 15vw, 96px) / 1 var(--dx-hud);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  -webkit-text-stroke: 1px color-mix(in srgb, var(--rxs-stage-accent, #79e8ff) 60%, transparent);
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+/* ULTRA 60s is long: it runs smaller. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #stages
+  .rxs-stage-tabs[data-stage="ultra"]
+  ~ .rxs-stage-panel
+  > div
+  > .rzn-form-code {
+  font-size: clamp(36px, 10vw, 72px);
+}
+
+@media (min-width: 1100px) {
+  @supports (grid-template-rows: subgrid) {
+    html[data-family="special"]
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page
+      > #stages
+      .rxs-stage-panel
+      > div
+      > .rzn-form-code {
+      top: auto;
+      right: auto;
+      bottom: 0;
+      left: -0.04em;
+      font-size: clamp(56px, 8.6vw, 150px);
+      opacity: 1;
+    }
+
+    html[data-family="special"]
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page
+      > #stages
+      .rxs-stage-tabs[data-stage="ultra"]
+      ~ .rxs-stage-panel
+      > div
+      > .rzn-form-code {
+      font-size: clamp(40px, 5.6vw, 98px);
+    }
+  }
+}
+
+/* Below 901px the copy block dissolves into the panel's grid (the
+   finish layer): the code took the panel's corner, on the art's top edge
+   and mostly behind it. It stands behind the form's name and title
+   instead — their two rows, under the art. */
+@media (max-width: 900px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages .rxs-stage-panel {
+    isolation: isolate;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > #stages
+    .rxs-stage-panel
+    > div
+    > .rzn-form-code {
+    grid-row: 2 / 4;
+    grid-column: 1;
+  }
+
+  /* ULTRA 60s fits beside its name chip. */
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > #stages
+    .rxs-stage-tabs[data-stage="ultra"]
+    ~ .rxs-stage-panel
+    > div
+    > .rzn-form-code {
+    font-size: clamp(26px, 8.4vw, 64px);
+  }
+}
+
+/* Where the viewer stacks (the art above the copy), the copy keeps its
+   own height: the two-column minimum of the polish layer would leave a
+   screen of empty stage under the points. */
+@media (min-width: 901px) and (max-width: 1099.98px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > #stages
+    .rxs-stage-panel
+    > div {
+    min-block-size: 0;
+    padding-block-start: clamp(24px, 3vw, 40px);
+  }
+}
+
+/* The nanite sweep: strips of cells over the art, at rest unseen. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #stages
+  .rxs-stage-panel
+  figure
+  > .rzn-mesh {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: grid;
+  grid-template-rows: repeat(12, minmax(0, 1fr));
+  gap: 2px;
+  padding: 2px;
+  pointer-events: none;
+  -webkit-mask-image: radial-gradient(48% 54% at 50% 50%, #000 42%, transparent 100%);
+  mask-image: radial-gradient(48% 54% at 50% 50%, #000 42%, transparent 100%);
+}
+
+/* Each strip: eight cells, a hair apart. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #stages
+  .rxs-stage-panel
+  figure
+  > .rzn-mesh
+  > i {
+  display: block;
+  background-image: linear-gradient(
+    90deg,
+    color-mix(
+        in srgb,
+        color-mix(in srgb, var(--rxs-stage-accent, #79e8ff) 62%, #fff) 64%,
+        transparent
+      )
+      calc(100% - 2px),
+    transparent 0
+  );
+  background-size: calc(100% / 8) 100%;
+  opacity: 0;
+  transform-origin: 0 50%;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #stages
+  .rxs-stage-panel
+  figure
+  > .rzn-mesh
+  > i:nth-child(even) {
+  transform-origin: 100% 50%;
+}
+
+/* The points read out as numbered lines in the form's light. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #stages
+  .rxs-stage-panel
+  > div
+  > ul {
+  counter-reset: rzn-point;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #stages
+  .rxs-stage-panel
+  > div
+  > ul
+  > li {
+  counter-increment: rzn-point;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #stages
+  .rxs-stage-panel
+  > div
+  > ul
+  > li::before {
+  content: counter(rzn-point, decimal-leading-zero) / "";
+  width: auto;
+  height: auto;
+  color: var(--rxs-stage-accent, #79e8ff);
+  font: 400 12px / 1 var(--dx-hud);
+  letter-spacing: 0.16em;
+  background: none;
+  transform: none;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #stages
+  .rxs-stage-panel
+  > div
+  > ul
+  > li::after {
+  content: "";
+  flex: 1 1 24px;
+  min-width: 24px;
+  height: 1px;
+  margin-inline-start: 8px;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--rxs-stage-accent, #79e8ff) 70%, transparent),
+    transparent
+  );
+}
+
+/* Desktop: tabs, hint and copy in the left column, the art the full
+   height of the screen beside them (one grid shared through subgrid). */
+@media (min-width: 1100px) {
+  @supports (grid-template-rows: subgrid) {
+    html[data-family="special"]
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page
+      > #stages
+      .rxs-stage-switcher {
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+      grid-template-rows: auto auto 1fr;
+      column-gap: clamp(28px, 4vw, 72px);
+    }
+
+    html[data-family="special"]
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page
+      > #stages
+      .rxs-stage-switcher
+      > :is(.rxs-stage-tabs, .rxs-stage-hint) {
+      grid-column: 1;
+      z-index: 3;
+    }
+
+    html[data-family="special"]
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page
+      > #stages
+      .rxs-stage-switcher
+      > .rxs-stage-tabs {
+      grid-row: 1;
+    }
+
+    html[data-family="special"]
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page
+      > #stages
+      .rxs-stage-switcher
+      > .rxs-stage-hint {
+      grid-row: 2;
+    }
+
+    html[data-family="special"]
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page
+      > #stages
+      .rxs-stage-switcher
+      > .rxs-stage-panel {
+      grid-column: 1 / -1;
+      grid-row: 1 / -1;
+      grid-template-columns: subgrid;
+      grid-template-rows: subgrid;
+      row-gap: 0;
+      pointer-events: none;
+    }
+
+    html[data-family="special"]
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page
+      > #stages
+      .rxs-stage-switcher
+      > .rxs-stage-panel
+      > figure {
+      grid-column: 2;
+      grid-row: 1 / -1;
+      width: min(100%, calc((100svh - var(--dxs-nav) - 40px) * 0.75));
+      pointer-events: auto;
+    }
+
+    html[data-family="special"]
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page
+      > #stages
+      .rxs-stage-switcher
+      > .rxs-stage-panel
+      > div {
+      grid-column: 1;
+      grid-row: 3;
+      align-self: stretch;
+      padding-top: clamp(4px, 1vw, 16px);
+      /* Room for the form's code at the column's foot. */
+      padding-bottom: calc(clamp(56px, 8.6vw, 150px) + 28px);
+      pointer-events: auto;
+    }
+  }
+}
+
+/* ================================================================
+   The end card: the finished suit behind the last line
+   ================================================================ */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-footer {
+  position: relative;
+  isolation: isolate;
+  min-height: min(78svh, 760px);
+  align-content: end;
+  overflow: clip;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rxs-footer
+  > .rzn-end-figure {
+  position: absolute;
+  right: clamp(12px, 9vw, 160px);
+  bottom: 0;
+  z-index: -1;
+  width: auto;
+  max-width: none;
+  height: 94%;
+  margin: 0;
+  object-fit: contain;
+  object-position: 50% 100%;
+  opacity: var(--rzn-end-o, 1);
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(180deg, #000 70%, transparent 100%);
+  mask-image: linear-gradient(180deg, #000 70%, transparent 100%);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-footer h2 {
+  font-size: clamp(36px, 5vw, 84px);
+  line-height: 1.12;
+}
+
+@media (max-width: 900px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-footer {
+    min-height: min(92svh, 860px);
+    /* Clear of the Zeus button where the page ends. */
+    padding-bottom: max(108px, calc(env(safe-area-inset-bottom) + 96px));
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rxs-footer
+    > .rzn-end-figure {
+    top: 4%;
+    right: 50%;
+    bottom: auto;
+    height: 64%;
+    translate: 50% 0;
+    --rzn-end-o: 0.55;
+    /* The kicker and the last line sit over the figure's legs: the helmet,
+       shoulders and core stay, the rest fades under the copy. */
+    -webkit-mask-image: linear-gradient(180deg, #000 30%, rgb(0 0 0 / 40%) 58%, transparent 84%);
+    mask-image: linear-gradient(180deg, #000 30%, rgb(0 0 0 / 40%) 58%, transparent 84%);
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-footer h2 {
+    font-size: clamp(30px, 9vw, 44px);
+  }
+}
+
+/* ================================================================
+   Motion (time-based): the form's nanite sweep, on the transient
+   data-rsn-form flag the RESONANCE script sets and clears
+   ================================================================ */
+@media (prefers-reduced-motion: no-preference) {
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    #rxs-stage-panel[data-rsn-form]
+    figure
+    > .rzn-mesh
+    > i {
+    animation: rzn-mesh 520ms cubic-bezier(0.16, 1, 0.3, 1)
+      calc(var(--rxp-entrance-delay, 0ms) + var(--rzn-d, 0) * 34ms) both;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    #rxs-stage-panel[data-rsn-form]
+    > div
+    > .rzn-form-code {
+    animation: rzn-code 760ms cubic-bezier(0.18, 1.5, 0.32, 1) var(--rxp-entrance-delay, 0ms) both;
+  }
+}
+
+@keyframes rzn-mesh {
+  0% {
+    opacity: 0;
+    transform: scaleX(0.06);
+  }
+
+  36% {
+    opacity: 0.9;
+    transform: scaleX(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scaleX(1);
+  }
+}
+
+@keyframes rzn-code {
+  from {
+    opacity: 0;
+    transform: translateY(14%) scale(1.12);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ================================================================
+   Scroll-linked: the end figure rises as the end card comes in
+   ================================================================ */
+@supports (animation-timeline: view()) and (animation-range: entry 0% entry 100%) {
+  @media (prefers-reduced-motion: no-preference) {
+    html[data-family="special"]:not([data-world-effects="economy"])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      > .rxs-footer {
+      view-timeline: --rzn-end block;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      > .rxs-footer
+      > .rzn-end-figure {
+      animation: rzn-end-rise linear both;
+      animation-timeline: --rzn-end;
+      animation-range: entry 0% entry 100%;
+    }
+  }
+}
+
+@keyframes rzn-end-rise {
+  from {
+    opacity: 0.2;
+    transform: translateY(12%) scale(0.94);
+  }
+
+  to {
+    opacity: var(--rzn-end-o, 1);
+    transform: none;
+  }
+}
+
+/* ================================================================
+   Scroll-linked: the stage's lock-ons follow the script (the RESONANCE
+   timelines of 01, its second cut and 02, shared through the page's
+   timeline-scope); the read-out box rides the armour's own push-in
+   ================================================================ */
+@supports (animation-timeline: view()) and (animation-range: entry 0% entry 100%) {
+  @media (prefers-reduced-motion: no-preference) and (forced-colors: none) and (min-width: 1100px) {
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      > .rxs-hero
+      .rxs-hero-visual
+      > .rzn-callouts {
+      display: block;
+      animation: rzn-push linear both;
+      animation-timeline: --rsn-hero;
+      animation-range: contain 0% contain 100%;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-hero-visual
+      .rzn-callout.is-reaction {
+      animation: rzn-lock-in linear both;
+      animation-timeline: --rsn-ch1;
+      animation-range: entry 62% entry 96%;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-hero-visual
+      .rzn-callout.is-reaction
+      > span {
+      animation: rzn-lock-out linear both;
+      animation-timeline: --rsn-cut-next;
+      animation-range: entry 20% entry 60%;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-hero-visual
+      .rzn-callout.is-mobility {
+      animation: rzn-lock-in linear both;
+      animation-timeline: --rsn-cut-next;
+      animation-range: entry 45% entry 95%;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-hero-visual
+      .rzn-callout.is-mobility
+      > span {
+      animation: rzn-lock-out linear both;
+      animation-timeline: --rsn-ch3;
+      animation-range: entry 0% entry 34%;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-hero-visual
+      .rzn-callout.is-core {
+      animation: rzn-lock-in linear both;
+      animation-timeline: --rsn-ch3;
+      animation-range: entry 38% entry 82%;
+    }
+  }
+}
+
+@keyframes rzn-push {
+  from {
+    translate: -50% 0;
+    scale: 1;
+  }
+
+  to {
+    translate: -50% -3%;
+    scale: 1.08;
+  }
+}
+
+@keyframes rzn-lock-in {
+  from {
+    opacity: 0;
+  }
+
+  45% {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes rzn-lock-out {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+/* ================================================================
+   Layout (persistent preferences): stacked screens hold 01's cuts in a
+   shorter frame, so a phone is not a figure in an empty screen
+   ================================================================ */
+@media (prefers-reduced-motion: no-preference) and (max-width: 1099.98px) {
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > #performance
+    .rxs-headline-metrics
+    > article {
+    min-height: min(calc(100svh - var(--dxs-nav)), max(440px, 64svh));
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > #performance
+    .rxs-headline-metrics
+    > article:first-child {
+    margin-bottom: 22svh;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > #performance
+    .rxs-headline-metrics::after {
+    height: 16svh;
+  }
+}
+
+@media (max-width: 760px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > #performance
+    .rxs-headline-metrics {
+    --rsn-figure-size: clamp(76px, 33vw, 150px);
+  }
+}
+
+/* ================================================================
+   04 TRINITY: three rings, each its own, fall into phase
+   (三者三様のまま、一糸乱れず). The three systems enter as three
+   equal, overlapping rings, each with its mark at its own angle; as the
+   scene comes into the view they glide to one centre, take their own
+   radii (evolution inside, the order round it, the human will outside)
+   and turn until the three marks stand on one axis — phase lock — and
+   one wave rings out from the core. At rest (reduced motion, economy,
+   the menu, no scroll timelines before the scene plays) the rings stand
+   locked: the finished picture.
+   ================================================================ */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #system > .rzn-trinity {
+  --rzn-s: min(84vw, max(340px, 44vw));
+  --rzn-ice: 121 232 255;
+  --rzn-violet: 182 163 255;
+  --rzn-gold: 242 216 150;
+  --rzn-white: 244 251 255;
+  position: relative;
+  z-index: 0;
+  display: block;
+  width: var(--rzn-s);
+  height: var(--rzn-s);
+  margin: clamp(-12px, -1vw, 0px) auto clamp(28px, 5vw, 44px);
+  pointer-events: none;
+}
+
+/* The phase axis: the line the three marks come to stand on. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #system
+  > .rzn-trinity::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 50%;
+  left: 50%;
+  width: 1px;
+  background: linear-gradient(180deg, transparent, rgb(var(--rzn-white) / 34%) 40%, transparent);
+  translate: -50% 0;
+}
+
+/* A faint horizon through the core. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #system
+  > .rzn-trinity::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: -8%;
+  right: -8%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(var(--rzn-ice) / 22%) 30%,
+    rgb(var(--rzn-violet) / 18%) 50%,
+    rgb(var(--rzn-gold) / 22%) 70%,
+    transparent
+  );
+}
+
+/* Each system: a carrier at the centre (it travels), the ring on it
+   (it takes its radius and turns). */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #system
+  > .rzn-trinity
+  > .rzn-tri {
+  --rzn-c: var(--rzn-ice);
+  --rzn-r: 0.17;
+  --rzn-x: -0.14;
+  --rzn-y: -0.08;
+  --rzn-turn: -150deg;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #system
+  > .rzn-trinity
+  > .rzn-tri:nth-child(2) {
+  --rzn-c: var(--rzn-violet);
+  --rzn-r: 0.3;
+  --rzn-x: 0.14;
+  --rzn-y: -0.08;
+  --rzn-turn: 110deg;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #system
+  > .rzn-trinity
+  > .rzn-tri:nth-child(3) {
+  --rzn-c: var(--rzn-gold);
+  --rzn-r: 0.43;
+  --rzn-x: 0;
+  --rzn-y: 0.16;
+  --rzn-turn: -230deg;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #system
+  > .rzn-trinity
+  > .rzn-tri
+  > .rzn-tri-ring {
+  /* The scale that makes every ring the same size while they overlap. */
+  --rzn-k: calc(0.25 / var(--rzn-r));
+  position: absolute;
+  top: calc(var(--rzn-r) * var(--rzn-s) * -1);
+  left: calc(var(--rzn-r) * var(--rzn-s) * -1);
+  width: calc(var(--rzn-r) * var(--rzn-s) * 2);
+  height: calc(var(--rzn-r) * var(--rzn-s) * 2);
+  border: 1.5px solid rgb(var(--rzn-c) / 74%);
+  border-radius: 50%;
+  background: radial-gradient(
+    closest-side,
+    transparent 58%,
+    rgb(var(--rzn-c) / 8%) 84%,
+    rgb(var(--rzn-c) / 18%) 100%
+  );
+  box-shadow:
+    0 0 22px rgb(var(--rzn-c) / 20%),
+    inset 0 0 16px rgb(var(--rzn-c) / 12%);
+}
+
+/* The ring's mark: where it stands in phase. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #system
+  > .rzn-trinity
+  > .rzn-tri
+  > .rzn-tri-ring::before {
+  content: "";
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  width: 3px;
+  height: 15px;
+  background: rgb(var(--rzn-c));
+  box-shadow: 0 0 12px rgb(var(--rzn-c) / 70%);
+  translate: -50% 0;
+}
+
+/* Opposite the mark, a dim dot: the ring reads as turning. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #system
+  > .rzn-trinity
+  > .rzn-tri
+  > .rzn-tri-ring::after {
+  content: "";
+  position: absolute;
+  bottom: -3px;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgb(var(--rzn-c) / 60%);
+  translate: -50% 0;
+}
+
+/* The system's number rides beside its mark, upright. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #system
+  > .rzn-trinity
+  > .rzn-tri
+  > .rzn-tri-ring
+  > b {
+  position: absolute;
+  top: -10px;
+  left: calc(50% + 9px);
+  color: rgb(var(--rzn-c));
+  font: 600 12px / 1 var(--dx-mono);
+  letter-spacing: 0.14em;
+  text-shadow: 0 0 10px rgb(var(--rzn-c) / 60%);
+  transform-origin: -9px 10px;
+}
+
+/* The core between them, and the wave it sends once the three lock. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #system
+  > .rzn-trinity
+  > .rzn-tri-core {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 12px;
+  height: 12px;
+  margin: -6px 0 0 -6px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgb(var(--rzn-white)),
+    rgb(var(--rzn-ice)) 60%,
+    rgb(var(--rzn-violet))
+  );
+  box-shadow:
+    0 0 18px rgb(var(--rzn-ice) / 80%),
+    0 0 40px rgb(var(--rzn-violet) / 40%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #system
+  > .rzn-trinity
+  > .rzn-tri-wave {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: calc(var(--rzn-s) * 0.86);
+  height: calc(var(--rzn-s) * 0.86);
+  margin: calc(var(--rzn-s) * -0.43) 0 0 calc(var(--rzn-s) * -0.43);
+  border: 1px solid rgb(var(--rzn-white) / 55%);
+  border-radius: 50%;
+  opacity: 0;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #system
+  > .rzn-trinity
+  > .rzn-tri-lock {
+  position: absolute;
+  top: calc(50% + 14px);
+  left: 50%;
+  color: rgb(var(--rzn-white) / 78%);
+  font: 400 12px / 1.4 var(--dx-hud);
+  letter-spacing: 0.22em;
+  white-space: nowrap;
+  translate: -50% 0;
+}
+
+/* The rings are the scene now: RESONANCE's concentric rings behind the
+   cards (the same three colours, already in phase) step aside. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #system
+  > .rxs-system-grid::before {
+  display: none;
+}
+
+/* Wide screens: the rings stand beside the heading, the cards below. */
+@media (min-width: 1100px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #system {
+    display: grid;
+    grid-template-columns: minmax(0, var(--dxs-wrap));
+    justify-content: center;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > #system
+    > .rxs-section-heading {
+    grid-area: 1 / 1;
+    align-self: end;
+    width: 100%;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #system > .rzn-trinity {
+    --rzn-s: min(470px, 34vw);
+    grid-area: 1 / 1;
+    justify-self: end;
+    margin: clamp(-56px, -3vw, -24px) clamp(24px, 5vw, 96px) 40px 0;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > #system
+    > :is(.rxs-system-grid, .rxs-specs) {
+    width: 100%;
+  }
+}
+
+/* ================================================================
+   Motion: the trinity falls into phase — with the scroll where scroll
+   timelines exist (its own named view timeline), otherwise once, by
+   time, on the transient data-rsn-in flag the RESONANCE script sets
+   ================================================================ */
+@supports (animation-timeline: view()) and (animation-range: entry 0% entry 100%) {
+  @media (prefers-reduced-motion: no-preference) {
+    html[data-family="special"]:not([data-world-effects="economy"])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      > #system
+      > .rzn-trinity {
+      view-timeline: --rzn-tri block;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      > #system
+      > .rzn-trinity
+      > .rzn-tri {
+      animation: rzn-tri-glide linear both;
+      animation-timeline: --rzn-tri;
+      animation-range: entry 35% cover 50%;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      > #system
+      > .rzn-trinity
+      > .rzn-tri
+      > .rzn-tri-ring {
+      animation: rzn-tri-tune linear both;
+      animation-timeline: --rzn-tri;
+      animation-range: entry 35% cover 50%;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      > #system
+      > .rzn-trinity
+      > .rzn-tri
+      > .rzn-tri-ring
+      > b {
+      animation: rzn-tri-upright linear both;
+      animation-timeline: --rzn-tri;
+      animation-range: entry 35% cover 50%;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      > #system
+      > .rzn-trinity
+      > .rzn-tri-core {
+      animation: rzn-tri-core linear both;
+      animation-timeline: --rzn-tri;
+      animation-range: entry 35% cover 50%;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      > #system
+      > .rzn-trinity
+      > .rzn-tri-lock {
+      animation: rzn-tri-lock linear both;
+      animation-timeline: --rzn-tri;
+      animation-range: cover 42% cover 54%;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      > #system
+      > .rzn-trinity
+      > .rzn-tri-wave {
+      animation: rzn-tri-wave linear both;
+      animation-timeline: --rzn-tri;
+      animation-range: cover 48% cover 70%;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    > #system
+    > .rzn-trinity[data-rsn-in]
+    > .rzn-tri {
+    animation: rzn-tri-glide 1100ms cubic-bezier(0.5, 0, 0.2, 1) both;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    > #system
+    > .rzn-trinity[data-rsn-in]
+    > .rzn-tri
+    > .rzn-tri-ring {
+    animation: rzn-tri-tune 1100ms cubic-bezier(0.5, 0, 0.2, 1) both;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    > #system
+    > .rzn-trinity[data-rsn-in]
+    > .rzn-tri
+    > .rzn-tri-ring
+    > b {
+    animation: rzn-tri-upright 1100ms cubic-bezier(0.5, 0, 0.2, 1) both;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    > #system
+    > .rzn-trinity[data-rsn-in]
+    > .rzn-tri-core {
+    animation: rzn-tri-core 1100ms cubic-bezier(0.5, 0, 0.2, 1) both;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    > #system
+    > .rzn-trinity[data-rsn-in]
+    > .rzn-tri-lock {
+    animation: rzn-tri-lock 1200ms linear both;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    > #system
+    > .rzn-trinity[data-rsn-in]
+    > .rzn-tri-wave {
+    animation: rzn-tri-wave 700ms cubic-bezier(0.16, 1, 0.3, 1) 1050ms both;
+  }
+}
+
+@keyframes rzn-tri-glide {
+  from {
+    translate: calc(var(--rzn-x) * var(--rzn-s)) calc(var(--rzn-y) * var(--rzn-s));
+  }
+
+  to {
+    translate: 0 0;
+  }
+}
+
+@keyframes rzn-tri-tune {
+  from {
+    rotate: var(--rzn-turn);
+    scale: var(--rzn-k);
+  }
+
+  to {
+    rotate: 0deg;
+    scale: 1;
+  }
+}
+
+/* The number counter-turns and counter-scales: it rides the mark upright
+   and at its own size. */
+@keyframes rzn-tri-upright {
+  from {
+    rotate: calc(var(--rzn-turn) * -1);
+    scale: calc(1 / var(--rzn-k));
+  }
+
+  to {
+    rotate: 0deg;
+    scale: 1;
+  }
+}
+
+@keyframes rzn-tri-core {
+  from {
+    opacity: 0.35;
+    scale: 0.5;
+  }
+
+  80% {
+    opacity: 0.6;
+    scale: 0.8;
+  }
+
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+@keyframes rzn-tri-lock {
+  from {
+    opacity: 0;
+    translate: -50% 6px;
+  }
+
+  70% {
+    opacity: 0;
+    translate: -50% 6px;
+  }
+
+  to {
+    opacity: 1;
+    translate: -50% 0;
+  }
+}
+
+@keyframes rzn-tri-wave {
+  from {
+    opacity: 0;
+    scale: 0.94;
+  }
+
+  25% {
+    opacity: 0.8;
+  }
+
+  to {
+    opacity: 0;
+    scale: 1.32;
+  }
+}
+
+/* ================================================================
+   Forced colours and print: the finished figure, every line, plain
+   ================================================================ */
+@media (forced-colors: active) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rzn-suitup.rzn-suitup
+    > .rzn-frame
+    :is(.rzn-light, .rzn-floor, .rzn-canvas, .rzn-rail, .rzn-hint) {
+    display: none;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rxs-hero
+    .rxs-hero-visual
+    > .rzn-callouts {
+    display: none;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup::before {
+    display: none;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #system > .rzn-trinity {
+    display: none;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > #stages
+    .rxs-stage-panel
+    :is(figure > .rzn-mesh, div > .rzn-form-code) {
+    display: none;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rzn-suitup
+    :is(
+      .rzn-line,
+      .rzn-chip,
+      .rzn-readout,
+      .rzn-readout > span,
+      .rzn-nanites,
+      .rzn-part,
+      .rzn-stamp > b
+    ) {
+    color: CanvasText;
+    text-shadow: none;
+    background: none;
+  }
+
+  /* Every part's cell (the even ones were pink, which forced colours
+     paints out). */
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rzn-suitup
+    .rzn-part:nth-child(n)::after {
+    background: CanvasText;
+    box-shadow: none;
+  }
+
+  /* On stacked screens the end figure stands behind the last line: in
+     forced colours the line stands alone. */
+  @media (max-width: 900px) {
+    html[data-family="special"]
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page
+      > .rxs-footer
+      > .rzn-end-figure {
+      display: none;
+    }
+  }
+}
+
+@media print {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup {
+    height: auto;
+    break-inside: avoid;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rzn-suitup
+    :is(.rzn-canvas, .rzn-rail, .rzn-hint) {
+    display: none;
+  }
+}

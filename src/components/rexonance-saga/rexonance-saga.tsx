@@ -1,7 +1,11 @@
 import { Fragment, memo, useCallback, useEffect, useRef, useState } from "react";
 import { RexonanceCallSequence } from "./rexonance-call-sequence";
 import { RexonanceAperture } from "./rexonance-aperture";
-import { REXONANCE_STAGE_DURATION_MS, type RexonanceStage } from "@/lib/rexonance-calls";
+import {
+  REXONANCE_CALLS,
+  REXONANCE_STAGE_DURATION_MS,
+  type RexonanceStage,
+} from "@/lib/rexonance-calls";
 import { planStageCall, type RexonanceStageEntrance } from "@/lib/rexonance-stage-call";
 import { GuardedLink } from "@/components/load-gate";
 import { DisplayName } from "@/components/name-text";
@@ -10,7 +14,20 @@ import { SideMenuLayer, SideMenuTrigger } from "@/components/world/world-chrome"
 import { useWorldMode } from "@/components/world/use-world-mode";
 import { WORLD_ENTER_ASSETS } from "@/lib/asset-loader";
 import { initRail } from "@/lib/liquid/boot.js";
-import { mountRexonanceResonance } from "@/lib/rexonance-resonance.js";
+import {
+  ASSEMBLY_PARTS,
+  mountRexonanceAssembly,
+  mountRexonanceResonance,
+  type RexonanceAssemblyConfig,
+} from "@/lib/rexonance-resonance.js";
+import {
+  REXONANCE_SUIT_FACE_GLOW,
+  REXONANCE_SUIT_FIGURE,
+  REXONANCE_SUIT_MARKS,
+  REXONANCE_SUIT_PIECES,
+  REXONANCE_SUIT_SIZE,
+  REXONANCE_SUIT_UNDERSUIT,
+} from "@/lib/rexonance-suit";
 import { rexonanceImage } from "@/lib/rexonance-images";
 import { REXONANCE_SITE_ARTWORK } from "@/lib/rexonance-site-artwork";
 import { supportsIOS27Enhancements } from "@/lib/rendering-profile";
@@ -354,6 +371,112 @@ const CORE_SYSTEMS = [
     body: "レックスとゼウスはそれぞれの存在を保ったまま悠真と超共鳴し、何を破壊し、何を残すかは、最後まで悠真自身が決めます。",
   },
 ] as const;
+
+// ZENITH (rx15): the suit-up the reader plays with the scroll. Only the
+// fields every revision of the suit module keeps are read (a piece's id,
+// group, box and seat, the figure, the undersuit and the marks), so a
+// finer piece list re-cuts the scene by itself.
+const SUIT_UP: RexonanceAssemblyConfig = {
+  figure: REXONANCE_SUIT_FIGURE,
+  undersuit: REXONANCE_SUIT_UNDERSUIT,
+  size: REXONANCE_SUIT_SIZE,
+  pieces: REXONANCE_SUIT_PIECES.map(({ id, group, x, y, w, h, seat }) => ({
+    id,
+    group,
+    x,
+    y,
+    w,
+    h,
+    seat,
+  })),
+  core: REXONANCE_SUIT_MARKS.core,
+  visor: REXONANCE_SUIT_MARKS.visor,
+  glow: REXONANCE_SUIT_FACE_GLOW,
+};
+// The published call, line by line; the chanted lines split into their
+// repeats, so each SA-GA！DEUS！ and REXONANCE！ lights on its own beat.
+const SUIT_UP_LINES = REXONANCE_CALLS.map((call) => {
+  const repeats = call.match(/SA-GA！DEUS！|REXONANCE！(?=REXONANCE！|$)/g);
+  return repeats && repeats.length > 1 && repeats.join("") === call ? repeats : [call];
+});
+
+// The form change's nanite sweep: twelve strips of cells woven across the
+// art, one after another, alternately from the left and the right.
+const FORM_MESH = Array.from({ length: 12 }, (_, index) => (
+  <i key={index} style={{ ["--rzn-d" as string]: index }} />
+));
+
+const RexonanceSuitUp = memo(function RexonanceSuitUp() {
+  const runwayRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => mountRexonanceAssembly(runwayRef.current, SUIT_UP), []);
+  return (
+    <div
+      ref={runwayRef}
+      className="rzn-suitup"
+      aria-hidden="true"
+      style={{
+        ["--rzn-aspect" as string]: `${REXONANCE_SUIT_SIZE.width} / ${REXONANCE_SUIT_SIZE.height}`,
+      }}
+    >
+      <div className="rzn-frame">
+        <i className="rzn-light" />
+        <i className="rzn-floor" />
+        <img
+          className="rzn-still"
+          src={REXONANCE_SUIT_FIGURE}
+          alt=""
+          width={REXONANCE_SUIT_SIZE.width}
+          height={REXONANCE_SUIT_SIZE.height}
+          loading="lazy"
+          decoding="async"
+        />
+        <canvas className="rzn-canvas" width={0} height={0} />
+        <div className="rzn-call">
+          <p className="rzn-kicker">
+            <span>SUIT-UP</span>
+            <span>NANITE ASSEMBLY</span>
+          </p>
+          <ol className="rzn-lines">
+            {SUIT_UP_LINES.map((units, index) => (
+              <li key={REXONANCE_CALLS[index]} className="rzn-line">
+                {units.map((unit, unitIndex) => (
+                  <span key={`${unit}-${unitIndex}`} className="rzn-chip">
+                    {unit}
+                  </span>
+                ))}
+              </li>
+            ))}
+          </ol>
+          <p className="rzn-hint">スクロールで装着</p>
+        </div>
+        <div className="rzn-hud">
+          <p className="rzn-readout">
+            <b className="rzn-percent">100</b>
+            <span>%</span>
+          </p>
+          <p className="rzn-nanites">
+            <small>NANITES</small>
+            <span className="rzn-count">ONLINE</span>
+          </p>
+          <ol className="rzn-parts">
+            {ASSEMBLY_PARTS.map((part) => (
+              <li key={part} className="rzn-part">
+                {part}
+              </li>
+            ))}
+          </ol>
+          <p className="rzn-stamp">
+            <span>REXONANCE SAGA</span>
+            <b>{STAGES.standard.code}</b>
+          </p>
+        </div>
+        <i className="rzn-rail">
+          <i />
+        </i>
+      </div>
+    </div>
+  );
+});
 
 const releaseControlFocus = (control: HTMLElement) => {
   window.requestAnimationFrame(() => {
@@ -1106,6 +1229,35 @@ export function RexonanceSaga() {
             <i className="rsn-shard" />
             <i className="rsn-shard" />
           </span>
+          {/* ZENITH (rx15): while the stage holds beside 01 and 02, it reads
+              out what the script is saying — a lock-on per beat. */}
+          <span className="rzn-callouts">
+            <span className="rzn-callout is-reaction">
+              <span>
+                <i />
+                <b>
+                  650<small>%+</small>
+                </b>
+                <em>REACTION</em>
+              </span>
+            </span>
+            <span className="rzn-callout is-mobility">
+              <span>
+                <i />
+                <b>
+                  900<small>%</small>
+                </b>
+                <em>MOBILITY</em>
+              </span>
+            </span>
+            <span className="rzn-callout is-core">
+              <span>
+                <i />
+                <b>P14</b>
+                <em>PROCESSING CORE</em>
+              </span>
+            </span>
+          </span>
         </div>
         <a className="rxs-scroll-cue" href="#performance">
           <span>まず、数字から。</span>
@@ -1204,6 +1356,8 @@ export function RexonanceSaga() {
         <P14Comparator nativeIOSSelection={nativeIOSSelection} />
       </section>
 
+      <RexonanceSuitUp />
+
       <section id="stages" className="rxs-stages rxs-section">
         <header className="rxs-section-heading rxs-reveal">
           <p>THREE OPERATING STAGES</p>
@@ -1281,6 +1435,10 @@ export function RexonanceSaga() {
                 <i />
                 <i />
               </i>
+              {/* ZENITH (rx15): nanites re-forming over the new art. */}
+              <i className="rzn-mesh" aria-hidden="true">
+                {FORM_MESH}
+              </i>
             </figure>
             <div key={`${stage}-copy`}>
               <small>{activeStage.code}</small>
@@ -1291,6 +1449,10 @@ export function RexonanceSaga() {
                   <li key={point}>{point}</li>
                 ))}
               </ul>
+              {/* ZENITH (rx15): the form's code, outlined and huge. */}
+              <i className="rzn-form-code" aria-hidden="true">
+                {activeStage.code}
+              </i>
             </div>
           </div>
         </div>
@@ -1305,6 +1467,20 @@ export function RexonanceSaga() {
             一糸乱れず。
           </h2>
         </header>
+
+        {/* ZENITH (rx15): the three, each its own ring, fall into phase. */}
+        <div className="rzn-trinity" aria-hidden="true">
+          {CORE_SYSTEMS.map((system) => (
+            <span key={system.number} className="rzn-tri">
+              <i className="rzn-tri-ring">
+                <b>{system.number}</b>
+              </i>
+            </span>
+          ))}
+          <i className="rzn-tri-wave" />
+          <i className="rzn-tri-core" />
+          <small className="rzn-tri-lock">PHASE LOCK</small>
+        </div>
 
         <div className="rxs-system-grid">
           {CORE_SYSTEMS.map((system) => (
@@ -1347,6 +1523,17 @@ export function RexonanceSaga() {
       </section>
 
       <footer className="rxs-footer">
+        {/* ZENITH (rx15): the suit, finished, stands behind the last line. */}
+        <img
+          className="rzn-end-figure"
+          src={REXONANCE_SUIT_FIGURE}
+          alt=""
+          aria-hidden="true"
+          width={REXONANCE_SUIT_SIZE.width}
+          height={REXONANCE_SUIT_SIZE.height}
+          loading="lazy"
+          decoding="async"
+        />
         {/* RESONANCE (rx11): the last wave, gold — the decision is his. */}
         <span className="rsn-coda" aria-hidden="true">
           <i />
