@@ -1228,7 +1228,14 @@ async function runCase(browser, profileName, scenario) {
         fetches.length >= 2,
         "a failed low atlas can be retried through ordinary Rexonance entry",
       );
-      assert.ok(fetches.some((fetch) => fetch.priority === "high" && fetch.error === null));
+      const failed = fetches.find((fetch) => fetch.error !== null);
+      const successfulRetry = fetches.find((fetch) => failed && fetch.at > failed.at &&
+        fetch.error === null && fetch.bodyDoneAt !== null && fetch.bodyError === null);
+      assert.ok(successfulRetry, "the failed body is followed by a fully received retry");
+      // Current main also preloads the destination page after the suit. It
+      // can repair the failed atlas at low priority before the entry tap;
+      // that is a real successful retry, not a high-priority intent failure.
+      result.retryPriority = successfulRetry.priority;
       result.retryFetches = fetches;
       if (scenario === "failure-pending-retry") {
         const gold = await page.evaluate(
