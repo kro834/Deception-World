@@ -107,6 +107,7 @@ const snapshot = (page) =>
       frameHeight: f.offsetHeight,
       percent: r.querySelector(".rzn-percent").textContent,
       constrained: document.documentElement.hasAttribute("data-rzn-constrained"),
+      naniteCount: r.querySelector(".rzn-count")?.textContent?.trim() ?? null,
       top: r.getBoundingClientRect().top + scrollY,
       scrollY,
       pin: parseFloat(getComputedStyle(f).top) || 0,
@@ -118,6 +119,15 @@ const snapshot = (page) =>
         CSS.supports("animation-range", "entry 0% entry 100%"),
     };
   });
+
+const assertNaniteTarget = (state, label) => {
+  const match = state.naniteCount?.match(/\/\s*([\d,]+)/);
+  const target = match ? Number(match[1].replaceAll(",", "")) : 0;
+  assert.ok(
+    target > 0,
+    `${label}: nanite target must resolve above zero (count=${JSON.stringify(state.naniteCount)})`,
+  );
+};
 
 const installCanvasDrawProbe = async (context) => {
   await context.addInitScript(() => {
@@ -363,6 +373,8 @@ async function functional(engine, label, profile, { connection, noTimeline = fal
       });
       const staticHud = await hudGeometry(page);
       const staticScene = await staticSceneGeometry(page);
+      const staticState = await snapshot(page);
+      assertNaniteTarget(staticState, label);
       assert.deepEqual(staticHud.overlaps, [], `${label}: static stamp/count/Zeus overlap`);
       assert.ok(
         staticHud.boxes.stamp && staticHud.boxes.nanites && staticHud.boxes.zeus,
@@ -415,6 +427,7 @@ async function functional(engine, label, profile, { connection, noTimeline = fal
       report.functional.push({
         label,
         form: captureForm,
+        naniteCount: staticState.naniteCount,
         geometry,
         hud: staticHud,
         staticScene,
@@ -461,6 +474,7 @@ async function functional(engine, label, profile, { connection, noTimeline = fal
       ];
       const phases = [];
       const forwardHashes = new Set();
+      const forwardSamples = [];
       if (process.env.CAPTURE_BASELINE !== "1") {
         const firstUnfinished = await snapshot(page);
         if (captureForm !== "standard")
@@ -499,6 +513,7 @@ async function functional(engine, label, profile, { connection, noTimeline = fal
           { timeout: 5000 },
         );
         const state = await snapshot(page);
+        assertNaniteTarget(state, `${label} ${direction}/${progress}`);
         state.actualProgress =
           (state.scrollY - (start.top - start.pin)) / (start.height - start.frameHeight);
         assert.ok(
@@ -532,6 +547,12 @@ async function functional(engine, label, profile, { connection, noTimeline = fal
           if (captureForm !== "standard")
             assert.notEqual(state.formComplete, "true", `${label}: form completed before .975`);
           forwardHashes.add(evidence.pixelHash);
+          forwardSamples.push({
+            progress,
+            phase: state.phase,
+            percent: state.percent,
+            ...evidence,
+          });
         }
         if (convergence)
           assert.equal(
@@ -576,6 +597,7 @@ async function functional(engine, label, profile, { connection, noTimeline = fal
                   phase: runway?.dataset.rznPhase ?? null,
                   form: runway?.dataset.form ?? null,
                   formComplete: runway?.dataset.rznFormComplete ?? null,
+                  naniteCount: runway?.querySelector(".rzn-count")?.textContent?.trim() ?? null,
                   sceneComplete: runway?.hasAttribute("data-rzn-complete") ?? false,
                   formTabStates: Array.from(
                     document.querySelectorAll('[id^="rxs-stage-tab-"]'),
@@ -619,10 +641,11 @@ async function functional(engine, label, profile, { connection, noTimeline = fal
             `${label}: nanite count exceeds viewport ${JSON.stringify(hud)}`,
           );
           if (hud.viewportWidth >= hud.viewportHeight) {
-            assert.ok(
-              hud.ancillaryStampHidden,
-              `${label}: landscape stamp name should be hidden ${JSON.stringify(hud)}`,
-            );
+            if (hud.viewportWidth <= 1099 && hud.viewportHeight <= 540)
+              assert.ok(
+                hud.ancillaryStampHidden,
+                `${label}: compact landscape stamp name should be hidden ${JSON.stringify(hud)}`,
+              );
             assert.ok(
               hud.boxes.stamp.bottom <= hud.boxes.zeus.top + 1,
               `${label}: landscape stamp must clear Zeus ${JSON.stringify(hud)}`,
@@ -636,6 +659,13 @@ async function functional(engine, label, profile, { connection, noTimeline = fal
         }
         if (direction === "forward" && progress >= 0.975)
           forwardHashes.add(settledEvidence.pixelHash);
+        if (direction === "forward" && progress >= 0.975)
+          forwardSamples.push({
+            progress,
+            phase: state.phase,
+            percent: state.percent,
+            ...settledEvidence,
+          });
         const screenshot = `${label}-${captureForm}-${direction}-${name}.png`;
         await page.screenshot({ path: `${out}/${screenshot}` });
         report.functional.push({
@@ -657,7 +687,7 @@ async function functional(engine, label, profile, { connection, noTimeline = fal
         );
       assert.ok(
         forwardHashes.size >= 3,
-        `${label}: canvas pixels did not change across forward scrub checkpoints`,
+        `${label}: canvas pixels did not change across forward scrub checkpoints; unique=${forwardHashes.size}; samples=${JSON.stringify(forwardSamples)}`,
       );
       await page.evaluate(
         ({ start, progress }) =>

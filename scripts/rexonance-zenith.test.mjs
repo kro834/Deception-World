@@ -156,6 +156,8 @@ test("browser QA captures the requested viewports and both directions with canva
   assert.match(browserHarness, /direction: "forward", progress: 0\.975, name: "form-complete"/);
   assert.match(browserHarness, /dataset\.rznFormComplete === "true"/);
   assert.match(browserHarness, /CanvasRenderingContext2D\.prototype\.drawImage/);
+  assert.match(browserHarness, /nanite target must resolve above zero/);
+  assert.match(browserHarness, /r\.querySelector\("\.rzn-count"\)/);
   assert.match(browserHarness, /alphaPixels/);
   assert.match(browserHarness, /pixelHash/);
   assert.match(browserHarness, /reduced-motion-static\.png/);
