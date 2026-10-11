@@ -1247,6 +1247,12 @@ const seamField = async (width, blur) => {
 const seamLine = await seamField(2.6, 0);
 const seamGlow = await seamField(9, 5);
 const suit = Buffer.alloc(N * 3);
+// The compound eyes' frame: the V's outline (a ring) and its inside.
+const eyeGlass = await rasterise([FACE_GLOW], 0, 0.6);
+const eyeRim = await (async () => {
+  const outer = await rasterise([FACE_GLOW], 3.2, 0.5);
+  return Float32Array.from(outer, (v, i) => Math.max(0, Math.min(1, v - eyeGlass[i] * 0.85)));
+})();
 // Owner, 2026-10-11: the bare body before the armour has its own detail —
 // no ornament, but a muscle-fibre grain running the way each muscle runs
 // (pecs fanning to the armpit, deltoids from the shoulder, the arms along
@@ -1327,12 +1333,16 @@ for (let i = 0; i < N; i += 1) {
     const value = base[c] * grain * volume + edge * rim[c] * 0.36 + seam * CYAN[c];
     suit[i * 3 + c] = Math.round(Math.min(255, value));
   }
-  // The face: only its lights (the cyan and pink V), lit.
-  const g = glow[i];
-  // (Not the helmet's gold that edges the V in the art.)
-  if (g && !(rgb[i * 3] > rgb[i * 3 + 2] * 1.2 && rgb[i * 3 + 1] > rgb[i * 3 + 2] * 1.02)) {
-    for (let c = 0; c < 3; c += 1)
-      suit[i * 3 + c] = Math.round(suit[i * 3 + c] * (1 - g) + rgb[i * 3 + c] * g);
+  // The face (owner, 2026-10-11): only the compound eyes' frame — neither
+  // formed nor lit: a thin steel rim round the V, its inside dark glass.
+  const frame = eyeRim[i];
+  const glass = eyeGlass[i];
+  if (frame || glass) {
+    const steel = [88, 102, 120];
+    for (let c = 0; c < 3; c += 1) {
+      const dark = suit[i * 3 + c] * (1 - glass * 0.55);
+      suit[i * 3 + c] = Math.round(dark * (1 - frame) + steel[c] * frame);
+    }
   }
 }
 const UNDERSUIT = await writeWebp(

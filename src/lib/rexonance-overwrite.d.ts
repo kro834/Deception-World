@@ -6,6 +6,7 @@ export interface RexonanceOverwritePlan {
   height: number;
   key: Float32Array;
   extra: Uint8Array;
+  gone: Uint8Array;
   flight: Float32Array;
 }
 export function planOverwrite(options: {

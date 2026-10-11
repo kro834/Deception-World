@@ -62,7 +62,8 @@ const STAGES: Record<
     image: string;
     alt: string;
     title: string;
-    lede: string;
+    /** One paragraph, or several (EXCELSIOR's 概要). */
+    lede: string | readonly string[];
     points: readonly string[];
     accent: string;
   }
@@ -100,16 +101,17 @@ const STAGES: Record<
     points: ["単一実在収束", "SCALER《ULTRA》", "60秒間の最上位状態"],
     accent: "#ff72da",
   },
-  // Owner (2026-10-11): above ULTRA, also 60 s. Its copy is the owner's to
-  // write; until then only what the owner has said (no lede).
+  // Owner (2026-10-11/12): above ULTRA, also 60 s. The lede is a summary
+  // of the owner's 概要, as the owner asked ("説明は端折って要約した物を").
   excelsior: {
     label: "エクセルシア",
     code: "EXCELSIOR 60s",
     image: REXONANCE_SITE_ARTWORK.excelsior,
     alt: "仮面ライダーレクソナンスサーガ・エクセルシアの全身ビジュアル",
-    title: "レクソナンスサーガ・エクセルシア",
-    lede: "",
-    points: ["ULTRAの上位形態", "60秒間"],
+    // Zero-width markers (renderStageTitle → <wbr />) only: it breaks at its words.
+    title: "仮面ライダー\u200Bレクソナンスサーガ・\u200Bエクセルシア",
+    lede: "レクソナンスサーガの《超自己進化》が生んだ新たな構造を、REALMSの科学者『フェイブル』が独立した強化形態として完成させた、ウルトラを超える到達点。最大稼働時間は同じく60秒間。",
+    points: ["《超自己進化》", "フェイブルの技術", "最大稼働時間60秒間"],
     accent: "#7dffb8",
   },
 };
@@ -604,18 +606,18 @@ function FormMorph({
           : [
               // EXCELSIOR: from MAX to ULTRA, then its own nanites (prism
               // shards, coming down from the crown) add its decoration.
-              ...(from === "ultra"
-                ? []
-                : from === "standard"
+              ...(from === "standard"
+                ? ([
+                    { a: "panel:standard", b: "panel:max", ms: 360, tone: FORM_TONES.max },
+                    { a: "panel:max", b: "panel:ultra", ms: 460, tone: FORM_TONES.ultra },
+                  ] as Step[])
+                : from === "max"
                   ? ([
-                      { a: "panel:standard", b: "suit:max", ms: 360, tone: FORM_TONES.max },
-                      { a: "suit:max", b: "suit:ultra", ms: 460, tone: FORM_TONES.ultra },
+                      { a: "panel:max", b: "panel:ultra", ms: 460, tone: FORM_TONES.ultra },
                     ] as Step[])
-                  : ([
-                      { a: panel(from), b: "suit:ultra", ms: 460, tone: FORM_TONES.ultra },
-                    ] as Step[])),
+                  : []),
               {
-                a: from === "ultra" ? "panel:ultra" : "suit:ultra",
+                a: "panel:ultra",
                 b: "panel:excelsior",
                 ms: FORM_CHANGE_MS.excelsior,
                 extra: "difference",
@@ -1785,7 +1787,12 @@ export function RexonanceSaga() {
                 <div key={`${stage}-copy`}>
                   <small>{activeStage.code}</small>
                   <h3>{renderStageTitle(activeStage.title)}</h3>
-                  {activeStage.lede ? <p>{renderStageLede(activeStage.lede)}</p> : null}
+                  {(typeof activeStage.lede === "string"
+                    ? [activeStage.lede]
+                    : activeStage.lede
+                  ).map((paragraph) => (
+                    <p key={paragraph}>{renderStageLede(paragraph)}</p>
+                  ))}
                   <ul>
                     {activeStage.points.map((point) => (
                       <li key={point}>{point}</li>

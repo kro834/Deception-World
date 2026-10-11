@@ -45,6 +45,8 @@ export function planOverwrite({
   const n = cols * rows;
   const key = new Float32Array(n);
   const extra = new Uint8Array(n);
+  // A cell the next form no longer has: its nanites break away as it flips.
+  const gone = new Uint8Array(n);
   const flight = new Float32Array(n * 2);
   const next = random(seed);
   const [ox, oy] = origin;
@@ -70,6 +72,7 @@ export function planOverwrite({
             : (emerald(samples.to, i) && !emerald(samples.from, i)) ||
               samples.to[i + 3] - samples.from[i + 3] > 90;
         extra[index] = added ? 1 : 0;
+        gone[index] = samples.from[i + 3] > 120 && samples.to[i + 3] < 40 ? 1 : 0;
       }
       // Where an extra cell's nanites come from: out from the reactor.
       const angle = Math.atan2(cy - oy, cx - ox) + (next() - 0.5) * 0.9;
@@ -78,7 +81,7 @@ export function planOverwrite({
       flight[index * 2 + 1] = Math.sin(angle) * distance;
     }
   }
-  return { cols, rows, cell, width, height, key, extra, flight };
+  return { cols, rows, cell, width, height, key, extra, gone, flight };
 }
 
 /** Draws the change at `u` (0–1, the overwrite) and `v` (0–1, the extra
@@ -95,7 +98,7 @@ export function drawOverwrite(
   calm = false,
   style = "square",
 ) {
-  const { cols, rows, cell, width, height, key, extra, flight } = plan;
+  const { cols, rows, cell, width, height, key, extra, gone, flight } = plan;
   const hot = 0.08;
   const lead = 0.05;
   context.globalAlpha = 1;
@@ -115,6 +118,9 @@ export function drawOverwrite(
   }
   if (any) {
     context.clip();
+    // The old form's paint is taken away first (the forms differ in shape:
+    // a part the new form does not have is not left standing under it).
+    context.clearRect(0, 0, width, height);
     context.drawImage(to, 0, 0, width, height);
   }
   context.restore();
@@ -152,6 +158,25 @@ export function drawOverwrite(
     context.strokeStyle = tone;
     context.lineWidth = Math.max(0.6, cell * 0.06);
     context.stroke();
+  }
+  // The parts that go: their nanites break away outward and fade.
+  if (gone && !calm) {
+    context.beginPath();
+    for (let index = 0; index < key.length; index += 1) {
+      if (!gone[index]) continue;
+      const age = (u - key[index]) / 0.12;
+      if (age <= 0 || age >= 1) continue;
+      const col = index % cols;
+      const row = (index - col) / cols;
+      const size = cell * 0.5 * (1 - age);
+      const x = (col + 0.5) * cell - flight[index * 2] * age - size / 2;
+      const y = (row + 0.5) * cell - flight[index * 2 + 1] * age - size / 2;
+      context.rect(x, y, size, size);
+    }
+    context.globalAlpha = 0.7;
+    context.fillStyle = tone;
+    context.fill();
+    context.globalAlpha = 1;
   }
   // EXCELSIOR's nanites are of another kind: prism shards (emerald and
   // violet diamonds) that spiral in round the reactor and seat edge-on.

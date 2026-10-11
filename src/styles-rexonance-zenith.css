@@ -2478,3 +2478,18 @@ html[data-family="special"]
   grid-template-columns: repeat(4, 1fr);
 }
 
+/* EXCELSIOR's 概要 is several paragraphs (owner, 2026-10-12): they stand
+   apart, and its long title breaks only at its words (its <wbr />). */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  #rxs-stage-panel.rxs-stage-panel
+  > div
+  > p
+  + p {
+  margin-top: 0.75em;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-stage-panel > div > h3 {
+  word-break: keep-all;
+}
