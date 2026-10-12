@@ -90,8 +90,9 @@ const sheet = parse(premiere);
 const callSheet = parse(calls);
 
 const REDUCED = /prefers-reduced-motion:\s*no-preference/;
+// Route-cover gating is local so toggling the shared html flag cannot invalidate this page's subtree.
 const SCROLL_GATE =
-  /^html(?:\[data-ios27-enhanced="true"\])?:not\(\[data-world-effects="economy"\]\):not\(\[data-side-menu-open\]\):not\(\[data-loading\]\):not\(\[data-dialog-open\]\) \.rxs-page\.rxs-page\.rxs-rexonance-page\[data-motion-ready="true"\]/;
+  /^html(?:\[data-ios27-enhanced="true"\])?:not\(\[data-world-effects="economy"\]\):not\(\[data-side-menu-open\]\):not\(\[data-dialog-open\]\) \.rxs-page\.rxs-page\.rxs-rexonance-page:not\(\[data-route-covered\]\)\[data-motion-ready="true"\]/;
 const TIME_GATE = /^html:not\(\[data-world-effects="economy"\]\)/;
 const moves = (body) => {
   const animation = declaration(body, "animation") ?? declaration(body, "animation-name");
@@ -212,7 +213,7 @@ test("time-based motion is gated by reduced motion and economy, finite and quick
     for (const part of splitTopLevel(selector)) {
       assert.match(part, TIME_GATE, part);
       if (/\.rxs-hero\b|\.rxs-hero-|\.rxs-aperture|\.rxs-scroll-cue|\.rxp-ring/.test(part)) {
-        assert.match(part, /:not\(\[data-loading\]\)/, part);
+        assert.match(part, /:not\(\[data-route-covered\]\)/, part);
       }
     }
     const animation = declaration(body, "animation");
@@ -252,7 +253,7 @@ test("scroll-linked motion runs on named timelines behind the full gate", () => 
         // The iris joins the motion sheet's recede, the only anonymous view.
         assert.match(
           part,
-          /:not\(\[data-loading\]\) \.rxs-page\.rxs-page\.rxs-rexonance-page\[data-motion-ready="true"\]/,
+          /\.rxs-page\.rxs-page\.rxs-rexonance-page:not\(\[data-route-covered\]\)\[data-motion-ready="true"\]/,
         );
         assert.deepEqual(timelines, ["auto", "view(block)"]);
         assert.match(declaration(body, "animation"), /mx-recede linear both/);
@@ -287,7 +288,7 @@ test("economy rendering, scroll locks and first paint rest drawn", () => {
   ]) {
     assert.ok(calm.includes(target), target);
   }
-  for (const flag of ["data-side-menu-open", "data-dialog-open", "data-loading"]) {
+  for (const flag of ["data-side-menu-open", "data-dialog-open"]) {
     const rest = sheet.rules.find(
       ({ selector, body }) => selector.startsWith(`html[${flag}]`) && body === "animation: none;",
     );
@@ -295,6 +296,11 @@ test("economy rendering, scroll locks and first paint rest drawn", () => {
     for (const part of splitTopLevel(rest.selector))
       assert.match(part, new RegExp(`^html\\[${flag}\\] `));
   }
+  const coveredRest = sheet.rules.find(
+    ({ selector, body }) => selector.includes("[data-route-covered]") && body === "animation: none;",
+  );
+  assert.ok(coveredRest, "covered Rexonance pages rest without a document-wide CSS gate");
+  assert.doesNotMatch(premiere, /data-loading/);
   assert.ok(
     sheet.rules.some(
       ({ selector, body }) =>

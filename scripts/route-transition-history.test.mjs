@@ -156,6 +156,11 @@ function mount(
   });
   const root = {
     dataset: {},
+    setAttribute(name, value) {
+      this.dataset[
+        name.slice(5).replace(/-([a-z])/g, (_, character) => character.toUpperCase())
+      ] = String(value);
+    },
     removeAttribute(name) {
       delete this.dataset[
         name.slice(5).replace(/-([a-z])/g, (_, character) => character.toUpperCase())
@@ -254,6 +259,8 @@ function mount(
       if (name === "@/lib/route-warmup-deadline") return { preloadRouteWithDeadline };
       if (name === "@/lib/rexonance-calls")
         return { REXONANCE_ENTRY_TIMINGS, REXONANCE_SUIT_LATE_MS: 300 };
+      if (name === "@/lib/rexonance-route-cover")
+        return { syncRexonanceRouteCover: () => undefined };
       if (name === "@/lib/rexonance-entry-preparation") return entryPreparation;
       // Most cases keep layers cold. Prepared-layer cases exercise the
       // bounded plan wait; explicit warmSuit cases hold the real decoder wait.

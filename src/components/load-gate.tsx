@@ -25,6 +25,7 @@ import {
   type RexonanceTransitionRenderer,
 } from "@/lib/rexonance-transition-loader";
 import { REXONANCE_ENTRY_TIMINGS, REXONANCE_SUIT_LATE_MS } from "@/lib/rexonance-calls";
+import { syncRexonanceRouteCover } from "@/lib/rexonance-route-cover";
 import { prepareRexonanceEntry } from "@/lib/rexonance-entry-preparation";
 import {
   isRexonanceSuitReady,
@@ -950,6 +951,10 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
   // scrollbar gutter, and the Zeus button waits for the page's entrance.
   const markRouteCover = useCallback((state: "covering" | "revealing" | "settling" | null) => {
     const root = document.documentElement;
+    syncRexonanceRouteCover(
+      document.querySelector("main.rxs-page.rxs-rexonance-page"),
+      root,
+    );
     window.clearTimeout(arrivalTimer.current);
     if (state === null) {
       delete root.dataset.routeCover;
@@ -961,6 +966,14 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
         if (root.dataset.routeCover === "settling") delete root.dataset.routeCover;
       }, 260);
     }
+  }, []);
+
+  const setDocumentLoading = useCallback((loading: boolean) => {
+    const root = document.documentElement;
+    // Startup/lower-page guards read the literal "true", not just presence.
+    if (loading) root.setAttribute("data-loading", "true");
+    else root.removeAttribute("data-loading");
+    syncRexonanceRouteCover(document.querySelector("main.rxs-page.rxs-rexonance-page"), root);
   }, []);
 
   const finishOpeningHandoff = useCallback((token: number, restoreFocus = true) => {
@@ -976,7 +989,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
     runtime.animation.resolve(undefined);
     openingHandoff.current = null;
     setOpeningSnapshot(null);
-    document.documentElement.removeAttribute("data-loading");
+    setDocumentLoading(false);
     dispatchOpeningHandoffState(false);
     busy.current = false;
 
@@ -1006,7 +1019,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
       openingFocusFrames.current.push(secondFrame);
     });
     openingFocusFrames.current.push(firstFrame);
-  }, []);
+  }, [setDocumentLoading]);
 
   const beginOpeningHandoff = useCallback((source: OpeningHandoffSource) => {
     if (busy.current || openingHandoff.current) return false;
@@ -1020,11 +1033,11 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
       animation: createDeferred<void>(),
     };
     openingHandoff.current = runtime;
-    document.documentElement.dataset.loading = "true";
+    setDocumentLoading(true);
     dispatchOpeningHandoffState(true);
     setOpeningSnapshot({ token, phase: "covering", source });
     return true;
-  }, []);
+  }, [setDocumentLoading]);
 
   const notifyOpeningHandoffCovered = useCallback((token: number) => {
     const runtime = openingHandoff.current;
@@ -1080,7 +1093,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
       setOpeningSnapshot(null);
       dispatchOpeningHandoffState(false);
       busy.current = false;
-      document.documentElement.removeAttribute("data-loading");
+      setDocumentLoading(false);
       document.documentElement.removeAttribute("data-route-cover");
       setGate({ active: false, percent: 0, variant: "archive", phase: "covering" });
       setSignal("idle");
@@ -1129,12 +1142,12 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
       runtime?.destination.resolve(null);
       runtime?.animation.resolve(undefined);
       openingHandoff.current = null;
-      document.documentElement.removeAttribute("data-loading");
+      setDocumentLoading(false);
       document.documentElement.removeAttribute("data-route-cover");
       dispatchOpeningHandoffState(false);
       busy.current = false;
     };
-  }, [router]);
+  }, [router, setDocumentLoading]);
 
   // A deep link opened from outside the site (/world#manager-archive in a new
   // tab) lands like one followed inside it: in one jump, flush under the
@@ -1219,7 +1232,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
             // The destination now owns document scrolling. Keep the handoff
             // artwork alive for its arrival animation, but release the global
             // loading lock before waiting for that animation to complete.
-            document.documentElement.removeAttribute("data-loading");
+            setDocumentLoading(false);
             // The destination must paint twice before FLIP reads its geometry.
             // This prevents zero-sized target rects during iOS viewport changes.
             await nextFrame();
@@ -1309,7 +1322,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
           const releaseScrollMotion = holdManagedScrollMotion();
           const timings =
             tier === "full" ? { cover: 720, reveal: 1120 } : { cover: 100, reveal: 240 };
-          document.documentElement.dataset.loading = "true";
+          setDocumentLoading(true);
           markRouteCover("covering");
           setGate({
             active: true,
@@ -1330,7 +1343,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
             if (focusDestination) focusRouteDestination(hash);
             await settleUnderCover();
             if (!isCurrent()) return;
-            document.documentElement.removeAttribute("data-loading");
+            setDocumentLoading(false);
             markRouteCover("revealing");
             setGate({
               active: true,
@@ -1343,7 +1356,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
           } finally {
             window.setTimeout(releaseScrollMotion, 360);
             if (isCurrent()) {
-              document.documentElement.removeAttribute("data-loading");
+              setDocumentLoading(false);
               markRouteCover("settling");
               setGate({ active: false, percent: 0, variant: "archive", phase: "covering" });
               busy.current = false;
@@ -1432,7 +1445,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
                   to,
                   callOnly: Boolean(rexonanceCall),
                 });
-          document.documentElement.dataset.loading = "true";
+          setDocumentLoading(true);
           markRouteCover("covering");
           setGate({
             active: true,
@@ -1509,7 +1522,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
             }
             // The shutter lifts: the destination owns scrolling again, and its
             // own entrance (keyed to data-loading) starts with the hand-over.
-            document.documentElement.removeAttribute("data-loading");
+            setDocumentLoading(false);
             markRouteCover("revealing");
             if (!callOnly && landed && (landed.hold || !dockGeometry(landed))) await entranceLead();
             if (!isCurrent()) return;
@@ -1534,7 +1547,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
             window.setTimeout(releaseScrollMotion, 360);
             if (isCurrent()) {
               if (rexonanceTransition.current === requestId) rexonanceTransition.current = null;
-              document.documentElement.removeAttribute("data-loading");
+              setDocumentLoading(false);
               markRouteCover("settling");
               setGate({ active: false, percent: 0, variant: "archive", phase: "covering" });
               busy.current = false;
@@ -1557,7 +1570,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
             assets,
             to,
           });
-          document.documentElement.dataset.loading = "true";
+          setDocumentLoading(true);
           markRouteCover("covering");
           setGate({ active: true, percent: 0, variant: "zeus", phase: "covering", scene });
           try {
@@ -1574,7 +1587,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
             await settleUnderCover();
             if (!isCurrent()) return;
             const landed = { ...scene, ...landingRects() };
-            document.documentElement.removeAttribute("data-loading");
+            setDocumentLoading(false);
             markRouteCover("revealing");
             await entranceLead();
             if (!isCurrent()) return;
@@ -1588,7 +1601,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
             await revealRan(timings.reveal);
           } finally {
             if (isCurrent()) {
-              document.documentElement.removeAttribute("data-loading");
+              setDocumentLoading(false);
               markRouteCover("settling");
               setGate({ active: false, percent: 0, variant: "archive", phase: "covering" });
               busy.current = false;
@@ -1607,7 +1620,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
           to,
         });
         let progressTimer = 0;
-        document.documentElement.dataset.loading = "true";
+        setDocumentLoading(true);
         markRouteCover("covering");
         setGate({ active: true, percent: 4, variant: "archive", phase: "covering", scene });
         try {
@@ -1633,14 +1646,14 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
           if (focusDestination) focusRouteDestination(hash);
           await settleUnderCover();
           if (!isCurrent()) return;
-          document.documentElement.removeAttribute("data-loading");
+          setDocumentLoading(false);
           markRouteCover("revealing");
           setGate({ active: true, percent: 100, variant: "archive", phase: "revealing", scene });
           await revealRan(timings.reveal);
         } finally {
           if (progressTimer) window.clearInterval(progressTimer);
           if (isCurrent()) {
-            document.documentElement.removeAttribute("data-loading");
+            setDocumentLoading(false);
             markRouteCover("settling");
             setGate({ active: false, percent: 0, variant: "archive", phase: "covering" });
             busy.current = false;
@@ -1658,6 +1671,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
       navigate,
       pathname,
       router,
+      setDocumentLoading,
     ],
   );
 

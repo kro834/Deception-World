@@ -539,7 +539,8 @@ test("Dream Chapter navigation has a dedicated loading transition", () => {
     "the loading transition must respect reduced motion",
   );
   assert.match(loadGateSource, /preloadRoute/);
-  assert.match(loadGateSource, /document\.documentElement\.dataset\.loading/);
+  // Dream keeps the global CSS gate's literal loading value contract.
+  assert.match(loadGateSource, /root\.setAttribute\("data-loading",\s*"true"\)/);
 });
 
 test("all Dream Chapter pickup and poster controls use the shared Liquid Glass interaction", () => {

@@ -790,6 +790,21 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-fo
   }
 }
 
+/* These already-clipped, viewport-sized cuts can defer their contents without
+   estimating a section or changing the sticky containing block. Short screens
+   retain natural content sizing; the anchor, stack and spacer stay uncontained. */
+@media (prefers-reduced-motion: no-preference) and (min-height: 700px) {
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > #performance
+    .rxs-headline-metrics
+    > article {
+    content-visibility: auto;
+    contain-intrinsic-block-size: auto 0px;
+  }
+}
+
 /* The figure grows into the held frame (its field is sized from it). */
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #performance .rxs-headline-metrics {
   --rsn-figure-size: clamp(110px, 15.5vw, 252px);
@@ -1009,11 +1024,9 @@ html[data-family="special"]
     /* ---------- The cold open: layers at their own rates ---------- */
     /* Desktop: the stage holds the screen while 01 and 02 run beside it,
        so the layers drift through the hero's whole held range. */
-    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
       body
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       .rxs-hero-visual
       > .rsn-depth
       > i {
@@ -1024,99 +1037,81 @@ html[data-family="special"]
       animation-range: contain 0% contain 100%;
     }
 
-    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
       body
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       .rxs-hero-visual
       > .rsn-depth
       > .rsn-shaft {
       animation-name: rsn-shaft-a;
     }
 
-    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
       body
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       .rxs-hero-visual
       > .rsn-depth
       > .rsn-shaft:nth-child(2) {
       animation-name: rsn-shaft-b;
     }
 
-    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
       body
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       .rxs-hero-visual
       > .rsn-depth
       > .rsn-shaft:nth-child(3) {
       animation-name: rsn-shaft-c;
     }
 
-    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
       body
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       .rxs-hero-visual
       > .rsn-depth
       > .rsn-wave {
       animation-name: rsn-wave-1;
     }
 
-    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
       body
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       .rxs-hero-visual
       > .rsn-depth
       > .rsn-wave:nth-child(5) {
       animation-name: rsn-wave-2;
     }
 
-    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
       body
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       .rxs-hero-visual
       > .rsn-depth
       > .rsn-wave:nth-child(6) {
       animation-name: rsn-wave-3;
     }
 
-    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
       body
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       .rxs-hero-visual
       > .rsn-depth
       > .rsn-burst {
       animation-name: none;
     }
 
-    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
       body
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       .rxs-hero-visual
       > .rsn-depth
       > .rsn-shard {
       animation-name: rsn-shard-a;
     }
 
-    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
       body
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       .rxs-hero-visual
       > .rsn-depth
       > .rsn-shard:nth-child(2n) {
@@ -1126,11 +1121,9 @@ html[data-family="special"]
     /* The camera pushes in on the armour while it holds the stage; the
        arrival's iris and the motion sheet's recede keep their places in
        the list (the recede on the image's own, now named, timeline). */
-    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
       body
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       .rxs-hero-visual
       > img {
       animation:
@@ -1151,9 +1144,9 @@ html[data-family="special"]
     @media (min-width: 1100px) {
       html[data-family="special"]:not([data-world-effects="economy"]):not(
           [data-side-menu-open]
-        ):not([data-loading]):not([data-dialog-open])
+        ):not([data-dialog-open])
         body
-        .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+        .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
         .rxs-hero-visual
         > .rsn-depth
         > .rsn-wave:nth-child(n) {
@@ -1166,9 +1159,9 @@ html[data-family="special"]
     @media (max-width: 1099.98px) {
       html[data-family="special"]:not([data-world-effects="economy"]):not(
           [data-side-menu-open]
-        ):not([data-loading]):not([data-dialog-open])
+        ):not([data-dialog-open])
         body
-        .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+        .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
         .rxs-hero-visual
         > .rsn-depth
         > i {
@@ -1177,9 +1170,9 @@ html[data-family="special"]
 
       html[data-family="special"]:not([data-world-effects="economy"]):not(
           [data-side-menu-open]
-        ):not([data-loading]):not([data-dialog-open])
+        ):not([data-dialog-open])
         body
-        .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+        .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
         .rxs-hero-visual
         > img {
         animation-range:
@@ -1190,11 +1183,9 @@ html[data-family="special"]
     }
 
     /* ---------- Chapters: the prism line and the numeral ---------- */
-    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
       body
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       > .rxs-section::before {
       transform-origin: 0 50%;
       animation-name: rsn-draw;
@@ -1205,11 +1196,9 @@ html[data-family="special"]
       animation-range: entry 5% entry 55%;
     }
 
-    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
       body
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       > .rxs-section
       > .rxs-section-heading::after {
       animation-name: rsn-emit;
@@ -1221,11 +1210,9 @@ html[data-family="special"]
     }
 
     /* The chapter title is cut in from depth and settles. */
-    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
       body
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       > .rxs-section
       > .rxs-section-heading
       > h2 {
@@ -1241,11 +1228,9 @@ html[data-family="special"]
     /* ---------- 01: the cuts arrive, hold, and give way ---------- */
     /* Forwards fill: before its range the figure rests in place, so a
        clipping audit of a cut not yet reached reads it whole. */
-    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
       body
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       > #performance
       .rxs-headline-metrics
       article
@@ -1259,11 +1244,9 @@ html[data-family="special"]
       animation-range: entry 25% entry 100%;
     }
 
-    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
       body
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       > #performance
       .rxs-headline-metrics
       article::before {
@@ -1275,11 +1258,9 @@ html[data-family="special"]
       animation-range: entry 0% entry 60%;
     }
 
-    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
       body
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       > #performance
       .rxs-headline-metrics
       article
@@ -1293,11 +1274,9 @@ html[data-family="special"]
       animation-range: entry 30% entry 100%;
     }
 
-    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
       body
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       > #performance
       .rxs-headline-metrics
       article
@@ -1306,11 +1285,9 @@ html[data-family="special"]
       animation-range: entry 40% entry 100%;
     }
 
-    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
       body
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       > #performance
       .rxs-headline-metrics
       article
@@ -1321,11 +1298,9 @@ html[data-family="special"]
 
     /* The held cut gives way: as the next one slides over it, it sinks
        back into the dark (the whole card: its figure stays inside it). */
-    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
       body
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       > #performance
       .rxs-headline-metrics
       > article:first-child {
@@ -1339,11 +1314,9 @@ html[data-family="special"]
     }
 
     /* The instruments rise into place on their own timelines. */
-    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
       body
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       :is(.rxs-comparison, .rxs-p14-comparator).rxs-reveal {
       animation-name: rsn-plate-in;
       animation-duration: auto;
@@ -1363,11 +1336,9 @@ html[data-family="special"]
       view-timeline: --rsn-row block;
     }
 
-    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
       body
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       > #performance
       .rxs-comparison-metrics
       .rxs-bars {
@@ -1381,11 +1352,9 @@ html[data-family="special"]
     }
 
     /* ---------- 02: the chip turns in 3-D and catches the light ---------- */
-    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
       body
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       .rxs-p14-overview
       figure {
       transform-origin: 50% 70%;
@@ -1397,11 +1366,9 @@ html[data-family="special"]
       animation-range: entry 0% exit 100%;
     }
 
-    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
       body
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       .rxs-p14-overview
       figure
       > .rsn-glint {
@@ -1413,11 +1380,9 @@ html[data-family="special"]
       animation-range: entry 35% cover 52%;
     }
 
-    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
       body
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       .rxs-p14-overview::before {
       animation-name: rsn-ring-out;
       animation-duration: auto;
@@ -1428,11 +1393,9 @@ html[data-family="special"]
     }
 
     /* ---------- 04: the core rings out between the facets ---------- */
-    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
       body
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       > #system
       .rxs-system-grid::before {
       animation-name: rsn-core-open;
@@ -1444,11 +1407,9 @@ html[data-family="special"]
     }
 
     /* ---------- The end card: the last wave ---------- */
-    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
       body
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       > .rxs-footer
       > .rsn-coda
       > i {
@@ -1460,22 +1421,18 @@ html[data-family="special"]
       animation-range: entry 0% entry 80%;
     }
 
-    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
       body
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       > .rxs-footer
       > .rsn-coda
       > i:nth-child(2) {
       animation-range: entry 10% entry 90%;
     }
 
-    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
       body
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       > .rxs-footer
       > .rsn-coda
       > i:nth-child(3) {
@@ -1582,22 +1539,18 @@ html[data-family="special"]
 
 @media (prefers-reduced-motion: no-preference) {
   /* The lock: the counter punches once from depth and settles. */
-  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-      [data-loading]
-    ):not([data-dialog-open])
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
     body
-    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
     [data-rsn-count][data-rsn-state="lock"]
     > .rsn-count {
     animation: rsn-punch 520ms var(--rsn-hit) both;
   }
 
   /* While the figure counts, its field draws in (the charge)... */
-  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-      [data-loading]
-    ):not([data-dialog-open])
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
     body
-    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
     .rxs-headline-metrics
     article
     > strong[data-rsn-state="count"]
@@ -1608,11 +1561,9 @@ html[data-family="special"]
 
   /* ...and on the lock it bursts once from the figure: a white ring flies out,
      the field shudders outward and settles, a streak crosses the frame. */
-  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-      [data-loading]
-    ):not([data-dialog-open])
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
     body
-    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
     .rxs-headline-metrics
     article[data-rsn-hit]
     > .rsn-field
@@ -1620,11 +1571,9 @@ html[data-family="special"]
     animation: rsn-burst 1100ms var(--rsn-out) both;
   }
 
-  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-      [data-loading]
-    ):not([data-dialog-open])
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
     body
-    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
     .rxs-headline-metrics
     article[data-rsn-hit]
     > .rsn-field {
@@ -1632,11 +1581,9 @@ html[data-family="special"]
     animation: rsn-shock 760ms var(--rsn-hit) both;
   }
 
-  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-      [data-loading]
-    ):not([data-dialog-open])
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
     body
-    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
     .rxs-headline-metrics
     article[data-rsn-hit]
     > .rsn-field::after {
@@ -1644,44 +1591,36 @@ html[data-family="special"]
   }
 
   /* The readouts and the processors light their own rule. */
-  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-      [data-loading]
-    ):not([data-dialog-open])
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
     body
-    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
     :is(.rxs-p14-copy dl > div, .rxs-specs > div)[data-rsn-hit]::after {
     animation: rsn-tick 900ms var(--rsn-out) both;
   }
 
   /* The cold open's hit: once the cover has handed over and the figure
      stands, the core bursts and the title catches one refraction band. */
-  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-      [data-loading]
-    ):not([data-dialog-open])
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
     body
-    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"][data-rsn-arrive]
+    .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"][data-rsn-arrive]
     .rxs-hero-visual
     > .rsn-depth
     > .rsn-burst {
     animation: rsn-core-burst-a 1300ms var(--rsn-out) 820ms both;
   }
 
-  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-      [data-loading]
-    ):not([data-dialog-open])
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
     body
-    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"][data-rsn-arrive]
+    .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"][data-rsn-arrive]
     .rxs-hero-visual
     > .rsn-depth
     > .rsn-burst:nth-child(8) {
     animation-delay: 980ms;
   }
 
-  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-      [data-loading]
-    ):not([data-dialog-open])
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
     body
-    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"][data-rsn-arrive]
+    .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"][data-rsn-arrive]
     > .rxs-hero
     h1::after {
     animation: rsn-title-sweep 900ms var(--rsn-snap) 900ms both;
@@ -1690,11 +1629,9 @@ html[data-family="special"]
   /* 03: the transformation. The form's light rings out from its core,
      one refraction band crosses it and the figure rises from depth and
      settles, timed to the card's entrance (the rest guard's delay). */
-  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-      [data-loading]
-    ):not([data-dialog-open])
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
     body
-    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
     #rxs-stage-panel[data-entrance][data-rsn-form]
     figure
     > .rsn-form
@@ -1702,11 +1639,9 @@ html[data-family="special"]
     animation: rsn-form-ring 980ms var(--rsn-out) var(--rxp-entrance-delay, 0ms) both;
   }
 
-  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-      [data-loading]
-    ):not([data-dialog-open])
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
     body
-    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
     #rxs-stage-panel[data-entrance][data-rsn-form]
     figure
     > .rsn-form
@@ -1714,11 +1649,9 @@ html[data-family="special"]
     animation-delay: calc(var(--rxp-entrance-delay, 0ms) + 110ms);
   }
 
-  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-      [data-loading]
-    ):not([data-dialog-open])
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
     body
-    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
     #rxs-stage-panel[data-entrance][data-rsn-form]
     figure
     > .rsn-form
@@ -1726,11 +1659,9 @@ html[data-family="special"]
     animation-delay: calc(var(--rxp-entrance-delay, 0ms) + 220ms);
   }
 
-  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-      [data-loading]
-    ):not([data-dialog-open])
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
     body
-    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
     #rxs-stage-panel[data-entrance][data-rsn-form]
     figure
     > .rsn-form
@@ -1742,11 +1673,9 @@ html[data-family="special"]
      composes with the motion sheet's scroll settle (scale) on the same
      image, which keeps its place in the list. A quiet change never dims
      the art (the rest guard's flash budget). */
-  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-      [data-loading]
-    ):not([data-dialog-open])
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
     body
-    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
     #rxs-stage-panel[data-entrance="card"][data-rsn-form]
     figure
     > img {
@@ -1757,11 +1686,9 @@ html[data-family="special"]
      copy start the verifies measure, never moves). The Premiere's own
      entrance stays first in the list, so clearing the flag never replays
      it. */
-  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-      [data-loading]
-    ):not([data-dialog-open])
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
     body
-    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
     #rxs-stage-panel[data-entrance="card"][data-rsn-form]
     > div
     > small {
@@ -1771,11 +1698,9 @@ html[data-family="special"]
       rsn-badge 560ms var(--rsn-hit) calc(var(--rxp-entrance-delay, 0ms) + 40ms) both;
   }
 
-  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-      [data-loading]
-    ):not([data-dialog-open])
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
     body
-    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
     #rxs-stage-panel[data-entrance="quiet"][data-rsn-form]
     > div
     > small {
@@ -1789,11 +1714,9 @@ html[data-family="special"]
 /* With scroll timelines the figure's own scroll settle joins the rise. */
 @supports (animation-timeline: view()) and (animation-range: entry 0% entry 100%) {
   @media (prefers-reduced-motion: no-preference) {
-    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
       body
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       #rxs-stage-panel[data-entrance="card"][data-rsn-form]
       figure
       > img {
@@ -1839,11 +1762,9 @@ html[data-family="special"]
    ================================================================ */
 @supports not ((animation-timeline: view()) and (animation-range: entry 0% entry 100%)) {
   @media (prefers-reduced-motion: no-preference) {
-    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
       body
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       > .rxs-section
       > .rxs-section-heading[data-rsn-in]
       > h2 {
@@ -1851,53 +1772,43 @@ html[data-family="special"]
       animation: rsn-cut-in 900ms linear both;
     }
 
-    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
       body
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       > .rxs-section
       > .rxs-section-heading[data-rsn-in]::after {
       animation: rsn-emit 1200ms var(--rsn-out) 200ms both;
     }
 
-    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
       body
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       .rxs-p14-overview[data-rsn-in]
       figure {
       transform-origin: 50% 70%;
       animation: rsn-chip-land 1100ms var(--rsn-out) both;
     }
 
-    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
       body
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       .rxs-p14-overview[data-rsn-in]
       figure
       > .rsn-glint {
       animation: rsn-glint 900ms linear 300ms both;
     }
 
-    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
       body
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       > #system
       .rxs-system-grid[data-rsn-in]::before {
       animation: rsn-core-open 1400ms var(--rsn-out) both;
     }
 
-    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
       body
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       > .rxs-footer[data-rsn-in]
       > .rsn-coda
       > i {

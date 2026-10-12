@@ -50,6 +50,7 @@ import { REXONANCE_SITE_ARTWORK } from "@/lib/rexonance-site-artwork";
 import { supportsIOS27Enhancements } from "@/lib/rendering-profile";
 import { warmRexonanceStages } from "@/lib/warm-rexonance-stages";
 import { mountLocalNavCurrent } from "@/lib/local-nav-current";
+import { syncRexonanceRouteCover } from "@/lib/rexonance-route-cover";
 
 type P14Baseline = "p1" | "p2";
 type PerformanceBaseline = "vertex" | "vinculum" | "extreme";
@@ -1223,6 +1224,10 @@ export function RexonanceSaga() {
   const stageCallStartedAt = useRef(0);
   const stageCallExitedAt = useRef(Number.NEGATIVE_INFINITY);
   const pageRef = useRef<HTMLElement | null>(null);
+  const setPageRef = useCallback((page: HTMLElement | null) => {
+    pageRef.current = page;
+    syncRexonanceRouteCover(page);
+  }, []);
   const stageTabsRef = useRef<HTMLDivElement | null>(null);
   const activeStage = STAGES[stage];
 
@@ -1524,7 +1529,7 @@ export function RexonanceSaga() {
 
   return (
     <main
-      ref={pageRef}
+      ref={setPageRef}
       id="top"
       className="rxs-page rxs-rexonance-page"
       data-motion-ready={motionReady ? "true" : "false"}

@@ -1908,11 +1908,9 @@ html[data-family="special"]
    ================================================================ */
 @supports (animation-timeline: view()) and (animation-range: entry 0% entry 100%) {
   @media (prefers-reduced-motion: no-preference) {
-    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
       body
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       > #performance
       .rxs-headline-metrics
       > article
@@ -1923,11 +1921,9 @@ html[data-family="special"]
       animation-range: entry 30% entry 100%;
     }
 
-    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
-        [data-loading]
-      ):not([data-dialog-open])
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
       body
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       > #performance
       .rxs-headline-metrics
       > article.rxs-reveal {

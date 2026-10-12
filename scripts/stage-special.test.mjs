@@ -129,7 +129,8 @@ test("motion is transform and opacity only, finite, and fully gated", async () =
         `${path}: ${rule.trim().slice(0, 80)}`,
       );
       assert.match(rule, /:not\(\[data-side-menu-open\]\)/, path);
-      assert.match(rule, /:not\(\s*\[data-loading\]\s*\)/, path);
+      // Rexonance mirrors the same loading lock locally; other trailers retain the root gate.
+      assert.match(rule, path === SHEETS.rexonance ? /:not\(\[data-route-covered\]\)/ : /:not\(\s*\[data-loading\]\s*\)/, path);
       assert.match(rule, /:not\(\[data-dialog-open\]\)/, path);
       const opened = before.lastIndexOf("@media (prefers-reduced-motion: no-preference)");
       assert.ok(

@@ -108,7 +108,13 @@ const REDUCED = /prefers-reduced-motion:\s*no-preference/;
 const SUPPORTS =
   /^@supports \(animation-timeline: view\(\)\) and \(animation-range: entry 0% entry 100%\)$/;
 const FULL_GATE =
-  /^html\[data-family="special"\]:not\(\[data-world-effects="economy"\]\):not\(\[data-side-menu-open\]\):not\(\[data-loading\]\):not\(\[data-dialog-open\]\) body \.rxs-page\.rxs-page\.rxs-rexonance-page/;
+  /^html\[data-family="special"\]:not\(\[data-world-effects="economy"\]\):not\(\[data-side-menu-open\]\):not\(\[data-dialog-open\]\) body \.rxs-page\.rxs-page\.rxs-rexonance-page:not\(\[data-route-covered\]\)/;
+
+test("loading gates are local to the Rexonance page, not the document root", () => {
+  assert.doesNotMatch(css, /data-loading/);
+  assert.match(css, /\.rxs-page\.rxs-page\.rxs-rexonance-page\[data-motion-ready="true"\]/);
+});
+
 const moves = (body) => {
   const animation = declaration(body, "animation") ?? declaration(body, "animation-name");
   return Boolean(animation) && animation !== "none";
@@ -248,7 +254,7 @@ test("scroll-linked motion rides named timelines behind the full gate", () => {
       if (frames) assert.doesNotMatch(frames, /clip-path|color|background/, name);
     }
   }
-  // Timelines are declared under the persistent flags only.
+  // Timelines are declared under persistent flags and the page-local cover gate.
   for (const { selector, body, context } of sheet.rules) {
     if (!/view-timeline|timeline-scope/.test(body)) continue;
     assert.ok(
@@ -256,6 +262,7 @@ test("scroll-linked motion rides named timelines behind the full gate", () => {
       selector,
     );
     assert.doesNotMatch(selector, /data-side-menu-open|data-dialog-open|data-loading/);
+    assert.match(selector, /\.rxs-page\.rxs-page\.rxs-rexonance-page\[data-motion-ready="true"\]/);
     assert.match(selector, /:not\(\[data-world-effects="economy"\]\)/);
   }
   // The page's timeline-scope belongs to RESONANCE: ZENITH never redeclares
@@ -327,9 +334,10 @@ test("the pinned runway is a layout of the persistent preferences, never of the 
       selector,
     );
     assert.match(selector, /:not\(\[data-world-effects="economy"\]\)/);
+    // The route-cover marker gates motion only; the runway's sticky geometry stays pinned.
     assert.doesNotMatch(
       selector,
-      /data-side-menu-open|data-dialog-open|data-loading|data-motion-ready|data-rzn-state/,
+      /data-side-menu-open|data-dialog-open|data-loading|data-route-covered|data-motion-ready|data-rzn-state/,
     );
     assert.match(selector, /:not\(\[data-rzn-constrained\]\)/);
   }

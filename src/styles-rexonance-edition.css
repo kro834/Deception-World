@@ -286,8 +286,8 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  html:not([data-world-effects="economy"]):not([data-loading])
-    .rxs-page.rxs-page.rxs-rexonance-page
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])
     .rxs-aperture {
     animation: rx-aperture-lock 1100ms cubic-bezier(0.16, 1, 0.3, 1) both;
   }

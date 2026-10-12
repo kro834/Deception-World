@@ -120,6 +120,9 @@ export const WorldAtmosphere = memo(function WorldAtmosphere() {
     };
     const sync = () => {
       frame = 0;
+      // A covered route keeps its last light; do not force the outgoing
+      // World's entire layout for an invisible chapter-colour decision.
+      if (document.documentElement.hasAttribute("data-loading")) return;
       const positioned = regions.map((region) => ({
         ...region,
         rect: region.element.getBoundingClientRect(),
@@ -146,6 +149,7 @@ export const WorldAtmosphere = memo(function WorldAtmosphere() {
       fadeLight(phase);
     };
     const requestSync = () => {
+      if (document.documentElement.hasAttribute("data-loading")) return;
       if (!frame) frame = window.requestAnimationFrame(sync);
     };
     const measure = () => {

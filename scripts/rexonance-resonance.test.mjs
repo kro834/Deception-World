@@ -678,7 +678,13 @@ const REDUCED = /prefers-reduced-motion:\s*no-preference/;
 const SUPPORTS =
   /^@supports \(animation-timeline: view\(\)\) and \(animation-range: entry 0% entry 100%\)$/;
 const FULL_GATE =
-  /^html\[data-family="special"\]:not\(\[data-world-effects="economy"\]\):not\(\[data-side-menu-open\]\):not\(\[data-loading\]\):not\(\[data-dialog-open\]\) body \.rxs-page\.rxs-page\.rxs-rexonance-page\[data-motion-ready="true"\]/;
+  /^html\[data-family="special"\]:not\(\[data-world-effects="economy"\]\):not\(\[data-side-menu-open\]\):not\(\[data-dialog-open\]\) body \.rxs-page\.rxs-page\.rxs-rexonance-page:not\(\[data-route-covered\]\)\[data-motion-ready="true"\]/;
+
+test("loading gates are local to the Rexonance page, not the document root", () => {
+  assert.doesNotMatch(css, /data-loading/);
+  assert.match(css, /\.rxs-page\.rxs-page\.rxs-rexonance-page\[data-motion-ready="true"\]/);
+});
+
 const moves = (body) => {
   const animation = declaration(body, "animation") ?? declaration(body, "animation-name");
   return Boolean(animation) && animation !== "none";
@@ -863,9 +869,10 @@ test("the pinned cuts are a layout of the persistent preferences, never of the m
   const [{ selector, context }] = sticky;
   assert.ok(context.some((at) => REDUCED.test(at)));
   assert.match(selector, /:not\(\[data-world-effects="economy"\]\)/);
+  // The route-cover marker gates motion only; the pinned cuts must keep their scroll geometry.
   assert.doesNotMatch(
     selector,
-    /data-side-menu-open|data-dialog-open|data-loading|data-motion-ready/,
+    /data-side-menu-open|data-dialog-open|data-loading|data-route-covered|data-motion-ready/,
   );
 });
 

@@ -188,29 +188,29 @@ html[data-world-effects="economy"]
      restore the owner's plate turn. The plate now only fades in; its three
      phases ratchet into place one after another, gold last. Groups move;
      paths never do. */
-  html:not([data-world-effects="economy"]):not([data-loading])
-    .rxs-page.rxs-page.rxs-rexonance-page
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])
     .rxs-aperture {
     animation: rxp-aperture-in 420ms linear both;
   }
 
-  html:not([data-world-effects="economy"]):not([data-loading])
-    .rxs-page.rxs-page.rxs-rexonance-page
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])
     .rxs-aperture-phase {
     transform-box: view-box;
     transform-origin: 360px 360px;
     animation: rxp-phase-ice 360ms steps(4, jump-end) backwards;
   }
 
-  html:not([data-world-effects="economy"]):not([data-loading])
-    .rxs-page.rxs-page.rxs-rexonance-page
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])
     .rxs-aperture-phase.is-violet {
     animation-name: rxp-phase-violet;
     animation-delay: 60ms;
   }
 
-  html:not([data-world-effects="economy"]):not([data-loading])
-    .rxs-page.rxs-page.rxs-rexonance-page
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])
     .rxs-aperture-phase.is-gold {
     animation-name: rxp-phase-gold;
     animation-delay: 120ms;
@@ -218,29 +218,29 @@ html[data-world-effects="economy"]
 
   /* The headline opens through a slit from its centre line: layered, not
      typed. Extreme keeps the typewriter strike. Backwards fill only. */
-  html:not([data-world-effects="economy"]):not([data-loading])
-    .rxs-page.rxs-page.rxs-rexonance-page
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])
     .rxs-hero
     h1 {
     animation: rxp-slit 360ms var(--rxp-strike) 60ms backwards;
   }
 
   /* The lede's two sentences arrive in turn. */
-  html:not([data-world-effects="economy"]):not([data-loading])
-    .rxs-page.rxs-page.rxs-rexonance-page
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])
     .rxs-hero-lede {
     animation: none;
   }
 
-  html:not([data-world-effects="economy"]):not([data-loading])
-    .rxs-page.rxs-page.rxs-rexonance-page
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])
     .rxs-hero-lede-text
     > span {
     animation: rxp-rise-s 360ms var(--rxp-out) 200ms backwards;
   }
 
-  html:not([data-world-effects="economy"]):not([data-loading])
-    .rxs-page.rxs-page.rxs-rexonance-page
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])
     .rxs-hero-lede-text
     > span:nth-child(2) {
     animation-delay: 260ms;
@@ -248,58 +248,58 @@ html[data-world-effects="economy"]
 
   /* The figure resolves inside its aperture, from the plate's centre. It
      starts open by 9%, so the hero image paints from the first frame. */
-  html:not([data-world-effects="economy"]):not([data-loading])
-    .rxs-page.rxs-page.rxs-rexonance-page
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])
     .rxs-hero-visual
     img {
     animation: rxp-iris 900ms var(--rxp-resolve) backwards;
   }
 
   /* The floor draws under a figure that is already standing. */
-  html:not([data-world-effects="economy"]):not([data-loading])
-    .rxs-page.rxs-page.rxs-rexonance-page
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])
     .rxs-hero-visual::before {
     animation-delay: 420ms;
   }
 
   /* The printer wipe's leading edge belongs to Extreme. */
-  html:not([data-world-effects="economy"]):not([data-loading])
-    .rxs-page.rxs-page.rxs-rexonance-page
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])
     .rxs-hero-visual
     > .rxs-orbit-b {
     animation: none;
   }
 
-  html:not([data-world-effects="economy"]):not([data-loading])
-    .rxs-page.rxs-page.rxs-rexonance-page
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])
     .rxs-hero-visual
     > .rxp-ring {
     animation: rxp-ping 1020ms var(--rxp-out) 300ms both;
   }
 
-  html:not([data-world-effects="economy"]):not([data-loading])
-    .rxs-page.rxs-page.rxs-rexonance-page
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])
     .rxs-hero-visual
     > .rxp-ring.is-violet {
     animation-delay: 390ms;
   }
 
-  html:not([data-world-effects="economy"]):not([data-loading])
-    .rxs-page.rxs-page.rxs-rexonance-page
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])
     .rxs-hero-visual
     > .rxp-ring.is-gold {
     animation-delay: 480ms;
   }
 
   /* The cue appears once the figure is nearly whole. */
-  html:not([data-world-effects="economy"]):not([data-loading])
-    .rxs-page.rxs-page.rxs-rexonance-page
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])
     .rxs-scroll-cue {
     animation-delay: 900ms;
   }
 
-  html:not([data-world-effects="economy"]):not([data-loading])
-    .rxs-page.rxs-page.rxs-rexonance-page
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])
     .rxs-scroll-cue
     i {
     animation-delay: 960ms;
@@ -310,8 +310,8 @@ html[data-world-effects="economy"]
    image (the recede keeps its place and progress). */
 @supports (animation-timeline: view()) and (animation-range: entry 0% entry 100%) {
   @media (prefers-reduced-motion: no-preference) {
-    html:not([data-world-effects="economy"]):not([data-loading])
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    html:not([data-world-effects="economy"])
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       .rxs-hero-visual
       img {
       animation:
@@ -852,52 +852,52 @@ html[data-world-effects="economy"]
   @media (prefers-reduced-motion: no-preference) {
     /* Named timelines (the elevation's --sc-chapter, --sc-tile and --sc-end
        are reused). */
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
         [data-dialog-open]
       )
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       .rxs-headline-metrics
       article {
       view-timeline: --rxp-metric block;
     }
 
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
         [data-dialog-open]
       )
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       .rxs-p14-overview {
       view-timeline: --rxp-core block;
     }
 
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
         [data-dialog-open]
       )
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       .rxs-p14-copy
       dl {
       view-timeline: --rxp-readout block;
     }
 
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
         [data-dialog-open]
       )
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       .rxs-stage-switcher {
       view-timeline: --rxp-stage block;
     }
 
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
         [data-dialog-open]
       )
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       .rxs-system-grid {
       view-timeline: --rxp-grid block;
     }
 
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
         [data-dialog-open]
       )
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       .rxs-specs {
       view-timeline: --rxp-specs block;
     }
@@ -906,10 +906,10 @@ html[data-world-effects="economy"]
        stepped; only position is), the line clicks into register from a
        small lateral offset, and the intro only fades: body text never
        moves. */
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
         [data-dialog-open]
       )
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       .rxs-section-heading::before {
       animation-name: rxp-fade, rxp-lock;
       animation-duration: auto;
@@ -921,10 +921,10 @@ html[data-world-effects="economy"]
         entry 0% entry 50%;
     }
 
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
         [data-dialog-open]
       )
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       .rxs-section-heading
       h2 {
       animation-name: rxp-fade, rxp-lock-x;
@@ -937,10 +937,10 @@ html[data-world-effects="economy"]
         entry 10% entry 55%;
     }
 
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
         [data-dialog-open]
       )
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       .rxs-footer
       h2 {
       animation-name: rxp-fade, rxp-lock-x;
@@ -953,10 +953,10 @@ html[data-world-effects="economy"]
         entry 10% entry 55%;
     }
 
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
         [data-dialog-open]
       )
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       .rxs-section-heading
       > span {
       animation-name: rxp-fade;
@@ -971,8 +971,8 @@ html[data-world-effects="economy"]
        stepped lock and the intro its native fade. */
     html[data-ios27-enhanced="true"]:not([data-world-effects="economy"]):not(
         [data-side-menu-open]
-      ):not([data-loading]):not([data-dialog-open])
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      ):not([data-dialog-open])
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       .rxs-section-heading
       h2 {
       animation-name: rxp-lock-x;
@@ -982,18 +982,18 @@ html[data-world-effects="economy"]
 
     html[data-ios27-enhanced="true"]:not([data-world-effects="economy"]):not(
         [data-side-menu-open]
-      ):not([data-loading]):not([data-dialog-open])
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      ):not([data-dialog-open])
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       .rxs-section-heading
       > span {
       animation-name: none;
     }
 
     /* 01 PERFORMANCE: the numerals lock like a gauge; the arc sweeps. */
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
         [data-dialog-open]
       )
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       .rxs-headline-metrics
       article
       strong {
@@ -1008,10 +1008,10 @@ html[data-world-effects="economy"]
         entry 0% entry 60%;
     }
 
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
         [data-dialog-open]
       )
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       .rxs-headline-metrics
       .rxp-gauge {
       animation-name: rxp-sweep;
@@ -1023,10 +1023,10 @@ html[data-world-effects="economy"]
     }
 
     /* 02 P14: the core powers on; the readout ticks in reading order. */
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
         [data-dialog-open]
       )
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       .rxs-p14-overview
       figure::before {
       animation-name: rxp-bracket;
@@ -1037,10 +1037,10 @@ html[data-world-effects="economy"]
       animation-range: entry 10% entry 60%;
     }
 
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
         [data-dialog-open]
       )
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       .rxs-p14-copy
       dl
       div {
@@ -1054,10 +1054,10 @@ html[data-world-effects="economy"]
         entry 0% entry 60%;
     }
 
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
         [data-dialog-open]
       )
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       .rxs-p14-copy
       dl
       div:nth-child(2) {
@@ -1066,10 +1066,10 @@ html[data-world-effects="economy"]
         entry 10% entry 70%;
     }
 
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
         [data-dialog-open]
       )
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       .rxs-p14-copy
       dl
       div:nth-child(3) {
@@ -1079,10 +1079,10 @@ html[data-world-effects="economy"]
     }
 
     /* 03 STAGES: the prism hairline lights in three ticks, one per form. */
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
         [data-dialog-open]
       )
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       .rxs-stage-panel::before {
       animation-name: rxp-draw;
       animation-duration: auto;
@@ -1094,10 +1094,10 @@ html[data-world-effects="economy"]
 
     /* 04 TRINITY: three plates converge from three sides, transform only
        (plates never fade); HUMAN WILL lands last and locks in gold. */
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
         [data-dialog-open]
       )
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       .rxs-system-grid
       article {
       animation-name: rxp-from-left;
@@ -1108,30 +1108,30 @@ html[data-world-effects="economy"]
       animation-range: entry 0% entry 70%;
     }
 
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
         [data-dialog-open]
       )
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       .rxs-system-grid
       article:nth-child(2) {
       animation-name: rxp-from-below;
       animation-range: entry 10% entry 80%;
     }
 
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
         [data-dialog-open]
       )
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       .rxs-system-grid
       article:nth-child(3) {
       animation-name: rxp-from-right;
       animation-range: entry 20% entry 90%;
     }
 
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
         [data-dialog-open]
       )
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       .rxs-system-grid
       article:nth-child(3)::after {
       animation-name: rxp-lock;
@@ -1142,10 +1142,10 @@ html[data-world-effects="economy"]
       animation-range: entry 60% entry 90%;
     }
 
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
         [data-dialog-open]
       )
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       .rxs-system-grid::after {
       transform-origin: 50% 0;
       animation-name: rxp-bus;
@@ -1158,10 +1158,10 @@ html[data-world-effects="economy"]
 
     /* The two processors slide in from opposite sides; the joint between
        them draws itself; the figures lock like the headline ones. */
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
         [data-dialog-open]
       )
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       .rxs-specs
       > div {
       animation-name: rxp-from-left;
@@ -1172,19 +1172,19 @@ html[data-world-effects="economy"]
       animation-range: entry 0% entry 60%;
     }
 
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
         [data-dialog-open]
       )
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       .rxs-specs
       > div:last-child {
       animation-name: rxp-from-right;
     }
 
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
         [data-dialog-open]
       )
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       .rxs-specs
       > i {
       animation-name: rxp-joint;
@@ -1195,10 +1195,10 @@ html[data-world-effects="economy"]
       animation-range: entry 20% entry 70%;
     }
 
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
         [data-dialog-open]
       )
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       .rxs-specs
       > div
       strong {
@@ -1215,10 +1215,10 @@ html[data-world-effects="economy"]
 
     /* The end card: the plates step up in reading order; the gold
        terminal plugs in last. */
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
         [data-dialog-open]
       )
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       .rxs-footer
       > a {
       animation-name: rxp-step-up;
@@ -1229,28 +1229,28 @@ html[data-world-effects="economy"]
       animation-range: entry 10% entry 60%;
     }
 
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
         [data-dialog-open]
       )
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       .rxs-footer
       > a:nth-of-type(2) {
       animation-range: entry 20% entry 70%;
     }
 
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
         [data-dialog-open]
       )
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       .rxs-footer
       > a:nth-of-type(3) {
       animation-range: entry 30% entry 80%;
     }
 
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
         [data-dialog-open]
       )
-      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
       .rxs-footer::after {
       animation-name: rxp-plug;
       animation-duration: auto;
@@ -1327,8 +1327,8 @@ html[data-dialog-open]
   animation: none;
 }
 
-html[data-loading]
-  .rxs-page.rxs-page.rxs-rexonance-page
+html
+  .rxs-page.rxs-page.rxs-rexonance-page[data-route-covered]
   :is(
     .rxs-section-heading h2,
     .rxs-footer h2,
@@ -1342,8 +1342,8 @@ html[data-loading]
     .rxs-specs > div strong,
     .rxs-footer > a
   ),
-html[data-loading]
-  .rxs-page.rxs-page.rxs-rexonance-page
+html
+  .rxs-page.rxs-page.rxs-rexonance-page[data-route-covered]
   :is(
     .rxs-section-heading,
     .rxs-p14-overview figure,
@@ -1352,8 +1352,8 @@ html[data-loading]
     .rxs-system-grid,
     .rxs-footer
   )::before,
-html[data-loading]
-  .rxs-page.rxs-page.rxs-rexonance-page
+html
+  .rxs-page.rxs-page.rxs-rexonance-page[data-route-covered]
   :is(.rxs-system-grid article:nth-child(3), .rxs-system-grid, .rxs-footer)::after {
   animation: none;
 }
