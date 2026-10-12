@@ -1,0 +1,313 @@
+/* The screening room is loaded only when requested. Its top-layer dialog
+   keeps the picture whole, while the ordinary page stays at its scroll spot. */
+.dream-screening-dialog {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  color: #f4ecdc;
+  background: #0d0912;
+  overflow: hidden;
+  font-family: "Shippori Mincho", "Yu Mincho", serif;
+}
+
+.dream-screening-dialog::backdrop {
+  background: #08060b;
+}
+
+.dream-screening-shell {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto auto auto;
+  width: 100%;
+  height: 100%;
+  height: 100dvh;
+  min-height: 0;
+  padding: max(8px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right))
+    max(8px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
+  box-sizing: border-box;
+  background: radial-gradient(60% 46% at 50% 10%, rgb(200 164 92 / 9%), transparent 75%), #0d0912;
+}
+
+.dream-screening-header,
+.dream-screening-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+}
+
+.dream-screening-header {
+  min-height: 60px;
+  padding: 4px clamp(4px, 2vw, 28px) 8px;
+  border-bottom: 1px solid rgb(200 164 92 / 38%);
+}
+
+.dream-screening-title {
+  min-width: 0;
+}
+.dream-screening-title > span {
+  display: block;
+  color: #d0aa65;
+  font:
+    600 10px/1.3 Georgia,
+    serif;
+  letter-spacing: 0.15em;
+  white-space: nowrap;
+}
+.dream-screening-title h2 {
+  margin: 2px 0 0;
+  font-size: clamp(17px, 2.5vw, 27px);
+  line-height: 1.1;
+  letter-spacing: 0.25em;
+}
+.dream-screening-count {
+  flex: none;
+  color: #e6c28e;
+  font:
+    600 14px/1 Georgia,
+    serif;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.14em;
+}
+.dream-screening-count > span {
+  color: #9f886b;
+}
+
+.dream-screening-dialog button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  min-width: 44px;
+  min-height: 44px;
+  border: 1px solid rgb(200 164 92 / 50%);
+  border-radius: 0;
+  color: #f4ecdc;
+  background: #211522;
+  font: inherit;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.dream-screening-dialog button:focus-visible {
+  outline: 3px solid #fff0b5;
+  outline-offset: 2px;
+}
+.dream-screening-dialog button:hover {
+  background: #372239;
+}
+.dream-screening-close {
+  gap: 7px;
+  padding: 0 12px;
+  white-space: nowrap;
+}
+.dream-screening-close > span:first-child {
+  font:
+    26px/1 Arial,
+    sans-serif;
+}
+
+.dream-screening-stage {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) 52px;
+  align-items: stretch;
+  gap: clamp(4px, 1vw, 16px);
+  min-height: 0;
+  padding: clamp(8px, 1.8vh, 20px) clamp(2px, 1vw, 16px);
+}
+.dream-screening-stage > .dream-screening-arrow {
+  align-self: center;
+  width: 100%;
+  height: 52px;
+  font:
+    24px/1 Georgia,
+    serif;
+}
+.dream-screening-picture {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  background:
+    linear-gradient(90deg, rgb(200 164 92 / 17%), transparent 18% 82%, rgb(200 164 92 / 17%))
+      center / 100% 1px no-repeat,
+    #08060b;
+}
+.dream-screening-picture > img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  box-shadow: 0 14px 32px rgb(0 0 0 / 55%);
+}
+.dream-screening-picture.is-zoomed {
+  display: block;
+  overflow: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  text-align: center;
+}
+.dream-screening-picture.is-zoomed > img {
+  width: auto;
+  height: auto;
+  max-width: none;
+  max-height: none;
+  margin: auto;
+}
+.dream-screening-controls {
+  min-height: 48px;
+  padding: 4px clamp(4px, 2vw, 28px);
+  border-top: 1px solid rgb(200 164 92 / 34%);
+}
+.dream-screening-caption {
+  min-width: 0;
+  margin: 0;
+  color: #e5d8c9;
+  font-size: clamp(12px, 1.15vw, 15px);
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+.dream-screening-zoom {
+  padding: 0 12px;
+  white-space: nowrap;
+  font-size: 12px !important;
+}
+.dream-screening-zoom[aria-pressed="true"] {
+  color: #241821;
+  background: #e8d8b7;
+}
+.dream-screening-message {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 18px;
+  padding: 0 clamp(4px, 2vw, 28px);
+}
+.dream-screening-status {
+  min-height: 18px;
+  margin: 0;
+  color: #e6c28e;
+  font-size: 12px;
+  line-height: 18px;
+}
+.dream-screening-retry {
+  padding: 0 12px;
+}
+.dream-screening-filmstrip {
+  display: flex;
+  gap: 7px;
+  min-width: 0;
+  height: 78px;
+  padding: 6px 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  border-top: 1px solid rgb(200 164 92 / 24%);
+  scrollbar-color: #8a6a2f #130d18;
+  scroll-snap-type: x proximity;
+}
+.dream-screening-filmstrip > button {
+  position: relative;
+  width: 56px;
+  min-width: 56px;
+  height: 64px;
+  min-height: 64px;
+  padding: 2px;
+  overflow: hidden;
+  scroll-snap-align: center;
+}
+.dream-screening-filmstrip > button[aria-current="true"] {
+  border-color: #f0c77c;
+  box-shadow: 0 0 0 2px #f0c77c inset;
+}
+.dream-screening-filmstrip img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.dream-screening-filmstrip button span {
+  position: absolute;
+  left: 2px;
+  bottom: 2px;
+  padding: 1px 3px;
+  color: #fff;
+  background: rgb(13 9 18 / 80%);
+  font:
+    10px/1.3 Georgia,
+    serif;
+}
+
+@media (max-width: 540px) {
+  .dream-screening-header {
+    min-height: 52px;
+  }
+  .dream-screening-title > span {
+    font-size: 8px;
+    letter-spacing: 0.07em;
+  }
+  .dream-screening-count {
+    font-size: 12px;
+    letter-spacing: 0.04em;
+  }
+  .dream-screening-close {
+    padding: 0 4px;
+  }
+  .dream-screening-close > span:last-child {
+    display: none;
+  }
+  .dream-screening-stage {
+    grid-template-columns: 44px minmax(0, 1fr) 44px;
+  }
+  .dream-screening-stage > .dream-screening-arrow {
+    height: 44px;
+  }
+  .dream-screening-filmstrip {
+    height: 70px;
+    padding-block: 3px;
+  }
+  .dream-screening-filmstrip > button {
+    height: 62px;
+    min-height: 62px;
+  }
+}
+
+@media (max-height: 520px) and (orientation: landscape) {
+  .dream-screening-header {
+    min-height: 44px;
+    padding-block: 0 2px;
+  }
+  .dream-screening-title h2 {
+    font-size: 16px;
+  }
+  .dream-screening-stage {
+    padding-block: 2px;
+  }
+  .dream-screening-filmstrip {
+    height: 54px;
+    padding-block: 2px;
+  }
+  .dream-screening-filmstrip > button {
+    height: 48px;
+    min-height: 48px;
+  }
+}
+
+@media (forced-colors: active) {
+  .dream-screening-dialog,
+  .dream-screening-dialog button,
+  .dream-screening-picture {
+    color: CanvasText;
+    background: Canvas;
+  }
+  .dream-screening-dialog button {
+    border-color: CanvasText;
+  }
+}

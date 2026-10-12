@@ -184,6 +184,84 @@ html[data-family="dream"] main.dream-page.dream-page > .dream-section > .dream-s
     linear-gradient(180deg, var(--dr-ink) 0, var(--dr-lacquer) 52%, var(--dr-ink) 100%);
 }
 
+/* Four projected stills give the intertitles their own scenes. The frame,
+   ghost numeral and typography remain over the images; the soft ink mask
+   leaves all heading text readable, including on a narrow programme leaf. */
+html[data-family="dream"]
+  main.dream-page.dream-page
+  > .dream-section
+  > .dream-section-heading
+  > .dream-act-still {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 43%;
+  opacity: 0.32;
+  filter: saturate(0.75);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 18%, #000 82%, transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0, #000 18%, #000 82%, transparent 100%);
+  pointer-events: none;
+}
+
+html[data-family="dream"]
+  main.dream-page.dream-page
+  > .dream-character-section
+  > .dream-section-heading
+  > .dream-act-still {
+  object-position: 50% 29%;
+  opacity: 0.27;
+}
+
+html[data-family="dream"]
+  main.dream-page.dream-page
+  > .dream-dolminence-section
+  > .dream-section-heading
+  > .dream-act-still {
+  object-position: 50% 48%;
+  opacity: 0.31;
+}
+
+html[data-family="dream"]
+  main.dream-page.dream-page
+  > .dream-case-section
+  > .dream-section-heading
+  > .dream-act-still {
+  object-position: 50% 54%;
+  opacity: 0.21;
+}
+
+@media (max-width: 760px) {
+  html[data-family="dream"]
+    main.dream-page.dream-page
+    > .dream-section
+    > .dream-section-heading
+    > .dream-act-still {
+    opacity: 0.22;
+    -webkit-mask-image: linear-gradient(
+      180deg,
+      transparent 0,
+      #000 24%,
+      #000 78%,
+      transparent 100%
+    );
+    mask-image: linear-gradient(180deg, transparent 0, #000 24%, #000 78%, transparent 100%);
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-family="dream"]
+    main.dream-page.dream-page
+    > .dream-section
+    > .dream-section-heading
+    > .dream-act-still {
+    display: none;
+  }
+}
+
 /* The card's own gilt double frame, inside the band, with stepped corners. */
 html[data-family="dream"]
   main.dream-page.dream-page
