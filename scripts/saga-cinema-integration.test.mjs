@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
 import { test } from "node:test";
+import sharp from "sharp";
 import { getRouteFamily } from "../src/lib/route-family.js";
 
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
@@ -47,7 +48,7 @@ test("cinema is a native special route with first-party menu and return navigati
   assert.match(chrome, /<CinemaLink beforeNavigate=\{close\}/u);
   assert.match(menu, /const CINEMA_PATH = "\/saga-cinema"/u);
   assert.match(menu, /href=\{`\$\{CINEMA_PATH\}#top`\}/u);
-  assert.match(menuStyles, /menu-thumbnail\.webp/u);
+  assert.match(menuStyles, /menu-thumbnail-20261012\.webp/u);
   assert.match(menuStyles, /--sh-art:/u);
   assert.doesNotMatch(menu, /window\.location\.(?:assign|replace)/u);
   assert.doesNotMatch(menu, /https?:\/\//iu);
@@ -65,11 +66,26 @@ test("route loads a scoped stylesheet and all chapter art is addressed by local 
     ...films.map(([, , , image]) => `/saga-cinema-assets/${image}`),
     "/saga-cinema-assets/saga-logo-original.webp",
     "/saga-cinema-assets/menu-thumbnail.webp",
+    "/saga-cinema-assets/menu-thumbnail-20261012.webp",
     "/saga-cinema-assets/michroma-latin.woff2",
   ]) {
     assert.ok(releaseIdentity.includes(`"${asset}"`), `${asset} is included in release identity`);
   }
   assert.match(styles, /@media\s*\(prefers-reduced-motion:\s*reduce\)/u);
+});
+
+test("cinema menu uses native-resolution poster art without loading it while closed", async () => {
+  const asset = new URL("../public/saga-cinema-assets/menu-thumbnail-20261012.webp", import.meta.url);
+  const bytes = readFileSync(asset);
+  const meta = await sharp(bytes).metadata();
+  const original = await sharp(new URL("../public/saga-cinema-assets/chapter-4.jpg", import.meta.url).pathname).metadata();
+  assert.equal(meta.format, "webp");
+  assert.equal(meta.width, original.width);
+  assert.equal(meta.height, original.height);
+  assert.ok(meta.width >= 800, "high-DPI menu must not reuse the 192px thumbnail");
+  assert.ok(bytes.length < 300_000, "native-resolution menu image stays under 300KB");
+  assert.match(menuStyles, /\[data-open="true"\][\s\S]*menu-thumbnail-20261012/u);
+  assert.doesNotMatch(menu, /menu-thumbnail|rel="preload"/u);
 });
 
 test("reduced-motion preferences and animated resources are cleaned up", () => {

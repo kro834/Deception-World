@@ -5,7 +5,7 @@ html[data-family]
   #site-side-panel.side-panel[data-open="true"]
   .side-panel-links
   > .side-panel-cinema-link {
-  --sh-art: url("/saga-cinema-assets/menu-thumbnail.webp");
+  --sh-art: url("/saga-cinema-assets/menu-thumbnail-20261012.webp");
   --sh-art-pos: 50% 18%;
 }
 
