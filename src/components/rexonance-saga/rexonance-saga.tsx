@@ -118,6 +118,10 @@ const STAGES: Record<
   },
 };
 
+// The forms the page shows (owner, 2026-10-12: EXCELSIOR withdrawn; its
+// data and art stay for later).
+const SHOWN_STAGES: RexonanceStage[] = ["standard", "max", "ultra"];
+
 const PERFORMANCE_BASELINES: Record<
   PerformanceBaseline,
   {
@@ -1370,7 +1374,7 @@ export function RexonanceSaga() {
   useEffect(() => {
     const rail = stageTabsRef.current;
     if (!rail) return;
-    const stages = Object.keys(STAGES) as RexonanceStage[];
+    const stages = SHOWN_STAGES;
     const onSelect = (event: Event) => {
       const index = (event as CustomEvent<{ index?: number }>).detail?.index;
       const nextStage = typeof index === "number" ? stages[index] : undefined;
@@ -1763,11 +1767,7 @@ export function RexonanceSaga() {
           <section id="stages" className="rxs-stages rxs-section">
             <header className="rxs-section-heading rxs-reveal">
               <p>THREE OPERATING STAGES</p>
-              <h2>
-                標準の上に、
-                <br />
-                あと3段。
-              </h2>
+              <h2>まだ、次元は変わる。</h2>
             </header>
 
             <div className="rxs-stage-switcher rxs-reveal">
@@ -1781,7 +1781,7 @@ export function RexonanceSaga() {
                 data-stage={stage}
               >
                 <LiquidLens />
-                {(Object.keys(STAGES) as RexonanceStage[]).map((key) => (
+                {SHOWN_STAGES.map((key) => (
                   <button
                     key={key}
                     id={`rxs-stage-tab-${key}`}

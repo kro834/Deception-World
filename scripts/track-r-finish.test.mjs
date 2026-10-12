@@ -180,7 +180,7 @@ test("the components carry the vetted copy shape: lede sentences, keyboard hint,
   assert.match(rexonance, /<h3>\{renderStageTitle\(activeStage\.title\)\}<\/h3>/);
   // rx2/COPY2.md C3: the stages h2 pays off 「これで、まだ標準。」.
   // Owner (2026-10-12): EXCELSIOR makes it three.
-  assert.match(rexonance, /標準の上に、\s*<br \/>\s*あと3段。/);
+  assert.match(rexonance, /まだ、次元は変わる。/);
   // The performance intro preserves phrase spans and its live baseline;
   // the standard-value comparison and unpublished stages stay explicit.
   assert.match(

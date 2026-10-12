@@ -2475,7 +2475,7 @@ html[data-family="special"]
   body
   .rxs-page.rxs-page.rxs-rexonance-page
   .rxs-stage-tabs.liquid-swipe-tabs {
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
 }
 
 /* EXCELSIOR's 概要 is several paragraphs (owner, 2026-10-12): they stand

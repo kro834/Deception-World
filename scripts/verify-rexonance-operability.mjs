@@ -154,9 +154,9 @@ try {
       for (const [key, stage] of [
         ["ArrowRight", "max"],
         // EXCELSIOR (owner, 2026-10-11) is the last form now.
-        ["End", "excelsior"],
+        ["End", "ultra"],
         ["ArrowRight", "standard"],
-        ["ArrowLeft", "excelsior"],
+        ["ArrowLeft", "ultra"],
         ["Home", "standard"],
       ]) {
         await page.keyboard.press(key);
@@ -264,7 +264,7 @@ try {
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
       await tabs.nth(2).focus();
       await page.keyboard.press("End");
-      await verifyStage(page, "excelsior");
+      await verifyStage(page, "ultra");
       assert.deepEqual(
         await verifyStageCopy(page),
         [],

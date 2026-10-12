@@ -14,7 +14,8 @@ const baseline = process.env.BASELINE_URL;
 const out = process.env.OUT_DIR || "/private/tmp/rexonance-zenith-verification";
 await mkdir(out, { recursive: true });
 const captureBaseline = process.env.CAPTURE_BASELINE === "1";
-const captureForm = process.env.CAPTURE_FORM || (captureBaseline ? "max" : "excelsior");
+// EXCELSIOR is withdrawn from the page (owner, 2026-10-12): new captures default to ULTRA.
+const captureForm = process.env.CAPTURE_FORM || (captureBaseline ? "max" : "ultra");
 assert.ok(
   ["standard", "max", "ultra", "excelsior"].includes(captureForm),
   `unknown CAPTURE_FORM: ${captureForm}`,
