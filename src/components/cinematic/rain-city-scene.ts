@@ -2,6 +2,9 @@
 // the clock and all lifetime management; this renderer never starts its own RAF.
 import * as THREE from "three";
 import { Reflector } from "three/addons/objects/Reflector.js";
+import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
+import { cityArchitecture } from "./rain-city-architecture.ts";
+import { applyCitySurface, cityTexture, type CitySurfaceImages } from "./rain-city-materials.ts";
 
 const smooth = (a: number, b: number, t: number) => {
   const x = Math.min(1, Math.max(0, (t - a) / (b - a)));
@@ -103,13 +106,19 @@ export class RainCityScene {
   private dustPixels = { value: 700 };
   private fragments: Fragment[] = [];
   private debris!: THREE.InstancedMesh;
+  private destruction: { mesh: THREE.InstancedMesh; fragments: Fragment[] }[] = [];
   private debrisPose = new THREE.Object3D();
   private headlight = new THREE.PointLight(0x8dcfe1, 130, 42, 1.6);
+  private lamps: Block[] = [];
+  private streetLights: THREE.SpotLight[] = [];
+  private lightPositions = { value: Array.from({ length: 6 }, () => new THREE.Vector3()) };
+  private reflectionTexel = { value: new THREE.Vector2(1 / 768, 1 / 512) };
   private geometries = new Set<THREE.BufferGeometry>();
   private materials = new Set<THREE.Material>();
+  private textures = new Set<THREE.Texture>();
   private disposed = false;
 
-  constructor() {
+  constructor(images: CitySurfaceImages | null = null) {
     this.canvas.className = "opening-rain-city";
     this.canvas.setAttribute("aria-hidden", "true");
     this.canvas.style.cssText =
@@ -117,39 +126,136 @@ export class RainCityScene {
     this.renderer = new THREE.WebGLRenderer({
       canvas: this.canvas,
       alpha: false,
-      antialias: false,
+      antialias: true,
       powerPreference: "high-performance",
       failIfMajorPerformanceCaveat: true,
     });
     try {
       this.renderer.outputColorSpace = THREE.SRGBColorSpace;
       this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      this.renderer.toneMappingExposure = 1.1;
+      this.renderer.toneMappingExposure = 1.2;
+      this.renderer.shadowMap.enabled = true;
+      this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
       this.scene.background = new THREE.Color("#030710");
-      this.scene.fog = new THREE.FogExp2("#08101b", 0.009);
-      this.scene.add(new THREE.HemisphereLight(0x6486ba, 0x080c16, 0.8));
-      const moon = new THREE.DirectionalLight(0x89b6eb, 1.7);
+      this.scene.fog = new THREE.FogExp2("#111d29", 0.013);
+      this.scene.add(new THREE.HemisphereLight(0x9cb4ca, 0x11151b, 0.85));
+      const moon = new THREE.DirectionalLight(0xa5bfd4, 2.2);
       moon.position.set(-35, 70, -80);
       this.scene.add(moon);
       const warm = new THREE.DirectionalLight(0xff7839, 0.32);
       warm.position.set(20, 8, 25);
       this.scene.add(warm);
+      this.headlight.intensity = 12;
+      this.headlight.decay = 2;
       this.scene.add(this.headlight);
+      this.installEnvironment();
 
       let seed = 73017;
       const random = () => {
         seed = (Math.imul(seed, 1664525) + 1013904223) | 0;
         return (seed >>> 0) / 4294967296;
       };
-      const concrete: Block[] = [],
-        steel: Block[] = [],
-        glass: Block[] = [],
-        rubble: Block[] = [],
-        lamps: Block[] = [],
-        windows: Block[] = [],
-        embers: Block[] = [];
-      // All neighbourhoods follow the same curved route as the camera. Deeper
-      // districts lose facades, then floors; debris replaces the surviving city.
+      const city = cityArchitecture(cityRouteAt, cityDamageAt, random);
+      this.lamps = city.lamps;
+      const maps = [
+        cityTexture(images?.[0], [156, 155, 147, 255], true),
+        cityTexture(images?.[1], [128, 128, 255, 255]),
+        cityTexture(images?.[2], [200, 200, 200, 255]),
+        cityTexture(images?.[3], [54, 59, 61, 255], true),
+        cityTexture(images?.[4], [128, 128, 255, 255]),
+        cityTexture(images?.[5], [180, 180, 180, 255]),
+      ];
+      maps.forEach((map) => this.textures.add(map));
+      this.canvas.dataset.materials = images ? "blender-baked" : "procedural-fallback";
+      const cement = (color: number) =>
+        applyCitySurface(
+          new THREE.MeshStandardMaterial({
+            color,
+            roughness: 1,
+            metalness: 0,
+            envMapIntensity: 0.3,
+          }),
+          maps,
+          3,
+        );
+      this.blocks(city.concrete, cement(0xc5c9ca));
+      this.blocks(city.masonry, cement(0x988577));
+      this.blocks(
+        city.steel,
+        new THREE.MeshStandardMaterial({ color: 0x434541, roughness: 0.52, metalness: 0.75 }),
+      );
+      this.blocks(
+        city.housings,
+        new THREE.MeshStandardMaterial({ color: 0x53605f, roughness: 0.38, metalness: 0.7 }),
+        new RoundedBoxGeometry(1, 1, 1, 1, 0.06),
+      );
+      this.blocks(
+        city.poles,
+        new THREE.MeshStandardMaterial({ color: 0x485151, roughness: 0.42, metalness: 0.8 }),
+        new THREE.CylinderGeometry(0.5, 0.57, 1, 8),
+      );
+      this.blocks(
+        city.darkRooms,
+        new THREE.MeshStandardMaterial({ color: 0x262320, roughness: 0.95 }),
+      );
+      const rooms = new THREE.MeshBasicMaterial({ color: 0xe5b275 });
+      rooms.onBeforeCompile = (shader) => {
+        shader.fragmentShader = shader.fragmentShader.replace(
+          "#include <color_fragment>",
+          `#include <color_fragment>
+          // Lamp-lit plaster is not an evenly luminous rectangle.
+          float shade=.32+.68*smoothstep(0.,.9,vUv.y);
+          diffuseColor.rgb*=shade;`,
+        );
+        shader.vertexShader = "#define USE_UV\n" + shader.vertexShader;
+        shader.fragmentShader = "#define USE_UV\n" + shader.fragmentShader;
+      };
+      this.blocks(city.rooms, rooms);
+      this.blocks(
+        city.glass,
+        new THREE.MeshPhysicalMaterial({
+          color: 0x697c7e,
+          metalness: 0.18,
+          roughness: 0.2,
+          transparent: true,
+          opacity: 0.3,
+          depthWrite: false,
+          clearcoat: 1,
+          clearcoatRoughness: 0.12,
+          envMapIntensity: 1.8,
+        }),
+      );
+      const chip = new THREE.Shape();
+      chip.moveTo(-0.5, -0.25);
+      chip.lineTo(-0.35, -0.48);
+      chip.lineTo(0.12, -0.39);
+      chip.lineTo(0.44, -0.12);
+      chip.lineTo(0.33, 0.11);
+      chip.lineTo(0.48, 0.37);
+      chip.lineTo(-0.11, 0.5);
+      chip.lineTo(-0.45, 0.22);
+      chip.closePath();
+      const rubbleGeometry = new THREE.ExtrudeGeometry(chip, {
+        depth: 1,
+        bevelEnabled: true,
+        bevelSize: 0.025,
+        bevelThickness: 0.018,
+        bevelSegments: 1,
+        steps: 1,
+      });
+      rubbleGeometry.translate(0, 0, -0.5);
+      rubbleGeometry.rotateX(-Math.PI / 2);
+      this.blocks(city.rubble, cement(0x9a9b98), rubbleGeometry);
+      this.blocks(
+        city.lamps,
+        new THREE.MeshBasicMaterial({ color: new THREE.Color(3.2, 1.85, 0.82) }),
+      );
+      this.lampHalos(city.lamps);
+      this.blocks(
+        city.embers,
+        new THREE.MeshBasicMaterial({ color: new THREE.Color(0.9, 0.2, 0.035) }),
+      );
+      this.installLighting();
       const along = (s: number, offset: number, y: number, b: Omit<Block, "x" | "y" | "z">) => {
         const p = cityRouteAt(s);
         return {
@@ -160,154 +266,6 @@ export class RainCityScene {
           yaw: -p.heading,
         };
       };
-      // Concrete floor plates, severed columns and irregular surviving facades.
-      // Missing cells expose each building's skeleton, including jagged rooflines.
-      for (const side of [-1, 1]) {
-        for (let row = 0; row < 2; row++) {
-          for (let b = 0; b < 23; b++) {
-            const distance = b * 13 + random() * 3;
-            const damage = cityDamageAt(distance);
-            const offset = side * (16 + row * 18 + random() * 2);
-            const w = 7 + random() * 5,
-              d = 7 + random() * 4;
-            const floors = 5 + Math.floor(random() * 12 * (1 - damage * 0.5));
-            for (let f = 0; f < floors; f++) {
-              const y = f * 3.1;
-              const damaged = random() < damage || f > floors * (1 - damage * 0.6);
-              if (f < 2 || random() > damage * 0.38)
-                concrete.push(
-                  along(distance, offset, y + 0.12, {
-                    w: w * (damaged ? 0.65 + random() * 0.35 : 1),
-                    h: 0.28,
-                    d,
-                    tilt: damaged ? side * damage * random() * 0.32 : 0,
-                    shade: 0.42 + random() * 0.25,
-                  }),
-                );
-              for (let c = 0; c < 4; c++) {
-                if (damaged && random() < 0.38) continue;
-                const cx = offset - w * 0.45 + c * w * 0.3;
-                concrete.push(
-                  along(distance - d * 0.43, cx, y + 1.55, {
-                    w: 0.35,
-                    h: 3.1,
-                    d: 0.48,
-                    shade: 0.55,
-                  }),
-                );
-                if (random() > (damaged ? 0.7 : 0.28)) {
-                  glass.push(
-                    along(distance - d * 0.45, cx + w * 0.13, y + 1.6, {
-                      w: w * 0.23,
-                      h: 2.35,
-                      d: 0.12,
-                      shade: 0.3 + random() * 0.65,
-                    }),
-                  );
-                }
-              }
-              steel.push(
-                along(distance, offset - side * w * 0.45, y + 1.55, {
-                  w: 0.18,
-                  h: 3.1,
-                  d: d * 0.95,
-                  shade: 0.65,
-                }),
-              );
-              // Surviving wall sections face the street, rather than leaving
-              // every block as an identical open construction scaffold.
-              for (let bay = 0; bay < 3; bay++) {
-                if (random() < damage * (damaged ? 0.9 : 0.55)) continue;
-                concrete.push(
-                  along(distance + d * 0.32 - bay * d * 0.32, offset - side * w * 0.47, y + 1.5, {
-                    w: 0.34,
-                    h: 2.85,
-                    d: d * 0.28,
-                    shade: 0.5 + random() * 0.35,
-                  }),
-                );
-                // Recessed glass and occasional surviving light distinguish
-                // abandoned offices from identical unfinished scaffolding.
-                const pane = along(
-                  distance + d * 0.32 - bay * d * 0.32,
-                  offset - side * w * 0.5,
-                  y + 1.65,
-                  { w: 0.035, h: 1.55, d: d * 0.18, shade: 0.4 + random() * 0.5 },
-                );
-                (random() < 0.18 * (1 - damage) ? windows : glass).push(pane);
-              }
-            }
-            // Jagged exposed reinforcing bars at broken corners.
-            for (let r = 0; r < 3; r++)
-              steel.push(
-                along(
-                  distance + (random() - 0.5) * d,
-                  offset + (random() - 0.5) * w,
-                  floors * 3.1 + 0.65,
-                  {
-                    w: 0.055,
-                    h: 1.6 + random() * 2,
-                    d: 0.06,
-                    tilt: (random() - 0.5) * 0.7,
-                  },
-                ),
-              );
-          }
-        }
-        for (let i = 0; i < 450; i++) {
-          const distance = random() * 290,
-            damage = cityDamageAt(distance);
-          const offset = side * (5 + random() * 12),
-            size = 0.2 + random() * (0.8 + damage * 4.2);
-          rubble.push(
-            along(distance, offset, size * 0.28, {
-              w: size,
-              h: size * (0.15 + random() * 0.28),
-              d: size * (0.5 + random() * 0.6),
-              tilt: (random() - 0.5) * 1.1,
-              shade: 0.35 + random() * 0.35,
-            }),
-          );
-          if (i % 14 === 0 && damage > 0.4)
-            embers.push(along(distance, offset, 0.2, { w: size * 0.7, h: 0.07, d: size * 0.3 }));
-        }
-        for (let i = 0; i < 15; i++) {
-          const s = 10 + i * 19,
-            damaged = i > 6 && i % 2 === 0;
-          steel.push(
-            along(s, side * 9.6, damaged ? 1.7 : 3.5, {
-              w: 0.15,
-              h: 7,
-              d: 0.15,
-              tilt: side * (damaged ? 1.2 : 0.06),
-            }),
-          );
-          if (damaged) continue;
-          steel.push(along(s, side * 8.65, 6.95, { w: 2, h: 0.12, d: 0.18, tilt: side * 0.08 }));
-          lamps.push(along(s, side * 7.8, 6.85, { w: 0.75, h: 0.1, d: 0.4 }));
-        }
-      }
-      this.blocks(
-        concrete,
-        new THREE.MeshStandardMaterial({ color: 0x71808a, roughness: 0.84, metalness: 0.12 }),
-      );
-      this.blocks(
-        steel,
-        new THREE.MeshStandardMaterial({ color: 0x35454e, roughness: 0.4, metalness: 0.75 }),
-      );
-      this.blocks(
-        glass,
-        new THREE.MeshStandardMaterial({ color: 0x183d4d, roughness: 0.2, metalness: 0.8 }),
-      );
-      this.blocks(
-        rubble,
-        new THREE.MeshStandardMaterial({ color: 0x747978, roughness: 0.92 }),
-        new THREE.IcosahedronGeometry(0.65, 0),
-      );
-      this.blocks(lamps, new THREE.MeshBasicMaterial({ color: 0xffd09a }));
-      this.lampHalos(lamps);
-      this.blocks(windows, new THREE.MeshBasicMaterial({ color: 0xaec8ce }));
-      this.blocks(embers, new THREE.MeshBasicMaterial({ color: 0xcb5425 }));
       // Worn lane paint also bends with the street (never a straight stripe
       // slipping sideways under a turning camera).
       const paint: Block[] = [],
@@ -323,78 +281,64 @@ export class RainCityScene {
       this.blocks(paint, new THREE.MeshStandardMaterial({ color: 0xc4baa0, roughness: 0.7 }));
       this.blocks(curbs, new THREE.MeshStandardMaterial({ color: 0x64717b, roughness: 0.8 }));
 
-      // A few surviving neon fixtures and warm pools on the wet roadway. No
-      // flashing billboards or screen-filling lightning to manufacture impact.
-      const signals: Block[] = [],
-        pools: Block[] = [];
-      for (let i = 0; i < 12; i++) {
-        const s = i * 24 + 8,
-          side = i % 2 ? -1 : 1;
-        signals.push(along(s, side * 11.1, 7, { w: 0.08, h: 3.6, d: 0.35, shade: 0.7 }));
-        pools.push(along(s, side * 7.8, 0.025, { w: 4, h: 1, d: 8, shade: 0.55 }));
-      }
-      this.blocks(signals, new THREE.MeshBasicMaterial({ color: 0x59adca }));
-      const poolGeo = new THREE.PlaneGeometry(1, 1);
-      poolGeo.rotateX(-Math.PI / 2);
-      this.blocks(
-        pools,
-        new THREE.ShaderMaterial({
-          transparent: true,
-          depthWrite: false,
-          vertexShader: `varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*instanceMatrix*vec4(position,1.);}`,
-          fragmentShader: `varying vec2 vUv;void main(){float a=pow(max(0.,1.-length((vUv-.5)*2.)),2.);gl_FragColor=vec4(.42,.19,.06,a*.2);
-          #include <tonemapping_fragment>
-          #include <colorspace_fragment>
-          }`,
-        }),
-        poolGeo,
-      );
-
       // Two entire buildings obstruct the bend and the final district. Their
       // facades fracture ahead of impact and their upper floors fold outward as
       // the camera crosses the original walls, leaving a visible hollow shell.
+      const windowFragments: Fragment[] = [],
+        frameFragments: Fragment[] = [];
       for (const distance of CITY_IMPACTS) {
         const p = cityRouteAt(distance),
           hit = cityTimeAt(distance);
-        for (let floor = 0; floor < 10; floor++) {
-          for (let column = -4; column <= 4; column++) {
-            const offset = column * 1.65,
-              y = floor * 2.25 + 1;
-            const block = along(distance, offset, y, {
-              w: 1.6,
-              h: 2.18,
-              d: 0.45 + random() * 0.4,
-              shade: 0.52 + random() * 0.35,
-            });
-            // Missing windows on upper floors, but a complete impact wall below.
-            if (floor > 2 && random() < 0.3) continue;
-            const side = column < 0 ? -1 : 1,
-              speed = 8 + random() * 13;
-            this.fragments.push({
-              ...block,
-              start: hit - 0.27 + Math.abs(column) * 0.022 + floor * 0.013,
+        for (let floor = 0; floor < 9; floor++) {
+          const y = floor * 3.15;
+          const part = (
+            x: number,
+            cy: number,
+            w: number,
+            h: number,
+            d: number,
+            depth = 0,
+            glass = false,
+          ): Fragment => {
+            const side = x < 0 ? -1 : 1,
+              speed = (glass ? 15 : 8) + random() * 12;
+            return {
+              x: p.x + Math.cos(p.heading) * x + Math.sin(p.heading) * depth,
+              z: p.z + Math.sin(p.heading) * x - Math.cos(p.heading) * depth,
+              y: cy,
+              w,
+              h,
+              d,
+              yaw: -p.heading,
+              shade: 0.74 + random() * 0.24,
+              start: hit - (glass ? 0.3 : 0.27) + Math.abs(x) * 0.012 + floor * 0.013,
               vx: Math.cos(p.heading) * side * speed + Math.sin(p.heading) * 8,
               vz: Math.sin(p.heading) * side * speed - Math.cos(p.heading) * 8,
               vy: floor < 3 ? 5 + random() * 7 : random() * 2,
-              spin: side * (0.3 + random() * 2),
-            });
+              spin: side * (0.3 + random() * (glass ? 5 : 1.3)),
+            };
+          };
+          // Spandrels, piers and inset glazing form an actual inhabited facade,
+          // not a checkerboard of disconnected cubes hung across the road.
+          for (let bay = -2; bay <= 2; bay++) {
+            const x = bay * 3.3;
+            if (floor > 6 && random() < 0.28) continue;
+            this.fragments.push(part(x - 0.83, y + 0.42, 1.69, 0.82, 0.52));
+            this.fragments.push(part(x + 0.83, y + 0.42, 1.69, 0.82, 0.52));
+            this.fragments.push(part(x, y + 2.99, 3.33, 0.34, 0.52));
+            this.fragments.push(part(x - 1.49, y + 1.83, 0.36, 2.12, 0.56));
+            this.fragments.push(part(x + 1.49, y + 1.83, 0.36, 2.12, 0.56));
+            // Four panes really separate on impact. They never persist as an
+            // immovable rectangular overlay after the surrounding wall breaks.
+            for (const dx of [-0.7, 0.7])
+              for (const dy of [1.36, 2.3])
+                windowFragments.push(part(x + dx, y + dy, 1.34, 0.89, 0.035, 0.18, true));
+            frameFragments.push(part(x, y + 1.82, 0.055, 1.92, 0.11, 0.02));
+            frameFragments.push(part(x, y + 1.82, 2.8, 0.055, 0.11, 0.02));
           }
-          // Broken floor plates and torn returns: the breach has real depth.
           for (const side of [-1, 1]) {
-            const block = along(distance + 4, side * 7.8, floor * 2.25 + 0.3, {
-              w: 3,
-              h: 0.32,
-              d: 10,
-              shade: 0.48,
-            });
-            this.fragments.push({
-              ...block,
-              start: hit - 0.12 + floor * 0.018,
-              vx: Math.cos(p.heading) * side * (3 + floor * 0.4),
-              vz: Math.sin(p.heading) * side * 4,
-              vy: -floor * 0.2,
-              spin: -side * (0.5 + floor * 0.05),
-            });
+            this.fragments.push(part(side * 7.55, y + 0.1, 3.4, 0.3, 9, 4));
+            this.fragments.push(part(side * 8.3, y + 1.55, 0.42, 3.15, 8, 4));
           }
         }
       }
@@ -418,13 +362,35 @@ export class RainCityScene {
         bevelThickness: 0.025,
       });
       fragmentGeometry.translate(0, 0, -0.5);
-      this.debris = this.blocks(
-        this.fragments,
-        new THREE.MeshStandardMaterial({ color: 0x829199, roughness: 0.78, metalness: 0.17 }),
-        fragmentGeometry,
-      );
+      this.debris = this.blocks(this.fragments, cement(0xb9b7b1), fragmentGeometry);
       this.debris.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
       this.debris.frustumCulled = false;
+      this.destruction.push({ mesh: this.debris, fragments: this.fragments });
+      const brokenWindows = this.blocks(
+        windowFragments,
+        new THREE.MeshStandardMaterial({
+          color: 0x273b43,
+          metalness: 0.6,
+          roughness: 0.2,
+          envMapIntensity: 1.7,
+        }),
+      );
+      const brokenFrames = this.blocks(
+        frameFragments,
+        new THREE.MeshStandardMaterial({
+          color: 0x616767,
+          metalness: 0.8,
+          roughness: 0.4,
+        }),
+      );
+      for (const [mesh, fragments] of [
+        [brokenWindows, windowFragments],
+        [brokenFrames, frameFragments],
+      ] as const) {
+        mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+        mesh.frustumCulled = false;
+        this.destruction.push({ mesh, fragments });
+      }
       this.makeImpactDust(random);
 
       // One bounded planar reflection, seen only through wet patches. It reflects
@@ -434,35 +400,66 @@ export class RainCityScene {
       this.reflection = new Reflector(reflectionGeometry, {
         textureWidth: 768,
         textureHeight: 512,
-        color: 0x637485,
         clipBias: 0.003,
-        multisample: 0,
+        multisample: 2,
       });
       this.reflection.rotation.x = -Math.PI / 2;
-      this.reflection.position.set(80, -0.05, -120);
+      this.reflection.position.set(80, -0.035, -120);
       this.reflection.getReflectionCamera(this.camera).layers.set(0);
-      this.scene.add(this.reflection);
-      const roadMat = new THREE.ShaderMaterial({
-        transparent: true,
-        depthWrite: false,
-        uniforms: { uTime: this.time },
-        vertexShader: vertex,
-        fragmentShader: `
-      varying vec3 vWorld; uniform float uTime; ${noise}
-      void main(){vec2 p=vWorld.xz; float n=noise(p*1.7),fine=noise(p*32.);
-      float wet=smoothstep(.37,.68,noise(p*vec2(.6,.28))+.12*noise(p*2.));
-      float ripple=sin(length(fract(p*1.2)-.5)*42.-uTime*9.)*.5+.5;
-      vec3 col=vec3(.009,.015,.021)+(fine-.5)*.012+n*.008;
-      col*=.5;col+=vec3(.002,.004,.007)*wet*(.95+ripple*.05);
-      float fog=1.-exp(-length(cameraPosition-vWorld)*.012);
-      gl_FragColor=vec4(mix(col,vec3(.0025,.005,.01),fog),mix(.98,.3,wet));
-      #include <tonemapping_fragment>
-      #include <colorspace_fragment>
-      }`,
+      const road = this.reflection.material as THREE.ShaderMaterial;
+      Object.assign(road.uniforms, {
+        uTime: this.time,
+        uTexel: this.reflectionTexel,
+        uLights: this.lightPositions,
+        uAlbedo: { value: maps[3] },
+        uNormal: { value: maps[4] },
+        uRoughness: { value: maps[5] },
       });
-      const road = this.mesh(new THREE.PlaneGeometry(400, 420), roadMat);
-      road.rotation.x = -Math.PI / 2;
-      road.position.set(80, -0.03, -120);
+      road.vertexShader = `uniform mat4 textureMatrix;varying vec4 vReflect;varying vec3 vWorld;
+        void main(){vReflect=textureMatrix*vec4(position,1.);vec4 p=modelMatrix*vec4(position,1.);
+        vWorld=p.xyz;gl_Position=projectionMatrix*viewMatrix*p;}`;
+      road.fragmentShader = `
+        uniform sampler2D tDiffuse,uAlbedo,uNormal,uRoughness;uniform float uTime;
+        uniform vec2 uTexel;uniform vec3 uLights[6];varying vec4 vReflect;varying vec3 vWorld;
+        ${noise}
+        void main(){
+          vec2 p=vWorld.xz,uv=p/4.;
+          float wet=smoothstep(.37,.69,noise(p*vec2(.35,.21))+.16*noise(p*1.2));
+          float rough=texture2D(uRoughness,uv).g;
+          vec2 bump=texture2D(uNormal,uv).xy*2.-1.;
+          // Broken rain rings change the reflected view, not just a tint above it.
+          vec2 cell=fract(p*1.35)-.5;float radius=length(cell);
+          float ring=sin(radius*59.-uTime*10.)*exp(-radius*6.)*.028;
+          vec2 slope=bump*(1.-wet)*.09+normalize(cell+vec2(.001))*ring*wet;
+          vec3 N=normalize(vec3(slope.x,1.,slope.y));
+          vec3 V=normalize(cameraPosition-vWorld);
+          vec2 projected=vReflect.xy/vReflect.w;
+          projected+=slope*.055;
+          projected=clamp(projected,vec2(.003),vec2(.997));
+          vec2 blur=uTexel*(1.5+rough*4.)*(1.-wet*.82);
+          vec3 reflected=texture2D(tDiffuse,projected).rgb*.4;
+          reflected+=texture2D(tDiffuse,clamp(projected+vec2(blur.x,0.),.001,.999)).rgb*.15;
+          reflected+=texture2D(tDiffuse,clamp(projected-vec2(blur.x,0.),.001,.999)).rgb*.15;
+          reflected+=texture2D(tDiffuse,clamp(projected+vec2(0.,blur.y),.001,.999)).rgb*.15;
+          reflected+=texture2D(tDiffuse,clamp(projected-vec2(0.,blur.y),.001,.999)).rgb*.15;
+          vec3 albedo=texture2D(uAlbedo,uv).rgb;
+          vec3 col=albedo*vec3(.11,.15,.2);
+          for(int i=0;i<6;i++){
+            vec3 L=uLights[i]-vWorld;float dist=length(L);L/=dist;
+            float cone=smoothstep(.5,.85,L.y);
+            float attenuation=210./(dist*dist+1.)*cone*pow(max(0.,1.-dist/27.),2.);
+            vec3 H=normalize(V+L);
+            float spec=pow(max(0.,dot(N,H)),mix(16.,170.,wet))*(.08+wet*.28);
+            col+=vec3(1.,.56,.25)*(albedo*max(0.,dot(N,L))*.45+spec)*attenuation;
+          }
+          float fresnel=.025+.64*pow(1.-max(0.,dot(N,V)),4.);
+          col=mix(col,reflected,clamp(fresnel*(.15+wet*.85),0.,.8));
+          float fog=1.-exp(-length(cameraPosition-vWorld)*.01);
+          gl_FragColor=vec4(mix(col,vec3(.004,.008,.014),fog),1.);
+          #include <tonemapping_fragment>
+          #include <colorspace_fragment>
+        }`;
+      this.scene.add(this.reflection);
 
       // Layered storm clouds above the street's vanishing point.
       const sky = this.mesh(
@@ -475,8 +472,8 @@ export class RainCityScene {
           fragmentShader: `
       varying vec3 vWorld;uniform float uTime;${noise}
       void main(){vec2 p=vWorld.xz*.018+vWorld.y*.006;float c=noise(p)+.5*noise(p*2.1)+.25*noise(p*4.2);
-      vec3 col=mix(vec3(.001,.002,.005),vec3(.008,.016,.035),c*.48);
-      float horizon=exp(-abs(vWorld.y-5.)*.045);col+=vec3(.004,.007,.014)*horizon;
+      vec3 col=mix(vec3(.001,.003,.007),vec3(.015,.025,.041),c*.5);
+      float horizon=exp(-abs(vWorld.y-5.)*.045);col+=vec3(.006,.01,.019)*horizon;
       gl_FragColor=vec4(col,1.);#include <colorspace_fragment>
       }`.replace(";#include", ";\n#include"),
         }),
@@ -502,17 +499,21 @@ export class RainCityScene {
       rainGeo.setAttribute("aSeed", new THREE.BufferAttribute(seeds, 1));
       rainGeo.setAttribute("aTail", new THREE.BufferAttribute(tails, 1));
       const rainMat = new THREE.ShaderMaterial({
-        uniforms: { uTime: this.time, uHeading: this.heading },
+        uniforms: { uTime: this.time, uHeading: this.heading, uLights: this.lightPositions },
         transparent: true,
         depthWrite: false,
         vertexShader: `
-      attribute float aSeed;attribute float aTail;uniform float uTime;uniform float uHeading;varying float vAlpha;
+      attribute float aSeed;attribute float aTail;uniform float uTime;uniform float uHeading;uniform vec3 uLights[6];varying float vAlpha;varying vec3 vColor;
       void main(){vec3 p=position;p.y=mod(p.y-uTime*(15.+aSeed*8.)+240.,24.)+aTail;
       p.x+=sin(uTime*.7)*.4;p.xz=mat2(cos(uHeading),sin(uHeading),-sin(uHeading),cos(uHeading))*p.xz;
       p+=cameraPosition;vec4 mv=viewMatrix*vec4(p,1.);
-      vAlpha=(.12+aSeed*.24)*(1.-smoothstep(25.,85.,-mv.z));
+      vAlpha=(.1+aSeed*.2)*(1.-smoothstep(25.,85.,-mv.z));
+      vColor=vec3(.18,.24,.31);
+      for(int i=0;i<6;i++){float light=max(0.,1.-distance(p,uLights[i])/9.);vColor+=vec3(.9,.48,.2)*light*light;}
       gl_Position=projectionMatrix*mv;}`,
-        fragmentShader: `varying float vAlpha;void main(){gl_FragColor=vec4(.58,.74,.81,vAlpha);}`,
+        fragmentShader: `varying float vAlpha;varying vec3 vColor;void main(){gl_FragColor=vec4(vColor,vAlpha);
+        #include <colorspace_fragment>
+        }`,
       });
       this.geometries.add(rainGeo);
       this.materials.add(rainMat);
@@ -556,6 +557,92 @@ export class RainCityScene {
     return mesh;
   }
 
+  private installEnvironment() {
+    // Linear-HDR overcast sky supplies broad reflections to glass and wet metal.
+    // This probe is made once per flight, not regenerated as the camera moves.
+    const width = 128,
+      height = 64,
+      data = new Float32Array(width * height * 4);
+    for (let y = 0; y < height; y++)
+      for (let x = 0; x < width; x++) {
+        const up = Math.cos(((y + 0.5) / height) * Math.PI);
+        const cloud = 0.82 + 0.18 * Math.sin(x * 0.13 + Math.sin(y * 0.4));
+        const moon = Math.exp(-((x - 29) ** 2 / 80 + (y - 16) ** 2 / 34));
+        const sky = (0.025 + Math.max(0, up) * 0.18) * cloud;
+        const i = (y * width + x) * 4;
+        data.set([sky * 0.62 + moon * 1.1, sky * 0.8 + moon * 1.25, sky + moon * 1.4, 1], i);
+      }
+    const environment = new THREE.DataTexture(
+      data,
+      width,
+      height,
+      THREE.RGBAFormat,
+      THREE.FloatType,
+    );
+    environment.mapping = THREE.EquirectangularReflectionMapping;
+    environment.needsUpdate = true;
+    this.textures.add(environment);
+    this.scene.environment = environment;
+  }
+
+  private installLighting() {
+    // A fixed-size pool avoids recompiling shaders as lamps enter the view.
+    // Only the nearest two lights cast soft shadows; distant lights stay cheap.
+    for (let i = 0; i < 6; i++) {
+      const light = new THREE.SpotLight(0xffc48c, 210, 27, 1.02, 0.72, 2);
+      light.castShadow = i < 2;
+      light.shadow.mapSize.set(1024, 1024);
+      light.shadow.camera.near = 0.4;
+      light.shadow.camera.far = 27;
+      light.shadow.bias = -0.0003;
+      light.shadow.normalBias = 0.045;
+      this.streetLights.push(light);
+      this.scene.add(light, light.target);
+    }
+    const beams = this.lamps.map((lamp) => ({ ...lamp, y: lamp.y - 3.3, w: 1, h: 1, d: 1 }));
+    const material = new THREE.ShaderMaterial({
+      transparent: true,
+      depthWrite: false,
+      side: THREE.DoubleSide,
+      blending: THREE.AdditiveBlending,
+      vertexShader: `varying vec3 vPosition;varying vec3 vNormal;varying float vHeight;
+      void main(){vec4 p=modelViewMatrix*instanceMatrix*vec4(position,1.);vPosition=p.xyz;
+      vNormal=normalize(normalMatrix*mat3(instanceMatrix)*normal);vHeight=position.y/6.6+.5;
+      gl_Position=projectionMatrix*p;}`,
+      fragmentShader: `varying vec3 vPosition;varying vec3 vNormal;varying float vHeight;
+      void main(){float edge=pow(abs(dot(normalize(vNormal),normalize(-vPosition))),2.);
+      float vertical=smoothstep(0.,.24,vHeight)*(1.-smoothstep(.8,1.,vHeight));
+      gl_FragColor=vec4(.85,.56,.3,edge*vertical*.065);
+      #include <colorspace_fragment>
+      }`,
+    });
+    this.blocks(beams, material, new THREE.ConeGeometry(4.2, 6.6, 24, 1, true));
+  }
+
+  private updateLighting(x: number, z: number) {
+    // The six-light pool changes beyond illumination range. Its two shadow
+    // slots change closer to the camera: fade shadows at a distance tie so
+    // switching lamps never produces a hard, visible shadow pop.
+    const nearby = this.lamps
+      .map((lamp) => ({ lamp, distance: (lamp.x - x) ** 2 + (lamp.z - z) ** 2 }))
+      .sort((a, b) => a.distance - b.distance)
+      .slice(0, 6);
+    this.streetLights.forEach((light, i) => {
+      const lamp = nearby[i]?.lamp;
+      if (!lamp) {
+        light.intensity = 0;
+        return;
+      }
+      light.position.set(lamp.x, lamp.y - 0.06, lamp.z);
+      light.target.position.set(lamp.x, -0.2, lamp.z);
+      this.lightPositions.value[i].copy(light.position);
+      if (i < 2) {
+        const nextDistance = Math.sqrt(nearby[2]?.distance ?? Infinity);
+        light.shadow.intensity = smooth(0, 5, nextDistance - Math.sqrt(nearby[i].distance));
+      }
+    });
+  }
+
   private lampHalos(lamps: Block[]) {
     const geometry = new THREE.PlaneGeometry(1, 1);
     const material = new THREE.ShaderMaterial({
@@ -564,12 +651,14 @@ export class RainCityScene {
       blending: THREE.AdditiveBlending,
       vertexShader: `varying vec2 vUv;varying float vFade;
       void main(){vUv=uv;vec4 center=modelViewMatrix*instanceMatrix*vec4(0.,0.,0.,1.);
-      center.xy+=position.xy*3.5;vFade=exp(-max(0.,-center.z)*.014);
+      center.xy+=position.xy*4.8;vFade=exp(-max(0.,-center.z)*.012);
       gl_Position=projectionMatrix*center;}`,
       fragmentShader: `varying vec2 vUv;varying float vFade;
       void main(){vec2 p=vUv-.5;float r=length(p)*2.;float glow=exp(-r*7.)*(1.-smoothstep(.6,1.,r));
       float streak=exp(-abs(p.y)*150.)*exp(-abs(p.x)*12.);
-      gl_FragColor=vec4(.7,.38,.15,(glow*.38+streak*.05)*vFade);}`,
+      gl_FragColor=vec4(1.2,.64,.24,(glow*.72+streak*.12)*vFade);
+      #include <colorspace_fragment>
+      }`,
     });
     this.blocks(lamps, material, geometry);
   }
@@ -632,36 +721,6 @@ export class RainCityScene {
     material: THREE.Material,
     geometry: THREE.BufferGeometry = new THREE.BoxGeometry(1, 1, 1),
   ) {
-    if (material instanceof THREE.MeshStandardMaterial) {
-      material.onBeforeCompile = (shader) => {
-        shader.vertexShader = "varying vec3 citySurface;\n" + shader.vertexShader;
-        shader.vertexShader = shader.vertexShader.replace(
-          "#include <begin_vertex>",
-          `#include <begin_vertex>
-          vec4 cityP=vec4(position,1.);
-          #ifdef USE_INSTANCING
-          cityP=instanceMatrix*cityP;
-          #endif
-          citySurface=(modelMatrix*cityP).xyz;`,
-        );
-        shader.fragmentShader =
-          "varying vec3 citySurface;\n" + noise + "\n" + shader.fragmentShader;
-        shader.fragmentShader = shader.fragmentShader.replace(
-          "#include <color_fragment>",
-          `#include <color_fragment>
-          float grime=noise(citySurface.xy*vec2(1.8,.14)+citySurface.z*.2);
-          float grain=noise(citySurface.xy*26.+citySurface.z*3.);
-          float cracks=pow(1.-abs(noise(citySurface.xy*2.+citySurface.z)-.5)*2.,24.);
-          diffuseColor.rgb*=.55+grime*.65+grain*.2-cracks*.23;`,
-        );
-        shader.fragmentShader = shader.fragmentShader.replace(
-          "#include <normal_fragment_begin>",
-          `#include <normal_fragment_begin>
-          normal=normalize(normal+vec3(noise(citySurface.yz*18.)-.5,
-          noise(citySurface.xz*18.)-.5,noise(citySurface.xy*18.)-.5)*.16);`,
-        );
-      };
-    }
     this.geometries.add(geometry);
     this.materials.add(material);
     const mesh = new THREE.InstancedMesh(geometry, material, blocks.length);
@@ -676,6 +735,8 @@ export class RainCityScene {
       mesh.setColorAt(i, color.setScalar(b.shade ?? 1));
     });
     mesh.computeBoundingSphere();
+    mesh.castShadow = material instanceof THREE.MeshStandardMaterial && !material.transparent;
+    mesh.receiveShadow = mesh.castShadow;
     this.scene.add(mesh);
     return mesh;
   }
@@ -712,6 +773,10 @@ export class RainCityScene {
         Math.max(128, Math.round(height * scale * 0.55)),
       );
     this.camera.aspect = width / height;
+    this.reflectionTexel.value.set(
+      1 / Math.max(128, Math.round(width * scale * 0.55)),
+      1 / Math.max(128, Math.round(height * scale * 0.55)),
+    );
     this.dustPixels.value = height * scale * 0.65;
     this.camera.fov = compact ? 78 : 66;
     this.camera.updateProjectionMatrix();
@@ -727,16 +792,19 @@ export class RainCityScene {
     this.camera.lookAt(state.targetX, state.y + 0.7, state.targetZ);
     this.camera.rotateZ(state.bank);
     this.headlight.position.set(state.x, state.y + 1, state.z);
-    this.fragments.forEach((fragment, i) => {
-      const pose = fragmentAt(fragment, t),
-        object = this.debrisPose;
-      object.position.set(pose.x, pose.y, pose.z);
-      object.rotation.set(0, pose.yaw, pose.tilt);
-      object.scale.set(fragment.w, fragment.h, fragment.d);
-      object.updateMatrix();
-      this.debris.setMatrixAt(i, object.matrix);
+    this.updateLighting(state.x, state.z);
+    this.destruction.forEach(({ mesh, fragments }) => {
+      fragments.forEach((fragment, i) => {
+        const pose = fragmentAt(fragment, t),
+          object = this.debrisPose;
+        object.position.set(pose.x, pose.y, pose.z);
+        object.rotation.set(0, pose.yaw, pose.tilt);
+        object.scale.set(fragment.w, fragment.h, fragment.d);
+        object.updateMatrix();
+        mesh.setMatrixAt(i, object.matrix);
+      });
+      mesh.instanceMatrix.needsUpdate = true;
     });
-    this.debris.instanceMatrix.needsUpdate = true;
     this.renderer.render(this.scene, this.camera);
   }
   dispose() {
@@ -744,6 +812,8 @@ export class RainCityScene {
     this.disposed = true;
     this.geometries.forEach((g) => g.dispose());
     this.materials.forEach((m) => m.dispose());
+    this.textures.forEach((texture) => texture.dispose());
+    this.streetLights.forEach((light) => light.shadow.dispose());
     this.scene.traverse((o) => {
       if (o instanceof THREE.InstancedMesh) o.dispose();
     });

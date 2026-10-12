@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "generator": "scripts/build-rain-city-materials.py",
+  "generatorSha256": "4806408b20b74f3b30c3acf7c468b4d38c18f3d541750ad1116225d8a52f4cfa",
+  "normalConvention": "Tangent OpenGL +X +Y +Z",
+  "runtimeTotalBytes": 1927950,
+  "assets": [
+    {"path":"/rain-city-materials/concrete-albedo.webp","material":"concrete","channel":"albedo","repeatMeters":3,"colorSpace":"sRGB","runtimeResolution":1024,"bytes":165510,"sha256":"1b8d38abd28843c000d479b9dcdc03056d91ea6a0e1bb4a166e82a39a0d3cfa2"},
+    {"path":"/rain-city-materials/concrete-normal.png","material":"concrete","channel":"normal","repeatMeters":3,"colorSpace":"Non-Color","runtimeResolution":512,"bytes":613739,"sha256":"67aaaefdda92a8e99e129fa08994812896dbe4865c3e51a138348177698a4ff9"},
+    {"path":"/rain-city-materials/concrete-roughness.png","material":"concrete","channel":"roughness","repeatMeters":3,"colorSpace":"Non-Color","runtimeResolution":512,"bytes":178847,"sha256":"fb319bb1c2b43eae413cc4baf8b7cff988f77239e961133b9368feeb7864ab0e"},
+    {"path":"/rain-city-materials/asphalt-albedo.webp","material":"asphalt","channel":"albedo","repeatMeters":4,"colorSpace":"sRGB","runtimeResolution":1024,"bytes":203038,"sha256":"e3113d92c3cd872ffef954e3edc0610de7edd402cd987176c70ff4ca8360e49b"},
+    {"path":"/rain-city-materials/asphalt-normal.png","material":"asphalt","channel":"normal","repeatMeters":4,"colorSpace":"Non-Color","runtimeResolution":512,"bytes":571937,"sha256":"9bd59728378cd6936396f0265c36c29dfe64bcd505ca3caa684ccc329809f421"},
+    {"path":"/rain-city-materials/asphalt-roughness.png","material":"asphalt","channel":"roughness","repeatMeters":4,"colorSpace":"Non-Color","runtimeResolution":512,"bytes":194879,"sha256":"5199b0da725a29a749cd3e97ddc72f3367720298ed8933705e8bb29ca70a95b5"}
+  ]
+}

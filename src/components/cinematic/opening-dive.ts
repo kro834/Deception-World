@@ -7,6 +7,11 @@
 // drops a frame of the dive. The context is released when the layer goes.
 import { hasConstrainedResources } from "@/lib/rendering-profile";
 import { RainCityScene, cityFlightAt } from "./rain-city-scene";
+import {
+  closeCitySurfaceImages,
+  loadCitySurfaceImages,
+  type CitySurfaceImages,
+} from "./rain-city-materials";
 import DIVE_SOURCE from "./opening-dive.frag.glsl?raw";
 import { ShaderPass, closeGlImage, loadGlImage, shouldDegrade, type GlImage } from "./opening-gl";
 import {
@@ -64,7 +69,12 @@ const COMPACT_BUDGET = 520_000;
 const WIDE_BUDGET = 1_300_000;
 const PRIME_TTL_MS = 1500;
 
-type DiveAssets = { logo: GlImage; atmosphere: GlImage; world: GlImage };
+type DiveAssets = {
+  logo: GlImage;
+  atmosphere: GlImage;
+  world: GlImage;
+  surfaces: CitySurfaceImages | null;
+};
 
 let prepared: Promise<DiveAssets> | null = null;
 let preparedKey = "";
@@ -75,15 +85,36 @@ export function prepareOpeningDive(logo: string) {
   if (prepared && preparedKey === logo) return prepared;
   releasePreparedBitmaps();
   preparedKey = logo;
-  const pending: Promise<DiveAssets> = Promise.all([
+  const pending: Promise<DiveAssets> = Promise.allSettled([
     loadGlImage(logo, { width: 1536, height: 1024 }, 1024),
     loadGlImage(DIVE_ATMOSPHERE_ART, { width: 1280, height: 720 }, 960),
     loadGlImage(DIVE_WORLD_ART, { width: 1024, height: 1536 }, 1024),
-  ]).then(
-    ([logoImage, atmosphere, world]) => {
-      const assets = { logo: logoImage, atmosphere, world };
+    loadCitySurfaceImages(),
+  ] as const).then(
+    ([logoImage, atmosphere, world, surfaces]) => {
+      if (
+        logoImage.status === "rejected" ||
+        atmosphere.status === "rejected" ||
+        world.status === "rejected" ||
+        surfaces.status === "rejected"
+      ) {
+        for (const result of [logoImage, atmosphere, world])
+          if (result.status === "fulfilled") closeGlImage(result.value);
+        if (surfaces.status === "fulfilled") closeCitySurfaceImages(surfaces.value);
+        if (prepared === pending) prepared = null;
+        throw new Error("Opening assets unavailable");
+      }
+      const assets = {
+        logo: logoImage.value,
+        atmosphere: atmosphere.value,
+        world: world.value,
+        surfaces: surfaces.value,
+      };
       if (prepared === pending) preparedValue = assets;
-      else [logoImage, atmosphere, world].forEach(closeGlImage);
+      else {
+        [assets.logo, assets.atmosphere, assets.world].forEach(closeGlImage);
+        closeCitySurfaceImages(assets.surfaces);
+      }
       return assets;
     },
     (error: unknown) => {
@@ -100,7 +131,10 @@ function releasePreparedBitmaps() {
   prepared = null;
   preparedKey = "";
   preparedValue = null;
-  if (value) [value.logo, value.atmosphere, value.world].forEach(closeGlImage);
+  if (value) {
+    [value.logo, value.atmosphere, value.world].forEach(closeGlImage);
+    closeCitySurfaceImages(value.surfaces);
+  }
 }
 
 type Primed = {
@@ -152,7 +186,7 @@ export function primeOpeningDive() {
   let pass: ShaderPass;
   let city: RainCityScene;
   try {
-    city = new RainCityScene();
+    city = new RainCityScene(preparedValue.surfaces);
   } catch {
     return;
   }
@@ -431,7 +465,7 @@ export function runOpeningDive({
         if (disposed) throw new Error("disposed");
         canvas = createCanvas();
         pass = createPass(canvas, assets);
-        city = new RainCityScene();
+        city = new RainCityScene(assets.surfaces);
         compiled = Promise.all([pass.compile(), city.compile()]).then(() => undefined);
         compiled.catch(() => undefined);
       }

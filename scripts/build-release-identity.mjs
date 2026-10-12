@@ -32,6 +32,13 @@ const paths = [
   "/exhibition-studio/studio-light.hdr",
   "/exhibition-studio/plaster-normal.png",
   "/exhibition-studio/plaster-roughness.png",
+  "/rain-city-materials/concrete-albedo.webp",
+  "/rain-city-materials/concrete-normal.png",
+  "/rain-city-materials/concrete-roughness.png",
+  "/rain-city-materials/asphalt-albedo.webp",
+  "/rain-city-materials/asphalt-normal.png",
+  "/rain-city-materials/asphalt-roughness.png",
+  "/rain-city-materials/manifest.json",
 ];
 const assets = paths.map((path) => ({
   path,

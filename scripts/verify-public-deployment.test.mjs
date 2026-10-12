@@ -54,6 +54,91 @@ import {
   verifyPublicDeployment,
 } from "./verify-public-deployment.mjs";
 
+const RAIN_CITY_ASSET_PATHS = [
+  "/rain-city-materials/concrete-albedo.webp",
+  "/rain-city-materials/concrete-normal.png",
+  "/rain-city-materials/concrete-roughness.png",
+  "/rain-city-materials/asphalt-albedo.webp",
+  "/rain-city-materials/asphalt-normal.png",
+  "/rain-city-materials/asphalt-roughness.png",
+  "/rain-city-materials/manifest.json",
+];
+
+test("rain-city release verification accepts exactly seven material paths and checks every delivered byte", async () => {
+  const bytes = new Map(RAIN_CITY_ASSET_PATHS.map((path) => [path, Buffer.from(`asset:${path}`)]));
+  const assets = RAIN_CITY_ASSET_PATHS.map((path) => ({
+    path,
+    sha256: createHash("sha256").update(bytes.get(path)).digest("hex"),
+  }));
+  const run = async ({ changed, unknown } = {}) => {
+    const seen = [];
+    const report = await verifyPublicDeployment({
+      baseUrl: "https://example.test",
+      expectedSha: "a".repeat(40),
+      fetchImpl: async (input) => {
+        const path = new URL(input).pathname;
+        seen.push(path);
+        if (path === "/release-identity.json")
+          return Response.json({
+            sha: "a".repeat(40),
+            assets: unknown ? [{ path: unknown, sha256: "0".repeat(64) }] : assets,
+          });
+        if (bytes.has(path))
+          return new Response(path === changed ? Buffer.from("changed material") : bytes.get(path));
+        if (RETIRED_AI_ROUTES.includes(path)) return new Response("Not Found", { status: 404 });
+        return new Response("Deception World");
+      },
+    });
+    return { report, seen };
+  };
+  const valid = await run();
+  assert.equal(valid.report.ok, true);
+  assert.deepEqual(
+    valid.report.results.filter(({ kind }) => kind === "asset").map(({ path }) => path),
+    RAIN_CITY_ASSET_PATHS,
+  );
+  for (const changed of RAIN_CITY_ASSET_PATHS) {
+    const { report } = await run({ changed });
+    assert.equal(report.ok, false, changed);
+    assert.equal(report.results.find(({ path }) => path === changed)?.ok, false, changed);
+  }
+  for (const unknown of [
+    "/rain-city-materials/unknown.png",
+    "/rain-city-materials/concrete-albedo.png",
+    "/rain-city-materials/asphalt-normal.webp",
+    "/rain-city-materials/../secret.png",
+    "/rain-city-materials/%2e%2e/secret.png",
+    "/rain-city-materials/%2E%2E/secret.png",
+    "/rain-city-materials/concrete-normal.png/../../secret.png",
+    "/rain-city-materials//concrete-normal.png",
+    ...RAIN_CITY_ASSET_PATHS.flatMap((path) =>
+      ["/extra", "%2fextra", ".bak", "?extra=1", "#extra", "\n", "\r\n"].map(
+        (suffix) => `${path}${suffix}`,
+      ),
+    ),
+  ]) {
+    const { report, seen } = await run({ unknown });
+    assert.equal(report.ok, false, unknown);
+    assert.ok(
+      report.results.some(
+        ({ kind, ok, error }) =>
+          kind === "identity" && !ok && error.includes("Invalid release asset path"),
+      ),
+      unknown,
+    );
+    assert.equal(
+      report.results.some(({ kind }) => kind === "asset"),
+      false,
+      unknown,
+    );
+    assert.equal(
+      seen.length,
+      1 + PUBLIC_SMOKE_ROUTES.length + RETIRED_AI_ROUTES.length,
+      `must reject before fetching ${unknown}`,
+    );
+  }
+});
+
 test("public verification hashes exhibition, cinema and authored Rexonance assets and rejects changed bytes or unknown paths", async () => {
   const paths = [
     "/rexonance-forms-20261011/excelsior-cutout-20261012.webp",
@@ -361,6 +446,7 @@ test("new release identity requires shared gallery readiness and preserves artwo
     "/exhibition-studio/studio-light.hdr",
     "/exhibition-studio/plaster-normal.png",
     "/exhibition-studio/plaster-roughness.png",
+    ...RAIN_CITY_ASSET_PATHS,
   ]) {
     const asset = written.assets.find((item) => item.path === path);
     assert.ok(asset, `${path} must be attested before production promotion`);
@@ -371,6 +457,13 @@ test("new release identity requires shared gallery readiness and preserves artwo
         .digest("hex"),
     );
   }
+  assert.deepEqual(
+    written.assets
+      .filter(({ path }) => path.startsWith("/rain-city-materials/"))
+      .map(({ path }) => path),
+    RAIN_CITY_ASSET_PATHS,
+    "the release attests exactly the seven runtime material paths",
+  );
 });
 
 test("an attested shared-gallery release checks config and public data using only unauthenticated GETs", async () => {

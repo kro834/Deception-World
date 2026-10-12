@@ -1,0 +1,68 @@
+{
+  "checkedAt": "2026-10-12",
+  "method": "Decode runtime maps with sharp; compare opposite-edge adjacent pixels against mean interior adjacent-pixel differences per axis",
+  "runtimeTotalBytes": 1927950,
+  "masters": {
+    "resolution": 1024,
+    "engine": "Cycles CPU",
+    "independentBakeHashMatches": 6,
+    "independentBakeCount": 2
+  },
+  "maps": [
+    {
+      "file": "concrete-albedo.webp",
+      "width": 1024,
+      "height": 1024,
+      "hashMatches": true,
+      "seamXRatio": 1.278503,
+      "seamYRatio": 1.139683
+    },
+    {
+      "file": "concrete-normal.png",
+      "width": 512,
+      "height": 512,
+      "hashMatches": true,
+      "seamXRatio": 1.021945,
+      "seamYRatio": 1.061699
+    },
+    {
+      "file": "concrete-roughness.png",
+      "width": 512,
+      "height": 512,
+      "hashMatches": true,
+      "seamXRatio": 0.922879,
+      "seamYRatio": 1.027408
+    },
+    {
+      "file": "asphalt-albedo.webp",
+      "width": 1024,
+      "height": 1024,
+      "hashMatches": true,
+      "seamXRatio": 1.050414,
+      "seamYRatio": 1.010637
+    },
+    {
+      "file": "asphalt-normal.png",
+      "width": 512,
+      "height": 512,
+      "hashMatches": true,
+      "seamXRatio": 0.843316,
+      "seamYRatio": 0.870976
+    },
+    {
+      "file": "asphalt-roughness.png",
+      "width": 512,
+      "height": 512,
+      "hashMatches": true,
+      "seamXRatio": 0.898452,
+      "seamYRatio": 0.519071
+    }
+  ],
+  "visualInspection": { "albedoMasters": true, "normalMaster": true, "cyclesStudioPreview": true },
+  "notEstablishedByAssetChecks": [
+    "browser readiness",
+    "rendering performance",
+    "Three.js lifecycle",
+    "physical Safari behavior"
+  ]
+}
