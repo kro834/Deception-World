@@ -1,0 +1,277 @@
+/* A compact field index that sits inside the source archive without replacing it. */
+.dream-page.dream-page .dream-record-explorer {
+  position: relative;
+  margin: 30px 0 48px;
+  padding: clamp(20px, 4vw, 42px);
+  overflow: hidden;
+  color: #eee9dd;
+  background:
+    linear-gradient(135deg, rgb(222 190 126 / 8%), transparent 42%),
+    linear-gradient(180deg, #11110f, #0a0a09);
+  border: 1px solid rgb(219 186 117 / 30%);
+  border-radius: 4px;
+  box-shadow: 0 20px 60px rgb(0 0 0 / 24%);
+}
+
+.dream-page.dream-page .dream-record-explorer::before {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  content: "";
+  background: linear-gradient(180deg, #e7ca8e, transparent 74%);
+}
+
+.dream-page.dream-page .dream-record-explorer-heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 8px 20px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid rgb(219 186 117 / 22%);
+}
+
+.dream-page.dream-page .dream-record-explorer-heading > p {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: #c9aa70;
+  font: 600 12px/1.4 var(--font-mono, monospace);
+  letter-spacing: 0.14em;
+}
+
+.dream-page.dream-page .dream-record-explorer-heading h3 {
+  margin: 0;
+  color: #f3ead6;
+  font-size: clamp(23px, 3vw, 34px);
+  line-height: 1.35;
+}
+
+.dream-page.dream-page .dream-record-explorer-heading > span {
+  color: #bdb7ab;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.dream-page.dream-page .dream-record-filters {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+  align-items: end;
+  gap: 12px;
+  padding: 22px 0 16px;
+}
+
+.dream-page.dream-page .dream-record-filters label {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+  color: #c9aa70;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+}
+
+.dream-page.dream-page .dream-record-filters select,
+.dream-page.dream-page .dream-record-filters > button,
+.dream-page.dream-page .dream-record-empty button,
+.dream-page.dream-page .dream-record-more {
+  min-width: 0;
+  min-height: 48px;
+  padding: 10px 14px;
+  color: #eee9dd;
+  font: inherit;
+  font-size: 13px;
+  background: #191815;
+  border: 1px solid rgb(219 186 117 / 34%);
+  border-radius: 3px;
+}
+
+.dream-page.dream-page .dream-record-filters select {
+  width: 100%;
+  color-scheme: dark;
+}
+
+.dream-page.dream-page .dream-record-filters > button,
+.dream-page.dream-page .dream-record-empty button,
+.dream-page.dream-page .dream-record-more {
+  cursor: pointer;
+}
+
+.dream-page.dream-page .dream-record-filters > button:disabled {
+  color: #8f8a7e;
+  border-color: rgb(219 186 117 / 16%);
+  cursor: default;
+}
+
+.dream-page.dream-page .dream-record-count {
+  margin: 0 0 12px;
+  color: #c9aa70;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.dream-page.dream-page .dream-record-results {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dream-page.dream-page .dream-record-card {
+  display: flex;
+  height: 100%;
+  min-width: 0;
+  flex-direction: column;
+  padding: clamp(16px, 2.4vw, 24px);
+  background: rgb(255 255 255 / 2.5%);
+  border: 1px solid rgb(255 255 255 / 9%);
+}
+
+.dream-page.dream-page .dream-record-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  margin: 0 0 12px;
+  color: #d0b678;
+  font: 600 12px/1.5 var(--font-mono, monospace);
+  letter-spacing: 0.06em;
+}
+
+.dream-page.dream-page .dream-record-meta span + span {
+  color: #aaa69b;
+}
+
+.dream-page.dream-page .dream-record-card h4 {
+  margin: 0 0 9px;
+  color: #f1e9d9;
+  font-size: 18px;
+  line-height: 1.55;
+}
+
+.dream-page.dream-page .dream-record-excerpt {
+  display: -webkit-box;
+  overflow: hidden;
+  margin: 0;
+  color: #c3bfb6;
+  font-size: 13px;
+  line-height: 1.85;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.dream-page.dream-page .dream-record-cast {
+  margin: 13px 0 0;
+  color: #aaa69b;
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.dream-page.dream-page .dream-record-cast span {
+  margin-right: 8px;
+  color: #c9aa70;
+}
+
+.dream-page.dream-page .dream-record-card nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 16px;
+}
+
+.dream-page.dream-page .dream-record-card nav a {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  padding: 7px 10px;
+  color: #e5d0a0;
+  font-size: 12px;
+  line-height: 1.5;
+  text-decoration: underline;
+  text-decoration-color: rgb(229 208 160 / 44%);
+  text-underline-offset: 0.2em;
+  background: rgb(219 186 117 / 6%);
+  border: 1px solid rgb(219 186 117 / 18%);
+}
+
+.dream-page.dream-page .dream-record-more {
+  display: block;
+  margin: 18px auto 0;
+}
+
+.dream-page.dream-page .dream-record-empty {
+  padding: 30px 18px;
+  color: #c3bfb6;
+  text-align: center;
+  border: 1px dashed rgb(219 186 117 / 30%);
+}
+
+.dream-page.dream-page .dream-record-empty button {
+  margin-top: 10px;
+}
+
+.dream-page.dream-page .dream-record-explorer :is(a, button, select):focus-visible {
+  outline: 2px solid #f0d594;
+  outline-offset: 3px;
+}
+
+@media (max-width: 760px) {
+  .dream-page.dream-page .dream-record-explorer-heading {
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .dream-page.dream-page .dream-record-filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dream-page.dream-page .dream-record-filters > button {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 520px) {
+  .dream-page.dream-page .dream-record-results {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .dream-page.dream-page .dream-record-filters {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .dream-page.dream-page .dream-record-filters > button {
+    grid-column: auto;
+  }
+
+  .dream-page.dream-page .dream-record-card nav {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce), (forced-colors: active) {
+  .dream-page.dream-page .dream-record-card,
+  .dream-page.dream-page .dream-record-filters select,
+  .dream-page.dream-page .dream-record-card nav a {
+    box-shadow: none;
+    transition: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .dream-page.dream-page .dream-record-explorer,
+  .dream-page.dream-page .dream-record-card,
+  .dream-page.dream-page .dream-record-filters select,
+  .dream-page.dream-page .dream-record-filters > button,
+  .dream-page.dream-page .dream-record-empty button,
+  .dream-page.dream-page .dream-record-more,
+  .dream-page.dream-page .dream-record-card nav a {
+    color: CanvasText;
+    background: Canvas;
+    border-color: CanvasText;
+    box-shadow: none;
+  }
+
+  .dream-page.dream-page .dream-record-explorer :is(a, button, select):focus-visible {
+    outline-color: Highlight;
+  }
+}
