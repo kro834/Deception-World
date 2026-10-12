@@ -181,6 +181,7 @@ async function testScreeningRoom(context, viewport) {
   const page = await context.newPage();
   const failures = [];
   const cssDelayMs = Number(process.env.SCREENING_CSS_DELAY_MS || 1200);
+  const allowTouchClickFallback = process.env.SCREENING_TAP_ALLOW_CLICK_FALLBACK === "1";
   let markCssRequest;
   const cssRequestSeen = new Promise((resolve) => {
     markCssRequest = resolve;
@@ -223,12 +224,15 @@ async function testScreeningRoom(context, viewport) {
       )}`,
     );
     failures.push(`${viewport.name}: hydrated trigger did not activate by tap`);
-    await trigger.click();
-    cssUrl = await Promise.race([
-      cssRequestSeen,
-      new Promise((resolve) => setTimeout(() => resolve(null), 10000)),
-    ]);
-    if (cssUrl) console.log(`${viewport.name}: hydrated trigger activated by click fallback after tap`);
+    if (allowTouchClickFallback) {
+      await trigger.click();
+      cssUrl = await Promise.race([
+        cssRequestSeen,
+        new Promise((resolve) => setTimeout(() => resolve(null), 10000)),
+      ]);
+      if (cssUrl)
+        console.log(`${viewport.name}: hydrated trigger activated by click fallback after tap`);
+    }
   }
   if (!cssUrl) {
     const state = await page.evaluate(() => ({
