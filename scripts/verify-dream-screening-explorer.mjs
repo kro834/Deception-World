@@ -20,7 +20,10 @@ const viewports = [
 await mkdir(output, { recursive: true });
 
 async function countResults(page) {
-  const text = await page.locator(".dream-record-count").innerText();
+  await page.waitForFunction(() =>
+    Boolean(document.querySelector(".dream-record-count")?.textContent?.match(/^\d+件の記録/)),
+  );
+  const text = (await page.locator(".dream-record-count").textContent())?.trim() ?? "";
   const match = text.match(/^(\d+)件の記録/);
   assert.ok(match, `Unexpected record count text: ${text}`);
   return Number(match[1]);
@@ -41,24 +44,72 @@ async function noHorizontalOverflow(page, label) {
 
 async function testScreeningRoom(context, viewport) {
   const page = await context.newPage();
+  const failures = [];
+  const cssDelayMs = Number(process.env.SCREENING_CSS_DELAY_MS || 1200);
+  let markCssRequest;
+  const cssRequestSeen = new Promise((resolve) => {
+    markCssRequest = resolve;
+  });
   const errors = [];
   page.on("pageerror", (error) => errors.push(error.message));
   await page.goto(new URL("/dream-chapter#chronicle", base).href, {
     waitUntil: "domcontentloaded",
   });
   await page.locator(".dream-chapter-nav a[href='#posters']").click();
-  await page.waitForURL("**/dream-chapter#posters");
+  await page.waitForURL("**/dream-chapter#posters", { waitUntil: "domcontentloaded" });
+
+  await page.route("**/*dream-screening-room*.css*", async (route) => {
+    markCssRequest(route.request().url());
+    await new Promise((resolve) => setTimeout(resolve, cssDelayMs));
+    await route.continue();
+  });
 
   const trigger = page.locator(".dream-screening-trigger");
   await trigger.scrollIntoViewIfNeeded();
   const departure = await page.evaluate(() => window.scrollY);
   await trigger.click();
+  const cssUrl = await Promise.race([
+    cssRequestSeen,
+    new Promise((resolve) => setTimeout(() => resolve(null), 10000)),
+  ]);
+  assert.ok(cssUrl, "Opening the room requests its lazy stylesheet after the trigger click");
+  await page.waitForFunction(
+    () => document.querySelector(".dream-screening-trigger")?.getAttribute("aria-busy") === "true",
+  );
+  const duringCssDelay = await page.evaluate(() => ({
+    y: window.scrollY,
+    bodyTop: document.body.style.top,
+    triggerText: document.querySelector(".dream-screening-trigger")?.textContent?.trim(),
+  }));
+  assert.equal(
+    duringCssDelay.y,
+    departure,
+    `${viewport.name}: delayed screening CSS must not move the page`,
+  );
+  assert.match(duringCssDelay.triggerText ?? "", /映写室を準備中/);
+  console.log(
+    `${viewport.name} screening cold CSS: ${JSON.stringify({ cssUrl, departure, ...duringCssDelay })}`,
+  );
   const dialog = page.locator(".dream-screening-dialog[open]");
   await dialog.waitFor({ state: "visible" });
+  const scrollWhenOpen = await page.evaluate(() => ({
+    y: window.scrollY,
+    bodyTop: document.body.style.top,
+    bodyPosition: document.body.style.position,
+  }));
+  console.log(
+    `${viewport.name} screening open scroll: ${JSON.stringify({ departure, ...scrollWhenOpen })}`,
+  );
+  assert.equal(
+    scrollWhenOpen.bodyTop,
+    `-${departure}px`,
+    `${viewport.name}: initial modal lock preserves the pre-open scroll offset`,
+  );
   await page.waitForFunction(() => {
     const image = document.querySelector(".dream-screening-picture > img");
     return Boolean(image?.complete && image.naturalWidth > 0);
   });
+  await page.screenshot({ path: `${output}/${viewport.name}-screening-fit.png` });
   await page.waitForFunction(() =>
     document.activeElement?.classList.contains("dream-screening-close"),
   );
@@ -118,17 +169,28 @@ async function testScreeningRoom(context, viewport) {
     Math.abs(zoomMetrics.height - zoomMetrics.naturalHeight) <= 1,
     "100% zoom uses the decoded image height",
   );
+  await page.screenshot({ path: `${output}/${viewport.name}-screening-zoom.png` });
   await zoom.click();
   assert.equal(await zoom.getAttribute("aria-pressed"), "false");
 
   await page.keyboard.press("Escape");
   await page.waitForFunction(() => !document.querySelector(".dream-screening-dialog"));
   await page.waitForFunction(() => document.activeElement?.matches(".dream-screening-trigger"));
-  assert.equal(
-    await page.evaluate(() => window.scrollY),
-    departure,
-    "Escape restores the departure scroll position",
+  const scrollAfterEscape = await page.evaluate(() => ({
+    y: window.scrollY,
+    bodyPosition: document.body.style.position,
+    bodyTop: document.body.style.top,
+    documentTop: document.documentElement.scrollTop,
+    triggerTop: document.querySelector(".dream-screening-trigger")?.getBoundingClientRect().top,
+  }));
+  console.log(
+    `${viewport.name} screening scroll: ${JSON.stringify({ departure, ...scrollAfterEscape })}`,
   );
+  if (scrollAfterEscape.y !== departure) {
+    failures.push(
+      `Escape scroll restoration: expected ${departure}px, found ${scrollAfterEscape.y}px (trigger top ${scrollAfterEscape.triggerTop}px)`,
+    );
+  }
   assert.equal(
     await page.evaluate(() => document.documentElement.dataset.dreamDialogOpen),
     undefined,
@@ -154,6 +216,7 @@ async function testScreeningRoom(context, viewport) {
   assert.deepEqual(errors, [], `${viewport.name} screening room has no page errors`);
   await page.screenshot({ path: `${output}/${viewport.name}-screening-room.png` });
   await page.close();
+  return failures;
 }
 
 async function testRecordExplorer(context, viewport) {
@@ -165,6 +228,9 @@ async function testRecordExplorer(context, viewport) {
   });
   const explorer = page.locator(".dream-record-explorer");
   await explorer.waitFor({ state: "visible" });
+  await page.waitForFunction(() =>
+    Boolean(document.querySelector(".dream-record-count")?.textContent?.match(/^\d+件の記録/)),
+  );
   await noHorizontalOverflow(page, `${viewport.name} record explorer`);
 
   const allCount = await countResults(page);
@@ -202,14 +268,14 @@ async function testRecordExplorer(context, viewport) {
   for (let index = 0; index < visibleCount; index += 1) {
     const card = visibleCards.nth(index);
     assert.equal(
-      (await card.locator(".dream-record-meta span").nth(0).innerText()).trim(),
+      (await card.locator(".dream-record-meta span").nth(0).textContent())?.trim(),
       `CASE ${matchingCase}`,
     );
     assert.equal(
-      (await card.locator(".dream-record-meta span").nth(1).innerText()).trim(),
+      (await card.locator(".dream-record-meta span").nth(1).textContent())?.trim(),
       matchingPlace,
     );
-    assert.match(await card.locator(".dream-record-cast").innerText(), /東風谷慶弥/);
+    assert.match((await card.locator(".dream-record-cast").textContent()) ?? "", /東風谷慶弥/);
   }
   const personLink = visibleCards.first().locator("nav a[href='#dream-character-keiya']");
   assert.equal(
@@ -296,6 +362,7 @@ async function testRecordExplorer(context, viewport) {
   await page.close();
 }
 
+const failures = [];
 try {
   for (const viewport of viewports) {
     const context = await browser.newContext({
@@ -304,21 +371,41 @@ try {
       hasTouch: viewport.hasTouch,
     });
     try {
-      await testScreeningRoom(context, viewport);
-      await testRecordExplorer(context, viewport);
-      console.log(
-        `${viewport.name}: screening room and Chronicle explorer passed (reduced motion)`,
-      );
-    } catch (error) {
-      const page = context.pages()[0];
-      if (page && !page.isClosed()) {
-        await page.screenshot({ path: `${output}/${viewport.name}-failure.png` }).catch(() => {});
+      try {
+        failures.push(...(await testScreeningRoom(context, viewport)));
+        console.log(`${viewport.name}: screening room flow completed (reduced motion)`);
+      } catch (error) {
+        failures.push(`${viewport.name} screening room: ${error.message}`);
+        const page = context.pages().find((candidate) => !candidate.isClosed());
+        if (page) {
+          await page
+            .screenshot({ path: `${output}/${viewport.name}-screening-failure.png` })
+            .catch(() => {});
+        }
       }
-      throw error;
+      try {
+        await testRecordExplorer(context, viewport);
+        console.log(`${viewport.name}: Chronicle explorer passed (reduced motion)`);
+      } catch (error) {
+        failures.push(`${viewport.name} Chronicle explorer: ${error.message}`);
+        const page = context.pages().find((candidate) => !candidate.isClosed());
+        if (page) {
+          await page
+            .screenshot({ path: `${output}/${viewport.name}-explorer-failure.png` })
+            .catch(() => {});
+        }
+      }
     } finally {
       await context.close();
     }
   }
 } finally {
   await browser.close();
+}
+
+if (failures.length) {
+  console.error(`Browser regressions found:\n- ${failures.join("\n- ")}`);
+  process.exitCode = 1;
+} else {
+  console.log("All Dream screening room and Chronicle explorer checks passed.");
 }
