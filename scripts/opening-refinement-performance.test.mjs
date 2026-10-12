@@ -237,11 +237,7 @@ function deferred() {
   return { promise, resolve, reject };
 }
 
-const CITY_BITMAP_SOURCES = [
-  "concrete-albedo.webp", "concrete-normal.png", "concrete-roughness.png",
-  "asphalt-albedo.webp", "asphalt-normal.png", "asphalt-roughness.png",
-].map((name) => `/rain-city-materials/${name}`);
-const DIVE_BITMAP_COUNT = 3 + CITY_BITMAP_SOURCES.length;
+const DIVE_BITMAP_COUNT = 3;
 
 // Use the real module-global preparation/release implementation so the test
 // covers invalidating pending decodes, not a fake engine's cleanup counter.
@@ -265,10 +261,6 @@ function diveBitmapRuntime() {
         loadGlImage: loadImage,
         closeGlImage: (image) => closedImages.push(image),
       };
-      if (name === "./rain-city-materials") return {
-        loadCitySurfaceImages: () => Promise.all(CITY_BITMAP_SOURCES.map(loadImage)),
-        closeCitySurfaceImages: (images) => images?.forEach((image) => closedImages.push(image)),
-      };
       return {};
     },
   });
@@ -281,13 +273,9 @@ function diveBitmapRuntime() {
 }
 
 function assertAllDiveBitmapsClosed(bitmaps, count = DIVE_BITMAP_COUNT) {
-  assert.equal(bitmaps.closedImages.length, count, "all legacy and surface bitmaps close");
+  assert.equal(bitmaps.closedImages.length, count, "all dive bitmaps close");
   assert.equal(new Set(bitmaps.closedImages).size, count, "every bitmap closes exactly once");
-  assert.equal(
-    bitmaps.closedImages.filter(({ source }) => CITY_BITMAP_SOURCES.includes(source)).length,
-    (count / DIVE_BITMAP_COUNT) * CITY_BITMAP_SOURCES.length,
-    "all six baked material bitmaps close for each preparation",
-  );
+
 }
 
 test("the entrance is hidden and disabled throughout idle and playing", () => {
@@ -439,10 +427,11 @@ test("a late dive chunk is allowed during an owned handoff but not during a repl
   }
 });
 
-test("unused completed preparation releases all nine bitmaps without duplicate closes", async () => {
+test("unused completed preparation releases all three bitmaps without duplicate closes", async () => {
   const bitmaps = diveBitmapRuntime();
   const prepared = bitmaps.engine.prepareOpeningDive("/prism.webp");
-  assert.deepEqual(bitmaps.pendingImages.slice(3).map(({ source }) => source), CITY_BITMAP_SOURCES);
+  assert.equal(bitmaps.pendingImages.length, 3);
+  assert.ok(bitmaps.pendingImages.every(({ source }) => !source.includes("rain-city")));
   bitmaps.resolveImages();
   await prepared;
   assert.equal(bitmaps.closedImages.length, 0, "a prepared flight owns its decoded inputs");
@@ -451,7 +440,7 @@ test("unused completed preparation releases all nine bitmaps without duplicate c
   assertAllDiveBitmapsClosed(bitmaps);
 });
 
-test("replaying a title reuses preparation and unmount closes all six surfaces and three legacy images", async () => {
+test("replaying a title reuses preparation and unmount closes all three dive images", async () => {
   for (const decodeBeforeReplay of [false, true]) {
     const bitmaps = diveBitmapRuntime();
     const ui = entryRuntime({ runEffects: true, diveImport: Promise.resolve(bitmaps.engine) });
@@ -499,7 +488,7 @@ test("unmount invalidates a pending real dive preparation and closes every later
   assertAllDiveBitmapsClosed(bitmaps, DIVE_BITMAP_COUNT * 2);
 });
 
-test("a failed legacy decode closes every successful legacy and material bitmap before allowing retry", async () => {
+test("a failed legacy decode closes every successful dive bitmap before allowing retry", async () => {
   for (const failed of [0, 1, 2]) {
     const bitmaps = diveBitmapRuntime();
     const prepared = bitmaps.engine.prepareOpeningDive("/prism.webp");
@@ -509,11 +498,7 @@ test("a failed legacy decode closes every successful legacy and material bitmap 
     await rejected;
     assert.equal(bitmaps.closedImages.length, DIVE_BITMAP_COUNT - 1);
     assert.equal(new Set(bitmaps.closedImages).size, DIVE_BITMAP_COUNT - 1);
-    assert.deepEqual(
-      bitmaps.closedImages.filter(({ source }) => CITY_BITMAP_SOURCES.includes(source)).map(({ source }) => source),
-      CITY_BITMAP_SOURCES,
-      "a legacy failure also releases all successfully decoded city surfaces",
-    );
+
     const retry = bitmaps.engine.prepareOpeningDive("/prism.webp");
     assert.notEqual(retry, prepared);
     assert.equal(bitmaps.pendingImages.length, DIVE_BITMAP_COUNT * 2);

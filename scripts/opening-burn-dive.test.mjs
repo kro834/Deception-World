@@ -17,7 +17,7 @@ const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 const sample = (from, to, step = 1 / 60) =>
   Array.from({ length: Math.round((to - from) / step) + 1 }, (_, index) => from + index * step);
 
-test("GPU loss continues the city rather than resolving the covered route", async () => {
+test("GPU loss continues the dive rather than resolving the covered route", async () => {
   const dive = await read("src/components/cinematic/opening-dive.ts");
   const lost = dive.slice(
     dive.indexOf("function onContextLost"),
@@ -27,7 +27,7 @@ test("GPU loss continues the city rather than resolving the covered route", asyn
   assert.match(lost, /releaseGl\(\)/);
   assert.match(lost, /onFallback\(elapsed\)/);
   assert.doesNotMatch(lost, /\bland\(\)/);
-  assert.match(dive, /if \(pass\.lost \|\| city\?\.lost\) throw new Error\("context-lost"\)/);
+  assert.match(dive, /if \(pass\.lost\) throw new Error\("context-lost"\)/);
   const handoff = await read("src/components/cinematic/opening-handoff.tsx");
   assert.match(
     handoff,
@@ -37,13 +37,14 @@ test("GPU loss continues the city rather than resolving the covered route", asyn
   assert.match(handoff, /end - elapsed \+ 34/);
 });
 
-test("the fallback street covers the opaque landing artwork throughout its flight", async () => {
-  const city = await read("src/styles-rain-city.css");
-  const route = await read("src/styles-route-transitions.css");
-  const cityZ = Number(city.match(/\[data-opening-city-fallback\] \{[^}]*z-index: (\d+)/)[1]);
-  const worldZ = Number(route.match(/\[data-opening-handoff-world\] \{[^}]*z-index: (\d+)/)[1]);
-  assert.ok(cityZ > worldZ);
-  assert.match(city, /prefers-reduced-motion: reduce/);
+test("the restored logo dive does not load the rainy city", async () => {
+  assert.equal(OPENING_DIVE.glEnd, 1.45);
+  const dive = await read("src/components/cinematic/opening-dive.ts");
+  const handoff = await read("src/components/cinematic/opening-handoff.tsx");
+  const root = await read("src/routes/__root.tsx");
+  assert.doesNotMatch(dive, /RainCity|loadCitySurfaceImages/);
+  assert.doesNotMatch(handoff, /RainCityFallback|data-opening-city-fallback/);
+  assert.doesNotMatch(root, /rainCityCss/);
 });
 
 test("the title's clock, the burn and the sequence agree", async () => {

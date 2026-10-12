@@ -46,7 +46,7 @@ for (const engine of engines) {
           HTMLCanvasElement.prototype.getContext = function (type, ...args) {
             if (scenario === "no-webgl" && /webgl/i.test(type)) return null;
             const gl = getContext.call(this, type, ...args);
-            if (/webgl/i.test(type) && gl && this.className === "opening-rain-city") {
+            if (/webgl/i.test(type) && gl && this.className === "opening-dive-canvas") {
               window.__openingContexts.push(gl);
             }
             return gl;
@@ -62,7 +62,7 @@ for (const engine of engines) {
         const started = Date.now();
         await enter.tap();
         if (scenario === "early-loss") {
-          await page.locator('[data-opening-handoff-tier="webgl"] .opening-rain-city').waitFor();
+          await page.locator('[data-opening-handoff-tier="webgl"] .opening-dive-canvas').waitFor();
           assert.ok(
             await page.evaluate(() => {
               const gl = window.__openingContexts.find((gl) => !gl.isContextLost());
@@ -73,31 +73,30 @@ for (const engine of engines) {
           );
         }
         if (scenario !== "reduced") {
-          await page.waitForTimeout(1600);
+          await page.waitForTimeout(350);
           const state = await page.evaluate(() => {
             const root = document.querySelector("[data-opening-handoff-root]");
-            const city = document.querySelector("[data-opening-city-fallback]");
-            const world = document.querySelector("[data-opening-handoff-world]");
-            const canvas = document.querySelector(".opening-rain-city");
+            const logo = document.querySelector("[data-opening-handoff-logo]");
+            const canvas = document.querySelector(".opening-dive-canvas");
             return {
               path: location.pathname,
               tier: root?.dataset.openingHandoffTier,
-              cityOpacity: city && Number(getComputedStyle(city).opacity),
-              cityZ: city && Number(getComputedStyle(city).zIndex),
-              worldZ: world && Number(getComputedStyle(world).zIndex),
+              rootOpacity: root && Number(getComputedStyle(root).opacity),
+              logoOpacity: logo && Number(getComputedStyle(logo).opacity),
+              cityCount: document.querySelectorAll("[data-opening-city-fallback], .opening-rain-city").length,
               canvasOpacity: canvas && Number(getComputedStyle(canvas).opacity),
               fallback: window.__openingDiveStats?.fallback,
             };
           });
+          assert.equal(state.cityCount, 0);
           assert.equal(state.path, "/", "flight must not skip straight to World");
           if (["economy", "no-webgl", "early-loss"].includes(scenario))
             assert.equal(state.tier, "css");
           if (state.tier === "css") {
-            assert.ok(state.cityOpacity > 0.9, "city layer must be opaque mid-flight");
-            assert.ok(state.cityZ > state.worldZ, "city must not hide behind landing art");
+            assert.ok(state.rootOpacity > 0.9, "CSS dive remains visible");
           } else {
             assert.equal(state.tier, "webgl");
-            assert.ok(state.canvasOpacity > 0.9, "3D city must be visible mid-flight");
+            assert.ok(state.canvasOpacity > 0.9, "logo shader must be visible mid-flight");
           }
           await page.screenshot({ path: `${output}/${engine}-${scenario}.png` });
           console.log(JSON.stringify({ engine, scenario, state }));

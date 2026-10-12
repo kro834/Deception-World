@@ -31,7 +31,6 @@ import ios27EnhancementsCss from "../styles-ios27-enhancements.css?url";
 import pickupStabilityCss from "../styles-pickup-stability.css?url";
 import appCss from "../styles.css?url";
 import routeTransitionsCss from "../styles-route-transitions.css?url";
-import rainCityCss from "../styles-rain-city.css?url";
 import frostedControlsCss from "../styles-frosted-controls.css?url";
 import futureInterfaceCss from "../styles-future-interface.css?url";
 import nameWordsCss from "../styles-name-words.css?url";
@@ -170,7 +169,6 @@ export const Route = createRootRoute({
       { rel: "manifest", href: "/__grok/manifest.webmanifest" },
       { rel: "apple-touch-icon", sizes: "180x180", href: "/__grok/icon-180.png" },
       { rel: "stylesheet", href: routeTransitionsCss },
-      { rel: "stylesheet", href: rainCityCss },
       { rel: "stylesheet", href: frostedControlsCss },
       { rel: "stylesheet", href: futureInterfaceCss },
       { rel: "stylesheet", href: nameWordsCss },

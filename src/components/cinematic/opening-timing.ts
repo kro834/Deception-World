@@ -68,7 +68,7 @@ export const OPENING_DIVE = {
   /** The camera breaks through the logo's ring into the world. */
   cut: 0.95,
   /** Last shader frame: the world at its landing framing. */
-  glEnd: 5.6,
+  glEnd: 1.45,
 } as const;
 
 /** GL (bitmaps + shader) must be ready this long after the press, or the dive is CSS. */

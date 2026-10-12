@@ -2,7 +2,6 @@ import { useLayoutEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { OPENING_DIVE } from "./opening-timing";
 import type { DiveRun, DiveStats } from "./opening-dive";
-import { RainCityFallback } from "./rain-city-fallback";
 
 export type OpeningHandoffRect = {
   left: number;
@@ -419,7 +418,7 @@ export function OpeningHandoffLayer({ snapshot, onCovered, onComplete }: Opening
       const cut = OPENING_DIVE.cut * 1000 * k;
       const end = OPENING_DIVE.glEnd * 1000 * k;
       // Resume after a live GL failure without replaying the title or skipping
-      // the street. Always leave a short visible landing sequence.
+      // the dive. Always leave a short visible landing sequence.
       const elapsed = Math.min(Math.max(0, elapsedSeconds * 1000), end - 750);
       const at = (value: number) => Math.min(1, Math.max(0, value / end));
       const add = (node: HTMLElement | null, keyframes: Keyframe[], easing = "linear") => {
@@ -481,12 +480,6 @@ export function OpeningHandoffLayer({ snapshot, onCovered, onComplete }: Opening
         { opacity: 0, transform: "scale(1.35)", offset: at(cut * 0.9) },
         { opacity: 1, transform: "scale(1.3)", offset: at(cut), easing: SETTLE_EASING },
         { opacity: 1, transform: "scale(1)" },
-      ]);
-      add(stableRoot.querySelector("[data-opening-city-fallback]"), [
-        { opacity: 0, transform: "scale(1)" },
-        { opacity: 1, transform: "scale(1.04)", offset: at(480 * k) },
-        { opacity: 1, transform: "scale(1.48)", offset: at((end / k - 700) * k) },
-        { opacity: 0, transform: "scale(1.68)" },
       ]);
       for (const bar of stableRoot.querySelectorAll<HTMLElement>(
         "[data-opening-handoff-letterbox]",
@@ -645,7 +638,6 @@ export function OpeningHandoffLayer({ snapshot, onCovered, onComplete }: Opening
       <div data-opening-handoff-letterbox="top" />
       <div data-opening-handoff-letterbox="bottom" />
       <div ref={glRef} data-opening-handoff-gl />
-      <RainCityFallback />
     </div>,
     document.body,
   );

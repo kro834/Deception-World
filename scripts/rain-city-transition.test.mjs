@@ -12,10 +12,9 @@ import {
   cityDamageAt,
   fragmentAt,
 } from "../src/components/cinematic/rain-city-scene.ts";
-import { OPENING_DIVE } from "../src/components/cinematic/opening-timing.ts";
 
-test("the rainy street's landing clock is exactly the handoff's landing clock", () => {
-  assert.equal(CITY_FLIGHT.end, OPENING_DIVE.glEnd);
+test("the retained rainy street has its independent flight clock", () => {
+  assert.equal(CITY_FLIGHT.end, 5.6);
   assert.ok(0 <= CITY_FLIGHT.enter && CITY_FLIGHT.enter < CITY_FLIGHT.clear);
   assert.ok(CITY_FLIGHT.clear < CITY_FLIGHT.exit && CITY_FLIGHT.exit < CITY_FLIGHT.end);
 });

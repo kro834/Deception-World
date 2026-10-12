@@ -6,12 +6,6 @@
 // changed, under that still frame, so the route's main-thread work never
 // drops a frame of the dive. The context is released when the layer goes.
 import { hasConstrainedResources } from "@/lib/rendering-profile";
-import { RainCityScene, cityFlightAt } from "./rain-city-scene";
-import {
-  closeCitySurfaceImages,
-  loadCitySurfaceImages,
-  type CitySurfaceImages,
-} from "./rain-city-materials";
 import DIVE_SOURCE from "./opening-dive.frag.glsl?raw";
 import { ShaderPass, closeGlImage, loadGlImage, shouldDegrade, type GlImage } from "./opening-gl";
 import {
@@ -73,7 +67,6 @@ type DiveAssets = {
   logo: GlImage;
   atmosphere: GlImage;
   world: GlImage;
-  surfaces: CitySurfaceImages | null;
 };
 
 let prepared: Promise<DiveAssets> | null = null;
@@ -89,18 +82,15 @@ export function prepareOpeningDive(logo: string) {
     loadGlImage(logo, { width: 1536, height: 1024 }, 1024),
     loadGlImage(DIVE_ATMOSPHERE_ART, { width: 1280, height: 720 }, 960),
     loadGlImage(DIVE_WORLD_ART, { width: 1024, height: 1536 }, 1024),
-    loadCitySurfaceImages(),
   ] as const).then(
-    ([logoImage, atmosphere, world, surfaces]) => {
+    ([logoImage, atmosphere, world]) => {
       if (
         logoImage.status === "rejected" ||
         atmosphere.status === "rejected" ||
-        world.status === "rejected" ||
-        surfaces.status === "rejected"
+        world.status === "rejected"
       ) {
         for (const result of [logoImage, atmosphere, world])
           if (result.status === "fulfilled") closeGlImage(result.value);
-        if (surfaces.status === "fulfilled") closeCitySurfaceImages(surfaces.value);
         if (prepared === pending) prepared = null;
         throw new Error("Opening assets unavailable");
       }
@@ -108,12 +98,10 @@ export function prepareOpeningDive(logo: string) {
         logo: logoImage.value,
         atmosphere: atmosphere.value,
         world: world.value,
-        surfaces: surfaces.value,
       };
       if (prepared === pending) preparedValue = assets;
       else {
         [assets.logo, assets.atmosphere, assets.world].forEach(closeGlImage);
-        closeCitySurfaceImages(assets.surfaces);
       }
       return assets;
     },
@@ -133,7 +121,6 @@ function releasePreparedBitmaps() {
   preparedValue = null;
   if (value) {
     [value.logo, value.atmosphere, value.world].forEach(closeGlImage);
-    closeCitySurfaceImages(value.surfaces);
   }
 }
 
@@ -141,7 +128,6 @@ type Primed = {
   canvas: HTMLCanvasElement;
   pass: ShaderPass;
   compiled: Promise<void>;
-  city: RainCityScene;
   timer: number;
 };
 
@@ -172,7 +158,6 @@ function releasePrimed() {
   primed = null;
   window.clearTimeout(current.timer);
   current.pass.dispose();
-  current.city.dispose();
 }
 
 /**
@@ -184,21 +169,14 @@ export function primeOpeningDive() {
   if (primed || currentDiveTier() !== "webgl" || !preparedValue) return;
   const canvas = createCanvas();
   let pass: ShaderPass;
-  let city: RainCityScene;
-  try {
-    city = new RainCityScene(preparedValue.surfaces);
-  } catch {
-    return;
-  }
   try {
     pass = createPass(canvas, preparedValue);
   } catch {
-    city.dispose();
     return; // no (hardware) WebGL: the dive tries once more, then goes CSS
   }
-  const compiled = Promise.all([pass.compile(), city.compile()]).then(() => undefined);
+  const compiled = pass.compile();
   compiled.catch(() => undefined);
-  primed = { canvas, pass, city, compiled, timer: window.setTimeout(releasePrimed, PRIME_TTL_MS) };
+  primed = { canvas, pass, compiled, timer: window.setTimeout(releasePrimed, PRIME_TTL_MS) };
 }
 
 /** The title unmounted: close unused bitmaps and an unclaimed primed context. */
@@ -300,7 +278,6 @@ export function runOpeningDive({
   let disposed = false;
   let landed = false;
   let pass: ShaderPass | null = null;
-  let city: RainCityScene | null = null;
   let canvas: HTMLCanvasElement | null = null;
   let raf = 0;
   let startedAt = 0;
@@ -315,7 +292,6 @@ export function runOpeningDive({
     const width = Math.max(1, window.visualViewport?.width ?? window.innerWidth);
     const height = Math.max(1, window.visualViewport?.height ?? window.innerHeight);
     stats.size = pass.resize(width, height);
-    city?.resize(width, height, pass.rung);
     const aspect = width / height;
     // Screen UV, y up.
     pass.set(
@@ -344,9 +320,7 @@ export function runOpeningDive({
     for (const name of Object.keys(uniforms) as (keyof typeof uniforms)[]) {
       pass.set(name, uniforms[name]);
     }
-    // The legacy logo/landing layer is completely covered mid-flight.
-    if (!city || cityFlightAt(T).opacity < 1) pass.draw();
-    city?.draw(T);
+    pass.draw();
   };
 
   const releaseGl = () => {
@@ -355,9 +329,6 @@ export function runOpeningDive({
     window.removeEventListener("resize", layout);
     document.removeEventListener("visibilitychange", onVisibility);
     canvas?.removeEventListener("webglcontextlost", onContextLost);
-    city?.canvas.removeEventListener("webglcontextlost", onContextLost);
-    city?.dispose();
-    city = null;
     pass?.dispose();
     pass = null;
     canvas?.remove();
@@ -456,15 +427,13 @@ export function runOpeningDive({
         primed = null;
         window.clearTimeout(current.timer);
       }
-      if (current && !current.pass.lost && !current.city.lost) {
+      if (current && !current.pass.lost) {
         stats.primed = true;
         canvas = current.canvas;
         pass = current.pass;
-        city = current.city;
         compiled = current.compiled;
       } else {
         current?.pass.dispose();
-        current?.city.dispose();
         const assets = await withDeadline(
           preparedValue
             ? Promise.resolve(preparedValue)
@@ -474,8 +443,7 @@ export function runOpeningDive({
         if (disposed) throw new Error("disposed");
         canvas = createCanvas();
         pass = createPass(canvas, assets);
-        city = new RainCityScene(assets.surfaces);
-        compiled = Promise.all([pass.compile(), city.compile()]).then(() => undefined);
+        compiled = pass.compile();
         compiled.catch(() => undefined);
       }
       await withDeadline(compiled, deadline);
@@ -483,16 +451,12 @@ export function runOpeningDive({
         releaseGl();
         return tier;
       }
-      if (pass.lost || city?.lost) throw new Error("context-lost");
+      if (pass.lost) throw new Error("context-lost");
       // In GPU memory: the decoded copies can go.
       releasePreparedBitmaps();
       const active: ShaderPass = pass;
       const target: HTMLCanvasElement = canvas;
       host.append(target);
-      if (city) {
-        host.append(city.canvas);
-        city.canvas.addEventListener("webglcontextlost", onContextLost);
-      }
       target.addEventListener("webglcontextlost", onContextLost);
       layout();
       window.addEventListener("resize", layout, { passive: true });

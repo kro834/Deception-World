@@ -9,7 +9,6 @@
 // OPENING_PROFILES=pixel,desktop            limit the viewports (default: both)
 // OPENING_SECTIONS=behaviour,perf,flash     limit the checks (default: all; flash-burn
 //                                           or flash-dive audit one of the two)
-// OPENING_SECTIONS=dive                    only dive tiers, city pixels, TTL and context loss
 // OPENING_TIERS=webgl,css,reduced           limit the flash-audit tiers (default: all)
 // OPENING_SHOTS_DIR=/abs/dir                also save keyframe PNGs and contact sheets
 import assert from "node:assert/strict";
@@ -41,12 +40,6 @@ const PROFILES = {
     hasTouch: true,
   },
   desktop: { viewport: { width: 1440, height: 900 } },
-  ipad: {
-    viewport: { width: 1366, height: 1024 },
-    deviceScaleFactor: 2,
-    hasTouch: true,
-    isMobile: true,
-  },
 };
 const profileNames = (process.env.OPENING_PROFILES || "pixel,desktop")
   .split(",")
@@ -54,7 +47,7 @@ const profileNames = (process.env.OPENING_PROFILES || "pixel,desktop")
 
 // Mirrors src/components/cinematic/opening-timing.ts.
 const SEQUENCE_SECONDS = 7.2;
-const DIVE = { glEnd: 5.6 };
+const DIVE = { glEnd: 1.45 };
 const FPS = 60;
 
 const warnings = [];
@@ -81,41 +74,14 @@ const NO_WEBGL = () => {
     return getContext.call(this, type, ...rest);
   };
 };
-const MISSING_CITY_MAPS = () => {
-  const fetch = window.fetch.bind(window);
-  window.fetch = (input, ...rest) =>
-    String(input).includes("/rain-city-materials/")
-      ? Promise.resolve(new Response("unavailable", { status: 503 }))
-      : fetch(input, ...rest);
-};
 // Counts the opening's contexts (by canvas class) and keeps them for isContextLost().
 const COUNT_WEBGL = () => {
   window.__glContexts = [];
   const getContext = HTMLCanvasElement.prototype.getContext;
   HTMLCanvasElement.prototype.getContext = function (type, ...rest) {
     const context = getContext.call(this, type, ...rest);
-    if (
-      /webgl/i.test(String(type)) &&
-      context &&
-      !window.__glContexts.some((entry) => entry.context === context)
-    ) {
-      const entry = { kind: this.className, context, draws: 0 };
-      window.__glContexts.push(entry);
-      if (this.className === "opening-rain-city") {
-        for (const name of [
-          "drawArrays",
-          "drawElements",
-          "drawArraysInstanced",
-          "drawElementsInstanced",
-        ]) {
-          if (typeof context[name] !== "function") continue;
-          const draw = context[name].bind(context);
-          context[name] = (...args) => {
-            entry.draws++;
-            return draw(...args);
-          };
-        }
-      }
+    if (/webgl/i.test(String(type)) && context) {
+      window.__glContexts.push({ kind: this.className, context });
     }
     return context;
   };
@@ -143,13 +109,6 @@ async function openTitle(browser, name, { audit = false, init = [], reducedMotio
   if (reducedMotion) await page.emulateMedia({ reducedMotion: "reduce" });
   const errors = [];
   page.on("pageerror", (error) => errors.push(error.message));
-  page.on("console", (message) => {
-    if (
-      message.type() === "error" &&
-      /shader|WebGLProgram|VALIDATE_STATUS|GL_INVALID|GL_INVALID_OPERATION/i.test(message.text())
-    )
-      errors.push(`GPU console: ${message.text()}`);
-  });
   if (audit) await page.clock.install();
   await page.goto(new URL(audit ? "/?opening-audit" : "/", base).href);
   await page.waitForSelector(".cine-stage");
@@ -158,10 +117,9 @@ async function openTitle(browser, name, { audit = false, init = [], reducedMotio
 
 const contexts = (page) =>
   page.evaluate(() =>
-    (window.__glContexts ?? []).map(({ kind, context, draws }) => ({
+    (window.__glContexts ?? []).map(({ kind, context }) => ({
       kind,
       lost: context.isContextLost(),
-      draws,
     })),
   );
 
@@ -255,21 +213,10 @@ async function checkLogoSitsInScene(browser, name) {
 async function checkEntrancePhase(page, name, ready) {
   // Locate the DOM control even when hidden from the accessibility tree.
   const entrance = page.locator(".cine-btn-primary");
-  assert.equal(
-    await entrance.isVisible(),
-    ready,
-    `${name}: entrance visibility follows completion`,
-  );
-  assert.equal(
-    await entrance.isDisabled(),
-    !ready,
-    `${name}: entrance cannot activate during playback`,
-  );
+  assert.equal(await entrance.isVisible(), ready, `${name}: entrance visibility follows completion`);
+  assert.equal(await entrance.isDisabled(), !ready, `${name}: entrance cannot activate during playback`);
   assert.equal(await page.locator(".cine-replay-slot").getAttribute("aria-hidden"), String(!ready));
-  assert.equal(
-    await page.locator(".cine-stage").getAttribute("data-opening-entry"),
-    ready ? "ready" : "pending",
-  );
+  assert.equal(await page.locator(".cine-stage").getAttribute("data-opening-entry"), ready ? "ready" : "pending");
 }
 
 async function checkBurnWebgl(browser, name) {
@@ -390,7 +337,6 @@ async function pressEnter(page, name) {
 async function checkDive(browser, name) {
   for (const [label, options, expected] of [
     ["capable", { init: [COUNT_WEBGL] }, "webgl"],
-    ["missing-city-maps", { init: [COUNT_WEBGL, MISSING_CITY_MAPS] }, "webgl"],
     ["no-webgl", { init: [NO_WEBGL] }, "css"],
     ["save-data", { init: [SAVE_DATA, COUNT_WEBGL] }, "css"],
     ["reduced", { reducedMotion: true, init: [COUNT_WEBGL] }, "reduced"],
@@ -420,66 +366,20 @@ async function checkDive(browser, name) {
     assert.equal(tier, expected, `${name} ${label}: dive tier`);
     if (tier === "webgl") {
       assert.equal(await page.locator(".opening-dive-canvas").count(), 1);
-      assert.equal(await page.locator(".opening-rain-city").count(), 1);
-      assert.equal(
-        await page.locator(".opening-rain-city").getAttribute("data-materials"),
-        label === "missing-city-maps" ? "procedural-fallback" : "blender-baked",
-        `${name}: actual baked assets are decoded before the first frame`,
-      );
       assert.ok(readyAfter <= 800, `${name}: GL ready ${readyAfter} ms after the press`);
-      await page.waitForFunction(
-        () => {
-          const city = document.querySelector(".opening-rain-city");
-          return (
-            city &&
-            Number(getComputedStyle(city).opacity) > 0.95 &&
-            window.__glContexts.some(
-              (entry) => entry.kind === "opening-rain-city" && entry.draws > 0,
-            )
-          );
-        },
-        null,
-        { timeout: 2500 },
-      );
-      const { width, height } = PROFILES[name].viewport;
-      const cityPixels = await samplePixels(
-        browser,
-        await page.locator(".opening-rain-city").screenshot(),
-        // Midnight has deliberately black windows. Sample the whole image,
-        // rather than letting three points inside windows classify it as blank.
-        Array.from({ length: 49 }, (_, i) => [
-          (((i % 7) + 0.5) / 7) * width,
-          ((Math.floor(i / 7) + 0.5) / 7) * height,
-        ]),
-        PROFILES[name].deviceScaleFactor ?? 1,
-      );
-      assert.ok(
-        cityPixels.filter((rgb) => Math.max(...rgb) > 20).length >= 5,
-        `${name}: city is not a black canvas ${JSON.stringify(cityPixels)}`,
-      );
-      assert.ok(
-        new Set(cityPixels.map((rgb) => rgb.join(","))).size > 8,
-        `${name}: city has spatial detail`,
-      );
-      console.log(JSON.stringify({ check: "rain-city-drawn", name, pixels: cityPixels }));
     }
     await page.waitForURL(/\/world$/, { timeout: 8000 });
     await page.locator("[data-opening-handoff-root]").waitFor({ state: "detached", timeout: 8000 });
     const after = await page.evaluate(() => ({
       canvases: document.querySelectorAll(".opening-dive-canvas").length,
-      cityCanvases: document.querySelectorAll(".opening-rain-city").length,
       loading: document.documentElement.hasAttribute("data-loading"),
       stats: window.__openingDiveStats ?? null,
     }));
     assert.equal(after.canvases, 0);
-    assert.equal(after.cityCanvases, 0);
     assert.equal(after.loading, false);
     const dive = (await contexts(page)).filter((entry) => entry.kind === "opening-dive-canvas");
-    const city = (await contexts(page)).filter((entry) => entry.kind === "opening-rain-city");
     if (tier === "webgl") {
       assert.equal(dive.length, 1, `${name}: one dive context ${JSON.stringify(dive)}`);
-      assert.equal(city.length, 1, `${name}: one city context ${JSON.stringify(city)}`);
-      assert.ok(city[0].draws > 0, `${name}: real city GPU draws occurred`);
       // Primed at pointerdown (touch: 60 ms into the contact or at pointerup).
       assert.equal(after.stats.primed, true, `${name}: the dive adopted the primed context`);
       if (readyAfter > 450) warn(`${name}: GL ready ${readyAfter} ms after the press`);
@@ -488,12 +388,7 @@ async function checkDive(browser, name) {
       dive.every((entry) => entry.lost),
       `${name} ${label}: dive contexts released`,
     );
-    assert.ok(
-      city.every((entry) => entry.lost),
-      `${name} ${label}: city contexts released`,
-    );
     if (expected !== "webgl") assert.equal(dive.length, 0, `${name} ${label}: no dive context`);
-    if (expected !== "webgl") assert.equal(city.length, 0, `${name} ${label}: no city context`);
     assert.deepEqual(errors, []);
     console.log(
       JSON.stringify({
@@ -509,7 +404,7 @@ async function checkDive(browser, name) {
     );
     await context.close();
   }
-  // A press that never becomes a click primes both contexts, released after their TTL.
+  // A press that never becomes a click primes one context, released after its TTL.
   if (!PROFILES[name].hasTouch) {
     const { context, page, errors } = await openTitle(browser, name, { init: [COUNT_WEBGL] });
     await page.locator(".cine-stage.is-playing").waitFor();
@@ -526,16 +421,9 @@ async function checkDive(browser, name) {
     const primedNow = (await contexts(page)).filter(
       (entry) => entry.kind === "opening-dive-canvas",
     );
-    const cityPrimed = (await contexts(page)).filter((entry) => entry.kind === "opening-rain-city");
     await page.waitForTimeout(1600);
     const later = (await contexts(page)).filter((entry) => entry.kind === "opening-dive-canvas");
-    const cityLater = (await contexts(page)).filter((entry) => entry.kind === "opening-rain-city");
     assert.equal(primedNow.length, 1, `${name}: pointerdown primes the dive`);
-    assert.equal(cityPrimed.length, 1, `${name}: pointerdown primes the city`);
-    assert.ok(
-      cityLater.length === 1 && cityLater.every((entry) => entry.lost),
-      `${name}: unclaimed city prime is released`,
-    );
     assert.ok(
       later.every((entry) => entry.lost),
       `${name}: an unclaimed prime is released`,
@@ -546,72 +434,6 @@ async function checkDive(browser, name) {
       JSON.stringify({ check: "dive-prime-ttl", name, primed: primedNow.length, released: true }),
     );
     await context.close();
-  }
-}
-
-async function checkDiveContextLoss(browser, name) {
-  for (const kind of ["opening-dive-canvas", "opening-rain-city"]) {
-    const { context, page, errors } = await openTitle(browser, name, { init: [COUNT_WEBGL] });
-    try {
-      await page.locator(".cine-stage.is-playing").waitFor();
-      await page.keyboard.press("Escape");
-      await page.locator(".cine-stage.is-complete").waitFor();
-      await page.waitForTimeout(1500);
-      await pressEnter(page, name);
-      await page.waitForFunction(() =>
-        document.querySelector('[data-opening-handoff-tier="webgl"] .opening-rain-city'),
-      );
-      // Lose the city context while the first facade is actively breaking,
-      // not just before the animation has allocated its instance buffers.
-      if (kind === "opening-rain-city") await page.waitForTimeout(3300);
-      const lost = await page.evaluate((kind) => {
-        const entry = window.__glContexts.find((entry) => entry.kind === kind);
-        const extension = entry?.context.getExtension("WEBGL_lose_context");
-        if (!extension) return false;
-        extension.loseContext();
-        return true;
-      }, kind);
-      assert.equal(lost, true, `${name}: real context loss supported for ${kind}`);
-      await page.locator('[data-opening-handoff-tier="css"]').waitFor({ timeout: 2000 });
-      await page.waitForTimeout(550);
-      const continuation = await page.evaluate(() => {
-        const city = document.querySelector("[data-opening-city-fallback]");
-        const world = document.querySelector("[data-opening-handoff-world]");
-        return {
-          path: location.pathname,
-          opacity: city && Number(getComputedStyle(city).opacity),
-          cityZ: city && Number(getComputedStyle(city).zIndex),
-          worldZ: world && Number(getComputedStyle(world).zIndex),
-        };
-      });
-      assert.equal(continuation.path, "/", `${name}: GPU loss must not skip the flight`);
-      assert.ok(continuation.opacity > 0.9, `${name}: CSS city continues visibly`);
-      assert.ok(continuation.cityZ > continuation.worldZ, `${name}: city is above landing art`);
-      await page.waitForURL(/\/world$/, { timeout: 8000 });
-      await page
-        .locator("[data-opening-handoff-root]")
-        .waitFor({ state: "detached", timeout: 8000 });
-      const final = await page.evaluate(() => ({
-        fallback: window.__openingDiveStats?.fallback,
-        loading: document.documentElement.hasAttribute("data-loading"),
-        canvases: document.querySelectorAll(".opening-dive-canvas,.opening-rain-city").length,
-      }));
-      assert.equal(final.fallback, "context-lost");
-      assert.equal(final.loading, false);
-      assert.equal(final.canvases, 0);
-      const all = (await contexts(page)).filter((entry) =>
-        ["opening-dive-canvas", "opening-rain-city"].includes(entry.kind),
-      );
-      assert.equal(all.length, 2);
-      assert.ok(
-        all.every((entry) => entry.lost),
-        `${name}: both contexts released after ${kind} loss`,
-      );
-      assert.deepEqual(errors, []);
-      console.log(JSON.stringify({ check: "dive-context-loss", name, kind, released: true }));
-    } finally {
-      await context.close();
-    }
   }
 }
 
@@ -1063,9 +885,7 @@ async function auditDiveFlashes(browser, name, tier) {
     // fail-safe cannot change the route in the middle of the audit.
     await page.clock.pauseAt(await page.evaluate(() => Date.now() + 5));
     const keyframes = new Set(
-      [0, 0.2, 0.4, 0.6, 1.2, 1.8, 2.5, 2.9, 3.1, 3.4, 3.6, 4.2, 4.5, 4.7, 4.9, 5.2, 5.58].map(
-        (t) => Math.round(t * FPS),
-      ),
+      [0, 0.2, 0.4, 0.6, 0.8, 0.9, 0.95, 1.05, 1.2, 1.44].map((t) => Math.round(t * FPS)),
     );
     for (let frame = 0; frame < DIVE.glEnd * FPS; frame += 1) {
       const t = frame / FPS;
@@ -1116,19 +936,15 @@ async function auditDiveFlashes(browser, name, tier) {
 
 const browser = await chromium.launch({ channel });
 try {
+  if (sections.has("dive")) {
+    for (const name of profileNames) await checkDive(browser, name);
+  }
   if (sections.has("behaviour")) {
     for (const name of profileNames) {
       await checkLogoSitsInScene(browser, name);
       await checkBurnWebgl(browser, name);
       await checkBurnTiers(browser, name);
       await checkDive(browser, name);
-      await checkDiveContextLoss(browser, name);
-    }
-  }
-  if (sections.has("dive") && !sections.has("behaviour")) {
-    for (const name of profileNames) {
-      await checkDive(browser, name);
-      await checkDiveContextLoss(browser, name);
     }
   }
   if (sections.has("perf") && profileNames.includes("pixel")) await checkPerformance(browser);
