@@ -625,8 +625,14 @@ function setup({ reduced = false, economy = false, loading = false } = {}) {
     rekey() {
       const rows = metrics();
       const processing = element("rxs-processing-comparison");
+      const removedNodes = comparison.children.splice(
+        0,
+        comparison.children.length,
+        rows,
+        processing,
+      );
       for (const watcher of live(comparison))
-        watcher.callback([{ addedNodes: [rows, processing] }]);
+        watcher.callback([{ addedNodes: [rows, processing], removedNodes }]);
       return rows;
     },
     tick(ms) {
@@ -670,6 +676,52 @@ test("a change of challenger arms the new rows, which clash when they are (or al
   assert.equal(rows.children[2].getAttribute("data-exf-clash"), "true");
   assert.equal(rows.children[0].getAttribute("data-exf-clash"), "");
   cleanup();
+});
+
+test("replacing a tape releases its rows, observers and active timers before the next clash", () => {
+  const t = setup();
+  const cleanup = t.mount();
+  const observer = t.io()[0];
+  const [active, pending] = t.initial.children;
+  t.reach(active);
+  assert.equal(t.timers.size, 1);
+  let current = t.rekey();
+  assert.equal(t.timers.size, 0, "the removed row's timer is cancelled at replacement");
+  assert.equal(active.getAttribute("data-exf-clash"), "done");
+  assert.equal(pending.hasAttribute("data-exf-clash"), false);
+  assert.deepEqual([...observer.targets], current.children);
+  observer.callback([{ target: pending, isIntersecting: true }], observer);
+  assert.equal(t.timers.size, 0, "a stale intersection cannot land the removed row");
+  for (let index = 0; index < 50; index += 1) {
+    const previous = current;
+    current = t.rekey();
+    assert.deepEqual([...observer.targets], current.children);
+    for (const row of previous.children) assert.equal(row.hasAttribute("data-exf-clash"), false);
+  }
+  t.tick(CLASH_MS);
+  assert.equal(t.timers.size, 0);
+  cleanup();
+});
+
+test("a batched intermediate tape and callbacks after unmount cannot re-arm removed rows", () => {
+  const t = setup();
+  const cleanup = t.mount();
+  const watcher = t.live(t.comparison)[0];
+  const observer = t.io()[0];
+  const intermediate = metrics();
+  const final = metrics();
+  t.comparison.children.splice(0, 1, final);
+  watcher.callback([
+    { addedNodes: [intermediate], removedNodes: [t.initial] },
+    { addedNodes: [final], removedNodes: [intermediate] },
+  ]);
+  assert.deepEqual([...observer.targets], final.children);
+  for (const row of intermediate.children) assert.equal(row.hasAttribute("data-exf-clash"), false);
+  cleanup();
+  watcher.callback([{ addedNodes: [final], removedNodes: [] }]);
+  observer.callback([{ target: final.children[0], isIntersecting: true }], observer);
+  assert.equal(t.timers.size, 0);
+  for (const row of final.children) assert.equal(row.hasAttribute("data-exf-clash"), false);
 });
 
 test("the engine stands down for reduced motion, economy rendering, the load gate and a hidden page, and releases everything", () => {

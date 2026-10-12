@@ -409,7 +409,9 @@ function initRail(root) {
     const list = tabs();
     if (!list.length) return;
     const next = clamp(i, 0, list.length - 1);
-    const changed = next !== active;
+    // A controlled tab can roll back while the finger still owns the lens.
+    const selected = list.findIndex(t => t.getAttribute('aria-selected') === 'true');
+    const changed = next !== (selected < 0 ? active : selected);
     active = next;
     syncTabState(active);
     if (changed) root.dispatchEvent(new CustomEvent('railselect', { detail: { index: active } }));
@@ -864,10 +866,11 @@ function initRail(root) {
   });
 
   const relayout = () => {
-    if (gesture) return;
     const i = tabs().findIndex((t) => t.getAttribute('aria-selected') === 'true');
     if (i >= 0) active = i;
     syncTabState(active);
+    // Keep the committed selection current without stealing a dragged lens.
+    if (gesture && gesture.hold !== 'armed') return;
     settle(active);
   };
   let ro = 0;

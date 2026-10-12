@@ -190,31 +190,21 @@ test("special-site parallax only updates meaningful visible frames", () => {
   }
 });
 
-test("native selector preserves keyboard focus and releases pointer focus", () => {
-  assert.match(component, /const selectPointerInteractionRef = useRef\(false\)/);
-  assert.match(
-    component,
-    /onPointerDown=\{\(\) => \{[\s\S]*?selectPointerInteractionRef\.current = true/,
+test("visible opponent choices expose selection and retain keyboard focus", () => {
+  assert.match(component, /className="exs-opponent-options"[\s\S]*?role="group"/);
+  assert.match(component, /aria-pressed=\{baseline === key\}/);
+  assert.match(component, /onClick=\{\(\) => setBaseline\(key\)\}/);
+  const choices = component.slice(
+    component.indexOf('className="exs-opponent-options"'),
+    component.indexOf('className="rxs-comparison-formula"'),
   );
-  assert.match(
-    component,
-    /onKeyDown=\{\(\) => \{[\s\S]*?selectPointerInteractionRef\.current = false/,
-  );
-  assert.match(
-    component,
-    /onBlur=\{\(\) => \{[\s\S]*?selectPointerInteractionRef\.current = false/,
-  );
-  assert.match(
-    component,
-    /if \(!selectPointerInteractionRef\.current\) return;[\s\S]*?releaseControlFocus\(control\)/,
-  );
-  assert.doesNotMatch(
-    component,
-    /setBaseline\(control\.value as ExtremeBaseline\);\s*releaseControlFocus\(control\)/,
-  );
+  assert.doesNotMatch(choices, /releaseControlFocus|\.blur\(/);
+  assert.match(choices, /role="status"/);
 });
 
-test("stage panel is named by the selected stage tab", () => {
+test("stage panel is named by the displayed stage while selection prepares", () => {
   assert.match(component, /id=\{`exs-stage-tab-\$\{key\}`\}/);
-  assert.match(component, /aria-labelledby=\{`exs-stage-tab-\$\{stage\}`\}/);
+  assert.match(component, /aria-labelledby=\{`exs-stage-tab-\$\{shownStage\}`\}/);
+  assert.match(component, /aria-busy=\{stagePending\}/);
+  assert.match(component, /const activeStage = EXTREME_STAGES\[shownStage\]/);
 });
