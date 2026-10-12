@@ -6,6 +6,7 @@ import { checkedUrl } from "./browser-guard.mjs";
 const base = checkedUrl(process.env.BASE_URL || "http://127.0.0.1:8574");
 const engine = process.env.PW_ENGINE === "webkit" ? webkit : chromium;
 const engineName = process.env.PW_ENGINE === "webkit" ? "webkit" : "chromium";
+const reducedMotion = process.env.PW_MOTION === "full" ? "no-preference" : "reduce";
 const browser = await engine.launch(
   engine === chromium ? { channel: process.env.PW_BROWSER_CHANNEL || "chrome" } : undefined,
 );
@@ -563,13 +564,13 @@ try {
   for (const viewport of viewports) {
     const context = await browser.newContext({
       viewport: { width: viewport.width, height: viewport.height },
-      reducedMotion: "reduce",
+      reducedMotion,
       hasTouch: viewport.hasTouch,
     });
     try {
       try {
         failures.push(...(await testScreeningRoom(context, viewport)));
-        console.log(`${viewport.name}: screening room flow completed (reduced motion)`);
+        console.log(`${viewport.name}: screening room flow completed (${reducedMotion})`);
       } catch (error) {
         failures.push(`${viewport.name} screening room: ${error.message}`);
         const page = context.pages().find((candidate) => !candidate.isClosed());
@@ -581,7 +582,7 @@ try {
       }
       try {
         await testRecordExplorer(context, viewport);
-        console.log(`${viewport.name}: Chronicle explorer passed (reduced motion)`);
+        console.log(`${viewport.name}: Chronicle explorer passed (${reducedMotion})`);
       } catch (error) {
         failures.push(`${viewport.name} Chronicle explorer: ${error.message}`);
         const page = context.pages().find((candidate) => !candidate.isClosed());
