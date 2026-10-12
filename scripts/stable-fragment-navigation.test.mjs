@@ -224,6 +224,21 @@ test("pointercancel releases the path, including during a long press", () => {
   h.cleanup();
 });
 
+test("blur and pagehide release a pointer whose up or cancel never arrived", () => {
+  for (const end of ["blur", "pagehide"]) {
+    const h = setup();
+    h.event();
+    h.emit("pointerdown");
+    h.flush(3000);
+    assert.deepEqual(h.sections.map((s) => s.style.contentVisibility), ["visible", "visible", ""]);
+    h.emit(end);
+    assert.deepEqual(h.sections.map((s) => s.style.contentVisibility), ["auto", "", ""]);
+    assert.equal(h.listeners.size, 0);
+    assert.equal(h.timers.size, 0);
+    h.cleanup();
+  }
+});
+
 test("a drag without a click releases after a bounded post-pointerup fallback", () => {
   const h = setup();
   h.event();

@@ -38,6 +38,8 @@ export function holdFragmentPath(root, target, environment = window) {
     environment.removeEventListener("pointercancel", release);
     environment.removeEventListener("click", onClick);
     environment.removeEventListener("wheel", finishWhenIdle);
+    environment.removeEventListener("blur", release);
+    environment.removeEventListener("pagehide", release);
     sections.forEach((section) => {
       const hold = fragmentPathHolds.get(section);
       if (!hold || --hold.owners > 0) return;
@@ -76,6 +78,8 @@ export function holdFragmentPath(root, target, environment = window) {
   environment.addEventListener("pointercancel", release, { passive: true });
   environment.addEventListener("click", onClick);
   environment.addEventListener("wheel", finishWhenIdle, { passive: true });
+  environment.addEventListener("blur", release);
+  environment.addEventListener("pagehide", release);
   limitTimer = environment.setTimeout(finishWhenIdle, 3000);
   onScroll();
   return release;
