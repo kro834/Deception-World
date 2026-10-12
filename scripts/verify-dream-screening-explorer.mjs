@@ -274,9 +274,11 @@ async function testScreeningRoom(context, viewport) {
   console.log(
     `${viewport.name} screening open scroll: ${JSON.stringify({ departure, ...scrollWhenOpen })}`,
   );
-  assert.equal(
-    scrollWhenOpen.bodyTop,
-    `-${departure}px`,
+  // Normal-motion WebKit can round the fragment's final composited position
+  // by one CSS pixel when temporary materialization ends; larger jumps fail.
+  const scrollTolerance = reducedMotion === "no-preference" ? 1 : 0;
+  assert.ok(
+    Math.abs(-Number.parseFloat(scrollWhenOpen.bodyTop) - departure) <= scrollTolerance,
     `${viewport.name}: initial modal lock preserves the pre-open scroll offset`,
   );
   await page.waitForFunction(() => {
@@ -382,7 +384,7 @@ async function testScreeningRoom(context, viewport) {
   console.log(
     `${viewport.name} screening scroll: ${JSON.stringify({ departure, ...scrollAfterEscape })}`,
   );
-  if (scrollAfterEscape.y !== departure) {
+  if (Math.abs(scrollAfterEscape.y - departure) > scrollTolerance) {
     failures.push(
       `Escape scroll restoration: expected ${departure}px, found ${scrollAfterEscape.y}px (trigger top ${scrollAfterEscape.triggerTop}px)`,
     );
