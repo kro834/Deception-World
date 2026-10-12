@@ -475,7 +475,7 @@ test("poster autoplay and prefetch pause across the Dream poster focus boundary"
     /if \(!event\.currentTarget\.contains\(event\.relatedTarget\)\) \{\s*setPosterControlsFocused\(false\);\s*\}/,
   );
   assert.equal(
-    pageSource.match(/posterControlsFocused,\s*(?:\n\s*)?poster(?:Index|Visible)/g)?.length,
+    pageSource.match(/posterControlsFocused,\s*screeningActive,\s*poster(?:Index|Visible)/g)?.length,
     2,
   );
 });

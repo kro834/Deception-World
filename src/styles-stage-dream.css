@@ -184,6 +184,84 @@ html[data-family="dream"] main.dream-page.dream-page > .dream-section > .dream-s
     linear-gradient(180deg, var(--dr-ink) 0, var(--dr-lacquer) 52%, var(--dr-ink) 100%);
 }
 
+/* Four projected stills give the intertitles their own scenes. The frame,
+   ghost numeral and typography remain over the images; the soft ink mask
+   leaves all heading text readable, including on a narrow programme leaf. */
+html[data-family="dream"]
+  main.dream-page.dream-page
+  > .dream-section
+  > .dream-section-heading
+  > .dream-act-still {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 43%;
+  opacity: 0.32;
+  filter: saturate(0.75);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 18%, #000 82%, transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0, #000 18%, #000 82%, transparent 100%);
+  pointer-events: none;
+}
+
+html[data-family="dream"]
+  main.dream-page.dream-page
+  > .dream-character-section
+  > .dream-section-heading
+  > .dream-act-still {
+  object-position: 50% 29%;
+  opacity: 0.27;
+}
+
+html[data-family="dream"]
+  main.dream-page.dream-page
+  > .dream-dolminence-section
+  > .dream-section-heading
+  > .dream-act-still {
+  object-position: 50% 48%;
+  opacity: 0.31;
+}
+
+html[data-family="dream"]
+  main.dream-page.dream-page
+  > .dream-case-section
+  > .dream-section-heading
+  > .dream-act-still {
+  object-position: 50% 54%;
+  opacity: 0.21;
+}
+
+@media (max-width: 760px) {
+  html[data-family="dream"]
+    main.dream-page.dream-page
+    > .dream-section
+    > .dream-section-heading
+    > .dream-act-still {
+    opacity: 0.22;
+    -webkit-mask-image: linear-gradient(
+      180deg,
+      transparent 0,
+      #000 24%,
+      #000 78%,
+      transparent 100%
+    );
+    mask-image: linear-gradient(180deg, transparent 0, #000 24%, #000 78%, transparent 100%);
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-family="dream"]
+    main.dream-page.dream-page
+    > .dream-section
+    > .dream-section-heading
+    > .dream-act-still {
+    opacity: 0;
+  }
+}
+
 /* The card's own gilt double frame, inside the band, with stepped corners. */
 html[data-family="dream"]
   main.dream-page.dream-page
@@ -1018,6 +1096,39 @@ html[data-family="dream"] main.dream-page.dream-page .dream-poster-current > fig
    arches and their 幟 keep their billing. Phones bill the lead alone and
    the two after it side by side, each name on a plate under its arch.
    ---------------------------------------------------------------- */
+html[data-family="dream"] main.dream-page.dream-page .dream-poster-current > figcaption {
+  flex-wrap: wrap;
+}
+html[data-family="dream"] main.dream-page.dream-page .dream-screening-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  max-width: 100%;
+  padding: 8px 18px;
+  margin-left: auto;
+  border: 1px solid #bf995d;
+  color: #f3e0b0;
+  background: #241625;
+  font: 600 13px/1.5 var(--dr-serif);
+  letter-spacing: 0.06em;
+  cursor: pointer;
+}
+html[data-family="dream"] main.dream-page.dream-page .dream-screening-trigger:focus-visible {
+  outline: 3px solid #fff0b5;
+  outline-offset: 3px;
+}
+html[data-family="dream"] main.dream-page.dream-page .dream-screening-trigger:disabled { opacity: 0.7; }
+html[data-family="dream"] main.dream-page.dream-page .dream-screening-load-error {
+  flex-basis: 100%;
+  font-size: 12px;
+  line-height: 1.6;
+}
+@media (max-width: 520px) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-screening-trigger { width: 100%; margin-left: 0; }
+}
+
 html[data-family="dream"] main.dream-page.dream-page .dream-character-grid {
   --dr-floor: clamp(150px, 15vw, 196px);
   position: relative;
@@ -2207,7 +2318,7 @@ html[data-family="dream"] main.dream-page.dream-page #case-notes {
 }
 
 html[data-family="dream"] main.dream-page.dream-page #chronicle {
-  contain-intrinsic-size: auto 2045px;
+  contain-intrinsic-size: auto 3795px;
 }
 
 html[data-family="dream"] main.dream-page.dream-page #atlas {
@@ -2256,7 +2367,7 @@ html[data-family="dream"] main.dream-page.dream-page #quotes {
   }
 
   html[data-family="dream"] main.dream-page.dream-page #chronicle {
-    contain-intrinsic-size: auto 2035px;
+    contain-intrinsic-size: auto 3815px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #atlas {
@@ -2306,7 +2417,7 @@ html[data-family="dream"] main.dream-page.dream-page #quotes {
   }
 
   html[data-family="dream"] main.dream-page.dream-page #chronicle {
-    contain-intrinsic-size: auto 2025px;
+    contain-intrinsic-size: auto 3990px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #atlas {
@@ -2356,7 +2467,7 @@ html[data-family="dream"] main.dream-page.dream-page #quotes {
   }
 
   html[data-family="dream"] main.dream-page.dream-page #chronicle {
-    contain-intrinsic-size: auto 2130px;
+    contain-intrinsic-size: auto 4075px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #atlas {
@@ -2406,7 +2517,7 @@ html[data-family="dream"] main.dream-page.dream-page #quotes {
   }
 
   html[data-family="dream"] main.dream-page.dream-page #chronicle {
-    contain-intrinsic-size: auto 2490px;
+    contain-intrinsic-size: auto 6710px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #atlas {
@@ -2456,7 +2567,7 @@ html[data-family="dream"] main.dream-page.dream-page #quotes {
   }
 
   html[data-family="dream"] main.dream-page.dream-page #chronicle {
-    contain-intrinsic-size: auto 2565px;
+    contain-intrinsic-size: auto 6785px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #atlas {
@@ -2506,7 +2617,7 @@ html[data-family="dream"] main.dream-page.dream-page #quotes {
   }
 
   html[data-family="dream"] main.dream-page.dream-page #chronicle {
-    contain-intrinsic-size: auto 2930px;
+    contain-intrinsic-size: auto 7180px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #atlas {
@@ -2556,7 +2667,7 @@ html[data-family="dream"] main.dream-page.dream-page #quotes {
   }
 
   html[data-family="dream"] main.dream-page.dream-page #chronicle {
-    contain-intrinsic-size: auto 2045px;
+    contain-intrinsic-size: auto 3965px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #atlas {
@@ -2606,7 +2717,7 @@ html[data-family="dream"] main.dream-page.dream-page #quotes {
   }
 
   html[data-family="dream"] main.dream-page.dream-page #chronicle {
-    contain-intrinsic-size: auto 2135px;
+    contain-intrinsic-size: auto 4375px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #atlas {
@@ -2656,7 +2767,7 @@ html[data-family="dream"] main.dream-page.dream-page #quotes {
   }
 
   html[data-family="dream"] main.dream-page.dream-page #chronicle {
-    contain-intrinsic-size: auto 2045px;
+    contain-intrinsic-size: auto 3795px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #atlas {

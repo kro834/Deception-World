@@ -22,12 +22,17 @@ function setup(hash = "#cases") {
       },
     }),
   }));
-  const chronicle = { ...chapters[3], dataset: {}, open: false };
+  const chronicle = { ...chapters[3], id: "dream-chronicle-case-3", dataset: {}, open: false };
   const note = { closest: () => null, matches: () => false, focus: () => focus++ };
   const targets = Object.fromEntries(chapters.map((chapter, no) => [`dream-case-${no}`, chapter]));
   targets["dream-chronicle-case-3"] = chronicle;
   targets["dream-case-note-3"] = note;
   targets["dream-chapter-index"] = note;
+  targets["dream-chronicle-event-25"] = {
+    closest: () => chronicle,
+    matches: (selector) => selector === ".dream-chronicle-item",
+    focus: () => focus++,
+  };
   const root = {
     ownerDocument: { getElementById: (id) => targets[id] },
     contains: (target) => Object.values(targets).includes(target) || target?.isLink,
@@ -108,6 +113,16 @@ test("initial, native click and history targets open one fold without closing ot
   h.cleanup();
 });
 
+test("a precise chronicle event opens its parent case and retains native fragment focus", () => {
+  const h = setup("#dream-chronicle-event-25");
+  assert.equal(h.chronicle.open, true);
+  assert.deepEqual(h.state(), { current: "3", open: [] });
+  h.click("#dream-chronicle-event-25", { detail: 0 });
+  h.flush();
+  assert.equal(h.focus(), 1);
+  h.cleanup();
+});
+
 test("closing the URL chapter remains a native close and does not reopen it", () => {
   const h = setup("#dream-case-2");
   h.chapters[2].open = false;
@@ -115,7 +130,11 @@ test("closing the URL chapter remains a native close and does not reopen it", ()
   assert.deepEqual(h.state(), { current: "2", open: [] });
   assert.equal(h.chapters[2].open, false);
   h.historyListeners.get("hashchange")();
-  assert.equal(h.chapters[2].open, false, "late duplicate history events cannot undo a native close");
+  assert.equal(
+    h.chapters[2].open,
+    false,
+    "late duplicate history events cannot undo a native close",
+  );
   h.cleanup();
 });
 

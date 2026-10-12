@@ -91,8 +91,11 @@ test("case reader uses native details without adding a modal or scroll lock", ()
   assert.match(cases, /各章のあらすじには、物語の展開・ネタバレを含みます。/);
   assert.doesNotMatch(
     cases,
-    /onPointer|onTouch|preventDefault|acquireViewportScrollLock|<img|<dialog/,
+    /onPointer|onTouch|preventDefault|acquireViewportScrollLock|<dialog/,
   );
+  // The fourth act's decorative intertitle is outside the canonical text reader.
+  assert.doesNotMatch(cases.slice(cases.indexOf('className="dream-reader"')), /<img/);
+  assert.match(cases, /className="dream-act-still"\s+aria-hidden="true"/);
   assert.match(cases, /<DreamStoryIndex \/>/);
   assert.match(cases, /<DreamStoryNavigation no=\{episode.no\} \/>/);
   assert.match(cases, /id=\{`dream-case-note-\$\{note.no\}`\}/);
