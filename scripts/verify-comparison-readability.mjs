@@ -80,25 +80,53 @@ async function checkSpecialComparison(page, route, width) {
   await page.goto(base + route);
   await ready(page);
   const select = page.locator(".rxs-comparison-selector select");
-  await select.evaluate((node) => node.scrollIntoView({ block: "center", behavior: "instant" }));
-  const options = await select
-    .locator("option")
-    .evaluateAll((nodes) => nodes.map((node) => node.value));
-  assert.ok(
-    await select.evaluate((node) => {
-      const style = getComputedStyle(node);
-      const context = document.createElement("canvas").getContext("2d");
-      context.font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
-      const available =
-        node.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight) - 24;
-      return [...node.options].every(
-        (option) => context.measureText(option.text).width <= available,
-      );
-    }),
-    "native comparison options fit",
-  );
+  // Owner-requested button UI replaces Extreme's select; keep Rexonance's native-select and result pins.
+  const usesButtons = route === "/extreme-saga";
+  const group = page.locator(".exs-opponent-options");
+  const buttons = group.locator("button[aria-pressed]");
+  let options;
+  if (usesButtons) {
+    await group.evaluate((node) => node.scrollIntoView({ block: "center", behavior: "instant" }));
+    assert.equal(await group.getAttribute("role"), "group");
+    assert.equal(await group.getAttribute("aria-labelledby"), "exs-opponent-label");
+    const choices = await buttons.evaluateAll((nodes) => nodes.map((node) => ({
+      name: node.querySelector("span")?.textContent.trim(),
+      code: node.querySelector("small")?.textContent.trim(),
+      unclipped: [node, ...node.querySelectorAll("span, small")].every((part) =>
+        part.scrollWidth <= part.clientWidth + 1 && part.scrollHeight <= part.clientHeight + 1),
+      pressed: node.getAttribute("aria-pressed"),
+    })));
+    assert.ok(choices.length >= 2, "all comparison opponents remain available");
+    assert.equal(choices.filter((choice) => choice.pressed === "true").length, 1);
+    for (const choice of choices)
+      assert.ok(choice.name && choice.code && choice.unclipped, JSON.stringify(choice));
+    options = choices.map((_, index) => index);
+  } else {
+    await select.evaluate((node) => node.scrollIntoView({ block: "center", behavior: "instant" }));
+    options = await select.locator("option").evaluateAll((nodes) => nodes.map((node) => node.value));
+    assert.ok(
+      await select.evaluate((node) => {
+        const style = getComputedStyle(node);
+        const context = document.createElement("canvas").getContext("2d");
+        context.font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+        const available =
+          node.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight) - 24;
+        return [...node.options].every(
+          (option) => context.measureText(option.text).width <= available,
+        );
+      }),
+      "native comparison options fit",
+    );
+  }
   for (const baseline of options) {
-    await select.selectOption(baseline);
+    if (usesButtons) {
+      await buttons.nth(baseline).click();
+      await page.waitForFunction((index) => {
+        const choices = [...document.querySelectorAll(".exs-opponent-options button[aria-pressed]")];
+        return choices[index]?.getAttribute("aria-pressed") === "true" &&
+          choices.filter((choice) => choice.getAttribute("aria-pressed") === "true").length === 1;
+      }, baseline);
+    } else await select.selectOption(baseline);
     await page.waitForTimeout(550);
     const rows = await page.locator(".rxs-comparison-metrics article header").evaluateAll((nodes) =>
       nodes.map((node) => {
