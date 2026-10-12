@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
+import { mkdir } from "node:fs/promises";
 import { chromium } from "playwright";
 
 const base = process.env.BASE_URL || "http://127.0.0.1:4194";
+const auditOut = process.env.AUDIT_OUT;
+if (auditOut) await mkdir(auditOut, { recursive: true });
 const browser = await chromium.launch({ channel: process.env.PW_BROWSER_CHANNEL || "chrome" });
 try {
   for (const [width, height] of [
@@ -40,42 +43,67 @@ try {
         behavior: "instant",
       }),
     );
-    const minimum = await page.locator(".rxs-p14-overview dl > div:nth-child(3) dd").evaluate(
-      (el) =>
+    const p14Visibility = await page
+      .locator(".rxs-p14-overview dl > div:nth-child(3)")
+      .evaluate((row) =>
         new Promise((resolve) => {
+          const value = row.querySelector("dd");
           const start = performance.now();
-          let opacity = 1;
+          let rowOpacity = 1;
+          let valueOpacity = 1;
           const sample = () => {
-            opacity = Math.min(opacity, Number(getComputedStyle(el).opacity));
+            rowOpacity = Math.min(rowOpacity, Number(getComputedStyle(row).opacity));
+            valueOpacity = Math.min(valueOpacity, Number(getComputedStyle(value).opacity));
             if (performance.now() - start < 1200) requestAnimationFrame(sample);
-            else resolve(opacity);
+            else resolve({ rowOpacity, valueOpacity });
           };
           sample();
         }),
+      );
+    assert.ok(
+      p14Visibility.rowOpacity > 0.99,
+      `P14 TUNING parent fades out: ${p14Visibility.rowOpacity} at ${width}px`,
     );
-    assert.ok(minimum > 0.99, `P14 result disappears: ${minimum} at ${width}px`);
+    assert.ok(
+      p14Visibility.valueOpacity > 0.99,
+      `P14 result disappears: ${p14Visibility.valueOpacity} at ${width}px`,
+    );
+    if (auditOut) await page.screenshot({ path: `${auditOut}/${width}-tuning.png` });
 
     await page.locator("#stages").evaluate((el) => el.scrollIntoView({ behavior: "instant" }));
     await page.waitForTimeout(800);
-    const labels = await page.locator(".exs-stage-tabs small").evaluateAll((els) =>
-      els.map((el) => {
-        const box = el.getBoundingClientRect();
-        const parent = el.parentElement.getBoundingClientRect();
-        return {
-          text: el.textContent,
-          height: box.height,
-          line: parseFloat(getComputedStyle(el).lineHeight),
-          fits: box.left >= parent.left && box.right <= parent.right,
-          font: parseFloat(getComputedStyle(el).fontSize),
-        };
-      }),
-    );
+    const labels = await page
+      .locator('.exs-stage-tabs button[role="tab"] > :is(span, small)')
+      .evaluateAll((els) =>
+        els.map((el) => {
+          const box = el.getBoundingClientRect();
+          const parent = el.parentElement.getBoundingClientRect();
+          return {
+            text: el.textContent,
+            height: box.height,
+            line: parseFloat(getComputedStyle(el).lineHeight),
+            whiteSpace: getComputedStyle(el).whiteSpace,
+            fits: box.left >= parent.left && box.right <= parent.right,
+            font: parseFloat(getComputedStyle(el).fontSize),
+          };
+        }),
+      );
     for (const label of labels) {
       assert.ok(
         label.height <= label.line + 1 && label.fits,
-        `${width}px label wraps/overflows: ${JSON.stringify(label)}`,
+        `${width}px name/code wraps/overflows: ${JSON.stringify(label)}`,
       );
       assert.ok(label.font >= 12);
+    }
+    if (width === 320) {
+      for (const text of ["ウルトラ", "ULTRA / 50 SEC"]) {
+        const label = labels.find((item) => item.text?.trim() === text);
+        assert.ok(label, `320px ULTRA tab is missing ${text}`);
+        assert.ok(
+          label.height <= label.line + 1 && label.fits,
+          `320px ULTRA ${text} must stay on one line inside its tab: ${JSON.stringify(label)}`,
+        );
+      }
     }
     if (width >= 1100) {
       for (const id of ["stages", "system"]) {
@@ -103,6 +131,7 @@ try {
           lines.sameRow && lines.rightCorner && lines.fits,
           `${width}px ${id} headline must fill both corners: ${JSON.stringify(lines)}`,
         );
+        if (auditOut) await page.screenshot({ path: `${auditOut}/${width}-${id}.png` });
       }
       for (const id of ["performance", "p14"]) {
         await page.locator(`#${id}`).evaluate((el) => el.scrollIntoView({ behavior: "instant" }));
@@ -127,7 +156,8 @@ try {
       JSON.stringify({
         viewport: `${width}x${height}`,
         roundTrigger: "pass",
-        p14MinimumOpacity: minimum,
+        p14MinimumOpacity: p14Visibility.valueOpacity,
+        p14MinimumRowOpacity: p14Visibility.rowOpacity,
         labels: "pass",
         heading: "pass",
       }),

@@ -1149,6 +1149,7 @@ html[data-world-effects="economy"] .rxs-page.rxs-page.exs-page #exs-stage-panel 
       .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
       .rxs-p14-copy
       .exo-read:nth-child(3) {
+      animation-name: exo-jab-in;
       animation-range: entry 36% entry 71%;
     }
 

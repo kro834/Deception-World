@@ -66,7 +66,7 @@ Subagents are GPT-6 Luna only, initial work limited to static independent audits
   public release SHA5488146554d38a7e802927679a2a962e5269ca7f matched.
   Merged trace samples304/247ms vary; no universal Layout speedup is claimed.
 
-## 7. ZENITH preparation — verified candidate, publication pending
+## 7. ZENITH preparation — published c3ce193
 
 - Native snapshots, row pixel separation, crop drawing, gold sheets/composites
   and buffers are separate cooperative idle phases. Four-ms JavaScript slices
@@ -94,9 +94,41 @@ Subagents are GPT-6 Luna only, initial work limited to static independent audits
   Merged gates2215pass/fail0/skip4; type/lint/source/build passed again.
   Five call profiles passed; four merged PixelCPU4 preload/roundtrip/abort
   conditions used the real engine. Evidence /private/tmp/backlog-item7-merged-*.
+- Actions38264874960 succeeded; public release SHA matched
+  c3ce1939682ed6cfa6f6ab21b9c0b90c6989e06f.
+
+## 8. FIGHT CARD visual repairs — verified candidate, CPU gap remains
+
+- Preserved IMPACT/VS892fe99. TUNING's parent now uses the existing translate-
+  only reveal, behind unchanged motion/economy/menu/loading/dialog gates.
+  The verifier detects ancestor opacity, not just dd opacity; old build fails
+  this strengthened check. All five widths pass with parent/value opacity1.
+- 390px exposed the same code wrapping as320px. Phone tab padding/nowrap covers
+  all widths through560px without changing copy, fonts or the12px floor.
+- The later editorial sheet had overwritten the existing wide heading rules.
+  Local wide rules now preserve the two corners after that reset; both no-
+  introduction rounds and introduction columns pass1100/1440px. Portrait
+  punch's existing96px threshold passes120px panel entry; no beat changed.
+- Gates2218pass/fail0/skip4, type/lint0errors/12existing warnings, source15/15,
+  vite build. FIGHT CARD5profiles pass; actual1100px and390px shots inspected.
+  Evidence /private/tmp/backlog-item8-*.
+- Original perf2/ab probe, Pixel412x915 DPR2.625 CPU4, instant1.6px/ms,
+  fresh contexts and3interleaved pairs. Final main-thread task median0.462s
+  vs8b40241 0.293s (1.57x); p9516.7/16.8ms, over33ms0, scroll LoAF0.
+  Renderer CPU5.037vs5.471s is a different metric, not proof of the requested
+  main-thread reduction. Earlier same-session ratios1.46–1.47 vary.
+- Trace identified a forced-style scroll callback in the common header. An
+  experimentally coalesced version measured0.559vs0.531s previous (no gain),
+  and was fully reverted together with its tests before publication. No new
+  animation/quality cuts or weakened performance pins. The CPU gap remains.
+- Latest main979f7b0's original-opening restoration was preserved on merge.
+- Main107e83b's WebKit opaque GPU recovery was also preserved. Release gates
+  passed again (2218pass/fail0/skip4). Related artwork, cinematic-edition,
+  film-direction and comparison-readability scripts passed sequentially.
 
 ## Remaining
 
-8–11 pending ordered browser/performance verification. Static audits indicate
+9–11 pending ordered browser/performance verification; item8CPU gap unresolved.
+Static audits indicate
 several are already implemented; do not blindly reapply reverted historical work.
 Physical iPhone/iPad checks remain separate from Chromium/WebKit emulation.

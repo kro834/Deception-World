@@ -1325,6 +1325,41 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page :is(a, button, summ
     background: rgb(233 196 126 / 6%);
   }
 }
+/* Keep the wide FIGHT CARD corners after this sheet's general heading reset. */
+@media (min-width: 1100px) {
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page
+    > :is(#performance, #p14) > .rxs-section-heading {
+    grid-template-columns: 58px minmax(0, 1.3fr) minmax(240px, 0.7fr);
+    grid-template-rows: auto auto;
+  }
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page
+    > :is(#performance, #p14) > .rxs-section-heading > span {
+    grid-column: 3;
+    grid-row: 1 / span 2;
+    align-self: end;
+    margin: 0 0 0.2em;
+    padding-inline-start: clamp(20px, 2.4vw, 40px);
+    border-inline-start: 1px solid rgb(var(--ext-gold-rgb) / 32%);
+  }
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page
+    > :is(#stages, #system) > .rxs-section-heading > h2 {
+    display: grid;
+    width: 100%;
+    max-width: none;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(16px, 2.2vw, 32px);
+    font-size: clamp(32px, 3.3vw, 52px);
+  }
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page
+    > :is(#stages, #system) > .rxs-section-heading > h2 > .exo-line {
+    white-space: nowrap;
+  }
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page
+    > :is(#stages, #system) > .rxs-section-heading > h2 > br {
+    display: none;
+  }
+}
+
 @media (forced-colors: active) {
   html[data-family="special"]
     body

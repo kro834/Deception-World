@@ -18,6 +18,7 @@ const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf
 const strip = (css) => css.replace(/\/\*[\s\S]*?\*\//g, "");
 const source = read("src/styles-extreme-fightcard.css");
 const css = strip(source);
+const overdrive = strip(read("src/styles-extreme-overdrive.css"));
 const route = read("src/routes/extreme-saga.tsx");
 const component = read("src/components/extreme-saga/extreme-saga.tsx");
 
@@ -494,6 +495,39 @@ test("the component adds only silent boxes, keeps one image per form and the own
   assert.match(component, /useEffect\(\(\) => mountExtremeFightCard\(pageRef\.current\), \[\]\);/);
   // The stage panel is reached like the other scenes (the sliver's arrival).
   assert.match(component, /data-exi-warm=\{`[^`]+`\}\s*data-exi-hit=""/);
+});
+
+// The readout's own opacity cannot reveal an ancestor that hides the whole row.
+test("P14 TUNING keeps its parent visible while reusing the translate-only reveal", () => {
+  const tuningRule = parse(overdrive).rules.find(({ selector }) =>
+    selector.endsWith(".rxs-p14-copy .exo-read:nth-child(3)"),
+  );
+  assert.ok(tuningRule, "TUNING retains its dedicated entry rule");
+  assert.ok(tuningRule.context.includes("@media (prefers-reduced-motion: no-preference)"));
+  const selector = tuningRule.selector.replace(/\s+/g, " ");
+  for (const gate of ["[data-world-effects=\"economy\"]", "[data-side-menu-open]", "[data-loading]", "[data-dialog-open]"])
+    assert.ok(selector.includes(`:not(${gate})`), `missing gate ${gate}`);
+  assert.match(tuningRule.body, /animation-name:\s*exo-jab-in;/);
+  assert.match(tuningRule.body, /animation-range:\s*entry 36% entry 71%;/);
+  const jabIn = parse(overdrive).keyframes.find(({ name }) => name === "exo-jab-in");
+  assert.ok(jabIn);
+  assert.doesNotMatch(jabIn.body, /opacity\s*:/);
+});
+
+test("both stage-tab names and codes fit on one line at 320px", () => {
+  // The same pin covers all phone widths; 390px exposed the identical wrap.
+  const narrow = css.slice(css.indexOf("@media (max-width: 560px)"));
+  assert.match(narrow, /\.exs-stage-tabs\s*>\s*button\[role="tab"\]\s*>\s*small\s*\{[^}]*white-space:\s*nowrap;/);
+  assert.match(component, /<span>\{EXTREME_STAGES\[key\]\.label\}<\/span>[\s\S]*?<small>\{EXTREME_STAGES\[key\]\.code\}<\/small>/);
+});
+
+// The later editorial reset must not undo the already pinned wide composition.
+test("the later editorial sheet preserves both wide heading corners", () => {
+  const editorial = parse(read("src/styles-extreme-editorial.css"));
+  const wide = editorial.rules.filter(({ context }) => context.includes("@media (min-width: 1100px)"));
+  assert.ok(wide.some(({ selector, body }) => selector.endsWith(".rxs-section-heading > h2") && /display:\s*grid;/.test(body)));
+  assert.ok(wide.some(({ selector, body }) => selector.endsWith("h2 > br") && /display:\s*none;/.test(body)));
+  assert.ok(wide.some(({ selector, body }) => selector.endsWith(".rxs-section-heading > span") && /grid-column:\s*3;/.test(body)));
 });
 
 /* ---------- The engine ---------- */

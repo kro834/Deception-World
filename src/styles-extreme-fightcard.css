@@ -196,7 +196,8 @@ html[data-family="special"]
   }
 }
 
-@media (max-width: 359px) {
+/* Codes need the same single-line room at 390px as at 320px. */
+@media (max-width: 560px) {
   html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-stage-tabs > button[role="tab"] {
     padding-inline: 6px;
   }
