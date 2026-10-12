@@ -150,7 +150,7 @@ test("browser QA captures the requested viewports and both directions with canva
   assert.match(browserHarness, /CAPTURE=1/);
   assert.match(browserHarness, /CAPTURE_BASELINE=1/);
   assert.match(browserHarness, /CAPTURE_FORM=standard\|max\|ultra\|excelsior/);
-  assert.match(browserHarness, /captureBaseline \? "max" : "excelsior"/);
+  assert.match(browserHarness, /captureBaseline \? "max" : "ultra"/);
   assert.match(browserHarness, /CAPTURE_PROFILES/);
   assert.match(browserHarness, /BROWSER=webkit/);
   assert.match(browserHarness, /direction: "forward"/);

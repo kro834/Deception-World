@@ -2,7 +2,7 @@
 // BASE_URL=... BASELINE_URL=... BENCH_RUNS=5 node scripts/verify-rexonance-zenith.mjs
 // CAPTURE=1 [CAPTURE_PROFILES=desktop1440,phone390] captures only visual profiles.
 // CAPTURE_BASELINE=1 records pre-phase builds without asserting new phase/form attributes.
-// CAPTURE_FORM=standard|max|ultra|excelsior selects the displayed form; new captures default to excelsior.
+// CAPTURE_FORM=standard|max|ultra|excelsior selects the displayed form; new captures default to ultra.
 // BROWSER=webkit selects WebKit; ZENITH_WEBKIT=1 adds WebKit to Chromium's full run.
 // ZENITH_TRACE=1 saves the end-of-scroll trace.
 import assert from "node:assert/strict";
