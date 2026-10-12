@@ -6,6 +6,7 @@
 // changed, under that still frame, so the route's main-thread work never
 // drops a frame of the dive. The context is released when the layer goes.
 import { hasConstrainedResources } from "@/lib/rendering-profile";
+import { RainCityScene, cityFlightAt } from "./rain-city-scene";
 import DIVE_SOURCE from "./opening-dive.frag.glsl?raw";
 import { ShaderPass, closeGlImage, loadGlImage, shouldDegrade, type GlImage } from "./opening-gl";
 import {
@@ -106,6 +107,7 @@ type Primed = {
   canvas: HTMLCanvasElement;
   pass: ShaderPass;
   compiled: Promise<void>;
+  city: RainCityScene;
   timer: number;
 };
 
@@ -136,6 +138,7 @@ function releasePrimed() {
   primed = null;
   window.clearTimeout(current.timer);
   current.pass.dispose();
+  current.city.dispose();
 }
 
 /**
@@ -147,14 +150,21 @@ export function primeOpeningDive() {
   if (primed || currentDiveTier() !== "webgl" || !preparedValue) return;
   const canvas = createCanvas();
   let pass: ShaderPass;
+  let city: RainCityScene;
+  try {
+    city = new RainCityScene();
+  } catch {
+    return;
+  }
   try {
     pass = createPass(canvas, preparedValue);
   } catch {
+    city.dispose();
     return; // no (hardware) WebGL: the dive tries once more, then goes CSS
   }
-  const compiled = pass.compile();
+  const compiled = Promise.all([pass.compile(), city.compile()]).then(() => undefined);
   compiled.catch(() => undefined);
-  primed = { canvas, pass, compiled, timer: window.setTimeout(releasePrimed, PRIME_TTL_MS) };
+  primed = { canvas, pass, city, compiled, timer: window.setTimeout(releasePrimed, PRIME_TTL_MS) };
 }
 
 /** The title unmounted: close unused bitmaps and an unclaimed primed context. */
@@ -253,6 +263,7 @@ export function runOpeningDive({
   let disposed = false;
   let landed = false;
   let pass: ShaderPass | null = null;
+  let city: RainCityScene | null = null;
   let canvas: HTMLCanvasElement | null = null;
   let raf = 0;
   let startedAt = 0;
@@ -267,6 +278,7 @@ export function runOpeningDive({
     const width = Math.max(1, window.visualViewport?.width ?? window.innerWidth);
     const height = Math.max(1, window.visualViewport?.height ?? window.innerHeight);
     stats.size = pass.resize(width, height);
+    city?.resize(width, height, pass.rung);
     const aspect = width / height;
     // Screen UV, y up.
     pass.set(
@@ -295,7 +307,9 @@ export function runOpeningDive({
     for (const name of Object.keys(uniforms) as (keyof typeof uniforms)[]) {
       pass.set(name, uniforms[name]);
     }
-    pass.draw();
+    // The legacy logo/landing layer is completely covered mid-flight.
+    if (!city || cityFlightAt(T).opacity < 1) pass.draw();
+    city?.draw(T);
   };
 
   const releaseGl = () => {
@@ -303,6 +317,9 @@ export function runOpeningDive({
     raf = 0;
     window.removeEventListener("resize", layout);
     canvas?.removeEventListener("webglcontextlost", onContextLost);
+    city?.canvas.removeEventListener("webglcontextlost", onContextLost);
+    city?.dispose();
+    city = null;
     pass?.dispose();
     pass = null;
     canvas?.remove();
@@ -396,13 +413,15 @@ export function runOpeningDive({
         primed = null;
         window.clearTimeout(current.timer);
       }
-      if (current && !current.pass.lost) {
+      if (current && !current.pass.lost && !current.city.lost) {
         stats.primed = true;
         canvas = current.canvas;
         pass = current.pass;
+        city = current.city;
         compiled = current.compiled;
       } else {
         current?.pass.dispose();
+        current?.city.dispose();
         const assets = await withDeadline(
           preparedValue
             ? Promise.resolve(preparedValue)
@@ -412,16 +431,24 @@ export function runOpeningDive({
         if (disposed) throw new Error("disposed");
         canvas = createCanvas();
         pass = createPass(canvas, assets);
-        compiled = pass.compile();
+        city = new RainCityScene();
+        compiled = Promise.all([pass.compile(), city.compile()]).then(() => undefined);
         compiled.catch(() => undefined);
       }
       await withDeadline(compiled, deadline);
-      if (disposed) throw new Error("disposed");
+      if (disposed || landed) {
+        releaseGl();
+        return tier;
+      }
       // In GPU memory: the decoded copies can go.
       releasePreparedBitmaps();
       const active: ShaderPass = pass;
       const target: HTMLCanvasElement = canvas;
       host.append(target);
+      if (city) {
+        host.append(city.canvas);
+        city.canvas.addEventListener("webglcontextlost", onContextLost);
+      }
       target.addEventListener("webglcontextlost", onContextLost);
       layout();
       window.addEventListener("resize", layout, { passive: true });

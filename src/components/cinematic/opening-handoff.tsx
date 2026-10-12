@@ -2,6 +2,7 @@ import { useLayoutEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { OPENING_DIVE } from "./opening-timing";
 import type { DiveRun, DiveStats } from "./opening-dive";
+import { RainCityFallback } from "./rain-city-fallback";
 
 export type OpeningHandoffRect = {
   left: number;
@@ -469,7 +470,15 @@ export function OpeningHandoffLayer({ snapshot, onCovered, onComplete }: Opening
         { opacity: 1, transform: "scale(1.3)", offset: at(cut), easing: SETTLE_EASING },
         { opacity: 1, transform: "scale(1)" },
       ]);
-      for (const bar of stableRoot.querySelectorAll<HTMLElement>("[data-opening-handoff-letterbox]")) {
+      add(stableRoot.querySelector("[data-opening-city-fallback]"), [
+        { opacity: 0, transform: "scale(1)" },
+        { opacity: 1, transform: "scale(1.04)", offset: at(480 * k) },
+        { opacity: 1, transform: "scale(1.48)", offset: at(2850 * k) },
+        { opacity: 0, transform: "scale(1.68)" },
+      ]);
+      for (const bar of stableRoot.querySelectorAll<HTMLElement>(
+        "[data-opening-handoff-letterbox]",
+      )) {
         const top = bar.dataset.openingHandoffLetterbox === "top";
         add(bar, [
           { transform: "translate3d(0, 0, 0)" },
@@ -551,10 +560,13 @@ export function OpeningHandoffLayer({ snapshot, onCovered, onComplete }: Opening
         });
       // Fail-safe: a dive that never lands (the tab was frozen) still covers.
       if (!audit) {
-        const safetyTimer = window.setTimeout(() => {
-          timers.delete(safetyTimer);
-          settleHandoff();
-        }, 2400);
+        const safetyTimer = window.setTimeout(
+          () => {
+            timers.delete(safetyTimer);
+            settleHandoff();
+          },
+          OPENING_DIVE.glEnd * 1000 + 950,
+        );
         timers.add(safetyTimer);
       }
     }
@@ -614,6 +626,7 @@ export function OpeningHandoffLayer({ snapshot, onCovered, onComplete }: Opening
       <div data-opening-handoff-letterbox="top" />
       <div data-opening-handoff-letterbox="bottom" />
       <div ref={glRef} data-opening-handoff-gl />
+      <RainCityFallback />
     </div>,
     document.body,
   );

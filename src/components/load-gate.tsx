@@ -1196,10 +1196,10 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
 
             // The opening owns the screen until the shared layer has painted its
             // complete cover: the dive lands on a still of the world (about
-            // 1.45 s, plus up to 0.45 s for GL). A fail-safe prevents a
+            // 3.5 s, plus up to 0.45 s for GL). A fail-safe prevents a
             // permanently stuck route if the browser aborts animation callbacks
             // while backgrounded.
-            await Promise.race([runtime.covered.promise, wait(2600)]);
+            await Promise.race([runtime.covered.promise, wait(5000)]);
             if (!isCurrent()) return;
             await Promise.race([Promise.all([routeWarmup, assetWarmup]), wait(2400)]);
             if (!isCurrent()) return;
