@@ -282,6 +282,19 @@ async function testScreeningRoom(context, viewport) {
     const image = document.querySelector(".dream-screening-picture > img");
     return Boolean(image?.complete && image.naturalWidth > 0);
   });
+  const fit = await page.locator(".dream-screening-picture > img").evaluate((image) => {
+    const bounds = image.getBoundingClientRect();
+    const frame = image.parentElement.getBoundingClientRect();
+    return {
+      contained: bounds.top >= frame.top - 1 && bounds.left >= frame.left - 1 &&
+        bounds.bottom <= frame.bottom + 1 && bounds.right <= frame.right + 1,
+      objectFit: getComputedStyle(image).objectFit,
+      width: bounds.width,
+      height: bounds.height,
+    };
+  });
+  assert.equal(fit.contained, true, `${viewport.name}: fitted art stays completely inside its frame`);
+  assert.equal(fit.objectFit, "contain", `${viewport.name}: fitted art retains its whole composition`);
   await page.screenshot({ path: `${output}/${viewport.name}-screening-fit.png` });
   await page.waitForFunction(() =>
     document.activeElement?.classList.contains("dream-screening-close"),
