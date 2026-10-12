@@ -48,7 +48,7 @@ const profileNames = (process.env.OPENING_PROFILES || "pixel,desktop")
 
 // Mirrors src/components/cinematic/opening-timing.ts.
 const SEQUENCE_SECONDS = 7.2;
-const DIVE = { glEnd: 3.5 };
+const DIVE = { glEnd: 5.6 };
 const FPS = 60;
 
 const warnings = [];
@@ -426,19 +426,20 @@ async function checkDive(browser, name) {
       const cityPixels = await samplePixels(
         browser,
         await page.locator(".opening-rain-city").screenshot(),
-        [
-          [width * 0.25, height * 0.4],
-          [width * 0.5, height * 0.5],
-          [width * 0.75, height * 0.65],
-        ],
+        // Midnight has deliberately black windows. Sample the whole image,
+        // rather than letting three points inside windows classify it as blank.
+        Array.from({ length: 49 }, (_, i) => [
+          (((i % 7) + 0.5) / 7) * width,
+          ((Math.floor(i / 7) + 0.5) / 7) * height,
+        ]),
         PROFILES[name].deviceScaleFactor ?? 1,
       );
       assert.ok(
-        cityPixels.flat().some((value) => value > 20),
+        cityPixels.filter((rgb) => Math.max(...rgb) > 20).length >= 5,
         `${name}: city is not a black canvas ${JSON.stringify(cityPixels)}`,
       );
       assert.ok(
-        new Set(cityPixels.map((rgb) => rgb.join(","))).size > 1,
+        new Set(cityPixels.map((rgb) => rgb.join(","))).size > 8,
         `${name}: city has spatial detail`,
       );
       console.log(JSON.stringify({ check: "rain-city-drawn", name, pixels: cityPixels }));
@@ -541,6 +542,9 @@ async function checkDiveContextLoss(browser, name) {
       await page.waitForFunction(() =>
         document.querySelector('[data-opening-handoff-tier="webgl"] .opening-rain-city'),
       );
+      // Lose the city context while the first facade is actively breaking,
+      // not just before the animation has allocated its instance buffers.
+      if (kind === "opening-rain-city") await page.waitForTimeout(3300);
       const lost = await page.evaluate((kind) => {
         const entry = window.__glContexts.find((entry) => entry.kind === kind);
         const extension = entry?.context.getExtension("WEBGL_lose_context");
@@ -1025,8 +1029,8 @@ async function auditDiveFlashes(browser, name, tier) {
     // fail-safe cannot change the route in the middle of the audit.
     await page.clock.pauseAt(await page.evaluate(() => Date.now() + 5));
     const keyframes = new Set(
-      [0, 0.2, 0.4, 0.6, 0.8, 0.9, 0.95, 1.05, 1.2, 1.44, 1.8, 2.5, 3.1, 3.48].map((t) =>
-        Math.round(t * FPS),
+      [0, 0.2, 0.4, 0.6, 1.2, 1.8, 2.5, 2.9, 3.1, 3.4, 3.6, 4.2, 4.5, 4.7, 4.9, 5.2, 5.58].map(
+        (t) => Math.round(t * FPS),
       ),
     );
     for (let frame = 0; frame < DIVE.glEnd * FPS; frame += 1) {

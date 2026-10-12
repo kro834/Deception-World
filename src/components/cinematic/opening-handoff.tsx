@@ -473,7 +473,7 @@ export function OpeningHandoffLayer({ snapshot, onCovered, onComplete }: Opening
       add(stableRoot.querySelector("[data-opening-city-fallback]"), [
         { opacity: 0, transform: "scale(1)" },
         { opacity: 1, transform: "scale(1.04)", offset: at(480 * k) },
-        { opacity: 1, transform: "scale(1.48)", offset: at(2850 * k) },
+        { opacity: 1, transform: "scale(1.48)", offset: at((end / k - 700) * k) },
         { opacity: 0, transform: "scale(1.68)" },
       ]);
       for (const bar of stableRoot.querySelectorAll<HTMLElement>(

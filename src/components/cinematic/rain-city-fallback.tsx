@@ -6,8 +6,8 @@ export function RainCityFallback() {
       <svg viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
         <defs>
           <linearGradient id="rain-city-sky" x2="0" y2="1">
-            <stop stopColor="#101923" />
-            <stop offset="1" stopColor="#65808a" />
+            <stop stopColor="#02050d" />
+            <stop offset="1" stopColor="#162538" />
           </linearGradient>
           <linearGradient id="rain-city-road" x2="0" y2="1">
             <stop stopColor="#3e535d" />
