@@ -6,8 +6,9 @@
  * (the art with its lights turned to a cold, dim monochrome; gold, black
  * plates and everything else untouched) and `lights` (only the lit pixels,
  * the rest transparent), to be drawn back over the unlit art as it lights.
- * One pixel pass. The synchronous API remains for ZENITH; preparation can
- * run the same pass in short row slices with createSplitLightsJob. Null
+ * One pixel pass. The synchronous API remains for suit-plan consumers;
+ * RESONANCE preparation uses createSplitLightsJob to run the same pass in
+ * short row slices. Null
  * where the pixels cannot be read (the suit then lights as it always did). */
 export function splitLights(source, sx, sy, w, h, document = globalThis.document) {
   const job = createSplitLightsJob(source, sx, sy, w, h, document);
@@ -49,7 +50,7 @@ export function createSplitLightsJob(source, sx, sy, w, h, document = globalThis
     let result = null;
     const release = () => {
       art = glow = a = g = null;
-      unlit.width = lights.width = 0;
+      unlit.width = unlit.height = lights.width = lights.height = 0;
       scratch.width = scratch.height = 0;
     };
     return {
@@ -103,8 +104,8 @@ export function createSplitLightsJob(source, sx, sy, w, h, document = globalThis
     };
   } catch {
     // Releasing owned canvases never closes a borrowed image or bitmap.
-    if (unlit) unlit.width = 0;
-    if (lights) lights.width = 0;
+    if (unlit) unlit.width = unlit.height = 0;
+    if (lights) lights.width = lights.height = 0;
     if (scratch) scratch.width = scratch.height = 0;
     return null;
   }

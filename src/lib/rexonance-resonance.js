@@ -6,7 +6,7 @@ import {
   sampleCells,
   warpPicture,
 } from "./rexonance-overwrite.js";
-import { splitLights } from "./rexonance-unlit.js";
+import { createSplitLightsJob } from "./rexonance-unlit.js";
 /** RESONANCE (rx11) for /rexonance-saga: the hits a stylesheet cannot time.
  *
  * Counts. Every [data-rsn-count] figure keeps the owner's value as its own
@@ -1319,6 +1319,8 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   // Cancelling resolves waiters so an old build cannot activate after exit.
   let building = null;
   let generation = 0;
+  let idleFallbackGeneration = -1;
+  let partialBuild = null;
   const idleJobs = new Map();
   const idleTask = (work) =>
     new Promise((resolve, reject) => {
@@ -1327,12 +1329,17 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         idleJobs.delete(id);
         if (disposed || !pageActive || document.hidden || !motionAllowed()) return resolve(null);
         try {
-          resolve(work(deadline));
+          if (deadline?.didTimeout) idleFallbackGeneration = generation;
+          // A timeout gets one bounded slice; subsequent work must not wait
+          // another second for idle time on a continuously busy main thread.
+          resolve(work(deadline?.didTimeout ? null : deadline));
         } catch (error) {
           reject(error);
         }
       };
-      const idle = typeof environment.requestIdleCallback === "function";
+      const idle =
+        typeof environment.requestIdleCallback === "function" &&
+        idleFallbackGeneration !== generation;
       const id = idle
         ? environment.requestIdleCallback(run, { timeout: 1000 })
         : environment.setTimeout(run, 16);
@@ -1344,8 +1351,11 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     });
   const cancelPreparation = () => {
     generation += 1;
+    idleFallbackGeneration = -1;
     for (const cancel of idleJobs.values()) cancel();
     idleJobs.clear();
+    partialBuild?.cancel();
+    partialBuild = null;
     building = null;
     preparing = null;
   };
@@ -1377,6 +1387,92 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         steps.return();
       }
     };
+    const resources = new Set();
+    const splitJobs = new Set();
+    let complete = false;
+    const state = {
+      cancel() {
+        if (complete) return;
+        for (const job of splitJobs) job.cancel();
+        splitJobs.clear();
+        for (const resource of resources) resource.width = resource.height = 0;
+        resources.clear();
+      },
+    };
+    partialBuild = state;
+    const mark = (phase) => {
+      try {
+        environment.__rexonancePreparationPhase?.(phase);
+      } catch {
+        // Test-only instrumentation must never affect preparation.
+      }
+    };
+    const makeSheet = async (phase) => {
+      mark(phase);
+      return idleTask(() => {
+        if (!active()) return null;
+        const sheet = document.createElement("canvas");
+        resources.add(sheet);
+        sheet.width = W;
+        sheet.height = H;
+        return sheet;
+      });
+    };
+    const drawPieces = async (items, draw, phase) => {
+      if (!items.length) return true;
+      let index = 0;
+      let finished = false;
+      while (active() && !finished) {
+        mark(phase);
+        const ran = await idleTask((deadline) => {
+          if (!active()) return;
+          const start = environment.performance?.now?.() ?? Date.now();
+          do {
+            draw(items[index++]);
+          } while (
+            index < items.length &&
+            (environment.performance?.now?.() ?? Date.now()) - start < 4 &&
+            (!deadline || deadline.timeRemaining() > 4)
+          );
+          finished = index >= items.length;
+        });
+        if (ran === null || !active()) return false;
+      }
+      return finished;
+    };
+    const splitLightsIdle = async (source, phase) => {
+      mark(`${phase}-setup`);
+      const job = await idleTask(() => {
+        if (!active()) return null;
+        const result = createSplitLightsJob(source, 0, 0, W, H, document);
+        if (result) splitJobs.add(result);
+        return result;
+      });
+      if (!job || !active()) return null;
+      let done = false;
+      while (active() && !done) {
+        mark(`${phase}-pixels`);
+        const ran = await idleTask((deadline) => {
+          if (!active()) return;
+          const until = (environment.performance?.now?.() ?? Date.now()) + 4;
+          done = job.step(until, deadline);
+        });
+        if (ran === null || !active()) return null;
+      }
+      if (!done || !active()) return null;
+      mark(`${phase}-upload`);
+      const layers = await idleTask(() => {
+        if (!active()) return null;
+        const result = job.commit();
+        splitJobs.delete(job);
+        if (result) {
+          resources.add(result.unlit);
+          resources.add(result.lights);
+        }
+        return result;
+      });
+      return layers;
+    };
     building = idleTask(() => sampleFigure(tile))
       .then(async (sample) => {
         if (!active()) return;
@@ -1404,84 +1500,98 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
             )
           : null;
         if (!active()) return;
-        plan = nextPlan;
-        goldPlan = nextGold;
-        pixels = facePixels(config.glow, config.visor);
-      })
-      .then(() =>
-        idleTask(() => {
-          if (disposed || token !== generation || !plan) return;
-          settled = document.createElement("canvas");
-          settled.width = W;
-          settled.height = H;
-          settledCount = 0;
-          // The suit's lights are held back until it is whole (owner): the
-          // figure with its ice-cyan and pink in monochrome, and that light.
-          lights = splitLights(images.figure, 0, 0, W, H, document);
-          // The driver at the waist: on the body, finished and whole, from
-          // the start (its plates' own cut-outs from the atlas).
-          const preset = config.pieces.filter((piece) => piece.preset);
-          if (preset.length && images.atlas) {
-            driver = Object.assign(document.createElement("canvas"), { width: W, height: H });
-            const dc = driver.getContext("2d");
-            for (let i = preset.length - 1; i >= 0; i -= 1) {
-              const piece = preset[i];
-              dc.drawImage(
-                images.atlas,
-                piece.ax,
-                piece.ay,
-                piece.w,
-                piece.h,
-                piece.x,
-                piece.y,
-                piece.w,
-                piece.h,
-              );
-            }
-            const driverLights = splitLights(driver, 0, 0, W, H, document);
-            if (driverLights) {
-              dc.clearRect(0, 0, W, H);
-              dc.drawImage(driverLights.unlit, 0, 0);
-              driverLights.unlit.width = driverLights.lights.width = 0;
-            }
+        const nextPixels = facePixels(config.glow, config.visor);
+        const nextSettled = await makeSheet("settled-sheet");
+        if (!nextSettled || !active()) return;
+        const nextLights = await splitLightsIdle(images.figure, "figure-lights");
+        if (!active()) return;
+
+        const preset = config.pieces.filter((piece) => piece.preset).reverse();
+        let nextDriver = null;
+        if (preset.length && images.atlas) {
+          nextDriver = await makeSheet("driver-sheet");
+          if (!nextDriver || !active()) return;
+          const dc = nextDriver.getContext("2d");
+          if (!(await drawPieces(preset, (piece) => dc.drawImage(
+            images.atlas, piece.ax, piece.ay, piece.w, piece.h,
+            piece.x, piece.y, piece.w, piece.h,
+          ), "driver-crops"))) return;
+          const driverLights = await splitLightsIdle(nextDriver, "driver-lights");
+          if (driverLights && active()) {
+            mark("driver-light-composite");
+            await idleTask(() => {
+              if (active()) {
+                dc.clearRect(0, 0, W, H);
+                dc.drawImage(driverLights.unlit, 0, 0);
+              }
+            });
+            driverLights.unlit.width = driverLights.unlit.height = 0;
+            driverLights.lights.width = driverLights.lights.height = 0;
+            resources.delete(driverLights.unlit);
+            resources.delete(driverLights.lights);
           }
-          if (goldPlan?.count) {
-            // The plates as they seat (their gold raw gunmetal), the gold
-            // alone (the art under the trims' mask), and the gold formed.
-            const sheet = () =>
-              Object.assign(document.createElement("canvas"), { width: W, height: H });
-            raw = sheet();
-            goldArt = sheet();
-            goldLayer = sheet();
-            goldCount = 0;
-            const rc = raw.getContext("2d");
-            const gc = goldArt.getContext("2d");
-            rc.drawImage(lights?.unlit || images.figure, 0, 0, W, H);
-            for (let i = config.pieces.length - 1; i >= 0; i -= 1) {
-              const piece = config.pieces[i];
-              if (piece.preset || !config.gold.cells[piece.id]) continue;
-              const cell = [
-                piece.ax,
-                piece.ay,
-                piece.w,
-                piece.h,
-                piece.x,
-                piece.y,
-                piece.w,
-                piece.h,
-              ];
-              rc.drawImage(images.gold, ...cell);
-              gc.drawImage(images.gold, ...cell);
-            }
+        }
+
+        let nextRaw = null;
+        let nextGoldArt = null;
+        let nextGoldLayer = null;
+        if (nextGold?.count) {
+          nextRaw = await makeSheet("gold-raw-sheet");
+          if (!nextRaw || !active()) return;
+          nextGoldArt = await makeSheet("gold-art-sheet");
+          if (!nextGoldArt || !active()) return;
+          nextGoldLayer = await makeSheet("gold-layer-sheet");
+          if (!nextGoldLayer || !active()) return;
+          const rc = nextRaw.getContext("2d");
+          const gc = nextGoldArt.getContext("2d");
+          mark("gold-base-copy");
+          await idleTask(() => {
+            if (active()) rc.drawImage(nextLights?.unlit || images.figure, 0, 0, W, H);
+          });
+          const goldPieces = config.pieces.slice().reverse().filter(
+            (piece) => !piece.preset && config.gold.cells[piece.id],
+          );
+          if (!active() || !(await drawPieces(goldPieces, (piece) => {
+            const cell = [piece.ax, piece.ay, piece.w, piece.h, piece.x, piece.y, piece.w, piece.h];
+            rc.drawImage(images.gold, ...cell);
+            gc.drawImage(images.gold, ...cell);
+          }, "gold-crops"))) return;
+          mark("gold-mask-composite");
+          await idleTask(() => {
+            if (!active()) return;
             gc.globalCompositeOperation = "source-in";
             gc.drawImage(images.figure, 0, 0, W, H);
             gc.globalCompositeOperation = "source-over";
-          }
-          allocate();
-        }),
-      )
+          });
+        }
+
+        if (!active()) return;
+        const nextBuffers = await allocateIdle(nextPlan, nextGold, nextPixels, active, mark);
+        if (!active() || !nextBuffers) return;
+        mark("ready");
+        plan = nextPlan;
+        goldPlan = nextGold;
+        pixels = nextPixels;
+        settled = nextSettled;
+        settledCount = 0;
+        lights = nextLights;
+        driver = nextDriver;
+        raw = nextRaw;
+        goldArt = nextGoldArt;
+        goldLayer = nextGoldLayer;
+        goldCount = 0;
+        buffers = nextBuffers;
+        complete = true;
+        if (partialBuild === state) partialBuild = null;
+      })
       .finally(() => {
-        if (token === generation) building = null;
+        if (token === generation) {
+          building = null;
+          if (!complete && partialBuild === state) {
+            state.cancel();
+            partialBuild = null;
+          }
+        }
       });
     return building;
   };
@@ -1596,38 +1706,113 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   // Per-frame buffers, allocated once per plan: a scrub draws thousands
   // of squares a frame and must not leave garbage behind it.
   let buffers = null;
-  const allocate = () => {
-    const n = plan.tiles.length * 4;
-    const faces = [];
-    for (let group = 0; group < 6; group += 1) {
-      faces.push(
-        [0, 1, 2].map((tone) => {
-          const list = pixels.filter((square) => square.group === group && square.tone === tone);
-          const rects = new Float32Array(list.length * 4);
-          list.forEach((square, index) => {
+  const allocateIdle = async (nextPlan, nextGold, nextPixels, active, mark) => {
+    const buckets = Array.from({ length: 18 }, () => []);
+    let cursor = 0;
+    while (active() && cursor < nextPixels.length) {
+      mark("buffer-face-buckets");
+      const ran = await idleTask((deadline) => {
+        if (!active()) return;
+        const start = environment.performance?.now?.() ?? Date.now();
+        do {
+          const square = nextPixels[cursor++];
+          if (
+            Number.isInteger(square.group) &&
+            square.group >= 0 &&
+            square.group < 6 &&
+            Number.isInteger(square.tone) &&
+            square.tone >= 0 &&
+            square.tone < 3
+          )
+            buckets[square.group * 3 + square.tone].push(square);
+        } while (
+          cursor < nextPixels.length &&
+          (environment.performance?.now?.() ?? Date.now()) - start < 4 &&
+          (!deadline || deadline.timeRemaining() > 4)
+        );
+      });
+      if (ran === null || !active()) return null;
+    }
+    if (!active()) return null;
+    const faces = Array.from({ length: 6 }, () => Array(3));
+    for (let index = 0; index < buckets.length; index += 1) {
+      const list = buckets[index];
+      mark("buffer-face-allocation");
+      const rects = await idleTask(() =>
+        active() ? new Float32Array(list.length * 4) : null,
+      );
+      if (!rects || !active()) return null;
+      let at = 0;
+      while (active() && at < list.length) {
+        mark("buffer-face-values");
+        const ran = await idleTask((deadline) => {
+          if (!active()) return;
+          const start = environment.performance?.now?.() ?? Date.now();
+          do {
+            const square = list[at];
             rects.set(
               [square.x - square.size / 2, square.y - square.size / 2, square.size, square.size],
-              index * 4,
+              at * 4,
             );
-          });
-          return rects;
-        }),
-      );
+            at += 1;
+          } while (
+            at < list.length &&
+            (environment.performance?.now?.() ?? Date.now()) - start < 4 &&
+            (!deadline || deadline.timeRemaining() > 4)
+          );
+        });
+        if (ran === null || !active()) return null;
+      }
+      faces[Math.floor(index / 3)][index % 3] = rects;
     }
-    const goldCells = goldPlan?.count ?? 0;
-    buffers = {
-      heat: GOLD_HEAT.map(() => new Float32Array(goldCells * 4)),
-      heatCounts: new Int32Array(GOLD_HEAT.length),
-      motes: Array.from({ length: 6 }, () => new Float32Array(n)),
-      moteCounts: new Int32Array(6),
-      art: new Int32Array(plan.tiles.length),
-      artRects: new Float32Array(n),
-      pose: new Float32Array(5),
-      flashes: Array.from({ length: 3 }, () => new Float32Array(n)),
-      flashCounts: new Int32Array(3),
+    const n = nextPlan.tiles.length * 4;
+    const goldCells = nextGold?.count ?? 0;
+    const result = {
+      heat: [],
+      heatCounts: null,
+      motes: [],
+      moteCounts: null,
+      art: null,
+      artRects: null,
+      pose: null,
+      flashes: [],
+      flashCounts: null,
       faces,
       glow: null,
     };
+    const allocate = async (phase, Type, length) => {
+      mark(`buffer-${phase}`);
+      const value = await idleTask(() => (active() ? new Type(length) : null));
+      return value && active() ? value : null;
+    };
+    for (let i = 0; i < GOLD_HEAT.length; i += 1) {
+      const value = await allocate("heat", Float32Array, goldCells * 4);
+      if (!value) return null;
+      result.heat.push(value);
+    }
+    result.heatCounts = await allocate("heat-counts", Int32Array, GOLD_HEAT.length);
+    if (!result.heatCounts) return null;
+    for (let i = 0; i < 6; i += 1) {
+      const value = await allocate("motes", Float32Array, n);
+      if (!value) return null;
+      result.motes.push(value);
+    }
+    result.moteCounts = await allocate("mote-counts", Int32Array, 6);
+    if (!result.moteCounts) return null;
+    result.art = await allocate("art", Int32Array, nextPlan.tiles.length);
+    if (!result.art) return null;
+    result.artRects = await allocate("art-rects", Float32Array, n);
+    if (!result.artRects) return null;
+    result.pose = await allocate("pose", Float32Array, 5);
+    if (!result.pose) return null;
+    for (let i = 0; i < 3; i += 1) {
+      const value = await allocate("flashes", Float32Array, n);
+      if (!value) return null;
+      result.flashes.push(value);
+    }
+    result.flashCounts = await allocate("flash-counts", Int32Array, 3);
+    if (!result.flashCounts) return null;
+    return result;
   };
   const fillRects = (context, rects, count, style, alpha) => {
     if (!count) return;
@@ -2447,7 +2632,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     if (settled) settled.width = settled.height = 0;
     settled = null;
     plan = null;
-    for (const sheet of [raw, goldArt, goldLayer, driver])
+    for (const sheet of [raw, goldArt, goldLayer, driver, lights?.unlit, lights?.lights])
       if (sheet) sheet.width = sheet.height = 0;
     raw = goldArt = goldLayer = goldPlan = driver = lights = null;
     goldCount = 0;
@@ -2578,7 +2763,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     environment.clearTimeout(calmTimer);
     formsState = null;
     images = null;
-    for (const sheet of [raw, goldArt, goldLayer, driver])
+    for (const sheet of [raw, goldArt, goldLayer, driver, lights?.unlit, lights?.lights])
       if (sheet) sheet.width = sheet.height = 0;
     raw = goldArt = goldLayer = goldPlan = driver = lights = null;
   };

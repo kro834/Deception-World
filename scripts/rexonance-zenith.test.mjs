@@ -558,6 +558,9 @@ function environment({
   const html = element();
   if (economy) html.setAttribute("data-world-effects", "economy");
   const calls = [];
+  const drawCalls = [];
+  const canvases = [];
+  const decodedSources = [];
   const context2d = new Proxy(
     {},
     {
@@ -573,7 +576,8 @@ function environment({
   let canvasId = 0;
   const makeCanvas = () => {
     const id = ++canvasId;
-    return {
+    const canvas = {
+      testCanvasId: id,
       width: 0,
       height: 0,
       clientWidth: 1440,
@@ -581,11 +585,21 @@ function environment({
       getContext: () =>
         new Proxy(context2d, {
           get: (ctx, key) => {
-            if (key === "drawImage") return (...args) => calls.push([key, args.length, id]);
+            if (key === "drawImage")
+              return (...args) => {
+                calls.push([key, args.length, id]);
+                drawCalls.push({
+                  target: id,
+                  source: args[0]?._src ?? args[0]?.testCanvasId,
+                  rect: args.slice(1),
+                });
+              };
             return ctx[key];
           },
         }),
     };
+    canvases.push(canvas);
+    return canvas;
   };
   const document = {
     documentElement: html,
@@ -632,6 +646,7 @@ function environment({
       selector === ".rzn-line" ? lines : selector === ".rzn-part" ? parts : [],
   });
   const observers = [];
+  const preparationPhases = [];
   class IntersectionObserver {
     constructor(callback, options) {
       this.callback = callback;
@@ -669,6 +684,7 @@ function environment({
   class Image {
     set src(value) {
       this._src = value;
+      decodedSources.push(value);
       queueMicrotask(() => this.onload?.());
     }
     decode() {
@@ -679,6 +695,7 @@ function environment({
   const frames = new Map();
   const idle = new Map();
   let idleId = 0;
+  let idleRequestCount = 0;
   const env = {
     ...target("window"),
     navigator: {},
@@ -703,6 +720,7 @@ function environment({
     setTimeout: (callback, ms) => setTimeout(callback, ms),
     clearTimeout,
     requestIdleCallback(callback) {
+      idleRequestCount += 1;
       const id = ++idleId;
       idle.set(id, callback);
       if (!idleHeld)
@@ -716,6 +734,7 @@ function environment({
     MutationObserver,
     ResizeObserver,
     Image,
+    __rexonancePreparationPhase: (phase) => preparationPhases.push(phase),
   };
   const flush = () => {
     for (const [id, callback] of [...frames]) {
@@ -743,8 +762,14 @@ function environment({
     lines,
     parts,
     calls,
+    drawCalls,
+    canvases,
+    decodedSources,
     idle,
-    prepared: () => canvasId >= 3,
+    idleRequestCount: () => idleRequestCount,
+    preparationPhases,
+    prepared: () => preparationPhases.includes("ready"),
+    readyCount: () => preparationPhases.filter((phase) => phase === "ready").length,
     canvasCount: () => canvasId,
   };
 }
@@ -952,6 +977,12 @@ test("gold preparation yields within the idle budget, cancels midway and finishe
   let goldReads = 0;
   const config = {
     ...engineConfig,
+    // Give the runtime fixture one real preset piece so the driver crop phase
+    // and its exact reverse-order source rectangles are exercised.
+    pieces: engineConfig.pieces.map((piece, index) =>
+      index === 0 ? { ...piece, preset: true } : piece,
+    ),
+    atlas: "/atlas.webp",
     gold: {
       atlas: "/gold.webp",
       cell: REXONANCE_SUIT_GOLD_CELL,
@@ -962,6 +993,7 @@ test("gold preparation yields within the idle budget, cancels midway and finishe
         },
       }),
     },
+    glow: [[0, 0], [24, 0], [24, 24], [0, 24]],
   };
   const dispose = mountRexonanceAssembly(t.runway, config, t.env);
   // A depleted deadline permits exactly one generator checkpoint per slot.
@@ -990,16 +1022,69 @@ test("gold preparation yields within the idle budget, cancels midway and finishe
     await step();
     assert.equal(goldReads, cancelledReads, "cancelled gold work stays stopped");
 
-    const beforeResume = t.canvasCount();
-    const resumedPrepared = () => t.canvasCount() >= beforeResume + 2;
+    const beforeResume = t.readyCount();
+    const resumedPrepared = () => t.readyCount() > beforeResume;
     t.listeners.get("window:pageshow")();
     let slots = 0;
-    while (!resumedPrepared() && slots < 4000) {
+    while (!resumedPrepared() && slots < 6000) {
       await step();
       slots += 1;
     }
     assert.ok(resumedPrepared(), "new generation finishes all gold and canvas preparation");
     assert.ok(slots > 50, "large gold plan requires multiple idle slots");
+    for (const phase of [
+      "settled-sheet",
+      "figure-lights-setup",
+      "figure-lights-pixels",
+      "figure-lights-upload",
+      "driver-crops",
+      "driver-lights-pixels",
+      "gold-raw-sheet",
+      "gold-art-sheet",
+      "gold-layer-sheet",
+      "gold-crops",
+      "gold-mask-composite",
+      "buffer-face-buckets",
+      "buffer-heat",
+      "ready",
+    ]) assert.ok(t.preparationPhases.includes(phase), `preparation exposes ${phase}`);
+    assert.ok(
+      t.preparationPhases.indexOf("gold-raw-sheet") < t.preparationPhases.indexOf("gold-art-sheet") &&
+        t.preparationPhases.indexOf("gold-art-sheet") < t.preparationPhases.indexOf("gold-layer-sheet"),
+      "three gold sheets are separately staged in the original order",
+    );
+    const expectedPreset = config.pieces
+      .filter((piece) => piece.preset)
+      .reverse()
+      .map((piece) => [
+        piece.ax,
+        piece.ay,
+        piece.w,
+        piece.h,
+        piece.x,
+        piece.y,
+        piece.w,
+        piece.h,
+      ]);
+    const driverDraws = t.drawCalls.filter((call) => call.source === "/atlas.webp");
+    assert.deepEqual(
+      driverDraws.map((call) => call.rect),
+      expectedPreset,
+      "preset atlas crops keep their reverse draw order and rectangles",
+    );
+    const expectedGold = config.pieces
+      .filter((piece) => !piece.preset && config.gold.cells[piece.id])
+      .reverse()
+      .flatMap((piece) => {
+        const rect = [piece.ax, piece.ay, piece.w, piece.h, piece.x, piece.y, piece.w, piece.h];
+        return [rect, rect];
+      });
+    const goldDraws = t.drawCalls.filter((call) => call.source === "/gold.webp");
+    assert.deepEqual(
+      goldDraws.map((call) => call.rect),
+      expectedGold,
+      "gold atlas crops keep their reverse draw order on both sheets",
+    );
     t.observers[0].callback([{ isIntersecting: true }]);
     await new Promise((resolve) => setTimeout(resolve, 10));
     assert.equal(t.runway.dataset.rznState, "live");
@@ -1024,6 +1109,72 @@ test("without requestIdleCallback the bounded timer fallback prepares the scene"
   assert.equal(t.runway.dataset.rznState, "live");
   dispose();
   assert.equal(t.frames.size, 0);
+});
+
+test("a timed-out empty idle deadline switches the generation to bounded timer slices", async () => {
+  const t = environment({ idleHeld: true });
+  const dispose = mountRexonanceAssembly(t.runway, engineConfig, t.env);
+  try {
+    t.observers[1].callback([{ isIntersecting: true }]);
+    assert.equal(t.idle.size, 1);
+    const [id, callback] = t.idle.entries().next().value;
+    t.idle.delete(id);
+    callback({ didTimeout: true, timeRemaining: () => 0 });
+    await new Promise((resolve) => setTimeout(resolve, 30));
+    assert.equal(t.idleRequestCount(), 1, "the same generation does not request another one-second idle timeout");
+    await until(t.prepared, "bounded timer slices complete preparation after idle timeout");
+    assert.equal(t.idleRequestCount(), 1);
+  } finally {
+    dispose();
+  }
+  assert.equal(t.idle.size, 0);
+});
+
+test("a hidden tab releases partial crop canvases, then resumes from decoded images", async () => {
+  const { REXONANCE_SUIT_GOLD_CELL, REXONANCE_SUIT_GOLD_CELLS } =
+    await import("../src/lib/rexonance-suit-gold.ts");
+  const t = environment({ idleHeld: true });
+  const config = {
+    ...engineConfig,
+    atlas: "/atlas.webp",
+    gold: {
+      atlas: "/gold.webp",
+      cell: REXONANCE_SUIT_GOLD_CELL,
+      cells: REXONANCE_SUIT_GOLD_CELLS,
+    },
+  };
+  const dispose = mountRexonanceAssembly(t.runway, config, t.env);
+  const step = async () => {
+    for (const [id, callback] of [...t.idle]) {
+      t.idle.delete(id);
+      callback({ timeRemaining: () => 0 });
+    }
+    await new Promise((resolve) => setImmediate(resolve));
+  };
+  try {
+    t.observers[1].callback([{ isIntersecting: true }]);
+    for (let i = 0; i < 6000 && !t.preparationPhases.includes("gold-crops"); i += 1)
+      await step();
+    assert.ok(t.preparationPhases.includes("gold-crops"), "gold atlas crop phase starts");
+    assert.ok(t.canvases.slice(1).some((canvas) => canvas.width > 0 && canvas.height > 0));
+    const decoded = [...t.decodedSources];
+    t.listeners.get("window:pagehide")();
+    await step();
+    assert.equal(t.idle.size, 0);
+    assert.ok(
+      t.canvases.slice(1).every((canvas) => canvas.width === 0 && canvas.height === 0),
+      "cancelled generation releases every partial owned canvas",
+    );
+    assert.equal(t.prepared(), false, "partial layers never publish as ready");
+    t.listeners.get("window:pageshow")();
+    for (let i = 0; i < 6000 && !t.prepared(); i += 1) await step();
+    assert.ok(t.prepared(), "the resumed generation completes");
+    assert.deepEqual(t.decodedSources, decoded, "resume reuses decoded source images");
+    assert.equal(t.readyCount(), 1, "only the complete resumed generation publishes");
+  } finally {
+    dispose();
+  }
+  assert.equal(t.idle.size, 0);
 });
 
 test("Save-Data and 2G shorten layout before fragment restoration, not on connection changes", () => {

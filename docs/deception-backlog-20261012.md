@@ -38,7 +38,7 @@ Subagents are GPT-6 Luna only, initial work limited to static independent audits
   The delay anchor is settled/hydrated World, not its first SSR visibility.
   Native backgrounding remains unverified because automated Chrome stays visible.
 
-## 6. Entry style/layout work — verified candidate, publication pending
+## 6. Entry style/layout work — published 5488146 (implementation a6e5ffa)
 
 - Synchronous local cover marker at React ref commit and every LoadGate state
   boundary. Global loading keeps its literal true value and cancellation/clock
@@ -60,8 +60,43 @@ Subagents are GPT-6 Luna only, initial work limited to static independent audits
   remains unverified), route history, World programme, performance invariants,
   phone Dream/Rexonance route/flash checks. Evidence: /private/tmp/backlog-item6-*.
 
+- Latest main's Rain City/Blender materials (7f52609) preserved during normal
+  merge. Merged gates2211pass/fail0/skip4; PixelCPU4 four real-engine cases,
+  phone routes and provided trace rechecked. Actions38259419503 succeeded and
+  public release SHA5488146554d38a7e802927679a2a962e5269ca7f matched.
+  Merged trace samples304/247ms vary; no universal Layout speedup is claimed.
+
+## 7. ZENITH preparation — verified candidate, publication pending
+
+- Native snapshots, row pixel separation, crop drawing, gold sheets/composites
+  and buffers are separate cooperative idle phases. Four-ms JavaScript slices
+  preserve all original pixels, masks, reverse crop order and touch draw caps.
+  Atomic publish prevents partial plans becoming live. Cancelled generations
+  release all owned canvases without closing borrowed decoded sources; resume
+  rebuilds from those sources. Completed job caches remain intact.
+- An expired idle deadline switches the generation to bounded16ms timer slots,
+  avoiding a one-second timeout per pixel row. Hidden/pagehide/unmount cancel
+  both scheduling paths. Tests cover timeout progress, real driver/gold crops,
+  atomic readiness and mid-crop cancellation/reuse. No safety pin weakened.
+- Gates2213pass/fail0/skip4, tsc, eslint0errors/12existing warnings,
+  source15/15, vite build. Chrome/WebKit91conditions passed including native
+  and no-timeline WebKit, six viewports, reduced motion, Save-Data/2G anchors,
+  forward/reverse/repeat paints. Converged desktop/phone arms and complete
+  canvas hashes exactly match baseline5488146; screenshots inspected.
+- PixelCPU4, three AB/BA pairs: max idle work31.0–31.7ms before vs5.0–5.6ms
+  after. Whole-scroll task median1351.61→1404.38ms (+3.9%), so this improves
+  latency peaks, not total CPU. End drops0 for every pair; historical1–2end
+  drops not reproduced before or after. Native allocation/readback remains
+  indivisible and one candidate run had a50ms task. Trace overhead is separate.
+- Evidence /private/tmp/backlog-item7-{base-visual,candidate}/report.json and
+  /private/tmp/backlog-item7-{unit,types,lint,build,calls}.log.
+- Main ee6b5a3's iPad opening/GPU recovery changes merged without overlap.
+  Merged gates2215pass/fail0/skip4; type/lint/source/build passed again.
+  Five call profiles passed; four merged PixelCPU4 preload/roundtrip/abort
+  conditions used the real engine. Evidence /private/tmp/backlog-item7-merged-*.
+
 ## Remaining
 
-7–11 pending ordered browser/performance verification. Static audits indicate
+8–11 pending ordered browser/performance verification. Static audits indicate
 several are already implemented; do not blindly reapply reverted historical work.
 Physical iPhone/iPad checks remain separate from Chromium/WebKit emulation.
