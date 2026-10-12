@@ -29,6 +29,8 @@ test("episode 03 advances within its recorded chapter and keeps discoveries unre
   assert.equal(episode.synopsis.length, 6);
   assert.match(episode.synopsis[2], /フェイブルが現れ、悠真を扉の奥へ連れていく/);
   assert.match(episode.synopsis[3], /改造に着手/);
+  assert.match(episode.synopsis[3], /碧栄壊滅の元凶はアザトでありサーガではないと報告/);
+  assert.match(episode.synopsis[3], /北米本部はサーガ討伐の方針を維持/);
   assert.match(episode.synopsis[4], /観測の主体も、重複の意味も分からない/);
   assert.match(episode.synopsis[5], /レックスの思索を通じ/);
   assert.match(episode.synopsis[5], /悠真たちはまだ知らない/);
@@ -36,6 +38,11 @@ test("episode 03 advances within its recorded chapter and keeps discoveries unre
     episode.synopsis.join(""),
     /EP4|改造を完成|デュアルエクスを完成|犬を倒した|犬に敗れた|イサクが滅びた|イサクを救った/,
   );
+});
+
+test("CODE's original order is labeled historical rather than the current accusation", () => {
+  const annex = readFileSync(new URL("../src/components/world/world-annex.tsx", import.meta.url), "utf8");
+  assert.match(annex, /派遣時の任務<\/span>\s*<span>\{entry\.mission\.text\}/);
 });
 
 const sourcePath = process.env.WORLD_TIMELINE_SOURCE;

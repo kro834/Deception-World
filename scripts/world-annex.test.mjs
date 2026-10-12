@@ -37,10 +37,12 @@ test("world-home preserves its layout and copy outside explicitly approved edits
   // world-mystery-data.ts) and each column heading gained an id for
   // /world#world-column-NN search links.
   assert.deepEqual(worldViewContract(homeView), {
-    records: "75248085b518563223b7a6a8b8237a8889c3044e7d62fbda436bc6e763cc74ed",
+    // 2026-10-12: three owner-requested EP4 pickups; all other records retained.
+    records: "a8a58478067394707675b3e9bd7ceda47f2e37d3ddb9e68c6dc7c4ee1593be3b",
     // rx14 F3/F29: responsive poster and WebP related-image attributes only.
     // The owner's records and exact copy above remain unchanged.
-    markup: "cff99e231c28f3c41881d8d2881a01b94b99367628ba577fe3dbb3862d0489e2",
+    // Each pickup may now land on its matching form's hash via GuardedLink.
+    markup: "d7c68347ead458ee2912bed4fcddc0a5a2d76e40acb26e149bdde2da14f6d69f",
   });
   // The WorldAnnexRiders hook stays where it was (this file is pinned), but
   // renders nothing: 02 RIDERS and 03 RECORDS sit back to back, and the

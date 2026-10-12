@@ -321,6 +321,8 @@ test("world-annex.tsx keeps its labels and accessibility with the approved episo
     "PROFILE",
     "item.by ? (",
     "OPEN DOSSIER",
+    // 2026-10-12: distinguish the original order from the latest exoneration report.
+    "派遣時の任務",
     "件名",
     "最終判定",
     "LOCATIONS",

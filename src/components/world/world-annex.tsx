@@ -454,6 +454,7 @@ function WorldFiles() {
                   {entry.mission ? (
                     <p className="wa-mission">
                       <b lang="en">{entry.mission.code}</b>
+                      <span>派遣時の任務</span>
                       <span>{entry.mission.text}</span>
                     </p>
                   ) : null}

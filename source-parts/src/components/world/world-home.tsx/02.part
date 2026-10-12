@@ -1,3 +1,34 @@
+        pos: "50% 0%",
+        alt: "仮面ライダールーラー・ポラリスモード",
+        width: 1023,
+        height: 1537,
+        to: "/characters/dante",
+        hash: "ruler-polaris",
+        assets: ["/character-dante.webp", "/rider-ruler-polaris.webp"],
+      },
+    ],
+  },
+  {
+    no: "05",
+    title: "FARCE",
+    src: "/episode-05-farce.jpeg",
+    pos: "50% 44%",
+    alt: "夜の遊園地で赤黒と青金の仮面ライダーが対峙するEP5のサムネイル",
+  },
+  {
+    no: "06",
+    title: "DEUS",
+    src: "/episode-06-deus.webp",
+    pos: "42% 38%",
+    alt: "夕暮れの崩壊した街で、傷ついた黒い衣装の人物が空を見上げるEP6 DEUSのビジュアル",
+  },
+];
+
+function scrollAxisX(scroller: HTMLElement | null, child: HTMLElement | null) {
+  if (!scroller || !child) return;
+  const left = child.offsetLeft - (scroller.clientWidth - child.clientWidth) / 2;
+  const behavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ? "auto"
     : "smooth";
   scroller.scrollTo({ left: Math.max(0, left), behavior });
 }
@@ -474,28 +505,3 @@ export function WorldHome() {
   }, [locationHash]);
 
   useLayoutEffect(() => {
-    if (locationHash !== "manager-archive-unmanaged") return;
-    setManagerTab(1);
-    syncRail(managerRail.current, 1);
-  }, [locationHash]);
-
-  // A search result opens one column: /world#world-column-02.
-  useLayoutEffect(() => {
-    const index = COLUMNS.findIndex((item) => locationHash === `world-column-${item.no}`);
-    if (index < 0) return;
-    setColumnTab(index);
-    syncRail(columnRail.current, index);
-  }, [locationHash]);
-
-  useLayoutEffect(() => {
-    let firstFrame = 0;
-    let secondFrame = 0;
-    let retryFrame = 0;
-    let cancelled = false;
-    // LoadGate keeps the destination handshake open for 2.2s. Keep probing
-    // connected targets for almost that whole window instead of assuming a
-    // fixed 24-frame budget, which can expire early on throttled devices.
-    const destinationReadyDeadline = window.performance.now() + 2_000;
-
-    const announceDestination = () => {
-      if (cancelled) return;

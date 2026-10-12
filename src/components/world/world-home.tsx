@@ -332,6 +332,7 @@ type EpisodePickup = {
   width: number;
   height: number;
   to: string;
+  hash?: string;
   assets: readonly string[];
 };
 
@@ -476,6 +477,43 @@ const EPISODES: EpisodeRecord[] = [
     src: "/episode-04-kill.jpeg",
     pos: "50% 16%",
     alt: "黒い衣装の人物が崩壊した街に立つEP4のサムネイル",
+    pickups: [
+      {
+        label: "仮面ライダーファラリス",
+        src: "/manager-lejas-rider.jpeg",
+        pos: "50% 8%",
+        alt: "仮面ライダーファラリス",
+        width: 1086,
+        height: 1448,
+        to: "/managers/lejas",
+        hash: "form-records",
+        assets: [...MANAGER_ASSETS.lejas, "/manager-lejas-rider.jpeg"],
+      },
+      {
+        label: "仮面ライダールーラー・エニグマモード",
+        displayLines: ["仮面ライダールーラー", "エニグマモード"],
+        src: "/rider-ruler-enigma.webp",
+        pos: "50% 0%",
+        alt: "仮面ライダールーラー・エニグマモード",
+        width: 1023,
+        height: 1535,
+        to: "/characters/dante",
+        hash: "ruler-enigma",
+        assets: ["/character-dante.webp", "/rider-ruler-enigma.webp"],
+      },
+      {
+        label: "仮面ライダールーラー・ポラリスモード",
+        displayLines: ["仮面ライダールーラー", "ポラリスモード"],
+        src: "/rider-ruler-polaris.webp",
+        pos: "50% 0%",
+        alt: "仮面ライダールーラー・ポラリスモード",
+        width: 1023,
+        height: 1537,
+        to: "/characters/dante",
+        hash: "ruler-polaris",
+        assets: ["/character-dante.webp", "/rider-ruler-polaris.webp"],
+      },
+    ],
   },
   {
     no: "05",
@@ -2862,6 +2900,7 @@ export function WorldHome() {
                     className="episode-pickup-item"
                     key={item.label}
                     to={item.to}
+                    hash={item.hash}
                     assets={item.assets}
                     beforeNavigate={closeEpisodePickup}
                     aria-label={`${item.label}の個別ページを開く`}

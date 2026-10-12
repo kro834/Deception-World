@@ -59,8 +59,9 @@ export const DANTE_SECTIONS = [
   },
 ];
 
-export const DANTE_FORMS: RiderForm[] = [
+export const DANTE_FORMS: (RiderForm & { id: string })[] = [
   {
+    id: "ruler-polaris",
     img: "/rider-ruler-polaris.webp",
     pos: "50% 0%",
     name: "ルーラー・ポラリスモード",
@@ -98,6 +99,7 @@ export const DANTE_FORMS: RiderForm[] = [
   },
   {
     img: "/rider-ruler-enigma.webp",
+    id: "ruler-enigma",
     pos: "50% 0%",
     name: "ルーラー・エニグマモード",
     nameParts: ["ルーラー・", "エニグマモード"],

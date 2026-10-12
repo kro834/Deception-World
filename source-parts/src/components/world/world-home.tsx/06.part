@@ -1,3 +1,9 @@
+                  </div>
+                ))}
+              </div>
+              <SlideOpenControl
+                ariaControls="world-column-pickup"
+                ariaLabel="世界観コラムのピックアップを開く"
                 buttonRef={pickupBtnRef}
                 className="world-column-slide-open"
                 expanded={pickupOpen}
@@ -359,6 +365,7 @@
                     className="episode-pickup-item"
                     key={item.label}
                     to={item.to}
+                    hash={item.hash}
                     assets={item.assets}
                     beforeNavigate={closeEpisodePickup}
                     aria-label={`${item.label}の個別ページを開く`}
