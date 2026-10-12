@@ -232,15 +232,27 @@ const flush = async () => {
 
 function deferred() {
   let resolve;
-  const promise = new Promise((settle) => { resolve = settle; });
-  return { promise, resolve };
+  let reject;
+  const promise = new Promise((settle, fail) => { resolve = settle; reject = fail; });
+  return { promise, resolve, reject };
 }
+
+const CITY_BITMAP_SOURCES = [
+  "concrete-albedo.webp", "concrete-normal.png", "concrete-roughness.png",
+  "asphalt-albedo.webp", "asphalt-normal.png", "asphalt-roughness.png",
+].map((name) => `/rain-city-materials/${name}`);
+const DIVE_BITMAP_COUNT = 3 + CITY_BITMAP_SOURCES.length;
 
 // Use the real module-global preparation/release implementation so the test
 // covers invalidating pending decodes, not a fake engine's cleanup counter.
 function diveBitmapRuntime() {
   const pendingImages = [];
   const closedImages = [];
+  const loadImage = (source) => {
+    const result = deferred();
+    pendingImages.push({ source, ...result });
+    return result.promise;
+  };
   const exports = {};
   runInNewContext(ts.transpileModule(read("src/components/cinematic/opening-dive.ts"), {
     compilerOptions: { module: ts.ModuleKind.CommonJS },
@@ -250,12 +262,12 @@ function diveBitmapRuntime() {
     navigator: {},
     require(name) {
       if (name === "./opening-gl") return {
-        loadGlImage(source) {
-          const result = deferred();
-          pendingImages.push({ source, ...result });
-          return result.promise;
-        },
+        loadGlImage: loadImage,
         closeGlImage: (image) => closedImages.push(image),
+      };
+      if (name === "./rain-city-materials") return {
+        loadCitySurfaceImages: () => Promise.all(CITY_BITMAP_SOURCES.map(loadImage)),
+        closeCitySurfaceImages: (images) => images?.forEach((image) => closedImages.push(image)),
       };
       return {};
     },
@@ -266,6 +278,16 @@ function diveBitmapRuntime() {
     }
   };
   return { engine: exports, pendingImages, closedImages, resolveImages };
+}
+
+function assertAllDiveBitmapsClosed(bitmaps, count = DIVE_BITMAP_COUNT) {
+  assert.equal(bitmaps.closedImages.length, count, "all legacy and surface bitmaps close");
+  assert.equal(new Set(bitmaps.closedImages).size, count, "every bitmap closes exactly once");
+  assert.equal(
+    bitmaps.closedImages.filter(({ source }) => CITY_BITMAP_SOURCES.includes(source)).length,
+    (count / DIVE_BITMAP_COUNT) * CITY_BITMAP_SOURCES.length,
+    "all six baked material bitmaps close for each preparation",
+  );
 }
 
 test("the entrance is hidden and disabled throughout idle and playing", () => {
@@ -408,11 +430,51 @@ test("a late dive chunk is allowed during an owned handoff but not during a repl
     ui.render();
     imported.resolve(bitmaps.engine);
     await flush();
-    assert.equal(bitmaps.pendingImages.length, phase === "complete" || phase === "diving" ? 3 : 0, phase);
+    const expected = phase === "complete" || phase === "diving" ? DIVE_BITMAP_COUNT : 0;
+    assert.equal(bitmaps.pendingImages.length, expected, phase);
     ui.unmount();
     bitmaps.resolveImages();
     await flush();
-    assert.equal(bitmaps.closedImages.length, bitmaps.pendingImages.length, "unused late decodes close");
+    assertAllDiveBitmapsClosed(bitmaps, expected);
+  }
+});
+
+test("unused completed preparation releases all nine bitmaps without duplicate closes", async () => {
+  const bitmaps = diveBitmapRuntime();
+  const prepared = bitmaps.engine.prepareOpeningDive("/prism.webp");
+  assert.deepEqual(bitmaps.pendingImages.slice(3).map(({ source }) => source), CITY_BITMAP_SOURCES);
+  bitmaps.resolveImages();
+  await prepared;
+  assert.equal(bitmaps.closedImages.length, 0, "a prepared flight owns its decoded inputs");
+  bitmaps.engine.releaseOpeningDivePrepared();
+  bitmaps.engine.releaseOpeningDivePrepared();
+  assertAllDiveBitmapsClosed(bitmaps);
+});
+
+test("replaying a title reuses preparation and unmount closes all six surfaces and three legacy images", async () => {
+  for (const decodeBeforeReplay of [false, true]) {
+    const bitmaps = diveBitmapRuntime();
+    const ui = entryRuntime({ runEffects: true, diveImport: Promise.resolve(bitmaps.engine) });
+    ui.state[0] = "complete";
+    const complete = ui.render();
+    complete.enter.onFocus();
+    await flush();
+    assert.equal(bitmaps.pendingImages.length, DIVE_BITMAP_COUNT);
+    if (decodeBeforeReplay) {
+      bitmaps.resolveImages();
+      await flush();
+    }
+    complete.replay.onClick({ detail: 0 });
+    ui.render();
+    assert.equal(ui.state[0], "idle");
+    bitmaps.resolveImages();
+    await flush();
+    ui.state[0] = "complete";
+    ui.render().enter.onFocus();
+    await flush();
+    assert.equal(bitmaps.pendingImages.length, DIVE_BITMAP_COUNT, "replay keeps the existing cache contract");
+    ui.unmount();
+    assertAllDiveBitmapsClosed(bitmaps);
   }
 });
 
@@ -422,19 +484,45 @@ test("unmount invalidates a pending real dive preparation and closes every later
   ui.state[0] = "complete";
   ui.render().enter.onFocus();
   await flush();
-  assert.equal(bitmaps.pendingImages.length, 3);
+  assert.equal(bitmaps.pendingImages.length, DIVE_BITMAP_COUNT);
   ui.unmount();
   const next = bitmaps.engine.prepareOpeningDive("/prism.webp");
-  assert.equal(bitmaps.pendingImages.length, 6, "abandoned preparation is not reused as a global cache");
-  bitmaps.resolveImages(0, 3);
+  assert.equal(bitmaps.pendingImages.length, DIVE_BITMAP_COUNT * 2, "abandoned preparation is not reused as a global cache");
+  bitmaps.resolveImages(0, DIVE_BITMAP_COUNT);
   await flush();
-  assert.equal(bitmaps.closedImages.length, 3, "the module closes invalidated async results");
+  assertAllDiveBitmapsClosed(bitmaps);
   assert.equal(bitmaps.engine.prepareOpeningDive("/prism.webp"), next,
     "late completion from the abandoned title cannot release a newer shared preparation");
-  bitmaps.resolveImages(3);
+  bitmaps.resolveImages(DIVE_BITMAP_COUNT);
   await next;
   bitmaps.engine.releaseOpeningDivePrepared();
-  assert.equal(bitmaps.closedImages.length, 6);
+  assertAllDiveBitmapsClosed(bitmaps, DIVE_BITMAP_COUNT * 2);
+});
+
+test("a failed legacy decode closes every successful legacy and material bitmap before allowing retry", async () => {
+  for (const failed of [0, 1, 2]) {
+    const bitmaps = diveBitmapRuntime();
+    const prepared = bitmaps.engine.prepareOpeningDive("/prism.webp");
+    const rejected = assert.rejects(prepared, /Opening assets unavailable/);
+    bitmaps.pendingImages[failed].reject(new Error("legacy decode unavailable"));
+    bitmaps.resolveImages();
+    await rejected;
+    assert.equal(bitmaps.closedImages.length, DIVE_BITMAP_COUNT - 1);
+    assert.equal(new Set(bitmaps.closedImages).size, DIVE_BITMAP_COUNT - 1);
+    assert.deepEqual(
+      bitmaps.closedImages.filter(({ source }) => CITY_BITMAP_SOURCES.includes(source)).map(({ source }) => source),
+      CITY_BITMAP_SOURCES,
+      "a legacy failure also releases all successfully decoded city surfaces",
+    );
+    const retry = bitmaps.engine.prepareOpeningDive("/prism.webp");
+    assert.notEqual(retry, prepared);
+    assert.equal(bitmaps.pendingImages.length, DIVE_BITMAP_COUNT * 2);
+    bitmaps.resolveImages(DIVE_BITMAP_COUNT);
+    await retry;
+    bitmaps.engine.releaseOpeningDivePrepared();
+    assert.equal(bitmaps.closedImages.length, DIVE_BITMAP_COUNT * 2 - 1);
+    assert.equal(new Set(bitmaps.closedImages).size, DIVE_BITMAP_COUNT * 2 - 1);
+  }
 });
 
 test("WebGL preparation happens after a painted playing phase, not on a skipped mount", () => {

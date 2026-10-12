@@ -125,8 +125,10 @@ test("draw skips invisible and disposed frames, with no independent animation lo
     time: { value: 0 },
     heading: { value: 0 },
     fragments: [],
+    destruction: [],
     debris: { instanceMatrix: {} },
     headlight: new THREE.PointLight(),
+    updateLighting() {},
     camera: new THREE.PerspectiveCamera(),
     scene: {},
     renderer: {
@@ -149,6 +151,28 @@ test("draw skips invisible and disposed frames, with no independent animation lo
     "utf8",
   );
   assert.doesNotMatch(source, /requestAnimationFrame\(|setAnimationLoop\(|setInterval\(/);
+});
+
+test("shadow-pool membership fades continuously without dimming the six street lights", () => {
+  const fake = {
+    lamps: [-30, -12, 0, 12, 30, 45].map((x) => ({ x, y: 7, z: 0 })),
+    streetLights: Array.from({ length: 6 }, () => new THREE.SpotLight(0xffffff, 210)),
+    lightPositions: { value: Array.from({ length: 6 }, () => new THREE.Vector3()) },
+  };
+  const at = (x) => {
+    RainCityScene.prototype.updateLighting.call(fake, x, 0);
+    return new Map(
+      fake.streetLights.slice(0, 2).map((light) => [light.position.x, light.shadow.intensity]),
+    );
+  };
+  const before = at(-0.01),
+    tie = at(0),
+    after = at(0.01);
+  assert.equal(tie.get(0), 1, "the nearest lamp keeps its shadow");
+  assert.equal(tie.get(-12), 0, "the departing shadow vanishes at the tie");
+  assert.ok(before.get(-12) < 0.001 && after.get(12) < 0.001);
+  assert.deepEqual(at(-0.01), before, "a replay seeks to identical shadow strengths");
+  assert.ok(fake.streetLights.every((light) => light.intensity === 210));
 });
 
 test("resize caps physical pixels, follows quality rungs and does nothing after disposal", () => {
@@ -175,6 +199,7 @@ test("resize caps physical pixels, follows quality rungs and does nothing after 
       },
       camera: new THREE.PerspectiveCamera(),
       dustPixels: { value: 0 },
+      reflectionTexel: { value: new THREE.Vector2() },
     };
     RainCityScene.prototype.resize.call(fake, 390, 844, 0);
     assert.ok(sizes[0][0] * sizes[0][1] <= 752000);
@@ -198,9 +223,13 @@ test("dispose releases shared geometry, materials, instance buffers and context 
   const calls = [];
   const geometry = new THREE.BoxGeometry();
   const material = new THREE.MeshBasicMaterial();
+  const texture = new THREE.Texture();
+  const light = new THREE.SpotLight();
+  light.shadow.dispose = () => calls.push("shadow");
   const instances = new THREE.InstancedMesh(geometry, material, 1);
   geometry.addEventListener("dispose", () => calls.push("geometry"));
   material.addEventListener("dispose", () => calls.push("material"));
+  texture.addEventListener("dispose", () => calls.push("texture"));
   instances.addEventListener("dispose", () => calls.push("instances"));
   const scene = new THREE.Scene();
   scene.add(instances);
@@ -208,6 +237,8 @@ test("dispose releases shared geometry, materials, instance buffers and context 
     disposed: false,
     geometries: new Set([geometry]),
     materials: new Set([material]),
+    textures: new Set([texture]),
+    streetLights: [light],
     scene,
     reflection: {
       dispose() {
@@ -233,6 +264,8 @@ test("dispose releases shared geometry, materials, instance buffers and context 
   for (const resource of [
     "geometry",
     "material",
+    "texture",
+    "shadow",
     "instances",
     "reflection",
     "renderer",

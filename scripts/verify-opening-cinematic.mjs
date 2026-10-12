@@ -41,6 +41,12 @@ const PROFILES = {
     hasTouch: true,
   },
   desktop: { viewport: { width: 1440, height: 900 } },
+  ipad: {
+    viewport: { width: 1366, height: 1024 },
+    deviceScaleFactor: 2,
+    hasTouch: true,
+    isMobile: true,
+  },
 };
 const profileNames = (process.env.OPENING_PROFILES || "pixel,desktop")
   .split(",")
@@ -74,6 +80,13 @@ const NO_WEBGL = () => {
     if (/webgl/i.test(String(type))) return null;
     return getContext.call(this, type, ...rest);
   };
+};
+const MISSING_CITY_MAPS = () => {
+  const fetch = window.fetch.bind(window);
+  window.fetch = (input, ...rest) =>
+    String(input).includes("/rain-city-materials/")
+      ? Promise.resolve(new Response("unavailable", { status: 503 }))
+      : fetch(input, ...rest);
 };
 // Counts the opening's contexts (by canvas class) and keeps them for isContextLost().
 const COUNT_WEBGL = () => {
@@ -377,6 +390,7 @@ async function pressEnter(page, name) {
 async function checkDive(browser, name) {
   for (const [label, options, expected] of [
     ["capable", { init: [COUNT_WEBGL] }, "webgl"],
+    ["missing-city-maps", { init: [COUNT_WEBGL, MISSING_CITY_MAPS] }, "webgl"],
     ["no-webgl", { init: [NO_WEBGL] }, "css"],
     ["save-data", { init: [SAVE_DATA, COUNT_WEBGL] }, "css"],
     ["reduced", { reducedMotion: true, init: [COUNT_WEBGL] }, "reduced"],
@@ -407,6 +421,11 @@ async function checkDive(browser, name) {
     if (tier === "webgl") {
       assert.equal(await page.locator(".opening-dive-canvas").count(), 1);
       assert.equal(await page.locator(".opening-rain-city").count(), 1);
+      assert.equal(
+        await page.locator(".opening-rain-city").getAttribute("data-materials"),
+        label === "missing-city-maps" ? "procedural-fallback" : "blender-baked",
+        `${name}: actual baked assets are decoded before the first frame`,
+      );
       assert.ok(readyAfter <= 800, `${name}: GL ready ${readyAfter} ms after the press`);
       await page.waitForFunction(
         () => {
