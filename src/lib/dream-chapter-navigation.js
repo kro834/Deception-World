@@ -24,7 +24,8 @@ export function mountDreamChapterNavigation(root, onChange, environment = window
   const readTarget = (hash) => {
     const match = /^#dream-(?:case|case-note|chronicle-case)-([0-5])$/.exec(hash);
     const paragraph = parseDreamReaderHash(hash);
-    if (!match && !paragraph && hash !== "#dream-chapter-index") return null;
+    const event = /^#dream-chronicle-event-([1-9]\d*)$/.test(hash);
+    if (!match && !paragraph && !event && hash !== "#dream-chapter-index") return null;
     const target = root.ownerDocument.getElementById(hash.slice(1));
     if (!target || !root.contains(target)) return null;
     if (
@@ -33,7 +34,12 @@ export function mountDreamChapterNavigation(root, onChange, environment = window
         target.closest(".dream-story-case")?.dataset.caseNo !== paragraph.caseNo)
     )
       return null;
-    return { target, no: match?.[1] ?? paragraph?.caseNo ?? null };
+    const eventCase =
+      event && target.matches(".dream-chronicle-item")
+        ? /^dream-chronicle-case-([0-5])$/.exec(target.closest("details")?.id || "")?.[1]
+        : null;
+    if (event && !eventCase) return null;
+    return { target, no: match?.[1] ?? paragraph?.caseNo ?? eventCase ?? null };
   };
   const sync = (hash = environment.location.hash, openTarget = true) => {
     syncedHash = hash;

@@ -5,7 +5,6 @@ import { createReadyPosterLoader } from "@/lib/ready-poster-loader";
 import { posterImage, preparePosterImage } from "@/lib/thumbnail-images";
 import { acquireViewportScrollLock } from "@/lib/viewport-scroll-lock.js";
 import { createScreeningSelection } from "./dream-screening-selection.js";
-import "./dream-screening-room.css";
 
 type DreamScreeningRoomProps = {
   initialIndex: number;
@@ -72,9 +71,11 @@ export function DreamScreeningRoom({ initialIndex, trigger, onClose }: DreamScre
     if (!dialog) return;
     const root = document.documentElement;
     const oldDialogFlag = root.dataset.dreamDialogOpen;
+    // showModal's native autofocus may scroll the document. Capture the
+    // departure position before it (and before any style-affecting flag).
+    const releaseScroll = acquireViewportScrollLock({ freezeBody: true });
     root.dataset.dreamDialogOpen = "true";
     dialog.showModal();
-    const releaseScroll = acquireViewportScrollLock({ freezeBody: true });
     let released = false;
     const releaseViewport = () => {
       if (released) return;

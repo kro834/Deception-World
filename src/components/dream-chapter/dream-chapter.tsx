@@ -56,6 +56,7 @@ import {
   VoicesLeaf,
 } from "./dream-chapter-extra";
 import { DREAM_ARCHIVE_CORNERS, type DreamArchiveCornerId } from "./dream-chapter-extra-data";
+import { DreamScreeningLauncher } from "./dream-screening-launcher";
 import {
   DreamStoryBacklinks,
   DreamStoryIndex,
@@ -620,6 +621,7 @@ export function DreamChapter() {
   const [posterLoading, setPosterLoading] = useState(false);
   const [posterLoadFailed, setPosterLoadFailed] = useState(false);
   const [posterControlsFocused, setPosterControlsFocused] = useState(false);
+  const [screeningActive, setScreeningActive] = useState(false);
   const [posterVisible, setPosterVisible] = useState(true);
   const [heroVisible, setHeroVisible] = useState(true);
   const [posterMotionEnabled, setPosterMotionEnabled] = useState(true);
@@ -866,6 +868,7 @@ export function DreamChapter() {
       posterShuffling ||
       posterLoading ||
       posterControlsFocused ||
+      screeningActive ||
       !posterVisible ||
       !posterMotionEnabled ||
       menuOpen ||
@@ -906,6 +909,7 @@ export function DreamChapter() {
     posterShuffling,
     posterLoading,
     posterControlsFocused,
+    screeningActive,
     posterVisible,
   ]);
 
@@ -914,6 +918,7 @@ export function DreamChapter() {
       !posterMotionEnabled ||
       !posterVisible ||
       posterControlsFocused ||
+      screeningActive ||
       menuOpen ||
       character ||
       dolminenceRecord
@@ -929,6 +934,7 @@ export function DreamChapter() {
     dolminenceRecord,
     menuOpen,
     posterControlsFocused,
+    screeningActive,
     posterIndex,
     posterMotionEnabled,
     posterVisible,
@@ -939,12 +945,29 @@ export function DreamChapter() {
       !posterVisible ||
       !posterMotionEnabled ||
       menuOpen ||
+      screeningActive ||
       character != null ||
       dolminenceRecord != null
     ) {
       cancelShuffle();
     }
-  }, [cancelShuffle, character, dolminenceRecord, menuOpen, posterMotionEnabled, posterVisible]);
+  }, [
+    cancelShuffle,
+    character,
+    dolminenceRecord,
+    menuOpen,
+    posterMotionEnabled,
+    posterVisible,
+    screeningActive,
+  ]);
+
+  const handleScreeningActive = useCallback(
+    (active: boolean) => {
+      if (active) cancelShuffle();
+      setScreeningActive(active);
+    },
+    [cancelShuffle],
+  );
 
   useEffect(
     () => () => {
@@ -1171,6 +1194,17 @@ export function DreamChapter() {
         aria-labelledby="poster-title"
       >
         <header className="dream-section-heading" data-film-reveal data-ts-numeral="I">
+          <img
+            className="dream-act-still"
+            aria-hidden="true"
+            src={DREAM_POSTERS[9].src}
+            {...posterImage(DREAM_POSTERS[9].src)}
+            alt=""
+            loading="lazy"
+            decoding="async"
+            width={DREAM_POSTERS[9].width}
+            height={DREAM_POSTERS[9].height}
+          />
           <FilmTextScan />
           <b className="dream-act-mark" aria-hidden="true">
             第一幕
@@ -1234,6 +1268,11 @@ export function DreamChapter() {
             <figcaption>
               <span>其ノ{toKanjiNumber(posterIndex + 1)}</span>
               <b>{activePoster.alt}</b>
+              <DreamScreeningLauncher
+                index={posterIndex}
+                onActiveChange={handleScreeningActive}
+                onSelection={selectPoster}
+              />
             </figcaption>
             <p
               className="dream-poster-load-status"
@@ -1363,6 +1402,17 @@ export function DreamChapter() {
         aria-labelledby="character-title"
       >
         <header className="dream-section-heading" data-film-reveal data-ts-numeral="II">
+          <img
+            className="dream-act-still"
+            aria-hidden="true"
+            src={DREAM_POSTERS[3].src}
+            {...posterImage(DREAM_POSTERS[3].src)}
+            alt=""
+            loading="lazy"
+            decoding="async"
+            width={DREAM_POSTERS[3].width}
+            height={DREAM_POSTERS[3].height}
+          />
           <FilmTextScan />
           <b className="dream-act-mark" aria-hidden="true">
             第二幕
@@ -1473,6 +1523,17 @@ export function DreamChapter() {
         aria-labelledby="dolminence-title"
       >
         <header className="dream-section-heading" data-film-reveal data-ts-numeral="III">
+          <img
+            className="dream-act-still"
+            aria-hidden="true"
+            src={DREAM_POSTERS[12].src}
+            {...posterImage(DREAM_POSTERS[12].src)}
+            alt=""
+            loading="lazy"
+            decoding="async"
+            width={DREAM_POSTERS[12].width}
+            height={DREAM_POSTERS[12].height}
+          />
           <FilmTextScan />
           <b className="dream-act-mark" aria-hidden="true">
             第三幕
@@ -1651,6 +1712,17 @@ export function DreamChapter() {
         aria-labelledby="case-title"
       >
         <header className="dream-section-heading" data-film-reveal data-ts-numeral="IV">
+          <img
+            className="dream-act-still"
+            aria-hidden="true"
+            src={DREAM_POSTERS[13].src}
+            {...posterImage(DREAM_POSTERS[13].src)}
+            alt=""
+            loading="lazy"
+            decoding="async"
+            width={DREAM_POSTERS[13].width}
+            height={DREAM_POSTERS[13].height}
+          />
           <FilmTextScan />
           <b className="dream-act-mark" aria-hidden="true">
             第四幕
@@ -1718,8 +1790,17 @@ export function DreamChapter() {
                   </summary>
                   <div className="dream-story-case-body">
                     <h3>{episode.lead}</h3>
-                    {episode.paragraphs.map((paragraph) => (
-                      <p key={paragraph}>{paragraph}</p>
+                    {episode.paragraphs.map((paragraph, index) => (
+                      <p
+                        key={paragraph}
+                        id={`dream-case-${episode.no}-paragraph-${index + 1}`}
+                        data-dream-reading-paragraph
+                        data-case-no={episode.no}
+                        data-paragraph-no={index + 1}
+                        tabIndex={-1}
+                      >
+                        {paragraph}
+                      </p>
                     ))}
                     <DreamStoryNavigation no={episode.no} />
                   </div>

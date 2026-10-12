@@ -275,3 +275,11 @@
     outline-color: Highlight;
   }
 }
+.dream-page .dream-chronicle-item[id] {
+  scroll-margin-top: calc(var(--dream-nav-offset, 96px) + 28px);
+}
+
+.dream-page .dream-chronicle-item[id]:focus-visible {
+  outline: 2px solid #e8c58d;
+  outline-offset: 4px;
+}

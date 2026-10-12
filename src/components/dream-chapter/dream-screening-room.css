@@ -20,6 +20,12 @@
   background: #08060b;
 }
 
+/* The shared movable control portals into open dialogs; the viewing room
+   has its own close/navigation controls and reserves this surface for art. */
+.dream-screening-dialog > .zeus-button {
+  display: none;
+}
+
 .dream-screening-shell {
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto auto auto;
