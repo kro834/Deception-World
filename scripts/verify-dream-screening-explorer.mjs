@@ -10,12 +10,16 @@ const browser = await engine.launch(
   engine === chromium ? { channel: process.env.PW_BROWSER_CHANNEL || "chrome" } : undefined,
 );
 const output = process.env.AUDIT_OUT || `/tmp/dream-screening-explorer-${engineName}`;
-const viewports = [
+const availableViewports = [
   { name: "320x640", width: 320, height: 640, hasTouch: true },
   { name: "390x844", width: 390, height: 844, hasTouch: true },
   { name: "1024x768-landscape", width: 1024, height: 768, hasTouch: false },
   { name: "1440x900", width: 1440, height: 900, hasTouch: false },
 ];
+const requestedViewports = process.env.PW_VIEWPORTS?.split(",").map((name) => name.trim());
+const viewports = requestedViewports?.length
+  ? availableViewports.filter((viewport) => requestedViewports.includes(viewport.name))
+  : availableViewports;
 
 await mkdir(output, { recursive: true });
 
@@ -27,6 +31,19 @@ async function countResults(page) {
   const match = text.match(/^(\d+)件の記録/);
   assert.ok(match, `Unexpected record count text: ${text}`);
   return Number(match[1]);
+}
+
+async function activate(locator, viewport) {
+  if (viewport.hasTouch) await locator.tap();
+  else await locator.click();
+}
+
+async function waitForHydration(page, selector) {
+  await page.locator(selector).first().waitFor({ state: "visible" });
+  await page.waitForFunction((target) => {
+    const element = document.querySelector(target);
+    return element && Object.keys(element).some((key) => key.startsWith("__reactProps"));
+  }, selector);
 }
 
 async function setFilter(page, index, value) {
@@ -42,6 +59,124 @@ async function noHorizontalOverflow(page, label) {
   assert.ok(overflow <= 1, `${label}: horizontal overflow ${overflow}px`);
 }
 
+async function installScreeningInputTrace(page) {
+  await page.evaluate(() => {
+    window.__screeningInputTrace = [];
+    window.__screeningNodeIds = new WeakMap();
+    window.__screeningNextNodeId = 1;
+    window.__screeningPointerDownNodes = new Map();
+    const types = ["pointerdown", "pointerup", "touchstart", "touchend", "click"];
+    const describe = (node) => {
+      if (!(node instanceof Element)) return node?.nodeName ?? String(node);
+      return `${node.tagName.toLowerCase()}${node.id ? `#${node.id}` : ""}${
+        typeof node.className === "string" && node.className.trim()
+          ? `.${node.className.trim().replace(/\s+/g, ".")}`
+          : ""
+      }`;
+    };
+    for (const type of types) {
+      for (const phase of [true, false]) {
+        document.addEventListener(
+          type,
+          (event) => {
+            const point = event.changedTouches?.[0] ?? event;
+            const x = Number.isFinite(point.clientX) ? point.clientX : null;
+            const y = Number.isFinite(point.clientY) ? point.clientY : null;
+            const trigger = document.querySelector(".dream-screening-trigger");
+            const triggerRect = trigger?.getBoundingClientRect();
+            const stage = document.querySelector(".dream-poster-stage");
+            const nodes = [
+              ["trigger", trigger],
+              ["figure", document.querySelector("#dream-poster-panel")],
+              ["caption", document.querySelector("#dream-poster-panel > figcaption")],
+              ["section", document.querySelector("#posters")],
+            ].map(([name, element]) => {
+              if (!element) return { name, present: false };
+              if (!window.__screeningNodeIds.has(element)) {
+                window.__screeningNodeIds.set(element, window.__screeningNextNodeId++);
+              }
+              const rect = element.getBoundingClientRect();
+              const style = getComputedStyle(element);
+              return {
+                name,
+                nodeId: window.__screeningNodeIds.get(element),
+                sameAsPointerdown:
+                  window.__screeningPointerDownNodes.has(name)
+                    ? window.__screeningPointerDownNodes.get(name) === element
+                    : null,
+                connected: element.isConnected,
+                rect: {
+                  top: Math.round(rect.top * 10) / 10,
+                  right: Math.round(rect.right * 10) / 10,
+                  bottom: Math.round(rect.bottom * 10) / 10,
+                  left: Math.round(rect.left * 10) / 10,
+                },
+                clientHeight: element.clientHeight,
+                scrollHeight: element.scrollHeight,
+                overflow: style.overflow,
+                visibility: style.visibility,
+                contentVisibility: style.contentVisibility,
+                transform: style.transform,
+                scale: style.scale,
+                html: element.outerHTML.slice(0, 180),
+              };
+            });
+            const entry = {
+              type,
+              phase: phase ? "capture" : "bubble",
+              target: describe(event.target),
+              path: event.composedPath().slice(0, 8).map(describe),
+              point: x === null || y === null ? null : { x, y },
+              elementFromPoint:
+                x === null || y === null ? null : describe(document.elementFromPoint(x, y)),
+              triggerRect: triggerRect
+                ? {
+                    top: Math.round(triggerRect.top * 10) / 10,
+                    right: Math.round(triggerRect.right * 10) / 10,
+                    bottom: Math.round(triggerRect.bottom * 10) / 10,
+                    left: Math.round(triggerRect.left * 10) / 10,
+                  }
+                : null,
+              scrollY: Math.round(window.scrollY),
+              stage: stage
+                ? {
+                    transform: getComputedStyle(stage).transform,
+                    visibility: getComputedStyle(stage).visibility,
+                  }
+                : null,
+              bodyPosition: getComputedStyle(document.body).position,
+              currentPoster: document
+                .querySelector("#dream-poster-panel")
+                ?.getAttribute("aria-labelledby"),
+              selectedPosterTab: document
+                .querySelector(".dream-poster-thumbnails [aria-selected='true']")
+                ?.id,
+              nodes,
+              defaultPrevented: event.defaultPrevented,
+              time: Math.round(performance.now()),
+            };
+            if (type === "pointerdown" && phase) {
+              for (const [name, element] of [
+                ["trigger", trigger],
+                ["figure", document.querySelector("#dream-poster-panel")],
+                ["caption", document.querySelector("#dream-poster-panel > figcaption")],
+                ["section", document.querySelector("#posters")],
+              ]) {
+                if (element) window.__screeningPointerDownNodes.set(name, element);
+              }
+            }
+            window.__screeningInputTrace.push(entry);
+            queueMicrotask(() => {
+              entry.defaultPreventedAfterDispatch = event.defaultPrevented;
+            });
+          },
+          phase,
+        );
+      }
+    }
+  });
+}
+
 async function testScreeningRoom(context, viewport) {
   const page = await context.newPage();
   const failures = [];
@@ -50,29 +185,63 @@ async function testScreeningRoom(context, viewport) {
   const cssRequestSeen = new Promise((resolve) => {
     markCssRequest = resolve;
   });
+  let openingRequested = false;
   const errors = [];
   page.on("pageerror", (error) => errors.push(error.message));
-  await page.goto(new URL("/dream-chapter#chronicle", base).href, {
-    waitUntil: "domcontentloaded",
-  });
-  await page.locator(".dream-chapter-nav a[href='#posters']").click();
-  await page.waitForURL("**/dream-chapter#posters", { waitUntil: "domcontentloaded" });
-
   await page.route("**/*dream-screening-room*.css*", async (route) => {
+    if (!openingRequested) {
+      await route.continue();
+      return;
+    }
     markCssRequest(route.request().url());
     await new Promise((resolve) => setTimeout(resolve, cssDelayMs));
     await route.continue();
   });
+  await page.goto(new URL("/dream-chapter#chronicle", base).href, {
+    waitUntil: "domcontentloaded",
+  });
+  const postersLink = page.locator(".dream-chapter-nav a[href='#posters']");
+  await waitForHydration(page, ".dream-chapter-nav a[href='#posters']");
+  await activate(postersLink, viewport);
+  await page.waitForURL("**/dream-chapter#posters", { waitUntil: "domcontentloaded" });
 
   const trigger = page.locator(".dream-screening-trigger");
+  await waitForHydration(page, ".dream-screening-trigger");
   await trigger.scrollIntoViewIfNeeded();
+  await installScreeningInputTrace(page);
   const departure = await page.evaluate(() => window.scrollY);
-  await trigger.click();
-  const cssUrl = await Promise.race([
+  openingRequested = true;
+  await activate(trigger, viewport);
+  let cssUrl = await Promise.race([
     cssRequestSeen,
-    new Promise((resolve) => setTimeout(() => resolve(null), 10000)),
+    new Promise((resolve) => setTimeout(() => resolve(null), viewport.hasTouch ? 2000 : 10000)),
   ]);
-  assert.ok(cssUrl, "Opening the room requests its lazy stylesheet after the trigger click");
+  if (!cssUrl && viewport.hasTouch) {
+    console.log(
+      `${viewport.name} touch input trace: ${JSON.stringify(
+        await page.evaluate(() => window.__screeningInputTrace),
+      )}`,
+    );
+    failures.push(`${viewport.name}: hydrated trigger did not activate by tap`);
+    await trigger.click();
+    cssUrl = await Promise.race([
+      cssRequestSeen,
+      new Promise((resolve) => setTimeout(() => resolve(null), 10000)),
+    ]);
+    if (cssUrl) console.log(`${viewport.name}: hydrated trigger activated by click fallback after tap`);
+  }
+  if (!cssUrl) {
+    const state = await page.evaluate(() => ({
+      busy: document.querySelector(".dream-screening-trigger")?.getAttribute("aria-busy"),
+      label: document.querySelector(".dream-screening-trigger")?.textContent?.trim(),
+    }));
+    assert.fail(
+      "Opening the room did not request its lazy stylesheet; trigger=" +
+        JSON.stringify(state) +
+        ", pageErrors=" +
+        errors.join(" | "),
+    );
+  }
   await page.waitForFunction(
     () => document.querySelector(".dream-screening-trigger")?.getAttribute("aria-busy") === "true",
   );
@@ -122,34 +291,43 @@ async function testScreeningRoom(context, viewport) {
   await noHorizontalOverflow(page, `${viewport.name} screening room`);
 
   // Exercise thumbnail selection, forward wrap at the final poster, and reverse wrap at the first.
-  await page.locator('.dream-screening-filmstrip > button[data-poster-index="0"]').click();
+  await activate(
+    page.locator('.dream-screening-filmstrip > button[data-poster-index="0"]'),
+    viewport,
+  );
   await page.waitForFunction(() =>
     document.querySelector(".dream-screening-count")?.textContent?.includes("01"),
   );
-  await page.locator(".dream-screening-arrow[aria-label='次のポスター']").click();
+  await activate(page.locator(".dream-screening-arrow[aria-label='次のポスター']"), viewport);
   await page.waitForFunction(() =>
     document.querySelector(".dream-screening-count")?.textContent?.includes("02"),
   );
-  await page.locator('.dream-screening-filmstrip > button[data-poster-index="14"]').click();
+  await activate(
+    page.locator('.dream-screening-filmstrip > button[data-poster-index="14"]'),
+    viewport,
+  );
   await page.waitForFunction(() =>
     document.querySelector(".dream-screening-count")?.textContent?.includes("15"),
   );
-  await page.locator(".dream-screening-arrow[aria-label='次のポスター']").click();
+  await activate(page.locator(".dream-screening-arrow[aria-label='次のポスター']"), viewport);
   await page.waitForFunction(() =>
     document.querySelector(".dream-screening-count")?.textContent?.includes("01"),
   );
-  await page.locator(".dream-screening-arrow[aria-label='前のポスター']").click();
+  await activate(page.locator(".dream-screening-arrow[aria-label='前のポスター']"), viewport);
   await page.waitForFunction(() =>
     document.querySelector(".dream-screening-count")?.textContent?.includes("15"),
   );
-  await page.locator('.dream-screening-filmstrip > button[data-poster-index="0"]').click();
+  await activate(
+    page.locator('.dream-screening-filmstrip > button[data-poster-index="0"]'),
+    viewport,
+  );
   await page.waitForFunction(() =>
     document.querySelector(".dream-screening-count")?.textContent?.includes("01"),
   );
 
   const image = page.locator(".dream-screening-picture > img");
   const zoom = page.locator(".dream-screening-zoom");
-  await zoom.click();
+  await activate(zoom, viewport);
   assert.equal(await zoom.getAttribute("aria-pressed"), "true");
   assert.equal(
     await page.locator(".dream-screening-picture").getAttribute("class"),
@@ -170,7 +348,7 @@ async function testScreeningRoom(context, viewport) {
     "100% zoom uses the decoded image height",
   );
   await page.screenshot({ path: `${output}/${viewport.name}-screening-zoom.png` });
-  await zoom.click();
+  await activate(zoom, viewport);
   assert.equal(await zoom.getAttribute("aria-pressed"), "false");
 
   await page.keyboard.press("Escape");
@@ -197,7 +375,7 @@ async function testScreeningRoom(context, viewport) {
   );
 
   // Browser Back dismisses the top-layer room and releases the viewport lock before restoration.
-  await trigger.click();
+  await activate(trigger, viewport);
   await page.locator(".dream-screening-dialog[open]").waitFor({ state: "visible" });
   await page.goBack({ waitUntil: "domcontentloaded" });
   await page.waitForURL("**/dream-chapter#chronicle");
@@ -228,6 +406,7 @@ async function testRecordExplorer(context, viewport) {
   });
   const explorer = page.locator(".dream-record-explorer");
   await explorer.waitFor({ state: "visible" });
+  await waitForHydration(page, ".dream-record-filters select");
   await page.waitForFunction(() =>
     Boolean(document.querySelector(".dream-record-count")?.textContent?.match(/^\d+件の記録/)),
   );
@@ -236,7 +415,7 @@ async function testRecordExplorer(context, viewport) {
   const allCount = await countResults(page);
   assert.ok(allCount > 8, "The full Chronicle result set exercises pagination");
   const more = page.locator(".dream-record-more");
-  await more.click();
+  await activate(more, viewport);
   await page.waitForFunction(() =>
     document.querySelector(".dream-record-count")?.textContent?.includes("16件を表示"),
   );
@@ -312,7 +491,7 @@ async function testRecordExplorer(context, viewport) {
   }
   assert.ok(foundEmpty, "A three-filter zero-result state is reachable");
   await page.locator(".dream-record-empty").waitFor({ state: "visible" });
-  await page.locator(".dream-record-empty button").click();
+  await activate(page.locator(".dream-record-empty button"), viewport);
   await page.waitForFunction(
     () =>
       document.querySelectorAll(".dream-record-filters select").length === 3 &&
@@ -330,7 +509,7 @@ async function testRecordExplorer(context, viewport) {
     .first();
   const href = await eventLink.getAttribute("href");
   assert.match(href ?? "", /^#dream-chronicle-event-\d+$/);
-  await eventLink.click();
+  await activate(eventLink, viewport);
   await page.waitForFunction((hash) => location.hash === hash, href);
   const targetId = href.slice(1);
   await page.waitForFunction((id) => {
