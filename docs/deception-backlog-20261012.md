@@ -97,7 +97,7 @@ Subagents are GPT-6 Luna only, initial work limited to static independent audits
 - Actions38264874960 succeeded; public release SHA matched
   c3ce1939682ed6cfa6f6ab21b9c0b90c6989e06f.
 
-## 8. FIGHT CARD visual repairs — verified candidate, CPU gap remains
+## 8. FIGHT CARD visual repairs — published ac41668, CPU gap remains
 
 - Preserved IMPACT/VS892fe99. TUNING's parent now uses the existing translate-
   only reveal, behind unchanged motion/economy/menu/loading/dialog gates.
@@ -125,10 +125,75 @@ Subagents are GPT-6 Luna only, initial work limited to static independent audits
 - Main107e83b's WebKit opaque GPU recovery was also preserved. Release gates
   passed again (2218pass/fail0/skip4). Related artwork, cinematic-edition,
   film-direction and comparison-readability scripts passed sequentially.
+  Actions38271656852 succeeded; public release SHA matched
+  ac4166826ef6bc678ba17bff4e999926a28974f0.
 
-## Remaining
+## 9. rx14 reading — existing reintegration reverified on ac41668
 
-9–11 pending ordered browser/performance verification; item8CPU gap unresolved.
-Static audits indicate
-several are already implemented; do not blindly reapply reverted historical work.
-Physical iPhone/iPad checks remain separate from Chromium/WebKit emulation.
+- Confirmed8957cd2 is an ancestor of current main. No duplicate cherry-pick of
+  3bd6b33 and no blanket pan-y restoration; long-press plus vertical scroll stays.
+- Fresh gates2218pass/fail0/skip4, type/lint0errors/12existing warnings,
+  source15/15 and prescribed build/8199 preview passed.
+- Sequential rexonance-operability, enforced dream-scroll-work,
+  dream-reader-navigation, site-health93/93, liquid-grid,
+  rider-hold-navigation, rail-work and hero-touch all passed.
+- Main was already synchronized: normal merge/push no-op, actual public
+  release SHA matched ac41668. Evidence /private/tmp/backlog-item9-*.
+
+## 10. rx14 dossier/world/reading — existing repairs reverified on ac41668
+
+- Fresh gates2218pass/fail0/skip4, type/lint0errors/12existing warnings,
+  source15/15 and prescribed build/8199 preview passed.
+- verify-rx14-completion passed all35screens at320/390/1024/1280/1440px,
+  menu/current-group/SECTIONS, command-bar lane, responsive art, recovery
+  pages, search focus/arrival and three short-landscape reveal cases.
+  Actual390px library and1024px World screenshots inspected.
+- Menu art uses400w on larger screens and240w through760px. Library/search
+  uses actual400w/680w/720w candidates; low-resolution originals are not
+  upscaled and labelled high-resolution. Original JPEGs remain retained.
+- F13 series-next ordering, opp1 launcher CONTINUE, opp7 portrait chapter
+  bands, worldO2 annex CV and f11 duplicate library data stay proposals.
+  Owner judgment and additional anchor/rotation/history audit are required.
+- Normal main merge/push no-op; actual public SHA matched ac41668.
+  Evidence /private/tmp/backlog-item10-*; owner's J section updated.
+
+## 11. rx17 final art/preload/reliability review — verified source ac41668
+
+- Fresh gates2218pass/fail0/skip4, type/lint0errors/12existing warnings,
+  source15/15 and prescribed build/8199 preview passed again. No timing change:
+  owner-approved2730ms cover, face fill1990ms and scatter2520ms remain.
+- Actual canvas engine frames:1440x900 and390x844DPR3,46regular frames each
+  (600..2400ms every40ms) plus boundary supplements. Root and independent
+  GPT-6 Luna art review inspected actual timelines and helm/tail/ribbon crops.
+  Silver/gunmetal plates receive additive gold directly after attachment;
+  unformed channels remain metal, not transparent holes. Gold is complete
+  before the1990ms face fill;1986ms helm supplement shows completion.
+- Actual CSS state asserts six face groups:1990ms unfilled,2000ms filling,
+  2120ms full,2480/2518ms held,2520ms only the first group begins scattering,
+  2560ms outward motion,2650ms opacity below0.09. No hold/beat substitution.
+- Desktop8 valid scenarios and PixelCPU4/network60ms9Mbps9 scenarios used
+  the real engine: hydrated World1/1.5/2.5/3.5s, roundtrip, intent-abort/resume,
+  pending-failure/retry and separate early-SSR menu probes. The unsupported
+  desktop native-touch probe was an invocation error, excluded rather than
+  weakening its guard; the native probe was rerun on touch-capable Pixel.
+- Strict first-visible1s input remains unverified on CPU4: action/native
+  delivery was late by969.5/773ms, although each pre-hydration click was
+  handled without retry and later entry used canvas. Desktop early input
+  was on time, but already hydrated; do not claim pre-hydration proof there.
+- Five call profiles, phone menu-dream/menu-rexonance and four recovery
+  cases passed sequentially. General flashes0/1, red flashes0, blank frames0.
+  Native background recovery remains unverified: real minimization kept
+  document.hidden=false; no fake DOM visibility override was used.
+- Evidence /private/tmp/backlog-item11-{frames,pixel-preload.json} and
+  calls/routes/recovery logs. Existing source is already public at ac41668;
+  final journal-only release identity is recorded in the owner's J section.
+
+## Remaining / evidence boundaries
+
+- Item8 CPU gap versus8b40241 remains unresolved (1.57x main-thread task in
+  the final3-pair sample). Appearance/flash/a11y/motion/performance pins were
+  not weakened. No global header experiment remains in source.
+- Strict first-visible1s throttled input and native background/foreground
+  need separate confirmation; hydrated1..3.5s engine entry did pass.
+- Physical iPhone/iPad confirmation remains separate from browser emulation.
+- Five owner-sensitive rx14 proposals stay proposals, not implementation.
