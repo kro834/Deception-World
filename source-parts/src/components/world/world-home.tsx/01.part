@@ -332,6 +332,7 @@ type EpisodePickup = {
   width: number;
   height: number;
   to: string;
+  hash?: string;
   assets: readonly string[];
 };
 
@@ -476,25 +477,31 @@ const EPISODES: EpisodeRecord[] = [
     src: "/episode-04-kill.jpeg",
     pos: "50% 16%",
     alt: "黒い衣装の人物が崩壊した街に立つEP4のサムネイル",
-  },
-  {
-    no: "05",
-    title: "FARCE",
-    src: "/episode-05-farce.jpeg",
-    pos: "50% 44%",
-    alt: "夜の遊園地で赤黒と青金の仮面ライダーが対峙するEP5のサムネイル",
-  },
-  {
-    no: "06",
-    title: "DEUS",
-    src: "/episode-06-deus.webp",
-    pos: "42% 38%",
-    alt: "夕暮れの崩壊した街で、傷ついた黒い衣装の人物が空を見上げるEP6 DEUSのビジュアル",
-  },
-];
-
-function scrollAxisX(scroller: HTMLElement | null, child: HTMLElement | null) {
-  if (!scroller || !child) return;
-  const left = child.offsetLeft - (scroller.clientWidth - child.clientWidth) / 2;
-  const behavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    ? "auto"
+    pickups: [
+      {
+        label: "仮面ライダーファラリス",
+        src: "/manager-lejas-rider.jpeg",
+        pos: "50% 8%",
+        alt: "仮面ライダーファラリス",
+        width: 1086,
+        height: 1448,
+        to: "/managers/lejas",
+        hash: "form-records",
+        assets: [...MANAGER_ASSETS.lejas, "/manager-lejas-rider.jpeg"],
+      },
+      {
+        label: "仮面ライダールーラー・エニグマモード",
+        displayLines: ["仮面ライダールーラー", "エニグマモード"],
+        src: "/rider-ruler-enigma.webp",
+        pos: "50% 0%",
+        alt: "仮面ライダールーラー・エニグマモード",
+        width: 1023,
+        height: 1535,
+        to: "/characters/dante",
+        hash: "ruler-enigma",
+        assets: ["/character-dante.webp", "/rider-ruler-enigma.webp"],
+      },
+      {
+        label: "仮面ライダールーラー・ポラリスモード",
+        displayLines: ["仮面ライダールーラー", "ポラリスモード"],
+        src: "/rider-ruler-polaris.webp",

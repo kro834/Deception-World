@@ -7,13 +7,19 @@ function setup() {
   const timers = new Map();
   let serial = 0;
   const events = {
-    addEventListener: (name, listener) => listeners.set(name, listener),
-    removeEventListener: (name) => listeners.delete(name),
+    addEventListener: (name, listener) => {
+      if (!listeners.has(name)) listeners.set(name, new Set());
+      listeners.get(name).add(listener);
+    },
+    removeEventListener: (name, listener) => {
+      listeners.get(name)?.delete(listener);
+      if (!listeners.get(name)?.size) listeners.delete(name);
+    },
   };
   const environment = {
     ...events,
-    setTimeout: (callback) => {
-      timers.set(++serial, callback);
+    setTimeout: (callback, delay) => {
+      timers.set(++serial, { callback, delay });
       return serial;
     },
     clearTimeout: (id) => timers.delete(id),
@@ -71,8 +77,15 @@ function setup() {
     reads: () => reads,
     environment,
     revisits: () => revisits,
-    flush() {
-      [...timers.values()].forEach((callback) => callback());
+    emit(name) {
+      for (const listener of [...(listeners.get(name) ?? [])]) listener();
+    },
+    flush(maxDelay = Infinity) {
+      for (const [id, timer] of [...timers]) {
+        if (timer.delay > maxDelay || !timers.has(id)) continue;
+        timers.delete(id);
+        timer.callback();
+      }
     },
   };
 }
@@ -85,7 +98,7 @@ test("native fragment navigation measures only the path to its destination once"
     ["visible", "visible", ""],
   );
   assert.equal(h.reads(), 1);
-  for (let i = 0; i < 90; i++) h.listeners.get("scroll")();
+  for (let i = 0; i < 90; i++) h.emit("scroll");
   assert.equal(h.reads(), 1, "no layout read during scrolling");
   h.flush();
   assert.deepEqual(
@@ -158,14 +171,14 @@ test("modified, cancelled, unknown and malformed fragment clicks leave layout al
   h.cleanup();
 });
 
-test("user interaction, repeated clicks and unmount release all temporary styles", () => {
-  for (const interrupt of ["pointerdown", "wheel", "unmount"]) {
+test("wheel, repeated fragment clicks and unmount release all temporary styles", () => {
+  for (const interrupt of ["wheel", "unmount"]) {
     const h = setup();
     h.event();
     h.event();
     assert.equal(h.timers.size, 2, "a second click replaces the first session");
     if (interrupt === "unmount") h.cleanup();
-    else h.listeners.get(interrupt)();
+    else h.emit(interrupt);
     assert.deepEqual(
       h.sections.map((s) => s.style.contentVisibility),
       ["auto", "", ""],
@@ -174,4 +187,81 @@ test("user interaction, repeated clicks and unmount release all temporary styles
     assert.equal(h.listeners.size, 0);
     h.cleanup();
   }
+});
+
+test("a tap holds the path through timer expiry and releases only after bubbling click", () => {
+  const h = setup();
+  h.event();
+  h.emit("click");
+  assert.deepEqual(
+    h.sections.map((s) => s.style.contentVisibility),
+    ["visible", "visible", ""],
+    "the same click that creates a hold must not end it",
+  );
+  h.emit("pointerdown");
+  h.emit("scroll");
+  h.flush(240);
+  h.flush(3000);
+  assert.deepEqual(h.sections.map((s) => s.style.contentVisibility), ["visible", "visible", ""]);
+  h.emit("pointerup");
+  assert.deepEqual(h.sections.map((s) => s.style.contentVisibility), ["visible", "visible", ""]);
+  h.emit("click");
+  assert.deepEqual(h.sections.map((s) => s.style.contentVisibility), ["auto", "", ""]);
+  assert.equal(h.listeners.size, 0);
+  assert.equal(h.timers.size, 0);
+  h.cleanup();
+});
+
+test("pointercancel releases the path, including during a long press", () => {
+  const h = setup();
+  h.event();
+  h.emit("pointerdown");
+  h.flush(3000);
+  h.emit("pointercancel");
+  assert.deepEqual(h.sections.map((s) => s.style.contentVisibility), ["auto", "", ""]);
+  assert.equal(h.listeners.size, 0);
+  assert.equal(h.timers.size, 0);
+  h.cleanup();
+});
+
+test("blur and pagehide release a pointer whose up or cancel never arrived", () => {
+  for (const end of ["blur", "pagehide"]) {
+    const h = setup();
+    h.event();
+    h.emit("pointerdown");
+    h.flush(3000);
+    assert.deepEqual(h.sections.map((s) => s.style.contentVisibility), ["visible", "visible", ""]);
+    h.emit(end);
+    assert.deepEqual(h.sections.map((s) => s.style.contentVisibility), ["auto", "", ""]);
+    assert.equal(h.listeners.size, 0);
+    assert.equal(h.timers.size, 0);
+    h.cleanup();
+  }
+});
+
+test("a drag without a click releases after a bounded post-pointerup fallback", () => {
+  const h = setup();
+  h.event();
+  h.emit("pointerdown");
+  h.emit("pointerup");
+  h.flush(240);
+  assert.deepEqual(h.sections.map((s) => s.style.contentVisibility), ["visible", "visible", ""]);
+  h.flush(600);
+  assert.deepEqual(h.sections.map((s) => s.style.contentVisibility), ["auto", "", ""]);
+  assert.equal(h.listeners.size, 0);
+  assert.equal(h.timers.size, 0);
+  h.cleanup();
+});
+
+test("unmount releases immediately during a press and preserves another owner's hold", () => {
+  const h = setup();
+  h.event();
+  const releaseOther = holdFragmentPath(h.root, h.sections[1], h.environment);
+  h.emit("pointerdown");
+  h.cleanup();
+  assert.deepEqual(h.sections.map((s) => s.style.contentVisibility), ["visible", "visible", ""]);
+  releaseOther();
+  assert.deepEqual(h.sections.map((s) => s.style.contentVisibility), ["auto", "", ""]);
+  assert.equal(h.listeners.size, 0);
+  assert.equal(h.timers.size, 0);
 });

@@ -2,11 +2,13 @@
 // inside 名台詞 and the supplements that make the owner's existing parts richer (dossier
 // RECORD sections, 人物一覧 profiles, the agent roster, the record sheet, 縫妖師 / 永守組 and
 // 用語集 with its INDEX leaf). Pure render over dream-chapter-extra-data.ts: no effects, no
-// handlers, no images, no dialogs. Mounted from dream-chapter.tsx; drawn by
+// images, no dialogs. The record explorer adds local filters over the same data.
+// Mounted from dream-chapter.tsx; drawn by
 // styles-dream-extra.css. The owner's own text stays where it is; every Japanese string here
 // comes from the data file (the source's wording), the rest are English HUD labels.
 import { DREAM_CASES } from "./dream-chapter-data";
 import { DreamStoryBacklinks } from "./dream-story-navigation";
+import { DreamRecordExplorer } from "./dream-record-explorer";
 import {
   DREAM_AGENT_ADDITIONS,
   DREAM_AGENT_SUPPLEMENT,
@@ -218,6 +220,7 @@ export function DreamChronicle({ id }: { id: "chronicle" }) {
       aria-labelledby="chronicle-title"
     >
       <CornerHeading id={id} count={DREAM_CHRONICLE.length} />
+      <DreamRecordExplorer />
       <ol className="dream-chronicle-cases" data-dream-reveal>
         {DREAM_CASES.map((episode, index) => {
           const events = DREAM_CHRONICLE.filter((event) => event.case === episode.no);
@@ -237,7 +240,12 @@ export function DreamChronicle({ id }: { id: "chronicle" }) {
                 <DreamStoryBacklinks no={episode.no} from="chronicle" />
                 <ol className="dream-chronicle-list">
                   {events.map((event) => (
-                    <li key={event.no} className="dream-chronicle-item">
+                    <li
+                      key={event.no}
+                      id={`dream-chronicle-event-${event.no}`}
+                      className="dream-chronicle-item"
+                      tabIndex={-1}
+                    >
                       <span className="dream-archive-seal" aria-hidden="true">
                         {toKanjiNumber(event.no)}
                       </span>

@@ -7,6 +7,11 @@
 // are never rendered. The owner's own Dream text stays in dream-chapter-data.ts and is not
 // repeated or reworded here. Spoiler line: no deaths, no identity reveals beyond the site's own
 // synopses, no final-act truths. Shape pinned by scripts/dream-extra-data.test.mjs.
+// Existing anchors retain the source editions documented in the 2026-10-06 review.
+// Events 45–49 use the 2026-10-12 attachment (58,405 physical lines), identified by
+// sourceRevision. Earlier lines shifted within that export; do not offset legacy anchors.
+// Chat dates identify source posts, not elapsed story days. The new endpoint is the
+// opening of the final battle, without a rescue, victory, full recovery or return.
 import type { DreamCharacter, DreamDolminence } from "./dream-chapter-data";
 
 /** Global line references into the source log, e.g. "2243,2247,2897". Not rendered. */
@@ -22,6 +27,7 @@ type DreamArchivePassageBase = {
   /** Caption for the whole passage when it is one speaker's words ("―― by"). */
   readonly by?: string;
   readonly lines: DreamSourceLines;
+  readonly sourceRevision?: "2026-10-12";
 };
 
 /** A passage: one `text` ("\n" = line break) or speaker `segments`, never both. */
@@ -969,6 +975,78 @@ export const DREAM_CHRONICLE: readonly DreamChronicleEvent[] = [
       },
     ],
     lines: "58003,58009,58012",
+  },
+  {
+    no: 45,
+    case: "5",
+    sourceRevision: "2026-10-12",
+    title: { text: "全員生きて勝ってくる", lines: "58024" },
+    place: "守矢神社",
+    cast: ["東風谷慶弥", "夕夏"],
+    text: "二柱の声に見送られ、慶弥と夕夏は永遠亭へと向かい、守矢の鳥居をくぐり抜けていった。",
+    lines: "58050",
+  },
+  {
+    no: 46,
+    case: "5",
+    sourceRevision: "2026-10-12",
+    title: { text: "必ず帰ってきます", lines: "58207" },
+    place: "守矢神社",
+    cast: ["東風谷早苗", "八坂神奈子", "洩矢諏訪子"],
+    segments: [
+      {
+        by: "東風谷早苗",
+        text: "「必ず帰ってきます。それに慶弥さん達も必ず助けてみせます！ だから……どうか、私を信じてください！」",
+      },
+      { text: "二柱の声を背に、早苗は慶弥たちの後を追って、朝靄の残る山道を駆け出していった。" },
+    ],
+    lines: "58207,58261",
+  },
+  {
+    no: 47,
+    case: "5",
+    sourceRevision: "2026-10-12",
+    title: { text: "瞼を開く", lines: "58335" },
+    place: "永遠亭",
+    cast: ["狗瓦", "魂魄妖夢", "鈴仙・優曇華院・イナバ"],
+    segments: [
+      {
+        text: "ずっと深い眠りに落ちていた狗瓦が、長い睫毛を震わせ、光を拒むようにゆっくりと瞼を開く。焦点を結ばない眼差しが、すぐ目の前で自分を必死に見つめる少女の姿を捉えた。",
+      },
+      { by: "狗瓦", text: "「……よう、む……？」" },
+    ],
+    lines: "58335,58341",
+  },
+  {
+    no: 48,
+    case: "5",
+    sourceRevision: "2026-10-12",
+    title: { text: "私たちの決戦へ", lines: "58363" },
+    place: "永遠亭",
+    cast: ["サヨ", "シエル"],
+    by: "サヨ",
+    text: "「そろそろ行くわよ、シエル……私たちの決戦へ」",
+    lines: "58363",
+  },
+  {
+    no: 49,
+    case: "5",
+    sourceRevision: "2026-10-12",
+    title: { text: "最後の決戦", lines: "58404" },
+    place: "幻想郷",
+    cast: ["如月狡", "ドルミネンス", "縫妖師"],
+    segments: [
+      {
+        text: "空を割るような重低音が響き渡り、空間が歪む。解き放たれた札の光芒の中から、禍々しい邪気を全身から放つ「十二体の武神」が、災厄の式神として幻想郷の上空に顕現した。",
+      },
+      {
+        text: "カーテンの揺らめきの中から、地鳴りのような咆哮とともに現れたのは、ロードインヴォーカーを装着した無数の悪夢の戦士たち。彼らは空を埋め尽くす黒雲の群れとなって、各々の標的――博麗神社、人里、魔法の森、永遠亭、紅魔館、守矢神社、そして幻想郷のあらゆる土地へと一斉に急降下を開始する。",
+      },
+      {
+        text: "幻想郷の命運を懸けた、ドルミネンスおよび縫妖師との「最後の決戦」が、今ここに火蓋を切った。",
+      },
+    ],
+    lines: "58385,58398,58404",
   },
 ] as const;
 

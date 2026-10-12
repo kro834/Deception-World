@@ -76,8 +76,8 @@ test("World episode records follow the actual chapter boundaries and later conse
     WORLD_EPISODE_NOTES.map(({ no, title }) => [no, title]),
     [["01", "HIDE-AND-SEEK"], ["02", "LEGENDS"], ["03", "DECEPTION WORLD"]],
   );
+  assert.deepEqual(WORLD_EPISODE_NOTES.map(({ synopsis }) => synopsis.length), [3, 3, 6]);
   for (const { synopsis } of WORLD_EPISODE_NOTES) {
-    assert.ok(synopsis.length >= 2 && synopsis.length <= 3);
     assert.ok(synopsis.every((paragraph) => paragraph.length > 80));
   }
   const first = WORLD_EPISODE_NOTES[0].synopsis.join("");
@@ -91,11 +91,16 @@ test("World episode records follow the actual chapter boundaries and later conse
   assert.match(ongoing, /ジェームズと真守の傷を消す/);
   assert.match(ongoing, /シュザがまだ彼らを狙っている/);
   assert.match(ongoing, /黒い扉からフェイブルが現れ/);
+  assert.match(ongoing, /ハイク.*改造に着手/);
+  assert.match(ongoing, /北米本部はサーガ討伐の方針を維持/);
+  assert.match(ongoing, /観測の主体も、重複の意味も分からない/);
+  assert.match(ongoing, /悠真たちはまだ知らない/);
+  assert.match(ongoing, /イサクはなお存続/);
   assert.doesNotMatch(ongoing, /シュザを倒した|シュザを倒す|テラが復活|新しいコアが完成|全ての戦いが終わ/);
 });
 
 test("the dream refuge describes witnessed recovery without promising a safe ending", () => {
-  assert.equal(WORLD_EPISODE_NOTES[2].stage, "天守閣〜悠真の夢");
+  assert.equal(WORLD_EPISODE_NOTES[2].stage, "天守閣・悠真の夢・光の間");
   const dream = WORLD_LOCATIONS.find(({ name }) => name === "悠真の夢");
   assert.match(dream.text, /ジェームズと真守の傷を消す/);
   assert.match(dream.text, /フェイブル/);

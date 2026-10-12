@@ -110,7 +110,9 @@ export function DantePage() {
       </section>
       <div id="form-records">
         {DANTE_FORMS.map((rider) => (
-          <FormPickup key={rider.name} rider={rider} />
+          <div id={rider.id} key={rider.id}>
+            <FormPickup rider={rider} />
+          </div>
         ))}
       </div>
       <DossierNav items={UNMANAGED_NAV} currentHref="/characters/dante" indexLabel="UNMANAGED" />

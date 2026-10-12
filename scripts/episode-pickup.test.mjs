@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
 import test from "node:test";
+import ts from "typescript";
+import { DANTE_FORMS } from "../src/components/world/dante-data.ts";
 
 const worldHomeUrl = new URL("../src/components/world/world-home.tsx", import.meta.url);
 const baseStylesUrl = new URL("../src/styles-world/07.css", import.meta.url);
@@ -44,6 +46,51 @@ test("EP1 and EP2 expose the five requested thumbnail pickup records", () => {
     ep2,
     /label: "仮面ライダーレルム\u3000ムーンフォーム"[\s\S]*?to: "\/characters\/luna"/,
   );
+});
+
+test("EP4 opens Phalaris and each requested Ruler mode at its own existing form", () => {
+  const source = ts.createSourceFile("world-home.tsx", worldHome, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+  const declaration = source.statements.filter(ts.isVariableStatement)
+    .flatMap((statement) => [...statement.declarationList.declarations])
+    .find((item) => item.name.getText(source) === "EPISODES");
+  const property = (node, name) => node.properties.find((item) => item.name?.getText(source) === name)?.initializer;
+  const episode = declaration.initializer.elements.find((node) => property(node, "no").text === "04");
+  const pickups = property(episode, "pickups").elements;
+  assert.deepEqual(pickups.map((item) => ["label", "src", "to", "hash"].map((key) => property(item, key).text)), [
+    ["仮面ライダーファラリス", "/manager-lejas-rider.jpeg", "/managers/lejas", "form-records"],
+    ["仮面ライダールーラー・エニグマモード", "/rider-ruler-enigma.webp", "/characters/dante", "ruler-enigma"],
+    ["仮面ライダールーラー・ポラリスモード", "/rider-ruler-polaris.webp", "/characters/dante", "ruler-polaris"],
+  ]);
+  for (const item of pickups) {
+    const src = property(item, "src").text;
+    assert.ok(existsSync(new URL(`../public${src}`, import.meta.url)), src);
+    assert.ok(property(item, "assets").getText(source).includes(src), "warm the linked form image");
+    if (property(item, "to").text === "/characters/dante") {
+      assert.equal(DANTE_FORMS.find((form) => form.id === property(item, "hash").text)?.img, src);
+      assert.equal(property(item, "displayLines").elements.length, 2, "long names have a stable two-line layout");
+    }
+  }
+  assert.match(worldHome, /hash=\{item\.hash\}/);
+  assert.match(readFileSync(new URL("../src/components/world/dante-page.tsx", import.meta.url), "utf8"), /<div id=\{rider\.id\} key=\{rider\.id\}>\s*<FormPickup rider=\{rider\} \/>/);
+  assert.match(readFileSync(new URL("../src/components/world/lejas-page.tsx", import.meta.url), "utf8"), /id="form-records"/);
+});
+
+test("EP4 form hashes bypass the delayed dossier top reset after route arrival", () => {
+  const gate = readFileSync(new URL("../src/components/load-gate.tsx", import.meta.url), "utf8");
+  const recognized = gate.match(/const isDossierSectionHash =([\s\S]*?);/)?.[1];
+  const reset = gate.match(/const resetRouteTop =([\s\S]*?);/)?.[1];
+  assert.ok(recognized && reset);
+  const shouldReset = new Function("pathname", "locationHash", "pathnameChanged", "fromHistory",
+    `const DETAIL_ROUTE = /^\\/(?:riders|managers|characters)\\//; const isDossierSectionHash = ${recognized}; return (${reset});`);
+  for (const hash of ["ruler-enigma", "ruler-polaris", "form-records"]) {
+    for (const prefix of ["", "#"]) {
+      assert.equal(shouldReset("/characters/dante", `${prefix}${hash}`, true, false), false, hash);
+    }
+  }
+  assert.equal(shouldReset("/managers/lejas", "form-records", true, false), false);
+  assert.equal(shouldReset("/characters/dante", "", true, false), true);
+  assert.equal(shouldReset("/characters/dante", "unknown-form", true, false), true);
+  assert.equal(shouldReset("/characters/dante", "", true, true), false);
 });
 
 test("episode selection and the single-tap plus remain sibling controls", () => {
