@@ -23,15 +23,21 @@ export function holdFragmentPath(root, target, environment = window) {
   target.getBoundingClientRect();
   let quietTimer = 0;
   let limitTimer = 0;
+  let clickFallback = 0;
   let finished = false;
-  const finish = () => {
+  let pointerPending = false;
+  const release = () => {
     if (finished) return;
     finished = true;
     environment.clearTimeout(quietTimer);
     environment.clearTimeout(limitTimer);
+    environment.clearTimeout(clickFallback);
     environment.removeEventListener("scroll", onScroll);
-    environment.removeEventListener("pointerdown", finish);
-    environment.removeEventListener("wheel", finish);
+    environment.removeEventListener("pointerdown", onPointerDown);
+    environment.removeEventListener("pointerup", onPointerUp);
+    environment.removeEventListener("pointercancel", release);
+    environment.removeEventListener("click", onClick);
+    environment.removeEventListener("wheel", finishWhenIdle);
     sections.forEach((section) => {
       const hold = fragmentPathHolds.get(section);
       if (!hold || --hold.owners > 0) return;
@@ -40,16 +46,39 @@ export function holdFragmentPath(root, target, environment = window) {
       else section.style.removeProperty("content-visibility");
     });
   };
+  // A synchronous content-visibility release on pointerdown changes WebKit's
+  // hit target before pointerup, so the native click misses the tapped button.
+  // Keep the path through the bubbling click (when its target is settled).
+  const finishWhenIdle = () => {
+    if (!pointerPending) release();
+  };
+  const onPointerDown = () => {
+    pointerPending = true;
+    environment.clearTimeout(quietTimer);
+    environment.clearTimeout(clickFallback);
+  };
+  const onPointerUp = () => {
+    if (!pointerPending) return;
+    // A drag may have no click. Do not release on pointerup itself: WebKit's
+    // compatibility click has not been targeted yet.
+    clickFallback = environment.setTimeout(release, 600);
+  };
+  const onClick = () => {
+    if (pointerPending) release();
+  };
   const onScroll = () => {
     environment.clearTimeout(quietTimer);
-    quietTimer = environment.setTimeout(finish, 240);
+    quietTimer = environment.setTimeout(finishWhenIdle, 240);
   };
   environment.addEventListener("scroll", onScroll, { passive: true });
-  environment.addEventListener("pointerdown", finish, { passive: true });
-  environment.addEventListener("wheel", finish, { passive: true });
-  limitTimer = environment.setTimeout(finish, 3000);
+  environment.addEventListener("pointerdown", onPointerDown, { passive: true });
+  environment.addEventListener("pointerup", onPointerUp, { passive: true });
+  environment.addEventListener("pointercancel", release, { passive: true });
+  environment.addEventListener("click", onClick);
+  environment.addEventListener("wheel", finishWhenIdle, { passive: true });
+  limitTimer = environment.setTimeout(finishWhenIdle, 3000);
   onScroll();
-  return finish;
+  return release;
 }
 
 /** Resolve skipped section heights before the browser starts a native hash
