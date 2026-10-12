@@ -17,6 +17,8 @@ const normalizeFilter = (value: string | undefined) =>
     .normalize("NFKC")
     .trim();
 
+const normalizePersonLinkKey = (value: string) => value.replace(/\s+/gu, "");
+
 export function buildDreamRecordOptions(records: readonly DreamChronicleEvent[]) {
   const unique = (values: string[]) => [...new Set(values.filter(Boolean))];
   return {
@@ -67,12 +69,13 @@ export function resolveDreamRecordLinks(
   const episode = cases.find((item) => String(item.no) === String(record.case));
   const atlasIndex = places.findIndex((item) => item.name === record.place);
   const matchingPeople = record.cast.flatMap((name) => {
-    const match = people.find((person) => person.name === name);
-    return match ? [{ name, href: match.href }] : [];
+    const key = normalizePersonLinkKey(name);
+    const matches = people.filter((person) => normalizePersonLinkKey(person.name) === key);
+    return matches.length === 1 ? [{ name, href: matches[0].href }] : [];
   });
 
   return {
-    chronicleHref: episode ? `#dream-chronicle-case-${episode.no}` : null,
+    chronicleHref: episode ? `#dream-chronicle-event-${record.no}` : null,
     synopsisHref: episode ? `#dream-case-${episode.no}` : null,
     placeHref: atlasIndex >= 0 ? `#dream-atlas-${atlasIndex + 1}` : null,
     people: matchingPeople,
