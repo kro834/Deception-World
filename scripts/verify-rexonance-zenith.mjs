@@ -375,7 +375,11 @@ async function functional(engine, label, profile, { connection, noTimeline = fal
       const staticHud = await hudGeometry(page);
       const staticScene = await staticSceneGeometry(page);
       const staticState = await snapshot(page);
-      assertNaniteTarget(staticState, label);
+      // The still tier shows the finished suit with the static "ONLINE" count.
+      assert.ok(
+        staticState.naniteCount === "ONLINE" || /\/\s*[\d,]*[1-9]/.test(staticState.naniteCount ?? ""),
+        `${label}: static nanite count (count=${JSON.stringify(staticState.naniteCount)})`,
+      );
       assert.deepEqual(staticHud.overlaps, [], `${label}: static stamp/count/Zeus overlap`);
       assert.ok(
         staticHud.boxes.stamp && staticHud.boxes.nanites && staticHud.boxes.zeus,
