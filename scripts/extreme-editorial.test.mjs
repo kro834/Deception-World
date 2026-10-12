@@ -110,7 +110,7 @@ test("editorial introduces no perpetual or scroll-bound motion and keeps visible
 
 test("functional copy stays at least 12px and live status has its own layout row", () => {
   for (const selector of [
-    ".exs-hero-caption",
+    // (The hero caption went with the poster opening: owner, 2026-10-12.)
     ".exs-chapter-index em",
     ".exs-opponent-label",
     ".exs-catalog-details > summary small",

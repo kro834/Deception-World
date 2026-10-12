@@ -648,19 +648,7 @@ export function ExtremeSaga() {
               <span>長引くほど、こっちのもの。</span>
             </span>
           </p>
-          <div className="exs-hero-actions">
-            <a href="#stages">
-              二つの形態を見る <span aria-hidden="true">↗</span>
-            </a>
-            <a href="#performance">
-              性能を比較する <span aria-hidden="true">↓</span>
-            </a>
-          </div>
         </div>
-        <p className="exs-hero-caption">
-          <span>MIDDLE / STANDARD</span>
-          <span>仮面ライダーエクスプリームサーガ</span>
-        </p>
         <div className="rxs-hero-visual" aria-hidden="true">
           <span className="rxs-orbit rxs-orbit-a" />
           <span className="rxs-orbit rxs-orbit-b" />

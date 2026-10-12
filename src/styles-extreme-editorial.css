@@ -77,183 +77,6 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page .rxs-brand span {
   background: none;
 }
 
-/* The opening is a poster, with room around the face and the two-beat
-   headline. A modest image limit also leaves headroom for the existing tilt. */
-html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-hero {
-  grid-column: 1;
-  grid-row: 1;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 0.95fr);
-  grid-template-rows: 1fr auto;
-  align-items: center;
-  gap: 20px clamp(28px, 4vw, 64px);
-  min-height: min(840px, max(680px, calc(100svh - var(--dxs-nav))));
-  padding: clamp(48px, 6vw, 88px) max(var(--ext-gutter), calc((100% - var(--dxs-wrap)) / 2)) 32px;
-  background:
-    radial-gradient(ellipse at 76% 40%, rgb(233 196 126 / 10%), transparent 56%), var(--ext-ink);
-}
-html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-hero .rxs-hero-copy {
-  grid-column: 1;
-  grid-row: 1;
-  align-self: center;
-  width: 100%;
-  padding: 0;
-  text-align: start;
-}
-html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-hero .rxs-hero-copy::before {
-  content: none;
-}
-html[data-family="special"]
-  body
-  .rxs-page.rxs-page.exs-page
-  > .exs-hero
-  .rxs-hero-copy
-  > p:first-child {
-  margin-bottom: 26px;
-  color: var(--ext-gold);
-  font-size: 10px;
-  letter-spacing: 0.2em;
-  line-height: 1.7;
-}
-html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-hero h1 {
-  width: fit-content;
-  max-width: 100%;
-  margin: 0;
-  color: #f4f0e7;
-  font-size: clamp(48px, 5.6vw, 82px);
-  line-height: 1.2;
-  letter-spacing: -0.045em;
-  background: none;
-  -webkit-text-fill-color: currentcolor;
-}
-html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-hero h1 > span {
-  margin-bottom: 24px;
-  padding: 0;
-  color: #f4f0e7;
-  font-size: clamp(15px, 1.8vw, 22px);
-  letter-spacing: 0.16em;
-  background: none;
-  clip-path: none;
-}
-html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-hero .rxs-hero-lede {
-  margin-top: 28px;
-  padding-left: 18px;
-  border-left: 1px solid var(--ext-gold);
-  color: #c6c2b8;
-  font-size: clamp(15px, 1.35vw, 18px);
-  line-height: 1.9;
-}
-html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-hero .rxs-hero-visual {
-  grid-column: 2;
-  grid-row: 1 / -1;
-  display: grid;
-  place-items: center;
-  align-self: center;
-  justify-self: center;
-  width: 100%;
-  height: auto;
-  min-height: 0;
-  aspect-ratio: 1023 / 1538;
-  max-width: min(500px, calc(960px / var(--exe-art-density)));
-  margin: 0;
-  overflow: visible;
-}
-html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-hero .rxs-hero-visual img {
-  position: relative;
-  inset: auto;
-  width: 100%;
-  height: auto;
-  max-width: 100%;
-  max-height: none;
-  object-fit: contain;
-  object-position: center;
-  translate: none;
-  scale: none;
-  filter: none;
-  -webkit-mask-image: linear-gradient(180deg, #000 0 90%, transparent 100%);
-  mask-image: linear-gradient(180deg, #000 0 90%, transparent 100%);
-}
-html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-hero > .exi-rays {
-  top: 0;
-  left: 40%;
-  width: 60%;
-  height: 100%;
-  color: rgb(233 196 126 / 9%);
-}
-html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-hero > .exi-shards,
-html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-hero .rxs-hero-ambient > i,
-html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-hero .exo-rev,
-html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-hero .exo-zone {
-  display: none;
-}
-html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-hero .exs-dial {
-  opacity: 0.24;
-}
-html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-hero > .exf-billing {
-  top: 12%;
-  left: 66%;
-  font-size: clamp(80px, 15vw, 224px);
-  -webkit-text-stroke-color: rgb(233 196 126 / 9%);
-}
-html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-hero .rxs-scroll-cue {
-  grid-column: 1;
-  grid-row: 2;
-  margin: 12px 0 0;
-  color: var(--exe-muted);
-  font-size: 12px;
-}
-html[data-family="special"]
-  body
-  .rxs-page.rxs-page.exs-page
-  > .exs-hero
-  .rxs-scroll-cue
-  > span::before {
-  color: var(--ext-gold);
-  background: none;
-  font-size: 14px;
-  padding: 0;
-}
-html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-hero-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px 14px;
-  margin-top: 32px;
-}
-html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-hero-actions a {
-  display: inline-flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-  min-height: 50px;
-  padding: 12px 20px;
-  border: 1px solid var(--exe-rule);
-  color: #e9e4d9;
-  font: 600 13px/1.5 var(--dx-body);
-}
-html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-hero-actions a:first-child {
-  border-color: var(--ext-gold);
-  color: var(--ext-ink);
-  background: var(--ext-gold);
-}
-html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-hero-caption {
-  grid-column: 2;
-  grid-row: 2;
-  z-index: 3;
-  justify-self: center;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 14px;
-  justify-content: center;
-  align-items: center;
-  margin: 0;
-  color: var(--exe-muted);
-  font: 400 12px/1.6 var(--dx-body);
-}
-html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-hero-caption > span:first-child {
-  color: var(--ext-gold);
-  font: 400 10px/1.6 var(--dx-hud);
-  letter-spacing: 0.14em;
-}
-
 /* A four-chapter contents strip follows the poster instead of competing
    with its subject. It remains ordinary links, including on a keyboard. */
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-index {
@@ -509,21 +332,6 @@ html[data-family="special"]
   font-size: clamp(17px, 2vw, 24px);
   background: none;
   clip-path: none;
-}
-html[data-family="special"]
-  body
-  .rxs-page.rxs-page.exs-page
-  > #performance
-  .rxs-comparison
-  > .rxs-comparison-key
-  > .exf-vs {
-  width: 40px;
-  margin: 0;
-  color: #aaa69c;
-  font-size: 15px;
-  border: 0;
-  background: none;
-  rotate: none;
 }
 html[data-family="special"]
   body
@@ -1115,14 +923,6 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page :is(a, button, summ
 }
 
 @media (max-width: 900px) {
-  html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-hero {
-    min-height: 0;
-    gap: 24px;
-    padding-block: 48px 30px;
-  }
-  html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-hero h1 {
-    font-size: clamp(38px, 5.5vw, 50px);
-  }
   html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-index {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -1196,76 +996,6 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page :is(a, button, summ
     min-height: 44px;
     font-size: 12px;
     letter-spacing: 0.02em;
-  }
-  html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-hero {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: auto auto auto auto;
-    row-gap: 24px;
-    padding-top: 38px;
-  }
-  html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-hero .rxs-hero-copy {
-    grid-column: 1;
-    grid-row: 1;
-    padding: 0;
-  }
-  html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-hero h1 {
-    font-size: clamp(40px, 11.5vw, 68px);
-  }
-  html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-hero h1 > span {
-    margin-bottom: 18px;
-    font-size: 14px;
-  }
-  html[data-family="special"]
-    body
-    .rxs-page.rxs-page.exs-page
-    > .exs-hero
-    .rxs-hero-copy
-    > p:first-child {
-    margin-bottom: 20px;
-    font-size: 10px;
-    letter-spacing: 0.14em;
-  }
-  html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-hero .rxs-hero-lede {
-    margin-top: 20px;
-    font-size: 14px;
-  }
-  html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-hero-actions {
-    gap: 10px;
-    margin-top: 24px;
-  }
-  html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-hero-actions a {
-    flex: 1;
-    min-height: 48px;
-    padding: 10px 12px;
-    font-size: 12px;
-    gap: 8px;
-  }
-  html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-hero .rxs-hero-visual {
-    grid-column: 1;
-    grid-row: 2;
-    max-width: min(360px, calc(960px / var(--exe-art-density)));
-    height: auto;
-  }
-  html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-hero > .exi-rays {
-    inset: auto 0 0;
-    width: 100%;
-    height: 58%;
-  }
-  html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-hero > .exf-billing {
-    top: 54%;
-    left: 50%;
-    font-size: 23vw;
-  }
-  html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-hero-caption {
-    grid-column: 1;
-    grid-row: 3;
-    margin-top: -14px;
-  }
-  html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-hero .rxs-scroll-cue {
-    grid-column: 1;
-    grid-row: 4;
-    justify-self: center;
-    margin: 0;
   }
   html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-index {
     padding-inline: 10px;
@@ -1587,7 +1317,6 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page :is(a, button, summ
 /* No new perpetual motion; interactive colour changes only for a fine
    pointer. Native details, static art and focus stay usable in all modes. */
 @media (hover: hover) and (pointer: fine) {
-  html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-hero-actions a:hover,
   html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-opponent-options button:hover,
   html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer > a:hover {
     border-color: #ffe1a1;
@@ -1597,21 +1326,6 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page :is(a, button, summ
   }
 }
 @media (forced-colors: active) {
-  html[data-family="special"]
-    body
-    .rxs-page.rxs-page.exs-page
-    :is(
-      .exs-hero-actions a,
-      .exs-opponent-options button,
-      .exs-catalog-details,
-      .exs-core-flow,
-      .exs-form-facts
-    ) {
-    color: CanvasText;
-    background: Canvas;
-    border-color: CanvasText;
-    box-shadow: none;
-  }
   html[data-family="special"]
     body
     .rxs-page.rxs-page.exs-page
