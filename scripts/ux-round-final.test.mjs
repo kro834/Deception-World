@@ -15,7 +15,7 @@ const loadGate = read("src/components/load-gate.tsx");
 test("a reader or contents jump in a dossier is aligned again while the page settles", () => {
   assert.match(
     loadGate,
-    /const DOSSIER_SECTION_LINK =\s*\/\^#\(\?:character-section-\[\\w-\]\+\|dossier-profile\|dossier-index\|identity-records\|form-records\)\$\/;/,
+    /const DOSSIER_SECTION_LINK =\s*\/\^#\(\?:character-section-\[\\w-\]\+\|dossier-profile\|dossier-index\|identity-records\|form-records\|ruler-enigma\|ruler-polaris\)\$\/;/,
   );
   // The native jump itself runs; the settle starts a frame later, instantly.
   assert.match(

@@ -75,6 +75,24 @@ test("EP4 opens Phalaris and each requested Ruler mode at its own existing form"
   assert.match(readFileSync(new URL("../src/components/world/lejas-page.tsx", import.meta.url), "utf8"), /id="form-records"/);
 });
 
+test("EP4 form hashes bypass the delayed dossier top reset after route arrival", () => {
+  const gate = readFileSync(new URL("../src/components/load-gate.tsx", import.meta.url), "utf8");
+  const recognized = gate.match(/const isDossierSectionHash =([\s\S]*?);/)?.[1];
+  const reset = gate.match(/const resetRouteTop =([\s\S]*?);/)?.[1];
+  assert.ok(recognized && reset);
+  const shouldReset = new Function("pathname", "locationHash", "pathnameChanged", "fromHistory",
+    `const DETAIL_ROUTE = /^\\/(?:riders|managers|characters)\\//; const isDossierSectionHash = ${recognized}; return (${reset});`);
+  for (const hash of ["ruler-enigma", "ruler-polaris", "form-records"]) {
+    for (const prefix of ["", "#"]) {
+      assert.equal(shouldReset("/characters/dante", `${prefix}${hash}`, true, false), false, hash);
+    }
+  }
+  assert.equal(shouldReset("/managers/lejas", "form-records", true, false), false);
+  assert.equal(shouldReset("/characters/dante", "", true, false), true);
+  assert.equal(shouldReset("/characters/dante", "unknown-form", true, false), true);
+  assert.equal(shouldReset("/characters/dante", "", true, true), false);
+});
+
 test("episode selection and the single-tap plus remain sibling controls", () => {
   assert.match(worldHome, /className="episode-card-select"/);
   assert.match(worldHome, /ep\.pickups\?\.length \? " has-pickup"/);
