@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { createHash } from "node:crypto";
 import test from "node:test";
 import {
   ASSEMBLY_BEATS,
@@ -7,6 +8,7 @@ import {
   ASSEMBLY_TOUCH_ART_BUDGET,
   mountRexonanceAssembly,
   planAssembly,
+  assemblyGoldPlanSteps,
 } from "../src/lib/rexonance-resonance.js";
 import {
   REXONANCE_SUIT_MARKS,
@@ -735,6 +737,7 @@ function environment({
     calls,
     idle,
     prepared: () => canvasId >= 3,
+    canvasCount: () => canvasId,
   };
 }
 
@@ -934,6 +937,76 @@ test("pagehide cancels queued preparation and pageshow safely resumes it", async
   assert.equal(t.idle.size, 0);
 });
 
+test("gold preparation yields within the idle budget, cancels midway and finishes before activation", async () => {
+  const { REXONANCE_SUIT_GOLD_CELL, REXONANCE_SUIT_GOLD_CELLS } =
+    await import("../src/lib/rexonance-suit-gold.ts");
+  const t = environment({ idleHeld: true });
+  let goldReads = 0;
+  const config = {
+    ...engineConfig,
+    gold: {
+      atlas: "/gold.webp",
+      cell: REXONANCE_SUIT_GOLD_CELL,
+      cells: new Proxy(REXONANCE_SUIT_GOLD_CELLS, {
+        get(target, key) {
+          goldReads += 1;
+          return target[key];
+        },
+      }),
+    },
+  };
+  const dispose = mountRexonanceAssembly(t.runway, config, t.env);
+  // A depleted deadline permits exactly one generator checkpoint per slot.
+  const step = async () => {
+    for (const [id, callback] of [...t.idle]) {
+      t.idle.delete(id);
+      callback({ timeRemaining: () => 0 });
+    }
+    await new Promise((resolve) => setImmediate(resolve));
+  };
+  try {
+    t.observers[1].callback([{ isIntersecting: true }]);
+    for (let i = 0; i < 2000 && !goldReads; i += 1) await step();
+    assert.ok(goldReads > 0, "gold generator has begun");
+    assert.equal(t.prepared(), false, "no canvas layers publish while gold is incomplete");
+    const initialReads = goldReads;
+    await step();
+    assert.equal(goldReads, initialReads, "a whole plate cannot run past a depleted deadline");
+    assert.equal(t.idle.size, 1, "the remaining gold work has another idle slot");
+    t.listeners.get("window:pagehide")();
+    await step();
+    assert.equal(t.idle.size, 0);
+    assert.equal(t.prepared(), false);
+    assert.equal(t.runway.dataset.rznState, undefined);
+    const cancelledReads = goldReads;
+    await step();
+    assert.equal(goldReads, cancelledReads, "cancelled gold work stays stopped");
+
+    const beforeResume = t.canvasCount();
+    const resumedPrepared = () => t.canvasCount() >= beforeResume + 2;
+    t.listeners.get("window:pageshow")();
+    let slots = 0;
+    while (!resumedPrepared() && slots < 4000) {
+      await step();
+      slots += 1;
+    }
+    assert.ok(resumedPrepared(), "new generation finishes all gold and canvas preparation");
+    assert.ok(slots > 50, "large gold plan requires multiple idle slots");
+    t.observers[0].callback([{ isIntersecting: true }]);
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    assert.equal(t.runway.dataset.rznState, "live");
+    t.scrollTo(0.85);
+    assert.ok(
+      t.calls.some(([name]) => name === "drawImage"),
+      "completed gold layers draw",
+    );
+  } finally {
+    dispose();
+  }
+  assert.equal(t.idle.size, 0);
+  assert.equal(t.frames.size, 0);
+});
+
 test("without requestIdleCallback the bounded timer fallback prepares the scene", async () => {
   const t = environment();
   delete t.env.requestIdleCallback;
@@ -1084,6 +1157,25 @@ test("the gold forms by nanites right after each plate lands; the driver is on f
     gold: { atlas: "", cell: REXONANCE_SUIT_GOLD_CELL, cells: REXONANCE_SUIT_GOLD_CELLS },
     landed,
   });
+  // This is the full a91b9f8 synchronous plan, including equal-lock ordering
+  // and overlap neighbors. Chunking must preserve the authored gold exactly.
+  assert.equal(
+    createHash("sha256").update(JSON.stringify(gold)).digest("hex"),
+    "81ea60658f3ff42a2cf2fb86914ec78f0ec902a105c4dcb22ca63045ce11cc98",
+  );
+  const steps = assemblyGoldPlanSteps({
+    pieces,
+    gold: { atlas: "", cell: REXONANCE_SUIT_GOLD_CELL, cells: REXONANCE_SUIT_GOLD_CELLS },
+    tiles: plan.tiles,
+  });
+  let result;
+  let checkpoints = 0;
+  do {
+    result = steps.next();
+    checkpoints += 1;
+  } while (!result.done);
+  assert.ok(checkpoints > 100, "grid walks, sorting and overlaps expose preparation checkpoints");
+  assert.deepEqual(result.value, gold, "idle and synchronous consumers return identical plans");
   assert.ok(gold.count > 4000);
   const earliest = Math.min(...landed.values());
   for (let i = 1; i < gold.count; i += 1) assert.ok(gold.lock[i] >= gold.lock[i - 1]);

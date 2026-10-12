@@ -64,6 +64,16 @@ export function planAssemblyGold(options: {
   overlaps: Int32Array[];
 } | null;
 
+export function assemblyGoldPlanSteps(
+  options: {
+    pieces: readonly RexonanceAssemblyPiece[];
+    gold: RexonanceAssemblyGold | undefined;
+  } & (
+    | { landed: Map<string, number>; tiles?: never }
+    | { landed?: never; tiles: readonly Pick<RexonanceAssemblyTile, "pieceId" | "t1">[] }
+  ),
+): Generator<undefined, ReturnType<typeof planAssemblyGold>, unknown>;
+
 export function rewindAssemblyGold(
   context: Pick<CanvasRenderingContext2D, "clearRect" | "drawImage">,
   art: CanvasImageSource,

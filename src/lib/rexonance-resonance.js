@@ -871,9 +871,10 @@ export const ASSEMBLY_GOLD = {
 
 // Trims from different plate grids overlap even when each individual grid
 // is disjoint. Prepare their neighbors once, never search the suit per frame.
-const goldOverlaps = (g, cell) => {
+function* goldOverlapSteps(g, cell) {
   const lists = Array.from({ length: g.count }, () => []);
   const bins = new Map();
+  let work = 0;
   for (let i = 0; i < g.count; i += 1) {
     const bx = Math.floor(g.x[i] / cell);
     const by = Math.floor(g.y[i] / cell);
@@ -882,6 +883,7 @@ const goldOverlaps = (g, cell) => {
         const bucket = bins.get(`${bx + dx},${by + dy}`);
         if (!bucket) continue;
         for (const j of bucket) {
+          if (++work % 128 === 0) yield;
           if (
             g.x[i] >= g.x[j] + g.w[j] ||
             g.x[j] >= g.x[i] + g.w[i] ||
@@ -896,9 +898,14 @@ const goldOverlaps = (g, cell) => {
     const key = `${bx},${by}`;
     if (!bins.has(key)) bins.set(key, []);
     bins.get(key).push(i);
+    if (++work % 128 === 0) yield;
   }
-  return lists.map((list) => Int32Array.from(list));
-};
+  for (let i = 0; i < lists.length; i += 1) {
+    lists[i] = Int32Array.from(lists[i]);
+    if (++work % 128 === 0) yield;
+  }
+  return lists;
+}
 
 /** Remove future cells and repair only their overlaps with retained paint.
  * A persistent cursor allows even one operation per frame to converge.
@@ -930,14 +937,25 @@ export function rewindAssemblyGold(context, art, g, state, target, budget) {
   return budget;
 }
 
-export function planAssemblyGold({ pieces, gold, landed }) {
+/** Preparation checkpoints include grid walks, sorting and overlap lookup.
+ * The synchronous wrapper and idle runtime consume the same exact plan. */
+export function* assemblyGoldPlanSteps({ pieces, gold, landed, tiles }) {
   if (!gold?.cells) return null;
+  let work = 0;
+  if (!landed) {
+    landed = new Map();
+    for (const item of tiles) {
+      if (item.pieceId) landed.set(item.pieceId, Math.max(landed.get(item.pieceId) ?? 0, item.t1));
+      if (++work % 128 === 0) yield;
+    }
+  }
   const G = gold.cell;
   const list = [];
-  pieces.forEach((piece, index) => {
+  for (let index = 0; index < pieces.length; index += 1) {
+    const piece = pieces[index];
     const base64 = gold.cells[piece.id];
     const done = landed.get(piece.id);
-    if (!base64 || piece.preset || done === undefined) return;
+    if (!base64 || piece.preset || done === undefined) continue;
     const bits = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
     const cols = Math.ceil(piece.w / G);
     const rows = Math.ceil(piece.h / G);
@@ -947,13 +965,14 @@ export function planAssemblyGold({ pieces, gold, landed }) {
     for (let r = 0; r < rows; r += 1)
       for (let c = 0; c < cols; c += 1) {
         const bit = r * cols + c;
+        if (++work % 128 === 0) yield;
         if (!(bits[bit >> 3] & (1 << (bit & 7)))) continue;
         grid[bit] = col.length;
         col.push(c);
         row.push(r);
       }
     const n = col.length;
-    if (!n) return;
+    if (!n) continue;
     const seatX = (piece.seat[0] - piece.x) / G - 0.5;
     const seatY = (piece.seat[1] - piece.y) / G - 0.5;
     const reach = new Float32Array(n).fill(-1);
@@ -964,6 +983,7 @@ export function planAssemblyGold({ pieces, gold, landed }) {
       let entry = -1;
       let best = Number.POSITIVE_INFINITY;
       for (let i = 0; i < n; i += 1) {
+        if (++work % 128 === 0) yield;
         if (reach[i] >= 0) continue;
         const d = Math.hypot(col[i] - seatX, row[i] - seatY);
         if (d < best) {
@@ -978,6 +998,7 @@ export function planAssemblyGold({ pieces, gold, landed }) {
       seen += 1;
       while (head < tail) {
         const i = queue[head++];
+        if (++work % 128 === 0) yield;
         for (let dy = -1; dy <= 1; dy += 1)
           for (let dx = -1; dx <= 1; dx += 1) {
             const c = col[i] + dx;
@@ -993,7 +1014,10 @@ export function planAssemblyGold({ pieces, gold, landed }) {
       }
     }
     let most = 0;
-    for (let i = 0; i < n; i += 1) most = Math.max(most, reach[i]);
+    for (let i = 0; i < n; i += 1) {
+      most = Math.max(most, reach[i]);
+      if (++work % 128 === 0) yield;
+    }
     const from = done + ASSEMBLY_GOLD.delay;
     const span = piece.group === "helm" ? ASSEMBLY_GOLD.helm : ASSEMBLY_GOLD.form;
     const random = seededRandom(7919 + index);
@@ -1014,22 +1038,53 @@ export function planAssemblyGold({ pieces, gold, landed }) {
         ux * G * 2.6,
         uy * G * 2.6,
       ]);
+      if (++work % 128 === 0) yield;
     }
-  });
-  list.sort((a, b) => a[4] - b[4]);
-  const field = (k) => Float32Array.from(list, (entry) => entry[k]);
+  }
+  // Stable merge sort preserves the previous native sort's equal-lock order
+  // while exposing checkpoints instead of one uninterruptible sort task.
+  let sorted = list;
+  let scratch = new Array(list.length);
+  for (let width = 1; width < list.length; width *= 2) {
+    for (let start = 0; start < list.length; start += width * 2) {
+      const mid = Math.min(start + width, list.length);
+      const end = Math.min(start + width * 2, list.length);
+      let left = start;
+      let right = mid;
+      for (let at = start; at < end; at += 1) {
+        scratch[at] =
+          right >= end || (left < mid && sorted[left][4] <= sorted[right][4])
+            ? sorted[left++]
+            : sorted[right++];
+        if (++work % 128 === 0) yield;
+      }
+    }
+    [sorted, scratch] = [scratch, sorted];
+  }
+  const fields = Array.from({ length: 7 }, () => new Float32Array(list.length));
+  for (let i = 0; i < sorted.length; i += 1) {
+    for (let k = 0; k < fields.length; k += 1) fields[k][i] = sorted[i][k];
+    if (++work % 128 === 0) yield;
+  }
   const result = {
     count: list.length,
-    x: field(0),
-    y: field(1),
-    w: field(2),
-    h: field(3),
-    lock: field(4),
-    ux: field(5),
-    uy: field(6),
+    x: fields[0],
+    y: fields[1],
+    w: fields[2],
+    h: fields[3],
+    lock: fields[4],
+    ux: fields[5],
+    uy: fields[6],
   };
-  result.overlaps = goldOverlaps(result, G);
+  result.overlaps = yield* goldOverlapSteps(result, G);
   return result;
+}
+
+export function planAssemblyGold(options) {
+  const steps = assemblyGoldPlanSteps(options);
+  let result = steps.next();
+  while (!result.done) result = steps.next();
+  return result.value;
 }
 
 // Pixel squares inside the face's lights (figure px), in burst groups.
@@ -1298,11 +1353,35 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     if (building) return building;
     const token = generation;
     const tile = coarse.matches ? 15 : 12;
+    const active = () =>
+      !disposed && pageActive && token === generation && !document.hidden && motionAllowed();
+    const buildSteps = async (steps) => {
+      try {
+        let result;
+        while (active()) {
+          await idleTask((deadline) => {
+            if (!active()) return;
+            const start = environment.performance?.now?.() ?? Date.now();
+            do {
+              result = steps.next();
+            } while (
+              !result.done &&
+              (environment.performance?.now?.() ?? Date.now()) - start < 4 &&
+              (!deadline || deadline.timeRemaining() > 4)
+            );
+          });
+          if (result?.done) return active() ? result.value : null;
+        }
+        return null;
+      } finally {
+        steps.return();
+      }
+    };
     building = idleTask(() => sampleFigure(tile))
-      .then((sample) =>
-        idleTask(async () => {
-          if (disposed || token !== generation) return;
-          const steps = assemblyPlanSteps({
+      .then(async (sample) => {
+        if (!active()) return;
+        const nextPlan = await buildSteps(
+          assemblyPlanSteps({
             size: config.size,
             pieces: config.pieces,
             core: config.core,
@@ -1310,40 +1389,25 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
             visor: config.visor,
             tile,
             sample,
-          });
-          let result;
-          while (
-            !disposed &&
-            pageActive &&
-            token === generation &&
-            !document.hidden &&
-            motionAllowed()
-          ) {
-            await idleTask((deadline) => {
-              const start = environment.performance?.now?.() ?? Date.now();
-              do {
-                result = steps.next();
-              } while (
-                !result.done &&
-                (environment.performance?.now?.() ?? Date.now()) - start < 4 &&
-                (!deadline || deadline.timeRemaining() > 4)
-              );
-            });
-            if (result?.done) break;
-          }
-          if (disposed || token !== generation || !result?.done) return;
-          plan = result.value;
-          pixels = facePixels(config.glow, config.visor);
-          // When each plate's last tile lands: its gold forms from there.
-          const landed = new Map();
-          for (const item of plan.tiles)
-            if (item.pieceId)
-              landed.set(item.pieceId, Math.max(landed.get(item.pieceId) ?? 0, item.t1));
-          goldPlan = images.gold
-            ? planAssemblyGold({ pieces: config.pieces, gold: config.gold, landed })
-            : null;
-        }),
-      )
+          }),
+        );
+        if (!active() || !nextPlan) return;
+        // Gold planning includes its overlap graph; neither planning phase
+        // becomes visible until both have finished for this generation.
+        const nextGold = images.gold
+          ? await buildSteps(
+              assemblyGoldPlanSteps({
+                pieces: config.pieces,
+                gold: config.gold,
+                tiles: nextPlan.tiles,
+              }),
+            )
+          : null;
+        if (!active()) return;
+        plan = nextPlan;
+        goldPlan = nextGold;
+        pixels = facePixels(config.glow, config.visor);
+      })
       .then(() =>
         idleTask(() => {
           if (disposed || token !== generation || !plan) return;
