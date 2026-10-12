@@ -125,6 +125,7 @@ export function mountExtremeImpact(page, environment = window) {
   let running = false;
   let arrived = false;
   let disposed = false;
+  let pageHidden = false;
   let observers = [];
   let watchers = [];
   let heroObserver = null;
@@ -250,6 +251,35 @@ export function mountExtremeImpact(page, environment = window) {
   ];
   // A tally answers to the nearest hit around it, not to every outer one.
   const scopeOf = (tally) => tally.parentElement?.closest("[data-exi-hit]") ?? null;
+  const releaseRemoved = (records) => {
+    for (const record of records)
+      for (const node of record.removedNodes ?? []) {
+        // A move within this page is not a disposal. Mutation records are
+        // delivered in batches, after the node may already be reinserted.
+        if (node.nodeType !== 1 || page.contains(node)) continue;
+        // React's re-keyed comparison and form figures must not remain in
+        // a pending tally, hit observer or beat timer until route unmount.
+        for (const figure of waiting)
+          if (node.contains(figure)) {
+            unwait(figure);
+            const copy = figure.querySelector("[data-exi-tally]");
+            if (copy) copy.textContent = "";
+          }
+        for (const figure of tallies.keys()) if (node.contains(figure)) finishTally(figure, false);
+        for (const [id, { element, name }] of timers)
+          if (node.contains(element)) {
+            environment.clearTimeout(id);
+            timers.delete(id);
+            if (element.getAttribute(name) === "true") element.setAttribute(name, "done");
+          }
+        const hits = [node, ...node.querySelectorAll("[data-exi-hit]")];
+        for (const observer of observers) for (const hit of hits) observer.unobserve(hit);
+      }
+    if (!tallies.size && tallyFrame) {
+      environment.cancelAnimationFrame(tallyFrame);
+      tallyFrame = 0;
+    }
+  };
 
   /* ---------- Hits ---------- */
   const land = (element) => {
@@ -277,27 +307,33 @@ export function mountExtremeImpact(page, environment = window) {
     }
   };
   const onIntersect = (entries, observer) => {
+    if (!running || !observers.includes(observer)) return;
     for (const entry of entries) {
       if (!entry.isIntersecting) continue;
       observer.unobserve(entry.target);
-      if (running) land(entry.target);
+      if (page.contains(entry.target) && entry.target.getAttribute("data-exi-hit") === "")
+        land(entry.target);
     }
   };
   const onRekey = (records) => {
+    if (disposed) return;
+    releaseRemoved(records);
     if (!running) return;
     for (const record of records)
       for (const node of record.addedNodes)
-        if (node.nodeType === 1)
+        if (node.nodeType === 1 && page.contains(node))
           for (const tally of talliesIn(node)) {
             if ((scopeOf(tally)?.getAttribute("data-exi-hit") ?? "true") === "") wait(tally);
             else startTally(tally);
           }
   };
   const onFigure = (records) => {
+    if (disposed) return;
+    releaseRemoved(records);
     if (!running || panel.getAttribute("data-exo-cut") !== "true") return;
     for (const record of records)
       for (const node of record.addedNodes)
-        if (node.nodeType === 1 && node.matches("figure"))
+        if (node.nodeType === 1 && node.parentElement === panel && node.matches("figure"))
           key(node, "data-exi-impact", BEATS.impact);
   };
   const onStage = () => {
@@ -426,14 +462,33 @@ export function mountExtremeImpact(page, environment = window) {
   };
 
   /* ---------- Warm art ---------- */
+  const constrainedNetwork = () =>
+    connection?.saveData || /^(slow-)?2g$/.test(connection?.effectiveType || "");
+  const canWarm = () =>
+    !disposed &&
+    !pageHidden &&
+    !document.hidden &&
+    !html.hasAttribute("data-loading") &&
+    !constrainedNetwork();
+  const stopWarm = () => {
+    warmObserver?.disconnect();
+    warmObserver = null;
+  };
   const warm = () => {
     if (warmObserver || !panel || !environment.IntersectionObserver || !environment.Image) return;
     const sources = (panel.getAttribute("data-exi-warm") || "").split(/\s+/).filter(Boolean);
     if (!sources.length) return;
-    warmObserver = new environment.IntersectionObserver(
+    const observer = new environment.IntersectionObserver(
       (entries) => {
+        // A disconnected observer can still have a queued delivery. Only
+        // the current observer may start work, under the current policy.
+        if (warmObserver !== observer || warmed.length) return;
+        if (!canWarm()) {
+          stopWarm();
+          return;
+        }
         if (!entries.some((entry) => entry.isIntersecting)) return;
-        warmObserver?.disconnect();
+        stopWarm();
         for (const source of sources) {
           const image = new environment.Image();
           image.decoding = "async";
@@ -444,7 +499,8 @@ export function mountExtremeImpact(page, environment = window) {
       },
       { rootMargin: "150% 0px 150% 0px" },
     );
-    warmObserver.observe(panel);
+    warmObserver = observer;
+    observer.observe(panel);
   };
 
   /* ---------- Gates ---------- */
@@ -460,9 +516,10 @@ export function mountExtremeImpact(page, environment = window) {
   };
   const sync = () => {
     if (disposed) return;
-    const constrained =
-      connection?.saveData || /^(slow-)?2g$/.test(connection?.effectiveType || "");
-    if (!constrained && !warmed.length) warm();
+    const constrained = constrainedNetwork();
+    if (canWarm()) {
+      if (!warmed.length) warm();
+    } else stopWarm();
     const next = !reducedMotion.matches && !constrained && html.dataset.worldEffects !== "economy";
     if (next !== allowed) {
       allowed = next;
@@ -470,7 +527,7 @@ export function mountExtremeImpact(page, environment = window) {
       else page.removeAttribute("data-exi-armed");
     }
     // Nothing is keyed behind the load gate's cover or in a hidden tab.
-    if (!allowed || document.hidden || html.hasAttribute("data-loading")) {
+    if (!allowed || pageHidden || document.hidden || html.hasAttribute("data-loading")) {
       if (running || observers.length || tallies.size || timers.size) stop();
       return;
     }
@@ -487,7 +544,14 @@ export function mountExtremeImpact(page, environment = window) {
     syncPointer();
   };
   const onPageHide = () => {
-    if (!disposed) stop();
+    if (disposed) return;
+    pageHidden = true;
+    stopWarm();
+    stop();
+  };
+  const onPageShow = () => {
+    pageHidden = false;
+    sync();
   };
 
   const attributes = new environment.MutationObserver(sync);
@@ -500,7 +564,7 @@ export function mountExtremeImpact(page, environment = window) {
   connection?.addEventListener?.("change", sync);
   document.addEventListener("visibilitychange", sync);
   environment.addEventListener("pagehide", onPageHide);
-  environment.addEventListener("pageshow", sync);
+  environment.addEventListener("pageshow", onPageShow);
   sync();
 
   return () => {
@@ -512,9 +576,9 @@ export function mountExtremeImpact(page, environment = window) {
     connection?.removeEventListener?.("change", sync);
     document.removeEventListener("visibilitychange", sync);
     environment.removeEventListener("pagehide", onPageHide);
-    environment.removeEventListener("pageshow", sync);
-    warmObserver?.disconnect();
-    warmObserver = null;
+    environment.removeEventListener("pageshow", onPageShow);
+    stopWarm();
+    warmed.length = 0;
     stop();
     page.removeAttribute("data-exi-armed");
     scenes.forEach((element) => element.removeAttribute("data-exi-hit"));

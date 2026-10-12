@@ -55,10 +55,11 @@
   });
 
   const relayout = () => {
-    if (gesture) return;
     const i = tabs().findIndex((t) => t.getAttribute('aria-selected') === 'true');
     if (i >= 0) active = i;
     syncTabState(active);
+    // Keep the committed selection current without stealing a dragged lens.
+    if (gesture && gesture.hold !== 'armed') return;
     settle(active);
   };
   let ro = 0;

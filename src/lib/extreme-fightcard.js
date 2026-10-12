@@ -57,7 +57,22 @@ export function mountExtremeFightCard(page, environment = window) {
     }
   };
   const articlesIn = (node) => [...(node.querySelectorAll?.(":scope > article") ?? [])];
-  const onIntersect = (entries) => {
+  const release = (articles) => {
+    for (const row of articles) {
+      rows?.unobserve(row);
+      waiting.delete(row);
+      for (const [id, target] of timers)
+        if (target === row) {
+          environment.clearTimeout(id);
+          timers.delete(id);
+        }
+      const state = row.getAttribute("data-exf-clash");
+      if (state === "") row.removeAttribute("data-exf-clash");
+      else if (state === "true") row.setAttribute("data-exf-clash", "done");
+    }
+  };
+  const onIntersect = (entries, observer) => {
+    if (disposed || observer !== rows) return;
     for (const entry of entries) {
       if (!entry.isIntersecting || !waiting.has(entry.target)) continue;
       rows?.unobserve(entry.target);
@@ -65,9 +80,21 @@ export function mountExtremeFightCard(page, environment = window) {
     }
   };
   const onChange = (records) => {
+    if (disposed || !watcher) return;
+    // React replaces the entire tape when its opponent changes. Drop both
+    // unreached rows and in-flight beats before arming the new tape.
+    for (const record of records)
+      for (const node of record.removedNodes ?? [])
+        if (node.nodeType === 1 && node.matches?.(".rxs-comparison-metrics"))
+          release(articlesIn(node));
     for (const record of records)
       for (const node of record.addedNodes)
-        if (node.nodeType === 1 && node.matches?.(".rxs-comparison-metrics")) arm(articlesIn(node));
+        if (
+          node.nodeType === 1 &&
+          node.matches?.(".rxs-comparison-metrics") &&
+          node === comparison.querySelector(":scope > .rxs-comparison-metrics")
+        )
+          arm(articlesIn(node));
   };
   const stop = () => {
     rows?.disconnect();

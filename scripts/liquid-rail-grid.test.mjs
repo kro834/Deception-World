@@ -267,6 +267,164 @@ test("a one-row rail remains horizontally constrained", () => {
   }
 });
 
+test("Extreme's controlled rollback resyncs the lens and permits the same keyboard retry", () => {
+  const component = readFileSync(
+    new URL("../src/components/extreme-saga/extreme-saga.tsx", import.meta.url),
+    "utf8",
+  );
+  assert.match(
+    component,
+    /useLayoutEffect\(\(\) => \{\s*stageTabsRef\.current\?\.dispatchEvent\(new Event\("liquidrelayout"\)\);\s*\}, \[stage\]\)/,
+    "notify after React commits the rolled-back ARIA state, not inside onError",
+  );
+  const ui = mountRail([cell(0, 0), cell(50, 0)]);
+  const selections = [];
+  ui.root.addEventListener("railselect", (event) => selections.push(event.detail.index));
+  try {
+    ui.root.dispatch("keydown", { target: ui.tabs[0], key: "ArrowRight" });
+    assert.deepEqual(selections, [1]);
+    // Image failure restores Middle in React without changing rail geometry.
+    ui.tabs[0].setAttribute("aria-selected", "true");
+    ui.tabs[0].tabIndex = 0;
+    ui.tabs[1].setAttribute("aria-selected", "false");
+    ui.tabs[1].tabIndex = -1;
+    ui.root.dispatch("liquidrelayout");
+    assert.equal(ui.lens.style.transform, "translate3d(0.00px,0.00px,0)");
+    assert.deepEqual(selections, [1], "a rollback itself must not request another form");
+    ui.root.dispatch("keydown", { target: ui.tabs[0], key: "ArrowRight" });
+    assert.deepEqual(selections, [1, 1], "the same form is a new request after rollback");
+    assert.equal(ui.tabs[1].getAttribute("aria-selected"), "true");
+  } finally {
+    ui.dispose();
+  }
+});
+
+test("a controlled rollback during a drag permits the same selection on release", () => {
+  const ui = mountRail([cell(0, 0), cell(50, 0)]);
+  const selections = [];
+  ui.root.addEventListener("railselect", (event) => selections.push(event.detail.index));
+  try {
+    ui.root.dispatch("keydown", { target: ui.tabs[0], key: "ArrowRight" });
+    ui.pointer("pointerdown", 75, 25, ui.tabs[1]);
+    ui.pointer("pointermove", 60, 25, ui.tabs[1]);
+    ui.flushFrames();
+    const heldTransform = ui.lens.style.transform;
+    ui.tabs[0].setAttribute("aria-selected", "true");
+    ui.tabs[1].setAttribute("aria-selected", "false");
+    ui.root.dispatch("liquidrelayout");
+    assert.equal(ui.lens.style.transform, heldTransform, "relayout must not steal the dragged lens");
+    assert.deepEqual(selections, [1], "rollback and drag preview must not commit a form");
+    assert.equal(ui.tabs[0].tabIndex, 0, "roving focus follows the committed rollback");
+    ui.pointer("pointerup", 60, 25, ui.tabs[1]);
+    ui.flushFrames();
+    assert.deepEqual(selections, [1, 1]);
+    assert.equal(ui.tabs[1].getAttribute("aria-selected"), "true");
+    assert.equal(ui.lens.style.transform, "translate3d(50.00px,0.00px,0)");
+    assert.equal(ui.root.dataset.railLock, undefined);
+  } finally {
+    ui.dispose();
+  }
+});
+
+for (const cancelEvent of ["pointercancel", "blur"]) {
+  test(`a controlled rollback during a drag restores the lens on ${cancelEvent}`, () => {
+    const ui = mountRail([cell(0, 0), cell(50, 0)]);
+    const selections = [];
+    ui.root.addEventListener("railselect", (event) => selections.push(event.detail.index));
+    try {
+      ui.root.dispatch("keydown", { target: ui.tabs[0], key: "ArrowRight" });
+      ui.pointer("pointerdown", 75, 25, ui.tabs[1]);
+      ui.pointer("pointermove", 60, 25, ui.tabs[1]);
+      ui.flushFrames();
+      ui.tabs[0].setAttribute("aria-selected", "true");
+      ui.tabs[1].setAttribute("aria-selected", "false");
+      ui.root.dispatch("liquidrelayout");
+      ui.win.dispatch(cancelEvent, { pointerId: 7 });
+      ui.flushFrames();
+      assert.deepEqual(selections, [1], "cancel must not emit another selection");
+      assert.equal(ui.tabs[0].getAttribute("aria-selected"), "true");
+      assert.equal(ui.lens.style.transform, "translate3d(0.00px,0.00px,0)");
+      assert.equal(ui.root.dataset.railLock, undefined);
+    } finally {
+      ui.dispose();
+    }
+  });
+}
+
+test("a controlled rollback while a rider touch is armed relayouts without engaging it", () => {
+  const ui = mountRail([cell(0, 0), cell(50, 0)], { classes: ["rider-tabs", "liquid-swipe-tabs"] });
+  const selections = [];
+  ui.root.addEventListener("railselect", (event) => selections.push(event.detail.index));
+  try {
+    ui.root.dispatch("keydown", { target: ui.tabs[0], key: "ArrowRight" });
+    ui.pointer("pointerdown", 75, 25, ui.tabs[1]);
+    assert.equal(ui.root.dataset.liquidArmed, "true");
+    ui.tabs[0].setAttribute("aria-selected", "true");
+    ui.tabs[1].setAttribute("aria-selected", "false");
+    ui.root.dispatch("liquidrelayout");
+    assert.equal(ui.lens.style.transform, "translate3d(0.00px,0.00px,0)");
+    assert.equal(ui.root.dataset.liquidArmed, "true", "rollback must not engage or cancel the touch");
+    assert.equal(ui.root.dataset.railLock, undefined);
+    ui.win.dispatch("pointercancel", { pointerId: 7 });
+    ui.advance(1000);
+    assert.deepEqual(selections, [1]);
+    assert.equal(ui.lens.style.transform, "translate3d(0.00px,0.00px,0)");
+    assert.equal(ui.root.dataset.railLock, undefined);
+  } finally {
+    ui.dispose();
+  }
+});
+
+test("selection compares committed ARIA even before a controlled relayout arrives", () => {
+  const ui = mountRail([cell(0, 0), cell(50, 0)]);
+  const selections = [];
+  ui.root.addEventListener("railselect", (event) => selections.push(event.detail.index));
+  try {
+    ui.tabs[1].dispatch("click", { detail: 0 });
+    ui.tabs[0].setAttribute("aria-selected", "true");
+    ui.tabs[1].setAttribute("aria-selected", "false");
+    ui.tabs[1].dispatch("click", { detail: 0 });
+    assert.deepEqual(selections, [1, 1]);
+    assert.equal(ui.tabs[1].tabIndex, 0);
+    assert.equal(ui.lens.style.transform, "translate3d(50.00px,0.00px,0)");
+  } finally {
+    ui.dispose();
+  }
+});
+
+test("pointer, keyboard and drag commit once without waiting for a controlled render", () => {
+  const ui = mountRail([cell(0, 0), cell(50, 0), cell(100, 0)]);
+  const selections = [];
+  ui.root.addEventListener("railselect", (event) => selections.push(event.detail.index));
+  try {
+    // No React render or liquidrelayout occurs between these inputs.
+    ui.pointer("pointerdown", 75, 25, ui.tabs[1]);
+    ui.pointer("pointerup", 75, 25, ui.tabs[1]);
+    ui.tabs[1].dispatch("click", { detail: 1 });
+    ui.tabs[1].dispatch("click", { detail: 0 });
+    assert.deepEqual(selections, [1], "pointerup plus click is one selection");
+    ui.root.dispatch("keydown", { target: ui.tabs[1], key: "End" });
+    ui.root.dispatch("keydown", { target: ui.tabs[2], key: "End" });
+    assert.deepEqual(selections, [1, 2], "repeated keyboard selection does not duplicate");
+    ui.pointer("pointerdown", 125, 25, ui.tabs[2]);
+    ui.pointer("pointermove", 25, 25, ui.tabs[0]);
+    ui.flushFrames();
+    assert.deepEqual(selections, [1, 2], "drag only previews until release");
+    assert.equal(ui.tabs[2].getAttribute("aria-selected"), "true");
+    ui.root.dispatch("liquidrelayout");
+    ui.pointer("pointerup", 25, 25, ui.tabs[0]);
+    ui.flushFrames();
+    ui.tabs[0].dispatch("click", { detail: 1 });
+    ui.tabs[0].dispatch("click", { detail: 0 });
+    assert.deepEqual(selections, [1, 2, 0], "release and synthetic click commit once");
+    assert.equal(ui.tabs[0].tabIndex, 0);
+    assert.equal(ui.lens.style.transform, "translate3d(0.00px,0.00px,0)");
+    assert.equal(ui.root.dataset.railLock, undefined);
+  } finally {
+    ui.dispose();
+  }
+});
+
 test("a one-column rail remains vertically constrained", () => {
   const ui = mountRail([cell(0, 0), cell(0, 50), cell(0, 100)]);
   try {

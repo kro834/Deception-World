@@ -303,9 +303,7 @@ test("12px floor, no !important, no images but the site's own two forms, a force
     assert.ok(form, selector);
     assert.match(
       body,
-      form === "ultra"
-        ? /saga-extreme-middle-20261006\.webp/
-        : /saga-extreme-ultra-20261006\.jpeg/,
+      form === "ultra" ? /saga-extreme-middle-20261006\.webp/ : /saga-extreme-ultra-20261006\.jpeg/,
       selector,
     );
   }
@@ -420,9 +418,9 @@ test("the component adds only textless, hidden ornaments, line wrappers and the 
   assert.doesNotMatch(specs, /×/);
   // The cut is armed by a change of form only, never at first paint, and
   // the art swaps at most once every STAGE_CUT_GAP_MS (never two flashes a
-  // second, whatever the tapping cadence); the tabs and the copy follow the
-  // selection at once, the selection handlers are the original ones.
-  assert.match(component, /const STAGE_CUT_GAP_MS = 1100;/);
+  // second, whatever the tapping cadence). Tabs follow intent immediately;
+  // decoded art and its copy commit together through the selection controller.
+  assert.match(read("src/lib/extreme-stage-selection.js"), /EXTREME_STAGE_CUT_GAP_MS = 1100;/);
   assert.match(component, /const \[stageCut, setStageCut\] = useState\(false\);/);
   assert.match(
     component,
@@ -430,15 +428,16 @@ test("the component adds only textless, hidden ornaments, line wrappers and the 
   );
   assert.match(
     component,
-    /useLayoutEffect\(\(\) => \{\s*if \(shownStage === stage\) return;\s*const cut = \(\) => \{\s*lastCutRef\.current = performance\.now\(\);\s*setStageCut\(true\);\s*setShownStage\(stage\);\s*\};\s*const wait = lastCutRef\.current \+ STAGE_CUT_GAP_MS - performance\.now\(\);\s*if \(wait <= 0\) \{\s*cut\(\);\s*return;\s*\}\s*const timer = window\.setTimeout\(cut, wait\);\s*return \(\) => window\.clearTimeout\(timer\);\s*\}, \[stage, shownStage\]\);/,
+    /onDisplay: \(next: ExtremeStage\) => \{[\s\S]*?setShownStage\(next\);\s*setStageCut\(true\);/,
   );
-  assert.match(component, /onClick=\{\(\) => setStage\(key\)\}/);
-  assert.match(component, /if \(nextStage\) setStage\(nextStage\);/);
+  assert.match(component, /selection\.dispose\(\)/);
+  assert.match(component, /onClick=\{\(\) => selectStage\(key\)\}/);
+  assert.match(component, /if \(nextStage\) selectStage\(nextStage\);/);
   assert.match(component, /data-exo-cut=\{stageCut \? "true" : undefined\}/);
   assert.match(component, /<figure key=\{shownStage\} data-form=\{shownStage\}>/);
   assert.match(component, /src=\{shownArt\.image\}\s*alt=\{shownArt\.alt\}/);
   // The panel stays named by the selected tab at once.
-  assert.match(component, /aria-labelledby=\{`exs-stage-tab-\$\{stage\}`\}/);
+  assert.match(component, /aria-labelledby=\{`exs-stage-tab-\$\{shownStage\}`\}/);
   // Both stage titles stand on two lines (no jump of the figure on phones).
   assert.match(
     component,

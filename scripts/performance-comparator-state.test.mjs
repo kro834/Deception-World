@@ -26,6 +26,7 @@ const cases = [
     setter: "setBaseline",
     initial: "diluculum",
     values: ["diluculum", "vinculum"],
+    buttons: true,
   },
 ];
 
@@ -119,16 +120,52 @@ function text(root) {
   return React.isValidElement(root) ? text(root.props.children) : String(root);
 }
 
+function selectedBaseline(root, config) {
+  if (!config.buttons) return nodes(root, (node) => node.type === "select")[0].props.value;
+  const group = byClass(root, "exs-opponent-options");
+  assert.equal(group.props.role, "group");
+  assert.equal(group.props["aria-labelledby"], "exs-opponent-label");
+  assert.equal(
+    text(nodes(root, (node) => node.props.id === "exs-opponent-label")[0]).trim(),
+    "比較する相手",
+  );
+  const buttons = nodes(group, (node) => node.type === "button");
+  assert.deepEqual(
+    buttons.map((button) => button.key),
+    config.values,
+  );
+  buttons.forEach((button) => assert.equal(button.props.type, "button"));
+  const selected = buttons.filter((button) => button.props["aria-pressed"] === true);
+  assert.equal(
+    selected.length,
+    1,
+    "exactly one of the always-present opponent buttons is selected",
+  );
+  return selected[0].key;
+}
+
+function changeBaseline(root, config, value) {
+  if (config.buttons) {
+    const button = nodes(
+      byClass(root, "exs-opponent-options"),
+      (node) => node.type === "button" && node.key === value,
+    )[0];
+    button.props.onClick();
+    return;
+  }
+  const select = nodes(root, (node) => node.type === "select")[0];
+  const event = { currentTarget: { value } };
+  select.props.onInput?.(event);
+  select.props.onChange(event);
+}
+
 for (const config of cases) {
   test(`${config.component}: all baseline changes retain values, row order, keys and live semantics`, () => {
     const h = harness(config);
     let root = h.render();
-    assert.equal(nodes(root, (node) => node.type === "select")[0].props.value, config.initial);
+    assert.equal(selectedBaseline(root, config), config.initial);
     for (const value of [...config.values, ...config.values.toReversed()]) {
-      const select = nodes(root, (node) => node.type === "select")[0];
-      const event = { currentTarget: { value } };
-      select.props.onInput?.(event);
-      select.props.onChange(event);
+      changeBaseline(root, config, value);
       root = h.render();
       assert.equal(root.type, "section");
       assert.equal(root.props.id, "performance");
@@ -137,13 +174,25 @@ for (const config of cases) {
         React.Children.toArray(root.props.children).map((node) => node.type),
         ["header", "div", "div", "p"],
       );
-      assert.equal(nodes(root, (node) => node.type === "select")[0].props.value, value);
+      assert.equal(selectedBaseline(root, config), value);
       const metrics = byClass(root, "rxs-comparison-metrics");
       assert.equal(metrics.key, value);
       assert.equal(metrics.props["data-baseline"], value);
-      assert.equal(metrics.props["aria-live"], "polite");
-      assert.equal(metrics.props["aria-atomic"], "true");
       const expected = h.context.catalog[value];
+      if (config.buttons) {
+        assert.equal(
+          metrics.props["aria-live"],
+          undefined,
+          "do not announce the whole four-row catalog",
+        );
+        assert.equal(metrics.props["aria-atomic"], undefined);
+        const statuses = nodes(root, (node) => node.props.role === "status");
+        assert.equal(statuses.length, 1);
+        assert.equal(text(statuses[0]), `${expected.label}を基準に比較しています。`);
+      } else {
+        assert.equal(metrics.props["aria-live"], "polite");
+        assert.equal(metrics.props["aria-atomic"], "true");
+      }
       const rows = nodes(metrics, (node) => node.type === "article");
       assert.equal(rows.length, expected.metrics.length);
       expected.metrics.forEach((metric, index) => {
@@ -169,8 +218,8 @@ for (const config of cases) {
         assert.ok(text(root.props.children[0]).includes(expected.label));
       const html = renderToStaticMarkup(root);
       assert.ok(html.includes('id="performance"'));
-      assert.ok(html.includes('aria-live="polite"'));
-      assert.equal((html.match(/<select\b/g) || []).length, 1);
+      assert.ok(html.includes(config.buttons ? 'role="status"' : 'aria-live="polite"'));
+      assert.equal((html.match(/<select\b/g) || []).length, config.buttons ? 0 : 1);
     }
   });
 
@@ -186,35 +235,44 @@ for (const config of cases) {
   });
 }
 
-test("Extreme comparison keeps keyboard focus and only blurs pointer selections", () => {
+test("Extreme opponent buttons preserve both keyboard and pointer focus while updating the real comparison", () => {
   const h = harness(cases[1]);
   const control = {
-    value: "vinculum",
     blurCount: 0,
     blur() {
       this.blurCount++;
     },
   };
   h.context.document.activeElement = control;
-  let select = nodes(h.render(), (node) => node.type === "select")[0];
-  select.props.onKeyDown();
-  select.props.onChange({ currentTarget: control });
-  h.flush();
-  assert.equal(control.blurCount, 0);
-  select = nodes(h.render(), (node) => node.type === "select")[0];
-  select.props.onPointerDown();
-  select.props.onChange({ currentTarget: control });
-  h.flush();
-  assert.equal(control.blurCount, 1);
-  select.props.onPointerDown();
-  select.props.onBlur();
-  select.props.onChange({ currentTarget: control });
-  h.flush();
-  assert.equal(
-    control.blurCount,
-    1,
-    "a cancelled pointer session cannot blur a later keyboard change",
-  );
+  for (const [value, detail] of [
+    ["vinculum", 0],
+    ["diluculum", 1],
+    ["vinculum", 1],
+    ["diluculum", 0],
+  ]) {
+    const root = h.render();
+    const button = nodes(
+      byClass(root, "exs-opponent-options"),
+      (node) => node.type === "button" && node.key === value,
+    )[0];
+    const event = { currentTarget: control, detail, key: "Enter" };
+    if (detail === 0) button.props.onKeyDown?.(event);
+    else {
+      button.props.onPointerDown?.(event);
+      button.props.onPointerUp?.(event);
+    }
+    button.props.onClick(event);
+    h.flush();
+    assert.equal(control.blurCount, 0, "neither input method forcibly blurs the chosen button");
+    assert.equal(h.context.document.activeElement, control);
+    const changed = h.render();
+    assert.equal(selectedBaseline(changed, cases[1]), value);
+    assert.equal(byClass(changed, "rxs-comparison-metrics").props["data-baseline"], value);
+    assert.equal(
+      text(nodes(changed, (node) => node.props.role === "status")[0]),
+      `${h.context.catalog[value].label}を基準に比較しています。`,
+    );
+  }
 });
 
 test("Rex comparison retains native input/change synchronization and pointer focus marker", () => {

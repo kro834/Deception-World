@@ -1,4 +1,4 @@
-import { memo, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { GuardedLink } from "@/components/load-gate";
 import { DisplayName } from "@/components/name-text";
 import { LiquidLens } from "@/components/world/liquid-rail";
@@ -10,15 +10,11 @@ import { mountExtremeMotion, mountExtremeNavReserve } from "@/lib/extreme-motion
 import { mountExtremeImpact } from "@/lib/extreme-impact.js";
 import { mountExtremeFightCard } from "@/lib/extreme-fightcard.js";
 import { mountLocalNavCurrent } from "@/lib/local-nav-current";
+import { createExtremeStageSelection } from "@/lib/extreme-stage-selection.js";
 import { ExtremeImpactDefs } from "./extreme-impact-art";
 
 type ExtremeStage = "middle" | "ultra";
 type ExtremeBaseline = "diluculum" | "vinculum";
-
-// The panel's art follows a change of form at most this often. The Ultra art
-// is far brighter than the Middle art, so a reader flicking between the two
-// would otherwise strobe the figure; the tabs and the copy follow at once.
-const STAGE_CUT_GAP_MS = 1100;
 
 type ComparisonMetric = {
   label: string;
@@ -258,13 +254,6 @@ const releaseControlFocus = (control: HTMLElement) => {
 const ExtremePerformance = memo(function ExtremePerformance() {
   const [baseline, setBaseline] = useState<ExtremeBaseline>("diluculum");
   const activeComparison = COMPARISONS[baseline];
-  const selectPointerInteractionRef = useRef(false);
-
-  const releaseSelectFocusAfterPointerChange = (control: HTMLSelectElement) => {
-    if (!selectPointerInteractionRef.current) return;
-    selectPointerInteractionRef.current = false;
-    releaseControlFocus(control);
-  };
   return (
     <section id="performance" className="rxs-performance rxs-section">
       <header className="rxs-section-heading rxs-reveal" data-exi-hit="">
@@ -339,30 +328,27 @@ const ExtremePerformance = memo(function ExtremePerformance() {
         data-exi-hit=""
         data-exi-rekey=""
       >
-        <label className="rxs-comparison-selector">
-          <span>比較する相手</span>
-          <select
-            value={baseline}
-            aria-label="エクスプリームの比較対象"
-            onPointerDown={() => {
-              selectPointerInteractionRef.current = true;
-            }}
-            onKeyDown={() => {
-              selectPointerInteractionRef.current = false;
-            }}
-            onBlur={() => {
-              selectPointerInteractionRef.current = false;
-            }}
-            onChange={(event) => {
-              const control = event.currentTarget;
-              setBaseline(control.value as ExtremeBaseline);
-              releaseSelectFocusAfterPointerChange(control);
-            }}
-          >
-            <option value="diluculum">ディルクルムサーガ</option>
-            <option value="vinculum">ヴィンクルムサーガ</option>
-          </select>
-        </label>
+        <div className="rxs-comparison-selector">
+          <span id="exs-opponent-label" className="exs-opponent-label">
+            比較する相手
+          </span>
+          <div className="exs-opponent-options" role="group" aria-labelledby="exs-opponent-label">
+            {(Object.keys(COMPARISONS) as ExtremeBaseline[]).map((key) => (
+              <button
+                key={key}
+                type="button"
+                aria-pressed={baseline === key}
+                onClick={() => setBaseline(key)}
+              >
+                <span>{COMPARISONS[key].label}サーガ</span>
+                <small>{COMPARISONS[key].code}</small>
+              </button>
+            ))}
+          </div>
+        </div>
+        <p className="exs-sr-only" role="status">
+          {activeComparison.label}を基準に比較しています。
+        </p>
         <p className="rxs-comparison-formula">
           比較基準：<b>{activeComparison.label}＝100%</b>
         </p>
@@ -379,13 +365,7 @@ const ExtremePerformance = memo(function ExtremePerformance() {
             {activeComparison.label}
           </span>
         </div>
-        <div
-          key={baseline}
-          className="rxs-comparison-metrics"
-          data-baseline={baseline}
-          aria-live="polite"
-          aria-atomic="true"
-        >
+        <div key={baseline} className="rxs-comparison-metrics" data-baseline={baseline}>
           {/* Each metric is a clash: Extreme's bar from the left, the
               challenger's from the right, meeting at their share. */}
           {activeComparison.metrics.map((metric) => (
@@ -429,40 +409,46 @@ const ExtremePerformance = memo(function ExtremePerformance() {
           ))}
         </div>
 
-        <section
-          key={`${baseline}-processing`}
-          className="rxs-processing-comparison"
-          aria-label={`${activeComparison.label}とエクスプリームの構成比較`}
-        >
-          <header>
-            <small>CATALOG / PROCESSING ARCHITECTURE</small>
-            <h3>同じ指標だけを、倍率へ。</h3>
-          </header>
-          <div>
-            <section>
-              <h4>{activeComparison.label}</h4>
-              <ul>
-                {activeComparison.baselineSpecs.map((line) => (
-                  <li key={line}>{line}</li>
-                ))}
-              </ul>
-            </section>
-            <section>
-              <h4>エクスプリーム</h4>
-              <ul>
-                {activeComparison.extremeSpecs.map((line) => (
-                  <li key={line}>{line}</li>
-                ))}
-              </ul>
-            </section>
-          </div>
-          <p>{activeComparison.verdict}</p>
-          <ul className="exs-unavailable">
-            {activeComparison.unavailable.map((line) => (
-              <li key={line}>{line}</li>
-            ))}
-          </ul>
-        </section>
+        <details className="exs-catalog-details">
+          <summary>
+            <span>構成と比較条件</span>
+            <small>演算系統・推定値・未公表の項目</small>
+          </summary>
+          <section
+            key={`${baseline}-processing`}
+            className="rxs-processing-comparison"
+            aria-label={`${activeComparison.label}とエクスプリームの構成比較`}
+          >
+            <header>
+              <small>CATALOG / PROCESSING ARCHITECTURE</small>
+              <h3>同じ指標だけを、倍率へ。</h3>
+            </header>
+            <div>
+              <section>
+                <h4>{activeComparison.label}</h4>
+                <ul>
+                  {activeComparison.baselineSpecs.map((line) => (
+                    <li key={line}>{line}</li>
+                  ))}
+                </ul>
+              </section>
+              <section>
+                <h4>エクスプリーム</h4>
+                <ul>
+                  {activeComparison.extremeSpecs.map((line) => (
+                    <li key={line}>{line}</li>
+                  ))}
+                </ul>
+              </section>
+            </div>
+            <p>{activeComparison.verdict}</p>
+            <ul className="exs-unavailable">
+              {activeComparison.unavailable.map((line) => (
+                <li key={line}>{line}</li>
+              ))}
+            </ul>
+          </section>
+        </details>
       </div>
       <p className="rxs-comparison-note rxs-reveal">
         主表示は選択形態を100%としたエクスプリームの性能比です。走力は100m所要時間の逆数から速度性能を換算しています。「est.」は推定値を示し、YOPSとTOPS、異なる演算系統、公開値不詳の項目は一つの倍率へ合算していません。
@@ -479,12 +465,15 @@ export function ExtremeSaga() {
   // yet: the cut (styles-extreme-overdrive.css) never plays at first paint.
   const [shownStage, setShownStage] = useState<ExtremeStage>("middle");
   const [stageCut, setStageCut] = useState(false);
+  const [stagePending, setStagePending] = useState(false);
+  const [stageError, setStageError] = useState("");
   const [motionReady, setMotionReady] = useState(false);
   const pageRef = useRef<HTMLElement | null>(null);
   const stageTabsRef = useRef<HTMLDivElement | null>(null);
-  const lastCutRef = useRef(Number.NEGATIVE_INFINITY);
+  const stageSelectionRef = useRef<ReturnType<typeof createExtremeStageSelection> | null>(null);
+  const displayedStageRef = useRef<ExtremeStage>("middle");
 
-  const activeStage = EXTREME_STAGES[stage];
+  const activeStage = EXTREME_STAGES[shownStage];
   const shownArt = EXTREME_STAGES[shownStage];
 
   useEffect(() => mountExtremeNavReserve(pageRef.current), []);
@@ -493,24 +482,38 @@ export function ExtremeSaga() {
   useEffect(() => mountExtremeImpact(pageRef.current), []);
   useEffect(() => mountExtremeFightCard(pageRef.current), []);
 
-  // A change of form cuts the art in before the next paint, unless the last
-  // cut was under STAGE_CUT_GAP_MS ago; then it waits, and a reader who has
-  // flicked back to the shown form in the meantime sees no cut at all.
-  useLayoutEffect(() => {
-    if (shownStage === stage) return;
-    const cut = () => {
-      lastCutRef.current = performance.now();
-      setStageCut(true);
-      setShownStage(stage);
+  useEffect(() => {
+    const selection = createExtremeStageSelection({
+      initialStage: "middle",
+      resolveImage: (next: ExtremeStage) => EXTREME_STAGES[next].image,
+      onDisplay: (next: ExtremeStage) => {
+        displayedStageRef.current = next;
+        setShownStage(next);
+        setStageCut(true);
+      },
+      onPending: setStagePending,
+      onError: (message: string) => {
+        setStageError(message);
+        if (message) setStage(displayedStageRef.current);
+      },
+    });
+    stageSelectionRef.current = selection;
+    return () => {
+      stageSelectionRef.current = null;
+      selection.dispose();
     };
-    const wait = lastCutRef.current + STAGE_CUT_GAP_MS - performance.now();
-    if (wait <= 0) {
-      cut();
-      return;
-    }
-    const timer = window.setTimeout(cut, wait);
-    return () => window.clearTimeout(timer);
-  }, [stage, shownStage]);
+  }, []);
+
+  const selectStage = useCallback((next: ExtremeStage) => {
+    setStage(next);
+    stageSelectionRef.current?.select(next);
+  }, []);
+
+  // An image failure rolls the selected tab back after the rail's own
+  // interaction. Re-read the committed ARIA state before its next input.
+  useLayoutEffect(() => {
+    stageTabsRef.current?.dispatchEvent(new Event("liquidrelayout"));
+  }, [stage]);
 
   useEffect(() => {
     const rail = stageTabsRef.current;
@@ -519,7 +522,7 @@ export function ExtremeSaga() {
     const onSelect = (event: Event) => {
       const index = (event as CustomEvent<{ index?: number }>).detail?.index;
       const nextStage = typeof index === "number" ? stages[index] : undefined;
-      if (nextStage) setStage(nextStage);
+      if (nextStage) selectStage(nextStage);
     };
     rail.addEventListener("railselect", onSelect);
     const dispose = initRail(rail);
@@ -527,7 +530,7 @@ export function ExtremeSaga() {
       rail.removeEventListener("railselect", onSelect);
       dispose?.();
     };
-  }, []);
+  }, [selectStage]);
 
   useEffect(() => {
     const page = pageRef.current;
@@ -586,10 +589,18 @@ export function ExtremeSaga() {
             </b>
           </GuardedLink>
           <nav aria-label="エクスプリームサーガ ページ内ナビゲーション">
-            <a href="#performance">比較</a>
-            <a href="#p14">P14</a>
-            <a href="#stages">形態</a>
-            <a href="#system">システム</a>
+            <a href="#performance">
+              <span aria-hidden="true">01</span> 比較
+            </a>
+            <a href="#p14">
+              <span aria-hidden="true">02</span> P14
+            </a>
+            <a href="#stages">
+              <span aria-hidden="true">03</span> 形態
+            </a>
+            <a href="#system">
+              <span aria-hidden="true">04</span> システム
+            </a>
           </nav>
           <SideMenuTrigger
             className="rxs-menu-trigger"
@@ -637,7 +648,19 @@ export function ExtremeSaga() {
               <span>長引くほど、こっちのもの。</span>
             </span>
           </p>
+          <div className="exs-hero-actions">
+            <a href="#stages">
+              二つの形態を見る <span aria-hidden="true">↗</span>
+            </a>
+            <a href="#performance">
+              性能を比較する <span aria-hidden="true">↓</span>
+            </a>
+          </div>
         </div>
+        <p className="exs-hero-caption">
+          <span>MIDDLE / STANDARD</span>
+          <span>仮面ライダーエクスプリームサーガ</span>
+        </p>
         <div className="rxs-hero-visual" aria-hidden="true">
           <span className="rxs-orbit rxs-orbit-a" />
           <span className="rxs-orbit rxs-orbit-b" />
@@ -671,19 +694,28 @@ export function ExtremeSaga() {
       </section>
 
       <nav className="rxs-chapter-index exs-chapter-index" aria-label="エクスプリームの見どころ">
+        <a href="#performance">
+          <small>PERFORMANCE</small>
+          <span>性能を比べる</span>
+          <em>打撃・跳躍・走力</em>
+          <i aria-hidden="true">↗</i>
+        </a>
         <a href="#p14">
           <small>P14</small>
           <span>演算コア</span>
+          <em>可能性から、勝利へ</em>
           <i aria-hidden="true">↗</i>
         </a>
         <a href="#stages">
           <small>2 STAGES</small>
           <span>二つの形態</span>
+          <em>ミドルとウルトラ</em>
           <i aria-hidden="true">↗</i>
         </a>
         <a href="#system">
           <small>SYSTEM</small>
           <span>中核システム</span>
+          <em>学習・充填・結果固定</em>
           <i aria-hidden="true">↗</i>
         </a>
       </nav>
@@ -761,6 +793,19 @@ export function ExtremeSaga() {
           </div>
         </div>
 
+        <div className="exs-core-flow" aria-label="P14の処理の流れ">
+          <span>
+            <small>INPUT</small>戦況を学習
+          </span>
+          <i aria-hidden="true">→</i>
+          <span>
+            <small>EXPANSION</small>勝利経路を生成
+          </span>
+          <i aria-hidden="true">→</i>
+          <span>
+            <small>FIXATION</small>結果へ収束
+          </span>
+        </div>
         <div className="exs-p14-comparison rxs-reveal">
           <article>
             <small>P14 / EXPANSION</small>
@@ -818,7 +863,7 @@ export function ExtremeSaga() {
                 tabIndex={stage === key ? 0 : -1}
                 className={stage === key ? "is-active" : ""}
                 style={{ ["--liquid-accent" as string]: EXTREME_STAGES[key].accent }}
-                onClick={() => setStage(key)}
+                onClick={() => selectStage(key)}
                 onPointerUp={(event) => releaseControlFocus(event.currentTarget)}
               >
                 <span>{EXTREME_STAGES[key].label}</span>
@@ -829,13 +874,19 @@ export function ExtremeSaga() {
           <p id="exs-stage-hint" className="rxs-stage-hint">
             タップ・長押し・左右スライド・矢印キーで切り替え
           </p>
+          <p className="exs-stage-status" role="status">
+            {stageError ||
+              (stagePending
+                ? `${EXTREME_STAGES[stage].label}を準備中…`
+                : `${activeStage.label}を表示中`)}
+          </p>
 
           <div
             id="exs-stage-panel"
             className="rxs-stage-panel"
             role="tabpanel"
-            aria-labelledby={`exs-stage-tab-${stage}`}
-            aria-live="polite"
+            aria-labelledby={`exs-stage-tab-${shownStage}`}
+            aria-busy={stagePending}
             data-exo-cut={stageCut ? "true" : undefined}
             data-exi-warm={`${EXTREME_STAGES.middle.image} ${EXTREME_STAGES.ultra.image}`}
             data-exi-hit=""
@@ -878,7 +929,7 @@ export function ExtremeSaga() {
                 </svg>
               </i>
             </figure>
-            <div key={`${stage}-copy`}>
+            <div key={`${shownStage}-copy`}>
               <small>{activeStage.code}</small>
               {/* Two lines at every width, broken after the 、, so a change
                   of form never moves the figure under the title. */}
@@ -891,6 +942,16 @@ export function ExtremeSaga() {
                 </span>
               </h3>
               <p>{activeStage.lede}</p>
+              <dl className="exs-form-facts">
+                <div>
+                  <dt>運用</dt>
+                  <dd>{shownStage === "middle" ? "標準状態" : "50秒間"}</dd>
+                </div>
+                <div>
+                  <dt>決着への道筋</dt>
+                  <dd>{shownStage === "middle" ? "勝利経路を増殖" : "一つの結果へ固定"}</dd>
+                </div>
+              </dl>
               <ul>
                 {activeStage.points.map((point) => (
                   <li key={point}>{point}</li>

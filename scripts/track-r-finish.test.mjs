@@ -171,7 +171,7 @@ test("the components carry the vetted copy shape: lede sentences, keyboard hint,
     );
     assert.match(source, /タップ・長押し・左右スライド・矢印キーで切り替え/);
     assert.doesNotMatch(source, /iOS標準選択/);
-    assert.match(source, /<span>比較する相手<\/span>/);
+    assert.match(source, /<span(?:\s[^>]*)?>\s*比較する相手\s*<\/span>/);
   }
   // A stage title's zero-width marker renders as <wbr />, never as text. The
   // rx2 Ultra title (rx2/COPY2.md C5) breaks at its 、 and needs no marker.

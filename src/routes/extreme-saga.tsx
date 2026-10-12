@@ -18,6 +18,7 @@ import stageSpecialCssUrl from "@/styles-stage-special.css?url";
 import stageExtremeCssUrl from "@/styles-stage-extreme.css?url";
 import extremeImpactCssUrl from "@/styles-extreme-impact.css?url";
 import extremeFightCardCssUrl from "@/styles-extreme-fightcard.css?url";
+import extremeEditorialCssUrl from "@/styles-extreme-editorial.css?url";
 
 export const Route = createFileRoute("/extreme-saga")({
   validateSearch: validateInquirySearch,
@@ -56,6 +57,7 @@ export const Route = createFileRoute("/extreme-saga")({
       { rel: "stylesheet", href: extremeImpactCssUrl },
       // FIGHT CARD (rx15): the bout plates, the tale of the tape, the duel.
       { rel: "stylesheet", href: extremeFightCardCssUrl },
+      { rel: "stylesheet", href: extremeEditorialCssUrl },
       CINEMATIC_STYLESHEET_LINK,
       {
         rel: "preload",

@@ -480,6 +480,15 @@ class Node {
     this.children.push(child);
     return child;
   }
+  remove() {
+    if (!this.parentElement) return;
+    const siblings = this.parentElement.children;
+    siblings.splice(siblings.indexOf(this), 1);
+    this.parentElement = null;
+  }
+  contains(node) {
+    return this === node || [...this.descendants()].includes(node);
+  }
   set textContent(value) {
     this.text = value;
   }
@@ -556,6 +565,17 @@ class Node {
 }
 
 const h = (tag, attributes, ...children) => new Node(tag, attributes, children);
+const tallyRow = () =>
+  h(
+    "article",
+    {},
+    h(
+      "b",
+      { class: "exi-figure" },
+      h("b", { class: "exi-real" }),
+      h("b", { class: "exi-tally", "data-exi-tally": "170.2%" }),
+    ),
+  );
 
 function setup({ reduced = false, fine = true, loading = false, saveData = false } = {}) {
   const frames = new Map();
@@ -793,7 +813,11 @@ test("a chained hit follows the one before it once, by its own delay, and never 
   offscreen.time.getBoundingClientRect = () => ({ top: 900, bottom: 1100 });
   offscreen.reach(offscreen.punch);
   offscreen.tick(380);
-  assert.equal(offscreen.time.getAttribute("data-exi-hit"), "", "the phone's second hit waits until it is visible");
+  assert.equal(
+    offscreen.time.getAttribute("data-exi-hit"),
+    "",
+    "the phone's second hit waits until it is visible",
+  );
   offscreen.reach(offscreen.time);
   assert.equal(offscreen.time.getAttribute("data-exi-hit"), "true");
   cleanupOffscreen();
@@ -881,14 +905,118 @@ test("rows re-keyed into a reached comparator replay their tallies; a waiting on
   cleanup();
 });
 
+test("replacing comparison rows immediately releases waiting and active tally copies", () => {
+  const t = setup({ fine: false });
+  const cleanup = t.mount();
+  t.tick(BEATS.arrival);
+  const retired = [];
+  for (let index = 0; index < 50; index += 1) {
+    const row = t.comparison.append(tallyRow());
+    const figure = row.querySelector(".exi-figure");
+    const copy = row.querySelector(".exi-tally");
+    t.mutate(t.comparison, [{ addedNodes: [row] }]);
+    assert.equal(figure.getAttribute("data-exi-waiting"), "true");
+    row.remove();
+    t.mutate(t.comparison, [{ addedNodes: [], removedNodes: [row] }]);
+    assert.equal(figure.hasAttribute("data-exi-waiting"), false);
+    assert.equal(copy.textContent, "");
+    copy.textContent = "released";
+    retired.push(copy);
+  }
+  t.reach(t.comparison);
+  t.tick(BEATS.hit);
+  const active = t.comparison.append(tallyRow());
+  t.mutate(t.comparison, [{ addedNodes: [active] }]);
+  const figure = active.querySelector(".exi-figure");
+  const copy = active.querySelector(".exi-tally");
+  assert.equal(t.frames.size, 1);
+  assert.equal(figure.getAttribute("data-exi-counting"), "true");
+  active.remove();
+  t.mutate(t.comparison, [{ removedNodes: [active], addedNodes: [] }]);
+  assert.equal(t.frames.size, 0, "the last removed tally releases its scheduled frame");
+  assert.equal(figure.hasAttribute("data-exi-counting"), false);
+  assert.equal(copy.textContent, "");
+  assert.equal(t.timers.size, 0);
+  copy.textContent = "released";
+  retired.push(copy);
+  cleanup();
+  for (const item of retired)
+    assert.equal(item.textContent, "released", "no waiting tally retained until unmount");
+});
+
+test("removal retires landed tally timers and observed hits, including stale intersections", () => {
+  const t = setup({ fine: false });
+  const row = t.comparison.append(tallyRow());
+  row.setAttribute("data-exi-hit", "");
+  const cleanup = t.mount();
+  t.tick(BEATS.arrival);
+  const observer = t.live((item) => item.targets.has(row))[0];
+  assert.ok(observer);
+  row.remove();
+  t.mutate(t.comparison, [{ removedNodes: [row], addedNodes: [] }]);
+  assert.equal(observer.targets.has(row), false);
+  observer.callback([{ target: row, isIntersecting: true }], observer);
+  assert.equal(row.getAttribute("data-exi-hit"), "");
+  assert.equal(t.frames.size, 0);
+  t.reach(t.comparison);
+  t.tick(BEATS.hit);
+  const landed = t.comparison.append(tallyRow());
+  t.mutate(t.comparison, [{ addedNodes: [landed] }]);
+  t.tick(900);
+  t.flush();
+  const figure = landed.querySelector(".exi-figure");
+  assert.equal(figure.getAttribute("data-exi-landed"), "true");
+  assert.equal(t.timers.size, 1);
+  landed.remove();
+  t.mutate(t.comparison, [{ removedNodes: [landed], addedNodes: [] }]);
+  assert.equal(t.timers.size, 0);
+  assert.equal(figure.getAttribute("data-exi-landed"), "done");
+  cleanup();
+});
+
+test("a re-key batch ignores intermediate rows that are already removed", () => {
+  const t = setup();
+  const cleanup = t.mount();
+  const intermediate = tallyRow();
+  const final = t.comparison.append(tallyRow());
+  t.mutate(t.comparison, [
+    { addedNodes: [intermediate], removedNodes: [] },
+    { addedNodes: [final], removedNodes: [intermediate] },
+  ]);
+  assert.equal(intermediate.querySelector(".exi-figure").hasAttribute("data-exi-waiting"), false);
+  assert.equal(final.querySelector(".exi-figure").getAttribute("data-exi-waiting"), "true");
+  cleanup();
+});
+
+test("a hit moved within the page keeps its pending observer and tally", () => {
+  const t = setup({ fine: false });
+  const row = t.comparison.append(tallyRow());
+  row.setAttribute("data-exi-hit", "");
+  const cleanup = t.mount();
+  const observer = t.live((item) => item.targets.has(row))[0];
+  row.remove();
+  t.comparison.append(row);
+  t.mutate(t.comparison, [
+    { removedNodes: [row], addedNodes: [] },
+    { removedNodes: [], addedNodes: [row] },
+  ]);
+  assert.equal(observer.targets.has(row), true);
+  assert.equal(row.querySelector(".exi-figure").getAttribute("data-exi-waiting"), "true");
+  t.reach(row);
+  assert.equal(row.querySelector(".exi-figure").getAttribute("data-exi-counting"), "true");
+  cleanup();
+});
+
 test("a change of form keys the new figure only after a reader's cut, and the rail pops", () => {
   const t = setup();
   const cleanup = t.mount();
   const first = h("figure", { "data-form": "ultra" });
+  t.panel.append(first);
   t.mutate(t.panel, [{ addedNodes: [first] }]);
   assert.equal(first.hasAttribute("data-exi-impact"), false, "no impact without data-exo-cut");
   t.panel.setAttribute("data-exo-cut", "true");
   const cut = h("figure", { "data-form": "ultra" });
+  t.panel.append(cut);
   t.mutate(t.panel, [{ addedNodes: [cut] }]);
   assert.equal(cut.getAttribute("data-exi-impact"), "true");
   t.tick(BEATS.impact);
@@ -899,6 +1027,22 @@ test("a change of form keys the new figure only after a reader's cut, and the ra
   assert.equal(t.rail.getAttribute("data-exi-pop"), "done");
   // The component's own timing is untouched: the engine never writes data-stage or the cut flag.
   assert.equal(t.rail.getAttribute("data-stage"), "middle");
+  cleanup();
+});
+
+test("replaced form figures release their impact timers, even when a cut is no longer active", () => {
+  const t = setup({ fine: false });
+  const cleanup = t.mount();
+  t.tick(BEATS.arrival);
+  t.panel.setAttribute("data-exo-cut", "true");
+  const figure = t.panel.append(h("figure", { "data-form": "ultra" }));
+  t.mutate(t.panel, [{ addedNodes: [figure] }]);
+  assert.equal(t.timers.size, 1);
+  t.panel.removeAttribute("data-exo-cut");
+  figure.remove();
+  t.mutate(t.panel, [{ removedNodes: [figure], addedNodes: [] }]);
+  assert.equal(t.timers.size, 0);
+  assert.equal(figure.getAttribute("data-exi-impact"), "done");
   cleanup();
 });
 
@@ -1029,7 +1173,106 @@ test("the forms' art is warmed once when the stage comes near", async () => {
     ["/a.webp", "/b.jpeg"],
   );
   assert.equal(warm.disconnected, true);
+  warm.callback([{ target: t.panel, isIntersecting: true }], warm);
+  t.connection.emit("change");
+  assert.equal(t.images.length, 2, "queued deliveries and policy updates never warm twice");
   cleanup();
+});
+
+test("art warm-up pauses and re-arms for network, visibility, loading and bfcache gates", () => {
+  const gates = [
+    {
+      name: "Save-Data",
+      set: (t, blocked) => {
+        t.connection.saveData = blocked;
+      },
+      emit: (t) => t.connection.emit("change"),
+    },
+    {
+      name: "2g",
+      set: (t, blocked) => {
+        t.connection.effectiveType = blocked ? "2g" : "4g";
+      },
+      emit: (t) => t.connection.emit("change"),
+    },
+    {
+      name: "hidden",
+      set: (t, blocked) => {
+        t.document.hidden = blocked;
+      },
+      emit: (t) => t.document.emit("visibilitychange"),
+    },
+    {
+      name: "loading",
+      set: (t, blocked) =>
+        blocked
+          ? t.htmlElement.setAttribute("data-loading", "")
+          : t.htmlElement.removeAttribute("data-loading"),
+      emit: (t) => t.mutate(t.htmlElement, []),
+    },
+    {
+      name: "bfcache",
+      set: (t, blocked) => t.environment.emit(blocked ? "pagehide" : "pageshow"),
+      emit: (t) => t.connection.emit("change"),
+    },
+  ];
+  for (const gate of gates) {
+    const t = setup();
+    const cleanup = t.mount();
+    const warm = () => t.live((item) => item.options?.rootMargin === "150% 0px 150% 0px")[0];
+    const first = warm();
+    gate.set(t, true);
+    // Deliver before the preference event too: callback-time policy matters.
+    first.callback([{ target: t.panel, isIntersecting: true }], first);
+    gate.emit(t);
+    assert.equal(first.disconnected, true, gate.name);
+    assert.equal(warm(), undefined, gate.name);
+    assert.equal(t.images.length, 0, gate.name);
+    gate.set(t, false);
+    gate.emit(t);
+    const resumed = warm();
+    assert.ok(resumed && resumed !== first, gate.name);
+    first.callback([{ target: t.panel, isIntersecting: true }], first);
+    assert.equal(t.images.length, 0, `${gate.name}: old callback stays cancelled after resume`);
+    resumed.callback([{ target: t.panel, isIntersecting: true }], resumed);
+    assert.equal(t.images.length, 2, gate.name);
+    cleanup();
+  }
+});
+
+test("art does not arm behind initial gates, remains content under reduced motion, and cannot start after unmount", () => {
+  for (const gate of ["loading", "hidden", "Save-Data"]) {
+    const t = setup({ loading: gate === "loading", saveData: gate === "Save-Data" });
+    t.document.hidden = gate === "hidden";
+    const cleanup = t.mount();
+    assert.equal(
+      t.live((item) => item.options?.rootMargin === "150% 0px 150% 0px").length,
+      0,
+      gate,
+    );
+    cleanup();
+  }
+  for (const preference of ["reduced", "economy"]) {
+    const t = setup({ reduced: preference === "reduced" });
+    if (preference === "economy") t.htmlElement.dataset.worldEffects = "economy";
+    const cleanup = t.mount();
+    const warm = t.live((item) => item.options?.rootMargin === "150% 0px 150% 0px")[0];
+    assert.ok(warm, "art is content rather than optional motion");
+    warm.callback([{ target: t.panel, isIntersecting: true }], warm);
+    assert.equal(t.images.length, 2);
+    cleanup();
+  }
+  const t = setup();
+  const cleanup = t.mount();
+  const warm = t.live((item) => item.options?.rootMargin === "150% 0px 150% 0px")[0];
+  const watcher = t.watchers.find((item) => item.target === t.comparison);
+  cleanup();
+  warm.callback([{ target: t.panel, isIntersecting: true }], warm);
+  const row = t.comparison.append(tallyRow());
+  watcher.callback([{ addedNodes: [row] }]);
+  assert.equal(t.images.length, 0);
+  assert.equal(t.frames.size, 0);
+  assert.equal(row.querySelector(".exi-figure").hasAttribute("data-exi-waiting"), false);
 });
 
 test("unmount releases every listener, observer, frame and timer, and its own attributes", () => {
