@@ -1,3 +1,5 @@
+import { parseDreamReaderHash } from "./dream-reader-state.js";
+
 /** Open a chapter before native fragment scrolling measures its position.
  * History and scrolling stay with the browser and the existing route guards. */
 export function mountDreamChapterNavigation(root, onChange, environment = window) {
@@ -21,9 +23,17 @@ export function mountDreamChapterNavigation(root, onChange, environment = window
   };
   const readTarget = (hash) => {
     const match = /^#dream-(?:case|case-note|chronicle-case)-([0-5])$/.exec(hash);
-    if (!match && hash !== "#dream-chapter-index") return null;
+    const paragraph = parseDreamReaderHash(hash);
+    if (!match && !paragraph && hash !== "#dream-chapter-index") return null;
     const target = root.ownerDocument.getElementById(hash.slice(1));
-    return target && root.contains(target) ? { target, no: match?.[1] ?? null } : null;
+    if (!target || !root.contains(target)) return null;
+    if (
+      paragraph &&
+      (!target.matches("[data-dream-reading-paragraph]") ||
+        target.closest(".dream-story-case")?.dataset.caseNo !== paragraph.caseNo)
+    )
+      return null;
+    return { target, no: match?.[1] ?? paragraph?.caseNo ?? null };
   };
   const sync = (hash = environment.location.hash, openTarget = true) => {
     syncedHash = hash;

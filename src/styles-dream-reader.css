@@ -1,5 +1,146 @@
 /* Six chapters form one reading route. All controls stay in the document;
    the fixed act navigation keeps its existing height and native page panning. */
+.dream-page.dream-page .dream-reader-support {
+  margin: 0 0 24px;
+  padding: clamp(14px, 2vw, 22px);
+  border: 1px solid rgb(200 164 92 / 38%);
+  background: #19111f;
+  color: var(--ts-kinari);
+  font-family: var(--ts-text);
+}
+.dream-page.dream-page .dream-reader-support-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin-bottom: 16px;
+}
+.dream-page.dream-page .dream-reader-support-heading p {
+  margin: 0;
+  font-family: var(--ts-display);
+  font-size: 18px;
+}
+.dream-page.dream-page .dream-reader-support-heading > span,
+.dream-page.dream-page .dream-reader-bookmark small {
+  color: #cbbfba;
+  font-size: 12px;
+}
+.dream-page.dream-page .dream-reader-settings {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.dream-page.dream-page .dream-reader-settings fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.dream-page.dream-page .dream-reader-settings legend {
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+.dream-page.dream-page .dream-reader-settings fieldset > div {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+.dream-page.dream-page .dream-reader-support :is(button, a) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid rgb(200 164 92 / 40%);
+  border-radius: 0;
+  color: var(--ts-kinari);
+  background: transparent;
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.5;
+  text-align: center;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+.dream-page.dream-page .dream-reader-support button[aria-pressed="true"] {
+  border-color: var(--ts-kin);
+  background: #33202b;
+  box-shadow: inset 0 -2px #c8a45c;
+}
+.dream-page.dream-page .dream-reader-bookmark {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid rgb(200 164 92 / 25%);
+}
+.dream-page.dream-page .dream-reader-bookmark p {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 12px;
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.75;
+}
+.dream-page.dream-page .dream-reader-bookmark .dream-reader-bookmark-empty {
+  color: #cbbfba;
+  font-size: 14px;
+}
+.dream-page.dream-page .dream-reader-bookmark-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+.dream-page.dream-page .dream-reader-bookmark-actions a {
+  border-color: var(--ts-kin);
+}
+.dream-page.dream-page .dream-reader-storage-note {
+  margin: 12px 0 0;
+  color: #cbbfba;
+  font-size: 13px;
+  line-height: 1.75;
+}
+.dream-page.dream-page
+  .dream-reader[data-dream-reader-size="large"]
+  .dream-story-case-body
+  > [data-dream-reading-paragraph] {
+  font-size: 19px;
+}
+.dream-page.dream-page
+  .dream-reader[data-dream-reader-spacing="comfortable"]
+  .dream-story-case-body
+  > [data-dream-reading-paragraph] {
+  line-height: 2.3;
+  margin-block: 1.4em;
+}
+.dream-page.dream-page [data-dream-reading-paragraph] {
+  scroll-margin-top: calc(var(--dream-nav-offset, 160px) + 20px);
+}
+.dream-page.dream-page .dream-reader-support :is(button, a):focus-visible,
+.dream-page.dream-page [data-dream-reading-paragraph]:focus-visible {
+  outline: 2px solid var(--ts-fuji);
+  outline-offset: 4px;
+}
+@media (max-width: 520px), (max-height: 420px) {
+  .dream-page.dream-page .dream-reader-settings {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (forced-colors: active) {
+  .dream-page.dream-page .dream-reader-support,
+  .dream-page.dream-page .dream-reader-support :is(button, a) {
+    color: CanvasText;
+    border-color: CanvasText;
+    background: Canvas;
+    box-shadow: none;
+  }
+  .dream-page.dream-page .dream-reader-support button[aria-pressed="true"] {
+    outline: 2px solid Highlight;
+  }
+}
 .dream-page.dream-page .dream-reader-index {
   margin: 0 0 32px;
   padding: 18px;

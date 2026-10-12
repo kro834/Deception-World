@@ -1,6 +1,112 @@
 import { useLayoutEffect, useRef, useState } from "react";
 import { mountDreamChapterNavigation } from "@/lib/dream-chapter-navigation.js";
+import {
+  DREAM_READER_DEFAULTS,
+  mountDreamReader,
+  type DreamReaderState,
+} from "@/lib/dream-reader-state.js";
 import { DREAM_CASES } from "./dream-chapter-data";
+
+/** Local reading preferences affect only the canonical synopsis paragraphs. */
+export function DreamReaderSupport() {
+  const supportRef = useRef<HTMLDivElement>(null);
+  const controller = useRef<ReturnType<typeof mountDreamReader> | null>(null);
+  const [reader, setReader] = useState<DreamReaderState>({
+    ...DREAM_READER_DEFAULTS,
+    available: true,
+  });
+  useLayoutEffect(() => {
+    const current = mountDreamReader(
+      supportRef.current?.closest<HTMLElement>(".dream-reader") ?? null,
+      DREAM_CASES,
+      setReader,
+    );
+    controller.current = current;
+    return () => {
+      current.dispose();
+      controller.current = null;
+    };
+  }, []);
+  const savedCase = DREAM_CASES.find((episode) => episode.no === reader.bookmark?.caseNo);
+  return (
+    <div ref={supportRef} className="dream-reader-support" aria-label="読書の支度">
+      <div className="dream-reader-support-heading">
+        <p>読書の支度</p>
+        <span>このブラウザーに保存</span>
+      </div>
+      <div className="dream-reader-settings">
+        <fieldset>
+          <legend>文字サイズ</legend>
+          <div>
+            <button
+              type="button"
+              aria-pressed={reader.size === "standard"}
+              onClick={() => controller.current?.setSize("standard")}
+            >
+              標準
+            </button>
+            <button
+              type="button"
+              aria-pressed={reader.size === "large"}
+              onClick={() => controller.current?.setSize("large")}
+            >
+              大きく
+            </button>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>行間</legend>
+          <div>
+            <button
+              type="button"
+              aria-pressed={reader.spacing === "standard"}
+              onClick={() => controller.current?.setSpacing("standard")}
+            >
+              標準
+            </button>
+            <button
+              type="button"
+              aria-pressed={reader.spacing === "comfortable"}
+              onClick={() => controller.current?.setSpacing("comfortable")}
+            >
+              ゆったり
+            </button>
+          </div>
+        </fieldset>
+      </div>
+      <div className="dream-reader-bookmark">
+        {savedCase && reader.bookmark ? (
+          <>
+            <p>
+              <small>しおり</small>
+              <span>
+                CASE {savedCase.no}「{savedCase.title}」
+              </span>
+              <small>{reader.bookmark.paragraph}段落目</small>
+            </p>
+            <div className="dream-reader-bookmark-actions">
+              <a href={`#dream-case-${savedCase.no}-paragraph-${reader.bookmark.paragraph}`}>
+                続きから読む
+              </a>
+              <button type="button" onClick={() => controller.current?.clearBookmark()}>
+                しおりを外す
+              </button>
+            </div>
+          </>
+        ) : (
+          <p className="dream-reader-bookmark-empty">
+            本文を読むと、読んでいる段落にしおりを残します。
+          </p>
+        )}
+      </div>
+      {!reader.available ? (
+        <p className="dream-reader-storage-note" role="status">
+          この環境ではしおりや設定を保存できません。今のページでは調整できます。
+        </p>
+      ) : null}
+    </div>
+  );
+}
 
 /** The six chapters remain independent native folds; the map names one URL location. */
 export function DreamStoryIndex() {
@@ -14,36 +120,39 @@ export function DreamStoryIndex() {
     [],
   );
   return (
-    <nav
-      ref={navRef}
-      id="dream-chapter-index"
-      className="dream-reader-index"
-      aria-label="六章の目次"
-      tabIndex={-1}
-    >
-      <div className="dream-reader-index-head">
-        <p>六章を辿る</p>
-        <span>CASE 0–5</span>
-      </div>
-      <ol>
-        {DREAM_CASES.map((episode) => (
-          <li key={episode.no}>
-            <a
-              href={`#dream-case-${episode.no}`}
-              aria-current={location.current === episode.no ? "location" : undefined}
-            >
-              <span className="dream-reader-index-number">{episode.no}</span>
-              <span>{episode.title}</span>
-              {location.open.includes(episode.no) ? (
-                <small>開いている</small>
-              ) : (
-                <small>あらすじ</small>
-              )}
-            </a>
-          </li>
-        ))}
-      </ol>
-    </nav>
+    <>
+      <DreamReaderSupport />
+      <nav
+        ref={navRef}
+        id="dream-chapter-index"
+        className="dream-reader-index"
+        aria-label="六章の目次"
+        tabIndex={-1}
+      >
+        <div className="dream-reader-index-head">
+          <p>六章を辿る</p>
+          <span>CASE 0–5</span>
+        </div>
+        <ol>
+          {DREAM_CASES.map((episode) => (
+            <li key={episode.no}>
+              <a
+                href={`#dream-case-${episode.no}`}
+                aria-current={location.current === episode.no ? "location" : undefined}
+              >
+                <span className="dream-reader-index-number">{episode.no}</span>
+                <span>{episode.title}</span>
+                {location.open.includes(episode.no) ? (
+                  <small>開いている</small>
+                ) : (
+                  <small>あらすじ</small>
+                )}
+              </a>
+            </li>
+          ))}
+        </ol>
+      </nav>
+    </>
   );
 }
 
