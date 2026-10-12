@@ -431,7 +431,13 @@ export function OpeningHandoffLayer({ snapshot, onCovered, onComplete }: Opening
       };
       // The title's still: it covers in about 0.2 s, the camera plunges into the
       // ring, one amber swell, then the world settles at the page's framing.
-      add(stableRoot, [{ opacity: 0 }, { opacity: 1, offset: at(220 * k) }, { opacity: 1 }]);
+      // A lost GPU already owned the screen. Keep its replacement opaque even
+      // when WebKit delays starting compositor animations after context loss.
+      add(stableRoot, [
+        { opacity: elapsedSeconds > 0 ? 1 : 0 },
+        { opacity: 1, offset: at(220 * k) },
+        { opacity: 1 },
+      ]);
       // The glyphs dim as they grow (the tunnel), so none sweeps a bright edge
       // back and forth across the frame.
       add(logoRef.current, [

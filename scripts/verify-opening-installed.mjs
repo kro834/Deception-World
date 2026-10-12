@@ -71,6 +71,9 @@ for (const engine of engines) {
               return Boolean(extension);
             }),
           );
+          // WEBGL_lose_context dispatches its event asynchronously; sample
+          // the fallback clock only after the application has switched tiers.
+          await page.locator('[data-opening-handoff-tier="css"]').waitFor();
         }
         if (scenario !== "reduced") {
           await page.waitForTimeout(350);

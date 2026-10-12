@@ -34,6 +34,7 @@ test("GPU loss continues the dive rather than resolving the covered route", asyn
     /onFallback: \(elapsed\) => \{\s*tierLabel = "css";\s*startCssDive\(elapsed\)/,
   );
   assert.match(handoff, /animation\.currentTime = elapsed/);
+  assert.match(handoff, /opacity: elapsedSeconds > 0 \? 1 : 0/);
   assert.match(handoff, /end - elapsed \+ 34/);
 });
 
