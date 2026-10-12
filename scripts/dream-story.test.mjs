@@ -36,15 +36,32 @@ test("six chapter cases retain their titles and distinct substantive summaries",
   assert.doesNotMatch(finalCase, /元の現実(?:へ|に)帰還を果た|救出を完了|死者全員が帰還/);
 });
 
-test("the latest revolt scenes remain preparations, not a completed rescue or revival", () => {
+test("the revolt reaches the battle opening without completing rescue or revival", () => {
   const finalCase = DREAM_CASES[5].paragraphs.join("");
-  for (const scene of ["橙", "藍", "小指", "神奈子", "諏訪子", "朝食", "妖夢", "毛布", "狗瓦", "こいし", "指先"]) {
+  for (const scene of [
+    "橙",
+    "藍",
+    "小指",
+    "神奈子",
+    "諏訪子",
+    "朝食",
+    "妖夢",
+    "毛布",
+    "狗瓦",
+    "こいし",
+    "指先",
+  ]) {
     assert.ok(finalCase.includes(scene), scene);
   }
   assert.match(finalCase, /怪作を迎えに行く出発を前に/);
   assert.match(finalCase, /意識の戻らない狗瓦/);
   assert.match(finalCase, /指先が、誰にも気づかれないほどかすかに動いた/);
-  assert.doesNotMatch(finalCase, /花火屋(?:が|は).{0,12}(?:復活|蘇生|生き返)|狗瓦(?:が|は).{0,12}(?:目覚め|意識を取り戻)|奪還(?:に成功|を果た|を完了)/);
+  assert.match(finalCase, /狗瓦が妖夢の手を握り返し、目を開いて彼女の名を呼んだ/);
+  assert.match(finalCase, /最後の決戦が幕を開ける/);
+  assert.doesNotMatch(
+    finalCase,
+    /花火屋(?:が|は).{0,12}(?:復活|蘇生|生き返)|狗瓦(?:が|は).{0,12}(?:全快|戦闘に復帰)|奪還(?:に成功|を果た|を完了)/,
+  );
 });
 
 test("Touhou crossings explain source-specific roles, not invented alliances", () => {

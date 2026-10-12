@@ -13,7 +13,7 @@ const read = (file) => readFileSync(new URL(`../${file}`, import.meta.url), "utf
 const dataSource = read("src/components/dream-chapter/dream-chapter-extra-data.ts");
 
 const LINES = /^\d+(?:-\d+)?(?:,\d+(?:-\d+)?)*$/;
-const MAX_LINE = 58013;
+const MAX_LINES = { legacy: 58013, "2026-10-12": 58405 };
 const HUD = /^[A-Z0-9][A-Z0-9 ·\-–—:'.&/]*$/;
 
 const isPassage = (value) =>
@@ -66,15 +66,15 @@ test("archive corners keep their ids, 目次 rows and English HUD kickers", () =
   for (const label of Object.values(extra.DREAM_ARCHIVE_LABELS)) assert.match(label, HUD);
 });
 
-test("chronicle: forty-four events retain case order and add four pre-rescue scenes", () => {
+test("chronicle: forty-nine events retain case order through the final battle opening", () => {
   const events = extra.DREAM_CHRONICLE;
   assert.deepEqual(
     events.map(({ no }) => no),
-    Array.from({ length: 44 }, (_, i) => i + 1),
+    Array.from({ length: 49 }, (_, i) => i + 1),
   );
   const cases = owner.DREAM_CASES.map(({ no }) => no);
   const perCase = cases.map((no) => events.filter((event) => event.case === no).length);
-  assert.deepEqual(perCase, [7, 7, 8, 8, 6, 8]);
+  assert.deepEqual(perCase, [7, 7, 8, 8, 6, 13]);
   for (let i = 1; i < events.length; i += 1) {
     assert.ok(cases.indexOf(events[i].case) >= cases.indexOf(events[i - 1].case), `event ${i + 1}`);
   }
@@ -87,7 +87,10 @@ test("chronicle: forty-four events retain case order and add four pre-rescue sce
 test("new chronicle passages preserve complete source utterances and physical anchors", () => {
   const [finger, sayo, promise, blanket] = extra.DREAM_CHRONICLE.slice(40);
   assert.equal(finger.lines, "57713");
-  assert.equal(finger.text, "拭われて綺麗になった花火屋の指先が、誰の目にも留まらないほど、かすかに、ぴくりと小さく動いた。");
+  assert.equal(
+    finger.text,
+    "拭われて綺麗になった花火屋の指先が、誰の目にも留まらないほど、かすかに、ぴくりと小さく動いた。",
+  );
   assert.equal(sayo.lines, "57854,57870,57880");
   assert.deepEqual(sayo.segments, [
     { by: "サヨ", text: "「だから……彼を取り戻すまでは、私は死ぬわけにはいかないのよ」" },
@@ -96,12 +99,18 @@ test("new chronicle passages preserve complete source utterances and physical an
   ]);
   assert.equal(promise.lines, "57966,57972");
   assert.deepEqual(promise.segments, [
-    { by: "八坂神奈子", text: "「それなら約束だ。全員で必ず生きて帰ろう。……そして、帰ったらまた一杯やるぞ」" },
+    {
+      by: "八坂神奈子",
+      text: "「それなら約束だ。全員で必ず生きて帰ろう。……そして、帰ったらまた一杯やるぞ」",
+    },
     { by: "洩矢諏訪子", text: "「神様とのゆびきりげんまん、破ったら許さないからね？」" },
   ]);
   assert.equal(blanket.lines, "58003,58009,58012");
   assert.deepEqual(blanket.segments, [
-    { by: "鈴仙・優曇華院・イナバ", text: "「いいえ。永琳様が、風邪を引かないようにって掛けてくれたのよ」" },
+    {
+      by: "鈴仙・優曇華院・イナバ",
+      text: "「いいえ。永琳様が、風邪を引かないようにって掛けてくれたのよ」",
+    },
     { by: "魂魄妖夢", text: "「そうですか……」" },
     { text: "静かに答えた妖夢は、その優しさにギュッと毛布を握り締めた。" },
   ]);
@@ -209,17 +218,17 @@ test("supplements attach only to the owner's existing ids, codes, terms and labe
 
 test("every passage is one text or speaker segments, with global source line refs", () => {
   assert.ok(passages.length > 300);
-  const checkLines = (spec, at) => {
+  const checkLines = (spec, at, revision = "legacy") => {
     assert.match(spec, LINES, at);
     let previous = 0;
     for (const part of spec.split(",")) {
       const [a, b = a] = part.split("-").map(Number);
-      assert.ok(a > previous && b >= a && b <= MAX_LINE, `${at}: ${spec}`);
+      assert.ok(a > previous && b >= a && b <= MAX_LINES[revision], `${at}: ${spec}`);
       previous = b;
     }
   };
   for (const { at, passage } of passages) {
-    checkLines(passage.lines, at);
+    checkLines(passage.lines, at, passage.sourceRevision);
     assert.notEqual(typeof passage.text === "string", Array.isArray(passage.segments), at);
     if (passage.segments) {
       assert.ok(passage.segments.length > 0, at);
@@ -229,7 +238,13 @@ test("every passage is one text or speaker segments, with global source line ref
   }
   walk(extra, "extra", (item, at) => {
     if (item && typeof item === "object" && !Array.isArray(item) && "lines" in item) {
-      checkLines(item.lines, at);
+      const event = at.match(/DREAM_CHRONICLE\[(\d+)\]/);
+      checkLines(
+        item.lines,
+        at,
+        item.sourceRevision ??
+          (event ? extra.DREAM_CHRONICLE[Number(event[1])].sourceRevision : undefined),
+      );
     }
   });
 });
