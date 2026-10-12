@@ -71,6 +71,28 @@ async function landParagraph(page, id) {
   }, id);
 }
 
+async function zeusClearance(page, reading) {
+  await page.waitForFunction((active) => {
+    const button = document.querySelector(".zeus-button");
+    if (!button) return false;
+    const hidden = getComputedStyle(button).visibility === "hidden";
+    return (
+      document.documentElement.hasAttribute("data-dream-reading-active") === active &&
+      hidden === active
+    );
+  }, reading);
+  assert.equal(
+    await page.locator(".dream-back-link").isVisible(),
+    true,
+    "native return stays available",
+  );
+  assert.equal(
+    await page.locator(".dream-site-header .side-panel-trigger").isVisible(),
+    true,
+    "native menu stays available",
+  );
+}
+
 // Place the authored paragraph across the runtime's reading line. The later
 // mouse wheel is a real browser input; a synthetic scroll event cannot pass.
 async function positionParagraph(page, id) {
@@ -109,6 +131,7 @@ try {
     });
     try {
       await ready(page);
+      await zeusClearance(page, false);
       assert.equal(await value(page), null, `${name}: initial visit writes no reading position`);
       await page.locator('.dream-reader-index a[href="#dream-case-5"]').press("Enter");
       await page.waitForURL("**#dream-case-5");
@@ -116,6 +139,7 @@ try {
       const id = "dream-case-5-paragraph-4";
       assert.equal(await page.locator("#dream-case-0 [data-dream-reading-paragraph]").count(), 3);
       await positionParagraph(page, id);
+      await zeusClearance(page, true);
       // Merely arriving by a link or programmatic layout adjustment must not
       // save an earlier paragraph during the fragment jump.
       await page.waitForTimeout(1000);
@@ -140,6 +164,7 @@ try {
       );
       assert.equal(await page.locator("#dream-case-5").getAttribute("open"), null);
       await expectBookmark(page, { caseNo: "5", paragraph: 4 });
+      await zeusClearance(page, false);
       await page.screenshot({ path: `${output}/${name}-plain-revisit.png` });
 
       await page
@@ -148,6 +173,7 @@ try {
       await page.waitForURL(`**#${id}`);
       await landParagraph(page, id);
       await page.waitForFunction((targetId) => document.activeElement?.id === targetId, id);
+      await zeusClearance(page, true);
       assert.equal(
         await page.locator('.dream-reader-index a[aria-current="location"]').getAttribute("href"),
         "#dream-case-5",
@@ -185,6 +211,7 @@ try {
       assert.equal(typography.font, 19);
       assert.ok(Math.abs(typography.line / typography.font - 2.3) < 0.02);
       await expectBookmark(page, { caseNo: "5", paragraph: 4 });
+      await zeusClearance(page, true);
       await page.screenshot({ path: `${output}/${name}-resumed-comfort.png` });
 
       await page.getByRole("button", { name: "しおりを外す", exact: true }).click();
@@ -209,6 +236,10 @@ try {
       await expectBookmark(page, null);
       assert.equal(await page.locator(".dream-reader-bookmark-actions a").count(), 0);
       await geometry(page, name);
+      await page.locator("#dream-case-5 .dream-reader-return").press("Enter");
+      await page.waitForURL("**#dream-chapter-index");
+      await zeusClearance(page, false);
+      await page.screenshot({ path: `${output}/${name}-reader-left.png` });
       assert.deepEqual(errors, []);
       report.checks.push({
         name,
@@ -219,6 +250,8 @@ try {
         comfortGeometry,
         typography,
         clearedSettings: settings,
+        zeusHiddenDuringReading: true,
+        zeusRestoredAfterLeaving: true,
       });
       console.log(
         `${name}: trusted reading, explicit resume, preferences, clear and layout passed`,
@@ -256,6 +289,8 @@ try {
     await page.getByRole("button", { name: "ゆったり", exact: true }).click();
     await page.locator('.dream-reader-index a[href="#dream-case-0"]').press("Enter");
     await page.waitForFunction(() => document.getElementById("dream-case-0").open);
+    await positionParagraph(page, "dream-case-0-paragraph-1");
+    await zeusClearance(page, true);
     const typography = await page.locator("#dream-case-0-paragraph-1").evaluate((paragraph) => {
       const style = getComputedStyle(paragraph);
       return { font: parseFloat(style.fontSize), line: parseFloat(style.lineHeight) };
@@ -272,6 +307,35 @@ try {
     throw error;
   } finally {
     await context.close();
+    activePage = null;
+  }
+  const fallbackContext = await browser.newContext({
+    viewport: { width: 320, height: 640 },
+    reducedMotion: "reduce",
+  });
+  await fallbackContext.addInitScript(() => {
+    Object.defineProperty(window, "IntersectionObserver", { configurable: true, value: undefined });
+  });
+  const fallbackPage = await fallbackContext.newPage();
+  activePage = fallbackPage;
+  const fallbackErrors = [];
+  fallbackPage.on("pageerror", (error) => fallbackErrors.push(error.message));
+  try {
+    await ready(fallbackPage);
+    await fallbackPage.locator('.dream-reader-index a[href="#dream-case-0"]').press("Enter");
+    await fallbackPage.waitForFunction(() => document.getElementById("dream-case-0").open);
+    await positionParagraph(fallbackPage, "dream-case-0-paragraph-1");
+    await zeusClearance(fallbackPage, false);
+    assert.deepEqual(fallbackErrors, []);
+    report.checks.push({ name: "no-intersection-observer320", floatingControlAvailable: true });
+    console.log(
+      "no-intersection-observer320: floating control stays available without a stale reader flag",
+    );
+  } catch (error) {
+    await fallbackPage.screenshot({ path: `${output}/no-observer320-failure.png` }).catch(() => {});
+    throw error;
+  } finally {
+    await fallbackContext.close();
     activePage = null;
   }
   await writeFile(`${output}/report.json`, JSON.stringify(report, null, 2));

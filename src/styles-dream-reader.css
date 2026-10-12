@@ -1,5 +1,11 @@
 /* Six chapters form one reading route. All controls stay in the document;
    the fixed act navigation keeps its existing height and native page panning. */
+@media (max-width: 760px) {
+  html[data-dream-reading-active="true"] body .zeus-button {
+    visibility: hidden;
+    pointer-events: none;
+  }
+}
 .dream-page.dream-page .dream-reader-support {
   margin: 0 0 24px;
   padding: clamp(14px, 2vw, 22px);

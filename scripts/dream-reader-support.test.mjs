@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 import {
   DREAM_READER_STORAGE_KEY,
   mountDreamReader,
+  mountDreamReadingVisibility,
   parseDreamReaderHash,
   validateDreamReaderState,
 } from "../src/lib/dream-reader-state.js";
@@ -16,6 +17,198 @@ const saved = {
   spacing: "comfortable",
   bookmark: { caseNo: "5", paragraph: 4 },
 };
+
+function visibilitySetup({ width = 320, supported = true } = {}) {
+  const attributes = new Map();
+  const rootListeners = new Map();
+  const docListeners = new Map();
+  const windowListeners = new Map();
+  const mediaListeners = new Map();
+  const viewportListeners = new Map();
+  const observers = [];
+  const navObservers = [];
+  let navBottom = 120;
+  const fold = { open: false };
+  const paragraph = { closest: () => fold };
+  const html = {
+    setAttribute: (key, value) => attributes.set(key, value),
+    removeAttribute: (key) => attributes.delete(key),
+  };
+  const document = {
+    documentElement: html,
+    hidden: false,
+    querySelector: () => ({ getBoundingClientRect: () => ({ bottom: navBottom }) }),
+    addEventListener: (key, callback) => docListeners.set(key, callback),
+    removeEventListener: (key) => docListeners.delete(key),
+  };
+  const root = {
+    ownerDocument: document,
+    contains: (node) => node === paragraph,
+    querySelectorAll: () => [paragraph],
+    addEventListener: (key, callback) => rootListeners.set(key, callback),
+    removeEventListener: (key) => rootListeners.delete(key),
+  };
+  const media = {
+    matches: width <= 760,
+    addEventListener: (key, callback) => mediaListeners.set(key, callback),
+    removeEventListener: (key) => mediaListeners.delete(key),
+  };
+  const environment = {
+    innerWidth: width,
+    innerHeight: 640,
+    matchMedia: () => media,
+    addEventListener: (key, callback) => windowListeners.set(key, callback),
+    removeEventListener: (key) => windowListeners.delete(key),
+    visualViewport: {
+      addEventListener: (key, callback) => viewportListeners.set(key, callback),
+      removeEventListener: (key) => viewportListeners.delete(key),
+    },
+    IntersectionObserver: supported
+      ? class {
+          constructor(callback, options) {
+            this.callback = callback;
+            this.options = options;
+            this.observed = [];
+            observers.push(this);
+          }
+          observe(node) {
+            this.observed.push(node);
+          }
+          disconnect() {
+            this.disconnected = true;
+          }
+        }
+      : undefined,
+    ResizeObserver: class {
+      constructor(callback) {
+        this.callback = callback;
+        navObservers.push(this);
+      }
+      observe() {}
+      disconnect() {
+        this.disconnected = true;
+      }
+    },
+  };
+  const emit = (visible, height = 24, observer = observers.at(-1)) =>
+    observer.callback([
+      {
+        target: paragraph,
+        isIntersecting: visible,
+        intersectionRect: { width: 180, height },
+      },
+    ]);
+  return {
+    attributes,
+    root,
+    document,
+    environment,
+    media,
+    fold,
+    paragraph,
+    emit,
+    observers,
+    navObservers,
+    rootListeners,
+    docListeners,
+    windowListeners,
+    mediaListeners,
+    viewportListeners,
+    setNavBottom: (value) => {
+      navBottom = value;
+    },
+  };
+}
+
+test("small-screen Zeus clearance follows real open-paragraph intersections below the fixed act bar", () => {
+  const h = visibilitySetup();
+  const dispose = mountDreamReadingVisibility(h.root, h.environment);
+  assert.equal(h.observers[0].options.rootMargin, "-120px 0px 0px 0px");
+  assert.deepEqual(h.observers[0].observed, [h.paragraph]);
+  assert.equal(h.attributes.size, 0);
+  h.emit(true);
+  assert.equal(h.attributes.size, 0, "a closed fold cannot hide the control");
+  h.fold.open = true;
+  h.rootListeners.get("toggle")({ target: { matches: () => true } });
+  h.emit(true, 0);
+  assert.equal(h.attributes.size, 0, "zero-area intersection is not readable content");
+  h.emit(true);
+  assert.deepEqual([...h.attributes], [["data-dream-reading-active", "true"]]);
+  h.emit(false);
+  assert.equal(h.attributes.size, 0, "leaving the paragraph restores the control immediately");
+  h.emit(true);
+  h.fold.open = false;
+  h.rootListeners.get("toggle")({ target: { matches: () => true } });
+  assert.equal(
+    h.attributes.size,
+    0,
+    "native fold close restores before the next observer delivery",
+  );
+  dispose();
+});
+
+test("Zeus clearance clears on desktop, updates nav clipping and resumes after size changes", () => {
+  const h = visibilitySetup({ width: 1024 });
+  h.fold.open = true;
+  const dispose = mountDreamReadingVisibility(h.root, h.environment);
+  assert.equal(h.observers.length, 0, "wide screens never hide Zeus");
+  h.media.matches = true;
+  h.mediaListeners.get("change")();
+  h.emit(true);
+  assert.equal(h.attributes.size, 1);
+  h.setNavBottom(164);
+  h.navObservers[0].callback();
+  assert.equal(h.observers.at(-1).options.rootMargin, "-164px 0px 0px 0px");
+  h.emit(true);
+  h.media.matches = false;
+  h.mediaListeners.get("change")();
+  assert.equal(h.attributes.size, 0);
+  assert.equal(h.observers.at(-1).disconnected, true);
+  dispose();
+});
+
+test("hidden pages, history departure and route cleanup restore Zeus and reject stale intersections", () => {
+  const h = visibilitySetup();
+  h.fold.open = true;
+  const dispose = mountDreamReadingVisibility(h.root, h.environment);
+  h.emit(true);
+  const old = h.observers[0];
+  h.document.hidden = true;
+  h.docListeners.get("visibilitychange")();
+  h.emit(true, 24, old);
+  assert.equal(h.attributes.size, 0);
+  h.document.hidden = false;
+  h.docListeners.get("visibilitychange")();
+  h.emit(true);
+  assert.equal(h.attributes.size, 1);
+  h.windowListeners.get("pagehide")();
+  assert.equal(h.attributes.size, 0);
+  h.windowListeners.get("pageshow")();
+  h.emit(true);
+  assert.equal(h.attributes.size, 1);
+  dispose();
+  h.emit(true);
+  assert.equal(h.attributes.size, 0);
+  assert.equal(
+    h.rootListeners.size +
+      h.docListeners.size +
+      h.windowListeners.size +
+      h.mediaListeners.size +
+      h.viewportListeners.size,
+    0,
+  );
+  assert.ok(h.observers.every((observer) => observer.disconnected));
+  assert.ok(h.navObservers.every((observer) => observer.disconnected));
+});
+
+test("without IntersectionObserver the floating control stays available and no reader flag survives", () => {
+  const h = visibilitySetup({ supported: false });
+  h.attributes.set("data-dream-reading-active", "true");
+  const dispose = mountDreamReadingVisibility(h.root, h.environment);
+  assert.equal(h.attributes.size, 0);
+  assert.equal(h.windowListeners.size + h.rootListeners.size + h.docListeners.size, 0);
+  dispose();
+});
 
 function setup(value = null, denied = false) {
   const listeners = new Map();

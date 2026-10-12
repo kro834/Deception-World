@@ -23,6 +23,112 @@ export function validateDreamReaderState(value, cases) {
   };
 }
 
+/** The floating control yields only while an open synopsis paragraph is
+ * actually visible below the act bar on a small screen. No scroll polling. */
+export function mountDreamReadingVisibility(root, environment = window) {
+  const document = root?.ownerDocument;
+  const html = document?.documentElement;
+  if (!html) return () => {};
+  const flag = "data-dream-reading-active";
+  html.removeAttribute(flag);
+  if (typeof environment.IntersectionObserver !== "function")
+    return () => html.removeAttribute(flag);
+  const media = environment.matchMedia?.("(max-width: 760px)");
+  const small = () => (media ? media.matches : environment.innerWidth <= 760);
+  const intersections = new Map();
+  let observer = null;
+  let disposed = false;
+  let pageActive = true;
+  let observedTop = -1;
+  let generation = 0;
+  const clear = () => html.removeAttribute(flag);
+  const sync = () => {
+    const visible =
+      !disposed &&
+      pageActive &&
+      !document.hidden &&
+      small() &&
+      [...intersections].some(
+        ([paragraph, intersects]) =>
+          intersects && root.contains(paragraph) && paragraph.closest(".dream-story-case")?.open,
+      );
+    if (visible) html.setAttribute(flag, "true");
+    else clear();
+  };
+  const disconnect = () => {
+    generation += 1;
+    observer?.disconnect();
+    observer = null;
+    intersections.clear();
+    clear();
+  };
+  const nav = document.querySelector(".dream-chapter-nav");
+  const refresh = (force = false) => {
+    if (disposed) return;
+    if (!pageActive || document.hidden || !small()) return disconnect();
+    const top = Math.ceil(Math.max(0, nav?.getBoundingClientRect().bottom || 0));
+    if (top >= environment.innerHeight) return disconnect();
+    if (!force && observer && top === observedTop) return sync();
+    disconnect();
+    observedTop = top;
+    const token = generation;
+    observer = new environment.IntersectionObserver(
+      (entries) => {
+        if (disposed || token !== generation) return;
+        for (const entry of entries)
+          intersections.set(
+            entry.target,
+            entry.isIntersecting &&
+              entry.intersectionRect.width > 0 &&
+              entry.intersectionRect.height > 0,
+          );
+        sync();
+      },
+      { rootMargin: `-${top}px 0px 0px 0px`, threshold: 0 },
+    );
+    for (const paragraph of root.querySelectorAll("[data-dream-reading-paragraph]"))
+      observer.observe(paragraph);
+  };
+  const onToggle = (event) => {
+    if (event.target.matches?.(".dream-story-case")) refresh(true);
+  };
+  const onResize = () => refresh();
+  const onVisibility = () => refresh(true);
+  const onHide = () => {
+    pageActive = false;
+    disconnect();
+  };
+  const onShow = () => {
+    pageActive = true;
+    refresh(true);
+  };
+  const resizeObserver =
+    typeof environment.ResizeObserver === "function"
+      ? new environment.ResizeObserver(onResize)
+      : null;
+  if (nav) resizeObserver?.observe(nav);
+  root.addEventListener("toggle", onToggle, true);
+  document.addEventListener("visibilitychange", onVisibility);
+  environment.addEventListener("resize", onResize);
+  environment.addEventListener("pagehide", onHide);
+  environment.addEventListener("pageshow", onShow);
+  environment.visualViewport?.addEventListener("resize", onResize);
+  media?.addEventListener?.("change", onVisibility);
+  refresh();
+  return () => {
+    disposed = true;
+    disconnect();
+    resizeObserver?.disconnect();
+    root.removeEventListener("toggle", onToggle, true);
+    document.removeEventListener("visibilitychange", onVisibility);
+    environment.removeEventListener("resize", onResize);
+    environment.removeEventListener("pagehide", onHide);
+    environment.removeEventListener("pageshow", onShow);
+    environment.visualViewport?.removeEventListener("resize", onResize);
+    media?.removeEventListener?.("change", onVisibility);
+  };
+}
+
 /** Only a reader's deliberate scroll/open action may update the bookmark.
  * Fragment arrivals and resume jumps never write a position or alter history. */
 export function mountDreamReader(root, cases, onChange, environment = window) {
@@ -139,6 +245,7 @@ export function mountDreamReader(root, cases, onChange, environment = window) {
   apply();
   publish();
   const eventTarget = root?.ownerDocument;
+  const releaseReadingVisibility = mountDreamReadingVisibility(root, environment);
   if (root) {
     eventTarget.addEventListener("click", onClick, true);
     eventTarget.addEventListener("keydown", onIntent, true);
@@ -174,6 +281,7 @@ export function mountDreamReader(root, cases, onChange, environment = window) {
     dispose() {
       disposed = true;
       pause();
+      releaseReadingVisibility();
       if (!root) return;
       eventTarget.removeEventListener("click", onClick, true);
       eventTarget.removeEventListener("keydown", onIntent, true);

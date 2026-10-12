@@ -14,6 +14,10 @@ export interface DreamReaderCase {
 }
 export const DREAM_READER_STORAGE_KEY: string;
 export const DREAM_READER_DEFAULTS: Omit<DreamReaderState, "available">;
+export function mountDreamReadingVisibility(
+  root: HTMLElement | null,
+  environment?: typeof window,
+): () => void;
 export function parseDreamReaderHash(hash: string): DreamReaderBookmark | null;
 export function validateDreamReaderState(
   value: unknown,
