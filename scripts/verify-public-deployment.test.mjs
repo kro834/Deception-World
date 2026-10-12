@@ -74,6 +74,7 @@ test("public verification hashes exhibition, cinema and authored Rexonance asset
     "/saga-cinema-assets/chapter-4.jpg",
     "/saga-cinema-assets/saga-logo-original.webp",
     "/saga-cinema-assets/menu-thumbnail.webp",
+    "/saga-cinema-assets/menu-thumbnail-20261012.webp",
     "/saga-cinema-assets/michroma-latin.woff2",
   ];
   const bytes = new Map(
@@ -124,6 +125,8 @@ test("public verification hashes exhibition, cinema and authored Rexonance asset
     "/exhibition-studio/studio-light.hdr/extra",
     "/exhibition-studio/../secret.png",
     "/saga-cinema-assets/unknown.jpg",
+    "/saga-cinema-assets/menu-thumbnail-20261013.webp",
+    "/saga-cinema-assets/menu-thumbnail-20261012.webp/extra",
     "/saga-cinema-assets/chapter-5.jpg",
     "/saga-cinema-assets/chapter-1.jpg/extra",
     "/saga-cinema-assets/../secret.png",
