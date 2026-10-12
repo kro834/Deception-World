@@ -65,3 +65,47 @@ test("unmount invalidates a pending decode", async () => {
   assert.deepEqual(committed, []);
   assert.deepEqual(statuses, ["loading"]);
 });
+
+test("choosing the displayed picture cancels a pending different picture", async () => {
+  const pending = new Map();
+  const committed = [];
+  const statuses = [];
+  const selection = createScreeningSelection(
+    (index) => new Promise((resolve) => pending.set(index, resolve)),
+    (index) => committed.push(index),
+    (status, index) => statuses.push([status, index]),
+    15,
+  );
+  const initial = selection.select(0);
+  pending.get(0)(true);
+  await initial;
+  const other = selection.select(2);
+  const backToCurrent = selection.select(0);
+  pending.get(0)(true);
+  await backToCurrent;
+  pending.get(2)(true);
+  await other;
+  assert.deepEqual(committed, [0, 0]);
+  assert.deepEqual(statuses.at(-1), ["ready", 0]);
+});
+
+test("reselecting one pending picture makes only the latest request effective", async () => {
+  const pending = [];
+  const committed = [];
+  const statuses = [];
+  const selection = createScreeningSelection(
+    () => new Promise((resolve) => pending.push(resolve)),
+    (index) => committed.push(index),
+    (status, index) => statuses.push([status, index]),
+    15,
+  );
+  const first = selection.select(5);
+  const second = selection.select(5);
+  pending[0](true);
+  await first;
+  assert.deepEqual(committed, []);
+  pending[1](true);
+  await second;
+  assert.deepEqual(committed, [5]);
+  assert.deepEqual(statuses.at(-1), ["ready", 5]);
+});

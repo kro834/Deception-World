@@ -19,8 +19,9 @@ export function DreamScreeningRoom({ initialIndex, trigger, onClose }: DreamScre
   const firstIndex =
     ((initialIndex % DREAM_POSTERS.length) + DREAM_POSTERS.length) % DREAM_POSTERS.length;
   const [index, setIndex] = useState(firstIndex);
-  const [requestedIndex, setRequestedIndex] = useState<number | null>(null);
+  const [requestedIndex, setRequestedIndex] = useState<number | null>(firstIndex);
   const [failedIndex, setFailedIndex] = useState<number | null>(null);
+  const [imageReady, setImageReady] = useState(false);
   const [zoomed, setZoomed] = useState(false);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -42,6 +43,7 @@ export function DreamScreeningRoom({ initialIndex, trigger, onClose }: DreamScre
       (next: number) => {
         currentIndexRef.current = next;
         setIndex(next);
+        setImageReady(true);
         setZoomed(false);
         imageViewportRef.current?.scrollTo({ top: 0, left: 0, behavior: "instant" });
       },
@@ -59,13 +61,11 @@ export function DreamScreeningRoom({ initialIndex, trigger, onClose }: DreamScre
     onCloseRef.current(currentIndexRef.current);
   }, []);
 
-  const select = useCallback(
-    (next: number) => {
-      if (next === currentIndexRef.current && failedIndex == null) return;
-      void selectionRef.current?.select(next);
-    },
-    [failedIndex],
-  );
+  // A request for the currently shown picture is still a new choice. It must
+  // supersede any pending request for a different picture (or retry the first).
+  const select = useCallback((next: number) => {
+    void selectionRef.current?.select(next);
+  }, []);
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -75,26 +75,38 @@ export function DreamScreeningRoom({ initialIndex, trigger, onClose }: DreamScre
     root.dataset.dreamDialogOpen = "true";
     dialog.showModal();
     const releaseScroll = acquireViewportScrollLock({ freezeBody: true });
+    let released = false;
+    const releaseViewport = () => {
+      if (released) return;
+      released = true;
+      if (dialog.open) dialog.close();
+      releaseScroll();
+      if (oldDialogFlag === undefined) delete root.dataset.dreamDialogOpen;
+      else root.dataset.dreamDialogOpen = oldDialogFlag;
+    };
     closeRef.current?.focus({ preventScroll: true });
+    // The initial picture gets the same decoded-image and retry guarantee as
+    // every later choice. Until ready, the stage shows an explicit placeholder.
+    void selectionRef.current?.select(firstIndex);
     let historyDismissed = false;
     const stopHistory = router.history.subscribe(({ action }) => {
       if (action.type !== "BACK" && action.type !== "FORWARD" && action.type !== "GO") return;
       historyDismissed = true;
+      // Release the old page offset before the browser restores its destination.
+      releaseViewport();
       close();
     });
     return () => {
       stopHistory();
       selectionRef.current?.invalidate();
       loaderRef.current?.dispose();
-      if (dialog.open) dialog.close();
-      releaseScroll();
-      if (oldDialogFlag === undefined) delete root.dataset.dreamDialogOpen;
-      else root.dataset.dreamDialogOpen = oldDialogFlag;
+      loaderRef.current = null;
+      releaseViewport();
       if (!historyDismissed && trigger?.isConnected) {
         window.requestAnimationFrame(() => trigger.focus({ preventScroll: true }));
       }
     };
-  }, [close, router, trigger]);
+  }, [close, firstIndex, router, trigger]);
 
   useEffect(() => {
     const filmstrip = filmstripRef.current;
@@ -164,16 +176,22 @@ export function DreamScreeningRoom({ initialIndex, trigger, onClose }: DreamScre
             ref={imageViewportRef}
             className={`dream-screening-picture${zoomed ? " is-zoomed" : ""}`}
           >
-            <img
-              key={poster.src}
-              src={poster.src}
-              {...posterImage(poster.src)}
-              width={poster.width}
-              height={poster.height}
-              alt={poster.alt}
-              decoding="async"
-              draggable={false}
-            />
+            {imageReady ? (
+              <img
+                key={poster.src}
+                src={poster.src}
+                {...posterImage(poster.src)}
+                width={poster.width}
+                height={poster.height}
+                alt={poster.alt}
+                decoding="async"
+                draggable={false}
+              />
+            ) : (
+              <p className="dream-screening-placeholder">
+                {failedIndex === firstIndex ? "画像を読み込めませんでした" : "画像を読み込み中"}
+              </p>
+            )}
           </div>
           <button
             type="button"
@@ -193,6 +211,7 @@ export function DreamScreeningRoom({ initialIndex, trigger, onClose }: DreamScre
             type="button"
             className="dream-screening-zoom"
             aria-pressed={zoomed}
+            disabled={!imageReady}
             onClick={() => {
               setZoomed((value) => !value);
               imageViewportRef.current?.scrollTo({ top: 0, left: 0, behavior: "instant" });

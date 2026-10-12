@@ -148,6 +148,13 @@
   object-fit: contain;
   box-shadow: 0 14px 32px rgb(0 0 0 / 55%);
 }
+.dream-screening-placeholder {
+  margin: 0;
+  padding: 16px;
+  color: #e6c28e;
+  font-size: 13px;
+  text-align: center;
+}
 .dream-screening-picture.is-zoomed {
   display: block;
   overflow: auto;
