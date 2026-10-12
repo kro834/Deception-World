@@ -54,8 +54,13 @@ import {
   verifyPublicDeployment,
 } from "./verify-public-deployment.mjs";
 
-test("public verification hashes exhibition material and studio assets and rejects changed bytes or unknown paths", async () => {
+test("public verification hashes exhibition, cinema and authored Rexonance assets and rejects changed bytes or unknown paths", async () => {
   const paths = [
+    "/rexonance-forms-20261011/excelsior-cutout-20261012.webp",
+    "/rider-rexonance-excelsior-cutout-20261012.webp",
+    "/rider-rexonance-excelsior-cutout-20261012-delivery-640.webp",
+    "/rider-rexonance-excelsior-cutout-20261012-delivery-960.webp",
+    "/rider-rexonance-excelsior-cutout-20261012-delivery-1022.webp",
     "/exhibition-metal/manifest.json",
     "/exhibition-metal/brushed-alloy-normal.png",
     "/exhibition-metal/brushed-alloy-roughness.png",
@@ -107,6 +112,10 @@ test("public verification hashes exhibition material and studio assets and rejec
   );
   for (const changed of paths) assert.equal((await run({ changed })).report.ok, false, changed);
   for (const unknown of [
+    "/rexonance-forms-20261011/unknown.webp",
+    "/rexonance-forms-20261011/excelsior-cutout-20261012.webp/extra",
+    "/rider-rexonance-excelsior-cutout-20261012-delivery-2048.webp",
+    "/rider-rexonance-excelsior-cutout-20261012.webp%2fextra",
     "/exhibition-metal/unknown.png",
     "/exhibition-metal/brushed-alloy-normal.png/extra",
     "/exhibition-metal/brushed-alloy-roughness.png%2fextra",
@@ -124,6 +133,8 @@ test("public verification hashes exhibition material and studio assets and rejec
     assert.equal(
       invalid.seen.some(
         (path) =>
+          path.startsWith("/rexonance-forms-20261011/") ||
+          path.startsWith("/rider-rexonance-excelsior-cutout-20261012") ||
           path.startsWith("/exhibition-metal/") ||
           path.startsWith("/exhibition-studio/") ||
           path.startsWith("/saga-cinema-assets/"),
