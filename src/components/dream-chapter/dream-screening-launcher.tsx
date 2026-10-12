@@ -19,15 +19,16 @@ export function DreamScreeningLauncher({
   const [initialIndex, setInitialIndex] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const generation = useRef(0);
 
-  useEffect(
-    () => () => {
+  useEffect(() => {
+    setHydrated(true);
+    return () => {
       generation.current += 1;
-    },
-    [],
-  );
+    };
+  }, []);
 
   const open = async () => {
     const request = ++generation.current;
@@ -61,12 +62,12 @@ export function DreamScreeningLauncher({
         className="dream-screening-trigger"
         type="button"
         aria-haspopup="dialog"
-        aria-busy={loading}
-        disabled={loading}
+        aria-busy={!hydrated || loading}
+        disabled={!hydrated || loading}
         onClick={() => void open()}
       >
         <span aria-hidden="true">⛶</span>
-        {loading ? "映写室を準備中" : failed ? "映写室を再読み込み" : "映写室で見る"}
+        {!hydrated || loading ? "映写室を準備中" : failed ? "映写室を再読み込み" : "映写室で見る"}
       </button>
       {failed ? (
         <span className="dream-screening-load-error" role="status">

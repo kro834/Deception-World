@@ -52,8 +52,9 @@ export function mountDreamReadingVisibility(root, environment = window) {
         ([paragraph, intersects]) =>
           intersects && root.contains(paragraph) && paragraph.closest(".dream-story-case")?.open,
       );
-    if (visible) html.setAttribute(flag, "true");
-    else clear();
+    if (visible) {
+      if (html.getAttribute(flag) !== "true") html.setAttribute(flag, "true");
+    } else clear();
   };
   const disconnect = () => {
     generation += 1;

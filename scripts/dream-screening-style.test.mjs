@@ -12,6 +12,24 @@ const code = ts.transpileModule(
   { compilerOptions: { module: ts.ModuleKind.CommonJS } },
 ).outputText;
 
+test("the screening trigger waits for hydration and CSS without hiding the programme", () => {
+  const launcher = readFileSync(
+    new URL("../src/components/dream-chapter/dream-screening-launcher.tsx", import.meta.url),
+    "utf8",
+  );
+  const room = readFileSync(
+    new URL("../src/components/dream-chapter/dream-screening-room.tsx", import.meta.url),
+    "utf8",
+  );
+  assert.match(launcher, /disabled=\{!hydrated \|\| loading\}/);
+  assert.match(launcher, /await Promise\.all\([\s\S]*prepareScreeningStyle\(\)/);
+  assert.doesNotMatch(room, /<link|precedence=/);
+  assert.ok(
+    room.indexOf("acquireViewportScrollLock({ freezeBody: true })") <
+      room.indexOf("dialog.showModal()"),
+  );
+});
+
 function setup() {
   const links = [];
   const timers = new Map();

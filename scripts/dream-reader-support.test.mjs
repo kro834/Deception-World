@@ -31,6 +31,7 @@ function visibilitySetup({ width = 320, supported = true } = {}) {
   const fold = { open: false };
   const paragraph = { closest: () => fold };
   const html = {
+    getAttribute: (key) => attributes.get(key) ?? null,
     setAttribute: (key, value) => attributes.set(key, value),
     removeAttribute: (key) => attributes.delete(key),
   };
