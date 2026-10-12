@@ -236,6 +236,8 @@ export type DiveRunOptions = {
   audit?: boolean;
   /** The shader phase ended on the landing frame (the handoff is covered). */
   onLanded: () => void;
+  /** Continue the same flight in DOM layers if a live GPU context is lost. */
+  onFallback: (elapsedSeconds: number) => void;
 };
 
 export type DiveRun = {
@@ -275,6 +277,7 @@ export function runOpeningDive({
   barHeight,
   audit = false,
   onLanded,
+  onFallback,
 }: DiveRunOptions): DiveRun {
   const openedAt = performance.now();
   let tier: OpeningTier = currentDiveTier();
@@ -350,6 +353,7 @@ export function runOpeningDive({
     if (raf) window.cancelAnimationFrame(raf);
     raf = 0;
     window.removeEventListener("resize", layout);
+    document.removeEventListener("visibilitychange", onVisibility);
     canvas?.removeEventListener("webglcontextlost", onContextLost);
     city?.canvas.removeEventListener("webglcontextlost", onContextLost);
     city?.dispose();
@@ -387,10 +391,15 @@ export function runOpeningDive({
 
   function onContextLost(event: Event) {
     event.preventDefault();
+    if (disposed || tier !== "webgl") return;
     stats.fallback = "context-lost";
-    // The layer's own cover stays; the route goes on under it.
+    const elapsed = startedAt ? (performance.now() - startedAt) / 1000 : 0;
+    tier = "css";
+    stats.tier = tier;
     releaseGl();
-    land();
+    // Losing the canvas is not landing. Keep the route covered and hand the
+    // remaining flight to the compositor, including an early loss on iPad.
+    if (!landed) onFallback(elapsed);
   }
 
   function onVisibility() {
@@ -474,6 +483,7 @@ export function runOpeningDive({
         releaseGl();
         return tier;
       }
+      if (pass.lost || city?.lost) throw new Error("context-lost");
       // In GPU memory: the decoded copies can go.
       releasePreparedBitmaps();
       const active: ShaderPass = pass;

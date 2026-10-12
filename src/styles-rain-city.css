@@ -1,5 +1,8 @@
 [data-opening-city-fallback] {
   position: absolute;
+  /* Above the opaque World still (z=8), not behind it. GL/reduced tiers hide
+     this layer; its final fade reveals the same World landing underneath. */
+  z-index: 10;
   inset: 0;
   overflow: hidden;
   opacity: 0;

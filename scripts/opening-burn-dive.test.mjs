@@ -17,6 +17,35 @@ const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 const sample = (from, to, step = 1 / 60) =>
   Array.from({ length: Math.round((to - from) / step) + 1 }, (_, index) => from + index * step);
 
+test("GPU loss continues the city rather than resolving the covered route", async () => {
+  const dive = await read("src/components/cinematic/opening-dive.ts");
+  const lost = dive.slice(
+    dive.indexOf("function onContextLost"),
+    dive.indexOf("function onVisibility"),
+  );
+  assert.match(lost, /stats\.tier = tier/);
+  assert.match(lost, /releaseGl\(\)/);
+  assert.match(lost, /onFallback\(elapsed\)/);
+  assert.doesNotMatch(lost, /\bland\(\)/);
+  assert.match(dive, /if \(pass\.lost \|\| city\?\.lost\) throw new Error\("context-lost"\)/);
+  const handoff = await read("src/components/cinematic/opening-handoff.tsx");
+  assert.match(
+    handoff,
+    /onFallback: \(elapsed\) => \{\s*tierLabel = "css";\s*startCssDive\(elapsed\)/,
+  );
+  assert.match(handoff, /animation\.currentTime = elapsed/);
+  assert.match(handoff, /end - elapsed \+ 34/);
+});
+
+test("the fallback street covers the opaque landing artwork throughout its flight", async () => {
+  const city = await read("src/styles-rain-city.css");
+  const route = await read("src/styles-route-transitions.css");
+  const cityZ = Number(city.match(/\[data-opening-city-fallback\] \{[^}]*z-index: (\d+)/)[1]);
+  const worldZ = Number(route.match(/\[data-opening-handoff-world\] \{[^}]*z-index: (\d+)/)[1]);
+  assert.ok(cityZ > worldZ);
+  assert.match(city, /prefers-reduced-motion: reduce/);
+});
+
 test("the title's clock, the burn and the sequence agree", async () => {
   const title = await read("src/components/cinematic/title-sequence.tsx");
   const styles = await read("src/styles.css");

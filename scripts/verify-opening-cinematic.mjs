@@ -572,6 +572,21 @@ async function checkDiveContextLoss(browser, name) {
         return true;
       }, kind);
       assert.equal(lost, true, `${name}: real context loss supported for ${kind}`);
+      await page.locator('[data-opening-handoff-tier="css"]').waitFor({ timeout: 2000 });
+      await page.waitForTimeout(550);
+      const continuation = await page.evaluate(() => {
+        const city = document.querySelector("[data-opening-city-fallback]");
+        const world = document.querySelector("[data-opening-handoff-world]");
+        return {
+          path: location.pathname,
+          opacity: city && Number(getComputedStyle(city).opacity),
+          cityZ: city && Number(getComputedStyle(city).zIndex),
+          worldZ: world && Number(getComputedStyle(world).zIndex),
+        };
+      });
+      assert.equal(continuation.path, "/", `${name}: GPU loss must not skip the flight`);
+      assert.ok(continuation.opacity > 0.9, `${name}: CSS city continues visibly`);
+      assert.ok(continuation.cityZ > continuation.worldZ, `${name}: city is above landing art`);
       await page.waitForURL(/\/world$/, { timeout: 8000 });
       await page
         .locator("[data-opening-handoff-root]")

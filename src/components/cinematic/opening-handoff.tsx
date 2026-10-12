@@ -403,18 +403,30 @@ export function OpeningHandoffLayer({ snapshot, onCovered, onComplete }: Opening
     // ---- Covering: the dive.
     const cssAnimations: Animation[] = [];
     let cssStarted = false;
-    const startCssDive = () => {
+    let safetyTimer = 0;
+    const startCssDive = (elapsedSeconds = 0) => {
       if (cssStarted || settled || !alive) return;
       cssStarted = true;
+      // The CSS completion timer now owns the remaining flight. An older GL
+      // watchdog must not cut short a fallback that starts near landing.
+      if (safetyTimer) {
+        window.clearTimeout(safetyTimer);
+        timers.delete(safetyTimer);
+        safetyTimer = 0;
+      }
       stableRoot.dataset.openingHandoffTier = "css";
       const k = CSS_DIVE_SCALE[mode];
       const cut = OPENING_DIVE.cut * 1000 * k;
       const end = OPENING_DIVE.glEnd * 1000 * k;
+      // Resume after a live GL failure without replaying the title or skipping
+      // the street. Always leave a short visible landing sequence.
+      const elapsed = Math.min(Math.max(0, elapsedSeconds * 1000), end - 750);
       const at = (value: number) => Math.min(1, Math.max(0, value / end));
       const add = (node: HTMLElement | null, keyframes: Keyframe[], easing = "linear") => {
         const animation = animateNode(node, keyframes, commonOptions(end, easing), running);
         if (animation) {
           cssAnimations.push(animation);
+          if (elapsed > 0) animation.currentTime = elapsed;
           if (audit) animation.pause();
         }
       };
@@ -491,10 +503,13 @@ export function OpeningHandoffLayer({ snapshot, onCovered, onComplete }: Opening
         ]);
       }
       if (!audit) {
-        const coveredTimer = window.setTimeout(() => {
-          timers.delete(coveredTimer);
-          settleHandoff();
-        }, end + 34);
+        const coveredTimer = window.setTimeout(
+          () => {
+            timers.delete(coveredTimer);
+            settleHandoff();
+          },
+          end - elapsed + 34,
+        );
         timers.add(coveredTimer);
       }
     };
@@ -540,6 +555,10 @@ export function OpeningHandoffLayer({ snapshot, onCovered, onComplete }: Opening
             barHeight: Math.max(42, viewportRect.height * 0.075),
             audit,
             onLanded: () => settleHandoff(),
+            onFallback: (elapsed) => {
+              tierLabel = "css";
+              startCssDive(elapsed);
+            },
           });
           diveRef.current?.run.dispose();
           diveRef.current = { token, run };
@@ -560,7 +579,7 @@ export function OpeningHandoffLayer({ snapshot, onCovered, onComplete }: Opening
         });
       // Fail-safe: a dive that never lands (the tab was frozen) still covers.
       if (!audit) {
-        const safetyTimer = window.setTimeout(
+        safetyTimer = window.setTimeout(
           () => {
             timers.delete(safetyTimer);
             settleHandoff();
