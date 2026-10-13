@@ -174,14 +174,29 @@ try {
   await scenario("old Rexonance finally cannot erase a newer Ciel cover", async (page) => {
     const hold = await holdChunk(page);
     try {
-      // #re-dive is the product's supported deep link to Ciel's source card;
-      // it unlocks that section through the normal application path.
-      await sourcePage(page, true, "re-dive");
+      // Owner (2026-10-14): RE DIVE now holds a classified report; Ciel remains in the unlocked menu.
+      await sourcePage(page);
+      const rising = page.getByRole("button", { name: "RISING THE WORLD", exact: true });
+      await rising.scrollIntoViewIfNeeded();
+      await rising.click();
+      await page.locator(".rw-skip").click();
+      await page.locator(".rw-redive-button").waitFor({ state: "visible" });
+      await page.waitForTimeout(1900); // Existing SKIP/REPLAY tap guard and RE DIVE fade.
+      await page.locator(".rw-redive-button").click();
+      await page.waitForFunction(() => !document.querySelector(".rw-dialog")?.open);
+      await page.locator(".re-dive-file-cover").click();
+      await page.locator(".rd-file-dialog[open]").waitFor();
+      await page.keyboard.press("Escape");
+      await page.locator(".rd-file-dialog").waitFor({ state: "detached" });
+      await page.waitForURL("**/world#re-dive");
+      await page.locator('.topbar nav a[href="#story"]').click();
+      await page.waitForURL("**/world#story");
       await enterRexonance(page);
       await page.waitForTimeout(100);
       assert.ok(hold.requests() > 0);
       await backFromPending(page, "re-dive");
-      await page.locator('a.ciel-signal[href="/characters/ciel"]').click();
+      await page.locator(".side-panel-trigger").click();
+      await page.locator('#site-side-panel a[href="/characters/ciel"]').click();
       await page.locator(".load-gate.is-ciel-cutin").waitFor();
       hold.release();
       // The old warmup resolves while the newer cover is still closing.

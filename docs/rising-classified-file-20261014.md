@@ -47,6 +47,11 @@
   General flashes were at most one per second; red flashes were zero.
 - Existing archive-content pins were updated with one-line owner-reason comments.
   Accessibility, fonts, motion, timing and flash safety pins were not weakened.
+- The Rexonance recovery verifier's Ciel case no longer targets the removed
+  classified-area character card. It unlocks the archive with the real RISING
+  controls, opens/closes the report, and uses the existing unlocked Ciel menu.
+  The same held-request/history/new-cut-in assertions passed; no application
+  timing, route or cancellation logic changed.
 - Browser engine/emulation results are not physical iPhone/iPad or installed-PWA
   validation. No claim of real-device coverage is made.
 
