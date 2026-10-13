@@ -32,6 +32,15 @@ test("classified body is activated only on opening and rendered as plain text", 
   assert.match(viewer, /className="rd-file-reader"[\s\S]*?tabIndex=\{0\}/);
 });
 
+test("reader verification waits for mounted World, not its prepaint family", async () => {
+  const verifier = await read("scripts/verify-classified-file.mjs");
+  // A mounted-route check is stronger readiness, not proof of first-SSR-tap performance.
+  assert.match(verifier, /dataset\.worldPageVisible === "true"/);
+  assert.match(verifier, /name: "RISING THE WORLD", exact: true/);
+  assert.match(verifier, /assert\.equal\(actualText, report\.text/);
+  assert.match(verifier, /throw error;\s*\} finally/);
+});
+
 test("native file modal synchronously locks scrolling and releases it on close and unmount", async () => {
   const viewer = await read("src/components/world/re-dive-file-dialog.tsx");
   assert.match(

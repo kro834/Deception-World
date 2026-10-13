@@ -30,7 +30,7 @@
 
 ## Verification
 
-- `npm test`: 2,223 pass / fail 0 / existing skip 4. TypeScript passed. ESLint:
+- `npm test`: 2,224 pass / fail 0 / existing skip 4. TypeScript passed. ESLint:
   0 errors / 12 existing warnings. Source-parts check: 15 groups. Vite build passed.
 - On the built preview at port 8199, `verify-classified-file.mjs` passed Chrome
   320×640, 390×844 DPR3, 1024×768 and 1440×900; WebKit 390×844 DPR3 and 1024×768.
@@ -52,6 +52,13 @@
   controls, opens/closes the report, and uses the existing unlocked Ciel menu.
   The same held-request/history/new-cut-in assertions passed; no application
   timing, route or cancellation logic changed.
+- The full recovery script passed four network/history cases; actual window
+  backgrounding remained unverified because automated Chrome stayed visible.
+- An initial live probe used the prepaint family as readiness and timed out
+  waiting for RE DIVE. The verifier now also awaits `use-world-mode`'s mounted-
+  route visibility marker and saves failure diagnostics without masking errors.
+  Live phone/desktop full-text/open/close/rotation/history checks then passed.
+  This verifies mounted controls, not a first-SSR-tap timing or hydration repair.
 - Browser engine/emulation results are not physical iPhone/iPad or installed-PWA
   validation. No claim of real-device coverage is made.
 

@@ -25,6 +25,8 @@ const ready = (page) =>
   page.waitForFunction(
     () =>
       document.documentElement.dataset.family &&
+      // The prepaint family exists before hydration; wait for the mounted World route too.
+      document.documentElement.dataset.worldPageVisible === "true" &&
       !document.documentElement.hasAttribute("data-loading") &&
       !document.documentElement.hasAttribute("data-route-scroll-settling"),
   );
@@ -189,6 +191,26 @@ try {
     await context.close();
   }
   await writeFile(output + "/report.json", JSON.stringify(results, null, 2));
+} catch (error) {
+  const page = browser.contexts().at(-1)?.pages().at(-1);
+  if (page) {
+    await page.screenshot({ path: output + "/" + engine + "-failure.png" }).catch(() => {});
+    console.error(
+      JSON.stringify(
+        await page.evaluate(() => ({
+          failure: {
+            url: location.href,
+            mounted: document.documentElement.dataset.worldPageVisible,
+            loading: document.documentElement.dataset.loading,
+            risingOpen: document.querySelector(".rw-dialog")?.open,
+            tier: document.querySelector(".rw-viewport")?.dataset.tier,
+            reDiveOffered: !!document.querySelector(".rw-redive-button"),
+          },
+        })),
+      ),
+    );
+  }
+  throw error;
 } finally {
   await browser.close();
 }
