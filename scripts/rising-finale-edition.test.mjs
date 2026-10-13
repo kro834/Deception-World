@@ -188,34 +188,22 @@ test("the rising and RE DIVE sheets: finite, gated, 12px and forced colours", as
   assert.match(forcedReDive, /border: 1px solid CanvasText;/);
   assert.match(forcedReDive, /\.signal > span \{\s*-webkit-text-stroke: 0;/);
 });
-
-test("the burnt 六詠 box keeps the archive's order and words; I is the hero", async () => {
+// Owner (2026-10-14): one classified report replaces the six public dossier slots in RE DIVE.
+test("the classified file keeps the burnt archive material and DOM reading order", async () => {
   const section = await read("src/components/world/re-dive-section.tsx");
   const css = await readCss("src/styles-world-re-dive.css");
-  // Visual order follows the DOM (I, II, III, IV, V, VI): no reordering.
   assert.doesNotMatch(css, /(^|[;{\s])order\s*:/);
-  const placed = rules(css).filter((rule) => /grid-(column|row)\s*:/.test(rule.body ?? ""));
-  for (const rule of placed) {
-    assert.match(
-      rule.selector,
-      /\.ciel-signal|is-vacant|:last-child|re-dive-tab|threat-copy|signal-array$|app-|\.signal > i$|> :is\(span, i, b\)$|\.signal\.is-vacant > i$/,
-      `${rule.selector} is placed out of order`,
-    );
-  }
+  assert.match(section, /className="threat-panel re-dive-archive"/);
+  assert.match(section, /className="manager-slot-grid signal-array re-dive-file-grid"/);
+  assert.match(section, /className="re-dive-file-cover"/);
   assert.match(
     css,
-    /\.signal-array > \.signal\.ciel-signal \{\s*grid-column: 1 \/ 3;\s*grid-row: 1 \/ 3;/,
+    /\.signal-array\.re-dive-file-grid \{\s*grid-template-columns: minmax\(0, 1fr\);\s*grid-template-rows: none;/,
   );
-  assert.match(css, /grid-template-columns: minmax\(0, 2fr\) repeat\(5, minmax\(0, 1fr\)\);/);
-  // The column and the archive panel step aside only in RE DIVE.
-  assert.match(
-    css,
-    /:is\(\.re-dive-section \.signal-column, \.re-dive-archive \.manager-archive-panel\) \{\s*display: contents;/,
-  );
-  // The markup is the archive's: no class or word was added to the section.
-  assert.doesNotMatch(section, /re-dive-plate|re-dive-seal|re-dive-hero/);
+  assert.match(css, /\.re-dive-file-cover:focus-visible,[\s\S]*?outline: 2px solid #ffc08a;/);
+  assert.match(css, /\.re-dive-ground \{\s*z-index: -1;/);
+  assert.doesNotMatch(section, /OPEN DOSSIER|\/characters\/|\/managers\//);
 });
-
 test("the 404 record plate: its own sheet, linked only where it renders", async () => {
   const component = await read("src/lib/error-component.tsx");
   const root = await read("src/routes/__root.tsx");

@@ -1089,8 +1089,8 @@ export function SideMenuLayer({
                 </GuardedLink>
                 {reDiveReached ? (
                   <GuardedLink to="/world" hash="re-dive" assets={[]} beforeNavigate={close}>
-                    <span>RE DIVE</span>
-                    <i>RIKUEI</i>
+                    <span>機密ファイル</span>
+                    <i>CLASSIFIED</i>
                   </GuardedLink>
                 ) : null}
               </>

@@ -960,3 +960,307 @@
     background: ButtonFace;
   }
 }
+
+/* Owner: the RISING destination is now a classified report, not public dossiers.
+   Keep the burned landing ground and the existing transition beats intact. */
+.site-shell.film-edition.mirage-edition .re-dive-section .signal-array.re-dive-file-grid {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: none;
+  grid-auto-rows: auto;
+}
+
+.site-shell.film-edition.mirage-edition .re-dive-file-cover {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: clamp(20px, 3vw, 40px);
+  width: 100%;
+  min-height: 220px;
+  padding: clamp(20px, 3vw, 36px);
+  border: 1px solid rgb(255 170 120 / 0.36);
+  border-radius: 0;
+  background: linear-gradient(135deg, #24100b, #100706);
+  color: #fff3ea;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.site-shell.film-edition.mirage-edition .re-dive-file-cover:hover {
+  border-color: #ffc08a;
+}
+
+.site-shell.film-edition.mirage-edition .re-dive-file-cover:focus-visible,
+.rd-file-close:focus-visible,
+.rd-file-reader:focus-visible {
+  outline: 2px solid #ffc08a;
+  outline-offset: 4px;
+}
+
+.rd-file-mark {
+  position: relative;
+  display: flex;
+  flex: 0 0 108px;
+  align-items: center;
+  justify-content: center;
+  width: 108px;
+  height: 140px;
+  border: 1px solid #b57954;
+  background: #1a0c09;
+  color: #ffd1ac;
+}
+
+.rd-file-mark > span {
+  padding: 7px 5px;
+  border-block: 1px solid currentColor;
+  font: 400 12px / 1.5 var(--mr-hud, "Michroma", "Oxanium", sans-serif);
+  letter-spacing: 0.08em;
+}
+
+.rd-file-mark > i {
+  position: absolute;
+  inset: 8px;
+  border: 1px solid rgb(255 190 140 / 0.18);
+  pointer-events: none;
+}
+
+.rd-file-cover-copy {
+  display: flex;
+  flex: 1 1 220px;
+  min-width: 0;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.rd-file-cover-copy > small,
+.rd-file-cover-copy > span {
+  font-size: 14px;
+  line-height: 1.7;
+  color: #dcc3b2;
+}
+
+.rd-file-cover-copy > strong {
+  font-size: clamp(18px, 2.4vw, 28px);
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.rd-file-cover-action {
+  flex: 0 0 auto;
+  align-self: end;
+  margin-left: auto;
+  padding-block: 10px;
+  border-bottom: 1px solid #c89360;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #ffdbb7;
+}
+
+.rd-file-dialog {
+  box-sizing: border-box;
+  width: min(880px, calc(100vw - 32px));
+  height: min(960px, calc(100svh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 32px));
+  max-width: none;
+  max-height: none;
+  margin: auto;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid #b57954;
+  border-radius: 0;
+  background: #100807;
+  color: #f5e7dd;
+  font: inherit;
+  box-shadow: 0 24px 80px rgb(0 0 0 / 0.5);
+}
+
+.rd-file-dialog[open] {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+}
+
+.rd-file-dialog::backdrop {
+  background: rgb(2 2 4 / 0.88);
+}
+
+/* The injected floating shortcut must not obscure lines of this manuscript. */
+#re-dive-file-dialog .zeus-button {
+  display: none;
+}
+
+.rd-file-header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px clamp(16px, 4vw, 36px);
+  border-bottom: 1px solid rgb(255 190 140 / 0.3);
+  background: #180b08;
+}
+
+.rd-file-header > div {
+  min-width: 0;
+}
+
+.rd-file-label {
+  margin: 0 0 10px;
+  color: #ffc08a;
+  font: 400 12px / 1.5 var(--mr-hud, "Michroma", "Oxanium", sans-serif);
+  letter-spacing: 0.12em;
+}
+
+.rd-file-header h2 {
+  margin: 0;
+  font-size: clamp(20px, 3vw, 28px);
+  line-height: 1.4;
+}
+
+#rd-file-caption {
+  margin: 8px 0 0;
+  color: #d2b9a7;
+  font-size: 14px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.rd-file-close {
+  flex: 0 0 auto;
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1px solid #ac7e59;
+  border-radius: 0;
+  background: #26120d;
+  color: #fff1e5;
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+.rd-file-reader {
+  min-height: 0;
+  padding: 30px clamp(18px, 5vw, 52px) 44px;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  font-size: 16px;
+  line-height: 1.95;
+}
+
+.rd-file-reader > :is(p, h3) {
+  max-width: 42em;
+  margin: 0 auto 1.45em;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.rd-file-reader > h3 {
+  color: #ffe5cf;
+  font-size: clamp(20px, 3vw, 28px);
+  line-height: 1.7;
+}
+
+.rd-file-reader > p:first-child {
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgb(255 190 140 / 0.26);
+  color: #ffc08a;
+}
+
+.rd-file-reader > :last-child {
+  margin-bottom: 0;
+}
+
+.rd-file-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px clamp(16px, 4vw, 36px);
+  border-top: 1px solid rgb(255 190 140 / 0.3);
+  background: #180b08;
+}
+
+.rd-file-footer > span {
+  color: #d2b9a7;
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+@media (max-width: 599px) {
+  .site-shell.film-edition.mirage-edition .re-dive-file-cover {
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+
+  .rd-file-mark {
+    flex-basis: 100%;
+    width: 100%;
+    height: 64px;
+  }
+
+  .rd-file-mark > span {
+    font-size: 12px;
+    letter-spacing: 0;
+  }
+
+  .rd-file-cover-copy {
+    flex-basis: 100%;
+  }
+
+  .rd-file-cover-action {
+    margin-left: auto;
+  }
+
+  .rd-file-dialog {
+    width: calc(100vw - 16px);
+    height: calc(100svh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 16px);
+  }
+
+  .rd-file-header {
+    padding-block: 16px;
+  }
+
+  .rd-file-footer {
+    align-items: start;
+    flex-direction: column;
+  }
+
+  .rd-file-footer .rd-file-close {
+    align-self: stretch;
+  }
+}
+
+@media (forced-colors: active) {
+  .site-shell.film-edition.mirage-edition .re-dive-file-cover,
+  .rd-file-mark,
+  .rd-file-dialog,
+  .rd-file-header,
+  .rd-file-footer {
+    border-color: CanvasText;
+    background: Canvas;
+    color: CanvasText;
+    box-shadow: none;
+  }
+
+  .rd-file-close {
+    border-color: ButtonText;
+    background: ButtonFace;
+    color: ButtonText;
+  }
+
+  .rd-file-cover-copy > :is(small, span),
+  .rd-file-cover-action,
+  .rd-file-mark > span,
+  .rd-file-label,
+  #rd-file-caption,
+  .rd-file-reader > h3,
+  .rd-file-reader > p:first-child,
+  .rd-file-footer > span {
+    color: CanvasText;
+  }
+
+  .site-shell.film-edition.mirage-edition .re-dive-file-cover:focus-visible,
+  .rd-file-close:focus-visible,
+  .rd-file-reader:focus-visible {
+    outline-color: Highlight;
+  }
+}

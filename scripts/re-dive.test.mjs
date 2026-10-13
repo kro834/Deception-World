@@ -113,45 +113,22 @@ test("the shader, the stage and the section draw the same ground", async () => {
   assert.match(shader, /float gy = px\.y - uGroundTop;/);
 });
 
-test("the six signals: シエル first with his illustration and his own page", async () => {
+// Owner (2026-10-14): RISING now opens one supplied classified report, not public dossiers.
+test("RE DIVE is a classified archive; the public manager archive stays separate", async () => {
   const section = await read("src/components/world/re-dive-section.tsx");
   const home = await read("src/components/world/world-home.tsx");
-  assert.match(section, /const CIEL = RE_DIVE_RIKUEI_NAV\[0\];/);
-  assert.match(section, /to=\{CIEL\.href \?\? "\/characters\/ciel"\}/);
-  // His card carries his illustration, in the managers' card slot.
+  assert.match(section, /CLASSIFIED ARCHIVE/);
+  assert.match(section, /<h3 id="re-dive-title">機密ファイル<\/h3>/);
+  assert.match(section, /aria-haspopup="dialog"/);
+  assert.match(section, /onLeave\(\);\s*setFileOpen\(true\);/);
   assert.match(
     section,
-    /src="\/ciel-thumb-20260924\.jpeg"\s*\{\.\.\.cielThumbnail\(\)\}\s*alt="シエルのキャラクタービジュアル"\s*width=\{640\}\s*height=\{800\}/,
+    /\{fileOpen \? \(?\s*<ReDiveFileDialog onClose=\{closeFile\} returnFocusRef=\{coverRef\} \/>/,
   );
-
-  const order = [
-    ...section.matchAll(
-      /<(GuardedLink|VacantSignal)[\s\S]*?(?:aria-label="六詠([IV]+)|numeral="([IV]+)")/g,
-    ),
-  ].map(([, , linked, vacant]) => linked ?? vacant);
-  assert.deepEqual(order, ["I", "II", "III", "IV", "V", "VI"]);
-  assert.match(section, /aria-label="六詠I シエルの個別資料を開く"/);
-  assert.match(section, /<b>シエル<\/b>/);
-  assert.match(section, /<VacantSignal numeral="III"/);
-  assert.match(section, /<VacantSignal numeral="VI"/);
-  assert.match(section, /aria-label=\{`六詠\$\{numeral\} 欠番`\}/);
-  assert.match(section, /<b>欠番<\/b>/);
-  assert.doesNotMatch(section, /zeus/i, "rank I is シエル, not Zeus");
-  for (const manager of ["rex-loi", "lejas", "opus"]) {
-    assert.match(section, new RegExp(`to="/managers/${manager}"`));
-  }
-  // The archive's own box: same classes and words as the Deception World 六詠.
-  for (const needle of [
-    'className="threat-panel',
-    'className="manager-slot-grid signal-array"',
-    'aria-label="六詠を示す6つのシグナル"',
-    "MANAGER ARCHIVE",
-    "SIX SIGNALS",
-    "ABOVE THE WORLD.",
-    "OPEN DOSSIER",
-  ]) {
-    assert.ok(section.includes(needle), `section: ${needle}`);
-    assert.ok(home.includes(needle), `archive: ${needle}`);
+  assert.match(section, /RE_DIVE_CLASSIFIED_REPORT\.title/);
+  assert.doesNotMatch(section, /GuardedLink|\/characters\/|\/managers\/|RE_DIVE_RIKUEI_NAV/);
+  for (const label of ["MANAGER ARCHIVE", "SIX SIGNALS", "ABOVE THE WORLD.", "OPEN DOSSIER"]) {
+    assert.ok(home.includes(label), `public archive unchanged: ${label}`);
   }
 });
 

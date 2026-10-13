@@ -16,6 +16,7 @@ import { mkdirSync } from "node:fs";
 import { join } from "node:path";
 import { chromium } from "playwright";
 import { RE_DIVE } from "../src/components/world/re-dive-timing.ts";
+import { RE_DIVE_CLASSIFIED_REPORT } from "../src/components/world/re-dive-classified-report.ts";
 import { RISING_TIMING } from "../src/components/world/rising-timing.ts";
 
 const base = process.env.BASE_URL || "http://127.0.0.1:8082";
@@ -1228,14 +1229,8 @@ async function auditFlashes(browser, name, tier) {
 
 // RE DIVE…? at the end still: from the press to the section, in each tier.
 const REDIVE_INIT = { webgl: [], css: [SAVE_DATA], reduced: [] };
-const REDIVE_CARDS = [
-  "六詠I シエルの個別資料を開く",
-  "六詠II レックス・ロワの個別資料を開く",
-  "六詠III 欠番",
-  "六詠IV レジャスの個別資料を開く",
-  "六詠V オパスの個別資料を開く",
-  "六詠VI 欠番",
-];
+// Owner (2026-10-14): one classified report replaces the public dossier cards after RISING.
+const REDIVE_CARDS = [RE_DIVE_CLASSIFIED_REPORT.title + "の機密ファイルを開く"];
 
 /** The dialog at its end still with RE DIVE…? offered (SKIP taken). */
 async function openReDive(browser, name, tier) {
@@ -1283,14 +1278,14 @@ async function checkReDive(browser, name, tier) {
       focus: document.activeElement?.id ?? null,
       arrived: section?.hasAttribute("data-arrived") ?? false,
       cards: section
-        ? [...section.querySelectorAll(".signal-array > .signal")].map((card) =>
+        ? [...section.querySelectorAll(".re-dive-file-cover")].map((card) =>
             card.getAttribute("aria-label"),
           )
         : [],
-      ciel: section?.querySelector(".ciel-signal img")?.getAttribute("src") ?? null,
-      // How many of the six ranks sit wholly inside the landing view.
+      title: section?.querySelector("#re-dive-title")?.textContent ?? null,
+      // The new report cover must still fit the existing landing spread.
       inView: section
-        ? [...section.querySelectorAll(".signal-array > .signal")].filter((card) => {
+        ? [...section.querySelectorAll(".re-dive-file-cover")].filter((card) => {
             const rect = card.getBoundingClientRect();
             return rect.top >= 0 && rect.bottom <= window.innerHeight + 0.5;
           }).length
@@ -1309,15 +1304,37 @@ async function checkReDive(browser, name, tier) {
   assert.equal(state.focus, "re-dive");
   assert.ok(state.arrived);
   assert.deepEqual(state.cards, REDIVE_CARDS);
-  assert.equal(state.ciel, "/ciel-thumb-20260924.jpeg");
-  // Landscape tablets and desktops land with all six ranks in view.
+  assert.equal(state.title, "機密ファイル");
+  // Keep the landing visibility pin for the new one-report archive.
   if (name === "tablet-1024" || name === "desktop") {
-    assert.equal(state.inView, 6, `${name} ${tier}: all six ranks in the landing view`);
+    assert.equal(state.inView, 1, `${name} ${tier}: the report cover is wholly in view`);
   }
   assert.equal(state.dialogFlag, false);
   assert.equal(state.bodyPosition, "");
   assert.equal(state.unlocked, "1");
   assert.equal(state.endArtAnimations, 0, `${name} ${tier}: the end still is left as it was`);
+  const opener = page.locator(".re-dive-file-cover");
+  await opener.scrollIntoViewIfNeeded();
+  const originY = await page.evaluate(() => scrollY);
+  await opener.click();
+  await page.locator(".rd-file-dialog[open]").waitFor();
+  const content = await page
+    .locator(".rd-file-reader")
+    .evaluate((reader) =>
+      [...reader.querySelectorAll("[data-report-paragraph]")]
+        .map((node) => node.textContent)
+        .join("\n\n"),
+    );
+  assert.equal(content, RE_DIVE_CLASSIFIED_REPORT.text, `${name}: the complete owner report`);
+  assert.equal(await page.evaluate(() => document.body.style.position), "fixed");
+  await page.keyboard.press("Escape");
+  await page.locator(".rd-file-dialog").waitFor({ state: "detached" });
+  assert.equal(await page.evaluate(() => document.body.style.position), "");
+  assert.ok(
+    Math.abs((await page.evaluate(() => scrollY)) - originY) <= 2,
+    `${name}: file close restores position`,
+  );
+  assert.equal(await page.evaluate(() => document.activeElement?.className), "re-dive-file-cover");
   assert.deepEqual(errors, []);
   console.log(
     JSON.stringify({ check: "re-dive", name, tier, ...state, cards: state.cards.length }),
