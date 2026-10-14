@@ -47,6 +47,7 @@ import { IPAD_STANDALONE_VIEWPORT_SCRIPT } from "@/lib/ipad-standalone-viewport"
 import { getViewportChrome, getViewportChromeColor } from "@/lib/viewport-chrome";
 import { getRouteFamily } from "@/lib/route-family";
 import { DOSSIER_HUD_FONTS_URL } from "@/lib/world-head";
+import { siteFontLinks } from "@/lib/site-fonts";
 import { ZEUS_BUTTON_SIZES, ZEUS_BUTTON_SRCSET } from "@/lib/thumbnail-images";
 
 const APP_NAME = "Deception World";
@@ -195,10 +196,7 @@ export const Route = createRootRoute({
         href: "https://fonts.gstatic.com",
         crossOrigin: "anonymous",
       },
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Noto+Sans+JP:wght@400;500;600&family=Oxanium:wght@400;500;600;700&family=Zen+Kaku+Gothic+New:wght@500;600;700&display=swap",
-      },
+      ...siteFontLinks(matches.some((match) => (match.routeId as string) === "/")),
       // The chrome's HUD labels: the Michroma subset of capitals and digits
       // the character files already load (a few KB, display=swap).
       { rel: "stylesheet", href: DOSSIER_HUD_FONTS_URL },
