@@ -42,11 +42,13 @@ import rexonanceCallsCss from "../styles-rexonance-calls.css?url";
 import viewportChromeCss from "../styles-viewport-chrome.css?url";
 import stageCss from "../styles-stage.css?url";
 import stageShellCss from "../styles-stage-shell.css?url";
+import openingShellCss from "../styles-opening-shell.css?url";
 import { DEVICE_PROFILE_SCRIPT } from "@/lib/device-profile-gate";
 import { IPAD_STANDALONE_VIEWPORT_SCRIPT } from "@/lib/ipad-standalone-viewport";
 import { getViewportChrome, getViewportChromeColor } from "@/lib/viewport-chrome";
 import { getRouteFamily } from "@/lib/route-family";
 import { DOSSIER_HUD_FONTS_URL } from "@/lib/world-head";
+import { siteFontLinks } from "@/lib/site-fonts";
 import { ZEUS_BUTTON_SIZES, ZEUS_BUTTON_SRCSET } from "@/lib/thumbnail-images";
 
 const APP_NAME = "Deception World";
@@ -162,7 +164,10 @@ export const Route = createRootRoute({
       { rel: "stylesheet", href: androidPerformanceCss },
       { rel: "stylesheet", href: ios18PerformanceCss },
       { rel: "stylesheet", href: ios27EnhancementsCss },
-      { rel: "stylesheet", href: pickupStabilityCss },
+      // The title has no pickup/record UI. Keep the exact original order on every other route.
+      ...(matches.some((match) => (match.routeId as string) === "/")
+        ? []
+        : [{ rel: "stylesheet", href: pickupStabilityCss }]),
       { rel: "icon", type: "image/png", sizes: "32x32", href: "/favicon-32.png" },
       { rel: "icon", type: "image/png", sizes: "64x64", href: "/favicon.png" },
       { rel: "stylesheet", href: appCss },
@@ -171,8 +176,12 @@ export const Route = createRootRoute({
       { rel: "stylesheet", href: routeTransitionsCss },
       { rel: "stylesheet", href: frostedControlsCss },
       { rel: "stylesheet", href: futureInterfaceCss },
-      { rel: "stylesheet", href: nameWordsCss },
-      { rel: "stylesheet", href: pickupVisibilityCss },
+      ...(matches.some((match) => (match.routeId as string) === "/")
+        ? []
+        : [
+            { rel: "stylesheet", href: nameWordsCss },
+            { rel: "stylesheet", href: pickupVisibilityCss },
+          ]),
       { rel: "stylesheet", href: pressFeedbackCss },
       // The shared chrome (menu, announcements, covers, Zeus button, skip
       // link) in one grammar on every route; it outweighs the route sheets.
@@ -183,22 +192,26 @@ export const Route = createRootRoute({
       // Entry calls must be available on the departure route as well.
       { rel: "stylesheet", href: rexonanceCallsCss },
       { rel: "stylesheet", href: viewportChromeCss },
-      { rel: "stylesheet", href: inquiryNavigationCss },
+      ...(matches.some((match) => (match.routeId as string) === "/")
+        ? []
+        : [{ rel: "stylesheet", href: inquiryNavigationCss }]),
       // The site-wide interface tokens; each page family scopes its own
       // stage sheet to html[data-family].
       { rel: "stylesheet", href: stageCss },
       // The command bar and the launcher menu, on every family.
-      { rel: "stylesheet", href: stageShellCss },
+      {
+        rel: "stylesheet",
+        href: matches.some((match) => (match.routeId as string) === "/")
+          ? openingShellCss
+          : stageShellCss,
+      },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       {
         rel: "preconnect",
         href: "https://fonts.gstatic.com",
         crossOrigin: "anonymous",
       },
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Noto+Sans+JP:wght@400;500;600&family=Oxanium:wght@400;500;600;700&family=Zen+Kaku+Gothic+New:wght@500;600;700&display=swap",
-      },
+      ...siteFontLinks(matches.some((match) => (match.routeId as string) === "/")),
       // The chrome's HUD labels: the Michroma subset of capitals and digits
       // the character files already load (a few KB, display=swap).
       { rel: "stylesheet", href: DOSSIER_HUD_FONTS_URL },

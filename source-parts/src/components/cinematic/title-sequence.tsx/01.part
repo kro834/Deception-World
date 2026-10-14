@@ -11,6 +11,8 @@ import {
 import { useRouter } from "@tanstack/react-router";
 import { RotateCcw, SkipForward } from "lucide-react";
 import { WORLD_ENTER_ASSETS, preloadAssets } from "@/lib/asset-loader";
+import { preloadOpeningDestinationStyles } from "@/lib/opening-destination-styles";
+import stageShellCssUrl from "@/styles-stage-shell.css?url";
 import {
   OPENING_LOGO_FINAL,
   OPENING_LOGO_FIRST,
@@ -355,6 +357,7 @@ export function TitleSequence() {
       const titleReady = firstLogoRef.current?.decode().catch(() => undefined);
       void Promise.resolve(titleReady).then(() => {
         if (cancelled || document.hidden) return;
+        preloadOpeningDestinationStyles(stageShellCssUrl);
         void Promise.all([
           preloadAssets(WORLD_ENTER_ASSETS, () => undefined, "low"),
           router.preloadRoute({ to: "/world" }).catch(() => undefined),

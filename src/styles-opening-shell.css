@@ -1,0 +1,28 @@
+/* The unchanged shared tokens, without the launcher/dossier rules unused on /. */
+html[data-family] {
+  --sh-ink: #03060c;
+  --sh-ink-rgb: 3 6 12;
+  --sh-ink-2: #08101b;
+  --sh-ink-3: #0e1826;
+  --sh-l1: #7ae8ff;
+  --sh-l1-rgb: 122 232 255;
+  --sh-l2: #a48bff;
+  --sh-l2-rgb: 164 139 255;
+  --sh-on-l1: #03060c;
+  --sh-text: #f2f7fb;
+  --sh-text-2: #bccbd8;
+  --sh-text-3: #8fa3b5;
+  --sh-focus: #fff0b5;
+  --sh-hud: "Michroma", "Oxanium", "Noto Sans JP", sans-serif;
+  --sh-mono: "Oxanium", "Noto Sans JP", sans-serif;
+  /* One web face per stack, then the system's Japanese face: a second
+     segmented web face made each arriving subset relayout everything. */
+  --sh-jp-fallback:
+    "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic UI", "Yu Gothic", "Noto Sans CJK JP",
+    sans-serif;
+  --sh-display: "Zen Kaku Gothic New", var(--sh-jp-fallback);
+  --sh-body: "Noto Sans JP", var(--sh-jp-fallback);
+  --sh-gutter: clamp(16px, 4vw, 72px);
+  --sh-bar-h: 76px;
+  --sh-ease: cubic-bezier(0.16, 1, 0.3, 1);
+}

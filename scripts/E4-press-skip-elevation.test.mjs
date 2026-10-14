@@ -228,7 +228,8 @@ test("the root mounts the watcher and links its sheet after the pickup sheet", (
   assert.match(root, /<AppGuards \/>\s*<DialogOpenFlag \/>\s*<PressFeedback \/>\s*<LibrarySession \/>\s*<Outlet \/>/);
   assert.match(
     root,
-    /\{ rel: "stylesheet", href: pickupVisibilityCss \},\s*\{ rel: "stylesheet", href: pressFeedbackCss \},/,
+    // Owner (2026-10-14): opening omits pickup UI; other routes keep this exact cascade order.
+    /\{ rel: "stylesheet", href: pickupVisibilityCss \},\s*\]\),\s*\{ rel: "stylesheet", href: pressFeedbackCss \},/,
   );
 });
 

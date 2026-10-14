@@ -149,6 +149,8 @@ function entryRuntime({
         };
       if (name === "@/lib/asset-loader")
         return { WORLD_ENTER_ASSETS: ["/world.webp"], preloadAssets: async () => undefined };
+      // Startup delivery adds an idle stylesheet hint, not a different title clock/handler.
+      if (name === "@/lib/opening-destination-styles") return { preloadOpeningDestinationStyles() {} };
       if (name === "./opening-timing") return { OPENING_BURN: { start: 2.6 } };
       if (name === "./particles") return { Particles };
       if (name === "./opening-burn" || name === "./opening-dive") {
