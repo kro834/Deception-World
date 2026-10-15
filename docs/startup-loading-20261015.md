@@ -23,18 +23,37 @@ unchanged; other chats own Dream, image delivery and library/search refinements.
 - No root styles, fonts, animation clocks, Rexonance files/preloads, load gate,
   IMPACT/VS, image assets, Japanese copy, or rail gestures were changed.
 
+## Integrated image-delivery work
+
+Normally merged image counterpart `bbc3d6d` after the independent JavaScript
+commit `437ec2e`. Reuse decoded, exact-currentSrc title images for independent
+premultiplied bitmaps instead of fetching the bytes again; preserve resize,
+shader clocks, cross-origin safety, rotation validation and bitmap cleanup.
+Only lazy gallery-grid previews use actual-width auto sizing, with conservative
+legacy fallbacks and the existing React cleanup that releases detached nodes.
+Featured/full-resolution images and original artwork bytes are unchanged.
+
+The image counterpart measured the same first eleven images at 390px DPR3:
+2,179,530 → 932,384 body bytes (57.2% less), unchanged layout dimensions and
+sufficient source pixels. At 1024px DPR2 the corrected quality selection instead
+increases 1.54 → 2.00MB; do not claim all viewports download less. Repeated SPA
+navigation plus GC retained none of 570 tracked page/image references; source
+bitmap comparison found zero pixel delta. An independent Astra review found no
+P1/P2 issues and reran all fifteen targeted tests successfully.
+
 ## Measured evidence
 
 Fresh production builds compared with main `faa5ab25b9b0`:
 
 | JavaScript | Baseline | Candidate | Reduction |
 | --- | ---: | ---: | ---: |
-| Entry decoded | 528,209 B | 399,506 B | 24.4% |
-| Entry reproducible gzip | 162,759 B | 127,904 B | 21.4% |
-| Entire SSR critical graph decoded | 657,845 B | 529,142 B | 19.6% |
-| Entire SSR critical graph reproducible gzip | 207,380 B | 172,524 B | 16.8% |
+| Entry decoded | 528,209 B | 399,550 B | 24.4% |
+| Entry reproducible gzip | 162,759 B | 127,940 B | 21.4% |
+| Entire SSR critical graph decoded | 657,845 B | 529,186 B | 19.6% |
+| Entire SSR critical graph reproducible gzip | 207,380 B | 172,559 B | 16.8% |
 
-Three alternating AB/BA samples, Chrome 390×844 DPR3, CPU4, 60ms latency,
+For the JavaScript-only candidate before image integration, three alternating
+AB/BA samples, Chrome 390×844 DPR3, CPU4, 60ms latency,
 9Mbps, fresh contexts/cache disabled: opening preparation median 1,877.6 →
 1,748.3ms; script CPU 0.285 → 0.240s. World preparation 5,578.9 → 5,519.4ms:
 this is a small change, not a solved World-layout bottleneck. Rendering and
@@ -48,7 +67,7 @@ compression configuration, broad asset-cache rewrite or service worker was added
 
 ## Verification
 
-- Unit tests: 2,247 pass / fail 0 / existing skips 4. TypeScript, ESLint
+- Integrated unit tests: 2,262 pass / fail 0 / existing skips 4. TypeScript, ESLint
   (0 errors / existing warnings 12), source-parts (15 groups) and production
   build passed. Original safety/motion/performance assertions are retained.
 - Chrome and WebKit each passed 320/390/844/1024/1440px comparisons: actual
@@ -87,3 +106,12 @@ Publication uses the existing verified-main workflow, separately from these
 local checks. Physical iPhone/iPad Home Screen apps, real background/foreground
 and previously documented Extreme/first-second input issues remain unverified
 or outstanding; this JavaScript separation does not claim to resolve them.
+
+Final integration rebuilt and passed the complete 2,262-test suite, types,
+lint and source-parts checks, compiled critical-graph budgets, iPhone-size
+opening behaviour, the complete Chrome and WebKit gallery verifiers, and Chrome/WebKit
+five-width typography/ENTER/menu/Back comparisons again. No root/Rexonance
+or clock diff was introduced by the image merge. The direct Vercel inspection
+connector remains 403 for the target scope and no local CLI is installed;
+publication must be confirmed via the existing GitHub workflow and public
+identity/asset/behaviour checks, without re-authentication or settings changes.
