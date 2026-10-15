@@ -302,6 +302,10 @@ test("blocked session storage still supports a tab-local capture, return and dis
   const exports = {};
   runInNewContext(compile("src/lib/record-return-state.ts"), {
     exports,
+    require: (name) => {
+      assert.equal(name, "./library-browse-state.ts");
+      return { validateLibraryBrowseSearch };
+    },
     window: {
       get sessionStorage() {
         throw new Error("blocked");
@@ -327,6 +331,7 @@ function arrivalHarness({
   native = false,
   query = input.source.search,
   rawSearch,
+  pathname = "/search",
 } = {}) {
   const frames = new Map(),
     timers = new Map(),
@@ -338,8 +343,16 @@ function arrivalHarness({
     scroll = 0,
     dialog = false,
     blur;
+  const cardId = state.recordReturnCardId(
+    pathname === "/library" ? "library" : "search",
+    "manager-rex-loi",
+  );
   const target = {
-    id: card ? input.source.cardId : "record-results-heading",
+    id: card
+      ? cardId
+      : pathname === "/library"
+        ? "library-browser-title"
+        : "record-results-heading",
     getClientRects: () => [{}],
     closest: () => null,
     matches: () => card,
@@ -363,7 +376,7 @@ function arrivalHarness({
     },
   };
   const window = {
-    location: { pathname: "/search", search: rawSearch ?? defaultStringifySearch(query) },
+    location: { pathname, search: rawSearch ?? defaultStringifySearch(query) },
     requestAnimationFrame(callback) {
       frames.set(++serial, callback);
       return serial;
@@ -416,7 +429,7 @@ function arrivalHarness({
     },
   });
   const source = state.makeRecordReturn(
-    { ...input, source: { ...input.source, search: query } },
+    { ...input, source: { ...input.source, pathname, cardId, search: query } },
     now,
   ).source;
   const stop = exports.watchRecordReturnArrival(source, !native);
@@ -508,7 +521,54 @@ test("hand-written numeric, boolean and null search URLs match the search route'
     h.expire(240);
     assert.deepEqual(h.counts(), { focus: 1, scroll: 1 }, rawSearch);
   }
-  assert.deepEqual(state.recordReturnSourceSearch("/library", { q: 2 }), {});
+});
+
+test("handwritten library primitive queries share route normalization and restore the saved shelf on Back", () => {
+  for (const [raw, q] of [
+    ["?q=2", "2"],
+    ["?q=0", "0"],
+    ["?q=true", "true"],
+    ["?q=false", "false"],
+    ["?q=null", "null"],
+  ]) {
+    const rawSearch = `${raw}&kind=chapter&scope=saved&guide=forms`;
+    const parsed = defaultParseSearch(rawSearch);
+    const query = validateLibraryBrowseSearch(parsed);
+    assert.deepEqual(state.recordReturnSourceSearch("/library", parsed), query, raw);
+    assert.equal(query.q, q);
+    const made = state.makeRecordReturn(
+      {
+        ...input,
+        source: {
+          pathname: "/library",
+          search: query,
+          cardId: state.recordReturnCardId("library", "case-02"),
+        },
+      },
+      now,
+    );
+    const back = state.advanceRecordReturn(
+      { ...made, phase: "reading" },
+      {
+        pathname: "/library",
+        search: parsed,
+      },
+      now + 1,
+    );
+    assert.equal(back.context.phase, "source", raw);
+    assert.equal(back.restore.scroll, false, raw);
+    assert.deepEqual(back.restore.source.search, query, raw);
+    for (const native of [false, true]) {
+      const h = arrivalHarness({ pathname: "/library", query, rawSearch, native });
+      h.flush();
+      h.expire(240);
+      assert.deepEqual(h.counts(), { focus: 1, scroll: native ? 0 : 1 }, raw);
+    }
+  }
+  assert.doesNotMatch(
+    compile("src/lib/library-browse-state.ts"),
+    /require\(["'].*library-data|searchLibrary|LIBRARY_ENTRIES/,
+  );
 });
 
 test("new user input, timeout and route departure cancel pending return focus and clean observers", () => {

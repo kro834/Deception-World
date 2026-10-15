@@ -1,3 +1,5 @@
+import { validateLibraryBrowseSearch } from "./library-browse-state.ts";
+
 /** A small, tab-local reading journey. Never imports the full search index. */
 export const RECORD_RETURN_KEY = "dw-record-return-v1";
 export const RECORD_RETURN_LIFETIME = 30 * 60_000;
@@ -27,7 +29,6 @@ export type RecordReturnInput = {
 };
 
 const categories = new Set(["people", "riders", "forms", "story", "world", "systems", "pages"]);
-const kinds = new Set(["page", "person", "chapter"]);
 const phases = new Set(["leaving", "reading", "returning", "source"]);
 const internalPath = /^\/(?:[a-z0-9]+(?:-[a-z0-9]+)*)(?:\/[a-z0-9]+(?:-[a-z0-9]+)*)?$/;
 const cardPattern = /^record-return-(search|library)-[a-zA-Z0-9_-]{1,120}$/;
@@ -55,8 +56,16 @@ export function recordReturnSourceSearch(pathname: string, value: unknown): Quer
   if (pathname !== "/search" && pathname !== "/library") return null;
   if (!object(value)) return null;
   const query: Query = {};
-  // /search accepts primitive queries from hand-written URLs; /library only
-  // accepts strings. Match the routes after the router's JSON query decoding.
+  if (pathname === "/library") {
+    // Share the route's lightweight validator: handwritten ?q=2/true/null
+    // and router-quoted string queries must identify the same saved shelf.
+    for (const [key, item] of Object.entries(validateLibraryBrowseSearch(value))) {
+      if (typeof item === "string") query[key] = item;
+    }
+    return query;
+  }
+  // /search also accepts primitive queries from hand-written URLs. Keep its
+  // exact draft and existing bounds after the router's JSON query decoding.
   const queryValue =
     typeof value.q === "string"
       ? value.q
@@ -77,10 +86,6 @@ export function recordReturnSourceSearch(pathname: string, value: unknown): Quer
         : NaN;
     if (Number.isFinite(shown) && shown > 24)
       query.shown = String(Math.min(144, Math.floor(shown)));
-  } else {
-    if (typeof value.kind === "string" && kinds.has(value.kind)) query.kind = value.kind;
-    if (value.guide === "keepers" || value.guide === "forms") query.guide = value.guide;
-    if (value.scope === "saved") query.scope = "saved";
   }
   return query;
 }
