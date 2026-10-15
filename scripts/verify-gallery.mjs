@@ -180,9 +180,21 @@ try {
   await recoveryPage.route(`**${GALLERY_ARTWORKS[0].full}`, (route) => route.abort());
   await recoveryPage.goto(base + "/gallery", { waitUntil: "networkidle" });
   await recoveryPage.locator(".gallery-work-open").first().click();
-  const failure = recoveryPage.locator(".gallery-viewer[open] .gallery-image-error");
-  await failure.waitFor();
-  assert.equal(await failure.locator("a").getAttribute("href"), GALLERY_ARTWORKS[0].medium);
+  // The existing viewer keeps a successful medium image after full-art failure; block both below to retain total-error coverage.
+  const fallback = recoveryPage.locator(".gallery-viewer[open] .gallery-image-fallback");
+  await fallback.waitFor();
+  const preview = recoveryPage.locator(
+    '.gallery-viewer[open] .gallery-image-preview[data-ready="true"]',
+  );
+  assert.equal(await preview.getAttribute("src"), GALLERY_ARTWORKS[0].medium);
+  assert.ok(await preview.evaluate((node) => node.naturalWidth > 0));
+  assert.equal(await preview.getAttribute("alt"), GALLERY_ARTWORKS[0].alt);
+  assert.equal(await recoveryPage.locator(".gallery-image-error").count(), 0);
+  await recoveryPage.getByRole("button", { name: "高画質を再読み込み", exact: true }).click();
+  await recoveryPage.waitForFunction(
+    () => document.querySelector('.gallery-image-full[data-ready="true"]')?.naturalWidth > 0,
+  );
+  await fallback.waitFor({ state: "hidden" });
   await recoveryPage.getByRole("button", { name: "次の作品 →" }).click();
   await recoveryPage.waitForFunction(
     () => document.querySelector('.gallery-image-full[data-ready="true"]')?.naturalWidth > 0,
@@ -191,8 +203,38 @@ try {
   await recoveryPage.locator(".gallery-viewer[open]").waitFor({ state: "hidden" });
   await recovery.close();
 
+  const unavailable = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const unavailablePage = await unavailable.newPage();
+  for (const source of new Set([GALLERY_ARTWORKS[0].full, GALLERY_ARTWORKS[0].medium]))
+    await unavailablePage.route(`**${source}`, (route) => route.abort());
+  await unavailablePage.goto(base + "/gallery", { waitUntil: "networkidle" });
+  await unavailablePage.locator(".gallery-work-open").first().click();
+  const failure = unavailablePage.locator(".gallery-viewer[open] .gallery-image-error");
+  await failure.waitFor();
+  assert.equal(await failure.locator("a").getAttribute("href"), GALLERY_ARTWORKS[0].medium);
+  await unavailablePage.getByRole("button", { name: "次の作品 →" }).click();
+  await unavailablePage.waitForFunction(
+    () => document.querySelector('.gallery-image-full[data-ready="true"]')?.naturalWidth > 0,
+  );
+  await unavailablePage.getByRole("button", { name: "閉じる" }).click();
+  await unavailablePage.locator(".gallery-viewer[open]").waitFor({ state: "hidden" });
+  await unavailable.close();
+
   // Check the newly appended exhibition at both viewing sizes, including
   // the final work's wrap back to the start of the collection.
+  // Titles are publicly editable (or blank); compare the live card/header, not retired catalog defaults.
+  const assertWorkHeading = async (page, dialog, work) => {
+    const card = page.locator(`[data-gallery-artwork="${work.id}"]`);
+    const number = await card.locator(".gallery-work-number").innerText();
+    assert.equal(
+      await dialog.locator("h2").evaluate((node) => node.firstChild.textContent.trim()),
+      number,
+    );
+    assert.deepEqual(
+      await dialog.locator(".gallery-personal-title").allTextContents(),
+      await card.locator("h3").allTextContents(),
+    );
+  };
   for (const width of [390, 1440]) {
     const added = await browser.newContext({ viewport: { width, height: 900 } });
     const addedPage = await added.newPage();
@@ -204,7 +246,7 @@ try {
       const art = dialog.locator(".gallery-image-full");
       await art.evaluate((node) => node.decode());
       assert.equal(await art.getAttribute("src"), work.full);
-      assert.equal(await dialog.locator("h2").innerText(), work.title);
+      await assertWorkHeading(addedPage, dialog, work);
       assert.deepEqual(await art.evaluate((node) => [node.naturalWidth, node.naturalHeight]), [
         work.width,
         work.height,
@@ -213,7 +255,8 @@ try {
       await addedPage.screenshot({ path: `${output}/gallery-${width}-${work.id}.png` });
       if (work === GALLERY_ARTWORKS.at(-1)) {
         await addedPage.keyboard.press("ArrowRight");
-        assert.equal(await dialog.locator("h2").innerText(), GALLERY_ARTWORKS[0].title);
+        await assertWorkHeading(addedPage, dialog, GALLERY_ARTWORKS[0]);
+        assert.equal(await art.getAttribute("src"), GALLERY_ARTWORKS[0].full);
       }
       await addedPage.getByRole("button", { name: "閉じる" }).click();
       await dialog.waitFor({ state: "hidden" });
