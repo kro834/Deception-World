@@ -210,12 +210,34 @@ try {
 
     // Opening by pointer, then closing by keyboard is a mixed-input path.
     const trigger = page.getByRole("button", { name: "メニューを開く", exact: true });
+    const triggerBounds = await trigger.boundingBox();
+    assert.ok(
+      triggerBounds &&
+        triggerBounds.y >= 0 &&
+        triggerBounds.y + triggerBounds.height <= viewport.height,
+      "the sticky menu opener is already visible without scrolling",
+    );
+    const point = {
+      x: triggerBounds.x + triggerBounds.width / 2,
+      y: triggerBounds.y + triggerBounds.height / 2,
+    };
+    assert.ok(
+      await trigger.evaluate(
+        (node, point) => node.contains(document.elementFromPoint(point.x, point.y)),
+        point,
+      ),
+      "the visible opener receives the pointer",
+    );
     const before = await page.evaluate(() => scrollY);
-    await trigger.click();
+    // WebKit's locator scrollIntoViewIfNeeded moves an already-visible sticky
+    // opener by 83px before pointerdown. Use its measured visible position,
+    // matching a real mouse press, rather than attributing that move to menu close.
+    await page.mouse.click(point.x, point.y);
     await page.locator('.side-panel[data-open="true"]').waitFor();
     await page.waitForFunction(() =>
       document.querySelector('.side-panel[data-open="true"]')?.contains(document.activeElement),
     );
+    const openedOffset = await page.evaluate(() => scrollY);
     // macOS WebKit uses Option-Tab to include native buttons in its tab order.
     await page.keyboard.press(engine === "webkit" ? "Alt+Tab" : "Tab");
     assert.equal(
@@ -227,9 +249,10 @@ try {
     await page.waitForFunction(
       () => document.activeElement?.getAttribute("aria-label") === "メニューを開く",
     );
+    const closedOffset = await page.evaluate(() => scrollY);
     assert.ok(
-      Math.abs((await page.evaluate(() => scrollY)) - before) < 2,
-      "closing the menu keeps the page position",
+      Math.abs(closedOffset - before) < 2,
+      `closing the menu keeps the page position (${before} → ${openedOffset} → ${closedOffset})`,
     );
     assert.deepEqual(errors, [], "no browser JS error in the complete reading journey");
     report.push({

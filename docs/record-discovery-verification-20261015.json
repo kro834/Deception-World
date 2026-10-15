@@ -1,0 +1,89 @@
+{
+  "purpose": "Pre-publication implementation and local verification record; not a production attestation",
+  "date": "2026-10-15",
+  "branch": "codex/site-improvements-20261015",
+  "integratedMain": "45e6bad662eb59eba6df66995c9321c540a9a771",
+  "features": [
+    "Shareable library query, kind and saved-only filters, including Back and reload",
+    "Preserve an unflushed query before opening a record; handle IME and stale asynchronous navigation",
+    "Tab-session return from a record to the original search or library card with focus and scroll restoration",
+    "Keyboard-accessible full-page search results without changing quick-search combobox navigation",
+    "Current-section menu visibility and keyboard focus restoration without moving the underlying page",
+    "Unambiguous source download explanation and non-duplicated 404 recovery links",
+    "Settle WebKit's observed post-bookmark fragment adjustment at the same offset, once after an own bookmark DOM commit"
+  ],
+  "coordination": {
+    "startupAndImages": "da0c2b2eec390b827850228684de1b19df95da27",
+    "opening": "899b6e702a5bcb9063f93acb9c66a2af4782f1cd",
+    "dream": "45e6bad662eb59eba6df66995c9321c540a9a771",
+    "method": "Normal merges preserving the four other chats' changes; dirty owner checkout not edited"
+  },
+  "preserved": [
+    "Owner prose, names, source data and intentional duplicate entries",
+    "Rider long-press selection and vertical page scrolling",
+    "Opening timing and logo-dive direction",
+    "Removal of Ultra runtime settings, while retaining story form names",
+    "No public gallery upload or title edit during verification"
+  ],
+  "repositoryGates": {
+    "implementationBuild": "40dc5bd4a0a746a02572929bf0bc46bbc8786a6e",
+    "tests": { "total": 2351, "passed": 2347, "failed": 0, "skipped": 4 },
+    "typecheck": "passed",
+    "eslint": { "errors": 0, "existingWarnings": 12 },
+    "sourceParts": "15 groups matched",
+    "diffCheck": "passed",
+    "productionBuild": "passed without running local database migrations"
+  },
+  "requestedRegressions": {
+    "implementationBuild": "7ead20a4c1f813249af349b919df2281388bc7df",
+    "status": "all passed",
+    "scripts": [
+      "verify-rexonance-operability",
+      "verify-dream-scroll-work",
+      "verify-dream-reader-navigation",
+      "verify-site-health",
+      "verify-liquid-grid",
+      "verify-rider-hold-navigation",
+      "verify-rail-work",
+      "verify-hero-touch"
+    ],
+    "siteHealth": "93/93 route and viewport combinations",
+    "evidence": "output/playwright/final-<script>.log (local ignored browser artifacts)"
+  },
+  "startupFileBudget": {
+    "status": "passed",
+    "baselineEntryBytes": 528209,
+    "entryBytes": 406997,
+    "baselineEntryGzipBytes": 162759,
+    "entryGzipBytes": 130439,
+    "criticalGraphBytes": 537516,
+    "criticalGraphGzipBytes": 175318,
+    "measurement": "Decoded files and reproducible gzip size, not elapsed startup or network transfer time"
+  },
+  "browserVerification": {
+    "implementationBuild": "40dc5bd4a0a746a02572929bf0bc46bbc8786a6e",
+    "chromium": "passed; 390x844 and 1024x1366 journeys, 320x640/568x320/1440x900 layouts",
+    "webkit": "passed; the same five viewports and full touch/mouse, keyboard and return journeys",
+    "webkitFixBoundaries": [
+      "Only own bookmark commits on hash-bearing library pages; cold hydration and unrelated renders do not scroll",
+      "Same x/y coordinates, no history, focus, pointer-default or pointer-capture change",
+      "Skip out-of-range Safari rubber-band coordinates",
+      "Shared rail, load-gate, press feedback and root scroll CSS remain unchanged",
+      "Press/margin/default-blocking hypotheses were rejected by independent contrasts; speculative changes were removed"
+    ],
+    "menuHarness": "The already-visible sticky opener is hit-tested and clicked at its measured center. WebKit locator auto-scroll independently moved it 83px before pointerdown; coordinate input preserved the page through opening, closing, focus restoration and unlock. No app workaround was added for this harness behavior.",
+    "coverage": [
+      "Library query then immediate record open; native Back, reload, explicit return and stable card focus",
+      "Saved-only shelf, removal focus, reload and touch/mouse filter activation",
+      "Search Tab navigation, record round trip and original result focus",
+      "Quoted and handwritten numeric library URL round trips",
+      "Pointer-open/keyboard-close menu focus restoration",
+      "No horizontal overflow; download/404 recovery and current-location menu row"
+    ],
+    "physicalDevices": "Not tested; iPhone/iPad Safari and installed-PWA checks remain with the owner"
+  },
+  "publication": {
+    "method": "Normal push to main, deploy-main.yml gates and exact-release public verification",
+    "attestation": "Publication is verified separately after CI; this source file does not claim that publication has completed"
+  }
+}
