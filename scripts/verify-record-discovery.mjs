@@ -25,6 +25,11 @@ const ready = (page) =>
 const settled = async (page) => {
   await ready(page);
   await page.evaluate(() => document.fonts.ready);
+  // SSR already carries the family attribute. Wait for the shelf's existing
+  // interactive readiness signal before exercising its hydrated draft state.
+  if (await page.locator(".library-page").count()) {
+    await page.locator(".library-card button:not([disabled])").first().waitFor();
+  }
 };
 const shot = async (page, name) => {
   await page.evaluate(async () => {
@@ -241,8 +246,12 @@ try {
     await page.locator('.side-panel[data-open="true"]').evaluate(async (node) => {
       await Promise.all(
         node
-          .getAnimations({ subtree: true })
-          .filter((animation) => animation.effect?.getComputedTiming().endTime !== Infinity)
+          .getAnimations()
+          .filter(
+            (animation) =>
+              animation.playState === "running" &&
+              animation.effect?.getComputedTiming().endTime !== Infinity,
+          )
           .map((animation) => animation.finished.catch(() => {})),
       );
     });
