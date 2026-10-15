@@ -1047,6 +1047,9 @@ export function prepareRexonanceNanites(priority: "low" | "high" = "low") {
   return pending;
 }
 
+/** The prepared layout, read-only (tests and frame audits). */
+export const rexonanceNaniteLayout = (): Readonly<Layout> | null => LAYOUT;
+
 /** Whether the call can draw its extras: prepared, and every kit sheet decoded. */
 export const isRexonanceNaniteReady = () =>
   READY &&
@@ -1387,7 +1390,7 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
     TX = (dx * rc - dy * rs) / tl;
     TY = (dx * rs + dy * rc) / tl;
   };
-  // A chip being born (fraction `born` of its wave): on its spiral arm out
+  // A chip being born (that fraction of its wave): on its spiral arm out
   // of the core, blending into its ring pose (PX, PY on entry).
   const bornPose = (c: number, born: number) => {
     const a = L.arm[c] + L.armDir[c] * 2.4 * Math.PI * born;
@@ -2341,6 +2344,7 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
       const p = L.order[k];
       const F = all[p].fit;
       if (!(L.flags[p] & 2) || L.kind[p] < 0 || t < F || t >= F + SW.shock) continue;
+      if (TOUCH && heroes >= HEROES) break;
       const tau = (t - F) / SW.shock;
       const frame = Math.min(KIT_FX.shock.frames - 1, Math.floor(tau * KIT_FX.shock.frames));
       const k2 = (L.shockW[p] * s) / KIT_FX.shock.w;
