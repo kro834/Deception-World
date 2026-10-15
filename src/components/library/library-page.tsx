@@ -22,7 +22,12 @@ import {
 } from "@/lib/library-data";
 import { pathArt, RIDER_ART, titleRunStyle } from "@/lib/record-art";
 import { watchRecordArrival } from "@/lib/record-arrival";
-import { captureRecordReturn, recordReturnCardId } from "@/lib/record-return-state";
+import {
+  captureRecordReturn,
+  finishRecordReturnOpening,
+  recordReturnCardId,
+  type RecordReturnContext,
+} from "@/lib/record-return-state";
 import {
   libraryBrowseKey,
   LIBRARY_QUERY_DELAY,
@@ -53,7 +58,7 @@ function EntryCard({
   entry: LibraryEntry;
   bookmarked: boolean;
   ready: boolean;
-  beforeOpen: (entry: LibraryEntry) => Promise<(() => boolean) | undefined>;
+  beforeOpen: (entry: LibraryEntry) => Promise<(() => RecordReturnContext | null) | undefined>;
   onBookmark: (id: string) => void;
 }) {
   const { go } = useLoadGate();
@@ -81,15 +86,24 @@ function EntryCard({
         // GuardedLink's beforeNavigate is synchronous. Keep its native link
         // and intent warmers, but await the source URL before leaving it.
         void beforeOpen(entry)
-          .then((commit) => {
-            if (!commit?.()) return;
-            watchRecordArrival(entry.path, entry.hash);
-            return go({
-              to: entry.path,
-              hash: entry.hash,
-              assets: [],
-              focusDestination: fromKeyboard,
-            });
+          .then(async (commit) => {
+            const captured = commit?.();
+            if (!captured) return;
+            try {
+              watchRecordArrival(entry.path, entry.hash);
+              await go({
+                to: entry.path,
+                hash: entry.hash,
+                assets: [],
+                focusDestination: fromKeyboard,
+              });
+            } finally {
+              finishRecordReturnOpening(captured, {
+                pathname: window.location.pathname,
+                search: defaultParseSearch(window.location.search),
+                hash: window.location.hash,
+              });
+            }
           })
           .catch(() => link.focus({ preventScroll: true }));
       }}
@@ -334,16 +348,18 @@ export function LibraryPage({
     // Capture and the caller's go() happen in the same synchronous turn after
     // this final guard; a newer click, Back, or unmount cannot revive an old A.
     return () => {
-      if (!isCurrent()) return false;
-      captureRecordReturn({
-        source: {
-          pathname: "/library",
-          search: { ...source, guide },
-          cardId: recordReturnCardId("library", entry.id),
+      if (!isCurrent()) return null;
+      return captureRecordReturn(
+        {
+          source: {
+            pathname: "/library",
+            search: { ...source, guide },
+            cardId: recordReturnCardId("library", entry.id),
+          },
+          target: { pathname: entry.path, hash: entry.hash },
         },
-        target: { pathname: entry.path, hash: entry.hash },
-      });
-      return true;
+        true,
+      );
     };
   };
   const setQuery = (value: string) => {

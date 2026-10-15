@@ -6,9 +6,11 @@ import { watchRecordArrival } from "@/lib/record-arrival";
 import {
   captureRecordReturn,
   clearRecordReturn,
+  finishRecordReturnOpening,
   makeRecordReturn,
   matchesRecordReturnSource,
   type RecordReturnInput,
+  type RecordReturnContext,
 } from "@/lib/record-return-state";
 
 /** Opens a result the way the site's own links do (load gate, transitions). */
@@ -33,6 +35,7 @@ export function useOpenResult() {
       const request = ++sequence.current;
       const target = { pathname: document.to, search: document.search, hash };
       const context = source ? makeRecordReturn({ source, target }) : null;
+      let captured: RecordReturnContext | null = null;
       if (context) {
         // Commit the live draft to this history entry before leaving. The
         // debounced field write may not have run yet when a result is opened.
@@ -57,14 +60,26 @@ export function useOpenResult() {
           })
         )
           return;
-        captureRecordReturn({ source: context.source, target });
+        captured = captureRecordReturn({ source: context.source, target }, true);
       } else clearRecordReturn();
-      watchRecordArrival(document.to, hash);
-      if (document.search) {
-        void router.navigate({ to: document.to, search: document.search as never, hash });
-        return;
+      try {
+        watchRecordArrival(document.to, hash);
+        if (document.search) {
+          await router.navigate({ to: document.to, search: document.search as never, hash });
+        } else {
+          await go({ to: document.to, hash, assets: [], focusDestination: fromKeyboard });
+        }
+      } catch {
+        // The router/load gate owns its error and retry UI. Event handlers
+        // intentionally do not await this hook, so consume the rejection here.
+      } finally {
+        if (captured)
+          finishRecordReturnOpening(captured, {
+            pathname: window.location.pathname,
+            search: defaultParseSearch(window.location.search),
+            hash: window.location.hash,
+          });
       }
-      void go({ to: document.to, hash, assets: [], focusDestination: fromKeyboard });
     },
     [go, router],
   );

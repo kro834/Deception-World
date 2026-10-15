@@ -5,12 +5,12 @@ import { getInquiryGuide, getInquiryStop } from "@/lib/inquiry-guides";
 import {
   beginRecordReturn,
   clearRecordReturn,
+  expireRecordReturn,
   getRecordReturn,
   getServerRecordReturn,
   matchesRecordReturnTarget,
   reconcileRecordReturn,
-  RECORD_RETURN_LIFETIME,
-  RECORD_RETURN_PENDING,
+  recordReturnExpiresAt,
   subscribeRecordReturn,
 } from "@/lib/record-return-state";
 import { watchRecordReturnArrival } from "@/lib/record-return-arrival";
@@ -23,23 +23,22 @@ export function RecordReturnNavigation() {
     getRecordReturn,
     getServerRecordReturn,
   );
-  const createdAt = context?.createdAt;
+  const source = context?.source;
   const phase = context?.phase;
 
   useEffect(() => {
     const restore = reconcileRecordReturn(location);
     return restore ? watchRecordReturnArrival(restore.source, restore.scroll) : undefined;
-  }, [location, createdAt]);
+  }, [location, source]);
 
   useEffect(() => {
-    if (createdAt === undefined) return;
-    const lifetime = phase === "leaving" ? RECORD_RETURN_PENDING : RECORD_RETURN_LIFETIME;
+    if (!context) return;
     const timer = window.setTimeout(
-      clearRecordReturn,
-      Math.max(0, createdAt + lifetime - Date.now()),
+      () => expireRecordReturn(context),
+      Math.max(0, recordReturnExpiresAt(context) - Date.now()),
     );
     return () => window.clearTimeout(timer);
-  }, [createdAt, phase]);
+  }, [context]);
 
   const guide = getInquiryGuide((location.search as Record<string, unknown>).guide);
   if (

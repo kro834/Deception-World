@@ -215,13 +215,14 @@ export function advanceRecordReturn(
   context: RecordReturnContext | null,
   location: RecordReturnLocation,
   now = Date.now(),
+  opening = false,
 ): {
   context: RecordReturnContext | null;
   restore?: { source: RecordReturnSource; scroll: boolean };
 } {
   if (!context || now - context.createdAt >= RECORD_RETURN_LIFETIME || now < context.createdAt)
     return { context: null };
-  if (context.phase === "leaving" && now - context.createdAt >= RECORD_RETURN_PENDING)
+  if (!opening && context.phase === "leaving" && now - context.createdAt >= RECORD_RETURN_PENDING)
     return { context: null };
   if (matchesRecordReturnTarget(context, location))
     return {
@@ -230,7 +231,7 @@ export function advanceRecordReturn(
           ? context
           : { ...context, phase: "reading" },
     };
-  if (context.phase === "leaving" && location.pathname === context.source.pathname)
+  if (context.phase === "leaving" && matchesRecordReturnSource(context.source, location))
     return { context };
   if (matchesRecordReturnSource(context.source, location)) {
     if (context.phase === "source") return { context };
@@ -245,8 +246,18 @@ export function advanceRecordReturn(
 let snapshot: RecordReturnContext | null = null;
 let initialized = false;
 const listeners = new Set<() => void>();
+// Object identity, not an epoch timestamp, distinguishes even two captures in
+// the same millisecond. This lease is deliberately never persisted on reload.
+let opening: { context: RecordReturnContext; release: () => void } | undefined;
+
+function releaseOpening() {
+  const previous = opening;
+  opening = undefined;
+  previous?.release();
+}
 
 function publish(next: RecordReturnContext | null) {
+  if (opening && opening.context !== next) releaseOpening();
   initialized = true;
   if (snapshot === next) return;
   snapshot = next;
@@ -276,10 +287,55 @@ export function subscribeRecordReturn(listener: () => void) {
 export const getRecordReturn = () => snapshot;
 export const getServerRecordReturn = () => null;
 
-export function captureRecordReturn(input: RecordReturnInput) {
+export function captureRecordReturn(input: RecordReturnInput, inFlight = false) {
   const next = makeRecordReturn(input);
+  releaseOpening();
+  if (next && inFlight) {
+    const cancel = () => {
+      if (opening?.context === next) publish(null);
+    };
+    opening = {
+      context: next,
+      release: () => {
+        window.removeEventListener("popstate", cancel);
+        window.removeEventListener("pagehide", cancel);
+        document.removeEventListener("deception-world:cancel-route-transition", cancel);
+      },
+    };
+    window.addEventListener("popstate", cancel);
+    window.addEventListener("pagehide", cancel);
+    document.addEventListener("deception-world:cancel-route-transition", cancel);
+  }
   publish(next);
   return next;
+}
+
+/** Complete only this still-pending opening; never recreate a cancelled or
+ * superseded journey, even when its route promise finishes much later. */
+export function finishRecordReturnOpening(
+  captured: RecordReturnContext,
+  location: RecordReturnLocation,
+) {
+  if (opening?.context !== captured || snapshot !== captured) return;
+  const result = matchesRecordReturnTarget(captured, location)
+    ? advanceRecordReturn(captured, location, Date.now(), true).context
+    : null;
+  publish(result);
+}
+
+export function recordReturnExpiresAt(context: RecordReturnContext) {
+  const lifetime =
+    context.phase === "leaving" && opening?.context !== context
+      ? RECORD_RETURN_PENDING
+      : RECORD_RETURN_LIFETIME;
+  return context.createdAt + lifetime;
+}
+
+/** A queued timer from an older capture must not dismiss a newer selection. */
+export function expireRecordReturn(expected: RecordReturnContext) {
+  if (snapshot !== expected) return;
+  const now = Date.now();
+  if (now < expected.createdAt || now >= recordReturnExpiresAt(expected)) publish(null);
 }
 export function clearRecordReturn() {
   publish(null);
@@ -288,7 +344,7 @@ export function beginRecordReturn() {
   if (snapshot?.phase === "reading") publish({ ...snapshot, phase: "returning" });
 }
 export function reconcileRecordReturn(location: RecordReturnLocation) {
-  const result = advanceRecordReturn(snapshot, location);
+  const result = advanceRecordReturn(snapshot, location, Date.now(), opening?.context === snapshot);
   publish(result.context);
   return result.restore;
 }

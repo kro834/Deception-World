@@ -270,9 +270,249 @@ test("unrelated routes, changed destination hashes, abandoned navigation and exp
   );
   assert.equal(state.advanceRecordReturn(reading, input.target, now - 1).context, null);
   assert.equal(
-    state.advanceRecordReturn(context(), { ...sourceLocation, search: {} }, now + 1).context.phase,
-    "leaving",
+    state.advanceRecordReturn(context(), { ...sourceLocation, search: {} }, now + 1).context,
+    null,
   );
+});
+
+function openingHarness() {
+  let time = now;
+  const events = new Map();
+  const storage = new Map();
+  const eventTarget = (surface) => ({
+    addEventListener(name, callback) {
+      events.set(`${surface}:${name}`, callback);
+    },
+    removeEventListener(name, callback) {
+      const key = `${surface}:${name}`;
+      if (events.get(key) === callback) events.delete(key);
+    },
+  });
+  const exports = {};
+  runInNewContext(compile("src/lib/record-return-state.ts"), {
+    exports,
+    Date: class extends Date {
+      static now() {
+        return time;
+      }
+    },
+    window: {
+      ...eventTarget("window"),
+      sessionStorage: {
+        getItem: (key) => storage.get(key) ?? null,
+        setItem: (key, value) => storage.set(key, value),
+        removeItem: (key) => storage.delete(key),
+      },
+    },
+    document: eventTarget("document"),
+    require: (name) => {
+      assert.equal(name, "./library-browse-state.ts");
+      return { validateLibraryBrowseSearch };
+    },
+  });
+  return {
+    state: exports,
+    events,
+    storage,
+    now: () => time,
+    at: (next) => {
+      time = next;
+    },
+    dispatch: (name) => events.get(name)?.(),
+  };
+}
+
+test("an active capture survives the 15-second boundary in pure transitions and the UI deadline", () => {
+  for (const elapsed of [14_999, 15_000, 16_000]) {
+    const h = openingHarness();
+    const captured = h.state.captureRecordReturn(input, true);
+    assert.equal(h.state.recordReturnExpiresAt(captured), now + state.RECORD_RETURN_LIFETIME);
+    h.at(now + elapsed);
+    // A queued callback from a previous 15-second timer cannot kill the lease.
+    h.state.expireRecordReturn(captured);
+    assert.equal(h.state.getRecordReturn(), captured);
+    h.state.reconcileRecordReturn(sourceLocation);
+    assert.equal(h.state.getRecordReturn(), captured);
+    assert.equal(
+      state.advanceRecordReturn(captured, input.target, now + elapsed, true).context.phase,
+      "reading",
+    );
+    h.state.reconcileRecordReturn(input.target);
+    const reading = h.state.getRecordReturn();
+    assert.equal(reading.phase, "reading");
+    assert.equal(h.events.size, 0);
+    // The old leaving callback can also run after the arrival effect.
+    h.state.expireRecordReturn(captured);
+    h.state.finishRecordReturnOpening(captured, sourceLocation);
+    assert.equal(h.state.getRecordReturn(), reading);
+    assert.equal(
+      h.state.recordReturnExpiresAt(reading),
+      now + state.RECORD_RETURN_LIFETIME,
+    );
+  }
+});
+
+test("completion before the destination effect retains only the exact arrived target after 15 seconds", () => {
+  for (const elapsed of [14_999, 15_000, 16_000]) {
+    const h = openingHarness();
+    const captured = h.state.captureRecordReturn(input, true);
+    h.at(now + elapsed);
+    h.state.finishRecordReturnOpening(captured, input.target);
+    assert.equal(h.state.getRecordReturn().phase, "reading");
+    h.state.reconcileRecordReturn(input.target);
+    assert.equal(h.state.getRecordReturn().phase, "reading");
+    assert.equal(h.events.size, 0);
+  }
+  for (const location of [
+    sourceLocation,
+    { ...sourceLocation, search: { q: "別の語" } },
+    { ...input.target, hash: "dossier-abilities" },
+    { ...input.target, search: { guide: "keepers" } },
+    { pathname: "/world" },
+  ]) {
+    const h = openingHarness();
+    const captured = h.state.captureRecordReturn(input, true);
+    h.at(now + 16_000);
+    h.state.finishRecordReturnOpening(captured, location);
+    assert.equal(h.state.getRecordReturn(), null, JSON.stringify(location));
+    assert.equal(h.events.size, 0);
+    h.state.finishRecordReturnOpening(captured, input.target);
+    assert.equal(h.state.getRecordReturn(), null);
+  }
+});
+
+test("Back, pagehide, explicit cancellation and changed source/target never revive a pending capture", () => {
+  for (const event of [
+    "window:popstate",
+    "window:pagehide",
+    "document:deception-world:cancel-route-transition",
+  ]) {
+    const h = openingHarness();
+    const captured = h.state.captureRecordReturn(input, true);
+    h.dispatch(event);
+    assert.equal(h.state.getRecordReturn(), null, event);
+    assert.equal(h.events.size, 0);
+    h.at(now + 16_000);
+    h.state.finishRecordReturnOpening(captured, input.target);
+    assert.equal(h.state.getRecordReturn(), null);
+  }
+  for (const location of [
+    { ...sourceLocation, search: { q: "別の語", category: "people", shown: 48 } },
+    { ...input.target, hash: "dossier-abilities" },
+    { pathname: "/world" },
+  ]) {
+    const h = openingHarness();
+    const captured = h.state.captureRecordReturn(input, true);
+    h.state.reconcileRecordReturn(location);
+    assert.equal(h.state.getRecordReturn(), null);
+    h.state.finishRecordReturnOpening(captured, input.target);
+    assert.equal(h.state.getRecordReturn(), null);
+    assert.equal(h.events.size, 0);
+  }
+});
+
+test("same-millisecond captures have independent completion, cancellation and timer identities", () => {
+  const h = openingHarness();
+  const first = h.state.captureRecordReturn(input, true);
+  const oldCancel = h.events.get("window:popstate");
+  const second = h.state.captureRecordReturn(input, true);
+  assert.equal(first.createdAt, second.createdAt);
+  assert.notEqual(first, second);
+  h.at(now + 16_000);
+  h.state.finishRecordReturnOpening(first, sourceLocation);
+  h.state.finishRecordReturnOpening(first, input.target);
+  h.state.expireRecordReturn(first);
+  oldCancel();
+  assert.equal(h.state.getRecordReturn(), second);
+  assert.equal(h.events.size, 3);
+  h.state.finishRecordReturnOpening(second, input.target);
+  const reading = h.state.getRecordReturn();
+  assert.equal(reading.phase, "reading");
+  h.state.finishRecordReturnOpening(first, sourceLocation);
+  assert.equal(h.state.getRecordReturn(), reading);
+  assert.equal(h.events.size, 0);
+});
+
+test("in-flight state is never persisted, ordinary pending expires at 15 seconds and all journeys expire at 30 minutes", () => {
+  const h = openingHarness();
+  const captured = h.state.captureRecordReturn(input, true);
+  const persisted = h.storage.get(state.RECORD_RETURN_KEY);
+  assert.deepEqual(JSON.parse(persisted), plain(captured));
+  assert.equal(state.parseRecordReturn(persisted, now + 15_000), null);
+  h.at(now + state.RECORD_RETURN_LIFETIME);
+  assert.equal(
+    state.advanceRecordReturn(captured, input.target, now + state.RECORD_RETURN_LIFETIME, true)
+      .context,
+    null,
+  );
+  h.state.expireRecordReturn(captured);
+  assert.equal(h.state.getRecordReturn(), null);
+  assert.equal(h.events.size, 0);
+  h.state.finishRecordReturnOpening(captured, input.target);
+  assert.equal(h.state.getRecordReturn(), null);
+
+  const plainPending = openingHarness();
+  const pending = plainPending.state.captureRecordReturn(input);
+  assert.equal(plainPending.state.recordReturnExpiresAt(pending), now + 15_000);
+  plainPending.at(now + 15_000);
+  plainPending.state.expireRecordReturn(pending);
+  assert.equal(plainPending.state.getRecordReturn(), null);
+});
+
+test("the return component schedules the active lifetime and binds effects to capture identity rather than timestamp", () => {
+  const h = openingHarness();
+  const timers = [];
+  const effects = [];
+  const exports = {};
+  runInNewContext(compile("src/components/library/record-return-navigation.tsx"), {
+    exports,
+    Date: { now: h.now },
+    window: {
+      setTimeout(callback, delay) {
+        timers.push({ callback, delay });
+        return timers.length;
+      },
+      clearTimeout() {},
+    },
+    require(name) {
+      if (name === "react")
+        return {
+          useEffect(callback, dependencies) {
+            effects.push({ callback, dependencies });
+          },
+          useSyncExternalStore: () => h.state.getRecordReturn(),
+        };
+      if (name === "@tanstack/react-router")
+        return { useRouterState: ({ select }) => select({ location: sourceLocation }) };
+      if (name === "@/lib/record-return-state") return h.state;
+      if (name === "@/lib/inquiry-guides") return { getInquiryGuide, getInquiryStop };
+      if (name === "@/components/load-gate") return {};
+      if (name === "@/lib/record-return-arrival") return {};
+      if (name === "react/jsx-runtime") return {};
+      if (name.endsWith("?url")) return { default: "/record-return.css" };
+      throw new Error(name);
+    },
+  });
+  const first = h.state.captureRecordReturn(input, true);
+  exports.RecordReturnNavigation();
+  effects[0].callback();
+  effects[1].callback();
+  assert.equal(timers[0].delay, state.RECORD_RETURN_LIFETIME);
+  const second = h.state.captureRecordReturn(input, true);
+  exports.RecordReturnNavigation();
+  assert.equal(first.createdAt, second.createdAt);
+  assert.notEqual(effects[0].dependencies[1], effects[2].dependencies[1]);
+  assert.equal(effects[1].dependencies[0], first);
+  assert.equal(effects[3].dependencies[0], second);
+  h.at(now + 16_000);
+  timers[0].callback();
+  assert.equal(h.state.getRecordReturn(), second);
+  effects[2].callback();
+  effects[3].callback();
+  assert.equal(timers[1].delay, state.RECORD_RETURN_LIFETIME - 16_000);
+  h.at(now + state.RECORD_RETURN_LIFETIME);
+  timers[1].callback();
+  assert.equal(h.state.getRecordReturn(), null);
 });
 
 test("session parsing rejects malformed and expired data, retaining safe reload state", () => {
@@ -640,12 +880,15 @@ test("full-page results can opt into Tab while quick-search defaults and modifie
   assert.match(page, /window\.clearTimeout\(queryTimerRef\.current\)/);
 });
 
-function openHarness() {
+function openHarness({ store, deferGo = false } = {}) {
   const calls = [],
-    pending = [];
+    pending = [],
+    goPending = [],
+    finishes = [];
   const location = {
     pathname: input.source.pathname,
     search: defaultStringifySearch(input.source.search),
+    hash: "",
   };
   let cleanup;
   const exports = {};
@@ -678,6 +921,8 @@ function openHarness() {
           useLoadGate: () => ({
             go: (options) => {
               calls.push(["go", plain(options)]);
+              if (deferGo)
+                return new Promise((resolve, reject) => goPending.push({ resolve, reject }));
             },
           }),
         };
@@ -686,14 +931,90 @@ function openHarness() {
       if (name === "@/lib/record-return-state")
         return {
           ...state,
-          captureRecordReturn: (input) => calls.push(["capture", plain(input)]),
-          clearRecordReturn: () => calls.push(["clear"]),
+          captureRecordReturn: (input, inFlight) => {
+            assert.equal(inFlight, true);
+            calls.push(["capture", plain(input)]);
+            return store ? store.captureRecordReturn(input, inFlight) : state.makeRecordReturn(input);
+          },
+          finishRecordReturnOpening: (captured, location) => {
+            finishes.push([captured, plain(location)]);
+            store?.finishRecordReturnOpening(captured, location);
+          },
+          clearRecordReturn: () => {
+            calls.push(["clear"]);
+            store?.clearRecordReturn();
+          },
         };
       throw new Error(name);
     },
   });
-  return { open: exports.useOpenResult(), calls, pending, location, cleanup: () => cleanup() };
+  return {
+    open: exports.useOpenResult(), calls, pending, goPending, finishes, location,
+    cleanup: () => cleanup(),
+  };
 }
+
+test("search keeps its exact capture alive while go is pending and completes it after a slow target arrives", async () => {
+  const h = openingHarness();
+  const open = openHarness({ store: h.state, deferGo: true });
+  const result = { document: { to: input.target.pathname }, hash: input.target.hash };
+  const promise = open.open(result, false, input.source);
+  open.pending[0].resolve();
+  await new Promise(setImmediate);
+  const captured = h.state.getRecordReturn();
+  assert.equal(captured.phase, "leaving");
+  h.at(now + 16_000);
+  h.state.expireRecordReturn(captured);
+  assert.equal(h.state.getRecordReturn(), captured);
+  Object.assign(open.location, {
+    pathname: input.target.pathname,
+    search: "",
+    hash: `#${input.target.hash}`,
+  });
+  open.goPending[0].resolve();
+  await promise;
+  assert.equal(h.state.getRecordReturn().phase, "reading");
+  assert.equal(open.finishes.length, 1);
+  assert.equal(open.finishes[0][0], captured);
+  assert.equal(h.events.size, 0);
+});
+
+test("search consumes rejected go and direct navigation, clears failed or ignored openings, and never revives Back", async () => {
+  for (const mode of ["rejected-go", "ignored-go", "rejected-direct", "back"]) {
+    const h = openingHarness();
+    const open = openHarness({ store: h.state, deferGo: true });
+    const result = {
+      document: {
+        to: input.target.pathname,
+        ...(mode === "rejected-direct" ? { search: { guide: "keepers" } } : {}),
+      },
+      hash: input.target.hash,
+    };
+    const promise = open.open(result, false, input.source);
+    open.pending[0].resolve();
+    await new Promise(setImmediate);
+    assert.equal(h.state.getRecordReturn().phase, "leaving");
+    h.at(now + 16_000);
+    if (mode === "back") {
+      h.dispatch("window:popstate");
+      Object.assign(open.location, {
+        pathname: input.target.pathname, search: "", hash: `#${input.target.hash}`,
+      });
+    }
+    if (mode === "rejected-direct") {
+      // A rejected direct route did not commit its new browser URL.
+      Object.assign(open.location, sourceLocation, {
+        search: defaultStringifySearch(sourceLocation.search),
+      });
+      open.pending[1].reject(new Error("route rejected"));
+    } else if (mode === "rejected-go") open.goPending[0].reject(new Error("gate rejected"));
+    else open.goPending[0].resolve();
+    await assert.doesNotReject(promise);
+    assert.equal(h.state.getRecordReturn(), null, mode);
+    assert.equal(open.finishes.length, 1);
+    assert.equal(h.events.size, 0);
+  }
+});
 
 test("opening a result commits its latest source URL before capture and destination navigation", async () => {
   const h = openHarness();

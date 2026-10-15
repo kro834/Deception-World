@@ -37,7 +37,10 @@ const settled = async (page) => {
   if (await page.locator(".library-page").count()) {
     await page.locator(".library-card button:not([disabled])").first().waitFor();
     await page.waitForFunction(() => document.documentElement.dataset.worldPageVisible === "true");
-  } else if (new URL(page.url()).pathname === "/world") {
+  } else if (["/world", "/search"].includes(new URL(page.url()).pathname)) {
+    // Search also SSR-renders working native links. Its family/font signals can
+    // precede hydration, so wait for its existing interactive lifecycle before
+    // testing client-side draft capture and return navigation.
     await page.waitForFunction(() => document.documentElement.dataset.worldPageVisible === "true");
   }
   // Hydration may start the hash landing after SSR's first readiness check.
