@@ -351,10 +351,17 @@ export const isRexonanceSuitPlanReady = () =>
 let LIGHTS: {
   unlit: HTMLCanvasElement;
   lights: HTMLCanvasElement;
+  motes?: HTMLCanvasElement;
   figure: HTMLCanvasElement;
 } | null = null;
 export const plateLights = () => LIGHTS;
-function layOutLights(split: { unlit: HTMLCanvasElement; lights: HTMLCanvasElement }) {
+// The split's third layer, the motes (rx, 2026-10-15), is the call's alone.
+const SPLIT_OPTIONS = { motes: true };
+function layOutLights(split: {
+  unlit: HTMLCanvasElement;
+  lights: HTMLCanvasElement;
+  motes?: HTMLCanvasElement;
+}) {
   const figure = Object.assign(globalThis.document.createElement("canvas"), {
     width: FIG.width,
     height: FIG.height,
@@ -378,7 +385,7 @@ function layOutLights(split: { unlit: HTMLCanvasElement; lights: HTMLCanvasEleme
 export function prepareLights(art: CanvasImageSource) {
   if (!LIGHTS && !work.drawing) {
     const { width, height } = REXONANCE_SUIT_GOLD_ATLAS;
-    const split = splitLights(art, 0, 0, width, height);
+    const split = splitLights(art, 0, 0, width, height, globalThis.document, SPLIT_OPTIONS);
     if (split) {
       LIGHTS = layOutLights(split);
       work.dirty = true;
@@ -402,6 +409,15 @@ export function forming(art: CanvasImageSource, gold: CanvasImageSource) {
   }
   return context;
 }
+
+// The tiles as nanite motes (owner, 2026-10-15: the cut-out looked rough
+// while the plates streamed in — a mote was a solid square of its tone, so
+// at the figure's edge the forming suit was stair-stepped). A mote is its
+// own tile of the art in nanite light (the light split's third layer: the
+// art pushed to ice, pink and white, with the art's own alpha), so the
+// suit's edge is the artwork's edge from the first mote, and inside the body
+// the tiles remain the nanite squares. Without the split, the art itself.
+export const moteSheet = (art: CanvasImageSource): CanvasImageSource => LIGHTS?.motes ?? art;
 
 let preparation: Promise<boolean> | null = null;
 let promotePreparation: (() => void) | null = null;
@@ -480,7 +496,15 @@ export function prepareRexonanceSuit(priority: "low" | "high" = "low") {
       }
       if (stage === "light-setup") {
         const { width, height } = REXONANCE_SUIT_GOLD_ATLAS;
-        lightJob = createSplitLightsJob(art, 0, 0, width, height);
+        lightJob = createSplitLightsJob(
+          art,
+          0,
+          0,
+          width,
+          height,
+          globalThis.document,
+          SPLIT_OPTIONS,
+        );
         lightSource = art;
         stage = lightJob ? "light-rows" : "atlas";
         schedule();

@@ -565,9 +565,16 @@ test("single-flight preparation creates unlit layers once and retains them acros
   assert.equal(ui.plan.prepareRexonanceSuit("high"), preparing);
   ui.flush();
   assert.equal(await preparing, false);
-  assert.deepEqual(ui.lightSplits, [
-    [ui.art, 0, 0, suit.REXONANCE_SUIT_GOLD_ATLAS.width, suit.REXONANCE_SUIT_GOLD_ATLAS.height],
+  // 2026-10-15: the call's split also asks for its mote layer (its document, then the option).
+  assert.equal(ui.lightSplits.length, 1);
+  assert.deepEqual(ui.lightSplits[0].slice(0, 5), [
+    ui.art,
+    0,
+    0,
+    suit.REXONANCE_SUIT_GOLD_ATLAS.width,
+    suit.REXONANCE_SUIT_GOLD_ATLAS.height,
   ]);
+  assert.equal(ui.lightSplits[0][6]?.motes, true);
   assert.equal(ui.plan.plateLights().unlit, ui.unlit);
   assert.equal(ui.plan.plateLights().lights, ui.lights);
   await flushPromises();

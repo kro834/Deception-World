@@ -10,6 +10,7 @@ import {
   T,
   cells,
   forming,
+  moteSheet,
   planEnd,
   planSurges,
   plateLights,
@@ -120,13 +121,14 @@ export function SuitNanites({ onReady }: { onReady: () => void }) {
         const settled = make();
         const flight = make();
         const source = work.canvas;
-        if (!atlasWork || !source || !settled || !flight) {
+        const all = plates();
+        const sheet = moteSheet(atlas);
+        if (!atlasWork || !source || !sheet || !settled || !flight) {
           box.replaceChildren();
           return;
         }
         work.dirty = true;
         const s = width / FIG.width;
-        const all = plates();
         const surges = planSurges();
         const end = planEnd();
         const gold = cells();
@@ -214,40 +216,55 @@ export function SuitNanites({ onReady }: { onReady: () => void }) {
             if (t < plate.spawn || (done[p] && t >= plate.last)) continue;
             const { piece } = plate;
             if (t < plate.fit) {
+              // The tiles that have locked: one clip of their cells and one
+              // draw of the plate. Drawn one by one at the canvas's scale,
+              // their resampled edges left a dark lattice between them, so a
+              // forming plate looked chopped into squares (owner, 2026-10-15).
+              let locked = false;
+              flight.save();
+              flight.beginPath();
+              for (const tile of plate.tiles) {
+                if (t - tile.land < 0) continue;
+                const x0 = Math.round(tile.dx * s);
+                const y0 = Math.round(tile.dy * s);
+                flight.rect(
+                  x0,
+                  y0,
+                  Math.round((tile.dx + tile.tw) * s) - x0,
+                  Math.round((tile.dy + tile.th) * s) - y0,
+                );
+                locked = true;
+              }
+              if (locked) {
+                flight.clip();
+                flight.globalAlpha = 1;
+                flight.drawImage(
+                  source,
+                  piece.ax,
+                  piece.ay,
+                  piece.w,
+                  piece.h,
+                  piece.x * s,
+                  piece.y * s,
+                  piece.w * s,
+                  piece.h * s,
+                );
+              }
+              flight.restore();
               for (const tile of plate.tiles) {
                 const u = (t - tile.land + FLIGHT) / FLIGHT;
-                if (u <= 0) continue;
-                if (u >= 1) {
-                  flight.globalAlpha = 1;
-                  flight.drawImage(
-                    source,
-                    tile.sx,
-                    tile.sy,
-                    tile.tw,
-                    tile.th,
-                    tile.dx * s,
-                    tile.dy * s,
-                    tile.tw * s,
-                    tile.th * s,
-                  );
-                  continue;
-                }
+                if (u <= 0 || u >= 1) continue;
                 const e = 1 - (1 - u) ** 3;
                 const x = (tile.dx + tile.ox * (1 - e)) * s;
                 const y = (tile.dy + tile.oy * (1 - e)) * s;
                 if (u < 0.62) {
-                  // A nanite mote, streaming in.
+                  // A nanite mote, streaming in: its own tile of the art in
+                  // its tone (the mote sheet), so even now the suit's edge is
+                  // the artwork's edge (owner, 2026-10-15).
                   const size = T * s * (0.3 + 0.4 * (u / 0.62));
                   flight.globalAlpha = Math.min(1, u * 5) * 0.85;
-                  flight.fillStyle = tile.tone;
-                  flight.fillRect(x + (T * s - size) / 2, y + (T * s - size) / 2, size, size);
-                } else {
-                  // It turns into its piece of the plate (gold unformed) and locks.
-                  const v = (u - 0.62) / 0.38;
-                  const size = T * s * (0.72 + 0.28 * v);
-                  flight.globalAlpha = 0.55 + 0.45 * v;
                   flight.drawImage(
-                    source,
+                    sheet,
                     tile.sx,
                     tile.sy,
                     tile.tw,
@@ -257,6 +274,22 @@ export function SuitNanites({ onReady }: { onReady: () => void }) {
                     size * (tile.tw / T),
                     size * (tile.th / T),
                   );
+                } else {
+                  // It turns into its piece of the plate (gold unformed) and
+                  // locks: whole and on the pixel grid, fading up, its mote's
+                  // light fading into it. (It used to grow into place from
+                  // 72%: the gaps that opened between neighbours, and the
+                  // seams of tiles drawn off the pixel grid, read as a plate
+                  // chopped into squares — owner, 2026-10-15.)
+                  const v = (u - 0.62) / 0.38;
+                  const x0 = Math.round(x);
+                  const y0 = Math.round(y);
+                  const w = Math.round(x + tile.tw * s) - x0;
+                  const h = Math.round(y + tile.th * s) - y0;
+                  flight.globalAlpha = 0.55 + 0.45 * v;
+                  flight.drawImage(source, tile.sx, tile.sy, tile.tw, tile.th, x0, y0, w, h);
+                  flight.globalAlpha = 0.6 * (1 - v);
+                  flight.drawImage(sheet, tile.sx, tile.sy, tile.tw, tile.th, x0, y0, w, h);
                 }
               }
               continue;

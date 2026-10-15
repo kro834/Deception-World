@@ -10,8 +10,8 @@
  * RESONANCE preparation uses createSplitLightsJob to run the same pass in
  * short row slices. Null
  * where the pixels cannot be read (the suit then lights as it always did). */
-export function splitLights(source, sx, sy, w, h, document = globalThis.document) {
-  const job = createSplitLightsJob(source, sx, sy, w, h, document);
+export function splitLights(source, sx, sy, w, h, document = globalThis.document, options) {
+  const job = createSplitLightsJob(source, sx, sy, w, h, document, options);
   if (!job) return null;
   job.step(Infinity);
   return job.commit();
@@ -22,23 +22,40 @@ export function splitLights(source, sx, sy, w, h, document = globalThis.document
  * escape this job. A short deadline still advances one row, so a busy host
  * cannot starve preparation forever. Native readback/put operations and one
  * row are indivisible: the deadline bounds cooperative work, not those
- * native operations' wall time. */
-export function createSplitLightsJob(source, sx, sy, w, h, document = globalThis.document) {
+ * native operations' wall time.
+ *
+ * `options.motes` (the call's nanite engine; owner, 2026-10-15): a third
+ * canvas, `motes`, from the same pass — the art in nanite light (each pixel
+ * pushed to pink or ice, the darker the more) with the art's own alpha, so a
+ * tile streaming in as a mote keeps the artwork's edge. */
+export function createSplitLightsJob(
+  source,
+  sx,
+  sy,
+  w,
+  h,
+  document = globalThis.document,
+  options = {},
+) {
   let unlit;
   let lights;
+  let motes;
   let scratch;
   try {
     const make = () => Object.assign(document.createElement("canvas"), { width: w, height: h });
     scratch = make();
     unlit = make();
     lights = make();
+    if (options.motes) motes = make();
     const uc = scratch.getContext("2d", { willReadFrequently: true });
     if (!uc) throw new Error("unavailable light separation context");
     uc.drawImage(source, sx, sy, w, h, 0, 0, w, h);
     let art = uc.getImageData(0, 0, w, h);
     let glow = uc.createImageData(w, h);
+    let heat = motes ? uc.createImageData(w, h) : null;
     let a = art.data;
     let g = glow.data;
+    let m = heat ? heat.data : null;
     // Native ImageData has width. Lightweight callers/tests may only expose
     // its bytes, so use the requested region rather than creating a NaN
     // cursor that could strand the synchronous compatibility pass forever.
@@ -49,8 +66,9 @@ export function createSplitLightsJob(source, sx, sy, w, h, document = globalThis
     let cancelled = false;
     let result = null;
     const release = () => {
-      art = glow = a = g = null;
+      art = glow = heat = a = g = m = null;
       unlit.width = unlit.height = lights.width = lights.height = 0;
+      if (motes) motes.width = motes.height = 0;
       scratch.width = scratch.height = 0;
     };
     return {
@@ -59,7 +77,7 @@ export function createSplitLightsJob(source, sx, sy, w, h, document = globalThis
         try {
           do {
             const end = Math.min(at + rowBytes, a.length);
-            separate(a, g, at, end);
+            separate(a, g, m, at, end);
             at = end;
             if (at >= a.length) return true;
           } while (
@@ -86,9 +104,16 @@ export function createSplitLightsJob(source, sx, sy, w, h, document = globalThis
           uc.clearRect(0, 0, w, h);
           uc.putImageData(glow, 0, 0);
           lc.drawImage(scratch, 0, 0);
+          if (motes) {
+            const mc = motes.getContext("2d");
+            if (!mc) throw new Error("unavailable mote layer context");
+            uc.clearRect(0, 0, w, h);
+            uc.putImageData(heat, 0, 0);
+            mc.drawImage(scratch, 0, 0);
+          }
           scratch.width = scratch.height = 0;
-          result = { unlit, lights };
-          art = glow = a = g = null;
+          result = motes ? { unlit, lights, motes } : { unlit, lights };
+          art = glow = heat = a = g = m = null;
           return result;
         } catch {
           cancelled = true;
@@ -106,14 +131,22 @@ export function createSplitLightsJob(source, sx, sy, w, h, document = globalThis
     // Releasing owned canvases never closes a borrowed image or bitmap.
     if (unlit) unlit.width = unlit.height = 0;
     if (lights) lights.width = lights.height = 0;
+    if (motes) motes.width = motes.height = 0;
     if (scratch) scratch.width = scratch.height = 0;
     return null;
   }
 }
 
+// The motes' nanite light: ice for most of the art (the black plates and
+// the gold trims too — the gold forms later, from its own nanites), pink
+// for its magenta and pink pixels.
+const ICE = [140, 239, 255];
+const PINK = [255, 143, 216];
+
 // Keep the original per-pixel arithmetic and rounding order: splitting rows
-// only changes when pixels are visited, never their resulting bytes.
-function separate(a, g, from, to) {
+// only changes when pixels are visited, never their resulting bytes. `m`
+// (the mote bytes) is filled from the untouched art, or null.
+function separate(a, g, m, from, to) {
   for (let i = from; i < to; i += 4) {
     if (!a[i + 3]) continue;
     const r = a[i];
@@ -122,13 +155,27 @@ function separate(a, g, from, to) {
     const max = Math.max(r, gr, b);
     const min = Math.min(r, gr, b);
     const chroma = max - min;
+    let hue = -1;
+    if (chroma) {
+      if (max === r) hue = ((gr - b) / chroma + 6) % 6;
+      else if (max === gr) hue = (b - r) / chroma + 2;
+      else hue = (r - gr) / chroma + 4;
+      hue *= 60;
+    }
+    if (m) {
+      // The pixel in nanite light, the darker the more (a black plate's
+      // mote is a cold spark, a crystal's keeps its own light), a touch
+      // brighter than the art; the art's alpha.
+      const luma = 0.2126 * r + 0.7152 * gr + 0.0722 * b;
+      const tint = chroma >= 0.25 * max && (hue >= 285 || hue < 12) ? PINK : ICE;
+      const lift = 0.56 + 0.26 * (1 - luma / 255);
+      m[i] = Math.min(255, Math.round((r + (tint[0] - r) * lift) * 1.12));
+      m[i + 1] = Math.min(255, Math.round((gr + (tint[1] - gr) * lift) * 1.12));
+      m[i + 2] = Math.min(255, Math.round((b + (tint[2] - b) * lift) * 1.12));
+      m[i + 3] = a[i + 3];
+    }
     if (max < 70 || chroma < 0.3 * max) continue;
     // Hue: gold and bronze (red-orange to yellow) keep their colour.
-    let hue;
-    if (max === r) hue = ((gr - b) / chroma + 6) % 6;
-    else if (max === gr) hue = (b - r) / chroma + 2;
-    else hue = (r - gr) / chroma + 4;
-    hue *= 60;
     if (hue >= 12 && hue < 70) continue;
     // A lit pixel: cyan, blue, violet or pink. Its share of the light.
     const k = Math.min(1, (chroma / max - 0.3) / 0.25) * Math.min(1, (max - 70) / 60);

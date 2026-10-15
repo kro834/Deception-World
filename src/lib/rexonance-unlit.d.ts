@@ -1,4 +1,11 @@
-export type SplitLightsResult = { unlit: HTMLCanvasElement; lights: HTMLCanvasElement };
+export type SplitLightsResult = {
+  unlit: HTMLCanvasElement;
+  lights: HTMLCanvasElement;
+  /** With `options.motes`: the art in nanite light, the art's alpha (the call's motes). */
+  motes?: HTMLCanvasElement;
+};
+
+export type SplitLightsOptions = { motes?: boolean };
 
 export type SplitLightsJob = {
   /** Cooperatively advance rows; true is terminal (completed or cancelled). */
@@ -16,6 +23,7 @@ export function createSplitLightsJob(
   w: number,
   h: number,
   document?: Document,
+  options?: SplitLightsOptions,
 ): SplitLightsJob | null;
 
 export function splitLights(
@@ -25,4 +33,5 @@ export function splitLights(
   w: number,
   h: number,
   document?: Document,
+  options?: SplitLightsOptions,
 ): SplitLightsResult | null;
