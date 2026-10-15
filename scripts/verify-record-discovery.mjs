@@ -127,6 +127,19 @@ try {
       .tap();
     await page.waitForURL("**scope=saved**");
     assert.equal(await page.locator(".library-card").count(), 2);
+    // Repeat using a mouse after real touch: WebKit must not move the target
+    // between pointerdown and click in either input mode.
+    await page
+      .getByRole("group", { name: "探す資料の範囲" })
+      .getByRole("button", { name: /^すべての資料/ })
+      .click();
+    await page.waitForURL((url) => !url.searchParams.has("scope"));
+    await page
+      .getByRole("group", { name: "探す資料の範囲" })
+      .getByRole("button", { name: /しおりのみ/ })
+      .click();
+    await page.waitForURL("**scope=saved**");
+    assert.equal(await page.locator(".library-card").count(), 2);
     await page
       .locator(".library-card")
       .first()
@@ -225,6 +238,7 @@ try {
       libraryBackAndReload: true,
       explicitCardReturn: true,
       savedFacet: true,
+      savedFacetTouchAndMouse: true,
       keyboardResults: true,
       mixedInputMenu: true,
       savedIds,
