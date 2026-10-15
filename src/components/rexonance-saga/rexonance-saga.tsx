@@ -51,6 +51,7 @@ import { supportsIOS27Enhancements } from "@/lib/rendering-profile";
 import { warmRexonanceStages } from "@/lib/warm-rexonance-stages";
 import { mountLocalNavCurrent } from "@/lib/local-nav-current";
 import { syncRexonanceRouteCover } from "@/lib/rexonance-route-cover";
+import { releasePendingImage, releasePendingImages } from "@/lib/release-pending-images";
 
 type P14Baseline = "p1" | "p2";
 type PerformanceBaseline = "vertex" | "vinculum" | "extreme";
@@ -585,16 +586,26 @@ function FormMorph({
       return;
     let cancelled = false;
     let frame = 0;
+    // Owned until the effect ends (audit #31): a load still in flight would
+    // hold this canvas, and through it the page; the sheets are freed at once.
+    const loaders = new Set<HTMLImageElement>();
+    const sheets: HTMLCanvasElement[] = [];
     const load = (src: string) =>
       new Promise<HTMLImageElement>((resolve, reject) => {
         const image = new Image();
+        loaders.add(image);
         image.decoding = "async";
-        image.onload = () =>
+        image.onload = () => {
+          loaders.delete(image);
           void image.decode().then(
             () => resolve(image),
             () => resolve(image),
           );
-        image.onerror = reject;
+        };
+        image.onerror = (error) => {
+          loaders.delete(image);
+          reject(error);
+        };
         image.src = src;
       });
     // A source is a form's panel art (drawn as the panel draws it) or, for
@@ -693,9 +704,14 @@ function FormMorph({
         // Where each panel picture stands in the canvas (for the pose warp).
         const boxes = new Map<Source, { x: number; y: number; w: number; h: number }>();
         const pictures = new Map(loaded);
+        const sheet = () => {
+          const made = Object.assign(document.createElement("canvas"), { width: W, height: H });
+          sheets.push(made);
+          return made;
+        };
         for (const [source, image] of loaded) {
-          const sheet = Object.assign(document.createElement("canvas"), { width: W, height: H });
-          const c = sheet.getContext("2d")!;
+          const prepare = sheet();
+          const c = prepare.getContext("2d")!;
           const nw = image.naturalWidth || 1;
           const nh = image.naturalHeight || 1;
           if (source.startsWith("panel:")) {
@@ -716,7 +732,7 @@ function FormMorph({
             const scale = Math.min(W / nw, (H * 0.96) / nh);
             c.drawImage(image, (W - nw * scale) / 2, H - nh * scale, nw * scale, nh * scale);
           }
-          prepared.set(source, sheet);
+          prepared.set(source, prepare);
         }
         const cell = Math.max(8, Math.round(Math.min(W, H) / 34));
         const plans = steps.map((step, index) => {
@@ -740,8 +756,6 @@ function FormMorph({
         // ULTRA and EXCELSIOR stand a little differently (owner, 2026-10-12):
         // through their change the limbs are carried over a little at a time.
         const posed = (step: Step) => step.a === "panel:ultra" && step.b === "panel:excelsior";
-        const sheet = () =>
-          Object.assign(document.createElement("canvas"), { width: W, height: H });
         const warpA = steps.some(posed) ? sheet() : null;
         const warpB = steps.some(posed) ? sheet() : null;
         const tail = steps.at(-1)!.extra ? FORM_CHANGE_MS.extra * 0.6 : 0;
@@ -820,6 +834,10 @@ function FormMorph({
     return () => {
       cancelled = true;
       if (frame) cancelAnimationFrame(frame);
+      for (const image of loaders) releasePendingImage(image);
+      loaders.clear();
+      for (const done of sheets) done.width = done.height = 0;
+      sheets.length = 0;
     };
   }, [from, to, delay]);
   return <canvas ref={ref} className="rxs-form-morph" aria-hidden="true" />;
@@ -1323,6 +1341,14 @@ export function RexonanceSaga() {
       window.clearTimeout(stageCallTimer.current);
     };
   }, [cancelStageCall]);
+
+  // Leaving releases the page (audit #31): an <img> of the removed page still
+  // downloading (a stalled connection) would otherwise keep the whole page,
+  // canvases and all, until the network gives up. Runs after the removal.
+  useEffect(() => {
+    const page = pageRef.current;
+    return () => releasePendingImages(page);
+  }, []);
 
   useEffect(() => {
     const page = pageRef.current;

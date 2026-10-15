@@ -7,6 +7,7 @@ import {
   warpPicture,
 } from "./rexonance-overwrite.js";
 import { createSplitLightsJob } from "./rexonance-unlit.js";
+import { releasePendingImage } from "./release-pending-images.js";
 /** RESONANCE (rx11) for /rexonance-saga: the hits a stylesheet cannot time.
  *
  * Counts. Every [data-rsn-count] figure keeps the owner's value as its own
@@ -1205,16 +1206,28 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     );
   };
 
+  // Pictures still downloading when the scene goes (audit #31): each one's
+  // handlers hold this scene, and through it the runway and its page.
+  const loaders = new Set();
+  const picture = (src) =>
+    new Promise((resolve, reject) => {
+      const image = new environment.Image();
+      loaders.add(image);
+      image.decoding = "async";
+      image.onload = () => {
+        loaders.delete(image);
+        resolve(image);
+      };
+      image.onerror = (error) => {
+        loaders.delete(image);
+        reject(error);
+      };
+      image.src = src;
+    });
   const load = () => {
     if (loading) return loading;
     const decode = (src) =>
-      new Promise((resolve, reject) => {
-        const image = new environment.Image();
-        image.decoding = "async";
-        image.onload = () => resolve(image);
-        image.onerror = reject;
-        image.src = src;
-      })
+      picture(src)
         .then((image) =>
           image.decode
             ? image.decode().then(
@@ -2423,14 +2436,6 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   const formFigures = () => {
     if (formsState || formsLoading || !config.forms || !images) return formsState;
     formsLoading = true;
-    const picture = (src) =>
-      new Promise((resolve, reject) => {
-        const image = new environment.Image();
-        image.decoding = "async";
-        image.onload = () => resolve(image);
-        image.onerror = reject;
-        image.src = src;
-      });
     Promise.all([
       picture(config.forms.max),
       picture(config.forms.ultra),
@@ -2761,6 +2766,17 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     images?.atlas?.close?.();
     formObserver?.disconnect();
     environment.clearTimeout(calmTimer);
+    for (const image of loaders) releasePendingImage(image);
+    loaders.clear();
+    if (formsState)
+      for (const sheet of [
+        formsState.fig,
+        formsState.max,
+        formsState.ultra,
+        formsState.excelsior,
+        ...formsState.warp,
+      ])
+        if (sheet) sheet.width = sheet.height = 0;
     formsState = null;
     images = null;
     for (const sheet of [raw, goldArt, goldLayer, driver, lights?.unlit, lights?.lights])

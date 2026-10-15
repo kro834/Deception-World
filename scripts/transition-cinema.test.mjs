@@ -202,7 +202,11 @@ test("the shutter closes onto the pressed card and lands on the portrait frame",
     /\.closest\("\.rider-detail"\)\s*\?\.querySelector<HTMLImageElement>\("\.rider-visual img\.is-on"\)/,
   );
   assert.match(gate, /document\.querySelector\("main \.manager-portrait-frame"\)/);
-  assert.match(gate, /Boolean\(lastPress\?\.target\.closest\("\.manager-pagination"\)\)/);
+  // The press is held weakly since audit #31 (a left page must not stay alive).
+  assert.match(
+    gate,
+    /Boolean\(lastPress\?\.target\.deref\(\)\?\.closest\("\.manager-pagination"\)\)/,
+  );
   for (const layer of ["dwc-shutter", "dwc-carry", "dwc-lock"]) {
     assert.match(gate, new RegExp(`className="${layer}" aria-hidden="true"`));
   }
