@@ -1322,9 +1322,11 @@ test("the gold forms by nanites right after each plate lands; the driver is on f
   // owner: a slow scroll lands a band at a time — and the plates are cut
   // from the base figure too, so the gold's locks moved with them; the hash
   // is the plan after those changes.)
+  // (owner 2026-10-16 超大幅な改善 — the gold waits for the plate to clamp
+  // (ASSEMBLY_GOLD.delay .003 → .008); each cell names its plate (`piece`).)
   assert.equal(
     createHash("sha256").update(JSON.stringify(gold)).digest("hex"),
-    "ca307bc7b93369ec230e88f62dfaffb91e4a7e4358fb841ad29af6ed07f82b29",
+    "c34630d9b1e5ea32a956e5fb7e8fc50b628104fab71e7e9c69cc22782cfff905",
   );
   const steps = assemblyGoldPlanSteps({
     pieces,

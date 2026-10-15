@@ -6,7 +6,21 @@ import {
   sampleCells,
   warpPicture,
 } from "./rexonance-overwrite.js";
-import { createSplitLightsJob } from "./rexonance-unlit.js";
+import {
+  createNaniteGuideJob,
+  createNaniteMetalJob,
+  createNaniteMoltenJob,
+  createSplitLightsJob,
+} from "./rexonance-unlit.js";
+import {
+  ASSEMBLY_COMET_BUDGET,
+  ASSEMBLY_NANITES,
+  ASSEMBLY_SPRITE_BUDGET,
+  ASSEMBLY_TOUCH_HERO_BUDGET,
+  assemblyNanitePlanSteps,
+  createAssemblyNanites,
+  naniteLatticeSteps,
+} from "./rexonance-assembly-nanites.js";
 import { releasePendingImage } from "./release-pending-images.js";
 /** RESONANCE (rx11) for /rexonance-saga: the hits a stylesheet cannot time.
  *
@@ -524,7 +538,6 @@ const BEAT_OF_GROUP = {
   ribbon: 4,
   helm: 5,
 };
-const FLASH = 0.018;
 const WELDS_PER_FRAME = 160;
 const GOLD_PER_FRAME = 900;
 // The scroll has rested this long: the transient squares are cleared.
@@ -538,7 +551,13 @@ const GOLD_HEAT = [
   ["rgb(255 253 243)", 0.42],
 ];
 export const ASSEMBLY_TOUCH_ART_BUDGET = 64;
-const CONTACT_BUDGET = 64;
+// The nanite swarm's timings and budgets (owner, 2026-10-16: 超大幅な改善).
+export {
+  ASSEMBLY_NANITES,
+  ASSEMBLY_SPRITE_BUDGET,
+  ASSEMBLY_COMET_BUDGET,
+  ASSEMBLY_TOUCH_HERO_BUDGET,
+};
 const PIXEL_BUDGET = 2_600_000;
 const TONES = [
   [121, 232, 255],
@@ -756,8 +775,9 @@ function* assemblyPlanSteps({
     }
     return owner;
   };
-  // `src`: 0 the base figure (the armour), 1 the full figure.
-  const place = (owner, sx, sy, tw, th, cx, cy, rgb, src) => {
+  // `src`: 0 the base figure (the armour), 1 the full figure; `cov` the
+  // tile's sampled alpha (a landing nanite never stands past the art).
+  const place = (owner, sx, sy, tw, th, cx, cy, rgb, src, cov = 1) => {
     // The driver is drawn whole from its cut-outs, never as tiles.
     if (owner?.preset) return;
     const reach = owner ? Math.hypot(cx - owner.piece.seat[0], cy - owner.piece.seat[1]) : 0;
@@ -774,6 +794,7 @@ function* assemblyPlanSteps({
       reach,
       rgb,
       src,
+      cov,
     });
   };
   for (let row = 0; row < rows; row += 1) {
@@ -793,7 +814,18 @@ function* assemblyPlanSteps({
         const owner = ownerOf(armour, sx, sy, tw, th, cx, cy);
         if (owner) {
           const d = baseSample.data;
-          place(owner, sx, sy, tw, th, cx, cy, [d[offset], d[offset + 1], d[offset + 2]], 0);
+          place(
+            owner,
+            sx,
+            sy,
+            tw,
+            th,
+            cx,
+            cy,
+            [d[offset], d[offset + 1], d[offset + 2]],
+            0,
+            d[offset + 3] / 255,
+          );
           under = true;
         }
       }
@@ -816,7 +848,7 @@ function* assemblyPlanSteps({
       // Over the armour, only an ornament's cell forms again (from the full
       // figure); a cell the armour already holds is done.
       if (under && !(owner && ornament.has(owner.piece.group))) continue;
-      place(owner, sx, sy, tw, th, cx, cy, rgb, 1);
+      place(owner, sx, sy, tw, th, cx, cy, rgb, 1, sample ? sample.data[offset + 3] / 255 : 1);
     }
   }
   const [coreX, coreY] = core;
@@ -1019,7 +1051,9 @@ export function planAssembly(options) {
  * Returns flat, lock-sorted arrays (figure px, progress 0–1).
  */
 export const ASSEMBLY_GOLD = {
-  delay: 0.003,
+  // The gold waits for its plate to clamp and its seam to ignite (owner,
+  // 2026-10-16: 超大幅な改善 — the pour runs through the printed conduit).
+  delay: 0.008,
   form: 0.03,
   helm: 0.016,
   approach: 0.007,
@@ -1195,6 +1229,7 @@ export function* assemblyGoldPlanSteps({ pieces, gold, landed, tiles }) {
         from + flow * span,
         ux * G * 2.6,
         uy * G * 2.6,
+        index,
       ]);
       if (++work % 128 === 0) yield;
     }
@@ -1220,8 +1255,11 @@ export function* assemblyGoldPlanSteps({ pieces, gold, landed, tiles }) {
     [sorted, scratch] = [scratch, sorted];
   }
   const fields = Array.from({ length: 7 }, () => new Float32Array(list.length));
+  // Each cell names its plate (the conduit and its clamps are per plate).
+  const piece = new Int16Array(list.length);
   for (let i = 0; i < sorted.length; i += 1) {
     for (let k = 0; k < fields.length; k += 1) fields[k][i] = sorted[i][k];
+    piece[i] = sorted[i][7];
     if (++work % 128 === 0) yield;
   }
   const result = {
@@ -1233,6 +1271,7 @@ export function* assemblyGoldPlanSteps({ pieces, gold, landed, tiles }) {
     lock: fields[4],
     ux: fields[5],
     uy: fields[6],
+    piece,
   };
   result.overlaps = yield* goldOverlapSteps(result, G);
   return result;
@@ -1338,6 +1377,12 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   // The base figure's layers (the armour's; owner, 2026-10-16).
   let baseLights = null;
   let baseRaw = null;
+  // The nanite swarm (owner, 2026-10-16: 超大幅な改善): its stage plan, its
+  // renderer, and the canvases it draws from (raw metal, silhouettes, the
+  // guide's hologram and walls, molten gold, the scaffold lattice).
+  let nano = null;
+  let swarm = null;
+  let naniteSheets = [];
   let driver = null;
   let lights = null;
   let settled = null;
@@ -1408,6 +1453,10 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
               )
             : image,
         );
+    // The nanite kit (owner, 2026-10-16): each sheet optional; touch
+    // screens draw no comets.
+    const kit = config.nanites;
+    const optional = (src) => (src ? decode(src).catch(() => null) : null);
     loading = Promise.all([
       decode(config.figure),
       decode(config.undersuit),
@@ -1416,16 +1465,17 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       // The figure without its ornaments (owner, 2026-10-16); the scene
       // plays from the full figure alone without it.
       config.base ? decode(config.base).catch(() => null) : null,
-    ]).then(([figure, undersuit, gold, atlas, base]) => {
+      optional(kit?.cells?.src),
+      coarse.matches ? null : optional(kit?.comets?.src),
+      optional(kit?.fx?.src),
+      optional(kit?.guide?.src),
+    ]).then(([figure, undersuit, gold, atlas, base, cells, comets, fx, guide]) => {
       if (disposed) {
-        figure.close?.();
-        undersuit.close?.();
-        gold?.close?.();
-        atlas?.close?.();
-        base?.close?.();
+        for (const image of [figure, undersuit, gold, atlas, base, cells, comets, fx, guide])
+          image?.close?.();
         return null;
       }
-      images = { figure, undersuit, gold, atlas, base };
+      images = { figure, undersuit, gold, atlas, base, cells, comets, fx, guide };
       return images;
     });
     return loading;
@@ -1703,6 +1753,37 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       });
       return layers;
     };
+    // The nanite kit's pixel jobs (rexonance-unlit.js): the same idle
+    // contract as the light split, every canvas owned until published.
+    const pixelJobIdle = async (phase, create, keys) => {
+      mark(`${phase}-setup`);
+      const job = await idleTask(() => {
+        if (!active()) return null;
+        const result = create();
+        if (result) splitJobs.add(result);
+        return result;
+      });
+      if (!job || !active()) return null;
+      let done = false;
+      while (active() && !done) {
+        mark(`${phase}-rows`);
+        const ran = await idleTask((deadline) => {
+          if (!active()) return;
+          const until = (environment.performance?.now?.() ?? Date.now()) + 4;
+          done = job.step(until, deadline);
+        });
+        if (ran === null || !active()) return null;
+      }
+      if (!done || !active()) return null;
+      mark(`${phase}-upload`);
+      return idleTask(() => {
+        if (!active()) return null;
+        const result = job.commit();
+        splitJobs.delete(job);
+        if (result) for (const key of keys) if (result[key]) resources.add(result[key]);
+        return result;
+      });
+    };
     const ornamentSet = new Set(config.ornaments ?? []);
     building = idleTask(() => sampleFigure(tile))
       .then(async (sample) => {
@@ -1865,9 +1946,132 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         }
 
         if (!active()) return;
+        // The nanite swarm (owner, 2026-10-16: 超大幅な改善). Raw nanite
+        // metal (and the art's silhouette) for the armour and the
+        // ornaments, from the art with its gold unformed.
+        const metalBase =
+          baseSample && images.base
+            ? await pixelJobIdle(
+                "nanite-metal",
+                () =>
+                  createNaniteMetalJob(
+                    nextBaseRaw || nextBaseLights?.unlit || images.base,
+                    0,
+                    0,
+                    W,
+                    H,
+                    document,
+                    { silhouette: true },
+                  ),
+                ["metal", "silhouette"],
+              )
+            : null;
+        if (!active()) return;
+        const metalFigure = await pixelJobIdle(
+          "nanite-metal",
+          () =>
+            createNaniteMetalJob(nextRaw || nextLights?.unlit || images.figure, 0, 0, W, H, document, {
+              silhouette: true,
+            }),
+          ["metal", "silhouette"],
+        );
+        if (!active()) return;
+        // The guideway's hologram and its walls (atlas space).
+        const guideLayers = images.guide
+          ? await pixelJobIdle(
+              "nanite-guide",
+              () => createNaniteGuideJob(images.guide, document, { walls: !coarse.matches }),
+              ["holo", "walls"],
+            )
+          : null;
+        if (!active()) return;
+        // Molten gold, white-hot to amber, from the gold art.
+        const moltenLayer = nextGoldArt
+          ? await pixelJobIdle(
+              "nanite-molten",
+              () => createNaniteMoltenJob(nextGoldArt, 0, 0, W, H, document),
+              ["molten"],
+            )
+          : null;
+        if (!active()) return;
+        // The stage plan: plates, seams, rings, phases, paint order.
+        mark("nanite-seams");
+        const nextNano = await buildSteps(
+          assemblyNanitePlanSteps({
+            plan: nextPlan,
+            pieces: config.pieces,
+            size: config.size,
+            core: config.core,
+            visor: config.visor,
+            gold: nextGold,
+            seams: config.nanites?.seams,
+            goldBoxes: config.nanites?.goldBoxes,
+            coarse: coarse.matches,
+          }),
+        );
+        if (!active() || !nextNano) return;
+        // The scaffold lattice, drawn once.
+        const nextLattice = await makeSheet("nanite-lattice");
+        if (!nextLattice || !active()) return;
+        mark("nanite-lattice");
+        await buildSteps(naniteLatticeSteps(nextLattice.getContext("2d"), nextNano, tile));
+        if (!active()) return;
+        mark("buffer-nanites");
+        const artFigure = nextRaw || nextLights?.unlit || images.figure;
+        const artBase = (images.base && (nextBaseRaw || nextBaseLights?.unlit || images.base)) || artFigure;
+        const nextSwarm = await idleTask(() =>
+          active()
+            ? createAssemblyNanites({
+                plan: nextPlan,
+                nano: nextNano,
+                size: config.size,
+                core: config.core,
+                visor: config.visor,
+                coarse: coarse.matches,
+                sprites: { cells: images.cells, comets: images.comets, fx: images.fx },
+                kit: config.nanites,
+                layers: {
+                  metal: [metalBase?.metal ?? null, metalFigure?.metal ?? null],
+                  silhouette: [metalBase?.silhouette ?? null, metalFigure?.silhouette ?? null],
+                  art: [artBase, artFigure],
+                  motes: [nextBaseLights?.motes ?? null, nextLights?.motes ?? null],
+                  holo: guideLayers?.holo ?? null,
+                  walls: guideLayers?.walls ?? null,
+                  face: guideLayers ? images.guide : null,
+                  frame: nextFrame,
+                  frameDeep: nextFrameDeep,
+                  molten: moltenLayer?.molten ?? null,
+                  goldArt: nextGoldArt,
+                  lattice: nextLattice,
+                },
+                gold: nextGold,
+                goldCell: config.gold?.cell ?? 4,
+                touchArtBudget: ASSEMBLY_TOUCH_ART_BUDGET,
+              })
+            : null,
+        );
+        if (!active() || !nextSwarm) return;
+        const nextNaniteSheets = [
+          metalBase?.metal,
+          metalBase?.silhouette,
+          metalFigure?.metal,
+          metalFigure?.silhouette,
+          guideLayers?.holo,
+          guideLayers?.walls,
+          moltenLayer?.molten,
+          nextLattice,
+        ].filter(Boolean);
         const nextBuffers = await allocateIdle(nextPlan, nextGold, nextPixels, active, mark);
         if (!active() || !nextBuffers) return;
         mark("ready");
+        try {
+          environment.__rexonanceNanitePlan?.(nextNano);
+        } catch {
+          // Test-only instrumentation must never affect preparation.
+        }
+        nano = nextNano;
+        swarm = nextSwarm;
+        naniteSheets = nextNaniteSheets;
         plan = nextPlan;
         goldPlan = nextGold;
         pixels = nextPixels;
@@ -1971,8 +2175,15 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       item.th,
     );
   };
-  const unweld = (item) => {
+  // Unwelding a tile clears its cell; the tile sharing that cell (an
+  // ornament's over the armour's, or the armour's under it) is redrawn if
+  // it is still painted, so a reverse scrub leaves no hole beneath the
+  // ornaments (owner, 2026-10-16: the finished suit is the artwork, both ways).
+  const unweld = (index) => {
+    const item = plan.tiles[index];
     settled.getContext("2d").clearRect(item.sx, item.sy, item.tw, item.th);
+    const partner = nano.under[index];
+    if (partner >= 0 && nano.paintRank[partner] < settledCount) weld(plan.tiles[partner]);
   };
   // The tiles landed by `progress` (they are sorted by landing).
   const landedBy = (progress) => {
@@ -1986,38 +2197,51 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     }
     return low;
   };
+  // The tiles painted by `progress`, in paint order: a plate is painted
+  // from its seat outward once it has clamped (owner, 2026-10-16), so the
+  // settled canvas only ever holds painted art.
+  const paintedBy = (progress) => {
+    const at = nano.paintAt;
+    let low = 0;
+    let high = at.length;
+    while (low < high) {
+      const middle = (low + high) >> 1;
+      if (at[middle] <= progress) low = middle + 1;
+      else high = middle;
+    }
+    return low;
+  };
   // Welds catch up a little each frame (a jump into the scene would weld
-  // thousands at once); until welded, a landed tile shows as its mosaic
-  // square. Once the seal has covered them, nothing more is welded.
+  // thousands at once); until welded, a painted tile is drawn from the art
+  // through a clip. Once the seal has covered them, nothing more is welded.
   let behind = false;
-  const syncSettled = (landed, sealed) => {
+  const syncSettled = (painted, sealed) => {
     const { tiles } = plan;
-    const step = assemblyCacheStep(settledCount, landed, WELDS_PER_FRAME);
+    const order = nano.paintOrder;
+    const step = assemblyCacheStep(settledCount, painted, WELDS_PER_FRAME);
     if (step.reset) {
       settled.getContext("2d").clearRect(0, 0, W, H);
       settledCount = 0;
     }
-    while (settledCount > landed) {
+    while (settledCount > painted) {
       settledCount -= 1;
-      unweld(tiles[settledCount]);
+      unweld(order[settledCount]);
     }
     if (sealed) {
       return;
     }
     let budget = WELDS_PER_FRAME;
-    while (settledCount < landed && budget > 0) {
-      weld(tiles[settledCount]);
+    while (settledCount < painted && budget > 0) {
+      weld(tiles[order[settledCount]]);
       settledCount += 1;
       budget -= 1;
     }
-    behind ||= settledCount < landed;
+    behind ||= settledCount < painted;
   };
 
   // Per-frame buffers, allocated once per plan: a scrub draws thousands
   // of squares a frame and must not leave garbage behind it.
   let buffers = null;
-  // The streaks' endpoints this frame (the rich scene only; reused).
-  const streaks = new Float32Array(360 * 4);
   const allocateIdle = async (nextPlan, nextGold, nextPixels, active, mark) => {
     const buckets = Array.from({ length: 18 }, () => []);
     let cursor = 0;
@@ -2077,18 +2301,10 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       }
       faces[Math.floor(index / 3)][index % 3] = rects;
     }
-    const n = nextPlan.tiles.length * 4;
     const goldCells = nextGold?.count ?? 0;
     const result = {
       heat: [],
       heatCounts: null,
-      motes: [],
-      moteCounts: null,
-      art: null,
-      artRects: null,
-      pose: null,
-      flashes: [],
-      flashCounts: null,
       faces,
       glow: null,
     };
@@ -2104,26 +2320,6 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     }
     result.heatCounts = await allocate("heat-counts", Int32Array, GOLD_HEAT.length);
     if (!result.heatCounts) return null;
-    for (let i = 0; i < 6; i += 1) {
-      const value = await allocate("motes", Float32Array, n);
-      if (!value) return null;
-      result.motes.push(value);
-    }
-    result.moteCounts = await allocate("mote-counts", Int32Array, 6);
-    if (!result.moteCounts) return null;
-    result.art = await allocate("art", Int32Array, nextPlan.tiles.length);
-    if (!result.art) return null;
-    result.artRects = await allocate("art-rects", Float32Array, n);
-    if (!result.artRects) return null;
-    result.pose = await allocate("pose", Float32Array, 5);
-    if (!result.pose) return null;
-    for (let i = 0; i < 3; i += 1) {
-      const value = await allocate("flashes", Float32Array, n);
-      if (!value) return null;
-      result.flashes.push(value);
-    }
-    result.flashCounts = await allocate("flash-counts", Int32Array, 3);
-    if (!result.flashCounts) return null;
     return result;
   };
   const fillRects = (context, rects, count, style, alpha) => {
@@ -2218,9 +2414,14 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     context.globalAlpha = 1;
   };
 
-  // `calm`: the scroll has stopped: no transient squares (weld flashes, the
-  // gold's heat, the tiles' outlines) are left standing on the formed parts.
-  const draw = (progress, calm = false) => {
+  // `calm`: the scroll has rested: the frame is a pure function of the
+  // progress, without the transient effects (comets, sparks, links, recoil,
+  // seams, shock rings, spall, pulses, lacquer, droplets, beams, the glint,
+  // the scan sweep and the shake).
+  let backRects = false;
+  let lastDrawMs = 0;
+  const draw = (progress, calm = false, dq = 0) => {
+    const started = environment.performance?.now?.() ?? 0;
     const context = canvas.getContext("2d");
     const { figure, undersuit } = images;
     const B = ASSEMBLY_BEATS;
@@ -2229,12 +2430,25 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     context.globalAlpha = 1;
     context.globalCompositeOperation = "source-over";
     context.clearRect(0, 0, canvas.width, canvas.height);
-    context.setTransform(view.scale, 0, 0, view.scale, view.x, view.y);
+    const seal = smooth(span(progress, B.seal));
+    // The swarm (owner, 2026-10-16: 超大幅な改善) runs until the seal is
+    // whole; from .9 on nothing new is drawn.
+    const nanites = swarm && progress < B.seal[1] ? swarm : null;
+    let vx = view.x;
+    let vy = view.y;
+    if (nanites) {
+      const shake = nanites.frame(progress, dq, calm, view.scale, backRects && !calm);
+      vx += shake.shakeX * view.scale;
+      vy += shake.shakeY * view.scale;
+      nanites.view(view.scale, vx, vy);
+    }
+    context.setTransform(view.scale, 0, 0, view.scale, vx, vy);
     context.imageSmoothingEnabled = true;
 
+    // The cocoon's far side, behind the body.
+    if (nanites) nanites.backPass(context);
     // FAR UP！: the scan wakes the undersuit, top to bottom.
     const scan = span(progress, B.scan);
-    const seal = smooth(span(progress, B.seal));
     if (seal < 1) {
       const fade = 1 - seal;
       context.globalAlpha = 0.24 * fade;
@@ -2253,33 +2467,31 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       }
     }
 
-    // The welded plates, then the seal into the finished figure.
+    // Its middle band, over the body and under the plates.
+    if (nanites) nanites.midPass(context);
+
+    // The painted plates (welded in paint order), then the seal into the
+    // finished figure.
     const { tiles } = plan;
-    const landed = landedBy(progress);
-    syncSettled(landed, seal >= 1);
+    const painted = paintedBy(progress);
+    syncSettled(painted, seal >= 1);
     context.globalAlpha = 1;
-    // In flight, a plate's tiles carry its gold unformed: the armour's from
-    // the base figure, the ornaments' from the full figure (owner,
-    // 2026-10-16).
+    // A plate's art carries its gold unformed: the armour's from the base
+    // figure, the ornaments' from the full figure (owner, 2026-10-16).
     const plates = raw || lights?.unlit || figure;
     const baseArt = baseRaw || baseLights?.unlit || images.base || plates;
-    // The rich scene (a fine pointer, the mote layer made): the nanites are
-    // the art itself in nanite light, with the art's outline; touch screens
-    // keep the batched squares and the bounded art draws.
-    const sheet = coarse.matches ? null : lights?.motes || null;
-    const baseSheet = (sheet && baseLights?.motes) || sheet;
-    const sheetOf = (item) => (item.src === 0 ? baseSheet : sheet);
     if (seal < 1) {
       context.drawImage(settled, 0, 0, W, H);
-      // Landed, not yet welded (the welds catch up a budget a frame): the
-      // art itself through one clip per source, not a flat square each.
-      if (landed > settledCount) {
+      // Painted, not yet welded (the welds catch up a budget a frame): the
+      // art itself through one clip per source.
+      if (painted > settledCount) {
+        const order = nano.paintOrder;
         for (let src = 0; src < 2; src += 1) {
           let any = false;
           context.save();
           context.beginPath();
-          for (let index = settledCount; index < landed; index += 1) {
-            const item = tiles[index];
+          for (let index = settledCount; index < painted; index += 1) {
+            const item = tiles[order[index]];
             if ((item.src ?? 1) !== src) continue;
             context.rect(item.sx, item.sy, item.tw, item.th);
             any = true;
@@ -2291,85 +2503,27 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
           context.restore();
         }
       }
+      // Seated plates still in raw metal, and the lacquer front.
+      if (nanites) nanites.seatedPass(context, painted);
       if (goldLayer) {
         syncGold(progress);
         context.drawImage(goldLayer, 0, 0, W, H);
-        if (!calm) drawGold(context, progress);
+        // The molten band and the cooling cells.
+        if (nanites) nanites.moltenPass(context);
+        // Touch screens (and a scene without the chips) keep the batched heat.
+        if (!calm && (coarse.matches || !images.cells)) drawGold(context, progress);
       }
       if (driver) context.drawImage(driver, 0, 0, W, H);
-      // The gold's frame (owner, 2026-10-16): just before a piece's tiles
-      // fly, the wireframe of its gold trims appears where it will sit,
-      // holds while the plate assembles on it, and fades as the gold forms;
-      // a scan line sweeps it with the scroll.
-      if (frame_ && plan.frames) {
-        const lead = 0.035;
-        const settle = ASSEMBLY_GOLD.delay + ASSEMBLY_GOLD.form;
-        for (const box of plan.frames) {
-          if (progress < box.from - lead) break;
-          const end = box.to + settle;
-          if (progress >= end) continue;
-          const rise = easeOut(clamp01((progress - (box.from - lead)) / lead));
-          const fade = 1 - clamp01((progress - box.to) / settle);
-          const alpha = Math.min(rise, fade);
-          if (alpha <= 0) continue;
-          const cx = box.x + box.w / 2;
-          const cy = box.y + box.h / 2;
-          // It projects in: larger and nearer, settling onto the body.
-          const zoom = 1 + 0.12 * (1 - rise);
-          context.save();
-          context.translate(cx, cy);
-          context.scale(zoom, zoom);
-          context.translate(-cx, -cy);
-          context.beginPath();
-          context.rect(box.x - 3, box.y - 3, box.w + 6, box.h + 6);
-          context.clip();
-          // Its depth (owner, 2026-10-16: more solid, more futuristic): the
-          // shape extruded down and to the right in dark gold, the lit face
-          // on top.
-          if (frameDeep_) {
-            for (let step = 4; step >= 1; step -= 1) {
-              context.globalAlpha = alpha * (0.2 + 0.09 * (4 - step));
-              context.drawImage(frameDeep_, step * 1.3, step * 1.5, W, H);
-            }
-            // The bevel's light on the upper-left edges.
-            context.globalAlpha = alpha * 0.35;
-            context.drawImage(frame_, -0.9, -0.9, W, H);
-          }
-          context.globalAlpha = alpha;
-          context.drawImage(frame_, 0, 0, W, H);
-          if (!calm) {
-            // A scan plane sweeps the frame with the scroll, a glow ahead of it.
-            const sweep = box.y + box.h * ((progress * 60 + box.x * 0.01) % 1);
-            context.globalAlpha = alpha * 0.18;
-            context.fillStyle = TONE_CSS[0];
-            context.fillRect(box.x, sweep - 10, box.w, 10);
-            context.globalAlpha = alpha * 0.6;
-            context.fillStyle = TONE_CSS[2];
-            context.fillRect(box.x, sweep - 0.6, box.w, 1.2);
-          }
-          context.restore();
-          // The lock: corner brackets slide in from outside as it settles.
-          const reach = 10 + 14 * (1 - rise);
-          const arm = Math.min(14, box.w * 0.18, box.h * 0.18);
-          context.globalAlpha = alpha * 0.9;
-          context.strokeStyle = "rgb(255 226 150)";
-          context.lineWidth = 1.2;
-          context.beginPath();
-          for (const [sxn, syn] of [
-            [-1, -1],
-            [1, -1],
-            [-1, 1],
-            [1, 1],
-          ]) {
-            const px = cx + sxn * (box.w / 2 + reach);
-            const py = cy + syn * (box.h / 2 + reach);
-            context.moveTo(px - sxn * arm, py);
-            context.lineTo(px, py);
-            context.lineTo(px, py - syn * arm);
-          }
-          context.stroke();
-        }
-        context.globalAlpha = 1;
+      if (nanites) {
+        // Before contact: each trim's hologram on the body, its scan plane
+        // and pulses; each staged plate's contact shadow, then the plate in
+        // raw metal on its lifted, tilted stage; after contact, the conduit;
+        // the latches, clamps and beams.
+        nanites.hologramPass(context);
+        nanites.shadowPass(context);
+        nanites.stagedPass(context);
+        nanites.conduitPass(context);
+        nanites.hardwarePass(context);
       }
     }
     if (seal > 0) {
@@ -2517,286 +2671,15 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       if (forms) context.restore();
     }
 
-    // Motes, flights and welds of the tiles still to land.
-    const { motes, moteCounts, art, artRects, flashes, flashCounts } = buffers;
-    moteCounts.fill(0);
-    flashCounts.fill(0);
-    let arts = 0;
-    let trails = 0;
-    let streakCount = 0;
-    for (let index = landed; index < tiles.length; index += 1) {
-      const item = tiles[index];
-      if (progress < item.m) continue;
-      if (progress < item.t0) {
-        // A mote: it fades in on RIDER！, drifts a little toward its seat,
-        // and circles its place in the cloud and breathes with the scroll
-        // (owner, 2026-10-15: the cloud is alive at every notch).
-        const hang = clamp01((progress - item.m) / (item.t0 - item.m));
-        const drift = 0.1 * hang;
-        const turn = (progress - item.m) * 7 + item.phase;
-        const orbit = (4 + 9 * (1 - hang)) * (0.7 + 0.3 * Math.sin(item.phase * 3));
-        const breath = 0.78 + 0.34 * (0.5 + 0.5 * Math.sin(turn * 2.3 + item.phase));
-        const size = (item.tone === 2 ? 4.5 : 3.2) * breath;
-        const slot = (progress - item.m < 0.021 ? 0 : 3) + item.tone;
-        const buffer = motes[slot];
-        const at = moteCounts[slot];
-        buffer[at] = item.ox + (item.cx - item.ox) * drift + Math.cos(turn) * orbit - size / 2;
-        buffer[at + 1] =
-          item.oy + (item.cy - item.oy) * drift + Math.sin(turn) * orbit * 0.6 - size / 2;
-        buffer[at + 2] = size;
-        buffer[at + 3] = size;
-        moteCounts[slot] = at + 4;
-        continue;
-      }
-      assemblyTilePose(item, progress, buffers.pose);
-      const [left, top, w, h, u] = buffers.pose;
-      // The rich scene: a streak behind the tile — two after-images of where
-      // it was a moment ago, in nanite light, and the line it flew — reads
-      // its path at every notch of a slow scroll.
-      if (sheet && !calm && u > 0.08 && u < 0.94 && trails < 360) {
-        trails += 1;
-        const flightSpan = item.t1 - item.t0;
-        for (let ghost = 1; ghost <= 2; ghost += 1) {
-          assemblyTilePose(item, progress - flightSpan * 0.07 * ghost, buffers.pose);
-          const [tx, ty, tw, th] = buffers.pose;
-          const shrink = 0.84 - ghost * 0.14;
-          context.globalAlpha = (ghost === 1 ? 0.34 : 0.16) * (1 - u * 0.6);
-          context.drawImage(
-            sheetOf(item),
-            item.sx,
-            item.sy,
-            item.tw,
-            item.th,
-            tx + (tw * (1 - shrink)) / 2,
-            ty + (th * (1 - shrink)) / 2,
-            tw * shrink,
-            th * shrink,
-          );
-          if (ghost === 2) {
-            // The line it flew, into the streaks' batched path.
-            streaks[streakCount] = tx + tw / 2;
-            streaks[streakCount + 1] = ty + th / 2;
-            streaks[streakCount + 2] = left + w / 2;
-            streaks[streakCount + 3] = top + h / 2;
-            streakCount += 4;
-          }
-        }
-      }
-      if (u < 0.62 && coarse.matches) {
-        const slot = item.tone + 3;
-        const at = moteCounts[slot];
-        motes[slot][at] = left;
-        motes[slot][at + 1] = top;
-        motes[slot][at + 2] = w * 0.84;
-        motes[slot][at + 3] = h * 0.84;
-        moteCounts[slot] = at + 4;
-      } else if (u < 0.62 && sheet) {
-        // The nanite: its own tile of the art in nanite light, so the
-        // piece's outline is there from the first glimpse.
-        context.globalAlpha = 0.72 + 0.28 * u;
-        context.drawImage(sheetOf(item), item.sx, item.sy, item.tw, item.th, left, top, w, h);
-      } else if (u < 0.62) {
-        // The mosaic: a nanite square of the plate's colour, a hair apart.
-        context.globalAlpha = 0.45 + 0.5 * u;
-        context.fillStyle = item.fill;
-        context.fillRect(left + w * 0.08, top + h * 0.08, w * 0.84, h * 0.84);
-      } else {
-        art[arts] = index;
-        artRects[arts * 4] = left;
-        artRects[arts * 4 + 1] = top;
-        artRects[arts * 4 + 2] = w;
-        artRects[arts * 4 + 3] = h;
-        arts += 1;
-      }
-    }
-    // The streaks: one batched path of the lines the tiles in flight flew.
-    if (streakCount) {
-      context.globalAlpha = 0.3;
-      context.strokeStyle = TONE_CSS[0];
-      context.lineWidth = 0.8;
-      context.beginPath();
-      for (let i = 0; i < streakCount; i += 4) {
-        context.moveTo(streaks[i], streaks[i + 1]);
-        context.lineTo(streaks[i + 2], streaks[i + 3]);
-      }
-      context.stroke();
-      context.globalAlpha = 1;
-    }
-    const artCount = coarse.matches ? Math.min(arts, ASSEMBLY_TOUCH_ART_BUDGET) : arts;
-    // Omitted texture draws remain luminous tiles, batched in three paths.
-    // Every tile still welds into the complete, full-resolution figure.
-    if (artCount < arts) {
-      let selected = 0;
-      for (let i = 0; i < arts; i += 1) {
-        if (i === Math.floor((selected * arts) / artCount)) {
-          selected += 1;
-          continue;
-        }
-        const slot = tiles[art[i]].tone + 3;
-        const at = moteCounts[slot];
-        const o = i * 4;
-        for (let j = 0; j < 4; j += 1) motes[slot][at + j] = artRects[o + j];
-        moteCounts[slot] = at + 4;
-      }
-    }
-    for (let slot = 0; slot < 6; slot += 1) {
-      fillRects(context, motes[slot], moteCounts[slot], TONE_CSS[slot % 3], slot < 3 ? 0.36 : 0.78);
-    }
-    context.globalAlpha = 1;
-    for (let n = 0; n < artCount; n += 1) {
-      const i = Math.floor((n * arts) / artCount);
-      const item = tiles[art[i]];
-      const o = i * 4;
-      context.drawImage(
-        tileArt(item),
-        item.sx,
-        item.sy,
-        item.tw,
-        item.th,
-        artRects[o],
-        artRects[o + 1],
-        artRects[o + 2],
-        artRects[o + 3],
-      );
-    }
-    // The rich scene: the nanite light fades into the art as the tile
-    // turns into its piece — on the art's own outline, never a square
-    // outline round it.
-    if (sheet && !calm) {
-      for (let n = 0; n < artCount; n += 1) {
-        const i = Math.floor((n * arts) / artCount);
-        const item = tiles[art[i]];
-        const u = clamp01((progress - item.t0) / (item.t1 - item.t0));
-        const v = clamp01((u - 0.62) / 0.38);
-        if (v >= 1) continue;
-        const o = i * 4;
-        context.globalAlpha = 0.85 * (1 - v);
-        context.drawImage(
-          sheetOf(item),
-          item.sx,
-          item.sy,
-          item.tw,
-          item.th,
-          artRects[o],
-          artRects[o + 1],
-          artRects[o + 2],
-          artRects[o + 3],
-        );
-      }
-      context.globalAlpha = 1;
-    }
-    // A restrained bevel catches the approaching plate's edge. Two batched
-    // paths, at most 64 tiles: no shadows, filters, or per-tile state stack.
-    if (!calm && arts && !sheet) {
-      const count = Math.min(artCount, CONTACT_BUDGET);
-      for (let edge = 0; edge < 2; edge += 1) {
-        context.beginPath();
-        for (let n = 0; n < count; n += 1) {
-          const i = Math.floor((n * arts) / count);
-          const item = tiles[art[i]];
-          const u = clamp01((progress - item.t0) / (item.t1 - item.t0));
-          if (u < 0.65 || u > 0.96) continue;
-          const o = i * 4;
-          const x = artRects[o];
-          const y = artRects[o + 1];
-          const w = artRects[o + 2];
-          const h = artRects[o + 3];
-          const inset = Math.min(w, h) * 0.14;
-          if (edge === 0) {
-            context.moveTo(x + inset, y + h - inset);
-            context.lineTo(x + w - inset, y + h - inset);
-            context.lineTo(x + w - inset, y + inset);
-          } else {
-            context.moveTo(x + inset, y + h * 0.45);
-            context.lineTo(x + inset, y + inset);
-            context.lineTo(x + w * 0.65, y + inset);
-          }
-        }
-        context.globalAlpha = edge ? 0.5 : 0.55;
-        context.strokeStyle = edge ? "rgb(228 248 255)" : "rgb(8 15 25)";
-        context.lineWidth = edge ? 0.85 : 1.6;
-        context.stroke();
-      }
-    }
-    if (arts && !calm && !sheet) {
-      context.globalAlpha = 0.55;
-      context.strokeStyle = TONE_CSS[0];
-      context.lineWidth = 0.9;
-      context.beginPath();
-      for (let n = 0; n < artCount; n += 1) {
-        const i = Math.floor((n * arts) / artCount) * 4;
-        context.rect(artRects[i], artRects[i + 1], artRects[i + 2], artRects[i + 3]);
-      }
-      context.stroke();
-    }
-    // Welds: a hot core in each cell that has just landed, cooling to ice —
-    // in the rich scene the cell itself, white-hot in nanite light, cooling
-    // into the art (its own outline; a square poked past the figure's edge).
-    for (let index = landed - 1; index >= 0; index -= 1) {
-      const item = tiles[index];
-      // Landed in order: going back, each weld is older than the last.
-      const age = (progress - item.t1) / FLASH;
-      if (age >= 1) break;
-      if (calm) break;
-      if (sheet) {
-        context.globalAlpha = 0.9 * (1 - age);
-        context.drawImage(
-          sheetOf(item),
-          item.sx,
-          item.sy,
-          item.tw,
-          item.th,
-          item.sx,
-          item.sy,
-          item.tw,
-          item.th,
-        );
-        continue;
-      }
-      const inset = item.tw * (0.12 + 0.2 * age);
-      const slot = age < 0.34 ? 0 : age < 0.67 ? 1 : 2;
-      const buffer = flashes[slot];
-      const at = flashCounts[slot];
-      buffer[at] = item.sx + inset;
-      buffer[at + 1] = item.sy + inset;
-      buffer[at + 2] = item.tw - inset * 2;
-      buffer[at + 3] = item.th - inset * 2;
-      flashCounts[slot] = at + 4;
-    }
-    context.globalAlpha = 1;
-    if (calm) flashCounts.fill(0);
-    fillRects(context, flashes[0], flashCounts[0], TONE_CSS[2], 0.62);
-    fillRects(context, flashes[1], flashCounts[1], "rgb(190 244 255)", 0.36);
-    fillRects(context, flashes[2], flashCounts[2], TONE_CSS[0], 0.18);
-
-    // Each DEUS！: contact rolls across the landing plane, rather than a
-    // front-facing circle covering the armor. Its duration is scroll-bound.
-    context.lineWidth = 1.8;
-    for (let beat = 0; beat < 5; beat += 1) {
-      const done = plan.partDone[beat];
-      const u = (progress - done) / 0.045;
-      if (!done || u < 0 || u >= 1 || calm) continue;
-      const [cx, cy] = plan.centroids[beat];
-      context.globalAlpha = (1 - u) * 0.5;
-      context.strokeStyle = RING_TONES[beat % 3];
-      context.beginPath();
-      context.save();
-      context.translate(cx, cy);
-      context.rotate(beat % 2 ? -0.12 : 0.12);
-      context.scale(1, beat === 0 ? 0.25 : 0.48);
-      context.arc(0, 0, 18 + 190 * easeOut(u), 0, Math.PI * 2);
-      context.stroke();
-      context.restore();
-      // One short seam glint per landed group, bounded to five contacts.
-      const contact = Math.max(0, 1 - u * 3);
-      if (contact > 0) {
-        context.globalAlpha = contact * 0.6;
-        context.strokeStyle = "rgb(235 248 255)";
-        context.beginPath();
-        context.moveTo(cx - 10 - 18 * u, cy);
-        context.lineTo(cx + 10 + 18 * u, cy);
-        context.stroke();
-      }
+    if (nanites) {
+      // The flights, the impacts, the gold's nanites, the cocoon's near
+      // side and the free chips spiralling into the reactor.
+      nanites.flightPass(context);
+      nanites.impactPass(context);
+      nanites.goldPass(context);
+      nanites.frontPass(context);
+      nanites.freePass(context);
+      nanites.endFrame();
     }
 
     // REXONANCE DEUS！: the face fills with pixel squares, which scatter.
@@ -2853,6 +2736,12 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       }
     }
     context.globalAlpha = 1;
+    lastDrawMs = (environment.performance?.now?.() ?? 0) - started;
+    try {
+      environment.__rexonanceDrawMs?.(lastDrawMs, progress, calm);
+    } catch {
+      // Test-only instrumentation must never affect drawing.
+    }
   };
 
   /* ---------------- the HUD (written only when it changes) ---------------- */
@@ -3019,7 +2908,15 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       : null;
   formObserver?.observe(runway, { attributes: true, attributeFilter: ["data-form"] });
 
-  const render = () => {
+  // Follow-through (owner, 2026-10-16: fine and dynamic at every notch):
+  // the displayed progress chases the scroll's, so one wheel notch plays as
+  // a short animation rather than a jump cut. A jump (over .06), the last
+  // few ten-thousandths, and everything from the ignition on (.9) snap; the
+  // HUD reads the scroll itself.
+  let lastTarget = -1;
+  let lastStamp = 0;
+  let force = false;
+  const render = (stamp) => {
     frame = 0;
     if (disposed || !live || document.hidden || !view) return;
     const progress = readProgress();
@@ -3030,12 +2927,39 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       if (canvas.height !== height) canvas.height = height;
       lastProgress = -1;
     }
-    if (Math.abs(progress - lastProgress) < 0.0005) return;
-    lastProgress = progress;
-    draw(progress);
+    const fresh = typeof stamp === "number" && stamp > lastStamp;
+    const dt = Math.min(50, Math.max(8, fresh ? stamp - lastStamp : 16.7));
+    if (fresh) lastStamp = stamp;
+    let shown = progress;
+    if (lastProgress >= 0) {
+      const settledHere = lastProgress === lastTarget;
+      if (!force && settledHere && Math.abs(progress - lastProgress) < 0.0005) return;
+      const gap = progress - lastProgress;
+      if (
+        Math.abs(gap) <= 0.06 &&
+        Math.abs(gap) >= 0.0004 &&
+        progress < ASSEMBLY_BEATS.light[0] &&
+        lastProgress < ASSEMBLY_BEATS.light[0]
+      ) {
+        shown = lastProgress + gap * (1 - Math.exp(-dt / (coarse.matches ? 40 : 60)));
+        if (Math.abs(progress - shown) < 0.0004) shown = progress;
+      }
+    }
+    force = false;
+    const step = lastProgress >= 0 ? Math.min(0.01, Math.abs(shown - lastProgress)) : 0;
+    lastProgress = shown;
+    lastTarget = progress;
+    // The governor: a slow last frame draws the far band as rects next.
+    backRects = !coarse.matches && lastDrawMs > 7;
+    draw(shown, false, step);
     updateHud(progress);
-    // Once the scroll rests, redraw the moment without its transient squares.
     environment.clearTimeout(calmTimer);
+    calmTimer = 0;
+    if (shown !== progress) {
+      schedule();
+      return;
+    }
+    // Once the scroll rests, redraw the moment without its transient effects.
     calmTimer = environment.setTimeout(() => {
       calmTimer = 0;
       if (
@@ -3052,7 +2976,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         draw(lastProgress, true);
     }, CALM_MS);
     if (behind) {
-      lastProgress = -1;
+      force = true;
       schedule();
     }
   };
@@ -3156,11 +3080,16 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       if (sheet) sheet.width = sheet.height = 0;
     raw = goldArt = goldLayer = goldPlan = driver = lights = frame_ = null;
     frameDeep_ = baseLights = baseRaw = null;
+    for (const sheet of naniteSheets) sheet.width = sheet.height = 0;
+    naniteSheets = [];
+    nano = swarm = null;
     goldCount = 0;
     goldReverse.dirty = -1;
     goldReverse.at = 0;
     buffers = null;
     view = null;
+    lastTarget = -1;
+    force = false;
   };
 
   let preparing = null;
@@ -3281,6 +3210,10 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     images?.gold?.close?.();
     images?.atlas?.close?.();
     images?.base?.close?.();
+    images?.cells?.close?.();
+    images?.comets?.close?.();
+    images?.fx?.close?.();
+    images?.guide?.close?.();
     formObserver?.disconnect();
     environment.clearTimeout(calmTimer);
     for (const image of loaders) releasePendingImage(image);
@@ -3314,5 +3247,8 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       if (sheet) sheet.width = sheet.height = 0;
     raw = goldArt = goldLayer = goldPlan = driver = lights = frame_ = null;
     frameDeep_ = baseLights = baseRaw = null;
+    for (const sheet of naniteSheets) sheet.width = sheet.height = 0;
+    naniteSheets = [];
+    nano = swarm = null;
   };
 }

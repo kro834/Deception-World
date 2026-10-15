@@ -784,7 +784,10 @@ html[data-family="special"]
     body
     .rxs-page.rxs-page.rxs-rexonance-page
     > .rzn-suitup {
-    height: max(1700px, 300svh);
+    /* 20% more runway (owner, 2026-10-16: 超大幅な改善 — each plate now
+       stages, clamps, seams and paints; every stage stays legible at a
+       5–9 px nudge). */
+    height: max(2000px, 360svh);
   }
 
   html[data-family="special"]:not([data-world-effects="economy"]):not([data-rzn-constrained])
@@ -803,7 +806,7 @@ html[data-family="special"]
     body
     .rxs-page.rxs-page.rxs-rexonance-page
     > .rzn-suitup {
-    height: max(1400px, 250svh);
+    height: max(1650px, 300svh);
   }
 
   /* One line of the call at a time, large, across the top. */

@@ -37,6 +37,7 @@ import {
 import { rexonanceImage } from "@/lib/rexonance-images";
 import { REXONANCE_FORM_FIGURES, REXONANCE_FORM_PAD } from "@/lib/rexonance-forms";
 import { REXONANCE_SUIT_BASE, REXONANCE_SUIT_ORNAMENTS } from "@/lib/rexonance-suit-base";
+import { REXONANCE_NANITES } from "@/lib/rexonance-nanites";
 import {
   FORM_CHANGE_MS,
   FORM_LANDMARKS,
@@ -448,6 +449,10 @@ const SUIT_UP: RexonanceAssemblyConfig = {
     cell: REXONANCE_SUIT_GOLD_CELL,
     cells: REXONANCE_SUIT_GOLD_CELLS,
   },
+  // The nanite kit (owner, 2026-10-16: 超大幅な改善): Blender hex chips,
+  // comets, clamps, latches, scan planes, droplets, shock rings, the gold
+  // guideway conduit, and each plate's real outline and gold box.
+  nanites: REXONANCE_NANITES,
 };
 // The published call, line by line; the chanted lines split into their
 // repeats, so each SA-GA！DEUS！ and REXONANCE！ lights on its own beat.
