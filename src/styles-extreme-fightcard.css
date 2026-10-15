@@ -1309,6 +1309,11 @@ html[data-family="special"]
     grid-column: 1;
     grid-row: 1;
     justify-self: start;
+    /* The name's column fits the name: shrunk to the frame's start, the
+       1fr column let 「エクスプリーム」 run under the VS badge on a phone
+       (its last character hidden; 2026-10-15). */
+    grid-template-columns: auto auto;
+    column-gap: 12px;
   }
 
   html[data-family="special"]

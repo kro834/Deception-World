@@ -270,11 +270,11 @@
     grid-auto-columns: min(84vw, 520px);
   }
 
-  footer {
+  main.film-edition > footer {
     grid-template-columns: 1fr auto;
   }
 
-  footer p {
+  main.film-edition > footer p {
     display: none;
   }
 }
@@ -907,7 +907,7 @@
     font-size: clamp(50px, 15vw, 72px);
   }
 
-  footer {
+  main.film-edition > footer {
     align-items: center;
     padding: 34px 18px;
   }

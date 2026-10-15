@@ -1841,6 +1841,10 @@ html[data-world-effects="economy"] .site-shell.film-edition.mirage-edition .wa-i
 @media (min-width: 1100px) {
   .site-shell.film-edition.mirage-edition .wa-episodes {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+    /* Each plate ends with its own notes: stretched to the row, EP01 and
+       EP02 framed about 1,300px of nothing under the longer EP03
+       (2026-10-15). */
+    align-items: start;
   }
 }
 
@@ -2464,5 +2468,13 @@ html[data-world-effects="economy"] .site-shell.film-edition.mirage-edition .wa-l
 
   .site-shell.film-edition.mirage-edition .wa-locations > .wa-code::after {
     background: CanvasText;
+  }
+}
+
+/* Narrow phones: the two-up wall's names step down a size, so a long name
+   (ジェームズ・スミス) keeps to one line in a 170px tile (2026-10-15). */
+@media (max-width: 400px) {
+  .site-shell.film-edition.mirage-edition .wa-person h3 {
+    font-size: 15px;
   }
 }

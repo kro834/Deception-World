@@ -1093,6 +1093,18 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page :is(a, button, summ
     > .rxs-comparison-key {
     padding: 0;
   }
+  /* The name keeps clear of the VS diamond, which overhangs its own track
+     by about 25px: without it 「エクスプリーム」 lost its last character
+     under the badge on a phone (2026-10-15). */
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #performance
+    .rxs-comparison
+    > .rxs-comparison-key
+    > span:first-child {
+    padding-right: 28px;
+  }
   html[data-family="special"]
     body
     .rxs-page.rxs-page.exs-page

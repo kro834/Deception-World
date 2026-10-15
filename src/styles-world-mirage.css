@@ -1872,7 +1872,12 @@ html[data-mode="world"]:not([data-world-effects="economy"])
       .hero-backdrop {
       animation: mr-par-back linear both;
       animation-timeline: --mr-hero;
-      animation-range: contain 0% exit 100%;
+      /* From the hero's top edge at the scrollport's top (page top) until
+         its bottom edge leaves: the same run as before on a hero at least a
+         viewport tall, and still from the page top on a shorter hero (the
+         portrait tablet's, 2026-10-15: `contain` had already ended there at
+         scrollY 0, so the title opened faded and split). */
+      animation-range: exit-crossing 0% exit-crossing 100%;
     }
 
     html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
@@ -1883,7 +1888,7 @@ html[data-mode="world"]:not([data-world-effects="economy"])
       > i {
       animation: mr-par-floor linear both;
       animation-timeline: --mr-hero;
-      animation-range: contain 0% exit 100%;
+      animation-range: exit-crossing 0% exit-crossing 100%;
     }
 
     html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
@@ -1894,7 +1899,7 @@ html[data-mode="world"]:not([data-world-effects="economy"])
       .orbit {
       animation: mr-dial-turn linear both;
       animation-timeline: --mr-hero;
-      animation-range: contain 0% exit 100%;
+      animation-range: exit-crossing 0% exit-crossing 100%;
     }
 
     html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
@@ -1914,7 +1919,7 @@ html[data-mode="world"]:not([data-world-effects="economy"])
       .mr-word {
       animation: mr-split-left linear both;
       animation-timeline: --mr-hero;
-      animation-range: contain 0% contain 520px;
+      animation-range: exit-crossing 0% exit-crossing 520px;
     }
 
     html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(

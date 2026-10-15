@@ -648,7 +648,10 @@
   text-shadow: 0 12px 55px rgba(0, 0, 0, 0.72);
 }
 
-footer {
+/* World's own footer only (2026-10-15): this sheet also loads on the cinema
+   and library pages, whose footers these bare `footer` rules had broken
+   (a one-character column, hidden lines). */
+main.film-edition > footer {
   position: relative;
   z-index: 1;
   display: grid;
@@ -678,26 +681,26 @@ footer {
   letter-spacing: -0.04em;
 }
 
-footer p,
-footer a {
+main.film-edition > footer p,
+main.film-edition > footer a {
   color: var(--dim);
   font-size: 7px;
   letter-spacing: 0.2em;
 }
 
-footer p {
+main.film-edition > footer p {
   margin: 0;
   text-align: center;
 }
 
-footer a {
+main.film-edition > footer a {
   justify-self: end;
   padding: 14px 0;
   transition: color 0.25s;
 }
 
 @media (hover: hover) and (pointer: fine) {
-  footer a:hover {
+  main.film-edition > footer a:hover {
     color: var(--cyan);
   }
 }

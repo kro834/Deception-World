@@ -2868,6 +2868,11 @@ html[data-family] body #site-side-panel.side-panel > .side-panel-files a::before
   content: "";
   position: absolute;
   inset: 0;
+  /* The rows' marker tick is switched off (display: none, opacity: 0) by
+     the link rules; this scrim is not that tick, and without it the names
+     stood straight on the light portraits (テラ unreadable; 2026-10-15). */
+  display: block;
+  opacity: 1;
   background: linear-gradient(transparent, rgb(var(--sh-ink-rgb) / 96%));
   z-index: -1;
   pointer-events: none;
@@ -2877,11 +2882,13 @@ html[data-family] body #site-side-panel.side-panel > .side-panel-files a > span 
   color: var(--sh-text);
   font-size: 14px;
   overflow-wrap: anywhere;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 70%);
 }
 html[data-family] body #site-side-panel.side-panel > .side-panel-files a > i {
   flex-shrink: 0;
   color: var(--sh-l1);
   font: normal 12px var(--sh-mono);
+  text-shadow: 0 1px 2px rgb(0 0 0 / 70%);
 }
 html[data-family] body #site-side-panel.side-panel > .side-panel-files a[aria-current="page"] {
   border-color: var(--sh-l1);

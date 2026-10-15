@@ -270,6 +270,9 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero .fst-he
   position: relative;
   inset: auto;
   display: block;
+  /* The logo file has no alpha (a black ground): screened, its black drops
+     out over the lit screen instead of standing as a dark box (2026-10-15). */
+  mix-blend-mode: screen;
   width: auto;
   max-width: 64%;
   height: auto;
