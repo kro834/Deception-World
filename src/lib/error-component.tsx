@@ -1,4 +1,3 @@
-import { Link } from "@tanstack/react-router";
 import { TriangleAlert } from "lucide-react";
 import notFoundCss from "@/styles-not-found.css?url";
 import loadErrorCss from "@/styles-load-error.css?url";
@@ -48,10 +47,6 @@ export function NotFoundComponent() {
       <p>DECEPTION WORLD</p>
       <h1>記録が見つかりません。</h1>
       <p>指定された資料は存在しないか、まだ公開されていません。</p>
-      <Link to="/world">WORLD ARCHIVEへ戻る</Link>
-      <Link to="/search" className="app-not-found-search">
-        資料検索で探す
-      </Link>
       <RecoveryTiles />
     </main>
   );

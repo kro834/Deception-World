@@ -1,9 +1,19 @@
 import { useRef } from "react";
 import { Link, useRouter, useRouterState } from "@tanstack/react-router";
 import { getInquiryGuide, getInquiryStop } from "@/lib/inquiry-guides";
+import { RecordReturnNavigation } from "./record-return-navigation";
+
+export function InquiryNavigation() {
+  return (
+    <>
+      <RecordReturnNavigation />
+      <InquiryGuideNavigation />
+    </>
+  );
+}
 
 /** Only explicit guide links activate this; ordinary reading remains unchanged. */
-export function InquiryNavigation() {
+export function InquiryGuideNavigation() {
   const location = useRouterState({ select: (state) => state.location });
   const router = useRouter();
   const detailsRef = useRef<HTMLDetailsElement>(null);

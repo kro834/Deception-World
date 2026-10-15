@@ -14,8 +14,7 @@
   color: var(--library-ink);
   background:
     radial-gradient(ellipse at 78% -4%, rgb(122 232 255 / 0.11), transparent 44%),
-    radial-gradient(ellipse at 6% 40%, rgb(240 207 134 / 0.05), transparent 38%),
-    #05090f;
+    radial-gradient(ellipse at 6% 40%, rgb(240 207 134 / 0.05), transparent 38%), #05090f;
 }
 .library-topbar,
 .library-footer {
@@ -244,8 +243,7 @@
   grid-column: 1 / -1;
   border-color: rgb(122 232 255 / 0.32) !important;
   background:
-    linear-gradient(120deg, rgb(122 232 255 / 0.1), transparent 55%),
-    rgb(4 8 14 / 0.6) !important;
+    linear-gradient(120deg, rgb(122 232 255 / 0.1), transparent 55%), rgb(4 8 14 / 0.6) !important;
 }
 .library-continue-kind {
   display: flex;
@@ -670,5 +668,182 @@
   }
   .library-page .library-primary-link {
     border: 1px solid LinkText;
+  }
+}
+
+/* URL-backed browsing stays a small, explicit workbench within the existing
+   STAGE shelves. No new fixed layer, blur, or motion is needed. */
+html[data-family="library"] .library-page .library-jump-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin-top: 18px;
+}
+html[data-family="library"] .library-page .library-jump-links a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 44px;
+  color: var(--dx-text-2, var(--library-ink));
+  font-size: 13px;
+  text-decoration: underline;
+  text-underline-offset: 5px;
+}
+html[data-family="library"] .library-page .library-jump-links a:first-child {
+  color: var(--dx-edition, var(--library-ice));
+}
+html[data-family="library"] .library-page #library-browser,
+html[data-family="library"] .library-page #library-browse-results {
+  scroll-margin-top: calc(100px + env(safe-area-inset-top));
+}
+html[data-family="library"] .library-page .library-browse-controls {
+  min-width: 0;
+  padding: clamp(14px, 2vw, 24px);
+  border: 1px solid var(--dxl-line-2, var(--library-line));
+  border-radius: 4px;
+  background: var(--dxl-well, #04080e);
+}
+html[data-family="library"]
+  .library-page
+  .library-browse-controls
+  > .library-search-note:first-child {
+  margin-top: 0;
+}
+html[data-family="library"] .library-page .library-query-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: stretch;
+  gap: 10px;
+}
+html[data-family="library"] .library-page .library-browse-controls .library-search {
+  min-width: 0;
+  padding-inline: 12px 6px;
+}
+html[data-family="library"] .library-page .library-browse-controls .library-search input {
+  min-width: 0;
+}
+html[data-family="library"]
+  .library-page
+  .library-browse-controls
+  .library-search
+  input::-webkit-search-cancel-button {
+  display: none;
+}
+html[data-family="library"] .library-page .library-browse-controls button {
+  min-height: 44px;
+  min-width: 44px;
+  border: 1px solid var(--dxl-line-2, var(--library-line));
+  border-radius: 4px;
+  color: var(--dx-text-2, var(--library-ink));
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+html[data-family="library"] .library-page .library-browse-controls .library-query-clear {
+  flex: none;
+  width: 44px;
+  padding: 0;
+  border-color: transparent;
+  font-size: 22px;
+}
+html[data-family="library"] .library-page .library-browse-controls .library-browse-submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 0 18px;
+  border-color: var(--dx-edition, var(--library-ice));
+  color: var(--dx-edition, var(--library-ice));
+}
+html[data-family="library"]
+  .library-page
+  .library-browse-controls
+  :is(.library-scope-row, .library-filter-row) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 14px 0 0;
+  padding: 0;
+  overflow: visible;
+}
+html[data-family="library"]
+  .library-page
+  .library-browse-controls
+  :is(.library-scope-row, .library-filter-row)
+  button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 12px;
+  border-radius: 999px;
+}
+html[data-family="library"] .library-page .library-browse-controls button[aria-pressed="true"] {
+  border-color: var(--dx-edition, var(--library-ice));
+  color: #03141c;
+  background: var(--dx-edition, var(--library-ice));
+}
+html[data-family="library"]
+  .library-page
+  .library-browse-controls
+  :is(.library-scope-row, .library-filter-row)
+  button
+  > span {
+  min-width: 1.5em;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  opacity: 0.8;
+}
+html[data-family="library"] .library-page .library-active-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+  margin-top: 18px;
+  padding-top: 12px;
+  border-top: 1px solid var(--dxl-line, var(--library-line));
+  color: var(--dx-text-3, var(--library-muted));
+  font-size: 12px;
+  line-height: 1.8;
+}
+html[data-family="library"] .library-page .library-active-filters p {
+  margin: 0;
+}
+html[data-family="library"] .library-page .library-active-filters .library-query-summary {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  color: var(--dx-text, var(--library-ink));
+}
+html[data-family="library"] .library-page .library-active-filters button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-left: auto;
+  padding: 0 12px;
+}
+html[data-family="library"] .library-page .library-results-heading > p:focus {
+  outline: 2px solid var(--dx-focus, var(--library-ice));
+  outline-offset: 5px;
+}
+html[data-family="library"] .library-page .library-saved-state button {
+  min-height: 44px;
+}
+@media (max-width: 560px) {
+  html[data-family="library"] .library-page .library-query-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  html[data-family="library"] .library-page .library-browse-controls .library-browse-submit {
+    min-height: 44px;
+  }
+}
+@media (forced-colors: active) {
+  html[data-family="library"] .library-page .library-browse-controls button[aria-pressed="true"] {
+    border-color: Highlight;
+    color: HighlightText;
+    background: Highlight;
   }
 }

@@ -221,7 +221,7 @@ test("the 404 record plate: its own sheet, linked only where it renders", async 
     "<p>DECEPTION WORLD</p>",
     "<h1>記録が見つかりません。</h1>",
     "<p>指定された資料は存在しないか、まだ公開されていません。</p>",
-    '<Link to="/world">WORLD ARCHIVEへ戻る</Link>',
+    "<RecoveryTiles />",
   ];
   let at = 0;
   for (const word of words) {

@@ -33,10 +33,12 @@ function mount(location) {
           useRouter: () => ({ navigate: (options) => calls.push(options) }),
         };
       if (name === "@/lib/inquiry-guides") return guides;
+      if (name === "./record-return-navigation")
+        return { RecordReturnNavigation: Symbol("Record return") };
       throw new Error(`Unexpected dependency: ${name}`);
     },
   });
-  return { tree: exports.InquiryNavigation(), calls };
+  return { tree: exports.InquiryGuideNavigation(), calls };
 }
 
 function nodes(tree, predicate) {

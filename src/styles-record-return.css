@@ -1,0 +1,61 @@
+.record-return-navigation {
+  position: fixed;
+  left: max(12px, env(safe-area-inset-left));
+  bottom: max(12px, env(safe-area-inset-bottom));
+  z-index: 70;
+  display: flex;
+  max-width: min(
+    208px,
+    calc(100vw - 100px - env(safe-area-inset-left) - env(safe-area-inset-right))
+  );
+  border: 1px solid #9faeb8;
+  border-radius: 4px;
+  background: #101a23;
+  box-shadow: 0 4px 18px #0006;
+  color: #f4eee2;
+  font-family: "Noto Sans JP", sans-serif;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.record-return-navigation a {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  min-width: 0;
+  padding: 6px 10px;
+  color: inherit;
+  text-decoration: none;
+  box-sizing: border-box;
+}
+.record-return-navigation button {
+  flex: 0 0 44px;
+  min-height: 44px;
+  border: 0;
+  border-left: 1px solid #9faeb850;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.record-return-navigation :focus-visible {
+  outline: 2px solid #ecc991;
+  outline-offset: 3px;
+}
+html[data-loading] .record-return-navigation,
+html[data-route-cover] .record-return-navigation,
+html[data-route-scroll-settling] .record-return-navigation,
+html[data-dialog-open] .record-return-navigation,
+body:has(dialog[open], .side-panel[data-open="true"]) .record-return-navigation {
+  visibility: hidden;
+}
+@media (forced-colors: active) {
+  .record-return-navigation {
+    color: LinkText;
+    background: Canvas;
+    border-color: ButtonText;
+  }
+  .record-return-navigation button {
+    border-color: ButtonText;
+  }
+}

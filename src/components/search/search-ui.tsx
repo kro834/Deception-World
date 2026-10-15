@@ -51,6 +51,7 @@ export function ResultOption({
   id,
   active,
   className,
+  tabbable = false,
   onOpen,
   children,
 }: {
@@ -58,6 +59,7 @@ export function ResultOption({
   id: string;
   active: boolean;
   className?: string;
+  tabbable?: boolean;
   onOpen: (result: SearchResult, fromKeyboard: boolean) => void;
   children: ReactNode;
 }) {
@@ -70,7 +72,8 @@ export function ResultOption({
       id={id}
       role="option"
       aria-selected={active}
-      tabIndex={-1}
+      tabIndex={tabbable ? 0 : -1}
+      data-record-id={result.document.id}
       href={resultHref(result)}
       className={className}
       data-active={active ? "true" : undefined}

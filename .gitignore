@@ -14,3 +14,4 @@ attachments
 /tmp
 *.log
 public/release-identity.json
+output/playwright/

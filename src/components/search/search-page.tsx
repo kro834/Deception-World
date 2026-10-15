@@ -25,6 +25,7 @@ import { clearRecentSearches, rememberSearch, useRecentSearches } from "./search
 import { Highlighted, HighlightedName, ResultOption } from "./search-ui";
 import { placeLabel, stepActive } from "./search-ui-helpers";
 import { useOpenResult } from "./use-open-result";
+import { recordReturnCardId } from "@/lib/record-return-state";
 
 const PAGE_SIZE = 24;
 const GROUP_PREVIEW = 4;
@@ -82,6 +83,7 @@ export function SearchPage({
   const [composing, setComposing] = useState(false);
   const compositionEndedRef = useRef(-Infinity);
   const writtenRef = useRef(query);
+  const queryTimerRef = useRef<number | undefined>(undefined);
   const inputRef = useRef<HTMLInputElement>(null);
   const resultsRef = useRef<HTMLHeadingElement>(null);
   const listboxId = useId().replace(/:/g, "") + "-records";
@@ -116,7 +118,7 @@ export function SearchPage({
         const limit = trimmed ? GROUP_PREVIEW : BROWSE_PREVIEW;
         const items: Option[] = group.results.slice(0, limit).map((result) => ({
           kind: "result",
-          id: `${listboxId}-${result.document.id}`,
+          id: recordReturnCardId("search", result.document.id),
           result,
         }));
         if (group.results.length > limit)
@@ -133,7 +135,7 @@ export function SearchPage({
     } else {
       const items: Option[] = filtered.slice(0, shown).map((result) => ({
         kind: "result",
-        id: `${listboxId}-${result.document.id}`,
+        id: recordReturnCardId("search", result.document.id),
         result,
       }));
       if (items.length) sections.push({ category, total: filtered.length, items });
@@ -156,9 +158,11 @@ export function SearchPage({
   useEffect(() => {
     if (composing || draft === writtenRef.current) return;
     const timer = window.setTimeout(() => {
+      queryTimerRef.current = undefined;
       writtenRef.current = draft;
       onQueryChangeRef.current(draft);
     }, URL_DELAY_MS);
+    queryTimerRef.current = timer;
     return () => window.clearTimeout(timer);
   }, [composing, draft]);
 
@@ -184,8 +188,14 @@ export function SearchPage({
 
   const open = (result: SearchResult, fromKeyboard: boolean) => {
     if (draft.trim()) rememberSearch(draft);
-    flushQuery();
-    openResult(result, fromKeyboard);
+    window.clearTimeout(queryTimerRef.current);
+    queryTimerRef.current = undefined;
+    writtenRef.current = draft;
+    void openResult(result, fromKeyboard, {
+      pathname: "/search",
+      search: { q: draft, category, shown },
+      cardId: recordReturnCardId("search", result.document.id),
+    });
   };
 
   // Cards keep one handler, so moving the active option re-renders two cards.
@@ -408,7 +418,7 @@ export function SearchPage({
                         role="option"
                         aria-selected={activeOption?.id === option.id}
                         data-active={activeOption?.id === option.id ? "true" : undefined}
-                        tabIndex={-1}
+                        tabIndex={0}
                         href={`/search?${new URLSearchParams({
                           ...(trimmed ? { q: trimmed } : {}),
                           category: option.category,
@@ -497,6 +507,7 @@ const ResultCard = memo(function ResultCard({
       id={option.id}
       active={active}
       className="search-result-card"
+      tabbable
       onOpen={onOpen}
     >
       <RecordArtFrame
