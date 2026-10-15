@@ -2,16 +2,12 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { GALLERY_ARTWORKS } from "@/components/gallery/gallery-data";
 import { ExhibitionStudio } from "@/components/exhibition/exhibition-studio";
 import { useExhibitionArtworkReady } from "@/lib/use-exhibition-artwork-ready";
+import { normalizeExhibitionSearch } from "@/lib/gallery-route-search";
 import { createWorldHead, WORLD_CORE_STYLESHEET_LINKS } from "@/lib/world-head";
 import studioCssUrl from "@/styles-exhibition-studio.css?url";
 
 export const Route = createFileRoute("/exhibition")({
-  validateSearch: (search: Record<string, unknown>): { work?: string } => ({
-    work:
-      typeof search.work === "string" && GALLERY_ARTWORKS.some((art) => art.id === search.work)
-        ? search.work
-        : undefined,
-  }),
+  validateSearch: normalizeExhibitionSearch,
   component: ExhibitionRoom,
   head: () =>
     createWorldHead({

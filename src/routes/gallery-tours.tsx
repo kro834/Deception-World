@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { GalleryToursPage } from "@/components/gallery-tours/tours-page";
-import { normalizeTourSearch } from "@/components/gallery-tours/tour-data";
+import { normalizeTourSearch } from "@/components/gallery-tours/tour-route-search";
 import { createWorldHead, WORLD_CORE_STYLESHEET_LINKS } from "@/lib/world-head";
 import galleryCssUrl from "@/styles-gallery.css?url";
 import toursCssUrl from "@/styles-gallery-tours.css?url";
