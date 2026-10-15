@@ -36,6 +36,14 @@ export const dossierImageSources = [
   "/rider-cipher.jpeg",
   "/rider-cipher-blacksite.jpeg",
   "/rider-vandal-20260826.jpeg",
+  // The 六詠 riders' and Realm's Earth/Moon form pickups (their files, the
+  // World's episode pickups and their warm-ups): 451-761 KB as supplied.
+  "/manager-shuza-rider.jpeg",
+  "/manager-lejas-rider.jpeg",
+  "/manager-opus-rider.jpeg",
+  "/manager-reemu-rider.jpeg",
+  "/rider-realm-earth.jpeg",
+  "/rider-realm-moon.jpeg",
   "/character-luna-thumb.jpeg",
   "/character-terra-thumb.jpeg",
   "/dream-chapter-ciel.jpeg",
