@@ -26,11 +26,61 @@ export const OPENING_LADDER = [
 ] as const;
 
 /**
- * Fetches `src` (normally from the HTTP cache: the page's <img> layers load
- * the same URL) and prepares it as an ImageBitmap of at most `maxWidth`
- * pixels, decoded off the main thread and premultiplied, so the upload is a
- * copy. Falls back to an <img>, which the upload then premultiplies.
+ * Reuses the exact image candidate already decoded by the title, rather than
+ * issuing a fetch/revalidation and decoding the same compressed bytes again.
+ * Only pending work is shared: no DOM nodes or decoded images are kept in a
+ * module cache after settlement (the burn/dive own their texture lifetimes).
  */
+type OpeningImage = { image: HTMLImageElement; borrowed: boolean };
+const pendingImages = new Map<string, Promise<OpeningImage>>();
+
+async function detachedOpeningImage(url: string, crossOrigin: string | null = null) {
+  const image = new Image();
+  image.decoding = "async";
+  // Retain the same cache/CORS mode when cloning a live title layer.
+  if (crossOrigin !== null) image.crossOrigin = crossOrigin;
+  else if (new URL(url).origin !== new URL(document.baseURI).origin) image.crossOrigin = "anonymous";
+  image.src = url;
+  await image.decode();
+  if (!image.naturalWidth) throw new Error("Opening image unavailable");
+  return image;
+}
+
+function loadOpeningImage(src: string): Promise<OpeningImage> {
+  const url = new URL(src, document.baseURI).href;
+  const pending = pendingImages.get(url);
+  if (pending) return pending;
+  const load = async () => {
+    // currentSrc, not src: a responsive logo may have chosen another density.
+    // Never change a live layer's attributes to prepare a shader texture.
+    const sameOrigin = new URL(url).origin === new URL(document.baseURI).origin;
+    const displayed = Array.from(document.images).find(
+      (image) =>
+        image.currentSrc === url && image.complete && image.naturalWidth > 0 &&
+        (sameOrigin || image.crossOrigin === "anonymous"),
+    );
+    if (displayed) {
+      try {
+        await displayed.decode();
+        // Rotation can change srcset selection while decode is pending.
+        if (displayed.currentSrc === url && displayed.naturalWidth > 0)
+          return { image: displayed, borrowed: true };
+      } catch {
+        // A removed/replaced layer must not make the independent dive fail.
+      }
+    }
+    return { image: await detachedOpeningImage(url), borrowed: false };
+  };
+  const request = load();
+  pendingImages.set(url, request);
+  const release = () => {
+    if (pendingImages.get(url) === request) pendingImages.delete(url);
+  };
+  void request.then(release, release);
+  return request;
+}
+
+/** Prepares an independently owned, resized and premultiplied bitmap. */
 export async function loadGlImage(
   src: string,
   natural: { width: number; height: number },
@@ -39,24 +89,24 @@ export async function loadGlImage(
   const ratio = Math.min(1, maxWidth / natural.width);
   const width = Math.max(1, Math.round(natural.width * ratio));
   const height = Math.max(1, Math.round(natural.height * ratio));
+  const { image, borrowed } = await loadOpeningImage(src);
   try {
-    const response = await fetch(src);
-    if (!response.ok) throw new Error(`opening-art ${response.status}`);
-    const blob = await response.blob();
     const options: ImageBitmapOptions = { premultiplyAlpha: "premultiply" };
     if (ratio < 1) {
       options.resizeWidth = width;
       options.resizeHeight = height;
       options.resizeQuality = "low"; // "medium" mipmaps on the main thread
     }
-    const bitmap = await createImageBitmap(blob, options);
+    const bitmap = await createImageBitmap(image, options);
     return { source: bitmap, width: bitmap.width, height: bitmap.height };
   } catch {
-    const image = new Image();
-    image.decoding = "async";
-    image.src = src;
-    await image.decode();
-    return { source: image, width: image.naturalWidth, height: image.naturalHeight };
+    // Never retain a live responsive DOM layer in a prepared texture. The
+    // fallback owns an exact-src detached image (no density-corrected sizes or
+    // viewport listener), reusing the browser's matching image cache.
+    const fallback = borrowed
+      ? await detachedOpeningImage(new URL(src, document.baseURI).href, image.crossOrigin)
+      : image;
+    return { source: fallback, width: fallback.naturalWidth, height: fallback.naturalHeight };
   }
 }
 
