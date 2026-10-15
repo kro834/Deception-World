@@ -778,11 +778,15 @@ function* assemblyPlanSteps({
           : 2;
     const [from, to] = beatWindow(beat);
     const flight = beat === 4 ? 0.045 : 0.05;
+    // Within a DEUS！ the pieces still land bottom first, but each piece's
+    // tiles spread along the scroll from its seat outward (owner,
+    // 2026-10-15: a slow scroll lands a band at a time, not a whole piece at
+    // one notch), so neighbouring pieces overlap in flight.
     const key = clamp01(
       beat === 5
         ? (1 - Math.hypot(item.cx - eyeX, item.cy - eyeY) / helmReach) * 0.9 + random() * 0.1
-        : (item.owner?.rank ?? 0) * 0.52 +
-            (item.reach / (item.owner?.reach ?? 1)) * 0.38 +
+        : (item.owner?.rank ?? 0) * 0.36 +
+            (item.reach / (item.owner?.reach ?? 1)) * 0.54 +
             random() * 0.1,
     );
     item.beat = beat;
@@ -819,6 +823,9 @@ function* assemblyPlanSteps({
     // Each plate shares an approach plane. Tile-local variation is seeded
     // without consuming the timing PRNG, preserving every landing beat.
     const plane = ((Math.imul((item.owner?.index ?? beat) + 1, 2654435761) >>> 0) % 997) / 997;
+    // The mote's own phase in the hovering cloud's slow swirl (seeded the
+    // same way, so every landing beat is as it was).
+    item.phase = (((Math.imul(index + 7, 2246822519) >>> 0) % 1024) / 1024) * Math.PI * 2;
     item.depth = 0.35 + plane * 0.65;
     item.curveX = (item.cx < width / 2 ? -1 : 1) * height * (0.025 + plane * 0.035);
     item.curveY = -height * (0.018 + plane * 0.018);
@@ -831,6 +838,23 @@ function* assemblyPlanSteps({
     delete item.rgb;
   }
   tiles.sort((a, b) => a.t1 - b.t1);
+  // Each piece's landing window, with its box (owner, 2026-10-16: just
+  // before a part is fitted, the frame of its gold appears where it will
+  // sit). Sorted by when the first tile flies.
+  const windows = new Map();
+  for (const item of tiles) {
+    if (!item.pieceId) continue;
+    const window = windows.get(item.pieceId);
+    if (!window) windows.set(item.pieceId, { from: item.t0, to: item.t1 });
+    else {
+      if (item.t0 < window.from) window.from = item.t0;
+      if (item.t1 > window.to) window.to = item.t1;
+    }
+  }
+  const frames = pieces
+    .filter((piece) => windows.has(piece.id) && !piece.preset)
+    .map((piece) => ({ x: piece.x, y: piece.y, w: piece.w, h: piece.h, ...windows.get(piece.id) }))
+    .sort((a, b) => a.from - b.from);
   return {
     tiles,
     cols,
@@ -838,7 +862,45 @@ function* assemblyPlanSteps({
     tile,
     partDone,
     centroids: centroids.map(([x, y, n]) => (n ? [x / n, y / n] : [coreX, coreY])),
+    frames,
   };
+}
+
+/** The gold's frame (owner, 2026-10-16): a wireframe of the gold trims —
+ * white-ice at their edges, a second fainter edge inside, the faintest ice
+ * across the trim — traced from the gold art's alpha, one row at a time. */
+export function traceGoldFrameRow(source, target, y, width, height) {
+  const edge = 90;
+  const row = y * width;
+  for (let x = 0; x < width; x += 1) {
+    const i = (row + x) * 4;
+    if (source[i + 3] < edge) continue;
+    const open = (dx, dy) => {
+      const nx = x + dx;
+      const ny = y + dy;
+      return nx < 0 || ny < 0 || nx >= width || ny >= height
+        ? true
+        : source[((ny * width + nx) << 2) + 3] < edge;
+    };
+    // The trims' edge in white gold, a gold line inside it, an ice haze
+    // across the trim: the gold's own shape, as a hologram.
+    if (open(1, 0) || open(-1, 0) || open(0, 1) || open(0, -1)) {
+      target[i] = 255;
+      target[i + 1] = 241;
+      target[i + 2] = 200;
+      target[i + 3] = 240;
+    } else if (open(2, 0) || open(-2, 0) || open(0, 2) || open(0, -2)) {
+      target[i] = 255;
+      target[i + 1] = 212;
+      target[i + 2] = 118;
+      target[i + 3] = 150;
+    } else {
+      target[i] = 121;
+      target[i + 1] = 232;
+      target[i + 2] = 255;
+      target[i + 3] = 44;
+    }
+  }
 }
 
 /** Pure synchronous plan for callers/tests; the live scene advances this
@@ -1176,6 +1238,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   let goldLayer = null;
   let goldCount = 0;
   const goldReverse = { count: 0, dirty: -1, at: 0 };
+  let frame_ = null;
   let driver = null;
   let lights = null;
   let settled = null;
@@ -1453,11 +1516,57 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       }
       return finished;
     };
-    const splitLightsIdle = async (source, phase) => {
+    // The figure's split also yields its mote layer (2026-10-15): the art in
+    // nanite light, with the art's own alpha, for the tiles in flight and
+    // the welds — a nanite then carries the piece's outline, never a square
+    // standing out past it.
+    const traceGoldFrame = async (source, target, phase) => {
+      mark(`${phase}-read`);
+      const data = await idleTask(() => {
+        if (!active()) return null;
+        try {
+          const image = source.getContext("2d").getImageData(0, 0, W, H);
+          const out = target.getContext("2d").createImageData(W, H);
+          return image?.data?.length === W * H * 4 && out?.data?.length === W * H * 4
+            ? { image, out }
+            : null;
+        } catch {
+          return null;
+        }
+      });
+      if (!data || !active()) return false;
+      const { image, out } = data;
+      let row = 0;
+      while (active() && row < H) {
+        mark(`${phase}-rows`);
+        const ran = await idleTask((deadline) => {
+          if (!active()) return;
+          const start = environment.performance?.now?.() ?? Date.now();
+          do {
+            traceGoldFrameRow(image.data, out.data, row, W, H);
+            row += 1;
+          } while (
+            row < H &&
+            (environment.performance?.now?.() ?? Date.now()) - start < 4 &&
+            (!deadline || deadline.timeRemaining() > 4)
+          );
+        });
+        if (ran === null || !active()) return false;
+      }
+      if (row < H || !active()) return false;
+      mark(`${phase}-upload`);
+      const put = await idleTask(() => {
+        if (!active()) return false;
+        target.getContext("2d").putImageData(out, 0, 0);
+        return true;
+      });
+      return put === true;
+    };
+    const splitLightsIdle = async (source, phase, options) => {
       mark(`${phase}-setup`);
       const job = await idleTask(() => {
         if (!active()) return null;
-        const result = createSplitLightsJob(source, 0, 0, W, H, document);
+        const result = createSplitLightsJob(source, 0, 0, W, H, document, options);
         if (result) splitJobs.add(result);
         return result;
       });
@@ -1481,6 +1590,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         if (result) {
           resources.add(result.unlit);
           resources.add(result.lights);
+          if (result.motes) resources.add(result.motes);
         }
         return result;
       });
@@ -1516,7 +1626,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         const nextPixels = facePixels(config.glow, config.visor);
         const nextSettled = await makeSheet("settled-sheet");
         if (!nextSettled || !active()) return;
-        const nextLights = await splitLightsIdle(images.figure, "figure-lights");
+        const nextLights = await splitLightsIdle(images.figure, "figure-lights", { motes: true });
         if (!active()) return;
 
         const preset = config.pieces.filter((piece) => piece.preset).reverse();
@@ -1578,6 +1688,19 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
           });
         }
 
+        // The gold's frame (owner, 2026-10-16), traced from the gold art in
+        // idle rows; the scene plays without it where pixels cannot be read.
+        let nextFrame = null;
+        if (nextGoldArt && active()) {
+          nextFrame = await makeSheet("gold-frame-sheet");
+          if (!nextFrame || !active()) return;
+          if (!(await traceGoldFrame(nextGoldArt, nextFrame, "gold-frame"))) {
+            nextFrame.width = nextFrame.height = 0;
+            resources.delete(nextFrame);
+            nextFrame = null;
+          }
+        }
+
         if (!active()) return;
         const nextBuffers = await allocateIdle(nextPlan, nextGold, nextPixels, active, mark);
         if (!active() || !nextBuffers) return;
@@ -1592,6 +1715,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         raw = nextRaw;
         goldArt = nextGoldArt;
         goldLayer = nextGoldLayer;
+        frame_ = nextFrame;
         goldCount = 0;
         buffers = nextBuffers;
         complete = true;
@@ -1719,6 +1843,8 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   // Per-frame buffers, allocated once per plan: a scrub draws thousands
   // of squares a frame and must not leave garbage behind it.
   let buffers = null;
+  // The streaks' endpoints this frame (the rich scene only; reused).
+  const streaks = new Float32Array(360 * 4);
   const allocateIdle = async (nextPlan, nextGold, nextPixels, active, mark) => {
     const buckets = Array.from({ length: 18 }, () => []);
     let cursor = 0;
@@ -1959,12 +2085,26 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     const landed = landedBy(progress);
     syncSettled(landed, seal >= 1);
     context.globalAlpha = 1;
+    // In flight, a plate's tiles carry its gold unformed.
+    const plates = raw || lights?.unlit || figure;
+    // The rich scene (a fine pointer, the mote layer made): the nanites are
+    // the art itself in nanite light, with the art's outline; touch screens
+    // keep the batched squares and the bounded art draws.
+    const sheet = coarse.matches ? null : lights?.motes || null;
     if (seal < 1) {
       context.drawImage(settled, 0, 0, W, H);
-      for (let index = settledCount; index < landed; index += 1) {
-        const item = tiles[index];
-        context.fillStyle = item.fill;
-        context.fillRect(item.sx + 0.8, item.sy + 0.8, item.tw - 1.6, item.th - 1.6);
+      // Landed, not yet welded (the welds catch up a budget a frame): the
+      // art itself through one clip, not a flat square each.
+      if (landed > settledCount) {
+        context.save();
+        context.beginPath();
+        for (let index = settledCount; index < landed; index += 1) {
+          const item = tiles[index];
+          context.rect(item.sx, item.sy, item.tw, item.th);
+        }
+        context.clip();
+        context.drawImage(plates, 0, 0, W, H);
+        context.restore();
       }
       if (goldLayer) {
         syncGold(progress);
@@ -1972,6 +2112,37 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         if (!calm) drawGold(context, progress);
       }
       if (driver) context.drawImage(driver, 0, 0, W, H);
+      // The gold's frame (owner, 2026-10-16): just before a piece's tiles
+      // fly, the wireframe of its gold trims appears where it will sit,
+      // holds while the plate assembles on it, and fades as the gold forms;
+      // a scan line sweeps it with the scroll.
+      if (frame_ && plan.frames) {
+        const lead = 0.035;
+        const settle = ASSEMBLY_GOLD.delay + ASSEMBLY_GOLD.form;
+        for (const box of plan.frames) {
+          if (progress < box.from - lead) break;
+          const end = box.to + settle;
+          if (progress >= end) continue;
+          const rise = clamp01((progress - (box.from - lead)) / lead);
+          const fade = 1 - clamp01((progress - box.to) / settle);
+          const alpha = Math.min(rise, fade);
+          if (alpha <= 0) continue;
+          context.save();
+          context.beginPath();
+          context.rect(box.x, box.y, box.w, box.h);
+          context.clip();
+          context.globalAlpha = alpha * 0.95;
+          context.drawImage(frame_, 0, 0, W, H);
+          if (!calm) {
+            const sweep = box.y + box.h * ((progress * 60 + box.x * 0.01) % 1);
+            context.globalAlpha = alpha * 0.5;
+            context.fillStyle = TONE_CSS[2];
+            context.fillRect(box.x, sweep - 0.6, box.w, 1.2);
+          }
+          context.restore();
+        }
+        context.globalAlpha = 1;
+      }
     }
     if (seal > 0) {
       context.globalAlpha = seal;
@@ -2123,18 +2294,27 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     moteCounts.fill(0);
     flashCounts.fill(0);
     let arts = 0;
+    let trails = 0;
+    let streakCount = 0;
     for (let index = landed; index < tiles.length; index += 1) {
       const item = tiles[index];
       if (progress < item.m) continue;
       if (progress < item.t0) {
-        // A mote: it fades in on RIDER！ and drifts a little toward its seat.
-        const drift = 0.1 * clamp01((progress - item.m) / (item.t0 - item.m));
-        const size = item.tone === 2 ? 4.5 : 3.2;
+        // A mote: it fades in on RIDER！, drifts a little toward its seat,
+        // and circles its place in the cloud and breathes with the scroll
+        // (owner, 2026-10-15: the cloud is alive at every notch).
+        const hang = clamp01((progress - item.m) / (item.t0 - item.m));
+        const drift = 0.1 * hang;
+        const turn = (progress - item.m) * 7 + item.phase;
+        const orbit = (4 + 9 * (1 - hang)) * (0.7 + 0.3 * Math.sin(item.phase * 3));
+        const breath = 0.78 + 0.34 * (0.5 + 0.5 * Math.sin(turn * 2.3 + item.phase));
+        const size = (item.tone === 2 ? 4.5 : 3.2) * breath;
         const slot = (progress - item.m < 0.021 ? 0 : 3) + item.tone;
         const buffer = motes[slot];
         const at = moteCounts[slot];
-        buffer[at] = item.ox + (item.cx - item.ox) * drift - size / 2;
-        buffer[at + 1] = item.oy + (item.cy - item.oy) * drift - size / 2;
+        buffer[at] = item.ox + (item.cx - item.ox) * drift + Math.cos(turn) * orbit - size / 2;
+        buffer[at + 1] =
+          item.oy + (item.cy - item.oy) * drift + Math.sin(turn) * orbit * 0.6 - size / 2;
         buffer[at + 2] = size;
         buffer[at + 3] = size;
         moteCounts[slot] = at + 4;
@@ -2142,6 +2322,38 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       }
       assemblyTilePose(item, progress, buffers.pose);
       const [left, top, w, h, u] = buffers.pose;
+      // The rich scene: a streak behind the tile — two after-images of where
+      // it was a moment ago, in nanite light, and the line it flew — reads
+      // its path at every notch of a slow scroll.
+      if (sheet && !calm && u > 0.08 && u < 0.94 && trails < 360) {
+        trails += 1;
+        const flightSpan = item.t1 - item.t0;
+        for (let ghost = 1; ghost <= 2; ghost += 1) {
+          assemblyTilePose(item, progress - flightSpan * 0.07 * ghost, buffers.pose);
+          const [tx, ty, tw, th] = buffers.pose;
+          const shrink = 0.84 - ghost * 0.14;
+          context.globalAlpha = (ghost === 1 ? 0.34 : 0.16) * (1 - u * 0.6);
+          context.drawImage(
+            sheet,
+            item.sx,
+            item.sy,
+            item.tw,
+            item.th,
+            tx + (tw * (1 - shrink)) / 2,
+            ty + (th * (1 - shrink)) / 2,
+            tw * shrink,
+            th * shrink,
+          );
+          if (ghost === 2) {
+            // The line it flew, into the streaks' batched path.
+            streaks[streakCount] = tx + tw / 2;
+            streaks[streakCount + 1] = ty + th / 2;
+            streaks[streakCount + 2] = left + w / 2;
+            streaks[streakCount + 3] = top + h / 2;
+            streakCount += 4;
+          }
+        }
+      }
       if (u < 0.62 && coarse.matches) {
         const slot = item.tone + 3;
         const at = moteCounts[slot];
@@ -2150,6 +2362,11 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         motes[slot][at + 2] = w * 0.84;
         motes[slot][at + 3] = h * 0.84;
         moteCounts[slot] = at + 4;
+      } else if (u < 0.62 && sheet) {
+        // The nanite: its own tile of the art in nanite light, so the
+        // piece's outline is there from the first glimpse.
+        context.globalAlpha = 0.72 + 0.28 * u;
+        context.drawImage(sheet, item.sx, item.sy, item.tw, item.th, left, top, w, h);
       } else if (u < 0.62) {
         // The mosaic: a nanite square of the plate's colour, a hair apart.
         context.globalAlpha = 0.45 + 0.5 * u;
@@ -2163,6 +2380,19 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         artRects[arts * 4 + 3] = h;
         arts += 1;
       }
+    }
+    // The streaks: one batched path of the lines the tiles in flight flew.
+    if (streakCount) {
+      context.globalAlpha = 0.3;
+      context.strokeStyle = TONE_CSS[0];
+      context.lineWidth = 0.8;
+      context.beginPath();
+      for (let i = 0; i < streakCount; i += 4) {
+        context.moveTo(streaks[i], streaks[i + 1]);
+        context.lineTo(streaks[i + 2], streaks[i + 3]);
+      }
+      context.stroke();
+      context.globalAlpha = 1;
     }
     const artCount = coarse.matches ? Math.min(arts, ASSEMBLY_TOUCH_ART_BUDGET) : arts;
     // Omitted texture draws remain luminous tiles, batched in three paths.
@@ -2185,8 +2415,6 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       fillRects(context, motes[slot], moteCounts[slot], TONE_CSS[slot % 3], slot < 3 ? 0.36 : 0.78);
     }
     context.globalAlpha = 1;
-    // In flight, a plate's tiles carry its gold unformed.
-    const plates = raw || lights?.unlit || figure;
     for (let n = 0; n < artCount; n += 1) {
       const i = Math.floor((n * arts) / artCount);
       const item = tiles[art[i]];
@@ -2203,9 +2431,35 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         artRects[o + 3],
       );
     }
+    // The rich scene: the nanite light fades into the art as the tile
+    // turns into its piece — on the art's own outline, never a square
+    // outline round it.
+    if (sheet && !calm) {
+      for (let n = 0; n < artCount; n += 1) {
+        const i = Math.floor((n * arts) / artCount);
+        const item = tiles[art[i]];
+        const u = clamp01((progress - item.t0) / (item.t1 - item.t0));
+        const v = clamp01((u - 0.62) / 0.38);
+        if (v >= 1) continue;
+        const o = i * 4;
+        context.globalAlpha = 0.85 * (1 - v);
+        context.drawImage(
+          sheet,
+          item.sx,
+          item.sy,
+          item.tw,
+          item.th,
+          artRects[o],
+          artRects[o + 1],
+          artRects[o + 2],
+          artRects[o + 3],
+        );
+      }
+      context.globalAlpha = 1;
+    }
     // A restrained bevel catches the approaching plate's edge. Two batched
     // paths, at most 64 tiles: no shadows, filters, or per-tile state stack.
-    if (!calm && arts) {
+    if (!calm && arts && !sheet) {
       const count = Math.min(artCount, CONTACT_BUDGET);
       for (let edge = 0; edge < 2; edge += 1) {
         context.beginPath();
@@ -2236,7 +2490,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         context.stroke();
       }
     }
-    if (arts && !calm) {
+    if (arts && !calm && !sheet) {
       context.globalAlpha = 0.55;
       context.strokeStyle = TONE_CSS[0];
       context.lineWidth = 0.9;
@@ -2247,12 +2501,20 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       }
       context.stroke();
     }
-    // Welds: a hot core in each cell that has just landed, cooling to ice.
+    // Welds: a hot core in each cell that has just landed, cooling to ice —
+    // in the rich scene the cell itself, white-hot in nanite light, cooling
+    // into the art (its own outline; a square poked past the figure's edge).
     for (let index = landed - 1; index >= 0; index -= 1) {
       const item = tiles[index];
       // Landed in order: going back, each weld is older than the last.
       const age = (progress - item.t1) / FLASH;
       if (age >= 1) break;
+      if (calm) break;
+      if (sheet) {
+        context.globalAlpha = 0.9 * (1 - age);
+        context.drawImage(sheet, item.sx, item.sy, item.tw, item.th, item.sx, item.sy, item.tw, item.th);
+        continue;
+      }
       const inset = item.tw * (0.12 + 0.2 * age);
       const slot = age < 0.34 ? 0 : age < 0.67 ? 1 : 2;
       const buffer = flashes[slot];
@@ -2263,6 +2525,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       buffer[at + 3] = item.th - inset * 2;
       flashCounts[slot] = at + 4;
     }
+    context.globalAlpha = 1;
     if (calm) flashCounts.fill(0);
     fillRects(context, flashes[0], flashCounts[0], TONE_CSS[2], 0.62);
     fillRects(context, flashes[1], flashCounts[1], "rgb(190 244 255)", 0.36);
@@ -2637,9 +2900,18 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     if (settled) settled.width = settled.height = 0;
     settled = null;
     plan = null;
-    for (const sheet of [raw, goldArt, goldLayer, driver, lights?.unlit, lights?.lights])
+    for (const sheet of [
+      raw,
+      goldArt,
+      goldLayer,
+      frame_,
+      driver,
+      lights?.unlit,
+      lights?.lights,
+      lights?.motes,
+    ])
       if (sheet) sheet.width = sheet.height = 0;
-    raw = goldArt = goldLayer = goldPlan = driver = lights = null;
+    raw = goldArt = goldLayer = goldPlan = driver = lights = frame_ = null;
     goldCount = 0;
     goldReverse.dirty = -1;
     goldReverse.at = 0;
@@ -2779,8 +3051,17 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         if (sheet) sheet.width = sheet.height = 0;
     formsState = null;
     images = null;
-    for (const sheet of [raw, goldArt, goldLayer, driver, lights?.unlit, lights?.lights])
+    for (const sheet of [
+      raw,
+      goldArt,
+      goldLayer,
+      frame_,
+      driver,
+      lights?.unlit,
+      lights?.lights,
+      lights?.motes,
+    ])
       if (sheet) sheet.width = sheet.height = 0;
-    raw = goldArt = goldLayer = goldPlan = driver = lights = null;
+    raw = goldArt = goldLayer = goldPlan = driver = lights = frame_ = null;
   };
 }
