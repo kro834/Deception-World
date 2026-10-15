@@ -75,8 +75,7 @@ const openingAuditRequested = () =>
 // The shared pre-paint gate also selects economy for iOS/iPadOS 18 and
 // four-core Android. Keep runtime work aligned with that CSS renderer without
 // reading document state into the server/client hydration tree.
-const hasEconomyOpeningProfile = () =>
-  document.documentElement?.dataset.worldEffects === "economy";
+const hasEconomyOpeningProfile = () => document.documentElement?.dataset.worldEffects === "economy";
 
 type OpeningTitleTestHook = {
   readonly phase: SequencePhase;
@@ -325,6 +324,9 @@ export function TitleSequence() {
   const phaseRef = useRef(phase);
   const completedAtRef = useRef(Number.NEGATIVE_INFINITY);
   const mountedRef = useRef(true);
+  // Visibility can return between the handoff's first paint and navigation.
+  // That operation still owns the diving phase; recovery must not cancel it.
+  const entryPendingRef = useRef(false);
   const { beginOpeningHandoff, go } = useLoadGate();
   const router = useRouter();
   phaseRef.current = phase;
@@ -716,6 +718,7 @@ export function TitleSequence() {
     });
     if (!started) return;
 
+    entryPendingRef.current = true;
     if (document.activeElement instanceof HTMLElement) {
       document.activeElement.blur();
     }
@@ -741,12 +744,19 @@ export function TitleSequence() {
         phaseRef.current = "complete";
         setPhase("complete");
       }
+    } finally {
+      entryPendingRef.current = false;
     }
   }, [beginOpeningHandoff, economyOpening, go]);
 
   useEffect(() => {
     const restoreTitleIfNeeded = () => {
-      if (mountedRef.current && phaseRef.current === "diving" && window.location.pathname === "/") {
+      if (
+        mountedRef.current &&
+        !entryPendingRef.current &&
+        phaseRef.current === "diving" &&
+        window.location.pathname === "/"
+      ) {
         phaseRef.current = "complete";
         setPhase("complete");
       }
@@ -822,13 +832,20 @@ export function TitleSequence() {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      // Let a focused editor, another handled interaction, IME composition,
+      // and browser/assistive shortcuts keep ownership of their keystrokes.
+      if (e.defaultPrevented || e.isComposing || e.metaKey || e.ctrlKey || e.altKey) return;
+      const target = e.target instanceof Element ? e.target : null;
+      if (
+        target?.closest("input, textarea, select, [contenteditable]:not([contenteditable='false'])")
+      )
+        return;
       // A held key repeats. A held Enter or Space would skip the opening and
       // then, once focus reaches it, press ENTER THE WORLD as well.
       if (e.repeat) {
         if (e.key === "Enter" || e.key === " ") e.preventDefault();
         return;
       }
-      const target = e.target instanceof Element ? e.target : null;
       // Enter and Space keep their native press on a focused control. The
       // letters work there too, since a keyboard skip or replay leaves focus
       // on a button. Text entry, and a browser shortcut held with Cmd, Ctrl
@@ -836,10 +853,7 @@ export function TitleSequence() {
       const isInteractive = Boolean(
         target?.closest("button, a, input, textarea, select, [contenteditable='true']"),
       );
-      const isTextEntry = Boolean(
-        target?.closest("input, textarea, select, [contenteditable='true']"),
-      );
-      const letter = isTextEntry || e.metaKey || e.ctrlKey || e.altKey ? "" : e.key.toLowerCase();
+      const letter = e.key.toLowerCase();
       const isSkipKey = e.key === "Escape" || e.key === " " || e.key === "Enter";
       if (
         phase === "playing" &&
@@ -874,7 +888,9 @@ export function TitleSequence() {
       className={stageClass}
       aria-label="仮面ライダーサーガ Deception World オープニング"
       aria-busy={isWorldTransitioning}
-      data-opening-entry={isWorldTransitioning ? "leaving" : phase === "complete" ? "ready" : "pending"}
+      data-opening-entry={
+        isWorldTransitioning ? "leaving" : phase === "complete" ? "ready" : "pending"
+      }
     >
       <div className="cine-camera" aria-hidden="true">
         <video

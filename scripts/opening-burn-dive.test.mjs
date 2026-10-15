@@ -31,7 +31,7 @@ test("GPU loss continues the dive rather than resolving the covered route", asyn
   const handoff = await read("src/components/cinematic/opening-handoff.tsx");
   assert.match(
     handoff,
-    /onFallback: \(elapsed\) => \{\s*tierLabel = "css";\s*startCssDive\(elapsed\)/,
+    /onFallback: \(elapsed, landed\) => \{[\s\S]*?if \(landed\) \{[\s\S]*?return;\s*\}\s*tierLabel = "css";\s*startCssDive\(elapsed\)/,
   );
   assert.match(handoff, /animation\.currentTime = elapsed/);
   assert.match(handoff, /opacity: elapsedSeconds > 0 \? 1 : 0/);

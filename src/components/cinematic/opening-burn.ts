@@ -62,24 +62,30 @@ export function prepareOpeningBurn(first: string, final: string, maxWidth: numbe
     releasePreparedBitmaps();
     preparedKey = key;
     const natural = { width: 1536, height: 1024 };
-    const pending: Promise<BurnAssets> = Promise.all([
+    const pending: Promise<BurnAssets> = Promise.allSettled([
       loadGlImage(first, natural, maxWidth),
       loadGlImage(final, natural, maxWidth),
-    ]).then(
-      ([firstImage, finalImage]) => {
-        const assets = { first: firstImage, final: finalImage };
-        if (prepared === pending) preparedValue = assets;
-        else {
-          closeGlImage(firstImage);
-          closeGlImage(finalImage);
+    ] as const).then(([firstResult, finalResult]) => {
+      if (firstResult.status === "rejected" || finalResult.status === "rejected") {
+        if (firstResult.status === "fulfilled") closeGlImage(firstResult.value);
+        if (finalResult.status === "fulfilled") closeGlImage(finalResult.value);
+        if (prepared === pending) {
+          prepared = null;
+          preparedKey = "";
         }
-        return assets;
-      },
-      (error: unknown) => {
-        if (prepared === pending) prepared = null;
-        throw error;
-      },
-    );
+      }
+      if (firstResult.status === "rejected") throw firstResult.reason;
+      if (finalResult.status === "rejected") throw finalResult.reason;
+      const firstImage = firstResult.value;
+      const finalImage = finalResult.value;
+      const assets = { first: firstImage, final: finalImage };
+      if (prepared === pending) preparedValue = assets;
+      else {
+        closeGlImage(firstImage);
+        closeGlImage(finalImage);
+      }
+      return assets;
+    });
     prepared = pending;
   }
   return prepared;

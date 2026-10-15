@@ -254,7 +254,7 @@ html[data-world-effects="economy"] .cine-stage .cine-logo-wrap {
 
 @media (max-width: 360px) and (orientation: portrait) {
   .cine-stage .cine-skip {
-    bottom: calc(max(8vh, 56px) + 48px + 12px);
+    bottom: calc(max(8vh, 56px) + 52px + 12px);
   }
 }
 
