@@ -214,8 +214,8 @@ export type DiveRunOptions = {
   audit?: boolean;
   /** The shader phase ended on the landing frame (the handoff is covered). */
   onLanded: () => void;
-  /** Continue the same flight in DOM layers if a live GPU context is lost. */
-  onFallback: (elapsedSeconds: number) => void;
+  /** Continue the flight, or preserve its landing still, when the GPU context is lost. */
+  onFallback: (elapsedSeconds: number, landed?: boolean) => void;
 };
 
 export type DiveRun = {
@@ -284,14 +284,26 @@ export function runOpeningDive({
   let firstDraw = 0;
   let lastDraw = Number.NEGATIVE_INFINITY;
   let fade: Animation | null = null;
+  let landingMotion: Animation | null = null;
+  const visualViewport = window.visualViewport;
+  let layoutWidth = 0;
+  let layoutHeight = 0;
   const frameTimes: number[] = [];
   const drawTimes: number[] = [];
 
   const layout = () => {
     if (!pass) return;
-    const width = Math.max(1, window.visualViewport?.width ?? window.innerWidth);
-    const height = Math.max(1, window.visualViewport?.height ?? window.innerHeight);
+    const width = Math.max(1, visualViewport?.width ?? window.innerWidth);
+    const height = Math.max(1, visualViewport?.height ?? window.innerHeight);
+    const previousSize = stats.size;
     stats.size = pass.resize(width, height);
+    const resized =
+      width !== layoutWidth ||
+      height !== layoutHeight ||
+      stats.size.width !== previousSize?.width ||
+      stats.size.height !== previousSize?.height;
+    layoutWidth = width;
+    layoutHeight = height;
     const aspect = width / height;
     // Screen UV, y up.
     pass.set(
@@ -311,6 +323,9 @@ export function runOpeningDive({
     pass.set("uAtmoScale", ...cover(1280 / 720));
     pass.set("uWorldScale", ...cover(1024 / 1536));
     pass.set("uBarH", Math.min(0.2, barHeight / height));
+    // Resizing clears a WebGL drawing buffer. The landed run has no draw loop
+    // left to restore it while destination loading or arrival still owns it.
+    if (landed && resized) draw(OPENING_DIVE.glEnd);
   };
 
   const draw = (T: number) => {
@@ -327,8 +342,13 @@ export function runOpeningDive({
     if (raf) window.cancelAnimationFrame(raf);
     raf = 0;
     window.removeEventListener("resize", layout);
+    visualViewport?.removeEventListener("resize", layout);
     document.removeEventListener("visibilitychange", onVisibility);
     canvas?.removeEventListener("webglcontextlost", onContextLost);
+    fade?.cancel();
+    fade = null;
+    landingMotion?.cancel();
+    landingMotion = null;
     pass?.dispose();
     pass = null;
     canvas?.remove();
@@ -350,7 +370,7 @@ export function runOpeningDive({
       stats.running = false;
       if (canvas && !audit && typeof canvas.animate === "function") {
         // A slow push-in on the compositor keeps the still frame alive.
-        canvas.animate([{ transform: "scale(1)" }, { transform: "scale(1.025)" }], {
+        landingMotion = canvas.animate([{ transform: "scale(1)" }, { transform: "scale(1.025)" }], {
           duration: 1600,
           easing: "ease-in-out",
           fill: "forwards",
@@ -364,13 +384,18 @@ export function runOpeningDive({
     event.preventDefault();
     if (disposed || tier !== "webgl") return;
     stats.fallback = "context-lost";
-    const elapsed = startedAt ? (performance.now() - startedAt) / 1000 : 0;
+    const elapsed = landed
+      ? OPENING_DIVE.glEnd
+      : startedAt
+        ? (performance.now() - startedAt) / 1000
+        : 0;
     tier = "css";
     stats.tier = tier;
     releaseGl();
-    // Losing the canvas is not landing. Keep the route covered and hand the
-    // remaining flight to the compositor, including an early loss on iPad.
-    if (!landed) onFallback(elapsed);
+    // The owner needs a replacement even after landing: the destination may
+    // still be loading or arriving beneath the retained canvas.
+    if (landed) onFallback(elapsed, true);
+    else onFallback(elapsed);
   }
 
   function onVisibility() {
@@ -460,6 +485,7 @@ export function runOpeningDive({
       target.addEventListener("webglcontextlost", onContextLost);
       layout();
       window.addEventListener("resize", layout, { passive: true });
+      visualViewport?.addEventListener("resize", layout, { passive: true });
       // Frame 0 is the title's own framing, faded in over the DOM title.
       draw(0);
       stats.size = active.size;
@@ -506,7 +532,6 @@ export function runOpeningDive({
     if (disposed) return;
     disposed = true;
     document.removeEventListener("visibilitychange", onVisibility);
-    fade?.cancel();
     releaseGl();
   };
 

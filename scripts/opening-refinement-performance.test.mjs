@@ -16,6 +16,7 @@ function entryRuntime({
   profileDevice = {},
   prepaintProfile = false,
   withVideo = false,
+  withLogo = false,
   diveImport,
 } = {}) {
   const state = [];
@@ -134,6 +135,7 @@ function entryRuntime({
     document,
     navigator,
     Element,
+    HTMLElement: Element,
     performance: { now: () => now, getEntriesByType: () => [] },
     URLSearchParams,
     require: (name) => {
@@ -174,15 +176,26 @@ function entryRuntime({
     document,
     video,
     chunkRequests,
-    key(key) {
+    key(key, options = {}) {
       const event = new Event("keydown", { cancelable: true });
-      Object.defineProperties(event, {
-        key: { value: key },
-        repeat: { value: false },
-        target: { value: new Element() },
-      });
+      const target = new Element();
+      if (options.textEntry) target.closest = () => target;
+      for (const [name, value] of Object.entries({ key, repeat: false, target, ...options })) {
+        if (name !== "handled" && name !== "textEntry") Object.defineProperty(event, name, { value });
+      }
+      if (options.handled) event.preventDefault();
       events.dispatchEvent(event);
       return event;
+    },
+    visibility(hidden) {
+      document.hidden = hidden;
+      document.visibilityState = hidden ? "hidden" : "visible";
+      document.dispatchEvent(new Event("visibilitychange"));
+    },
+    pageShow() {
+      const event = new Event("pageshow");
+      Object.defineProperty(event, "persisted", { value: true });
+      events.dispatchEvent(event);
     },
     unmount() {
       for (const effect of effects) effect?.cleanup?.();
@@ -210,6 +223,10 @@ function entryRuntime({
       effectIndex = 0;
       const tree = exports.TitleSequence();
       const all = nodes(tree);
+      if (withLogo) all.find((node) => node.props?.className === "cine-logo-core").props.imageRef.current = {
+        currentSrc: "/prism.webp",
+        getBoundingClientRect: () => ({ left: 40, top: 100, width: 240, height: 160 }),
+      };
       if (withVideo) all.find((node) => node.props?.className === "cine-atmosphere").props.ref.current = video;
       const commit = pendingEffects;
       pendingEffects = [];
@@ -309,7 +326,7 @@ test("the ready control deck passes empty pointer hits through while enabled chi
 
 test("SKIP has its own row above the final entrance at narrow portrait and short landscape sizes", () => {
   assert.match(css, /bottom: calc\(max\(10vh, 72px\) \+ 52px \+ 12px\);/);
-  assert.match(css, /bottom: calc\(max\(8vh, 56px\) \+ 48px \+ 12px\);/);
+  assert.match(css, /bottom: calc\(max\(8vh, 56px\) \+ 52px \+ 12px\);/);
   assert.match(css, /bottom: calc\(30px \+ 44px \+ 12px\);/);
 });
 
@@ -346,6 +363,86 @@ test("skip reveals the final entrance and replay deck", () => {
   assert.equal(complete.replay.hidden, false);
   assert.equal(complete.replay.disabled, false);
   assert.equal(complete.tree.props["data-opening-entry"], "ready");
+});
+
+test("visibility and persisted pageshow preserve entry while its paint and navigation are pending", async () => {
+  const ui = entryRuntime({ runEffects: true, withLogo: true });
+  ui.state[0] = "complete";
+  const ready = ui.render();
+  ready.enter.onClick();
+  assert.equal(ui.state[0], "diving");
+  assert.equal(ui.handoffs.length, 1);
+  for (const beforePaint of [true, false]) {
+    ui.visibility(true);
+    ui.visibility(false);
+    ui.pageShow();
+    assert.equal(ui.state[0], "diving", "an owned entry must not be recovered as abandoned");
+    ui.render().enter.onClick();
+    assert.equal(ui.handoffs.length, 1, "returning to the app cannot duplicate the handoff");
+    if (beforePaint) {
+      ui.advance(32);
+      await flush();
+      assert.equal(ui.navigations.length, 1, "the original navigation still starts after paint");
+    }
+  }
+  ui.navigations[0].resolve();
+  await flush();
+  assert.equal(ui.state[0], "complete", "a cancelled route restores usable controls");
+  ui.render().enter.onClick();
+  ui.advance(32);
+  await flush();
+  assert.equal(ui.navigations.length, 2, "cancelled entry permits a fresh attempt");
+  ui.runtime.location.pathname = "/world";
+  ui.navigations[1].resolve();
+  await flush();
+  ui.unmount();
+});
+
+test("failed entry recovers and unmount before paint cannot navigate", async () => {
+  for (const unmount of [false, true]) {
+    const ui = entryRuntime({ runEffects: true, withLogo: true });
+    ui.state[0] = "complete";
+    ui.render().enter.onClick();
+    if (unmount) ui.unmount();
+    ui.advance(32);
+    await flush();
+    assert.equal(ui.navigations.length, unmount ? 0 : 1);
+    if (!unmount) {
+      ui.navigations[0].reject(new Error("navigation interrupted"));
+      await flush();
+      assert.equal(ui.state[0], "complete");
+      ui.render().enter.onClick();
+      assert.equal(ui.handoffs.length, 2);
+      ui.unmount();
+      ui.advance(32);
+      await flush();
+    }
+  }
+});
+
+test("opening shortcuts leave handled, composing, edited and modified keystrokes alone", () => {
+  const ui = entryRuntime({ runEffects: true });
+  ui.state[0] = "playing";
+  ui.render();
+  for (const options of [
+    { handled: true }, { isComposing: true }, { metaKey: true },
+    { ctrlKey: true }, { altKey: true }, { textEntry: true },
+  ]) {
+    for (const key of ["Escape", "Enter", " ", "s"]) {
+      const event = ui.key(key, options);
+      assert.equal(ui.state[0], "playing", `${key} ${JSON.stringify(options)}`);
+      assert.equal(event.defaultPrevented, Boolean(options.handled));
+    }
+  }
+  assert.equal(ui.key("Escape").defaultPrevented, true);
+  assert.equal(ui.state[0], "complete");
+  ui.render();
+  ui.advance(600);
+  ui.key("r", { ctrlKey: true });
+  assert.equal(ui.state[0], "complete");
+  ui.key("r");
+  assert.equal(ui.state[0], "idle");
+  ui.unmount();
 });
 
 test("the delayed start preserves the hidden entrance until the score completes", () => {

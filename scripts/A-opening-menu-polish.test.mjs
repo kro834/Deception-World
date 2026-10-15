@@ -81,11 +81,11 @@ test("a keyboard skip hands focus on, and a held key presses once", () => {
   // Focus now rests on a button, so the letters must not be gated on buttons.
   assert.match(
     title,
-    /const isTextEntry = Boolean\(\s*target\?\.closest\("input, textarea, select, \[contenteditable='true'\]"\),\s*\);/,
+    /target\?\.closest\("input, textarea, select, \[contenteditable\]:not\(\[contenteditable='false'\]\)"\)[\s\S]{0,30}return;/,
   );
   assert.match(
     title,
-    /const letter = isTextEntry \|\| e\.metaKey \|\| e\.ctrlKey \|\| e\.altKey \? "" : e\.key\.toLowerCase\(\);/,
+    /if \(e\.defaultPrevented \|\| e\.isComposing \|\| e\.metaKey \|\| e\.ctrlKey \|\| e\.altKey\) return;/,
   );
   assert.match(
     title,

@@ -57,7 +57,10 @@ import {
 } from "./dream-chapter-extra";
 import { DREAM_ARCHIVE_CORNERS, type DreamArchiveCornerId } from "./dream-chapter-extra-data";
 import { DreamScreeningLauncher } from "./dream-screening-launcher";
+import { DreamReadingLauncher } from "./dream-reading-launcher";
+import { DreamProgrammeDesk } from "./dream-programme-desk";
 import {
+  DreamChapterCompanion,
   DreamStoryBacklinks,
   DreamStoryIndex,
   DreamStoryNavigation,
@@ -1171,6 +1174,7 @@ export function DreamChapter() {
         </div>
       </section>
 
+      <DreamProgrammeDesk />
       <nav className="dream-contents" aria-labelledby="dream-contents-title" data-dream-reveal>
         <h2 id="dream-contents-title">目次</h2>
         <ol>
@@ -1740,6 +1744,7 @@ export function DreamChapter() {
             各章のあらすじには、物語の展開・ネタバレを含みます。
           </p>
         </div>
+        <DreamReadingLauncher />
         <DreamStoryIndex />
         <div className="dream-story-layout">
           <aside className="dream-story-crossings" aria-labelledby="dream-crossings-title">
@@ -1802,6 +1807,7 @@ export function DreamChapter() {
                         {paragraph}
                       </p>
                     ))}
+                    <DreamChapterCompanion no={episode.no} />
                     <DreamStoryNavigation no={episode.no} />
                   </div>
                 </details>
