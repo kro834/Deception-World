@@ -244,6 +244,15 @@ export function OpeningHandoffLayer({ snapshot, onCovered, onComplete }: Opening
     const focusY = sourceLogoRect.top + sourceLogoRect.height * RING.y;
 
     if (snapshot.phase === "covering") {
+      if (root.dataset.openingHandoffLanding === "static") {
+        delete root.dataset.openingHandoffLanding;
+        root.style.removeProperty("background");
+        for (const layer of root.querySelectorAll<HTMLElement>(":scope > *")) {
+          layer.style.removeProperty("visibility");
+        }
+        worldRef.current?.style.removeProperty("opacity");
+        worldRef.current?.style.removeProperty("transform");
+      }
       setRect(logo, sourceLogoRect);
       setRect(video, sourceVideoRect);
       setRect(hud, sourceHudRect);
@@ -322,10 +331,10 @@ export function OpeningHandoffLayer({ snapshot, onCovered, onComplete }: Opening
     }
 
     function scheduleViewportUpdate() {
-      if (!alive || settled || viewportFrame) return;
+      if (!alive || viewportFrame) return;
       viewportFrame = window.requestAnimationFrame(() => {
         viewportFrame = 0;
-        if (!alive || settled) return;
+        if (!alive) return;
         updateVisualViewport(stableRoot);
       });
     }
@@ -554,7 +563,38 @@ export function OpeningHandoffLayer({ snapshot, onCovered, onComplete }: Opening
             barHeight: Math.max(42, viewportRect.height * 0.075),
             audit,
             onLanded: () => settleHandoff(),
-            onFallback: (elapsed) => {
+            onFallback: (elapsed, landed) => {
+              if (landed) {
+                // This run also owns its still during arrival, after this
+                // covering effect has settled and cleaned up. Only its token
+                // and connected portal may replace that retained GL frame.
+                const world = worldRef.current;
+                const currentDive = diveRef.current;
+                if (
+                  currentDive?.token !== token ||
+                  currentDive.run !== run ||
+                  rootRef.current !== stableRoot ||
+                  !stableRoot.isConnected ||
+                  !world?.isConnected ||
+                  !stableRoot.contains(world)
+                )
+                  return;
+                tierLabel = "css";
+                stableRoot.dataset.openingHandoffTier = "css";
+                stableRoot.dataset.openingHandoffLanding = "static";
+                stableRoot.style.background = "#04080f";
+                // Do not touch root opacity: its arrival fade may already be
+                // running. A static world replaces the canvas without another
+                // tunnel, title reveal, or covered notification.
+                for (const layer of stableRoot.querySelectorAll<HTMLElement>(":scope > *")) {
+                  if (layer !== world) layer.style.visibility = "hidden";
+                }
+                for (const animation of world.getAnimations()) animation.cancel();
+                world.style.opacity = "1";
+                world.style.transform = "none";
+                world.style.visibility = "visible";
+                return;
+              }
               tierLabel = "css";
               startCssDive(elapsed);
             },
