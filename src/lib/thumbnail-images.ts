@@ -151,7 +151,15 @@ export const CIEL_PORTRAIT_SIZES = "(max-width: 760px) 92vw, (max-width: 1120px)
 // scripts/build-portrait-variants.mjs, and the full file stays the largest
 // candidate (for a 3x landscape phone or a 2x desktop with a profile open).
 // A source without a delivery copy gets one at its own width (`build`).
-const portrait = (source: string, full: string, fullWidth: number, buildFull = false): ImageSet => {
+// `sourceWidth`: a supplied file wider than its delivery copy adds a step at
+// its own width (a WebP re-encode of the supplied pixels).
+const portrait = (
+  source: string,
+  full: string,
+  fullWidth: number,
+  buildFull = false,
+  sourceWidth = 0,
+): ImageSet => {
   const stem = full.replace(/\.webp$/, "");
   return {
     source,
@@ -160,6 +168,9 @@ const portrait = (source: string, full: string, fullWidth: number, buildFull = f
       // A source not much wider than 720 px serves that step itself.
       ...(fullWidth >= 840 ? [{ path: `${stem}-720.webp`, width: 720, build: true }] : []),
       { path: full, width: fullWidth, ...(buildFull ? { build: true } : null) },
+      ...(sourceWidth > fullWidth
+        ? [{ path: `${stem}-${sourceWidth}.webp`, width: sourceWidth, build: true }]
+        : []),
     ],
   };
 };
@@ -199,7 +210,15 @@ export const PORTRAIT_THUMBNAILS: Record<string, ImageSet> = {
     720,
   ),
   "/character-luna.webp": portrait("/character-luna.jpeg", "/character-luna.webp", 1028),
-  "/character-terra.webp": portrait("/character-terra.jpeg", "/character-terra.webp", 1080),
+  // テラ's supplied JPEG is 1470 px wide; her delivery file was drawn at 1080, which
+  // her dossier hero (662 px at 1440 x 900) enlarges 1.3 times at DPR 2.
+  "/character-terra.webp": portrait(
+    "/character-terra.jpeg",
+    "/character-terra.webp",
+    1080,
+    false,
+    1470,
+  ),
   "/character-yoake-mamori.jpeg": portrait(
     "/character-yoake-mamori.jpeg",
     "/character-yoake-mamori-delivery.webp",

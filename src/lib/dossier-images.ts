@@ -67,9 +67,10 @@ type HeroImage = { source: string; variants: HeroVariant[]; aspect: number };
 // The character files' hero portraits (five managers, テラ and ルナ) loaded
 // their full delivery file at every size (up to 362 KB for a 517 px frame).
 // They gain a 720 px candidate (テラ and ルナ reuse the cast wall's 360 and
-// 720 px files); the full file stays the largest. Keyed by the URL the page
-// and its navigation warm-ups (MANAGER_ASSETS, dossier-nav, the World's
-// cards) name.
+// 720 px files); the full file stays the largest, except テラ's, whose
+// supplied JPEG (1470 px) is wider than its old delivery file. Keyed by the
+// URL the page and its navigation warm-ups (MANAGER_ASSETS, dossier-nav, the
+// World's cards) name.
 const managerHero = (stem: string, width: number, height: number): HeroImage => ({
   source: `${stem}.jpeg`,
   variants: [
@@ -80,7 +81,9 @@ const managerHero = (stem: string, width: number, height: number): HeroImage => 
 });
 const portraitHero = (full: string, height: number): HeroImage => {
   const set = PORTRAIT_THUMBNAILS[full];
-  const width = set.variants[set.variants.length - 1].width;
+  // The aspect is the full delivery file's (its height is given), even when a
+  // wider step drawn from the supplied file follows it.
+  const width = (set.variants.find((variant) => variant.path === full) ?? set.variants[0]).width;
   return {
     source: set.source,
     variants: set.variants.map(({ path, width: size }) => ({ path, width: size })),
@@ -97,17 +100,20 @@ export const DOSSIER_HERO_IMAGES: Record<string, HeroImage> = {
   "/character-terra.jpeg": portraitHero("/character-terra.webp", 1431),
 };
 
-// The hero frame (measured at 300-2600 px): 100vw - 38 px on phones, about
-// 40vw to 1120 px, then 517-522 px, and 1.25 times as tall on phones, up to 1.5
-// above. It crops with object-fit: cover, so a portrait wider than the frame
-// needs the frame's height times its aspect. A 1x desktop and a 2x phone to
-// 390 px take the 720 px file; 3x phones and 2x desktops keep the full one.
+// The hero frame (the STAGE dossier, re-measured 2026-10-15 at 320-2560 x
+// 390-1366 px): the screen's width on phones, about 54vh tall; on the split
+// stage (1100 px and up and 540 px tall, or a landscape 900 px and 600 px
+// tall) min(46vw, 820px) wide by 100vh - 76px; otherwise a stacked frame 0.92
+// as wide as tall, at most 353 px or 49vh. The old 517 px desktop frame is
+// 662 px at 1440 x 900 and 820 px at 1920 x 1080, where a 1x screen took the
+// 720 px file. It crops with object-fit: cover, so a portrait narrower than
+// the frame needs the frame's height times its aspect. Phones ask for 92vw
+// (within the site's 0.9 rule), so a 2x phone keeps the 720 px file and a 3x
+// phone the full one, as before.
 export function dossierHeroSizes(aspect: number) {
-  const phone = Math.max(1, aspect * 1.25);
-  const wide = Math.max(1, aspect * 1.5);
-  const phoneTerm =
-    phone > 1 ? `calc((100vw - 36px) * ${+phone.toFixed(3)})` : "calc(100vw - 36px)";
-  return `(max-width: 760px) ${phoneTerm}, (max-width: 1120px) ${+(42 * wide).toFixed(1)}vw, ${Math.ceil(524 * wide)}px`;
+  const a = +aspect.toFixed(3);
+  const split = `max(min(46vw, 820px), calc((100vh - 76px) * ${a}))`;
+  return `(max-width: 760px) max(92vw, ${+(55 * a).toFixed(1)}vh), (min-width: 1100px) and (min-height: 540px) ${split}, (min-width: 900px) and (min-height: 600px) and (orientation: landscape) ${split}, min(100vw, max(353px, 49vh))`;
 }
 
 // The Rexonance pickup card on the Saga and シエル files loads eagerly, and
