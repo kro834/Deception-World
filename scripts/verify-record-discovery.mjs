@@ -12,6 +12,7 @@ const browser = await (engine === "webkit"
   ? webkit.launch()
   : chromium.launch({ channel: "chrome" }));
 const report = [];
+let activePage;
 const prepareContext = (context) => {
   context.setDefaultTimeout(20_000);
   context.setDefaultNavigationTimeout(45_000);
@@ -28,15 +29,19 @@ const ready = (page) =>
   });
 const settled = async (page) => {
   await ready(page);
-  await page.evaluate(() => document.fonts.ready);
+  await page.evaluate(() =>
+    Promise.race([document.fonts.ready, new Promise((resolve) => setTimeout(resolve, 5000))]),
+  );
   // SSR already carries the family attribute. Wait for the shelf's existing
   // interactive readiness signal before exercising its hydrated draft state.
   if (await page.locator(".library-page").count()) {
     await page.locator(".library-card button:not([disabled])").first().waitFor();
-  }
-  if (new URL(page.url()).pathname === "/world") {
+    await page.waitForFunction(() => document.documentElement.dataset.worldPageVisible === "true");
+  } else if (new URL(page.url()).pathname === "/world") {
     await page.waitForFunction(() => document.documentElement.dataset.worldPageVisible === "true");
   }
+  // Hydration may start the hash landing after SSR's first readiness check.
+  await ready(page);
 };
 const shot = async (page, name) => {
   await page.evaluate(async () => {
@@ -44,9 +49,14 @@ const shot = async (page, name) => {
       [...document.images]
         .filter((image) => {
           const rect = image.getBoundingClientRect();
-          return rect.height && rect.top < innerHeight && rect.bottom > 0;
+          return image.complete && rect.height && rect.top < innerHeight && rect.bottom > 0;
         })
-        .map((image) => image.decode().catch(() => {})),
+        .map((image) =>
+          Promise.race([
+            image.decode().catch(() => {}),
+            new Promise((resolve) => setTimeout(resolve, 1500)),
+          ]),
+        ),
     );
   });
   await page.screenshot({ path: `${out}/${name}.png` });
@@ -60,6 +70,8 @@ try {
     const context = await browser.newContext({ viewport, hasTouch: true });
     prepareContext(context);
     const page = await context.newPage();
+    activePage = page;
+    console.log(`CHECK ${engine}/${viewport.width}: library journey`);
     const errors = [];
     page.on("pageerror", (error) => errors.push(error.message));
     await page.goto(`${base}/library?kind=person&guide=keepers#library-browser`);
@@ -99,6 +111,7 @@ try {
     await shot(page, `${viewport.width}-library-return`);
 
     // Store and filter actual bookmarks in this isolated context, never a server.
+    console.log(`CHECK ${engine}/${viewport.width}: saved shelf`);
     await page.goto(`${base}/library?kind=person#library-browser`);
     await settled(page);
     const firstCards = page.locator(".library-card");
@@ -106,19 +119,19 @@ try {
     for (const index of [0, 1]) {
       const item = firstCards.nth(index);
       savedIds.push(await item.getAttribute("data-library-entry"));
-      await item.getByRole("button", { name: /しおりを保存/ }).click();
+      await item.getByRole("button", { name: /しおりを保存/ }).tap();
     }
     await page
       .getByRole("group", { name: "探す資料の範囲" })
       .getByRole("button", { name: /しおりのみ/ })
-      .click();
+      .tap();
     await page.waitForURL("**scope=saved**");
     assert.equal(await page.locator(".library-card").count(), 2);
     await page
       .locator(".library-card")
       .first()
       .getByRole("button", { name: /しおりを解除/ })
-      .click();
+      .tap();
     await page.waitForFunction(() => document.querySelectorAll(".library-card").length === 1);
     assert.ok(
       await page.locator(".library-card").evaluate((node) => node.contains(document.activeElement)),
@@ -131,6 +144,7 @@ try {
     assert.equal(await page.locator(".library-card").count(), 1);
     await shot(page, `${viewport.width}-saved-shelf`);
 
+    console.log(`CHECK ${engine}/${viewport.width}: search journey`);
     await page.goto(`${base}/search?category=people`);
     await settled(page);
     const categories = page.getByRole("group", { name: "資料の分類" }).getByRole("button");
@@ -230,12 +244,14 @@ try {
     const context = await browser.newContext({ viewport });
     prepareContext(context);
     const page = await context.newPage();
+    activePage = page;
     for (const path of [
       "/library?q=ゼウス&kind=person#library-browser",
       "/search?q=ゼウス",
       "/download",
       "/missing-record-discovery",
     ]) {
+      console.log(`CHECK ${engine}/${viewport.width}: ${path}`);
       const response = await page.goto(new URL(path, base).href);
       await settled(page);
       assert.ok(
@@ -256,17 +272,11 @@ try {
     await page.goto(`${base}/world#records`);
     await settled(page);
     await page.getByRole("button", { name: "メニューを開く", exact: true }).click();
-    await page.locator('.side-panel[data-open="true"]').evaluate(async (node) => {
-      await Promise.all(
-        node
-          .getAnimations()
-          .filter(
-            (animation) =>
-              animation.playState === "running" &&
-              animation.effect?.getComputedTiming().endTime !== Infinity,
-          )
-          .map((animation) => animation.finished.catch(() => {})),
-      );
+    await page.waitForFunction(() => {
+      const panel = document.querySelector('.side-panel[data-open="true"]');
+      if (!panel) return false;
+      const rect = panel.getBoundingClientRect();
+      return rect.left >= -1 && rect.right <= innerWidth + 1;
     });
     const row = page.locator('.side-panel-links > [aria-current="location"]').first();
     await row.waitFor();
@@ -291,6 +301,27 @@ try {
     `${out}/report.json`,
     JSON.stringify({ base, engine, checks: report }, null, 2) + "\n",
   );
+} catch (error) {
+  if (activePage && !activePage.isClosed()) {
+    console.error(
+      "Failure state:",
+      await activePage.evaluate(() => ({
+        url: location.href,
+        active: document.activeElement?.outerHTML.slice(0, 500),
+        scope: Array.from(document.querySelectorAll(".library-scope-row button")).map((node) => ({
+          text: node.textContent,
+          pressed: node.getAttribute("aria-pressed"),
+        })),
+        errors: document.querySelector(".library-browse-error")?.textContent,
+        attributes: Array.from(document.documentElement.attributes, (item) => [
+          item.name,
+          item.value,
+        ]),
+      })),
+    );
+    await activePage.screenshot({ path: `${out}/failure.png` }).catch(() => {});
+  }
+  throw error;
 } finally {
   await browser.close();
 }

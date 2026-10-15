@@ -628,6 +628,20 @@ test("saved loading and storage failures are never reported as a genuine zero-re
   assert.ok(text(empty.tree()).includes("条件に合う資料が見つかりません"));
 });
 
+test("library filters own a geometry-stable press without suppressing native pointer input", () => {
+  const h = mount();
+  const form = nodes(h.tree(), (node) => node.type === "form")[0];
+  assert.equal(form.props["data-press-skip"], "true");
+  assert.equal(form.props.onPointerDown, undefined);
+  assert.equal(form.props.onMouseDown, undefined);
+  const styles = readFileSync(new URL("../src/styles-library.css", import.meta.url), "utf8");
+  const active = styles.match(
+    /\.library-browse-controls button:active:not\(:disabled\)\s*\{([^}]+)\}/,
+  )?.[1];
+  assert.ok(active?.includes("box-shadow: inset"));
+  assert.doesNotMatch(active, /(?:scale|transform|filter|translate)\s*:/);
+});
+
 test("removing a saved result keeps focus on a remaining card or the results status", () => {
   const h = mount(
     { scope: "saved" },

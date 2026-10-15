@@ -491,6 +491,7 @@ export function LibraryPage({
             </div>
             <form
               className="library-browse-controls"
+              data-press-skip="true"
               role="search"
               action="/library#library-browser"
               method="get"

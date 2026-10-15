@@ -741,6 +741,14 @@ html[data-family="library"] .library-page .library-browse-controls button {
   font-size: 13px;
   cursor: pointer;
 }
+/* These controls own their press response (data-press-skip). WebKit can
+   re-scroll a hash landing when the shared scale/filter press starts, moving
+   the button between pointerdown and click. A small inset keeps the response
+   visible without changing geometry, focus, or native touch scrolling. */
+html[data-family="library"] .library-page .library-browse-controls button:active:not(:disabled) {
+  border-color: var(--dx-edition, var(--library-ice));
+  box-shadow: inset 0 0 0 2px rgb(122 232 255 / 35%);
+}
 html[data-family="library"] .library-page .library-browse-controls .library-query-clear {
   flex: none;
   width: 44px;
