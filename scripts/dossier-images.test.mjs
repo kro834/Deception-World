@@ -32,3 +32,34 @@ test("manager navigation warmup selects the same WebP as the detail page", () =>
   assert.ok(dossierImage("/manager-reemu.jpeg").sizes);
   assert.deepEqual(dossierImage("/unknown.jpeg"), {});
 });
+
+test("夜明護尊's hero asks for the delivery WebP its warm-ups already fetch", () => {
+  // dossier-nav, the World's cards and the cast wall warm /character-yoake-mamori.jpeg
+  // through dossierImage(); the hero must not then fetch the 170 KB JPEG as well.
+  const page = readFileSync(
+    new URL("../src/components/world/yoake-mamori-page.tsx", import.meta.url),
+    "utf8",
+  );
+  assert.match(
+    page,
+    /src="\/character-yoake-mamori\.jpeg"\s*\{\.\.\.dossierImage\("\/character-yoake-mamori\.jpeg"\)\}/,
+  );
+  assert.match(dossierImage("/character-yoake-mamori.jpeg").srcSet, /-delivery\.webp 736w$/);
+});
+
+test("the 六詠 riders' and Realm's Earth/Moon form pickups are delivered as WebP", () => {
+  for (const source of [
+    "/manager-shuza-rider.jpeg",
+    "/manager-lejas-rider.jpeg",
+    "/manager-opus-rider.jpeg",
+    "/manager-reemu-rider.jpeg",
+    "/rider-realm-earth.jpeg",
+    "/rider-realm-moon.jpeg",
+  ]) {
+    assert.equal(dossierImage(source).srcSet, source.replace(/\.jpeg$/, "-delivery.webp"));
+    const output = new URL(`../public${dossierImage(source).srcSet}`, import.meta.url);
+    const original = new URL(`../public${source}`, import.meta.url);
+    // q80 (scripts/build-dossier-images.mjs): about a third of the supplied JPEG.
+    assert.ok(statSync(output).size < statSync(original).size * 0.45, source);
+  }
+});

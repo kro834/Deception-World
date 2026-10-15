@@ -3,8 +3,10 @@
 // so Chrome draws them: createImageBitmap with high-quality resampling, then
 // canvas WebP at the quality build-dossier-images.mjs uses (84).
 // Regenerate with `node scripts/build-thumbnail-variants.mjs [source]` (needs
-// the Chrome channel for Playwright; a source path limits it to that set). The
-// variants and their slots are listed in src/lib/thumbnail-images.ts.
+// the Chrome channel for Playwright; a source path limits it to that set, a
+// variant's own path to that one file). A variant with `from` is drawn from
+// that larger supplied file of the same picture instead of the set's source.
+// The variants and their slots are listed in src/lib/thumbnail-images.ts.
 import { readFileSync, writeFileSync } from "node:fs";
 import { chromium } from "playwright";
 import {
@@ -28,10 +30,15 @@ const sets = [
 ];
 const only = process.argv[2];
 for (const [set, quality] of sets) {
-  if (only && set.source !== only) continue;
   for (const variant of set.variants) {
+    if (only && set.source !== only && variant.path !== only) continue;
     if (variant.build)
-      jobs.push({ source: set.source, output: variant.path, width: variant.width, quality });
+      jobs.push({
+        source: variant.from ?? set.source,
+        output: variant.path,
+        width: variant.width,
+        quality,
+      });
   }
 }
 

@@ -2,6 +2,7 @@ import { useWorldMode } from "./use-world-mode";
 import { DossierContents, DossierReader } from "./dossier-reader";
 import { DossierTopbar } from "./world-chrome";
 import { YOAKE_MAMORI_SECTIONS } from "./yoake-mamori-data";
+import { dossierImage } from "@/lib/dossier-images";
 
 const facts = [
   ["名前", "▢▢▢　▢▢"],
@@ -37,8 +38,11 @@ export function YoakeMamoriPage() {
       <section className="manager-hero" id="dossier-profile">
         <div className="manager-portrait-column">
           <div className="manager-portrait-frame">
+            {/* The delivery WebP its warm-ups (dossier-nav, the World's cards)
+                already fetch, not the 170 KB JPEG a second time. */}
             <img
               src="/character-yoake-mamori.jpeg"
+              {...dossierImage("/character-yoake-mamori.jpeg")}
               alt="夜明護尊のキャラクタービジュアル"
               width={736}
               height={976}

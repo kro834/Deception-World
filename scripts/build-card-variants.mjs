@@ -8,7 +8,8 @@
 // dossier quality, 84). A variant as wide as its source is a WebP re-encode
 // of a file that had no delivery copy.
 // Regenerate with `node scripts/build-card-variants.mjs [source]` (needs the
-// Chrome channel for Playwright; a source path limits it to that set). The
+// Chrome channel for Playwright; a source path limits it to that set, a
+// variant's own path to that one file). The
 // variants and their slots are listed in src/lib/thumbnail-images.ts
 // (PORTRAIT_THUMBNAILS, POSTER_IMAGES, TITLE_LOGO_IMAGES) and
 // src/lib/dossier-images.ts (DOSSIER_HERO_IMAGES).
@@ -31,8 +32,8 @@ for (const set of [
   ...Object.values(TITLE_LOGO_IMAGES),
   ...Object.values(DOSSIER_HERO_IMAGES),
 ]) {
-  if (only && set.source !== only) continue;
   for (const variant of set.variants) {
+    if (only && set.source !== only && variant.path !== only) continue;
     if (variant.build) jobs.push({ source: set.source, output: variant.path, width: variant.width });
   }
 }

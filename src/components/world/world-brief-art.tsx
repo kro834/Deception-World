@@ -1,9 +1,12 @@
 import { useEffect, useRef, useState } from "react";
+import { briefStageArt } from "@/lib/thumbnail-images";
 
+// Each still with its episode's full set of steps (the stage is as tall as
+// 65vh and crops with cover: EP2's landscape still needs more than 900 px).
 const ART = [
-  "/episode-01-hide-and-seek-delivery-900.webp",
-  "/episode-02-legends-delivery-900.webp",
-  "/episode-03-deception-world-delivery-900.webp",
+  briefStageArt("/episode-01-hide-and-seek.jpeg", 1086 / 1448),
+  briefStageArt("/episode-02-legends.jpeg", 1448 / 1086),
+  briefStageArt("/episode-03-deception-world.jpeg", 1086 / 1448),
 ];
 
 /** A decorative stage alongside the unchanged World files. No new lore. */
@@ -51,7 +54,7 @@ export function WorldBriefArt() {
           {art.previous !== null ? (
             <img
               key={`previous-${art.previous}`}
-              src={ART[art.previous]}
+              {...ART[art.previous]}
               alt=""
               loading="lazy"
               decoding="async"
@@ -60,7 +63,7 @@ export function WorldBriefArt() {
           <img
             key={`current-${art.current}`}
             className="is-current"
-            src={ART[art.current]}
+            {...ART[art.current]}
             alt=""
             loading="lazy"
             decoding="async"

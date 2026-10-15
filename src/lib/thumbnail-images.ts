@@ -11,7 +11,9 @@
 // before. A 360 px Galaxy (DPR 3) now decodes an episode at 900 px wide
 // instead of 1086-1448 px, and a manager card at 480 px instead of 640 px.
 
-type Variant = { path: string; width: number; build?: boolean };
+// `from`: a larger supplied file of the same picture to draw the variant from
+// (the card's own source is narrower than the step it serves).
+type Variant = { path: string; width: number; build?: boolean; from?: string };
 type ImageSet = { source: string; variants: Variant[]; fallback?: string };
 
 const launcher = (stem: string, source = `${stem}.webp`): ImageSet => ({
@@ -104,8 +106,20 @@ const manager = (stem: string, fullWidth: number): ImageSet => ({
   ],
 });
 
+// Zeus's art is landscape in a portrait slot, so it covers the slot's height:
+// 383 px wide at 1366 px and up, 479 px at 820 (iPad portrait). At DPR 2 that
+// is more than its 640 px card file holds; the card is a plain downscale of
+// /manager-zeus.jpeg (1424 px), so a 960 px step is drawn from that file.
+const zeusCard = manager("/manager-zeus-thumb", 640);
+zeusCard.variants.push({
+  path: "/manager-zeus-thumb-960.webp",
+  width: 960,
+  build: true,
+  from: "/manager-zeus.jpeg",
+});
+
 export const MANAGER_THUMBNAILS: Record<string, ImageSet & { aspect: number }> = {
-  zeus: { ...manager("/manager-zeus-thumb", 640), aspect: 640 / 497 },
+  zeus: { ...zeusCard, aspect: 640 / 497 },
   "rex-loi": { ...manager("/manager-rex-loi-thumb", 640), aspect: 640 / 960 },
   shuza: { ...manager("/manager-shuza-thumb", 640), aspect: 640 / 913 },
   "lejas-portrait": { ...manager("/manager-lejas-portrait-thumb", 640), aspect: 640 / 799 },
@@ -137,7 +151,15 @@ export const CIEL_PORTRAIT_SIZES = "(max-width: 760px) 92vw, (max-width: 1120px)
 // scripts/build-portrait-variants.mjs, and the full file stays the largest
 // candidate (for a 3x landscape phone or a 2x desktop with a profile open).
 // A source without a delivery copy gets one at its own width (`build`).
-const portrait = (source: string, full: string, fullWidth: number, buildFull = false): ImageSet => {
+// `sourceWidth`: a supplied file wider than its delivery copy adds a step at
+// its own width (a WebP re-encode of the supplied pixels).
+const portrait = (
+  source: string,
+  full: string,
+  fullWidth: number,
+  buildFull = false,
+  sourceWidth = 0,
+): ImageSet => {
   const stem = full.replace(/\.webp$/, "");
   return {
     source,
@@ -146,6 +168,9 @@ const portrait = (source: string, full: string, fullWidth: number, buildFull = f
       // A source not much wider than 720 px serves that step itself.
       ...(fullWidth >= 840 ? [{ path: `${stem}-720.webp`, width: 720, build: true }] : []),
       { path: full, width: fullWidth, ...(buildFull ? { build: true } : null) },
+      ...(sourceWidth > fullWidth
+        ? [{ path: `${stem}-${sourceWidth}.webp`, width: sourceWidth, build: true }]
+        : []),
     ],
   };
 };
@@ -185,7 +210,15 @@ export const PORTRAIT_THUMBNAILS: Record<string, ImageSet> = {
     720,
   ),
   "/character-luna.webp": portrait("/character-luna.jpeg", "/character-luna.webp", 1028),
-  "/character-terra.webp": portrait("/character-terra.jpeg", "/character-terra.webp", 1080),
+  // テラ's supplied JPEG is 1470 px wide; her delivery file was drawn at 1080, which
+  // her dossier hero (662 px at 1440 x 900) enlarges 1.3 times at DPR 2.
+  "/character-terra.webp": portrait(
+    "/character-terra.jpeg",
+    "/character-terra.webp",
+    1080,
+    false,
+    1470,
+  ),
   "/character-yoake-mamori.jpeg": portrait(
     "/character-yoake-mamori.jpeg",
     "/character-yoake-mamori-delivery.webp",
@@ -333,12 +366,16 @@ export function preparePosterImage(
   image.src = choice.src ?? source;
 }
 
-// Card slots: phones about 40vw by 212 px; 561-820 px up to 190 x 212;
-// 821-1100 px up to 150 x 179; wider up to 240 x 179.
+// Card slots (measured 2026-10-15 at 320-2560 px; the STAGE grid): 0.6 as
+// wide as tall, and tall by viewport width: about 82vw - 62 px to 359 px,
+// 51vw - 33 px to 559, 47vw - 9 px to 860, 22vw - 2 px to 1365, then 297 px.
+// The art crops with cover, so it needs the slot's height times its aspect
+// ratio (or the slot's width, for art narrower than the slot).
 const managerSizes = (aspect: number) => {
-  const phone = Math.ceil(212 * aspect);
-  const desk = Math.ceil(179 * aspect);
-  return `(max-width: 560px) max(40vw, ${phone}px), (max-width: 820px) max(190px, ${phone}px), (max-width: 1100px) max(150px, ${desk}px), max(240px, ${desk}px)`;
+  const k = Math.max(aspect, 0.6);
+  const slot = (vw: number, px: number) =>
+    `calc(${+(vw * k).toFixed(1)}vw - ${Math.floor(px * k)}px)`;
+  return `(max-width: 359px) ${slot(82.1, 62)}, (max-width: 559px) ${slot(50.9, 33)}, (max-width: 860px) ${slot(46.6, 9)}, (max-width: 1365px) ${slot(22.1, 2)}, ${Math.ceil(298 * k)}px`;
 };
 
 const srcSet = (set: ImageSet) =>
@@ -347,6 +384,21 @@ const srcSet = (set: ImageSet) =>
 export function episodeThumbnail(source: string) {
   const set = EPISODE_THUMBNAILS[source];
   return set ? { srcSet: srcSet(set), sizes: EPISODE_THUMBNAIL_SIZES } : {};
+}
+
+// The World brief's art stage (world-brief-art.tsx, 1101 px and up): a sticky
+// box min(65vh, 680px) tall and 299-370 px wide that crops with cover, so a
+// still needs the box's height times its aspect ratio: 780-907 px for EP2's
+// landscape still, which only had its 900 px step before (1.7 times enlarged
+// at DPR 2). Every step of the episode's set is a candidate; src stays the
+// 900 px step it loaded before.
+export function briefStageArt(source: string, aspect: number) {
+  const set = EPISODE_THUMBNAILS[source];
+  return {
+    src: set.variants[1].path,
+    srcSet: srcSet(set),
+    sizes: `max(min(27vw, 370px), calc(min(65vh, 680px) * ${+aspect.toFixed(3)}))`,
+  };
 }
 
 export function managerThumbnail(name: keyof typeof MANAGER_THUMBNAILS) {

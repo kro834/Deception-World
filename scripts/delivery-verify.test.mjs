@@ -115,6 +115,7 @@ test("the Dream hero's WebPs keep the art's pixels and ratio; the JPEGs stay as 
   );
 });
 
+// テラ's set ends on a 1470 px step drawn from her supplied JPEG (wider than her old 1080 px file).
 test("dossier heroes: width candidates of their stated widths, the old file still the largest", () => {
   assert.deepEqual(Object.keys(DOSSIER_HERO_IMAGES).sort(), [
     "/character-luna.jpeg",
@@ -139,8 +140,8 @@ test("dossier heroes: width candidates of their stated widths, the old file stil
       previousBytes = bytes.length;
     }
     assert.ok(Math.abs(set.aspect - full[0] / full[1]) < 0.001, key);
-    // A 1x desktop's frame (517 x 716 at 1440 x 900) needs at most 720 px.
-    assert.ok(Math.max(517, 716 * set.aspect) <= 720, key);
+    // A 1x desktop's frame (re-measured 2026-10-15: 662 x 824 at 1440 x 900) needs at most 720 px.
+    assert.ok(Math.max(662, 824 * set.aspect) <= 720, key);
     assert.ok(
       set.variants.some((variant) => variant.width === 720),
       key,
@@ -159,35 +160,92 @@ test("dossier heroes: width candidates of their stated widths, the old file stil
 });
 
 test("dossier hero sizes never ask for less than the frame's cover crop needs", () => {
-  // Hero frames measured at 300-2600 px wide (CSS px, width x height).
+  // Re-measured 2026-10-15 for the STAGE dossier (the old table had 517 px desktop frames).
+  // Hero frames at rest: [viewport width, height, frame width, height] in CSS px.
   const frames = [
-    [320, 282, 353],
-    [390, 352, 441],
-    [760, 722, 903],
-    [768, 298, 448],
-    [1024, 405, 608],
-    [1120, 445, 651],
-    [1308, 522, 783],
-    [1440, 517, 716],
-    [1920, 517, 776],
+    [320, 844, 320, 456],
+    [390, 844, 390, 456],
+    [430, 844, 430, 456],
+    [700, 900, 449, 488],
+    [760, 1366, 754, 820],
+    [768, 1024, 456, 495],
+    [820, 900, 383, 416],
+    [1024, 1366, 657, 714],
+    [844, 390, 288, 274],
+    [844, 600, 288, 312],
+    [900, 700, 414, 624],
+    [932, 600, 429, 532],
+    [1024, 900, 471, 824],
+    [1100, 560, 506, 484],
+    [1100, 900, 506, 824],
+    [1280, 500, 346, 376],
+    [1280, 900, 589, 824],
+    [1440, 530, 298, 324],
+    [1440, 900, 662, 824],
+    [1680, 1080, 773, 1004],
+    [1920, 1080, 820, 1004],
+    [2560, 1366, 820, 1290],
   ];
-  const evaluate = (sizes, vw) => {
-    for (const part of sizes.split(/,(?![^(]*\))/)) {
-      const match = part.trim().match(/^\(max-width: (\d+)px\)\s+(.*)$/);
-      if (match && vw > Number(match[1])) continue;
-      const length = match ? match[2] : part.trim();
-      const calc = length.match(/^calc\(100vw - (\d+)px\)$/);
-      if (calc) return vw - Number(calc[1]);
-      if (length.endsWith("vw")) return (vw * Number.parseFloat(length)) / 100;
-      return Number.parseFloat(length);
+  // The subset of sizes that dossierHeroSizes writes: width, height and
+  // orientation conditions; px, vw and vh lengths in min(), max() and calc().
+  const split = (text) => {
+    const parts = [];
+    let depth = 0;
+    let start = 0;
+    for (let i = 0; i < text.length; i++) {
+      if (text[i] === "(") depth++;
+      else if (text[i] === ")") depth--;
+      else if (text[i] === "," && depth === 0) {
+        parts.push(text.slice(start, i).trim());
+        start = i + 1;
+      }
+    }
+    return [...parts, text.slice(start).trim()];
+  };
+  const length = (expression, vw, vh) => {
+    const value = expression.trim();
+    const call = value.match(/^(min|max|calc)\((.*)\)$/);
+    if (call) {
+      if (call[1] === "calc") {
+        const product = call[2].match(/^\((.*)\) \* ([\d.]+)$/);
+        if (product) return length(`calc(${product[1]})`, vw, vh) * Number(product[2]);
+        const difference = call[2].match(/^(.*) - (.*)$/);
+        if (difference) return length(difference[1], vw, vh) - length(difference[2], vw, vh);
+        return length(call[2], vw, vh);
+      }
+      const values = split(call[2]).map((part) => length(part, vw, vh));
+      return call[1] === "min" ? Math.min(...values) : Math.max(...values);
+    }
+    const unit = value.match(/^([\d.]+)(px|vw|vh)$/);
+    assert.ok(unit, `unsupported length ${value}`);
+    const number = Number(unit[1]);
+    return unit[2] === "px" ? number : (number * (unit[2] === "vw" ? vw : vh)) / 100;
+  };
+  const evaluate = (sizes, vw, vh) => {
+    for (const entry of split(sizes)) {
+      const conditions = [
+        ...entry.matchAll(/\((max-width|min-width|min-height|orientation): ([^)]+)\)/g),
+      ];
+      const matches = conditions.every(([, feature, value]) => {
+        if (feature === "orientation") return (vw > vh ? "landscape" : "portrait") === value;
+        const limit = Number.parseFloat(value);
+        if (feature === "max-width") return vw <= limit;
+        if (feature === "min-width") return vw >= limit;
+        return vh >= limit;
+      });
+      if (!matches) continue;
+      return length(entry.replace(/^(?:\([^)]+\)(?: and )?)+/, ""), vw, vh);
     }
     throw new Error(sizes);
   };
   for (const [key, set] of Object.entries(DOSSIER_HERO_IMAGES)) {
     const sizes = dossierHeroSizes(set.aspect);
-    for (const [vw, w, h] of frames) {
+    for (const [vw, vh, w, h] of frames) {
       const need = Math.max(w, h * set.aspect);
-      assert.ok(evaluate(sizes, vw) >= need - 0.5, `${key} at ${vw}: ${sizes}`);
+      // Phones' full-bleed frame is asked for at 92vw (the site's 0.9 rule), so a 2x phone
+      // keeps the 720 px file and a 3x phone the full one; elsewhere the full need.
+      const floor = vw <= 760 ? need * 0.9 : need - 0.5;
+      assert.ok(evaluate(sizes, vw, vh) >= floor, `${key} at ${vw}x${vh}: ${sizes}`);
     }
   }
 });
@@ -198,11 +256,16 @@ test("each hero and its navigation warm-ups ask with one srcset and sizes", () =
   assert.match(stub, /src=\{profile\.image\}\s*\{\.\.\.dossierImage\(profile\.image\)\}/);
   assert.match(related, /src=\{person\.image\}\s*\{\.\.\.dossierImage\(person\.image\)\}/);
   // The full candidate is the WebP each hero loaded before.
+  // (テラ's is followed by the 1470 px step drawn from her supplied JPEG.)
   for (const source of [stub, related]) {
     for (const [, image, webp] of source.matchAll(/image: "([^"]+)",\s*imageWebp: "([^"]+)",/g)) {
       const set = dossierImage(image);
       if (image.startsWith("/manager-lejas")) continue;
-      assert.match(set.srcSet, new RegExp(`${webp} \\d+w$`), image);
+      assert.match(
+        set.srcSet,
+        new RegExp(`${webp} \\d+w(?:, /character-terra-1470\\.webp 1470w)?$`),
+        image,
+      );
       assert.ok(set.sizes, image);
     }
   }
