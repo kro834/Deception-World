@@ -57,6 +57,9 @@ async function snapshot(page) {
       const target = document.getElementById(decodeURIComponent(link.hash.slice(1)));
       const bounds = target.getBoundingClientRect();
       const style = getComputedStyle(link);
+      // The bar's own line under a link (its hover/focus line), lit for the chapter.
+      const line = getComputedStyle(link, "::after");
+      const lineScale = line.scale === "none" ? 1 : Number.parseFloat(line.scale);
       return {
         id: target.id,
         current: link.getAttribute("aria-current"),
@@ -64,6 +67,12 @@ async function snapshot(page) {
         crossing: bounds.top <= band.bottom && bounds.bottom >= band.top,
         color: style.color,
         underline: style.textDecorationLine,
+        lit:
+          line.content !== "none" &&
+          line.display !== "none" &&
+          lineScale >= 0.99 &&
+          Number.parseFloat(line.height) >= 2 &&
+          Number(line.opacity) > 0.9,
         navVisible: Boolean(link.getClientRects().length),
       };
     });
@@ -85,9 +94,15 @@ async function verifyCurrent(page, expected, label) {
   await page.waitForFunction(
     (wanted) => {
       const links = [...document.querySelectorAll('.rxs-local-nav nav a[aria-current="location"]')];
+      // The lit line has finished drawing out (or in) wherever it transitions.
+      const settled = [...document.querySelectorAll(".rxs-local-nav nav a")].every((link) => {
+        const scale = getComputedStyle(link, "::after").scale;
+        const value = scale === "none" ? 1 : Number.parseFloat(scale);
+        return link.hash === `#${wanted}` ? value >= 0.99 : value <= 0.01;
+      });
       return wanted === null
-        ? links.length === 0
-        : links.length === 1 && links[0].hash === `#${wanted}`;
+        ? links.length === 0 && settled
+        : links.length === 1 && links[0].hash === `#${wanted}` && settled;
     },
     expected,
     { timeout: 7000 },
@@ -117,11 +132,14 @@ async function verifyCurrent(page, expected, label) {
       link.current === null || link.current === "location",
       `${label}: correct aria-current value`,
     );
+    // Audit #23: the mark is the bar's own line, drawn out at 2px, not a text underline.
+    assert.equal(
+      link.lit,
+      link.id === expected,
+      `${label}: only the current chapter's line is lit`,
+    );
     if (link.id === expected) {
-      assert.ok(
-        link.underline.includes("underline"),
-        `${label}: current chapter has a non-color mark`,
-      );
+      assert.ok(link.lit, `${label}: current chapter has a non-color mark`);
       assert.ok(
         state.links
           .filter((other) => other.id !== expected)
