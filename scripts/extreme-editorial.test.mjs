@@ -62,10 +62,10 @@ test("the opaque nav covers the safe area and keeps four reachable mobile chapte
   const links = find(".rxs-local-nav nav a", "(max-width: 680px)");
   assert.equal(declaration(links, "min-height"), "44px");
   assert.equal(declaration(find(".rxs-local-nav nav a"), "gap"), "6px");
-  assert.equal(
-    declaration(find('.rxs-local-nav nav a[aria-current="location"]'), "text-decoration"),
-    "underline",
-  );
+  // Audit #23: the shared lit line marks the chapter (a text underline broke at "02 P14").
+  const current = find('.rxs-local-nav nav a[aria-current="location"]');
+  assert.equal(declaration(current, "color"), "var(--ext-gold)");
+  assert.equal(declaration(current, "text-decoration"), undefined);
 });
 
 test("the form canvas has a stable portrait ratio and keeps the rx14 physical limits", () => {

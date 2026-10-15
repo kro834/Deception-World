@@ -291,7 +291,10 @@ async function revealRan(duration: number, onStart?: () => void, cap = 1400) {
 
 // The press that started a route change: the card it lands on is where the
 // shutter closes. Read once, within the slide control's completion delay.
-let lastPress: { target: Element; at: number } | null = null;
+// Held weakly (audit #31): a page left without a guarded transition (Back, a
+// plain link, router navigation) never takes its press, and a strong hold
+// kept that whole removed page — /rexonance-saga's canvases and all — alive.
+let lastPress: { target: WeakRef<Element>; at: number } | null = null;
 const PRESS_WINDOW_MS = 1400;
 
 function notePress(event: Event) {
@@ -302,16 +305,17 @@ function notePress(event: Event) {
       : event.target instanceof Element
         ? event.target
         : null;
-  if (target) lastPress = { target, at: performance.now() };
+  if (target) lastPress = { target: new WeakRef(target), at: performance.now() };
 }
 
 function takePress() {
   const press = lastPress;
   lastPress = null;
-  if (!press || performance.now() - press.at > PRESS_WINDOW_MS || !press.target.isConnected) {
+  const target = press?.target.deref();
+  if (!press || !target || performance.now() - press.at > PRESS_WINDOW_MS || !target.isConnected) {
     return null;
   }
-  return press.target;
+  return target;
 }
 
 function cineTier(reduceMotion: boolean): CineScene["tier"] {
@@ -1419,7 +1423,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
           const flip =
             DETAIL_ROUTE.test(pathname) &&
             DETAIL_ROUTE.test(to) &&
-            Boolean(lastPress?.target.closest(".manager-pagination"));
+            Boolean(lastPress?.target.deref()?.closest(".manager-pagination"));
           const timings = reduceMotion
             ? { cover: 100, reveal: 160 }
             : tier === "calm"

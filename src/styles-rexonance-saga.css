@@ -95,17 +95,44 @@
 }
 
 /* The shared rx14 observer follows the chapter in view, independently of a
-   hash change or motion support. Underlining also identifies it without color. */
+   hash change or motion support (aria-current="location"). The bar lights it
+   in its own language, as Final Stage lights its lamp line (audit #23): the
+   name at full strength, and the bar's own line — its hover and focus line,
+   in the site light (Rexonance ice, Extreme gold) — drawn out under the link
+   at 2px. The line identifies the chapter without colour. It grows in with
+   the bar's transition only where motion is allowed
+   (styles-showcase-elevation.css) and is simply there otherwise. */
 html[data-family="special"]
   body
   .rxs-page:is(.rxs-rexonance-page, .exs-page)
   > header.rxs-local-nav
   nav
   a[aria-current="location"] {
-  color: var(--rxs-gold);
-  text-decoration: underline;
-  text-decoration-thickness: 2px;
-  text-underline-offset: 0.45em;
+  color: #fff;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page:is(.rxs-rexonance-page, .exs-page)
+  > header.rxs-local-nav
+  nav
+  a[aria-current="location"]::after {
+  height: 2px;
+  scale: 1 1;
+}
+
+/* Forced colours draw no line (it is a painted box): the name is underlined. */
+@media (forced-colors: active) {
+  html[data-family="special"]
+    body
+    .rxs-page:is(.rxs-rexonance-page, .exs-page)
+    > header.rxs-local-nav
+    nav
+    a[aria-current="location"] {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.45em;
+  }
 }
 
 /* Hover answers a fine pointer only: after a tap, touch browsers keep :hover

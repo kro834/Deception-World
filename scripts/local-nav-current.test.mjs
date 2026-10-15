@@ -234,8 +234,25 @@ test("both saga pages mount the shared rx14 helper as an independently cleaned-u
     );
   }
   const css = read("src/styles-rexonance-saga.css");
+  // Audit #23: lit in each bar's own language (the site-light line, as Final Stage's lamp line).
+  const current =
+    /\.rxs-page:is\(\.rxs-rexonance-page, \.exs-page\)\s*> header\.rxs-local-nav\s*nav\s*a\[aria-current="location"\]/
+      .source;
+  assert.match(css, new RegExp(`${current}\\s*\\{\\s*color: #fff;\\s*\\}`));
+  // The non-colour mark: the bar's line, drawn out and 2px, under the chapter in view.
+  assert.match(css, new RegExp(`${current}::after\\s*\\{\\s*height: 2px;\\s*scale: 1 1;\\s*\\}`));
+  // Forced colours hide that painted line, so the name itself is underlined there.
   assert.match(
     css,
-    /\.rxs-page:is\(\.rxs-rexonance-page, \.exs-page\)[\s\S]*?a\[aria-current="location"\]\s*\{[^}]*color: var\(--rxs-gold\);[^}]*text-decoration: underline;/,
+    new RegExp(
+      `@media \\(forced-colors: active\\) \\{\\s*html\\[data-family="special"\\]\\s*body\\s*${current}\\s*\\{\\s*text-decoration: underline;`,
+    ),
   );
+  // The line grows in only where motion is allowed; otherwise it is simply there.
+  const elevation = read("src/styles-showcase-elevation.css");
+  assert.match(
+    elevation,
+    /@media \(prefers-reduced-motion: no-preference\) and \(hover: hover\) and \(pointer: fine\) \{[\s\S]*?html:not\(\[data-world-effects="economy"\]\) \.rxs-page\.rxs-page \.rxs-local-nav nav a::after \{\s*transition: scale 220ms/,
+  );
+  assert.match(elevation, /\.rxs-page\.rxs-page \.rxs-local-nav nav a::after \{[^}]*scale: 0 1;/);
 });

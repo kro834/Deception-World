@@ -67,10 +67,9 @@ html[data-family="special"]
   .rxs-local-nav
   nav
   a[aria-current="location"] {
+  /* The name in the site gold; the bar's lit line (styles-rexonance-saga.css)
+     runs under the whole link, where a text underline broke at "02 P14". */
   color: var(--ext-gold);
-  text-decoration: underline;
-  text-decoration-thickness: 2px;
-  text-underline-offset: 0.65em;
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page .rxs-brand span {
   color: var(--ext-gold);
