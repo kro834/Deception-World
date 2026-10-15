@@ -59,8 +59,7 @@ import {
 } from "./gallery-viewer-state";
 import { GALLERY_FEATURE_KEY, readGalleryFeature, saveGalleryFeature } from "./gallery-feature";
 import { GALLERY_TITLES_KEY, readGalleryTitles, type GalleryTitles } from "./gallery-titles";
-
-const imageSizes = "(max-width: 640px) 46vw, (max-width: 1000px) 30vw, 22vw";
+import { galleryGridImage } from "./gallery-grid-image";
 
 function revealGalleryControl(control: HTMLElement | null) {
   const header = control?.closest<HTMLElement>(".gallery-viewer-header");
@@ -1383,13 +1382,7 @@ export function GalleryPage() {
                     <img
                       src={work.thumb}
                       srcSet={work.srcSet}
-                      sizes={
-                        display.preferences.density === "spacious"
-                          ? "(max-width: 700px) 92vw, (max-width: 1020px) 75vw, 60vw"
-                          : work.width > work.height
-                            ? "(max-width: 640px) 92vw, (max-width: 1000px) 60vw, 44vw"
-                            : imageSizes
-                      }
+                      {...galleryGridImage(display.preferences.density, work.width, work.height)}
                       alt={work.alt}
                       width={work.width}
                       height={work.height}

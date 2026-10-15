@@ -210,6 +210,18 @@ async function testScreeningRoom(context, viewport) {
   const trigger = page.locator(".dream-screening-trigger");
   await waitForHydration(page, ".dream-screening-trigger");
   await trigger.scrollIntoViewIfNeeded();
+  // The programme and its Japanese fonts sit above this trigger. Capture the
+  // departure only after their geometry is final, so a late font swap cannot
+  // masquerade as a movement caused by the delayed screening stylesheet.
+  await page.waitForFunction(() => {
+    const programmeCss = document.querySelector('link[href*="styles-dream-programme"]');
+    return Boolean(programmeCss?.sheet) && document.fonts.status === "loaded";
+  });
+  await page.evaluate(async () => {
+    await document.fonts.ready;
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+  });
+  await trigger.scrollIntoViewIfNeeded();
   await installScreeningInputTrace(page);
   const departure = await page.evaluate(() => window.scrollY);
   openingRequested = true;
@@ -255,15 +267,15 @@ async function testScreeningRoom(context, viewport) {
     bodyTop: document.body.style.top,
     triggerText: document.querySelector(".dream-screening-trigger")?.textContent?.trim(),
   }));
+  console.log(
+    `${viewport.name} screening cold CSS: ${JSON.stringify({ cssUrl, departure, ...duringCssDelay })}`,
+  );
   assert.equal(
     duringCssDelay.y,
     departure,
     `${viewport.name}: delayed screening CSS must not move the page`,
   );
   assert.match(duringCssDelay.triggerText ?? "", /映写室を準備中/);
-  console.log(
-    `${viewport.name} screening cold CSS: ${JSON.stringify({ cssUrl, departure, ...duringCssDelay })}`,
-  );
   const dialog = page.locator(".dream-screening-dialog[open]");
   await dialog.waitFor({ state: "visible" });
   const scrollWhenOpen = await page.evaluate(() => ({

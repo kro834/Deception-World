@@ -12,8 +12,9 @@ export const Route = createFileRoute("/download")({
   component: DownloadPage,
   head: () =>
     createWorldHead({
-      title: "サイトデータ｜Deception World",
-      description: "Deception Worldの公開中mainソースをZIPで取得できます。",
+      title: "ソースコードの取得｜Deception World",
+      description:
+        "Deception WorldのGitHub上の最新mainソースをZIPで取得できます。公開サイトの配信版とは異なる場合があります。",
       // Addon first: the page sheet wins the cascade; the HUD subset is the
       // dossiers' Michroma (capitals and digits) for the EXPORT / MAIN ARCHIVE labels.
       stylesheetLinks: [
@@ -32,14 +33,17 @@ function DownloadPage() {
       </span>
       <p>EXPORT</p>
       <h1>Deception World</h1>
-      <b>MAIN ARCHIVE</b>
+      <b>SOURCE CODE / MAIN</b>
       <a className="export-page-btn" href={MAIN_ARCHIVE_URL}>
-        公開中のmainをZIPで保存する
+        最新mainのソースをZIPで保存する
       </a>
       <a className="export-page-alt" href="/api/export">
         ダウンロードを再試行
       </a>
-      <small>GitHub上の最新mainを取得します ／ node_modules は含みません</small>
+      <small>
+        GitHub上のソースコードです。公開サイトの配信版とは異なる場合があります。
+        ギャラリーに投稿した画像・しおり・個人設定・node_modules は含みません。
+      </small>
       <Link to="/world" className="export-page-back">
         メインサイトへ戻る
       </Link>

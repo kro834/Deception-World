@@ -4,10 +4,11 @@ import { createWorldHead, WORLD_CORE_STYLESHEET_LINKS } from "@/lib/world-head";
 import libraryCssUrl from "@/styles-library.css?url";
 import inquiryCssUrl from "@/styles-library-inquiry.css?url";
 import stageLibraryCssUrl from "@/styles-stage-library.css?url";
-import { getInquiryGuide, validateInquirySearch } from "@/lib/inquiry-guides";
+import { getInquiryGuide } from "@/lib/inquiry-guides";
+import { validateLibraryBrowseSearch } from "@/lib/library-browse-state";
 
 export const Route = createFileRoute("/library")({
-  validateSearch: validateInquirySearch,
+  validateSearch: validateLibraryBrowseSearch,
   component: LibraryRoute,
   head: () =>
     createWorldHead({
@@ -25,11 +26,22 @@ export const Route = createFileRoute("/library")({
 });
 
 function LibraryRoute() {
-  const { guide } = Route.useSearch();
+  const { guide, q = "", kind = "all", scope = "all" } = Route.useSearch();
   const navigate = Route.useNavigate();
   return (
     <LibraryPage
       guide={guide}
+      query={q}
+      kind={kind}
+      scope={scope}
+      onBrowseChange={(next, { replace = true } = {}) => {
+        return navigate({
+          search: (previous) => validateLibraryBrowseSearch({ ...previous, ...next }),
+          hash: true,
+          replace,
+          resetScroll: false,
+        });
+      }}
       onGuideChange={(id) => {
         const next = getInquiryGuide(id);
         if (next || id === "")

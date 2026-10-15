@@ -1,0 +1,110 @@
+{
+  "purpose": "Pre-publication implementation and local verification record; not a production attestation",
+  "date": "2026-10-15",
+  "branch": "codex/site-improvements-20261015",
+  "integratedMain": "45e6bad662eb59eba6df66995c9321c540a9a771",
+  "features": [
+    "Shareable library query, kind and saved-only filters, including Back and reload",
+    "Preserve an unflushed query before opening a record; handle IME and stale asynchronous navigation",
+    "Tab-session return from a record to the original search or library card with focus and scroll restoration",
+    "Keyboard-accessible full-page search results without changing quick-search combobox navigation",
+    "Current-section menu visibility and keyboard focus restoration without moving the underlying page",
+    "Unambiguous source download explanation and non-duplicated 404 recovery links",
+    "Settle WebKit's observed post-bookmark fragment adjustment at the same offset, once after an own bookmark DOM commit",
+    "Retain the return journey while its own opening is in flight; isolate cancellation, completion and timers by context identity"
+  ],
+  "coordination": {
+    "startupAndImages": "da0c2b2eec390b827850228684de1b19df95da27",
+    "opening": "899b6e702a5bcb9063f93acb9c66a2af4782f1cd",
+    "dream": "45e6bad662eb59eba6df66995c9321c540a9a771",
+    "method": "Normal merges preserving the four other chats' changes; dirty owner checkout not edited"
+  },
+  "preserved": [
+    "Owner prose, names, source data and intentional duplicate entries",
+    "Rider long-press selection and vertical page scrolling",
+    "Opening timing and logo-dive direction",
+    "Removal of Ultra runtime settings, while retaining story form names",
+    "No public gallery upload or title edit during verification"
+  ],
+  "repositoryGates": {
+    "implementationBuild": "995d137b8d4ae2477d483916672e08e0a43ea901",
+    "tests": { "total": 2359, "passed": 2355, "failed": 0, "skipped": 4 },
+    "typecheck": "passed",
+    "eslint": { "errors": 0, "existingWarnings": 12 },
+    "sourceParts": "15 groups matched",
+    "diffCheck": "passed",
+    "productionBuild": "passed without running local database migrations"
+  },
+  "requestedRegressions": {
+    "implementationBuild": "995d137b8d4ae2477d483916672e08e0a43ea901",
+    "status": "all passed",
+    "scripts": [
+      "verify-rexonance-operability",
+      "verify-dream-scroll-work",
+      "verify-dream-reader-navigation",
+      "verify-site-health",
+      "verify-liquid-grid",
+      "verify-rider-hold-navigation",
+      "verify-rail-work",
+      "verify-hero-touch"
+    ],
+    "siteHealth": "93/93 route and viewport combinations",
+    "evidence": "output/playwright/durable-verify-<script>.log (local ignored browser artifacts)"
+  },
+  "startupFileBudget": {
+    "status": "passed",
+    "baselineEntryBytes": 528209,
+    "entryBytes": 407717,
+    "baselineEntryGzipBytes": 162759,
+    "entryGzipBytes": 130640,
+    "criticalGraphBytes": 538241,
+    "criticalGraphGzipBytes": 175524,
+    "measurement": "Decoded files and reproducible gzip size, not elapsed startup or network transfer time"
+  },
+  "browserVerification": {
+    "implementationBuild": "995d137b8d4ae2477d483916672e08e0a43ea901",
+    "chromium": "passed; 390x844 and 1024x1366 journeys, 320x640/568x320/1440x900 layouts",
+    "webkit": "passed; the same five viewports and full touch/mouse, keyboard and return journeys",
+    "webkitFixBoundaries": [
+      "Only own bookmark commits on hash-bearing library pages; cold hydration and unrelated renders do not scroll",
+      "Same x/y coordinates, no history, focus, pointer-default or pointer-capture change",
+      "Skip out-of-range Safari rubber-band coordinates",
+      "Shared rail, load-gate, press feedback and root scroll CSS remain unchanged",
+      "Press/margin/default-blocking hypotheses were rejected by independent contrasts; speculative changes were removed"
+    ],
+    "menuHarness": "The already-visible sticky opener is hit-tested and clicked at its measured center. WebKit locator auto-scroll independently moved it 83px before pointerdown; coordinate input preserved the page through opening, closing, focus restoration and unlock. No app workaround was added for this harness behavior.",
+    "searchHarness": "Search waits for its existing world-page-visible hydration lifecycle before exercising client-side handlers. Its SSR links already have valid native hrefs; the family and font signals alone do not establish that draft capture is hydrated.",
+    "coverage": [
+      "Library query then immediate record open; native Back, reload, explicit return and stable card focus",
+      "Saved-only shelf, removal focus, reload and touch/mouse filter activation",
+      "Search Tab navigation, record round trip and original result focus",
+      "Quoted and handwritten numeric library URL round trips",
+      "Pointer-open/keyboard-close menu focus restoration",
+      "No horizontal overflow; download/404 recovery and current-location menu row",
+      "Clock-boundary library/search arrival after more than 15 seconds of Date time; actual elapsed browser time is recorded separately",
+      "A real route-preparation deadline clears the pending journey without a late navigation"
+    ],
+    "pendingJourneyBoundaries": [
+      "Only the exact in-memory capture receives an in-flight lease; no lease is stored across reloads",
+      "Persisted abandoned leaving state still expires after 15 seconds; all states retain the 30-minute maximum",
+      "Back, pagehide, explicit cancellation, changed source/target and failed or ignored openings cannot revive an old capture",
+      "Same-millisecond captures, queued old timers and late promise completion are isolated by object identity",
+      "Shared load gate, Rexonance warmup and destination-arrival highlight timeout are unchanged"
+    ],
+    "adversarialEvidence": "output/playwright/record-return-durable-adversarial-summary.json; five isolated Chromium cases passed with no page errors. Raw reports distinguish a corrected diagnostic-only record-selection error from application behavior.",
+    "physicalDevices": "Not tested; iPhone/iPad Safari and installed-PWA checks remain with the owner"
+  },
+  "previousPublicVerification": {
+    "release": "24c298b525d52c525a344662152377182190d332",
+    "ciRun": "38701370338",
+    "status": "Exact identity and public smoke passed; independent full Chromium and WebKit five-viewport reruns passed",
+    "initialObservations": [
+      "The first Chromium run reached Zeus without a return link; cause was not established. The search hydration wait and the independently proven 15-second in-flight boundary are treated separately.",
+      "The first WebKit run reported two Rex atlas access-control messages. Both assets returned 200/basic in independent fetches, the full rerun passed without page errors, and an explicit abort/retry contrast passed. The original message did not reproduce; no application workaround or error allowlist was added."
+    ]
+  },
+  "publication": {
+    "method": "Normal push to main, deploy-main.yml gates and exact-release public verification",
+    "attestation": "Publication is verified separately after CI; this source file does not claim that publication has completed"
+  }
+}

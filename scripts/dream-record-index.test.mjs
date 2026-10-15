@@ -3,8 +3,11 @@ import test from "node:test";
 import {
   buildDreamRecordOptions,
   dreamRecordExcerpt,
+  dreamRecordHighlight,
   dreamRecordPassageText,
+  dreamRecordSearchTerms,
   filterDreamRecords,
+  normalizeDreamRecordSearch,
   resolveDreamRecordLinks,
 } from "../src/lib/dream-record-index.ts";
 import { DREAM_CHRONICLE } from "../src/components/dream-chapter/dream-chapter-extra-data.ts";
@@ -31,6 +34,65 @@ test("filter options derive unique canonical values in stable order", () => {
     places: ["人里", "永遠亭"],
     people: ["シエル", "怪作"],
   });
+});
+
+test("keyword spelling normalizes kana, width and case and splits unique AND terms", () => {
+  assert.equal(normalizeDreamRecordSearch("ｼｴﾙ ＣＡＳＥ ガラス"), "しえる case がらす");
+  assert.deepEqual(dreamRecordSearchTerms(" シエル\u3000ｼｴﾙ\nCASE "), ["しえる", "case"]);
+  assert.deepEqual(dreamRecordSearchTerms(" \u3000 "), []);
+});
+
+test("keyword AND search combines title, source passage, cast and place with facets", () => {
+  const source = [
+    { ...records[0], title: { text: "白い扉" }, text: "ｶﾞﾗｽの向こう。" },
+    { ...records[1], title: { text: "白い部屋" }, text: "ガラスの向こう。" },
+    { ...records[2], title: { text: "朝食" } },
+  ];
+  assert.deepEqual(filterDreamRecords(source, { query: "白い がらす しえる 人里" }), [source[0]]);
+  assert.deepEqual(filterDreamRecords(source, { query: "ガラス", person: "怪作", case: "1" }), [
+    source[1],
+  ]);
+  assert.deepEqual(filterDreamRecords(source, { query: "ガラス", place: "永遠亭" }), []);
+  assert.deepEqual(filterDreamRecords(source, { query: "存在しない言葉" }), []);
+  assert.deepEqual(filterDreamRecords(source, { query: "   " }), source);
+  assert.deepEqual(
+    filterDreamRecords(source, { query: "[.*" }),
+    [],
+    "query is literal text, not a regular expression",
+  );
+  assert.deepEqual(
+    filterDreamRecords(records, { query: "団子 怪作" }),
+    [records[1]],
+    "segmented passages are searchable",
+  );
+});
+
+test("query-near excerpts surface late matches and keep original source spelling", () => {
+  const source = `${"前の場面。".repeat(45)}ｶﾞﾗｽの扉が開く。${"後の場面。".repeat(35)}`;
+  const excerpt = dreamRecordExcerpt({ text: source }, 90, "がらす");
+  assert.ok(excerpt.startsWith("…"));
+  assert.ok(excerpt.endsWith("…"));
+  assert.ok(excerpt.includes("ｶﾞﾗｽの扉が開く。"));
+  assert.ok(Array.from(excerpt).length <= 90);
+  assert.ok(source.includes(excerpt.slice(1, -1)), "no canonical passage words are rewritten");
+  assert.equal(dreamRecordExcerpt({ text: "シエルの声。" }, 90, "しえる"), "シエルの声。");
+  assert.equal(
+    dreamRecordExcerpt({ text: source }, 90, "本文にはない"),
+    dreamRecordExcerpt({ text: source }, 90),
+  );
+});
+
+test("highlight runs map normalized matches to exact original Unicode text", () => {
+  const source = "声：ｶﾞﾗｽ、ガラス、か\u3099らす。<b>";
+  const runs = dreamRecordHighlight(source, "がらす");
+  assert.equal(runs.map((run) => run.text).join(""), source);
+  assert.deepEqual(
+    runs.filter((run) => run.match).map((run) => run.text),
+    ["ｶﾞﾗｽ", "ガラス", "か\u3099らす"],
+  );
+  assert.deepEqual(dreamRecordHighlight("シエル", "し しえる"), [{ text: "シエル", match: true }]);
+  assert.deepEqual(dreamRecordHighlight("<b>", "<b>"), [{ text: "<b>", match: true }]);
+  assert.deepEqual(dreamRecordHighlight("本文", ""), [{ text: "本文", match: false }]);
 });
 
 test("passage summaries support both canonical passage shapes and stay compact", () => {

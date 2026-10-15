@@ -435,7 +435,11 @@ export function SideMenuLayer({
     // in view, clear of the bottom edge by the panel's own bottom padding
     // (32px, plus the home indicator's inset on an iPhone). Only the panel
     // scrolls; scrollIntoView could also move the locked page behind it.
-    const current = panel.querySelector<HTMLElement>('.side-panel-links > [aria-current="page"]');
+    // World chapters have a current location, not a current file. Keep that
+    // row visible even when its whole SECTIONS group cannot fit in landscape.
+    const current =
+      panel.querySelector<HTMLElement>('.side-panel-links > [aria-current="page"]') ??
+      panel.querySelector<HTMLElement>('.side-panel-links > [aria-current="location"]');
     if (current) {
       const clearance = parseFloat(window.getComputedStyle(panel).paddingBottom) || 24;
       const overflow =
@@ -444,9 +448,7 @@ export function SideMenuLayer({
     }
     // Show the group heading, not just the current tile, when that group
     // fits under the sticky head. Taller groups keep the row-in-view rule.
-    const group = (
-      current ?? panel.querySelector('[aria-current="location"]')
-    )?.closest<HTMLElement>(".side-panel-group");
+    const group = current?.closest<HTMLElement>(".side-panel-group");
     const head = panel.querySelector(".side-panel-head");
     if (group && head) {
       const bounds = group.getBoundingClientRect();
@@ -868,6 +870,7 @@ export function SideMenuLayer({
             onClick={
               controlled
                 ? (event) => {
+                    sideMenuRestoreFocusRef.current = event.detail === 0;
                     if (event.detail !== 0) event.currentTarget.blur();
                     close();
                   }

@@ -1,7 +1,15 @@
-import { useState, type CSSProperties } from "react";
-import { Link } from "@tanstack/react-router";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
+import { defaultParseSearch, Link } from "@tanstack/react-router";
 import { LibraryInquiry } from "./library-inquiry";
-import { GuardedLink } from "@/components/load-gate";
+import { GuardedLink, useLoadGate } from "@/components/load-gate";
 import { DisplayName } from "@/components/name-text";
 import { useWorldMode } from "@/components/world/use-world-mode";
 import { SideMenuLayer, SideMenuTrigger } from "@/components/world/world-chrome";
@@ -14,6 +22,21 @@ import {
 } from "@/lib/library-data";
 import { pathArt, RIDER_ART, titleRunStyle } from "@/lib/record-art";
 import { watchRecordArrival } from "@/lib/record-arrival";
+import {
+  captureRecordReturn,
+  finishRecordReturnOpening,
+  recordReturnCardId,
+  type RecordReturnContext,
+} from "@/lib/record-return-state";
+import {
+  libraryBrowseKey,
+  LIBRARY_QUERY_DELAY,
+  LIBRARY_QUERY_LIMIT,
+  validateLibraryBrowseSearch,
+  type LibraryBrowseScope,
+  type LibraryBrowseSelection,
+} from "@/lib/library-browse-state";
+import { filterLibraryBrowse } from "@/lib/library-browse-filter";
 import { toggleBookmark, useLibraryStore } from "./library-store";
 import { LibraryHub } from "./library-hub";
 import { RecordArtFrame } from "./record-art";
@@ -29,37 +52,72 @@ function EntryCard({
   entry,
   bookmarked,
   ready,
+  beforeOpen,
+  onBookmark,
 }: {
   entry: LibraryEntry;
   bookmarked: boolean;
   ready: boolean;
+  beforeOpen: (entry: LibraryEntry) => Promise<(() => RecordReturnContext | null) | undefined>;
+  onBookmark: (id: string) => void;
 }) {
+  const { go } = useLoadGate();
   return (
-    <article className="library-card" data-kind={entry.kind}>
+    <article
+      id={recordReturnCardId("library", entry.id)}
+      className="library-card"
+      data-kind={entry.kind}
+      data-library-entry={entry.id}
+      onClickCapture={(event) => {
+        if (
+          event.defaultPrevented ||
+          event.button !== 0 ||
+          event.metaKey ||
+          event.ctrlKey ||
+          event.shiftKey ||
+          event.altKey
+        )
+          return;
+        const link = (event.target as Element).closest<HTMLAnchorElement>("a[data-library-open]");
+        if (!link || !event.currentTarget.contains(link)) return;
+        event.preventDefault();
+        event.stopPropagation();
+        const fromKeyboard = event.detail === 0;
+        // GuardedLink's beforeNavigate is synchronous. Keep its native link
+        // and intent warmers, but await the source URL before leaving it.
+        void beforeOpen(entry)
+          .then(async (commit) => {
+            const captured = commit?.();
+            if (!captured) return;
+            try {
+              watchRecordArrival(entry.path, entry.hash);
+              await go({
+                to: entry.path,
+                hash: entry.hash,
+                assets: [],
+                focusDestination: fromKeyboard,
+              });
+            } finally {
+              finishRecordReturnOpening(captured, {
+                pathname: window.location.pathname,
+                search: defaultParseSearch(window.location.search),
+                hash: window.location.hash,
+              });
+            }
+          })
+          .catch(() => link.focus({ preventScroll: true }));
+      }}
+    >
       <RecordArtFrame art={pathArt(entry.path, entry.hash)} title={entry.title} />
       <p className="library-card-kind">{LIBRARY_KINDS[entry.kind]}</p>
       <h3 style={titleRunStyle(entry.title)}>
-        <GuardedLink
-          to={entry.path}
-          hash={entry.hash}
-          assets={[]}
-          beforeNavigate={() => {
-            watchRecordArrival(entry.path, entry.hash);
-          }}
-        >
+        <GuardedLink to={entry.path} hash={entry.hash} assets={[]} data-library-open="true">
           <DisplayName value={entry.title} />
         </GuardedLink>
       </h3>
       <p className="library-card-description">{entry.description}</p>
       <div className="library-card-actions">
-        <GuardedLink
-          to={entry.path}
-          hash={entry.hash}
-          assets={[]}
-          beforeNavigate={() => {
-            watchRecordArrival(entry.path, entry.hash);
-          }}
-        >
+        <GuardedLink to={entry.path} hash={entry.hash} assets={[]} data-library-open="true">
           資料を開く <span aria-hidden="true">↗</span>
         </GuardedLink>
         <button
@@ -67,7 +125,7 @@ function EntryCard({
           disabled={!ready}
           aria-pressed={bookmarked}
           aria-label={`${entry.title}のしおり${bookmarked ? "を解除" : "を保存"}`}
-          onClick={() => toggleBookmark(entry.id)}
+          onClick={() => onBookmark(entry.id)}
         >
           {bookmarked ? "保存済み ✓" : "しおり ＋"}
         </button>
@@ -77,20 +135,293 @@ function EntryCard({
 }
 export function LibraryPage({
   guide,
+  query,
+  kind,
+  scope,
+  onBrowseChange,
   onGuideChange,
 }: {
   guide?: string;
+  query: string;
+  kind: LibraryKind | "all";
+  scope: LibraryBrowseScope;
+  onBrowseChange: (next: LibraryBrowseSelection, options?: { replace?: boolean }) => Promise<void>;
   onGuideChange: (id: string) => void;
 }) {
   useWorldMode();
-  const [query, setQuery] = useState("");
+  const [draft, setDraft] = useState(query);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [kind, setKind] = useState<LibraryKind | "all">("all");
+  const [composing, setComposing] = useState(false);
+  const [browseError, setBrowseError] = useState("");
+  const draftRef = useRef(query);
+  const composingRef = useRef(false);
+  const compositionEndedRef = useRef(-Infinity);
+  const timerRef = useRef<number | undefined>(undefined);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const resultsRef = useRef<HTMLParagraphElement>(null);
+  const bookmarkFocusRef = useRef<{ id: string; candidates: string[] } | undefined>(undefined);
+  const bookmarkScrollCommitRef = useRef(false);
+  const onBrowseChangeRef = useRef(onBrowseChange);
+  const committedRef = useRef(libraryBrowseKey({ q: query, kind, scope }));
+  const ownWritesRef = useRef(new Set<string>());
+  const pendingWriteRef = useRef<{ key: string; promise: Promise<void> } | undefined>(undefined);
+  const openSequenceRef = useRef(0);
+  const mountedRef = useRef(true);
+  // Match-owned search values advance together. A global router history key
+  // can advance before this match and must not produce an old-query/new-key
+  // tuple that falsely cancels an in-flight source URL write.
+  const sourceKey = JSON.stringify([query, kind, scope, guide]);
+  const sourceRef = useRef(sourceKey);
   const { saved, ready, error } = useLibraryStore();
-  const visible = searchLibrary(query, kind);
+
+  useLayoutEffect(() => {
+    if (!bookmarkScrollCommitRef.current) return;
+    bookmarkScrollCommitRef.current = false;
+    if (!window.location.hash) return;
+    const scroller = document.scrollingElement;
+    if (!scroller) return;
+    const maxX = Math.max(0, scroller.scrollWidth - scroller.clientWidth);
+    const maxY = Math.max(0, scroller.scrollHeight - scroller.clientHeight);
+    const { scrollX: left, scrollY: top } = window;
+    // A same-position instant scroll clears WebKit's pending native fragment
+    // adjustment after the personal shelf changes height. Otherwise its next
+    // press can move a filter before click. Do this once after our own save,
+    // never during input or scroll, and do not clamp Safari rubber-band offsets.
+    if (left < 0 || top < 0 || left > maxX || top > maxY) return;
+    window.scrollTo({ left, top, behavior: "instant" });
+  });
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+      openSequenceRef.current += 1;
+    };
+  }, []);
+
+  useEffect(() => {
+    onBrowseChangeRef.current = onBrowseChange;
+  });
+
+  const cancelQueryWrite = () => {
+    window.clearTimeout(timerRef.current);
+    timerRef.current = undefined;
+  };
+
+  const writeBrowse = useCallback((next: LibraryBrowseSelection, replace = true): Promise<void> => {
+    window.clearTimeout(timerRef.current);
+    timerRef.current = undefined;
+    const key = libraryBrowseKey(next);
+    if (key === committedRef.current)
+      return pendingWriteRef.current?.key === key
+        ? pendingWriteRef.current.promise
+        : Promise.resolve();
+    const previous = committedRef.current;
+    committedRef.current = key;
+    ownWritesRef.current.add(key);
+    setBrowseError("");
+    const promise = Promise.resolve(onBrowseChangeRef.current(next, { replace }))
+      .catch((reason: unknown) => {
+        if (committedRef.current === key) committedRef.current = previous;
+        ownWritesRef.current.delete(key);
+        if (mountedRef.current)
+          setBrowseError("検索条件を保存できませんでした。もう一度お試しください。");
+        throw reason;
+      })
+      .finally(() => {
+        if (pendingWriteRef.current?.promise === promise) pendingWriteRef.current = undefined;
+      });
+    pendingWriteRef.current = { key, promise };
+    return promise;
+  }, []);
+
+  // Our own debounced URL acknowledgement must not erase newer typing. A
+  // different matched search is authoritative; popstate below also restores
+  // Back/Forward entries whose query and filters happen to be identical.
+  useEffect(() => {
+    if (sourceRef.current === sourceKey) return;
+    sourceRef.current = sourceKey;
+    const key = libraryBrowseKey({ q: query, kind, scope });
+    committedRef.current = key;
+    const ownWrite = ownWritesRef.current.has(key);
+    if (ownWrite) {
+      ownWritesRef.current.delete(key);
+      return;
+    }
+    ownWritesRef.current.clear();
+    openSequenceRef.current += 1;
+    window.clearTimeout(timerRef.current);
+    timerRef.current = undefined;
+    composingRef.current = false;
+    setComposing(false);
+    draftRef.current = query;
+    setDraft(query);
+  }, [sourceKey, query, kind, scope]);
+
+  useEffect(() => {
+    const restore = () => {
+      openSequenceRef.current += 1;
+      window.clearTimeout(timerRef.current);
+      timerRef.current = undefined;
+      ownWritesRef.current.clear();
+      if (window.location.pathname !== "/library") return;
+      const next = validateLibraryBrowseSearch(defaultParseSearch(window.location.search));
+      const q = next.q ?? "";
+      committedRef.current = libraryBrowseKey({
+        q,
+        kind: next.kind ?? "all",
+        scope: next.scope ?? "all",
+      });
+      composingRef.current = false;
+      setComposing(false);
+      draftRef.current = q;
+      setDraft(q);
+    };
+    window.addEventListener("popstate", restore);
+    return () => {
+      window.removeEventListener("popstate", restore);
+      window.clearTimeout(timerRef.current);
+    };
+  }, []);
+
+  useEffect(() => {
+    const next = { q: draft, kind, scope };
+    if (composing || libraryBrowseKey(next) === committedRef.current) return;
+    const timer = window.setTimeout(() => {
+      const latest = { q: draftRef.current, kind, scope };
+      if (composingRef.current) return;
+      void writeBrowse(latest).catch(() => undefined);
+    }, LIBRARY_QUERY_DELAY);
+    timerRef.current = timer;
+    return () => window.clearTimeout(timer);
+  }, [draft, composing, kind, scope, writeBrowse]);
+
+  const { counts, entries: visible } = useMemo(
+    () => filterLibraryBrowse({ q: draft, kind, scope }, saved.bookmarks),
+    [draft, kind, scope, saved.bookmarks],
+  );
+  const savedCount = filterLibraryBrowse({ q: draft, kind, scope: "saved" }, saved.bookmarks)
+    .entries.length;
+  const allCount = searchLibrary(draft, kind).length;
+  const savedKnown = ready && (!error || saved.bookmarks.length > 0);
+  const savedUnavailable = scope === "saved" && !savedKnown;
+  const filtersActive = Boolean(draft.trim()) || kind !== "all" || scope !== "all";
+  const selection = () => ({ q: draftRef.current, kind, scope });
+  const flushQuery = () => writeBrowse(selection());
+  const quietFlush = () => {
+    openSequenceRef.current += 1;
+    void flushQuery().catch(() => undefined);
+  };
+  const beforeOpen = async (entry: LibraryEntry) => {
+    // GuardedLink calls this only for an unmodified same-tab activation.
+    // Commit before capturing so the return shelf includes the latest field.
+    const request = ++openSequenceRef.current;
+    const source = selection();
+    try {
+      await writeBrowse(source);
+    } catch (reason) {
+      if (
+        !mountedRef.current ||
+        request !== openSequenceRef.current ||
+        window.location.pathname !== "/library"
+      )
+        return;
+      throw reason;
+    }
+    const isCurrent = () => {
+      if (
+        !mountedRef.current ||
+        request !== openSequenceRef.current ||
+        window.location.pathname !== "/library"
+      )
+        return false;
+      const actual = validateLibraryBrowseSearch(defaultParseSearch(window.location.search));
+      return (
+        libraryBrowseKey({
+          q: actual.q ?? "",
+          kind: actual.kind ?? "all",
+          scope: actual.scope ?? "all",
+        }) === libraryBrowseKey(source) && actual.guide === guide
+      );
+    };
+    if (!isCurrent()) return;
+    // Capture and the caller's go() happen in the same synchronous turn after
+    // this final guard; a newer click, Back, or unmount cannot revive an old A.
+    return () => {
+      if (!isCurrent()) return null;
+      return captureRecordReturn(
+        {
+          source: {
+            pathname: "/library",
+            search: { ...source, guide },
+            cardId: recordReturnCardId("library", entry.id),
+          },
+          target: { pathname: entry.path, hash: entry.hash },
+        },
+        true,
+      );
+    };
+  };
+  const setQuery = (value: string) => {
+    openSequenceRef.current += 1;
+    draftRef.current = value;
+    setDraft(value);
+  };
+  const clearFilters = () => {
+    composingRef.current = false;
+    setComposing(false);
+    setQuery("");
+    void writeBrowse({ q: "", kind: "all", scope: "all" }).catch(() => undefined);
+    inputRef.current?.focus({ preventScroll: true });
+  };
+  const changeKind = (next: LibraryKind | "all") => {
+    openSequenceRef.current += 1;
+    void writeBrowse({ ...selection(), kind: next }, false).catch(() => undefined);
+  };
+  const changeScope = (next: LibraryBrowseScope) => {
+    openSequenceRef.current += 1;
+    void writeBrowse({ ...selection(), scope: next }, false).catch(() => undefined);
+  };
+  const onBookmark = (id: string) => {
+    bookmarkScrollCommitRef.current = true;
+    if (scope === "saved") {
+      const index = visible.findIndex((entry) => entry.id === id);
+      bookmarkFocusRef.current = {
+        id,
+        candidates: [visible[index + 1]?.id, visible[index - 1]?.id].filter(
+          (value): value is string => Boolean(value),
+        ),
+      };
+    }
+    toggleBookmark(id);
+  };
+  useEffect(() => {
+    const pending = bookmarkFocusRef.current;
+    if (!pending) return;
+    if (scope !== "saved") {
+      bookmarkFocusRef.current = undefined;
+      return;
+    }
+    if (saved.bookmarks.includes(pending.id)) {
+      if (error) bookmarkFocusRef.current = undefined;
+      return;
+    }
+    bookmarkFocusRef.current = undefined;
+    const next =
+      !error &&
+      pending.candidates
+        .map((id) =>
+          document
+            .getElementById(recordReturnCardId("library", id))
+            ?.querySelector<HTMLAnchorElement>("a[href]"),
+        )
+        .find(Boolean);
+    (next || resultsRef.current)?.focus({ preventScroll: true });
+  }, [saved.bookmarks, scope, error]);
+
   // Browsing everything reads best shelved by kind; a search or filter is one list.
   const shelves =
-    kind === "all" && !query.trim()
+    kind === "all" && !draft.trim() && scope === "all"
       ? (Object.keys(LIBRARY_KINDS) as LibraryKind[]).map((id) => ({
           id,
           entries: visible.filter((entry) => entry.kind === id),
@@ -128,6 +459,17 @@ export function LibraryPage({
               <GuardedLink to="/search" assets={[]} className="library-fulltext-link">
                 本文から検索 <span aria-hidden="true">↗</span>
               </GuardedLink>
+              <nav className="library-jump-links" aria-label="資料室内の移動">
+                <a href="#library-browser" onClick={quietFlush}>
+                  資料を探す <span aria-hidden="true">↓</span>
+                </a>
+                <a href="#my-library" onClick={quietFlush}>
+                  しおり・履歴
+                </a>
+                <a href="#inquiry" onClick={quietFlush}>
+                  問いから辿る
+                </a>
+              </nav>
             </div>
             <nav
               className="library-cast"
@@ -147,6 +489,7 @@ export function LibraryPage({
                   assets={[]}
                   className="library-cast-tile"
                   style={{ "--cast-tone": tone } as CSSProperties}
+                  beforeNavigate={quietFlush}
                 >
                   <span className="library-cast-art" aria-hidden="true">
                     {/* The first two files are on a phone's first screen; the
@@ -172,61 +515,215 @@ export function LibraryPage({
             </nav>
           </section>
           <LibraryHub saved={saved} ready={ready} />
-          <LibraryInquiry guide={guide} onGuideChange={onGuideChange} />
-          <section className="library-browser" aria-labelledby="library-browser-title">
+          <LibraryInquiry
+            guide={guide}
+            onGuideChange={(id) => {
+              void flushQuery()
+                .then(() => onGuideChange(id))
+                .catch(() => undefined);
+            }}
+          />
+          <section
+            className="library-browser"
+            id="library-browser"
+            aria-labelledby="library-browser-title"
+          >
             <div className="library-browser-heading">
               <h2 id="library-browser-title">資料を探す</h2>
               <p>{LIBRARY_ENTRIES.length}件の入口を、種類ごとに並べています。</p>
             </div>
-            <p className="library-search-note">
-              ここでは資料名・入口を検索できます。文章の中の言葉を探すには「本文から検索」を開いてください。
-            </p>
-            <label className="library-search-label" htmlFor="library-search">
-              資料名・人物名・キーワード
-            </label>
-            <div className="library-search">
-              <span aria-hidden="true">⌕</span>
-              <input
-                id="library-search"
-                type="search"
-                value={query}
-                maxLength={160}
-                placeholder="例：シエル、saga、CASE 2、ギャラリー"
-                onChange={(event) => setQuery(event.target.value)}
-              />
-            </div>
-            <p className="library-search-note">
-              ひらがな・カタカナ、英字の大文字・小文字、全角・半角に対応。複数の語はスペースで区切れます。
-            </p>
-            <div className="library-filter-row" role="group" aria-label="資料の種類">
-              <button type="button" aria-pressed={kind === "all"} onClick={() => setKind("all")}>
-                すべて
-              </button>
-              {Object.entries(LIBRARY_KINDS).map(([id, label]) => (
-                <button
-                  key={id}
-                  type="button"
-                  aria-pressed={kind === id}
-                  onClick={() => setKind(id as LibraryKind)}
-                >
-                  {label}
+            <form
+              className="library-browse-controls"
+              role="search"
+              action="/library#library-browser"
+              method="get"
+              aria-label="資料室の絞り込み"
+              onSubmit={(event) => {
+                event.preventDefault();
+                if (composingRef.current || performance.now() - compositionEndedRef.current < 50)
+                  return;
+                quietFlush();
+                resultsRef.current?.focus({ preventScroll: true });
+                resultsRef.current?.scrollIntoView({ block: "start" });
+              }}
+            >
+              <p className="library-search-note">
+                資料名や人物名から入口を探せます。本文の中の言葉は「本文から検索」へ。
+              </p>
+              <label className="library-search-label" htmlFor="library-search">
+                資料名・人物名・キーワード
+              </label>
+              <div className="library-query-row">
+                <div className="library-search">
+                  <span aria-hidden="true">⌕</span>
+                  <input
+                    ref={inputRef}
+                    id="library-search"
+                    name="q"
+                    type="search"
+                    value={draft}
+                    maxLength={LIBRARY_QUERY_LIMIT}
+                    aria-describedby="library-query-help"
+                    aria-controls="library-browse-results"
+                    placeholder="例：シエル、saga、CASE 2"
+                    autoComplete="off"
+                    enterKeyHint="search"
+                    onChange={(event) => setQuery(event.target.value)}
+                    onCompositionStart={() => {
+                      cancelQueryWrite();
+                      composingRef.current = true;
+                      setComposing(true);
+                    }}
+                    onCompositionEnd={(event) => {
+                      composingRef.current = false;
+                      compositionEndedRef.current = performance.now();
+                      setComposing(false);
+                      setQuery(event.currentTarget.value);
+                    }}
+                    onKeyDown={(event) => {
+                      if (
+                        event.key === "Enter" &&
+                        (composingRef.current ||
+                          event.nativeEvent.isComposing ||
+                          event.nativeEvent.keyCode === 229)
+                      )
+                        event.preventDefault();
+                    }}
+                  />
+                  {draft ? (
+                    <button
+                      className="library-query-clear"
+                      type="button"
+                      aria-label="資料の検索語を消す"
+                      onClick={() => {
+                        setQuery("");
+                        void writeBrowse({ ...selection(), q: "" }).catch(() => undefined);
+                        inputRef.current?.focus({ preventScroll: true });
+                      }}
+                    >
+                      ×
+                    </button>
+                  ) : null}
+                </div>
+                <button type="submit" className="library-browse-submit">
+                  絞り込む <span aria-hidden="true">↗</span>
                 </button>
-              ))}
-            </div>
+              </div>
+              {kind !== "all" ? <input type="hidden" name="kind" value={kind} /> : null}
+              {scope === "saved" ? <input type="hidden" name="scope" value="saved" /> : null}
+              {guide ? <input type="hidden" name="guide" value={guide} /> : null}
+              <p className="library-search-note" id="library-query-help">
+                ひらがな・カタカナ、全角・半角に対応。複数の語はスペースで区切れます。
+              </p>
+              <div className="library-scope-row" role="group" aria-label="探す資料の範囲">
+                <button
+                  type="button"
+                  aria-pressed={scope === "all"}
+                  onClick={() => changeScope("all")}
+                >
+                  すべての資料 <span>{allCount}</span>
+                </button>
+                <button
+                  type="button"
+                  aria-pressed={scope === "saved"}
+                  onClick={() => changeScope("saved")}
+                >
+                  しおりのみ{" "}
+                  <span
+                    aria-label={
+                      !savedKnown
+                        ? !ready
+                          ? "保存データを確認中"
+                          : "保存データを確認できません"
+                        : undefined
+                    }
+                  >
+                    {!savedKnown ? "—" : savedCount}
+                  </span>
+                </button>
+              </div>
+              <div className="library-filter-row" role="group" aria-label="資料の種類">
+                <button
+                  type="button"
+                  aria-pressed={kind === "all"}
+                  onClick={() => changeKind("all")}
+                >
+                  すべて <span>{savedUnavailable ? "—" : counts.all}</span>
+                </button>
+                {Object.entries(LIBRARY_KINDS).map(([id, label]) => (
+                  <button
+                    key={id}
+                    type="button"
+                    aria-pressed={kind === id}
+                    onClick={() => changeKind(id as LibraryKind)}
+                  >
+                    {label} <span>{savedUnavailable ? "—" : counts[id as LibraryKind]}</span>
+                  </button>
+                ))}
+              </div>
+              <div className="library-active-filters" aria-label="現在の絞り込み">
+                <p>
+                  {scope === "saved" ? "しおりに保存した資料" : "すべての資料"} /{" "}
+                  {kind === "all" ? "すべての種類" : LIBRARY_KINDS[kind]}
+                </p>
+                {draft.trim() ? (
+                  <span className="library-query-summary">「{draft.trim()}」</span>
+                ) : null}
+                {filtersActive ? (
+                  <button type="button" onClick={clearFilters}>
+                    条件をリセット <span aria-hidden="true">×</span>
+                  </button>
+                ) : (
+                  <span>条件は、このページのURLに保存されます。</span>
+                )}
+              </div>
+            </form>
             {error ? (
               <p className="library-error" role="status">
                 {error}
               </p>
             ) : null}
-            <div className="library-results-heading">
-              <p role="status">{`${visible.length}件の資料`}</p>
-              {query.trim() ? (
-                <Link to="/search" search={{ q: query.trim() }} className="library-fulltext-inline">
-                  「{query.trim()}」を本文から検索 <span aria-hidden="true">↗</span>
+            {browseError ? (
+              <p className="library-error" role="status">
+                {browseError}
+              </p>
+            ) : null}
+            <div
+              className="library-results-heading"
+              id="library-browse-results"
+              aria-busy={savedUnavailable && !ready}
+            >
+              <p ref={resultsRef} tabIndex={-1} role="status" aria-live="polite" aria-atomic="true">
+                {savedUnavailable
+                  ? !ready
+                    ? "しおりを確認しています…"
+                    : "しおりを確認できません"
+                  : `${visible.length}件の資料`}
+              </p>
+              {draft.trim() ? (
+                <Link
+                  to="/search"
+                  search={{ q: draft.trim() }}
+                  className="library-fulltext-inline"
+                  onClick={quietFlush}
+                >
+                  「{draft.trim()}」を本文から検索 <span aria-hidden="true">↗</span>
                 </Link>
               ) : null}
             </div>
-            {visible.length ? (
+            {savedUnavailable ? (
+              <div className="library-empty library-saved-state">
+                <h3>{!ready ? "保存データを確認しています" : "保存データを利用できません"}</h3>
+                <p>
+                  {!ready
+                    ? "このブラウザーのしおりを読み込んでいます。"
+                    : "保存の確認ができないため、しおりの検索結果は表示していません。すべての資料は引き続き探せます。"}
+                </p>
+                <button type="button" onClick={() => changeScope("all")}>
+                  すべての資料から探す
+                </button>
+              </div>
+            ) : visible.length ? (
               shelves.map((shelf) =>
                 shelf.entries.length ? (
                   <section
@@ -247,6 +744,8 @@ export function LibraryPage({
                           entry={entry}
                           bookmarked={saved.bookmarks.includes(entry.id)}
                           ready={ready}
+                          beforeOpen={beforeOpen}
+                          onBookmark={onBookmark}
                         />
                       ))}
                     </div>
@@ -256,14 +755,12 @@ export function LibraryPage({
             ) : (
               <div className="library-empty">
                 <h3>条件に合う資料が見つかりません</h3>
-                <p>短い名前や別の表記で検索するか、資料の種類を「すべて」に戻してください。</p>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setQuery("");
-                    setKind("all");
-                  }}
-                >
+                <p>
+                  {scope === "saved" && !saved.bookmarks.length
+                    ? "「すべての資料」に切り替え、資料カードや人物資料のメニューからしおりを保存してください。"
+                    : "短い名前や別の表記で検索するか、資料の種類・範囲を戻してください。"}
+                </p>
+                <button type="button" onClick={clearFilters}>
                   検索条件をクリア
                 </button>
               </div>

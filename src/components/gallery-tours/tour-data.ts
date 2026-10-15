@@ -1,4 +1,5 @@
 import { GALLERY_ARTWORKS, type GalleryArtwork } from "../gallery/gallery-data.ts";
+export { normalizeTourSearch } from "./tour-route-search.ts";
 
 export type GalleryTourStop = { artworkId: string; note: string };
 export type GalleryTour = {
@@ -219,17 +220,6 @@ export function getGalleryTour(id: unknown): GalleryTour | undefined {
 
 export function getTourArtwork(id: string): GalleryArtwork | undefined {
   return artworksById.get(id);
-}
-
-export function normalizeTourSearch(input: Record<string, unknown>): {
-  tour?: string;
-  work?: string;
-} {
-  const tour = getGalleryTour(input.tour);
-  if (!tour) return {};
-  return typeof input.work === "string" && tour.stops.some((stop) => stop.artworkId === input.work)
-    ? { tour: tour.id, work: input.work }
-    : { tour: tour.id };
 }
 
 export function getTourStopIndex(tour: GalleryTour, workId?: string): number {
