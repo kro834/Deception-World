@@ -410,6 +410,35 @@ test("a reading-room dialog blocks pending and new page captures, then ordinary 
   h.controller.dispose();
 });
 
+test("closing an untouched reading room by pointer protects the bookmark from restored page scroll", () => {
+  const h = setup(JSON.stringify(saved));
+  h.fire("wheel", { isTrusted: true });
+  h.paragraphs[0].rect = { top: 150, bottom: 650 };
+  h.dialogAttributes.set("data-dream-dialog-open", "true");
+  h.flush();
+  assert.equal(h.writes.length, 0, "the room blocks the page's pending capture");
+
+  // No wheel, keyboard or save action occurs in the room. Document capture
+  // sees its close button before the dialog releases the frozen page scroll.
+  h.fire("click", {
+    button: 0,
+    isTrusted: true,
+    target: { closest: (selector) => (selector === ".dream-reading-room" ? {} : null) },
+  });
+  h.dialogAttributes.delete("data-dream-dialog-open");
+  h.fire("scroll");
+  h.flush();
+  assert.equal(h.writes.length, 0, "restoring page scroll cannot reuse pre-room reading intent");
+  assert.deepEqual(h.states.at(-1).bookmark, saved.bookmark);
+
+  h.fire("wheel", { isTrusted: true });
+  h.fire("scroll");
+  h.flush();
+  assert.equal(h.writes.length, 1, "the next deliberate reading operation saves normally");
+  assert.deepEqual(h.states.at(-1).bookmark, { caseNo: "5", paragraph: 1 });
+  h.controller.dispose();
+});
+
 test("resume and other fragment jumps protect the stored target through intermediate scroll positions", () => {
   const h = setup(JSON.stringify(saved));
   h.fire("wheel", { isTrusted: true });

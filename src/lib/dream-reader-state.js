@@ -227,6 +227,12 @@ export function mountDreamReader(root, cases, onChange, environment = window) {
     queueCapture();
   };
   const onClick = (event) => {
+    // A pointer-only visit can close without wheel/key intent. Cancel the
+    // page's previous reading intent before the room restores its scroll.
+    if (modalOpen() && event.target.closest?.(".dream-reading-room")) {
+      pause();
+      return;
+    }
     if (
       event.defaultPrevented ||
       event.button !== 0 ||
