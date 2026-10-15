@@ -1,4 +1,12 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
 import { defaultParseSearch, Link } from "@tanstack/react-router";
 import { LibraryInquiry } from "./library-inquiry";
 import { GuardedLink, useLoadGate } from "@/components/load-gate";
@@ -138,6 +146,7 @@ export function LibraryPage({
   const inputRef = useRef<HTMLInputElement>(null);
   const resultsRef = useRef<HTMLParagraphElement>(null);
   const bookmarkFocusRef = useRef<{ id: string; candidates: string[] } | undefined>(undefined);
+  const bookmarkScrollCommitRef = useRef(false);
   const onBrowseChangeRef = useRef(onBrowseChange);
   const committedRef = useRef(libraryBrowseKey({ q: query, kind, scope }));
   const ownWritesRef = useRef(new Set<string>());
@@ -150,6 +159,23 @@ export function LibraryPage({
   const sourceKey = JSON.stringify([query, kind, scope, guide]);
   const sourceRef = useRef(sourceKey);
   const { saved, ready, error } = useLibraryStore();
+
+  useLayoutEffect(() => {
+    if (!bookmarkScrollCommitRef.current) return;
+    bookmarkScrollCommitRef.current = false;
+    if (!window.location.hash) return;
+    const scroller = document.scrollingElement;
+    if (!scroller) return;
+    const maxX = Math.max(0, scroller.scrollWidth - scroller.clientWidth);
+    const maxY = Math.max(0, scroller.scrollHeight - scroller.clientHeight);
+    const { scrollX: left, scrollY: top } = window;
+    // A same-position instant scroll clears WebKit's pending native fragment
+    // adjustment after the personal shelf changes height. Otherwise its next
+    // press can move a filter before click. Do this once after our own save,
+    // never during input or scroll, and do not clamp Safari rubber-band offsets.
+    if (left < 0 || top < 0 || left > maxX || top > maxY) return;
+    window.scrollTo({ left, top, behavior: "instant" });
+  });
 
   useEffect(() => {
     mountedRef.current = true;
@@ -341,6 +367,7 @@ export function LibraryPage({
     void writeBrowse({ ...selection(), scope: next }, false).catch(() => undefined);
   };
   const onBookmark = (id: string) => {
+    bookmarkScrollCommitRef.current = true;
     if (scope === "saved") {
       const index = visible.findIndex((entry) => entry.id === id);
       bookmarkFocusRef.current = {

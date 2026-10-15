@@ -115,6 +115,8 @@ function mount(initial = {}, savedState = {}) {
   const toggles = [];
   const departures = [];
   const focused = [];
+  const scrolls = [];
+  const scroller = { scrollWidth: 1200, clientWidth: 1024, scrollHeight: 6000, clientHeight: 1366 };
   const targets = new Map();
   const store = {
     ready: true,
@@ -130,6 +132,11 @@ function mount(initial = {}, savedState = {}) {
   let now = 1000;
   let writePromise;
   const window = {
+    scrollX: 0,
+    scrollY: 0,
+    scrollTo(options) {
+      scrolls.push(plain(options));
+    },
     location: {
       pathname: "/library",
       search: defaultStringifySearch(
@@ -162,7 +169,7 @@ function mount(initial = {}, savedState = {}) {
   runInNewContext(pageSource, {
     exports: exported,
     window,
-    document: { getElementById: (id) => targets.get(id) },
+    document: { getElementById: (id) => targets.get(id), scrollingElement: scroller },
     URLSearchParams,
     performance: { now: () => now },
     require(name) {
@@ -195,6 +202,20 @@ function mount(initial = {}, savedState = {}) {
             return (refs[index] ??= { current: fn }).current;
           },
           useEffect(fn, dependencies) {
+            const index = hook++;
+            const previous = effects[index];
+            if (
+              !dependencies ||
+              !previous ||
+              dependencies.some((item, at) => item !== previous.dependencies?.[at])
+            ) {
+              pendingEffects.push(() => {
+                previous?.cleanup?.();
+                effects[index] = { dependencies, cleanup: fn() };
+              });
+            }
+          },
+          useLayoutEffect(fn, dependencies) {
             const index = hook++;
             const previous = effects[index];
             if (
@@ -316,6 +337,8 @@ function mount(initial = {}, savedState = {}) {
     events,
     timers,
     focused,
+    scrolls,
+    scroller,
     target,
     tree: () => tree,
     time: (value) => {
@@ -626,6 +649,45 @@ test("saved loading and storage failures are never reported as a genuine zero-re
   }
   const empty = mount({ scope: "saved" });
   assert.ok(text(empty.tree()).includes("条件に合う資料が見つかりません"));
+});
+
+test("own bookmark commits clear a pending native fragment at the same viewport offset once", () => {
+  const h = mount();
+  h.window.location.hash = "#library-browser";
+  h.window.scrollY = 1710;
+  h.cards()[0].props.onBookmark("saga");
+  assert.equal(h.scrolls.length, 0, "never scroll in the input handler before the DOM commit");
+  h.store.saved = { ...h.store.saved, bookmarks: ["saga"] };
+  h.render();
+  assert.deepEqual(h.scrolls, [{ left: 0, top: 1710, behavior: "instant" }]);
+  assert.equal(h.window.scrollY, 1710);
+  assert.equal(h.window.location.hash, "#library-browser");
+  assert.equal(h.writes.length, 0);
+  assert.equal(h.focused.length, 0);
+  h.render();
+  assert.equal(h.scrolls.length, 1, "an unrelated render must not keep adjusting the viewport");
+  h.window.location.hash = "";
+  h.cards()[0].props.onBookmark("realm");
+  h.render();
+  assert.equal(h.scrolls.length, 1, "normal non-fragment browsing needs no adjustment");
+});
+
+test("bookmark commits do not clamp Safari overscroll or run for cold saved data", () => {
+  const h = mount({}, { saved: { version: 1, bookmarks: ["saga"], recent: [] } });
+  assert.equal(h.scrolls.length, 0, "cold hydration is not an own bookmark mutation");
+  h.window.location.hash = "#library-browser";
+  for (const [x, y] of [
+    [0, -1],
+    [-1, 100],
+    [0, 100000],
+    [100000, 100],
+  ]) {
+    h.window.scrollX = x;
+    h.window.scrollY = y;
+    h.cards()[0].props.onBookmark("saga");
+    h.render();
+  }
+  assert.equal(h.scrolls.length, 0, "out-of-range offsets stay under native browser control");
 });
 
 test("removing a saved result keeps focus on a remaining card or the results status", () => {
