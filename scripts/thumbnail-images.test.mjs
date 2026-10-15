@@ -71,8 +71,20 @@ test("episode and manager cards and the Zeus button use the right-sized sets", (
   assert.match(episode.sizes, /^\(max-width: 560px\) calc\(100vw - 84px\),/);
   assert.deepEqual(episodeThumbnail("/unknown.jpeg"), {});
   // Height-bound artwork asks for the slot height times its aspect ratio.
-  assert.match(managerThumbnail("zeus").sizes, /\(max-width: 560px\) max\(40vw, 273px\)/);
-  assert.match(managerThumbnail("reemu").sizes, /\(max-width: 560px\) max\(40vw, 120px\)/);
+  // Re-pinned 2026-10-15: the STAGE grid's slot is 297 px tall from 1366 px (not 179).
+  assert.match(
+    managerThumbnail("zeus").sizes,
+    /\(max-width: 860px\) calc\(60vw - 11px\), .*, 384px$/,
+  );
+  assert.match(
+    managerThumbnail("reemu").sizes,
+    /\(max-width: 860px\) calc\(28vw - 5px\), .*, 179px$/,
+  );
+  // Zeus's landscape card covers 383 px at 1366+: a 960 px step from its 1424 px source.
+  assert.match(
+    managerThumbnail("zeus").srcSet,
+    /\/manager-zeus-thumb\.webp 640w, \/manager-zeus-thumb-960\.webp 960w$/,
+  );
 
   const zeus = read("src/components/zeus-button.tsx");
   assert.match(zeus, /src="\/zeus-button-360\.webp"\s*srcSet=\{ZEUS_BUTTON_SRCSET\}\s*sizes=\{ZEUS_BUTTON_SIZES\}/);

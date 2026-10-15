@@ -157,7 +157,8 @@ test("シエル's thumbnails: the supplied illustration, cropped and right-sized
   assert.ok(statSync(publicFile(CIEL_THUMBNAIL.source)).size > 0);
   const { srcSet, sizes } = cielThumbnail();
   assert.equal(srcSet, "/ciel-thumb-20260924-480.webp 480w, /ciel-thumb-20260924.webp 640w");
-  assert.match(sizes, /^\(max-width: 560px\) max\(40vw, 170px\)/);
+  // Re-pinned 2026-10-15: the managers' card slot sizes were re-measured for the STAGE grid.
+  assert.match(sizes, /^\(max-width: 359px\) calc\(65\.7vw - 49px\)/);
 });
 
 test("RE DIVE…? is offered at the end still only, outside the SKIP / もう一度 spot", async () => {

@@ -111,12 +111,17 @@ export function dossierHeroSizes(aspect: number) {
 }
 
 // The Rexonance pickup card on the Saga and シエル files loads eagerly, and
-// its record opens from the same file: 382 KB as supplied, for a card of
-// 282-569 px (the record's figure is never wider). The card, the record and
-// the gate's warm-up ask with the special site's candidates and the card's
-// sizes, so each device fetches one file.
+// its record opens from the same file: 382 KB as supplied. The card, the
+// record and the gate's warm-up ask with the special site's candidates and
+// the card's sizes, so each device fetches one file. The STAGE card's figure
+// is min(stage width, 0.8 x stage height) (styles-stage-dossier.css): the
+// screen's width on phones, up to 699 px on portrait tablets (0.8 x 64svh),
+// then min(46vw, 0.8 x (100svh - header)), 659 px at 1440 x 900. The old
+// 46vw/570 px cap had a 2x iPad portrait take the 960 px step for a 699 px
+// figure.
 const FORM_PICKUP_IMAGES = new Set(["/rider-rexonance-saga-pickup-20260922.webp"]);
-export const FORM_PICKUP_SIZES = "(max-width: 760px) calc(100vw - 36px), min(46vw, 570px)";
+export const FORM_PICKUP_SIZES =
+  "(max-width: 760px) 100vw, (orientation: portrait) min(100vw, 720px), min(46vw, 820px, 80vh)";
 export function formPickupImage(source: string): { srcSet?: string; sizes?: string } {
   if (!FORM_PICKUP_IMAGES.has(source)) return {};
   return { srcSet: rexonanceImage(source).srcSet, sizes: FORM_PICKUP_SIZES };

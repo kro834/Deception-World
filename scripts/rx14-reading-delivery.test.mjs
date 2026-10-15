@@ -6,7 +6,13 @@ import sharp from "sharp";
 import { dossierImage, dossierImageSources } from "../src/lib/dossier-images.ts";
 import { recordImage } from "../src/lib/record-images.ts";
 import { FORM_RECORD_IMAGES } from "../src/lib/record-form-images.ts";
-import { LAUNCHER_TILE_IMAGES, launcherTile, posterImage } from "../src/lib/thumbnail-images.ts";
+import {
+  EPISODE_THUMBNAILS,
+  LAUNCHER_TILE_IMAGES,
+  briefStageArt,
+  launcherTile,
+  posterImage,
+} from "../src/lib/thumbnail-images.ts";
 
 const asset = (path) => fileURLToPath(new URL(`../public${path}`, import.meta.url));
 const source = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
@@ -109,4 +115,30 @@ test("World reading-stage motion is finite and paused by all rendering guards", 
   assert.match(css, /prefers-reduced-motion: no-preference/);
   assert.match(css, /animation: sw-brief-art-in 360ms ease-out both/);
   assert.doesNotMatch(css, /infinite|backdrop-filter/);
+});
+
+test("the World brief's art stage offers every step of its stills", async () => {
+  // The stage is min(65vh, 680px) tall and crops with cover: EP2's landscape
+  // still is 780-907 px wide there, more than its 900 px step holds at DPR 2.
+  const component = source("src/components/world/world-brief-art.tsx");
+  const stills = [...component.matchAll(/briefStageArt\("([^"]+)", (\d+) \/ (\d+)\)/g)];
+  assert.deepEqual(
+    stills.map(([, path]) => path),
+    [
+      "/episode-01-hide-and-seek.jpeg",
+      "/episode-02-legends.jpeg",
+      "/episode-03-deception-world.jpeg",
+    ],
+  );
+  assert.equal(component.match(/\{\.\.\.ART\[art\.(?:current|previous)\]\}/g)?.length, 2);
+  for (const [, path, width, height] of stills) {
+    const art = briefStageArt(path, width / height);
+    const set = EPISODE_THUMBNAILS[path];
+    assert.equal(art.src, set.variants[1].path, "src stays the 900 px step");
+    assert.equal(art.srcSet.split(", ").length, set.variants.length);
+    assert.match(art.sizes, /calc\(min\(65vh, 680px\) \* [\d.]+\)/);
+    const full = await sharp(asset(set.variants.at(-1).path)).metadata();
+    assert.equal(full.width, set.variants.at(-1).width);
+    assert.ok(Math.abs(full.width / full.height - width / height) < 0.002, path);
+  }
 });
