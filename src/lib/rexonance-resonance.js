@@ -2022,7 +2022,6 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         const nextSwarm = await idleTask(() =>
           active()
             ? createAssemblyNanites({
-                plan: nextPlan,
                 nano: nextNano,
                 size: config.size,
                 core: config.core,

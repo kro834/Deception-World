@@ -1348,3 +1348,145 @@ test("the gold forms by nanites right after each plate lands; the driver is on f
   // Done before the seal into the finished figure.
   assert.ok(gold.lock[gold.count - 1] < ASSEMBLY_BEATS.seal[1]);
 });
+
+/* ---------------- the nanite swarm (owner, 2026-10-16: 超大幅な改善) ---------------- */
+
+test("touch with the nanite kit keeps its 64 art draws and at most 16 nanite sprites a frame", async () => {
+  const { REXONANCE_NANITES, REXONANCE_NANITE_DIR } = await import("../src/lib/rexonance-nanites.ts");
+  // Both with the kit and without it (two-tone rect chips, traced frames).
+  for (const nanites of [REXONANCE_NANITES, undefined]) {
+    const t = environment({ coarse: true });
+    const dispose = mountRexonanceAssembly(t.runway, { ...engineConfig, nanites }, t.env);
+    t.observers[1].callback([{ isIntersecting: true }]);
+    await until(t.prepared, "warm preparation completed");
+    t.observers[0].callback([{ isIntersecting: true }]);
+    await until(() => t.runway.dataset.rznState === "live" && t.frames.size > 0, "scene live");
+    // Unlike the older touch check above, let the canvas be measured (its
+    // ResizeObserver notice is a later task), so these frames really draw.
+    await new Promise((resolve) => setTimeout(resolve, 5));
+    if (nanites) {
+      assert.ok(t.decodedSources.some((src) => src.startsWith(REXONANCE_NANITE_DIR)), "kit fetched");
+      assert.ok(!t.decodedSources.some((src) => /comets/.test(src)), "touch fetches no comets");
+    }
+    let kitDraws = 0;
+    let drawn = 0;
+    for (const progress of [0.3, 0.35, 0.5, 0.7, 0.8, 0.84]) {
+      t.calls.length = 0;
+      t.drawCalls.length = 0;
+      t.scrollTo(progress);
+      const art = t.calls.filter((c) => c[0] === "drawImage" && c[1] === 9 && c[2] === 1);
+      assert.ok(art.length <= ASSEMBLY_TOUCH_ART_BUDGET + 1, `${progress}: ${art.length}`); // plus undersuit scan
+      const kit = t.drawCalls.filter(
+        (call) => call.target === 1 && String(call.source).startsWith(REXONANCE_NANITE_DIR),
+      );
+      assert.ok(kit.length <= 16, `${progress}: ${kit.length} nanite sprites`);
+      kitDraws += kit.length;
+      drawn += t.drawCalls.filter((call) => call.target === 1).length;
+    }
+    assert.ok(t.canvas.width > 0 && drawn > 0, "the frames were drawn");
+    if (nanites) assert.ok(kitDraws > 0, "the chips nearest lock are drawn from the kit");
+    else assert.equal(kitDraws, 0);
+    dispose();
+    assert.equal(t.frames.size, 0);
+  }
+});
+
+test("the swarm's draw passes allocate nothing", () => {
+  const source = read("src/lib/rexonance-assembly-nanites.js");
+  const from = source.indexOf("/* -- draw passes: allocation-free from here -- */");
+  const to = source.indexOf("/* -- end of the draw passes -- */");
+  assert.ok(from > 0 && to > from + 20000, `${from} ${to}`);
+  const passes = source.slice(from, to);
+  assert.doesNotMatch(
+    passes,
+    /\bnew |\.map\(|\.filter\(|\.slice\(|\.concat\(|\[\]|Array\.from|\.push\(|=> \{\s*return \{/,
+  );
+  // No per-sprite transform: only plates (the jig) and rings set one.
+  assert.equal(passes.match(/\.setTransform\(/g)?.length, 3);
+});
+
+test("the nanite stage plan: paint order, the shared cells, and timings before .9", async () => {
+  const { planAssemblyNanites } = await import("../src/lib/rexonance-assembly-nanites.js");
+  const { REXONANCE_NANITES } = await import("../src/lib/rexonance-nanites.ts");
+  const { planAssemblyGold, ASSEMBLY_NANITES } = await import("../src/lib/rexonance-resonance.js");
+  const { REXONANCE_SUIT_GOLD_CELL, REXONANCE_SUIT_GOLD_CELLS } =
+    await import("../src/lib/rexonance-suit-gold.ts");
+  const { REXONANCE_SUIT_DRIVER } = await import("../src/lib/rexonance-calls.ts");
+  const pieces = REXONANCE_SUIT_PIECES.map((piece) => ({
+    ...piece,
+    preset: REXONANCE_SUIT_DRIVER.includes(piece.id),
+  }));
+  const options = {
+    size: REXONANCE_SUIT_SIZE,
+    pieces,
+    core: REXONANCE_SUIT_MARKS.core,
+    visor: REXONANCE_SUIT_MARKS.visor,
+    maskTile: REXONANCE_SUIT_TILE,
+    tile: 12,
+  };
+  const plan = planAssembly(options);
+  const before = JSON.stringify(plan.tiles.map(({ m, t0, t1 }) => [m, t0, t1]));
+  const gold = planAssemblyGold({
+    pieces,
+    gold: { atlas: "", cell: REXONANCE_SUIT_GOLD_CELL, cells: REXONANCE_SUIT_GOLD_CELLS },
+    landed: new Map(),
+    tiles: undefined,
+  }) ?? null;
+  void gold;
+  const goldPlan = (await import("../src/lib/rexonance-resonance.js")).planAssemblyGold({
+    pieces,
+    gold: { atlas: "", cell: REXONANCE_SUIT_GOLD_CELL, cells: REXONANCE_SUIT_GOLD_CELLS },
+    landed: (() => {
+      const landed = new Map();
+      for (const tile of plan.tiles)
+        if (tile.pieceId) landed.set(tile.pieceId, Math.max(landed.get(tile.pieceId) ?? 0, tile.t1));
+      return landed;
+    })(),
+  });
+  const nano = planAssemblyNanites({
+    plan,
+    pieces,
+    size: REXONANCE_SUIT_SIZE,
+    core: REXONANCE_SUIT_MARKS.core,
+    visor: REXONANCE_SUIT_MARKS.visor,
+    gold: goldPlan,
+    seams: REXONANCE_NANITES.seams,
+    goldBoxes: REXONANCE_NANITES.goldBoxes,
+  });
+  // The tile schedule is untouched (index hashes only).
+  assert.equal(JSON.stringify(plan.tiles.map(({ m, t0, t1 }) => [m, t0, t1])), before);
+  const n = plan.tiles.length;
+  assert.equal(nano.count, n);
+  for (let k = 1; k < n; k += 1) assert.ok(nano.paintAt[k] >= nano.paintAt[k - 1]);
+  for (let i = 0; i < n; i += 1) {
+    assert.equal(nano.paintOrder[nano.paintRank[i]], i);
+    assert.ok(nano.tp[i] > plan.tiles[i].t1, "paint follows the landing");
+    const partner = nano.under[i];
+    if (partner >= 0) {
+      assert.equal(plan.tiles[partner].sx, plan.tiles[i].sx);
+      assert.equal(plan.tiles[partner].sy, plan.tiles[i].sy);
+      assert.notEqual(plan.tiles[partner].src, plan.tiles[i].src);
+    }
+    const parent = nano.parent[i];
+    if (parent >= 0) {
+      assert.ok(parent < i, "the lattice parent locked earlier");
+      assert.equal(nano.pieceOf[parent], nano.pieceOf[i]);
+    }
+    assert.ok(nano.birth[i] <= plan.tiles[i].m + 1e-9 && nano.birth[i] >= 0.07);
+  }
+  // Every plate: its seam, gold box and clamps release before .9 (tail
+  // ≤ .878, helmet ≤ .892), the driver never staged.
+  const driver = new Set(REXONANCE_SUIT_DRIVER);
+  assert.ok(nano.pieces.length >= 50);
+  for (const piece of nano.pieces) {
+    assert.ok(!driver.has(piece.id), piece.id);
+    assert.ok(piece.loopCount >= 1, `${piece.id} has a seam`);
+    assert.ok(piece.contact > piece.to && piece.contact <= piece.to + ASSEMBLY_NANITES.seat + 1e-9);
+    assert.ok(piece.g0 >= piece.contact, `${piece.id}: the gold pours after contact`);
+    assert.ok(piece.releaseEnd < (piece.helm ? 0.8921 : 0.8781), `${piece.id}: ${piece.releaseEnd}`);
+    if (piece.helm) assert.equal(piece.lift, 0, "the helmet forms in place");
+  }
+  // The DEUS！ accents and the crest.
+  assert.equal(nano.pieces.filter((piece) => piece.accent).length, 4);
+  assert.equal(nano.pieces.find((piece) => piece.crest)?.id, "helmet-crest");
+});

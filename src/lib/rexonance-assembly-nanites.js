@@ -61,6 +61,8 @@ export const ASSEMBLY_COMET_BUDGET = 400;
 export const ASSEMBLY_TOUCH_HERO_BUDGET = 16;
 
 const BIRTH = 0.012;
+// The crown ring's height above the visor (figure px): over the head.
+const CROWN_LIFT = 96;
 const RING_COUNT = 8;
 const FREE_CHIPS = 240;
 const FREE_CHIPS_TOUCH = 96;
@@ -791,7 +793,6 @@ const SHADE_CSS = ["rgb(22 58 74)", "rgb(74 34 62)", "rgb(58 64 76)"];
  * the view (`view(scale, x, y)` in device px).
  */
 export function createAssemblyNanites({
-  plan,
   nano,
   size,
   core,
@@ -938,8 +939,6 @@ export function createAssemblyNanites({
   const batchCap = Math.max(4096, n + goldCount + 1024);
   const batch = new Float32Array(batchCap * 4);
   let batchN = 0;
-  const batch2 = new Float32Array(batchCap * 4);
-  let batch2N = 0;
   const links = new Float32Array(3 * n * 4);
   const linkCounts = new Int32Array(3);
 
@@ -955,6 +954,9 @@ export function createAssemblyNanites({
   let sprites_ = 0;
   let fxReserve = 160;
   let cometsDrawn = 0;
+  // Each pass's share of the comet budget: the far band (behind the body)
+  // takes little, the near bands and the flights the rest.
+  let cometLimit = 0;
   let heroes = 0;
   let conduitDraws = 0;
   let nanitesDrawn = 0;
@@ -1042,7 +1044,7 @@ export function createAssemblyNanites({
         const ang = TH0[i] + (3 * Math.PI * (q - N.crown[0])) / 0.05;
         const rc = 60 + 30 * HELMD[i];
         x += (visorX + rc * Math.cos(ang) - x) * beta;
-        y += (visorY - 20 + 0.35 * rc * Math.sin(ang) - y) * beta;
+        y += (visorY - CROWN_LIFT + 0.35 * rc * Math.sin(ang) - y) * beta;
         z += (Math.sin(ang) - z) * beta;
         kind = 3;
       }
@@ -1089,7 +1091,7 @@ export function createAssemblyNanites({
       const ang = TH0[i] + (3 * Math.PI * (t0 - N.crown[0])) / 0.05;
       const rc = 60 + 30 * HELMD[i];
       const px0 = visorX + rc * Math.cos(ang) - hx;
-      const py0 = visorY - 20 + 0.35 * rc * Math.sin(ang) - hy;
+      const py0 = visorY - CROWN_LIFT + 0.35 * rc * Math.sin(ang) - hy;
       const w = u / dive;
       const turn = (RDIR[0] * 1.5 * Math.PI * w);
       const c = Math.cos(turn);
@@ -1429,7 +1431,7 @@ export function createAssemblyNanites({
   };
   // A comet (N7): the pose 3 steps back gives the streak, pre-rotated.
   const comet = (ctx, slot, i) => {
-    if (cometsDrawn >= ASSEMBLY_COMET_BUDGET) return;
+    if (cometsDrawn >= cometLimit) return;
     const back = Q - 3 * DQ;
     if (i < n) poseTile(i, back, SC);
     else poseFree(i - n, back, SC);
@@ -1446,8 +1448,11 @@ export function createAssemblyNanites({
     kk = kk < 0.6 ? 0.6 : kk > 2.5 ? 2.5 : kk;
     const draw = 32 * kk;
     const row = COMET_ROW[TN[slot]] + long;
-    ctx.globalAlpha = 0.5 * A[slot];
+    // Added light: the sheet's tails are faint, so a flick glows into streaks.
+    ctx.globalCompositeOperation = "lighter";
+    ctx.globalAlpha = Math.min(1, 0.85 * A[slot]);
     ctx.drawImage(cometSheet, 32 * a, 32 * row, 32, 32, X[slot] - draw / 2, Y[slot] - draw / 2, draw, draw);
+    ctx.globalCompositeOperation = "source-over";
     cometsDrawn += 1;
   };
 
@@ -1616,8 +1621,14 @@ export function createAssemblyNanites({
   };
 
   /* 1–3: the cocoon behind the body, then under the plates. */
-  const backPass = (ctx) => band(ctx, backList, nBack, false, true);
-  const midPass = (ctx) => band(ctx, midList, nMid, false, false);
+  const backPass = (ctx) => {
+    cometLimit = 0.15 * ASSEMBLY_COMET_BUDGET;
+    band(ctx, backList, nBack, false, true);
+  };
+  const midPass = (ctx) => {
+    cometLimit = cometsDrawn + 0.3 * ASSEMBLY_COMET_BUDGET;
+    band(ctx, midList, nMid, false, false);
+  };
 
   /* 5: seated plates still in metal, then the lacquer front (A6). */
   const seatedPass = (ctx, painted) => {
@@ -2066,6 +2077,7 @@ export function createAssemblyNanites({
   const flightPass = (ctx) => {
     const q = Q;
     const comets = cometSheet && !CALM && DQ > 0;
+    cometLimit = cometsDrawn + 0.25 * ASSEMBLY_COMET_BUDGET;
     let arts = 0;
     for (let c = 0; c < nFlight; c += 1) {
       const i = flightList[c];
@@ -2431,7 +2443,10 @@ export function createAssemblyNanites({
   };
 
   /* 17–18: the cocoon in front, then the free chips imploding (N12). */
-  const frontPass = (ctx) => band(ctx, frontList, nFront, true, false);
+  const frontPass = (ctx) => {
+    cometLimit = ASSEMBLY_COMET_BUDGET;
+    band(ctx, frontList, nFront, true, false);
+  };
   const freePass = (ctx) => {
     const rich = cells && !coarse;
     for (let c = 0; c < nImplode; c += 1) {
