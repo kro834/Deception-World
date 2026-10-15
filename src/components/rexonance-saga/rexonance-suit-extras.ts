@@ -1168,7 +1168,7 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
     flight.setTransform(1, 0, 0, 1, ox, oy);
     transformed = false;
   };
-  const useJig = (p: number) => {
+  const applyJig = (p: number) => {
     const o = p * 6;
     flight.setTransform(jig[o], jig[o + 1], jig[o + 2], jig[o + 3], jig[o + 4], jig[o + 5]);
     transformed = true;
@@ -1992,7 +1992,7 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
     const tiles = plate.tiles;
     const staged = jigged[p] === 1;
     // The staged plate: lattice, walls and the landed metal, under its jig.
-    useJig(p);
+    applyJig(p);
     if (
       lattice &&
       staged &&
@@ -2132,7 +2132,7 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
     }
     if (!fadeCount) return;
     // The metal tiles fading in, and the recoil's pop, on the staged plate.
-    useJig(p);
+    applyJig(p);
     for (let k = 0; k < fadeCount; k += 1) {
       if (draws >= BUDGET) break;
       const i = fades[k];
@@ -2181,7 +2181,7 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
     if (L.kind[p] >= 0 && L.kind[p] !== 3 && (t < F + SW.overshoot || (L.kind[p] === 2 && t < F + SW.sway))) {
       const lambda = lambdaAt(p, t);
       setJig(p, lambda, TOUCH ? 0 : hingeAt(p, t, lambda), TOUCH ? 0 : swayAt(p, t));
-      useJig(p);
+      applyJig(p);
     }
     const paintEnd = F + SW.paint[0] + (L.kind[p] === 3 ? SW.paint[2] : SW.paint[1]);
     flight.globalAlpha = 1;
@@ -2250,7 +2250,7 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
     if (moving) {
       const lambda = lambdaAt(p, t);
       setJig(p, lambda, TOUCH ? 0 : hingeAt(p, t, lambda), TOUCH ? 0 : swayAt(p, t));
-      useJig(p);
+      applyJig(p);
     }
     drawConduit(p, t, false);
     if (moving) base();
