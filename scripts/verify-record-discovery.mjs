@@ -12,6 +12,10 @@ const browser = await (engine === "webkit"
   ? webkit.launch()
   : chromium.launch({ channel: "chrome" }));
 const report = [];
+const prepareContext = (context) => {
+  context.setDefaultTimeout(20_000);
+  context.setDefaultNavigationTimeout(45_000);
+};
 const ready = (page) =>
   page.waitForFunction(() => {
     const root = document.documentElement;
@@ -29,6 +33,9 @@ const settled = async (page) => {
   // interactive readiness signal before exercising its hydrated draft state.
   if (await page.locator(".library-page").count()) {
     await page.locator(".library-card button:not([disabled])").first().waitFor();
+  }
+  if (new URL(page.url()).pathname === "/world") {
+    await page.waitForFunction(() => document.documentElement.dataset.worldPageVisible === "true");
   }
 };
 const shot = async (page, name) => {
@@ -51,6 +58,7 @@ try {
     { width: 1024, height: 1366 },
   ]) {
     const context = await browser.newContext({ viewport, hasTouch: true });
+    prepareContext(context);
     const page = await context.newPage();
     const errors = [];
     page.on("pageerror", (error) => errors.push(error.message));
@@ -153,19 +161,22 @@ try {
     // TanStack protects JSON-looking string queries with quotes in the URL.
     // The arrival observer must parse those exactly as the router does.
     if (viewport.width === 390) {
-      await page.goto(`${base}/library?q=%222%22&kind=chapter#library-browser`);
-      await settled(page);
-      assert.equal(await input.inputValue(), "2");
-      const numeric = page.locator(".library-card").first();
-      const numericId = await numeric.getAttribute("id");
-      await numeric.locator("h3 a").click();
-      await page.waitForURL("**/dream-chapter**");
-      await settled(page);
-      await page.locator(".record-return-navigation a").click();
-      await page.waitForURL("**/library?**");
-      await settled(page);
-      await page.waitForFunction((id) => document.activeElement?.id === id, numericId);
-      assert.equal(await input.inputValue(), "2", "JSON-looking query roundtrip");
+      for (const rawQuery of ["%222%22", "2"]) {
+        await page.goto(`${base}/library?q=${rawQuery}&kind=chapter#library-browser`);
+        await settled(page);
+        assert.equal(await input.inputValue(), "2");
+        const numeric = page.locator(".library-card").first();
+        const numericId = await numeric.getAttribute("id");
+        await numeric.locator("h3 a").click();
+        await page.waitForURL("**/dream-chapter**");
+        await settled(page);
+        if (rawQuery === "2") await page.goBack();
+        else await page.locator(".record-return-navigation a").click();
+        await page.waitForURL("**/library?**");
+        await settled(page);
+        await page.waitForFunction((id) => document.activeElement?.id === id, numericId);
+        assert.equal(await input.inputValue(), "2", "JSON-looking query roundtrip");
+      }
       await page.goto(`${base}/search?q=${encodeURIComponent("ゼウス")}&category=people`);
       await settled(page);
     }
@@ -178,7 +189,8 @@ try {
     await page.waitForFunction(() =>
       document.querySelector('.side-panel[data-open="true"]')?.contains(document.activeElement),
     );
-    await page.keyboard.press("Tab");
+    // macOS WebKit uses Option-Tab to include native buttons in its tab order.
+    await page.keyboard.press(engine === "webkit" ? "Alt+Tab" : "Tab");
     assert.equal(
       await page.evaluate(() => document.activeElement?.classList.contains("side-panel-close")),
       true,
@@ -216,6 +228,7 @@ try {
     { width: 1440, height: 900 },
   ]) {
     const context = await browser.newContext({ viewport });
+    prepareContext(context);
     const page = await context.newPage();
     for (const path of [
       "/library?q=ゼウス&kind=person#library-browser",
