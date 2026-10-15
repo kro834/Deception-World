@@ -218,6 +218,7 @@ function setup(value = null, denied = false) {
   let timerId = 0;
   const writes = [];
   const attributes = new Map();
+  const dialogAttributes = new Map();
   const fold = { open: true, dataset: { caseNo: "5" } };
   const paragraphs = [1, 2, 3, 4, 5, 6].map((no) => ({
     id: `dream-case-5-paragraph-${no}`,
@@ -231,6 +232,11 @@ function setup(value = null, denied = false) {
   }));
   const doc = {
     hidden: false,
+    documentElement: {
+      getAttribute: (name) => dialogAttributes.get(name) ?? null,
+      setAttribute: (name, value) => dialogAttributes.set(name, value),
+      removeAttribute: (name) => dialogAttributes.delete(name),
+    },
     querySelector: () => ({ getBoundingClientRect: () => ({ bottom: 120 }) }),
     getElementById: (id) => paragraphs.find((p) => p.id === id),
     addEventListener: (name, listener) => docListeners.set(name, listener),
@@ -285,6 +291,7 @@ function setup(value = null, denied = false) {
     fold,
     paragraphs,
     attributes,
+    dialogAttributes,
     controller,
     fire,
     flush,
@@ -371,6 +378,35 @@ test("a deliberate settled scroll saves only an actually visible open paragraph 
   h.fire("scroll");
   h.flush();
   assert.equal(h.writes.length, 1, "closed paragraphs cannot become the reading position");
+  h.controller.dispose();
+});
+
+test("a reading-room dialog blocks pending and new page captures, then ordinary reading resumes", () => {
+  const h = setup(JSON.stringify(saved));
+  h.fire("wheel", { isTrusted: true });
+  assert.equal(h.timers.size, 1, "page scroll schedules a capture before opening the room");
+  h.paragraphs[0].rect = { top: 150, bottom: 650 };
+  h.dialogAttributes.set("data-dream-dialog-open", "true");
+  h.flush();
+  assert.equal(h.writes.length, 0, "a pending capture must recheck the dialog state");
+  assert.deepEqual(h.states.at(-1).bookmark, saved.bookmark);
+
+  h.fire("wheel", { isTrusted: true });
+  h.fire("keydown", { key: "PageDown", isTrusted: true });
+  h.fire("scroll");
+  h.flush();
+  assert.equal(h.writes.length, 0, "wheel and key events inside the room cannot save page text");
+  assert.equal(h.timers.size, 0);
+
+  h.dialogAttributes.delete("data-dream-dialog-open");
+  h.fire("scroll");
+  h.flush();
+  assert.equal(h.writes.length, 0, "closing the room does not itself count as reading intent");
+  h.fire("wheel", { isTrusted: true });
+  h.fire("scroll");
+  h.flush();
+  assert.deepEqual(h.states.at(-1).bookmark, { caseNo: "5", paragraph: 1 });
+  assert.equal(h.writes.length, 1);
   h.controller.dispose();
 });
 

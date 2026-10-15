@@ -1,0 +1,478 @@
+/* The programme desk joins the existing Taisho palette. Text and tickets stay
+   in ordinary document flow so native hash navigation retains its geometry. */
+.dream-page.dream-page .dream-programme-desk {
+  position: relative;
+  isolation: isolate;
+  width: min(1120px, calc(100% - 40px));
+  margin: clamp(44px, 6vw, 76px) auto 0;
+  padding: clamp(18px, 2.8vw, 32px);
+  border: 1px solid var(--ts-hair);
+  color: var(--ts-kinari);
+  background:
+    linear-gradient(120deg, rgb(25 47 96 / 22%), transparent 46%),
+    linear-gradient(180deg, #241629, #130d1b);
+  box-shadow: 0 18px 48px rgb(0 0 0 / 22%);
+}
+
+.dream-page.dream-page .dream-programme-desk::before {
+  content: "";
+  position: absolute;
+  inset: 7px;
+  z-index: -1;
+  border: 1px solid var(--ts-hair-soft);
+  pointer-events: none;
+}
+
+.dream-page.dream-page .dream-programme-heading {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  margin: 0 0 22px;
+  padding-bottom: 17px;
+  border-bottom: 3px double var(--ts-hair);
+}
+
+.dream-page.dream-page .dream-programme-heading > p {
+  flex-basis: 100%;
+  margin: 0;
+  color: var(--ts-kin-light);
+  font-family: var(--ts-latin);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+}
+
+.dream-page.dream-page .dream-programme-heading h2 {
+  margin: 0;
+  color: var(--ts-kin-hi);
+  font-family: var(--ts-display);
+  font-size: clamp(24px, 3.1vw, 36px);
+  font-weight: 800;
+  letter-spacing: 0.13em;
+}
+
+.dream-page.dream-page .dream-programme-heading > span {
+  color: var(--ts-zoge);
+  font-family: var(--ts-text);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.dream-page.dream-page .dream-programme-routes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(10px, 1.6vw, 18px);
+}
+
+.dream-page.dream-page .dream-programme-ticket {
+  --ticket-accent: var(--ts-shu-text);
+  position: relative;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-width: 0;
+  min-height: 174px;
+  padding: 16px 18px 13px;
+  border: 1px solid var(--ts-hair);
+  color: var(--ts-kinari);
+  background:
+    linear-gradient(var(--ticket-accent) 0 0) top left / 44px 3px no-repeat,
+    linear-gradient(138deg, rgb(255 255 255 / 5%), transparent 42%),
+    #201624;
+  text-decoration: none;
+}
+
+.dream-page.dream-page .dream-programme-ticket:nth-child(2) {
+  --ticket-accent: var(--ts-kin-light);
+  background:
+    linear-gradient(var(--ticket-accent) 0 0) top left / 44px 3px no-repeat,
+    linear-gradient(138deg, rgb(255 255 255 / 5%), transparent 42%),
+    #27202a;
+}
+
+.dream-page.dream-page .dream-programme-ticket:nth-child(3) {
+  --ticket-accent: var(--ts-fuji);
+  background:
+    linear-gradient(var(--ticket-accent) 0 0) top left / 44px 3px no-repeat,
+    linear-gradient(138deg, rgb(255 255 255 / 5%), transparent 42%),
+    #1b2031;
+}
+
+.dream-page.dream-page .dream-programme-ticket::after {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  border: 1px solid rgb(200 164 92 / 18%);
+  pointer-events: none;
+}
+
+.dream-page.dream-page .dream-programme-ticket-head,
+.dream-page.dream-page .dream-programme-ticket-foot {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.dream-page.dream-page .dream-programme-ticket-head {
+  color: var(--ts-zoge);
+  font-family: var(--ts-latin);
+  font-size: 11px;
+  letter-spacing: 0.15em;
+}
+
+.dream-page.dream-page .dream-programme-ticket-head small:first-child {
+  color: var(--ticket-accent);
+  font-size: 16px;
+}
+
+.dream-page.dream-page .dream-programme-ticket-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-block: 16px 20px;
+}
+
+.dream-page.dream-page .dream-programme-ticket-main > span {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--ticket-accent);
+  border-radius: 50%;
+  color: var(--ticket-accent);
+  font-family: var(--ts-display);
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.dream-page.dream-page .dream-programme-ticket-main strong {
+  min-width: 0;
+  font-family: var(--ts-display);
+  font-size: clamp(18px, 2vw, 23px);
+  font-weight: 800;
+  line-height: 1.45;
+  letter-spacing: 0.08em;
+}
+
+.dream-page.dream-page .dream-programme-ticket-foot {
+  padding-top: 10px;
+  border-top: 1px dashed var(--ts-hair-soft);
+  color: var(--ts-zoge);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.dream-page.dream-page .dream-programme-ticket-foot > span {
+  color: var(--ticket-accent);
+  font-family: var(--ts-latin);
+  font-size: 18px;
+  line-height: 1;
+}
+
+.dream-page.dream-page .dream-programme-ticket:focus-visible,
+.dream-page.dream-page .dream-chapter-companion :is(summary, a):focus-visible {
+  outline: 2px solid var(--ts-fuji);
+  outline-offset: 3px;
+}
+
+/* Six chapters are a legible 3×2 route, with state and exact paragraph counts. */
+.dream-page.dream-page .dream-reader-index {
+  padding: clamp(16px, 2vw, 24px);
+  border: 1px solid var(--ts-hair);
+  background: #1b1321;
+}
+
+.dream-page.dream-page .dream-reader-index ol {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.dream-page.dream-page .dream-reader-index a {
+  display: grid;
+  grid-template-columns: 35px minmax(0, 1fr);
+  grid-template-rows: 1fr auto;
+  gap: 8px 12px;
+  min-height: 116px;
+  padding: 15px;
+  border: 1px solid var(--ts-hair-soft);
+  background:
+    linear-gradient(var(--ts-kin) 0 0) 0 0 / 25px 2px no-repeat,
+    #251a28;
+}
+
+.dream-page.dream-page .dream-reader-index-number {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--ts-hair);
+  color: var(--ts-kin-light);
+  font-size: 18px;
+}
+
+.dream-page.dream-page .dream-reader-index-title {
+  display: grid;
+  align-content: start;
+  gap: 2px;
+  min-width: 0;
+}
+
+.dream-page.dream-page .dream-reader-index-title strong {
+  color: var(--ts-kinari);
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.dream-page.dream-page .dream-reader-index-title > span {
+  color: var(--ts-ginnezu);
+  font-family: var(--ts-latin);
+  font-size: 11px;
+  letter-spacing: 0.13em;
+  overflow-wrap: anywhere;
+}
+
+.dream-page.dream-page .dream-reader-index-meta {
+  grid-column: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 2px 10px;
+  padding-top: 7px;
+  border-top: 1px solid var(--ts-hair-soft);
+}
+
+.dream-page.dream-page .dream-reader-index-meta small {
+  color: var(--ts-zoge);
+  font-family: var(--ts-text);
+  font-size: 12px;
+}
+
+.dream-page.dream-page .dream-reader-index a[aria-current="location"] {
+  border-color: var(--ts-kin);
+  background: #392532;
+  box-shadow: inset 0 -3px var(--ts-kin);
+}
+
+.dream-page.dream-page .dream-reader-index a[aria-current="location"] .dream-reader-index-number {
+  color: #1b1321;
+  background: var(--ts-kin-light);
+}
+
+/* A folded chapter reference never competes with the synopsis paragraphs. */
+.dream-page.dream-page .dream-chapter-companion {
+  margin-top: 22px;
+  border: 1px solid rgb(110 44 53 / 30%);
+  color: #382638;
+  background: #e9decb;
+}
+
+.dream-page.dream-page .dream-chapter-companion summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 50px;
+  padding: 10px 15px;
+  cursor: pointer;
+  list-style: none;
+  font-family: var(--ts-display);
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.dream-page.dream-page .dream-chapter-companion summary::-webkit-details-marker {
+  display: none;
+}
+
+.dream-page.dream-page .dream-chapter-companion summary::before {
+  content: "+";
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border: 1px solid #79353c;
+  color: #79353c;
+  font-family: var(--ts-latin);
+  font-size: 16px;
+  line-height: 1;
+}
+
+.dream-page.dream-page .dream-chapter-companion[open] summary::before {
+  content: "−";
+}
+
+.dream-page.dream-page .dream-chapter-companion summary > span {
+  margin-right: auto;
+}
+
+.dream-page.dream-page .dream-chapter-companion summary small {
+  color: #6e5d6b;
+  font-family: var(--ts-text);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.dream-page.dream-page .dream-chapter-companion-body {
+  padding: 0 15px 16px;
+  border-top: 1px solid rgb(110 44 53 / 20%);
+}
+
+.dream-page.dream-page .dream-chapter-companion-places {
+  margin: 12px 0;
+  color: #473a43;
+  font-size: 13px;
+  line-height: 1.75;
+}
+
+.dream-page.dream-page .dream-chapter-companion-places span {
+  margin-right: 10px;
+  color: #79353c;
+  font-weight: 800;
+}
+
+.dream-page.dream-page .dream-chapter-companion ol {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dream-page.dream-page .dream-chapter-companion li {
+  min-width: 0;
+}
+
+.dream-page.dream-page .dream-chapter-companion li a {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  align-items: center;
+  gap: 2px 8px;
+  min-height: 52px;
+  padding: 6px 9px;
+  border: 1px solid rgb(110 44 53 / 20%);
+  color: #47303b;
+  text-decoration: none;
+}
+
+.dream-page.dream-page .dream-chapter-companion li a span {
+  grid-row: 1 / 3;
+  color: #79353c;
+  font-family: var(--ts-latin);
+  font-size: 12px;
+}
+
+.dream-page.dream-page .dream-chapter-companion li a strong {
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.dream-page.dream-page .dream-chapter-companion li a small {
+  color: #655766;
+  font-size: 11px;
+}
+
+.dream-page.dream-page .dream-chapter-companion-all {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-top: 8px;
+  color: #79353c;
+  font-size: 13px;
+  text-underline-offset: 5px;
+}
+
+.dream-page.dream-page #dream-record-explorer {
+  scroll-margin-top: calc(var(--dream-nav-offset, 160px) + 20px);
+}
+
+@media (max-width: 760px) {
+  .dream-page.dream-page .dream-programme-routes {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .dream-page.dream-page .dream-programme-ticket {
+    min-height: 124px;
+    padding: 12px 15px;
+  }
+
+  .dream-page.dream-page .dream-programme-ticket-main {
+    margin-block: 8px 10px;
+  }
+
+  .dream-page.dream-page .dream-reader-index ol {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dream-page.dream-page .dream-reader-index a {
+    min-height: 112px;
+    padding: 12px;
+  }
+}
+
+@media (max-width: 359px) {
+  .dream-page.dream-page .dream-programme-desk {
+    width: calc(100% - 24px);
+    padding: 16px;
+  }
+
+  .dream-page.dream-page .dream-reader-index ol,
+  .dream-page.dream-page .dream-chapter-companion ol {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 520px) {
+  .dream-page.dream-page .dream-chapter-companion ol {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .dream-page.dream-page .dream-programme-ticket:hover,
+  .dream-page.dream-page .dream-reader-index a:hover {
+    border-color: var(--ts-kin-light);
+    background-color: #3a2634;
+  }
+
+  .dream-page.dream-page .dream-chapter-companion li a:hover {
+    background: #f4ecdc;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dream-page.dream-page .dream-programme-desk,
+  .dream-page.dream-page .dream-programme-ticket,
+  .dream-page.dream-page .dream-reader-index a,
+  .dream-page.dream-page .dream-chapter-companion {
+    animation: none;
+    transition: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .dream-page.dream-page
+    :is(
+      .dream-programme-desk,
+      .dream-programme-ticket,
+      .dream-reader-index a,
+      .dream-chapter-companion,
+      .dream-chapter-companion li a
+    ) {
+    border-color: CanvasText;
+    color: CanvasText;
+    background: Canvas;
+    box-shadow: none;
+  }
+
+  .dream-page.dream-page .dream-reader-index a[aria-current="location"] {
+    outline: 2px solid Highlight;
+  }
+}

@@ -9,6 +9,7 @@ import { DREAM_ATLAS, DREAM_CHRONICLE } from "./dream-chapter-extra-data";
 import {
   buildDreamRecordOptions,
   dreamRecordExcerpt,
+  dreamRecordHighlight,
   filterDreamRecords,
   resolveDreamRecordLinks,
 } from "@/lib/dream-record-index";
@@ -30,28 +31,69 @@ const DREAM_RECORD_PEOPLE = [
 const DREAM_RECORD_OPTIONS = buildDreamRecordOptions(DREAM_CHRONICLE);
 
 export function DreamRecordExplorer() {
-  const [filters, setFilters] = useState({ case: "", person: "", place: "" });
+  const [filters, setFilters] = useState({ query: "", case: "", person: "", place: "" });
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const results = useMemo(() => filterDreamRecords(DREAM_CHRONICLE, filters), [filters]);
   const visibleResults = results.slice(0, visibleCount);
-  const hasFilters = Boolean(filters.case || filters.person || filters.place);
+  const hasFacets = Boolean(filters.case || filters.person || filters.place);
+  const hasQuery = Boolean(filters.query.trim());
+  const hasFilters = hasQuery || hasFacets;
+  const activeFilters = [
+    { key: "query", label: "キーワード", value: filters.query.trim() },
+    { key: "case", label: "章", value: filters.case ? `CASE ${filters.case}` : "" },
+    { key: "person", label: "人物", value: filters.person },
+    { key: "place", label: "舞台", value: filters.place },
+  ] as const;
+  const highlighted = (text: string) =>
+    dreamRecordHighlight(text, filters.query).map((run, index) =>
+      run.match ? <mark key={index}>{run.text}</mark> : run.text,
+    );
 
   const updateFilter = (key: keyof typeof filters, value: string) => {
     setFilters((current) => ({ ...current, [key]: value }));
     setVisibleCount(PAGE_SIZE);
   };
   const clearFilters = () => {
-    setFilters({ case: "", person: "", place: "" });
+    setFilters({ query: "", case: "", person: "", place: "" });
+    setVisibleCount(PAGE_SIZE);
+  };
+  const clearFacets = () => {
+    setFilters((current) => ({ ...current, case: "", person: "", place: "" }));
     setVisibleCount(PAGE_SIZE);
   };
 
   return (
-    <section className="dream-record-explorer" aria-labelledby="dream-record-explorer-title">
+    <section
+      id="dream-record-explorer"
+      className="dream-record-explorer"
+      aria-labelledby="dream-record-explorer-title"
+      tabIndex={-1}
+    >
       <header className="dream-record-explorer-heading">
         <p lang="en">FIELD INDEX / CHRONICLE</p>
         <h3 id="dream-record-explorer-title">記録を探す</h3>
-        <span>章・人物・舞台を組み合わせて絞り込む</span>
+        <span>全{DREAM_CHRONICLE.length}件の出来事から、言葉と手掛かりを辿る</span>
       </header>
+
+      <div className="dream-record-search">
+        <label htmlFor="dream-record-query">記録の中の言葉を探す</label>
+        <div className="dream-record-search-field">
+          <span aria-hidden="true">⌕</span>
+          <input
+            id="dream-record-query"
+            type="search"
+            value={filters.query}
+            onChange={(event) => updateFilter("query", event.target.value)}
+            placeholder="人物の名前、場所、台詞の一節…"
+            aria-describedby="dream-record-search-help"
+            autoComplete="off"
+            spellCheck={false}
+          />
+        </div>
+        <p id="dream-record-search-help">
+          見出し・本文・人物・舞台を検索。空白で区切ると、すべての言葉を含む記録に絞ります。
+        </p>
+      </div>
 
       <div className="dream-record-filters" aria-label="記録の絞り込み">
         <label>
@@ -104,8 +146,28 @@ export function DreamRecordExplorer() {
         </button>
       </div>
 
+      {hasFilters ? (
+        <ul className="dream-record-active-filters" aria-label="検索中の条件">
+          {activeFilters
+            .filter((filter) => filter.value)
+            .map((filter) => (
+              <li key={filter.key}>
+                <button
+                  type="button"
+                  onClick={() => updateFilter(filter.key, "")}
+                  aria-label={`${filter.label}「${filter.value}」の条件を外す`}
+                >
+                  <span>{filter.label}</span>
+                  <b>{filter.value}</b>
+                  <i aria-hidden="true">×</i>
+                </button>
+              </li>
+            ))}
+        </ul>
+      ) : null}
+
       <p className="dream-record-count" role="status" aria-live="polite" aria-atomic="true">
-        {results.length}件の記録
+        {results.length}件の記録 / 全{DREAM_CHRONICLE.length}件
         {results.length > visibleResults.length ? `（${visibleResults.length}件を表示）` : ""}
       </p>
 
@@ -122,13 +184,15 @@ export function DreamRecordExplorer() {
                 <article className="dream-record-card">
                   <p className="dream-record-meta">
                     <span>CASE {record.case}</span>
-                    <span>{record.place}</span>
+                    <span>{highlighted(record.place)}</span>
                   </p>
-                  <h4>{record.title.text}</h4>
-                  <p className="dream-record-excerpt">{dreamRecordExcerpt(record)}</p>
+                  <h4>{highlighted(record.title.text)}</h4>
+                  <p className="dream-record-excerpt">
+                    {highlighted(dreamRecordExcerpt(record, 132, filters.query))}
+                  </p>
                   <p className="dream-record-cast">
                     <span>人物</span>
-                    {record.cast.join("・")}
+                    {highlighted(record.cast.join("・"))}
                   </p>
                   <nav aria-label={`${record.title.text}の関連記録`}>
                     {links.chronicleHref ? <a href={links.chronicleHref}>出来事を読む</a> : null}
@@ -152,9 +216,22 @@ export function DreamRecordExplorer() {
       ) : (
         <div className="dream-record-empty">
           <p>この条件に合う記録はありません。</p>
-          <button type="button" onClick={clearFilters}>
-            条件をクリア
-          </button>
+          <span>言葉を短くするか、章・人物・舞台の条件を外して探し直せます。</span>
+          <div>
+            {hasQuery && hasFacets ? (
+              <>
+                <button type="button" onClick={() => updateFilter("query", "")}>
+                  キーワードを外す
+                </button>
+                <button type="button" onClick={clearFacets}>
+                  章・人物・舞台を外す
+                </button>
+              </>
+            ) : null}
+            <button type="button" onClick={clearFilters}>
+              条件をクリア
+            </button>
+          </div>
         </div>
       )}
 

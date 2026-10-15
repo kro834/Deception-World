@@ -173,9 +173,11 @@ export function mountDreamReader(root, cases, onChange, environment = window) {
     environment.clearTimeout(timer);
     timer = 0;
   };
+  const modalOpen = () =>
+    root?.ownerDocument.documentElement?.getAttribute?.("data-dream-dialog-open") === "true";
   const capture = () => {
     timer = 0;
-    if (!reading || disposed || !root || root.ownerDocument.hidden) return;
+    if (!reading || disposed || !root || root.ownerDocument.hidden || modalOpen()) return;
     const nav = root.ownerDocument.querySelector(".dream-chapter-nav");
     const top = Math.max(0, nav?.getBoundingClientRect().bottom || 0) + 20;
     const bottom = environment.innerHeight;
@@ -212,6 +214,10 @@ export function mountDreamReader(root, cases, onChange, environment = window) {
     if (reading && !disposed) timer = environment.setTimeout(capture, 800);
   };
   const onIntent = (event) => {
+    if (modalOpen()) {
+      pause();
+      return;
+    }
     if (event.isTrusted === false) return;
     if (event.type === "keydown") {
       if (!/^(ArrowDown|ArrowUp|PageDown|PageUp|Home|End| )$/.test(event.key)) return;
@@ -243,6 +249,21 @@ export function mountDreamReader(root, cases, onChange, environment = window) {
   const onVisibility = () => {
     if (root?.ownerDocument.hidden) pause();
   };
+  // The explicit reading room shares this same browser-local bookmark. Read
+  // back through validation; event payloads never become trusted state.
+  const onRoomSave = () => {
+    pause();
+    try {
+      state = validateDreamReaderState(
+        JSON.parse(storage?.getItem(DREAM_READER_STORAGE_KEY)),
+        cases,
+      );
+      apply();
+      publish();
+    } catch {
+      /* Denied storage leaves the current reader usable. */
+    }
+  };
   apply();
   publish();
   const eventTarget = root?.ownerDocument;
@@ -256,6 +277,7 @@ export function mountDreamReader(root, cases, onChange, environment = window) {
     environment.addEventListener("hashchange", pause);
     environment.addEventListener("popstate", pause);
     environment.addEventListener("pagehide", pause);
+    environment.addEventListener("dream-reader-state-change", onRoomSave);
     eventTarget.addEventListener("visibilitychange", onVisibility);
   }
   return {
@@ -292,6 +314,7 @@ export function mountDreamReader(root, cases, onChange, environment = window) {
       environment.removeEventListener("hashchange", pause);
       environment.removeEventListener("popstate", pause);
       environment.removeEventListener("pagehide", pause);
+      environment.removeEventListener("dream-reader-state-change", onRoomSave);
       eventTarget.removeEventListener("visibilitychange", onVisibility);
       for (const [name, value] of [
         ["data-dream-reader-size", oldSize],

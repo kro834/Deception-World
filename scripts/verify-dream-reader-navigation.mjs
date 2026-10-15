@@ -94,6 +94,14 @@ try {
     assert.equal(await page.locator("#dream-case-3").getAttribute("open"), "");
     await page.keyboard.press(linkTab);
     assert.equal(
+      await page.evaluate(() =>
+        document.activeElement?.matches("#dream-case-3 .dream-chapter-companion > summary"),
+      ),
+      true,
+      "the new folded chapter companion is the first keyboard stop",
+    );
+    await page.keyboard.press(linkTab);
+    assert.equal(
       await page.evaluate(() => document.activeElement?.getAttribute("href")),
       "#dream-case-note-3",
     );
@@ -128,12 +136,17 @@ try {
     await page.waitForFunction(() => !document.getElementById("dream-case-3")?.open);
     await page.waitForFunction(
       () =>
-        document.querySelector('.dream-reader-index a[href="#dream-case-3"] small')?.textContent ===
-        "あらすじ",
+        document.querySelector(
+          '.dream-reader-index a[href="#dream-case-3"] .dream-reader-index-meta small:last-child',
+        )?.textContent === "あらすじ",
     );
     await current(page, "3");
     assert.equal(
-      await page.locator('.dream-reader-index a[href="#dream-case-3"] small').innerText(),
+      await page
+        .locator(
+          '.dream-reader-index a[href="#dream-case-3"] .dream-reader-index-meta small:last-child',
+        )
+        .innerText(),
       "あらすじ",
     );
     assert.equal(await page.locator("#dream-case-2").getAttribute("open"), "");

@@ -9,7 +9,7 @@ const style = read("src/styles-dream-record-explorer.css");
 test("the record explorer uses only canonical chronicle fields and existing destinations", () => {
   assert.match(component, /filterDreamRecords\(DREAM_CHRONICLE, filters\)/);
   assert.match(component, /record\.title\.text/);
-  assert.match(component, /dreamRecordExcerpt\(record\)/);
+  assert.match(component, /dreamRecordExcerpt\(record, 132, filters\.query\)/);
   assert.match(component, /record\.cast\.join\("・"\)/);
   assert.match(component, /DREAM_RECORD_OPTIONS\.cases\.map/);
   assert.match(component, /DREAM_RECORD_OPTIONS\.people\.map/);
@@ -18,6 +18,21 @@ test("the record explorer uses only canonical chronicle fields and existing dest
   assert.match(component, /links\.chronicleHref/);
   assert.match(component, /links\.synopsisHref/);
   assert.match(component, /links\.placeHref/);
+});
+
+test("keyword discovery preserves native destinations and exposes removable conditions", () => {
+  assert.match(component, /id="dream-record-explorer"/);
+  assert.match(component, /type="search"/);
+  assert.match(component, /htmlFor="dream-record-query"/);
+  assert.match(component, /aria-describedby="dream-record-search-help"/);
+  assert.match(component, /dreamRecordHighlight\(text, filters\.query\)/);
+  assert.match(component, /<mark key=\{index\}>\{run\.text\}<\/mark>/);
+  assert.match(component, /aria-label="検索中の条件"/);
+  assert.match(component, /updateFilter\(filter\.key, ""\)/);
+  assert.match(component, /キーワードを外す/);
+  assert.match(component, /章・人物・舞台を外す/);
+  assert.match(component, /DREAM_CHRONICLE\.length/);
+  assert.doesNotMatch(component, /pushState|replaceState|location\.hash|dangerouslySetInnerHTML/);
 });
 
 test("the result list is bounded, announces result counts, and exposes an empty-state reset", () => {

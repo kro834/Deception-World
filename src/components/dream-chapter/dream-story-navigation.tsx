@@ -6,6 +6,7 @@ import {
   type DreamReaderState,
 } from "@/lib/dream-reader-state.js";
 import { DREAM_CASES } from "./dream-chapter-data";
+import { DREAM_CHRONICLE } from "./dream-chapter-extra-data";
 
 /** Local reading preferences affect only the canonical synopsis paragraphs. */
 export function DreamReaderSupport() {
@@ -141,18 +142,56 @@ export function DreamStoryIndex() {
                 aria-current={location.current === episode.no ? "location" : undefined}
               >
                 <span className="dream-reader-index-number">{episode.no}</span>
-                <span>{episode.title}</span>
-                {location.open.includes(episode.no) ? (
-                  <small>開いている</small>
-                ) : (
-                  <small>あらすじ</small>
-                )}
+                <span className="dream-reader-index-title">
+                  <strong>{episode.title}</strong>
+                  <span lang="en">{episode.reading}</span>
+                </span>
+                <span className="dream-reader-index-meta">
+                  <small>{episode.paragraphs.length}段落</small>
+                  <small>{location.open.includes(episode.no) ? "開いている" : "あらすじ"}</small>
+                </span>
               </a>
             </li>
           ))}
         </ol>
       </nav>
     </>
+  );
+}
+
+/** Canonical event titles and places belonging to this case, hidden until requested. */
+export function DreamChapterCompanion({ no }: { no: string }) {
+  const events = DREAM_CHRONICLE.filter((event) => event.case === no);
+  if (!events.length) return null;
+  const places = [...new Set(events.map((event) => event.place))];
+
+  return (
+    <details className="dream-chapter-companion">
+      <summary>
+        <span>この章の出来事</span>
+        <small>{events.length}件の記録</small>
+      </summary>
+      <div className="dream-chapter-companion-body">
+        <p className="dream-chapter-companion-places">
+          <span>舞台</span>
+          {places.join("・")}
+        </p>
+        <ol>
+          {events.map((event) => (
+            <li key={event.no}>
+              <a href={`#dream-chronicle-event-${event.no}`}>
+                <span>{String(event.no).padStart(2, "0")}</span>
+                <strong>{event.title.text}</strong>
+                <small>{event.place}</small>
+              </a>
+            </li>
+          ))}
+        </ol>
+        <a className="dream-chapter-companion-all" href={`#dream-chronicle-case-${no}`}>
+          CASE {no}の出来事へ
+        </a>
+      </div>
+    </details>
   );
 }
 

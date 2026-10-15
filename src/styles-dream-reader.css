@@ -1,5 +1,56 @@
 /* Six chapters form one reading route. All controls stay in the document;
    the fixed act navigation keeps its existing height and native page panning. */
+.dream-page .dream-reading-entry {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 24px;
+  padding: clamp(24px, 4vw, 44px);
+  margin-bottom: 28px;
+  border: 1px solid #8c7047;
+  background: linear-gradient(120deg, #302336, #191722);
+  color: #eee4d0;
+  scroll-margin-top: calc(var(--dream-nav-offset, 160px) + 20px);
+}
+.dream-page .dream-reading-entry p {
+  margin: 0;
+  font: 10px/1.8 sans-serif;
+  letter-spacing: 0.22em;
+  color: #c5a676;
+}
+.dream-page .dream-reading-entry h3 {
+  margin: 10px 0;
+  font-family: var(--ts-display);
+  font-size: clamp(22px, 3vw, 32px);
+  letter-spacing: 0.12em;
+}
+.dream-page .dream-reading-entry > div > span {
+  font: 13px/2 var(--ts-text);
+  color: #cdbfb5;
+}
+.dream-page .dream-reading-entry button {
+  min-height: 48px;
+  padding: 14px 24px;
+  border: 1px solid #c5a676;
+  background: #e8d8b7;
+  color: #29202c;
+  font: 15px/1.5 var(--ts-text);
+  cursor: pointer;
+}
+.dream-page .dream-reading-entry button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+.dream-page .dream-reading-entry button:focus-visible {
+  outline: 3px solid var(--ts-fuji);
+  outline-offset: 4px;
+}
+@media (max-width: 520px) {
+  .dream-page .dream-reading-entry button {
+    width: 100%;
+  }
+}
 @media (max-width: 760px) {
   html[data-dream-reading-active="true"] body .zeus-button {
     visibility: hidden;
