@@ -1319,11 +1319,12 @@ test("the gold forms by nanites right after each plate lands; the driver is on f
   // This is the full synchronous plan, including equal-lock ordering and
   // overlap neighbors. Chunking must preserve the authored gold exactly.
   // (2026-10-16: the tiles' schedule spreads each piece along the scroll —
-  // owner: a slow scroll lands a band at a time — so the gold's locks moved
-  // with it; the hash is the plan after that change.)
+  // owner: a slow scroll lands a band at a time — and the plates are cut
+  // from the base figure too, so the gold's locks moved with them; the hash
+  // is the plan after those changes.)
   assert.equal(
     createHash("sha256").update(JSON.stringify(gold)).digest("hex"),
-    "fe552ffbb8fc826ed6a151e34f640a504c20da0ca73bfb05afc52c3b5c848589",
+    "ca307bc7b93369ec230e88f62dfaffb91e4a7e4358fb841ad29af6ed07f82b29",
   );
   const steps = assemblyGoldPlanSteps({
     pieces,

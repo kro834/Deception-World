@@ -29,11 +29,20 @@ const require = createRequire(import.meta.url);
 const sharp = require(process.env.SHARP_MODULE || "sharp");
 
 const VERSION = "20261010";
+// The published assets' folder (2026-10-16: the armour plates are cut from
+// the owner's figure without its ornaments; a new folder, so a cached atlas
+// never meets the new module).
+const ASSET_VERSION = "20261016";
+const BASE_SOURCE = fileURLToPath(
+  new URL("../design/rexonance-suit/rexonance-base-20261016.jpg", import.meta.url),
+);
 const SOURCE = fileURLToPath(
   new URL(`../design/rexonance-suit/rexonance-full-${VERSION}.jpg`, import.meta.url),
 );
-const OUT_DIR = fileURLToPath(new URL(`../public/rexonance-suit-${VERSION}/`, import.meta.url));
-const PUBLIC_PATH = `/rexonance-suit-${VERSION}`;
+const OUT_DIR = fileURLToPath(
+  new URL(`../public/rexonance-suit-${ASSET_VERSION}/`, import.meta.url),
+);
+const PUBLIC_PATH = `/rexonance-suit-${ASSET_VERSION}`;
 const MODULE = fileURLToPath(new URL("../src/lib/rexonance-suit.ts", import.meta.url));
 const GOLD_MODULE = fileURLToPath(new URL("../src/lib/rexonance-suit-gold.ts", import.meta.url));
 const debugArg = process.argv.find((arg) => arg.startsWith("--debug="));
@@ -806,118 +815,151 @@ const boxFraction = (mask, radius) => {
   }
   return out;
 };
-const goldTrim = (() => {
-  const hue = new Float32Array(N);
-  const sat = new Float32Array(N);
-  const val = new Float32Array(N);
-  for (let i = 0; i < N; i += 1) {
-    const r = rgb[i * 3] / 255;
-    const g = rgb[i * 3 + 1] / 255;
-    const b = rgb[i * 3 + 2] / 255;
-    const max = Math.max(r, g, b);
-    const d = max - Math.min(r, g, b);
-    let h = 0;
-    if (d > 1e-6) {
-      h = max === r ? ((g - b) / d) % 6 : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
-      h = h * 60 + (h < 0 ? 360 : 0);
-    }
-    hue[i] = h;
-    sat[i] = max ? d / max : 0;
-    val[i] = max;
-  }
-  const gold = new Float32Array(N);
-  for (let i = 0; i < N; i += 1) {
-    const warm = hue[i] >= 17 && hue[i] <= 54;
-    if (warm && ((sat[i] >= 0.3 && val[i] >= 0.16) || (sat[i] >= 0.42 && val[i] >= 0.07)))
-      gold[i] = 1;
-    // Deep red-brown shadow on the bronze.
-    else if (hue[i] >= 9 && hue[i] < 17 && sat[i] >= 0.5 && val[i] >= 0.07 && val[i] < 0.45)
-      gold[i] = 1;
-  }
-  const near = boxFraction(gold, 3);
-  for (let i = 0; i < N; i += 1) {
-    if (gold[i]) continue;
-    const [r, g, b] = [rgb[i * 3], rgb[i * 3 + 1], rgb[i * 3 + 2]];
-    const notPink = !(hue[i] > 280 || hue[i] < 12) || sat[i] < 0.16;
-    // Pale tan and highlights on the trims, and their lower-saturation mid-tones.
-    if (
-      val[i] > 0.42 &&
-      sat[i] < 0.36 &&
-      b <= r * 1.02 &&
-      b <= g * 1.08 &&
-      notPink &&
-      near[i] > 0.3
-    )
-      gold[i] = 1;
-    else if (hue[i] >= 12 && hue[i] <= 60 && sat[i] >= 0.16 && val[i] >= 0.12 && near[i] > 0.25)
-      gold[i] = 1;
-  }
-  // Specular highlights blown to white: flood in from the bronze, 7 px deep.
-  {
-    const depth = new Uint8Array(N).fill(255);
-    const queue = new Int32Array(N);
-    let head = 0;
-    let tail = 0;
+// The gold's layers of one picture (the full artwork; the base figure, for
+// the armour plates — 2026-10-16): the trims, their soft mask and the raw
+// channel they form in.
+async function goldLayersOf(colours) {
+  const goldTrim = (() => {
+    const hue = new Float32Array(N);
+    const sat = new Float32Array(N);
+    const val = new Float32Array(N);
     for (let i = 0; i < N; i += 1) {
-      if (!gold[i]) continue;
-      depth[i] = 0;
-      queue[tail++] = i;
-    }
-    const pale = (i) =>
-      val[i] > 0.62 &&
-      sat[i] < 0.3 &&
-      rgb[i * 3 + 2] <= rgb[i * 3] + 12 &&
-      rgb[i * 3 + 2] <= rgb[i * 3 + 1] + 14;
-    while (head < tail) {
-      const i = queue[head++];
-      if (depth[i] >= 7) continue;
-      const x = i % W;
-      for (const j of [x > 0 ? i - 1 : -1, x < W - 1 ? i + 1 : -1, i - W, i + W]) {
-        if (j < 0 || j >= N || depth[j] !== 255 || !pale(j)) continue;
-        depth[j] = depth[i] + 1;
-        gold[j] = 1;
-        queue[tail++] = j;
+      const r = colours[i * 3] / 255;
+      const g = colours[i * 3 + 1] / 255;
+      const b = colours[i * 3 + 2] / 255;
+      const max = Math.max(r, g, b);
+      const d = max - Math.min(r, g, b);
+      let h = 0;
+      if (d > 1e-6) {
+        h = max === r ? ((g - b) / d) % 6 : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
+        h = h * 60 + (h < 0 ? 360 : 0);
       }
+      hue[i] = h;
+      sat[i] = max ? d / max : 0;
+      val[i] = max;
     }
-  }
-  // Close the trims' holes (shadow, highlight and reflections; the dim
-  // mauve of a trim's shadowed face that mirrors the pink crystals), in
-  // passes that grow in from the bronze.
-  for (let pass = 0; pass < 4; pass += 1) {
-    const around = boxFraction(gold, 2);
-    const wide = boxFraction(gold, 4);
+    const gold = new Float32Array(N);
+    for (let i = 0; i < N; i += 1) {
+      const warm = hue[i] >= 17 && hue[i] <= 54;
+      if (warm && ((sat[i] >= 0.3 && val[i] >= 0.16) || (sat[i] >= 0.42 && val[i] >= 0.07)))
+        gold[i] = 1;
+      // Deep red-brown shadow on the bronze.
+      else if (hue[i] >= 9 && hue[i] < 17 && sat[i] >= 0.5 && val[i] >= 0.07 && val[i] < 0.45)
+        gold[i] = 1;
+    }
+    const near = boxFraction(gold, 3);
     for (let i = 0; i < N; i += 1) {
       if (gold[i]) continue;
-      const cool = sat[i] > 0.28 && hue[i] > 170 && hue[i] < 300;
-      const pink = sat[i] > 0.28 && (hue[i] >= 300 || hue[i] < 12);
-      const mauve = (hue[i] >= 300 || hue[i] < 17) && sat[i] < 0.5 && val[i] < 0.45;
-      if (!cool && !pink && (around[i] > 0.55 || (val[i] < 0.3 && wide[i] > 0.6))) gold[i] = 1;
-      else if (pink && sat[i] < 0.55 && val[i] > 0.5 && around[i] > 0.7) gold[i] = 1;
-      else if (mauve && wide[i] > 0.34) gold[i] = 1;
+      const [r, g, b] = [colours[i * 3], colours[i * 3 + 1], colours[i * 3 + 2]];
+      const notPink = !(hue[i] > 280 || hue[i] < 12) || sat[i] < 0.16;
+      // Pale tan and highlights on the trims, and their lower-saturation mid-tones.
+      if (
+        val[i] > 0.42 &&
+        sat[i] < 0.36 &&
+        b <= r * 1.02 &&
+        b <= g * 1.08 &&
+        notPink &&
+        near[i] > 0.3
+      )
+        gold[i] = 1;
+      else if (hue[i] >= 12 && hue[i] <= 60 && sat[i] >= 0.16 && val[i] >= 0.12 && near[i] > 0.25)
+        gold[i] = 1;
+    }
+    // Specular highlights blown to white: flood in from the bronze, 7 px deep.
+    {
+      const depth = new Uint8Array(N).fill(255);
+      const queue = new Int32Array(N);
+      let head = 0;
+      let tail = 0;
+      for (let i = 0; i < N; i += 1) {
+        if (!gold[i]) continue;
+        depth[i] = 0;
+        queue[tail++] = i;
+      }
+      const pale = (i) =>
+        val[i] > 0.62 &&
+        sat[i] < 0.3 &&
+        colours[i * 3 + 2] <= colours[i * 3] + 12 &&
+        colours[i * 3 + 2] <= colours[i * 3 + 1] + 14;
+      while (head < tail) {
+        const i = queue[head++];
+        if (depth[i] >= 7) continue;
+        const x = i % W;
+        for (const j of [x > 0 ? i - 1 : -1, x < W - 1 ? i + 1 : -1, i - W, i + W]) {
+          if (j < 0 || j >= N || depth[j] !== 255 || !pale(j)) continue;
+          depth[j] = depth[i] + 1;
+          gold[j] = 1;
+          queue[tail++] = j;
+        }
+      }
+    }
+    // Close the trims' holes (shadow, highlight and reflections; the dim
+    // mauve of a trim's shadowed face that mirrors the pink crystals), in
+    // passes that grow in from the bronze.
+    for (let pass = 0; pass < 4; pass += 1) {
+      const around = boxFraction(gold, 2);
+      const wide = boxFraction(gold, 4);
+      for (let i = 0; i < N; i += 1) {
+        if (gold[i]) continue;
+        const cool = sat[i] > 0.28 && hue[i] > 170 && hue[i] < 300;
+        const pink = sat[i] > 0.28 && (hue[i] >= 300 || hue[i] < 12);
+        const mauve = (hue[i] >= 300 || hue[i] < 17) && sat[i] < 0.5 && val[i] < 0.45;
+        if (!cool && !pink && (around[i] > 0.55 || (val[i] < 0.3 && wide[i] > 0.6))) gold[i] = 1;
+        else if (pink && sat[i] < 0.55 && val[i] > 0.5 && around[i] > 0.7) gold[i] = 1;
+        else if (mauve && wide[i] > 0.34) gold[i] = 1;
+      }
+    }
+    const specks = boxFraction(gold, 2);
+    for (let i = 0; i < N; i += 1) if (gold[i] && specks[i] < 0.2) gold[i] = 0;
+    return gold;
+  })();
+  // Soft, wider than the trims, so the raw state covers their fringe. Owner,
+  // 2026-10-11: a seated arm or leg showed a thin yellow rim before its gold
+  // formed; the mask takes every warm gold-toned pixel within 4 px of a
+  // trim (its shadows and highlights), and stays solid to its edge.
+  const goldSoft = await (async () => {
+    const near = boxFraction(goldTrim, 4);
+    const grown = boxFraction(goldTrim, 1);
+    const field = new Float32Array(N);
+    for (let i = 0; i < N; i += 1) {
+      const r = colours[i * 3];
+      const g = colours[i * 3 + 1];
+      const b = colours[i * 3 + 2];
+      const warm = Math.max(r, g, b) > 50 && r > b * 1.2 && g > b * 1.02;
+      field[i] = grown[i] > 0 || (near[i] > 0 && warm) ? 1 : 0;
+    }
+    const soft = await blurField(field, 0.8);
+    return Float32Array.from(soft, (v) => Math.min(1, v * 1.6));
+  })();
+  const goldLight = await blurField(
+    Float32Array.from(
+      { length: N },
+      (_, i) => (0.2126 * colours[i * 3] + 0.7152 * colours[i * 3 + 1] + 0.0722 * colours[i * 3 + 2]) / 255,
+    ),
+    2,
+  );
+  const rawGold = Buffer.alloc(N * 3);
+  for (let y = 1; y < H - 1; y += 1) {
+    for (let x = 1; x < W - 1; x += 1) {
+      const i = y * W + x;
+      const m = goldSoft[i];
+      if (!m) continue;
+      const k = Math.min(1, goldLight[i] ** 0.9);
+      const wall = Math.min(
+        1,
+        Math.hypot(goldSoft[i + 1] - goldSoft[i - 1], goldSoft[i + W] - goldSoft[i - W]) * 0.9,
+      );
+      const local = (0.2126 * colours[i * 3] + 0.7152 * colours[i * 3 + 1] + 0.0722 * colours[i * 3 + 2]) / 255;
+      const detail = Math.max(-5, Math.min(6, (local - goldLight[i]) * 20));
+      const base = [31 + 38 * k + detail, 36 + 41 * k + detail, 43 + 46 * k + detail];
+      const steel = [112, 126, 144];
+      for (let c = 0; c < 3; c += 1)
+        rawGold[i * 3 + c] = Math.round(base[c] + (steel[c] - base[c]) * wall);
     }
   }
-  const specks = boxFraction(gold, 2);
-  for (let i = 0; i < N; i += 1) if (gold[i] && specks[i] < 0.2) gold[i] = 0;
-  return gold;
-})();
-// Soft, wider than the trims, so the raw state covers their fringe. Owner,
-// 2026-10-11: a seated arm or leg showed a thin yellow rim before its gold
-// formed; the mask takes every warm gold-toned pixel within 4 px of a
-// trim (its shadows and highlights), and stays solid to its edge.
-const goldSoft = await (async () => {
-  const near = boxFraction(goldTrim, 4);
-  const grown = boxFraction(goldTrim, 1);
-  const field = new Float32Array(N);
-  for (let i = 0; i < N; i += 1) {
-    const r = rgb[i * 3];
-    const g = rgb[i * 3 + 1];
-    const b = rgb[i * 3 + 2];
-    const warm = Math.max(r, g, b) > 50 && r > b * 1.2 && g > b * 1.02;
-    field[i] = grown[i] > 0 || (near[i] > 0 && warm) ? 1 : 0;
-  }
-  const soft = await blurField(field, 0.8);
-  return Float32Array.from(soft, (v) => Math.min(1, v * 1.6));
-})();
+  return { goldTrim, goldSoft, rawGold };
+}
+const { goldTrim, goldSoft, rawGold } = await goldLayersOf(rgb);
 
 // --- The figure's alpha ---------------------------------------------------
 const protect = await rasterise([BODY], 6);
@@ -1130,19 +1172,141 @@ const hash = (a, b) => {
 const glow = await rasterise([FACE_GLOW], 1.5, 1.2);
 // The helmet's lights, unlit: the V reads as dark glass with a faint cool
 // sheen until the final call fills it.
-const unlit = Buffer.from(rgb);
-for (let i = 0; i < N; i += 1) {
-  const g = glow[i];
-  if (!g) continue;
-  const r = rgb[i * 3];
-  const gr = rgb[i * 3 + 1];
-  const b = rgb[i * 3 + 2];
-  const l = 0.2126 * r + 0.7152 * gr + 0.0722 * b;
-  const off = [10 + l * 0.12, 16 + l * 0.15, 26 + l * 0.22];
-  unlit[i * 3] = Math.round(r + (off[0] - r) * g);
-  unlit[i * 3 + 1] = Math.round(gr + (off[1] - gr) * g);
-  unlit[i * 3 + 2] = Math.round(b + (off[2] - b) * g);
-}
+const unlitOf = (colours) => {
+  const unlit = Buffer.from(colours);
+  for (let i = 0; i < N; i += 1) {
+    const g = glow[i];
+    if (!g) continue;
+    const r = colours[i * 3];
+    const gr = colours[i * 3 + 1];
+    const b = colours[i * 3 + 2];
+    const l = 0.2126 * r + 0.7152 * gr + 0.0722 * b;
+    const off = [10 + l * 0.12, 16 + l * 0.15, 26 + l * 0.22];
+    unlit[i * 3] = Math.round(r + (off[0] - r) * g);
+    unlit[i * 3 + 1] = Math.round(gr + (off[1] - gr) * g);
+    unlit[i * 3 + 2] = Math.round(b + (off[2] - b) * g);
+  }
+  return unlit;
+};
+
+// --- The base figure (owner, 2026-10-16) -------------------------------------
+// The owner's Rexonance without its ornaments (no tail, no ribbons), in the
+// cut-out's frame, placed on the artwork where the cut-out sits. The armour
+// plates are cut from it, whole (the arm beneath a ribbon too); the
+// ornaments' plates from the full artwork, over them.
+const ORNAMENT_GROUPS = new Set(["tail", "ribbon"]);
+const BASE_CUT = { width: 999, height: 1835, left: 30, top: 51 };
+const rgbBase = await (async () => {
+  const cut = await sharp(BASE_SOURCE)
+    .resize(BASE_CUT.width, BASE_CUT.height, { fit: "fill", kernel: "lanczos3" })
+    .removeAlpha()
+    .png()
+    .toBuffer();
+  return sharp({ create: { width: W, height: H, channels: 3, background: "#000" } })
+    .composite([{ input: cut, left: BASE_CUT.left, top: BASE_CUT.top }])
+    .removeAlpha()
+    .raw()
+    .toBuffer();
+})();
+// Its alpha: within the figure's, less the black ground it shows where the
+// ornaments were (flood-filled from the edges with its dark rim, feathered).
+// A pixel the base shares with the artwork (no ornament over it): set by
+// the base's ground flood below.
+const same = new Uint8Array(N);
+const alphaBase = await (async () => {
+  const lum = new Uint8Array(N);
+  for (let i = 0; i < N; i += 1)
+    lum[i] = Math.max(rgbBase[i * 3], rgbBase[i * 3 + 1], rgbBase[i * 3 + 2]);
+  const ground = new Uint8Array(N);
+  const queue = new Int32Array(N);
+  let head = 0;
+  let tail = 0;
+  // The ground never enters the body (the black bodysuit; `protect`, as
+  // the artwork's own flood); it reaches under the tail and the ribbons.
+  const push = (i) => {
+    if (ground[i] || lum[i] >= 14 || protect[i] > 0.5) return;
+    ground[i] = 1;
+    queue[tail++] = i;
+  };
+  for (let x = 0; x < W; x += 1) {
+    push(x);
+    push((H - 1) * W + x);
+  }
+  for (let y = 0; y < H; y += 1) {
+    push(y * W);
+    push(y * W + W - 1);
+  }
+  while (head < tail) {
+    const i = queue[head++];
+    const x = i % W;
+    if (x > 0) push(i - 1);
+    if (x < W - 1) push(i + 1);
+    if (i >= W) push(i - W);
+    if (i < N - W) push(i + W);
+  }
+  const grown = Float32Array.from(ground);
+  for (let i = 0; i < N; i += 1) {
+    if (ground[i] || lum[i] >= 44) continue;
+    const x = i % W;
+    if (
+      (x > 0 && ground[i - 1]) ||
+      (x < W - 1 && ground[i + 1]) ||
+      (i >= W && ground[i - W]) ||
+      (i < N - W && ground[i + W])
+    )
+      grown[i] = 1;
+  }
+  const soft = await blurField(grown, 1);
+  // An ornament's pixel: the artwork paints where the base shows ground, or
+  // paints something else (the ribbon over the arm). Elsewhere the base
+  // shares the artwork's pixel (the armour, the figure's own dark outline),
+  // and keeps the figure's alpha as it is: the ground is cut only at the
+  // ornaments' places.
+  // ...grown by a few pixels, so an ornament's dark parts (a tail ring's
+  // black gap, a ribbon's black inner face, as dark as the ground) go with
+  // it; the armour beside a ribbon that this also takes is the same pixel in
+  // both pictures, drawn twice, harmlessly.
+  // Two signals: the base showing ground where the artwork is figure (the
+  // ribbons, however dark their inner faces — a near-black ribbon over the
+  // black ground is no shared pixel), and, inside the body, a coherent run
+  // of pixels painted differently (the ribbon over the arm) — the two
+  // pictures differ by a scattered grain everywhere, so a lone differing
+  // pixel means nothing. The figure's shared silhouette is neither: there
+  // the two grounds meet a pixel apart (the base is resampled), so the
+  // artwork's own ground, grown by two pixels, is kept out.
+  const artGround = boxFraction(background, 2);
+  const over = new Float32Array(N);
+  const other = new Float32Array(N);
+  for (let i = 0; i < N; i += 1) {
+    const d = Math.max(
+      Math.abs(rgb[i * 3] - rgbBase[i * 3]),
+      Math.abs(rgb[i * 3 + 1] - rgbBase[i * 3 + 1]),
+      Math.abs(rgb[i * 3 + 2] - rgbBase[i * 3 + 2]),
+    );
+    over[i] = ground[i] && alpha[i] > 0.5 && artGround[i] === 0 ? 1 : 0;
+    other[i] = d > 40 ? 1 : 0;
+  }
+  const nearOver = boxFraction(over, 4);
+  const dense = boxFraction(other, 4);
+  const coherent = Float32Array.from(dense, (v) => (v > 0.45 ? 1 : 0));
+  const nearCoherent = boxFraction(coherent, 2);
+  for (let i = 0; i < N; i += 1) same[i] = nearOver[i] > 0 || nearCoherent[i] > 0 ? 0 : 1;
+  let groundInFigure = 0;
+  let differing = 0;
+  for (let i = 0; i < N; i += 1) {
+    if (alpha[i] > 0.5 && ground[i]) groundInFigure += 1;
+    if (alpha[i] > 0.5 && !ground[i] && !same[i]) differing += 1;
+  }
+  console.log(
+    `base: ground under the figure ${groundInFigure} px, painted differently ${differing} px`,
+  );
+  return Float32Array.from(alpha, (a, i) =>
+    same[i] ? a : a * (1 - Math.min(1, soft[i])),
+  );
+})();
+const ornamentMask = Float32Array.from(same, (s) => (s ? 0 : 1));
+const goldBase = await goldLayersOf(rgbBase);
+const unlitBase = unlitOf(rgbBase);
 
 // --- Partition ----------------------------------------------------------------
 // Where a polygon cuts across the black bodysuit, a straight cut would float
@@ -1150,27 +1314,41 @@ for (let i = 0; i < N; i += 1) {
 // piece keeps only the lit armour, and the dark suit there stays with the
 // body layer. Deeper inside, a piece keeps its black plates.
 const bodyCore = await rasterise([BODY]);
-const armour = await blurField(
-  Float32Array.from({ length: N }, (_, i) => {
-    const bright = Math.max(rgb[i * 3], rgb[i * 3 + 1], rgb[i * 3 + 2]);
-    return Math.min(1, Math.max(0, (bright - 36) / 44));
-  }),
-  1.2,
-);
+const armourOf = (colours) =>
+  blurField(
+    Float32Array.from({ length: N }, (_, i) => {
+      const bright = Math.max(colours[i * 3], colours[i * 3 + 1], colours[i * 3 + 2]);
+      return Math.min(1, Math.max(0, (bright - 36) / 44));
+    }),
+    1.2,
+  );
+const armour = await armourOf(rgb);
+const armourBase = await armourOf(rgbBase);
+// The full artwork's pixels are the ornaments' to claim; the base figure's
+// the armour's (2026-10-16): an ornament over a plate takes only what differs
+// from the base, and the plate beneath it is whole.
 const remaining = new Float32Array(N).fill(1);
+const remainingBase = new Float32Array(N).fill(1);
 const pieceFields = [];
 const claimed = new Float32Array(N);
+const isOrnament = (piece) => ORNAMENT_GROUPS.has(piece.group);
 for (const piece of PIECES) {
   const poly = await rasterise([piece.poly]);
   const depth = await blurField(poly, 9);
   const field = new Float32Array(N);
+  const ornament = isOrnament(piece);
+  const left = ornament ? remaining : remainingBase;
+  const cover = ornament ? alpha : alphaBase;
+  const lit = ornament ? armour : armourBase;
   for (let i = 0; i < N; i += 1) {
-    const take = poly[i] * remaining[i];
-    remaining[i] -= take;
+    const take = poly[i] * left[i] * (ornament ? ornamentMask[i] : 1);
+    left[i] -= take;
     if (!take) continue;
     const inner = Math.min(1, Math.max(0, (depth[i] - 0.72) / 0.26));
-    const keep = bodyCore[i] > 0.5 ? Math.max(armour[i], inner) : 1;
-    field[i] = take * alpha[i] * keep;
+    const keep = bodyCore[i] > 0.5 ? Math.max(lit[i], inner) : 1;
+    // Beneath an ornament a plate keeps only its lit armour: the dark suit
+    // there stays with the undersuit until the ornament covers it.
+    field[i] = take * cover[i] * (ornament || same[i] ? keep : Math.min(keep, lit[i]));
     claimed[i] += field[i];
   }
   pieceFields.push(field);
@@ -1180,6 +1358,54 @@ for (const piece of PIECES) {
       Math.round(poly.reduce((s, v) => s + v, 0)),
       Math.round(field.reduce((s, v) => s + v, 0)),
     );
+}
+// What no polygon reaches. The armour beneath a ribbon (the polygons were
+// drawn round the ribbon): the nearest armour piece's, by its polygon's
+// reach. An ornament's pixel outside its polygon (the polygons were drawn
+// where the armour had already claimed): the nearest ornament's, by reach,
+// then by seat, so every pixel the artwork paints over the armour lands.
+for (const [index, piece] of PIECES.entries()) {
+  const ornament = isOrnament(piece);
+  const reach = await blurField(await rasterise([piece.poly]), ornament ? 24 : 14);
+  const field = pieceFields[index];
+  const left = ornament ? remaining : remainingBase;
+  const cover = ornament ? alpha : alphaBase;
+  for (let i = 0; i < N; i += 1) {
+    if (!left[i] || cover[i] < 0.03 || reach[i] < (ornament ? 0.005 : 0.02)) continue;
+    if (ornament && !ornamentMask[i]) continue;
+    const take = left[i] * cover[i] * (ornament || same[i] ? 1 : armourBase[i]);
+    left[i] = 0;
+    field[i] += take;
+    claimed[i] += take;
+  }
+}
+{
+  const ornaments = PIECES.map((piece, index) => ({ piece, index })).filter(({ piece }) =>
+    isOrnament(piece),
+  );
+  let strays = 0;
+  for (let i = 0; i < N; i += 1) {
+    if (!remaining[i] || alpha[i] < 0.03 || !ornamentMask[i]) continue;
+    const x = i % W;
+    const y = (i - x) / W;
+    let best = null;
+    let nearest = Number.POSITIVE_INFINITY;
+    for (const entry of ornaments) {
+      const [sx, sy] = entry.piece.seat;
+      const d = (sx - x) ** 2 + (sy - y) ** 2;
+      if (d < nearest) {
+        nearest = d;
+        best = entry;
+      }
+    }
+    if (!best) break;
+    const take = remaining[i] * alpha[i];
+    remaining[i] = 0;
+    pieceFields[best.index][i] += take;
+    claimed[i] += take;
+    strays += 1;
+  }
+  console.log(`base: ornament pixels beyond every polygon's reach ${strays}`);
 }
 const body = new Float32Array(N);
 for (let i = 0; i < N; i += 1) body[i] = Math.max(0, alpha[i] - claimed[i]);
@@ -1382,32 +1608,6 @@ const FACE = await writeWebp(
 // material floor and its local bevel detail: near-black channels look like
 // missing plate pixels while the gold flows in. The channel walls catch a
 // cool reflection, but this substrate is never the finished bronze.
-const goldLight = await blurField(
-  Float32Array.from(
-    { length: N },
-    (_, i) => (0.2126 * rgb[i * 3] + 0.7152 * rgb[i * 3 + 1] + 0.0722 * rgb[i * 3 + 2]) / 255,
-  ),
-  2,
-);
-const rawGold = Buffer.alloc(N * 3);
-for (let y = 1; y < H - 1; y += 1) {
-  for (let x = 1; x < W - 1; x += 1) {
-    const i = y * W + x;
-    const m = goldSoft[i];
-    if (!m) continue;
-    const k = Math.min(1, goldLight[i] ** 0.9);
-    const wall = Math.min(
-      1,
-      Math.hypot(goldSoft[i + 1] - goldSoft[i - 1], goldSoft[i + W] - goldSoft[i - W]) * 0.9,
-    );
-    const local = (0.2126 * rgb[i * 3] + 0.7152 * rgb[i * 3 + 1] + 0.0722 * rgb[i * 3 + 2]) / 255;
-    const detail = Math.max(-5, Math.min(6, (local - goldLight[i]) * 20));
-    const base = [31 + 38 * k + detail, 36 + 41 * k + detail, 43 + 46 * k + detail];
-    const steel = [112, 126, 144];
-    for (let c = 0; c < 3; c += 1)
-      rawGold[i * 3 + c] = Math.round(base[c] + (steel[c] - base[c]) * wall);
-  }
-}
 
 // The plates: one atlas, its art on the left half and each plate's coarse
 // nanite mosaic at the same place on the right half (one file, one decode).
@@ -1422,7 +1622,14 @@ for (const [index, plate] of plates.entries()) {
   const found = bounds(plate.field);
   if (!found) throw new Error(`${plate.id}: the clip claims nothing`);
   const box = deliveryBox(found, Math.ceil(MARGIN / SCALE) + 1);
-  const colours = plate.region === "helmet" ? unlit : rgb;
+  // The armour plates from the base figure (the helmet unlit), the
+  // ornaments' from the full artwork (2026-10-16).
+  const fromBase = !ORNAMENT_GROUPS.has(
+    PIECES.find((piece) => piece.id === plate.region).group,
+  );
+  const colours = plate.region === "helmet" ? unlitBase : fromBase ? rgbBase : rgb;
+  const plateGoldSoft = fromBase ? goldBase.goldSoft : goldSoft;
+  const plateRawGold = fromBase ? goldBase.rawGold : rawGold;
   const art = extractRaw(await toDelivery(rgba(plate.field, colours)), box);
   const { width: w, height: h } = box;
   // rx17: its gold, unformed (the raw channel; alpha: the trims' soft
@@ -1431,8 +1638,8 @@ for (const [index, plate] of plates.entries()) {
   const gold = extractRaw(
     await toDelivery(
       rgba(
-        Float32Array.from(plate.field, (v, i) => v * goldSoft[i]),
-        rawGold,
+        Float32Array.from(plate.field, (v, i) => v * plateGoldSoft[i]),
+        plateRawGold,
       ),
     ),
     box,

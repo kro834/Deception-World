@@ -12,7 +12,7 @@ const root = (path) => fileURLToPath(new URL(`../${path}`, import.meta.url));
 const SOURCE = { width: 1055, height: 2000 };
 const CROP = { left: 20, top: 41, width: 1019, height: 1855 };
 const FIG = { width: 571, height: 1040 };
-const SUIT = "public/rexonance-suit-20261010";
+const SUIT = "public/rexonance-suit-20261016";
 const OUT = "public/rexonance-forms-20261011";
 
 const base = await sharp(root(`${SUIT}/figure.webp`))

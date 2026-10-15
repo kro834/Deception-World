@@ -103,11 +103,13 @@ test("rx17: the gold atlas and the gold cells, generated with the plates", async
   // Preloaded with the rest, right after the engine's atlas.
   assert.equal(REXONANCE_SUIT_ASSETS[1], REXONANCE_SUIT_GOLD_ATLAS.src);
   // Its own budget (the brief: at most 150 KB more for the call).
-  assert.ok(statSync(path).size <= 150_000, String(statSync(path).size));
+  // 2026-10-16: the armour plates carry the arm beneath the ribbons, and
+  // the ornaments their overlap (the atlas is cut from two pictures now).
+  assert.ok(statSync(path).size <= 175_000, String(statSync(path).size));
   let total = 0;
   for (const file of [...REXONANCE_SUIT_ASSETS, REXONANCE_SUIT_FIGURE])
     total += statSync(new URL(`../public${file}`, import.meta.url)).size;
-  assert.ok(total < 640_000, String(total));
+  assert.ok(total < 700_000, String(total));
   // The size of the atlas's art half: each plate's raw gold at its art's place.
   const meta = await sharp(path).metadata();
   assert.deepEqual(

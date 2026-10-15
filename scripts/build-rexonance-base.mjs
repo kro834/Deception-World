@@ -1,7 +1,7 @@
 // Builds the Rexonance base figure for the scroll suit-up (owner,
 // 2026-10-16): the owner's art of Rexonance without its ornaments (no tail,
 // no ribbons), in the suit figure's frame (571 x 1040, pixel for pixel over
-// public/rexonance-suit-20261010/figure.webp), with an alpha from the black
+// public/rexonance-suit-20261016/figure.webp), with an alpha from the black
 // ground. The scene assembles the armour whole from it, and the ornaments
 // then form over the armour from the full art.
 //
@@ -19,7 +19,7 @@ const CUT = { width: 999, height: 1835, left: 30, top: 51 };
 const CROP = { left: 20, top: 41, width: 1019, height: 1855 };
 const FIG = { width: 571, height: 1040 };
 const N = FIG.width * FIG.height;
-const OUT = "public/rexonance-suit-20261016/base.webp";
+const OUT = "public/rexonance-suit-base-20261016/base.webp";
 
 // The black ground: near-black pixels connected to the image edges, with
 // their dark anti-aliased rim, feathered (as the MAX/ULTRA figures are cut).
@@ -43,7 +43,7 @@ const { data } = await sharp(placed)
   .removeAlpha()
   .raw()
   .toBuffer({ resolveWithObject: true });
-const figure = await sharp(root("public/rexonance-suit-20261010/figure.webp"))
+const figure = await sharp(root("public/rexonance-suit-20261016/figure.webp"))
   .ensureAlpha()
   .raw()
   .toBuffer();

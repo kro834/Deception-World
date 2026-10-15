@@ -712,6 +712,19 @@ function* assemblyPlanSteps({
   }
   const ornament = new Set(ornaments ?? []);
   const armour = baseSample ? ranked.filter((entry) => !ornament.has(entry.piece.group)) : null;
+  const ornamentEntries = ranked.filter((entry) => ornament.has(entry.piece.group));
+  const nearestSeat = (candidates, cx, cy) => {
+    let owner = null;
+    let best = Number.POSITIVE_INFINITY;
+    for (const entry of candidates) {
+      const distance = (entry.piece.seat[0] - cx) ** 2 + (entry.piece.seat[1] - cy) ** 2;
+      if (distance < best) {
+        best = distance;
+        owner = entry;
+      }
+    }
+    return owner;
+  };
   const tiles = [];
   // The owner of a cell among `candidates`: the atlas is front-first, so
   // the vote is over the actual painted mask, not the smallest rectangle (a
@@ -789,7 +802,14 @@ function* assemblyPlanSteps({
         if (sample.data[offset + 3] < 40) continue;
         rgb = [sample.data[offset], sample.data[offset + 1], sample.data[offset + 2]];
       }
-      const owner = ownerOf(ranked, sx, sy, tw, th, cx, cy);
+      let owner = ownerOf(ranked, sx, sy, tw, th, cx, cy);
+      // A painted cell no mask claims, where the base shows nothing, is an
+      // ornament's (a ribbon's strand beside the knee): the nearest
+      // ornament's seat says whose, so it lands with the ornaments — not
+      // with the legs by its height (owner, 2026-10-16: the decoration
+      // beside the knees showed before it was fitted).
+      if (!owner && armour && baseSample.data[offset + 3] < 40 && ornamentEntries.length)
+        owner = nearestSeat(ornamentEntries, cx, cy);
       // Failed sampling still has the authored plate silhouette; never
       // turn its transparent background into a rectangular tile swarm.
       if (!sample && masked && !owner) continue;
