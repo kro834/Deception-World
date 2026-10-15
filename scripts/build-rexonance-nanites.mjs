@@ -3,6 +3,7 @@
 // nanite, the armour formation and the gold guideways rebuilt). Reproducible:
 //
 //   node scripts/build-rexonance-nanites.mjs [--blender=<Blender binary>] [--check]
+//     [--only=cells,fx,guide] [--work=<dir>] [--debug=<dir>] [--placeholder]
 //
 // writes public/rexonance-nanites-20261016/{cells,comets,fx,guide}.webp and
 // the generated module src/lib/rexonance-nanites.ts.
@@ -50,6 +51,9 @@ const arg = (name) => {
 const CHECK = process.argv.includes("--check");
 const PLACEHOLDER = process.argv.includes("--placeholder");
 const BLENDER = arg("blender");
+// --only=cells,fx,guide: with --blender, re-render only these scenes (the
+// others are packed from the work folder's earlier renders).
+const ONLY = (arg("only") || "cells,fx,guide").split(",");
 const WORK = arg("work") || join(tmpdir(), "rexonance-nanites-work");
 // --debug=<dir>: also writes each sheet, lossless, as <dir>/<name>.png.
 const DEBUG = arg("debug");
@@ -67,7 +71,8 @@ const WEBP = {
   cells: { quality: 80, alphaQuality: 90, effort: 6 },
   comets: { quality: 80, alphaQuality: 90, effort: 6 },
   fx: { quality: 82, alphaQuality: 85, effort: 6 },
-  guide: { quality: 72, alphaQuality: 65, effort: 6 },
+  // The thin rails of the conduit encode smaller with libwebp's picture tuning.
+  guide: { quality: 72, alphaQuality: 65, effort: 6, preset: "picture", smartSubsample: false },
 };
 const TONES = {
   ice: [121, 232, 255],
@@ -574,12 +579,21 @@ function bleed(raw, width, height) {
   return out;
 }
 
-const encode = (name, source, options = WEBP[name]) => {
+// Below these alphas a pixel is lanczos ringing or a render's stray
+// coverage (at most 3% light): cleared, it costs nothing.
+const ALPHA_FLOOR = { cells: 4, comets: 0, fx: 8, guide: 6 };
+const floorAlpha = (raw, floor) => {
+  if (floor)
+    for (let i = 3; i < raw.length; i += 4) if (raw[i] < floor) raw[i] = raw[i - 1] = raw[i - 2] = raw[i - 3] = 0;
+  return raw;
+};
+
+const encode = async (name, source, options = WEBP[name]) => {
   const [width, height] = SIZE[name];
-  const raw = bleed(source, width, height);
+  const raw = bleed(floorAlpha(Buffer.from(source), ALPHA_FLOOR[name]), width, height);
   if (DEBUG) {
     mkdirSync(DEBUG, { recursive: true });
-    sharp(raw, { raw: { width, height, channels: 4 } }).png().toFile(join(DEBUG, `${name}.png`));
+    await sharp(raw, { raw: { width, height, channels: 4 } }).png().toFile(join(DEBUG, `${name}.png`));
   }
   return sharp(raw, { raw: { width, height, channels: 4 } })
     .webp({ smartSubsample: true, ...options })
@@ -659,7 +673,7 @@ async function packFx(frameAt, scanGlow = true) {
   }
   {
     const { raw, size, height: h } = await frameAt("scan");
-    let cell = await downsample(raw, size, h, scan.w, scan.h);
+    let cell = snapLight(await downsample(raw, size, h, scan.w, scan.h));
     if (scanGlow) cell = scanUnderGlow(cell);
     blit(sheet, width, cell, scan.w, scan.h, scan.x, scan.y);
   }
@@ -671,12 +685,27 @@ async function packFx(frameAt, scanGlow = true) {
     }
   for (let k = 0; k < shock.frames; k += 1) {
     const { raw, size, height: h } = await frameAt(`shock-${k}`);
-    const cell = await downsample(raw, size, h, shock.w, shock.h);
+    const cell = snapLight(await downsample(raw, size, h, shock.w, shock.h));
     const x = shock.x + shock.w * (k % shock.cols);
     const y = shock.y + shock.h * Math.floor(k / shock.cols);
     blit(sheet, width, featherCell(cell, shock.w, shock.h, 2), shock.w, shock.h, x, y);
   }
   return sheet;
+}
+
+// The shock ring and the scan plane are pure light: their colours lie on
+// the line from ice (190, 240, 255) to white by luminance; snapped there, the
+// denoiser's colour grain costs no bytes (their shape is in the alpha).
+function snapLight(cell) {
+  for (let i = 0; i < cell.length; i += 4) {
+    if (!cell[i + 3]) continue;
+    const L = (0.2126 * cell[i] + 0.7152 * cell[i + 1] + 0.0722 * cell[i + 2]) / 255;
+    const t = clamp01((L - 0.85) / 0.15);
+    cell[i] = Math.round(190 + 65 * t);
+    cell[i + 1] = Math.round(240 + 15 * t);
+    cell[i + 2] = 255;
+  }
+  return cell;
 }
 
 // Beneath the scan plane's leading edge (row edgeY), a soft ice lip of
@@ -803,8 +832,10 @@ async function guidePrep(alpha) {
     for (let y = 0; y < h; y += 1) alpha.copy(cell, y * w, (ay + y) * ATLAS_W + ax, (ay + y) * ATLAS_W + ax + w);
     const big = await sharp(cell, { raw: { width: w, height: h, channels: 1 } })
       .resize(w * 2, h * 2, { kernel: "cubic", fit: "fill" })
+      .extractChannel(0)
       .raw()
       .toBuffer();
+    if (big.length !== w * h * 4) throw new Error(`${piece.id}: the upsampled gold is not one channel`);
     const W2 = w * 2;
     const H2 = h * 2;
     const contours = traceContours(big, W2, H2, 96)
@@ -841,10 +872,34 @@ const pngFrames = (dir) => async (name) => {
   return { raw: data, size: info.width, height: info.height };
 };
 
+// The hard-light glass is one uniform material (alpha 0.28): Cycles leaves
+// its stochastic transparency's grain in the alpha and the denoiser a faint
+// colour grain; each glass pixel takes the glass's mean colour and the exact
+// alpha 0.28 (71), as rendered without noise. The rails (gold) and the
+// channel (opaque) are untouched.
+function flattenGlass(raw) {
+  const glassy = (i) => raw[i + 3] > 40 && raw[i + 3] < 150 && raw[i + 2] >= raw[i];
+  const sum = [0, 0, 0];
+  let count = 0;
+  for (let i = 0; i < raw.length; i += 4)
+    if (glassy(i)) {
+      for (let c = 0; c < 3; c += 1) sum[c] += raw[i + c];
+      count += 1;
+    }
+  if (!count) return raw;
+  const mean = sum.map((v) => Math.round(v / count));
+  for (let i = 0; i < raw.length; i += 4)
+    if (glassy(i)) {
+      raw.set(mean, i);
+      raw[i + 3] = 71;
+    }
+  return raw;
+}
+
 async function renderedGuide(mask) {
   const { data, info } = await sharp(join(WORK, "guide", "guide.png")).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
   const raw = await downsample(data, info.width, info.height, ATLAS_W, ATLAS_H);
-  return applyMask(raw, mask);
+  return applyMask(flattenGlass(raw), mask);
 }
 
 // --- Placeholders (phase 0) ---------------------------------------------------------------
@@ -1199,12 +1254,14 @@ if (PLACEHOLDER) {
 } else {
   if (BLENDER) {
     if (!existsSync(BLENDER)) throw new Error(`no Blender at ${BLENDER}`);
-    const prep = join(WORK, "guide-prep.json");
-    writeFileSync(prep, JSON.stringify(await guidePrep(alpha)));
     for (const dir of ["cells", "fx", "guide"]) mkdirSync(join(WORK, dir), { recursive: true });
-    runBlender("nanite_cells.py", join(WORK, "cells"));
-    runBlender("nanite_fx.py", join(WORK, "fx"));
-    runBlender("nanite_guide.py", prep, join(WORK, "guide", "guide.png"));
+    if (ONLY.includes("cells")) runBlender("nanite_cells.py", join(WORK, "cells"));
+    if (ONLY.includes("fx")) runBlender("nanite_fx.py", join(WORK, "fx"));
+    if (ONLY.includes("guide")) {
+      const prep = join(WORK, "guide-prep.json");
+      writeFileSync(prep, JSON.stringify(await guidePrep(alpha)));
+      runBlender("nanite_guide.py", prep, join(WORK, "guide", "guide.png"));
+    }
   }
   const rendered = ["cells", "fx", "guide"].every((dir) => existsSync(join(WORK, dir)) && readdirSync(join(WORK, dir)).length);
   if (rendered) {
@@ -1215,20 +1272,33 @@ if (PLACEHOLDER) {
   } else console.log("no renders in the work folder: cells, fx and guide stay as committed");
 }
 if (frames) {
-  encoded.cells = await encode("cells", await packCells(frames, sparks));
-  encoded.fx = await encode("fx", await packFx(frames, !PLACEHOLDER));
-  // The flat placeholders' hard edges cost more than the renders' soft ones.
-  if (PLACEHOLDER)
-    for (const name of ["cells", "fx"])
-      for (let quality = WEBP[name].quality - 6; encoded[name].length > BUDGET[name] && quality >= 40; quality -= 6)
-        encoded[name] = await encode(name, await (name === "cells" ? packCells(frames, sparks) : packFx(frames, false)), { ...WEBP[name], quality });
-  let quality = WEBP.guide.quality;
-  for (;;) {
-    encoded.guide = await encode("guide", guideRaw, { ...WEBP.guide, quality });
-    if (encoded.guide.length <= BUDGET.guide || quality <= 64) break;
-    quality -= 2;
+  // Over budget at the contract's settings, the alpha's quality steps down
+  // first (85 → 65), then the colour's: each sheet reports what it used.
+  const sheets = { cells: await packCells(frames, sparks), fx: await packFx(frames, !PLACEHOLDER) };
+  for (const name of ["cells", "fx"]) {
+    const ladder = [];
+    for (let alphaQuality = WEBP[name].alphaQuality; alphaQuality >= 65; alphaQuality -= 5) ladder.push({ ...WEBP[name], alphaQuality });
+    for (let quality = WEBP[name].quality - 4; quality >= 40; quality -= 4) ladder.push({ ...WEBP[name], alphaQuality: 65, quality });
+    for (const options of ladder) {
+      encoded[name] = await encode(name, sheets[name], options);
+      if (encoded[name].length <= BUDGET[name]) {
+        if (options !== ladder[0]) console.log(`${name}.webp encoded at quality ${options.quality}, alpha ${options.alphaQuality}`);
+        break;
+      }
+    }
   }
-  if (quality !== WEBP.guide.quality) console.log(`guide.webp encoded at quality ${quality}`);
+  // The guide: quality 72 → 64 before it may exceed its budget (then the
+  // alpha's quality 65 → 45 at 64).
+  const guideLadder = [];
+  for (let quality = WEBP.guide.quality; quality >= 64; quality -= 2) guideLadder.push({ ...WEBP.guide, quality });
+  for (let alphaQuality = 55; alphaQuality >= 45; alphaQuality -= 10) guideLadder.push({ ...WEBP.guide, quality: 64, alphaQuality });
+  for (const options of guideLadder) {
+    encoded.guide = await encode("guide", guideRaw, options);
+    if (encoded.guide.length <= BUDGET.guide) {
+      if (options !== guideLadder[0]) console.log(`guide.webp encoded at quality ${options.quality}, alpha ${options.alphaQuality}`);
+      break;
+    }
+  }
 }
 const bytes = {};
 for (const name of FILES) {

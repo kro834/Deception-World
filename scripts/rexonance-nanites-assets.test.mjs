@@ -337,16 +337,19 @@ test("the guideway conduit stays on each plate's own gold, covers it, and is lit
     }
   }
   assert.ok(covered >= 0.95 * solid, `the conduit covers ${covered} of ${solid} solid gold cells`);
-  // The rails' upper-left flanks outshine their lower-right flanks.
+  // The rails (gold pixels on the conduit's outline) facing the upper left
+  // (their left and upper neighbours outside) outshine those facing the
+  // lower right.
   const alpha = (x, y) => (x < 0 || y < 0 || x >= W || y >= H ? 0 : guide.data[(y * W + x) * 4 + 3]);
   let [ul, ulN, lr, lrN] = [0, 0, 0, 0];
   for (let y = 0; y < H; y += 1)
     for (let x = 0; x < W; x += 1) {
-      if (alpha(x, y) < 200) continue;
-      const L = luminance(guide.data, (y * W + x) * 4);
-      if (alpha(x - 1, y - 1) < 64 && alpha(x + 1, y + 1) >= 200) [ul, ulN] = [ul + L, ulN + 1];
-      if (alpha(x + 1, y + 1) < 64 && alpha(x - 1, y - 1) >= 200) [lr, lrN] = [lr + L, lrN + 1];
+      const i = (y * W + x) * 4;
+      if (alpha(x, y) < 100 || guide.data[i] <= guide.data[i + 2]) continue;
+      const L = luminance(guide.data, i);
+      if (alpha(x - 1, y) < 32 && alpha(x, y - 1) < 32) [ul, ulN] = [ul + L, ulN + 1];
+      if (alpha(x + 1, y) < 32 && alpha(x, y + 1) < 32) [lr, lrN] = [lr + L, lrN + 1];
     }
-  assert.ok(ulN > 500 && lrN > 500, "rails on every side");
-  assert.ok(ul / ulN > lr / lrN, `upper-left flanks ${(ul / ulN).toFixed(3)} vs lower-right ${(lr / lrN).toFixed(3)}`);
+  assert.ok(ulN > 300 && lrN > 300, `rails on every side (${ulN}, ${lrN})`);
+  assert.ok(ul / ulN > 1.3 * (lr / lrN), `upper-left flanks ${(ul / ulN).toFixed(3)} vs lower-right ${(lr / lrN).toFixed(3)}`);
 });
