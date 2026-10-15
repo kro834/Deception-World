@@ -586,7 +586,7 @@ main.site-shell.film-edition.mirage-edition #world-column-pickup .world-column-d
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  filter: drop-shadow(3px 0 0 rgb(164 139 255 / 34%));
+  filter: drop-shadow(3px 0 0 rgb(255 95 200 / 34%));
   font-size: clamp(32px, 4.4vw, 60px);
   line-height: 1.2;
 }

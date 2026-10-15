@@ -39,8 +39,8 @@ html[data-family] {
   --sh-ink-3: #0e1826;
   --sh-l1: #7ae8ff;
   --sh-l1-rgb: 122 232 255;
-  --sh-l2: #a48bff;
-  --sh-l2-rgb: 164 139 255;
+  --sh-l2: #ff5fc8;
+  --sh-l2-rgb: 255 95 200;
   --sh-on-l1: #03060c;
   --sh-text: #f2f7fb;
   --sh-text-2: #bccbd8;
@@ -132,7 +132,7 @@ html[data-family="special"] .rxs-page.fst-page {
 
 /* The character files keep their own accent as the second light. */
 html[data-family="dossier"] .manager-page {
-  --sh-l2: var(--manager-accent, #a48bff);
+  --sh-l2: var(--manager-accent, #ff5fc8);
 }
 
 /* The Dream Chapter numbers its chapters as its own plates do (壱, 弐). */

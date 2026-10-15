@@ -28,7 +28,7 @@
   border: 1px solid rgb(122 232 255 / 24%);
   border-radius: 6px;
   background:
-    linear-gradient(90deg, #7ae8ff, #a48bff 34%, #ff5cc8 66%, #f0cf86) 0 0 / 100% 2px no-repeat,
+    linear-gradient(90deg, #7ae8ff, #ff5fc8 34%, #ff5cc8 66%, #f0cf86) 0 0 / 100% 2px no-repeat,
     linear-gradient(#7ae8ff 0 0) 0 0 / 22px 2px no-repeat,
     linear-gradient(#7ae8ff 0 0) 0 0 / 2px 22px no-repeat,
     linear-gradient(#f0cf86 0 0) 100% 100% / 22px 2px no-repeat,

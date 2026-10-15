@@ -45,7 +45,7 @@
   --mr-ice: #7ae8ff;
   --mr-ice-hi: #c6f5ff;
   --mr-ice-deep: #2bb6e3;
-  --mr-violet: #a48bff;
+  --mr-violet: #ff5fc8;
   --mr-magenta: #ff5cc8;
   --mr-gold: #f0cf86;
   --mr-gold-deep: #c9a24e;
@@ -57,7 +57,7 @@
   --mr-focus: #fff0b5;
   --mr-line: rgb(122 232 255 / 20%);
   --mr-line-strong: rgb(122 232 255 / 52%);
-  --mr-prism: linear-gradient(90deg, #7ae8ff 0%, #a48bff 34%, #ff5cc8 66%, #f0cf86 100%);
+  --mr-prism: linear-gradient(90deg, #7ae8ff 0%, #ff5fc8 34%, #ff5cc8 66%, #f0cf86 100%);
   --mr-chrome: linear-gradient(180deg, #ffffff 0%, #eafbff 30%, #9eeeff 60%, #5aa8ff 100%);
   --mr-hud: "Michroma", "Oxanium", "Noto Sans JP", sans-serif;
   --mr-mono: "Oxanium", "Noto Sans JP", sans-serif;
@@ -100,7 +100,7 @@
   color: var(--mr-text);
   background:
     radial-gradient(ellipse 70% 38% at 86% 3%, rgb(122 232 255 / 12%), transparent 70%),
-    radial-gradient(ellipse 60% 30% at 6% 30%, rgb(164 139 255 / 7%), transparent 70%),
+    radial-gradient(ellipse 60% 30% at 6% 30%, rgb(255 95 200 / 7%), transparent 70%),
     radial-gradient(ellipse 60% 30% at 94% 62%, rgb(255 92 200 / 5%), transparent 70%),
     radial-gradient(ellipse 70% 30% at 20% 92%, rgb(240 207 134 / 4%), transparent 70%),
     repeating-linear-gradient(90deg, rgb(122 232 255 / 2.6%) 0 1px, transparent 1px 96px),
@@ -203,7 +203,7 @@ html[data-mode="world"]:not([data-world-effects="economy"])
 .site-shell.film-edition.mirage-edition .hero {
   background:
     radial-gradient(ellipse 44% 54% at 78% 54%, rgb(122 232 255 / 12%), transparent 70%),
-    radial-gradient(ellipse 30% 36% at 66% 28%, rgb(164 139 255 / 10%), transparent 70%),
+    radial-gradient(ellipse 30% 36% at 66% 28%, rgb(255 95 200 / 10%), transparent 70%),
     radial-gradient(ellipse 30% 30% at 92% 80%, rgb(255 92 200 / 8%), transparent 70%), transparent;
 }
 
@@ -273,7 +273,7 @@ html[data-mode="world"]:not([data-world-effects="economy"])
     transparent 40%,
     rgb(122 232 255 / 10%) 47%,
     rgb(198 245 255 / 34%) 50%,
-    rgb(164 139 255 / 12%) 53%,
+    rgb(255 95 200 / 12%) 53%,
     transparent 60%
   );
 }
@@ -290,7 +290,7 @@ html[data-mode="world"]:not([data-world-effects="economy"])
     90deg,
     transparent,
     rgb(122 232 255 / 9%) 32%,
-    rgb(164 139 255 / 12%) 48%,
+    rgb(255 95 200 / 12%) 48%,
     rgb(255 92 200 / 8%) 62%,
     rgb(240 207 134 / 5%) 74%,
     transparent
@@ -318,7 +318,7 @@ html[data-mode="world"]:not([data-world-effects="economy"])
   transform-origin: 50% 100%;
   background:
     repeating-linear-gradient(90deg, rgb(122 232 255 / 24%) 0 1px, transparent 1px 64px),
-    repeating-linear-gradient(0deg, rgb(164 139 255 / 20%) 0 1px, transparent 1px 64px);
+    repeating-linear-gradient(0deg, rgb(255 95 200 / 20%) 0 1px, transparent 1px 64px);
 }
 
 .site-shell.film-edition.mirage-edition .mr-hero-readout {
@@ -474,7 +474,7 @@ html[data-mode="world"]:not([data-world-effects="economy"])
         #ffffff 10%,
         #f0cf86 22%,
         #ff5cc8 34%,
-        #a48bff 46%,
+        #ff5fc8 46%,
         #7ae8ff 60%,
         #2bb6e3 82%,
         #7ae8ff
@@ -512,7 +512,7 @@ html[data-mode="world"]:not([data-world-effects="economy"])
     0 0 0 2px rgb(122 232 255 / 14%),
     0 30px 80px rgb(0 0 0 / 60%),
     0 0 90px rgb(122 232 255 / 16%),
-    0 0 160px rgb(164 139 255 / 12%);
+    0 0 160px rgb(255 95 200 / 12%);
 }
 
 .site-shell.film-edition.mirage-edition .poster-media {
@@ -594,7 +594,7 @@ html[data-mode="world"]:not([data-world-effects="economy"])
       transparent 30.6% 55%,
       rgb(255 92 200 / 55%) 55% 62%,
       transparent 62% 76%,
-      rgb(164 139 255 / 55%) 76% 80%,
+      rgb(255 95 200 / 55%) 76% 80%,
       transparent 80%
     );
     -webkit-mask: radial-gradient(
@@ -710,7 +710,7 @@ html[data-mode="world"]:not([data-world-effects="economy"])
 }
 
 .site-shell.film-edition.mirage-edition .mr-ticker.is-close .mr-ticker-row.is-outline > span {
-  -webkit-text-stroke-color: rgb(164 139 255 / 48%);
+  -webkit-text-stroke-color: rgb(255 95 200 / 48%);
 }
 
 /* ================================================================
@@ -748,7 +748,7 @@ html[data-mode="world"]:not([data-world-effects="economy"])
     180deg,
     transparent,
     rgb(122 232 255 / 8%) 42%,
-    rgb(164 139 255 / 6%) 52%,
+    rgb(255 95 200 / 6%) 52%,
     transparent
   );
   pointer-events: none;
@@ -767,7 +767,7 @@ html[data-mode="world"]:not([data-world-effects="economy"])
   top: 0.07em;
   left: 0.07em;
   z-index: -1;
-  color: rgb(164 139 255 / 36%);
+  color: rgb(255 95 200 / 36%);
   text-shadow: none;
   -webkit-text-stroke: 0;
   pointer-events: none;
@@ -806,7 +806,7 @@ html[data-mode="world"]:not([data-world-effects="economy"])
 .site-shell.film-edition.mirage-edition .story-layout {
   background:
     linear-gradient(135deg, rgb(122 232 255 / 6%), transparent 42%),
-    linear-gradient(315deg, rgb(164 139 255 / 6%), transparent 40%), var(--mr-deck);
+    linear-gradient(315deg, rgb(255 95 200 / 6%), transparent 40%), var(--mr-deck);
   background-color: var(--mr-deck);
 }
 
@@ -912,7 +912,7 @@ html[data-mode="world"]:not([data-world-effects="economy"])
   background: linear-gradient(180deg, #e7fbff, var(--mr-ice));
   box-shadow:
     0 0 12px rgb(122 232 255 / 80%),
-    0 0 24px rgb(164 139 255 / 40%);
+    0 0 24px rgb(255 95 200 / 40%);
 }
 
 .site-shell.film-edition.mirage-edition .signal > b {
@@ -1237,7 +1237,7 @@ html[data-mode="world"]:not([data-world-effects="economy"])
    03 Records: the record bay
    ================================================================ */
 .site-shell.film-edition.mirage-edition .episode-archive {
-  background: linear-gradient(135deg, rgb(164 139 255 / 6%), transparent 40%), var(--mr-deck);
+  background: linear-gradient(135deg, rgb(255 95 200 / 6%), transparent 40%), var(--mr-deck);
 }
 
 .site-shell.film-edition.mirage-edition .episode-archive::after {
@@ -1351,7 +1351,7 @@ html[data-mode="world"]:not([data-world-effects="economy"])
       transparent 24.6% 48%,
       rgb(255 92 200 / 55%) 48% 56%,
       transparent 56% 72%,
-      rgb(164 139 255 / 60%) 72% 76%,
+      rgb(255 95 200 / 60%) 72% 76%,
       transparent 76%
     ),
     repeating-conic-gradient(rgb(122 232 255 / 45%) 0 0.4deg, transparent 0.4deg 5deg);
@@ -2953,7 +2953,7 @@ html:not([data-world-effects="economy"])[data-android-renderer]
   .story-layout {
   background:
     var(--mr-brackets), linear-gradient(135deg, rgb(122 232 255 / 6%), transparent 42%),
-    linear-gradient(315deg, rgb(164 139 255 / 6%), transparent 40%), var(--mr-deck);
+    linear-gradient(315deg, rgb(255 95 200 / 6%), transparent 40%), var(--mr-deck);
   background-repeat: no-repeat;
   background-origin: border-box;
 }
@@ -2997,7 +2997,7 @@ html:not([data-world-effects="economy"])[data-android-renderer]
   .site-shell.film-edition.mirage-edition
   .episode-archive {
   background:
-    var(--mr-brackets), linear-gradient(135deg, rgb(164 139 255 / 6%), transparent 40%),
+    var(--mr-brackets), linear-gradient(135deg, rgb(255 95 200 / 6%), transparent 40%),
     var(--mr-deck);
   background-repeat: no-repeat;
   background-blend-mode: normal;

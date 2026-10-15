@@ -84,7 +84,7 @@ main.manager-page:not(.is-sovereign) .dossier-arrive-scan {
     linear-gradient(
         90deg,
         var(--dm-rim) 0%,
-        var(--dm-violet, #a48bff) 34%,
+        var(--dm-violet, #ff5fc8) 34%,
         var(--dm-magenta, #ff5cc8) 66%,
         var(--dm-gold, #f0cf86) 100%
       )

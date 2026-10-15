@@ -49,7 +49,7 @@
   --pc-plate: rgb(9 17 30 / 78%);
   --pc-ice: #7ae8ff;
   --pc-gold: #f0cf86;
-  --pc-violet: #a48bff;
+  --pc-violet: #ff5fc8;
   --pc-magenta: #ff5cc8;
   --pc-text: #eef6fb;
   --pc-text-2: #b9cad8;
@@ -939,7 +939,7 @@ html[data-mode="world"]
   line-height: 1;
   letter-spacing: 0.02em;
   -webkit-text-stroke: 1px var(--pc-lock);
-  text-shadow: 0.07em 0.07em 0 rgb(164 139 255 / 34%);
+  text-shadow: 0.07em 0.07em 0 rgb(255 95 200 / 34%);
 }
 
 html[data-mode="world"]
@@ -2136,7 +2136,7 @@ html body #episode-pickup-dialog .episode-pickup-item figure > span {
   line-height: 1;
   letter-spacing: 0.02em;
   -webkit-text-stroke: 1px var(--pc-lock);
-  text-shadow: 0.07em 0.07em 0 rgb(164 139 255 / 34%);
+  text-shadow: 0.07em 0.07em 0 rgb(255 95 200 / 34%);
 }
 
 html body #episode-pickup-dialog .episode-pickup-item > div {

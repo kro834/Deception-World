@@ -18,8 +18,8 @@ export const OPENING_LOGO_SIZES = "min(1120px, 92vw, 117vh)";
 export const OPENING_LOGO_WIDTH = 1536;
 export const OPENING_LOGO_HEIGHT = 1024;
 
-export const OPENING_LOGO_FIRST = delivery("logo-title-ice-20260924");
-export const OPENING_LOGO_FINAL = delivery("logo-title-prism-20260924");
+export const OPENING_LOGO_FIRST = delivery("logo-title-saga-20261016");
+export const OPENING_LOGO_FINAL = delivery("logo-title-saga-20261016");
 
 /**
  * The candidate a browser would pick for a logo box of `cssWidth` px: the

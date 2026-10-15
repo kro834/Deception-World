@@ -15,7 +15,7 @@
   --dl-ice: #7ae8ff;
   --dl-lock: color-mix(in srgb, #7ae8ff 62%, #dff9ff);
   --dl-gold: #f0cf86;
-  --dl-violet: #a48bff;
+  --dl-violet: #ff5fc8;
   --dl-magenta: #ff5cc8;
   --dl-text-2: #b9cad8;
   --dl-text-3: #8fa6ba;
@@ -67,7 +67,7 @@
   font-family: var(--font-sans, "Noto Sans JP", "Hiragino Sans", system-ui, sans-serif);
   background:
     radial-gradient(ellipse 70% 38% at 86% 3%, rgb(122 232 255 / 13%), transparent 70%),
-    radial-gradient(ellipse 60% 30% at 6% 30%, rgb(164 139 255 / 7%), transparent 70%),
+    radial-gradient(ellipse 60% 30% at 6% 30%, rgb(255 95 200 / 7%), transparent 70%),
     radial-gradient(ellipse 70% 30% at 20% 92%, rgb(240 207 134 / 4%), transparent 70%),
     var(--dl-ink);
 }

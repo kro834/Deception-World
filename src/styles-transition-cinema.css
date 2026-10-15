@@ -89,7 +89,7 @@ html body .load-gate.has-cine > .dwc-shutter > i.is-right::after {
   top: 0;
   bottom: 0;
   width: 1px;
-  background: linear-gradient(180deg, #7ae8ff, #a48bff 34%, #ff5cc8 66%, #f0cf86);
+  background: linear-gradient(180deg, #7ae8ff, #ff5fc8 34%, #ff5cc8 66%, #f0cf86);
 }
 
 html body .load-gate.has-cine > .dwc-shutter > i.is-left::after {
@@ -105,7 +105,7 @@ html body .load-gate.has-cine > .dwc-shutter > i.is-bottom::after {
   right: 0;
   left: 0;
   height: 1px;
-  background: var(--dwc-prism, linear-gradient(90deg, #7ae8ff, #a48bff, #ff5cc8, #f0cf86));
+  background: var(--dwc-prism, linear-gradient(90deg, #7ae8ff, #ff5fc8, #ff5cc8, #f0cf86));
 }
 
 html body .load-gate.has-cine > .dwc-shutter > i.is-top::after {
@@ -1029,7 +1029,7 @@ html body .load-gate.has-cine.rider-route-dive .archive-dive-space {
       112deg,
       transparent 36%,
       rgb(122 232 255 / 0.09) 46%,
-      rgb(164 139 255 / 0.08) 52%,
+      rgb(255 95 200 / 0.08) 52%,
       transparent 62%
     );
 }
@@ -1072,7 +1072,7 @@ html body .load-gate.has-cine.is-rexonance-dive .archive-dive-space {
     112deg,
     transparent 30%,
     rgb(122 232 255 / 0.1) 42%,
-    rgb(164 139 255 / 0.09) 50%,
+    rgb(255 95 200 / 0.09) 50%,
     rgb(255 92 200 / 0.08) 58%,
     transparent 70%
   );
@@ -1771,7 +1771,7 @@ html body .load-gate.has-cine:is(.is-cine-calm, .is-cine-reduced) .rider-cutin-c
   right: 0;
   left: 0;
   height: 2px;
-  background: linear-gradient(90deg, #7ae8ff 0%, #a48bff 34%, #ff5cc8 66%, #f0cf86 100%);
+  background: linear-gradient(90deg, #7ae8ff 0%, #ff5fc8 34%, #ff5cc8 66%, #f0cf86 100%);
   pointer-events: none;
   transform: scaleX(0.9);
   transform-origin: 0 50%;

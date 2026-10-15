@@ -5,8 +5,8 @@ const origin = process.env.BASE_URL || "http://localhost:8082";
 const engine = process.env.PW_ENGINE || "chromium";
 // The opening's two alpha-keyed logos (2026-09-24): the ice logo burns and
 // the prism logo stays. Each is one srcset family of delivery widths.
-const firstLogo = /^\/logo-title-ice-20260924-delivery-(?:640|960|1280|1536)\.webp$/;
-const finalLogo = /^\/logo-title-prism-20260924-delivery-(?:640|960|1280|1536)\.webp$/;
+const firstLogo = /^\/logo-title-saga-20261016-delivery-(?:640|960|1280|1536)\.webp$/;
+const finalLogo = /^\/logo-title-saga-20261016-delivery-(?:640|960|1280|1536)\.webp$/;
 const browser = await (engine === "webkit" ? webkit : chromium).launch(
   engine === "webkit" ? {} : { channel: "chrome" },
 );
@@ -50,7 +50,7 @@ try {
     // The route preloads the ice logo with the <img> layers' srcset and sizes,
     // so every layer (and the burn's ImageBitmaps, from the HTTP cache) uses
     // one candidate of each logo.
-    assert.ok(await page.locator('link[rel=preload][imagesrcset*="logo-title-ice-20260924"]').count() >= 1);
+    assert.ok(await page.locator('link[rel=preload][imagesrcset*="logo-title-saga-20261016"]').count() >= 1);
     const fetched = await page.evaluate(() => performance.getEntriesByType("resource")
       .map(entry => new URL(entry.name).pathname)
       .filter(path => /\/logo-title/.test(path)));

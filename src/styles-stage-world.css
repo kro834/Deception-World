@@ -95,8 +95,8 @@ html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition 
 html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > #riders {
   --sw-light: #cfd8e3;
   --sw-light-rgb: 207 216 227;
-  --sw-warm: #a48bff;
-  --sw-warm-rgb: 164 139 255;
+  --sw-warm: #ff5fc8;
+  --sw-warm-rgb: 255 95 200;
   --sw-base: #10151c;
   --sw-deck: #1b2028;
   --sw-deck-2: #12161d;
@@ -197,7 +197,7 @@ html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition 
   html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > #riders {
     background:
       radial-gradient(42% 760px at 62% 0, rgb(236 242 250 / 13%), transparent 74%),
-      radial-gradient(50% 300px at 62% 100%, rgb(164 139 255 / 14%), transparent 72%),
+      radial-gradient(50% 300px at 62% 100%, rgb(255 95 200 / 14%), transparent 72%),
       linear-gradient(180deg, #14181e 0%, #222831 44%, #262c35 62%, #161a20 100%);
   }
 
@@ -816,7 +816,7 @@ html[data-family="world"]:root
   bottom: -1px;
   width: min(240px, 42%);
   height: 1px;
-  background: linear-gradient(90deg, #7ae8ff, rgb(164 139 255 / 60%) 60%, transparent);
+  background: linear-gradient(90deg, #7ae8ff, rgb(255 95 200 / 60%) 60%, transparent);
 }
 
 html[data-family="world"]:root

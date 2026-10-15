@@ -6,7 +6,7 @@ dialog.quick-search {
   --qs-faint: #8196a8;
   --qs-ice: #7ae8ff;
   --qs-gold: #f0cf86;
-  --qs-prism: linear-gradient(90deg, #7ae8ff 0%, #a48bff 34%, #ff5cc8 66%, #f0cf86 100%);
+  --qs-prism: linear-gradient(90deg, #7ae8ff 0%, #ff5fc8 34%, #ff5cc8 66%, #f0cf86 100%);
   --qs-hud: "Michroma", "Oxanium", "Helvetica Neue", sans-serif;
   box-sizing: border-box;
   width: min(680px, calc(100vw - 32px));

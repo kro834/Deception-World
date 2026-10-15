@@ -8,13 +8,13 @@
   --search-gold: #f0cf86;
   --search-panel: #0a121b;
   --search-line: rgb(122 232 255 / 0.18);
-  --search-prism: linear-gradient(90deg, #7ae8ff 0%, #a48bff 34%, #ff5cc8 66%, #f0cf86 100%);
+  --search-prism: linear-gradient(90deg, #7ae8ff 0%, #ff5fc8 34%, #ff5cc8 66%, #f0cf86 100%);
   --search-hud: "Michroma", "Oxanium", "Helvetica Neue", sans-serif;
   min-height: 100svh;
   color: var(--search-ink);
   background:
     radial-gradient(ellipse at 88% -6%, rgb(122 232 255 / 0.12), transparent 46%),
-    radial-gradient(ellipse at 0% 30%, rgb(164 139 255 / 0.06), transparent 40%),
+    radial-gradient(ellipse at 0% 30%, rgb(255 95 200 / 0.06), transparent 40%),
     #05090f;
 }
 .search-page .search-topbar {

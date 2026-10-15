@@ -41,12 +41,12 @@
   --dwc-focus: #fff0b5;
   --dwc-line: rgb(122 232 255 / 20%);
   --dwc-line-strong: rgb(122 232 255 / 52%);
-  --dwc-prism: linear-gradient(90deg, #7ae8ff 0%, #a48bff 34%, #ff5cc8 66%, #f0cf86 100%);
+  --dwc-prism: linear-gradient(90deg, #7ae8ff 0%, #ff5fc8 34%, #ff5cc8 66%, #f0cf86 100%);
   /* The prism at the plate strength (.62) for the top edge of a card. */
   --dwc-prism-soft: linear-gradient(
     90deg,
     rgb(122 232 255 / 62%) 0%,
-    rgb(164 139 255 / 62%) 34%,
+    rgb(255 95 200 / 62%) 34%,
     rgb(255 92 200 / 62%) 66%,
     rgb(240 207 134 / 62%) 100%
   );
@@ -589,7 +589,7 @@ html body #site-announcement-dialog .site-announcement-hub {
   border-radius: 6px;
   background:
     radial-gradient(ellipse 60% 40% at 0% 0%, rgb(122 232 255 / 10%), transparent 70%),
-    radial-gradient(ellipse 50% 40% at 100% 100%, rgb(164 139 255 / 7%), transparent 70%),
+    radial-gradient(ellipse 50% 40% at 100% 100%, rgb(255 95 200 / 7%), transparent 70%),
     var(--dwc-grid),
     var(--dwc-ink);
   -webkit-backdrop-filter: none;
@@ -947,7 +947,7 @@ html body #site-announcement-dialog .site-announcement-metric {
 }
 
 html body #site-announcement-dialog .site-announcement-metric b {
-  background: linear-gradient(90deg, #c6f5ff 0%, #7ae8ff 40%, #a48bff 75%, #f0cf86 100%);
+  background: linear-gradient(90deg, #c6f5ff 0%, #7ae8ff 40%, #ff5fc8 75%, #f0cf86 100%);
   -webkit-background-clip: text;
   background-clip: text;
   font-family: var(--dwc-mono);
@@ -1034,7 +1034,7 @@ html body .load-gate .cine-dive-status::before {
     90deg,
     transparent,
     #7ae8ff 18%,
-    #a48bff 40%,
+    #ff5fc8 40%,
     #ff5cc8 62%,
     #f0cf86 84%,
     transparent
@@ -1107,7 +1107,7 @@ html body .load-gate.rider-route-cutin .rider-cutin-caption small {
       90deg,
       transparent,
       #7ae8ff 18%,
-      #a48bff 40%,
+      #ff5fc8 40%,
       #ff5cc8 62%,
       #f0cf86 84%,
       transparent

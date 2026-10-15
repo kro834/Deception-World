@@ -3,7 +3,7 @@ import { dossierImage } from "@/lib/dossier-images";
 import { DisplayName } from "@/components/name-text";
 import { CIEL_PORTRAIT, cielPortrait } from "@/lib/thumbnail-images";
 import { useWorldMode } from "./use-world-mode";
-import { DossierNav, NameText, RE_DIVE_RIKUEI_NAV } from "./dossier-nav";
+import { NameText, RE_DIVE_RIKUEI_NAV } from "./dossier-nav";
 import { FormPickup } from "./manager-stub";
 import { DossierContents, DossierReader } from "./dossier-reader";
 import { RIDER_DOSSIERS } from "./rider-page";
@@ -233,12 +233,6 @@ export function CielPage() {
           </article>
         </section>
       ) : null}
-      <DossierNav
-        items={RE_DIVE_RIKUEI_NAV}
-        currentHref={CIEL.href ?? "/characters/ciel"}
-        indexLabel="RIKUEI"
-        returnHash={RE_DIVE_HASH}
-      />
     </main>
   );
 }

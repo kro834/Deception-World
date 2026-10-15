@@ -244,7 +244,7 @@ main.site-shell.film-edition.mirage-edition .topbar-actions::before {
      brightest stop is #343b45), so the brisk-scroll reading holds. */
   main.site-shell.film-edition.mirage-edition #riders {
     background:
-      radial-gradient(ellipse 50% 30% at 92% 12%, rgb(164 139 255 / 24%), transparent 70%),
+      radial-gradient(ellipse 50% 30% at 92% 12%, rgb(255 95 200 / 24%), transparent 70%),
       radial-gradient(ellipse 46% 30% at 4% 88%, rgb(255 92 200 / 16%), transparent 70%),
       linear-gradient(
         168deg,
@@ -428,7 +428,7 @@ main.site-shell.film-edition.mirage-edition .topbar-actions::before {
 
   main.site-shell.film-edition.mirage-edition #riders .rider-number {
     color: #0b0e12;
-    background: linear-gradient(90deg, #cfd8e3, #a48bff 45%, #ff5cc8 75%, #f0cf86);
+    background: linear-gradient(90deg, #cfd8e3, #ff5fc8 45%, #ff5cc8 75%, #f0cf86);
   }
 
   main.site-shell.film-edition.mirage-edition #riders .rider-visual::before {

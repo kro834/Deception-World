@@ -43,6 +43,7 @@ import viewportChromeCss from "../styles-viewport-chrome.css?url";
 import stageCss from "../styles-stage.css?url";
 import stageShellCss from "../styles-stage-shell.css?url";
 import openingShellCss from "../styles-opening-shell.css?url";
+import sagaStreamlineCss from "../styles-saga-streamline.css?url";
 import { DEVICE_PROFILE_SCRIPT } from "@/lib/device-profile-gate";
 import { IPAD_STANDALONE_VIEWPORT_SCRIPT } from "@/lib/ipad-standalone-viewport";
 import { getViewportChrome, getViewportChromeColor } from "@/lib/viewport-chrome";
@@ -205,6 +206,11 @@ export const Route = createRootRoute({
           ? openingShellCss
           : stageShellCss,
       },
+      // The 2026-10-16 key visual's pink light trails, site-wide (not on the
+      // title, which is the logo itself).
+      ...(matches.some((match) => (match.routeId as string) === "/")
+        ? []
+        : [{ rel: "stylesheet", href: sagaStreamlineCss }]),
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       {
         rel: "preconnect",

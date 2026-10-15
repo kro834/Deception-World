@@ -27,7 +27,7 @@
   --lr-deck: #08111c;
   --lr-ice: #7ae8ff;
   --lr-ice-hi: #c6f5ff;
-  --lr-violet: #a48bff;
+  --lr-violet: #ff5fc8;
   --lr-magenta: #ff5cc8;
   --lr-gold: #f0cf86;
   --lr-signal: #ff5a7e;
@@ -55,7 +55,7 @@
   text-align: left;
   background:
     radial-gradient(ellipse 70% 42% at 50% 0%, rgb(122 232 255 / 11%), transparent 70%),
-    radial-gradient(ellipse 60% 34% at 50% 104%, rgb(164 139 255 / 8%), transparent 70%),
+    radial-gradient(ellipse 60% 34% at 50% 104%, rgb(255 95 200 / 8%), transparent 70%),
     repeating-linear-gradient(90deg, rgb(122 232 255 / 3%) 0 1px, transparent 1px 28px),
     repeating-linear-gradient(0deg, rgb(122 232 255 / 3%) 0 1px, transparent 1px 28px),
     var(--lr-ink);
@@ -206,7 +206,7 @@
   inset: 14px;
   z-index: -1;
   content: "";
-  background: linear-gradient(135deg, rgb(122 232 255 / 16%), rgb(164 139 255 / 6%));
+  background: linear-gradient(135deg, rgb(122 232 255 / 16%), rgb(255 95 200 / 6%));
   clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
 }
 

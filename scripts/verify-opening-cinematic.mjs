@@ -177,7 +177,7 @@ async function checkLogoSitsInScene(browser, name) {
       boxed: document.documentElement.scrollWidth > window.innerWidth,
     };
   });
-  assert.match(state.src, /^\/logo-title-prism-20260924-delivery-\d+\.webp$/, state.src);
+  assert.match(state.src, /^\/logo-title-saga-20261016-delivery-\d+\.webp$/, state.src);
   // The corners of the logo's box, with and without the logo: an alpha-keyed
   // logo leaves the scene there untouched (the old matte was a black box).
   const [x, y, w, h] = state.box;

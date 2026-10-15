@@ -46,6 +46,8 @@ const original = [
   "@/styles-inquiry-navigation.css?url",
   "../styles-stage.css?url",
   "../styles-stage-shell.css?url",
+  // Owner (2026-10-16): the new key visual's pink light trails, site-wide except the title.
+  "../styles-saga-streamline.css?url",
   fonts.SITE_CORE_FONTS_URL,
   fonts.SITE_DISPLAY_FONTS_URL,
   "hud-fonts",
@@ -70,6 +72,7 @@ test("opening removes only unused record UI CSS and preserves the same shell tok
   const expected = original
     .filter((href) => !omitted.has(href))
     .filter((href) => href !== fonts.SITE_DISPLAY_FONTS_URL)
+    .filter((href) => href !== "../styles-saga-streamline.css?url")
     .map((href) =>
       href === "../styles-stage-shell.css?url" ? "../styles-opening-shell.css?url" : href,
     );

@@ -194,7 +194,7 @@
   top: 0.07em;
   left: 0.07em;
   z-index: -1;
-  color: rgb(164 139 255 / 36%);
+  color: rgb(255 95 200 / 36%);
   text-shadow: none;
   -webkit-text-stroke: 0;
   pointer-events: none;
@@ -299,7 +299,7 @@
   font-weight: 700;
   letter-spacing: 0.04em;
   line-height: 1.25;
-  filter: drop-shadow(3px 0 0 rgb(164 139 255 / 34%));
+  filter: drop-shadow(3px 0 0 rgb(255 95 200 / 34%));
 }
 
 .site-shell.film-edition.mirage-edition .wa-count {
@@ -347,7 +347,7 @@
   font-weight: 700;
   letter-spacing: 0.03em;
   line-height: 1.35;
-  text-shadow: 2px 0 0 rgb(164 139 255 / 30%);
+  text-shadow: 2px 0 0 rgb(255 95 200 / 30%);
 }
 
 .site-shell.film-edition.mirage-edition .wa-prose {
@@ -1665,7 +1665,7 @@ html[data-world-effects="economy"] .site-shell.film-edition.mirage-edition .wa-i
   font-size: clamp(22px, 2.2vw, 28px);
   font-weight: 700;
   letter-spacing: 0.04em;
-  filter: drop-shadow(3px 0 0 rgb(164 139 255 / 34%));
+  filter: drop-shadow(3px 0 0 rgb(255 95 200 / 34%));
 }
 
 .site-shell.film-edition.mirage-edition .wa-locations ol {
@@ -1814,7 +1814,7 @@ html[data-world-effects="economy"] .site-shell.film-edition.mirage-edition .wa-i
   letter-spacing: 0.06em;
   line-height: 1.2;
   overflow-wrap: anywhere;
-  text-shadow: 2px 0 0 rgb(164 139 255 / 30%);
+  text-shadow: 2px 0 0 rgb(255 95 200 / 30%);
 }
 
 .site-shell.film-edition.mirage-edition .wa-episode-head small {

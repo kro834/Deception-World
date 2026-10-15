@@ -7,7 +7,7 @@
   --library-ice: #7ae8ff;
   --library-gold: #e6c27f;
   --library-line: rgb(122 232 255 / 0.16);
-  --library-prism: linear-gradient(90deg, #7ae8ff 0%, #a48bff 34%, #ff5cc8 66%, #f0cf86 100%);
+  --library-prism: linear-gradient(90deg, #7ae8ff 0%, #ff5fc8 34%, #ff5cc8 66%, #f0cf86 100%);
   --library-hud: "Michroma", "Oxanium", "Helvetica Neue", sans-serif;
   min-height: 100svh;
   padding-bottom: 3rem;

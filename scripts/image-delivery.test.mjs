@@ -6,14 +6,11 @@ import test from "node:test";
 const readSource = (path) => readFileSync(new URL(path, import.meta.url), "utf8");
 
 const optimizedAssets = [
-  ["logo-title-ice-20260924-delivery-640.webp", 90_000],
-  ["logo-title-ice-20260924-delivery-960.webp", 160_000],
-  ["logo-title-ice-20260924-delivery-1280.webp", 240_000],
-  ["logo-title-ice-20260924-delivery-1536.webp", 320_000],
-  ["logo-title-prism-20260924-delivery-640.webp", 90_000],
-  ["logo-title-prism-20260924-delivery-960.webp", 160_000],
-  ["logo-title-prism-20260924-delivery-1280.webp", 240_000],
-  ["logo-title-prism-20260924-delivery-1536.webp", 320_000],
+  // The owner's 2026-10-16 title logo (supplied with alpha) replaces the ice/prism pair.
+  ["logo-title-saga-20261016-delivery-640.webp", 90_000],
+  ["logo-title-saga-20261016-delivery-960.webp", 160_000],
+  ["logo-title-saga-20261016-delivery-1280.webp", 240_000],
+  ["logo-title-saga-20261016-delivery-1536.webp", 320_000],
   ["deception-world-poster.webp", 650_000],
   ["deception-world-poster-delivery.webp", 480_000],
   ["character-james-20260829.webp", 100_000],
@@ -75,11 +72,11 @@ test("critical images expose explicit priority and responsive delivery hints", (
   assert.match(indexRoute, /type: "image\/webp",\s*href: OPENING_LOGO_FIRST\.src,\s*imageSrcSet: OPENING_LOGO_FIRST\.srcSet,\s*imageSizes: OPENING_LOGO_SIZES/);
   assert.match(indexRoute, /fetchPriority: "high"/);
   assert.match(openingLogo, /const WIDTHS = \[640, 960, 1280, 1536\] as const;/);
-  assert.match(openingLogo, /OPENING_LOGO_FIRST = delivery\("logo-title-ice-20260924"\)/);
-  assert.match(openingLogo, /OPENING_LOGO_FINAL = delivery\("logo-title-prism-20260924"\)/);
+  assert.match(openingLogo, /OPENING_LOGO_FIRST = delivery\("logo-title-saga-20261016"\)/);
+  assert.match(openingLogo, /OPENING_LOGO_FINAL = delivery\("logo-title-saga-20261016"\)/);
   assert.match(openingLogo, /OPENING_LOGO_SIZES = "min\(1120px, 92vw, 117vh\)"/);
   assert.match(titleSequence, /srcSet=\{logo\.srcSet\}[\s\S]*?sizes=\{OPENING_LOGO_SIZES\}[\s\S]*?width=\{OPENING_LOGO_WIDTH\}[\s\S]*?height=\{OPENING_LOGO_HEIGHT\}/);
-  assert.match(openingHandoff, /DEFAULT_LOGO_SRC = "\/logo-title-prism-20260924-delivery-1536\.webp"/);
+  assert.match(openingHandoff, /DEFAULT_LOGO_SRC = "\/logo-title-saga-20261016-delivery-1536\.webp"/);
   assert.match(assetLoader, /WORLD_ENTER_ASSETS = \[[\s\S]*?"\/deception-world-poster-delivery\.webp"/);
   assert.match(worldHome, /srcSet=\{r\.img\.replace\(\/\\\.jpe\?g\$\/i, "\.webp"\)\}/);
   assert.match(worldHome, /src="\/deception-world-poster-delivery\.webp"[\s\S]*?loading="lazy"/);
@@ -104,7 +101,7 @@ test("the supplied logos are preserved and their alpha-keyed files serve every o
   }
   // Delivery files carry alpha (VP8X with the alpha flag): no black matte.
   for (const width of [640, 960, 1280, 1536]) {
-    for (const stem of ["logo-title-ice-20260924", "logo-title-prism-20260924"]) {
+    for (const stem of ["logo-title-saga-20261016"]) {
       const bytes = readFileSync(new URL(`../public/${stem}-delivery-${width}.webp`, import.meta.url));
       assert.equal(bytes.subarray(12, 16).toString("ascii"), "VP8X", `${stem} ${width}`);
       assert.ok((bytes[20] & 0x10) !== 0, `${stem}-delivery-${width} must have alpha`);

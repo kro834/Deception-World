@@ -33,10 +33,10 @@ test("his page keeps 月城悠真's record from the eight riders, without マキ
   assert.match(page, /<small>CIEL<\/small>/);
   assert.match(page, /alt="シエルのキャラクタービジュアル"/);
   assert.match(page, /\{\.\.\.cielPortrait\(\)\}/);
-  // It returns to RE DIVE's 六詠, and pages through it.
+  // It returns to RE DIVE. Owner (2026-10-16): the 六詠 strip with シエル as I is gone from his page.
   assert.match(page, /returnHash=\{RE_DIVE_HASH\}/);
   assert.match(page, /const RE_DIVE_HASH = "re-dive";/);
-  assert.match(page, /items=\{RE_DIVE_RIKUEI_NAV\}/);
+  assert.doesNotMatch(page, /<DossierNav/);
   const nav = await read("src/components/world/dossier-nav.tsx");
   const list = nav.slice(nav.indexOf("export const RE_DIVE_RIKUEI_NAV"));
   const order = [

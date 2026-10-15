@@ -23,7 +23,7 @@ main.manager-page:not(.is-sovereign) {
   --dossier-radius: 4px;
   --dm-lock: color-mix(in srgb, var(--manager-accent, #7ae8ff) 62%, #dff9ff);
   --dm-gold: #f0cf86;
-  --dm-violet: #a48bff;
+  --dm-violet: #ff5fc8;
   --dm-magenta: #ff5cc8;
   --dm-text-2: #b9cad8;
   --dm-text-3: #8fa6ba;
@@ -55,7 +55,7 @@ main.manager-page:not(.is-sovereign) {
       color-mix(in srgb, var(--manager-accent, #7ae8ff) 13%, transparent),
       transparent 70%
     ),
-    radial-gradient(ellipse 60% 30% at 6% 30%, rgb(164 139 255 / 7%), transparent 70%),
+    radial-gradient(ellipse 60% 30% at 6% 30%, rgb(255 95 200 / 7%), transparent 70%),
     radial-gradient(ellipse 60% 30% at 94% 62%, rgb(255 92 200 / 5%), transparent 70%),
     radial-gradient(ellipse 70% 30% at 20% 92%, rgb(240 207 134 / 4%), transparent 70%), #04080f;
 }
@@ -132,7 +132,7 @@ main.manager-page:not(.is-sovereign) :is(.manager-quotes, .manager-copy-section)
       color-mix(in srgb, var(--manager-accent, #7ae8ff) 7%, transparent),
       transparent 42%
     ),
-    linear-gradient(315deg, rgb(164 139 255 / 5%), transparent 40%),
+    linear-gradient(315deg, rgb(255 95 200 / 5%), transparent 40%),
     rgb(10 18 32 / 82%);
 }
 
@@ -402,7 +402,7 @@ main.manager-page:not(.is-sovereign) .manager-section-index > span {
   color: transparent;
   -webkit-text-stroke: 1.5px var(--dm-lock);
   text-shadow:
-    0.07em 0.07em 0 rgb(164 139 255 / 36%),
+    0.07em 0.07em 0 rgb(255 95 200 / 36%),
     0 0 36px color-mix(in srgb, var(--dm-lock) 24%, transparent);
 }
 
@@ -764,7 +764,7 @@ main.manager-page:not(.is-sovereign) .manager-dossier .manager-copy-heading > sp
   line-height: 1;
   letter-spacing: 0.02em;
   -webkit-text-stroke: 1.5px var(--dm-lock);
-  text-shadow: 0.07em 0.07em 0 rgb(164 139 255 / 30%);
+  text-shadow: 0.07em 0.07em 0 rgb(255 95 200 / 30%);
 }
 
 main.manager-page:not(.is-sovereign) .manager-dossier .manager-copy-heading > span::after {
