@@ -101,6 +101,11 @@ export interface RexonanceAssemblyConfig {
   gold?: RexonanceAssemblyGold;
   /** The plates' atlas (art | mosaic), for the driver's cut-outs. */
   atlas?: string;
+  /** The figure without its ornaments (owner, 2026-10-16): the armour
+   * assembles whole from it; the `ornaments` groups then form over it
+   * from the full figure. */
+  base?: string;
+  ornaments?: readonly string[];
   /** The MAX and ULTRA figures (same frame): the suit-up ends on the form
    * named by the runway's data-form. */
   forms?: {

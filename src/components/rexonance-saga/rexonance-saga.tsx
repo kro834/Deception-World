@@ -36,6 +36,7 @@ import {
 } from "@/lib/rexonance-suit";
 import { rexonanceImage } from "@/lib/rexonance-images";
 import { REXONANCE_FORM_FIGURES, REXONANCE_FORM_PAD } from "@/lib/rexonance-forms";
+import { REXONANCE_SUIT_BASE, REXONANCE_SUIT_ORNAMENTS } from "@/lib/rexonance-suit-base";
 import {
   FORM_CHANGE_MS,
   FORM_LANDMARKS,
@@ -416,6 +417,10 @@ const CORE_SYSTEMS = [
 const SUIT_UP: RexonanceAssemblyConfig = {
   forms: { ...REXONANCE_FORM_FIGURES, pad: REXONANCE_FORM_PAD },
   figure: REXONANCE_SUIT_FIGURE,
+  // The armour assembles whole from the figure without its ornaments; the
+  // tail and ribbons then form over it (owner, 2026-10-16).
+  base: REXONANCE_SUIT_BASE,
+  ornaments: REXONANCE_SUIT_ORNAMENTS,
   undersuit: REXONANCE_SUIT_UNDERSUIT,
   size: REXONANCE_SUIT_SIZE,
   maskTile: REXONANCE_SUIT_TILE,
