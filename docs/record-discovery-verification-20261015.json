@@ -10,7 +10,8 @@
     "Keyboard-accessible full-page search results without changing quick-search combobox navigation",
     "Current-section menu visibility and keyboard focus restoration without moving the underlying page",
     "Unambiguous source download explanation and non-duplicated 404 recovery links",
-    "Settle WebKit's observed post-bookmark fragment adjustment at the same offset, once after an own bookmark DOM commit"
+    "Settle WebKit's observed post-bookmark fragment adjustment at the same offset, once after an own bookmark DOM commit",
+    "Retain the return journey while its own opening is in flight; isolate cancellation, completion and timers by context identity"
   ],
   "coordination": {
     "startupAndImages": "da0c2b2eec390b827850228684de1b19df95da27",
@@ -26,8 +27,8 @@
     "No public gallery upload or title edit during verification"
   ],
   "repositoryGates": {
-    "implementationBuild": "40dc5bd4a0a746a02572929bf0bc46bbc8786a6e",
-    "tests": { "total": 2351, "passed": 2347, "failed": 0, "skipped": 4 },
+    "implementationBuild": "995d137b8d4ae2477d483916672e08e0a43ea901",
+    "tests": { "total": 2359, "passed": 2355, "failed": 0, "skipped": 4 },
     "typecheck": "passed",
     "eslint": { "errors": 0, "existingWarnings": 12 },
     "sourceParts": "15 groups matched",
@@ -35,7 +36,7 @@
     "productionBuild": "passed without running local database migrations"
   },
   "requestedRegressions": {
-    "implementationBuild": "7ead20a4c1f813249af349b919df2281388bc7df",
+    "implementationBuild": "995d137b8d4ae2477d483916672e08e0a43ea901",
     "status": "all passed",
     "scripts": [
       "verify-rexonance-operability",
@@ -48,20 +49,20 @@
       "verify-hero-touch"
     ],
     "siteHealth": "93/93 route and viewport combinations",
-    "evidence": "output/playwright/final-<script>.log (local ignored browser artifacts)"
+    "evidence": "output/playwright/durable-verify-<script>.log (local ignored browser artifacts)"
   },
   "startupFileBudget": {
     "status": "passed",
     "baselineEntryBytes": 528209,
-    "entryBytes": 406997,
+    "entryBytes": 407717,
     "baselineEntryGzipBytes": 162759,
-    "entryGzipBytes": 130439,
-    "criticalGraphBytes": 537516,
-    "criticalGraphGzipBytes": 175318,
+    "entryGzipBytes": 130640,
+    "criticalGraphBytes": 538241,
+    "criticalGraphGzipBytes": 175524,
     "measurement": "Decoded files and reproducible gzip size, not elapsed startup or network transfer time"
   },
   "browserVerification": {
-    "implementationBuild": "40dc5bd4a0a746a02572929bf0bc46bbc8786a6e",
+    "implementationBuild": "995d137b8d4ae2477d483916672e08e0a43ea901",
     "chromium": "passed; 390x844 and 1024x1366 journeys, 320x640/568x320/1440x900 layouts",
     "webkit": "passed; the same five viewports and full touch/mouse, keyboard and return journeys",
     "webkitFixBoundaries": [
@@ -72,15 +73,35 @@
       "Press/margin/default-blocking hypotheses were rejected by independent contrasts; speculative changes were removed"
     ],
     "menuHarness": "The already-visible sticky opener is hit-tested and clicked at its measured center. WebKit locator auto-scroll independently moved it 83px before pointerdown; coordinate input preserved the page through opening, closing, focus restoration and unlock. No app workaround was added for this harness behavior.",
+    "searchHarness": "Search waits for its existing world-page-visible hydration lifecycle before exercising client-side handlers. Its SSR links already have valid native hrefs; the family and font signals alone do not establish that draft capture is hydrated.",
     "coverage": [
       "Library query then immediate record open; native Back, reload, explicit return and stable card focus",
       "Saved-only shelf, removal focus, reload and touch/mouse filter activation",
       "Search Tab navigation, record round trip and original result focus",
       "Quoted and handwritten numeric library URL round trips",
       "Pointer-open/keyboard-close menu focus restoration",
-      "No horizontal overflow; download/404 recovery and current-location menu row"
+      "No horizontal overflow; download/404 recovery and current-location menu row",
+      "Clock-boundary library/search arrival after more than 15 seconds of Date time; actual elapsed browser time is recorded separately",
+      "A real route-preparation deadline clears the pending journey without a late navigation"
     ],
+    "pendingJourneyBoundaries": [
+      "Only the exact in-memory capture receives an in-flight lease; no lease is stored across reloads",
+      "Persisted abandoned leaving state still expires after 15 seconds; all states retain the 30-minute maximum",
+      "Back, pagehide, explicit cancellation, changed source/target and failed or ignored openings cannot revive an old capture",
+      "Same-millisecond captures, queued old timers and late promise completion are isolated by object identity",
+      "Shared load gate, Rexonance warmup and destination-arrival highlight timeout are unchanged"
+    ],
+    "adversarialEvidence": "output/playwright/record-return-durable-adversarial-summary.json; five isolated Chromium cases passed with no page errors. Raw reports distinguish a corrected diagnostic-only record-selection error from application behavior.",
     "physicalDevices": "Not tested; iPhone/iPad Safari and installed-PWA checks remain with the owner"
+  },
+  "previousPublicVerification": {
+    "release": "24c298b525d52c525a344662152377182190d332",
+    "ciRun": "38701370338",
+    "status": "Exact identity and public smoke passed; independent full Chromium and WebKit five-viewport reruns passed",
+    "initialObservations": [
+      "The first Chromium run reached Zeus without a return link; cause was not established. The search hydration wait and the independently proven 15-second in-flight boundary are treated separately.",
+      "The first WebKit run reported two Rex atlas access-control messages. Both assets returned 200/basic in independent fetches, the full rerun passed without page errors, and an explicit abort/retry contrast passed. The original message did not reproduce; no application workaround or error allowlist was added."
+    ]
   },
   "publication": {
     "method": "Normal push to main, deploy-main.yml gates and exact-release public verification",
