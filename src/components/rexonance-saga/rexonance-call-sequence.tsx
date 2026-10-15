@@ -11,6 +11,7 @@ import {
   REXONANCE_SUIT_PARTS,
   REXONANCE_SUIT_PIXELS,
   REXONANCE_SUIT_REVEAL_MS,
+  REXONANCE_SUIT_SPARKS,
   REXONANCE_SUIT_SYSTEMS,
   type RexonanceStage,
 } from "@/lib/rexonance-calls";
@@ -332,18 +333,7 @@ const pieceClock = (piece: RexonanceSuitPiece) => {
   } as CSSProperties;
 };
 // Sparks: every accent, and the first bite of each run.
-const SUIT_SPARKS = [
-  ...REXONANCE_SUIT_ACCENTS,
-  "boot-foot-l",
-  "boot-foot-r",
-  "knee-disc-l",
-  "knee-disc-r",
-  "arm-fist-l",
-  "shoulder-disc-l",
-  "shoulder-disc-r",
-  "tail-4b",
-  "helmet-jaw",
-];
+const SUIT_SPARKS = REXONANCE_SUIT_SPARKS;
 
 // Deterministic scatter (seeded, so server and client draw the same).
 const seeded = (seed: number) => {
@@ -451,10 +441,17 @@ function Suit({ suit, animate }: { suit: "build" | "whole"; animate: boolean }) 
   const visor = REXONANCE_SUIT_MARKS.visor;
   // rx13: the nanite engine (micro-tiles on a canvas) takes over the plates
   // once it is ready in time; until then, or without it, the DOM plates play.
+  // Owner (2026-10-16, 超大幅な改善): when the nanite kit is ready too, the
+  // engine's own swarm (Blender hex chips in an orbital cocoon) replaces
+  // the SVG motes of RIDER！.
+  const [swarm, setSwarm] = useState("svg" as "svg" | "canvas");
   const [nanites, setNanites] = useState<"dom" | "canvas">("dom");
-  const onNanites = useCallback(() => setNanites("canvas"), []);
+  const onNanites = useCallback((rich?: boolean) => {
+    setNanites("canvas");
+    if (rich) setSwarm("canvas");
+  }, []);
   return (
-    <div className="rx-suit" data-suit={suit} data-nanites={nanites}>
+    <div className="rx-suit" data-suit={suit} data-nanites={nanites} data-swarm={swarm}>
       {/* Interior HUD: the visor's curved edges and a heading strip. */}
       <i className="rx-suit-rim is-left" />
       <i className="rx-suit-rim is-right" />

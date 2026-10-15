@@ -1272,6 +1272,20 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   height: 100%;
 }
 
+/* Owner (2026-10-16, 超大幅な改善): on fine pointers the nanite engine's
+   canvases bleed past the figure for its cocoon, comets and spall — never
+   more than 4 % to the left (inside the landscape calls' 24 px gap) and
+   never below it (the portrait calls' band). */
+.rx-call-sequence .rx-suit-build > .rx-suit-nanites[data-bleed] {
+  inset: -2% -10% 0 -4%;
+}
+
+/* With the nanite kit ready, the engine's own swarm (hex chips in an
+   orbital cocoon) replaces RIDER！'s SVG motes; they stay the fallback. */
+.rx-call-sequence .rx-suit[data-swarm="canvas"] .rx-suit-figure > .rx-suit-motes {
+  visibility: hidden;
+}
+
 .rx-call-sequence .rx-suit[data-nanites="canvas"] .rx-suit-build > :is(.rx-suit-mote, .rx-suit-plate) {
   display: none;
 }
