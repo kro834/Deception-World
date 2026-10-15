@@ -6,6 +6,7 @@ import test from "node:test";
 import vm from "node:vm";
 import ts from "typescript";
 import * as three from "three";
+import { normalizeExhibitionSearch } from "../src/lib/gallery-route-search.ts";
 
 const require = createRequire(import.meta.url);
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
@@ -80,6 +81,7 @@ test("the immersive room only accepts known artwork IDs, never a supplied textur
     "@/components/gallery/gallery-data": { GALLERY_ARTWORKS: [{ id: "g19" }, { id: "g80" }] },
     "@/components/exhibition/exhibition-studio": { ExhibitionStudio() {} },
     "@/lib/use-exhibition-artwork-ready": { useExhibitionArtworkReady() {} },
+    "@/lib/gallery-route-search": { normalizeExhibitionSearch },
     "@/lib/world-head": { createWorldHead: (head) => head, WORLD_CORE_STYLESHEET_LINKS: [] },
     "@/styles-exhibition-studio.css?url": "studio.css",
   });
