@@ -296,6 +296,8 @@ export interface AssemblyNanites {
   frontPass: Pass;
   freePass: Pass;
   endFrame(): void;
+  /** Releases the swarm's own small sheets. */
+  release(): void;
 }
 
 type Sheet = CanvasImageSource | null;

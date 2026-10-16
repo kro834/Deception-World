@@ -3264,6 +3264,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     frameDeep_ = baseLights = baseRaw = null;
     for (const sheet of naniteSheets) sheet.width = sheet.height = 0;
     naniteSheets = [];
+    swarm?.release?.();
     nano = swarm = goldVisible = null;
     goldCount = 0;
     goldReverse.dirty = -1;
@@ -3456,6 +3457,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     frameDeep_ = baseLights = baseRaw = null;
     for (const sheet of naniteSheets) sheet.width = sheet.height = 0;
     naniteSheets = [];
+    swarm?.release?.();
     nano = swarm = goldVisible = null;
   };
 }

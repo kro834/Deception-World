@@ -4753,6 +4753,15 @@ export function createAssemblyNanites({
     flushChips(ctx);
     ctx.globalAlpha = 1;
   };
+  // The swarm's own small sheets (the tinted shock rings, the lacquer's
+  // scratch), released with the scene's (round 3, memory).
+  const release = () => {
+    if (shockTint) shockTint.width = shockTint.height = 0;
+    if (lacq) lacq.width = lacq.height = 0;
+    shockTint = null;
+    lacq = null;
+    lacqCtx = null;
+  };
   // The frame's tally (instrumentation only: nothing reads it back).
   const endFrame = () => {
     state.sprites = sprites_;
@@ -4783,5 +4792,6 @@ export function createAssemblyNanites({
     frontPass,
     freePass,
     endFrame,
+    release,
   };
 }
