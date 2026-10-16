@@ -133,6 +133,13 @@ const BUSY_DIM = 0.5;
 const LATCHES = 8;
 const LATTICE_A = 0.54;
 const LINK_MS = 40;
+/** The defocused front band (review 50): only the nearest chips (z past
+ * BOKEH_Z), at BOKEH_A, never over a plate being built. */
+const BOKEH_Z = 0.95;
+const BOKEH_A = 0.22;
+/** The helmet's tiles land from here (ms): the crown's glow steps back. */
+const HELM_LAND = 1700;
+
 /** The free chips gather round the reactor over GATHER (ms), on orbits of
  * GATHER_R (+26, +52) figure px, squashed GATHER_SQUASH, turning GATHER_SPIN
  * a second; the implosion (SW.implode) then spirals them in. */
@@ -162,7 +169,13 @@ const MIP_Y = Int16Array.from(KIT_CELLS.mip.y);
 const UNFOLD_X = Int16Array.from(KIT_CELLS.unfold.x);
 const BOKEH_X = Int16Array.from(KIT_CELLS.bokeh.x);
 const BOKEH_Y = Int16Array.from(KIT_CELLS.bokeh.y);
-const COMET_ROW = Int8Array.from([KIT_COMETS.rows.ice, KIT_COMETS.rows.pink, KIT_COMETS.rows.ice]);
+// By tone (ice, pink, white, gold): white streaks ice, gold its own row (review 32).
+const COMET_ROW = Int8Array.from([
+  KIT_COMETS.rows.ice,
+  KIT_COMETS.rows.pink,
+  KIT_COMETS.rows.ice,
+  KIT_COMETS.rows.gold,
+]);
 const ANCHOR = Float32Array.from([
   ...KIT_FX.clamp.anchor.tl,
   ...KIT_FX.clamp.anchor.tr,
@@ -237,6 +250,10 @@ const GOLD_TONE = 3;
 // Touch's two-tone rect chips: [tone, shade] per tone.
 const RECT_TONES = ["#8cefff", "#ff8fd8", "#eefcff", "#ffd27a"] as const;
 const RECT_SHADES = ["#1d4f63", "#5a2350", "#3a4a5a", "#6a4a12"] as const;
+/** Their batches: four tones by three alpha levels. */
+const RECT_ALPHA = Float32Array.of(0.3, 0.6, 0.9);
+const RECT_BUCKETS = 12;
+
 
 const hash = (a: number, b: number) => {
   let h = (a * 374761393 + b * 668265263) | 0;
@@ -2038,7 +2055,8 @@ const ROLL = 21; // a ring pose's roll (tumble frames): banked to the orbit
 const ARG_LX = 22; // a tile's pathfinder's seated centre (figure px)
 const ARG_LY = 23;
 const FADE = 24; // the fence's fade at the sprite slots' centre (round 3)
-const POSE_SLOTS = 25;
+const HALO = 25; // the crown's glow reined in while the helmet lands (round 3)
+const POSE_SLOTS = 26;
 /** No fence: nothing fades, nothing is kept clear. */
 const OPEN = Float32Array.of(-1e9, -1e9, 1e9, 1e9, 1, 0, 0, 0, 0);
 /** At most this many plates' seats ripple through the swarm at once. */
@@ -2140,8 +2158,8 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
   const fadeA = new Float32Array(4096);
   let fadeCount = 0;
   const RECT_CAP = 2048;
-  const rects = new Float32Array(8 * RECT_CAP * 3);
-  const rectCount = new Int32Array(8);
+  const rects = new Float32Array(RECT_BUCKETS * RECT_CAP * 3);
+  const rectCount = new Int32Array(RECT_BUCKETS);
   let draws = 0;
   let comets = 0;
   let heroes = 0;
@@ -2303,28 +2321,49 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
     rects[o + 2] = d;
     rectCount[bucket] = k + 1;
   };
+  // Touch's chips (round 3, reviews 23/39/29/41): each a small two-tone
+  // hex — a wide band and a tall band (a hex at a few device px), over its
+  // dark side offset down-right by about a quarter of its size, with a lit
+  // core on the brighter ones — batched by tone and three alpha levels, so a
+  // dim chip behind the body stays dim. No drawImage.
+  const hexRects = (x: number, y: number, d: number) => {
+    flight.rect(x - 0.45 * d, y - 0.27 * d, 0.9 * d, 0.54 * d);
+    flight.rect(x - 0.25 * d, y - 0.5 * d, 0.5 * d, d);
+  };
   const flushRects = () => {
-    for (let bucket = 0; bucket < 8; bucket += 1) {
+    for (let bucket = 0; bucket < RECT_BUCKETS; bucket += 1) {
       const count = rectCount[bucket];
       if (!count) continue;
-      const tone = bucket >> 1;
-      flight.globalAlpha = bucket & 1 ? 0.9 : 0.55;
+      const tone = (bucket / 3) | 0;
+      const level = bucket - tone * 3;
+      flight.globalAlpha = RECT_ALPHA[level];
       flight.fillStyle = RECT_SHADES[tone];
       flight.beginPath();
       for (let k = 0; k < count; k += 1) {
         const o = (bucket * RECT_CAP + k) * 3;
         const d = rects[o + 2];
-        flight.rect(rects[o] - d / 2 + 1, rects[o + 1] - d / 2 + 1, d, d);
+        const off = d > 4 ? 0.22 * d : 1;
+        hexRects(rects[o] + off, rects[o + 1] + off, d);
       }
       flight.fill();
       flight.fillStyle = RECT_TONES[tone];
       flight.beginPath();
       for (let k = 0; k < count; k += 1) {
         const o = (bucket * RECT_CAP + k) * 3;
-        const d = rects[o + 2];
-        flight.rect(rects[o] - d / 2, rects[o + 1] - d / 2, d, d);
+        hexRects(rects[o], rects[o + 1], rects[o + 2]);
       }
       flight.fill();
+      if (level > 0) {
+        flight.fillStyle = "#f4fbff";
+        flight.beginPath();
+        for (let k = 0; k < count; k += 1) {
+          const o = (bucket * RECT_CAP + k) * 3;
+          const d = rects[o + 2];
+          if (d < 5) continue;
+          flight.rect(rects[o] - 0.16 * d, rects[o + 1] - 0.16 * d, 0.32 * d, 0.32 * d);
+        }
+        flight.fill();
+      }
       rectCount[bucket] = 0;
     }
     flight.globalAlpha = 1;
@@ -2357,13 +2396,14 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
       // Touch: two-tone rects that pulse with the tumble; a few heroes.
       if (hero && heroes < HEROES) heroes += 1;
       else {
+        if (alpha < 0.12) return;
         const pulse = 0.55 + 0.45 * Math.abs(Math.cos((TAU * frame) / FRAMES));
-        const side = d * pulse * 0.8;
+        const side = d * pulse * 0.9;
         rect(
-          (tone < GOLD_TONE ? tone : GOLD_TONE) * 2 + (alpha > 0.6 ? 1 : 0),
+          (tone < GOLD_TONE ? tone : GOLD_TONE) * 3 + (alpha < 0.4 ? 0 : alpha < 0.75 ? 1 : 2),
           x,
           y,
-          side > 1.5 ? side : 1.5,
+          side > 2 ? side : 2,
         );
         return;
       }
@@ -2382,7 +2422,7 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
     const y = pose[SY];
     const d = pose[SD];
     if (TOUCH && heroes >= HEROES) {
-      rect((tone < WHITE ? tone : WHITE) * 2 + 1, x, y, d * 0.8);
+      rect((tone < WHITE ? tone : WHITE) * 3 + 2, x, y, d * 0.8);
       return;
     }
     if (TOUCH) heroes += 1;
@@ -2404,7 +2444,7 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
     const long = length >= 12 ? 1 : 0;
     const stretch = length / KIT_COMETS.tail[long];
     const k = stretch < 0.6 ? 0.6 : stretch > 2.5 ? 2.5 : stretch;
-    const row = COMET_ROW[tone > GOLD_TONE ? 0 : tone === GOLD_TONE ? 2 : tone] + long;
+    const row = COMET_ROW[tone > GOLD_TONE ? 0 : tone] + long;
     comets += 1;
     draws += 1;
     flight.globalAlpha = 0.5 * pose[SA];
@@ -2589,10 +2629,12 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
         x += (cx - x) * m;
         y += (cy - y) * m;
         z += (Math.sin(a) - z) * m;
+        // Round 3 (review 18): its near side never swells past nanite size.
+        if (z > 0.6) z = 0.6;
         // A golden crown.
         if (m > 0.2) tone = c % 4 ? GOLD_TONE : WHITE;
         alpha *= 1.5;
-        size *= 1 + 0.25 * m;
+        size *= 1 + 0.1 * m;
         chipVX[c] = 0;
         chipVY[c] = 0;
         if (t >= L.drainAt[c]) {
@@ -2703,7 +2745,7 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
             ? 1
             : z <= 0.35
               ? 2
-              : z > 0.85 && !helm
+              : z > BOKEH_Z && !helm
                 ? 4
                 : 3;
       if (band === 1 && !crowned) {
@@ -2713,13 +2755,14 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
         if (cx >= 0 && cy >= 0 && cx < OCC_W && cy < OCC_H)
           alpha *= 1 - (0.8 * L.occupancy[cy * OCC_W + cx]) / 255;
       }
-      if ((band === 1 || band === 2) && !crowned) {
+      if ((band === 1 || band === 2 || band === 4) && !crowned) {
         // Round 3: over a plate being staged or printed, the back and mid
-        // chips step back, so the plate forming is the beat's subject.
+        // chips step back, so the plate forming is the beat's subject; the
+        // defocused front chips (review 50) leave it clear.
         const cx = Math.floor((x / W) * BUSY_W);
         const cy = Math.floor((y / H) * BUSY_H);
         if (cx >= 0 && cy >= 0 && cx < BUSY_W && cy < BUSY_H && busy[cy * BUSY_W + cx])
-          alpha *= BUSY_DIM;
+          alpha *= band === 4 ? 0 : BUSY_DIM;
       }
       if (band === 3 && alpha > 0.7) alpha = 0.7;
       chipBand[c] = band;
@@ -2848,11 +2891,15 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
         comet(chipT[c]);
       }
       if (band === 5 && !TOUCH && draws < BUDGET) {
-        // Its glow: the warm or white bokeh, faint and wide.
+        // Its glow: the warm or white bokeh, faint and wide. Round 3 (review
+        // 18): a crown chip's glow shrinks to 1.2x the chip, at most 0.5,
+        // while the helmet's tiles land, so the forming helmet stays legible.
         draws += 1;
-        const g = chipD[c] * 2.4 * SPRITE;
+        const crown = L.chipPlate[c] >= 0 && L.kind[L.chipPlate[c]] === 3 ? pose[HALO] : 0;
+        const g = chipD[c] * (2.4 - 1.2 * crown) * SPRITE;
         const glowTone = chipT[c] === GOLD_TONE ? GOLD_TONE : WHITE;
-        const glow = 0.4 * chipA[c] * pose[GLOW];
+        let glow = 0.4 * chipA[c] * pose[GLOW];
+        if (crown > 0 && glow > 0.5) glow = 0.5;
         flight.globalAlpha = glow < 1 ? glow : 1;
         sprite(cellsImage, BOKEH_X[glowTone], BOKEH_Y[glowTone], 32, 32, x, y, g);
       }
@@ -2863,11 +2910,11 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
           chip(chipF[c], chipT[c]);
           continue;
         }
-        if (draws >= BUDGET) continue;
+        if (draws >= BUDGET || chipA[c] <= 0.01) continue;
         draws += 1;
         const d = chipD[c] * 1.6 * SPRITE;
         const t = chipT[c] > GOLD_TONE ? ICE : chipT[c];
-        flight.globalAlpha = 0.35;
+        flight.globalAlpha = BOKEH_A * (chipA[c] < 1 ? chipA[c] : 1);
         sprite(cellsImage, BOKEH_X[t], BOKEH_Y[t], 32, 32, x, y, d);
         continue;
       }
@@ -3360,10 +3407,12 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
     jigged.fill(0);
     base();
     frameState(t);
-    // 1. The cocoon's back and mid chips.
+    // 1. The cocoon's back and mid chips (touch: flushed now, so they lie
+    // under the plates; round 3, reviews 29/41).
     swarm(t);
     lanes(false, t);
     drawChips(1, 2);
+    if (TOUCH) flushRects();
     pumps(t);
     // Plates by fit: their jigs (the nearest to contact first), guideways.
     for (let k = 0; k < P; k += 1) {
@@ -4341,6 +4390,7 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
     // white-hot glows ease in (no step in the frame's light).
     pose[GLOW] =
       t >= SW.implode[0] ? smooth((t - SW.implode[0]) / 90) : smooth((t - SW.crown[0]) / 100);
+    pose[HALO] = smooth((t - HELM_LAND) / 60);
     lanes(true, t);
     drawChips(3, 5);
     if (TOUCH) flushRects();
