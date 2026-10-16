@@ -191,7 +191,14 @@ test("the forged face is preloaded on this route only; the files are small woff2
     "g",
   );
   assert.equal(route.match(preload)?.length, 1);
-  assert.equal(route.match(/as: "font"/g)?.length, 1, "one font preload on the route");
+  // owner request 2026-10-17 (round 3): the 2.7 KB outline instance is preloaded
+  // too, so the hero's outlined ghost never draws first in the forged face.
+  const outlinePreload = new RegExp(
+    String.raw`\{\s*rel: "preload",\s*as: "font",\s*type: "font/woff2",\s*href: "${OUTLINE_FONT.replace(/[./]/g, "\\$&")}",\s*crossOrigin: "anonymous",\s*\}`,
+    "g",
+  );
+  assert.equal(route.match(outlinePreload)?.length, 1);
+  assert.equal(route.match(/as: "font"/g)?.length, 2, "two font preloads on the route");
   for (const path of [
     "src/routes/world.tsx",
     "src/routes/extreme-saga.tsx",
