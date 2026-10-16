@@ -457,16 +457,26 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-se
    01: the cuts, the comparison, the processors
    ================================================================ */
 /* The field anchors on the forged digits' centre (the resonance sheet
-   reads these two). */
+   reads these two): the rings sit on the three digits' measured centre. */
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #performance .rxs-headline-metrics {
-  --rsn-figure-center: 1.19;
+  --rsn-figure-center: 1.15;
   --rsn-figure-origin: 1.15em;
 }
 
-/* Phones: 「650%+」 forged at ZENITH's 33vw leaves 1px; 31.5vw leaves 12-20. */
+/* The figure keeps clear of the Zeus button (fixed at the right edge, so
+   every line passes it as the cut scrolls). 「650%+」 spans 2.72em from the
+   gutter: on phones (gutter 5vw, Zeus 72px in) this size leaves it 14px
+   short of Zeus at 320-430, as before the forged digits; on laptops a
+   touch under RESONANCE's 15.5vw leaves 20px or more at 1100-1536. */
 @media (max-width: 760px) {
   html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #performance .rxs-headline-metrics {
-    --rsn-figure-size: clamp(72px, 31.5vw, 144px);
+    --rsn-figure-size: clamp(72px, calc(35vw - 32px), 144px);
+  }
+}
+
+@media (min-width: 1100px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #performance .rxs-headline-metrics {
+    --rsn-figure-size: clamp(110px, calc(15.5vw - 6px), 252px);
   }
 }
 
@@ -522,6 +532,21 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-comp
   letter-spacing: -0.01em;
   font-variant-numeric: tabular-nums lining-nums;
   -webkit-text-fill-color: #79e8ff;
+}
+
+/* 1100-1439px: the comparison is a column 436-590px wide. Every row's label
+   stands over its value there (an instrument's legend), so the result always
+   sits beside it: the long 走力 rows (「0.00021秒」 against 「47,619.0%」 and
+   its estimate) no longer drop their result onto a line of their own. */
+@media (min-width: 1100px) and (max-width: 1439.98px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-comparison-metrics article header > div {
+    display: block;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-comparison-metrics article header small {
+    display: block;
+    margin-bottom: 4px;
+  }
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-comparison-result em {
