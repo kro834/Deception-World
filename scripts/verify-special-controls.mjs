@@ -68,6 +68,13 @@ async function checkTextEnlargement(route, width) {
         parseFloat(getComputedStyle(document.querySelector(".rxs-brand b")).fontSize) >= font * 1.9,
       baseMetrics.font,
     );
+    // The page reserve follows the nav through ResizeObserver + one animation frame
+    // (rexonance-saga.tsx queueNavReserve); wait for that frame before reading it.
+    await page.waitForFunction(() => {
+      const nav = document.querySelector(".rxs-local-nav").getBoundingClientRect().height;
+      const pad = parseFloat(getComputedStyle(document.querySelector(".rxs-page")).paddingTop);
+      return pad >= nav - 1;
+    });
     const enlarged = await page.evaluate(() => {
       const page = document.querySelector(".rxs-page");
       const nav = document.querySelector(".rxs-local-nav");
