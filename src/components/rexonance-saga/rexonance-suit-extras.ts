@@ -3019,8 +3019,11 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
       const plate = all[p];
       const F = plate.fit;
       const accent = (L.flags[p] & 1) !== 0;
-      if (t >= F - SW.project && t < F + 120) {
-        const a = t - F + SW.project;
+      // The latch is at its seat by the time its guideway starts building
+      // (its laser runs to the weld head).
+      const appear = Math.min(F - SW.project, L.buildA[p]);
+      if (t >= appear && t < F + 120) {
+        const a = t - appear;
         const grow = smooth(a / 40);
         let alpha = grow * (t > F + 40 ? 1 - (t - F - 40) / 80 : 1);
         const frame =
