@@ -17,6 +17,7 @@ export const ASSEMBLY_NANITES: {
   readonly link: number;
   readonly release: number;
   readonly clampIn: number;
+  readonly clampHold: number;
   readonly crown: readonly [number, number];
   readonly implode: readonly [number, number];
 };
@@ -114,6 +115,13 @@ export interface NanitePlate {
   buildEnd: number;
   /** Its climb (the beat; the ribbons climb on their own). */
   climb: number;
+  /** One cell step of its front (progress): the time a cell takes to fill. */
+  cellT: number;
+  /** Its clamps: size (× the sprite), corners drawn (bits tl, tr, bl, br),
+   * and each corner's anchor [x0, y0, … x3, y3] (figure px). */
+  clampK: number;
+  clampMask: number;
+  clamp: Float32Array | null;
   recedeEnd: number;
   releaseEnd: number;
 }
@@ -164,6 +172,9 @@ export interface NanitePlan {
   /** Per plate (its gold range), its cells and their build times, sorted. */
   buildAt: Float64Array;
   buildIdx: Int32Array;
+  /** Per gold cell: the step the front reached it by (−1, 0, 1 per axis). */
+  buildDX: Int8Array;
+  buildDY: Int8Array;
   rings: NaniteRings;
   free: {
     count: number;
@@ -268,7 +279,8 @@ export interface AssemblyNanites {
   midPass: Pass;
   seatedPass(context: CanvasRenderingContext2D, painted: number): void;
   moltenPass: Pass;
-  hologramPass: Pass;
+  /** `covered`: the guideways under staged plates (drawn after the shells). */
+  hologramPass(context: CanvasRenderingContext2D, covered?: boolean): void;
   shadowPass: Pass;
   stagedPass: Pass;
   conduitPass: Pass;
@@ -321,6 +333,8 @@ export interface NaniteConduitCell {
   h: number;
   fx: number;
   fy: number;
+  /** How far before a cut the conduit fades out (px, default 5). */
+  fade?: number;
 }
 export interface NaniteConduitIO {
   guide: Uint8ClampedArray;
@@ -360,7 +374,16 @@ export function createAssemblyConduitJob(options: {
   guide: CanvasImageSource & { width: number; height: number };
   gold: CanvasImageSource;
   art: CanvasImageSource;
-  pieces: readonly { x: number; y: number; w: number; h: number; ax: number; ay: number; layer: number }[];
+  pieces: readonly {
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+    ax: number;
+    ay: number;
+    layer: number;
+    fade?: number;
+  }[];
   size: { readonly width: number; readonly height: number };
   goldPlan?: { count: number; x: ArrayLike<number>; y: ArrayLike<number>; w: ArrayLike<number>; h: ArrayLike<number> } | null;
   holo?: boolean;

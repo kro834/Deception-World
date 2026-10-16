@@ -42,6 +42,7 @@ export interface RexonanceAssemblyGold {
 export const ASSEMBLY_GOLD: {
   delay: number;
   form: number;
+  helmDelay: number;
   helm: number;
   approach: number;
   cool: number;

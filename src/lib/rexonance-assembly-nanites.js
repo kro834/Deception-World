@@ -50,8 +50,12 @@ export const ASSEMBLY_NANITES = Object.freeze({
   recoil: 0.006,
   spark: 0.004,
   link: 0.004,
-  release: 0.008,
-  clampIn: 0.016,
+  release: 0.006,
+  // The clamps slide in from .010 before the last tile lands and let go
+  // .004 after contact (round 3: a mechanism around the bite, not brackets
+  // standing round every plate for .07).
+  clampIn: 0.01,
+  clampHold: 0.004,
   crown: Object.freeze([0.66, 0.68]),
   implode: Object.freeze([0.86, 0.9]),
 });
@@ -60,13 +64,14 @@ export const ASSEMBLY_NANITES = Object.freeze({
  * px per unit progress, up the body and along the trims), `ready` the least
  * time between a conduit's completion and its plate's contact, `early` the
  * most a beat's climb runs ahead of its first fitting, `holo` how
- * far the ice hologram runs ahead of the solid conduit, `head` the weld
- * head's length and `ember` the sparks' life behind it. */
+ * far the ice hologram runs ahead of the solid conduit (round 3: a short
+ * laser band, no longer a third of a trim), `head` the weld head's length
+ * and `ember` the sparks' life behind it. */
 export const ASSEMBLY_GUIDEWAY = Object.freeze({
   climb: 6000,
   ready: 0.012,
   early: 0.05,
-  holo: 0.005,
+  holo: 0.0022,
   head: 0.0012,
   ember: 0.003,
 });
@@ -109,6 +114,16 @@ const RIPPLE_T = 0.012;
 const GLINT_MAX = 96;
 const LIGHT_X = -0.6;
 const LIGHT_Y = -0.8;
+// The pour's bands by lock age (round 3): white-hot leading edge, amber,
+// then cooling into the formed copper gold; touch's three.
+const MOLTEN_AGES = [0, 0.0008, 0.0024, 0.0042, 0.0062, 0.0088, 0.012];
+const MOLTEN_ALPHA = [1, 1, 0.82, 0.58, 0.36, 0.16];
+const MOLTEN_TOUCH = [0, 0.0024, 0.006, 0.012];
+const MOLTEN_TOUCH_ALPHA = [1, 0.5, 0.2];
+// The pour's own nanites (round 3, reviews: dark gold "gravel" and a row of
+// yellow dashes): one cell in three throws an incoming bead, one in three a
+// droplet.
+const POUR_SHARE = 0.34;
 
 /** A stable hash of an index into [0, 1) (no PRNG state). */
 export function naniteHash(index, salt) {
@@ -457,11 +472,16 @@ export function* assemblyNanitePlanSteps({
       goldEnd: 0,
       g0: Infinity,
       g1: -Infinity,
-      span: helm ? 0.016 : 0.03,
+      span: helm ? 0.01 : 0.03,
       // The guideway's build window (set with the gold) and its climb.
       buildStart: Infinity,
       buildEnd: Infinity,
       climb: -1,
+      cellT: 0.001,
+      // The clamps (set below): size, which corners, where each bites.
+      clampK: 0.7,
+      clampMask: 0,
+      clamp: null,
       recedeEnd: contact + 0.02,
       releaseEnd: contact + 0.028,
     });
@@ -650,7 +670,8 @@ export function* assemblyNanitePlanSteps({
       piece.goldEnd = per[p + 1];
       if (piece.goldEnd > piece.goldFirst) {
         // The pour runs from to + delay; flow = (lock − start) / span.
-        piece.g0 = Math.min(piece.g0, done[piece.index] + 0.008);
+        // (ASSEMBLY_GOLD's delay; the helmet's helmDelay.)
+        piece.g0 = Math.min(piece.g0, done[piece.index] + (piece.helm ? 0.005 : 0.008));
         piece.recedeEnd = piece.g1 + 0.012;
         piece.releaseEnd = piece.recedeEnd + N.release;
         if (!piece.hasGoldBox) {
@@ -684,6 +705,11 @@ export function* assemblyNanitePlanSteps({
   const buildB = new Float32Array(gold?.count ?? 0);
   const buildAt = new Float64Array(goldIdx.length);
   const buildIdx = new Int32Array(goldIdx.length);
+  // Each cell's growth direction (round 3, owner: 滑らかに): the step from
+  // the cell the front reached it from, so the front cell fills from that
+  // side, a fraction at a time (−1, 0, 1 per axis; the entry grows upward).
+  const buildDX = new Int8Array(gold?.count ?? 0);
+  const buildDY = new Int8Array(gold?.count ?? 0);
   if (goldIdx.length) {
     // A climb per beat (the ribbons, which hang from the shoulders to the
     // feet, climb beside the tail rather than below it).
@@ -764,6 +790,7 @@ export function* assemblyNanitePlanSteps({
       }
       // Each island in turn, from its lowest cell (nearest its middle).
       const dist = new Float64Array(count).fill(-1);
+      const pred = new Int32Array(count).fill(-1);
       const queue = new Int32Array(count);
       const label = new Int32Array(count).fill(-1);
       const heapD = new Float64Array(count * 8 + 8);
@@ -868,6 +895,7 @@ export function* assemblyNanitePlanSteps({
               const d = dk + (dx && dy ? Math.SQRT2 : 1);
               if (dist[j] >= 0 && dist[j] <= d + 1e-9) continue;
               dist[j] = d;
+              pred[j] = k;
               push(j, d);
             }
           if (tick()) yield;
@@ -902,18 +930,31 @@ export function* assemblyNanitePlanSteps({
       if (gs + length > latest) length = latest - gs;
       piece.buildStart = gs;
       piece.buildEnd = gs + length;
-      if (piece.kind === 1) {
-        const li = goldIdx[first + last];
-        anchorX = gold.x[li] + gold.w[li] / 2;
-        anchorY = gold.y[li] + gold.h[li] / 2;
-        chainNext = gs + 0.8 * length;
-      }
       for (let k = 0; k < count; k += 1) {
         const i = goldIdx[first + k];
         const b = most > 0 ? Math.max(0, dist[k]) / most : 0;
         buildB[i] = b;
         buildAt[first + k] = gs + b * length;
         buildIdx[first + k] = i;
+        const from = pred[k];
+        if (from >= 0) {
+          buildDX[i] = col[k] - col[from];
+          buildDY[i] = row[k] - row[from];
+        } else if (chained) {
+          // A chained segment's entry grows on from the chain's front.
+          const dx = gold.x[i] + gold.w[i] / 2 - anchorX;
+          const dy = gold.y[i] + gold.h[i] / 2 - anchorY;
+          if (Math.abs(dx) > Math.abs(dy)) buildDX[i] = dx < 0 ? -1 : 1;
+          else buildDY[i] = dy < 0 ? -1 : 1;
+        } else buildDY[i] = -1;
+      }
+      // One cell step of the front (progress): the time a cell takes to fill.
+      piece.cellT = most > 0 ? length / most : length;
+      if (piece.kind === 1) {
+        const li = goldIdx[first + last];
+        anchorX = gold.x[li] + gold.w[li] / 2;
+        anchorY = gold.y[li] + gold.h[li] / 2;
+        chainNext = gs + 0.8 * length;
       }
       // Sorted by build time (insertion sort into the plate's segment).
       for (let k = first + 1; k < first + count; k += 1) {
@@ -929,6 +970,70 @@ export function* assemblyNanitePlanSteps({
         buildIdx[at + 1] = i;
         if (tick()) yield;
       }
+    }
+  }
+
+  // The clamps (G3; round 3, reviews: they read as flat HUD brackets, piled
+  // up round the chest, and floated far from the large ornaments): drawn
+  // large enough for their bevel, bolt and LED to read, scaled with the gold
+  // box; none on a box under 40 px, the lower pair only under 110 px; each
+  // bites the plate's own outline at its point nearest that corner, never an
+  // empty box corner; and one clamp to a spot (a corner another plate's
+  // clamp already holds at overlapping times is left out).
+  {
+    for (let p = 0; p < NP; p += 1) {
+      const pc = npieces[p];
+      const bx = pc.gbox[0];
+      const by = pc.gbox[1];
+      const bw = pc.gbox[2];
+      const bh = pc.gbox[3];
+      const size = Math.sqrt(bw * bh);
+      pc.clampK = Math.max(0.55, Math.min(0.75, 0.45 + size / 320));
+      pc.clampMask = !pc.hasGoldBox || pc.helm || size < 40 ? 0 : size < 110 ? 12 : 15;
+      const anchors = new Float32Array(8);
+      for (let c = 0; c < 4; c += 1) {
+        anchors[c * 2] = c & 1 ? bx + bw : bx;
+        anchors[c * 2 + 1] = c & 2 ? by + bh : by;
+      }
+      if (pc.loopCount)
+        for (let c = 0; c < 4; c += 1) {
+          const tx = anchors[c * 2];
+          const ty = anchors[c * 2 + 1];
+          let best = Infinity;
+          for (let L = pc.loopFirst; L < pc.loopFirst + pc.loopCount; L += 1)
+            for (let k = loopStart[L]; k < loopStart[L] + loopCount[L]; k += 1) {
+              const d = (seamXs[k] - tx) ** 2 + (seamYs[k] - ty) ** 2;
+              if (d < best) {
+                best = d;
+                anchors[c * 2] = seamXs[k];
+                anchors[c * 2 + 1] = seamYs[k];
+              }
+            }
+        }
+      pc.clamp = anchors;
+      if (tick()) yield;
+    }
+    for (let p = 0; p < NP; p += 1) {
+      const a = npieces[p];
+      if (!a.clampMask) continue;
+      const a0 = a.to - N.clampIn;
+      const a1 = a.contact + N.clampHold + N.release;
+      for (let o = 0; o < p; o += 1) {
+        const b = npieces[o];
+        if (
+          !b.clampMask ||
+          a0 >= b.contact + N.clampHold + N.release ||
+          b.to - N.clampIn >= a1
+        )
+          continue;
+        for (let c = 0; c < 4; c += 1)
+          if (
+            a.clampMask & b.clampMask & (1 << c) &&
+            Math.hypot(a.clamp[c * 2] - b.clamp[c * 2], a.clamp[c * 2 + 1] - b.clamp[c * 2 + 1]) < 12
+          )
+            a.clampMask &= ~(1 << c);
+      }
+      if (tick()) yield;
     }
   }
 
@@ -1009,6 +1114,8 @@ export function* assemblyNanitePlanSteps({
     goldHash,
     buildB,
     buildAt,
+    buildDX,
+    buildDY,
     buildIdx,
     rings,
     free,
@@ -1146,6 +1253,8 @@ const conduitCut = (tn, gold, w, h, x, y) => {
  */
 export function* naniteConduitRows(cell, io) {
   const { w, h, fx, fy } = cell;
+  // How far before a cut the conduit fades (px; chamfer units are 3 a px).
+  const fade = cell.fade ?? 5;
   const { guide, gold, art, m, tn, hm, d, dc, face, holo, walls, mask, figFace, W, H } = io;
   // 1. The art's gold tone, and the gold it shows in this plate: its gold
   // alpha × the tone.
@@ -1273,7 +1382,7 @@ export function* naniteConduitRows(cell, io) {
       // before a cut like the conduit.
       if (v > 0) {
         const X = fx + x;
-        const byte = conduitByte(v * smooth(clamp01((dc[k] - 1) / 12)) * 255);
+        const byte = conduitByte(v * smooth(clamp01((dc[k] - 1) / (2.4 * fade))) * 255);
         if (byte && X >= 0 && X < W && Y >= 0 && Y < H) {
           const o = (Y * W + X) * 4;
           if (byte > mask[o + 3]) {
@@ -1285,7 +1394,7 @@ export function* naniteConduitRows(cell, io) {
       let dilated = 0;
       for (let t = y - 2; t <= y + 2; t += 1) if (t >= 0 && t < h && hm[t * w + x] > dilated) dilated = hm[t * w + x];
       if (dilated <= 0.02) continue;
-      const cut = smooth(clamp01((dc[k] - 3) / 15));
+      const cut = smooth(clamp01((dc[k] - 3) / (3 * fade)));
       if (cut <= 0) continue;
       // Glass: ice, over the visible gold only.
       let a = 0;
@@ -1501,7 +1610,7 @@ export function createAssemblyConduitJob({
       if (images.some((image, index) => (index === 0 || image) && !image?.data))
         throw new Error("invalid conduit pixels");
       rows = naniteConduitRows(
-        { w, h, fx: x, fy: y },
+        { w, h, fx: x, fy: y, fade: piece.fade ?? 5 },
         {
           guide: read(guide, ax, ay, w, h),
           gold: read(gold, ax, ay, w, h),
@@ -1945,6 +2054,8 @@ export function createAssemblyNanites({
   const BB = nano.buildB ?? new Float32Array(goldCountOf(gold));
   const BAT = nano.buildAt ?? new Float64Array(0);
   const BIDX = nano.buildIdx ?? new Int32Array(0);
+  const BDX = nano.buildDX ?? new Int8Array(goldCountOf(gold));
+  const BDY = nano.buildDY ?? new Int8Array(goldCountOf(gold));
   const RCY = rings.cy;
   const RRX = rings.rx;
   const RRY = rings.ry;
@@ -2013,6 +2124,11 @@ export function createAssemblyNanites({
   }
   const LAM = new Float64Array(NP);
   const STAGED = new Uint8Array(NP);
+  // Per frame, each plate's guideway on the body (hologramPass): 1 drawn per
+  // plate, 2 held in touch's figure-space clip; COVER 1 while its staged
+  // plate is over it (drawn after the shells).
+  const GMODE = new Uint8Array(NP);
+  const COVER = new Uint8Array(NP);
   const laneCount = new Uint16Array(NP);
   const beamI = new Int32Array(NP * 2);
   const heldList = new Int32Array(NP);
@@ -2724,6 +2840,25 @@ export function createAssemblyNanites({
     conduitDraws = 0;
     nanitesDrawn = 0;
     for (let p = 0; p < NP; p += 1) jigFor(p, q, JIGGED[p] === 1);
+    let conduits = 0;
+    for (let p = 0; p < NP; p += 1) {
+      const pc = P[p];
+      GMODE[p] = 0;
+      COVER[p] = 0;
+      if (
+        pc.goldEnd <= pc.goldFirst ||
+        q < pc.buildStart - ASSEMBLY_GUIDEWAY.holo ||
+        q >= pc.contact
+      )
+        continue;
+      COVER[p] = STAGED[p] && q >= pc.from ? 1 : 0;
+      if (coarse && (q >= pc.buildEnd || conduits >= TOUCH_CONDUITS)) {
+        GMODE[p] = figFace && q >= pc.buildStart ? 2 : 0;
+        continue;
+      }
+      GMODE[p] = 1;
+      conduits += 1;
+    }
     // Micro-shake (A5): the four DEUS！ accents and the crest.
     state.shakeX = 0;
     state.shakeY = 0;
@@ -2821,8 +2956,8 @@ export function createAssemblyNanites({
     let reserve = FX_RESERVE;
     if (gold && goldCount && !coarse) {
       const head = goldBy(q);
-      reserve += goldBy(q + 0.007) - head;
-      reserve += Math.min(DROP_MAX, head - goldBy(q - 0.0016));
+      reserve += Math.ceil(POUR_SHARE * (goldBy(q + 0.007) - head));
+      reserve += Math.ceil(POUR_SHARE * Math.min(DROP_MAX, head - goldBy(q - 0.0016)));
     }
     keep = nBack ? Math.min(1, Math.max(0, ASSEMBLY_SPRITE_BUDGET - reserve - near) / nBack) : 1;
     return state;
@@ -2951,35 +3086,32 @@ export function createAssemblyNanites({
     ctx.globalAlpha = 1;
   };
 
-  /* 6: the molten band and the cooling cells (G6, G7), over the gold. */
+  /* 6: the molten band and the cooling cells (G6, G7), over the gold. The
+     pour (round 3, reviews: no white-hot to amber band, a ragged row of
+     yellow dashes): the cells by the age of their lock, oldest first —
+     cooling into the formed copper gold, then amber, then the newest cells
+     white-hot (the molten layer added onto itself) — a gradient band that
+     runs along the trims from the seat. Touch takes three bands. */
   const moltenPass = (ctx) => {
     if (!gold || !molten || !goldCount) return;
     const q = Q;
-    const head = goldBy(q);
-    const band0 = goldBy(q - 0.004);
-    // The cooling cells (aged .004–.012) in age bands that dim as they cool
-    // (touch: one), so the cooled edge melts into the painted gold rather
-    // than ending on the cells' straight lines (review 2026-10-16).
-    const bands = coarse ? 1 : 4;
-    for (let b = 0; b < bands; b += 1) {
-      const from = goldBy(q - 0.004 - ((b + 1) * 0.008) / bands);
-      const to = b ? goldBy(q - 0.004 - (b * 0.008) / bands) : band0;
+    const last = coarse ? MOLTEN_TOUCH.length - 1 : MOLTEN_AGES.length - 1;
+    for (let b = last - 1; b >= 0; b -= 1) {
+      const from = goldBy(q - (coarse ? MOLTEN_TOUCH[b + 1] : MOLTEN_AGES[b + 1]));
+      const to = goldBy(q - (coarse ? MOLTEN_TOUCH[b] : MOLTEN_AGES[b]));
       if (from >= to) continue;
       ctx.save();
       ctx.beginPath();
       for (let i = from; i < to; i += 1) ctx.rect(gold.x[i], gold.y[i], gold.w[i], gold.h[i]);
       ctx.clip();
-      ctx.globalAlpha = coarse ? 0.3 : 0.45 * (1 - b / bands);
+      ctx.globalAlpha = coarse ? MOLTEN_TOUCH_ALPHA[b] : MOLTEN_ALPHA[b];
       ctx.drawImage(molten, 0, 0, W, H);
-      ctx.restore();
-    }
-    if (band0 < head) {
-      ctx.save();
-      ctx.beginPath();
-      for (let i = band0; i < head; i += 1) ctx.rect(gold.x[i], gold.y[i], gold.w[i], gold.h[i]);
-      ctx.clip();
-      ctx.globalAlpha = 1;
-      ctx.drawImage(molten, 0, 0, W, H);
+      if (b === 0 && !coarse) {
+        // The leading edge, white-hot.
+        ctx.globalCompositeOperation = "lighter";
+        ctx.globalAlpha = 0.62;
+        ctx.drawImage(molten, 0, 0, W, H);
+      }
       ctx.restore();
     }
   };
@@ -3003,6 +3135,44 @@ export function createAssemblyNanites({
       ctx.rect(gold.x[i], gold.y[i], gold.w[i], gold.h[i]);
     }
     ctx.clip();
+  };
+  // The same clip at the build front (round 3, owner: 滑らかに): a cell the
+  // front reached less than one cell step ago (q − its build time < cellT)
+  // is filled only that fraction, from the side the front came in — the
+  // front moves sub-cell, never a 4 px square at a time. `q` the front's
+  // time (the hologram's lead uses its own).
+  const buildClipFront = (ctx, p, first, end, q) => {
+    const T = P[p].cellT;
+    ctx.beginPath();
+    for (let k = first; k < end; k += 1) {
+      const i = BIDX[k];
+      const f = T > 0 ? (q - BAT[k]) / T : 1;
+      if (f <= 0) continue;
+      const x = gold.x[i];
+      const y = gold.y[i];
+      const w = gold.w[i];
+      const h = gold.h[i];
+      if (f >= 1) {
+        ctx.rect(x, y, w, h);
+        continue;
+      }
+      const dx = BDX[i];
+      const dy = BDY[i];
+      const rw = dx ? w * f : w;
+      const rh = dy ? h * f : h;
+      ctx.rect(dx < 0 ? x + w - rw : x, dy < 0 ? y + h - rh : y, rw, rh);
+    }
+    ctx.clip();
+  };
+  // The point the front has reached in build-ordered cell k (its partial
+  // fill's leading edge), into RG[0], RG[1].
+  const frontPoint = (p, k, q) => {
+    const i = BIDX[k];
+    const T = P[p].cellT;
+    let f = T > 0 ? (q - BAT[k]) / T : 1;
+    f = f < 0 ? 0 : f > 1 ? 1 : f;
+    RG[0] = gold.x[i] + gold.w[i] * (0.5 + BDX[i] * (f - 0.5));
+    RG[1] = gold.y[i] + gold.h[i] * (0.5 + BDY[i] * (f - 0.5));
   };
   // The walls' parallax (G5): the rails turn as you scroll through a plate's
   // whole guideway, from its build to its pour.
@@ -3106,10 +3276,16 @@ export function createAssemblyNanites({
   /* 8: before contact, each trim's guideway is BUILT on the body (owner,
      2026-10-16: 「金のガイドウェイは上から被さる形ではなく、足先から滑らかに
      作られていく。」): the solid conduit (walls, rails, glass, channel) grows
-     from the plate's lowest cell along its trims, the ice hologram a short
-     stretch ahead of it, a white-hot weld head at the front throwing sparks,
-     a hard-light beam from the latch driving it; then the pulses (G2). */
-  const hologramPass = (ctx) => {
+     from the plate's lowest cell along its trims — its front sub-cell and
+     feathered over three cell steps, a fresh weld thread lit along the
+     conduit's own rails and a hot round core at its tip throwing sparks, the
+     ice hologram a short stretch ahead fading toward its lead, a hard-light
+     beam from the latch driving it; then the pulses (G2). Built ONCE (round
+     3, reviews: the staged shell hid it, then it formed a second time): a
+     plate's guideway stays on the body while its plate is staged — the
+     `covered` call, after the staged shells, draws it through them, lighter
+     while the plate hovers, whole as it seats onto it. */
+  const hologramPass = (ctx, covered = false) => {
     if (!gold || !goldCount) return;
     const faceSheet = guideFace();
     const holoSheet = guideHolo();
@@ -3118,119 +3294,151 @@ export function createAssemblyNanites({
     const q = Q;
     const GW = ASSEMBLY_GUIDEWAY;
     const live = !CALM && !coarse;
+    const want = covered ? 1 : 0;
     batchN = 0;
     headN = 0;
     glowN = 0;
     emberN = 0;
     beamN = 0;
-    let plates = 0;
     let held = 0;
     for (let p = 0; p < NP; p += 1) {
+      const mode = GMODE[p];
+      if (!mode || COVER[p] !== want) continue;
       const pc = P[p];
-      const first = pc.goldFirst;
-      if (pc.goldEnd <= first) continue;
-      // (A jigged plate's stays under it while its conduit comes through.)
-      const until = JIGGED[p] === 1 && !pc.fixed ? pc.contact + 0.002 : pc.contact;
-      if (q < pc.buildStart - GW.holo || q >= until) continue;
-      // Touch draws per plate only the (up to four) conduits still being
-      // built; every other built frame holds in one figure-space clip below,
+      // Touch: every other built frame holds in one figure-space clip below,
       // so none pops in and out.
-      if (coarse && (q >= pc.buildEnd || plates >= TOUCH_CONDUITS)) {
-        if (figFace && q >= pc.buildStart) heldList[held++] = p;
+      if (mode === 2) {
+        heldList[held++] = p;
         continue;
       }
-      plates += 1;
+      const first = pc.goldFirst;
+      const T = pc.cellT;
       const built = builtIn(p, q);
-      const ahead = q < pc.buildEnd ? builtIn(p, q + GW.holo) : built;
+      const a = covered ? 1 - 0.45 * LAM[p] : 1;
       if (built > first && faceSheet) {
-        ctx.save();
-        buildClip(ctx, first, built);
-        conduitBody(ctx, p, faceSheet, wallSheet, atlas, 1, q);
-        conduitDraws += 1;
-        ctx.restore();
-        if (!coarse && atlas) glint(ctx, p, faceSheet, atlas, 1, first, built, true);
-      }
-      if (ahead > built) {
-        // The hologram ahead of the head (touch: a faint preview of the
-        // conduit itself, from the figure-space face, through a clip).
-        if (holoSheet) {
-          ctx.save();
-          buildClip(ctx, built, ahead);
-          ctx.globalAlpha = 0.85;
-          plateDraw(ctx, holoSheet, atlas, p, 0, 0, pc.h);
+        const solid = builtIn(p, q - 3 * T);
+        const mid = builtIn(p, q - 1.5 * T);
+        if (solid >= pc.goldEnd && !coarse) {
+          // Whole: the conduit's own smooth edges, no cell clip.
+          conduitBody(ctx, p, faceSheet, wallSheet, atlas, a, q);
           conduitDraws += 1;
-          ctx.restore();
-        } else if (figFace) {
-          ctx.save();
-          buildClip(ctx, built, ahead);
-          ctx.globalAlpha = 0.45;
-          ctx.drawImage(figFace[pc.ornament ? 1 : 0], 0, 0, W, H);
-          ctx.restore();
+        } else {
+          if (solid > first) {
+            ctx.save();
+            buildClip(ctx, first, solid);
+            conduitBody(ctx, p, faceSheet, wallSheet, atlas, a, q);
+            conduitDraws += 1;
+            ctx.restore();
+          }
+          if (mid > solid) {
+            ctx.save();
+            buildClip(ctx, solid, mid);
+            ctx.globalAlpha = 0.8 * a;
+            plateDraw(ctx, faceSheet, atlas, p, 0, 0, pc.h);
+            conduitDraws += 1;
+            ctx.restore();
+          }
+          if (built > mid) {
+            // The front: filling sub-cell, half laid; its fresh weld lit
+            // white-hot along the conduit's own rails and channel (fine
+            // pointers), never squares.
+            ctx.save();
+            buildClipFront(ctx, p, mid, built, q);
+            ctx.globalAlpha = 0.55 * a;
+            plateDraw(ctx, faceSheet, atlas, p, 0, 0, pc.h);
+            if (!coarse) {
+              ctx.globalCompositeOperation = "lighter";
+              ctx.globalAlpha = 0.85 * a;
+              plateDraw(ctx, faceSheet, atlas, p, 0, 0, pc.h);
+            }
+            conduitDraws += 1;
+            ctx.restore();
+          }
+        }
+        if (!coarse && atlas) glint(ctx, p, faceSheet, atlas, a, first, built, true);
+      }
+      if (q < pc.buildEnd) {
+        // The hologram ahead of the head, fading toward its lead (touch: a
+        // faint preview of the conduit itself, from the figure-space face).
+        const near = builtIn(p, q + GW.holo * 0.5);
+        const ahead = builtIn(p, q + GW.holo);
+        if (ahead > built && (holoSheet || figFace)) {
+          for (let band = 0; band < 2; band += 1) {
+            const from = band ? near : built;
+            const to = band ? ahead : near;
+            if (to <= from) continue;
+            ctx.save();
+            if (band) buildClipFront(ctx, p, from, to, q + GW.holo);
+            else buildClip(ctx, from, to);
+            if (holoSheet) {
+              ctx.globalAlpha = (band ? 0.28 : 0.55) * a;
+              plateDraw(ctx, holoSheet, atlas, p, 0, 0, pc.h);
+              conduitDraws += 1;
+            } else {
+              ctx.globalAlpha = (band ? 0.22 : 0.45) * a;
+              ctx.drawImage(figFace[pc.ornament ? 1 : 0], 0, 0, W, H);
+            }
+            ctx.restore();
+          }
         }
       }
-      if (q < pc.buildEnd + GW.head) {
-        // The weld head: the cells just built, white-hot, with a glow (only
-        // where the art shows gold).
-        const from = builtIn(p, q - GW.head);
-        for (let k = from; k < built && headN < HEAD_CAP * 4 - 4; k += 1) {
-          const i = BIDX[k];
-          if (!shown(i)) continue;
-          const age = (q - BAT[k]) / GW.head;
-          const cx = gold.x[i] + gold.w[i] / 2;
-          const cy = gold.y[i] + gold.h[i] / 2;
-          const s = 2.4 - 1.2 * age;
-          pushRect(headRects, headN, cx - s / 2, cy - s / 2, s, s);
-          headN += 4;
-          if (glowN < HEAD_CAP * 4 - 4) {
-            const g = 6 - 3 * age;
-            pushRect(glowRects, glowN, cx - g / 2, cy - g / 2, g, g);
+      if (q < pc.buildEnd + GW.head && built > first) {
+        // The weld's hot core at the tip: a soft round glow and a white
+        // point (touch: an ice glow and the point), the spark star and the
+        // beam from the latch while it runs.
+        const k = built - 1;
+        const i = BIDX[k];
+        if (shown(i)) {
+          frontPoint(p, k, q);
+          const cx = RG[0];
+          const cy = RG[1];
+          const fade = q < pc.buildEnd ? 1 : 1 - (q - pc.buildEnd) / GW.head;
+          if (cells && !coarse) {
+            const g = 10 * (0.75 + 0.25 * fade);
+            ctx.globalCompositeOperation = "lighter";
+            ctx.globalAlpha = 0.8 * fade * a;
+            ctx.drawImage(cells, BKX[2], BKY[2], 32, 32, cx - g / 2, cy - g / 2, g, g);
+            ctx.globalCompositeOperation = "source-over";
+            sprites_ += 1;
+          } else if (glowN < HEAD_CAP * 4 - 4) {
+            pushRect(glowRects, glowN, cx - 2.6, cy - 2.6, 5.2, 5.2);
             glowN += 4;
           }
-        }
-        if (live && built > first && q < pc.buildEnd) {
-          // The front's spark star and the beam from the latch.
-          const k = built - 1;
-          const i = BIDX[k];
-          const cx = gold.x[i] + gold.w[i] / 2;
-          const cy = gold.y[i] + gold.h[i] / 2;
-          if (cells && shown(i)) {
-            const f = Math.floor(q / 0.0006 + 4 * GHASH[i]) % 4;
-            const draw = 11;
-            ctx.globalAlpha = 0.9;
-            ctx.drawImage(
-              cells,
-              SPX + 32 * f,
-              SPY,
-              32,
-              32,
-              cx - draw / 2,
-              cy - draw / 2,
-              draw,
-              draw,
-            );
-            sprites_ += 1;
+          if (headN < HEAD_CAP * 4 - 4) {
+            const s = 1.1 + 0.5 * fade;
+            pushRect(headRects, headN, cx - s / 2, cy - s / 2, s, s);
+            headN += 4;
           }
-          if (beamN < NP * 4) {
-            beams[beamN] = pc.seatX;
-            beams[beamN + 1] = pc.seatY;
-            beams[beamN + 2] = cx;
-            beams[beamN + 3] = cy;
-            beamN += 4;
+          if (live && q < pc.buildEnd) {
+            if (cells) {
+              const f = Math.floor(q / 0.0006 + 4 * GHASH[i]) % 4;
+              const draw = 9;
+              ctx.globalAlpha = 0.85 * a;
+              ctx.drawImage(cells, SPX + 32 * f, SPY, 32, 32, cx - draw / 2, cy - draw / 2, draw, draw);
+              sprites_ += 1;
+            }
+            if (beamN < NP * 4) {
+              beams[beamN] = pc.seatX;
+              beams[beamN + 1] = pc.seatY;
+              beams[beamN + 2] = cx;
+              beams[beamN + 3] = cy;
+              beamN += 4;
+            }
           }
         }
         if (live) {
           // Sparks flung from the weld, falling as they cool.
           const from2 = builtIn(p, q - GW.ember);
-          for (let k = from2; k < built && emberN < HEAD_CAP * 4 - 4; k += 1) {
-            const i = BIDX[k];
-            const h = GHASH[i];
-            if (h >= 0.4 || !shown(i)) continue;
-            const age = (q - BAT[k]) / GW.ember;
+          for (let kk = from2; kk < built && emberN < HEAD_CAP * 4 - 4; kk += 1) {
+            const ii = BIDX[kk];
+            const h = GHASH[ii];
+            if (h >= 0.4 || !shown(ii)) continue;
+            const age = (q - BAT[kk]) / GW.ember;
             const ang = TAU * ((h * 7.31) % 1);
             const speed = 10 + 22 * ((h * 13.7) % 1);
-            const x = gold.x[i] + gold.w[i] / 2 + Math.cos(ang) * speed * age;
+            const x = gold.x[ii] + gold.w[ii] / 2 + Math.cos(ang) * speed * age;
             const y =
-              gold.y[i] + gold.h[i] / 2 + Math.sin(ang) * speed * age * 0.7 + 30 * age * age;
+              gold.y[ii] + gold.h[ii] / 2 + Math.sin(ang) * speed * age * 0.7 + 30 * age * age;
             const s = 0.5 + 1.1 * (1 - age);
             pushRect(emberRects, emberN, x - s / 2, y - s / 2, s, s);
             emberN += 4;
@@ -3241,7 +3449,7 @@ export function createAssemblyNanites({
     }
     // Touch: every other built frame, whole, through one clip per layer
     // (armour, ornaments) of the figure-space faces — a five-argument draw.
-    if (held) heldFrames(ctx, held, false);
+    if (held) heldFrames(ctx, held, false, covered ? 0.8 : 1);
     if (beamN) {
       ctx.globalAlpha = 0.3;
       ctx.strokeStyle = TONE_CSS[0];
@@ -3253,16 +3461,16 @@ export function createAssemblyNanites({
       }
       ctx.stroke();
     }
-    fillBatch(ctx, glowRects, glowN, "rgb(150 236 255)", coarse ? 0.3 : 0.38);
-    fillBatch(ctx, headRects, headN, "rgb(250 254 255)", 0.95);
+    fillBatch(ctx, glowRects, glowN, "rgb(150 236 255)", 0.32);
+    fillBatch(ctx, headRects, headN, "rgb(255 253 246)", 0.95);
     fillBatch(ctx, emberRects, emberN, "rgb(255 232 170)", 0.85);
     fillBatch(ctx, batch, batchN, "rgb(170 240 255)", 0.34);
     ctx.globalAlpha = 1;
   };
   // Touch's held frames (heldList[0, count)): before contact the cells built
   // by q (and the hologram's stretch ahead); after it (`seated`) the cells
-  // not yet behind the cooling front.
-  const heldFrames = (ctx, count, seated) => {
+  // the gold has not yet poured into.
+  const heldFrames = (ctx, count, seated, alpha = 1) => {
     const GW = ASSEMBLY_GUIDEWAY;
     const q = Q;
     for (let layer = 0; layer < 2; layer += 1) {
@@ -3277,7 +3485,7 @@ export function createAssemblyNanites({
           any = true;
         }
         if (seated) {
-          for (let kk = goldAfter(p, q - 0.012); kk < pc.goldEnd; kk += 1) {
+          for (let kk = goldAfter(p, q); kk < pc.goldEnd; kk += 1) {
             const i = GIDX[kk];
             ctx.rect(gold.x[i], gold.y[i], gold.w[i], gold.h[i]);
           }
@@ -3291,7 +3499,7 @@ export function createAssemblyNanites({
       }
       if (!any) continue;
       ctx.clip();
-      ctx.globalAlpha = 1;
+      ctx.globalAlpha = alpha;
       ctx.drawImage(figFace[layer], 0, 0, W, H);
       ctx.restore();
     }
@@ -3390,10 +3598,13 @@ export function createAssemblyNanites({
     ctx.globalAlpha = 1;
   };
 
-  /* 11: from the seat on, the built conduit over the plate as it slams
-     home into it (fading in through the seat), its walls turning with the
-     scroll (G5), pulses marching up it until the pour, receding behind the
-     cooling front (G7). */
+  /* 11: from contact on, the guideway the plate seated onto (round 3: the
+     same conduit, never formed again): whole, at full strength, its walls
+     turning with the scroll (G5); a band of light runs up it from the toe
+     end as the plate locks; pulses march up it until the pour; and the
+     molten gold takes it over cell by cell (round 3, reviews: under the
+     conduit's glass the pour did not read) — ahead of the front the empty
+     guideway, at it the conduit dissolving into the white-hot metal. */
   const conduitPass = (ctx) => {
     if (!gold) return;
     const faceSheet = guideFace();
@@ -3406,35 +3617,54 @@ export function createAssemblyNanites({
     let held = 0;
     for (let p = 0; p < NP; p += 1) {
       const pc = P[p];
-      if (q < pc.to || q >= pc.recedeEnd || pc.goldEnd <= pc.goldFirst) continue;
-      // Never over a plate still moving under its jig: a jigged plate's
-      // conduit comes through as it seats (the guideway lay on the body
-      // under it until then), so the two never disagree (owner, 2026-10-16).
-      const moving = JIGGED[p] === 1 && !pc.fixed;
-      if (moving && q < pc.contact) continue;
+      if (q < pc.contact || q >= pc.recedeEnd || pc.goldEnd <= pc.goldFirst) continue;
       if (coarse && (plates >= TOUCH_CONDUITS || conduitDraws >= TOUCH_CONDUITS * 2)) {
         // Touch: the seated conduits beyond its per-plate draws hold in the
         // figure-space clip.
-        if (figFace && q >= pc.contact) heldList[held++] = p;
+        if (figFace) heldList[held++] = p;
         continue;
       }
       plates += 1;
-      const seat = moving
-        ? smooth(clamp01((q - pc.contact) / 0.002))
-        : q < pc.contact
-          ? smooth(clamp01((q - pc.to) / (pc.contact - pc.to)))
-          : 1;
-      // Behind the cooling front the conduit is gone: it became the gold.
-      const first = goldAfter(p, q - 0.012);
-      if (pc.goldEnd > first) {
-        ctx.save();
-        goldClip(ctx, first, pc.goldEnd);
-        conduitBody(ctx, p, faceSheet, wallSheet, atlas, seat, q);
-        conduitDraws += 1;
-        ctx.restore();
-        if (!coarse && atlas) glint(ctx, p, faceSheet, atlas, seat, first, pc.goldEnd, false);
+      // Where the gold has poured, the conduit is gone: it became the gold.
+      const first = goldAfter(p, q - 0.0008);
+      if (first >= pc.goldEnd) continue;
+      const soft = goldAfter(p, q);
+      if (soft === pc.goldFirst && !coarse) {
+        // Nothing receding yet: the whole conduit, its own smooth edges.
+        conduitBody(ctx, p, faceSheet, wallSheet, atlas, 1, q);
+      } else {
+        if (pc.goldEnd > soft) {
+          ctx.save();
+          goldClip(ctx, soft, pc.goldEnd);
+          conduitBody(ctx, p, faceSheet, wallSheet, atlas, 1, q);
+          ctx.restore();
+        }
+        if (soft > first) {
+          ctx.save();
+          goldClip(ctx, first, soft);
+          ctx.globalAlpha = 0.35;
+          plateDraw(ctx, faceSheet, atlas, p, 0, 0, pc.h);
+          ctx.restore();
+        }
       }
-      if (!CALM && q >= pc.contact) pulseLight(ctx, p, pc.goldEnd, guideHolo(), atlas);
+      conduitDraws += 1;
+      if (!coarse && atlas) glint(ctx, p, faceSheet, atlas, 1, first, pc.goldEnd, false);
+      if (!CALM && !coarse && q < pc.contact + 0.004) {
+        // The lock: the band of light runs toe to tip through the conduit.
+        const len = pc.buildEnd - pc.buildStart;
+        const sweep = ((q - pc.contact) / 0.004) * 1.25;
+        const k0 = builtIn(p, pc.buildStart + (sweep - 0.25) * len);
+        const k1 = builtIn(p, pc.buildStart + sweep * len);
+        if (k1 > k0) {
+          ctx.save();
+          buildClip(ctx, k0, k1);
+          ctx.globalCompositeOperation = "lighter";
+          ctx.globalAlpha = 0.75;
+          plateDraw(ctx, faceSheet, atlas, p, 0, 0, pc.h);
+          ctx.restore();
+        }
+      }
+      if (!CALM) pulseLight(ctx, p, pc.goldEnd, guideHolo(), atlas);
     }
     if (held) heldFrames(ctx, held, true);
     fillBatch(ctx, batch, batchN, "rgb(170 240 255)", 0.34);
@@ -3495,31 +3725,41 @@ export function createAssemblyNanites({
       ctx.strokeStyle = "rgb(150 236 255)";
       ctx.stroke();
     }
-    // The clamps: one per gold-box corner. They SLIDE in along the body's
-    // surface from beside the box (owner, 2026-10-16: nothing descends onto
-    // it) — the lower pair first, as the guideway was built — bite as the
-    // plate lands, and slide away as the conduit recedes.
+    // The clamps: one per corner the plan gives them (on a large ornament,
+    // on its own outline). They SLIDE in along the body's surface from
+    // beside it (owner, 2026-10-16: nothing descends onto it) — the lower
+    // pair first, as the guideway was built — bite as the plate lands, and
+    // slide away as the conduit recedes. Drawn large enough for the bevel to
+    // read, their gold chrome lifted, and the bolt's ice LED lights through
+    // the bite (round 3, reviews: flat khaki HUD brackets).
     strokes = false;
     for (let p = 0; p < NP; p += 1) {
       const pc = P[p];
-      if (!pc.hasGoldBox || pc.helm) continue;
+      const mask = pc.clampMask;
+      if (!mask) continue;
       const start = pc.to - N.clampIn;
-      const relStart = pc.recedeEnd;
+      const relStart = pc.contact + N.clampHold;
       if (q < start || q >= relStart + N.release) continue;
-      const [bx, by, bw, bh] = pc.gbox;
-      const kk = Math.max(0.3, Math.min(0.6, Math.min(bw, bh) / 80));
+      const kk = pc.clampK;
       const draw = CL.cell * kk;
-      const reach = 10 + 0.25 * bw;
+      const reach = 8 + 0.18 * Math.min(pc.gbox[2], 120);
+      const bite =
+        q < pc.contact - 0.002 || q >= pc.contact + 0.006
+          ? 0
+          : q < pc.contact
+            ? smooth((q - pc.contact + 0.002) / 0.002)
+            : 1 - (q - pc.contact) / 0.006;
       for (let c = 0; c < 4; c += 1) {
+        if (!(mask & (1 << c))) continue;
         const sxn = c & 1 ? 1 : -1;
         const syn = c & 2 ? 1 : -1;
-        const at = start + (c < 2 ? 0.003 : 0);
+        const at = start + (c < 2 ? 0.002 : 0);
         if (q < at) continue;
         let f = 7;
         let slide = 0;
         let alpha = 1;
-        if (q < at + 0.008) {
-          const w = (q - at) / 0.008;
+        if (q < at + 0.006) {
+          const w = (q - at) / 0.006;
           slide = 1 - easeOut(w);
           alpha = clamp01(w * 2.5);
         } else if (q >= pc.contact - 0.002 && q < pc.contact + 0.002)
@@ -3532,22 +3772,26 @@ export function createAssemblyNanites({
           alpha = 1 - r;
         }
         if (alpha <= 0) continue;
-        const cx = (sxn > 0 ? bx + bw : bx) + sxn * reach * slide;
-        const cy = syn > 0 ? by + bh : by;
+        const cx = pc.clamp[c * 2] + sxn * reach * slide;
+        const cy = pc.clamp[c * 2 + 1];
         if (fxSheet && !coarse) {
+          const sx = CL.x + CL.cell * f;
+          const sy = CL.y + CL.cell * c;
+          const dx = cx - CLAX[c] * kk;
+          const dy = cy - CLAY[c] * kk;
           ctx.globalAlpha = alpha;
-          ctx.drawImage(
-            fxSheet,
-            CL.x + CL.cell * f,
-            CL.y + CL.cell * c,
-            CL.cell,
-            CL.cell,
-            cx - CLAX[c] * kk,
-            cy - CLAY[c] * kk,
-            draw,
-            draw,
-          );
-          sprites_ += 1;
+          ctx.drawImage(fxSheet, sx, sy, CL.cell, CL.cell, dx, dy, draw, draw);
+          ctx.globalCompositeOperation = "lighter";
+          ctx.globalAlpha = 0.32 * alpha;
+          ctx.drawImage(fxSheet, sx, sy, CL.cell, CL.cell, dx, dy, draw, draw);
+          sprites_ += 2;
+          if (bite > 0 && cells) {
+            const g = 10 * kk;
+            ctx.globalAlpha = 0.7 * bite * alpha;
+            ctx.drawImage(cells, BKX[0], BKY[0], 32, 32, cx - g / 2, cy - g / 2, g, g);
+            sprites_ += 1;
+          }
+          ctx.globalCompositeOperation = "source-over";
         } else {
           if (!strokes) {
             ctx.beginPath();
@@ -3957,30 +4201,20 @@ export function createAssemblyNanites({
     const q = Q;
     const approach = 0.007;
     const G = goldCell;
-    // Incoming: gold hex chips on the flow path.
+    // Incoming: molten gold beads on the flow path (one cell in three),
+    // bright as they arrive.
     if (cells) {
       const end = goldBy(q + approach);
       for (let i = goldBy(q); i < end; i += 1) {
-        if (!shown(i)) continue;
+        if (GHASH[i] >= POUR_SHARE || !shown(i)) continue;
         const u = 1 - (gold.lock[i] - q) / approach;
         const e = smooth(clamp01(u));
-        const size = G * (0.9 + 0.7 * e);
+        const size = G * (0.8 + 0.55 * e);
         const x = gold.x[i] + gold.w[i] / 2 + gold.ux[i] * (1 - u);
         const y = gold.y[i] + gold.h[i] / 2 + gold.uy[i] * (1 - u);
-        let f = Math.floor(24 * GHASH[i] + 30 * u) % 24;
-        if (f < 0) f += 24;
-        ctx.globalAlpha = 0.95;
-        ctx.drawImage(
-          cells,
-          MIPX[3] + 16 * f,
-          MIPY[3],
-          16,
-          16,
-          x - size / 2,
-          y - size / 2,
-          size,
-          size,
-        );
+        const f = Math.floor(GHASH[i] * 24 + 12 * u) % 8;
+        ctx.globalAlpha = 0.35 + 0.6 * e;
+        ctx.drawImage(cells, BEADX + 32 * f, BEADY, 32, 32, x - size / 2, y - size / 2, size, size);
         sprites_ += 1;
       }
     }
@@ -3990,9 +4224,9 @@ export function createAssemblyNanites({
     const dropStart = goldBy(q - 0.0016);
     const head = goldBy(q);
     for (let i = dropStart; i < head && drops < DROP_MAX; i += 1) {
-      if (!shown(i)) continue;
+      if (GHASH[i] < 1 - POUR_SHARE || !shown(i)) continue;
       const age = (q - gold.lock[i]) / 0.0016;
-      const size = 1.4 * G;
+      const size = 1.2 * G;
       const cx = gold.x[i] + gold.w[i] / 2;
       const cy = gold.y[i] + gold.h[i] / 2;
       drops += 1;
@@ -4015,7 +4249,7 @@ export function createAssemblyNanites({
         let a = Math.round(Math.atan2(-gold.uy[i], -gold.ux[i]) / (Math.PI / 8)) % 8;
         if (a < 0) a += 8;
         const e = age < 0.25 ? 2 : age < 0.5 ? 1 : 0;
-        const draw = size * 2.2;
+        const draw = size * 1.75;
         ctx.globalAlpha = 1;
         ctx.drawImage(
           fxSheet,
@@ -4051,20 +4285,20 @@ export function createAssemblyNanites({
         );
         sprites_ += 1;
       }
-      // The recede front: one cell in four sheds a chip that rises and fades.
-      const recEnd = goldBy(q - 0.012);
-      for (let i = goldBy(q - 0.016); i < recEnd; i += 1) {
-        if (GHASH[i] >= 0.25 || !shown(i)) continue;
-        const t = (q - 0.012 - gold.lock[i]) / 0.004;
-        const rise = (6 + 4 * GHASH[i] * 4) * t;
-        const size = G * 1.2;
+      // The mould lifts off: as the gold takes a cell, one cell in eight
+      // sheds an ice glass nanite of the conduit that rises and fades.
+      for (let i = goldBy(q - 0.003); i < head; i += 1) {
+        if (GHASH[i] < 0.88 || !shown(i)) continue;
+        const t = (q - gold.lock[i]) / 0.003;
+        const rise = (5 + 26 * (GHASH[i] - 0.88)) * t;
+        const size = G * 1.1;
         let f = Math.floor(24 * GHASH[i] * 4 + 40 * t) % 24;
         if (f < 0) f += 24;
-        ctx.globalAlpha = 0.9 * (1 - t);
+        ctx.globalAlpha = 0.8 * (1 - t);
         ctx.drawImage(
           cells,
-          MIPX[3] + 16 * f,
-          MIPY[3],
+          MIPX[0] + 16 * f,
+          MIPY[0],
           16,
           16,
           gold.x[i] + gold.w[i] / 2 - size / 2,

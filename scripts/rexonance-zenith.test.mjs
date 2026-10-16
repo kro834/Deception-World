@@ -1392,9 +1392,10 @@ test("the gold forms by nanites right after each plate lands; the driver is on f
   // is the plan after those changes.)
   // (owner 2026-10-16 超大幅な改善 — the gold waits for the plate to clamp
   // (ASSEMBLY_GOLD.delay .003 → .008); each cell names its plate (`piece`).)
+  // (Round 3: the helmet's gold from .005 after its last tile, over .010.)
   assert.equal(
     createHash("sha256").update(JSON.stringify(gold)).digest("hex"),
-    "c34630d9b1e5ea32a956e5fb7e8fc50b628104fab71e7e9c69cc22782cfff905",
+    "df2e5fe2e2b904a95e042bb8bafadb21d95da18a49f6e9bf7823689c9dea5730",
   );
   const steps = assemblyGoldPlanSteps({
     pieces,
@@ -1714,12 +1715,26 @@ test("the gold guideway is built from the toe tips up, along the trims, never la
     return calls.filter((call) => call.sx === foot.ax && call.sy === foot.ay);
   };
   assert.equal(clipsFor(foot.buildStart - ASSEMBLY_GUIDEWAY.holo - 0.001).length, 0, "nothing before");
+  // (Round 3: the conduit is drawn in bands — solid, then its front feathered
+  // over three cell steps and filled sub-cell — so the built cells are the
+  // union of its guide draws' clips, each rect inside one cell.)
+  const builtCells = (q) => {
+    const cells = new Set();
+    const rects = [];
+    for (const call of clipsFor(q))
+      if (call.source === "guide")
+        for (const [x, y, w, h] of call.rects) {
+          rects.push([x, y, w, h]);
+          cells.add(`${Math.floor((x + w / 2 - foot.x) / REXONANCE_SUIT_GOLD_CELL)},${Math.floor((y + h / 2 - foot.y) / REXONANCE_SUIT_GOLD_CELL)}`);
+        }
+    return { count: cells.size, rects };
+  };
   let previous = 0;
   for (const u of [0.15, 0.4, 0.7, 1]) {
     const q = foot.buildStart + u * (foot.buildEnd - foot.buildStart) + 1e-6;
-    const solid = clipsFor(q).find((call) => call.source === "guide");
-    assert.ok(solid && solid.rects.length > previous, `${u}: the conduit grows`);
-    previous = solid.rects.length;
+    const solid = builtCells(q);
+    assert.ok(solid.count > previous, `${u}: the conduit grows`);
+    previous = solid.count;
     const lowest = Math.max(...solid.rects.map(([, y, , h]) => y + h));
     assert.equal(lowest, foot.gbox[1] + foot.gbox[3], "it runs from the toe end");
   }
@@ -1752,8 +1767,9 @@ test("the gold guideway is built from the toe tips up, along the trims, never la
     clamps.hardwarePass(context);
     return draws;
   };
-  const start = foot.to - 0.016;
-  const slide = [0.002, 0.004, 0.006, 0.009].map((d) => clampDraws(start + d));
+  // (Round 3: the clamps come in .010 before the last tile, over .006.)
+  const start = foot.to - 0.01;
+  const slide = [0.0005, 0.0015, 0.0025, 0.0045].map((d) => clampDraws(start + d));
   for (const draws of slide) for (const draw of draws) assert.ok(draw.frame === 7 || draw.frame >= 8);
   const lowerLeft = slide.map((draws) => draws.find((draw) => draw.corner === 2 && Math.abs(draw.dw - slide[3].find((d) => d.corner === 2).dw) < 1e-9));
   assert.ok(lowerLeft.every(Boolean), "the lower-left clamp is drawn at one size throughout");

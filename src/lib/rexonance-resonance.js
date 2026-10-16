@@ -1061,7 +1061,11 @@ export const ASSEMBLY_GOLD = {
   // 2026-10-16: 超大幅な改善 — the pour runs through the printed conduit).
   delay: 0.008,
   form: 0.03,
-  helm: 0.016,
+  // The helmet's gold runs sooner and quicker (round 3, review: the visor's
+  // pour still crossed the brow as the compound eyes filled at .855): from
+  // .005 after its last tile, over .010 — whole by about .852.
+  helmDelay: 0.005,
+  helm: 0.01,
   approach: 0.007,
   cool: 0.012,
   glint: 0.006,
@@ -1216,8 +1220,9 @@ export function* assemblyGoldPlanSteps({ pieces, gold, landed, tiles }) {
       most = Math.max(most, reach[i]);
       if (++work % 128 === 0) yield;
     }
-    const from = done + ASSEMBLY_GOLD.delay;
-    const span = piece.group === "helm" ? ASSEMBLY_GOLD.helm : ASSEMBLY_GOLD.form;
+    const helm = piece.group === "helm";
+    const from = done + (helm ? ASSEMBLY_GOLD.helmDelay : ASSEMBLY_GOLD.delay);
+    const span = helm ? ASSEMBLY_GOLD.helm : ASSEMBLY_GOLD.form;
     const random = seededRandom(7919 + index);
     for (let i = 0; i < n; i += 1) {
       const p = parent[i];
@@ -2054,7 +2059,18 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         const conduitPieces = nextNano.pieces
           .filter((piece) => piece.goldEnd > piece.goldFirst)
           .sort((a, b) => b.buildStart - a.buildStart)
-          .map(({ x, y, w, h, ax, ay, ornament }) => ({ x, y, w, h, ax, ay, layer: ornament ? 1 : 0 }));
+          // (The helmet's conduit fades over 10 px where its gold runs on
+          // into the next plate, never a straight edge across the brow.)
+          .map(({ x, y, w, h, ax, ay, ornament, helm }) => ({
+            x,
+            y,
+            w,
+            h,
+            ax,
+            ay,
+            layer: ornament ? 1 : 0,
+            fade: helm ? 10 : 5,
+          }));
         const conduit =
           images.guide && images.gold && nextGold?.count && conduitPieces.length
             ? await pixelJobIdle(
@@ -2610,13 +2626,17 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       }
       if (driver) context.drawImage(driver, 0, 0, W, H);
       if (nanites) {
-        // Before contact: each trim's hologram on the body, its scan plane
-        // and pulses; each staged plate's contact shadow, then the plate in
-        // raw metal on its lifted, tilted stage; after contact, the conduit;
-        // the latches, clamps and beams.
+        // Before contact: each trim's guideway being built on the body, its
+        // hologram and pulses; each staged plate's contact shadow, then the
+        // plate in raw metal on its lifted, tilted stage, with its guideway
+        // seen through it; after contact, the conduit it seated onto; the
+        // latches, clamps and beams.
         nanites.hologramPass(context);
         nanites.shadowPass(context);
         nanites.stagedPass(context);
+        // The guideways under staged plates, through their shells (built
+        // once, never hidden: round 3).
+        nanites.hologramPass(context, true);
         nanites.conduitPass(context);
         nanites.hardwarePass(context);
       }
