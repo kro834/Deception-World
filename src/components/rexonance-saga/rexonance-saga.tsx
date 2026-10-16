@@ -496,6 +496,17 @@ const RexonanceSuitUp = memo(function RexonanceSuitUp({ stage }: { stage: Rexona
           loading="lazy"
           decoding="async"
         />
+        {/* While the scene prepares, the undersuit stands in for the finished
+            figure (owner, 2026-10-16: never the finished suit before the scroll). */}
+        <img
+          className="rzn-under"
+          src={REXONANCE_SUIT_UNDERSUIT}
+          alt=""
+          width={REXONANCE_SUIT_SIZE.width}
+          height={REXONANCE_SUIT_SIZE.height}
+          loading="lazy"
+          decoding="async"
+        />
         <canvas className="rzn-canvas" width={0} height={0} />
         <div className="rzn-call">
           <p className="rzn-kicker">

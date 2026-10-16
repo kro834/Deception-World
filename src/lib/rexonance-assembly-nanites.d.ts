@@ -66,6 +66,8 @@ export interface NanitePlate {
   kind: number;
   seg: number;
   helm: boolean;
+  /** Formed in place, never staged: the helmet and the narrow hanging plates. */
+  fixed: boolean;
   ornament: boolean;
   srcMask: number;
   x: number;
@@ -152,6 +154,9 @@ export interface NanitePlan {
   paintOrder: Int32Array;
   paintAt: Float64Array;
   paintRank: Int32Array;
+  /** How far past q (progress) the seated pass looks along the paint order:
+   * the longest a landed tile waits for its paint with no stage holding it. */
+  seatLag: number;
   goldIdx: Int32Array;
   goldHash: Float32Array;
   /** Per gold cell: its place along its plate's guideway, 0 at the entry. */

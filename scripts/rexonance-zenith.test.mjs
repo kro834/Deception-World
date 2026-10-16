@@ -957,6 +957,74 @@ test("touch art draws are bounded; settled endpoints and offscreen scenes do not
   dispose();
 });
 
+test("never the finished suit before the scroll: near and not yet live, the undersuit stands in, and the first live frame draws before it goes (owner 2026-10-16)", async () => {
+  // owner 2026-10-16: 「スクロールする前から完成済みなこともあるので修正して。」
+  // A warm preparation already running when the scene came near kept the
+  // finished still (and its 100 % read-out) up until live, for seconds.
+  const t = environment({ idleHeld: true });
+  const dispose = mountRexonanceAssembly(t.runway, engineConfig, t.env);
+  const warm = t.observers.find((o) => o.options.rootMargin === "3203px 0px");
+  warm.callback([{ isIntersecting: true }]);
+  assert.equal(t.runway.dataset.rznState, undefined, "warming far away changes nothing");
+  assert.equal(t.percent.textContent, "100");
+  // Near while that preparation runs: the loading state at once, the
+  // read-outs at the start, as the first live frame will show them.
+  t.observers[0].callback([
+    { isIntersecting: true, boundingClientRect: { top: 400, bottom: 3100 } },
+  ]);
+  assert.equal(t.runway.dataset.rznState, "loading");
+  assert.equal(t.runway.dataset.rznPhase, "prepare");
+  assert.equal(t.runway.dataset.rznLine, "0");
+  assert.equal(t.percent.textContent, "000");
+  assert.ok(t.lines[0].hasAttribute("data-on"));
+  // Live: the undersuit still stays under the canvas until a frame is drawn.
+  for (let i = 0; i < 400 && t.runway.dataset.rznState !== "live"; i += 1) {
+    for (const [id, callback] of [...t.idle]) {
+      t.idle.delete(id);
+      callback({ timeRemaining: () => 40 });
+    }
+    await new Promise((resolve) => setTimeout(resolve, 1));
+  }
+  assert.equal(t.runway.dataset.rznState, "live");
+  assert.equal(t.runway.dataset.rznArming, "under");
+  await until(() => t.frames.size > 0, "first frame queued");
+  t.scrollTo(0);
+  assert.equal(t.runway.dataset.rznArming, undefined, "the first live frame is drawn");
+  dispose();
+  assert.equal(t.runway.dataset.rznState, undefined);
+  assert.equal(t.percent.textContent, "100");
+
+  // Arriving from below, past the runway's end: the live frame there is the
+  // finished suit, so the finished still stays (and stays under the canvas
+  // until that frame is drawn).
+  const b = environment();
+  const disposeB = mountRexonanceAssembly(b.runway, engineConfig, b.env);
+  b.observers[0].callback([
+    { isIntersecting: true, boundingClientRect: { top: -2600, bottom: 900 } },
+  ]);
+  assert.equal(b.runway.dataset.rznState, undefined);
+  assert.equal(b.percent.textContent, "100");
+  await until(() => b.runway.dataset.rznState === "live", "scene live");
+  assert.equal(b.runway.dataset.rznArming, "still");
+  disposeB();
+
+  // The stylesheet: the finished still is hidden once there is a state
+  // (except while it is the one held under the first frame); the undersuit
+  // still only while loading or held.
+  const hidden = sheet.rules.filter(
+    ({ selector, body }) => /> \.rzn-still$/.test(selector) && /visibility: hidden/.test(body),
+  );
+  assert.equal(hidden.length, 1);
+  assert.match(hidden[0].selector, /\[data-rzn-state\]:not\(\[data-rzn-arming="still"\]\)/);
+  const under = sheet.rules.filter(({ selector }) => /> \.rzn-under$/.test(selector));
+  assert.ok(under.some(({ body }) => /display: none/.test(body)));
+  const shown = under.filter(({ body }) => /display: block/.test(body));
+  assert.equal(shown.length, 1);
+  assert.match(shown[0].selector, /\[data-rzn-state="loading"\]/);
+  assert.match(shown[0].selector, /\[data-rzn-arming="under"\]/);
+  for (const { context } of [...hidden, ...under]) assert.equal(context.length, 0);
+});
+
 test("pagehide cancels queued preparation and pageshow safely resumes it", async () => {
   const t = environment({ idleHeld: true });
   const dispose = mountRexonanceAssembly(t.runway, engineConfig, t.env);
@@ -1545,6 +1613,9 @@ test("the gold guideway is built from the toe tips up, along the trims, never la
     assert.ok(piece.buildEnd <= piece.contact - ASSEMBLY_GUIDEWAY.ready + 1e-9, piece.id);
     assert.ok(piece.buildStart >= 0.07 && piece.buildStart <= piece.buildEnd, piece.id);
     assert.equal(nano.buildAt[a], piece.buildStart);
+    // The tail is one chain from its root to its blade (checked below; review
+    // 2026-10-16: it grew from the hanging blade and the root at once).
+    if (piece.group === "tail" && piece.seg + (piece.id.endsWith("b") ? 1 : 0) > 0) continue;
     // It starts at the plate's lowest cell.
     let bottom = 0;
     for (let k = a; k < b; k += 1) bottom = Math.max(bottom, gold.y[nano.buildIdx[k]] + gold.h[nano.buildIdx[k]]);
@@ -1561,7 +1632,34 @@ test("the gold guideway is built from the toe tips up, along the trims, never la
     }
     if (early >= late) upward += 1;
   }
-  assert.ok(upward >= built.length * 0.9, `${upward}/${built.length} plates grow upward`);
+  const climbing = built.filter((piece) => piece.group !== "tail" || piece.id === "tail-0").length;
+  assert.ok(upward >= climbing * 0.9, `${upward}/${climbing} plates grow upward`);
+  // The tail's guideway is one build along the chain, root to blade
+  // (review 2026-10-16): each segment starts where its predecessor's front
+  // is — from its cell nearest the last cell that one built — as that one
+  // is four fifths done.
+  const chain = built
+    .filter((piece) => piece.group === "tail")
+    .sort((a, b) => a.seg - b.seg || (a.id < b.id ? -1 : 1));
+  assert.equal(chain[0].id, "tail-0");
+  assert.equal(chain.length, 9);
+  const centre = (i) => [gold.x[i] + gold.w[i] / 2, gold.y[i] + gold.h[i] / 2];
+  for (let k = 1; k < chain.length; k += 1) {
+    const before = chain[k - 1];
+    const piece = chain[k];
+    assert.ok(piece.buildStart > before.buildStart, `${piece.id} follows ${before.id}`);
+    assert.ok(
+      piece.buildStart >= before.buildStart + 0.8 * (before.buildEnd - before.buildStart) - 1e-9,
+      `${piece.id}: at most a fifth's overlap`,
+    );
+    const [lx, ly] = centre(nano.buildIdx[before.goldEnd - 1]);
+    const [ex, ey] = centre(nano.buildIdx[piece.goldFirst]);
+    const entry = Math.hypot(ex - lx, ey - ly);
+    for (let kk = piece.goldFirst; kk < piece.goldEnd; kk += 1) {
+      const [x, y] = centre(nano.buildIdx[kk]);
+      assert.ok(Math.hypot(x - lx, y - ly) >= entry - 1e-9, `${piece.id} starts nearest the front`);
+    }
+  }
   // The legs climb from the toe tips: the feet first, the thighs last.
   const legs = built.filter((piece) => piece.group === "legs");
   const first = legs.reduce((a, b) => (b.buildStart < a.buildStart ? b : a));
@@ -1664,6 +1762,307 @@ test("the gold guideway is built from the toe tips up, along the trims, never la
     assert.equal(lowerLeft[k].dy, lowerLeft[0].dy, "along the surface, not down onto it");
   }
   assert.ok(!slide[0].some((draw) => draw.corner < 2), "the upper pair follows the lower");
+});
+
+test("a landed tile stays drawn until its paint: the helmet's, formed in place, never vanishes (review 2026-10-16)", async () => {
+  // The helmet is never staged, and its outer tiles land up to ~.05 before
+  // their paint: the seated pass once looked only .0125 ahead along the
+  // paint order, so they vanished after landing and popped back as metal.
+  const { planAssemblyNanites, createAssemblyNanites, ASSEMBLY_NANITES: N } = await import(
+    "../src/lib/rexonance-assembly-nanites.js"
+  );
+  const { REXONANCE_NANITES } = await import("../src/lib/rexonance-nanites.ts");
+  const { planAssemblyGold } = await import("../src/lib/rexonance-resonance.js");
+  const { REXONANCE_SUIT_GOLD_CELL, REXONANCE_SUIT_GOLD_CELLS } =
+    await import("../src/lib/rexonance-suit-gold.ts");
+  const { REXONANCE_SUIT_DRIVER } = await import("../src/lib/rexonance-calls.ts");
+  const pieces = REXONANCE_SUIT_PIECES.map((piece) => ({
+    ...piece,
+    preset: REXONANCE_SUIT_DRIVER.includes(piece.id),
+  }));
+  const plan = planAssembly({
+    size: REXONANCE_SUIT_SIZE,
+    pieces,
+    core: REXONANCE_SUIT_MARKS.core,
+    visor: REXONANCE_SUIT_MARKS.visor,
+    maskTile: REXONANCE_SUIT_TILE,
+    tile: 12,
+  });
+  const landed = new Map();
+  for (const tile of plan.tiles)
+    if (tile.pieceId) landed.set(tile.pieceId, Math.max(landed.get(tile.pieceId) ?? 0, tile.t1));
+  const gold = planAssemblyGold({
+    pieces,
+    gold: { atlas: "", cell: REXONANCE_SUIT_GOLD_CELL, cells: REXONANCE_SUIT_GOLD_CELLS },
+    landed,
+  });
+  const nano = planAssemblyNanites({
+    plan,
+    pieces,
+    size: REXONANCE_SUIT_SIZE,
+    core: REXONANCE_SUIT_MARKS.core,
+    visor: REXONANCE_SUIT_MARKS.visor,
+    gold,
+    seams: REXONANCE_NANITES.seams,
+    goldBoxes: REXONANCE_NANITES.goldBoxes,
+    goldCell: REXONANCE_SUIT_GOLD_CELL,
+  });
+  const metal = [{ id: "m0" }, { id: "m1" }];
+  const swarm = createAssemblyNanites({
+    nano,
+    size: REXONANCE_SUIT_SIZE,
+    core: REXONANCE_SUIT_MARKS.core,
+    visor: REXONANCE_SUIT_MARKS.visor,
+    sprites: { cells: null, comets: null, fx: null },
+    kit: REXONANCE_NANITES,
+    gold,
+    layers: { metal },
+  });
+  let rects = [];
+  let clipped = [];
+  const draws = new Map();
+  const noop = () => {};
+  const context = new Proxy(
+    {
+      beginPath() {
+        rects = [];
+      },
+      rect(x, y) {
+        rects.push([x, y]);
+      },
+      clip() {
+        clipped = rects;
+      },
+      drawImage(source) {
+        const src = metal.indexOf(source);
+        if (src < 0) return;
+        for (const [x, y] of clipped) {
+          const key = `${src}:${x}:${y}`;
+          draws.set(key, (draws.get(key) ?? 0) + 1);
+        }
+      },
+      save() {},
+      restore() {
+        clipped = [];
+      },
+    },
+    { get: (target, key) => (key in target ? target[key] : noop), set: () => true },
+  );
+  const tiles = plan.tiles;
+  let checked = 0;
+  for (let q = 0.66; q <= 0.86; q += 0.001) {
+    draws.clear();
+    swarm.frame(q, 0, true, 1, false);
+    swarm.seatedPass(context, swarm.paintedBy(q));
+    swarm.stagedPass(context);
+    for (let i = 0; i < tiles.length; i += 1) {
+      if (tiles[i].t1 + N.recoil > q || nano.tp[i] <= q) continue;
+      const key = `${tiles[i].src ?? 1}:${tiles[i].sx}:${tiles[i].sy}`;
+      assert.equal(draws.get(key), 1, `q ${q.toFixed(3)}: tile ${i} (${tiles[i].pieceId}) drawn once`);
+      checked += 1;
+    }
+  }
+  assert.ok(checked > 1000, `${checked} landed, unpainted tiles checked`);
+});
+
+test("no plate shifts when it completes: narrow hanging plates form in place, and a plate is at its seat from contact on (owner 2026-10-16)", async () => {
+  // owner 2026-10-16: 「前がけの生成完了時にズレるのを修正して。」 The staged
+  // front tasset did not lie where its gold formed, and snapped home at
+  // completion. Every landed tile's drawn place must move smoothly while
+  // its plate is staged (no flip between a jigged and a seated pose, also
+  // on touch's lower cap), be the seat itself from contact on, and the
+  // tasset and the plates much taller than wide never leave their seat.
+  const { planAssemblyNanites, createAssemblyNanites, ASSEMBLY_NANITES: N } = await import(
+    "../src/lib/rexonance-assembly-nanites.js"
+  );
+  const { REXONANCE_NANITES } = await import("../src/lib/rexonance-nanites.ts");
+  const { planAssemblyGold } = await import("../src/lib/rexonance-resonance.js");
+  const { REXONANCE_SUIT_GOLD_CELL, REXONANCE_SUIT_GOLD_CELLS } =
+    await import("../src/lib/rexonance-suit-gold.ts");
+  const { REXONANCE_SUIT_DRIVER } = await import("../src/lib/rexonance-calls.ts");
+  const pieces = REXONANCE_SUIT_PIECES.map((piece) => ({
+    ...piece,
+    preset: REXONANCE_SUIT_DRIVER.includes(piece.id),
+  }));
+  const plan = planAssembly({
+    size: REXONANCE_SUIT_SIZE,
+    pieces,
+    core: REXONANCE_SUIT_MARKS.core,
+    visor: REXONANCE_SUIT_MARKS.visor,
+    maskTile: REXONANCE_SUIT_TILE,
+    tile: 12,
+  });
+  const landed = new Map();
+  for (const tile of plan.tiles)
+    if (tile.pieceId) landed.set(tile.pieceId, Math.max(landed.get(tile.pieceId) ?? 0, tile.t1));
+  const gold = planAssemblyGold({
+    pieces,
+    gold: { atlas: "", cell: REXONANCE_SUIT_GOLD_CELL, cells: REXONANCE_SUIT_GOLD_CELLS },
+    landed,
+  });
+  const nanoArgs = {
+    plan,
+    pieces,
+    size: REXONANCE_SUIT_SIZE,
+    core: REXONANCE_SUIT_MARKS.core,
+    visor: REXONANCE_SUIT_MARKS.visor,
+    gold,
+    seams: REXONANCE_NANITES.seams,
+    goldBoxes: REXONANCE_NANITES.goldBoxes,
+    goldCell: REXONANCE_SUIT_GOLD_CELL,
+  };
+  for (const coarse of [false, true]) {
+    const nano = planAssemblyNanites({ ...nanoArgs, coarse });
+    for (const piece of nano.pieces)
+      if (/^tasset/.test(piece.id) || (piece.kind === 0 && piece.h > 1.85 * piece.w))
+        assert.ok(piece.fixed && piece.offX === 0 && piece.offY === 0 && piece.theta === 0, piece.id);
+    const metal = [{ id: "m0" }, { id: "m1" }];
+    const swarm = createAssemblyNanites({
+      nano,
+      size: REXONANCE_SUIT_SIZE,
+      core: REXONANCE_SUIT_MARKS.core,
+      visor: REXONANCE_SUIT_MARKS.visor,
+      sprites: { cells: null, comets: null, fx: null },
+      kit: REXONANCE_NANITES,
+      gold,
+      layers: { metal },
+      coarse,
+    });
+    swarm.view(1, 0, 0);
+    let rects = [];
+    let clipped = [];
+    let m = [1, 0, 0, 1, 0, 0];
+    const seen = new Map();
+    const noop = () => {};
+    const context = new Proxy(
+      {
+        beginPath() {
+          rects = [];
+        },
+        rect(x, y, w, h) {
+          rects.push([x, y, w, h]);
+        },
+        clip() {
+          clipped = rects;
+        },
+        setTransform(a, b, c, d, e, f) {
+          m = [a, b, c, d, e, f];
+        },
+        drawImage(source) {
+          if (!metal.includes(source)) return;
+          for (const [x, y, w, h] of clipped) {
+            const cx = x + w / 2;
+            const cy = y + h / 2;
+            seen.set(`${metal.indexOf(source)}:${x}:${y}`, [
+              m[0] * cx + m[2] * cy + m[4],
+              m[1] * cx + m[3] * cy + m[5],
+            ]);
+          }
+        },
+        save() {},
+        restore() {
+          clipped = [];
+        },
+      },
+      { get: (target, key) => (key in target ? target[key] : noop), set: () => true },
+    );
+    const tiles = plan.tiles;
+    const pieceOf = new Map(nano.pieces.map((piece) => [piece.id, piece]));
+    const last = new Map();
+    let checked = 0;
+    let worst = 0;
+    const STEP = 0.0002;
+    for (let q = 0.1; q <= 0.9; q += STEP) {
+      seen.clear();
+      swarm.frame(q, 0, true, 1, false);
+      m = [1, 0, 0, 1, 0, 0];
+      swarm.seatedPass(context, swarm.paintedBy(q));
+      swarm.stagedPass(context);
+      for (let i = 0; i < tiles.length; i += 1) {
+        const tile = tiles[i];
+        if (!tile.pieceId || tile.t1 + N.recoil > q || nano.tp[i] <= q) continue;
+        const key = `${tile.src ?? 1}:${tile.sx}:${tile.sy}`;
+        const at = seen.get(key);
+        if (!at) continue;
+        const piece = pieceOf.get(tile.pieceId);
+        const cx = tile.sx + tile.tw / 2;
+        const cy = tile.sy + tile.th / 2;
+        if (piece.fixed || q >= piece.contact) {
+          const off = Math.hypot(at[0] - cx, at[1] - cy);
+          assert.ok(off < 1e-6, `${coarse ? "touch" : "desktop"} q ${q.toFixed(4)}: ${tile.pieceId} off its seat by ${off.toFixed(2)}`);
+        }
+        const before = last.get(key);
+        if (before && before[2] === Math.round(q / STEP) - 1) {
+          const step = Math.hypot(at[0] - before[0], at[1] - before[1]);
+          worst = Math.max(worst, step);
+          // (The fastest slam home, the tail's last turn, is ~5.5 px a step;
+          // a flip between poses is 10–25 px.)
+          assert.ok(step < 7, `${coarse ? "touch" : "desktop"} q ${q.toFixed(4)}: ${tile.pieceId} jumps ${step.toFixed(1)} px`);
+        }
+        last.set(key, [at[0], at[1], Math.round(q / STEP)]);
+        checked += 1;
+      }
+    }
+    assert.ok(checked > 5000, `${checked} landed tiles followed`);
+    assert.ok(worst > 0.5, "the staged plates still move in");
+  }
+});
+
+test("an armour tile never carries an ornament's pixels: the ribbon beside the knees forms with the ribbon (review 2026-10-16)", async () => {
+  // owner 2026-10-16: no decoration beside the knees before it is fitted.
+  // Dark ribbon pixels of the full art, where the base figure shows nothing
+  // but a thigh's or knee's cut-out mask reaches, once landed with the legs
+  // as black squares (p .27–.88). Such a cell is an ornament's.
+  const { createRequire } = await import("node:module");
+  const require = createRequire(import.meta.url);
+  const sharp = require("sharp");
+  const { REXONANCE_SUIT_ORNAMENTS } = await import("../src/lib/rexonance-suit-base.ts");
+  const { REXONANCE_SUIT_DRIVER } = await import("../src/lib/rexonance-calls.ts");
+  const { width: W, height: H } = REXONANCE_SUIT_SIZE;
+  const tile = 12;
+  const cols = Math.ceil(W / tile);
+  const rows = Math.ceil(H / tile);
+  const sampleOf = async (file) => {
+    const { fileURLToPath } = await import("node:url");
+    const { data } = await sharp(fileURLToPath(new URL(file, import.meta.url)))
+      .ensureAlpha()
+      .extend({ right: cols * tile - W, bottom: rows * tile - H, background: { r: 0, g: 0, b: 0, alpha: 0 } })
+      .resize(cols, rows, { kernel: "linear" })
+      .raw()
+      .toBuffer({ resolveWithObject: true });
+    return { data: new Uint8ClampedArray(data) };
+  };
+  const sample = await sampleOf("../public/rexonance-suit-20261016/figure.webp");
+  const baseSample = await sampleOf("../public/rexonance-suit-base-20261016/base.webp");
+  const pieces = REXONANCE_SUIT_PIECES.map((piece) => ({
+    ...piece,
+    preset: REXONANCE_SUIT_DRIVER.includes(piece.id),
+  }));
+  const groupOf = new Map(pieces.map((piece) => [piece.id, piece.group]));
+  const ornament = new Set(REXONANCE_SUIT_ORNAMENTS);
+  const plan = planAssembly({
+    size: REXONANCE_SUIT_SIZE,
+    pieces,
+    core: REXONANCE_SUIT_MARKS.core,
+    visor: REXONANCE_SUIT_MARKS.visor,
+    maskTile: REXONANCE_SUIT_TILE,
+    tile,
+    sample,
+    baseSample,
+    ornaments: REXONANCE_SUIT_ORNAMENTS,
+  });
+  let beside = 0;
+  for (const item of plan.tiles) {
+    if ((item.src ?? 1) !== 1) continue;
+    const offset = ((item.sy / tile) * cols + item.sx / tile) * 4;
+    if (baseSample.data[offset + 3] >= 40) continue;
+    beside += 1;
+    assert.ok(
+      item.pieceId && ornament.has(groupOf.get(item.pieceId)),
+      `cell ${item.sx},${item.sy} (${item.pieceId}) lands with an ornament`,
+    );
+  }
+  assert.ok(beside > 0);
 });
 
 test("a resting frame is a function of the progress alone: the same moment draws the same chips however it was reached (review 2026-10-16)", async () => {

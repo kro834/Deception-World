@@ -328,6 +328,11 @@ export function* assemblyNanitePlanSteps({
     const { index, piece, own, from, to, area, srcMask } = list[p];
     const kind = groupKind(piece.group);
     const helm = kind === 3;
+    // Formed in place, never lifted or tilted: the helmet, and the narrow
+    // hanging plates (the front tasset, a box much taller than wide) — a
+    // staged offset of theirs read as a shift when they completed (owner,
+    // 2026-10-16: 「前がけの生成完了時にズレるのを修正して。」).
+    const fixed = helm || /^tasset/.test(piece.id) || (kind === 0 && piece.h > 1.85 * piece.w);
     const [seatX, seatY] = piece.seat;
     let nx = seatX - coreX;
     let ny = 0.5 * (seatY - coreY);
@@ -399,6 +404,7 @@ export function* assemblyNanitePlanSteps({
       kind,
       seg,
       helm,
+      fixed,
       ornament,
       srcMask,
       x: piece.x,
@@ -417,9 +423,9 @@ export function* assemblyNanitePlanSteps({
       gx,
       gy,
       lift,
-      theta: helm ? 0 : (coarse ? 12 : 18) * DEG,
-      offX: lift * (0.55 * hx - 0.3),
-      offY: lift * -0.55,
+      theta: fixed ? 0 : (coarse ? 12 : 18) * DEG,
+      offX: fixed ? 0 : lift * (0.55 * hx - 0.3),
+      offY: fixed ? 0 : lift * -0.55,
       area,
       share,
       from,
@@ -592,6 +598,18 @@ export function* assemblyNanitePlanSteps({
     paintRank[order[k]] = k;
     if (tick()) yield;
   }
+  // How far past q the seated pass must look along the paint order: the
+  // longest a landed tile waits for its paint once no stage holds it. A
+  // staged plate holds its tiles until its stage ends; the helmet, formed in
+  // place and never staged, holds none — its outer tiles land up to ~.05
+  // before their paint and must stay drawn all that while (review
+  // 2026-10-16: they vanished after landing, then popped back as metal).
+  let seatLag = 0.0125;
+  for (let i = 0; i < n; i += 1) {
+    const piece = pieceOf[i] >= 0 ? npieces[pieceOf[i]] : null;
+    const held = piece && !piece.fixed ? Math.max(T1[i], piece.stageEnd) : T1[i];
+    if (tp[i] - held > seatLag) seatLag = tp[i] - held;
+  }
 
   // Each plate's gold cells (the gold plan is sorted by lock).
   let goldIdx = new Int32Array(0);
@@ -698,11 +716,32 @@ export function* assemblyNanitePlanSteps({
         ),
       );
     }
-    for (let p = 0; p < NP; p += 1) {
+    // The tail is one chain (review 2026-10-16: it grew from the hanging
+    // blade and at the root at once, a cloud of flecks): root to blade,
+    // tail-0 → 1a → 1b → … → 4b, each segment from the cell nearest the
+    // last its predecessor built, starting as that one is 80% done. The
+    // other plates keep the plate order.
+    const chainOrder = [];
+    for (let p = 0; p < NP; p += 1) if (npieces[p].kind !== 1) chainOrder.push(p);
+    const tailOrder = [];
+    for (let p = 0; p < NP; p += 1) if (npieces[p].kind === 1) tailOrder.push(p);
+    tailOrder.sort((a, b) =>
+      npieces[a].seg !== npieces[b].seg
+        ? npieces[a].seg - npieces[b].seg
+        : npieces[a].id < npieces[b].id
+          ? -1
+          : 1,
+    );
+    for (const p of tailOrder) chainOrder.push(p);
+    let anchorX = NaN;
+    let anchorY = NaN;
+    let chainNext = NaN;
+    for (const p of chainOrder) {
       const piece = npieces[p];
       const first = piece.goldFirst;
       const count = piece.goldEnd - first;
       if (count <= 0) continue;
+      const chained = piece.kind === 1 && anchorX === anchorX;
       const cols = Math.ceil(piece.w / G) + 2;
       const rows = Math.ceil(piece.h / G) + 2;
       const grid = new Int32Array(cols * rows).fill(-1);
@@ -754,9 +793,27 @@ export function* assemblyNanitePlanSteps({
           if (row[k] === row[low] && Math.abs(col[k] - mean) < Math.abs(col[entry] - mean))
             entry = k;
         }
+        // A chained tail segment's island starts at its cell nearest the
+        // chain's front, as far along as that cell lies from it.
+        let near = Infinity;
+        if (chained)
+          for (let at = 0; at < tail; at += 1) {
+            const kk = queue[at];
+            const ii = goldIdx[first + kk];
+            const d = Math.hypot(
+              gold.x[ii] + gold.w[ii] / 2 - anchorX,
+              gold.y[ii] + gold.h[ii] / 2 - anchorY,
+            );
+            if (d < near) {
+              near = d;
+              entry = kk;
+            }
+          }
         // The front reaches a higher island when it has climbed to it.
         const i = goldIdx[first + entry];
-        const offset = Math.max(0, (bottomOf[p] - (gold.y[i] + gold.h[i])) / G);
+        const offset = chained
+          ? near / G
+          : Math.max(0, (bottomOf[p] - (gold.y[i] + gold.h[i])) / G);
         // Dijkstra over the island (the diagonal costs √2), a binary heap.
         let size = 0;
         const push = (k, d) => {
@@ -807,18 +864,41 @@ export function* assemblyNanitePlanSteps({
           if (tick()) yield;
         }
       }
+      if (chained) {
+        // (Its nearest cell is where it starts: along from there.)
+        let least = Infinity;
+        for (let k = 0; k < count; k += 1) if (dist[k] >= 0 && dist[k] < least) least = dist[k];
+        for (let k = 0; k < count; k += 1) if (dist[k] >= 0) dist[k] -= least;
+      }
       let most = 0;
-      for (let k = 0; k < count; k += 1) most = Math.max(most, dist[k] < 0 ? 0 : dist[k]);
+      let last = 0;
+      for (let k = 0; k < count; k += 1)
+        if (dist[k] > most) {
+          most = dist[k];
+          last = k;
+        }
       // Its window: the beat's front reaches its bottom, then it grows at the
-      // climb's speed along its trims; always done before it seats.
+      // climb's speed along its trims; always done before it seats. A tail
+      // segment follows its predecessor along the chain.
       const key = piece.climb;
-      let gs = groupStart.get(key) + (groupBottom.get(key) - bottomOf[p]) / ASSEMBLY_GUIDEWAY.climb;
-      let length = (most * G) / ASSEMBLY_GUIDEWAY.climb;
+      let gs = chained
+        ? chainNext
+        : piece.kind === 1
+          ? groupStart.get(key)
+          : groupStart.get(key) + (groupBottom.get(key) - bottomOf[p]) / ASSEMBLY_GUIDEWAY.climb;
+      // (The chain runs half again as fast: nine segments in one build.)
+      let length = (most * G) / (ASSEMBLY_GUIDEWAY.climb * (piece.kind === 1 ? 1.5 : 1));
       const latest = piece.contact - ASSEMBLY_GUIDEWAY.ready;
       if (gs > latest - 0.004) gs = latest - 0.004;
       if (gs + length > latest) length = latest - gs;
       piece.buildStart = gs;
       piece.buildEnd = gs + length;
+      if (piece.kind === 1) {
+        const li = goldIdx[first + last];
+        anchorX = gold.x[li] + gold.w[li] / 2;
+        anchorY = gold.y[li] + gold.h[li] / 2;
+        chainNext = gs + 0.8 * length;
+      }
       for (let k = 0; k < count; k += 1) {
         const i = goldIdx[first + k];
         const b = most > 0 ? Math.max(0, dist[k]) / most : 0;
@@ -915,6 +995,7 @@ export function* assemblyNanitePlanSteps({
     paintOrder: order,
     paintAt,
     paintRank,
+    seatLag,
     goldIdx,
     goldHash,
     buildB,
@@ -1849,6 +1930,7 @@ export function createAssemblyNanites({
   const PARENT = nano.parent;
   const ORDER = nano.paintOrder;
   const PAINT = nano.paintAt;
+  const SEAT_LAG = nano.seatLag ?? 0.0125;
   const GIDX = nano.goldIdx;
   const GHASH = nano.goldHash;
   const BB = nano.buildB ?? new Float32Array(goldCountOf(gold));
@@ -1890,6 +1972,28 @@ export function createAssemblyNanites({
   let nFlight = 0;
   let nImplode = 0;
   const jig = new Float64Array(NP * 6);
+  // Which staged plates move under a jig, decided once: in the order they
+  // start, a plate is jigged when fewer than the cap are jigged over its
+  // start; it keeps that for its whole stage. (A count taken frame by frame
+  // promoted a waiting plate, seated until then, to its offset pose the
+  // moment another finished — a jump on touch.)
+  const JIGGED = new Uint8Array(NP);
+  {
+    const cap = coarse ? STAGED_TOUCH : STAGED_MAX;
+    const byFrom = [];
+    for (let p = 0; p < NP; p += 1) if (!P[p].fixed) byFrom.push(p);
+    byFrom.sort((a, b) => P[a].from - P[b].from || a - b);
+    for (let k = 0; k < byFrom.length; k += 1) {
+      const p = byFrom[k];
+      const start = P[p].from;
+      let open = 0;
+      for (let kk = 0; kk < k; kk += 1) {
+        const o = byFrom[kk];
+        if (JIGGED[o] && P[o].stageEnd > start) open += 1;
+      }
+      if (open < cap) JIGGED[p] = 1;
+    }
+  }
   const LAM = new Float64Array(NP);
   const STAGED = new Uint8Array(NP);
   const laneCount = new Uint16Array(NP);
@@ -1946,12 +2050,11 @@ export function createAssemblyNanites({
     comets: 0,
   };
 
-  // Ring geometry scratch (no allocation).
-  let RX = 0;
-  let RY = 0;
-  let RZ = 0;
-  let TX = 0;
-  let TY = 0;
+  // Ring geometry scratch: one typed slot, written per chip (a double in a
+  // closure \`let\` is boxed into a fresh heap number on every write, which
+  // is a per-frame allocation — the review's finding on the call, 2026-10-16;
+  // no per-frame allocation, owner 2026-10-16).
+  const RG = new Float64Array(5);
 
   /* -- draw passes: allocation-free from here -- */
   const ringPoint = (r, theta, ln, ph, tangent) => {
@@ -1964,9 +2067,9 @@ export function createAssemblyNanites({
     const ly = Ry * s + 3 * Math.sin(5 * theta + ph);
     const tc = RCOS[r];
     const ts = RSIN[r];
-    RX = W / 2 + lx * tc - ly * ts;
-    RY = RCY[r] + 4 * ln + lx * ts + ly * tc;
-    RZ = s;
+    RG[0] = W / 2 + lx * tc - ly * ts;
+    RG[1] = RCY[r] + 4 * ln + lx * ts + ly * tc;
+    RG[2] = s;
     if (tangent) {
       const dir = RDIR[r];
       const dlx = -R * s * dir;
@@ -1974,8 +2077,8 @@ export function createAssemblyNanites({
       const tx = dlx * tc - dly * ts;
       const ty = dlx * ts + dly * tc;
       const len = Math.hypot(tx, ty) || 1;
-      TX = tx / len;
-      TY = ty / len;
+      RG[3] = tx / len;
+      RG[4] = ty / len;
     }
   };
   // The birth spiral (N2): out of the core along one of three arms; s 0–1.
@@ -1988,8 +2091,8 @@ export function createAssemblyNanites({
     const ax = coreX + rho * Math.cos(angle);
     const ay = coreY + rho * Math.sin(angle) * 0.8;
     const e = smooth(clamp01((s - 0.6) / 0.4));
-    RX = ax + (tx - ax) * e;
-    RY = ay + (ty - ay) * e;
+    RG[0] = ax + (tx - ax) * e;
+    RG[1] = ay + (ty - ay) * e;
   };
   const jigX = (p, x, y) => jig[p * 6] * x + jig[p * 6 + 2] * y + jig[p * 6 + 4];
   const jigY = (p, x, y) => jig[p * 6 + 1] * x + jig[p * 6 + 3] * y + jig[p * 6 + 5];
@@ -2012,9 +2115,9 @@ export function createAssemblyNanites({
     const helm = p >= 0 && P[p].helm;
     if (q < t0) {
       ringPoint(r, TH0[i] + ROM[r] * (q - m), LANE[i], PHI[i], false);
-      let x = RX;
-      let y = RY;
-      let z = RZ;
+      let x = RG[0];
+      let y = RG[1];
+      let z = RG[2];
       let kind = 2;
       if (helm && q >= N.crown[0]) {
         const beta = smooth(clamp01((q - N.crown[0]) / (N.crown[1] - N.crown[0])));
@@ -2029,8 +2132,8 @@ export function createAssemblyNanites({
       const s = (q - b) / BIRTH;
       if (s < 1) {
         spiral(s, ARM[i], ARMDIR[i], x, y);
-        x = RX;
-        y = RY;
+        x = RG[0];
+        y = RG[1];
         size *= 0.6 + 0.4 * s;
         if (s < 0.5) TN[slot] = 2;
         kind = 1;
@@ -2084,11 +2187,11 @@ export function createAssemblyNanites({
       // plate's gate, onto its orbit.
       fr += rate * 2 * (q - t0);
       ringPoint(r, TH0[i] + ROM[r] * (t0 - m), LANE[i], PHI[i], true);
-      const p0x = RX;
-      const p0y = RY;
-      const z0 = RZ;
-      const p1x = p0x + TX * 0.12 * H;
-      const p1y = p0y + TY * 0.12 * H;
+      const p0x = RG[0];
+      const p0y = RG[1];
+      const z0 = RG[2];
+      const p1x = p0x + RG[3] * 0.12 * H;
+      const p1y = p0y + RG[4] * 0.12 * H;
       const p2x = (p >= 0 ? P[p].gateX : hx + nx * 0.1 * H) + qx * GATEJ[i];
       const p2y = (p >= 0 ? P[p].gateY : hy + ny * 0.1 * H) + qy * GATEJ[i];
       const p3x = hx + R0[i] * (Math.cos(PSI0[i]) * qx + 0.45 * Math.sin(PSI0[i]) * nx);
@@ -2155,9 +2258,9 @@ export function createAssemblyNanites({
     }
     const r = free.ring[j];
     ringPoint(r, free.th0[j] + ROM[r] * (q - b), free.lane[j], free.phi[j], false);
-    let x = RX;
-    let y = RY;
-    const z = RZ;
+    let x = RG[0];
+    let y = RG[1];
+    const z = RG[2];
     let size = s0 * (1 + 0.45 * z);
     let alpha = 0.45 + 0.25 * (z + 1);
     TN[slot] = free.tone[j];
@@ -2166,8 +2269,8 @@ export function createAssemblyNanites({
     const s = (q - b) / BIRTH;
     if (s < 1) {
       spiral(s, free.arm[j], free.armDir[j], x, y);
-      x = RX;
-      y = RY;
+      x = RG[0];
+      y = RG[1];
       size *= 0.6 + 0.4 * s;
       if (s < 0.5) TN[slot] = 2;
     }
@@ -2185,8 +2288,8 @@ export function createAssemblyNanites({
         false,
       );
       const k = 1 - smooth(u);
-      x = coreX + (RX - coreX) * k;
-      y = coreY + (RY - coreY) * k;
+      x = coreX + (RG[0] - coreX) * k;
+      y = coreY + (RG[1] - coreY) * k;
       size *= 1 - 0.4 * u;
       alpha *= 1 - u * u;
       kind = 8;
@@ -2265,28 +2368,20 @@ export function createAssemblyNanites({
     let lam = 0;
     let turn = 0;
     let skew = 0;
-    const staged = !pc.helm && q >= pc.from - N.lead && q < pc.stageEnd;
-    if (staged) {
+    const staged = !pc.fixed && q >= pc.from - N.lead && q < pc.stageEnd;
+    // From contact on the plate is exactly at its seat — no overshoot, no
+    // flutter — so the gold that forms on it (from contact + .003), the
+    // paint and the conduit all lie where the plate is (owner, 2026-10-16:
+    // nothing shifts when a part completes).
+    if (staged && q < pc.contact) {
       if (q < pc.from) lam = 1;
       else if (q < pc.to) lam = 1 - (0.35 * landedIn(p, q)) / pc.t1s.length;
-      else if (q < pc.contact) {
+      else {
         const u = (q - pc.to) / (pc.contact - pc.to);
         lam = 0.65 * (1 - u * u * u);
-      } else if (q < pc.contact + N.overshoot) {
-        const t = (q - pc.contact) / N.overshoot;
-        lam = -0.1 * Math.sin(Math.PI * t) * Math.exp(-2 * t);
       }
-      if (pc.kind === 1) {
-        turn = -(10 + 4 * pc.seg) * DEG * lam;
-        if (q >= pc.contact) {
-          const t = (q - pc.contact) / 0.012;
-          if (t < 1) turn += 3 * DEG * Math.exp(-6 * t) * Math.cos(12 * t);
-        }
-      }
-      if (pc.kind === 2 && q >= pc.contact) {
-        const t = (q - pc.contact) / 0.012;
-        if (t < 1) skew = 0.12 * Math.exp(-4 * t) * Math.sin(10 * t);
-      }
+      if (pc.kind === 1) turn = -(10 + 4 * pc.seg) * DEG * lam;
+      if (pc.kind === 2) skew = -0.1 * lam;
     }
     STAGED[p] = staged ? (allowed ? 1 : 2) : 0;
     LAM[p] = staged ? lam : 0;
@@ -2521,14 +2616,7 @@ export function createAssemblyNanites({
     heroes = 0;
     conduitDraws = 0;
     nanitesDrawn = 0;
-    let stagedCount = 0;
-    const cap = coarse ? STAGED_TOUCH : STAGED_MAX;
-    for (let p = 0; p < NP; p += 1) {
-      const pc = P[p];
-      const active = !pc.helm && q >= pc.from && q < pc.stageEnd;
-      jigFor(p, q, !active || stagedCount < cap);
-      if (active && stagedCount < cap) stagedCount += 1;
-    }
+    for (let p = 0; p < NP; p += 1) jigFor(p, q, JIGGED[p] === 1);
     // Micro-shake (A5): the four DEUS！ accents and the crest.
     state.shakeX = 0;
     state.shakeY = 0;
@@ -2681,7 +2769,8 @@ export function createAssemblyNanites({
       const sheet = metalOf(src);
       if (!sheet) continue;
       let any = false;
-      for (let kk = painted; kk < n && PAINT[kk] <= q + 0.0125; kk += 1) {
+      // Every landed, unpainted tile no stage holds (the helmet's all along).
+      for (let kk = painted; kk < n && PAINT[kk] <= q + SEAT_LAG; kk += 1) {
         const i = ORDER[kk];
         if (SRC[i] !== src || T1[i] > q) continue;
         const p = PO[i];
@@ -2918,7 +3007,9 @@ export function createAssemblyNanites({
       const pc = P[p];
       const first = pc.goldFirst;
       if (pc.goldEnd <= first) continue;
-      if (q < pc.buildStart - GW.holo || q >= pc.contact) continue;
+      // (A jigged plate's stays under it while its conduit comes through.)
+      const until = JIGGED[p] === 1 && !pc.fixed ? pc.contact + 0.002 : pc.contact;
+      if (q < pc.buildStart - GW.holo || q >= until) continue;
       // Touch draws per plate only the (up to four) conduits still being
       // built; every other built frame holds in one figure-space clip below,
       // so none pops in and out.
@@ -3194,6 +3285,11 @@ export function createAssemblyNanites({
     for (let p = 0; p < NP; p += 1) {
       const pc = P[p];
       if (q < pc.to || q >= pc.recedeEnd || pc.goldEnd <= pc.goldFirst) continue;
+      // Never over a plate still moving under its jig: a jigged plate's
+      // conduit comes through as it seats (the guideway lay on the body
+      // under it until then), so the two never disagree (owner, 2026-10-16).
+      const moving = JIGGED[p] === 1 && !pc.fixed;
+      if (moving && q < pc.contact) continue;
       if (coarse && (plates >= TOUCH_CONDUITS || conduitDraws >= TOUCH_CONDUITS * 2)) {
         // Touch: the seated conduits beyond its per-plate draws hold in the
         // figure-space clip.
@@ -3201,7 +3297,11 @@ export function createAssemblyNanites({
         continue;
       }
       plates += 1;
-      const seat = q < pc.contact ? smooth(clamp01((q - pc.to) / (pc.contact - pc.to))) : 1;
+      const seat = moving
+        ? smooth(clamp01((q - pc.contact) / 0.002))
+        : q < pc.contact
+          ? smooth(clamp01((q - pc.to) / (pc.contact - pc.to)))
+          : 1;
       // Behind the cooling front the conduit is gone: it became the gold.
       const first = goldAfter(p, q - 0.012);
       if (pc.goldEnd > first) {
@@ -3227,7 +3327,10 @@ export function createAssemblyNanites({
     let strokes = false;
     for (let p = 0; p < NP && latches < LATCH_MAX; p += 1) {
       const pc = P[p];
-      const start = pc.from - N.lead;
+      // A tail segment's latch opens only as the chain's build front nears
+      // it (review 2026-10-16: nine irises hung in the empty sky for .06).
+      const start =
+        pc.kind === 1 ? Math.max(pc.from - N.lead, pc.buildStart - 0.004) : pc.from - N.lead;
       if (q < start || q >= pc.contact + 0.01) continue;
       latches += 1;
       const appear = clamp01((q - start) / 0.006);

@@ -832,13 +832,22 @@ function* assemblyPlanSteps({
         rgb = [sample.data[offset], sample.data[offset + 1], sample.data[offset + 2]];
       }
       let owner = ownerOf(ranked, sx, sy, tw, th, cx, cy);
-      // A painted cell no mask claims, where the base shows nothing, is an
-      // ornament's (a ribbon's strand beside the knee): the nearest
-      // ornament's seat says whose, so it lands with the ornaments — not
-      // with the legs by its height (owner, 2026-10-16: the decoration
-      // beside the knees showed before it was fitted).
-      if (!owner && armour && baseSample.data[offset + 3] < 40 && ornamentEntries.length)
-        owner = nearestSeat(ornamentEntries, cx, cy);
+      // A painted cell where the base shows nothing is an ornament's (a
+      // ribbon's strand beside the knee, the cloth between the legs), even
+      // where an armour plate's cut-out mask reaches over it: an armour
+      // tile is only ever the base figure's. The ornament whose mask claims
+      // it, else the nearest ornament's seat, says whose, so it lands with
+      // the ornaments — not with the legs by its height (owner, 2026-10-16:
+      // the decoration beside the knees showed before it was fitted).
+      if (
+        armour &&
+        baseSample.data[offset + 3] < 40 &&
+        ornamentEntries.length &&
+        !(owner && ornament.has(owner.piece.group))
+      )
+        owner =
+          ownerOf(ornamentEntries, sx, sy, tw, th, cx, cy) ??
+          nearestSeat(ornamentEntries, cx, cy);
       // Failed sampling still has the authored plate silhouette; never
       // turn its transparent background into a rectangular tile swarm.
       if (!sample && masked && !owner) continue;
@@ -1358,6 +1367,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   let pageActive = true;
   let live = false;
   let near = false;
+  let nearPast = false;
   let warm = false;
   let frame = 0;
   let images = null;
@@ -1551,14 +1561,44 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   let idleFallbackGeneration = -1;
   let partialBuild = null;
   const idleJobs = new Map();
+  // The end of the current idle period (performance.now()), from the last
+  // real IdleDeadline. While it still has room, the next slice follows as a
+  // macrotask rather than waiting for the next idle period: each slice stays
+  // ≤ 6 ms and input and frames still interleave between the tasks (review
+  // 2026-10-16: ~170 slices a frame apart took 3.4–4.4 s of wall time for
+  // ~0.3 s of work, so a brisk reader reached the runway before it was live).
+  const clock = () => environment.performance?.now?.() ?? Date.now();
+  let idleUntil = 0;
+  let chain = null;
+  const chained = [];
+  const chainDeadline = {
+    didTimeout: false,
+    timeRemaining: () => Math.max(0, idleUntil - clock()),
+  };
+  const chainPort = () => {
+    if (chain) return chain;
+    if (typeof environment.MessageChannel !== "function") return null;
+    try {
+      chain = new environment.MessageChannel();
+      chain.port1.onmessage = () => chained.shift()?.();
+    } catch {
+      chain = null;
+    }
+    return chain;
+  };
   const idleTask = (work) =>
     new Promise((resolve, reject) => {
       if (disposed || !pageActive || document.hidden || !motionAllowed()) return resolve(null);
+      const key = {};
       const run = (deadline) => {
-        idleJobs.delete(id);
+        if (!idleJobs.delete(key)) return;
         if (disposed || !pageActive || document.hidden || !motionAllowed()) return resolve(null);
         try {
           if (deadline?.didTimeout) idleFallbackGeneration = generation;
+          // A real deadline opens an idle period the following slices may
+          // use; a timeout or a timer slice opens none.
+          if (deadline && deadline !== chainDeadline)
+            idleUntil = deadline.didTimeout ? 0 : clock() + deadline.timeRemaining();
           // A timeout gets one bounded slice; subsequent work must not wait
           // another second for idle time on a continuously busy main thread.
           resolve(work(deadline?.didTimeout ? null : deadline));
@@ -1569,10 +1609,18 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       const idle =
         typeof environment.requestIdleCallback === "function" &&
         idleFallbackGeneration !== generation;
+      // Still inside an idle period with room for a whole slice: next task.
+      const port = idle && idleUntil - clock() > 8 ? chainPort() : null;
+      if (port) {
+        chained.push(() => run(chainDeadline));
+        port.port2.postMessage(0);
+        idleJobs.set(key, () => resolve(null));
+        return;
+      }
       const id = idle
         ? environment.requestIdleCallback(run, { timeout: 1000 })
         : environment.setTimeout(run, 16);
-      idleJobs.set(id, () => {
+      idleJobs.set(key, () => {
         if (idle) environment.cancelIdleCallback?.(id);
         else environment.clearTimeout(id);
         resolve(null);
@@ -3010,6 +3058,8 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     } else quickFrames = 0;
     draw(shown, false, step);
     updateHud(progress);
+    // The first live frame is on the canvas: the still under it goes.
+    if (runway.dataset.rznArming) delete runway.dataset.rznArming;
     environment.clearTimeout(calmTimer);
     calmTimer = 0;
     if (shown !== progress) {
@@ -3076,27 +3126,16 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     }
   };
 
-  const goLive = () => {
-    if (disposed || !pageActive || live || !near || document.hidden || !images || !motionAllowed())
-      return;
-    if (!plan || !settled || !buffers) return;
-    live = true;
-    runway.dataset.rznState = "live";
-    lastProgress = -1;
-    listen(near);
-    // The canvas shows only now: it is measured once laid out, from the
-    // observer's first notice (a read here would force the layout).
-    if (resizeObserver) {
-      resizeObserver.observe(canvas);
-      resizeObserver.observe(runway);
-    } else if (measure()) schedule();
-  };
-  const goStill = () => {
-    cancelPreparation();
-    live = false;
-    listen(false);
-    resizeObserver?.disconnect();
+  // The finished still is every quiet mode's picture. While motion is
+  // allowed and the scene is near but not yet live, the undersuit stands in
+  // its place with the read-outs at the start, as the first live frame will
+  // draw them (owner, 2026-10-16: 「スクロールする前から完成済みなこともあるので
+  // 修正して。」 — the preparation can take seconds, and the finished suit
+  // showed first). A reader arriving from below, past the runway's end,
+  // keeps the finished still: that is what the live frame draws there.
+  const restHud = () => {
     delete runway.dataset.rznState;
+    delete runway.dataset.rznArming;
     delete runway.dataset.rznLine;
     delete runway.dataset.rznPhase;
     delete runway.dataset.rznFormComplete;
@@ -3119,6 +3158,44 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     });
     if (percent) writeText(percent, restPercent);
     if (counter) writeText(counter, restCount);
+  };
+  const showLoading = () => {
+    if (live || runway.dataset.rznState === "loading") return;
+    runway.dataset.rznState = "loading";
+    runway.dataset.rznLine = "0";
+    runway.dataset.rznPhase = "prepare";
+    lines.forEach(({ line, chips }, index) => {
+      setFlag(line, "data-on", index === 0);
+      if (index === 0 && chips.length === 1) setFlag(chips[0], "data-on", true);
+    });
+    if (percent) writeText(percent, "000");
+  };
+  const goLive = () => {
+    if (disposed || !pageActive || live || !near || document.hidden || !images || !motionAllowed())
+      return;
+    if (!plan || !settled || !buffers) return;
+    live = true;
+    // The still that was showing stays up under the (transparent) canvas
+    // until the first live frame is drawn: no frame of nothing between
+    // them (owner, 2026-10-16: 「スクロールする前から完成済みなこともあるので
+    // 修正して。」).
+    runway.dataset.rznArming = runway.dataset.rznState === "loading" ? "under" : "still";
+    runway.dataset.rznState = "live";
+    lastProgress = -1;
+    listen(near);
+    // The canvas shows only now: it is measured once laid out, from the
+    // observer's first notice (a read here would force the layout).
+    if (resizeObserver) {
+      resizeObserver.observe(canvas);
+      resizeObserver.observe(runway);
+    } else if (measure()) schedule();
+  };
+  const goStill = () => {
+    cancelPreparation();
+    live = false;
+    listen(false);
+    resizeObserver?.disconnect();
+    restHud();
     pendingSize = null;
     canvas.width = canvas.height = 0;
     if (settled) settled.width = settled.height = 0;
@@ -3157,13 +3234,16 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   let preparing = null;
   const wake = () => {
     if (disposed || !pageActive || live || !motionAllowed() || document.hidden) return;
+    // As soon as the scene is near — also while a warm preparation already
+    // runs (it once stayed on the finished still until live).
+    if (near && !nearPast) showLoading();
+    else if (nearPast && runway.dataset.rznState === "loading") restHud();
     if (plan && settled && buffers) {
       goLive();
       return;
     }
     if (preparing) return;
     const token = generation;
-    if (near) runway.dataset.rznState = "loading";
     preparing = idleTask(() => images || load())
       .then(() => {
         if (token === generation && images) return build();
@@ -3173,7 +3253,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       })
       .catch(() => {
         loading = null;
-        if (!disposed && !live) delete runway.dataset.rznState;
+        if (!disposed && !live) restHud();
       })
       .finally(() => {
         if (token === generation) preparing = null;
@@ -3183,7 +3263,16 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     typeof environment.IntersectionObserver === "function"
       ? new environment.IntersectionObserver(
           (entries) => {
-            for (const entry of entries) near = entry.isIntersecting;
+            for (const entry of entries) {
+              near = entry.isIntersecting;
+              // Past the runway's end (its bottom above the view's): the
+              // live frame there is the finished suit (the entry's own
+              // rect; no layout read).
+              const box = entry.boundingClientRect;
+              nearPast = Boolean(
+                near && box && box.bottom <= (environment.innerHeight || 0) + 1,
+              );
+            }
             if (disposed) return;
             if (near) wake();
             listen(near && live);
@@ -3257,6 +3346,13 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   return () => {
     disposed = true;
     goStill();
+    if (chain) {
+      chain.port1.onmessage = null;
+      chain.port1.close?.();
+      chain.port2.close?.();
+      chain = null;
+    }
+    chained.length = 0;
     nearObserver?.disconnect();
     warmObserver?.disconnect();
     htmlObserver.disconnect();
