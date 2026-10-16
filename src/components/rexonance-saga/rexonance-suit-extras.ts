@@ -136,6 +136,25 @@ const PULSE_WIDTH = 0.12;
 /** …and on a guideway being built, climbing it (a band every 1/4 of it). */
 const BUILD_PULSE_BANDS = 4;
 const BUILD_PULSE_SPEED = 0.012;
+// The weld head (owner, 2026-10-16: 滑らかに): a thin white-hot thread along
+// the channel over an ice halo, tapering over its last cells behind the
+// front, reaching smoothly into the next cell, with a soft glow at each
+// growing tip; the laser's projection ahead of it feathers out.
+const HEAD_CELLS = 2.6; // its length behind the front, in channel cells
+const HEAD_CORE = 0.42; // widths, in gold cells
+const HEAD_HALO = 1.3;
+const HEAD_CORE_A = Float32Array.of(0.95, 0.6, 0.28);
+const HEAD_HALO_A = Float32Array.of(0.3, 0.17, 0.07);
+const HEAD_TIPS = 3; // glowing tips per plate (two soft sprites each)
+const PROJECT_A = Float32Array.of(0.34, 0.19, 0.08);
+const PULSE_CORE = 0.36;
+// The molten band by age (REXONANCE_SUIT_SWARM.moltenAges): its newest
+// cells white-hot, the next molten under a fading white heat, then molten
+// fading into the painted gold below (each step: molten, then hot, alpha).
+const MOLTEN_A = Float32Array.of(0, 1, 0.72, 0.36);
+const HOT_A = Float32Array.of(1, 0.5, 0, 0);
+// The print head is quicker than the build's: a longer thread.
+const PRINT_CELLS = 4;
 /** The weld head throws an ember every EMBER_EVERY ms; each flies EMBER_LIFE
  * ms (at most EMBERS in the air per guideway). */
 const EMBER_EVERY = 14;
@@ -147,6 +166,9 @@ const WALL_DEPTH = 3;
 const SHEEN_MS = 320;
 /** N10: the helmet's crown ring, seen from a little above. */
 const CROWN_SQUASH = 0.3;
+// The swarm's phases, primed before any call (SuitExtras.prime): birth,
+// the rings and rivers, the crown, its drain, the implosion.
+const PRIME_T = Float32Array.of(400, 520, 900, 1300, 1650, 1820, 2050, 2140);
 /** Tones: ice 0, pink 1, white 2, gold 3 (the sheet's rows). */
 const ICE = 0;
 const PINK = 1;
@@ -208,12 +230,26 @@ type Layout = {
   // build (0..1); plate p's cells by build time in [first, end) of buildIdx.
   buildA: Float32Array;
   buildB: Float32Array;
-  headMs: Float32Array; // how long a cell glows in the weld head
 
   buildAt: Float32Array;
   buildFrac: Float32Array;
   buildIdx: Int32Array;
   buildSorted: Float32Array;
+  // The channel (the weld head and the pulses run along it, 滑らかに): each
+  // plate's gold cells thinned to a one-cell skeleton along its trims
+  // (Zhang–Suen on the cell grid), each channel cell's predecessor along the
+  // build (-1: where a trim starts), and plate p's channel cells by build in
+  // [chanFirst[p], chanFirst[p + 1]) of chanIdx (their buildFrac in chanFrac).
+  chan: Uint8Array;
+  chanPrev: Int32Array;
+  chanIdx: Int32Array;
+  chanFrac: Float32Array;
+  chanFirst: Int32Array;
+  // Each channel cell's point (figure px): its centre eased toward its
+  // neighbours along the channel, so the thread runs smooth, not stepped.
+  chanX: Float32Array;
+  chanY: Float32Array;
+  cellFrac: Float32Array; // one cell's step of a plate's buildFrac
   // Tiles (global index; plate p owns [tileFirst[p], tileFirst[p + 1])).
   tileFirst: Int32Array;
   landSorted: Float32Array;
@@ -275,6 +311,7 @@ type Sheets = {
   walls: HTMLCanvasElement | null;
   rails: HTMLCanvasElement | null;
   molten: HTMLCanvasElement | null;
+  hot: HTMLCanvasElement | null;
   lattice: HTMLCanvasElement | null;
 };
 
@@ -333,11 +370,18 @@ function* layoutSteps(all: Plate[], gold: Cells): Generator<undefined, Layout, u
     hasBox: new Uint8Array(P),
     buildA: new Float32Array(P).fill(Infinity),
     buildB: new Float32Array(P).fill(Infinity),
-    headMs: new Float32Array(P),
     buildAt: f32(gold.lock.length),
     buildFrac: f32(gold.lock.length),
     buildIdx: new Int32Array(gold.lock.length),
     buildSorted: f32(gold.lock.length),
+    chan: new Uint8Array(gold.lock.length),
+    chanPrev: new Int32Array(gold.lock.length).fill(-1),
+    chanIdx: new Int32Array(gold.lock.length),
+    chanFrac: f32(gold.lock.length),
+    chanFirst: new Int32Array(P + 1),
+    chanX: f32(gold.lock.length),
+    chanY: f32(gold.lock.length),
+    cellFrac: f32(P),
     tileFirst: new Int32Array(P + 1),
     landSorted: f32(N),
     cx: f32(N),
@@ -773,11 +817,14 @@ function* layOutBuild(L: Layout, all: Plate[], gold: Cells) {
   }
   yield;
   // Inside each plate: along the channel from each trim's entry.
+  let chanAt = 0;
   for (let p = 0; p < all.length; p += 1) {
     if (p) yield;
     const plate = all[p];
     const first = plate.first;
     const n = plate.end - first;
+    L.chanFirst[p] = chanAt;
+    L.chanFirst[p + 1] = chanAt;
     if (!Number.isFinite(L.buildA[p]) || n <= 0) {
       for (let k = first; k < plate.end; k += 1) {
         L.buildIdx[k] = k;
@@ -807,8 +854,10 @@ function* layOutBuild(L: Layout, all: Plate[], gold: Cells) {
     const seatR = (piece.seat[1] - piece.y) / G - 0.5;
     const centre = (piece.w / G - 1) / 2;
     const dist = new Float32Array(n).fill(-1);
+    const trim = new Int32Array(n);
     const queue = new Int32Array(n);
     let seen = 0;
+    let trims = 0;
     while (seen < n) {
       // The next trim's entry: its lowest cell (nearest the middle), or the
       // tail's cell nearest its seat.
@@ -825,6 +874,7 @@ function* layOutBuild(L: Layout, all: Plate[], gold: Cells) {
         }
       }
       dist[entry] = tail ? best * 0.45 : bottomRow - row[entry];
+      trim[entry] = trims;
       let head = 0;
       let end = 0;
       queue[end++] = entry;
@@ -839,17 +889,17 @@ function* layOutBuild(L: Layout, all: Plate[], gold: Cells) {
             const j = grid[r * cols + c];
             if (j < 0 || dist[j] >= 0) continue;
             dist[j] = dist[k] + (dx && dy ? 1.41 : 1);
+            trim[j] = trims;
             queue[end++] = j;
             seen += 1;
           }
       }
+      trims += 1;
     }
     let most = 0;
     for (let k = 0; k < n; k += 1) most = Math.max(most, dist[k]);
     const a = L.buildA[p];
     const span = L.buildB[p] - a;
-    // The weld head: about two cells deep along the channel.
-    L.headMs[p] = Math.min(16, Math.max(2, most > 0 ? (2.2 * span) / most : span));
     const order = Array.from({ length: n }, (_, k) => k).sort((x, y) => dist[x] - dist[y] || x - y);
     order.forEach((k, rank) => {
       const frac = most > 0 ? dist[k] / most : 0;
@@ -859,7 +909,116 @@ function* layOutBuild(L: Layout, all: Plate[], gold: Cells) {
       L.buildIdx[first + rank] = i;
       L.buildSorted[first + rank] = a + frac * span;
     });
+    L.cellFrac[p] = most > 0 ? 1 / most : 1;
+    // The channel: the plate's cells thinned to a one-cell skeleton (every
+    // trim keeps one cell at least), each linked back along the build.
+    const skeleton = thinCells(col, row, cols, rows);
+    const kept = new Uint8Array(trims);
+    for (let k = 0; k < n; k += 1) if (skeleton[k]) kept[trim[k]] = 1;
+    // A trim the thinning erased (a 2×2 speck): its entry cell (the first
+    // of it by build).
+    for (const k of order)
+      if (!kept[trim[k]]) {
+        skeleton[k] = 1;
+        kept[trim[k]] = 1;
+      }
+    for (const k of order) {
+      if (!skeleton[k]) continue;
+      const i = first + k;
+      L.chan[i] = 1;
+      let prev = -1;
+      let prevDist = -1;
+      for (let dy = -1; dy <= 1; dy += 1)
+        for (let dx = -1; dx <= 1; dx += 1) {
+          const c = col[k] + dx;
+          const r = row[k] + dy;
+          if ((!dx && !dy) || c < 0 || r < 0 || c >= cols || r >= rows) continue;
+          const j = grid[r * cols + c];
+          if (j < 0 || !skeleton[j] || dist[j] >= dist[k] || dist[j] <= prevDist) continue;
+          prev = j;
+          prevDist = dist[j];
+        }
+      L.chanPrev[i] = prev >= 0 ? first + prev : -1;
+      L.chanIdx[chanAt] = i;
+      L.chanFrac[chanAt] = L.buildFrac[i];
+      chanAt += 1;
+    }
+    L.chanFirst[p + 1] = chanAt;
+    // The thread's points: each channel cell's centre (twice) with its
+    // neighbours along the channel (its predecessor and its successors).
+    const sumX = new Float32Array(n);
+    const sumY = new Float32Array(n);
+    const count = new Float32Array(n);
+    const cx = (k: number) => gold.fx[first + k] + gold.cw[first + k] / 2;
+    const cy = (k: number) => gold.fy[first + k] + gold.ch[first + k] / 2;
+    for (let k = 0; k < n; k += 1) {
+      if (!skeleton[k]) continue;
+      sumX[k] += 2 * cx(k);
+      sumY[k] += 2 * cy(k);
+      count[k] += 2;
+      const j = L.chanPrev[first + k] - first;
+      if (j < 0) continue;
+      sumX[k] += cx(j);
+      sumY[k] += cy(j);
+      count[k] += 1;
+      sumX[j] += cx(k);
+      sumY[j] += cy(k);
+      count[j] += 1;
+    }
+    for (let k = 0; k < n; k += 1) {
+      if (!skeleton[k]) continue;
+      L.chanX[first + k] = sumX[k] / count[k];
+      L.chanY[first + k] = sumY[k] / count[k];
+    }
   }
+}
+
+// Zhang–Suen thinning of a plate's gold cells on their grid: 1 for the cells
+// of the one-cell skeleton along its trims.
+function thinCells(col: Int32Array, row: Int32Array, cols: number, rows: number) {
+  const w = cols + 2;
+  const h = rows + 2;
+  const image = new Uint8Array(w * h);
+  for (let k = 0; k < col.length; k += 1) image[(row[k] + 1) * w + col[k] + 1] = 1;
+  const doomed = new Int32Array(col.length);
+  for (let changed = true; changed;) {
+    changed = false;
+    for (let pass = 0; pass < 2; pass += 1) {
+      let count = 0;
+      for (let y = 1; y < h - 1; y += 1)
+        for (let x = 1; x < w - 1; x += 1) {
+          const o = y * w + x;
+          if (!image[o]) continue;
+          const p2 = image[o - w];
+          const p3 = image[o - w + 1];
+          const p4 = image[o + 1];
+          const p5 = image[o + w + 1];
+          const p6 = image[o + w];
+          const p7 = image[o + w - 1];
+          const p8 = image[o - 1];
+          const p9 = image[o - w - 1];
+          const b = p2 + p3 + p4 + p5 + p6 + p7 + p8 + p9;
+          if (b < 2 || b > 6) continue;
+          const turns =
+            (p2 < p3 ? 1 : 0) +
+            (p3 < p4 ? 1 : 0) +
+            (p4 < p5 ? 1 : 0) +
+            (p5 < p6 ? 1 : 0) +
+            (p6 < p7 ? 1 : 0) +
+            (p7 < p8 ? 1 : 0) +
+            (p8 < p9 ? 1 : 0) +
+            (p9 < p2 ? 1 : 0);
+          if (turns !== 1) continue;
+          if (pass === 0 ? p2 * p4 * p6 || p4 * p6 * p8 : p2 * p4 * p8 || p2 * p6 * p8) continue;
+          doomed[count++] = o;
+        }
+      for (let k = 0; k < count; k += 1) image[doomed[k]] = 0;
+      if (count) changed = true;
+    }
+  }
+  const skeleton = new Uint8Array(col.length);
+  for (let k = 0; k < col.length; k += 1) skeleton[k] = image[(row[k] + 1) * w + col[k] + 1];
+  return skeleton;
 }
 
 // Coverage: each tile's mean alpha (so a chip never unfolds past the art's
@@ -1020,11 +1179,13 @@ function createRailsJob(guide: CanvasImageSource, w: number, h: number) {
 
 // The molten gold (G6): the kit's formula (rexonance-unlit.js,
 // createNaniteMoltenJob: t = clamp(0.25 + 0.85 L) through the ramp, alpha
-// the art's times the gold mask's), with each read-back and the final
-// upload in a step of its own (the kit's job reads both layers in its first
-// step, past a 6 ms slice). Same job contract (row-sliced, byte-identical
-// whatever the slices, no composite operations, null if the pixels cannot be
-// read); kept here, the call's own.
+// the art's times the gold mask's), with each read-back and each upload in
+// a step of its own (the kit's job reads both layers in its first step, past
+// a 6 ms slice). Beside it, the band's white-hot head: the same ramp shifted
+// HOT_SHIFT toward white (the newest cells of the band are drawn from it,
+// the older from the molten, fading into the painted gold). Same job
+// contract (row-sliced, byte-identical whatever the slices, no composite
+// operations, null if the pixels cannot be read); kept here, the call's own.
 const MOLTEN_RAMP = Float32Array.of(
   0,
   120,
@@ -1043,6 +1204,16 @@ const MOLTEN_RAMP = Float32Array.of(
   250,
   236,
 );
+const HOT_SHIFT = 0.3;
+const moltenRamp = (t: number, out: Uint8ClampedArray, i: number) => {
+  let k = 4;
+  while (k < 12 && t > MOLTEN_RAMP[k]) k += 4;
+  const u = (t - MOLTEN_RAMP[k - 4]) / (MOLTEN_RAMP[k] - MOLTEN_RAMP[k - 4]);
+  for (let c = 1; c < 4; c += 1)
+    out[i + c - 1] = Math.round(
+      MOLTEN_RAMP[k - 4 + c] + (MOLTEN_RAMP[k + c] - MOLTEN_RAMP[k - 4 + c]) * u,
+    );
+};
 function createMoltenJob(
   source: CanvasImageSource,
   mask: CanvasImageSource | null,
@@ -1068,10 +1239,12 @@ function createMoltenJob(
     let art: Uint8ClampedArray | null = null;
     let gold: Uint8ClampedArray | null = null;
     let image: ImageData | null = null;
+    let hotImage: ImageData | null = null;
     let row = 0;
+    let moltenOut: HTMLCanvasElement | null = null;
     let uploaded = false;
     let cancelled = false;
-    let result: { molten: HTMLCanvasElement } | null = null;
+    let result: { molten: HTMLCanvasElement; hot: HTMLCanvasElement } | null = null;
     const pixels = (layer: CanvasImageSource) => {
       read.clearRect(0, 0, w, h);
       read.drawImage(layer, 0, 0, w, h, 0, 0, w, h);
@@ -1085,28 +1258,25 @@ function createMoltenJob(
           if (!art) {
             art = pixels(source);
             image = read.createImageData(w, h);
+            hotImage = read.createImageData(w, h);
             return false;
           }
           if (mask && !gold) {
             gold = pixels(mask);
             return false;
           }
-          const o = image!.data;
           if (row < h) {
+            const o = image!.data;
+            const hot = hotImage!.data;
             do {
               for (let x = 0, i = row * w * 4; x < w; x += 1, i += 4) {
                 const alpha = art[i + 3];
                 if (!alpha) continue;
                 const lum = (0.2126 * art[i] + 0.7152 * art[i + 1] + 0.0722 * art[i + 2]) / 255;
                 const t = unit(0.25 + 0.85 * lum);
-                let k = 4;
-                while (k < 12 && t > MOLTEN_RAMP[k]) k += 4;
-                const u = (t - MOLTEN_RAMP[k - 4]) / (MOLTEN_RAMP[k] - MOLTEN_RAMP[k - 4]);
-                for (let c = 1; c < 4; c += 1)
-                  o[i + c - 1] = Math.round(
-                    MOLTEN_RAMP[k - 4 + c] + (MOLTEN_RAMP[k + c] - MOLTEN_RAMP[k - 4 + c]) * u,
-                  );
-                o[i + 3] = gold ? Math.round((alpha * gold[i + 3]) / 255) : alpha;
+                moltenRamp(t, o, i);
+                moltenRamp(unit(t + HOT_SHIFT), hot, i);
+                o[i + 3] = hot[i + 3] = gold ? Math.round((alpha * gold[i + 3]) / 255) : alpha;
               }
               row += 1;
             } while (
@@ -1116,15 +1286,22 @@ function createMoltenJob(
             );
             return false;
           }
+          // One upload a step.
           const out = make();
           const write = out.getContext("2d");
           if (!write) throw new Error("unavailable molten output");
-          write.putImageData(image!, 0, 0);
+          if (!moltenOut) {
+            write.putImageData(image!, 0, 0);
+            moltenOut = out;
+            image = null;
+            return false;
+          }
+          write.putImageData(hotImage!, 0, 0);
           scratch.width = scratch.height = 0;
           art = gold = null;
-          image = null;
+          hotImage = null;
           uploaded = true;
-          result = { molten: out };
+          result = { molten: moltenOut, hot: out };
           return true;
         } catch {
           cancelled = true;
@@ -1139,7 +1316,7 @@ function createMoltenJob(
         if (cancelled || result) return;
         cancelled = true;
         art = gold = null;
-        image = null;
+        image = hotImage = null;
         release();
       },
     };
@@ -1155,6 +1332,13 @@ function createMoltenJob(
 let READY = false;
 let preparation: Promise<boolean> | null = null;
 let promotePreparation: (() => void) | null = null;
+let resumePreparation: (() => void) | null = null;
+
+// Review (2026-10-16, cold tap): /rexonance-saga is where the call lands and
+// ZENITH draws its first frames, and the suit's own warm-up waits for intent
+// there; so does this preparation. A slice that finds itself on the saga page
+// parks (no slice is queued) and the next route's warm resumes it.
+const onSaga = () => Boolean(globalThis.location?.pathname.startsWith("/rexonance-saga"));
 
 type Stage =
   "suit" | "layout" | "cover" | "metal" | "guide" | "rails" | "molten" | "lattice" | "done";
@@ -1166,6 +1350,7 @@ type Stage =
 export function prepareRexonanceNanites(priority: "low" | "high" = "low") {
   if (READY) return Promise.resolve(true);
   if (preparation) {
+    resumePreparation?.();
     if (priority === "high") promotePreparation?.();
     return preparation;
   }
@@ -1176,6 +1361,7 @@ export function prepareRexonanceNanites(priority: "low" | "high" = "low") {
     let cursor = 0;
     let generation = 0;
     let queued: { kind: "idle" | "frame"; id: number } | null = null;
+    let parked = false;
     let job: NanitePixelJob<Record<string, HTMLCanvasElement | undefined>> | null = null;
     let lattice: HTMLCanvasElement | null = null;
     const made: Partial<Sheets> = {};
@@ -1230,9 +1416,17 @@ export function prepareRexonanceNanites(priority: "low" | "high" = "low") {
       schedule();
     };
     const slice = (deadline?: IdleDeadline) => {
-      // A live call owns the frame: never read back or upload during it.
+      // A live call owns the frame: never read back or upload during it. A
+      // call that started without the extras drops an urgent preparation
+      // back to idle slices (it already plays the classic engine).
       if (work.drawing > 0) {
+        urgent = false;
         schedule();
+        return;
+      }
+      if (onSaga()) {
+        urgent = false;
+        parked = true;
         return;
       }
       // Each slice stays under 6 ms: its jobs step to 5 ms, its own units
@@ -1335,6 +1529,7 @@ export function prepareRexonanceNanites(priority: "low" | "high" = "low") {
             (result) => {
               if (!result.molten) return false;
               made.molten = result.molten;
+              made.hot = result.hot ?? null;
               return true;
             },
             "lattice",
@@ -1368,17 +1563,24 @@ export function prepareRexonanceNanites(priority: "low" | "high" = "low") {
             walls: made.walls ?? null,
             rails: made.rails ?? null,
             molten: made.molten ?? null,
+            hot: made.hot ?? null,
             lattice: made.lattice ?? null,
           };
           READY = true;
           settle(true);
+          primeNanites();
         }
       } catch {
         settle(false);
       }
     };
+    resumePreparation = () => {
+      if (settled || !parked || onSaga()) return;
+      parked = false;
+      schedule();
+    };
     promotePreparation = () => {
-      if (settled || urgent) return;
+      if (settled || urgent || onSaga()) return;
       urgent = true;
       generation += 1;
       if (queued?.kind === "idle") globalThis.cancelIdleCallback?.(queued.id);
@@ -1392,9 +1594,63 @@ export function prepareRexonanceNanites(priority: "low" | "high" = "low") {
     if (preparation === pending) {
       preparation = null;
       promotePreparation = null;
+      resumePreparation = null;
     }
   });
   return pending;
+}
+
+// Once prepared: a throwaway instance on a 1×1 canvas primes the poses (see
+// SuitExtras.prime), a step an idle slice, never while a call draws, and not
+// at all once a call has begun (its own instance is warm by then).
+let calls = 0;
+let primed = false;
+function primeNanites() {
+  if (primed || calls) return;
+  primed = true;
+  const canvas = Object.assign(globalThis.document.createElement("canvas"), {
+    width: 1,
+    height: 1,
+  });
+  const context = canvas.getContext("2d");
+  const extras = context
+    ? createSuitExtras(
+        {
+          flight: context,
+          s: 1,
+          ox: 0,
+          oy: 0,
+          all: plates(),
+          gold: cells(),
+          source: canvas,
+          sheet: canvas,
+        },
+        true,
+      )
+    : null;
+  if (!extras) {
+    canvas.width = canvas.height = 0;
+    return;
+  }
+  let k = 0;
+  const queue = () => {
+    if (globalThis.requestIdleCallback) globalThis.requestIdleCallback(step, { timeout: 2000 });
+    else globalThis.requestAnimationFrame(() => step());
+  };
+  const step = () => {
+    if (calls) {
+      canvas.width = canvas.height = 0;
+      return;
+    }
+    if (work.drawing > 0) return queue();
+    if (extras.prime(k)) {
+      canvas.width = canvas.height = 0;
+      return;
+    }
+    k += 1;
+    queue();
+  };
+  queue();
 }
 
 /** The prepared layout, read-only (tests and frame audits). */
@@ -1445,16 +1701,46 @@ export type SuitExtras = {
   /** drawImage calls in the last frame. */
   drawn: () => number;
   governed: () => boolean;
+  /** Before any call (idle time, a throwaway instance): runs the poses
+   * through step k of PRIME (no drawing), so V8 has feedback for every
+   * branch when the call's own instance runs (the closures share it) instead
+   * of deoptimising mid-call as each branch is first taken. Returns true once
+   * every step has run. */
+  prime: (k: number) => boolean;
 };
 
-// Pose scratch (the passes write these; nothing is allocated).
-let PX = 0;
-let PY = 0;
-let PZ = 0;
-let TX = 0;
-let TY = 0;
+// The pose scratch's slots (one Float64Array per call, made with its
+// buffers): a double written to a `let` that a closure or the module holds is
+// boxed into a fresh heap number on every write, so the passes write their
+// poses here instead (no per-frame allocation, owner 2026-10-16).
+const PX = 0; // figure px
+const PY = 1;
+const PZ = 2; // depth on the ring, −1 far … 1 near
+const TX = 3; // the ring's unit tangent
+const TY = 4;
+const SPEED = 5; // along the ring, figure px per ms
+const SIZE = 6; // a tile's flight: its size, frame, unfold frame and alpha
+const FRAME = 7;
+const UNFOLD = 8;
+const ALPHA = 9;
+const GLOW = 10; // the white-hot glows' ease-in
+// Arguments, likewise (a double passed to a call that is not inlined is
+// boxed too): a flight's fraction and its target (tilePose), a spiral's
+// fraction (bornPose, implodePose), and a sprite's device centre, size,
+// alpha and velocity (chip, unfold, comet).
+const ARG_U = 11;
+const ARG_CX = 12;
+const ARG_CY = 13;
+const SX = 14;
+const SY = 15;
+const SD = 16;
+const SA = 17;
+const SVX = 18;
+const SVY = 19;
+const ARG_T = 20; // a ring pose's time
+const POSE_SLOTS = 21;
 
-export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
+export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtras | null {
   const L = LAYOUT;
   const K = SHEETS;
   const cellsImage = rexonanceNaniteSource(KIT_CELLS.src);
@@ -1462,6 +1748,7 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
   const fxImage = rexonanceNaniteSource(KIT_FX.src);
   const guideImage = rexonanceNaniteSource(KIT_GUIDE.src);
   if (!READY || !L || !K || !cellsImage || !cometImage || !fxImage || !guideImage) return null;
+  if (!priming) calls += 1;
   const { flight, s, ox, oy, all, gold, source, sheet } = env;
   const P = all.length;
   if (L.kind.length !== P) return null;
@@ -1471,6 +1758,7 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
   const walls = K.walls;
   const rails = K.rails;
   const molten = K.molten;
+  const hot = K.hot;
   const lattice = K.lattice;
   // Per frame.
   const jig = new Float32Array(P * 6);
@@ -1499,11 +1787,16 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
   let pulsePreCount = 0;
   const pulsesPost = new Int32Array(Math.max(1, GOLD_N));
   let pulsePostCount = 0;
-  // The guideway's build heads (cells), and the latches' lasers to them.
-  const heads = new Int32Array(Math.max(1, GOLD_N));
-  let headCount = 0;
-  const cores = new Int32Array(Math.max(1, GOLD_N));
-  let coreCount = 0;
+  // The weld heads: curves along the channel (device px: start, control,
+  // end) by alpha bucket, their glowing tips (x, y, alpha), and the latches'
+  // lasers.
+  const SEGS = 6144;
+  const segs = new Float32Array(SEGS * 6);
+  const segBucket = new Uint8Array(SEGS);
+  let segCount = 0;
+  const TIPS = 192;
+  const tips = new Float32Array(TIPS * 3);
+  let tipCount = 0;
   const lasers = new Float32Array(P * 4);
   let laserCount = 0;
   const fades = new Int32Array(4096);
@@ -1521,7 +1814,8 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
   let jigs = 0;
   let transformed = false;
   let conduits = 0;
-  let glowRamp = 1;
+  const pose = new Float64Array(POSE_SLOTS);
+  pose[GLOW] = 1;
 
   const base = () => {
     flight.setTransform(1, 0, 0, 1, ox, oy);
@@ -1664,27 +1958,41 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
     }
     flight.globalAlpha = 1;
   };
-  // A hex chip: x, y device centre, d device size, its tumble frame.
-  const chip = (
+  // A square sprite centred on (x, y), d device px across, on whole device
+  // pixels: each fractional drawImage argument is boxed into a fresh heap
+  // number on every call (no per-frame allocation, owner 2026-10-16).
+  const sprite = (
+    image: CanvasImageSource,
+    sx: number,
+    sy: number,
+    sw: number,
+    sh: number,
     x: number,
     y: number,
     d: number,
-    frame: number,
-    tone: number,
-    alpha: number,
-    hero = false,
   ) => {
+    const k = Math.round(d) || 1;
+    flight.drawImage(image, sx, sy, sw, sh, Math.round(x - k / 2), Math.round(y - k / 2), k, k);
+  };
+  // A hex chip at the pose's sprite slots (SX, SY device centre, SD device
+  // size, SA alpha), in its tumble frame.
+  const chip = (frame: number, tone: number, hero = false) => {
+    const x = pose[SX];
+    const y = pose[SY];
+    const d = pose[SD];
+    const alpha = pose[SA];
     if (alpha <= 0.01 || d < 0.5) return;
     if (TOUCH) {
       // Touch: two-tone rects that pulse with the tumble; a few heroes.
       if (hero && heroes < HEROES) heroes += 1;
       else {
         const pulse = 0.55 + 0.45 * Math.abs(Math.cos((TAU * frame) / FRAMES));
+        const side = d * pulse * 0.8;
         rect(
-          Math.min(GOLD_TONE, tone) * 2 + (alpha > 0.6 ? 1 : 0),
+          (tone < GOLD_TONE ? tone : GOLD_TONE) * 2 + (alpha > 0.6 ? 1 : 0),
           x,
           y,
-          Math.max(1.5, d * pulse * 0.8),
+          side > 1.5 ? side : 1.5,
         );
         return;
       }
@@ -1694,60 +2002,49 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
     flight.globalAlpha = alpha > 1 ? 1 : alpha;
     const t = tone > GOLD_TONE ? ICE : tone;
     const e = d * SPRITE;
-    if (e <= MIP_BELOW)
-      flight.drawImage(
-        cellsImage,
-        MIP_X[t] + 16 * frame,
-        MIP_Y[t],
-        16,
-        16,
-        x - e / 2,
-        y - e / 2,
-        e,
-        e,
-      );
-    else flight.drawImage(cellsImage, 32 * frame, 32 * t, 32, 32, x - e / 2, y - e / 2, e, e);
+    if (e <= MIP_BELOW) sprite(cellsImage, MIP_X[t] + 16 * frame, MIP_Y[t], 16, 16, x, y, e);
+    else sprite(cellsImage, 32 * frame, 32 * t, 32, 32, x, y, e);
   };
-  const unfold = (x: number, y: number, d: number, k: number, tone: number, alpha: number) => {
+  // A chip unfolding into its tile (frame k), at the sprite slots.
+  const unfold = (k: number, tone: number) => {
+    const x = pose[SX];
+    const y = pose[SY];
+    const d = pose[SD];
     if (TOUCH && heroes >= HEROES) {
-      rect(Math.min(WHITE, tone) * 2 + 1, x, y, d * 0.8);
+      rect((tone < WHITE ? tone : WHITE) * 2 + 1, x, y, d * 0.8);
       return;
     }
     if (TOUCH) heroes += 1;
     if (draws >= BUDGET) return;
     draws += 1;
-    flight.globalAlpha = alpha;
+    flight.globalAlpha = pose[SA];
     const t = tone >= 3 ? ICE : tone;
-    flight.drawImage(
-      cellsImage,
-      UNFOLD_X[t] + 32 * k,
-      KIT_CELLS.unfold.y,
-      32,
-      32,
-      x - d / 2,
-      y - d / 2,
-      d,
-      d,
-    );
+    sprite(cellsImage, UNFOLD_X[t] + 32 * k, KIT_CELLS.unfold.y, 32, 32, x, y, d);
   };
-  const comet = (x: number, y: number, vx: number, vy: number, tone: number, alpha: number) => {
+  // A comet from the sprite slots' centre along their velocity (SVX, SVY).
+  const comet = (tone: number) => {
     if (TOUCH || governed || comets >= COMET_BUDGET || draws >= BUDGET) return;
-    const length = Math.hypot(vx, vy);
+    const vx = pose[SVX];
+    const vy = pose[SVY];
+    const length = (vx * vx + vy * vy) ** 0.5;
     if (length < 4) return;
     let a = Math.round(Math.atan2(vy, vx) / (Math.PI / 8)) % 16;
     if (a < 0) a += 16;
     const long = length >= 12 ? 1 : 0;
-    const k = Math.min(2.5, Math.max(0.6, length / KIT_COMETS.tail[long]));
+    const stretch = length / KIT_COMETS.tail[long];
+    const k = stretch < 0.6 ? 0.6 : stretch > 2.5 ? 2.5 : stretch;
     const row = COMET_ROW[tone > GOLD_TONE ? 0 : tone === GOLD_TONE ? 2 : tone] + long;
     comets += 1;
     draws += 1;
-    flight.globalAlpha = 0.5 * alpha;
+    flight.globalAlpha = 0.5 * pose[SA];
     const d = 32 * k;
-    flight.drawImage(cometImage, 32 * a, 32 * row, 32, 32, x - 16 * k, y - 16 * k, d, d);
+    sprite(cometImage, 32 * a, 32 * row, 32, 32, pose[SX], pose[SY], d);
   };
 
   /* The cocoon. */
-  const ringPose = (c: number, t: number) => {
+  // Chip c on its ring at the pose's ARG_T.
+  const ringPose = (c: number) => {
+    const t = pose[ARG_T];
     const r = L.ring[c];
     const lane = L.lane[c];
     const k = 1 + 0.045 * lane;
@@ -1761,38 +2058,44 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
     const ly = Ry * sin + 3 * Math.sin(5 * th + L.phi[c]) + 4 * lane;
     const rc = L.ringCos[r];
     const rs = L.ringSin[r];
-    PX = W / 2 + lx * rc - ly * rs;
-    PY = L.ringCy[r] + lx * rs + ly * rc;
-    PZ = sin;
+    pose[PX] = W / 2 + lx * rc - ly * rs;
+    pose[PY] = L.ringCy[r] + lx * rs + ly * rc;
+    pose[PZ] = sin;
     const dir = omega < 0 ? -1 : 1;
     const dx = -R * sin * dir;
     const dy = Ry * cos * dir;
-    const tl = Math.hypot(dx, dy) || 1;
-    TX = (dx * rc - dy * rs) / tl;
-    TY = (dx * rs + dy * rc) / tl;
+    // (Math.hypot boxes its arguments, and V8's mid tier boxes around
+    // Math.sqrt here; the power does neither.)
+    const tl = (dx * dx + dy * dy) ** 0.5 || 1;
+    pose[TX] = (dx * rc - dy * rs) / tl;
+    pose[TY] = (dx * rs + dy * rc) / tl;
+    // Its speed along the ring (the comets read their velocity from it).
+    pose[SPEED] = tl * Math.abs(omega);
   };
   // A chip being born (that fraction of its wave): on its spiral arm out
   // of the core, blending into its ring pose (PX, PY on entry).
-  const bornPose = (c: number, born: number) => {
+  const bornPose = (c: number) => {
+    const born = pose[ARG_U];
     const a = L.arm[c] + L.armDir[c] * 2.4 * Math.PI * born;
-    const rho = 150 * Math.max(0, born) ** 0.85;
+    const rho = 150 * (born > 0 ? born : 0) ** 0.85;
     const sx = CORE_X + rho * Math.cos(a);
     const sy = CORE_Y + 0.72 * rho * Math.sin(a);
     const m = smooth((born - 0.4) / 0.6);
-    PX = sx + (PX - sx) * m;
-    PY = sy + (PY - sy) * m;
+    pose[PX] = sx + (pose[PX] - sx) * m;
+    pose[PY] = sy + (pose[PY] - sy) * m;
   };
   // A free chip imploding (fraction u of the window) from its ring pose
   // (PX, PY on entry) into the reactor.
-  const implodePose = (u: number) => {
+  const implodePose = () => {
+    const u = pose[ARG_U];
     const a = TAU * u;
     const k = 1 - u * u * u;
-    const dx = PX - CORE_X;
-    const dy = PY - CORE_Y;
-    PX = CORE_X + (dx * Math.cos(a) - dy * Math.sin(a)) * k;
-    PY = CORE_Y + (dx * Math.sin(a) + dy * Math.cos(a)) * k;
+    const dx = pose[PX] - CORE_X;
+    const dy = pose[PY] - CORE_Y;
+    pose[PX] = CORE_X + (dx * Math.cos(a) - dy * Math.sin(a)) * k;
+    pose[PY] = CORE_Y + (dx * Math.sin(a) + dy * Math.cos(a)) * k;
   };
-  // Where chip c is at t (figure px: PX, PY, depth PZ); returns its alpha
+  // Where chip c is at t (figure px: pose PX, PY, depth PZ); returns its alpha
   // and writes size/tone/frame via the out arrays (index c). -1: not shown.
   const crownCentreY = VISOR_Y - 92;
   const swarm = (t: number) => {
@@ -1809,36 +2112,37 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
       let alpha = 1;
       let tone = L.chipTone[c];
       let spinBoost = 1;
-      ringPose(c, t);
-      let x = PX;
-      let y = PY;
-      let z = PZ;
+      pose[ARG_T] = t;
+      ringPose(c);
+      let x = pose[PX];
+      let y = pose[PY];
+      let z = pose[PZ];
       const born = (t - birth) / SW.wave;
       if (born < 1) {
         // N2: out of the core on one of three spiral arms, into its ring.
-        bornPose(c, born);
-        x = PX;
-        y = PY;
+        pose[ARG_U] = born;
+        bornPose(c);
+        x = pose[PX];
+        y = pose[PY];
         z = 0.5 + (z - 0.5) * smooth((born - 0.4) / 0.6);
         size *= 0.5 + 0.5 * born;
         if (born < 0.5) tone = WHITE;
         spinBoost = 2;
         if (!TOUCH && !governed && t - 24 >= birth) {
           // Its streak along the arm.
-          ringPose(c, t - 24);
-          bornPose(c, (t - 24 - birth) / SW.wave);
-          chipVX[c] = (x - PX) * s;
-          chipVY[c] = (y - PY) * s;
+          pose[ARG_T] = t - 24;
+          ringPose(c);
+          pose[ARG_U] = (t - 24 - birth) / SW.wave;
+          bornPose(c);
+          chipVX[c] = (x - pose[PX]) * s;
+          chipVY[c] = (y - pose[PY]) * s;
         }
       } else if (!TOUCH && c % 3 === 0 && !governed) {
-        // Comets from the ring's own speed (24 ms back).
-        const nx = PX;
-        const ny = PY;
-        ringPose(c, t - 24);
-        chipVX[c] = (nx - PX) * s;
-        chipVY[c] = (ny - PY) * s;
-        PX = nx;
-        PY = ny;
+        // Comets from the ring's own speed (its travel over 24 ms, along its
+        // tangent).
+        const travel = 24 * pose[SPEED] * s;
+        chipVX[c] = pose[TX] * travel;
+        chipVY[c] = pose[TY] * travel;
       }
       if (helm && t >= SW.crown[0]) {
         // N10: the helmet's chips gather in a crown above the head.
@@ -1875,11 +2179,12 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
         // N4: drained along its plate's river to the gate, fading there.
         const u = (t - L.drainAt[c]) / 120;
         if (u >= 1) continue;
-        ringPose(c, L.drainAt[c]);
-        const p0x = PX;
-        const p0y = PY;
-        const p1x = p0x + TX * 0.12 * H;
-        const p1y = p0y + TY * 0.12 * H;
+        pose[ARG_T] = L.drainAt[c];
+        ringPose(c);
+        const p0x = pose[PX];
+        const p0y = pose[PY];
+        const p1x = p0x + pose[TX] * 0.12 * H;
+        const p1y = p0y + pose[TY] * 0.12 * H;
         const gx = L.gateX[plate];
         const gy = L.gateY[plate];
         const p2x = gx + L.nX[plate] * 0.05 * H;
@@ -1901,9 +2206,10 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
         // streaking along their spiral.
         const u = (t - SW.implode[0]) / (SW.implode[1] - SW.implode[0]);
         if (u >= 1) continue;
-        implodePose(u);
-        x = PX;
-        y = PY;
+        pose[ARG_U] = u;
+        implodePose();
+        x = pose[PX];
+        y = pose[PY];
         size *= 1.5 * (1 - 0.6 * u);
         alpha = 1.35 * (1 - u * u * u * u) * (0.55 + 0.45 * smooth(u / 0.35));
         tone = c % 3 ? WHITE : tone;
@@ -1911,10 +2217,12 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
         chipVX[c] = 0;
         chipVY[c] = 0;
         if (!TOUCH && !governed) {
-          ringPose(c, t - 24);
-          implodePose(Math.max(0, u - 24 / (SW.implode[1] - SW.implode[0])));
-          chipVX[c] = (x - PX) * s;
-          chipVY[c] = (y - PY) * s;
+          pose[ARG_T] = t - 24;
+          ringPose(c);
+          pose[ARG_U] = Math.max(0, u - 24 / (SW.implode[1] - SW.implode[0]));
+          implodePose();
+          chipVX[c] = (x - pose[PX]) * s;
+          chipVY[c] = (y - pose[PY]) * s;
         }
       }
       if (born >= 1 && !(plate >= 0 && t >= L.drainAt[c]) && !(helm && t >= SW.crown[0]))
@@ -1943,7 +2251,7 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
         if (cx >= 0 && cy >= 0 && cx < OCC_W && cy < OCC_H)
           alpha *= 1 - (0.8 * L.occupancy[cy * OCC_W + cx]) / 255;
       }
-      if (band === 3) alpha = Math.min(alpha, 0.7);
+      if (band === 3 && alpha > 0.7) alpha = 0.7;
       chipBand[c] = band;
       chipX[c] = x * s;
       chipY[c] = y * s;
@@ -1951,10 +2259,13 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
       chipA[c] = alpha;
       chipT[c] = tone;
       // White-hot chips turn face-on (their lit core) with a small wobble.
-      chipF[c] =
+      // (Wrapped here rather than by a call: no boxed argument.)
+      const turn =
         band === 5
-          ? wrap(1.5 * Math.sin((TAU * L.chipSpin[c] * t) / 1000 + L.phi[c]))
-          : wrap(L.chipF0[c] + (FRAMES * L.chipSpin[c] * spinBoost * t) / 1000);
+          ? 1.5 * Math.sin((TAU * L.chipSpin[c] * t) / 1000 + L.phi[c])
+          : L.chipF0[c] + (FRAMES * L.chipSpin[c] * spinBoost * t) / 1000;
+      const frame = Math.floor(turn) % FRAMES;
+      chipF[c] = frame < 0 ? frame + FRAMES : frame;
     }
   };
   // The cocoon's lanes: each ring's ellipse, its far half faint behind the
@@ -2015,10 +2326,10 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
         KIT_FX.shock.y + KIT_FX.shock.h * Math.floor(frame / KIT_FX.shock.cols),
         KIT_FX.shock.w,
         KIT_FX.shock.h,
-        CORE_X * s - KIT_FX.shock.centre[0] * k,
-        CORE_Y * s - KIT_FX.shock.centre[1] * k,
-        KIT_FX.shock.w * k,
-        KIT_FX.shock.h * k,
+        Math.round(CORE_X * s - KIT_FX.shock.centre[0] * k),
+        Math.round(CORE_Y * s - KIT_FX.shock.centre[1] * k),
+        Math.round(KIT_FX.shock.w * k),
+        Math.round(KIT_FX.shock.h * k),
       );
     }
   };
@@ -2029,28 +2340,28 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
       if (band === 1 && governed) continue;
       const x = chipX[c];
       const y = chipY[c];
-      if (chipVX[c] || chipVY[c]) comet(x, y, chipVX[c], chipVY[c], chipT[c], chipA[c]);
+      pose[SX] = x;
+      pose[SY] = y;
+      pose[SA] = chipA[c];
+      if (chipVX[c] || chipVY[c]) {
+        pose[SVX] = chipVX[c];
+        pose[SVY] = chipVY[c];
+        comet(chipT[c]);
+      }
       if (band === 5 && !TOUCH && draws < BUDGET) {
         // Its glow: the warm or white bokeh, faint and wide.
         draws += 1;
         const g = chipD[c] * 2.4 * SPRITE;
         const glowTone = chipT[c] === GOLD_TONE ? GOLD_TONE : WHITE;
-        flight.globalAlpha = Math.min(1, 0.4 * chipA[c] * glowRamp);
-        flight.drawImage(
-          cellsImage,
-          BOKEH_X[glowTone],
-          BOKEH_Y[glowTone],
-          32,
-          32,
-          x - g / 2,
-          y - g / 2,
-          g,
-          g,
-        );
+        const glow = 0.4 * chipA[c] * pose[GLOW];
+        flight.globalAlpha = glow < 1 ? glow : 1;
+        sprite(cellsImage, BOKEH_X[glowTone], BOKEH_Y[glowTone], 32, 32, x, y, g);
       }
       if (band === 4) {
         if (TOUCH) {
-          chip(x, y, chipD[c] * 1.3, chipF[c], chipT[c], chipA[c] * 0.6);
+          pose[SD] = chipD[c] * 1.3;
+          pose[SA] = chipA[c] * 0.6;
+          chip(chipF[c], chipT[c]);
           continue;
         }
         if (draws >= BUDGET) continue;
@@ -2058,10 +2369,11 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
         const d = chipD[c] * 1.6 * SPRITE;
         const t = chipT[c] > GOLD_TONE ? ICE : chipT[c];
         flight.globalAlpha = 0.35;
-        flight.drawImage(cellsImage, BOKEH_X[t], BOKEH_Y[t], 32, 32, x - d / 2, y - d / 2, d, d);
+        sprite(cellsImage, BOKEH_X[t], BOKEH_Y[t], 32, 32, x, y, d);
         continue;
       }
-      chip(x, y, chipD[c], chipF[c], chipT[c], chipA[c]);
+      pose[SD] = chipD[c];
+      chip(chipF[c], chipT[c]);
     }
   };
 
@@ -2076,15 +2388,32 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
     }
     return lo;
   };
+  // A gold cell's clip rect, half a pixel proud of the cell on every side,
+  // on whole device pixels (a fractional argument is boxed on every call).
+  const cellRect = (i: number) => {
+    const x0 = Math.round(gold.fx[i] * s - 0.5);
+    const y0 = Math.round(gold.fy[i] * s - 0.5);
+    flight.rect(
+      x0,
+      y0,
+      Math.round((gold.fx[i] + gold.cw[i]) * s + 0.5) - x0,
+      Math.round((gold.fy[i] + gold.ch[i]) * s + 0.5) - y0,
+    );
+  };
+  // A tile's rect on whole device pixels (as the landed clips draw it).
+  const tileRect = (tile: Plate["tiles"][number]) => {
+    const x0 = Math.round(tile.dx * s);
+    const y0 = Math.round(tile.dy * s);
+    flight.rect(
+      x0,
+      y0,
+      Math.round((tile.dx + tile.tw) * s) - x0,
+      Math.round((tile.dy + tile.th) * s) - y0,
+    );
+  };
   const cellClip = (from: number, to: number) => {
     flight.beginPath();
-    for (let i = from; i < to; i += 1)
-      flight.rect(
-        gold.fx[i] * s - 0.5,
-        gold.fy[i] * s - 0.5,
-        gold.cw[i] * s + 1,
-        gold.ch[i] * s + 1,
-      );
+    for (let i = from; i < to; i += 1) cellRect(i);
     flight.clip();
   };
   const plateDraw = (image: CanvasImageSource, p: number, dx: number, dy: number) => {
@@ -2136,15 +2465,7 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
   };
   const buildClip = (from: number, to: number) => {
     flight.beginPath();
-    for (let k = from; k < to; k += 1) {
-      const i = L.buildIdx[k];
-      flight.rect(
-        gold.fx[i] * s - 0.5,
-        gold.fy[i] * s - 0.5,
-        gold.cw[i] * s + 1,
-        gold.ch[i] * s + 1,
-      );
-    }
+    for (let k = from; k < to; k += 1) cellRect(L.buildIdx[k]);
     flight.clip();
   };
   // Cells of [from, to) printed (build ≤ front) or not, as one clip.
@@ -2152,14 +2473,159 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
     flight.beginPath();
     for (let i = from; i < to; i += 1) {
       if (L.buildFrac[i] <= front !== printed) continue;
-      flight.rect(
-        gold.fx[i] * s - 0.5,
-        gold.fy[i] * s - 0.5,
-        gold.cw[i] * s + 1,
-        gold.ch[i] * s + 1,
-      );
+      cellRect(i);
     }
     flight.clip();
+  };
+  // The weld head of plate p at a front (of its buildFrac): its channel's
+  // segments behind the front over the band, by age, and the part of each
+  // next segment the front has reached (so the head runs smoothly between
+  // cells), whose ends glow (at most most of them). Returns the tips added.
+  // A curve of the channel through cell j (the control) from midway between
+  // its predecessor and j to (x, y): the channel's cell steps round into a
+  // smooth line (滑らかに).
+  const seg = (j: number, x: number, y: number, bucket: number) => {
+    if (segCount >= SEGS) return;
+    const o = segCount * 6;
+    const cx = L.chanX[j] * s;
+    const cy = L.chanY[j] * s;
+    const a = L.chanPrev[j];
+    segs[o] = a < 0 ? cx : (L.chanX[a] * s + cx) / 2;
+    segs[o + 1] = a < 0 ? cy : (L.chanY[a] * s + cy) / 2;
+    segs[o + 2] = cx;
+    segs[o + 3] = cy;
+    segs[o + 4] = x;
+    segs[o + 5] = y;
+    segBucket[segCount] = bucket;
+    segCount += 1;
+  };
+  const tip = (x: number, y: number, alpha: number) => {
+    if (tipCount >= TIPS) return;
+    const o = tipCount * 3;
+    tips[o] = x;
+    tips[o + 1] = y;
+    tips[o + 2] = alpha;
+    tipCount += 1;
+  };
+  const trace = (p: number, front: number, band: number, most: number) => {
+    const a0 = L.chanFirst[p];
+    const a1 = L.chanFirst[p + 1];
+    if (a1 <= a0 || front <= 0) return 0;
+    const from = front - band;
+    const reach = front + 1.5 * L.cellFrac[p];
+    let lo = a0;
+    let hi = a1;
+    while (lo < hi) {
+      const mid = (lo + hi) >> 1;
+      if (L.chanFrac[mid] <= from) lo = mid + 1;
+      else hi = mid;
+    }
+    let added = 0;
+    let newest = -1;
+    for (let k = lo; k < a1; k += 1) {
+      const fr = L.chanFrac[k];
+      if (fr > reach) break;
+      const i = L.chanIdx[k];
+      const j = L.chanPrev[i];
+      const x1 = L.chanX[i] * s;
+      const y1 = L.chanY[i] * s;
+      if (fr <= front) {
+        const age = (front - fr) / band;
+        const bucket = age < 0.34 ? 0 : age < 0.67 ? 1 : 2;
+        // A trim's first cell: a dot (its curve starts and ends on it).
+        if (j < 0) seg(i, x1 + 0.01, y1, bucket);
+        else {
+          const x0 = L.chanX[j] * s;
+          const y0 = L.chanY[j] * s;
+          seg(j, (x0 + x1) / 2, (y0 + y1) / 2, bucket);
+          // The newest reach on to the cell itself.
+          if (bucket === 0) seg(i, x1 + 0.01, y1, 0);
+        }
+        newest = k;
+        continue;
+      }
+      if (j < 0 || L.buildFrac[j] > front) continue;
+      const fj = L.buildFrac[j];
+      const gap = fr - fj;
+      const w = gap > 1e-6 ? (front - fj) / gap : 1;
+      const x0 = L.chanX[j] * s;
+      const y0 = L.chanY[j] * s;
+      const xt = x0 + (x1 - x0) * w;
+      const yt = y0 + (y1 - y0) * w;
+      seg(j, xt, yt, 0);
+      if (added < most) {
+        tip(xt, yt, 1);
+        added += 1;
+      }
+    }
+    if (!added && most && newest >= 0) {
+      // The build's last cells: the glow rests on the newest, fading out.
+      const i = L.chanIdx[newest];
+      const fade = 1 - (front - L.chanFrac[newest]) / band;
+      if (fade > 0.05) {
+        tip(L.chanX[i] * s, L.chanY[i] * s, fade);
+        added = 1;
+      }
+    }
+    return added;
+  };
+  const flushHeads = () => {
+    if (!segCount) return;
+    flight.lineCap = "round";
+    flight.lineJoin = "round";
+    for (let pass = 0; pass < 2; pass += 1) {
+      flight.strokeStyle = pass ? "#f6feff" : "#8cefff";
+      flight.lineWidth = Math.max(pass ? 0.9 : 2, G * (pass ? HEAD_CORE : HEAD_HALO) * s);
+      for (let bucket = 0; bucket < 3; bucket += 1) {
+        flight.beginPath();
+        let any = false;
+        for (let k = 0; k < segCount; k += 1) {
+          if (segBucket[k] !== bucket) continue;
+          const o = k * 6;
+          flight.moveTo(segs[o], segs[o + 1]);
+          flight.quadraticCurveTo(segs[o + 2], segs[o + 3], segs[o + 4], segs[o + 5]);
+          any = true;
+        }
+        if (!any) continue;
+        flight.globalAlpha = pass ? HEAD_CORE_A[bucket] : HEAD_HALO_A[bucket];
+        flight.stroke();
+      }
+    }
+    segCount = 0;
+  };
+  // The tips' glows: an ice bokeh over a small white-hot one (desktop).
+  const flushTips = () => {
+    for (let k = 0; k < tipCount && !TOUCH && draws < BUDGET - 1; k += 1) {
+      const o = k * 3;
+      const x = tips[o];
+      const y = tips[o + 1];
+      const halo = G * 3.4 * s;
+      const core = G * 1.5 * s;
+      draws += 2;
+      flight.globalAlpha = 0.65 * tips[o + 2];
+      sprite(cellsImage, BOKEH_X[ICE], BOKEH_Y[ICE], 32, 32, x, y, halo);
+      flight.globalAlpha = 0.9 * tips[o + 2];
+      sprite(cellsImage, BOKEH_X[WHITE], BOKEH_Y[WHITE], 32, 32, x, y, core);
+    }
+    tipCount = 0;
+  };
+  // Light pulses along the channel: a short dash from each pulsing channel
+  // cell back to its predecessor.
+  const chanStroke = (list: Int32Array, count: number) => {
+    flight.lineCap = "round";
+    flight.lineJoin = "round";
+    flight.lineWidth = Math.max(0.8, G * PULSE_CORE * s);
+    flight.beginPath();
+    for (let k = 0; k < count; k += 1) {
+      const i = list[k];
+      const j = L.chanPrev[i];
+      const x = L.chanX[i] * s;
+      const y = L.chanY[i] * s;
+      if (j < 0) flight.moveTo(x - 0.01, y);
+      else flight.moveTo(L.chanX[j] * s, L.chanY[j] * s);
+      flight.lineTo(x, y);
+    }
+    flight.stroke();
   };
   // On the body, before its plate: the solid conduit behind the head, the
   // laser's ice projection ahead of it, the weld head and its sparks, the
@@ -2169,47 +2635,63 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
     const first = plate.first;
     const end = plate.end;
     const k = builtBy(p, t);
-    const lead = builtBy(p, t + SW.build.ahead);
     if (k > first) {
       flight.save();
       if (k < end) buildClip(first, k);
       conduitFace(p, t);
       flight.restore();
     }
-    if (lead > k) {
-      flight.save();
-      buildClip(k, lead);
-      flight.globalAlpha = 0.5;
-      plateDraw(holo, p, 0, 0);
-      flight.restore();
-    }
-    const glow = L.headMs[p];
-    if (k > first && t < L.buildB[p] + glow) {
-      for (let j = builtBy(p, t - glow); j < k && headCount < heads.length; j += 1)
-        heads[headCount++] = L.buildIdx[j];
-      for (let j = builtBy(p, t - 0.45 * glow); j < k && coreCount < cores.length; j += 1)
-        cores[coreCount++] = L.buildIdx[j];
-      // The front: a spark star that twinkles as it runs, the latch's laser.
-      const i = L.buildIdx[k - 1];
-      const x = (gold.fx[i] + gold.cw[i] / 2) * s;
-      const y = (gold.fy[i] + gold.ch[i] / 2) * s;
-      if (sparkCount < SPARKS) {
-        const so = sparkCount * 4;
-        // Frames 4–5: the star over a white-hot glow (see the sparks pass).
-        const flicker = (Math.floor(t / 17) + p) & 1;
-        sparks[so] = x;
-        sparks[so + 1] = y;
-        sparks[so + 2] = 4 + flicker;
-        sparks[so + 3] = (TOUCH ? 11 : 16) * s * (flicker ? 0.85 : 1.15);
-        sparkCount += 1;
+    // The laser's projection just ahead of the head, feathered: brightest
+    // at the head, fading out over the build's lead (ahead).
+    let from = k;
+    for (let step = 0; step < 3; step += 1) {
+      const to = builtBy(p, t + (SW.build.ahead * (step + 1)) / 3);
+      if (to > from) {
+        flight.save();
+        buildClip(from, to);
+        flight.globalAlpha = PROJECT_A[step];
+        plateDraw(holo, p, 0, 0);
+        flight.restore();
       }
-      if (!TOUCH && laserCount < P) {
-        const o = laserCount * 4;
-        lasers[o] = L.seatX[p] * s;
-        lasers[o + 1] = L.seatY[p] * s;
-        lasers[o + 2] = x;
-        lasers[o + 3] = y;
-        laserCount += 1;
+      from = to;
+    }
+    // The weld head: a thread along the channel, its tips glowing.
+    const span = L.buildB[p] - L.buildA[p];
+    const front = span > 0 ? (t - L.buildA[p]) / span : 1;
+    const band = Math.max(0.03, HEAD_CELLS * L.cellFrac[p]);
+    if (k > first && front < 1 + band) {
+      const lead = tipCount;
+      const added = trace(p, front, band, HEAD_TIPS);
+      // The front: a spark star that twinkles as it runs, the latch's laser.
+      if (front <= 1) {
+        let x = 0;
+        let y = 0;
+        if (added) {
+          x = tips[lead * 3];
+          y = tips[lead * 3 + 1];
+        } else {
+          const i = L.buildIdx[k - 1];
+          x = (gold.fx[i] + gold.cw[i] / 2) * s;
+          y = (gold.fy[i] + gold.ch[i] / 2) * s;
+        }
+        if (sparkCount < SPARKS) {
+          const so = sparkCount * 4;
+          // Frames 4–5: the star over a white-hot glow (see the sparks pass).
+          const flicker = (Math.floor(t / 17) + p) & 1;
+          sparks[so] = x;
+          sparks[so + 1] = y;
+          sparks[so + 2] = 4 + flicker;
+          sparks[so + 3] = (TOUCH ? 11 : 14) * s * (flicker ? 0.85 : 1.15);
+          sparkCount += 1;
+        }
+        if (!TOUCH && laserCount < P) {
+          const o = laserCount * 4;
+          lasers[o] = L.seatX[p] * s;
+          lasers[o + 1] = L.seatY[p] * s;
+          lasers[o + 2] = x;
+          lasers[o + 3] = y;
+          laserCount += 1;
+        }
       }
     }
     // Embers off the weld head: one every EMBER_EVERY ms of the build, each
@@ -2230,20 +2712,18 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
         const u = age / EMBER_LIFE;
         const x = gold.fx[i] + gold.cw[i] / 2 + (h1 - 0.5) * 34 * u;
         const y = gold.fy[i] + gold.ch[i] / 2 - (14 + 22 * h2) * u + 30 * u * u;
-        chip(
-          x * s,
-          y * s,
-          (3.6 + 2.2 * h2) * s,
-          wrap(FRAMES * h1 + 40 * u),
-          h1 < 0.35 ? GOLD_TONE : WHITE,
-          1.1 * (1 - u * u),
-        );
+        pose[SX] = x * s;
+        pose[SY] = y * s;
+        pose[SD] = (3.6 + 2.2 * h2) * s;
+        pose[SA] = 1.1 * (1 - u * u);
+        chip(wrap(FRAMES * h1 + 40 * u), h1 < 0.35 ? GOLD_TONE : WHITE);
       }
     }
-    // Pulses climbing the built conduit.
+    // Pulses climbing the built conduit's channel.
     if (governed) return;
     for (let j = first; j < k; j += 1) {
       const i = L.buildIdx[j];
+      if (!L.chan[i]) continue;
       const v = BUILD_PULSE_BANDS * L.buildFrac[i] - BUILD_PULSE_SPEED * t;
       if (v - Math.floor(v) < PULSE_WIDTH && pulsePreCount < pulsesPre.length)
         pulsesPre[pulsePreCount++] = i;
@@ -2295,53 +2775,23 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
       flight.globalAlpha = 0.45;
       plateDraw(holo, p, 0, 0);
       flight.restore();
-      // The print head's laser-weld dots: an ice halo, a white-hot core.
-      for (let pass = 0; pass < 2; pass += 1) {
-        const size = pass ? 0.95 : 1.7;
-        flight.globalAlpha = pass ? 0.95 : 0.4;
-        flight.fillStyle = pass ? "#f6feff" : "#8cefff";
-        flight.beginPath();
-        for (let i = unc; i < plate.end; i += 1) {
-          const b = L.buildFrac[i];
-          if (b > front || b <= front - 0.08) continue;
-          const w = gold.cw[i] * size;
-          const h = gold.ch[i] * size;
-          flight.rect(
-            (gold.fx[i] + (gold.cw[i] - w) / 2) * s,
-            (gold.fy[i] + (gold.ch[i] - h) / 2) * s,
-            w * s,
-            h * s,
-          );
-        }
-        flight.fill();
-      }
+      // The print head: the weld thread running up the channel, tapering
+      // behind the front, its growing tips glowing.
+      trace(p, front, Math.max(0.04, PRINT_CELLS * L.cellFrac[p]), TOUCH ? 0 : HEAD_TIPS);
+      flushHeads();
+      flushTips();
     }
     flight.globalAlpha = 1;
     if (!collect) return;
     // Pulses on the conduit not yet poured, out from the seat (the pour's way).
     const pour = firstLockAfter(p, t);
     for (let i = Math.max(unc, pour); i < plate.end; i += 1) {
+      if (!L.chan[i]) continue;
       const v = PULSE_BANDS * gold.order[i] - PULSE_SPEED * t;
       if (v - Math.floor(v) < PULSE_WIDTH && pulsePostCount < pulsesPost.length)
         pulsesPost[pulsePostCount++] = i;
     }
   };
-  const cellRects = (list: Int32Array, count: number, size: number) => {
-    flight.beginPath();
-    for (let k = 0; k < count; k += 1) {
-      const i = list[k];
-      const w = gold.cw[i] * size;
-      const h = gold.ch[i] * size;
-      flight.rect(
-        (gold.fx[i] + (gold.cw[i] - w) / 2) * s,
-        (gold.fy[i] + (gold.ch[i] - h) / 2) * s,
-        w * s,
-        h * s,
-      );
-    }
-    flight.fill();
-  };
-
   /* The passes. */
   const before = (t: number) => {
     frames += 1;
@@ -2352,8 +2802,8 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
     sparkCount = 0;
     pulsePreCount = 0;
     pulsePostCount = 0;
-    headCount = 0;
-    coreCount = 0;
+    segCount = 0;
+    tipCount = 0;
     laserCount = 0;
     jigs = 0;
     conduits = 0;
@@ -2387,20 +2837,13 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
       buildGuideway(p, t);
     }
     if (pulsePreCount) {
-      flight.globalAlpha = 0.75;
-      flight.fillStyle = "#d8f8ff";
-      cellRects(pulsesPre, pulsePreCount, 0.55);
+      flight.globalAlpha = 0.7;
+      flight.strokeStyle = "#d8f8ff";
+      chanStroke(pulsesPre, pulsePreCount);
     }
-    if (headCount) {
-      // The laser-weld heads: an ice halo two cells deep, a white-hot core
-      // of dots at the very front.
-      flight.globalAlpha = 0.32;
-      flight.fillStyle = "#8cefff";
-      cellRects(heads, headCount, 1.15);
-      flight.globalAlpha = 0.95;
-      flight.fillStyle = "#f6feff";
-      cellRects(cores, coreCount, 0.6);
-    }
+    // The laser-weld heads: threads along the channels, their tips glowing.
+    flushHeads();
+    flushTips();
     if (laserCount) {
       // The latch's laser to its head.
       flight.globalAlpha = 0.32;
@@ -2428,7 +2871,7 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
         for (let i = first; i < end; i += 1) {
           if (L.land[i] > t) continue;
           const tile = all[p].tiles[i - first];
-          flight.rect(tile.dx * s, tile.dy * s, tile.tw * s, tile.th * s);
+          tileRect(tile);
           landed += 1;
         }
         if (landed) {
@@ -2443,13 +2886,12 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
   };
 
   // A tile's flight (N4, N5): lane from the gate, orbit to aim, dive and
-  // unfold. Writes PX, PY (figure px) and returns the stage's frame data
-  // through the scratch below.
-  let poseSize = 0;
-  let poseFrame = 0;
-  let poseUnfold = -1;
-  let poseAlpha = 1;
-  const tilePose = (p: number, i: number, u: number, Cx: number, Cy: number, helm: boolean) => {
+  // unfold. Writes the pose's PX, PY (figure px), SIZE, FRAME, UNFOLD (-1:
+  // none) and ALPHA.
+  const tilePose = (p: number, i: number, helm: boolean) => {
+    const u = pose[ARG_U];
+    const Cx = pose[ARG_CX];
+    const Cy = pose[ARG_CY];
     const nx = L.nX[p];
     const ny = L.nY[p];
     const qx = -ny;
@@ -2461,22 +2903,25 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
     const spin = (FRAMES * L.spin[i] * FLIGHT) / 1000;
     let size = L.size[i];
     let frame = L.f0[i];
-    poseUnfold = -1;
-    poseAlpha = Math.min(1, u * 8);
+    let unfolded = -1;
+    // (Conditionals, not Math.min: V8's mid tier boxes its result.)
+    let alpha = u * 8 < 1 ? u * 8 : 1;
     const aim = helm ? 0.7 : 0.8;
     if (helm && u < aim) {
       // N10: the helmet's tiles leave the crown spiralling inward.
       const v = u / aim;
-      const e = easeOut(v);
+      const iv = 1 - (v < 0 ? 0 : v);
+      const e = 1 - iv * iv * iv;
       const a = psi0 + 3 * Math.PI * v;
       const R = (122 + 36 * L.bow[i]) * (1 - e);
       const cx = VISOR_X + (hx - VISOR_X) * e;
       const cy = crownCentreY + (hy - crownCentreY) * e;
-      PX = cx + R * Math.cos(a);
-      PY = cy + CROWN_SQUASH * R * Math.sin(a);
+      pose[PX] = cx + R * Math.cos(a);
+      pose[PY] = cy + CROWN_SQUASH * R * Math.sin(a);
       frame += spin * 2 * u;
     } else if (u < 0.55) {
-      const v = smooth(u / 0.55);
+      const q = u < 0 ? 0 : u / 0.55;
+      const v = q * q * (3 - 2 * q);
       const w = 1 - v;
       const p0x = L.gateX[p] + 6 * L.jx[i];
       const p0y = L.gateY[p] + 6 * L.jy[i];
@@ -2487,36 +2932,39 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
       const p1y = p0y + (ey - p0y) * 0.35 + qy * bow;
       const p2x = ex + nx * 0.02 * H;
       const p2y = ey + ny * 0.02 * H;
-      PX = w * w * w * p0x + 3 * w * w * v * p1x + 3 * w * v * v * p2x + v * v * v * ex;
-      PY = w * w * w * p0y + 3 * w * w * v * p1y + 3 * w * v * v * p2y + v * v * v * ey;
+      pose[PX] = w * w * w * p0x + 3 * w * w * v * p1x + 3 * w * v * v * p2x + v * v * v * ex;
+      pose[PY] = w * w * w * p0y + 3 * w * w * v * p1y + 3 * w * v * v * p2y + v * v * v * ey;
       frame += spin * 3 * u;
     } else if (u < 0.8) {
       const w = (u - 0.55) / 0.25;
       const psi = psi0 + 1.5 * Math.PI * w;
       const r = r0 * (1 - w) ** 1.5;
-      PX = hx + r * (Math.cos(psi) * qx + 0.45 * Math.sin(psi) * nx);
-      PY = hy + r * (Math.cos(psi) * qy + 0.45 * Math.sin(psi) * ny);
+      pose[PX] = hx + r * (Math.cos(psi) * qx + 0.45 * Math.sin(psi) * nx);
+      pose[PY] = hy + r * (Math.cos(psi) * qy + 0.45 * Math.sin(psi) * ny);
       size *= 1 + 0.25 * Math.sin(psi);
       frame += spin * (3 * 0.55 + 1.5 * (u - 0.55));
     } else {
       const w = (u - aim) / (1 - aim);
       const w4 = w * w * w * w;
-      PX = hx + (Cx - hx) * w4;
-      PY = hy + (Cy - hy) * w4;
+      pose[PX] = hx + (Cx - hx) * w4;
+      pose[PY] = hy + (Cy - hy) * w4;
       // The frame eases to the face-on lock pose by the shortest way.
       const raw = frame + spin * (3 * 0.55 + 1.5 * 0.25 + (u - 0.8));
       let d = (raw % FRAMES) + (raw < 0 ? FRAMES : 0);
       if (d > FRAMES / 2) d -= FRAMES;
       frame = d * (1 - w) * (1 - w);
       if (w >= 0.3) {
-        poseUnfold = Math.min(6, Math.floor((w - 0.3) * 10));
+        unfolded = Math.min(6, Math.floor((w - 0.3) * 10));
         const full = T * (32 / 28) * (0.6 + 0.4 * L.cov[i]);
         size += (full - size) * ((w - 0.3) / 0.7);
       }
     }
-    if (u >= 0.86) poseAlpha *= 1 - (u - 0.86) / 0.14;
-    poseSize = size;
-    poseFrame = wrap(frame);
+    if (u >= 0.86) alpha *= 1 - (u - 0.86) / 0.14;
+    pose[SIZE] = size;
+    const turn = Math.floor(frame) % FRAMES;
+    pose[FRAME] = turn < 0 ? turn + FRAMES : turn;
+    pose[UNFOLD] = unfolded;
+    pose[ALPHA] = alpha;
   };
 
   const forming = (p: number, t: number) => {
@@ -2532,7 +2980,8 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
     applyJig(p);
     if (lattice && staged && !governed && t >= F - SW.lattice[0] && t < F - SW.lattice[1]) {
       const span = (t - F + SW.lattice[0]) / (SW.lattice[0] - SW.lattice[1]);
-      const fade = span > 0.8 ? (1 - span) / 0.2 : 1;
+      // It fades in as it grows (no step in the frame's light), out as it is consumed.
+      const fade = span < 0.3 ? span / 0.3 : span > 0.8 ? (1 - span) / 0.2 : 1;
       flight.save();
       flight.beginPath();
       flight.arc(
@@ -2614,7 +3063,8 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
           const so = sparkCount * 4;
           sparks[so] = (Cx - L.nX[p] * T * 0.5) * s;
           sparks[so + 1] = (Cy - L.nY[p] * T * 0.5) * s;
-          sparks[so + 2] = Math.min(3, Math.floor((4 * since) / SW.spark));
+          const star = Math.floor((4 * since) / SW.spark);
+          sparks[so + 2] = star < 3 ? star : 3;
           sparks[so + 3] = 1.6 * T * s;
           sparkCount += 1;
         }
@@ -2630,27 +3080,35 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
         }
         continue;
       }
-      tilePose(p, i, u, Cx, Cy, helm);
-      const x = PX * s;
-      const y = PY * s;
-      const tone = L.tone[i];
-      if (L.tflags[i] & 1 && u < 0.55 && !TOUCH && !governed) {
-        // N7: the comet from the chip's velocity (24 ms back).
-        const savedSize = poseSize;
-        const savedFrame = poseFrame;
-        const savedAlpha = poseAlpha;
-        const savedUnfold = poseUnfold;
-        tilePose(p, i, u - 24 / FLIGHT, Cx, Cy, helm);
-        const vx = x - PX * s;
-        const vy = y - PY * s;
-        poseSize = savedSize;
-        poseFrame = savedFrame;
-        poseAlpha = savedAlpha;
-        poseUnfold = savedUnfold;
-        comet(x, y, vx, vy, tone, poseAlpha);
+      // N7: the comet from the chip's velocity (where it was 24 ms back).
+      const streak = (L.tflags[i] & 1) !== 0 && u < 0.55 && !TOUCH && !governed;
+      let backX = 0;
+      let backY = 0;
+      pose[ARG_CX] = Cx;
+      pose[ARG_CY] = Cy;
+      if (streak) {
+        pose[ARG_U] = u - 24 / FLIGHT;
+        tilePose(p, i, helm);
+        backX = pose[PX];
+        backY = pose[PY];
       }
-      if (poseUnfold >= 0 && tone < 3) unfold(x, y, poseSize * s, poseUnfold, tone, poseAlpha);
-      else chip(x, y, poseSize * s, poseFrame, tone, poseAlpha, u >= 0.9);
+      pose[ARG_U] = u;
+      tilePose(p, i, helm);
+      const x = pose[PX] * s;
+      const y = pose[PY] * s;
+      const tone = L.tone[i];
+      pose[SX] = x;
+      pose[SY] = y;
+      pose[SD] = pose[SIZE] * s;
+      pose[SA] = pose[ALPHA];
+      if (streak) {
+        pose[SVX] = x - backX * s;
+        pose[SVY] = y - backY * s;
+        comet(tone);
+      }
+      const unfolded = pose[UNFOLD];
+      if (unfolded >= 0 && tone < 3) unfold(unfolded, tone);
+      else chip(pose[FRAME], tone, u >= 0.9);
       if (u >= 0.86 && fadeCount < fades.length) {
         fades[fadeCount] = i;
         fadeA[fadeCount] = (u - 0.86) / 0.14;
@@ -2683,22 +3141,26 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
       draws += 1;
       if (a >= 0) {
         flight.globalAlpha = a;
+        // Its cell of the landed clip, on whole device pixels (see the
+        // sprite helper).
+        const x0 = Math.round(tile.dx * s);
+        const y0 = Math.round(tile.dy * s);
         flight.drawImage(
           metal,
           tile.sx,
           tile.sy,
           tile.tw,
           tile.th,
-          tile.dx * s,
-          tile.dy * s,
-          tile.tw * s,
-          tile.th * s,
+          x0,
+          y0,
+          Math.round((tile.dx + tile.tw) * s) - x0,
+          Math.round((tile.dy + tile.th) * s) - y0,
         );
       } else {
         const tau = -a;
         const k2 = 1 + 0.14 * Math.exp(-5 * tau) * Math.cos(9.4 * tau);
-        const w = tile.tw * s * k2;
-        const h = tile.th * s * k2;
+        const w = Math.round(tile.tw * s * k2) || 1;
+        const h = Math.round(tile.th * s * k2) || 1;
         flight.globalAlpha = 1;
         flight.drawImage(
           metal,
@@ -2706,8 +3168,8 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
           tile.sy,
           tile.tw,
           tile.th,
-          (tile.dx + tile.tw / 2) * s - w / 2,
-          (tile.dy + tile.th / 2) * s - h / 2,
+          Math.round((tile.dx + tile.tw / 2) * s - w / 2),
+          Math.round((tile.dy + tile.th / 2) * s - h / 2),
           w,
           h,
         );
@@ -2771,7 +3233,7 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
       const age = t - L.tp[i];
       if (age < 0 || age >= SW.lacquer) continue;
       const tile = tiles[i - first];
-      flight.rect(tile.dx * s, tile.dy * s, tile.tw * s, tile.th * s);
+      tileRect(tile);
       any = true;
     }
     if (any) {
@@ -2827,7 +3289,8 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
     }
     const j = Math.min(k, start + n) - 1;
     const span2 = L.cum[j + 1] - L.cum[j] || 1;
-    const f2 = Math.min(1, (b - L.cum[j]) / span2);
+    const reach = (b - L.cum[j]) / span2;
+    const f2 = reach < 1 ? reach : 1;
     flight.lineTo(
       (L.px[j] + (L.px[j + 1] - L.px[j]) * f2) * s,
       (L.py[j] + (L.py[j + 1] - L.py[j]) * f2) * s,
@@ -2853,8 +3316,7 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
     if (any) flight.stroke();
   };
 
-  const after = (t: number) => {
-    base();
+  const seamsPass = (t: number) => {
     // 5. Seams (A4): two heads round the real outline, then an afterglow.
     flight.lineCap = "round";
     flight.lineJoin = "round";
@@ -2881,6 +3343,8 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
         if (L.loopLen[l] > 0) subPath(l, 0, L.loopLen[l]);
       flight.stroke();
     }
+  };
+  const ringsPass = (t: number) => {
     // Shock rings (A5) on the spark plates, in the plate's plane.
     let rings = 0;
     for (let k = 0; k < P && rings < (TOUCH ? 2 : 6); k += 1) {
@@ -2912,6 +3376,8 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
       if (TOUCH) heroes += 1;
     }
     base();
+  };
+  const spallPass = (t: number) => {
     // Spall: chips flung from the contact.
     for (let p = 0; p < P; p += 1) {
       const F = all[p].fit;
@@ -2929,9 +3395,15 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
         const x = (L.seatX[p] + vx * tau) * s;
         const y = (L.seatY[p] + vy * tau + 60 * tau * tau) * s;
         const fade = (1 - tau) * (1 - tau);
-        chip(x, y, (6 + 3 * h) * s * 0.7, wrap(FRAMES * h + 72 * tau), c % 3 ? WHITE : ICE, fade);
+        pose[SX] = x;
+        pose[SY] = y;
+        pose[SD] = (6 + 3 * h) * s * 0.7;
+        pose[SA] = fade;
+        chip(wrap(FRAMES * h + 72 * tau), c % 3 ? WHITE : ICE);
       }
     }
+  };
+  const sparksPass = () => {
     // N6: sparks at the leading edges; the guideways' weld heads (frames
     // 4–5: a star over a white-hot glow, the white bokeh).
     for (let k = 0; k < sparkCount; k += 1) {
@@ -2945,34 +3417,25 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
           const g = d * 1.25;
           flight.globalAlpha = 0.75;
           draws += 1;
-          flight.drawImage(
-            cellsImage,
-            BOKEH_X[WHITE],
-            BOKEH_Y[WHITE],
-            32,
-            32,
-            sparks[o] - g / 2,
-            sparks[o + 1] - g / 2,
-            g,
-            g,
-          );
+          sprite(cellsImage, BOKEH_X[WHITE], BOKEH_Y[WHITE], 32, 32, sparks[o], sparks[o + 1], g);
         }
       }
       flight.globalAlpha = 0.9;
       draws += 1;
       if (TOUCH) heroes += 1;
-      flight.drawImage(
+      sprite(
         cellsImage,
         KIT_CELLS.spark.x + 32 * frame,
         KIT_CELLS.spark.y,
         32,
         32,
-        sparks[o] - d / 2,
-        sparks[o + 1] - d / 2,
-        d,
+        sparks[o],
+        sparks[o + 1],
         d,
       );
     }
+  };
+  const linksPass = () => {
     // N6: the lattice links, by fading alpha bucket; N9: the beams.
     flight.strokeStyle = "#9ff1ff";
     flight.lineWidth = Math.max(0.8, 0.8 * s * 0.8);
@@ -3008,12 +3471,8 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
         flight.stroke();
       }
     }
-    // G2: pulses on the conduits.
-    if (pulsePostCount) {
-      flight.globalAlpha = 0.7;
-      flight.fillStyle = "#d8f8ff";
-      cellRects(pulsesPost, pulsePostCount, 0.5);
-    }
+  };
+  const latchesPass = (t: number) => {
     // 6. Latches (A1) and clamps (G3).
     for (let p = 0; p < P; p += 1) {
       if (L.kind[p] < 0) continue;
@@ -3045,18 +3504,17 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
           flight.stroke();
         } else if (draws < BUDGET) {
           if (TOUCH) heroes += 1;
-          alpha = Math.min(1, alpha);
+          if (alpha > 1) alpha = 1;
           flight.globalAlpha = alpha;
           draws += 1;
-          flight.drawImage(
+          sprite(
             fxImage,
             KIT_FX.latch.x + KIT_FX.latch.cell * frame,
             KIT_FX.latch.y,
             KIT_FX.latch.cell,
             KIT_FX.latch.cell,
-            x - d / 2,
-            y - d / 2,
-            d,
+            x,
+            y,
             d,
           );
         }
@@ -3091,7 +3549,8 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
       const bh = L.box[b + 3];
       const cw = L.clampW[p];
       const d = cw * s;
-      const scale = d / KIT_FX.clamp.cell;
+      const size = Math.round(d) || 1;
+      const scale = size / KIT_FX.clamp.cell;
       for (let corner = 0; corner < 4; corner += 1) {
         const right = corner & 1;
         const bottom = corner >> 1;
@@ -3114,19 +3573,23 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
         if (draws >= BUDGET) break;
         draws += 1;
         flight.globalAlpha = alpha;
+        // On whole device pixels (see the sprite helper), the anchor kept on
+        // the corner.
         flight.drawImage(
           fxImage,
           KIT_FX.clamp.x + KIT_FX.clamp.cell * frame,
           KIT_FX.clamp.y + KIT_FX.clamp.cell * CORNER_ROW[corner],
           KIT_FX.clamp.cell,
           KIT_FX.clamp.cell,
-          cx - ANCHOR[corner * 2] * scale,
-          cy - ANCHOR[corner * 2 + 1] * scale,
-          d,
-          d,
+          Math.round(cx - ANCHOR[corner * 2] * scale),
+          Math.round(cy - ANCHOR[corner * 2 + 1] * scale),
+          size,
+          size,
         );
       }
     }
+  };
+  const pourPass = (t: number) => {
     // 7. G6: the molten band, droplets at its head; G7: chips off the
     // receding front.
     let drops = 0;
@@ -3136,14 +3599,29 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
         const plate = all[p];
         if (L.kind[p] < 0 || plate.end <= plate.first) continue;
         if (t < plate.from || t >= plate.to + SW.recede + 120) continue;
-        const bandFrom = firstLockAfter(p, t - SW.molten);
+        // By age (owner, 2026-10-16: 立体的・未来的): white-hot at the head,
+        // molten behind it, its trailing edge fading into the painted gold.
         const bandTo = firstLockAfter(p, t);
-        if (molten && bandTo > bandFrom) {
-          flight.save();
-          cellClip(bandFrom, bandTo);
-          flight.globalAlpha = 1;
-          plateDraw(molten, p, 0, 0);
-          flight.restore();
+        if (molten) {
+          let to = bandTo;
+          for (let step = 0; step < SW.moltenAges.length; step += 1) {
+            const from = firstLockAfter(p, t - SW.moltenAges[step]);
+            if (to > from) {
+              flight.save();
+              cellClip(from, to);
+              const under = hot ? MOLTEN_A[step] : Math.max(MOLTEN_A[step], HOT_A[step]);
+              if (under > 0) {
+                flight.globalAlpha = under;
+                plateDraw(molten, p, 0, 0);
+              }
+              if (hot && HOT_A[step] > 0) {
+                flight.globalAlpha = HOT_A[step];
+                plateDraw(hot, p, 0, 0);
+              }
+              flight.restore();
+            }
+            to = from;
+          }
         }
         for (let i = firstLockAfter(p, t - SW.droplet); i < bandTo && drops < 160; i += 1) {
           if (draws >= BUDGET) break;
@@ -3151,11 +3629,12 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
           const age = t - gold.lock[i];
           let dx = -gold.ox[i];
           let dy = -gold.oy[i];
-          const dl = Math.hypot(dx, dy) || 1;
+          const dl = (dx * dx + dy * dy) ** 0.5 || 1;
           dx /= dl;
           dy /= dl;
-          const x = (gold.fx[i] + gold.cw[i] / 2 + dx * G * 0.4) * s;
-          const y = (gold.fy[i] + gold.ch[i] / 2 + dy * G * 0.4) * s;
+          // Just ahead of the band's head, leading it.
+          const x = (gold.fx[i] + gold.cw[i] / 2 + dx * G * 0.9) * s;
+          const y = (gold.fy[i] + gold.ch[i] / 2 + dy * G * 0.9) * s;
           drops += 1;
           draws += 1;
           if (age < 18) {
@@ -3164,32 +3643,21 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
             if (a < 0) a += 8;
             const d = 1.4 * G * 1.4 * s;
             flight.globalAlpha = 0.95;
-            flight.drawImage(
+            sprite(
               fxImage,
               KIT_FX.drop.x + KIT_FX.drop.cell * a,
               KIT_FX.drop.y + KIT_FX.drop.cell * e,
               KIT_FX.drop.cell,
               KIT_FX.drop.cell,
-              x - d / 2,
-              y - d / 2,
-              d,
+              x,
+              y,
               d,
             );
           } else {
             const d = 1.4 * G * 1.25 * s;
             const frame = Math.floor((age - 18) / 2) % KIT_CELLS.bead.frames;
             flight.globalAlpha = 0.9 * (1 - (age - 18) / (SW.droplet - 18));
-            flight.drawImage(
-              cellsImage,
-              KIT_CELLS.bead.x + 32 * frame,
-              KIT_CELLS.bead.y,
-              32,
-              32,
-              x - d / 2,
-              y - d / 2,
-              d,
-              d,
-            );
+            sprite(cellsImage, KIT_CELLS.bead.x + 32 * frame, KIT_CELLS.bead.y, 32, 32, x, y, d);
           }
         }
         // One in four cells at the receding front lifts off as a gold chip.
@@ -3202,12 +3670,32 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
           const x = (gold.fx[i] + gold.cw[i] / 2) * s;
           const y = (gold.fy[i] + gold.ch[i] / 2 - (6 + 4 * h) * u) * s;
           rising += 1;
-          chip(x, y, 3.6 * s, wrap(FRAMES * h + 30 * u), GOLD_TONE, 0.8 * (1 - u));
+          pose[SX] = x;
+          pose[SY] = y;
+          pose[SD] = 3.6 * s;
+          pose[SA] = 0.8 * (1 - u);
+          chip(wrap(FRAMES * h + 30 * u), GOLD_TONE);
         }
       }
+  };
+  const after = (t: number) => {
+    base();
+    seamsPass(t);
+    ringsPass(t);
+    spallPass(t);
+    sparksPass();
+    linksPass();
+    // G2: pulses on the conduits.
+    if (pulsePostCount) {
+      flight.globalAlpha = 0.65;
+      flight.strokeStyle = "#d8f8ff";
+      chanStroke(pulsesPost, pulsePostCount);
+    }
+    latchesPass(t);
+    pourPass(t);
     // 8. The front chips, the crown and the free chips (their bands); the
     // white-hot glows ease in (no step in the frame's light).
-    glowRamp =
+    pose[GLOW] =
       t >= SW.implode[0] ? smooth((t - SW.implode[0]) / 90) : smooth((t - SW.crown[0]) / 100);
     lanes(true, t);
     drawChips(3, 5);
@@ -3232,5 +3720,24 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
     },
     drawn: () => draws,
     governed: () => governed,
+    prime: (k: number) => {
+      if (k < PRIME_T.length) {
+        swarm(PRIME_T[k]);
+        return false;
+      }
+      // Every stage of a tile's flight, for a plate and the helmet.
+      for (let p = 0; p < P; p += 1) {
+        const first = L.tileFirst[p];
+        if (L.kind[p] < 0 || L.tileFirst[p + 1] <= first) continue;
+        const helm = L.kind[p] === 3;
+        pose[ARG_CX] = L.cx[first];
+        pose[ARG_CY] = L.cy[first];
+        for (let u = 0.05; u < 1; u += 0.1) {
+          pose[ARG_U] = u;
+          tilePose(p, first, helm);
+        }
+      }
+      return true;
+    },
   };
 }

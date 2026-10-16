@@ -22,7 +22,6 @@ let pending: Promise<boolean> | null = null;
 let controller: AbortController | null = null;
 let pendingPriority: Priority = "low";
 let decoded = false;
-let preparing = false;
 
 const blocked = () => {
   if (typeof window === "undefined" || typeof document === "undefined") return true;
@@ -35,18 +34,13 @@ const blocked = () => {
   return Boolean(document.hidden);
 };
 
-// Prepares the call's extras (its own chunk, the call's) in idle slices.
+// Prepares the call's extras (its own chunk, the call's) in idle slices. A
+// warm while it is in flight resumes a preparation parked on /rexonance-saga
+// (review 2026-10-16: the page a cold tap's call lands on waits).
 function prepare(priority: Priority) {
-  if (preparing && priority === "low") return;
-  preparing = true;
   void import("../components/rexonance-saga/rexonance-suit-extras").then(
-    (extras) =>
-      extras.prepareRexonanceNanites(priority).then((ready) => {
-        if (!ready) preparing = false;
-      }),
-    () => {
-      preparing = false;
-    },
+    (extras) => void extras.prepareRexonanceNanites(priority),
+    () => undefined,
   );
 }
 

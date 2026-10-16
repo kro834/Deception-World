@@ -335,6 +335,10 @@ export const REXONANCE_SUIT_SWARM = {
   link: 60,
   /** The molten band and its droplets behind each gold lock. */
   molten: 30,
+  /** The band by age (owner, 2026-10-16): cells locked within the first
+   * step white-hot, then molten under a fading white heat, then molten
+   * fading into the painted gold (the last step is `molten`). */
+  moltenAges: [6, 14, 22, 30],
   droplet: 24,
   /** The conduit recedes this long behind each lock; clamps release after. */
   recede: 70,

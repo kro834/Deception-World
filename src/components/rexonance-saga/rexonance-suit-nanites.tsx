@@ -19,7 +19,6 @@ import {
 } from "./rexonance-suit-plan";
 import { REXONANCE_SUIT_LIGHT } from "@/lib/rexonance-calls";
 import { REXONANCE_SUIT_MARKS } from "@/lib/rexonance-suit";
-import { warmRexonanceNanites } from "@/lib/rexonance-nanites-warmup";
 import { createSuitExtras, isRexonanceNaniteReady } from "./rexonance-suit-extras";
 
 /* rx13 (owner, 2026-10-11): "subdivide extremely finely so it feels like
@@ -490,11 +489,11 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
           work.drawing -= 1;
           flight.setTransform(1, 0, 0, 1, 0, 0);
           flight.clearRect(0, 0, width, height);
-          // A call that started before the kit was ready warms it for the next;
-          // one that drew its swarm hands RIDER！'s motes back their own end
-          // state (the finished frame is the classic call's exactly).
-          if (!extras) void warmRexonanceNanites();
-          else ready.current(false);
+          // A call that drew its swarm hands RIDER！'s motes back their own end
+          // state (the finished frame is the classic call's exactly). One
+          // that started before the kit was ready leaves the kit to the next
+          // route's warm (review 2026-10-16: never on the page it lands on).
+          if (extras) ready.current(false);
           for (let p = 0; p < all.length; p += 1) if (!done[p]) settle(p);
           if (!lit) {
             lit = true;
