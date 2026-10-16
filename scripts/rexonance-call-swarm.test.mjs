@@ -36,22 +36,34 @@ test("the swarm rides the pinned call: its timeline, and the pinned clocks uncha
   // RIDER！: six pump waves of chips spiral out of the core.
   assert.deepEqual([...swarm.waves], [330, 380, 430, 480, 530, 580]);
   assert.equal(swarm.wave, 160);
-  // Each plate's latch and hologram from F − 360, scanned over 90 ms; the
-  // lattice F − 270 → F − 60; clamps swing over [F − 120, F − 40] and bite
-  // F ± 10; the seat [F − 40, F] and its ring-out F → F + 40.
+  // Each plate's latch from F − 360; the lattice F − 270 → F − 60; clamps
+  // slide in over [F − 120, F − 40] and bite F ± 10; the seat [F − 40, F]
+  // and its ring-out F → F + 40.
   assert.equal(swarm.project, 360);
-  assert.equal(swarm.scan, 90);
+  // Owner override (2026-10-16): the guideway is built from the toe tips up,
+  // never projected or swept from above — no scan window remains; a group's
+  // build starts ≤ 380 ms (ornaments 300) before a plate and is whole 115 ms
+  // before it (ahead of its first tile, F − 100).
+  assert.equal("scan" in swarm, false);
+  assert.deepEqual(
+    { ...swarm.build },
+    { lead: 380, ornament: 300, done: 115, least: 70, head: 18, ahead: 32 },
+  );
+  assert.ok(swarm.build.done > calls.REXONANCE_SUIT_REVEAL_MS);
   assert.deepEqual([...swarm.lattice], [270, 60]);
   assert.deepEqual([...swarm.clamp], [120, 40, 10]);
   assert.equal(swarm.seat, calls.REXONANCE_SUIT_CLANK_MS);
   assert.equal(swarm.overshoot, calls.REXONANCE_SUIT_CLANK_MS);
-  // After F: seam 90 + glow 60, shock 140, print [F − 20, F + 30], paint
+  // After F: seam 90 + glow 60, shock 140, print [F − 30, F + 5] (bottom to
+  // top along the trims, owner override 2026-10-16; whole before the first
+  // gold locks at F + 6), paint
   // F + 6 → F + 70 (helmet F + 36), the conduit recedes 70 ms behind each
   // lock and its clamps release over [to + 70, to + 130].
   assert.equal(swarm.seam, 90);
   assert.equal(swarm.seamGlow, 60);
   assert.equal(swarm.shock, 140);
-  assert.deepEqual([...swarm.print], [20, 30]);
+  assert.deepEqual([...swarm.print], [30, 5]);
+  assert.ok(swarm.print[1] < calls.REXONANCE_SUIT_GOLD.delay);
   assert.deepEqual([...swarm.paint], [6, 64, 30]);
   assert.equal(swarm.recede, calls.REXONANCE_SUIT_GOLD.cool);
   assert.deepEqual([...swarm.release], [70, 130]);
@@ -59,7 +71,9 @@ test("the swarm rides the pinned call: its timeline, and the pinned clocks uncha
   assert.deepEqual([...swarm.implode], [1980, 2160]);
   // The legs project during RIDER！, before any leg armour seats.
   const legs = calls.REXONANCE_SUIT_CASCADE.find(({ group }) => group === "legs");
-  assert.ok(calls.REXONANCE_SUIT_FIT[legs.order[0]] - swarm.project >= calls.REXONANCE_CALL_BEATS[1].start);
+  assert.ok(
+    calls.REXONANCE_SUIT_FIT[legs.order[0]] - swarm.project >= calls.REXONANCE_CALL_BEATS[1].start,
+  );
   // Every clamp has released, and the free chips have imploded, before the
   // face's squares scatter; the crest's clamps are the last.
   const release = Math.max(
@@ -78,7 +92,8 @@ test("the swarm rides the pinned call: its timeline, and the pinned clocks uncha
   assert.deepEqual(calls.REXONANCE_SUIT_LIGHT, { from: 1980, spread: 380, bloom: 560 });
   // The shock rings' plates are the clank's sparks (accents and first bites).
   assert.equal(calls.REXONANCE_SUIT_SPARKS.length, 14);
-  for (const id of calls.REXONANCE_SUIT_ACCENTS) assert.ok(calls.REXONANCE_SUIT_SPARKS.includes(id));
+  for (const id of calls.REXONANCE_SUIT_ACCENTS)
+    assert.ok(calls.REXONANCE_SUIT_SPARKS.includes(id));
   assert.match(component, /const SUIT_SPARKS = REXONANCE_SUIT_SPARKS;/);
 });
 
@@ -88,15 +103,24 @@ test("the call decides once, bleeds only on fine pointers, and keeps the classic
   assert.match(nanites, /if \(rich && !coarse\) box\.dataset\.bleed = "";/);
   assert.match(nanites, /const extras = rich\s*\?\s*createSuitExtras\(/);
   assert.match(nanites, /ready\.current\(Boolean\(extras\)\);/);
-  assert.match(nanites, /if \(t < plate\.fit && extras\) \{\s*\/\/[^\n]*\n[^\n]*\n\s*extras\.forming\(p, t\);\s*continue;\s*\}/);
+  assert.match(
+    nanites,
+    /if \(t < plate\.fit && extras\) \{\s*\/\/[^\n]*\n[^\n]*\n\s*extras\.forming\(p, t\);\s*continue;\s*\}/,
+  );
   assert.match(nanites, /flight\.drawImage\(\s*source,\s*tile\.sx,\s*tile\.sy,/);
   // Every draw sits under the figure's offset on the bled canvas.
-  assert.match(nanites, /flight\.setTransform\(1, 0, 0, 1, 0, 0\);\s*flight\.clearRect\(0, 0, width, height\);\s*flight\.setTransform\(1, 0, 0, 1, ox, oy\);/);
+  assert.match(
+    nanites,
+    /flight\.setTransform\(1, 0, 0, 1, 0, 0\);\s*flight\.clearRect\(0, 0, width, height\);\s*flight\.setTransform\(1, 0, 0, 1, ox, oy\);/,
+  );
   assert.match(nanites, /settled\.setTransform\(1, 0, 0, 1, ox, oy\);/);
   // Its swarm replaces the SVG motes only when it runs; the motes' own
   // clock is unchanged, and the bleed never reaches below the figure nor
   // more than 4 % to its left.
-  assert.match(component, /const onNanites = useCallback\(\(rich\?: boolean\) => \{\s*setNanites\("canvas"\);\s*if \(rich\) setSwarm\("canvas"\);/);
+  assert.match(
+    component,
+    /const onNanites = useCallback\(\(rich\?: boolean\) => \{\s*setNanites\("canvas"\);\s*if \(rich\) setSwarm\("canvas"\);/,
+  );
   assert.match(component, /data-swarm=\{swarm\}/);
   assert.match(
     sheet,
@@ -153,7 +177,12 @@ test("the kit warms with ImageBitmaps only, after the plan, under the suit's ski
   );
   assert.deepEqual(
     [...kit.REXONANCE_NANITE_ASSETS],
-    [kit.REXONANCE_NANITE_CELLS.src, kit.REXONANCE_NANITE_COMETS.src, kit.REXONANCE_NANITE_FX.src, kit.REXONANCE_NANITE_GUIDE.src],
+    [
+      kit.REXONANCE_NANITE_CELLS.src,
+      kit.REXONANCE_NANITE_COMETS.src,
+      kit.REXONANCE_NANITE_FX.src,
+      kit.REXONANCE_NANITE_GUIDE.src,
+    ],
   );
 });
 
@@ -200,7 +229,8 @@ function recorder() {
     "putImageData",
   ])
     context[name] = (...args) => {
-      for (const value of args) if (typeof value === "number") assert.ok(Number.isFinite(value), name);
+      for (const value of args)
+        if (typeof value === "number") assert.ok(Number.isFinite(value), name);
     };
   return { context, log };
 }
@@ -279,7 +309,10 @@ async function extrasRuntime({ touch }) {
       if (name === "@/lib/rexonance-unlit.js")
         return {
           createNaniteMetalJob: (s, x, y, w, h, d, o) =>
-            job({ metal: canvas("metal"), ...(o?.silhouette ? { silhouette: canvas("silhouette") } : {}) }),
+            job({
+              metal: canvas("metal"),
+              ...(o?.silhouette ? { silhouette: canvas("silhouette") } : {}),
+            }),
           createNaniteGuideJob: (g, d, o) =>
             job({ holo: canvas("holo"), ...(o?.walls ? { walls: canvas("walls") } : {}) }),
           createNaniteMoltenJob: () => job({ molten: canvas("molten") }),
@@ -406,14 +439,19 @@ test("the layout: every chip has a ring, the cocoon drains bottom-up, every tile
   let helm = 0;
   for (let c = 0; c < chips; c += 1) {
     assert.ok(L.ring[c] >= 0 && L.ring[c] < 8);
-    assert.ok(calls.REXONANCE_SUIT_SWARM.waves.some((wave) => L.birth[c] >= wave && L.birth[c] < wave + 80));
+    assert.ok(
+      calls.REXONANCE_SUIT_SWARM.waves.some((wave) => L.birth[c] >= wave && L.birth[c] < wave + 80),
+    );
     const p = L.chipPlate[c];
     if (p < 0) {
       free += 1;
       assert.equal(L.drainAt[c], Infinity);
       continue;
     }
-    assert.ok(L.drainAt[c] >= L.birth[c] + calls.REXONANCE_SUIT_SWARM.wave - 0.01, "drains after its birth");
+    assert.ok(
+      L.drainAt[c] >= L.birth[c] + calls.REXONANCE_SUIT_SWARM.wave - 0.01,
+      "drains after its birth",
+    );
     if (all[p].piece.group === "legs") {
       legs += 1;
       legRings += L.ring[c];
@@ -429,4 +467,79 @@ test("the layout: every chip has a ring, the cocoon drains bottom-up, every tile
   assert.equal(free, 160);
   assert.ok(legRings / legs >= 5, `leg chips' mean ring ${legRings / legs}`);
   assert.ok(legs > 60 && helm > 20, `${legs} leg chips, ${helm} helmet chips`);
+});
+
+// Owner override (2026-10-16): 「金のガイドウェイは上から被さる形ではなく、足先から
+// 滑らかに作られていく。」 The guideway is built on the body, never laid over it:
+// no top-down scan or projection remains; each trim grows along its channel
+// from its lowest cell (the tail from its root) behind a weld head, the
+// front climbs the figure from the toe tips in the fitting order, every
+// guideway is whole before its plate's first tile lands, the conduit prints
+// onto the plate in the same bottom-to-top order, and the clamps slide in
+// along the surface (their swing-in frames, which drop from above, unused).
+test("the guideway grows from the toe tips up; clamps slide in; nothing descends", async () => {
+  assert.doesNotMatch(extrasSource, /KIT_FX\.scan|sweep/);
+  assert.match(extrasSource, /if \(!whole\) printClip\(unc, plate\.end, front, true\);/);
+  assert.match(extrasSource, /if \(L\.buildFrac\[i\] <= front !== printed\) continue;/);
+  assert.match(extrasSource, /frame = 7;\s*drift = 1\.1 \* \(1 - easeOut\(u\)\);/);
+  assert.doesNotMatch(extrasSource, /frame = Math\.min\(7, Math\.floor\(u \* 8\)\)/);
+  const { plan, extras } = await extrasRuntime({ touch: false });
+  const all = plan.plates();
+  const gold = plan.cells();
+  const L = extras.rexonanceNaniteLayout();
+  const { build } = calls.REXONANCE_SUIT_SWARM;
+  const box = (p) => [...L.box.slice(p * 4, p * 4 + 4)];
+  let built = 0;
+  all.forEach((plate, p) => {
+    if (L.kind[p] < 0 || plate.end <= plate.first) return;
+    built += 1;
+    const F = plate.fit;
+    const lead = L.kind[p] === 1 || L.kind[p] === 2 ? build.ornament : build.lead;
+    const id = plate.piece.id;
+    // Never long before its plate, whole before its first tile lands.
+    assert.ok(L.buildA[p] >= F - lead - 0.01, `${id} starts ${F - L.buildA[p]} before F`);
+    assert.ok(L.buildB[p] <= F - build.done + 0.01, `${id} whole ${F - L.buildB[p]} before F`);
+    assert.ok(
+      L.buildB[p] <= Math.min(...plate.tiles.map((tile) => tile.land)),
+      `${id} before its tiles`,
+    );
+    assert.ok(L.buildB[p] - L.buildA[p] >= 40, id);
+    // Monotone along the plate's build; each cell inside the window.
+    let bottom = -Infinity;
+    for (let k = plate.first; k < plate.end; k += 1) {
+      if (k > plate.first) assert.ok(L.buildSorted[k] >= L.buildSorted[k - 1], id);
+      const i = L.buildIdx[k];
+      assert.ok(i >= plate.first && i < plate.end, id);
+      assert.ok(L.buildAt[i] >= L.buildA[p] - 0.01 && L.buildAt[i] <= L.buildB[p] + 0.01, id);
+      bottom = Math.max(bottom, gold.fy[i]);
+    }
+    // It starts at its lowest trim cell (the tail at its root, by its seat).
+    const entry = L.buildIdx[plate.first];
+    if (L.kind[p] !== 1) assert.equal(gold.fy[entry], bottom, `${id} starts at its lowest cell`);
+  });
+  assert.equal(built, 55);
+  // The legs: the front climbs from the toe tips (with RIDER！) to the
+  // thighs — a plate whose gold sits lower starts no later.
+  const legs = all.map((_, p) => p).filter((p) => all[p].piece.group === "legs");
+  const feet = legs.filter((p) => all[p].piece.id.startsWith("boot-foot"));
+  for (const p of feet) {
+    assert.ok(L.buildA[p] >= calls.REXONANCE_SUIT_SWARM.waves[0], "after RIDER！ begins");
+    assert.ok(
+      L.buildA[p] <= Math.min(...legs.map((q) => L.buildA[q])) + 0.01,
+      "the toe tips first",
+    );
+  }
+  for (const a of legs)
+    for (const b of legs) {
+      const [, ay, , ah] = box(a);
+      const [, by, , bh] = box(b);
+      if (ay + ah > by + bh + 8)
+        assert.ok(L.buildA[a] <= L.buildA[b] + 0.01, `${all[a].piece.id} below ${all[b].piece.id}`);
+    }
+  // The tail, root to blade.
+  const tail = all
+    .map((_, p) => p)
+    .filter((p) => L.kind[p] === 1)
+    .sort((a, b) => all[a].fit - all[b].fit);
+  for (let k = 1; k < tail.length; k += 1) assert.ok(L.buildA[tail[k]] > L.buildA[tail[k - 1]]);
 });

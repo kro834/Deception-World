@@ -294,10 +294,18 @@ export const REXONANCE_SUIT_SWARM = {
   wave: 160,
   /** The cocoon's rings turn at this many revolutions a second (mid ring). */
   spin: 0.62,
-  /** Before F: the latch appears and the trims' hologram is projected. */
+  /** Before F: the latch appears at the seat. */
   project: 360,
-  /** The projection's scan sweep. */
-  scan: 90,
+  /** Owner (2026-10-16): 「金のガイドウェイは上から被さる形ではなく、足先から
+   * 滑らかに作られていく。」 — each trim's guideway is built on the body, never
+   * laid over it: it grows along its channel from its lowest cell (the tail
+   * from its root) to its upper end, a laser-weld head running ahead of the
+   * solid conduit, and the front climbs the figure from the toe tips in the
+   * fitting order. A group's front starts at most `lead` before a plate's F
+   * (ornaments: `ornament`) and every plate's guideway is whole `done` before
+   * its F (before its first tile lands); none is built in under `least`. The
+   * head glows `head` behind the front; the laser projects `ahead` of it. */
+  build: { lead: 380, ornament: 300, done: 115, least: 70, head: 18, ahead: 32 },
   /** Before F: the scaffold lattice grows, then is consumed. */
   lattice: [270, 60],
   /** Cocoon chips drain into their plate's lane from its first flight minus this. */
@@ -315,8 +323,9 @@ export const REXONANCE_SUIT_SWARM = {
   /** After F: the shock ring and the spall. */
   shock: 140,
   spall: 160,
-  /** The conduit prints over [F - 20, F + 30]. */
-  print: [20, 30],
+  /** The conduit prints onto the plate over [F - 30, F + 5], bottom to top
+   * along its trims (2026-10-16), whole before the first gold locks (F + 6). */
+  print: [30, 5],
   /** Paint develops from the seat outward over [F + 6, F + 70] (helmet + 36). */
   paint: [6, 64, 30],
   /** The lacquer front, the lock recoil, the spark and the lattice link. */

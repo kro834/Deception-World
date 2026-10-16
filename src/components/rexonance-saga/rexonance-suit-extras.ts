@@ -13,7 +13,6 @@ import { REXONANCE_NANITES } from "@/lib/rexonance-nanites";
 import {
   createNaniteGuideJob,
   createNaniteMetalJob,
-  createNaniteMoltenJob,
   type NanitePixelJob,
 } from "@/lib/rexonance-unlit.js";
 import { rexonanceNaniteSource } from "@/lib/rexonance-nanites-warmup";
@@ -54,12 +53,19 @@ import {
      seat, rings, a seam of light runs round its real outline, a shock ring
      lies in its plane, spall flies, and paint develops from the seat outward
      under a lacquer front — the settled plate is still the artwork exactly.
-   - Each plate's trims are projected onto the body as a scan-lined ice
-     hologram before it arrives; four 3D clamps lock them; the hologram is
-     printed into a Blender-rendered gold conduit (rails, hard-light glass, a
-     glowing channel, walls that turn in parallax) through which the pinned
-     gold pours as a white-hot band with oriented droplets, the conduit
-     receding behind the cooling front so only the painted gold remains.
+   - Each plate's trims get a Blender-rendered gold guideway (rails,
+     hard-light glass, a glowing channel, walls that turn in parallax) that is
+     built on the body before the plate arrives — never laid over it from
+     above (owner, 2026-10-16: 「金のガイドウェイは上から被さる形ではなく、足先
+     から滑らかに作られていく。」): it grows along its channel from each trim's
+     lowest cell to its upper end behind a laser-weld head with sparks, the
+     laser projecting the path just ahead in ice, and the front climbs the
+     figure from the toe tips in the fitting order, ahead of the plates. Four
+     3D clamps slide in along the surface to its corners and bite as the
+     plate slams onto it; the conduit prints onto the plate bottom to top,
+     and the pinned gold pours through it as a white-hot band with oriented
+     droplets, the conduit receding behind the cooling front so only the
+     painted gold remains.
 
    Everything is a closed-form function of the call clock t and index hashes;
    the plan's tiles, fits and gold locks are unchanged. Preparation runs in
@@ -127,6 +133,14 @@ const CORNER_ROW = Int8Array.from([
 const PULSE_BANDS = 5;
 const PULSE_SPEED = 0.006;
 const PULSE_WIDTH = 0.12;
+/** …and on a guideway being built, climbing it (a band every 1/4 of it). */
+const BUILD_PULSE_BANDS = 4;
+const BUILD_PULSE_SPEED = 0.012;
+/** The weld head throws an ember every EMBER_EVERY ms; each flies EMBER_LIFE
+ * ms (at most EMBERS in the air per guideway). */
+const EMBER_EVERY = 14;
+const EMBER_LIFE = 120;
+const EMBERS = 9;
 /** G5: the conduit's walls stand this deep (figure px) in parallax; a sheen
  * crosses it every SHEEN_MS. */
 const WALL_DEPTH = 3;
@@ -189,6 +203,17 @@ type Layout = {
   clampW: Float32Array;
   box: Float32Array; // gold box x, y, w, h
   hasBox: Uint8Array;
+  // The guideway's build (owner, 2026-10-16: from the toe tips up): each
+  // plate's window, and each gold cell's build time and place along its
+  // build (0..1); plate p's cells by build time in [first, end) of buildIdx.
+  buildA: Float32Array;
+  buildB: Float32Array;
+  headMs: Float32Array; // how long a cell glows in the weld head
+
+  buildAt: Float32Array;
+  buildFrac: Float32Array;
+  buildIdx: Int32Array;
+  buildSorted: Float32Array;
   // Tiles (global index; plate p owns [tileFirst[p], tileFirst[p + 1])).
   tileFirst: Int32Array;
   landSorted: Float32Array;
@@ -276,7 +301,9 @@ function seamLoops(base64: string | undefined) {
   return loops;
 }
 
-function buildLayout(all: Plate[], gold: Cells): Layout {
+// Built in units (one plate, one trim build, the swarm…), yielding between
+// them so the preparation keeps each idle slice short.
+function* layoutSteps(all: Plate[], gold: Cells): Generator<undefined, Layout, undefined> {
   const P = all.length;
   const N = all.reduce((sum, plate) => sum + plate.tiles.length, 0);
   const f32 = (n: number) => new Float32Array(n);
@@ -284,9 +311,7 @@ function buildLayout(all: Plate[], gold: Cells): Layout {
     kind: new Int8Array(P),
     segment: new Int8Array(P),
     flags: new Uint8Array(P),
-    order: Int16Array.from(
-      all.map((_, p) => p).sort((a, b) => all[a].fit - all[b].fit || a - b),
-    ),
+    order: Int16Array.from(all.map((_, p) => p).sort((a, b) => all[a].fit - all[b].fit || a - b)),
     seatX: f32(P),
     seatY: f32(P),
     nX: f32(P),
@@ -306,6 +331,13 @@ function buildLayout(all: Plate[], gold: Cells): Layout {
     clampW: f32(P),
     box: f32(P * 4),
     hasBox: new Uint8Array(P),
+    buildA: new Float32Array(P).fill(Infinity),
+    buildB: new Float32Array(P).fill(Infinity),
+    headMs: new Float32Array(P),
+    buildAt: f32(gold.lock.length),
+    buildFrac: f32(gold.lock.length),
+    buildIdx: new Int32Array(gold.lock.length),
+    buildSorted: f32(gold.lock.length),
     tileFirst: new Int32Array(P + 1),
     landSorted: f32(N),
     cx: f32(N),
@@ -378,6 +410,7 @@ function buildLayout(all: Plate[], gold: Cells): Layout {
   let loopAt = 0;
   let pointAt = 0;
   let tileAt = 0;
+  yield;
   for (let p = 0; p < P; p += 1) {
     const plate = all[p];
     const piece = plate.piece;
@@ -386,8 +419,7 @@ function buildLayout(all: Plate[], gold: Cells): Layout {
     L.kind[p] = kind;
     L.segment[p] = kind === 1 ? Number(/^tail-(\d)/.exec(piece.id)?.[1] ?? 0) : 0;
     const crest = piece.id === "helmet-crest";
-    L.flags[p] =
-      (accents.has(piece.id) ? 1 : 0) | (sparks.has(piece.id) ? 2 : 0) | (crest ? 4 : 0);
+    L.flags[p] = (accents.has(piece.id) ? 1 : 0) | (sparks.has(piece.id) ? 2 : 0) | (crest ? 4 : 0);
     const [sx, sy] = piece.seat;
     L.seatX[p] = sx;
     L.seatY[p] = sy;
@@ -449,8 +481,8 @@ function buildLayout(all: Plate[], gold: Cells): Layout {
     if (box && !driver) {
       L.hasBox[p] = 1;
       L.box.set(box, p * 4);
-      L.clampW[p] = Math.min(30, Math.max(18, 0.6 * Math.min(box[2], box[3]))) *
-        (L.flags[p] & 1 ? 1.2 : 1);
+      L.clampW[p] =
+        Math.min(30, Math.max(18, 0.6 * Math.min(box[2], box[3]))) * (L.flags[p] & 1 ? 1.2 : 1);
     }
     // Tiles: centres, flight seeds, paint order (from the seat outward).
     const first = tileAt;
@@ -531,10 +563,11 @@ function buildLayout(all: Plate[], gold: Cells): Layout {
       pointAt += count + 1;
       loopAt += 1;
     }
+    yield;
   }
   L.tileFirst[P] = tileAt;
   L.loopFirst[P] = loopAt;
-  void gold;
+  yield* layOutBuild(L, all, gold);
   // Rings: eight tilted lanes up the figure, the inner ones turning faster.
   for (let r = 0; r < RINGS; r += 1) {
     const cy = H * (0.13 + 0.112 * r);
@@ -635,6 +668,7 @@ function buildLayout(all: Plate[], gold: Cells): Layout {
     L.crownR[c] = 104 + 36 * hash(c, 2999);
     L.crownA[c] = TAU * hash(c, 3061);
   }
+  yield;
   // Occupancy: the body plates' tiles (not the ribbons or the tail), softened.
   const raw = new Uint8Array(OCC_W * OCC_H);
   for (let p = 0; p < P; p += 1) {
@@ -666,29 +700,211 @@ function buildLayout(all: Plate[], gold: Cells): Layout {
   return L;
 }
 
+/* The guideway's build (owner, 2026-10-16): 「金のガイドウェイは上から被さる形
+   ではなく、足先から滑らかに作られていく。」 Each group's front climbs its gold
+   from its lowest trim to its highest (the legs from the toe tips), so a
+   plate's window opens when the front reaches the bottom of its gold and
+   closes when it reaches the top — clamped so a guideway is never built
+   more than `lead` before its plate (ornaments `ornament`) and is whole
+   `done` before its first tile lands. The tail is built root to blade, a
+   segment after the other; a ribbon in its own window. Inside a plate the
+   guideway grows along its channel: from each trim's lowest cell (the
+   tail's from its seat) over the cells' 8-neighbourhood, a trim that starts
+   higher starting later, so the build head runs the trims smoothly upward. */
+function* layOutBuild(L: Layout, all: Plate[], gold: Cells) {
+  const B = SW.build;
+  const groups = new Map<string, number[]>();
+  all.forEach((plate, p) => {
+    if (L.kind[p] < 0 || !L.hasBox[p] || plate.end <= plate.first) return;
+    const list = groups.get(plate.piece.group) ?? [];
+    list.push(p);
+    groups.set(plate.piece.group, list);
+  });
+  for (const list of groups.values()) {
+    const kind = L.kind[list[0]];
+    const fits = list.map((p) => all[p].fit);
+    const firstFit = Math.min(...fits);
+    const lastFit = Math.max(...fits);
+    if (kind === 2) {
+      for (const p of list) {
+        L.buildA[p] = all[p].fit - B.ornament;
+        L.buildB[p] = all[p].fit - B.done;
+      }
+    } else if (kind === 1) {
+      const byFit = [...list].sort((a, b) => all[a].fit - all[b].fit);
+      const gA = firstFit - B.ornament;
+      const gB = lastFit - B.done;
+      byFit.forEach((p, k) => {
+        L.buildA[p] = gA + ((gB - gA) * k) / byFit.length;
+        L.buildB[p] = gA + ((gB - gA) * (k + 1.6)) / byFit.length;
+      });
+    } else {
+      let bottom = -Infinity;
+      let top = Infinity;
+      for (const p of list) {
+        bottom = Math.max(bottom, L.box[p * 4 + 1] + L.box[p * 4 + 3]);
+        top = Math.min(top, L.box[p * 4 + 1]);
+      }
+      const gA = Math.max(SW.waves[0] + 20, firstFit - B.lead);
+      let gB = lastFit - B.done;
+      const at = (y: number) => gA + ((bottom - y) / Math.max(1, bottom - top)) * (gB - gA);
+      // Every plate of the group whole before its own first tile lands.
+      while (gB > gA + 120 && list.some((p) => at(L.box[p * 4 + 1]) > all[p].fit - B.done)) gB -= 5;
+      for (const p of list) {
+        L.buildA[p] = at(L.box[p * 4 + 1] + L.box[p * 4 + 3]);
+        L.buildB[p] = at(L.box[p * 4 + 1]);
+      }
+    }
+    for (const p of list) {
+      const F = all[p].fit;
+      const lead = kind === 1 || kind === 2 ? B.ornament : B.lead;
+      // Never long before its plate; then at least `least` long, and whole
+      // `done` before its plate.
+      let a = Math.max(L.buildA[p], F - lead);
+      let b = Math.min(Math.max(L.buildB[p], a + B.least), F - B.done);
+      a = Math.min(a, b - 40);
+      if (!Number.isFinite(a) || !Number.isFinite(b)) {
+        a = F - lead;
+        b = F - B.done;
+      }
+      L.buildA[p] = a;
+      L.buildB[p] = b;
+    }
+  }
+  yield;
+  // Inside each plate: along the channel from each trim's entry.
+  for (let p = 0; p < all.length; p += 1) {
+    if (p) yield;
+    const plate = all[p];
+    const first = plate.first;
+    const n = plate.end - first;
+    if (!Number.isFinite(L.buildA[p]) || n <= 0) {
+      for (let k = first; k < plate.end; k += 1) {
+        L.buildIdx[k] = k;
+        L.buildSorted[k] = -Infinity;
+        L.buildAt[k] = -Infinity;
+        L.buildFrac[k] = 1;
+      }
+      continue;
+    }
+    const piece = plate.piece;
+    const cols = Math.ceil(piece.w / G) + 1;
+    const rows = Math.ceil(piece.h / G) + 1;
+    const grid = new Int32Array(cols * rows).fill(-1);
+    const col = new Int32Array(n);
+    const row = new Int32Array(n);
+    let bottomRow = 0;
+    for (let k = 0; k < n; k += 1) {
+      const c = Math.max(0, Math.min(cols - 1, Math.round((gold.fx[first + k] - piece.x) / G)));
+      const r = Math.max(0, Math.min(rows - 1, Math.round((gold.fy[first + k] - piece.y) / G)));
+      col[k] = c;
+      row[k] = r;
+      grid[r * cols + c] = k;
+      bottomRow = Math.max(bottomRow, r);
+    }
+    const tail = L.kind[p] === 1;
+    const seatC = (piece.seat[0] - piece.x) / G - 0.5;
+    const seatR = (piece.seat[1] - piece.y) / G - 0.5;
+    const centre = (piece.w / G - 1) / 2;
+    const dist = new Float32Array(n).fill(-1);
+    const queue = new Int32Array(n);
+    let seen = 0;
+    while (seen < n) {
+      // The next trim's entry: its lowest cell (nearest the middle), or the
+      // tail's cell nearest its seat.
+      let entry = -1;
+      let best = Infinity;
+      for (let k = 0; k < n; k += 1) {
+        if (dist[k] >= 0) continue;
+        const score = tail
+          ? Math.hypot(col[k] - seatC, row[k] - seatR)
+          : (bottomRow - row[k]) * 1000 + Math.abs(col[k] - centre);
+        if (score < best) {
+          best = score;
+          entry = k;
+        }
+      }
+      dist[entry] = tail ? best * 0.45 : bottomRow - row[entry];
+      let head = 0;
+      let end = 0;
+      queue[end++] = entry;
+      seen += 1;
+      while (head < end) {
+        const k = queue[head++];
+        for (let dy = -1; dy <= 1; dy += 1)
+          for (let dx = -1; dx <= 1; dx += 1) {
+            const c = col[k] + dx;
+            const r = row[k] + dy;
+            if ((!dx && !dy) || c < 0 || r < 0 || c >= cols || r >= rows) continue;
+            const j = grid[r * cols + c];
+            if (j < 0 || dist[j] >= 0) continue;
+            dist[j] = dist[k] + (dx && dy ? 1.41 : 1);
+            queue[end++] = j;
+            seen += 1;
+          }
+      }
+    }
+    let most = 0;
+    for (let k = 0; k < n; k += 1) most = Math.max(most, dist[k]);
+    const a = L.buildA[p];
+    const span = L.buildB[p] - a;
+    // The weld head: about two cells deep along the channel.
+    L.headMs[p] = Math.min(16, Math.max(2, most > 0 ? (2.2 * span) / most : span));
+    const order = Array.from({ length: n }, (_, k) => k).sort((x, y) => dist[x] - dist[y] || x - y);
+    order.forEach((k, rank) => {
+      const frac = most > 0 ? dist[k] / most : 0;
+      const i = first + k;
+      L.buildFrac[i] = frac;
+      L.buildAt[i] = a + frac * span;
+      L.buildIdx[first + rank] = i;
+      L.buildSorted[first + rank] = a + frac * span;
+    });
+  }
+}
+
 // Coverage: each tile's mean alpha (so a chip never unfolds past the art's
-// edge), one plate's cell read back per step.
-function coverPlate(L: Layout, plate: Plate, p: number, art: CanvasImageSource) {
-  const piece = plate.piece;
+// edge), from one read-back of the art at a third of its size (a tile is
+// then three pixels across: a short slice, where a read-back per plate cost
+// a frame's worth of idle time in all).
+const COVER_STEP = 3;
+function coverAll(L: Layout, all: Plate[], art: CanvasImageSource) {
+  const w = Math.ceil(ART_W / COVER_STEP);
+  const h = Math.ceil(ART_H / COVER_STEP);
   const canvas = Object.assign(globalThis.document.createElement("canvas"), {
-    width: piece.w,
-    height: piece.h,
+    width: w,
+    height: h,
   });
   const context = canvas.getContext("2d", { willReadFrequently: true });
-  if (!context) return;
-  context.drawImage(art, piece.ax, piece.ay, piece.w, piece.h, 0, 0, piece.w, piece.h);
-  const data = context.getImageData(0, 0, piece.w, piece.h).data;
-  const first = L.tileFirst[p];
-  for (let k = 0; k < plate.tiles.length; k += 1) {
-    const tile = plate.tiles[k];
-    const x0 = tile.dx - piece.x;
-    const y0 = tile.dy - piece.y;
-    let sum = 0;
-    for (let y = y0; y < y0 + tile.th; y += 1)
-      for (let x = x0; x < x0 + tile.tw; x += 1) sum += data[(y * piece.w + x) * 4 + 3];
-    L.cov[first + k] = sum / (255 * tile.tw * tile.th);
+  if (!context) return false;
+  context.imageSmoothingEnabled = true;
+  context.imageSmoothingQuality = "medium";
+  context.drawImage(art, 0, 0, ART_W, ART_H, 0, 0, ART_W / COVER_STEP, ART_H / COVER_STEP);
+  const data = context.getImageData(0, 0, w, h).data;
+  for (let p = 0; p < all.length; p += 1) {
+    if (L.kind[p] < 0) continue;
+    const tiles = all[p].tiles;
+    const first = L.tileFirst[p];
+    for (let k = 0; k < tiles.length; k += 1) {
+      const tile = tiles[k];
+      // The read-back pixels whose centres fall inside the tile (one at least).
+      let x0 = Math.ceil(tile.sx / COVER_STEP - 0.5);
+      let x1 = Math.floor((tile.sx + tile.tw) / COVER_STEP - 0.5);
+      let y0 = Math.ceil(tile.sy / COVER_STEP - 0.5);
+      let y1 = Math.floor((tile.sy + tile.th) / COVER_STEP - 0.5);
+      if (x1 < x0) x0 = x1 = Math.floor((tile.sx + tile.tw / 2) / COVER_STEP);
+      if (y1 < y0) y0 = y1 = Math.floor((tile.sy + tile.th / 2) / COVER_STEP);
+      let sum = 0;
+      let count = 0;
+      for (let y = Math.max(0, y0); y <= Math.min(h - 1, y1); y += 1)
+        for (let x = Math.max(0, x0); x <= Math.min(w - 1, x1); x += 1) {
+          sum += data[(y * w + x) * 4 + 3];
+          count += 1;
+        }
+      L.cov[first + k] = count ? sum / (255 * count) : 1;
+    }
   }
   canvas.width = canvas.height = 0;
+  return true;
 }
 
 // The scaffold lattice, in atlas space (so a plate's draw never shows its
@@ -709,7 +925,10 @@ function latticePlate(context: CanvasRenderingContext2D, L: Layout, plate: Plate
       const j = first + m;
       const dx = L.cx[j] - L.cx[i];
       const dy = L.cy[j] - L.cy[i];
-      if (!((Math.abs(dx - T) < 0.5 && Math.abs(dy) < 0.5) || (Math.abs(dy - T) < 0.5 && Math.abs(dx) < 0.5)))
+      if (!(
+        (Math.abs(dx - T) < 0.5 && Math.abs(dy) < 0.5) ||
+        (Math.abs(dy - T) < 0.5 && Math.abs(dx) < 0.5)
+      ))
         continue;
       context.moveTo(L.cx[i] + ax, L.cy[i] + ay);
       context.lineTo(L.cx[j] + ax, L.cy[j] + ay);
@@ -799,6 +1018,137 @@ function createRailsJob(guide: CanvasImageSource, w: number, h: number) {
   }
 }
 
+// The molten gold (G6): the kit's formula (rexonance-unlit.js,
+// createNaniteMoltenJob: t = clamp(0.25 + 0.85 L) through the ramp, alpha
+// the art's times the gold mask's), with each read-back and the final
+// upload in a step of its own (the kit's job reads both layers in its first
+// step, past a 6 ms slice). Same job contract (row-sliced, byte-identical
+// whatever the slices, no composite operations, null if the pixels cannot be
+// read); kept here, the call's own.
+const MOLTEN_RAMP = Float32Array.of(
+  0,
+  120,
+  52,
+  10,
+  0.4,
+  236,
+  140,
+  40,
+  0.7,
+  255,
+  210,
+  120,
+  1,
+  255,
+  250,
+  236,
+);
+function createMoltenJob(
+  source: CanvasImageSource,
+  mask: CanvasImageSource | null,
+  w: number,
+  h: number,
+) {
+  const owned: HTMLCanvasElement[] = [];
+  const make = () => {
+    const canvas = Object.assign(globalThis.document.createElement("canvas"), {
+      width: w,
+      height: h,
+    });
+    owned.push(canvas);
+    return canvas;
+  };
+  const release = () => {
+    for (const canvas of owned) canvas.width = canvas.height = 0;
+  };
+  try {
+    const scratch = make();
+    const read = scratch.getContext("2d", { willReadFrequently: true });
+    if (!read) throw new Error("unavailable molten context");
+    let art: Uint8ClampedArray | null = null;
+    let gold: Uint8ClampedArray | null = null;
+    let image: ImageData | null = null;
+    let row = 0;
+    let uploaded = false;
+    let cancelled = false;
+    let result: { molten: HTMLCanvasElement } | null = null;
+    const pixels = (layer: CanvasImageSource) => {
+      read.clearRect(0, 0, w, h);
+      read.drawImage(layer, 0, 0, w, h, 0, 0, w, h);
+      return read.getImageData(0, 0, w, h).data;
+    };
+    return {
+      step(until: number, deadline?: Pick<IdleDeadline, "timeRemaining">) {
+        if (cancelled || result || uploaded) return true;
+        try {
+          // One read-back, or the upload, per step.
+          if (!art) {
+            art = pixels(source);
+            image = read.createImageData(w, h);
+            return false;
+          }
+          if (mask && !gold) {
+            gold = pixels(mask);
+            return false;
+          }
+          const o = image!.data;
+          if (row < h) {
+            do {
+              for (let x = 0, i = row * w * 4; x < w; x += 1, i += 4) {
+                const alpha = art[i + 3];
+                if (!alpha) continue;
+                const lum = (0.2126 * art[i] + 0.7152 * art[i + 1] + 0.0722 * art[i + 2]) / 255;
+                const t = unit(0.25 + 0.85 * lum);
+                let k = 4;
+                while (k < 12 && t > MOLTEN_RAMP[k]) k += 4;
+                const u = (t - MOLTEN_RAMP[k - 4]) / (MOLTEN_RAMP[k] - MOLTEN_RAMP[k - 4]);
+                for (let c = 1; c < 4; c += 1)
+                  o[i + c - 1] = Math.round(
+                    MOLTEN_RAMP[k - 4 + c] + (MOLTEN_RAMP[k + c] - MOLTEN_RAMP[k - 4 + c]) * u,
+                  );
+                o[i + 3] = gold ? Math.round((alpha * gold[i + 3]) / 255) : alpha;
+              }
+              row += 1;
+            } while (
+              row < h &&
+              performance.now() < until &&
+              (!deadline || deadline.timeRemaining() >= 2)
+            );
+            return false;
+          }
+          const out = make();
+          const write = out.getContext("2d");
+          if (!write) throw new Error("unavailable molten output");
+          write.putImageData(image!, 0, 0);
+          scratch.width = scratch.height = 0;
+          art = gold = null;
+          image = null;
+          uploaded = true;
+          result = { molten: out };
+          return true;
+        } catch {
+          cancelled = true;
+          release();
+          return true;
+        }
+      },
+      commit() {
+        return cancelled ? null : result;
+      },
+      cancel() {
+        if (cancelled || result) return;
+        cancelled = true;
+        art = gold = null;
+        image = null;
+        release();
+      },
+    };
+  } catch {
+    release();
+    return null;
+  }
+}
+
 /* ------------------------------------------------------------------ */
 /* Preparation: in its own idle slices, after the plan and its lights. */
 
@@ -807,15 +1157,7 @@ let preparation: Promise<boolean> | null = null;
 let promotePreparation: (() => void) | null = null;
 
 type Stage =
-  | "suit"
-  | "layout"
-  | "cover"
-  | "metal"
-  | "guide"
-  | "rails"
-  | "molten"
-  | "lattice"
-  | "done";
+  "suit" | "layout" | "cover" | "metal" | "guide" | "rails" | "molten" | "lattice" | "done";
 
 /** Builds the call's extras (its layout, and the metal, hologram, walls,
  * molten and lattice layers) in ≤ 6 ms idle slices, once the plan and its
@@ -837,6 +1179,7 @@ export function prepareRexonanceNanites(priority: "low" | "high" = "low") {
     let job: NanitePixelJob<Record<string, HTMLCanvasElement | undefined>> | null = null;
     let lattice: HTMLCanvasElement | null = null;
     const made: Partial<Sheets> = {};
+    let steps: Generator<undefined, Layout, undefined> | null = null;
     let layout: Layout | null = null;
     const settle = (ready: boolean) => {
       if (settled) return;
@@ -864,8 +1207,7 @@ export function prepareRexonanceNanites(priority: "low" | "high" = "low") {
         queued = { kind: "idle", id: globalThis.requestIdleCallback(resume, { timeout: 1200 }) };
       else queued = { kind: "frame", id: globalThis.requestAnimationFrame(() => resume()) };
     };
-    const art = () =>
-      plateLights()?.unlit ?? rexonanceSuitSource(REXONANCE_SUIT_ATLAS.src) ?? null;
+    const art = () => plateLights()?.unlit ?? rexonanceSuitSource(REXONANCE_SUIT_ATLAS.src) ?? null;
     const runJob = (
       until: number,
       deadline: IdleDeadline | undefined,
@@ -893,7 +1235,10 @@ export function prepareRexonanceNanites(priority: "low" | "high" = "low") {
         schedule();
         return;
       }
-      const until = performance.now() + 6;
+      // Each slice stays under 6 ms: its jobs step to 5 ms, its own units
+      // start only before 4 ms.
+      const until = performance.now() + 5;
+      const soft = until - 1;
       try {
         const all = plates();
         const source = art();
@@ -910,21 +1255,26 @@ export function prepareRexonanceNanites(priority: "low" | "high" = "low") {
           return;
         }
         if (stage === "layout") {
-          layout = buildLayout(all, cells());
-          stage = "cover";
-          cursor = 0;
+          // A unit at a time (a plate, a trim build, the swarm…) while the
+          // slice has room; each unit is well under a millisecond.
+          steps ??= layoutSteps(all, cells());
+          for (;;) {
+            const next = steps.next();
+            if (next.done) {
+              layout = next.value;
+              steps = null;
+              stage = "cover";
+              cursor = 0;
+              break;
+            }
+            if (performance.now() > soft || (deadline && deadline.timeRemaining() < 2)) break;
+          }
           return schedule();
         }
         if (stage === "cover") {
-          while (cursor < all.length) {
-            if (layout!.kind[cursor] >= 0) coverPlate(layout!, all[cursor], cursor, source);
-            cursor += 1;
-            if (performance.now() > until || (deadline && deadline.timeRemaining() < 2)) break;
-          }
-          if (cursor >= all.length) {
-            stage = "metal";
-            cursor = 0;
-          }
+          if (!coverAll(layout!, all, source)) return settle(false);
+          stage = "metal";
+          cursor = 0;
           return schedule();
         }
         if (stage === "metal")
@@ -979,9 +1329,9 @@ export function prepareRexonanceNanites(priority: "low" | "high" = "low") {
             until,
             deadline,
             () =>
-              createNaniteMoltenJob(source, 0, 0, ART_W, ART_H, globalThis.document, {
-                mask: mask ?? undefined,
-              }) as NanitePixelJob<Record<string, HTMLCanvasElement | undefined>> | null,
+              createMoltenJob(source, mask, ART_W, ART_H) as NanitePixelJob<
+                Record<string, HTMLCanvasElement | undefined>
+              > | null,
             (result) => {
               if (!result.molten) return false;
               made.molten = result.molten;
@@ -1055,11 +1405,11 @@ export const isRexonanceNaniteReady = () =>
   READY &&
   Boolean(
     LAYOUT &&
-      SHEETS &&
-      rexonanceNaniteSource(KIT_CELLS.src) &&
-      rexonanceNaniteSource(KIT_COMETS.src) &&
-      rexonanceNaniteSource(KIT_FX.src) &&
-      rexonanceNaniteSource(KIT_GUIDE.src),
+    SHEETS &&
+    rexonanceNaniteSource(KIT_CELLS.src) &&
+    rexonanceNaniteSource(KIT_COMETS.src) &&
+    rexonanceNaniteSource(KIT_FX.src) &&
+    rexonanceNaniteSource(KIT_GUIDE.src),
   );
 
 /* ------------------------------------------------------------------ */
@@ -1078,7 +1428,7 @@ export type SuitExtrasEnv = {
   sheet: CanvasImageSource;
 };
 export type SuitExtras = {
-  /** Back and mid chips, holograms, scans, pulses, contact shadows. */
+  /** Back and mid chips, guideways being built, pulses, contact shadows. */
   before: (t: number) => void;
   /** A plate before its fit: staged metal, lattice, its flights. */
   forming: (p: number, t: number) => void;
@@ -1149,8 +1499,13 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
   let pulsePreCount = 0;
   const pulsesPost = new Int32Array(Math.max(1, GOLD_N));
   let pulsePostCount = 0;
-  const dots = new Int32Array(Math.max(1, GOLD_N));
-  let dotCount = 0;
+  // The guideway's build heads (cells), and the latches' lasers to them.
+  const heads = new Int32Array(Math.max(1, GOLD_N));
+  let headCount = 0;
+  const cores = new Int32Array(Math.max(1, GOLD_N));
+  let coreCount = 0;
+  const lasers = new Float32Array(P * 4);
+  let laserCount = 0;
   const fades = new Int32Array(4096);
   const fadeA = new Float32Array(4096);
   let fadeCount = 0;
@@ -1324,7 +1679,12 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
       if (hero && heroes < HEROES) heroes += 1;
       else {
         const pulse = 0.55 + 0.45 * Math.abs(Math.cos((TAU * frame) / FRAMES));
-        rect(Math.min(GOLD_TONE, tone) * 2 + (alpha > 0.6 ? 1 : 0), x, y, Math.max(1.5, d * pulse * 0.8));
+        rect(
+          Math.min(GOLD_TONE, tone) * 2 + (alpha > 0.6 ? 1 : 0),
+          x,
+          y,
+          Math.max(1.5, d * pulse * 0.8),
+        );
         return;
       }
     }
@@ -1334,7 +1694,17 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
     const t = tone > GOLD_TONE ? ICE : tone;
     const e = d * SPRITE;
     if (e <= MIP_BELOW)
-      flight.drawImage(cellsImage, MIP_X[t] + 16 * frame, MIP_Y[t], 16, 16, x - e / 2, y - e / 2, e, e);
+      flight.drawImage(
+        cellsImage,
+        MIP_X[t] + 16 * frame,
+        MIP_Y[t],
+        16,
+        16,
+        x - e / 2,
+        y - e / 2,
+        e,
+        e,
+      );
     else flight.drawImage(cellsImage, 32 * frame, 32 * t, 32, 32, x - e / 2, y - e / 2, e, e);
   };
   const unfold = (x: number, y: number, d: number, k: number, tone: number, alpha: number) => {
@@ -1347,7 +1717,17 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
     draws += 1;
     flight.globalAlpha = alpha;
     const t = tone >= 3 ? ICE : tone;
-    flight.drawImage(cellsImage, UNFOLD_X[t] + 32 * k, KIT_CELLS.unfold.y, 32, 32, x - d / 2, y - d / 2, d, d);
+    flight.drawImage(
+      cellsImage,
+      UNFOLD_X[t] + 32 * k,
+      KIT_CELLS.unfold.y,
+      32,
+      32,
+      x - d / 2,
+      y - d / 2,
+      d,
+      d,
+    );
   };
   const comet = (x: number, y: number, vx: number, vy: number, tone: number, alpha: number) => {
     if (TOUCH || governed || comets >= COMET_BUDGET || draws >= BUDGET) return;
@@ -1470,8 +1850,9 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
         y += (cy - y) * m;
         z += (Math.sin(a) - z) * m;
         // A golden crown.
-        if (m > 0.5) tone = c % 4 ? GOLD_TONE : WHITE;
-        alpha *= 1.25;
+        if (m > 0.2) tone = c % 4 ? GOLD_TONE : WHITE;
+        alpha *= 1.5;
+        size *= 1 + 0.25 * m;
         chipVX[c] = 0;
         chipVY[c] = 0;
         if (t >= L.drainAt[c]) {
@@ -1540,23 +1921,39 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
       const depth = 1 + 0.45 * z;
       size *= depth;
       alpha *= 0.55 + 0.22 * (z + 1);
-      const band = z < -0.15 ? 1 : z <= 0.35 ? 2 : z > 0.85 && !helm ? 4 : 3;
-      if (band === 1) {
+      const imploding = plate < 0 && t >= SW.implode[0];
+      const crowned = helm && t >= SW.crown[0];
+      // Band 5: white-hot, face-on, over a glow (the free chips feeding the
+      // reactor at the seal, and the crown's gold).
+      const band =
+        imploding || (crowned && z > -0.15)
+          ? 5
+          : z < -0.15
+            ? 1
+            : z <= 0.35
+              ? 2
+              : z > 0.85 && !helm
+                ? 4
+                : 3;
+      if (band === 1 && !crowned) {
         // Behind the body: dimmed where the undersuit stands.
         const cx = Math.floor((x / W) * OCC_W);
         const cy = Math.floor((y / H) * OCC_H);
         if (cx >= 0 && cy >= 0 && cx < OCC_W && cy < OCC_H)
           alpha *= 1 - (0.8 * L.occupancy[cy * OCC_W + cx]) / 255;
       }
-      if (band === 3 && !(plate < 0 && t >= SW.implode[0]) && !(helm && t >= SW.crown[0]))
-        alpha = Math.min(alpha, 0.7);
+      if (band === 3) alpha = Math.min(alpha, 0.7);
       chipBand[c] = band;
       chipX[c] = x * s;
       chipY[c] = y * s;
       chipD[c] = size * s;
       chipA[c] = alpha;
       chipT[c] = tone;
-      chipF[c] = wrap(L.chipF0[c] + (FRAMES * L.chipSpin[c] * spinBoost * t) / 1000);
+      // White-hot chips turn face-on (their lit core) with a small wobble.
+      chipF[c] =
+        band === 5
+          ? wrap(1.5 * Math.sin((TAU * L.chipSpin[c] * t) / 1000 + L.phi[c]))
+          : wrap(L.chipF0[c] + (FRAMES * L.chipSpin[c] * spinBoost * t) / 1000);
     }
   };
   // The cocoon's lanes: each ring's ellipse, its far half faint behind the
@@ -1565,8 +1962,11 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
     flight.lineWidth = Math.max(0.7, 0.55 * s);
     if (t >= SW.crown[0] && t < SW.crown[1] + 220) {
       // The crown's own lane above the head.
-      const fade = Math.min(smooth((t - SW.crown[0]) / 100), 1 - smooth((t - SW.crown[1] - 120) / 100));
-      flight.globalAlpha = (front ? 0.42 : 0.16) * fade;
+      const fade = Math.min(
+        smooth((t - SW.crown[0]) / 100),
+        1 - smooth((t - SW.crown[1] - 120) / 100),
+      );
+      flight.globalAlpha = (front ? 0.55 : 0.2) * fade;
       flight.strokeStyle = "#ffe2a6";
       flight.beginPath();
       flight.ellipse(
@@ -1629,6 +2029,24 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
       const x = chipX[c];
       const y = chipY[c];
       if (chipVX[c] || chipVY[c]) comet(x, y, chipVX[c], chipVY[c], chipT[c], chipA[c]);
+      if (band === 5 && !TOUCH && draws < BUDGET) {
+        // Its glow: the warm or white bokeh, faint and wide.
+        draws += 1;
+        const g = chipD[c] * 2.4 * SPRITE;
+        const glowTone = chipT[c] === GOLD_TONE ? GOLD_TONE : WHITE;
+        flight.globalAlpha = Math.min(1, 0.4 * chipA[c]);
+        flight.drawImage(
+          cellsImage,
+          BOKEH_X[glowTone],
+          BOKEH_Y[glowTone],
+          32,
+          32,
+          x - g / 2,
+          y - g / 2,
+          g,
+          g,
+        );
+      }
       if (band === 4) {
         if (TOUCH) {
           chip(x, y, chipD[c] * 1.3, chipF[c], chipT[c], chipA[c] * 0.6);
@@ -1657,20 +2075,15 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
     }
     return lo;
   };
-  const firstOrderAfter = (p: number, front: number) => {
-    let lo = all[p].first;
-    let hi = all[p].end;
-    while (lo < hi) {
-      const mid = (lo + hi) >> 1;
-      if (gold.order[mid] <= front) lo = mid + 1;
-      else hi = mid;
-    }
-    return lo;
-  };
   const cellClip = (from: number, to: number) => {
     flight.beginPath();
     for (let i = from; i < to; i += 1)
-      flight.rect(gold.fx[i] * s - 0.5, gold.fy[i] * s - 0.5, gold.cw[i] * s + 1, gold.ch[i] * s + 1);
+      flight.rect(
+        gold.fx[i] * s - 0.5,
+        gold.fy[i] * s - 0.5,
+        gold.cw[i] * s + 1,
+        gold.ch[i] * s + 1,
+      );
     flight.clip();
   };
   const plateDraw = (image: CanvasImageSource, p: number, dx: number, dy: number) => {
@@ -1688,86 +2101,229 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
       piece.h * s,
     );
   };
-  // The conduit (G4, G5, G7): printed cells solid (walls ×2, face), the rest
-  // hologram, all clipped behind the receding cooling front.
-  const drawConduit = (p: number, t: number, pre: boolean) => {
+  // The conduit's face: its walls twice in parallax (G5), the hard-light
+  // glass faint over the raw channel, the gold rails solid.
+  const conduitFace = (p: number, t: number) => {
+    if (walls) {
+      const phiAngle = Math.PI / 4 + 0.5 * Math.max(-1, Math.min(1, (t - all[p].fit) / 200));
+      const dx = WALL_DEPTH * Math.cos(phiAngle);
+      const dy = WALL_DEPTH * Math.sin(phiAngle);
+      flight.globalAlpha = 0.85;
+      plateDraw(walls, p, 0.5 * dx, 0.5 * dy);
+      flight.globalAlpha = 0.6;
+      plateDraw(walls, p, dx, dy);
+    }
+    flight.globalAlpha = rails ? 0.42 : TOUCH ? 0.8 : 1;
+    plateDraw(guideImage, p, 0, 0);
+    if (rails) {
+      flight.globalAlpha = 1;
+      plateDraw(rails, p, 0, 0);
+    }
+  };
+  /* The guideway's build (owner, 2026-10-16: 足先から滑らかに作られていく): the
+     plate's cells by build time; those built so far, and the ones the laser
+     projects just ahead of its head. */
+  const builtBy = (p: number, time: number) => {
+    let lo = all[p].first;
+    let hi = all[p].end;
+    while (lo < hi) {
+      const mid = (lo + hi) >> 1;
+      if (L.buildSorted[mid] <= time) lo = mid + 1;
+      else hi = mid;
+    }
+    return lo;
+  };
+  const buildClip = (from: number, to: number) => {
+    flight.beginPath();
+    for (let k = from; k < to; k += 1) {
+      const i = L.buildIdx[k];
+      flight.rect(
+        gold.fx[i] * s - 0.5,
+        gold.fy[i] * s - 0.5,
+        gold.cw[i] * s + 1,
+        gold.ch[i] * s + 1,
+      );
+    }
+    flight.clip();
+  };
+  // Cells of [from, to) printed (build ≤ front) or not, as one clip.
+  const printClip = (from: number, to: number, front: number, printed: boolean) => {
+    flight.beginPath();
+    for (let i = from; i < to; i += 1) {
+      if (L.buildFrac[i] <= front !== printed) continue;
+      flight.rect(
+        gold.fx[i] * s - 0.5,
+        gold.fy[i] * s - 0.5,
+        gold.cw[i] * s + 1,
+        gold.ch[i] * s + 1,
+      );
+    }
+    flight.clip();
+  };
+  // On the body, before its plate: the solid conduit behind the head, the
+  // laser's ice projection ahead of it, the weld head and its sparks, the
+  // latch's laser to it, and pulses climbing what is built.
+  const buildGuideway = (p: number, t: number) => {
     const plate = all[p];
-    if (plate.end <= plate.first || L.kind[p] < 0) return;
-    const F = plate.fit;
-    const unc = firstLockAfter(p, t - SW.recede);
-    if (unc >= plate.end) return;
-    const front = t >= F + SW.print[1] ? 2 : (t - F + SW.print[0]) / (SW.print[0] + SW.print[1]);
-    const printed = front <= 0 ? plate.first : firstOrderAfter(p, front);
-    const solidFrom = unc;
-    const solidTo = Math.max(unc, printed);
-    if (solidTo > solidFrom) {
-      const whole = solidFrom === plate.first && solidTo === plate.end;
+    const first = plate.first;
+    const end = plate.end;
+    const k = builtBy(p, t);
+    const lead = builtBy(p, t + SW.build.ahead);
+    if (k > first) {
       flight.save();
-      if (!whole) cellClip(solidFrom, solidTo);
-      if (walls) {
-        const phiAngle = Math.PI / 4 + 0.5 * Math.max(-1, Math.min(1, (t - F) / 200));
-        const dx = WALL_DEPTH * Math.cos(phiAngle);
-        const dy = WALL_DEPTH * Math.sin(phiAngle);
-        flight.globalAlpha = 0.85;
-        plateDraw(walls, p, 0.5 * dx, 0.5 * dy);
-        flight.globalAlpha = 0.6;
-        plateDraw(walls, p, dx, dy);
-      }
-      // The hard-light glass faint over the raw channel, the rails solid.
-      flight.globalAlpha = rails ? 0.42 : TOUCH ? 0.8 : 1;
-      plateDraw(guideImage, p, 0, 0);
-      if (rails) {
-        flight.globalAlpha = 1;
-        plateDraw(rails, p, 0, 0);
-        // A hard-light sheen sweeps the conduit from its seat side: its own
-        // hologram (rails and channel in ice-white) through a moving band.
-        if (L.hasBox[p] && !governed) {
-          const b = p * 4;
-          const bx = L.box[b];
-          const by = L.box[b + 1];
-          const bw = L.box[b + 2];
-          const bh = L.box[b + 3];
-          const span = bw + bh;
-          const head = (((t - F + 40) / SHEEN_MS) % 1.4) - 0.2;
-          const c = bx + span * head;
-          const band = Math.max(6, 0.16 * span);
-          flight.beginPath();
-          flight.moveTo((c - band) * s, by * s);
-          flight.lineTo((c + band) * s, by * s);
-          flight.lineTo((c + band - bh) * s, (by + bh) * s);
-          flight.lineTo((c - band - bh) * s, (by + bh) * s);
-          flight.closePath();
-          flight.clip();
-          flight.globalAlpha = 0.6;
-          plateDraw(holo, p, 0, 0);
-        }
-      }
+      if (k < end) buildClip(first, k);
+      conduitFace(p, t);
       flight.restore();
     }
-    const holoFrom = Math.max(unc, printed);
-    if (holoFrom < plate.end) {
+    if (lead > k) {
       flight.save();
-      if (holoFrom > plate.first) cellClip(holoFrom, plate.end);
-      flight.globalAlpha = 0.9;
+      buildClip(k, lead);
+      flight.globalAlpha = 0.5;
       plateDraw(holo, p, 0, 0);
       flight.restore();
     }
-    if (pre) {
-      flight.globalAlpha = 1;
-      return;
+    const glow = L.headMs[p];
+    if (k > first && t < L.buildB[p] + glow) {
+      for (let j = builtBy(p, t - glow); j < k && headCount < heads.length; j += 1)
+        heads[headCount++] = L.buildIdx[j];
+      for (let j = builtBy(p, t - 0.45 * glow); j < k && coreCount < cores.length; j += 1)
+        cores[coreCount++] = L.buildIdx[j];
+      // The front: a spark star that twinkles as it runs, the latch's laser.
+      const i = L.buildIdx[k - 1];
+      const x = (gold.fx[i] + gold.cw[i] / 2) * s;
+      const y = (gold.fy[i] + gold.ch[i] / 2) * s;
+      if (sparkCount < SPARKS) {
+        const so = sparkCount * 4;
+        // Frames 4–5: the star over a white-hot glow (see the sparks pass).
+        const flicker = (Math.floor(t / 17) + p) & 1;
+        sparks[so] = x;
+        sparks[so + 1] = y;
+        sparks[so + 2] = 4 + flicker;
+        sparks[so + 3] = (TOUCH ? 11 : 16) * s * (flicker ? 0.85 : 1.15);
+        sparkCount += 1;
+      }
+      if (!TOUCH && laserCount < P) {
+        const o = laserCount * 4;
+        lasers[o] = L.seatX[p] * s;
+        lasers[o + 1] = L.seatY[p] * s;
+        lasers[o + 2] = x;
+        lasers[o + 3] = y;
+        laserCount += 1;
+      }
     }
-    // The print head's laser-weld dots.
-    if (front > 0 && front < 1.05)
-      for (let i = Math.max(unc, firstOrderAfter(p, front - 0.05)); i < printed; i += 1)
-        if (dotCount < dots.length) dots[dotCount++] = i;
-    // Pulses on the conduit not yet poured.
+    // Embers off the weld head: one every EMBER_EVERY ms of the build, each
+    // thrown from where the head was then and falling as it cools.
+    if (k > first && !governed) {
+      const since = t - L.buildA[p];
+      const newest = Math.floor(since / EMBER_EVERY);
+      for (let e = 0; e < EMBERS; e += 1) {
+        const born = (newest - e) * EMBER_EVERY;
+        const age = since - born;
+        if (born < 0 || age >= EMBER_LIFE || L.buildA[p] + born > L.buildB[p]) continue;
+        const j = builtBy(p, L.buildA[p] + born);
+        if (j <= first) continue;
+        const i = L.buildIdx[j - 1];
+        const seed = (newest - e) * 7 + p * 131;
+        const h1 = hash(seed, 6007);
+        const h2 = hash(seed, 6113);
+        const u = age / EMBER_LIFE;
+        const x = gold.fx[i] + gold.cw[i] / 2 + (h1 - 0.5) * 34 * u;
+        const y = gold.fy[i] + gold.ch[i] / 2 - (14 + 22 * h2) * u + 30 * u * u;
+        chip(
+          x * s,
+          y * s,
+          (3.6 + 2.2 * h2) * s,
+          wrap(FRAMES * h1 + 40 * u),
+          h1 < 0.35 ? GOLD_TONE : WHITE,
+          1.1 * (1 - u * u),
+        );
+      }
+    }
+    // Pulses climbing the built conduit.
+    if (governed) return;
+    for (let j = first; j < k; j += 1) {
+      const i = L.buildIdx[j];
+      const v = BUILD_PULSE_BANDS * L.buildFrac[i] - BUILD_PULSE_SPEED * t;
+      if (v - Math.floor(v) < PULSE_WIDTH && pulsePreCount < pulsesPre.length)
+        pulsesPre[pulsePreCount++] = i;
+    }
+  };
+  // The conduit on the plate (G4, G5, G7): printed onto it bottom to top
+  // along its trims over [F − 30, F + 5] (its laser projection ahead of the
+  // weld dots), then solid, clipped behind the receding cooling front. Drawn
+  // under the current transform (the staged plate's jig while it seats).
+  const drawConduit = (p: number, t: number, collect: boolean) => {
+    const plate = all[p];
+    if (plate.end <= plate.first || L.kind[p] < 0) return;
+    const F = plate.fit;
+    const front = (t - F + SW.print[0]) / (SW.print[0] + SW.print[1]);
+    if (front <= 0) return;
+    const unc = firstLockAfter(p, t - SW.recede);
+    if (unc >= plate.end) return;
+    const whole = front >= 1;
+    flight.save();
+    if (!whole) printClip(unc, plate.end, front, true);
+    else if (unc > plate.first) cellClip(unc, plate.end);
+    conduitFace(p, t);
+    if (rails && whole && L.hasBox[p] && !governed) {
+      // A hard-light sheen runs across the conduit: its own hologram (rails and
+      // channel in ice-white) through a moving band.
+      const b = p * 4;
+      const bx = L.box[b];
+      const by = L.box[b + 1];
+      const bw = L.box[b + 2];
+      const bh = L.box[b + 3];
+      const span = bw + bh;
+      const head = (((t - F + 40) / SHEEN_MS) % 1.4) - 0.2;
+      const c = bx + span * head;
+      const band = Math.max(6, 0.16 * span);
+      flight.beginPath();
+      flight.moveTo((c - band) * s, by * s);
+      flight.lineTo((c + band) * s, by * s);
+      flight.lineTo((c + band - bh) * s, (by + bh) * s);
+      flight.lineTo((c - band - bh) * s, (by + bh) * s);
+      flight.closePath();
+      flight.clip();
+      flight.globalAlpha = 0.6;
+      plateDraw(holo, p, 0, 0);
+    }
+    flight.restore();
+    if (!whole) {
+      flight.save();
+      printClip(unc, plate.end, front, false);
+      flight.globalAlpha = 0.45;
+      plateDraw(holo, p, 0, 0);
+      flight.restore();
+      // The print head's laser-weld dots: an ice halo, a white-hot core.
+      for (let pass = 0; pass < 2; pass += 1) {
+        const size = pass ? 0.95 : 1.7;
+        flight.globalAlpha = pass ? 0.95 : 0.4;
+        flight.fillStyle = pass ? "#f6feff" : "#8cefff";
+        flight.beginPath();
+        for (let i = unc; i < plate.end; i += 1) {
+          const b = L.buildFrac[i];
+          if (b > front || b <= front - 0.08) continue;
+          const w = gold.cw[i] * size;
+          const h = gold.ch[i] * size;
+          flight.rect(
+            (gold.fx[i] + (gold.cw[i] - w) / 2) * s,
+            (gold.fy[i] + (gold.ch[i] - h) / 2) * s,
+            w * s,
+            h * s,
+          );
+        }
+        flight.fill();
+      }
+    }
+    flight.globalAlpha = 1;
+    if (!collect) return;
+    // Pulses on the conduit not yet poured, out from the seat (the pour's way).
     const pour = firstLockAfter(p, t);
     for (let i = Math.max(unc, pour); i < plate.end; i += 1) {
       const v = PULSE_BANDS * gold.order[i] - PULSE_SPEED * t;
       if (v - Math.floor(v) < PULSE_WIDTH && pulsePostCount < pulsesPost.length)
         pulsesPost[pulsePostCount++] = i;
     }
-    flight.globalAlpha = 1;
   };
   const cellRects = (list: Int32Array, count: number, size: number) => {
     flight.beginPath();
@@ -1795,7 +2351,9 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
     sparkCount = 0;
     pulsePreCount = 0;
     pulsePostCount = 0;
-    dotCount = 0;
+    headCount = 0;
+    coreCount = 0;
+    laserCount = 0;
     jigs = 0;
     conduits = 0;
     beamU.fill(-1);
@@ -1806,7 +2364,7 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
     lanes(false, t);
     drawChips(1, 2);
     pumps(t);
-    // Plates by fit: their jigs (the nearest to contact first), holograms.
+    // Plates by fit: their jigs (the nearest to contact first), guideways.
     for (let k = 0; k < P; k += 1) {
       const p = L.order[k];
       if (L.kind[p] < 0) continue;
@@ -1820,65 +2378,40 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
           jigs += 1;
         } else flat(p);
       } else flat(p);
-      // 2. G1: the trims' hologram projected on the body ahead of the plate.
-      if (t < F - SW.project || t >= F || plate.end <= plate.first || !L.hasBox[p]) continue;
+      // 2. The guideway, built on the body from the toe tips up (owner,
+      // 2026-10-16) ahead of its plate, which then slams onto it.
+      if (t < L.buildA[p] || t >= F || plate.end <= plate.first || !L.hasBox[p]) continue;
       if (TOUCH && conduits >= 4) continue;
       conduits += 1;
-      const u = (t - F + SW.project) / SW.scan;
-      const b = p * 4;
-      const bx = L.box[b];
-      const by = L.box[b + 1];
-      const bw = L.box[b + 2];
-      const bh = L.box[b + 3];
-      if (u < 1) {
-        const sweep = by + bh * easeOut(u);
-        flight.save();
-        flight.beginPath();
-        flight.rect((bx - 3) * s, (by - 3) * s, (bw + 6) * s, (sweep - by + 3) * s);
-        flight.clip();
-        flight.globalAlpha = 0.9;
-        plateDraw(holo, p, 0, 0);
-        flight.restore();
-        if (!TOUCH) {
-          const sw = bw * 1.2 * s;
-          const sh = Math.max(20, 0.4 * bh) * s;
-          flight.globalAlpha = 0.85 * (1 - u * u);
-          draws += 1;
-          flight.drawImage(
-            fxImage,
-            KIT_FX.scan.x,
-            KIT_FX.scan.y,
-            KIT_FX.scan.w,
-            KIT_FX.scan.h,
-            (bx + bw / 2) * s - sw / 2,
-            sweep * s - sh * (KIT_FX.scan.edgeY / KIT_FX.scan.h),
-            sw,
-            sh,
-          );
-        } else {
-          flight.globalAlpha = 0.8 * (1 - u);
-          flight.fillStyle = "#c9f6ff";
-          flight.fillRect(bx * s, sweep * s - 1, bw * s, 2);
-        }
-      } else if (t < F - SW.print[0]) {
-        flight.globalAlpha = 0.9;
-        plateDraw(holo, p, 0, 0);
-      } else drawConduit(p, t, true);
-      // G2: pulses march out from the seat along the hologram.
-      if (t >= F - 270) {
-        const front = (t - F + SW.print[0]) / (SW.print[0] + SW.print[1]);
-        const from = front > 0 ? firstOrderAfter(p, front) : plate.first;
-        for (let i = from; i < plate.end; i += 1) {
-          const v = PULSE_BANDS * gold.order[i] - PULSE_SPEED * t;
-          if (v - Math.floor(v) < PULSE_WIDTH && pulsePreCount < pulsesPre.length)
-            pulsesPre[pulsePreCount++] = i;
-        }
-      }
+      buildGuideway(p, t);
     }
     if (pulsePreCount) {
-      flight.globalAlpha = 0.7;
+      flight.globalAlpha = 0.75;
       flight.fillStyle = "#d8f8ff";
-      cellRects(pulsesPre, pulsePreCount, 0.5);
+      cellRects(pulsesPre, pulsePreCount, 0.55);
+    }
+    if (headCount) {
+      // The laser-weld heads: an ice halo two cells deep, a white-hot core
+      // of dots at the very front.
+      flight.globalAlpha = 0.32;
+      flight.fillStyle = "#8cefff";
+      cellRects(heads, headCount, 1.15);
+      flight.globalAlpha = 0.95;
+      flight.fillStyle = "#f6feff";
+      cellRects(cores, coreCount, 0.6);
+    }
+    if (laserCount) {
+      // The latch's laser to its head.
+      flight.globalAlpha = 0.32;
+      flight.strokeStyle = "#a6f2ff";
+      flight.lineWidth = Math.max(0.8, 0.6 * s);
+      flight.beginPath();
+      for (let k = 0; k < laserCount; k += 1) {
+        const o = k * 4;
+        flight.moveTo(lasers[o], lasers[o + 1]);
+        flight.lineTo(lasers[o + 2], lasers[o + 3]);
+      }
+      flight.stroke();
     }
     // 3. Contact shadows of the lifted plates (desktop).
     if (silhouette)
@@ -1996,13 +2529,7 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
     const staged = jigged[p] === 1;
     // The staged plate: lattice, walls and the landed metal, under its jig.
     applyJig(p);
-    if (
-      lattice &&
-      staged &&
-      !governed &&
-      t >= F - SW.lattice[0] &&
-      t < F - SW.lattice[1]
-    ) {
+    if (lattice && staged && !governed && t >= F - SW.lattice[0] && t < F - SW.lattice[1]) {
       const span = (t - F + SW.lattice[0]) / (SW.lattice[0] - SW.lattice[1]);
       const fade = span > 0.8 ? (1 - span) / 0.2 : 1;
       flight.save();
@@ -2046,6 +2573,11 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
       plateDraw(metal, p, 0, 0);
     }
     flight.restore();
+    // As it swings down onto its seat, its conduit prints onto it.
+    if (t >= F - SW.print[0] && (!TOUCH || conduits < 4)) {
+      if (TOUCH) conduits += 1;
+      drawConduit(p, t, false);
+    }
     base();
     // The flights: chips, comets, unfold; metal tiles fade in over them.
     fadeCount = 0;
@@ -2066,7 +2598,13 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
       if (u >= 1) {
         // N6: lock recoil, sparks and the lattice link.
         if (since >= SW.link) continue;
-        if (!TOUCH && !governed && since < SW.recoil && L.tflags[i] & 4 && fadeCount < fades.length) {
+        if (
+          !TOUCH &&
+          !governed &&
+          since < SW.recoil &&
+          L.tflags[i] & 4 &&
+          fadeCount < fades.length
+        ) {
           fades[fadeCount] = i;
           fadeA[fadeCount] = -since / SW.recoil;
           fadeCount += 1;
@@ -2181,7 +2719,11 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
   const seat = (p: number, t: number) => {
     const plate = all[p];
     const F = plate.fit;
-    if (L.kind[p] >= 0 && L.kind[p] !== 3 && (t < F + SW.overshoot || (L.kind[p] === 2 && t < F + SW.sway))) {
+    if (
+      L.kind[p] >= 0 &&
+      L.kind[p] !== 3 &&
+      (t < F + SW.overshoot || (L.kind[p] === 2 && t < F + SW.sway))
+    ) {
       const lambda = lambdaAt(p, t);
       setJig(p, lambda, TOUCH ? 0 : hingeAt(p, t, lambda), TOUCH ? 0 : swayAt(p, t));
       applyJig(p);
@@ -2255,7 +2797,7 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
       setJig(p, lambda, TOUCH ? 0 : hingeAt(p, t, lambda), TOUCH ? 0 : swayAt(p, t));
       applyJig(p);
     }
-    drawConduit(p, t, false);
+    drawConduit(p, t, true);
     if (moving) base();
   };
 
@@ -2389,17 +2931,38 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
         chip(x, y, (6 + 3 * h) * s * 0.7, wrap(FRAMES * h + 72 * tau), c % 3 ? WHITE : ICE, fade);
       }
     }
-    // N6: sparks at the leading edges.
+    // N6: sparks at the leading edges; the guideways' weld heads (frames
+    // 4–5: a star over a white-hot glow, the white bokeh).
     for (let k = 0; k < sparkCount; k += 1) {
       if (draws >= BUDGET || (TOUCH && heroes >= HEROES)) break;
       const o = k * 4;
       const d = sparks[o + 3];
+      let frame = sparks[o + 2];
+      if (frame >= 4) {
+        frame -= 4;
+        if (!TOUCH) {
+          const g = d * 1.25;
+          flight.globalAlpha = 0.75;
+          draws += 1;
+          flight.drawImage(
+            cellsImage,
+            BOKEH_X[WHITE],
+            BOKEH_Y[WHITE],
+            32,
+            32,
+            sparks[o] - g / 2,
+            sparks[o + 1] - g / 2,
+            g,
+            g,
+          );
+        }
+      }
       flight.globalAlpha = 0.9;
       draws += 1;
       if (TOUCH) heroes += 1;
       flight.drawImage(
         cellsImage,
-        KIT_CELLS.spark.x + 32 * sparks[o + 2],
+        KIT_CELLS.spark.x + 32 * frame,
         KIT_CELLS.spark.y,
         32,
         32,
@@ -2444,16 +3007,11 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
         flight.stroke();
       }
     }
-    // G2 / G4: pulses on the conduits, and the print head's weld dots.
+    // G2: pulses on the conduits.
     if (pulsePostCount) {
       flight.globalAlpha = 0.7;
       flight.fillStyle = "#d8f8ff";
       cellRects(pulsesPost, pulsePostCount, 0.5);
-    }
-    if (dotCount) {
-      flight.globalAlpha = 0.95;
-      flight.fillStyle = "#f6feff";
-      cellRects(dots, dotCount, 0.75);
     }
     // 6. Latches (A1) and clamps (G3).
     for (let p = 0; p < P; p += 1) {
@@ -2502,19 +3060,25 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
       if (!L.hasBox[p] || plate.end <= plate.first) continue;
       const release = plate.to + SW.release[0];
       if (t < F - SW.clamp[0] || t >= plate.to + SW.release[1]) continue;
+      // G3 (owner, 2026-10-16: nothing descends onto the body): each clamp
+      // slides in along the surface from beyond its corner in its rest pose,
+      // bites as the plate lands, holds, and slides back out as it releases.
       let frame = 11;
       let alpha = 1;
       let drift = 0;
       if (t < F - SW.clamp[1]) {
         const u = (t - F + SW.clamp[0]) / (SW.clamp[0] - SW.clamp[1]);
-        frame = Math.min(7, Math.floor(u * 8));
+        frame = 7;
+        drift = 1.1 * (1 - easeOut(u));
+        alpha = smooth(u * 2.5);
       } else if (t < F - SW.clamp[2]) frame = 7;
-      else if (t < F + SW.clamp[2]) frame = 8 + Math.min(3, Math.floor(((t - F + SW.clamp[2]) / (2 * SW.clamp[2])) * 4));
+      else if (t < F + SW.clamp[2])
+        frame = 8 + Math.min(3, Math.floor(((t - F + SW.clamp[2]) / (2 * SW.clamp[2])) * 4));
       else if (t >= release) {
         const u = (t - release) / (SW.release[1] - SW.release[0]);
-        frame = 11 - Math.min(11, Math.floor(u * 12));
-        alpha = 1 - u;
-        drift = 0.4 * u;
+        frame = u < 0.3 ? 11 - Math.min(3, Math.floor((u / 0.3) * 4)) : 7;
+        alpha = 1 - smooth(u);
+        drift = 1.1 * u * u;
       }
       const b = p * 4;
       const bx = L.box[b];
@@ -2533,7 +3097,7 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
           flight.globalAlpha = alpha * 0.9;
           flight.strokeStyle = "#ffd27a";
           flight.lineWidth = 1.2;
-          const arm = d * 0.33 * (frame < 7 ? frame / 7 : 1);
+          const arm = d * 0.33;
           const sx = right ? 1 : -1;
           const sy = bottom ? 1 : -1;
           flight.beginPath();
@@ -2639,7 +3203,7 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
       }
     // 8. The front chips, the crown and the free chips (their bands).
     lanes(true, t);
-    drawChips(3, 4);
+    drawChips(3, 5);
     if (TOUCH) flushRects();
     flight.globalAlpha = 1;
     flight.lineWidth = 1;

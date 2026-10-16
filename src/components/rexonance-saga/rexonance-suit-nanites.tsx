@@ -60,8 +60,9 @@ import { createSuitExtras, isRexonanceNaniteReady } from "./rexonance-suit-extra
    the core into an orbital cocoon, rivers through each plate's gate, aim,
    dive, unfold and lock; each plate staged in raw nanite metal over its
    shadow, latched, clamped, seated with a seam of light, a shock ring and
-   spall, and painted from the seat; each trim projected as a hologram,
-   printed into a 3D conduit and poured molten. Its canvases then bleed past
+   spall, and painted from the seat; each trim's 3D gold guideway built on
+   the body from the toe tips up (never laid over it from above), printed
+   onto the plate and poured molten. Its canvases then bleed past
    the figure on fine pointers (data-bleed), every draw sits under the
    figure's offset, and the plan, clock, gold and light below are
    unchanged. Otherwise today's call plays. */
@@ -242,8 +243,8 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
           heats.fill(0);
           glints.fill(0);
           moteCount = 0;
-          // The extras' back of the frame: the cocoon behind, the holograms
-          // projected ahead of each plate, the lifted plates' shadows.
+          // The extras' back of the frame: the cocoon behind, the guideways
+          // built on the body ahead of each plate, the lifted plates' shadows.
           extras?.before(t);
           for (let p = 0; p < all.length; p += 1) {
             const plate = all[p];
