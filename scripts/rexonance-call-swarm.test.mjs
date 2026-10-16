@@ -38,7 +38,7 @@ test("the swarm rides the pinned call: its timeline, and the pinned clocks uncha
   assert.equal(swarm.wave, 160);
   // Each plate's latch from F − 360; the lattice F − 270 → F − 60; clamps
   // slide in over [F − 120, F − 40] and bite F ± 10; the seat [F − 40, F]
-  // and its ring-out F → F + 40.
+  // with its ring-out inside it.
   assert.equal(swarm.project, 360);
   // Owner override (2026-10-16): the guideway is built from the toe tips up,
   // never projected or swept from above — no scan window remains; a group's
@@ -53,7 +53,10 @@ test("the swarm rides the pinned call: its timeline, and the pinned clocks uncha
   assert.deepEqual([...swarm.lattice], [270, 60]);
   assert.deepEqual([...swarm.clamp], [120, 40, 10]);
   assert.equal(swarm.seat, calls.REXONANCE_SUIT_CLANK_MS);
-  assert.equal(swarm.overshoot, calls.REXONANCE_SUIT_CLANK_MS);
+  // Every plate is still by F (owner 2026-10-16: 「前がけの生成完了時にズレるのを
+  // 修正して。」): no ring-out after the seat, the ribbons' sway before it.
+  assert.equal("overshoot" in swarm, false);
+  assert.equal(swarm.sway, 120);
   // After F: seam 90 + glow 60, shock 140, print [F − 30, F + 5] (bottom to
   // top along the trims, owner override 2026-10-16; whole before the first
   // gold locks at F + 6), paint
@@ -69,6 +72,10 @@ test("the swarm rides the pinned call: its timeline, and the pinned clocks uncha
   assert.deepEqual([...swarm.release], [70, 130]);
   assert.deepEqual([...swarm.crown], [1600, 1700]);
   assert.deepEqual([...swarm.implode], [1980, 2160]);
+  // The molten band by age (review 2026-10-16: white-hot at its head, amber
+  // behind, its tail fading into the painted gold): the last step is the band.
+  assert.deepEqual([...swarm.moltenAges], [6, 14, 22, 30]);
+  assert.equal(swarm.moltenAges.at(-1), swarm.molten);
   // The legs project during RIDER！, before any leg armour seats.
   const legs = calls.REXONANCE_SUIT_CASCADE.find(({ group }) => group === "legs");
   assert.ok(
@@ -117,7 +124,19 @@ test("the call decides once, bleeds only on fine pointers, and keeps the classic
   // the finished suit (frame 2730) is drawn exactly as before; only the
   // flight canvas bleeds (CSS), its figure origin on whole device pixels.
   assert.match(nanites, /settledCanvas\.width = Math\.round\(box\.clientWidth \* scale\);/);
-  assert.match(nanites, /const width = Math\.round\(flightCanvas\.offsetWidth \* scale\);/);
+  // Flight edges whole CSS px off the figure's (review 2026-10-16: plates hopped ~1 px at `to`).
+  assert.match(
+    nanites,
+    /const width = settledCanvas\.width \+ ox \+ Math\.round\(right \* scale\);/,
+  );
+  assert.match(
+    nanites,
+    /const height = settledCanvas\.height \+ oy \+ Math\.round\(bottom \* scale\);/,
+  );
+  assert.match(
+    nanites,
+    /left: `\$\{-left\}px`,\s*top: `\$\{-top\}px`,\s*width: `calc\(100% \+ \$\{left \+ right\}px\)`,\s*height: `calc\(100% \+ \$\{top \+ bottom\}px\)`,/,
+  );
   assert.match(nanites, /const s = settledCanvas\.width \/ FIG\.width;/);
   assert.match(nanites, /const ox = Math\.round\(/);
   assert.doesNotMatch(nanites, /settled\.setTransform/);
@@ -129,10 +148,10 @@ test("the call decides once, bleeds only on fine pointers, and keeps the classic
     /const onNanites = useCallback\(\(rich\?: boolean\) => \{\s*setNanites\("canvas"\);\s*setSwarm\(rich \? "canvas" : "svg"\);/,
   );
   // …and the motes return once the swarm is over (frame 2730 is HEAD's).
-  assert.match(
-    nanites,
-    /if \(!extras\) void warmRexonanceNanites\(\);\s*else ready\.current\(false\);/,
-  );
+  // (review 2026-10-16: a classic call no longer kicks the kit on the page
+  // it lands on; the next route's warm does.)
+  assert.match(nanites, /if \(extras\) ready\.current\(false\);/);
+  assert.doesNotMatch(nanites, /warmRexonanceNanites/);
   assert.match(component, /data-swarm=\{swarm\}/);
   assert.match(
     sheet,
@@ -164,6 +183,87 @@ test("the extras use no timers, randomness, filters or composites, and allocate 
   );
   // The plan stays free of the kit (its runtime test pins its modules).
   assert.doesNotMatch(planSource, /rexonance-nanites|rexonance-suit-extras/);
+});
+
+// Review (2026-10-16): no per-frame allocation in the draw passes. A double
+// written to a `let` that a closure or the module holds is boxed into a fresh
+// heap number on every write, so the poses, the sprites' arguments and the
+// glows' ramp live in one Float64Array per call; the closures keep only
+// integer counters and flags. Sprites land on whole device pixels and clip
+// rects on whole pixels (a fractional canvas argument is boxed on every
+// call), Math.hypot (which boxes its arguments) is not used, and the poses
+// are primed before any call so V8 has feedback for every branch.
+// scripts/verify-rexonance-call-alloc.mjs measures it in Chrome.
+test("the draw passes keep per-frame values in typed slots, not boxed lets", () => {
+  const scratch = extrasSource.slice(
+    extrasSource.indexOf("export function createSuitExtras("),
+    extrasSource.indexOf("  const base = () => {"),
+  );
+  assert.match(scratch, /const pose = new Float64Array\(POSE_SLOTS\);/);
+  const closureLets = [...scratch.matchAll(/^ {2}let (\w+)/gm)].map(([, name]) => name).sort();
+  assert.deepEqual(closureLets, [
+    "comets",
+    "conduits",
+    "draws",
+    "fadeCount",
+    "frames",
+    "governed",
+    "heroes",
+    "jigs",
+    "laserCount",
+    "linkCount",
+    "pulsePostCount",
+    "pulsePreCount",
+    "segCount",
+    "slow",
+    "sparkCount",
+    "tipCount",
+    "transformed",
+  ]);
+  const moduleLets = [...extrasSource.matchAll(/^let (\w+)/gm)].map(([, name]) => name).sort();
+  assert.deepEqual(moduleLets, [
+    "LAYOUT",
+    "READY",
+    "SHEETS",
+    "calls",
+    "preparation",
+    "primed",
+    "promotePreparation",
+    "resumePreparation",
+  ]);
+  const from = extrasSource.indexOf("  const base = () => {");
+  const to = extrasSource.indexOf("  return {\n    before,", from);
+  const draw = extrasSource.slice(from, to);
+  // No let inside the passes is written from another closure.
+  assert.doesNotMatch(draw, /^ {2}let /m);
+  assert.doesNotMatch(draw, /Math\.hypot\(/);
+  assert.doesNotMatch(extrasSource, /nothing is allocated\)/);
+  // Sprites on whole device pixels.
+  assert.match(
+    draw,
+    /const k = Math\.round\(d\) \|\| 1;\s*flight\.drawImage\(image, sx, sy, sw, sh, Math\.round\(x - k \/ 2\), Math\.round\(y - k \/ 2\), k, k\);/,
+  );
+  // The poses read their inputs from the slots.
+  assert.match(draw, /const tilePose = \(p: number, i: number, helm: boolean\) => \{/);
+  assert.match(draw, /const chip = \(frame: number, tone: number, hero = false\) => \{/);
+  assert.match(draw, /const ringPose = \(c: number\) => \{\s*const t = pose\[ARG_T\];/);
+  // Primed once prepared, on a throwaway instance, never while a call draws.
+  assert.match(extrasSource, /READY = true;\s*settle\(true\);\s*primeNanites\(\);/);
+  assert.match(extrasSource, /if \(work\.drawing > 0\) return queue\(\);/);
+});
+
+// Review (2026-10-16, cold tap): the kit's preparation never runs on
+// /rexonance-saga, where a cold tap's classic call lands and ZENITH draws
+// its first frames; a call that started without the extras drops it back to
+// idle slices, and the next route's warm resumes it.
+test("the kit's preparation parks on /rexonance-saga and resumes on the next route", () => {
+  assert.match(
+    extrasSource,
+    /if \(work\.drawing > 0\) \{\s*urgent = false;\s*schedule\(\);\s*return;\s*\}\s*if \(onSaga\(\)\) \{\s*urgent = false;\s*parked = true;\s*return;\s*\}/,
+  );
+  assert.match(extrasSource, /if \(preparation\) \{\s*resumePreparation\?\.\(\);/);
+  assert.match(warmup, /if \(ready\) \{[^]*?naniteWarm\?\.warm\("low"\);[^]*?\}/);
+  assert.doesNotMatch(kitWarmup, /preparing/);
 });
 
 test("the kit warms with ImageBitmaps only, after the plan, under the suit's skips", () => {
@@ -234,6 +334,7 @@ function recorder() {
     "stroke",
     "moveTo",
     "lineTo",
+    "quadraticCurveTo",
     "arc",
     "ellipse",
     "closePath",
@@ -421,6 +522,142 @@ test("touch: at most 24 hero sprites a frame from the kit; the swarm is rects", 
   assert.ok(Math.max(...frames.map(({ guide }) => guide)) <= 4);
 });
 
+// Owner (2026-10-16): 「前がけの生成完了時にズレるのを修正して。」 — the tassets
+// and the tall narrow plates form in place (never lifted or tilted), and no
+// plate moves once it has seated: from its fit on, its seat and conduit draw
+// under the figure's own transform, so its gold forms where the suit has it.
+test("the tassets form in place, and every plate is at rest from its fit on", async () => {
+  const { plan, extras } = await extrasRuntime({ touch: false });
+  const all = plan.plates();
+  const L = extras.rexonanceNaniteLayout();
+  all.forEach((plate, p) => {
+    const { id, w, h } = plate.piece;
+    if (id.startsWith("tasset-") || (L.kind[p] === 0 && h >= 1.8 * w)) {
+      assert.ok(L.flags[p] & 8, `${id}: formed in place`);
+      assert.equal(L.lift[p], 0, id);
+      assert.equal(L.tilt[p], 0, id);
+    }
+  });
+  assert.ok(all.filter(({ piece }) => piece.id.startsWith("tasset-")).length === 3);
+  const { context } = recorder();
+  const transforms = [];
+  context.setTransform = (...args) => transforms.push(args);
+  const ex = extras.createSuitExtras({
+    flight: context,
+    s: 1.5,
+    ox: 34,
+    oy: 31,
+    all,
+    gold: plan.cells(),
+    source: { kind: "work" },
+    sheet: { kind: "motes" },
+  });
+  for (let t = 600; t <= 2000; t += 5) {
+    ex.before(t);
+    for (let p = 0; p < all.length; p += 1) {
+      const plate = all[p];
+      if (t < plate.spawn || t >= plate.last) continue;
+      if (t < plate.fit) {
+        ex.forming(p, t);
+        continue;
+      }
+      transforms.length = 0;
+      if (t < plate.to) {
+        ex.seat(p, t);
+        ex.unseat();
+      }
+      ex.conduit(p, t);
+      for (const args of transforms)
+        assert.deepEqual(args, [1, 0, 0, 1, 34, 31], `${plate.piece.id} at ${t}: at rest`);
+    }
+    ex.after(t);
+  }
+});
+
+// Owner (2026-10-16): 「更にナノマシンの挙動をブラッシュアップして。」 — squads
+// that hop lanes behind a white leader, the core's heartbeat breathing the
+// rings, seat ripples, tile strings behind white pathfinders that lock on
+// and dart in, and chips banked to their orbit with a glint at the near
+// apex. All closed-form in the clock: a frame drawn again is the same frame.
+test("the swarm's life: squads, strings, and frames that depend on the clock alone", async () => {
+  const life = calls.REXONANCE_SUIT_SWARM_LIFE;
+  assert.deepEqual(JSON.parse(JSON.stringify(life)), {
+    squad: { size: 5, gap: 0.075, hop: [900, 1500], lag: 38 },
+    heartbeat: { from: 640, every: 330, lag: 260, breath: 0.035, hover: 1.6 },
+    ripple: { ms: 260, speed: 1.1, width: 24, push: 13 },
+    string: { gap: 12, reach: 60 },
+    glint: { most: 40 },
+  });
+  // The heartbeat starts after RIDER！'s last pump wave and stops at the seal.
+  assert.ok(life.heartbeat.from > calls.REXONANCE_SUIT_SWARM.waves.at(-1));
+  const { plan, extras } = await extrasRuntime({ touch: false });
+  const all = plan.plates();
+  const L = extras.rexonanceNaniteLayout();
+  // Squads: a leader (white) and up to four followers on its ring and lane.
+  let leaders = 0;
+  for (let c = 0; c < L.ring.length; c += 1) {
+    const lead = L.squad[c];
+    assert.equal(L.ring[lead], L.ring[c]);
+    assert.equal(L.rank[lead], 0);
+    assert.ok(L.rank[c] < life.squad.size);
+    if (L.rank[c] === 0) {
+      leaders += 1;
+      assert.equal(L.chipTone[c], 2, "a squad's leader is white");
+      assert.ok(L.hopT[c] >= life.squad.hop[0] && L.hopT[c] <= life.squad.hop[1]);
+    } else assert.equal(L.lane[c], L.lane[lead]);
+  }
+  assert.ok(leaders >= L.ring.length / life.squad.size, `${leaders} squads`);
+  // Strings: each tile follows a pathfinder of its own plate that lands first.
+  all.forEach((plate, p) => {
+    for (let i = L.tileFirst[p]; i < L.tileFirst[p + 1]; i += 1) {
+      const lead = L.tLead[i];
+      assert.ok(lead >= L.tileFirst[p] && lead < L.tileFirst[p + 1], plate.piece.id);
+      assert.ok(L.land[lead] <= L.land[i]);
+      assert.equal(L.tRank[lead], 0);
+      assert.ok(L.tflags[lead] & 8);
+    }
+  });
+  // A frame is a function of t alone: drawn after another time, or again,
+  // it issues exactly the same draws.
+  const frame = (ex, log, t) => {
+    log.length = 0;
+    ex.before(t);
+    for (let p = 0; p < all.length; p += 1) {
+      const plate = all[p];
+      if (t < plate.spawn || t >= plate.last) continue;
+      if (t < plate.fit) ex.forming(p, t);
+      else {
+        if (t < plate.to) {
+          ex.seat(p, t);
+          ex.unseat();
+        }
+        ex.conduit(p, t);
+      }
+    }
+    ex.after(t);
+    return JSON.stringify(log);
+  };
+  const { context } = recorder();
+  const log = [];
+  context.drawImage = (image, ...args) => log.push(image.kind, ...args.map((v) => Math.round(v)));
+  const ex = extras.createSuitExtras({
+    flight: context,
+    s: 1.5,
+    ox: 34,
+    oy: 31,
+    all,
+    gold: plan.cells(),
+    source: { kind: "work" },
+    sheet: { kind: "motes" },
+  });
+  for (const t of [700, 905, 1250, 1720]) {
+    const first = frame(ex, log, t);
+    frame(ex, log, t + 333);
+    frame(ex, log, t - 120);
+    assert.equal(frame(ex, log, t), first, `${t}: the same frame`);
+  }
+});
+
 test("the layout: every chip has a ring, the cocoon drains bottom-up, every tile a pose", async () => {
   const { plan, extras } = await extrasRuntime({ touch: false });
   const all = plan.plates();
@@ -555,4 +792,55 @@ test("the guideway grows from the toe tips up; clamps slide in; nothing descends
     .filter((p) => L.kind[p] === 1)
     .sort((a, b) => all[a].fit - all[b].fit);
   for (let k = 1; k < tail.length; k += 1) assert.ok(L.buildA[tail[k]] > L.buildA[tail[k - 1]]);
+});
+
+// Review (2026-10-16, 滑らかに): the weld head is a thin thread along each
+// trim's channel — a one-cell skeleton of its gold (Zhang–Suen), each cell
+// linked back to its predecessor along the build — never a band of cell-sized
+// squares; it rounds the cell steps into curves and glows at its growing
+// tips, and the pulses run the channel as short dashes.
+test("the weld head runs the trims' channels as a thread, not a band of squares", async () => {
+  assert.doesNotMatch(extrasSource, /cellRects|b <= front - 0\.08/);
+  assert.match(
+    extrasSource,
+    /trace\(p, front, Math\.max\(0\.04, PRINT_CELLS \* L\.cellFrac\[p\]\), TOUCH \? 0 : HEAD_TIPS\);\s*flushHeads\(\);\s*flushTips\(\);/,
+  );
+  assert.match(
+    extrasSource,
+    /flight\.quadraticCurveTo\(segs\[o \+ 2\], segs\[o \+ 3\], segs\[o \+ 4\], segs\[o \+ 5\]\);/,
+  );
+  const { plan, extras } = await extrasRuntime({ touch: false });
+  const all = plan.plates();
+  const gold = plan.cells();
+  const L = extras.rexonanceNaniteLayout();
+  let cells = 0;
+  let channel = 0;
+  all.forEach((plate, p) => {
+    if (L.kind[p] < 0 || plate.end <= plate.first) return;
+    const id = plate.piece.id;
+    const a0 = L.chanFirst[p];
+    const a1 = L.chanFirst[p + 1];
+    assert.ok(a1 > a0, `${id}: a channel`);
+    cells += plate.end - plate.first;
+    channel += a1 - a0;
+    for (let k = a0; k < a1; k += 1) {
+      const i = L.chanIdx[k];
+      assert.ok(i >= plate.first && i < plate.end && L.chan[i] === 1, id);
+      assert.equal(L.chanFrac[k], L.buildFrac[i]);
+      if (k > a0) assert.ok(L.chanFrac[k] >= L.chanFrac[k - 1], `${id}: by build`);
+      const j = L.chanPrev[i];
+      if (j < 0) continue;
+      // Its predecessor: a channel cell of the same plate, an 8-neighbour,
+      // built before it.
+      assert.ok(j >= plate.first && j < plate.end && L.chan[j] === 1, id);
+      assert.ok(L.buildFrac[j] < L.buildFrac[i], id);
+      assert.ok(
+        Math.abs(gold.fx[j] - gold.fx[i]) <= 4.01 && Math.abs(gold.fy[j] - gold.fy[i]) <= 4.01,
+        id,
+      );
+    }
+  });
+  // A thread: far fewer cells than the trims' gold.
+  assert.ok(channel < cells * 0.6, `${channel} channel cells of ${cells}`);
+  assert.ok(channel > cells * 0.1, `${channel} channel cells of ${cells}`);
 });

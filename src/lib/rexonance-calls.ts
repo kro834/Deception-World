@@ -319,10 +319,12 @@ export const REXONANCE_SUIT_SWARM = {
   drain: 60,
   /** The clamps swing in over [F - 120, F - 40] and bite over F ± 10. */
   clamp: [120, 40, 10],
-  /** The plate swings down onto its seat over [F - 40, F], then rings. */
+  /** The plate swings down onto its seat over [F - 40, F], rings out past
+   * it and is still at F: nothing moves once its gold can form (owner,
+   * 2026-10-16: 「前がけの生成完了時にズレるのを修正して。」; the tassets and
+   * the tall narrow plates form in place, like the helmet). */
   seat: 40,
-  overshoot: 40,
-  /** A ribbon sways this long after it seats. */
+  /** A ribbon flutters over the last this-many ms before it seats. */
   sway: 120,
   /** After F: the seam ignites round the plate's real outline, then glows. */
   seam: 90,
@@ -342,6 +344,10 @@ export const REXONANCE_SUIT_SWARM = {
   link: 60,
   /** The molten band and its droplets behind each gold lock. */
   molten: 30,
+  /** The band by age (owner, 2026-10-16): cells locked within the first
+   * step white-hot, then molten under a fading white heat, then molten
+   * fading into the painted gold (the last step is `molten`). */
+  moltenAges: [6, 14, 22, 30],
   droplet: 24,
   /** The conduit recedes this long behind each lock; clamps release after. */
   recede: 70,
@@ -349,4 +355,33 @@ export const REXONANCE_SUIT_SWARM = {
   /** The helmet's crown ring forms, and the free chips implode at the seal. */
   crown: [1600, 1700],
   implode: [1980, 2160],
+} as const;
+/** Owner (2026-10-16): 「更にナノマシンの挙動をブラッシュアップして。」 — each
+ * nanite of the call's swarm reads as a small machine of its own inside a
+ * structured swarm. Every behaviour is a closed-form function of the call
+ * clock and per-chip seeds (no state carried between frames); ms on the
+ * overlay's clock, figure px (571 x 1040) where noted. */
+export const REXONANCE_SUIT_SWARM_LIFE = {
+  /** Squads: the cocoon's chips fly in strings of `size` behind a white
+   * leader, `gap` rad apart on their ring; every squad hops lanes together
+   * once a `hop` ms period (each follower `lag` ms after the one ahead),
+   * jostling in its slot. */
+  squad: { size: 5, gap: 0.075, hop: [900, 1500], lag: 38 },
+  /** The core's heartbeat after the pump waves: every `every` ms from
+   * `from` until the seal, a beat that breathes each ring out by `breath`
+   * of its radius, reaching a ring `lag` ms per figure height from the core
+   * later; each chip also hovers `hover` px in its own slow rhythm. */
+  heartbeat: { from: 640, every: 330, lag: 260, breath: 0.035, hover: 1.6 },
+  /** A seating plate ripples through the swarm: a front `speed` px/ms wide
+   * `width` px pushes chips out by up to `push` px and spins them up, over
+   * `ms`. */
+  ripple: { ms: 260, speed: 1.1, width: 24, push: 13 },
+  /** Strings: a plate's tiles fly in single file behind a white pathfinder,
+   * `gap` ms apart, and bunch at a shared lock-on point (at most `reach` px
+   * from their own aim) where each hangs, twitching, before it darts in. */
+  string: { gap: 12, reach: 60 },
+  /** Banking: on its ring a chip rolls once an orbit, its lit face round to
+   * the viewer at the near apex, where a specular star flashes (at most
+   * `most` a frame, desktop). */
+  glint: { most: 40 },
 } as const;

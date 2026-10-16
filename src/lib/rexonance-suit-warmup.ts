@@ -347,9 +347,27 @@ export function pauseRexonanceSuitWarmup(preserveIntent = false) {
  * intent and bounded entry preparation cover earlier taps. Returns
  * its cancel. */
 export function scheduleRexonanceSuitWarm(delayMs = 1000) {
-  if (typeof window === "undefined" || ready) return () => {};
+  if (typeof window === "undefined") return () => {};
   if (window.location.pathname === "/" || window.location.pathname.startsWith("/rexonance-saga"))
     return () => {};
+  // Review (2026-10-16, cold tap): the nanite kit's preparation waits on
+  // /rexonance-saga (where a cold tap's call lands); the next route resumes
+  // it, in idle time, under the same skips.
+  if (ready) {
+    let resumeId = 0;
+    const resumeKit = () => {
+      resumeId = 0;
+      if (backgroundPauses || document.hidden || saving() || still()) return;
+      warmPlanWhenIdle();
+      naniteWarm?.warm("low");
+    };
+    if (window.requestIdleCallback)
+      resumeId = window.requestIdleCallback(resumeKit, { timeout: 2000 });
+    else resumeKit();
+    return () => {
+      if (resumeId) window.cancelIdleCallback?.(resumeId);
+    };
+  }
   let timer = 0;
   let idleId = 0;
   let cancelled = false;

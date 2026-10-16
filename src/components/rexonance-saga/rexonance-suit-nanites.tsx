@@ -19,7 +19,6 @@ import {
 } from "./rexonance-suit-plan";
 import { REXONANCE_SUIT_LIGHT } from "@/lib/rexonance-calls";
 import { REXONANCE_SUIT_MARKS } from "@/lib/rexonance-suit";
-import { warmRexonanceNanites } from "@/lib/rexonance-nanites-warmup";
 import { createSuitExtras, isRexonanceNaniteReady } from "./rexonance-suit-extras";
 
 /* rx13 (owner, 2026-10-11): "subdivide extremely finely so it feels like
@@ -138,17 +137,43 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
         const flightCanvas = make();
         settledCanvas.width = Math.round(box.clientWidth * scale);
         settledCanvas.height = Math.round(box.clientHeight * scale);
-        const width = Math.round(flightCanvas.offsetWidth * scale);
-        const height = Math.round(flightCanvas.offsetHeight * scale);
-        flightCanvas.width = width;
-        flightCanvas.height = height;
-        // The figure's box within the flight canvas, on whole device pixels
-        // (scale-free: both rects carry the figure's transform alike).
+        // The flight canvas's bleed (the stylesheet's) cut to whole pixels,
+        // never past it. Review 2026-10-16, owner:
+        // 「前がけの生成完了時にズレるのを修正して。」 A seated plate is drawn on
+        // the flight canvas until its gold is whole and then on the settled
+        // canvas, and the browser snaps each canvas's box to whole pixels on
+        // its own: with the bleed in percent of the figure, the two canvases'
+        // pixels fell up to 2 device px apart and each plate jumped as it
+        // changed canvas. Now the flight canvas's edges lie a whole number of
+        // CSS, backing and device pixels outside the figure's, so both boxes
+        // snap alike, and its backing store is the settled canvas's plus those
+        // pixels. The settled canvas is untouched (the finished suit as
+        // before). The figure's transforms are translations, alike on both
+        // rects.
         const outer = flightCanvas.getBoundingClientRect();
         const inner = box.getBoundingClientRect();
-        const ratio = outer.width ? width / outer.width : scale;
-        const ox = Math.round((inner.left - outer.left) * ratio);
-        const oy = Math.round((inner.top - outer.top) * ratio);
+        const dpr = globalThis.devicePixelRatio || 1;
+        const exact = (value: number) => Math.abs(value - Math.round(value)) < 1e-3;
+        // The CSS px that are whole in every pixel: 1 at 1x and 2x, 2 at 1.5x.
+        const step = [1, 2, 3, 4, 5, 6, 7, 8].find((n) => exact(n * scale) && exact(n * dpr)) ?? 1;
+        const cut = (value: number) => Math.max(0, Math.floor(value / step + 1e-6) * step);
+        const left = cut(inner.left - outer.left);
+        const top = cut(inner.top - outer.top);
+        const right = cut(outer.right - inner.right);
+        const bottom = cut(outer.bottom - inner.bottom);
+        const ox = Math.round(left * scale);
+        const oy = Math.round(top * scale);
+        const width = settledCanvas.width + ox + Math.round(right * scale);
+        const height = settledCanvas.height + oy + Math.round(bottom * scale);
+        flightCanvas.width = width;
+        flightCanvas.height = height;
+        if (left + top + right + bottom > 0)
+          Object.assign(flightCanvas.style, {
+            left: `${-left}px`,
+            top: `${-top}px`,
+            width: `calc(100% + ${left + right}px)`,
+            height: `calc(100% + ${top + bottom}px)`,
+          });
         const settled = settledCanvas.getContext("2d");
         const flight = flightCanvas.getContext("2d");
         const source = work.canvas;
@@ -490,11 +515,11 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
           work.drawing -= 1;
           flight.setTransform(1, 0, 0, 1, 0, 0);
           flight.clearRect(0, 0, width, height);
-          // A call that started before the kit was ready warms it for the next;
-          // one that drew its swarm hands RIDER！'s motes back their own end
-          // state (the finished frame is the classic call's exactly).
-          if (!extras) void warmRexonanceNanites();
-          else ready.current(false);
+          // A call that drew its swarm hands RIDER！'s motes back their own end
+          // state (the finished frame is the classic call's exactly). One
+          // that started before the kit was ready leaves the kit to the next
+          // route's warm (review 2026-10-16: never on the page it lands on).
+          if (extras) ready.current(false);
           for (let p = 0; p < all.length; p += 1) if (!done[p]) settle(p);
           if (!lit) {
             lit = true;
