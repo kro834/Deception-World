@@ -19,7 +19,8 @@ import {
 } from "./rexonance-suit-plan";
 import { REXONANCE_SUIT_LIGHT } from "@/lib/rexonance-calls";
 import { REXONANCE_SUIT_MARKS } from "@/lib/rexonance-suit";
-import { createSuitExtras, isRexonanceNaniteReady } from "./rexonance-suit-extras";
+import type { SuitExtrasEnv } from "./rexonance-suit-extras";
+import { suitExtrasApi } from "./rexonance-suit-extras-hook";
 
 /* rx13 (owner, 2026-10-11): "subdivide extremely finely so it feels like
    nanomachines, and fit it on in turn". The armour assembles out of the
@@ -68,6 +69,12 @@ import { createSuitExtras, isRexonanceNaniteReady } from "./rexonance-suit-extra
 
 /** The engine takes over only if it is ready before the first tile is due. */
 const START_BY = 420;
+
+// The extras through their hook (round 3, review 33): the call's chunk never
+// imports them, so a still tier never downloads the kit's code; until the
+// kit's warm-up has loaded and prepared them, the classic engine plays.
+const isRexonanceNaniteReady = () => suitExtrasApi()?.ready() ?? false;
+const createSuitExtras = (env: SuitExtrasEnv) => suitExtrasApi()?.create(env) ?? null;
 
 // The gold's light, batched per frame: a formed cell cools from white-hot
 // through molten gold to the painted gold, as a square that shrinks into
@@ -225,9 +232,12 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
         }
         work.dirty = true;
         const s = settledCanvas.width / FIG.width;
-        const extras = rich
+        // Round 3 (review 30): a pass of the extras that throws drops them
+        // for the rest of the call (tick), and the classic engine draws on.
+        let extras = rich
           ? createSuitExtras({ flight, s, ox, oy, all, gold: cells(), source, sheet, fence })
           : null;
+        const used = Boolean(extras);
         const surges = planSurges();
         const end = planEnd();
         const gold = cells();
@@ -599,6 +609,10 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
           // that started before the kit was ready leaves the kit to the next
           // route's warm (review 2026-10-16: never on the page it lands on).
           if (extras) ready.current(false);
+          // Round 3 (reviews 28/43/55): the prepared sheets are given back
+          // once the call that drew them is over (they held ~49 MB through the
+          // whole session); the next route's warm prepares them again.
+          if (used) suitExtrasApi()?.release();
           for (let p = 0; p < all.length; p += 1) if (!done[p]) settle(p);
           if (!lit) {
             lit = true;
@@ -623,8 +637,25 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
             return;
           }
           const began = performance.now();
-          draw(t);
+          try {
+            draw(t);
+          } catch {
+            if (!extras) {
+              finish();
+              return;
+            }
+            // The extras threw: drop them, settle the canvas's state, and
+            // let the classic engine (and RIDER！'s motes) carry the call.
+            extras = null;
+            if (typeof flight.reset === "function") flight.reset();
+            else for (let k = 0; k < 32; k += 1) flight.restore();
+            flight.setTransform(1, 0, 0, 1, 0, 0);
+            flight.globalAlpha = 1;
+            flight.clearRect(0, 0, width, height);
+            ready.current(false);
+          }
           if (extras) {
+
             extras.cost(performance.now() - began);
             if (extras.governed() && !("governed" in box.dataset)) box.dataset.governed = "";
           }

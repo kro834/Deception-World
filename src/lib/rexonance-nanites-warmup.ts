@@ -101,8 +101,20 @@ export function pauseRexonanceNanites() {
   aborting.abort();
 }
 
+/** Round 3 (reviews 28/43): once the call that drew them is over, the kit's
+ * decoded sheets are closed (about 8.7 MB of bitmaps, held for the session
+ * before); the next route's warm decodes them again from the cache. Never
+ * while a decode is in flight. */
+export function releaseRexonanceNaniteSources() {
+  if (pending) return;
+  for (const bitmap of sources.values()) bitmap.close?.();
+  sources.clear();
+  decoded = false;
+}
+
 /** A decoded sheet of the kit (null until the warm-up has it). */
 export const rexonanceNaniteSource = (source: string) => sources.get(source) ?? null;
+
 /** Whether every sheet of the kit is decoded. */
 export const isRexonanceNaniteDecoded = () => decoded;
 

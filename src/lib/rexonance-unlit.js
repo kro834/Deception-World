@@ -374,32 +374,40 @@ export function createNaniteMetalJob(
   const pitch = options.pitch ?? 4.6;
   const silhouette = Boolean(options.silhouette);
   const names = silhouette ? ["metal", "silhouette"] : ["metal"];
-  return createNanitePixelJob(document, w, h, [[source, sx, sy]], names, (y, [a], [m, s]) => {
-    const stride = w * 4;
-    for (let x = 0, i = y * stride; x < w; x += 1, i += 4) {
-      const alpha = a[i + 3];
-      if (!alpha) continue;
-      const L = (0.2126 * a[i] + 0.7152 * a[i + 1] + 0.0722 * a[i + 2]) / 255;
-      const hgt = naniteHexHeight(x + 0.5, y + 0.5, pitch);
-      const lit = naniteHexLight(x + 0.5, y + 0.5, pitch);
-      const right = x + 1 < w ? a[i + 7] : 0;
-      const left = x > 0 ? a[i - 1] : 0;
-      const below = y + 1 < h ? a[i + stride + 3] : 0;
-      const above = y > 0 ? a[i - stride + 3] : 0;
-      const rim = Math.max(-1, Math.min(1, ((-(right - left) - (below - above)) / 255) * 0.9));
-      const v = (26 + 150 * L) * (0.74 + 0.26 * hgt) + 34 * lit + 70 * rim;
-      m[i] = naniteByte(v * 0.92);
-      m[i + 1] = naniteByte(v * 0.97 + 4 * hgt);
-      m[i + 2] = naniteByte(v * 1.06 + 10 * hgt);
-      m[i + 3] = alpha;
-      if (s) {
-        s[i] = 6;
-        s[i + 1] = 10;
-        s[i + 2] = 18;
-        s[i + 3] = alpha;
-      }
+  return createNanitePixelJob(document, w, h, [[source, sx, sy]], names, (y, [a], [m, s]) =>
+    naniteMetalRow(y, w, h, a, m, s, pitch),
+  );
+}
+
+/** One row `y` of createNaniteMetalJob's formula, from the region's bytes
+ * `a` (w x h, RGBA) into `m` (and the silhouette's `s`, or null). Shared
+ * with the call's own phased job (round 3, rexonance-suit-extras), so the
+ * formula lives here alone. */
+export function naniteMetalRow(y, w, h, a, m, s, pitch = 4.6) {
+  const stride = w * 4;
+  for (let x = 0, i = y * stride; x < w; x += 1, i += 4) {
+    const alpha = a[i + 3];
+    if (!alpha) continue;
+    const L = (0.2126 * a[i] + 0.7152 * a[i + 1] + 0.0722 * a[i + 2]) / 255;
+    const hgt = naniteHexHeight(x + 0.5, y + 0.5, pitch);
+    const lit = naniteHexLight(x + 0.5, y + 0.5, pitch);
+    const right = x + 1 < w ? a[i + 7] : 0;
+    const left = x > 0 ? a[i - 1] : 0;
+    const below = y + 1 < h ? a[i + stride + 3] : 0;
+    const above = y > 0 ? a[i - stride + 3] : 0;
+    const rim = Math.max(-1, Math.min(1, ((-(right - left) - (below - above)) / 255) * 0.9));
+    const v = (26 + 150 * L) * (0.74 + 0.26 * hgt) + 34 * lit + 70 * rim;
+    m[i] = naniteByte(v * 0.92);
+    m[i + 1] = naniteByte(v * 0.97 + 4 * hgt);
+    m[i + 2] = naniteByte(v * 1.06 + 10 * hgt);
+    m[i + 3] = alpha;
+    if (s) {
+      s[i] = 6;
+      s[i + 1] = 10;
+      s[i + 2] = 18;
+      s[i + 3] = alpha;
     }
-  });
+  }
 }
 
 /** The guideway's derived layers (gold G1/G5), from the decoded guide sheet
@@ -413,27 +421,34 @@ export function createNaniteGuideJob(guide, document = globalThis.document, opti
   const w = guide ? (guide.naturalWidth ?? guide.width) : NaN;
   const h = guide ? (guide.naturalHeight ?? guide.height) : NaN;
   const names = options.walls ? ["holo", "walls"] : ["holo"];
-  return createNanitePixelJob(document, w, h, [[guide, 0, 0]], names, (y, [a], [o, wl]) => {
-    const scan = y % 3 === 2 ? 0.22 : 1;
-    for (let x = 0, i = y * w * 4; x < w; x += 1, i += 4) {
-      const alpha = a[i + 3];
-      if (!alpha) continue;
-      const L = (0.2126 * a[i] + 0.7152 * a[i + 1] + 0.0722 * a[i + 2]) / 255;
-      o[i] = naniteByte(40 + 186 * L);
-      o[i + 1] = naniteByte(150 + 100 * L);
-      o[i + 2] = naniteByte(200 + 55 * L);
-      o[i + 3] = naniteByte(alpha * (0.35 + 0.65 * L) * scan);
-      if (wl && alpha > 160) {
-        const k = naniteUnit((L - 0.3) / 0.25);
-        if (k > 0) {
-          wl[i] = 92;
-          wl[i + 1] = 60;
-          wl[i + 2] = 22;
-          wl[i + 3] = naniteByte(alpha * k);
-        }
+  return createNanitePixelJob(document, w, h, [[guide, 0, 0]], names, (y, [a], [o, wl]) =>
+    naniteGuideRow(y, w, a, o, wl),
+  );
+}
+
+/** One row `y` of createNaniteGuideJob's formula, from the guide's bytes
+ * `a` (w wide) into the hologram `o` (and the walls' `wl`, or null). Shared
+ * with the call's own phased job (round 3). */
+export function naniteGuideRow(y, w, a, o, wl) {
+  const scan = y % 3 === 2 ? 0.22 : 1;
+  for (let x = 0, i = y * w * 4; x < w; x += 1, i += 4) {
+    const alpha = a[i + 3];
+    if (!alpha) continue;
+    const L = (0.2126 * a[i] + 0.7152 * a[i + 1] + 0.0722 * a[i + 2]) / 255;
+    o[i] = naniteByte(40 + 186 * L);
+    o[i + 1] = naniteByte(150 + 100 * L);
+    o[i + 2] = naniteByte(200 + 55 * L);
+    o[i + 3] = naniteByte(alpha * (0.35 + 0.65 * L) * scan);
+    if (wl && alpha > 160) {
+      const k = naniteUnit((L - 0.3) / 0.25);
+      if (k > 0) {
+        wl[i] = 92;
+        wl[i + 1] = 60;
+        wl[i + 2] = 22;
+        wl[i + 3] = naniteByte(alpha * k);
       }
     }
-  });
+  }
 }
 
 // Molten gold, white-hot to amber: the ramp's stops (t, r, g, b).
@@ -454,18 +469,34 @@ export function createNaniteMoltenJob(
   options = {},
 ) {
   const reads = options.mask ? [[source, sx, sy], [options.mask, sx, sy]] : [[source, sx, sy]];
-  return createNanitePixelJob(document, w, h, reads, ["molten"], (y, [a, mask], [o]) => {
-    for (let x = 0, i = y * w * 4; x < w; x += 1, i += 4) {
-      const alpha = a[i + 3];
-      if (!alpha) continue;
-      const L = (0.2126 * a[i] + 0.7152 * a[i + 1] + 0.0722 * a[i + 2]) / 255;
-      const t = naniteUnit(0.25 + 0.85 * L);
-      let k = 4;
-      while (k < 12 && t > NANITE_MOLTEN[k]) k += 4;
-      const u = (t - NANITE_MOLTEN[k - 4]) / (NANITE_MOLTEN[k] - NANITE_MOLTEN[k - 4]);
-      for (let c = 1; c < 4; c += 1)
-        o[i + c - 1] = naniteByte(NANITE_MOLTEN[k - 4 + c] + (NANITE_MOLTEN[k + c] - NANITE_MOLTEN[k - 4 + c]) * u);
-      o[i + 3] = mask ? naniteByte((alpha * mask[i + 3]) / 255) : alpha;
-    }
-  });
+  return createNanitePixelJob(document, w, h, reads, ["molten"], (y, [a, mask], [o]) =>
+    naniteMoltenRow(y, w, a, mask ?? null, o, 0),
+  );
 }
+
+/** The molten ramp's colour at `t` (0..1, clamped) into out[i..i + 2]. */
+export function naniteMoltenRamp(t, out, i) {
+  const v = naniteUnit(t);
+  let k = 4;
+  while (k < 12 && v > NANITE_MOLTEN[k]) k += 4;
+  const u = (v - NANITE_MOLTEN[k - 4]) / (NANITE_MOLTEN[k] - NANITE_MOLTEN[k - 4]);
+  for (let c = 1; c < 4; c += 1)
+    out[i + c - 1] = naniteByte(
+      NANITE_MOLTEN[k - 4 + c] + (NANITE_MOLTEN[k + c] - NANITE_MOLTEN[k - 4 + c]) * u,
+    );
+}
+
+/** One row `y` of createNaniteMoltenJob's formula (t = clamp(0.25 + 0.85
+ * L), alpha the source's times the mask's), its ramp shifted `shift`
+ * toward white (0: the molten gold itself). Shared with the call's own
+ * phased job (round 3, review 9: its white-hot head is the shift 0.3). */
+export function naniteMoltenRow(y, w, a, mask, o, shift) {
+  for (let x = 0, i = y * w * 4; x < w; x += 1, i += 4) {
+    const alpha = a[i + 3];
+    if (!alpha) continue;
+    const L = (0.2126 * a[i] + 0.7152 * a[i + 1] + 0.0722 * a[i + 2]) / 255;
+    naniteMoltenRamp(naniteUnit(0.25 + 0.85 * L) + shift, o, i);
+    o[i + 3] = mask ? naniteByte((alpha * mask[i + 3]) / 255) : alpha;
+  }
+}
+

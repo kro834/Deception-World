@@ -12,11 +12,16 @@ import {
 } from "@/lib/rexonance-suit";
 import { REXONANCE_NANITES } from "@/lib/rexonance-nanites";
 import {
-  createNaniteGuideJob,
-  createNaniteMetalJob,
+  naniteGuideRow,
+  naniteMetalRow,
+  naniteMoltenRow,
   type NanitePixelJob,
 } from "@/lib/rexonance-unlit.js";
-import { rexonanceNaniteSource } from "@/lib/rexonance-nanites-warmup";
+import {
+  releaseRexonanceNaniteSources,
+  rexonanceNaniteSource,
+} from "@/lib/rexonance-nanites-warmup";
+import { registerSuitExtras } from "./rexonance-suit-extras-hook";
 import { rexonanceSuitSource } from "@/lib/rexonance-suit-warmup";
 import {
   FIG,
@@ -112,6 +117,10 @@ const SPRITE = 1.45;
 /** Draw budgets (desktop): drawImage a frame, comets, plates under a jig. */
 const BUDGET = 2450; // the pinned engine's own draws stay within 2,600
 const COMET_BUDGET = 300;
+/** …and once the governor has tripped (round 3, review 40). */
+const GOVERNED_BUDGET = 900;
+const GOVERNED_JIGS = 6;
+
 const JIGS = TOUCH ? 4 : 12;
 /** The seat's swing takes this share of [F − seat, F]; it rings out past
  * the seat over the rest and is still at F (owner, 2026-10-16). */
@@ -1324,122 +1333,27 @@ function latticePlate(context: CanvasRenderingContext2D, L: Layout, plate: Plate
   context.globalAlpha = 1;
 }
 
-// The conduit's rails and channel alone (the guide's opaque pixels), so its
-// hard-light glass can be drawn faint over the raw channel while the rails
-// stay solid. Same contract as the kit's pixel jobs (rexonance-unlit.js:
-// row-sliced, byte-identical whatever the slices, no composite operations,
-// null if the pixels cannot be read); kept here, the call's own layer.
-function createRailsJob(guide: CanvasImageSource, w: number, h: number) {
-  const owned: HTMLCanvasElement[] = [];
-  const make = () => {
-    const canvas = Object.assign(globalThis.document.createElement("canvas"), {
-      width: w,
-      height: h,
-    });
-    owned.push(canvas);
-    return canvas;
-  };
-  try {
-    const scratch = make();
-    const context = scratch.getContext("2d", { willReadFrequently: true });
-    if (!context) throw new Error("unavailable rails context");
-    context.drawImage(guide, 0, 0, w, h, 0, 0, w, h);
-    let input: Uint8ClampedArray | null = context.getImageData(0, 0, w, h).data;
-    let image: ImageData | null = context.createImageData(w, h);
-    let row = 0;
-    let result: { rails: HTMLCanvasElement } | null = null;
-    let cancelled = false;
-    const release = () => {
-      input = null;
-      image = null;
-      for (const canvas of owned) canvas.width = canvas.height = 0;
-    };
-    return {
-      step(until: number, deadline?: Pick<IdleDeadline, "timeRemaining">) {
-        if (cancelled || result || row >= h || !input || !image) return true;
-        const out = image.data;
-        do {
-          for (let x = 0, i = row * w * 4; x < w; x += 1, i += 4) {
-            const a = input[i + 3];
-            if (a < 150) continue;
-            out[i] = input[i];
-            out[i + 1] = input[i + 1];
-            out[i + 2] = input[i + 2];
-            out[i + 3] = a;
-          }
-          row += 1;
-          if (row >= h) return true;
-        } while (performance.now() < until && (!deadline || deadline.timeRemaining() >= 2));
-        return false;
-      },
-      commit() {
-        if (result) return result;
-        if (cancelled || row < h || !image) return null;
-        const canvas = make();
-        const target = canvas.getContext("2d");
-        if (!target) return null;
-        target.putImageData(image, 0, 0);
-        scratch.width = scratch.height = 0;
-        input = null;
-        image = null;
-        owned.length = 0;
-        result = { rails: canvas };
-        return result;
-      },
-      cancel() {
-        if (cancelled || result) return;
-        cancelled = true;
-        release();
-      },
-    };
-  } catch {
-    for (const canvas of owned) canvas.width = canvas.height = 0;
-    return null;
-  }
-}
-
-// The molten gold (G6): the kit's formula (rexonance-unlit.js,
-// createNaniteMoltenJob: t = clamp(0.25 + 0.85 L) through the ramp, alpha
-// the art's times the gold mask's), with each read-back and each upload in
-// a step of its own (the kit's job reads both layers in its first step, past
-// a 6 ms slice). Beside it, the band's white-hot head: the same ramp shifted
-// HOT_SHIFT toward white (the newest cells of the band are drawn from it,
-// the older from the molten, fading into the painted gold). Same job
+// The call's derived layers (round 3, reviews 8/27/9), with the formulas
+// of the kit's pixel jobs (rexonance-unlit.js: naniteMetalRow,
+// naniteGuideRow, naniteMoltenRow — they live there alone) and their
 // contract (row-sliced, byte-identical whatever the slices, no composite
-// operations, null if the pixels cannot be read); kept here, the call's own.
-const MOLTEN_RAMP = Float32Array.of(
-  0,
-  120,
-  52,
-  10,
-  0.4,
-  236,
-  140,
-  40,
-  0.7,
-  255,
-  210,
-  120,
-  1,
-  255,
-  250,
-  236,
-);
-const HOT_SHIFT = 0.3;
-const moltenRamp = (t: number, out: Uint8ClampedArray, i: number) => {
-  let k = 4;
-  while (k < 12 && t > MOLTEN_RAMP[k]) k += 4;
-  const u = (t - MOLTEN_RAMP[k - 4]) / (MOLTEN_RAMP[k] - MOLTEN_RAMP[k - 4]);
-  for (let c = 1; c < 4; c += 1)
-    out[i + c - 1] = Math.round(
-      MOLTEN_RAMP[k - 4 + c] + (MOLTEN_RAMP[k + c] - MOLTEN_RAMP[k - 4 + c]) * u,
-    );
-};
-function createMoltenJob(
-  source: CanvasImageSource,
-  mask: CanvasImageSource | null,
+// operations, null if the pixels cannot be read), but phased so that no
+// preparation slice holds a whole layer: each source is drawn into a
+// scratch canvas in a step of its own and read back a strip of rows a step,
+// the outputs' buffers are made in a step, the rows run to the deadline,
+// and each output is uploaded in a step of its own. The kit's jobs read
+// their whole layer (two for the molten) in their first step, 6-7.9 ms.
+const READ_STRIP = 248;
+type PhasedShade = (y: number, inputs: Uint8ClampedArray[], outputs: Uint8ClampedArray[]) => void;
+function createPhasedJob(
+  reads: CanvasImageSource[],
   w: number,
   h: number,
+  names: readonly string[],
+  shade: PhasedShade,
+  // The reads' own size (an output smaller than its source is read scaled).
+  srcW = w,
+  srcH = h,
 ) {
   const owned: HTMLCanvasElement[] = [];
   const make = () => {
@@ -1456,88 +1370,84 @@ function createMoltenJob(
   try {
     const scratch = make();
     const read = scratch.getContext("2d", { willReadFrequently: true });
-    if (!read) throw new Error("unavailable molten context");
-    let art: Uint8ClampedArray | null = null;
-    let gold: Uint8ClampedArray | null = null;
-    let image: ImageData | null = null;
-    let hotImage: ImageData | null = null;
+    if (!read) throw new Error("unavailable layer context");
+    let inputs: Uint8ClampedArray[] | null = reads.map(() => new Uint8ClampedArray(w * h * 4));
+    let images: ImageData[] | null = null;
+    let source = 0; // the read being copied
+    let strip = -1; // -1: draw it first; then its strips
     let row = 0;
-    let moltenOut: HTMLCanvasElement | null = null;
-    let uploaded = false;
+    let uploaded = 0;
     let cancelled = false;
-    let result: { molten: HTMLCanvasElement; hot: HTMLCanvasElement } | null = null;
-    const pixels = (layer: CanvasImageSource) => {
-      read.clearRect(0, 0, w, h);
-      read.drawImage(layer, 0, 0, w, h, 0, 0, w, h);
-      return read.getImageData(0, 0, w, h).data;
-    };
+    const result: Record<string, HTMLCanvasElement> = {};
+    let done = false;
     return {
       step(until: number, deadline?: Pick<IdleDeadline, "timeRemaining">) {
-        if (cancelled || result || uploaded) return true;
+        if (cancelled || done) return true;
         try {
-          // One read-back, or the upload, per step.
-          if (!art) {
-            art = pixels(source);
-            image = read.createImageData(w, h);
-            hotImage = read.createImageData(w, h);
+          if (source < reads.length) {
+            // One draw, or one strip's read-back, a step.
+            if (strip < 0) {
+              read.clearRect(0, 0, w, h);
+              read.drawImage(reads[source], 0, 0, srcW, srcH, 0, 0, w, h);
+              strip = 0;
+              return false;
+            }
+            const top = strip * READ_STRIP;
+            const rows = Math.min(READ_STRIP, h - top);
+            inputs![source].set(read.getImageData(0, top, w, rows).data, top * w * 4);
+            strip += 1;
+            if (top + rows >= h) {
+              source += 1;
+              strip = -1;
+              if (source >= reads.length) scratch.width = scratch.height = 0;
+            }
             return false;
           }
-          if (mask && !gold) {
-            gold = pixels(mask);
+          if (!images) {
+            images = names.map(() => read.createImageData(w, h));
             return false;
           }
           if (row < h) {
-            const o = image!.data;
-            const hot = hotImage!.data;
+            const outputs = images.map((image) => image.data);
             do {
-              for (let x = 0, i = row * w * 4; x < w; x += 1, i += 4) {
-                const alpha = art[i + 3];
-                if (!alpha) continue;
-                const lum = (0.2126 * art[i] + 0.7152 * art[i + 1] + 0.0722 * art[i + 2]) / 255;
-                const t = unit(0.25 + 0.85 * lum);
-                moltenRamp(t, o, i);
-                moltenRamp(unit(t + HOT_SHIFT), hot, i);
-                o[i + 3] = hot[i + 3] = gold ? Math.round((alpha * gold[i + 3]) / 255) : alpha;
-              }
+              shade(row, inputs!, outputs);
               row += 1;
             } while (
               row < h &&
               performance.now() < until &&
               (!deadline || deadline.timeRemaining() >= 2)
             );
+            if (row >= h) inputs = null;
             return false;
           }
           // One upload a step.
-          const out = make();
-          const write = out.getContext("2d");
-          if (!write) throw new Error("unavailable molten output");
-          if (!moltenOut) {
-            write.putImageData(image!, 0, 0);
-            moltenOut = out;
-            image = null;
-            return false;
-          }
-          write.putImageData(hotImage!, 0, 0);
-          scratch.width = scratch.height = 0;
-          art = gold = null;
-          hotImage = null;
-          uploaded = true;
-          result = { molten: moltenOut, hot: out };
+          const canvas = make();
+          const write = canvas.getContext("2d");
+          if (!write) throw new Error("unavailable layer output");
+          write.putImageData(images[uploaded], 0, 0);
+          result[names[uploaded]] = canvas;
+          uploaded += 1;
+          if (uploaded < names.length) return false;
+          images = null;
+          owned.length = 0;
+          done = true;
           return true;
         } catch {
           cancelled = true;
+          inputs = null;
+          images = null;
           release();
           return true;
         }
       },
       commit() {
-        return cancelled ? null : result;
+        return cancelled || !done ? null : result;
       },
       cancel() {
-        if (cancelled || result) return;
+        if (cancelled || done) return;
         cancelled = true;
-        art = gold = null;
-        image = hotImage = null;
+        inputs = null;
+        images = null;
         release();
       },
     };
@@ -1546,6 +1456,77 @@ function createMoltenJob(
     return null;
   }
 }
+
+// The raw nanite metal, from the art.
+const createMetalJob = (source: CanvasImageSource) =>
+  createPhasedJob([source], ART_W, ART_H, ["metal"], (y, [a], [m]) =>
+    naniteMetalRow(y, ART_W, ART_H, a, m, null),
+  );
+// Its silhouette (fine pointers: contact shadows and the staged plate's
+// shade), at half the atlas's resolution (round 3, reviews 28/43/55: a soft
+// shadow loses nothing, and it is a quarter of the canvas): rgb (6, 10, 18),
+// the art's alpha.
+const SHADOW_W = ART_W / 2;
+const SHADOW_H = ART_H / 2;
+const createShadowJob = (source: CanvasImageSource) =>
+  createPhasedJob(
+    [source],
+    SHADOW_W,
+    SHADOW_H,
+    ["silhouette"],
+    (y, [a], [s]) => {
+      for (let x = 0, i = y * SHADOW_W * 4; x < SHADOW_W; x += 1, i += 4) {
+        if (!a[i + 3]) continue;
+        s[i] = 6;
+        s[i + 1] = 10;
+        s[i + 2] = 18;
+        s[i + 3] = a[i + 3];
+      }
+    },
+    ART_W,
+    ART_H,
+  );
+
+// The guideway's hologram; on fine pointers its walls (G5) and its rails and
+// channel alone (the guide's opaque pixels, alpha ≥ 150), so its hard-light
+// glass can be drawn faint over the raw channel while the rails stay solid:
+// one read of the guide for all three (the rails used to read it again).
+const createGuideJob = (guide: CanvasImageSource, walls: boolean) =>
+  createPhasedJob(
+    [guide],
+    KIT_GUIDE.width,
+    KIT_GUIDE.height,
+    walls ? ["holo", "walls", "rails"] : ["holo"],
+    (y, [a], [o, wl, rails]) => {
+      naniteGuideRow(y, KIT_GUIDE.width, a, o, wl ?? null);
+      if (!rails) return;
+      for (let x = 0, i = y * KIT_GUIDE.width * 4; x < KIT_GUIDE.width; x += 1, i += 4) {
+        const alpha = a[i + 3];
+        if (alpha < 150) continue;
+        rails[i] = a[i];
+        rails[i + 1] = a[i + 1];
+        rails[i + 2] = a[i + 2];
+        rails[i + 3] = alpha;
+      }
+    },
+  );
+
+// The molten gold (G6), the art's gold through the gold mask, and the
+// band's white-hot head: the same ramp shifted HOT_SHIFT toward white (the
+// band's newest cells are drawn from it, the older from the molten, fading
+// into the painted gold).
+const HOT_SHIFT = 0.3;
+const createMoltenJob = (source: CanvasImageSource, mask: CanvasImageSource | null) =>
+  createPhasedJob(
+    mask ? [source, mask] : [source],
+    ART_W,
+    ART_H,
+    ["molten", "hot"],
+    (y, [a, gold], [molten, hot]) => {
+      naniteMoltenRow(y, ART_W, a, gold ?? null, molten, 0);
+      naniteMoltenRow(y, ART_W, a, gold ?? null, hot, HOT_SHIFT);
+    },
+  );
 
 // The clamps in gold (round 3, owner 「更にブラッシュアップ」): the kit's clamp
 // frames, regraded once in idle time from their dull khaki to polished
@@ -1637,8 +1618,8 @@ type Stage =
   | "layout"
   | "cover"
   | "metal"
+  | "shadow"
   | "guide"
-  | "rails"
   | "molten"
   | "lattice"
   | "clamps"
@@ -1750,6 +1731,14 @@ export function prepareRexonanceNanites(priority: "low" | "high" = "low") {
           return;
         }
         if (stage === "layout") {
+          // Prepared once already (its sheets given back after a call): the
+          // layout stands; only the sheets are made again.
+          if (LAYOUT && !steps) {
+            layout = LAYOUT;
+            stage = "metal";
+            cursor = 0;
+            return schedule();
+          }
           // A unit at a time (a plate, a trim build, the swarm…) while the
           // slice has room; each unit is well under a millisecond.
           steps ??= layoutSteps(all, cells());
@@ -1776,15 +1765,22 @@ export function prepareRexonanceNanites(priority: "low" | "high" = "low") {
           return runJob(
             until,
             deadline,
-            () =>
-              createNaniteMetalJob(source, 0, 0, ART_W, ART_H, globalThis.document, {
-                silhouette: !TOUCH,
-              }) as NanitePixelJob<Record<string, HTMLCanvasElement | undefined>> | null,
+            () => createMetalJob(source),
             (result) => {
               if (!result.metal) return false;
               made.metal = result.metal;
-              made.silhouette = result.silhouette ?? null;
               return true;
+            },
+            TOUCH ? "guide" : "shadow",
+          );
+        if (stage === "shadow")
+          return runJob(
+            until,
+            deadline,
+            () => createShadowJob(source),
+            (result) => {
+              made.silhouette = result.silhouette ?? null;
+              return Boolean(result.silhouette);
             },
             "guide",
           );
@@ -1792,41 +1788,23 @@ export function prepareRexonanceNanites(priority: "low" | "high" = "low") {
           return runJob(
             until,
             deadline,
-            () =>
-              createNaniteGuideJob(guide, globalThis.document, {
-                walls: !TOUCH,
-              }) as NanitePixelJob<Record<string, HTMLCanvasElement | undefined>> | null,
+            () => createGuideJob(guide, !TOUCH),
             (result) => {
               if (!result.holo) return false;
               made.holo = result.holo;
               made.walls = result.walls ?? null;
-              return true;
-            },
-            TOUCH ? "done" : "rails",
-          );
-        if (stage === "rails")
-          return runJob(
-            until,
-            deadline,
-            () =>
-              createRailsJob(guide, KIT_GUIDE.width, KIT_GUIDE.height) as NanitePixelJob<
-                Record<string, HTMLCanvasElement | undefined>
-              > | null,
-            (result) => {
               made.rails = result.rails ?? null;
-              return Boolean(result.rails);
+              return TOUCH || Boolean(result.rails);
             },
-            "molten",
+            TOUCH ? "done" : "molten",
           );
         if (stage === "molten") {
           const mask = rexonanceSuitSource(REXONANCE_SUIT_GOLD_ATLAS.src);
           return runJob(
             until,
             deadline,
-            () =>
-              createMoltenJob(source, mask, ART_W, ART_H) as NanitePixelJob<
-                Record<string, HTMLCanvasElement | undefined>
-              > | null,
+            () => createMoltenJob(source, mask),
+
             (result) => {
               if (!result.molten) return false;
               made.molten = result.molten;
@@ -1964,6 +1942,22 @@ function primeNanites() {
 
 /** The prepared layout, read-only (tests and frame audits). */
 export const rexonanceNaniteLayout = (): Readonly<Layout> | null => LAYOUT;
+
+/** Round 3 (reviews 28/43/55): once the call that drew them is over, the
+ * prepared sheets are given back (about 49 MB of canvases on desktop, held
+ * for the session before); the layout's typed arrays stay, and the next
+ * route's warm prepares the sheets again in idle slices. Never while a call
+ * draws. */
+export function releaseRexonanceNanites() {
+  if (!READY || !SHEETS || work.drawing > 0) return;
+  for (const canvas of Object.values(SHEETS)) if (canvas) canvas.width = canvas.height = 0;
+  SHEETS = null;
+  READY = false;
+  // …and the kit's decoded sheets (about 8.7 MB more).
+  releaseRexonanceNaniteSources();
+}
+
+
 
 /** Whether the call can draw its extras: prepared, and every kit sheet decoded. */
 export const isRexonanceNaniteReady = () =>
@@ -2128,6 +2122,8 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
   // which plates show their latch (the next LATCHES to seat).
   const busy = new Uint8Array(BUSY_W * BUSY_H);
   const latched = new Uint8Array(P);
+  // The frame's sprite budget and staged-plate cap (the governor lowers them).
+  const limit = Int32Array.of(BUDGET, JIGS);
   const ringCount = new Float32Array(RINGS);
   const LINKS = 1200;
   const links = new Float32Array(LINKS * 5);
@@ -2408,7 +2404,7 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
         return;
       }
     }
-    if (draws >= BUDGET) return;
+    if (draws >= limit[0]) return;
     draws += 1;
     flight.globalAlpha = alpha > 1 ? 1 : alpha;
     const t = tone > GOLD_TONE ? ICE : tone;
@@ -2426,7 +2422,7 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
       return;
     }
     if (TOUCH) heroes += 1;
-    if (draws >= BUDGET) return;
+    if (draws >= limit[0]) return;
     draws += 1;
     flight.globalAlpha = pose[SA];
     const t = tone >= 3 ? ICE : tone;
@@ -2434,7 +2430,7 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
   };
   // A comet from the sprite slots' centre along their velocity (SVX, SVY).
   const comet = (tone: number) => {
-    if (TOUCH || governed || comets >= COMET_BUDGET || draws >= BUDGET) return;
+    if (TOUCH || governed || comets >= COMET_BUDGET || draws >= limit[0]) return;
     const vx = pose[SVX];
     const vy = pose[SVY];
     const length = (vx * vx + vy * vy) ** 0.5;
@@ -2890,7 +2886,7 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
         pose[SVY] = chipVY[c];
         comet(chipT[c]);
       }
-      if (band === 5 && !TOUCH && draws < BUDGET) {
+      if (band === 5 && !TOUCH && draws < limit[0]) {
         // Its glow: the warm or white bokeh, faint and wide. Round 3 (review
         // 18): a crown chip's glow shrinks to 1.2x the chip, at most 0.5,
         // while the helmet's tiles land, so the forming helmet stays legible.
@@ -2910,7 +2906,7 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
           chip(chipF[c], chipT[c]);
           continue;
         }
-        if (draws >= BUDGET || chipA[c] <= 0.01) continue;
+        if (draws >= limit[0] || chipA[c] <= 0.01) continue;
         draws += 1;
         const d = chipD[c] * 1.6 * SPRITE;
         const t = chipT[c] > GOLD_TONE ? ICE : chipT[c];
@@ -2921,7 +2917,7 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
       pose[SD] = chipD[c];
       chip(chipF[c], chipT[c]);
       const glint = chipG[c];
-      if (glint > 0.05 && glints < LIFE.glint.most && draws < BUDGET) {
+      if (glint > 0.05 && glints < LIFE.glint.most && draws < limit[0]) {
         // The banking glint: the kit's star, brightest face-on.
         glints += 1;
         draws += 1;
@@ -2995,10 +2991,27 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
       piece.h * s,
     );
   };
+  // A plate from the half-resolution silhouette (round 3).
+  const shadowDraw = (image: CanvasImageSource, p: number, dx: number, dy: number) => {
+    const piece = all[p].piece;
+    draws += 1;
+    flight.drawImage(
+      image,
+      piece.ax / 2,
+      piece.ay / 2,
+      piece.w / 2,
+      piece.h / 2,
+      (piece.x + dx) * s,
+      (piece.y + dy) * s,
+      piece.w * s,
+      piece.h * s,
+    );
+  };
   // The conduit's face: its walls twice in parallax (G5), the hard-light
+
   // glass faint over the raw channel, the gold rails solid.
   const conduitFace = (p: number, t: number) => {
-    if (walls) {
+    if (walls && !governed) {
       const phiAngle = Math.PI / 4 + 0.5 * Math.max(-1, Math.min(1, (t - all[p].fit) / 200));
       const dx = WALL_DEPTH * Math.cos(phiAngle);
       const dy = WALL_DEPTH * Math.sin(phiAngle);
@@ -3159,7 +3172,7 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
   };
   // The tips' glows: an ice bokeh over a small white-hot one (desktop).
   const flushTips = () => {
-    for (let k = 0; k < tipCount && !TOUCH && draws < BUDGET - 1; k += 1) {
+    for (let k = 0; k < tipCount && !TOUCH && draws < limit[0] - 1; k += 1) {
       const o = k * 3;
       const x = tips[o];
       const y = tips[o + 1];
@@ -3392,6 +3405,8 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
   const before = (t: number) => {
     frames += 1;
     draws = 0;
+    limit[0] = governed ? GOVERNED_BUDGET : BUDGET;
+    limit[1] = governed ? GOVERNED_JIGS : JIGS;
     comets = 0;
     heroes = 0;
     linkCount = 0;
@@ -3422,7 +3437,7 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
       const F = plate.fit;
       if (t >= plate.spawn && t < F) {
         const lambda = lambdaAt(p, t);
-        if (lambda !== 0 && jigs < JIGS && L.kind[p] !== 3) {
+        if (lambda !== 0 && jigs < limit[1] && L.kind[p] !== 3) {
           setJig(p, lambda, TOUCH ? 0 : hingeAt(p, t, lambda), TOUCH ? 0 : swayAt(p, t));
           jigged[p] = 1;
           jigs += 1;
@@ -3476,7 +3491,7 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
         if (landed) {
           flight.clip();
           flight.globalAlpha = 0.38;
-          plateDraw(silhouette, p, 0, 0);
+          shadowDraw(silhouette, p, 0, 0);
         }
         flight.restore();
       }
@@ -3657,8 +3672,8 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
       flight.clip();
       if (silhouette && staged && lam[p] > 0.02) {
         flight.globalAlpha = 0.9;
-        plateDraw(silhouette, p, 0.8, 1);
-        plateDraw(silhouette, p, 1.6, 2);
+        shadowDraw(silhouette, p, 0.8, 1);
+        shadowDraw(silhouette, p, 1.6, 2);
       }
       flight.globalAlpha = 1;
       plateDraw(metal, p, 0, 0);
@@ -3717,7 +3732,14 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
         }
         const parent = L.parent[i];
         // Round 3: about half the locks spur a link, for LINK_MS.
-        if (parent >= 0 && since < LINK_MS && L.tflags[i] & 4 && linkCount < LINKS && !TOUCH) {
+        if (
+          parent >= 0 &&
+          since < LINK_MS &&
+          L.tflags[i] & 4 &&
+          linkCount < LINKS &&
+          !TOUCH &&
+          !governed
+        ) {
           const lo = linkCount * 5;
           links[lo] = Cx * s;
           links[lo + 1] = Cy * s;
@@ -3783,7 +3805,7 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
     // The metal tiles fading in, and the recoil's pop, on the staged plate.
     applyJig(p);
     for (let k = 0; k < fadeCount; k += 1) {
-      if (draws >= BUDGET) break;
+      if (draws >= limit[0]) break;
       const i = fades[k];
       const tile = tiles[i - first];
       const a = fadeA[k];
@@ -4041,7 +4063,7 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
     // N6: sparks at the leading edges; the guideways' weld heads (frames
     // 4–5: a star over a white-hot glow, the white bokeh).
     for (let k = 0; k < sparkCount; k += 1) {
-      if (draws >= BUDGET || (TOUCH && heroes >= HEROES)) break;
+      if (draws >= limit[0] || (TOUCH && heroes >= HEROES)) break;
       const o = k * 4;
       const d = sparks[o + 3];
       let frame = sparks[o + 2];
@@ -4149,7 +4171,7 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
           flight.beginPath();
           flight.arc(x, y, d * 0.32, 0, TAU);
           flight.stroke();
-        } else if (draws < BUDGET) {
+        } else if (draws < limit[0]) {
           if (TOUCH) heroes += 1;
           if (alpha > 1) alpha = 1;
           flight.globalAlpha = alpha;
@@ -4225,7 +4247,7 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
           flight.stroke();
           continue;
         }
-        if (draws >= BUDGET) break;
+        if (draws >= limit[0]) break;
         draws += 1;
         flight.globalAlpha = shown;
         // On whole device pixels (see the sprite helper), the anchor kept on
@@ -4241,7 +4263,7 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
           size,
           size,
         );
-        if (led > 0 && draws < BUDGET) {
+        if (led > 0 && draws < limit[0]) {
           draws += 1;
           flight.globalAlpha = 0.65 * led * shown;
 
@@ -4300,7 +4322,7 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
         // metal glows white-hot over a warm halo, fading as it cools.
         let heads = 0;
         for (let i = firstLockAfter(p, t - HEAD_GLOW_MS); i < bandTo && heads < HEAD_GLOWS; i += 1) {
-          if (!L.chan[i] || draws >= BUDGET - 1) continue;
+          if (!L.chan[i] || draws >= limit[0] - 1) continue;
           const fade = 1 - (t - gold.lock[i]) / HEAD_GLOW_MS;
           const x = (gold.fx[i] + gold.cw[i] / 2) * s;
           const y = (gold.fy[i] + gold.ch[i] / 2) * s;
@@ -4312,7 +4334,7 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
           sprite(cellsImage, BOKEH_X[WHITE], BOKEH_Y[WHITE], 32, 32, x, y, 2 * G * s);
         }
         for (let i = firstLockAfter(p, t - SW.droplet); i < bandTo && drops < 160; i += 1) {
-          if (draws >= BUDGET) break;
+          if (draws >= limit[0]) break;
           // One cell in three throws a droplet (round 3: fewer, larger beads).
           if (i % 3) continue;
           const age = t - gold.lock[i];
@@ -4351,7 +4373,9 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
             sprite(cellsImage, KIT_CELLS.bead.x + 32 * frame, KIT_CELLS.bead.y, 32, 32, x, y, d);
           }
         }
-        // One in four cells at the receding front lifts off as a gold chip.
+        // One in four cells at the receding front lifts off as a gold chip
+        // (not when governed).
+        if (governed) continue;
         const from = firstLockAfter(p, t - SW.recede - 120);
         const to = firstLockAfter(p, t - SW.recede);
         for (let i = from; i < to && rising < 120; i += 1) {
@@ -4407,10 +4431,14 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
     conduit,
     after,
     cost: (ms: number) => {
-      // The first frames upload the layers; judge the steady state.
+      // The first frames upload the layers; judge the steady state. Round 3
+      // (review 40): two slow frames within three trip it, not only two in
+      // a row, and it sheds more (the sprite budget to GOVERNED_BUDGET, six
+      // staged plates, the walls, links and rising chips besides the back
+      // band, comets, lacquer, embers and sheen).
       if (TOUCH || frames < 8 || governed) return;
-      slow = ms > 10 ? slow + 1 : 0;
-      if (slow >= 2) governed = true;
+      slow = ms > 10 ? slow + 2 : slow > 0 ? slow - 1 : 0;
+      if (slow >= 3) governed = true;
     },
     drawn: () => draws,
     governed: () => governed,
@@ -4437,3 +4465,11 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
     },
   };
 }
+
+// The call's engine reaches the extras through this hook alone (round 3,
+// review 33: the call's chunk never imports this one).
+registerSuitExtras({
+  ready: isRexonanceNaniteReady,
+  create: (env) => createSuitExtras(env),
+  release: releaseRexonanceNanites,
+});

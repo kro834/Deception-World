@@ -113,6 +113,19 @@ try {
     await page.goto(`${base}/world`, { waitUntil: "networkidle" });
     await page.waitForFunction(() => !document.querySelector(".load-gate"));
     await page.waitForTimeout(3500);
+    // Round 3 (review 30): this audit is of the rich path, so the nanite
+    // kit must be in: its four sheets fetched, then its idle preparation.
+    await page.waitForFunction(
+      () =>
+        ["cells.webp", "comets.webp", "fx.webp", "guide.webp"].every((name) =>
+          performance
+            .getEntriesByType("resource")
+            .some((entry) => entry.name.includes("/rexonance-nanites-") && entry.name.endsWith(name)),
+        ),
+      null,
+      { timeout: 20000 },
+    );
+    await page.waitForTimeout(2500);
     const trigger = page.locator(".side-panel-trigger").first();
     await (profile.hasTouch ? trigger.tap() : trigger.click());
     const link = page.locator('#site-side-panel a[href="/rexonance-saga#top"]').first();
@@ -168,10 +181,22 @@ try {
       const state = await page.evaluate(() => {
         const suit = document.querySelector(".rx-suit");
         const meter = document.querySelector(".rx-call-meter > i")?.getAnimations()[0];
+        // Round 3 (review 30): the flight canvas actually drew (a sparse
+        // sample of its pixels).
+        const flight = suit?.querySelectorAll(".rx-suit-nanites > canvas")[1];
+        let painted = 0;
+        if (flight?.width) {
+          const data = flight
+            .getContext("2d")
+            .getImageData(0, 0, flight.width, flight.height).data;
+          for (let i = 3; i < data.length; i += 4 * 97) if (data[i]) painted += 1;
+        }
         return {
           clock: Number(meter?.currentTime),
           suit: suit?.dataset.suit,
           nanites: suit?.dataset.nanites,
+          swarm: suit?.dataset.swarm,
+          painted,
           tier: suit?.closest(".rx-call-sequence")?.dataset.tier,
           canvases: [...(suit?.querySelectorAll(".rx-suit-nanites > canvas") ?? [])].map(
             (canvas) => ({ width: canvas.width, height: canvas.height }),
@@ -184,6 +209,13 @@ try {
       });
       assert.equal(state.clock, ms);
       assert.equal(state.nanites, "canvas", `${name} ${ms}: DOM fallback is not proof`);
+      // Round 3 (review 30): the rich path ran (its swarm, not the SVG
+      // motes) while the engine draws, and its flight canvas painted.
+      if (ms <= 2400)
+        assert.equal(state.swarm, "canvas", `${name} ${ms}: the extras must run (data-swarm)`);
+      if (ms <= 2000)
+        assert.ok(state.painted > 50, `${name} ${ms}: the flight canvas drew (${state.painted})`);
+
       assert.equal(state.suit, "build");
       assert.equal(state.tier, "full");
       assert.equal(state.canvases.length, 2);
@@ -245,6 +277,14 @@ try {
     }
     assert.equal(shots.length, 46);
     assert.equal(supplements.length, 8);
+    // …and once the engine is done, RIDER！'s motes are back (data-swarm svg).
+    await page.clock.runFor(200);
+    assert.equal(
+      await page.evaluate(() => document.querySelector(".rx-suit")?.dataset.swarm),
+      "svg",
+      `${name}: the SVG motes return at the finish`,
+    );
+
     assertRexonanceFaceHold({ shots, supplements }, name);
     assert.deepEqual(errors, []);
     await contactSheet(shots, join(output, `${name}-timeline.png`));

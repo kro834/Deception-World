@@ -689,3 +689,74 @@ for (const reason of ["go", "hidden"]) {
     }
   });
 }
+
+// Round 3 (review 45): a plan that finishes preparing while the page is
+// hidden or a go() holds the network used to skip the nanite kit's import,
+// and nothing kicked it again until a classic call. It now waits for the
+// resume.
+for (const reason of ["go", "hidden"]) {
+  test(`rx17: ${reason} while the plan prepares defers the kit's import until the page resumes`, async () => {
+    const f = await fixture();
+    try {
+      const source = readFileSync(
+        new URL("../src/lib/rexonance-suit-warmup.ts", import.meta.url),
+        "utf8",
+      );
+      const code = ts.transpileModule(source, {
+        compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
+      }).outputText;
+      let finishPlan;
+      let kitImports = 0;
+      const exports = {};
+      runInNewContext(code, {
+        exports,
+        window: globalThis.window,
+        document: globalThis.document,
+        navigator: globalThis.navigator,
+        Image: globalThis.Image,
+        AbortController,
+        createImageBitmap: undefined,
+        require(name) {
+          if (name === "./rexonance-suit.ts") return suit;
+          if (name === "./rexonance-site-artwork.ts") return { REXONANCE_SITE_ARTWORK: {} };
+          if (name === "./rexonance-transition-loader.ts")
+            return { prepareRexonanceTransition: { prefetch: () => Promise.resolve(null) } };
+          if (name === "../components/rexonance-saga/rexonance-suit-plan")
+            return {
+              prepareRexonanceSuit: () =>
+                new Promise((resolve) => {
+                  finishPlan = resolve;
+                }),
+            };
+          if (name === "./rexonance-nanites-warmup.ts") {
+            kitImports += 1;
+            return { warmRexonanceNanites: () => Promise.resolve(true) };
+          }
+          throw new Error(`unexpected module: ${name}`);
+        },
+      });
+      const cancel = exports.scheduleRexonanceSuitWarm();
+      f.runTimer();
+      f.runIdle();
+      f.loadImages();
+      await settle();
+      assert.equal(exports.isRexonanceSuitReady(), true);
+      f.runIdle();
+      await settle();
+      assert.ok(finishPlan, "the plan is preparing");
+      let resume;
+      if (reason === "go") resume = exports.pauseRexonanceSuitWarmup();
+      else f.visibility(true);
+      finishPlan(true);
+      await settle();
+      assert.equal(kitImports, 0, "no kit import while hidden or paused");
+      if (reason === "go") resume();
+      else f.visibility(false);
+      await settle();
+      assert.equal(kitImports, 1, "the resume imports the kit");
+      cancel();
+    } finally {
+      f.restore();
+    }
+  });
+}

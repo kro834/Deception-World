@@ -22,6 +22,9 @@ let activeBatch: WarmBatch | null = null;
 let backgroundPauses = 0;
 let planWaiting = false;
 let planIdlePending = false;
+// Round 3 (review 45): the plan was prepared while the page was hidden or a
+// go() held the network, so the kit's import waits for the resume.
+let kitWaiting = false;
 const completed = new Set<string>();
 const schedules = new Set<{ suspend: () => void; resume: () => void }>();
 // The decoded images stay referenced, so the CSS layers stay warm for the call.
@@ -81,13 +84,23 @@ function warmPlanWhenIdle() {
       () => undefined,
     ).then((prepared) => {
       // Then the nanite kit, after the plan (2026-10-16).
-      if (prepared !== true || document.hidden || backgroundPauses || saving() || still()) return;
-      void import("./rexonance-nanites-warmup.ts").then(
-        (kit) => kit.warmRexonanceNanites(),
-        () => undefined,
-      );
+      if (prepared !== true || saving() || still()) return;
+      kitWaiting = true;
+      resumeKit();
     });
   }, 2000);
+}
+
+// The kit's chunk once the plan is prepared, unless the page is hidden or a
+// go() holds the network: then on the resume (round 3, review 45: it used
+// to be skipped, and nothing kicked the kit again until a classic call).
+function resumeKit() {
+  if (!kitWaiting || !ready || document.hidden || backgroundPauses || saving() || still()) return;
+  kitWaiting = false;
+  void import("./rexonance-nanites-warmup.ts").then(
+    (kit) => kit.warmRexonanceNanites(),
+    () => undefined,
+  );
 }
 
 // A layer as an image, fetched and decoded off the main thread (it stays
@@ -255,6 +268,7 @@ async function start(priority: Priority, batch: WarmBatch) {
 export function warmRexonanceSuit(priority: Priority = "low"): Promise<boolean> {
   if (ready) {
     warmPlanWhenIdle();
+    resumeKit();
     if (priority === "high") naniteWarm?.warm("high");
     return Promise.resolve(true);
   }
@@ -329,6 +343,7 @@ export function pauseRexonanceSuitWarmup(preserveIntent = false) {
     if (!backgroundPauses) {
       schedules.forEach((schedule) => schedule.resume());
       warmPlanWhenIdle();
+      resumeKit();
       if (ready) naniteWarm?.warm("low");
     }
   };
@@ -355,15 +370,16 @@ export function scheduleRexonanceSuitWarm(delayMs = 1000) {
   // it, in idle time, under the same skips.
   if (ready) {
     let resumeId = 0;
-    const resumeKit = () => {
+    const resumeWarm = () => {
       resumeId = 0;
       if (backgroundPauses || document.hidden || saving() || still()) return;
       warmPlanWhenIdle();
+      resumeKit();
       naniteWarm?.warm("low");
     };
     if (window.requestIdleCallback)
-      resumeId = window.requestIdleCallback(resumeKit, { timeout: 2000 });
-    else resumeKit();
+      resumeId = window.requestIdleCallback(resumeWarm, { timeout: 2000 });
+    else resumeWarm();
     return () => {
       if (resumeId) window.cancelIdleCallback?.(resumeId);
     };
@@ -404,9 +420,11 @@ export function scheduleRexonanceSuitWarm(delayMs = 1000) {
     if (loaded && !ready) afterLoad();
     if (ready) {
       warmPlanWhenIdle();
+      resumeKit();
       naniteWarm?.warm("low");
     }
   };
+
   const onVisibility = () => {
     if (document.hidden) {
       suspend();
