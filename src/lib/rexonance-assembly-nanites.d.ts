@@ -20,6 +20,22 @@ export const ASSEMBLY_NANITES: {
   readonly crown: readonly [number, number];
   readonly implode: readonly [number, number];
 };
+/** The gold guideway's build (owner, 2026-10-16: built smoothly from the
+ * toe tips upward along the trims, never laid over from above). */
+export const ASSEMBLY_GUIDEWAY: {
+  /** The front's speed, figure px per unit progress. */
+  readonly climb: number;
+  /** The least time between a conduit's completion and its plate's contact. */
+  readonly ready: number;
+  /** The most a beat's climb runs ahead of its first fitting. */
+  readonly early: number;
+  /** How far the ice hologram runs ahead of the solid conduit. */
+  readonly holo: number;
+  /** The weld head's length. */
+  readonly head: number;
+  /** The sparks' life behind the head. */
+  readonly ember: number;
+};
 export const ASSEMBLY_SPRITE_BUDGET: number;
 export const ASSEMBLY_COMET_BUDGET: number;
 export const ASSEMBLY_TOUCH_HERO_BUDGET: number;
@@ -91,6 +107,11 @@ export interface NanitePlate {
   g0: number;
   g1: number;
   span: number;
+  /** The guideway's build window: from its lowest cell to its last. */
+  buildStart: number;
+  buildEnd: number;
+  /** Its climb (the beat; the ribbons climb on their own). */
+  climb: number;
   recedeEnd: number;
   releaseEnd: number;
 }
@@ -133,6 +154,11 @@ export interface NanitePlan {
   paintRank: Int32Array;
   goldIdx: Int32Array;
   goldHash: Float32Array;
+  /** Per gold cell: its place along its plate's guideway, 0 at the entry. */
+  buildB: Float32Array;
+  /** Per plate (its gold range), its cells and their build times, sorted. */
+  buildAt: Float64Array;
+  buildIdx: Int32Array;
   rings: NaniteRings;
   free: {
     count: number;
@@ -195,6 +221,8 @@ export interface NanitePlanOptions {
   } | null;
   seams?: Readonly<Record<string, string>> | null;
   goldBoxes?: Readonly<Record<string, readonly [number, number, number, number]>> | null;
+  /** The gold cells' size, figure px (4). */
+  goldCell?: number;
   coarse?: boolean;
 }
 
@@ -222,7 +250,13 @@ type Pass = (context: CanvasRenderingContext2D) => void;
 
 export interface AssemblyNanites {
   state: AssemblyNanitesState;
-  frame(q: number, dq: number, calm: boolean, scale: number, backRects: boolean): AssemblyNanitesState;
+  frame(
+    q: number,
+    dq: number,
+    calm: boolean,
+    scale: number,
+    backRects: boolean,
+  ): AssemblyNanitesState;
   view(scale: number, x: number, y: number): void;
   paintedBy(q: number): number;
   backPass: Pass;
@@ -260,6 +294,7 @@ export function createAssemblyNanites(options: {
     holo?: Sheet;
     walls?: Sheet;
     face?: Sheet;
+    glass?: Sheet;
     frame?: Sheet;
     frameDeep?: Sheet;
     molten?: Sheet;

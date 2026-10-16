@@ -1985,6 +1985,28 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
             )
           : null;
         if (!active()) return;
+        // The guideway's gold glass (atlas space, fine pointers): the guide's
+        // own shape in warm gold, so the conduit it builds reads as a gold
+        // frame of the plate's trims (owner: 金色のその部分に対応するフレーム).
+        let goldGlass = null;
+        if (guideLayers && !coarse.matches) {
+          mark("nanite-gold-glass");
+          goldGlass = await idleTask(() => {
+            if (!active()) return null;
+            const sheet = document.createElement("canvas");
+            resources.add(sheet);
+            sheet.width = images.guide.width;
+            sheet.height = images.guide.height;
+            const glass = sheet.getContext("2d");
+            for (let k = 0; k < 3; k += 1) glass.drawImage(images.guide, 0, 0);
+            glass.globalCompositeOperation = "source-in";
+            glass.fillStyle = "rgb(246 198 108)";
+            glass.fillRect(0, 0, sheet.width, sheet.height);
+            glass.globalCompositeOperation = "source-over";
+            return sheet;
+          });
+          if (!active()) return;
+        }
         // Molten gold, white-hot to amber, from the gold art.
         const moltenLayer = nextGoldArt
           ? await pixelJobIdle(
@@ -2006,6 +2028,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
             gold: nextGold,
             seams: config.nanites?.seams,
             goldBoxes: config.nanites?.goldBoxes,
+            goldCell: config.gold?.cell ?? 4,
             coarse: coarse.matches,
           }),
         );
@@ -2037,6 +2060,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
                   holo: guideLayers?.holo ?? null,
                   walls: guideLayers?.walls ?? null,
                   face: guideLayers ? images.guide : null,
+                  glass: goldGlass,
                   frame: nextFrame,
                   frameDeep: nextFrameDeep,
                   molten: moltenLayer?.molten ?? null,
@@ -2057,6 +2081,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
           metalFigure?.silhouette,
           guideLayers?.holo,
           guideLayers?.walls,
+          goldGlass,
           moltenLayer?.molten,
           nextLattice,
         ].filter(Boolean);

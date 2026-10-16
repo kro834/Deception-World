@@ -1490,3 +1490,178 @@ test("the nanite stage plan: paint order, the shared cells, and timings before .
   assert.equal(nano.pieces.filter((piece) => piece.accent).length, 4);
   assert.equal(nano.pieces.find((piece) => piece.crest)?.id, "helmet-crest");
 });
+
+test("the gold guideway is built from the toe tips up, along the trims, never laid over from above (owner 2026-10-16)", async () => {
+  // owner 2026-10-16: 「金のガイドウェイは上から被さる形ではなく、足先から
+  // 滑らかに作られていく。」 Each plate's conduit grows from its lowest cell
+  // along its trims; each beat's front climbs the body ahead of its fittings,
+  // the legs from the toes; a slow scroll lengthens it cell by cell.
+  const { planAssemblyNanites, createAssemblyNanites, ASSEMBLY_GUIDEWAY } = await import(
+    "../src/lib/rexonance-assembly-nanites.js"
+  );
+  const { REXONANCE_NANITES } = await import("../src/lib/rexonance-nanites.ts");
+  const { planAssemblyGold } = await import("../src/lib/rexonance-resonance.js");
+  const { REXONANCE_SUIT_GOLD_CELL, REXONANCE_SUIT_GOLD_CELLS } =
+    await import("../src/lib/rexonance-suit-gold.ts");
+  const { REXONANCE_SUIT_DRIVER } = await import("../src/lib/rexonance-calls.ts");
+  const pieces = REXONANCE_SUIT_PIECES.map((piece) => ({
+    ...piece,
+    preset: REXONANCE_SUIT_DRIVER.includes(piece.id),
+  }));
+  const plan = planAssembly({
+    size: REXONANCE_SUIT_SIZE,
+    pieces,
+    core: REXONANCE_SUIT_MARKS.core,
+    visor: REXONANCE_SUIT_MARKS.visor,
+    maskTile: REXONANCE_SUIT_TILE,
+    tile: 12,
+  });
+  const landed = new Map();
+  for (const tile of plan.tiles)
+    if (tile.pieceId) landed.set(tile.pieceId, Math.max(landed.get(tile.pieceId) ?? 0, tile.t1));
+  const gold = planAssemblyGold({
+    pieces,
+    gold: { atlas: "", cell: REXONANCE_SUIT_GOLD_CELL, cells: REXONANCE_SUIT_GOLD_CELLS },
+    landed,
+  });
+  const nano = planAssemblyNanites({
+    plan,
+    pieces,
+    size: REXONANCE_SUIT_SIZE,
+    core: REXONANCE_SUIT_MARKS.core,
+    visor: REXONANCE_SUIT_MARKS.visor,
+    gold,
+    seams: REXONANCE_NANITES.seams,
+    goldBoxes: REXONANCE_NANITES.goldBoxes,
+    goldCell: REXONANCE_SUIT_GOLD_CELL,
+  });
+  const built = nano.pieces.filter((piece) => piece.goldEnd > piece.goldFirst);
+  assert.ok(built.length >= 50);
+  let upward = 0;
+  for (const piece of built) {
+    const { goldFirst: a, goldEnd: b } = piece;
+    for (let k = a + 1; k < b; k += 1) assert.ok(nano.buildAt[k] >= nano.buildAt[k - 1]);
+    // Done before the plate seats, after RIDER! begins.
+    assert.ok(piece.buildEnd <= piece.contact - ASSEMBLY_GUIDEWAY.ready + 1e-9, piece.id);
+    assert.ok(piece.buildStart >= 0.07 && piece.buildStart <= piece.buildEnd, piece.id);
+    assert.equal(nano.buildAt[a], piece.buildStart);
+    // It starts at the plate's lowest cell.
+    let bottom = 0;
+    for (let k = a; k < b; k += 1) bottom = Math.max(bottom, gold.y[nano.buildIdx[k]] + gold.h[nano.buildIdx[k]]);
+    const entry = nano.buildIdx[a];
+    assert.equal(gold.y[entry] + gold.h[entry], bottom, `${piece.id} grows from its lowest cell`);
+    assert.equal(nano.buildB[entry], 0);
+    // Its first fifth lies lower on the body than its last fifth.
+    const fifth = Math.max(1, Math.floor((b - a) / 5));
+    let early = 0;
+    let late = 0;
+    for (let k = 0; k < fifth; k += 1) {
+      early += gold.y[nano.buildIdx[a + k]];
+      late += gold.y[nano.buildIdx[b - 1 - k]];
+    }
+    if (early >= late) upward += 1;
+  }
+  assert.ok(upward >= built.length * 0.9, `${upward}/${built.length} plates grow upward`);
+  // The legs climb from the toe tips: the feet first, the thighs last.
+  const legs = built.filter((piece) => piece.group === "legs");
+  const first = legs.reduce((a, b) => (b.buildStart < a.buildStart ? b : a));
+  assert.match(first.id, /boot-foot/);
+  const at = (id) => built.find((piece) => piece.id === id).buildStart;
+  assert.ok(at("boot-foot-l") < at("boot-ankle-l"));
+  assert.ok(at("boot-ankle-l") < at("knee-disc-l"));
+  assert.ok(at("knee-disc-l") < at("thigh-top-l"));
+  // No ornament's trim before the ornaments form (the knee rule).
+  for (const piece of built)
+    if (piece.group === "tail" || piece.group === "ribbon")
+      assert.ok(piece.buildStart - ASSEMBLY_GUIDEWAY.holo > 0.58, piece.id);
+
+  // Drawn: a foot's conduit lengthens with the scroll, from the toe end.
+  const foot = built.find((piece) => piece.id === "boot-foot-l");
+  const swarm = createAssemblyNanites({
+    nano,
+    size: REXONANCE_SUIT_SIZE,
+    core: REXONANCE_SUIT_MARKS.core,
+    visor: REXONANCE_SUIT_MARKS.visor,
+    sprites: { cells: null, comets: null, fx: null },
+    kit: REXONANCE_NANITES,
+    gold,
+    layers: { face: { id: "guide" }, holo: { id: "holo" } },
+  });
+  const clipsFor = (q) => {
+    const calls = [];
+    let rects = [];
+    const context = {
+      save() {},
+      restore() {},
+      beginPath() {
+        rects = [];
+      },
+      rect(x, y, w, h) {
+        rects.push([x, y, w, h]);
+      },
+      clip() {
+        calls.push({ rects });
+      },
+      drawImage(source, sx, sy) {
+        const last = calls[calls.length - 1];
+        if (last && !last.source) Object.assign(last, { source: source.id, sx, sy });
+      },
+      fill() {},
+      stroke() {},
+      moveTo() {},
+      lineTo() {},
+    };
+    swarm.frame(q, 0, true, 1, false);
+    swarm.hologramPass(context);
+    return calls.filter((call) => call.sx === foot.ax && call.sy === foot.ay);
+  };
+  assert.equal(clipsFor(foot.buildStart - ASSEMBLY_GUIDEWAY.holo - 0.001).length, 0, "nothing before");
+  let previous = 0;
+  for (const u of [0.15, 0.4, 0.7, 1]) {
+    const q = foot.buildStart + u * (foot.buildEnd - foot.buildStart) + 1e-6;
+    const solid = clipsFor(q).find((call) => call.source === "guide");
+    assert.ok(solid && solid.rects.length > previous, `${u}: the conduit grows`);
+    previous = solid.rects.length;
+    const lowest = Math.max(...solid.rects.map(([, y, , h]) => y + h));
+    assert.equal(lowest, foot.gbox[1] + foot.gbox[3], "it runs from the toe end");
+  }
+  assert.equal(previous, foot.goldEnd - foot.goldFirst, "whole when done");
+
+  // Its clamps slide in along the body from beside the box — never
+  // descending onto it (no swing frames, no scale), the lower pair first.
+  const fx = { id: "fx" };
+  const clamps = createAssemblyNanites({
+    nano,
+    size: REXONANCE_SUIT_SIZE,
+    core: REXONANCE_SUIT_MARKS.core,
+    visor: REXONANCE_SUIT_MARKS.visor,
+    sprites: { cells: null, comets: null, fx },
+    kit: REXONANCE_NANITES,
+    gold,
+  });
+  const clampDraws = (q) => {
+    const draws = [];
+    const noop = () => {};
+    const context = new Proxy(
+      {
+        drawImage(source, sx, sy, sw, sh, dx, dy, dw, dh) {
+          if (source === fx && sy < 192) draws.push({ frame: sx / 48, corner: sy / 48, dx, dy, dw, dh });
+        },
+      },
+      { get: (target, key) => (key in target ? target[key] : noop), set: () => true },
+    );
+    clamps.frame(q, 0, true, 1, false);
+    clamps.hardwarePass(context);
+    return draws;
+  };
+  const start = foot.to - 0.016;
+  const slide = [0.002, 0.004, 0.006, 0.009].map((d) => clampDraws(start + d));
+  for (const draws of slide) for (const draw of draws) assert.ok(draw.frame === 7 || draw.frame >= 8);
+  const lowerLeft = slide.map((draws) => draws.find((draw) => draw.corner === 2 && Math.abs(draw.dw - slide[3].find((d) => d.corner === 2).dw) < 1e-9));
+  assert.ok(lowerLeft.every(Boolean), "the lower-left clamp is drawn at one size throughout");
+  for (let k = 1; k < 4; k += 1) {
+    assert.ok(lowerLeft[k].dx >= lowerLeft[k - 1].dx, "it slides inward");
+    assert.equal(lowerLeft[k].dy, lowerLeft[0].dy, "along the surface, not down onto it");
+  }
+  assert.ok(!slide[0].some((draw) => draw.corner < 2), "the upper pair follows the lower");
+});
