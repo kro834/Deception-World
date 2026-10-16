@@ -86,6 +86,18 @@ const GLINT = [
   ["#fffdf3", 0.44, 0.68],
   ["#ffe39a", 0.22, 0.54],
 ] as const;
+/** With the extras, a gold mote by its approach (its size, figure px): far
+ * (e < 0.6) faint, closing in (e < 0.9) dim, about to lock bright. */
+const MOTE_MID = G * (0.22 + 0.42 * 0.6);
+const MOTE_NEAR = G * (0.22 + 0.42 * 0.9);
+const MOTE_A = [0.08, 0.22, 0.65] as const;
+
+
+/** The light's wave is drawn in this many arcs (each fades near an edge). */
+const RING_ARCS = 48;
+
+
+
 
 export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
   const host = useRef<HTMLDivElement>(null);
@@ -174,6 +186,34 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
             width: `calc(100% + ${left + right}px)`,
             height: `calc(100% + ${top + bottom}px)`,
           });
+        // Round 3 (owner 「更にブラッシュアップして」): what the flight canvas
+        // leaves clear, from the figure's origin in device px — its own edges
+        // (sprites fade out within `fence[4]` of them, so nothing meets a
+        // straight cut) and the HUD's P14 / FINAL ARRIVAL label where it
+        // overlaps the bleed (nothing draws over its glyphs).
+        const fence = new Float32Array(9);
+        fence[0] = -ox;
+        fence[1] = -oy;
+        fence[2] = width - ox;
+        fence[3] = height - oy;
+        fence[4] = (coarse ? 8 : 20) * scale;
+        const label = box
+          .closest(".rx-call-sequence")
+          ?.querySelector(".rx-call-caption > span:last-child")
+          ?.getBoundingClientRect();
+        if (label && label.width > 0 && label.height > 0) {
+          const x0 = Math.floor((label.left - inner.left - 6) * scale);
+          const y0 = Math.floor((label.top - inner.top - 4) * scale);
+          const x1 = Math.ceil((label.right - inner.left + 6) * scale);
+          const y1 = Math.ceil((label.bottom - inner.top) * scale);
+          if (x0 < fence[2] && x1 > fence[0] && y0 < fence[3] && y1 > fence[1]) {
+            fence[5] = x0;
+            fence[6] = y0;
+            fence[7] = x1;
+            fence[8] = y1;
+          }
+        }
+        const keepOut = fence[7] > fence[5];
         const settled = settledCanvas.getContext("2d");
         const flight = flightCanvas.getContext("2d");
         const source = work.canvas;
@@ -186,7 +226,7 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
         work.dirty = true;
         const s = settledCanvas.width / FIG.width;
         const extras = rich
-          ? createSuitExtras({ flight, s, ox, oy, all, gold: cells(), source, sheet })
+          ? createSuitExtras({ flight, s, ox, oy, all, gold: cells(), source, sheet, fence })
           : null;
         const surges = planSurges();
         const end = planEnd();
@@ -263,12 +303,47 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
           }
           flight.fill();
         };
+        // The pinned grains: the cooling cells, the glint and the gold motes
+        // in flight. With the extras they lie under the molten band (round 3,
+        // owner 「更にブラッシュアップして」: the band is the pour's hero), and
+        // the motes still far from their cells are faint, so the bright ones
+        // gather at the band's head instead of dotting the whole trim.
+        const grains = () => {
+          glow(heat[0], heats[0], BLOOM);
+          for (let k = HEAT.length - 1; k >= 0; k -= 1) glow(heat[k], heats[k], HEAT[k]);
+          for (let k = GLINT.length - 1; k >= 0; k -= 1) glow(glint[k], glints[k], GLINT[k]);
+          if (!moteCount) return;
+          flight.fillStyle = "#fff8de";
+          for (let pass = extras ? 0 : 2; pass < 3; pass += 1) {
+            flight.globalAlpha = extras ? MOTE_A[pass] : 0.86;
+            flight.beginPath();
+            for (let k = 0; k < moteCount; k += 1) {
+              const size = motes[k * 3 + 2];
+              if (extras && (size < MOTE_MID ? 0 : size < MOTE_NEAR ? 1 : 2) !== pass) continue;
+              flight.rect(
+                motes[k * 3] * s,
+                motes[k * 3 + 1] * s,
+                motes[k * 3 + 2] * s,
+                motes[k * 3 + 2] * s,
+              );
+            }
+            flight.fill();
+          }
+        };
         const draw = (t: number) => {
           if (t < last) reset();
           last = t;
           flight.setTransform(1, 0, 0, 1, 0, 0);
           flight.clearRect(0, 0, width, height);
           flight.setTransform(1, 0, 0, 1, ox, oy);
+          if (keepOut) {
+            // The label stays clear (round 3): the frame is drawn around it.
+            flight.save();
+            flight.beginPath();
+            flight.rect(fence[0], fence[1], fence[2] - fence[0], fence[3] - fence[1]);
+            flight.rect(fence[5], fence[6], fence[7] - fence[5], fence[8] - fence[6]);
+            flight.clip("evenodd");
+          }
           heats.fill(0);
           glints.fill(0);
           moteCount = 0;
@@ -457,9 +532,10 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
               glint[bucket][glints[bucket]++] = i;
             }
           }
-          // The extras' front: seams, rings, spall, links, latches, clamps,
-          // the molten band and its droplets, the front of the cocoon.
-          extras?.after(t);
+          // With the extras, the pinned grains first: the front passes (seams,
+          // rings, spall, links, latches, clamps, the molten band and its
+          // droplets, the front of the cocoon) come after the light, over them.
+          if (extras) grains();
           // The suit is whole: the reactor ignites and the light runs out
           // through the body; a bloom rides it and settles.
           if (held && t >= REXONANCE_SUIT_LIGHT.from) {
@@ -479,34 +555,37 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
             }
             flight.restore();
             // The light's front: a wave from the reactor, fading as it settles.
+            // Round 3: drawn in arcs, each fading out as it nears the flight
+            // canvas's edges, so the wave never ends on a straight cut.
             const bloom = 1 - (t - REXONANCE_SUIT_LIGHT.from) / REXONANCE_SUIT_LIGHT.bloom;
             if (bloom > 0 && u < 1) {
-              flight.globalAlpha = 0.7 * bloom;
               flight.strokeStyle = "#c8f5ff";
               flight.lineWidth = 6 * s;
-              flight.beginPath();
-              flight.arc(coreX * s, coreY * s, Math.max(1, radius), 0, Math.PI * 2);
-              flight.stroke();
+              const r = Math.max(1, radius);
+              const margin = fence[4] + 3 * s;
+              for (let k = 0; k < RING_ARCS; k += 1) {
+                const a0 = (Math.PI * 2 * k) / RING_ARCS;
+                const mid = a0 + Math.PI / RING_ARCS;
+                const x = coreX * s + r * Math.cos(mid);
+                const y = coreY * s + r * Math.sin(mid);
+                let edge = x - fence[0];
+                if (fence[2] - x < edge) edge = fence[2] - x;
+                if (y - fence[1] < edge) edge = y - fence[1];
+                if (fence[3] - y < edge) edge = fence[3] - y;
+                if (edge <= 0) continue;
+                const f = edge < margin ? edge / margin : 1;
+                flight.globalAlpha = 0.7 * bloom * f * f * (3 - 2 * f);
+                flight.beginPath();
+                flight.arc(coreX * s, coreY * s, r, a0, a0 + (Math.PI * 2) / RING_ARCS + 0.004);
+                flight.stroke();
+              }
               flight.globalAlpha = 1;
             }
           }
-          glow(heat[0], heats[0], BLOOM);
-          for (let k = HEAT.length - 1; k >= 0; k -= 1) glow(heat[k], heats[k], HEAT[k]);
-          for (let k = GLINT.length - 1; k >= 0; k -= 1) glow(glint[k], glints[k], GLINT[k]);
-          if (moteCount) {
-            flight.globalAlpha = 0.86;
-            flight.fillStyle = "#fff8de";
-            flight.beginPath();
-            for (let k = 0; k < moteCount; k += 1)
-              flight.rect(
-                motes[k * 3] * s,
-                motes[k * 3 + 1] * s,
-                motes[k * 3 + 2] * s,
-                motes[k * 3 + 2] * s,
-              );
-            flight.fill();
-          }
+          if (extras) extras.after(t);
+          else grains();
           flight.globalAlpha = 1;
+          if (keepOut) flight.restore();
         };
         let finished = false;
         const finish = () => {

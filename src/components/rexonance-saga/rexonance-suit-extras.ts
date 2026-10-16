@@ -113,6 +113,22 @@ const JIGS = TOUCH ? 4 : 12;
 /** The seat's swing takes this share of [F − seat, F]; it rings out past
  * the seat over the rest and is still at F (owner, 2026-10-16). */
 const SLAM = 0.72;
+/** Clamps (round 3): none on a gold box whose short side is under CLAMP_MIN
+ * figure px, the lower pair under CLAMP_PAIR; on a box over CLAMP_HUGE times
+ * the median area they bite the part's own outline. */
+const CLAMP_MIN = 44;
+const CLAMP_PAIR = 96;
+const CLAMP_HUGE = 2.5;
+/** A clamp holding after its bite rests at this alpha until it releases. */
+const CLAMP_HOLD = 0.5;
+
+/** A top-down group's guideways: each plate's share of its group's build. */
+const FIT_WINDOW = 0.3;
+
+/** After the bite, the clamp's LED dims over this long (ms). */
+const LED_MS = 60;
+
+
 const HEROES = 24;
 /** Chips drawn per hex frame: mip and cell columns, tone rows. */
 const MIP_X = Int16Array.from(KIT_CELLS.mip.x);
@@ -151,15 +167,28 @@ const HEAD_HALO = 1.3;
 const HEAD_CORE_A = Float32Array.of(0.95, 0.6, 0.28);
 const HEAD_HALO_A = Float32Array.of(0.3, 0.17, 0.07);
 const HEAD_TIPS = 3; // glowing tips per plate (two soft sprites each)
-const PROJECT_A = Float32Array.of(0.34, 0.19, 0.08);
+const PROJECT_A = Float32Array.of(0.62, 0.3, 0.1);
+const PROJECT_CELLS = 3;
+
 const PULSE_CORE = 0.36;
 // The molten band by age (REXONANCE_SUIT_SWARM.moltenAges): its newest
 // cells white-hot, the next molten under a fading white heat, then molten
 // fading into the painted gold below (each step: molten, then hot, alpha).
-const MOLTEN_A = Float32Array.of(0, 1, 0.72, 0.36);
+// Round 3: the band held opaque longer (the pinned grains lie under it).
+const MOLTEN_A = Float32Array.of(0, 1, 0.92, 0.62);
 const HOT_A = Float32Array.of(1, 0.5, 0, 0);
 // The print head is quicker than the build's: a longer thread.
 const PRINT_CELLS = 4;
+// The molten band's head (round 3): its newest channel cells glow white-hot
+// for HEAD_GLOW_MS (at most HEAD_GLOWS a plate); a droplet is an oriented
+// drop until DROP_BEAD ms, then a bead (the last third of its life).
+const HEAD_GLOW_MS = 10;
+const HEAD_GLOWS = 10;
+const DROP_BEAD = 8;
+const EMBER_A = 0.38;
+
+
+
 /** The weld head throws an ember every EMBER_EVERY ms; each flies EMBER_LIFE
  * ms (at most EMBERS in the air per guideway). */
 const EMBER_EVERY = 14;
@@ -228,6 +257,12 @@ type Layout = {
   shockW: Float32Array;
   latchW: Float32Array;
   clampW: Float32Array;
+  // The clamps (round 3): where each corner's clamp bites (figure px; the
+  // gold box's corner, or on a huge ornament box the outline's point nearest
+  // it, so it bites the part), and which corners have one (bit k: corner k).
+  clampX: Float32Array;
+  clampY: Float32Array;
+  clampMask: Uint8Array;
   box: Float32Array; // gold box x, y, w, h
   hasBox: Uint8Array;
   // The guideway's build (owner, 2026-10-16: from the toe tips up): each
@@ -331,6 +366,7 @@ type Sheets = {
   molten: HTMLCanvasElement | null;
   hot: HTMLCanvasElement | null;
   lattice: HTMLCanvasElement | null;
+  clamps: HTMLCanvasElement | null;
 };
 
 let LAYOUT: Layout | null = null;
@@ -384,6 +420,9 @@ function* layoutSteps(all: Plate[], gold: Cells): Generator<undefined, Layout, u
     shockW: f32(P),
     latchW: f32(P),
     clampW: f32(P),
+    clampX: f32(P * 4),
+    clampY: f32(P * 4),
+    clampMask: new Uint8Array(P),
     box: f32(P * 4),
     hasBox: new Uint8Array(P),
     buildA: new Float32Array(P).fill(Infinity),
@@ -467,6 +506,11 @@ function* layoutSteps(all: Plate[], gold: Cells): Generator<undefined, Layout, u
   >;
   // Seams first (their sizes), then plates and tiles.
   const allLoops = all.map((plate) => seamLoops(REXONANCE_NANITES.seams[plate.piece.id]));
+  // The gold boxes' median area: a box far larger than it is an ornament's.
+  const areas = Object.values(boxes)
+    .map((box) => box[2] * box[3])
+    .sort((a, b) => a - b);
+  const medianArea = areas.length ? areas[areas.length >> 1] : 1;
   const loopCount = allLoops.reduce((sum, loops) => sum + loops.length, 0);
   const pointCount = allLoops.reduce(
     (sum, loops) => sum + loops.reduce((n, points) => n + points.length / 2 + 1, 0),
@@ -559,8 +603,34 @@ function* layoutSteps(all: Plate[], gold: Cells): Generator<undefined, Layout, u
     if (box && !driver) {
       L.hasBox[p] = 1;
       L.box.set(box, p * 4);
-      L.clampW[p] =
-        Math.min(30, Math.max(18, 0.6 * Math.min(box[2], box[3]))) * (L.flags[p] & 1 ? 1.2 : 1);
+      // Round 3 (owner 「更にブラッシュアップ」): clamps drawn large enough that
+      // their bevel, bolt and LED read (the L's arms ≥ 11 figure px), none on
+      // a box too small to hold them, only the lower pair on a small one.
+      const least = Math.min(box[2], box[3]);
+      L.clampW[p] = Math.min(40, Math.max(28, 0.45 * least)) * (L.flags[p] & 1 ? 1.15 : 1);
+
+      L.clampMask[p] = least < CLAMP_MIN ? 0 : least < CLAMP_PAIR ? 0b1100 : 0b1111;
+      const loop = allLoops[p][0];
+      const huge = box[2] * box[3] > CLAMP_HUGE * medianArea && loop && loop.length >= 6;
+      for (let corner = 0; corner < 4; corner += 1) {
+        const cx = box[0] + (corner & 1) * box[2];
+        const cy = box[1] + (corner >> 1) * box[3];
+        let bx = cx;
+        let by = cy;
+        if (huge) {
+          let best = Infinity;
+          for (let k = 0; k < loop.length; k += 2) {
+            const d = (loop[k] - cx) ** 2 + (loop[k + 1] - cy) ** 2;
+            if (d < best) {
+              best = d;
+              bx = loop[k];
+              by = loop[k + 1];
+            }
+          }
+        }
+        L.clampX[p * 4 + corner] = bx;
+        L.clampY[p * 4 + corner] = by;
+      }
     }
     // Tiles: centres, flight seeds, paint order (from the seat outward).
     const first = tileAt;
@@ -882,14 +952,31 @@ function* layOutBuild(L: Layout, all: Plate[], gold: Cells) {
       }
       const gA = Math.max(SW.waves[0] + 20, firstFit - B.lead);
       let gB = lastFit - B.done;
-      const at = (y: number) => gA + ((bottom - y) / Math.max(1, bottom - top)) * (gB - gA);
-      // Every plate of the group whole before its own first tile lands.
-      while (gB > gA + 120 && list.some((p) => at(L.box[p * 4 + 1]) > all[p].fit - B.done)) gB -= 5;
-      for (const p of list) {
-        L.buildA[p] = at(L.box[p * 4 + 1] + L.box[p * 4 + 3]);
-        L.buildB[p] = at(L.box[p * 4 + 1]);
+      // A group that fits from the top down (the arms: upper arm first, the
+      // fists last) builds its guideways in that same order (round 3: the
+      // guideway and the fit read in one direction), each still grown up its
+      // own trims from its lowest cell (owner: never laid over from above).
+      const firstPlate = list.reduce((a, b) => (all[b].fit < all[a].fit ? b : a));
+      const lastPlate = list.reduce((a, b) => (all[b].fit > all[a].fit ? b : a));
+      const lowest = (p: number) => L.box[p * 4 + 1] + L.box[p * 4 + 3];
+      if (lowest(firstPlate) < lowest(lastPlate) - 8 && lastFit > firstFit) {
+        for (const p of list) {
+          const frac = (all[p].fit - firstFit) / (lastFit - firstFit);
+          L.buildA[p] = gA + frac * (gB - gA) * (1 - FIT_WINDOW);
+          L.buildB[p] = L.buildA[p] + FIT_WINDOW * (gB - gA);
+        }
+      } else {
+        const at = (y: number) => gA + ((bottom - y) / Math.max(1, bottom - top)) * (gB - gA);
+        // Every plate of the group whole before its own first tile lands.
+        while (gB > gA + 120 && list.some((p) => at(L.box[p * 4 + 1]) > all[p].fit - B.done))
+          gB -= 5;
+        for (const p of list) {
+          L.buildA[p] = at(L.box[p * 4 + 1] + L.box[p * 4 + 3]);
+          L.buildB[p] = at(L.box[p * 4 + 1]);
+        }
       }
     }
+
     for (const p of list) {
       const F = all[p].fit;
       const lead = kind === 1 || kind === 2 ? B.ornament : B.lead;
@@ -1417,6 +1504,77 @@ function createMoltenJob(
   }
 }
 
+// The clamps in gold (round 3, owner 「更にブラッシュアップ」): the kit's clamp
+// frames, regraded once in idle time from their dull khaki to polished
+// gold-chrome about a quarter brighter, their bolt's LED kept ice-white. A
+// canvas of the clamp region alone (its frames at the same offsets); null if
+// its pixels cannot be read (the call then draws the kit's own).
+const CLAMP_RAMP = Float32Array.of(
+  0,
+  52,
+  30,
+  8,
+  0.35,
+  150,
+  96,
+  30,
+  0.65,
+  232,
+  176,
+  82,
+  0.85,
+  255,
+  226,
+  150,
+  1,
+  255,
+  248,
+  226,
+);
+function goldClamps(fx: CanvasImageSource) {
+  const w = KIT_FX.clamp.cell * KIT_FX.clamp.frames;
+  const h = KIT_FX.clamp.cell * 4;
+  const canvas = Object.assign(globalThis.document.createElement("canvas"), {
+    width: w,
+    height: h,
+  });
+  try {
+    const context = canvas.getContext("2d", { willReadFrequently: true });
+    if (!context) throw new Error("unavailable clamp context");
+    context.drawImage(fx, KIT_FX.clamp.x, KIT_FX.clamp.y, w, h, 0, 0, w, h);
+    const image = context.getImageData(0, 0, w, h);
+    const d = image.data;
+    for (let i = 0; i < d.length; i += 4) {
+      if (!d[i + 3]) continue;
+      const r = d[i];
+      const g = d[i + 1];
+      const b = d[i + 2];
+      const max = Math.max(r, g, b);
+      const lum = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+      if (lum > 0.78 && max - Math.min(r, g, b) < 0.2 * max) {
+        // The LED: ice-white.
+        d[i] = 232;
+        d[i + 1] = 250;
+        d[i + 2] = 255;
+        continue;
+      }
+      const v = unit(lum * 1.3 + 0.06);
+      let k = 4;
+      while (k < 16 && v > CLAMP_RAMP[k]) k += 4;
+      const u = (v - CLAMP_RAMP[k - 4]) / (CLAMP_RAMP[k] - CLAMP_RAMP[k - 4]);
+      for (let c = 1; c < 4; c += 1)
+        d[i + c - 1] = Math.round(
+          CLAMP_RAMP[k - 4 + c] + (CLAMP_RAMP[k + c] - CLAMP_RAMP[k - 4 + c]) * u,
+        );
+    }
+    context.putImageData(image, 0, 0);
+    return canvas;
+  } catch {
+    canvas.width = canvas.height = 0;
+    return null;
+  }
+}
+
 /* ------------------------------------------------------------------ */
 /* Preparation: in its own idle slices, after the plan and its lights. */
 
@@ -1432,7 +1590,16 @@ let resumePreparation: (() => void) | null = null;
 const onSaga = () => Boolean(globalThis.location?.pathname.startsWith("/rexonance-saga"));
 
 type Stage =
-  "suit" | "layout" | "cover" | "metal" | "guide" | "rails" | "molten" | "lattice" | "done";
+  | "suit"
+  | "layout"
+  | "cover"
+  | "metal"
+  | "guide"
+  | "rails"
+  | "molten"
+  | "lattice"
+  | "clamps"
+  | "done";
 
 /** Builds the call's extras (its layout, and the metal, hologram, walls,
  * molten and lattice layers) in ≤ 6 ms idle slices, once the plan and its
@@ -1641,8 +1808,15 @@ export function prepareRexonanceNanites(priority: "low" | "high" = "low") {
           }
           if (cursor >= all.length) {
             made.lattice = lattice;
-            stage = "done";
+            stage = "clamps";
           }
+          return schedule();
+        }
+        if (stage === "clamps") {
+          // The clamps in gold (a small read-back); without it, the kit's own.
+          const fx = rexonanceNaniteSource(KIT_FX.src);
+          made.clamps = fx ? goldClamps(fx) : null;
+          stage = "done";
           return schedule();
         }
         if (stage === "done") {
@@ -1656,6 +1830,7 @@ export function prepareRexonanceNanites(priority: "low" | "high" = "low") {
             molten: made.molten ?? null,
             hot: made.hot ?? null,
             lattice: made.lattice ?? null,
+            clamps: made.clamps ?? null,
           };
           READY = true;
           settle(true);
@@ -1773,6 +1948,10 @@ export type SuitExtrasEnv = {
   /** The working atlas (art, gold raw), and the mote sheet (lacquer). */
   source: CanvasImageSource;
   sheet: CanvasImageSource;
+  /** Round 3: device px from the figure's origin — the flight canvas's
+   * edges (x0, y0, x1, y1), the fade margin, and a box nothing draws over
+   * (the HUD label; empty when x1 ≤ x0). Without it, nothing is fenced. */
+  fence?: Float32Array;
 };
 export type SuitExtras = {
   /** Back and mid chips, guideways being built, pulses, contact shadows. */
@@ -1832,7 +2011,10 @@ const ARG_T = 20; // a ring pose's time
 const ROLL = 21; // a ring pose's roll (tumble frames): banked to the orbit
 const ARG_LX = 22; // a tile's pathfinder's seated centre (figure px)
 const ARG_LY = 23;
-const POSE_SLOTS = 24;
+const FADE = 24; // the fence's fade at the sprite slots' centre (round 3)
+const POSE_SLOTS = 25;
+/** No fence: nothing fades, nothing is kept clear. */
+const OPEN = Float32Array.of(-1e9, -1e9, 1e9, 1e9, 1, 0, 0, 0, 0);
 /** At most this many plates' seats ripple through the swarm at once. */
 const RIPPLES = 8;
 /** The core's heartbeat (LIFE.heartbeat) at t: 0 between beats, about 1 at
@@ -1855,6 +2037,20 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
   if (!READY || !L || !K || !cellsImage || !cometImage || !fxImage || !guideImage) return null;
   if (!priming) calls += 1;
   const { flight, s, ox, oy, all, gold, source, sheet } = env;
+  const fence = env.fence ?? OPEN;
+  // The implosion's vortex (round 3): an ellipse round the core that the
+  // flight canvas holds (the figure's box without a fence), its reach to
+  // each side, up and down (figure px).
+  const inset = env.fence ? fence[4] / s : 0;
+  const edgeL = (env.fence ? fence[0] / s : 0) + inset;
+  const edgeT = (env.fence ? fence[1] / s : 0) + inset;
+  const edgeR = (env.fence ? fence[2] / s : W) - inset;
+  const edgeB = (env.fence ? fence[3] / s : H) - inset;
+  const reachX = Math.max(60, Math.min(CORE_X - edgeL, edgeR - CORE_X));
+  const reachUp = Math.max(60, CORE_Y - edgeT);
+  const reachDown = Math.max(60, edgeB - CORE_Y);
+
+
   const P = all.length;
   if (L.kind.length !== P) return null;
   const metal = K.metal;
@@ -1865,6 +2061,11 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
   const molten = K.molten;
   const hot = K.hot;
   const lattice = K.lattice;
+  // The clamps' frames: the gold regrade when prepared, else the kit's own.
+  const clampImage = K.clamps ?? fxImage;
+  const clampX0 = K.clamps ? 0 : KIT_FX.clamp.x;
+  const clampY0 = K.clamps ? 0 : KIT_FX.clamp.y;
+
   // Per frame.
   const jig = new Float32Array(P * 6);
   const lam = new Float32Array(P);
@@ -2039,6 +2240,31 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
   };
 
   /* Sprites. */
+  // Round 3: the fence's fade at the sprite slots' centre (pose[FADE]): 0 on
+  // and past the flight canvas's edges and inside the label kept clear,
+  // rising to 1 over the fence's margin, so no sprite meets a straight cut
+  // and none sits on the HUD's glyphs.
+  const fenceFade = () => {
+    const x = pose[SX];
+    const y = pose[SY];
+    const m = fence[4];
+    let f = 1;
+    let d = x - fence[0];
+    if (d < m) f = d > 0 ? (f * d) / m : 0;
+    d = fence[2] - x;
+    if (d < m) f = d > 0 ? (f * d) / m : 0;
+    d = y - fence[1];
+    if (d < m) f = d > 0 ? (f * d) / m : 0;
+    d = fence[3] - y;
+    if (d < m) f = d > 0 ? (f * d) / m : 0;
+    if (fence[7] > fence[5]) {
+      const gx = x < fence[5] ? fence[5] - x : x > fence[7] ? x - fence[7] : 0;
+      const gy = y < fence[6] ? fence[6] - y : y > fence[8] ? y - fence[8] : 0;
+      d = gx > gy ? gx : gy;
+      if (d < m) f = d > 0 ? (f * d) / m : 0;
+    }
+    pose[FADE] = f * f * (3 - 2 * f);
+  };
   const rect = (bucket: number, x: number, y: number, d: number) => {
     const k = rectCount[bucket];
     if (k >= RECT_CAP) return;
@@ -2223,15 +2449,27 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
   };
   // A free chip imploding (fraction u of the window) from its ring pose
   // (PX, PY on entry) into the reactor.
+  // Round 3: it turns in the vortex's own frame (its offset from the core
+  // over the vortex's reach on that side), so the spiral stays on the canvas
+  // instead of swinging the low rings out past its edges; one beyond the
+  // vortex is drawn in to its rim over the first third.
   const implodePose = () => {
     const u = pose[ARG_U];
     const a = TAU * u;
-    const k = 1 - u * u * u;
-    const dx = pose[PX] - CORE_X;
+    const nx = (pose[PX] - CORE_X) / reachX;
     const dy = pose[PY] - CORE_Y;
-    pose[PX] = CORE_X + (dx * Math.cos(a) - dy * Math.sin(a)) * k;
-    pose[PY] = CORE_Y + (dx * Math.sin(a) + dy * Math.cos(a)) * k;
+    const ny = dy / (dy > 0 ? reachDown : reachUp);
+    const len = (nx * nx + ny * ny) ** 0.5;
+    const pull = len > 1 ? 1 / (1 + (len - 1) * smooth(u / 0.3)) : 1;
+    const k = (1 - u * u * u) * pull;
+    const cos = Math.cos(a);
+    const sin = Math.sin(a);
+    const rx = (nx * cos - ny * sin) * k;
+    const ry = (nx * sin + ny * cos) * k;
+    pose[PX] = CORE_X + rx * reachX;
+    pose[PY] = CORE_Y + ry * (ry > 0 ? reachDown : reachUp);
   };
+
   // Where chip c is at t (figure px: pose PX, PY, depth PZ); returns its alpha
   // and writes size/tone/frame via the out arrays (index c). -1: not shown.
   const crownCentreY = VISOR_Y - 92;
@@ -2432,7 +2670,10 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
       chipX[c] = x * s;
       chipY[c] = y * s;
       chipD[c] = size * s;
-      chipA[c] = alpha;
+      pose[SX] = chipX[c];
+      pose[SY] = chipY[c];
+      fenceFade();
+      chipA[c] = alpha * pose[FADE];
       chipT[c] = tone;
       // White-hot chips turn face-on (their lit core) with a small wobble.
       // (Wrapped here rather than by a call: no boxed argument.)
@@ -2862,10 +3103,17 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
       flight.restore();
     }
     // The laser's projection just ahead of the head, feathered: brightest
-    // at the head, fading out over the build's lead (ahead).
+    // at the head, fading out over its lead. Round 3: a short band, at most
+    // PROJECT_CELLS cells of the build ahead of the front (and never more
+    // than SW.build.ahead ms), so it runs ahead of the weld point instead of
+    // ghosting the whole trim.
+
+    const span = L.buildB[p] - L.buildA[p];
+    const reach = PROJECT_CELLS * L.cellFrac[p] * span;
+    const ahead = reach < SW.build.ahead ? reach : SW.build.ahead;
     let from = k;
     for (let step = 0; step < 3; step += 1) {
-      const to = builtBy(p, t + (SW.build.ahead * (step + 1)) / 3);
+      const to = builtBy(p, t + (ahead * (step + 1)) / 3);
       if (to > from) {
         flight.save();
         buildClip(from, to);
@@ -2876,7 +3124,6 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
       from = to;
     }
     // The weld head: a thread along the channel, its tips glowing.
-    const span = L.buildB[p] - L.buildA[p];
     const front = span > 0 ? (t - L.buildA[p]) / span : 1;
     const band = Math.max(0.03, HEAD_CELLS * L.cellFrac[p]);
     if (k > first && front < 1 + band) {
@@ -2935,7 +3182,8 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
         pose[SX] = x * s;
         pose[SY] = y * s;
         pose[SD] = (3.6 + 2.2 * h2) * s;
-        pose[SA] = 1.1 * (1 - u * u);
+        fenceFade();
+        pose[SA] = 1.1 * (1 - u * u) * pose[FADE];
         chip(wrap(FRAMES * h1 + 40 * u), h1 < 0.35 ? GOLD_TONE : WHITE);
       }
     }
@@ -3368,7 +3616,8 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
       pose[SX] = x;
       pose[SY] = y;
       pose[SD] = pose[SIZE] * s;
-      pose[SA] = pose[ALPHA];
+      fenceFade();
+      pose[SA] = pose[ALPHA] * pose[FADE];
       if (streak) {
         pose[SVX] = x - backX * s;
         pose[SVY] = y - backY * s;
@@ -3650,7 +3899,8 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
         pose[SX] = x;
         pose[SY] = y;
         pose[SD] = (6 + 3 * h) * s * 0.7;
-        pose[SA] = fade;
+        fenceFade();
+        pose[SA] = fade * pose[FADE];
         chip(wrap(FRAMES * h + 72 * tau), c % 3 ? WHITE : ICE);
       }
     }
@@ -3663,16 +3913,21 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
       const o = k * 4;
       const d = sparks[o + 3];
       let frame = sparks[o + 2];
+      pose[SX] = sparks[o];
+      pose[SY] = sparks[o + 1];
+      fenceFade();
+      const fade = pose[FADE];
+      if (fade <= 0.01) continue;
       if (frame >= 4) {
         frame -= 4;
         if (!TOUCH) {
           const g = d * 1.25;
-          flight.globalAlpha = 0.75;
+          flight.globalAlpha = 0.75 * fade;
           draws += 1;
           sprite(cellsImage, BOKEH_X[WHITE], BOKEH_Y[WHITE], 32, 32, sparks[o], sparks[o + 1], g);
         }
       }
-      flight.globalAlpha = 0.9;
+      flight.globalAlpha = 0.9 * fade;
       draws += 1;
       if (TOUCH) heroes += 1;
       sprite(
@@ -3744,9 +3999,17 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
             : t < F
               ? 6 + Math.min(5, Math.floor(((t - F + SW.seat) / SW.seat) * 6))
               : 11;
-        const d = L.latchW[p] * (0.6 + 0.4 * grow) * s;
+        // It swells as its claws bite (round 3: the bite reads at 1x).
+        const v = (t - F + SW.seat) / (SW.seat + 40);
+        const bite = v > 0 && v < 1 ? Math.sin(Math.PI * v) : 0;
+        const d = L.latchW[p] * (0.6 + 0.4 * grow) * (1 + 0.3 * bite) * s;
         const x = L.seatX[p] * s;
+
         const y = L.seatY[p] * s;
+        pose[SX] = x;
+        pose[SY] = y;
+        fenceFade();
+        alpha *= pose[FADE];
         if (TOUCH && !(accent && heroes < HEROES)) {
           flight.globalAlpha = alpha * 0.8;
           flight.strokeStyle = "#8cefff";
@@ -3771,7 +4034,7 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
           );
         }
       }
-      if (!L.hasBox[p] || plate.end <= plate.first) continue;
+      if (!L.hasBox[p] || plate.end <= plate.first || !L.clampMask[p]) continue;
       const release = plate.to + SW.release[0];
       if (t < F - SW.clamp[0] || t >= plate.to + SW.release[1]) continue;
       // G3 (owner, 2026-10-16: nothing descends onto the body): each clamp
@@ -3791,25 +4054,33 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
       else if (t >= release) {
         const u = (t - release) / (SW.release[1] - SW.release[0]);
         frame = u < 0.3 ? 11 - Math.min(3, Math.floor((u / 0.3) * 4)) : 7;
-        alpha = 1 - smooth(u);
+        alpha = CLAMP_HOLD * (1 - smooth(u));
         drift = 1.1 * u * u;
+      } else {
+        // Holding while the gold sets (round 3): the bite is the moment, so
+        // a held clamp steps back (fewer bright brackets at once).
+        alpha = 1 - (1 - CLAMP_HOLD) * smooth((t - F - SW.clamp[2]) / LED_MS);
       }
-      const b = p * 4;
-      const bx = L.box[b];
-      const by = L.box[b + 1];
-      const bw = L.box[b + 2];
-      const bh = L.box[b + 3];
       const cw = L.clampW[p];
       const d = cw * s;
       const size = Math.round(d) || 1;
       const scale = size / KIT_FX.clamp.cell;
+      // The bite lights its bolt's ice LED (round 3), which dims as it holds.
+      const since = t - F + SW.clamp[2];
+      const led = since < 0 ? 0 : since < 2 * SW.clamp[2] ? 1 : 1 - (since - 2 * SW.clamp[2]) / LED_MS;
       for (let corner = 0; corner < 4; corner += 1) {
+        if (!((L.clampMask[p] >> corner) & 1)) continue;
         const right = corner & 1;
         const bottom = corner >> 1;
-        const cx = (bx + right * bw + (right ? 1 : -1) * drift * cw) * s;
-        const cy = (by + bottom * bh + (bottom ? 1 : -1) * drift * cw) * s;
+        const cx = (L.clampX[p * 4 + corner] + (right ? 1 : -1) * drift * cw) * s;
+        const cy = (L.clampY[p * 4 + corner] + (bottom ? 1 : -1) * drift * cw) * s;
+        pose[SX] = cx;
+        pose[SY] = cy;
+        fenceFade();
+        const shown = alpha * pose[FADE];
+        if (shown <= 0.01) continue;
         if (TOUCH) {
-          flight.globalAlpha = alpha * 0.9;
+          flight.globalAlpha = shown * 0.9;
           flight.strokeStyle = "#ffd27a";
           flight.lineWidth = 1.2;
           const arm = d * 0.33;
@@ -3824,13 +4095,13 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
         }
         if (draws >= BUDGET) break;
         draws += 1;
-        flight.globalAlpha = alpha;
+        flight.globalAlpha = shown;
         // On whole device pixels (see the sprite helper), the anchor kept on
         // the corner.
         flight.drawImage(
-          fxImage,
-          KIT_FX.clamp.x + KIT_FX.clamp.cell * frame,
-          KIT_FX.clamp.y + KIT_FX.clamp.cell * CORNER_ROW[corner],
+          clampImage,
+          clampX0 + KIT_FX.clamp.cell * frame,
+          clampY0 + KIT_FX.clamp.cell * CORNER_ROW[corner],
           KIT_FX.clamp.cell,
           KIT_FX.clamp.cell,
           Math.round(cx - ANCHOR[corner * 2] * scale),
@@ -3838,6 +4109,12 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
           size,
           size,
         );
+        if (led > 0 && draws < BUDGET) {
+          draws += 1;
+          flight.globalAlpha = 0.65 * led * shown;
+
+          sprite(cellsImage, BOKEH_X[ICE], BOKEH_Y[ICE], 32, 32, cx, cy, 0.42 * d);
+        }
       }
     }
   };
@@ -3855,6 +4132,18 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
         // molten behind it, its trailing edge fading into the painted gold.
         const bandTo = firstLockAfter(p, t);
         if (molten) {
+          // Behind the band (round 3), the cells still cooling keep a dull
+          // ember glow over the pinned grains, so the molten metal sets into
+          // the painted gold instead of breaking into separate squares.
+          const coolTo = firstLockAfter(p, t - SW.moltenAges[SW.moltenAges.length - 1]);
+          const coolFrom = firstLockAfter(p, t - SW.recede);
+          if (coolTo > coolFrom) {
+            flight.save();
+            cellClip(coolFrom, coolTo);
+            flight.globalAlpha = EMBER_A;
+            plateDraw(molten, p, 0, 0);
+            flight.restore();
+          }
           let to = bandTo;
           for (let step = 0; step < SW.moltenAges.length; step += 1) {
             const from = firstLockAfter(p, t - SW.moltenAges[step]);
@@ -3875,9 +4164,25 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
             to = from;
           }
         }
+        // The band's head (round 3): where a trim's channel locks, the newest
+        // metal glows white-hot over a warm halo, fading as it cools.
+        let heads = 0;
+        for (let i = firstLockAfter(p, t - HEAD_GLOW_MS); i < bandTo && heads < HEAD_GLOWS; i += 1) {
+          if (!L.chan[i] || draws >= BUDGET - 1) continue;
+          const fade = 1 - (t - gold.lock[i]) / HEAD_GLOW_MS;
+          const x = (gold.fx[i] + gold.cw[i] / 2) * s;
+          const y = (gold.fy[i] + gold.ch[i] / 2) * s;
+          heads += 1;
+          draws += 2;
+          flight.globalAlpha = 0.6 * fade;
+          sprite(cellsImage, BOKEH_X[GOLD_TONE], BOKEH_Y[GOLD_TONE], 32, 32, x, y, 4.4 * G * s);
+          flight.globalAlpha = 0.95 * fade;
+          sprite(cellsImage, BOKEH_X[WHITE], BOKEH_Y[WHITE], 32, 32, x, y, 2 * G * s);
+        }
         for (let i = firstLockAfter(p, t - SW.droplet); i < bandTo && drops < 160; i += 1) {
           if (draws >= BUDGET) break;
-          if (i & 1) continue;
+          // One cell in three throws a droplet (round 3: fewer, larger beads).
+          if (i % 3) continue;
           const age = t - gold.lock[i];
           let dx = -gold.ox[i];
           let dy = -gold.oy[i];
@@ -3889,11 +4194,12 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
           const y = (gold.fy[i] + gold.ch[i] / 2 + dy * G * 0.9) * s;
           drops += 1;
           draws += 1;
-          if (age < 18) {
-            const e = age < 6 ? 2 : age < 12 ? 1 : 0;
+          if (age < DROP_BEAD) {
+            // Thrown: a short oval drop along its flight, then a bead.
+            const e = age < 4 ? 1 : 0;
             let a = Math.round(Math.atan2(dy, dx) / (Math.PI / 8)) % 8;
             if (a < 0) a += 8;
-            const d = 1.4 * G * 1.4 * s;
+            const d = 2.2 * G * s;
             flight.globalAlpha = 0.95;
             sprite(
               fxImage,
@@ -3906,9 +4212,10 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
               d,
             );
           } else {
-            const d = 1.4 * G * 1.25 * s;
-            const frame = Math.floor((age - 18) / 2) % KIT_CELLS.bead.frames;
-            flight.globalAlpha = 0.9 * (1 - (age - 18) / (SW.droplet - 18));
+            // Its last third: a wobbling bead, settling into the trim.
+            const d = 2.2 * G * s;
+            const frame = Math.floor((age - DROP_BEAD) / 2) % KIT_CELLS.bead.frames;
+            flight.globalAlpha = 0.95 * (1 - (age - DROP_BEAD) / (SW.droplet - DROP_BEAD));
             sprite(cellsImage, KIT_CELLS.bead.x + 32 * frame, KIT_CELLS.bead.y, 32, 32, x, y, d);
           }
         }
@@ -3925,7 +4232,9 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
           pose[SX] = x;
           pose[SY] = y;
           pose[SD] = 3.6 * s;
-          pose[SA] = 0.8 * (1 - u);
+          fenceFade();
+          pose[SA] = 0.8 * (1 - u) * pose[FADE];
+
           chip(wrap(FRAMES * h + 30 * u), GOLD_TONE);
         }
       }
