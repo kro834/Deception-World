@@ -159,7 +159,6 @@ const GATHER_SPIN = 1.4;
 /** …and white-hot on its near side from GATHER_HEAT ms into the gathering. */
 const GATHER_HEAT = 80;
 
-
 /** A clamp holding after its bite rests at this alpha until it releases. */
 
 const CLAMP_HOLD = 0.5;
@@ -169,7 +168,6 @@ const FIT_WINDOW = 0.3;
 
 /** After the bite, the clamp's LED dims over this long (ms). */
 const LED_MS = 60;
-
 
 const HEROES = 24;
 /** Chips drawn per hex frame: mip and cell columns, tone rows. */
@@ -235,8 +233,6 @@ const HEAD_GLOWS = 10;
 const DROP_BEAD = 8;
 const EMBER_A = 0.38;
 
-
-
 /** The weld head throws an ember every EMBER_EVERY ms; each flies EMBER_LIFE
  * ms (at most EMBERS in the air per guideway). */
 const EMBER_EVERY = 14;
@@ -262,7 +258,6 @@ const RECT_SHADES = ["#1d4f63", "#5a2350", "#3a4a5a", "#6a4a12"] as const;
 /** Their batches: four tones by three alpha levels. */
 const RECT_ALPHA = Float32Array.of(0.3, 0.6, 0.9);
 const RECT_BUCKETS = 12;
-
 
 const hash = (a: number, b: number) => {
   let h = (a * 374761393 + b * 668265263) | 0;
@@ -770,7 +765,7 @@ function* layoutSteps(all: Plate[], gold: Cells): Generator<undefined, Layout, u
       L.r0[i] = L.r0[lead] * (1 - 0.03 * Math.min(rank, 10));
       L.jx[i] = L.jx[lead];
       L.jy[i] = L.jy[lead];
-          }
+    }
     tileAt += n;
     // Seams.
     L.loopFirst[p] = loopAt;
@@ -1957,8 +1952,6 @@ export function releaseRexonanceNanites() {
   releaseRexonanceNaniteSources();
 }
 
-
-
 /** Whether the call can draw its extras: prepared, and every kit sheet decoded. */
 export const isRexonanceNaniteReady = () =>
   READY &&
@@ -2084,8 +2077,10 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
   const edgeT = (env.fence ? fence[1] / s : 0) + inset;
   const edgeR = (env.fence ? fence[2] / s : W) - inset;
   const edgeB = (env.fence ? fence[3] / s : H) - inset;
-  const reach = Math.max(60, Math.min(CORE_X - edgeL, edgeR - CORE_X, CORE_Y - edgeT, edgeB - CORE_Y));
-
+  const reach = Math.max(
+    60,
+    Math.min(CORE_X - edgeL, edgeR - CORE_X, CORE_Y - edgeT, edgeB - CORE_Y),
+  );
 
   const P = all.length;
   if (L.kind.length !== P) return null;
@@ -4221,7 +4216,8 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
       const scale = size / KIT_FX.clamp.cell;
       // The bite lights its bolt's ice LED (round 3), which dims as it holds.
       const since = t - F + SW.clamp[2];
-      const led = since < 0 ? 0 : since < 2 * SW.clamp[2] ? 1 : 1 - (since - 2 * SW.clamp[2]) / LED_MS;
+      const led =
+        since < 0 ? 0 : since < 2 * SW.clamp[2] ? 1 : 1 - (since - 2 * SW.clamp[2]) / LED_MS;
       for (let corner = 0; corner < 4; corner += 1) {
         if (!((L.clampMask[p] >> corner) & 1)) continue;
         const right = corner & 1;
@@ -4321,7 +4317,11 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
         // The band's head (round 3): where a trim's channel locks, the newest
         // metal glows white-hot over a warm halo, fading as it cools.
         let heads = 0;
-        for (let i = firstLockAfter(p, t - HEAD_GLOW_MS); i < bandTo && heads < HEAD_GLOWS; i += 1) {
+        for (
+          let i = firstLockAfter(p, t - HEAD_GLOW_MS);
+          i < bandTo && heads < HEAD_GLOWS;
+          i += 1
+        ) {
           if (!L.chan[i] || draws >= limit[0] - 1) continue;
           const fade = 1 - (t - gold.lock[i]) / HEAD_GLOW_MS;
           const x = (gold.fx[i] + gold.cw[i] / 2) * s;

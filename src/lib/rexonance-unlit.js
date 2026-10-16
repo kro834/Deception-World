@@ -499,4 +499,3 @@ export function naniteMoltenRow(y, w, a, mask, o, shift) {
     o[i + 3] = mask ? naniteByte((alpha * mask[i + 3]) / 255) : alpha;
   }
 }
-

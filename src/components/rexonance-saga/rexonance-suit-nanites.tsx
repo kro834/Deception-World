@@ -99,12 +99,8 @@ const MOTE_MID = G * (0.22 + 0.42 * 0.6);
 const MOTE_NEAR = G * (0.22 + 0.42 * 0.9);
 const MOTE_A = [0.08, 0.22, 0.65] as const;
 
-
 /** The light's wave is drawn in this many arcs (each fades near an edge). */
 const RING_ARCS = 48;
-
-
-
 
 export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
   const host = useRef<HTMLDivElement>(null);
@@ -655,7 +651,6 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
             ready.current(false);
           }
           if (extras) {
-
             extras.cost(performance.now() - began);
             if (extras.governed() && !("governed" in box.dataset)) box.dataset.governed = "";
           }

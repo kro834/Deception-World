@@ -299,7 +299,6 @@ export const REXONANCE_SUIT_SPARKS: readonly string[] = [
  * reactor before the seal so the implosion is a visible vortex (review 31,
  * round 3); the per-frame draw budget (2,600) holds. */
 export const REXONANCE_SUIT_SWARM = {
-
   /** RIDER！: six pump waves of chips spiral out of the P14 core. */
   waves: [330, 380, 430, 480, 530, 580],
   /** Each wave's spiral out into the cocoon. */

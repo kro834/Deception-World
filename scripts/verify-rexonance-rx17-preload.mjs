@@ -1055,7 +1055,6 @@ async function runCase(browser, profileName, scenario) {
         { timeout: 30000 },
       );
       await tap(".rxs-brand", "rexonance-return-world");
-
     }
     let world = await worldDisplayed();
     result.worldTiming = world;

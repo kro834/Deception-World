@@ -120,7 +120,9 @@ try {
         ["cells.webp", "comets.webp", "fx.webp", "guide.webp"].every((name) =>
           performance
             .getEntriesByType("resource")
-            .some((entry) => entry.name.includes("/rexonance-nanites-") && entry.name.endsWith(name)),
+            .some(
+              (entry) => entry.name.includes("/rexonance-nanites-") && entry.name.endsWith(name),
+            ),
         ),
       null,
       { timeout: 20000 },
@@ -186,9 +188,7 @@ try {
         const flight = suit?.querySelectorAll(".rx-suit-nanites > canvas")[1];
         let painted = 0;
         if (flight?.width) {
-          const data = flight
-            .getContext("2d")
-            .getImageData(0, 0, flight.width, flight.height).data;
+          const data = flight.getContext("2d").getImageData(0, 0, flight.width, flight.height).data;
           for (let i = 3; i < data.length; i += 4 * 97) if (data[i]) painted += 1;
         }
         return {
