@@ -1,7 +1,7 @@
 import { useCallback, useState, type CSSProperties } from "react";
 import {
   REXONANCE_CALL_BEATS,
-  REXONANCE_CALLS,
+  REXONANCE_ENTRY_CALLS,
   REXONANCE_ENTRY_TIMINGS,
   REXONANCE_STAGE_DURATION_MS,
   REXONANCE_STAGE_LABELS,
@@ -11,6 +11,7 @@ import {
   REXONANCE_SUIT_PARTS,
   REXONANCE_SUIT_PIXELS,
   REXONANCE_SUIT_REVEAL_MS,
+  REXONANCE_SUIT_SPARKS,
   REXONANCE_SUIT_SYSTEMS,
   type RexonanceStage,
 } from "@/lib/rexonance-calls";
@@ -39,6 +40,15 @@ type RexonanceCallSequenceProps = {
 };
 
 function CallLines({ index }: { index: number }) {
+  if (index === 0) {
+    return (
+      <>
+        <span>Ultra DEUS！</span>
+        <span>REXONANCE！</span>
+      </>
+    );
+  }
+  if (index === 1) return <span>RIDER！</span>;
   if (index === 2) {
     return (
       <>
@@ -76,7 +86,7 @@ function CallLines({ index }: { index: number }) {
       </>
     );
   }
-  return <span>{REXONANCE_CALLS[index]}</span>;
+  return <span>{REXONANCE_ENTRY_CALLS[index]}</span>;
 }
 
 // The stage card's badge: the helmet of the approved artwork drawn in a
@@ -332,18 +342,7 @@ const pieceClock = (piece: RexonanceSuitPiece) => {
   } as CSSProperties;
 };
 // Sparks: every accent, and the first bite of each run.
-const SUIT_SPARKS = [
-  ...REXONANCE_SUIT_ACCENTS,
-  "boot-foot-l",
-  "boot-foot-r",
-  "knee-disc-l",
-  "knee-disc-r",
-  "arm-fist-l",
-  "shoulder-disc-l",
-  "shoulder-disc-r",
-  "tail-4b",
-  "helmet-jaw",
-];
+const SUIT_SPARKS = REXONANCE_SUIT_SPARKS;
 
 // Deterministic scatter (seeded, so server and client draw the same).
 const seeded = (seed: number) => {
@@ -451,10 +450,19 @@ function Suit({ suit, animate }: { suit: "build" | "whole"; animate: boolean }) 
   const visor = REXONANCE_SUIT_MARKS.visor;
   // rx13: the nanite engine (micro-tiles on a canvas) takes over the plates
   // once it is ready in time; until then, or without it, the DOM plates play.
+  // Owner (2026-10-16, 超大幅な改善): when the nanite kit is ready too, the
+  // engine's own swarm (Blender hex chips in an orbital cocoon) replaces
+  // the SVG motes of RIDER！ while it runs (the engine reports again, not
+  // rich, once its swarm is over, so the motes' own end state returns and
+  // the finished frame is the classic call's exactly).
+  const [swarm, setSwarm] = useState("svg" as "svg" | "canvas");
   const [nanites, setNanites] = useState<"dom" | "canvas">("dom");
-  const onNanites = useCallback(() => setNanites("canvas"), []);
+  const onNanites = useCallback((rich?: boolean) => {
+    setNanites("canvas");
+    setSwarm(rich ? "canvas" : "svg");
+  }, []);
   return (
-    <div className="rx-suit" data-suit={suit} data-nanites={nanites}>
+    <div className="rx-suit" data-suit={suit} data-nanites={nanites} data-swarm={swarm}>
       {/* Interior HUD: the visor's curved edges and a heading strip. */}
       <i className="rx-suit-rim is-left" />
       <i className="rx-suit-rim is-right" />
@@ -465,7 +473,7 @@ function Suit({ suit, animate }: { suit: "build" | "whole"; animate: boolean }) 
         <i className="rx-suit-floor" />
       </i>
       <div className="rx-suit-figure">
-        {/* FAR UP！ scans the bare undersuit top to bottom: a frame that
+        {/* The opening call pair scans the bare undersuit top to bottom: a frame that
             slides down over a picture that holds still (two transforms).
             The finished figure stands in it for the still tiers, or when
             the pieces were not ready in time. */}
@@ -534,7 +542,7 @@ function Suit({ suit, animate }: { suit: "build" | "whole"; animate: boolean }) 
           {/* ... or, at full motion, its micro-tiles stream in and lock, and
               (rx17) gold nanites form its gold right after it seats. The
               engine runs only while the suit builds (a late switch inside
-              FAR UP！ mounts it then). */}
+              the opening beat mounts it then). */}
           {animate && suit === "build" ? <SuitNanites onReady={onNanites} /> : null}
           {/* The face's lights, lit: they come on under the pixel squares. */}
           <i
@@ -695,12 +703,12 @@ export function RexonanceCallSequence({
       )}
       {entry ? <Suit suit={suit} animate={tier === "full"} /> : <SuitBadge />}
       <div className="rx-call-caption">
-        <span>TRINITY RESONANCE</span>
+        <span>SELF RESONANCE</span>
         <span>{entry ? "P14 / FINAL ARRIVAL" : `P14 / ${REXONANCE_STAGE_LABELS[stage]}`}</span>
       </div>
       <div className="rx-call-words">
         {entry ? (
-          REXONANCE_CALLS.map((call, index) => (
+          REXONANCE_ENTRY_CALLS.map((call, index) => (
             <div
               key={`${index}-${call}`}
               className={`rx-call-beat${index < 2 ? " rx-call-opening" : ""}${index === 4 ? " rx-call-final" : ""}${index === 2 ? " rx-call-chant" : ""}${index === 3 ? " rx-call-repetition" : ""}`}

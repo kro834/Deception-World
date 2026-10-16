@@ -70,7 +70,7 @@ const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf
 const strip = (css) => css.replace(/\/\*[\s\S]*?\*\//g, "");
 const sheet = strip(read("src/styles-rexonance-calls.css"));
 const component = read("src/components/rexonance-saga/rexonance-call-sequence.tsx");
-const page = read("src/components/rexonance-saga/rexonance-saga.tsx");
+const profile = read("src/lib/rexonance-profile.ts");
 const suitCss = sheet.slice(sheet.indexOf(".rx-call-sequence .rx-suit {"));
 
 const flat = (text) =>
@@ -148,10 +148,15 @@ test("the HUD prints only facts the page states, with generic HUD words", () => 
   const generic = new Set(["ONLINE", "LINK"]);
   assert.equal(REXONANCE_SUIT_SYSTEMS.length, 6);
   for (const [name, status] of REXONANCE_SUIT_SYSTEMS) {
-    assert.ok(page.includes(name), `the page states ${name}`);
+    assert.ok(profile.includes(name), `the canonical profile states ${name}`);
     if (generic.has(status)) continue;
-    // A reading keeps its system: the page prints them as one fact.
-    assert.ok(page.includes(`${status} · ${name}`), `the page states ${status} · ${name}`);
+    // The canonical profile prints the value and system on adjacent lines;
+    // normalize its number grouping and slash style to the compact HUD readout.
+    const profileStatus = status.replaceAll(",", "").replace(" / ", "／");
+    assert.ok(
+      profile.includes(profileStatus),
+      `the canonical profile states ${status} for ${name}`,
+    );
   }
   assert.deepEqual([...REXONANCE_SUIT_PARTS], ["LEGS", "ARMS", "CHEST", "HEAD"]);
   // The only literal words in the component: the calls' lines, the caption,
@@ -165,10 +170,12 @@ test("the HUD prints only facts the page states, with generic HUD words", () => 
     "OPERATING STAGE",
     "REXONANCE",
     "REXONANCE！",
+    "RIDER！",
     // The chant's call; its answer, DEUS！, is listed above (2026-10-05).
     "SA-GA！",
+    "SELF RESONANCE",
     "SYSTEM CHECK",
-    "TRINITY RESONANCE",
+    "Ultra DEUS！",
   ]);
   assert.match(component, /REXONANCE_SUIT_SYSTEMS\.map\(\(\[name, status\], index\)/);
   // suitup3: each label lands on the line its region forms. rx12: the

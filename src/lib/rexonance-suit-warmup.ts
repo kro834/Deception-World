@@ -33,6 +33,16 @@ const decodedPictures = new Map<string, HTMLImageElement>();
 // rx17: what the nanite engine draws, decoded once and shared with it.
 const sources = new Map<string, CanvasImageSource>();
 const DRAWN: readonly string[] = [REXONANCE_SUIT_ATLAS.src, REXONANCE_SUIT_GOLD_ATLAS.src];
+// Owner (2026-10-16, 超大幅な改善): the nanite kit's own warm-up (its own
+// chunk, rexonance-nanites-warmup: ImageBitmaps only) is imported once the
+// plan is prepared and registers here, so intent can promote it and an
+// unrelated go() can pause it. The suit's own layers and fetches are its
+// own business, untouched by it.
+type NaniteWarm = { warm: (priority: Priority) => void; pause: () => void };
+let naniteWarm: NaniteWarm | null = null;
+export function registerRexonanceNaniteWarm(hooks: NaniteWarm) {
+  naniteWarm = hooks;
+}
 
 const saving = () => {
   const connection = (navigator as Navigator & { connection?: Connection }).connection;
@@ -69,7 +79,14 @@ function warmPlanWhenIdle() {
         return plan.prepareRexonanceSuit();
       },
       () => undefined,
-    );
+    ).then((prepared) => {
+      // Then the nanite kit, after the plan (2026-10-16).
+      if (prepared !== true || document.hidden || backgroundPauses || saving() || still()) return;
+      void import("./rexonance-nanites-warmup.ts").then(
+        (kit) => kit.warmRexonanceNanites(),
+        () => undefined,
+      );
+    });
   }, 2000);
 }
 
@@ -238,6 +255,7 @@ async function start(priority: Priority, batch: WarmBatch) {
 export function warmRexonanceSuit(priority: Priority = "low"): Promise<boolean> {
   if (ready) {
     warmPlanWhenIdle();
+    if (priority === "high") naniteWarm?.warm("high");
     return Promise.resolve(true);
   }
   if (pending) {
@@ -302,6 +320,7 @@ export function pauseRexonanceSuitWarmup(preserveIntent = false) {
   backgroundPauses += 1;
   schedules.forEach((schedule) => schedule.suspend());
   abortWarmup(preserveIntent);
+  if (!preserveIntent) naniteWarm?.pause();
   let released = false;
   return () => {
     if (released) return;
@@ -310,6 +329,7 @@ export function pauseRexonanceSuitWarmup(preserveIntent = false) {
     if (!backgroundPauses) {
       schedules.forEach((schedule) => schedule.resume());
       warmPlanWhenIdle();
+      if (ready) naniteWarm?.warm("low");
     }
   };
 }
@@ -364,12 +384,16 @@ export function scheduleRexonanceSuitWarm(delayMs = 1000) {
   };
   const resume = () => {
     if (loaded && !ready) afterLoad();
-    if (ready) warmPlanWhenIdle();
+    if (ready) {
+      warmPlanWhenIdle();
+      naniteWarm?.warm("low");
+    }
   };
   const onVisibility = () => {
     if (document.hidden) {
       suspend();
       abortWarmup();
+      naniteWarm?.pause();
     } else resume();
   };
   const schedule = { suspend, resume };

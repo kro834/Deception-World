@@ -61,6 +61,8 @@ export function planAssemblyGold(options: {
   lock: Float32Array;
   ux: Float32Array;
   uy: Float32Array;
+  /** Each cell's plate (its index in `pieces`). */
+  piece: Int16Array;
   overlaps: Int32Array[];
 } | null;
 
@@ -89,6 +91,78 @@ export function rewindAssemblyGold(
   budget: number,
 ): number;
 
+/** The nanite kit's sheet geometry (REXONANCE_NANITES, generated). */
+export interface RexonanceAssemblyNanites {
+  readonly cells: {
+    readonly src: string;
+    readonly cell: number;
+    readonly mip: { readonly x: readonly number[]; readonly y: readonly number[] };
+    readonly unfold: { readonly y: number; readonly x: readonly number[] };
+    readonly bokeh: { readonly x: readonly number[]; readonly y: readonly number[] };
+    readonly bead: { readonly x: number; readonly y: number };
+    readonly spark: { readonly x: number; readonly y: number };
+  };
+  readonly comets: {
+    readonly src: string;
+    readonly rows: { readonly ice: number; readonly pink: number; readonly gold: number };
+    readonly tail: readonly number[];
+  };
+  readonly fx: {
+    readonly src: string;
+    readonly clamp: {
+      readonly x: number;
+      readonly y: number;
+      readonly cell: number;
+      readonly anchor: Readonly<Record<"tl" | "tr" | "bl" | "br", readonly number[]>>;
+    };
+    readonly latch: { readonly x: number; readonly y: number; readonly cell: number };
+    readonly scan: {
+      readonly x: number;
+      readonly y: number;
+      readonly w: number;
+      readonly h: number;
+      readonly edgeY: number;
+    };
+    readonly drop: { readonly x: number; readonly y: number; readonly cell: number };
+    readonly shock: {
+      readonly x: number;
+      readonly y: number;
+      readonly w: number;
+      readonly h: number;
+      readonly cols: number;
+      readonly centre: readonly number[];
+    };
+  };
+  readonly guide: { readonly src: string };
+  /** Each plate's real outline (base64 Int16 LE loops, quarter figure px). */
+  readonly seams: Readonly<Record<string, string>>;
+  /** Each plate's gold box [x, y, w, h], figure px. */
+  readonly goldBoxes: Readonly<Record<string, readonly [number, number, number, number]>>;
+}
+
+export const ASSEMBLY_NANITES: {
+  readonly lead: number;
+  readonly sweep: number;
+  readonly seat: number;
+  readonly overshoot: number;
+  readonly seam: number;
+  readonly seamGlow: number;
+  readonly shock: number;
+  readonly paint: number;
+  readonly lacquer: number;
+  readonly print: number;
+  readonly recoil: number;
+  readonly spark: number;
+  readonly link: number;
+  readonly release: number;
+  readonly clampIn: number;
+  readonly crown: readonly [number, number];
+  readonly implode: readonly [number, number];
+};
+export const ASSEMBLY_SPRITE_BUDGET: number;
+export const ASSEMBLY_COMET_BUDGET: number;
+export const ASSEMBLY_TOUCH_HERO_BUDGET: number;
+
 export interface RexonanceAssemblyConfig {
   figure: string;
   undersuit: string;
@@ -106,6 +180,10 @@ export interface RexonanceAssemblyConfig {
    * from the full figure. */
   base?: string;
   ornaments?: readonly string[];
+  /** The nanite kit (owner, 2026-10-16): the swarm's sprites, the
+   * guideway conduit, the plates' seams and gold boxes. Optional: without
+   * it the swarm plays as two-tone rect chips over the traced gold frame. */
+  nanites?: RexonanceAssemblyNanites;
   /** The MAX and ULTRA figures (same frame): the suit-up ends on the form
    * named by the runway's data-form. */
   forms?: {

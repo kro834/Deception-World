@@ -3,7 +3,7 @@ import { chromium, webkit } from "playwright";
 
 const base = process.env.BASE_URL || "http://127.0.0.1:8082";
 const calls = [
-  "FAR UP！",
+  "Ultra DEUS！\nREXONANCE！",
   "RIDER！",
   "SA-GA！DEUS！SA-GA！DEUS！SA-GA！DEUS！SA-GA！DEUS！",
   "REXONANCE！REXONANCE！REXONANCE！REXONANCE！",
@@ -76,11 +76,13 @@ try {
     assert.deepEqual(
       report.calls,
       calls,
-      "All five calls remain readable without downloaded fonts",
+      "All five entry beats remain readable without downloaded fonts",
     );
     assert.deepEqual(report.clipping, [], "Fallback text must fit even at the impact scale");
     assert.deepEqual(errors, [], "Font failure must not raise a page error");
-    console.log(`PASS font fallback ${viewport.width}x${viewport.height}: five calls, no clipping`);
+    console.log(
+      `PASS font fallback ${viewport.width}x${viewport.height}: five entry beats, no clipping`,
+    );
     await context.close();
   }
 } finally {

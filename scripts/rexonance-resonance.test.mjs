@@ -916,7 +916,7 @@ test("each figure keeps the owner's value as its own text; its counter is a hidd
   for (const [value, suffix] of [
     ["650", "<span>%\\+</span>"],
     ["900", "<span>%</span>"],
-    ["50,000", "<span>YOPS</span>"],
+    ["50,000〜", "<span>YOPS</span>"],
     ["9,000", "<span>TOPS</span>"],
   ]) {
     assert.match(
@@ -954,7 +954,7 @@ test("each figure keeps the owner's value as its own text; its counter is a hidd
 test("the counter prints the owner's figures at every step without reflowing", () => {
   const cases = [
     ["650", ["000", "325", "650"]],
-    ["50,000", ["00,000", "25,000", "50,000"]],
+    ["50,000〜", ["00,000〜", "25,000〜", "50,000〜"]],
     ["9,000", ["0,000", "4,500", "9,000"]],
     ["90%", ["00%", "45%", "90%"]],
     ["約0.06ms", ["約0.00ms", "約0.03ms", "約0.06ms"]],
@@ -1215,4 +1215,49 @@ test("withdrawing motion hands every waiting figure back at once", () => {
   assert.equal(cut.getAttribute("data-rsn-state"), "armed");
   dispose();
   assert.equal(cut.overlay.childNodes[0].data, "650");
+});
+
+test("a reverse scrub repaints the armour under each ornament tile it takes off (owner, 2026-10-16)", async () => {
+  // Welds now follow the paint order; an ornament cell over the armour is
+  // the same cell twice. Taking the ornament's weld off clears that cell, so
+  // the armour beneath must be drawn again: no hole under the ornaments.
+  const t = scrollAssemblyEnvironment();
+  const dispose = mountRexonanceAssembly(
+    t.runway,
+    {
+      figure: "/figure",
+      undersuit: "/undersuit",
+      base: "/base",
+      ornaments: ["tail", "ribbon"],
+      size: { width: 60, height: 60 },
+      pieces: [
+        { id: "rib", group: "ribbon", x: 0, y: 0, w: 60, h: 60, seat: [30, 8] },
+        { id: "leg", group: "legs", x: 0, y: 0, w: 60, h: 60, seat: [30, 52] },
+      ],
+      core: [30, 30],
+      visor: [30, 6],
+      glow: [],
+    },
+    t.env,
+  );
+  try {
+    t.observers[0].callback([{ isIntersecting: true }]);
+    for (let i = 0; i < 200 && t.runway.dataset.rznState !== "live"; i += 1)
+      await new Promise((resolve) => setTimeout(resolve, 5));
+    assert.equal(t.runway.dataset.rznState, "live");
+    t.scroll(0.85);
+    for (let rounds = 0; t.frames.size && rounds < 30; rounds += 1) t.frame();
+    const reverse = t.scroll(0.7);
+    const cleared = reverse.filter(
+      (c) => c.method === "clearRect" && c.args[2] === 15 && c.args[3] === 15,
+    );
+    assert.ok(cleared.length > 0, "the reverse takes ornament welds off");
+    for (const clear of cleared) {
+      const after = reverse.slice(reverse.indexOf(clear) + 1).find((c) => c.target === clear.target);
+      assert.equal(after?.method, "drawImage", "the armour beneath is drawn again");
+      assert.deepEqual(after.args.slice(5), clear.args, "into exactly that cell");
+    }
+  } finally {
+    dispose();
+  }
 });

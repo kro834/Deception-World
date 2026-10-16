@@ -175,7 +175,8 @@ test("the components carry the vetted copy shape: lede sentences, keyboard hint,
   }
   // A stage title's zero-width marker renders as <wbr />, never as text. The
   // rx2 Ultra title (rx2/COPY2.md C5) breaks at its 、 and needs no marker.
-  assert.match(rexonance, /title: "神属権限まで、一動作に。"/);
+  // Owner's 2026-10-16 canon centers Ultra on Yuma controlling 終焉.
+  assert.match(rexonance, /title: "終焉の全出力を、一動作に。"/);
   assert.match(rexonance, /title\.split\("\\u200B"\)/);
   assert.match(rexonance, /<h3>\{renderStageTitle\(activeStage\.title\)\}<\/h3>/);
   // rx2/COPY2.md C3: the stages h2 pays off 「これで、まだ標準。」.

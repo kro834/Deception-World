@@ -399,7 +399,7 @@ test("the scene is decorative and passes the generated shape masks to its plan",
     /useEffect\(\(\) => mountRexonanceAssembly\(runwayRef\.current, SUIT_UP\), \[\]\);/,
   );
   // The call is the published one, in its order.
-  assert.match(page, /const SUIT_UP_LINES = REXONANCE_CALLS\.map/);
+  assert.match(page, /const SUIT_UP_LINES = REXONANCE_ENTRY_CALLS\.map/);
   // The new ornaments are hidden from assistive technology.
   for (const ornament of ["rzn-mesh", "rzn-form-code", "rzn-end-figure"]) {
     assert.match(
@@ -1322,9 +1322,11 @@ test("the gold forms by nanites right after each plate lands; the driver is on f
   // owner: a slow scroll lands a band at a time — and the plates are cut
   // from the base figure too, so the gold's locks moved with them; the hash
   // is the plan after those changes.)
+  // (owner 2026-10-16 超大幅な改善 — the gold waits for the plate to clamp
+  // (ASSEMBLY_GOLD.delay .003 → .008); each cell names its plate (`piece`).)
   assert.equal(
     createHash("sha256").update(JSON.stringify(gold)).digest("hex"),
-    "ca307bc7b93369ec230e88f62dfaffb91e4a7e4358fb841ad29af6ed07f82b29",
+    "c34630d9b1e5ea32a956e5fb7e8fc50b628104fab71e7e9c69cc22782cfff905",
   );
   const steps = assemblyGoldPlanSteps({
     pieces,
@@ -1345,4 +1347,513 @@ test("the gold forms by nanites right after each plate lands; the driver is on f
   assert.ok(gold.lock[0] > earliest);
   // Done before the seal into the finished figure.
   assert.ok(gold.lock[gold.count - 1] < ASSEMBLY_BEATS.seal[1]);
+});
+
+/* ---------------- the nanite swarm (owner, 2026-10-16: 超大幅な改善) ---------------- */
+
+test("touch with the nanite kit keeps its 64 art draws and at most 16 nanite sprites a frame", async () => {
+  const { REXONANCE_NANITES, REXONANCE_NANITE_DIR } = await import("../src/lib/rexonance-nanites.ts");
+  // Both with the kit and without it (two-tone rect chips, traced frames).
+  for (const nanites of [REXONANCE_NANITES, undefined]) {
+    const t = environment({ coarse: true });
+    const dispose = mountRexonanceAssembly(t.runway, { ...engineConfig, nanites }, t.env);
+    t.observers[1].callback([{ isIntersecting: true }]);
+    await until(t.prepared, "warm preparation completed");
+    t.observers[0].callback([{ isIntersecting: true }]);
+    await until(() => t.runway.dataset.rznState === "live" && t.frames.size > 0, "scene live");
+    // Unlike the older touch check above, let the canvas be measured (its
+    // ResizeObserver notice is a later task), so these frames really draw.
+    await new Promise((resolve) => setTimeout(resolve, 5));
+    if (nanites) {
+      assert.ok(t.decodedSources.some((src) => src.startsWith(REXONANCE_NANITE_DIR)), "kit fetched");
+      assert.ok(!t.decodedSources.some((src) => /comets/.test(src)), "touch fetches no comets");
+    }
+    let kitDraws = 0;
+    let drawn = 0;
+    for (const progress of [0.3, 0.35, 0.5, 0.7, 0.8, 0.84]) {
+      t.calls.length = 0;
+      t.drawCalls.length = 0;
+      t.scrollTo(progress);
+      const art = t.calls.filter((c) => c[0] === "drawImage" && c[1] === 9 && c[2] === 1);
+      assert.ok(art.length <= ASSEMBLY_TOUCH_ART_BUDGET + 1, `${progress}: ${art.length}`); // plus undersuit scan
+      const kit = t.drawCalls.filter(
+        (call) => call.target === 1 && String(call.source).startsWith(REXONANCE_NANITE_DIR),
+      );
+      assert.ok(kit.length <= 16, `${progress}: ${kit.length} nanite sprites`);
+      kitDraws += kit.length;
+      drawn += t.drawCalls.filter((call) => call.target === 1).length;
+    }
+    assert.ok(t.canvas.width > 0 && drawn > 0, "the frames were drawn");
+    if (nanites) assert.ok(kitDraws > 0, "the chips nearest lock are drawn from the kit");
+    else assert.equal(kitDraws, 0);
+    dispose();
+    assert.equal(t.frames.size, 0);
+  }
+});
+
+test("the swarm's draw passes allocate nothing", () => {
+  const source = read("src/lib/rexonance-assembly-nanites.js");
+  const from = source.indexOf("/* -- draw passes: allocation-free from here -- */");
+  const to = source.indexOf("/* -- end of the draw passes -- */");
+  assert.ok(from > 0 && to > from + 20000, `${from} ${to}`);
+  const passes = source.slice(from, to);
+  assert.doesNotMatch(
+    passes,
+    /\bnew |\.map\(|\.filter\(|\.slice\(|\.concat\(|\[\]|Array\.from|\.push\(|=> \{\s*return \{/,
+  );
+  // No per-sprite transform: only plates (the jig) and rings set one.
+  assert.equal(passes.match(/\.setTransform\(/g)?.length, 3);
+});
+
+test("the nanite stage plan: paint order, the shared cells, and timings before .9", async () => {
+  const { planAssemblyNanites } = await import("../src/lib/rexonance-assembly-nanites.js");
+  const { REXONANCE_NANITES } = await import("../src/lib/rexonance-nanites.ts");
+  const { planAssemblyGold, ASSEMBLY_NANITES } = await import("../src/lib/rexonance-resonance.js");
+  const { REXONANCE_SUIT_GOLD_CELL, REXONANCE_SUIT_GOLD_CELLS } =
+    await import("../src/lib/rexonance-suit-gold.ts");
+  const { REXONANCE_SUIT_DRIVER } = await import("../src/lib/rexonance-calls.ts");
+  const pieces = REXONANCE_SUIT_PIECES.map((piece) => ({
+    ...piece,
+    preset: REXONANCE_SUIT_DRIVER.includes(piece.id),
+  }));
+  const options = {
+    size: REXONANCE_SUIT_SIZE,
+    pieces,
+    core: REXONANCE_SUIT_MARKS.core,
+    visor: REXONANCE_SUIT_MARKS.visor,
+    maskTile: REXONANCE_SUIT_TILE,
+    tile: 12,
+  };
+  const plan = planAssembly(options);
+  const before = JSON.stringify(plan.tiles.map(({ m, t0, t1 }) => [m, t0, t1]));
+  const gold = planAssemblyGold({
+    pieces,
+    gold: { atlas: "", cell: REXONANCE_SUIT_GOLD_CELL, cells: REXONANCE_SUIT_GOLD_CELLS },
+    landed: new Map(),
+    tiles: undefined,
+  }) ?? null;
+  void gold;
+  const goldPlan = (await import("../src/lib/rexonance-resonance.js")).planAssemblyGold({
+    pieces,
+    gold: { atlas: "", cell: REXONANCE_SUIT_GOLD_CELL, cells: REXONANCE_SUIT_GOLD_CELLS },
+    landed: (() => {
+      const landed = new Map();
+      for (const tile of plan.tiles)
+        if (tile.pieceId) landed.set(tile.pieceId, Math.max(landed.get(tile.pieceId) ?? 0, tile.t1));
+      return landed;
+    })(),
+  });
+  const nano = planAssemblyNanites({
+    plan,
+    pieces,
+    size: REXONANCE_SUIT_SIZE,
+    core: REXONANCE_SUIT_MARKS.core,
+    visor: REXONANCE_SUIT_MARKS.visor,
+    gold: goldPlan,
+    seams: REXONANCE_NANITES.seams,
+    goldBoxes: REXONANCE_NANITES.goldBoxes,
+  });
+  // The tile schedule is untouched (index hashes only).
+  assert.equal(JSON.stringify(plan.tiles.map(({ m, t0, t1 }) => [m, t0, t1])), before);
+  const n = plan.tiles.length;
+  assert.equal(nano.count, n);
+  for (let k = 1; k < n; k += 1) assert.ok(nano.paintAt[k] >= nano.paintAt[k - 1]);
+  for (let i = 0; i < n; i += 1) {
+    assert.equal(nano.paintOrder[nano.paintRank[i]], i);
+    assert.ok(nano.tp[i] > plan.tiles[i].t1, "paint follows the landing");
+    const partner = nano.under[i];
+    if (partner >= 0) {
+      assert.equal(plan.tiles[partner].sx, plan.tiles[i].sx);
+      assert.equal(plan.tiles[partner].sy, plan.tiles[i].sy);
+      assert.notEqual(plan.tiles[partner].src, plan.tiles[i].src);
+    }
+    const parent = nano.parent[i];
+    if (parent >= 0) {
+      assert.ok(parent < i, "the lattice parent locked earlier");
+      assert.equal(nano.pieceOf[parent], nano.pieceOf[i]);
+    }
+    assert.ok(nano.birth[i] <= plan.tiles[i].m + 1e-9 && nano.birth[i] >= 0.07);
+  }
+  // Every plate: its seam, gold box and clamps release before .9 (tail
+  // ≤ .878, helmet ≤ .892), the driver never staged.
+  const driver = new Set(REXONANCE_SUIT_DRIVER);
+  assert.ok(nano.pieces.length >= 50);
+  for (const piece of nano.pieces) {
+    assert.ok(!driver.has(piece.id), piece.id);
+    assert.ok(piece.loopCount >= 1, `${piece.id} has a seam`);
+    assert.ok(piece.contact > piece.to && piece.contact <= piece.to + ASSEMBLY_NANITES.seat + 1e-9);
+    assert.ok(piece.g0 >= piece.contact, `${piece.id}: the gold pours after contact`);
+    assert.ok(piece.releaseEnd < (piece.helm ? 0.8921 : 0.8781), `${piece.id}: ${piece.releaseEnd}`);
+    if (piece.helm) assert.equal(piece.lift, 0, "the helmet forms in place");
+  }
+  // The DEUS！ accents and the crest.
+  assert.equal(nano.pieces.filter((piece) => piece.accent).length, 4);
+  assert.equal(nano.pieces.find((piece) => piece.crest)?.id, "helmet-crest");
+});
+
+test("the gold guideway is built from the toe tips up, along the trims, never laid over from above (owner 2026-10-16)", async () => {
+  // owner 2026-10-16: 「金のガイドウェイは上から被さる形ではなく、足先から
+  // 滑らかに作られていく。」 Each plate's conduit grows from its lowest cell
+  // along its trims; each beat's front climbs the body ahead of its fittings,
+  // the legs from the toes; a slow scroll lengthens it cell by cell.
+  const { planAssemblyNanites, createAssemblyNanites, ASSEMBLY_GUIDEWAY } = await import(
+    "../src/lib/rexonance-assembly-nanites.js"
+  );
+  const { REXONANCE_NANITES } = await import("../src/lib/rexonance-nanites.ts");
+  const { planAssemblyGold } = await import("../src/lib/rexonance-resonance.js");
+  const { REXONANCE_SUIT_GOLD_CELL, REXONANCE_SUIT_GOLD_CELLS } =
+    await import("../src/lib/rexonance-suit-gold.ts");
+  const { REXONANCE_SUIT_DRIVER } = await import("../src/lib/rexonance-calls.ts");
+  const pieces = REXONANCE_SUIT_PIECES.map((piece) => ({
+    ...piece,
+    preset: REXONANCE_SUIT_DRIVER.includes(piece.id),
+  }));
+  const plan = planAssembly({
+    size: REXONANCE_SUIT_SIZE,
+    pieces,
+    core: REXONANCE_SUIT_MARKS.core,
+    visor: REXONANCE_SUIT_MARKS.visor,
+    maskTile: REXONANCE_SUIT_TILE,
+    tile: 12,
+  });
+  const landed = new Map();
+  for (const tile of plan.tiles)
+    if (tile.pieceId) landed.set(tile.pieceId, Math.max(landed.get(tile.pieceId) ?? 0, tile.t1));
+  const gold = planAssemblyGold({
+    pieces,
+    gold: { atlas: "", cell: REXONANCE_SUIT_GOLD_CELL, cells: REXONANCE_SUIT_GOLD_CELLS },
+    landed,
+  });
+  const nano = planAssemblyNanites({
+    plan,
+    pieces,
+    size: REXONANCE_SUIT_SIZE,
+    core: REXONANCE_SUIT_MARKS.core,
+    visor: REXONANCE_SUIT_MARKS.visor,
+    gold,
+    seams: REXONANCE_NANITES.seams,
+    goldBoxes: REXONANCE_NANITES.goldBoxes,
+    goldCell: REXONANCE_SUIT_GOLD_CELL,
+  });
+  const built = nano.pieces.filter((piece) => piece.goldEnd > piece.goldFirst);
+  assert.ok(built.length >= 50);
+  let upward = 0;
+  for (const piece of built) {
+    const { goldFirst: a, goldEnd: b } = piece;
+    for (let k = a + 1; k < b; k += 1) assert.ok(nano.buildAt[k] >= nano.buildAt[k - 1]);
+    // Done before the plate seats, after RIDER! begins.
+    assert.ok(piece.buildEnd <= piece.contact - ASSEMBLY_GUIDEWAY.ready + 1e-9, piece.id);
+    assert.ok(piece.buildStart >= 0.07 && piece.buildStart <= piece.buildEnd, piece.id);
+    assert.equal(nano.buildAt[a], piece.buildStart);
+    // It starts at the plate's lowest cell.
+    let bottom = 0;
+    for (let k = a; k < b; k += 1) bottom = Math.max(bottom, gold.y[nano.buildIdx[k]] + gold.h[nano.buildIdx[k]]);
+    const entry = nano.buildIdx[a];
+    assert.equal(gold.y[entry] + gold.h[entry], bottom, `${piece.id} grows from its lowest cell`);
+    assert.equal(nano.buildB[entry], 0);
+    // Its first fifth lies lower on the body than its last fifth.
+    const fifth = Math.max(1, Math.floor((b - a) / 5));
+    let early = 0;
+    let late = 0;
+    for (let k = 0; k < fifth; k += 1) {
+      early += gold.y[nano.buildIdx[a + k]];
+      late += gold.y[nano.buildIdx[b - 1 - k]];
+    }
+    if (early >= late) upward += 1;
+  }
+  assert.ok(upward >= built.length * 0.9, `${upward}/${built.length} plates grow upward`);
+  // The legs climb from the toe tips: the feet first, the thighs last.
+  const legs = built.filter((piece) => piece.group === "legs");
+  const first = legs.reduce((a, b) => (b.buildStart < a.buildStart ? b : a));
+  assert.match(first.id, /boot-foot/);
+  const at = (id) => built.find((piece) => piece.id === id).buildStart;
+  assert.ok(at("boot-foot-l") < at("boot-ankle-l"));
+  assert.ok(at("boot-ankle-l") < at("knee-disc-l"));
+  assert.ok(at("knee-disc-l") < at("thigh-top-l"));
+  // No ornament's trim before the ornaments form (the knee rule).
+  for (const piece of built)
+    if (piece.group === "tail" || piece.group === "ribbon")
+      assert.ok(piece.buildStart - ASSEMBLY_GUIDEWAY.holo > 0.58, piece.id);
+
+  // Drawn: a foot's conduit lengthens with the scroll, from the toe end.
+  const foot = built.find((piece) => piece.id === "boot-foot-l");
+  const swarm = createAssemblyNanites({
+    nano,
+    size: REXONANCE_SUIT_SIZE,
+    core: REXONANCE_SUIT_MARKS.core,
+    visor: REXONANCE_SUIT_MARKS.visor,
+    sprites: { cells: null, comets: null, fx: null },
+    kit: REXONANCE_NANITES,
+    gold,
+    layers: { face: { id: "guide" }, holo: { id: "holo" } },
+  });
+  const clipsFor = (q) => {
+    const calls = [];
+    let rects = [];
+    const context = {
+      save() {},
+      restore() {},
+      beginPath() {
+        rects = [];
+      },
+      rect(x, y, w, h) {
+        rects.push([x, y, w, h]);
+      },
+      clip() {
+        calls.push({ rects });
+      },
+      drawImage(source, sx, sy) {
+        const last = calls[calls.length - 1];
+        if (last && !last.source) Object.assign(last, { source: source.id, sx, sy });
+      },
+      fill() {},
+      stroke() {},
+      moveTo() {},
+      lineTo() {},
+    };
+    swarm.frame(q, 0, true, 1, false);
+    swarm.hologramPass(context);
+    return calls.filter((call) => call.sx === foot.ax && call.sy === foot.ay);
+  };
+  assert.equal(clipsFor(foot.buildStart - ASSEMBLY_GUIDEWAY.holo - 0.001).length, 0, "nothing before");
+  let previous = 0;
+  for (const u of [0.15, 0.4, 0.7, 1]) {
+    const q = foot.buildStart + u * (foot.buildEnd - foot.buildStart) + 1e-6;
+    const solid = clipsFor(q).find((call) => call.source === "guide");
+    assert.ok(solid && solid.rects.length > previous, `${u}: the conduit grows`);
+    previous = solid.rects.length;
+    const lowest = Math.max(...solid.rects.map(([, y, , h]) => y + h));
+    assert.equal(lowest, foot.gbox[1] + foot.gbox[3], "it runs from the toe end");
+  }
+  assert.equal(previous, foot.goldEnd - foot.goldFirst, "whole when done");
+
+  // Its clamps slide in along the body from beside the box — never
+  // descending onto it (no swing frames, no scale), the lower pair first.
+  const fx = { id: "fx" };
+  const clamps = createAssemblyNanites({
+    nano,
+    size: REXONANCE_SUIT_SIZE,
+    core: REXONANCE_SUIT_MARKS.core,
+    visor: REXONANCE_SUIT_MARKS.visor,
+    sprites: { cells: null, comets: null, fx },
+    kit: REXONANCE_NANITES,
+    gold,
+  });
+  const clampDraws = (q) => {
+    const draws = [];
+    const noop = () => {};
+    const context = new Proxy(
+      {
+        drawImage(source, sx, sy, sw, sh, dx, dy, dw, dh) {
+          if (source === fx && sy < 192) draws.push({ frame: sx / 48, corner: sy / 48, dx, dy, dw, dh });
+        },
+      },
+      { get: (target, key) => (key in target ? target[key] : noop), set: () => true },
+    );
+    clamps.frame(q, 0, true, 1, false);
+    clamps.hardwarePass(context);
+    return draws;
+  };
+  const start = foot.to - 0.016;
+  const slide = [0.002, 0.004, 0.006, 0.009].map((d) => clampDraws(start + d));
+  for (const draws of slide) for (const draw of draws) assert.ok(draw.frame === 7 || draw.frame >= 8);
+  const lowerLeft = slide.map((draws) => draws.find((draw) => draw.corner === 2 && Math.abs(draw.dw - slide[3].find((d) => d.corner === 2).dw) < 1e-9));
+  assert.ok(lowerLeft.every(Boolean), "the lower-left clamp is drawn at one size throughout");
+  for (let k = 1; k < 4; k += 1) {
+    assert.ok(lowerLeft[k].dx >= lowerLeft[k - 1].dx, "it slides inward");
+    assert.equal(lowerLeft[k].dy, lowerLeft[0].dy, "along the surface, not down onto it");
+  }
+  assert.ok(!slide[0].some((draw) => draw.corner < 2), "the upper pair follows the lower");
+});
+
+test("a resting frame is a function of the progress alone: the same moment draws the same chips however it was reached (review 2026-10-16)", async () => {
+  // The far band's sprite share once came from the previous frame's tally,
+  // so a calm frame at one progress drew differently after a forward scrub,
+  // a reverse scrub or a jump. It is now a function of q.
+  const { planAssemblyNanites, createAssemblyNanites } = await import(
+    "../src/lib/rexonance-assembly-nanites.js"
+  );
+  const { REXONANCE_NANITES } = await import("../src/lib/rexonance-nanites.ts");
+  const { planAssemblyGold } = await import("../src/lib/rexonance-resonance.js");
+  const { REXONANCE_SUIT_GOLD_CELL, REXONANCE_SUIT_GOLD_CELLS } =
+    await import("../src/lib/rexonance-suit-gold.ts");
+  const { REXONANCE_SUIT_DRIVER } = await import("../src/lib/rexonance-calls.ts");
+  const pieces = REXONANCE_SUIT_PIECES.map((piece) => ({
+    ...piece,
+    preset: REXONANCE_SUIT_DRIVER.includes(piece.id),
+  }));
+  const plan = planAssembly({
+    size: REXONANCE_SUIT_SIZE,
+    pieces,
+    core: REXONANCE_SUIT_MARKS.core,
+    visor: REXONANCE_SUIT_MARKS.visor,
+    maskTile: REXONANCE_SUIT_TILE,
+    tile: 12,
+  });
+  const landed = new Map();
+  for (const tile of plan.tiles)
+    if (tile.pieceId) landed.set(tile.pieceId, Math.max(landed.get(tile.pieceId) ?? 0, tile.t1));
+  const gold = planAssemblyGold({
+    pieces,
+    gold: { atlas: "", cell: REXONANCE_SUIT_GOLD_CELL, cells: REXONANCE_SUIT_GOLD_CELLS },
+    landed,
+  });
+  const nano = planAssemblyNanites({
+    plan,
+    pieces,
+    size: REXONANCE_SUIT_SIZE,
+    core: REXONANCE_SUIT_MARKS.core,
+    visor: REXONANCE_SUIT_MARKS.visor,
+    gold,
+    seams: REXONANCE_NANITES.seams,
+    goldBoxes: REXONANCE_NANITES.goldBoxes,
+    goldCell: REXONANCE_SUIT_GOLD_CELL,
+  });
+  const sheet = (id) => ({ id, width: 1, height: 1 });
+  const swarm = createAssemblyNanites({
+    nano,
+    size: REXONANCE_SUIT_SIZE,
+    core: REXONANCE_SUIT_MARKS.core,
+    visor: REXONANCE_SUIT_MARKS.visor,
+    sprites: { cells: sheet("cells"), comets: sheet("comets"), fx: sheet("fx") },
+    kit: REXONANCE_NANITES,
+    gold,
+    layers: { face: sheet("face"), holo: sheet("holo"), walls: sheet("walls") },
+  });
+  const record = () => {
+    const log = [];
+    const round = (value) => (typeof value === "number" ? Math.round(value * 1000) / 1000 : value?.id ?? value);
+    const context = new Proxy(
+      {},
+      {
+        get: (_, key) => (...args) => log.push(`${String(key)}(${args.map(round).join(",")})`),
+        set: (_, key, value) => {
+          log.push(`${String(key)}=${round(value)}`);
+          return true;
+        },
+      },
+    );
+    return { log, context };
+  };
+  // Every pass of a frame at q, after the given predecessors.
+  const frameAt = (q, before, calm) => {
+    for (const [p, live] of before) {
+      const { context } = record();
+      swarm.frame(p, live ? 0.004 : 0, !live, 2, false);
+      swarm.view(2, 0, 0);
+      for (const pass of ["backPass", "midPass", "flightPass", "goldPass", "frontPass", "freePass"])
+        swarm[pass](context);
+      swarm.endFrame();
+    }
+    const { log, context } = record();
+    swarm.frame(q, 0, calm, 2, false);
+    swarm.view(2, 0, 0);
+    for (const pass of ["backPass", "midPass", "frontPass", "freePass"]) swarm[pass](context);
+    swarm.endFrame();
+    return log;
+  };
+  for (const q of [0.15, 0.25, 0.3, 0.4]) {
+    const forward = frameAt(q, [[q - 0.02, true], [q - 0.01, true], [q, true]], true);
+    const reverse = frameAt(q, [[q + 0.02, true], [q + 0.01, true], [q, true]], true);
+    const jump = frameAt(q, [[0.95, true], [q, true]], true);
+    const cold = frameAt(q, [], true);
+    assert.ok(forward.length > 1000, `${q}: the cocoon is drawn (${forward.length} calls)`);
+    assert.deepEqual(reverse, forward, `${q}: reverse scrub`);
+    assert.deepEqual(jump, forward, `${q}: jump`);
+    assert.deepEqual(cold, forward, `${q}: first frame`);
+    // Live frames too (comets aside): the band passes match.
+    const liveA = frameAt(q, [[q - 0.02, true]], false);
+    const liveB = frameAt(q, [[q + 0.02, true]], false);
+    assert.deepEqual(liveB, liveA, `${q}: live frames after different scrubs`);
+  }
+});
+
+test("the raw metal and the molten gold are made in bands of rows, byte for byte the kit's pixel jobs, however sliced (review 2026-10-16: idle slices ≤ 6 ms)", async () => {
+  // A whole-figure read and its canvases in one idle slice cost 7–12 ms on a
+  // phone; the scene now reads a band of rows a slice. The bytes are the
+  // kit's own (createNaniteMetalJob / createNaniteMoltenJob).
+  const { createAssemblyLayerJob } = await import("../src/lib/rexonance-assembly-nanites.js");
+  const { createNaniteMetalJob, createNaniteMoltenJob } = await import("../src/lib/rexonance-unlit.js");
+  // A pixel-exact fake canvas (unscaled copies only).
+  const document = {
+    createElement() {
+      const canvas = { width: 0, height: 0, data: null };
+      const sized = () => {
+        if (!canvas.data || canvas.data.length !== canvas.width * canvas.height * 4)
+          canvas.data = new Uint8ClampedArray(canvas.width * canvas.height * 4);
+        return canvas.data;
+      };
+      const copy = (src, sw, sx, sy, dst, dw, dx, dy, w, h, dh) => {
+        for (let y = 0; y < h; y += 1) {
+          if (dy + y < 0 || dy + y >= dh) continue;
+          for (let x = 0; x < w; x += 1) {
+            const s = ((sy + y) * sw + sx + x) * 4;
+            const d = ((dy + y) * dw + dx + x) * 4;
+            for (let c = 0; c < 4; c += 1) dst[d + c] = src[s + c] ?? 0;
+          }
+        }
+      };
+      canvas.getContext = () => ({
+        drawImage(image, sx, sy, sw, sh, dx, dy) {
+          const dst = sized();
+          const src = image.getContext ? image.getContext("2d").pixels() : image.data;
+          copy(src, image.width, sx, sy, dst, canvas.width, dx, dy, sw, sh, canvas.height);
+        },
+        clearRect(x, y, w, h) {
+          const dst = sized();
+          for (let yy = y; yy < y + h; yy += 1) dst.fill(0, (yy * canvas.width + x) * 4, (yy * canvas.width + x + w) * 4);
+        },
+        getImageData(x, y, w, h) {
+          const data = new Uint8ClampedArray(w * h * 4);
+          copy(sized(), canvas.width, x, y, data, w, 0, 0, w, h, h);
+          return { width: w, height: h, data };
+        },
+        createImageData(w, h) {
+          return { width: w, height: h, data: new Uint8ClampedArray(w * h * 4) };
+        },
+        putImageData(image, dx, dy, x0 = 0, y0 = 0, w = image.width, h = image.height) {
+          copy(image.data, image.width, x0, y0, sized(), canvas.width, dx + x0, dy + y0, w, h, canvas.height);
+        },
+        pixels: sized,
+      });
+      return canvas;
+    },
+  };
+  const W = 37;
+  const H = 131;
+  let state = 0x5eed1234;
+  const data = Uint8ClampedArray.from({ length: W * H * 4 }, (_, i) => {
+    state = (Math.imul(state, 1664525) + 1013904223) >>> 0;
+    const v = state >>> 24;
+    if (i % 4 === 3) return v < 85 ? 0 : v < 140 ? v : 255;
+    return v;
+  });
+  const source = { width: W, height: H, data };
+  const mask = { width: W, height: H, data: data.map((v, i) => (i % 4 === 3 ? 255 - v : v)) };
+  const run = (job, slice) => {
+    let clock = 0;
+    const saved = globalThis.performance.now;
+    globalThis.performance.now = () => (clock += slice);
+    try {
+      while (!job.step(clock + 4, null));
+    } finally {
+      globalThis.performance.now = saved;
+    }
+    return job.commit();
+  };
+  const bytes = (canvas) => Array.from(canvas.getContext("2d").pixels());
+  const kitMetal = run(createNaniteMetalJob(source, 0, 0, W, H, document, { silhouette: true }), 1);
+  const kitMolten = run(createNaniteMoltenJob(source, 0, 0, W, H, document, { mask }), 1);
+  for (const slice of [0.5, 3, 100]) {
+    const metal = run(createAssemblyLayerJob({ source, width: W, height: H, kind: "metal", silhouette: true, document }), slice);
+    assert.deepEqual(bytes(metal.metal), bytes(kitMetal.metal), `metal, slice ${slice}`);
+    assert.deepEqual(bytes(metal.silhouette), bytes(kitMetal.silhouette), `silhouette, slice ${slice}`);
+    const molten = run(createAssemblyLayerJob({ source, width: W, height: H, kind: "molten", mask, document }), slice);
+    assert.deepEqual(bytes(molten.molten), bytes(kitMolten.molten), `molten, slice ${slice}`);
+  }
+  // And the scene uses them, not the whole-figure jobs.
+  const engine = read("src/lib/rexonance-resonance.js");
+  assert.match(engine, /createAssemblyLayerJob\(\{[\s\S]*?kind: "metal"/);
+  assert.match(engine, /createAssemblyLayerJob\(\{[\s\S]*?kind: "molten"/);
+  assert.doesNotMatch(engine, /createNaniteMetalJob\(|createNaniteMoltenJob\(/);
 });

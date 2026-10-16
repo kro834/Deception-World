@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { existsSync, readFileSync, statSync } from "node:fs";
 import { test } from "node:test";
+import { runInNewContext } from "node:vm";
+import ts from "typescript";
 
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 const component = read("src/components/rexonance-saga/rexonance-saga.tsx");
@@ -12,6 +14,29 @@ const transitions = read("src/styles-route-transitions.css");
 const loadGate = read("src/components/load-gate.tsx");
 const loader = read("src/lib/asset-loader.ts");
 
+test("revised punch and kick comparisons derive every displayed figure from the catalog", () => {
+  const file = ts.createSourceFile("rexonance.tsx", component, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+  const declaration = file.statements.filter(ts.isVariableStatement)
+    .flatMap((statement) => [...statement.declarationList.declarations])
+    .find((item) => item.name.getText(file) === "PERFORMANCE_BASELINES");
+  assert.ok(declaration?.initializer);
+  const context = {};
+  runInNewContext(ts.transpileModule(`globalThis.data = ${declaration.initializer.getText(file)}`, {
+    compilerOptions: { module: ts.ModuleKind.CommonJS },
+  }).outputText, context);
+  for (const baseline of Object.values(context.data)) {
+    for (const metric of baseline.metrics.filter((metric) => ["パンチ力", "キック力"].includes(metric.label))) {
+      const current = parseFloat(metric.current);
+      const previous = parseFloat(metric.previous);
+      const ratio = current / previous;
+      assert.equal(metric.relative, `${(ratio * 100).toFixed(1)}%`);
+      assert.equal(metric.multiplier, `${ratio.toFixed(2)}倍`);
+      assert.equal(parseFloat(metric.delta), Number(((ratio - 1) * 100).toFixed(1)));
+      assert.equal(metric.bar, Number((previous / current * 100).toFixed(1)));
+    }
+  }
+});
+
 test("Rexonance special site is reachable from every shared side menu", () => {
   assert.match(route, /createFileRoute\("\/rexonance-saga"\)/);
   assert.match(menu, /<span>\s*<DisplayName value="レクソナンスサーガ" \/>\s*<\/span>/);
@@ -22,12 +47,23 @@ test("Rexonance special site is reachable from every shared side menu", () => {
 });
 
 test("Rexonance special site preserves published performance and stage definitions", () => {
-  for (const value of ["332.2t", "480.5t", "6000m", "0.00021秒", "650", "900"]) {
+  // Owner's latest catalog replaces the earlier punch/kick figures.
+  for (const value of ["372.2t", "483.5t", "6000m", "0.00021秒", "650", "900"]) {
     assert.match(component, new RegExp(value.replace(".", "\\.")));
   }
   for (const stage of ["レクソナンス", "マックス", "ウルトラ", "単一実在収束", "60秒間"]) {
     assert.match(component, new RegExp(stage));
   }
+  // Owner's revised canon centers Yuma's awakened, self-controlled 終焉.
+  for (const phrase of ["第五の犬", "終焉", "i-2", "二角形構造"]) {
+    assert.ok(component.includes(phrase), `${phrase} should be shown`);
+  }
+  assert.match(component, /KHAOSが進化候補を生成し、KOSMOSが整合性を検証し/);
+  assert.match(component, /二つの頂点と二本の位相境界/);
+  assert.match(component, /限定的なベクトル仮想演算空間を生成する/);
+  assert.doesNotMatch(component, /DEUS SHIFT|REXONANCE PERK/);
+  assert.doesNotMatch(component, /レックスとゼウス|絶対秩序/);
+  assert.doesNotMatch(component, /DEUS SHIFT|REXONANCE PERK/);
   assert.match(component, /標準運用値/);
   assert.match(component, /最大出力ではなく/);
 });
@@ -86,13 +122,14 @@ test("Vertex and Vinculum comparisons keep supplied processors and compare only 
     "P2",
     "Paranormal Realizer Pro",
     "Neural Resonancer Pro",
-    "50,000YOPS / ∞Core · KHAOS DeuX",
+    "50,000〜YOPS / ∞Core · KHAOS DeuX",
     "9,000TOPS / 300Core · KOSMOS DeuX",
     "P14",
   ]) {
     assert.match(component, new RegExp(value.replaceAll(".", "\\.")));
   }
-  assert.match(component, /KHAOS系YOPSが5\.0倍、KOSMOS系TOPSが30\.0倍/);
+  assert.match(component, /基準値比ではKHAOS系YOPSが5\.0倍、KOSMOS系TOPSが30\.0倍/);
+  assert.match(component, /固定された最大性能を示しません/);
   assert.match(component, /単純換算は行わず/);
   assert.match(component, /activePerformanceBaseline\.processing\.baseline\.map/);
   assert.match(component, /activePerformanceBaseline\.processing\.rexonance\.map/);
@@ -101,22 +138,31 @@ test("Vertex and Vinculum comparisons keep supplied processors and compare only 
 
 test("catalog comparison separates baseline ratio, multiplier, and increase", () => {
   for (const value of [
-    "488.5%",
-    "4.89倍",
-    "+388.5%",
-    "278.7%",
-    "2.79倍",
+    "547.4%",
+    "5.47倍",
+    "+447.4%",
+    // Owner's new kick catalog: 483.5 / 172.4, independently calculated above.
+    "280.5%",
+    "2.80倍",
+    "+180.5%",
     "6000%",
     "60.0倍",
     "285,714.3%",
     "約2857.14倍",
-    "336.2%",
-    "3.36倍",
+    "376.7%",
+    "3.77倍",
+    "+276.7%（推定値比）",
+    "243.2%",
+    "2.43倍",
+    "+143.2%（推定値比）",
     "120.0%",
     "1.20倍",
     "47,619.0%",
     "約476.19倍",
-    "161.6%",
+    "181.0%",
+    "+81.0%",
+    "156.5%",
+    "+56.5%",
     "580.6%",
     "952.4%",
     "9.52倍",

@@ -2,7 +2,7 @@ import { Fragment, memo, useCallback, useEffect, useRef, useState } from "react"
 import { RexonanceCallSequence } from "./rexonance-call-sequence";
 import { RexonanceAperture } from "./rexonance-aperture";
 import {
-  REXONANCE_CALLS,
+  REXONANCE_ENTRY_CALLS,
   REXONANCE_STAGE_DURATION_MS,
   type RexonanceStage,
   REXONANCE_SUIT_DRIVER,
@@ -37,6 +37,7 @@ import {
 import { rexonanceImage } from "@/lib/rexonance-images";
 import { REXONANCE_FORM_FIGURES, REXONANCE_FORM_PAD } from "@/lib/rexonance-forms";
 import { REXONANCE_SUIT_BASE, REXONANCE_SUIT_ORNAMENTS } from "@/lib/rexonance-suit-base";
+import { REXONANCE_NANITES } from "@/lib/rexonance-nanites";
 import {
   FORM_CHANGE_MS,
   FORM_LANDMARKS,
@@ -79,8 +80,8 @@ const STAGES: Record<
     image: REXONANCE_SITE_ARTWORK.standard,
     alt: "仮面ライダーレクソナンスサーガの全身ビジュアル",
     title: "無限出力が、平常運転。",
-    lede: "SA-GA OS 5.5が超自己進化と絶対秩序を統合し、標準運用の時点でエクスプリーム・ウルトラ以上の実効戦闘性能を安定して維持します。",
-    points: ["高安定・高継戦", "REXONANCE DRIVE", "標準カタログ値を公開"],
+    lede: "精神的変化に伴う著しい適正値上昇によって第五の犬として完全覚醒した悠真が、自身に備わる『終焉』を完全制御した姿です。",
+    points: ["終焉の完全制御", "自己共鳴型システム", "標準カタログ値を公開"],
     accent: "#63e2ff",
   },
   max: {
@@ -101,8 +102,8 @@ const STAGES: Record<
     // Two keep-all phrases that break at their 、 on iPhone Safari, so this
     // title needs no break marker; renderStageTitle still turns a zero-width
     // marker into <wbr /> for any future title (rx2/COPY2.md C5).
-    title: "神属権限まで、一動作に。",
-    lede: "身体、武装、リアクター、極小主権宇宙を一つの巨大な攻撃機関へ統合し、60秒間、全演算・神属権限・出力を現在の一動作へ集中します。",
+    title: "終焉の全出力を、一動作に。",
+    lede: "悠真自身が完全制御する『終焉』を対象へ限定し、空間崩壊を防ぎながら、身体、武装、リアクター、全演算と出力を60秒間、一動作へ集中します。",
     points: ["単一実在収束", "SCALER《ULTRA》", "60秒間の最上位状態"],
     accent: "#ff72da",
   },
@@ -157,21 +158,21 @@ const PERFORMANCE_BASELINES: Record<
     metrics: [
       {
         label: "パンチ力",
-        current: "332.2t",
+        current: "372.2t",
         previous: "68.0t",
-        relative: "488.5%",
-        multiplier: "4.89倍",
-        delta: "+388.5%",
-        bar: 20.5,
+        relative: "547.4%",
+        multiplier: "5.47倍",
+        delta: "+447.4%",
+        bar: 18.3,
       },
       {
         label: "キック力",
-        current: "480.5t",
+        current: "483.5t",
         previous: "172.4t",
-        relative: "278.7%",
-        multiplier: "2.79倍",
-        delta: "+178.7%",
-        bar: 35.9,
+        relative: "280.5%",
+        multiplier: "2.80倍",
+        delta: "+180.5%",
+        bar: 35.7,
       },
       {
         label: "ジャンプ力",
@@ -195,7 +196,7 @@ const PERFORMANCE_BASELINES: Record<
     ],
     processing: {
       baseline: ["50,000〜TOPS / 200Core", "URANUS X", "TAMAYURA X（アクセラレータ）", "P1"],
-      rexonance: ["50,000YOPS / ∞Core · KHAOS DeuX", "9,000TOPS / 300Core · KOSMOS DeuX", "P14"],
+      rexonance: ["50,000〜YOPS / ∞Core · KHAOS DeuX", "9,000TOPS / 300Core · KOSMOS DeuX", "P14"],
       verdict:
         "URANUS XのTOPS値とKHAOS DeuXのYOPS値は単位・演算系統が異なります。KOSMOS DeuXを含めた総合演算倍率への単純換算は行わず、公開スペックを並列表示しています。",
     },
@@ -206,21 +207,21 @@ const PERFORMANCE_BASELINES: Record<
     metrics: [
       {
         label: "パンチ力",
-        current: "332.2t",
+        current: "372.2t",
         previous: "98.8t（est.）",
-        relative: "336.2%",
-        multiplier: "3.36倍",
-        delta: "+236.2%（推定値比）",
-        bar: 29.7,
+        relative: "376.7%",
+        multiplier: "3.77倍",
+        delta: "+276.7%（推定値比）",
+        bar: 26.5,
       },
       {
         label: "キック力",
-        current: "480.5t",
+        current: "483.5t",
         previous: "198.8t（est.）",
-        relative: "241.7%",
-        multiplier: "2.42倍",
-        delta: "+141.7%（推定値比）",
-        bar: 41.4,
+        relative: "243.2%",
+        multiplier: "2.43倍",
+        delta: "+143.2%（推定値比）",
+        bar: 41.1,
       },
       {
         label: "ジャンプ力",
@@ -251,14 +252,14 @@ const PERFORMANCE_BASELINES: Record<
         "Neural Resonancer Pro",
       ],
       rexonance: [
-        "50,000YOPS / ∞Core · KHAOS DeuX",
+        "50,000〜YOPS / ∞Core · KHAOS DeuX",
         "9,000TOPS / 300Core · KOSMOS DeuX",
         "P14",
         "Paranormal Realizer Ultra",
         "Neural Resonancer Ultra",
       ],
       verdict:
-        "同一単位・同系統の公開値では、KHAOS系YOPSが5.0倍、KOSMOS系TOPSが30.0倍です。Core数と補助機構は構成差として併記し、異なる指標を一つの倍率へ合算していません。",
+        "基準値比ではKHAOS系YOPSが5.0倍、KOSMOS系TOPSが30.0倍です。KHAOSの50,000YOPSは標準稼働時の基準値で、固定された最大性能を示しません。Core数と補助機構は構成差として併記し、異なる指標を一つの倍率へ合算していません。",
     },
   },
   extreme: {
@@ -267,21 +268,21 @@ const PERFORMANCE_BASELINES: Record<
     metrics: [
       {
         label: "パンチ力",
-        current: "332.2t",
+        current: "372.2t",
         previous: "205.6t〜",
-        relative: "161.6%",
-        multiplier: "1.62倍",
-        delta: "+61.6%",
-        bar: 61.9,
+        relative: "181.0%",
+        multiplier: "1.81倍",
+        delta: "+81.0%",
+        bar: 55.2,
       },
       {
         label: "キック力",
-        current: "480.5t",
+        current: "483.5t",
         previous: "308.9t〜",
-        relative: "155.6%",
-        multiplier: "1.56倍",
-        delta: "+55.6%",
-        bar: 64.3,
+        relative: "156.5%",
+        multiplier: "1.57倍",
+        delta: "+56.5%",
+        bar: 63.9,
       },
       {
         label: "ジャンプ力",
@@ -305,9 +306,9 @@ const PERFORMANCE_BASELINES: Record<
     ],
     processing: {
       baseline: ["20,000YOPS / ∞Core · KHAOS Ultra", "5,000TOPS / 300Core · KOSMOS Ultra"],
-      rexonance: ["50,000YOPS / ∞Core · KHAOS DeuX", "9,000TOPS / 300Core · KOSMOS DeuX", "P14"],
+      rexonance: ["50,000〜YOPS / ∞Core · KHAOS DeuX", "9,000TOPS / 300Core · KOSMOS DeuX", "P14"],
       verdict:
-        "同一単位の公開値では、KHAOS系YOPSが2.5倍、KOSMOS系TOPSが1.8倍です。YOPSとTOPSを合算した総合倍率には換算していません。",
+        "基準値比ではKHAOS系YOPSが2.5倍、KOSMOS系TOPSが1.8倍です。KHAOSの50,000YOPSは標準稼働時の基準値で、固定された最大性能を示しません。YOPSとTOPSを合算した総合倍率には換算していません。",
     },
   },
 };
@@ -399,21 +400,21 @@ const P14_METRICS = [
 const CORE_SYSTEMS = [
   {
     number: "01",
-    code: "EVOLUTION",
-    title: "超自己進化",
-    body: "観測した敵能力と戦況をもとに、次世代の装甲・演算・権限構造を生み出します。戦闘中も攻撃の周波数、位相、権限署名を更新し続けます。",
+    code: "i-2 / SECOND-GENERATION PROCESS",
+    title: "i-2 第二世代無限縮小製造プロセス",
+    body: "無限縮小を可能にする第二世代の製造プロセスです。第五の犬としての悠真自身が持つ性質に合わせ、レクソナンスコア、ドライバー、全身の戦闘機構を同一の『終焉』へ同期させます。",
   },
   {
     number: "02",
-    code: "ABSOLUTE ORDER",
-    title: "絶対秩序",
-    body: "進化した要素へ境界と役割を与え、互いに矛盾なく働くよう即座に固定します。進化を続けながらも、自己崩壊を防ぎます。",
+    code: "TWO-ANGLE STRUCTURE",
+    title: "二角形構造",
+    body: "二つの頂点と二本の位相境界によって構成される特殊な演算構造。通常空間の内部だけでは完結しない閉路を形成し、その内側へ限定的なベクトル仮想演算空間を生成する。",
   },
   {
     number: "03",
-    code: "HUMAN WILL",
-    title: "月城悠真の意思",
-    body: "レックスとゼウスはそれぞれの存在を保ったまま悠真と超共鳴し、何を破壊し、何を残すかは、最後まで悠真自身が決めます。",
+    code: "SELF-RESONANCE / FINAL JUDGMENT",
+    title: "悠真自身による自己共鳴",
+    body: "第五の犬として完全覚醒した悠真自身の性質と、レクソナンスコア、ドライバー、全身の機構を一つの『終焉』へ同調させます。KHAOSが進化候補を生成し、KOSMOSが整合性を検証し、超自己進化や反エントロピー・位相推進の運用と作用対象の最終判断は悠真自身が担います。",
   },
 ] as const;
 
@@ -452,10 +453,14 @@ const SUIT_UP: RexonanceAssemblyConfig = {
     cell: REXONANCE_SUIT_GOLD_CELL,
     cells: REXONANCE_SUIT_GOLD_CELLS,
   },
+  // The nanite kit (owner, 2026-10-16: 超大幅な改善): Blender hex chips,
+  // comets, clamps, latches, scan planes, droplets, shock rings, the gold
+  // guideway conduit, and each plate's real outline and gold box.
+  nanites: REXONANCE_NANITES,
 };
-// The published call, line by line; the chanted lines split into their
-// repeats, so each SA-GA！DEUS！ and REXONANCE！ lights on its own beat.
-const SUIT_UP_LINES = REXONANCE_CALLS.map((call) => {
+// The entry overlay follows its established five-beat grouping; repeated
+// chant text still splits into individual visual units within its existing beat.
+const SUIT_UP_LINES = REXONANCE_ENTRY_CALLS.map((call) => {
   const repeats = call.match(/SA-GA！DEUS！|REXONANCE！(?=REXONANCE！|$)/g);
   return repeats && repeats.length > 1 && repeats.join("") === call ? repeats : [call];
 });
@@ -523,7 +528,7 @@ const RexonanceSuitUp = memo(function RexonanceSuitUp({ stage }: { stage: Rexona
           </p>
           <ol className="rzn-lines">
             {SUIT_UP_LINES.map((units, index) => (
-              <li key={REXONANCE_CALLS[index]} className="rzn-line">
+              <li key={REXONANCE_ENTRY_CALLS[index]} className="rzn-line">
                 {units.map((unit, unitIndex) => (
                   <span key={`${unit}-${unitIndex}`} className="rzn-chip">
                     {unit}
@@ -1748,7 +1753,7 @@ export function RexonanceSaga() {
           <i aria-hidden="true">↗</i>
         </a>
         <a href="#system">
-          <small>TRINITY</small>
+          <small>SELF-RESONANCE</small>
           <span>共鳴構造</span>
           <i aria-hidden="true">↗</i>
         </a>
@@ -1945,15 +1950,15 @@ export function RexonanceSaga() {
 
           <section id="system" className="rxs-system rxs-section">
             <header className="rxs-section-heading rxs-reveal">
-              <p>TRINITY RESONANCE</p>
+              <p>SELF-RESONANCE</p>
               <h2>
-                三者三様のまま、
+                悠真自身が、
                 <br />
-                一糸乱れず。
+                終焉を制御する。
               </h2>
             </header>
 
-            {/* ZENITH (rx15): the three, each its own ring, fall into phase. */}
+            {/* Three system layers converge on Yuma's self-resonance. */}
             <div className="rzn-trinity" aria-hidden="true">
               {CORE_SYSTEMS.map((system) => (
                 <span key={system.number} className="rzn-tri">
@@ -1984,12 +1989,12 @@ export function RexonanceSaga() {
               <div>
                 <small>KHAOS DeuX</small>
                 <strong data-rsn-count="">
-                  50,000<span>YOPS</span>
+                  50,000〜<span>YOPS</span>
                   <b className="rsn-count" aria-hidden="true">
-                    50,000<span>YOPS</span>
+                    50,000〜<span>YOPS</span>
                   </b>
                 </strong>
-                <p>∞ CORE</p>
+                <p>∞ CORE / 基準値</p>
               </div>
               {/* A drawn hairline, not a multiplication sign: the two units stand
               side by side and are never multiplied (rx2/COPY2.md C8). */}
