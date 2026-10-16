@@ -7,7 +7,7 @@ const browser = await (engine === "webkit" ? webkit : chromium).launch(
   engine === "webkit" ? {} : { channel: process.env.PW_BROWSER_CHANNEL || "chrome" },
 );
 const calls = [
-  "FAR UP！",
+  "Ultra DEUS！\nREXONANCE！",
   "RIDER！",
   "SA-GA！DEUS！SA-GA！DEUS！SA-GA！DEUS！SA-GA！DEUS！",
   "REXONANCE！REXONANCE！REXONANCE！REXONANCE！",
@@ -294,24 +294,24 @@ async function verifyProfile(profile) {
   if (touch) await link.tap();
   else await link.click();
   await page.locator('.rx-call-sequence[data-mode="entry"]').waitFor({ timeout: 10000 });
-  const entryCall = (call, index) => {
+  const entryCall = (index) => {
     const finalClass = index === 4 ? ".rx-call-final" : "";
-    return `.rx-call-sequence[data-mode="entry"] .rx-call-beat[data-call="${call}"]${finalClass}`;
+    return `.rx-call-sequence[data-mode="entry"] .rx-call-beat:nth-child(${index + 1})${finalClass}`;
   };
-  await waitForVisibleCall(page, entryCall("FAR UP！", 0), 1);
+  await waitForVisibleCall(page, entryCall(0), 2);
   if (["desktop", "phone-390"].includes(profile.name)) {
     await page.screenshot({ path: `/tmp/rexonance-entry-${profile.name}-first.png` });
   }
-  await verifySuitClear(page, entryCall("FAR UP！", 0), profile.name, "FAR UP！");
+  await verifySuitClear(page, entryCall(0), profile.name, "Ultra DEUS！ / REXONANCE！");
   // The system check has booted by RIDER！ (rx3).
   await page.waitForFunction(
     (target) => {
       const beat = document.querySelector(target);
       return beat && Number(getComputedStyle(beat).opacity) > 0.3;
     },
-    entryCall("RIDER！", 1),
+    entryCall(1),
   );
-  await verifySuitClear(page, entryCall("RIDER！", 1), profile.name, "RIDER！");
+  await verifySuitClear(page, entryCall(1), profile.name, "RIDER！");
   await waitForVisibleCall(
     page,
     '.rx-call-sequence[data-mode="entry"] .rx-call-chant[data-call="SA-GA！DEUS！SA-GA！DEUS！SA-GA！DEUS！SA-GA！DEUS！"]',
@@ -337,7 +337,7 @@ async function verifyProfile(profile) {
     profile.name,
     "REXONANCE！",
   );
-  await waitForVisibleCall(page, entryCall("REXONANCE DEUS！", 4), 2);
+  await waitForVisibleCall(page, entryCall(4), 2);
   // Every callout and the LOCK are up just before the hand-over (rx3).
   await page
     .waitForFunction(
@@ -355,7 +355,7 @@ async function verifyProfile(profile) {
     )
     .catch(() => undefined);
   if (await page.locator('.rx-call-sequence[data-mode="entry"][data-phase="covering"]').count()) {
-    await verifySuitClear(page, entryCall("REXONANCE DEUS！", 4), profile.name, "REXONANCE DEUS！");
+    await verifySuitClear(page, entryCall(4), profile.name, "REXONANCE DEUS！");
   }
   if (["desktop", "phone-390"].includes(profile.name)) {
     await page.screenshot({ path: `/tmp/rexonance-entry-${profile.name}-final.png` });
@@ -370,7 +370,7 @@ async function verifyProfile(profile) {
   assert.deepEqual(
     await page.evaluate(() => window.__rexonanceEntryCalls),
     calls,
-    `${profile.name}: five canonical calls must appear once and in order`,
+    `${profile.name}: five entry beats must appear once and in order`,
   );
   assert.equal(
     await page.evaluate(() => window.__rexonanceCallMaxRoots),
@@ -622,8 +622,8 @@ async function verifyProfile(profile) {
     await backEntryPage.locator('.rx-call-sequence[data-mode="entry"]').waitFor({ timeout: 10000 });
     await waitForVisibleCall(
       backEntryPage,
-      '.rx-call-sequence[data-mode="entry"] .rx-call-beat[data-call="FAR UP！"]',
-      1,
+      '.rx-call-sequence[data-mode="entry"] .rx-call-beat:nth-child(1)',
+      2,
     );
     await backEntryPage.goBack({ waitUntil: "domcontentloaded" });
     await backEntryPage.waitForURL("**/form-archive", { timeout: 10000 });

@@ -45,13 +45,18 @@ export function watchPresses(doc = document) {
   let minMs = 0;
   // One pending timer per control (the rest of its minimum hold, then its
   // settle), so a quick second tap elsewhere never strands the first press.
-  /** @type {WeakMap<Element, number>} */
-  const timers = new WeakMap();
+  // Enumerable only while a hold/settle is pending, so interruption and
+  // teardown can cancel all controls, including taps already released.
+  /** @type {Map<Element, number>} */
+  const timers = new Map();
 
   /** @param {Element} el @param {() => void} run @param {number} ms */
   const later = (el, run, ms) => {
     view?.clearTimeout(timers.get(el));
-    timers.set(el, view?.setTimeout(run, ms) ?? 0);
+    timers.set(el, view?.setTimeout(() => {
+      timers.delete(el);
+      run();
+    }, ms) ?? 0);
   };
 
   /** @param {Element} el */
@@ -106,7 +111,12 @@ export function watchPresses(doc = document) {
   const up = (event) => {
     if (event.pointerId === pointerId) release(event.type === "pointerup");
   };
-  const cancel = () => release();
+  const cancel = () => {
+    release();
+    for (const el of timers.keys()) {
+      if (el.getAttribute(ATTRIBUTE) !== "out") settle(el);
+    }
+  };
 
   const options = { capture: true, passive: true };
   doc.addEventListener("pointerdown", down, options);
@@ -121,7 +131,14 @@ export function watchPresses(doc = document) {
   root.setAttribute("data-press-ready", "");
 
   return () => {
-    release();
+    if (pressed) pressed.removeAttribute(ATTRIBUTE);
+    pressed = null;
+    pointerId = -1;
+    for (const [el, timer] of timers) {
+      view?.clearTimeout(timer);
+      el.removeAttribute(ATTRIBUTE);
+    }
+    timers.clear();
     doc.removeEventListener("pointerdown", down, options);
     doc.removeEventListener("pointermove", move, options);
     doc.removeEventListener("pointerup", up, options);

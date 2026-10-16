@@ -71,7 +71,7 @@
     if (!text || /^[—―–-]+$/.test(text)) return { ...base, state: "none" };
     if (/測定不能/.test(text)) return { ...base, state: "unmeasurable" };
     if (/不詳|不明|非公開/.test(text)) return { ...base, state: "unknown" };
-    if (/^無制限/.test(text)) return { ...base, state: "unlimited", value: Infinity };
+    if (/^(?:無制限|無限大)/.test(text)) return { ...base, state: "unlimited", value: Infinity };
     const numbers = (text.match(NUMBER) || []).map(Number);
     if (/⇄/.test(text) && numbers.length) {
       const min = Math.min(...numbers);
@@ -100,14 +100,15 @@
     const tops = [];
     const yops = [];
     let bounded = false;
-    const pattern = /(\d[\d,]*(?:\.\d+)?)\s*([YZEPTG])OPS(\s*[〜～~])?/g;
+    const pattern = /(\d[\d,]*(?:\.\d+)?)\s*([〜～~])?\s*([YZEPTG])OPS(\s*[〜～~])?/g;
     for (const match of printed.matchAll(pattern)) {
       const value = Number(match[1].replace(/,/g, ""));
       fragments.push(match[0].replace(/\s+/g, ""));
-      if (match[2] === "T") {
+      const unit = match[3];
+      if (unit === "T") {
         tops.push(value);
-        if (match[3]) bounded = true;
-      } else if (match[2] === "Y") yops.push(value);
+        if (match[2] || match[4]) bounded = true;
+      } else if (unit === "Y") yops.push(value);
     }
     if (!fragments.length) {
       const fallback = classifyValue(raw);

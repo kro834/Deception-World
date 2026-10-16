@@ -399,7 +399,7 @@ test("the scene is decorative and passes the generated shape masks to its plan",
     /useEffect\(\(\) => mountRexonanceAssembly\(runwayRef\.current, SUIT_UP\), \[\]\);/,
   );
   // The call is the published one, in its order.
-  assert.match(page, /const SUIT_UP_LINES = REXONANCE_CALLS\.map/);
+  assert.match(page, /const SUIT_UP_LINES = REXONANCE_ENTRY_CALLS\.map/);
   // The new ornaments are hidden from assistive technology.
   for (const ornament of ["rzn-mesh", "rzn-form-code", "rzn-end-figure"]) {
     assert.match(

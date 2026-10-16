@@ -8,6 +8,7 @@ import { runInNewContext } from "node:vm";
 import test from "node:test";
 import ts from "typescript";
 import { buildFormIndexSource, extractArchiveForms } from "./build-search-form-index.mjs";
+import { rexonanceEntries, rexonanceSection } from "../src/lib/rexonance-profile.ts";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const read = (path) => readFileSync(resolve(root, path), "utf8");
@@ -79,6 +80,8 @@ test("every rider, manager and character dossier route has a record", () => {
     REX_LOI: managers[1],
     REXONANCE_CALLS: [],
     FINAL_STAGE_ENTER_ASSETS: [],
+    rexonanceSection,
+    rexonanceEntries,
   });
   for (const rider of riders) {
     const document = byId.get(`rider-${rider.id}`);

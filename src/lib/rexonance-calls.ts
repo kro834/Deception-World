@@ -1,11 +1,18 @@
-// Published transformation call, in its original order and punctuation.
-// The operating-stage names are labels, not additional transformation calls.
+// Canonical transformation call, in its original order and punctuation.
 export const REXONANCE_CALLS = [
-  "FAR UP！",
+  "Ultra DEUS！",
+  "REXONANCE！",
   "RIDER！",
   "SA-GA！DEUS！SA-GA！DEUS！SA-GA！DEUS！SA-GA！DEUS！",
   "REXONANCE！REXONANCE！REXONANCE！REXONANCE！",
   "REXONANCE DEUS！",
+] as const;
+
+// Keep the established five-beat choreography: the two opening calls share
+// the first beat, while the remaining four canonical calls keep their slots.
+export const REXONANCE_ENTRY_CALLS = [
+  REXONANCE_CALLS.slice(0, 2).join("\n"),
+  ...REXONANCE_CALLS.slice(2),
 ] as const;
 
 // EXCELSIOR (owner, 2026-10-11): above ULTRA, also 60 s.
@@ -40,7 +47,7 @@ export const REXONANCE_CALL_BEATS = [
 export const REXONANCE_SUIT_SYSTEMS = [
   ["SA-GA OS 5.5", "ONLINE"],
   ["P14", "LINK"],
-  ["KHAOS DeuX", "50,000YOPS / ∞Core"],
+  ["KHAOS DeuX", "50,000〜YOPS / ∞Core"],
   ["KOSMOS DeuX", "9,000TOPS / 300Core"],
   ["Paranormal Realizer Ultra", "ONLINE"],
   ["Neural Resonancer Ultra", "ONLINE"],
@@ -51,8 +58,8 @@ export const REXONANCE_SUIT_SYSTEMS = [
 export const REXONANCE_SUIT_PARTS = ["LEGS", "ARMS", "CHEST", "HEAD"] as const;
 
 // rx12 (2026-10-10, owner): the suit-up is the approved full-body artwork,
-// cut into raster plates (scripts/build-rexonance-suit.mjs). FAR UP！ scans
-// the bare undersuit; RIDER！ seeds the P14 core and nanite motes gather.
+// cut into raster plates (scripts/build-rexonance-suit.mjs). The opening
+// call pair scans the bare undersuit; RIDER！ seeds the P14 core and motes gather.
 // rx13 (2026-10-11, owner): the armour forms right on the undersuit and
 // fits plate by plate — a cascade up the body (legs, waist, arms, chest and
 // core, shoulders), the tail growing out midway, the helmet last; each
@@ -264,6 +271,6 @@ export const REXONANCE_SUIT_PIXELS = {
   groups: 6,
 } as const;
 /** If the pieces are not decoded when the call starts, the call plays with
- * the finished figure; it switches to the build only while FAR UP！'s scan
+ * the finished figure; it switches to the build only while the opening scan
  * is still running, never once any armour could show. */
 export const REXONANCE_SUIT_LATE_MS = 300;

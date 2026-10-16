@@ -335,7 +335,7 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
                 <section className="form-pickup-overview" aria-label="フォーム概要">
                   <header>
                     <span>00</span>
-                    <p>{isRexonance ? "OVERVIEW / TRINITY RESONANCE" : "OVERVIEW"}</p>
+                    <p>{isRexonance ? "OVERVIEW / SELF RESONANCE" : "OVERVIEW"}</p>
                   </header>
                   <div>
                     {overview.map((paragraph) => (

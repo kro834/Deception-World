@@ -1609,6 +1609,13 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   }
 }
 
+/* Owner 2026-10-16: Ultra DEUS！ / REXONANCE！ share the existing opening
+   beat. Their longer text needs the repeated-call width budget, not FAR UP's
+   short-word scale; timing, movement and typeface remain unchanged. */
+.rx-call-sequence[data-mode="entry"] .rx-call-opening:first-child {
+  font-size: max(24px, min(7.6vw, 100px, 13vh));
+}
+
 /* Wide landscape frames: the figure stands on the right at nearly the
    frame's height; the calls keep the zone on its left (--rx-call-zone),
    each call's type capped to fit that zone (its measured width in em:
@@ -1631,6 +1638,10 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
 
   .rx-call-sequence[data-mode="entry"] .rx-call-opening {
     font-size: max(24px, min(10.5vw, 156px, 22vh, var(--rx-call-zone) / 5.6));
+  }
+
+  .rx-call-sequence[data-mode="entry"] .rx-call-opening:first-child {
+    font-size: max(24px, min(7.6vw, 100px, 13vh, var(--rx-call-zone) / 10.5));
   }
 
   .rx-call-sequence[data-mode="entry"] :is(.rx-call-chant, .rx-call-repetition) {

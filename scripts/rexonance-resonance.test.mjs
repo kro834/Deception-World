@@ -916,7 +916,7 @@ test("each figure keeps the owner's value as its own text; its counter is a hidd
   for (const [value, suffix] of [
     ["650", "<span>%\\+</span>"],
     ["900", "<span>%</span>"],
-    ["50,000", "<span>YOPS</span>"],
+    ["50,000〜", "<span>YOPS</span>"],
     ["9,000", "<span>TOPS</span>"],
   ]) {
     assert.match(
@@ -954,7 +954,7 @@ test("each figure keeps the owner's value as its own text; its counter is a hidd
 test("the counter prints the owner's figures at every step without reflowing", () => {
   const cases = [
     ["650", ["000", "325", "650"]],
-    ["50,000", ["00,000", "25,000", "50,000"]],
+    ["50,000〜", ["00,000〜", "25,000〜", "50,000〜"]],
     ["9,000", ["0,000", "4,500", "9,000"]],
     ["90%", ["00%", "45%", "90%"]],
     ["約0.06ms", ["約0.00ms", "約0.03ms", "約0.06ms"]],

@@ -4,9 +4,11 @@ import { test } from "node:test";
 import {
   REXONANCE_CALL_BEATS,
   REXONANCE_CALLS,
+  REXONANCE_ENTRY_CALLS,
   REXONANCE_ENTRY_TIMINGS,
   REXONANCE_STAGE_DURATION_MS,
   REXONANCE_STAGE_LABELS,
+  REXONANCE_SUIT_SYSTEMS,
 } from "../src/lib/rexonance-calls.ts";
 
 const read = (path) => readFileSync(new URL(`../src/${path}`, import.meta.url), "utf8");
@@ -15,16 +17,27 @@ const styles = read("styles-rexonance-calls.css");
 const rider = read("components/world/rider-page.tsx");
 
 const publishedCalls = [
-  "FAR UP！",
+  "Ultra DEUS！",
+  "REXONANCE！",
   "RIDER！",
   "SA-GA！DEUS！SA-GA！DEUS！SA-GA！DEUS！SA-GA！DEUS！",
   "REXONANCE！REXONANCE！REXONANCE！REXONANCE！",
   "REXONANCE DEUS！",
 ];
 
-test("entry calls stay identical to the published five-call sequence and order", () => {
+const entryCalls = [
+  "Ultra DEUS！\nREXONANCE！",
+  "RIDER！",
+  "SA-GA！DEUS！SA-GA！DEUS！SA-GA！DEUS！SA-GA！DEUS！",
+  "REXONANCE！REXONANCE！REXONANCE！REXONANCE！",
+  "REXONANCE DEUS！",
+];
+
+test("canonical calls stay exact and entry calls retain the five-beat order", () => {
   assert.deepEqual(REXONANCE_CALLS, publishedCalls);
-  assert.equal(REXONANCE_CALL_BEATS.length, publishedCalls.length);
+  assert.deepEqual(REXONANCE_ENTRY_CALLS, entryCalls);
+  assert.equal(REXONANCE_CALL_BEATS.length, entryCalls.length);
+  assert.deepEqual(REXONANCE_SUIT_SYSTEMS[2], ["KHAOS DeuX", "50,000〜YOPS / ∞Core"]);
 
   const riderBlockStart = rider.indexOf('name: "レクソナンスサーガ"');
   const riderBlockEnd = rider.indexOf("stats: [", riderBlockStart);
@@ -35,8 +48,10 @@ test("entry calls stay identical to the published five-call sequence and order",
   assert.ok(!component.includes("AudioContext"));
   assert.ok(!component.includes("new Audio"));
   assert.ok(!component.includes("speechSynthesis"));
-  assert.match(component, /REXONANCE_CALLS\.map\(\(call, index\)/);
+  assert.match(component, /REXONANCE_ENTRY_CALLS\.map\(\(call, index\)/);
   assert.match(component, /data-call=\{call\}/);
+  assert.match(component, /<span>Ultra DEUS！<\/span>\s*<span>REXONANCE！<\/span>/);
+  assert.match(component, /if \(index === 1\) return <span>RIDER！<\/span>/);
   // 2026-10-05 (owner): each chant line is SA-GA！ with DEUS！ as its
   // answer; the line's text is still SA-GA！DEUS！, four times.
   assert.equal(
@@ -47,7 +62,8 @@ test("entry calls stay identical to the published five-call sequence and order",
     ).length,
     4,
   );
-  assert.equal((component.match(/<span>REXONANCE！<\/span>/g) ?? []).length, 4);
+  // One opening REXONANCE！ plus the following four-call repetition.
+  assert.equal((component.match(/<span>REXONANCE！<\/span>/g) ?? []).length, 5);
   assert.match(
     component,
     /if \(index === 4\)[\s\S]*?<span>REXONANCE<\/span>[\s\S]*?<span>DEUS！<\/span>/,
