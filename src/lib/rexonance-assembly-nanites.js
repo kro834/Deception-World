@@ -25,6 +25,8 @@
    once; the draw passes below write typed arrays and batched paths only.
    ===================================================================== */
 
+import { naniteHexHeight, naniteHexLight } from "./rexonance-unlit.js";
+
 const TAU = Math.PI * 2;
 const DEG = Math.PI / 180;
 const clamp01 = (value) => (value < 0 ? 0 : value > 1 ? 1 : value);
@@ -92,6 +94,12 @@ const TOUCH_SEAMS = 4;
 const SHOCK_MAX = 8;
 const LATCH_MAX = 24;
 const DROP_MAX = 240;
+// The sprites the effects may take beside the chips (latches, clamps, shock
+// rings, spall, sparks, the recede front's chips), held back from the far
+// band's share of the budget. A constant, so the share is a function of the
+// progress alone: the same moment draws the same chips however it was
+// reached (the review's determinism rule).
+const FX_RESERVE = 400;
 
 /** A stable hash of an index into [0, 1) (no PRNG state). */
 export function naniteHash(index, salt) {
@@ -187,7 +195,7 @@ export function* assemblyNanitePlanSteps({
   let work = 0;
   // A checkpoint every few thousand simple steps: well inside an idle
   // slice, and few enough that a starved idle queue still finishes.
-  const tick = () => ++work % 4096 === 0;
+  const tick = () => ++work % 512 === 0;
 
   // The tiles' own fields, copied once into typed arrays.
   const T0 = new Float64Array(n);
@@ -984,6 +992,696 @@ export function* naniteLatticeSteps(context, nano, tile) {
   }
 }
 
+/* ---------------- the conduit's own layers (review, 2026-10-16) ----------------
+   The guide (REXONANCE_NANITE_GUIDE) is traced from each plate's raw gold
+   mask, which also covers dark metal the finished art never shows as gold
+   (a whole triangle under the helmet's brow, the knee discs' crystals). The
+   conduit is re-made from it per plate, for exactly the gold the finished
+   art shows there: hard-light ice glass over that gold only, a continuous
+   ice channel down every strip, and gold rails — the guide's own wherever
+   gold shows, plus rails traced along the visible gold's edges — lit from
+   the upper left. Everything conduit-derived (the face, its hologram, its
+   walls, the molten gold's mask, which cells pulse, print and throw
+   droplets) comes from it, so nothing paints gold the art does not show. */
+
+/** How much a pixel of the finished art reads as gold, 0–1: warm (red over
+ * green over blue, green clearly above blue, so never the pink or cyan
+ * lights), saturated (highlights a little less) and lit. */
+export function naniteGoldTone(r, g, b) {
+  const warm = clamp01((g - b - 12) / 30) * clamp01((r - g + 6) / 20);
+  if (!warm) return 0;
+  const max = r > g ? (r > b ? r : b) : g > b ? g : b;
+  const min = r < g ? (r < b ? r : b) : g < b ? g : b;
+  const sat = max ? (max - min) / max : 0;
+  const L = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+  return warm * clamp01((sat - 0.08) / 0.12) * clamp01((L - 0.1) / 0.1);
+}
+
+// The rails' gold, dark amber to white-hot: stops (t, r, g, b).
+const CONDUIT_GOLD = [
+  0, 64, 36, 10, 0.3, 170, 104, 34, 0.6, 236, 182, 92, 0.82, 255, 224, 150, 1, 255, 248, 226,
+];
+const CONDUIT_ICE = [140, 217, 255];
+const CONDUIT_CHANNEL = [200, 245, 255];
+const conduitByte = (v) => (v <= 0 ? 0 : v >= 255 ? 255 : Math.round(v));
+// The eight compass steps (dx, dy).
+const CONDUIT_RAYS = [1, 0, 1, 1, 0, 1, -1, 1, -1, 0, -1, -1, 0, -1, 1, -1];
+
+// A cut in plate gold: a pixel where the art's gold runs on although this
+// plate's gold has ended beside it — or the plate's gold running into the
+// cell's edge.
+const conduitCut = (tn, gold, w, h, x, y) => {
+  const k = y * w + x;
+  if (tn[k] < 0.3) return false;
+  const own = gold[k * 4 + 3];
+  if (x === 0 || y === 0 || x === w - 1 || y === h - 1) return own >= 24;
+  if (own >= 24) return false;
+  for (let yy = y - 1; yy <= y + 1; yy += 1)
+    for (let xx = x - 1; xx <= x + 1; xx += 1) {
+      const kk = yy * w + xx;
+      if (tn[kk] >= 0.3 && gold[kk * 4 + 3] >= 64) return true;
+    }
+  return false;
+};
+
+/**
+ * One plate's conduit, row by row (yields after every row, so the idle
+ * slices that drive it stay short). `cell` = { w, h, fx, fy }: the plate's
+ * atlas cell size and its place in the figure. `io`: the plate's `guide`,
+ * `gold` and `art` pixels (w × h RGBA; `art` the finished figure under the
+ * cell), scratch `m`, `tn`, `hm` (Float32Array) and `d`, `dc` (Uint16Array) of at least
+ * w × h, the outputs `face` and optional `holo` and `walls` (w × h RGBA,
+ * zeroed), and the figure-space `mask` and optional `figFace` (W × H RGBA,
+ * accumulated: the mask by maximum, the face overwritten).
+ */
+export function* naniteConduitRows(cell, io) {
+  const { w, h, fx, fy } = cell;
+  const { guide, gold, art, m, tn, hm, d, dc, face, holo, walls, mask, figFace, W, H } = io;
+  // 1. The art's gold tone, and the gold it shows in this plate: its gold
+  // alpha × the tone.
+  for (let y = 0; y < h; y += 1) {
+    for (let x = 0, i = y * w * 4; x < w; x += 1, i += 4) {
+      const ga = gold[i + 3];
+      const k = y * w + x;
+      const tone = art[i + 3] ? (art[i + 3] / 255) * naniteGoldTone(art[i], art[i + 1], art[i + 2]) : 0;
+      tn[k] = tone;
+      if (!ga || !tone) {
+        m[k] = 0;
+        continue;
+      }
+      m[k] = (ga / 255) * tone;
+    }
+    yield;
+  }
+  // 2. Its distance transform (chamfer 3–4, the cell's border as outside),
+  // a 5 px running maximum along the rows for the dilated mask, and the
+  // distance to a cut (`dc`): where the art's gold runs on past this plate's
+  // gold (into the next plate, or past the cell's edge), so the conduit
+  // fades there instead of ending on a straight line (review 2026-10-16:
+  // the helmet's brow).
+  for (let y = 0; y < h; y += 1) {
+    for (let x = 0; x < w; x += 1) {
+      const k = y * w + x;
+      let c = 65535;
+      if (conduitCut(tn, gold, w, h, x, y)) c = 0;
+      else {
+        if (x > 0 && dc[k - 1] + 3 < c) c = dc[k - 1] + 3;
+        if (y > 0) {
+          if (dc[k - w] + 3 < c) c = dc[k - w] + 3;
+          if (x > 0 && dc[k - w - 1] + 4 < c) c = dc[k - w - 1] + 4;
+          if (x + 1 < w && dc[k - w + 1] + 4 < c) c = dc[k - w + 1] + 4;
+        }
+      }
+      dc[k] = c;
+      let best = 0;
+      if (m[k] > 0.4) {
+        best = 65535;
+        const l = x > 0 ? d[k - 1] + 3 : 3;
+        if (l < best) best = l;
+        if (y > 0) {
+          const u = d[k - w] + 3;
+          if (u < best) best = u;
+          const ul = x > 0 ? d[k - w - 1] + 4 : 4;
+          if (ul < best) best = ul;
+          const ur = x + 1 < w ? d[k - w + 1] + 4 : 4;
+          if (ur < best) best = ur;
+        } else best = Math.min(best, 3);
+      }
+      d[k] = best;
+      let peak = 0;
+      for (let t = x - 2; t <= x + 2; t += 1) if (t >= 0 && t < w && m[y * w + t] > peak) peak = m[y * w + t];
+      hm[k] = peak;
+    }
+    yield;
+  }
+  for (let y = h - 1; y >= 0; y -= 1) {
+    for (let x = w - 1; x >= 0; x -= 1) {
+      const k = y * w + x;
+      let c = dc[k];
+      if (c) {
+        if (x + 1 < w && dc[k + 1] + 3 < c) c = dc[k + 1] + 3;
+        if (y + 1 < h) {
+          if (dc[k + w] + 3 < c) c = dc[k + w] + 3;
+          if (x + 1 < w && dc[k + w + 1] + 4 < c) c = dc[k + w + 1] + 4;
+          if (x > 0 && dc[k + w - 1] + 4 < c) c = dc[k + w - 1] + 4;
+        }
+        dc[k] = c;
+      }
+      let best = d[k];
+      if (!best) continue;
+      const r = x + 1 < w ? d[k + 1] + 3 : 3;
+      if (r < best) best = r;
+      if (y + 1 < h) {
+        const b = d[k + w] + 3;
+        if (b < best) best = b;
+        const br = x + 1 < w ? d[k + w + 1] + 4 : 4;
+        if (br < best) best = br;
+        const bl = x > 0 ? d[k + w - 1] + 4 : 4;
+        if (bl < best) best = bl;
+      } else if (3 < best) best = 3;
+      d[k] = best;
+    }
+    yield;
+  }
+  // 3. The face, its hologram and its walls. Rails run only along the art's
+  // own trim edges (where its gold tone ends), never along a cut where one
+  // plate's gold meets the next plate's across a straight line, nor along
+  // the cell's edge (the tone is read as running on past it), and the whole
+  // conduit fades out over the last 5 px before a cut.
+  const at = (x, y) =>
+    tn[(y < 0 ? 0 : y >= h ? h - 1 : y) * w + (x < 0 ? 0 : x >= w ? w - 1 : x)];
+  const dist = (x, y) => (x >= 0 && x < w && y >= 0 && y < h ? d[y * w + x] : 0);
+  // Outside the art's gold: low tone, and not a speck of shadow (within
+  // 3 px of gold every way round) inside it. Coordinates clamp to the cell.
+  const low = (x, y) => {
+    const cx = x < 0 ? 0 : x >= w ? w - 1 : x;
+    const cy = y < 0 ? 0 : y >= h ? h - 1 : y;
+    if (tn[cy * w + cx] >= 0.3) return false;
+    for (let r = 0; r < 16; r += 2) {
+      let hit = false;
+      for (let step = 1; step <= 3; step += 1) {
+        const xx = cx + CONDUIT_RAYS[r] * step;
+        const yy = cy + CONDUIT_RAYS[r + 1] * step;
+        if (xx < 0 || yy < 0 || xx >= w || yy >= h) break;
+        if (tn[yy * w + xx] >= 0.3) {
+          hit = true;
+          break;
+        }
+      }
+      if (!hit) return true;
+    }
+    return false;
+  };
+  const ridge = (k0, a, b) => k0 >= a && k0 >= b && (k0 > a || k0 > b);
+  for (let y = 0; y < h; y += 1) {
+    const Y = fy + y;
+    const scan = ((Y % 3) + 3) % 3 === 2 ? 0.22 : 1;
+    for (let x = 0, i = y * w * 4; x < w; x += 1, i += 4) {
+      const k = y * w + x;
+      const v = m[k];
+      // The visible gold's mask (the molten gold's), softened over 4 px
+      // before a cut like the conduit.
+      if (v > 0) {
+        const X = fx + x;
+        const byte = conduitByte(v * smooth(clamp01((dc[k] - 1) / 12)) * 255);
+        if (byte && X >= 0 && X < W && Y >= 0 && Y < H) {
+          const o = (Y * W + X) * 4;
+          if (byte > mask[o + 3]) {
+            mask[o] = mask[o + 1] = mask[o + 2] = 255;
+            mask[o + 3] = byte;
+          }
+        }
+      }
+      let dilated = 0;
+      for (let t = y - 2; t <= y + 2; t += 1) if (t >= 0 && t < h && hm[t * w + x] > dilated) dilated = hm[t * w + x];
+      if (dilated <= 0.02) continue;
+      const cut = smooth(clamp01((dc[k] - 3) / 15));
+      if (cut <= 0) continue;
+      // Glass: ice, over the visible gold only.
+      let a = 0;
+      let r = 0;
+      let g = 0;
+      let b = 0;
+      const glass = (72 / 255) * smooth(clamp01(v / 0.6));
+      if (glass > 0) {
+        a = glass;
+        r = CONDUIT_ICE[0];
+        g = CONDUIT_ICE[1];
+        b = CONDUIT_ICE[2];
+      }
+      // The channel: the distance transform's ridge, in strips ≥ 3 px wide.
+      const dk = d[k];
+      if (dk >= 5) {
+        const dl = dist(x - 1, y);
+        const dr = dist(x + 1, y);
+        const du = dist(x, y - 1);
+        const dd = dist(x, y + 1);
+        if (
+          ridge(dk, dl, dr) ||
+          ridge(dk, du, dd) ||
+          ridge(dk, dist(x - 1, y - 1), dist(x + 1, y + 1)) ||
+          ridge(dk, dist(x + 1, y - 1), dist(x - 1, y + 1))
+        ) {
+          const ca = (210 / 255) * clamp01((dk / 3 - 1.2) / 0.8);
+          const na = ca + a * (1 - ca);
+          if (na > 0) {
+            r = (CONDUIT_CHANNEL[0] * ca + r * a * (1 - ca)) / na;
+            g = (CONDUIT_CHANNEL[1] * ca + g * a * (1 - ca)) / na;
+            b = (CONDUIT_CHANNEL[2] * ca + b * a * (1 - ca)) / na;
+            a = na;
+          }
+        }
+      }
+      // Rails: along the visible gold's true edges (on its inner side, 2 px
+      // wide: where the art's gold ends, never along its own shading nor
+      // round a speck of shadow inside it), lit where the edge faces the
+      // upper left; and the guide's own rails wherever gold shows.
+      let rail = 0;
+      let tone = 0;
+      if (v > 0.3 && tn[k] > 0.3) {
+        const near =
+          low(x + 1, y) || low(x - 1, y) || low(x, y + 1) || low(x, y - 1)
+            ? 1
+            : low(x + 2, y) || low(x - 2, y) || low(x, y + 2) || low(x, y - 2)
+              ? 0.72
+              : 0;
+        if (near) {
+          const gx = at(x + 1, y) - at(x - 1, y) + 0.5 * (at(x + 2, y) - at(x - 2, y));
+          const gy = at(x, y + 1) - at(x, y - 1) + 0.5 * (at(x, y + 2) - at(x, y - 2));
+          const edge = Math.hypot(gx, gy);
+          rail = near;
+          tone = edge > 0.05 ? 0.6 + 0.4 * ((gx + gy) / (Math.SQRT2 * edge)) : 0.6;
+        }
+      }
+      const guideA = guide[i + 3];
+      let nearEdge = false;
+      if (guideA >= 120 && dilated > 0.25)
+        for (let yy = y - 1; yy <= y + 1 && !nearEdge; yy += 1)
+          for (let xx = x - 1; xx <= x + 1; xx += 1)
+            if (low(xx, yy)) {
+              nearEdge = true;
+              break;
+            }
+      if (nearEdge) {
+        const keep = (guideA / 255) * clamp01(dilated * 1.6);
+        if (keep > rail) {
+          const L = (0.2126 * guide[i] + 0.7152 * guide[i + 1] + 0.0722 * guide[i + 2]) / 255;
+          rail = keep;
+          tone = clamp01(0.05 + 1.15 * L);
+        }
+      }
+      if (rail > 0) {
+        let s = 4;
+        while (s < 16 && tone > CONDUIT_GOLD[s]) s += 4;
+        const u = (tone - CONDUIT_GOLD[s - 4]) / (CONDUIT_GOLD[s] - CONDUIT_GOLD[s - 4]);
+        const rr = CONDUIT_GOLD[s - 3] + (CONDUIT_GOLD[s + 1] - CONDUIT_GOLD[s - 3]) * u;
+        const rg = CONDUIT_GOLD[s - 2] + (CONDUIT_GOLD[s + 2] - CONDUIT_GOLD[s - 2]) * u;
+        const rb = CONDUIT_GOLD[s - 1] + (CONDUIT_GOLD[s + 3] - CONDUIT_GOLD[s - 1]) * u;
+        const na = rail + a * (1 - rail);
+        r = (rr * rail + r * a * (1 - rail)) / na;
+        g = (rg * rail + g * a * (1 - rail)) / na;
+        b = (rb * rail + b * a * (1 - rail)) / na;
+        a = na;
+        if (walls && rail > 0.25) {
+          walls[i] = 92;
+          walls[i + 1] = 60;
+          walls[i + 2] = 22;
+          walls[i + 3] = conduitByte(255 * rail * cut);
+        }
+      }
+      a *= cut;
+      if (a <= 0) continue;
+      const fr = conduitByte(r);
+      const fg = conduitByte(g);
+      const fb = conduitByte(b);
+      const fa = conduitByte(255 * a);
+      face[i] = fr;
+      face[i + 1] = fg;
+      face[i + 2] = fb;
+      face[i + 3] = fa;
+      const X = fx + x;
+      if (figFace && X >= 0 && X < W && Y >= 0 && Y < H) {
+        const o = (Y * W + X) * 4;
+        figFace[o] = fr;
+        figFace[o + 1] = fg;
+        figFace[o + 2] = fb;
+        figFace[o + 3] = fa;
+      }
+      if (!holo) continue;
+      // The hologram (gold G1): ice, brighter where the face is, scan-lined
+      // on the figure's rows.
+      const L = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+      holo[i] = conduitByte(40 + 186 * L);
+      holo[i + 1] = conduitByte(150 + 100 * L);
+      holo[i + 2] = conduitByte(200 + 55 * L);
+      holo[i + 3] = conduitByte(255 * a * (0.35 + 0.65 * L) * scan);
+    }
+    yield;
+  }
+}
+
+/**
+ * The conduit's layers for every plate (gold G1–G7), as an idle job with
+ * the pixel jobs' contract (rexonance-unlit.js): step(until, idleDeadline)
+ * → done; commit() → the result or null (idempotent; null when pixels
+ * cannot be read); cancel() releases what was not published.
+ * `pieces`: [{ x, y, w, h, ax, ay, layer }] in the order their figure-space
+ * faces are laid (a later plate's pixel covers an earlier's). Result:
+ * { face, holo?, walls? } atlas-space canvases the guide's size, `mask` the
+ * figure-space visible gold (its alpha), `figFace` two figure-space faces
+ * by `layer` (when `figureFace`: touch draws them through clips), and `vis`, one byte per
+ * gold cell of `goldPlan`: 1 where the finished art shows gold in it.
+ */
+export function createAssemblyConduitJob({
+  guide,
+  gold,
+  art,
+  pieces,
+  size,
+  goldPlan = null,
+  holo = true,
+  walls = false,
+  figureFace = false,
+  document = globalThis.document,
+}) {
+  const owned = [];
+  try {
+    const AW = guide ? (guide.naturalWidth ?? guide.width) : NaN;
+    const AH = guide ? (guide.naturalHeight ?? guide.height) : NaN;
+    const { width: W, height: H } = size;
+    if (!Number.isInteger(AW) || !Number.isInteger(AH) || AW <= 0 || AH <= 0 || !gold || !art)
+      throw new Error("invalid conduit inputs");
+    const make = (w, h) => {
+      const canvas = Object.assign(document.createElement("canvas"), { width: w, height: h });
+      owned.push(canvas);
+      return canvas;
+    };
+    let maxW = 1;
+    let maxH = 1;
+    let maxArea = 1;
+    for (const piece of pieces) {
+      maxW = Math.max(maxW, piece.w);
+      maxH = Math.max(maxH, piece.h);
+      maxArea = Math.max(maxArea, piece.w * piece.h);
+    }
+    const scratch = make(maxW, maxH);
+    const uc = scratch.getContext("2d", { willReadFrequently: true });
+    if (!uc) throw new Error("unavailable conduit context");
+    const outFace = make(AW, AH);
+    const outHolo = holo ? make(AW, AH) : null;
+    const outWalls = walls ? make(AW, AH) : null;
+    const outMask = make(W, H);
+    const outFig = figureFace ? [make(W, H), make(W, H)] : null;
+    const contexts = [outFace, outHolo, outWalls].map((canvas) => canvas?.getContext("2d") ?? null);
+    if (!contexts[0]) throw new Error("unavailable conduit output");
+    let maskImage = uc.createImageData(W, H);
+    let figImages = outFig ? outFig.map(() => uc.createImageData(W, H)) : null;
+    if (!maskImage?.data || (figImages && figImages.some((image) => !image?.data)))
+      throw new Error("invalid conduit pixels");
+    let m = new Float32Array(maxArea);
+    let tn = new Float32Array(maxArea);
+    let hm = new Float32Array(maxArea);
+    let d = new Uint16Array(maxArea);
+    let dc = new Uint16Array(maxArea);
+    const vis = new Uint8Array(goldPlan?.count ?? 0);
+    let k = 0;
+    let rows = null;
+    let piece = null;
+    let images = null;
+    let cell = 0;
+    let cancelled = false;
+    let result = null;
+    const read = (source, sx, sy, w, h) => {
+      uc.clearRect(0, 0, w, h);
+      uc.drawImage(source, sx, sy, w, h, 0, 0, w, h);
+      const data = uc.getImageData(0, 0, w, h)?.data;
+      if (!data || data.length < w * h * 4) throw new Error("invalid conduit pixels");
+      return data;
+    };
+    const release = () => {
+      m = tn = hm = d = dc = null;
+      maskImage = figImages = images = rows = null;
+      for (const canvas of owned) canvas.width = canvas.height = 0;
+    };
+    const begin = () => {
+      piece = pieces[k];
+      const { x, y, w, h, ax, ay } = piece;
+      images = [uc.createImageData(w, h), holo ? uc.createImageData(w, h) : null];
+      images.push(walls ? uc.createImageData(w, h) : null);
+      if (images.some((image, index) => (index === 0 || image) && !image?.data))
+        throw new Error("invalid conduit pixels");
+      rows = naniteConduitRows(
+        { w, h, fx: x, fy: y },
+        {
+          guide: read(guide, ax, ay, w, h),
+          gold: read(gold, ax, ay, w, h),
+          art: read(art, x, y, w, h),
+          m,
+          tn,
+          hm,
+          d,
+          dc,
+          face: images[0].data,
+          holo: images[1]?.data ?? null,
+          walls: images[2]?.data ?? null,
+          mask: maskImage.data,
+          figFace: figImages ? figImages[piece.layer ? 1 : 0].data : null,
+          W,
+          H,
+        },
+      );
+    };
+    const finishPiece = () => {
+      for (let index = 0; index < 3; index += 1)
+        if (images[index] && contexts[index]) contexts[index].putImageData(images[index], piece.ax, piece.ay);
+      rows = images = piece = null;
+      k += 1;
+    };
+    // Each gold cell: shown when the art's visible gold covers ≥ 2 px of it.
+    const cells = (until) => {
+      const g = goldPlan;
+      const data = maskImage.data;
+      while (cell < vis.length) {
+        const x0 = Math.max(0, Math.floor(g.x[cell]));
+        const y0 = Math.max(0, Math.floor(g.y[cell]));
+        const x1 = Math.min(W, Math.ceil(g.x[cell] + g.w[cell]));
+        const y1 = Math.min(H, Math.ceil(g.y[cell] + g.h[cell]));
+        let sum = 0;
+        for (let y = y0; y < y1; y += 1) for (let x = x0; x < x1; x += 1) sum += data[(y * W + x) * 4 + 3];
+        vis[cell] = sum >= 2 * 255 ? 1 : 0;
+        cell += 1;
+        if ((cell & 255) === 0 && until()) return false;
+      }
+      return true;
+    };
+    return {
+      step(until, idleDeadline) {
+        if (cancelled || result) return true;
+        const late = (margin = 0) =>
+          (until !== Infinity && globalThis.performance.now() >= until - margin) ||
+          (idleDeadline && idleDeadline.timeRemaining() < 2 + margin);
+        try {
+          let worked = false;
+          while (k < pieces.length) {
+            // A plate's reads (up to ~115k px) want 2.5 ms of the slice left.
+            if (!rows) {
+              if (worked && late(2.5)) return false;
+              begin();
+            }
+            if (rows.next().done) finishPiece();
+            worked = true;
+            if (late()) return false;
+          }
+          return cells(() => late());
+        } catch {
+          cancelled = true;
+          release();
+          return true;
+        }
+      },
+      commit() {
+        if (result) return result;
+        if (cancelled || k < pieces.length || cell < vis.length) return null;
+        try {
+          // (CPU-backed: the molten job reads it straight back.)
+          const mc = outMask.getContext("2d", { willReadFrequently: true });
+          if (!mc) throw new Error("unavailable conduit output");
+          mc.putImageData(maskImage, 0, 0);
+          if (outFig)
+            outFig.forEach((canvas, index) => {
+              const fc = canvas.getContext("2d");
+              if (!fc) throw new Error("unavailable conduit output");
+              fc.putImageData(figImages[index], 0, 0);
+            });
+          scratch.width = scratch.height = 0;
+          m = tn = hm = d = dc = null;
+          maskImage = figImages = null;
+          result = { face: outFace, holo: outHolo, walls: outWalls, mask: outMask, figFace: outFig, vis };
+          return result;
+        } catch {
+          cancelled = true;
+          release();
+          return null;
+        }
+      },
+      cancel() {
+        if (cancelled || result) return;
+        cancelled = true;
+        release();
+      },
+    };
+  } catch {
+    for (const canvas of owned) canvas.width = canvas.height = 0;
+    return null;
+  }
+}
+
+/* ---------------- figure-space layers in bands (idle slices ≤ 6 ms) ----------------
+   The raw nanite metal (armour A3) and the molten gold (G6/G7), with the
+   formulas of createNaniteMetalJob and createNaniteMoltenJob
+   (rexonance-unlit.js) and the same bytes, made a band of rows at a time:
+   the source (and the mask) are first copied to the CPU, each in a slice
+   of its own, then read a band at a time (a whole-figure read and its
+   canvases in one slice cost 7–12 ms on a phone), so no slice of the
+   preparation runs long. */
+const LAYER_BAND = 16;
+// The CPU copies are made a strip of rows a slice.
+const LAYER_STRIP = 104;
+const MOLTEN_RAMP = [0, 120, 52, 10, 0.4, 236, 140, 40, 0.7, 255, 210, 120, 1, 255, 250, 236];
+
+/**
+ * A figure-space layer job with the pixel jobs' contract (step(until,
+ * idleDeadline) → done; commit() → result | null, idempotent; cancel()).
+ * `kind` "metal" → { metal, silhouette? } (`silhouette`, `pitch`), "molten"
+ * → { molten } (`mask`: its alpha scales the molten's). Bytes do not depend
+ * on how the work is sliced.
+ */
+export function createAssemblyLayerJob({
+  source,
+  width: W,
+  height: H,
+  kind,
+  silhouette = false,
+  pitch = 4.6,
+  mask = null,
+  document = globalThis.document,
+}) {
+  const owned = [];
+  try {
+    if (!source || !Number.isInteger(W) || !Number.isInteger(H) || W <= 0 || H <= 0)
+      throw new Error("invalid layer inputs");
+    const make = (w, h) => {
+      const canvas = Object.assign(document.createElement("canvas"), { width: w, height: h });
+      owned.push(canvas);
+      return canvas;
+    };
+    const metal = kind === "metal";
+    const names = metal ? (silhouette ? ["metal", "silhouette"] : ["metal"]) : ["molten"];
+    const outputs = names.map(() => make(W, H));
+    const contexts = outputs.map((canvas) => canvas.getContext("2d"));
+    // The CPU copies of the source and the mask, made by the first steps.
+    const copies = (mask ? [source, mask] : [source]).map(() => make(W, H));
+    const copyContexts = copies.map((canvas) => canvas.getContext("2d", { willReadFrequently: true }));
+    if (copyContexts.some((context) => !context) || contexts.some((context) => !context))
+      throw new Error("unavailable layer context");
+    let images = names.map(() => copyContexts[0].createImageData(W, LAYER_BAND));
+    if (images.some((image) => !image?.data)) throw new Error("invalid layer pixels");
+    let copied = 0;
+    let copyTop = 0;
+    let top = 0;
+    let cancelled = false;
+    let result = null;
+    const release = () => {
+      images = null;
+      for (const canvas of owned) canvas.width = canvas.height = 0;
+    };
+    // Rows [y0, y0 + rows) of copy `index`, as RGBA bytes.
+    const read = (index, y0, rows) => {
+      const data = copyContexts[index].getImageData(0, y0, W, rows)?.data;
+      if (!data || data.length < W * rows * 4) throw new Error("invalid layer pixels");
+      return data;
+    };
+    const band = () => {
+      const rows = Math.min(LAYER_BAND, H - top);
+      // (One row of context either side for the metal's rim.)
+      const above = metal && top > 0 ? 1 : 0;
+      const below = metal && top + rows < H ? 1 : 0;
+      const a = read(0, top - above, rows + above + below);
+      const m = mask ? read(1, top, rows) : null;
+      const out = images.map((image) => image.data);
+      for (const data of out) data.fill(0);
+      const stride = W * 4;
+      for (let y = 0; y < rows; y += 1) {
+        const Y = top + y;
+        for (let x = 0, o = y * stride, i = (y + above) * stride; x < W; x += 1, o += 4, i += 4) {
+          const alpha = a[i + 3];
+          if (!alpha) continue;
+          const L = (0.2126 * a[i] + 0.7152 * a[i + 1] + 0.0722 * a[i + 2]) / 255;
+          if (metal) {
+            const hgt = naniteHexHeight(x + 0.5, Y + 0.5, pitch);
+            const lit = naniteHexLight(x + 0.5, Y + 0.5, pitch);
+            const right = x + 1 < W ? a[i + 7] : 0;
+            const left = x > 0 ? a[i - 1] : 0;
+            const down = Y + 1 < H ? a[i + stride + 3] : 0;
+            const up = Y > 0 ? a[i - stride + 3] : 0;
+            const rim = Math.max(-1, Math.min(1, ((-(right - left) - (down - up)) / 255) * 0.9));
+            const v = (26 + 150 * L) * (0.74 + 0.26 * hgt) + 34 * lit + 70 * rim;
+            const mt = out[0];
+            mt[o] = conduitByte(v * 0.92);
+            mt[o + 1] = conduitByte(v * 0.97 + 4 * hgt);
+            mt[o + 2] = conduitByte(v * 1.06 + 10 * hgt);
+            mt[o + 3] = alpha;
+            if (out[1]) {
+              const sh = out[1];
+              sh[o] = 6;
+              sh[o + 1] = 10;
+              sh[o + 2] = 18;
+              sh[o + 3] = alpha;
+            }
+          } else {
+            const t = clamp01(0.25 + 0.85 * L);
+            let k = 4;
+            while (k < 12 && t > MOLTEN_RAMP[k]) k += 4;
+            const u = (t - MOLTEN_RAMP[k - 4]) / (MOLTEN_RAMP[k] - MOLTEN_RAMP[k - 4]);
+            const mo = out[0];
+            for (let c = 1; c < 4; c += 1)
+              mo[o + c - 1] = conduitByte(MOLTEN_RAMP[k - 4 + c] + (MOLTEN_RAMP[k + c] - MOLTEN_RAMP[k - 4 + c]) * u);
+            mo[o + 3] = m ? conduitByte((alpha * m[o + 3]) / 255) : alpha;
+          }
+        }
+      }
+      images.forEach((image, index) => contexts[index].putImageData(image, 0, top, 0, 0, W, rows));
+      top += rows;
+    };
+    return {
+      step(until, idleDeadline) {
+        if (cancelled || result || top >= H) return true;
+        try {
+          if (copied < copies.length) {
+            // The copies, a strip a slice.
+            const rows = Math.min(LAYER_STRIP, H - copyTop);
+            copyContexts[copied].drawImage(copied ? mask : source, 0, copyTop, W, rows, 0, copyTop, W, rows);
+            copyTop += rows;
+            if (copyTop >= H) {
+              copied += 1;
+              copyTop = 0;
+            }
+            return false;
+          }
+          do band();
+          while (
+            top < H &&
+            (until === Infinity || globalThis.performance.now() < until) &&
+            (!idleDeadline || idleDeadline.timeRemaining() >= 2)
+          );
+          return top >= H;
+        } catch {
+          cancelled = true;
+          release();
+          return true;
+        }
+      },
+      commit() {
+        if (result) return result;
+        if (cancelled || top < H) return null;
+        for (const canvas of copies) canvas.width = canvas.height = 0;
+        images = null;
+        result = {};
+        names.forEach((name, index) => (result[name] = outputs[index]));
+        return result;
+      },
+      cancel() {
+        if (cancelled || result) return;
+        cancelled = true;
+        release();
+      },
+    };
+  } catch {
+    for (const canvas of owned) canvas.width = canvas.height = 0;
+    return null;
+  }
+}
+
 // The kit's sheet geometry (REXONANCE_NANITES), used when a config omits it.
 const KIT = {
   cells: {
@@ -1012,6 +1710,22 @@ const KIT = {
 const goldCountOf = (gold) => gold?.count ?? 0;
 const TONE_CSS = ["rgb(121 232 255)", "rgb(255 143 216)", "rgb(244 251 255)"];
 const SHADE_CSS = ["rgb(22 58 74)", "rgb(74 34 62)", "rgb(58 64 76)"];
+// Touch's hex chips: the desktop sprites' pastel tones, their shade, and the
+// lit core (review, 2026-10-16: never flat saturated squares on a phone).
+const TOUCH_TONE_CSS = ["rgb(176 238 255)", "rgb(255 192 232)", "rgb(244 251 255)"];
+const TOUCH_SHADE_CSS = ["rgb(34 70 90)", "rgb(90 46 78)", "rgb(62 68 82)"];
+// A hexagon's six corners at 24 turns through its 60° symmetry: the chip
+// spins with its tumble frame.
+const HEX_TURNS = (() => {
+  const table = new Float32Array(24 * 12);
+  for (let f = 0; f < 24; f += 1)
+    for (let k = 0; k < 6; k += 1) {
+      const angle = (Math.PI / 3) * (k + f / 24);
+      table[f * 12 + k * 2] = Math.cos(angle);
+      table[f * 12 + k * 2 + 1] = Math.sin(angle);
+    }
+  return table;
+})();
 
 /**
  * The swarm's renderer for one prepared scene. `frame(q, dq, calm, scale,
@@ -1090,11 +1804,13 @@ export function createAssemblyNanites({
   const metal = layers.metal ?? [null, null];
   const silhouette = layers.silhouette ?? [null, null];
   const art = layers.art ?? [null, null];
-  const motes = layers.motes ?? [null, null];
   const holo = layers.holo ?? null;
   const walls = layers.walls ?? null;
   const face = layers.face ?? null;
-  const glass = layers.glass ?? null;
+  // Touch: the conduits' faces laid in the figure (armour, ornaments).
+  const figFace = layers.figFace ?? null;
+  // One byte per gold cell: 1 where the finished art shows gold in it.
+  const VIS = layers.goldVisible ?? null;
   const frameSheet = layers.frame ?? null;
   const frameDeep = layers.frameDeep ?? null;
   const molten = layers.molten ?? null;
@@ -1178,6 +1894,7 @@ export function createAssemblyNanites({
   const STAGED = new Uint8Array(NP);
   const laneCount = new Uint16Array(NP);
   const beamI = new Int32Array(NP * 2);
+  const heldList = new Int32Array(NP);
   const beamU = new Float32Array(NP * 2);
   const topI = new Int32Array(TOUCH_CHIPS);
   const topU = new Float32Array(TOUCH_CHIPS);
@@ -1213,7 +1930,6 @@ export function createAssemblyNanites({
   let VY = 0;
   let keep = 1;
   let sprites_ = 0;
-  let fxReserve = 160;
   let cometsDrawn = 0;
   // Each pass's share of the comet budget: the far band (behind the body)
   // takes little, the near bands and the flights the rest.
@@ -1628,18 +2344,48 @@ export function createAssemblyNanites({
       ctx.rect(buffer[i], buffer[i + 1], buffer[i + 2], buffer[i + 3]);
     ctx.fill();
   };
-  // A chip as two-tone rects (touch, fallbacks, decimation): the tone over
-  // a darker shade 1 px down-right, its size pulsing with the tumble.
+  // A chip without its sprite, batched (touch, fallbacks, decimation): on
+  // touch a spinning two-tone hexagon in the desktop's pastel tones, mixed
+  // per chip, with a lit core; elsewhere two-tone rects. Its size pulses
+  // with the tumble either way.
   const rectChip = (slot, bright, speck = false) => {
     let f = FR[slot] % 24;
     if (f < 0) f += 24;
-    const size = S[slot] * (speck ? 0.32 : 1) * (0.55 + 0.45 * Math.abs(Math.cos((TAU * f) / 24)));
-    const t = TN[slot] > 2 ? 0 : TN[slot];
+    let size = S[slot] * (speck ? 0.32 : 1) * (0.55 + 0.45 * Math.abs(Math.cos((TAU * f) / 24)));
+    let t = TN[slot] > 2 ? 0 : TN[slot];
+    if (coarse) {
+      if (size > 12) size = 12;
+      if (t !== 2 && slot < total) {
+        const hash = slot >= n ? free.hsh[slot - n] : HSH[slot];
+        t = (hash * 7.13) % 1 < 0.5 ? 0 : 1;
+      }
+    }
     const b = t * 2 + (bright ? 1 : 0);
     const at = chipCounts[b];
     if (at >= RECT_CAP * 4) return;
-    pushRect(chipRects, b * RECT_CAP * 4 + at, X[slot] - size / 2, Y[slot] - size / 2, size, size);
+    const base = b * RECT_CAP * 4 + at;
+    chipRects[base] = X[slot];
+    chipRects[base + 1] = Y[slot];
+    // (A hexagon of about the sprite chip's own footprint, ~3/4 of its cell.)
+    chipRects[base + 2] = coarse ? size * 0.38 : size / 2;
+    chipRects[base + 3] = Math.floor(f) % 24;
     chipCounts[b] = at + 4;
+  };
+  const chipPath = (ctx, base, count, offset) => {
+    ctx.beginPath();
+    for (let i = base; i < base + count; i += 4) {
+      const cx = chipRects[i] + offset;
+      const cy = chipRects[i + 1] + offset;
+      const r = chipRects[i + 2];
+      if (!coarse) {
+        ctx.rect(cx - r, cy - r, 2 * r, 2 * r);
+        continue;
+      }
+      const turn = chipRects[i + 3] * 12;
+      ctx.moveTo(cx + r * HEX_TURNS[turn], cy + r * HEX_TURNS[turn + 1]);
+      for (let k = 2; k < 12; k += 2) ctx.lineTo(cx + r * HEX_TURNS[turn + k], cy + r * HEX_TURNS[turn + k + 1]);
+      ctx.closePath();
+    }
   };
   const flushChips = (ctx) => {
     for (let b = 0; b < 6; b += 1) {
@@ -1648,16 +2394,22 @@ export function createAssemblyNanites({
       const base = b * RECT_CAP * 4;
       const t = b >> 1;
       ctx.globalAlpha = b & 1 ? 0.75 : 0.42;
-      ctx.fillStyle = SHADE_CSS[t];
-      ctx.beginPath();
-      for (let i = base; i < base + count; i += 4)
-        ctx.rect(chipRects[i] + 0.9, chipRects[i + 1] + 0.9, chipRects[i + 2], chipRects[i + 3]);
+      ctx.fillStyle = coarse ? TOUCH_SHADE_CSS[t] : SHADE_CSS[t];
+      chipPath(ctx, base, count, 0.9);
       ctx.fill();
-      ctx.fillStyle = TONE_CSS[t];
-      ctx.beginPath();
-      for (let i = base; i < base + count; i += 4)
-        ctx.rect(chipRects[i], chipRects[i + 1], chipRects[i + 2], chipRects[i + 3]);
+      if (coarse) ctx.globalAlpha = b & 1 ? 0.66 : 0.36;
+      ctx.fillStyle = coarse ? TOUCH_TONE_CSS[t] : TONE_CSS[t];
+      chipPath(ctx, base, count, 0);
       ctx.fill();
+      if (coarse && b & 1) {
+        // The lit core of each near chip.
+        ctx.globalAlpha = 0.9;
+        ctx.fillStyle = "rgb(246 253 255)";
+        ctx.beginPath();
+        for (let i = base; i < base + count; i += 4)
+          if (chipRects[i + 2] > 1.4) ctx.rect(chipRects[i] - 0.7, chipRects[i + 1] - 0.7, 1.4, 1.4);
+        ctx.fill();
+      }
       chipCounts[b] = 0;
     }
     ctx.globalAlpha = 1;
@@ -1852,9 +2604,17 @@ export function createAssemblyNanites({
       else if (Z[slot] <= 0.35) midList[nMid++] = slot;
       else frontList[nFront++] = slot;
     }
-    // The far band takes what the sprite budget leaves.
+    // The far band takes what the sprite budget leaves after the near bands,
+    // the flights, the gold's incoming chips and droplets and the effects —
+    // every term a function of q, never of the last frame.
     const near = visible - nBack;
-    keep = nBack ? Math.min(1, Math.max(0, ASSEMBLY_SPRITE_BUDGET - fxReserve - near) / nBack) : 1;
+    let reserve = FX_RESERVE;
+    if (gold && goldCount && !coarse) {
+      const head = goldBy(q);
+      reserve += goldBy(q + 0.007) - head;
+      reserve += Math.min(DROP_MAX, head - goldBy(q - 0.0016));
+    }
+    keep = nBack ? Math.min(1, Math.max(0, ASSEMBLY_SPRITE_BUDGET - reserve - near) / nBack) : 1;
     return state;
   };
 
@@ -1885,10 +2645,14 @@ export function createAssemblyNanites({
     if (atlas) ctx.drawImage(sheet, pc.ax, pc.ay, pc.w, h, pc.x + dx, pc.y + dy, pc.w, h);
     else ctx.drawImage(sheet, pc.x, pc.y, pc.w, h, pc.x + dx, pc.y + dy, pc.w, h);
   };
-  const guideHolo = () => (holo ? holo : frameSheet);
+  // The conduit's sheets: atlas-space per plate (the conduit job), else the
+  // traced frame in figure space. Touch has no atlas hologram: it draws the
+  // figure-space ones through clips.
+  const guideHolo = () => (holo ? holo : face ? null : frameSheet);
   const guideFace = () => (face ? face : frameSheet);
   const guideWalls = () => (walls ? walls : face ? null : frameDeep);
-  const atlasGuide = () => Boolean(face || holo);
+  const atlasGuide = () => Boolean(face);
+  const shown = (i) => !VIS || VIS[i] === 1;
 
   // The rects of plate p's gold cells [first, end) as a clip.
   const goldClip = (ctx, first, end) => {
@@ -1939,26 +2703,20 @@ export function createAssemblyNanites({
     if (CALM) return;
     const first = paintedBy(q - N.lacquer);
     if (first >= painted) return;
-    if (coarse) {
-      batchN = 0;
-      for (let kk = first; kk < painted; kk += 1) {
-        const i = ORDER[kk];
-        pushRect(batch, batchN, SX[i], SY[i], TW[i], TH[i]);
-        batchN += 4;
-      }
-      fillBatch(ctx, batch, batchN, "rgb(214 248 255)", 0.25);
-      ctx.globalAlpha = 1;
-      return;
-    }
-    // The lacquer: the art in nanite light, added over the fresh paint in
-    // three age bands, brightest at the front, so it sweeps rather than
-    // stamps cells.
+    // The lacquer (A6): a white-ice sheen sweeping out from the seat over the
+    // fresh paint — the plate's own raw metal (neutral, ice-cool, the art's
+    // exact alpha and hex relief) added as light through the cells painted
+    // in the last .0015, in three age bands, brightest at the front. Never
+    // the mote sheet: no mosaic squares, and no cyan or pink before the seal
+    // (owner: the lights stay monochrome until the suit is whole). Touch
+    // takes one band.
+    const bands = coarse ? 1 : 3;
     for (let src = 0; src < 2; src += 1) {
-      const sheet = motes[src] || motes[1] || motes[0];
+      const sheet = metalOf(src);
       if (!sheet) continue;
-      for (let age = 0; age < 3; age += 1) {
-        const newest = q - (age * N.lacquer) / 3;
-        const oldest = q - ((age + 1) * N.lacquer) / 3;
+      for (let age = 0; age < bands; age += 1) {
+        const newest = q - (age * N.lacquer) / bands;
+        const oldest = q - ((age + 1) * N.lacquer) / bands;
         let any = false;
         for (let kk = first; kk < painted; kk += 1) {
           const i = ORDER[kk];
@@ -1973,12 +2731,13 @@ export function createAssemblyNanites({
         if (any) {
           ctx.clip();
           ctx.globalCompositeOperation = "lighter";
-          ctx.globalAlpha = 0.55 - 0.17 * age;
+          ctx.globalAlpha = coarse ? 0.32 : 0.46 - 0.14 * age;
           ctx.drawImage(sheet, 0, 0, W, H);
           ctx.restore();
         }
       }
     }
+    ctx.globalAlpha = 1;
   };
 
   /* 6: the molten band and the cooling cells (G6, G7), over the gold. */
@@ -1987,13 +2746,19 @@ export function createAssemblyNanites({
     const q = Q;
     const head = goldBy(q);
     const band0 = goldBy(q - 0.004);
-    const cool0 = goldBy(q - 0.012);
-    if (cool0 < band0) {
+    // The cooling cells (aged .004–.012) in age bands that dim as they cool
+    // (touch: one), so the cooled edge melts into the painted gold rather
+    // than ending on the cells' straight lines (review 2026-10-16).
+    const bands = coarse ? 1 : 4;
+    for (let b = 0; b < bands; b += 1) {
+      const from = goldBy(q - 0.004 - ((b + 1) * 0.008) / bands);
+      const to = b ? goldBy(q - 0.004 - (b * 0.008) / bands) : band0;
+      if (from >= to) continue;
       ctx.save();
       ctx.beginPath();
-      for (let i = cool0; i < band0; i += 1) ctx.rect(gold.x[i], gold.y[i], gold.w[i], gold.h[i]);
+      for (let i = from; i < to; i += 1) ctx.rect(gold.x[i], gold.y[i], gold.w[i], gold.h[i]);
       ctx.clip();
-      ctx.globalAlpha = 0.45;
+      ctx.globalAlpha = coarse ? 0.3 : 0.45 * (1 - b / bands);
       ctx.drawImage(molten, 0, 0, W, H);
       ctx.restore();
     }
@@ -2032,32 +2797,52 @@ export function createAssemblyNanites({
   // whole guideway, from its build to its pour.
   const wallTurn = (pc, q) => Math.PI / 4 + 0.6 * Math.max(-1, Math.min(1, (q - pc.contact) / 0.1));
 
-  // The conduit's body at alpha `a`: its walls stepped down-right (the rails'
-  // depth, turning with the scroll), its gold glass, then its lit face.
+  // The conduit's body at alpha `a`: its walls in dark amber stepped
+  // down-right at 1.1 and 2.2 px (the rails' depth, turning with the
+  // scroll), then its face — ice glass, the channel and the gold rails —
+  // and the hologram's scanlines left in the glass.
   const conduitBody = (ctx, p, faceSheet, wallSheet, atlas, a, q) => {
     const pc = P[p];
     if (wallSheet) {
       const turn = wallTurn(pc, q);
-      const dx = 3 * Math.cos(turn);
-      const dy = 3 * Math.sin(turn);
-      ctx.globalAlpha = 0.45 * a;
+      const dx = 2.2 * Math.cos(turn);
+      const dy = 2.2 * Math.sin(turn);
+      ctx.globalAlpha = 0.72 * a;
       plateDraw(ctx, wallSheet, atlas, p, dx, dy, pc.h);
-      ctx.globalAlpha = 0.6 * a;
-      plateDraw(ctx, wallSheet, atlas, p, 0.66 * dx, 0.66 * dy, pc.h);
-      ctx.globalAlpha = 0.75 * a;
-      plateDraw(ctx, wallSheet, atlas, p, 0.33 * dx, 0.33 * dy, pc.h);
-    }
-    if (glass && atlas) {
-      ctx.globalAlpha = 0.24 * a;
-      plateDraw(ctx, glass, true, p, 0, 0, pc.h);
+      ctx.globalAlpha = 0.85 * a;
+      plateDraw(ctx, wallSheet, atlas, p, 0.5 * dx, 0.5 * dy, pc.h);
     }
     ctx.globalAlpha = a;
     plateDraw(ctx, faceSheet, atlas, p, 0, 0, pc.h);
-    // Its hard light: the hologram's scanlines left in the glass.
-    if (glass && atlas && holo) {
-      ctx.globalAlpha = 0.2 * a;
+    if (holo && atlas) {
+      ctx.globalAlpha = 0.22 * a;
       plateDraw(ctx, holo, true, p, 0, 0, pc.h);
     }
+  };
+  // The rails' travelling glint (fine pointers): a band of cells running up
+  // each conduit from its toe end, its face added as light through them.
+  // A function of q alone, so it stays at rest.
+  const glint = (ctx, p, faceSheet, atlas, a, first, end, byBuild) => {
+    const pc = P[p];
+    let any = false;
+    for (let kk = first; kk < end; kk += 1) {
+      const i = byBuild ? BIDX[kk] : GIDX[kk];
+      let v = (2.5 * BB[i] - 70 * Q) % 1;
+      if (v < 0) v += 1;
+      if (v >= 0.1 || !shown(i)) continue;
+      if (!any) {
+        ctx.save();
+        ctx.beginPath();
+        any = true;
+      }
+      ctx.rect(gold.x[i], gold.y[i], gold.w[i], gold.h[i]);
+    }
+    if (!any) return;
+    ctx.clip();
+    ctx.globalCompositeOperation = "lighter";
+    ctx.globalAlpha = 0.42 * a;
+    plateDraw(ctx, faceSheet, atlas, p, 0, 0, pc.h);
+    ctx.restore();
   };
 
   // The pulses (G2) on plate p's built cells [first, end) not yet poured,
@@ -2070,7 +2855,7 @@ export function createAssemblyNanites({
       if (gold.lock[i] <= q) continue;
       let v = (6 * BB[i] - 150 * q) % 1;
       if (v < 0) v += 1;
-      if (v >= 0.16 || batchN >= batchCap * 4 - 4) continue;
+      if (v >= 0.16 || batchN >= batchCap * 4 - 4 || !shown(i)) continue;
       pushRect(batch, batchN, gold.x[i], gold.y[i], gold.w[i], gold.h[i]);
       batchN += 4;
     }
@@ -2091,7 +2876,7 @@ export function createAssemblyNanites({
       if (gold.lock[i] <= q) continue;
       let v = (6 * BB[i] - 150 * q) % 1;
       if (v < 0) v += 1;
-      if (v >= 0.16) continue;
+      if (v >= 0.16 || !shown(i)) continue;
       if (!any) {
         ctx.save();
         ctx.beginPath();
@@ -2128,103 +2913,122 @@ export function createAssemblyNanites({
     emberN = 0;
     beamN = 0;
     let plates = 0;
-    // Touch draws at most four conduits: those still being built first.
-    for (let pass = coarse ? 0 : 1; pass < 2; pass += 1)
-      for (let p = 0; p < NP; p += 1) {
-        const pc = P[p];
-        const first = pc.goldFirst;
-        if (pc.goldEnd <= first) continue;
-        if (q < pc.buildStart - GW.holo || q >= pc.contact) continue;
-        if (coarse && q < pc.buildEnd !== (pass === 0)) continue;
-        if (coarse && (plates >= TOUCH_CONDUITS || conduitDraws >= TOUCH_CONDUITS * 2)) continue;
-        plates += 1;
-        const built = builtIn(p, q);
-        const ahead = q < pc.buildEnd ? builtIn(p, q + GW.holo) : built;
-        if (built > first && faceSheet) {
-          ctx.save();
-          buildClip(ctx, first, built);
-          conduitBody(ctx, p, faceSheet, wallSheet, atlas, 1, q);
-          conduitDraws += 1;
-          ctx.restore();
-        }
-        if (ahead > built && holoSheet && (!coarse || conduitDraws < TOUCH_CONDUITS * 2)) {
-          // The hologram ahead: brightest just ahead of the head.
+    let held = 0;
+    for (let p = 0; p < NP; p += 1) {
+      const pc = P[p];
+      const first = pc.goldFirst;
+      if (pc.goldEnd <= first) continue;
+      if (q < pc.buildStart - GW.holo || q >= pc.contact) continue;
+      // Touch draws per plate only the (up to four) conduits still being
+      // built; every other built frame holds in one figure-space clip below,
+      // so none pops in and out.
+      if (coarse && (q >= pc.buildEnd || plates >= TOUCH_CONDUITS)) {
+        if (figFace && q >= pc.buildStart) heldList[held++] = p;
+        continue;
+      }
+      plates += 1;
+      const built = builtIn(p, q);
+      const ahead = q < pc.buildEnd ? builtIn(p, q + GW.holo) : built;
+      if (built > first && faceSheet) {
+        ctx.save();
+        buildClip(ctx, first, built);
+        conduitBody(ctx, p, faceSheet, wallSheet, atlas, 1, q);
+        conduitDraws += 1;
+        ctx.restore();
+        if (!coarse && atlas) glint(ctx, p, faceSheet, atlas, 1, first, built, true);
+      }
+      if (ahead > built) {
+        // The hologram ahead of the head (touch: a faint preview of the
+        // conduit itself, from the figure-space face, through a clip).
+        if (holoSheet) {
           ctx.save();
           buildClip(ctx, built, ahead);
           ctx.globalAlpha = 0.85;
           plateDraw(ctx, holoSheet, atlas, p, 0, 0, pc.h);
           conduitDraws += 1;
           ctx.restore();
+        } else if (figFace) {
+          ctx.save();
+          buildClip(ctx, built, ahead);
+          ctx.globalAlpha = 0.45;
+          ctx.drawImage(figFace[pc.ornament ? 1 : 0], 0, 0, W, H);
+          ctx.restore();
         }
-        if (q < pc.buildEnd + GW.head) {
-          // The weld head: the cells just built, white-hot, with a glow.
-          const from = builtIn(p, q - GW.head);
-          for (let k = from; k < built && headN < HEAD_CAP * 4 - 4; k += 1) {
-            const i = BIDX[k];
-            const age = (q - BAT[k]) / GW.head;
-            const cx = gold.x[i] + gold.w[i] / 2;
-            const cy = gold.y[i] + gold.h[i] / 2;
-            const s = 2.4 - 1.2 * age;
-            pushRect(headRects, headN, cx - s / 2, cy - s / 2, s, s);
-            headN += 4;
-            if (glowN < HEAD_CAP * 4 - 4) {
-              const g = 6 - 3 * age;
-              pushRect(glowRects, glowN, cx - g / 2, cy - g / 2, g, g);
-              glowN += 4;
-            }
-          }
-          if (live && built > first && q < pc.buildEnd) {
-            // The front's spark star and the beam from the latch.
-            const k = built - 1;
-            const i = BIDX[k];
-            const cx = gold.x[i] + gold.w[i] / 2;
-            const cy = gold.y[i] + gold.h[i] / 2;
-            if (cells) {
-              const f = Math.floor(q / 0.0006 + 4 * GHASH[i]) % 4;
-              const draw = 11;
-              ctx.globalAlpha = 0.9;
-              ctx.drawImage(
-                cells,
-                SPX + 32 * f,
-                SPY,
-                32,
-                32,
-                cx - draw / 2,
-                cy - draw / 2,
-                draw,
-                draw,
-              );
-              sprites_ += 1;
-            }
-            if (beamN < NP * 4) {
-              beams[beamN] = pc.seatX;
-              beams[beamN + 1] = pc.seatY;
-              beams[beamN + 2] = cx;
-              beams[beamN + 3] = cy;
-              beamN += 4;
-            }
-          }
-          if (live) {
-            // Sparks flung from the weld, falling as they cool.
-            const from2 = builtIn(p, q - GW.ember);
-            for (let k = from2; k < built && emberN < HEAD_CAP * 4 - 4; k += 1) {
-              const i = BIDX[k];
-              const h = GHASH[i];
-              if (h >= 0.4) continue;
-              const age = (q - BAT[k]) / GW.ember;
-              const ang = TAU * ((h * 7.31) % 1);
-              const speed = 10 + 22 * ((h * 13.7) % 1);
-              const x = gold.x[i] + gold.w[i] / 2 + Math.cos(ang) * speed * age;
-              const y =
-                gold.y[i] + gold.h[i] / 2 + Math.sin(ang) * speed * age * 0.7 + 30 * age * age;
-              const s = 0.5 + 1.1 * (1 - age);
-              pushRect(emberRects, emberN, x - s / 2, y - s / 2, s, s);
-              emberN += 4;
-            }
-          }
-        }
-        if (!CALM && built > first) pulseLight(ctx, p, built, holoSheet, atlas);
       }
+      if (q < pc.buildEnd + GW.head) {
+        // The weld head: the cells just built, white-hot, with a glow (only
+        // where the art shows gold).
+        const from = builtIn(p, q - GW.head);
+        for (let k = from; k < built && headN < HEAD_CAP * 4 - 4; k += 1) {
+          const i = BIDX[k];
+          if (!shown(i)) continue;
+          const age = (q - BAT[k]) / GW.head;
+          const cx = gold.x[i] + gold.w[i] / 2;
+          const cy = gold.y[i] + gold.h[i] / 2;
+          const s = 2.4 - 1.2 * age;
+          pushRect(headRects, headN, cx - s / 2, cy - s / 2, s, s);
+          headN += 4;
+          if (glowN < HEAD_CAP * 4 - 4) {
+            const g = 6 - 3 * age;
+            pushRect(glowRects, glowN, cx - g / 2, cy - g / 2, g, g);
+            glowN += 4;
+          }
+        }
+        if (live && built > first && q < pc.buildEnd) {
+          // The front's spark star and the beam from the latch.
+          const k = built - 1;
+          const i = BIDX[k];
+          const cx = gold.x[i] + gold.w[i] / 2;
+          const cy = gold.y[i] + gold.h[i] / 2;
+          if (cells && shown(i)) {
+            const f = Math.floor(q / 0.0006 + 4 * GHASH[i]) % 4;
+            const draw = 11;
+            ctx.globalAlpha = 0.9;
+            ctx.drawImage(
+              cells,
+              SPX + 32 * f,
+              SPY,
+              32,
+              32,
+              cx - draw / 2,
+              cy - draw / 2,
+              draw,
+              draw,
+            );
+            sprites_ += 1;
+          }
+          if (beamN < NP * 4) {
+            beams[beamN] = pc.seatX;
+            beams[beamN + 1] = pc.seatY;
+            beams[beamN + 2] = cx;
+            beams[beamN + 3] = cy;
+            beamN += 4;
+          }
+        }
+        if (live) {
+          // Sparks flung from the weld, falling as they cool.
+          const from2 = builtIn(p, q - GW.ember);
+          for (let k = from2; k < built && emberN < HEAD_CAP * 4 - 4; k += 1) {
+            const i = BIDX[k];
+            const h = GHASH[i];
+            if (h >= 0.4 || !shown(i)) continue;
+            const age = (q - BAT[k]) / GW.ember;
+            const ang = TAU * ((h * 7.31) % 1);
+            const speed = 10 + 22 * ((h * 13.7) % 1);
+            const x = gold.x[i] + gold.w[i] / 2 + Math.cos(ang) * speed * age;
+            const y =
+              gold.y[i] + gold.h[i] / 2 + Math.sin(ang) * speed * age * 0.7 + 30 * age * age;
+            const s = 0.5 + 1.1 * (1 - age);
+            pushRect(emberRects, emberN, x - s / 2, y - s / 2, s, s);
+            emberN += 4;
+          }
+        }
+      }
+      if (!CALM && built > first) pulseLight(ctx, p, built, holoSheet, atlas);
+    }
+    // Touch: every other built frame, whole, through one clip per layer
+    // (armour, ornaments) of the figure-space faces — a five-argument draw.
+    if (held) heldFrames(ctx, held, false);
     if (beamN) {
       ctx.globalAlpha = 0.3;
       ctx.strokeStyle = TONE_CSS[0];
@@ -2241,6 +3045,43 @@ export function createAssemblyNanites({
     fillBatch(ctx, emberRects, emberN, "rgb(255 232 170)", 0.85);
     fillBatch(ctx, batch, batchN, "rgb(170 240 255)", 0.34);
     ctx.globalAlpha = 1;
+  };
+  // Touch's held frames (heldList[0, count)): before contact the cells built
+  // by q (and the hologram's stretch ahead); after it (`seated`) the cells
+  // not yet behind the cooling front.
+  const heldFrames = (ctx, count, seated) => {
+    const GW = ASSEMBLY_GUIDEWAY;
+    const q = Q;
+    for (let layer = 0; layer < 2; layer += 1) {
+      let any = false;
+      for (let h = 0; h < count; h += 1) {
+        const p = heldList[h];
+        const pc = P[p];
+        if ((pc.ornament ? 1 : 0) !== layer) continue;
+        if (!any) {
+          ctx.save();
+          ctx.beginPath();
+          any = true;
+        }
+        if (seated) {
+          for (let kk = goldAfter(p, q - 0.012); kk < pc.goldEnd; kk += 1) {
+            const i = GIDX[kk];
+            ctx.rect(gold.x[i], gold.y[i], gold.w[i], gold.h[i]);
+          }
+        } else {
+          const end = builtIn(p, q + GW.holo);
+          for (let kk = pc.goldFirst; kk < end; kk += 1) {
+            const i = BIDX[kk];
+            ctx.rect(gold.x[i], gold.y[i], gold.w[i], gold.h[i]);
+          }
+        }
+      }
+      if (!any) continue;
+      ctx.clip();
+      ctx.globalAlpha = 1;
+      ctx.drawImage(figFace[layer], 0, 0, W, H);
+      ctx.restore();
+    }
   };
 
   // The landed, unpainted tiles of plate p with source `src`, as a path.
@@ -2349,10 +3190,16 @@ export function createAssemblyNanites({
     const q = Q;
     batchN = 0;
     let plates = 0;
+    let held = 0;
     for (let p = 0; p < NP; p += 1) {
       const pc = P[p];
       if (q < pc.to || q >= pc.recedeEnd || pc.goldEnd <= pc.goldFirst) continue;
-      if (coarse && (plates >= TOUCH_CONDUITS || conduitDraws >= TOUCH_CONDUITS * 2)) continue;
+      if (coarse && (plates >= TOUCH_CONDUITS || conduitDraws >= TOUCH_CONDUITS * 2)) {
+        // Touch: the seated conduits beyond its per-plate draws hold in the
+        // figure-space clip.
+        if (figFace && q >= pc.contact) heldList[held++] = p;
+        continue;
+      }
       plates += 1;
       const seat = q < pc.contact ? smooth(clamp01((q - pc.to) / (pc.contact - pc.to))) : 1;
       // Behind the cooling front the conduit is gone: it became the gold.
@@ -2363,9 +3210,11 @@ export function createAssemblyNanites({
         conduitBody(ctx, p, faceSheet, wallSheet, atlas, seat, q);
         conduitDraws += 1;
         ctx.restore();
+        if (!coarse && atlas) glint(ctx, p, faceSheet, atlas, seat, first, pc.goldEnd, false);
       }
       if (!CALM && q >= pc.contact) pulseLight(ctx, p, pc.goldEnd, guideHolo(), atlas);
     }
+    if (held) heldFrames(ctx, held, true);
     fillBatch(ctx, batch, batchN, "rgb(170 240 255)", 0.34);
     ctx.globalAlpha = 1;
   };
@@ -2555,7 +3404,9 @@ export function createAssemblyNanites({
     if (coarse) {
       let chips = 0;
       for (let c = 0; c < TOUCH_CHIPS; c += 1) if (topI[c] >= 0) chips += 1;
-      const reserve = conduitDraws + (cells ? chips : 0) + TOUCH_RINGS;
+      // (+1: the undersuit's own nine-argument draw shares the canvas, so a
+      // frame stays within 64 in all.)
+      const reserve = conduitDraws + (cells ? chips : 0) + TOUCH_RINGS + 1;
       budget = Math.max(0, Math.min(arts, touchArtBudget - reserve));
     }
     let drawnArts = 0;
@@ -2844,6 +3695,7 @@ export function createAssemblyNanites({
     if (cells) {
       const end = goldBy(q + approach);
       for (let i = goldBy(q); i < end; i += 1) {
+        if (!shown(i)) continue;
         const u = 1 - (gold.lock[i] - q) / approach;
         const e = smooth(clamp01(u));
         const size = G * (0.9 + 0.7 * e);
@@ -2872,6 +3724,7 @@ export function createAssemblyNanites({
     const dropStart = goldBy(q - 0.0016);
     const head = goldBy(q);
     for (let i = dropStart; i < head && drops < DROP_MAX; i += 1) {
+      if (!shown(i)) continue;
       const age = (q - gold.lock[i]) / 0.0016;
       const size = 1.4 * G;
       const cx = gold.x[i] + gold.w[i] / 2;
@@ -2915,7 +3768,7 @@ export function createAssemblyNanites({
     // One lock in twenty throws a spark.
     if (cells) {
       for (let i = goldBy(q - 0.004); i < head; i += 1) {
-        if (GHASH[i] >= 0.05) continue;
+        if (GHASH[i] >= 0.05 || !shown(i)) continue;
         const f = Math.min(3, Math.floor(((q - gold.lock[i]) / 0.004) * 4));
         const draw = 5 * G;
         ctx.globalAlpha = 0.9;
@@ -2935,7 +3788,7 @@ export function createAssemblyNanites({
       // The recede front: one cell in four sheds a chip that rises and fades.
       const recEnd = goldBy(q - 0.012);
       for (let i = goldBy(q - 0.016); i < recEnd; i += 1) {
-        if (GHASH[i] >= 0.25) continue;
+        if (GHASH[i] >= 0.25 || !shown(i)) continue;
         const t = (q - 0.012 - gold.lock[i]) / 0.004;
         const rise = (6 + 4 * GHASH[i] * 4) * t;
         const size = G * 1.2;
@@ -2994,9 +3847,8 @@ export function createAssemblyNanites({
     flushChips(ctx);
     ctx.globalAlpha = 1;
   };
-  // The frame's tally: the next frame's effect reserve, and the counts.
+  // The frame's tally (instrumentation only: nothing reads it back).
   const endFrame = () => {
-    fxReserve = Math.max(160, sprites_ - (nBack + nMid + nFront));
     state.sprites = sprites_;
     state.heroes = heroes + conduitDraws;
     state.nanites = nanitesDrawn + (face ? conduitDraws : 0);

@@ -6,18 +6,15 @@ import {
   sampleCells,
   warpPicture,
 } from "./rexonance-overwrite.js";
-import {
-  createNaniteGuideJob,
-  createNaniteMetalJob,
-  createNaniteMoltenJob,
-  createSplitLightsJob,
-} from "./rexonance-unlit.js";
+import { createSplitLightsJob } from "./rexonance-unlit.js";
 import {
   ASSEMBLY_COMET_BUDGET,
   ASSEMBLY_NANITES,
   ASSEMBLY_SPRITE_BUDGET,
   ASSEMBLY_TOUCH_HERO_BUDGET,
   assemblyNanitePlanSteps,
+  createAssemblyConduitJob,
+  createAssemblyLayerJob,
   createAssemblyNanites,
   naniteLatticeSteps,
 } from "./rexonance-assembly-nanites.js";
@@ -1370,6 +1367,9 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   let raw = null;
   let goldArt = null;
   let goldLayer = null;
+  // One byte per gold cell: 1 where the finished art shows gold in it (the
+  // conduit job's), so no mote or heat lands on dark metal under a trim.
+  let goldVisible = null;
   let goldCount = 0;
   const goldReverse = { count: 0, dirty: -1, at: 0 };
   let frame_ = null;
@@ -1605,7 +1605,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
               result = steps.next();
             } while (
               !result.done &&
-              (environment.performance?.now?.() ?? Date.now()) - start < 4 &&
+              (environment.performance?.now?.() ?? Date.now()) - start < 3 &&
               (!deadline || deadline.timeRemaining() > 4)
             );
           });
@@ -1733,7 +1733,8 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         mark(`${phase}-pixels`);
         const ran = await idleTask((deadline) => {
           if (!active()) return;
-          const until = (environment.performance?.now?.() ?? Date.now()) + 4;
+          // (3 ms of work, so a slice with its overheads stays ≤ 6 ms.)
+          const until = (environment.performance?.now?.() ?? Date.now()) + 3;
           done = job.step(until, deadline);
         });
         if (ran === null || !active()) return null;
@@ -1769,7 +1770,8 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         mark(`${phase}-rows`);
         const ran = await idleTask((deadline) => {
           if (!active()) return;
-          const until = (environment.performance?.now?.() ?? Date.now()) + 4;
+          // (3 ms of work, so a slice with its overheads stays ≤ 6 ms.)
+          const until = (environment.performance?.now?.() ?? Date.now()) + 3;
           done = job.step(until, deadline);
         });
         if (ran === null || !active()) return null;
@@ -1888,8 +1890,14 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
           mark("gold-mask-composite");
           await idleTask(() => {
             if (!active()) return;
+            // The formed gold is the art with its lights held (unlit), like
+            // every plate before the seal (owner: the lights stay monochrome
+            // until the suit is whole); the seal lays the unlit figure and
+            // then the lights over all of it, so the finished suit is the
+            // artwork either way. (Review 2026-10-16: the lit figure inside
+            // the helmet-visor's gold cells read as a pale block on the brow.)
             gc.globalCompositeOperation = "source-in";
-            gc.drawImage(images.figure, 0, 0, W, H);
+            gc.drawImage(nextLights?.unlit || images.figure, 0, 0, W, H);
             gc.globalCompositeOperation = "source-over";
           });
           // The armour's raw-gold sheet: the base figure with the armour
@@ -1949,72 +1957,27 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         // The nanite swarm (owner, 2026-10-16: 超大幅な改善). Raw nanite
         // metal (and the art's silhouette) for the armour and the
         // ornaments, from the art with its gold unformed.
+        // (Made in bands of rows, so every idle slice stays short.)
+        const metalJob = (source) =>
+          pixelJobIdle(
+            "nanite-metal",
+            () =>
+              createAssemblyLayerJob({
+                source,
+                width: W,
+                height: H,
+                kind: "metal",
+                silhouette: true,
+                document,
+              }),
+            ["metal", "silhouette"],
+          );
         const metalBase =
           baseSample && images.base
-            ? await pixelJobIdle(
-                "nanite-metal",
-                () =>
-                  createNaniteMetalJob(
-                    nextBaseRaw || nextBaseLights?.unlit || images.base,
-                    0,
-                    0,
-                    W,
-                    H,
-                    document,
-                    { silhouette: true },
-                  ),
-                ["metal", "silhouette"],
-              )
+            ? await metalJob(nextBaseRaw || nextBaseLights?.unlit || images.base)
             : null;
         if (!active()) return;
-        const metalFigure = await pixelJobIdle(
-          "nanite-metal",
-          () =>
-            createNaniteMetalJob(nextRaw || nextLights?.unlit || images.figure, 0, 0, W, H, document, {
-              silhouette: true,
-            }),
-          ["metal", "silhouette"],
-        );
-        if (!active()) return;
-        // The guideway's hologram and its walls (atlas space).
-        const guideLayers = images.guide
-          ? await pixelJobIdle(
-              "nanite-guide",
-              () => createNaniteGuideJob(images.guide, document, { walls: !coarse.matches }),
-              ["holo", "walls"],
-            )
-          : null;
-        if (!active()) return;
-        // The guideway's gold glass (atlas space, fine pointers): the guide's
-        // own shape in warm gold, so the conduit it builds reads as a gold
-        // frame of the plate's trims (owner: 金色のその部分に対応するフレーム).
-        let goldGlass = null;
-        if (guideLayers && !coarse.matches) {
-          mark("nanite-gold-glass");
-          goldGlass = await idleTask(() => {
-            if (!active()) return null;
-            const sheet = document.createElement("canvas");
-            resources.add(sheet);
-            sheet.width = images.guide.width;
-            sheet.height = images.guide.height;
-            const glass = sheet.getContext("2d");
-            for (let k = 0; k < 3; k += 1) glass.drawImage(images.guide, 0, 0);
-            glass.globalCompositeOperation = "source-in";
-            glass.fillStyle = "rgb(246 198 108)";
-            glass.fillRect(0, 0, sheet.width, sheet.height);
-            glass.globalCompositeOperation = "source-over";
-            return sheet;
-          });
-          if (!active()) return;
-        }
-        // Molten gold, white-hot to amber, from the gold art.
-        const moltenLayer = nextGoldArt
-          ? await pixelJobIdle(
-              "nanite-molten",
-              () => createNaniteMoltenJob(nextGoldArt, 0, 0, W, H, document),
-              ["molten"],
-            )
-          : null;
+        const metalFigure = await metalJob(nextRaw || nextLights?.unlit || images.figure);
         if (!active()) return;
         // The stage plan: plates, seams, rings, phases, paint order.
         mark("nanite-seams");
@@ -2033,6 +1996,61 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
           }),
         );
         if (!active() || !nextNano) return;
+        // The guideway's conduit (review, 2026-10-16), per plate for exactly
+        // the gold the finished art shows: ice glass, a continuous channel and
+        // gold rails lit upper-left; its hologram and walls (fine pointers),
+        // or the figure-space faces touch draws through one clip; the visible
+        // gold's mask (for the molten gold) and which gold cells show any.
+        // The figure-space faces are laid latest-built first, so where plates
+        // overlap the earliest-built frame shows (never one not built yet).
+        const conduitPieces = nextNano.pieces
+          .filter((piece) => piece.goldEnd > piece.goldFirst)
+          .sort((a, b) => b.buildStart - a.buildStart)
+          .map(({ x, y, w, h, ax, ay, ornament }) => ({ x, y, w, h, ax, ay, layer: ornament ? 1 : 0 }));
+        const conduit =
+          images.guide && images.gold && nextGold?.count && conduitPieces.length
+            ? await pixelJobIdle(
+                "nanite-conduit",
+                () =>
+                  createAssemblyConduitJob({
+                    guide: images.guide,
+                    gold: images.gold,
+                    art: images.figure,
+                    pieces: conduitPieces,
+                    size: config.size,
+                    goldPlan: nextGold,
+                    holo: !coarse.matches,
+                    walls: !coarse.matches,
+                    figureFace: coarse.matches,
+                    document,
+                  }),
+                ["face", "holo", "walls", "mask"],
+              )
+            : null;
+        if (!active()) return;
+        if (conduit?.figFace) for (const sheet of conduit.figFace) resources.add(sheet);
+        // Molten gold, white-hot to amber, from the gold art — only where the
+        // finished art shows gold (the conduit's mask).
+        const moltenLayer = nextGoldArt
+          ? await pixelJobIdle(
+              "nanite-molten",
+              () =>
+                createAssemblyLayerJob({
+                  source: nextGoldArt,
+                  width: W,
+                  height: H,
+                  kind: "molten",
+                  mask: conduit?.mask ?? null,
+                  document,
+                }),
+              ["molten"],
+            )
+          : null;
+        if (conduit?.mask) {
+          conduit.mask.width = conduit.mask.height = 0;
+          resources.delete(conduit.mask);
+        }
+        if (!active()) return;
         // The scaffold lattice, drawn once.
         const nextLattice = await makeSheet("nanite-lattice");
         if (!nextLattice || !active()) return;
@@ -2057,10 +2075,11 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
                   silhouette: [metalBase?.silhouette ?? null, metalFigure?.silhouette ?? null],
                   art: [artBase, artFigure],
                   motes: [nextBaseLights?.motes ?? null, nextLights?.motes ?? null],
-                  holo: guideLayers?.holo ?? null,
-                  walls: guideLayers?.walls ?? null,
-                  face: guideLayers ? images.guide : null,
-                  glass: goldGlass,
+                  holo: conduit?.holo ?? null,
+                  walls: conduit?.walls ?? null,
+                  face: conduit?.face ?? null,
+                  figFace: conduit?.figFace ?? null,
+                  goldVisible: conduit?.vis ?? null,
                   frame: nextFrame,
                   frameDeep: nextFrameDeep,
                   molten: moltenLayer?.molten ?? null,
@@ -2079,9 +2098,10 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
           metalBase?.silhouette,
           metalFigure?.metal,
           metalFigure?.silhouette,
-          guideLayers?.holo,
-          guideLayers?.walls,
-          goldGlass,
+          conduit?.face,
+          conduit?.holo,
+          conduit?.walls,
+          ...(conduit?.figFace ?? []),
           moltenLayer?.molten,
           nextLattice,
         ].filter(Boolean);
@@ -2095,6 +2115,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         }
         nano = nextNano;
         swarm = nextSwarm;
+        goldVisible = conduit?.vis ?? null;
         naniteSheets = nextNaniteSheets;
         plan = nextPlan;
         goldPlan = nextGold;
@@ -2403,6 +2424,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     for (; index < g.count; index += 1) {
       const lock = g.lock[index];
       if (lock > progress + approach) break;
+      if (goldVisible && !goldVisible[index]) continue;
       const w = g.w[index];
       const h = g.h[index];
       let slot;
@@ -2444,6 +2466,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   // the scan sweep and the shake).
   let backRects = false;
   let lastDrawMs = 0;
+  let quickFrames = 0;
   const draw = (progress, calm = false, dq = 0) => {
     const started = environment.performance?.now?.() ?? 0;
     const context = canvas.getContext("2d");
@@ -2973,8 +2996,18 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     const step = lastProgress >= 0 ? Math.min(0.01, Math.abs(shown - lastProgress)) : 0;
     lastProgress = shown;
     lastTarget = progress;
-    // The governor: a slow last frame draws the far band as rects next.
-    backRects = !coarse.matches && lastDrawMs > 7;
+    // The governor: a slow frame (over 7 ms) draws the far band as rects from
+    // the next one on, and it stays so until the scroll rests or 30 frames in
+    // a row come in under 4 ms — never alternating frame by frame, which
+    // would flicker hundreds of far chips at the display rate.
+    if (coarse.matches) backRects = false;
+    else if (lastDrawMs > 7) {
+      backRects = true;
+      quickFrames = 0;
+    } else if (backRects && lastDrawMs < 4) {
+      quickFrames += 1;
+      if (quickFrames >= 30) backRects = false;
+    } else quickFrames = 0;
     draw(shown, false, step);
     updateHud(progress);
     environment.clearTimeout(calmTimer);
@@ -2996,8 +3029,13 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         images &&
         plan &&
         lastProgress >= 0
-      )
+      ) {
+        // At rest the whole far band is back (the calm frame never uses the
+        // governor), and the next scroll starts from a full frame.
+        backRects = false;
+        quickFrames = 0;
         draw(lastProgress, true);
+      }
     }, CALM_MS);
     if (behind) {
       force = true;
@@ -3106,7 +3144,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     frameDeep_ = baseLights = baseRaw = null;
     for (const sheet of naniteSheets) sheet.width = sheet.height = 0;
     naniteSheets = [];
-    nano = swarm = null;
+    nano = swarm = goldVisible = null;
     goldCount = 0;
     goldReverse.dirty = -1;
     goldReverse.at = 0;
@@ -3273,6 +3311,6 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     frameDeep_ = baseLights = baseRaw = null;
     for (const sheet of naniteSheets) sheet.width = sheet.height = 0;
     naniteSheets = [];
-    nano = swarm = null;
+    nano = swarm = goldVisible = null;
   };
 }

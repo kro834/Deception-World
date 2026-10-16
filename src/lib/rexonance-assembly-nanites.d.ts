@@ -290,11 +290,13 @@ export function createAssemblyNanites(options: {
     metal?: [Sheet, Sheet];
     silhouette?: [Sheet, Sheet];
     art?: [Sheet, Sheet];
-    motes?: [Sheet, Sheet];
     holo?: Sheet;
     walls?: Sheet;
     face?: Sheet;
-    glass?: Sheet;
+    /** Touch: the conduits' faces laid in the figure, [armour, ornaments]. */
+    figFace?: [Sheet, Sheet] | null;
+    /** One byte per gold cell: 1 where the finished art shows gold. */
+    goldVisible?: Uint8Array | null;
     frame?: Sheet;
     frameDeep?: Sheet;
     molten?: Sheet;
@@ -305,3 +307,82 @@ export function createAssemblyNanites(options: {
   goldCell?: number;
   touchArtBudget?: number;
 }): AssemblyNanites;
+
+/** How much a pixel of the finished art reads as gold, 0–1. */
+export function naniteGoldTone(r: number, g: number, b: number): number;
+
+export interface NaniteConduitCell {
+  w: number;
+  h: number;
+  fx: number;
+  fy: number;
+}
+export interface NaniteConduitIO {
+  guide: Uint8ClampedArray;
+  gold: Uint8ClampedArray;
+  art: Uint8ClampedArray;
+  m: Float32Array;
+  tn: Float32Array;
+  hm: Float32Array;
+  d: Uint16Array;
+  dc: Uint16Array;
+  face: Uint8ClampedArray;
+  holo?: Uint8ClampedArray | null;
+  walls?: Uint8ClampedArray | null;
+  mask: Uint8ClampedArray;
+  figFace?: Uint8ClampedArray | null;
+  W: number;
+  H: number;
+}
+/** One plate's conduit, row by row (yields after every row). */
+export function naniteConduitRows(cell: NaniteConduitCell, io: NaniteConduitIO): Generator<void, void, void>;
+
+export interface AssemblyConduitResult {
+  face: HTMLCanvasElement;
+  holo: HTMLCanvasElement | null;
+  walls: HTMLCanvasElement | null;
+  mask: HTMLCanvasElement;
+  figFace: [HTMLCanvasElement, HTMLCanvasElement] | null;
+  vis: Uint8Array;
+}
+export interface AssemblyConduitJob {
+  step(until: number, idleDeadline?: { timeRemaining(): number } | null): boolean;
+  commit(): AssemblyConduitResult | null;
+  cancel(): void;
+}
+/** The conduit's layers for every plate, as an idle job (the pixel jobs' contract). */
+export function createAssemblyConduitJob(options: {
+  guide: CanvasImageSource & { width: number; height: number };
+  gold: CanvasImageSource;
+  art: CanvasImageSource;
+  pieces: readonly { x: number; y: number; w: number; h: number; ax: number; ay: number; layer: number }[];
+  size: { readonly width: number; readonly height: number };
+  goldPlan?: { count: number; x: ArrayLike<number>; y: ArrayLike<number>; w: ArrayLike<number>; h: ArrayLike<number> } | null;
+  holo?: boolean;
+  walls?: boolean;
+  figureFace?: boolean;
+  document?: Document;
+}): AssemblyConduitJob | null;
+
+export interface AssemblyLayerJob<R> {
+  step(until: number, idleDeadline?: { timeRemaining(): number } | null): boolean;
+  commit(): R | null;
+  cancel(): void;
+}
+/** The raw nanite metal or the molten gold for the whole figure, a band of
+ * rows at a time (the formulas of createNaniteMetalJob and
+ * createNaniteMoltenJob). */
+export function createAssemblyLayerJob(options: {
+  source: CanvasImageSource;
+  width: number;
+  height: number;
+  kind: "metal" | "molten";
+  silhouette?: boolean;
+  pitch?: number;
+  mask?: CanvasImageSource | null;
+  document?: Document;
+}): AssemblyLayerJob<{
+  metal?: HTMLCanvasElement;
+  silhouette?: HTMLCanvasElement;
+  molten?: HTMLCanvasElement;
+}> | null;

@@ -1665,3 +1665,195 @@ test("the gold guideway is built from the toe tips up, along the trims, never la
   }
   assert.ok(!slide[0].some((draw) => draw.corner < 2), "the upper pair follows the lower");
 });
+
+test("a resting frame is a function of the progress alone: the same moment draws the same chips however it was reached (review 2026-10-16)", async () => {
+  // The far band's sprite share once came from the previous frame's tally,
+  // so a calm frame at one progress drew differently after a forward scrub,
+  // a reverse scrub or a jump. It is now a function of q.
+  const { planAssemblyNanites, createAssemblyNanites } = await import(
+    "../src/lib/rexonance-assembly-nanites.js"
+  );
+  const { REXONANCE_NANITES } = await import("../src/lib/rexonance-nanites.ts");
+  const { planAssemblyGold } = await import("../src/lib/rexonance-resonance.js");
+  const { REXONANCE_SUIT_GOLD_CELL, REXONANCE_SUIT_GOLD_CELLS } =
+    await import("../src/lib/rexonance-suit-gold.ts");
+  const { REXONANCE_SUIT_DRIVER } = await import("../src/lib/rexonance-calls.ts");
+  const pieces = REXONANCE_SUIT_PIECES.map((piece) => ({
+    ...piece,
+    preset: REXONANCE_SUIT_DRIVER.includes(piece.id),
+  }));
+  const plan = planAssembly({
+    size: REXONANCE_SUIT_SIZE,
+    pieces,
+    core: REXONANCE_SUIT_MARKS.core,
+    visor: REXONANCE_SUIT_MARKS.visor,
+    maskTile: REXONANCE_SUIT_TILE,
+    tile: 12,
+  });
+  const landed = new Map();
+  for (const tile of plan.tiles)
+    if (tile.pieceId) landed.set(tile.pieceId, Math.max(landed.get(tile.pieceId) ?? 0, tile.t1));
+  const gold = planAssemblyGold({
+    pieces,
+    gold: { atlas: "", cell: REXONANCE_SUIT_GOLD_CELL, cells: REXONANCE_SUIT_GOLD_CELLS },
+    landed,
+  });
+  const nano = planAssemblyNanites({
+    plan,
+    pieces,
+    size: REXONANCE_SUIT_SIZE,
+    core: REXONANCE_SUIT_MARKS.core,
+    visor: REXONANCE_SUIT_MARKS.visor,
+    gold,
+    seams: REXONANCE_NANITES.seams,
+    goldBoxes: REXONANCE_NANITES.goldBoxes,
+    goldCell: REXONANCE_SUIT_GOLD_CELL,
+  });
+  const sheet = (id) => ({ id, width: 1, height: 1 });
+  const swarm = createAssemblyNanites({
+    nano,
+    size: REXONANCE_SUIT_SIZE,
+    core: REXONANCE_SUIT_MARKS.core,
+    visor: REXONANCE_SUIT_MARKS.visor,
+    sprites: { cells: sheet("cells"), comets: sheet("comets"), fx: sheet("fx") },
+    kit: REXONANCE_NANITES,
+    gold,
+    layers: { face: sheet("face"), holo: sheet("holo"), walls: sheet("walls") },
+  });
+  const record = () => {
+    const log = [];
+    const round = (value) => (typeof value === "number" ? Math.round(value * 1000) / 1000 : value?.id ?? value);
+    const context = new Proxy(
+      {},
+      {
+        get: (_, key) => (...args) => log.push(`${String(key)}(${args.map(round).join(",")})`),
+        set: (_, key, value) => {
+          log.push(`${String(key)}=${round(value)}`);
+          return true;
+        },
+      },
+    );
+    return { log, context };
+  };
+  // Every pass of a frame at q, after the given predecessors.
+  const frameAt = (q, before, calm) => {
+    for (const [p, live] of before) {
+      const { context } = record();
+      swarm.frame(p, live ? 0.004 : 0, !live, 2, false);
+      swarm.view(2, 0, 0);
+      for (const pass of ["backPass", "midPass", "flightPass", "goldPass", "frontPass", "freePass"])
+        swarm[pass](context);
+      swarm.endFrame();
+    }
+    const { log, context } = record();
+    swarm.frame(q, 0, calm, 2, false);
+    swarm.view(2, 0, 0);
+    for (const pass of ["backPass", "midPass", "frontPass", "freePass"]) swarm[pass](context);
+    swarm.endFrame();
+    return log;
+  };
+  for (const q of [0.15, 0.25, 0.3, 0.4]) {
+    const forward = frameAt(q, [[q - 0.02, true], [q - 0.01, true], [q, true]], true);
+    const reverse = frameAt(q, [[q + 0.02, true], [q + 0.01, true], [q, true]], true);
+    const jump = frameAt(q, [[0.95, true], [q, true]], true);
+    const cold = frameAt(q, [], true);
+    assert.ok(forward.length > 1000, `${q}: the cocoon is drawn (${forward.length} calls)`);
+    assert.deepEqual(reverse, forward, `${q}: reverse scrub`);
+    assert.deepEqual(jump, forward, `${q}: jump`);
+    assert.deepEqual(cold, forward, `${q}: first frame`);
+    // Live frames too (comets aside): the band passes match.
+    const liveA = frameAt(q, [[q - 0.02, true]], false);
+    const liveB = frameAt(q, [[q + 0.02, true]], false);
+    assert.deepEqual(liveB, liveA, `${q}: live frames after different scrubs`);
+  }
+});
+
+test("the raw metal and the molten gold are made in bands of rows, byte for byte the kit's pixel jobs, however sliced (review 2026-10-16: idle slices ≤ 6 ms)", async () => {
+  // A whole-figure read and its canvases in one idle slice cost 7–12 ms on a
+  // phone; the scene now reads a band of rows a slice. The bytes are the
+  // kit's own (createNaniteMetalJob / createNaniteMoltenJob).
+  const { createAssemblyLayerJob } = await import("../src/lib/rexonance-assembly-nanites.js");
+  const { createNaniteMetalJob, createNaniteMoltenJob } = await import("../src/lib/rexonance-unlit.js");
+  // A pixel-exact fake canvas (unscaled copies only).
+  const document = {
+    createElement() {
+      const canvas = { width: 0, height: 0, data: null };
+      const sized = () => {
+        if (!canvas.data || canvas.data.length !== canvas.width * canvas.height * 4)
+          canvas.data = new Uint8ClampedArray(canvas.width * canvas.height * 4);
+        return canvas.data;
+      };
+      const copy = (src, sw, sx, sy, dst, dw, dx, dy, w, h, dh) => {
+        for (let y = 0; y < h; y += 1) {
+          if (dy + y < 0 || dy + y >= dh) continue;
+          for (let x = 0; x < w; x += 1) {
+            const s = ((sy + y) * sw + sx + x) * 4;
+            const d = ((dy + y) * dw + dx + x) * 4;
+            for (let c = 0; c < 4; c += 1) dst[d + c] = src[s + c] ?? 0;
+          }
+        }
+      };
+      canvas.getContext = () => ({
+        drawImage(image, sx, sy, sw, sh, dx, dy) {
+          const dst = sized();
+          const src = image.getContext ? image.getContext("2d").pixels() : image.data;
+          copy(src, image.width, sx, sy, dst, canvas.width, dx, dy, sw, sh, canvas.height);
+        },
+        clearRect(x, y, w, h) {
+          const dst = sized();
+          for (let yy = y; yy < y + h; yy += 1) dst.fill(0, (yy * canvas.width + x) * 4, (yy * canvas.width + x + w) * 4);
+        },
+        getImageData(x, y, w, h) {
+          const data = new Uint8ClampedArray(w * h * 4);
+          copy(sized(), canvas.width, x, y, data, w, 0, 0, w, h, h);
+          return { width: w, height: h, data };
+        },
+        createImageData(w, h) {
+          return { width: w, height: h, data: new Uint8ClampedArray(w * h * 4) };
+        },
+        putImageData(image, dx, dy, x0 = 0, y0 = 0, w = image.width, h = image.height) {
+          copy(image.data, image.width, x0, y0, sized(), canvas.width, dx + x0, dy + y0, w, h, canvas.height);
+        },
+        pixels: sized,
+      });
+      return canvas;
+    },
+  };
+  const W = 37;
+  const H = 131;
+  let state = 0x5eed1234;
+  const data = Uint8ClampedArray.from({ length: W * H * 4 }, (_, i) => {
+    state = (Math.imul(state, 1664525) + 1013904223) >>> 0;
+    const v = state >>> 24;
+    if (i % 4 === 3) return v < 85 ? 0 : v < 140 ? v : 255;
+    return v;
+  });
+  const source = { width: W, height: H, data };
+  const mask = { width: W, height: H, data: data.map((v, i) => (i % 4 === 3 ? 255 - v : v)) };
+  const run = (job, slice) => {
+    let clock = 0;
+    const saved = globalThis.performance.now;
+    globalThis.performance.now = () => (clock += slice);
+    try {
+      while (!job.step(clock + 4, null));
+    } finally {
+      globalThis.performance.now = saved;
+    }
+    return job.commit();
+  };
+  const bytes = (canvas) => Array.from(canvas.getContext("2d").pixels());
+  const kitMetal = run(createNaniteMetalJob(source, 0, 0, W, H, document, { silhouette: true }), 1);
+  const kitMolten = run(createNaniteMoltenJob(source, 0, 0, W, H, document, { mask }), 1);
+  for (const slice of [0.5, 3, 100]) {
+    const metal = run(createAssemblyLayerJob({ source, width: W, height: H, kind: "metal", silhouette: true, document }), slice);
+    assert.deepEqual(bytes(metal.metal), bytes(kitMetal.metal), `metal, slice ${slice}`);
+    assert.deepEqual(bytes(metal.silhouette), bytes(kitMetal.silhouette), `silhouette, slice ${slice}`);
+    const molten = run(createAssemblyLayerJob({ source, width: W, height: H, kind: "molten", mask, document }), slice);
+    assert.deepEqual(bytes(molten.molten), bytes(kitMolten.molten), `molten, slice ${slice}`);
+  }
+  // And the scene uses them, not the whole-figure jobs.
+  const engine = read("src/lib/rexonance-resonance.js");
+  assert.match(engine, /createAssemblyLayerJob\(\{[\s\S]*?kind: "metal"/);
+  assert.match(engine, /createAssemblyLayerJob\(\{[\s\S]*?kind: "molten"/);
+  assert.doesNotMatch(engine, /createNaniteMetalJob\(|createNaniteMoltenJob\(/);
+});
