@@ -22,6 +22,7 @@ import stageSpecialCssUrl from "@/styles-stage-special.css?url";
 import stageRexonanceCssUrl from "@/styles-stage-rexonance.css?url";
 import rexonanceResonanceCssUrl from "@/styles-rexonance-resonance.css?url";
 import rexonanceZenithCssUrl from "@/styles-rexonance-zenith.css?url";
+import rexonanceForgeCssUrl from "@/styles-rexonance-forge.css?url";
 import { rexonanceImage } from "@/lib/rexonance-images";
 import { REXONANCE_SITE_ARTWORK } from "@/lib/rexonance-site-artwork";
 import { syncRexonanceLayoutGate } from "@/lib/rexonance-layout-gate.js";
@@ -74,6 +75,9 @@ export const Route = createFileRoute("/rexonance-saga")({
       // ZENITH (rx15): the suit-up on the page — the call played with the
       // scroll, the armour assembled from nanites (styles-rexonance-zenith.css).
       { rel: "stylesheet", href: rexonanceZenithCssUrl },
+      // FORGE (rx18): the page's type in four materials and its chrome in the
+      // engines' grammar — chips, guideways, molten gold (styles-rexonance-forge.css).
+      { rel: "stylesheet", href: rexonanceForgeCssUrl },
       CINEMATIC_STYLESHEET_LINK,
       {
         rel: "preload",
@@ -82,6 +86,14 @@ export const Route = createFileRoute("/rexonance-saga")({
         imageSrcSet: rexonanceImage(REXONANCE_SITE_ARTWORK.standard).srcSet,
         imageSizes: rexonanceImage(REXONANCE_SITE_ARTWORK.standard).sizes,
         fetchPriority: "high",
+      },
+      // The forged face (every figure and the name), on this route only.
+      {
+        rel: "preload",
+        as: "font",
+        type: "font/woff2",
+        href: "/fonts/rexonance-forge-20261016.woff2",
+        crossOrigin: "anonymous",
       },
     ],
   }),

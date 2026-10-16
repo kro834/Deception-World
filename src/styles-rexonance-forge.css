@@ -1,0 +1,1214 @@
+/* ================================================================
+   FORGE — Rexonance, set in metal (rx18, 2026-10-16)
+
+   The owner asked for the special site's typography and the rest of
+   its presentation to be brushed up a great deal. The suit-up engines
+   (ZENITH and the entry call) now render nanite chips, gold guideways
+   and molten gold; this layer gives the page's chrome the same grammar
+   and four type materials, each with one job:
+
+   - FORGED: "Rexonance Forge" (Saira, OFL, fixed at width 125, weights
+     300-800, ASCII plus · × −; public/fonts, preloaded on this route
+     only) for the name and every figure, tabular and in metal: ice
+     chrome for data, pink chrome for MOBILITY, gold for the units;
+   - ETCHED: Michroma's capitals and digits (the HUD subset) with
+     "Rexonance Etch" (its a-z and !) for the Latin instrument labels;
+   - CARVED: Zen Kaku Gothic New for the Japanese display lines, ledes
+     and captions (and the CJK inside a display figure);
+   - PRINTED: Noto Sans JP for reading text and Japanese labels.
+   Oxanium stays only as ZENITH's telemetry voice and as a fallback.
+
+   One grammar from the engines: a CHIP is an ice hex nanite; a
+   GUIDEWAY is a bevelled gold rail; MOLTEN is a white-hot lock that
+   cools to gold; a FORM assembles from motes on both sides. Gold is
+   budgeted: the wordmark and the end kicker, the kicker and lede rails,
+   the gold half of each seam, the numeral outlines, the figure units,
+   the HUD percent at completion, PHASE LOCK, the art's lower brackets
+   and the transient molten lock.
+
+   Route-only (after ZENITH, before the cinematic sheet), scoped to the
+   doubled Rexonance page class; never the bar, the menu or the calls.
+   Copy is untouched: type is styling only. Motion is opacity and
+   transforms, finite and quick: the cold open keys on RESONANCE's
+   data-rsn-arrive, the molten lock on its data-rsn-hit, the seam's chip
+   rides RESONANCE's own --rsn-scene draw. Reduced motion, economy,
+   Save-Data and 2G rest drawn, with no molten state; forced colours
+   drop every ornament; more contrast paints solid; browsers without
+   background-clip:text get solid colours. Guard:
+   scripts/rexonance-forge.test.mjs.
+   ================================================================ */
+
+/* ---------- Faces ---------- */
+@font-face {
+  font-family: "Rexonance Forge";
+  src: url("/fonts/rexonance-forge-20261016.woff2") format("woff2");
+  font-weight: 300 800;
+  font-stretch: 100%;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0020-007E, U+00B7, U+00D7, U+2212;
+}
+
+/* The same face at 800 with its overlapping contours merged, for the two
+   outlined uses (the ghost and the form codes): a stroke never shows a
+   contour inside a letter (Saira's R overlaps its bowl). Same metrics. */
+@font-face {
+  font-family: "Rexonance Forge Outline";
+  src: url("/fonts/rexonance-forge-outline-20261016.woff2") format("woff2");
+  font-weight: 800;
+  font-stretch: 100%;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0020, U+0030-0039, U+0041, U+0043, U+0045, U+0047-0049, U+004C-004F, U+0052-0055, U+0058, U+0073;
+}
+
+@font-face {
+  font-family: "Rexonance Etch";
+  src: url("/fonts/rexonance-etch-20261016.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0021, U+0061-007A;
+}
+
+/* Until the forged face arrives (or if it is blocked): local grotesques
+   scaled to its width and metrics. Letters land within 1 %; digits run
+   narrower, never wider, so nothing can overflow. */
+@font-face {
+  font-family: "Rexonance Forge Fallback";
+  src: local("Arial"), local("ArialMT"), local("Helvetica Neue"), local("Roboto");
+  font-weight: 300 500;
+  font-display: swap;
+  size-adjust: 109%;
+  ascent-override: 104%;
+  descent-override: 40%;
+  line-gap-override: 0%;
+  unicode-range: U+0020-007E, U+00B7, U+00D7, U+2212;
+}
+
+@font-face {
+  font-family: "Rexonance Forge Fallback";
+  src:
+    local("Arial Bold"), local("Arial-BoldMT"), local("Helvetica Neue Bold"), local("HelveticaNeue-Bold"),
+    local("Roboto Bold");
+  font-weight: 600 800;
+  font-display: swap;
+  size-adjust: 109%;
+  ascent-override: 104%;
+  descent-override: 40%;
+  line-gap-override: 0%;
+  unicode-range: U+0020-007E, U+00B7, U+00D7, U+2212;
+}
+
+/* ---------- Materials ---------- */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page {
+  --rxf-forge: "Rexonance Forge", "Rexonance Forge Fallback", "Zen Kaku Gothic New", "Noto Sans JP", sans-serif;
+  --rxf-forge-outline: "Rexonance Forge Outline", "Rexonance Forge", "Rexonance Forge Fallback", sans-serif;
+  --rxf-forge-text: "Rexonance Forge", "Rexonance Forge Fallback", "Noto Sans JP", "Zen Kaku Gothic New", sans-serif;
+  --rxf-etch: "Michroma", "Rexonance Etch", "Oxanium", "Noto Sans JP", sans-serif;
+  /* Bevelled gold: a bright face, a dark horizon, a warm underside. */
+  --rxf-gold: linear-gradient(
+    180deg,
+    #fffaf0 0%,
+    #f7e2a8 24%,
+    #d9ad5c 47%,
+    #7d5520 50%,
+    #c99a4c 55%,
+    #f6dda0 76%,
+    #fff3d0 90%,
+    #a87a35 100%
+  );
+  --rxf-ice: linear-gradient(
+    180deg,
+    #fff 0%,
+    #effcff 34%,
+    #a9f0ff 49%,
+    #3bb6d6 51%,
+    #8fe6fb 62%,
+    #e9fbff 88%,
+    #fff 100%
+  );
+  --rxf-pink: linear-gradient(
+    180deg,
+    #fff 0%,
+    #fff0fa 34%,
+    #ffb1e6 49%,
+    #d0469f 51%,
+    #ff9bdc 62%,
+    #fff0fa 88%,
+    #fff 100%
+  );
+  /* White-hot to bright gold: the lock before it cools. */
+  --rxf-molten: linear-gradient(180deg, #fffaf0 0%, #ffe6a3 30%, #f2b84b 55%, #ffd98a 75%, #c98a2e 100%);
+  --rxf-rail-2: linear-gradient(180deg, #fff3cf 0 1px, #c9974a 1px 2px);
+  --rxf-rail-3: linear-gradient(180deg, #fff3cf 0 1px, #f2d896 1px 2px, rgb(110 74 23) 2px 3px);
+  --rxf-depth: rgb(78 50 12);
+  /* One ice nanite: a 7 x 8 pointy-top hexagon, lit from its centre. */
+  --rxf-chip: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7 8'%3E%3Cdefs%3E%3CradialGradient id='g'%3E%3Cstop offset='0' stop-color='%23fff'/%3E%3Cstop offset='.45' stop-color='%2379e8ff'/%3E%3Cstop offset='1' stop-color='%23004664'/%3E%3C/radialGradient%3E%3C/defs%3E%3Cpath d='M3.5 0 7 2v4L3.5 8 0 6V2z' fill='url(%23g)'/%3E%3C/svg%3E");
+}
+
+/* ================================================================
+   Cold open: the forged name over its fitted ghost
+   ================================================================ */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero h1 {
+  line-height: 1.02;
+  letter-spacing: -0.01em;
+  font-feature-settings: "palt" 1;
+}
+
+/* The wordmark: one line of forged capitals, extruded in dark gold under
+   a bevelled gold face (the span's own text is the white-hot core). */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero h1 > span {
+  position: relative;
+  z-index: 0;
+  isolation: isolate;
+  display: block;
+  width: fit-content;
+  margin: 0 0 0.34em;
+  color: #f2d896;
+  font: 800 clamp(22px, 3.05vw, 50px) / 1 var(--rxf-forge);
+  letter-spacing: 0.035em;
+  white-space: nowrap;
+  -webkit-text-fill-color: currentcolor;
+  background: none;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero h1 > span::before {
+  content: "REXONANCE SAGA" / "";
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  color: var(--rxf-depth);
+  -webkit-text-fill-color: currentcolor;
+  translate: 0.045em 0.06em;
+  pointer-events: none;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero h1 > span::after {
+  content: none;
+  color: #f2d896;
+}
+
+@supports ((background-clip: text) or (-webkit-background-clip: text)) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero h1 > span {
+    color: #fff3d0;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero h1 > span::after {
+    content: "REXONANCE SAGA" / "";
+    position: absolute;
+    inset: 0;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    background: var(--rxf-gold);
+    -webkit-background-clip: text;
+    background-clip: text;
+    opacity: 1;
+    pointer-events: none;
+  }
+}
+
+@media (max-width: 1099.98px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero h1 > span {
+    font-size: clamp(24px, 6.6vw, 40px);
+  }
+}
+
+/* The outlined ghost is nine nanites now (.rxf-mark), fitted to the
+   copy column, so it is never cut at the edge of a phone. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero .rxs-hero-copy::before {
+  content: none;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero .rxs-hero-copy > .rxf-mark {
+  position: absolute;
+  z-index: -1;
+  top: auto;
+  right: auto;
+  bottom: -1em;
+  left: clamp(40px, 5vw, 96px);
+  display: block;
+  margin: 0;
+  padding: 0;
+  color: transparent;
+  /* From the text start to 6.95 em (the word plus 3 %), clear of the
+     Zeus button: the column is 51vw wide with an 80px right reserve. */
+  font: 800 clamp(56px, calc((51vw - 80px - clamp(40px, 5vw, 96px)) / 6.95), 160px) / 0.8 var(--rxf-forge-outline);
+  letter-spacing: -0.02em;
+  font-kerning: none;
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Where the window is too short for the band between the lede and the cue
+   (the copy is centred, so the room shrinks with the height), the ghost
+   heads the copy instead, above the kicker, as it does on phones. Each
+   width band switches at the height its widest window needs. */
+@media (min-width: 1100px) and (max-width: 1279.98px) and (max-height: 799.98px),
+  (min-width: 1280px) and (max-width: 1365.98px) and (max-height: 839.98px),
+  (min-width: 1366px) and (max-width: 1439.98px) and (max-height: 864.98px),
+  (min-width: 1440px) and (max-width: 1535.98px) and (max-height: 894.98px),
+  (min-width: 1536px) and (max-width: 1679.98px) and (max-height: 944.98px),
+  (min-width: 1680px) and (max-width: 1919.98px) and (max-height: 994.98px),
+  (min-width: 1920px) and (max-width: 2239.98px) and (max-height: 1039.98px),
+  (min-width: 2240px) and (max-height: 1084.98px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero .rxs-hero-copy > .rxf-mark {
+    top: auto;
+    bottom: calc(100% + 20px);
+    font-size: clamp(56px, min(13svh, calc((51vw - 80px - clamp(40px, 5vw, 96px)) / 6.95)), 160px);
+  }
+}
+
+@media (max-width: 1099.98px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero .rxs-hero-copy > .rxf-mark {
+    top: -0.62em;
+    bottom: auto;
+    left: var(--rxt-gutter);
+    font-size: clamp(40px, calc((100vw - 2 * var(--rxt-gutter)) / 6.95), 200px);
+  }
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero .rxs-hero-copy > .rxf-mark > i {
+  display: inline-block;
+  color: transparent;
+  font-style: normal;
+  -webkit-text-stroke: 1px rgb(121 232 255 / 26%);
+}
+
+@supports ((background-clip: text) or (-webkit-background-clip: text)) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero .rxs-hero-copy > .rxf-mark > i {
+    background: linear-gradient(
+      180deg,
+      rgb(121 232 255 / 10%) 10%,
+      rgb(121 232 255 / 3%) 60%,
+      rgb(242 216 150 / 14%) 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+}
+
+/* Each letter's mote: its order and where it streams in from, above and
+   below the line in turn. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero .rxs-hero-copy > .rxf-mark > i:nth-child(1) {
+  --rxf-i: 0;
+  --rxf-dx: -0.18em;
+  --rxf-dy: 0.32em;
+  --rxf-r: -6deg;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero .rxs-hero-copy > .rxf-mark > i:nth-child(2) {
+  --rxf-i: 1;
+  --rxf-dx: 0.12em;
+  --rxf-dy: -0.28em;
+  --rxf-r: 6deg;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero .rxs-hero-copy > .rxf-mark > i:nth-child(3) {
+  --rxf-i: 2;
+  --rxf-dx: -0.08em;
+  --rxf-dy: 0.24em;
+  --rxf-r: -6deg;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero .rxs-hero-copy > .rxf-mark > i:nth-child(4) {
+  --rxf-i: 3;
+  --rxf-dx: 0.16em;
+  --rxf-dy: -0.3em;
+  --rxf-r: 6deg;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero .rxs-hero-copy > .rxf-mark > i:nth-child(5) {
+  --rxf-i: 4;
+  --rxf-dx: -0.14em;
+  --rxf-dy: 0.34em;
+  --rxf-r: -6deg;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero .rxs-hero-copy > .rxf-mark > i:nth-child(6) {
+  --rxf-i: 5;
+  --rxf-dx: 0.1em;
+  --rxf-dy: -0.22em;
+  --rxf-r: 6deg;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero .rxs-hero-copy > .rxf-mark > i:nth-child(7) {
+  --rxf-i: 6;
+  --rxf-dx: -0.12em;
+  --rxf-dy: 0.28em;
+  --rxf-r: -6deg;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero .rxs-hero-copy > .rxf-mark > i:nth-child(8) {
+  --rxf-i: 7;
+  --rxf-dx: 0.08em;
+  --rxf-dy: -0.26em;
+  --rxf-r: 6deg;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero .rxs-hero-copy > .rxf-mark > i:nth-child(9) {
+  --rxf-i: 8;
+  --rxf-dx: -0.16em;
+  --rxf-dy: 0.3em;
+  --rxf-r: -6deg;
+}
+
+/* The kicker and the lede ride gold guideways. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero .rxs-hero-copy > p:first-child::before {
+  width: 40px;
+  height: 2px;
+  background: var(--rxf-rail-2);
+  box-shadow: 0 1px 0 rgb(0 0 0 / 70%);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero .rxs-hero-lede {
+  color: rgb(242 247 251 / 90%);
+  font-size: clamp(17px, 1.65vw, 24px);
+  font-weight: 500;
+  line-height: 1.6;
+  letter-spacing: 0.08em;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero .rxs-hero-lede::before {
+  width: 28px;
+  height: 2px;
+  background: var(--rxf-rail-2);
+}
+
+/* Etched kickers (K1). Phones keep their 12px, so their wraps stay. */
+@media (min-width: 561px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero .rxs-hero-copy > p:first-child,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-section > .rxs-section-heading > p {
+    color: #79e8ff;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.4;
+    letter-spacing: 0.28em;
+  }
+}
+
+/* ================================================================
+   Chapter heads and seams
+   ================================================================ */
+/* The scene numeral: forged light, outlined in gold. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-section > .rxs-section-heading::before {
+  color: transparent;
+  font-family: var(--rxf-forge);
+  font-weight: 300;
+  letter-spacing: -0.01em;
+  font-variant-numeric: proportional-nums lining-nums;
+  -webkit-text-stroke: 1px rgb(242 216 150 / 78%);
+  /* A clipped figure carries no shadow: the offset copy read as a misprint. */
+  text-shadow: none;
+}
+
+/* Phones: the forged numeral is wider than the old one; a little tighter
+   keeps the kicker beside it on one line where it fitted before (390). */
+@media (max-width: 560px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-section > .rxs-section-heading::before {
+    letter-spacing: -0.06em;
+  }
+}
+
+@supports ((background-clip: text) or (-webkit-background-clip: text)) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-section > .rxs-section-heading::before {
+    background: linear-gradient(180deg, rgb(242 216 150 / 24%), transparent 62%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-section > .rxs-section-heading > h2 {
+  letter-spacing: -0.01em;
+}
+
+/* The seam: RESONANCE's line repainted as one 3px guideway (ice and
+   violet into gold, a light bevel above, a dark underside below). Its
+   draw is RESONANCE's, untouched. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-section::before {
+  height: 3px;
+  background:
+    linear-gradient(90deg, rgb(255 255 255 / 70%), #fff3cf 46%) 0 0 / 100% 1px no-repeat,
+    linear-gradient(90deg, #79e8ff 0, #b6a3ff 30%, #f2d896 46%, #f2d896 100%) 0 1px / 100% 1px no-repeat,
+    linear-gradient(90deg, rgb(0 70 100 / 80%), rgb(110 74 23) 46%) 0 2px / 100% 1px no-repeat;
+  box-shadow: 0 0 14px rgb(255 226 150 / 18%);
+}
+
+/* ...and its end node: one ice nanite, which rides the draw head. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-section::after {
+  content: "" / "";
+  position: absolute;
+  z-index: 1;
+  top: -2.5px;
+  right: 0;
+  left: 0;
+  height: 8px;
+  background:
+    var(--rxf-chip) 100% 50% / 7px 8px no-repeat,
+    radial-gradient(circle at calc(100% - 3.5px) 50%, rgb(121 232 255 / 45%), transparent 9px);
+  pointer-events: none;
+}
+
+/* ================================================================
+   01: the cuts, the comparison, the processors
+   ================================================================ */
+/* The field anchors on the forged digits' centre (the resonance sheet
+   reads these two). */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #performance .rxs-headline-metrics {
+  --rsn-figure-center: 1.19;
+  --rsn-figure-origin: 1.15em;
+}
+
+/* Phones: 「650%+」 forged at ZENITH's 33vw leaves 1px; 31.5vw leaves 12-20. */
+@media (max-width: 760px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #performance .rxs-headline-metrics {
+    --rsn-figure-size: clamp(72px, 31.5vw, 144px);
+  }
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #performance .rxs-headline-metrics strong {
+  color: #eafcff;
+  font-family: var(--rxf-forge);
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  font-variant-numeric: tabular-nums lining-nums;
+  -webkit-text-fill-color: currentcolor;
+  text-shadow: none;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #performance .rxs-headline-metrics > article + article strong {
+  color: #ffe3f6;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #performance .rxs-headline-metrics strong span,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #performance .rxs-headline-metrics > article + article strong span {
+  margin-left: 0.08em;
+  color: #f2d896;
+  font: 700 max(12px, 0.3em) / 1 var(--rxf-forge);
+  letter-spacing: 0.02em;
+  -webkit-text-fill-color: currentcolor;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #performance .rxs-headline-metrics p {
+  color: rgb(242 247 251 / 88%);
+  font-size: clamp(15px, 1.25vw, 18px);
+  font-weight: 500;
+  line-height: 1.7;
+  letter-spacing: 0.06em;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-comparison-result b {
+  color: #eafcff;
+  font: 600 clamp(28px, 2.6vw, 40px) / 1.15 var(--rxf-forge);
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums lining-nums;
+  -webkit-text-fill-color: currentcolor;
+  text-shadow: none;
+}
+
+@media (max-width: 760px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-comparison-result b {
+    font-size: 30px;
+  }
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-comparison-metrics article header strong {
+  color: #79e8ff;
+  font: 500 clamp(24px, 2.1vw, 30px) / 1.15 var(--rxf-forge);
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums lining-nums;
+  -webkit-text-fill-color: #79e8ff;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-comparison-result em {
+  color: #79e8ff;
+  font: 500 13px / 1.6 var(--rxf-forge-text);
+  letter-spacing: 0.03em;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-comparison-metrics article > p {
+  font: 500 13px / 1.6 var(--rxf-forge-text);
+  letter-spacing: 0.03em;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-comparison-formula b {
+  font-family: var(--rxf-forge-text);
+  font-weight: 600;
+}
+
+/* Japanese labels are printed, never etched with Michroma's tracking. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-comparison-selector > span,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-comparison-result i {
+  font: 500 12px / 1.5 var(--dx-body);
+  letter-spacing: 0.08em;
+}
+
+/* The processors' units are the parts between a "/" or a "·" (the
+   component's markup), each at most about 135px forged at 14px: every one
+   fits a 212px card's 164px measure at 1100px, so a unit never widens the
+   list past its card and the slash or dot always ends a line. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-processing-comparison li {
+  font: 500 14px / 1.6 var(--rxf-forge-text);
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-processing-comparison > p {
+  line-height: 1.85;
+}
+
+/* ================================================================
+   02: P14
+   ================================================================ */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .rxs-p14-copy h3,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .rxs-p14-comparator > header h3 {
+  font-feature-settings: "palt" 1;
+  letter-spacing: 0;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .rxs-p14-copy dd {
+  color: #eafcff;
+  font: 500 clamp(24px, 2.2vw, 32px) / 1.1 var(--rxf-forge);
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums lining-nums;
+  -webkit-text-fill-color: currentcolor;
+  text-shadow: none;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .rxs-p14-values strong {
+  color: #eafcff;
+  font-family: var(--rxf-forge);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums lining-nums;
+  -webkit-text-fill-color: currentcolor;
+  text-shadow: none;
+}
+
+@media (max-width: 374px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .rxs-p14-values strong {
+    font-size: 21px;
+  }
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .rxs-p14-values b {
+  font-family: var(--rxf-forge-text);
+  font-weight: 500;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .rxs-p14-metrics > article > p b {
+  color: #79e8ff;
+  font-family: var(--rxf-forge-text);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* ================================================================
+   SUIT-UP: the HUD's text (ZENITH's sizes and telemetry stay)
+   ================================================================ */
+/* The call is etched: Michroma's capitals with the Etch lowercase, so the
+   entry call's 「Ultra」 is one face, never Michroma's U with Oxanium's ltra. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-line,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-chip {
+  font-family: var(--rxf-etch);
+  font-feature-settings: "palt" 1, "pwid" 1;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-readout {
+  font-family: var(--rxf-forge);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-percent {
+  font-weight: 700;
+}
+
+/* The percent locks in gold once the suit is on, and on the finished still
+   (no state at all): never while the scene loads, which may print 000. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup[data-rzn-complete] .rzn-percent,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup:not([data-rzn-state]) .rzn-percent {
+  color: #f2d896;
+}
+
+/* ================================================================
+   03: the forms
+   ================================================================ */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-section .rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"] small {
+  font-family: var(--rxf-etch);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages .rxs-stage-panel > div > small {
+  font-family: var(--rxf-etch);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages .rxs-stage-panel > div > h3 {
+  font-feature-settings: "palt" 1;
+  letter-spacing: -0.01em;
+}
+
+/* The form's code, forged and fitted to its column: never cut. Its
+   intensity is in the stroke and the fill, so it rests at full opacity
+   everywhere (no step when the form change hands back). */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages .rxs-stage-panel > div > .rzn-form-code {
+  --rzn-code-em: 2.86;
+  overflow: visible;
+  max-width: none;
+  color: transparent;
+  font-family: var(--rxf-forge-outline);
+  font-weight: 800;
+  line-height: 0.8;
+  letter-spacing: -0.01em;
+  -webkit-text-stroke: 1px color-mix(in srgb, var(--rxs-stage-accent, #79e8ff) 72%, transparent);
+  -webkit-text-fill-color: transparent;
+  opacity: 1;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages .rxs-stage-tabs[data-stage="ultra"] ~ .rxs-stage-panel > div > .rzn-form-code {
+  /* 「ULTRA 60s」 measures 5.905em; the extra keeps it 10px clear of the
+     chip on a 320px phone (the chip's s is Michroma's, a little wider). */
+  --rzn-code-em: 6.24;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages .rxs-stage-panel > div > .rzn-form-code,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages .rxs-stage-tabs[data-stage="ultra"] ~ .rxs-stage-panel > div > .rzn-form-code {
+  font-size: clamp(22px, calc(62vw * 0.55 / var(--rzn-code-em)), 96px);
+}
+
+@supports ((background-clip: text) or (-webkit-background-clip: text)) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages .rxs-stage-panel > div > .rzn-form-code {
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--rxs-stage-accent, #79e8ff) 28%, transparent),
+      color-mix(in srgb, var(--rxs-stage-accent, #79e8ff) 4%, transparent) 56%,
+      transparent 58%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+  }
+}
+
+@media (max-width: 1099.98px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages .rxs-stage-panel > div > .rzn-form-code {
+    -webkit-text-stroke: 1px color-mix(in srgb, var(--rxs-stage-accent, #79e8ff) 56%, transparent);
+  }
+}
+
+@media (max-width: 900px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages .rxs-stage-panel > div > .rzn-form-code,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages .rxs-stage-tabs[data-stage="ultra"] ~ .rxs-stage-panel > div > .rzn-form-code {
+    top: 0.08em;
+    font-size: clamp(22px, calc((100vw - 40px) * 0.55 / var(--rzn-code-em)), 96px);
+  }
+}
+
+@media (min-width: 1100px) {
+  @supports (grid-template-rows: subgrid) {
+    html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages .rxs-stage-panel > div > .rzn-form-code,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages .rxs-stage-tabs[data-stage="ultra"] ~ .rxs-stage-panel > div > .rzn-form-code {
+      top: auto;
+      bottom: 0;
+      font-size: clamp(40px, calc(min(40vw, 526px) / var(--rzn-code-em)), 176px);
+    }
+  }
+}
+
+/* The art's frame: four corner brackets, the top two in the form's
+   light, the lower two in the bevelled gold guideway. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages .rxs-stage-panel > figure > span {
+  z-index: 2;
+  background:
+    linear-gradient(var(--rxs-stage-accent, #79e8ff) 0 0) 0 0 / 36px 1px no-repeat,
+    linear-gradient(var(--rxs-stage-accent, #79e8ff) 0 0) 0 0 / 1px 36px no-repeat,
+    linear-gradient(var(--rxs-stage-accent, #79e8ff) 0 0) 100% 0 / 36px 1px no-repeat,
+    linear-gradient(var(--rxs-stage-accent, #79e8ff) 0 0) 100% 0 / 1px 36px no-repeat,
+    linear-gradient(180deg, #fff3cf 0 1px, #f2d896 1px 2px, rgb(110 74 23) 2px 3px) 0 100% / 36px 3px no-repeat,
+    linear-gradient(90deg, #fff3cf 0 1px, #f2d896 1px 2px, rgb(110 74 23) 2px 3px) 0 100% / 3px 36px no-repeat,
+    linear-gradient(180deg, #fff3cf 0 1px, #f2d896 1px 2px, rgb(110 74 23) 2px 3px) 100% 100% / 36px 3px no-repeat,
+    linear-gradient(90deg, #fff3cf 0 1px, #f2d896 1px 2px, rgb(110 74 23) 2px 3px) 100% 100% / 3px 36px no-repeat;
+  pointer-events: none;
+}
+
+/* ================================================================
+   04: the trinity, the specs
+   ================================================================ */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #system .rxs-system-grid header span {
+  font-family: var(--rxf-forge);
+  font-size: clamp(40px, 4vw, 60px);
+  font-weight: 300;
+  line-height: 0.9;
+  letter-spacing: -0.01em;
+  font-variant-numeric: proportional-nums lining-nums;
+}
+
+/* The plate's head is a nameplate: the forged numeral, and under it the
+   etched code as the title's kicker, set from the plate's own edge. Side by
+   side, a two-part code had a third of the plate and broke into three or
+   four ragged lines (「/ FINAL」 began one). */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #system .rxs-system-grid article > header {
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 14px;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #system .rxs-system-grid article > header > small {
+  padding-top: 0;
+  font-family: var(--rxf-etch);
+  text-align: start;
+}
+
+/* The code's units (the slash with the word before it; FINAL JUDGMENT). */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #system .rxs-system-grid article > header > small > b {
+  font: inherit;
+  letter-spacing: inherit;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #system .rxs-system-grid h3 {
+  font-feature-settings: "palt" 1;
+  letter-spacing: 0;
+  /* Titles break between phrases (「悠真自身による／自己共鳴」); the long
+     one also carries its own <wbr>s. keep-all stays where this is missing. */
+  word-break: auto-phrase;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-specs > div > small,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-specs p {
+  font: 400 12px / 1.6 var(--rxf-etch);
+  letter-spacing: 0.2em;
+}
+
+/* ...and the Japanese word in a spec's foot is printed, never etched with
+   Michroma's tracking (as the comparison's labels). */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-specs p > span {
+  font: 500 12px / 1.6 var(--dx-body);
+  letter-spacing: 0.08em;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-specs strong {
+  color: #eafcff;
+  font: 300 clamp(52px, 6.4vw, 96px) / 1 var(--rxf-forge);
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums lining-nums;
+  -webkit-text-fill-color: currentcolor;
+  text-shadow: none;
+}
+
+/* Phones: 「50,000〜YOPS」 keeps 12px or more to its column at 320-560. */
+@media (max-width: 560px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-specs strong {
+    font-size: min(14.5vw, 60px);
+  }
+}
+
+/* The wave after the KHAOS figure is set as the figure's mark: the printed
+   〜 at a little over half the digits' size, on their centre line, painted
+   by the figure's own chrome (so it counts, locks and cools with it). */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-specs strong .rxf-wave {
+  margin: 0 0.04em;
+  font: 400 max(12px, 0.62em) / 1 var(--dx-body);
+  font-style: normal;
+  letter-spacing: 0;
+  font-feature-settings: normal;
+  vertical-align: 0.18em;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-specs strong span {
+  margin-left: 0.1em;
+  color: #f2d896;
+  font: 700 max(12px, 0.28em) / 1 var(--rxf-forge);
+  letter-spacing: 0.06em;
+  -webkit-text-fill-color: currentcolor;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #system > .rzn-trinity > .rzn-tri-lock {
+  color: #f2d896;
+}
+
+/* The rings' numbers are figures too: forged, tabular (size and seat stay). */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #system > .rzn-trinity > .rzn-tri > .rzn-tri-ring > b {
+  font-family: var(--rxf-forge-text);
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+/* ================================================================
+   The end card
+   ================================================================ */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-footer > div > p {
+  width: fit-content;
+  color: #f2d896;
+  font: 700 clamp(13px, 1.1vw, 16px) / 1.3 var(--rxf-forge);
+  letter-spacing: 0.14em;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-footer h2 {
+  font-size: clamp(36px, 5.6vw, 84px);
+  line-height: 1.08;
+  letter-spacing: -0.01em;
+  font-feature-settings: "palt" 1;
+}
+
+/* The last line stays whole on the narrowest phones (RESONANCE's rule). */
+@media (max-width: 374px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-footer h2 {
+    font-size: clamp(30px, 10.4vw, 40px);
+  }
+}
+
+/* ================================================================
+   Metal: every figure in chrome, every unit and bookend in gold
+   ================================================================ */
+@supports ((background-clip: text) or (-webkit-background-clip: text)) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #performance .rxs-headline-metrics strong,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-comparison-result b,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .rxs-p14-copy dd,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .rxs-p14-values strong,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-specs strong {
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    background: var(--rxf-ice);
+    -webkit-background-clip: text;
+    background-clip: text;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #performance .rxs-headline-metrics > article + article strong {
+    color: transparent;
+    background: var(--rxf-pink);
+    -webkit-background-clip: text;
+    background-clip: text;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #performance .rxs-headline-metrics strong span,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #performance .rxs-headline-metrics > article + article strong span,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-specs strong span,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup[data-rzn-complete] .rzn-percent,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup:not([data-rzn-state]) .rzn-percent {
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    background: var(--rxf-gold);
+    -webkit-background-clip: text;
+    background-clip: text;
+    text-shadow: none;
+  }
+
+  /* The end kicker may wrap on a phone: the bevel repeats per line. */
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-footer > div > p {
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    background: var(--rxf-gold) 0 0 / 100% 1.3em repeat-y;
+    -webkit-background-clip: text;
+    background-clip: text;
+  }
+}
+
+/* ================================================================
+   The molten lock: a counted figure locks white-hot, then cools
+   ================================================================ */
+/* A paint state on RESONANCE's clock, as its counter paint is: the
+   mirror shows molten while it locks (and while the hit cools it). */
+@media screen and (prefers-reduced-motion: no-preference) and (forced-colors: none) {
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > :is(#performance, #p14, #system)
+    [data-rsn-count]:is([data-rsn-state="lock"], [data-rsn-state="done"])
+    > .rsn-count {
+    color: #ffe6a3;
+  }
+
+  @supports ((background-clip: text) or (-webkit-background-clip: text)) {
+    html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+      > :is(#performance, #p14, #system)
+      [data-rsn-count]:is([data-rsn-state="lock"], [data-rsn-state="done"])
+      > .rsn-count {
+      color: transparent;
+      -webkit-text-fill-color: transparent;
+      background: var(--rxf-molten);
+      -webkit-background-clip: text;
+      background-clip: text;
+      text-shadow: none;
+    }
+  }
+}
+
+/* ================================================================
+   Motion: time-based beats (the full gate, transient keys)
+   ================================================================ */
+@media (prefers-reduced-motion: no-preference) {
+  /* The wordmark projects on the arrival only, never on the shared rise
+     (which would replay when the arrival flag clears). */
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero h1 > span {
+    animation: none;
+  }
+
+  /* 120-440 ms: the kicker's guideway draws. */
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"][data-rsn-arrive]
+    > .rxs-hero
+    .rxs-hero-copy
+    > p:first-child::before {
+    transform-origin: 0 50%;
+    animation: rxf-rail 320ms cubic-bezier(0.16, 1, 0.3, 1) 120ms both;
+  }
+
+  /* 240-1080 ms: the ghost assembles, its motes streaming in from both
+     sides of the line. */
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"][data-rsn-arrive]
+    > .rxs-hero
+    .rxs-hero-copy
+    > .rxf-mark
+    > i {
+    animation: rxf-mote 520ms cubic-bezier(0.18, 1.5, 0.32, 1) calc(240ms + var(--rxf-i, 0) * 40ms) both;
+  }
+
+  /* 440-960 ms: the name projects in white-hot (after the slit opens)... */
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"][data-rsn-arrive]
+    > .rxs-hero
+    h1
+    > span {
+    transform-origin: 0 100%;
+    animation: rxf-project 520ms cubic-bezier(0.22, 1, 0.36, 1) 440ms both;
+  }
+
+  /* ...860-1120 ms: extrudes... */
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"][data-rsn-arrive]
+    > .rxs-hero
+    h1
+    > span::before {
+    animation: rxf-extrude 260ms cubic-bezier(0.18, 1.5, 0.32, 1) 860ms both;
+  }
+
+  /* ...960-1320 ms: and its gold forms. */
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"][data-rsn-arrive]
+    > .rxs-hero
+    h1
+    > span::after {
+    animation: rxf-gold 360ms cubic-bezier(0.45, 0, 0.2, 1) 960ms both;
+  }
+
+  /* The lock cools: the molten mirror fades over the figure's own chrome
+     inside the hit's window (560-1240 ms after the lock). */
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
+    > :is(#performance, #p14, #system)
+    [data-rsn-hit]
+    > [data-rsn-count][data-rsn-state="done"]
+    > .rsn-count {
+    visibility: visible;
+    animation: rxf-cool 680ms var(--rsn-out) both;
+  }
+}
+
+/* ================================================================
+   Motion: scroll-linked (the full gate, named timelines)
+   ================================================================ */
+@supports (animation-timeline: view()) and (animation-range: entry 0% entry 100%) {
+  @media (prefers-reduced-motion: no-preference) {
+    /* The chip rides the seam's draw head: RESONANCE's timeline, range
+       and easing for the line, so it rests as the line's end node. */
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
+      > .rxs-section::after {
+      animation-name: rxf-run;
+      animation-duration: auto;
+      animation-timing-function: var(--rsn-out);
+      animation-fill-mode: both;
+      animation-timeline: --rsn-scene;
+      animation-range: entry 5% entry 55%;
+    }
+  }
+}
+
+/* ================================================================
+   More contrast: solid fills
+   ================================================================ */
+@media (prefers-contrast: more) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero h1 > span::before,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero h1 > span::after {
+    content: none;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero h1 > span,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-footer > div > p,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup[data-rzn-complete] .rzn-percent,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup:not([data-rzn-state]) .rzn-percent {
+    color: #f2d896;
+    -webkit-text-fill-color: currentcolor;
+    background: none;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #performance .rxs-headline-metrics strong,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #performance .rxs-headline-metrics > article + article strong,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-comparison-result b,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .rxs-p14-copy dd,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .rxs-p14-values strong,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-specs strong {
+    color: #f2f7fb;
+    -webkit-text-fill-color: currentcolor;
+    background: none;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #performance .rxs-headline-metrics strong span,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #performance .rxs-headline-metrics > article + article strong span,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-specs strong span {
+    color: #f2d896;
+    -webkit-text-fill-color: currentcolor;
+    background: none;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-section > .rxs-section-heading::before {
+    color: #f2d896;
+    -webkit-text-fill-color: currentcolor;
+    -webkit-text-stroke: 0;
+    background: none;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero .rxs-hero-copy > .rxf-mark > i,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages .rxs-stage-panel > div > .rzn-form-code {
+    background: none;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > :is(#performance, #p14, #system)
+    [data-rsn-count]:is([data-rsn-state="lock"], [data-rsn-state="done"])
+    > .rsn-count {
+    color: var(--dx-text, #f2f7fb);
+    -webkit-text-fill-color: currentcolor;
+    background: none;
+  }
+}
+
+/* ================================================================
+   Forced colours: no ornaments, text in CanvasText
+   ================================================================ */
+@media (forced-colors: active) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero .rxs-hero-copy > .rxf-mark,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero h1 > span::before,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero h1 > span::after,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-section::after,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages .rxs-stage-panel > figure > span,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages .rxs-stage-panel > div > .rzn-form-code {
+    display: none;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero h1 > span,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #performance .rxs-headline-metrics strong,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #performance .rxs-headline-metrics > article + article strong,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #performance .rxs-headline-metrics strong span,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #performance .rxs-headline-metrics > article + article strong span,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-comparison-result b,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-comparison-metrics article header strong,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .rxs-p14-copy dd,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .rxs-p14-values strong,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-specs strong,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-specs strong span,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-percent,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-footer > div > p {
+    color: CanvasText;
+    -webkit-text-fill-color: CanvasText;
+    -webkit-text-stroke: 0;
+    background: none;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-section > .rxs-section-heading::before {
+    -webkit-text-fill-color: transparent;
+    -webkit-text-stroke: 1px CanvasText;
+    background: none;
+  }
+}
+
+/* ================================================================
+   Keyframes (opacity and transforms only, finite)
+   ================================================================ */
+@keyframes rxf-rail {
+  from {
+    scale: 0 1;
+  }
+}
+
+@keyframes rxf-mote {
+  from {
+    opacity: 0;
+    translate: var(--rxf-dx, 0) var(--rxf-dy, 0);
+    rotate: var(--rxf-r, 0deg);
+    scale: 0.82;
+  }
+
+  62% {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 1;
+    translate: 0 0;
+    rotate: 0deg;
+    scale: 1;
+  }
+}
+
+@keyframes rxf-project {
+  from {
+    opacity: 0;
+    translate: 0 0.22em;
+    scale: 1.015;
+  }
+
+  to {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+  }
+}
+
+@keyframes rxf-extrude {
+  from {
+    translate: 0 0;
+  }
+}
+
+@keyframes rxf-gold {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes rxf-cool {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes rxf-run {
+  from {
+    translate: -100% 0;
+  }
+
+  to {
+    translate: 0 0;
+  }
+}
