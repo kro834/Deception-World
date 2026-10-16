@@ -108,6 +108,9 @@ const SPRITE = 1.45;
 const BUDGET = 2450; // the pinned engine's own draws stay within 2,600
 const COMET_BUDGET = 300;
 const JIGS = TOUCH ? 4 : 12;
+/** The seat's swing takes this share of [F − seat, F]; it rings out past
+ * the seat over the rest and is still at F (owner, 2026-10-16). */
+const SLAM = 0.72;
 const HEROES = 24;
 /** Chips drawn per hex frame: mip and cell columns, tone rows. */
 const MIP_X = Int16Array.from(KIT_CELLS.mip.x);
@@ -204,7 +207,7 @@ type Layout = {
   // Plates (index = the plan's plate index).
   kind: Int8Array; // -1 driver, 0 armour, 1 tail, 2 ribbon, 3 helm
   segment: Int8Array; // a tail segment's index, root (0) to blade (4)
-  flags: Uint8Array; // 1 accent, 2 shock ring, 4 crest
+  flags: Uint8Array; // 1 accent, 2 shock ring, 4 crest, 8 formed in place
   order: Int16Array; // plates by fit
   seatX: Float32Array;
   seatY: Float32Array;
@@ -500,9 +503,16 @@ function* layoutSteps(all: Plate[], gold: Cells): Generator<undefined, Layout, u
     L.gY[p] = gy;
     const area = piece.w * piece.h;
     const helm = kind === 3;
-    const lift = helm ? 0 : (TOUCH ? 3 : 5) + (TOUCH ? 6 : 9) * Math.sqrt(area / maxArea);
+    // Owner (2026-10-16): 「前がけの生成完了時にズレるのを修正して。」 — the
+    // hanging front plates (tasset-*) and any armour plate much taller than
+    // wide form in place on the body, like the helmet: no lift, no tilt, so
+    // nothing has to snap into place when they complete.
+    const inPlace =
+      helm || piece.id.startsWith("tasset-") || (kind === 0 && piece.h >= 1.8 * piece.w);
+    if (inPlace) L.flags[p] |= 8;
+    const lift = inPlace ? 0 : (TOUCH ? 3 : 5) + (TOUCH ? 6 : 9) * Math.sqrt(area / maxArea);
     L.lift[p] = lift * (kind === 1 || kind === 2 ? 1.4 : 1);
-    L.tilt[p] = helm || TOUCH ? 0 : (12 * Math.PI) / 180;
+    L.tilt[p] = inPlace || TOUCH ? 0 : (12 * Math.PI) / 180;
     const hx = Math.sign(sx - W / 2) * Math.min(1, Math.abs(sx - W / 2) / (0.25 * W));
     L.offX[p] = L.lift[p] * (0.55 * hx - 0.3);
     L.offY[p] = L.lift[p] * -0.55;
@@ -1688,7 +1698,7 @@ export type SuitExtras = {
   before: (t: number) => void;
   /** A plate before its fit: staged metal, lattice, its flights. */
   forming: (p: number, t: number) => void;
-  /** A seated plate: metal and paint (under its ring-out). */
+  /** A seated plate: metal and paint (at rest on the body). */
   seat: (p: number, t: number) => void;
   unseat: () => void;
   /** A seated plate's conduit (printed, receding behind the pour). */
@@ -1877,37 +1887,46 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
     jig[o + 4] = ox;
     jig[o + 5] = oy;
   };
+  // Every plate is at rest on its seat by its fit F (owner, 2026-10-16:
+  // 「前がけの生成完了時にズレるのを修正して。」): it swings down over the
+  // first SLAM of [F − seat, F], rings out past the seat over the rest and is
+  // still at F, so its print, its gold, the molten band and the cooling cells
+  // (all drawn at the seat once it has seated) never meet an offset plate.
   // A3: a tail segment's in-plane hinge (root → blade swings wider), and its
-  // ring-out past the seat.
+  // ring-out past the seat, ending at F.
   const hingeAt = (p: number, t: number, lambda: number) => {
     if (L.kind[p] !== 1) return 0;
     const F = all[p].fit;
     const k = L.segment[p];
-    if (t >= F && t < F + SW.overshoot) {
-      const tau = (t - F) / SW.overshoot;
-      return ((3 * Math.PI) / 180) * Math.exp(-6 * tau) * Math.cos(12 * tau);
+    const ring = F - SW.seat * (1 - SLAM);
+    if (t >= F) return 0;
+    if (t >= ring) {
+      const v = (t - ring) / (F - ring);
+      return ((3 * Math.PI) / 180) * Math.sin(Math.PI * v) * (1 - v);
     }
     return lambda > 0 ? (-(10 + 4 * k) * Math.PI * lambda) / 180 : 0;
   };
-  // A3: a ribbon sways once it has seated.
+  // A3: a ribbon flutters as it swings down, and is still at its seat.
   const swayAt = (p: number, t: number) => {
     if (L.kind[p] !== 2) return 0;
-    const tau = (t - all[p].fit) / SW.sway;
-    if (tau < 0 || tau >= 1) return 0;
-    return 0.12 * Math.exp(-4 * tau) * Math.sin(10 * tau);
+    const r = (all[p].fit - t) / SW.sway;
+    if (r <= 0 || r >= 1) return 0;
+    return 0.1 * r * r * Math.sin(3 * Math.PI * (1 - r));
   };
-  // λ: lifted until the plate fills, swung down over the seat, then a ring-out.
+  // λ: lifted until the plate fills, swung down over the seat, then a ring-out
+  // that ends at F. Plates formed in place (the helmet, the tassets) stay at 0.
   const lambdaAt = (p: number, t: number) => {
     const F = all[p].fit;
-    if (L.kind[p] === 3) return 0;
-    if (t >= F + SW.overshoot) return 0;
-    if (t >= F) {
-      const tau = (t - F) / SW.overshoot;
-      return -0.1 * Math.sin(Math.PI * tau) * Math.exp(-2 * tau);
-    }
+    if (L.kind[p] === 3 || L.flags[p] & 8) return 0;
+    if (t >= F) return 0;
     if (t >= F - SW.seat) {
       const u = (t - F + SW.seat) / SW.seat;
-      return L.lam0[p] * (1 - u * u * u);
+      if (u >= SLAM) {
+        const v = (u - SLAM) / (1 - SLAM);
+        return -0.12 * Math.sin(Math.PI * v) * (1 - v);
+      }
+      const w = u / SLAM;
+      return L.lam0[p] * (1 - w * w * w);
     }
     // Landed fraction: binary search in the plate's sorted landings.
     const first = L.tileFirst[p];
@@ -2821,10 +2840,10 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
       if (L.kind[p] < 0) continue;
       const plate = all[p];
       const F = plate.fit;
-      if (t >= plate.spawn && t < F + SW.overshoot) {
+      if (t >= plate.spawn && t < F) {
         const lambda = lambdaAt(p, t);
         if (lambda !== 0 && jigs < JIGS && L.kind[p] !== 3) {
-          setJig(p, lambda, TOUCH ? 0 : hingeAt(p, t, lambda));
+          setJig(p, lambda, TOUCH ? 0 : hingeAt(p, t, lambda), TOUCH ? 0 : swayAt(p, t));
           jigged[p] = 1;
           jigs += 1;
         } else flat(p);
@@ -2978,7 +2997,13 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
     const staged = jigged[p] === 1;
     // The staged plate: lattice, walls and the landed metal, under its jig.
     applyJig(p);
-    if (lattice && staged && !governed && t >= F - SW.lattice[0] && t < F - SW.lattice[1]) {
+    if (
+      lattice &&
+      (staged || L.flags[p] & 8) &&
+      !governed &&
+      t >= F - SW.lattice[0] &&
+      t < F - SW.lattice[1]
+    ) {
       const span = (t - F + SW.lattice[0]) / (SW.lattice[0] - SW.lattice[1]);
       // It fades in as it grows (no step in the frame's light), out as it is consumed.
       const fade = span < 0.3 ? span / 0.3 : span > 0.8 ? (1 - span) / 0.2 : 1;
@@ -3182,15 +3207,8 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
   const seat = (p: number, t: number) => {
     const plate = all[p];
     const F = plate.fit;
-    if (
-      L.kind[p] >= 0 &&
-      L.kind[p] !== 3 &&
-      (t < F + SW.overshoot || (L.kind[p] === 2 && t < F + SW.sway))
-    ) {
-      const lambda = lambdaAt(p, t);
-      setJig(p, lambda, TOUCH ? 0 : hingeAt(p, t, lambda), TOUCH ? 0 : swayAt(p, t));
-      applyJig(p);
-    }
+    // Seated: at rest on the body (every plate is still by F), so its gold
+    // forms exactly where the finished suit has it.
     const paintEnd = F + SW.paint[0] + (L.kind[p] === 3 ? SW.paint[2] : SW.paint[1]);
     flight.globalAlpha = 1;
     if (L.kind[p] < 0 || t >= paintEnd) {
@@ -3251,17 +3269,8 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
     if (t < all[p].fit || L.kind[p] < 0) return;
     if (TOUCH && conduits >= 4) return;
     conduits += 1;
-    // It rides its seated plate's ring-out and sway.
-    const F = all[p].fit;
-    const moving =
-      L.kind[p] !== 3 && (t < F + SW.overshoot || (L.kind[p] === 2 && t < F + SW.sway));
-    if (moving) {
-      const lambda = lambdaAt(p, t);
-      setJig(p, lambda, TOUCH ? 0 : hingeAt(p, t, lambda), TOUCH ? 0 : swayAt(p, t));
-      applyJig(p);
-    }
+    // Its plate is at rest on the body (every plate is still by F).
     drawConduit(p, t, true);
-    if (moving) base();
   };
 
   // A loop's sub-path between arc lengths a < b (0 ≤ a, b ≤ its length).

@@ -312,10 +312,12 @@ export const REXONANCE_SUIT_SWARM = {
   drain: 60,
   /** The clamps swing in over [F - 120, F - 40] and bite over F ± 10. */
   clamp: [120, 40, 10],
-  /** The plate swings down onto its seat over [F - 40, F], then rings. */
+  /** The plate swings down onto its seat over [F - 40, F], rings out past
+   * it and is still at F: nothing moves once its gold can form (owner,
+   * 2026-10-16: 「前がけの生成完了時にズレるのを修正して。」; the tassets and
+   * the tall narrow plates form in place, like the helmet). */
   seat: 40,
-  overshoot: 40,
-  /** A ribbon sways this long after it seats. */
+  /** A ribbon flutters over the last this-many ms before it seats. */
   sway: 120,
   /** After F: the seam ignites round the plate's real outline, then glows. */
   seam: 90,

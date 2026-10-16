@@ -38,7 +38,7 @@ test("the swarm rides the pinned call: its timeline, and the pinned clocks uncha
   assert.equal(swarm.wave, 160);
   // Each plate's latch from F − 360; the lattice F − 270 → F − 60; clamps
   // slide in over [F − 120, F − 40] and bite F ± 10; the seat [F − 40, F]
-  // and its ring-out F → F + 40.
+  // with its ring-out inside it.
   assert.equal(swarm.project, 360);
   // Owner override (2026-10-16): the guideway is built from the toe tips up,
   // never projected or swept from above — no scan window remains; a group's
@@ -53,7 +53,10 @@ test("the swarm rides the pinned call: its timeline, and the pinned clocks uncha
   assert.deepEqual([...swarm.lattice], [270, 60]);
   assert.deepEqual([...swarm.clamp], [120, 40, 10]);
   assert.equal(swarm.seat, calls.REXONANCE_SUIT_CLANK_MS);
-  assert.equal(swarm.overshoot, calls.REXONANCE_SUIT_CLANK_MS);
+  // Every plate is still by F (owner 2026-10-16: 「前がけの生成完了時にズレるのを
+  // 修正して。」): no ring-out after the seat, the ribbons' sway before it.
+  assert.equal("overshoot" in swarm, false);
+  assert.equal(swarm.sway, 120);
   // After F: seam 90 + glow 60, shock 140, print [F − 30, F + 5] (bottom to
   // top along the trims, owner override 2026-10-16; whole before the first
   // gold locks at F + 6), paint
@@ -505,6 +508,58 @@ test("touch: at most 24 hero sprites a frame from the kit; the swarm is rects", 
   assert.ok(heroes > 0);
   // At most four conduits a frame, their face only (no walls).
   assert.ok(Math.max(...frames.map(({ guide }) => guide)) <= 4);
+});
+
+// Owner (2026-10-16): 「前がけの生成完了時にズレるのを修正して。」 — the tassets
+// and the tall narrow plates form in place (never lifted or tilted), and no
+// plate moves once it has seated: from its fit on, its seat and conduit draw
+// under the figure's own transform, so its gold forms where the suit has it.
+test("the tassets form in place, and every plate is at rest from its fit on", async () => {
+  const { plan, extras } = await extrasRuntime({ touch: false });
+  const all = plan.plates();
+  const L = extras.rexonanceNaniteLayout();
+  all.forEach((plate, p) => {
+    const { id, w, h } = plate.piece;
+    if (id.startsWith("tasset-") || (L.kind[p] === 0 && h >= 1.8 * w)) {
+      assert.ok(L.flags[p] & 8, `${id}: formed in place`);
+      assert.equal(L.lift[p], 0, id);
+      assert.equal(L.tilt[p], 0, id);
+    }
+  });
+  assert.ok(all.filter(({ piece }) => piece.id.startsWith("tasset-")).length === 3);
+  const { context } = recorder();
+  const transforms = [];
+  context.setTransform = (...args) => transforms.push(args);
+  const ex = extras.createSuitExtras({
+    flight: context,
+    s: 1.5,
+    ox: 34,
+    oy: 31,
+    all,
+    gold: plan.cells(),
+    source: { kind: "work" },
+    sheet: { kind: "motes" },
+  });
+  for (let t = 600; t <= 2000; t += 5) {
+    ex.before(t);
+    for (let p = 0; p < all.length; p += 1) {
+      const plate = all[p];
+      if (t < plate.spawn || t >= plate.last) continue;
+      if (t < plate.fit) {
+        ex.forming(p, t);
+        continue;
+      }
+      transforms.length = 0;
+      if (t < plate.to) {
+        ex.seat(p, t);
+        ex.unseat();
+      }
+      ex.conduit(p, t);
+      for (const args of transforms)
+        assert.deepEqual(args, [1, 0, 0, 1, 34, 31], `${plate.piece.id} at ${t}: at rest`);
+    }
+    ex.after(t);
+  }
 });
 
 test("the layout: every chip has a ring, the cocoon drains bottom-up, every tile a pose", async () => {
