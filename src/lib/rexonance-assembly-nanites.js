@@ -357,6 +357,14 @@ export function* assemblyNanitePlanSteps({
       loopPerim.push(cum);
       seamPoints += count;
     }
+    // The river's gate, 0.1H out along the normal — kept inside the frame:
+    // a gate that would fall below the feet moves outward instead.
+    let gateX = seatX + nx * 0.1 * H;
+    let gateY = seatY + ny * 0.1 * H;
+    if (gateY > H - 36) {
+      gateX += (seatX < W / 2 ? -1 : 1) * (gateY - (H - 36));
+      gateY = H - 36;
+    }
     const shock =
       Math.min(220, Math.max(40, 1.6 * Math.max(piece.w, piece.h) * (0.6 + 0.9 * share))) *
       (isCrest ? 1.4 : accent ? 1.3 : 1);
@@ -380,8 +388,8 @@ export function* assemblyNanitePlanSteps({
       seatY,
       nx,
       ny,
-      gateX: seatX + nx * 0.1 * H,
-      gateY: seatY + ny * 0.1 * H,
+      gateX,
+      gateY,
       gx,
       gy,
       lift,
@@ -926,6 +934,7 @@ export function createAssemblyNanites({
   const jig = new Float64Array(NP * 6);
   const LAM = new Float64Array(NP);
   const STAGED = new Uint8Array(NP);
+  const laneCount = new Uint16Array(NP);
   const beamI = new Int32Array(NP * 2);
   const beamU = new Float32Array(NP * 2);
   const topI = new Int32Array(TOUCH_CHIPS);
@@ -1518,6 +1527,7 @@ export function createAssemblyNanites({
       beamI[b] = -1;
       beamU[b] = -1;
     }
+    for (let p = 0; p < NP; p += 1) laneCount[p] = 0;
     for (let c = 0; c < TOUCH_CHIPS; c += 1) {
       topI[c] = -1;
       topU[c] = -1;
@@ -1532,6 +1542,7 @@ export function createAssemblyNanites({
         flightList[nFlight++] = i;
         const u = U[i];
         const p = PO[i];
+        if (p >= 0 && kind === 4) laneCount[p] += 1;
         if (p >= 0 && u >= 0.8 && u < 1) {
           const b = p * 2;
           if (u > beamU[b]) {
@@ -1864,7 +1875,7 @@ export function createAssemblyNanites({
         ctx.beginPath();
         ctx.arc(pc.seatX, pc.seatY, Math.max(1, pc.reach * 1.05 * grow), 0, TAU);
         ctx.clip();
-        ctx.globalAlpha = 0.9;
+        ctx.globalAlpha = 0.6;
         ctx.drawImage(lattice, 0, 0, W, H);
         ctx.restore();
         lattices += 1;
@@ -2046,6 +2057,29 @@ export function createAssemblyNanites({
     if (strokes) {
       ctx.globalAlpha = 0.85;
       ctx.strokeStyle = "rgb(255 220 140)";
+      ctx.stroke();
+    }
+    // The rivers' gates: two ice posts where each plate's stream narrows.
+    let posts = false;
+    const half = 0.012 * H;
+    for (let p = 0; p < NP; p += 1) {
+      if (laneCount[p] < 3) continue;
+      const pc = P[p];
+      if (!posts) {
+        ctx.beginPath();
+        posts = true;
+      }
+      for (let side = -1; side <= 1; side += 2) {
+        const x = pc.gateX - pc.ny * half * side;
+        const y = pc.gateY + pc.nx * half * side;
+        ctx.moveTo(x - pc.nx * 4, y - pc.ny * 4);
+        ctx.lineTo(x + pc.nx * 4, y + pc.ny * 4);
+      }
+    }
+    if (posts) {
+      ctx.globalAlpha = 0.55;
+      ctx.strokeStyle = TONE_CSS[0];
+      ctx.lineWidth = 1.1;
       ctx.stroke();
     }
     // Hard-light beams from each staged plate's latch to its diving tiles.
