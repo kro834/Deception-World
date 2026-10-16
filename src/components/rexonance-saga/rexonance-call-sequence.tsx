@@ -443,12 +443,14 @@ function Suit({ suit, animate }: { suit: "build" | "whole"; animate: boolean }) 
   // once it is ready in time; until then, or without it, the DOM plates play.
   // Owner (2026-10-16, 超大幅な改善): when the nanite kit is ready too, the
   // engine's own swarm (Blender hex chips in an orbital cocoon) replaces
-  // the SVG motes of RIDER！.
+  // the SVG motes of RIDER！ while it runs (the engine reports again, not
+  // rich, once its swarm is over, so the motes' own end state returns and
+  // the finished frame is the classic call's exactly).
   const [swarm, setSwarm] = useState("svg" as "svg" | "canvas");
   const [nanites, setNanites] = useState<"dom" | "canvas">("dom");
   const onNanites = useCallback((rich?: boolean) => {
     setNanites("canvas");
-    if (rich) setSwarm("canvas");
+    setSwarm(rich ? "canvas" : "svg");
   }, []);
   return (
     <div className="rx-suit" data-suit={suit} data-nanites={nanites} data-swarm={swarm}>

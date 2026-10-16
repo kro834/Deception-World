@@ -1273,11 +1273,17 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
 }
 
 /* Owner (2026-10-16, 超大幅な改善): on fine pointers the nanite engine's
-   canvases bleed past the figure for its cocoon, comets and spall — never
-   more than 4 % to the left (inside the landscape calls' 24 px gap) and
-   never below it (the portrait calls' band). */
-.rx-call-sequence .rx-suit-build > .rx-suit-nanites[data-bleed] {
-  inset: -2% -10% 0 -4%;
+   flight canvas bleeds past the figure for its cocoon, comets and spall —
+   never more than 4 % to the left (inside the landscape calls' 24 px gap)
+   and never below it (the portrait calls' band). Its settled canvas (the
+   plates as they finish) stays on the figure's own box, so the finished
+   suit is drawn exactly as before. */
+.rx-call-sequence .rx-suit-build > .rx-suit-nanites[data-bleed] > canvas:last-child {
+  inset: auto;
+  top: -2%;
+  left: -4%;
+  width: 114%;
+  height: 102%;
 }
 
 /* With the nanite kit ready, the engine's own swarm (hex chips in an

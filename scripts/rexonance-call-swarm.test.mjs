@@ -113,19 +113,32 @@ test("the call decides once, bleeds only on fine pointers, and keeps the classic
     nanites,
     /flight\.setTransform\(1, 0, 0, 1, 0, 0\);\s*flight\.clearRect\(0, 0, width, height\);\s*flight\.setTransform\(1, 0, 0, 1, ox, oy\);/,
   );
-  assert.match(nanites, /settled\.setTransform\(1, 0, 0, 1, ox, oy\);/);
+  // The settled canvas stays on the figure's box at the figure's scale, so
+  // the finished suit (frame 2730) is drawn exactly as before; only the
+  // flight canvas bleeds (CSS), its figure origin on whole device pixels.
+  assert.match(nanites, /settledCanvas\.width = Math\.round\(box\.clientWidth \* scale\);/);
+  assert.match(nanites, /const width = Math\.round\(flightCanvas\.offsetWidth \* scale\);/);
+  assert.match(nanites, /const s = settledCanvas\.width \/ FIG\.width;/);
+  assert.match(nanites, /const ox = Math\.round\(/);
+  assert.doesNotMatch(nanites, /settled\.setTransform/);
   // Its swarm replaces the SVG motes only when it runs; the motes' own
   // clock is unchanged, and the bleed never reaches below the figure nor
   // more than 4 % to its left.
   assert.match(
     component,
-    /const onNanites = useCallback\(\(rich\?: boolean\) => \{\s*setNanites\("canvas"\);\s*if \(rich\) setSwarm\("canvas"\);/,
+    /const onNanites = useCallback\(\(rich\?: boolean\) => \{\s*setNanites\("canvas"\);\s*setSwarm\(rich \? "canvas" : "svg"\);/,
+  );
+  // …and the motes return once the swarm is over (frame 2730 is HEAD's).
+  assert.match(
+    nanites,
+    /if \(!extras\) void warmRexonanceNanites\(\);\s*else ready\.current\(false\);/,
   );
   assert.match(component, /data-swarm=\{swarm\}/);
   assert.match(
     sheet,
-    /\.rx-call-sequence \.rx-suit-build > \.rx-suit-nanites\[data-bleed\] \{\s*inset: -2% -10% 0 -4%;\s*\}/,
+    /\.rx-call-sequence \.rx-suit-build > \.rx-suit-nanites\[data-bleed\] > canvas:last-child \{\s*inset: auto;\s*top: -2%;\s*left: -4%;\s*width: 114%;\s*height: 102%;\s*\}/,
   );
+  assert.doesNotMatch(sheet, /\.rx-suit-nanites\[data-bleed\] \{/);
   assert.match(
     sheet,
     /\.rx-call-sequence \.rx-suit\[data-swarm="canvas"\] \.rx-suit-figure > \.rx-suit-motes \{\s*visibility: hidden;\s*\}/,

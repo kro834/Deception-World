@@ -124,28 +124,33 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
         );
         const scale = Math.min(coarse ? 1.25 : 2, globalThis.devicePixelRatio || 1);
         // The extras are decided once, here (2026-10-16); on fine pointers
-        // the canvases then bleed past the figure for the cocoon and spall.
+        // the flight canvas then bleeds past the figure (CSS) for the cocoon
+        // and spall. The settled canvas covers the figure exactly as it
+        // always has, so the finished suit is drawn pixel for pixel as before.
         const rich = isRexonanceNaniteReady();
         if (rich && !coarse) box.dataset.bleed = "";
-        const width = Math.round(box.clientWidth * scale);
-        const height = Math.round(box.clientHeight * scale);
-        // The figure's box within the canvas (scale-free: both rects carry
-        // the figure's transform alike).
-        const outer = box.getBoundingClientRect();
-        const inner = build.getBoundingClientRect();
-        const ratio = outer.width ? width / outer.width : scale;
-        const ox = (inner.left - outer.left) * ratio;
-        const oy = (inner.top - outer.top) * ratio;
         const make = () => {
-          const canvas = Object.assign(globalThis.document.createElement("canvas"), {
-            width,
-            height,
-          });
+          const canvas = globalThis.document.createElement("canvas");
           box.append(canvas);
-          return canvas.getContext("2d");
+          return canvas;
         };
-        const settled = make();
-        const flight = make();
+        const settledCanvas = make();
+        const flightCanvas = make();
+        settledCanvas.width = Math.round(box.clientWidth * scale);
+        settledCanvas.height = Math.round(box.clientHeight * scale);
+        const width = Math.round(flightCanvas.offsetWidth * scale);
+        const height = Math.round(flightCanvas.offsetHeight * scale);
+        flightCanvas.width = width;
+        flightCanvas.height = height;
+        // The figure's box within the flight canvas, on whole device pixels
+        // (scale-free: both rects carry the figure's transform alike).
+        const outer = flightCanvas.getBoundingClientRect();
+        const inner = box.getBoundingClientRect();
+        const ratio = outer.width ? width / outer.width : scale;
+        const ox = Math.round((inner.left - outer.left) * ratio);
+        const oy = Math.round((inner.top - outer.top) * ratio);
+        const settled = settledCanvas.getContext("2d");
+        const flight = flightCanvas.getContext("2d");
         const source = work.canvas;
         const all = plates();
         const sheet = moteSheet(atlas);
@@ -154,8 +159,7 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
           return;
         }
         work.dirty = true;
-        const s = (inner.width * ratio || width) / FIG.width;
-        settled.setTransform(1, 0, 0, 1, ox, oy);
+        const s = settledCanvas.width / FIG.width;
         const extras = rich
           ? createSuitExtras({ flight, s, ox, oy, all, gold: cells(), source, sheet })
           : null;
@@ -204,7 +208,7 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
           done[index] = 1;
         };
         const reset = () => {
-          settled.clearRect(0, 0, width, height);
+          settled.clearRect(0, 0, settledCanvas.width, settledCanvas.height);
           done.fill(0);
           for (let p = 0; p < all.length; p += 1) locked[p] = all[p].first;
           work.dirty = true;
@@ -486,8 +490,11 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
           work.drawing -= 1;
           flight.setTransform(1, 0, 0, 1, 0, 0);
           flight.clearRect(0, 0, width, height);
-          // A call that started before the kit was ready warms it for the next.
+          // A call that started before the kit was ready warms it for the next;
+          // one that drew its swarm hands RIDER！'s motes back their own end
+          // state (the finished frame is the classic call's exactly).
           if (!extras) void warmRexonanceNanites();
+          else ready.current(false);
           for (let p = 0; p < all.length; p += 1) if (!done[p]) settle(p);
           if (!lit) {
             lit = true;
