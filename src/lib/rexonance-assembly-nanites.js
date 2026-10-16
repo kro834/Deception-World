@@ -16,8 +16,11 @@
    projected onto the body as an ice hologram before its plate arrives, is
    printed into a Blender-rendered gold conduit (rails, hard-light glass, a
    glowing channel, walls that turn as you scroll) clamped at its corners,
-   and molten gold pours through it from the seat while the conduit recedes
-   behind the cooling front: what remains is exactly the painted trim.
+   built once and kept on the body through its plate's staging, and molten
+   gold pours from the seat into it, taking the conduit over cell by cell —
+   white-hot, amber, cooling to copper: what remains is exactly the painted
+   trim. As the seal nears, the free chips gather into rings round the
+   reactor and spiral into it.
 
    Every pose is a closed-form function of the displayed progress q, seeded
    from index hashes (never the timing PRNG): the plan's m, t0, t1, beats,
