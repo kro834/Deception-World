@@ -3,6 +3,7 @@ import {
   REXONANCE_SUIT_DRIVER,
   REXONANCE_SUIT_SPARKS,
   REXONANCE_SUIT_SWARM,
+  REXONANCE_SUIT_SWARM_LIFE,
 } from "@/lib/rexonance-calls";
 import {
   REXONANCE_SUIT_ATLAS,
@@ -76,6 +77,7 @@ import {
    a few hero sprites, and only metal and hologram layers are prepared. */
 
 const SW = REXONANCE_SUIT_SWARM;
+const LIFE = REXONANCE_SUIT_SWARM_LIFE;
 const KIT_CELLS = REXONANCE_NANITES.cells;
 const KIT_COMETS = REXONANCE_NANITES.comets;
 const KIT_FX = REXONANCE_NANITES.fx;
@@ -270,8 +272,12 @@ type Layout = {
   size: Float32Array;
   cov: Float32Array;
   tone: Uint8Array;
-  tflags: Uint8Array; // 1 comet, 2 spark, 4 recoil
+  tflags: Uint8Array; // 1 comet, 2 spark, 4 recoil, 8 pathfinder
   parent: Int32Array;
+  // Strings (2026-10-16, 更にブラッシュアップ): each tile's pathfinder (the
+  // string's first to land) and its place in the string.
+  tLead: Int32Array;
+  tRank: Int16Array;
   // Seams: plate p owns loops [loopFirst[p], loopFirst[p + 1]); a loop owns
   // points [loopStart, loopStart + loopN] (the last repeats the first).
   loopFirst: Int32Array;
@@ -297,6 +303,14 @@ type Layout = {
   chipTone: Uint8Array;
   crownR: Float32Array;
   crownA: Float32Array;
+  // Squads: each chip's leader (itself for a leader) and its place behind
+  // it; the squad's lane hops (period ms, phase, direction); its hover.
+  squad: Int16Array;
+  rank: Int8Array;
+  hopT: Float32Array;
+  hop0: Float32Array;
+  hopDir: Int8Array;
+  hoverT: Float32Array;
   // Rings.
   ringCy: Float32Array;
   ringRx: Float32Array;
@@ -305,6 +319,7 @@ type Layout = {
   ringSin: Float32Array;
   ringOmega: Float32Array;
   ringTilt: Float32Array;
+  ringLag: Float32Array; // the heartbeat's delay from the core (ms)
   occupancy: Uint8Array;
 };
 type Sheets = {
@@ -403,6 +418,8 @@ function* layoutSteps(all: Plate[], gold: Cells): Generator<undefined, Layout, u
     tone: new Uint8Array(N),
     tflags: new Uint8Array(N),
     parent: new Int32Array(N).fill(-1),
+    tLead: new Int32Array(N),
+    tRank: new Int16Array(N),
     loopFirst: new Int32Array(P + 1),
     loopStart: new Int32Array(0),
     loopN: new Int32Array(0),
@@ -425,6 +442,12 @@ function* layoutSteps(all: Plate[], gold: Cells): Generator<undefined, Layout, u
     chipTone: new Uint8Array(CHIPS),
     crownR: f32(CHIPS),
     crownA: f32(CHIPS),
+    squad: new Int16Array(CHIPS),
+    rank: new Int8Array(CHIPS),
+    hopT: f32(CHIPS),
+    hop0: f32(CHIPS),
+    hopDir: new Int8Array(CHIPS),
+    hoverT: f32(CHIPS),
     ringCy: f32(RINGS),
     ringRx: f32(RINGS),
     ringRy: f32(RINGS),
@@ -432,6 +455,7 @@ function* layoutSteps(all: Plate[], gold: Cells): Generator<undefined, Layout, u
     ringSin: f32(RINGS),
     ringOmega: f32(RINGS),
     ringTilt: f32(RINGS),
+    ringLag: f32(RINGS),
     occupancy: new Uint8Array(OCC_W * OCC_H),
   };
   let maxArea = 1;
@@ -568,7 +592,7 @@ function* layoutSteps(all: Plate[], gold: Cells): Generator<undefined, Layout, u
       L.jy[i] = hash(i, 1409) * 2 - 1;
       L.bow[i] = hash(i, 1511) - 0.5;
       L.size[i] = 7 * (0.9 + 0.25 * h2);
-      L.tone[i] = i % 9 === 0 ? WHITE : cx < W / 2 ? ICE : PINK;
+      L.tone[i] = cx < W / 2 ? ICE : PINK;
       L.tflags[i] = (i % 3 === 0 ? 1 : 0) | (h3 < 1 / 6 ? 2 : 0) | (h1 < 0.55 ? 4 : 0);
       const col = Math.round((tile.dx - piece.x) / T);
       const row = Math.round((tile.dy - piece.y) / T);
@@ -597,6 +621,34 @@ function* layoutSteps(all: Plate[], gold: Cells): Generator<undefined, Layout, u
       }
     const lands = L.land.slice(first, first + n).sort();
     L.landSorted.set(lands, first);
+    // Strings: the tiles by landing, dealt round-robin into strings whose
+    // members land about LIFE.string.gap ms apart; each follows its
+    // pathfinder's river and orbit (its bow, its angle, its radius).
+    const byLand = Array.from({ length: n }, (_, k) => first + k).sort(
+      (a, b) => L.land[a] - L.land[b] || a - b,
+    );
+    const span = n > 1 ? L.land[byLand[n - 1]] - L.land[byLand[0]] : 0;
+    const strings = Math.max(
+      1,
+      Math.min(16, Math.round((LIFE.string.gap * n) / Math.max(1, span)), n),
+    );
+    for (let k = 0; k < n; k += 1) {
+      const i = byLand[k];
+      const lead = byLand[k % strings];
+      const rank = Math.floor(k / strings);
+      L.tLead[i] = lead;
+      L.tRank[i] = rank;
+      if (rank === 0) {
+        L.tone[i] = WHITE;
+        L.tflags[i] |= 1 | 8;
+        continue;
+      }
+      L.bow[i] = L.bow[lead];
+      L.psi0[i] = L.psi0[lead] + 0.08 * rank;
+      L.r0[i] = L.r0[lead] * (1 - 0.03 * Math.min(rank, 10));
+      L.jx[i] = L.jx[lead];
+      L.jy[i] = L.jy[lead];
+          }
     tileAt += n;
     // Seams.
     L.loopFirst[p] = loopAt;
@@ -634,6 +686,7 @@ function* layoutSteps(all: Plate[], gold: Cells): Generator<undefined, Layout, u
     L.ringCos[r] = Math.cos(tilt);
     L.ringSin[r] = Math.sin(tilt);
     L.ringOmega[r] = ((r % 2 ? -1 : 1) * TAU * SW.spin * ((0.45 * W) / rx) ** 1.5) / 1000;
+    L.ringLag[r] = (LIFE.heartbeat.lag * Math.abs(cy - CORE_Y)) / H;
   }
   // The cocoon: chips shared out by tile count, each on the ring nearest its
   // plate's seat (the helmet's on ring 0), so it drains bottom-up.
@@ -721,6 +774,34 @@ function* layoutSteps(all: Plate[], gold: Cells): Generator<undefined, Layout, u
             : PINK;
     L.crownR[c] = 104 + 36 * hash(c, 2999);
     L.crownA[c] = TAU * hash(c, 3061);
+  }
+  // Squads: each ring's chips in index order, LIFE.squad.size at a time; a
+  // follower takes its leader's lane and wobble and trails it on the ring.
+  const Q = LIFE.squad;
+  const ringSeen = new Int32Array(RINGS);
+  const ringLead = new Int32Array(RINGS);
+  for (let c = 0; c < CHIPS; c += 1) {
+    const r = L.ring[c];
+    const rank = ringSeen[r] % Q.size;
+    ringSeen[r] += 1;
+    if (!rank) ringLead[r] = c;
+    const lead = ringLead[r];
+    L.squad[c] = lead;
+    L.rank[c] = rank;
+    L.hoverT[c] = 620 + 420 * hash(c, 3163);
+    if (!rank) {
+      // The leader is white; its followers carry the squad's colour.
+      L.chipTone[c] = WHITE;
+      L.hopT[c] = Q.hop[0] + (Q.hop[1] - Q.hop[0]) * hash(c, 3251);
+      L.hop0[c] = hash(c, 3343);
+      L.hopDir[c] = L.lane[c] > 0 ? -1 : L.lane[c] < 0 ? 1 : hash(c, 3433) < 0.5 ? -1 : 1;
+      continue;
+    }
+    const dir = L.ringOmega[r] < 0 ? -1 : 1;
+    L.theta0[c] = L.theta0[lead] - dir * rank * Q.gap;
+    L.lane[c] = L.lane[lead];
+    L.phi[c] = L.phi[lead] + 0.4 * rank;
+    if (L.chipTone[c] === WHITE) L.chipTone[c] = hash(c, 3539) < 0.5 ? ICE : PINK;
   }
   yield;
   // Occupancy: the body plates' tiles (not the ribbons or the tail), softened.
@@ -1748,7 +1829,21 @@ const SA = 17;
 const SVX = 18;
 const SVY = 19;
 const ARG_T = 20; // a ring pose's time
-const POSE_SLOTS = 21;
+const ROLL = 21; // a ring pose's roll (tumble frames): banked to the orbit
+const ARG_LX = 22; // a tile's pathfinder's seated centre (figure px)
+const ARG_LY = 23;
+const POSE_SLOTS = 24;
+/** At most this many plates' seats ripple through the swarm at once. */
+const RIPPLES = 8;
+/** The core's heartbeat (LIFE.heartbeat) at t: 0 between beats, about 1 at
+ * a beat's peak (a sharp rise, a slower fall); none before it starts or
+ * from the seal on. */
+const beatAt = (t: number) => {
+  const since = t - LIFE.heartbeat.from;
+  if (since < 0 || t >= SW.implode[0]) return 0;
+  const tau = since - LIFE.heartbeat.every * Math.floor(since / LIFE.heartbeat.every);
+  return 1.6 * (1 - Math.exp(-tau / 10)) * Math.exp(-tau / 70);
+};
 
 export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtras | null {
   const L = LAYOUT;
@@ -1783,6 +1878,8 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
   const chipBand = new Uint8Array(CHIPS); // 0 none, 1 back, 2 mid, 3 front, 4 bokeh
   const chipVX = new Float32Array(CHIPS);
   const chipVY = new Float32Array(CHIPS);
+  const chipG = new Float32Array(CHIPS); // its banking glint (0 none … 1)
+  const ripples = new Float32Array(RIPPLES * 4);
   const ringCount = new Float32Array(RINGS);
   const LINKS = 1200;
   const links = new Float32Array(LINKS * 5);
@@ -2065,16 +2162,31 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
   const ringPose = (c: number) => {
     const t = pose[ARG_T];
     const r = L.ring[c];
-    const lane = L.lane[c];
-    const k = 1 + 0.045 * lane;
+    const lead = L.squad[c];
+    const rank = L.rank[c];
+    // Squads hop lanes together, each follower a beat after the one ahead,
+    // jostling in its slot (LIFE.squad).
+    const ph = (t - rank * LIFE.squad.lag) / L.hopT[lead] + L.hop0[lead];
+    const f = ph - Math.floor(ph);
+    const hop = smooth((f - 0.5) / 0.16) - smooth((f - 0.84) / 0.16);
+    const jostle = rank ? 0.3 * Math.sin((TAU * t) / 470 + 1.7 * rank + L.phi[c]) : 0;
+    const lane = L.lane[c] + L.hopDir[lead] * hop + jostle;
+    // The core's heartbeat breathes the ring out (LIFE.heartbeat).
+    const breath = 1 + LIFE.heartbeat.breath * beatAt(t - L.ringLag[r]);
+    const k = (1 + 0.045 * lane) * breath;
     const R = L.ringRx[r] * k;
     const Ry = L.ringRy[r] * k;
     const omega = L.ringOmega[r];
-    const th = L.theta0[c] + omega * t;
+    const sway = rank ? 0.014 * rank * Math.sin((TAU * t) / 610 + 2.1 * rank) : 0;
+    const th = L.theta0[c] + omega * t + sway;
     const cos = Math.cos(th);
     const sin = Math.sin(th);
     const lx = R * cos;
-    const ly = Ry * sin + 3 * Math.sin(5 * th + L.phi[c]) + 4 * lane;
+    const ly =
+      Ry * sin +
+      3 * Math.sin(5 * th + L.phi[c]) +
+      4 * lane +
+      LIFE.heartbeat.hover * Math.sin((TAU * t) / L.hoverT[c] + 3 * L.phi[c]);
     const rc = L.ringCos[r];
     const rs = L.ringSin[r];
     pose[PX] = W / 2 + lx * rc - ly * rs;
@@ -2090,6 +2202,12 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
     pose[TY] = (dx * rs + dy * rc) / tl;
     // Its speed along the ring (the comets read their velocity from it).
     pose[SPEED] = tl * Math.abs(omega);
+    // Banked to its orbit: it rolls once a revolution, its lit face (frame 0)
+    // turned to the viewer as it swings in toward the near apex, its dark
+    // back on the far side; it banks into a lane hop.
+    pose[ROLL] =
+      (FRAMES * (th - Math.PI / 2 + dir * 0.75)) / TAU +
+      5 * L.hopDir[lead] * Math.sin(Math.PI * hop);
   };
   // A chip being born (that fraction of its wave): on its spiral arm out
   // of the core, blending into its ring pose (PX, PY on entry).
@@ -2119,10 +2237,26 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
   const crownCentreY = VISOR_Y - 92;
   const swarm = (t: number) => {
     ringCount.fill(0);
+    // The plates seated in the last LIFE.ripple.ms: each sends a ripple out
+    // through the swarm from its seat (accents and shock-ring plates harder).
+    let rippleCount = 0;
+    for (let k = 0; k < P && rippleCount < RIPPLES; k += 1) {
+      const p = L.order[k];
+      const age = t - all[p].fit;
+      if (age < 0) break;
+      if (L.kind[p] < 0 || age >= LIFE.ripple.ms) continue;
+      const o = rippleCount * 4;
+      ripples[o] = L.seatX[p];
+      ripples[o + 1] = L.seatY[p];
+      ripples[o + 2] = age;
+      ripples[o + 3] = L.flags[p] & 1 ? 1.5 : L.flags[p] & 2 ? 1.2 : 1;
+      rippleCount += 1;
+    }
     for (let c = 0; c < CHIPS; c += 1) {
       chipBand[c] = 0;
       chipVX[c] = 0;
       chipVY[c] = 0;
+      chipG[c] = 0;
       const birth = L.birth[c];
       if (t < birth) continue;
       const plate = L.chipPlate[c];
@@ -2136,6 +2270,7 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
       let x = pose[PX];
       let y = pose[PY];
       let z = pose[PZ];
+      const roll = pose[ROLL];
       const born = (t - birth) / SW.wave;
       if (born < 1) {
         // N2: out of the core on one of three spiral arms, into its ring.
@@ -2244,8 +2379,30 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
           chipVY[c] = (y - pose[PY]) * s;
         }
       }
-      if (born >= 1 && !(plate >= 0 && t >= L.drainAt[c]) && !(helm && t >= SW.crown[0]))
-        ringCount[L.ring[c]] += 1;
+      const onRing =
+        born >= 1 &&
+        !(plate >= 0 && t >= L.drainAt[c]) &&
+        !(helm && t >= SW.crown[0]) &&
+        !(plate < 0 && t >= SW.implode[0]);
+      if (onRing) ringCount[L.ring[c]] += 1;
+      // The seats' ripples: a chip in a front is pushed out from the seat,
+      // flares and is flipped over by it, then falls back into its place.
+      let kick = 0;
+      for (let k = 0; k < rippleCount; k += 1) {
+        const o = k * 4;
+        const dx = x - ripples[o];
+        const dy = y - ripples[o + 1];
+        const dist = (dx * dx + dy * dy) ** 0.5 || 1;
+        const age = ripples[o + 2];
+        const a = (dist - LIFE.ripple.speed * age) / LIFE.ripple.width;
+        if (a * a >= 9) continue;
+        const fall = 1 - age / LIFE.ripple.ms;
+        const g = Math.exp(-a * a) * fall * fall * ripples[o + 3];
+        x += (dx / dist) * LIFE.ripple.push * g;
+        y += (dy / dist) * LIFE.ripple.push * g;
+        kick += g;
+      }
+      if (kick > 0) alpha *= 1 + 0.35 * (kick < 1 ? kick : 1);
       const depth = 1 + 0.45 * z;
       size *= depth;
       alpha *= 0.55 + 0.22 * (z + 1);
@@ -2279,12 +2436,27 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
       chipT[c] = tone;
       // White-hot chips turn face-on (their lit core) with a small wobble.
       // (Wrapped here rather than by a call: no boxed argument.)
+      // On its ring it is banked to the orbit (ROLL): one in three exactly,
+      // so its lit face comes round and glints as it swings in; the others a
+      // few frames either way, all wobbling; a ripple flips it over.
       const turn =
         band === 5
           ? 1.5 * Math.sin((TAU * L.chipSpin[c] * t) / 1000 + L.phi[c])
-          : L.chipF0[c] + (FRAMES * L.chipSpin[c] * spinBoost * t) / 1000;
+          : onRing
+            ? roll +
+              (c % 3 ? (L.chipF0[c] - FRAMES / 2) / 3 : 0) +
+              1.6 * Math.sin((TAU * L.chipSpin[c] * t) / 1000 + L.phi[c]) +
+              0.6 * FRAMES * (kick < 1 ? kick : 1)
+            : L.chipF0[c] + (FRAMES * L.chipSpin[c] * spinBoost * t) / 1000;
       const frame = Math.floor(turn) % FRAMES;
       chipF[c] = frame < 0 ? frame + FRAMES : frame;
+      if (onRing && band === 3 && c % 3 === 0 && !TOUCH && !governed) {
+        // Its specular glint, while its face is within a frame of the viewer.
+        let d = turn - FRAMES * Math.floor(turn / FRAMES);
+        if (d > FRAMES / 2) d -= FRAMES;
+        if (d < 0) d = -d;
+        if (d < 1.2) chipG[c] = (1 - d / 1.2) * smooth((z - 0.35) / 0.3);
+      }
     }
   };
   // The cocoon's lanes: each ring's ellipse, its far half faint behind the
@@ -2314,14 +2486,17 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
     for (let r = 0; r < RINGS; r += 1) {
       const fill = Math.min(1, ringCount[r] / 20);
       if (fill <= 0.02) continue;
-      flight.globalAlpha = (front ? 0.16 : 0.07) * fill;
+      // The heartbeat runs out through the lanes (LIFE.heartbeat).
+      const beat = beatAt(t - L.ringLag[r]);
+      const breath = 1 + LIFE.heartbeat.breath * beat;
+      flight.globalAlpha = (front ? 0.16 : 0.07) * fill * (1 + 0.7 * beat);
       flight.strokeStyle = r % 2 ? "#ffb8e8" : "#a6f2ff";
       flight.beginPath();
       flight.ellipse(
         (W / 2) * s,
         L.ringCy[r] * s,
-        L.ringRx[r] * s,
-        L.ringRy[r] * s,
+        L.ringRx[r] * breath * s,
+        L.ringRy[r] * breath * s,
         L.ringTilt[r],
         front ? 0 : Math.PI,
         front ? Math.PI : TAU,
@@ -2332,12 +2507,19 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
   // N2: each pump wave rings out of the core.
   const pumps = (t: number) => {
     if (TOUCH) return;
-    for (let w = 0; w < SW.waves.length; w += 1) {
-      const u = (t - SW.waves[w]) / 140;
+    // After the waves the core keeps beating: a faint, small ring a beat.
+    const since = t - LIFE.heartbeat.from;
+    const beatU =
+      since < 0 || t >= SW.implode[0]
+        ? 1
+        : (since - LIFE.heartbeat.every * Math.floor(since / LIFE.heartbeat.every)) / 140;
+    for (let w = 0; w <= SW.waves.length; w += 1) {
+      const heart = w === SW.waves.length;
+      const u = heart ? beatU : (t - SW.waves[w]) / 140;
       if (u < 0 || u >= 1) continue;
       const frame = Math.min(KIT_FX.shock.frames - 1, Math.floor(u * KIT_FX.shock.frames));
-      const k = (90 * s) / KIT_FX.shock.w;
-      flight.globalAlpha = 0.4 * (1 - u);
+      const k = ((heart ? 64 : 90) * s) / KIT_FX.shock.w;
+      flight.globalAlpha = (heart ? 0.16 : 0.4) * (1 - u);
       draws += 1;
       flight.drawImage(
         fxImage,
@@ -2353,6 +2535,7 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
     }
   };
   const drawChips = (from: number, to: number) => {
+    let glints = 0;
     for (let c = 0; c < CHIPS; c += 1) {
       const band = chipBand[c];
       if (band < from || band > to) continue;
@@ -2393,6 +2576,24 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
       }
       pose[SD] = chipD[c];
       chip(chipF[c], chipT[c]);
+      const glint = chipG[c];
+      if (glint > 0.05 && glints < LIFE.glint.most && draws < BUDGET) {
+        // The banking glint: the kit's star, brightest face-on.
+        glints += 1;
+        draws += 1;
+        const k = glint > 0.66 ? 0 : glint > 0.33 ? 1 : 2;
+        flight.globalAlpha = 0.85 * glint * (chipA[c] < 0.7 ? chipA[c] / 0.7 : 1);
+        sprite(
+          cellsImage,
+          KIT_CELLS.spark.x + 32 * k,
+          KIT_CELLS.spark.y,
+          32,
+          32,
+          x,
+          y,
+          chipD[c] * 1.9,
+        );
+      }
     }
   };
 
@@ -2906,7 +3107,10 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
 
   // A tile's flight (N4, N5): lane from the gate, orbit to aim, dive and
   // unfold. Writes the pose's PX, PY (figure px), SIZE, FRAME, UNFOLD (-1:
-  // none) and ALPHA.
+  // none) and ALPHA. Strings (LIFE.string): a plate's tiles fly in single
+  // file behind their pathfinder (ARG_LX, ARG_LY: its seated centre),
+  // spiral in on a shared lock-on point near it, hang there a beat with a
+  // searching twitch while they turn face-on, then dart into their cells.
   const tilePose = (p: number, i: number, helm: boolean) => {
     const u = pose[ARG_U];
     const Cx = pose[ARG_CX];
@@ -2917,18 +3121,32 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
     const qy = nx;
     const hx = Cx + nx * 10;
     const hy = Cy + ny * 10;
+    // The string's lock-on point: its pathfinder's aim, within reach of ours.
+    let ax = 0;
+    let ay = 0;
+    if (!helm) {
+      ax = pose[ARG_LX] - Cx;
+      ay = pose[ARG_LY] - Cy;
+      const al = (ax * ax + ay * ay) ** 0.5;
+      if (al > LIFE.string.reach) {
+        ax *= LIFE.string.reach / al;
+        ay *= LIFE.string.reach / al;
+      }
+    }
+    const kx = hx + ax;
+    const ky = hy + ay;
     const r0 = L.r0[i];
     const psi0 = L.psi0[i];
     const spin = (FRAMES * L.spin[i] * FLIGHT) / 1000;
-    let size = L.size[i];
+    // A pathfinder is a size up (and white, with its comet: the layout).
+    let size = L.tflags[i] & 8 ? 1.25 * L.size[i] : L.size[i];
     let frame = L.f0[i];
     let unfolded = -1;
     // (Conditionals, not Math.min: V8's mid tier boxes its result.)
     let alpha = u * 8 < 1 ? u * 8 : 1;
-    const aim = helm ? 0.7 : 0.8;
-    if (helm && u < aim) {
+    if (helm && u < 0.7) {
       // N10: the helmet's tiles leave the crown spiralling inward.
-      const v = u / aim;
+      const v = u / 0.7;
       const iv = 1 - (v < 0 ? 0 : v);
       const e = 1 - iv * iv * iv;
       const a = psi0 + 3 * Math.PI * v;
@@ -2938,14 +3156,14 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
       pose[PX] = cx + R * Math.cos(a);
       pose[PY] = cy + CROWN_SQUASH * R * Math.sin(a);
       frame += spin * 2 * u;
-    } else if (u < 0.55) {
-      const q = u < 0 ? 0 : u / 0.55;
+    } else if (!helm && u < 0.5) {
+      const q = u < 0 ? 0 : u / 0.5;
       const v = q * q * (3 - 2 * q);
       const w = 1 - v;
       const p0x = L.gateX[p] + 6 * L.jx[i];
       const p0y = L.gateY[p] + 6 * L.jy[i];
-      const ex = hx + r0 * (Math.cos(psi0) * qx + 0.45 * Math.sin(psi0) * nx);
-      const ey = hy + r0 * (Math.cos(psi0) * qy + 0.45 * Math.sin(psi0) * ny);
+      const ex = kx + r0 * (Math.cos(psi0) * qx + 0.45 * Math.sin(psi0) * nx);
+      const ey = ky + r0 * (Math.cos(psi0) * qy + 0.45 * Math.sin(psi0) * ny);
       const bow = L.bow[i] * 0.05 * H;
       const p1x = p0x + (ex - p0x) * 0.35 + qx * bow;
       const p1y = p0y + (ey - p0y) * 0.35 + qy * bow;
@@ -2954,24 +3172,43 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
       pose[PX] = w * w * w * p0x + 3 * w * w * v * p1x + 3 * w * v * v * p2x + v * v * v * ex;
       pose[PY] = w * w * w * p0y + 3 * w * w * v * p1y + 3 * w * v * v * p2y + v * v * v * ey;
       frame += spin * 3 * u;
-    } else if (u < 0.8) {
-      const w = (u - 0.55) / 0.25;
+    } else if (!helm && u < 0.72) {
+      // Spiralling in on the lock-on point.
+      const w = (u - 0.5) / 0.22;
       const psi = psi0 + 1.5 * Math.PI * w;
       const r = r0 * (1 - w) ** 1.5;
-      pose[PX] = hx + r * (Math.cos(psi) * qx + 0.45 * Math.sin(psi) * nx);
-      pose[PY] = hy + r * (Math.cos(psi) * qy + 0.45 * Math.sin(psi) * ny);
-      size *= 1 + 0.25 * Math.sin(psi);
-      frame += spin * (3 * 0.55 + 1.5 * (u - 0.55));
-    } else {
-      const w = (u - aim) / (1 - aim);
-      const w4 = w * w * w * w;
-      pose[PX] = hx + (Cx - hx) * w4;
-      pose[PY] = hy + (Cy - hy) * w4;
-      // The frame eases to the face-on lock pose by the shortest way.
-      const raw = frame + spin * (3 * 0.55 + 1.5 * 0.25 + (u - 0.8));
+      pose[PX] = kx + r * (Math.cos(psi) * qx + 0.45 * Math.sin(psi) * nx);
+      pose[PY] = ky + r * (Math.cos(psi) * qy + 0.45 * Math.sin(psi) * ny);
+      size *= 1 + 0.25 * Math.sin(psi) * (1 - w);
+      frame += spin * (3 * 0.5 + 1.5 * (u - 0.5));
+    } else if (!helm && u < 0.8) {
+      // Locked on: it hangs at the point, twitching as it searches, and
+      // turns its lit face to the viewer (a flash) before it dives.
+      const v = (u - 0.72) / 0.08;
+      const twitch = 1.6 * Math.sin(5 * Math.PI * v) * (1 - v);
+      pose[PX] = kx + qx * twitch;
+      pose[PY] = ky + qy * twitch;
+      size *= 1 + 0.18 * Math.sin(Math.PI * v);
+      const raw = frame + spin * (3 * 0.5 + 1.5 * 0.22);
       let d = (raw % FRAMES) + (raw < 0 ? FRAMES : 0);
       if (d > FRAMES / 2) d -= FRAMES;
-      frame = d * (1 - w) * (1 - w);
+      const turn = 1 - smooth(v * 1.4);
+      frame = d * turn;
+    } else {
+      // The dive: from the lock-on point (the helmet's: its own aim) to its
+      // cell, darting in faster as it goes.
+      const aim = helm ? 0.7 : 0.8;
+      const w = (u - aim) / (1 - aim);
+      const e = helm ? w * w * w * w : w * w * w;
+      pose[PX] = kx + (Cx - kx) * e;
+      pose[PY] = ky + (Cy - ky) * e;
+      if (helm) {
+        // The frame eases to the face-on lock pose by the shortest way.
+        const raw = frame + spin * (2 * 0.7 + (u - 0.7));
+        let d = (raw % FRAMES) + (raw < 0 ? FRAMES : 0);
+        if (d > FRAMES / 2) d -= FRAMES;
+        frame = d * (1 - w) * (1 - w);
+      } else frame = 0;
       if (w >= 0.3) {
         unfolded = Math.min(6, Math.floor((w - 0.3) * 10));
         const full = T * (32 / 28) * (0.6 + 0.4 * L.cov[i]);
@@ -3070,6 +3307,12 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
       if (u <= 0) continue;
       const Cx = a00 * L.cx[i] + a01 * L.cy[i] + ex;
       const Cy = a10 * L.cx[i] + a11 * L.cy[i] + ey;
+      if (u < 1) {
+        // Its string's pathfinder, on the same jig.
+        const lead = L.tLead[i];
+        pose[ARG_LX] = a00 * L.cx[lead] + a01 * L.cy[lead] + ex;
+        pose[ARG_LY] = a10 * L.cx[lead] + a11 * L.cy[lead] + ey;
+      }
       if (u >= 1) {
         // N6: lock recoil, sparks and the lattice link.
         if (since >= SW.link) continue;
@@ -3741,6 +3984,8 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
         const helm = L.kind[p] === 3;
         pose[ARG_CX] = L.cx[first];
         pose[ARG_CY] = L.cy[first];
+        pose[ARG_LX] = L.cx[L.tLead[first]];
+        pose[ARG_LY] = L.cy[L.tLead[first]];
         for (let u = 0.05; u < 1; u += 0.1) {
           pose[ARG_U] = u;
           tilePose(p, first, helm);

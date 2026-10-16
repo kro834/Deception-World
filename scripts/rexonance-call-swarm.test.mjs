@@ -562,6 +562,90 @@ test("the tassets form in place, and every plate is at rest from its fit on", as
   }
 });
 
+// Owner (2026-10-16): 「更にナノマシンの挙動をブラッシュアップして。」 — squads
+// that hop lanes behind a white leader, the core's heartbeat breathing the
+// rings, seat ripples, tile strings behind white pathfinders that lock on
+// and dart in, and chips banked to their orbit with a glint at the near
+// apex. All closed-form in the clock: a frame drawn again is the same frame.
+test("the swarm's life: squads, strings, and frames that depend on the clock alone", async () => {
+  const life = calls.REXONANCE_SUIT_SWARM_LIFE;
+  assert.deepEqual(JSON.parse(JSON.stringify(life)), {
+    squad: { size: 5, gap: 0.075, hop: [900, 1500], lag: 38 },
+    heartbeat: { from: 640, every: 330, lag: 260, breath: 0.035, hover: 1.6 },
+    ripple: { ms: 260, speed: 1.1, width: 24, push: 13 },
+    string: { gap: 12, reach: 60 },
+    glint: { most: 40 },
+  });
+  // The heartbeat starts after RIDER！'s last pump wave and stops at the seal.
+  assert.ok(life.heartbeat.from > calls.REXONANCE_SUIT_SWARM.waves.at(-1));
+  const { plan, extras } = await extrasRuntime({ touch: false });
+  const all = plan.plates();
+  const L = extras.rexonanceNaniteLayout();
+  // Squads: a leader (white) and up to four followers on its ring and lane.
+  let leaders = 0;
+  for (let c = 0; c < L.ring.length; c += 1) {
+    const lead = L.squad[c];
+    assert.equal(L.ring[lead], L.ring[c]);
+    assert.equal(L.rank[lead], 0);
+    assert.ok(L.rank[c] < life.squad.size);
+    if (L.rank[c] === 0) {
+      leaders += 1;
+      assert.equal(L.chipTone[c], 2, "a squad's leader is white");
+      assert.ok(L.hopT[c] >= life.squad.hop[0] && L.hopT[c] <= life.squad.hop[1]);
+    } else assert.equal(L.lane[c], L.lane[lead]);
+  }
+  assert.ok(leaders >= L.ring.length / life.squad.size, `${leaders} squads`);
+  // Strings: each tile follows a pathfinder of its own plate that lands first.
+  all.forEach((plate, p) => {
+    for (let i = L.tileFirst[p]; i < L.tileFirst[p + 1]; i += 1) {
+      const lead = L.tLead[i];
+      assert.ok(lead >= L.tileFirst[p] && lead < L.tileFirst[p + 1], plate.piece.id);
+      assert.ok(L.land[lead] <= L.land[i]);
+      assert.equal(L.tRank[lead], 0);
+      assert.ok(L.tflags[lead] & 8);
+    }
+  });
+  // A frame is a function of t alone: drawn after another time, or again,
+  // it issues exactly the same draws.
+  const frame = (ex, log, t) => {
+    log.length = 0;
+    ex.before(t);
+    for (let p = 0; p < all.length; p += 1) {
+      const plate = all[p];
+      if (t < plate.spawn || t >= plate.last) continue;
+      if (t < plate.fit) ex.forming(p, t);
+      else {
+        if (t < plate.to) {
+          ex.seat(p, t);
+          ex.unseat();
+        }
+        ex.conduit(p, t);
+      }
+    }
+    ex.after(t);
+    return JSON.stringify(log);
+  };
+  const { context } = recorder();
+  const log = [];
+  context.drawImage = (image, ...args) => log.push(image.kind, ...args.map((v) => Math.round(v)));
+  const ex = extras.createSuitExtras({
+    flight: context,
+    s: 1.5,
+    ox: 34,
+    oy: 31,
+    all,
+    gold: plan.cells(),
+    source: { kind: "work" },
+    sheet: { kind: "motes" },
+  });
+  for (const t of [700, 905, 1250, 1720]) {
+    const first = frame(ex, log, t);
+    frame(ex, log, t + 333);
+    frame(ex, log, t - 120);
+    assert.equal(frame(ex, log, t), first, `${t}: the same frame`);
+  }
+});
+
 test("the layout: every chip has a ring, the cocoon drains bottom-up, every tile a pose", async () => {
   const { plan, extras } = await extrasRuntime({ touch: false });
   const all = plan.plates();
