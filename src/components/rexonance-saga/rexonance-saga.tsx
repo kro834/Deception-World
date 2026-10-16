@@ -37,7 +37,6 @@ import {
 import { rexonanceImage } from "@/lib/rexonance-images";
 import { REXONANCE_FORM_FIGURES, REXONANCE_FORM_PAD } from "@/lib/rexonance-forms";
 import { REXONANCE_SUIT_BASE, REXONANCE_SUIT_ORNAMENTS } from "@/lib/rexonance-suit-base";
-import { REXONANCE_NANITES } from "@/lib/rexonance-nanites";
 import {
   FORM_CHANGE_MS,
   FORM_LANDMARKS,
@@ -455,8 +454,9 @@ const SUIT_UP: RexonanceAssemblyConfig = {
   },
   // The nanite kit (owner, 2026-10-16: 超大幅な改善): Blender hex chips,
   // comets, clamps, latches, scan planes, droplets, shock rings, the gold
-  // guideway conduit, and each plate's real outline and gold box.
-  nanites: REXONANCE_NANITES,
+  // guideway conduit, and each plate's real outline and gold box — loaded
+  // with the scene's pictures (round 3), never by the still tiers.
+  nanites: () => import("@/lib/rexonance-nanites").then((module) => module.REXONANCE_NANITES),
 };
 // The entry overlay follows its established five-beat grouping; repeated
 // chant text still splits into individual visual units within its existing beat.

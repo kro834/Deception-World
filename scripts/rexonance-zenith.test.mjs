@@ -944,7 +944,9 @@ test("touch art draws are bounded; settled endpoints and offscreen scenes do not
     t.calls.length = 0;
     t.scrollTo(progress);
     const art = t.calls.filter((c) => c[0] === "drawImage" && c[1] === 9 && c[2] === 1);
-    assert.ok(art.length <= ASSEMBLY_TOUCH_ART_BUDGET + 1, `${progress}: ${art.length}`); // plus undersuit scan
+    // (Round 3: the undersuit's draw is reserved inside the budget, so a
+    // touch frame stays within 64 in all — review: it was stated as 65.)
+    assert.ok(art.length <= ASSEMBLY_TOUCH_ART_BUDGET, `${progress}: ${art.length}`);
   }
   t.scrollTo(1);
   t.flush();
@@ -1444,7 +1446,9 @@ test("touch with the nanite kit keeps its 64 art draws and at most 16 nanite spr
       t.drawCalls.length = 0;
       t.scrollTo(progress);
       const art = t.calls.filter((c) => c[0] === "drawImage" && c[1] === 9 && c[2] === 1);
-      assert.ok(art.length <= ASSEMBLY_TOUCH_ART_BUDGET + 1, `${progress}: ${art.length}`); // plus undersuit scan
+      // (Round 3: the undersuit's draw is reserved inside the budget, so a
+      // touch frame stays within 64 in all — review: it was stated as 65.)
+      assert.ok(art.length <= ASSEMBLY_TOUCH_ART_BUDGET, `${progress}: ${art.length}`);
       const kit = t.drawCalls.filter(
         (call) => call.target === 1 && String(call.source).startsWith(REXONANCE_NANITE_DIR),
       );
@@ -1472,12 +1476,24 @@ test("the swarm's draw passes allocate nothing", () => {
   );
   // No per-sprite transform: only plates (the jig) and rings set one.
   assert.equal(passes.match(/\.setTransform\(/g)?.length, 3);
+  // (Round 3, review: seamArc's per-call closures and an array destructuring
+  // slipped past the pin above.) Arrow functions only at the top level of
+  // the pass region, never made inside a pass; no array destructuring.
+  const nested = passes
+    .split("\n")
+    .filter((line) => /=>/.test(line) && !/^ {2}\S/.test(line) && !/^\s*\/\//.test(line));
+  assert.deepEqual(nested, [], "no closures made inside the draw passes");
+  assert.doesNotMatch(passes, /\b(?:const|let) \[[^\]]*\] =/, "no array destructuring in the draw passes");
 });
 
 test("the nanite stage plan: paint order, the shared cells, and timings before .9", async () => {
-  const { planAssemblyNanites } = await import("../src/lib/rexonance-assembly-nanites.js");
+  // (Round 3: the swarm's timings live with the swarm, which the scene now
+  // loads with its pictures.)
+  const { planAssemblyNanites, ASSEMBLY_NANITES } = await import(
+    "../src/lib/rexonance-assembly-nanites.js"
+  );
   const { REXONANCE_NANITES } = await import("../src/lib/rexonance-nanites.ts");
-  const { planAssemblyGold, ASSEMBLY_NANITES } = await import("../src/lib/rexonance-resonance.js");
+  const { planAssemblyGold } = await import("../src/lib/rexonance-resonance.js");
   const { REXONANCE_SUIT_GOLD_CELL, REXONANCE_SUIT_GOLD_CELLS } =
     await import("../src/lib/rexonance-suit-gold.ts");
   const { REXONANCE_SUIT_DRIVER } = await import("../src/lib/rexonance-calls.ts");
@@ -1495,14 +1511,7 @@ test("the nanite stage plan: paint order, the shared cells, and timings before .
   };
   const plan = planAssembly(options);
   const before = JSON.stringify(plan.tiles.map(({ m, t0, t1 }) => [m, t0, t1]));
-  const gold = planAssemblyGold({
-    pieces,
-    gold: { atlas: "", cell: REXONANCE_SUIT_GOLD_CELL, cells: REXONANCE_SUIT_GOLD_CELLS },
-    landed: new Map(),
-    tiles: undefined,
-  }) ?? null;
-  void gold;
-  const goldPlan = (await import("../src/lib/rexonance-resonance.js")).planAssemblyGold({
+  const goldPlan = planAssemblyGold({
     pieces,
     gold: { atlas: "", cell: REXONANCE_SUIT_GOLD_CELL, cells: REXONANCE_SUIT_GOLD_CELLS },
     landed: (() => {

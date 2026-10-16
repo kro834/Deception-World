@@ -893,13 +893,15 @@ html[data-family="special"]
    runway (named view timeline). Gated. The call's chips and the parts
    switch on their beat (the scroll is their timing; a transition on
    each of twenty cells started a compositor animation per beat and
-   re-layered the frame); only the stamp lands.
+   re-layered the frame); only the stamp lands. Live only (round 3,
+   review: the switch from the finished still into loading faded the
+   HIGH stamp and aura out over 300 ms after a jump; it is now instant).
    ================================================================ */
 @media (prefers-reduced-motion: no-preference) {
   html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
     body
     .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])
-    > .rzn-suitup[data-rzn-state]
+    > .rzn-suitup[data-rzn-state="live"]
     .rzn-stamp {
     transition:
       opacity 160ms ease-out,
@@ -2822,7 +2824,7 @@ html[data-family="special"]
   html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
     body
     .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])
-    > .rzn-suitup[data-rzn-state]
+    > .rzn-suitup[data-rzn-state="live"]
     :is(.rzn-light, .rzn-aura, .rzn-crown, .rzn-lines, .rzn-readout, .rzn-nanites, .rzn-parts) {
     transition:
       opacity 240ms ease-out,

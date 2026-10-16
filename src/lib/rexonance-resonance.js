@@ -7,17 +7,6 @@ import {
   warpPicture,
 } from "./rexonance-overwrite.js";
 import { createSplitLightsJob } from "./rexonance-unlit.js";
-import {
-  ASSEMBLY_COMET_BUDGET,
-  ASSEMBLY_NANITES,
-  ASSEMBLY_SPRITE_BUDGET,
-  ASSEMBLY_TOUCH_HERO_BUDGET,
-  assemblyNanitePlanSteps,
-  createAssemblyConduitJob,
-  createAssemblyLayerJob,
-  createAssemblyNanites,
-  naniteLatticeSteps,
-} from "./rexonance-assembly-nanites.js";
 import { releasePendingImage } from "./release-pending-images.js";
 /** RESONANCE (rx11) for /rexonance-saga: the hits a stylesheet cannot time.
  *
@@ -548,13 +537,9 @@ const GOLD_HEAT = [
   ["rgb(255 253 243)", 0.42],
 ];
 export const ASSEMBLY_TOUCH_ART_BUDGET = 64;
-// The nanite swarm's timings and budgets (owner, 2026-10-16: 超大幅な改善).
-export {
-  ASSEMBLY_NANITES,
-  ASSEMBLY_SPRITE_BUDGET,
-  ASSEMBLY_COMET_BUDGET,
-  ASSEMBLY_TOUCH_HERO_BUDGET,
-};
+// (The nanite swarm's timings and budgets live with the swarm, in
+// rexonance-assembly-nanites.js, which the scene loads with its pictures:
+// round 3, the still tiers never download it.)
 const PIXEL_BUDGET = 2_600_000;
 const TONES = [
   [121, 232, 255],
@@ -1343,6 +1328,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   const html = document.documentElement;
   const canvas = runway.querySelector("canvas.rzn-canvas");
   const frameBox = runway.querySelector(".rzn-frame");
+  const under = runway.querySelector(".rzn-under");
   if (!canvas || !frameBox || typeof canvas.getContext !== "function") return () => {};
   const reduced = environment.matchMedia("(prefers-reduced-motion: reduce)");
   const forcedColors = environment.matchMedia("(forced-colors: active)");
@@ -1398,6 +1384,11 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   let nano = null;
   let swarm = null;
   let naniteSheets = [];
+  // The swarm's module and kit, loaded with the pictures (round 3: the still
+  // tiers — reduced motion, economy, Save-Data — never mount the scene, so
+  // they never download them). `config.nanites` is the kit or its loader.
+  let lib = null;
+  let kit = null;
   let driver = null;
   let lights = null;
   let settled = null;
@@ -1448,6 +1439,18 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     });
   const load = () => {
     if (loading) return loading;
+    loading = Promise.all([
+      import("./rexonance-assembly-nanites.js"),
+      typeof config.nanites === "function" ? config.nanites() : (config.nanites ?? null),
+    ]).then(([module, nanites]) => {
+      if (disposed) return null;
+      lib = module;
+      kit = nanites ?? null;
+      return pictures();
+    });
+    return loading;
+  };
+  const pictures = () => {
     const decode = (src) =>
       picture(src)
         .then((image) =>
@@ -1470,9 +1473,8 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         );
     // The nanite kit (owner, 2026-10-16): each sheet optional; touch
     // screens draw no comets.
-    const kit = config.nanites;
     const optional = (src) => (src ? decode(src).catch(() => null) : null);
-    loading = Promise.all([
+    return Promise.all([
       decode(config.figure),
       decode(config.undersuit),
       config.gold?.atlas ? decode(config.gold.atlas).catch(() => null) : null,
@@ -1493,7 +1495,6 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       images = { figure, undersuit, gold, atlas, base, cells, comets, fx, guide };
       return images;
     });
-    return loading;
   };
 
   // One texel per tile: the figure drawn down to the grid gives each
@@ -1877,17 +1878,22 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         const nextPixels = facePixels(config.glow, config.visor);
         const nextSettled = await makeSheet("settled-sheet");
         if (!nextSettled || !active()) return;
-        const nextLights = await splitLightsIdle(images.figure, "figure-lights", { motes: true });
+        // (No mote layers: the scene no longer reads them — round 3, memory.)
+        const nextLights = await splitLightsIdle(images.figure, "figure-lights");
         if (!active()) return;
         // The base figure's own light split (its lights held back too, its
         // mote layer for the rich scene) and, below, its raw-gold sheet.
         let nextBaseLights = null;
         let nextBaseRaw = null;
         if (baseSample && images.base) {
-          nextBaseLights = await splitLightsIdle(images.base, "base-lights", {
-            motes: !coarse.matches,
-          });
+          nextBaseLights = await splitLightsIdle(images.base, "base-lights");
           if (!active()) return;
+          // The base figure's lights are never drawn (the seal lays the full
+          // figure's): released at once (round 3, memory).
+          if (nextBaseLights?.lights) {
+            nextBaseLights.lights.width = nextBaseLights.lights.height = 0;
+            resources.delete(nextBaseLights.lights);
+          }
         }
 
         const preset = config.pieces.filter((piece) => piece.preset).reverse();
@@ -1987,25 +1993,6 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
           }
         }
 
-        // The gold's frame (owner, 2026-10-16), traced from the gold art in
-        // idle rows: its lit face and its depth; the scene plays without it
-        // where pixels cannot be read.
-        let nextFrame = null;
-        let nextFrameDeep = null;
-        if (nextGoldArt && active()) {
-          nextFrame = await makeSheet("gold-frame-sheet");
-          if (!nextFrame || !active()) return;
-          nextFrameDeep = await makeSheet("gold-frame-deep-sheet");
-          if (!nextFrameDeep || !active()) return;
-          if (!(await traceGoldFrame(nextGoldArt, nextFrame, nextFrameDeep, "gold-frame"))) {
-            for (const sheet of [nextFrame, nextFrameDeep]) {
-              sheet.width = sheet.height = 0;
-              resources.delete(sheet);
-            }
-            nextFrame = nextFrameDeep = null;
-          }
-        }
-
         if (!active()) return;
         // The nanite swarm (owner, 2026-10-16: 超大幅な改善). Raw nanite
         // metal (and the art's silhouette) for the armour and the
@@ -2015,7 +2002,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
           pixelJobIdle(
             "nanite-metal",
             () =>
-              createAssemblyLayerJob({
+              lib.createAssemblyLayerJob({
                 source,
                 width: W,
                 height: H,
@@ -2032,18 +2019,24 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         if (!active()) return;
         const metalFigure = await metalJob(nextRaw || nextLights?.unlit || images.figure);
         if (!active()) return;
+        // With the base's raw sheet made, its unlit copy is no longer read.
+        if (nextBaseRaw && nextBaseLights?.unlit) {
+          nextBaseLights.unlit.width = nextBaseLights.unlit.height = 0;
+          resources.delete(nextBaseLights.unlit);
+          nextBaseLights = { ...nextBaseLights, unlit: null, lights: null };
+        }
         // The stage plan: plates, seams, rings, phases, paint order.
         mark("nanite-seams");
         const nextNano = await buildSteps(
-          assemblyNanitePlanSteps({
+          lib.assemblyNanitePlanSteps({
             plan: nextPlan,
             pieces: config.pieces,
             size: config.size,
             core: config.core,
             visor: config.visor,
             gold: nextGold,
-            seams: config.nanites?.seams,
-            goldBoxes: config.nanites?.goldBoxes,
+            seams: kit?.seams,
+            goldBoxes: kit?.goldBoxes,
             goldCell: config.gold?.cell ?? 4,
             coarse: coarse.matches,
           }),
@@ -2061,22 +2054,23 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
           .sort((a, b) => b.buildStart - a.buildStart)
           // (The helmet's conduit fades over 10 px where its gold runs on
           // into the next plate, never a straight edge across the brow.)
-          .map(({ x, y, w, h, ax, ay, ornament, helm }) => ({
-            x,
-            y,
-            w,
-            h,
-            ax,
-            ay,
-            layer: ornament ? 1 : 0,
-            fade: helm ? 10 : 5,
+          .map((plate) => ({
+            x: plate.x,
+            y: plate.y,
+            w: plate.w,
+            h: plate.h,
+            ax: plate.ax,
+            ay: plate.ay,
+            layer: plate.ornament ? 1 : 0,
+            fade: plate.helm ? 10 : 5,
+            plate,
           }));
         const conduit =
           images.guide && images.gold && nextGold?.count && conduitPieces.length
             ? await pixelJobIdle(
                 "nanite-conduit",
                 () =>
-                  createAssemblyConduitJob({
+                  lib.createAssemblyConduitJob({
                     guide: images.guide,
                     gold: images.gold,
                     art: images.figure,
@@ -2093,13 +2087,40 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
             : null;
         if (!active()) return;
         if (conduit?.figFace) for (const sheet of conduit.figFace) resources.add(sheet);
+        // The conduit's sheets are packed tighter than the gold atlas (round
+        // 3, memory): each plate's place in them.
+        if (conduit?.places)
+          conduitPieces.forEach(({ plate }, k) => {
+            plate.packX = conduit.places[2 * k];
+            plate.packY = conduit.places[2 * k + 1];
+          });
+        // The gold's frame (owner, 2026-10-16), traced from the gold art in
+        // idle rows: its lit face and its depth — now only where the conduit
+        // could not be made (round 3, memory: unread beside it); the scene
+        // plays without it where pixels cannot be read.
+        let nextFrame = null;
+        let nextFrameDeep = null;
+        if (!conduit?.face && nextGoldArt && active()) {
+          nextFrame = await makeSheet("gold-frame-sheet");
+          if (!nextFrame || !active()) return;
+          nextFrameDeep = await makeSheet("gold-frame-deep-sheet");
+          if (!nextFrameDeep || !active()) return;
+          if (!(await traceGoldFrame(nextGoldArt, nextFrame, nextFrameDeep, "gold-frame"))) {
+            for (const sheet of [nextFrame, nextFrameDeep]) {
+              sheet.width = sheet.height = 0;
+              resources.delete(sheet);
+            }
+            nextFrame = nextFrameDeep = null;
+          }
+        }
+        if (!active()) return;
         // Molten gold, white-hot to amber, from the gold art — only where the
         // finished art shows gold (the conduit's mask).
         const moltenLayer = nextGoldArt
           ? await pixelJobIdle(
               "nanite-molten",
               () =>
-                createAssemblyLayerJob({
+                lib.createAssemblyLayerJob({
                   source: nextGoldArt,
                   width: W,
                   height: H,
@@ -2119,26 +2140,25 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         const nextLattice = await makeSheet("nanite-lattice");
         if (!nextLattice || !active()) return;
         mark("nanite-lattice");
-        await buildSteps(naniteLatticeSteps(nextLattice.getContext("2d"), nextNano, tile));
+        await buildSteps(lib.naniteLatticeSteps(nextLattice.getContext("2d"), nextNano, tile));
         if (!active()) return;
         mark("buffer-nanites");
         const artFigure = nextRaw || nextLights?.unlit || images.figure;
         const artBase = (images.base && (nextBaseRaw || nextBaseLights?.unlit || images.base)) || artFigure;
         const nextSwarm = await idleTask(() =>
           active()
-            ? createAssemblyNanites({
+            ? lib.createAssemblyNanites({
                 nano: nextNano,
                 size: config.size,
                 core: config.core,
                 visor: config.visor,
                 coarse: coarse.matches,
                 sprites: { cells: images.cells, comets: images.comets, fx: images.fx },
-                kit: config.nanites,
+                kit,
                 layers: {
                   metal: [metalBase?.metal ?? null, metalFigure?.metal ?? null],
                   silhouette: [metalBase?.silhouette ?? null, metalFigure?.silhouette ?? null],
                   art: [artBase, artFigure],
-                  motes: [nextBaseLights?.motes ?? null, nextLights?.motes ?? null],
                   holo: conduit?.holo ?? null,
                   walls: conduit?.walls ?? null,
                   face: conduit?.face ?? null,
@@ -3313,7 +3333,13 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       (entries) => {
         if (disposed) return;
         warm = entries.some((entry) => entry.isIntersecting);
-        if (warm) wake();
+        if (warm) {
+          // The undersuit that stands in while the scene prepares is fetched
+          // and decoded now, not when it is shown (round 3, review: a cold
+          // jump showed an empty stage for 50–90 ms). Nothing visible changes.
+          if (under && motionAllowed() && under.loading !== "eager") under.loading = "eager";
+          wake();
+        }
       },
       { rootMargin: `${Math.round((environment.innerHeight || 900) * 3.5)}px 0px` },
     );

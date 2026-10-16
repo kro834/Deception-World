@@ -141,28 +141,7 @@ export interface RexonanceAssemblyNanites {
   readonly goldBoxes: Readonly<Record<string, readonly [number, number, number, number]>>;
 }
 
-export const ASSEMBLY_NANITES: {
-  readonly lead: number;
-  readonly sweep: number;
-  readonly seat: number;
-  readonly overshoot: number;
-  readonly seam: number;
-  readonly seamGlow: number;
-  readonly shock: number;
-  readonly paint: number;
-  readonly lacquer: number;
-  readonly print: number;
-  readonly recoil: number;
-  readonly spark: number;
-  readonly link: number;
-  readonly release: number;
-  readonly clampIn: number;
-  readonly crown: readonly [number, number];
-  readonly implode: readonly [number, number];
-};
-export const ASSEMBLY_SPRITE_BUDGET: number;
-export const ASSEMBLY_COMET_BUDGET: number;
-export const ASSEMBLY_TOUCH_HERO_BUDGET: number;
+// (The swarm's timings and budgets: rexonance-assembly-nanites.js.)
 
 export interface RexonanceAssemblyConfig {
   figure: string;
@@ -183,8 +162,10 @@ export interface RexonanceAssemblyConfig {
   ornaments?: readonly string[];
   /** The nanite kit (owner, 2026-10-16): the swarm's sprites, the
    * guideway conduit, the plates' seams and gold boxes. Optional: without
-   * it the swarm plays as two-tone rect chips over the traced gold frame. */
-  nanites?: RexonanceAssemblyNanites;
+   * it the swarm plays as two-tone rect chips over the traced gold frame.
+   * Either the kit or its loader (round 3: loaded with the pictures, so the
+   * still tiers never download it). */
+  nanites?: RexonanceAssemblyNanites | (() => Promise<RexonanceAssemblyNanites | null>);
   /** The MAX and ULTRA figures (same frame): the suit-up ends on the form
    * named by the runway's data-form. */
   forms?: {

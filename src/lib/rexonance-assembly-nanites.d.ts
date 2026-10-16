@@ -78,6 +78,9 @@ export interface NanitePlate {
   h: number;
   ax: number;
   ay: number;
+  /** Its place in the conduit's packed sheets (the face, holo and walls). */
+  packX: number;
+  packY: number;
   seatX: number;
   seatY: number;
   nx: number;
@@ -367,6 +370,8 @@ export interface AssemblyConduitResult {
   mask: HTMLCanvasElement;
   figFace: [HTMLCanvasElement, HTMLCanvasElement] | null;
   vis: Uint8Array;
+  /** Each plate's place [x, y] in the packed face, holo and walls. */
+  places: Int32Array;
 }
 export interface AssemblyConduitJob {
   step(until: number, idleDeadline?: { timeRemaining(): number } | null): boolean;

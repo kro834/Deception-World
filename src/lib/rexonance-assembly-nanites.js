@@ -462,6 +462,10 @@ export function* assemblyNanitePlanSteps({
       h: piece.h,
       ax: piece.ax ?? 0,
       ay: piece.ay ?? 0,
+      // Its place in the conduit's packed sheets (set by the engine from the
+      // conduit job; the gold atlas's own place until then).
+      packX: piece.ax ?? 0,
+      packY: piece.ay ?? 0,
       atlas: piece.ax !== undefined && piece.ay !== undefined,
       seatX,
       seatY,
@@ -1608,9 +1612,45 @@ export function createAssemblyConduitJob({
     const scratch = make(maxW, maxH);
     const uc = scratch.getContext("2d", { willReadFrequently: true });
     if (!uc) throw new Error("unavailable conduit context");
-    const outFace = make(AW, AH);
-    const outHolo = holo ? make(AW, AH) : null;
-    const outWalls = walls ? make(AW, AH) : null;
+    // The face, hologram and walls are packed tighter than the gold atlas
+    // (round 3, memory: the atlas is a third empty): plates by height on
+    // shelves, 2 px apart, at whichever width (in 16 px steps) holds least.
+    const places = new Int32Array(pieces.length * 2);
+    let PW = AW;
+    let PH = AH;
+    {
+      const order = pieces.map((_, i) => i).sort((a, b) => pieces[b].h - pieces[a].h || a - b);
+      let best = AW * AH;
+      for (let width = Math.ceil(maxW) + 2; width <= AW; width += 16) {
+        const at = new Int32Array(pieces.length * 2);
+        let x = 0;
+        let y = 0;
+        let shelf = 0;
+        for (const i of order) {
+          const w = Math.ceil(pieces[i].w);
+          const h = Math.ceil(pieces[i].h);
+          if (x && x + w > width) {
+            x = 0;
+            y += shelf + 2;
+            shelf = 0;
+          }
+          at[2 * i] = x;
+          at[2 * i + 1] = y;
+          x += w + 2;
+          if (h > shelf) shelf = h;
+        }
+        const height = y + shelf;
+        if (width * height < best) {
+          best = width * height;
+          PW = width;
+          PH = height;
+          places.set(at);
+        }
+      }
+    }
+    const outFace = make(PW, PH);
+    const outHolo = holo ? make(PW, PH) : null;
+    const outWalls = walls ? make(PW, PH) : null;
     const outMask = make(W, H);
     const outFig = figureFace ? [make(W, H), make(W, H)] : null;
     const contexts = [outFace, outHolo, outWalls].map((canvas) => canvas?.getContext("2d") ?? null);
@@ -1674,7 +1714,8 @@ export function createAssemblyConduitJob({
     };
     const finishPiece = () => {
       for (let index = 0; index < 3; index += 1)
-        if (images[index] && contexts[index]) contexts[index].putImageData(images[index], piece.ax, piece.ay);
+        if (images[index] && contexts[index])
+          contexts[index].putImageData(images[index], places[2 * k], places[2 * k + 1]);
       rows = images = piece = null;
       k += 1;
     };
@@ -1737,7 +1778,15 @@ export function createAssemblyConduitJob({
           scratch.width = scratch.height = 0;
           m = tn = hm = d = dc = null;
           maskImage = figImages = null;
-          result = { face: outFace, holo: outHolo, walls: outWalls, mask: outMask, figFace: outFig, vis };
+          result = {
+            face: outFace,
+            holo: outHolo,
+            walls: outWalls,
+            mask: outMask,
+            figFace: outFig,
+            vis,
+            places,
+          };
           return result;
         } catch {
           cancelled = true;
@@ -3191,7 +3240,7 @@ export function createAssemblyNanites({
     const pc = P[p];
     const h = rows < pc.h ? rows : pc.h;
     if (h <= 0) return;
-    if (atlas) ctx.drawImage(sheet, pc.ax, pc.ay, pc.w, h, pc.x + dx, pc.y + dy, pc.w, h);
+    if (atlas) ctx.drawImage(sheet, pc.packX, pc.packY, pc.w, h, pc.x + dx, pc.y + dy, pc.w, h);
     else ctx.drawImage(sheet, pc.x, pc.y, pc.w, h, pc.x + dx, pc.y + dy, pc.w, h);
   };
   // The conduit's sheets: atlas-space per plate (the conduit job), else the
@@ -3808,6 +3857,8 @@ export function createAssemblyNanites({
           ctx.globalAlpha = 0.35;
           plateDraw(ctx, faceSheet, atlas, p, 0, 0, pc.h);
           ctx.restore();
+          // (Touch counts each of its art draws.)
+          if (coarse) conduitDraws += 1;
         }
       }
       conduitDraws += 1;
@@ -3920,7 +3971,8 @@ export function createAssemblyNanites({
             ctx.clip();
             ctx.globalCompositeOperation = "lighter";
             ctx.globalAlpha = 0.32 * fade;
-            ctx.drawImage(sheet, x0, y0, w, h, x0, y0, w, h);
+            // (A five-argument draw: touch's art budget counts nine-argument ones.)
+            ctx.drawImage(sheet, 0, 0, W, H);
           }
           ctx.restore();
         }
@@ -4331,6 +4383,8 @@ export function createAssemblyNanites({
   };
 
   // A stretch [a, b] (arc length, a ≤ b, any sign) of seam loop L as a path.
+  // (Its point index and arc length at a step are written inline: closures
+  // made per call allocate every frame — round 3, review.)
   const seamArc = (ctx, L, a, b) => {
     const start = LSTART[L];
     const count = LCOUNT[L];
@@ -4350,31 +4404,29 @@ export function createAssemblyNanites({
     }
     let k = low;
     let base = 0;
-    const point = (index) => start + (index % count);
-    const cumAt = (index) => (index >= count ? per : SEAMC[start + index]);
     {
-      const c0 = cumAt(k);
-      const c1 = cumAt(k + 1);
+      const c0 = k >= count ? per : SEAMC[start + k];
+      const c1 = k + 1 >= count ? per : SEAMC[start + k + 1];
       const t = c1 > c0 ? (a - c0) / (c1 - c0) : 0;
-      const i0 = point(k);
-      const i1 = point(k + 1);
+      const i0 = start + (k % count);
+      const i1 = start + ((k + 1) % count);
       ctx.moveTo(SEAMX[i0] + (SEAMX[i1] - SEAMX[i0]) * t, SEAMY[i0] + (SEAMY[i1] - SEAMY[i0]) * t);
     }
     for (let guard = 0; guard < count * 2 + 2; guard += 1) {
       const next = k + 1;
-      const cNext = base + cumAt(next);
+      const cNext = base + (next >= count ? per : SEAMC[start + next]);
       if (cNext >= b) {
-        const c0 = base + cumAt(k);
+        const c0 = base + (k >= count ? per : SEAMC[start + k]);
         const t = cNext > c0 ? (b - c0) / (cNext - c0) : 1;
-        const i0 = point(k);
-        const i1 = point(next);
+        const i0 = start + (k % count);
+        const i1 = start + (next % count);
         ctx.lineTo(
           SEAMX[i0] + (SEAMX[i1] - SEAMX[i0]) * t,
           SEAMY[i0] + (SEAMY[i1] - SEAMY[i0]) * t,
         );
         return;
       }
-      ctx.lineTo(SEAMX[point(next)], SEAMY[point(next)]);
+      ctx.lineTo(SEAMX[start + (next % count)], SEAMY[start + (next % count)]);
       k = next;
       if (k >= count) {
         k = 0;
