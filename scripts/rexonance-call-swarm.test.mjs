@@ -108,7 +108,11 @@ test("the call decides once, bleeds only on fine pointers, and keeps the classic
   // Decided at the engine's start; the classic tile path stays the fallback.
   assert.match(nanites, /const rich = isRexonanceNaniteReady\(\);/);
   assert.match(nanites, /if \(rich && !coarse\) box\.dataset\.bleed = "";/);
-  assert.match(nanites, /const extras = rich\s*\?\s*createSuitExtras\(/);
+  // Round 3 (review 30): `let`, so a pass that throws drops the extras mid-call.
+  assert.match(nanites, /let extras = rich\s*\?\s*createSuitExtras\(/);
+  // Round 3 (review 33): reached through their hook, never imported by the call.
+  assert.doesNotMatch(nanites, /^import \{[^}]*\} from "\.\/rexonance-suit-extras";/m);
+  assert.match(nanites, /suitExtrasApi\(\)\?\.create\(env\)/);
   assert.match(nanites, /ready\.current\(Boolean\(extras\)\);/);
   assert.match(
     nanites,
@@ -373,7 +377,7 @@ async function extrasRuntime({ touch }) {
       };
     },
   });
-  const job = (result) => ({ step: () => true, commit: () => result, cancel() {} });
+
   const sources = new Map(
     Object.values({
       cells: kit.REXONANCE_NANITE_CELLS,
@@ -420,23 +424,20 @@ async function extrasRuntime({ touch }) {
       if (name === "@/lib/rexonance-calls") return calls;
       if (name === "@/lib/rexonance-suit") return suit;
       if (name === "@/lib/rexonance-nanites") return kit;
+      // Round 3 (reviews 8/27/9): the call phases its own read-backs and
+      // shares the kit's row formulas (their bytes: rexonance-nanites-unlit).
       if (name === "@/lib/rexonance-unlit.js")
-        return {
-          createNaniteMetalJob: (s, x, y, w, h, d, o) =>
-            job({
-              metal: canvas("metal"),
-              ...(o?.silhouette ? { silhouette: canvas("silhouette") } : {}),
-            }),
-          createNaniteGuideJob: (g, d, o) =>
-            job({ holo: canvas("holo"), ...(o?.walls ? { walls: canvas("walls") } : {}) }),
-          createNaniteMoltenJob: () => job({ molten: canvas("molten") }),
-        };
+        return { naniteMetalRow() {}, naniteGuideRow() {}, naniteMoltenRow() {} };
+
       if (name === "@/lib/rexonance-nanites-warmup")
         return { rexonanceNaniteSource: (url) => sources.get(url) ?? null };
       if (name === "@/lib/rexonance-suit-warmup")
         return { rexonanceSuitSource: (url) => suitSources.get(url) ?? null };
       if (name === "./rexonance-suit-plan")
         return { ...plan, prepareRexonanceSuit: () => Promise.resolve(true) };
+      // Round 3: the extras register with the call's hook once loaded.
+      if (name === "./rexonance-suit-extras-hook") return { registerSuitExtras() {} };
+
       throw new Error(`unexpected module ${name}`);
     },
   });

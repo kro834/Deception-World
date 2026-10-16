@@ -1004,7 +1004,9 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-su
   }
 
   /* The lock cools: the molten mirror fades over the figure's own chrome
-     inside the hit's window (560-1240 ms after the lock). */
+     inside the hit's window (560-1240 ms after the lock). Round 3: a real
+     cooling, not a collapse — the heat holds at first (0.9 at 200 ms), the
+     gold is half gone over the chrome by about 400 ms and set by 680 ms. */
   html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
     body
     .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
@@ -1013,7 +1015,7 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-su
     > [data-rsn-count][data-rsn-state="done"]
     > .rsn-count {
     visibility: visible;
-    animation: rxf-cool 680ms var(--rsn-out) both;
+    animation: rxf-cool 680ms cubic-bezier(0.6, 0, 0.6, 1) both;
   }
 }
 

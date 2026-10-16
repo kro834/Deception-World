@@ -1043,6 +1043,17 @@ async function runCase(browser, profileName, scenario) {
         0,
         "direct Rexonance entry keeps speculative suit work off",
       );
+      // Review 61 (round 3): the brand is a client-side link only once React
+      // has hydrated it; a tap before that is a full-document navigation
+      // (wait for its props, as other verifies do for .side-panel-trigger).
+      await page.waitForFunction(
+        () => {
+          const brand = document.querySelector(".rxs-brand");
+          return Boolean(brand) && Object.keys(brand).some((key) => key.startsWith("__reactProps"));
+        },
+        null,
+        { timeout: 30000 },
+      );
       await tap(".rxs-brand", "rexonance-return-world");
     }
     let world = await worldDisplayed();

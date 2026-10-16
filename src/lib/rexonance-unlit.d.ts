@@ -104,3 +104,35 @@ export function naniteHexHeight(x: number, y: number, pitch?: number): number;
 /** Pure: +1 on a hex's 0.8 px upper-left bevel rim, -1 on its lower-right
  * rim, else 0. */
 export function naniteHexLight(x: number, y: number, pitch?: number): number;
+
+/** One row of createNaniteMetalJob's formula (shared with the call's phased
+ * job): from the region's bytes `a` (w x h) into `m` (and `s`, or null). */
+export function naniteMetalRow(
+  y: number,
+  w: number,
+  h: number,
+  a: Uint8ClampedArray,
+  m: Uint8ClampedArray,
+  s: Uint8ClampedArray | null,
+  pitch?: number,
+): void;
+/** One row of createNaniteGuideJob's formula: hologram `o`, walls `wl`. */
+export function naniteGuideRow(
+  y: number,
+  w: number,
+  a: Uint8ClampedArray,
+  o: Uint8ClampedArray,
+  wl: Uint8ClampedArray | null,
+): void;
+/** The molten ramp's colour at t (0..1, clamped) into out[i..i + 2]. */
+export function naniteMoltenRamp(t: number, out: Uint8ClampedArray, i: number): void;
+/** One row of createNaniteMoltenJob's formula, its ramp shifted `shift`
+ * toward white; alpha the source's times the mask's (when given). */
+export function naniteMoltenRow(
+  y: number,
+  w: number,
+  a: Uint8ClampedArray,
+  mask: Uint8ClampedArray | null,
+  o: Uint8ClampedArray,
+  shift: number,
+): void;
