@@ -57,6 +57,9 @@ export const ASSEMBLY_NANITES = Object.freeze({
   clampIn: 0.01,
   clampHold: 0.004,
   crown: Object.freeze([0.66, 0.68]),
+  // The free chips gather into rings round the reactor (round 3), then
+  // implode into it.
+  gather: Object.freeze([0.8, 0.845]),
   implode: Object.freeze([0.86, 0.9]),
 });
 /** The gold guideway's build (owner, 2026-10-16: built smoothly from the
@@ -132,6 +135,17 @@ const LACQ_A = [0.5, 0.16];
 // At most this many lattice links a plate a frame, and latches at once.
 const LINKS_PER_PLATE = 12;
 const LATCHES_SHOWN = 8;
+// The seal's gathering rings round the reactor (round 3, reviews: the swarm
+// did not visibly spiral into the reactor): radius (figure px), turn rate
+// (radians per unit progress), tilt.
+const GATHER_R = [62, 100, 140];
+const GATHER_W = [(Math.PI * 2 * 2.4) / 0.06, (Math.PI * 2 * 2) / 0.06, (Math.PI * 2 * 1.7) / 0.06];
+const GATHER_COS = [Math.cos(0.2), Math.cos(-0.12), Math.cos(0.28)];
+const GATHER_SIN = [Math.sin(0.2), Math.sin(-0.12), Math.sin(0.28)];
+// The bokeh (round 3, reviews: haze stripes across the figure and the face):
+// only the nearest chips, smaller and fainter, never over the head or a plate
+// being built.
+const BOKEH_Z = 0.95;
 
 /** A stable hash of an index into [0, 1) (no PRNG state). */
 export function naniteHash(index, salt) {
@@ -2232,6 +2246,13 @@ export function createAssemblyNanites({
   const COVER = new Uint8Array(NP);
   const laneCount = new Uint16Array(NP);
   const LINKN = new Uint8Array(NP);
+  // Per frame: the boxes of the plates being built (no bokeh over them) and
+  // the gates whose rivers are running (the cocoon thins round them).
+  const BUILD = new Float32Array(NP * 4);
+  let nBuild = 0;
+  const GATEX = new Float32Array(NP);
+  const GATEY = new Float32Array(NP);
+  let nGates = 0;
   const latchList = new Int32Array(NP);
   const latchKey = new Float64Array(NP);
   const beamI = new Int32Array(NP * 2);
@@ -2374,6 +2395,9 @@ export function createAssemblyNanites({
         x += (visorX + rc * Math.cos(ang) - x) * beta;
         y += (visorY - CROWN_LIFT + 0.35 * rc * Math.sin(ang) - y) * beta;
         z += (Math.sin(ang) - z) * beta;
+        // (Never as near as the bokeh: the crown stays a ring of crisp chips,
+        // round 3.)
+        if (z > 0.6) z = 0.6;
         kind = 3;
       }
       let size = s0 * (1 + 0.45 * z);
@@ -2471,8 +2495,11 @@ export function createAssemblyNanites({
         x += qx * wave;
         y += qy * wave;
       }
+      // Each river stands out from the cocoon (round 3, review N4): its chips
+      // white and a quarter larger.
       const ring0 = s0 * (1 + 0.45 * z0);
-      size = ring0 + (s0 * 1.1 - ring0) * v;
+      size = (ring0 + (s0 * 1.1 - ring0) * v) * 1.25;
+      TN[slot] = 2;
       alpha = 0.45 + 0.25 * (z0 + 1) + (0.95 - 0.45 - 0.25 * (z0 + 1)) * v;
       kind = 4;
     } else if (u < dive) {
@@ -2579,26 +2606,42 @@ export function createAssemblyNanites({
       size *= 0.6 + 0.4 * s;
       if (s < 0.5) TN[slot] = 2;
     }
-    if (q >= N.implode[0]) {
-      // The seal (N12): each ring spins up and collapses onto the reactor,
-      // its chips spiralling in along their own shrinking ellipses (rotating
-      // the whole cocoon about the core would sweep its tall rings off the
-      // figure).
-      const u = (q - N.implode[0]) / (N.implode[1] - N.implode[0]);
-      orbit(
-        r,
-        free.th0[j] + ROM[r] * (q - b) + RDIR[r] * 3 * Math.PI * u * u,
-        free.lane[j],
-        free.phi[j],
-        false,
-        q,
-      );
-      const k = 1 - smooth(u);
-      x = coreX + (RG[0] - coreX) * k;
-      y = coreY + (RG[1] - coreY) * k;
-      size *= 1 - 0.4 * u;
-      alpha *= 1 - u * u;
-      kind = 8;
+    if (q >= N.gather[0]) {
+      // The seal (N12; round 3, reviews: a handful of specks drifted near the
+      // chest): from .80 the free chips leave the cocoon for three tilted
+      // rings round the reactor, whirling; from .86 each ring spins up and
+      // collapses into it, the chips at full size until late, so the swarm
+      // visibly spirals into the core that the light then runs out of.
+      const g = j % 3;
+      const dir = g === 1 ? -1 : 1;
+      let ang = free.th0[j] + dir * GATHER_W[g] * (q - N.gather[0]);
+      let shrink = 1;
+      let u = 0;
+      if (q >= N.implode[0]) {
+        u = (q - N.implode[0]) / (N.implode[1] - N.implode[0]);
+        ang += dir * 2.5 * Math.PI * u * u;
+        shrink = 1 - smooth(u);
+      }
+      const c = Math.cos(ang);
+      const sn = Math.sin(ang);
+      const lx = GATHER_R[g] * c * shrink;
+      const ly = 0.36 * GATHER_R[g] * sn * shrink;
+      const e = smooth(clamp01((q - N.gather[0]) / (N.gather[1] - N.gather[0])));
+      x += (coreX + lx * GATHER_COS[g] - ly * GATHER_SIN[g] - x) * e;
+      y += (coreY + lx * GATHER_SIN[g] + ly * GATHER_COS[g] - y) * e;
+      const gz = z + (0.9 * sn - z) * e;
+      size = s0 * (1 + 0.3 * gz) * (1 - 0.35 * u);
+      alpha = (0.55 + 0.2 * (gz + 1)) * (u > 0.7 ? 1 - smooth((u - 0.7) / 0.3) : 1);
+      if (u > 0) kind = 8;
+      X[slot] = x;
+      Y[slot] = y;
+      Z[slot] = gz;
+      S[slot] = size;
+      A[slot] = alpha;
+      FR[slot] = free.f0[j] + 2400 * free.spin[j] * (q - b);
+      U[slot] = -1;
+      KIND[slot] = kind;
+      return;
     }
     X[slot] = x;
     Y[slot] = y;
@@ -2855,11 +2898,11 @@ export function createAssemblyNanites({
     let cs = 32;
     let draw = size;
     let alpha = A[slot] < alphaCap ? A[slot] : alphaCap;
-    if (bokeh && Z[slot] > 0.92) {
+    if (bokeh && Z[slot] > BOKEH_Z && bokehAt(X[slot], Y[slot])) {
       sx = BKX[t];
       sy = BKY[t];
-      draw = size * 1.6;
-      alpha = 0.3;
+      draw = size * 1.3;
+      alpha = 0.22;
     } else if (uf >= 0 && t < 3) {
       sx = UNX[t] + 32 * uf;
       sy = UNY;
@@ -2930,6 +2973,31 @@ export function createAssemblyNanites({
     }
     flushChips(ctx);
     ctx.globalAlpha = 1;
+  };
+
+  // Cocoon chips within 40 px of a running gate, at half their light.
+  const thinNear = (list, count) => {
+    for (let c = 0; c < count; c += 1) {
+      const slot = list[c];
+      for (let g = 0; g < nGates; g += 1) {
+        const dx = X[slot] - GATEX[g];
+        const dy = Y[slot] - GATEY[g];
+        if (dx * dx + dy * dy < 1600) {
+          A[slot] *= 0.5;
+          break;
+        }
+      }
+    }
+  };
+  // Whether a near chip may be drawn defocused: not over the head (the face
+  // and neck stay clear) nor over a plate being built.
+  const bokehAt = (x, y) => {
+    if (x > visorX - 80 && x < visorX + 80 && y < visorY + 75) return false;
+    for (let k = 0; k < nBuild; k += 1) {
+      const o = k * 4;
+      if (x > BUILD[o] && x < BUILD[o + 2] && y > BUILD[o + 1] && y < BUILD[o + 3]) return false;
+    }
+    return true;
   };
 
   /**
@@ -3052,10 +3120,38 @@ export function createAssemblyNanites({
       if (!KIND[slot]) continue;
       visible += 1;
       if (ripN && KIND[slot] === 7) ripple(slot);
-      if (KIND[slot] === 8) implodeList[nImplode++] = slot;
+      // (The far side of the imploding rings stays behind the body.)
+      if (KIND[slot] === 8 && Z[slot] >= -0.2) implodeList[nImplode++] = slot;
       else if (Z[slot] < -0.15) backList[nBack++] = slot;
       else if (Z[slot] <= 0.35) midList[nMid++] = slot;
       else frontList[nFront++] = slot;
+    }
+    // The plates being built (from their first flight to just after their
+    // paint), whose boxes the bokeh keeps off.
+    nBuild = 0;
+    for (let p = 0; p < NP; p += 1) {
+      const pc = P[p];
+      if (q < pc.from - 0.02 || q > pc.contact + 0.015) continue;
+      const o = nBuild * 4;
+      BUILD[o] = pc.x;
+      BUILD[o + 1] = pc.y;
+      BUILD[o + 2] = pc.x + pc.w;
+      BUILD[o + 3] = pc.y + pc.h;
+      nBuild += 1;
+    }
+    // Round each gate whose river runs, the cocoon thins (round 3, review N4:
+    // the streams through a gate were lost in the cloud).
+    nGates = 0;
+    for (let p = 0; p < NP; p += 1) {
+      if (laneCount[p] < 3) continue;
+      GATEX[nGates] = P[p].gateX;
+      GATEY[nGates] = P[p].gateY;
+      nGates += 1;
+    }
+    if (nGates) {
+      thinNear(backList, nBack);
+      thinNear(midList, nMid);
+      thinNear(frontList, nFront);
     }
     // The far band takes what the sprite budget leaves after the near bands,
     // the flights, the gold's incoming chips and droplets and the effects —
@@ -3998,7 +4094,8 @@ export function createAssemblyNanites({
       ctx.strokeStyle = "rgb(255 220 140)";
       ctx.stroke();
     }
-    // The rivers' gates: two ice posts where each plate's stream narrows.
+    // The rivers' gates: two ice posts where each plate's stream narrows
+    // (round 3, review N4: they were not visible), each lit at its tip.
     let posts = false;
     const half = 0.012 * H;
     for (let p = 0; p < NP; p += 1) {
@@ -4011,15 +4108,30 @@ export function createAssemblyNanites({
       for (let side = -1; side <= 1; side += 2) {
         const x = pc.gateX - pc.ny * half * side;
         const y = pc.gateY + pc.nx * half * side;
-        ctx.moveTo(x - pc.nx * 4, y - pc.ny * 4);
-        ctx.lineTo(x + pc.nx * 4, y + pc.ny * 4);
+        ctx.moveTo(x - pc.nx * 6, y - pc.ny * 6);
+        ctx.lineTo(x + pc.nx * 6, y + pc.ny * 6);
       }
     }
     if (posts) {
-      ctx.globalAlpha = 0.55;
-      ctx.strokeStyle = TONE_CSS[0];
-      ctx.lineWidth = 1.1;
+      ctx.globalAlpha = 0.85;
+      ctx.strokeStyle = "rgb(196 244 255)";
+      ctx.lineWidth = 1.6;
       ctx.stroke();
+      if (cells && !coarse) {
+        ctx.globalCompositeOperation = "lighter";
+        ctx.globalAlpha = 0.5;
+        for (let p = 0; p < NP; p += 1) {
+          if (laneCount[p] < 3) continue;
+          const pc = P[p];
+          for (let side = -1; side <= 1; side += 2) {
+            const x = pc.gateX - pc.ny * half * side + pc.nx * 6;
+            const y = pc.gateY + pc.nx * half * side + pc.ny * 6;
+            ctx.drawImage(cells, BKX[0], BKY[0], 32, 32, x - 5, y - 5, 10, 10);
+            sprites_ += 1;
+          }
+        }
+        ctx.globalCompositeOperation = "source-over";
+      }
     }
     // Hard-light beams from each staged plate's latch to its diving tiles.
     if (!CALM && !coarse) {
@@ -4537,16 +4649,52 @@ export function createAssemblyNanites({
   };
   const freePass = (ctx) => {
     const rich = cells && !coarse;
-    // Charged as they fall in: added light, so they read over the armour.
-    if (rich && nImplode) ctx.globalCompositeOperation = "lighter";
+    if (rich && nImplode && !CALM) {
+      // Each chip's short trail along its spiral (where it was .003 ago),
+      // and, while the scroll moves, its comet.
+      ctx.globalCompositeOperation = "lighter";
+      ctx.strokeStyle = "rgb(190 242 255)";
+      ctx.lineWidth = 0.9;
+      ctx.beginPath();
+      for (let c = 0; c < nImplode; c += 1) {
+        const slot = implodeList[c];
+        poseFree(slot - n, Q - 0.003, SC);
+        if (!KIND[SC]) continue;
+        ctx.moveTo(X[SC], Y[SC]);
+        ctx.lineTo(X[slot], Y[slot]);
+      }
+      ctx.globalAlpha = 0.26;
+      ctx.stroke();
+      ctx.globalCompositeOperation = "source-over";
+      cometLimit = cometsDrawn + 0.25 * ASSEMBLY_COMET_BUDGET;
+      if (cometSheet && DQ > 0)
+        for (let c = 0; c < nImplode; c += 1) {
+          const slot = implodeList[c];
+          if (free.hsh[slot - n] < 0.5) comet(ctx, slot, slot);
+        }
+    }
+    // Charged as they fall in, each still a chip with a faint halo of its own
+    // light (round 3: added light on the chips themselves saturated the
+    // converging rings into white smears).
+    if (rich && nImplode) {
+      ctx.globalCompositeOperation = "lighter";
+      for (let c = 0; c < nImplode; c += 1) {
+        const slot = implodeList[c];
+        const t = TN[slot] > 2 ? 2 : TN[slot];
+        const g = S[slot] * 1.5;
+        ctx.globalAlpha = 0.28 * A[slot];
+        ctx.drawImage(cells, BKX[t], BKY[t], 32, 32, X[slot] - g / 2, Y[slot] - g / 2, g, g);
+        sprites_ += 1;
+      }
+      ctx.globalCompositeOperation = "source-over";
+    }
     for (let c = 0; c < nImplode; c += 1) {
       const slot = implodeList[c];
       if (rich) {
-        A[slot] = Math.min(1, A[slot] * 1.7);
+        A[slot] = Math.min(1, A[slot] * 1.2);
         spriteChip(ctx, slot, 1, false);
       } else rectChip(slot, true);
     }
-    ctx.globalCompositeOperation = "source-over";
     flushChips(ctx);
     ctx.globalAlpha = 1;
   };

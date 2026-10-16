@@ -19,6 +19,7 @@ export const ASSEMBLY_NANITES: {
   readonly clampIn: number;
   readonly clampHold: number;
   readonly crown: readonly [number, number];
+  readonly gather: readonly [number, number];
   readonly implode: readonly [number, number];
 };
 /** The gold guideway's build (owner, 2026-10-16: built smoothly from the
