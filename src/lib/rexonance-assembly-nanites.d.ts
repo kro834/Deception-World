@@ -284,6 +284,7 @@ export interface AssemblyNanites {
   shadowPass: Pass;
   stagedPass: Pass;
   conduitPass: Pass;
+  lacquerPass: Pass;
   hardwarePass: Pass;
   flightPass: Pass;
   impactPass: Pass;
@@ -323,6 +324,8 @@ export function createAssemblyNanites(options: {
   gold?: NanitePlanOptions["gold"] & { ux: Float32Array; uy: Float32Array };
   goldCell?: number;
   touchArtBudget?: number;
+  /** For the swarm's own small sheets (the tinted shock rings). */
+  document?: Document;
 }): AssemblyNanites;
 
 /** How much a pixel of the finished art reads as gold, 0–1. */

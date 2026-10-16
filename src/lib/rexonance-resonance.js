@@ -2153,6 +2153,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
                 gold: nextGold,
                 goldCell: config.gold?.cell ?? 4,
                 touchArtBudget: ASSEMBLY_TOUCH_ART_BUDGET,
+                document,
               })
             : null,
         );
@@ -2638,6 +2639,8 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         // once, never hidden: round 3).
         nanites.hologramPass(context, true);
         nanites.conduitPass(context);
+        // The lacquer's light sweeping out over each freshly painted plate.
+        nanites.lacquerPass(context);
         nanites.hardwarePass(context);
       }
     }

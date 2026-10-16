@@ -124,6 +124,14 @@ const MOLTEN_TOUCH_ALPHA = [1, 0.5, 0.2];
 // yellow dashes): one cell in three throws an incoming bead, one in three a
 // droplet.
 const POUR_SHARE = 0.34;
+// The lacquer's rings round the paint front (round 3): how far each reaches
+// behind the front (in) and ahead of it (out), figure px, and its light.
+const LACQ_IN = [3, 10];
+const LACQ_OUT = [2, -3];
+const LACQ_A = [0.5, 0.16];
+// At most this many lattice links a plate a frame, and latches at once.
+const LINKS_PER_PLATE = 12;
+const LATCHES_SHOWN = 8;
 
 /** A stable hash of an index into [0, 1) (no PRNG state). */
 export function naniteHash(index, salt) {
@@ -382,7 +390,10 @@ export function* assemblyNanitePlanSteps({
     }
     const share = Math.sqrt(area / maxArea);
     const ornament = kind === 1 || kind === 2;
-    const lift = helm ? 0 : (10 + 12 * share) * (ornament ? 1.4 : 1);
+    // The staged plate hovers in front of the body (round 3, review: the lift
+    // and tilt were imperceptible): armour lifts 16–36 px and tilts 24°; the
+    // ornaments keep their own swing (their turn and skew already carry it).
+    const lift = helm ? 0 : ornament ? (10 + 12 * share) * 1.4 : 16 + 20 * share;
     const hx = Math.sign(seatX - W / 2) * Math.min(1, Math.abs(seatX - W / 2) / (0.25 * W));
     const accent = accentOf.includes(p);
     const isCrest = p === crest;
@@ -447,7 +458,7 @@ export function* assemblyNanitePlanSteps({
       gx,
       gy,
       lift,
-      theta: fixed ? 0 : (coarse ? 12 : 18) * DEG,
+      theta: fixed ? 0 : (ornament ? (coarse ? 12 : 18) : coarse ? 16 : 24) * DEG,
       offX: fixed ? 0 : lift * (0.55 * hx - 0.3),
       offY: fixed ? 0 : lift * -0.55,
       area,
@@ -601,6 +612,14 @@ export function* assemblyNanitePlanSteps({
     if (tick()) yield;
   }
 
+  // An ornament's tile paints after the armour tile under it (round 3,
+  // review: the weld draws without clearing, so an armour tile welded later
+  // covered the ornament's full-figure cell until the seal).
+  for (let i = 0; i < n; i += 1) {
+    const j = under[i];
+    if (SRC[i] === 1 && j >= 0 && tp[i] <= tp[j]) tp[i] = tp[j] + 1e-6;
+    if (tick()) yield;
+  }
   // The paint order: a stable merge sort by paint time, with checkpoints.
   let order = Int32Array.from({ length: n }, (_, i) => i);
   let scratch = new Int32Array(n);
@@ -750,6 +769,15 @@ export function* assemblyNanitePlanSteps({
           groupContact.get(key) - ASSEMBLY_GUIDEWAY.ready - climbs - ASSEMBLY_GUIDEWAY.early,
         ),
       );
+    }
+    // The upper body rises as one (round 3, review: after the legs each beat
+    // restarted low, the waist after the chest): the waist's climb starts as
+    // the arms' ends, before the chest's — its plates seat last, so it holds
+    // on the body longer, as the feet's does.
+    if (groupStart.has(1) && groupStart.has(3)) {
+      const armsEnd =
+        groupStart.get(1) + (groupBottom.get(1) - groupTop.get(1)) / ASSEMBLY_GUIDEWAY.climb;
+      groupStart.set(3, Math.min(groupStart.get(3), armsEnd));
     }
     // The tail is one chain (review 2026-10-16: it grew from the hanging
     // blade and at the root at once, a cloud of flecks): root to blade,
@@ -1945,6 +1973,7 @@ export function createAssemblyNanites({
   gold = null,
   goldCell = 4,
   touchArtBudget = 64,
+  document: doc = globalThis.document,
 }) {
   const N = ASSEMBLY_NANITES;
   const { width: W, height: H } = size;
@@ -2000,6 +2029,54 @@ export function createAssemblyNanites({
   const LT = k.fx.latch;
   const DRP = k.fx.drop;
   const SHK = k.fx.shock;
+  // The shock rings tinted toward ice (190, 240, 255), made once (fine
+  // pointers; a small strip of the effects sheet).
+  let shockTint = null;
+  if (fxSheet && !coarse && doc?.createElement) {
+    try {
+      const rows = Math.ceil((SHK.frames ?? 10) / SHK.cols);
+      const strip = doc.createElement("canvas");
+      strip.width = SHK.w * SHK.cols;
+      strip.height = SHK.h * rows;
+      const sc = strip.getContext("2d");
+      if (sc) {
+        // (The ring laid twice as light: the sprite's glass ring is faint.)
+        sc.globalCompositeOperation = "lighter";
+        sc.drawImage(fxSheet, SHK.x, SHK.y, strip.width, strip.height, 0, 0, strip.width, strip.height);
+        sc.drawImage(fxSheet, SHK.x, SHK.y, strip.width, strip.height, 0, 0, strip.width, strip.height);
+        sc.globalCompositeOperation = "source-atop";
+        sc.globalAlpha = 0.7;
+        sc.fillStyle = "rgb(170 236 255)";
+        sc.fillRect(0, 0, strip.width, strip.height);
+        shockTint = strip;
+      }
+    } catch {
+      shockTint = null;
+    }
+  }
+  // The lacquer's scratch (fine pointers): one plate's box at most. A ring of
+  // white-ice light is cut there to the plate's own cells and the art's
+  // alpha, then added to the frame.
+  let lacq = null;
+  let lacqCtx = null;
+  if (!coarse && doc?.createElement) {
+    try {
+      let mw = 1;
+      let mh = 1;
+      for (let p = 0; p < NP; p += 1) {
+        mw = Math.max(mw, Math.ceil(P[p].w));
+        mh = Math.max(mh, Math.ceil(P[p].h));
+      }
+      lacq = doc.createElement("canvas");
+      lacq.width = mw;
+      lacq.height = mh;
+      lacqCtx = lacq.getContext("2d");
+      if (!lacqCtx) lacq = null;
+    } catch {
+      lacq = null;
+      lacqCtx = null;
+    }
+  }
   const metal = layers.metal ?? [null, null];
   const silhouette = layers.silhouette ?? [null, null];
   const art = layers.art ?? [null, null];
@@ -2122,6 +2199,30 @@ export function createAssemblyNanites({
       if (open < cap) JIGGED[p] = 1;
     }
   }
+  // Which jigged plates draw their walls and lattice (desktop: up to
+  // STAGED_RICH at once) and which staged plates draw a lattice on touch (up
+  // to TOUCH_LATTICE), decided once by the same sweep — never a per-frame
+  // count that promotes a plate the moment another finishes (round 3).
+  const RICH = new Uint8Array(NP);
+  const LATTICED = new Uint8Array(NP);
+  {
+    const byFrom = [];
+    for (let p = 0; p < NP; p += 1) if (!P[p].fixed) byFrom.push(p);
+    byFrom.sort((a, b) => P[a].from - P[b].from || a - b);
+    for (let k = 0; k < byFrom.length; k += 1) {
+      const p = byFrom[k];
+      const start = P[p].from - 0.02;
+      let rich = 0;
+      let latticed = 0;
+      for (let kk = 0; kk < k; kk += 1) {
+        const o = byFrom[kk];
+        if (RICH[o] && P[o].stageEnd > start) rich += 1;
+        if (LATTICED[o] && P[o].to > start) latticed += 1;
+      }
+      if (JIGGED[p] && rich < STAGED_RICH) RICH[p] = 1;
+      if (latticed < TOUCH_LATTICE) LATTICED[p] = 1;
+    }
+  }
   const LAM = new Float64Array(NP);
   const STAGED = new Uint8Array(NP);
   // Per frame, each plate's guideway on the body (hologramPass): 1 drawn per
@@ -2130,6 +2231,9 @@ export function createAssemblyNanites({
   const GMODE = new Uint8Array(NP);
   const COVER = new Uint8Array(NP);
   const laneCount = new Uint16Array(NP);
+  const LINKN = new Uint8Array(NP);
+  const latchList = new Int32Array(NP);
+  const latchKey = new Float64Array(NP);
   const beamI = new Int32Array(NP * 2);
   const heldList = new Int32Array(NP);
   const beamU = new Float32Array(NP * 2);
@@ -2597,11 +2701,14 @@ export function createAssemblyNanites({
     // paint and the conduit all lie where the plate is (owner, 2026-10-16:
     // nothing shifts when a part completes).
     if (staged && q < pc.contact) {
+      // Armour hovers lifted while it fills (round 3), then drops home with
+      // weight: slow off the hover, fastest at contact.
+      const hold = pc.ornament ? 0.35 : 0.2;
       if (q < pc.from) lam = 1;
-      else if (q < pc.to) lam = 1 - (0.35 * landedIn(p, q)) / pc.t1s.length;
+      else if (q < pc.to) lam = 1 - (hold * landedIn(p, q)) / pc.t1s.length;
       else {
         const u = (q - pc.to) / (pc.contact - pc.to);
-        lam = 0.65 * (1 - u * u * u);
+        lam = (1 - hold) * (1 - u * u * u);
       }
       if (pc.kind === 1) turn = -(10 + 4 * pc.seg) * DEG * lam;
       if (pc.kind === 2) skew = -0.1 * lam;
@@ -2636,7 +2743,8 @@ export function createAssemblyNanites({
     const a11 = sr * f01 + cr * f11;
     a00 += skew * a10;
     a01 += skew * a11;
-    const sc = 1 + 0.04 * lam;
+    // (Nearer the eye, larger: the hovering plate shrinks onto the body.)
+    const sc = 1 + (pc.ornament ? 0.04 : 0.07) * lam;
     const ox = pc.offX * lam;
     const oy = pc.offY * lam;
     jig[j] = a00 * sc;
@@ -3019,7 +3127,7 @@ export function createAssemblyNanites({
     band(ctx, midList, nMid, false, false);
   };
 
-  /* 5: seated plates still in metal, then the lacquer front (A6). */
+  /* 5: seated plates still in metal (the lacquer front is pass 11b). */
   const seatedPass = (ctx, painted) => {
     const q = Q;
     for (let src = 0; src < 2; src += 1) {
@@ -3044,43 +3152,6 @@ export function createAssemblyNanites({
         ctx.globalAlpha = 1;
         ctx.drawImage(sheet, 0, 0, W, H);
         ctx.restore();
-      }
-    }
-    if (CALM) return;
-    const first = paintedBy(q - N.lacquer);
-    if (first >= painted) return;
-    // The lacquer (A6): a white-ice sheen sweeping out from the seat over the
-    // fresh paint — the plate's own raw metal (neutral, ice-cool, the art's
-    // exact alpha and hex relief) added as light through the cells painted
-    // in the last .0015, in three age bands, brightest at the front. Never
-    // the mote sheet: no mosaic squares, and no cyan or pink before the seal
-    // (owner: the lights stay monochrome until the suit is whole). Touch
-    // takes one band.
-    const bands = coarse ? 1 : 3;
-    for (let src = 0; src < 2; src += 1) {
-      const sheet = metalOf(src);
-      if (!sheet) continue;
-      for (let age = 0; age < bands; age += 1) {
-        const newest = q - (age * N.lacquer) / bands;
-        const oldest = q - ((age + 1) * N.lacquer) / bands;
-        let any = false;
-        for (let kk = first; kk < painted; kk += 1) {
-          const i = ORDER[kk];
-          if (SRC[i] !== src || TP[i] > newest || TP[i] <= oldest) continue;
-          if (!any) {
-            ctx.save();
-            ctx.beginPath();
-            any = true;
-          }
-          ctx.rect(SX[i], SY[i], TW[i], TH[i]);
-        }
-        if (any) {
-          ctx.clip();
-          ctx.globalCompositeOperation = "lighter";
-          ctx.globalAlpha = coarse ? 0.32 : 0.46 - 0.14 * age;
-          ctx.drawImage(sheet, 0, 0, W, H);
-          ctx.restore();
-        }
       }
     }
     ctx.globalAlpha = 1;
@@ -3534,10 +3605,10 @@ export function createAssemblyNanites({
         const sheet = silhouette[src];
         if (!sheet) continue;
         ctx.save();
-        ctx.translate(0.35 * pc.lift * 0.45 * lam, 0.6 * pc.lift * 0.45 * lam);
+        ctx.translate(0.35 * pc.lift * 0.6 * lam, 0.6 * pc.lift * 0.6 * lam);
         if (landedPath(ctx, p, src, q)) {
           ctx.clip();
-          ctx.globalAlpha = 0.38;
+          ctx.globalAlpha = 0.5;
           ctx.drawImage(sheet, 0, 0, W, H);
         }
         ctx.restore();
@@ -3549,18 +3620,15 @@ export function createAssemblyNanites({
   /* 10: the staged plates under their jigs: lattice, walls, metal. */
   const stagedPass = (ctx) => {
     const q = Q;
-    let rich = 0;
-    let lattices = 0;
     for (let p = 0; p < NP; p += 1) {
       if (!STAGED[p]) continue;
       const pc = P[p];
       if (q < pc.from - 0.02) continue;
       const jigged = STAGED[p] === 1;
       if (jigged) setJig(ctx, p);
-      const full = !coarse && rich < STAGED_RICH;
-      if (jigged) rich += 1;
+      const full = !coarse && RICH[p] === 1;
       // The scaffold lattice (A2), growing from the seat.
-      if (lattice && q < pc.to && (coarse ? lattices < TOUCH_LATTICE : full)) {
+      if (lattice && q < pc.to && (coarse ? LATTICED[p] === 1 : full)) {
         const grow = easeOut(clamp01((q - (pc.from - 0.02)) / (pc.to - pc.from + 0.02)));
         ctx.save();
         ctx.beginPath();
@@ -3572,7 +3640,6 @@ export function createAssemblyNanites({
         ctx.globalAlpha = 0.6;
         ctx.drawImage(lattice, 0, 0, W, H);
         ctx.restore();
-        lattices += 1;
       }
       if (q >= pc.from)
         for (let src = 0; src < 2; src += 1) {
@@ -3671,19 +3738,139 @@ export function createAssemblyNanites({
     ctx.globalAlpha = 1;
   };
 
+  /* 11b: the lacquer (A6; round 3, reviews: translucent cyan blocks with hard
+     tile edges): a white-ice sheen ring that follows each plate's paint
+     front out from its seat — the plate's own raw metal (neutral, ice-cool,
+     the art's exact alpha and hex relief) added as light through the
+     plate's cells and rings round its seat at the front's radius, brightest
+     at the front and feathered behind it, so it sweeps as a curve, never as
+     squares. No cyan or pink before the seal (owner: the lights stay
+     monochrome until the suit is whole). Touch takes one ring. Drawn after
+     the conduit, so the light sweeps the whole fresh plate. */
+  const lacquerPass = (ctx) => {
+    if (CALM) return;
+    const q = Q;
+    const rings = coarse ? 1 : LACQ_A.length;
+    for (let p = 0; p < NP; p += 1) {
+      const pc = P[p];
+      const t = (q - pc.contact - 0.001) / (pc.helm ? 0.004 : N.paint);
+      if (t <= 0 || t >= 1.2) continue;
+      const r = t * pc.reach;
+      const fade = t > 1 ? (1.2 - t) / 0.2 : 1;
+      const ids = pc.tiles;
+      // (The outer ring's box of the sheet, inside the plate's.)
+      const R = r + LACQ_OUT[0];
+      const x0 = Math.max(pc.x, Math.floor(pc.seatX - R));
+      const y0 = Math.max(pc.y, Math.floor(pc.seatY - R));
+      const x1 = Math.min(pc.x + pc.w, Math.ceil(pc.seatX + R));
+      const y1 = Math.min(pc.y + pc.h, Math.ceil(pc.seatY + R));
+      if (x1 <= x0 || y1 <= y0) continue;
+      const w = x1 - x0;
+      const h = y1 - y0;
+      for (let src = 0; src < 2; src += 1) {
+        if (!(pc.srcMask & (1 << src))) continue;
+        const sheet = metalOf(src);
+        if (!sheet) continue;
+        for (let ring = 0; ring < rings; ring += 1) {
+          const r1 = r + LACQ_OUT[ring];
+          const r0 = r - LACQ_IN[ring];
+          if (r1 <= 0.5) continue;
+          if (lacq) {
+            lacqCtx.globalCompositeOperation = "source-over";
+            lacqCtx.clearRect(0, 0, w, h);
+            lacqCtx.save();
+            lacqCtx.beginPath();
+            for (let kk = 0; kk < ids.length; kk += 1) {
+              const i = ids[kk];
+              if (SRC[i] !== src || T1[i] > q) continue;
+              lacqCtx.rect(SX[i] - x0, SY[i] - y0, TW[i], TH[i]);
+            }
+            lacqCtx.clip();
+            lacqCtx.drawImage(sheet, x0, y0, w, h, 0, 0, w, h);
+            lacqCtx.restore();
+            lacqCtx.globalCompositeOperation = "source-in";
+            lacqCtx.fillStyle = "rgb(236 251 255)";
+            lacqCtx.beginPath();
+            lacqCtx.arc(pc.seatX - x0, pc.seatY - y0, r1, 0, TAU);
+            if (r0 > 0.5) {
+              lacqCtx.moveTo(pc.seatX - x0 + r0, pc.seatY - y0);
+              lacqCtx.arc(pc.seatX - x0, pc.seatY - y0, r0, 0, TAU, true);
+            }
+            lacqCtx.fill();
+            ctx.globalCompositeOperation = "lighter";
+            ctx.globalAlpha = LACQ_A[ring] * fade;
+            ctx.drawImage(lacq, 0, 0, w, h, x0, y0, w, h);
+            ctx.globalCompositeOperation = "source-over";
+            continue;
+          }
+          // Touch (and no scratch): the plate's metal added through the ring.
+          ctx.save();
+          ctx.beginPath();
+          let any = false;
+          for (let kk = 0; kk < ids.length; kk += 1) {
+            const i = ids[kk];
+            if (SRC[i] !== src || T1[i] > q) continue;
+            ctx.rect(SX[i], SY[i], TW[i], TH[i]);
+            any = true;
+          }
+          if (any) {
+            ctx.clip();
+            ctx.beginPath();
+            ctx.arc(pc.seatX, pc.seatY, r1, 0, TAU);
+            if (r0 > 0.5) {
+              ctx.moveTo(pc.seatX + r0, pc.seatY);
+              ctx.arc(pc.seatX, pc.seatY, r0, 0, TAU, true);
+            }
+            ctx.clip();
+            ctx.globalCompositeOperation = "lighter";
+            ctx.globalAlpha = 0.32 * fade;
+            ctx.drawImage(sheet, x0, y0, w, h, x0, y0, w, h);
+          }
+          ctx.restore();
+        }
+      }
+    }
+    ctx.globalAlpha = 1;
+  };
+
   /* 12: the hardpoint latches (A1), the corner clamps (G3), the beams (N9). */
   const hardwarePass = (ctx) => {
     const q = Q;
     let latches = 0;
     ctx.lineWidth = 1.2;
     let strokes = false;
-    for (let p = 0; p < NP && latches < LATCH_MAX; p += 1) {
+    // A latch opens just before its plate seats (round 3, reviews: tail and
+    // helmet latches hung in the empty sky for .1; fifteen rings at once on
+    // the chest), the helmet's only once the crown has formed; at most the
+    // next eight plates' at once (nearest contact first).
+    let candidates = 0;
+    for (let p = 0; p < NP; p += 1) {
       const pc = P[p];
-      // A tail segment's latch opens only as the chain's build front nears
-      // it (review 2026-10-16: nine irises hung in the empty sky for .06).
-      const start =
-        pc.kind === 1 ? Math.max(pc.from - N.lead, pc.buildStart - 0.004) : pc.from - N.lead;
+      let start = Math.max(pc.from - N.lead, pc.contact - 0.03);
+      if (pc.kind === 1) start = Math.max(start, pc.buildStart - 0.004);
+      if (pc.helm) start = Math.max(start, N.crown[1]);
       if (q < start || q >= pc.contact + 0.01) continue;
+      latchList[candidates] = p;
+      latchKey[candidates] = start;
+      candidates += 1;
+    }
+    // (Selection: the first LATCHES_SHOWN by contact, in place.)
+    const shownLatches = candidates < LATCHES_SHOWN ? candidates : LATCHES_SHOWN;
+    for (let a2 = 0; a2 < shownLatches; a2 += 1) {
+      let best = a2;
+      for (let b2 = a2 + 1; b2 < candidates; b2 += 1)
+        if (P[latchList[b2]].contact < P[latchList[best]].contact) best = b2;
+      const lp = latchList[a2];
+      const lk = latchKey[a2];
+      latchList[a2] = latchList[best];
+      latchKey[a2] = latchKey[best];
+      latchList[best] = lp;
+      latchKey[best] = lk;
+    }
+    for (let c2 = 0; c2 < shownLatches && latches < LATCH_MAX; c2 += 1) {
+      const p = latchList[c2];
+      const pc = P[p];
+      const start = latchKey[c2];
       latches += 1;
       const appear = clamp01((q - start) / 0.006);
       const fade = q > pc.contact + 0.004 ? 1 - (q - pc.contact - 0.004) / 0.006 : 1;
@@ -3725,13 +3912,13 @@ export function createAssemblyNanites({
       ctx.strokeStyle = "rgb(150 236 255)";
       ctx.stroke();
     }
-    // The clamps: one per corner the plan gives them (on a large ornament,
-    // on its own outline). They SLIDE in along the body's surface from
-    // beside it (owner, 2026-10-16: nothing descends onto it) — the lower
-    // pair first, as the guideway was built — bite as the plate lands, and
-    // slide away as the conduit recedes. Drawn large enough for the bevel to
-    // read, their gold chrome lifted, and the bolt's ice LED lights through
-    // the bite (round 3, reviews: flat khaki HUD brackets).
+    // The clamps: one per corner the plan gives them, each on the plate's own
+    // outline. They SLIDE in along the body's surface from beside it (owner,
+    // 2026-10-16: nothing descends onto it) — the lower pair first, as the
+    // guideway was built — bite as the plate lands, and slide away once it
+    // has locked. Drawn large enough for the bevel to read, their gold
+    // chrome lifted, and the bolt's ice LED lights through the bite (round
+    // 3, reviews: flat khaki HUD brackets).
     strokes = false;
     for (let p = 0; p < NP; p += 1) {
       const pc = P[p];
@@ -3840,7 +4027,9 @@ export function createAssemblyNanites({
       for (let p = 0; p < NP; p += 1)
         for (let b = 0; b < 2; b += 1) {
           const i = beamI[p * 2 + b];
-          if (i < 0) continue;
+          // (Gone before the lock: a beam over the last of the dive only
+          // scratched the plate.)
+          if (i < 0 || U[i] > 0.93) continue;
           if (!any) {
             ctx.beginPath();
             any = true;
@@ -3976,9 +4165,13 @@ export function createAssemblyNanites({
       ctx.globalAlpha = 1 - t * 0.5;
       ctx.drawImage(metalOf(SRC[i]), SX[i], SY[i], TW[i], TH[i], cx - w / 2, cy - h / 2, w, h);
     }
-    // Sparks (1 lock in 6) and lattice links to the parent cell.
+    // Sparks (1 lock in 6) and lattice links (round 3, reviews: dozens of
+    // hairline scratches over the filling plate): from each newly locked
+    // tile a short spur half way to the cell it grew from, the newest dozen
+    // a plate, so the lattice reads as nodes crystallising outward.
     linkCounts[0] = linkCounts[1] = linkCounts[2] = 0;
-    for (let i = landedBy(q - N.spark); i < landed; i += 1) {
+    LINKN.fill(0);
+    for (let i = landed - 1; i >= landedBy(q - N.spark); i -= 1) {
       const p = PO[i];
       const t = (q - T1[i]) / N.spark;
       const cx = p >= 0 ? jigX(p, CX[i], CY[i]) : CX[i];
@@ -3995,13 +4188,16 @@ export function createAssemblyNanites({
         sprites_ += 1;
       }
       const j = PARENT[i];
-      if (j >= 0) {
+      if (j >= 0 && (p < 0 || LINKN[p] < LINKS_PER_PLATE)) {
+        if (p >= 0) LINKN[p] += 1;
         const bucket = t < 0.34 ? 0 : t < 0.67 ? 1 : 2;
         const at = bucket * n * 4 + linkCounts[bucket];
+        const px = p >= 0 ? jigX(p, CX[j], CY[j]) : CX[j];
+        const py = p >= 0 ? jigY(p, CX[j], CY[j]) : CY[j];
         links[at] = cx;
         links[at + 1] = cy;
-        links[at + 2] = p >= 0 ? jigX(p, CX[j], CY[j]) : CX[j];
-        links[at + 3] = p >= 0 ? jigY(p, CX[j], CY[j]) : CY[j];
+        links[at + 2] = cx + (px - cx) * 0.5;
+        links[at + 3] = cy + (py - cy) * 0.5;
         linkCounts[bucket] += 4;
       }
     }
@@ -4010,7 +4206,7 @@ export function createAssemblyNanites({
     for (let bucket = 0; bucket < 3; bucket += 1) {
       const count = linkCounts[bucket];
       if (!count) continue;
-      ctx.globalAlpha = 0.6 * (1 - (bucket + 0.5) / 3);
+      ctx.globalAlpha = 0.42 * (1 - (bucket + 0.5) / 3);
       ctx.beginPath();
       const base = bucket * n * 4;
       for (let at = base; at < base + count; at += 4) {
@@ -4144,11 +4340,17 @@ export function createAssemblyNanites({
       const c = Math.cos(rot) * VS;
       const s = Math.sin(rot) * VS;
       ctx.setTransform(c, s, -s, c, VS * pc.seatX + VX, VS * pc.seatY + VY);
-      ctx.globalAlpha = 0.5;
+      // Hard ice light (round 3, review: dull grey smoke): the ring tinted
+      // toward ice and added as light, at its brightest on its first frames
+      // (a small area, inside the flash rule).
+      if (shockTint) {
+        ctx.globalCompositeOperation = "lighter";
+        ctx.globalAlpha = frameK < 3 ? 0.5 : 0.42;
+      } else ctx.globalAlpha = 0.5;
       ctx.drawImage(
-        fxSheet,
-        SHK.x + SHK.w * (frameK % SHK.cols),
-        SHK.y + SHK.h * Math.floor(frameK / SHK.cols),
+        shockTint ?? fxSheet,
+        (shockTint ? 0 : SHK.x) + SHK.w * (frameK % SHK.cols),
+        (shockTint ? 0 : SHK.y) + SHK.h * Math.floor(frameK / SHK.cols),
         SHK.w,
         SHK.h,
         (-SHK.centre[0] * w) / SHK.w,
@@ -4156,6 +4358,7 @@ export function createAssemblyNanites({
         w,
         h,
       );
+      ctx.globalCompositeOperation = "source-over";
       heroes += coarse ? 1 : 0;
       nanitesDrawn += coarse ? 1 : 0;
       sprites_ += 1;
@@ -4369,6 +4572,7 @@ export function createAssemblyNanites({
     shadowPass,
     stagedPass,
     conduitPass,
+    lacquerPass,
     hardwarePass,
     flightPass,
     impactPass,
