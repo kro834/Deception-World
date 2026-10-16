@@ -1521,6 +1521,7 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
   let jigs = 0;
   let transformed = false;
   let conduits = 0;
+  let glowRamp = 1;
 
   const base = () => {
     flight.setTransform(1, 0, 0, 1, ox, oy);
@@ -1904,7 +1905,7 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
         x = PX;
         y = PY;
         size *= 1.5 * (1 - 0.6 * u);
-        alpha = 1.35 * (1 - u * u * u * u);
+        alpha = 1.35 * (1 - u * u * u * u) * (0.55 + 0.45 * smooth(u / 0.35));
         tone = c % 3 ? WHITE : tone;
         z = 0.6;
         chipVX[c] = 0;
@@ -2034,7 +2035,7 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
         draws += 1;
         const g = chipD[c] * 2.4 * SPRITE;
         const glowTone = chipT[c] === GOLD_TONE ? GOLD_TONE : WHITE;
-        flight.globalAlpha = Math.min(1, 0.4 * chipA[c]);
+        flight.globalAlpha = Math.min(1, 0.4 * chipA[c] * glowRamp);
         flight.drawImage(
           cellsImage,
           BOKEH_X[glowTone],
@@ -3204,7 +3205,10 @@ export function createSuitExtras(env: SuitExtrasEnv): SuitExtras | null {
           chip(x, y, 3.6 * s, wrap(FRAMES * h + 30 * u), GOLD_TONE, 0.8 * (1 - u));
         }
       }
-    // 8. The front chips, the crown and the free chips (their bands).
+    // 8. The front chips, the crown and the free chips (their bands); the
+    // white-hot glows ease in (no step in the frame's light).
+    glowRamp =
+      t >= SW.implode[0] ? smooth((t - SW.implode[0]) / 90) : smooth((t - SW.crown[0]) / 100);
     lanes(true, t);
     drawChips(3, 5);
     if (TOUCH) flushRects();
