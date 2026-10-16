@@ -291,6 +291,38 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-he
   }
 }
 
+/* Where the ghost heads the copy (the short windows above, tablets and
+   phones), it stands directly over the gold name: there it is the name's
+   backdrop, not a second title, at 60% of its light (it keeps its full
+   light between the lede and the cue). */
+@media (min-width: 1100px) and (max-width: 1279.98px) and (max-height: 799.98px),
+  (min-width: 1280px) and (max-width: 1365.98px) and (max-height: 839.98px),
+  (min-width: 1366px) and (max-width: 1439.98px) and (max-height: 864.98px),
+  (min-width: 1440px) and (max-width: 1535.98px) and (max-height: 894.98px),
+  (min-width: 1536px) and (max-width: 1679.98px) and (max-height: 944.98px),
+  (min-width: 1680px) and (max-width: 1919.98px) and (max-height: 994.98px),
+  (min-width: 1920px) and (max-width: 2239.98px) and (max-height: 1039.98px),
+  (min-width: 2240px) and (max-height: 1084.98px),
+  (max-width: 1099.98px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero .rxs-hero-copy > .rxf-mark > i {
+    -webkit-text-stroke: 1px rgb(121 232 255 / 16%);
+  }
+
+  @supports ((background-clip: text) or (-webkit-background-clip: text)) {
+    html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero .rxs-hero-copy > .rxf-mark > i {
+      background: linear-gradient(
+        180deg,
+        rgb(121 232 255 / 6%) 10%,
+        rgb(121 232 255 / 2%) 60%,
+        rgb(242 216 150 / 8%) 100%
+      );
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+  }
+}
+
 /* Each letter's mote: its order and where it streams in from, above and
    below the line in turn. */
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero .rxs-hero-copy > .rxf-mark > i:nth-child(1) {
@@ -378,6 +410,18 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-he
   background: var(--rxf-rail-2);
 }
 
+/* 320px phones: 「THE NEXT GENERATION」 ran 25px into the Zeus button's
+   column (at 320x568 Zeus covered 「…GENERATION」 on the first screen).
+   The rail stands over the words (as it already did there) and closer
+   tracking ends them 11px short of Zeus; the size stays 12px. */
+@media (max-width: 359.98px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero .rxs-hero-copy > p:first-child {
+    flex-direction: column;
+    align-items: flex-start;
+    letter-spacing: 0.08em;
+  }
+}
+
 /* Etched kickers (K1). Phones keep their 12px, so their wraps stay. */
 @media (min-width: 561px) {
   html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero .rxs-hero-copy > p:first-child,
@@ -410,6 +454,15 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-se
 @media (max-width: 560px) {
   html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-section > .rxs-section-heading::before {
     letter-spacing: -0.06em;
+  }
+}
+
+/* ...and at 360 the kickers close up from 0.22em to 0.2em, so 「PROCESSING
+   CORE / P14」 holds its line beside 02 as it did before the forged numeral
+   (it needed 269px of 268). The numeral's outlines stay apart. */
+@media (max-width: 374.98px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-section > .rxs-section-heading > p {
+    letter-spacing: 0.2em;
   }
 }
 
