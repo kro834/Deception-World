@@ -3533,7 +3533,8 @@ export function createAssemblyNanites({
       const first = pc.goldFirst;
       const T = pc.cellT;
       const built = builtIn(p, q);
-      const a = covered ? 1 - 0.45 * LAM[p] : 1;
+      // (Eased in from the first landing, so the guideway never dims at once.)
+      const a = covered ? 1 - 0.45 * LAM[p] * smooth(clamp01((q - pc.from) / 0.006)) : 1;
       if (built > first && faceSheet) {
         const solid = builtIn(p, q - 3 * T);
         const mid = builtIn(p, q - 1.5 * T);
