@@ -93,7 +93,10 @@ const [VISOR_X, VISOR_Y] = REXONANCE_SUIT_MARKS.visor;
 const ART_W = REXONANCE_SUIT_ATLAS.width / 2;
 const ART_H = REXONANCE_SUIT_ATLAS.height;
 const RINGS = 8;
-/** Cocoon chips (each drains into a plate) and free chips (the implosion). */
+/** Cocoon chips (each drains into a plate) and free chips (they gather round
+ * the reactor, then implode); more than the brief's 384 + 96 by design (see
+ * REXONANCE_SUIT_SWARM). */
+
 const COCOON = TOUCH ? 128 : 512;
 const FREE = TOUCH ? 32 : 160;
 const CHIPS = COCOON + FREE;
@@ -119,7 +122,30 @@ const SLAM = 0.72;
 const CLAMP_MIN = 44;
 const CLAMP_PAIR = 96;
 const CLAMP_HUGE = 2.5;
+/** Legibility (round 3, review 38): the back and mid chips dim to BUSY_DIM
+ * over the gold box of a plate being staged or printed (a BUSY_W x BUSY_H
+ * grid over the figure); at most LATCHES latches show at once (the next to
+ * seat); the scaffold lattice at LATTICE_A; a lock spurs its lattice link
+ * for LINK_MS. */
+const BUSY_W = 32;
+const BUSY_H = 58;
+const BUSY_DIM = 0.5;
+const LATCHES = 8;
+const LATTICE_A = 0.54;
+const LINK_MS = 40;
+/** The free chips gather round the reactor over GATHER (ms), on orbits of
+ * GATHER_R (+26, +52) figure px, squashed GATHER_SQUASH, turning GATHER_SPIN
+ * a second; the implosion (SW.implode) then spirals them in. */
+const GATHER = Float32Array.of(1790, 1960);
+const GATHER_R = 92;
+const GATHER_SQUASH = 0.42;
+const GATHER_SPIN = 1.4;
+/** …and white-hot on its near side from GATHER_HEAT ms into the gathering. */
+const GATHER_HEAT = 80;
+
+
 /** A clamp holding after its bite rests at this alpha until it releases. */
+
 const CLAMP_HOLD = 0.5;
 
 /** A top-down group's guideways: each plate's share of its group's build. */
@@ -2038,17 +2064,15 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
   if (!priming) calls += 1;
   const { flight, s, ox, oy, all, gold, source, sheet } = env;
   const fence = env.fence ?? OPEN;
-  // The implosion's vortex (round 3): an ellipse round the core that the
-  // flight canvas holds (the figure's box without a fence), its reach to
-  // each side, up and down (figure px).
+  // The implosion's reach (round 3): the radius round the core that the
+  // flight canvas holds (the figure's box without a fence), figure px.
+
   const inset = env.fence ? fence[4] / s : 0;
   const edgeL = (env.fence ? fence[0] / s : 0) + inset;
   const edgeT = (env.fence ? fence[1] / s : 0) + inset;
   const edgeR = (env.fence ? fence[2] / s : W) - inset;
   const edgeB = (env.fence ? fence[3] / s : H) - inset;
-  const reachX = Math.max(60, Math.min(CORE_X - edgeL, edgeR - CORE_X));
-  const reachUp = Math.max(60, CORE_Y - edgeT);
-  const reachDown = Math.max(60, edgeB - CORE_Y);
+  const reach = Math.max(60, Math.min(CORE_X - edgeL, edgeR - CORE_X, CORE_Y - edgeT, edgeB - CORE_Y));
 
 
   const P = all.length;
@@ -2081,6 +2105,11 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
   const chipVY = new Float32Array(CHIPS);
   const chipG = new Float32Array(CHIPS); // its banking glint (0 none … 1)
   const ripples = new Float32Array(RIPPLES * 4);
+  // Round 3 (legibility, review 38): each frame, the gold boxes of the plates
+  // being staged or printed (the back and mid chips dim inside them), and
+  // which plates show their latch (the next LATCHES to seat).
+  const busy = new Uint8Array(BUSY_W * BUSY_H);
+  const latched = new Uint8Array(P);
   const ringCount = new Float32Array(RINGS);
   const LINKS = 1200;
   const links = new Float32Array(LINKS * 5);
@@ -2449,25 +2478,34 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
   };
   // A free chip imploding (fraction u of the window) from its ring pose
   // (PX, PY on entry) into the reactor.
-  // Round 3: it turns in the vortex's own frame (its offset from the core
-  // over the vortex's reach on that side), so the spiral stays on the canvas
-  // instead of swinging the low rings out past its edges; one beyond the
-  // vortex is drawn in to its rim over the first third.
+  // Round 3 (review 31: the free chips earn their place): ahead of the seal
+  // the free chips leave their rings and gather round the reactor in two
+  // counter-turning orbits (pose PX, PY, PZ at the pose's ARG_T, blended in),
+  // so the implosion starts from a visible vortex instead of a few strays.
+  const gatherPose = (c: number) => {
+    const t = pose[ARG_T];
+    if (L.chipPlate[c] >= 0 || t < GATHER[0]) return;
+    const m = smooth((t - GATHER[0]) / (GATHER[1] - GATHER[0]));
+    const R = GATHER_R + 26 * (c % 3);
+    const th = L.theta0[c] + ((c % 2 ? 1 : -1) * TAU * GATHER_SPIN * t) / 1000;
+    pose[PX] += (CORE_X + R * Math.cos(th) - pose[PX]) * m;
+    pose[PY] += (CORE_Y + GATHER_SQUASH * R * Math.sin(th) - pose[PY]) * m;
+    pose[PZ] += (Math.sin(th) - pose[PZ]) * m;
+  };
+  // Round 3: the free chips start it from their orbits round the reactor
+  // (gatherPose); one still farther out than the canvas holds round the
+  // core is drawn in to that reach over the first third, so no spiral swings
+  // past the flight canvas's edges.
   const implodePose = () => {
     const u = pose[ARG_U];
     const a = TAU * u;
-    const nx = (pose[PX] - CORE_X) / reachX;
+    const dx = pose[PX] - CORE_X;
     const dy = pose[PY] - CORE_Y;
-    const ny = dy / (dy > 0 ? reachDown : reachUp);
-    const len = (nx * nx + ny * ny) ** 0.5;
+    const len = (dx * dx + dy * dy) ** 0.5 / reach;
     const pull = len > 1 ? 1 / (1 + (len - 1) * smooth(u / 0.3)) : 1;
     const k = (1 - u * u * u) * pull;
-    const cos = Math.cos(a);
-    const sin = Math.sin(a);
-    const rx = (nx * cos - ny * sin) * k;
-    const ry = (nx * sin + ny * cos) * k;
-    pose[PX] = CORE_X + rx * reachX;
-    pose[PY] = CORE_Y + ry * (ry > 0 ? reachDown : reachUp);
+    pose[PX] = CORE_X + (dx * Math.cos(a) - dy * Math.sin(a)) * k;
+    pose[PY] = CORE_Y + (dx * Math.sin(a) + dy * Math.cos(a)) * k;
   };
 
   // Where chip c is at t (figure px: pose PX, PY, depth PZ); returns its alpha
@@ -2505,9 +2543,14 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
       let spinBoost = 1;
       pose[ARG_T] = t;
       ringPose(c);
+      gatherPose(c);
       let x = pose[PX];
       let y = pose[PY];
       let z = pose[PZ];
+      const gathering = plate < 0 && t >= GATHER[0];
+      // A gathered chip stays crisp (never the defocused front band).
+      if (gathering && z > 0.8) z = 0.8;
+
       const roll = pose[ROLL];
       const born = (t - birth) / SW.wave;
       if (born < 1) {
@@ -2529,7 +2572,7 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
           chipVX[c] = (x - pose[PX]) * s;
           chipVY[c] = (y - pose[PY]) * s;
         }
-      } else if (!TOUCH && c % 3 === 0 && !governed) {
+      } else if (!TOUCH && c % 3 === 0 && !governed && !gathering) {
         // Comets from the ring's own speed (its travel over 24 ms, along its
         // tangent).
         const travel = 24 * pose[SPEED] * s;
@@ -2611,6 +2654,7 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
         if (!TOUCH && !governed) {
           pose[ARG_T] = t - 24;
           ringPose(c);
+          gatherPose(c);
           pose[ARG_U] = Math.max(0, u - 24 / (SW.implode[1] - SW.implode[0]));
           implodePose();
           chipVX[c] = (x - pose[PX]) * s;
@@ -2621,7 +2665,7 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
         born >= 1 &&
         !(plate >= 0 && t >= L.drainAt[c]) &&
         !(helm && t >= SW.crown[0]) &&
-        !(plate < 0 && t >= SW.implode[0]);
+        !gathering;
       if (onRing) ringCount[L.ring[c]] += 1;
       // The seats' ripples: a chip in a front is pushed out from the seat,
       // flares and is flipped over by it, then falls back into its place.
@@ -2646,10 +2690,14 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
       alpha *= 0.55 + 0.22 * (z + 1);
       const imploding = plate < 0 && t >= SW.implode[0];
       const crowned = helm && t >= SW.crown[0];
+      // Round 3: a free chip gathered round the reactor heats up, white-hot
+      // on the near side of its orbit.
+      const heated = gathering && !imploding && z > -0.15 && t >= GATHER[0] + GATHER_HEAT;
+      if (heated && c % 3) tone = WHITE;
       // Band 5: white-hot, face-on, over a glow (the free chips feeding the
       // reactor at the seal, and the crown's gold).
       const band =
-        imploding || (crowned && z > -0.15)
+        imploding || heated || (crowned && z > -0.15)
           ? 5
           : z < -0.15
             ? 1
@@ -2664,6 +2712,14 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
         const cy = Math.floor((y / H) * OCC_H);
         if (cx >= 0 && cy >= 0 && cx < OCC_W && cy < OCC_H)
           alpha *= 1 - (0.8 * L.occupancy[cy * OCC_W + cx]) / 255;
+      }
+      if ((band === 1 || band === 2) && !crowned) {
+        // Round 3: over a plate being staged or printed, the back and mid
+        // chips step back, so the plate forming is the beat's subject.
+        const cx = Math.floor((x / W) * BUSY_W);
+        const cy = Math.floor((y / H) * BUSY_H);
+        if (cx >= 0 && cy >= 0 && cx < BUSY_W && cy < BUSY_H && busy[cy * BUSY_W + cx])
+          alpha *= BUSY_DIM;
       }
       if (band === 3 && alpha > 0.7) alpha = 0.7;
       chipBand[c] = band;
@@ -3151,7 +3207,7 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
           sparks[so + 3] = (TOUCH ? 11 : 14) * s * (flicker ? 0.85 : 1.15);
           sparkCount += 1;
         }
-        if (!TOUCH && laserCount < P) {
+        if (!TOUCH && laserCount < P && latched[p]) {
           const o = laserCount * 4;
           lasers[o] = L.seatX[p] * s;
           lasers[o + 1] = L.seatY[p] * s;
@@ -3261,6 +3317,31 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
     }
   };
   /* The passes. */
+  // The frame's busy boxes and latches (see busy, latched).
+  const frameState = (t: number) => {
+    busy.fill(0);
+    latched.fill(0);
+    let shown = 0;
+    for (let k = 0; k < P; k += 1) {
+      const p = L.order[k];
+      if (L.kind[p] < 0) continue;
+      const plate = all[p];
+      const F = plate.fit;
+      const appear = F - SW.project < L.buildA[p] ? F - SW.project : L.buildA[p];
+      if (t >= appear && t < F + 120 && shown < LATCHES) {
+        latched[p] = 1;
+        shown += 1;
+      }
+      if (!L.hasBox[p] || t < plate.spawn || t >= F + SW.print[1]) continue;
+      const b = p * 4;
+      const c0 = Math.floor((L.box[b] / W) * BUSY_W);
+      const c1 = Math.floor(((L.box[b] + L.box[b + 2]) / W) * BUSY_W);
+      const r0 = Math.floor((L.box[b + 1] / H) * BUSY_H);
+      const r1 = Math.floor(((L.box[b + 1] + L.box[b + 3]) / H) * BUSY_H);
+      for (let r = r0 < 0 ? 0 : r0; r <= r1 && r < BUSY_H; r += 1)
+        for (let c = c0 < 0 ? 0 : c0; c <= c1 && c < BUSY_W; c += 1) busy[r * BUSY_W + c] = 1;
+    }
+  };
   const before = (t: number) => {
     frames += 1;
     draws = 0;
@@ -3278,6 +3359,7 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
     beamU.fill(-1);
     jigged.fill(0);
     base();
+    frameState(t);
     // 1. The cocoon's back and mid chips.
     swarm(t);
     lanes(false, t);
@@ -3502,7 +3584,7 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
         TAU,
       );
       flight.clip();
-      flight.globalAlpha = 0.9 * fade;
+      flight.globalAlpha = LATTICE_A * fade;
       plateDraw(lattice, p, 0, 0);
       flight.restore();
     }
@@ -3585,13 +3667,14 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
           sparkCount += 1;
         }
         const parent = L.parent[i];
-        if (parent >= 0 && linkCount < LINKS && !TOUCH) {
+        // Round 3: about half the locks spur a link, for LINK_MS.
+        if (parent >= 0 && since < LINK_MS && L.tflags[i] & 4 && linkCount < LINKS && !TOUCH) {
           const lo = linkCount * 5;
           links[lo] = Cx * s;
           links[lo + 1] = Cy * s;
           links[lo + 2] = (a00 * L.cx[parent] + a01 * L.cy[parent] + ex) * s;
           links[lo + 3] = (a10 * L.cx[parent] + a11 * L.cy[parent] + ey) * s;
-          links[lo + 4] = 1 - since / SW.link;
+          links[lo + 4] = 1 - since / LINK_MS;
           linkCount += 1;
         }
         continue;
@@ -3632,7 +3715,7 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
         fadeCount += 1;
       }
       // N9: the beam from the latch to the two tiles nearest lock.
-      if (u >= 0.8 && !TOUCH) {
+      if (u >= 0.9 && !TOUCH && latched[p]) {
         if (u > beamU[bu]) {
           beamU[bu + 1] = beamU[bu];
           beams[bu * 2 + 2] = beams[bu * 2];
@@ -3958,7 +4041,7 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
         any = true;
       }
       if (!any) continue;
-      flight.globalAlpha = 0.6 * (bucket === 0 ? 0.85 : bucket === 1 ? 0.5 : 0.2);
+      flight.globalAlpha = 0.45 * (bucket === 0 ? 0.85 : bucket === 1 ? 0.5 : 0.2);
       flight.stroke();
     }
     if (!TOUCH) {
@@ -3966,7 +4049,7 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
       let any = false;
       for (let p = 0; p < P; p += 1) {
         for (let b = 0; b < 2; b += 1) {
-          if (beamU[p * 2 + b] < 0.8) continue;
+          if (beamU[p * 2 + b] < 0.9) continue;
           flight.moveTo(L.seatX[p] * s, L.seatY[p] * s);
           flight.lineTo(beams[p * 4 + b * 2], beams[p * 4 + b * 2 + 1]);
           any = true;
@@ -3989,7 +4072,7 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
       // The latch is at its seat by the time its guideway starts building
       // (its laser runs to the weld head).
       const appear = Math.min(F - SW.project, L.buildA[p]);
-      if (t >= appear && t < F + 120) {
+      if (t >= appear && t < F + 120 && latched[p]) {
         const a = t - appear;
         const grow = smooth(a / 40);
         let alpha = grow * (t > F + 40 ? 1 - (t - F - 40) / 80 : 1);

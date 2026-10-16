@@ -293,8 +293,13 @@ export const REXONANCE_SUIT_SPARKS: readonly string[] = [
  * swarm, armour staging and gold guideways (rexonance-suit-extras), in ms
  * on the overlay's clock, relative to each plate's fit F where noted. The
  * pinned clocks above (fits, gold, light, pixels, cover) are unchanged; the
- * swarm rides them. */
+ * swarm rides them. The swarm is 512 cocoon chips and 160 free chips on
+ * desktop (touch: 128 and 32), deliberately more than the brief's 384 + 96:
+ * the cocoon reads as a swarm at 1x, and the free chips gather round the
+ * reactor before the seal so the implosion is a visible vortex (review 31,
+ * round 3); the per-frame draw budget (2,600) holds. */
 export const REXONANCE_SUIT_SWARM = {
+
   /** RIDER！: six pump waves of chips spiral out of the P14 core. */
   waves: [330, 380, 430, 480, 530, 580],
   /** Each wave's spiral out into the cocoon. */
