@@ -100,6 +100,15 @@ const DROP_MAX = 240;
 // progress alone: the same moment draws the same chips however it was
 // reached (the review's determinism rule).
 const FX_RESERVE = 400;
+// The nanites' own life (owner, 2026-10-16: 「更にナノマシンの挙動をブラッシュアップ
+// して。」), every term a function of q and per-chip seeds: the plates seating
+// at once whose ripple runs through the cocoon, the ripple's life, the
+// glints a frame, and the key light the banking chips catch (upper left).
+const RIPPLE_MAX = 4;
+const RIPPLE_T = 0.012;
+const GLINT_MAX = 96;
+const LIGHT_X = -0.6;
+const LIGHT_Y = -0.8;
 
 /** A stable hash of an index into [0, 1) (no PRNG state). */
 export function naniteHash(index, salt) {
@@ -1961,6 +1970,14 @@ export function createAssemblyNanites({
   const KIND = new Uint8Array(total + 1);
   const TN = new Uint8Array(total + 1);
   const UF = new Int8Array(total + 1);
+  // Per slot: the glint its lit face throws as it banks into the key light
+  // (0–1), and its velocity tracer's tail (NaN: none).
+  const GL = new Float32Array(total + 1);
+  const TRX = new Float32Array(total + 1);
+  const TRY = new Float32Array(total + 1);
+  // The plates seating now: seat x, y, age 0–1, strength.
+  const RIP = new Float64Array(RIPPLE_MAX * 4);
+  let ripN = 0;
   const backList = new Int32Array(total);
   const midList = new Int32Array(total);
   const frontList = new Int32Array(total);
@@ -2081,6 +2098,15 @@ export function createAssemblyNanites({
       RG[4] = ty / len;
     }
   };
+  // N13, traffic in the cocoon: each ring carries three density packets
+  // travelling at half its chips' speed, so the chips bunch and stream
+  // through them rather than turning like a rigid wheel, and each weaves
+  // across its ring's lanes as it goes round. A function of the chip's angle
+  // and q (the river leaves from exactly this pose).
+  const orbit = (r, theta, ln, ph, tangent, q) => {
+    const th = theta + 0.2333 * Math.sin(3 * theta - 1.5 * ROM[r] * q + 1.7 * r);
+    ringPoint(r, th, ln + 0.9 * Math.sin(2 * th + ph), ph, tangent);
+  };
   // The birth spiral (N2): out of the core along one of three arms; s 0–1.
   // Every chip of a wave shares the arms' curve (radius and angle are
   // functions of s alone), so a pump reads as three spiral arms; in its last
@@ -2112,9 +2138,11 @@ export function createAssemblyNanites({
     let fr = F0[i] + rate * (q - m);
     TN[slot] = TONE[i];
     UF[slot] = -1;
+    GL[slot] = 0;
+    TRX[slot] = NaN;
     const helm = p >= 0 && P[p].helm;
     if (q < t0) {
-      ringPoint(r, TH0[i] + ROM[r] * (q - m), LANE[i], PHI[i], false);
+      orbit(r, TH0[i] + ROM[r] * (q - m), LANE[i], PHI[i], false, q);
       let x = RG[0];
       let y = RG[1];
       let z = RG[2];
@@ -2186,7 +2214,7 @@ export function createAssemblyNanites({
       // The river: from its ring pose at t0, out along the ring, through the
       // plate's gate, onto its orbit.
       fr += rate * 2 * (q - t0);
-      ringPoint(r, TH0[i] + ROM[r] * (t0 - m), LANE[i], PHI[i], true);
+      orbit(r, TH0[i] + ROM[r] * (t0 - m), LANE[i], PHI[i], true, t0);
       const p0x = RG[0];
       const p0y = RG[1];
       const z0 = RG[2];
@@ -2203,6 +2231,21 @@ export function createAssemblyNanites({
       const d = v * v * v;
       x = a * p0x + bb * p1x + c * p2x + d * p3x;
       y = a * p0y + bb * p1y + c * p2y + d * p3y;
+      // Its heading (the curve's derivative): the tracer behind it and, as
+      // it banks into the key light, its lit face's glint (N15, N16).
+      const d0 = 3 * (1 - v) * (1 - v);
+      const d1 = 6 * (1 - v) * v;
+      const d2 = 3 * v * v;
+      const vx = d0 * (p1x - p0x) + d1 * (p2x - p1x) + d2 * (p3x - p2x);
+      const vy = d0 * (p1y - p0y) + d1 * (p2y - p1y) + d2 * (p3y - p2y);
+      const speed = Math.hypot(vx, vy);
+      if (speed > 1) {
+        const k = 0.026 * Math.sin(Math.PI * v);
+        TRX[slot] = x - vx * k;
+        TRY[slot] = y - vy * k;
+        const dot = (vx * LIGHT_X + vy * LIGHT_Y) / speed;
+        if (dot > 0.93) GL[slot] = ((dot - 0.93) / 0.07) * Math.sin(Math.PI * v);
+      }
       if (p >= 0 && P[p].kind === 2) {
         const wave = 6 * Math.sin(y / 40 - 60 * q) * Math.sin(Math.PI * v);
         x += qx * wave;
@@ -2221,14 +2264,54 @@ export function createAssemblyNanites({
       x = hx + rr * (Math.cos(psi) * qx + 0.45 * Math.sin(psi) * nx);
       y = hy + rr * (Math.cos(psi) * qy + 0.45 * Math.sin(psi) * ny);
       size = s0 * (1 + 0.25 * Math.sin(psi));
+      // N15: banking round the hover point, its lit face catches the key
+      // light once a turn — a glint, and the face-on frame.
+      const hdx = -Math.sin(psi) * qx + 0.45 * Math.cos(psi) * nx;
+      const hdy = -Math.sin(psi) * qy + 0.45 * Math.cos(psi) * ny;
+      const hl = Math.hypot(hdx, hdy) || 1;
+      const dot = (hdx * LIGHT_X + hdy * LIGHT_Y) / hl;
+      if (dot > 0.9 && rr > 2) {
+        const g = (dot - 0.9) / 0.1;
+        GL[slot] = g;
+        fr *= 1 - g;
+      }
       kind = 5;
     } else {
       // The dive: speed peaks at contact; it turns face-on and unfolds.
       fr += helm ? rate * 1.5 * dive * span : rate * (2 * 0.55 * span + 0.5 * 0.25 * span);
       const w = (u - dive) / (1 - dive);
-      const w2 = w * w;
-      x = hx + (cx - hx) * w2 * w2;
-      y = hy + (cy - hy) * w2 * w2;
+      // N14, leaders and followers: a plate's first tiles dive at once; the
+      // rest hesitate at the hover point — backing off a breath along the
+      // plate's normal, sniffing sideways — then dart in, faster, to land at
+      // the same moment. (Rank: when the tile lands within its plate's
+      // flights; the hesitation grows with it, per-chip varied.)
+      let hes = 0;
+      if (!helm && p >= 0) {
+        const pc = P[p];
+        const rank = (t1 - pc.from) / Math.max(1e-6, pc.to - pc.from);
+        hes = (0.12 + 0.16 * HSH[i]) * smooth(clamp01((rank - 0.12) / 0.3));
+      }
+      if (w < hes) {
+        const sn = w / hes;
+        const bob = Math.sin(Math.PI * sn);
+        const sniff = 2.5 * Math.sin(TAU * (sn + HSH[i])) * bob;
+        x = hx + nx * 6 * bob + qx * sniff;
+        y = hy + ny * 6 * bob + qy * sniff;
+      } else {
+        const wd = hes > 0 ? (w - hes) / (1 - hes) : w;
+        const e = hes > 0 ? wd * wd * wd : wd * wd * wd * wd;
+        x = hx + (cx - hx) * e;
+        y = hy + (cy - hy) * e;
+        // N16: its tracer, as long as it is fast.
+        const wb = wd > 0.1 ? wd - 0.1 : 0;
+        const eb = hes > 0 ? wb * wb * wb : wb * wb * wb * wb;
+        const tx = hx + (cx - hx) * eb;
+        const ty = hy + (cy - hy) * eb;
+        if (Math.abs(x - tx) + Math.abs(y - ty) > 2) {
+          TRX[slot] = tx;
+          TRY[slot] = ty;
+        }
+      }
       let f = fr % 24;
       if (f < 0) f += 24;
       if (f > 12) f -= 24;
@@ -2257,7 +2340,7 @@ export function createAssemblyNanites({
       return;
     }
     const r = free.ring[j];
-    ringPoint(r, free.th0[j] + ROM[r] * (q - b), free.lane[j], free.phi[j], false);
+    orbit(r, free.th0[j] + ROM[r] * (q - b), free.lane[j], free.phi[j], false, q);
     let x = RG[0];
     let y = RG[1];
     const z = RG[2];
@@ -2265,6 +2348,8 @@ export function createAssemblyNanites({
     let alpha = 0.45 + 0.25 * (z + 1);
     TN[slot] = free.tone[j];
     UF[slot] = -1;
+    GL[slot] = 0;
+    TRX[slot] = NaN;
     let kind = 7;
     const s = (q - b) / BIRTH;
     if (s < 1) {
@@ -2280,12 +2365,13 @@ export function createAssemblyNanites({
       // the whole cocoon about the core would sweep its tall rings off the
       // figure).
       const u = (q - N.implode[0]) / (N.implode[1] - N.implode[0]);
-      ringPoint(
+      orbit(
         r,
         free.th0[j] + ROM[r] * (q - b) + RDIR[r] * 3 * Math.PI * u * u,
         free.lane[j],
         free.phi[j],
         false,
+        q,
       );
       const k = 1 - smooth(u);
       x = coreX + (RG[0] - coreX) * k;
@@ -2302,6 +2388,27 @@ export function createAssemblyNanites({
     FR[slot] = free.f0[j] + 2400 * free.spin[j] * (q - b);
     U[slot] = -1;
     KIND[slot] = kind;
+  };
+
+  // N17, the seating ripple: a plate that seats sends a ring wave out
+  // through the cocoon from its seat — the chips at the wavefront are pushed
+  // outward, brighten and swell, then fall back into their lanes.
+  const ripple = (slot) => {
+    for (let k = 0; k < ripN; k += 1) {
+      const o = k * 4;
+      const dx = X[slot] - RIP[o];
+      const dy = Y[slot] - RIP[o + 1];
+      const d = Math.hypot(dx, dy) || 1;
+      const t = RIP[o + 2];
+      const g = (d - 24 - 300 * t) / 30;
+      if (g > 3 || g < -3) continue;
+      const w = Math.exp(-g * g) * (1 - t) * (1 - t) * RIP[o + 3];
+      X[slot] += (dx / d) * 12 * w;
+      Y[slot] += (dy / d) * 12 * w;
+      const a = A[slot] * (1 + 0.9 * w);
+      A[slot] = a > 1 ? 1 : a;
+      S[slot] *= 1 + 0.3 * w;
+    }
   };
 
   // The tiles of plate p landed by q (its tiles sorted by landing).
@@ -2630,6 +2737,19 @@ export function createAssemblyNanites({
         state.shakeX += e * Math.sin(41 * t);
         state.shakeY += e * Math.cos(37 * t);
       }
+    // The plates seating now, newest first (their ripples, N17).
+    ripN = 0;
+    for (let p = NP - 1; p >= 0 && ripN < RIPPLE_MAX; p -= 1) {
+      const pc = P[p];
+      const t = (q - pc.contact) / RIPPLE_T;
+      if (t < 0 || t >= 1) continue;
+      const o = ripN * 4;
+      RIP[o] = pc.seatX;
+      RIP[o + 1] = pc.seatY;
+      RIP[o + 2] = t;
+      RIP[o + 3] = 0.55 + 0.6 * pc.share + (pc.accent || pc.crest ? 0.4 : 0);
+      ripN += 1;
+    }
     nBack = nMid = nFront = nFlight = nImplode = 0;
     let visible = 0;
     for (let b = 0; b < NP * 2; b += 1) {
@@ -2647,6 +2767,7 @@ export function createAssemblyNanites({
       topChip[i] = 0;
       if (!kind) continue;
       visible += 1;
+      if (ripN && kind < 4) ripple(i);
       if (kind >= 4) {
         flightList[nFlight++] = i;
         const u = U[i];
@@ -2687,6 +2808,7 @@ export function createAssemblyNanites({
       poseFree(j, q, slot);
       if (!KIND[slot]) continue;
       visible += 1;
+      if (ripN && KIND[slot] === 7) ripple(slot);
       if (KIND[slot] === 8) implodeList[nImplode++] = slot;
       else if (Z[slot] < -0.15) backList[nBack++] = slot;
       else if (Z[slot] <= 0.35) midList[nMid++] = slot;
@@ -3514,6 +3636,28 @@ export function createAssemblyNanites({
     }
     let drawnArts = 0;
     let seenArts = 0;
+    // N16, velocity tracers: a hairline from where each fast chip was a
+    // moment of its flight ago (the river's, the dart's), under the chips,
+    // tapering — faint over its whole length, brighter over the half nearest
+    // the chip.
+    ctx.strokeStyle = "rgb(196 244 255)";
+    ctx.lineWidth = 0.8;
+    for (let half = 0; half < 2; half += 1) {
+      let traced = 0;
+      ctx.beginPath();
+      for (let c = 0; c < nFlight; c += 1) {
+        const i = flightList[c];
+        const tx = TRX[i];
+        if (tx !== tx || A[i] <= 0.05) continue;
+        const k = half ? 0.5 : 0;
+        ctx.moveTo(tx + (X[i] - tx) * k, TRY[i] + (Y[i] - TRY[i]) * k);
+        ctx.lineTo(X[i], Y[i]);
+        traced += 1;
+      }
+      if (!traced) break;
+      ctx.globalAlpha = (half ? 0.42 : 0.18) * (coarse ? 0.85 : 1);
+      ctx.stroke();
+    }
     for (let c = 0; c < nFlight; c += 1) {
       const i = flightList[c];
       if (comets && (KIND[i] === 4 || KIND[i] === 5)) comet(ctx, i, i);
@@ -3552,20 +3696,39 @@ export function createAssemblyNanites({
       }
     }
     flushChips(ctx);
+    // N15, the glints: the star of light a banking chip's face throws.
+    if (cells && !coarse) {
+      let glints = 0;
+      ctx.globalCompositeOperation = "lighter";
+      for (let c = 0; c < nFlight && glints < GLINT_MAX; c += 1) {
+        const i = flightList[c];
+        const g = GL[i];
+        if (g <= 0.05 || A[i] <= 0.1) continue;
+        const draw = S[i] * (1.1 + 1.3 * g);
+        ctx.globalAlpha = 0.85 * g;
+        ctx.drawImage(cells, SPX, SPY, 32, 32, X[i] - draw / 2, Y[i] - draw / 2, draw, draw);
+        sprites_ += 1;
+        glints += 1;
+      }
+      ctx.globalCompositeOperation = "source-over";
+    }
     if (coarse || CALM) {
       ctx.globalAlpha = 1;
       return;
     }
-    // The recoil: each just-locked tile, alone over its plate, rings.
+    // The recoil: each just-locked tile, alone over its plate, snaps in —
+    // squashed along its plate's normal by the impact, across it widened,
+    // then a rebound (N18, snap and bounce).
     const landed = landedBy(q);
     for (let i = landedBy(q - N.recoil); i < landed; i += 1) {
       const p = PO[i];
       const t = (q - T1[i]) / N.recoil;
-      const scale = 1 + 0.14 * Math.exp(-5 * t) * Math.cos(9.4 * t);
+      const sq = 0.18 * Math.exp(-5 * t) * Math.cos(9.4 * t);
+      const along = p >= 0 ? Math.abs(P[p].nx) : 0;
       const cx = p >= 0 ? jigX(p, CX[i], CY[i]) : CX[i];
       const cy = p >= 0 ? jigY(p, CX[i], CY[i]) : CY[i];
-      const w = TW[i] * scale;
-      const h = TH[i] * scale;
+      const w = TW[i] * (1 - sq * along + 0.6 * sq * (1 - along));
+      const h = TH[i] * (1 - sq * (1 - along) + 0.6 * sq * along);
       ctx.globalAlpha = 1 - t * 0.5;
       ctx.drawImage(metalOf(SRC[i]), SX[i], SY[i], TW[i], TH[i], cx - w / 2, cy - h / 2, w, h);
     }
