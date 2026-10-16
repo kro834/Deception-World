@@ -1894,29 +1894,9 @@ function primeNanites() {
     width: 1,
     height: 1,
   });
-  const context = canvas.getContext("2d");
-  const extras = context
-    ? createSuitExtras(
-        {
-          flight: context,
-          s: 1,
-          ox: 0,
-          oy: 0,
-          all: plates(),
-          gold: cells(),
-          source: canvas,
-          sheet: canvas,
-          // A fence like a call's (round 3): edges the swarm meets and a box
-          // kept clear, so the fades' branches are primed too.
-          fence: Float32Array.of(-12, -10, W + 30, H, 14, 0.66 * W, -12, W + 24, 0),
-        },
-        true,
-      )
-    : null;
-  if (!extras) {
-    canvas.width = canvas.height = 0;
-    return;
-  }
+  // The throwaway instance is made in an idle step of its own (round 3: not
+  // in the slice that publishes the sheets, which stays short).
+  let extras: SuitExtras | null = null;
   let k = 0;
   const queue = () => {
     if (globalThis.requestIdleCallback) globalThis.requestIdleCallback(step, { timeout: 2000 });
@@ -1928,6 +1908,32 @@ function primeNanites() {
       return;
     }
     if (work.drawing > 0) return queue();
+    if (!extras) {
+      const context = canvas.getContext("2d");
+      extras = context
+        ? createSuitExtras(
+            {
+              flight: context,
+              s: 1,
+              ox: 0,
+              oy: 0,
+              all: plates(),
+              gold: cells(),
+              source: canvas,
+              sheet: canvas,
+              // A fence like a call's (round 3): edges the swarm meets and a
+              // box kept clear, so the fades' branches are primed too.
+              fence: Float32Array.of(-12, -10, W + 30, H, 14, 0.66 * W, -12, W + 24, 0),
+            },
+            true,
+          )
+        : null;
+      if (!extras) {
+        canvas.width = canvas.height = 0;
+        return;
+      }
+      return queue();
+    }
     if (extras.prime(k)) {
       canvas.width = canvas.height = 0;
       return;
