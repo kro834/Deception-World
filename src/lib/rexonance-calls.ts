@@ -267,3 +267,79 @@ export const REXONANCE_SUIT_PIXELS = {
  * the finished figure; it switches to the build only while FAR UP！'s scan
  * is still running, never once any armour could show. */
 export const REXONANCE_SUIT_LATE_MS = 300;
+/** Sparks: every accent, and the first bite of each run (the clank's
+ * four-point glint, and from 2026-10-16 the nanite engine's shock rings). */
+export const REXONANCE_SUIT_SPARKS: readonly string[] = [
+  ...REXONANCE_SUIT_ACCENTS,
+  "boot-foot-l",
+  "boot-foot-r",
+  "knee-disc-l",
+  "knee-disc-r",
+  "arm-fist-l",
+  "shoulder-disc-l",
+  "shoulder-disc-r",
+  "tail-4b",
+  "helmet-jaw",
+];
+/** Owner (2026-10-16): 「blenderなどを用いてナノマシン一つ一つの挙動や装甲形成や
+ * 金のガイドウェイなどを大きく改善して」「超大幅な改善で。」 — the call's nanite
+ * swarm, armour staging and gold guideways (rexonance-suit-extras), in ms
+ * on the overlay's clock, relative to each plate's fit F where noted. The
+ * pinned clocks above (fits, gold, light, pixels, cover) are unchanged; the
+ * swarm rides them. */
+export const REXONANCE_SUIT_SWARM = {
+  /** RIDER！: six pump waves of chips spiral out of the P14 core. */
+  waves: [330, 380, 430, 480, 530, 580],
+  /** Each wave's spiral out into the cocoon. */
+  wave: 160,
+  /** The cocoon's rings turn at this many revolutions a second (mid ring). */
+  spin: 0.62,
+  /** Before F: the latch appears at the seat. */
+  project: 360,
+  /** Owner (2026-10-16): 「金のガイドウェイは上から被さる形ではなく、足先から
+   * 滑らかに作られていく。」 — each trim's guideway is built on the body, never
+   * laid over it: it grows along its channel from its lowest cell (the tail
+   * from its root) to its upper end, a laser-weld head running ahead of the
+   * solid conduit, and the front climbs the figure from the toe tips in the
+   * fitting order. A group's front starts at most `lead` before a plate's F
+   * (ornaments: `ornament`) and every plate's guideway is whole `done` before
+   * its F (before its first tile lands); none is built in under `least`. The
+   * head glows `head` behind the front; the laser projects `ahead` of it. */
+  build: { lead: 380, ornament: 300, done: 115, least: 70, head: 18, ahead: 32 },
+  /** Before F: the scaffold lattice grows, then is consumed. */
+  lattice: [270, 60],
+  /** Cocoon chips drain into their plate's lane from its first flight minus this. */
+  drain: 60,
+  /** The clamps swing in over [F - 120, F - 40] and bite over F ± 10. */
+  clamp: [120, 40, 10],
+  /** The plate swings down onto its seat over [F - 40, F], then rings. */
+  seat: 40,
+  overshoot: 40,
+  /** A ribbon sways this long after it seats. */
+  sway: 120,
+  /** After F: the seam ignites round the plate's real outline, then glows. */
+  seam: 90,
+  seamGlow: 60,
+  /** After F: the shock ring and the spall. */
+  shock: 140,
+  spall: 160,
+  /** The conduit prints onto the plate over [F - 30, F + 5], bottom to top
+   * along its trims (2026-10-16), whole before the first gold locks (F + 6). */
+  print: [30, 5],
+  /** Paint develops from the seat outward over [F + 6, F + 70] (helmet + 36). */
+  paint: [6, 64, 30],
+  /** The lacquer front, the lock recoil, the spark and the lattice link. */
+  lacquer: 12,
+  recoil: 40,
+  spark: 50,
+  link: 60,
+  /** The molten band and its droplets behind each gold lock. */
+  molten: 30,
+  droplet: 24,
+  /** The conduit recedes this long behind each lock; clamps release after. */
+  recede: 70,
+  release: [70, 130],
+  /** The helmet's crown ring forms, and the free chips implode at the seal. */
+  crown: [1600, 1700],
+  implode: [1980, 2160],
+} as const;

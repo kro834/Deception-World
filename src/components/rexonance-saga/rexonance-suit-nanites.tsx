@@ -19,6 +19,8 @@ import {
 } from "./rexonance-suit-plan";
 import { REXONANCE_SUIT_LIGHT } from "@/lib/rexonance-calls";
 import { REXONANCE_SUIT_MARKS } from "@/lib/rexonance-suit";
+import { warmRexonanceNanites } from "@/lib/rexonance-nanites-warmup";
+import { createSuitExtras, isRexonanceNaniteReady } from "./rexonance-suit-extras";
 
 /* rx13 (owner, 2026-10-11): "subdivide extremely finely so it feels like
    nanomachines, and fit it on in turn". The armour assembles out of the
@@ -50,7 +52,20 @@ import { REXONANCE_SUIT_MARKS } from "@/lib/rexonance-suit";
    (shared with the warm-up: ImageBitmaps where supported) before the first
    tile is due; otherwise the DOM plates play instead. Its plan and working
    atlas are prepared in idle time ahead of the call (rexonance-suit-plan).
-   It never runs after the overlay closes. */
+   It never runs after the overlay closes.
+
+   Owner (2026-10-16, 「超大幅な改善で。」): when the nanite kit is decoded and
+   its extras prepared before the call (rexonance-suit-extras), the engine
+   decides once, at its start, to draw them too: Blender hex chips born from
+   the core into an orbital cocoon, rivers through each plate's gate, aim,
+   dive, unfold and lock; each plate staged in raw nanite metal over its
+   shadow, latched, clamped, seated with a seam of light, a shock ring and
+   spall, and painted from the seat; each trim's 3D gold guideway built on
+   the body from the toe tips up (never laid over it from above), printed
+   onto the plate and poured molten. Its canvases then bleed past
+   the figure on fine pointers (data-bleed), every draw sits under the
+   figure's offset, and the plan, clock, gold and light below are
+   unchanged. Otherwise today's call plays. */
 
 /** The engine takes over only if it is ready before the first tile is due. */
 const START_BY = 420;
@@ -73,7 +88,7 @@ const GLINT = [
   ["#ffe39a", 0.22, 0.54],
 ] as const;
 
-export function SuitNanites({ onReady }: { onReady: () => void }) {
+export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
   const host = useRef<HTMLDivElement>(null);
   const ready = useRef(onReady);
   ready.current = onReady;
@@ -104,22 +119,38 @@ export function SuitNanites({ onReady }: { onReady: () => void }) {
         const atlasWork = forming(atlas, raw);
         // Touch screens draw at up to 1.25x (the tiles are 9 px of art; a 2x
         // backing store only doubled the fill work on a tablet).
-        const scale = Math.min(
-          globalThis.matchMedia?.("(pointer: coarse), (any-pointer: coarse)").matches ? 1.25 : 2,
-          globalThis.devicePixelRatio || 1,
+        const coarse = Boolean(
+          globalThis.matchMedia?.("(pointer: coarse), (any-pointer: coarse)").matches,
         );
-        const width = Math.round(box.clientWidth * scale);
-        const height = Math.round(box.clientHeight * scale);
+        const scale = Math.min(coarse ? 1.25 : 2, globalThis.devicePixelRatio || 1);
+        // The extras are decided once, here (2026-10-16); on fine pointers
+        // the flight canvas then bleeds past the figure (CSS) for the cocoon
+        // and spall. The settled canvas covers the figure exactly as it
+        // always has, so the finished suit is drawn pixel for pixel as before.
+        const rich = isRexonanceNaniteReady();
+        if (rich && !coarse) box.dataset.bleed = "";
         const make = () => {
-          const canvas = Object.assign(globalThis.document.createElement("canvas"), {
-            width,
-            height,
-          });
+          const canvas = globalThis.document.createElement("canvas");
           box.append(canvas);
-          return canvas.getContext("2d");
+          return canvas;
         };
-        const settled = make();
-        const flight = make();
+        const settledCanvas = make();
+        const flightCanvas = make();
+        settledCanvas.width = Math.round(box.clientWidth * scale);
+        settledCanvas.height = Math.round(box.clientHeight * scale);
+        const width = Math.round(flightCanvas.offsetWidth * scale);
+        const height = Math.round(flightCanvas.offsetHeight * scale);
+        flightCanvas.width = width;
+        flightCanvas.height = height;
+        // The figure's box within the flight canvas, on whole device pixels
+        // (scale-free: both rects carry the figure's transform alike).
+        const outer = flightCanvas.getBoundingClientRect();
+        const inner = box.getBoundingClientRect();
+        const ratio = outer.width ? width / outer.width : scale;
+        const ox = Math.round((inner.left - outer.left) * ratio);
+        const oy = Math.round((inner.top - outer.top) * ratio);
+        const settled = settledCanvas.getContext("2d");
+        const flight = flightCanvas.getContext("2d");
         const source = work.canvas;
         const all = plates();
         const sheet = moteSheet(atlas);
@@ -128,7 +159,10 @@ export function SuitNanites({ onReady }: { onReady: () => void }) {
           return;
         }
         work.dirty = true;
-        const s = width / FIG.width;
+        const s = settledCanvas.width / FIG.width;
+        const extras = rich
+          ? createSuitExtras({ flight, s, ox, oy, all, gold: cells(), source, sheet })
+          : null;
         const surges = planSurges();
         const end = planEnd();
         const gold = cells();
@@ -174,7 +208,7 @@ export function SuitNanites({ onReady }: { onReady: () => void }) {
           done[index] = 1;
         };
         const reset = () => {
-          settled.clearRect(0, 0, width, height);
+          settled.clearRect(0, 0, settledCanvas.width, settledCanvas.height);
           done.fill(0);
           for (let p = 0; p < all.length; p += 1) locked[p] = all[p].first;
           work.dirty = true;
@@ -207,14 +241,25 @@ export function SuitNanites({ onReady }: { onReady: () => void }) {
         const draw = (t: number) => {
           if (t < last) reset();
           last = t;
+          flight.setTransform(1, 0, 0, 1, 0, 0);
           flight.clearRect(0, 0, width, height);
+          flight.setTransform(1, 0, 0, 1, ox, oy);
           heats.fill(0);
           glints.fill(0);
           moteCount = 0;
+          // The extras' back of the frame: the cocoon behind, the guideways
+          // built on the body ahead of each plate, the lifted plates' shadows.
+          extras?.before(t);
           for (let p = 0; p < all.length; p += 1) {
             const plate = all[p];
             if (t < plate.spawn || (done[p] && t >= plate.last)) continue;
             const { piece } = plate;
+            if (t < plate.fit && extras) {
+              // Staged in raw metal under its jig; its tiles fly the river,
+              // aim, dive, unfold and lock onto it.
+              extras.forming(p, t);
+              continue;
+            }
             if (t < plate.fit) {
               // The tiles that have locked: one clip of their cells and one
               // draw of the plate. Drawn one by one at the canvas's scale,
@@ -306,17 +351,20 @@ export function SuitNanites({ onReady }: { onReady: () => void }) {
               } else {
                 while (locked[p] < plate.end && gold.lock[locked[p]] <= t) locked[p] += 1;
                 flight.globalAlpha = 1;
-                flight.drawImage(
-                  source,
-                  piece.ax,
-                  piece.ay,
-                  piece.w,
-                  piece.h,
-                  piece.x * s,
-                  piece.y * s,
-                  piece.w * s,
-                  piece.h * s,
-                );
+                // Seated: metal until the paint reaches each tile (extras).
+                if (extras) extras.seat(p, t);
+                else
+                  flight.drawImage(
+                    source,
+                    piece.ax,
+                    piece.ay,
+                    piece.w,
+                    piece.h,
+                    piece.x * s,
+                    piece.y * s,
+                    piece.w * s,
+                    piece.h * s,
+                  );
                 if (locked[p] > plate.first) {
                   flight.save();
                   flight.beginPath();
@@ -336,8 +384,11 @@ export function SuitNanites({ onReady }: { onReady: () => void }) {
                   );
                   flight.restore();
                 }
+                extras?.unseat();
               }
             }
+            // The conduit over the seated plate, receding behind the pour.
+            extras?.conduit(p, t);
             if (plate.end === plate.first) continue;
             // The gold's light: motes in flight, cells cooling, the glint.
             const sweep = (t - plate.to) / GOLD.glint;
@@ -381,6 +432,9 @@ export function SuitNanites({ onReady }: { onReady: () => void }) {
               glint[bucket][glints[bucket]++] = i;
             }
           }
+          // The extras' front: seams, rings, spall, links, latches, clamps,
+          // the molten band and its droplets, the front of the cocoon.
+          extras?.after(t);
           // The suit is whole: the reactor ignites and the light runs out
           // through the body; a bloom rides it and settles.
           if (held && t >= REXONANCE_SUIT_LIGHT.from) {
@@ -434,7 +488,13 @@ export function SuitNanites({ onReady }: { onReady: () => void }) {
           if (finished) return;
           finished = true;
           work.drawing -= 1;
+          flight.setTransform(1, 0, 0, 1, 0, 0);
           flight.clearRect(0, 0, width, height);
+          // A call that started before the kit was ready warms it for the next;
+          // one that drew its swarm hands RIDER！'s motes back their own end
+          // state (the finished frame is the classic call's exactly).
+          if (!extras) void warmRexonanceNanites();
+          else ready.current(false);
           for (let p = 0; p < all.length; p += 1) if (!done[p]) settle(p);
           if (!lit) {
             lit = true;
@@ -458,11 +518,16 @@ export function SuitNanites({ onReady }: { onReady: () => void }) {
             finish();
             return;
           }
+          const began = performance.now();
           draw(t);
+          if (extras) {
+            extras.cost(performance.now() - began);
+            if (extras.governed() && !("governed" in box.dataset)) box.dataset.governed = "";
+          }
           frame = globalThis.requestAnimationFrame(tick);
         };
         work.drawing += 1;
-        ready.current();
+        ready.current(Boolean(extras));
         draw(now);
         frame = globalThis.requestAnimationFrame(tick);
       };
