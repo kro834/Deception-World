@@ -411,7 +411,8 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rsn-coun
   white-space: nowrap;
   visibility: hidden;
   pointer-events: none;
-  transform-origin: 0.9em 55%;
+  /* owner request 2026-10-16: the cut figures are set in the forged face; the field anchors on the new digit centre */
+  transform-origin: var(--rsn-figure-origin, 0.9em) 55%;
 }
 
 /* The suffix copy only holds the line's layout; the figure's own shows. */
@@ -442,7 +443,8 @@ html[data-family="special"]
   > i {
   position: absolute;
   top: var(--rsn-field-y, 50%);
-  left: calc(var(--rsn-figure-size) * 0.94);
+  /* owner request 2026-10-16: the cut figures are set in the forged face; the field anchors on the new digit centre */
+  left: calc(var(--rsn-figure-size) * var(--rsn-figure-center, 0.94));
   display: block;
   width: calc(var(--rsn-figure-size) * 1.5);
   aspect-ratio: 1;
@@ -514,7 +516,8 @@ html[data-family="special"]
   );
   box-shadow: 0 0 16px rgb(var(--rsn-ice) / 60%);
   opacity: 0;
-  transform-origin: calc(var(--rsn-figure-size) * 0.94) 50%;
+  /* owner request 2026-10-16: the cut figures are set in the forged face; the field anchors on the new digit centre */
+  transform-origin: calc(var(--rsn-figure-size) * var(--rsn-figure-center, 0.94)) 50%;
   pointer-events: none;
 }
 
@@ -1235,7 +1238,8 @@ html[data-family="special"]
       .rxs-headline-metrics
       article
       > strong {
-      transform-origin: 0.9em 55%;
+      /* owner request 2026-10-16: the cut figures are set in the forged face; the field anchors on the new digit centre */
+      transform-origin: var(--rsn-figure-origin, 0.9em) 55%;
       animation-name: rsn-figure-in;
       animation-duration: auto;
       animation-timing-function: linear;
@@ -1555,7 +1559,8 @@ html[data-family="special"]
     article
     > strong[data-rsn-state="count"]
     ~ .rsn-field {
-    transform-origin: calc(var(--rsn-figure-size) * 0.94) var(--rsn-field-y, 50%);
+    /* owner request 2026-10-16: the cut figures are set in the forged face; the field anchors on the new digit centre */
+    transform-origin: calc(var(--rsn-figure-size) * var(--rsn-figure-center, 0.94)) var(--rsn-field-y, 50%);
     animation: rsn-charge 900ms cubic-bezier(0.5, 0, 0.9, 0.4) both;
   }
 
@@ -1577,7 +1582,8 @@ html[data-family="special"]
     .rxs-headline-metrics
     article[data-rsn-hit]
     > .rsn-field {
-    transform-origin: calc(var(--rsn-figure-size) * 0.94) var(--rsn-field-y, 50%);
+    /* owner request 2026-10-16: the cut figures are set in the forged face; the field anchors on the new digit centre */
+    transform-origin: calc(var(--rsn-figure-size) * var(--rsn-figure-center, 0.94)) var(--rsn-field-y, 50%);
     animation: rsn-shock 760ms var(--rsn-hit) both;
   }
 

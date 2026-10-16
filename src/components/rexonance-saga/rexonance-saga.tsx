@@ -125,6 +125,10 @@ const STAGES: Record<
 // data and art stay for later).
 const SHOWN_STAGES: RexonanceStage[] = ["standard", "max", "ultra"];
 
+// FORGE (rx18): the hero's outlined name, one letter a nanite mote, so the
+// cold open can assemble it from both sides of the line (silent text).
+const FORGE_MARK = [..."REXONANCE"];
+
 const PERFORMANCE_BASELINES: Record<
   PerformanceBaseline,
   {
@@ -1042,7 +1046,9 @@ const RexonancePerformance = memo(function RexonancePerformance() {
           over it once, and the field rings out from it on the lock. */}
       <div className="rxs-headline-metrics">
         <article className="rxs-reveal">
-          <small>REACTION / VS VINCULUM</small>
+          <small>
+            REACTION / <span className="rxp-nowrap">VS VINCULUM</span>
+          </small>
           <strong data-rsn-count="">
             650<span>%+</span>
             <b className="rsn-count" aria-hidden="true">
@@ -1059,7 +1065,9 @@ const RexonancePerformance = memo(function RexonancePerformance() {
           </span>
         </article>
         <article className="rxs-reveal">
-          <small>MOBILITY / VS EXTREME</small>
+          <small>
+            MOBILITY / <span className="rxp-nowrap">VS EXTREME</span>
+          </small>
           <strong data-rsn-count="">
             900<span>%</span>
             <b className="rsn-count" aria-hidden="true">
@@ -1161,7 +1169,16 @@ const RexonancePerformance = memo(function RexonancePerformance() {
               <h4>{activePerformanceBaseline.label}</h4>
               <ul>
                 {activePerformanceBaseline.processing.baseline.map((line) => (
-                  <li key={line}>{line}</li>
+                  <li key={line}>
+                    {line.includes(" · ")
+                      ? line.split(" · ").flatMap((unit, index, units) => [
+                          index > 0 ? " " : null,
+                          <span key={unit} className="rxp-nowrap">
+                            {index < units.length - 1 ? `${unit} ·` : unit}
+                          </span>,
+                        ])
+                      : line}
+                  </li>
                 ))}
               </ul>
             </section>
@@ -1169,7 +1186,16 @@ const RexonancePerformance = memo(function RexonancePerformance() {
               <h4>レクソナンス</h4>
               <ul>
                 {activePerformanceBaseline.processing.rexonance.map((line) => (
-                  <li key={line}>{line}</li>
+                  <li key={line}>
+                    {line.includes(" · ")
+                      ? line.split(" · ").flatMap((unit, index, units) => [
+                          index > 0 ? " " : null,
+                          <span key={unit} className="rxp-nowrap">
+                            {index < units.length - 1 ? `${unit} ·` : unit}
+                          </span>,
+                        ])
+                      : line}
+                  </li>
                 ))}
               </ul>
             </section>
@@ -1631,6 +1657,12 @@ export function RexonanceSaga() {
               <span>全てが最高峰で。</span>
             </span>
           </p>
+          {/* FORGE (rx18): the name's ghost, assembled from nanites on arrival. */}
+          <span className="rxf-mark" aria-hidden="true">
+            {FORGE_MARK.map((letter, index) => (
+              <i key={index}>{letter}</i>
+            ))}
+          </span>
         </div>
         <div className="rxs-hero-visual" aria-hidden="true">
           <RexonanceAperture />
