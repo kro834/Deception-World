@@ -95,6 +95,16 @@ export const Route = createFileRoute("/rexonance-saga")({
         href: "/fonts/rexonance-forge-20261016.woff2",
         crossOrigin: "anonymous",
       },
+      // ...and its outline instance (2.7 KB: the hero's ghost, on the first
+      // screen, and the form codes), so the outlined name never first draws
+      // with the forged face's inner contours and then swaps.
+      {
+        rel: "preload",
+        as: "font",
+        type: "font/woff2",
+        href: "/fonts/rexonance-forge-outline-20261016.woff2",
+        crossOrigin: "anonymous",
+      },
     ],
   }),
 });

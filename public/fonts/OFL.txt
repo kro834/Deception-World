@@ -15,9 +15,11 @@ rexonance-etch-20261016.woff2 ("Rexonance Etch")
   A subset (a-z and !) of Michroma, designed by Vernon Adams.
   Copyright 2011 The Michroma Project Authors (https://github.com/googlefonts/Michroma-font)
 
-All three are modified (subsetted) versions and are served under their own
-names, as the license asks. All are licensed under the SIL Open Font
-License, Version 1.1, copied below.
+All three are modified (subsetted) versions. Each carries its own name, in
+its name table (family, full and PostScript names) and in CSS: "Rexonance
+Forge", "Rexonance Forge Outline" and "Rexonance Etch". Neither copyright
+statement declares a Reserved Font Name. All are licensed under the SIL
+Open Font License, Version 1.1, copied below.
 
 
 This Font Software is licensed under the SIL Open Font License, Version 1.1.

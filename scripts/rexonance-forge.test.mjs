@@ -191,7 +191,14 @@ test("the forged face is preloaded on this route only; the files are small woff2
     "g",
   );
   assert.equal(route.match(preload)?.length, 1);
-  assert.equal(route.match(/as: "font"/g)?.length, 1, "one font preload on the route");
+  // owner request 2026-10-17 (round 3): the 2.7 KB outline instance is preloaded
+  // too, so the hero's outlined ghost never draws first in the forged face.
+  const outlinePreload = new RegExp(
+    String.raw`\{\s*rel: "preload",\s*as: "font",\s*type: "font/woff2",\s*href: "${OUTLINE_FONT.replace(/[./]/g, "\\$&")}",\s*crossOrigin: "anonymous",\s*\}`,
+    "g",
+  );
+  assert.equal(route.match(outlinePreload)?.length, 1);
+  assert.equal(route.match(/as: "font"/g)?.length, 2, "two font preloads on the route");
   for (const path of [
     "src/routes/world.tsx",
     "src/routes/extreme-saga.tsx",
@@ -283,12 +290,14 @@ test("every rule is scoped to the Rexonance page and leaves the bar, the menu, t
       for (const [id] of part.matchAll(/#[\w-]+/g)) assert.ok(allowedIds.has(id), `${part}: ${id}`);
     }
     // The stage tabs keep their operability contract: the face only.
+    // owner request 2026-10-17 (round 3): and the codes' tracking, a glyph fit
+    // so 「ULTRA 60s」 holds one line on 390-440px phones; never geometry.
     if (
       /\.rxs-stage-tabs(?![\w-])/.test(selector) &&
       !/\.rxs-stage-tabs\[[^\]]+\] ~/.test(selector)
     ) {
       for (const [, property] of body.matchAll(/(?:^|;)\s*([\w-]+)\s*:/g))
-        assert.equal(property, "font-family", `${selector}: ${property}`);
+        assert.ok(["font-family", "letter-spacing"].includes(property), `${selector}: ${property}`);
     }
   }
   assert.doesNotMatch(css, /--dx-(?:hud|mono|display|body)\s*:/);

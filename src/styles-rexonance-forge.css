@@ -291,6 +291,38 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-he
   }
 }
 
+/* Where the ghost heads the copy (the short windows above, tablets and
+   phones), it stands directly over the gold name: there it is the name's
+   backdrop, not a second title, at 60% of its light (it keeps its full
+   light between the lede and the cue). */
+@media (min-width: 1100px) and (max-width: 1279.98px) and (max-height: 799.98px),
+  (min-width: 1280px) and (max-width: 1365.98px) and (max-height: 839.98px),
+  (min-width: 1366px) and (max-width: 1439.98px) and (max-height: 864.98px),
+  (min-width: 1440px) and (max-width: 1535.98px) and (max-height: 894.98px),
+  (min-width: 1536px) and (max-width: 1679.98px) and (max-height: 944.98px),
+  (min-width: 1680px) and (max-width: 1919.98px) and (max-height: 994.98px),
+  (min-width: 1920px) and (max-width: 2239.98px) and (max-height: 1039.98px),
+  (min-width: 2240px) and (max-height: 1084.98px),
+  (max-width: 1099.98px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero .rxs-hero-copy > .rxf-mark > i {
+    -webkit-text-stroke: 1px rgb(121 232 255 / 16%);
+  }
+
+  @supports ((background-clip: text) or (-webkit-background-clip: text)) {
+    html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero .rxs-hero-copy > .rxf-mark > i {
+      background: linear-gradient(
+        180deg,
+        rgb(121 232 255 / 6%) 10%,
+        rgb(121 232 255 / 2%) 60%,
+        rgb(242 216 150 / 8%) 100%
+      );
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+  }
+}
+
 /* Each letter's mote: its order and where it streams in from, above and
    below the line in turn. */
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero .rxs-hero-copy > .rxf-mark > i:nth-child(1) {
@@ -378,6 +410,18 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-he
   background: var(--rxf-rail-2);
 }
 
+/* 320px phones: 「THE NEXT GENERATION」 ran 25px into the Zeus button's
+   column (at 320x568 Zeus covered 「…GENERATION」 on the first screen).
+   The rail stands over the words (as it already did there) and closer
+   tracking ends them 11px short of Zeus; the size stays 12px. */
+@media (max-width: 359.98px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero .rxs-hero-copy > p:first-child {
+    flex-direction: column;
+    align-items: flex-start;
+    letter-spacing: 0.08em;
+  }
+}
+
 /* Etched kickers (K1). Phones keep their 12px, so their wraps stay. */
 @media (min-width: 561px) {
   html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero .rxs-hero-copy > p:first-child,
@@ -413,6 +457,15 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-se
   }
 }
 
+/* ...and at 360 the kickers close up from 0.22em to 0.2em, so 「PROCESSING
+   CORE / P14」 holds its line beside 02 as it did before the forged numeral
+   (it needed 269px of 268). The numeral's outlines stay apart. */
+@media (max-width: 374.98px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-section > .rxs-section-heading > p {
+    letter-spacing: 0.2em;
+  }
+}
+
 @supports ((background-clip: text) or (-webkit-background-clip: text)) {
   html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-section > .rxs-section-heading::before {
     background: linear-gradient(180deg, rgb(242 216 150 / 24%), transparent 62%);
@@ -428,8 +481,10 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-se
 
 /* The seam: RESONANCE's line repainted as one 3px guideway (ice and
    violet into gold, a light bevel above, a dark underside below). Its
-   draw is RESONANCE's, untouched. */
+   draw is RESONANCE's, untouched. It runs in from the left edge and ends
+   at the page gutter, on its node. */
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-section::before {
+  right: var(--rxt-gutter);
   height: 3px;
   background:
     linear-gradient(90deg, rgb(255 255 255 / 70%), #fff3cf 46%) 0 0 / 100% 1px no-repeat,
@@ -438,18 +493,21 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-se
   box-shadow: 0 0 14px rgb(255 226 150 / 18%);
 }
 
-/* ...and its end node: one ice nanite, which rides the draw head. */
+/* ...and its end node: one ice nanite, which rides the draw head. The box
+   runs 10px past the node and stands 20px tall, so the node's glow is whole
+   (never cut by its own box, the viewport or a classic scrollbar); the run
+   (rxf-run) travels the rail's length, so it still rides the head. */
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-section::after {
   content: "" / "";
   position: absolute;
   z-index: 1;
-  top: -2.5px;
-  right: 0;
+  top: -8.5px;
+  right: calc(var(--rxt-gutter) - 10px);
   left: 0;
-  height: 8px;
+  height: 20px;
   background:
-    var(--rxf-chip) 100% 50% / 7px 8px no-repeat,
-    radial-gradient(circle at calc(100% - 3.5px) 50%, rgb(121 232 255 / 45%), transparent 9px);
+    var(--rxf-chip) calc(100% - 10px) 50% / 7px 8px no-repeat,
+    radial-gradient(circle at calc(100% - 13.5px) 50%, rgb(121 232 255 / 45%), transparent 9px);
   pointer-events: none;
 }
 
@@ -457,16 +515,26 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-se
    01: the cuts, the comparison, the processors
    ================================================================ */
 /* The field anchors on the forged digits' centre (the resonance sheet
-   reads these two). */
+   reads these two): the rings sit on the three digits' measured centre. */
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #performance .rxs-headline-metrics {
-  --rsn-figure-center: 1.19;
+  --rsn-figure-center: 1.15;
   --rsn-figure-origin: 1.15em;
 }
 
-/* Phones: 「650%+」 forged at ZENITH's 33vw leaves 1px; 31.5vw leaves 12-20. */
+/* The figure keeps clear of the Zeus button (fixed at the right edge, so
+   every line passes it as the cut scrolls). 「650%+」 spans 2.72em from the
+   gutter: on phones (gutter 5vw, Zeus 72px in) this size leaves it 14px
+   short of Zeus at 320-430, as before the forged digits; on laptops a
+   touch under RESONANCE's 15.5vw leaves 20px or more at 1100-1536. */
 @media (max-width: 760px) {
   html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #performance .rxs-headline-metrics {
-    --rsn-figure-size: clamp(72px, 31.5vw, 144px);
+    --rsn-figure-size: clamp(72px, calc(35vw - 32px), 144px);
+  }
+}
+
+@media (min-width: 1100px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #performance .rxs-headline-metrics {
+    --rsn-figure-size: clamp(110px, calc(15.5vw - 6px), 252px);
   }
 }
 
@@ -522,6 +590,21 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-comp
   letter-spacing: -0.01em;
   font-variant-numeric: tabular-nums lining-nums;
   -webkit-text-fill-color: #79e8ff;
+}
+
+/* 1100-1439px: the comparison is a column 436-590px wide. Every row's label
+   stands over its value there (an instrument's legend), so the result always
+   sits beside it: the long 走力 rows (「0.00021秒」 against 「47,619.0%」 and
+   its estimate) no longer drop their result onto a line of their own. */
+@media (min-width: 1100px) and (max-width: 1439.98px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-comparison-metrics article header > div {
+    display: block;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-comparison-metrics article header small {
+    display: block;
+    margin-bottom: 4px;
+  }
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-comparison-result em {
@@ -644,6 +727,17 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-se
   font-family: var(--rxf-etch);
 }
 
+/* Phones 376-440px: the three codes set without Michroma's 0.12em tracking,
+   so 「ULTRA 60s」 (91.8px untracked, 104.8 tracked) holds one line in its
+   94-110px tab at 390-440. Narrower tabs are narrower than the code itself at
+   the 12px floor and keep its break 「ULTRA／60s」. Glyph fit only: the
+   tabs' geometry, size and face stay. */
+@media (min-width: 376px) and (max-width: 440px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-section .rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"] small {
+    letter-spacing: 0;
+  }
+}
+
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages .rxs-stage-panel > div > small {
   font-family: var(--rxf-etch);
 }
@@ -674,6 +768,16 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages
   /* 「ULTRA 60s」 measures 5.905em; the extra keeps it 10px clear of the
      chip on a 320px phone (the chip's s is Michroma's, a little wider). */
   --rzn-code-em: 6.24;
+}
+
+/* ...and it rests there once the form has been drawn. ZENITH's sweep plays
+   while RESONANCE's form flag is up and has ended by the time the flag
+   clears (at most 380 + 760 ms of the flag's 1800); the Premiere's entrance
+   (its card resolve, its quiet settle) must not take the code over then and
+   replay it, which flashed the code about 1.85 s after every change. Above
+   the Premiere's (1,6,2), below ZENITH's flagged rule (1,11,3). */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page #rxs-stage-panel[data-entrance] > div > .rzn-form-code {
+  animation: none;
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages .rxs-stage-panel > div > .rzn-form-code,
@@ -858,6 +962,16 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-fo
 @media (max-width: 374px) {
   html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-footer h2 {
     font-size: clamp(30px, 10.4vw, 40px);
+  }
+}
+
+/* Tablets break the last line after 理不尽すら (its <wbr>), as phones and
+   laptops do: from 901px the finished suit stands at the right, and the
+   one-line title ran 176px into its legs at 1024 (「せろ。」 on the armour).
+   7.4em holds 「殺して見せろ。」 and no more. */
+@media (min-width: 761px) and (max-width: 1099.98px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-footer h2 {
+    max-width: 7.4em;
   }
 }
 
@@ -1206,8 +1320,9 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-fo
 }
 
 @keyframes rxf-run {
+  /* The rail's length: the node's box is 10px longer than the rail. */
   from {
-    translate: -100% 0;
+    translate: calc(-100% + 10px) 0;
   }
 
   to {
