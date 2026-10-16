@@ -888,6 +888,33 @@ const renderStageLede = (lede: string) =>
     ),
   );
 
+// FORGE (rx18): a long plate title breaks only between its phrases
+// (第二世代／無限縮小／製造プロセス), never inside a word ("プロ｜セス"); the
+// visible text and the heading's name are unchanged.
+const PLATE_TITLE_PHRASE_ENDS = /(第二世代|無限縮小)/;
+const renderPlateTitle = (title: string) =>
+  title.split(PLATE_TITLE_PHRASE_ENDS).map((part, index) => (
+    <Fragment key={`${index}-${part}`}>
+      {part}
+      {index % 2 === 1 ? <wbr /> : null}
+    </Fragment>
+  ));
+
+// FORGE (rx18): a plate code never starts a line with its slash, and FINAL
+// JUDGMENT stays one phrase. <b>, not <span>: the plate's numeral rules
+// style every span in its header. The text is unchanged.
+const PLATE_CODE_UNITS = /([^\s-]+ \/|FINAL JUDGMENT)/;
+const renderPlateCode = (code: string) =>
+  code.split(PLATE_CODE_UNITS).map((part, index) =>
+    index % 2 === 1 ? (
+      <b key={`${index}-${part}`} className="rxp-nowrap">
+        {part}
+      </b>
+    ) : (
+      <Fragment key={`${index}-${part}`}>{part}</Fragment>
+    ),
+  );
+
 // Keep frequent comparison input updates out of the hero, stage art and effects.
 const P14Comparator = memo(function P14Comparator({
   nativeIOSSelection,
@@ -1141,8 +1168,11 @@ const RexonancePerformance = memo(function RexonancePerformance() {
                 <span className="rxs-comparison-result">
                   <i>基準比</i>
                   <b>{metric.relative}</b>
+                  {/* FORGE (rx18): the slash ends a line, never starts one, and the
+                  delta stays whole (「（推定値比）」 never splits). */}
                   <em>
-                    {metric.multiplier} / {metric.delta}
+                    <span className="rxp-nowrap">{metric.multiplier} /</span>{" "}
+                    <span className="rxp-nowrap">{metric.delta}</span>
                   </em>
                 </span>
               </header>
@@ -1153,9 +1183,16 @@ const RexonancePerformance = memo(function RexonancePerformance() {
                 <i className="is-rexonance" />
                 <i className="is-extreme" style={{ width: `${metric.bar}%` }} />
               </div>
+              {/* FORGE (rx18): each slash ends its line; the text is unchanged. */}
               <p>
-                {activePerformanceBaseline.code} / {metric.previous}
-                {metric.note ? <span> / {metric.note}</span> : null}
+                <span className="rxp-nowrap">{activePerformanceBaseline.code} /</span>{" "}
+                {metric.note ? (
+                  <>
+                    <span className="rxp-nowrap">{metric.previous} /</span> {metric.note}
+                  </>
+                ) : (
+                  metric.previous
+                )}
               </p>
             </article>
           ))}
@@ -1172,16 +1209,24 @@ const RexonancePerformance = memo(function RexonancePerformance() {
           <div>
             <section>
               <h4>{activePerformanceBaseline.label}</h4>
+              {/* FORGE (rx18): a line breaks only after its "/" or "·"; each part
+              stays whole, so neither begins a line (the text is unchanged). */}
               <ul>
                 {activePerformanceBaseline.processing.baseline.map((line) => (
                   <li key={line}>
-                    {line.includes(" · ")
-                      ? line.split(" · ").flatMap((unit, index, units) => [
-                          index > 0 ? " " : null,
-                          <span key={unit} className="rxp-nowrap">
-                            {index < units.length - 1 ? `${unit} ·` : unit}
-                          </span>,
-                        ])
+                    {/ · | \/ /.test(line)
+                      ? line.split(" · ").flatMap((unit, index, units) =>
+                          unit.split(" / ").flatMap((part, at, parts) => [
+                            index > 0 || at > 0 ? " " : null,
+                            <span key={`${index}-${at}`} className="rxp-nowrap">
+                              {at < parts.length - 1
+                                ? `${part} /`
+                                : index < units.length - 1
+                                  ? `${part} ·`
+                                  : part}
+                            </span>,
+                          ]),
+                        )
                       : line}
                   </li>
                 ))}
@@ -1192,13 +1237,19 @@ const RexonancePerformance = memo(function RexonancePerformance() {
               <ul>
                 {activePerformanceBaseline.processing.rexonance.map((line) => (
                   <li key={line}>
-                    {line.includes(" · ")
-                      ? line.split(" · ").flatMap((unit, index, units) => [
-                          index > 0 ? " " : null,
-                          <span key={unit} className="rxp-nowrap">
-                            {index < units.length - 1 ? `${unit} ·` : unit}
-                          </span>,
-                        ])
+                    {/ · | \/ /.test(line)
+                      ? line.split(" · ").flatMap((unit, index, units) =>
+                          unit.split(" / ").flatMap((part, at, parts) => [
+                            index > 0 || at > 0 ? " " : null,
+                            <span key={`${index}-${at}`} className="rxp-nowrap">
+                              {at < parts.length - 1
+                                ? `${part} /`
+                                : index < units.length - 1
+                                  ? `${part} ·`
+                                  : part}
+                            </span>,
+                          ]),
+                        )
                       : line}
                   </li>
                 ))}
@@ -1977,9 +2028,9 @@ export function RexonanceSaga() {
                 <article key={system.number} className="rxs-reveal">
                   <header>
                     <span>{system.number}</span>
-                    <small>{system.code}</small>
+                    <small>{renderPlateCode(system.code)}</small>
                   </header>
-                  <h3>{system.title}</h3>
+                  <h3>{renderPlateTitle(system.title)}</h3>
                   <p>{system.body}</p>
                 </article>
               ))}
@@ -1988,13 +2039,20 @@ export function RexonanceSaga() {
             <div className="rxs-specs rxs-reveal">
               <div>
                 <small>KHAOS DeuX</small>
+                {/* FORGE (rx18): the wave is set as a figure's mark, not a CJK
+                glyph at the digits' size (the text is unchanged). */}
                 <strong data-rsn-count="">
-                  50,000〜<span>YOPS</span>
+                  50,000<i className="rxf-wave">〜</i>
+                  <span>YOPS</span>
                   <b className="rsn-count" aria-hidden="true">
-                    50,000〜<span>YOPS</span>
+                    50,000<i className="rxf-wave">〜</i>
+                    <span>YOPS</span>
                   </b>
                 </strong>
-                <p>∞ CORE / 基準値</p>
+                {/* FORGE (rx18): the Japanese word is printed, not etched. */}
+                <p>
+                  ∞ CORE / <span>基準値</span>
+                </p>
               </div>
               {/* A drawn hairline, not a multiplication sign: the two units stand
               side by side and are never multiplied (rx2/COPY2.md C8). */}

@@ -916,7 +916,8 @@ test("each figure keeps the owner's value as its own text; its counter is a hidd
   for (const [value, suffix] of [
     ["650", "<span>%\\+</span>"],
     ["900", "<span>%</span>"],
-    ["50,000〜", "<span>YOPS</span>"],
+    // owner request 2026-10-16: FORGE (rx18) sets the wave as its own mark; the text is unchanged
+    ['50,000<i className="rxf-wave">〜</i>', "\\s*<span>YOPS</span>"],
     ["9,000", "<span>TOPS</span>"],
   ]) {
     assert.match(

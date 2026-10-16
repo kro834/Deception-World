@@ -549,6 +549,10 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-comp
   letter-spacing: 0.08em;
 }
 
+/* The processors' units are the parts between a "/" or a "·" (the
+   component's markup), each at most about 135px forged at 14px: every one
+   fits a 212px card's 164px measure at 1100px, so a unit never widens the
+   list past its card and the slash or dot always ends a line. */
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-processing-comparison li {
   font: 500 14px / 1.6 var(--rxf-forge-text);
   letter-spacing: 0.02em;
@@ -607,8 +611,11 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .r
 /* ================================================================
    SUIT-UP: the HUD's text (ZENITH's sizes and telemetry stay)
    ================================================================ */
+/* The call is etched: Michroma's capitals with the Etch lowercase, so the
+   entry call's 「Ultra」 is one face, never Michroma's U with Oxanium's ltra. */
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-line,
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-chip {
+  font-family: var(--rxf-etch);
   font-feature-settings: "palt" 1, "pwid" 1;
 }
 
@@ -623,9 +630,10 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-su
   font-weight: 700;
 }
 
-/* The percent locks in gold once the suit is on (and on the still). */
+/* The percent locks in gold once the suit is on, and on the finished still
+   (no state at all): never while the scene loads, which may print 000. */
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup[data-rzn-complete] .rzn-percent,
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup:not([data-rzn-state="live"]) .rzn-percent {
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup:not([data-rzn-state]) .rzn-percent {
   color: #f2d896;
 }
 
@@ -739,15 +747,48 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #system
   font-variant-numeric: proportional-nums lining-nums;
 }
 
+/* The plate's head is a nameplate: the forged numeral, and under it the
+   etched code as the title's kicker, set from the plate's own edge. Side by
+   side, a two-part code had a third of the plate and broke into three or
+   four ragged lines (「/ FINAL」 began one). */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #system .rxs-system-grid article > header {
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 14px;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #system .rxs-system-grid article > header > small {
+  padding-top: 0;
+  font-family: var(--rxf-etch);
+  text-align: start;
+}
+
+/* The code's units (the slash with the word before it; FINAL JUDGMENT). */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #system .rxs-system-grid article > header > small > b {
+  font: inherit;
+  letter-spacing: inherit;
+}
+
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #system .rxs-system-grid h3 {
   font-feature-settings: "palt" 1;
   letter-spacing: 0;
+  /* Titles break between phrases (「悠真自身による／自己共鳴」); the long
+     one also carries its own <wbr>s. keep-all stays where this is missing. */
+  word-break: auto-phrase;
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-specs > div > small,
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-specs p {
   font: 400 12px / 1.6 var(--rxf-etch);
   letter-spacing: 0.2em;
+}
+
+/* ...and the Japanese word in a spec's foot is printed, never etched with
+   Michroma's tracking (as the comparison's labels). */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-specs p > span {
+  font: 500 12px / 1.6 var(--dx-body);
+  letter-spacing: 0.08em;
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-specs strong {
@@ -759,10 +800,23 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-spec
   text-shadow: none;
 }
 
+/* Phones: 「50,000〜YOPS」 keeps 12px or more to its column at 320-560. */
 @media (max-width: 560px) {
   html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-specs strong {
-    font-size: min(15.5vw, 64px);
+    font-size: min(14.5vw, 60px);
   }
+}
+
+/* The wave after the KHAOS figure is set as the figure's mark: the printed
+   〜 at a little over half the digits' size, on their centre line, painted
+   by the figure's own chrome (so it counts, locks and cools with it). */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-specs strong .rxf-wave {
+  margin: 0 0.04em;
+  font: 400 max(12px, 0.62em) / 1 var(--dx-body);
+  font-style: normal;
+  letter-spacing: 0;
+  font-feature-settings: normal;
+  vertical-align: 0.18em;
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-specs strong span {
@@ -834,7 +888,7 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-spec
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #performance .rxs-headline-metrics > article + article strong span,
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-specs strong span,
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup[data-rzn-complete] .rzn-percent,
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup:not([data-rzn-state="live"]) .rzn-percent {
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup:not([data-rzn-state]) .rzn-percent {
     color: transparent;
     -webkit-text-fill-color: transparent;
     background: var(--rxf-gold);
@@ -996,7 +1050,7 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-he
   html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero h1 > span,
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-footer > div > p,
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup[data-rzn-complete] .rzn-percent,
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup:not([data-rzn-state="live"]) .rzn-percent {
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup:not([data-rzn-state]) .rzn-percent {
     color: #f2d896;
     -webkit-text-fill-color: currentcolor;
     background: none;

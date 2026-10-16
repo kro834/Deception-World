@@ -673,10 +673,78 @@ test("the owner's copy renders unchanged: the cut kickers and every processing l
     const items = nodes(comparison, (node) => node.type === "li").map(text);
     const { processing } = context.catalog[value];
     assert.deepEqual(items, [...processing.baseline, ...processing.rexonance], value);
+    // owner request 2026-10-16: FORGE (rx18) — a line breaks only after its
+    // "/" or "·": every part between them is one unit, ending in its mark.
     for (const item of nodes(comparison, (node) => node.type === "li")) {
-      const units = nodes(item, (node) => node.props.className === "rxp-nowrap");
-      if (text(item).includes(" · ")) assert.equal(units.length, text(item).split(" · ").length);
-      else assert.equal(units.length, 0);
+      const units = nodes(item, (node) => node.props.className === "rxp-nowrap").map(text);
+      const line = text(item);
+      const parts = line.split(" · ").flatMap((unit) => unit.split(" / "));
+      if (/ · | \/ /.test(line)) {
+        assert.equal(units.length, parts.length, line);
+        assert.equal(units.join(" "), line);
+        for (const unit of units.slice(0, -1)) assert.match(unit, / [/·]$/, line);
+      } else assert.equal(units.length, 0, line);
     }
+    // owner request 2026-10-16: FORGE (rx18) — the result and the foot keep
+    // their slash on the line it ends.
+    const metrics = nodes(root, (node) => node.props.className === "rxs-comparison-metrics")[0];
+    for (const row of nodes(metrics, (node) => node.type === "article")) {
+      const result = nodes(row, (node) => node.type === "em")[0];
+      const parts = nodes(result, (node) => node.props.className === "rxp-nowrap").map(text);
+      assert.equal(parts.length, 2);
+      assert.match(parts[0], / \/$/);
+      assert.equal(parts.join(" "), text(result));
+      const foot = nodes(row, (node) => node.type === "p")[0];
+      assert.equal(
+        text(nodes(foot, (node) => node.props.className === "rxp-nowrap")[0]),
+        `${context.catalog[value].code} /`,
+      );
+      assert.match(text(foot), new RegExp(`^${context.catalog[value].code} / `));
+    }
+    // owner request 2026-10-16: FORGE (rx18) — the foot reads as before, and a
+    // note's slash stays with the value it follows.
+    const feet = nodes(metrics, (node) => node.type === "p");
+    context.catalog[value].metrics.forEach((metric, index) => {
+      const { code } = context.catalog[value];
+      const expected = `${code} / ${metric.previous}${metric.note ? ` / ${metric.note}` : ""}`;
+      assert.equal(text(feet[index]), expected);
+      const units = nodes(feet[index], (node) => node.props.className === "rxp-nowrap").map(text);
+      assert.deepEqual(units, metric.note ? [`${code} /`, `${metric.previous} /`] : [`${code} /`]);
+    });
+  }
+});
+
+test("the plates break between phrases, and the KHAOS wave is the figure's mark", () => {
+  // owner request 2026-10-16: FORGE (rx18) — the plate title and code helpers
+  // only add <wbr> and units: the text stays the owner's.
+  assert.match(page, /<small>\{renderPlateCode\(system\.code\)\}<\/small>/);
+  assert.match(page, /<h3>\{renderPlateTitle\(system\.title\)\}<\/h3>/);
+  assert.match(page, /const PLATE_TITLE_PHRASE_ENDS = \/\(第二世代\|無限縮小\)\/;/);
+  assert.match(page, /const PLATE_CODE_UNITS = \/\(\[\^\\s-\]\+ \\\/\|FINAL JUDGMENT\)\/;/);
+  // The plate's numeral rules style every span in its header: units are <b>.
+  assert.match(page, /<b key=\{`\$\{index\}-\$\{part\}`\} className="rxp-nowrap">/);
+  // owner request 2026-10-16: FORGE (rx18) — the wave is wrapped, never changed.
+  const figure = page.match(/<small>KHAOS DeuX<\/small>[\s\S]*?<\/strong>/)?.[0] ?? "";
+  assert.equal((figure.match(/50,000<i className="rxf-wave">〜<\/i>\s*<span>YOPS<\/span>/g) || []).length, 2);
+  assert.match(css, /\.rxs-specs strong \.rxf-wave \{[^}]*font: 400 max\(12px, 0\.62em\) \/ 1 var\(--dx-body\);/);
+  // It paints with the figure (counts, locks and cools with it): no own fill.
+  assert.doesNotMatch(css.match(/\.rxs-specs strong \.rxf-wave \{[^}]*\}/)[0], /background|color|fill/);
+});
+
+test("the HUD's call is etched, and its percent turns gold only when complete or at rest", () => {
+  // owner request 2026-10-16: FORGE (rx18) — 「Ultra」 is one face (Etch's
+  // lowercase), never Michroma's U with Oxanium's ltra.
+  assert.match(
+    css,
+    /> \.rzn-suitup \.rzn-line,\s*html\[data-family="special"\] body \.rxs-page\.rxs-page\.rxs-rexonance-page > \.rzn-suitup \.rzn-chip \{\s*font-family: var\(--rxf-etch\);/,
+  );
+  // owner request 2026-10-16: FORGE (rx18) — gold is the finished state: the
+  // completed scrub or the still (no data-rzn-state), never a loading HUD.
+  const gold = css.match(/[^{}]*\.rzn-percent[^{}]*\{[^}]*#f2d896[^}]*\}/g) ?? [];
+  assert.ok(gold.length >= 1);
+  for (const rule of gold) {
+    assert.match(rule, /\.rzn-suitup\[data-rzn-complete\] \.rzn-percent/);
+    assert.match(rule, /\.rzn-suitup:not\(\[data-rzn-state\]\) \.rzn-percent/);
+    assert.doesNotMatch(rule, /data-rzn-state="live"/);
   }
 });
