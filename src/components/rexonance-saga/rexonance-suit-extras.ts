@@ -1906,6 +1906,9 @@ function primeNanites() {
           gold: cells(),
           source: canvas,
           sheet: canvas,
+          // A fence like a call's (round 3): edges the swarm meets and a box
+          // kept clear, so the fades' branches are primed too.
+          fence: Float32Array.of(-12, -10, W + 30, H, 14, 0.66 * W, -12, W + 24, 0),
         },
         true,
       )
@@ -2282,26 +2285,20 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
   // and past the flight canvas's edges and inside the label kept clear,
   // rising to 1 over the fence's margin, so no sprite meets a straight cut
   // and none sits on the HUD's glyphs.
+  // (By the nearest of them; no variable that mixes integers and doubles,
+  // which V8 would box.)
   const fenceFade = () => {
     const x = pose[SX];
     const y = pose[SY];
-    const m = fence[4];
-    let f = 1;
-    let d = x - fence[0];
-    if (d < m) f = d > 0 ? (f * d) / m : 0;
-    d = fence[2] - x;
-    if (d < m) f = d > 0 ? (f * d) / m : 0;
-    d = y - fence[1];
-    if (d < m) f = d > 0 ? (f * d) / m : 0;
-    d = fence[3] - y;
-    if (d < m) f = d > 0 ? (f * d) / m : 0;
-    if (fence[7] > fence[5]) {
-      const gx = x < fence[5] ? fence[5] - x : x > fence[7] ? x - fence[7] : 0;
-      const gy = y < fence[6] ? fence[6] - y : y > fence[8] ? y - fence[8] : 0;
-      d = gx > gy ? gx : gy;
-      if (d < m) f = d > 0 ? (f * d) / m : 0;
-    }
-    pose[FADE] = f * f * (3 - 2 * f);
+    const across = x - fence[0] < fence[2] - x ? x - fence[0] : fence[2] - x;
+    const down = y - fence[1] < fence[3] - y ? y - fence[1] : fence[3] - y;
+    const edge = across < down ? across : down;
+    const gx = x < fence[5] ? fence[5] - x : x > fence[7] ? x - fence[7] : 0;
+    const gy = y < fence[6] ? fence[6] - y : y > fence[8] ? y - fence[8] : 0;
+    const clear =
+      fence[7] <= fence[5] ? edge : gx > gy ? (gx < edge ? gx : edge) : gy < edge ? gy : edge;
+    const u = clear <= 0 ? 0 : clear >= fence[4] ? 1 : clear / fence[4];
+    pose[FADE] = u * u * (3 - 2 * u);
   };
   const rect = (bucket: number, x: number, y: number, d: number) => {
     const k = rectCount[bucket];
@@ -4444,6 +4441,9 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
     governed: () => governed,
     prime: (k: number) => {
       if (k < PRIME_T.length) {
+        // The frame's busy boxes and latches too (round 3), so the swarm's
+        // dimmed branches have feedback before a call takes them.
+        frameState(PRIME_T[k]);
         swarm(PRIME_T[k]);
         return false;
       }
