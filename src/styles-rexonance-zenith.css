@@ -173,13 +173,49 @@ html[data-family="special"]
   display: block;
 }
 
+/* Motion allowed, near, not yet live (the preparation can take seconds):
+   the undersuit stands where the scene starts, as faint as the first live
+   frame draws it, never the finished suit (owner, 2026-10-16: 「スクロールする
+   前から完成済みなこともあるので修正して。」). Until the first live frame is on
+   the canvas, the still that was showing stays under it. */
 html[data-family="special"]
   body
   .rxs-page.rxs-page.rxs-rexonance-page
-  > .rzn-suitup[data-rzn-state="live"]
+  > .rzn-suitup[data-rzn-state]:not([data-rzn-arming="still"])
   > .rzn-frame
   > .rzn-still {
   visibility: hidden;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup
+  > .rzn-frame
+  > .rzn-under {
+  position: absolute;
+  left: calc(var(--rzn-fig-x) * 100%);
+  bottom: calc(var(--rzn-fig-b) * 100%);
+  z-index: 1;
+  display: none;
+  width: calc(var(--rzn-fig-w) * 100%);
+  max-width: none;
+  height: calc(var(--rzn-fig-h) * 100%);
+  margin: 0;
+  translate: -50% 0;
+  object-fit: contain;
+  object-position: 50% 100%;
+  opacity: 0.24;
+  pointer-events: none;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup:is([data-rzn-state="loading"], [data-rzn-arming="under"])
+  > .rzn-frame
+  > .rzn-under {
+  display: block;
 }
 
 /* ---------------- The call (left) ---------------- */
@@ -474,7 +510,7 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-su
 html[data-family="special"]
   body
   .rxs-page.rxs-page.rxs-rexonance-page
-  > .rzn-suitup[data-rzn-state="live"]
+  > .rzn-suitup[data-rzn-state]
   .rzn-chip:not([data-on]) {
   opacity: 0.2;
   translate: 0 0.14em;
@@ -483,7 +519,7 @@ html[data-family="special"]
 html[data-family="special"]
   body
   .rxs-page.rxs-page.rxs-rexonance-page
-  > .rzn-suitup[data-rzn-state="live"]
+  > .rzn-suitup[data-rzn-state]
   .rzn-line[data-on]
   .rzn-chip[data-on] {
   color: rgb(var(--rzn-white));
@@ -495,7 +531,7 @@ html[data-family="special"]
 html[data-family="special"]
   body
   .rxs-page.rxs-page.rxs-rexonance-page
-  > .rzn-suitup[data-rzn-state="live"]
+  > .rzn-suitup[data-rzn-state]
   .rzn-line[data-done]
   .rzn-chip {
   opacity: 0.5;
@@ -504,7 +540,7 @@ html[data-family="special"]
 html[data-family="special"]
   body
   .rxs-page.rxs-page.rxs-rexonance-page
-  > .rzn-suitup[data-rzn-state="live"]
+  > .rzn-suitup[data-rzn-state]
   .rzn-part:not([data-on]) {
   opacity: 0.32;
 }
@@ -512,7 +548,7 @@ html[data-family="special"]
 html[data-family="special"]
   body
   .rxs-page.rxs-page.rxs-rexonance-page
-  > .rzn-suitup[data-rzn-state="live"]
+  > .rzn-suitup[data-rzn-state]
   .rzn-part:not([data-on])::after {
   background: transparent;
   box-shadow: inset 0 0 0 1px rgb(var(--rzn-ice) / 60%);
@@ -521,7 +557,7 @@ html[data-family="special"]
 html[data-family="special"]
   body
   .rxs-page.rxs-page.rxs-rexonance-page
-  > .rzn-suitup[data-rzn-state="live"]:not([data-rzn-complete])
+  > .rzn-suitup[data-rzn-state]:not([data-rzn-complete])
   .rzn-stamp {
   opacity: 0;
   scale: 1.35;
@@ -530,7 +566,7 @@ html[data-family="special"]
 html[data-family="special"]
   body
   .rxs-page.rxs-page.rxs-rexonance-page
-  > .rzn-suitup[data-rzn-state="live"]:is([data-rzn-line="0"], [data-rzn-line="1"])
+  > .rzn-suitup[data-rzn-state]:is([data-rzn-line="0"], [data-rzn-line="1"])
   .rzn-hint {
   display: flex;
 }
@@ -813,7 +849,7 @@ html[data-family="special"]
   html[data-family="special"]:not([data-world-effects="economy"])
     body
     .rxs-page.rxs-page.rxs-rexonance-page
-    > .rzn-suitup[data-rzn-state="live"]
+    > .rzn-suitup[data-rzn-state]
     .rzn-lines {
     grid-template-areas: "line";
   }
@@ -821,7 +857,7 @@ html[data-family="special"]
   html[data-family="special"]:not([data-world-effects="economy"])
     body
     .rxs-page.rxs-page.rxs-rexonance-page
-    > .rzn-suitup[data-rzn-state="live"]
+    > .rzn-suitup[data-rzn-state]
     .rzn-line {
     grid-area: line;
     font-size: clamp(20px, 4vw, 36px);
@@ -830,7 +866,7 @@ html[data-family="special"]
   html[data-family="special"]:not([data-world-effects="economy"])
     body
     .rxs-page.rxs-page.rxs-rexonance-page
-    > .rzn-suitup[data-rzn-state="live"]
+    > .rzn-suitup[data-rzn-state]
     .rzn-line:is(:nth-child(3), :nth-child(4)) {
     font-size: clamp(14px, 2.9vw, 26px);
   }
@@ -838,7 +874,7 @@ html[data-family="special"]
   html[data-family="special"]:not([data-world-effects="economy"])
     body
     .rxs-page.rxs-page.rxs-rexonance-page
-    > .rzn-suitup[data-rzn-state="live"]
+    > .rzn-suitup[data-rzn-state]
     .rzn-line:last-child {
     font-size: clamp(20px, 4vw, 36px);
   }
@@ -846,7 +882,7 @@ html[data-family="special"]
   html[data-family="special"]:not([data-world-effects="economy"])
     body
     .rxs-page.rxs-page.rxs-rexonance-page
-    > .rzn-suitup[data-rzn-state="live"]
+    > .rzn-suitup[data-rzn-state]
     .rzn-line:not([data-on]) {
     visibility: hidden;
   }
@@ -863,7 +899,7 @@ html[data-family="special"]
   html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
     body
     .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])
-    > .rzn-suitup[data-rzn-state="live"]
+    > .rzn-suitup[data-rzn-state]
     .rzn-stamp {
     transition:
       opacity 160ms ease-out,
@@ -883,7 +919,7 @@ html[data-family="special"]
     html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
       body
       .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
-      > .rzn-suitup[data-rzn-state="live"]
+      > .rzn-suitup[data-rzn-state]
       .rzn-rail {
       display: block;
     }
@@ -891,7 +927,7 @@ html[data-family="special"]
     html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
       body
       .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
-      > .rzn-suitup[data-rzn-state="live"]
+      > .rzn-suitup[data-rzn-state]
       .rzn-rail
       > i {
       animation: rzn-rail linear both;
@@ -2601,7 +2637,7 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-su
 html[data-family="special"]
   body
   .rxs-page.rxs-page.rxs-rexonance-page
-  > .rzn-suitup:not([data-rzn-state="live"])
+  > .rzn-suitup:not([data-rzn-state])
   .rzn-phase
   > [data-phase="complete"],
 html[data-family="special"]
@@ -2646,7 +2682,7 @@ html[data-family="special"]
 html[data-family="special"]
   body
   .rxs-page.rxs-page.rxs-rexonance-page
-  > .rzn-suitup[data-rzn-state="live"]
+  > .rzn-suitup[data-rzn-state]
   .rzn-line[data-done] {
   opacity: 0.62;
 }
@@ -2658,7 +2694,7 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-su
 html[data-family="special"]
   body
   .rxs-page.rxs-page.rxs-rexonance-page
-  > .rzn-suitup[data-rzn-state="live"]:not([data-rzn-form-complete])
+  > .rzn-suitup[data-rzn-state]:not([data-rzn-form-complete])
   > .rzn-frame
   > .rzn-aura {
   opacity: 0;
@@ -2668,7 +2704,7 @@ html[data-family="special"]
 html[data-family="special"]
   body
   .rxs-page.rxs-page.rxs-rexonance-page
-  > .rzn-suitup[data-rzn-state="live"]:not([data-rzn-form-complete])
+  > .rzn-suitup[data-rzn-state]:not([data-rzn-form-complete])
   > .rzn-frame
   > .rzn-crown {
   opacity: 0;
@@ -2678,7 +2714,7 @@ html[data-family="special"]
 html[data-family="special"]
   body
   .rxs-page.rxs-page.rxs-rexonance-page
-  > .rzn-suitup[data-rzn-state="live"]:is([data-rzn-phase="ignite"], [data-rzn-phase="evolve"])
+  > .rzn-suitup[data-rzn-state]:is([data-rzn-phase="ignite"], [data-rzn-phase="evolve"])
   > .rzn-frame
   > .rzn-light {
   opacity: 0.64;
@@ -2687,7 +2723,7 @@ html[data-family="special"]
 html[data-family="special"]
   body
   .rxs-page.rxs-page.rxs-rexonance-page
-  > .rzn-suitup[data-rzn-state="live"]:not([data-rzn-form-complete])
+  > .rzn-suitup[data-rzn-state]:not([data-rzn-form-complete])
   .rzn-stamp {
   opacity: 0;
   scale: 1.12;
@@ -2786,7 +2822,7 @@ html[data-family="special"]
   html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
     body
     .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])
-    > .rzn-suitup[data-rzn-state="live"]
+    > .rzn-suitup[data-rzn-state]
     :is(.rzn-light, .rzn-aura, .rzn-crown, .rzn-lines, .rzn-readout, .rzn-nanites, .rzn-parts) {
     transition:
       opacity 240ms ease-out,
@@ -2838,7 +2874,7 @@ html[data-family="special"]
   html[data-family="special"]
     body
     .rxs-page.rxs-page.rxs-rexonance-page
-    > .rzn-suitup:not([data-rzn-state="live"])
+    > .rzn-suitup:not([data-rzn-state])
     .rzn-line:not(:last-child) {
     display: none;
   }
@@ -2888,7 +2924,7 @@ html[data-family="special"]
   html[data-family="special"]
     body
     .rxs-page.rxs-page.rxs-rexonance-page
-    > .rzn-suitup[data-rzn-state="live"]
+    > .rzn-suitup[data-rzn-state]
     .rzn-line:last-child {
     font-size: 18px;
   }
@@ -2896,7 +2932,7 @@ html[data-family="special"]
   html[data-family="special"]
     body
     .rxs-page.rxs-page.rxs-rexonance-page
-    > .rzn-suitup[data-rzn-state="live"]
+    > .rzn-suitup[data-rzn-state]
     .rzn-lines {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -2908,7 +2944,7 @@ html[data-family="special"]
   html[data-family="special"]
     body
     .rxs-page.rxs-page.rxs-rexonance-page
-    > .rzn-suitup:not([data-rzn-state="live"])
+    > .rzn-suitup:not([data-rzn-state])
     > .rzn-frame {
     --rzn-fig-b: 0.3;
     height: max(460px, calc(100svh - var(--dxs-nav)));
@@ -2917,7 +2953,7 @@ html[data-family="special"]
   html[data-family="special"]
     body
     .rxs-page.rxs-page.rxs-rexonance-page
-    > .rzn-suitup:not([data-rzn-state="live"])
+    > .rzn-suitup:not([data-rzn-state])
     .rzn-kicker {
     display: none;
   }
@@ -2975,7 +3011,7 @@ html[data-family="special"]
   html[data-family="special"]
     body
     .rxs-page.rxs-page.rxs-rexonance-page
-    > .rzn-suitup[data-rzn-state="live"]
+    > .rzn-suitup[data-rzn-state]
     .rzn-lines {
     grid-template-areas: "line";
   }
@@ -2983,7 +3019,7 @@ html[data-family="special"]
   html[data-family="special"]
     body
     .rxs-page.rxs-page.rxs-rexonance-page
-    > .rzn-suitup[data-rzn-state="live"]
+    > .rzn-suitup[data-rzn-state]
     .rzn-line {
     grid-area: line;
   }
@@ -2991,7 +3027,7 @@ html[data-family="special"]
   html[data-family="special"]
     body
     .rxs-page.rxs-page.rxs-rexonance-page
-    > .rzn-suitup[data-rzn-state="live"]
+    > .rzn-suitup[data-rzn-state]
     .rzn-line:not([data-on]) {
     visibility: hidden;
   }
