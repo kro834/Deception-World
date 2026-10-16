@@ -283,12 +283,14 @@ test("every rule is scoped to the Rexonance page and leaves the bar, the menu, t
       for (const [id] of part.matchAll(/#[\w-]+/g)) assert.ok(allowedIds.has(id), `${part}: ${id}`);
     }
     // The stage tabs keep their operability contract: the face only.
+    // owner request 2026-10-17 (round 3): and the codes' tracking, a glyph fit
+    // so 「ULTRA 60s」 holds one line on 390-440px phones; never geometry.
     if (
       /\.rxs-stage-tabs(?![\w-])/.test(selector) &&
       !/\.rxs-stage-tabs\[[^\]]+\] ~/.test(selector)
     ) {
       for (const [, property] of body.matchAll(/(?:^|;)\s*([\w-]+)\s*:/g))
-        assert.equal(property, "font-family", `${selector}: ${property}`);
+        assert.ok(["font-family", "letter-spacing"].includes(property), `${selector}: ${property}`);
     }
   }
   assert.doesNotMatch(css, /--dx-(?:hud|mono|display|body)\s*:/);

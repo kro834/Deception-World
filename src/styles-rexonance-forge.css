@@ -669,6 +669,17 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-se
   font-family: var(--rxf-etch);
 }
 
+/* Phones 376-440px: the three codes set without Michroma's 0.12em tracking,
+   so 「ULTRA 60s」 (91.8px untracked, 104.8 tracked) holds one line in its
+   94-110px tab at 390-440. Narrower tabs are narrower than the code itself at
+   the 12px floor and keep its break 「ULTRA／60s」. Glyph fit only: the
+   tabs' geometry, size and face stay. */
+@media (min-width: 376px) and (max-width: 440px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-section .rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"] small {
+    letter-spacing: 0;
+  }
+}
+
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages .rxs-stage-panel > div > small {
   font-family: var(--rxf-etch);
 }
@@ -699,6 +710,16 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages
   /* 「ULTRA 60s」 measures 5.905em; the extra keeps it 10px clear of the
      chip on a 320px phone (the chip's s is Michroma's, a little wider). */
   --rzn-code-em: 6.24;
+}
+
+/* ...and it rests there once the form has been drawn. ZENITH's sweep plays
+   while RESONANCE's form flag is up and has ended by the time the flag
+   clears (at most 380 + 760 ms of the flag's 1800); the Premiere's entrance
+   (its card resolve, its quiet settle) must not take the code over then and
+   replay it, which flashed the code about 1.85 s after every change. Above
+   the Premiere's (1,6,2), below ZENITH's flagged rule (1,11,3). */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page #rxs-stage-panel[data-entrance] > div > .rzn-form-code {
+  animation: none;
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages .rxs-stage-panel > div > .rzn-form-code,
