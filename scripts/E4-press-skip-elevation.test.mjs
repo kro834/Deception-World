@@ -104,6 +104,7 @@ function fakePage() {
   return {
     doc,
     listeners,
+    timers,
     rootAttributes,
     Element,
     advance,
@@ -143,7 +144,8 @@ test("a touch press is marked at once, held for a quick tap and settled on the h
     page.pointer("pointerdown", button, { kind: "mouse" });
     assert.equal(button.getAttribute("data-press"), "in");
     dispose();
-    assert.equal(button.getAttribute("data-press"), "out");
+    // Teardown removes feedback immediately; no old timer may mutate a remounted control.
+    assert.equal(button.getAttribute("data-press"), null);
     assert.ok(!page.rootAttributes.has("data-press-ready"));
     assert.equal(page.listeners.size, 0);
   } finally {
@@ -171,6 +173,50 @@ test("a swipe, a scroll or a cancel releases at once, so a card never dips under
     page.pointer("pointerdown", third);
     page.pointer("pointercancel", third);
     assert.equal(third.getAttribute("data-press"), "out");
+  } finally {
+    page.restore();
+  }
+});
+
+test("a scroll or app interruption cancels the minimum hold of an already released tap", () => {
+  for (const event of ["scroll", "visibilitychange", "contextmenu", "window:blur"]) {
+    const page = fakePage();
+    try {
+      const dispose = watchPresses(page.doc);
+      const card = new page.Element();
+      page.pointer("pointerdown", card);
+      page.advance(20);
+      page.pointer("pointerup", card);
+      if (event.startsWith("window:")) page.listeners.get(event)();
+      else page.fire(event);
+      assert.equal(card.getAttribute("data-press"), "out", event);
+      page.advance(340);
+      assert.equal(card.getAttribute("data-press"), null);
+      dispose();
+      assert.equal(page.timers.size, 0);
+    } finally {
+      page.restore();
+    }
+  }
+});
+
+test("disposal clears every pending hold and cannot erase a remounted watcher's new press", () => {
+  const page = fakePage();
+  try {
+    const dispose = watchPresses(page.doc);
+    const card = new page.Element();
+    page.pointer("pointerdown", card);
+    page.advance(20);
+    page.pointer("pointerup", card);
+    dispose();
+    assert.equal(card.getAttribute("data-press"), null);
+    assert.equal(page.timers.size, 0);
+    const remount = watchPresses(page.doc);
+    page.pointer("pointerdown", card);
+    page.advance(1000);
+    assert.equal(card.getAttribute("data-press"), "touch");
+    remount();
+    assert.equal(page.timers.size, 0);
   } finally {
     page.restore();
   }

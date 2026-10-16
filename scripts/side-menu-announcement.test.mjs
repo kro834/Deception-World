@@ -24,13 +24,13 @@ test("the world and archive side menu expose the shared announcement", () => {
   assert.match(chrome, /title: "レクソナンスサーガの性能と三つの形態を紹介。"/);
   assert.match(chrome, /sequence: "PRODUCT BRIEFING 03"/);
   assert.match(chrome, /image: "\/rider-saga-rexonance-thumbnail-20260827\.jpeg"/);
-  assert.match(chrome, /value: "\+61\.6%"/);
-  assert.match(chrome, /value: "\+55\.6%"/);
+  // Owner's latest catalog changes the announcement's punch/kick comparison.
+  assert.match(chrome, /value: "\+81\.0%"/);
+  assert.match(chrome, /value: "\+56\.5%"/);
   assert.match(chrome, /value: "\+480\.6%"/);
   assert.match(chrome, /value: "−89\.5%"/);
-  assert.match(chrome, /ヴィンクルムサーガと比較して650%以上の反応速度/);
-  assert.match(chrome, /エクスプリームサーガと比較して最大900%高い機動力/);
-  assert.match(chrome, /三者の共鳴が、無限出力を戦闘の力に変える。/);
+  assert.match(chrome, /KHAOSが候補を生成し、KOSMOSが整合性を検証/);
+  assert.match(chrome, /第五の犬として完全覚醒した悠真が、自身の『終焉』を完全制御する。/);
   assert.doesNotMatch(chrome, /ウルトラハイエンドモデルに相応しい性能/);
   assert.match(chrome, /title: "Not Even Close\."/);
   assert.match(chrome, /image: "\/announcement-not-even-close\.jpeg"/);

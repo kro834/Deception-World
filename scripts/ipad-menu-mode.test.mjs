@@ -623,6 +623,33 @@ test("an in-memory OFF survives controller remounts when storage is denied", () 
   remount();
 });
 
+test("a failed storage write cannot restore the stale preference on controller remount", () => {
+  const oldWindow = globalThis.window;
+  const oldDocument = globalThis.document;
+  const f = fixture({ preference: "1" });
+  f.win.localStorage.setItem = () => { throw new Error("QuotaExceededError"); };
+  globalThis.window = f.win;
+  globalThis.document = f.doc;
+  let dispose = watchIpadMenuMode(f.win, f.doc);
+  try {
+    setIpadMenuMode(false);
+    f.flush();
+    dispose();
+    dispose = watchIpadMenuMode(f.win, f.doc);
+    f.flush();
+    assert.equal(getIpadMenuSnapshot(), "off");
+    // A real cross-tab preference update still supersedes the temporary choice.
+    f.emit("storage", { key: IPAD_MENU_STORAGE_KEY, newValue: "1" });
+    assert.equal(getIpadMenuSnapshot(), "on");
+  } finally {
+    dispose();
+    if (oldWindow === undefined) delete globalThis.window;
+    else globalThis.window = oldWindow;
+    if (oldDocument === undefined) delete globalThis.document;
+    else globalThis.document = oldDocument;
+  }
+});
+
 test("late device detection initializes the default and window resize remains a fallback", () => {
   const f = fixture({ ipad: false, preference: null });
   f.win.ResizeObserver = undefined;

@@ -47,6 +47,7 @@ test("the classifier reads each printed state in the documented order", () => {
     ["測定不能", "unmeasurable", null],
     ["不詳", "unknown", null],
     ["無制限", "unlimited", Infinity],
+    ["無限大", "unlimited", Infinity],
     ["20.0–400×", "range", 400],
     ["≥8.24×", "lower-bound", 8.24],
     ["≥1,143×", "lower-bound", 1143],
@@ -85,6 +86,23 @@ test("compute keeps TOPS and YOPS apart and quotes the figures as printed", () =
   assert.equal(bounded.state, "lower-bound");
   assert.equal(bounded.tops, 50000);
   assert.equal(bounded.display, "50,000TOPS〜");
+
+  const boundedBeforeUnit = P.parseCompute("50,000〜TOPS / 200Core");
+  assert.equal(boundedBeforeUnit.state, "lower-bound");
+  assert.equal(boundedBeforeUnit.tops, 50000);
+  assert.equal(boundedBeforeUnit.display, "50,000〜TOPS");
+
+  const yopsBoundAfterUnit = P.parseCompute("50,000YOPS〜 / ∞Core");
+  assert.equal(yopsBoundAfterUnit.state, "yops-only");
+  assert.equal(yopsBoundAfterUnit.yops, 50000);
+  assert.equal(yopsBoundAfterUnit.tops, null);
+  assert.equal(yopsBoundAfterUnit.display, "50,000YOPS〜");
+
+  const yopsBoundBeforeUnit = P.parseCompute("50,000〜YOPS / ∞Core");
+  assert.equal(yopsBoundBeforeUnit.state, "yops-only");
+  assert.equal(yopsBoundBeforeUnit.yops, 50000);
+  assert.equal(yopsBoundBeforeUnit.tops, null);
+  assert.equal(yopsBoundBeforeUnit.display, "50,000〜YOPS");
 
   const switching = P.parseCompute("3,000TOPS / 200Core ⇄ 60,000TOPS / 300Core");
   assert.equal(switching.state, "mode-switch");
@@ -136,17 +154,19 @@ test("the six axes come from Saga's composite labels and Realm's single ones", (
   // Rexonance after its runtime update: 演算 (YOPS) plus 演算2 (TOPS).
   const rexonance = P.extractAxes(
     new Map([
-      ["パンチ・キック", "332.2t / 480.5t"],
+      ["パンチ・キック", "372.2t / 483.5t"],
       ["ジャンプ・100m", "6000m / 0.00021秒"],
       ["飛行速度", "測定不能"],
-      ["演算", "50000YOPS / ∞Core（KHAOS DeuX）"],
+      ["演算", "50000〜YOPS / ∞Core（KHAOS DeuX）"],
       ["演算2", "9000TOPS / 300Core（KOSMOS DeuX）"],
-      ["EMP", "無制限"],
+      ["EMP", "無限大"],
     ]),
   );
+  assert.equal(rexonance.punch.value, 372.2);
+  assert.equal(rexonance.kick.value, 483.5);
   assert.equal(rexonance.compute.tops, 9000);
   assert.equal(rexonance.compute.yops, 50000);
-  assert.equal(rexonance.compute.display, "50000YOPS + 9000TOPS");
+  assert.equal(rexonance.compute.display, "50000〜YOPS + 9000TOPS");
   assert.equal(rexonance.emp.state, "unlimited");
 
   const extremeUltra = P.extractAxes(

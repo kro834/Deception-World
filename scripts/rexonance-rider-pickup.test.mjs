@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import test from "node:test";
+import { REXONANCE_PROFILE_TEXT } from "../src/lib/rexonance-profile.ts";
 
 const riderPage = readFileSync(
   new URL("../src/components/world/rider-page.tsx", import.meta.url),
@@ -49,12 +50,15 @@ test("Saga keeps Extreme and Rexonance as two dedicated pickup records", () => {
     "the collapsed Rexonance heading should follow the Extreme heading",
   );
   assert.match(riderPage, /rider\.id === "saga"[\s\S]*?rider\.forms\.filter\(\(form\) => form\.featuredPickup\)/);
-  assert.match(riderPage, /332\.2t/);
-  assert.match(riderPage, /480\.5t/);
-  assert.match(riderPage, /50000YOPS／∞Core/);
+  // Owner 2026-10-16: new catalog values; long setting prose shares the verbatim profile.
+  assert.match(riderPage, /372\.2t/);
+  assert.match(riderPage, /483\.5t/);
+  assert.match(riderPage, /50000〜YOPS／∞Core/);
   assert.match(riderPage, /SA-GA OS 5\.5/);
-  assert.match(riderPage, /REXONANCE NANO ARMOR/);
-  assert.match(riderPage, /デウスシフト・レクソナンスパーク/);
+  assert.match(riderPage, /overview: rexonanceSection\("概要"\)/);
+  assert.match(riderPage, /finishers: rexonanceEntries\("必殺技"\)/);
+  assert.match(REXONANCE_PROFILE_TEXT, /REXONANCE NANO ARMOR/);
+  assert.match(REXONANCE_PROFILE_TEXT, /デウスシフト・レクソナンスパーク/);
 });
 
 test("all supplied Rexonance and linked-armament assets are present and mapped", () => {

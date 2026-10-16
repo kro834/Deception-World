@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import { runInNewContext } from "node:vm";
 import test from "node:test";
 import ts from "typescript";
+import { rexonanceEntries, rexonanceSection } from "../src/lib/rexonance-profile.ts";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const read = (path) => readFileSync(resolve(root, path), "utf8");
@@ -112,6 +113,8 @@ test("published manager and rider excerpts and names remain source accurate", ()
     REX_LOI: managers[1],
     REXONANCE_CALLS: [],
     FINAL_STAGE_ENTER_ASSETS: [],
+    rexonanceSection,
+    rexonanceEntries,
   });
   assert.equal(riders.length, 8);
   for (const rider of riders) {
@@ -254,4 +257,14 @@ test("special system descriptions remain literal published component excerpts", 
       assert.equal(doc.description, system.body);
     }
   }
+});
+
+test("Rexonance search points to Yuma's awakened self-resonance canon", () => {
+  // Owner's revised canon replaces the former external-gods/trinity summary.
+  const rider = byId.get("rexonance-saga");
+  for (const keyword of ["第五の犬", "終焉", "自己共鳴", "i-2", "二角形構造", "DEUS SHIFT", "REXONANCE PERK"]) {
+    assert.ok(rider.keywords.includes(keyword), `${keyword} should be searchable`);
+  }
+  assert.match(rider.description, /第五の犬として完全覚醒した悠真/);
+  assert.match(rider.description, /自身の『終焉』/);
 });

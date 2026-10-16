@@ -96,8 +96,10 @@ export function setIpadMenuMode(enabled) {
   }
   try {
     window.localStorage.setItem(IPAD_MENU_STORAGE_KEY, enabled ? "1" : "0");
+    root.removeAttribute("data-ipad-menu-unsaved");
   } catch {
     // The DOM remains the in-memory preference when storage is unavailable.
+    root.setAttribute("data-ipad-menu-unsaved", "true");
   }
   refreshIpadMenuMode();
 }
@@ -139,6 +141,12 @@ export function watchIpadMenuMode(win = window, doc = document) {
   };
   const loadPreference = () => {
     const fallback = root.getAttribute("data-ipad-menu-preference") !== "off";
+    // Reads may succeed even when quota/privacy restrictions reject writes.
+    // Never replace the visitor's current choice with that stale stored value.
+    if (root.getAttribute("data-ipad-menu-unsaved") === "true") {
+      applyPreference(fallback);
+      return;
+    }
     try {
       applyPreference(readIpadMenuPreference(win.localStorage, fallback));
     } catch {
@@ -269,6 +277,7 @@ export function watchIpadMenuMode(win = window, doc = document) {
     } catch {
       return;
     }
+    root.removeAttribute("data-ipad-menu-unsaved");
     applyPreference(event.newValue !== "0");
     scrollRequested = false;
     reconcileRequested = true;

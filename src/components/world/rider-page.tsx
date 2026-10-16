@@ -3,6 +3,7 @@ import { GuardedLink } from "@/components/load-gate";
 import { FINAL_STAGE_ENTER_ASSETS } from "@/lib/asset-loader";
 import { dossierImage } from "@/lib/dossier-images";
 import { REXONANCE_CALLS } from "@/lib/rexonance-calls";
+import { rexonanceEntries, rexonanceSection } from "@/lib/rexonance-profile";
 import { DisplayName } from "@/components/name-text";
 import { useWorldMode } from "./use-world-mode";
 import { useDialogHistoryDismiss } from "./use-dialog-history-dismiss";
@@ -211,7 +212,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
         system: "エクスサーガドライバー × デュアルエクスコア／レクソナンスコア",
         name: "レクソナンスサーガ",
         displayName: "レクソナンスサーガ",
-        sub: "TRINITY RESONANCE / FINAL ARRIVAL",
+        sub: "SELF RESONANCE / FINAL ARRIVAL",
         featuredPickup: true,
         theme: "rexonance",
         quote: "無限出力を、無限の攻撃として完成させる。",
@@ -219,99 +220,34 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
         stats: [
           { dt: "HEIGHT", dd: "244.9cm" },
           { dt: "WEIGHT", dd: "190.8kg" },
-          { dt: "PUNCH", dd: "332.2t" },
-          { dt: "KICK", dd: "480.5t" },
+          { dt: "PUNCH", dd: "372.2t" },
+          { dt: "KICK", dd: "483.5t" },
           { dt: "JUMP", dd: "6000m" },
-          { dt: "100m", dd: "0.00021sec" },
+          { dt: "100m", dd: "0.00021s／100m" },
           { dt: "FLIGHT", dd: "測定不能" },
-          { dt: "KHAOS DeuX", dd: "50000YOPS／∞Core" },
+          { dt: "KHAOS DeuX", dd: "50000〜YOPS／∞Core" },
           { dt: "KOSMOS DeuX", dd: "9000TOPS／300Core" },
-          { dt: "EMP", dd: "無制限" },
+          { dt: "戦闘OS", dd: "SA-GA OS 5.5" },
+          { dt: "EMP", dd: "無限大" },
         ],
-        overview: [
-          "月城悠真がエクスサーガドライバーへデュアルエクスコアとレクソナンスコアを装填して変身する、サーガシステムの最終到達形態。その力を担うのは、秩序と破壊を司るレックス・ロワ、最高位神格を持つ五代目ゼウス、そして神から切り離されながら一人の人間として生きた悠真の三者。それぞれが独立したまま超共鳴し、個を失わずに戦闘出力だけを月城悠真へ集約することで成立する。",
-          "エクスプリームサーガが開いた無制限出力の設計思想を継承し、REXONANCE DRIVE、REXONANCE DEUS、KHAOS DeuX、KOSMOS DeuXを統合する。生成した力を踏み込み、加速、姿勢維持、装甲突破、位相貫通、権限干渉、存在構造への伝達まで連続的に再配分する。作用域であるエフェクティブ・エリアを極小化し、装甲内部のトランスミッション・エリアを最短化することで、反射や散逸を抑え、同じ出力をより鋭く、確実に対象へ到達させる。",
-          "攻撃の周波数、位相、権限署名は戦闘中にも更新され、一般的な無効化処理の成立条件から外れる構成へ逐次遷移する。さらに超高位管理権限は反管理権限さえ外部権限要求として捕捉し、レックスの主権で作用範囲を整理し、ゼウスの第一性で悠真の処理を先行させる。最大出力だけでなく、実際に届く実効攻撃性能においてエクスプリーム・ウルトラを上回る、無限出力を無限の攻撃へ完成させた形態である。",
-          "ゼウス由来の超自己進化は、現在の装甲、演算、出力、攻撃形式を次世代状態へ更新し続ける。レックス由来の絶対秩序は、その進化結果へ境界と役割を与え、破綻のない一つの戦闘体系へ即座に固定する。進化しても秩序を失わず、秩序があっても進化は止まらない。この循環がレクソナンスの核で、スリムな外形に反して、全身は一つの巨大な攻撃機関として機能する。",
-        ],
+        overview: rexonanceSection("概要"),
         abilities: [
-          {
-            name: "SA-GA OS 5.5",
-            body: "KHAOS DeuX、KOSMOS DeuX、Paranormal Realizer Ultra、Neural Resonancer Ultraの解析を悠真の知覚、判断、運動制御へ統合する戦闘OS。自動操縦ではなく、本人の意思と経験を残したまま反応速度と実行精度を拡張する。高負荷で生じた神経同期の遅れや無駄も学習し、次回の補正へ反映する。",
-          },
-          {
-            name: "超自己進化 × 絶対秩序",
-            body: "観測した敵能力と戦況から次世代の装甲・演算・権限構造を生成し、整合性と生体適合を検査した上で実装する。絶対秩序が進化した要素を即座に体系化するため、過剰進化による自己崩壊を避けながら更新を継続できる。",
-          },
-          {
-            name: "REXONANCE NANO ARMOR",
-            body: "膨大なナノマシン群が硬度、密度、熱伝導、位相特性、権限署名をリアルタイムで再構成する可変装甲。接触直前には攻撃部位へ構造材と伝達機能を集中し、生成エネルギーの散逸を最小化する。",
-          },
-          {
-            name: "REXONANCE DRIVE",
-            body: "身体、武装、敵構造、戦場環境から成立可能な攻撃状態を多数生成し、現実に破綻なく実行できる解だけを選択する。一つの攻撃動作の途中で脚部、推進、前面装甲、拳や刀身、対象内部へ出力を移し替え、全身を一つの攻撃機構として運用する。",
-          },
-          {
-            name: "REXONANCE DEUS",
-            body: "レックスの管理主権・秩序・破壊と、ゼウスの最高位神格・第一性を、悠真自身の最終意思へ従わせる神属権限統合機構。何を破壊し何を残すかは常に悠真が決め、反管理権限を含む外部干渉も主権宇宙の内部へ取り込んで監査・限定・拒絶する。",
-          },
-          {
-            name: "ラーニング／拒絶／Exception World",
-            body: "攻撃を重心、意図、能力条件、因果へ分解して対抗案を更新し、悪夢や侵食、不正な接続だけを成立前に切り離す。両立しない能力や法則は隔離した例外領域で一時成立させ、終了後に整合性を検査する。",
-          },
+          ...rexonanceEntries("製造プロセス"),
+          ...rexonanceEntries("統合演算機構"),
+          ...rexonanceEntries("超光速機動・推進制御機構"),
+          ...rexonanceEntries("装甲・外観"),
+          ...rexonanceEntries("能力"),
         ],
         arsenal: [
           {
-            name: "レルムスレイヤー・マークⅥ",
-            body: "秩序解析と出力再配分へ直結した高機動型の対管理武装。",
-          },
-          {
-            name: "レルムスレイヤー・マークXIV",
-            body: "より高い権限干渉と構造切断へ対応する次世代仕様。",
-          },
-          {
-            name: "アクシスレイカー・マークⅦ",
-            body: "アークスモードとランチャーモードを切り替え、収束射撃から全方位砲撃まで担う。",
-          },
-          {
-            name: "ユナイトエッジ・ランサーモード",
-            body: "実効作用域を一点へ圧縮し、ヴィンクルムマジックを上回る理論貫通値を記録する決戦武装。",
-          },
-          {
-            name: "共鳴武装群",
-            body: "フェイタルエッジ、レルムスレイヤー、メビウスネイバー、レジェンズエッジを含む全武装がREXONANCE DRIVEへ同期する。",
+            name: rexonanceSection("追加武装")
+              .filter((line) => /^『 /u.test(line))
+              .map((line) => line.slice(2, -2)).join("／"),
+            body: rexonanceSection("追加武装")
+              .filter((line) => !/^『 /u.test(line)).join("\n"),
           },
         ],
-        finishers: [
-          {
-            name: "ハイグリーム・エッジ／レクソナンスレイド",
-            body: "全身出力を最適な軌道へ収束する強斬撃と、反動まで次の一撃へ再利用して拳・蹴り・斬撃・射撃を連結する連続攻撃。",
-          },
-          {
-            name: "スクワッドビッグバン／レクソナンス・エクスラッシュ",
-            body: "複数コアの能力を破綻しない順序へ整列させ、対象の防御だけでなく外部能力や管理権限の接続まで切断する。",
-          },
-          {
-            name: "レクソナンスプロージョン",
-            body: "Exception Worldで一挺の射線を複数経路へ展開し、回避、防御、転嫁経路を順番に閉鎖した後、最後の一撃を対象内部で解放する。",
-          },
-          {
-            name: "レクソナンスメテオ",
-            body: "悪夢、侵食、支配だけを対象から分離し、残すべき人格と生命を悠真が選択してから敵性要素へ蹴撃を叩き込む分離浄化技。",
-          },
-          {
-            name: "レクソナンスリボルト",
-            body: "攻撃に付与された支配、改変、無効化、転嫁を分離し、敵性干渉だけを奪い取って発生元へ返送する権限迎撃型カウンター。",
-          },
-          {
-            name: "レクソナンスストライク",
-            body: "紅紫と翠緑の神性を脚部へ集中し、表層装甲、内部構造、再生中枢、管理接続へ位相衝撃を連続命中させる。",
-          },
-          {
-            name: "デウスシフト・レクソナンスパーク",
-            body: "LOWからULTRAまで出力を段階的に上昇させ、エフェクティブ・エリアを足先一点へ圧縮する最終必殺技。肉体、装甲、位相、再生、管理権限を解析し、最も効率よく破壊できる深度へ全攻撃力を通す。",
-          },
-        ],
+        finishers: rexonanceEntries("必殺技"),
         weaponGallery: [
           {
             img: "/weapon-realm-slayer-mark-vi.jpeg",
