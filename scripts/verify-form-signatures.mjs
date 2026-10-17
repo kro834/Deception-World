@@ -124,6 +124,25 @@ try {
           .locator(".form-signature-flare")
           .evaluate((el) => getComputedStyle(el).animationName);
         assert.equal(active, "none");
+      } else {
+        assert.equal(
+          await heading.evaluate((el) => getComputedStyle(el).animationName),
+          "signature-title",
+        );
+        assert.equal(
+          await dialog
+            .locator(".form-signature-flare")
+            .evaluate((el) => getComputedStyle(el).animationName),
+          "signature-pressure",
+        );
+        if (theme.id === "kemonohen") {
+          assert.equal(
+            await dialog
+              .locator(".form-signature-trace.is-first")
+              .evaluate((el) => getComputedStyle(el).animationName),
+            "signature-claw",
+          );
+        }
       }
       await page.waitForTimeout(1000);
       const running = await dialog
