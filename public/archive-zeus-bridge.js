@@ -12,7 +12,9 @@
 (() => {
   if (window.parent === window) return;
 
-  const WORDS = 'h1, h2, h3, h4, [role="heading"], a[href], button, [role="tab"], summary, label';
+  // Mirrors ZEUS_AVOID_TEXT_SELECTOR (zeus-button.tsx); the P14 read-outs
+  // never occur in an archive, so the two last entries match nothing here.
+  const WORDS = 'h1, h2, h3, h4, [role="heading"], a[href], button, [role="tab"], summary, label, .rxs-p14-values strong, .rxs-p14-values b';
   const DISPLAY = "strong, b";
   const DISPLAY_MIN_PX = 24;
   const END = "p, li, dt, dd, small, span, em, q, blockquote, figcaption, time";
