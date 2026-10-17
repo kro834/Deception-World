@@ -1,8 +1,10 @@
 # The Rexonance nanite effects (owner, 2026-10-16: 「超大幅な改善で。」), for
-# public/rexonance-nanites-20261016/fx.webp. Blender 5.2: Cycles on the GPU
+# public/rexonance-nanites-20261016/fx.webp. Blender 4.5/5.2: Cycles on the GPU
 # (the scan plane in Eevee).
 #
 #   Blender -b --factory-startup -P scripts/blender/nanite_fx.py -- <out dir>
+# NANITE_CPU=1 uses Cycles CPU when Metal is unavailable; hardware-only
+# rendering (NANITE_HARDWARE_ONLY=1) keeps all twelve original clamp/latch poses.
 #
 # Writes PNGs at 4x their sheet size (the build script downsamples them with
 # lanczos3):
@@ -40,12 +42,15 @@ def scene(width, height, engine="CYCLES", samples=96):
     sc = bpy.context.scene
     if engine == "CYCLES":
         sc.render.engine = "CYCLES"
-        prefs = bpy.context.preferences.addons["cycles"].preferences
-        prefs.compute_device_type = "METAL"
-        prefs.get_devices()
-        for device in prefs.devices:
-            device.use = device.type == "METAL"
-        sc.cycles.device = "GPU"
+        if os.environ.get("NANITE_CPU") == "1":
+            sc.cycles.device = "CPU"
+        else:
+            prefs = bpy.context.preferences.addons["cycles"].preferences
+            prefs.compute_device_type = "METAL"
+            prefs.get_devices()
+            for device in prefs.devices:
+                device.use = device.type == "METAL"
+            sc.cycles.device = "GPU"
         sc.cycles.samples = samples
         sc.cycles.use_denoising = True
         sc.cycles.denoiser = "OPENIMAGEDENOISE"
@@ -203,11 +208,15 @@ def clamps():
     clamp = bpy.data.objects.new("clamp", None)
     sc.collection.objects.link(clamp)
     clamp.parent = corner
-    box("bar-h", (1.0, 0.22, 0.14), (0.28, 0.11, 0), gold, (0.03, 2), clamp)
-    box("bar-v", (0.22, 1.0, 0.14), (-0.11, -0.28, 0), gold, (0.03, 2), clamp)
-    box("groove-h", (0.62, 0.035, 0.012), (0.36, 0.11, 0.072), groove, None, clamp)
-    box("groove-v", (0.035, 0.62, 0.012), (-0.11, -0.36, 0.072), groove, None, clamp)
-    bpy.ops.mesh.primitive_cylinder_add(vertices=32, radius=0.09, depth=0.06, location=(-0.11, 0.11, 0.09))
+    box("bar-h", (1.0, 0.22, 0.14), (0.28, 0.11, 0), gold, (0.035, 4), clamp)
+    box("bar-v", (0.22, 1.0, 0.14), (-0.11, -0.28, 0), gold, (0.035, 4), clamp)
+    # Recessed steel channels and a raised hexagonal bolt head make the
+    # metallic shoulders and LED inlays read as machined parts, not lines.
+    box("channel-h", (0.68, 0.065, 0.018), (0.36, 0.11, 0.07), dark, (0.008, 2), clamp)
+    box("channel-v", (0.065, 0.68, 0.018), (-0.11, -0.36, 0.07), dark, (0.008, 2), clamp)
+    box("groove-h", (0.62, 0.035, 0.012), (0.36, 0.11, 0.081), groove, None, clamp)
+    box("groove-v", (0.035, 0.62, 0.012), (-0.11, -0.36, 0.081), groove, None, clamp)
+    bpy.ops.mesh.primitive_cylinder_add(vertices=6, radius=0.10, depth=0.07, location=(-0.11, 0.11, 0.09))
     bolt = bpy.context.active_object
     bolt.data.materials.append(dark)
     bolt.parent = clamp
@@ -258,6 +267,15 @@ def latch():
     for obj in (outer, inner):
         for poly in obj.data.polygons:
             poly.use_smooth = True
+    # Six raised fasteners and their inset LED faces remain anchored while
+    # the iris closes; the original twelve poses and pivots stay unchanged.
+    for k in range(6):
+        a = k * math.pi / 3
+        xy = (math.cos(a) * 0.78, math.sin(a) * 0.78)
+        bpy.ops.mesh.primitive_cylinder_add(vertices=6, radius=0.085, depth=0.09, location=(*xy, 0.06))
+        bpy.context.active_object.data.materials.append(gold)
+        bpy.ops.mesh.primitive_cylinder_add(vertices=16, radius=0.03, depth=0.012, location=(*xy, 0.11))
+        bpy.context.active_object.data.materials.append(ring)
     claws = []
     for k in range(6):
         bpy.ops.mesh.primitive_cone_add(vertices=24, radius1=0.16, radius2=0.0, depth=0.5)
@@ -478,7 +496,8 @@ def shock():
 
 clamps()
 latch()
-scan()
-drops()
-shock()
+if not os.environ.get("NANITE_HARDWARE_ONLY"):
+    scan()
+    drops()
+    shock()
 print("NANITE-DONE", flush=True)

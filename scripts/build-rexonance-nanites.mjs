@@ -4,6 +4,7 @@
 //
 //   node scripts/build-rexonance-nanites.mjs [--blender=<Blender binary>] [--check]
 //     [--only=cells,fx,guide] [--work=<dir>] [--debug=<dir>] [--placeholder]
+//     [--hardware]
 //
 // writes public/rexonance-nanites-20261016/{cells,comets,fx,guide}.webp and
 // the generated module src/lib/rexonance-nanites.ts.
@@ -13,6 +14,9 @@
 //   on the GPU), then packs and encodes every sheet. The raw renders are kept
 //   in the work folder (--work=<dir>, default <tmp>/rexonance-nanites-work);
 //   they are not committed.
+// - --hardware: render/repack only clamps and latches into the existing fx
+//   sheet; leave cells, comets, guide and the suit/face atlases untouched.
+//   Set NANITE_CPU=1 for this render when Metal is unavailable.
 // - without --blender: regenerates only the script-made parts — comets.webp,
 //   the spark (repacked into cells.webp only when the renders are still in
 //   the work folder), the seams, the gold boxes and the module — from the
@@ -51,6 +55,8 @@ const arg = (name) => {
 const CHECK = process.argv.includes("--check");
 const PLACEHOLDER = process.argv.includes("--placeholder");
 const BLENDER = arg("blender");
+// Re-render only clamps/latches, preserving the other committed sheets.
+const HARDWARE = process.argv.includes("--hardware");
 // --only=cells,fx,guide: with --blender, re-render only these scenes (the
 // others are packed from the work folder's earlier renders).
 const ONLY = (arg("only") || "cells,fx,guide").split(",");
@@ -655,9 +661,11 @@ const CLAMP_CORNERS = ["tl", "tr", "bl", "br"];
 // The swing-in starts outside its cell (scale 1.45, 0.5 out, turned 75°): its
 // first frames fade in (owner flash rule: nothing pops).
 const CLAMP_FADE = [0.3, 0.6, 0.85];
-async function packFx(frameAt, scanGlow = true) {
+async function packFx(frameAt, scanGlow = true, hardwareOnly = false) {
   const [width, height] = SIZE.fx;
-  const sheet = Buffer.alloc(width * height * 4);
+  const sheet = hardwareOnly
+    ? await sharp(filePath("fx")).ensureAlpha().raw().toBuffer()
+    : Buffer.alloc(width * height * 4);
   const { clamp, latch, scan, drop, shock } = FX;
   for (const [row, corner] of CLAMP_CORNERS.entries())
     for (let f = 0; f < clamp.frames; f += 1) {
@@ -671,6 +679,7 @@ async function packFx(frameAt, scanGlow = true) {
     const cell = await downsample(raw, size, size, latch.cell, latch.cell);
     blit(sheet, width, featherCell(cell, latch.cell, latch.cell, 1), latch.cell, latch.cell, latch.x + f * latch.cell, latch.y);
   }
+  if (hardwareOnly) return sheet;
   {
     const { raw, size, height: h } = await frameAt("scan");
     let cell = snapLight(await downsample(raw, size, h, scan.w, scan.h));
@@ -856,6 +865,7 @@ async function guidePrep(alpha) {
 function runBlender(script, ...args) {
   const started = Date.now();
   const result = spawnSync(BLENDER, ["-b", "--factory-startup", "-P", join(BLENDER_DIR, script), "--", ...args], {
+    env: { ...process.env, ...(HARDWARE ? { NANITE_HARDWARE_ONLY: "1" } : {}) },
     stdio: ["ignore", "pipe", "pipe"],
     encoding: "utf8",
     maxBuffer: 256 * 1024 * 1024,
@@ -1255,21 +1265,26 @@ if (PLACEHOLDER) {
   if (BLENDER) {
     if (!existsSync(BLENDER)) throw new Error(`no Blender at ${BLENDER}`);
     for (const dir of ["cells", "fx", "guide"]) mkdirSync(join(WORK, dir), { recursive: true });
-    if (ONLY.includes("cells")) runBlender("nanite_cells.py", join(WORK, "cells"));
-    if (ONLY.includes("fx")) runBlender("nanite_fx.py", join(WORK, "fx"));
-    if (ONLY.includes("guide")) {
+    if (!HARDWARE && ONLY.includes("cells")) runBlender("nanite_cells.py", join(WORK, "cells"));
+    if (HARDWARE || ONLY.includes("fx")) runBlender("nanite_fx.py", join(WORK, "fx"));
+    if (!HARDWARE && ONLY.includes("guide")) {
       const prep = join(WORK, "guide-prep.json");
       writeFileSync(prep, JSON.stringify(await guidePrep(alpha)));
       runBlender("nanite_guide.py", prep, join(WORK, "guide", "guide.png"));
     }
   }
-  const rendered = ["cells", "fx", "guide"].every((dir) => existsSync(join(WORK, dir)) && readdirSync(join(WORK, dir)).length);
+  if (HARDWARE) {
+    const raw = await packFx(pngFrames(join(WORK, "fx")), true, true);
+    encoded.fx = await encode("fx", raw);
+    delete encoded.comets;
+  }
+  const rendered = !HARDWARE && ["cells", "fx", "guide"].every((dir) => existsSync(join(WORK, dir)) && readdirSync(join(WORK, dir)).length);
   if (rendered) {
     const atCells = pngFrames(join(WORK, "cells"));
     const atFx = pngFrames(join(WORK, "fx"));
     frames = async (name) => ((/^(tumble|unfold|bead)-/.test(name) ? atCells : atFx)(name));
     guideRaw = await renderedGuide(mask);
-  } else console.log("no renders in the work folder: cells, fx and guide stay as committed");
+  } else if (!HARDWARE) console.log("no renders in the work folder: cells, fx and guide stay as committed");
 }
 if (frames) {
   // Over budget at the contract's settings, the alpha's quality steps down

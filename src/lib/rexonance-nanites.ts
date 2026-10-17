@@ -2,7 +2,7 @@
 // The Rexonance nanite kit (owner, 2026-10-16: 「超大幅な改善で。」): Blender-
 // rendered hex nanite chips, comets, clamps, latches, scan planes, molten
 // droplets, shock rings and the gold guideway conduit, with each plate's
-// real outline (seams) and gold box. 4 files, 246690 bytes.
+// real outline (seams) and gold box. 4 files, 250562 bytes.
 
 /** The kit's folder (public/). */
 export const REXONANCE_NANITE_DIR = "/rexonance-nanites-20261016" as const;
@@ -325,9 +325,9 @@ export const REXONANCE_NANITE_ASSETS = [
 export const REXONANCE_NANITE_BYTES = {
   cells: 47694,
   comets: 9722,
-  fx: 39868,
+  fx: 43740,
   guide: 149406,
-  total: 246690,
+  total: 250562,
 } as const;
 
 /** The suit files the guide and the seams were built from (the first 16 hex
