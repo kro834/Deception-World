@@ -447,7 +447,10 @@ test("the suit keeps the call clock and is finished before the hand-over", () =>
     REXONANCE_SUIT_LATE_MS < Math.min(...pieceClocks.map(({ t }) => t)) - REXONANCE_SUIT_GATHER_MS,
   );
   // Resonance: one ring per REXONANCE！ quarter-beat, with the arcs.
-  for (const phase of [0, 1, 2]) {
+  // (Owner 2026-10-17: four calls, four rings — the fourth, k = 3, had none.)
+  assert.match(component, /const SUIT_RINGS = \[\.\.\.SUIT_PHASES, "ice"\] as const;/);
+  assert.match(component, /\{SUIT_RINGS\.map\(\(phase, index\) => \(/);
+  for (const phase of [0, 1, 2, 3]) {
     const ring = layerTimes(declaration(covering(".rx-suit-ring").body, "animation"), {
       "--rx-suit-k": phase,
     });
