@@ -244,6 +244,12 @@ async function liveBitmaps(cdp) {
   return result.result.value;
 }
 
+// The rising sequence owns these two sizes; Rexonance prewarm bitmaps are separate owners.
+async function risingBitmaps(cdp) {
+  const risingSizes = new Set(["576x768", "683x1024"]);
+  return (await liveBitmaps(cdp)).filter((size) => risingSizes.has(size));
+}
+
 // ---------------------------------------------------------------- gate
 async function checkGate(browser, name, { reducedMotion = false } = {}) {
   const { context, page, errors } = await openWorld(browser, name, { reducedMotion });
@@ -814,11 +820,11 @@ async function checkTiers(browser, name) {
     await cdp.send("HeapProfiler.enable");
     const waitBitmaps = async (count) => {
       for (let attempt = 0; attempt < 20; attempt += 1) {
-        const live = await liveBitmaps(cdp);
+        const live = await risingBitmaps(cdp);
         if (live.length === count) return live;
         await page.waitForTimeout(500);
       }
-      return liveBitmaps(cdp);
+      return risingBitmaps(cdp);
     };
     await scrollToGate(page);
     const approached = await waitBitmaps(2);
