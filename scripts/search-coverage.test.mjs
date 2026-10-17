@@ -121,8 +121,9 @@ test("character dossiers index the chapters their pages render", () => {
 
 test("World episodes, columns, terms, places and briefs are all indexed with anchors", () => {
   const columns = loadData("src/components/world/world-columns-data.ts").WORLD_COLUMNS;
-  // Columns 01-04 and the owner's 05 (“犬”と“イサク”の謎, bbb4853).
-  assert.equal(columns.length, 5);
+  // Columns 01-04, the owner's 05 (“犬”と“イサク”の謎, bbb4853) and 06 『？？？』
+  // (2026-10-17: the 『犬』 dossier behind a spoiler slider).
+  assert.equal(columns.length, 6);
   for (const column of columns) {
     const document = byId.get(`world-column-${column.no}`);
     assert.equal(document.description, column.body);

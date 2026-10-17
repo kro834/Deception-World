@@ -28,6 +28,7 @@ import { useDialogHistoryDismiss } from "./use-dialog-history-dismiss";
 import { WorldAtmosphere } from "./world-atmosphere";
 import { WORLD_COLUMNS } from "./world-columns-data";
 import { MysteryColumnProse } from "./mystery-column-prose";
+import { DogDossierProse } from "./dog-dossier-prose";
 
 const POSTERS = [
   {
@@ -935,6 +936,9 @@ export function WorldHome() {
   const [episode, setEpisode] = useState(0);
   const [episodePickup, setEpisodePickup] = useState<number | null>(null);
   const [pickupOpen, setPickupOpen] = useState(false);
+  // Column 06 『？？？』 (owner, 2026-10-17): the dossier shows only after the
+  // reader slides its plus open; once opened it stays open for the visit.
+  const [dossierOpen, setDossierOpen] = useState(false);
   const [sideMenuOpen, setSideMenuOpen] = useState(false);
   const [heroVisible, setHeroVisible] = useState(true);
   // Read by the poster timer at once; the state follows when scrolling settles.
@@ -2538,12 +2542,23 @@ export function WorldHome() {
               </div>
               <SlideOpenControl
                 ariaControls="world-column-pickup"
-                ariaLabel="世界観コラムのピックアップを開く"
+                ariaLabel={
+                  "spoiler" in column
+                    ? "ネタバレを含む資料を開く"
+                    : "世界観コラムのピックアップを開く"
+                }
                 buttonRef={pickupBtnRef}
                 className="world-column-slide-open"
                 expanded={pickupOpen}
-                label="ピックアップ"
-                onOpen={openPickup}
+                label={"spoiler" in column ? "ネタバレを開く" : "ピックアップ"}
+                onOpen={
+                  "spoiler" in column
+                    ? () => {
+                        setDossierOpen(true);
+                        openPickup();
+                      }
+                    : openPickup
+                }
               />
             </div>
           </div>
@@ -3019,6 +3034,23 @@ export function WorldHome() {
                 <h3>{item.title}</h3>
                 {item.no === "05" ? (
                   <MysteryColumnProse paragraphs={item.pickup} />
+                ) : item.no === "06" ? (
+                  dossierOpen ? (
+                    <DogDossierProse id="world-column-dossier" />
+                  ) : (
+                    <div className="world-column-spoiler-gate">
+                      <p>{item.body}</p>
+                      <SlideOpenControl
+                        ariaControls="world-column-dossier"
+                        ariaLabel="ネタバレを含む資料を開く"
+                        className="world-column-slide-open world-column-spoiler-open"
+                        expanded={false}
+                        label="ネタバレを開く"
+                        opensDialog={false}
+                        onOpen={() => setDossierOpen(true)}
+                      />
+                    </div>
+                  )
                 ) : (
                   <div>
                     {item.pickup.map((para) => (

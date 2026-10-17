@@ -669,7 +669,8 @@ export const SEARCH_DOCUMENTS: readonly SearchCatalogueDocument[] = [
     title: "コラム" + column.no + " " + column.title,
     category: "world",
     description: column.body,
-    body: column.pickup.join("\n"),
+    // A spoiler column (06 『？？？』) is found by its title and warning only.
+    body: "spoiler" in column && column.spoiler ? "" : column.pickup.join("\n"),
     keywords: ["世界観コラム", "WORLD COLUMN", column.kicker],
     to: "/world",
     hash: "world-column-" + column.no,

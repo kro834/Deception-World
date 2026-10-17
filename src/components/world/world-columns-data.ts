@@ -1,3 +1,4 @@
+import { DOG_DOSSIER_COLUMN } from "./world-dog-dossier-data";
 import { DOG_ISAKU_COLUMN } from "./world-mystery-data";
 
 // The World page's 世界観コラム, word for word as the owner wrote them
@@ -51,4 +52,7 @@ export const WORLD_COLUMNS = [
   },
   // 05, the owner's mystery column (bbb4853), kept in its own module.
   DOG_ISAKU_COLUMN,
+  // 06 『？？？』 (owner, 2026-10-17): a spoiler warning, and the 『犬』
+  // dossier behind a plus slider. Its own module; the search skips the dossier.
+  DOG_DOSSIER_COLUMN,
 ] as const;

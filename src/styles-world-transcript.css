@@ -2,9 +2,10 @@
    only an aria-hidden facsimile receives finite, viewport-gated effects. */
 .site-shell.film-edition.mirage-edition .world-column-tabs.liquid-swipe-tabs {
   /* The shared frosted sheet forces a one-row flex rail. Only this expanded
-     five-column selector needs a grid; its glass and lens remain unchanged. */
+     six-column selector needs a grid; its glass and lens remain unchanged
+     (2026-10-17: column 06 『？？？』 joined the rail). */
   display: grid !important;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
 }
 
 .site-shell.film-edition.mirage-edition .world-column-tabs.liquid-swipe-tabs > button b {
@@ -13,7 +14,7 @@
 }
 
 @media (max-width: 899px) {
-  /* Five labels remain readable, and the existing lens supports both rows. */
+  /* Six labels remain readable in two rows of three; the lens supports both rows. */
   .site-shell.film-edition.mirage-edition .world-column-tabs.liquid-swipe-tabs {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     grid-auto-rows: minmax(90px, auto);
@@ -190,6 +191,113 @@
   color: var(--mr-text-3);
   font: 500 12px/1.8 var(--mr-mono);
   letter-spacing: 0.1em;
+}
+
+/* Column 06 『？？？』 (owner, 2026-10-17) reads like column 05's record once
+   its dossier is open: the same reading rules, on its own pane. */
+.site-shell.film-edition.mirage-edition #column-dialog-panel-5 > .world-mystery-reading {
+  columns: auto;
+  max-inline-size: 72ch;
+  margin-inline: auto;
+}
+
+.site-shell.film-edition.mirage-edition #column-dialog-panel-5 .world-mystery-note {
+  margin-block: 0 32px;
+  padding: 18px 22px;
+  border-inline-start: 2px solid var(--mr-ice);
+  background: var(--mr-deck-raised);
+  color: var(--mr-text-2);
+  font: 400 14px/1.9 var(--font-body);
+}
+
+.site-shell.film-edition.mirage-edition #column-dialog-panel-5 .world-mystery-chapter {
+  margin-block: 32px;
+  padding-block-start: 24px;
+  border-block-start: 1px solid var(--mr-line);
+}
+
+.site-shell.film-edition.mirage-edition #column-dialog-panel-5 .world-mystery-chapter h4 {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin: 0 0 18px;
+  color: var(--mr-ice-hi);
+  font: 600 clamp(17px, 2vw, 22px)/1.65 var(--font-body);
+  text-wrap: pretty;
+}
+
+.site-shell.film-edition.mirage-edition #column-dialog-panel-5 .world-mystery-chapter h4 span {
+  flex: 0 0 auto;
+  color: var(--mr-text-3);
+  font: 500 12px/1.5 var(--mr-mono);
+}
+
+.site-shell.film-edition.mirage-edition #column-dialog-panel-5 .world-mystery-chapter p {
+  margin: 0;
+  color: var(--mr-text-2);
+  font: 400 clamp(15px, 1.3vw, 18px)/2.1 var(--font-body);
+  letter-spacing: 0.025em;
+  overflow-wrap: anywhere;
+}
+
+.site-shell.film-edition.mirage-edition #column-dialog-panel-5 .world-mystery-term {
+  color: var(--mr-ice-hi);
+  font-weight: 600;
+}
+
+.site-shell.film-edition.mirage-edition #column-dialog-panel-5 .world-mystery-end {
+  padding-block: 20px;
+  border-block-start: 1px solid var(--mr-line);
+  color: var(--mr-text-3);
+  font: 500 12px/1.8 var(--mr-mono);
+  letter-spacing: 0.1em;
+}
+
+/* Column 06 『？？？』 (owner, 2026-10-17): the warning and the plus slider
+   that opens the 『犬』 dossier; the dossier's title and its closing section. */
+.site-shell.film-edition.mirage-edition #column-dialog-panel-5 .world-column-spoiler-gate {
+  display: grid;
+  gap: 26px;
+  max-inline-size: 72ch;
+  margin-inline: auto;
+  padding: 24px 22px 28px;
+  border-inline-start: 2px solid var(--mr-violet);
+  background: var(--mr-deck-raised);
+}
+
+.site-shell.film-edition.mirage-edition #column-dialog-panel-5 .world-column-spoiler-gate > p {
+  margin: 0;
+  color: var(--mr-text-2);
+  font: 400 clamp(15px, 1.3vw, 18px)/2 var(--font-body);
+  letter-spacing: 0.025em;
+}
+
+.site-shell.film-edition.mirage-edition #column-dialog-panel-5 .world-column-spoiler-open {
+  justify-self: start;
+}
+
+.site-shell.film-edition.mirage-edition #column-dialog-panel-5 .world-dossier-title {
+  display: grid;
+  gap: 6px;
+  margin: 0 0 8px;
+}
+
+.site-shell.film-edition.mirage-edition #column-dialog-panel-5 .world-dossier-title strong {
+  color: var(--mr-ice-hi);
+  font: 700 clamp(20px, 2.4vw, 28px)/1.5 var(--font-body);
+  letter-spacing: 0.02em;
+}
+
+.site-shell.film-edition.mirage-edition #column-dialog-panel-5 .world-dossier-title span {
+  color: var(--mr-text-3);
+  font: 500 13px/1.8 var(--font-body);
+  letter-spacing: 0.08em;
+}
+
+/* The owner's ⸻ before the summing-up: a heavier rule. */
+.site-shell.film-edition.mirage-edition #column-dialog-panel-5 .world-dossier-divided {
+  margin-block-start: 44px;
+  border-block-start: 2px solid var(--mr-ice);
 }
 
 .site-shell.film-edition.mirage-edition #quotes .wa-transcript-visual {
