@@ -30,6 +30,7 @@ export const dossierImageSources = [
   "/rider-profile-leddic.jpeg",
   "/rider-profile-argenome.jpeg",
   "/rider-profile-over-zeztz.jpeg",
+  "/rider-over-zeztz-explom-20261018.jpeg",
   "/rider-leddic-ishihen.jpeg",
   "/rider-leddic-hoko.jpeg",
   "/rider-leddic-rekka-20260829.jpeg",

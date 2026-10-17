@@ -1,3 +1,8 @@
+                  <NameText value={f.dd} seams />
+                </dd>
+              </div>
+            ))}
+          </dl>
         </div>
       </section>
       <DossierReader name={rider.civilian.name} identity forms={pickupForms.length > 0} />

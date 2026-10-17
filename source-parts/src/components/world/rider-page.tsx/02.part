@@ -1,8 +1,3 @@
-      sub: "MIDDLE / HIGH / XHIGH / MAX / ULTRA",
-      quote:
-        "レクソナンスの超共鳴と、ヴィンクルムの接続を一つの戦闘体系へ。ファイナルステージ限定の超究極フォーム。",
-      img: "/rider-far-from-saga-middle.webp",
-      pos: "50% 8%",
       to: "/final-stage",
       hash: "far-from-saga",
       assets: FINAL_STAGE_ENTER_ASSETS,
@@ -333,3 +328,13 @@
             name: "薬",
             body: "患者や負傷者の状態に適した回復用の薬を生み出す。怪我の度合いが大きいほど、精製に必要な時間も延びる。",
           },
+        ],
+        arsenal: [
+          {
+            name: "草薙刀",
+            body: "全長150cm、緑色の柄の両端に約25cmずつの刃を備えた薙刀。危険だからという理由で折り、二刀流として扱う。",
+          },
+        ],
+        finishers: [
+          {
+            name: "SUPPORT To GRASS",

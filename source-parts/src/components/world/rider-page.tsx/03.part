@@ -1,13 +1,3 @@
-        ],
-        arsenal: [
-          {
-            name: "草薙刀",
-            body: "全長150cm、緑色の柄の両端に約25cmずつの刃を備えた薙刀。危険だからという理由で折り、二刀流として扱う。",
-          },
-        ],
-        finishers: [
-          {
-            name: "SUPPORT To GRASS",
             body: "支援、妨害、拘束、回復を一つの戦闘へ混在させ、豪快な近接戦闘と同居させる。",
           },
         ],
@@ -333,3 +323,18 @@
     forms: [
       {
         img: "/rider-profile-over-zeztz.jpeg",
+        pos: "50% 8%",
+        system: "ゼッツドライバー × フィジカムインパクトカプセム",
+        name: "オーバーゼッツ",
+        sub: "フィジカムインパクト",
+        calls: ["グッドモーニング！ ライダー！", "ゼ・ゼ・ゼッツ！", "インパクト！"],
+        stats: [
+          { dt: "HEIGHT", dd: "200.5cm" },
+          { dt: "WEIGHT", dd: "97.7kg" },
+          { dt: "PUNCH", dd: "17.7t" },
+          { dt: "KICK", dd: "37.7t" },
+          { dt: "JUMP", dd: "27.7m" },
+          { dt: "100m", dd: "1.7秒" },
+        ],
+        abilities: [
+          {

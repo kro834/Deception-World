@@ -1039,6 +1039,29 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
           { name: "インパクトオーバーバニッシュ", body: "フィジカムインパクトの超必殺技。" },
         ],
       },
+      {
+        img: "/rider-over-zeztz-explom-20261018.jpeg",
+        pos: "50% 8%",
+        system: "ゼッツドライバー",
+        name: "オーバーゼッツ",
+        sub: "エクスプロム",
+        calls: ["アメイジング！ ライダー！", "ゼッツ！ゼッツ！ゼッツ！オーバー！", "エクスプロム！"],
+        overview: [
+          "物理攻撃の負荷を増強した筋繊維に溜め込み、放出する事により高い攻撃力を発揮する。この一連の動作が前提となっているため、防御力が大きく向上し、パフォーマンスも改善されている。",
+        ],
+        stats: [
+          { dt: "HEIGHT", dd: "205.9cm（est.）" },
+          { dt: "WEIGHT", dd: "110.0kg（est.）" },
+          { dt: "PUNCH", dd: "77.7〜t（est.）" },
+          { dt: "KICK", dd: "77.7〜t（est.）" },
+          { dt: "JUMP", dd: "50.5m（ひと跳び est.）" },
+          { dt: "100m", dd: "1.0秒（100m est.）" },
+        ],
+        finishers: [
+          { name: "エクスプロムスマッシュ", body: "エクスプロムの必殺技。" },
+          { name: "エクスプロムオーバースマッシュ", body: "エクスプロムの必殺技。" },
+        ],
+      },
     ],
     civilian: {
       name: "ジェームズ・スミス",
@@ -1262,9 +1285,11 @@ export function RiderPage({ id }: { id: string }) {
         ? rider.forms
         : rider.id === "leddic"
           ? rider.forms
-          : primaryForm
-            ? [primaryForm]
-            : [];
+          : rider.id === "over-zeztz"
+            ? rider.forms
+            : primaryForm
+              ? [primaryForm]
+              : [];
   return (
     <main
       className="manager-page rider-dossier-page"
