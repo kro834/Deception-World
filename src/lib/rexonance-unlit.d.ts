@@ -8,9 +8,11 @@ export type SplitLightsResult = {
 export type SplitLightsOptions = { motes?: boolean };
 
 export type SplitLightsJob = {
-  /** Cooperatively advance rows; true is terminal (completed or cancelled). */
+  /** Cooperatively advance one phase (the snapshot, a strip's read-back, one
+   * canvas's upload) or rows to the deadline; Infinity without an expired idle
+   * deadline runs the whole pass. True is terminal (completed or cancelled). */
   step(until: number, idleDeadline?: Pick<IdleDeadline, "timeRemaining">): boolean;
-  /** Publish only a completed pass. Repeated successful commits are idempotent. */
+  /** Publish only a completed pass (no pixel work). Repeated successful commits are idempotent. */
   commit(): SplitLightsResult | null;
   /** Release unpublished resources; never destroy an already committed result. */
   cancel(): void;

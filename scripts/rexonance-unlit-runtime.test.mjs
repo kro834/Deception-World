@@ -54,7 +54,9 @@ function fixture(pixels, width, height, failures = {}) {
   const canvases = [];
   const calls = { draw: [], read: [], create: [], put: [], clock: 0, close: 0 };
   let now = 0;
-  const image = { close: () => calls.close++ };
+  // Round 4: the job reads strips, so the fake canvas models regions — the
+  // draw snapshots the source's live pixels, reads/puts address rows.
+  const image = { pixels, close: () => calls.close++ };
   const document = {
     createElement(tag) {
       assert.equal(tag, "canvas");
@@ -73,18 +75,25 @@ function fixture(pixels, width, height, failures = {}) {
         getImageData(...args) {
           calls.read.push(args);
           if (failures.read) throw new Error("tainted snapshot");
-          if (failures.omitImageDataWidth) return { data: Uint8ClampedArray.from(pixels) };
-          return { width, height, data: Uint8ClampedArray.from(pixels) };
+          const [, y, w, h] = args;
+          const data = (canvas.pixels ?? new Uint8ClampedArray(pixels.length)).slice(
+            y * width * 4,
+            (y + h) * width * 4,
+          );
+          if (failures.omitImageDataWidth) return { data };
+          return { width: w, height: h, data };
         },
         createImageData(...args) {
           calls.create.push(args);
           if (failures.create) throw new Error("allocation failed");
-          return { width, height, data: new Uint8ClampedArray(pixels.length) };
+          const [w, h] = args;
+          return { width: w, height: h, data: new Uint8ClampedArray(w * h * 4) };
         },
         putImageData(data, ...args) {
           calls.put.push({ index, args });
           if (failures.put === index) throw new Error("lost drawing context");
-          canvas.pixels = Uint8ClampedArray.from(data.data);
+          canvas.pixels ??= new Uint8ClampedArray(pixels.length);
+          canvas.pixels.set(data.data, args[1] * width * 4);
         },
       };
       canvas.getContext = (kind, options) => {
@@ -115,6 +124,10 @@ function fixture(pixels, width, height, failures = {}) {
   );
   return { api: runtime.api, calls, image, document, canvases, now: () => now };
 }
+
+// Round 4 (phased split): besides one step per row, a job of one strip takes
+// a snapshot step, a read-back step and one upload step per canvas.
+const PHASES = 4;
 
 function assertBytes(result, expected) {
   assert.ok(result);
@@ -148,7 +161,8 @@ test("ImageData without width uses the requested row size and synchronous compat
   assert.equal(synchronous.calls.clock, 0);
   const sliced = fixture(pixels, width, height, { omitImageDataWidth: true });
   const job = sliced.api.createSplitLightsJob(sliced.image, 0, 0, width, height);
-  for (let row = 0; row < height; row++) assert.equal(job.step(-1), row === height - 1);
+  for (let step = 0; step < height + PHASES; step++)
+    assert.equal(job.step(-1), step === height + PHASES - 1);
   assertBytes(job.commit(), expected);
 });
 
@@ -172,8 +186,9 @@ test("the real 1024 by 866 preparation region stays byte-identical across bounde
   while (!job.step(ui.now() + 6)) assert.ok(++slices < height);
   assert.ok(slices > 1, "the full-size pixel pass genuinely yields");
   assertBytes(job.commit(), expected);
-  assert.equal(ui.calls.read.length, 1);
-  assert.equal(ui.calls.put.length, 2);
+  // Round 4: read back in four 248-row strips, each uploaded per canvas.
+  assert.equal(ui.calls.read.length, 4);
+  assert.equal(ui.calls.put.length, 8);
 });
 
 test("known cyan, blue and pink pixels become cold monochrome and restore their original light bytes", () => {
@@ -211,7 +226,7 @@ test("transparent, threshold, gold, bronze and light-colour boundaries retain or
   const expected = originalBytes(pixels);
   const ui = fixture(pixels, 4, 4);
   const job = ui.api.createSplitLightsJob(ui.image, 0, 0, 4, 4);
-  for (let row = 0; row < 4; row++) assert.equal(job.step(-1), row === 3);
+  for (let step = 0; step < 4 + PHASES; step++) assert.equal(job.step(-1), step === 3 + PHASES);
   assertBytes(job.commit(), expected);
   for (const index of [8, 9, 10, 11, 20, 21, 22, 23, 24, 25, 26, 27, 36, 37, 38, 39])
     assert.equal(expected.unlit[index], pixels[index], `preserved boundary byte ${index}`);
@@ -230,16 +245,16 @@ for (const slicing of ["one-row", "six-ms", "idle-expired", "infinite"]) {
     let done = false;
     let slices = 0;
     while (!done) {
-      assert.ok(++slices <= height, "an expired budget still advances one complete row");
+      assert.ok(++slices <= height + PHASES, "an expired budget still advances one phase or row");
       const until = slicing === "one-row" ? -1 : slicing === "six-ms" ? ui.now() + 6 : Infinity;
       const idle = slicing === "idle-expired" ? { timeRemaining: () => 0 } : undefined;
       const before = ui.now();
       done = job.step(until, idle);
       if (slicing === "six-ms") assert.ok(ui.now() - before <= 6);
       if (!done) assert.equal(job.commit(), null, "incomplete work cannot expose either canvas");
-      assert.equal(ui.calls.put.length, 0, "row slices do not commit canvas pixels");
+      // (Round 4: the uploads are steps of their own, published only by commit.)
     }
-    if (slicing === "one-row" || slicing === "idle-expired") assert.equal(slices, height);
+    if (slicing === "one-row" || slicing === "idle-expired") assert.equal(slices, height + PHASES);
     if (slicing === "infinite") assert.equal(slices, 1);
     assertBytes(job.commit(), originalBytes(pixels));
     assert.equal(ui.calls.draw.length, 3);
@@ -265,11 +280,15 @@ test("committing twice is idempotent and cancellation does not destroy published
   assertBytes(result, originalBytes(pixels));
 });
 
-test("setup takes one immutable snapshot even if the borrowed source pixels later change", () => {
+// (Round 4: the snapshot is the first step's, no longer setup's.)
+test("the first step takes one immutable snapshot even if the borrowed source pixels later change", () => {
   const pixels = randomPixels(5, 7);
   const expected = originalBytes(pixels);
   const ui = fixture(pixels, 5, 7);
   const job = ui.api.createSplitLightsJob(ui.image, 9, 4, 5, 7);
+  assert.equal(ui.calls.draw.length, 0, "setup only makes the canvases");
+  assert.equal(job.step(-1), false);
+  assert.deepEqual(ui.calls.draw[0], [ui.image, 9, 4, 5, 7, 0, 0, 5, 7]);
   pixels.fill(0);
   assert.equal(job.step(Infinity), true);
   assertBytes(job.commit(), expected);
@@ -296,14 +315,9 @@ for (const started of [false, true]) {
   });
 }
 
-for (const failures of [
-  { canvas: 0 },
-  { canvas: 1 },
-  { context: 0 },
-  { draw: true },
-  { read: true },
-  { create: true },
-]) {
+// (Round 4: a closed bitmap, a tainted read or a failed allocation now
+// fails a step — terminal, null commit — instead of setup.)
+for (const failures of [{ canvas: 0 }, { canvas: 1 }, { context: 0 }]) {
   test(`unavailable setup returns null and keeps the decoded source borrowed: ${JSON.stringify(failures)}`, () => {
     const ui = fixture(randomPixels(3, 4), 3, 4, failures);
     assert.equal(ui.api.createSplitLightsJob(ui.image, 0, 0, 3, 4), null);
@@ -313,13 +327,21 @@ for (const failures of [
   });
 }
 
-for (const failures of [{ context: 1 }, { context: 2 }, { put: 0 }]) {
-  test(`unavailable commit returns null with no partial result and remains terminal: ${JSON.stringify(failures)}`, () => {
+for (const failures of [
+  { draw: true },
+  { read: true },
+  { create: true },
+  { context: 1 },
+  { context: 2 },
+  { put: 0 },
+]) {
+  test(`an unavailable phase commits null with no partial result and remains terminal: ${JSON.stringify(failures)}`, () => {
     const ui = fixture(randomPixels(3, 4), 3, 4, failures);
     const job = ui.api.createSplitLightsJob(ui.image, 0, 0, 3, 4);
     assert.ok(job);
     assert.equal(job.step(Infinity), true);
     assert.equal(job.commit(), null);
+    if (failures.draw || failures.read || failures.create) assert.equal(ui.calls.put.length, 0);
     const before = JSON.stringify(ui.calls);
     assert.equal(job.step(Infinity), true);
     assert.equal(job.commit(), null);
