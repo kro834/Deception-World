@@ -1099,6 +1099,9 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
       busy.current = false;
       setDocumentLoading(false);
       document.documentElement.removeAttribute("data-route-cover");
+      if (!document.querySelector?.('.side-panel[data-open="true"]')) {
+        delete document.documentElement.dataset.sideMenuOpen;
+      }
       setGate({ active: false, percent: 0, variant: "archive", phase: "covering" });
       setSignal("idle");
       setDelayedRoute(null);
@@ -1148,6 +1151,9 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
       openingHandoff.current = null;
       setDocumentLoading(false);
       document.documentElement.removeAttribute("data-route-cover");
+      if (!document.querySelector?.('.side-panel[data-open="true"]')) {
+        delete document.documentElement.dataset.sideMenuOpen;
+      }
       dispatchOpeningHandoffState(false);
       busy.current = false;
     };
@@ -1380,6 +1386,9 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
             diveVariant === "rexonance" && tier === "full" ? warmRexonanceSuit("high") : null;
           let rexonanceSuit: "build" | "whole" = "whole";
           if (diveVariant === "rexonance") {
+            if (document.documentElement.dataset.sideMenuOpen === "true") {
+              markRouteCover("covering");
+            }
             const preparation = prepareRexonanceTransition();
             rexonanceCoverCancel.current = preparation.cancel;
             rexonanceCall = await preparation.promise;
@@ -1451,6 +1460,9 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
                 });
           setDocumentLoading(true);
           markRouteCover("covering");
+          if (!document.querySelector?.('.side-panel[data-open="true"]')) {
+            delete document.documentElement.dataset.sideMenuOpen;
+          }
           setGate({
             active: true,
             percent: 100,
@@ -1549,6 +1561,9 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
             );
           } finally {
             window.setTimeout(releaseScrollMotion, 360);
+            if (!document.querySelector?.('.side-panel[data-open="true"]')) {
+              delete document.documentElement.dataset.sideMenuOpen;
+            }
             if (isCurrent()) {
               if (rexonanceTransition.current === requestId) rexonanceTransition.current = null;
               setDocumentLoading(false);
@@ -2107,6 +2122,7 @@ export function GuardedLink({
     }
     e.preventDefault();
     e.stopPropagation();
+    if (e.detail !== 0) e.currentTarget?.blur?.();
     beforeNavigate?.();
     // detail 0: activated from the keyboard (Enter), not a pointer.
     void go({ to, hash, search, assets, transition, focusDestination: e.detail === 0 });

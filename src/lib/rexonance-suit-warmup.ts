@@ -470,19 +470,39 @@ export function scheduleRexonancePagePreload(preload: () => Promise<unknown>, de
     pagePreloaded = true;
     void preload()
       .then((matches) => {
-        // The route's head links (its stylesheets), once each.
+        // The route's head links (its stylesheets and fonts), once each.
         const list = Array.isArray(matches) ? matches : [];
-        for (const match of list as { links?: { rel?: string; href?: string }[] }[]) {
+        for (const match of list as {
+          links?: {
+            rel?: string;
+            as?: string;
+            type?: string;
+            href?: string;
+            crossOrigin?: string;
+          }[];
+        }[]) {
           for (const link of match.links ?? []) {
-            if (link.rel !== "stylesheet" || !link.href) continue;
+            if (!link.href) continue;
             if (document.head.querySelector(`link[href="${CSS.escape(link.href)}"]`)) continue;
-            const hint = Object.assign(document.createElement("link"), {
-              rel: "preload",
-              as: "style",
-              href: link.href,
-            });
-            hint.setAttribute("fetchpriority", "low");
-            document.head.append(hint);
+            if (link.rel === "stylesheet") {
+              const hint = Object.assign(document.createElement("link"), {
+                rel: "preload",
+                as: "style",
+                href: link.href,
+              });
+              hint.setAttribute("fetchpriority", "low");
+              document.head.append(hint);
+            } else if (link.rel === "preload" && link.as === "font") {
+              const hint = Object.assign(document.createElement("link"), {
+                rel: "preload",
+                as: "font",
+                type: link.type ?? "font/woff2",
+                href: link.href,
+                crossOrigin: link.crossOrigin ?? "anonymous",
+              });
+              hint.setAttribute("fetchpriority", "low");
+              document.head.append(hint);
+            }
           }
         }
       })

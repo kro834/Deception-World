@@ -1314,26 +1314,51 @@ export function RexonanceSaga() {
   // server's markup always matches), the page first renders its hero and
   // 01 only; the rest (P14 on) renders in an idle slot once the reveal has
   // run, so the hand-over lays out a short page. A hash arrival renders all.
-  const [lower, setLower] = useState(
-    () =>
-      typeof document === "undefined" ||
-      document.documentElement.dataset.loading !== "true" ||
-      // A hash arrival (not #top) needs its section at once.
-      (window.location.hash.length > 1 && window.location.hash !== "#top"),
+  const [step, setStep] = useState(() =>
+    typeof document === "undefined" ||
+    document.documentElement.dataset.loading !== "true" ||
+    // A hash arrival (not #top) needs its section at once.
+    (window.location.hash.length > 1 && window.location.hash !== "#top")
+      ? 3
+      : 0,
   );
+  const lower = step >= 3;
   useEffect(() => {
     if (lower) return;
     const root = document.documentElement;
     let idle = 0;
     let timer = 0;
-    const show = () => setLower(true);
+    const schedule = (next: () => void, delay = 16) => {
+      if (window.requestIdleCallback) idle = window.requestIdleCallback(next, { timeout: 220 });
+      // Safari has no idle callback: leave the reveal's last frames alone.
+      else timer = window.setTimeout(next, delay);
+    };
+    const advance = () => {
+      idle = 0;
+      timer = 0;
+      setStep((current) => (current < 3 ? current + 1 : 3));
+    };
+    const flushAll = () => {
+      if (timer) window.clearTimeout(timer);
+      if (idle) window.cancelIdleCallback?.(idle);
+      timer = idle = 0;
+      setStep(3);
+    };
+    const onHashClick = (event: MouseEvent) => {
+      const link = (event.target as Element | null)?.closest?.('a[href^="#"]');
+      if (link && link.getAttribute("href") !== "#top") flushAll();
+    };
+    window.addEventListener("hashchange", flushAll);
+    document.addEventListener("click", onHashClick, true);
     const later = () => {
-      timer = window.setTimeout(() => {
-        timer = 0;
-        if (window.requestIdleCallback) idle = window.requestIdleCallback(show, { timeout: 700 });
-        // Safari has no idle callback: leave the reveal's last frames alone.
-        else timer = window.setTimeout(show, 400);
-      }, REXONANCE_ENTRY_TIMINGS.reveal + 80);
+      if (step === 0) {
+        timer = window.setTimeout(() => {
+          timer = 0;
+          schedule(advance, 400);
+        }, REXONANCE_ENTRY_TIMINGS.reveal + 80);
+      } else {
+        schedule(advance, 32);
+      }
     };
     const observer = new MutationObserver(() => {
       if (root.hasAttribute("data-loading")) return;
@@ -1345,10 +1370,12 @@ export function RexonanceSaga() {
     else later();
     return () => {
       observer.disconnect();
+      window.removeEventListener("hashchange", flushAll);
+      document.removeEventListener("click", onHashClick, true);
       if (timer) window.clearTimeout(timer);
       if (idle) window.cancelIdleCallback?.(idle);
     };
-  }, [lower]);
+  }, [lower, step]);
 
   const [nativeIOSSelection, setNativeIOSSelection] = useState(false);
   const [motionReady, setMotionReady] = useState(false);
@@ -1849,11 +1876,10 @@ export function RexonanceSaga() {
         </a>
       </nav>
 
-      <RexonancePerformance />
+      {step >= 1 ? <RexonancePerformance /> : null}
 
       {lower ? (
-        <>
-          <section id="p14" className="rxs-p14 rxs-section" aria-labelledby="rxs-p14-title">
+        <section id="p14" className="rxs-p14 rxs-section" aria-labelledby="rxs-p14-title">
             <header className="rxs-section-heading rxs-reveal">
               <p>PROCESSING CORE / P14</p>
               <h2 id="rxs-p14-title">
@@ -1923,8 +1949,11 @@ export function RexonanceSaga() {
             </div>
 
             <P14Comparator nativeIOSSelection={nativeIOSSelection} />
-          </section>
+        </section>
+      ) : null}
 
+      {step >= 2 ? (
+        <>
           <RexonanceSuitUp stage={stage} />
 
           <section id="stages" className="rxs-stages rxs-section">
@@ -2154,9 +2183,9 @@ export function RexonanceSaga() {
             </GuardedLink>
           </footer>
         </>
-      ) : (
-        <div className="rxs-lower-pending" aria-hidden="true" />
-      )}
+      ) : null}
+
+      {!lower ? <div className="rxs-lower-pending" aria-hidden="true" /> : null}
     </main>
   );
 }

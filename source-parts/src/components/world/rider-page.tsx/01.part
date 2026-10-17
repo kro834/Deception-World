@@ -324,3 +324,12 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
           kicker: "拒絶の力",
           title: "『それ、いらない』で攻撃の到達を拒む。",
           body: [
+            "『それ、いらない』の一言で、攻撃の威力ではなく『攻撃が届く』という結果を成立させない。視線は常にシエルだけへ注がれる。一人称は『ワタシ』、二人称は『アナタ』。",
+          ],
+        },
+      ],
+    },
+    special: {
+      kicker: "ファイナルステージ",
+      name: "ファーフロムサーガ",
+      en: "FAR FROM SAGA",

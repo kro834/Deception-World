@@ -11,6 +11,10 @@
 /* A modal navigation layer owns the viewport while it is open. Lock both
    scrolling roots because iOS can keep the documentElement scrollable when
    only body overflow is changed. The panel remains the sole pan surface. */
+html[data-side-menu-open="true"] {
+  scrollbar-gutter: stable;
+}
+
 html[data-side-menu-open="true"],
 html[data-side-menu-open="true"] body {
   overflow: hidden !important;

@@ -14,6 +14,7 @@ const QUALITY_80 = new Set([
   "/manager-reemu-rider.jpeg",
   "/rider-realm-earth.jpeg",
   "/rider-realm-moon.jpeg",
+  "/rider-leddic-kemonohen-9237.jpeg",
 ]);
 let original = 0,
   delivery = 0;
