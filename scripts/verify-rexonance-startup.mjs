@@ -13,10 +13,16 @@ try {
   }, { noIdle: process.env.NO_IDLE === '1' });
   await page.goto(`${process.env.BASE_URL || 'https://deception-world.vercel.app'}/rexonance-saga`);
   await page.waitForSelector('.rzn-suitup');
+  await page.waitForFunction(() => document.querySelector('main[data-motion-ready]') &&
+    !document.documentElement.hasAttribute('data-loading'), null, { timeout: 60000 });
+  // Route arrival restores scroll after hydration. Do not race that restore
+  // and accidentally test the hero instead of the assembly runway.
+  await page.waitForTimeout(4000);
   await page.evaluate(() => {
     const r = document.querySelector('.rzn-suitup'), f = r.querySelector('.rzn-frame');
     scrollTo({ top: r.getBoundingClientRect().top + scrollY + (r.offsetHeight - f.offsetHeight) * .45, behavior: 'instant' });
   });
+  await page.waitForFunction(() => scrollY > innerHeight);
   let live = false;
   for (let i = 0; i < 15; i++) {
     await page.waitForTimeout(1000);
