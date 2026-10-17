@@ -390,7 +390,14 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-he
 html[data-family="special"]
   body
   .rxs-page.rxs-page.rxs-rexonance-page
-  :is(.rxs-headline-metrics strong, .rxs-specs strong, .rxs-p14-copy dd)[data-rsn-count] {
+  :is(
+    .rxs-headline-metrics strong,
+    .rxs-specs strong,
+    .rxs-p14-copy dd,
+    .rxs-comparison-metrics header strong,
+    .rxs-comparison-result b,
+    .rxs-p14-values strong
+  )[data-rsn-count] {
   position: relative;
 }
 

@@ -1040,7 +1040,14 @@ const P14Comparator = memo(function P14Comparator({
               </span>
               <span>
                 <i>P14（換算）</i>
-                <strong>{metric.relative[p14Baseline]}</strong>
+                {/* owner 2026-10-17: the read-out counts and locks like the
+                headline figures (it was skipped); the value stays its own text. */}
+                <strong data-rsn-count="">
+                  {metric.relative[p14Baseline]}
+                  <b className="rsn-count" aria-hidden="true">
+                    {metric.relative[p14Baseline]}
+                  </b>
+                </strong>
               </span>
             </div>
             <p key={`${metric.label}-${p14Baseline}`}>
@@ -1174,11 +1181,23 @@ const RexonancePerformance = memo(function RexonancePerformance() {
               <header>
                 <div>
                   <small>{metric.label}</small>
-                  <strong>{metric.current}</strong>
+                  {/* owner 2026-10-17: the comparison figures count and lock
+                  like the headline ones (they were skipped). */}
+                  <strong data-rsn-count="">
+                    {metric.current}
+                    <b className="rsn-count" aria-hidden="true">
+                      {metric.current}
+                    </b>
+                  </strong>
                 </div>
                 <span className="rxs-comparison-result">
                   <i>基準比</i>
-                  <b>{metric.relative}</b>
+                  <b data-rsn-count="">
+                    {metric.relative}
+                    <span className="rsn-count" aria-hidden="true">
+                      {metric.relative}
+                    </span>
+                  </b>
                   {/* FORGE (rx18): the slash ends a line, never starts one, and the
                   delta stays whole (「（推定値比）」 never splits). */}
                   <em>

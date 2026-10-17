@@ -129,29 +129,52 @@ export function mountRexonanceResonance(page, environment = window) {
   };
 
   /* ---------------- counts ---------------- */
+  // The figures are read when the layer mounts and again whenever the page
+  // adds some (owner, 2026-10-17: the 01 comparison and the P14 read-outs
+  // are re-rendered with their baseline, so their percentages were never
+  // counted — "skipped"). A figure the page removes is dropped.
   const figures = [];
-  for (const host of page.querySelectorAll("[data-rsn-count]")) {
-    const overlay = host.querySelector(".rsn-count");
-    const node = overlay
-      ? [...overlay.childNodes].find((child) => child.nodeType === 3 && /\d/.test(child.data))
-      : null;
-    const template = node ? countTemplate(node.data) : null;
-    if (!template) continue;
-    figures.push({
-      host,
-      node,
-      rendered: node.data,
-      template,
-      duration: host.closest(".rxs-headline-metrics") ? COUNT_MS : READOUT_MS,
-      state: "idle",
-      start: 0,
-      printed: node.data,
-      lockTimer: 0,
-    });
-  }
-  const byHost = new Map(figures.map((figure) => [figure.host, figure]));
+  const byHost = new Map();
   const queued = new Set();
   let countFrame = 0;
+  let armedMode = false;
+  const collect = () => {
+    for (const host of page.querySelectorAll("[data-rsn-count]")) {
+      if (byHost.has(host)) continue;
+      const overlay = host.querySelector(".rsn-count");
+      const node = overlay
+        ? [...overlay.childNodes].find((child) => child.nodeType === 3 && /\d/.test(child.data))
+        : null;
+      const template = node ? countTemplate(node.data) : null;
+      if (!template) continue;
+      const figure = {
+        host,
+        node,
+        rendered: node.data,
+        template,
+        duration: host.closest(".rxs-headline-metrics") ? COUNT_MS : READOUT_MS,
+        state: "idle",
+        start: 0,
+        printed: node.data,
+        lockTimer: 0,
+      };
+      figures.push(figure);
+      byHost.set(host, figure);
+      ensureCountObserver();
+      if (armedMode) armFigure(figure);
+    }
+  };
+  const prune = () => {
+    for (let index = figures.length - 1; index >= 0; index -= 1) {
+      const figure = figures[index];
+      if (figure.host.isConnected !== false) continue;
+      environment.clearTimeout(figure.lockTimer);
+      countObserver?.unobserve(figure.host);
+      queued.delete(figure);
+      byHost.delete(figure.host);
+      figures.splice(index, 1);
+    }
+  };
 
   const print = (figure, text) => {
     if (figure.printed === text) return;
@@ -210,7 +233,10 @@ export function mountRexonanceResonance(page, environment = window) {
     setState(figure, "count");
     if (!countFrame) countFrame = environment.requestAnimationFrame(tick);
   };
-  if (environment.IntersectionObserver && figures.length) {
+  // Made with the first figure, so a page that renders its figures later
+  // still gets one.
+  const ensureCountObserver = () => {
+    if (countObserver || !environment.IntersectionObserver) return;
     countObserver = new environment.IntersectionObserver(
       (entries) => {
         if (disposed || document.hidden) return;
@@ -222,17 +248,22 @@ export function mountRexonanceResonance(page, environment = window) {
       },
       { threshold: 0.35, rootMargin: "0px 0px -8% 0px" },
     );
-  }
+  };
+  const armFigure = (figure) => {
+    if (figure.state !== "idle") return;
+    ensureCountObserver();
+    if (!countObserver) return;
+    setState(figure, "armed");
+    print(figure, formatCount(figure.template, 0));
+    countObserver.observe(figure.host);
+  };
   const arm = () => {
     // Forced colours paint the figures' own text; the counters never show.
-    if (!countObserver || forcedColors.matches) return;
-    for (const figure of figures) {
-      if (figure.state !== "idle") continue;
-      setState(figure, "armed");
-      print(figure, formatCount(figure.template, 0));
-      countObserver.observe(figure.host);
-    }
+    if (forcedColors.matches) return;
+    armedMode = true;
+    for (const figure of figures) armFigure(figure);
   };
+  collect();
   const stopCounts = () => {
     if (countFrame) environment.cancelAnimationFrame(countFrame);
     countFrame = 0;
@@ -242,6 +273,7 @@ export function mountRexonanceResonance(page, environment = window) {
   };
   // Motion withdrawn: every figure is its own text again, at once.
   const disarm = () => {
+    armedMode = false;
     stopCounts();
     countObserver?.disconnect();
     queued.clear();
@@ -260,6 +292,7 @@ export function mountRexonanceResonance(page, environment = window) {
       countObserver?.observe(figure.host);
     }
   };
+
 
   /* ---------------- arrival, form, scenes ---------------- */
   let arrived = false;
@@ -431,11 +464,22 @@ export function mountRexonanceResonance(page, environment = window) {
   document.addEventListener("visibilitychange", sync);
   environment.addEventListener("pagehide", onPageHide);
   environment.addEventListener("pageshow", sync);
+  // Figures the page renders later (a comparison or P14 baseline change
+  // replaces its block): read on the next DOM change, dropped when gone.
+  const figureObserver = environment.MutationObserver
+    ? new environment.MutationObserver(() => {
+        if (disposed) return;
+        prune();
+        collect();
+      })
+    : null;
+  figureObserver?.observe(page, { childList: true, subtree: true });
   sync();
 
   return () => {
     disposed = true;
     htmlObserver.disconnect();
+    figureObserver?.disconnect();
     formObserver?.disconnect();
     sceneObserver?.disconnect();
     reduced.removeEventListener?.("change", sync);
@@ -2933,6 +2977,9 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     if (percent && share !== hud.percent) {
       hud.percent = share;
       writeText(percent, share);
+      // Owner (2026-10-17): the read-outs light with the scroll like the
+      // chips (they stayed dark until the lock). One write per percent.
+      runway.style?.setProperty?.("--rzn-glow", (Number(share) / 100).toFixed(2));
     }
     const count = `${grouped(landedBy(progress))} / ${grouped(plan.tiles.length)}`;
     if (counter && count !== hud.count) {
@@ -3201,6 +3248,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     });
     if (percent) writeText(percent, restPercent);
     if (counter) writeText(counter, restCount);
+    runway.style?.removeProperty?.("--rzn-glow");
   };
   const showLoading = () => {
     if (live || runway.dataset.rznState === "loading") return;

@@ -937,6 +937,22 @@ test("each figure keeps the owner's value as its own text; its counter is a hidd
       value,
     );
   }
+  // Owner (2026-10-17): the comparison and P14 read-outs count too (they
+  // were skipped); the result's mirror is a span, so the b rules stay off it.
+  for (const [open, value, mirror, close] of [
+    ["strong", "{metric.current}", "b", "strong"],
+    ["b", "{metric.relative}", "span", "b"],
+    ["strong", "{metric.relative[p14Baseline]}", "b", "strong"],
+  ]) {
+    const figure = value.replace(/[[\]{}.]/g, "\\$&");
+    assert.match(
+      page,
+      new RegExp(
+        `<${open} data-rsn-count="">\\s*${figure}\\s*<${mirror} className="rsn-count" aria-hidden="true">\\s*${figure}\\s*</${mirror}>\\s*</${close}>`,
+      ),
+      value,
+    );
+  }
   // Every ornament the layer adds is hidden from assistive technology.
   for (const ornament of ["rsn-field", "rsn-form", "rsn-coda", "rsn-glint"]) {
     assert.match(page, new RegExp(`className="${ornament}" aria-hidden="true"`), ornament);
@@ -1112,6 +1128,7 @@ function environment({ reduced = false, economy = false, fine = false, timelines
     html,
     document,
     figures,
+    makeFigure,
     observers,
     mutationObservers,
     listeners,
@@ -1175,6 +1192,42 @@ test("a figure counts once from zero, locks with a transient hit, and hands back
   assert.equal(readout.getAttribute("data-rsn-state"), null);
   assert.equal(readout.overlay.childNodes[0].data, "約0.06ms");
   assert.ok(t.observers.every((observer) => observer.disconnected));
+});
+
+// Owner (2026-10-17): the 01 comparison and the P14 read-outs are re-rendered
+// with their baseline, so their figures must be read when they appear.
+test("a figure the page renders later is armed and counts; one it removes is dropped", () => {
+  const t = environment();
+  const dispose = mountRexonanceResonance(t.pageNode, t.env);
+  const [counts] = t.observers;
+  const later = t.makeFigure("547.4%");
+  t.figures.push(later);
+  const pageObserver = t.mutationObservers.at(-1);
+  pageObserver.callback();
+  assert.equal(later.getAttribute("data-rsn-state"), "armed");
+  assert.equal(later.overlay.childNodes[0].data, "000.0%");
+  assert.ok(counts.targets.has(later));
+  counts.callback([{ isIntersecting: true, target: later }]);
+  assert.equal(later.getAttribute("data-rsn-state"), "count");
+  t.advance(1000);
+  assert.equal(later.getAttribute("data-rsn-state"), "lock");
+  assert.equal(later.overlay.childNodes[0].data, "547.4%");
+  // Replaced by the page (a baseline change): the old figure is forgotten.
+  const gone = t.figures.pop();
+  gone.isConnected = false;
+  const replacement = t.makeFigure("376.7%");
+  t.figures.push(replacement);
+  // Pending: the arrival flag, the lock and the hit; only the lock is the figure's own.
+  const pending = t.timers.size;
+  pageObserver.callback();
+  assert.ok(!counts.targets.has(gone));
+  assert.equal(replacement.getAttribute("data-rsn-state"), "armed");
+  assert.equal(replacement.overlay.childNodes[0].data, "000.0%");
+  assert.equal(t.timers.size, pending - 1, "the removed figure's lock timer is cleared");
+  dispose();
+  assert.equal(replacement.getAttribute("data-rsn-state"), null);
+  assert.ok(t.observers.every((observer) => observer.disconnected));
+  assert.ok(t.mutationObservers.every((observer) => observer.disconnected));
 });
 
 test("hiding the page ends a running count on its value; a route cover holds a count back", () => {

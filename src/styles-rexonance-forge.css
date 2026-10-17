@@ -720,6 +720,24 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-su
   color: #f2d896;
 }
 
+/* Owner (2026-10-17): the read-outs follow the scroll with the chips' ice
+   light, the only HUD text that stayed dark until the lock. --rzn-glow is the
+   engine's share of the way to the lock (one write per percent); the nanite
+   count locks in gold with the percent. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup[data-rzn-state="live"]:not([data-rzn-complete]) .rzn-percent,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup[data-rzn-state="live"]:not([data-rzn-complete]) .rzn-count {
+  color: rgb(var(--rzn-white));
+  text-shadow:
+    0 0 1px rgb(var(--rzn-ice) / calc(var(--rzn-glow, 0) * 100%)),
+    0 0 calc(8px + var(--rzn-glow, 0) * 22px) rgb(var(--rzn-ice) / calc(var(--rzn-glow, 0) * 60%));
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup[data-rzn-complete] .rzn-count,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup:not([data-rzn-state]) .rzn-count {
+  color: #f2d896;
+  text-shadow: 0 0 14px rgb(242 216 150 / 35%);
+}
+
 /* ================================================================
    03: the forms
    ================================================================ */
