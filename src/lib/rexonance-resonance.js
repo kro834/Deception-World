@@ -1710,23 +1710,16 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
           reject(error);
         }
       };
-      // The reader is at the scene and it is not live yet (a direct arrival,
-      // or a reader faster than the preparation): bounded slices one after
-      // another on timers, not only in idle periods (scrolling leaves about
-      // one idle slice a frame). Each is still ≤ 6 ms, with frames between.
-      if (near && !live) {
-        const id = environment.setTimeout(run, 0);
-        idleJobs.set(key, () => {
-          environment.clearTimeout(id);
-          resolve(null);
-        });
-        return;
-      }
       const idle =
         typeof environment.requestIdleCallback === "function" &&
         idleFallbackGeneration !== generation;
       // Still inside an idle period with room for a whole slice: next task.
-      const port = idle && idleUntil - clock() > 8 ? chainPort() : null;
+      // While the reader is at the scene and it is not live yet (a direct
+      // arrival, or a reader faster than the preparation), the period's last
+      // few ms take one more slice (a slice's work stops at 3–4 ms): scrolling
+      // leaves short idle periods, and the slack was left unused.
+      const room = near && !live ? 4.5 : 8;
+      const port = idle && idleUntil - clock() > room ? chainPort() : null;
       if (port) {
         chained.push(() => run(chainDeadline));
         port.port2.postMessage(0);
