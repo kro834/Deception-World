@@ -1,6 +1,3 @@
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.8"
                         strokeLinecap="round"
                       />
                       <rect
@@ -510,3 +507,7 @@
                     : openPickup
                 }
               />
+            </div>
+          </div>
+        </section>
+      </section>

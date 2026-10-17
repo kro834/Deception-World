@@ -95,7 +95,7 @@ test("the World page shows the warning and the plus slider first, the dossier on
   );
   assert.match(
     home,
-    /className="world-column-spoiler-gate">\s*<p>\{item\.body\}<\/p>\s*<SlideOpenControl/,
+    /className="world-column-spoiler-gate">\s*<p>\{item\.body\}<\/p>[\s\S]*?\{pickupOpen \? \(\s*<SlideOpenControl/,
   );
   assert.match(home, /opensDialog=\{false\}\s*onOpen=\{\(\) => setDossierOpen\(true\)\}/);
   const prose = read("src/components/world/dog-dossier-prose.tsx");

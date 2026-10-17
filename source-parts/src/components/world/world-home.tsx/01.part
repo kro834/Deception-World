@@ -510,3 +510,4 @@ const EPISODES: EpisodeRecord[] = [
         alt: "仮面ライダールーラー・ポラリスモード",
         width: 1023,
         height: 1537,
+        to: "/characters/dante",

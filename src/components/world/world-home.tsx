@@ -3040,15 +3040,20 @@ export function WorldHome() {
                   ) : (
                     <div className="world-column-spoiler-gate">
                       <p>{item.body}</p>
-                      <SlideOpenControl
-                        ariaControls="world-column-dossier"
-                        ariaLabel="ネタバレを含む資料を開く"
-                        className="world-column-spoiler-open"
-                        expanded={false}
-                        label="ネタバレを開く"
-                        opensDialog={false}
-                        onOpen={() => setDossierOpen(true)}
-                      />
+                      {/* Rendered only while the pickup is open, so the page
+                      keeps one .world-column-slide-open while it is closed
+                      (verify-column-frame focuses it by that class). */}
+                      {pickupOpen ? (
+                        <SlideOpenControl
+                          ariaControls="world-column-dossier"
+                          ariaLabel="ネタバレを含む資料を開く"
+                          className="world-column-slide-open world-column-spoiler-open"
+                          expanded={false}
+                          label="ネタバレを開く"
+                          opensDialog={false}
+                          onOpen={() => setDossierOpen(true)}
+                        />
+                      ) : null}
                     </div>
                   )
                 ) : (

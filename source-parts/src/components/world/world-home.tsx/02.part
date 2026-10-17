@@ -1,4 +1,3 @@
-        to: "/characters/dante",
         hash: "ruler-polaris",
         assets: ["/character-dante.webp", "/rider-ruler-polaris.webp"],
       },
@@ -511,3 +510,4 @@ export function WorldHome() {
 
   // A search result opens one column: /world#world-column-02.
   useLayoutEffect(() => {
+    const index = COLUMNS.findIndex((item) => locationHash === `world-column-${item.no}`);

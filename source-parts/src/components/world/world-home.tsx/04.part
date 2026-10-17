@@ -1,6 +1,3 @@
-      const swapIndex = randomBelow(index + 1);
-      [posterSequence[index], posterSequence[swapIndex]] = [
-        posterSequence[swapIndex],
         posterSequence[index],
       ];
     }
@@ -511,3 +508,6 @@
                     <svg viewBox="0 0 24 24" width="14" height="14">
                       <path
                         d="M8 10V8a4 4 0 0 1 7.5-2"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.8"

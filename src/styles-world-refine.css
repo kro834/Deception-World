@@ -11,7 +11,7 @@
 /* HOLD + SLIDE: its ring was a box-shadow the frosted sheet's !important
    shadow beat. An outline, on the control's keyboard flag (a tap clears it). */
 main.site-shell.film-edition.mirage-edition
-  :is(.world-column-slide-open, .world-column-spoiler-open).ios-slide-open[data-keyboard-focus="true"]:focus-visible {
+  .world-column-slide-open.ios-slide-open[data-keyboard-focus="true"]:focus-visible {
   outline: 2px solid var(--mr-focus);
   outline-offset: 3px;
 }
@@ -87,7 +87,7 @@ main.site-shell.film-edition.mirage-edition .world-column-summary-pane p {
     border-left: 1px solid var(--mr-line);
   }
 
-  main.site-shell.film-edition.mirage-edition :is(.world-column-slide-open, .world-column-spoiler-open).ios-slide-open {
+  main.site-shell.film-edition.mirage-edition .world-column-slide-open.ios-slide-open {
     grid-column: 2;
     grid-row: 3;
     align-self: end;
@@ -449,28 +449,28 @@ main.site-shell.film-edition.mirage-edition
    on with ice brackets above and gold at the foot, drawn as background
    layers over each control's own surface. Box, travel and drag unchanged. */
 main.site-shell.film-edition.mirage-edition
-  :is(.world-column-slide-open, .world-column-spoiler-open, .rider-dossier-open).ios-slide-open,
+  :is(.world-column-slide-open, .rider-dossier-open).ios-slide-open,
 main.site-shell.film-edition.mirage-edition
-  :is(.world-column-slide-open, .world-column-spoiler-open, .rider-dossier-open).ios-slide-open::before,
+  :is(.world-column-slide-open, .rider-dossier-open).ios-slide-open::before,
 main.site-shell.film-edition.mirage-edition
-  :is(.world-column-slide-open, .world-column-spoiler-open, .rider-dossier-open).ios-slide-open::after {
+  :is(.world-column-slide-open, .rider-dossier-open).ios-slide-open::after {
   border-radius: 4px !important;
 }
 
 main.site-shell.film-edition.mirage-edition
-  :is(.world-column-slide-open, .world-column-spoiler-open, .rider-dossier-open).ios-slide-open
+  :is(.world-column-slide-open, .rider-dossier-open).ios-slide-open
   :is(.ios-slide-open-fill, .ios-slide-open-thumb) {
   border-radius: 2px !important;
 }
 
 main.site-shell.film-edition.mirage-edition
-  :is(.world-column-slide-open, .world-column-spoiler-open, .rider-dossier-open).ios-slide-open
+  :is(.world-column-slide-open, .rider-dossier-open).ios-slide-open
   .ios-slide-open-thumb
   > i {
   border-radius: 1px;
 }
 
-main.site-shell.film-edition.mirage-edition :is(.world-column-slide-open, .world-column-spoiler-open).ios-slide-open {
+main.site-shell.film-edition.mirage-edition .world-column-slide-open.ios-slide-open {
   background:
     linear-gradient(var(--mr-ice) 0 0) 0 0 / 10px 2px no-repeat,
     linear-gradient(var(--mr-ice) 0 0) 0 0 / 2px 10px no-repeat,
@@ -712,7 +712,7 @@ main.site-shell.film-edition.mirage-edition .story-layout .story-heading .eyebro
    ================================================================ */
 @media (forced-colors: active) {
   main.site-shell.film-edition.mirage-edition
-    :is(.world-column-slide-open, .world-column-spoiler-open).ios-slide-open[data-keyboard-focus="true"]:focus-visible,
+    .world-column-slide-open.ios-slide-open[data-keyboard-focus="true"]:focus-visible,
   main.site-shell.film-edition.mirage-edition
     :is(.manager-archive-tabs, .rider-tabs, .world-column-tabs).liquid-swipe-tabs
     > button[role="tab"]:focus-visible,
@@ -776,7 +776,7 @@ main.site-shell.film-edition.mirage-edition .story-layout .story-heading .eyebro
 
   /* HOLD + SLIDE: a system plate without the brackets. */
   main.site-shell.film-edition.mirage-edition
-    :is(.world-column-slide-open, .world-column-spoiler-open, .rider-dossier-open).ios-slide-open {
+    :is(.world-column-slide-open, .rider-dossier-open).ios-slide-open {
     background-image: none !important;
   }
 }
