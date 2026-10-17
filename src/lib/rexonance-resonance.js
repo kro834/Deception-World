@@ -2927,6 +2927,25 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     // REXONANCE DEUS！: the face fills with pixel squares, which scatter.
     const [visorX, visorY] = config.visor;
     const [fillFrom, burstTo] = B.pixels;
+    // The compound eyes do not exist until the pixels fill them (owner,
+    // 2026-10-17): from the helmet's beat the visor is empty dark glass,
+    // which gives way as the squares arrive.
+    const glow = config.glow;
+    const hollow = 1 - clamp01((progress - fillFrom) / 0.03);
+    if (glow?.length > 2 && progress >= B.rexonance[0] && hollow > 0) {
+      context.save();
+      context.globalAlpha = hollow;
+      context.fillStyle = "#04060b";
+      context.beginPath();
+      context.moveTo(glow[0][0], glow[0][1]);
+      for (let i = 1; i < glow.length; i += 1) context.lineTo(glow[i][0], glow[i][1]);
+      context.closePath();
+      context.fill();
+      context.lineWidth = 2;
+      context.strokeStyle = "#04060b";
+      context.stroke();
+      context.restore();
+    }
     if (pixels.length && progress >= fillFrom && progress < burstTo) {
       const fill = clamp01((progress - fillFrom) / 0.03);
       const burst = smooth(clamp01((progress - (burstTo - 0.04)) / 0.04));
