@@ -1578,6 +1578,7 @@ export function RiderPage({ id }: { id: string }) {
                   abilities: form.abilities,
                   arsenal: form.arsenal,
                   finishers: form.finishers,
+                  extraForms: partnerForms,
                 }}
               />
             ))}
