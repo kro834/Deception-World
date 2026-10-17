@@ -528,7 +528,7 @@ async function verifyDelayedArtworkImage() {
   const requested = new Promise((resolve) => { requestedResolve = resolve; });
   const handlerFinished = new Promise((resolve) => { handlerFinishedResolve = resolve; });
   await page.route("**/*", async (route) => {
-    if (new URL(route.request().url()).pathname.endsWith("/character-fable-20260923.webp")) {
+    if (new URL(route.request().url()).pathname.endsWith("/character-fable-20261017.webp")) {
       requestedResolve();
       await new Promise((resolve) => setTimeout(resolve, 1800));
       try { await route.continue(); } catch { /* closing the dialog may cancel the image request */ }
@@ -567,7 +567,7 @@ async function verifyFailedArtworkImage() {
   page.on("pageerror", (error) => errors.push(error.message));
   await readyWorldArtworkPage(page);
   await page.route("**/*", async (route) => {
-    if (new URL(route.request().url()).pathname.endsWith("/character-fable-20260923.webp")) {
+    if (new URL(route.request().url()).pathname.endsWith("/character-fable-20261017.webp")) {
       await route.abort("failed");
     } else {
       await route.continue();
