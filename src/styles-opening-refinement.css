@@ -1,17 +1,16 @@
 /* One title, one light path. Preserve the seven-second sequence, approved logo
    geometry and control deck; let the background recede as the prism arrives.
    The entrance appears when the title completes or the visitor skips it. */
-.cine-stage.cine-stage {
-  --op-halo-rest: 0.72;
-  --op-rays-rest: 0.42;
+.cine-stage {
+  --op-halo-rest: 1;
+  --op-rays-rest: 0.72;
   background:
-    radial-gradient(ellipse at 24% 65%, rgb(61 92 113 / 16%), transparent 55%),
-    radial-gradient(ellipse at 82% 28%, rgb(119 77 108 / 10%), transparent 46%), #04080f;
+    radial-gradient(ellipse at 24% 65%, rgb(61 92 113 / 18%), transparent 56%),
+    radial-gradient(ellipse at 82% 28%, rgb(119 77 108 / 12%), transparent 48%), #04080f;
 }
 
-/* Broad reflected light replaces the dense fan. The mask is static; only
-   its parent plane participates in the existing finite arrival. */
-.cine-stage .cine-rays {
+/* Broad reflected light base (overridden by styles-opening-cinema.css volumetric fan). */
+.cine-rays {
   background:
     linear-gradient(113deg, transparent 22%, rgb(122 232 255 / 13%) 22.1%, transparent 38%),
     linear-gradient(113deg, transparent 37%, rgb(182 163 255 / 8%) 37.1%, transparent 54%),
@@ -20,71 +19,65 @@
   mask-image: radial-gradient(ellipse at 50% 36%, #000, transparent 72%);
 }
 
-.cine-stage .cine-halo {
+.cine-halo {
   background: radial-gradient(
     ellipse,
-    rgb(122 232 255 / 10%),
-    rgb(182 163 255 / 5%) 42%,
+    rgb(122 232 255 / 12%),
+    rgb(182 163 255 / 6%) 42%,
     transparent 70%
   );
 }
 
-/* A pair of diagonal registration cuts echoes the silhouette of the actual
-   wordmark without placing more lettering or a second frame over it. */
-.cine-stage .cine-depth-grid {
+/* Radial/conic astrolabe grid complemented by diagonal registration cuts
+   echoing the silhouette of the wordmark. */
+.cine-depth-grid {
   background:
-    linear-gradient(157deg, transparent 39.9%, rgb(122 232 255 / 22%) 40%, transparent 40.12%),
-    linear-gradient(157deg, transparent 59.9%, rgb(240 207 134 / 20%) 60%, transparent 60.12%);
+    linear-gradient(157deg, transparent 39.85%, rgb(122 232 255 / 24%) 40%, transparent 40.15%),
+    linear-gradient(157deg, transparent 59.85%, rgb(240 207 134 / 22%) 60%, transparent 60.15%),
+    repeating-radial-gradient(
+      circle at 50% 50%,
+      transparent 0 7.8%,
+      rgb(122 232 255 / 11%) 8% 8.1%,
+      transparent 8.3% 15.8%
+    ),
+    repeating-conic-gradient(
+      from 4deg at 50% 50%,
+      transparent 0deg 14.4deg,
+      rgb(240 207 134 / 9%) 14.7deg 14.84deg,
+      transparent 15.05deg 30deg
+    );
 }
 
-.cine-stage.is-complete .cine-hud {
-  opacity: 0.14;
-}
-
-.cine-stage.is-complete .cine-aperture {
-  opacity: 0.24;
-}
-
-.cine-stage.is-complete :is(.cine-orbit-a, .cine-orbit-b) {
-  opacity: 0.18;
-}
-
-.cine-stage.is-complete .cine-editorial-word {
-  visibility: hidden;
-}
-
-.cine-stage .cine-title-caption {
+.cine-title-caption {
   color: #d8e3ed;
 }
 
-/* A photographic projection plane, not floating scene props. These are
-   existing DOM planes; the artwork stays full-frame and no raster is added.
-   Keep one quiet dial, the real logo and the physical-looking reflected light. */
-.cine-stage :is(.cine-prism-field, .cine-aperture, .cine-orbit-b, .cine-depth-grid) {
+/* Economy opening keeps only the primary dial and logo planes. */
+.cine-stage.is-economy-opening :is(.cine-prism-field, .cine-aperture, .cine-orbit-b, .cine-depth-grid) {
   display: none;
 }
 
-.cine-stage .cine-editorial-word {
+.cine-stage.is-economy-opening .cine-editorial-word {
   visibility: hidden;
 }
 
-.cine-stage .cine-editorial::before {
+.cine-editorial::before {
   background:
-    linear-gradient(114deg, transparent 12%, rgb(122 232 255 / 5%) 39%, transparent 63%),
-    radial-gradient(ellipse 72% 28% at 50% 51%, rgb(122 232 255 / 10%), transparent 78%);
+    linear-gradient(114deg, transparent 12%, rgb(122 232 255 / 6%) 39%, transparent 63%),
+    radial-gradient(ellipse 72% 28% at 50% 51%, rgb(122 232 255 / 11%), transparent 78%);
 }
 
-.cine-stage .cine-editorial::after {
+.cine-editorial::after {
   background:
     linear-gradient(
         90deg,
         transparent,
-        rgb(122 232 255 / 34%) 28%,
-        rgb(182 163 255 / 28%) 62%,
+        rgb(122 232 255 / 38%) 28%,
+        rgb(182 163 255 / 32%) 62%,
         transparent
       )
       0 0 / 100% 1px no-repeat,
-    radial-gradient(ellipse 56% 34% at 50% 100%, rgb(122 232 255 / 9%), transparent 80%);
+    radial-gradient(ellipse 56% 34% at 50% 100%, rgb(122 232 255 / 11%), transparent 80%);
   -webkit-mask-image: linear-gradient(90deg, transparent, #000 24%, #000 76%, transparent);
   mask-image: linear-gradient(90deg, transparent, #000 24%, #000 76%, transparent);
   -webkit-mask-size: 100% 100%;
@@ -95,12 +88,8 @@
   mask-repeat: no-repeat;
 }
 
-.cine-stage .cine-hud {
-  opacity: 0.22;
-}
-
-.cine-stage .cine-editorial-frame > i {
-  background-color: rgb(122 232 255 / 3%);
+.cine-editorial-frame > i {
+  background-color: rgb(122 232 255 / 4%);
 }
 
 /* Keep the entrance outside the opening score and keyboard focus until the
@@ -129,22 +118,10 @@
   display: none;
 }
 
-.cine-stage .cine-btn {
+.cine-btn {
   min-height: 52px;
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
-}
-
-.cine-stage .cine-btn-primary {
-  border-radius: 8px;
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 85%),
-    inset 0 -1px 0 rgb(154 125 70 / 22%),
-    0 12px 36px rgb(0 0 0 / 42%);
-}
-
-.cine-stage .cine-btn-secondary {
-  border-radius: 8px;
 }
 
 /* Paused at rest on every renderer, not only Android. The finished title
@@ -167,41 +144,10 @@ html[data-world-effects="economy"] .cine-stage .cine-logo-wrap {
   clip-path: none;
 }
 
-/* The only pale plane is the way into the film. Touch targets, type sizes
-   and positioning are unchanged, including the narrow landscape deck. */
-.cine-stage .cine-btn-primary {
-  color: #17202b;
-  border-color: #e3c185;
-  background: #edf2f3;
-  box-shadow: 0 8px 28px rgb(0 0 0 / 32%);
-}
-
-.cine-stage .cine-btn-primary::before {
-  background:
-    linear-gradient(#9a7d46 0 0) left top / 18px 2px,
-    linear-gradient(#9a7d46 0 0) left top / 2px 18px,
-    linear-gradient(#355d6d 0 0) right bottom / 18px 2px,
-    linear-gradient(#355d6d 0 0) right bottom / 2px 18px;
-  background-repeat: no-repeat;
-}
-
-.cine-stage .cine-btn-secondary {
-  background: #0c1823;
-  color: #c9e4ed;
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .cine-stage .cine-btn-primary:hover {
-    color: #04080f;
-    background: #fff;
-    border-color: #fff0b5;
-  }
-}
-
 @media (prefers-reduced-motion: no-preference) {
   /* A diagonal light slit opens along the wordmark's own sweep. It arrives
      before the unchanged burn starts at 2.6s. No independent clock/layer. */
-  html:not([data-world-effects="economy"]) body .cine-stage.cine-stage.is-playing .cine-logo-wrap {
+  html:not([data-world-effects="economy"]) .cine-stage.is-playing .cine-logo-wrap {
     animation-name: op-title-unseal;
   }
 }
@@ -229,9 +175,9 @@ html[data-world-effects="economy"] .cine-stage .cine-logo-wrap {
 }
 
 @media (orientation: portrait) {
-  .cine-stage.cine-stage {
-    --op-halo-rest: 0.5;
-    --op-rays-rest: 0.28;
+  .cine-stage {
+    --op-halo-rest: 0.55;
+    --op-rays-rest: 0.45;
   }
 }
 

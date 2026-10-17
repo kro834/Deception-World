@@ -1,6 +1,8 @@
 /* Kept on the left: the movable Zeus control starts on the right. */
 .inquiry-navigation {
   --inquiry-accent: #ecc991;
+  --inquiry-surface-top: #121f2d;
+  --inquiry-surface-bottom: #081019;
   position: fixed;
   bottom: max(16px, env(safe-area-inset-bottom));
   left: max(16px, env(safe-area-inset-left));
@@ -12,7 +14,7 @@
   text-align: left;
 }
 .inquiry-navigation[data-tone="blue"] {
-  --inquiry-accent: #a0dcea;
+  --inquiry-accent: #7ae8ff;
 }
 .inquiry-navigation > summary {
   display: flex;
@@ -21,10 +23,14 @@
   width: max-content;
   min-height: 48px;
   padding: 8px 16px;
-  border: 1px solid var(--inquiry-accent);
+  border: 1px solid color-mix(in srgb, var(--inquiry-accent) 68%, transparent);
   border-radius: 4px;
-  background: #101a23;
-  box-shadow: 0 6px 25px #0008;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 7%), transparent 52%),
+    linear-gradient(180deg, var(--inquiry-surface-top), var(--inquiry-surface-bottom));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 14%),
+    0 10px 28px rgb(0 0 0 / 64%);
   color: var(--inquiry-accent);
   cursor: pointer;
   list-style: none;
@@ -32,7 +38,24 @@
 .inquiry-navigation > summary::-webkit-details-marker {
   display: none;
 }
+@media (hover: hover) and (pointer: fine) {
+  .inquiry-navigation > summary:hover {
+    border-color: var(--inquiry-accent);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 22%),
+      0 12px 32px rgb(0 0 0 / 72%),
+      0 0 20px color-mix(in srgb, var(--inquiry-accent) 22%, transparent);
+  }
+}
 .inquiry-navigation small {
+  padding: 2px 7px;
+  border: 1px solid color-mix(in srgb, var(--inquiry-accent) 36%, transparent);
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--inquiry-accent) 10%, transparent);
+  font-family: "Oxanium", "Michroma", "Noto Sans JP", sans-serif;
+  font-size: 12px;
+  line-height: 1.3;
+  letter-spacing: 0.08em;
   font-variant-numeric: tabular-nums;
 }
 .inquiry-navigation-panel {
@@ -45,11 +68,15 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   padding: 20px;
-  border: 1px solid #87949a;
-  border-top: 3px solid var(--inquiry-accent);
+  border: 1px solid color-mix(in srgb, var(--inquiry-accent) 34%, #87949a);
+  border-top: 2px solid var(--inquiry-accent);
   border-radius: 4px;
-  background: #101a23;
-  box-shadow: 0 8px 32px #000a;
+  background:
+    radial-gradient(ellipse 90% 40% at 50% 0%, color-mix(in srgb, var(--inquiry-accent) 10%, transparent), transparent 72%),
+    linear-gradient(180deg, var(--inquiry-surface-top), var(--inquiry-surface-bottom));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 12%),
+    0 18px 44px rgb(0 0 0 / 76%);
 }
 .inquiry-navigation-panel h2 {
   font-size: 18px;
@@ -63,6 +90,7 @@
 .inquiry-navigation-panel .inquiry-navigation-label {
   color: var(--inquiry-accent);
   font-size: 12px;
+  letter-spacing: 0.08em;
   margin: 0;
 }
 .inquiry-navigation-panel nav {
@@ -72,9 +100,11 @@
 .inquiry-navigation-panel a {
   display: grid;
   min-height: 44px;
-  padding: 8px 10px;
-  border: 1px solid #87949a60;
+  padding: 8px 12px;
+  border: 1px solid color-mix(in srgb, var(--inquiry-accent) 24%, #87949a50);
   border-radius: 3px;
+  background: rgb(255 255 255 / 2.5%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 6%);
   color: #f4eee2;
   text-decoration: none;
 }
@@ -87,7 +117,11 @@
   font-weight: 500;
 }
 .inquiry-navigation-panel a:hover {
-  background: #ffffff0c;
+  border-color: color-mix(in srgb, var(--inquiry-accent) 62%, transparent);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--inquiry-accent) 12%, transparent), rgb(255 255 255 / 4%) 82%);
+  box-shadow:
+    inset 2px 0 0 var(--inquiry-accent),
+    inset 0 1px 0 rgb(255 255 255 / 12%);
 }
 .inquiry-navigation-panel .inquiry-navigation-return {
   display: flex;
@@ -101,12 +135,19 @@
 .inquiry-navigation-panel button {
   min-height: 44px;
   padding: 8px 12px;
-  border: 1px solid #87949a;
+  border: 1px solid color-mix(in srgb, var(--inquiry-accent) 32%, #87949a);
   border-radius: 3px;
-  background: transparent;
+  background: rgb(255 255 255 / 3%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 7%);
   color: inherit;
   font: inherit;
   cursor: pointer;
+}
+@media (hover: hover) and (pointer: fine) {
+  .inquiry-navigation-panel button:hover {
+    border-color: var(--inquiry-accent);
+    background: color-mix(in srgb, var(--inquiry-accent) 10%, transparent);
+  }
 }
 .inquiry-navigation :focus-visible {
   outline: 2px solid var(--inquiry-accent);
@@ -126,8 +167,11 @@ body:has(.side-panel[data-open="true"]) .inquiry-navigation {
     background: Canvas;
     color: CanvasText;
     border-color: ButtonText;
+    box-shadow: none;
   }
   .inquiry-navigation-panel a {
     color: LinkText;
+    box-shadow: none;
   }
 }
+

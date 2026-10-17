@@ -108,15 +108,22 @@ void main() {
     streak *= pow(1.0 - across, 3.0) * smoothstep(0.05, 0.5, r) * smoothstep(0.0, 0.35, uDive);
     vec3 lineCol = mix(mix(vec3(0.48, 0.91, 1.0), vec3(0.94, 0.81, 0.53), step(0.85, rnd)),
                        vec3(1.0, 0.72, 0.42), smoothstep(0.65, 1.0, uDive));
+    // Concentric optical aperture pulse expanding as the camera plunges into the ring.
+    float ringWave = fract(r * 3.4 - uTime * 2.2);
+    float ringPulse = smoothstep(0.0, 0.08, ringWave) * fall(0.24, 0.08, ringWave)
+                    * smoothstep(0.06, 0.24, r) * fall(0.78, 0.24, r)
+                    * smoothstep(0.06, 0.38, uDive) * fall(0.96, 0.48, uDive);
     // Deep in the ring the scene falls dark (the tunnel), so the magnified
     // glyphs never flare; only the streaks carry the speed.
     float dim = mix(1.0, 0.42, smoothstep(0.25, 1.0, uDive) * (1.0 - uWorld));
     col *= dim * mix(1.0, fall(1.2, 0.18, r), uDive * 0.72);
-    col += lineCol * streak * 0.95;
+    col += lineCol * streak * 0.98 + vec3(0.54, 0.88, 1.0) * ringPulse * 0.24;
   }
 
-  // ---- Breakthrough: one slow amber swell at the mouth of the tunnel, never a white-out.
-  col += vec3(1.0, 0.76, 0.5) * uWarp * 0.36 * fall(0.8, 0.0, r);
+  // ---- Breakthrough: one slow amber swell at the mouth of the tunnel, paired
+  // with a subtle Mirage ice corona as the World frame opens, never a white-out.
+  col += vec3(1.0, 0.76, 0.5) * uWarp * 0.38 * fall(0.8, 0.0, r)
+       + vec3(0.48, 0.91, 1.0) * uWarp * 0.15 * smoothstep(0.18, 0.46, r) * fall(0.95, 0.46, r);
 
   // ---- Landing: the World page's hero (key visual at half strength on dark
   // blue, a scrim heavy on the left and at the bottom).

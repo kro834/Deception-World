@@ -1616,17 +1616,21 @@ html[data-route-scroll-settling="true"] {
   inset: 0;
   background:
     radial-gradient(
-      ellipse at var(--opening-dive-x) var(--opening-dive-y),
-      rgb(var(--opening-handoff-blue) / 0.22),
-      transparent 34%
+      circle at var(--opening-dive-x) var(--opening-dive-y),
+      rgb(198 245 255 / 0.24) 0%,
+      rgb(var(--opening-handoff-blue) / 0.24) 16%,
+      rgb(var(--opening-handoff-pink) / 0.12) 30%,
+      transparent 46%
     ),
     conic-gradient(
-      from 64deg,
+      from 64deg at var(--opening-dive-x) var(--opening-dive-y),
       transparent,
-      rgb(var(--opening-handoff-pink) / 0.2),
+      rgb(var(--opening-handoff-pink) / 0.22),
       transparent 34%,
-      rgb(var(--opening-handoff-blue) / 0.22),
-      transparent 72%
+      rgb(var(--opening-handoff-blue) / 0.24),
+      transparent 68%,
+      rgb(var(--opening-handoff-gold) / 0.16),
+      transparent 92%
     );
   opacity: 0.55;
   transform-origin: var(--opening-dive-x) var(--opening-dive-y);
@@ -1657,27 +1661,39 @@ html[data-route-scroll-settling="true"] {
   z-index: 3;
   inset: -60%;
   opacity: 0;
-  background: repeating-conic-gradient(
-    from 3deg at var(--opening-speed-at),
-    transparent 0deg 4.2deg,
-    rgb(var(--opening-handoff-blue) / 0.42) 4.4deg 4.6deg,
-    transparent 4.8deg 9deg,
-    rgb(var(--opening-handoff-gold) / 0.34) 9.1deg 9.25deg,
-    transparent 9.4deg 13deg
-  );
+  background:
+    radial-gradient(
+      circle at var(--opening-speed-at),
+      transparent 10%,
+      rgb(var(--opening-handoff-blue) / 0.22) 16%,
+      transparent 17.5%,
+      transparent 27%,
+      rgb(var(--opening-handoff-gold) / 0.18) 29%,
+      transparent 30.5%
+    ),
+    repeating-conic-gradient(
+      from 3deg at var(--opening-speed-at),
+      transparent 0deg 3.8deg,
+      rgb(var(--opening-handoff-blue) / 0.48) 4.05deg 4.3deg,
+      transparent 4.55deg 7.8deg,
+      rgb(var(--opening-handoff-pink) / 0.32) 8deg 8.2deg,
+      transparent 8.45deg 10.6deg,
+      rgb(var(--opening-handoff-gold) / 0.38) 10.8deg 11deg,
+      transparent 11.25deg 13deg
+    );
   -webkit-mask-image: radial-gradient(
     circle at var(--opening-speed-at),
     transparent 4%,
-    #000 18%,
-    #000 44%,
-    transparent 64%
+    #000 16%,
+    #000 46%,
+    transparent 66%
   );
   mask-image: radial-gradient(
     circle at var(--opening-speed-at),
     transparent 4%,
-    #000 18%,
-    #000 44%,
-    transparent 64%
+    #000 16%,
+    #000 46%,
+    transparent 66%
   );
   transform-origin: var(--opening-speed-at);
   will-change: transform, opacity;
@@ -1688,13 +1704,16 @@ html[data-route-scroll-settling="true"] {
   z-index: 5;
   min-width: 1px;
   min-height: 1px;
-  border: 1px solid rgb(var(--opening-handoff-blue) / 0.28);
+  border: 1px solid rgb(var(--opening-handoff-blue) / 0.34);
   border-radius: 50%;
   background: repeating-conic-gradient(
     from 0deg,
-    rgb(var(--opening-handoff-blue) / 0.32) 0deg 0.55deg,
+    rgb(var(--opening-handoff-blue) / 0.36) 0deg 0.55deg,
     transparent 0.65deg 7.5deg
   );
+  box-shadow:
+    0 0 28px rgb(var(--opening-handoff-blue) / 0.16),
+    inset 0 0 22px rgb(var(--opening-handoff-blue) / 0.08);
   opacity: 0.7;
   will-change: transform, opacity;
 }
@@ -1706,7 +1725,7 @@ html[data-route-scroll-settling="true"] {
   display: block;
   width: min(72%, 360px);
   overflow: hidden;
-  color: rgb(216 247 255 / 0.76);
+  color: rgb(216 247 255 / 0.82);
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: clamp(7px, 0.72vw, 11px);
   font-style: normal;
@@ -1725,28 +1744,28 @@ html[data-route-scroll-settling="true"] {
 
 [data-opening-handoff-hud] > b {
   bottom: 15%;
-  color: rgb(var(--opening-handoff-gold) / 0.76);
+  color: rgb(var(--opening-handoff-gold) / 0.84);
   letter-spacing: 0.36em;
 }
 
 [data-opening-handoff-hud] > i {
   position: absolute;
   inset: 9%;
-  border: 1px solid rgb(var(--opening-handoff-blue) / 0.21);
-  border-right-color: rgb(var(--opening-handoff-pink) / 0.62);
+  border: 1px solid rgb(var(--opening-handoff-blue) / 0.26);
+  border-right-color: rgb(var(--opening-handoff-pink) / 0.68);
   border-radius: 50%;
 }
 
 [data-opening-handoff-hud] > i:nth-of-type(2) {
   inset: 19%;
-  border-color: rgb(var(--opening-handoff-pink) / 0.22);
-  border-left-color: rgb(var(--opening-handoff-blue) / 0.7);
+  border-color: rgb(var(--opening-handoff-pink) / 0.26);
+  border-left-color: rgb(var(--opening-handoff-blue) / 0.76);
 }
 
 [data-opening-handoff-hud] > i:nth-of-type(3) {
   inset: 31%;
   border-style: dashed;
-  border-color: rgb(var(--opening-handoff-gold) / 0.38);
+  border-color: rgb(var(--opening-handoff-gold) / 0.44);
 }
 
 /* The alpha-keyed prism logo: light on the scene, no box. */
@@ -1780,8 +1799,9 @@ html[data-route-scroll-settling="true"] {
   pointer-events: none;
   background: radial-gradient(
     circle at var(--opening-dive-x) var(--opening-dive-y),
-    transparent 16%,
-    rgb(1 4 10 / 0.72) 52%,
+    transparent 14%,
+    rgb(var(--opening-handoff-blue) / 0.14) 22%,
+    rgb(1 4 10 / 0.76) 52%,
     #010307 88%
   );
 }
@@ -1822,7 +1842,7 @@ html[data-route-scroll-settling="true"] {
     linear-gradient(0deg, #04080f 0%, transparent 34%, rgb(4 8 15 / 48%) 100%);
 }
 
-/* One amber swell at the breakthrough (never white). */
+/* One amber swell at the breakthrough, ringed by a subtle Mirage ice corona (never white). */
 [data-opening-handoff-bloom] {
   position: absolute;
   z-index: 9;
@@ -1831,9 +1851,11 @@ html[data-route-scroll-settling="true"] {
   pointer-events: none;
   background: radial-gradient(
     circle at var(--opening-dive-x) var(--opening-dive-y),
-    rgb(255 199 133 / 0.62),
-    rgb(255 160 90 / 0.3) 34%,
-    transparent 72%
+    rgb(255 204 140 / 0.65) 0%,
+    rgb(255 162 92 / 0.34) 30%,
+    rgb(var(--opening-handoff-blue) / 0.18) 50%,
+    rgb(var(--opening-handoff-pink) / 0.08) 64%,
+    transparent 76%
   );
 }
 
@@ -1849,10 +1871,12 @@ html[data-route-scroll-settling="true"] {
 
 [data-opening-handoff-letterbox="top"] {
   top: 0;
+  box-shadow: inset 0 -1px 0 rgb(var(--opening-handoff-blue) / 0.26);
 }
 
 [data-opening-handoff-letterbox="bottom"] {
   bottom: 0;
+  box-shadow: inset 0 1px 0 rgb(var(--opening-handoff-gold) / 0.24);
 }
 
 /* Economy: no ambient loops anywhere in the handoff (the dive itself is WAAPI). */

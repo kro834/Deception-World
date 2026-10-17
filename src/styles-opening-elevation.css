@@ -44,9 +44,11 @@
   --color-ice: var(--op-ice);
   --color-ice-dim: var(--op-ice-deep);
   --color-gold: var(--op-gold);
-  --op-plate: color-mix(in srgb, var(--op-ink) 82%, transparent);
-  --op-plate-edge: 0 0 0 1px color-mix(in srgb, var(--op-ink) 60%, transparent);
-  --op-plate-drop: 0 12px 32px rgb(0 0 0 / 0.5);
+  --op-plate: color-mix(in srgb, var(--op-ink) 84%, transparent);
+  --op-plate-edge:
+    inset 0 1px 0 color-mix(in srgb, #fff 14%, transparent),
+    0 0 0 1px color-mix(in srgb, var(--op-ink) 60%, transparent);
+  --op-plate-drop: 0 12px 32px rgb(0 0 0 / 0.54);
   /* The frame's bracket arm, and the clearance SKIP and the cue keep from it
      so they never ride a corner mark. */
   --op-arm: 28px;

@@ -49,6 +49,11 @@ main.manager-page.dante-page:not(.is-sovereign) {
   --dm-rim: #ed667e;
 }
 
+main.manager-page.rider-dossier-page:not(.is-sovereign) {
+  --dm-key: rgb(var(--rider-accent-rgb, 122 232 255));
+  --dm-rim: rgb(var(--rider-secondary-rgb, 240 207 134));
+}
+
 main.manager-page:not(.is-sovereign):has(img[src*="character-yoake-mamori"]) {
   --dm-key: #a8c7ff;
   --dm-rim: #f0cf86;
@@ -94,6 +99,25 @@ main.manager-page:not(.is-sovereign) .dossier-arrive-scan {
   opacity: 0;
   translate: 0 -100%;
   pointer-events: none;
+}
+
+main.manager-page.rider-dossier-page:not(.is-sovereign) .dossier-arrive-scan {
+  background:
+    linear-gradient(
+        90deg,
+        var(--dm-key) 0%,
+        color-mix(in srgb, var(--dm-key) 52%, var(--dm-rim)) 36%,
+        var(--dm-rim) 72%,
+        var(--dm-gold, #f0cf86) 100%
+      )
+      bottom / 100% 2px no-repeat,
+    linear-gradient(
+        0deg,
+        color-mix(in srgb, var(--dm-key) 28%, transparent),
+        color-mix(in srgb, var(--dm-rim) 10%, transparent) 38px,
+        transparent 84px
+      )
+      bottom / 100% 84px no-repeat;
 }
 
 /* ================================================================
@@ -142,6 +166,14 @@ html[data-world-effects="economy"]
     animation:
       dm-arrive-travel 640ms var(--dm-arrive-ease) calc(var(--dm-arrive-delay) + 60ms) both,
       dm-arrive-edge 640ms linear calc(var(--dm-arrive-delay) + 60ms) both;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    main.manager-page:not(.is-sovereign)
+    #dossier-profile
+    .manager-portrait-frame
+    .manager-numeral {
+    animation: dm-arrive-rise 460ms var(--dm-arrive-out) calc(var(--dm-arrive-delay) + 220ms) both;
   }
 
   html:not([data-world-effects="economy"]):not([data-loading])
@@ -196,15 +228,28 @@ html[data-world-effects="economy"]
   html:not([data-world-effects="economy"]):not([data-loading])
     main.manager-page:not(.is-sovereign)
     .manager-hero
-    :is(.manager-quotes, .manager-facts) {
+    :is(.manager-quotes, .rider-hero-prose, .rider-special-site-link, .manager-facts) {
     animation: dm-arrive-panel 460ms var(--dm-arrive-out) calc(var(--dm-arrive-delay) + 320ms) both;
   }
 
   html:not([data-world-effects="economy"]):not([data-loading])
     main.manager-page:not(.is-sovereign)
     .manager-hero
-    .manager-facts {
+    .rider-hero-prose {
+    animation-delay: calc(var(--dm-arrive-delay) + 360ms);
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    main.manager-page:not(.is-sovereign)
+    .manager-hero
+    :is(.manager-facts, .rider-special-site-link) {
     animation-delay: calc(var(--dm-arrive-delay) + 400ms);
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    main.manager-page:not(.is-sovereign)
+    .dossier-contents {
+    animation: dm-arrive-panel 480ms var(--dm-arrive-out) calc(var(--dm-arrive-delay) + 440ms) both;
   }
 
   html:not([data-world-effects="economy"]):not([data-loading])

@@ -451,49 +451,54 @@ export function OpeningHandoffLayer({ snapshot, onCovered, onComplete }: Opening
       // back and forth across the frame.
       add(logoRef.current, [
         { transform: "scale(1)", opacity: 1, easing: DIVE_EASING },
-        { transform: "scale(3)", opacity: 0.8, offset: at(cut * 0.45), easing: DIVE_EASING },
-        { transform: "scale(6.5)", opacity: 0.28, offset: at(cut * 0.86) },
-        { transform: "scale(8)", opacity: 0, offset: at(cut) },
-        { transform: "scale(8)", opacity: 0 },
+        { transform: "scale(1.65)", opacity: 0.94, offset: at(cut * 0.24), easing: DIVE_EASING },
+        { transform: "scale(3.2)", opacity: 0.78, offset: at(cut * 0.48), easing: DIVE_EASING },
+        { transform: "scale(6.8)", opacity: 0.26, offset: at(cut * 0.86) },
+        { transform: "scale(8.4)", opacity: 0, offset: at(cut) },
+        { transform: "scale(8.4)", opacity: 0 },
       ]);
       add(videoRef.current, [
         { transform: "scale(1)", opacity: 0.8, easing: DIVE_EASING },
-        { transform: "scale(1.6)", opacity: 0.3, offset: at(cut) },
-        { transform: "scale(1.6)", opacity: 0 },
+        { transform: "scale(1.26)", opacity: 0.62, offset: at(cut * 0.5), easing: DIVE_EASING },
+        { transform: "scale(1.68)", opacity: 0.28, offset: at(cut) },
+        { transform: "scale(1.68)", opacity: 0 },
       ]);
       add(backdropRef.current, [
         { transform: "scale(1)", opacity: 0.55, easing: DIVE_EASING },
-        { transform: "scale(1.7)", opacity: 0.9, offset: at(cut) },
-        { transform: "scale(1.7)", opacity: 0 },
+        { transform: "scale(1.32)", opacity: 0.78, offset: at(cut * 0.52), easing: DIVE_EASING },
+        { transform: "scale(1.78)", opacity: 0.92, offset: at(cut) },
+        { transform: "scale(1.78)", opacity: 0 },
       ]);
       add(hudRef.current, [
-        { transform: "scale(1)", opacity: 0.7, easing: DIVE_EASING },
-        { transform: "scale(3.2)", opacity: 0, offset: at(cut * 0.85) },
-        { transform: "scale(3.2)", opacity: 0 },
+        { transform: "scale(1) rotate(0deg)", opacity: 0.72, easing: DIVE_EASING },
+        { transform: "scale(1.85) rotate(8deg)", opacity: 0.52, offset: at(cut * 0.46), easing: DIVE_EASING },
+        { transform: "scale(3.4) rotate(16deg)", opacity: 0, offset: at(cut * 0.86) },
+        { transform: "scale(3.4) rotate(16deg)", opacity: 0 },
       ]);
       add(speedRef.current, [
-        { transform: "scale(0.7)", opacity: 0, easing: "ease-in" },
-        { transform: "scale(1.5)", opacity: 0.55, offset: at(cut * 0.55) },
-        { transform: "scale(2.6)", opacity: 0.8, offset: at(cut) },
-        { transform: "scale(3.2)", opacity: 0, offset: at(cut + 260 * k) },
-        { transform: "scale(3.2)", opacity: 0 },
+        { transform: "scale(0.68)", opacity: 0, easing: "ease-in" },
+        { transform: "scale(1.48)", opacity: 0.58, offset: at(cut * 0.52) },
+        { transform: "scale(2.68)", opacity: 0.84, offset: at(cut) },
+        { transform: "scale(3.32)", opacity: 0, offset: at(cut + 260 * k) },
+        { transform: "scale(3.32)", opacity: 0 },
       ]);
       add(tunnelRef.current, [
         { opacity: 0, easing: "ease-in" },
-        { opacity: 0.8, offset: at(cut) },
+        { opacity: 0.42, offset: at(cut * 0.54) },
+        { opacity: 0.84, offset: at(cut) },
         { opacity: 0, offset: at(cut + 300 * k) },
         { opacity: 0 },
       ]);
       add(bloomRef.current, [
-        { opacity: 0 },
-        { opacity: 0, offset: at(cut * 0.55) },
-        { opacity: 0.85, offset: at(cut), easing: "ease-out" },
-        { opacity: 0 },
+        { opacity: 0, transform: "scale(0.88)" },
+        { opacity: 0, transform: "scale(0.92)", offset: at(cut * 0.54) },
+        { opacity: 0.86, transform: "scale(1.04)", offset: at(cut), easing: "ease-out" },
+        { opacity: 0, transform: "scale(1.16)" },
       ]);
       add(worldRef.current, [
-        { opacity: 0, transform: "scale(1.35)" },
-        { opacity: 0, transform: "scale(1.35)", offset: at(cut * 0.9) },
-        { opacity: 1, transform: "scale(1.3)", offset: at(cut), easing: SETTLE_EASING },
+        { opacity: 0, transform: "scale(1.36)" },
+        { opacity: 0, transform: "scale(1.36)", offset: at(cut * 0.9) },
+        { opacity: 1, transform: "scale(1.28)", offset: at(cut), easing: SETTLE_EASING },
         { opacity: 1, transform: "scale(1)" },
       ]);
       for (const bar of stableRoot.querySelectorAll<HTMLElement>(
