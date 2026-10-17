@@ -1,0 +1,44 @@
+{
+  "base": "545bcd5eaf479742ca9d7117087d9423603e0857",
+  "scope": "ZENITH scroll assembly; entrance-call artwork and choreography unchanged",
+  "changes": [
+    "Lossless unlit driver stand-in generated from the live atlas crops; the original six-asset atlas remains untouched",
+    "Metal layer bands reduced from 16 to 2 rows, with identical one-row rim halos",
+    "Seam-plan checkpoints reduced from 512 to 64 iterations",
+    "Cooperative preparation budget reduced from 3 to 1.5 ms to reserve native-operation headroom"
+  ],
+  "alreadyPresentAndVerified": [
+    "Mask-based owner voting, including arm-mask holes and ornament separation",
+    "Save-Data and 2G layout snapshot before fragment restoration; runway 852 px / frame 850 px in 412x915 profile",
+    "Save-Data and 2G: p14, stages, system anchors stay within 2 px after arrival"
+  ],
+  "preparationCPU4x": {
+    "viewport": [390, 844],
+    "metal": { "callbacks": 439, "maxMs": 4.8, "p95Ms": 3, "over6": 0 },
+    "seams": { "callbacks": 32, "maxMs": 4, "p95Ms": 2.2, "over6": 0 },
+    "qualification": "Measured local Chrome run, not a hard real-time guarantee or physical-device result"
+  },
+  "pins": [
+    "Touch art draws <=64",
+    "No allocations in swarm draw passes",
+    "Far warm-up does not change visible state",
+    "Driver stand-in visible pixels equal the live unlit atlas composite",
+    "Metal/molten bytes identical across different slice sizes",
+    "Metal native readbacks <=4 rows including halos"
+  ],
+  "endScrollInvestigation": {
+    "trace": "/private/tmp/rexonance-zenith-verification/candidate-end-trace.json",
+    "observedEndDrops": 0,
+    "lateCallbackMs": 18.904,
+    "afterStopMs": 165.919,
+    "source": "src/components/zeus-button.tsx schedulePlacement -> placeButton / avoidCriticalControls",
+    "qualification": "The reported 1-2 dropped frames did not reproduce in this run. Shared Zeus collision work identified but not changed; unrelated operability browser was also active, so this is diagnostic, not an isolated baseline performance comparison."
+  },
+  "remaining": [
+    "Hand-refining PIECES polygon seams at elbows was not undertaken",
+    "Pre-hydration restored-scroll and one-frame far-jump stand-in states are not claimed fixed",
+    "Fast 3G arrival wait is not eliminated; existing idle-code / half-hero image prefetch policy and memory tradeoff are unchanged",
+    "First-touch Chrome raster-cache pixel difference has not been independently resolved",
+    "Physical iPhone/iPad verification remains required; automated WebKit includes native and no-scroll-timeline paths"
+  ]
+}

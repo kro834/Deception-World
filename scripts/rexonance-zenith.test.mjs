@@ -1161,7 +1161,7 @@ test("never the finished suit before the scroll: near and not yet live, the unde
   );
   assert.equal(hidden.length, 1);
   assert.match(hidden[0].selector, /\[data-rzn-state\]:not\(\[data-rzn-arming="still"\]\)/);
-  const under = sheet.rules.filter(({ selector }) => /> \.rzn-under$/.test(selector));
+  const under = sheet.rules.filter(({ selector }) => /> :is\(\.rzn-under, \.rzn-driver-standin\)$/.test(selector));
   assert.ok(under.some(({ body }) => /display: none/.test(body)));
   const shown = under.filter(({ body }) => /display: block/.test(body));
   assert.equal(shown.length, 1);
@@ -1288,7 +1288,9 @@ test("gold preparation yields within the idle budget, cancels midway and finishe
     const resumedPrepared = () => t.readyCount() > beforeResume;
     t.listeners.get("window:pageshow")();
     let slots = 0;
-    while (!resumedPrepared() && slots < 6000) {
+    // Depleted deadlines advance one checkpoint, not a wall-clock slice.
+    // Finer native readback bands intentionally need more such checkpoints.
+    while (!resumedPrepared() && slots < 24000) {
       await step();
       slots += 1;
     }
@@ -1429,7 +1431,7 @@ test("a hidden tab releases partial crop canvases, then resumes from decoded ima
     );
     assert.equal(t.prepared(), false, "partial layers never publish as ready");
     t.listeners.get("window:pageshow")();
-    for (let i = 0; i < 6000 && !t.prepared(); i += 1) await step();
+    for (let i = 0; i < 24000 && !t.prepared(); i += 1) await step();
     assert.ok(t.prepared(), "the resumed generation completes");
     assert.deepEqual(t.decodedSources, decoded, "resume reuses decoded source images");
     assert.equal(t.readyCount(), 1, "only the complete resumed generation publishes");
@@ -2391,6 +2393,7 @@ test("the raw metal and the molten gold are made in bands of rows, byte for byte
   const { createAssemblyLayerJob } = await import("../src/lib/rexonance-assembly-nanites.js");
   const { createNaniteMetalJob, createNaniteMoltenJob } = await import("../src/lib/rexonance-unlit.js");
   // A pixel-exact fake canvas (unscaled copies only).
+  const reads = [];
   const document = {
     createElement() {
       const canvas = { width: 0, height: 0, data: null };
@@ -2420,6 +2423,7 @@ test("the raw metal and the molten gold are made in bands of rows, byte for byte
           for (let yy = y; yy < y + h; yy += 1) dst.fill(0, (yy * canvas.width + x) * 4, (yy * canvas.width + x + w) * 4);
         },
         getImageData(x, y, w, h) {
+          reads.push(h);
           const data = new Uint8ClampedArray(w * h * 4);
           copy(sized(), canvas.width, x, y, data, w, 0, 0, w, h, h);
           return { width: w, height: h, data };
@@ -2461,7 +2465,9 @@ test("the raw metal and the molten gold are made in bands of rows, byte for byte
   const kitMetal = run(createNaniteMetalJob(source, 0, 0, W, H, document, { silhouette: true }), 1);
   const kitMolten = run(createNaniteMoltenJob(source, 0, 0, W, H, document, { mask }), 1);
   for (const slice of [0.5, 3, 100]) {
+    reads.length = 0;
     const metal = run(createAssemblyLayerJob({ source, width: W, height: H, kind: "metal", silhouette: true, document }), slice);
+    assert.ok(reads.length > 0 && reads.every((rows) => rows <= 4), "native readbacks: two rows plus rim halo only");
     assert.deepEqual(bytes(metal.metal), bytes(kitMetal.metal), `metal, slice ${slice}`);
     assert.deepEqual(bytes(metal.silhouette), bytes(kitMetal.silhouette), `silhouette, slice ${slice}`);
     const molten = run(createAssemblyLayerJob({ source, width: W, height: H, kind: "molten", mask, document }), slice);

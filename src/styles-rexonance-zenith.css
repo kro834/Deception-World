@@ -193,7 +193,7 @@ html[data-family="special"]
   .rxs-page.rxs-page.rxs-rexonance-page
   > .rzn-suitup
   > .rzn-frame
-  > .rzn-under {
+  > :is(.rzn-under, .rzn-driver-standin) {
   position: absolute;
   left: calc(var(--rzn-fig-x) * 100%);
   bottom: calc(var(--rzn-fig-b) * 100%);
@@ -210,12 +210,16 @@ html[data-family="special"]
   pointer-events: none;
 }
 
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup > .rzn-frame > .rzn-driver-standin {
+  opacity: 1;
+}
+
 html[data-family="special"]
   body
   .rxs-page.rxs-page.rxs-rexonance-page
   > .rzn-suitup:is([data-rzn-state="loading"], [data-rzn-arming="under"])
   > .rzn-frame
-  > .rzn-under {
+  > :is(.rzn-under, .rzn-driver-standin) {
   display: block;
 }
 

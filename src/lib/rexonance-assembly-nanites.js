@@ -244,7 +244,7 @@ export function* assemblyNanitePlanSteps({
   let work = 0;
   // A checkpoint every few thousand simple steps: well inside an idle
   // slice, and few enough that a starved idle queue still finishes.
-  const tick = () => ++work % 512 === 0;
+  const tick = () => ++work % 64 === 0;
 
   // The tiles' own fields, copied once into typed arrays.
   const T0 = new Float64Array(n);
@@ -1817,7 +1817,9 @@ export function createAssemblyConduitJob({
    of its own, then read a band at a time (a whole-figure read and its
    canvases in one slice cost 7–12 ms on a phone), so no slice of the
    preparation runs long. */
-const LAYER_BAND = 16;
+// Keep the indivisible read + shading + upload small even under CPU throttle.
+// Two halo rows retain the exact rim at band boundaries.
+const LAYER_BAND = 2;
 // The CPU copies are made a strip of rows a slice.
 const LAYER_STRIP = 104;
 const MOLTEN_RAMP = [0, 120, 52, 10, 0.4, 236, 140, 40, 0.7, 255, 210, 120, 1, 255, 250, 236];

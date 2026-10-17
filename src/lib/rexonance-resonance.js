@@ -509,7 +509,7 @@ export function mountRexonanceResonance(page, environment = window) {
    the armour assembles out of nanites on one canvas. The figure is cut
    at run time into a grid of small tiles (REXONANCE_SUIT_FIGURE, read
    through the page's config from src/lib/rexonance-suit.ts); each tile
-   belongs to the smallest suit piece whose box holds it, so the order
+   belongs to the suit piece whose painted mask covers it, so the order
    follows the module's piece list whatever its granularity (only each
    piece's id, group, box and seat are read). Over the bare undersuit:
 
@@ -1373,6 +1373,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   const canvas = runway.querySelector("canvas.rzn-canvas");
   const frameBox = runway.querySelector(".rzn-frame");
   const under = runway.querySelector(".rzn-under");
+  const driverStandin = runway.querySelector(".rzn-driver-standin");
   if (!canvas || !frameBox || typeof canvas.getContext !== "function") return () => {};
   const reduced = environment.matchMedia("(prefers-reduced-motion: reduce)");
   const forcedColors = environment.matchMedia("(forced-colors: active)");
@@ -1762,7 +1763,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
               result = steps.next();
             } while (
               !result.done &&
-              (environment.performance?.now?.() ?? Date.now()) - start < 3 &&
+              (environment.performance?.now?.() ?? Date.now()) - start < 1.5 &&
               (!deadline || deadline.timeRemaining() > 4)
             );
           });
@@ -1890,8 +1891,8 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         mark(`${phase}-pixels`);
         const ran = await idleTask((deadline) => {
           if (!active()) return;
-          // (3 ms of work, so a slice with its overheads stays ≤ 6 ms.)
-          const until = (environment.performance?.now?.() ?? Date.now()) + 3;
+          // Leave headroom for the final indivisible native operation.
+          const until = (environment.performance?.now?.() ?? Date.now()) + 1.5;
           done = job.step(until, deadline);
         });
         if (ran === null || !active()) return null;
@@ -1927,8 +1928,8 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         mark(`${phase}-rows`);
         const ran = await idleTask((deadline) => {
           if (!active()) return;
-          // (3 ms of work, so a slice with its overheads stays ≤ 6 ms.)
-          const until = (environment.performance?.now?.() ?? Date.now()) + 3;
+          // Leave headroom for the final indivisible native operation.
+          const until = (environment.performance?.now?.() ?? Date.now()) + 1.5;
           done = job.step(until, deadline);
         });
         if (ran === null || !active()) return null;
@@ -3503,6 +3504,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
           // and decoded now, not when it is shown (round 3, review: a cold
           // jump showed an empty stage for 50–90 ms). Nothing visible changes.
           if (under && motionAllowed() && under.loading !== "eager") under.loading = "eager";
+          if (driverStandin && motionAllowed()) driverStandin.loading = "eager";
           wake();
         }
       },

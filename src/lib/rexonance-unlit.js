@@ -248,6 +248,10 @@ function separate(a, g, m, from, to) {
 }
 
 // --- The nanite kit's derived layers (owner, 2026-10-16: 「超大幅な改善で。」) ---
+// Shared with the offline loading-driver baker; the pixel algorithm is unchanged.
+export function separateDriverPixels(data) {
+  separate(data, new Uint8ClampedArray(data.length), null, 0, data.length);
+}
 // Asset-free pixel jobs with the same contract as createSplitLightsJob: one
 // snapshot at setup, row slices (byte-identical whatever their sizes), an
 // idempotent commit that publishes only a completed pass, cancel() releasing
