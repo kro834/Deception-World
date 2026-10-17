@@ -80,6 +80,22 @@ try {
       assert.equal(pointerCloseFocus.focused, false, `${name}: pointer open must not focus close`);
       assert.equal(pointerCloseFocus.emphasized, false, JSON.stringify(pointerCloseFocus));
       await dialog.locator(".other-artwork-viewer > img").evaluate((img) => img.decode());
+      if (id === "fable") {
+        assert.equal(
+          await trigger.locator("img").getAttribute("src"),
+          "/character-fable-20261017-thumb.webp",
+        );
+        const portrait = await dialog.locator(".other-artwork-viewer > img").evaluate((img) => ({
+          source: img.getAttribute("src"),
+          width: img.naturalWidth,
+          height: img.naturalHeight,
+        }));
+        assert.deepEqual(portrait, {
+          source: "/character-fable-20261017.webp",
+          width: 720,
+          height: 1280,
+        });
+      }
       const metrics = await dialog.locator(".other-artwork-viewer > img").evaluate((img) => ({
         fit: getComputedStyle(img).objectFit,
         ratio: img.getBoundingClientRect().width / img.getBoundingClientRect().height,
