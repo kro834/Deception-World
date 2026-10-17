@@ -139,7 +139,7 @@ const CLAMP_HUGE = 2.5;
  * for LINK_MS. */
 const BUSY_W = 32;
 const BUSY_H = 58;
-const BUSY_DIM = 0.5;
+const BUSY_DIM = 0.28;
 const LATCHES = 8;
 const LATTICE_A = 0.54;
 const LINK_MS = 40;
@@ -357,6 +357,10 @@ type Layout = {
   tone: Uint8Array;
   tflags: Uint8Array; // 1 comet, 2 spark, 4 recoil, 8 pathfinder
   parent: Int32Array;
+  // Local docking axes follow the last welded neighbour. Chips approach
+  // along these keys, rather than all diving along the plate's normal.
+  dockX: Float32Array;
+  dockY: Float32Array;
   // Strings (2026-10-16, 更にブラッシュアップ): each tile's pathfinder (the
   // string's first to land) and its place in the string.
   tLead: Int32Array;
@@ -505,6 +509,8 @@ function* layoutSteps(all: Plate[], gold: Cells): Generator<undefined, Layout, u
     tone: new Uint8Array(N),
     tflags: new Uint8Array(N),
     parent: new Int32Array(N).fill(-1),
+    dockX: f32(N),
+    dockY: f32(N),
     tLead: new Int32Array(N),
     tRank: new Int16Array(N),
     loopFirst: new Int32Array(P + 1),
@@ -709,7 +715,7 @@ function* layoutSteps(all: Plate[], gold: Cells): Generator<undefined, Layout, u
       L.jx[i] = hash(i, 1301) * 2 - 1;
       L.jy[i] = hash(i, 1409) * 2 - 1;
       L.bow[i] = hash(i, 1511) - 0.5;
-      L.size[i] = 7 * (0.9 + 0.25 * h2);
+      L.size[i] = 8.6 * (0.9 + 0.25 * h2);
       L.tone[i] = cx < W / 2 ? ICE : PINK;
       L.tflags[i] = (i % 3 === 0 ? 1 : 0) | (h3 < 1 / 6 ? 2 : 0) | (h1 < 0.55 ? 4 : 0);
       const col = Math.round((tile.dx - piece.x) / T);
@@ -737,6 +743,14 @@ function* layoutSteps(all: Plate[], gold: Cells): Generator<undefined, Layout, u
           }
         L.parent[i] = best;
       }
+    for (let i = first; i < first + n; i += 1) {
+      const parent = L.parent[i];
+      const dx = parent < 0 ? L.nX[p] : L.cx[i] - L.cx[parent];
+      const dy = parent < 0 ? L.nY[p] : L.cy[i] - L.cy[parent];
+      const length = Math.hypot(dx, dy) || 1;
+      L.dockX[i] = dx / length;
+      L.dockY[i] = dy / length;
+    }
     const lands = L.land.slice(first, first + n).sort();
     L.landSorted.set(lands, first);
     // Strings: the tiles by landing, dealt round-robin into strings whose
@@ -2147,6 +2161,11 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
   const SPARKS = 160;
   const sparks = new Float32Array(SPARKS * 4);
   let sparkCount = 0;
+  // Sparse, articulated docking keys: x/y, local axis, jaw span, opening,
+  // heat and visibility. These are line batches, not more sprite layers.
+  const DOCKS = TOUCH ? 24 : 128;
+  const docks = new Float32Array(DOCKS * 8);
+  let dockCount = 0;
   const beams = new Float32Array(P * 4);
   const beamU = new Float32Array(P * 2);
   const GOLD_N = gold.lock.length;
@@ -2327,14 +2346,31 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
     rects[o + 2] = d;
     rectCount[bucket] = k + 1;
   };
-  // Touch's chips (round 3, reviews 23/39/29/41): each a small two-tone
-  // hex — a wide band and a tall band (a hex at a few device px), over its
-  // dark side offset down-right by about a quarter of its size, with a lit
-  // core on the brighter ones — batched by tone and three alpha levels, so a
-  // dim chip behind the body stays dim. No drawImage.
-  const hexRects = (x: number, y: number, d: number) => {
-    flight.rect(x - 0.45 * d, y - 0.27 * d, 0.9 * d, 0.54 * d);
-    flight.rect(x - 0.25 * d, y - 0.5 * d, 0.5 * d, d);
+  // Touch keeps the same tone/alpha batches and sprite budget. Large
+  // carriers have a six-sided shell and a recessed socket: the former
+  // two-rectangle approximation looked like a luminous cross when scaled.
+  // Tiny chips remain one rect, where facets would be subpixel anyway.
+  const hexRects = (x: number, y: number, d: number, socket = false) => {
+    if (d < 5) {
+      flight.rect(x - 0.4 * d, y - 0.4 * d, 0.8 * d, 0.8 * d);
+      return;
+    }
+    flight.moveTo(x - d * 0.5, y);
+    flight.lineTo(x - d * 0.25, y - d * 0.43);
+    flight.lineTo(x + d * 0.25, y - d * 0.43);
+    flight.lineTo(x + d * 0.5, y);
+    flight.lineTo(x + d * 0.25, y + d * 0.43);
+    flight.lineTo(x - d * 0.25, y + d * 0.43);
+    flight.closePath();
+    if (!socket) return;
+    // Reverse winding leaves a dark mechanical recess through the shell.
+    flight.moveTo(x - d * 0.28, y);
+    flight.lineTo(x - d * 0.14, y + d * 0.24);
+    flight.lineTo(x + d * 0.14, y + d * 0.24);
+    flight.lineTo(x + d * 0.28, y);
+    flight.lineTo(x + d * 0.14, y - d * 0.24);
+    flight.lineTo(x - d * 0.14, y - d * 0.24);
+    flight.closePath();
   };
   const flushRects = () => {
     for (let bucket = 0; bucket < RECT_BUCKETS; bucket += 1) {
@@ -2356,7 +2392,7 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
       flight.beginPath();
       for (let k = 0; k < count; k += 1) {
         const o = (bucket * RECT_CAP + k) * 3;
-        hexRects(rects[o], rects[o + 1], rects[o + 2]);
+        hexRects(rects[o], rects[o + 1], rects[o + 2], true);
       }
       flight.fill();
       if (level > 0) {
@@ -2366,7 +2402,7 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
           const o = (bucket * RECT_CAP + k) * 3;
           const d = rects[o + 2];
           if (d < 5) continue;
-          flight.rect(rects[o] - 0.16 * d, rects[o + 1] - 0.16 * d, 0.32 * d, 0.32 * d);
+          flight.rect(rects[o] - 0.1 * d, rects[o + 1] - 0.1 * d, 0.2 * d, 0.2 * d);
         }
         flight.fill();
       }
@@ -3161,7 +3197,7 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
     flight.lineCap = "round";
     flight.lineJoin = "round";
     for (let pass = 0; pass < 2; pass += 1) {
-      flight.strokeStyle = pass ? "#f6feff" : "#8cefff";
+      flight.strokeStyle = pass ? "#fff8dc" : "#e9ae43";
       flight.lineWidth = Math.max(pass ? 0.9 : 2, G * (pass ? HEAD_CORE : HEAD_HALO) * s);
       for (let bucket = 0; bucket < 3; bucket += 1) {
         flight.beginPath();
@@ -3421,6 +3457,7 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
     heroes = 0;
     linkCount = 0;
     sparkCount = 0;
+    dockCount = 0;
     pulsePreCount = 0;
     pulsePostCount = 0;
     segCount = 0;
@@ -3519,12 +3556,17 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
     const u = pose[ARG_U];
     const Cx = pose[ARG_CX];
     const Cy = pose[ARG_CY];
-    const nx = L.nX[p];
-    const ny = L.nY[p];
+    const jo = p * 6;
+    const dx = jig[jo] * L.dockX[i] + jig[jo + 2] * L.dockY[i];
+    const dy = jig[jo + 1] * L.dockX[i] + jig[jo + 3] * L.dockY[i];
+    const length = (dx * dx + dy * dy) ** 0.5 || 1;
+    const nx = dx / length;
+    const ny = dy / length;
     const qx = -ny;
     const qy = nx;
-    const hx = Cx + nx * 10;
-    const hy = Cy + ny * 10;
+    const stand = helm ? 10 : 18 + 6 * L.bow[i];
+    const hx = Cx + nx * stand;
+    const hy = Cy + ny * stand;
     // The string's lock-on point: its pathfinder's aim, within reach of ours.
     let ax = 0;
     let ay = 0;
@@ -3537,13 +3579,13 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
         ay *= LIFE.string.reach / al;
       }
     }
-    const kx = hx + ax;
-    const ky = hy + ay;
+    const kx = hx + ax * 0.35;
+    const ky = hy + ay * 0.35;
     const r0 = L.r0[i];
     const psi0 = L.psi0[i];
     const spin = (FRAMES * L.spin[i] * FLIGHT) / 1000;
     // A pathfinder is a size up (and white, with its comet: the layout).
-    let size = L.tflags[i] & 8 ? 1.25 * L.size[i] : L.size[i];
+    let size = L.tflags[i] & 8 ? 1.6 * L.size[i] : L.size[i];
     let frame = L.f0[i];
     let unfolded = -1;
     // (Conditionals, not Math.min: V8's mid tier boxes its result.)
@@ -3560,8 +3602,8 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
       pose[PX] = cx + R * Math.cos(a);
       pose[PY] = cy + CROWN_SQUASH * R * Math.sin(a);
       frame += spin * 2 * u;
-    } else if (!helm && u < 0.5) {
-      const q = u < 0 ? 0 : u / 0.5;
+    } else if (!helm && u < 0.46) {
+      const q = u < 0 ? 0 : u / 0.46;
       const v = q * q * (3 - 2 * q);
       const w = 1 - v;
       const p0x = L.gateX[p] + 6 * L.jx[i];
@@ -3576,36 +3618,44 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
       pose[PX] = w * w * w * p0x + 3 * w * w * v * p1x + 3 * w * v * v * p2x + v * v * v * ex;
       pose[PY] = w * w * w * p0y + 3 * w * w * v * p1y + 3 * w * v * v * p2y + v * v * v * ey;
       frame += spin * 3 * u;
-    } else if (!helm && u < 0.72) {
-      // Spiralling in on the lock-on point.
-      const w = (u - 0.5) / 0.22;
+    } else if (!helm && u < 0.68) {
+      // Braking thrusters spiral into the keyed standoff. Each chip has
+      // its neighbour's joining axis, so the river fans into surface lanes.
+      const w = (u - 0.46) / 0.22;
       const psi = psi0 + 1.5 * Math.PI * w;
       const r = r0 * (1 - w) ** 1.5;
       pose[PX] = kx + r * (Math.cos(psi) * qx + 0.45 * Math.sin(psi) * nx);
       pose[PY] = ky + r * (Math.cos(psi) * qy + 0.45 * Math.sin(psi) * ny);
-      size *= 1 + 0.25 * Math.sin(psi) * (1 - w);
-      frame += spin * (3 * 0.5 + 1.5 * (u - 0.5));
+      size *= 1 + 0.2 * Math.sin(psi) * Math.sin(Math.PI * w);
+      frame += spin * (3 * 0.46 + 1.5 * (u - 0.46));
     } else if (!helm && u < 0.8) {
       // Locked on: it hangs at the point, twitching as it searches, and
       // turns its lit face to the viewer (a flash) before it dives.
-      const v = (u - 0.72) / 0.08;
-      const twitch = 1.6 * Math.sin(5 * Math.PI * v) * (1 - v);
+      const v = (u - 0.68) / 0.12;
+      const twitch = 2.2 * Math.sin(3 * Math.PI * v) * (1 - v) * (1 - v);
+      // An actuator corrects across the key; axial movement waits for
+      // face alignment. The oscillation damps before the magnetic pull.
       pose[PX] = kx + qx * twitch;
       pose[PY] = ky + qy * twitch;
       size *= 1 + 0.18 * Math.sin(Math.PI * v);
-      const raw = frame + spin * (3 * 0.5 + 1.5 * 0.22);
+      const raw = frame + spin * (3 * 0.46 + 1.5 * 0.22);
       let d = (raw % FRAMES) + (raw < 0 ? FRAMES : 0);
       if (d > FRAMES / 2) d -= FRAMES;
-      const turn = 1 - smooth(v * 1.4);
+      const turn = 1 - smooth(v);
       frame = d * turn;
     } else {
-      // The dive: from the lock-on point (the helmet's: its own aim) to its
-      // cell, darting in faster as it goes.
+      // Magnetic capture ends at a two-pixel gap. The last six percent is
+      // a separate insertion: jaws close, a small compression rings down,
+      // and the chip's face becomes the artwork on the existing clock.
       const aim = helm ? 0.7 : 0.8;
-      const w = (u - aim) / (1 - aim);
-      const e = helm ? w * w * w * w : w * w * w;
-      pose[PX] = kx + (Cx - kx) * e;
-      pose[PY] = ky + (Cy - ky) * e;
+      const v = (u - aim) / (0.94 - aim);
+      const w = v < 0 ? 0 : v > 1 ? 1 : v;
+      const e = w * w * (3 - 2 * w);
+      const compression = u < 0.94 ? 0 : (u - 0.94) / 0.06;
+      const gap = 2 * (1 - smooth(compression));
+      const ring = compression > 0 ? 0.9 * Math.sin(TAU * compression) * (1 - compression) : 0;
+      pose[PX] = kx + (Cx + nx * gap - kx) * e + qx * ring;
+      pose[PY] = ky + (Cy + ny * gap - ky) * e + qy * ring;
       if (helm) {
         // The frame eases to the face-on lock pose by the shortest way.
         const raw = frame + spin * (2 * 0.7 + (u - 0.7));
@@ -3613,11 +3663,12 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
         if (d > FRAMES / 2) d -= FRAMES;
         frame = d * (1 - w) * (1 - w);
       } else frame = 0;
-      if (w >= 0.3) {
-        unfolded = Math.min(6, Math.floor((w - 0.3) * 10));
-        const full = T * (32 / 28) * (0.6 + 0.4 * L.cov[i]);
-        size += (full - size) * ((w - 0.3) / 0.7);
-      }
+    }
+    if (u >= 0.82) {
+      const open = smooth((u - 0.82) / 0.18);
+      unfolded = Math.min(6, Math.floor(open * 7));
+      const full = T * (32 / 28) * (0.6 + 0.4 * L.cov[i]);
+      size += (full - size) * open;
     }
     if (u >= 0.86) alpha *= 1 - (u - 0.86) / 0.14;
     pose[SIZE] = size;
@@ -3711,6 +3762,32 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
       if (u <= 0) continue;
       const Cx = a00 * L.cx[i] + a01 * L.cy[i] + ex;
       const Cy = a10 * L.cx[i] + a11 * L.cy[i] + ey;
+      // A few readable receiver keys per plate. They open across the
+      // incoming chip's own axis, grip on contact, then run a weld back to
+      // the already seated neighbour. The helmet keeps its original pixel
+      // fill clear. Touch uses the same mechanism with a smaller batch.
+      if (
+        !helm &&
+        !governed &&
+        u >= 0.58 &&
+        since < 44 &&
+        (i % 11 === 0 || ((L.tflags[i] & 8) !== 0 && i % 3 === 0)) &&
+        dockCount < DOCKS
+      ) {
+        const dx = a00 * L.dockX[i] + a01 * L.dockY[i];
+        const dy = a10 * L.dockX[i] + a11 * L.dockY[i];
+        const length = (dx * dx + dy * dy) ** 0.5 || 1;
+        const d = dockCount * 8;
+        docks[d] = Cx * s;
+        docks[d + 1] = Cy * s;
+        docks[d + 2] = dx / length;
+        docks[d + 3] = dy / length;
+        docks[d + 4] = (T * 0.55 + 2) * s;
+        docks[d + 5] = 1 - smooth((u - 0.8) / 0.2);
+        docks[d + 6] = since;
+        docks[d + 7] = since < 0 ? smooth((u - 0.58) / 0.12) : 1 - smooth(since / 44);
+        dockCount += 1;
+      }
       if (u < 1) {
         // Its string's pathfinder, on the same jig.
         const lead = L.tLead[i];
@@ -3875,6 +3952,24 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
     const end = L.tileFirst[p + 1];
     const tiles = plate.tiles;
     // A6: metal where the paint has not reached, the painted art behind it.
+    // Keep the last receivers cooling across the forming → seated handoff;
+    // their positions now use the same resting coordinates as the plate.
+    if (L.kind[p] !== 3 && !governed && t < F + 44) {
+      for (let i = first; i < end && dockCount < DOCKS; i += 1) {
+        const since = t - L.land[i];
+        if (since >= 44 || (i % 11 !== 0 && !((L.tflags[i] & 8) !== 0 && i % 3 === 0))) continue;
+        const o = dockCount * 8;
+        docks[o] = L.cx[i] * s;
+        docks[o + 1] = L.cy[i] * s;
+        docks[o + 2] = L.dockX[i];
+        docks[o + 3] = L.dockY[i];
+        docks[o + 4] = (T * 0.55 + 2) * s;
+        docks[o + 5] = 0;
+        docks[o + 6] = since;
+        docks[o + 7] = 1 - smooth(since / 44);
+        dockCount += 1;
+      }
+    }
     for (let pass = 0; pass < 2; pass += 1) {
       flight.save();
       flight.beginPath();
@@ -4139,6 +4234,59 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
       if (any) {
         flight.globalAlpha = 0.35;
         flight.lineWidth = Math.max(0.8, 0.8 * s * 0.8);
+        flight.stroke();
+      }
+    }
+  };
+  // Articulated receiver jaws and a short, cooling weld. Drawn in nine
+  // line batches regardless of chip count; the dark undercut gives each
+  // physical key depth, while the open jaws expose the original art.
+  const dockingPass = () => {
+    if (!dockCount) return;
+    flight.lineCap = "round";
+    flight.lineJoin = "round";
+    for (let stage = 0; stage < 3; stage += 1) {
+      for (let pass = 0; pass < 3; pass += 1) {
+        flight.beginPath();
+        let any = false;
+        for (let k = 0; k < dockCount; k += 1) {
+          const o = k * 8;
+          const since = docks[o + 6];
+          if ((since < 0 ? 0 : since < 12 ? 1 : 2) !== stage || docks[o + 7] < 0.15) continue;
+          const x = docks[o];
+          const y = docks[o + 1];
+          const nx = docks[o + 2];
+          const ny = docks[o + 3];
+          const span = docks[o + 4];
+          const opening = docks[o + 5];
+          const gap = span * (0.44 + 0.62 * opening);
+          const reach = span * (0.48 + 0.12 * opening);
+          if (pass < 2) {
+            for (let side = -1; side <= 1; side += 2) {
+              const cx = x - ny * gap * side;
+              const cy = y + nx * gap * side;
+              flight.moveTo(cx + nx * reach, cy + ny * reach);
+              flight.lineTo(cx - nx * reach, cy - ny * reach);
+              flight.lineTo(
+                cx - nx * reach + ny * span * 0.3 * side,
+                cy - ny * reach - nx * span * 0.3 * side,
+              );
+            }
+          } else if (since >= 0) {
+            // The fusion seam travels toward the last attached neighbour,
+            // changing white-hot to gold as it contracts and cools.
+            const progress = since < 12 ? since / 12 : 1;
+            flight.moveTo(x, y);
+            flight.lineTo(x - nx * span * progress, y - ny * span * progress);
+          } else continue;
+          any = true;
+        }
+        if (!any) continue;
+        flight.strokeStyle =
+          pass === 0 ? "#241707" : pass === 1 ? "#e9b356" : stage === 1 ? "#fff9e2" : "#b77b35";
+        flight.lineWidth =
+          pass === 0 ? Math.max(1.7, 2.1 * s) : Math.max(0.65, (pass === 1 ? 0.9 : 1.2) * s);
+        flight.globalAlpha = pass === 0 ? 0.65 : stage === 0 ? 0.48 : stage === 1 ? 0.92 : 0.4;
         flight.stroke();
       }
     }
@@ -4417,6 +4565,7 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
     spallPass(t);
     sparksPass();
     linksPass();
+    dockingPass();
     // G2: pulses on the conduits.
     if (pulsePostCount) {
       flight.globalAlpha = 0.65;

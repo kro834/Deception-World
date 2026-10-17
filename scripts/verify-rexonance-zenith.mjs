@@ -372,6 +372,17 @@ async function functional(engine, label, profile, { connection, noTimeline = fal
         const pin = parseFloat(getComputedStyle(frame).top) || 0;
         return Math.abs(frame.getBoundingClientRect().top - pin) <= 2;
       });
+      // On phone layouts the shared Zeus control hides itself while scrolling.
+      // The pin can settle before the control's short scroll timer clears its
+      // data-scrolling flag, so wait for the actual DOM state measured below.
+      await page.waitForFunction(() => {
+        const button = document.querySelector(".zeus-button");
+        return (
+          button &&
+          button.dataset.scrolling !== "true" &&
+          getComputedStyle(button).visibility !== "hidden"
+        );
+      });
       const staticHud = await hudGeometry(page);
       const staticScene = await staticSceneGeometry(page);
       const staticState = await snapshot(page);

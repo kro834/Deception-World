@@ -484,6 +484,27 @@ export function* assemblyNanitePlanSteps({
       offY: fixed ? 0 : lift * -0.55,
       area,
       share,
+      // Heavy shells hover square to the chest; the paired limb shells
+      // bank in from opposite sides. These are prepared once, not inferred
+      // from names in the hot loop. Fixed pieces still never leave the body.
+      seatHold: ornament
+        ? 0.35
+        : piece.group === "arms"
+          ? 0.38
+          : piece.group === "legs"
+            ? 0.3
+            : 0.16,
+      bank: fixed
+        ? 0
+        : (seatX < W / 2 ? -1 : 1) *
+          (piece.group === "arms"
+            ? 8
+            : piece.group === "shoulders"
+              ? 5
+              : piece.group === "legs"
+                ? 3
+                : 0) *
+          DEG,
       from,
       to,
       contact,
@@ -1069,16 +1090,13 @@ export function* assemblyNanitePlanSteps({
       const a1 = a.contact + N.clampHold + N.release;
       for (let o = 0; o < p; o += 1) {
         const b = npieces[o];
-        if (
-          !b.clampMask ||
-          a0 >= b.contact + N.clampHold + N.release ||
-          b.to - N.clampIn >= a1
-        )
+        if (!b.clampMask || a0 >= b.contact + N.clampHold + N.release || b.to - N.clampIn >= a1)
           continue;
         for (let c = 0; c < 4; c += 1)
           if (
             a.clampMask & b.clampMask & (1 << c) &&
-            Math.hypot(a.clamp[c * 2] - b.clamp[c * 2], a.clamp[c * 2 + 1] - b.clamp[c * 2 + 1]) < 12
+            Math.hypot(a.clamp[c * 2] - b.clamp[c * 2], a.clamp[c * 2 + 1] - b.clamp[c * 2 + 1]) <
+              12
           )
             a.clampMask &= ~(1 << c);
       }
@@ -1311,7 +1329,9 @@ export function* naniteConduitRows(cell, io) {
     for (let x = 0, i = y * w * 4; x < w; x += 1, i += 4) {
       const ga = gold[i + 3];
       const k = y * w + x;
-      const tone = art[i + 3] ? (art[i + 3] / 255) * naniteGoldTone(art[i], art[i + 1], art[i + 2]) : 0;
+      const tone = art[i + 3]
+        ? (art[i + 3] / 255) * naniteGoldTone(art[i], art[i + 1], art[i + 2])
+        : 0;
       tn[k] = tone;
       if (!ga || !tone) {
         m[k] = 0;
@@ -1357,7 +1377,8 @@ export function* naniteConduitRows(cell, io) {
       }
       d[k] = best;
       let peak = 0;
-      for (let t = x - 2; t <= x + 2; t += 1) if (t >= 0 && t < w && m[y * w + t] > peak) peak = m[y * w + t];
+      for (let t = x - 2; t <= x + 2; t += 1)
+        if (t >= 0 && t < w && m[y * w + t] > peak) peak = m[y * w + t];
       hm[k] = peak;
     }
     yield;
@@ -1396,8 +1417,7 @@ export function* naniteConduitRows(cell, io) {
   // plate's gold meets the next plate's across a straight line, nor along
   // the cell's edge (the tone is read as running on past it), and the whole
   // conduit fades out over the last 5 px before a cut.
-  const at = (x, y) =>
-    tn[(y < 0 ? 0 : y >= h ? h - 1 : y) * w + (x < 0 ? 0 : x >= w ? w - 1 : x)];
+  const at = (x, y) => tn[(y < 0 ? 0 : y >= h ? h - 1 : y) * w + (x < 0 ? 0 : x >= w ? w - 1 : x)];
   const dist = (x, y) => (x >= 0 && x < w && y >= 0 && y < h ? d[y * w + x] : 0);
   // Outside the art's gold: low tone, and not a speck of shadow (within
   // 3 px of gold every way round) inside it. Coordinates clamp to the cell.
@@ -1441,7 +1461,8 @@ export function* naniteConduitRows(cell, io) {
         }
       }
       let dilated = 0;
-      for (let t = y - 2; t <= y + 2; t += 1) if (t >= 0 && t < h && hm[t * w + x] > dilated) dilated = hm[t * w + x];
+      for (let t = y - 2; t <= y + 2; t += 1)
+        if (t >= 0 && t < h && hm[t * w + x] > dilated) dilated = hm[t * w + x];
       if (dilated <= 0.02) continue;
       const cut = smooth(clamp01((dc[k] - 3) / (3 * fade)));
       if (cut <= 0) continue;
@@ -1732,7 +1753,8 @@ export function createAssemblyConduitJob({
         const x1 = Math.min(W, Math.ceil(g.x[cell] + g.w[cell]));
         const y1 = Math.min(H, Math.ceil(g.y[cell] + g.h[cell]));
         let sum = 0;
-        for (let y = y0; y < y1; y += 1) for (let x = x0; x < x1; x += 1) sum += data[(y * W + x) * 4 + 3];
+        for (let y = y0; y < y1; y += 1)
+          for (let x = x0; x < x1; x += 1) sum += data[(y * W + x) * 4 + 3];
         vis[cell] = sum >= 2 * 255 ? 1 : 0;
         cell += 1;
         if ((cell & 255) === 0 && until()) return false;
@@ -1856,7 +1878,9 @@ export function createAssemblyLayerJob({
     const contexts = outputs.map((canvas) => canvas.getContext("2d"));
     // The CPU copies of the source and the mask, made by the first steps.
     const copies = (mask ? [source, mask] : [source]).map(() => make(W, H));
-    const copyContexts = copies.map((canvas) => canvas.getContext("2d", { willReadFrequently: true }));
+    const copyContexts = copies.map((canvas) =>
+      canvas.getContext("2d", { willReadFrequently: true }),
+    );
     if (copyContexts.some((context) => !context) || contexts.some((context) => !context))
       throw new Error("unavailable layer context");
     let images = names.map(() => copyContexts[0].createImageData(W, LAYER_BAND));
@@ -1920,7 +1944,9 @@ export function createAssemblyLayerJob({
             const u = (t - MOLTEN_RAMP[k - 4]) / (MOLTEN_RAMP[k] - MOLTEN_RAMP[k - 4]);
             const mo = out[0];
             for (let c = 1; c < 4; c += 1)
-              mo[o + c - 1] = conduitByte(MOLTEN_RAMP[k - 4 + c] + (MOLTEN_RAMP[k + c] - MOLTEN_RAMP[k - 4 + c]) * u);
+              mo[o + c - 1] = conduitByte(
+                MOLTEN_RAMP[k - 4 + c] + (MOLTEN_RAMP[k + c] - MOLTEN_RAMP[k - 4 + c]) * u,
+              );
             mo[o + 3] = m ? conduitByte((alpha * m[o + 3]) / 255) : alpha;
           }
         }
@@ -1935,7 +1961,17 @@ export function createAssemblyLayerJob({
           if (copied < copies.length) {
             // The copies, a strip a slice.
             const rows = Math.min(LAYER_STRIP, H - copyTop);
-            copyContexts[copied].drawImage(copied ? mask : source, 0, copyTop, W, rows, 0, copyTop, W, rows);
+            copyContexts[copied].drawImage(
+              copied ? mask : source,
+              0,
+              copyTop,
+              W,
+              rows,
+              0,
+              copyTop,
+              W,
+              rows,
+            );
             copyTop += rows;
             if (copyTop >= H) {
               copied += 1;
@@ -2110,8 +2146,28 @@ export function createAssemblyNanites({
       if (sc) {
         // (The ring laid twice as light: the sprite's glass ring is faint.)
         sc.globalCompositeOperation = "lighter";
-        sc.drawImage(fxSheet, SHK.x, SHK.y, strip.width, strip.height, 0, 0, strip.width, strip.height);
-        sc.drawImage(fxSheet, SHK.x, SHK.y, strip.width, strip.height, 0, 0, strip.width, strip.height);
+        sc.drawImage(
+          fxSheet,
+          SHK.x,
+          SHK.y,
+          strip.width,
+          strip.height,
+          0,
+          0,
+          strip.width,
+          strip.height,
+        );
+        sc.drawImage(
+          fxSheet,
+          SHK.x,
+          SHK.y,
+          strip.width,
+          strip.height,
+          0,
+          0,
+          strip.width,
+          strip.height,
+        );
         sc.globalCompositeOperation = "source-atop";
         sc.globalAlpha = 0.7;
         sc.fillStyle = "rgb(170 236 255)";
@@ -2191,6 +2247,27 @@ export function createAssemblyNanites({
   const HSH = nano.hsh;
   const TP = nano.tp;
   const PARENT = nano.parent;
+  // Each socket is keyed to an already-formed neighbour. Keep the approach
+  // on the outward side of that edge rather than diving every cell along
+  // the same plate normal. Two floats per cell, prepared outside the frame.
+  const DOCKX = new Float32Array(n);
+  const DOCKY = new Float32Array(n);
+  for (let i = 0; i < n; i += 1) {
+    const pc = P[PO[i]];
+    const parent = PARENT[i];
+    let dx = pc?.nx ?? 0;
+    let dy = pc?.ny ?? -1;
+    if (parent >= 0 && !pc?.helm) {
+      const vx = CX[i] - CX[parent];
+      const vy = CY[i] - CY[parent];
+      const length = Math.hypot(vx, vy) || 1;
+      dx = (0.8 * vx) / length + 0.2 * dx;
+      dy = (0.8 * vy) / length + 0.2 * dy;
+    }
+    const length = Math.hypot(dx, dy) || 1;
+    DOCKX[i] = dx / length;
+    DOCKY[i] = dy / length;
+  }
   const ORDER = nano.paintOrder;
   const PAINT = nano.paintAt;
   const SEAT_LAG = nano.seatLag ?? 0.0125;
@@ -2477,8 +2554,8 @@ export function createAssemblyNanites({
     const span = t1 - t0;
     const u = (q - t0) / span;
     U[slot] = u;
-    const nx = p >= 0 ? P[p].nx : 0;
-    const ny = p >= 0 ? P[p].ny : -1;
+    const nx = DOCKX[i];
+    const ny = DOCKY[i];
     const qx = -ny;
     const qy = nx;
     const cx = p >= 0 ? jigX(p, CX[i], CY[i]) : CX[i];
@@ -2552,19 +2629,24 @@ export function createAssemblyNanites({
       // Each river stands out from the cocoon (round 3, review N4): its chips
       // white and a quarter larger.
       const ring0 = s0 * (1 + 0.45 * z0);
-      size = (ring0 + (s0 * 1.1 - ring0) * v) * 1.25;
+      size = ring0 + (s0 * 1.375 - ring0) * v;
       TN[slot] = 2;
       alpha = 0.45 + 0.25 * (z0 + 1) + (0.95 - 0.45 - 0.25 * (z0 + 1)) * v;
       kind = 4;
     } else if (u < dive) {
-      // The aim: it circles the hover point, closing in.
-      fr += rate * (2 * 0.55 * span + 0.5 * (q - t0 - 0.55 * span));
+      // Braking orbit: zero speed at both handoffs, then turn the keyed
+      // socket face-on. No size pop or fresh tumble at the river boundary.
       const w = (u - 0.55) / (dive - 0.55);
-      const psi = PSI0[i] + 1.5 * Math.PI * w;
-      const rr = R0[i] * (1 - w) ** 1.5;
+      const e = smooth(w);
+      const psi = PSI0[i] + 1.5 * Math.PI * e;
+      const rr = R0[i] * (1 - e);
       x = hx + rr * (Math.cos(psi) * qx + 0.45 * Math.sin(psi) * nx);
       y = hy + rr * (Math.cos(psi) * qy + 0.45 * Math.sin(psi) * ny);
-      size = s0 * (1 + 0.25 * Math.sin(psi));
+      size = s0 * (1.375 - 0.375 * e + 0.08 * Math.sin(Math.PI * w) ** 2);
+      const gateFrame = F0[i] + rate * (t0 - m + 3 * 0.55 * span);
+      const faceFrame = gateFrame - Math.round(gateFrame / 24) * 24;
+      fr = faceFrame * (1 - e);
+      TN[slot] = 2;
       // N15: banking round the hover point, its lit face catches the key
       // light once a turn — a glint, and the face-on frame.
       const hdx = -Math.sin(psi) * qx + 0.45 * Math.cos(psi) * nx;
@@ -2574,11 +2656,12 @@ export function createAssemblyNanites({
       if (dot > 0.9 && rr > 2) {
         const g = (dot - 0.9) / 0.1;
         GL[slot] = g;
-        fr *= 1 - g;
       }
       kind = 5;
     } else {
-      // The dive: speed peaks at contact; it turns face-on and unfolds.
+      // Magnetic capture: settle 2 px off the keyed socket, then insert.
+      // This shares the entry call's mechanical language without changing
+      // a single arrival beat, reveal time or finished-art pixel.
       fr += helm ? rate * 1.5 * dive * span : rate * (2 * 0.55 * span + 0.5 * 0.25 * span);
       const w = (u - dive) / (1 - dive);
       // N14, leaders and followers: a plate's first tiles dive at once; the
@@ -2600,12 +2683,24 @@ export function createAssemblyNanites({
         y = hy + ny * 6 * bob + qy * sniff;
       } else {
         const wd = hes > 0 ? (w - hes) / (1 - hes) : w;
-        const e = hes > 0 ? wd * wd * wd : wd * wd * wd * wd;
+        const e = helm
+          ? hes > 0
+            ? wd * wd * wd
+            : wd * wd * wd * wd
+          : wd < 0.7
+            ? 0.8 * smooth(wd / 0.7)
+            : 0.8 + 0.2 * smooth((wd - 0.7) / 0.3);
         x = hx + (cx - hx) * e;
         y = hy + (cy - hy) * e;
         // N16: its tracer, as long as it is fast.
         const wb = wd > 0.1 ? wd - 0.1 : 0;
-        const eb = hes > 0 ? wb * wb * wb : wb * wb * wb * wb;
+        const eb = helm
+          ? hes > 0
+            ? wb * wb * wb
+            : wb * wb * wb * wb
+          : wb < 0.7
+            ? 0.8 * smooth(wb / 0.7)
+            : 0.8 + 0.2 * smooth((wb - 0.7) / 0.3);
         const tx = hx + (cx - hx) * eb;
         const ty = hy + (cy - hy) * eb;
         if (Math.abs(x - tx) + Math.abs(y - ty) > 2) {
@@ -2616,7 +2711,7 @@ export function createAssemblyNanites({
       let f = fr % 24;
       if (f < 0) f += 24;
       if (f > 12) f -= 24;
-      fr = f * (1 - w) * (1 - w);
+      fr = helm ? f * (1 - w) * (1 - w) : 0;
       if (u >= 0.86) {
         const g = (u - 0.86) / 0.14;
         UF[slot] = Math.min(6, Math.floor(g * 7));
@@ -2798,15 +2893,18 @@ export function createAssemblyNanites({
     // paint and the conduit all lie where the plate is (owner, 2026-10-16:
     // nothing shifts when a part completes).
     if (staged && q < pc.contact) {
-      // Armour hovers lifted while it fills (round 3), then drops home with
-      // weight: slow off the hover, fastest at contact.
-      const hold = pc.ornament ? 0.35 : 0.2;
+      // Anatomy-led assembly: limbs converge as they fill, heavy torso
+      // shells hold back, then their clamps brake them into an exact seat.
+      // Smooth progress, rather than a tile-count staircase, also allows
+      // slow scrubbing without plate jitter.
+      const hold = pc.seatHold;
       if (q < pc.from) lam = 1;
-      else if (q < pc.to) lam = 1 - (hold * landedIn(p, q)) / pc.t1s.length;
+      else if (q < pc.to) lam = 1 - hold * smooth((q - pc.from) / (pc.to - pc.from));
       else {
         const u = (q - pc.to) / (pc.contact - pc.to);
-        lam = (1 - hold) * (1 - u * u * u);
+        lam = (1 - hold) * (1 - smooth(u));
       }
+      turn = pc.bank * lam;
       if (pc.kind === 1) turn = -(10 + 4 * pc.seg) * DEG * lam;
       if (pc.kind === 2) skew = -0.1 * lam;
     }
@@ -2906,7 +3004,8 @@ export function createAssemblyNanites({
       }
       const turn = chipRects[i + 3] * 12;
       ctx.moveTo(cx + r * HEX_TURNS[turn], cy + r * HEX_TURNS[turn + 1]);
-      for (let k = 2; k < 12; k += 2) ctx.lineTo(cx + r * HEX_TURNS[turn + k], cy + r * HEX_TURNS[turn + k + 1]);
+      for (let k = 2; k < 12; k += 2)
+        ctx.lineTo(cx + r * HEX_TURNS[turn + k], cy + r * HEX_TURNS[turn + k + 1]);
       ctx.closePath();
     }
   };
@@ -2930,7 +3029,8 @@ export function createAssemblyNanites({
         ctx.fillStyle = "rgb(246 253 255)";
         ctx.beginPath();
         for (let i = base; i < base + count; i += 4)
-          if (chipRects[i + 2] > 1.4) ctx.rect(chipRects[i] - 0.7, chipRects[i + 1] - 0.7, 1.4, 1.4);
+          if (chipRects[i + 2] > 1.4)
+            ctx.rect(chipRects[i] - 0.7, chipRects[i + 1] - 0.7, 1.4, 1.4);
         ctx.fill();
       }
       chipCounts[b] = 0;
@@ -3636,7 +3736,17 @@ export function createAssemblyNanites({
               const f = Math.floor(q / 0.0006 + 4 * GHASH[i]) % 4;
               const draw = 9;
               ctx.globalAlpha = 0.85 * a;
-              ctx.drawImage(cells, SPX + 32 * f, SPY, 32, 32, cx - draw / 2, cy - draw / 2, draw, draw);
+              ctx.drawImage(
+                cells,
+                SPX + 32 * f,
+                SPY,
+                32,
+                32,
+                cx - draw / 2,
+                cy - draw / 2,
+                draw,
+                draw,
+              );
               sprites_ += 1;
             }
             if (beamN < NP * 4) {

@@ -1,5 +1,5 @@
 # The Rexonance nanite chip (owner, 2026-10-16: 「超大幅な改善で。」), for
-# public/rexonance-nanites-20261016/cells.webp. Blender 5.2, Cycles on the GPU.
+# public/rexonance-nanites-20261018/cells.webp. Blender 4.2+, Cycles.
 #
 #   Blender -b --factory-startup -P scripts/blender/nanite_cells.py -- <out dir> [px=128]
 #
@@ -50,12 +50,15 @@ def scene(width, height, samples=96):
     bpy.ops.wm.read_factory_settings(use_empty=True)
     sc = bpy.context.scene
     sc.render.engine = "CYCLES"
-    prefs = bpy.context.preferences.addons["cycles"].preferences
-    prefs.compute_device_type = "METAL"
-    prefs.get_devices()
-    for device in prefs.devices:
-        device.use = device.type == "METAL"
-    sc.cycles.device = "GPU"
+    if os.environ.get("NANITE_CPU") == "1":
+        sc.cycles.device = "CPU"
+    else:
+        prefs = bpy.context.preferences.addons["cycles"].preferences
+        prefs.compute_device_type = "METAL"
+        prefs.get_devices()
+        for device in prefs.devices:
+            device.use = device.type == "METAL"
+        sc.cycles.device = "GPU"
     sc.cycles.samples = samples
     sc.cycles.use_denoising = True
     sc.cycles.denoiser = "OPENIMAGEDENOISE"
@@ -215,6 +218,8 @@ def build_chip(sc):
     top, bottom = hex_prism(bm, 1.0, 0.34, split=4)
     bmesh.ops.inset_region(bm, faces=[top], thickness=0.30, depth=0.0)
     bmesh.ops.inset_region(bm, faces=[top], thickness=0.06, depth=-0.08)
+    # The dark machined well separates the lens from the high, reflective lip.
+    top.material_index = 3
     # The back: a dark plate (slot 2) with a hex seam ring 0.05 wide, 0.22 in
     # from the edge (slot 1).
     rim = bmesh.ops.inset_region(bm, faces=[bottom], thickness=0.22, depth=0.0)["faces"]
@@ -251,8 +256,44 @@ def build_chip(sc):
     bm.to_mesh(core_mesh)
     bm.free()
     core = bpy.data.objects.new("core", core_mesh)
-    core.location = (0, 0, 0.12)
+    core.location = (0, 0, 0.11)
     sc.collection.objects.link(core)
+
+    def hex_ring(name, radius, z, thickness, segments, material_slot):
+        data = bpy.data.curves.new(name, "CURVE")
+        data.dimensions = "3D"
+        data.resolution_u = 1
+        data.bevel_depth = thickness
+        data.bevel_resolution = 2
+        spline = data.splines.new("POLY")
+        spline.points.add(segments - 1)
+        for i, point in enumerate(spline.points):
+            angle = 2 * math.pi * i / segments
+            point.co = (radius * math.cos(angle), radius * math.sin(angle), 0, 1)
+        spline.use_cyclic_u = True
+        obj = bpy.data.objects.new(name, data)
+        obj.location.z = z
+        sc.collection.objects.link(obj)
+        obj["material_slot"] = material_slot
+        return obj
+
+    # A pair of independent lips gives the face depth even after downsampling.
+    bezel = hex_ring("raised face bezel", 0.73, 0.185, 0.028, 6, "bezel")
+    optic = hex_ring("inner optic seal", 0.46, 0.105, 0.018, 6, "seal")
+    back_socket = hex_ring("back service socket", 0.46, -0.185, 0.022, 6, "back")
+
+    # Six recessed transverse cuts distinguish the solid sidewall from a flat
+    # polygon when the chip tumbles edge-on.
+    side_cuts = []
+    for k in range(6):
+        a = (k + 0.5) * math.pi / 3
+        bpy.ops.mesh.primitive_cube_add(size=1)
+        groove = bpy.context.active_object
+        groove.name = f"side recess {k}"
+        groove.location = (0.868 * math.cos(a), 0.868 * math.sin(a), 0)
+        groove.rotation_euler.z = a + math.pi / 2
+        groove.scale = (0.16, 0.025, 0.10)
+        side_cuts.append(groove)
 
     bpy.ops.mesh.primitive_uv_sphere_add(radius=0.10, segments=24, ring_count=12, location=(0.78, 0, 0.17))
     pin = bpy.context.active_object
@@ -261,10 +302,10 @@ def build_chip(sc):
 
     root = bpy.data.objects.new("nanite", None)
     sc.collection.objects.link(root)
-    for obj in (body, core, pin):
+    for obj in (body, core, pin, bezel, optic, back_socket, *side_cuts):
         obj.parent = root
     root.rotation_mode = "QUATERNION"
-    return root, body, core, pin
+    return root, body, core, pin, bezel, optic, back_socket, side_cuts
 
 
 def render(sc, name):
@@ -275,11 +316,11 @@ def render(sc, name):
 sc = scene(PX, PX)
 camera(sc, ORTHO)
 rig_a(sc)
-root, body, core, pin = build_chip(sc)
+root, body, core, pin, bezel, optic, back_socket, side_cuts = build_chip(sc)
 # Three slots on the body (0 the metal, 1 the back seam, 2 the back plate), one on the core and
 # the pin; each tone swaps the slots' materials (clearing the slots would
 # reset the faces' material indices).
-for obj, slots in ((body, 3), (core, 1), (pin, 1)):
+for obj, slots in ((body, 4), (core, 1), (pin, 1), (bezel, 1), (optic, 1), (back_socket, 1)):
     for _ in range(slots):
         obj.data.materials.append(None)
 for tone, (base, roughness, glow) in TONES.items():
@@ -289,13 +330,25 @@ for tone, (base, roughness, glow) in TONES.items():
     # chip seen from behind is a dark hex lit by its seam (RIG-A's under
     # light would otherwise mirror off it brighter than the face).
     body.data.materials[2] = principled(f"{tone}-back", (0.10, 0.11, 0.13), 1.0, 0.45)
+    body.data.materials[3] = principled(f"{tone}-well", (0.035, 0.048, 0.065), 0.75, 0.48)
+    bezel.data.materials[0] = principled(f"{tone}-bezel", tuple(min(1.0, v * 1.8 + 0.09) for v in base), 1.0, 0.19)
+    optic.data.materials[0] = emitter(f"{tone}-seal", glow, 1.25)
+    back_socket.data.materials[0] = principled(f"{tone}-socket", (0.23, 0.26, 0.31), 1.0, 0.25)
+    for groove in side_cuts:
+        groove.data.materials.clear()
+        groove.data.materials.append(principled(f"{tone}-side-cut", (0.025, 0.035, 0.045), 0.9, 0.48))
     core_material = emitter(f"{tone}-core", glow, 7.0, radius=0.42)
     pin_material = emitter(f"{tone}-pin", glow, 7.0)
     core.data.materials[0] = core_material
     pin.data.materials[0] = pin_material
     body.data.shape_keys.key_blocks["slab"].value = 0.0
-    core.location.z = 0.12
+    core.location.z = 0.11
     pin.location.z = 0.17
+    # The previous tone ends on the compressed slab pose. Every new tone
+    # begins from the same full-size chip before its 24 tumble renders.
+    bezel.scale = (1, 1, 1)
+    optic.scale = (1, 1, 1)
+    pin.scale = (1, 1, 1)
     for f in range(24):
         root.rotation_quaternion = Quaternion(AXIS, 2 * math.pi * f / 24)
         render(sc, f"tumble-{tone}-{f:02d}")
@@ -306,7 +359,9 @@ for tone, (base, roughness, glow) in TONES.items():
     for k in range(1, 7):
         s = k / 6
         body.data.shape_keys.key_blocks["slab"].value = s
-        core.location.z = 0.12 * (1 - s) + 0.045 * s
+        core.location.z = 0.11 * (1 - s) + 0.045 * s
+        bezel.scale = (1 - 0.04 * s,) * 3
+        optic.scale = (1 - 0.05 * s,) * 3
         pin.location.z = 0.17 * (1 - s) + 0.05 * s
         pin.scale = (1 - 0.5 * s,) * 3
         strength = 7.0 - 5.5 * s

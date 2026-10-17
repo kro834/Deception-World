@@ -1,6 +1,6 @@
 # The gold guideway conduit (owner, 2026-10-16: 「金のガイドラインもより立体的に
-# 未来的に。」 and 「超大幅な改善で。」), for public/rexonance-nanites-20261016/
-# guide.webp. Blender 5.2, Cycles on the GPU.
+# 未来的に。」 and 「超大幅な改善で。」), for public/rexonance-nanites-20261018/
+# guide.webp. Blender 5.2, Cycles. NANITE_CPU=1 selects CPU rendering.
 #
 #   Blender -b --factory-startup -P scripts/blender/nanite_guide.py -- <prep.json> <out.png>
 #
@@ -20,6 +20,7 @@
 # gold (alpha 0 where gold.webp's alpha <= 32, dilated by 2 px).
 import json
 import math
+import os
 import sys
 
 import bpy
@@ -43,12 +44,15 @@ def srgb(c):
 bpy.ops.wm.read_factory_settings(use_empty=True)
 sc = bpy.context.scene
 sc.render.engine = "CYCLES"
-prefs = bpy.context.preferences.addons["cycles"].preferences
-prefs.compute_device_type = "METAL"
-prefs.get_devices()
-for device in prefs.devices:
-    device.use = device.type == "METAL"
-sc.cycles.device = "GPU"
+if os.environ.get("NANITE_CPU") == "1":
+    sc.cycles.device = "CPU"
+else:
+    prefs = bpy.context.preferences.addons["cycles"].preferences
+    prefs.compute_device_type = "METAL"
+    prefs.get_devices()
+    for device in prefs.devices:
+        device.use = device.type == "METAL"
+    sc.cycles.device = "GPU"
 sc.cycles.samples = 64
 sc.cycles.use_denoising = True
 sc.cycles.denoiser = "OPENIMAGEDENOISE"
@@ -127,6 +131,19 @@ skeleton = [path for piece in prep["pieces"] for path in piece["skeleton"]]
 rails = curve("rails", contours, True, "3D", 1.6, 0.0)
 glass = curve("glass", contours, True, "2D", 0.0, -0.8)
 channel = curve("channel", skeleton, False, "3D", 0.5, 0.2)
+# A darker, wider extrusion underneath the thin light pipe gives each
+# conduit a machined trough that remains visible at atlas resolution.
+rail_base = curve("rail supporting extrusion", contours, True, "3D", 2.3, -1.4)
+channel_base = curve("channel recess", skeleton, False, "3D", 1.5, -1.1)
+
+support = bpy.data.materials.new("anodised support")
+support.use_nodes = True
+support_bsdf = support.node_tree.nodes["Principled BSDF"]
+support_bsdf.inputs["Base Color"].default_value = (0.055, 0.075, 0.095, 1)
+support_bsdf.inputs["Metallic"].default_value = 0.88
+support_bsdf.inputs["Roughness"].default_value = 0.36
+rail_base.data.materials.append(support)
+channel_base.data.materials.append(support)
 
 gold = bpy.data.materials.new("rail")
 gold.use_nodes = True

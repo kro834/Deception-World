@@ -1,5 +1,5 @@
 # The Rexonance nanite effects (owner, 2026-10-16: 「超大幅な改善で。」), for
-# public/rexonance-nanites-20261016/fx.webp. Blender 4.5/5.2: Cycles on the GPU
+# public/rexonance-nanites-20261018/fx.webp. Blender 4.5/5.2: Cycles on the GPU
 # (the scan plane in Eevee).
 #
 #   Blender -b --factory-startup -P scripts/blender/nanite_fx.py -- <out dir>
@@ -200,7 +200,8 @@ def clamps():
     rig_a(sc, key_gain=1.5)
     camera = ortho_camera(sc, CLAMP_CELL / CLAMP_PX)
     gold = machined(principled("gold-chrome", (1, 0.76, 0.35), 1.0, 0.22, coat=0.2))
-    dark = principled("bolt", (0.16, 0.18, 0.21), 1.0, 0.3)
+    dark = principled("bolt", (0.10, 0.13, 0.17), 1.0, 0.33)
+    titanium = principled("titanium guard", (0.36, 0.42, 0.49), 1.0, 0.20)
     groove = emitter("groove", ICE, 0.6)
     led = emitter("led", ICE, 0.6)
     corner = bpy.data.objects.new("corner", None)
@@ -210,6 +211,10 @@ def clamps():
     clamp.parent = corner
     box("bar-h", (1.0, 0.22, 0.14), (0.28, 0.11, 0), gold, (0.035, 4), clamp)
     box("bar-v", (0.22, 1.0, 0.14), (-0.11, -0.28, 0), gold, (0.035, 4), clamp)
+    # Stepped outer guards expose a second, cooler metal face on both arms.
+    box("guard-h", (0.88, 0.065, 0.11), (0.29, 0.245, -0.015), titanium, (0.018, 3), clamp)
+    box("guard-v", (0.065, 0.88, 0.11), (-0.245, -0.29, -0.015), titanium, (0.018, 3), clamp)
+    box("joint saddle", (0.22, 0.22, 0.17), (-0.11, 0.11, 0.015), dark, (0.035, 3), clamp)
     # Recessed steel channels and a raised hexagonal bolt head make the
     # metallic shoulders and LED inlays read as machined parts, not lines.
     box("channel-h", (0.68, 0.065, 0.018), (0.36, 0.11, 0.07), dark, (0.008, 2), clamp)
@@ -255,16 +260,21 @@ def latch():
     sc = scene(192, 192)
     rig_a(sc)
     ortho_camera(sc, 2.6)
-    gunmetal = principled("gunmetal", (0.16, 0.18, 0.21), 1.0, 0.3)
+    gunmetal = principled("gunmetal", (0.10, 0.13, 0.17), 1.0, 0.3)
+    titanium = principled("beveled housing", (0.32, 0.39, 0.45), 1.0, 0.22)
     gold = machined(principled("gold-chrome", (1, 0.76, 0.35), 1.0, 0.22, coat=0.2))
     ring = emitter("ice-ring", ICE, 1.0)
     bpy.ops.mesh.primitive_torus_add(major_radius=0.78, minor_radius=0.07, major_segments=96, minor_segments=16)
     outer = bpy.context.active_object
     outer.data.materials.append(gunmetal)
+    bpy.ops.mesh.primitive_torus_add(major_radius=0.86, minor_radius=0.045, major_segments=96, minor_segments=10)
+    housing = bpy.context.active_object
+    housing.location.z = -0.055
+    housing.data.materials.append(titanium)
     bpy.ops.mesh.primitive_torus_add(major_radius=0.62, minor_radius=0.025, major_segments=96, minor_segments=8)
     inner = bpy.context.active_object
     inner.data.materials.append(ring)
-    for obj in (outer, inner):
+    for obj in (outer, inner, housing):
         for poly in obj.data.polygons:
             poly.use_smooth = True
     # Six raised fasteners and their inset LED faces remain anchored while

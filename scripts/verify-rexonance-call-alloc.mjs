@@ -10,6 +10,7 @@
 // BASE_URL=http://127.0.0.1:8705 PW_BROWSER_CHANNEL=chrome node scripts/verify-rexonance-call-alloc.mjs
 import assert from "node:assert/strict";
 import { chromium } from "playwright";
+import { REXONANCE_NANITE_DIR } from "../src/lib/rexonance-nanites.ts";
 
 const base = process.env.BASE_URL ?? "http://127.0.0.1:8705";
 const browser = await chromium.launch({ channel: process.env.PW_BROWSER_CHANNEL ?? "chrome" });
@@ -22,7 +23,7 @@ async function play(rich) {
   const page = await context.newPage();
   const errors = [];
   page.on("pageerror", (error) => errors.push(error.message));
-  if (!rich) await page.route("**/rexonance-nanites-20261016/**", (route) => route.abort());
+  if (!rich) await page.route(`**${REXONANCE_NANITE_DIR}/**`, (route) => route.abort());
   const cdp = await context.newCDPSession(page);
   await page.goto(`${base}/world`, { waitUntil: "networkidle" });
   await page.waitForFunction(

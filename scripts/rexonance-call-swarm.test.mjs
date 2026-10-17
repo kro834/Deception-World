@@ -215,6 +215,7 @@ test("the draw passes keep per-frame values in typed slots, not boxed lets", () 
   assert.deepEqual(closureLets, [
     "comets",
     "conduits",
+    "dockCount",
     "draws",
     "fadeCount",
     "frames",
@@ -425,7 +426,26 @@ async function extrasRuntime({ touch }) {
     },
   });
   const extras = {};
-  runInNewContext(transpile(extrasSource), {
+  // Test-only probes exercise the real closed-form pose without adding a
+  // debugging API, copy or allocation to the production drawing engine.
+  const instrumented = extrasSource.replace(
+    "  return {\n    before,",
+    `  return {
+      poseAt(p, i, u) {
+        flat(p);
+        pose[ARG_U] = u;
+        pose[ARG_CX] = L.cx[i];
+        pose[ARG_CY] = L.cy[i];
+        pose[ARG_LX] = L.cx[L.tLead[i]];
+        pose[ARG_LY] = L.cy[L.tLead[i]];
+        tilePose(p, i, L.kind[p] === 3);
+        return Array.from(pose);
+      },
+      docking() { return Array.from(docks.subarray(0, dockCount * 8)); },
+      chipShape(x, y, d, socket) { hexRects(x, y, d, socket); },
+      before,`,
+  );
+  runInNewContext(transpile(instrumented), {
     ...globals,
     exports: extras,
     require(name) {
@@ -530,6 +550,45 @@ test("touch: at most 24 hero sprites a frame from the kit; the swarm is rects", 
   assert.ok(heroes > 0);
   // At most four conduits a frame, their face only (no walls).
   assert.ok(Math.max(...frames.map(({ guide }) => guide)) <= 4);
+});
+
+test("touch carriers have a six-sided shell with a recessed socket and tiny chips stay cheap", async () => {
+  const { plan, extras } = await extrasRuntime({ touch: true });
+  const { context } = recorder();
+  const loops = [];
+  let rectangles = 0;
+  context.moveTo = (x, y) => loops.push([[x, y]]);
+  context.lineTo = (x, y) => loops.at(-1).push([x, y]);
+  context.rect = () => {
+    rectangles += 1;
+  };
+  const ex = extras.createSuitExtras({
+    flight: context,
+    s: 1,
+    ox: 0,
+    oy: 0,
+    all: plan.plates(),
+    gold: plan.cells(),
+    source: { kind: "work" },
+    sheet: { kind: "motes" },
+  });
+  ex.chipShape(10, 20, 10, true);
+  assert.deepEqual(
+    loops.map((loop) => loop.length),
+    [6, 6],
+    "shell and socket each have six facets",
+  );
+  const area = (loop) =>
+    loop.reduce((sum, [x, y], i) => {
+      const next = loop[(i + 1) % loop.length];
+      return sum + x * next[1] - next[0] * y;
+    }, 0);
+  assert.ok(area(loops[0]) * area(loops[1]) < 0, "reverse winding exposes the dark recess");
+  assert.ok(Math.abs(area(loops[1])) < Math.abs(area(loops[0])), "socket stays inside the shell");
+  loops.length = 0;
+  ex.chipShape(10, 20, 3, true);
+  assert.equal(rectangles, 1, "subpixel facets use one cheap rect");
+  assert.equal(loops.length, 0);
 });
 
 // Owner (2026-10-16): 「前がけの生成完了時にズレるのを修正して。」 — the tassets
@@ -727,6 +786,117 @@ test("the layout: every chip has a ring, the cocoon drains bottom-up, every tile
   assert.equal(free, 160);
   assert.ok(legRings / legs >= 5, `leg chips' mean ring ${legRings / legs}`);
   assert.ok(legs > 60 && helm > 20, `${legs} leg chips, ${helm} helmet chips`);
+});
+
+test("keyed nanites stay continuous through braking, alignment, capture and insertion", async () => {
+  const { plan, extras } = await extrasRuntime({ touch: false });
+  const all = plan.plates();
+  const L = extras.rexonanceNaniteLayout();
+  const { context } = recorder();
+  const ex = extras.createSuitExtras({
+    flight: context,
+    s: 1,
+    ox: 0,
+    oy: 0,
+    all,
+    gold: plan.cells(),
+    source: { kind: "work" },
+    sheet: { kind: "motes" },
+  });
+  const axes = new Set();
+  let checked = 0;
+  for (let p = 0; p < all.length; p += 1) {
+    if (L.kind[p] < 0) continue;
+    const first = L.tileFirst[p];
+    const end = L.tileFirst[p + 1];
+    for (let i = first; i < end; i += 1) {
+      assert.ok(Math.abs(Math.hypot(L.dockX[i], L.dockY[i]) - 1) < 1e-6, "unit docking axis");
+      axes.add(`${L.dockX[i].toFixed(2)},${L.dockY[i].toFixed(2)}`);
+      if (i !== first && i !== end - 1 && i !== Math.floor((first + end) / 2)) continue;
+      for (const boundary of [0.46, 0.68, 0.7, 0.8, 0.82, 0.94, 1]) {
+        const left = ex.poseAt(p, i, boundary - 1e-7);
+        const right = ex.poseAt(p, i, boundary);
+        assert.ok(
+          Math.hypot(left[0] - right[0], left[1] - right[1]) < 0.01,
+          `${all[p].piece.id} at ${boundary}: no position jump`,
+        );
+        assert.ok(Math.abs(left[6] - right[6]) < 0.01, `${boundary}: no size pop`);
+      }
+      const gap = ex.poseAt(p, i, 0.94);
+      assert.ok(
+        Math.abs(Math.hypot(gap[0] - L.cx[i], gap[1] - L.cy[i]) - 2) < 1e-6,
+        "capture leaves a two-pixel insertion gap",
+      );
+      const locked = ex.poseAt(p, i, 1);
+      assert.ok(
+        Math.hypot(locked[0] - L.cx[i], locked[1] - L.cy[i]) < 1e-6,
+        "insertion ends on the artwork cell exactly",
+      );
+      assert.equal(Math.abs(locked[7]), 0, "face aligned at contact");
+      assert.ok(Math.abs(locked[9]) < 1e-6, "chip fades on the existing landing clock");
+      checked += 1;
+    }
+  }
+  assert.ok(axes.size >= 8, "joining axes follow local neighbours around the armour");
+  assert.ok(checked >= 100, "sample every armour and ornament group including the helmet");
+});
+
+test("receiver jaws close on contact and cool without obscuring the helmet", async () => {
+  const { plan, extras } = await extrasRuntime({ touch: false });
+  const all = plan.plates();
+  const L = extras.rexonanceNaniteLayout();
+  const { context } = recorder();
+  const ex = extras.createSuitExtras({
+    flight: context,
+    s: 1,
+    ox: 0,
+    oy: 0,
+    all,
+    gold: plan.cells(),
+    source: { kind: "work" },
+    sheet: { kind: "motes" },
+  });
+  let candidate;
+  for (let p = 0; p < all.length && !candidate; p += 1) {
+    if (L.kind[p] !== 0) continue;
+    for (let i = L.tileFirst[p]; i < L.tileFirst[p + 1]; i += 1) {
+      if (i % 11 === 0 && L.land[i] + 44 < all[p].fit) {
+        candidate = { p, i };
+        break;
+      }
+    }
+  }
+  assert.ok(candidate, "an armour tile with time to cool before fitting");
+  for (const since of [-25, 6, 28]) {
+    const t = L.land[candidate.i] + since;
+    ex.before(t);
+    ex.forming(candidate.p, t);
+    const raw = ex.docking();
+    const entries = Array.from({ length: raw.length / 8 }, (_, k) => raw.slice(k * 8, k * 8 + 8));
+    const key = entries.find((entry) => Math.abs(entry[6] - since) < 0.001);
+    assert.ok(key, `${since}: receiver mechanism is visible`);
+    if (since < 0) assert.ok(key[5] > 0.5, "jaws open before capture");
+    else assert.equal(key[5], 0, "jaws latch at contact");
+    assert.ok(key[7] > 0 && key[7] <= 1, "bounded cooling visibility");
+  }
+  const atFit = all.findIndex(
+    (plate, p) =>
+      L.kind[p] === 0 &&
+      Array.from(L.land.subarray(L.tileFirst[p], L.tileFirst[p + 1])).some(
+        (land, k) => (L.tileFirst[p] + k) % 11 === 0 && plate.fit - land < 25,
+      ),
+  );
+  assert.ok(atFit >= 0, "a late receiver continues through plate fitting");
+  ex.before(all[atFit].fit + 5);
+  ex.seat(atFit, all[atFit].fit + 5);
+  assert.ok(ex.docking().length > 0, "fitting does not cut off cooling receivers");
+  for (let p = 0; p < all.length; p += 1) {
+    if (L.kind[p] !== 3) continue;
+    const t = L.land[L.tileFirst[p]];
+    ex.before(t);
+    ex.forming(p, t);
+    assert.equal(ex.docking().length, 0, "late face pixels stay clear of receiver jaws");
+  }
 });
 
 // Owner override (2026-10-16): 「金のガイドウェイは上から被さる形ではなく、足先から

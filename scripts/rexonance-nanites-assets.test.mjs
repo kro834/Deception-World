@@ -266,6 +266,26 @@ test("the hex chips: a lit face-on core, a dark back that still glows, a square 
   for (let k = 1; k < 4; k += 1) assert.ok(spark(k) < spark(k - 1), `spark frame ${k} is smaller than ${k - 1}`);
 });
 
+test("settled corner clamps retain their gold jaws and cool metal guards", async () => {
+  const { data, width } = await decode(REXONANCE_NANITE_FX.src);
+  const { clamp } = REXONANCE_NANITE_FX;
+  for (const [corner, row] of Object.entries(clamp.corners)) {
+    let gold = 0;
+    let coolMetal = 0;
+    const x0 = clamp.x + (clamp.frames - 1) * clamp.cell;
+    const y0 = clamp.y + row * clamp.cell;
+    for (let y = 0; y < clamp.cell; y += 1)
+      for (let x = 0; x < clamp.cell; x += 1) {
+        const i = ((y0 + y) * width + x0 + x) * 4;
+        if (data[i + 3] < 128) continue;
+        const [r, g, b] = [data[i], data[i + 1], data[i + 2]];
+        if (r > g * 1.08 && g > b * 1.2 && r > 70) gold += 1;
+        if (b > r * 1.1 && b > g * 1.02 && b > 50) coolMetal += 1;
+      }
+    assert.ok(gold >= 4 && coolMetal >= 12, `${corner}: ${gold} gold and ${coolMetal} cool-metal pixels`);
+  }
+});
+
 test("each comet's head is its brightest pixel, at (16, 16)", async () => {
   const { data, width } = await decode(REXONANCE_NANITE_COMETS.src);
   const { cell, angles, rows, head } = REXONANCE_NANITE_COMETS;

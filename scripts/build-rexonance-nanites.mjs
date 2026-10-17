@@ -6,7 +6,7 @@
 //     [--only=cells,fx,guide] [--work=<dir>] [--debug=<dir>] [--placeholder]
 //     [--hardware]
 //
-// writes public/rexonance-nanites-20261016/{cells,comets,fx,guide}.webp and
+// writes public/rexonance-nanites-20261018/{cells,comets,fx,guide}.webp and
 // the generated module src/lib/rexonance-nanites.ts.
 //
 // - --blender=<path>: renders the three Blender scenes headless
@@ -41,7 +41,7 @@ const require = createRequire(import.meta.url);
 const sharp = require(process.env.SHARP_MODULE || "sharp");
 
 const ROOT = fileURLToPath(new URL("..", import.meta.url));
-const VERSION = "20261016";
+const VERSION = "20261018";
 const DIR = `/rexonance-nanites-${VERSION}`;
 const OUT_DIR = join(ROOT, "public", DIR.slice(1));
 const MODULE = join(ROOT, "src/lib/rexonance-nanites.ts");
@@ -1302,11 +1302,12 @@ if (frames) {
       }
     }
   }
-  // The guide: quality 72 → 64 before it may exceed its budget (then the
-  // alpha's quality 65 → 45 at 64).
+  // The thin machined track adds detail to the guide. Keep its silhouette and
+  // alpha first; trade a little colour precision if the new render is larger.
   const guideLadder = [];
-  for (let quality = WEBP.guide.quality; quality >= 64; quality -= 2) guideLadder.push({ ...WEBP.guide, quality });
-  for (let alphaQuality = 55; alphaQuality >= 45; alphaQuality -= 10) guideLadder.push({ ...WEBP.guide, quality: 64, alphaQuality });
+  for (let quality = WEBP.guide.quality; quality >= 48; quality -= 2) guideLadder.push({ ...WEBP.guide, quality, alphaQuality: 65 });
+  for (let quality = 62; quality >= 48; quality -= 2) guideLadder.push({ ...WEBP.guide, quality, alphaQuality: 55 });
+  for (let quality = 58; quality >= 48; quality -= 2) guideLadder.push({ ...WEBP.guide, quality, alphaQuality: 45 });
   for (const options of guideLadder) {
     encoded.guide = await encode("guide", guideRaw, options);
     if (encoded.guide.length <= BUDGET.guide) {
