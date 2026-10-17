@@ -537,6 +537,13 @@ export function SideMenuLayer({
     }
     return () => {
       watcher?.destroy();
+      if (
+        !sideMenuRestoreFocusRef.current &&
+        document.activeElement instanceof HTMLElement &&
+        panel.contains(document.activeElement)
+      ) {
+        document.activeElement.blur();
+      }
       // Released before focus returns: an inert opener cannot take it.
       for (const element of inerted) element.inert = false;
       window.cancelAnimationFrame(focusFrame);
@@ -547,14 +554,11 @@ export function SideMenuLayer({
       document.removeEventListener("wheel", containBackgroundScroll, true);
       document.removeEventListener("focusin", containBackgroundFocus, true);
       releaseViewportScrollLock();
-      delete root.dataset.sideMenuOpen;
+      if (!root.dataset.routeCover) {
+        delete root.dataset.sideMenuOpen;
+      }
       if (sideMenuRestoreFocusRef.current) {
         previousFocus?.focus({ preventScroll: true });
-      } else if (
-        document.activeElement instanceof HTMLElement &&
-        panel.contains(document.activeElement)
-      ) {
-        document.activeElement.blur();
       }
       sideMenuRestoreFocusRef.current = false;
       sideMenuOpenerRef.current = null;

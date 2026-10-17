@@ -41,6 +41,7 @@
   left: 0;
   height: auto;
   min-height: 62px;
+  contain: layout style;
   border-bottom: 1px solid rgb(255 255 255 / 10%);
   background: rgb(3 5 11 / 76%);
   backdrop-filter: saturate(155%) blur(24px);

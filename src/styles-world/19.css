@@ -181,6 +181,7 @@
   position: fixed;
   z-index: 61;
   isolation: isolate;
+  contain: layout style;
   inset-block: 0;
   right: 0;
   display: flex;

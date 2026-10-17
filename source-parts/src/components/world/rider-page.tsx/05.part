@@ -1,3 +1,11 @@
+        </div>
+      </section>
+      <DossierReader name={rider.civilian.name} identity forms={pickupForms.length > 0} />
+      <section
+        className={`rider-archive-identity-records${rider.nightmare ? " has-nightmare" : ""}${rider.partner ? " has-partner" : ""}`}
+        id="identity-records"
+        aria-label={rider.partner ? "変身前記録と相棒記録" : "変身前記録"}
+      >
         <figure className="rider-archive-civilian">
           <div className="rider-archive-civilian-visual">
             <img

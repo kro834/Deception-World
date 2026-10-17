@@ -69,6 +69,15 @@ test("Hanaka's Ishihen and Chigiri's Hoko and Rekka forms preserve every supplie
     "88m",
     "0.5秒",
     "炎爪",
+    "犭フォーム",
+    "227cm",
+    "165kg",
+    "112t",
+    "615t",
+    "98m",
+    "0.83秒",
+    "万物殺し",
+    "ばんぶつころし",
   ]) {
     assert.ok(rider.includes(value), `${value} should remain in Chigiri's form records`);
   }
