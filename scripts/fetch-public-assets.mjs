@@ -118,7 +118,7 @@ const files = [
   "rider-leddic-hoko.jpeg",
   "rider-leddic-ishihen.jpeg",
   "rider-leddic-rekka-20260829.jpeg",
-  "rider-leddic-kemonohen-20261018.jpeg",
+  "rider-leddic-kemonohen-9237.jpeg",
   "rider-loa.jpeg",
   "rider-luna.jpeg",
   "rider-macabergoanightmare.jpeg",
