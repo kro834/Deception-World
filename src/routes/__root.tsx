@@ -12,6 +12,7 @@ import { LibraryVisitTracker } from "@/components/library/library-controls";
 import { InquiryNavigation } from "@/components/library/inquiry-navigation";
 import { QuickSearchHost } from "@/components/search/quick-search-host";
 import inquiryNavigationCss from "@/styles-inquiry-navigation.css?url";
+import interactionChoreographyCss from "@/styles-interaction-choreography.css?url";
 import { AuthProvider } from "@/lib/auth/provider";
 import { PreviewHostBridge } from "@/components/preview-host-bridge";
 import { LegacyDataRetirement } from "@/components/legacy-data-retirement";
@@ -210,7 +211,10 @@ export const Route = createRootRoute({
       // title, which is the logo itself).
       ...(matches.some((match) => (match.routeId as string) === "/")
         ? []
-        : [{ rel: "stylesheet", href: sagaStreamlineCss }]),
+        : [
+            { rel: "stylesheet", href: sagaStreamlineCss },
+            { rel: "stylesheet", href: interactionChoreographyCss },
+          ]),
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       {
         rel: "preconnect",

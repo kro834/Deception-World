@@ -88,6 +88,15 @@ try {
       if (selector === ".hero .text-action" && width <= 767 && !(await target.isVisible())) continue;
       await target.evaluate(e => e.scrollIntoView({ block: "center", behavior: "instant" }));
       await page.waitForTimeout(160);
+      // Phone reading scrolls deliberately hide Zeus until scrolling settles.
+      // Test its real hit target once it returns, not the hidden placeholder.
+      if (selector === ".zeus-button") {
+        await page.waitForFunction(() => {
+          const button = document.querySelector(".zeus-button");
+          return button && getComputedStyle(button).visibility === "visible" &&
+            getComputedStyle(button).pointerEvents !== "none";
+        });
+      }
       if (await target.evaluate(e => e.getBoundingClientRect().bottom < 96)) {
         await page.evaluate(() => window.scrollTo({ top: Math.max(240, scrollY), behavior: "instant" }));
         await page.waitForTimeout(160);
