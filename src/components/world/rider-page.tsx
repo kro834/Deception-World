@@ -819,7 +819,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
           ],
         },
         {
-          img: "/rider-leddic-hoko.jpeg",
+          img: "/rider-leddic-kemonohen.jpeg",
           pos: "50% 8%",
           system: "レディックウォッチ × 犭フォーム",
           name: "レディック",

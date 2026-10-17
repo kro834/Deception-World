@@ -118,6 +118,7 @@ export const RIDER_NAV: DossierLink[] = [
       "/rider-leddic-ishihen.jpeg",
       "/rider-leddic-hoko.jpeg",
       "/rider-leddic-rekka-20260829.jpeg",
+      "/rider-leddic-kemonohen.jpeg",
     ],
     kicker: "RIDER 05",
   },
