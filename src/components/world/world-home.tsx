@@ -3043,7 +3043,7 @@ export function WorldHome() {
                       <SlideOpenControl
                         ariaControls="world-column-dossier"
                         ariaLabel="ネタバレを含む資料を開く"
-                        className="world-column-slide-open world-column-spoiler-open"
+                        className="world-column-spoiler-open"
                         expanded={false}
                         label="ネタバレを開く"
                         opensDialog={false}

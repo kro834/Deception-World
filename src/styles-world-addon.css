@@ -1087,7 +1087,7 @@ br.tab-br {
   margin-left: auto;
 }
 
-.world-column-slide-open.ios-slide-open {
+:is(.world-column-slide-open, .world-column-spoiler-open).ios-slide-open {
   --slide-accent: var(--cyan, #67d8ff);
   position: relative;
   width: min(100%, 300px);

@@ -45,7 +45,7 @@ test("world-home preserves its layout and copy outside explicitly approved edits
     // The owner's records and exact copy above remain unchanged.
     // Each pickup may now land on its matching form's hash via GuardedLink.
     // 2026-10-17: column 06's slider label and its dialog pane (gate, then dossier).
-    markup: "296b0593f077a6c71ebd334a56a3d15b5f4610083fd045999ece94dd522889d0",
+    markup: "b3ed1158f726b0d33a2c6120476e17cd14ef0db558d5f1464cc40b752201c2e4",
   });
   // The WorldAnnexRiders hook stays where it was (this file is pinned), but
   // renders nothing: 02 RIDERS and 03 RECORDS sit back to back, and the
