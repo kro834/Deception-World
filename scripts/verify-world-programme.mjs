@@ -255,14 +255,15 @@ async function verifyDreamStory(page, viewport) {
 
   for (let index = 0; index < 6; index += 1) {
     const detail = details.nth(index);
-    const summary = detail.locator("summary");
+    // Pin the disclosure summary directly under details, not any nested summary.
+    const summary = detail.locator(":scope > summary");
     assert.equal(
       await detail.getAttribute("open"),
       null,
       `${viewport.name}: Case ${index} starts closed`,
     );
     assert.equal(
-      await summary.locator(".dream-story-case-heading > span").innerText(),
+      await summary.locator(":scope > .dream-story-case-heading > span").innerText(),
       dreamChapters[index],
       `${viewport.name}: Case ${index} label`,
     );

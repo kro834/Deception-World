@@ -289,7 +289,8 @@ test("scroll before the long press cancels navigation; scrolling settles once pe
     ui.handlers.onPointerUp(ui.event());
     assert.equal(ui.navigated(), 0);
     for (let i = 0; i < 12; i++) ui.win.dispatchEvent(new Event("scroll"));
-    assert.equal(ui.timers.size, 1);
+    // Phone reading adds one idle-reveal timer; collision work still settles once.
+    assert.equal(ui.timers.size, 2);
     assert.equal(ui.timerDelays.at(-1), android ? 140 : 72);
     ui.unmount();
   }

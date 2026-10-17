@@ -267,7 +267,8 @@ for (const resume of ["pageshow", "visibilitychange"]) {
   test(`${resume} reconciles a changed viewport once without a resize or saved-position write`, () => {
     const ui = mount();
     ui.win.dispatchEvent(new Event("scroll"));
-    assert.equal(ui.timers.size, 1);
+    // Phone scroll now owns both collision settling and its independent reveal timer.
+    assert.equal(ui.timers.size, 2);
     ui.doc.hidden = true;
     ui.doc.dispatchEvent(new Event("visibilitychange"));
     assert.equal(ui.timers.size, 0, "suspended collision work is removed");
@@ -295,4 +296,34 @@ test("both Zeus image variants stay low priority while preserving their thumbnai
   for (const image of images) assert.match(image, /fetchPriority="low"/);
   assert.match(images[0], /srcSet=\{ZEUS_BUTTON_SRCSET\}/);
   assert.match(images[1], /srcSet=\{ZEUS_BUTTON_RETURN_SRCSET\}/);
+});
+
+test("phone scrolling hides Zeus until idle and cancels its reveal work on disposal", () => {
+  const ui = mount();
+  ui.win.dispatchEvent(new Event("scroll"));
+  assert.equal(ui.button.dataset.scrolling, "true");
+  ui.win.dispatchEvent(new Event("scroll"));
+  assert.equal(ui.timers.size, 2, "repeated scrolls replace timers instead of accumulating work");
+  ui.flushTimers();
+  assert.equal(ui.button.dataset.scrolling, undefined);
+  ui.flushFrames();
+  assert.equal(ui.saved.length, 0, "reading never changes the chosen saved position");
+  ui.win.dispatchEvent(new Event("scroll"));
+  ui.unmount();
+  assert.equal(ui.button.dataset.scrolling, undefined);
+  assert.equal(ui.timers.size, 0);
+  ui.win.dispatchEvent(new Event("scroll"));
+  assert.equal(ui.timers.size, 0);
+});
+
+test("a held drag and wider screens do not acquire phone reading suppression", () => {
+  const ui = mount();
+  ui.hold();
+  ui.win.dispatchEvent(new Event("scroll"));
+  assert.equal(ui.button.dataset.scrolling, undefined);
+  ui.handlers.onPointerCancel(ui.event());
+  ui.win.innerWidth = 1024;
+  ui.win.dispatchEvent(new Event("scroll"));
+  assert.equal(ui.button.dataset.scrolling, undefined);
+  ui.unmount();
 });

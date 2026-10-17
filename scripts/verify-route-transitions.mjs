@@ -12,6 +12,7 @@
 //   ROUTE_PROFILES=desktop,phone ROUTE_SCENARIOS=world-saga,world-leddic (optional filters)
 import assert from "node:assert/strict";
 import { chromium } from "playwright";
+import { isFlatCoverFrame } from "./route-transition-frame.mjs";
 
 const BASE_URL = process.env.BASE_URL ?? "http://localhost:8082";
 const FPS = 60;
@@ -100,7 +101,7 @@ async function createAnalyser(browser) {
       const v = i / 255;
       return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
     });
-    window.stats = async (b64, cssW, cssH, cellCss) => {
+    window.stats = async (b64, cssW, cssH, cellCss, zeusWitness) => {
       const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
       const bitmap = await createImageBitmap(new Blob([bytes], { type: "image/jpeg" }));
       const W = Math.round(cssW / 2);
@@ -120,6 +121,22 @@ async function createAnalyser(browser) {
       }
       const n = W * H;
       const mean = sum / n;
+      let zeusDetailFraction = null;
+      if (zeusWitness) {
+        const x0 = Math.floor(W * 0.375);
+        const x1 = Math.ceil(W * 0.625);
+        const y0 = Math.floor(H * 0.34);
+        const y1 = Math.ceil(H * 0.75);
+        let detailPixels = 0;
+        let regionPixels = 0;
+        for (let y = y0; y < y1; y += 1) {
+          for (let x = x0; x < x1; x += 1) {
+            if (L[y * W + x] > 0.05) detailPixels += 1;
+            regionPixels += 1;
+          }
+        }
+        zeusDetailFraction = detailPixels / regionPixels;
+      }
       const cw = Math.round(cellCss / 2);
       const cells = [];
       for (let cy = 0; cy + cw <= H; cy += Math.floor(cw / 2)) {
@@ -154,7 +171,13 @@ async function createAnalyser(browser) {
       // thin rule, a caption) lifts it off the ground; a flat frame does not.
       const sorted = Float32Array.from(L).sort();
       const p99 = sorted[Math.floor(sorted.length * 0.995)];
-      return { mean, std: Math.sqrt(Math.max(0, sum2 / n - mean * mean)), p99, cells };
+      return {
+        mean,
+        std: Math.sqrt(Math.max(0, sum2 / n - mean * mean)),
+        p99,
+        cells,
+        zeusDetailFraction,
+      };
     };
     // WCAG 2.3.1 per cell: opposing changes of 10 % relative luminance (the
     // darker side under 0.8), or of saturated red; a flash is a pair.
@@ -268,8 +291,8 @@ async function audit(browser, analyser, profileName, name) {
     await page.evaluate(() => window.__freeze());
     const buffer = await page.screenshot({ type: "jpeg", quality: 80, scale: "css" });
     const stats = await analyser.evaluate(
-      ([b, w, h, c]) => window.stats(b, w, h, c),
-      [buffer.toString("base64"), width, height, cell],
+      ([b, w, h, c, z]) => window.stats(b, w, h, c, z),
+      [buffer.toString("base64"), width, height, cell, name === "world-zeus"],
     );
     series.push({ t, ...stats });
   };
@@ -337,7 +360,8 @@ async function audit(browser, analyser, profileName, name) {
   const firstGate = states.find((state) => state.gate);
   // Flat frames count while the cover holds; once data-loading goes, the
   // destination's own entrance owns the frame (reported, not asserted).
-  const flat = (frame) => frame.gate && frame.mean < 0.05 && frame.std < 0.012 && frame.p99 < 0.05;
+  // The 250 ms Zeus seal is visible in its center despite missing the global brightness cutoff.
+  const flat = (frame) => frame.gate && isFlatCoverFrame(frame, name);
   const blank = series.filter((frame) => flat(frame) && /is-covering/.test(frame.gate));
   const flatAfter = series.filter((frame) => flat(frame) && !/is-covering/.test(frame.gate));
   // data-loading goes only after the destination is there (the hand-over).
