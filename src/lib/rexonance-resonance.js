@@ -2944,8 +2944,17 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
             : progress < B.rexonance[1]
               ? 3
               : 4;
+    // The chant's units light one by one while their line is up: the k-th of
+    // four at k/5 of the line's beat, so the fourth is lit for the beat's
+    // last fifth before the line is done and dims (owner, 2026-10-17:
+    // 「4つめの『REXONANCE！』が発光しなかったりする」 — at ×4 the fourth lit
+    // only at the beat's end, the frame the line was dimmed). DEUS！ also
+    // lights as each group lands, if that is sooner.
+    const chantLit = (beat) => Math.min(4, Math.floor(span(progress, beat) * 5));
     const deusDone = plan.partDone.slice(0, 4).filter((done) => progress >= done).length;
-    const chips = `${deusDone}:${Math.floor(span(progress, B.rexonance) * 4)}`;
+    const deusLit = Math.min(4, Math.max(deusDone, chantLit(B.deus)));
+    const rexonanceLit = chantLit(B.rexonance);
+    const chips = `${deusLit}:${rexonanceLit}`;
     if (line !== hud.line || chips !== hud.chips) {
       if (line !== hud.line) runway.dataset.rznLine = String(line);
       hud.line = line;
@@ -2953,8 +2962,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       lines.forEach(({ line: element, chips: units }, index) => {
         setFlag(element, "data-on", index === line);
         setFlag(element, "data-done", index < line);
-        const lit =
-          index === 2 ? deusDone : index === 3 ? Math.floor(span(progress, B.rexonance) * 4) : 0;
+        const lit = index === 2 ? deusLit : index === 3 ? rexonanceLit : 0;
         units.forEach((unit, unitIndex) =>
           setFlag(
             unit,

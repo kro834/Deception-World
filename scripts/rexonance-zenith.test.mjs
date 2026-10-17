@@ -513,6 +513,8 @@ function environment({
   forced = false,
   coarse = false,
   idleHeld = false,
+  // The page's chant lines (SA-GA！DEUS！ and REXONANCE！, ×4 each) as four chips.
+  chants = false,
 } = {}) {
   const listeners = new Map();
   const target = (name) => ({
@@ -609,7 +611,11 @@ function environment({
   };
   const canvas = makeCanvas();
   const frameBox = element({ offsetHeight: 837 });
-  const lines = [0, 1, 2, 3, 4].map(() => element({ querySelectorAll: () => [element()] }));
+  const lines = [0, 1, 2, 3, 4].map((index) => {
+    const count = chants && (index === 2 || index === 3) ? 4 : 1;
+    const chips = Array.from({ length: count }, () => element());
+    return element({ querySelectorAll: () => chips, chips });
+  });
   const parts = ASSEMBLY_PARTS.map(() => element());
   // The read-outs hold one text node, as React renders them; the engine
   // must rewrite its data, never replace it (a tree change per frame
@@ -907,6 +913,48 @@ test("mask holes belong to the ribbon, never the smaller arm box", () => {
   assert.equal(plan.tiles.find((t) => t.cx === 15 && t.cy === 15).pieceId, "ribbon");
   assert.equal(plan.tiles.filter((t) => t.pieceId === "arm").length, 3);
   assert.ok(plan.tiles.filter((t) => t.pieceId === "arm").every((t) => t.cx === 5));
+});
+
+// Owner 2026-10-17: 「変身音発光演出で4つめの『REXONANCE！』が発光しなかったりする」 — all four chips of each chant line lit while the line is still active.
+test("every chant unit lights while its line is up: all four chips of SA-GA！DEUS！ and of REXONANCE！ are on before the line is done", async () => {
+  const t = environment({ chants: true });
+  const dispose = mountRexonanceAssembly(t.runway, engineConfig, t.env);
+  t.observers[0].callback([
+    { isIntersecting: true, boundingClientRect: { top: 400, bottom: 3100 } },
+  ]);
+  await until(() => t.runway.dataset.rznState === "live" && t.frames.size > 0, "scene live");
+  for (const [index, beat] of [
+    [2, ASSEMBLY_BEATS.deus],
+    [3, ASSEMBLY_BEATS.rexonance],
+  ]) {
+    const line = t.lines[index];
+    let previous = 0;
+    let allLit = null;
+    for (let progress = beat[0] + 0.001; progress < beat[1]; progress += 0.002) {
+      t.scrollTo(progress);
+      const label = `line ${index} @${progress.toFixed(3)}`;
+      assert.ok(line.hasAttribute("data-on") && !line.hasAttribute("data-done"), label);
+      const on = line.chips.map((chip) => chip.hasAttribute("data-on"));
+      const count = on.filter(Boolean).length;
+      // In order, and never going out again within the line.
+      assert.deepEqual(
+        on,
+        on.map((_, k) => k < count),
+        label,
+      );
+      assert.ok(count >= previous, `${label}: ${count} < ${previous}`);
+      previous = count;
+      if (count === 4 && allLit === null) allLit = progress;
+    }
+    assert.ok(allLit !== null, `line ${index}: the fourth chip never lit while the line was up`);
+    // The fourth stays lit for a visible stretch of the line, not its last frame.
+    assert.ok(beat[1] - allLit >= (beat[1] - beat[0]) * 0.15, `line ${index}: ${allLit}`);
+    // Once the line is done its chips stay on (dimmed with the line).
+    t.scrollTo(beat[1] + 0.001);
+    assert.ok(line.hasAttribute("data-done"));
+    assert.ok(line.chips.every((chip) => chip.hasAttribute("data-on")));
+  }
+  dispose();
 });
 
 test("3.5 screens ahead preparation is idle-only, does not activate layout, and cancels on exit", async () => {
