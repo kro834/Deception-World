@@ -515,6 +515,8 @@ function environment({
   idleHeld = false,
   // The page's chant lines (SA-GA！DEUS！ and REXONANCE！, ×4 each) as four chips.
   chants = false,
+  // The page has finished loading (the early warm-up waits for it).
+  loaded = false,
 } = {}) {
   const listeners = new Map();
   const target = (name) => ({
@@ -606,6 +608,7 @@ function environment({
   const document = {
     documentElement: html,
     hidden: false,
+    readyState: loaded ? "complete" : "loading",
     createElement: () => makeCanvas(),
     ...target("document"),
   };
@@ -954,6 +957,90 @@ test("every chant unit lights while its line is up: all four chips of SA-GA！DE
     assert.ok(line.hasAttribute("data-done"));
     assert.ok(line.chips.every((chip) => chip.hasAttribute("data-on")));
   }
+  dispose();
+});
+
+// Owner 2026-10-17: 「レクソナンスのスクロールで変身するやつが読み込まれずに過ぎてしまったりする」 — fetched once the page is idle, prepared once the reader is past the hero; the picture never changes from it.
+test("the early warm-up: the network half once the page is idle after load, the preparation once the reader is past the hero, the look unchanged", async () => {
+  let kitRequests = 0;
+  const config = {
+    ...engineConfig,
+    nanites: () => {
+      kitRequests += 1;
+      return Promise.resolve(null);
+    },
+  };
+  const t = environment({ loaded: true });
+  const dispose = mountRexonanceAssembly(t.runway, config, t.env);
+  await until(() => t.decodedSources.length >= 2, "the sheets are requested once idle");
+  assert.equal(kitRequests, 1, "the kit is imported with them");
+  assert.deepEqual(t.decodedSources.slice(0, 2), ["/f.webp", "/u.webp"]);
+  await new Promise((resolve) => setTimeout(resolve, 20));
+  assert.equal(t.preparationPhases.length, 0, "nothing is prepared before the reader moves");
+  assert.equal(t.runway.dataset.rznState, undefined, "and nothing visible changes");
+  assert.equal(t.percent.textContent, "100");
+  // Still in the hero: no preparation; past it: the preparation runs.
+  t.env.scrollY = 200;
+  t.listeners.get("document:scroll")();
+  await new Promise((resolve) => setTimeout(resolve, 10));
+  assert.equal(t.preparationPhases.length, 0);
+  t.env.scrollY = 600;
+  t.listeners.get("document:scroll")();
+  assert.equal(t.listeners.has("document:scroll"), false, "one notice is enough");
+  await until(t.prepared, "prepared far ahead of the scene");
+  assert.equal(t.runway.dataset.rznState, undefined, "preparing far away changes nothing");
+  assert.equal(t.percent.textContent, "100");
+  assert.equal(t.canvas.width, 0);
+  // The sheets fetched ahead are the ones decoded: no second request.
+  assert.equal(t.decodedSources.filter((src) => src === "/f.webp").length, 1);
+  // Near: live at once, from what is ready.
+  t.observers[0].callback([
+    { isIntersecting: true, boundingClientRect: { top: 400, bottom: 3100 } },
+  ]);
+  assert.equal(t.runway.dataset.rznState, "live");
+  dispose();
+  assert.equal([...t.listeners.keys()].length, 0, [...t.listeners.keys()].join());
+
+  // Before the page's load event nothing is fetched; the still tiers never.
+  const early = environment();
+  const disposeEarly = mountRexonanceAssembly(early.runway, engineConfig, early.env);
+  await new Promise((resolve) => setTimeout(resolve, 10));
+  assert.equal(early.decodedSources.length, 0);
+  assert.ok(early.listeners.has("window:load"));
+  disposeEarly();
+  assert.equal([...early.listeners.keys()].length, 0);
+  for (const options of [{ reduced: true }, { economy: true }, { forced: true }]) {
+    const q = environment({ ...options, loaded: true });
+    const disposeQ = mountRexonanceAssembly(q.runway, config, q.env);
+    q.env.scrollY = 2000;
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    q.listeners.get("document:scroll")?.();
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    assert.equal(q.decodedSources.length, 0, JSON.stringify(options));
+    assert.equal(q.preparationPhases.length, 0, JSON.stringify(options));
+    disposeQ();
+  }
+  assert.equal(kitRequests, 1, "the still tiers never import the kit");
+});
+
+// R-1 19/60: a reader arriving inside the runway gets that moment whole on the first live frame (no catch-up from the start).
+test("a mid-runway arrival resumes at its progress: the first live frame needs no catch-up", async () => {
+  const t = environment();
+  const dispose = mountRexonanceAssembly(t.runway, engineConfig, t.env);
+  t.observers[1].callback([{ isIntersecting: true }]);
+  await until(t.prepared, "warm preparation completed");
+  // A jump to 40 % of the runway (a restored scroll, a link): near at once.
+  t.scrollTo(0.4);
+  t.observers[0].callback([
+    { isIntersecting: true, boundingClientRect: { top: -682, bottom: 2018 } },
+  ]);
+  await until(
+    () => t.runway.dataset.rznState === "live" && t.frames.size > 0,
+    "scene live after its catch-up",
+  );
+  t.flush();
+  assert.equal(t.percent.textContent, "043");
+  assert.equal(t.frames.size, 0, "the first frame drew the moment whole (nothing left behind)");
   dispose();
 });
 
