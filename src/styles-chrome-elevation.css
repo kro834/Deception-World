@@ -1289,6 +1289,19 @@ html body .zeus-button[data-dragging="true"][data-move-tag="below"] .zeus-button
   }
 }
 
+/* Hide only during phone reading scrolls; keyboard focus and held navigation stay usable. */
+@media (max-width: 760px), (max-height: 500px) and (pointer: coarse) {
+  html
+    body
+    .zeus-button[data-scrolling="true"]:not([data-dragging="true"]):not(
+      [data-navigating="true"]
+    ):not(:focus-visible) {
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
 /* ================================================================
    The skip link: a chamfered ice plate on a gold seam. The chamfer
    clips anything outside the plate, so its focus ring is drawn inside.

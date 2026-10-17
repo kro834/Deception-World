@@ -50,6 +50,7 @@ const RETURN_IMAGE_MIN_MS = 360;
 // Relocations glide; the timer cleans up after the 220ms transition, or at
 // once where reduced motion or economy leave no transition.
 const GLIDE_MS = 260;
+const SCROLL_REVEAL_MS = 180;
 // A drop this close to a side edge docks on it.
 const EDGE_SNAP_PX = 48;
 const ZEUS_AVOID_SELECTOR = [
@@ -991,6 +992,15 @@ function ZeusButton({
 
   useEffect(() => {
     const settleMs = isAndroidRenderer(navigator) ? 140 : 72;
+    const phone = window.matchMedia?.(
+      "(max-width: 760px), (max-height: 500px) and (pointer: coarse)",
+    );
+    let scrollRevealTimer: number | null = null;
+    const revealAfterScroll = () => {
+      if (scrollRevealTimer != null) window.clearTimeout(scrollRevealTimer);
+      scrollRevealTimer = null;
+      if (buttonRef.current) delete buttonRef.current.dataset.scrolling;
+    };
     const schedulePlacement = () => {
       if (activePointer.current != null || placementFrame.current != null) return;
       placementFrame.current = window.requestAnimationFrame(() => {
@@ -1006,6 +1016,12 @@ function ZeusButton({
         return;
       }
       droppedHere.current = false;
+      if (phone?.matches ?? window.innerWidth <= 760) {
+        const button = buttonRef.current;
+        if (button) button.dataset.scrolling = "true";
+        if (scrollRevealTimer != null) window.clearTimeout(scrollRevealTimer);
+        scrollRevealTimer = window.setTimeout(revealAfterScroll, SCROLL_REVEAL_MS);
+      }
       if (placementTimer.current != null) window.clearTimeout(placementTimer.current);
       // Collision checks read the geometry of every visible critical control.
       // Run that work once scrolling settles instead of on every scroll frame.
@@ -1083,6 +1099,7 @@ function ZeusButton({
       }
       // Rotation, split view or a keyboard changes the cached drag bounds.
       // Cancel the gesture before the next sample can use obsolete geometry.
+      revealAfterScroll();
       cancelPointer.current();
       stepAway.current = null;
       if (placementTimer.current != null) {
@@ -1096,6 +1113,7 @@ function ZeusButton({
     // on return, without persisting this temporary safety placement.
     const onResume = () => {
       if (document.hidden) return;
+      revealAfterScroll();
       cancelPointer.current();
       cancelPlacement();
       stepAway.current = null;
@@ -1103,10 +1121,15 @@ function ZeusButton({
       schedulePlacement();
     };
     const onVisibility = () => {
-      if (document.hidden) cancelPlacement();
-      else onResume();
+      if (document.hidden) {
+        revealAfterScroll();
+        cancelPlacement();
+      } else onResume();
     };
-    const onSuspend = () => cancelPlacement();
+    const onSuspend = () => {
+      revealAfterScroll();
+      cancelPlacement();
+    };
     // The optional iPad launcher moves immediately when its root flags change.
     // Waiting for scroll-settle and then gliding would leave this higher-z
     // button over the new menu target. Reconcile only that footprint change,
@@ -1147,6 +1170,7 @@ function ZeusButton({
     document.addEventListener("scroll", onInnerScroll, { capture: true, passive: true });
     return () => {
       compactMenuObserver.disconnect();
+      revealAfterScroll();
       document.removeEventListener("toggle", onLayoutChange, { capture: true });
       document.removeEventListener("scroll", onInnerScroll, { capture: true });
       window.removeEventListener("resize", onResize);

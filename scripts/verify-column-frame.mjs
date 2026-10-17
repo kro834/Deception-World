@@ -49,7 +49,7 @@ try {
       await page.waitForTimeout(1200);
       const rail = page.locator(".world-column-dialog-tabs");
       const tabs = rail.locator('button[role="tab"]');
-      for (let i = 0; i < 4; i++) {
+      for (let i = 0; i < await tabs.count(); i++) {
         await tabs.nth(i).tap();
         await page.waitForTimeout(450);
         const state = await rail.evaluate((e) => {
@@ -81,12 +81,13 @@ try {
         assert.ok(state.lensError < 2, JSON.stringify(state));
         assert.equal(state.inside, true);
         assert.equal(state.textFits, true, `dialog rail labels overflow at ${width}`);
-        // Frosted capsule rails at every width since cba387a
-        // (styles-frosted-controls.css, !important).
-        assert.equal(state.radius, "999px");
+        // The three-column phone rail intentionally switches to a 36px shell.
+        assert.equal(state.radius, width <= 899 ? "36px" : "999px");
       }
+      // Six tabs now form two rows on phones; exercise a horizontal drag within one row.
+      await tabs.nth(3).tap();
       const start = await tabs.nth(3).boundingBox(),
-        end = await tabs.nth(2).boundingBox();
+        end = await tabs.nth(4).boundingBox();
       const cdp = await page.context().newCDPSession(page);
       const x = start.x + start.width / 2,
         y = start.y + start.height / 2;
@@ -101,11 +102,11 @@ try {
       }
       await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
       await page.waitForTimeout(500);
-      assert.equal(await tabs.nth(2).getAttribute("aria-selected"), "true");
+      assert.equal(await tabs.nth(4).getAttribute("aria-selected"), "true");
       await cdp.detach();
       if (width === 375) await page.screenshot({ path: "/tmp/column-frame-after.png" });
       console.log(
-        JSON.stringify({ width, tapAllFour: true, lensAligned: true, textFits: true, drag: true }),
+        JSON.stringify({ width, tapAll: await tabs.count(), lensAligned: true, textFits: true, drag: true }),
       );
     } finally {
       await page.close();
