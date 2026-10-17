@@ -98,7 +98,8 @@ test("the original light split is byte-for-byte HEAD's (the nanite jobs only fol
   const original = source.slice(0, source.indexOf("\n// --- The nanite kit"));
   assert.equal(
     createHash("sha256").update(original).digest("hex"),
-    "c3dd881e3a967f60b8829849ddc505b22fe198bbb945666acf175a6db8c669b1",
+    // Round 4: the split's job phased (strips, one upload a step); its bytes are pinned below.
+    "cd5fbc2800eb3ed00c4b3a935adb8efd4cdb0e3cad1e26763fa6fd39f5562f2f",
   );
   // And it still splits a seeded picture exactly as before (frozen digest).
   const ui = load();
