@@ -891,40 +891,42 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
 
 .cine-aperture::before {
   inset: 1%;
-  border: 1px solid rgb(163 222 255 / 0.16);
+  border: 1px solid rgb(122 232 255 / 0.24);
   background: repeating-conic-gradient(
     from 9deg,
-    transparent 0deg 20deg,
-    rgb(159 212 255 / 0.2) 20.3deg 20.65deg,
-    transparent 21deg 30deg
+    transparent 0deg 14deg,
+    rgb(122 232 255 / 0.32) 14.3deg 14.65deg,
+    transparent 15deg 20deg
   );
-  -webkit-mask-image: radial-gradient(circle, transparent 0 73%, #000 73.4% 74%, transparent 74.4%);
-  mask-image: radial-gradient(circle, transparent 0 73%, #000 73.4% 74%, transparent 74.4%);
+  -webkit-mask-image: radial-gradient(circle, transparent 0 72.8%, #000 73.2% 74.2%, transparent 74.6%);
+  mask-image: radial-gradient(circle, transparent 0 72.8%, #000 73.2% 74.2%, transparent 74.6%);
 }
 
 .cine-aperture::after {
   inset: 13%;
-  border: 1px solid rgb(232 204 136 / 0.18);
+  border: 1px solid rgb(240 207 134 / 0.26);
   box-shadow:
-    inset 0 0 32px rgb(122 194 236 / 0.05),
-    0 0 38px rgb(219 181 100 / 0.04);
+    inset 0 0 38px rgb(122 232 255 / 0.08),
+    0 0 44px rgb(240 207 134 / 0.06);
 }
 
 .cine-aperture > i {
   inset: 21%;
-  border: 1px solid rgb(179 226 255 / 0.2);
+  border: 1px solid rgb(164 139 255 / 0.26);
 }
 
 .cine-aperture > i:nth-child(2) {
   inset: 29%;
-  border-color: rgb(240 215 138 / 0.22);
+  border-color: rgb(240 207 134 / 0.32);
   border-style: dashed;
 }
 
 .cine-aperture > i:nth-child(3) {
   inset: 37%;
-  border-color: rgb(255 255 255 / 0.2);
-  box-shadow: 0 0 18px rgb(159 212 255 / 0.12);
+  border-color: rgb(198 245 255 / 0.3);
+  box-shadow:
+    0 0 22px rgb(122 232 255 / 0.18),
+    inset 0 0 16px rgb(164 139 255 / 0.12);
 }
 
 .is-playing .cine-aperture {
@@ -932,7 +934,7 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
 }
 
 .is-complete .cine-aperture {
-  opacity: 0.36;
+  opacity: 0.5;
   transform: translate(-50%, -50%) scale(1) rotate(0);
 }
 
@@ -942,11 +944,13 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
   left: 50%;
   width: min(108vw, 1240px);
   height: min(34vw, 390px);
-  border: 1px solid rgb(159 212 255 / 0.12);
+  border: 1px solid rgb(122 232 255 / 0.2);
   border-radius: 50%;
   opacity: 0;
   transform: translate(-50%, -50%) rotate(-8deg) scale(0.72);
-  box-shadow: 0 0 28px rgb(77 139 194 / 0.05);
+  box-shadow:
+    0 0 32px rgb(122 232 255 / 0.08),
+    inset 0 0 24px rgb(122 232 255 / 0.04);
   will-change: opacity, transform;
 }
 
@@ -960,8 +964,8 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
   border-radius: 50%;
   background: #dff4ff;
   box-shadow:
-    0 0 14px rgb(159 212 255 / 0.85),
-    0 0 28px rgb(159 212 255 / 0.38);
+    0 0 14px rgb(122 232 255 / 0.9),
+    0 0 30px rgb(122 232 255 / 0.45);
 }
 
 .cine-orbit::before {
@@ -974,7 +978,10 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
 .cine-orbit-b {
   width: min(94vw, 1080px);
   height: min(27vw, 310px);
-  border-color: rgb(240 215 138 / 0.13);
+  border-color: rgb(240 207 134 / 0.22);
+  box-shadow:
+    0 0 32px rgb(240 207 134 / 0.07),
+    inset 0 0 22px rgb(164 139 255 / 0.04);
   transform: translate(-50%, -50%) rotate(64deg) scale(0.68);
 }
 
@@ -982,8 +989,8 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
 .cine-orbit-b::after {
   background: #fff2c6;
   box-shadow:
-    0 0 14px rgb(240 215 138 / 0.75),
-    0 0 28px rgb(212 176 86 / 0.3);
+    0 0 14px rgb(240 207 134 / 0.85),
+    0 0 30px rgb(240 207 134 / 0.4);
 }
 
 .is-playing .cine-orbit-a {
@@ -995,12 +1002,12 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
 }
 
 .is-complete .cine-orbit-a {
-  opacity: 0.3;
+  opacity: 0.42;
   transform: translate(-50%, -50%) rotate(5deg) scale(1);
 }
 
 .is-complete .cine-orbit-b {
-  opacity: 0.24;
+  opacity: 0.34;
   transform: translate(-50%, -50%) rotate(74deg) scale(1);
 }
 
@@ -1011,21 +1018,43 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
 
 .cine-prism-field > i {
   position: absolute;
-  width: 1px;
-  height: clamp(38px, 8vw, 112px);
+  width: 1.5px;
+  height: clamp(44px, 9vw, 128px);
   border-radius: 50%;
   background: linear-gradient(
     180deg,
     transparent,
-    rgb(222 243 255 / 0.68),
-    rgb(112 191 242 / 0.16),
+    rgb(198 245 255 / 0.85),
+    rgb(122 232 255 / 0.32),
     transparent
   );
-  box-shadow: 0 0 8px rgb(159 212 255 / 0.2);
+  box-shadow: 0 0 12px rgb(122 232 255 / 0.32);
   opacity: 0;
   transform: rotate(24deg) scaleY(0.3);
   transform-origin: center;
   will-change: opacity, transform;
+}
+
+.cine-prism-field > i:nth-child(2n) {
+  background: linear-gradient(
+    180deg,
+    transparent,
+    rgb(255 240 181 / 0.82),
+    rgb(240 207 134 / 0.3),
+    transparent
+  );
+  box-shadow: 0 0 12px rgb(240 207 134 / 0.28);
+}
+
+.cine-prism-field > i:nth-child(3n) {
+  background: linear-gradient(
+    180deg,
+    transparent,
+    rgb(214 196 255 / 0.82),
+    rgb(255 92 200 / 0.28),
+    transparent
+  );
+  box-shadow: 0 0 12px rgb(164 139 255 / 0.3);
 }
 
 .cine-prism-field > i:nth-child(1) {
@@ -1113,8 +1142,8 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: min(88vw, 1060px);
-  height: min(44vw, 530px);
+  width: min(92vw, 1120px);
+  height: min(48vw, 560px);
   pointer-events: none;
   opacity: 0;
   transform: translate(-50%, -50%) scale(0.22);
@@ -1128,25 +1157,32 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
   border-radius: 50%;
   background: radial-gradient(
     ellipse,
-    rgb(255 255 255 / 0.66) 0,
-    rgb(178 226 255 / 0.28) 12%,
-    rgb(212 176 86 / 0.12) 30%,
-    transparent 66%
+    rgb(255 255 255 / 0.74) 0,
+    rgb(122 232 255 / 0.36) 14%,
+    rgb(164 139 255 / 0.18) 28%,
+    rgb(240 207 134 / 0.14) 42%,
+    transparent 68%
   );
   filter: blur(2px);
 }
 
 .cine-impact-bloom > i {
   position: absolute;
-  inset: 12%;
-  border: 1px solid rgb(197 232 255 / 0.36);
+  inset: 10%;
+  border: 1px solid rgb(122 232 255 / 0.48);
   border-radius: 50%;
+  box-shadow:
+    0 0 24px rgb(122 232 255 / 0.28),
+    inset 0 0 16px rgb(122 232 255 / 0.16);
   opacity: 0;
 }
 
 .cine-impact-bloom > i:nth-child(2) {
-  inset: 24%;
-  border-color: rgb(240 215 138 / 0.32);
+  inset: 22%;
+  border-color: rgb(240 207 134 / 0.44);
+  box-shadow:
+    0 0 22px rgb(240 207 134 / 0.24),
+    inset 0 0 14px rgb(255 92 200 / 0.14);
 }
 
 .is-playing .cine-impact-bloom {
@@ -1635,11 +1671,12 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
 
 .cine-burn-light {
   position: absolute;
-  inset: 12% 0 0;
+  inset: 10% 0 0;
   opacity: 0;
   background:
-    radial-gradient(ellipse 46% 42% at 40% 72%, rgb(255 104 44 / 0.34), transparent 72%),
-    radial-gradient(ellipse 62% 52% at 52% 64%, rgb(190 40 14 / 0.2), transparent 76%);
+    radial-gradient(ellipse 48% 44% at 40% 72%, rgb(255 118 48 / 0.42), transparent 72%),
+    radial-gradient(ellipse 64% 54% at 54% 62%, rgb(206 46 18 / 0.26), transparent 76%),
+    radial-gradient(ellipse 52% 40% at 50% 42%, rgb(164 139 255 / 0.14), transparent 70%);
 }
 
 .cine-title-lockup[data-burn] .cine-burn-light {
@@ -1833,21 +1870,27 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
 @keyframes cine-burn-light {
   0% {
     opacity: 0;
+    transform: scale(0.92);
   }
   18% {
-    opacity: 0.55;
+    opacity: 0.62;
+    transform: scale(0.98);
   }
   45% {
-    opacity: 0.85;
+    opacity: 0.92;
+    transform: scale(1.06);
   }
   66% {
-    opacity: 0.7;
+    opacity: 0.76;
+    transform: scale(1.04);
   }
   82% {
-    opacity: 0.22;
+    opacity: 0.28;
+    transform: scale(1.01);
   }
   100% {
     opacity: 0;
+    transform: scale(1);
   }
 }
 
@@ -1940,11 +1983,13 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
 .cine-logo-shine {
   background: linear-gradient(
     108deg,
-    transparent 32%,
-    rgb(159 212 255 / 0) 42%,
-    rgb(255 255 255 / 0.55) 50%,
-    rgb(240 215 138 / 0.28) 56%,
-    transparent 68%
+    transparent 28%,
+    rgb(122 232 255 / 0) 38%,
+    rgb(122 232 255 / 0.42) 45%,
+    rgb(255 255 255 / 0.72) 50%,
+    rgb(255 92 200 / 0.38) 54%,
+    rgb(240 207 134 / 0.42) 60%,
+    transparent 70%
   );
   background-size: 220% 100%;
   background-position: 120% 0;
@@ -2748,17 +2793,18 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
 @keyframes aperture-assembly {
   0% {
     opacity: 0;
-    transform: translate(-50%, -50%) scale(0.48) rotate(-21deg);
+    transform: translate(-50%, -50%) scale(0.42) rotate(-28deg);
   }
-  30% {
-    opacity: 0.66;
+  28% {
+    opacity: 0.84;
+    transform: translate(-50%, -50%) scale(0.96) rotate(-4deg);
   }
-  62% {
-    opacity: 0.4;
-    transform: translate(-50%, -50%) scale(1.035) rotate(2deg);
+  58% {
+    opacity: 0.62;
+    transform: translate(-50%, -50%) scale(1.045) rotate(3deg);
   }
   100% {
-    opacity: 0.36;
+    opacity: 0.48;
     transform: translate(-50%, -50%) scale(1) rotate(0);
   }
 }
@@ -2766,28 +2812,30 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
 @keyframes orbit-a-lock {
   0% {
     opacity: 0;
-    transform: translate(-50%, -50%) rotate(-14deg) scale(0.68);
+    transform: translate(-50%, -50%) rotate(-24deg) scale(0.64);
   }
-  38% {
-    opacity: 0.5;
+  36% {
+    opacity: 0.72;
+    transform: translate(-50%, -50%) rotate(-3deg) scale(1.03);
   }
   100% {
-    opacity: 0.3;
-    transform: translate(-50%, -50%) rotate(5deg) scale(1);
+    opacity: 0.44;
+    transform: translate(-50%, -50%) rotate(6deg) scale(1);
   }
 }
 
 @keyframes orbit-b-lock {
   0% {
     opacity: 0;
-    transform: translate(-50%, -50%) rotate(54deg) scale(0.62);
+    transform: translate(-50%, -50%) rotate(42deg) scale(0.58);
   }
-  44% {
-    opacity: 0.4;
+  42% {
+    opacity: 0.64;
+    transform: translate(-50%, -50%) rotate(68deg) scale(1.035);
   }
   100% {
-    opacity: 0.24;
-    transform: translate(-50%, -50%) rotate(74deg) scale(1);
+    opacity: 0.36;
+    transform: translate(-50%, -50%) rotate(76deg) scale(1);
   }
 }
 
@@ -2796,12 +2844,16 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
     opacity: 0;
     filter: blur(2px);
   }
-  22% {
-    opacity: 0.8;
+  18% {
+    opacity: 0.96;
     filter: blur(0);
   }
-  46% {
-    opacity: 0.24;
+  44% {
+    opacity: 0.38;
+  }
+  72% {
+    opacity: 0.64;
+    filter: blur(0);
   }
   100% {
     opacity: 0;
@@ -2812,41 +2864,48 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
 @keyframes impact-bloom {
   0% {
     opacity: 0;
-    transform: translate(-50%, -50%) scale(0.16);
+    transform: translate(-50%, -50%) scale(0.14);
   }
-  22% {
-    opacity: 0.92;
+  18% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(0.88);
   }
-  54% {
-    opacity: 0.24;
+  52% {
+    opacity: 0.36;
   }
   100% {
     opacity: 0;
-    transform: translate(-50%, -50%) scale(1.42);
+    transform: translate(-50%, -50%) scale(1.56);
   }
 }
 
 @keyframes impact-ring {
   0% {
     opacity: 0;
-    transform: scale(0.42);
+    transform: scale(0.36);
   }
-  28% {
-    opacity: 0.72;
+  24% {
+    opacity: 0.88;
+  }
+  64% {
+    opacity: 0.32;
   }
   100% {
     opacity: 0;
-    transform: scale(1.62);
+    transform: scale(1.78);
   }
 }
 
 @keyframes logo-echo-ice {
   0% {
     opacity: 0;
-    transform: translate3d(-18px, 0, 0) scale(0.985);
+    transform: translate3d(-24px, -2px, 0) scale(0.98);
   }
-  32% {
-    opacity: 0.34;
+  28% {
+    opacity: 0.48;
+  }
+  64% {
+    opacity: 0.18;
   }
   100% {
     opacity: 0;
@@ -2857,10 +2916,13 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
 @keyframes logo-echo-gold {
   0% {
     opacity: 0;
-    transform: translate3d(18px, 0, 0) scale(0.985);
+    transform: translate3d(24px, 2px, 0) scale(0.98);
   }
-  32% {
-    opacity: 0.3;
+  28% {
+    opacity: 0.44;
+  }
+  64% {
+    opacity: 0.16;
   }
   100% {
     opacity: 0;
@@ -2877,13 +2939,14 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
 @keyframes hud-reticle-lock {
   0% {
     opacity: 0;
-    transform: scale(1.28) rotate(-5deg);
+    transform: scale(1.32) rotate(-8deg);
   }
-  54% {
-    opacity: 0.8;
+  48% {
+    opacity: 0.92;
+    transform: scale(0.985) rotate(1deg);
   }
   100% {
-    opacity: 0.52;
+    opacity: 0.64;
     transform: scale(1) rotate(0);
   }
 }
@@ -3187,20 +3250,20 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
     transform: translate(-50%, -50%) scaleX(0.18);
   }
   20% {
-    opacity: 0.7;
-    transform: translate(-50%, -50%) scaleX(0.82);
+    opacity: 0.86;
+    transform: translate(-50%, -50%) scaleX(0.92);
   }
   26% {
-    opacity: 0.1;
-    transform: translate(-50%, -50%) scaleX(1);
+    opacity: 0.16;
+    transform: translate(-50%, -50%) scaleX(1.06);
   }
   66% {
-    opacity: 0.38;
-    transform: translate(-50%, -50%) scaleX(0.72);
+    opacity: 0.52;
+    transform: translate(-50%, -50%) scaleX(0.84);
   }
   73% {
     opacity: 0;
-    transform: translate(-50%, -50%) scaleX(1);
+    transform: translate(-50%, -50%) scaleX(1.04);
   }
 }
 
@@ -3272,11 +3335,11 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
   0% {
     opacity: 0;
   }
-  28% {
-    opacity: 0.4;
+  24% {
+    opacity: 0.58;
   }
-  72% {
-    opacity: 0.12;
+  68% {
+    opacity: 0.22;
   }
   100% {
     opacity: 0;
@@ -3286,24 +3349,31 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
 @keyframes shine-sweep {
   0% {
     opacity: 0;
-    background-position: 120% 0;
+    background-position: 125% 0;
   }
-  18% {
+  22% {
     opacity: 1;
+  }
+  78% {
+    opacity: 0.84;
   }
   100% {
     opacity: 0;
-    background-position: -40% 0;
+    background-position: -45% 0;
   }
 }
 
 @keyframes hud-in {
   0% {
     opacity: 0;
-    transform: translate(-50%, -50%) scale(0.9);
+    transform: translate(-50%, -50%) scale(0.88);
+  }
+  56% {
+    opacity: 0.44;
+    transform: translate(-50%, -50%) scale(1.015);
   }
   100% {
-    opacity: 0.28;
+    opacity: 0.34;
     transform: translate(-50%, -50%) scale(1);
   }
 }
@@ -3311,11 +3381,11 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
 @keyframes line-grow {
   from {
     width: 0;
-    opacity: 0.9;
+    opacity: 0.96;
   }
   to {
-    width: min(460px, 62vw);
-    opacity: 0.9;
+    width: min(540px, 68vw);
+    opacity: 1;
   }
 }
 

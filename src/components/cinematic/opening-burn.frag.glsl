@@ -84,26 +84,33 @@ void main() {
   // Just ahead of the front the heated air refracts the ice light: its red
   // and blue split a little to either side, converging again as it chars.
   float fringeA = fall(0.09, 0.0, d) * uHeat * (1.0 - uCool) * env;
-  vec2 fx = vec2(0.0055, 0.0) * fringeA;
-  first.r = mix(first.r, sampleTop(uFirst, luv + haze + fx).r, fringeA * 0.8);
-  first.b = mix(first.b, sampleTop(uFirst, luv + haze - fx).b, fringeA * 0.8);
+  vec2 fx = vec2(0.0068, 0.0) * fringeA;
+  first.r = mix(first.r, sampleTop(uFirst, luv + haze + fx).r, fringeA * 0.86);
+  first.b = mix(first.b, sampleTop(uFirst, luv + haze - fx).b, fringeA * 0.86);
   float fl = lum(first);
-  float scorch = fall(0.13, 0.0, d) * uHeat;
-  first.rgb = mix(first.rgb, vec3(1.0, 0.36, 0.08) * fl * 1.3, scorch * 0.85);
-  first.rgb *= 1.0 - 0.55 * fall(0.035, 0.0, d) * uHeat;
+  float scorch = fall(0.14, 0.0, d) * uHeat;
+  first.rgb = mix(first.rgb, vec3(1.0, 0.38, 0.09) * fl * 1.38, scorch * 0.88);
+  first.rgb *= 1.0 - 0.56 * fall(0.036, 0.0, d) * uHeat;
 
   // ---- Behind the front: ash with ember veins, then the prism logo, hot, cooling.
   float age = clamp(-d / 0.3, 0.0, 1.0);
   float reveal = max(smoothstep(0.03, 0.55, age), uCool);
   float hot = (1.0 - smoothstep(0.3, 1.0, age)) * (1.0 - uCool);
+  float prismSheen = smoothstep(0.14, 0.46, age) * fall(0.92, 0.44, age) * (1.0 - uCool);
   vec4 fin = sampleTop(uFinal, luv + haze * 0.6);
   float fn = lum(fin);
-  fin.rgb = mix(fin.rgb, vec3(1.0, 0.34, 0.07) * fn * 1.25, hot * 0.9);
+  vec3 prismTint = mix(
+    mix(vec3(0.46, 0.91, 1.0), vec3(0.96, 0.84, 0.52), smoothstep(0.15, 0.55, luv.x)),
+    vec3(0.96, 0.5, 0.88),
+    smoothstep(0.48, 0.92, luv.x)
+  );
+  fin.rgb = mix(fin.rgb, vec3(1.0, 0.36, 0.08) * fn * 1.32, hot * 0.92);
+  fin.rgb += prismTint * fn * prismSheen * 0.46;
   fin *= reveal;
   float ash = lum(sampleTop(uFirst, luv));
-  float veins = smoothstep(0.56, 0.68, fbm(lp * 7.0 + 3.0));
-  float charA = clamp(ash * 2.2, 0.0, 1.0) * (1.0 - reveal) * 0.85;
-  vec3 charC = (vec3(0.03, 0.017, 0.013) + vec3(0.9, 0.22, 0.04) * veins * (1.0 - age) * 0.7) * charA;
+  float veins = smoothstep(0.52, 0.68, fbm(lp * 7.2 + 3.0));
+  float charA = clamp(ash * 2.25, 0.0, 1.0) * (1.0 - reveal) * 0.88;
+  vec3 charC = (vec3(0.03, 0.017, 0.013) + vec3(0.96, 0.28, 0.05) * veins * (1.0 - age) * 0.84) * charA;
   vec4 behind = fin + vec4(charC, charA) * (1.0 - fin.a);
 
   float burnt = fall(0.0, -0.02, d);
@@ -114,35 +121,35 @@ void main() {
   // Each tongue reaches its own height: a contrast-stretched turbulence field
   // that rises with time, so tongues stretch, break off and thin into dark red
   // tips, with dark gaps between them.
-  float flameH = 0.32;
-  vec2 fq = vec2(lp.x * 3.6, luv.y * 1.9 - t * 1.5);
+  float flameH = 0.35;
+  vec2 fq = vec2(lp.x * 3.6, luv.y * 1.9 - t * 1.56);
   // Lateral sway grows with height, so tongues bend and lick instead of standing.
-  fq.x += (vnoise(vec2(lp.x * 1.6, luv.y * 1.3 - t * 0.6)) - 0.5) * (1.1 + 1.2 * clamp(d * 3.0, 0.0, 1.0));
-  float turb = fbm(fq) * 0.7 + vnoise(vec2(lp.x * 13.0, luv.y * 5.0 - t * 2.6)) * 0.3;
-  float tongues = clamp((turb - 0.5) * 1.9 + 0.5, 0.0, 1.0);
-  float reach = flameH * (0.12 + 1.05 * tongues);
+  fq.x += (vnoise(vec2(lp.x * 1.6, luv.y * 1.3 - t * 0.64)) - 0.5) * (1.14 + 1.25 * clamp(d * 3.0, 0.0, 1.0));
+  float turb = fbm(fq) * 0.7 + vnoise(vec2(lp.x * 13.0, luv.y * 5.0 - t * 2.7)) * 0.3;
+  float tongues = clamp((turb - 0.5) * 1.95 + 0.5, 0.0, 1.0);
+  float reach = flameH * (0.13 + 1.08 * tongues);
   float core = clamp(1.0 - d / reach, 0.0, 1.0);   // 1 at the base, 0 at the tip
-  float frontF = core * (0.36 + 0.86 * tongues) + 0.3 * fall(0.03, 0.0, d);
+  float frontF = core * (0.38 + 0.88 * tongues) + 0.34 * fall(0.032, 0.0, d);
   // Low fire in the freshly burnt strip just behind the front.
-  float behindF = (0.45 + 0.6 * tongues) * (1.0 - clamp(-d / 0.06, 0.0, 1.0));
+  float behindF = (0.48 + 0.62 * tongues) * (1.0 - clamp(-d / 0.065, 0.0, 1.0));
   // Front and fresh-ash fire meet over a narrow band (no stepped line at d = 0).
   float heat = mix(behindF, frontF, smoothstep(-0.02, 0.02, d));
   // Fine flicker texture inside the body (it averages out over any larger area).
-  heat *= 0.78 + 0.44 * vnoise(vec2(lp.x * 24.0, luv.y * 10.0 - t * 3.0));
-  heat = clamp(heat * 1.15 * uFlame * mix(0.45, 1.0, smoothstep(0.03, 0.3, fuel)) * env, 0.0, 1.2);
-  float fireA = smoothstep(0.08, 0.75, heat);
+  heat *= 0.78 + 0.46 * vnoise(vec2(lp.x * 24.0, luv.y * 10.0 - t * 3.1));
+  heat = clamp(heat * 1.22 * uFlame * mix(0.46, 1.0, smoothstep(0.03, 0.3, fuel)) * env, 0.0, 1.25);
+  float fireA = smoothstep(0.07, 0.74, heat);
   vec3 fire = fireRamp(heat);
 
   // A thin burning edge where the front eats the glyphs.
-  float rim = fall(0.012, 0.0, abs(d + 0.004)) * (0.1 + 0.9 * fuel) * env
-            * max(uFlame, 0.3 * (1.0 - uCool)) * 0.8;
+  float rim = fall(0.014, 0.0, abs(d + 0.004)) * (0.12 + 0.92 * fuel) * env
+            * max(uFlame, 0.34 * (1.0 - uCool)) * 0.92;
 
   // Faint smoke above the flames, and the fire's light on the air around it.
   float smokeA = smoothstep(0.46, 0.8, fbm(lp * 2.6 + vec2(0.0, -t * 0.45)))
-               * smoothstep(0.05, 0.3, d) * fall(0.75, 0.3, d) * uFlame * env * 0.3;
-  vec3 spill = vec3(1.0, 0.3, 0.07) * fall(0.4, 0.0, abs(d - 0.06)) * env * uFlame * 0.1;
+               * smoothstep(0.05, 0.3, d) * fall(0.75, 0.3, d) * uFlame * env * 0.32;
+  vec3 spill = vec3(1.0, 0.34, 0.08) * fall(0.42, 0.0, abs(d - 0.06)) * env * uFlame * 0.14;
 
-  float embers = emberLayer(lp, t, 13.0, 0.55, 1.0) + emberLayer(lp, t, 8.0, 0.38, 5.0) * 0.9;
+  float embers = emberLayer(lp, t, 13.0, 0.55, 1.0) + emberLayer(lp, t, 8.0, 0.38, 5.0) * 0.95;
   // Sparks leave the fire zone and drift above it.
   float sparkZone = fall(1.2, 0.6, length(q)) * clamp(uFlame * 1.4, 0.0, 1.0) * smoothstep(-0.12, 0.08, d) * fall(0.9, 0.3, d);
   embers *= sparkZone;
@@ -156,14 +163,14 @@ void main() {
   // burns (they show through it), with a little soot in its body.
   vec4 outC = col;
   outC = vec4(vec3(0.012, 0.01, 0.01) * smokeA, smokeA) + outC * (1.0 - smokeA);
-  outC.rgb = outC.rgb * (1.0 - fireA * 0.4) + fire * fireA;
-  outC.a = max(outC.a, fireA * 0.6);
-  outC.rgb += vec3(1.0, 0.45, 0.12) * rim * 1.2 + vec3(1.0, 0.42, 0.1) * embers * 1.4 + spill;
+  outC.rgb = outC.rgb * (1.0 - fireA * 0.38) + fire * fireA;
+  outC.a = max(outC.a, fireA * 0.64);
+  outC.rgb += vec3(1.0, 0.52, 0.16) * rim * 1.42 + vec3(1.0, 0.46, 0.12) * embers * 1.58 + spill;
   // Ash covers (soot with an ember-lit edge), then the near embers add their light.
   float flakeA = clamp(flakes, 0.0, 1.0) * 0.85;
-  vec3 flakeC = vec3(0.1, 0.075, 0.065) + vec3(0.95, 0.3, 0.06) * fall(0.12, 0.0, -d) * 0.5;
+  vec3 flakeC = vec3(0.1, 0.075, 0.065) + vec3(0.98, 0.34, 0.08) * fall(0.13, 0.0, -d) * 0.58;
   outC = vec4(flakeC * flakeA, flakeA) + outC * (1.0 - flakeA);
-  outC.rgb += vec3(1.0, 0.5, 0.16) * bokeh * 0.55;
+  outC.rgb += vec3(1.0, 0.54, 0.18) * bokeh * 0.68;
   outC = clamp(outC, 0.0, 1.0);
   // Light needs coverage in a premultiplied canvas (rgb <= alpha).
   outC.a = max(outC.a, max(outC.r, max(outC.g, outC.b)));

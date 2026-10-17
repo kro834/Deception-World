@@ -14,7 +14,13 @@
   --saga-pink: #ff4fc3;
   --saga-pink-rgb: 255 79 195;
   --saga-magenta: #c84dff;
+  --saga-magenta-rgb: 200 77 255;
   --saga-blue: #4f7bff;
+  --saga-blue-rgb: 79 123 255;
+  --saga-ice: #7ae8ff;
+  --saga-ice-rgb: 122 232 255;
+  --saga-gold: #f0cf86;
+  --saga-gold-rgb: 240 207 134;
   --saga-stream: linear-gradient(
     100deg,
     transparent 0,
@@ -24,11 +30,34 @@
     rgb(240 207 134 / 80%) 86%,
     transparent 100%
   );
+  --saga-prism-rule: linear-gradient(
+    90deg,
+    var(--saga-ice) 0%,
+    var(--saga-blue) 32%,
+    var(--saga-pink) 66%,
+    var(--saga-gold) 100%
+  );
+  --saga-prism-fade: linear-gradient(
+    90deg,
+    rgb(var(--saga-ice-rgb) / 72%) 0%,
+    rgb(var(--saga-blue-rgb) / 68%) 30%,
+    rgb(var(--saga-pink-rgb) / 72%) 62%,
+    rgb(var(--saga-gold-rgb) / 52%) 84%,
+    transparent 100%
+  );
+  --saga-spec-top: inset 0 1px 0 rgb(255 255 255 / 10%);
+  --saga-spec-bright: inset 0 1px 0 rgb(255 255 255 / 18%);
 
   /* The stage's second light is the logo's pink (Dream keeps its own). */
   --dx-edition-2: #ff5fc8;
   --dx-edition-2-rgb: 255 95 200;
-  --dx-seam: linear-gradient(90deg, var(--dx-edition), var(--saga-blue) 34%, var(--saga-pink) 68%, var(--dx-gold));
+  --dx-seam: linear-gradient(
+    90deg,
+    var(--dx-edition),
+    var(--saga-blue) 34%,
+    var(--saga-pink) 68%,
+    var(--dx-gold)
+  );
 }
 
 html[data-family="dream"] {
@@ -64,32 +93,533 @@ html:not([data-family="dream"]) body::before {
   }
 }
 
-/* Primary actions and the launcher carry the pink edge of the logo's
-   plate; the lit launcher square runs ice into pink like its trails.
-   (:not(#saga) only lifts these above the shell's own rules.) */
+/* ================================================================
+   1. Command Bar & Navigation Brush-Up
+   ================================================================ */
 @media (forced-colors: none) {
+  /* Crisp top specular edge and deeper elevation across all site command bars. */
+  html[data-family]:not([data-family="dream"])
+    body
+    :is(
+      main.site-shell.film-edition > header.topbar,
+      .manager-page > header.manager-topbar,
+      .rxs-page.rxs-page.rxs-page > header.rxs-local-nav,
+      .library-page > header.library-topbar,
+      .search-page > header.search-topbar,
+      .form-archive-page > header.form-archive-toolbar
+    ):not(#saga) {
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 9%),
+      0 1px 0 rgb(0 0 0 / 78%),
+      0 10px 28px -14px rgb(0 0 0 / 72%);
+  }
+
+  /* The bar's lower reading line threads ice -> blue -> pink -> gold. */
+  html[data-family]:not([data-family="dream"])
+    body
+    :is(
+      main.site-shell.film-edition > header.topbar,
+      .manager-page > header.manager-topbar
+    ):not(#saga)::after {
+    background: linear-gradient(
+      90deg,
+      var(--sh-l1) 0%,
+      var(--saga-blue) 32%,
+      var(--saga-pink) 64%,
+      rgb(var(--saga-gold-rgb) / 72%) 86%,
+      transparent 100%
+    );
+  }
+
+  /* The DW sigil plate: dual-light bevel (ice cut corner + subtle pink ambient sheen). */
+  html[data-family]:not([data-family="dream"])
+    body
+    :is(
+      main.site-shell.film-edition > header.topbar .brand-sigil,
+      .manager-page > header.manager-topbar .brand-sigil
+    ):not(#saga) {
+    border-color: rgb(var(--sh-l1-rgb) / 68%);
+    background:
+      linear-gradient(225deg, var(--sh-l1) 0 6px, transparent 6px),
+      linear-gradient(140deg, rgb(var(--sh-l1-rgb) / 22%) 0%, rgb(var(--saga-pink-rgb) / 12%) 58%, transparent 82%),
+      var(--sh-ink-2);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 16%),
+      0 0 18px -6px rgb(var(--sh-l1-rgb) / 36%);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    html[data-family]:not([data-family="dream"])
+      body
+      :is(
+        main.site-shell.film-edition > header.topbar .brand:hover .brand-sigil,
+        .manager-page > header.manager-topbar .brand:hover .brand-sigil
+      ):not(#saga) {
+      border-color: var(--sh-l1);
+      box-shadow:
+        inset 0 1px 0 rgb(255 255 255 / 24%),
+        0 0 20px -4px rgb(var(--saga-pink-rgb) / 48%);
+    }
+  }
+
+  /* World command bar chapter tabs: prism foot bar on active chapter, subtle preview on hover. */
+  html[data-family="world"]
+    body
+    main.site-shell.film-edition
+    > header.topbar
+    nav
+    a[aria-current="location"]:not(#saga) {
+    color: #fff;
+    background: linear-gradient(
+      0deg,
+      rgb(var(--saga-pink-rgb) / 10%) 0%,
+      rgb(var(--sh-l1-rgb) / 6%) 52%,
+      transparent 88%
+    );
+  }
+
+  html[data-family="world"]
+    body
+    main.site-shell.film-edition
+    > header.topbar
+    nav
+    a[aria-current="location"]:not(#saga)::after {
+    background: var(--saga-prism-rule);
+    opacity: 1;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    html[data-family="world"]
+      body
+      main.site-shell.film-edition
+      > header.topbar
+      nav
+      a:not([aria-current="location"]):hover:not(#saga) {
+      color: var(--sh-text);
+      background: linear-gradient(0deg, rgb(var(--sh-l1-rgb) / 6%), transparent 78%);
+    }
+
+    html[data-family="world"]
+      body
+      main.site-shell.film-edition
+      > header.topbar
+      nav
+      a:not([aria-current="location"]):hover:not(#saga)::after {
+      background: var(--saga-prism-fade);
+      opacity: 0.55;
+    }
+  }
+
+  /* Dossier back control & return links: machined dark plate with specular top edge. */
+  html[data-family="dossier"]
+    body
+    .manager-page
+    > header.manager-topbar
+    .manager-back:not(#saga) {
+    border-color: rgb(var(--sh-l1-rgb) / 36%);
+    background:
+      linear-gradient(180deg, rgb(255 255 255 / 5%), transparent 55%),
+      var(--sh-ink-2);
+    box-shadow:
+      var(--saga-spec-top),
+      0 6px 16px -8px rgb(0 0 0 / 65%);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    html[data-family="dossier"]
+      body
+      .manager-page
+      > header.manager-topbar
+      .manager-back:hover:not(#saga) {
+      border-color: rgb(var(--saga-pink-rgb) / 58%);
+      background:
+        linear-gradient(90deg, rgb(var(--sh-l1-rgb) / 10%), rgb(var(--saga-pink-rgb) / 10%)),
+        var(--sh-ink-2);
+      box-shadow:
+        var(--saga-spec-bright),
+        0 8px 20px -8px rgb(var(--saga-pink-rgb) / 38%);
+    }
+  }
+
+  /* Primary actions and the launcher carry the pink edge of the logo's
+     plate; the lit launcher square runs ice into pink like its trails. */
   html:not([data-family="dream"]) body .primary-action:not(#saga) {
     box-shadow:
       inset 0 1px 0 rgb(255 255 255 / 55%),
       0 0 0 1px rgb(var(--saga-pink-rgb) / 45%),
       0 14px 34px -18px rgb(var(--saga-pink-rgb) / 85%);
   }
+
+  @media (hover: hover) and (pointer: fine) {
+    html:not([data-family="dream"]) body .primary-action:hover:not(#saga) {
+      box-shadow:
+        inset 0 1px 0 rgb(255 255 255 / 72%),
+        0 0 0 1px rgb(var(--saga-pink-rgb) / 68%),
+        0 16px 38px -14px rgb(var(--saga-pink-rgb) / 92%);
+    }
+  }
+
   html[data-family]:not([data-family="dream"]):not([data-family="gallery"]):not(
       [data-ipad-menu-scrolled="true"]
     ):not([data-ipad-menu-motion])
     body
     .side-panel-trigger.side-panel-trigger:not(#saga) {
     background:
-      linear-gradient(180deg, rgb(255 255 255 / 26%), transparent 46%),
-      linear-gradient(135deg, var(--sh-l1) 0 42%, #c9a3ff 70%, var(--saga-pink) 100%) !important;
+      linear-gradient(180deg, rgb(255 255 255 / 28%), transparent 46%),
+      linear-gradient(135deg, var(--sh-l1) 0 40%, #c9a3ff 68%, var(--saga-pink) 100%) !important;
     box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 34%),
       inset 0 0 0 1px rgb(255 255 255 / 22%),
-      0 0 0 1px rgb(var(--saga-pink-rgb) / 34%),
-      0 10px 26px -12px rgb(var(--saga-pink-rgb) / 75%) !important;
+      0 0 0 1px rgb(var(--saga-pink-rgb) / 38%),
+      0 10px 26px -12px rgb(var(--saga-pink-rgb) / 78%) !important;
   }
-  /* Section rules: ice running into pink, then out. */
+
+  /* ================================================================
+     2. Full-Screen Launcher (#site-side-panel) & Announcement Dialog
+     ================================================================ */
+  /* Launcher header seam: ice -> blue -> pink -> gold. */
+  html[data-family]:not([data-family="dream"])
+    body
+    #site-side-panel.side-panel
+    > .side-panel-head:not(#saga) {
+    background:
+      var(--saga-prism-fade)
+        var(--sp-pad-inline) 100% / calc(100% - 2 * var(--sp-pad-inline)) 1px no-repeat,
+      var(--sh-ink);
+  }
+
+  /* Launcher DW plate: matches the command bar's dual-light bevel. */
+  html[data-family]:not([data-family="dream"])
+    body
+    #site-side-panel.side-panel
+    > .side-panel-head
+    > div:not(#saga)::before {
+    border-color: rgb(var(--sh-l1-rgb) / 68%);
+    background:
+      linear-gradient(225deg, var(--sh-l1) 0 7px, transparent 7px),
+      linear-gradient(140deg, rgb(var(--sh-l1-rgb) / 22%) 0%, rgb(var(--saga-pink-rgb) / 14%) 62%, transparent 86%),
+      var(--sh-ink-2);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 16%),
+      0 0 20px -6px rgb(var(--sh-l1-rgb) / 38%);
+  }
+
+  /* Group kickers: streamline prism tick and trailing rule. */
+  html[data-family]:not([data-family="dream"])
+    body
+    #site-side-panel.side-panel
+    > .side-panel-group
+    > p:not(#saga)::before {
+    background: linear-gradient(90deg, var(--sh-l1), var(--saga-pink));
+  }
+
+  html[data-family]:not([data-family="dream"])
+    body
+    #site-side-panel.side-panel
+    > .side-panel-group
+    > p:not(#saga)::after {
+    background: linear-gradient(
+      90deg,
+      rgb(var(--sh-l1-rgb) / 40%) 0%,
+      rgb(var(--saga-pink-rgb) / 28%) 42%,
+      transparent 94%
+    );
+  }
+
+  /* FIND A RECORD quick search trigger: recessed optical well with prism sheen. */
+  html[data-family]:not([data-family="dream"])
+    body
+    #site-side-panel.side-panel
+    .side-panel-links
+    > button.side-panel-quick-search:not(#saga) {
+    border-color: rgb(var(--sh-l1-rgb) / 50%);
+    background:
+      linear-gradient(
+        90deg,
+        rgb(var(--sh-l1-rgb) / 12%) 0%,
+        rgb(var(--saga-pink-rgb) / 7%) 46%,
+        transparent 78%
+      ),
+      var(--sh-ink-2);
+    box-shadow:
+      var(--saga-spec-top),
+      0 10px 26px -14px rgb(0 0 0 / 70%);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    html[data-family]:not([data-family="dream"])
+      body
+      #site-side-panel.side-panel
+      .side-panel-links
+      > button.side-panel-quick-search:hover:not([data-press]):not(#saga) {
+      border-color: rgb(var(--saga-pink-rgb) / 62%);
+      background:
+        linear-gradient(
+          90deg,
+          rgb(var(--sh-l1-rgb) / 16%) 0%,
+          rgb(var(--saga-pink-rgb) / 12%) 52%,
+          transparent 85%
+        ),
+        var(--sh-ink-2);
+      box-shadow:
+        var(--saga-spec-bright),
+        0 12px 28px -12px rgb(var(--saga-pink-rgb) / 32%);
+    }
+  }
+
+  /* SECTIONS chapter list: active chapter carries a dual-light left bar & wash. */
+  html[data-family]:not([data-family="dream"])
+    body
+    #site-side-panel.side-panel
+    > .side-panel-head
+    + .side-panel-group
+    + .side-panel-group
+    > .side-panel-links
+    > a:is([aria-current="page"], [aria-current="location"]):not(#saga) {
+    background: linear-gradient(
+      90deg,
+      rgb(var(--sh-l1-rgb) / 16%) 0%,
+      rgb(var(--saga-pink-rgb) / 8%) 48%,
+      transparent 92%
+    );
+    box-shadow:
+      inset 3px 0 0 var(--sh-l1),
+      inset 0 1px 0 rgb(255 255 255 / 5%);
+  }
+
+  /* Launcher art tiles: top specular bevel and prism rim on hover/active. */
+  html[data-family]:not([data-family="dream"])
+    body
+    #site-side-panel.side-panel
+    > :where(
+      .side-panel-head + .side-panel-group + .side-panel-group + .side-panel-group,
+      .side-panel-head
+        + .side-panel-group
+        + .side-panel-group
+        + .side-panel-group
+        + .side-panel-group,
+      .side-panel-riders,
+      .side-panel-group:nth-last-child(3),
+      .side-panel-group:nth-last-child(2)
+    )
+    > .side-panel-links
+    > :is(a, button.side-panel-link-button):not(#saga) {
+    border-color: rgb(var(--sh-l1-rgb) / 26%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 12%),
+      0 10px 24px -14px rgb(0 0 0 / 68%);
+  }
+
+  html[data-family]:not([data-family="dream"])
+    body
+    #site-side-panel.side-panel
+    > :where(
+      .side-panel-head + .side-panel-group + .side-panel-group + .side-panel-group,
+      .side-panel-head
+        + .side-panel-group
+        + .side-panel-group
+        + .side-panel-group
+        + .side-panel-group,
+      .side-panel-riders,
+      .side-panel-group:nth-last-child(3),
+      .side-panel-group:nth-last-child(2)
+    )
+    > .side-panel-links
+    > :is(a, button.side-panel-link-button):is([aria-current="page"], [aria-current="location"]):not(#saga) {
+    border-color: var(--sh-l1);
+    box-shadow:
+      inset 3px 0 0 var(--sh-l1),
+      inset 0 1px 0 rgb(255 255 255 / 20%),
+      0 0 0 1px rgb(var(--saga-pink-rgb) / 36%),
+      0 14px 30px -14px rgb(var(--saga-pink-rgb) / 45%);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    html[data-family]:not([data-family="dream"])
+      body
+      #site-side-panel.side-panel
+      > :where(
+        .side-panel-head + .side-panel-group + .side-panel-group + .side-panel-group,
+        .side-panel-head
+          + .side-panel-group
+          + .side-panel-group
+          + .side-panel-group
+          + .side-panel-group,
+        .side-panel-riders,
+        .side-panel-group:nth-last-child(3),
+        .side-panel-group:nth-last-child(2)
+      )
+      > .side-panel-links
+      > :is(a, button.side-panel-link-button):not([aria-current]):hover:not([data-press]):not(#saga) {
+      border-color: rgb(var(--saga-pink-rgb) / 56%);
+      box-shadow:
+        inset 0 1px 0 rgb(255 255 255 / 20%),
+        inset 0 0 0 1px rgb(var(--sh-l1-rgb) / 22%),
+        0 14px 30px -14px rgb(var(--saga-pink-rgb) / 42%);
+    }
+  }
+
+  /* Announcement hub dialog: prism top edge and refined list item hover. */
+  html body #site-announcement-dialog .site-announcement-hub:not(#saga) {
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 12%),
+      0 28px 72px rgb(0 0 0 / 72%),
+      0 0 0 1px rgb(var(--saga-ice-rgb) / 18%);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    html body #site-announcement-dialog .site-announcement-list-item:hover:not(#saga) {
+      border-color: rgb(var(--saga-pink-rgb) / 52%);
+      box-shadow: inset 2px 0 0 var(--saga-pink);
+    }
+  }
+
+  /* ================================================================
+     3. World Stage (/world) — Section Heads, Hero, Console & Cards
+     ================================================================ */
+  /* Section rules: ice running into blue, pink and gold, then out. */
   html:not([data-family="dream"]) body .section-index:not(#saga) {
-    border-image: linear-gradient(90deg, rgb(122 232 255 / 55%), rgb(var(--saga-pink-rgb) / 60%) 42%, rgb(var(--saga-pink-rgb) / 0%) 92%) 1;
+    border-image: linear-gradient(
+        90deg,
+        rgb(122 232 255 / 62%),
+        rgb(79 123 255 / 58%) 26%,
+        rgb(var(--saga-pink-rgb) / 64%) 54%,
+        rgb(240 207 134 / 45%) 78%,
+        rgb(var(--saga-pink-rgb) / 0%) 95%
+      )
+      1;
+  }
+
+  html[data-family="world"]
+    body
+    main.site-shell.film-edition.mirage-edition
+    > section
+    > .section-index:not(#saga) {
+    background: linear-gradient(
+        90deg,
+        var(--sw-light) 0%,
+        rgb(var(--saga-pink-rgb) / 68%) 48%,
+        rgb(var(--sw-warm-rgb) / 48%) 76%,
+        transparent 100%
+      )
+      0 100% / min(280px, 48%) 1px no-repeat;
+  }
+
+  /* Hero poster stage & control cluster: optical bevel and subtle rim light. */
+  html[data-family="world"]
+    body
+    main.site-shell.film-edition.mirage-edition
+    .poster-frame:not(#saga) {
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 16%),
+      0 0 0 1px rgb(var(--saga-ice-rgb) / 24%),
+      0 26px 64px -20px rgb(0 0 0 / 82%),
+      0 0 42px -16px rgb(var(--saga-pink-rgb) / 28%);
+  }
+
+  html[data-family="world"]
+    body
+    main.site-shell.film-edition.mirage-edition
+    .poster-control-cluster
+    > :is(.poster-shuffle, .poster-reset):not(#saga) {
+    box-shadow: var(--saga-spec-top);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    html[data-family="world"]
+      body
+      main.site-shell.film-edition.mirage-edition
+      .poster-control-cluster
+      > :is(.poster-shuffle, .poster-reset):hover:not(#saga) {
+      border-color: rgb(var(--saga-pink-rgb) / 56%) !important;
+      box-shadow:
+        var(--saga-spec-bright),
+        0 8px 22px -10px rgb(var(--saga-pink-rgb) / 42%) !important;
+    }
+  }
+
+  /* Interactive tab rails on /world (六詠 archive, World Column, Riders):
+     active tab takes a crisp top specular edge and prism accent. */
+  html[data-family="world"]
+    body
+    main.site-shell.film-edition.mirage-edition
+    :is(.manager-archive-tabs, .world-column-tabs, .rider-tabs)
+    > button:is([aria-selected="true"], .is-active):not(#saga) {
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 18%),
+      inset 0 -2px 0 var(--saga-pink),
+      0 8px 22px -12px rgb(var(--saga-pink-rgb) / 48%) !important;
+  }
+
+  /* Stage cards across /world (六詠 signals, Unmanaged Dante, Related cards,
+     World Column, Rider Console, Episode cards, Annex documents):
+     unified top specular hairline and refined hover elevation. */
+  html[data-family="world"]
+    body
+    main.site-shell.film-edition.mirage-edition
+    :is(
+      .signal.has-visual,
+      .dante-archive,
+      .other-archive-card,
+      .world-column,
+      .rider-console,
+      .episode-card-surface,
+      .wa-doc
+    ):not(#saga) {
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 9%),
+      0 16px 38px -20px rgb(0 0 0 / 72%);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    html[data-family="world"]
+      body
+      main.site-shell.film-edition.mirage-edition
+      :is(
+        .signal.has-visual.is-accessible,
+        .other-archive-card,
+        .episode-card-surface
+      ):hover:not(#saga) {
+      border-color: rgb(var(--saga-pink-rgb) / 52%) !important;
+      box-shadow:
+        inset 0 1px 0 rgb(255 255 255 / 18%),
+        0 18px 42px -16px rgb(0 0 0 / 82%),
+        0 0 28px -10px rgb(var(--saga-pink-rgb) / 34%) !important;
+    }
+
+    html[data-family="world"]
+      body
+      main.site-shell.film-edition.mirage-edition
+      :is(.rider-dossier-open, .world-column-slide-open):hover:not(#saga) {
+      border-color: rgb(var(--saga-pink-rgb) / 64%) !important;
+      box-shadow:
+        inset 0 1px 0 rgb(255 255 255 / 22%),
+        0 10px 26px -10px rgb(var(--saga-pink-rgb) / 45%) !important;
+    }
+  }
+
+  /* ================================================================
+     4. Dossiers, Library & Search Subpage Elevation
+     ================================================================ */
+  html[data-family="dossier"]
+    body
+    .manager-page
+    :is(.manager-pagination a, .dossier-index-return):not(#saga) {
+    box-shadow:
+      var(--saga-spec-top),
+      0 10px 26px -14px rgb(0 0 0 / 68%);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    html[data-family="dossier"]
+      body
+      .manager-page
+      :is(.manager-pagination a, .dossier-index-return):hover:not(#saga) {
+      border-color: rgb(var(--saga-pink-rgb) / 56%);
+      box-shadow:
+        var(--saga-spec-bright),
+        0 14px 30px -12px rgb(var(--saga-pink-rgb) / 36%);
+    }
   }
 }
 
@@ -97,3 +627,4 @@ html:not([data-family="dream"]) body::before {
 html {
   scrollbar-color: rgb(var(--saga-pink-rgb) / 55%) transparent;
 }
+

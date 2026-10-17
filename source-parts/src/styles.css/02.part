@@ -1,3 +1,13 @@
+
+/* ENTER THE WORLD: the handoff layer's dive covers the title from its first
+   frame (the canvas fades in over it on the title's own framing), so the
+   scene holds still underneath; only the interface steps away. */
+.is-diving .cine-dive-tunnel {
+  animation: world-dive-tunnel-enter 0.28s cubic-bezier(0.12, 0.82, 0.12, 1) both;
+}
+
+.is-diving .cine-dive-tunnel::before {
+  animation: world-dive-ring-stream 0.36s linear 0.06s infinite;
 }
 
 .is-diving .cine-dive-tunnel::after {
@@ -527,17 +537,18 @@
 @keyframes aperture-assembly {
   0% {
     opacity: 0;
-    transform: translate(-50%, -50%) scale(0.48) rotate(-21deg);
+    transform: translate(-50%, -50%) scale(0.42) rotate(-28deg);
   }
-  30% {
-    opacity: 0.66;
+  28% {
+    opacity: 0.84;
+    transform: translate(-50%, -50%) scale(0.96) rotate(-4deg);
   }
-  62% {
-    opacity: 0.4;
-    transform: translate(-50%, -50%) scale(1.035) rotate(2deg);
+  58% {
+    opacity: 0.62;
+    transform: translate(-50%, -50%) scale(1.045) rotate(3deg);
   }
   100% {
-    opacity: 0.36;
+    opacity: 0.48;
     transform: translate(-50%, -50%) scale(1) rotate(0);
   }
 }
@@ -545,28 +556,30 @@
 @keyframes orbit-a-lock {
   0% {
     opacity: 0;
-    transform: translate(-50%, -50%) rotate(-14deg) scale(0.68);
+    transform: translate(-50%, -50%) rotate(-24deg) scale(0.64);
   }
-  38% {
-    opacity: 0.5;
+  36% {
+    opacity: 0.72;
+    transform: translate(-50%, -50%) rotate(-3deg) scale(1.03);
   }
   100% {
-    opacity: 0.3;
-    transform: translate(-50%, -50%) rotate(5deg) scale(1);
+    opacity: 0.44;
+    transform: translate(-50%, -50%) rotate(6deg) scale(1);
   }
 }
 
 @keyframes orbit-b-lock {
   0% {
     opacity: 0;
-    transform: translate(-50%, -50%) rotate(54deg) scale(0.62);
+    transform: translate(-50%, -50%) rotate(42deg) scale(0.58);
   }
-  44% {
-    opacity: 0.4;
+  42% {
+    opacity: 0.64;
+    transform: translate(-50%, -50%) rotate(68deg) scale(1.035);
   }
   100% {
-    opacity: 0.24;
-    transform: translate(-50%, -50%) rotate(74deg) scale(1);
+    opacity: 0.36;
+    transform: translate(-50%, -50%) rotate(76deg) scale(1);
   }
 }
 
@@ -575,12 +588,16 @@
     opacity: 0;
     filter: blur(2px);
   }
-  22% {
-    opacity: 0.8;
+  18% {
+    opacity: 0.96;
     filter: blur(0);
   }
-  46% {
-    opacity: 0.24;
+  44% {
+    opacity: 0.38;
+  }
+  72% {
+    opacity: 0.64;
+    filter: blur(0);
   }
   100% {
     opacity: 0;
@@ -591,41 +608,48 @@
 @keyframes impact-bloom {
   0% {
     opacity: 0;
-    transform: translate(-50%, -50%) scale(0.16);
+    transform: translate(-50%, -50%) scale(0.14);
   }
-  22% {
-    opacity: 0.92;
+  18% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(0.88);
   }
-  54% {
-    opacity: 0.24;
+  52% {
+    opacity: 0.36;
   }
   100% {
     opacity: 0;
-    transform: translate(-50%, -50%) scale(1.42);
+    transform: translate(-50%, -50%) scale(1.56);
   }
 }
 
 @keyframes impact-ring {
   0% {
     opacity: 0;
-    transform: scale(0.42);
+    transform: scale(0.36);
   }
-  28% {
-    opacity: 0.72;
+  24% {
+    opacity: 0.88;
+  }
+  64% {
+    opacity: 0.32;
   }
   100% {
     opacity: 0;
-    transform: scale(1.62);
+    transform: scale(1.78);
   }
 }
 
 @keyframes logo-echo-ice {
   0% {
     opacity: 0;
-    transform: translate3d(-18px, 0, 0) scale(0.985);
+    transform: translate3d(-24px, -2px, 0) scale(0.98);
   }
-  32% {
-    opacity: 0.34;
+  28% {
+    opacity: 0.48;
+  }
+  64% {
+    opacity: 0.18;
   }
   100% {
     opacity: 0;
@@ -636,10 +660,13 @@
 @keyframes logo-echo-gold {
   0% {
     opacity: 0;
-    transform: translate3d(18px, 0, 0) scale(0.985);
+    transform: translate3d(24px, 2px, 0) scale(0.98);
   }
-  32% {
-    opacity: 0.3;
+  28% {
+    opacity: 0.44;
+  }
+  64% {
+    opacity: 0.16;
   }
   100% {
     opacity: 0;
@@ -656,13 +683,14 @@
 @keyframes hud-reticle-lock {
   0% {
     opacity: 0;
-    transform: scale(1.28) rotate(-5deg);
+    transform: scale(1.32) rotate(-8deg);
   }
-  54% {
-    opacity: 0.8;
+  48% {
+    opacity: 0.92;
+    transform: scale(0.985) rotate(1deg);
   }
   100% {
-    opacity: 0.52;
+    opacity: 0.64;
     transform: scale(1) rotate(0);
   }
 }
@@ -966,20 +994,20 @@
     transform: translate(-50%, -50%) scaleX(0.18);
   }
   20% {
-    opacity: 0.7;
-    transform: translate(-50%, -50%) scaleX(0.82);
+    opacity: 0.86;
+    transform: translate(-50%, -50%) scaleX(0.92);
   }
   26% {
-    opacity: 0.1;
-    transform: translate(-50%, -50%) scaleX(1);
+    opacity: 0.16;
+    transform: translate(-50%, -50%) scaleX(1.06);
   }
   66% {
-    opacity: 0.38;
-    transform: translate(-50%, -50%) scaleX(0.72);
+    opacity: 0.52;
+    transform: translate(-50%, -50%) scaleX(0.84);
   }
   73% {
     opacity: 0;
-    transform: translate(-50%, -50%) scaleX(1);
+    transform: translate(-50%, -50%) scaleX(1.04);
   }
 }
 
@@ -1051,11 +1079,11 @@
   0% {
     opacity: 0;
   }
-  28% {
-    opacity: 0.4;
+  24% {
+    opacity: 0.58;
   }
-  72% {
-    opacity: 0.12;
+  68% {
+    opacity: 0.22;
   }
   100% {
     opacity: 0;
@@ -1065,24 +1093,31 @@
 @keyframes shine-sweep {
   0% {
     opacity: 0;
-    background-position: 120% 0;
+    background-position: 125% 0;
   }
-  18% {
+  22% {
     opacity: 1;
+  }
+  78% {
+    opacity: 0.84;
   }
   100% {
     opacity: 0;
-    background-position: -40% 0;
+    background-position: -45% 0;
   }
 }
 
 @keyframes hud-in {
   0% {
     opacity: 0;
-    transform: translate(-50%, -50%) scale(0.9);
+    transform: translate(-50%, -50%) scale(0.88);
+  }
+  56% {
+    opacity: 0.44;
+    transform: translate(-50%, -50%) scale(1.015);
   }
   100% {
-    opacity: 0.28;
+    opacity: 0.34;
     transform: translate(-50%, -50%) scale(1);
   }
 }
@@ -1090,11 +1125,11 @@
 @keyframes line-grow {
   from {
     width: 0;
-    opacity: 0.9;
+    opacity: 0.96;
   }
   to {
-    width: min(460px, 62vw);
-    opacity: 0.9;
+    width: min(540px, 68vw);
+    opacity: 1;
   }
 }
 
