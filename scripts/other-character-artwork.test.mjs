@@ -17,8 +17,9 @@ const artwork = [
   {
     id: "fable",
     name: "フェイブル",
-    image: "/character-fable-20260923.webp",
-    thumb: "/character-fable-20260923-thumb.webp",
+    // Owner replaced Fable's portrait on 2026-10-17; version the URL to bypass old caches.
+    image: "/character-fable-20261017.webp",
+    thumb: "/character-fable-20261017-thumb.webp",
   },
 ];
 
