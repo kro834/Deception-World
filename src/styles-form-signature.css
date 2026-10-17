@@ -1,0 +1,372 @@
+/* Only the Over-Zeztz and Leddic routes link this sheet. These OFL display
+   subsets total 10.4 kB; body text and controls retain the reading face. */
+@font-face {
+  font-family: "Explom Display";
+  src: url("/fonts/explom-display-20261018.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Kemonohen Brush";
+  src: url("/fonts/kemonohen-brush-20261018.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+[data-form-theme="explom"] {
+  --signature-face: "Explom Display", "Zen Kaku Gothic New", sans-serif;
+  --signature-light: #72f2ec;
+  --signature-hot: #ff4a60;
+  --signature-ink: #071418;
+  --signature-wash: rgb(30 205 194 / 12%);
+}
+
+[data-form-theme="kemonohen"] {
+  --signature-face: "Kemonohen Brush", "Yu Mincho", "Hiragino Mincho ProN", serif;
+  --signature-light: #ff9b94;
+  --signature-hot: #db263e;
+  --signature-ink: #130a0d;
+  --signature-wash: rgb(170 17 40 / 16%);
+}
+
+/* The character art is unmodified. Light stays on the frame and behind it. */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup:where([data-form-theme="explom"], [data-form-theme="kemonohen"]) {
+  --sd-accent: var(--signature-light);
+  --sd-rule: var(--signature-light);
+  --sd-glow: var(--signature-wash);
+  --sd-glow-soft: var(--signature-wash);
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup:where([data-form-theme="explom"], [data-form-theme="kemonohen"])
+  .form-pickup-card {
+  border-top: 2px solid var(--signature-hot);
+  background:
+    radial-gradient(ellipse at 90% 68%, var(--signature-wash), transparent 60%),
+    var(--signature-ink);
+}
+
+.form-signature {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  user-select: none;
+  contain: paint;
+}
+
+.form-signature-seal {
+  position: absolute;
+  left: 3%;
+  top: 15%;
+  color: var(--signature-light);
+  font: 400 clamp(46px, 9vw, 132px) / 1 var(--signature-face);
+  letter-spacing: -0.04em;
+  writing-mode: vertical-rl;
+  opacity: 0.16;
+}
+
+[data-form-theme="kemonohen"] .form-signature-seal {
+  left: auto;
+  right: -3%;
+  top: 6%;
+  font-size: clamp(180px, 32vw, 420px);
+  writing-mode: horizontal-tb;
+  opacity: 0.2;
+  transform: rotate(-12deg);
+}
+
+.form-signature-trace,
+.form-signature-flare {
+  position: absolute;
+  display: block;
+  pointer-events: none;
+}
+
+[data-form-theme="explom"] .form-signature-trace {
+  inset: 14% 5%;
+  border: 1px solid var(--signature-light);
+  border-left: 4px solid var(--signature-hot);
+  border-right: 4px solid var(--signature-hot);
+  border-radius: 50%;
+  opacity: 0.38;
+  transform: scaleX(0.9) rotate(-26deg);
+}
+
+[data-form-theme="explom"] .form-signature-trace.is-second {
+  inset: 19% 1%;
+  opacity: 0.22;
+  transform: scaleX(0.9) rotate(26deg);
+}
+
+[data-form-theme="explom"] .form-signature-trace.is-third {
+  inset: 8% 12%;
+  border-style: dashed;
+  border-width: 1px;
+  opacity: 0.16;
+}
+
+[data-form-theme="kemonohen"] .form-signature-trace {
+  top: -10%;
+  left: 14%;
+  width: 7px;
+  height: 120%;
+  background: linear-gradient(
+    180deg,
+    transparent 8%,
+    #ffb3a0 30%,
+    var(--signature-hot) 55%,
+    transparent 90%
+  );
+  clip-path: polygon(70% 0, 100% 5%, 62% 48%, 90% 50%, 18% 100%, 0 94%, 28% 48%, 0 46%);
+  transform: rotate(19deg);
+  opacity: 0.65;
+}
+
+[data-form-theme="kemonohen"] .form-signature-trace.is-second {
+  left: 20%;
+  top: -18%;
+}
+[data-form-theme="kemonohen"] .form-signature-trace.is-third {
+  left: 26%;
+  top: -23%;
+}
+
+.form-signature-flare {
+  inset: 8%;
+  border: 2px solid var(--signature-light);
+  border-radius: 50%;
+  opacity: 0;
+}
+
+[data-form-theme="kemonohen"] .form-signature-flare {
+  inset: 4% 8%;
+  border-radius: 47% 53% 59% 41%;
+  border-color: var(--signature-hot);
+}
+
+/* Titles, not another badge: the form's name is the dominant reading line. */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup:where([data-form-theme="explom"], [data-form-theme="kemonohen"])
+  .form-pickup-copy {
+  width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
+  border-bottom: 1px solid var(--signature-hot);
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  :where([data-form-theme="explom"], [data-form-theme="kemonohen"])
+  :is(.form-pickup-copy, .form-pickup-heading)
+  h2
+  > b {
+  background: none;
+  color: #e7e9ed;
+  filter: none;
+  font-family: "Zen Kaku Gothic New", "Noto Sans JP", sans-serif;
+  font-size: clamp(22px, 3.8vw, 32px);
+  text-shadow: none;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  :where([data-form-theme="explom"], [data-form-theme="kemonohen"])
+  :is(.form-pickup-copy, .form-pickup-heading)
+  > em {
+  position: relative;
+  display: block;
+  max-width: 100%;
+  margin: 8px 0 10px;
+  padding: 0 0 14px;
+  border: 0;
+  border-bottom: 2px solid var(--signature-hot);
+  color: #f4fffe;
+  background: none;
+  font: 400 clamp(28px, 5.4vw, 56px) / 1.35 var(--signature-face);
+  letter-spacing: -0.045em;
+  overflow-wrap: anywhere;
+  text-shadow:
+    2px 3px 0 #821c35,
+    -1px -1px 0 #147b80;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  [data-form-theme="kemonohen"]
+  :is(.form-pickup-copy, .form-pickup-heading)
+  > em {
+  font-size: clamp(38px, 6.4vw, 72px);
+  letter-spacing: 0.025em;
+  color: #fff1e7;
+  text-shadow: 2px 3px 0 #80132b;
+  border-image: linear-gradient(90deg, var(--signature-hot), transparent) 1;
+}
+
+.form-signature-reading {
+  display: block;
+  margin: 2px 0 2px 2px;
+  color: var(--signature-light);
+  font:
+    400 14px/1.5 "Kemonohen Brush",
+    serif;
+  letter-spacing: 0.18em;
+  text-shadow: none;
+}
+
+/* The same material carries through the opened record and its mini-gallery. */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup-dialog:where([data-form-theme="explom"], [data-form-theme="kemonohen"]) {
+  --pc-lock: var(--signature-light);
+  --pc-accent: var(--signature-hot);
+  --pc-gold: var(--signature-light);
+  --pc-edge: color-mix(in srgb, var(--signature-hot) 40%, transparent);
+  --pc-plate: var(--signature-ink);
+  --manager-accent: var(--signature-light);
+  border-color: var(--signature-hot);
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup-dialog:where([data-form-theme="explom"], [data-form-theme="kemonohen"])
+  > .form-pickup-panel {
+  position: relative;
+  isolation: isolate;
+  background:
+    radial-gradient(ellipse at 95% 0%, var(--signature-wash), transparent 580px),
+    var(--signature-ink);
+}
+
+.form-pickup-panel > .form-signature {
+  height: min(70vh, 640px);
+  z-index: -1;
+  opacity: 0.5;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  [data-form-theme="kemonohen"]
+  .is-ability
+  h3 {
+  font: 400 44px/1.25 var(--signature-face);
+  color: #ffd5cd;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup-gallery
+  > figure:where([data-form-theme="explom"], [data-form-theme="kemonohen"]) {
+  border-color: var(--signature-hot);
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup-gallery
+  > figure:where([data-form-theme="explom"], [data-form-theme="kemonohen"])
+  figcaption
+  > span {
+  color: var(--signature-light);
+  font: 400 clamp(20px, 3vw, 30px) / 1.5 var(--signature-face);
+  letter-spacing: 0;
+}
+
+/* Finite arrival only. No flashing, perpetual particles, filters or rAF loop.
+   Opening is immediate: these run inside the already-interactive dialog. */
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"])
+    .form-pickup[data-signature-arrived="true"]
+    > .form-pickup-card
+    .form-signature-flare,
+  html:not([data-world-effects="economy"])
+    .form-pickup-dialog[open]
+    > .form-pickup-panel
+    > .form-signature
+    .form-signature-flare {
+    animation: signature-pressure 850ms ease-out both;
+  }
+
+  html:not([data-world-effects="economy"])
+    .form-pickup[data-form-theme="kemonohen"][data-signature-arrived="true"]
+    > .form-pickup-card
+    .form-signature-trace,
+  html:not([data-world-effects="economy"])
+    .form-pickup-dialog[data-form-theme="kemonohen"][open]
+    > .form-pickup-panel
+    > .form-signature
+    .form-signature-trace {
+    animation: signature-claw 650ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  html:not([data-world-effects="economy"])
+    .form-pickup-dialog:where([data-form-theme="explom"], [data-form-theme="kemonohen"])[open]
+    .form-pickup-heading
+    > em {
+    animation: signature-title 520ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+}
+
+@keyframes signature-pressure {
+  0% {
+    transform: scale(0.65);
+    opacity: 0;
+  }
+  24% {
+    opacity: 0.65;
+  }
+  100% {
+    transform: scale(1.25);
+    opacity: 0;
+  }
+}
+
+@keyframes signature-claw {
+  from {
+    transform: translateY(-38%) rotate(19deg);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) rotate(19deg);
+    opacity: 0.65;
+  }
+}
+
+@keyframes signature-title {
+  from {
+    transform: translateY(10px) scale(1.035);
+    opacity: 0.35;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .form-signature,
+  .form-signature * {
+    animation: none !important;
+  }
+}
+
+@media (forced-colors: active) {
+  .form-signature {
+    display: none;
+  }
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    :where([data-form-theme="explom"], [data-form-theme="kemonohen"])
+    :is(.form-pickup-copy, .form-pickup-heading)
+    > em {
+    color: CanvasText;
+    text-shadow: none;
+    border-color: CanvasText;
+  }
+}

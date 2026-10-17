@@ -16,6 +16,7 @@ import { LiquidPointerGlow } from "./liquid-rail";
 import { resetPickupScroll, settlePickupScroll } from "./pickup-scroll-reset";
 import { rememberRiderReturn } from "./rider-return-state";
 import { DossierTopbar } from "./world-chrome";
+import type { FormTheme } from "./form-signature-state";
 
 type RiderDossierForm = {
   img: string;
@@ -28,7 +29,7 @@ type RiderDossierForm = {
   quote?: string;
   overview?: string[];
   featuredPickup?: boolean;
-  theme?: "rexonance";
+  theme?: FormTheme;
   stats?: { dt: string; dd: string }[];
   abilities?: { name: string; body: string }[];
   arsenal?: { name: string; body: string }[];
@@ -242,9 +243,11 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
           {
             name: rexonanceSection("追加武装")
               .filter((line) => /^『 /u.test(line))
-              .map((line) => line.slice(2, -2)).join("／"),
+              .map((line) => line.slice(2, -2))
+              .join("／"),
             body: rexonanceSection("追加武装")
-              .filter((line) => !/^『 /u.test(line)).join("\n"),
+              .filter((line) => !/^『 /u.test(line))
+              .join("\n"),
           },
         ],
         finishers: rexonanceEntries("必殺技"),
@@ -337,4 +340,3 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
       quote:
         "レクソナンスの超共鳴と、ヴィンクルムの接続を一つの戦闘体系へ。ファイナルステージ限定の超究極フォーム。",
       img: "/rider-far-from-saga-middle.webp",
-      pos: "50% 8%",

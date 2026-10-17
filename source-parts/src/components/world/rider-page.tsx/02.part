@@ -1,3 +1,4 @@
+      pos: "50% 8%",
       to: "/final-stage",
       hash: "far-from-saga",
       assets: FINAL_STAGE_ENTER_ASSETS,
@@ -338,3 +339,4 @@
         finishers: [
           {
             name: "SUPPORT To GRASS",
+            body: "支援、妨害、拘束、回復を一つの戦闘へ混在させ、豪快な近接戦闘と同居させる。",

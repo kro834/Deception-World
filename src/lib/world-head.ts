@@ -8,6 +8,7 @@ import dossierCinemaCssUrl from "@/styles-dossier-cinema.css?url";
 import pickupCinemaCssUrl from "@/styles-pickup-cinema.css?url";
 import dossierReadingCssUrl from "@/styles-dossier-reading.css?url";
 import stageDossierCssUrl from "@/styles-stage-dossier.css?url";
+import formSignatureCssUrl from "@/styles-form-signature.css?url";
 
 export type RouteStylesheetLink = {
   rel: "stylesheet";
@@ -129,6 +130,9 @@ export function createRiderHead(id: string) {
     title: `仮面ライダー${rider.name}｜Deception World`,
     description: `仮面ライダー${rider.name}の人物記録、能力、フォーム、装備を収録した公式資料。`,
     image: rider.image,
-    stylesheetLinks: DOSSIER_STYLESHEET_LINKS,
+    stylesheetLinks:
+      id === "over-zeztz" || id === "leddic"
+        ? [...DOSSIER_STYLESHEET_LINKS, { rel: "stylesheet", href: formSignatureCssUrl }]
+        : DOSSIER_STYLESHEET_LINKS,
   });
 }

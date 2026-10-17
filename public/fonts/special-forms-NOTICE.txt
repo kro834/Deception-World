@@ -1,0 +1,16 @@
+Special form display subsets (2026-10-18)
+
+explom-display-20261018.woff2: Dela Gothic One, regular.
+Upstream: https://github.com/google/fonts/tree/main/ofl/delagothicone
+License: explom-display-OFL.txt (SIL Open Font License 1.1).
+Subset text: エクスプロムオーバーゼッツスマッシュEXPLOM
+
+kemonohen-brush-20261018.woff2: Yuji Syuku, regular.
+Upstream: https://github.com/google/fonts/tree/main/ofl/yujisyuku
+License: kemonohen-brush-OFL.txt (SIL Open Font License 1.1).
+Subset text: 犭フォームレディックけものへん狂猛狩
+
+Subsets delivered by the Google Fonts CSS2 text API on 2026-10-18 with
+display=swap and a modern browser User-Agent. No full font or third-party
+font request is needed by the deployed site. Original name/copyright tables
+are preserved; the aliases Explom Display and Kemonohen Brush are CSS names.

@@ -15,6 +15,10 @@ const compiledHistory = ts.transpileModule(
   ),
   { compilerOptions: { module: ts.ModuleKind.CommonJS } },
 ).outputText;
+const compiledSignature = ts.transpileModule(
+  readFileSync(new URL("../src/components/world/form-signature-state.ts", import.meta.url), "utf8"),
+  { compilerOptions: { module: ts.ModuleKind.CommonJS } },
+).outputText;
 
 function mount() {
   const effects = [],
@@ -58,6 +62,11 @@ function mount() {
     document: doc,
     HTMLElement: class HTMLElement {},
     require(name) {
+      if (name === "./form-signature-state") {
+        const signatureExports = {};
+        runInNewContext(compiledSignature, { ...scope, exports: signatureExports });
+        return signatureExports;
+      }
       if (name === "./use-dialog-history-dismiss") {
         const historyExports = {};
         runInNewContext(compiledHistory, { ...scope, exports: historyExports });

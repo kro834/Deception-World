@@ -1,3 +1,4 @@
+                <dd>
                   <NameText value={f.dd} seams />
                 </dd>
               </div>
@@ -239,6 +240,7 @@
                   calls: form.calls,
                   quote: form.quote,
                   overview: form.overview,
+                  theme: form.theme,
                   stats: form.stats,
                   abilities: form.abilities,
                   arsenal: form.arsenal,

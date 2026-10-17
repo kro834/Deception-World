@@ -1,3 +1,12 @@
+                        src={f.img}
+                        {...dossierImage(f.img)}
+                        alt=""
+                        style={{ objectPosition: f.pos }}
+                        decoding="async"
+                        loading="lazy"
+                      />
+                      <figcaption>
+                        <span>{f.sub ?? "FORM"}</span>
                         <b>
                           <DisplayName value={f.name} />
                         </b>
@@ -414,8 +423,3 @@ export const REX_LOI: Profile = {
     arsenal: [
       {
         name: "サーパスアタノール",
-        body: "光で再錬成する構造を照合・固定し、闇で不要な組成や過剰なエネルギー、外部接続を分解・吸収する胸部変換炉。二つの神性を衝突させず循環し、損失を極限まで抑えてヒネモスを生む。",
-      },
-      {
-        name: "デアグローブ",
-        body: "接触対象を拳撃が最も効率よく伝わる組成へ再錬成し、観測・解析可能な対象を硬度や性質によらず破壊する。十分な解析後には、装甲効果、結界、空間構造といった非物質的防御も一時的に破壊可能な構造体として再定義する。",

@@ -46,9 +46,14 @@ test("every dossier route but the sovereign file loads the dossier sheets", asyn
   const dossierFonts = head.match(/DOSSIER_HUD_FONTS_URL =\s*"([^"]+)"/)?.[1];
   assert.ok(worldFonts);
   assert.equal(dossierFonts, worldFonts);
-  // Both rider heads, known id or not.
+  // Both rider heads retain the shared sheets. Only the two signature forms
+  // append their route-specific presentation, after that common cascade.
   const rider = head.slice(head.indexOf("export function createRiderHead"));
-  assert.equal(rider.match(/stylesheetLinks: DOSSIER_STYLESHEET_LINKS/g)?.length, 2);
+  assert.match(rider, /stylesheetLinks: DOSSIER_STYLESHEET_LINKS/);
+  assert.match(
+    rider,
+    /id === "over-zeztz" \|\| id === "leddic"\s*\? \[\.\.\.DOSSIER_STYLESHEET_LINKS, \{ rel: "stylesheet", href: formSignatureCssUrl \}\]\s*:\s*DOSSIER_STYLESHEET_LINKS/,
+  );
 
   for (const name of ["lejas", "opus", "reemu", "rex-loi", "shuza"]) {
     const route = await read(`src/routes/managers/${name}.tsx`);

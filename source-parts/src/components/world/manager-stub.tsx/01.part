@@ -12,6 +12,8 @@ import { DossierContents, DossierReader } from "./dossier-reader";
 import { DisplayName } from "@/components/name-text";
 import { dossierImage, formPickupImage } from "@/lib/dossier-images";
 import { useDialogHistoryDismiss } from "./use-dialog-history-dismiss";
+import { FormSignature } from "./form-signature";
+import { useFormSignatureArrival, type FormTheme } from "./form-signature-state";
 
 type Section = { no: string; kicker: string; title: string; body: string[] };
 
@@ -30,8 +32,8 @@ export type RiderForm = {
   abilities?: { name: string; body: string }[];
   arsenal?: { name: string; body: string }[];
   finishers?: { name: string; body: string }[];
-  extraForms?: { img: string; pos: string; name: string; sub?: string }[];
-  theme?: "rexonance";
+  extraForms?: { img: string; pos: string; name: string; sub?: string; theme?: FormTheme }[];
+  theme?: FormTheme;
   weaponGallery?: { img: string; pos?: string; name: string; label: string }[];
 };
 
@@ -55,6 +57,7 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
   const router = useRouter();
   // Name markup marks word boundaries; labels and alt retain exact spelling.
   const rider = record;
+  const signatureRef = useFormSignatureArrival(rider.theme);
   const dlg = useRef<HTMLDialogElement>(null);
   const opener = useRef<HTMLButtonElement>(null);
   const pointerOpened = useRef(false);
@@ -207,7 +210,9 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
   );
   return (
     <section
+      ref={signatureRef}
       className={`form-pickup${isRexonance ? " is-rexonance-pickup" : ""}`}
+      data-form-theme={rider.theme}
       aria-label={`${riderPrefix}${record.name}の記録`}
       aria-busy={gateActive}
     >
@@ -221,6 +226,7 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
           </div>
         ) : null}
         <div className="form-pickup-visual">
+          <FormSignature theme={rider.theme} />
           <img
             src={rider.img}
             {...dossierImage(rider.img)}
@@ -249,6 +255,9 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
           </h2>
           {rider.sub ? (
             <em>
+              {rider.theme === "kemonohen" ? (
+                <small className="form-signature-reading">けものへん</small>
+              ) : null}
               <DisplayName value={rider.sub} />
             </em>
           ) : null}
@@ -258,6 +267,7 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
       <dialog
         ref={dlg}
         className={`form-pickup-dialog${isRexonance ? " is-rexonance-dialog" : ""}`}
+        data-form-theme={rider.theme}
         tabIndex={-1}
         aria-label={`${riderPrefix}${record.name}`}
         onClose={resetScroll}
@@ -283,6 +293,7 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
           </i>
         </button>
         <div className="form-pickup-panel">
+          <FormSignature theme={rider.theme} />
           {isRexonance ? (
             <div className="rexonance-panel-ambient" aria-hidden="true">
               <i />
@@ -302,6 +313,9 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
             </h2>
             {rider.sub ? (
               <em>
+                {rider.theme === "kemonohen" ? (
+                  <small className="form-signature-reading">けものへん</small>
+                ) : null}
                 <DisplayName value={rider.sub} />
               </em>
             ) : null}
@@ -407,14 +421,5 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
               {extraForms.length > 1 ? (
                 <div className="form-pickup-gallery">
                   {extraForms.map((f) => (
-                    <figure key={`${f.name}-${f.sub ?? ""}`}>
+                    <figure key={`${f.name}-${f.sub ?? ""}`} data-form-theme={f.theme}>
                       <img
-                        src={f.img}
-                        {...dossierImage(f.img)}
-                        alt=""
-                        style={{ objectPosition: f.pos }}
-                        decoding="async"
-                        loading="lazy"
-                      />
-                      <figcaption>
-                        <span>{f.sub ?? "FORM"}</span>

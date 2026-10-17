@@ -16,6 +16,7 @@ import { LiquidPointerGlow } from "./liquid-rail";
 import { resetPickupScroll, settlePickupScroll } from "./pickup-scroll-reset";
 import { rememberRiderReturn } from "./rider-return-state";
 import { DossierTopbar } from "./world-chrome";
+import type { FormTheme } from "./form-signature-state";
 
 type RiderDossierForm = {
   img: string;
@@ -28,7 +29,7 @@ type RiderDossierForm = {
   quote?: string;
   overview?: string[];
   featuredPickup?: boolean;
-  theme?: "rexonance";
+  theme?: FormTheme;
   stats?: { dt: string; dd: string }[];
   abilities?: { name: string; body: string }[];
   arsenal?: { name: string; body: string }[];
@@ -242,9 +243,11 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
           {
             name: rexonanceSection("追加武装")
               .filter((line) => /^『 /u.test(line))
-              .map((line) => line.slice(2, -2)).join("／"),
+              .map((line) => line.slice(2, -2))
+              .join("／"),
             body: rexonanceSection("追加武装")
-              .filter((line) => !/^『 /u.test(line)).join("\n"),
+              .filter((line) => !/^『 /u.test(line))
+              .join("\n"),
           },
         ],
         finishers: rexonanceEntries("必殺技"),
@@ -824,6 +827,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
           system: "レディックウォッチ × 犭フォーム",
           name: "レディック",
           sub: "犭フォーム",
+          theme: "kemonohen",
           calls: ["犭フォーム！！！"],
           quote: "自我と引き換えに、目に映る全てを狩る狂戦士。",
           overview: [
@@ -1045,7 +1049,12 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
         system: "ゼッツドライバー",
         name: "オーバーゼッツ",
         sub: "エクスプロム",
-        calls: ["アメイジング！ ライダー！", "ゼッツ！ゼッツ！ゼッツ！オーバー！", "エクスプロム！"],
+        theme: "explom",
+        calls: [
+          "アメイジング！ ライダー！",
+          "ゼッツ！ゼッツ！ゼッツ！オーバー！",
+          "エクスプロム！",
+        ],
         overview: [
           "物理攻撃の負荷を増強した筋繊維に溜め込み、放出する事により高い攻撃力を発揮する。この一連の動作が前提となっているため、防御力が大きく向上し、パフォーマンスも改善されている。",
         ],
@@ -1599,6 +1608,7 @@ export function RiderPage({ id }: { id: string }) {
                   calls: form.calls,
                   quote: form.quote,
                   overview: form.overview,
+                  theme: form.theme,
                   stats: form.stats,
                   abilities: form.abilities,
                   arsenal: form.arsenal,
