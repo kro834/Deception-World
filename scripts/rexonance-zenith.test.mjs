@@ -513,6 +513,10 @@ function environment({
   forced = false,
   coarse = false,
   idleHeld = false,
+  // The page's chant lines (SA-GA！DEUS！ and REXONANCE！, ×4 each) as four chips.
+  chants = false,
+  // The page has finished loading (the early warm-up waits for it).
+  loaded = false,
 } = {}) {
   const listeners = new Map();
   const target = (name) => ({
@@ -604,12 +608,17 @@ function environment({
   const document = {
     documentElement: html,
     hidden: false,
+    readyState: loaded ? "complete" : "loading",
     createElement: () => makeCanvas(),
     ...target("document"),
   };
   const canvas = makeCanvas();
   const frameBox = element({ offsetHeight: 837 });
-  const lines = [0, 1, 2, 3, 4].map(() => element({ querySelectorAll: () => [element()] }));
+  const lines = [0, 1, 2, 3, 4].map((index) => {
+    const count = chants && (index === 2 || index === 3) ? 4 : 1;
+    const chips = Array.from({ length: count }, () => element());
+    return element({ querySelectorAll: () => chips, chips });
+  });
   const parts = ASSEMBLY_PARTS.map(() => element());
   // The read-outs hold one text node, as React renders them; the engine
   // must rewrite its data, never replace it (a tree change per frame
@@ -907,6 +916,137 @@ test("mask holes belong to the ribbon, never the smaller arm box", () => {
   assert.equal(plan.tiles.find((t) => t.cx === 15 && t.cy === 15).pieceId, "ribbon");
   assert.equal(plan.tiles.filter((t) => t.pieceId === "arm").length, 3);
   assert.ok(plan.tiles.filter((t) => t.pieceId === "arm").every((t) => t.cx === 5));
+});
+
+// Owner 2026-10-17: 「変身音発光演出で4つめの『REXONANCE！』が発光しなかったりする」 — all four chips of each chant line lit while the line is still active.
+test("every chant unit lights while its line is up: all four chips of SA-GA！DEUS！ and of REXONANCE！ are on before the line is done", async () => {
+  const t = environment({ chants: true });
+  const dispose = mountRexonanceAssembly(t.runway, engineConfig, t.env);
+  t.observers[0].callback([
+    { isIntersecting: true, boundingClientRect: { top: 400, bottom: 3100 } },
+  ]);
+  await until(() => t.runway.dataset.rznState === "live" && t.frames.size > 0, "scene live");
+  for (const [index, beat] of [
+    [2, ASSEMBLY_BEATS.deus],
+    [3, ASSEMBLY_BEATS.rexonance],
+  ]) {
+    const line = t.lines[index];
+    let previous = 0;
+    let allLit = null;
+    for (let progress = beat[0] + 0.001; progress < beat[1]; progress += 0.002) {
+      t.scrollTo(progress);
+      const label = `line ${index} @${progress.toFixed(3)}`;
+      assert.ok(line.hasAttribute("data-on") && !line.hasAttribute("data-done"), label);
+      const on = line.chips.map((chip) => chip.hasAttribute("data-on"));
+      const count = on.filter(Boolean).length;
+      // In order, and never going out again within the line.
+      assert.deepEqual(
+        on,
+        on.map((_, k) => k < count),
+        label,
+      );
+      assert.ok(count >= previous, `${label}: ${count} < ${previous}`);
+      previous = count;
+      if (count === 4 && allLit === null) allLit = progress;
+    }
+    assert.ok(allLit !== null, `line ${index}: the fourth chip never lit while the line was up`);
+    // The fourth stays lit for a visible stretch of the line, not its last frame.
+    assert.ok(beat[1] - allLit >= (beat[1] - beat[0]) * 0.15, `line ${index}: ${allLit}`);
+    // Once the line is done its chips stay on (dimmed with the line).
+    t.scrollTo(beat[1] + 0.001);
+    assert.ok(line.hasAttribute("data-done"));
+    assert.ok(line.chips.every((chip) => chip.hasAttribute("data-on")));
+  }
+  dispose();
+});
+
+// Owner 2026-10-17: 「レクソナンスのスクロールで変身するやつが読み込まれずに過ぎてしまったりする」 — fetched once the page is idle, prepared once the reader is past the hero; the picture never changes from it.
+test("the early warm-up: the network half once the page is idle after load, the preparation once the reader is past the hero, the look unchanged", async () => {
+  let kitRequests = 0;
+  const config = {
+    ...engineConfig,
+    nanites: () => {
+      kitRequests += 1;
+      return Promise.resolve(null);
+    },
+  };
+  const t = environment({ loaded: true });
+  const dispose = mountRexonanceAssembly(t.runway, config, t.env);
+  await until(() => t.decodedSources.length >= 2, "the sheets are requested once idle");
+  assert.equal(kitRequests, 1, "the kit is imported with them");
+  assert.deepEqual(t.decodedSources.slice(0, 2), ["/f.webp", "/u.webp"]);
+  await new Promise((resolve) => setTimeout(resolve, 20));
+  assert.equal(t.preparationPhases.length, 0, "nothing is prepared before the reader moves");
+  assert.equal(t.runway.dataset.rznState, undefined, "and nothing visible changes");
+  assert.equal(t.percent.textContent, "100");
+  // Still in the hero: no preparation; past it: the preparation runs.
+  t.env.scrollY = 200;
+  t.listeners.get("document:scroll")();
+  await new Promise((resolve) => setTimeout(resolve, 10));
+  assert.equal(t.preparationPhases.length, 0);
+  t.env.scrollY = 600;
+  t.listeners.get("document:scroll")();
+  assert.equal(t.listeners.has("document:scroll"), false, "one notice is enough");
+  await until(t.prepared, "prepared far ahead of the scene");
+  assert.equal(t.runway.dataset.rznState, undefined, "preparing far away changes nothing");
+  assert.equal(t.percent.textContent, "100");
+  assert.equal(t.canvas.width, 0);
+  // The sheets fetched ahead are the ones decoded: no second request.
+  assert.equal(t.decodedSources.filter((src) => src === "/f.webp").length, 1);
+  // Near: live at once, from what is ready.
+  t.observers[0].callback([
+    { isIntersecting: true, boundingClientRect: { top: 400, bottom: 3100 } },
+  ]);
+  assert.equal(t.runway.dataset.rznState, "live");
+  dispose();
+  assert.equal([...t.listeners.keys()].length, 0, [...t.listeners.keys()].join());
+
+  // Before the page's load event nothing is fetched; the still tiers never.
+  const early = environment();
+  const disposeEarly = mountRexonanceAssembly(early.runway, engineConfig, early.env);
+  await new Promise((resolve) => setTimeout(resolve, 10));
+  assert.equal(early.decodedSources.length, 0);
+  assert.ok(early.listeners.has("window:load"));
+  // A reader already past the hero before it: the preparation starts then.
+  early.env.scrollY = 900;
+  early.listeners.get("document:scroll")();
+  await until(early.prepared, "prepared on the first scroll past the hero");
+  assert.equal(early.runway.dataset.rznState, undefined);
+  disposeEarly();
+  assert.equal([...early.listeners.keys()].length, 0);
+  for (const options of [{ reduced: true }, { economy: true }, { forced: true }]) {
+    const q = environment({ ...options, loaded: true });
+    const disposeQ = mountRexonanceAssembly(q.runway, config, q.env);
+    q.env.scrollY = 2000;
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    q.listeners.get("document:scroll")?.();
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    assert.equal(q.decodedSources.length, 0, JSON.stringify(options));
+    assert.equal(q.preparationPhases.length, 0, JSON.stringify(options));
+    disposeQ();
+  }
+  assert.equal(kitRequests, 1, "the still tiers never import the kit");
+});
+
+// R-1 19/60: a reader arriving inside the runway gets that moment whole on the first live frame (no catch-up from the start).
+test("a mid-runway arrival resumes at its progress: the first live frame needs no catch-up", async () => {
+  const t = environment();
+  const dispose = mountRexonanceAssembly(t.runway, engineConfig, t.env);
+  t.observers[1].callback([{ isIntersecting: true }]);
+  await until(t.prepared, "warm preparation completed");
+  // A jump to 40 % of the runway (a restored scroll, a link): near at once.
+  t.scrollTo(0.4);
+  t.observers[0].callback([
+    { isIntersecting: true, boundingClientRect: { top: -682, bottom: 2018 } },
+  ]);
+  await until(
+    () => t.runway.dataset.rznState === "live" && t.frames.size > 0,
+    "scene live after its catch-up",
+  );
+  t.flush();
+  assert.equal(t.percent.textContent, "043");
+  assert.equal(t.frames.size, 0, "the first frame drew the moment whole (nothing left behind)");
+  dispose();
 });
 
 test("3.5 screens ahead preparation is idle-only, does not activate layout, and cancels on exit", async () => {

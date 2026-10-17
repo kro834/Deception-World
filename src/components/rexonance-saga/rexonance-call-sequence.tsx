@@ -444,6 +444,9 @@ const SUIT_HALOS = [
 ] as const;
 // The phases of the resonance rings from the core.
 const SUIT_PHASES = ["ice", "violet", "gold"] as const;
+// One ring per REXONANCE！ quarter-beat: four calls, the ice phase again on the
+// fourth (owner, 2026-10-17: 「4つめの『REXONANCE！』が発光しなかったりする」).
+const SUIT_RINGS = [...SUIT_PHASES, "ice"] as const;
 
 function Suit({ suit, animate }: { suit: "build" | "whole"; animate: boolean }) {
   const { motes, pixels } = suitSquares();
@@ -604,9 +607,9 @@ function Suit({ suit, animate }: { suit: "build" | "whole"; animate: boolean }) 
             </svg>
           );
         })}
-        {SUIT_PHASES.map((phase, index) => (
+        {SUIT_RINGS.map((phase, index) => (
           <i
-            key={phase}
+            key={index}
             className={`rx-suit-ring is-${phase}`}
             style={{ ...at(REXONANCE_SUIT_MARKS.core), "--rx-suit-k": index } as CSSProperties}
           />

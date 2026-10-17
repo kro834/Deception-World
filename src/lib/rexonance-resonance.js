@@ -1466,11 +1466,12 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   // Pictures still downloading when the scene goes (audit #31): each one's
   // handlers hold this scene, and through it the runway and its page.
   const loaders = new Set();
-  const picture = (src) =>
+  const picture = (src, priority) =>
     new Promise((resolve, reject) => {
       const image = new environment.Image();
       loaders.add(image);
       image.decoding = "async";
+      if (priority) image.fetchPriority = priority;
       image.onload = () => {
         loaders.delete(image);
         resolve(image);
@@ -1481,12 +1482,56 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       };
       image.src = src;
     });
-  const load = () => {
-    if (loading) return loading;
-    loading = Promise.all([
+  // The network half of the preparation, fetched ahead (owner, 2026-10-17:
+  // 「レクソナンスのスクロールで変身するやつが読み込まれずに過ぎてしまったりする」):
+  // once the page is idle after its load, the swarm's module and its kit are
+  // imported and the scene's sheets requested at low priority, so the
+  // preparation starts from bytes already here. Decoding waits for wake().
+  // Only under the motion gate: the still tiers never download any of it.
+  let modulesLoading = null;
+  const modules = () => {
+    modulesLoading ??= Promise.all([
       import("./rexonance-assembly-nanites.js"),
       typeof config.nanites === "function" ? config.nanites() : (config.nanites ?? null),
-    ]).then(([module, nanites]) => {
+    ]).catch((error) => {
+      modulesLoading = null;
+      throw error;
+    });
+    return modulesLoading;
+  };
+  const sheetSources = (nanites) =>
+    [
+      config.figure,
+      config.undersuit,
+      config.gold?.atlas,
+      config.atlas,
+      config.base,
+      nanites?.cells?.src,
+      coarse.matches ? null : nanites?.comets?.src,
+      nanites?.fx?.src,
+      nanites?.guide?.src,
+    ].filter(Boolean);
+  // src → the early request (its <img>, or null when it failed).
+  const fetched = new Map();
+  let prefetching = false;
+  const prefetch = () => {
+    if (prefetching || images || disposed || !motionAllowed()) return;
+    prefetching = true;
+    if (under && under.loading !== "eager") under.loading = "eager";
+    modules().then(
+      ([, nanites]) => {
+        if (disposed || images) return;
+        for (const src of sheetSources(nanites))
+          if (!fetched.has(src)) fetched.set(src, picture(src, "low").catch(() => null));
+      },
+      () => {
+        prefetching = false;
+      },
+    );
+  };
+  const load = () => {
+    if (loading) return loading;
+    loading = modules().then(([module, nanites]) => {
       if (disposed) return null;
       lib = module;
       kit = nanites ?? null;
@@ -1495,8 +1540,17 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     return loading;
   };
   const pictures = () => {
+    // A sheet fetched ahead is taken as it is (or fetched again if that
+    // failed); the rest are asked for now, ahead of the page's own images.
+    const take = (src) => {
+      const early = fetched.get(src);
+      fetched.delete(src);
+      return early
+        ? early.then((image) => image ?? picture(src, "high"))
+        : picture(src, "high");
+    };
     const decode = (src) =>
-      picture(src)
+      take(src)
         .then((image) =>
           image.decode
             ? image.decode().then(
@@ -1660,7 +1714,12 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         typeof environment.requestIdleCallback === "function" &&
         idleFallbackGeneration !== generation;
       // Still inside an idle period with room for a whole slice: next task.
-      const port = idle && idleUntil - clock() > 8 ? chainPort() : null;
+      // While the reader is at the scene and it is not live yet (a direct
+      // arrival, or a reader faster than the preparation), the period's last
+      // few ms take one more slice (a slice's work stops at 3–4 ms): scrolling
+      // leaves short idle periods, and the slack was left unused.
+      const room = near && !live ? 4.5 : 8;
+      const port = idle && idleUntil - clock() > room ? chainPort() : null;
       if (port) {
         chained.push(() => run(chainDeadline));
         port.port2.postMessage(0);
@@ -2944,8 +3003,17 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
             : progress < B.rexonance[1]
               ? 3
               : 4;
+    // The chant's units light one by one while their line is up: the k-th of
+    // four at k/5 of the line's beat, so the fourth is lit for the beat's
+    // last fifth before the line is done and dims (owner, 2026-10-17:
+    // 「4つめの『REXONANCE！』が発光しなかったりする」 — at ×4 the fourth lit
+    // only at the beat's end, the frame the line was dimmed). DEUS！ also
+    // lights as each group lands, if that is sooner.
+    const chantLit = (beat) => Math.min(4, Math.floor(span(progress, beat) * 5));
     const deusDone = plan.partDone.slice(0, 4).filter((done) => progress >= done).length;
-    const chips = `${deusDone}:${Math.floor(span(progress, B.rexonance) * 4)}`;
+    const deusLit = Math.min(4, Math.max(deusDone, chantLit(B.deus)));
+    const rexonanceLit = chantLit(B.rexonance);
+    const chips = `${deusLit}:${rexonanceLit}`;
     if (line !== hud.line || chips !== hud.chips) {
       if (line !== hud.line) runway.dataset.rznLine = String(line);
       hud.line = line;
@@ -2953,8 +3021,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       lines.forEach(({ line: element, chips: units }, index) => {
         setFlag(element, "data-on", index === line);
         setFlag(element, "data-done", index < line);
-        const lit =
-          index === 2 ? deusDone : index === 3 ? Math.floor(span(progress, B.rexonance) * 4) : 0;
+        const lit = index === 2 ? deusLit : index === 3 ? rexonanceLit : 0;
         units.forEach((unit, unitIndex) =>
           setFlag(
             unit,
@@ -3338,20 +3405,55 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     force = false;
   };
 
+  // A reader arriving inside the runway (a restored scroll, a jump): the
+  // welds and the gold are caught up to where they are, in bounded slices,
+  // before the first live frame, so it draws that moment whole instead of
+  // catching up from the start a budget a frame (R-1 19/60). Far away or at
+  // the start there is nothing to catch up and the scene goes live at once.
+  const caughtUp = (progress) =>
+    progress >= ASSEMBLY_BEATS.seal[1] ||
+    (settledCount === paintedBy(progress) &&
+      (!goldLayer || (goldCount === goldBy(progress) && goldReverse.dirty < 0)));
+  const arrival = () => {
+    measureRunway();
+    return readProgress();
+  };
+  const prime = async (token) => {
+    while (token === generation && near && !live && plan && settled && buffers) {
+      if (caughtUp(arrival())) return;
+      const ran = await idleTask(() => {
+        if (token !== generation || !plan || !settled) return;
+        const progress = arrival();
+        const start = clock();
+        do {
+          behind = false;
+          syncSettled(paintedBy(progress), span(progress, ASSEMBLY_BEATS.seal) >= 1);
+          if (goldLayer) syncGold(progress);
+        } while (behind && clock() - start < 3);
+        behind = false;
+      });
+      if (ran === null) return;
+    }
+  };
   let preparing = null;
   const wake = () => {
     if (disposed || !pageActive || live || !motionAllowed() || document.hidden) return;
     // (The stand-in is the near observer's and sync's, round 4: the warm
     // preparation far away never changes the picture.)
     if (plan && settled && buffers) {
-      goLive();
-      return;
+      if (!near || caughtUp(arrival())) {
+        goLive();
+        return;
+      }
     }
     if (preparing) return;
     const token = generation;
     preparing = idleTask(() => images || load())
       .then(() => {
-        if (token === generation && images) return build();
+        if (token === generation && images && !(plan && settled && buffers)) return build();
+      })
+      .then(() => {
+        if (token === generation && near) return prime(token);
       })
       .then(() => {
         if (token === generation) goLive();
@@ -3409,6 +3511,65 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     warmObserver.observe(runway);
   };
 
+  // The early warm-up (owner, 2026-10-17: 「レクソナンスのスクロールで変身する
+  // やつが読み込まれずに過ぎてしまったりする」 — 3.5 screens ahead left a brisk
+  // reader, or a slow phone, 2–4 s of preparation, and they passed the scene
+  // on its stand-in). Once the page is idle after its load, the network half
+  // is fetched (prefetch); once the reader has scrolled past the hero, the
+  // preparation itself starts, in the same idle slices as the warm-up (the
+  // picture does not change: the stand-in stays the near observer's).
+  let eager = false;
+  let earlyId = 0;
+  let earlyIdle = false;
+  let earlyListening = false;
+  const pastHero = () => (environment.scrollY || 0) >= (environment.innerHeight || 900) * 0.5;
+  const stopEarlyScroll = () => {
+    if (!earlyListening) return;
+    earlyListening = false;
+    document.removeEventListener("scroll", onEarlyScroll);
+  };
+  const goEager = () => {
+    stopEarlyScroll();
+    eager = true;
+    wake();
+  };
+  const onEarlyScroll = () => {
+    if (pastHero()) goEager();
+  };
+  // (The reader's first scroll may come before the page's load event, with
+  // its images still arriving: the preparation then asks for its sheets at
+  // high priority, ahead of the images further down.)
+  const listenEarly = () => {
+    if (earlyListening || eager || disposed) return;
+    earlyListening = true;
+    document.addEventListener("scroll", onEarlyScroll, { passive: true });
+  };
+  const startEarly = () => {
+    earlyId = 0;
+    if (disposed || !motionAllowed()) return;
+    prefetch();
+    if (eager) return;
+    if (pastHero()) goEager();
+    else listenEarly();
+  };
+  const scheduleEarly = () => {
+    environment.removeEventListener("load", scheduleEarly);
+    if (disposed || earlyId) return;
+    earlyIdle = typeof environment.requestIdleCallback === "function";
+    earlyId = earlyIdle
+      ? environment.requestIdleCallback(startEarly, { timeout: 2000 })
+      : environment.setTimeout(startEarly, 600);
+  };
+  const cancelEarly = () => {
+    environment.removeEventListener("load", scheduleEarly);
+    stopEarlyScroll();
+    if (earlyId) {
+      if (earlyIdle) environment.cancelIdleCallback?.(earlyId);
+      else environment.clearTimeout(earlyId);
+    }
+    earlyId = 0;
+  };
+
   const sync = () => {
     if (disposed) return;
     if (!motionAllowed()) {
@@ -3424,7 +3585,8 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       return;
     }
     standIn();
-    if (warm || near) wake();
+    if (warm || near || eager) wake();
+    else if (!earlyId && !earlyListening && document.readyState === "complete") startEarly();
     lastProgress = -1;
     schedule();
   };
@@ -3451,6 +3613,9 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   environment.addEventListener("resize", observeWarmup);
   nearObserver?.observe(runway);
   observeWarmup();
+  if (motionAllowed()) listenEarly();
+  if (document.readyState === "complete") scheduleEarly();
+  else environment.addEventListener("load", scheduleEarly);
   if (!nearObserver) {
     near = warm = true;
     standIn();
@@ -3460,6 +3625,8 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   return () => {
     disposed = true;
     goStill();
+    cancelEarly();
+    fetched.clear();
     if (chain) {
       chain.port1.onmessage = null;
       chain.port1.close?.();

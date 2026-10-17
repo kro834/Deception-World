@@ -690,6 +690,19 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
     animation-delay: calc(var(--rx-call-start) + 230ms + var(--rx-call-answer-n) * 120ms);
   }
 
+  /* The fourth answer lands 60 ms before the chant gives way to REXONANCE！
+     (the pinned pulse: 230 ms, then every 120 ms), so its 120 ms fade was cut
+     at half, never lit (owner, 2026-10-17: 「4つめが発光しなかったりする」). It
+     arrives lit and settles within what is left of its line. */
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
+    .rx-call-chant
+    > span:nth-child(4)
+    .rx-call-answer {
+    animation-name: rxCallAnswerLast;
+    animation-duration: calc(var(--rx-call-duration) - 230ms - 3 * 120ms);
+  }
+
   /* The answer mirrors it from the right, bottom line first. */
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
@@ -720,10 +733,17 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
     .rx-call-aperture
     > i {
+    /* The fourth REXONANCE！ (the beat's last quarter) has no phase of its
+       own: all three flare on it together, then lock (owner, 2026-10-17:
+       「変身音発光演出で4つめの『REXONANCE！』が発光しなかったりする」). */
     animation:
       rxCallPhaseIn 170ms var(--rx-call-ease) forwards,
+      rxCallPhaseIn 170ms var(--rx-call-ease),
       rxCallPhaseLock 60ms steps(3, jump-end) forwards;
-    animation-delay: var(--rx-call-response-start), calc(var(--rx-call-final-start) - 60ms);
+    animation-delay:
+      var(--rx-call-response-start),
+      calc(var(--rx-call-response-start) + var(--rx-call-response-duration) * 3 / 4),
+      calc(var(--rx-call-final-start) - 60ms);
   }
 
   html:not([data-world-effects="economy"])
@@ -732,6 +752,7 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
     > i:nth-child(2) {
     animation-delay:
       calc(var(--rx-call-response-start) + var(--rx-call-response-duration) / 4),
+      calc(var(--rx-call-response-start) + var(--rx-call-response-duration) * 3 / 4),
       calc(var(--rx-call-final-start) - 60ms);
   }
 
@@ -741,6 +762,7 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
     > i:nth-child(3) {
     animation-delay:
       calc(var(--rx-call-response-start) + var(--rx-call-response-duration) / 2),
+      calc(var(--rx-call-response-start) + var(--rx-call-response-duration) * 3 / 4),
       calc(var(--rx-call-final-start) - 60ms);
   }
 
@@ -924,6 +946,20 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   from {
     opacity: 0;
     transform: translate3d(0.35em, 0, 0) scale(1.18);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+/* (Unlit until its moment — the answers fill both ways — then lit at once.) */
+@keyframes rxCallAnswerLast {
+  from {
+    opacity: 0;
+    transform: translate3d(0.35em, 0, 0) scale(1.18);
+  }
+  1% {
+    opacity: 1;
   }
   to {
     opacity: 1;
