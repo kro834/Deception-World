@@ -3547,16 +3547,21 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   const onEarlyScroll = () => {
     if (pastHero()) goEager();
   };
+  // (The reader's first scroll may come before the page's load event, with
+  // its images still arriving: the preparation then asks for its sheets at
+  // high priority, ahead of the images further down.)
+  const listenEarly = () => {
+    if (earlyListening || eager || disposed) return;
+    earlyListening = true;
+    document.addEventListener("scroll", onEarlyScroll, { passive: true });
+  };
   const startEarly = () => {
     earlyId = 0;
     if (disposed || !motionAllowed()) return;
     prefetch();
     if (eager) return;
     if (pastHero()) goEager();
-    else if (!earlyListening) {
-      earlyListening = true;
-      document.addEventListener("scroll", onEarlyScroll, { passive: true });
-    }
+    else listenEarly();
   };
   const scheduleEarly = () => {
     environment.removeEventListener("load", scheduleEarly);
@@ -3619,6 +3624,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   environment.addEventListener("resize", observeWarmup);
   nearObserver?.observe(runway);
   observeWarmup();
+  if (motionAllowed()) listenEarly();
   if (document.readyState === "complete") scheduleEarly();
   else environment.addEventListener("load", scheduleEarly);
   if (!nearObserver) {

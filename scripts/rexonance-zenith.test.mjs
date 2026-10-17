@@ -1007,6 +1007,11 @@ test("the early warm-up: the network half once the page is idle after load, the 
   await new Promise((resolve) => setTimeout(resolve, 10));
   assert.equal(early.decodedSources.length, 0);
   assert.ok(early.listeners.has("window:load"));
+  // A reader already past the hero before it: the preparation starts then.
+  early.env.scrollY = 900;
+  early.listeners.get("document:scroll")();
+  await until(early.prepared, "prepared on the first scroll past the hero");
+  assert.equal(early.runway.dataset.rznState, undefined);
   disposeEarly();
   assert.equal([...early.listeners.keys()].length, 0);
   for (const options of [{ reduced: true }, { economy: true }, { forced: true }]) {
