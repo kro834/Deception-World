@@ -98,13 +98,27 @@ try {
         );
       }
       const image = card.locator(".form-pickup-visual > img");
-      await image.evaluate((el) => el.decode());
       // Below-fold stacks materialize on approach, changing their measured
       // height. Settle that real layout before taking viewport (not offscreen
       // element) screenshots; an element capture can skip auto-CV descendants.
       await page.waitForTimeout(950);
       await title.evaluate((el) => el.scrollIntoView({ behavior: "instant", block: "center" }));
       await page.waitForTimeout(200);
+      await image.evaluate(async (el) => {
+        // WebKit can replace a responsive candidate while auto-CV settles.
+        // Retry only a real source change; never swallow a broken image.
+        for (let attempt = 0; attempt < 3; attempt++) {
+          const source = el.currentSrc;
+          try {
+            await el.decode();
+            return;
+          } catch (error) {
+            if (attempt === 2 || el.currentSrc === source) throw error;
+            await new Promise(requestAnimationFrame);
+          }
+        }
+      });
+      assert.ok(await image.evaluate((el) => el.complete && el.naturalWidth > 0));
       await page.screenshot({ path: `${output}/${label}-${theme.id}-card.png` });
       const opener = card.locator(".form-pickup-plus");
       if (scenario.width <= 1024) await opener.locator(".ios-slide-open-label").tap();
