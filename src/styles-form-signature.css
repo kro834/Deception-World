@@ -305,7 +305,8 @@ html[data-family="dossier"]
     animation: signature-claw 650ms cubic-bezier(0.16, 1, 0.3, 1) both;
   }
 
-  html:not([data-world-effects="economy"])
+  html[data-family="dossier"]:not([data-world-effects="economy"])
+    main.manager-page.manager-page.manager-page
     .form-pickup-dialog:where([data-form-theme="explom"], [data-form-theme="kemonohen"])[open]
     .form-pickup-heading
     > em {
