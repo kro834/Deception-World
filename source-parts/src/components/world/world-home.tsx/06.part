@@ -1,15 +1,3 @@
-                  </div>
-                ))}
-              </div>
-              <SlideOpenControl
-                ariaControls="world-column-pickup"
-                ariaLabel="世界観コラムのピックアップを開く"
-                buttonRef={pickupBtnRef}
-                className="world-column-slide-open"
-                expanded={pickupOpen}
-                label="ピックアップ"
-                onOpen={openPickup}
-              />
             </div>
           </div>
         </section>
@@ -484,6 +472,23 @@
                 <h3>{item.title}</h3>
                 {item.no === "05" ? (
                   <MysteryColumnProse paragraphs={item.pickup} />
+                ) : item.no === "06" ? (
+                  dossierOpen ? (
+                    <DogDossierProse id="world-column-dossier" />
+                  ) : (
+                    <div className="world-column-spoiler-gate">
+                      <p>{item.body}</p>
+                      <SlideOpenControl
+                        ariaControls="world-column-dossier"
+                        ariaLabel="ネタバレを含む資料を開く"
+                        className="world-column-slide-open world-column-spoiler-open"
+                        expanded={false}
+                        label="ネタバレを開く"
+                        opensDialog={false}
+                        onOpen={() => setDossierOpen(true)}
+                      />
+                    </div>
+                  )
                 ) : (
                   <div>
                     {item.pickup.map((para) => (

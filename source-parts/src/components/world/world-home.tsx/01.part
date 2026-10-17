@@ -28,6 +28,7 @@ import { useDialogHistoryDismiss } from "./use-dialog-history-dismiss";
 import { WorldAtmosphere } from "./world-atmosphere";
 import { WORLD_COLUMNS } from "./world-columns-data";
 import { MysteryColumnProse } from "./mystery-column-prose";
+import { DogDossierProse } from "./dog-dossier-prose";
 
 const POSTERS = [
   {
@@ -505,3 +506,7 @@ const EPISODES: EpisodeRecord[] = [
         label: "仮面ライダールーラー・ポラリスモード",
         displayLines: ["仮面ライダールーラー", "ポラリスモード"],
         src: "/rider-ruler-polaris.webp",
+        pos: "50% 0%",
+        alt: "仮面ライダールーラー・ポラリスモード",
+        width: 1023,
+        height: 1537,
