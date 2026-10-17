@@ -29,10 +29,11 @@ export function mountFilmMotion(root, environment = globalThis) {
         remember(
           node.animate(
             [
-              { opacity: 0.82, transform: "translate3d(0, 10px, 0)" },
+              { opacity: 0.82, transform: "translate3d(0, 22px, 0)" },
+              { opacity: 1, transform: "translate3d(0, 2px, 0)" },
               { opacity: 1, transform: "none" },
             ],
-            { duration: 520, easing: "cubic-bezier(.16,1,.3,1)" },
+            { duration: 680, easing: "cubic-bezier(.16,1,.3,1)" },
           ),
         );
         const scan = node.querySelector(".film-text-scan > i");

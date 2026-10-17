@@ -1,0 +1,203 @@
+/* Shared finishing choreography. No gesture handlers, scroll locks, permanent
+   layers or hidden resting content. Artwork and existing signature entrances
+   keep their own transforms; only decorative children move. */
+:root {
+  --choreography-ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* A keyboard-selected destination receives the same material cue as a mouse. */
+body :is(.dossier-contents, .dream-contents) a:focus-visible,
+body .gallery-work-open:focus-visible .gallery-work-frame {
+  outline: 2px solid var(--gallery-brass, #bceeff);
+  outline-offset: 4px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Menu labels arrive behind their already stationary, usable hit areas.
+     The compact iPad launcher and the safe-area cover are not transformed. */
+  html:not([data-world-effects="economy"])
+    body
+    #site-side-panel[data-open="true"]
+    .side-panel-links
+    > :is(a, button)
+    > span {
+    animation: choreography-label 460ms var(--choreography-ease) backwards;
+  }
+  html:not([data-world-effects="economy"])
+    body
+    #site-side-panel[data-open="true"]
+    .side-panel-links
+    > :nth-child(2)
+    > span {
+    animation-delay: 35ms;
+  }
+  html:not([data-world-effects="economy"])
+    body
+    #site-side-panel[data-open="true"]
+    .side-panel-links
+    > :nth-child(n + 3)
+    > span {
+    animation-delay: 70ms;
+  }
+
+  /* A travelling reflection belongs to the mat, never to the original art.
+     Clip the finite sweep inside the frame, with no full-screen GPU surface. */
+  html:not([data-world-effects="economy"])
+    .gallery-page
+    .gallery-work[data-gallery-enter="true"]
+    .gallery-work-frame::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(
+      110deg,
+      transparent 32%,
+      rgb(255 232 185 / 0.14) 48%,
+      transparent 64%
+    );
+    opacity: 0;
+    animation: choreography-reflection 850ms var(--choreography-ease);
+  }
+  html:not([data-world-effects="economy"])
+    .gallery-page
+    .gallery-work[data-gallery-enter="true"]
+    figcaption {
+    animation: choreography-caption 600ms 70ms var(--choreography-ease) backwards;
+  }
+  html:not([data-world-effects="economy"])
+    .gallery-page
+    .gallery-viewer[open]
+    .gallery-viewer-stage {
+    animation: choreography-exhibit 480ms var(--choreography-ease);
+  }
+  html:not([data-world-effects="economy"])
+    .gallery-page
+    .gallery-viewer[open]
+    .gallery-viewer-footer {
+    animation: choreography-caption 420ms 80ms var(--choreography-ease) backwards;
+  }
+
+  /* Native disclosures retain immediate layout, hash navigation and focus. */
+  html:not([data-world-effects="economy"]) .inquiry-navigation[open] .inquiry-navigation-panel {
+    transform-origin: 0 100%;
+    animation: choreography-panel 320ms var(--choreography-ease);
+  }
+  html:not([data-world-effects="economy"])
+    .dream-page.dream-page
+    .dream-archive-fold[open]
+    > :not(summary) {
+    animation: choreography-reading 520ms var(--choreography-ease);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    html:not([data-world-effects="economy"]) body :is(.dossier-contents, .dream-contents) a {
+      transition:
+        background-color 220ms ease,
+        border-color 220ms ease,
+        box-shadow 220ms ease;
+    }
+    html:not([data-world-effects="economy"])
+      body
+      :is(.dossier-contents, .dream-contents)
+      a:is(:hover, :focus-visible) {
+      box-shadow:
+        inset 3px 0 0 currentColor,
+        inset 0 0 24px rgb(159 219 241 / 0.08);
+    }
+    html:not([data-world-effects="economy"])
+      .gallery-page
+      .gallery-work-open:hover
+      .gallery-work-frame::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(
+        110deg,
+        transparent 32%,
+        rgb(255 232 185 / 0.14) 48%,
+        transparent 64%
+      );
+      opacity: 0;
+      animation: choreography-hover-reflection 650ms var(--choreography-ease);
+    }
+  }
+}
+
+@keyframes choreography-label {
+  from {
+    opacity: 0.65;
+    translate: 10px 0;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+@keyframes choreography-caption {
+  from {
+    opacity: 0.72;
+    translate: 0 7px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+@keyframes choreography-exhibit {
+  from {
+    opacity: 0.65;
+    scale: 0.975;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+@keyframes choreography-panel {
+  from {
+    opacity: 0.8;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes choreography-reading {
+  from {
+    opacity: 0.78;
+    translate: 0 10px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+@keyframes choreography-reflection {
+  0% {
+    opacity: 0;
+    translate: -80% 0;
+  }
+  25% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    translate: 80% 0;
+  }
+}
+@keyframes choreography-hover-reflection {
+  0% {
+    opacity: 0;
+    translate: -80% 0;
+  }
+  25% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    translate: 80% 0;
+  }
+}
