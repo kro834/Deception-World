@@ -11,8 +11,8 @@ export type SuitExtrasApi = {
   /** Prepared, and every kit sheet decoded. */
   ready: () => boolean;
   create: (env: SuitExtrasEnv) => SuitExtras | null;
-  /** After a call: give back the prepared sheets (the next route's warm
-   * prepares them again). */
+  /** After a call: retain one kit on visible World/Rexonance routes;
+   * release it when hidden or on an unrelated route. */
   release: () => void;
 };
 

@@ -22,6 +22,7 @@ import {
   rexonanceNaniteSource,
 } from "@/lib/rexonance-nanites-warmup";
 import { registerSuitExtras } from "./rexonance-suit-extras-hook";
+import { createRexonanceCallRetention } from "@/lib/rexonance-call-retention";
 import { rexonanceSuitSource } from "@/lib/rexonance-suit-warmup";
 import {
   FIG,
@@ -1947,18 +1948,26 @@ function primeNanites() {
 /** The prepared layout, read-only (tests and frame audits). */
 export const rexonanceNaniteLayout = (): Readonly<Layout> | null => LAYOUT;
 
-/** Round 3 (reviews 28/43/55): once the call that drew them is over, the
- * prepared sheets are given back (about 49 MB of canvases on desktop, held
- * for the session before); the layout's typed arrays stay, and the next
- * route's warm prepares the sheets again in idle slices. Never while a call
- * draws. */
-export function releaseRexonanceNanites() {
+/** Give back about 49 MB of canvases when the retention policy expires.
+ * The layout's typed arrays stay; a later route warm can prepare again in
+ * idle slices. Never while a call draws. */
+function disposeRexonanceNanites() {
   if (!READY || !SHEETS || work.drawing > 0) return;
   for (const canvas of Object.values(SHEETS)) if (canvas) canvas.width = canvas.height = 0;
   SHEETS = null;
   READY = false;
   // …and the kit's decoded sheets (about 8.7 MB more).
   releaseRexonanceNaniteSources();
+}
+
+let retention: ReturnType<typeof createRexonanceCallRetention> | null = null;
+/** Reuse the prepared kit across visible World/Rexonance visits. Leaving
+ * those routes, economy mode or hiding the page releases it within a second.
+ * There is still only one kit, and a drawing call always owns its sheets. */
+export function releaseRexonanceNanites() {
+  if (!READY || !SHEETS) return;
+  retention ??= createRexonanceCallRetention(disposeRexonanceNanites, () => work.drawing > 0);
+  retention.retain();
 }
 
 /** Whether the call can draw its extras: prepared, and every kit sheet decoded. */
@@ -2075,7 +2084,6 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
   const fxImage = rexonanceNaniteSource(KIT_FX.src);
   const guideImage = rexonanceNaniteSource(KIT_GUIDE.src);
   if (!READY || !L || !K || !cellsImage || !cometImage || !fxImage || !guideImage) return null;
-  if (!priming) calls += 1;
   const { flight, s, ox, oy, all, gold, source, sheet } = env;
   const fence = env.fence ?? OPEN;
   // The implosion's reach (round 3): the radius round the core that the
@@ -2093,6 +2101,10 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
 
   const P = all.length;
   if (L.kind.length !== P) return null;
+  if (!priming) {
+    calls += 1;
+    retention?.acquire();
+  }
   const metal = K.metal;
   const silhouette = K.silhouette;
   const holo = K.holo;

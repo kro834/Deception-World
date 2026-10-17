@@ -619,9 +619,8 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
           // that started before the kit was ready leaves the kit to the next
           // route's warm (review 2026-10-16: never on the page it lands on).
           if (extras) ready.current(false);
-          // Round 3 (reviews 28/43/55): the prepared sheets are given back
-          // once the call that drew them is over (they held ~49 MB through the
-          // whole session); the next route's warm prepares them again.
+          // Keep one prepared kit for visible World/Rexonance return visits;
+          // its retention policy releases it on other routes or when hidden.
           if (used) suitExtrasApi()?.release();
           for (let p = 0; p < all.length; p += 1) if (!done[p]) settle(p);
           if (!lit) {
@@ -632,6 +631,7 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
         stop = () => {
           if (!finished) work.drawing -= 1;
           finished = true;
+          if (used) suitExtrasApi()?.release();
         };
         const tick = () => {
           frame = 0;

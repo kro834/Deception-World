@@ -17,6 +17,7 @@ import * as calls from "../src/lib/rexonance-calls.ts";
 import * as suit from "../src/lib/rexonance-suit.ts";
 import * as gold from "../src/lib/rexonance-suit-gold.ts";
 import * as kit from "../src/lib/rexonance-nanites.ts";
+import { createRexonanceCallRetention } from "../src/lib/rexonance-call-retention.ts";
 
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 const extrasSource = read("src/components/rexonance-saga/rexonance-suit-extras.ts");
@@ -240,6 +241,7 @@ test("the draw passes keep per-frame values in typed slots, not boxed lets", () 
     "primed",
     "promotePreparation",
     "resumePreparation",
+    "retention", // route lifetime only; no per-frame mutation/allocation
   ]);
   const from = extrasSource.indexOf("  const base = () => {");
   const to = extrasSource.indexOf("  return {\n    before,", from);
@@ -430,6 +432,7 @@ async function extrasRuntime({ touch }) {
       if (name === "@/lib/rexonance-calls") return calls;
       if (name === "@/lib/rexonance-suit") return suit;
       if (name === "@/lib/rexonance-nanites") return kit;
+      if (name === "@/lib/rexonance-call-retention") return { createRexonanceCallRetention };
       // Round 3 (reviews 8/27/9): the call phases its own read-backs and
       // shares the kit's row formulas (their bytes: rexonance-nanites-unlit).
       if (name === "@/lib/rexonance-unlit.js")
