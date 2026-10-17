@@ -153,6 +153,11 @@ const ZEUS_AVOID_TEXT_SELECTOR = [
   '[role="tab"]',
   "summary",
   "label",
+  // 2026-10-17 round 4: Rexonance's P14 read-outs (「96%」, the 100% base).
+  // Their forged figures fall to 21px below 390px, under the display-figure
+  // floor, so the button could rest on a read-out mid-scroll at 320-375.
+  ".rxs-p14-values strong",
+  ".rxs-p14-values b",
 ].join(",");
 const ZEUS_DISPLAY_TEXT_SELECTOR = "strong, b";
 const ZEUS_DISPLAY_TEXT_MIN_PX = 24;

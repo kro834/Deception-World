@@ -46,6 +46,15 @@ test("disclosure rows and the new controls are stepped off as whole boxes", () =
   );
   // Inside a dialog only its own controls count, like its words.
   assert.match(zeus, /const controlRoot: ParentNode = button\.closest\("dialog"\) \?\? document;/);
+  // 2026-10-17 round 4: the P14 read-outs count as words at every size (their
+  // forged figures are 21px below 390px, under the 24px display floor).
+  const words = zeus.slice(
+    zeus.indexOf("const ZEUS_AVOID_TEXT_SELECTOR"),
+    zeus.indexOf("const ZEUS_DISPLAY_TEXT_SELECTOR"),
+  );
+  for (const selector of ['".rxs-p14-values strong"', '".rxs-p14-values b"']) {
+    assert.ok(words.includes(selector), selector);
+  }
 });
 
 test("its own side first; the far rows only when clear; the fallback weighs distance", () => {
