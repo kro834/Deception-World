@@ -1027,6 +1027,55 @@ test("never the finished suit before the scroll: near and not yet live, the unde
   for (const { context } of [...hidden, ...under]) assert.equal(context.length, 0);
 });
 
+// Round 4 (patch B): under the motion gate the stand-in is the default picture from the near observer's first notice.
+test("a far jump never paints the finished still first: the stand-in is the motion tier's default from the first notice", async () => {
+  // Far below the view (the page's first frames): the undersuit and the
+  // read-outs at the start already, before any warm-up or nearness.
+  const far = { isIntersecting: false, boundingClientRect: { top: 5200, bottom: 7900 } };
+  const t = environment({ idleHeld: true });
+  const dispose = mountRexonanceAssembly(t.runway, engineConfig, t.env);
+  t.observers[0].callback([far]);
+  assert.equal(t.runway.dataset.rznState, "loading");
+  assert.equal(t.percent.textContent, "000");
+  assert.equal(t.counter.textContent, "ONLINE", "the count is the live frame's to write");
+  // The warm preparation far away changes nothing more.
+  const warm = t.observers.find((o) => o.options.rootMargin === "3203px 0px");
+  warm.callback([{ isIntersecting: true }]);
+  assert.equal(t.runway.dataset.rznState, "loading");
+  // At the runway's end (near and past it) the finished still is back, as
+  // the live frame there draws it; leaving again restores the stand-in.
+  t.observers[0].callback([
+    { isIntersecting: true, boundingClientRect: { top: -2600, bottom: 900 } },
+  ]);
+  assert.equal(t.runway.dataset.rznState, undefined);
+  assert.equal(t.percent.textContent, "100");
+  t.observers[0].callback([far]);
+  assert.equal(t.runway.dataset.rznState, "loading");
+  // Economy turns it back into the still tier's finished still at once (any
+  // sync; the attribute's own observer calls the same), and full effects
+  // bring the stand-in back.
+  t.html.setAttribute("data-world-effects", "economy");
+  t.listeners.get("document:visibilitychange")();
+  assert.equal(t.runway.dataset.rznState, undefined);
+  assert.equal(t.percent.textContent, "100");
+  t.html.removeAttribute("data-world-effects");
+  t.listeners.get("document:visibilitychange")();
+  assert.equal(t.runway.dataset.rznState, "loading");
+  dispose();
+  assert.equal(t.runway.dataset.rznState, undefined);
+  assert.equal(t.percent.textContent, "100");
+
+  // The still tiers: the same first notice leaves the finished still alone.
+  for (const options of [{ reduced: true }, { economy: true }, { forced: true }]) {
+    const q = environment(options);
+    const disposeQ = mountRexonanceAssembly(q.runway, engineConfig, q.env);
+    q.observers[0].callback([far]);
+    assert.equal(q.runway.dataset.rznState, undefined, JSON.stringify(options));
+    assert.equal(q.percent.textContent, "100", JSON.stringify(options));
+    disposeQ();
+  }
+});
+
 test("pagehide cancels queued preparation and pageshow safely resumes it", async () => {
   const t = environment({ idleHeld: true });
   const dispose = mountRexonanceAssembly(t.runway, engineConfig, t.env);

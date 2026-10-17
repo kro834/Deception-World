@@ -128,7 +128,8 @@ html[data-family="special"]
   box-shadow: 0 0 0 10px rgb(var(--rzn-ice) / 4%);
 }
 
-/* The finished figure: the still every mode shows until the scene is live. */
+/* The finished figure: the still tiers' picture. Under the motion gate it
+   shows before live only at the runway's end (round 4). */
 html[data-family="special"]
   body
   .rxs-page.rxs-page.rxs-rexonance-page
@@ -173,7 +174,7 @@ html[data-family="special"]
   display: block;
 }
 
-/* Motion allowed, near, not yet live (the preparation can take seconds):
+/* Motion allowed, not yet live (near or not, round 4; the preparation can take seconds):
    the undersuit stands where the scene starts, as faint as the first live
    frame draws it, never the finished suit (owner, 2026-10-16: 「スクロールする
    前から完成済みなこともあるので修正して。」). Until the first live frame is on

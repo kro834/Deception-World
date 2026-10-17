@@ -3217,8 +3217,9 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   };
 
   // The finished still is every quiet mode's picture. While motion is
-  // allowed and the scene is near but not yet live, the undersuit stands in
-  // its place with the read-outs at the start, as the first live frame will
+  // allowed and the scene is not yet live (near or not, round 4), the
+  // undersuit stands in its place with the read-outs at the start, as the
+  // first live frame will
   // draw them (owner, 2026-10-16: 「スクロールする前から完成済みなこともあるので
   // 修正して。」 — the preparation can take seconds, and the finished suit
   // showed first). A reader arriving from below, past the runway's end,
@@ -3260,6 +3261,20 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       if (index === 0 && chips.length === 1) setFlag(chips[0], "data-on", true);
     });
     if (percent) writeText(percent, "000");
+  };
+  // Round 4 (patch B): under the motion gate the undersuit stand-in is the
+  // scene's default picture, set from the near observer's first notice (the
+  // page's first frames, long before a reader can reach the scene), not
+  // only once the scene is near: a far jump (End, a scrollbar drag) painted
+  // a frame of the finished still and its 100 % read-out before the near
+  // observer's notice arrived. Only a reader at the runway's end (near and
+  // past it: the live frame there is the finished suit) keeps the finished
+  // still. Reduced motion, economy, Save-Data/2G and forced colours never
+  // get here: they keep the finished still exactly as before.
+  const standIn = () => {
+    if (live || !motionAllowed()) return;
+    if (!nearPast) showLoading();
+    else if (runway.dataset.rznState === "loading") restHud();
   };
   const goLive = () => {
     if (disposed || !pageActive || live || !near || document.hidden || !images || !motionAllowed())
@@ -3326,10 +3341,8 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   let preparing = null;
   const wake = () => {
     if (disposed || !pageActive || live || !motionAllowed() || document.hidden) return;
-    // As soon as the scene is near — also while a warm preparation already
-    // runs (it once stayed on the finished still until live).
-    if (near && !nearPast) showLoading();
-    else if (nearPast && runway.dataset.rznState === "loading") restHud();
+    // (The stand-in is the near observer's and sync's, round 4: the warm
+    // preparation far away never changes the picture.)
     if (plan && settled && buffers) {
       goLive();
       return;
@@ -3366,6 +3379,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
               );
             }
             if (disposed) return;
+            standIn();
             if (near) wake();
             listen(near && live);
             schedule();
@@ -3409,6 +3423,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       calmTimer = 0;
       return;
     }
+    standIn();
     if (warm || near) wake();
     lastProgress = -1;
     schedule();
@@ -3438,6 +3453,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   observeWarmup();
   if (!nearObserver) {
     near = warm = true;
+    standIn();
     wake();
   }
 
