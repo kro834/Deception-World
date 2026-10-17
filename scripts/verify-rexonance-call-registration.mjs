@@ -6,13 +6,13 @@
 // the same figure pixel landed up to 1.9 device px apart on the two
 // canvases and each plate dropped about 1 device px at its hand-off. The
 // flight canvas's edges now lie whole CSS px outside the figure's (its
-// backing store the settled canvas's plus those pixels), and the settled
-// canvas is untouched, so the finished suit is drawn as before. This plays
+// backing store the figure's plus those pixels), and since round 4 the
+// settled canvas shares that box and backing. This plays
 // the rich entry call on a production preview (1440x900 at 2x, fine pointer):
-//  1. the boxes: the settled canvas is the figure's box at the figure's
-//     backing; the flight canvas bleeds left and up by whole CSS px, never
+//  1. the boxes: the flight canvas bleeds left and up by whole CSS px, never
 //     past the stylesheet's bleed nor below the figure, and its backing store
-//     is the settled canvas's plus those pixels at 2x;
+//     is the figure's plus those pixels at 2x; the settled canvas shares its
+//     box and backing (round 4, patch A);
 //  2. the pixels: across each plate's hand-off (`to` − 2 ms → `to` + 2 ms)
 //     the best sub-pixel fit of the frame after onto the frame before is no
 //     shift at all. The figure's own jolt (rxSuitJolt) is held at one time
@@ -22,10 +22,9 @@
 //  3. the screen: last, the engine's draws are muted and the same grid of
 //     dots is drawn at the same figure pixels on each canvas; shown one at a
 //     time, the dots land on the same device pixels: exactly (< 0.05 device
-//     px) vertically, and within 0.25 device px horizontally. That remainder
-//     is the settled canvas's own: Chrome shows its 856 backing px over
-//     429 CSS px (858 device px), a stretch the flight canvas cannot copy
-//     without moving the finished suit.
+//     px) both ways. (Until round 4 the settled canvas kept the figure's box
+//     and Chrome showed its 856 backing px over 858 device px, 0.16 device px
+//     across; patch A put it on the flight canvas's box.)
 // ALL=1 scrubs every plate with gold; PLATES=id,id picks plates; OUT=<dir>
 // keeps the frames. LEGACY_GEOMETRY=1 puts the flight canvas back on its old
 // box (the stylesheet's percentages at its rounded CSS size; checks 1 and 3
@@ -156,15 +155,21 @@ console.log("boxes", JSON.stringify({ box: info.box, canvases: info.canvases }))
   const [settled, flight] = info.canvases;
   const { box } = info;
   const near = (a, b) => Math.abs(a - b) <= 1 / 64 + 1e-9;
-  // The settled canvas: the figure's box at the figure's backing, as before.
+  // Round 4 (patch A): the settled canvas shares the flight canvas's box, style and backing (was: the figure's box).
   for (const key of ["x", "y", "w", "h"])
-    check(near(settled.rect[key], box[key]), `the settled canvas left the figure's box (${key})`);
-  check(settled.style === null, `the settled canvas has a style: ${settled.style}`);
-  const figure = info.client.map((size) => Math.round(size * DPR));
+    check(
+      near(settled.rect[key], flight.rect[key]),
+      `the settled canvas left the flight canvas's box (${key})`,
+    );
   check(
-    settled.backing[0] === figure[0] && settled.backing[1] === figure[1],
-    `the settled canvas's backing ${settled.backing} is not the figure's ${figure}`,
+    settled.style === flight.style,
+    `the settled canvas's style ${settled.style} is not the flight canvas's`,
   );
+  check(
+    settled.backing[0] === flight.backing[0] && settled.backing[1] === flight.backing[1],
+    `the settled canvas's backing ${settled.backing} is not the flight canvas's ${flight.backing}`,
+  );
+  const figure = info.client.map((size) => Math.round(size * DPR));
   // The flight canvas: whole CSS px outside the figure on every side.
   const insets = {
     left: box.x - flight.rect.x,
@@ -185,12 +190,12 @@ console.log("boxes", JSON.stringify({ box: info.box, canvases: info.canvases }))
   check(insets.right <= box.w * 0.1 + 1 / 64, `the flight canvas bleeds ${insets.right} px right`);
   check(near(insets.bottom, 0), `the flight canvas bleeds ${insets.bottom} px below the figure`);
   const expected = [
-    settled.backing[0] + Math.round((insets.left + insets.right) * DPR),
-    settled.backing[1] + Math.round((insets.top + insets.bottom) * DPR),
+    figure[0] + Math.round((insets.left + insets.right) * DPR),
+    figure[1] + Math.round((insets.top + insets.bottom) * DPR),
   ];
   check(
     flight.backing[0] === expected[0] && flight.backing[1] === expected[1],
-    `the flight canvas's backing ${flight.backing} is not the settled canvas's plus its bleed (${expected})`,
+    `the flight canvas's backing ${flight.backing} is not the figure's plus its bleed (${expected})`,
   );
 }
 
@@ -376,8 +381,9 @@ check(
   worstY < 0.05,
   `the canvases put the same figure pixel ${worstY.toFixed(3)} device px apart down`,
 );
+// Round 4 (patch A): exact across too, now that both canvases share one box (was < 0.25).
 check(
-  worstX < 0.25,
+  worstX < 0.05,
   `the canvases put the same figure pixel ${worstX.toFixed(3)} device px apart across`,
 );
 

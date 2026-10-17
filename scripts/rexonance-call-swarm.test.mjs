@@ -124,9 +124,8 @@ test("the call decides once, bleeds only on fine pointers, and keeps the classic
     nanites,
     /flight\.setTransform\(1, 0, 0, 1, 0, 0\);\s*flight\.clearRect\(0, 0, width, height\);\s*flight\.setTransform\(1, 0, 0, 1, ox, oy\);/,
   );
-  // The settled canvas stays on the figure's box at the figure's scale, so
-  // the finished suit (frame 2730) is drawn exactly as before; only the
-  // flight canvas bleeds (CSS), its figure origin on whole device pixels.
+  // The figure's scale comes from its own backing; the flight canvas bleeds
+  // (CSS), its figure origin on whole device pixels.
   assert.match(nanites, /settledCanvas\.width = Math\.round\(box\.clientWidth \* scale\);/);
   // Flight edges whole CSS px off the figure's (review 2026-10-16: plates hopped ~1 px at `to`).
   assert.match(
@@ -137,13 +136,20 @@ test("the call decides once, bleeds only on fine pointers, and keeps the classic
     nanites,
     /const height = settledCanvas\.height \+ oy \+ Math\.round\(bottom \* scale\);/,
   );
+  // Round 4 (patch A): the settled canvas takes the flight canvas's bled box and backing.
+  assert.match(nanites, /settledCanvas\.width = width;\s*settledCanvas\.height = height;/);
+  assert.match(
+    nanites,
+    /for \(const canvas of \[settledCanvas, flightCanvas\]\)\s*Object\.assign\(canvas\.style, \{/,
+  );
   assert.match(
     nanites,
     /left: `\$\{-left\}px`,\s*top: `\$\{-top\}px`,\s*width: `calc\(100% \+ \$\{left \+ right\}px\)`,\s*height: `calc\(100% \+ \$\{top \+ bottom\}px\)`,/,
   );
   assert.match(nanites, /const s = settledCanvas\.width \/ FIG\.width;/);
   assert.match(nanites, /const ox = Math\.round\(/);
-  assert.doesNotMatch(nanites, /settled\.setTransform/);
+  // Round 4 (patch A): the settled canvas draws under the same whole-pixel offset (was: no transform).
+  assert.match(nanites, /settled\.setTransform\(1, 0, 0, 1, ox, oy\);/);
   // Its swarm replaces the SVG motes only when it runs; the motes' own
   // clock is unchanged, and the bleed never reaches below the figure nor
   // more than 4 % to its left.

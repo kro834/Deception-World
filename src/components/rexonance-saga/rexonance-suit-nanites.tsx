@@ -139,8 +139,7 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
         const scale = Math.min(coarse ? 1.25 : 2, globalThis.devicePixelRatio || 1);
         // The extras are decided once, here (2026-10-16); on fine pointers
         // the flight canvas then bleeds past the figure (CSS) for the cocoon
-        // and spall. The settled canvas covers the figure exactly as it
-        // always has, so the finished suit is drawn pixel for pixel as before.
+        // and spall, and the settled canvas shares its box (below).
         const rich = isRexonanceNaniteReady();
         if (rich && !coarse) box.dataset.bleed = "";
         const make = () => {
@@ -162,9 +161,8 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
         // changed canvas. Now the flight canvas's edges lie a whole number of
         // CSS, backing and device pixels outside the figure's, so both boxes
         // snap alike, and its backing store is the settled canvas's plus those
-        // pixels. The settled canvas is untouched (the finished suit as
-        // before). The figure's transforms are translations, alike on both
-        // rects.
+        // pixels (round 4: the settled canvas then takes the same box, below).
+        // The figure's transforms are translations, alike on both rects.
         const outer = flightCanvas.getBoundingClientRect();
         const inner = box.getBoundingClientRect();
         const dpr = globalThis.devicePixelRatio || 1;
@@ -180,15 +178,29 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
         const oy = Math.round(top * scale);
         const width = settledCanvas.width + ox + Math.round(right * scale);
         const height = settledCanvas.height + oy + Math.round(bottom * scale);
+        // The figure's scale, from its own backing (before the settled
+        // canvas takes the bled box).
+        const s = settledCanvas.width / FIG.width;
+        // Round 4 (patch A): the settled canvas shares the flight canvas's
+        // box and backing, and draws the finished plates under the same
+        // whole-pixel offset. Chrome snapped its figure-sized layer (856
+        // backing px over 428.22 CSS px, shown at 858 device px) apart from
+        // the bled one, leaving 0.16 device px across at each hand-off; two
+        // identical boxes snap alike, so a plate changes canvas in place. The
+        // finished frame moves by that same sub-pixel snap. Touch screens do
+        // not bleed: both canvases stay on the figure's box, as before.
+        settledCanvas.width = width;
+        settledCanvas.height = height;
         flightCanvas.width = width;
         flightCanvas.height = height;
         if (left + top + right + bottom > 0)
-          Object.assign(flightCanvas.style, {
-            left: `${-left}px`,
-            top: `${-top}px`,
-            width: `calc(100% + ${left + right}px)`,
-            height: `calc(100% + ${top + bottom}px)`,
-          });
+          for (const canvas of [settledCanvas, flightCanvas])
+            Object.assign(canvas.style, {
+              left: `${-left}px`,
+              top: `${-top}px`,
+              width: `calc(100% + ${left + right}px)`,
+              height: `calc(100% + ${top + bottom}px)`,
+            });
         // Round 3 (owner 「更にブラッシュアップして」): what the flight canvas
         // leaves clear, from the figure's origin in device px — its own edges
         // (sprites fade out within `fence[4]` of them, so nothing meets a
@@ -227,7 +239,7 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
           return;
         }
         work.dirty = true;
-        const s = settledCanvas.width / FIG.width;
+        settled.setTransform(1, 0, 0, 1, ox, oy);
         // Round 3 (review 30): a pass of the extras that throws drops them
         // for the rest of the call (tick), and the classic engine draws on.
         let extras = rich
@@ -279,7 +291,9 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
           done[index] = 1;
         };
         const reset = () => {
-          settled.clearRect(0, 0, settledCanvas.width, settledCanvas.height);
+          settled.setTransform(1, 0, 0, 1, 0, 0);
+          settled.clearRect(0, 0, width, height);
+          settled.setTransform(1, 0, 0, 1, ox, oy);
           done.fill(0);
           for (let p = 0; p < all.length; p += 1) locked[p] = all[p].first;
           work.dirty = true;
