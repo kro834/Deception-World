@@ -972,21 +972,24 @@ test("the early warm-up: the network half once the page is idle after load, the 
   };
   const t = environment({ loaded: true });
   const dispose = mountRexonanceAssembly(t.runway, config, t.env);
-  await until(() => t.decodedSources.length >= 2, "the sheets are requested once idle");
-  assert.equal(kitRequests, 1, "the kit is imported with them");
-  assert.deepEqual(t.decodedSources.slice(0, 2), ["/f.webp", "/u.webp"]);
+  await until(() => kitRequests === 1, "the code (module and kit) is imported once idle");
   await new Promise((resolve) => setTimeout(resolve, 20));
+  // verify-rexonance-rx17-preload's roundtrip pin: a direct entry keeps
+  // speculative suit work off, so no sheet is requested until the reader moves.
+  assert.equal(t.decodedSources.length, 0, "no sheet before the reader moves");
   assert.equal(t.preparationPhases.length, 0, "nothing is prepared before the reader moves");
   assert.equal(t.runway.dataset.rznState, undefined, "and nothing visible changes");
   assert.equal(t.percent.textContent, "100");
-  // Still in the hero: no preparation; past it: the preparation runs.
+  // Still in the hero: nothing; past it: the sheets are fetched and the preparation runs.
   t.env.scrollY = 200;
   t.listeners.get("document:scroll")();
   await new Promise((resolve) => setTimeout(resolve, 10));
+  assert.equal(t.decodedSources.length, 0);
   assert.equal(t.preparationPhases.length, 0);
   t.env.scrollY = 600;
   t.listeners.get("document:scroll")();
   assert.equal(t.listeners.has("document:scroll"), false, "one notice is enough");
+  await until(() => t.decodedSources.length >= 2, "the sheets are requested past the hero");
   await until(t.prepared, "prepared far ahead of the scene");
   assert.equal(t.runway.dataset.rznState, undefined, "preparing far away changes nothing");
   assert.equal(t.percent.textContent, "100");

@@ -3531,6 +3531,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   const goEager = () => {
     stopEarlyScroll();
     eager = true;
+    prefetch();
     wake();
   };
   const onEarlyScroll = () => {
@@ -3547,7 +3548,10 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   const startEarly = () => {
     earlyId = 0;
     if (disposed || !motionAllowed()) return;
-    prefetch();
+    // At idle only the code (the swarm module and the kit) is fetched: a
+    // direct entry keeps speculative suit work off (verify-rexonance-rx17-
+    // preload's roundtrip pin), so the sheets wait for the past-hero scroll.
+    modules().catch(() => {});
     if (eager) return;
     if (pastHero()) goEager();
     else listenEarly();
