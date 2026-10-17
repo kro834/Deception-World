@@ -1522,11 +1522,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       ([, nanites]) => {
         if (disposed || images) return;
         for (const src of sheetSources(nanites))
-          if (!fetched.has(src))
-            fetched.set(
-              src,
-              picture(src, "low").catch(() => null),
-            );
+          if (!fetched.has(src)) fetched.set(src, picture(src, "low").catch(() => null));
       },
       () => {
         prefetching = false;
