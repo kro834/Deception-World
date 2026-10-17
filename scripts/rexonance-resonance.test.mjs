@@ -474,7 +474,9 @@ test("reactor glow waits for sealed armor and advanced art waits for the ignitio
   );
   try {
     t.observers[0].callback([{ isIntersecting: true }]);
-    for (let i = 0; i < 100 && t.runway.dataset.rznState !== "live"; i += 1)
+    // Preparation now yields every two rows; CI timer scheduling needs more
+    // turns. This is readiness waiting, not the draw-budget assertion below.
+    for (let i = 0; i < 1000 && t.runway.dataset.rznState !== "live"; i += 1)
       await new Promise((resolve) => setTimeout(resolve, 5));
     assert.equal(t.runway.dataset.rznState, "live");
     const seal = t.scroll(0.89);
@@ -627,7 +629,8 @@ test("gold converges while scroll rests, reverse work stays bounded, touch art r
   );
   try {
     t.observers[0].callback([{ isIntersecting: true }]);
-    for (let i = 0; i < 100 && t.runway.dataset.rznState !== "live"; i += 1)
+    // Two-row preparation yields need additional timer turns on shared CI.
+    for (let i = 0; i < 1000 && t.runway.dataset.rznState !== "live"; i += 1)
       await new Promise((resolve) => setTimeout(resolve, 5));
     assert.equal(t.runway.dataset.rznState, "live");
     const first = t.scroll(0.5);
