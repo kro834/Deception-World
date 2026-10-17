@@ -1674,6 +1674,11 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   // ~0.3 s of work, so a brisk reader reached the runway before it was live).
   const clock = () => environment.performance?.now?.() ?? Date.now();
   let idleUntil = 0;
+  // Without idle callbacks (Safari), one 16 ms timer per tiny slice turned
+  // sub-second work into a many-second 0% standstill. A timer opens a short
+  // burst of separately yielding tasks; another timer yields to paint/input
+  // after 4 ms. Individual preparation slices keep their existing budgets.
+  let fallbackUntil = 0;
   let chain = null;
   const chained = [];
   const chainDeadline = {
@@ -1695,10 +1700,11 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     new Promise((resolve, reject) => {
       if (disposed || !pageActive || document.hidden || !motionAllowed()) return resolve(null);
       const key = {};
-      const run = (deadline) => {
+      const run = (deadline, opensFallback = false) => {
         if (!idleJobs.delete(key)) return;
         if (disposed || !pageActive || document.hidden || !motionAllowed()) return resolve(null);
         try {
+          if (opensFallback) fallbackUntil = clock() + 4;
           if (deadline?.didTimeout) idleFallbackGeneration = generation;
           // A real deadline opens an idle period the following slices may
           // use; a timeout or a timer slice opens none.
@@ -1720,16 +1726,17 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       // few ms take one more slice (a slice's work stops at 3–4 ms): scrolling
       // leaves short idle periods, and the slack was left unused.
       const room = near && !live ? 4.5 : 8;
-      const port = idle && idleUntil - clock() > room ? chainPort() : null;
+      const port = (idle ? idleUntil - clock() > room : fallbackUntil > clock())
+        ? chainPort() : null;
       if (port) {
-        chained.push(() => run(chainDeadline));
+        chained.push(() => run(idle ? chainDeadline : null));
         port.port2.postMessage(0);
         idleJobs.set(key, () => resolve(null));
         return;
       }
       const id = idle
         ? environment.requestIdleCallback(run, { timeout: 1000 })
-        : environment.setTimeout(run, 16);
+        : environment.setTimeout(() => run(null, true), 16);
       idleJobs.set(key, () => {
         if (idle) environment.cancelIdleCallback?.(id);
         else environment.clearTimeout(id);
@@ -1739,6 +1746,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   const cancelPreparation = () => {
     generation += 1;
     idleFallbackGeneration = -1;
+    fallbackUntil = 0;
     for (const cancel of idleJobs.values()) cancel();
     idleJobs.clear();
     partialBuild?.cancel();

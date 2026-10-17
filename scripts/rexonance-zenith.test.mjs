@@ -1375,6 +1375,45 @@ test("without requestIdleCallback the bounded timer fallback prepares the scene"
   assert.equal(t.frames.size, 0);
 });
 
+test("Safari fallback batches tiny slices but yields to timers after each bounded burst", async () => {
+  const { MessageChannel } = await import("node:worker_threads");
+  const t = environment();
+  delete t.env.requestIdleCallback;
+  let now = 0;
+  let posts = 0;
+  let timers = 0;
+  let burst = 0;
+  let maxBurst = 0;
+  t.env.performance = { now: () => now };
+  t.env.MessageChannel = class extends MessageChannel {
+    constructor() {
+      super();
+      const post = this.port2.postMessage.bind(this.port2);
+      this.port2.postMessage = (...args) => {
+        posts++;
+        now++;
+        maxBurst = Math.max(maxBurst, ++burst);
+        post(...args);
+      };
+    }
+  };
+  t.env.setTimeout = (callback, ms) => {
+    if (ms === 16) { timers++; burst = 0; }
+    return setTimeout(callback, 0);
+  };
+  const dispose = mountRexonanceAssembly(t.runway, engineConfig, t.env);
+  try {
+    t.observers[0].callback([{ isIntersecting: true }]);
+    await until(() => t.runway.dataset.rznState === "live", "Safari tasks finish preparation");
+    assert.ok(posts > timers, "tiny slices do not each incur a 16 ms delay");
+    assert.ok(timers > 1, "paint/input receives repeated timer breaks");
+    assert.ok(maxBurst <= 4, "task chaining stops at the 4 ms burst boundary");
+    t.scrollTo(0.5);
+    assert.notEqual(t.percent.textContent, "000", "scroll advances after preparation");
+  } finally { dispose(); }
+  assert.equal(t.frames.size, 0);
+});
+
 test("a timed-out empty idle deadline switches the generation to bounded timer slices", async () => {
   const t = environment({ idleHeld: true });
   const dispose = mountRexonanceAssembly(t.runway, engineConfig, t.env);

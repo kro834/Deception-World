@@ -5,7 +5,7 @@ import { chromium } from "playwright";
 const browser = await chromium.launch({ channel: "chrome" });
 try {
   const page = await browser.newPage({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
-  await page.addInitScript(() => {
+  await page.addInitScript(({ noIdle }) => {
     let phase = "";
     window.__rexonancePreparationPhase = (value) => { phase = value; };
     window.__preparationSlices = [];
@@ -20,6 +20,12 @@ try {
     };
     const idle = window.requestIdleCallback.bind(window);
     window.requestIdleCallback = (callback, options) => idle(wrap(callback), options);
+    if (noIdle) {
+      window.requestIdleCallback = undefined;
+      const timer = window.setTimeout.bind(window);
+      window.setTimeout = (callback, delay, ...args) =>
+        timer(typeof callback === "function" ? wrap(callback) : callback, delay, ...args);
+    }
     const NativeChannel = window.MessageChannel;
     window.MessageChannel = class extends NativeChannel {
       constructor() {
@@ -31,7 +37,7 @@ try {
         });
       }
     };
-  });
+  }, { noIdle: process.env.NO_IDLE === "1" });
   const cdp = await page.context().newCDPSession(page);
   await cdp.send("Emulation.setCPUThrottlingRate", { rate: 4 });
   await page.goto(`${process.env.BASE_URL || "http://127.0.0.1:4217"}/rexonance-saga`);
