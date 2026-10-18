@@ -1404,7 +1404,13 @@ test("Safari fallback batches tiny slices but yields to timers after each bounde
   const dispose = mountRexonanceAssembly(t.runway, engineConfig, t.env);
   try {
     t.observers[0].callback([{ isIntersecting: true }]);
-    await until(() => t.runway.dataset.rznState === "live", "Safari tasks finish preparation");
+    // goLive marks the runway live before the mock ResizeObserver's next
+    // task measures the canvas and queues its first animation frame. Wait
+    // for that frame as the other live-scene tests do; scrollTo flushes it.
+    await until(
+      () => t.runway.dataset.rznState === "live" && t.frames.size > 0,
+      "Safari tasks finish preparation and queue the first frame",
+    );
     assert.ok(posts > timers, "tiny slices do not each incur a 16 ms delay");
     assert.ok(timers > 1, "paint/input receives repeated timer breaks");
     assert.ok(maxBurst <= 4, "task chaining stops at the 4 ms burst boundary");
