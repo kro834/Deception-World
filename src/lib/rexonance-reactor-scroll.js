@@ -2,6 +2,7 @@ import { reactorCoilAngle, reactorCoilScale, reactorFormation } from "./rexonanc
 
 const IDS = new Set(["core-disc", "core-swirl"]);
 const CELL = 3;
+const HEX = 4.5;
 const CELL_BAND = 0.5;
 const CELL_LEAD = 0.45;
 const FRESH = [];
@@ -74,6 +75,30 @@ export function createReactorLayers({ document, pieces, atlas, art, undersuit, s
     sc.drawImage(bare, 0, 0);
   }
   bare.width = bare.height = 0;
+  // The unfinished reactor hides under a honeycomb (owner, 2026-10-18):
+  // dark hex cells with steel-blue edges, only over the socket's own shape.
+  sc.globalCompositeOperation = "source-atop";
+  sc.fillStyle = "rgb(8 12 20 / 0.55)";
+  sc.fillRect(0, 0, w, h);
+  const r = HEX;
+  const dx = r * Math.sqrt(3);
+  sc.beginPath();
+  for (let row = 0, cy = 0; cy < h + r * 2; row += 1, cy += r * 1.5) {
+    for (let cx = row % 2 ? dx / 2 : 0; cx < w + dx; cx += dx) {
+      for (let k = 0; k < 6; k += 1) {
+        const a = Math.PI / 6 + (k * Math.PI) / 3;
+        const px = cx + r * Math.cos(a);
+        const py = cy + r * Math.sin(a);
+        if (k) sc.lineTo(px, py);
+        else sc.moveTo(px, py);
+      }
+      sc.closePath?.();
+    }
+  }
+  sc.lineWidth = 0.8;
+  sc.strokeStyle = "rgb(132 182 214 / 0.6)";
+  sc.stroke();
+  sc.globalCompositeOperation = "source-over";
   return layers;
 }
 
