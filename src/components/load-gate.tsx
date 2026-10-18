@@ -138,7 +138,7 @@ const RIDER_DIVE_TIMINGS: Record<RiderDiveVariant, { cover: number; reveal: numb
   realm: { cover: 360, reveal: 460 },
   lore: { cover: 360, reveal: 460 },
   vandal: { cover: 360, reveal: 460 },
-  dream: { cover: 420, reveal: 500 },
+  dream: { cover: 450, reveal: 540 },
   rexonance: REXONANCE_ENTRY_TIMINGS,
   extreme: { cover: 380, reveal: 480 },
   "final-stage": { cover: 380, reveal: 480 },
@@ -1907,7 +1907,9 @@ function RiderRouteDive({
               ? "EXTREME // SUPREME SITE"
               : variant === "final-stage"
                 ? "FINAL STAGE // STORY SITE"
-                : `${meta.name} // RIDER ${meta.no}`}
+                : variant === "dream"
+                  ? "DREAM CHAPTER // LIQUID ABYSS"
+                  : `${meta.name} // RIDER ${meta.no}`}
         </small>
         <span>
           {variant === "rexonance"
@@ -1922,9 +1924,13 @@ function RiderRouteDive({
                 ? revealing
                   ? "最終位相へ到着"
                   : "最終位相へダイブ中"
-                : revealing
-                  ? "個別資料へ到着"
-                  : "記録位相へダイブ中"}
+                : variant === "dream"
+                  ? revealing
+                    ? "深層夢界へ沈降完了"
+                    : "夢界の液層へ沈降中"
+                  : revealing
+                    ? "個別資料へ到着"
+                    : "記録位相へダイブ中"}
         </span>
       </span>
     </div>

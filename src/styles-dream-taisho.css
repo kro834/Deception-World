@@ -1928,9 +1928,11 @@
 
 @keyframes ts-settle {
   from {
-    scale: 1.08;
+    translate: 0 -22px;
+    scale: 1.09;
   }
   to {
+    translate: 0 0;
     scale: 1;
   }
 }
@@ -1958,7 +1960,11 @@
 @keyframes ts-rise {
   from {
     opacity: 0;
-    translate: 0 24px;
+    translate: 0 -18px;
+  }
+  65% {
+    opacity: 1;
+    translate: 0 3px;
   }
   to {
     opacity: 1;
