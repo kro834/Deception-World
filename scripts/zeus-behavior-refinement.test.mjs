@@ -294,8 +294,8 @@ test("both Zeus image variants stay low priority while preserving their thumbnai
   const images = source.match(/<img\b[\s\S]*?\/>/g) ?? [];
   assert.equal(images.length, 2);
   for (const image of images) assert.match(image, /fetchPriority="low"/);
-  assert.match(images[0], /srcSet=\{ZEUS_BUTTON_SRCSET\}/);
-  assert.match(images[1], /srcSet=\{ZEUS_BUTTON_RETURN_SRCSET\}/);
+  assert.match(images[0], /srcSet=\{CIEL_BUTTON_SRCSET\}/);
+  assert.match(images[1], /srcSet=\{CIEL_BUTTON_SRCSET\}/);
 });
 
 test("phone scrolling hides Zeus until idle and cancels its reveal work on disposal", () => {

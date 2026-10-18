@@ -63,6 +63,7 @@ const RAIN_CITY_ASSET_PATHS = [
   "/rain-city-materials/asphalt-roughness.png",
   "/rain-city-materials/manifest.json",
 ];
+const CIEL_BUTTON_PATHS = [144, 216, 360].map((width) => `/ciel-button-20261018-${width}.webp`);
 
 test("rain-city release verification accepts exactly seven material paths and checks every delivered byte", async () => {
   const bytes = new Map(RAIN_CITY_ASSET_PATHS.map((path) => [path, Buffer.from(`asset:${path}`)]));
@@ -141,6 +142,7 @@ test("rain-city release verification accepts exactly seven material paths and ch
 
 test("public verification hashes exhibition, cinema and authored Rexonance assets and rejects changed bytes or unknown paths", async () => {
   const paths = [
+    ...CIEL_BUTTON_PATHS,
     "/rexonance-forms-20261011/excelsior-cutout-20261012.webp",
     "/rider-rexonance-excelsior-cutout-20261012.webp",
     "/rider-rexonance-excelsior-cutout-20261012-delivery-640.webp",
@@ -198,6 +200,11 @@ test("public verification hashes exhibition, cinema and authored Rexonance asset
   );
   for (const changed of paths) assert.equal((await run({ changed })).report.ok, false, changed);
   for (const unknown of [
+    "/ciel-button-20261018-720.webp",
+    "/ciel-button-20261019-144.webp",
+    ...CIEL_BUTTON_PATHS.flatMap((path) =>
+      ["/extra", "%2fextra", ".bak", "?x=1", "#extra", "\n", "\r\n"].map((suffix) => path + suffix),
+    ),
     "/rexonance-forms-20261011/unknown.webp",
     "/rexonance-forms-20261011/excelsior-cutout-20261012.webp/extra",
     "/rider-rexonance-excelsior-cutout-20261012-delivery-2048.webp",
@@ -439,6 +446,7 @@ test("new release identity requires shared gallery readiness and preserves artwo
     ),
   );
   for (const path of [
+    ...CIEL_BUTTON_PATHS,
     "/exhibition-metal/manifest.json",
     "/exhibition-metal/brushed-alloy-normal.png",
     "/exhibition-metal/brushed-alloy-roughness.png",

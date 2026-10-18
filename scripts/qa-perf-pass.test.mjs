@@ -337,7 +337,7 @@ test("the opening does not preload the Zeus button it never shows", () => {
   assert.match(root, /head: \(\{ matches \}\) => \(\{/);
   assert.match(
     root,
-    /\.\.\.\(matches\.some\(\(match\) => \(match\.routeId as string\) === "\/"\)\s*\? \[\]\s*: \[\s*\{\s*rel: "preload",\s*as: "image",\s*type: "image\/webp",\s*href: "\/zeus-button-360\.webp",/,
+    /\.\.\.\(matches\.some\(\(match\) => \(match\.routeId as string\) === "\/"\)\s*\? \[\]\s*: \[\s*\{\s*rel: "preload",\s*as: "image",\s*type: "image\/webp",\s*href: "\/ciel-button-20261018-360\.webp",/,
   );
   // The button itself still never renders on the opening.
   assert.match(

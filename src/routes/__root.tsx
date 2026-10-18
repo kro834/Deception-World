@@ -51,7 +51,7 @@ import { getViewportChrome, getViewportChromeColor } from "@/lib/viewport-chrome
 import { getRouteFamily } from "@/lib/route-family";
 import { DOSSIER_HUD_FONTS_URL } from "@/lib/world-head";
 import { siteFontLinks } from "@/lib/site-fonts";
-import { ZEUS_BUTTON_SIZES, ZEUS_BUTTON_SRCSET } from "@/lib/thumbnail-images";
+import { CIEL_BUTTON_SIZES, CIEL_BUTTON_SRCSET } from "@/lib/thumbnail-images";
 
 const APP_NAME = "Deception World";
 const host = import.meta.env.VITE_PUBLIC_HOSTNAME;
@@ -157,9 +157,9 @@ export const Route = createRootRoute({
               rel: "preload",
               as: "image",
               type: "image/webp",
-              href: "/zeus-button-360.webp",
-              imageSrcSet: ZEUS_BUTTON_SRCSET,
-              imageSizes: ZEUS_BUTTON_SIZES,
+              href: "/ciel-button-20261018-360.webp",
+              imageSrcSet: CIEL_BUTTON_SRCSET,
+              imageSizes: CIEL_BUTTON_SIZES,
               fetchPriority: "low" as const,
             },
           ]),

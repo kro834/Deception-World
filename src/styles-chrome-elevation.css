@@ -1159,6 +1159,47 @@ html body .zeus-button {
   outline-offset: 6px;
 }
 
+/* Ciel keeps the proven floating-control geometry and gesture selectors. */
+html body .zeus-button.ciel-button[data-navigation-character="ciel"] {
+  border-color: rgb(128 228 162 / 82%);
+  background:
+    linear-gradient(
+      145deg,
+      rgb(231 255 239 / 78%),
+      rgb(55 130 84 / 24%) 54%,
+      rgb(80 203 134 / 36%)
+    ),
+    #071a11;
+  outline-color: rgb(110 239 159 / 48%);
+  box-shadow:
+    inset 0 1px 0 rgb(240 255 245 / 86%),
+    0 0 0 3px rgb(5 22 14 / 82%),
+    0 12px 34px rgb(0 0 0 / 50%),
+    0 0 28px rgb(94 228 142 / 22%);
+}
+
+html body .zeus-button.ciel-button[data-navigation-character="ciel"] .zeus-button-aura {
+  border-color: rgb(173 242 190 / 75%);
+  box-shadow: inset 0 -12px 22px rgb(82 207 129 / 12%);
+}
+
+html body .zeus-button.ciel-button[data-navigation-character="ciel"] .zeus-button-aura::before {
+  border-color: #9aefb4;
+  background: linear-gradient(0deg, rgb(94 228 142 / 26%), transparent 72%);
+}
+
+html body .zeus-button.ciel-button[data-navigation-character="ciel"] .zeus-button-move {
+  border-color: rgb(128 228 162 / 75%);
+}
+
+html body .zeus-button.ciel-button[data-navigation-character="ciel"][data-dragging="true"] {
+  outline-color: #9aefb4;
+}
+
+html body .zeus-button.ciel-button[data-navigation-character="ciel"]:focus-visible {
+  outline: 2px solid #c0ffda;
+}
+
 html body .zeus-button::before {
   display: none;
 }

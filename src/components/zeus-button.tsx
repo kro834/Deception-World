@@ -21,11 +21,8 @@ import {
   type ZeusBounds,
   type ZeusDragGeometry,
 } from "@/lib/zeus-drag";
-import {
-  ZEUS_BUTTON_RETURN_SRCSET,
-  ZEUS_BUTTON_SIZES,
-  ZEUS_BUTTON_SRCSET,
-} from "@/lib/thumbnail-images";
+import { CIEL_BUTTON_SIZES, CIEL_BUTTON_SRCSET } from "@/lib/thumbnail-images";
+import { waitForFloatingButtonDelay, waitForFloatingButtonPaint } from "@/lib/floating-button-wait";
 
 type ZeusButtonPosition = { x: number; y: number };
 
@@ -355,8 +352,43 @@ export function ZeusButtonProvider({ children }: { children: ReactNode }) {
   const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null);
   const [sideMenuOpen, setSideMenuOpen] = useState(false);
   const navigatingRef = useRef(false);
+  const navigationRun = useRef<AbortController | null>(null);
+  const navigationRouting = useRef<AbortController | null>(null);
+  const mounted = useRef(true);
   const [navigating, setNavigating] = useState(false);
   const [returnImage, setReturnImage] = useState(false);
+
+  useEffect(() => {
+    mounted.current = true;
+    const cancelNavigation = () => {
+      const run = navigationRun.current;
+      if (!run) return;
+      const ownsRoute = navigationRouting.current === run;
+      navigationRun.current = null;
+      navigatingRef.current = false;
+      run.abort();
+      setReturnImage(false);
+      setNavigating(false);
+      if (ownsRoute) {
+        navigationRouting.current = null;
+        document.dispatchEvent(new CustomEvent("deception-world:cancel-route-transition"));
+      }
+    };
+    const onVisibility = () => {
+      if (document.hidden) cancelNavigation();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+    window.addEventListener("pagehide", cancelNavigation);
+    return () => {
+      mounted.current = false;
+      navigationRun.current?.abort();
+      navigationRun.current = null;
+      navigationRouting.current = null;
+      navigatingRef.current = false;
+      document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("pagehide", cancelNavigation);
+    };
+  }, []);
 
   useEffect(() => {
     try {
@@ -424,7 +456,9 @@ export function ZeusButtonProvider({ children }: { children: ReactNode }) {
   const settings = useMemo(() => ({ enabled, setEnabled }), [enabled, setEnabled]);
 
   const goToTop = useCallback(async () => {
-    if (navigatingRef.current) return;
+    if (navigatingRef.current || document.hidden || !mounted.current) return;
+    const run = new AbortController();
+    navigationRun.current = run;
     navigatingRef.current = true;
     setNavigating(true);
     setReturnImage(true);
@@ -433,16 +467,15 @@ export function ZeusButtonProvider({ children }: { children: ReactNode }) {
     try {
       // Give the compact image swap one paint before navigation. The shared
       // fullscreen gate remains reserved for form-archive transitions.
-      await new Promise<void>((resolve) => {
-        window.requestAnimationFrame(() => resolve());
-      });
+      if (!(await waitForFloatingButtonPaint(run.signal))) return;
+      if (navigationRun.current !== run || document.hidden) return;
       document.dispatchEvent(new CustomEvent("deception-world:cancel-route-transition"));
       const openDialogs = Array.from(
         document.querySelectorAll<HTMLDialogElement>("dialog[open]"),
       ).reverse();
       for (const dialog of openDialogs) {
         try {
-          dialog.close("zeus-navigation");
+          dialog.close("ciel-navigation");
         } catch {
           /* A dialog may already be closing through its own transition. */
         }
@@ -454,15 +487,26 @@ export function ZeusButtonProvider({ children }: { children: ReactNode }) {
         frame.contentWindow?.postMessage({ type: "saga-archive:close-transients" }, "*");
       });
 
+      navigationRouting.current = run;
       await go({ to: "/world", hash: "top" });
+    } catch {
+      // The shared route controller owns failure/retry UI. A pointer or keyboard
+      // handler must not leak a rejected promise or leave this control locked.
     } finally {
-      const remaining = RETURN_IMAGE_MIN_MS - (performance.now() - returnImageStartedAt);
-      if (remaining > 0) {
-        await new Promise((resolve) => window.setTimeout(resolve, remaining));
+      if (navigationRouting.current === run) navigationRouting.current = null;
+      if (navigationRun.current === run) {
+        const remaining = RETURN_IMAGE_MIN_MS - (performance.now() - returnImageStartedAt);
+        await waitForFloatingButtonDelay(remaining, run.signal);
+        // A hidden tab can resume with a newer run; old completion owns no UI.
+        if (navigationRun.current === run) {
+          navigationRun.current = null;
+          navigatingRef.current = false;
+          if (mounted.current) {
+            setReturnImage(false);
+            setNavigating(false);
+          }
+        }
       }
-      setReturnImage(false);
-      navigatingRef.current = false;
-      setNavigating(false);
     }
   }, [go]);
 
@@ -497,7 +541,7 @@ export function ZeusButtonToggle() {
       onClick={() => settings.setEnabled(!settings.enabled)}
     >
       <span>
-        <b>ゼウスボタン</b>
+        <b>シエルボタン</b>
         <small>常駐ナビゲーション</small>
       </span>
       <i aria-hidden="true">
@@ -1401,14 +1445,15 @@ function ZeusButton({
     <button
       ref={buttonRef}
       type="button"
-      className="zeus-button"
+      className="zeus-button ciel-button"
+      data-navigation-character="ciel"
       data-dragging="false"
       data-navigating={String(navigating)}
       data-return-loading={String(returnImage)}
       data-menu-open={String(sideMenuOpen)}
       aria-grabbed="false"
       aria-busy={navigating}
-      aria-label="ゼウスボタン。押すとトップへ戻り、長押しすると移動できます"
+      aria-label="シエルボタン。押すとトップへ戻り、長押しすると移動できます"
       onPointerDown={(event) => {
         if (navigating) return;
         if (!event.isPrimary || (event.pointerType === "mouse" && event.button !== 0)) return;
@@ -1559,9 +1604,9 @@ function ZeusButton({
       <span className="zeus-button-aura" aria-hidden="true" />
       <img
         className="zeus-button-image is-default"
-        src="/zeus-button-360.webp"
-        srcSet={ZEUS_BUTTON_SRCSET}
-        sizes={ZEUS_BUTTON_SIZES}
+        src="/ciel-button-20261018-360.webp"
+        srcSet={CIEL_BUTTON_SRCSET}
+        sizes={CIEL_BUTTON_SIZES}
         width={360}
         height={360}
         alt=""
@@ -1571,9 +1616,9 @@ function ZeusButton({
       />
       <img
         className="zeus-button-image is-returning"
-        src="/zeus-button-return-360.webp"
-        srcSet={ZEUS_BUTTON_RETURN_SRCSET}
-        sizes={ZEUS_BUTTON_SIZES}
+        src="/ciel-button-20261018-360.webp"
+        srcSet={CIEL_BUTTON_SRCSET}
+        sizes={CIEL_BUTTON_SIZES}
         width={360}
         height={360}
         alt=""

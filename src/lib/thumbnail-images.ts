@@ -441,3 +441,17 @@ export const ZEUS_BUTTON_IMAGES = {
 
 export const ZEUS_BUTTON_SRCSET = srcSet(ZEUS_BUTTON_IMAGES.default);
 export const ZEUS_BUTTON_RETURN_SRCSET = srcSet(ZEUS_BUTTON_IMAGES.returning);
+
+// One supplied illustration serves both resting and return states. Keep the
+// legacy Zeus sets above for older assets/build consumers, not runtime loading.
+export const CIEL_BUTTON_SIZES = ZEUS_BUTTON_SIZES;
+export const CIEL_BUTTON_IMAGE = {
+  source: "/ciel-button-20261018.jpeg",
+  fallback: "/ciel-button-20261018-360.webp",
+  variants: [
+    { path: "/ciel-button-20261018-144.webp", width: 144, build: true },
+    { path: "/ciel-button-20261018-216.webp", width: 216, build: true },
+    { path: "/ciel-button-20261018-360.webp", width: 360, build: true },
+  ],
+} satisfies ImageSet;
+export const CIEL_BUTTON_SRCSET = srcSet(CIEL_BUTTON_IMAGE);

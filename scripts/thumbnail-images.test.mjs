@@ -6,6 +6,8 @@ import {
   MANAGER_THUMBNAILS,
   ZEUS_BUTTON_IMAGES,
   ZEUS_BUTTON_SIZES,
+  CIEL_BUTTON_IMAGE,
+  CIEL_BUTTON_SIZES,
   episodeThumbnail,
   managerThumbnail,
 } from "../src/lib/thumbnail-images.ts";
@@ -29,6 +31,7 @@ test("every candidate is a WebP of the width its descriptor states, smaller than
     ...Object.values(EPISODE_THUMBNAILS),
     ...Object.values(MANAGER_THUMBNAILS),
     ...Object.values(ZEUS_BUTTON_IMAGES),
+    CIEL_BUTTON_IMAGE,
   ];
   for (const set of sets) {
     let previous = 0;
@@ -39,9 +42,10 @@ test("every candidate is a WebP of the width its descriptor states, smaller than
       previous = variant.width;
     }
     const sizes = set.variants.map((variant) => statSync(file(variant.path)).size);
-    for (let i = 1; i < sizes.length; i += 1) assert.ok(sizes[i - 1] < sizes[i], set.variants[i - 1].path);
+    for (let i = 1; i < sizes.length; i += 1)
+      assert.ok(sizes[i - 1] < sizes[i], set.variants[i - 1].path);
     // The largest candidate keeps the resolution the slot loaded before.
-    const zeus = Object.values(ZEUS_BUTTON_IMAGES).includes(set);
+    const zeus = set === CIEL_BUTTON_IMAGE || Object.values(ZEUS_BUTTON_IMAGES).includes(set);
     assert.ok(set.variants.at(-1).width >= (zeus ? 360 : 540), set.variants.at(-1).path);
   }
 });
@@ -52,7 +56,9 @@ test("episode and manager cards and the Zeus button use the right-sized sets", (
   for (const name of Object.keys(MANAGER_THUMBNAILS)) {
     assert.match(
       worldHome,
-      new RegExp(`src="/manager-${name}-thumb\\.jpeg"\\s*\\{\\.\\.\\.managerThumbnail\\("${name}"\\)\\}`),
+      new RegExp(
+        `src="/manager-${name}-thumb\\.jpeg"\\s*\\{\\.\\.\\.managerThumbnail\\("${name}"\\)\\}`,
+      ),
     );
   }
   assert.deepEqual(Object.keys(EPISODE_THUMBNAILS).sort(), [
@@ -87,15 +93,20 @@ test("episode and manager cards and the Zeus button use the right-sized sets", (
   );
 
   const zeus = read("src/components/zeus-button.tsx");
-  assert.match(zeus, /src="\/zeus-button-360\.webp"\s*srcSet=\{ZEUS_BUTTON_SRCSET\}\s*sizes=\{ZEUS_BUTTON_SIZES\}/);
   assert.match(
     zeus,
-    /src="\/zeus-button-return-360\.webp"\s*srcSet=\{ZEUS_BUTTON_RETURN_SRCSET\}\s*sizes=\{ZEUS_BUTTON_SIZES\}/,
+    /src="\/ciel-button-20261018-360\.webp"\s*srcSet=\{CIEL_BUTTON_SRCSET\}\s*sizes=\{CIEL_BUTTON_SIZES\}/,
+  );
+  assert.match(
+    zeus,
+    /src="\/ciel-button-20261018-360\.webp"\s*srcSet=\{CIEL_BUTTON_SRCSET\}\s*sizes=\{CIEL_BUTTON_SIZES\}/,
   );
   // The preload names the same candidates, so one file is fetched once.
   assert.match(
     read("src/routes/__root.tsx"),
-    /href: "\/zeus-button-360\.webp",\s*imageSrcSet: ZEUS_BUTTON_SRCSET,\s*imageSizes: ZEUS_BUTTON_SIZES,/,
+    /href: "\/ciel-button-20261018-360\.webp",\s*imageSrcSet: CIEL_BUTTON_SRCSET,\s*imageSizes: CIEL_BUTTON_SIZES,/,
   );
   assert.equal(ZEUS_BUTTON_SIZES, "(max-width: 560px) 48px, 80px");
+  assert.equal(CIEL_BUTTON_SIZES, ZEUS_BUTTON_SIZES);
+  assert.doesNotMatch(zeus, /src="\/zeus-button(?:-return)?-360\.webp"/);
 });

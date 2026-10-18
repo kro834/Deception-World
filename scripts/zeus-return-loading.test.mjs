@@ -11,7 +11,7 @@ test("Zeus navigation closes transient UI and uses the shared route controller",
   assert.match(source, /export function ZeusButtonProvider[\s\S]*?const navigatingRef = useRef/);
   assert.match(source, /const \{ go \} = useLoadGate\(\)/);
   assert.match(source, /await go\(\{ to: "\/world", hash: "top" \}\)/);
-  assert.match(source, /dialog\.close\("zeus-navigation"\)/);
+  assert.match(source, /dialog\.close\("ciel-navigation"\)/);
   assert.doesNotMatch(source, /scrollIntoView/);
   assert.doesNotMatch(source, /behavior:\s*"smooth"/);
   assert.match(root, /<LoadGateProvider>[\s\S]*?<ZeusButtonProvider>/);
@@ -20,7 +20,7 @@ test("Zeus navigation closes transient UI and uses the shared route controller",
 test("Zeus swaps only its compact character image without mounting a fullscreen loader", () => {
   assert.match(source, /const \[returnImage, setReturnImage\] = useState\(false\)/);
   assert.match(source, /data-return-loading=\{String\(returnImage\)\}/);
-  assert.match(source, /src="\/zeus-button-return-360\.webp"/);
+  assert.match(source, /src="\/ciel-button-20261018-360\.webp"/);
   assert.match(
     styles,
     /\.zeus-button\[data-return-loading="true"\][\s\S]*?\.zeus-button-image\.is-returning/,

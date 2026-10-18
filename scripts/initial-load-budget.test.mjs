@@ -126,5 +126,8 @@ test("suspended or cancelled idle warmup performs no work", async (t) => {
 test("Zeus image is low-priority and is not preloaded on the opening", () => {
   const root = readFileSync(new URL("../src/routes/__root.tsx", import.meta.url), "utf8");
   assert.match(root, /routeId as string\) === "\/"\)[\s\S]*?\? \[\]/);
-  assert.match(root, /href: "\/zeus-button-360.webp",[\s\S]*?fetchPriority: "low" as const/);
+  assert.match(
+    root,
+    /href: "\/ciel-button-20261018-360.webp",[\s\S]*?fetchPriority: "low" as const/,
+  );
 });
