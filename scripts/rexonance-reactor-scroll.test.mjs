@@ -27,6 +27,8 @@ function recorder() {
     // The forming edge's light (owner, 2026-10-18).
     lineTo: (...args) => operations.push(["lineTo", ...args]),
     stroke: () => operations.push(["stroke"]),
+    rect: () => {},
+    fillRect: () => {},
     restore: () => operations.push(["restore"]),
     rotate: (...args) => operations.push(["rotate", ...args]),
     save: () => operations.push(["save"]),

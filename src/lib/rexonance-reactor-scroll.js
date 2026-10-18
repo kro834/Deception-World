@@ -1,6 +1,29 @@
 import { reactorCoilAngle, reactorCoilScale, reactorFormation } from "./rexonance-reactor.js";
 
 const IDS = new Set(["core-disc", "core-swirl"]);
+const CELL = 3;
+const CELL_BAND = 0.7;
+const FRESH = [];
+
+/** The coil's cell grid (coil-local px), built once per layer set. Each cell
+ * keeps its clockwise angle from 12 o'clock and a fixed random seed. */
+function reactorCells(layers, core) {
+  if (layers.cells) return layers.cells;
+  const [cx, cy] = core;
+  const cells = [];
+  let seed = 7;
+  const random = () => ((seed = (seed * 16807) % 2147483647) - 1) / 2147483646;
+  for (let py = layers.y; py < layers.y + layers.h; py += CELL)
+    for (let px = layers.x; px < layers.x + layers.w; px += CELL) {
+      const dx = px + CELL / 2 - cx;
+      const dy = py + CELL / 2 - cy;
+      let angle = Math.atan2(dy, dx) + Math.PI / 2;
+      if (angle < 0) angle += Math.PI * 2;
+      cells.push({ x: px - cx, y: py - cy, angle, seed: random() });
+    }
+  layers.cells = cells;
+  return cells;
+}
 
 /** The real reactor and its coiled armour, not a circular crop of the chest.
  * Three small sheets separate the fixed disc from the rotating coil. */
@@ -103,6 +126,37 @@ export function drawReactorFormation(context, layers, core, u) {
     context.save();
     context.globalAlpha = reactorFormation(u);
     context.drawImage(layers.disc, x, y, w, h);
+    context.restore();
+  }
+  // Ahead of the solid wedge the coil condenses from fine nanite cells
+  // (3 px): the nearer a cell to the front, the likelier it has already
+  // seated; the newest flash gold as they lock (owner, 2026-10-18).
+  if (u > 0 && u < 1) {
+    const [cx, cy] = core;
+    const cells = reactorCells(layers, core);
+    const front = Math.PI * 2 * reactorFormation(u);
+    const scale = reactorCoilScale(u);
+    context.save();
+    context.translate(cx, cy);
+    context.rotate(reactorCoilAngle(u));
+    context.scale(scale, scale);
+    context.beginPath();
+    let fresh = 0;
+    for (const cell of cells) {
+      const ahead = cell.angle - front;
+      if (ahead <= 0 || ahead >= CELL_BAND) continue;
+      const near = 1 - ahead / CELL_BAND;
+      if (cell.seed > near * near) continue;
+      context.rect(cell.x, cell.y, CELL, CELL);
+      if (near * near - cell.seed < 0.08) FRESH[fresh++] = cell;
+    }
+    context.clip();
+    context.globalAlpha = Math.min(1, u * 3);
+    context.drawImage(layers.art, x - cx, y - cy, w, h);
+    context.globalCompositeOperation = "lighter";
+    context.globalAlpha = 0.7;
+    context.fillStyle = "rgb(240 207 134)";
+    for (let i = 0; i < fresh; i += 1) context.fillRect(FRESH[i].x, FRESH[i].y, CELL, CELL);
     context.restore();
   }
   // The forming edge: a thin gold-to-pink line where the nanites are laying
