@@ -1572,9 +1572,56 @@ for (let i = 0; i < N; i += 1) {
     }
   }
 }
+// Owner, 2026-10-18: the bare face carries sharp machined detail — the
+// compound eyes' double rim, a pointed crest, angular brow chevrons, facets
+// from the visor's corners, raked vents, cheek blades and a chin grille —
+// baked into the undersuit so the scroll scene and the call show the same.
+const bareFaceSvg = (() => {
+  const xs = FACE_GLOW.map(([x]) => x);
+  const ys = FACE_GLOW.map(([, y]) => y);
+  const [x0, x1, y0, y1] = [Math.min(...xs), Math.max(...xs), Math.min(...ys), Math.max(...ys)];
+  const vx = (x0 + x1) / 2;
+  const hw = (x1 - x0) / 2;
+  const eh = y1 - y0;
+  const top = y0 - eh * 0.3;
+  const chin = y1 + eh * 0.08;
+  const k = CROP.width / FIG_W; // delivery px to source px
+  const pt = (x, y) => `${x.toFixed(1)},${y.toFixed(1)}`;
+  const poly = (scale, dy) =>
+    FACE_GLOW.map(([x, y]) => pt(vx + (x - vx) * scale, y0 + dy + (y - y0) * (scale === 1 ? 1 : 0.86))).join(" ");
+  const lines = [];
+  const seg = (...points) => lines.push(`M${points.map(([x, y]) => pt(x, y)).join(" L")}`);
+  seg([vx, top + eh * 0.02], [vx, y0 + eh * 0.04]);
+  seg([vx - hw * 0.16, top + eh * 0.12], [vx, top + eh * 0.01], [vx + hw * 0.16, top + eh * 0.12]);
+  for (const side of [-1, 1]) {
+    seg([vx + side, y0 - eh * 0.03], [vx + side * hw * 0.46, y0 - eh * 0.16], [vx + side * hw * 0.94, y0 + eh * 0.01]);
+    seg([vx + side, y0 - eh * 0.15], [vx + side * hw * 0.4, y0 - eh * 0.27], [vx + side * hw * 0.8, y0 - eh * 0.17]);
+    seg([vx + side * hw * 0.9, y0 + eh * 0.01], [vx + side * hw * 0.24, top + eh * 0.06]);
+    for (let n = 0; n < 3; n += 1) {
+      const ty = y0 + eh * (0.18 + n * 0.09);
+      seg([vx + side * hw * 0.99, ty], [vx + side * hw * 0.8, ty + eh * 0.07]);
+    }
+    seg([vx + side * hw * 0.97, y0 + eh * 0.5], [vx + side * hw * 0.62, y1 - eh * 0.02]);
+  }
+  const grille = [];
+  for (let n = 0; n < 3; n += 1) {
+    const gy = y1 - eh * (0.16 - n * 0.07);
+    const gw = hw * (0.22 - n * 0.05);
+    grille.push(`M${pt(vx - gw, gy)} L${pt(vx - gw * 0.25, gy)}`, `M${pt(vx + gw * 0.25, gy)} L${pt(vx + gw, gy)}`);
+  }
+  const cy = (top + chin) / 2;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}"><defs><clipPath id="h"><ellipse cx="${vx}" cy="${cy}" rx="${hw * 0.98}" ry="${(chin - top) / 2}"/></clipPath></defs><g clip-path="url(#h)" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="${poly(1, 0)}" stroke="rgb(196,216,236)" stroke-opacity="0.85" stroke-width="${(1.1 * k).toFixed(2)}"/><polygon points="${poly(0.84, eh * 0.06)}" stroke="rgb(122,168,204)" stroke-opacity="0.5" stroke-width="${(0.7 * k).toFixed(2)}"/><path d="${lines.join(" ")}" stroke="rgb(176,202,228)" stroke-opacity="0.72" stroke-width="${(0.75 * k).toFixed(2)}"/><path d="${grille.join(" ")}" stroke="rgb(122,150,182)" stroke-opacity="0.6" stroke-width="${(0.9 * k).toFixed(2)}"/></g></svg>`;
+})();
+const undersuitRaw = await sharp(rgba(bodyMask, suit), { raw: { width: W, height: H, channels: 4 } })
+  .composite([{ input: Buffer.from(bareFaceSvg) }])
+  .raw()
+  .toBuffer();
+// The detail never leaves the body's own outline.
+for (let i = 0; i < N; i += 1)
+  undersuitRaw[i * 4 + 3] = Math.min(undersuitRaw[i * 4 + 3], Math.round(bodyMask[i] * 255));
 const UNDERSUIT = await writeWebp(
   "undersuit.webp",
-  await toDelivery(rgba(bodyMask, suit)),
+  await toDelivery(undersuitRaw),
   FIG_W,
   FIG_H,
   {
