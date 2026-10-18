@@ -3115,7 +3115,8 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
             const phase = (i / 36 + u * 1.6) % 1;
             const r = R * 1.5 * (1 - phase) + 2;
             const a = i * 2.39996 + phase * Math.PI * 3.2;
-            context.globalAlpha = Math.sin(Math.PI * phase) * (1 - u * 0.6);
+            // All the trails arrive together with the coil, never a few early.
+            context.globalAlpha = Math.sin(Math.PI * phase) * (1 - u * 0.6) * smooth(Math.min(1, u * 4));
             context.strokeStyle = REACTOR_MOTES[i % 3];
             context.lineWidth = 1.2 + (i % 3) * 0.6;
             context.beginPath();

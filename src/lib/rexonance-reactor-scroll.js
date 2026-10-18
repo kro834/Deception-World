@@ -2,7 +2,8 @@ import { reactorCoilAngle, reactorCoilScale, reactorFormation } from "./rexonanc
 
 const IDS = new Set(["core-disc", "core-swirl"]);
 const CELL = 3;
-const CELL_BAND = 0.7;
+const CELL_BAND = 0.5;
+const CELL_LEAD = 0.45;
 const FRESH = [];
 
 /** The coil's cell grid (coil-local px), built once per layer set. Each cell
@@ -145,16 +146,18 @@ export function drawReactorFormation(context, layers, core, u) {
     for (const cell of cells) {
       const ahead = cell.angle - front;
       if (ahead <= 0 || ahead >= CELL_BAND) continue;
-      const near = 1 - ahead / CELL_BAND;
-      if (cell.seed > near * near) continue;
+      // Only a tight band right at the front fills, densest at the front:
+      // no lone cells seated far ahead of the coil (owner, 2026-10-18).
+      const near = (1 - ahead / CELL_BAND - CELL_LEAD) / (1 - CELL_LEAD);
+      if (near <= 0 || cell.seed > near) continue;
       context.rect(cell.x, cell.y, CELL, CELL);
-      if (near * near - cell.seed < 0.08) FRESH[fresh++] = cell;
+      if (near - cell.seed < 0.06) FRESH[fresh++] = cell;
     }
     context.clip();
     context.globalAlpha = Math.min(1, u * 3);
     context.drawImage(layers.art, x - cx, y - cy, w, h);
     context.globalCompositeOperation = "lighter";
-    context.globalAlpha = 0.7;
+    context.globalAlpha = 0.7 * Math.min(1, u * 3);
     context.fillStyle = "rgb(240 207 134)";
     for (let i = 0; i < fresh; i += 1) context.fillRect(FRESH[i].x, FRESH[i].y, CELL, CELL);
     context.restore();
