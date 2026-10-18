@@ -7,7 +7,7 @@ import {
   warpPicture,
 } from "./rexonance-overwrite.js";
 import { createSplitLightsJob } from "./rexonance-unlit.js";
-import { drawBodyFlame, drawNaniteFlame } from "./rexonance-flame.js";
+import { drawBodyFlame, drawNaniteFlame, warmNaniteFlame } from "./rexonance-flame.js";
 import { releasePendingImage } from "./release-pending-images.js";
 import {
   createReactorLayers,
@@ -299,7 +299,6 @@ export function mountRexonanceResonance(page, environment = window) {
       countObserver?.observe(figure.host);
     }
   };
-
 
   /* ---------------- arrival, form, scenes ---------------- */
   let arrived = false;
@@ -886,8 +885,7 @@ function* assemblyPlanSteps({
         !(owner && ornament.has(owner.piece.group))
       )
         owner =
-          ownerOf(ornamentEntries, sx, sy, tw, th, cx, cy) ??
-          nearestSeat(ornamentEntries, cx, cy);
+          ownerOf(ornamentEntries, sx, sy, tw, th, cx, cy) ?? nearestSeat(ornamentEntries, cx, cy);
       // Failed sampling still has the authored plate silhouette; never
       // turn its transparent background into a rectangular tile swarm.
       if (!sample && masked && !owner) continue;
@@ -1586,7 +1584,11 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       ([, nanites]) => {
         if (disposed || images) return;
         for (const src of sheetSources(nanites))
-          if (!fetched.has(src)) fetched.set(src, picture(src, "low").catch(() => null));
+          if (!fetched.has(src))
+            fetched.set(
+              src,
+              picture(src, "low").catch(() => null),
+            );
       },
       () => {
         prefetching = false;
@@ -1611,15 +1613,17 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     const take = (src) => {
       const early = fetched.get(src);
       fetched.delete(src);
-      return early
-        ? early.then((image) => image ?? picture(src, "high"))
-        : picture(src, "high");
+      return early ? early.then((image) => image ?? picture(src, "high")) : picture(src, "high");
     };
     const decode = (src) =>
       take(src)
         .then((image) =>
           image.decode
-            ? boundedImage(image.decode().then(() => image), image, 500)
+            ? boundedImage(
+                image.decode().then(() => image),
+                image,
+                500,
+              )
             : image,
         )
         // Drawn into a canvas, an <img> is decoded again on the main thread
@@ -1649,19 +1653,21 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       coarse.matches ? null : optional(kit?.comets?.src),
       optional(kit?.fx?.src),
       optional(kit?.guide?.src),
-    ]).then(([figure, undersuit, gold, atlas, base, cells, comets, fx, guide]) => {
-      if (disposed) {
-        for (const image of [figure, undersuit, gold, atlas, base, cells, comets, fx, guide])
-          image?.close?.();
-        return null;
-      }
-      images = { figure, undersuit, gold, atlas, base, cells, comets, fx, guide };
-      return images;
-    }).catch((error) => {
-      failed = true;
-      for (const image of decoded) image?.close?.();
-      throw error;
-    });
+    ])
+      .then(([figure, undersuit, gold, atlas, base, cells, comets, fx, guide]) => {
+        if (disposed) {
+          for (const image of [figure, undersuit, gold, atlas, base, cells, comets, fx, guide])
+            image?.close?.();
+          return null;
+        }
+        images = { figure, undersuit, gold, atlas, base, cells, comets, fx, guide };
+        return images;
+      })
+      .catch((error) => {
+        failed = true;
+        for (const image of decoded) image?.close?.();
+        throw error;
+      });
   };
 
   // One texel per tile: the figure drawn down to the grid gives each
@@ -1675,18 +1681,11 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     try {
       if (typeof environment.createImageBitmap === "function") {
         bitmap = await boundedImage(
-          environment.createImageBitmap(
-            source,
-            0,
-            0,
-            cols * tile,
-            rows * tile,
-            {
-              resizeWidth: cols,
-              resizeHeight: rows,
-              resizeQuality: "medium",
-            },
-          ),
+          environment.createImageBitmap(source, 0, 0, cols * tile, rows * tile, {
+            resizeWidth: cols,
+            resizeHeight: rows,
+            resizeQuality: "medium",
+          }),
           null,
           500,
           true,
@@ -1804,7 +1803,8 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       // leaves short idle periods, and the slack was left unused.
       const room = near && !live ? 4.5 : 8;
       const port = (idle ? idleUntil - clock() > room : fallbackUntil > clock())
-        ? chainPort() : null;
+        ? chainPort()
+        : null;
       if (port) {
         chained.push(() => run(idle ? chainDeadline : null));
         port.port2.postMessage(0);
@@ -1817,10 +1817,13 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       // Near the reader, recovery must begin before they pass the runway.
       if (idle) {
         idleId = environment.requestIdleCallback(run, { timeout: 1000 });
-        watchdog = environment.setTimeout(() => {
-          idleFallbackGeneration = generation;
-          run(null, true);
-        }, near && !live ? 160 : 600);
+        watchdog = environment.setTimeout(
+          () => {
+            idleFallbackGeneration = generation;
+            run(null, true);
+          },
+          near && !live ? 160 : 600,
+        );
       } else watchdog = environment.setTimeout(() => run(null, true), 16);
       idleJobs.set(key, () => {
         if (idleId) environment.cancelIdleCallback?.(idleId);
@@ -2132,10 +2135,25 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
           nextDriver = await makeSheet("driver-sheet");
           if (!nextDriver || !active()) return;
           const dc = nextDriver.getContext("2d");
-          if (!(await drawPieces(preset, (piece) => dc.drawImage(
-            images.atlas, piece.ax, piece.ay, piece.w, piece.h,
-            piece.x, piece.y, piece.w, piece.h,
-          ), "driver-crops"))) return;
+          if (
+            !(await drawPieces(
+              preset,
+              (piece) =>
+                dc.drawImage(
+                  images.atlas,
+                  piece.ax,
+                  piece.ay,
+                  piece.w,
+                  piece.h,
+                  piece.x,
+                  piece.y,
+                  piece.w,
+                  piece.h,
+                ),
+              "driver-crops",
+            ))
+          )
+            return;
           const driverLights = await splitLightsIdle(nextDriver, "driver-lights");
           if (driverLights && active()) {
             mark("driver-light-composite");
@@ -2168,14 +2186,32 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
           await idleTask(() => {
             if (active()) rc.drawImage(nextLights?.unlit || images.figure, 0, 0, W, H);
           });
-          const goldPieces = config.pieces.slice().reverse().filter(
-            (piece) => !piece.preset && config.gold.cells[piece.id],
-          );
-          if (!active() || !(await drawPieces(goldPieces, (piece) => {
-            const cell = [piece.ax, piece.ay, piece.w, piece.h, piece.x, piece.y, piece.w, piece.h];
-            rc.drawImage(images.gold, ...cell);
-            gc.drawImage(images.gold, ...cell);
-          }, "gold-crops"))) return;
+          const goldPieces = config.pieces
+            .slice()
+            .reverse()
+            .filter((piece) => !piece.preset && config.gold.cells[piece.id]);
+          if (
+            !active() ||
+            !(await drawPieces(
+              goldPieces,
+              (piece) => {
+                const cell = [
+                  piece.ax,
+                  piece.ay,
+                  piece.w,
+                  piece.h,
+                  piece.x,
+                  piece.y,
+                  piece.w,
+                  piece.h,
+                ];
+                rc.drawImage(images.gold, ...cell);
+                gc.drawImage(images.gold, ...cell);
+              },
+              "gold-crops",
+            ))
+          )
+            return;
           mark("gold-mask-composite");
           await idleTask(() => {
             if (!active()) return;
@@ -2374,7 +2410,8 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         if (!active()) return;
         mark("buffer-nanites");
         const artFigure = nextRaw || nextLights?.unlit || images.figure;
-        const artBase = (images.base && (nextBaseRaw || nextBaseLights?.unlit || images.base)) || artFigure;
+        const artBase =
+          (images.base && (nextBaseRaw || nextBaseLights?.unlit || images.base)) || artFigure;
         const nextSwarm = await idleTask(() =>
           active()
             ? lib.createAssemblyNanites({
@@ -2790,7 +2827,11 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       const region = item.pieceId ?? `r${Math.floor(item.cx / 40)},${Math.floor(item.cy / 40)}`;
       const key = `${region}:${item.src ?? 1}`;
       let part = byPiece.get(key);
-      if (!part) byPiece.set(key, (part = { src: item.src ?? 1, tiles: [], pos: [], first: Infinity, last: -1 }));
+      if (!part)
+        byPiece.set(
+          key,
+          (part = { src: item.src ?? 1, tiles: [], pos: [], first: Infinity, last: -1 }),
+        );
       part.tiles.push(item);
       part.pos.push(pos[index]);
       part.first = Math.min(part.first, pos[index]);
@@ -2855,8 +2896,14 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     context.setTransform(view.scale, 0, 0, view.scale, vx, vy);
     context.imageSmoothingEnabled = true;
 
+    const flame = smooth(
+      Math.min(span(progress, NANITE_FLAME_IN), 1 - span(progress, NANITE_FLAME_OUT)),
+    );
+    const flameClock = calm ? progress * 60 : (environment.performance?.now?.() ?? 0) / 1000;
+
     // The cocoon's far side, behind the body.
     if (nanites) nanites.backPass(context);
+    if (flame > 0) drawBodyFlame(context, config.size, flame, flameClock, 1, "back");
     // FAR UP！: the scan wakes the undersuit, top to bottom.
     const scan = span(progress, B.scan);
     if (seal < 1) {
@@ -2884,16 +2931,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     if (nanites) nanites.midPass(context);
     // The nanites' source (owner, 2026-10-18): a forest-green flame at the
     // reactor, burning while the swarm is born from it and spirals out.
-    {
-      const flame = smooth(
-        Math.min(span(progress, NANITE_FLAME_IN), 1 - span(progress, NANITE_FLAME_OUT)),
-      );
-      if (flame > 0) {
-        const clock = calm ? progress * 60 : (environment.performance?.now?.() ?? 0) / 1000;
-        drawBodyFlame(context, config.size, flame, clock);
-        drawNaniteFlame(context, config.core, flame, clock);
-      }
-    }
+    if (flame > 0) drawNaniteFlame(context, config.core, flame, flameClock);
 
     // The painted plates (welded in paint order), then the seal into the
     // finished figure.
@@ -3212,7 +3250,8 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
             const r = R * 1.5 * (1 - phase) + 2;
             const a = i * 2.39996 + phase * Math.PI * 3.2;
             // All the trails arrive together with the coil, never a few early.
-            context.globalAlpha = Math.sin(Math.PI * phase) * (1 - u * 0.6) * smooth(Math.min(1, u * 4));
+            context.globalAlpha =
+              Math.sin(Math.PI * phase) * (1 - u * 0.6) * smooth(Math.min(1, u * 4));
             context.strokeStyle = REACTOR_MOTES[i % 3];
             context.lineWidth = 1.2 + (i % 3) * 0.6;
             context.beginPath();
@@ -3251,6 +3290,9 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       }
       context.globalAlpha = 1;
     }
+
+    // Sparse near-side fire crosses the outer armour, not the core/face.
+    if (flame > 0) drawBodyFlame(context, config.size, flame, flameClock, 1, "front");
 
     // REXONANCE DEUS！: the face fills with pixel squares, which scatter.
     const [visorX, visorY] = config.visor;
@@ -3800,6 +3842,9 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   let preparing = null;
   const wake = () => {
     if (disposed || !pageActive || live || !motionAllowed() || document.hidden) return;
+    // Load alongside this scene's existing warm-up, never on global startup
+    // and never as a prerequisite for its plates, call clock or navigation.
+    void warmNaniteFlame(environment);
     // (The stand-in is the near observer's and sync's, round 4: the warm
     // preparation far away never changes the picture.)
     if (plan && settled && buffers) {
@@ -3820,7 +3865,13 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         }
       })
       .then(() => {
-        if (token === generation && pageActive && !document.hidden && motionAllowed() && !(plan && settled && buffers))
+        if (
+          token === generation &&
+          pageActive &&
+          !document.hidden &&
+          motionAllowed() &&
+          !(plan && settled && buffers)
+        )
           throw new Error("assembly preparation did not complete");
         if (token === generation && near) return prime(token);
       })
@@ -3861,9 +3912,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
               // live frame there is the finished suit (the entry's own
               // rect; no layout read).
               const box = entry.boundingClientRect;
-              nearPast = Boolean(
-                near && box && box.bottom <= (environment.innerHeight || 0) + 1,
-              );
+              nearPast = Boolean(near && box && box.bottom <= (environment.innerHeight || 0) + 1);
             }
             if (disposed) return;
             standIn();

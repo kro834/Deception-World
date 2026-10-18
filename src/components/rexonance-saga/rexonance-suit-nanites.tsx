@@ -20,7 +20,7 @@ import {
 import { REXONANCE_SUIT_LIGHT, REXONANCE_SUIT_REVEAL_MS } from "@/lib/rexonance-calls";
 import { REXONANCE_SUIT_MARKS } from "@/lib/rexonance-suit";
 import { reactorCoilAngle, reactorCoilScale } from "@/lib/rexonance-reactor.js";
-import { drawBodyFlame, drawNaniteFlame } from "@/lib/rexonance-flame.js";
+import { drawBodyFlame, drawNaniteFlame, warmNaniteFlame } from "@/lib/rexonance-flame.js";
 import type { SuitExtrasEnv } from "./rexonance-suit-extras";
 import { suitExtrasApi } from "./rexonance-suit-extras-hook";
 
@@ -114,6 +114,7 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
     let cancelled = false;
     let frame = 0;
     let stop = () => {};
+    void warmNaniteFlame();
     // rx17: the engine begins on the overlay's next frame, never inside the
     // task that mounts it (its style and layout reads would force the whole
     // overlay's style there).
@@ -376,16 +377,14 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
           extras?.before(t);
           // The nanites' source (owner, 2026-10-18): the forest-green flame
           // at the reactor, burning as the first plates stream in.
-          {
-            const raw = Math.min(
-              Math.min(1, Math.max(0, t / CALL_FLAME[0])),
-              1 - Math.min(1, Math.max(0, (t - CALL_FLAME[1]) / CALL_FLAME[2])),
-            );
-            const flame = raw * raw * (3 - 2 * raw);
-            if (flame > 0) {
-              drawBodyFlame(flight, FIG, flame, t / 1000, s);
-              drawNaniteFlame(flight, REXONANCE_SUIT_MARKS.core, flame, t / 1000, s);
-            }
+          const rawFlame = Math.min(
+            Math.min(1, Math.max(0, t / CALL_FLAME[0])),
+            1 - Math.min(1, Math.max(0, (t - CALL_FLAME[1]) / CALL_FLAME[2])),
+          );
+          const flame = rawFlame * rawFlame * (3 - 2 * rawFlame);
+          if (flame > 0) {
+            drawBodyFlame(flight, FIG, flame, t / 1000, s, "back");
+            drawNaniteFlame(flight, REXONANCE_SUIT_MARKS.core, flame, t / 1000, s);
           }
           for (let p = 0; p < all.length; p += 1) {
             const plate = all[p];
@@ -642,6 +641,7 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
           }
           if (extras) extras.after(t);
           else grains();
+          if (flame > 0) drawBodyFlame(flight, FIG, flame, t / 1000, s, "front");
           flight.globalAlpha = 1;
           if (keepOut) flight.restore();
         };

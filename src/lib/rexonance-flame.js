@@ -1,166 +1,407 @@
-// The nanites' source (owner, 2026-10-18): a forest-green fire round the
-// reactor that kindles slowly, burns across its surroundings and dies down
-// slowly. Shared by the scroll scene (rexonance-resonance.js) and the entry
-// call (rexonance-suit-nanites.tsx); `scale` maps figure px to canvas px.
-//
-// Realism (owner: より リアル に): not shapes but a particle fire — soft
-// blobs that rise from a burning bed, swell, drift on a turbulent sway,
-// cool from a pale-green core through green to dark forest green and thin
-// into smoke, with sparks lifting off. Each particle's state is a pure
-// function of the clock, so a resting frame is the same however reached.
+// The nanites' source (owner): forest-green fire, kindling and dying down
+// slowly from head to feet. Both suit-up engines use this renderer. Its
+// tongues are a Blender-rendered, turbulent participating volume, not a
+// cloud of overlapping radial-gradient discs. Their roots follow the body
+// and floor; a sparse near layer passes over the armour without hiding it.
+export const NANITE_FLAME_ATLAS = Object.freeze({
+  src: "/rexonance-flame-20261019/flame.webp",
+  width: 1024,
+  height: 1024,
+  columns: 8,
+  rows: 4,
+  frames: 32,
+  tileWidth: 128,
+  tileHeight: 256,
+  fps: 16,
+});
 
-const FLAMES = 150;
-const SPARKS = 26;
-const SPRITE = 64;
-// Colour by age: core, flame, forest, smoke.
-const TONES = [
-  [210, 255, 196],
-  [96, 214, 92],
-  [40, 160, 44],
-  [14, 70, 26],
-];
+let atlas = null;
+let pending = null;
+let failedAt = -Infinity;
+let coarse = false;
+const RETRY_AFTER = 30000;
 
-let sprites = null;
-const makeSprites = () => {
-  const doc = globalThis.document;
-  if (!doc?.createElement) return null;
-  return TONES.map(([r, g, b]) => {
-    const canvas = doc.createElement("canvas");
-    canvas.width = canvas.height = SPRITE;
-    const c = canvas.getContext("2d");
-    if (!c || !c.createRadialGradient) return canvas;
-    const half = SPRITE / 2;
-    const glow = c.createRadialGradient(half, half, 0, half, half, half);
-    glow.addColorStop(0, `rgb(${r} ${g} ${b} / 1)`);
-    glow.addColorStop(0.35, `rgb(${r} ${g} ${b} / 0.55)`);
-    glow.addColorStop(1, `rgb(${r} ${g} ${b} / 0)`);
-    c.fillStyle = glow;
-    c.fillRect(0, 0, SPRITE, SPRITE);
-    return canvas;
-  });
-};
+export const naniteFlameReady = () => atlas !== null;
+
+/** Local, non-blocking warm-up: a slow/missing sheet never holds the suit-up.
+ * One decoded 4 MiB sheet is retained across World/Rexonance return visits.
+ * This deliberately is not a global startup prefetch or a new render loop. */
+export function warmNaniteFlame(environment = globalThis) {
+  const document = environment.document;
+  const connection = environment.navigator?.connection;
+  if (
+    !document?.createElement ||
+    document.hidden ||
+    document.documentElement?.dataset?.worldEffects === "economy" ||
+    connection?.saveData ||
+    /^(slow-)?2g$/.test(connection?.effectiveType || "") ||
+    environment.matchMedia?.("(prefers-reduced-motion: reduce)").matches ||
+    environment.matchMedia?.("(forced-colors: active)").matches
+  )
+    return Promise.resolve(false);
+  // Re-evaluate the input tier on a return visit too: a retained sheet may
+  // now be used in a tablet window with a different attached pointer.
+  coarse = Boolean(environment.matchMedia?.("(pointer: coarse), (any-pointer: coarse)").matches);
+  // Both live engines warm before their first draw. Build the tiny fallback
+  // and contact-light canvases now, not inside that first critical frame.
+  prepare();
+  if (atlas) return Promise.resolve(true);
+  if (pending) return pending;
+  if (Date.now() - failedAt < RETRY_AFTER) return Promise.resolve(false);
+  pending = new Promise((resolve) => {
+    const image = document.createElement("img");
+    let finished = false;
+    const done = (ready) => {
+      if (finished) return;
+      finished = true;
+      image.onload = image.onerror = null;
+      if (
+        ready &&
+        image.naturalWidth === NANITE_FLAME_ATLAS.width &&
+        image.naturalHeight === NANITE_FLAME_ATLAS.height
+      )
+        atlas = image;
+      else failedAt = Date.now();
+      resolve(atlas !== null);
+    };
+    image.decoding = "async";
+    image.fetchPriority = "low";
+    image.onload = () => {
+      if (typeof image.decode !== "function") done(true);
+      else
+        Promise.resolve()
+          .then(() => image.decode())
+          .then(
+            () => done(true),
+            () => done(false),
+          );
+    };
+    image.onerror = () => done(false);
+    image.src = NANITE_FLAME_ATLAS.src;
+  })
+    .catch(() => {
+      failedAt = Date.now();
+      return false;
+    })
+    .finally(() => {
+      pending = null;
+    });
+  return pending;
+}
 
 const hash = (n) => {
   const x = Math.sin(n * 127.1 + 311.7) * 43758.5453;
   return x - Math.floor(x);
 };
+const clamp = (n) => Math.min(1, Math.max(0, n));
+const smooth = (n) => n * n * (3 - 2 * n);
+const TAU = Math.PI * 2;
 
-/**
- * `strength` 0–1 is how far the fire has kindled (the callers ease it in
- * and out slowly); `clock` in seconds drives the flicker.
- */
-export function drawNaniteFlame(context, [cx, cy], strength, clock, scale = 1) {
-  if (strength <= 0) return;
-  sprites ??= makeSprites();
-  if (!sprites) return;
-  context.save();
-  if (scale !== 1) context.scale(scale, scale);
-  // The burning bed widens as the fire takes hold, round the reactor.
-  const bedX = 34 + 70 * strength;
-  const bedY = 16 + 26 * strength;
-  const height = 70 + 110 * strength;
-  context.globalCompositeOperation = "lighter";
-  for (let i = 0; i < FLAMES; i += 1) {
-    // Only as many tongues as the fire has caught.
-    if (hash(i + 0.5) > strength * 1.15) continue;
-    const rate = 0.55 + 0.5 * hash(i + 1.3);
-    const age = (clock * rate + hash(i + 2.7)) % 1;
-    const angle = hash(i + 4.1) * Math.PI * 2;
-    const reach = Math.sqrt(hash(i + 5.9));
-    const bx = cx + Math.cos(angle) * bedX * reach;
-    const by = cy + 18 + Math.sin(angle) * bedY * reach;
-    // Nearer the middle, taller; the turbulence grows as it rises.
-    const lift = height * (1 - 0.55 * reach) * age;
-    const sway =
-      Math.sin(clock * 2.3 + i * 1.7 + age * 5) * 10 * age +
-      Math.sin(clock * 5.1 + i * 0.6) * 3 * age * age;
-    const x = bx + sway;
-    const y = by - lift;
-    // Swells as it leaves the bed, then thins.
-    const size = (20 + 24 * hash(i + 7.3)) * (0.5 + age * 1.1) * (1 - age * 0.55);
-    const tone = age < 0.18 ? 0 : age < 0.45 ? 1 : age < 0.78 ? 2 : 3;
-    const fade = Math.sin(Math.PI * Math.min(1, age * 1.15)) * strength;
-    context.globalAlpha = Math.min(1, fade * (tone === 3 ? 0.3 : tone === 0 ? 0.85 : 0.7));
-    if (tone === 3) context.globalCompositeOperation = "source-over";
-    context.drawImage(sprites[tone], x - size / 2, y - size * 0.62, size, size * 1.24);
-    if (tone === 3) context.globalCompositeOperation = "lighter";
-  }
-  // Sparks lifting off the fire.
-  context.fillStyle = "rgb(186 255 170)";
-  for (let i = 0; i < SPARKS; i += 1) {
-    if (hash(i + 31.5) > strength) continue;
-    const age = (clock * (0.35 + 0.3 * hash(i + 33.1)) + hash(i + 35.7)) % 1;
-    const x = cx + (hash(i + 37.3) - 0.5) * bedX * 2 + Math.sin(clock * 3 + i) * 14 * age;
-    const y = cy + 10 - (height * 1.3) * age;
-    context.globalAlpha = (1 - age) * 0.8 * strength;
-    const size = 1.4 + 1.6 * (1 - age);
-    context.fillRect(x - size / 2, y - size / 2, size, size);
-  }
-  context.restore();
-}
-
-// The body's half-width at a height (fractions of the figure): head, neck,
-// shoulders, waist, hips, knees, feet.
+// Immutable seeds: the warmed engines allocate no particle objects,
+// gradients or random/hash state in a frame (including reverse scrubbing).
+const COUNT = 64;
+const SEED = new Float32Array(COUNT * 8);
+for (let i = 0; i < SEED.length; i += 1) SEED[i] = hash(i + 0.37);
 const PROFILE = [
-  [0.06, 0.07],
-  [0.18, 0.09],
-  [0.24, 0.4],
-  [0.4, 0.36],
+  [0.04, 0.065],
+  [0.16, 0.09],
+  [0.24, 0.39],
+  [0.4, 0.35],
   [0.5, 0.24],
   [0.62, 0.26],
   [0.8, 0.24],
-  [0.97, 0.28],
+  [0.98, 0.28],
 ];
 const halfWidth = (v) => {
   for (let k = 1; k < PROFILE.length; k += 1) {
     const [y1, w1] = PROFILE[k];
     if (v <= y1) {
       const [y0, w0] = PROFILE[k - 1];
-      return w0 + ((w1 - w0) * (v - y0)) / (y1 - y0);
+      return w0 + (w1 - w0) * clamp((v - y0) / (y1 - y0));
     }
   }
   return PROFILE[PROFILE.length - 1][1];
 };
-const BODY_FLAMES = 420;
+const ROOTS = new Float32Array(40 * 3);
+for (let i = 0; i < 40; i += 1) {
+  const v = 0.075 + ((i >> 1) / 19) * 0.9;
+  const side = i % 2 ? 1 : -1;
+  ROOTS[i * 3] = 0.5 + side * (halfWidth(v) + 0.006);
+  ROOTS[i * 3 + 1] = v;
+  ROOTS[i * 3 + 2] = side;
+}
 
-/**
- * The fire all round the body (owner, 2026-10-18): tongues rising from a
- * burning bed that hugs the figure's outline from the head to the feet,
- * and from the floor at its feet. `size` is the figure's { width, height }.
- */
-export function drawBodyFlame(context, size, strength, clock, scale = 1) {
-  if (strength <= 0) return;
-  sprites ??= makeSprites();
-  if (!sprites) return;
-  const { width: W, height: H } = size;
-  context.save();
-  if (scale !== 1) context.scale(scale, scale);
-  context.globalCompositeOperation = "lighter";
-  for (let i = 0; i < BODY_FLAMES; i += 1) {
-    if (hash(i + 50.5) > strength * 1.1) continue;
-    const rate = 0.5 + 0.45 * hash(i + 51.3);
-    const age = (clock * rate + hash(i + 52.7)) % 1;
-    let bx;
-    let by;
-    if (hash(i + 53.9) < 0.22) {
-      // The floor at the feet.
-      bx = W * (0.5 + (hash(i + 54.1) - 0.5) * 0.8);
-      by = H * 0.985;
-    } else {
-      const v = 0.05 + 0.93 * hash(i + 55.3);
-      const side = hash(i + 56.7) < 0.5 ? -1 : 1;
-      bx = W * (0.5 + side * (halfWidth(v) - 0.01 + 0.04 * hash(i + 57.1)));
-      by = H * v;
-    }
-    const lift = (60 + 70 * hash(i + 58.3)) * (0.6 + 0.4 * strength) * age;
-    const sway = Math.sin(clock * 2.6 + i * 1.3 + age * 5) * 7 * age;
-    const s = (26 + 28 * hash(i + 59.9)) * (0.5 + age * 1.1) * (1 - age * 0.55);
-    const tone = age < 0.16 ? 0 : age < 0.42 ? 1 : age < 0.76 ? 2 : 3;
-    const fade = Math.sin(Math.PI * Math.min(1, age * 1.15)) * strength;
-    context.globalAlpha = Math.min(1, fade * (tone === 3 ? 0.26 : tone === 0 ? 0.8 : 0.62));
-    if (tone === 3) context.globalCompositeOperation = "source-over";
-    context.drawImage(sprites[tone], bx + sway - s / 2, by - lift - s * 0.62, s, s * 1.24);
-    if (tone === 3) context.globalCompositeOperation = "lighter";
+let fallback = null;
+let heat = null;
+let fallbackAttempted = false;
+const makeFallback = () => {
+  const document = globalThis.document;
+  if (!document?.createElement) return null;
+  const canvas = document.createElement("canvas");
+  canvas.width = 96;
+  canvas.height = 192;
+  const c = canvas.getContext("2d");
+  if (!c?.createLinearGradient || !c.bezierCurveTo) return null;
+  const colour = c.createLinearGradient(0, 192, 0, 0);
+  colour.addColorStop(0, "rgb(156 243 112 / 0.8)");
+  colour.addColorStop(0.2, "rgb(58 180 67 / 0.66)");
+  colour.addColorStop(0.6, "rgb(22 101 49 / 0.38)");
+  colour.addColorStop(1, "rgb(9 47 27 / 0)");
+  c.fillStyle = colour;
+  c.beginPath();
+  c.moveTo(28, 192);
+  c.bezierCurveTo(5, 147, 31, 121, 37, 104);
+  c.bezierCurveTo(45, 76, 18, 53, 63, 5);
+  c.bezierCurveTo(45, 58, 84, 62, 68, 109);
+  c.bezierCurveTo(58, 139, 90, 154, 70, 192);
+  c.closePath();
+  c.fill();
+  const glow = document.createElement("canvas");
+  glow.width = glow.height = 64;
+  const g = glow.getContext("2d");
+  if (g?.createRadialGradient) {
+    const gradient = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+    gradient.addColorStop(0, "rgb(111 226 94 / 0.5)");
+    gradient.addColorStop(0.25, "rgb(30 138 55 / 0.28)");
+    gradient.addColorStop(1, "rgb(9 66 35 / 0)");
+    g.fillStyle = gradient;
+    g.fillRect(0, 0, 64, 64);
+    heat = glow;
   }
-  context.restore();
+  return canvas;
+};
+
+// Inset half a texel to keep the adjacent atlas tile out of bilinear reads.
+// Both frames use the same root/size: interpolation cannot make the fire
+// slide across the body or detach at the floor.
+const tongue = (c, x, y, width, height, phase, alpha, lean) => {
+  if (alpha < 0.002) return;
+  c.save();
+  try {
+    c.translate(x, y);
+    c.rotate(lean);
+    if (atlas) {
+      // The volume's authored root is tile y=248, with 8 px of transparent
+      // camera margin below it. Compensate after the half-texel inset so the
+      // visible floor flame, not the image rectangle, touches its contact.
+      const top = -height + (height * (255.5 - 248)) / 255;
+      const time = ((phase % 32) + 32) % 32;
+      const first = Math.floor(time);
+      const next = (first + 1) % 32;
+      const mix = time - first;
+      c.globalAlpha = alpha * (1 - mix);
+      c.drawImage(
+        atlas,
+        (first % 8) * 128 + 0.5,
+        (first >> 3) * 256 + 0.5,
+        127,
+        255,
+        -width / 2,
+        top,
+        width,
+        height,
+      );
+      if (mix > 0.001) {
+        c.globalAlpha = alpha * mix;
+        c.drawImage(
+          atlas,
+          (next % 8) * 128 + 0.5,
+          (next >> 3) * 256 + 0.5,
+          127,
+          255,
+          -width / 2,
+          top,
+          width,
+          height,
+        );
+      }
+    } else if (fallback) {
+      c.globalAlpha = alpha * 0.7;
+      c.drawImage(fallback, -width / 2, -height, width, height);
+    }
+  } finally {
+    c.restore();
+  }
+};
+
+const valid = (strength, clock, scale) =>
+  Number.isFinite(strength) &&
+  strength > 0 &&
+  Number.isFinite(clock) &&
+  Number.isFinite(scale) &&
+  scale > 0;
+const prepare = () => {
+  // A direct legacy draw can still prepare once without a warm-up. Failed
+  // canvas allocation must not throw, or be attempted again on every frame.
+  if (!fallback && !fallbackAttempted && globalThis.document?.createElement) {
+    fallbackAttempted = true;
+    try {
+      fallback = makeFallback();
+    } catch {
+      /* The decoded atlas can still carry the fire. */
+    }
+  }
+  return atlas || fallback;
+};
+
+/** Strength is the existing callers' slow kindle/die-down envelope. A calm
+ * scroll frame supplies a progress clock; it stays reproducible and still. */
+export function drawNaniteFlame(context, core, strength, clock, scale = 1) {
+  if (
+    !valid(strength, clock, scale) ||
+    !core ||
+    !Number.isFinite(core[0]) ||
+    !Number.isFinite(core[1]) ||
+    !prepare()
+  )
+    return;
+  const power = smooth(clamp(strength));
+  const cx = core[0];
+  const cy = core[1];
+  context.save();
+  try {
+    if (scale !== 1) context.scale(scale, scale);
+    context.globalCompositeOperation = "source-over";
+    // The reactor remains readable: narrow fire springs from its rim,
+    // rather than a white-green bloom covering the central mechanism.
+    for (let i = 0; i < 8; i += 1) {
+      const k = i * 8;
+      const angle = SEED[k] * TAU;
+      const pulse = 0.84 + 0.16 * Math.sin(clock * (3 + SEED[k + 1]) + i * 2.1);
+      tongue(
+        context,
+        cx + Math.cos(angle) * (27 + 31 * power),
+        cy + 20 + Math.sin(angle) * 17,
+        25 + SEED[k + 2] * 25,
+        (67 + SEED[k + 3] * 73) * (0.45 + 0.55 * power) * pulse,
+        clock * 16 * (0.8 + SEED[k + 4] * 0.35) + SEED[k + 5] * 32,
+        power * (0.24 + SEED[k + 6] * 0.16),
+        Math.cos(angle) * 0.12,
+      );
+    }
+    if (heat) {
+      context.globalCompositeOperation = "lighter";
+      context.globalAlpha = power * 0.18;
+      context.drawImage(heat, cx - 89, cy - 43, 178, 86);
+    }
+    context.fillStyle = "rgb(164 235 119)";
+    context.globalCompositeOperation = "source-over";
+    for (let i = 0; i < 14; i += 1) {
+      const k = i * 8;
+      const age = (((clock * (0.34 + SEED[k] * 0.23) + SEED[k + 1]) % 1) + 1) % 1;
+      context.globalAlpha = power * Math.sin(age * Math.PI) * 0.55;
+      context.fillRect(
+        cx + (SEED[k + 2] - 0.5) * 95 + Math.sin(age * 6 + i) * age * 13,
+        cy + 14 - age * (115 + SEED[k + 3] * 110),
+        0.7 + SEED[k + 4],
+        1.3 + SEED[k + 5],
+      );
+    }
+  } finally {
+    context.restore();
+  }
+}
+
+/** `back` is behind the body's plates; `front` is the sparse near edge and
+ * embers. The default preserves the old API for isolated uses/tests. No new
+ * particle can appear beyond the figure's head/feet clipping bounds. */
+export function drawBodyFlame(context, size, strength, clock, scale = 1, layer = "all") {
+  if (
+    !valid(strength, clock, scale) ||
+    !size ||
+    !Number.isFinite(size.width) ||
+    size.width <= 0 ||
+    !Number.isFinite(size.height) ||
+    size.height <= 0 ||
+    !prepare()
+  )
+    return;
+  const W = size.width;
+  const H = size.height;
+  const unit = H / 1000;
+  const power = smooth(clamp(strength));
+  context.save();
+  try {
+    if (scale !== 1) context.scale(scale, scale);
+    context.globalCompositeOperation = "source-over";
+    if (layer !== "front") {
+      // A coarse pointer gets 14 root pairs instead of 20; every pair still
+      // spans head to feet. The sprite detail, not particle count, is quality.
+      const rootPairs = coarse ? 14 : 20;
+      for (let n = 0; n < rootPairs * 2; n += 1) {
+        const i = Math.round(((n >> 1) * 19) / (rootPairs - 1)) * 2 + (n % 2);
+        const k = i * 8;
+        const side = ROOTS[i * 3 + 2];
+        const wave = Math.sin(clock * (2.2 + SEED[k]) + i * 2.4);
+        const height = (72 + SEED[k + 1] * 79) * unit * (0.45 + power * 0.55);
+        const y = ROOTS[i * 3 + 1] * H;
+        tongue(
+          context,
+          ROOTS[i * 3] * W + side * 4 * unit * wave,
+          y,
+          (25 + SEED[k + 2] * 22) * unit,
+          Math.min(height, Math.max(5, y - H * 0.012)),
+          clock * 16 * (0.78 + SEED[k + 3] * 0.4) + SEED[k + 4] * 32,
+          power * (0.31 + SEED[k + 5] * 0.2),
+          side * (0.04 + SEED[k + 6] * 0.13),
+        );
+      }
+      // Separate contact fire: low, spreading tongues, never hovering balls.
+      for (let i = 0; i < 8; i += 1) {
+        const k = (i + 40) * 8;
+        tongue(
+          context,
+          W * (0.16 + (i / 7) * 0.68),
+          H * 0.986,
+          (43 + SEED[k] * 30) * unit,
+          (42 + SEED[k + 1] * 53) * unit * power,
+          clock * 16 * (0.85 + SEED[k + 2] * 0.3) + SEED[k + 3] * 32,
+          power * 0.43,
+          (i - 3.5) * 0.055,
+        );
+      }
+      if (heat) {
+        context.globalCompositeOperation = "lighter";
+        context.globalAlpha = power * 0.32;
+        context.drawImage(heat, W * 0.1, H * 0.947, W * 0.8, H * 0.055);
+        context.globalCompositeOperation = "source-over";
+      }
+    }
+    if (layer !== "back") {
+      // These wisps cross only the outer armour. The sternum, face and gold
+      // trim are not washed out by an additive full-body green overlay.
+      for (let i = 0; i < 8; i += 1) {
+        const k = (i + 48) * 8;
+        const root = (i * 5 + 3) % 40;
+        const side = ROOTS[root * 3 + 2];
+        tongue(
+          context,
+          ROOTS[root * 3] * W - side * 12 * unit,
+          ROOTS[root * 3 + 1] * H,
+          (24 + SEED[k] * 18) * unit,
+          (53 + SEED[k + 1] * 58) * unit * power,
+          clock * 16 * (0.8 + SEED[k + 2] * 0.3) + SEED[k + 3] * 32,
+          power * 0.18,
+          side * 0.16,
+        );
+      }
+      context.fillStyle = "rgb(146 224 106)";
+      for (let i = 0; i < 16; i += 1) {
+        const k = i * 8;
+        const age = (((clock * (0.28 + SEED[k] * 0.3) + SEED[k + 1]) % 1) + 1) % 1;
+        const root = (i * 7 + 3) % 40;
+        const y = ROOTS[root * 3 + 1] * H - age * 95 * unit;
+        if (y < H * 0.02) continue;
+        context.globalAlpha = power * (1 - age) * 0.5;
+        context.fillRect(
+          ROOTS[root * 3] * W + Math.sin(age * 7 + i) * age * 14 * unit,
+          y,
+          unit * (0.7 + SEED[k + 2]),
+          unit * (1.2 + SEED[k + 3]),
+        );
+      }
+    }
+  } finally {
+    context.restore();
+  }
 }

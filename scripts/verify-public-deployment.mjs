@@ -292,7 +292,10 @@ export async function verifyPublicDeployment({
       });
       for (const asset of identity.assets) {
         if (
-          (!/^\/ciel-button-20261018-(?:144|216|360)\.webp(?![\s\S])/u.test(asset.path) &&
+          (!/^\/rexonance-flame-20261019\/(?:flame\.webp|manifest\.json)(?![\s\S])/u.test(
+            asset.path,
+          ) &&
+            !/^\/ciel-button-20261018-(?:144|216|360)\.webp(?![\s\S])/u.test(asset.path) &&
             !/^\/(?:gallery\/|saga-extreme-|rexonance-forms-20261011\/excelsior-cutout-20261012\.webp$|rider-rexonance-excelsior-cutout-20261012(?:-delivery-(?:640|960|1022))?\.webp$|saga-cinema-assets\/(?:chapter-[1-4]\.jpg|saga-logo-original\.webp|menu-thumbnail(?:-20261012)?\.webp|michroma-latin\.woff2)$|exhibition-metal\/(?:brushed-alloy-(?:normal|roughness)\.png|manifest\.json)$|exhibition-studio\/(?:studio-light\.hdr|plaster-(?:normal|roughness)\.png|manifest\.json)$|rain-city-materials\/(?:(?:concrete|asphalt)-(?:albedo\.webp|(?:normal|roughness)\.png)|manifest\.json)(?![\s\S]))/u.test(
               asset.path,
             )) ||

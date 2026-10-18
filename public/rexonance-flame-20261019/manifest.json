@@ -1,0 +1,234 @@
+{
+  "version": 1,
+  "asset": {
+    "path": "/rexonance-flame-20261019/flame.webp",
+    "sha256": "6dbaae2fb6fa5ff7e83bec7ee14bfb39424f920e2d3cc4dbd4bb4838761f49bf",
+    "bytes": 459470,
+    "width": 1024,
+    "height": 1024,
+    "alpha": true
+  },
+  "atlas": {
+    "columns": 8,
+    "rows": 4,
+    "frames": 32,
+    "frameWidth": 128,
+    "frameHeight": 256,
+    "order": "left-to-right, top-to-bottom",
+    "framesPerSecond": 16,
+    "durationSeconds": 2,
+    "origin": "bottom centre",
+    "direction": "up",
+    "contentBounds": {
+      "left": 8,
+      "top": 24,
+      "right": 117,
+      "bottom": 248,
+      "alphaThreshold": 8
+    },
+    "sourceAnchor": [64, 248]
+  },
+  "render": {
+    "generator": "scripts/blender/rexonance_flame.py",
+    "blenderVersion": "5.2.0 LTS",
+    "blenderBuildHash": "fbe6228777e7",
+    "renderer": "Cycles CPU",
+    "samples": 64,
+    "renderFrameSize": [256, 512],
+    "runtimeFrameSize": [128, 256],
+    "frames": 32,
+    "durationSeconds": 2,
+    "loopGeometryMaxDelta": 0,
+    "loopCheckRendered": true,
+    "loop": "closed-periodic 3D centreline and 4D fBm fields",
+    "volumeTongues": 8,
+    "vertices": 4704,
+    "shader": "heterogeneous Principled Volume, fBm density and emission, dark forest-green absorption, pale lime core",
+    "camera": "orthographic; transparent world; root bottom-centre; rising upwards",
+    "colourManagement": "Standard, exposure -0.2"
+  },
+  "encoding": {
+    "format": "WebP",
+    "quality": 88,
+    "alphaQuality": 100,
+    "kernel": "lanczos3",
+    "budgetBytes": 500000
+  },
+  "loopPixelCheck": {
+    "differentChannels": 0,
+    "maxChannelDelta": 0,
+    "compared": "frame 0 and separately rendered frame 32"
+  },
+  "sources": [
+    {
+      "path": "scripts/blender/rexonance_flame.py",
+      "sha256": "48d1f920804218103dfe41e7acfe1c5818404360fa5ccf79d6e13d128e32875f"
+    },
+    {
+      "path": "scripts/build-rexonance-flame.mjs",
+      "sha256": "cb87539bec04aa8d7aa5ad0cc699adf837f1f9e93766e4c9daa401861522f667"
+    }
+  ],
+  "renderHashes": [
+    {
+      "frame": 0,
+      "sha256": "a7c2af40728e83c40495a00a5c7d81fbdc60ada0b3c529d377ecfdbb92505109",
+      "bytes": 169935
+    },
+    {
+      "frame": 1,
+      "sha256": "de77860a27c05246402ebd50a076be36c382ea9686144c572bb7dd81bc0f23f2",
+      "bytes": 168927
+    },
+    {
+      "frame": 2,
+      "sha256": "a955027f0c485e848d0c5c3128c9f06f18feadc12bb2c2c01853190552717134",
+      "bytes": 168772
+    },
+    {
+      "frame": 3,
+      "sha256": "676d1ad722e8e7624030429f63e85d1832520b4349eecf9274f83e1d6822476f",
+      "bytes": 166838
+    },
+    {
+      "frame": 4,
+      "sha256": "06b4814229f1c40b3ab2d142cb23c3de1492d5112908b6a28bfd0185e4c15676",
+      "bytes": 164802
+    },
+    {
+      "frame": 5,
+      "sha256": "8414d5ca898f66f98059cd9bf76061e185dd09ad0ae157f39cd90122fc2912f8",
+      "bytes": 164653
+    },
+    {
+      "frame": 6,
+      "sha256": "bca97baa24f016eb289b93ad6ec9f46e5f97043f2e8eb614fd28a9bb13ef5b05",
+      "bytes": 166851
+    },
+    {
+      "frame": 7,
+      "sha256": "344689664386559d7afc99c360b6ed15b77423ec032ee52bf80d377756525920",
+      "bytes": 166813
+    },
+    {
+      "frame": 8,
+      "sha256": "31937abce1ccccc6fd9c57d6eca87207c954d182b1739bf86bd3f9bc95aeb43c",
+      "bytes": 167963
+    },
+    {
+      "frame": 9,
+      "sha256": "f9f67b932cfecded003a68b50eb53313b36357f228ff6c87aefc4be1e0b2db05",
+      "bytes": 168094
+    },
+    {
+      "frame": 10,
+      "sha256": "6b00200b490716af403b890a4470b7c8b9ddbf5471fe741265665f393ec19bc3",
+      "bytes": 167539
+    },
+    {
+      "frame": 11,
+      "sha256": "51472cdb89189e0f58edc98d7424333f8b9786acaf9d90f02775282dc52dc4e0",
+      "bytes": 167737
+    },
+    {
+      "frame": 12,
+      "sha256": "a90dcf86f69b80d7ae75696fc9640bfc8e89711fcd8eed859372171b974bdd7f",
+      "bytes": 166574
+    },
+    {
+      "frame": 13,
+      "sha256": "8549fc90b7a74033186b1e717f930f5ba0869aae5daf841b9e600f89665f1026",
+      "bytes": 165938
+    },
+    {
+      "frame": 14,
+      "sha256": "b77320dc1ff60c96686d4869c723339700adeef9d265668ec3d4df77b6671186",
+      "bytes": 168542
+    },
+    {
+      "frame": 15,
+      "sha256": "5405e6cbab97d16f30820d274d8ea31ab92b7a3467a28da4e07dc7b8086ac16d",
+      "bytes": 166951
+    },
+    {
+      "frame": 16,
+      "sha256": "6eb957afc17e1ce42f83a278fcaf783cd48e0b722575609b18cfb4df764afc50",
+      "bytes": 165671
+    },
+    {
+      "frame": 17,
+      "sha256": "c35f91a4d5a83d519110b6cd3819c6324f1463f8fa82ccffe8dd3e2c7f1180a8",
+      "bytes": 164791
+    },
+    {
+      "frame": 18,
+      "sha256": "358e9c9919b24cbd2d7592e34829dfa9b1f957f1b107036be554a558b7ac88a2",
+      "bytes": 162613
+    },
+    {
+      "frame": 19,
+      "sha256": "809356faee66b6cdd3903738bb8dece4db504ff7ab06d4df406d0c4868d2c325",
+      "bytes": 161000
+    },
+    {
+      "frame": 20,
+      "sha256": "e6853591e5db86cb623587eff40c7652cafecab5f36497e8ee2cc72a7f2bcb06",
+      "bytes": 160295
+    },
+    {
+      "frame": 21,
+      "sha256": "e5f75cb1e9143b77ea0d18c7f9f5059297fff267d688cefbea54269cc4244833",
+      "bytes": 159534
+    },
+    {
+      "frame": 22,
+      "sha256": "b2dc9a025a476518725b5e55bb289fcd33a4c5f4017447f6adc15435a711c3b3",
+      "bytes": 159631
+    },
+    {
+      "frame": 23,
+      "sha256": "b76790ec7b37c00f7aaefb8cb4a47416d0c106e9c88ce28738d8f75efa72759b",
+      "bytes": 162777
+    },
+    {
+      "frame": 24,
+      "sha256": "ffa194ce03e11bf9dd254295cf4565bc2812010fec606731de97857fff482a9e",
+      "bytes": 165273
+    },
+    {
+      "frame": 25,
+      "sha256": "5ed2ccaccfb664ac22a24e780733ee7df6024b429f7ac5c84e1e3ae89de98016",
+      "bytes": 166502
+    },
+    {
+      "frame": 26,
+      "sha256": "181dce508ebbf447afb11ad4e80bb20e79065d170c86d5dbec21cbb5d63a4b62",
+      "bytes": 166527
+    },
+    {
+      "frame": 27,
+      "sha256": "5c8cf260b04a9af383ad57d2e27979cbb1c3793e2e5d8ffa87d53d5a3e12cd78",
+      "bytes": 167878
+    },
+    {
+      "frame": 28,
+      "sha256": "f6e2eda3f33f2b340ff1145068bbbdadb02d34c3a311f71d3570c9a126ba68a0",
+      "bytes": 168268
+    },
+    {
+      "frame": 29,
+      "sha256": "c9978c1ae1f828e7fe3fd6276c47b21a42eea81126e3333329575bb4dbbab6d8",
+      "bytes": 167230
+    },
+    {
+      "frame": 30,
+      "sha256": "13dd94c9b1ca2943111d67111568df6fcce1413c96f0e3fc2170677cf9046be6",
+      "bytes": 169192
+    },
+    {
+      "frame": 31,
+      "sha256": "60c58fa5ab717bed11a8065290337fdc22631a4b71701c75d32b3f13b3e499a6",
+      "bytes": 169625
+    }
+  ]
+}

@@ -142,6 +142,8 @@ test("rain-city release verification accepts exactly seven material paths and ch
 
 test("public verification hashes exhibition, cinema and authored Rexonance assets and rejects changed bytes or unknown paths", async () => {
   const paths = [
+    "/rexonance-flame-20261019/flame.webp",
+    "/rexonance-flame-20261019/manifest.json",
     ...CIEL_BUTTON_PATHS,
     "/rexonance-forms-20261011/excelsior-cutout-20261012.webp",
     "/rider-rexonance-excelsior-cutout-20261012.webp",
@@ -200,6 +202,13 @@ test("public verification hashes exhibition, cinema and authored Rexonance asset
   );
   for (const changed of paths) assert.equal((await run({ changed })).report.ok, false, changed);
   for (const unknown of [
+    "/rexonance-flame-20261019/unknown.webp",
+    "/rexonance-flame-20261020/flame.webp",
+    ...["flame.webp", "manifest.json"].flatMap((name) =>
+      ["/extra", "%2fextra", ".bak", "?x=1", "#extra", "\n", "\r\n"].map(
+        (suffix) => `/rexonance-flame-20261019/${name}${suffix}`,
+      ),
+    ),
     "/ciel-button-20261018-720.webp",
     "/ciel-button-20261019-144.webp",
     ...CIEL_BUTTON_PATHS.flatMap((path) =>
@@ -232,6 +241,7 @@ test("public verification hashes exhibition, cinema and authored Rexonance asset
           path.startsWith("/rider-rexonance-excelsior-cutout-20261012") ||
           path.startsWith("/exhibition-metal/") ||
           path.startsWith("/exhibition-studio/") ||
+          path.startsWith("/rexonance-flame-") ||
           path.startsWith("/ciel-button-") ||
           path.startsWith("/saga-cinema-assets/"),
       ),

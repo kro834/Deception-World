@@ -8,6 +8,8 @@ const sha =
 if (!/^[0-9a-f]{40}$/u.test(sha)) throw new Error("Release identity requires an exact commit SHA");
 const gallery = JSON.parse(readFileSync("public/gallery/asset-manifest.json", "utf8"));
 const paths = [
+  "/rexonance-flame-20261019/flame.webp",
+  "/rexonance-flame-20261019/manifest.json",
   "/ciel-button-20261018-144.webp",
   "/ciel-button-20261018-216.webp",
   "/ciel-button-20261018-360.webp",
