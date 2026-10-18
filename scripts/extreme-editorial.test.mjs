@@ -160,3 +160,31 @@ test("320px and 390px comparison values occupy separate rows without shrinking t
       assert.equal(declaration(rule, "font-size"), undefined);
   }
 });
+
+test("KOSMOS Ultra readouts stay above core rays, separate figures from units, and keep padded spec plates", () => {
+  const p14Copy = find("> #p14 .rxs-p14-copy");
+  const p14Figure = find("> #p14 .rxs-p14-overview figure");
+  assert.equal(declaration(p14Copy, "position"), "relative");
+  assert.equal(declaration(p14Copy, "z-index"), "2");
+  assert.equal(declaration(p14Figure, "z-index"), "1");
+  const p14Value = find("> #p14 .rxs-p14-copy dd");
+  assert.equal(declaration(p14Value, "color"), "#fff8ea");
+  assert.equal(declaration(p14Value, "font-variant-numeric"), "tabular-nums");
+  const p14FigureSpan = find("> #p14 .rxs-p14-copy dd > .exi-figure");
+  assert.equal(declaration(p14FigureSpan, "margin-right"), "0.28em");
+  const specsCard = find("> #system .rxs-specs > .rxs-spec-group");
+  assert.equal(declaration(specsCard, "z-index"), "2");
+  assert.match(declaration(specsCard, "padding"), /clamp\(24px/);
+  const specsDd = find("> #system .rxs-specs > .rxs-spec-group dd");
+  assert.equal(declaration(specsDd, "color"), "#fffaf0");
+  assert.equal(declaration(specsDd, "font-variant-numeric"), "tabular-nums");
+  assert.equal(declaration(specsDd, "gap"), "0.28em");
+  const mobileSpecs = find("> #system .rxs-specs > .rxs-spec-group", "(max-width: 680px)");
+  assert.equal(declaration(mobileSpecs, "padding"), "22px 18px");
+  const scrollCueSpan = find("> .exs-hero .rxs-scroll-cue > span");
+  assert.equal(declaration(scrollCueSpan, "display"), "inline-flex");
+  const secondMeter = find("#performance .exi-stage > article:nth-child(2)::after");
+  assert.equal(declaration(secondMeter, "grid-row"), "3");
+});
+
+

@@ -1,20 +1,75 @@
-/* Extreme — editorial fight night.
-   One quiet surface for the existing rounds; the drawings, source artwork,
-   one-shot motion and input controllers keep their own lifetimes. */
+/* Extreme — Forged Editorial Championship Edition.
+   Elevates every round of /extreme-saga into a high-contrast obsidian,
+   burnished-gold, and hyper-cyan technical showcase while preserving
+   all DOM contracts, density caps, and one-shot motion lifecycles. */
 html[data-family="special"] body .rxs-page.rxs-page.exs-page {
-  --ext-gold: #e9c47e;
-  --ext-gold-rgb: 233 196 126;
-  --ext-amber: #c48943;
-  --ext-amber-rgb: 196 137 67;
-  --ext-ink: #080807;
-  --ext-ink-2: #10100e;
+  --ext-gold: #f0ca7d;
+  --ext-gold-rgb: 240 202 125;
+  --ext-amber: #cc8b3c;
+  --ext-amber-rgb: 204 139 60;
+  --ext-ink: #070706;
+  --ext-ink-2: #0e0d0b;
   --ext-gutter: clamp(20px, 5vw, 80px);
   --ext-slant: clamp(18px, 2.4vw, 36px);
-  --exe-rule: rgb(233 196 126 / 22%);
-  --exe-muted: #b6b3aa;
+  --exe-rule: rgb(240 202 125 / 24%);
+  --exe-rule-strong: rgb(240 202 125 / 48%);
+  --exe-rule-subtle: rgb(255 246 224 / 10%);
+  --exe-muted: #c2bdb2;
+  --exe-ivory: #f8f3e8;
+  --exe-cyan: #7ce2ff;
+  --exe-cyan-rgb: 124 226 255;
+  --exe-surface-1: linear-gradient(165deg, rgb(24 22 18 / 96%) 0%, rgb(12 11 9 / 98%) 100%);
+  --exe-surface-2: linear-gradient(
+    145deg,
+    rgb(32 28 21 / 95%) 0%,
+    rgb(16 15 12 / 98%) 62%,
+    rgb(11 10 8 / 99%) 100%
+  );
+  --exe-surface-gold: linear-gradient(
+    135deg,
+    rgb(240 202 125 / 16%) 0%,
+    rgb(24 21 16 / 94%) 44%,
+    rgb(12 11 9 / 98%) 100%
+  );
+  --exe-surface-cyan: linear-gradient(
+    135deg,
+    rgb(124 226 255 / 15%) 0%,
+    rgb(16 23 28 / 95%) 46%,
+    rgb(10 13 16 / 99%) 100%
+  );
+  --exe-gold-metal: linear-gradient(
+    180deg,
+    #fffdf7 0%,
+    #fff0c7 20%,
+    #f0ca7d 46%,
+    #b98233 76%,
+    #f7dda0 100%
+  );
+  --exe-ivory-metal: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    #f8f3e8 38%,
+    #dfd5c2 78%,
+    #f7f1e5 100%
+  );
+  --exe-cyan-metal: linear-gradient(
+    180deg,
+    #f4feff 0%,
+    #c8f5ff 32%,
+    #74ddff 68%,
+    #bcefff 100%
+  );
+  --exe-gold-pill: linear-gradient(135deg, #fff6db 0%, #f1cb80 45%, #c78d3a 100%);
+  --exe-card-shadow:
+    0 22px 52px -24px rgb(0 0 0 / 88%),
+    inset 0 1px 0 rgb(255 248 230 / 16%),
+    inset 0 0 0 1px var(--exe-rule);
   --exe-art-density: 1;
   --dxs-wrap: 1240px;
-  background: var(--ext-ink);
+  background:
+    radial-gradient(ellipse 80% 45% at 50% 0%, rgb(240 202 125 / 9%), transparent 70%),
+    var(--ext-ink);
+  color: var(--exe-ivory);
 }
 
 @media (resolution > 1dppx) {
@@ -33,22 +88,44 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page {
   }
 }
 
-/* Local navigation remains opaque through the safe area. The measured
-   reserve, not a second fixed offset, owns both anchor and page clearance. */
+/* ================================================================
+   LOCAL NAVIGATION — Frosted Obsidian Telemetry Header
+   ================================================================ */
 html[data-family="special"] body .rxs-page.rxs-page.exs-page .rxs-local-nav {
   top: 0;
   padding-top: env(safe-area-inset-top, 0px);
   background: #080807;
-  border-bottom: 1px solid var(--exe-rule);
-  box-shadow: 0 6px 24px rgb(0 0 0 / 12%);
+  border-bottom: 1px solid var(--exe-rule-strong);
+  box-shadow:
+    0 12px 36px rgb(0 0 0 / 48%),
+    inset 0 -1px 0 rgb(255 244 214 / 8%);
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page .rxs-local-nav-inner {
   width: min(var(--dxs-wrap), calc(100% - 2 * var(--ext-gutter)));
   min-height: 72px;
 }
+html[data-family="special"] body .rxs-page.rxs-page.exs-page .rxs-brand {
+  gap: 12px;
+}
+html[data-family="special"] body .rxs-page.rxs-page.exs-page .rxs-brand span {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 13px 4px 11px;
+  color: #080807;
+  background: var(--exe-gold-pill);
+  font: 700 11px/1 var(--dx-hud);
+  letter-spacing: 0.16em;
+  clip-path: polygon(0 0, 100% 0, calc(100% - 7px) 100%, 0 100%);
+  box-shadow: 0 4px 16px rgb(240 202 125 / 26%);
+}
+html[data-family="special"] body .rxs-page.rxs-page.exs-page .rxs-brand b {
+  color: var(--exe-ivory);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
 html[data-family="special"] body .rxs-page.rxs-page.exs-page .rxs-local-nav nav {
   display: flex;
-  gap: clamp(10px, 2vw, 30px);
+  gap: clamp(8px, 1.6vw, 22px);
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page .rxs-local-nav nav a {
   display: inline-flex;
@@ -56,10 +133,20 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page .rxs-local-nav nav 
   justify-content: center;
   gap: 6px;
   min-height: 44px;
-  padding-inline: 3px;
-  color: #bab8af;
+  padding-inline: 10px;
+  border-radius: 6px;
+  color: #c9c4b8;
   font-size: 12px;
+  letter-spacing: 0.08em;
   white-space: nowrap;
+  transition:
+    color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 180ms ease;
+}
+html[data-family="special"] body .rxs-page.rxs-page.exs-page .rxs-local-nav nav a:hover {
+  color: #fff6e0;
+  background: rgb(240 202 125 / 8%);
 }
 html[data-family="special"]
   body
@@ -67,17 +154,176 @@ html[data-family="special"]
   .rxs-local-nav
   nav
   a[aria-current="location"] {
-  /* The name in the site gold; the bar's lit line (styles-rexonance-saga.css)
-     runs under the whole link, where a text underline broke at "02 P14". */
   color: var(--ext-gold);
-}
-html[data-family="special"] body .rxs-page.rxs-page.exs-page .rxs-brand span {
-  color: var(--ext-gold);
-  background: none;
+  background: linear-gradient(180deg, rgb(240 202 125 / 15%), rgb(240 202 125 / 4%));
+  box-shadow:
+    inset 0 0 0 1px rgb(240 202 125 / 32%),
+    0 4px 14px rgb(0 0 0 / 30%);
 }
 
-/* A four-chapter contents strip follows the poster instead of competing
-   with its subject. It remains ordinary links, including on a keyboard. */
+/* ================================================================
+   COLD OPEN HERO — Grand Championship Arena Poster
+   ================================================================ */
+html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-hero {
+  background:
+    radial-gradient(54% 62% at 68% 44%, rgb(240 202 125 / 20%), transparent 72%),
+    radial-gradient(44% 38% at 24% 26%, rgb(204 139 60 / 12%), transparent 70%),
+    radial-gradient(50% 28% at 50% 100%, rgb(240 202 125 / 16%), transparent 74%),
+    linear-gradient(180deg, #090807 0%, #0d0c09 56%, #070706 100%);
+}
+html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-hero > .exf-billing {
+  left: 50%;
+  translate: -50% 0;
+  -webkit-text-stroke: 1px rgb(240 202 125 / 24%);
+  opacity: 0.78;
+}
+html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-hero > .exi-rays {
+  color: rgb(240 202 125 / 22%);
+}
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  .exs-hero
+  .rxs-hero-copy
+  > .rxs-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  width: fit-content;
+  margin: 0 0 14px;
+  padding: 7px 14px;
+  border: 1px solid var(--exe-rule-strong);
+  border-radius: 999px;
+  color: #ffe8b3;
+  background: linear-gradient(90deg, rgb(240 202 125 / 18%), rgb(240 202 125 / 5%));
+  box-shadow:
+    inset 0 1px 0 rgb(255 250 235 / 20%),
+    0 8px 24px rgb(0 0 0 / 35%);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+}
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  .exs-hero
+  .rxs-hero-copy
+  > .rxs-kicker::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ext-gold);
+  box-shadow: 0 0 10px var(--ext-gold);
+}
+html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-hero .rxs-wordmark {
+  display: block;
+  margin: 0 0 14px;
+  color: #ffe6ae;
+  background: var(--exe-gold-metal);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-size: clamp(16px, 2vw, 24px);
+  letter-spacing: 0.28em;
+  filter: drop-shadow(0 4px 18px rgb(240 202 125 / 20%));
+}
+html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-hero h1 {
+  margin: 0 0 20px;
+  font-size: clamp(44px, 6.2vw, 88px);
+  line-height: 1.06;
+  letter-spacing: -0.03em;
+  background-image: var(--exe-gold-metal);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 14px 34px rgb(0 0 0 / 72%));
+}
+html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-hero .rxs-hero-lede {
+  max-width: 34em;
+  margin: 0;
+  padding: 14px 18px;
+  border-left: 3px solid var(--ext-gold);
+  border-radius: 0 10px 10px 0;
+  color: #e9e2d4;
+  background: linear-gradient(90deg, rgb(18 16 12 / 86%), rgb(12 11 9 / 68%));
+  box-shadow:
+    inset 0 1px 0 rgb(255 248 230 / 10%),
+    0 12px 28px rgb(0 0 0 / 42%);
+  font-size: clamp(14px, 1.25vw, 16px);
+  line-height: 1.85;
+}
+html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-hero .rxs-hero-lede::before {
+  display: none;
+}
+html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-hero .rxs-hero-visual img {
+  filter:
+    drop-shadow(0 28px 56px rgb(0 0 0 / 82%))
+    drop-shadow(0 0 42px rgb(240 202 125 / 20%));
+}
+html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-hero .rxs-scroll-cue {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  width: fit-content;
+  min-height: 48px;
+  padding: 10px 20px 10px 12px;
+  border: 1px solid var(--exe-rule-strong);
+  border-radius: 999px;
+  color: var(--exe-ivory);
+  background: linear-gradient(180deg, rgb(28 24 18 / 92%), rgb(12 11 9 / 96%));
+  box-shadow:
+    0 14px 32px rgb(0 0 0 / 56%),
+    inset 0 1px 0 rgb(255 248 230 / 18%);
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-hero .rxs-scroll-cue:hover {
+  transform: translateY(-2px);
+  border-color: var(--ext-gold);
+  box-shadow:
+    0 16px 36px rgb(0 0 0 / 68%),
+    0 0 24px rgb(240 202 125 / 22%),
+    inset 0 1px 0 rgb(255 248 230 / 28%);
+}
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > .exs-hero
+  .rxs-scroll-cue
+  > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--exe-ivory);
+  font: 700 13px/1.4 var(--dx-display);
+  letter-spacing: 0.08em;
+}
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > .exs-hero
+  .rxs-scroll-cue
+  > span::before {
+  display: inline-grid;
+  place-items: center;
+  min-width: 34px;
+  height: 26px;
+  margin: 0;
+  padding: 0 10px;
+  border-radius: 999px;
+  color: #080807;
+  background: var(--exe-gold-pill);
+  clip-path: none;
+  font: 700 12px/1 var(--dx-mono);
+  letter-spacing: 0.08em;
+  box-shadow: 0 2px 10px rgb(240 202 125 / 32%);
+}
+
+/* ================================================================
+   CHAPTER INDEX — Four-Bout Telemetry Strip
+   ================================================================ */
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-index {
   grid-column: 1;
   grid-row: 2;
@@ -87,16 +333,30 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-inde
   max-width: none;
   margin: 0;
   padding: 0 max(var(--ext-gutter), calc((100% - var(--dxs-wrap)) / 2));
-  background: #11110f;
-  border-block: 1px solid var(--exe-rule);
+  background:
+    linear-gradient(90deg, rgb(240 202 125 / 6%), transparent 25%, transparent 75%, rgb(240 202 125 / 6%)),
+    #0e0d0b;
+  border-block: 1px solid var(--exe-rule-strong);
+  box-shadow:
+    0 18px 44px rgb(0 0 0 / 55%),
+    inset 0 1px 0 rgb(255 248 230 / 10%);
   clip-path: none;
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-index a {
+  position: relative;
   grid-template-columns: minmax(0, 1fr) auto;
   grid-template-rows: auto auto auto;
-  gap: 6px 10px;
-  min-height: 138px;
-  padding: 24px clamp(14px, 2vw, 26px);
+  gap: 8px 14px;
+  min-height: 148px;
+  padding: 26px clamp(16px, 2.2vw, 28px);
+  background: linear-gradient(180deg, rgb(240 202 125 / 0%), rgb(240 202 125 / 0%));
+  transition:
+    background 200ms ease,
+    box-shadow 200ms ease;
+}
+html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-index a:hover {
+  background: linear-gradient(180deg, rgb(240 202 125 / 12%), rgb(240 202 125 / 3%));
+  box-shadow: inset 0 2px 0 var(--ext-gold);
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-index a + a {
   border-top: 0;
@@ -114,12 +374,15 @@ html[data-family="special"]
   font-style: normal;
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-index small {
+  color: var(--ext-gold);
   font-size: 10px;
-  letter-spacing: 0.15em;
+  letter-spacing: 0.16em;
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-index span {
-  font-size: 16px;
-  letter-spacing: 0.02em;
+  color: var(--exe-ivory);
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-index em {
   color: var(--exe-muted);
@@ -128,30 +391,55 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-inde
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-index i {
   grid-column: 2;
   grid-row: 1 / -1;
-  display: block;
-  font-size: 16px;
+  align-self: center;
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--exe-rule);
+  border-radius: 999px;
+  color: var(--ext-gold);
+  background: rgb(240 202 125 / 6%);
+  font-size: 14px;
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    background-color 180ms ease;
+}
+html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-index a:hover i {
+  transform: translateX(3px);
+  border-color: var(--ext-gold);
+  background: rgb(240 202 125 / 18%);
 }
 
-/* Chapter numbers are a quiet margin note. The Japanese headline owns
-   the hierarchy; fine rules carry the boxing-card vocabulary. */
+/* ================================================================
+   ROUND HEADINGS — Sculpted Championship Section Headers
+   ================================================================ */
 html[data-family="special"]
   body
   .rxs-page.rxs-page.exs-page
   > :is(#performance, #p14, #stages, #system) {
-  padding-top: calc(clamp(64px, 8vw, 112px) + var(--ext-slant));
-  padding-bottom: clamp(64px, 8vw, 112px);
+  padding-top: calc(clamp(72px, 9vw, 124px) + var(--ext-slant));
+  padding-bottom: clamp(72px, 9vw, 124px);
 }
 html[data-family="special"]
   body
   .rxs-page.rxs-page.exs-page
   > :is(#performance, #p14, #stages, #system)
   > .rxs-section-heading {
-  grid-template-columns: 58px minmax(0, 1fr);
+  grid-template-columns: 72px minmax(0, 1fr);
   grid-template-rows: auto auto auto;
-  gap: 12px clamp(18px, 3vw, 42px);
-  margin-bottom: clamp(36px, 5vw, 68px);
-  padding-bottom: 28px;
-  background: linear-gradient(var(--exe-rule), var(--exe-rule)) 0 100% / 100% 1px no-repeat;
+  gap: 12px clamp(20px, 3vw, 40px);
+  margin-bottom: clamp(40px, 5.5vw, 72px);
+  padding-bottom: 32px;
+  background:
+    linear-gradient(
+      90deg,
+      var(--ext-gold) 0%,
+      rgb(240 202 125 / 38%) 34%,
+      rgb(240 202 125 / 8%) 100%
+    )
+    0 100% / 100% 1px no-repeat;
 }
 html[data-family="special"]
   body
@@ -161,12 +449,21 @@ html[data-family="special"]
   grid-column: 1;
   grid-row: 1 / span 2;
   align-self: start;
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
   margin: 0;
-  padding: 3px 0 0;
+  padding: 0;
+  border: 1px solid var(--exe-rule-strong);
+  border-radius: 12px;
   color: var(--ext-gold);
-  font-size: 30px;
+  background: linear-gradient(145deg, rgb(240 202 125 / 18%) 0%, rgb(17 15 12 / 94%) 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 248 230 / 22%),
+    0 10px 24px rgb(0 0 0 / 45%);
+  font-size: 24px;
   line-height: 1;
-  background: none;
   clip-path: none;
 }
 html[data-family="special"]
@@ -185,8 +482,9 @@ html[data-family="special"]
   grid-column: 2;
   grid-row: 1;
   margin: 0;
-  font-size: 10px;
-  letter-spacing: 0.17em;
+  color: var(--ext-gold);
+  font-size: 11px;
+  letter-spacing: 0.2em;
 }
 html[data-family="special"]
   body
@@ -200,8 +498,13 @@ html[data-family="special"]
   max-width: 100%;
   width: auto;
   margin: 0;
-  font-size: clamp(30px, 3.8vw, 56px);
-  line-height: 1.3;
+  color: var(--exe-ivory);
+  background: var(--exe-ivory-metal);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-size: clamp(30px, 4vw, 56px);
+  line-height: 1.28;
   letter-spacing: -0.03em;
 }
 html[data-family="special"]
@@ -230,8 +533,8 @@ html[data-family="special"]
   > span {
   grid-column: 2;
   grid-row: 3;
-  max-width: 42em;
-  margin: 4px 0 0;
+  max-width: 44em;
+  margin: 6px 0 0;
   padding: 0;
   border: 0;
   color: var(--exe-muted);
@@ -239,12 +542,36 @@ html[data-family="special"]
   line-height: 1.9;
 }
 
-/* The headline figures still strike once; their reading surface is calm. */
+/* ================================================================
+   ROUND 01 / IMPACT — Headline Gauges & Tale of the Tape Console
+   ================================================================ */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #performance
+  > .rxs-headline-metrics {
+  background:
+    radial-gradient(48% 64% at 24% 38%, rgb(240 202 125 / 14%), transparent 72%),
+    radial-gradient(46% 62% at 78% 66%, rgb(124 226 255 / 10%), transparent 72%),
+    linear-gradient(180deg, #0d0c0a 0%, #090908 100%);
+  border-block: 1px solid var(--exe-rule-strong);
+  box-shadow:
+    inset 0 1px 0 rgb(255 248 230 / 10%),
+    0 24px 60px rgb(0 0 0 / 55%);
+}
 html[data-family="special"] body .rxs-page.rxs-page.exs-page #performance .exi-stage {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   grid-template-rows: auto;
-  gap: clamp(28px, 4vw, 64px);
-  padding-block: clamp(38px, 5vw, 64px);
+  gap: clamp(24px, 3.6vw, 48px);
+  padding-block: clamp(40px, 5.5vw, 68px);
+}
+html[data-family="special"] body .rxs-page.rxs-page.exs-page #performance .exi-stage > article {
+  position: relative;
+  z-index: 1;
+  padding: clamp(24px, 3.2vw, 40px);
+  border-radius: 14px;
+  background: var(--exe-surface-gold);
+  box-shadow: var(--exe-card-shadow);
 }
 html[data-family="special"]
   body
@@ -257,9 +584,44 @@ html[data-family="special"]
   justify-self: stretch;
   justify-items: start;
   margin: 0;
-  padding-left: clamp(24px, 4vw, 56px);
-  border-left: 1px solid var(--exe-rule);
+  padding: clamp(24px, 3.2vw, 40px);
+  border-left: 0;
+  border-radius: 14px;
+  background: var(--exe-surface-cyan);
+  box-shadow:
+    0 22px 52px -24px rgb(0 0 0 / 88%),
+    inset 0 1px 0 rgb(220 250 255 / 18%),
+    inset 0 0 0 1px rgb(124 226 255 / 28%);
   text-align: start;
+}
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  #performance
+  .exi-stage
+  > article
+  > small {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px;
+  border: 1px solid var(--exe-rule);
+  border-radius: 999px;
+  color: #ffe7b3;
+  background: rgb(240 202 125 / 10%);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+}
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  #performance
+  .exi-stage
+  > article:nth-child(2)
+  > small {
+  border-color: rgb(124 226 255 / 32%);
+  color: #c8f4ff;
+  background: rgb(124 226 255 / 10%);
 }
 html[data-family="special"]
   body
@@ -275,12 +637,77 @@ html[data-family="special"]
   .exi-stage
   > article:nth-child(2)
   > strong {
-  font-size: clamp(52px, 7.6vw, 108px);
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.14em;
+  color: #fffaf0;
+  font-size: clamp(52px, 7.2vw, 104px);
   line-height: 1;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 8px 28px rgb(0 0 0 / 65%);
+}
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  #performance
+  .exi-stage
+  > article
+  > strong
+  > span {
+  margin-left: 0.08em;
+  color: var(--ext-gold);
+  font-size: 0.32em;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  #performance
+  .exi-stage
+  > article:nth-child(2)
+  > strong
+  > span {
+  color: var(--exe-cyan);
+}
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  #performance
+  .exi-stage
+  > article:first-child::after {
+  height: 12px;
+  background: linear-gradient(90deg, var(--ext-amber), var(--ext-gold) 65%, #fff5d6);
+}
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  #performance
+  .exi-stage
+  > article:nth-child(2)::after {
+  content: "";
+  position: static;
+  grid-column: 1;
+  grid-row: 3;
+  display: block;
+  width: min(100%, 460px);
+  height: 12px;
+  margin: 0;
+  background: linear-gradient(90deg, #2d95bd, var(--exe-cyan) 68%, #effcff);
+  -webkit-mask: repeating-linear-gradient(90deg, #000 0 9px, transparent 9px 12px);
+  mask: repeating-linear-gradient(90deg, #000 0 9px, transparent 9px 12px);
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  aspect-ratio: auto;
+  opacity: 1;
+  transform: none;
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page #performance .exi-stage > article > p {
-  color: var(--exe-muted);
+  color: #ddd6c7;
   font-size: 13px;
+  line-height: 1.75;
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page #performance .exi-stage .exi-band {
   display: none;
@@ -291,21 +718,27 @@ html[data-family="special"]
   #performance
   .exi-stage
   :is(.exi-rays, .exi-streaks) {
-  color: rgb(233 196 126 / 10%);
+  color: rgb(240 202 125 / 9%);
 }
 html[data-family="special"]
   body
   .rxs-page.rxs-page.exs-page
   > #performance
   > .rxs-headline-metrics::before {
-  opacity: 0.3;
+  opacity: 0.24;
 }
+
+/* Tale of the Tape Comparator Console */
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > #performance .rxs-comparison {
-  grid-template-columns: minmax(0, 0.7fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 0.72fr) minmax(0, 1fr);
   grid-template-rows: auto auto auto auto;
-  padding: clamp(20px, 3vw, 40px);
-  background: #141410;
-  box-shadow: inset 0 0 0 1px var(--exe-rule);
+  padding: clamp(24px, 3.5vw, 44px);
+  border-radius: 16px;
+  background:
+    radial-gradient(ellipse 60% 50% at 15% 0%, rgb(240 202 125 / 12%), transparent 70%),
+    radial-gradient(ellipse 60% 50% at 88% 0%, rgb(124 226 255 / 9%), transparent 70%),
+    var(--exe-surface-1);
+  box-shadow: var(--exe-card-shadow);
 }
 html[data-family="special"]
   body
@@ -316,7 +749,7 @@ html[data-family="special"]
   align-self: center;
   grid-column: 1;
   grid-row: 1;
-  padding-right: 20px;
+  padding-right: 24px;
 }
 html[data-family="special"]
   body
@@ -325,12 +758,28 @@ html[data-family="special"]
   .rxs-comparison
   > .rxs-comparison-key
   > span:first-child {
-  min-height: 0;
-  padding: 0;
+  min-height: 54px;
+  padding: 10px 26px 10px 18px;
+  color: #080807;
+  font-size: clamp(18px, 2vw, 24px);
+  font-weight: 800;
+  background: var(--exe-gold-pill);
+  clip-path: polygon(0 0, 100% 0, calc(100% - 16px) 100%, 0 100%);
+  box-shadow: 0 10px 26px rgb(240 202 125 / 22%);
+}
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #performance
+  .rxs-comparison
+  > .rxs-comparison-key
+  > .exf-vs {
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--exe-rule-strong);
   color: var(--ext-gold);
-  font-size: clamp(17px, 2vw, 24px);
-  background: none;
-  clip-path: none;
+  background: #0c0b09;
+  box-shadow: 0 8px 20px rgb(0 0 0 / 60%);
 }
 html[data-family="special"]
   body
@@ -352,33 +801,43 @@ html[data-family="special"]
 html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-opponent-options {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
+  gap: 12px;
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-opponent-label {
   display: block;
   grid-column: 1 / -1;
-  margin: 0 0 4px;
-  color: var(--exe-muted);
-  font: 400 12px/1.5 var(--dx-body);
+  margin: 0 0 6px;
+  color: var(--ext-gold);
+  font: 600 12px/1.5 var(--dx-body);
+  letter-spacing: 0.08em;
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-opponent-options button {
   display: grid;
   align-content: center;
   gap: 4px;
   min-width: 0;
-  min-height: 48px;
-  padding: 10px 12px;
-  border: 1px solid #45433b;
-  border-radius: 2px;
-  color: #c4c0b7;
-  background: #10100e;
-  font: 600 13px/1.5 var(--dx-body);
+  min-height: 56px;
+  padding: 12px 16px;
+  border: 1px solid rgb(255 248 230 / 16%);
+  border-radius: 10px;
+  color: #d6d1c6;
+  background: linear-gradient(180deg, rgb(24 23 20 / 92%), rgb(14 13 11 / 96%));
+  font: 700 14px/1.45 var(--dx-body);
   cursor: pointer;
+  transition:
+    border-color 180ms ease,
+    background 180ms ease,
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-opponent-options button:hover {
+  border-color: var(--exe-rule-strong);
+  transform: translateY(-1px);
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-opponent-options button small {
   color: var(--exe-muted);
-  font: 400 10px/1.6 var(--dx-hud);
-  letter-spacing: 0.05em;
+  font: 500 10px/1.6 var(--dx-hud);
+  letter-spacing: 0.08em;
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-sr-only {
   position: absolute;
@@ -396,10 +855,18 @@ html[data-family="special"]
   .rxs-page.rxs-page.exs-page
   .exs-opponent-options
   button[aria-pressed="true"] {
-  color: #fff1d5;
+  color: #fff6df;
   border-color: var(--ext-gold);
-  background: #30281b;
+  background: linear-gradient(145deg, rgb(240 202 125 / 24%), rgb(36 29 18 / 95%));
   box-shadow: inset 0 -2px 0 var(--ext-gold);
+}
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  .exs-opponent-options
+  button[aria-pressed="true"]
+  small {
+  color: var(--ext-gold);
 }
 html[data-family="special"]
   body
@@ -409,8 +876,13 @@ html[data-family="special"]
   > .rxs-comparison-formula {
   grid-column: 1 / -1;
   grid-row: 2;
-  justify-self: start;
-  margin: 24px 0 8px;
+  justify-self: stretch;
+  margin: 26px 0 14px;
+  padding: 12px 16px;
+  border-left: 3px solid var(--ext-gold);
+  border-radius: 0 8px 8px 0;
+  color: #e4ddd0;
+  background: rgb(240 202 125 / 7%);
   text-align: start;
 }
 html[data-family="special"]
@@ -422,7 +894,7 @@ html[data-family="special"]
   grid-column: 1 / -1;
   grid-row: 3;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0 clamp(24px, 4vw, 56px);
+  gap: 20px clamp(24px, 3.6vw, 44px);
   padding: 0;
 }
 html[data-family="special"]
@@ -431,9 +903,38 @@ html[data-family="special"]
   > #performance
   .rxs-comparison-metrics
   > article {
-  row-gap: 16px;
+  row-gap: 18px;
   align-content: start;
-  padding-block: 26px;
+  margin-block: 10px;
+  padding: clamp(20px, 2.5vw, 28px);
+  border-radius: 12px;
+  background: linear-gradient(165deg, rgb(24 22 18 / 90%), rgb(12 11 9 / 96%));
+  box-shadow:
+    inset 0 1px 0 rgb(255 248 230 / 10%),
+    inset 0 0 0 1px rgb(240 202 125 / 18%);
+}
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #performance
+  .rxs-comparison-metrics
+  > article
+  > header
+  > div
+  > strong {
+  color: #fffaf0;
+  font-variant-numeric: tabular-nums;
+}
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #performance
+  .rxs-comparison-metrics
+  .rxs-comparison-result {
+  padding: 6px 12px;
+  border: 1px solid var(--exe-rule);
+  border-radius: 8px;
+  background: rgb(240 202 125 / 10%);
 }
 html[data-family="special"]
   body
@@ -441,7 +942,9 @@ html[data-family="special"]
   > #performance
   .rxs-comparison
   .rxs-bars {
-  height: 7px;
+  height: 9px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 7%);
 }
 html[data-family="special"]
   body
@@ -452,6 +955,7 @@ html[data-family="special"]
   > i::before {
   -webkit-mask: none;
   mask: none;
+  border-radius: 999px;
 }
 html[data-family="special"]
   body
@@ -461,14 +965,14 @@ html[data-family="special"]
   .rxs-bars
   > i.is-rexonance::after {
   width: 3px;
-  height: 13px;
+  height: 15px;
   clip-path: none;
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-catalog-details {
   grid-column: 1 / -1;
   grid-row: 4;
   min-width: 0;
-  margin-top: 8px;
+  margin-top: 16px;
   border-top: 1px solid var(--exe-rule);
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-catalog-details > summary {
@@ -478,8 +982,8 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-catalog-detail
   gap: 10px 20px;
   min-height: 64px;
   padding: 18px 0;
-  color: #eee8dc;
-  font: 600 14px/1.5 var(--dx-body);
+  color: #f4eee2;
+  font: 700 14px/1.5 var(--dx-body);
   cursor: pointer;
   list-style: none;
 }
@@ -492,9 +996,16 @@ html[data-family="special"]
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-catalog-details > summary::after {
   content: "+";
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
   margin-left: auto;
+  border: 1px solid var(--exe-rule);
+  border-radius: 999px;
   color: var(--ext-gold);
-  font: 400 24px/1 var(--dx-mono);
+  background: rgb(240 202 125 / 10%);
+  font: 400 20px/1 var(--dx-mono);
 }
 html[data-family="special"]
   body
@@ -502,6 +1013,7 @@ html[data-family="special"]
   .exs-catalog-details[open]
   > summary::after {
   content: "−";
+  background: rgb(240 202 125 / 20%);
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-catalog-details > summary small {
   color: var(--exe-muted);
@@ -513,21 +1025,51 @@ html[data-family="special"]
   .exs-catalog-details
   .rxs-processing-comparison {
   margin: 0;
-  padding: 20px 0 4px;
+  padding: 22px 0 6px;
   border: 0;
-  border-top: 1px solid rgb(255 255 255 / 8%);
+  border-top: 1px solid var(--exe-rule-subtle);
   background: none;
   box-shadow: none;
 }
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  .exs-catalog-details
+  .rxs-processing-comparison
+  > div {
+  gap: 16px;
+}
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  .exs-catalog-details
+  .rxs-processing-comparison
+  > div
+  > section {
+  padding: 20px 22px;
+  border-radius: 12px;
+  background: rgb(16 15 12 / 90%);
+  box-shadow: inset 0 0 0 1px var(--exe-rule);
+}
 
-/* The core reads as one explanation, one artefact, then a causal line. */
+/* ================================================================
+   ROUND 02 / P14 CORE — Dual-Reactor Architecture & Causal Flow
+   ================================================================ */
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > #p14 .rxs-p14-overview {
-  grid-template-columns: minmax(0, 1fr) minmax(0, 0.82fr);
+  grid-template-columns: minmax(0, 1.06fr) minmax(300px, 0.88fr);
   grid-template-rows: auto;
   align-items: center;
-  gap: clamp(32px, 6vw, 80px);
+  gap: clamp(32px, 5.5vw, 72px);
+  padding: clamp(24px, 3.5vw, 44px);
+  border-radius: 18px;
+  background:
+    radial-gradient(ellipse 55% 65% at 80% 50%, rgb(240 202 125 / 12%), transparent 70%),
+    var(--exe-surface-1);
+  box-shadow: var(--exe-card-shadow);
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > #p14 .rxs-p14-overview figure {
+  position: relative;
+  z-index: 1;
   grid-column: 2;
   grid-row: 1;
   justify-self: center;
@@ -540,41 +1082,70 @@ html[data-family="special"]
   .rxs-p14-overview
   figure
   > .exi-rays {
-  color: rgb(233 196 126 / 12%);
+  color: rgb(240 202 125 / 12%);
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > #p14 .rxs-p14-copy {
+  position: relative;
+  z-index: 2;
   display: block;
   grid-column: 1;
   grid-row: 1;
   min-width: 0;
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > #p14 .rxs-p14-copy > small {
-  display: block;
-  margin: 0 0 18px;
+  display: inline-flex;
+  align-items: center;
+  margin: 0 0 16px;
+  padding: 5px 12px;
+  border: 1px solid var(--exe-rule);
+  border-radius: 999px;
+  color: var(--ext-gold);
+  background: rgb(240 202 125 / 10%);
   font-size: 10px;
+  letter-spacing: 0.16em;
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > #p14 .rxs-p14-copy > h3 {
   margin: 0 0 18px;
-  font-size: clamp(24px, 2.6vw, 36px);
-  line-height: 1.5;
+  color: var(--exe-ivory);
+  font-size: clamp(24px, 2.7vw, 38px);
+  line-height: 1.42;
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > #p14 .rxs-p14-copy > p {
   max-width: 38em;
   color: var(--exe-muted);
+  line-height: 1.9;
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > #p14 .rxs-p14-copy dl {
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0 24px;
+  gap: 14px 18px;
   margin-top: 28px;
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > #p14 .rxs-p14-copy dl > div {
+  display: grid;
+  align-content: start;
   gap: 8px;
-  padding: 16px 0;
-  border: 0;
-  border-top: 1px solid var(--exe-rule);
-  background: none;
-  box-shadow: none;
+  padding: 18px 20px;
+  border: 1px solid var(--exe-rule);
+  border-radius: 12px;
+  background:
+    linear-gradient(155deg, rgb(240 202 125 / 11%) 0%, rgb(16 15 12 / 94%) 72%),
+    #11100d;
+  box-shadow:
+    inset 0 1px 0 rgb(255 248 230 / 12%),
+    0 12px 28px -18px rgb(0 0 0 / 80%);
   clip-path: none;
+}
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #p14
+  .rxs-p14-copy
+  dl
+  > div:nth-child(2) {
+  border-color: rgb(124 226 255 / 38%);
+  background:
+    linear-gradient(155deg, rgb(124 226 255 / 14%) 0%, rgb(13 19 23 / 95%) 72%),
+    #0e1316;
 }
 html[data-family="special"]
   body
@@ -585,41 +1156,114 @@ html[data-family="special"]
   > div:last-child {
   grid-column: 1 / -1;
 }
-html[data-family="special"] body .rxs-page.rxs-page.exs-page > #p14 .rxs-p14-copy dd {
-  font-size: clamp(21px, 2.2vw, 29px);
+html[data-family="special"] body .rxs-page.rxs-page.exs-page > #p14 .rxs-p14-copy dt {
+  color: var(--ext-gold);
+  font: 700 12px/1.4 var(--dx-display);
+  letter-spacing: 0.14em;
 }
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #p14
+  .rxs-p14-copy
+  dl
+  > div:nth-child(2)
+  dt {
+  color: var(--exe-cyan);
+}
+html[data-family="special"] body .rxs-page.rxs-page.exs-page > #p14 .rxs-p14-copy dd {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  column-gap: 0.28em;
+  row-gap: 4px;
+  margin: 0;
+  color: #fff8ea;
+  font-size: clamp(24px, 2.5vw, 34px);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: 0.01em;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 2px 16px rgb(0 0 0 / 65%);
+}
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #p14
+  .rxs-p14-copy
+  dd
+  > .exi-figure {
+  margin-right: 0.28em;
+  color: #fffdf7;
+  font-variant-numeric: tabular-nums;
+}
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #p14
+  .rxs-p14-copy
+  dl
+  > div:nth-child(2)
+  dd {
+  color: #e9fbff;
+}
+
+/* 3-Step Causal Pipeline */
 html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-core-flow {
   display: flex;
-  align-items: center;
+  align-items: stretch;
   justify-content: space-between;
   gap: 14px;
   max-width: var(--dxs-wrap);
-  margin: 40px auto 28px;
-  padding: 24px 0;
-  border-block: 1px solid var(--exe-rule);
-  color: #e2dacc;
-  font: 500 clamp(12px, 1.4vw, 16px)/1.7 var(--dx-body);
+  margin: 36px auto 28px;
+  padding: 20px 24px;
+  border: 1px solid var(--exe-rule);
+  border-radius: 14px;
+  color: #ede6d8;
+  background:
+    linear-gradient(90deg, rgb(240 202 125 / 8%), rgb(124 226 255 / 6%) 50%, rgb(240 202 125 / 10%)),
+    #0f0e0c;
+  box-shadow: var(--exe-card-shadow);
+  font: 600 13px/1.6 var(--dx-body);
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-core-flow > span {
   flex: 1;
+  padding: 12px 16px;
+  border: 1px solid var(--exe-rule-subtle);
+  border-radius: 10px;
+  background: rgb(10 10 8 / 72%);
   text-align: center;
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-core-flow > span small {
   display: block;
-  margin-bottom: 7px;
+  margin-bottom: 6px;
   color: var(--ext-gold);
-  font: 400 10px/1.6 var(--dx-hud);
-  letter-spacing: 0.1em;
+  font: 600 10px/1.5 var(--dx-hud);
+  letter-spacing: 0.14em;
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-core-flow :is(i, b) {
   flex: none;
+  align-self: center;
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--exe-rule);
+  border-radius: 999px;
   color: var(--ext-gold);
+  background: rgb(240 202 125 / 10%);
   font-style: normal;
 }
+
+/* P14 Dual Chamber Cards (KHAOS Ultra vs KOSMOS Ultra) */
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > #p14 .exs-p14-comparison > article {
-  padding: clamp(24px, 3vw, 40px);
-  background: #11110f;
-  box-shadow: inset 0 0 0 1px var(--exe-rule);
+  padding: clamp(26px, 3.2vw, 42px);
+  border-radius: 16px;
+  background: var(--exe-surface-cyan);
+  box-shadow:
+    0 22px 52px -24px rgb(0 0 0 / 88%),
+    inset 0 2px 0 rgb(124 226 255 / 45%),
+    inset 0 0 0 1px rgb(124 226 255 / 26%);
   clip-path: none;
 }
 html[data-family="special"]
@@ -627,8 +1271,20 @@ html[data-family="special"]
   .rxs-page.rxs-page.exs-page
   > #p14
   .exs-p14-comparison
+  > article.is-kosmos {
+  background: var(--exe-surface-gold);
+  box-shadow:
+    0 22px 52px -24px rgb(0 0 0 / 88%),
+    inset 0 2px 0 var(--ext-gold),
+    inset 0 0 0 1px var(--exe-rule-strong);
+}
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #p14
+  .exs-p14-comparison
   > article::after {
-  opacity: 0.25;
+  opacity: 0.22;
 }
 html[data-family="special"]
   body
@@ -636,17 +1292,18 @@ html[data-family="special"]
   > #p14
   .exs-p14-comparison
   > .exo-arrow {
-  width: 36px;
-  height: 36px;
+  width: 42px;
+  height: 42px;
   color: var(--ext-gold);
-  border: 1px solid var(--exe-rule);
-  background: none;
-  box-shadow: none;
+  border: 1px solid var(--exe-rule-strong);
+  border-radius: 999px;
+  background: #12110e;
+  box-shadow: 0 8px 22px rgb(0 0 0 / 55%);
 }
 
-/* A fixed-ratio portrait canvas belongs to the art, not the length of its
-   copy. The selected image, old-form backdrop and seam use this same box.
-   The rx14 density caps remain the upper bound at every device pixel ratio. */
+/* ================================================================
+   ROUND 03 / STAGES — Two-Phase Combat Form Showcase
+   ================================================================ */
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > #stages > .rxs-section-heading {
   width: min(var(--dxs-wrap), calc(100% - 2 * var(--ext-gutter)));
   margin-inline: auto;
@@ -667,8 +1324,15 @@ html[data-family="special"]
   grid-column: 1;
   grid-row: 1;
   justify-self: start;
-  width: min(460px, 100%);
-  margin: 0 0 12px;
+  width: min(500px, 100%);
+  margin: 0 0 14px;
+  padding: 6px;
+  border: 1px solid var(--exe-rule-strong);
+  border-radius: 14px;
+  background: #0d0c0a;
+  box-shadow:
+    inset 0 1px 0 rgb(255 248 230 / 10%),
+    0 12px 30px rgb(0 0 0 / 50%);
 }
 html[data-family="special"]
   body
@@ -685,22 +1349,37 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-stage-status {
   grid-column: 1;
   grid-row: 3;
   min-height: 1.6em;
-  margin: 0 0 20px;
+  margin: 0 0 22px;
   color: var(--ext-gold);
-  font: 400 12px/1.6 var(--dx-body);
+  font: 600 12px/1.6 var(--dx-body);
+  letter-spacing: 0.04em;
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > #stages #exs-stage-panel {
   grid-column: 1;
   grid-row: 4;
-  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 0.98fr) minmax(0, 1.02fr);
   grid-template-rows: auto;
   align-items: center;
-  gap: clamp(32px, 6vw, 80px);
+  gap: clamp(32px, 5.5vw, 76px);
   min-height: 0;
-  padding: clamp(24px, 3vw, 40px) 0;
-  border-block: 1px solid var(--exe-rule);
+  padding: clamp(28px, 3.8vw, 48px);
+  border: 1px solid var(--exe-rule-strong);
+  border-radius: 18px;
   background:
-    radial-gradient(ellipse at 76% 42%, rgb(233 196 126 / 6%), transparent 60%), var(--ext-ink);
+    radial-gradient(ellipse 52% 65% at 76% 45%, rgb(240 202 125 / 14%), transparent 65%),
+    var(--exe-surface-1);
+  box-shadow: var(--exe-card-shadow);
+}
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #stages
+  #exs-stage-panel[data-stage="ultra"] {
+  border-color: rgb(124 226 255 / 42%);
+  background:
+    radial-gradient(ellipse 55% 68% at 76% 45%, rgb(124 226 255 / 15%), transparent 65%),
+    radial-gradient(ellipse 45% 50% at 20% 20%, rgb(240 202 125 / 12%), transparent 68%),
+    var(--exe-surface-1);
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > #stages #exs-stage-panel > figure {
   grid-column: 2;
@@ -712,6 +1391,11 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page > #stages #exs-stag
   max-height: calc(1538px / var(--exf-art-density));
   aspect-ratio: 1022 / 1538;
   margin: 0;
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at 50% 38%, rgb(240 202 125 / 16%), transparent 68%),
+    rgb(10 10 8 / 72%);
+  box-shadow: inset 0 0 0 1px var(--exe-rule);
   transform: none;
   scale: none;
 }
@@ -751,16 +1435,22 @@ html[data-family="special"]
   #exs-stage-panel
   > div
   > small {
-  margin-bottom: 22px;
-  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  margin-bottom: 18px;
+  padding: 6px 14px;
+  border: 1px solid var(--exe-rule-strong);
+  border-radius: 999px;
   color: var(--ext-gold);
-  background: none;
+  background: rgb(240 202 125 / 12%);
   clip-path: none;
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > #stages #exs-stage-panel > div > h3 {
-  font-size: clamp(27px, 3.2vw, 46px);
-  line-height: 1.4;
-  letter-spacing: -0.035em;
+  margin: 0 0 16px;
+  color: var(--exe-ivory);
+  font-size: clamp(28px, 3.3vw, 46px);
+  line-height: 1.34;
+  letter-spacing: -0.03em;
 }
 html[data-family="special"]
   body
@@ -786,37 +1476,46 @@ html[data-family="special"]
   > div
   > ul
   > li {
-  padding: 6px 10px;
+  padding: 7px 13px;
   border: 1px solid var(--exe-rule);
-  color: #d8d1c1;
-  background: #12110e;
+  border-radius: 999px;
+  color: #efe7d7;
+  background: linear-gradient(180deg, rgb(30 27 20 / 90%), rgb(16 15 12 / 94%));
   font-size: 12px;
+  font-weight: 600;
   clip-path: none;
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-form-facts {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 20px;
+  gap: 16px;
   margin: 28px 0 0;
   padding: 20px 0 0;
   border-top: 1px solid var(--exe-rule);
 }
+html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-form-facts > div {
+  padding: 14px 16px;
+  border: 1px solid var(--exe-rule-subtle);
+  border-radius: 10px;
+  background: rgb(12 11 9 / 76%);
+}
 html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-form-facts dt {
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   color: var(--ext-gold);
-  font: 400 12px/1.5 var(--dx-body);
-  letter-spacing: 0.15em;
+  font: 700 12px/1.5 var(--dx-body);
+  letter-spacing: 0.14em;
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-form-facts dd {
   margin: 0;
-  color: #e5dfd2;
-  font: 500 13px/1.8 var(--dx-body);
+  color: #f0eadd;
+  font: 500 13px/1.75 var(--dx-body);
 }
 
-/* The drive train shares a baseline. Large numbers no longer compete
-   with the next chapter, and the end card returns to the poster's ink. */
+/* ================================================================
+   ROUND 04 / SYSTEM — Three-Pillar Drive Train & Dual Spec Deck
+   ================================================================ */
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > #system .rxs-system-grid {
-  gap: 22px;
+  gap: 24px;
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > #system .rxs-system-grid > article,
 html[data-family="special"]
@@ -832,9 +1531,13 @@ html[data-family="special"]
   .rxs-system-grid
   > article:nth-child(2) {
   margin-top: 0;
-  padding: 28px;
-  background: #151410;
-  box-shadow: inset 0 0 0 1px var(--exe-rule);
+  padding: clamp(26px, 3vw, 34px);
+  border-radius: 16px;
+  background: var(--exe-surface-2);
+  box-shadow:
+    0 22px 48px -24px rgb(0 0 0 / 88%),
+    inset 0 2px 0 var(--ext-gold),
+    inset 0 0 0 1px var(--exe-rule);
 }
 html[data-family="special"]
   body
@@ -852,14 +1555,20 @@ html[data-family="special"]
   .rxs-system-grid
   > article
   .exo-number {
-  padding: 0;
+  display: inline-grid;
+  place-items: center;
+  min-width: 44px;
+  height: 44px;
+  padding: 0 10px;
+  border: 1px solid var(--exe-rule-strong);
+  border-radius: 10px;
   color: var(--ext-gold);
-  font-size: 30px;
-  background: none;
+  background: rgb(240 202 125 / 12%);
+  font-size: 22px;
   clip-path: none;
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > #system .rxs-system-grid header {
-  align-items: start;
+  align-items: center;
   margin-bottom: 18px;
 }
 html[data-family="special"]
@@ -870,63 +1579,262 @@ html[data-family="special"]
   header
   small {
   max-width: 16em;
+  color: #dfd8ca;
   font-size: 10px;
-  letter-spacing: 0.08em;
-  line-height: 1.8;
+  letter-spacing: 0.1em;
+  line-height: 1.75;
+}
+html[data-family="special"] body .rxs-page.rxs-page.exs-page > #system .rxs-system-grid h3 {
+  color: var(--exe-ivory);
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > #system .rxs-system-grid p {
   color: var(--exe-muted);
+  line-height: 1.85;
 }
+
+/* System Spec Deck: KHAOS Ultra & KOSMOS Ultra Readout Plates */
+html[data-family="special"] body .rxs-page.rxs-page.exs-page > #system .rxs-specs {
+  position: relative;
+  gap: 24px;
+  margin-top: clamp(32px, 4vw, 48px);
+}
+html[data-family="special"] body .rxs-page.rxs-page.exs-page > #system .rxs-specs > .exi-rays {
+  z-index: 0;
+  color: rgb(240 202 125 / 8%);
+}
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #system
+  .rxs-specs
+  > .rxs-spec-group {
+  position: relative;
+  z-index: 2;
+  padding: clamp(24px, 3vw, 36px);
+  border-radius: 16px;
+  background: var(--exe-surface-gold);
+  box-shadow: var(--exe-card-shadow);
+}
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #system
+  .rxs-specs
+  > .rxs-spec-group:nth-of-type(2) {
+  background: var(--exe-surface-cyan);
+  box-shadow:
+    0 22px 52px -24px rgb(0 0 0 / 88%),
+    inset 0 1px 0 rgb(220 250 255 / 20%),
+    inset 0 0 0 1px rgb(124 226 255 / 34%);
+}
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #system
+  .rxs-specs
+  > .rxs-spec-group
+  > h3 {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 18px;
+  padding: 6px 14px;
+  border: 1px solid var(--exe-rule-strong);
+  border-radius: 999px;
+  color: #ffe8b6;
+  background: rgb(240 202 125 / 12%);
+  font-size: 13px;
+  letter-spacing: 0.16em;
+  clip-path: none;
+}
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #system
+  .rxs-specs
+  > .rxs-spec-group:nth-of-type(2)
+  > h3 {
+  border-color: rgb(124 226 255 / 42%);
+  color: #d8f8ff;
+  background: rgb(124 226 255 / 14%);
+}
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #system
+  .rxs-specs
+  > .rxs-spec-group
+  dl {
+  gap: 16px;
+}
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #system
+  .rxs-specs
+  > .rxs-spec-group
+  dl
+  > div {
+  padding: 18px 20px;
+  border: 1px solid rgb(255 248 230 / 12%);
+  border-radius: 12px;
+  background: rgb(9 9 8 / 74%);
+}
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #system
+  .rxs-specs
+  > .rxs-spec-group
+  dt {
+  margin-bottom: 6px;
+  color: var(--exe-muted);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+}
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #system
+  .rxs-specs
+  > .rxs-spec-group
+  dd {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.28em;
+  margin: 0;
+  color: #fffaf0;
+  font-size: clamp(26px, 3vw, 40px);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: 0.01em;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 4px 18px rgb(0 0 0 / 70%);
+}
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #system
+  .rxs-specs
+  > .rxs-spec-group:nth-of-type(2)
+  dd {
+  color: #f0fcff;
+}
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #system
+  .rxs-specs
+  > .rxs-spec-group
+  dd
+  > .exi-figure {
+  color: #ffffff;
+  font-variant-numeric: tabular-nums;
+}
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #system
+  .rxs-specs
+  > .rxs-spec-group
+  dd
+  > span:not(.exi-figure) {
+  color: var(--ext-gold);
+  font-size: 0.56em;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+}
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #system
+  .rxs-specs
+  > .rxs-spec-group:nth-of-type(2)
+  dd
+  > span:not(.exi-figure) {
+  color: var(--exe-cyan);
+}
+
+/* ================================================================
+   FOOTER — Championship Finale & Return Stage
+   ================================================================ */
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer {
-  padding: clamp(80px, 12vw, 164px) max(var(--ext-gutter), calc((100% - var(--dxs-wrap)) / 2))
-    clamp(64px, 8vw, 108px);
-  color: #eee6d7;
+  padding: clamp(88px, 12vw, 168px) max(var(--ext-gutter), calc((100% - var(--dxs-wrap)) / 2))
+    clamp(72px, 9vw, 116px);
+  color: #f3ecde;
   background:
-    radial-gradient(ellipse at 88% 100%, rgb(233 196 126 / 12%), transparent 65%), #0b0b09;
-  border-top: 1px solid var(--exe-rule);
+    radial-gradient(ellipse 70% 60% at 82% 100%, rgb(240 202 125 / 16%), transparent 66%),
+    radial-gradient(ellipse 50% 50% at 16% 0%, rgb(240 202 125 / 10%), transparent 68%),
+    #090907;
+  border-top: 1px solid var(--exe-rule-strong);
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer h2 {
-  color: #eee6d7;
-  font-size: clamp(36px, 6vw, 82px);
-  line-height: 1.28;
+  color: #f6efe2;
+  background: var(--exe-gold-metal);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-size: clamp(38px, 6.2vw, 86px);
+  line-height: 1.22;
   letter-spacing: -0.03em;
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer > div > p {
   color: var(--ext-gold);
-  font-size: 10px;
-  letter-spacing: 0.16em;
+  font-size: 11px;
+  letter-spacing: 0.18em;
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer > a,
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer > a.rxs-footer-return {
-  border: 1px solid var(--exe-rule);
-  color: #e4dccb;
-  background: transparent;
-  box-shadow: none;
+  border: 1px solid var(--exe-rule-strong);
+  border-radius: 10px;
+  color: #f4ede0;
+  background: linear-gradient(180deg, rgb(28 25 19 / 92%), rgb(14 13 10 / 96%));
+  box-shadow:
+    0 12px 28px rgb(0 0 0 / 48%),
+    inset 0 1px 0 rgb(255 248 230 / 14%);
   clip-path: none;
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease;
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer > a:first-of-type {
-  color: var(--ext-ink);
-  background: var(--ext-gold);
+  color: #080807;
+  border-color: var(--ext-gold);
+  background: var(--exe-gold-pill);
+  font-weight: 700;
+}
+html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer > a:hover,
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > .rxs-footer
+  > a.rxs-footer-return:hover {
+  transform: translateY(-2px);
   border-color: var(--ext-gold);
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer > .exf-billing {
   bottom: -0.22em;
-  -webkit-text-stroke: 1px rgb(233 196 126 / 13%);
+  -webkit-text-stroke: 1px rgb(240 202 125 / 14%);
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer > .exi-rays {
-  color: rgb(233 196 126 / 6%);
+  color: rgb(240 202 125 / 6%);
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page :is(a, button, summary):focus-visible {
   outline: 2px solid #ffe1a1;
   outline-offset: 4px;
 }
 
+/* ================================================================
+   RESPONSIVE BREAKPOINTS
+   ================================================================ */
 @media (max-width: 900px) {
   html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-index {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-index a {
-    min-height: 116px;
+    min-height: 122px;
     padding: 20px 18px;
   }
   html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-index a:nth-child(3) {
@@ -952,6 +1860,15 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page :is(a, button, summ
     .rxs-system-grid
     > article {
     padding: 28px;
+  }
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #system
+    .rxs-specs
+    > .rxs-spec-group
+    dl {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
@@ -985,7 +1902,7 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page :is(a, button, summ
     grid-row: 2;
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 0;
+    gap: 4px;
     width: 100%;
     padding-top: 4px;
     overflow: visible;
@@ -993,6 +1910,7 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page :is(a, button, summ
   html[data-family="special"] body .rxs-page.rxs-page.exs-page .rxs-local-nav nav a {
     min-width: 0;
     min-height: 44px;
+    padding-inline: 4px;
     font-size: 12px;
     letter-spacing: 0.02em;
   }
@@ -1000,7 +1918,7 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page :is(a, button, summ
     padding-inline: 10px;
   }
   html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-index a {
-    padding: 18px 10px;
+    padding: 18px 12px;
     min-height: 116px;
   }
   html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-index span {
@@ -1015,7 +1933,7 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page :is(a, button, summ
     .rxs-page.rxs-page.exs-page
     > :is(#performance, #p14, #stages, #system)
     > .rxs-section-heading {
-    grid-template-columns: 34px minmax(0, 1fr);
+    grid-template-columns: 48px minmax(0, 1fr);
     gap: 10px 14px;
     padding-bottom: 24px;
   }
@@ -1024,7 +1942,9 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page :is(a, button, summ
     .rxs-page.rxs-page.exs-page
     > :is(#performance, #p14, #stages, #system)
     > .rxs-section-heading::before {
-    font-size: 24px;
+    width: 42px;
+    height: 42px;
+    font-size: 18px;
   }
   html[data-family="special"]
     body
@@ -1033,7 +1953,7 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page :is(a, button, summ
     > .rxs-section-heading
     > h2 {
     font-size: clamp(26px, 6.7vw, 40px);
-    line-height: 1.45;
+    line-height: 1.42;
   }
   html[data-family="special"]
     body
@@ -1048,8 +1968,8 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page :is(a, button, summ
   html[data-family="special"] body .rxs-page.rxs-page.exs-page #performance .exi-stage {
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: auto auto;
-    gap: 28px;
-    padding-block: 34px;
+    gap: 20px;
+    padding-block: 32px;
   }
   html[data-family="special"]
     body
@@ -1059,9 +1979,8 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page :is(a, button, summ
     > article:nth-child(2) {
     grid-column: 1;
     grid-row: 2;
-    padding: 28px 0 0;
+    padding: 24px 20px;
     border-left: 0;
-    border-top: 1px solid var(--exe-rule);
   }
   html[data-family="special"]
     body
@@ -1077,7 +1996,7 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page :is(a, button, summ
     .exi-stage
     > article:nth-child(2)
     > strong {
-    font-size: clamp(56px, 18vw, 96px);
+    font-size: clamp(54px, 16vw, 88px);
   }
   html[data-family="special"] body .rxs-page.rxs-page.exs-page > #performance .rxs-comparison {
     grid-template-columns: minmax(0, 1fr);
@@ -1115,7 +2034,7 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page :is(a, button, summ
     margin-top: 16px;
   }
   html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-opponent-options button {
-    padding-inline: 5px;
+    padding-inline: 8px;
     font-size: 12px;
   }
   html[data-family="special"]
@@ -1174,7 +2093,7 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page :is(a, button, summ
   html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-catalog-details > summary {
     position: relative;
     display: grid;
-    padding-right: 26px;
+    padding-right: 40px;
   }
   html[data-family="special"]
     body
@@ -1196,40 +2115,42 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page :is(a, button, summ
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: auto auto;
     gap: 32px;
+    padding: 22px 18px;
   }
   html[data-family="special"] body .rxs-page.rxs-page.exs-page > #p14 .rxs-p14-overview figure {
     grid-column: 1;
-    grid-row: 1;
-    width: min(78%, 280px, calc(1200px / var(--exe-art-density)));
+    grid-row: 2;
+    max-width: min(320px, 78vw);
   }
   html[data-family="special"] body .rxs-page.rxs-page.exs-page > #p14 .rxs-p14-copy {
     grid-column: 1;
-    grid-row: 2;
+    grid-row: 1;
   }
   html[data-family="special"] body .rxs-page.rxs-page.exs-page > #p14 .rxs-p14-copy dl {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0 16px;
-  }
-  html[data-family="special"] body .rxs-page.rxs-page.exs-page > #p14 .rxs-p14-copy dt {
-    font-size: 12px;
-    letter-spacing: 0.04em;
-  }
-  html[data-family="special"] body .rxs-page.rxs-page.exs-page > #p14 .rxs-p14-copy dd {
-    font-size: clamp(18px, 4.8vw, 26px);
+    grid-template-columns: minmax(0, 1fr);
   }
   html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-core-flow {
     flex-direction: column;
+    align-items: stretch;
     gap: 10px;
-    margin-top: 28px;
+    padding: 18px 16px;
   }
   html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-core-flow :is(i, b) {
-    rotate: 90deg;
+    transform: rotate(90deg);
+  }
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #stages
+    .rxs-stage-switcher
+    > .rxs-stage-tabs.liquid-swipe-tabs {
+    width: 100%;
   }
   html[data-family="special"] body .rxs-page.rxs-page.exs-page > #stages #exs-stage-panel {
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: auto auto;
-    gap: 30px;
-    padding-block: 24px 32px;
+    gap: 24px;
+    padding: 22px 18px;
   }
   html[data-family="special"] body .rxs-page.rxs-page.exs-page > #stages #exs-stage-panel > figure {
     grid-column: 1;
@@ -1244,30 +2165,20 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page :is(a, button, summ
     margin: 0;
     padding: 0;
   }
-  html[data-family="special"]
-    body
-    .rxs-page.rxs-page.exs-page
-    > #stages
-    #exs-stage-panel
-    > div
-    > h3 {
-    font-size: clamp(28px, 7.2vw, 42px);
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-form-facts {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
   }
   html[data-family="special"]
     body
     .rxs-page.rxs-page.exs-page
     > #system
-    .rxs-system-grid
-    > article {
-    padding: 24px;
-  }
-  html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer h2 {
-    font-size: clamp(31px, 9vw, 52px);
+    .rxs-specs
+    > .rxs-spec-group {
+    padding: 22px 18px;
   }
 }
 
-/* At phone widths the catalogue value and its relative result each get a
-   whole row. Their intrinsic numbers never compete for the same 256px. */
 @media (max-width: 480px) {
   html[data-family="special"]
     body
@@ -1307,6 +2218,13 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page :is(a, button, summ
   }
 }
 
+@media (max-width: 380px) {
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page .rxs-local-nav nav a {
+    font-size: 12px;
+    letter-spacing: 0;
+  }
+}
+
 @media (max-width: 359px) {
   html[data-family="special"] body .rxs-page.rxs-page.exs-page {
     --ext-gutter: 16px;
@@ -1325,26 +2243,32 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page :is(a, button, summ
   }
 }
 
-/* No new perpetual motion; interactive colour changes only for a fine
-   pointer. Native details, static art and focus stay usable in all modes. */
 @media (hover: hover) and (pointer: fine) {
   html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-opponent-options button:hover,
   html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer > a:hover {
     border-color: #ffe1a1;
   }
   html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-index a:hover {
-    background: rgb(233 196 126 / 6%);
+    background: rgb(240 202 125 / 8%);
   }
 }
+
 /* Keep the wide FIGHT CARD corners after this sheet's general heading reset. */
 @media (min-width: 1100px) {
-  html[data-family="special"] body .rxs-page.rxs-page.exs-page
-    > :is(#performance, #p14) > .rxs-section-heading {
-    grid-template-columns: 58px minmax(0, 1.3fr) minmax(240px, 0.7fr);
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > :is(#performance, #p14)
+    > .rxs-section-heading {
+    grid-template-columns: 72px minmax(0, 1.3fr) minmax(240px, 0.7fr);
     grid-template-rows: auto auto;
   }
-  html[data-family="special"] body .rxs-page.rxs-page.exs-page
-    > :is(#performance, #p14) > .rxs-section-heading > span {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > :is(#performance, #p14)
+    > .rxs-section-heading
+    > span {
     grid-column: 3;
     grid-row: 1 / span 2;
     align-self: end;
@@ -1352,8 +2276,12 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page :is(a, button, summ
     padding-inline-start: clamp(20px, 2.4vw, 40px);
     border-inline-start: 1px solid rgb(var(--ext-gold-rgb) / 32%);
   }
-  html[data-family="special"] body .rxs-page.rxs-page.exs-page
-    > :is(#stages, #system) > .rxs-section-heading > h2 {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > :is(#stages, #system)
+    > .rxs-section-heading
+    > h2 {
     display: grid;
     width: 100%;
     max-width: none;
@@ -1361,17 +2289,37 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page :is(a, button, summ
     gap: clamp(16px, 2.2vw, 32px);
     font-size: clamp(32px, 3.3vw, 52px);
   }
-  html[data-family="special"] body .rxs-page.rxs-page.exs-page
-    > :is(#stages, #system) > .rxs-section-heading > h2 > .exo-line {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > :is(#stages, #system)
+    > .rxs-section-heading
+    > h2
+    > .exo-line {
     white-space: nowrap;
   }
-  html[data-family="special"] body .rxs-page.rxs-page.exs-page
-    > :is(#stages, #system) > .rxs-section-heading > h2 > br {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > :is(#stages, #system)
+    > .rxs-section-heading
+    > h2
+    > br {
     display: none;
   }
 }
 
 @media (forced-colors: active) {
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page .rxs-local-nav,
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-index,
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page > #performance .rxs-comparison,
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page > #p14 .exs-p14-comparison > article,
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page > #system .rxs-system-grid > article,
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer {
+    background: Canvas;
+    color: CanvasText;
+    box-shadow: none;
+  }
   html[data-family="special"]
     body
     .rxs-page.rxs-page.exs-page
