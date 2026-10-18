@@ -103,13 +103,16 @@ test("reactor sheets crop only the two exact atlas masks and retain the dark soc
   assert.equal(layers.y, 218);
   assert.equal(layers.w, 115);
   assert.equal(layers.h, 139);
-  assert.equal(canvases.length, 3);
+  // Owner (2026-10-18): a fourth, temporary sheet carries the bare disc;
+  // it is released (0×0) once laid into the primed socket.
+  assert.equal(canvases.length, 4);
   assert.deepEqual(
     canvases.map(({ width, height }) => [width, height]),
     [
       [layers.w, layers.h],
       [layers.w, layers.h],
       [layers.w, layers.h],
+      [0, 0],
     ],
   );
 
@@ -132,14 +135,20 @@ test("reactor sheets crop only the two exact atlas masks and retain the dark soc
   );
 
   const socketOps = canvases[1].context.operations;
+  // The coil primed in dark metal; the disc's bare undersuit laid over it.
   assert.deepEqual(
     socketOps.filter(([operation]) => operation === "drawImage").map(([, source]) => source),
-    [layers.art, layers.disc, undersuit],
+    [layers.art, canvases[3]],
   );
   assert.ok(
     socketOps.some(
-      ([operation, value]) => operation === "globalCompositeOperation" && value === "source-in",
+      ([operation, value]) => operation === "globalCompositeOperation" && value === "source-atop",
     ),
+  );
+  const bareOps = canvases[3].context.operations;
+  assert.deepEqual(
+    bareOps.filter(([operation]) => operation === "drawImage").map(([, source]) => source),
+    [layers.disc, undersuit],
   );
   assert.equal(canvases[1].context.globalCompositeOperation, "source-over");
 });

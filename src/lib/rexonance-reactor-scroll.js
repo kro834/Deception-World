@@ -53,13 +53,27 @@ export function createReactorLayers({ document, pieces, atlas, art, undersuit, s
     const target = p.id === "core-disc" ? dc : pc;
     target.drawImage(atlas, p.ax, p.ay, p.w, p.h, p.x - x, p.y - y, p.w, p.h);
   }
-  sc.drawImage(picture, 0, 0);
-  sc.drawImage(disc, 0, 0);
   const layers = { art: picture, disc, socket, x, y, w, h };
   repaintReactorArt(layers, art, size);
-  sc.globalCompositeOperation = "source-in";
-  sc.drawImage(undersuit, 0, 0, size.width, size.height, -x, -y, size.width, size.height);
+  // The socket: the coil's shape in dark primed metal, like every plate
+  // waiting for its paint, so late in the suit-up the chest never looks
+  // missing (owner, 2026-10-18); only the disc shows the bare undersuit.
+  sc.drawImage(picture, 0, 0);
+  sc.globalCompositeOperation = "source-atop";
+  sc.fillStyle = "rgb(14 18 28 / 0.66)";
+  sc.fillRect(0, 0, w, h);
   sc.globalCompositeOperation = "source-over";
+  const bare = document.createElement("canvas");
+  bare.width = w;
+  bare.height = h;
+  const bc = bare.getContext("2d");
+  if (bc) {
+    bc.drawImage(disc, 0, 0);
+    bc.globalCompositeOperation = "source-in";
+    bc.drawImage(undersuit, 0, 0, size.width, size.height, -x, -y, size.width, size.height);
+    sc.drawImage(bare, 0, 0);
+  }
+  bare.width = bare.height = 0;
   return layers;
 }
 

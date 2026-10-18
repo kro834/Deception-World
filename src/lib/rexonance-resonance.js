@@ -1371,6 +1371,100 @@ const BURSTS = [
   [4.8, 16],
 ];
 
+// The bare face's etched detail, in figure px from the eyes' outline (the
+// visor's V spans most of the head): kept inside the head's own oval.
+function drawBareFace(context, config, scan, fade) {
+  const glow = config.glow;
+  const vx = config.visor[0];
+  let x0 = Infinity;
+  let x1 = -Infinity;
+  let y0 = Infinity;
+  let y1 = -Infinity;
+  for (const [x, y] of glow) {
+    if (x < x0) x0 = x;
+    if (x > x1) x1 = x;
+    if (y < y0) y0 = y;
+    if (y > y1) y1 = y;
+  }
+  const hw = (x1 - x0) / 2;
+  const eh = y1 - y0;
+  const top = y0 - eh * 0.3;
+  const chin = y1 + eh * 0.08;
+  const reach = scan * config.size.height;
+  if (reach <= top) return;
+  context.save();
+  // The head's oval, and only as far as the scan has woken it.
+  context.beginPath();
+  context.ellipse(vx, (top + chin) / 2, hw * 0.98, (chin - top) / 2, 0, 0, Math.PI * 2);
+  context.clip();
+  context.beginPath();
+  context.rect(vx - hw * 2, top - 2, hw * 4, Math.max(0, reach - top + 2));
+  context.clip();
+  context.globalAlpha = 0.9 * fade;
+  context.lineCap = "round";
+  context.lineJoin = "round";
+  // The eyes' frame: a dark recess, an outer rim and an inner bevel.
+  context.beginPath();
+  for (let i = 0; i < glow.length; i += 1) {
+    const [x, y] = glow[i];
+    if (i) context.lineTo(x, y);
+    else context.moveTo(x, y);
+  }
+  context.closePath();
+  context.fillStyle = "rgb(6 9 16 / 0.5)";
+  context.fill();
+  context.lineWidth = 1.4;
+  context.strokeStyle = "rgb(170 192 216 / 0.7)";
+  context.stroke();
+  context.beginPath();
+  for (let i = 0; i < glow.length; i += 1) {
+    const x = vx + (glow[i][0] - vx) * 0.84;
+    const y = y0 + eh * 0.06 + (glow[i][1] - y0) * 0.86;
+    if (i) context.lineTo(x, y);
+    else context.moveTo(x, y);
+  }
+  context.closePath();
+  context.lineWidth = 0.7;
+  context.strokeStyle = "rgb(122 168 204 / 0.5)";
+  context.stroke();
+  // The crown: a centre ridge, two brow plates and the crest's facets
+  // rising from the visor's upper corners.
+  context.beginPath();
+  context.moveTo(vx, top + eh * 0.03);
+  context.lineTo(vx, y0 + eh * 0.04);
+  for (const side of [-1, 1]) {
+    context.moveTo(vx + side * 1.2, y0 - eh * 0.05);
+    context.quadraticCurveTo(vx + side * hw * 0.5, y0 - eh * 0.2, vx + side * hw * 0.92, y0 - eh * 0.02);
+    context.moveTo(vx + side * 1.2, y0 - eh * 0.16);
+    context.quadraticCurveTo(vx + side * hw * 0.42, y0 - eh * 0.3, vx + side * hw * 0.78, y0 - eh * 0.2);
+    context.moveTo(vx + side * hw * 0.9, y0 + eh * 0.01);
+    context.lineTo(vx + side * hw * 0.3, top + eh * 0.04);
+    // Side vents beside the visor.
+    for (let k = 0; k < 3; k += 1) {
+      const ty = y0 + eh * (0.2 + k * 0.09);
+      context.moveTo(vx + side * hw * 0.98, ty);
+      context.lineTo(vx + side * hw * 0.82, ty + eh * 0.05);
+    }
+  }
+  context.lineWidth = 0.8;
+  context.strokeStyle = "rgb(150 178 206 / 0.55)";
+  context.stroke();
+  // The chin's grille, under the V's point.
+  context.beginPath();
+  for (let k = 0; k < 3; k += 1) {
+    const gy = y1 - eh * (0.16 - k * 0.07);
+    const gw = hw * (0.22 - k * 0.05);
+    context.moveTo(vx - gw, gy);
+    context.lineTo(vx - gw * 0.25, gy);
+    context.moveTo(vx + gw * 0.25, gy);
+    context.lineTo(vx + gw, gy);
+  }
+  context.lineWidth = 0.9;
+  context.strokeStyle = "rgb(122 150 182 / 0.6)";
+  context.stroke();
+  context.restore();
+}
+
 /**
  * Mounts the suit-up scene on its runway. `config`: { figure, undersuit,
  * size: { width, height }, pieces: [{ id, group, x, y, w, h, seat }],
@@ -2872,6 +2966,12 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         context.fillRect(-W * 0.08, scanned - 26, W * 1.16, 24);
       }
     }
+
+    // The bare face has its own machined detail (owner, 2026-10-18: it was
+    // too plain): the compound eyes' frame (no light), a centre ridge, brow
+    // plates, cheek seams, a mouth grille and temple vents, etched in steel
+    // as the scan passes; the helmet's tiles land over it.
+    if (seal < 1 && config.glow?.length > 2) drawBareFace(context, config, scan, 1 - seal);
 
     // Its middle band, over the body and under the plates.
     if (nanites) nanites.midPass(context);
