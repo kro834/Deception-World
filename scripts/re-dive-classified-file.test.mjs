@@ -58,7 +58,8 @@ test("native file modal synchronously locks scrolling and releases it on close a
   assert.match(viewer, /removeEventListener\("pagehide", dismissForNavigation\)/);
   assert.match(viewer, /dismissForNavigation = useCallback\(\(\) => dismiss\(false\)/);
   assert.match(viewer, /viewportRef\.current\.width !== window\.innerWidth/);
-  assert.match(viewer, /opener\.closest<HTMLElement>\("\.re-dive-section"\)\?\.scrollIntoView/);
+  assert.match(viewer, /const archive = opener\.closest<HTMLElement>\("\.re-dive-section"\)/);
+  assert.match(viewer, /if \(archive\) restoreArchivePosition\(archive\)/);
   assert.match(viewer, /opener\.focus\(\{ preventScroll: true \}\)/);
 });
 

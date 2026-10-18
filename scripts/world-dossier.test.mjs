@@ -70,6 +70,8 @@ test("the dossier is the owner's record, section by section", () => {
 test("the dossier moves out of ordinary columns into the post-RISING book", () => {
   assert.equal(DOG_DOSSIER_COLUMN.title, "？？？");
   assert.match(DOG_DOSSIER_COLUMN.body, /ネタバレ/);
+  assert.ok(DOG_DOSSIER_COLUMN.body.endsWith("開くと、資料の本文が表示されます。"));
+  assert.doesNotMatch(DOG_DOSSIER_COLUMN.body, /プラスを右へスライドすると/);
   assert.equal(DOG_DOSSIER_COLUMN.pickup.length, 57);
   const columns = loadData("src/components/world/world-columns-data.ts").WORLD_COLUMNS;
   assert.equal(columns.length, 5);
