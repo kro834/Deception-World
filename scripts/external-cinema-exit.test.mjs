@@ -184,7 +184,7 @@ test("unmount disposal prevents stale timers, state updates and redirects", () =
   assert.equal(h.exit.begin(), false);
 });
 
-test("the shared STORIES group adds exactly one cinema row above both Dream branches", () => {
+test("the shared STORIES cinema link enters through the route gate", () => {
   const chrome = readFileSync(
     new URL("../src/components/world/world-chrome.tsx", import.meta.url),
     "utf8",
@@ -201,11 +201,8 @@ test("the shared STORIES group adds exactly one cinema row above both Dream bran
   assert.match(component, /映画四部作「仮面ライダーサーガ」/);
   assert.match(component, /<i>本編リメイク<\/i>/);
   assert.match(component, /href=\{`\$\{CINEMA_PATH\}#top`\}/);
-  assert.match(component, /createPortal\([\s\S]*document\.body/);
-  const css = readFileSync(
-    new URL("../src/components/world/external-cinema-link.css", import.meta.url),
-    "utf8",
-  );
-  assert.doesNotMatch(css, /\binfinite\b/);
-  assert.match(css, /prefers-reduced-motion: reduce/);
+  // The shared load gate owns the destination curtain; CinemaLink must not add a pre-navigation overlay.
+  assert.match(component, /shouldAnimateCinemaClick\(event\)/);
+  assert.match(component, /void go\(\{[\s\S]*?to: CINEMA_PATH,[\s\S]*?assets: CINEMA_ASSETS/);
+  assert.doesNotMatch(component, /createCinemaExit|createPortal|<div className="external-cinema-exit"/);
 });

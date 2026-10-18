@@ -44,9 +44,10 @@ test("Zeus keeps the same outer button size while its return image is active", (
 test("fullscreen route effects are limited to gallery, archive, Zeus, and rider dossiers", () => {
   assert.match(gate, /pathname === "\/form-archive" \|\| to === "\/form-archive"/);
   assert.match(gate, /const isZeusTransition = changesDocument && to === "\/managers\/zeus"/);
+  // Saga is another deliberate full-screen cover; only the listed exceptions may route directly.
   assert.match(
     gate,
-    /if \(\s*!isArchiveTransition &&\s*!isZeusTransition &&\s*!isGalleryTransition &&\s*!riderTransitionVariant\s*\) \{[\s\S]*?await navigate/,
+    /if \(\s*!isArchiveTransition &&\s*!isZeusTransition &&\s*!isGalleryTransition &&\s*!isCinemaTransition &&\s*!riderTransitionVariant\s*\) \{[\s\S]*?await navigate/,
   );
   assert.match(gate, /"\/riders\/saga": "saga"/);
   assert.match(gate, /"\/riders\/realm": "realm"/);

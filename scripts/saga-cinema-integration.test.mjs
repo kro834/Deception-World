@@ -99,11 +99,17 @@ test("reduced-motion preferences and animated resources are cleaned up", () => {
   assert.match(page, /if \(ref\.current\?\.open\) ref\.current\.close\(\)/u);
 });
 
-test("keyboard and accessible dialog controls remain present", () => {
+test("route arrival has no second opening dialog and catalogue dialogs remain accessible", () => {
   assert.match(page, /aria-label="メインナビゲーション"/u);
   assert.match(page, /onKeyDown=\{chapterKeyboard\}/u);
-  assert.match(page, /<dialog[\s\S]*?aria-labelledby="dialog-title"/u);
+  // Entry belongs to the route curtain; an automatic post-navigation modal/replay is a second intro.
+  assert.doesNotMatch(
+    page,
+    /id="opening"|id="opening-skip"|id="enter-world"|id="replay-intro"|saga-opening-v2|openingInitializedRef|replayOpening/u,
+  );
+  assert.match(page, /id="film-dialog"[\s\S]*?aria-labelledby="dialog-title"/u);
   assert.match(page, /aria-label="作品情報を閉じる"/u);
+  assert.match(page, /id="gallery-dialog"[\s\S]*?aria-label="メインビジュアル ギャラリー"/u);
   assert.match(page, /aria-label="ギャラリーを閉じる"/u);
   assert.match(styles, /:focus-visible/u);
 });

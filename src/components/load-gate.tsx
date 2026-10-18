@@ -44,7 +44,7 @@ type RiderTransitionVariant = RiderDiveVariant | RiderCutInVariant;
 type GateState = {
   active: boolean;
   percent: number;
-  variant: "archive" | "zeus" | "gallery" | RiderTransitionVariant;
+  variant: "archive" | "zeus" | "gallery" | "cinema" | RiderTransitionVariant;
   phase: "covering" | "revealing";
   scene?: CineScene | null;
   rexonanceCall?: RexonanceTransitionRenderer | null;
@@ -1259,6 +1259,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
         setDelayedRoute(null);
         const changesDocument = pathname !== to;
         const isGalleryTransition = changesDocument && to === "/gallery";
+        const isCinemaTransition = changesDocument && to === "/saga-cinema";
         const isArchiveTransition =
           changesDocument &&
           to !== "/rexonance-saga" &&
@@ -1290,6 +1291,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
           !isArchiveTransition &&
           !isZeusTransition &&
           !isGalleryTransition &&
+          !isCinemaTransition &&
           !riderTransitionVariant
         ) {
           const releaseScrollMotion = changesDocument || hash ? holdManagedScrollMotion() : null;
@@ -1328,23 +1330,36 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
         const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
         const tier = cineTier(reduceMotion);
 
-        if (isGalleryTransition) {
+        if (isGalleryTransition || isCinemaTransition) {
           const releaseScrollMotion = holdManagedScrollMotion();
-          const timings =
-            tier === "full" ? { cover: 720, reveal: 1120 } : { cover: 100, reveal: 240 };
+          const coverVariant = isCinemaTransition ? "cinema" : "gallery";
+          const timings = isCinemaTransition
+            ? tier === "full"
+              ? { cover: 420, reveal: 560 }
+              : { cover: 80, reveal: 180 }
+            : tier === "full"
+              ? { cover: 720, reveal: 1120 }
+              : { cover: 100, reveal: 240 };
           setDocumentLoading(true);
           markRouteCover("covering");
           setGate({
             active: true,
             percent: 100,
-            variant: "gallery",
+            variant: coverVariant,
             phase: "covering",
             scene: null,
           });
           try {
             await nextFrame();
             await nextFrame();
+            const cinemaArt = isCinemaTransition
+              ? Promise.race([
+                preloadAssets(assets, () => undefined).catch(() => undefined),
+                wait(1000),
+              ]) : null;
             if (!isCurrent() || !(await warmCoveredDestination())) return;
+            if (cinemaArt) await cinemaArt;
+            if (!isCurrent()) return;
             const remaining = timings.cover - (performance.now() - startedAt);
             if (remaining > 0) await wait(remaining);
             if (!isCurrent()) return;
@@ -1358,7 +1373,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
             setGate({
               active: true,
               percent: 100,
-              variant: "gallery",
+              variant: coverVariant,
               phase: "revealing",
               scene: null,
             });
@@ -1754,6 +1769,25 @@ function LoadOverlay({
 }) {
   if (!active) return null;
   if (variant === "gallery") return <GalleryCurtain phase={phase} />;
+  if (variant === "cinema") {
+    return (
+      <div
+        className={`load-gate cinema-route-curtain is-${phase}`}
+        role="status"
+        aria-live="polite"
+        aria-busy={phase === "covering"}
+        aria-label="映画四部作のページへ移動中"
+      >
+        <div className="cinema-route-shutter is-left" aria-hidden="true" />
+        <div className="cinema-route-shutter is-right" aria-hidden="true" />
+        <div className="cinema-route-title" aria-hidden="true">
+          <small>FILMS 01 — 04</small>
+          <b>仮面ライダーサーガ</b>
+          <span>邂逅 ／ 覚醒 ／ 激情 ／ 終末</span>
+        </div>
+      </div>
+    );
+  }
   const isRiderDive =
     variant === "saga" ||
     variant === "realm" ||
