@@ -603,6 +603,7 @@ const grouped = (value) => String(value).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 const REACTOR_RADIUS = 40;
 const REACTOR_SWIRL = [0.74, 0.82];
 const REACTOR_MOTES = ["rgb(240 207 134)", "rgb(150 236 255)", "rgb(255 143 216)"];
+const PRIMER_LEAD = 0.035;
 const clamp01 = (value) => (value < 0 ? 0 : value > 1 ? 1 : value);
 const span = (progress, [from, to]) => clamp01((progress - from) / (to - from));
 const smooth = (u) => u * u * (3 - 2 * u);
@@ -2771,6 +2772,53 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     context.globalAlpha = 1;
   };
 
+  // Each plate's tiles with their paint-order positions (built once), and a
+  // darkened, desaturated copy of each art source to prime them with.
+  let primerCache = null;
+  const primerParts = () => {
+    if (primerCache?.plan === plan) return primerCache.parts;
+    const order = nano.paintOrder;
+    const pos = new Int32Array(plan.tiles.length);
+    for (let k = 0; k < order.length; k += 1) pos[order[k]] = k;
+    const byPiece = new Map();
+    plan.tiles.forEach((item, index) => {
+      // Tiles without a piece (the ornaments) prime by small regions.
+      const region = item.pieceId ?? `r${Math.floor(item.cx / 40)},${Math.floor(item.cy / 40)}`;
+      const key = `${region}:${item.src ?? 1}`;
+      let part = byPiece.get(key);
+      if (!part) byPiece.set(key, (part = { src: item.src ?? 1, tiles: [], pos: [], first: Infinity, last: -1 }));
+      part.tiles.push(item);
+      part.pos.push(pos[index]);
+      part.first = Math.min(part.first, pos[index]);
+      part.last = Math.max(part.last, pos[index]);
+    });
+    primerCache = { plan, parts: [...byPiece.values()] };
+    return primerCache.parts;
+  };
+  const primers = new Map();
+  const releasePrimers = () => {
+    for (const sheet of primers.values()) sheet.width = sheet.height = 0;
+    primers.clear();
+    primerCache = null;
+  };
+  const primerSheet = (art) => {
+    let sheet = primers.get(art);
+    if (sheet) return sheet;
+    if (primers.size > 1) releasePrimers();
+    sheet = document.createElement("canvas");
+    sheet.width = W;
+    sheet.height = H;
+    const c = sheet.getContext("2d");
+    if (c) {
+      c.drawImage(art, 0, 0, W, H);
+      c.globalCompositeOperation = "source-atop";
+      c.fillStyle = "rgb(14 18 28 / 0.66)";
+      c.fillRect(0, 0, W, H);
+    }
+    primers.set(art, sheet);
+    return sheet;
+  };
+
   // `calm`: the scroll has rested: the frame is a pure function of the
   // progress, without the transient effects (comets, sparks, links, recoil,
   // seams, shock rings, spall, pulses, lacquer, droplets, beams, the glint,
@@ -2860,6 +2908,35 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
           }
           context.restore();
         }
+      }
+      // A plate part-way through forming never shows holes: its tiles not
+      // yet painted are laid as dark primed metal in the plate's own shape,
+      // so the paint arrives over a whole plate (owner, 2026-10-18).
+      if (painted < tiles.length) {
+        const parts = primerParts();
+        const at = nano.paintAt;
+        for (const part of parts) {
+          if (part.last < painted) continue;
+          // From just before the plate's first cell is painted, fading in.
+          const fade = clamp01((progress - at[part.first] + PRIMER_LEAD) / PRIMER_LEAD);
+          if (fade <= 0) continue;
+          let any = false;
+          context.save();
+          context.beginPath();
+          for (let k = 0; k < part.tiles.length; k += 1) {
+            if (part.pos[k] < painted) continue;
+            const item = part.tiles[k];
+            context.rect(item.sx, item.sy, item.tw, item.th);
+            any = true;
+          }
+          if (any) {
+            context.clip();
+            context.globalAlpha = fade;
+            context.drawImage(primerSheet(part.src === 0 ? baseArt : plates), 0, 0, W, H);
+          }
+          context.restore();
+        }
+        context.globalAlpha = 1;
       }
       // Seated plates still in raw metal, and the lacquer front.
       if (nanites) nanites.seatedPass(context, painted);
@@ -3661,6 +3738,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     naniteSheets = [];
     swarm?.release?.();
     nano = swarm = goldVisible = null;
+    releasePrimers();
     goldCount = 0;
     goldReverse.dirty = -1;
     goldReverse.at = 0;
@@ -3993,5 +4071,6 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     naniteSheets = [];
     swarm?.release?.();
     nano = swarm = goldVisible = null;
+    releasePrimers();
   };
 }
