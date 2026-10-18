@@ -162,6 +162,13 @@ test("320px and 390px comparison values occupy separate rows without shrinking t
 });
 
 test("KOSMOS Ultra readouts stay above core rays, separate figures from units, and keep padded spec plates", () => {
+  assert.match(source, /@font-face[\s\S]*?font-family:\s*"Rexonance Forge"/);
+  assert.match(source, /@font-face[\s\S]*?font-family:\s*"Rexonance Forge Outline"/);
+  assert.match(source, /@font-face[\s\S]*?font-family:\s*"Rexonance Etch"/);
+  const heroWordmarkAfter = find(".exs-hero .rxs-hero-copy > h1 > span::after");
+  assert.equal(declaration(heroWordmarkAfter, "content"), '"EXTREME SAGA"');
+  const stageFrame = find("> #stages #exs-stage-panel > figure > .exo-frame");
+  assert.equal(declaration(stageFrame, "position"), "absolute");
   const p14Copy = find("> #p14 .rxs-p14-copy");
   const p14Figure = find("> #p14 .rxs-p14-overview figure");
   assert.equal(declaration(p14Copy, "position"), "relative");
