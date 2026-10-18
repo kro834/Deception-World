@@ -102,10 +102,11 @@ html body .load-gate.has-cine.is-extreme-dive {
 }
 
 html body .load-gate.has-cine.is-dream-dive {
-  --dwc-accent: #f0c978;
-  --dwc-gold: #cc493b;
-  --dwc-lock: #f7dfb0;
+  --dwc-accent: #8ec8f6;
+  --dwc-gold: #e6c28e;
+  --dwc-lock: #bfe2ff;
   --dwc-arm: 30px;
+  --dwc-close: 380ms;
 }
 
 /* A cut-in's stage takes over sooner: its iris closes in 260 ms. */
@@ -434,14 +435,91 @@ html body .load-gate.has-cine.is-extreme-dive .rider-dive-mark > i {
     drop-shadow(0 8px 24px rgb(2 6 14 / 0.85));
 }
 
+html body .load-gate.has-cine.is-dream-dive > .dwc-shutter > i.is-top::after,
+html body .load-gate.has-cine.is-dream-dive > .dwc-shutter > i.is-bottom::after {
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent 4%,
+    rgb(142 200 246 / 0.72) 22%,
+    rgb(230 194 142 / 0.92) 50%,
+    rgb(142 200 246 / 0.72) 78%,
+    transparent 96%
+  );
+  box-shadow:
+    0 0 18px rgb(142 200 246 / 0.56),
+    0 0 32px rgb(230 194 142 / 0.28);
+}
+
+html
+  body
+  .load-gate.has-cine.rider-route-dive.is-dream-dive:not(.has-carry-art):not(.has-carry-file)
+  > .dwc-lock::before {
+  border-color: rgb(142 200 246 / 0.38);
+  border-radius: 14px;
+  background:
+    radial-gradient(ellipse 84% 26% at 50% 14%, rgb(191 226 255 / 0.24), transparent 64%),
+    radial-gradient(ellipse 76% 32% at 50% 86%, rgb(230 194 142 / 0.18), transparent 68%),
+    linear-gradient(
+      168deg,
+      rgb(142 200 246 / 0.14) 0%,
+      transparent 38%,
+      rgb(112 168 236 / 0.08) 68%,
+      rgb(230 194 142 / 0.14) 100%
+    ),
+    rgb(5 11 24 / 0.72);
+  box-shadow:
+    inset 0 1px 0 rgb(191 226 255 / 0.36),
+    inset 0 -1px 0 rgb(230 194 142 / 0.28),
+    inset 0 0 28px rgb(112 184 246 / 0.14),
+    0 22px 54px rgb(1 4 12 / 0.56);
+}
+
+html body .load-gate.has-cine.is-dream-dive .cine-dive-tunnel {
+  background:
+    repeating-radial-gradient(
+      ellipse 62% 38% at 50% 48%,
+      transparent 0 4.4%,
+      rgb(142 200 246 / 0.38) 4.8% 5.3%,
+      rgb(230 194 142 / 0.24) 5.6% 6.1%,
+      transparent 6.7% 11.8%
+    ),
+    radial-gradient(ellipse 52% 34% at 50% 48%, rgb(112 184 246 / 0.22), transparent 72%);
+}
+
+html body .load-gate.has-cine.is-dream-dive .cine-dive-tunnel > i {
+  background:
+    radial-gradient(
+      circle at 36% 64%,
+      rgb(191 226 255 / 0.68) 0 0.7%,
+      rgb(142 200 246 / 0.22) 1.5%,
+      transparent 2.5%
+    ),
+    radial-gradient(
+      circle at 64% 58%,
+      rgb(230 194 142 / 0.62) 0 0.65%,
+      rgb(230 194 142 / 0.18) 1.4%,
+      transparent 2.3%
+    ),
+    radial-gradient(circle at 48% 72%, rgb(191 226 255 / 0.58) 0 0.55%, transparent 1.8%),
+    radial-gradient(circle at 56% 36%, rgb(142 200 246 / 0.52) 0 0.75%, transparent 2.1%),
+    radial-gradient(circle at 42% 42%, rgb(230 194 142 / 0.48) 0 0.5%, transparent 1.7%),
+    repeating-radial-gradient(
+      ellipse 54% 32% at 50% 52%,
+      transparent 0 6.2%,
+      rgb(191 226 255 / 0.32) 6.6% 7.1%,
+      transparent 7.6% 14%
+    );
+}
+
 html body .load-gate.has-cine.is-dream-dive .rider-dive-mark > i {
-  color: rgb(240 201 120 / 0.22);
+  color: rgb(142 200 246 / 0.24);
   font-weight: 700;
   letter-spacing: 0.06em;
-  -webkit-text-stroke: 1.8px #f0c978;
+  -webkit-text-stroke: 1.8px #bfe2ff;
   filter:
-    drop-shadow(0 0 20px rgb(204 73 59 / 0.45))
-    drop-shadow(0 6px 22px rgb(6 4 10 / 0.88));
+    drop-shadow(0 0 20px rgb(112 184 246 / 0.52))
+    drop-shadow(0 8px 24px rgb(3 8 20 / 0.9));
 }
 
 html body .load-gate.has-cine.rider-route-dive .cine-dive-status {
@@ -958,27 +1036,132 @@ html body .load-gate.has-cine.is-cine-flip .rider-cutin-caption {
       both;
   }
 
+  /* Dream Chapter liquid submersion: rising water surface on close, parting
+     liquid overhead on open, upward-drifting caustics/bubbles, and viscous
+     downward sinking of the held glass plate, numeral, and status. */
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-iris.is-dream-dive.is-covering
+    > .dwc-shutter
+    > i.is-top {
+    animation-name: dwc-dream-close-top;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-iris.is-dream-dive.is-covering
+    > .dwc-shutter
+    > i.is-bottom {
+    animation-name: dwc-dream-close-bottom;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-dream-dive.is-revealing
+    > .dwc-shutter
+    > i.is-top {
+    animation-name: dwc-dream-open-top;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-dream-dive.is-revealing
+    > .dwc-shutter
+    > i.is-bottom {
+    animation-name: dwc-dream-open-bottom;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-dream-dive.is-revealing
+    > .dwc-shutter
+    > i.is-left {
+    animation-name: dwc-dream-open-left;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-dream-dive.is-revealing
+    > .dwc-shutter
+    > i.is-right {
+    animation-name: dwc-dream-open-right;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-dream-dive.is-covering
+    .archive-dive-space {
+    animation: dwc-dream-liquid-rise 360ms cubic-bezier(0.16, 0.84, 0.2, 1) 20ms both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-dream-dive.is-revealing
+    .archive-dive-space {
+    animation: dwc-dream-liquid-out calc(var(--dwc-reveal) * 0.56) cubic-bezier(0.22, 0.68, 0.2, 1)
+      calc(var(--dwc-reveal) * 0.22) both;
+  }
+
   html:not([data-world-effects="economy"])
     body
     .load-gate.has-cine.is-cine-full.is-dream-dive.is-covering
     .cine-dive-tunnel {
-    --dwc-o: 0.74;
-    animation: dwc-dream-tunnel 300ms cubic-bezier(0.14, 0.88, 0.16, 1) both;
+    --dwc-o: 0.78;
+    animation: dwc-dream-tunnel 360ms cubic-bezier(0.16, 0.86, 0.18, 1) both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-dream-dive.is-covering
+    .cine-dive-tunnel
+    > i {
+    animation: dwc-dream-bubbles-in 360ms cubic-bezier(0.16, 0.86, 0.2, 1) 20ms both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-dream-dive.is-revealing
+    .cine-dive-tunnel
+    > i {
+    animation: dwc-dream-bubbles-out calc(var(--dwc-reveal) * 0.52) ease-out
+      calc(var(--dwc-reveal) * 0.18) both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-dream-dive.is-covering
+    > .dwc-lock::before {
+    animation: dwc-dream-glass-sink 340ms cubic-bezier(0.18, 0.88, 0.22, 1) 60ms both;
   }
 
   html:not([data-world-effects="economy"])
     body
     .load-gate.has-cine.is-cine-full.is-dream-dive.is-covering
     .rider-dive-mark {
-    animation: dwc-dream-mark-in 240ms cubic-bezier(0.14, 0.94, 0.2, 1) 70ms both;
+    animation: dwc-dream-mark-in 340ms cubic-bezier(0.16, 0.88, 0.2, 1) 50ms both;
   }
 
   html:not([data-world-effects="economy"])
     body
     .load-gate.has-cine.is-cine-full.is-dream-dive.is-revealing
     .rider-dive-mark {
-    animation: dwc-dream-mark-out calc(var(--dwc-reveal) * 0.4) cubic-bezier(0.28, 0, 0.2, 1)
+    animation: dwc-dream-mark-out calc(var(--dwc-reveal) * 0.46) cubic-bezier(0.28, 0, 0.2, 1)
       both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-dream-dive.is-covering
+    .cine-dive-status {
+    animation: dwc-dream-status-in 320ms cubic-bezier(0.18, 0.86, 0.2, 1) 90ms both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-dream-dive.is-revealing
+    .cine-dive-status {
+    animation: dwc-dream-status-out calc(var(--dwc-reveal) * 0.44) ease-in
+      calc(var(--dwc-reveal) * 0.24) both;
   }
 
   /* A docked file takes the portrait at once: the numeral and the status
@@ -1241,26 +1424,45 @@ html body .load-gate.has-cine.is-dream-dive .archive-dive-space {
   --dwc-o: 0.94;
   opacity: 0.94;
   background:
+    radial-gradient(ellipse 76% 18% at 50% 18%, rgb(191 226 255 / 0.24), transparent 66%),
     linear-gradient(
         90deg,
-        transparent 8%,
-        rgb(204 73 59 / 0.52) 26%,
-        rgb(240 201 120 / 0.82) 50%,
-        rgb(204 73 59 / 0.52) 74%,
-        transparent 92%
+        transparent 6%,
+        rgb(142 200 246 / 0.54) 26%,
+        rgb(230 194 142 / 0.82) 50%,
+        rgb(142 200 246 / 0.54) 74%,
+        transparent 94%
       )
-      50% 72% / 100% 2px no-repeat,
+      50% 22% / 100% 1.5px no-repeat,
     linear-gradient(
-      90deg,
-      rgb(122 38 32 / 0.24) 0%,
-      transparent 16%,
-      transparent 84%,
-      rgb(122 38 32 / 0.24) 100%
+        90deg,
+        transparent 10%,
+        rgb(112 184 246 / 0.44) 30%,
+        rgb(191 226 255 / 0.68) 50%,
+        rgb(112 184 246 / 0.44) 70%,
+        transparent 90%
+      )
+      50% 74% / 100% 1.5px no-repeat,
+    repeating-radial-gradient(
+      ellipse 64% 22% at 50% 26%,
+      transparent 0 28px,
+      rgb(142 200 246 / 0.09) 28px 30px,
+      transparent 30px 58px
     ),
-    repeating-linear-gradient(60deg, transparent 0 22px, rgb(240 201 120 / 0.085) 22px 23px),
-    repeating-linear-gradient(-60deg, transparent 0 22px, rgb(240 201 120 / 0.085) 22px 23px),
-    radial-gradient(ellipse 56% 42% at 50% 34%, rgb(240 201 120 / 0.2), transparent 64%),
-    radial-gradient(ellipse 50% 38% at 50% 72%, rgb(204 73 59 / 0.18), transparent 62%);
+    repeating-linear-gradient(
+      102deg,
+      transparent 0 44px,
+      rgb(142 200 246 / 0.065) 44px 48px,
+      transparent 48px 96px
+    ),
+    repeating-linear-gradient(
+      78deg,
+      transparent 0 52px,
+      rgb(230 194 142 / 0.055) 52px 55px,
+      transparent 55px 108px
+    ),
+    radial-gradient(ellipse 62% 44% at 50% 34%, rgb(112 184 246 / 0.22), transparent 68%),
+    radial-gradient(ellipse 54% 40% at 50% 76%, rgb(230 194 142 / 0.16), transparent 64%);
 }
 
 html body .load-gate.has-cine.is-rexonance-dive .archive-dive-space {
@@ -1879,28 +2081,164 @@ html body .load-gate.has-cine:is(.is-cine-calm, .is-cine-reduced) .rider-cutin-c
   }
 }
 
-@keyframes dwc-dream-tunnel {
+@keyframes dwc-dream-close-top {
   from {
-    opacity: 0.22;
-    transform: translate(-50%, -50%) scale(0.32) rotate(-5deg);
+    translate: 0 -100%;
   }
-  45% {
-    opacity: 0.84;
+  52% {
+    translate: 0 calc(var(--oy) * 1px - 100%);
+  }
+  78%,
+  to {
+    translate: 0 calc((var(--oy) + var(--oh) * 0.28) * 1px + 1px - 100%);
+  }
+}
+
+@keyframes dwc-dream-close-bottom {
+  from {
+    translate: 0 100%;
+  }
+  48% {
+    translate: 0 calc((var(--oy) + var(--oh) * 0.72) * 1px);
+  }
+  78%,
+  to {
+    translate: 0 calc((var(--oy) + var(--oh) * 0.28) * 1px - 1px);
+  }
+}
+
+@keyframes dwc-dream-open-top {
+  from {
+    translate: 0 calc((var(--ly) + var(--lh) * 0.36) * 1px + 1px - 100%);
+  }
+  38% {
+    translate: 0 calc(var(--ly) * 1px - 100%);
   }
   to {
-    opacity: 0.74;
-    transform: translate(-50%, -50%) scale(1.12) rotate(0deg);
+    translate: 0 -100%;
+  }
+}
+
+@keyframes dwc-dream-open-bottom {
+  from {
+    translate: 0 calc((var(--ly) + var(--lh) * 0.36) * 1px - 1px);
+  }
+  44% {
+    translate: 0 calc((var(--ly) + var(--lh)) * 1px);
+  }
+  to {
+    translate: 0 100%;
+  }
+}
+
+@keyframes dwc-dream-open-left {
+  from {
+    translate: calc((var(--lx) + var(--lw) / 2) * 1px + 1px - 100%) 0;
+  }
+  42% {
+    translate: calc(var(--lx) * 1px - 100%) -2%;
+  }
+  to {
+    translate: -100% -6%;
+  }
+}
+
+@keyframes dwc-dream-open-right {
+  from {
+    translate: calc((var(--lx) + var(--lw) / 2) * 1px - 1px) 0;
+  }
+  42% {
+    translate: calc((var(--lx) + var(--lw)) * 1px) -2%;
+  }
+  to {
+    translate: 100% -6%;
+  }
+}
+
+@keyframes dwc-dream-liquid-rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 7vh, 0) scale(0.96, 1.05);
+  }
+  to {
+    opacity: 0.94;
+    transform: translate3d(0, -2vh, 0) scale(1.03, 0.99);
+  }
+}
+
+@keyframes dwc-dream-liquid-out {
+  from {
+    opacity: 0.94;
+    transform: translate3d(0, -2vh, 0) scale(1.03, 0.99);
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(0, -9vh, 0) scale(1.08, 0.96);
+  }
+}
+
+@keyframes dwc-dream-tunnel {
+  from {
+    opacity: 0.18;
+    transform: translate(-50%, -38%) scale(0.42, 0.3) rotate(-3deg);
+  }
+  48% {
+    opacity: 0.86;
+  }
+  to {
+    opacity: 0.78;
+    transform: translate(-50%, -54%) scale(1.08, 0.88) rotate(0deg);
+  }
+}
+
+@keyframes dwc-dream-bubbles-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 9vh, 0) scale(0.76);
+  }
+  45% {
+    opacity: 0.64;
+  }
+  to {
+    opacity: 0.42;
+    transform: translate3d(0, -4vh, 0) scale(1.08);
+  }
+}
+
+@keyframes dwc-dream-bubbles-out {
+  from {
+    opacity: 0.42;
+    transform: translate3d(0, -4vh, 0) scale(1.08);
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(0, -14vh, 0) scale(1.18);
+  }
+}
+
+@keyframes dwc-dream-glass-sink {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -28px, 0) scale(1.04, 0.95);
+  }
+  66% {
+    opacity: 1;
+    transform: translate3d(0, 6px, 0) scale(0.99, 1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
   }
 }
 
 @keyframes dwc-dream-mark-in {
   0% {
     opacity: 0;
-    transform: translate3d(-50%, -50%, 0) scale(1.52) rotate(-3deg);
+    transform: translate3d(-50%, -86%, 0) scale(1.16, 0.92) rotate(-2.5deg);
   }
-  65% {
+  64% {
     opacity: 1;
-    transform: translate3d(-50%, -50%, 0) scale(0.96) rotate(0.4deg);
+    transform: translate3d(-50%, -43%, 0) scale(0.97, 1.04) rotate(0.8deg);
   }
   100% {
     opacity: 1;
@@ -1911,11 +2249,37 @@ html body .load-gate.has-cine:is(.is-cine-calm, .is-cine-reduced) .rider-cutin-c
 @keyframes dwc-dream-mark-out {
   from {
     opacity: 1;
-    transform: translate3d(-50%, -50%, 0) scale(1);
+    transform: translate3d(-50%, -50%, 0) scale(1) rotate(0deg);
   }
   to {
     opacity: 0;
-    transform: translate3d(-50%, -50%, 0) scale(1.22);
+    transform: translate3d(-50%, -18%, 0) scale(0.88, 0.94) rotate(1.5deg);
+  }
+}
+
+@keyframes dwc-dream-status-in {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -18px);
+  }
+  68% {
+    opacity: 1;
+    transform: translate(-50%, 4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@keyframes dwc-dream-status-out {
+  from {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, 20px);
   }
 }
 
