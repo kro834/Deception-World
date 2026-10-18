@@ -110,14 +110,16 @@ const settled = (page) =>
     { timeout: 60000 },
   );
 
-async function openEntry(page) {
+async function openEntry(page, animated = true) {
   const trigger = page.locator(".side-panel-trigger").first();
   await trigger.click();
   const link = page.locator('#site-side-panel a[href="/rexonance-saga#top"]').first();
   await link.waitFor({ state: "visible" });
   await link.scrollIntoViewIfNeeded();
   await link.click();
-  await page.locator('.rx-call-sequence[data-mode="entry"]').waitFor({ timeout: 15000 });
+  if (animated)
+    await page.locator('.rx-call-sequence[data-mode="entry"]').waitFor({ timeout: 15000 });
+  else await page.waitForURL("**/rexonance-saga#top", { timeout: 15000 });
 }
 
 async function readRunway(page) {
@@ -206,9 +208,10 @@ try {
         await settled(page);
         // Real warm-up and idle preparation; no forced engine or network prefetch.
         await page.waitForTimeout(9000);
-        await openEntry(page);
-        await page.locator('.rx-suit[data-suit="build"]').waitFor({ state: "attached" });
-        for (const target of [600, 1000, 1600, 2200]) {
+        await openEntry(page, mode !== "reduced");
+        if (mode !== "reduced")
+          await page.locator('.rx-suit[data-suit="build"]').waitFor({ state: "attached" });
+        for (const target of mode === "reduced" ? [] : [600, 1000, 1600, 2200]) {
           if (!(await page.locator(".rx-call-sequence").count())) break;
           // Seek the actual CSS meter read by the real canvas engine. Only
           // its clock is controlled; no replacement painter or synthetic draw.
@@ -331,7 +334,7 @@ try {
           window.__flameQA.measureEntry = true;
           window.__flameQA.entryFrameMs = [];
         });
-        await openEntry(page);
+        await openEntry(page, mode !== "reduced");
         await page.waitForURL("**/rexonance-saga#top", { timeout: 45000 });
         await settled(page);
         await page.evaluate(() => {

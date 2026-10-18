@@ -261,7 +261,9 @@ export function drawNaniteFlame(context, core, strength, clock, scale = 1) {
   context.save();
   try {
     if (scale !== 1) context.scale(scale, scale);
-    context.globalCompositeOperation = "source-over";
+    // The volume already stores dark/low-density emission. Add its radiance
+    // rather than dimming it against the dark stage for a second time.
+    context.globalCompositeOperation = "lighter";
     // The reactor remains readable: narrow fire springs from its rim,
     // rather than a white-green bloom covering the central mechanism.
     for (let i = 0; i < 8; i += 1) {
@@ -272,10 +274,10 @@ export function drawNaniteFlame(context, core, strength, clock, scale = 1) {
         context,
         cx + Math.cos(angle) * (27 + 31 * power),
         cy + 20 + Math.sin(angle) * 17,
-        25 + SEED[k + 2] * 25,
-        (67 + SEED[k + 3] * 73) * (0.45 + 0.55 * power) * pulse,
+        (25 + SEED[k + 2] * 25) * 1.65,
+        (67 + SEED[k + 3] * 73) * 1.25 * (0.45 + 0.55 * power) * pulse,
         clock * 16 * (0.8 + SEED[k + 4] * 0.35) + SEED[k + 5] * 32,
-        power * (0.24 + SEED[k + 6] * 0.16),
+        power * (0.66 + SEED[k + 6] * 0.26),
         Math.cos(angle) * 0.12,
       );
     }
@@ -323,7 +325,9 @@ export function drawBodyFlame(context, size, strength, clock, scale = 1, layer =
   context.save();
   try {
     if (scale !== 1) context.scale(scale, scale);
-    context.globalCompositeOperation = "source-over";
+    // Behind the silhouette/plates, radiance adds while the armour still
+    // occludes the near half of each plume. Only the sparse front uses screen.
+    context.globalCompositeOperation = "lighter";
     if (layer !== "front") {
       // A coarse pointer gets 14 root pairs instead of 20; every pair still
       // spans head to feet. The sprite detail, not particle count, is quality.
@@ -333,16 +337,16 @@ export function drawBodyFlame(context, size, strength, clock, scale = 1, layer =
         const k = i * 8;
         const side = ROOTS[i * 3 + 2];
         const wave = Math.sin(clock * (2.2 + SEED[k]) + i * 2.4);
-        const height = (72 + SEED[k + 1] * 79) * unit * (0.45 + power * 0.55);
+        const height = (72 + SEED[k + 1] * 79) * unit * 1.3 * (0.45 + power * 0.55);
         const y = ROOTS[i * 3 + 1] * H;
         tongue(
           context,
           ROOTS[i * 3] * W + side * 4 * unit * wave,
           y,
-          (25 + SEED[k + 2] * 22) * unit,
+          (25 + SEED[k + 2] * 22) * unit * 1.8,
           Math.min(height, Math.max(5, y - H * 0.012)),
           clock * 16 * (0.78 + SEED[k + 3] * 0.4) + SEED[k + 4] * 32,
-          power * (0.31 + SEED[k + 5] * 0.2),
+          power * (0.72 + SEED[k + 5] * 0.28),
           side * (0.04 + SEED[k + 6] * 0.13),
         );
       }
@@ -353,10 +357,10 @@ export function drawBodyFlame(context, size, strength, clock, scale = 1, layer =
           context,
           W * (0.16 + (i / 7) * 0.68),
           H * 0.986,
-          (43 + SEED[k] * 30) * unit,
-          (42 + SEED[k + 1] * 53) * unit * power,
+          (43 + SEED[k] * 30) * unit * 1.3,
+          (42 + SEED[k + 1] * 53) * unit * 1.2 * power,
           clock * 16 * (0.85 + SEED[k + 2] * 0.3) + SEED[k + 3] * 32,
-          power * 0.43,
+          power * 0.85,
           (i - 3.5) * 0.055,
         );
       }
@@ -368,6 +372,7 @@ export function drawBodyFlame(context, size, strength, clock, scale = 1, layer =
       }
     }
     if (layer !== "back") {
+      context.globalCompositeOperation = "screen";
       // These wisps cross only the outer armour. The sternum, face and gold
       // trim are not washed out by an additive full-body green overlay.
       for (let i = 0; i < 8; i += 1) {
@@ -378,10 +383,10 @@ export function drawBodyFlame(context, size, strength, clock, scale = 1, layer =
           context,
           ROOTS[root * 3] * W - side * 12 * unit,
           ROOTS[root * 3 + 1] * H,
-          (24 + SEED[k] * 18) * unit,
-          (53 + SEED[k + 1] * 58) * unit * power,
+          (24 + SEED[k] * 18) * unit * 1.4,
+          (53 + SEED[k + 1] * 58) * unit * 1.2 * power,
           clock * 16 * (0.8 + SEED[k + 2] * 0.3) + SEED[k + 3] * 32,
-          power * 0.18,
+          power * 0.35,
           side * 0.16,
         );
       }

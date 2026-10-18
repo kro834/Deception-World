@@ -110,8 +110,8 @@ test("the Blender flame is one transparent 32-frame atlas, not repeated radial d
     ["webp", 1024, 1024, 4],
   );
   assert.ok(
-    statSync(asset).size <= 600_000,
-    "one decoded 4 MiB atlas stays under a 600 kB transfer budget",
+    statSync(asset).size <= 500_000,
+    "one decoded 4 MiB atlas stays under a 500 kB transfer budget",
   );
   const { data, info } = await sharp(image)
     .ensureAlpha()
@@ -150,6 +150,29 @@ test("the Blender flame is one transparent 32-frame atlas, not repeated radial d
   assert.ok(coloured > 1000 && green / coloured > 0.85, "the rendered flame stays forest-green");
   const generator = readFileSync(file("scripts/blender/rexonance_flame.py"), "utf8");
   assert.match(generator, /import bpy/, "the external Blender build is reproducible");
+});
+
+test("the delivered fire matches its Blender source, authored ground contact and independently rendered loop seam", () => {
+  const manifest = JSON.parse(
+    readFileSync(file("public/rexonance-flame-20261019/manifest.json"), "utf8"),
+  );
+  const digest = (bytes) => createHash("sha256").update(bytes).digest("hex");
+  const bytes = readFileSync(file(`public${manifest.asset.path}`));
+  assert.equal(digest(bytes), manifest.asset.sha256);
+  assert.equal(bytes.length, manifest.asset.bytes);
+  assert.deepEqual(manifest.atlas.sourceAnchor, [64, 248]);
+  assert.equal(manifest.atlas.contentBounds.bottom, manifest.atlas.sourceAnchor[1]);
+  assert.equal(manifest.atlas.frames, 32);
+  assert.equal(manifest.render.renderer, "Cycles CPU");
+  assert.equal(manifest.render.loopCheckRendered, true);
+  assert.ok(manifest.render.loopGeometryMaxDelta < 0.000001);
+  assert.deepEqual(
+    [manifest.loopPixelCheck.differentChannels, manifest.loopPixelCheck.maxChannelDelta],
+    [0, 0],
+  );
+  assert.equal(new Set(manifest.renderHashes.map(({ sha256 }) => sha256)).size, 32);
+  for (const source of manifest.sources)
+    assert.equal(digest(readFileSync(file(source.path))), source.sha256, source.path);
 });
 
 test("warm-up deduplicates in-flight loads and retains the decoded atlas on return", async () => {
