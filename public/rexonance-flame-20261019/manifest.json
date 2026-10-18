@@ -2,8 +2,8 @@
   "version": 1,
   "asset": {
     "path": "/rexonance-flame-20261019/flame.webp",
-    "sha256": "6dbaae2fb6fa5ff7e83bec7ee14bfb39424f920e2d3cc4dbd4bb4838761f49bf",
-    "bytes": 459470,
+    "sha256": "db523fd82776d2aedfb3d8ce13730cb9ee422c3f584a8efefee163a846db70f4",
+    "bytes": 434422,
     "width": 1024,
     "height": 1024,
     "alpha": true
@@ -23,7 +23,7 @@
       "left": 8,
       "top": 24,
       "right": 117,
-      "bottom": 248,
+      "bottom": 245,
       "alphaThreshold": 8
     },
     "sourceAnchor": [64, 248]
@@ -52,7 +52,13 @@
     "quality": 88,
     "alphaQuality": 100,
     "kernel": "lanczos3",
-    "budgetBytes": 500000
+    "budgetBytes": 500000,
+    "rootFeather": {
+      "startY": 228,
+      "endY": 248,
+      "curve": "1 - smoothstep(0, 1, t)",
+      "alphaOnly": true
+    }
   },
   "loopPixelCheck": {
     "differentChannels": 0,
@@ -66,7 +72,7 @@
     },
     {
       "path": "scripts/build-rexonance-flame.mjs",
-      "sha256": "cb87539bec04aa8d7aa5ad0cc699adf837f1f9e93766e4c9daa401861522f667"
+      "sha256": "fd2dd93a06bbb9eddfde90dd5f5a90252fa717d544fe97cba7c4237b2434c40f"
     }
   ],
   "renderHashes": [

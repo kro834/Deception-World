@@ -29,6 +29,11 @@ const frameWidth = 128;
 const frameHeight = 256;
 const frames = columns * rows;
 const budgetBytes = 500_000;
+// A bounded volume has a geometric base. Feather only its opacity into the
+// surrounding fire bed, so stacked sprites never expose a horizontal cut.
+// This is finishing of the rendered volume, not a replacement flame shape.
+const rootFeather = { startY: 228, endY: 248, curve: "1 - smoothstep(0, 1, t)", alphaOnly: true };
+const sourceAnchor = [frameWidth / 2, rootFeather.endY];
 
 if (process.argv.includes("--check")) {
   const manifest = JSON.parse(await readFile(manifestFile, "utf8"));
@@ -90,11 +95,22 @@ const contentBounds = {
 for (let frame = 0; frame < frames; frame += 1) {
   const name = `flame-${String(frame).padStart(2, "0")}.png`;
   const png = await readFile(join(source, name));
-  const input = await sharp(png)
+  const rgba = await sharp(png)
     .resize(frameWidth, frameHeight, { kernel: "lanczos3" })
+    .ensureAlpha()
+    .raw()
+    .toBuffer();
+  for (let y = rootFeather.startY; y < frameHeight; y += 1) {
+    const t = Math.min(1, (y - rootFeather.startY) / (rootFeather.endY - rootFeather.startY));
+    const opacity = 1 - t * t * (3 - 2 * t);
+    for (let x = 0; x < frameWidth; x += 1) {
+      const alpha = (y * frameWidth + x) * 4 + 3;
+      rgba[alpha] = Math.round(rgba[alpha] * opacity);
+    }
+  }
+  const input = await sharp(rgba, { raw: { width: frameWidth, height: frameHeight, channels: 4 } })
     .png()
     .toBuffer();
-  const rgba = await sharp(input).ensureAlpha().raw().toBuffer();
   for (let y = 0; y < frameHeight; y += 1) {
     for (let x = 0; x < frameWidth; x += 1) {
       if (rgba[(y * frameWidth + x) * 4 + 3] <= contentBounds.alphaThreshold) continue;
@@ -155,7 +171,7 @@ await writeFile(
           origin: "bottom centre",
           direction: "up",
           contentBounds,
-          sourceAnchor: [frameWidth / 2, contentBounds.bottom],
+          sourceAnchor,
         },
         render: provenance,
         encoding: {
@@ -164,6 +180,7 @@ await writeFile(
           alphaQuality: 100,
           kernel: "lanczos3",
           budgetBytes,
+          rootFeather,
         },
         loopPixelCheck: {
           differentChannels,

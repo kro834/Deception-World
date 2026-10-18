@@ -120,6 +120,7 @@ test("the Blender flame is one transparent 32-frame atlas, not repeated radial d
   const hashes = new Set();
   const alphaLevels = new Set();
   let [green, coloured] = [0, 0];
+  let rootTailAlpha = 0;
   for (let frame = 0; frame < atlas.frames; frame++) {
     const pixels = [];
     let occupied = 0;
@@ -131,6 +132,7 @@ test("the Blender flame is one transparent 32-frame atlas, not repeated radial d
         const [r, g, b, a] = data.subarray(i, i + 4);
         pixels.push(r, g, b, a);
         alphaLevels.add(a);
+        if (y >= 248) rootTailAlpha = Math.max(rootTailAlpha, a);
         if (a > 8) occupied++;
         if (a > 24 && Math.max(r, g, b) - Math.min(r, g, b) > 12) {
           coloured++;
@@ -147,6 +149,7 @@ test("the Blender flame is one transparent 32-frame atlas, not repeated radial d
   }
   assert.ok(hashes.size >= 28, `${hashes.size}/32 distinct animation frames`);
   assert.ok(alphaLevels.size > 64, "soft volumetric density rather than a binary silhouette");
+  assert.equal(rootTailAlpha, 0, "the feathered root cannot expose a rectangular tile cutoff");
   assert.ok(coloured > 1000 && green / coloured > 0.85, "the rendered flame stays forest-green");
   const generator = readFileSync(file("scripts/blender/rexonance_flame.py"), "utf8");
   assert.match(generator, /import bpy/, "the external Blender build is reproducible");
@@ -161,7 +164,11 @@ test("the delivered fire matches its Blender source, authored ground contact and
   assert.equal(digest(bytes), manifest.asset.sha256);
   assert.equal(bytes.length, manifest.asset.bytes);
   assert.deepEqual(manifest.atlas.sourceAnchor, [64, 248]);
-  assert.equal(manifest.atlas.contentBounds.bottom, manifest.atlas.sourceAnchor[1]);
+  assert.ok(manifest.atlas.contentBounds.bottom <= manifest.atlas.sourceAnchor[1]);
+  assert.ok(
+    manifest.atlas.sourceAnchor[1] - manifest.atlas.contentBounds.bottom <= 8,
+    "the feathered root remains within eight source pixels of its physical contact",
+  );
   assert.equal(manifest.atlas.frames, 32);
   assert.equal(manifest.render.renderer, "Cycles CPU");
   assert.equal(manifest.render.loopCheckRendered, true);
