@@ -13,17 +13,26 @@ const component = compile("src/components/zeus-button.tsx") + "\nexports.TestBut
 const geometryCode = compile("src/lib/zeus-drag.ts");
 const resizeCode = compile("src/lib/viewport-resize.ts");
 
-function mount({ scale = 1, android = true, innerHeight = 844, visualViewport = null } = {}) {
+function mount({
+  scale = 1,
+  android = true,
+  innerHeight = 844,
+  visualViewport = null,
+  secret = false,
+  navigating = false,
+} = {}) {
   const effects = [],
     timers = new Map(),
     frames = new Map(),
     saved = [],
     timerDelays = [],
-    observers = [];
+    observers = [],
+    secretTaps = [];
   let serial = 0,
     navigated = 0,
     layoutReads = 0,
-    guardCalls = 0;
+    guardCalls = 0,
+    secretResets = 0;
   class Element extends EventTarget {
     attributes = new Map();
     dataset = {};
@@ -172,12 +181,19 @@ function mount({ scale = 1, android = true, innerHeight = 844, visualViewport = 
   const element = exports.TestButton({
     position: { x: 0.8, y: 0.8 },
     sideMenuOpen: false,
-    navigating: false,
+    navigating,
     returnImage: false,
     onPositionChange: (position) => saved.push({ ...position }),
     onNavigate: async () => {
       navigated++;
     },
+    ...(secret
+      ? {
+          onSecretTap: (origin) => secretTaps.push({ ...origin }),
+          onSecretReset: () => secretResets++,
+          secretArmed: true,
+        }
+      : {}),
   });
   element.props.ref.current = button;
   const cleanups = effects.map((fn) => fn());
@@ -223,6 +239,8 @@ function mount({ scale = 1, android = true, innerHeight = 844, visualViewport = 
     reads: () => layoutReads,
     navigated: () => navigated,
     guardCalls: () => guardCalls,
+    secretTaps,
+    secretResets: () => secretResets,
     observers,
     mutateRoot: (name, value) => {
       doc.documentElement.setAttribute(name, value);
@@ -534,4 +552,107 @@ test("opening a disclosure re-places the button once the page settles", () => {
   assert.equal(ui.timerDelays.at(-1), 220);
   ui.unmount();
   assert.equal(ui.timers.size, 0);
+});
+
+const secretDown = (ui, overrides = {}) => {
+  const event = { ...ui.event(), timeStamp: 100, ...overrides };
+  ui.handlers.onPointerDownCapture(event);
+  ui.handlers.onPointerDown(event);
+  return event;
+};
+const secretUp = (ui, down, overrides = {}) => {
+  const event = { ...down, timeStamp: down.timeStamp + 80, ...overrides };
+  ui.handlers.onPointerUpCapture(event);
+  ui.handlers.onPointerUp(event);
+  return event;
+};
+
+test("the secret sees one valid pointer tap before ordinary navigation and never its compatibility click", () => {
+  const ui = mount({ secret: true });
+  const down = secretDown(ui);
+  secretUp(ui, down);
+  ui.handlers.onClick({ detail: 1, currentTarget: ui.button, preventDefault() {} });
+  assert.equal(ui.secretTaps.length, 1);
+  assert.equal(ui.navigated(), 1);
+  assert.equal(ui.secretResets(), 0);
+  const origin = ui.secretTaps[0];
+  assert.ok(origin.x >= 0 && origin.x <= 1 && origin.y >= 0 && origin.y <= 1);
+});
+
+test("valid captured taps can count during navigation without starting a duplicate route", () => {
+  const ui = mount({ secret: true, navigating: true });
+  const down = secretDown(ui);
+  secretUp(ui, down);
+  assert.equal(ui.secretTaps.length, 1);
+  assert.equal(ui.navigated(), 0);
+});
+
+for (const invalid of [
+  "non-primary",
+  "right-mouse",
+  "moved",
+  "long-hold",
+  "cancel",
+  "second-touch",
+]) {
+  test(`the secret discards ${invalid} instead of inheriting a valid-looking pointerup`, () => {
+    const ui = mount({ secret: true });
+    const down = secretDown(
+      ui,
+      invalid === "non-primary"
+        ? { isPrimary: false }
+        : invalid === "right-mouse"
+          ? { pointerType: "mouse", button: 2 }
+          : {},
+    );
+    if (invalid === "moved") {
+      const move = { ...down, clientX: down.clientX + 30, timeStamp: 130 };
+      ui.handlers.onPointerMoveCapture(move);
+      ui.handlers.onPointerMove(move);
+    }
+    if (invalid === "cancel") {
+      ui.handlers.onPointerCancelCapture(down);
+      ui.handlers.onPointerCancel(down);
+    }
+    if (invalid === "second-touch")
+      ui.handlers.onPointerDownCapture({ ...down, pointerId: 2, isPrimary: false });
+    secretUp(ui, down, invalid === "long-hold" ? { timeStamp: 481 } : {});
+    assert.equal(ui.secretTaps.length, 0);
+    assert.ok(ui.secretResets() >= 1);
+  });
+}
+
+for (const reason of ["scroll", "blur", "pagehide", "visibilitychange", "Escape", "lost-capture"]) {
+  test(`the secret's pending press is abandoned on ${reason}`, () => {
+    const ui = mount({ secret: true });
+    const down = secretDown(ui);
+    if (reason === "Escape") ui.handlers.onKeyDown({ key: "Escape", preventDefault() {} });
+    else if (reason === "lost-capture") ui.handlers.onLostPointerCapture(down);
+    else if (reason === "visibilitychange") {
+      ui.doc.hidden = true;
+      ui.doc.dispatchEvent(new Event(reason));
+      ui.doc.hidden = false;
+    } else ui.win.dispatchEvent(new Event(reason));
+    secretUp(ui, down);
+    assert.equal(ui.secretTaps.length, 0, "a cancelled gesture cannot count toward ten");
+    assert.ok(ui.secretResets() >= 1);
+  });
+}
+
+test("keyboard activation counts once while held Enter/Space autorepeat is suppressed", () => {
+  const ui = mount({ secret: true });
+  ui.handlers.onClick({ detail: 0, currentTarget: ui.button, preventDefault() {} });
+  assert.equal(ui.secretTaps.length, 1);
+  assert.equal(ui.navigated(), 1);
+  for (const key of ["Enter", " "]) {
+    let prevented = 0;
+    ui.handlers.onKeyDown({
+      key,
+      repeat: true,
+      preventDefault() {
+        prevented++;
+      },
+    });
+    assert.equal(prevented, 1);
+  }
 });

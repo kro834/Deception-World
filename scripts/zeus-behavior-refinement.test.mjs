@@ -291,7 +291,11 @@ for (const resume of ["pageshow", "visibilitychange"]) {
 }
 
 test("both Zeus image variants stay low priority while preserving their thumbnail sources", () => {
-  const images = source.match(/<img\b[\s\S]*?\/>/g) ?? [];
+  // The optional, tenth-tap secret artwork is not an ordinary navigation
+  // image. Both established variants must retain their exact delivery policy.
+  const images = (source.match(/<img\b[\s\S]*?\/>/g) ?? []).filter((image) =>
+    /className="zeus-button-image\s/.test(image),
+  );
   assert.equal(images.length, 2);
   for (const image of images) assert.match(image, /fetchPriority="low"/);
   assert.match(images[0], /srcSet=\{CIEL_BUTTON_SRCSET\}/);

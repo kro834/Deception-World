@@ -7,6 +7,7 @@ import {
   useRef,
   useState,
   type PointerEvent as ReactPointerEvent,
+  type ComponentType,
   type ReactNode,
 } from "react";
 import { createPortal } from "react-dom";
@@ -23,8 +24,19 @@ import {
 } from "@/lib/zeus-drag";
 import { CIEL_BUTTON_SIZES, CIEL_BUTTON_SRCSET } from "@/lib/thumbnail-images";
 import { waitForFloatingButtonDelay, waitForFloatingButtonPaint } from "@/lib/floating-button-wait";
+import { CIEL_INFERNO_GAP_MS, createCielInfernoTrigger } from "@/lib/ciel-inferno-trigger";
 
 type ZeusButtonPosition = { x: number; y: number };
+type InfernoView = ComponentType<{
+  origin: ZeusButtonPosition;
+  onClose: () => void;
+  artSrc?: string;
+  artSrcSet?: string;
+  routeKey?: string;
+}>;
+const INFERNO_ART_SRCSET = [216, 720, 1080]
+  .map((width) => `/ciel-inferno-20261019/ciel-${width}.webp ${width}w`)
+  .join(", ");
 
 type ZeusButtonSettings = {
   enabled: boolean;
@@ -357,6 +369,105 @@ export function ZeusButtonProvider({ children }: { children: ReactNode }) {
   const mounted = useRef(true);
   const [navigating, setNavigating] = useState(false);
   const [returnImage, setReturnImage] = useState(false);
+  // Append state after the established navigation state. A rapid-tap session
+  // belongs to this persistent provider, not to a route or a moved portal.
+  const [secretArmed, setSecretArmed] = useState(false);
+  const [secretOrigin, setSecretOrigin] = useState<ZeusButtonPosition | null>(null);
+  const [Inferno, setInferno] = useState<InfernoView | null>(null);
+  const secretTrigger = useRef<ReturnType<typeof createCielInfernoTrigger> | null>(null);
+  if (!secretTrigger.current) secretTrigger.current = createCielInfernoTrigger();
+  const secretTimer = useRef<number | null>(null);
+  const secretActive = useRef(false);
+  const secretModule = useRef<Promise<typeof import("./ciel-inferno")> | null>(null);
+
+  const resetSecret = useCallback(() => {
+    if (secretActive.current) return;
+    if (secretTimer.current != null) window.clearTimeout(secretTimer.current);
+    secretTimer.current = null;
+    secretTrigger.current?.reset();
+    setSecretArmed(false);
+  }, []);
+
+  const closeSecret = useCallback(() => {
+    if (secretTimer.current != null) window.clearTimeout(secretTimer.current);
+    secretTimer.current = null;
+    secretActive.current = false;
+    secretTrigger.current?.reset();
+    if (mounted.current) {
+      setSecretArmed(false);
+      setSecretOrigin(null);
+    }
+  }, []);
+
+  const tapSecret = useCallback(
+    (origin: ZeusButtonPosition) => {
+      // If the lazy chunk is still arriving, the changed button itself is
+      // an immediate escape hatch. Once mounted the dialog owns dismissal.
+      if (secretActive.current) {
+        closeSecret();
+        return;
+      }
+      if (document.hidden || !mounted.current) return;
+      const result = secretTrigger.current!.tap(performance.now());
+      if (secretTimer.current != null) window.clearTimeout(secretTimer.current);
+      setSecretArmed(true);
+      secretTimer.current = window.setTimeout(resetSecret, CIEL_INFERNO_GAP_MS + 20);
+      if (result.primed && !secretModule.current) {
+        // Nothing heavy loads for ordinary single/double taps or on startup.
+        const image = document.createElement("img");
+        image.decoding = "async";
+        image.fetchPriority = "low";
+        image.src = "/ciel-inferno-20261019/ciel-216.webp";
+        secretModule.current = import("./ciel-inferno");
+        void secretModule.current.then(
+          (module) => {
+            if (mounted.current) setInferno(() => module.default);
+          },
+          () => {
+            secretModule.current = null;
+            closeSecret();
+          },
+        );
+      }
+      if (!result.triggered) return;
+      if (secretTimer.current != null) window.clearTimeout(secretTimer.current);
+      secretActive.current = true;
+      // A stalled chunk must not leave the ordinary navigation locked.
+      secretTimer.current = window.setTimeout(closeSecret, 12000);
+      // Own the tenth tap before its normal pointerup handler can navigate.
+      navigationRun.current?.abort();
+      navigationRun.current = null;
+      navigationRouting.current = null;
+      navigatingRef.current = false;
+      setNavigating(false);
+      setReturnImage(false);
+      document.dispatchEvent(new CustomEvent("deception-world:cancel-route-transition"));
+      setSecretOrigin({
+        x: Math.max(0, Math.min(1, origin.x)),
+        y: Math.max(0, Math.min(1, origin.y)),
+      });
+    },
+    [closeSecret, resetSecret],
+  );
+
+  useEffect(() => {
+    const hide = () => {
+      if (document.hidden) closeSecret();
+    };
+    document.addEventListener("visibilitychange", hide);
+    window.addEventListener("pagehide", closeSecret);
+    return () => {
+      document.removeEventListener("visibilitychange", hide);
+      window.removeEventListener("pagehide", closeSecret);
+      if (secretTimer.current != null) window.clearTimeout(secretTimer.current);
+      secretTimer.current = null;
+      secretActive.current = false;
+    };
+  }, [closeSecret]);
+
+  useEffect(() => {
+    if (!enabled) closeSecret();
+  }, [enabled, closeSecret]);
 
   useEffect(() => {
     mounted.current = true;
@@ -403,7 +514,11 @@ export function ZeusButtonProvider({ children }: { children: ReactNode }) {
     let frame = 0;
     const updateTarget = () => {
       frame = 0;
-      const openDialogs = Array.from(document.querySelectorAll<HTMLDialogElement>("dialog[open]"));
+      // The secret temporarily replaces this button and owns its own exit.
+      // Never move its return target into that soon-to-be-removed surface.
+      const openDialogs = Array.from(
+        document.querySelectorAll<HTMLDialogElement>("dialog[open]:not(.ciel-inferno)"),
+      );
       setPortalTarget(openDialogs.at(-1) ?? document.body);
       setSideMenuOpen(Boolean(document.querySelector('.side-panel[data-open="true"]')));
     };
@@ -456,7 +571,8 @@ export function ZeusButtonProvider({ children }: { children: ReactNode }) {
   const settings = useMemo(() => ({ enabled, setEnabled }), [enabled, setEnabled]);
 
   const goToTop = useCallback(async () => {
-    if (navigatingRef.current || document.hidden || !mounted.current) return;
+    if (secretActive.current || navigatingRef.current || document.hidden || !mounted.current)
+      return;
     const run = new AbortController();
     navigationRun.current = run;
     navigatingRef.current = true;
@@ -513,7 +629,7 @@ export function ZeusButtonProvider({ children }: { children: ReactNode }) {
   return (
     <ZeusButtonContext.Provider value={settings}>
       {children}
-      {enabled && pathname !== "/" && portalTarget
+      {enabled && pathname !== "/" && portalTarget && !(secretOrigin && Inferno)
         ? createPortal(
             <ZeusButton
               position={position}
@@ -522,10 +638,24 @@ export function ZeusButtonProvider({ children }: { children: ReactNode }) {
               returnImage={returnImage}
               onPositionChange={savePosition}
               onNavigate={goToTop}
+              onSecretTap={tapSecret}
+              onSecretReset={resetSecret}
+              onSecretClose={closeSecret}
+              secretArmed={secretArmed}
+              secretAwakening={Boolean(secretOrigin)}
             />,
             portalTarget,
           )
         : null}
+      {secretOrigin && Inferno ? (
+        <Inferno
+          origin={secretOrigin}
+          onClose={closeSecret}
+          artSrc="/ciel-inferno-20261019/ciel-1080.webp"
+          artSrcSet={INFERNO_ART_SRCSET}
+          routeKey={pathname}
+        />
+      ) : null}
     </ZeusButtonContext.Provider>
   );
 }
@@ -559,6 +689,11 @@ function ZeusButton({
   returnImage,
   onPositionChange,
   onNavigate,
+  onSecretTap,
+  onSecretReset,
+  onSecretClose,
+  secretArmed = false,
+  secretAwakening = false,
 }: {
   position: ZeusButtonPosition;
   sideMenuOpen: boolean;
@@ -566,6 +701,11 @@ function ZeusButton({
   returnImage: boolean;
   onPositionChange: (position: ZeusButtonPosition) => void;
   onNavigate: () => Promise<void>;
+  onSecretTap?: (origin: ZeusButtonPosition) => void;
+  onSecretReset?: () => void;
+  onSecretClose?: () => void;
+  secretArmed?: boolean;
+  secretAwakening?: boolean;
 }) {
   const buttonRef = useRef<HTMLButtonElement>(null);
   const activePointer = useRef<number | null>(null);
@@ -597,6 +737,7 @@ function ZeusButton({
   // A safe temporary spot stays put until the reader moves on or that spot
   // becomes obstructed. Passive layout/frame reports must not send it home.
   const stepAway = useRef<{ scrollTop: number } | null>(null);
+  const secretPress = useRef<{ id: number; x: number; y: number; at: number } | null>(null);
 
   useEffect(() => {
     preferredPosition.current = position;
@@ -1054,7 +1195,8 @@ function ZeusButton({
       });
     };
     const onScroll = () => {
-      if (activePointer.current != null && !held.current) cancelPointer.current();
+      if ((activePointer.current != null && !held.current) || secretPress.current)
+        cancelPointer.current();
       if (activePointer.current != null) {
         if (held.current) refreshDragViewport();
         return;
@@ -1290,6 +1432,10 @@ function ZeusButton({
      fallback a no-op. */
   useEffect(() => {
     const cancelDanglingPointer = (event?: PointerEvent) => {
+      if (secretPress.current && (!event || event.pointerId === secretPress.current.id)) {
+        secretPress.current = null;
+        onSecretReset?.();
+      }
       if (activePointer.current == null || (event && event.pointerId !== activePointer.current))
         return;
       const button = buttonRef.current;
@@ -1320,8 +1466,8 @@ function ZeusButton({
     // leave the first finger's pending hold armed until its next movement.
     const cancelOnAnotherPointer = (event: PointerEvent) => {
       if (
-        activePointer.current != null &&
-        event.pointerId !== activePointer.current &&
+        (activePointer.current != null || secretPress.current) &&
+        event.pointerId !== (activePointer.current ?? secretPress.current?.id) &&
         event.pointerType !== "mouse"
       ) {
         cancelDanglingPointer();
@@ -1346,7 +1492,7 @@ function ZeusButton({
       document.removeEventListener("visibilitychange", cancelWhenHidden);
       cancelPointer.current = () => {};
     };
-  }, [clearHoldTimer, cancelDragFrame, disarmTouchGuard, restoreGestureOrigin]);
+  }, [clearHoldTimer, cancelDragFrame, disarmTouchGuard, restoreGestureOrigin, onSecretReset]);
 
   const moveToPointer = (clientX: number, clientY: number) => {
     const button = buttonRef.current;
@@ -1376,6 +1522,10 @@ function ZeusButton({
   };
 
   const finishPointer = (event: ReactPointerEvent<HTMLButtonElement>, cancelled = false) => {
+    if (cancelled && secretPress.current?.id === event.pointerId) {
+      secretPress.current = null;
+      onSecretReset?.();
+    }
     if (activePointer.current !== event.pointerId) return;
     clearHoldTimer();
     cancelDragFrame();
@@ -1451,9 +1601,68 @@ function ZeusButton({
       data-navigating={String(navigating)}
       data-return-loading={String(returnImage)}
       data-menu-open={String(sideMenuOpen)}
+      data-secret-armed={String(secretArmed)}
+      data-secret-awakening={String(secretAwakening)}
       aria-grabbed="false"
       aria-busy={navigating}
-      aria-label="シエルボタン。押すとトップへ戻り、長押しすると移動できます"
+      aria-label={
+        secretAwakening
+          ? "シエルボタン。演出を終了"
+          : "シエルボタン。押すとトップへ戻り、長押しすると移動できます"
+      }
+      onPointerDownCapture={(event) => {
+        if (
+          !onSecretTap ||
+          !event.isPrimary ||
+          (event.pointerType === "mouse" && event.button !== 0)
+        ) {
+          secretPress.current = null;
+          onSecretReset?.();
+          return;
+        }
+        secretPress.current = {
+          id: event.pointerId,
+          x: event.clientX,
+          y: event.clientY,
+          at: event.timeStamp,
+        };
+      }}
+      onPointerMoveCapture={(event) => {
+        const press = secretPress.current;
+        if (
+          press &&
+          Math.hypot(event.clientX - press.x, event.clientY - press.y) > MOVE_TOLERANCE
+        ) {
+          secretPress.current = null;
+          onSecretReset?.();
+        }
+      }}
+      onPointerUpCapture={(event) => {
+        const press = secretPress.current;
+        secretPress.current = null;
+        if (!press || !onSecretTap) return;
+        if (
+          press.id !== event.pointerId ||
+          held.current ||
+          event.timeStamp - press.at > TAP_MAX_MS ||
+          Math.hypot(event.clientX - press.x, event.clientY - press.y) > MOVE_TOLERANCE
+        ) {
+          onSecretReset?.();
+          return;
+        }
+        const rect = event.currentTarget.getBoundingClientRect();
+        // Busy taps have no ordinary gesture handler. Still swallow their
+        // compatibility clicks if the tenth tap removes this button.
+        if (navigating && event.pointerType !== "mouse") guardTapThrough();
+        onSecretTap({
+          x: (rect.left + rect.width / 2) / Math.max(1, window.innerWidth),
+          y: (rect.top + rect.height / 2) / Math.max(1, window.innerHeight),
+        });
+      }}
+      onPointerCancelCapture={() => {
+        secretPress.current = null;
+        onSecretReset?.();
+      }}
       onPointerDown={(event) => {
         if (navigating) return;
         if (!event.isPrimary || (event.pointerType === "mouse" && event.button !== 0)) return;
@@ -1590,11 +1799,25 @@ function ZeusButton({
       onLostPointerCapture={(event) => finishPointer(event, true)}
       onClick={(event) => {
         event.preventDefault();
-        if (event.detail === 0) void onNavigate();
+        if (event.detail === 0) {
+          if (onSecretTap) {
+            const rect = event.currentTarget.getBoundingClientRect();
+            onSecretTap({
+              x: (rect.left + rect.width / 2) / Math.max(1, window.innerWidth),
+              y: (rect.top + rect.height / 2) / Math.max(1, window.innerHeight),
+            });
+          }
+          void onNavigate();
+        }
       }}
       onContextMenu={(event) => event.preventDefault()}
       onKeyDown={(event) => {
-        if (event.key === "Escape" && activePointer.current != null) {
+        if (event.repeat && (event.key === "Enter" || event.key === " ")) event.preventDefault();
+        if (event.key === "Escape" && secretAwakening) {
+          event.preventDefault();
+          onSecretClose?.();
+        }
+        if (event.key === "Escape" && (activePointer.current != null || secretPress.current)) {
           event.preventDefault();
           cancelPointer.current();
         }
@@ -1602,6 +1825,18 @@ function ZeusButton({
       onDragStart={(event) => event.preventDefault()}
     >
       <span className="zeus-button-aura" aria-hidden="true" />
+      <span className="zeus-button-secret-hit" aria-hidden="true" />
+      {secretAwakening ? (
+        <img
+          className="zeus-button-secret-image"
+          src="/ciel-inferno-20261019/ciel-216.webp"
+          width={216}
+          height={216}
+          alt=""
+          decoding="async"
+          draggable={false}
+        />
+      ) : null}
       <img
         className="zeus-button-image is-default"
         src="/ciel-button-20261018-360.webp"

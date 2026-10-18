@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "recipe": {
+    "path": "scripts/build-ciel-inferno-art.mjs",
+    "sha256": "ee79d300921a6fca51346ec37d8904bcfd7d3b2815146842bb7b94171c54b525"
+  },
+  "source": {
+    "path": "design/ciel-inferno-reference-20261019.png",
+    "width": 1254,
+    "sha256": "8a95e04930ba37a82e558e0ec7893fc1950fdb4c1d486ea28790fcc39d8d0ea0"
+  },
+  "processing": "owner-supplied illustration; original composition; resize only; private metadata removed",
+  "assets": [
+    {
+      "path": "/ciel-inferno-20261019/ciel-216.webp",
+      "width": 216,
+      "bytes": 29478,
+      "budgetBytes": 40000,
+      "sha256": "79beed7e61f87b6ea226f4a3d0e0c5b576d26ca150c4fd119d76ea8b275b7086"
+    },
+    {
+      "path": "/ciel-inferno-20261019/ciel-720.webp",
+      "width": 720,
+      "bytes": 216476,
+      "budgetBytes": 260000,
+      "sha256": "a76f6b855e11d1afc3e9e56b6d17b942ff3904920b489245d2ae09020d6f946d"
+    },
+    {
+      "path": "/ciel-inferno-20261019/ciel-1080.webp",
+      "width": 1080,
+      "bytes": 391368,
+      "budgetBytes": 480000,
+      "sha256": "fb1391a2612f3ec5578dd769b2a5bb3848de3e926fb230c4eb0de5e821ea90cf"
+    }
+  ]
+}

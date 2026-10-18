@@ -129,3 +129,13 @@ Publication uses the existing **Deploy verified main to Production** workflow,
 with its staged-candidate, exact SHA, asset hash and public-readiness checks.
 The release receipt must compare the deployed `/release-identity.json` with the
 published commit and the atlas/manifest hashes; a push alone is not completion.
+
+Public receipt completed for `65076cc6fbcc68048714a194abaddfaab95849b0`:
+the canonical domain returned that exact identity (HTTP 200), the atlas was
+434,422 bytes with SHA-256
+`db523fd82776d2aedfb3d8ce13730cb9ee422c3f584a8efefee163a846db70f4`,
+and the manifest hash matched. Vercel's production deployment was READY for
+that commit. Public Chromium 320px and WebKit 1024px flows both passed first-call
+fire, scrolling, all 32 atlas frames, single first fetch / no repeat fetch,
+visibility recovery and zero JavaScript errors. Receipts:
+`output/playwright/flame-public/{identity-probe.json,chromium/report.json,webkit/report.json}`.

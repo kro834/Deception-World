@@ -64,6 +64,12 @@ const RAIN_CITY_ASSET_PATHS = [
   "/rain-city-materials/manifest.json",
 ];
 const CIEL_BUTTON_PATHS = [144, 216, 360].map((width) => `/ciel-button-20261018-${width}.webp`);
+const CIEL_INFERNO_PATHS = [
+  ...[216, 720, 1080].map((width) => `/ciel-inferno-20261019/ciel-${width}.webp`),
+  "/ciel-inferno-20261019/artwork-manifest.json",
+  "/ciel-inferno-20261019/jet.webp",
+  "/ciel-inferno-20261019/jet-manifest.json",
+];
 
 test("rain-city release verification accepts exactly seven material paths and checks every delivered byte", async () => {
   const bytes = new Map(RAIN_CITY_ASSET_PATHS.map((path) => [path, Buffer.from(`asset:${path}`)]));
@@ -142,6 +148,7 @@ test("rain-city release verification accepts exactly seven material paths and ch
 
 test("public verification hashes exhibition, cinema and authored Rexonance assets and rejects changed bytes or unknown paths", async () => {
   const paths = [
+    ...CIEL_INFERNO_PATHS,
     "/rexonance-flame-20261019/flame.webp",
     "/rexonance-flame-20261019/manifest.json",
     ...CIEL_BUTTON_PATHS,
@@ -202,6 +209,13 @@ test("public verification hashes exhibition, cinema and authored Rexonance asset
   );
   for (const changed of paths) assert.equal((await run({ changed })).report.ok, false, changed);
   for (const unknown of [
+    "/ciel-inferno-20261019/unknown.webp",
+    "/ciel-inferno-20261019/ciel-144.webp",
+    "/ciel-inferno-20261020/jet.webp",
+    "/ciel-inferno-20261019/../secret.png",
+    ...CIEL_INFERNO_PATHS.flatMap((path) =>
+      ["/extra", "%2fextra", ".bak", "?x=1", "#extra", "\n", "\r\n"].map((suffix) => path + suffix),
+    ),
     "/rexonance-flame-20261019/unknown.webp",
     "/rexonance-flame-20261020/flame.webp",
     ...["flame.webp", "manifest.json"].flatMap((name) =>
@@ -243,6 +257,7 @@ test("public verification hashes exhibition, cinema and authored Rexonance asset
           path.startsWith("/exhibition-studio/") ||
           path.startsWith("/rexonance-flame-") ||
           path.startsWith("/ciel-button-") ||
+          path.startsWith("/ciel-inferno-") ||
           path.startsWith("/saga-cinema-assets/"),
       ),
       false,
@@ -457,6 +472,7 @@ test("new release identity requires shared gallery readiness and preserves artwo
     ),
   );
   for (const path of [
+    ...CIEL_INFERNO_PATHS,
     ...CIEL_BUTTON_PATHS,
     "/exhibition-metal/manifest.json",
     "/exhibition-metal/brushed-alloy-normal.png",

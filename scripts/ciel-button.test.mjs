@@ -5,6 +5,7 @@ import test from "node:test";
 import ts from "typescript";
 import sharp from "sharp";
 import { stripJpegPrivateMetadata } from "./build-ciel-button.mjs";
+import * as infernoTrigger from "../src/lib/ciel-inferno-trigger.ts";
 
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 
@@ -125,6 +126,7 @@ function mount() {
           }),
         };
       if (name === "@/lib/floating-button-wait") return waits;
+      if (name === "@/lib/ciel-inferno-trigger") return infernoTrigger;
       return {};
     },
   });
@@ -174,7 +176,30 @@ const start = async (h) => {
 test("Ciel branding uses the supplied illustration in both states and preserves personal preferences", () => {
   const source = read("src/components/zeus-button.tsx");
   assert.match(source, /<b>シエルボタン<\/b>/);
-  assert.match(source, /aria-label="シエルボタン。押すとトップへ戻り、長押しすると移動できます"/);
+  const tree = ts.createSourceFile(
+    "zeus-button.tsx",
+    source,
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.TSX,
+  );
+  const labels = [];
+  const visit = (node) => {
+    if (
+      ts.isJsxAttribute(node) &&
+      node.name.getText(tree) === "aria-label" &&
+      node.initializer?.getText(tree).includes("シエルボタン")
+    )
+      labels.push(node);
+    ts.forEachChild(node, visit);
+  };
+  visit(tree);
+  assert.equal(labels.length, 1, "the Ciel control has one authoritative accessible label");
+  const label = labels[0].initializer.expression;
+  assert.ok(ts.isConditionalExpression(label));
+  assert.equal(label.condition.getText(tree), "secretAwakening");
+  assert.equal(label.whenTrue.text, "シエルボタン。演出を終了");
+  assert.equal(label.whenFalse.text, "シエルボタン。押すとトップへ戻り、長押しすると移動できます");
   assert.equal((source.match(/src="\/ciel-button-20261018-360.webp"/g) ?? []).length, 2);
   assert.doesNotMatch(source, /ゼウスボタン|src="\/zeus-button/);
   assert.match(source, /deception-world:zeus-button-enabled/);

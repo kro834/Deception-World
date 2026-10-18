@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
+import ts from "typescript";
 
 // Usability round A (2026-09-26): phone input and history. A tap on the Zeus
 // button no longer opens the card beneath it, Back/Forward into a dossier
@@ -31,7 +32,44 @@ test("a touch on the Zeus button does not also open the control beneath it", () 
     /if \(event\.pointerType !== "mouse"\) guardTapThrough\(\);\s*void onNavigate\(\);/,
   );
   // Keyboard presses (detail 0) navigate with no guard.
-  assert.match(zeus, /if \(event\.detail === 0\) void onNavigate\(\);/);
+  const tree = ts.createSourceFile(
+    "zeus-button.tsx",
+    zeus,
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.TSX,
+  );
+  const branches = [];
+  const findBranch = (node) => {
+    if (ts.isIfStatement(node) && ts.isBinaryExpression(node.expression)) {
+      const condition = node.expression;
+      if (
+        condition.operatorToken.kind === ts.SyntaxKind.EqualsEqualsEqualsToken &&
+        condition.left.getText(tree) === "event.detail" &&
+        condition.right.getText(tree) === "0"
+      )
+        branches.push(node.thenStatement);
+    }
+    ts.forEachChild(node, findBranch);
+  };
+  findBranch(tree);
+  assert.equal(branches.length, 1, "one authoritative keyboard activation branch");
+  const calls = [];
+  const readCalls = (node) => {
+    if (ts.isCallExpression(node)) calls.push(node.expression.getText(tree));
+    ts.forEachChild(node, readCalls);
+  };
+  readCalls(branches[0]);
+  assert.equal(
+    calls.filter((name) => name === "onNavigate").length,
+    1,
+    "keyboard still navigates once",
+  );
+  assert.equal(
+    calls.includes("guardTapThrough"),
+    false,
+    "keyboard never arms the pointer tap-through guard",
+  );
   // RISING keeps the shared guard, not a copy of its own.
   assert.doesNotMatch(rising, /function guardTapThrough/);
 });

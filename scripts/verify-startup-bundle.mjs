@@ -23,6 +23,10 @@ export const STARTUP_BUDGET = {
 // Runtime string values survive minification and escaped Unicode. The channel
 // name remains in the lightweight preview loader, so it is deliberately absent.
 export const FORBIDDEN_STARTUP_PAYLOADS = [
+  {
+    name: "Ciel secret renderer",
+    markers: ["Ciel canvas unavailable", "シエルの緑炎", "EMERALD INFERNO"],
+  },
   { name: "Zod implementation", markers: ["$ZodType", "$ZodError", "ZodError"] },
   { name: "preview bridge implementation", markers: ["__grokPreviewBridgeRoot"] },
   {

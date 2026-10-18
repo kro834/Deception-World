@@ -44,7 +44,7 @@ test("the Zeus button steps off titles and control labels, measured by their gly
   );
   assert.match(
     zeus,
-    /const onScroll = \(\) => \{\s*if \(activePointer\.current != null && !held\.current\) cancelPointer\.current\(\);\s*if \(activePointer\.current != null\) \{\s*if \(held\.current\) refreshDragViewport\(\);\s*return;\s*\}\s*droppedHere\.current = false;/,
+    /const onScroll = \(\) => \{\s*if \(\(activePointer\.current != null && !held\.current\) \|\| secretPress\.current\)\s*cancelPointer\.current\(\);\s*if \(activePointer\.current != null\) \{\s*if \(held\.current\) refreshDragViewport\(\);\s*return;\s*\}\s*droppedHere\.current = false;/,
   );
   // Inside a dialog only the dialog's own words count.
   assert.match(zeus, /const root: ParentNode = button\.closest\("dialog"\) \?\? document;/);
@@ -178,8 +178,14 @@ test("display names break between their words, never inside one", () => {
     /<b>\s*<DisplayName value=\{SAGA\.special\.name\} \/>\s*<\/b>/,
   );
   const finalStage = read("src/components/final-stage/final-stage.tsx");
-  assert.equal([...finalStage.matchAll(/<b>\s*<DisplayName value=\{name\} \/>\s*<\/b>/g)].length, 2);
-  assert.equal([...finalStage.matchAll(/<em>\s*<DisplayName value=\{sub\} \/>\s*<\/em>/g)].length, 2);
+  assert.equal(
+    [...finalStage.matchAll(/<b>\s*<DisplayName value=\{name\} \/>\s*<\/b>/g)].length,
+    2,
+  );
+  assert.equal(
+    [...finalStage.matchAll(/<em>\s*<DisplayName value=\{sub\} \/>\s*<\/em>/g)].length,
+    2,
+  );
   assert.match(
     read("src/components/dream-chapter/dream-chapter.tsx"),
     /<b>\s*<DisplayName value=\{record\.name\} \/>\s*<\/b>/,
