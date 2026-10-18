@@ -106,6 +106,7 @@ try {
     await page.waitForFunction(() => document.querySelector(".rd-file-reader")?.scrollTop > 0);
     await page.screenshot({ path: output + "/" + engine + "-" + name + "-reader.png" });
     const reveal = dialog.getByRole("button", { name: "ネタバレを開く", exact: true });
+    assert.match(await dialog.locator(".rd-file-appendix > p").allTextContents().then((parts) => parts.join("")), /開くと、資料の本文が表示されます。/);
     await reveal.click();
     assert.equal(await dialog.locator('[aria-controls="rd-file-dog-dossier"]').getAttribute("aria-expanded"), "true");
     const dossier = dialog.locator(".world-dossier-reading");
@@ -166,6 +167,11 @@ try {
         bodyPosition: document.body.style.position,
         focus: document.activeElement?.className,
         behavior: getComputedStyle(document.documentElement).scrollBehavior,
+        scrollPadding: getComputedStyle(document.documentElement).scrollPaddingTop,
+        scrollMargin: getComputedStyle(document.querySelector("#re-dive")).scrollMarginTop,
+        sectionHeight: document.querySelector("#re-dive").getBoundingClientRect().height,
+        maxScroll: document.scrollingElement.scrollHeight - innerHeight,
+        topbarVar: getComputedStyle(document.documentElement).getPropertyValue("--film-topbar-height"),
       }));
       await page.screenshot({ path: output + "/" + engine + "-" + name + "-rotation-failure.png" });
       console.log(JSON.stringify({ rotationFailure: { returnTop, headerBottom, ...diagnostic } }));

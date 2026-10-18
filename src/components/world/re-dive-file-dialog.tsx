@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type RefObject } from "react";
 import { acquireViewportScrollLock } from "@/lib/viewport-scroll-lock.js";
 import { guardTapThrough } from "@/lib/tap-through-guard";
+import { restoreArchivePosition } from "@/lib/restore-archive-position";
 import { useDialogHistoryDismiss } from "./use-dialog-history-dismiss";
 import { RE_DIVE_CLASSIFIED_REPORT } from "./re-dive-classified-report";
 import { DOG_DOSSIER_COLUMN } from "./world-dog-dossier-data";
@@ -38,10 +39,8 @@ export function ReDiveFileDialog({
           viewportRef.current.width !== window.innerWidth ||
           viewportRef.current.height !== window.innerHeight
         ) {
-          opener.closest<HTMLElement>(".re-dive-section")?.scrollIntoView({
-            block: "start",
-            behavior: "instant",
-          });
+          const archive = opener.closest<HTMLElement>(".re-dive-section");
+          if (archive) restoreArchivePosition(archive);
         }
         opener.focus({ preventScroll: true });
       }

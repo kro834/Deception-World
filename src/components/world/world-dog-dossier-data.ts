@@ -124,6 +124,6 @@ export const DOG_DOSSIER_COLUMN = {
   title: "？？？",
   kicker: "SPOILER",
   spoiler: true,
-  body: "このコラムには、物語の核心に触れるネタバレが含まれます。プラスを右へスライドすると、資料の本文が表示されます。",
+  body: "このコラムには、物語の核心に触れるネタバレが含まれます。開くと、資料の本文が表示されます。",
   pickup: DOG_DOSSIER.sections.flatMap((section) => section.paragraphs),
 } as const;
