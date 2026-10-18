@@ -72,33 +72,31 @@ export function createReactorLayers({ document, pieces, atlas, art, undersuit, s
     bc.drawImage(disc, 0, 0);
     bc.globalCompositeOperation = "source-in";
     bc.drawImage(undersuit, 0, 0, size.width, size.height, -x, -y, size.width, size.height);
+    // Only the reactor itself, unfinished, hides under a honeycomb (owner,
+    // 2026-10-18/19): dark hex cells with steel-blue edges on the disc.
+    bc.globalCompositeOperation = "source-atop";
+    bc.fillStyle = "rgb(8 12 20 / 0.55)";
+    bc.fillRect(0, 0, w, h);
+    const r = HEX;
+    const dx = r * Math.sqrt(3);
+    bc.beginPath();
+    for (let row = 0, cy = 0; cy < h + r * 2; row += 1, cy += r * 1.5) {
+      for (let cx = row % 2 ? dx / 2 : 0; cx < w + dx; cx += dx) {
+        for (let k = 0; k < 6; k += 1) {
+          const a = Math.PI / 6 + (k * Math.PI) / 3;
+          if (k) bc.lineTo(cx + r * Math.cos(a), cy + r * Math.sin(a));
+          else bc.moveTo(cx + r * Math.cos(a), cy + r * Math.sin(a));
+        }
+        bc.closePath?.();
+      }
+    }
+    bc.lineWidth = 0.8;
+    bc.strokeStyle = "rgb(132 182 214 / 0.6)";
+    bc.stroke();
+    bc.globalCompositeOperation = "source-over";
     sc.drawImage(bare, 0, 0);
   }
   bare.width = bare.height = 0;
-  // The unfinished reactor hides under a honeycomb (owner, 2026-10-18):
-  // dark hex cells with steel-blue edges, only over the socket's own shape.
-  sc.globalCompositeOperation = "source-atop";
-  sc.fillStyle = "rgb(8 12 20 / 0.55)";
-  sc.fillRect(0, 0, w, h);
-  const r = HEX;
-  const dx = r * Math.sqrt(3);
-  sc.beginPath();
-  for (let row = 0, cy = 0; cy < h + r * 2; row += 1, cy += r * 1.5) {
-    for (let cx = row % 2 ? dx / 2 : 0; cx < w + dx; cx += dx) {
-      for (let k = 0; k < 6; k += 1) {
-        const a = Math.PI / 6 + (k * Math.PI) / 3;
-        const px = cx + r * Math.cos(a);
-        const py = cy + r * Math.sin(a);
-        if (k) sc.lineTo(px, py);
-        else sc.moveTo(px, py);
-      }
-      sc.closePath?.();
-    }
-  }
-  sc.lineWidth = 0.8;
-  sc.strokeStyle = "rgb(132 182 214 / 0.6)";
-  sc.stroke();
-  sc.globalCompositeOperation = "source-over";
   return layers;
 }
 
