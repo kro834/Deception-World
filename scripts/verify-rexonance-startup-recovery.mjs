@@ -202,6 +202,7 @@ const readLayout = async (page) =>
     return {
       url: location.href,
       scrollY: Math.round(scrollY),
+      routeScrollSettling: document.documentElement.hasAttribute("data-route-scroll-settling"),
       documentHeight: document.documentElement.scrollHeight,
       assemblyDocTop: docTop(heading),
       assemblyViewportTop: heading ? Math.round(heading.getBoundingClientRect().top) : null,
@@ -233,7 +234,15 @@ const waitForStableLayout = async (page, timeout = 10000) => {
   throw new Error(`layout did not stabilize: ${JSON.stringify(await readLayout(page))}`);
 };
 
-const moveIntoAssembly = async (page) => {
+const waitForRouteScrollSettled = async (page) => {
+  await page.waitForFunction(
+    () => !document.documentElement.hasAttribute("data-route-scroll-settling"),
+    null,
+    { timeout: timeoutMs },
+  );
+};
+
+const moveIntoAssembly = async (page, realInput = false) => {
   await page.waitForFunction(
     () => {
       const runway = document.querySelector(".rzn-suitup");
@@ -244,20 +253,33 @@ const moveIntoAssembly = async (page) => {
     { timeout: timeoutMs },
   );
   await waitForStableLayout(page, timeoutMs);
-  await page.locator(".rzn-suitup").evaluate((runway) => {
-    const frame = runway.querySelector(".rzn-frame");
-    if (!frame) throw new Error("Rexonance frame is missing");
-    const pinTop = Number.parseFloat(getComputedStyle(frame).top) || 0;
-    const top =
-      runway.getBoundingClientRect().top +
-      scrollY -
-      pinTop +
-      (runway.offsetHeight - frame.offsetHeight) * 0.45;
-    const root = document.documentElement;
-    const previousBehavior = root.style.scrollBehavior;
-    root.style.scrollBehavior = "auto";
-    scrollTo(0, top);
-    root.style.scrollBehavior = previousBehavior;
+  await waitForRouteScrollSettled(page);
+  // Natural arrivals exercise real user input. Fault-injection cases can
+  // start at the hero or below the scene, so position those deterministically
+  // only after the route's own hash settlement has released scrolling.
+  if (!realInput) {
+    await page.locator(".rzn-suitup").evaluate((runway) => {
+      const frame = runway.querySelector(".rzn-frame");
+      if (!frame) throw new Error("Rexonance frame is missing");
+      const pinTop = Number.parseFloat(getComputedStyle(frame).top) || 0;
+      const top =
+        runway.getBoundingClientRect().top +
+        scrollY -
+        pinTop +
+        (runway.offsetHeight - frame.offsetHeight) * 0.45;
+      const root = document.documentElement;
+      const previousBehavior = root.style.scrollBehavior;
+      root.style.scrollBehavior = "auto";
+      scrollTo(0, top);
+      root.style.scrollBehavior = previousBehavior;
+    });
+    return;
+  }
+  const before = await page.evaluate(() => Math.round(scrollY));
+  if (engine === "webkit") await page.keyboard.press("PageDown");
+  else await page.mouse.wheel(0, 1200);
+  await page.waitForFunction((previousY) => Math.round(scrollY) > previousY, before, {
+    timeout: timeoutMs,
   });
 };
 
@@ -297,9 +319,13 @@ const assertLiveAssembly = async (page, label) => {
     await page.waitForFunction(
       () => {
         const runway = document.querySelector(".rzn-suitup");
+        const canvas = runway?.querySelector(".rzn-canvas");
         return (
           runway?.dataset.rznState === "live" &&
-          Number.parseInt(runway.querySelector(".rzn-percent")?.textContent ?? "0", 10) > 0
+          Boolean(runway.dataset.rznPhase) &&
+          Number.parseInt(runway.querySelector(".rzn-percent")?.textContent ?? "0", 10) > 0 &&
+          (canvas?.width ?? 0) > 0 &&
+          (canvas?.height ?? 0) > 0
         );
       },
       null,
@@ -359,6 +385,7 @@ try {
       null,
       { timeout: timeoutMs },
     );
+    await waitForRouteScrollSettled(page);
     const landing = await page.locator("#assembly").evaluate((element) => ({
       top: Math.round(element.getBoundingClientRect().top),
       scrollMargin: getComputedStyle(element).scrollMarginBlockStart,
@@ -367,7 +394,7 @@ try {
       throw new Error(
         `direct-assembly-hash: anchor drifted out of view after layout settled; ${JSON.stringify(landing)}`,
       );
-    await moveIntoAssembly(page);
+    await moveIntoAssembly(page, true);
     return { landing, state: await assertLiveAssembly(page, "direct-assembly-hash") };
   });
 
@@ -386,6 +413,7 @@ try {
         timeout: timeoutMs,
       });
       await waitForStableLayout(page, timeoutMs);
+      await waitForRouteScrollSettled(page);
       const click = await page.evaluate(() => window.__rznHeroHashClick);
       const landing = await page.locator("#assembly").evaluate((element) => ({
         top: Math.round(element.getBoundingClientRect().top),
@@ -403,7 +431,7 @@ try {
         throw new Error(
           `client-world-to-hero-cta-early-assembly: anchor drifted after route transition/layout; click=${JSON.stringify(click)} landing=${JSON.stringify(landing)}`,
         );
-      await moveIntoAssembly(page);
+      await moveIntoAssembly(page, true);
       return {
         click,
         landing,
