@@ -1937,6 +1937,26 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
     animation: rxSuitHold 100ms cubic-bezier(0.3, 0.55, 0.35, 1) var(--rx-suit-t) both;
   }
 
+  /* Cold DOM fallback: the isolated painted coil shares the reactor's
+     formation window. Separate wrapper/art transforms give the same
+     smoothstep turn and ease-out growth as the scalar canvas helper. */
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
+    .rx-suit-plate[data-piece="core-swirl"] {
+    transform-origin: var(--rx-coil-x) var(--rx-coil-y);
+    animation:
+      rxSuitCoilTurn 100ms cubic-bezier(0.333333, 0, 0.666667, 1) var(--rx-suit-t) both,
+      rxSuitCoilAppear 100ms linear var(--rx-suit-t) both;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
+    .rx-suit-plate[data-piece="core-swirl"]
+    > .rx-suit-art {
+    transform-origin: var(--rx-coil-x) var(--rx-coil-y);
+    animation: rxSuitCoilGrow 100ms cubic-bezier(0.333333, 1, 0.666667, 1) var(--rx-suit-t) both;
+  }
+
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
     .rx-suit-spark {
@@ -2239,6 +2259,30 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   }
   to {
     transform: none;
+  }
+}
+@keyframes rxSuitCoilTurn {
+  from {
+    transform: rotate(-225deg);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes rxSuitCoilGrow {
+  from {
+    transform: scale(0.55);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes rxSuitCoilAppear {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 @keyframes rxSuitSpark {

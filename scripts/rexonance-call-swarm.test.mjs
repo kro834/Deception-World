@@ -17,6 +17,7 @@ import * as calls from "../src/lib/rexonance-calls.ts";
 import * as suit from "../src/lib/rexonance-suit.ts";
 import * as gold from "../src/lib/rexonance-suit-gold.ts";
 import * as kit from "../src/lib/rexonance-nanites.ts";
+import * as reactor from "../src/lib/rexonance-reactor.js";
 import { createRexonanceCallRetention } from "../src/lib/rexonance-call-retention.ts";
 
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
@@ -472,6 +473,7 @@ async function extrasRuntime({ touch }) {
       if (name === "@/lib/rexonance-calls") return calls;
       if (name === "@/lib/rexonance-suit") return suit;
       if (name === "@/lib/rexonance-nanites") return kit;
+      if (name === "@/lib/rexonance-reactor.js") return reactor;
       if (name === "@/lib/rexonance-call-retention") return { createRexonanceCallRetention };
       // Round 3 (reviews 8/27/9): the call phases its own read-backs and
       // shares the kit's row formulas (their bytes: rexonance-nanites-unlit).
@@ -720,6 +722,77 @@ test("armour aligns on anatomical rails, compresses, and keeps exact final regis
       [1, 0, 0, 1, 0, 0],
       `${all[p].piece.id}: fixed fitting`,
     );
+  }
+});
+
+test("the real artwork coil grows with the reactor and rotates around its fixed centre", async () => {
+  for (const touch of [false, true]) {
+    const { plan, extras } = await extrasRuntime({ touch });
+    const all = plan.plates();
+    const L = extras.rexonanceNaniteLayout();
+    const p = all.findIndex(({ piece }) => piece.id === "core-swirl");
+    const disc = all.findIndex(({ piece }) => piece.id === "core-disc");
+    assert.equal(all[p].fit, all[disc].fit, "coil and disc share their formation endpoint");
+    assert.equal(all[p].from, all[disc].from, "their gold also starts together");
+    assert.ok(L.jigSlot[p] < (touch ? 4 : 12), "the actual coil always owns a rotation slot");
+    assert.equal(L.receiverN[p], 0, "no fixed receiver fingers cover the rotating coil");
+    const { context } = recorder();
+    let transform = null;
+    const drawn = [];
+    const originalSetTransform = context.setTransform;
+    const originalDrawImage = context.drawImage;
+    context.setTransform = (...args) => {
+      transform = args;
+      originalSetTransform(...args);
+    };
+    context.drawImage = (image, ...args) => {
+      drawn.push({ args, transform });
+      originalDrawImage(image, ...args);
+    };
+    const ex = extras.createSuitExtras({
+      flight: context,
+      s: 1,
+      ox: 0,
+      oy: 0,
+      all,
+      gold: plan.cells(),
+      source: { kind: "work" },
+      sheet: { kind: "motes" },
+    });
+    const [cx, cy] = suit.REXONANCE_SUIT_MARKS.core;
+    for (const u of [0.2, 0.5, 0.8, 1]) {
+      const t = all[p].fit - calls.REXONANCE_SUIT_REVEAL_MS * (1 - u);
+      const matrix = Array.from(ex.platePose(p, t));
+      const scale = reactor.reactorCoilScale(u);
+      const angle = reactor.reactorCoilAngle(u);
+      assert.ok(Math.abs(matrix[0] - Math.cos(angle) * scale) < 1e-6);
+      assert.ok(Math.abs(matrix[1] - Math.sin(angle) * scale) < 1e-6);
+      assert.ok(Math.abs(matrix[0] * cx + matrix[2] * cy + matrix[4] - cx) < 1e-4);
+      assert.ok(Math.abs(matrix[1] * cx + matrix[3] * cy + matrix[5] - cy) < 1e-4);
+      assert.deepEqual(
+        Array.from(ex.platePose(disc, t)),
+        [1, 0, 0, 1, 0, 0],
+        "reactor disc itself never orbits",
+      );
+      ex.before(t);
+      if (u < 1) assert.equal(ex.staged()[p], 1, "touch and desktop actually stage the coil");
+    }
+    assert.deepEqual(
+      Array.from(ex.platePose(p, all[p].fit)),
+      [1, 0, 0, 1, 0, 0],
+      "original final registration",
+    );
+    const middle = all[p].fit - calls.REXONANCE_SUIT_REVEAL_MS / 2;
+    ex.before(middle);
+    drawn.length = 0;
+    ex.forming(p, middle);
+    const piece = all[p].piece;
+    const artwork = drawn.find(
+      ({ args }) =>
+        args[0] === piece.ax && args[1] === piece.ay && args[2] === piece.w && args[3] === piece.h,
+    );
+    assert.ok(artwork, "draws the isolated core-swirl atlas artwork, not a generated ring");
+    assert.ok(Math.abs(artwork.transform[1]) > 0.1, "the artwork draw carries its rotation");
   }
 });
 

@@ -202,6 +202,9 @@ export const REXONANCE_SUIT_FIT: Readonly<Record<string, number>> = Object.fromE
   ...REXONANCE_SUIT_CASCADE.flatMap(({ from, to, order }) =>
     order.map((id, k) => [id, Math.round(from + ((to - from) * k) / (order.length - 1))]),
   ),
+  // The real coil grows while the reactor forms, sharing its final seat.
+  // The surrounding chest leaves and the five call beats keep their clocks.
+  ["core-swirl", REXONANCE_SUIT_SNAP.chest],
 ]);
 /** The plates that seat on an accent (the strongest clank). */
 export const REXONANCE_SUIT_ACCENTS: readonly string[] = REXONANCE_SUIT_CASCADE.filter(

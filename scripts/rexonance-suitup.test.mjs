@@ -323,6 +323,10 @@ test("the suit keeps the call clock and is finished before the hand-over", () =>
     const fits = order.map((id) => REXONANCE_SUIT_FIT[id]);
     for (let k = 1; k < fits.length; k += 1) {
       const gap = fits[k] - fits[k - 1];
+      if (order[k - 1] === "core-swirl" && order[k] === "core-disc") {
+        assert.equal(gap, 0, "the actual coil forms together with its reactor");
+        continue;
+      }
       assert.ok(gap >= 10 && gap <= 80, `${group}: one after another (${gap} ms)`);
     }
     if (group in REXONANCE_SUIT_SNAP) assert.equal(fits.at(-1), REXONANCE_SUIT_SNAP[group]);

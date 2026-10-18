@@ -1332,7 +1332,12 @@ test("gold preparation yields within the idle budget, cancels midway and finishe
         piece.w,
         piece.h,
       ]);
-    const driverDraws = t.drawCalls.filter((call) => call.source === "/atlas.webp");
+    // Reactor masks also crop the atlas into small local sheets. The driver
+    // contract concerns its figure-sized sheet, not those independent masks.
+    const driverDraws = t.drawCalls.filter((call) =>
+      call.source === "/atlas.webp" &&
+      t.canvases.find((canvas) => canvas.testCanvasId === call.target)?.width === config.size.width,
+    );
     assert.deepEqual(
       driverDraws.map((call) => call.rect),
       expectedPreset,

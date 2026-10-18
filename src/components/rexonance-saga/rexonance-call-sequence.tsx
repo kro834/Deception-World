@@ -339,6 +339,12 @@ const pieceClock = (piece: RexonanceSuitPiece) => {
     "--rx-suit-gx": gx,
     "--rx-suit-gy": gy,
     "--rx-suit-k": REXONANCE_SUIT_ACCENTS.includes(piece.id) ? 1.07 : 1.025,
+    ...(piece.id === "core-swirl"
+      ? {
+          "--rx-coil-x": `${((REXONANCE_SUIT_MARKS.core[0] - piece.x) / piece.w) * 100}%`,
+          "--rx-coil-y": `${((REXONANCE_SUIT_MARKS.core[1] - piece.y) / piece.h) * 100}%`,
+        }
+      : {}),
   } as CSSProperties;
 };
 // Sparks: every accent, and the first bite of each run.

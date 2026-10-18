@@ -17,8 +17,9 @@ import {
   plates,
   work,
 } from "./rexonance-suit-plan";
-import { REXONANCE_SUIT_LIGHT } from "@/lib/rexonance-calls";
+import { REXONANCE_SUIT_LIGHT, REXONANCE_SUIT_REVEAL_MS } from "@/lib/rexonance-calls";
 import { REXONANCE_SUIT_MARKS } from "@/lib/rexonance-suit";
+import { reactorCoilAngle, reactorCoilScale } from "@/lib/rexonance-reactor.js";
 import type { SuitExtrasEnv } from "./rexonance-suit-extras";
 import { suitExtrasApi } from "./rexonance-suit-extras-hook";
 
@@ -381,6 +382,26 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
               continue;
             }
             if (t < plate.fit) {
+              // The classic canvas path uses the same real coil artwork and
+              // reactor clock as the richer kit. Only this isolated atlas
+              // piece rotates: the disc and neighbouring chest stay put.
+              const coil = piece.id === "core-swirl";
+              if (coil) {
+                const u = (t - plate.fit + REXONANCE_SUIT_REVEAL_MS) / REXONANCE_SUIT_REVEAL_MS;
+                const angle = reactorCoilAngle(u);
+                const scale = reactorCoilScale(u);
+                const cos = Math.cos(angle) * scale;
+                const sin = Math.sin(angle) * scale;
+                flight.save();
+                flight.setTransform(
+                  cos,
+                  sin,
+                  -sin,
+                  cos,
+                  (coreX - cos * coreX + sin * coreY) * s + ox,
+                  (coreY - sin * coreX - cos * coreY) * s + oy,
+                );
+              }
               // The tiles that have locked: one clip of their cells and one
               // draw of the plate. Drawn one by one at the canvas's scale,
               // their resampled edges left a dark lattice between them, so a
@@ -457,6 +478,7 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
                   flight.drawImage(sheet, tile.sx, tile.sy, tile.tw, tile.th, x0, y0, w, h);
                 }
               }
+              if (coil) flight.restore();
               continue;
             }
             // Seated. Its gold cells lock as they are due. The working atlas

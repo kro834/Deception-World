@@ -24,6 +24,8 @@ import {
 import { registerSuitExtras } from "./rexonance-suit-extras-hook";
 import { createRexonanceCallRetention } from "@/lib/rexonance-call-retention";
 import { rexonanceSuitSource } from "@/lib/rexonance-suit-warmup";
+import { reactorCoilAngle, reactorCoilScale } from "@/lib/rexonance-reactor.js";
+import { REXONANCE_SUIT_REVEAL_MS } from "@/lib/rexonance-calls";
 import {
   FIG,
   FLIGHT,
@@ -294,7 +296,7 @@ type Layout = {
   // Plates (index = the plan's plate index).
   kind: Int8Array; // -1 driver, 0 armour, 1 tail, 2 ribbon, 3 helm
   segment: Int8Array; // a tail segment's index, root (0) to blade (4)
-  flags: Uint8Array; // 1 accent, 2 shock ring, 4 crest, 8 formed in place
+  flags: Uint8Array; // 1 accent, 2 shock ring, 4 crest, 8 formed in place, 16 reactor coil
   order: Int16Array; // plates by fit
   jigSlot: Uint8Array; // fixed reservation for its whole formation; 255 = fixed
   seatX: Float32Array;
@@ -607,7 +609,12 @@ function* layoutSteps(all: Plate[], gold: Cells): Generator<undefined, Layout, u
     L.kind[p] = kind;
     L.segment[p] = kind === 1 ? Number(/^tail-(\d)/.exec(piece.id)?.[1] ?? 0) : 0;
     const crest = piece.id === "helmet-crest";
-    L.flags[p] = (accents.has(piece.id) ? 1 : 0) | (sparks.has(piece.id) ? 2 : 0) | (crest ? 4 : 0);
+    const coil = piece.id === "core-swirl";
+    L.flags[p] =
+      (accents.has(piece.id) ? 1 : 0) |
+      (sparks.has(piece.id) ? 2 : 0) |
+      (crest ? 4 : 0) |
+      (coil ? 16 : 0);
     const [sx, sy] = piece.seat;
     L.seatX[p] = sx;
     L.seatY[p] = sy;
@@ -649,7 +656,10 @@ function* layoutSteps(all: Plate[], gold: Cells): Generator<undefined, Layout, u
     // wide form in place on the body, like the helmet: no lift, no tilt, so
     // nothing has to snap into place when they complete.
     const inPlace =
-      helm || piece.id.startsWith("tasset-") || (kind === 0 && piece.h >= 1.8 * piece.w);
+      helm ||
+      piece.id === "core-disc" ||
+      piece.id.startsWith("tasset-") ||
+      (kind === 0 && piece.h >= 1.8 * piece.w);
     if (inPlace) L.flags[p] |= 8;
     const lift = inPlace ? 0 : (TOUCH ? 3 : 5) + (TOUCH ? 6 : 9) * Math.sqrt(area / maxArea);
     L.lift[p] = lift * (kind === 1 || kind === 2 ? 1.4 : 1);
@@ -671,6 +681,9 @@ function* layoutSteps(all: Plate[], gold: Cells): Generator<undefined, Layout, u
       L.offY[p] = distance * (shoulder ? -0.48 : chest ? -0.12 : 0.65);
       L.tilt[p] = TOUCH ? 0 : ((shoulder ? 24 : 18) * Math.PI) / 180;
       L.hinge[p] = (side * (shoulder ? 14 : chest ? 9 : 6) * Math.PI) / 180;
+    }
+    if (coil) {
+      L.lift[p] = L.offX[p] = L.offY[p] = L.tilt[p] = L.hinge[p] = 0;
     }
     let reach = 1;
     for (const [cx, cy] of [
@@ -835,7 +848,8 @@ function* layoutSteps(all: Plate[], gold: Cells): Generator<undefined, Layout, u
       pointAt += count + 1;
       loopAt += 1;
     }
-    if (kind === 0) {
+    if (coil) L.clampMask[p] = 0;
+    if (kind === 0 && !coil) {
       // Socket frames follow the dominant real contour, including the tall
       // plates that must form in place. Sampling happens only in preparation.
       let outside = -1;
@@ -873,7 +887,13 @@ function* layoutSteps(all: Plate[], gold: Cells): Generator<undefined, Layout, u
   // Reserve a carriage for the entire interval, rather than promoting a
   // previously flat panel when another plate fits and frees a frame slot.
   // With larger articulated travel that promotion would visibly pop.
-  for (const p of L.order) {
+  const jigOrder = Array.from(L.order).sort(
+    (a, b) =>
+      Number(Boolean(L.flags[b] & 16)) - Number(Boolean(L.flags[a] & 16)) ||
+      all[a].fit - all[b].fit ||
+      a - b,
+  );
+  for (const p of jigOrder) {
     if (L.kind[p] < 0 || L.flags[p] & 8) continue;
     for (let slot = 0; slot < JIGS; slot += 1) {
       let free = true;
@@ -2334,6 +2354,21 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
   const setJig = (p: number, lambda: number, hinge = 0, sway = 0) => {
     const o = p * 6;
     lam[p] = lambda;
+    if (L.flags[p] & 16) {
+      const u = 1 - lambda;
+      const angle = reactorCoilAngle(u);
+      const scale = reactorCoilScale(u);
+      const cos = Math.cos(angle) * scale;
+      const sin = Math.sin(angle) * scale;
+      const negativeSin = sin ? -sin : 0;
+      jig[o] = cos;
+      jig[o + 1] = sin;
+      jig[o + 2] = negativeSin;
+      jig[o + 3] = cos;
+      jig[o + 4] = (CORE_X - cos * CORE_X - negativeSin * CORE_Y) * s + ox;
+      jig[o + 5] = (CORE_Y - sin * CORE_X - cos * CORE_Y) * s + oy;
+      return;
+    }
     const phiAngle = L.tilt[p] * lambda;
     const c = Math.cos(phiAngle);
     const sk = 0.08 * Math.sin(phiAngle);
@@ -2413,6 +2448,7 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
   // that ends at F. Plates formed in place (the helmet, the tassets) stay at 0.
   const lambdaAt = (p: number, t: number) => {
     const F = all[p].fit;
+    if (L.flags[p] & 16) return Math.max(0, Math.min(1, (F - t) / REXONANCE_SUIT_REVEAL_MS));
     if (L.kind[p] === 3 || L.flags[p] & 8) return 0;
     if (t >= F) return 0;
     if (L.kind[p] === 0) {

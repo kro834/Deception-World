@@ -8,6 +8,12 @@ import {
 } from "./rexonance-overwrite.js";
 import { createSplitLightsJob } from "./rexonance-unlit.js";
 import { releasePendingImage } from "./release-pending-images.js";
+import {
+  createReactorLayers,
+  deferReactorPieces,
+  drawReactorFormation,
+  repaintReactorArt,
+} from "./rexonance-reactor-scroll.js";
 /** RESONANCE (rx11) for /rexonance-saga: the hits a stylesheet cannot time.
  *
  * Counts. Every [data-rsn-count] figure keeps the owner's value as its own
@@ -1442,6 +1448,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   let kit = null;
   let driver = null;
   let lights = null;
+  let reactor = null;
   let settled = null;
   let settledCount = 0;
   let pixels = null;
@@ -1624,8 +1631,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         });
     // The nanite kit (owner, 2026-10-16): each sheet optional; touch
     // screens draw no comets.
-    const optional = (src) =>
-      src ? boundedImage(decode(src), null, 2000, true) : null;
+    const optional = (src) => (src ? boundedImage(decode(src), null, 2000, true) : null);
     return Promise.all([
       decode(config.figure),
       decode(config.undersuit),
@@ -2038,10 +2044,32 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         const baseSample =
           images.base && sample ? await idleTask(() => sampleFigure(tile, images.base)) : null;
         if (!active()) return;
+        mark("reactor-crops");
+        const nextReactor = await idleTask(() => {
+          if (!active()) return null;
+          const result = createReactorLayers({
+            document,
+            pieces: config.pieces,
+            atlas: images.atlas,
+            art: images.figure,
+            undersuit: images.undersuit,
+            size: config.size,
+          });
+          if (result) {
+            resources.add(result.art);
+            resources.add(result.socket);
+          }
+          return result;
+        });
+        if (!active()) return;
+        // The coil is born with the reactor, not delivered early as a chest
+        // plate. Keep its mask in the ownership vote so neighbours cannot
+        // claim its pixels; only the normal delivery is skipped.
+        const planningPieces = nextReactor ? deferReactorPieces(config.pieces) : config.pieces;
         const nextPlan = await buildSteps(
           assemblyPlanSteps({
             size: config.size,
-            pieces: config.pieces,
+            pieces: planningPieces,
             core: config.core,
             maskTile: config.maskTile,
             visor: config.visor,
@@ -2057,7 +2085,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         const nextGold = images.gold
           ? await buildSteps(
               assemblyGoldPlanSteps({
-                pieces: config.pieces,
+                pieces: planningPieces,
                 gold: config.gold,
                 tiles: nextPlan.tiles,
               }),
@@ -2070,6 +2098,13 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         // (No mote layers: the scene no longer reads them — round 3, memory.)
         const nextLights = await splitLightsIdle(images.figure, "figure-lights");
         if (!active()) return;
+        if (nextReactor && nextLights?.unlit) {
+          mark("reactor-unlit");
+          await idleTask(() => {
+            if (active()) repaintReactorArt(nextReactor, nextLights.unlit, config.size);
+          });
+          if (!active()) return;
+        }
         // The base figure's own light split (its lights held back too, its
         // mote layer for the rich scene) and, below, its raw-gold sheet.
         let nextBaseLights = null;
@@ -2397,6 +2432,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         settled = nextSettled;
         settledCount = 0;
         lights = nextLights;
+        reactor = nextReactor;
         driver = nextDriver;
         raw = nextRaw;
         goldArt = nextGoldArt;
@@ -2595,9 +2631,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     for (let index = 0; index < buckets.length; index += 1) {
       const list = buckets[index];
       mark("buffer-face-allocation");
-      const rects = await idleTask(() =>
-        active() ? new Float32Array(list.length * 4) : null,
-      );
+      const rects = await idleTask(() => (active() ? new Float32Array(list.length * 4) : null));
       if (!rects || !active()) return null;
       let at = 0;
       while (active() && at < list.length) {
@@ -3019,37 +3053,65 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       const [rx, ry] = config.core;
       const R = REACTOR_RADIUS;
       const [swirlFrom, swirlTo] = REACTOR_SWIRL;
+      if (reactor && progress >= B.deus[0] && progress < B.light[0]) {
+        // The whole coiled armour and orb share one formation clock. The
+        // masked artwork rotates, then holds its exact registered pose
+        // through the seal; the original full figure takes over at ignition.
+        drawReactorFormation(context, reactor, config.core, span(progress, REACTOR_SWIRL));
+      }
       if (progress >= B.deus[0] && progress < swirlTo) {
         const u = span(progress, REACTOR_SWIRL);
         // The socket waits dark; the reactor's own picture then turns in
         // from a small, fast spin to rest, growing to its rim (a vortex).
-        context.save();
-        context.beginPath();
-        context.arc(rx, ry, R, 0, Math.PI * 2);
-        context.clip();
-        if (undersuit) {
-          // The bare undersuit shows where the reactor will form (owner).
-          const ux = (undersuit.width || W) / W;
-          const uy = (undersuit.height || H) / H;
-          context.drawImage(undersuit, (rx - R) * ux, (ry - R) * uy, R * 2 * ux, R * 2 * uy, rx - R, ry - R, R * 2, R * 2);
-        }
-        if (u > 0) {
-          const grow = easeOut(u);
+        if (!reactor) {
+          context.save();
           context.beginPath();
-          context.arc(rx, ry, Math.max(1, R * grow), 0, Math.PI * 2);
+          context.arc(rx, ry, R, 0, Math.PI * 2);
           context.clip();
-          context.translate(rx, ry);
-          context.rotate(-(1 - grow) * Math.PI * 2.6);
-          const k = 0.55 + 0.45 * grow;
-          context.scale(k, k);
-          context.translate(-rx, -ry);
-          context.globalAlpha = Math.min(1, u * 2.2);
-          const art = lights?.unlit || figure;
-          const sx = (art.width || W) / W;
-          const sy = (art.height || H) / H;
-          context.drawImage(art, (rx - R) * sx, (ry - R) * sy, R * 2 * sx, R * 2 * sy, rx - R, ry - R, R * 2, R * 2);
+          if (undersuit) {
+            // The bare undersuit shows where the reactor will form (owner).
+            const ux = (undersuit.width || W) / W;
+            const uy = (undersuit.height || H) / H;
+            context.drawImage(
+              undersuit,
+              (rx - R) * ux,
+              (ry - R) * uy,
+              R * 2 * ux,
+              R * 2 * uy,
+              rx - R,
+              ry - R,
+              R * 2,
+              R * 2,
+            );
+          }
+          if (u > 0) {
+            const grow = easeOut(u);
+            context.beginPath();
+            context.arc(rx, ry, Math.max(1, R * grow), 0, Math.PI * 2);
+            context.clip();
+            context.translate(rx, ry);
+            context.rotate(-(1 - grow) * Math.PI * 2.6);
+            const k = 0.55 + 0.45 * grow;
+            context.scale(k, k);
+            context.translate(-rx, -ry);
+            context.globalAlpha = Math.min(1, u * 2.2);
+            const art = lights?.unlit || figure;
+            const sx = (art.width || W) / W;
+            const sy = (art.height || H) / H;
+            context.drawImage(
+              art,
+              (rx - R) * sx,
+              (ry - R) * sy,
+              R * 2 * sx,
+              R * 2 * sy,
+              rx - R,
+              ry - R,
+              R * 2,
+              R * 2,
+            );
+          }
+          context.restore();
         }
-        context.restore();
         if (!calm && progress >= swirlFrom) {
           // Nanites drawn down a logarithmic spiral into the eye.
           context.save();
@@ -3591,10 +3653,13 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       baseLights?.unlit,
       baseLights?.lights,
       baseLights?.motes,
+      reactor?.art,
+      reactor?.socket,
     ])
       if (sheet) sheet.width = sheet.height = 0;
     raw = goldArt = goldLayer = goldPlan = driver = lights = frame_ = null;
     frameDeep_ = baseLights = baseRaw = null;
+    reactor = null;
     for (const sheet of naniteSheets) sheet.width = sheet.height = 0;
     naniteSheets = [];
     swarm?.release?.();
@@ -3919,10 +3984,13 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       baseLights?.unlit,
       baseLights?.lights,
       baseLights?.motes,
+      reactor?.art,
+      reactor?.socket,
     ])
       if (sheet) sheet.width = sheet.height = 0;
     raw = goldArt = goldLayer = goldPlan = driver = lights = frame_ = null;
     frameDeep_ = baseLights = baseRaw = null;
+    reactor = null;
     for (const sheet of naniteSheets) sheet.width = sheet.height = 0;
     naniteSheets = [];
     swarm?.release?.();
