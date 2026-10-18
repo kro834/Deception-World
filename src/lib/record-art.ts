@@ -129,7 +129,7 @@ const EPISODES: Record<string, Picture> = {
   "03": { src: "/episode-03-deception-world-delivery-600.webp", pos: "50% 30%" },
   "04": { src: "/episode-04-kill-delivery-600.webp", pos: "50% 30%" },
   "05": { src: "/episode-05-farce-delivery-600.webp", pos: "50% 40%" },
-  "06": { src: "/episode-06-deus-600.webp", pos: "50% 40%" },
+  "06": { src: "/episode-06-arrival-error.svg", pos: "50% 50%" },
 };
 
 /** The Form Archive's own 240 px portrait thumbnails. */

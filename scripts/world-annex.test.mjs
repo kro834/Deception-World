@@ -41,7 +41,8 @@ test("world-home preserves its layout and copy outside explicitly approved edits
     // 2026-10-17: the owner's column 06 『？？？』 (a spoiler warning, the 『犬』
     // dossier behind its plus slider); all other records retained.
     // 2026-10-19: remove 06 from the ordinary columns; preserve it in the RE DIVE book.
-    records: "a8a58478067394707675b3e9bd7ceda47f2e37d3ddb9e68c6dc7c4ee1593be3b",
+    // Owner 2026-10-19: only EP6's title, thumbnail and alt change to 来訪 / ERROR; markup stays pinned.
+    records: "22ab243d973ad8f6619fddeaf1ebfe891f61f2fcfdd09adad4bb2039e064d7f2",
     // rx14 F3/F29: responsive poster and WebP related-image attributes only.
     // The owner's records and exact copy above remain unchanged.
     // Each pickup may now land on its matching form's hash via GuardedLink.
