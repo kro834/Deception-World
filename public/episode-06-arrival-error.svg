@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" role="img" aria-labelledby="title desc">
+  <title id="title">EP.06 ERROR</title>
+  <desc id="desc">来訪のサムネイル。暗い画面に赤いERRORとSIGNAL LOSTが表示されている。</desc>
+  <defs>
+    <pattern id="scan" width="8" height="8" patternUnits="userSpaceOnUse">
+      <path d="M0 0H8" stroke="#91aaa6" stroke-opacity=".05"/>
+    </pattern>
+  </defs>
+  <path fill="#05090b" d="M0 0H800V800H0Z"/>
+  <path fill="url(#scan)" d="M0 0H800V800H0Z"/>
+  <path d="M120 276H160M120 276V306M640 276H680V306M120 494V524H160M640 524H680V494" fill="none" stroke="#8c3b44" stroke-width="2"/>
+  <path d="M225 310H575M225 488H575" stroke="#47252c"/>
+  <g font-family="monospace" text-anchor="middle">
+    <text x="400" y="350" fill="#aa7a80" font-size="18" letter-spacing="5">EP.06</text>
+    <text x="400" y="431" fill="#ef6978" font-size="100" font-weight="700" letter-spacing="6">ERROR</text>
+    <text x="400" y="466" fill="#a3b6b2" font-size="18" letter-spacing="4">SIGNAL LOST</text>
+  </g>
+  <path d="M237 382H270M556 426H579" stroke="#05090b" stroke-width="4"/>
+</svg>

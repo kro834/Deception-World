@@ -524,10 +524,10 @@ const EPISODES: EpisodeRecord[] = [
   },
   {
     no: "06",
-    title: "DEUS",
-    src: "/episode-06-deus.webp",
-    pos: "42% 38%",
-    alt: "夕暮れの崩壊した街で、傷ついた黒い衣装の人物が空を見上げるEP6 DEUSのビジュアル",
+    title: "来訪",
+    src: "/episode-06-arrival-error.svg",
+    pos: "50% 50%",
+    alt: "EP6 来訪：サムネイルのERROR表示",
   },
 ];
 
