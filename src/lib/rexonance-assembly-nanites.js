@@ -36,6 +36,42 @@ const clamp01 = (value) => (value < 0 ? 0 : value > 1 ? 1 : value);
 const smooth = (u) => u * u * (3 - 2 * u);
 const easeOut = (u) => 1 - (1 - u) * (1 - u) * (1 - u);
 
+/** Staged shell distance from its seat: approach, magnetic capture, lock.
+ * The two smooth segments meet with zero velocity at the capture point. */
+export function armorSeatLift(piece, q) {
+  if (q < piece.from) return 1;
+  if (q < piece.to)
+    return 1 - piece.seatHold * smooth(clamp01((q - piece.from) / (piece.to - piece.from)));
+  if (q >= piece.contact) return 0;
+  const u = clamp01((q - piece.to) / (piece.contact - piece.to));
+  if (piece.ornament) return (1 - piece.seatHold) * (1 - smooth(u));
+  const at = piece.catchAt;
+  const hold = piece.catchLift;
+  return (1 - piece.seatHold) * (u < at
+    ? 1 - (1 - hold) * smooth(u / at)
+    : hold * (1 - smooth((u - at) / (1 - at))));
+}
+
+/** Write the socket's rail, jaw and contact phases into a reusable buffer.
+ * All values depend only on displayed progress; callers allocate the buffer
+ * once, outside the frame path. */
+export function armorDockState(piece, q, out) {
+  out[0] = smooth(clamp01((q - (piece.to - 0.014)) / 0.004)) *
+    smooth(clamp01((piece.contact - q) / 0.003));
+  out[1] = smooth(clamp01((q - (piece.contact - 0.004)) / 0.004));
+  out[2] = 1 - smooth(clamp01((q - piece.contact) / 0.014));
+  out[3] = Math.min(piece.railLength, Math.hypot(piece.offX, piece.offY) * armorSeatLift(piece, q));
+  return out;
+}
+
+const armorClampOrder = (corner) => corner === 2 ? 0 : corner === 1 ? 1 : corner === 3 ? 2 : 3;
+export function armorClampBite(piece, corner, q) {
+  const lead = 0.006 - armorClampOrder(corner) * 0.0015;
+  return q < piece.contact
+    ? smooth(clamp01((q - (piece.contact - lead)) / lead))
+    : 1 - smooth(clamp01((q - piece.contact) / 0.006));
+}
+
 /** The per-plate timings (progress): the latch and hologram `lead` the
  * plate's first flight; `seat` the swing home after its last tile lands
  * (contact = to + seat; the helmet to + .003); the rest run from contact. */
@@ -412,6 +448,21 @@ export function* assemblyNanitePlanSteps({
     // ornaments keep their own swing (their turn and skew already carry it).
     const lift = helm ? 0 : ornament ? (10 + 12 * share) * 1.4 : 16 + 20 * share;
     const hx = Math.sign(seatX - W / 2) * Math.min(1, Math.abs(seatX - W / 2) / (0.25 * W));
+    const side = seatX < W / 2 ? -1 : 1;
+    // The shell arrives from the side of the anatomy it covers. Arms key
+    // laterally, shoulders fold down and in, legs rise from below, while
+    // torso shells approach the chest/waist from their natural edges.
+    const approachX = piece.group === "arms" ? side * 0.76
+      : piece.group === "shoulders" ? side * 0.62
+        : piece.group === "legs" ? side * 0.27
+          : piece.group === "waist" ? side * 0.28
+            : piece.group === "chest" ? side * 0.4 * Math.abs(hx)
+              : 0.55 * hx - 0.3;
+    const approachY = piece.group === "arms" ? -0.2
+      : piece.group === "shoulders" ? -0.48
+        : piece.group === "legs" ? 0.76
+          : piece.group === "waist" ? 0.62
+            : piece.group === "chest" ? -0.68 : -0.55;
     const accent = accentOf.includes(p);
     const isCrest = p === crest;
     const contact = to + (helm ? 0.003 : N.seat);
@@ -480,8 +531,15 @@ export function* assemblyNanitePlanSteps({
       gy,
       lift,
       theta: fixed ? 0 : (ornament ? (coarse ? 12 : 18) : coarse ? 16 : 24) * DEG,
-      offX: fixed ? 0 : lift * (0.55 * hx - 0.3),
-      offY: fixed ? 0 : lift * -0.55,
+      offX: fixed ? 0 : lift * approachX,
+      offY: fixed ? 0 : lift * approachY,
+      // The fitting travels on this anatomical socket axis. Its two keyed
+      // runners straddle the plate's actual seat, not its gold-box corners.
+      railX: 0,
+      railY: 0,
+      railLength: 0,
+      railHalf: 0,
+      railAnchors: null,
       area,
       share,
       // Heavy shells hover square to the chest; the paired limb shells
@@ -494,6 +552,10 @@ export function* assemblyNanitePlanSteps({
           : piece.group === "legs"
             ? 0.3
             : 0.16,
+      catchAt: piece.group === "arms" || piece.group === "shoulders" ? 0.4
+        : piece.group === "legs" ? 0.25 : 0.32,
+      catchLift: piece.group === "arms" || piece.group === "shoulders" ? 0.64
+        : piece.group === "legs" ? 0.52 : 0.58,
       bank: fixed
         ? 0
         : (seatX < W / 2 ? -1 : 1) *
@@ -1053,6 +1115,11 @@ export function* assemblyNanitePlanSteps({
   {
     for (let p = 0; p < NP; p += 1) {
       const pc = npieces[p];
+      const travel = Math.hypot(pc.offX, pc.offY);
+      pc.railX = travel ? pc.offX / travel : 0;
+      pc.railY = travel ? pc.offY / travel : 0;
+      pc.railLength = travel * 1.18;
+      pc.railHalf = Math.max(5, Math.min(14, Math.min(pc.w, pc.h) * 0.16));
       const bx = pc.gbox[0];
       const by = pc.gbox[1];
       const bw = pc.gbox[2];
@@ -1081,6 +1148,13 @@ export function* assemblyNanitePlanSteps({
             }
         }
       pc.clamp = anchors;
+      const lateral = Math.abs(pc.railX) > Math.abs(pc.railY);
+      const first = lateral ? (pc.railX > 0 ? 1 : 0) : (pc.railY > 0 ? 2 : 0);
+      const second = lateral ? first + 2 : first + 1;
+      pc.railAnchors = new Float32Array([
+        anchors[first * 2], anchors[first * 2 + 1],
+        anchors[second * 2], anchors[second * 2 + 1],
+      ]);
       if (tick()) yield;
     }
     for (let p = 0; p < NP; p += 1) {
@@ -2370,6 +2444,7 @@ export function createAssemblyNanites({
   }
   const LAM = new Float64Array(NP);
   const STAGED = new Uint8Array(NP);
+  const DOCK = new Float64Array(4);
   // Per frame, each plate's guideway on the body (hologramPass): 1 drawn per
   // plate, 2 held in touch's figure-space clip; COVER 1 while its staged
   // plate is over it (drawn after the shells).
@@ -2897,13 +2972,7 @@ export function createAssemblyNanites({
       // shells hold back, then their clamps brake them into an exact seat.
       // Smooth progress, rather than a tile-count staircase, also allows
       // slow scrubbing without plate jitter.
-      const hold = pc.seatHold;
-      if (q < pc.from) lam = 1;
-      else if (q < pc.to) lam = 1 - hold * smooth((q - pc.from) / (pc.to - pc.from));
-      else {
-        const u = (q - pc.to) / (pc.contact - pc.to);
-        lam = (1 - hold) * (1 - smooth(u));
-      }
+      lam = armorSeatLift(pc, q);
       turn = pc.bank * lam;
       if (pc.kind === 1) turn = -(10 + 4 * pc.seg) * DEG * lam;
       if (pc.kind === 2) skew = -0.1 * lam;
@@ -3861,6 +3930,30 @@ export function createAssemblyNanites({
       const lam = LAM[p];
       if (lam <= 0) continue;
       const pc = P[p];
+      // Two runners start at the plate's leading contour. Their outer ends
+      // remain exposed even as the opaque shell covers the body-side seat.
+      if (!pc.ornament && pc.railLength > 0 && q >= pc.to - 0.014) {
+        armorDockState(pc, q, DOCK);
+        const a = DOCK[0];
+        if (a > 0) {
+          const run = pc.railLength;
+          ctx.beginPath();
+          for (let k2 = 0; k2 < 4; k2 += 2) {
+            const ax = pc.railAnchors[k2];
+            const ay = pc.railAnchors[k2 + 1];
+            ctx.moveTo(ax, ay);
+            ctx.lineTo(ax + pc.railX * run, ay + pc.railY * run);
+          }
+          ctx.globalAlpha = 0.24 * a;
+          ctx.strokeStyle = "rgb(80 170 200)";
+          ctx.lineWidth = 3.8;
+          ctx.stroke();
+          ctx.globalAlpha = 0.8 * a;
+          ctx.strokeStyle = "rgb(255 220 140)";
+          ctx.lineWidth = 1.2;
+          ctx.stroke();
+        }
+      }
       for (let src = 0; src < 2; src += 1) {
         if (!(pc.srcMask & (1 << src))) continue;
         const sheet = silhouette[src];
@@ -4178,8 +4271,8 @@ export function createAssemblyNanites({
     }
     // The clamps: one per corner the plan gives them, each on the plate's own
     // outline. They SLIDE in along the body's surface from beside it (owner,
-    // 2026-10-16: nothing descends onto it) — the lower pair first, as the
-    // guideway was built — bite as the plate lands, and slide away once it
+    // 2026-10-16: nothing descends onto it) — a lower key, its diagonal
+    // mate, then the opposite pair bite in sequence and slide away once it
     // has locked. Drawn large enough for the bevel to read, their gold
     // chrome lifted, and the bolt's ice LED lights through the bite (round
     // 3, reviews: flat khaki HUD brackets).
@@ -4194,18 +4287,17 @@ export function createAssemblyNanites({
       const kk = pc.clampK;
       const draw = CL.cell * kk;
       const reach = 8 + 0.18 * Math.min(pc.gbox[2], 120);
-      const bite =
-        q < pc.contact - 0.002 || q >= pc.contact + 0.006
-          ? 0
-          : q < pc.contact
-            ? smooth((q - pc.contact + 0.002) / 0.002)
-            : 1 - (q - pc.contact) / 0.006;
       for (let c = 0; c < 4; c += 1) {
         if (!(mask & (1 << c))) continue;
         const sxn = c & 1 ? 1 : -1;
         const syn = c & 2 ? 1 : -1;
-        const at = start + (c < 2 ? 0.002 : 0);
+        // A seam-anchored lower key finds register; its diagonal mate
+        // follows, then the opposite pair. All four finish their bite at
+        // contact while their travel is visible over the preceding 0.016.
+        const order = armorClampOrder(c);
+        const at = start + order * 0.002;
         if (q < at) continue;
+        const bite = armorClampBite(pc, c, q);
         let f = 7;
         let slide = 0;
         let alpha = 1;
@@ -4213,8 +4305,9 @@ export function createAssemblyNanites({
           const w = (q - at) / 0.006;
           slide = 1 - easeOut(w);
           alpha = clamp01(w * 2.5);
-        } else if (q >= pc.contact - 0.002 && q < pc.contact + 0.002)
-          f = 8 + Math.min(3, Math.floor(((q - pc.contact + 0.002) / 0.004) * 4));
+        } else if (q < pc.contact && bite > 0)
+          f = 8 + Math.min(3, Math.floor(bite * 4));
+        else if (q >= pc.contact && q < pc.contact + 0.002) f = 11;
         else if (q >= pc.contact + 0.002 && q < relStart) f = 11;
         else if (q >= relStart) {
           const r = (q - relStart) / N.release;
@@ -4261,6 +4354,93 @@ export function createAssemblyNanites({
       ctx.globalAlpha = 0.85;
       ctx.strokeStyle = "rgb(255 220 140)";
       ctx.stroke();
+    }
+    // The small locking teeth run from the actual seam anchors into the
+    // armor. Their stagger follows the same order as the clamp heads.
+    let teeth = false;
+    ctx.beginPath();
+    for (let p = 0; p < NP; p += 1) {
+      const pc = P[p];
+      if (!pc.clampMask || q < pc.contact - 0.006 || q >= pc.contact + 0.006) continue;
+      for (let c = 0; c < 4; c += 1) {
+        if (!(pc.clampMask & (1 << c))) continue;
+        const bite = armorClampBite(pc, c, q);
+        if (bite <= 0) continue;
+        const ax = pc.clamp[c * 2];
+        const ay = pc.clamp[c * 2 + 1];
+        const dx = pc.seatX - ax;
+        const dy = pc.seatY - ay;
+        const length = Math.hypot(dx, dy) || 1;
+        const reach = (8 * bite) / length;
+        ctx.moveTo(ax, ay);
+        ctx.lineTo(ax + dx * reach, ay + dy * reach);
+        teeth = true;
+      }
+    }
+    if (teeth) {
+      ctx.strokeStyle = "rgb(242 252 255)";
+      ctx.lineWidth = 1.6;
+      ctx.globalAlpha = 0.75;
+      ctx.stroke();
+    }
+    // The moving edge key stays on the plate's transformed contour. At each
+    // of its two sockets a pair of jaws closes onto the real seam anchor;
+    // their contact heat cools away. No sprite draws are added to either
+    // desktop or touch art budgets.
+    let collars = 0;
+    for (let p = 0; p < NP && collars < (coarse ? STAGED_TOUCH : STAGED_MAX); p += 1) {
+      const pc = P[p];
+      if (pc.ornament || pc.fixed || !JIGGED[p] || q < pc.to - 0.014 || q >= pc.contact + 0.014)
+        continue;
+      armorDockState(pc, q, DOCK);
+      const closed = DOCK[1];
+      const cool = DOCK[2];
+      const runner = DOCK[0];
+      const collar = smooth(clamp01((q - (pc.contact - 0.004)) / 0.002)) * cool;
+      if (runner <= 0 && collar <= 0) continue;
+      collars += 1;
+      const tx = -pc.railY;
+      const ty = pc.railX;
+      const gap = 5 * (1 - closed);
+      const depth = Math.max(5, Math.min(12, pc.railLength * 0.36));
+      if (runner > 0) {
+        ctx.beginPath();
+        ctx.moveTo(jigX(p, pc.railAnchors[0], pc.railAnchors[1]),
+          jigY(p, pc.railAnchors[0], pc.railAnchors[1]));
+        ctx.lineTo(jigX(p, pc.railAnchors[2], pc.railAnchors[3]),
+          jigY(p, pc.railAnchors[2], pc.railAnchors[3]));
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = "rgb(220 247 255)";
+        ctx.globalAlpha = 0.78 * runner;
+        ctx.stroke();
+      }
+      if (collar <= 0) continue;
+      ctx.beginPath();
+      for (let k2 = 0; k2 < 4; k2 += 2) {
+        const ax = pc.railAnchors[k2];
+        const ay = pc.railAnchors[k2 + 1];
+        for (let side = -1; side <= 1; side += 2) {
+          const outerX = ax + tx * side * (pc.railHalf * 0.55 + gap);
+          const outerY = ay + ty * side * (pc.railHalf * 0.55 + gap);
+          ctx.moveTo(outerX + pc.railX * depth, outerY + pc.railY * depth);
+          ctx.lineTo(outerX, outerY);
+          ctx.lineTo(ax + tx * side * gap, ay + ty * side * gap);
+        }
+      }
+      ctx.lineWidth = 3.4;
+      ctx.strokeStyle = "rgb(114 77 36)";
+      ctx.globalAlpha = 0.82 * collar;
+      ctx.stroke();
+      ctx.lineWidth = 1.3;
+      ctx.strokeStyle = "rgb(255 205 118)";
+      ctx.globalAlpha = 0.7 * collar;
+      ctx.stroke();
+      if (q >= pc.contact) {
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = "rgb(224 248 255)";
+        ctx.globalAlpha = 0.86 * collar * cool;
+        ctx.stroke();
+      }
     }
     // The rivers' gates: two ice posts where each plate's stream narrows
     // (round 3, review N4: they were not visible), each lit at its tip.

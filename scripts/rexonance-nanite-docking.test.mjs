@@ -16,7 +16,9 @@ import {
 } from "../src/lib/rexonance-suit.ts";
 import { REXONANCE_SUIT_DRIVER } from "../src/lib/rexonance-calls.ts";
 import { planAssembly, planAssemblyGold } from "../src/lib/rexonance-resonance.js";
-import { planAssemblyNanites } from "../src/lib/rexonance-assembly-nanites.js";
+import {
+  armorClampBite, armorDockState, armorSeatLift, planAssemblyNanites,
+} from "../src/lib/rexonance-assembly-nanites.js";
 
 const source = readFileSync(
   new URL("../src/lib/rexonance-assembly-nanites.js", import.meta.url),
@@ -280,4 +282,109 @@ test("seat holds follow anatomy and arm banks face in from opposite sides", () =
     }
   }
   assert.ok(left > 0 && right > 0, `both arm banks represented (${left}, ${right})`);
+});
+
+test("armor runners are keyed to each plate's actual travel vector", () => {
+  const { nano } = fixture();
+  let checked = 0;
+  for (const piece of nano.pieces) {
+    if (piece.fixed || piece.ornament) continue;
+    const travel = Math.hypot(piece.offX, piece.offY);
+    assert.ok(travel > 0 && piece.railLength > travel, `${piece.id} has a full approach rail`);
+    close(Math.hypot(piece.railX, piece.railY), 1, 1e-6, `${piece.id} rail unit axis`);
+    close(piece.railX * travel, piece.offX, 1e-5, `${piece.id} rail follows x travel`);
+    close(piece.railY * travel, piece.offY, 1e-5, `${piece.id} rail follows y travel`);
+    assert.ok(piece.railHalf >= 5 && piece.railHalf <= 14, `${piece.id} socket width`);
+    for (let k = 0; k < 4; k += 2) {
+      const ax = piece.railAnchors[k];
+      const ay = piece.railAnchors[k + 1];
+      assert.ok(Math.hypot(ax - piece.seatX, ay - piece.seatY) > 1,
+        `${piece.id} runner attaches to an edge rather than the seat centre`);
+      assert.ok(Array.from({ length: 4 }, (_, c) =>
+        Math.hypot(ax - piece.clamp[c * 2], ay - piece.clamp[c * 2 + 1]) < 1e-5).some(Boolean),
+      `${piece.id} runner uses an actual contour clamp anchor`);
+    }
+    const side = piece.seatX < REXONANCE_SUIT_SIZE.width / 2 ? -1 : 1;
+    if (piece.group === "arms" || piece.group === "shoulders")
+      assert.ok(piece.offX * side > 0, `${piece.id} approaches from its outer side`);
+    if (piece.group === "legs" || piece.group === "waist")
+      assert.ok(piece.offY > 0, `${piece.id} rises from below`);
+    checked += 1;
+  }
+  assert.ok(checked >= 30, `${checked} moving armor plates have keyed rails`);
+});
+
+test("anatomical capture pauses on the rail then seats with continuous endpoints", () => {
+  const { nano } = fixture();
+  for (const piece of nano.pieces) {
+    if (piece.fixed || piece.ornament) continue;
+    const at = piece.to + (piece.contact - piece.to) * piece.catchAt;
+    const before = armorSeatLift(piece, at - 1e-8);
+    const held = armorSeatLift(piece, at);
+    const after = armorSeatLift(piece, at + 1e-8);
+    close(before, held, 1e-7, `${piece.id} capture starts continuously`);
+    close(after, held, 1e-7, `${piece.id} capture exits continuously`);
+    close(held, (1 - piece.seatHold) * piece.catchLift, 1e-9,
+      `${piece.id} capture holds clear of socket`);
+    close(armorSeatLift(piece, piece.to - 1e-8), armorSeatLift(piece, piece.to), 1e-6,
+      `${piece.id} approach joins capture`);
+    close(armorSeatLift(piece, piece.contact - 1e-8), 0, 1e-6,
+      `${piece.id} final lock has no jump`);
+    close(armorSeatLift(piece, piece.contact), 0, 1e-9,
+      `${piece.id} remains seated`);
+  }
+});
+
+test("rail, jaw and cooling phases meet continuously and scrub in either direction", () => {
+  const { nano } = fixture();
+  const state = new Float64Array(4);
+  const replay = new Float64Array(4);
+  for (const piece of nano.pieces) {
+    if (piece.fixed || piece.ornament) continue;
+    armorDockState(piece, piece.to - 0.014, state);
+    close(state[0], 0, 1e-9, `${piece.id} rail begins at zero`);
+    armorDockState(piece, piece.to - 0.009, state);
+    assert.ok(state[0] > 0.99, `${piece.id} full runners precede landing`);
+    armorDockState(piece, piece.contact - 1e-8, state);
+    close(state[3], 0, 1e-5, `${piece.id} plate reaches socket continuously`);
+    close(state[0], 0, 1e-5, `${piece.id} rail retracts at contact`);
+    armorDockState(piece, piece.contact, state);
+    close(state[1], 1, 1e-9, `${piece.id} jaws close at contact`);
+    close(state[2], 1, 1e-9, `${piece.id} cooling starts at contact`);
+    close(state[3], 0, 1e-9, `${piece.id} no final position jump`);
+    armorDockState(piece, piece.contact + 0.014, state);
+    close(state[2], 0, 1e-9, `${piece.id} cooling ends cleanly`);
+    const q = piece.to + (piece.contact - piece.to) * 0.53;
+    armorDockState(piece, q, state);
+    armorDockState(piece, piece.contact + 0.008, replay);
+    armorDockState(piece, q, replay);
+    assert.deepEqual([...replay], [...state], `${piece.id} reverse scrub is deterministic`);
+  }
+});
+
+test("seam-anchored clamp keys bite in diagonal order and meet at contact", () => {
+  const { nano } = fixture();
+  let checked = 0;
+  for (const piece of nano.pieces) {
+    if (piece.clampMask !== 15) continue;
+    const sample = piece.contact - 0.00375;
+    const first = armorClampBite(piece, 2, sample);
+    const diagonal = armorClampBite(piece, 1, sample);
+    const opposite = armorClampBite(piece, 3, sample);
+    const last = armorClampBite(piece, 0, sample);
+    assert.ok(first > diagonal && diagonal > opposite && opposite >= last,
+      `${piece.id} lower key, diagonal mate, opposite pair`);
+    for (let c = 0; c < 4; c += 1) {
+      const lead = 0.006 - [3, 1, 0, 2][c] * 0.0015;
+      close(armorClampBite(piece, c, piece.contact - lead), 0, 1e-9,
+        `${piece.id} corner ${c} begins without a tooth jump`);
+      close(armorClampBite(piece, c, piece.contact), 1, 1e-9, `${piece.id} corner ${c} seated`);
+      close(armorClampBite(piece, c, piece.contact + 0.006), 0, 1e-9,
+        `${piece.id} corner ${c} released`);
+      assert.ok(Number.isFinite(piece.clamp[c * 2]) && Number.isFinite(piece.clamp[c * 2 + 1]),
+        `${piece.id} corner ${c} has a seam anchor`);
+    }
+    checked += 1;
+  }
+  assert.ok(checked > 0, "large armor plates use all four keyed corners");
 });

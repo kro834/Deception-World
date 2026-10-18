@@ -221,7 +221,6 @@ test("the draw passes keep per-frame values in typed slots, not boxed lets", () 
     "frames",
     "governed",
     "heroes",
-    "jigs",
     "laserCount",
     "linkCount",
     "pulsePostCount",
@@ -428,9 +427,18 @@ async function extrasRuntime({ touch }) {
   const extras = {};
   // Test-only probes exercise the real closed-form pose without adding a
   // debugging API, copy or allocation to the production drawing engine.
-  const instrumented = extrasSource.replace(
-    "  return {\n    before,",
-    `  return {
+  const instrumented = extrasSource
+    .replace(
+      "  const receiversPass = (t: number) => {",
+      "  const receiverVisits = [];\n  const receiversPass = (t: number) => {",
+    )
+    .replace(
+      "      // Receiver reservation owns this plate's entire visible interval.",
+      "      receiverVisits.push(p);\n      // Receiver reservation owns this plate's entire visible interval.",
+    )
+    .replace(
+      "  return {\n    before,",
+      `  return {
       poseAt(p, i, u) {
         flat(p);
         pose[ARG_U] = u;
@@ -442,9 +450,21 @@ async function extrasRuntime({ touch }) {
         return Array.from(pose);
       },
       docking() { return Array.from(docks.subarray(0, dockCount * 8)); },
+      platePose(p, t) {
+        const lambda = lambdaAt(p, t);
+        setJig(p, lambda, hingeAt(p, t, lambda), swayAt(p, t));
+        return Array.from(jig.subarray(p * 6, p * 6 + 6));
+      },
+      receiversAt(t) { receiversPass(t); },
+      receiverVisitsAt(t) {
+        receiverVisits.length = 0;
+        receiversPass(t);
+        return Array.from(receiverVisits);
+      },
+      staged() { return Array.from(jigged); },
       chipShape(x, y, d, socket) { hexRects(x, y, d, socket); },
       before,`,
-  );
+    );
   runInNewContext(transpile(instrumented), {
     ...globals,
     exports: extras,
@@ -641,6 +661,246 @@ test("the tassets form in place, and every plate is at rest from its fit on", as
     }
     ex.after(t);
   }
+});
+
+test("armour aligns on anatomical rails, compresses, and keeps exact final registration", async () => {
+  const { plan, extras } = await extrasRuntime({ touch: false });
+  const all = plan.plates();
+  const L = extras.rexonanceNaniteLayout();
+  const { context } = recorder();
+  const ex = extras.createSuitExtras({
+    flight: context,
+    s: 1,
+    ox: 0,
+    oy: 0,
+    all,
+    gold: plan.cells(),
+    source: { kind: "work" },
+    sheet: { kind: "motes" },
+  });
+  for (const id of [
+    "shoulder-upper-l",
+    "shoulder-upper-r",
+    "chest-pec-l",
+    "chest-pec-r",
+    "arm-fist-l",
+  ]) {
+    const p = all.findIndex(({ piece }) => piece.id === id);
+    assert.ok(p >= 0 && !(L.flags[p] & 8), `${id}: a staged armour plate`);
+    const { fit, piece } = all[p];
+    const poseAt = (before) => Array.from(ex.platePose(p, fit - before));
+    const displacement = (pose) =>
+      Math.hypot(
+        pose[0] * piece.seat[0] + pose[2] * piece.seat[1] + pose[4] - piece.seat[0],
+        pose[1] * piece.seat[0] + pose[3] * piece.seat[1] + pose[5] - piece.seat[1],
+      );
+    const approach = poseAt(150);
+    const aligned = poseAt(86);
+    const inserting = poseAt(42);
+    const compressing = poseAt(11);
+    assert.ok(displacement(approach) > 15, `${id}: readable physical carriage travel`);
+    assert.ok(displacement(approach) > displacement(aligned), `${id}: approach`);
+    assert.ok(displacement(aligned) > displacement(inserting), `${id}: insertion`);
+    assert.ok(displacement(inserting) > displacement(compressing), `${id}: compression`);
+    const side = id.endsWith("-l") ? -1 : 1;
+    assert.equal(Math.sign(L.offX[p]), side, `${id}: comes from its own side of the body`);
+    assert.deepEqual(poseAt(0), [1, 0, 0, 1, 0, 0], `${id}: exact final pose`);
+    assert.deepEqual(
+      Array.from(ex.platePose(p, fit + 30)),
+      [1, 0, 0, 1, 0, 0],
+      `${id}: no residual spring`,
+    );
+    ex.platePose(p, fit - 5);
+    assert.deepEqual(poseAt(150), approach, `${id}: independent of frame history`);
+  }
+  for (let p = 0; p < all.length; p += 1) {
+    if (!(L.flags[p] & 8)) continue;
+    assert.deepEqual(
+      Array.from(ex.platePose(p, all[p].fit - 80)),
+      [1, 0, 0, 1, 0, 0],
+      `${all[p].piece.id}: fixed fitting`,
+    );
+  }
+});
+
+test("carriage reservations stay fixed through each plate's complete formation", async () => {
+  for (const touch of [false, true]) {
+    const { plan, extras } = await extrasRuntime({ touch });
+    const all = plan.plates();
+    const L = extras.rexonanceNaniteLayout();
+    const { context } = recorder();
+    const ex = extras.createSuitExtras({
+      flight: context,
+      s: 1,
+      ox: 0,
+      oy: 0,
+      all,
+      gold: plan.cells(),
+      source: { kind: "work" },
+      sheet: { kind: "motes" },
+    });
+    const firstState = new Int8Array(all.length).fill(-1);
+    for (let t = 300; t < 2000; t += 2) {
+      ex.before(t);
+      const staged = ex.staged();
+      assert.ok(staged.reduce((sum, value) => sum + value, 0) <= (touch ? 4 : 12), "carriage cap");
+      for (let p = 0; p < all.length; p += 1) {
+        if (t < all[p].spawn || t >= all[p].fit) continue;
+        if (firstState[p] < 0) firstState[p] = staged[p];
+        assert.equal(staged[p], firstState[p], `${all[p].piece.id} at ${t}: no late promotion`);
+      }
+    }
+    for (let p = 0; p < all.length; p += 1) {
+      if (L.jigSlot[p] === 255) continue;
+      for (let q = p + 1; q < all.length; q += 1) {
+        if (L.jigSlot[q] !== L.jigSlot[p]) continue;
+        assert.ok(
+          all[p].fit <= all[q].spawn || all[q].fit <= all[p].spawn,
+          "one carriage per simultaneous plate",
+        );
+      }
+    }
+  }
+});
+
+test("receiver reservations never promote a hidden frame halfway through fitting", async () => {
+  for (const touch of [false, true]) {
+    const { plan, extras } = await extrasRuntime({ touch });
+    const all = plan.plates();
+    const L = extras.rexonanceNaniteLayout();
+    const { context } = recorder();
+    const ex = extras.createSuitExtras({
+      flight: context,
+      s: 1,
+      ox: 0,
+      oy: 0,
+      all,
+      gold: plan.cells(),
+      source: { kind: "work" },
+      sheet: { kind: "motes" },
+    });
+    const firstState = new Int8Array(all.length).fill(-1);
+    let visible = 0;
+    let skipped = 0;
+    for (let t = 300; t < 2200; t += 2) {
+      ex.before(t);
+      const rendered = new Set(ex.receiverVisitsAt(t));
+      assert.ok(rendered.size <= (touch ? 2 : 7), "receiver plate budget");
+      for (let p = 0; p < all.length; p += 1) {
+        if (!L.receiverN[p] || t < all[p].fit - 150 || t >= all[p].fit + 64) continue;
+        const shown = Number(rendered.has(p));
+        if (firstState[p] < 0) {
+          firstState[p] = shown;
+          if (shown) visible += 1;
+          else skipped += 1;
+        }
+        assert.equal(
+          shown,
+          firstState[p],
+          `${all[p].piece.id} at ${t}: complete receiver interval`,
+        );
+      }
+    }
+    assert.ok(visible > 0, "reserved receivers draw across the call");
+    assert.ok(skipped > 0, "overlapping plate reservations exercise the cap");
+    if (touch) {
+      for (const group of ["arms", "shoulders"])
+        assert.ok(
+          all.some(
+            (plate, p) =>
+              plate.piece.group === group &&
+              L.jigSlot[p] < 4 &&
+              L.receiverSlot[p] < 2 &&
+              firstState[p] === 1,
+          ),
+          `${group}: a moving touch plate retains its complete receiver hardware`,
+        );
+    }
+  }
+});
+
+test("receiver frames follow armour contours and opposed shutters fasten in stages", async () => {
+  const { plan, extras } = await extrasRuntime({ touch: false });
+  const all = plan.plates();
+  const L = extras.rexonanceNaniteLayout();
+  const p = all.findIndex(({ piece }) => piece.id === "shoulder-outer-l");
+  assert.equal(L.receiverN[p], 6);
+  for (let plate = 0; plate < all.length; plate += 1) {
+    if (L.kind[plate] !== 0) {
+      assert.equal(
+        L.receiverN[plate],
+        0,
+        `${all[plate].piece.id}: no face, ornament or driver sockets`,
+      );
+      continue;
+    }
+    for (let key = 0; key < L.receiverN[plate]; key += 1) {
+      const o = (plate * 6 + key) * 4;
+      assert.ok(
+        Math.abs(Math.hypot(L.receiver[o + 2], L.receiver[o + 3]) - 1) < 1e-5,
+        "unit contour normal",
+      );
+    }
+  }
+  // Isolate this plate's actual rendered receiver polygons. Their first two
+  // vertices give a shutter's opening along the local contour tangent.
+  const saved = [...L.receiverN];
+  const savedSlot = L.receiverSlot[p];
+  L.receiverN.fill(0);
+  L.receiverN[p] = 6;
+  L.receiverSlot[p] = 0;
+  const { context } = recorder();
+  let polygons = [];
+  let path = [];
+  context.beginPath = () => {
+    path = [];
+  };
+  context.moveTo = (x, y) => path.push([x, y]);
+  context.lineTo = (x, y) => path.push([x, y]);
+  context.fill = () => {
+    polygons = path;
+  };
+  const ex = extras.createSuitExtras({
+    flight: context,
+    s: 1,
+    ox: 0,
+    oy: 0,
+    all,
+    gold: plan.cells(),
+    source: { kind: "work" },
+    sheet: { kind: "motes" },
+  });
+  const openingAt = (before) => {
+    const t = all[p].fit - before;
+    const pose = ex.platePose(p, t);
+    polygons = [];
+    ex.receiversAt(t);
+    return Array.from({ length: 6 }, (_, key) => {
+      const o = (p * 6 + key) * 4;
+      const x = L.receiver[o];
+      const y = L.receiver[o + 1];
+      const tx = -L.receiver[o + 3];
+      const ty = L.receiver[o + 2];
+      const cx = pose[0] * x + pose[2] * y + pose[4];
+      const cy = pose[1] * x + pose[3] * y + pose[5];
+      const a = polygons[key * 8];
+      const b = polygons[key * 8 + 1];
+      return Math.abs(((a[0] + b[0]) / 2 - cx) * tx + ((a[1] + b[1]) / 2 - cy) * ty);
+    });
+  };
+  const catching = openingAt(57);
+  assert.ok(catching[0] < catching[3], "first anchor bites before its opposite");
+  assert.ok(catching[3] < catching[1], "opposite bites before the next pair");
+  const closed = openingAt(0);
+  assert.ok(
+    Math.max(...closed) - Math.min(...closed) < 1e-4,
+    "all shutters finish together at the fitted contour",
+  );
+  polygons = [];
+  ex.receiversAt(all[p].fit + 64);
+  assert.equal(polygons.length, 0, "mechanism disappears after cooling");
+  L.receiverN.set(saved);
+  L.receiverSlot[p] = savedSlot;
 });
 
 // Owner (2026-10-16): 「更にナノマシンの挙動をブラッシュアップして。」 — squads

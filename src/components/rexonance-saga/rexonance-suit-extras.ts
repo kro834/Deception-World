@@ -126,6 +126,14 @@ const JIGS = TOUCH ? 4 : 12;
 /** The seat's swing takes this share of [F − seat, F]; it rings out past
  * the seat over the rest and is still at F (owner, 2026-10-16). */
 const SLAM = 0.72;
+// Armour is aligned on its hinge before the rail carriage seats it. These
+// phases fit inside the existing call: the final compression still ends at F.
+const RAIL_LEAD = 150;
+const RAIL_ALIGN = 86;
+const RAIL_INSERT = 22;
+const RECEIVER_KEYS = 6;
+const RECEIVER_COOL = 64;
+const RECEIVER_PLATES = TOUCH ? 2 : 7;
 /** Clamps (round 3): none on a gold box whose short side is under CLAMP_MIN
  * figure px, the lower pair under CLAMP_PAIR; on a box over CLAMP_HUGE times
  * the median area they bite the part's own outline. */
@@ -288,6 +296,7 @@ type Layout = {
   segment: Int8Array; // a tail segment's index, root (0) to blade (4)
   flags: Uint8Array; // 1 accent, 2 shock ring, 4 crest, 8 formed in place
   order: Int16Array; // plates by fit
+  jigSlot: Uint8Array; // fixed reservation for its whole formation; 255 = fixed
   seatX: Float32Array;
   seatY: Float32Array;
   nX: Float32Array;
@@ -300,6 +309,11 @@ type Layout = {
   offY: Float32Array;
   lift: Float32Array;
   tilt: Float32Array;
+  hinge: Float32Array;
+  // Six sockets sampled on the real outside contour, x/y and outward normal.
+  receiver: Float32Array;
+  receiverN: Uint8Array;
+  receiverSlot: Uint8Array; // reserved for the whole approach and cooling interval
   lam0: Float32Array;
   reach: Float32Array;
   shockW: Float32Array;
@@ -455,6 +469,7 @@ function* layoutSteps(all: Plate[], gold: Cells): Generator<undefined, Layout, u
     segment: new Int8Array(P),
     flags: new Uint8Array(P),
     order: Int16Array.from(all.map((_, p) => p).sort((a, b) => all[a].fit - all[b].fit || a - b)),
+    jigSlot: new Uint8Array(P).fill(255),
     seatX: f32(P),
     seatY: f32(P),
     nX: f32(P),
@@ -467,6 +482,10 @@ function* layoutSteps(all: Plate[], gold: Cells): Generator<undefined, Layout, u
     offY: f32(P),
     lift: f32(P),
     tilt: f32(P),
+    hinge: f32(P),
+    receiver: f32(P * RECEIVER_KEYS * 4),
+    receiverN: new Uint8Array(P),
+    receiverSlot: new Uint8Array(P).fill(255),
     lam0: f32(P),
     reach: f32(P),
     shockW: f32(P),
@@ -638,6 +657,21 @@ function* layoutSteps(all: Plate[], gold: Cells): Generator<undefined, Layout, u
     const hx = Math.sign(sx - W / 2) * Math.min(1, Math.abs(sx - W / 2) / (0.25 * W));
     L.offX[p] = L.lift[p] * (0.55 * hx - 0.3);
     L.offY[p] = L.lift[p] * -0.55;
+    if (kind === 0 && !inPlace) {
+      // Plates approach along the anatomy: breast leaves close towards the
+      // sternum, shoulder shells pivot inward, limb shells slide up their
+      // limb. This is a carriage carrying the assembled metal, not a swarm
+      // translation. Tassets and tall fitted plates retain their fixed seats.
+      const side = sx < W / 2 ? -1 : 1;
+      const shoulder = piece.group === "shoulders";
+      const chest = piece.group === "chest";
+      const distance = (TOUCH ? 12 : 21) + (TOUCH ? 7 : 13) * Math.sqrt(area / maxArea);
+      L.lift[p] = distance;
+      L.offX[p] = side * distance * (shoulder ? 1 : chest ? 0.9 : 0.48);
+      L.offY[p] = distance * (shoulder ? -0.48 : chest ? -0.12 : 0.65);
+      L.tilt[p] = TOUCH ? 0 : ((shoulder ? 24 : 18) * Math.PI) / 180;
+      L.hinge[p] = (side * (shoulder ? 14 : chest ? 9 : 6) * Math.PI) / 180;
+    }
     let reach = 1;
     for (const [cx, cy] of [
       [piece.x, piece.y],
@@ -801,10 +835,93 @@ function* layoutSteps(all: Plate[], gold: Cells): Generator<undefined, Layout, u
       pointAt += count + 1;
       loopAt += 1;
     }
+    if (kind === 0) {
+      // Socket frames follow the dominant real contour, including the tall
+      // plates that must form in place. Sampling happens only in preparation.
+      let outside = -1;
+      for (let l = L.loopFirst[p]; l < loopAt; l += 1)
+        if (outside < 0 || L.loopLen[l] > L.loopLen[outside]) outside = l;
+      if (outside >= 0 && L.loopLen[outside] > 32) {
+        const start = L.loopStart[outside];
+        const count = L.loopN[outside];
+        let at = 0;
+        for (let key = 0; key < RECEIVER_KEYS; key += 1) {
+          const target = (L.loopLen[outside] * (key + 0.5)) / RECEIVER_KEYS;
+          while (at < count - 1 && L.cum[start + at + 1] < target) at += 1;
+          const a = start + at;
+          const b = a + 1;
+          const dx = L.px[b] - L.px[a];
+          const dy = L.py[b] - L.py[a];
+          const length = Math.max(0.001, L.cum[b] - L.cum[a]);
+          const u = (target - L.cum[a]) / length;
+          const x = L.px[a] + dx * u;
+          const y = L.py[a] + dy * u;
+          const sign = dy * (x - bcx) - dx * (y - bcy) < 0 ? -1 : 1;
+          const o = (p * RECEIVER_KEYS + key) * 4;
+          L.receiver[o] = x;
+          L.receiver[o + 1] = y;
+          L.receiver[o + 2] = (dy * sign) / length;
+          L.receiver[o + 3] = (-dx * sign) / length;
+        }
+        L.receiverN[p] = RECEIVER_KEYS;
+      }
+    }
     yield;
   }
   L.tileFirst[P] = tileAt;
   L.loopFirst[P] = loopAt;
+  // Reserve a carriage for the entire interval, rather than promoting a
+  // previously flat panel when another plate fits and frees a frame slot.
+  // With larger articulated travel that promotion would visibly pop.
+  for (const p of L.order) {
+    if (L.kind[p] < 0 || L.flags[p] & 8) continue;
+    for (let slot = 0; slot < JIGS; slot += 1) {
+      let free = true;
+      for (let q = 0; q < P; q += 1) {
+        if (L.jigSlot[q] !== slot) continue;
+        if (all[p].spawn < all[q].fit && all[q].spawn < all[p].fit) {
+          free = false;
+          break;
+        }
+      }
+      if (!free) continue;
+      L.jigSlot[p] = slot;
+      break;
+    }
+  }
+  // A receiver is either present throughout approach, fastening and cooling,
+  // or absent throughout. Reusing a framewise cap could first reveal it only
+  // after its plate had fitted, particularly with the two-frame touch budget.
+  // Give the scarce touch frames to moving arm/shoulder carriages first,
+  // so a complete physical mechanism survives before static surface clamps.
+  const receiverPriority = (p: number) =>
+    L.jigSlot[p] >= JIGS
+      ? 2
+      : all[p].piece.group === "arms" || all[p].piece.group === "shoulders"
+        ? 0
+        : 1;
+  const receiverOrder = Array.from(L.order).sort(
+    (a, b) => receiverPriority(a) - receiverPriority(b) || all[a].fit - all[b].fit || a - b,
+  );
+  for (const p of receiverOrder) {
+    if (!L.receiverN[p]) continue;
+    for (let slot = 0; slot < RECEIVER_PLATES; slot += 1) {
+      let free = true;
+      for (let q = 0; q < P; q += 1) {
+        if (L.receiverSlot[q] !== slot) continue;
+        if (
+          all[p].fit - RAIL_LEAD < all[q].fit + RECEIVER_COOL &&
+          all[q].fit - RAIL_LEAD < all[p].fit + RECEIVER_COOL
+        ) {
+          free = false;
+          break;
+        }
+      }
+      if (!free) continue;
+      L.receiverSlot[p] = slot;
+      break;
+    }
+  }
   yield* layOutBuild(L, all, gold);
   // Rings: eight tilted lanes up the figure, the inner ones turning faster.
   for (let r = 0; r < RINGS; r += 1) {
@@ -2197,7 +2314,6 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
   let governed = false;
   let slow = 0;
   let frames = 0;
-  let jigs = 0;
   let transformed = false;
   let conduits = 0;
   const pose = new Float64Array(POSE_SLOTS);
@@ -2271,6 +2387,10 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
   // A3: a tail segment's in-plane hinge (root → blade swings wider), and its
   // ring-out past the seat, ending at F.
   const hingeAt = (p: number, t: number, lambda: number) => {
+    if (L.kind[p] === 0) {
+      if (L.flags[p] & 8) return 0;
+      return L.hinge[p] * (1 - smooth((t - all[p].fit + RAIL_LEAD) / (RAIL_LEAD - RAIL_ALIGN)));
+    }
     if (L.kind[p] !== 1) return 0;
     const F = all[p].fit;
     const k = L.segment[p];
@@ -2295,6 +2415,17 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
     const F = all[p].fit;
     if (L.kind[p] === 3 || L.flags[p] & 8) return 0;
     if (t >= F) return 0;
+    if (L.kind[p] === 0) {
+      const before = F - t;
+      // Hinge alignment (64ms), sliding insertion (64ms), then the short
+      // compression stroke. No spring or registration drift survives F.
+      if (before >= RAIL_LEAD) return 1;
+      if (before >= RAIL_ALIGN)
+        return 1 - 0.28 * smooth((RAIL_LEAD - before) / (RAIL_LEAD - RAIL_ALIGN));
+      if (before >= RAIL_INSERT)
+        return 0.72 - 0.64 * smooth((RAIL_ALIGN - before) / (RAIL_ALIGN - RAIL_INSERT));
+      return 0.08 * (1 - smooth((RAIL_INSERT - before) / RAIL_INSERT));
+    }
     if (t >= F - SW.seat) {
       const u = (t - F + SW.seat) / SW.seat;
       if (u >= SLAM) {
@@ -2797,14 +2928,19 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
         if (cx >= 0 && cy >= 0 && cx < OCC_W && cy < OCC_H)
           alpha *= 1 - (0.8 * L.occupancy[cy * OCC_W + cx]) / 255;
       }
-      if ((band === 1 || band === 2 || band === 4) && !crowned) {
+      if (band <= 4 && !crowned) {
         // Round 3: over a plate being staged or printed, the back and mid
         // chips step back, so the plate forming is the beat's subject; the
         // defocused front chips (review 50) leave it clear.
         const cx = Math.floor((x / W) * BUSY_W);
         const cy = Math.floor((y / H) * BUSY_H);
-        if (cx >= 0 && cy >= 0 && cx < BUSY_W && cy < BUSY_H && busy[cy * BUSY_W + cx])
-          alpha *= band === 4 ? 0 : BUSY_DIM;
+        if (cx >= 0 && cy >= 0 && cx < BUSY_W && cy < BUSY_H) {
+          const occupied = busy[cy * BUSY_W + cx];
+          // Articulated panels need their silhouette and key teeth readable
+          // through the near band too, across the whole carriage travel.
+          if (occupied === 2) alpha *= band === 4 ? 0 : 0.12;
+          else if (occupied && band !== 3) alpha *= band === 4 ? 0 : BUSY_DIM;
+        }
       }
       if (band === 3 && alpha > 0.7) alpha = 0.7;
       chipBand[c] = band;
@@ -3438,14 +3574,20 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
         latched[p] = 1;
         shown += 1;
       }
-      if (!L.hasBox[p] || t < plate.spawn || t >= F + SW.print[1]) continue;
+      const mechanical = L.receiverN[p] > 0 && t >= F - RAIL_LEAD && t < F + RECEIVER_COOL;
+      if (!mechanical && (!L.hasBox[p] || t < plate.spawn || t >= F + SW.print[1])) continue;
       const b = p * 4;
-      const c0 = Math.floor((L.box[b] / W) * BUSY_W);
-      const c1 = Math.floor(((L.box[b] + L.box[b + 2]) / W) * BUSY_W);
-      const r0 = Math.floor((L.box[b + 1] / H) * BUSY_H);
-      const r1 = Math.floor(((L.box[b + 1] + L.box[b + 3]) / H) * BUSY_H);
+      const x = mechanical ? plate.piece.x - 28 : L.box[b];
+      const y = mechanical ? plate.piece.y - 28 : L.box[b + 1];
+      const width = mechanical ? plate.piece.w + 56 : L.box[b + 2];
+      const height = mechanical ? plate.piece.h + 56 : L.box[b + 3];
+      const c0 = Math.floor((x / W) * BUSY_W);
+      const c1 = Math.floor(((x + width) / W) * BUSY_W);
+      const r0 = Math.floor((y / H) * BUSY_H);
+      const r1 = Math.floor(((y + height) / H) * BUSY_H);
       for (let r = r0 < 0 ? 0 : r0; r <= r1 && r < BUSY_H; r += 1)
-        for (let c = c0 < 0 ? 0 : c0; c <= c1 && c < BUSY_W; c += 1) busy[r * BUSY_W + c] = 1;
+        for (let c = c0 < 0 ? 0 : c0; c <= c1 && c < BUSY_W; c += 1)
+          busy[r * BUSY_W + c] = mechanical ? 2 : Math.max(1, busy[r * BUSY_W + c]);
     }
   };
   const before = (t: number) => {
@@ -3463,7 +3605,6 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
     segCount = 0;
     tipCount = 0;
     laserCount = 0;
-    jigs = 0;
     conduits = 0;
     beamU.fill(-1);
     jigged.fill(0);
@@ -3484,10 +3625,9 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
       const F = plate.fit;
       if (t >= plate.spawn && t < F) {
         const lambda = lambdaAt(p, t);
-        if (lambda !== 0 && jigs < limit[1] && L.kind[p] !== 3) {
+        if (lambda !== 0 && L.jigSlot[p] < limit[1] && L.kind[p] !== 3) {
           setJig(p, lambda, TOUCH ? 0 : hingeAt(p, t, lambda), TOUCH ? 0 : swayAt(p, t));
           jigged[p] = 1;
-          jigs += 1;
         } else flat(p);
       } else flat(p);
       // 2. The guideway, built on the body from the toe tips up (owner,
@@ -4558,8 +4698,123 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
         }
       }
   };
+  // The fixed receiver and the moving plate are both visible during docking.
+  // Dark machined channels have bright bevels; their opposed shutter tongues
+  // close anchor → opposite → next pair, rather than flashing every corner
+  // together. Each socket lies on the artwork's real contour. At F the metal
+  // plate already has its final transform; only the socket cooling remains.
+  const receiversPass = (t: number) => {
+    if (governed) return;
+    for (let k = 0; k < P; k += 1) {
+      const p = L.order[k];
+      const F = all[p].fit;
+      if (
+        !L.receiverN[p] ||
+        L.receiverSlot[p] >= RECEIVER_PLATES ||
+        t < F - RAIL_LEAD ||
+        t >= F + RECEIVER_COOL
+      )
+        continue;
+      // Receiver reservation owns this plate's entire visible interval.
+      const reveal = smooth((t - F + RAIL_LEAD) / 34);
+      const cool = 1 - smooth((t - F) / RECEIVER_COOL);
+      const alpha = reveal * cool;
+      const jo = p * 6;
+      for (let pass = 0; pass < 3; pass += 1) {
+        flight.beginPath();
+        for (let key = 0; key < L.receiverN[p]; key += TOUCH ? 2 : 1) {
+          const o = (p * RECEIVER_KEYS + key) * 4;
+          const x = L.receiver[o] * s;
+          const y = L.receiver[o + 1] * s;
+          const nx = L.receiver[o + 2];
+          const ny = L.receiver[o + 3];
+          const tx = -ny;
+          const ty = nx;
+          // Opposite keys are paired, but the second jaw closes 8ms later.
+          const rank = (key % 3) * 2 + (key >= 3 ? 1 : 0);
+          const catchAt = F - 76 + rank * 8;
+          const bite = smooth((t - catchAt) / 24);
+          const open = (1 - bite) * (TOUCH ? 5 : 8) * s;
+          const width = (TOUCH ? 2.8 : 3.4) * s;
+          const depth = (3.2 + 2.2 * bite) * s;
+          const px = jig[jo] * x + jig[jo + 2] * y + jig[jo + 4] - ox;
+          const py = jig[jo + 1] * x + jig[jo + 3] * y + jig[jo + 5] - oy;
+          if (pass === 0) {
+            // Twin rails join the body seat to its actual moving carriage.
+            // The two hard shoulders remain readable under the metal tongue.
+            for (let side = -1; side <= 1; side += 2) {
+              const dx = tx * side * (width + 1.6 * s);
+              const dy = ty * side * (width + 1.6 * s);
+              flight.moveTo(x + dx - nx * depth, y + dy - ny * depth);
+              flight.lineTo(x + dx + nx * (open + depth), y + dy + ny * (open + depth));
+              flight.lineTo(px + dx + nx * depth, py + dy + ny * depth);
+            }
+          } else if (pass === 1) {
+            // Two opposing solid shutter fingers seat over the panel rim.
+            // Staggered teeth interlock instead of drawing a luminous box.
+            for (let side = -1; side <= 1; side += 2) {
+              const along = side * (width + open);
+              const bx = px + tx * along;
+              const by = py + ty * along;
+              const tooth = side * (width + 1.4 * s);
+              flight.moveTo(bx - nx * depth, by - ny * depth);
+              flight.lineTo(bx + nx * depth, by + ny * depth);
+              flight.lineTo(bx + nx * depth - tx * tooth, by + ny * depth - ty * tooth);
+              flight.lineTo(
+                bx - tx * tooth - nx * depth * 0.35,
+                by - ty * tooth - ny * depth * 0.35,
+              );
+              flight.closePath();
+            }
+          } else {
+            // A thin bevel traces the keyed shoulder; light crosses
+            // each fastener only as that pair bites, then cools to steel.
+            const heat = Math.max(0, 1 - Math.abs(t - catchAt - 24) / 42);
+            const length = (2 + 4 * heat) * s;
+            flight.moveTo(
+              px - tx * (width + open) - nx * depth,
+              py - ty * (width + open) - ny * depth,
+            );
+            flight.lineTo(
+              px - tx * (width + open) + nx * depth,
+              py - ty * (width + open) + ny * depth,
+            );
+            flight.lineTo(px - tx * open + nx * depth, py - ty * open + ny * depth);
+            flight.moveTo(
+              px + tx * (width + open) - nx * depth,
+              py + ty * (width + open) - ny * depth,
+            );
+            flight.lineTo(
+              px + tx * (width + open) + nx * depth,
+              py + ty * (width + open) + ny * depth,
+            );
+            flight.lineTo(px + tx * open + nx * depth, py + ty * open + ny * depth);
+            flight.moveTo(
+              x - tx * length - nx * (depth + 1.8 * s),
+              y - ty * length - ny * (depth + 1.8 * s),
+            );
+            flight.lineTo(
+              x + tx * length - nx * (depth + 1.8 * s),
+              y + ty * length - ny * (depth + 1.8 * s),
+            );
+          }
+        }
+        flight.globalAlpha = alpha * (pass === 0 ? 0.6 : pass === 1 ? 0.88 : 0.8);
+        if (pass === 1) {
+          flight.fillStyle = "#293843";
+          flight.fill();
+        } else {
+          flight.strokeStyle = pass === 0 ? "#18242e" : "#c3e4ef";
+          flight.lineWidth = Math.max(0.7, (pass === 0 ? 2.5 : 0.8) * s);
+          flight.stroke();
+        }
+      }
+    }
+    flight.globalAlpha = 1;
+  };
   const after = (t: number) => {
     base();
+    receiversPass(t);
     seamsPass(t);
     ringsPass(t);
     spallPass(t);
