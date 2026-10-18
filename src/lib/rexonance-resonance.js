@@ -1413,8 +1413,8 @@ function drawBareFace(context, config, scan, fade) {
   context.closePath();
   context.fillStyle = "rgb(6 9 16 / 0.5)";
   context.fill();
-  context.lineWidth = 1.4;
-  context.strokeStyle = "rgb(170 192 216 / 0.7)";
+  context.lineWidth = 1.1;
+  context.strokeStyle = "rgb(196 216 236 / 0.85)";
   context.stroke();
   context.beginPath();
   for (let i = 0; i < glow.length; i += 1) {
@@ -1427,27 +1427,34 @@ function drawBareFace(context, config, scan, fade) {
   context.lineWidth = 0.7;
   context.strokeStyle = "rgb(122 168 204 / 0.5)";
   context.stroke();
-  // The crown: a centre ridge, two brow plates and the crest's facets
-  // rising from the visor's upper corners.
+  // The crown, sharp (owner, 2026-10-18): a pointed crest over the visor,
+  // angular brow chevrons, the facets rising from the visor's corners, side
+  // vents raked back and blade seams on the cheeks.
   context.beginPath();
-  context.moveTo(vx, top + eh * 0.03);
+  context.moveTo(vx, top + eh * 0.02);
   context.lineTo(vx, y0 + eh * 0.04);
+  context.moveTo(vx - hw * 0.16, top + eh * 0.12);
+  context.lineTo(vx, top + eh * 0.01);
+  context.lineTo(vx + hw * 0.16, top + eh * 0.12);
   for (const side of [-1, 1]) {
-    context.moveTo(vx + side * 1.2, y0 - eh * 0.05);
-    context.quadraticCurveTo(vx + side * hw * 0.5, y0 - eh * 0.2, vx + side * hw * 0.92, y0 - eh * 0.02);
-    context.moveTo(vx + side * 1.2, y0 - eh * 0.16);
-    context.quadraticCurveTo(vx + side * hw * 0.42, y0 - eh * 0.3, vx + side * hw * 0.78, y0 - eh * 0.2);
+    context.moveTo(vx + side * 1, y0 - eh * 0.03);
+    context.lineTo(vx + side * hw * 0.46, y0 - eh * 0.16);
+    context.lineTo(vx + side * hw * 0.94, y0 + eh * 0.01);
+    context.moveTo(vx + side * 1, y0 - eh * 0.15);
+    context.lineTo(vx + side * hw * 0.4, y0 - eh * 0.27);
+    context.lineTo(vx + side * hw * 0.8, y0 - eh * 0.17);
     context.moveTo(vx + side * hw * 0.9, y0 + eh * 0.01);
-    context.lineTo(vx + side * hw * 0.3, top + eh * 0.04);
-    // Side vents beside the visor.
+    context.lineTo(vx + side * hw * 0.24, top + eh * 0.06);
     for (let k = 0; k < 3; k += 1) {
-      const ty = y0 + eh * (0.2 + k * 0.09);
-      context.moveTo(vx + side * hw * 0.98, ty);
-      context.lineTo(vx + side * hw * 0.82, ty + eh * 0.05);
+      const ty = y0 + eh * (0.18 + k * 0.09);
+      context.moveTo(vx + side * hw * 0.99, ty);
+      context.lineTo(vx + side * hw * 0.8, ty + eh * 0.07);
     }
+    context.moveTo(vx + side * hw * 0.97, y0 + eh * 0.5);
+    context.lineTo(vx + side * hw * 0.62, y1 - eh * 0.02);
   }
-  context.lineWidth = 0.8;
-  context.strokeStyle = "rgb(150 178 206 / 0.55)";
+  context.lineWidth = 0.75;
+  context.strokeStyle = "rgb(176 202 228 / 0.72)";
   context.stroke();
   // The chin's grille, under the V's point.
   context.beginPath();

@@ -1449,15 +1449,16 @@ const FIGURE = await writeWebp("figure.webp", figureRaw, FIG_W, FIG_H, { quality
 
 // The bodysuit: the body's own form, desaturated and sunk into a dark
 // suit, a faint nanite hex mesh, thin cyan seams and a cool edge light.
-const bodyMask = await rasterise([BODY], 0, 0.7);
+// Owner, 2026-10-18: sharper — a crisper outline, form and seams.
+const bodyMask = await rasterise([BODY], 0, 0.35);
 const formLight = await blurField(
   Float32Array.from({ length: N }, (_, i) => {
     const l = (0.2126 * rgb[i * 3] + 0.7152 * rgb[i * 3 + 1] + 0.0722 * rgb[i * 3 + 2]) / 255;
     return l * bodyMask[i];
   }),
-  9,
+  5,
 );
-const inner = await blurField(bodyMask, 9);
+const inner = await blurField(bodyMask, 5);
 const seamSvg = (width, colour) =>
   `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}"><rect width="${W}" height="${H}" fill="#000"/>${SEAMS.map(
     (line) =>
@@ -1470,8 +1471,8 @@ const seamField = async (width, blur) => {
   const step = data.length / N;
   return Float32Array.from({ length: N }, (_, i) => data[i * step] / 255);
 };
-const seamLine = await seamField(2.6, 0);
-const seamGlow = await seamField(9, 5);
+const seamLine = await seamField(1.6, 0);
+const seamGlow = await seamField(5, 2.5);
 const suit = Buffer.alloc(N * 3);
 // The compound eyes' frame: the V's outline (a ring) and its inside.
 const eyeGlass = await rasterise([FACE_GLOW], 0, 0.6);
@@ -1532,7 +1533,7 @@ for (let i = 0; i < N; i += 1) {
   const form = formLight[i];
   // Lit from the top left, cool on the left and warm-violet on the right.
   const side = x < CX ? 0 : 1;
-  const edge = Math.max(0, m - inner[i]) * 1.8;
+  const edge = Math.max(0, m - inner[i]) * 2.6;
   // Volume: brighter on the muscle's crown, darker toward the body's edge.
   const volume = 0.72 + 0.4 * inner[i];
   let grain = 1;
@@ -1542,7 +1543,7 @@ for (let i = 0; i < N; i += 1) {
     const warp = fibreNoise(x / 38, y / 38) * 2.2;
     const wave = 0.5 + 0.5 * Math.cos((2 * Math.PI * p) / spacing + warp);
     // Raised fibres with fine dark grooves between them.
-    grain = 0.66 + 0.5 * wave ** 1.6;
+    grain = 0.6 + 0.58 * wave ** 2.2;
     const ax = Math.abs(x - CX);
     if (y > 650 && y < 885 && ax < 105) {
       for (const band of bands) {
@@ -1552,7 +1553,7 @@ for (let i = 0; i < N; i += 1) {
       if (ax < 3) grain *= 0.62; // the linea alba
     }
   }
-  const seam = seamLine[i] * 0.22 + seamGlow[i] * 0.08;
+  const seam = seamLine[i] * 0.34 + seamGlow[i] * 0.06;
   const base = [9 + form * 62, 13 + form * 74, 22 + form * 96];
   const rim = side ? [255, 150, 225] : CYAN;
   for (let c = 0; c < 3; c += 1) {
@@ -1577,7 +1578,7 @@ const UNDERSUIT = await writeWebp(
   FIG_W,
   FIG_H,
   {
-    quality: 62,
+    quality: 80,
   },
 );
 
