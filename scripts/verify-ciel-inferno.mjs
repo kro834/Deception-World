@@ -1,20 +1,23 @@
 // Read-only QA of the actual ten-tap Ciel secret, never a forced renderer mount.
 // BASE_URL=... [CIEL_PROFILES=desktop,phone320,tablet1024] [PW_ENGINE=webkit]
 // [CIEL_MODES=normal,reduced,no-webgl,economy,forced-colors,blocked-jet,blocked-art,pending-import]
-// [CIEL_EXTENDED=0] [CIEL_AUTO_CYCLES=3] [EXPECTED_RELEASE=<full SHA>]
+// [CIEL_EXTENDED=1] [CIEL_RELOAD_CYCLES=2] [CIEL_LONG_RETAIN=0] [EXPECTED_RELEASE=<full SHA>]
 // node scripts/verify-ciel-inferno.mjs
 import assert from "node:assert/strict";
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { chromium, webkit } from "playwright";
+import sharp from "sharp";
 
 const base = process.env.BASE_URL || "http://127.0.0.1:8198";
-const out = process.env.AUDIT_OUT || "output/playwright/ciel-inferno";
+const out = process.env.AUDIT_OUT || "output/playwright/ciel-inferno-burned";
 const engine = process.env.PW_ENGINE === "webkit" ? webkit : chromium;
 const selected = (process.env.CIEL_PROFILES || "desktop,phone320,tablet1024").split(",");
 const modes = (process.env.CIEL_MODES || "normal").split(",");
-const autoCycles = Number(process.env.CIEL_AUTO_CYCLES || 1);
-assert.ok(Number.isInteger(autoCycles) && autoCycles >= 1 && autoCycles <= 5);
+const reloadCycles = Number(process.env.CIEL_RELOAD_CYCLES || 2);
+assert.ok(Number.isInteger(reloadCycles) && reloadCycles >= 1 && reloadCycles <= 5);
+const settingKeys = ["deception-world:zeus-button-enabled", "deception-world:zeus-button-position"];
+const savedSettings = ["true", JSON.stringify({ x: 0.82, y: 0.72 })];
 const profiles = {
   desktop: { viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1, hasTouch: false },
   phone320: { viewport: { width: 320, height: 844 }, deviceScaleFactor: 3, hasTouch: true },
@@ -49,6 +52,7 @@ async function installProbe(context, mode) {
       jetFrames: [],
       events: [],
       buttonChanges: [],
+      documentId: `${Date.now()}-${Math.random()}`,
     };
     for (const type of ["pointerdown", "pointerup", "pointercancel", "click", "blur", "scroll"]) {
       document.addEventListener(
@@ -147,8 +151,13 @@ const settled = (page) =>
     { timeout: 60000 },
   );
 
-async function press(page, touch) {
+async function press(page, touch, input = "pointer") {
   const button = page.locator("button.ciel-button");
+  if (input === "keyboard") {
+    await button.focus();
+    await page.keyboard.press("Enter");
+    return;
+  }
   const box = await button.boundingBox();
   assert.ok(box && box.width > 0 && box.height > 0, "the actual Ciel button is drawn");
   const x = box.x + box.width / 2,
@@ -157,9 +166,9 @@ async function press(page, touch) {
   else await page.mouse.click(x, y);
 }
 
-async function burst(page, touch, count = 10) {
+async function burst(page, touch, count = 10, input = "pointer") {
   for (let i = 1; i <= count; i++) {
-    await press(page, touch);
+    await press(page, touch, input);
     if (i < 10)
       assert.equal(
         await page.locator("dialog.ciel-inferno[open]").count(),
@@ -170,8 +179,8 @@ async function burst(page, touch, count = 10) {
   }
 }
 
-async function openEffect(page, touch) {
-  await burst(page, touch);
+async function openEffect(page, touch, input = "pointer") {
+  await burst(page, touch, 10, input);
   const dialog = page.locator("dialog.ciel-inferno[open]");
   await dialog.waitFor({ state: "visible", timeout: 12000 });
   await page.waitForFunction(
@@ -182,33 +191,58 @@ async function openEffect(page, touch) {
   return dialog;
 }
 
-async function closed(page) {
-  await page.locator("dialog.ciel-inferno").waitFor({ state: "detached", timeout: 15000 });
-  await page.waitForTimeout(350);
-  const state = await page.evaluate(() => ({
-    pending: window.__infernoQA.pending.size,
-    frames: window.__infernoQA.frames,
-    focus: document.activeElement?.classList.contains("ciel-button"),
-    activeElement: {
-      tag: document.activeElement?.tagName,
-      className: document.activeElement?.className,
-      id: document.activeElement?.id,
+async function burned(page, dir, label) {
+  await page.waitForFunction(
+    () => {
+      const dialog = document.querySelector("dialog.ciel-inferno");
+      return dialog?.dataset.phase === "burned" && dialog.dataset.ready === "true" && dialog.open;
     },
-    scrollY,
-    settings: ["deception-world:zeus-button-enabled", "deception-world:zeus-button-position"].map(
-      (key) => localStorage.getItem(key),
-    ),
-    documentWidth: document.documentElement.scrollWidth,
-    viewportWidth: innerWidth,
-  }));
-  assert.equal(state.pending, 0, "closed effect leaves no inferno requestAnimationFrame work");
-  await page.waitForTimeout(150);
+    null,
+    { timeout: 15000 },
+  );
+  await page.waitForTimeout(200);
+  const state = await page.evaluate(
+    (keys) => ({
+      pending: window.__infernoQA.pending.size,
+      frames: window.__infernoQA.frames,
+      draws: window.__infernoQA.jetDraws,
+      documentId: window.__infernoQA.documentId,
+      open: document.querySelector("dialog.ciel-inferno")?.open,
+      phase: document.querySelector("dialog.ciel-inferno")?.dataset.phase,
+      renderer: document.querySelector("dialog.ciel-inferno")?.dataset.renderer,
+      canvasCount: document.querySelectorAll(".ciel-inferno canvas").length,
+      controls: [...document.querySelectorAll(".ciel-inferno button, button.ciel-button")].filter(
+        (element) =>
+          element.getClientRects().length && getComputedStyle(element).visibility !== "hidden",
+      ).length,
+      scrollY,
+      settings: keys.map((key) => localStorage.getItem(key)),
+      documentWidth: document.documentElement.scrollWidth,
+      viewportWidth: innerWidth,
+    }),
+    settingKeys,
+  );
+  assert.equal(state.canvasCount, 0, "burned removes both GPU and detail canvases");
+  assert.equal(state.renderer, "stopped", "burned no longer owns an active graphics backend");
+  assert.equal(state.controls, 0, "burned has no visible return, close or navigation controls");
+  assert.equal(state.pending, 0, "burned leaves no inferno requestAnimationFrame work");
+  assert.deepEqual(state.settings, savedSettings, "burning never overwrites personal settings");
+  await page.waitForTimeout(300);
   assert.equal(
     await page.evaluate(() => window.__infernoQA.frames),
     state.frames,
-    "closed renderer cannot keep painting",
+    "burned renderer cannot keep painting",
   );
-  assert.ok(state.documentWidth <= state.viewportWidth, "no horizontal overflow after cleanup");
+  assert.equal(await page.evaluate(() => window.__infernoQA.jetDraws), state.draws);
+  const capture = await page.screenshot({ path: join(dir, `${label}.png`), scale: "css" });
+  const stats = await sharp(capture).removeAlpha().stats();
+  assert.ok(
+    stats.channels.slice(0, 3).every((channel) => channel.max <= 1),
+    "the entire viewport is pure black",
+  );
+  assert.equal(stats.isOpaque, true, "the black surface is opaque, not transparent PNG pixels");
+  state.blackPixelMax = Math.max(...stats.channels.slice(0, 3).map((channel) => channel.max));
+  assert.ok(state.documentWidth <= state.viewportWidth, "no horizontal overflow behind the blank");
   return state;
 }
 
@@ -221,6 +255,98 @@ const probeState = (page) =>
     buttonChanges: window.__infernoQA.buttonChanges,
   }));
 
+async function restored(page, requests, previousId) {
+  await settled(page);
+  await page.locator("main").first().waitFor({ state: "visible" });
+  await page.locator("button.ciel-button").waitFor({ state: "visible" });
+  await page.waitForFunction(() => {
+    const image = document.querySelector("button.ciel-button .is-default");
+    return image instanceof HTMLImageElement && image.complete && image.naturalWidth > 0;
+  });
+  assert.equal(
+    await page.locator("dialog.ciel-inferno").count(),
+    0,
+    "reload starts an unburned document",
+  );
+  assert.equal(requests.length, 0, "reload does not eagerly request the secret's code or artwork");
+  const state = await page.evaluate(
+    (keys) => ({
+      documentId: window.__infernoQA.documentId,
+      settings: keys.map((key) => localStorage.getItem(key)),
+      navigationType: performance.getEntriesByType("navigation")[0]?.type,
+    }),
+    settingKeys,
+  );
+  assert.deepEqual(
+    state.settings,
+    savedSettings,
+    "reload preserves the user's saved button preferences",
+  );
+  if (previousId) {
+    assert.notEqual(state.documentId, previousId, "only a real reload makes a new document");
+    assert.equal(state.navigationType, "reload");
+  }
+  return state;
+}
+
+async function retainBurned(page, touch, dir, initial) {
+  const results = [];
+  await page.keyboard.press("Escape");
+  results.push({ kind: "escape", state: await burned(page, dir, "retained-escape") });
+  const size = page.viewportSize();
+  if (touch) await page.touchscreen.tap(size.width / 2, size.height / 2);
+  else await page.mouse.click(size.width / 2, size.height / 2);
+  await page.keyboard.press("Tab");
+  await page.keyboard.press("Enter");
+  await page.mouse.wheel(0, 600);
+  results.push({ kind: "tap-key-scroll", state: await burned(page, dir, "retained-input") });
+  await page.evaluate(() => document.querySelector("dialog.ciel-inferno").close());
+  results.push({
+    kind: "external-dialog-close",
+    state: await burned(page, dir, "retained-external-close"),
+  });
+  await page.evaluate(() => {
+    Object.defineProperty(document, "hidden", { configurable: true, value: true });
+    document.dispatchEvent(new Event("visibilitychange"));
+    delete document.hidden;
+    document.dispatchEvent(new Event("visibilitychange"));
+    window.dispatchEvent(new PageTransitionEvent("pageshow", { persisted: true }));
+  });
+  results.push({
+    kind: "synthetic-hidden-pageshow",
+    state: await burned(page, dir, "retained-resume"),
+  });
+  await page.evaluate(() => {
+    location.hash = "ciel-burned-retention";
+  });
+  await page.waitForURL("**#ciel-burned-retention");
+  results.push({ kind: "hashchange", state: await burned(page, dir, "retained-hash") });
+  await page.goBack({ waitUntil: "domcontentloaded" });
+  results.push({
+    kind: "real-history-back",
+    url: page.url(),
+    state: await burned(page, dir, "retained-back"),
+  });
+  await page.goBack({ waitUntil: "domcontentloaded" });
+  assert.equal(
+    new URL(page.url()).pathname,
+    "/library",
+    "real Back changes routes but cannot reveal the site",
+  );
+  results.push({
+    kind: "real-route-back",
+    url: page.url(),
+    state: await burned(page, dir, "retained-route-back"),
+  });
+  for (const result of results)
+    assert.equal(
+      result.state.documentId,
+      initial.documentId,
+      `${result.kind} cannot recreate the document to escape the burn`,
+    );
+  return results;
+}
+
 try {
   for (const name of selected) {
     for (const mode of modes) {
@@ -229,6 +355,18 @@ try {
       await mkdir(dir, { recursive: true });
       const context = await browser.newContext({
         ...profiles[name],
+        storageState: {
+          cookies: [],
+          origins: [
+            {
+              origin: new URL(base).origin,
+              localStorage: settingKeys.map((name, index) => ({
+                name,
+                value: savedSettings[index],
+              })),
+            },
+          ],
+        },
         ...(mode === "reduced" ? { reducedMotion: "reduce" } : {}),
         ...(mode === "forced-colors" ? { forcedColors: "active" } : {}),
       });
@@ -253,7 +391,7 @@ try {
       });
       const record = { engine: engine.name(), profile: name, mode, flows: [] };
       try {
-        await page.goto(`${base}/world#top`, { waitUntil: "networkidle" });
+        await page.goto(`${base}/library?kind=person`, { waitUntil: "networkidle" });
         await settled(page);
         if (process.env.EXPECTED_RELEASE) {
           const release = await page.evaluate(async () => {
@@ -279,6 +417,7 @@ try {
             (key) => localStorage.getItem(key),
           ),
         );
+        assert.deepEqual(initialSettings, savedSettings);
         assert.equal(
           requests.length,
           0,
@@ -340,251 +479,231 @@ try {
           );
           continue;
         }
-        const dialog = await openEffect(page, profiles[name].hasTouch);
-        const active = await dialog.evaluate((node) => ({
-          renderer: node.dataset.renderer,
-          calm: node.dataset.calm,
-          phase: node.dataset.phase,
-          ready: node.dataset.ready,
-          open: node.open,
-          modal: node.matches(":modal"),
-          scrollY,
-        }));
-        assert.equal(active.open, true);
-        assert.equal(active.modal, true, "the native modal blocks accidental taps into the page");
-        assert.ok(["webgl2", "webgl", "2d", "calm"].includes(active.renderer));
-        if (mode === "no-webgl") assert.equal(active.renderer, "2d");
-        if (calm) assert.equal(active.calm, "true");
-        await page.waitForFunction(
-          () => {
-            const image = document.querySelector(".ciel-inferno-dragon img");
-            return image instanceof HTMLImageElement && image.complete && image.naturalWidth > 0;
-          },
-          null,
-          { timeout: 10000 },
-        );
-        const artwork = await page.locator(".ciel-inferno-dragon img").evaluate((image) => ({
-          currentSrc: image.currentSrc,
-          width: image.naturalWidth,
-          fallback: image.dataset.fallback,
-          srcset: image.getAttribute("srcset"),
-        }));
-        assert.match(artwork.currentSrc, /\/ciel-inferno-20261019\/ciel-(?:216|720|1080)\.webp$/);
-        if (mode === "blocked-art") {
-          assert.equal(
-            artwork.fallback,
-            "true",
-            "a failed large illustration uses its safe fallback",
-          );
-          assert.match(artwork.currentSrc, /\/ciel-216\.webp$/);
-          assert.equal(
-            artwork.srcset,
-            null,
-            "failed responsive candidates cannot cause an error loop",
-          );
-          // A responsive element's naturalWidth may remain density-corrected
-          // (e.g. 207 CSS pixels). Decode the source without srcset to verify
-          // its true 216 by 216 intrinsic pixels instead of conflating units.
-          artwork.intrinsic = await page.evaluate(async (url) => {
-            const source = new Image();
-            source.src = url;
-            await source.decode();
-            return { width: source.naturalWidth, height: source.naturalHeight };
-          }, artwork.currentSrc);
-          assert.deepEqual(artwork.intrinsic, { width: 216, height: 216 });
-        }
-        record.artwork = artwork;
-        await page.screenshot({ path: join(dir, "awaken.png"), scale: "css" });
-        if (!calm) {
-          await page.waitForTimeout(1500);
-          await page.screenshot({ path: join(dir, "jet.png"), scale: "css" });
-          await page.waitForFunction(
-            () => document.querySelector("dialog.ciel-inferno")?.dataset.phase === "engulf",
-            null,
-            { timeout: 6000 },
-          );
-          await page.screenshot({ path: join(dir, "engulf.png"), scale: "css" });
-          await page.waitForFunction(
-            () =>
-              [...(document.querySelector(".ciel-inferno-dragon")?.getAnimations() || [])].some(
-                (animation) =>
-                  animation.animationName === "ci-dragon-cooldown" &&
-                  Number(animation.currentTime) >= 5250,
-              ),
-            null,
-            { timeout: 6000 },
-          );
-          await page.screenshot({ path: join(dir, "coal.png"), scale: "css" });
-          await page.waitForFunction(
-            () => document.querySelector("dialog.ciel-inferno")?.dataset.phase === "ash",
-            null,
-            { timeout: 6000 },
-          );
-          await page.screenshot({ path: join(dir, "ash.png"), scale: "css" });
-          // Ash starts before the supplied art has fully faded. Verify the
-          // genuinely spent surface as well, without seeking its real clock.
-          await page.waitForFunction(
-            () =>
-              [...(document.querySelector(".ciel-inferno-dragon")?.getAnimations() || [])].some(
-                (animation) =>
-                  animation.animationName === "ci-dragon-cooldown" &&
-                  Number(animation.currentTime) >= 6600,
-              ),
-            null,
-            { timeout: 4000 },
-          );
-          await page.screenshot({ path: join(dir, "coal-final.png"), scale: "css" });
-          const spent = await page
-            .locator(".ciel-inferno-dragon")
-            .evaluate((dragon) => Number(getComputedStyle(dragon).opacity));
-          assert.ok(spent <= 0.03, "the final ash surface no longer retains the dragon overlay");
-          const rendering = await dialog.evaluate((node) => ({
-            jet: node.dataset.jet,
-            draws: window.__infernoQA.jetDraws,
-            frames: window.__infernoQA.jetFrames.length,
-          }));
-          if (mode === "blocked-jet") {
-            assert.equal(rendering.jet, "fallback");
-            assert.equal(rendering.draws, 0);
-          } else {
+        for (let cycle = 1; cycle <= reloadCycles; cycle++) {
+          const cycleDir = join(dir, `cycle-${cycle}`);
+          await mkdir(cycleDir, { recursive: true });
+          if (cycle > 1) {
+            if (mode === "economy")
+              await page.evaluate(() => {
+                document.documentElement.dataset.worldEffects = "economy";
+              });
+            await press(page, profiles[name].hasTouch);
+            await press(page, profiles[name].hasTouch);
             assert.equal(
-              rendering.jet,
-              "ready",
-              "the live effect decodes its real Blender pressure-jet sheet",
+              requests.length,
+              0,
+              "ordinary taps after reload also keep secret resources unloaded",
             );
-            assert.ok(
-              rendering.draws > 0 && rendering.frames > 8,
-              "the sheet actually animates in the real canvas",
-            );
+            await page.waitForTimeout(650);
           }
-          record.rendering = rendering;
-        }
-        await page.keyboard.press("Escape");
-        const afterEscape = await closed(page);
-        record.flows.push({ kind: "pointer-ten", active, after: afterEscape });
-        assert.deepEqual(
-          afterEscape.settings,
-          initialSettings,
-          "secret does not rewrite the user's button preferences",
-        );
-        assert.ok(
-          Math.abs(afterEscape.scrollY - active.scrollY) <= 2,
-          "closing restores the underlying scroll position",
-        );
-        assert.equal(afterEscape.focus, true, "closing restores keyboard focus to Ciel");
-
-        // A second invocation comes from actual keyboard activation. It must
-        // not rely on a synthetic renderer event or a private mount hook.
-        for (let i = 0; i < 10; i++) {
-          await page.locator("button.ciel-button").focus();
-          await page.keyboard.press("Enter");
-          if (i < 9) assert.equal(await page.locator("dialog.ciel-inferno[open]").count(), 0);
-          await page.waitForTimeout(45);
-        }
-        await page.locator("dialog.ciel-inferno[open]").waitFor({ state: "visible" });
-        await page.getByRole("button", { name: "演出を終了", exact: true }).click();
-        const afterKeyboard = await closed(page);
-        assert.equal(
-          afterKeyboard.focus,
-          true,
-          "the close control returns focus to the live Ciel button",
-        );
-        record.flows.push({ kind: "keyboard-ten-close", after: afterKeyboard });
-
-        // Auto-finish and a live graphics-failure path are exercised once per
-        // mode/profile without advancing or replacing the renderer's clock.
-        for (let cycle = 1; cycle <= autoCycles; cycle++) {
-          await openEffect(page, profiles[name].hasTouch);
-          const autoStarted = Date.now();
-          await page
-            .locator("dialog.ciel-inferno")
-            .waitFor({ state: "detached", timeout: calm ? 5000 : 13000 });
-          const autoElapsedMs = Date.now() - autoStarted;
-          const afterAuto = await closed(page);
-          assert.equal(
-            afterAuto.focus,
-            true,
-            `automatic completion ${cycle} returns focus to the live Ciel button`,
+          const input = cycle % 2 ? "pointer" : "keyboard";
+          const began = Date.now();
+          const dialog = await openEffect(page, profiles[name].hasTouch, input);
+          const active = await dialog.evaluate((node) => ({
+            renderer: node.dataset.renderer,
+            calm: node.dataset.calm,
+            phase: node.dataset.phase,
+            ready: node.dataset.ready,
+            open: node.open,
+            modal: node.matches(":modal"),
+            scrollY,
+          }));
+          assert.equal(active.open, true);
+          assert.equal(active.modal, true, "the native modal blocks accidental taps into the page");
+          assert.ok(["webgl2", "webgl", "2d", "calm"].includes(active.renderer));
+          if (mode === "no-webgl") assert.equal(active.renderer, "2d");
+          if (calm) assert.equal(active.calm, "true");
+          await page.waitForFunction(
+            () => {
+              const image = document.querySelector(".ciel-inferno-dragon img");
+              return image instanceof HTMLImageElement && image.complete && image.naturalWidth > 0;
+            },
+            null,
+            { timeout: 10000 },
           );
-          assert.deepEqual(
-            afterAuto.settings,
-            initialSettings,
-            `automatic completion ${cycle} preserves preferences`,
-          );
-          assert.ok(
-            Math.abs(afterAuto.scrollY - active.scrollY) <= 2,
-            `automatic completion ${cycle} preserves the underlying scroll position`,
-          );
-          record.flows.push({
-            kind: "auto",
+          const artwork = await page.locator(".ciel-inferno-dragon img").evaluate((image) => ({
+            currentSrc: image.currentSrc,
+            width: image.naturalWidth,
+            fallback: image.dataset.fallback,
+            srcset: image.getAttribute("srcset"),
+          }));
+          assert.match(artwork.currentSrc, /\/ciel-inferno-20261019\/ciel-(?:216|720|1080)\.webp$/);
+          if (mode === "blocked-art") {
+            assert.equal(
+              artwork.fallback,
+              "true",
+              "a failed large illustration uses its safe fallback",
+            );
+            assert.match(artwork.currentSrc, /\/ciel-216\.webp$/);
+            assert.equal(
+              artwork.srcset,
+              null,
+              "failed responsive candidates cannot cause an error loop",
+            );
+            // A responsive element's naturalWidth may remain density-corrected
+            // (e.g. 207 CSS pixels). Decode the source without srcset to verify
+            // its true 216 by 216 intrinsic pixels instead of conflating units.
+            artwork.intrinsic = await page.evaluate(async (url) => {
+              const source = new Image();
+              source.src = url;
+              await source.decode();
+              return { width: source.naturalWidth, height: source.naturalHeight };
+            }, artwork.currentSrc);
+            assert.deepEqual(artwork.intrinsic, { width: 216, height: 216 });
+          }
+          record.artwork = artwork;
+          await page.screenshot({ path: join(cycleDir, "awaken.png"), scale: "css" });
+          if (!calm) {
+            await page.waitForTimeout(1500);
+            await page.screenshot({ path: join(cycleDir, "jet.png"), scale: "css" });
+            await page.waitForFunction(
+              () => document.querySelector("dialog.ciel-inferno")?.dataset.phase === "engulf",
+              null,
+              { timeout: 6000 },
+            );
+            await page.screenshot({ path: join(cycleDir, "engulf.png"), scale: "css" });
+            await page.waitForFunction(
+              () =>
+                [...(document.querySelector(".ciel-inferno-dragon")?.getAnimations() || [])].some(
+                  (animation) =>
+                    animation.animationName === "ci-dragon-cooldown" &&
+                    Number(animation.currentTime) >= 5250,
+                ),
+              null,
+              { timeout: 6000 },
+            );
+            await page.screenshot({ path: join(cycleDir, "coal.png"), scale: "css" });
+            await page.waitForFunction(
+              () => document.querySelector("dialog.ciel-inferno")?.dataset.phase === "ash",
+              null,
+              { timeout: 6000 },
+            );
+            await page.screenshot({ path: join(cycleDir, "ash.png"), scale: "css" });
+            // Ash starts before the supplied art has fully faded. Verify the
+            // genuinely spent surface as well, without seeking its real clock.
+            await page.waitForFunction(
+              () =>
+                [...(document.querySelector(".ciel-inferno-dragon")?.getAnimations() || [])].some(
+                  (animation) =>
+                    animation.animationName === "ci-dragon-cooldown" &&
+                    Number(animation.currentTime) >= 6600,
+                ),
+              null,
+              { timeout: 4000 },
+            );
+            await page.screenshot({ path: join(cycleDir, "coal-final.png"), scale: "css" });
+            const spent = await page
+              .locator(".ciel-inferno-dragon")
+              .evaluate((dragon) => Number(getComputedStyle(dragon).opacity));
+            assert.ok(spent <= 0.03, "the final ash surface no longer retains the dragon overlay");
+            const rendering = await dialog.evaluate((node) => ({
+              jet: node.dataset.jet,
+              draws: window.__infernoQA.jetDraws,
+              frames: window.__infernoQA.jetFrames.length,
+            }));
+            if (mode === "blocked-jet") {
+              assert.equal(rendering.jet, "fallback");
+              assert.equal(rendering.draws, 0);
+            } else {
+              assert.equal(
+                rendering.jet,
+                "ready",
+                "the live effect decodes its real Blender pressure-jet sheet",
+              );
+              assert.ok(
+                rendering.draws > 0 && rendering.frames > 8,
+                "the sheet actually animates in the real canvas",
+              );
+            }
+            record.rendering = rendering;
+          }
+          const terminal = await burned(page, cycleDir, "burned");
+          const flow = {
+            kind: `${input}-burned-until-reload`,
             cycle,
-            elapsedMs: autoElapsedMs,
-            after: afterAuto,
-          });
-        }
-        if (calm) {
-          assert.equal(
-            requests.some((url) => /\/jet\.webp/.test(url)),
-            false,
-            "calm modes do not download or decode the pressure jet",
-          );
-          assert.equal(
-            await page.evaluate(() =>
-              window.__infernoQA.contexts.some(
-                (entry) => /^webgl/.test(entry.kind) && entry.result,
-              ),
-            ),
-            false,
-            "calm modes allocate no WebGL context",
-          );
-        }
-        if (mode === "normal" && name === "desktop" && process.env.CIEL_EXTENDED !== "0") {
-          await openEffect(page, profiles[name].hasTouch);
-          await page.evaluate(() => {
-            Object.defineProperty(document, "hidden", { configurable: true, value: true });
-            document.dispatchEvent(new Event("visibilitychange"));
-          });
-          record.flows.push({ kind: "synthetic-hidden-cancel", after: await closed(page) });
-          await page.evaluate(() => {
-            delete document.hidden;
-            document.dispatchEvent(new Event("visibilitychange"));
-          });
-          await openEffect(page, profiles[name].hasTouch);
-          const renderer = await page.locator("dialog.ciel-inferno").getAttribute("data-renderer");
-          if (renderer === "webgl2" || renderer === "webgl") {
-            const lost = await page.evaluate((kind) => {
-              const canvas = document.querySelector("canvas.ciel-inferno-field");
-              const gl = canvas.getContext(kind);
-              const extension = gl?.getExtension("WEBGL_lose_context");
-              if (!extension) return false;
-              extension.loseContext();
-              return true;
-            }, renderer);
-            assert.equal(lost, true, "a real WebGL context-loss path is available");
-            record.flows.push({ kind: "webgl-context-lost", after: await closed(page) });
-          } else {
-            await page.keyboard.press("Escape");
-            record.flows.push({
-              kind: "context-loss-not-applicable",
-              renderer,
-              after: await closed(page),
-            });
+            active,
+            terminal,
+            elapsedMs: Date.now() - began,
+          };
+          if (cycle === 1) {
+            flow.retained = await retainBurned(page, profiles[name].hasTouch, cycleDir, terminal);
+            if (mode === "normal" && name === "desktop" && process.env.CIEL_LONG_RETAIN !== "0") {
+              await page.waitForTimeout(14000);
+              flow.afterFourteenSeconds = await burned(page, cycleDir, "retained-fourteen-seconds");
+            }
           }
-          await page.goto(`${base}/library?kind=person`, { waitUntil: "networkidle" });
-          await settled(page);
-          await openEffect(page, profiles[name].hasTouch);
-          await page.goBack({ waitUntil: "domcontentloaded" });
-          await settled(page);
-          assert.equal(
-            new URL(page.url()).pathname,
-            "/library",
-            "real browser Back owns its destination",
-          );
-          record.flows.push({
-            kind: "real-history-route-cancel",
-            url: page.url(),
-            after: await closed(page),
-          });
+          if (calm) {
+            assert.equal(
+              requests.some((url) => /\/jet\.webp/.test(url)),
+              false,
+              "calm modes do not download or decode the pressure jet",
+            );
+            assert.equal(
+              await page.evaluate(() =>
+                window.__infernoQA.contexts.some(
+                  (entry) => /^webgl/.test(entry.kind) && entry.result,
+                ),
+              ),
+              false,
+              "calm modes allocate no WebGL context",
+            );
+          }
+          flow.requests = [...requests];
+          flow.probe = await probeState(page);
+          requests.length = 0;
+          await page.reload({ waitUntil: "networkidle" });
+          flow.restoredByReload = await restored(page, requests, terminal.documentId);
+          await page.screenshot({ path: join(cycleDir, "restored-by-reload.png"), scale: "css" });
+          record.flows.push(flow);
+        }
+        if (mode === "normal" && name === "desktop" && process.env.CIEL_EXTENDED === "1") {
+          for (const fault of [
+            "escape",
+            "external-close",
+            "hidden",
+            "context-lost",
+            "route-back",
+          ]) {
+            requests.length = 0;
+            await page.goto(`${base}/library?kind=person`, { waitUntil: "networkidle" });
+            await restored(page, requests);
+            const dialog = await openEffect(page, profiles[name].hasTouch);
+            if (fault === "escape") await page.keyboard.press("Escape");
+            if (fault === "external-close") await dialog.evaluate((node) => node.close());
+            if (fault === "hidden") {
+              await page.evaluate(() => {
+                Object.defineProperty(document, "hidden", { configurable: true, value: true });
+                document.dispatchEvent(new Event("visibilitychange"));
+                delete document.hidden;
+                document.dispatchEvent(new Event("visibilitychange"));
+              });
+            }
+            if (fault === "context-lost") {
+              const kind = await dialog.getAttribute("data-renderer");
+              if (kind === "webgl2" || kind === "webgl") {
+                const lost = await page.evaluate((contextKind) => {
+                  const canvas = document.querySelector("canvas.ciel-inferno-field");
+                  const extension = canvas
+                    .getContext(contextKind)
+                    ?.getExtension("WEBGL_lose_context");
+                  extension?.loseContext();
+                  return Boolean(extension);
+                }, kind);
+                assert.equal(lost, true, "the failure uses a real WebGL context loss");
+              } else await page.keyboard.press("Escape");
+            }
+            if (fault === "route-back") await page.goBack({ waitUntil: "domcontentloaded" });
+            const terminal = await burned(page, dir, `fault-${fault}-burned`);
+            const flow = {
+              kind: `live-${fault}-commits-burned`,
+              terminal,
+              probe: await probeState(page),
+            };
+            requests.length = 0;
+            await page.reload({ waitUntil: "networkidle" });
+            flow.restoredByReload = await restored(page, requests, terminal.documentId);
+            record.flows.push(flow);
+          }
         }
         assert.deepEqual(errors, [], "no browser JavaScript errors in the real secret journey");
         record.requests = requests;
@@ -592,7 +711,7 @@ try {
         record.probe = await probeState(page);
         results.push(record);
         console.log(
-          `PASS ${engine.name()} ${name}/${mode}: true pointer 9/10, keyboard, close, automatic cleanup`,
+          `PASS ${engine.name()} ${name}/${mode}: ${reloadCycles} reload-only burned cycles, real input and stopped GPU`,
         );
       } catch (error) {
         record.failure = { message: error.message, stack: error.stack };

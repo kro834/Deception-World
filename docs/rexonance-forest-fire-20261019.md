@@ -21,8 +21,10 @@ ray tracing, MetalFX, or a new WebGL engine. The reproducible source, render
 settings and delivered asset hash are retained alongside the packed atlas.
 
 The runtime uses a transparent animated atlas, with bounded shared decoding,
-time interpolation, body-contour placement and restrained front-layer fire.
-The artwork and its reactor remain visible through the effect. A lightweight
+time interpolation, body-contour placement and overlapping near-surface fire.
+The final artwork and fixed reactor/separately rotating coil are unchanged.
+The owner's later full-body direction intentionally lets near-surface fire pass
+in front of the unfinished face, chest and limbs as well as the contour. A lightweight
 procedural fallback covers unavailable or failed image decoding. Reduced-motion,
 economy and hidden-page paths must not introduce a new fire-atlas download.
 
@@ -49,7 +51,7 @@ The manifest also records source-script hashes and every intermediate render's
 hash. Production verification hashes both the atlas and manifest, and rejects
 unknown paths or suffixes before requesting them.
 
-## Verification record
+## Original forest-fire release verification
 
 The local evidence is kept under `output/playwright/`; these generated screenshots,
 intermediate PNGs and Blender scene are not production assets. Compare the same
@@ -139,3 +141,61 @@ that commit. Public Chromium 320px and WebKit 1024px flows both passed first-cal
 fire, scrolling, all 32 atlas frames, single first fetch / no repeat fetch,
 visibility recovery and zero JavaScript errors. Receipts:
 `output/playwright/flame-public/{identity-probe.json,chromium/report.json,webkit/report.json}`.
+
+## Full-body burn revision
+
+The owner clarified that green fire should spread over and burn the entire
+undersuit before subsiding. The previous front layer intentionally avoided the
+face and sternum and used only eight outer wisps. The shared renderer now uses
+twenty near-surface roots (sixteen on coarse pointers), crossing the head,
+chest, abdomen, waist and both upper/lower arms, thighs, shins and feet. Their
+upward turbulent volumes overlap through the torso, rather than merely glowing
+behind the silhouette. Both entry-call and scrolling assembly already use
+these shared back/front passes, so they receive the same coverage without a
+second timeline or new render loop. Existing slow ignition/extinction envelopes
+still bring the fire to zero and reveal the original finished figure.
+
+This redistributes the existing draw budget: back roots decrease to thirteen
+pairs (nine on coarse pointers). Including the actual contact-light canvases,
+the maximum remains 126 / 102 image draws, below the existing 128 / 104 limits.
+The delivered Blender atlas, source scripts, manifest, transfer/decode size and
+single-fetch policy are unchanged. The body-part coverage and deterministic
+reverse-scrubbing checks are in `scripts/rexonance-flame.test.mjs`; visual
+acceptance must additionally sample the same peak frame in both real engines,
+not merely count green pixels somewhere in a whole canvas.
+
+An initial full-body layout was rejected: screen blending over the bright
+silver/blue undersuit left only thin green lines, and the actual screenshot's
+shin regions contained no green flame. Counting the transparent entry flight
+canvas by itself overstated the result because the DOM undersuit and settled
+plates had not yet been composited. The acceptance script now samples the
+real screenshot, using independently retained viewport/figure geometry.
+
+The corrected front layer keeps the Blender volume's absorption with
+source-over blending, denser alpha and wider overlapping tongues. Roots are
+below the visible body patches; shins and feet follow the undersuit's wider
+stance, and thigh fire reaches upward into the hips. Its size/strength still
+follows the existing slow envelope. No full-body flat-colour sheet, new image
+download or extra render loop was added. Source/volume bounds and real PNG
+coverage are complementary checks; reproducing a particular root array alone
+is not evidence that the final body visibly burns.
+
+The accepted v2 reports are under `output/playwright/rexonance-flame-body-v2/`:
+Chromium desktop, Chromium 320px and WebKit 1024px all pass the unchanged 5%
+minimum green-pixel requirement across all eleven inner-body regions in one
+peak screenshot per engine. On desktop, every near-peak entry sample has a
+minimum of 25.61–28.87% and scroll samples have 24.83–28.23%. The touch profiles
+are more affected by the existing plate/emission progression: accepted peak
+entry samples are 6.28% / 6.13%, and scroll .14 samples are 7.95% / 8.41%.
+These ratios quantify the selected frames, not continuous coverage throughout
+ignition and extinction or physical-device image quality.
+
+All three normal runs also confirm zero new fire draws at entry 2600ms and
+scroll .34 / .92 / .99, with a clear final figure. They retain one atlas request,
+no repeat request, hidden-page draw suspension and zero JavaScript errors.
+Chromium 320px additionally passes blocked-atlas procedural fallback in both
+engines and reduced motion without a fire download or tall scroll trap. The
+earlier `rexonance-flame-body/chromium-normal` report is a rejected diagnostic,
+not acceptance evidence. The shared renderer's 25 unit tests pass, including
+real body-point bounds, context-state restoration, reverse-clock determinism
+and the unchanged 128 / 104 image-draw budgets with contact lights included.

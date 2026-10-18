@@ -1,16 +1,41 @@
 // Real browser evidence for the Blender flame, not a source-string audit.
 // BASE_URL=... [FLAME_BASELINE=1] [FLAME_PROFILES=desktop,phone320,tablet1024]
 // [FLAME_CASES=normal,blocked,reduced] [BROWSER=webkit] node scripts/verify-rexonance-flame.mjs
+// [FLAME_COVERAGE_MIN=0.05] opts into a measured per-region peak coverage gate.
 // The disposable profile never posts gallery images or changes public data.
 import assert from "node:assert/strict";
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { chromium, webkit } from "playwright";
+import sharp from "sharp";
 
 const base = process.env.BASE_URL || "http://127.0.0.1:8197";
 const out = process.env.OUT_DIR || "output/playwright/rexonance-flame";
 const baseline = process.env.FLAME_BASELINE === "1";
 const naturalClock = process.env.FLAME_NATURAL === "1";
+const coverageMinimum = process.env.FLAME_COVERAGE_MIN
+  ? Number(process.env.FLAME_COVERAGE_MIN)
+  : null;
+assert.ok(
+  coverageMinimum === null ||
+    (Number.isFinite(coverageMinimum) && coverageMinimum > 0 && coverageMinimum <= 1),
+  "FLAME_COVERAGE_MIN must be a ratio greater than zero and at most one",
+);
+// Inner patches of the authored 571x1040 body, not its green halo. Chest
+// and abdomen are separate so a bright reactor alone cannot pass a torso.
+const bodyRegions = {
+  head: [259, 104, 48, 60],
+  chest: [250, 245, 70, 64],
+  abdomen: [253, 348, 62, 56],
+  armLeft: [111, 420, 31, 70],
+  armRight: [429, 420, 31, 70],
+  thighLeft: [185, 540, 40, 85],
+  thighRight: [343, 540, 40, 85],
+  shinLeft: [146, 760, 31, 90],
+  shinRight: [393, 760, 31, 90],
+  footLeft: [122, 955, 45, 45],
+  footRight: [404, 955, 45, 45],
+};
 const asset = "/rexonance-flame-20261019/flame.webp";
 const engine = process.env.BROWSER === "webkit" ? webkit : chromium;
 const browser = await engine.launch(engine === chromium ? { channel: "chrome" } : {});
@@ -158,31 +183,205 @@ async function scrollToProgress(page, progress) {
 }
 
 async function canvasPixels(page, selector) {
-  return page.evaluate((query) => {
-    const source = document.querySelector(query);
-    if (!source?.width || !source.height) return null;
-    const sample = document.createElement("canvas");
-    sample.width = 48;
-    sample.height = 80;
-    const c = sample.getContext("2d", { willReadFrequently: true });
-    c.drawImage(source, 0, 0, sample.width, sample.height);
-    const data = c.getImageData(0, 0, sample.width, sample.height).data;
-    let [visible, green, hash] = [0, 0, 2166136261];
-    for (let i = 0; i < data.length; i += 4) {
-      if (data[i + 3] > 8) {
-        visible++;
-        if (data[i + 1] > data[i] * 1.2 && data[i + 1] > data[i + 2] * 1.15) green++;
+  return page.evaluate(
+    ({ query, regions }) => {
+      const source = document.querySelector(query);
+      if (!source?.width || !source.height) return null;
+      const sample = document.createElement("canvas");
+      sample.width = 48;
+      sample.height = 80;
+      const c = sample.getContext("2d", { willReadFrequently: true });
+      c.drawImage(source, 0, 0, sample.width, sample.height);
+      const data = c.getImageData(0, 0, sample.width, sample.height).data;
+      let [visible, green, hash] = [0, 0, 2166136261];
+      for (let i = 0; i < data.length; i += 4) {
+        if (data[i + 3] > 8) {
+          visible++;
+          if (data[i + 1] > data[i] * 1.2 && data[i + 1] > data[i + 2] * 1.15) green++;
+        }
+        for (let k = 0; k < 4; k++) hash = Math.imul(hash ^ data[i + k], 16777619);
       }
-      for (let k = 0; k < 4; k++) hash = Math.imul(hash ^ data[i + k], 16777619);
-    }
-    return {
-      width: source.width,
-      height: source.height,
-      visible,
-      green,
-      hash: (hash >>> 0).toString(16),
-    };
-  }, selector);
+      const result = {
+        width: source.width,
+        height: source.height,
+        visible,
+        green,
+        hash: (hash >>> 0).toString(16),
+      };
+      const rect = source.getBoundingClientRect();
+      const host = source.closest(".rx-suit-nanites");
+      let figure;
+      if (host) {
+        const box = host.getBoundingClientRect();
+        // The entry painter uses uniform figure scaling from its own width;
+        // the child canvas may bleed beyond that box on a fine pointer.
+        const scale = (box.width * source.width) / rect.width / 571;
+        figure = {
+          x: ((box.left - rect.left) * source.width) / rect.width,
+          y: ((box.top - rect.top) * source.height) / rect.height,
+          width: scale * 571,
+          height: scale * 1040,
+        };
+      } else if (source.matches(".rzn-canvas")) {
+        // Read the public responsive figure geometry. DOM fallback images are
+        // display:none once live, so their empty client rect is not evidence.
+        const style = getComputedStyle(source);
+        const value = (key, fallback) => Number.parseFloat(style.getPropertyValue(key)) || fallback;
+        const height = Math.min(
+          source.clientHeight * value("--rzn-fig-h", 0.84),
+          (source.clientWidth * value("--rzn-fig-w", 0.9) * 1040) / 571,
+        );
+        const width = (height * 571) / 1040;
+        const ratioX = source.width / source.clientWidth;
+        const ratioY = source.height / source.clientHeight;
+        figure = {
+          x: (source.clientWidth * value("--rzn-fig-x", 0.5) - width / 2) * ratioX,
+          y: (source.clientHeight * (1 - value("--rzn-fig-b", 0.05)) - height) * ratioY,
+          width: width * ratioX,
+          height: height * ratioY,
+        };
+      }
+      if (!figure || !Object.values(figure).every(Number.isFinite) || figure.width <= 0)
+        return result;
+      // One figure-relative read preserves the actual composited painter,
+      // including armour occluding back flames. No substitute renderer runs.
+      const body = document.createElement("canvas");
+      body.width = 171;
+      body.height = 312;
+      const bc = body.getContext("2d", { willReadFrequently: true });
+      bc.drawImage(
+        source,
+        figure.x,
+        figure.y,
+        figure.width,
+        figure.height,
+        0,
+        0,
+        body.width,
+        body.height,
+      );
+      const pixels = bc.getImageData(0, 0, body.width, body.height).data;
+      const coverage = {};
+      for (const [name, [x, y, width, height]] of Object.entries(regions)) {
+        const x0 = Math.floor((x / 571) * body.width);
+        const y0 = Math.floor((y / 1040) * body.height);
+        const x1 = Math.ceil(((x + width) / 571) * body.width);
+        const y1 = Math.ceil(((y + height) / 1040) * body.height);
+        let green = 0;
+        let visible = 0;
+        let greenExcess = 0;
+        for (let row = y0; row < y1; row++) {
+          for (let column = x0; column < x1; column++) {
+            const i = (row * body.width + column) * 4;
+            if (pixels[i + 3] <= 24) continue;
+            visible++;
+            const excess = pixels[i + 1] - Math.max(pixels[i] * 1.2, pixels[i + 2] * 1.15);
+            if (pixels[i + 1] > 28 && excess > 0) {
+              green++;
+              greenExcess += (excess / 255) * (pixels[i + 3] / 255);
+            }
+          }
+        }
+        const count = (x1 - x0) * (y1 - y0);
+        coverage[name] = {
+          pixels: count,
+          visible,
+          green,
+          greenRatio: green / count,
+          meanGreenExcess: greenExcess / count,
+        };
+      }
+      return {
+        ...result,
+        figure,
+        viewportFigure: {
+          x: rect.left + (figure.x / source.width) * rect.width,
+          y: rect.top + (figure.y / source.height) * rect.height,
+          width: (figure.width / source.width) * rect.width,
+          height: (figure.height / source.height) * rect.height,
+        },
+        coverage,
+      };
+    },
+    { query: selector, regions: bodyRegions },
+  );
+}
+
+async function screenCoverage(capture, figure) {
+  if (!figure) return null;
+  const { data, info } = await sharp(capture)
+    .ensureAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  return Object.fromEntries(
+    Object.entries(bodyRegions).map(([name, [x, y, width, height]]) => {
+      const x0 = Math.floor(figure.x + (x / 571) * figure.width);
+      const y0 = Math.floor(figure.y + (y / 1040) * figure.height);
+      const x1 = Math.ceil(figure.x + ((x + width) / 571) * figure.width);
+      const y1 = Math.ceil(figure.y + ((y + height) / 1040) * figure.height);
+      const inBounds = x0 >= 0 && y0 >= 0 && x1 <= info.width && y1 <= info.height;
+      const count = (x1 - x0) * (y1 - y0);
+      let green = 0;
+      let greenExcess = 0;
+      if (inBounds)
+        for (let row = y0; row < y1; row++) {
+          for (let column = x0; column < x1; column++) {
+            const i = (row * info.width + column) * 4;
+            const excess = data[i + 1] - Math.max(data[i] * 1.2, data[i + 2] * 1.15);
+            if (data[i + 1] > 28 && excess > 0) {
+              green++;
+              greenExcess += excess / 255;
+            }
+          }
+        }
+      return [
+        name,
+        {
+          pixels: count,
+          inBounds,
+          green,
+          greenRatio: green / count,
+          meanGreenExcess: greenExcess / count,
+        },
+      ];
+    }),
+  );
+}
+
+function coverageSummary(shots, isPeak) {
+  const peaks = shots.filter(isPeak);
+  return {
+    frames: peaks.map((shot) => ({
+      at: shot.target ?? shot.progress,
+      minimum: Math.min(
+        ...Object.values(shot.screenCoverage ?? {}).map((region) => region.greenRatio),
+      ),
+      regions: shot.screenCoverage ?? null,
+    })),
+    // A temporal maximum is diagnostic only; it cannot let eleven different
+    // frames masquerade as the body burning together in one peak frame.
+    regionalPeak: Object.fromEntries(
+      Object.keys(bodyRegions).map((name) => [
+        name,
+        Math.max(0, ...peaks.map((shot) => shot.screenCoverage?.[name]?.greenRatio ?? 0)),
+      ]),
+    ),
+  };
+}
+
+function assertPeakCoverage(summary, label) {
+  assert.ok(summary.frames.length >= 2, `${label}: multiple near-peak frames were sampled`);
+  for (const frame of summary.frames)
+    assert.ok(
+      Object.keys(frame.regions ?? {}).length === Object.keys(bodyRegions).length &&
+        Object.values(frame.regions).every((region) => region.inBounds && region.pixels > 0),
+      `${label}/${frame.at}: visible screen samples cover all eleven body regions`,
+    );
+  if (coverageMinimum !== null)
+    assert.ok(
+      summary.frames.some((frame) => frame.minimum >= coverageMinimum),
+      `${label}: one peak frame must cover every body region by at least ${coverageMinimum}`,
+    );
 }
 
 try {
@@ -203,7 +402,15 @@ try {
       page.on("request", (request) => {
         if (request.url().includes(asset)) requests.push(request.url());
       });
-      const record = { profile: name, mode, baseline, naturalClock, entry: [], scroll: [] };
+      const record = {
+        profile: name,
+        mode,
+        baseline,
+        naturalClock,
+        coverageMinimum,
+        entry: [],
+        scroll: [],
+      };
       try {
         await page.goto(`${base}/world`, { waitUntil: "networkidle" });
         await settled(page);
@@ -241,7 +448,7 @@ try {
               .map((entry) => new URL(entry.name).pathname),
           }));
         }
-        for (const target of mode === "reduced" ? [] : [600, 1000, 1600, 2200]) {
+        for (const target of mode === "reduced" ? [] : [600, 850, 1000, 1150, 1600, 2200, 2600]) {
           if (!(await page.locator(".rx-call-sequence").count())) break;
           // Seek the actual CSS meter read by the real canvas engine. Only
           // its clock is controlled; no replacement painter or synthetic draw.
@@ -272,8 +479,25 @@ try {
           });
           const pixels = await canvasPixels(page, ".rx-suit-nanites > canvas:nth-child(2)");
           const file = join(dir, `entry-${target}.png`);
-          await page.screenshot({ path: file, scale: "css" });
-          record.entry.push({ target, ...state, pixels, file });
+          const capture = await page.screenshot({ path: file, scale: "css" });
+          record.entry.push({
+            target,
+            ...state,
+            pixels,
+            screenCoverage: await screenCoverage(capture, pixels?.viewportFigure),
+            file,
+          });
+          if (target === 2600) {
+            const before = await page.evaluate(
+              () => window.__flameQA.atlas.entry + window.__flameQA.fallback.entry,
+            );
+            await page.waitForTimeout(100);
+            const after = await page.evaluate(
+              () => window.__flameQA.atlas.entry + window.__flameQA.fallback.entry,
+            );
+            record.entryExtinguished = { target, flameDrawsAfter: after - before };
+            assert.equal(after, before, `${name}: entry flame stops after its slow extinction`);
+          }
         }
         if (mode === "normal" && !baseline) {
           assert.equal(
@@ -316,7 +540,7 @@ try {
             Math.max(0, geometry.top - profiles[name].viewport.height * 4.4),
           );
           await page.waitForTimeout(1800);
-          for (const progress of [0.04, 0.1, 0.14, 0.22, 0.3, 0.14]) {
+          for (const progress of [0.04, 0.1, 0.14, 0.22, 0.3, 0.34, 0.92, 0.99, 0.14]) {
             const state = await scrollToProgress(page, progress);
             await page.waitForFunction(
               () => document.querySelector('.rzn-suitup[data-rzn-state="live"] canvas')?.width > 0,
@@ -326,8 +550,45 @@ try {
             const pixels = await canvasPixels(page, "canvas.rzn-canvas");
             assert.ok(pixels?.visible > 20, `${name}/${progress}: painted scroll canvas`);
             const file = join(dir, `scroll-${progress}-${record.scroll.length}.png`);
-            await page.screenshot({ path: file, scale: "css" });
-            record.scroll.push({ progress, ...state, pixels, file });
+            const capture = await page.screenshot({ path: file, scale: "css" });
+            record.scroll.push({
+              progress,
+              ...state,
+              pixels,
+              screenCoverage: await screenCoverage(capture, pixels?.viewportFigure),
+              file,
+            });
+            if (progress === 0.34 || progress === 0.92 || progress === 0.99) {
+              const before = await page.evaluate(
+                () => window.__flameQA.atlas.scroll + window.__flameQA.fallback.scroll,
+              );
+              await page.waitForTimeout(100);
+              const after = await page.evaluate(
+                () => window.__flameQA.atlas.scroll + window.__flameQA.fallback.scroll,
+              );
+              record.scrollExtinguished ??= [];
+              record.scrollExtinguished.push({ progress, flameDrawsAfter: after - before });
+              assert.equal(
+                after,
+                before,
+                `${name}/${progress}: extinguished flame cannot obscure the completed armour`,
+              );
+            }
+          }
+          record.bodyCoverage = {
+            entry: coverageSummary(
+              record.entry,
+              (shot) => shot.target >= 850 && shot.target <= 1150,
+            ),
+            scroll: coverageSummary(
+              record.scroll,
+              (shot) => shot.progress === 0.1 || shot.progress === 0.14,
+            ),
+            note: "Inner body patches are measured from the actual visible screenshot, including the DOM undersuit, both canvas layers and their opacity. Source-canvas coverage is retained per shot for diagnostics. Regional maxima cannot satisfy the optional gate: all regions must pass together in one peak frame. Extinguished and final armour frames are retained separately.",
+          };
+          if (mode === "normal" && !baseline) {
+            assertPeakCoverage(record.bodyCoverage.entry, `${name}/entry`);
+            assertPeakCoverage(record.bodyCoverage.scroll, `${name}/scroll`);
           }
           // A real-time forward/reverse sweep, without screenshots in the measured interval.
           await page.evaluate(async () => {

@@ -345,6 +345,117 @@ test("touch uses fewer interpolated tongues while retaining body, floor and reac
   );
 });
 
+test("front fire crosses the entire head, torso, arms, thighs, shins and feet on both input tiers", async () => {
+  const W = 571;
+  const H = 1040;
+  const regions = [
+    ["head", 0.5, 0.13],
+    ["upper torso", 0.5, 0.266],
+    ["abdomen", 0.5, 0.362],
+    ["hips", 0.5, 0.58],
+    ["left upper arm", 0.22, 0.437],
+    ["right upper arm", 0.78, 0.437],
+    ["left forearm", 0.18, 0.54],
+    ["right forearm", 0.82, 0.54],
+    ["left thigh", 0.36, 0.56],
+    ["right thigh", 0.64, 0.56],
+    ["left shin", 0.28, 0.77],
+    ["right shin", 0.72, 0.77],
+    ["left foot", 0.25, 0.94],
+    ["right foot", 0.75, 0.94],
+  ];
+  for (const coarse of [false, true]) {
+    const module = await fresh();
+    const f = fixture();
+    f.environment.matchMedia = (query) => ({
+      matches: coarse && query.includes("pointer: coarse"),
+    });
+    await ready(module, f);
+    const p = painter();
+    module.drawBodyFlame(p.context, { width: W, height: H }, 1, 1.7, 1, "front");
+    const roots = [];
+    for (const row of p.operations) {
+      if (row[0] === "translate") roots.push({ x: row[1], y: row[2], images: [] });
+      if (row[0] === "image") roots.at(-1).images.push(row);
+    }
+    assert.equal(
+      roots.length,
+      coarse ? 16 : 20,
+      "reuse the old edge-fire budget for body-surface roots",
+    );
+    for (const [region, x, y] of regions) {
+      assert.ok(
+        // Sample the body's inner surface, not a copy of the authored root
+        // array. A flame's visible middle must reach this point: anchoring a
+        // transparent sprite below it is not enough. Browser PNGs additionally
+        // verify the real absorbed/emitted colour over the original undersuit.
+        roots.some((root) => {
+          const image = root.images[0];
+          return (
+            Math.abs(root.x - x * W) < image[8] * 0.32 &&
+            y * H > root.y + image[7] + image[9] * 0.1 &&
+            y * H < root.y + image[7] + image[9] * 0.95
+          );
+        }),
+        `${coarse ? "coarse" : "fine"}: ${region} receives near-surface fire, not only an edge halo`,
+      );
+    }
+    const centre = roots.slice(0, 4).map((root) => {
+      const image = root.images[0];
+      return [
+        root.y + image[7] + image[9] * ((24 - 0.5) / 255),
+        root.y + image[7] + image[9] * ((245 - 0.5) / 255),
+      ];
+    });
+    assert.ok(centre[0][0] < H * 0.05, "the flame actually reaches the head surface");
+    for (let i = 1; i < centre.length; i++)
+      assert.ok(
+        centre[i][0] <= centre[i - 1][1] + H * 0.012,
+        "overlapping fire joins the body centre instead of leaving a hollow sternum",
+      );
+    assert.ok(centre.at(-1)[1] > H * 0.62, "the joined flame extends into the hips");
+    assert.ok(
+      p.operations.filter((row) => row[0] === "image").every((row) => row.at(-1) === "source-over"),
+      "near fire retains the authored volume absorption over bright armour",
+    );
+    assert.equal(p.states.length, 0);
+  }
+});
+
+test("whole-body near fire remains within the existing 128/104 draw budgets including both contact lights", async () => {
+  const previous = Object.getOwnPropertyDescriptor(globalThis, "document");
+  try {
+    for (const coarse of [false, true]) {
+      const module = await fresh();
+      const f = fixture();
+      f.environment.matchMedia = (query) => ({
+        matches: coarse && query.includes("pointer: coarse"),
+      });
+      Object.defineProperty(globalThis, "document", {
+        configurable: true,
+        value: f.environment.document,
+      });
+      await ready(module, f);
+      const p = painter();
+      module.drawBodyFlame(p.context, { width: 571, height: 1040 }, 1, 1.7, 1, "back");
+      module.drawNaniteFlame(p.context, [285, 335], 1, 1.7);
+      module.drawBodyFlame(p.context, { width: 571, height: 1040 }, 1, 1.7, 1, "front");
+      const images = p.operations.filter((row) => row[0] === "image");
+      assert.equal(
+        images.filter((row) => row[1] === "fallback").length,
+        2,
+        "include the reactor and floor contact-light draws in the budget",
+      );
+      assert.ok(images.length <= (coarse ? 104 : 128), `${images.length} total draws`);
+      assert.equal(p.context.globalAlpha, 0.73);
+      assert.equal(p.context.globalCompositeOperation, "multiply");
+    }
+  } finally {
+    if (previous) Object.defineProperty(globalThis, "document", previous);
+    else delete globalThis.document;
+  }
+});
+
 test("valid draws use atlas frame rectangles with interpolation and deterministic reverse scrubbing", async () => {
   const module = await fresh();
   const f = fixture();

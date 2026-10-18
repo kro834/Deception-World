@@ -29,7 +29,7 @@ import { CIEL_INFERNO_GAP_MS, createCielInfernoTrigger } from "@/lib/ciel-infern
 type ZeusButtonPosition = { x: number; y: number };
 type InfernoView = ComponentType<{
   origin: ZeusButtonPosition;
-  onClose: () => void;
+  onCommit: () => void;
   artSrc?: string;
   artSrcSet?: string;
   routeKey?: string;
@@ -378,6 +378,10 @@ export function ZeusButtonProvider({ children }: { children: ReactNode }) {
   if (!secretTrigger.current) secretTrigger.current = createCielInfernoTrigger();
   const secretTimer = useRef<number | null>(null);
   const secretActive = useRef(false);
+  // The hidden scene belongs to this document once mounted. Ending its
+  // animation leaves the page burned until a real browser reload; never
+  // write this transient state into personal settings or session storage.
+  const secretCommitted = useRef(false);
   const secretModule = useRef<Promise<typeof import("./ciel-inferno")> | null>(null);
 
   const resetSecret = useCallback(() => {
@@ -389,6 +393,9 @@ export function ZeusButtonProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const closeSecret = useCallback(() => {
+    // Only a still-pending lazy import can be cancelled back to navigation.
+    // Once mounted, the scene owns a reload-only burned surface.
+    if (secretCommitted.current) return;
     if (secretTimer.current != null) window.clearTimeout(secretTimer.current);
     secretTimer.current = null;
     secretActive.current = false;
@@ -399,10 +406,16 @@ export function ZeusButtonProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const commitSecret = useCallback(() => {
+    secretCommitted.current = true;
+    if (secretTimer.current != null) window.clearTimeout(secretTimer.current);
+    secretTimer.current = null;
+  }, []);
+
   const tapSecret = useCallback(
     (origin: ZeusButtonPosition) => {
       // If the lazy chunk is still arriving, the changed button itself is
-      // an immediate escape hatch. Once mounted the dialog owns dismissal.
+      // an immediate escape hatch. Once mounted the scene owns its reload-only ending.
       if (secretActive.current) {
         closeSecret();
         return;
@@ -514,8 +527,8 @@ export function ZeusButtonProvider({ children }: { children: ReactNode }) {
     let frame = 0;
     const updateTarget = () => {
       frame = 0;
-      // The secret temporarily replaces this button and owns its own exit.
-      // Never move its return target into that soon-to-be-removed surface.
+      // The scene replaces this button until a real reload. It is never a
+      // target for the ordinary floating-button portal.
       const openDialogs = Array.from(
         document.querySelectorAll<HTMLDialogElement>("dialog[open]:not(.ciel-inferno)"),
       );
@@ -650,7 +663,7 @@ export function ZeusButtonProvider({ children }: { children: ReactNode }) {
       {secretOrigin && Inferno ? (
         <Inferno
           origin={secretOrigin}
-          onClose={closeSecret}
+          onCommit={commitSecret}
           artSrc="/ciel-inferno-20261019/ciel-1080.webp"
           artSrcSet={INFERNO_ART_SRCSET}
           routeKey={pathname}

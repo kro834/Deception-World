@@ -2,7 +2,8 @@
 // slowly from head to feet. Both suit-up engines use this renderer. Its
 // tongues are a Blender-rendered, turbulent participating volume, not a
 // cloud of overlapping radial-gradient discs. Their roots follow the body
-// and floor; a sparse near layer passes over the armour without hiding it.
+// and floor; its near layer burns across the entire unfinished body before
+// the existing slow envelope lets the final armour emerge unchanged.
 export const NANITE_FLAME_ATLAS = Object.freeze({
   src: "/rexonance-flame-20261019/flame.webp",
   width: 1024,
@@ -130,6 +131,23 @@ for (let i = 0; i < 40; i += 1) {
   ROOTS[i * 3 + 1] = v;
   ROOTS[i * 3 + 2] = side;
 }
+// Near-surface roots follow the actual body, not just its silhouette.
+// x/y are figure fractions; width is figure px at H=1000; height is H's
+// fraction. The first sixteen cover every region even on a coarse pointer.
+// Extra fine-pointer strands fill the waist/upper-thigh mixing layer.
+const FRONT = new Float32Array([
+  // Head, chest, abdomen and hips overlap along the body centreline.
+  0.5, 0.18, 145, 0.19, 0, 0.5, 0.35, 245, 0.25, 0.015, 0.5, 0.52, 225, 0.25, -0.02, 0.5, 0.68, 215,
+  0.26, 0.015,
+  // Arms and forearms; volume roots sit below their visible body patches.
+  0.21, 0.46, 135, 0.26, -0.12, 0.79, 0.46, 135, 0.26, 0.12, 0.19, 0.64, 130, 0.25, -0.1, 0.81,
+  0.64, 130, 0.25, 0.1,
+  // The shins/feet splay wider than the thighs in the supplied undersuit.
+  0.36, 0.79, 165, 0.32, -0.04, 0.64, 0.79, 165, 0.32, 0.04, 0.28, 0.94, 150, 0.25, -0.035, 0.72,
+  0.94, 150, 0.25, 0.035, 0.255, 0.986, 155, 0.16, -0.045, 0.745, 0.986, 155, 0.16, 0.045, 0.39,
+  0.42, 135, 0.23, -0.035, 0.61, 0.42, 135, 0.23, 0.035, 0.4, 0.58, 125, 0.23, -0.04, 0.6, 0.58,
+  125, 0.23, 0.04, 0.4, 0.71, 120, 0.22, -0.025, 0.6, 0.71, 120, 0.22, 0.025,
+]);
 
 let fallback = null;
 let heat = null;
@@ -304,8 +322,8 @@ export function drawNaniteFlame(context, core, strength, clock, scale = 1) {
   }
 }
 
-/** `back` is behind the body's plates; `front` is the sparse near edge and
- * embers. The default preserves the old API for isolated uses/tests. No new
+/** `back` is behind the body's plates; `front` burns across the whole body
+ * and adds embers. The default preserves the old API for isolated uses/tests. No new
  * particle can appear beyond the figure's head/feet clipping bounds. */
 export function drawBodyFlame(context, size, strength, clock, scale = 1, layer = "all") {
   if (
@@ -325,13 +343,13 @@ export function drawBodyFlame(context, size, strength, clock, scale = 1, layer =
   context.save();
   try {
     if (scale !== 1) context.scale(scale, scale);
-    // Behind the silhouette/plates, radiance adds while the armour still
-    // occludes the near half of each plume. Only the sparse front uses screen.
+    // The silhouette still occludes the back fire. Redistribute its budget
+    // toward the near body surface instead of adding more atlas draws.
     context.globalCompositeOperation = "lighter";
     if (layer !== "front") {
-      // A coarse pointer gets 14 root pairs instead of 20; every pair still
-      // spans head to feet. The sprite detail, not particle count, is quality.
-      const rootPairs = coarse ? 14 : 20;
+      // Nine/thirteen pairs preserve head-to-feet coverage behind the body;
+      // their released budget now covers sixteen/twenty near-surface roots.
+      const rootPairs = coarse ? 9 : 13;
       for (let n = 0; n < rootPairs * 2; n += 1) {
         const i = Math.round(((n >> 1) * 19) / (rootPairs - 1)) * 2 + (n % 2);
         const k = i * 8;
@@ -372,22 +390,27 @@ export function drawBodyFlame(context, size, strength, clock, scale = 1, layer =
       }
     }
     if (layer !== "back") {
-      context.globalCompositeOperation = "screen";
-      // These wisps cross only the outer armour. The sternum, face and gold
-      // trim are not washed out by an additive full-body green overlay.
-      for (let i = 0; i < 8; i += 1) {
-        const k = (i + 48) * 8;
-        const root = (i * 5 + 3) % 40;
-        const side = ROOTS[root * 3 + 2];
+      context.globalCompositeOperation = "source-over";
+      // Overlapping, upward-moving volume tongues cross head, sternum,
+      // abdomen, both arms, thighs, shins and feet. Preserve the volume's
+      // authored absorption as well as emission: screen blending on bright
+      // silver/blue plates had reduced the fire to almost invisible lines.
+      const nearRoots = coarse ? 16 : 20;
+      for (let i = 0; i < nearRoots; i += 1) {
+        const k = (i + 44) * 8;
+        const root = i * 5;
+        const y = FRONT[root + 1] * H;
+        const lift = FRONT[root + 3] * H * (0.58 + 0.42 * power);
+        const pulse = 0.94 + 0.06 * Math.sin(clock * (2.1 + SEED[k]) + i * 1.7);
         tongue(
           context,
-          ROOTS[root * 3] * W - side * 12 * unit,
-          ROOTS[root * 3 + 1] * H,
-          (24 + SEED[k] * 18) * unit * 1.4,
-          (53 + SEED[k + 1] * 58) * unit * 1.2 * power,
+          FRONT[root] * W + Math.sin(clock * 1.7 + i * 2.3) * 3 * unit * power,
+          y,
+          FRONT[root + 2] * unit * (0.7 + 0.3 * power),
+          Math.min(lift * pulse, Math.max(5, y - H * 0.012)),
           clock * 16 * (0.8 + SEED[k + 2] * 0.3) + SEED[k + 3] * 32,
-          power * 0.35,
-          side * 0.16,
+          power * (0.88 + SEED[k + 4] * 0.1),
+          FRONT[root + 4] + Math.sin(clock * 2 + i) * 0.025,
         );
       }
       context.fillStyle = "rgb(146 224 106)";

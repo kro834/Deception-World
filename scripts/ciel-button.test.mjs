@@ -42,13 +42,36 @@ const compile = (path) =>
 // Run the real provider callbacks and its real cancelable waits. Rendering is
 // checked separately in the browser; these tests control otherwise rare races.
 function mount() {
+  const tree = ts.createSourceFile(
+    "zeus-button.tsx",
+    read("src/components/zeus-button.tsx"),
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.TSX,
+  );
+  const provider = tree.statements.find(
+    (node) => ts.isFunctionDeclaration(node) && node.name?.text === "ZeusButtonProvider",
+  );
+  const callbackNames = [];
+  const visit = (node) => {
+    if (
+      ts.isVariableDeclaration(node) &&
+      node.initializer &&
+      ts.isCallExpression(node.initializer) &&
+      node.initializer.expression.getText(tree) === "useCallback"
+    )
+      callbackNames.push(node.name.getText(tree));
+    ts.forEachChild(node, visit);
+  };
+  visit(provider);
   const effects = [],
     callbacks = [],
     states = [],
     writes = [],
     frames = new Map(),
     timers = new Map(),
-    pending = [];
+    pending = [],
+    storageWrites = [];
   let serial = 0,
     time = 0;
   const win = new EventTarget(),
@@ -64,11 +87,15 @@ function mount() {
       return serial;
     },
     clearTimeout: (id) => timers.delete(id),
-    localStorage: { getItem: () => null, setItem() {} },
+    localStorage: {
+      getItem: () => null,
+      setItem: (...args) => storageWrites.push(args),
+    },
   });
   Object.assign(doc, {
     hidden: false,
     body: {},
+    createElement: () => ({}),
     querySelectorAll: () => [],
     querySelector: () => null,
   });
@@ -144,6 +171,15 @@ function mount() {
     pending,
     waits,
     navigate,
+    storageWrites,
+    callback(name) {
+      const index = callbackNames.indexOf(name);
+      assert.ok(index >= 0, `real provider callback ${name} exists`);
+      return callbacks[index];
+    },
+    advanceTime(ms) {
+      time += ms;
+    },
     flushFrames() {
       for (const [id, fn] of [...frames]) {
         frames.delete(id);
@@ -172,6 +208,51 @@ const start = async (h) => {
   await tick();
   return { done };
 };
+
+const triggerSecret = (h) => {
+  for (let i = 0; i < 10; i++) {
+    h.callback("tapSecret")({ x: 0.95, y: 0.82 });
+    h.advanceTime(100);
+  }
+};
+
+test("committing the scene clears its import deadline and retains the burned document until reload", async () => {
+  const h = mount();
+  triggerSecret(h);
+  const origin = h.states[7];
+  assert.ok(origin && origin.x === 0.95);
+  assert.deepEqual(
+    [...h.timers.values()].map(({ ms }) => ms),
+    [12000],
+  );
+  h.callback("commitSecret")();
+  assert.equal(h.timers.size, 0, "a committed scene cannot be uncovered by the import deadline");
+  h.callback("closeSecret")();
+  h.doc.hidden = true;
+  h.doc.dispatchEvent(new Event("visibilitychange"));
+  h.win.dispatchEvent(new Event("pagehide"));
+  h.flushTimers();
+  assert.equal(h.states[7], origin, "Escape and lifecycle cancellation cannot remove the scene");
+  h.doc.hidden = false;
+  await h.navigate();
+  assert.equal(h.frames.size, 0, "burned state cannot start ordinary navigation");
+  assert.equal(h.pending.length, 0);
+  assert.equal(h.storageWrites.length, 0, "the scene never persists a burned flag");
+  h.unmount();
+  await tick();
+});
+
+test("an uncommitted import can still be cancelled without persisting a burned flag", async () => {
+  const h = mount();
+  triggerSecret(h);
+  h.callback("closeSecret")();
+  assert.equal(h.states[7], null);
+  assert.equal(h.states[6], false);
+  assert.equal(h.timers.size, 0);
+  assert.equal(h.storageWrites.length, 0);
+  h.unmount();
+  await tick();
+});
 
 test("Ciel branding uses the supplied illustration in both states and preserves personal preferences", () => {
   const source = read("src/components/zeus-button.tsx");

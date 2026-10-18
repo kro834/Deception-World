@@ -72,8 +72,9 @@ void main(){
  colour+=vec3(.1,.42,.08)*cracks*coal*(1.-smoothstep(6.1,7.8,t));
  float dim=.24*smoothstep(0.,.65,t);
  float alpha=max(dim,max(inside*.96,max(jet*.84,crown*.86)));
- float restore=1.-smoothstep(7.1,9.15,t);
- OUTPUT=vec4(colour,clamp(alpha*restore,0.,1.));
+ // Burn remains opaque; never reveal the untouched page behind the shell.
+ float black=smoothstep(6.6,9.,t);
+ OUTPUT=vec4(colour*(1.-black),clamp(max(alpha,black),0.,1.));
 }`;
 
 function createField(canvas: HTMLCanvasElement) {
@@ -180,15 +181,15 @@ function createField(canvas: HTMLCanvasElement) {
 /** Canvas2D is a real lower-cost alternative, not a blank error screen. */
 function paintFallback(context: CanvasRenderingContext2D, g: InfernoGeometry, t: number) {
   const { width: w, height: h, mouthX: x, mouthY: y } = g;
-  const restore = 1 - ease(7.1, 9.15, t);
+  const black = ease(6.6, 9, t);
   context.globalCompositeOperation = "source-over";
-  context.globalAlpha = restore * ease(0, 0.65, t) * 0.24;
+  context.globalAlpha = Math.max(ease(0, 0.65, t) * 0.24, black);
   context.fillStyle = "#020a07";
   context.fillRect(0, 0, w, h);
   const radius = ease(2.1, 5.25, t) * Math.hypot(w, h) * 1.22;
   if (t > 2.1) {
-    context.globalAlpha = restore * 0.97;
-    context.fillStyle = t < 5.3 ? "#07351b" : "#050b08";
+    context.globalAlpha = 0.97 + black * 0.03;
+    context.fillStyle = t < 5.3 ? "#07351b" : "#000";
     context.beginPath();
     for (let i = 0; i <= 80; i++) {
       const angle = (i / 80) * TAU;
@@ -204,7 +205,7 @@ function paintFallback(context: CanvasRenderingContext2D, g: InfernoGeometry, t:
     context.closePath();
     context.fill();
     if (t < 6.3) {
-      context.globalAlpha = restore * (1 - ease(5.3, 6.3, t)) * 0.65;
+      context.globalAlpha = (1 - ease(5.3, 6.3, t)) * 0.65;
       context.strokeStyle = "#56be49";
       context.lineWidth = 15 + 9 * Math.sin(t * 2);
       context.stroke();
@@ -341,7 +342,7 @@ export function createCielInfernoRenderer(options: Options) {
     if (background) background.render(geometry, seconds);
     else paintFallback(context, geometry, seconds);
     const pressure = ease(1.02, 1.65, seconds) * (1 - ease(4.6, 5.6, seconds));
-    const restore = 1 - ease(7.1, 9.15, seconds);
+    const emberFade = 1 - ease(6.8, 8.7, seconds);
     const reach = Math.hypot(w, h) * (0.13 + ease(1.1, 3.2, seconds) * 0.97);
     context.globalCompositeOperation = "lighter";
     if (pressure > 0) {
@@ -418,7 +419,7 @@ export function createCielInfernoRenderer(options: Options) {
       const px = SEEDS[k + 2] * w + Math.sin(life * 8 + i) * 24;
       const py = (SEEDS[k + 3] * h + life * h * (ash > 0.6 ? 0.5 : -0.4) + h) % h;
       context.globalAlpha =
-        Math.sin(life * Math.PI) * restore * ease(1.8, 3, seconds) * (0.36 + ash * 0.12);
+        Math.sin(life * Math.PI) * emberFade * ease(1.8, 3, seconds) * (0.36 + ash * 0.12);
       const size = 0.7 + SEEDS[k + 4] * (ash > 0.6 ? 1.3 : 2);
       context.fillRect(px, py, size, size * (ash > 0.6 ? 1.3 : 2.4));
     }

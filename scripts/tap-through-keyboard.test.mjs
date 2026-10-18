@@ -19,9 +19,9 @@ function mount() {
     closest(selector) {
       assert.equal(
         selector,
-        'button.ciel-button:is([data-secret-armed="true"], [data-navigating="true"]), dialog.ciel-inferno[open] :is(button.ciel-inferno-close, button.ciel-inferno-return)',
+        'button.ciel-button:is([data-secret-armed="true"], [data-navigating="true"]), dialog.ciel-inferno[open] button.ciel-inferno-close',
       );
-      return [true, "busy", "close", "return"].includes(this.armed) ? this : null;
+      return [true, "busy", "close"].includes(this.armed) ? this : null;
     }
   }
   class MouseEvent {
@@ -104,13 +104,13 @@ test("the busy Ciel hit area cannot lapse when the short burst timer expires bef
   );
 });
 
-test("secret exit controls stay immediately usable while backdrop and underlying controls remain guarded", () => {
+test("only the flame-stop control is exempt; obsolete return controls and the page remain guarded", () => {
   const ui = mount();
   for (const kind of ["close", "return", "backdrop", "underlying-link"]) {
     const event = new ui.MouseEvent("click", 1);
     event.target = new ui.Element(kind);
     ui.handlers.get("click")(event);
-    assert.equal(event.prevented, !["close", "return"].includes(kind));
+    assert.equal(event.prevented, kind !== "close");
     assert.equal(event.stopped, event.prevented);
   }
 });

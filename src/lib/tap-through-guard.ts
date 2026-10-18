@@ -23,7 +23,7 @@ export function guardTapThrough() {
       typeof Element !== "undefined" &&
       event.target instanceof Element &&
       event.target.closest(
-        'button.ciel-button:is([data-secret-armed="true"], [data-navigating="true"]), dialog.ciel-inferno[open] :is(button.ciel-inferno-close, button.ciel-inferno-return)',
+        'button.ciel-button:is([data-secret-armed="true"], [data-navigating="true"]), dialog.ciel-inferno[open] button.ciel-inferno-close',
       )
     )
       return;

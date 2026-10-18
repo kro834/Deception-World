@@ -3,6 +3,8 @@ import test from "node:test";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import sharp from "sharp";
+import { runInNewContext } from "node:vm";
+import ts from "typescript";
 import {
   CIEL_INFERNO_GAP_MS,
   CIEL_INFERNO_TAPS,
@@ -211,4 +213,389 @@ test("separate provider instances do not share counters, locks or persistence", 
     primed: false,
     triggered: false,
   });
+});
+
+// Execute the actual component effects with a tiny host, rather than matching
+// source text. Browser QA independently checks native top-layer and black pixels.
+function mountInferno({ calm = false, nativeFailure = false, styleReady = true } = {}) {
+  let clock = 0,
+    serial = 0,
+    commits = 0,
+    renders = 0,
+    disposals = 0,
+    dirty = false;
+  const timers = new Map(),
+    frames = new Map(),
+    observers = [],
+    refs = [],
+    states = [],
+    effects = [];
+  const storageWrites = [];
+  let refIndex = 0,
+    stateIndex = 0,
+    effectIndex = 0;
+  const fragment = Symbol("fragment");
+  class Style {
+    values = new Map();
+    setProperty(name, value, priority = "") {
+      this.values.set(name, [value, priority]);
+    }
+    getPropertyValue(name) {
+      return this.values.get(name)?.[0] || "";
+    }
+    getPropertyPriority(name) {
+      return this.values.get(name)?.[1] || "";
+    }
+    removeProperty(name) {
+      this.values.delete(name);
+    }
+    get length() {
+      return this.values.size;
+    }
+  }
+  class Host extends EventTarget {
+    constructor(tag = "div") {
+      super();
+      this.tagName = tag.toUpperCase();
+      this.children = [];
+      this.attrs = new Map();
+      this.dataset = {};
+      this.style = new Style();
+      this.className = "";
+      this.inert = false;
+      this.isConnected = true;
+    }
+    get classList() {
+      return { contains: (name) => this.className.split(/\s+/).includes(name) };
+    }
+    get open() {
+      return this.attrs.has("open");
+    }
+    setAttribute(name, value) {
+      this.attrs.set(name, value);
+      if (name === "open")
+        for (const observer of observers)
+          if (observer.target === this) queueMicrotask(() => observer.callback([]));
+    }
+    getAttribute(name) {
+      return this.attrs.get(name) ?? null;
+    }
+    removeAttribute(name) {
+      this.attrs.delete(name);
+      if (name === "open")
+        for (const observer of observers)
+          if (observer.target === this) queueMicrotask(() => observer.callback([]));
+    }
+    hasAttribute(name) {
+      return name === "style" ? Boolean(this.style.length) : this.attrs.has(name);
+    }
+    append(child) {
+      this.children.push(child);
+      child.parent = this;
+    }
+    remove() {
+      if (this.parent)
+        this.parent.children = this.parent.children.filter((child) => child !== this);
+      this.isConnected = false;
+    }
+    contains(child) {
+      return child === this || this.children.some((node) => node.contains(child));
+    }
+    focus() {
+      doc.activeElement = this;
+    }
+    showModal() {
+      if (nativeFailure) throw new Error("native unavailable");
+      this.setAttribute("open", "");
+    }
+    close() {
+      this.removeAttribute("open");
+      this.dispatchEvent(new Event("close"));
+    }
+  }
+  const html = new Host("html"),
+    body = new Host("body"),
+    head = new Host("head"),
+    app = new Host("main");
+  body.append(app);
+  html.dataset.worldEffects = "full";
+  const doc = new EventTarget();
+  Object.assign(doc, {
+    documentElement: html,
+    body,
+    head,
+    hidden: false,
+    activeElement: body,
+    createElement(tag) {
+      const node = new Host(tag);
+      if (tag === "link" && styleReady) node.sheet = {};
+      return node;
+    },
+  });
+  const win = new EventTarget(),
+    media = new EventTarget(),
+    connection = new EventTarget();
+  media.matches = calm;
+  const timeout = (fn, ms) => {
+    timers.set(++serial, { fn, at: clock + ms });
+    return serial;
+  };
+  const clear = (id) => timers.delete(id);
+  const raf = (fn) => {
+    frames.set(++serial, fn);
+    return serial;
+  };
+  const storage = { setItem: (...args) => storageWrites.push(args) };
+  Object.assign(win, {
+    innerWidth: 1024,
+    innerHeight: 768,
+    setTimeout: timeout,
+    clearTimeout: clear,
+    requestAnimationFrame: raf,
+    cancelAnimationFrame: (id) => frames.delete(id),
+    visualViewport: new EventTarget(),
+    localStorage: storage,
+    sessionStorage: storage,
+  });
+  let rendererOptions;
+  const renderer = {
+    backend: "webgl2",
+    resize() {},
+    render() {
+      renders++;
+    },
+    dispose() {
+      disposals++;
+    },
+  };
+  const jsx = (type, props) => ({ type, props });
+  const compiled = ts.transpileModule(bytes("src/components/ciel-inferno.tsx").toString(), {
+    compilerOptions: {
+      module: ts.ModuleKind.CommonJS,
+      target: ts.ScriptTarget.ES2022,
+      jsx: ts.JsxEmit.ReactJSX,
+    },
+  }).outputText;
+  const exports = {};
+  runInNewContext(compiled, {
+    exports,
+    document: doc,
+    window: win,
+    navigator: { connection },
+    HTMLElement: Host,
+    Node: Host,
+    MutationObserver: class {
+      constructor(callback) {
+        this.callback = callback;
+        observers.push(this);
+      }
+      observe(target) {
+        this.target = target;
+      }
+      disconnect() {
+        this.target = null;
+      }
+    },
+    performance: { now: () => clock },
+    innerWidth: 1024,
+    innerHeight: 768,
+    matchMedia: (query) => (query.includes("pointer:") ? { matches: false } : media),
+    requestAnimationFrame: raf,
+    cancelAnimationFrame: (id) => frames.delete(id),
+    clearTimeout: clear,
+    queueMicrotask,
+    Event,
+    require(name) {
+      if (name === "react")
+        return {
+          useRef(current) {
+            const id = refIndex++;
+            return (refs[id] ||= { current });
+          },
+          useState(initial) {
+            const id = stateIndex++;
+            if (!(id in states)) states[id] = initial;
+            return [
+              states[id],
+              (value) => {
+                states[id] = value;
+                dirty = true;
+              },
+            ];
+          },
+          useId: () => "inferno-test",
+          useEffect(fn, deps) {
+            const id = effectIndex++,
+              previous = effects[id];
+            if (!previous || deps.some((value, i) => value !== previous.deps[i]))
+              effects[id] = { fn, deps, pending: true, cleanup: previous?.cleanup };
+          },
+        };
+      if (name === "react/jsx-runtime") return { jsx, jsxs: jsx, Fragment: fragment };
+      if (name === "react-dom") return { createPortal: (tree) => tree };
+      if (name === "@/lib/ciel-inferno-renderer")
+        return {
+          CIEL_INFERNO_DURATION: 9200,
+          createCielInfernoRenderer(options) {
+            rendererOptions = options;
+            return renderer;
+          },
+        };
+      if (name.endsWith(".css?url")) return { default: "inferno-test.css" };
+      throw new Error(`Unexpected component import ${name}`);
+    },
+  });
+  let props = { origin: { x: 0.8, y: 0.7 }, onCommit: () => commits++, routeKey: "/world" };
+  let modal;
+  const build = (tree) => {
+    if (tree == null || typeof tree === "boolean" || typeof tree === "string") return [];
+    if (Array.isArray(tree)) return tree.flatMap(build);
+    if (tree.type === fragment) return build(tree.props.children);
+    const node = tree.props.ref?.current || new Host(tree.type);
+    if (tree.props.ref) tree.props.ref.current = node;
+    node.className = tree.props.className || "";
+    for (const [name, value] of Object.entries(tree.props)) {
+      if (name.startsWith("data-"))
+        node.dataset[name.slice(5).replace(/-([a-z])/g, (_, c) => c.toUpperCase())] = value;
+    }
+    Object.assign(node.style, tree.props.style);
+    node.children = build(tree.props.children);
+    for (const child of node.children) child.parent = node;
+    return [node];
+  };
+  const render = () => {
+    refIndex = stateIndex = effectIndex = 0;
+    dirty = false;
+    modal = build(exports.default(props))[0];
+    body.children = [app, modal];
+    modal.parent = body;
+    for (const effect of effects)
+      if (effect.pending) {
+        effect.pending = false;
+        effect.cleanup = effect.fn();
+      }
+    if (dirty) render();
+  };
+  const descendants = (node) => [node, ...node.children.flatMap(descendants)];
+  render();
+  return {
+    doc,
+    win,
+    app,
+    html,
+    body,
+    media,
+    storageWrites,
+    timers,
+    frames,
+    get modal() {
+      return modal;
+    },
+    get commits() {
+      return commits;
+    },
+    get disposals() {
+      return disposals;
+    },
+    get renders() {
+      return renders;
+    },
+    get rendererOptions() {
+      return rendererOptions;
+    },
+    nodes: (tag) => descendants(modal).filter((node) => node.tagName === tag.toUpperCase()),
+    flush() {
+      if (dirty) render();
+    },
+    async settleMicrotasks() {
+      await Promise.resolve();
+      await Promise.resolve();
+      if (dirty) render();
+    },
+    advance(ms) {
+      clock += ms;
+      for (const [id, timer] of [...timers]) if (timer.at <= clock && timers.delete(id)) timer.fn();
+      if (dirty) render();
+    },
+    route(routeKey) {
+      props = { ...props, routeKey };
+      render();
+    },
+    dispose() {
+      for (const effect of effects) effect.cleanup?.();
+    },
+  };
+}
+
+function assertBurned(host) {
+  assert.equal(host.modal.open, true);
+  assert.equal(host.modal.dataset.phase, "burned");
+  assert.equal(host.modal.dataset.ready, "true");
+  assert.equal(host.modal.dataset.renderer, "stopped");
+  assert.equal(host.modal.style.background, "#000");
+  for (const tag of ["canvas", "img", "button"]) assert.equal(host.nodes(tag).length, 0, tag);
+  assert.equal(host.frames.size, 0);
+  assert.equal(host.timers.size, 0);
+  assert.equal(host.app.inert, true);
+  assert.deepEqual(host.storageWrites, []);
+}
+
+test("the actual component naturally becomes a GPU-free burned shell and does not expire after fourteen seconds", () => {
+  const host = mountInferno();
+  assert.equal(host.commits, 1);
+  assert.equal(host.nodes("canvas").length, 2);
+  host.advance(9200);
+  assertBurned(host);
+  assert.equal(host.disposals, 1);
+  host.advance(14000);
+  assertBurned(host);
+  assert.equal(host.commits, 1);
+  assert.equal(host.disposals, 1);
+});
+
+test("Escape, external close, visibility, pageshow and same-document routes cannot restore a committed burn", async () => {
+  const host = mountInferno();
+  const cancel = new Event("cancel", { cancelable: true });
+  host.modal.dispatchEvent(cancel);
+  host.flush();
+  assert.equal(cancel.defaultPrevented, true);
+  assertBurned(host);
+  host.modal.close();
+  await host.settleMicrotasks();
+  assertBurned(host);
+  host.doc.hidden = true;
+  host.doc.dispatchEvent(new Event("visibilitychange"));
+  host.doc.hidden = false;
+  host.doc.dispatchEvent(new Event("visibilitychange"));
+  for (const type of ["pageshow", "popstate", "hashchange"])
+    host.win.dispatchEvent(new Event(type));
+  host.route("/library");
+  await host.settleMicrotasks();
+  assertBurned(host);
+  assert.equal(host.disposals, 1);
+});
+
+for (const fault of ["renderer", "styles", "native-dialog"]) {
+  test(`${fault} failure commits a persistent black surface instead of restoring the page`, () => {
+    const host = mountInferno({
+      nativeFailure: fault === "native-dialog",
+      styleReady: fault !== "styles",
+    });
+    if (fault === "renderer") host.rendererOptions.onFailure();
+    if (fault === "styles") host.doc.head.children[0].onerror();
+    host.flush();
+    assertBurned(host);
+  });
+}
+
+test("calm rendering burns without creating a renderer, while only a fresh component/document starts unburned", () => {
+  const host = mountInferno({ calm: true });
+  assert.equal(host.rendererOptions, undefined);
+  host.advance(1900);
+  assertBurned(host);
+  assert.equal(host.disposals, 0);
+  const fresh = mountInferno({ calm: true });
+  assert.equal(fresh.modal.dataset.phase, "awaken");
+  assert.equal(fresh.nodes("canvas").length, 2);
+  assert.equal(fresh.commits, 1);
 });
