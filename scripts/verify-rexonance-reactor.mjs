@@ -48,6 +48,14 @@ assert.ok(selected.length, "RX_REACTOR_PROFILES did not select a known profile")
 await mkdir(out, { recursive: true });
 
 const digest = (buffer) => createHash("sha256").update(buffer).digest("hex").slice(0, 16);
+const runwayProgress = (state) =>
+  (state.scrollY - (state.top - state.pin)) / (state.height - state.frameHeight);
+const reachedMilestone = (actual, progress, state) =>
+  actual + 1e-6 >= progress && actual <= progress + 2 / (state.height - state.frameHeight);
+const geometryChanged = (before, after) =>
+  ["top", "height", "frameHeight", "pin"].some(
+    (property) => Math.abs(before[property] - after[property]) > 0.5,
+  );
 const readRunway = (page) =>
   page.evaluate(() => {
     const runway = document.querySelector(".rzn-suitup");
@@ -219,51 +227,53 @@ for (const profile of selected) {
     const shots = [];
     for (const { direction, progress } of milestones) {
       const label = `${profile.name}-${direction}`;
-      const previousDraws = await page.evaluate(() => window.__reactorCanvasDraws);
-      await page.evaluate(
-        ({ start, progress }) =>
-          scrollTo({
-            top: Math.ceil(start.top - start.pin + progress * (start.height - start.frameHeight)),
-            behavior: "instant",
-          }),
-        { start: initial, progress },
-      );
-      const approximatePercent = Math.round(Math.min(1, progress / 0.93) * 100);
-      try {
+      let evidence;
+      let state;
+      let actual;
+      let corrections = 0;
+      // WebKit can change font metrics and the sticky frame's top/height as
+      // the first live canvas replaces its still. Aim each stop using current
+      // geometry; re-aim only when that geometry itself changed mid-stop.
+      for (let attempt = 0; attempt < 3; attempt += 1) {
+        const before = await readRunway(page);
+        const previousDraws = await page.evaluate(() => window.__reactorCanvasDraws);
+        await page.evaluate(
+          ({ start, progress }) =>
+            scrollTo({
+              top: Math.ceil(start.top - start.pin + progress * (start.height - start.frameHeight)),
+              behavior: "instant",
+            }),
+          { start: before, progress },
+        );
         await page.waitForFunction(
-          (expected) => {
+          () => {
             const runway = document.querySelector(".rzn-suitup");
             return (
               runway?.dataset.rznState === "live" &&
-              runway.querySelector("canvas.rzn-canvas")?.width > 0 &&
-              Math.abs(Number(runway.querySelector(".rzn-percent")?.textContent) - expected) <= 1
+              runway.querySelector("canvas.rzn-canvas")?.width > 0
             );
           },
-          approximatePercent,
+          null,
           { timeout: 30000 },
         );
-      } catch (error) {
-        const failureState = await readRunway(page);
-        throw new Error(
-          `${label}/${progress}: timed out waiting for ${approximatePercent}%: ${JSON.stringify(failureState)}`,
-          {
-            cause: error,
-          },
+        evidence = await awaitPaint(page, `${label}/${progress}`, previousDraws);
+        state = { ...(await readRunway(page)), direction, progress };
+        actual = runwayProgress(state);
+        if (reachedMilestone(actual, progress, state)) break;
+        assert.ok(
+          geometryChanged(before, state),
+          `${label}/${progress}: scroll missed target without a layout change; before=${JSON.stringify(before)}, current=${JSON.stringify(state)}`,
         );
+        corrections += 1;
       }
-      const evidence = await awaitPaint(page, `${label}/${progress}`, previousDraws);
-      const state = { ...(await readRunway(page)), direction, progress };
-      const actual =
-        (state.scrollY - (initial.top - initial.pin)) / (initial.height - initial.frameHeight);
       assert.ok(
-        actual + 1e-6 >= progress &&
-          actual <= progress + 2 / (initial.height - initial.frameHeight),
-        `${label}/${progress}: wrong scroll progress ${actual}`,
+        reachedMilestone(actual, progress, state),
+        `${label}/${progress}: wrong current-layout scroll progress ${actual}; state=${JSON.stringify(state)}`,
       );
       assert.equal(
         state.percent,
         Math.round(Math.min(1, actual / 0.93) * 100),
-        `${label}/${progress}: HUD progress`,
+        `${label}/${progress}: HUD progress; current=${JSON.stringify(state)}, actual=${actual}`,
       );
       assert.ok(
         state.canvasWidth > 0 && state.canvasHeight > 0,
@@ -274,7 +284,7 @@ for (const profile of selected) {
         `${label}/${progress}: horizontal overflow`,
       );
       const files = await capture(page, dir, direction, state, evidence);
-      shots.push({ ...state, actual, ...files });
+      shots.push({ ...state, actual, corrections, ...files });
       console.log(
         `${label} ${progress.toFixed(2)}: ${state.phase} / ${state.percent}% / ${evidence.alphaPixels} pixels`,
       );
