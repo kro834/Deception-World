@@ -98,3 +98,69 @@ export function drawNaniteFlame(context, [cx, cy], strength, clock, scale = 1) {
   }
   context.restore();
 }
+
+// The body's half-width at a height (fractions of the figure): head, neck,
+// shoulders, waist, hips, knees, feet.
+const PROFILE = [
+  [0.06, 0.07],
+  [0.18, 0.09],
+  [0.24, 0.4],
+  [0.4, 0.36],
+  [0.5, 0.24],
+  [0.62, 0.26],
+  [0.8, 0.24],
+  [0.97, 0.28],
+];
+const halfWidth = (v) => {
+  for (let k = 1; k < PROFILE.length; k += 1) {
+    const [y1, w1] = PROFILE[k];
+    if (v <= y1) {
+      const [y0, w0] = PROFILE[k - 1];
+      return w0 + ((w1 - w0) * (v - y0)) / (y1 - y0);
+    }
+  }
+  return PROFILE[PROFILE.length - 1][1];
+};
+const BODY_FLAMES = 420;
+
+/**
+ * The fire all round the body (owner, 2026-10-18): tongues rising from a
+ * burning bed that hugs the figure's outline from the head to the feet,
+ * and from the floor at its feet. `size` is the figure's { width, height }.
+ */
+export function drawBodyFlame(context, size, strength, clock, scale = 1) {
+  if (strength <= 0) return;
+  sprites ??= makeSprites();
+  if (!sprites) return;
+  const { width: W, height: H } = size;
+  context.save();
+  if (scale !== 1) context.scale(scale, scale);
+  context.globalCompositeOperation = "lighter";
+  for (let i = 0; i < BODY_FLAMES; i += 1) {
+    if (hash(i + 50.5) > strength * 1.1) continue;
+    const rate = 0.5 + 0.45 * hash(i + 51.3);
+    const age = (clock * rate + hash(i + 52.7)) % 1;
+    let bx;
+    let by;
+    if (hash(i + 53.9) < 0.22) {
+      // The floor at the feet.
+      bx = W * (0.5 + (hash(i + 54.1) - 0.5) * 0.8);
+      by = H * 0.985;
+    } else {
+      const v = 0.05 + 0.93 * hash(i + 55.3);
+      const side = hash(i + 56.7) < 0.5 ? -1 : 1;
+      bx = W * (0.5 + side * (halfWidth(v) - 0.01 + 0.04 * hash(i + 57.1)));
+      by = H * v;
+    }
+    const lift = (60 + 70 * hash(i + 58.3)) * (0.6 + 0.4 * strength) * age;
+    const sway = Math.sin(clock * 2.6 + i * 1.3 + age * 5) * 7 * age;
+    const s = (26 + 28 * hash(i + 59.9)) * (0.5 + age * 1.1) * (1 - age * 0.55);
+    const tone = age < 0.16 ? 0 : age < 0.42 ? 1 : age < 0.76 ? 2 : 3;
+    const fade = Math.sin(Math.PI * Math.min(1, age * 1.15)) * strength;
+    context.globalAlpha = Math.min(1, fade * (tone === 3 ? 0.26 : tone === 0 ? 0.8 : 0.62));
+    if (tone === 3) context.globalCompositeOperation = "source-over";
+    context.drawImage(sprites[tone], bx + sway - s / 2, by - lift - s * 0.62, s, s * 1.24);
+    if (tone === 3) context.globalCompositeOperation = "lighter";
+  }
+  context.restore();
+}

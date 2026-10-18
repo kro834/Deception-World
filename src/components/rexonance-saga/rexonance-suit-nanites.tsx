@@ -20,7 +20,7 @@ import {
 import { REXONANCE_SUIT_LIGHT, REXONANCE_SUIT_REVEAL_MS } from "@/lib/rexonance-calls";
 import { REXONANCE_SUIT_MARKS } from "@/lib/rexonance-suit";
 import { reactorCoilAngle, reactorCoilScale } from "@/lib/rexonance-reactor.js";
-import { drawNaniteFlame } from "@/lib/rexonance-flame.js";
+import { drawBodyFlame, drawNaniteFlame } from "@/lib/rexonance-flame.js";
 import type { SuitExtrasEnv } from "./rexonance-suit-extras";
 import { suitExtrasApi } from "./rexonance-suit-extras-hook";
 
@@ -382,7 +382,10 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
               1 - Math.min(1, Math.max(0, (t - CALL_FLAME[1]) / CALL_FLAME[2])),
             );
             const flame = raw * raw * (3 - 2 * raw);
-            if (flame > 0) drawNaniteFlame(flight, REXONANCE_SUIT_MARKS.core, flame, t / 1000, s);
+            if (flame > 0) {
+              drawBodyFlame(flight, FIG, flame, t / 1000, s);
+              drawNaniteFlame(flight, REXONANCE_SUIT_MARKS.core, flame, t / 1000, s);
+            }
           }
           for (let p = 0; p < all.length; p += 1) {
             const plate = all[p];

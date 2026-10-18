@@ -7,7 +7,7 @@ import {
   warpPicture,
 } from "./rexonance-overwrite.js";
 import { createSplitLightsJob } from "./rexonance-unlit.js";
-import { drawNaniteFlame } from "./rexonance-flame.js";
+import { drawBodyFlame, drawNaniteFlame } from "./rexonance-flame.js";
 import { releasePendingImage } from "./release-pending-images.js";
 import {
   createReactorLayers,
@@ -2890,6 +2890,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       );
       if (flame > 0) {
         const clock = calm ? progress * 60 : (environment.performance?.now?.() ?? 0) / 1000;
+        drawBodyFlame(context, config.size, flame, clock);
         drawNaniteFlame(context, config.core, flame, clock);
       }
     }

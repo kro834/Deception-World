@@ -5,3 +5,10 @@ export function drawNaniteFlame(
   clock: number,
   scale?: number,
 ): void;
+export function drawBodyFlame(
+  context: CanvasRenderingContext2D,
+  size: { readonly width: number; readonly height: number },
+  strength: number,
+  clock: number,
+  scale?: number,
+): void;
