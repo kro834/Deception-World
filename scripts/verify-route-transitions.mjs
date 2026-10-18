@@ -73,6 +73,7 @@ const SCENARIOS = {
   "menu-rexonance": menuDive("/world", "/rexonance-saga#top", "/rexonance-saga"),
   "menu-extreme": menuDive("/world", "/extreme-saga#top", "/extreme-saga"),
   "menu-final": menuDive("/world", "/final-stage#top", "/final-stage"),
+  "menu-cinema": menuDive("/world", "/saga-cinema#top", "/saga-cinema"),
   // The dream dive back to the World (the Dream Chapter's return link): its
   // ground clears from the World side (styles-world-mirage.css).
   "dream-world": { start: "/dream-chapter", dest: "/world", target: ".dream-back-link" },
@@ -333,7 +334,8 @@ async function audit(browser, analyser, profileName, name) {
       const covers =
         Boolean(gate) &&
         (!gate.classList.contains("is-revealing") ||
-          [...gate.querySelectorAll(".dwc-shutter > i, .rider-cutin-stage, .rx-call-ground")].some(
+          // Cinema's own shutters/title also cover the destination until their reveal finishes.
+          [...gate.querySelectorAll(".dwc-shutter > i, .rider-cutin-stage, .rx-call-ground, .cinema-route-shutter, .cinema-route-title")].some(
             shown,
           ));
       return {
@@ -386,7 +388,12 @@ async function audit(browser, analyser, profileName, name) {
   console.log(JSON.stringify(result));
   await context.close();
   assert.ok(firstGate, `${profileName} ${name}: a cover was shown`);
-  assert.match(firstGate.gate, /has-cine/, `${profileName} ${name}: the file shutter`);
+  if (name === "menu-cinema") {
+    // Saga uses its dedicated route curtain rather than the shared file shutter class.
+    assert.match(firstGate.gate, /cinema-route-curtain/, `${profileName} ${name}: route curtain`);
+  } else {
+    assert.match(firstGate.gate, /has-cine/, `${profileName} ${name}: the file shutter`);
+  }
   assert.equal(
     handedOver?.path,
     scenario.dest,

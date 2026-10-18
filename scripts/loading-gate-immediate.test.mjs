@@ -16,8 +16,9 @@ test("covered opening navigation is selected before immediate routes while rider
   assert.notEqual(goEnd, -1, "go callback must end before the provider API");
   const goBlock = gate.slice(goStart, goEnd);
   const coveredIndex = goBlock.search(/if\s*\([^)]*\btransitionCovered\b[^)]*\)\s*\{/);
+  // Saga's new curtain is a covered branch, so it must stay out of direct navigation.
   const directIndex = goBlock.search(
-    /if \(\s*!isArchiveTransition &&\s*!isZeusTransition &&\s*!isGalleryTransition &&\s*!riderTransitionVariant\s*\) \{/,
+    /if \(\s*!isArchiveTransition &&\s*!isZeusTransition &&\s*!isGalleryTransition &&\s*!isCinemaTransition &&\s*!riderTransitionVariant\s*\) \{/,
   );
   assert.notEqual(coveredIndex, -1, "go must handle a shared transition before routing");
   assert.notEqual(directIndex, -1, "go must retain the immediate-route branch");
@@ -29,9 +30,10 @@ test("covered opening navigation is selected before immediate routes while rider
 
   assert.match(gate, /pathname === "\/form-archive" \|\| to === "\/form-archive"/);
   assert.match(gate, /const isZeusTransition = changesDocument && to === "\/managers\/zeus"/);
+  // Direct-route behavior must continue excluding every route with a deliberate cover.
   assert.match(
     gate,
-    /if \(\s*!isArchiveTransition &&\s*!isZeusTransition &&\s*!isGalleryTransition &&\s*!riderTransitionVariant\s*\) \{[\s\S]*?await navigate\(\{ to, hash, search: navigationSearch \?\? \(changesDocument \? undefined : true\) \}\);[\s\S]*?return;/,
+    /if \(\s*!isArchiveTransition &&\s*!isZeusTransition &&\s*!isGalleryTransition &&\s*!isCinemaTransition &&\s*!riderTransitionVariant\s*\) \{[\s\S]*?await navigate\(\{ to, hash, search: navigationSearch \?\? \(changesDocument \? undefined : true\) \}\);[\s\S]*?return;/,
   );
   const directTail = goBlock.slice(directIndex).search(/\n\s+return;\n\s+\}/);
   const directEnd = directTail === -1 ? -1 : directIndex + directTail;

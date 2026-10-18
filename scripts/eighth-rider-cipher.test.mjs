@@ -63,8 +63,9 @@ test("Cipher dossier navigation mounts the enhanced false-trace cut-in", () => {
   assert.match(gate, /cipher-data-fragments[^]*?Array\.from\(\{ length: 16 \}/);
   assert.match(worldCss, /styles-world\/22\.css/);
   assert.match(cutInCss, /\.is-cipher-cutin\.is-revealing \.cipher-slash-field/);
+  // Saga now takes the covered route path; keep ordinary navigation excluded from covers.
   assert.match(
     gate,
-    /if \(\s*!isArchiveTransition &&\s*!isZeusTransition &&\s*!isGalleryTransition &&\s*!riderTransitionVariant\s*\) \{[\s\S]*?await navigate\(\{ to, hash, search: navigationSearch \?\? \(changesDocument \? undefined : true\) \}\);[\s\S]*?return;/,
+    /if \(\s*!isArchiveTransition &&\s*!isZeusTransition &&\s*!isGalleryTransition &&\s*!isCinemaTransition &&\s*!riderTransitionVariant\s*\) \{[\s\S]*?await navigate\(\{ to, hash, search: navigationSearch \?\? \(changesDocument \? undefined : true\) \}\);[\s\S]*?return;/,
   );
 });

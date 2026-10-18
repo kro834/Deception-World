@@ -83,7 +83,6 @@ export function SagaCinema() {
   const pageRef = useRef<HTMLDivElement>(null);
   const heroRef = useRef<HTMLElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const openingRef = useRef<HTMLDialogElement>(null);
   const detailRef = useRef<HTMLDialogElement>(null);
   const galleryRef = useRef<HTMLDialogElement>(null);
   const detailPosterRef = useRef<HTMLButtonElement>(null);
@@ -92,10 +91,8 @@ export function SagaCinema() {
   const requestedHeroRef = useRef(3);
   const committedHeroRef = useRef(3);
   const galleryFromDetailRef = useRef(false);
-  const openingInitializedRef = useRef(false);
   const releaseScrollLockRef = useRef<(() => void) | null>(null);
   const timersRef = useRef(new Set<ReturnType<typeof setTimeout>>());
-  const openingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const touchRef = useRef<{ x: number; y: number } | null>(null);
   const [heroIndex, setHeroIndex] = useState(3);
@@ -105,18 +102,15 @@ export function SagaCinema() {
   const [automatic, setAutomatic] = useState(false);
   const [heroVisible, setHeroVisible] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [openingOpen, setOpeningOpen] = useState(false);
-  const [openingDeparting, setOpeningDeparting] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [toast, setToast] = useState("");
   const { calm, ready, visible } = useCinemaPreferences();
-  const modalOpen = openingOpen || detailOpen || galleryOpen;
+  const modalOpen = detailOpen || galleryOpen;
   const hero = SAGA_CINEMA_FILMS[heroIndex];
   const detail = SAGA_CINEMA_FILMS[detailIndex];
   const gallery = SAGA_CINEMA_FILMS[galleryIndex];
 
-  useNativeDialog(openingRef, openingOpen);
   useNativeDialog(detailRef, detailOpen);
   useNativeDialog(galleryRef, galleryOpen);
   useCinemaMotion(
@@ -141,14 +135,11 @@ export function SagaCinema() {
     selectionRef.current += 1;
     requestedHeroRef.current = committedHeroRef.current;
     setHeroChanging(false);
-    if (openingTimerRef.current) clearTimeout(openingTimerRef.current);
-    [openingRef, galleryRef, detailRef].forEach((ref) => {
+    [galleryRef, detailRef].forEach((ref) => {
       if (ref.current?.open) ref.current.close();
     });
     releaseScrollLockRef.current?.();
     releaseScrollLockRef.current = null;
-    setOpeningOpen(false);
-    setOpeningDeparting(false);
     setGalleryOpen(false);
     setDetailOpen(false);
     setMenuOpen(false);
@@ -169,9 +160,8 @@ export function SagaCinema() {
       mountedRef.current = false;
       selectionRef.current += 1;
       timers.forEach((timer) => clearTimeout(timer));
-      if (openingTimerRef.current) clearTimeout(openingTimerRef.current);
       if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
-      [openingRef, galleryRef, detailRef].forEach((ref) => {
+      [galleryRef, detailRef].forEach((ref) => {
         if (ref.current?.open) ref.current.close();
       });
     };
@@ -198,32 +188,8 @@ export function SagaCinema() {
   }, []);
 
   useEffect(() => {
-    if (!ready || openingInitializedRef.current) return;
-    openingInitializedRef.current = true;
-    if (calm || (window.location.hash && window.location.hash !== "#top")) return;
-    try {
-      if (sessionStorage.getItem("saga-opening-v2") === "seen") return;
-    } catch {
-      /* Session storage is optional. */
-    }
-    const root = document.documentElement;
-    const openWhenReady = () => {
-      if (root.hasAttribute("data-loading")) return;
-      setOpeningOpen(true);
-      observer.disconnect();
-    };
-    const observer = new MutationObserver(openWhenReady);
-    observer.observe(root, { attributes: true, attributeFilter: ["data-loading"] });
-    openWhenReady();
-    return () => observer.disconnect();
-  }, [calm, ready]);
-
-  useEffect(() => {
     if (!calm) return;
     setAutomatic(false);
-    setOpeningOpen(false);
-    setOpeningDeparting(false);
-    if (openingTimerRef.current) clearTimeout(openingTimerRef.current);
   }, [calm]);
 
   const selectHero = useCallback(
@@ -279,29 +245,6 @@ export function SagaCinema() {
       ?.focus({ preventScroll: true });
   };
 
-  const enterSaga = () => {
-    if (openingTimerRef.current) clearTimeout(openingTimerRef.current);
-    try {
-      sessionStorage.setItem("saga-opening-v2", "seen");
-    } catch {
-      /* Optional persistence. */
-    }
-    if (calm) {
-      setOpeningOpen(false);
-      setOpeningDeparting(false);
-      return;
-    }
-    setOpeningDeparting(true);
-    openingTimerRef.current = setTimeout(() => {
-      setOpeningOpen(false);
-      setOpeningDeparting(false);
-    }, 650);
-  };
-  const replayOpening = () => {
-    if (openingTimerRef.current) clearTimeout(openingTimerRef.current);
-    setOpeningDeparting(false);
-    setOpeningOpen(true);
-  };
   const openDetail = (index: number) => {
     setDetailIndex(cinemaWrap(index));
     setDetailOpen(true);
@@ -560,9 +503,6 @@ export function SagaCinema() {
                 <span>
                   邂逅 <i>/</i> 覚醒 <i>/</i> 激情 <i>/</i> 終末
                 </span>
-                <button className="text-button" id="replay-intro" onClick={replayOpening}>
-                  OPENING <span>↺</span>
-                </button>
               </div>
             </section>
             <section className="intro section" id="introduction">
@@ -761,66 +701,6 @@ export function SagaCinema() {
             </div>
           </footer>
         </div>
-        <dialog
-          ref={openingRef}
-          id="opening"
-          className={`opening${openingDeparting ? " departing" : ""}`}
-          aria-label="映画 仮面ライダーサーガ オープニング"
-          onClose={() => {
-            setOpeningOpen(false);
-            setOpeningDeparting(false);
-          }}
-          onCancel={(event) => {
-            event.preventDefault();
-            enterSaga();
-          }}
-        >
-          <div className="opening-background" aria-hidden="true" />
-          <div className="opening-panels" aria-hidden="true">
-            <i />
-            <i />
-            <i />
-            <i />
-          </div>
-          <div className="opening-frame" aria-hidden="true" />
-          <div className="opening-orbit" aria-hidden="true">
-            <i />
-            <i />
-            <i />
-          </div>
-          <div className="opening-top">
-            <span>SAGA / THE CINEMATIC TETRALOGY</span>
-            <span>FILMS 01 — 04</span>
-          </div>
-          <button className="opening-skip" id="opening-skip" onClick={enterSaga}>
-            SKIP <span>↗</span>
-          </button>
-          <div className="opening-center">
-            <p className="opening-project">本編リメイク 映画4部作</p>
-            <div className="logo-crop opening-logo">
-              <img src={SAGA_CINEMA_LOGO} width="1536" height="1024" alt="仮面ライダーサーガ" />
-            </div>
-            <div className="opening-titles">
-              <span>邂逅</span>
-              <i />
-              <span>覚醒</span>
-              <i />
-              <span>激情</span>
-              <i />
-              <span>終末</span>
-            </div>
-            <p className="opening-caption">FOUR CHAPTERS. ONE SAGA.</p>
-            <button id="enter-world" className="frame-button" onClick={enterSaga}>
-              ENTER THE SAGA <span>→</span>
-            </button>
-          </div>
-          <div className="opening-bottom">
-            <WorldReturn className="opening-world-return" beforeNavigate={closeAll}>
-              ← ディセプションワールドへ戻る
-            </WorldReturn>
-            <span>KAMEN RIDER SAGA</span>
-          </div>
-        </dialog>
         <dialog
           ref={detailRef}
           id="film-dialog"

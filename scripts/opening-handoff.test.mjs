@@ -101,8 +101,9 @@ test("the title recovers cancellation, BFCache, and background video state", () 
 test("covered navigation waits for destination readiness and is cancellation-safe", () => {
   const goBlock = sliceBetween(gate, "const go = useCallback", "\n\n  const api = useMemo", "go");
   const coveredIndex = goBlock.search(/if\s*\([^)]*\btransitionCovered\b[^)]*\)\s*\{/);
+  // Saga is covered by its route curtain and must not enter the direct branch.
   const directIndex = goBlock.search(
-    /if\s*\(\s*!isArchiveTransition\s*&&\s*!isZeusTransition\s*&&\s*!isGalleryTransition\s*&&\s*!riderTransitionVariant\s*\)\s*\{/,
+    /if\s*\(\s*!isArchiveTransition\s*&&\s*!isZeusTransition\s*&&\s*!isGalleryTransition\s*&&\s*!isCinemaTransition\s*&&\s*!riderTransitionVariant\s*\)\s*\{/,
   );
   assert.notEqual(coveredIndex, -1, "go must have a transitionCovered branch");
   assert.notEqual(directIndex, -1, "go must retain the ordinary direct-navigation branch");
