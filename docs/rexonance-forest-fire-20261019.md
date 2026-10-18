@@ -26,6 +26,29 @@ The artwork and its reactor remain visible through the effect. A lightweight
 procedural fallback covers unavailable or failed image decoding. Reduced-motion,
 economy and hidden-page paths must not introduce a new fire-atlas download.
 
+The final atlas has 32 frames (8 × 4, each 128 × 256) and weighs 434,422 bytes.
+Its decoded RGBA footprint is 4 MiB, retained once across return visits. Cycles
+CPU rendered eight volumes/4,704 vertices at 64 samples and 256 × 512 pixels
+per frame, before Lanczos downsampling. A separately rendered closing frame
+matches the first frame exactly (zero differing RGBA channels). The packer
+feathers only the root alpha from source y=228 to y=248, avoiding rectangular
+cutoffs while keeping the physical contact at `[64,248]`.
+
+Reproduce with a compatible Blender executable, then check the packed result:
+
+```sh
+/path/to/Blender -b --factory-startup -P scripts/blender/rexonance_flame.py -- \
+  output/playwright/flame-production --frames 32 --samples 64 --scale 2 --render-loop-check
+node scripts/build-rexonance-flame.mjs
+node scripts/build-rexonance-flame.mjs --check
+```
+
+The atlas SHA-256 is
+`db523fd82776d2aedfb3d8ce13730cb9ee422c3f584a8efefee163a846db70f4`.
+The manifest also records source-script hashes and every intermediate render's
+hash. Production verification hashes both the atlas and manifest, and rejects
+unknown paths or suffixes before requesting them.
+
 ## Verification record
 
 The local evidence is kept under `output/playwright/`; these generated screenshots,
@@ -34,5 +57,75 @@ assembly progress in the reference and candidate, including ignition, maximum
 burn and extinction, in both engines. Browser emulation is not physical iPad or
 iPhone verification; those checks remain with the owner.
 
-Final commands, results, asset sizes and release identity are recorded here after
-the candidate passes its checks.
+Local source/build checks on `e227a0f301070192b6f50cfa25d2c108f7495862`:
+
+- `npm test`: 2,539 discovered, 2,534 passed, zero failed, five skipped.
+- `npm run typecheck`, `npx vite build`: passed. No database migration was run
+  during local builds.
+- `npm run lint`: zero errors, 12 warnings in pre-existing unrelated files.
+- `node scripts/sync-source-parts.mjs --check`: all 15 source groups agree.
+- `node scripts/build-rexonance-flame.mjs --check`: dimensions, 500 kB transfer
+  budget, hashes, reproducible sources and independently rendered loop agree.
+- `verify-rexonance-operability.mjs`: all eight Chromium profiles passed,
+  including coarse-pointer drag/scroll, tab focus, anchor positioning,
+  orientation, reduced motion and forced colours. Run against the same runtime
+  before its final root-alpha feathering; no input/layout code changed afterward.
+
+The initial candidate was rejected after the real composition made the volume
+too dark. The second iteration uses controlled additive back/core emission,
+wider fire tongues, a restrained screen-composited front layer and a final
+root-alpha feather. This is a visual correction, not an assertion of greater
+device frame rate. At peak strength the engine uses 64 tongues (52 with a coarse
+pointer), each sampling at most two atlas frames, rather than the previous 570
+radial blobs; actual frame costs depend on the rest of the assembly.
+
+`verify-rexonance-flame.mjs` passed all nine final browser cases:
+
+| Engine   | Viewports / cases                                           | Result   |
+| -------- | ----------------------------------------------------------- | -------- |
+| Chromium | 1440px desktop, 320px touch/DPR3, 1024px touch/DPR2; normal | 3 passed |
+| Chromium | Desktop and 320px; atlas blocked and reduced motion         | 4 passed |
+| WebKit   | 320px touch/DPR3 and 1024px touch/DPR2; normal              | 2 passed |
+
+The probe recorded real atlas draws in **both** engines, all 32 source frames,
+one initial request and zero repeat requests. Missing-atlas cases actually drew
+the cached procedural fallback in both engines. Reduced motion requested no
+flame atlas and kept its finished still without a tall scroll trap. Normal cases
+had no JavaScript errors or horizontal overflow, stopped drawing under synthetic
+visibility hiding, and resumed afterward. Synthetic visibility is not genuine
+device backgrounding or PWA testing.
+
+The frame audit first waits for the real entry engine's initial decision before
+seeking its CSS meter. An earlier audit sought to 600 ms immediately after DOM
+attachment, before WebKit's React effect/next rAF could start; that artificial
+seek crossed the existing 420 ms start deadline and produced a false DOM
+fallback. Independent **unmodified natural-clock** first calls confirmed Canvas
+startup at 97 ms in the candidate and 52 ms in the baseline, with real green fire
+in both. The corrected audit asserts actual first-call atlas draws and green
+pixels; repeat-call success alone is insufficient.
+
+The Chromium runs on this Mac measured an entry-frame median of 16.7 ms and
+p95 of 16.7–16.8 ms, but occasional entry frames reached 50–83.4 ms. The scroll
+canvas draw CPU p95 was 2.9 ms on desktop and 3.7 ms in the two touch emulations.
+These are instrumented, warmed browser measurements, not physical-device
+performance guarantees. The atlas is fetched locally as 434,422 encoded bytes
+(434,722 including reported transfer overhead). The startup byte-budget check
+also passed; byte size is not elapsed loading time.
+
+Evidence directories:
+
+- `output/playwright/rexonance-flame-v3/chromium-normal/`
+- `output/playwright/rexonance-flame-v3/chromium-fallback/`
+- `output/playwright/rexonance-flame-v3/webkit-normal-guarded/`
+- `output/playwright/rexonance-flame-v3/webkit-natural/`
+
+The superseded `webkit-normal/` folder is retained only for the artificial-seek
+audit described above, not as first-call visual acceptance evidence. The final
+guarded WebKit runs naturally selected the Canvas engine at 35 ms (320px) and
+150 ms (1024px), before exact-clock captures confirmed atlas draws and green
+pixels in the first three ignition/maximum/extinction shots.
+
+Publication uses the existing **Deploy verified main to Production** workflow,
+with its staged-candidate, exact SHA, asset hash and public-readiness checks.
+The release receipt must compare the deployed `/release-identity.json` with the
+published commit and the atlas/manifest hashes; a push alone is not completion.

@@ -10,6 +10,7 @@ import { chromium, webkit } from "playwright";
 const base = process.env.BASE_URL || "http://127.0.0.1:8197";
 const out = process.env.OUT_DIR || "output/playwright/rexonance-flame";
 const baseline = process.env.FLAME_BASELINE === "1";
+const naturalClock = process.env.FLAME_NATURAL === "1";
 const asset = "/rexonance-flame-20261019/flame.webp";
 const engine = process.env.BROWSER === "webkit" ? webkit : chromium;
 const browser = await engine.launch(engine === chromium ? { channel: "chrome" } : {});
@@ -202,7 +203,7 @@ try {
       page.on("request", (request) => {
         if (request.url().includes(asset)) requests.push(request.url());
       });
-      const record = { profile: name, mode, baseline, entry: [], scroll: [] };
+      const record = { profile: name, mode, baseline, naturalClock, entry: [], scroll: [] };
       try {
         await page.goto(`${base}/world`, { waitUntil: "networkidle" });
         await settled(page);
@@ -211,18 +212,51 @@ try {
         await openEntry(page, mode !== "reduced");
         if (mode !== "reduced")
           await page.locator('.rx-suit[data-suit="build"]').waitFor({ state: "attached" });
+        const entryStarted = Date.now();
+        if (mode !== "reduced") {
+          // React effects begin the real painter on a subsequent rAF. Never
+          // jump the clock beyond START_BY=420ms before that decision: doing
+          // so would manufacture a DOM fallback in WebKit, not test the app.
+          await page.waitForFunction(
+            () => {
+              const suit = document.querySelector(".rx-suit");
+              const time = Number(
+                document.querySelector(".rx-call-meter > i")?.getAnimations()[0]?.currentTime,
+              );
+              return suit?.dataset.nanites === "canvas" || time >= 440;
+            },
+            null,
+            { timeout: 4000 },
+          );
+          record.initialEntry = await page.evaluate(() => ({
+            nanites: document.querySelector(".rx-suit")?.dataset.nanites,
+            swarm: document.querySelector(".rx-suit")?.dataset.swarm,
+            clock: Number(
+              document.querySelector(".rx-call-meter > i")?.getAnimations()[0]?.currentTime,
+            ),
+            atlasDraws: window.__flameQA.atlas.entry,
+            naniteSheets: performance
+              .getEntriesByType("resource")
+              .filter((entry) => entry.name.includes("/rexonance-nanites-"))
+              .map((entry) => new URL(entry.name).pathname),
+          }));
+        }
         for (const target of mode === "reduced" ? [] : [600, 1000, 1600, 2200]) {
           if (!(await page.locator(".rx-call-sequence").count())) break;
           // Seek the actual CSS meter read by the real canvas engine. Only
           // its clock is controlled; no replacement painter or synthetic draw.
-          await page.evaluate((time) => {
-            const meter = document.querySelector(".rx-call-meter > i")?.getAnimations()[0];
-            if (meter) {
-              meter.pause();
-              meter.currentTime = time;
-            }
-          }, target);
-          await page.waitForTimeout(80);
+          if (naturalClock)
+            await page.waitForTimeout(Math.max(0, target - (Date.now() - entryStarted)));
+          else {
+            await page.evaluate((time) => {
+              const meter = document.querySelector(".rx-call-meter > i")?.getAnimations()[0];
+              if (meter) {
+                meter.pause();
+                meter.currentTime = time;
+              }
+            }, target);
+            await page.waitForTimeout(80);
+          }
           const state = await page.evaluate(() => {
             const suit = document.querySelector(".rx-suit");
             const sequence = document.querySelector(".rx-call-sequence");
@@ -240,6 +274,19 @@ try {
           const file = join(dir, `entry-${target}.png`);
           await page.screenshot({ path: file, scale: "css" });
           record.entry.push({ target, ...state, pixels, file });
+        }
+        if (mode === "normal" && !baseline) {
+          assert.equal(
+            record.initialEntry.nanites,
+            "canvas",
+            `${name}: the naturally started initial call selected the real painter before any seek`,
+          );
+          assert.ok(
+            record.entry
+              .filter((shot) => shot.target <= 1600)
+              .every((shot) => shot.atlasDraws > 0 && shot.pixels?.green > 0),
+            `${name}: initial flame frames must be drawn, not only a later return call`,
+          );
         }
         await page.evaluate(() =>
           document.querySelector(".rx-call-meter > i")?.getAnimations()[0]?.play(),
