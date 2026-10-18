@@ -32,6 +32,8 @@ import { naniteHexHeight, naniteHexLight } from "./rexonance-unlit.js";
 
 const TAU = Math.PI * 2;
 const DEG = Math.PI / 180;
+const MERGE_FROM = 0.62;
+const ABSORB = 0.026;
 const clamp01 = (value) => (value < 0 ? 0 : value > 1 ? 1 : value);
 const smooth = (u) => u * u * (3 - 2 * u);
 const easeOut = (u) => 1 - (1 - u) * (1 - u) * (1 - u);
@@ -4640,6 +4642,32 @@ export function createAssemblyNanites({
       }
     }
     flushChips(ctx);
+    // Small cells gather into the big one (owner, 2026-10-18): over each
+    // chip's last approach four small cells close in on it and merge as its
+    // metal tile appears.
+    if (!coarse && !CALM) {
+      ctx.fillStyle = "rgb(214 246 255)";
+      ctx.beginPath();
+      let merging = 0;
+      for (let c = 0; c < nFlight; c += 1) {
+        const i = flightList[c];
+        const u = U[i];
+        if (u < MERGE_FROM || u >= 0.9 || A[i] <= 0.05) continue;
+        const v = (u - MERGE_FROM) / (0.9 - MERGE_FROM);
+        const spread = (1 - v) * (1 - v) * Math.max(TW[i], TH[i]) * 2.2;
+        const size = 1.8 + 1.6 * (1 - v);
+        for (let k = 0; k < 4; k += 1) {
+          const a = HSH[i] * TAU + k * 1.5708 + v * 2.2;
+          const r = spread * (0.6 + 0.4 * ((k * 0.37 + HSH[i]) % 1));
+          ctx.rect(X[i] + Math.cos(a) * r - size / 2, Y[i] + Math.sin(a) * r - size / 2, size, size);
+        }
+        merging += 1;
+      }
+      if (merging) {
+        ctx.globalAlpha = 0.92;
+        ctx.fill();
+      }
+    }
     // N15, the glints: the star of light a banking chip's face throws.
     if (cells && !coarse) {
       let glints = 0;
@@ -4676,6 +4704,44 @@ export function createAssemblyNanites({
       ctx.globalAlpha = 1 - t * 0.5;
       ctx.drawImage(metalOf(SRC[i]), SX[i], SY[i], TW[i], TH[i], cx - w / 2, cy - h / 2, w, h);
     }
+    // The surplus cells, liquid: from one locked tile in three, two droplets
+    // run on from it toward the plate's seat, stretching and thinning as the
+    // body drinks them in (owner, 2026-10-18).
+    ctx.lineCap = "round";
+    for (let tone = 0; tone < 2; tone += 1) {
+      ctx.strokeStyle = tone ? "rgb(240 207 134)" : "rgb(196 244 255)";
+      for (let i = landedBy(q - ABSORB); i < landed; i += 1) {
+        const p = PO[i];
+        if (p < 0 || HSH[i] > 1 / 3) continue;
+        const t = (q - T1[i]) / ABSORB;
+        if (t <= 0 || t >= 1) continue;
+        const pc = P[p];
+        const cx = jigX(p, CX[i], CY[i]);
+        const cy = jigY(p, CX[i], CY[i]);
+        let dx = pc.seatX - cx;
+        let dy = pc.seatY - cy;
+        const d = Math.hypot(dx, dy) || 1;
+        dx /= d;
+        dy /= d;
+        const run = Math.min(d, 22) * (1 - (1 - t) * (1 - t));
+        const sideW = 1.2 + 2 * HSH[i];
+        ctx.globalAlpha = 0.75 * (1 - t);
+        ctx.lineWidth = 2.4 * (1 - t) + 0.5;
+        ctx.beginPath();
+        for (let k = 0; k < 2; k += 1) {
+          if ((k ^ tone) === 1 && HSH[i] < 1 / 6) continue;
+          const sign = k ? sideW : -sideW;
+          const ox = -dy * sign;
+          const oy = dx * sign;
+          const hx = cx + ox + dx * run;
+          const hy = cy + oy + dy * run;
+          ctx.moveTo(hx - dx * (2 + 6 * t), hy - dy * (2 + 6 * t));
+          ctx.lineTo(hx, hy);
+        }
+        ctx.stroke();
+      }
+    }
+    ctx.lineCap = "butt";
     // Sparks (1 lock in 6) and lattice links (round 3, reviews: dozens of
     // hairline scratches over the filling plate): from each newly locked
     // tile a short spur half way to the cell it grew from, the newest dozen
