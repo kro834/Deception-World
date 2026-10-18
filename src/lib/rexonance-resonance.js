@@ -7,6 +7,7 @@ import {
   warpPicture,
 } from "./rexonance-overwrite.js";
 import { createSplitLightsJob } from "./rexonance-unlit.js";
+import { drawNaniteFlame } from "./rexonance-flame.js";
 import { releasePendingImage } from "./release-pending-images.js";
 import {
   createReactorLayers,
@@ -1371,6 +1372,8 @@ const BURSTS = [
   [4.8, 16],
 ];
 
+const NANITE_FLAME_IN = [0.045, 0.075];
+const NANITE_FLAME_OUT = [0.15, 0.2];
 /**
  * Mounts the suit-up scene on its runway. `config`: { figure, undersuit,
  * size: { width, height }, pieces: [{ id, group, x, y, w, h, seat }],
@@ -2878,6 +2881,15 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
 
     // Its middle band, over the body and under the plates.
     if (nanites) nanites.midPass(context);
+    // The nanites' source (owner, 2026-10-18): a forest-green flame at the
+    // reactor, burning while the swarm is born from it and spirals out.
+    {
+      const flame = Math.min(span(progress, NANITE_FLAME_IN), 1 - span(progress, NANITE_FLAME_OUT));
+      if (flame > 0) {
+        const clock = calm ? progress * 900 : (environment.performance?.now?.() ?? 0) / 1000;
+        drawNaniteFlame(context, config.core, flame, clock);
+      }
+    }
 
     // The painted plates (welded in paint order), then the seal into the
     // finished figure.
