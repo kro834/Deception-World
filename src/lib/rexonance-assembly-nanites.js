@@ -3907,6 +3907,38 @@ export function createAssemblyNanites({
   };
 
   // The landed, unpainted tiles of plate p with source `src`, as a path.
+  // Every tile of plate p (from src) not yet painted at q.
+  const pendingPath = (ctx, p, src, q) => {
+    const ids = P[p].tiles;
+    let any = false;
+    ctx.beginPath();
+    for (let kk = 0; kk < ids.length; kk += 1) {
+      const i = ids[kk];
+      if (SRC[i] !== src || TP[i] <= q) continue;
+      ctx.rect(SX[i], SY[i], TW[i], TH[i]);
+      any = true;
+    }
+    return any;
+  };
+  // A darkened copy of each metal sheet (built once): the primer.
+  const primers = [null, null];
+  const primerOf = (src) => {
+    if (primers[src]) return primers[src];
+    const sheet = metalOf(src);
+    const doc = globalThis.document;
+    if (!sheet || !doc?.createElement) return null;
+    const canvas = doc.createElement("canvas");
+    canvas.width = W;
+    canvas.height = H;
+    const c = canvas.getContext("2d");
+    if (!c) return null;
+    c.drawImage(sheet, 0, 0, W, H);
+    c.globalCompositeOperation = "source-atop";
+    c.fillStyle = "rgb(14 18 28 / 0.66)";
+    c.fillRect(0, 0, W, H);
+    primers[src] = canvas;
+    return canvas;
+  };
   const landedPath = (ctx, p, src, q) => {
     const pc = P[p];
     const ids = pc.tiles;
@@ -3994,6 +4026,25 @@ export function createAssemblyNanites({
         ctx.globalAlpha = 0.6;
         ctx.drawImage(lattice, 0, 0, W, H);
         ctx.restore();
+      }
+      // The whole plate first, in dark primed metal in its own shape, so a
+      // staged plate never reads as scattered fragments with holes; its
+      // tiles land over it (owner, 2026-10-18).
+      {
+        const fade = clamp01((q - (pc.from - 0.02)) / 0.02);
+        if (fade > 0)
+          for (let src = 0; src < 2; src += 1) {
+            if (!(pc.srcMask & (1 << src))) continue;
+            const primer = primerOf(src);
+            if (!primer) continue;
+            ctx.save();
+            if (pendingPath(ctx, p, src, q)) {
+              ctx.clip();
+              ctx.globalAlpha = fade;
+              ctx.drawImage(primer, 0, 0, W, H);
+            }
+            ctx.restore();
+          }
       }
       if (q >= pc.from)
         for (let src = 0; src < 2; src += 1) {
@@ -5054,6 +5105,10 @@ export function createAssemblyNanites({
     shockTint = null;
     lacq = null;
     lacqCtx = null;
+    for (let src = 0; src < 2; src += 1) {
+      if (primers[src]) primers[src].width = primers[src].height = 0;
+      primers[src] = null;
+    }
   };
   // The frame's tally (instrumentation only: nothing reads it back).
   const endFrame = () => {
