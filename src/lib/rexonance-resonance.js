@@ -595,7 +595,6 @@ const TONE_CSS = TONES.map(([r, g, b]) => `rgb(${r} ${g} ${b})`);
 
 const grouped = (value) => String(value).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 const REACTOR_RADIUS = 40;
-const REACTOR_RINGS = 5;
 const REACTOR_SWIRL = [0.74, 0.82];
 const REACTOR_MOTES = ["rgb(240 207 134)", "rgb(150 236 255)", "rgb(255 143 216)"];
 const clamp01 = (value) => (value < 0 ? 0 : value > 1 ? 1 : value);
@@ -2946,21 +2945,38 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       const [swirlFrom, swirlTo] = REACTOR_SWIRL;
       if (progress >= B.deus[0] && progress < swirlTo) {
         const u = span(progress, REACTOR_SWIRL);
+        // The socket waits dark; the reactor's own picture then turns in
+        // from a small, fast spin to rest, growing to its rim (a vortex).
         context.save();
-        context.fillStyle = "#05070c";
-        for (let ring = 0; ring < REACTOR_RINGS; ring += 1) {
-          // Outer rings first; each sweeps its turn as the vortex draws in.
-          const start = (ring / REACTOR_RINGS) * 0.55;
-          const sweep = smooth(clamp01((u - start) / 0.45));
-          if (sweep >= 1) continue;
-          const outer = R * (1 - ring / REACTOR_RINGS) + 0.75;
-          const inner = Math.max(0, R * (1 - (ring + 1) / REACTOR_RINGS) - 0.75);
-          const turn = -Math.PI / 2 + ring * 0.9 + sweep * Math.PI * 2;
+        context.beginPath();
+        context.arc(rx, ry, R, 0, Math.PI * 2);
+        context.clip();
+        if (undersuit) {
+          // The bare undersuit shows where the reactor will form (owner).
+          const ux = (undersuit.width || W) / W;
+          const uy = (undersuit.height || H) / H;
+          context.fillStyle = "#05070c";
+          context.fillRect(rx - R, ry - R, R * 2, R * 2);
+          context.drawImage(undersuit, (rx - R) * ux, (ry - R) * uy, R * 2 * ux, R * 2 * uy, rx - R, ry - R, R * 2, R * 2);
+        } else {
+          context.fillStyle = "#05070c";
+          context.fillRect(rx - R, ry - R, R * 2, R * 2);
+        }
+        if (u > 0) {
+          const grow = easeOut(u);
           context.beginPath();
-          context.arc(rx, ry, outer, turn, -Math.PI / 2 + ring * 0.9 + Math.PI * 2);
-          context.arc(rx, ry, inner, -Math.PI / 2 + ring * 0.9 + Math.PI * 2, turn, true);
-          context.closePath();
-          context.fill();
+          context.arc(rx, ry, Math.max(1, R * grow), 0, Math.PI * 2);
+          context.clip();
+          context.translate(rx, ry);
+          context.rotate(-(1 - grow) * Math.PI * 2.6);
+          const k = 0.55 + 0.45 * grow;
+          context.scale(k, k);
+          context.translate(-rx, -ry);
+          context.globalAlpha = Math.min(1, u * 2.2);
+          const art = lights?.unlit || figure;
+          const sx = (art.width || W) / W;
+          const sy = (art.height || H) / H;
+          context.drawImage(art, (rx - R) * sx, (ry - R) * sy, R * 2 * sx, R * 2 * sy, rx - R, ry - R, R * 2, R * 2);
         }
         context.restore();
         if (!calm && progress >= swirlFrom) {
@@ -2972,9 +2988,11 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
             const r = R * 1.5 * (1 - phase) + 2;
             const a = i * 2.39996 + phase * Math.PI * 3.2;
             context.globalAlpha = Math.sin(Math.PI * phase) * (1 - u * 0.6);
-            context.fillStyle = REACTOR_MOTES[i % 3];
-            const size = 1.6 + (i % 3);
-            context.fillRect(rx + Math.cos(a) * r - size / 2, ry + Math.sin(a) * r - size / 2, size, size);
+            context.strokeStyle = REACTOR_MOTES[i % 3];
+            context.lineWidth = 1.2 + (i % 3) * 0.6;
+            context.beginPath();
+            context.arc(rx, ry, r, a - 0.5, a);
+            context.stroke();
           }
           context.restore();
         }
