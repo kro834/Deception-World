@@ -10,7 +10,12 @@ try {
     const errors = [];
     page.on("pageerror", error => errors.push(error.message));
     await page.goto(base + "/world");
-    await page.waitForFunction(() => !document.documentElement.hasAttribute("data-loading"));
+    // SSR has no loading flag either; wait for the mounted World route before testing selection.
+    await page.waitForFunction(() =>
+      document.documentElement.dataset.worldPageVisible === "true" &&
+      !document.documentElement.hasAttribute("data-loading") &&
+      !document.documentElement.hasAttribute("data-route-scroll-settling"),
+    );
     const select = page.getByRole("button", { name: "EP.06 来訪を選択", exact: true });
     await select.click();
     const card = page.locator(".episode-card").nth(5);
