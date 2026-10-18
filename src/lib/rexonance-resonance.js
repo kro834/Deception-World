@@ -2057,6 +2057,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
           });
           if (result) {
             resources.add(result.art);
+            resources.add(result.disc);
             resources.add(result.socket);
           }
           return result;
@@ -3045,24 +3046,19 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       nanites.endFrame();
     }
 
-    // The chest reactor forms as a vortex (owner, 2026-10-18): its socket
-    // waits dark, then rings of the art sweep in from the rim to the eye of
-    // the swirl with nanites spiralling inward; it shines when the lights
-    // run out (B.light), its arms turning as it ignites.
+    // The disc forms without rotating; only its surrounding coil turns.
+    // Both form together, before the existing B.light ignition.
     {
       const [rx, ry] = config.core;
       const R = REACTOR_RADIUS;
       const [swirlFrom, swirlTo] = REACTOR_SWIRL;
       if (reactor && progress >= B.deus[0] && progress < B.light[0]) {
-        // The whole coiled armour and orb share one formation clock. The
-        // masked artwork rotates, then holds its exact registered pose
-        // through the seal; the original full figure takes over at ignition.
+        // Separate masks share one clock but never share the coil transform.
         drawReactorFormation(context, reactor, config.core, span(progress, REACTOR_SWIRL));
       }
       if (progress >= B.deus[0] && progress < swirlTo) {
         const u = span(progress, REACTOR_SWIRL);
-        // The socket waits dark; the reactor's own picture then turns in
-        // from a small, fast spin to rest, growing to its rim (a vortex).
+        // Without separate masks, reveal in place rather than rotate the disc.
         if (!reactor) {
           context.save();
           context.beginPath();
@@ -3090,7 +3086,6 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
             context.arc(rx, ry, Math.max(1, R * grow), 0, Math.PI * 2);
             context.clip();
             context.translate(rx, ry);
-            context.rotate(-(1 - grow) * Math.PI * 2.6);
             const k = 0.55 + 0.45 * grow;
             context.scale(k, k);
             context.translate(-rx, -ry);
@@ -3654,6 +3649,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       baseLights?.lights,
       baseLights?.motes,
       reactor?.art,
+      reactor?.disc,
       reactor?.socket,
     ])
       if (sheet) sheet.width = sheet.height = 0;
@@ -3985,6 +3981,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       baseLights?.lights,
       baseLights?.motes,
       reactor?.art,
+      reactor?.disc,
       reactor?.socket,
     ])
       if (sheet) sheet.width = sheet.height = 0;

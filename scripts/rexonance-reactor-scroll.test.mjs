@@ -98,18 +98,19 @@ test("reactor sheets crop only the two exact atlas masks and retain the dark soc
   assert.equal(layers.y, 218);
   assert.equal(layers.w, 115);
   assert.equal(layers.h, 139);
-  assert.equal(canvases.length, 2);
+  assert.equal(canvases.length, 3);
   assert.deepEqual(
     canvases.map(({ width, height }) => [width, height]),
     [
       [layers.w, layers.h],
       [layers.w, layers.h],
+      [layers.w, layers.h],
     ],
   );
 
-  const atlasDraws = canvases[0].context.operations.filter(
-    ([operation, source]) => operation === "drawImage" && source === atlas,
-  );
+  const atlasDraws = corePieces
+    .flatMap((p) => (p.id === "core-disc" ? layers.disc : layers.art).context.operations)
+    .filter(([operation, source]) => operation === "drawImage" && source === atlas);
   assert.equal(atlasDraws.length, 2);
   assert.deepEqual(
     atlasDraws.map(([, , sx, sy, sw, sh, dx, dy, dw, dh]) => [sx, sy, sw, sh, dx, dy, dw, dh]),
@@ -128,7 +129,7 @@ test("reactor sheets crop only the two exact atlas masks and retain the dark soc
   const socketOps = canvases[1].context.operations;
   assert.deepEqual(
     socketOps.filter(([operation]) => operation === "drawImage").map(([, source]) => source),
-    [layers.art, undersuit],
+    [layers.art, layers.disc, undersuit],
   );
   assert.ok(
     socketOps.some(
@@ -207,6 +208,7 @@ test("coil formation records reversible rotation, scale and wedge reveal, ending
     w: 115,
     h: 139,
     art: { kind: "coil-art" },
+    disc: { kind: "fixed-disc" },
     socket: { kind: "coil-socket" },
   };
   const start = formationOperations(layers, 0);
@@ -231,6 +233,26 @@ test("coil formation records reversible rotation, scale and wedge reveal, ending
     ),
   );
   assert.ok(middle.some(([operation]) => operation === "clip"));
+  const discDraw = middle.findIndex(
+    ([operation, source]) => operation === "drawImage" && source === layers.disc,
+  );
+  const coilDraw = middle.findIndex(
+    ([operation, source]) => operation === "drawImage" && source === layers.art,
+  );
+  assert.ok(discDraw > coilDraw);
+  assert.deepEqual(
+    middle.slice(coilDraw + 1, discDraw),
+    [["restore"], ["save"], ["globalAlpha", reactorFormation(0.5)]],
+    "disc must be drawn outside every coil transform and clip",
+  );
+  assert.deepEqual(middle[discDraw], [
+    "drawImage",
+    layers.disc,
+    layers.x,
+    layers.y,
+    layers.w,
+    layers.h,
+  ]);
   const wedge = middle.find(([operation]) => operation === "arc");
   assert.ok(wedge);
   assert.equal(wedge[4], -Math.PI / 2);
