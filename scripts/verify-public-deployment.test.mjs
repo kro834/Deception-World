@@ -232,6 +232,7 @@ test("public verification hashes exhibition, cinema and authored Rexonance asset
           path.startsWith("/rider-rexonance-excelsior-cutout-20261012") ||
           path.startsWith("/exhibition-metal/") ||
           path.startsWith("/exhibition-studio/") ||
+          path.startsWith("/ciel-button-") ||
           path.startsWith("/saga-cinema-assets/"),
       ),
       false,
