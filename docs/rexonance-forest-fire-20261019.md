@@ -199,3 +199,97 @@ earlier `rexonance-flame-body/chromium-normal` report is a rejected diagnostic,
 not acceptance evidence. The shared renderer's 25 unit tests pass, including
 real body-point bounds, context-state restoration, reverse-clock determinism
 and the unchanged 128 / 104 image-draw budgets with contact lights included.
+
+## Natural surface-burn refinement
+
+The next owner review asks for a more natural whole-body burn, not more flame
+coverage or a change to the Ciel hidden effect. In the preceding full-body
+revision, a wide centre root at y=.68 was below the undersuit's actual crotch:
+it made a hanging green curtain across the empty gap between the thighs. The
+centre roots now remain near the solid waist; the fire over each leg remains
+separate. Slightly staggered arm/leg heights and irregular contact roots close
+to the two soles break up the regular horizontal rows.
+
+`surfacePower` spreads ignition from the chest toward the more distant body
+regions. All roots still reach full strength at the peak. A shared upward
+travelling gust and smaller independent curls vary the height, width and lean
+of attached fire without moving it off the body. As strength falls, local fire
+contracts in height as well as opacity; there is no simultaneous full-height
+fade of the entire figure. The existing caller envelopes and exact zero-fire
+ending remain unchanged. Strength and clock alone determine the result, so
+reverse scrolling cannot retain stale ignition or emit new fire after it ends.
+
+The owner's additional directions strengthen whole-body fire and remove the
+flat emitter-like bottoms. Two redundant chest roots now catch the upper
+thighs on both input tiers, joining the knee flames into leg-length fire. Arm
+fire is broader and its roots follow the actual hands rather than hanging
+below them. Larger slow wind-driven lean and smaller independent curls make
+the flames sway instead of moving in mirrored upright bundles.
+
+For the owner's face-area correction, back fire starts on the temples rather
+than above the crown, and its width profile follows the shoulders and limbs.
+Two independently phased front roots follow the cheeks/jaw, with a restrained
+sway near the face. One duplicate waist strand is reassigned to the second
+cheek, including on touch: seventeen near roots instead of sixteen still fit
+the existing 104-draw ceiling. Wider shin fire keeps the whole-body peak from
+losing a lower-leg region at particular atlas phases. Face/limb roots are
+checked against the real undersuit alpha, not a floating rectangular emitter.
+
+A new cache-safe atlas is delivered under
+`/rexonance-flame-natural-20261019/`. It reuses the existing Blender Cycles
+renders; only the alpha finishing near the roots is revised, not the original
+volume colour or geometry. A wider feather and irregular, frame-periodic
+curved root dissolve the horizontal basal edge. This is repacking the real
+rendered frames, not a newly executed fluid simulation. The original published
+atlas remains available unchanged for old pages. The procedural fallback also
+has a curved, transparent root rather than a straight opaque baseline.
+
+Only the new atlas is requested by the current renderer. Its 32-frame layout,
+500 kB transfer ceiling, 4 MiB shared decode, one-load policy and reduced-motion
+behaviour remain. No new animation loop, per-frame canvas, gradient or random
+state is introduced. Both engines keep the 128/104 image-draw ceilings. The
+original stationary reactor, rotating coils and final supplied armour artwork
+are outside this adjustment. Exact release attestation includes both the old
+and the new atlas/manifest, with narrowly allowed paths and byte hashes.
+
+Unit checks additionally sweep ignition/extinction forward and backward, check
+continuous bounded local brightness and shrinking fire height, and reject new
+canvas/gradient/random work after warm-up. The former unit sample at centre
+y=.58 was in a transparent leg gap, not on the hips; it is corrected to the
+solid waist at y=.445. This does not weaken the independent screenshot gate:
+all eleven real body patches must still contain at least 5% green fire together
+in one peak screenshot, in both entry and scroll, including reverse scroll.
+Screenshots also sample intermediate ignition/extinction to review the flow,
+not just a completed still. Browser emulation is not physical-device testing.
+
+The accepted normal candidate is `output/playwright/rexonance-natural-v6/`;
+earlier v1/v2/v4/v5 captures remain diagnostics rather than release acceptance.
+Chromium 1440px, Chromium 320px/DPR3 and WebKit 1024px/DPR2 pass the forward and
+reverse gates, with all eleven inner body regions simultaneously above 5% in
+the same peak screenshot. The sampled peak minima are 31.79–38.24% (desktop),
+35.23–36.90% (phone), and 35.32–37.48% (tablet). These ratios describe selected
+small screen regions, not continuous whole-body percentages or device quality.
+All three confirm one atlas request, no repeat request, all 32 source frames,
+no JavaScript errors, hidden-page draw suspension and no flame draws after the
+existing extinction endpoint. Independent screenshot review confirms the
+cheek/temple connection, separate legs, curved roots and clear final artwork.
+
+The new atlas is 403,088 bytes, SHA-256
+`19e755a5840c30abf3e7066c9ee758977af131809fd752692501d2a8159aa328`.
+Its central root contours vary by 10–17 source pixels instead of sharing a
+horizontal row; contact remains five source pixels from the authored anchor.
+The separately rendered first/closing frame also matches after alpha finishing
+(zero differing channels). Existing Blender render hashes remain unchanged.
+The final source gates pass: 2,588 tests discovered, 2,583 passed, zero failed,
+five existing skips; typecheck and build pass, lint has zero errors and twelve
+pre-existing warnings, and all fifteen source-part groups match. Local builds
+use Vite without invoking a database migration. No gallery writes or settings
+deletions are part of these checks.
+
+Chromium 320px also passes blocked-atlas fallback in both engines and reduced
+motion without a flame request or tall scroll trap. A separate first-visit
+natural-clock run never seeks the CSS meter: its actual captures are at
+333/467/600/850/1017/1167/1600/1967/2217/2617 ms, with all-body peak coverage
+and zero green at the extinguished endpoint. Together with the three normal
+profiles, all six local flows pass. Browser contexts are disposable and closed;
+genuine iPhone/iPad/PWA and physical background recovery remain untested.

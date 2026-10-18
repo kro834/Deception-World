@@ -292,7 +292,7 @@ export async function verifyPublicDeployment({
       });
       for (const asset of identity.assets) {
         if (
-          (!/^\/rexonance-flame-20261019\/(?:flame\.webp|manifest\.json)(?![\s\S])/u.test(
+          (!/^\/rexonance-flame-(?:natural-)?20261019\/(?:flame\.webp|manifest\.json)(?![\s\S])/u.test(
             asset.path,
           ) &&
             !/^\/ciel-inferno-20261019\/(?:ciel-(?:216|720|1080)\.webp|jet\.webp|(?:artwork|jet)-manifest\.json)(?![\s\S])/u.test(

@@ -5,7 +5,7 @@
 // and floor; its near layer burns across the entire unfinished body before
 // the existing slow envelope lets the final armour emerge unchanged.
 export const NANITE_FLAME_ATLAS = Object.freeze({
-  src: "/rexonance-flame-20261019/flame.webp",
+  src: "/rexonance-flame-natural-20261019/flame.webp",
   width: 1024,
   height: 1024,
   columns: 8,
@@ -104,14 +104,16 @@ const COUNT = 64;
 const SEED = new Float32Array(COUNT * 8);
 for (let i = 0; i < SEED.length; i += 1) SEED[i] = hash(i + 0.37);
 const PROFILE = [
-  [0.04, 0.065],
-  [0.16, 0.09],
-  [0.24, 0.39],
-  [0.4, 0.35],
-  [0.5, 0.24],
-  [0.62, 0.26],
-  [0.8, 0.24],
-  [0.98, 0.28],
+  [0.14, 0.08],
+  [0.18, 0.06],
+  [0.2, 0.12],
+  [0.24, 0.25],
+  [0.4, 0.33],
+  [0.54, 0.37],
+  [0.57, 0.35],
+  [0.6, 0.24],
+  [0.8, 0.27],
+  [0.98, 0.36],
 ];
 const halfWidth = (v) => {
   for (let k = 1; k < PROFILE.length; k += 1) {
@@ -125,7 +127,9 @@ const halfWidth = (v) => {
 };
 const ROOTS = new Float32Array(40 * 3);
 for (let i = 0; i < 40; i += 1) {
-  const v = 0.075 + ((i >> 1) / 19) * 0.9;
+  // Begin on the temples, not in the air above the crown. The profile then
+  // follows shoulders, hands and legs rather than a wide rectangular halo.
+  const v = 0.14 + ((i >> 1) / 19) * 0.835;
   const side = i % 2 ? 1 : -1;
   ROOTS[i * 3] = 0.5 + side * (halfWidth(v) + 0.006);
   ROOTS[i * 3 + 1] = v;
@@ -133,21 +137,33 @@ for (let i = 0; i < 40; i += 1) {
 }
 // Near-surface roots follow the actual body, not just its silhouette.
 // x/y are figure fractions; width is figure px at H=1000; height is H's
-// fraction. The first sixteen cover every region even on a coarse pointer.
-// Extra fine-pointer strands fill the waist/upper-thigh mixing layer.
+// fraction. The first seventeen cover every region even on a coarse pointer.
+// Mandatory upper-thigh roots join the knee flames instead of relying on
+// their thin tips. Extra fine-pointer strands fill the waist mixing layer.
 const FRONT = new Float32Array([
   // Head, chest, abdomen and hips overlap along the body centreline.
-  0.5, 0.18, 145, 0.19, 0, 0.5, 0.35, 245, 0.25, 0.015, 0.5, 0.52, 225, 0.25, -0.02, 0.5, 0.68, 215,
-  0.26, 0.015,
+  0.455, 0.184, 105, 0.16, -0.025, 0.485, 0.345, 230, 0.25, 0.015, 0.515, 0.425, 220, 0.24, -0.02,
+  0.49, 0.465, 195, 0.195, 0.015,
   // Arms and forearms; volume roots sit below their visible body patches.
-  0.21, 0.46, 135, 0.26, -0.12, 0.79, 0.46, 135, 0.26, 0.12, 0.19, 0.64, 130, 0.25, -0.1, 0.81,
-  0.64, 130, 0.25, 0.1,
+  0.21, 0.452, 150, 0.28, -0.12, 0.79, 0.469, 150, 0.28, 0.12, 0.19, 0.58, 145, 0.29, -0.1, 0.81,
+  0.585, 145, 0.29, 0.1,
   // The shins/feet splay wider than the thighs in the supplied undersuit.
-  0.36, 0.79, 165, 0.32, -0.04, 0.64, 0.79, 165, 0.32, 0.04, 0.28, 0.94, 150, 0.25, -0.035, 0.72,
-  0.94, 150, 0.25, 0.035, 0.255, 0.986, 155, 0.16, -0.045, 0.745, 0.986, 155, 0.16, 0.045, 0.39,
-  0.42, 135, 0.23, -0.035, 0.61, 0.42, 135, 0.23, 0.035, 0.4, 0.58, 125, 0.23, -0.04, 0.6, 0.58,
-  125, 0.23, 0.04, 0.4, 0.71, 120, 0.22, -0.025, 0.6, 0.71, 120, 0.22, 0.025,
+  0.335, 0.75, 175, 0.35, -0.08, 0.665, 0.765, 175, 0.35, 0.08, 0.28, 0.86, 180, 0.25, -0.035, 0.72,
+  0.87, 180, 0.25, 0.035, 0.255, 0.986, 155, 0.16, -0.045, 0.745, 0.986, 155, 0.16, 0.045, 0.37,
+  0.635, 170, 0.23, -0.035, 0.63, 0.648, 170, 0.23, 0.035, 0.55, 0.187, 105, 0.16, 0.025, 0.63,
+  0.596, 120, 0.23, 0.04, 0.345, 0.7, 115, 0.22, -0.025, 0.655, 0.715, 115, 0.22, 0.025,
 ]);
+// A fire begins at the chest, catches the more distant limbs, then contracts
+// into shorter surface flames as the caller's envelope dies away. This is a
+// pure function of strength/position: reverse scrubbing needs no particle
+// history, extra clock or animation loop. The peak still reaches every root.
+const surfacePower = (strength, v, seed) => {
+  const delay = 0.035 + Math.abs(v - 0.32) * 0.2 + seed * 0.09;
+  return smooth(clamp((strength - delay) / (1 - delay)));
+};
+// Contact follows the two soles; a regular row across the empty space between
+// the legs had read as a green platform rather than fire touching the ground.
+const SOLES = new Float32Array([0.17, 0.235, 0.285, 0.335, 0.655, 0.715, 0.775, 0.83]);
 
 let fallback = null;
 let heat = null;
@@ -161,17 +177,19 @@ const makeFallback = () => {
   const c = canvas.getContext("2d");
   if (!c?.createLinearGradient || !c.bezierCurveTo) return null;
   const colour = c.createLinearGradient(0, 192, 0, 0);
-  colour.addColorStop(0, "rgb(156 243 112 / 0.8)");
+  colour.addColorStop(0, "rgb(156 243 112 / 0)");
+  colour.addColorStop(0.13, "rgb(156 243 112 / 0.76)");
   colour.addColorStop(0.2, "rgb(58 180 67 / 0.66)");
   colour.addColorStop(0.6, "rgb(22 101 49 / 0.38)");
   colour.addColorStop(1, "rgb(9 47 27 / 0)");
   c.fillStyle = colour;
   c.beginPath();
-  c.moveTo(28, 192);
+  c.moveTo(28, 188);
   c.bezierCurveTo(5, 147, 31, 121, 37, 104);
   c.bezierCurveTo(45, 76, 18, 53, 63, 5);
   c.bezierCurveTo(45, 58, 84, 62, 68, 109);
-  c.bezierCurveTo(58, 139, 90, 154, 70, 192);
+  c.bezierCurveTo(58, 139, 90, 154, 70, 183);
+  c.bezierCurveTo(58, 176, 46, 189, 28, 188);
   c.closePath();
   c.fill();
   const glow = document.createElement("canvas");
@@ -344,28 +362,33 @@ export function drawBodyFlame(context, size, strength, clock, scale = 1, layer =
   try {
     if (scale !== 1) context.scale(scale, scale);
     // The silhouette still occludes the back fire. Redistribute its budget
-    // toward the near body surface instead of adding more atlas draws.
+    // toward the near body surface within the existing draw ceiling.
     context.globalCompositeOperation = "lighter";
     if (layer !== "front") {
       // Nine/thirteen pairs preserve head-to-feet coverage behind the body;
-      // their released budget now covers sixteen/twenty near-surface roots.
+      // their budget supports seventeen/twenty near-surface roots, including
+      // both cheeks, while staying within the same 104/128 draw ceilings.
       const rootPairs = coarse ? 9 : 13;
       for (let n = 0; n < rootPairs * 2; n += 1) {
         const i = Math.round(((n >> 1) * 19) / (rootPairs - 1)) * 2 + (n % 2);
         const k = i * 8;
         const side = ROOTS[i * 3 + 2];
-        const wave = Math.sin(clock * (2.2 + SEED[k]) + i * 2.4);
-        const height = (72 + SEED[k + 1] * 79) * unit * 1.3 * (0.45 + power * 0.55);
-        const y = ROOTS[i * 3 + 1] * H;
+        const v = ROOTS[i * 3 + 1];
+        const local = surfacePower(strength, v, SEED[k + 5]);
+        const wave = Math.sin(clock * 1.8 + v * 9 + side * 0.6);
+        const curl = Math.sin(clock * (2.2 + SEED[k]) - v * 13 + SEED[k + 1] * TAU);
+        const height =
+          (72 + SEED[k + 1] * 79) * unit * 1.3 * (0.24 + local * 0.76) * (0.94 + curl * 0.09);
+        const y = v * H + Math.sin(clock * 2.4 + i * 2.1) * 3 * unit * local;
         tongue(
           context,
-          ROOTS[i * 3] * W + side * 4 * unit * wave,
+          ROOTS[i * 3] * W + (wave * 4 + curl * 2) * unit * local,
           y,
-          (25 + SEED[k + 2] * 22) * unit * 1.8,
+          (25 + SEED[k + 2] * 22) * unit * 1.8 * (0.91 + local * 0.09),
           Math.min(height, Math.max(5, y - H * 0.012)),
           clock * 16 * (0.78 + SEED[k + 3] * 0.4) + SEED[k + 4] * 32,
-          power * (0.72 + SEED[k + 5] * 0.28),
-          side * (0.04 + SEED[k + 6] * 0.13),
+          local * (0.7 + SEED[k + 5] * 0.28),
+          side * (0.04 + SEED[k + 6] * 0.1) + wave * 0.085 + curl * 0.025,
         );
       }
       // Separate contact fire: low, spreading tongues, never hovering balls.
@@ -373,10 +396,14 @@ export function drawBodyFlame(context, size, strength, clock, scale = 1, layer =
         const k = (i + 40) * 8;
         tongue(
           context,
-          W * (0.16 + (i / 7) * 0.68),
+          W * SOLES[i],
           H * 0.986,
           (43 + SEED[k] * 30) * unit * 1.3,
-          (42 + SEED[k + 1] * 53) * unit * 1.2 * power,
+          (35 + SEED[k + 1] * 47) *
+            unit *
+            1.2 *
+            power *
+            (0.9 + 0.1 * Math.sin(clock * 3.3 + i * 2.4)),
           clock * 16 * (0.85 + SEED[k + 2] * 0.3) + SEED[k + 3] * 32,
           power * 0.85,
           (i - 3.5) * 0.055,
@@ -395,22 +422,31 @@ export function drawBodyFlame(context, size, strength, clock, scale = 1, layer =
       // abdomen, both arms, thighs, shins and feet. Preserve the volume's
       // authored absorption as well as emission: screen blending on bright
       // silver/blue plates had reduced the fire to almost invisible lines.
-      const nearRoots = coarse ? 16 : 20;
+      const nearRoots = coarse ? 17 : 20;
       for (let i = 0; i < nearRoots; i += 1) {
         const k = (i + 44) * 8;
         const root = i * 5;
-        const y = FRONT[root + 1] * H;
-        const lift = FRONT[root + 3] * H * (0.58 + 0.42 * power);
-        const pulse = 0.94 + 0.06 * Math.sin(clock * (2.1 + SEED[k]) + i * 1.7);
+        const v = FRONT[root + 1];
+        const local = surfacePower(strength, v, SEED[k + 4]);
+        const face = i === 0 || i === 16;
+        // A shared upward travelling gust links the fire from the soles to
+        // the shoulders. Smaller local curls keep the left/right limbs from
+        // swinging as mirrored blocks. Roots stay attached to real surfaces;
+        // there is deliberately no centre root in the hollow below the hips.
+        const gust = Math.sin(clock * 1.8 + v * 9);
+        const curl = Math.sin(clock * (2.3 + SEED[k]) - v * 13 + SEED[k + 1] * TAU);
+        const y = v * H + curl * 3 * unit * local;
+        const lift = FRONT[root + 3] * H * (0.25 + 0.75 * Math.sqrt(local));
+        const pulse = 1 + gust * 0.065 + curl * 0.065;
         tongue(
           context,
-          FRONT[root] * W + Math.sin(clock * 1.7 + i * 2.3) * 3 * unit * power,
+          FRONT[root] * W + (gust * 3.5 + curl * 2) * unit * local,
           y,
-          FRONT[root + 2] * unit * (0.7 + 0.3 * power),
+          FRONT[root + 2] * unit * (0.9 + 0.1 * local) * (1 - curl * 0.045),
           Math.min(lift * pulse, Math.max(5, y - H * 0.012)),
           clock * 16 * (0.8 + SEED[k + 2] * 0.3) + SEED[k + 3] * 32,
-          power * (0.88 + SEED[k + 4] * 0.1),
-          FRONT[root + 4] + Math.sin(clock * 2 + i) * 0.025,
+          local * (0.94 + SEED[k + 4] * 0.06) * (0.97 + 0.03 * gust),
+          FRONT[root + 4] + (gust * 0.095 + curl * 0.04) * (face ? 0.55 : 1),
         );
       }
       context.fillStyle = "rgb(146 224 106)";
@@ -420,7 +456,8 @@ export function drawBodyFlame(context, size, strength, clock, scale = 1, layer =
         const root = (i * 7 + 3) % 40;
         const y = ROOTS[root * 3 + 1] * H - age * 95 * unit;
         if (y < H * 0.02) continue;
-        context.globalAlpha = power * (1 - age) * 0.5;
+        context.globalAlpha =
+          surfacePower(strength, ROOTS[root * 3 + 1], SEED[k]) * (1 - age) * 0.5;
         context.fillRect(
           ROOTS[root * 3] * W + Math.sin(age * 7 + i) * age * 14 * unit,
           y,

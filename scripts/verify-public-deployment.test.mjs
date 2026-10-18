@@ -151,6 +151,8 @@ test("public verification hashes exhibition, cinema and authored Rexonance asset
     ...CIEL_INFERNO_PATHS,
     "/rexonance-flame-20261019/flame.webp",
     "/rexonance-flame-20261019/manifest.json",
+    "/rexonance-flame-natural-20261019/flame.webp",
+    "/rexonance-flame-natural-20261019/manifest.json",
     ...CIEL_BUTTON_PATHS,
     "/rexonance-forms-20261011/excelsior-cutout-20261012.webp",
     "/rider-rexonance-excelsior-cutout-20261012.webp",
@@ -218,6 +220,13 @@ test("public verification hashes exhibition, cinema and authored Rexonance asset
     ),
     "/rexonance-flame-20261019/unknown.webp",
     "/rexonance-flame-20261020/flame.webp",
+    "/rexonance-flame-natural-20261019/unknown.webp",
+    "/rexonance-flame-natural-20261020/flame.webp",
+    ...["flame.webp", "manifest.json"].flatMap((name) =>
+      ["/extra", "%2fextra", ".bak", "?x=1", "#extra", "\n", "\r\n"].map(
+        (suffix) => `/rexonance-flame-natural-20261019/${name}${suffix}`,
+      ),
+    ),
     ...["flame.webp", "manifest.json"].flatMap((name) =>
       ["/extra", "%2fextra", ".bak", "?x=1", "#extra", "\n", "\r\n"].map(
         (suffix) => `/rexonance-flame-20261019/${name}${suffix}`,

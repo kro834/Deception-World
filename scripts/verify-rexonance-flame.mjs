@@ -2,6 +2,7 @@
 // BASE_URL=... [FLAME_BASELINE=1] [FLAME_PROFILES=desktop,phone320,tablet1024]
 // [FLAME_CASES=normal,blocked,reduced] [BROWSER=webkit] node scripts/verify-rexonance-flame.mjs
 // [FLAME_COVERAGE_MIN=0.05] opts into a measured per-region peak coverage gate.
+// [OUT_DIR=output/playwright/rexonance-flame] [FLAME_NATURAL=1] controls evidence/real-clock capture.
 // The disposable profile never posts gallery images or changes public data.
 import assert from "node:assert/strict";
 import { mkdir, writeFile } from "node:fs/promises";
@@ -36,7 +37,7 @@ const bodyRegions = {
   footLeft: [122, 955, 45, 45],
   footRight: [404, 955, 45, 45],
 };
-const asset = "/rexonance-flame-20261019/flame.webp";
+const asset = "/rexonance-flame-natural-20261019/flame.webp";
 const engine = process.env.BROWSER === "webkit" ? webkit : chromium;
 const browser = await engine.launch(engine === chromium ? { channel: "chrome" } : {});
 const profiles = {
@@ -356,6 +357,9 @@ function coverageSummary(shots, isPeak) {
       minimum: Math.min(
         ...Object.values(shot.screenCoverage ?? {}).map((region) => region.greenRatio),
       ),
+      minimumRegion: Object.entries(shot.screenCoverage ?? {}).sort(
+        ([, a], [, b]) => a.greenRatio - b.greenRatio,
+      )[0]?.[0],
       regions: shot.screenCoverage ?? null,
     })),
     // A temporal maximum is diagnostic only; it cannot let eleven different
@@ -380,7 +384,9 @@ function assertPeakCoverage(summary, label) {
   if (coverageMinimum !== null)
     assert.ok(
       summary.frames.some((frame) => frame.minimum >= coverageMinimum),
-      `${label}: one peak frame must cover every body region by at least ${coverageMinimum}`,
+      `${label}: one peak frame must cover every body region by at least ${coverageMinimum}; ${summary.frames
+        .map((frame) => `${frame.at}/${frame.minimumRegion}=${(frame.minimum * 100).toFixed(2)}%`)
+        .join(", ")}`,
     );
 }
 
@@ -419,7 +425,6 @@ try {
         await openEntry(page, mode !== "reduced");
         if (mode !== "reduced")
           await page.locator('.rx-suit[data-suit="build"]').waitFor({ state: "attached" });
-        const entryStarted = Date.now();
         if (mode !== "reduced") {
           // React effects begin the real painter on a subsequent rAF. Never
           // jump the clock beyond START_BY=420ms before that decision: doing
@@ -448,12 +453,22 @@ try {
               .map((entry) => new URL(entry.name).pathname),
           }));
         }
-        for (const target of mode === "reduced" ? [] : [600, 850, 1000, 1150, 1600, 2200, 2600]) {
+        for (const target of mode === "reduced"
+          ? []
+          : [320, 460, 600, 850, 1000, 1150, 1600, 1950, 2200, 2600]) {
           if (!(await page.locator(".rx-call-sequence").count())) break;
           // Seek the actual CSS meter read by the real canvas engine. Only
           // its clock is controlled; no replacement painter or synthetic draw.
           if (naturalClock)
-            await page.waitForTimeout(Math.max(0, target - (Date.now() - entryStarted)));
+            await page.waitForFunction(
+              (time) => {
+                const sequence = document.querySelector(".rx-call-sequence");
+                const meter = document.querySelector(".rx-call-meter > i")?.getAnimations()[0];
+                return !sequence || (meter && Number(meter.currentTime) >= time);
+              },
+              target,
+              { timeout: 10000 },
+            );
           else {
             await page.evaluate((time) => {
               const meter = document.querySelector(".rx-call-meter > i")?.getAnimations()[0];
@@ -507,7 +522,7 @@ try {
           );
           assert.ok(
             record.entry
-              .filter((shot) => shot.target <= 1600)
+              .filter((shot) => shot.target >= 600 && shot.target <= 1600)
               .every((shot) => shot.atlasDraws > 0 && shot.pixels?.green > 0),
             `${name}: initial flame frames must be drawn, not only a later return call`,
           );
@@ -540,7 +555,14 @@ try {
             Math.max(0, geometry.top - profiles[name].viewport.height * 4.4),
           );
           await page.waitForTimeout(1800);
-          for (const progress of [0.04, 0.1, 0.14, 0.22, 0.3, 0.34, 0.92, 0.99, 0.14]) {
+          // Retain the old all-region peak gate and completed-armour shots,
+          // but also inspect ignition and shrinking extinction. The final
+          // five samples travel backwards through the same live scene.
+          const progressSamples = [
+            0.025, 0.04, 0.065, 0.085, 0.1, 0.14, 0.22, 0.27, 0.3, 0.34, 0.92, 0.99, 0.27, 0.14,
+            0.1, 0.065, 0.025,
+          ];
+          for (const [index, progress] of progressSamples.entries()) {
             const state = await scrollToProgress(page, progress);
             await page.waitForFunction(
               () => document.querySelector('.rzn-suitup[data-rzn-state="live"] canvas')?.width > 0,
@@ -553,6 +575,7 @@ try {
             const capture = await page.screenshot({ path: file, scale: "css" });
             record.scroll.push({
               progress,
+              direction: index < 12 ? "forward" : "reverse",
               ...state,
               pixels,
               screenCoverage: await screenCoverage(capture, pixels?.viewportFigure),
@@ -582,13 +605,54 @@ try {
             ),
             scroll: coverageSummary(
               record.scroll,
-              (shot) => shot.progress === 0.1 || shot.progress === 0.14,
+              (shot) =>
+                shot.direction === "forward" && (shot.progress === 0.1 || shot.progress === 0.14),
+            ),
+            reverse: coverageSummary(
+              record.scroll,
+              (shot) =>
+                shot.direction === "reverse" && (shot.progress === 0.1 || shot.progress === 0.14),
             ),
             note: "Inner body patches are measured from the actual visible screenshot, including the DOM undersuit, both canvas layers and their opacity. Source-canvas coverage is retained per shot for diagnostics. Regional maxima cannot satisfy the optional gate: all regions must pass together in one peak frame. Extinguished and final armour frames are retained separately.",
+          };
+          const temporalCoverage = (shots) =>
+            shots.map((shot) => {
+              const regions = Object.values(shot.screenCoverage ?? {});
+              return {
+                at: shot.target ?? shot.progress,
+                direction: shot.direction ?? "forward",
+                clock: shot.clock ?? null,
+                canvasGreen: shot.pixels?.green ?? 0,
+                meanGreenExcess:
+                  regions.reduce((sum, region) => sum + region.meanGreenExcess, 0) /
+                  Math.max(1, regions.length),
+                regionRatios: Object.fromEntries(
+                  Object.entries(shot.screenCoverage ?? {}).map(([name, region]) => [
+                    name,
+                    region.greenRatio,
+                  ]),
+                ),
+              };
+            });
+          record.naturalness = {
+            entry: temporalCoverage(record.entry),
+            scroll: temporalCoverage(record.scroll),
+            note: "Early ignition, full-body peak, lowering extinction and reverse ignition are captured from the real engines. Region timing and intensity are diagnostics for visual review, not a substitute for the unchanged simultaneous eleven-region peak coverage gate. Reverse clocks are tested exactly in the unit renderer; browser atlas phase is intentionally free-running.",
           };
           if (mode === "normal" && !baseline) {
             assertPeakCoverage(record.bodyCoverage.entry, `${name}/entry`);
             assertPeakCoverage(record.bodyCoverage.scroll, `${name}/scroll`);
+            assertPeakCoverage(record.bodyCoverage.reverse, `${name}/reverse`);
+            assert.ok(
+              record.scroll
+                .filter(
+                  (shot) =>
+                    shot.direction === "reverse" &&
+                    (shot.progress === 0.1 || shot.progress === 0.14),
+                )
+                .every((shot) => shot.pixels?.green > 0),
+              "reverse scroll re-ignites the actual flame at both peak samples",
+            );
           }
           // A real-time forward/reverse sweep, without screenshots in the measured interval.
           await page.evaluate(async () => {
@@ -730,6 +794,9 @@ try {
         console.log(
           `PASS ${engine.name()} ${name}/${mode}: entry, scroll, repeat, ${record.requests} atlas request(s)`,
         );
+      } catch (error) {
+        record.failure = { name: error.name, message: error.message };
+        throw error;
       } finally {
         await writeFile(join(dir, "result.json"), JSON.stringify(record, null, 2) + "\n");
         await context.close();
