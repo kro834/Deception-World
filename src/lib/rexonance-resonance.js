@@ -594,6 +594,10 @@ const RING_TONES = ["rgb(121 232 255)", "rgb(182 163 255)", "rgb(242 216 150)"];
 const TONE_CSS = TONES.map(([r, g, b]) => `rgb(${r} ${g} ${b})`);
 
 const grouped = (value) => String(value).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+const REACTOR_RADIUS = 40;
+const REACTOR_RINGS = 5;
+const REACTOR_SWIRL = [0.74, 0.82];
+const REACTOR_MOTES = ["rgb(240 207 134)", "rgb(150 236 255)", "rgb(255 143 216)"];
 const clamp01 = (value) => (value < 0 ? 0 : value > 1 ? 1 : value);
 const span = (progress, [from, to]) => clamp01((progress - from) / (to - from));
 const smooth = (u) => u * u * (3 - 2 * u);
@@ -2930,6 +2934,79 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       nanites.frontPass(context);
       nanites.freePass(context);
       nanites.endFrame();
+    }
+
+    // The chest reactor forms as a vortex (owner, 2026-10-18): its socket
+    // waits dark, then rings of the art sweep in from the rim to the eye of
+    // the swirl with nanites spiralling inward; it shines when the lights
+    // run out (B.light), its arms turning as it ignites.
+    {
+      const [rx, ry] = config.core;
+      const R = REACTOR_RADIUS;
+      const [swirlFrom, swirlTo] = REACTOR_SWIRL;
+      if (progress >= B.deus[0] && progress < swirlTo) {
+        const u = span(progress, REACTOR_SWIRL);
+        context.save();
+        context.fillStyle = "#05070c";
+        for (let ring = 0; ring < REACTOR_RINGS; ring += 1) {
+          // Outer rings first; each sweeps its turn as the vortex draws in.
+          const start = (ring / REACTOR_RINGS) * 0.55;
+          const sweep = smooth(clamp01((u - start) / 0.45));
+          if (sweep >= 1) continue;
+          const outer = R * (1 - ring / REACTOR_RINGS) + 0.75;
+          const inner = Math.max(0, R * (1 - (ring + 1) / REACTOR_RINGS) - 0.75);
+          const turn = -Math.PI / 2 + ring * 0.9 + sweep * Math.PI * 2;
+          context.beginPath();
+          context.arc(rx, ry, outer, turn, -Math.PI / 2 + ring * 0.9 + Math.PI * 2);
+          context.arc(rx, ry, inner, -Math.PI / 2 + ring * 0.9 + Math.PI * 2, turn, true);
+          context.closePath();
+          context.fill();
+        }
+        context.restore();
+        if (!calm && progress >= swirlFrom) {
+          // Nanites drawn down a logarithmic spiral into the eye.
+          context.save();
+          context.globalCompositeOperation = "lighter";
+          for (let i = 0; i < 36; i += 1) {
+            const phase = (i / 36 + u * 1.6) % 1;
+            const r = R * 1.5 * (1 - phase) + 2;
+            const a = i * 2.39996 + phase * Math.PI * 3.2;
+            context.globalAlpha = Math.sin(Math.PI * phase) * (1 - u * 0.6);
+            context.fillStyle = REACTOR_MOTES[i % 3];
+            const size = 1.6 + (i % 3);
+            context.fillRect(rx + Math.cos(a) * r - size / 2, ry + Math.sin(a) * r - size / 2, size, size);
+          }
+          context.restore();
+        }
+      }
+      if (lights && progress >= B.light[0]) {
+        const g = span(progress, [B.light[0], B.light[0] + 0.05]);
+        if (g < 1) {
+          const glowAlpha = Math.sin(Math.PI * g);
+          context.save();
+          context.translate(rx, ry);
+          context.rotate(g * Math.PI * 1.4);
+          context.globalCompositeOperation = "lighter";
+          for (let arm = 0; arm < 3; arm += 1) {
+            context.rotate((Math.PI * 2) / 3);
+            context.beginPath();
+            for (let t = 0; t <= 1.0001; t += 0.1) {
+              const r = R * 0.12 + R * 1.05 * t;
+              const a = t * 2.6;
+              const x = Math.cos(a) * r;
+              const y = Math.sin(a) * r;
+              if (t === 0) context.moveTo(x, y);
+              else context.lineTo(x, y);
+            }
+            context.globalAlpha = 0.85 * glowAlpha;
+            context.strokeStyle = arm === 1 ? "rgb(255 143 216)" : "rgb(150 236 255)";
+            context.lineWidth = 3.2 * (1 - g) + 1;
+            context.stroke();
+          }
+          context.restore();
+        }
+      }
+      context.globalAlpha = 1;
     }
 
     // REXONANCE DEUS！: the face fills with pixel squares, which scatter.
