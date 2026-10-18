@@ -489,8 +489,11 @@ test("the component adds only silent boxes, keeps one image per form and the own
     component,
     /data-exf-win=\{metric\.currentBar >= metric\.baselineBar \? "extreme" : "rival"\}/,
   );
-  // The ratio stands as the owner's figure (the clash carries the beat).
-  assert.match(component, /<b>\{metric\.relative\}<\/b>/);
+  // The ratio stands as the owner's figure and counts via its silent tally copy.
+  assert.match(
+    component,
+    /<b>\s*<span className="exi-figure">\s*<span className="exi-real">\{metric\.relative\}<\/span>/,
+  );
   assert.match(component, /\{activeComparison\.code\} \/ <b>\{metric\.previous\}<\/b>/);
   assert.match(component, /useEffect\(\(\) => mountExtremeFightCard\(pageRef\.current\), \[\]\);/);
   // The stage panel is reached like the other scenes (the sliver's arrival).

@@ -367,17 +367,13 @@ test("every tally is a silent copy of the owner's figure, which stays in the tex
       /<(?:b|span) className="exi-figure">\s*<(b|span) className="exi-real">([^<{]+|\{[^}]+\})<\/\1>\s*<\1\s+className="exi-tally"\s+aria-hidden="true"\s+data-exi-tally=(?:"([^"]+)"|\{([^}]+)\})\s*\/>/g,
     ),
   ];
-  // rx11 review: the specs no longer count the P14 figures a second time (each
-  // draw is a text change, the costliest beat on the page).
-  // rx15 (FIGHT CARD): the console's ratios no longer count either: its clash
-  // bars carry that beat on the compositor; three tallies remain.
-  assert.equal(tallies.length, 3);
-  assert.equal((component.match(/data-exi-tally=/g) ?? []).length, 3);
+  assert.equal(tallies.length, 8);
+  assert.equal((component.match(/data-exi-tally=/g) ?? []).length, 8);
   for (const [, , real, literal, expression] of tallies) {
     if (literal) assert.equal(literal, real.trim());
     else assert.equal(`{${expression}}`, real.trim());
   }
-  for (const figure of ["205.6", "20,000", "5,000"])
+  for (const figure of ["205.6", "0.002", "20,000", "5,000"])
     assert.ok(component.includes(`data-exi-tally="${figure}"`));
   // A tally redraws the figure exactly at its end, zero-padded on the way.
   for (const value of [
@@ -875,6 +871,55 @@ test("a tally counts up from zero over the owner's figure, lands on it and never
   t.tick(BEATS.landed);
   assert.equal(figure.getAttribute("data-exi-landed"), "done");
   assert.equal(t.frames.size, 0, "no frame is requested once every tally has landed");
+  cleanup();
+});
+
+test("sub-tenth 3-decimal sprint times sweep down like a chronograph and clash rows replay their tallies", () => {
+  const t = setup();
+  const sprintFigure = h(
+    "b",
+    { class: "exi-figure" },
+    h("b", { class: "exi-real" }),
+    h("b", { class: "exi-tally", "data-exi-tally": "0.002" }),
+  );
+  t.time.append(h("strong", {}, sprintFigure));
+  const clashRow = h(
+    "article",
+    { "data-exf-clash": "" },
+    h(
+      "strong",
+      {},
+      h(
+        "span",
+        { class: "exi-figure" },
+        h("span", { class: "exi-real" }),
+        h("span", { class: "exi-tally", "data-exi-tally": "0.002秒" }),
+      ),
+    ),
+  );
+  t.comparison.append(clashRow);
+  const cleanup = t.mount();
+  const sprintCopy = sprintFigure.querySelector(".exi-tally");
+  assert.equal(sprintCopy.textContent, "0.000");
+  t.reach(t.time);
+  assert.equal(sprintFigure.getAttribute("data-exi-counting"), "true");
+  t.tick(300);
+  t.flush();
+  assert.match(sprintCopy.textContent, /^0\.\d{3}$/);
+  assert.ok(Number(sprintCopy.textContent) > 0.002 && Number(sprintCopy.textContent) < 0.999);
+  t.tick(900);
+  t.flush();
+  assert.equal(sprintFigure.getAttribute("data-exi-landed"), "true");
+
+  // When a comparator row clashes into view via data-exf-clash="true", its tally starts measuring.
+  const rowFigure = clashRow.querySelector(".exi-figure");
+  const rowCopy = clashRow.querySelector(".exi-tally");
+  clashRow.setAttribute("data-exf-clash", "true");
+  t.mutate(t.comparison, [{ type: "attributes", attributeName: "data-exf-clash", target: clashRow }]);
+  assert.equal(rowFigure.getAttribute("data-exi-counting"), "true");
+  t.tick(300);
+  t.flush();
+  assert.match(rowCopy.textContent, /^0\.\d{3}秒$/);
   cleanup();
 });
 

@@ -313,7 +313,11 @@ const ExtremePerformance = memo(function ExtremePerformance() {
             </i>
             <small>100M TIME / EXTREME</small>
             <strong>
-              0.002<span>SEC</span>
+              <b className="exi-figure">
+                <b className="exi-real">0.002</b>
+                <b className="exi-tally" aria-hidden="true" data-exi-tally="0.002" />
+              </b>
+              <span>SEC</span>
               <i className="exo-speed" aria-hidden="true" />
             </strong>
             <p>標準状態の100m走破時間</p>
@@ -376,11 +380,21 @@ const ExtremePerformance = memo(function ExtremePerformance() {
               <header>
                 <div>
                   <small>{metric.label}</small>
-                  <strong>{metric.current}</strong>
+                  <strong>
+                    <span className="exi-figure">
+                      <span className="exi-real">{metric.current}</span>
+                      <span className="exi-tally" aria-hidden="true" data-exi-tally={metric.current} />
+                    </span>
+                  </strong>
                 </div>
                 <span className="rxs-comparison-result">
                   <i>基準比</i>
-                  <b>{metric.relative}</b>
+                  <b>
+                    <span className="exi-figure">
+                      <span className="exi-real">{metric.relative}</span>
+                      <span className="exi-tally" aria-hidden="true" data-exi-tally={metric.relative} />
+                    </span>
+                  </b>
                   <em>
                     {metric.multiplier} / {metric.delta}
                   </em>
@@ -752,7 +766,7 @@ export function ExtremeSaga() {
               KHAOS UltraとKOSMOS
               Ultraを束ね、学習によって増えた可能性を実行可能な勝利経路へ整えます。競合や破綻を除外しながら経路を再評価し、最短の勝利条件へ収束させます。変換効率・応答・安定率の個別数値は未公表です。
             </p>
-            <dl aria-label="エクスプリームのP14構成">
+            <dl aria-label="エクスプリームのP14構成" data-exi-hit="" data-exi-line="mid">
               <div className="exo-read">
                 <dt>KHAOS Ultra</dt>
                 <dd>
@@ -977,7 +991,11 @@ export function ExtremeSaga() {
           <div>
             <small>KHAOS Ultra</small>
             <strong>
-              20,000<span>YOPS</span>
+              <b className="exi-figure">
+                <b className="exi-real">20,000</b>
+                <b className="exi-tally" aria-hidden="true" data-exi-tally="20,000" />
+              </b>
+              <span>YOPS</span>
             </strong>
             <p>∞ CORE</p>
           </div>
@@ -985,7 +1003,11 @@ export function ExtremeSaga() {
           <div>
             <small>KOSMOS Ultra</small>
             <strong>
-              5,000<span>TOPS</span>
+              <b className="exi-figure">
+                <b className="exi-real">5,000</b>
+                <b className="exi-tally" aria-hidden="true" data-exi-tally="5,000" />
+              </b>
+              <span>TOPS</span>
             </strong>
             <p>300 CORE</p>
           </div>

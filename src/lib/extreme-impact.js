@@ -49,10 +49,8 @@ const SCENES = ":scope > :is(.rxs-section, .rxs-footer), :scope :is(.rxs-system-
 const TALLY_MS = 900;
 // A chained hit follows the one before it by this much unless it says.
 const CHAIN_MS = 380;
-// A counter reads as rolling at twenty draws a second. Every draw is a text
-// change (layout, paint and a commit of its layer), the costliest beat on the
-// page, so it runs a third of the frames and stops braking sooner.
-const TALLY_STEP_MS = 50;
+// A counter reads as a live telemetry drum at ~30 draws a second.
+const TALLY_STEP_MS = 32;
 const TILT_EASE = 0.14;
 // Each key outlives the latest beat it starts (every beat ends by 2 s).
 export const BEATS = { hit: 2100, landed: 800, impact: 1000, pop: 500, arrival: 2200 };
@@ -72,12 +70,14 @@ export function parseTally(text) {
     if (whole[index] === ",") marks.push(distance);
     else distance += 1;
   }
-  return { prefix, suffix, value, decimals: fraction.length, width: digits.length, marks };
+  const sweepFrom = fraction.length >= 3 && value > 0 && value < 0.1 ? 0.999 : 0;
+  return { prefix, suffix, value, decimals: fraction.length, width: digits.length, marks, sweepFrom };
 }
 
 /** Draw a value in the figure's own shape: zero-padded, grouped, same decimals. */
 export function formatTally(parts, value) {
-  const fixed = Math.max(0, Math.min(parts.value, value)).toFixed(parts.decimals);
+  const cap = parts.sweepFrom ? Math.max(parts.value, parts.sweepFrom) : parts.value;
+  const fixed = Math.max(0, Math.min(cap, value)).toFixed(parts.decimals);
   const [whole, fraction] = fixed.split(".");
   const padded = whole.padStart(parts.width, "0");
   let grouped = "";
@@ -215,9 +215,12 @@ export function mountExtremeImpact(page, environment = window) {
         continue;
       }
       if (time - run.drawn < TALLY_STEP_MS) continue;
-      // Fast off the line, braking hard into the value. The copy keeps one
-      // text node and only its characters change (no node is inserted).
-      const text = formatTally(run.parts, run.parts.value * (1 - (1 - progress) ** 4));
+      // Smooth telemetry drum braking into the measured value.
+      const eased = 1 - (1 - progress) ** 2.6;
+      const measured = run.parts.sweepFrom
+        ? run.parts.sweepFrom + (run.parts.value - run.parts.sweepFrom) * eased
+        : run.parts.value * eased;
+      const text = formatTally(run.parts, measured);
       if (text !== run.text) {
         run.text = text;
         run.drawn = time;
@@ -319,13 +322,29 @@ export function mountExtremeImpact(page, environment = window) {
     if (disposed) return;
     releaseRemoved(records);
     if (!running) return;
-    for (const record of records)
-      for (const node of record.addedNodes)
+    for (const record of records) {
+      if (
+        record.type === "attributes" &&
+        record.attributeName === "data-exf-clash" &&
+        record.target?.getAttribute?.("data-exf-clash") === "true" &&
+        page.contains(record.target)
+      ) {
+        for (const tally of talliesIn(record.target)) {
+          const figure = tally.parentElement;
+          if (!figure || tallies.has(figure)) continue;
+          retire(figure, "data-exi-landed");
+          figure.removeAttribute("data-exi-landed");
+          startTally(tally);
+        }
+        continue;
+      }
+      for (const node of record.addedNodes ?? [])
         if (node.nodeType === 1 && page.contains(node))
           for (const tally of talliesIn(node)) {
             if ((scopeOf(tally)?.getAttribute("data-exi-hit") ?? "true") === "") wait(tally);
             else startTally(tally);
           }
+    }
   };
   const onFigure = (records) => {
     if (disposed) return;
@@ -360,7 +379,12 @@ export function mountExtremeImpact(page, environment = window) {
     const Watcher = environment.MutationObserver;
     for (const container of page.querySelectorAll("[data-exi-rekey]")) {
       const watcher = new Watcher(onRekey);
-      watcher.observe(container, { childList: true });
+      watcher.observe(container, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ["data-exf-clash"],
+      });
       watchers.push(watcher);
     }
     if (panel) {

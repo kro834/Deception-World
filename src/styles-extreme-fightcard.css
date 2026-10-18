@@ -2067,6 +2067,18 @@ html[data-family="special"]
     body
     .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
     .rxs-comparison-metrics
+    > article[data-exf-clash="true"]
+    .rxs-comparison-result {
+    transform-origin: 100% 50%;
+    animation: exf-result-lock 440ms var(--exi-hit) var(--exf-row, 0ms) both;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    .rxs-comparison-metrics
     > article:nth-child(2) {
     --exf-row: 90ms;
   }
@@ -2238,7 +2250,7 @@ html[data-family="special"]
 @keyframes exf-bill {
   from {
     opacity: 0;
-    transform: translateX(-9%) scaleX(1.12);
+    transform: translateX(-12%) scaleX(1.18);
   }
   to {
     opacity: 1;
@@ -2249,7 +2261,7 @@ html[data-family="special"]
 @keyframes exf-bill-end {
   from {
     opacity: 0;
-    transform: translateX(9%) scaleX(1.12);
+    transform: translateX(12%) scaleX(1.18);
   }
   to {
     opacity: 1;
@@ -2260,11 +2272,11 @@ html[data-family="special"]
 @keyframes exf-plate {
   0% {
     opacity: 0;
-    transform: scale(1.7) rotate(-8deg);
+    transform: scale(1.88) rotate(-10deg);
   }
   55% {
     opacity: 1;
-    transform: scale(0.94) rotate(1deg);
+    transform: scale(0.93) rotate(1.5deg);
   }
   100% {
     opacity: 1;
@@ -2277,7 +2289,7 @@ html[data-family="special"]
     scale: 1 1;
   }
   30% {
-    scale: 4 1;
+    scale: 6 1;
   }
   100% {
     scale: 1 1;
@@ -2296,18 +2308,33 @@ html[data-family="special"]
 @keyframes exf-burst {
   0% {
     opacity: 0;
-    scale: 0.2;
-    rotate: -40deg;
+    scale: 0.15;
+    rotate: -48deg;
   }
   40% {
     opacity: 1;
-    scale: 1.7;
-    rotate: 8deg;
+    scale: 1.95;
+    rotate: 10deg;
   }
   100% {
     opacity: 1;
     scale: 1;
     rotate: 0deg;
+  }
+}
+
+@keyframes exf-result-lock {
+  0% {
+    translate: 18px 0;
+    scale: 1.08;
+  }
+  55% {
+    translate: -2px 0;
+    scale: 0.98;
+  }
+  100% {
+    translate: 0 0;
+    scale: 1;
   }
 }
 

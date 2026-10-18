@@ -832,6 +832,7 @@ html[data-family="special"]
   aspect-ratio: auto;
   opacity: 1;
   transform: none;
+  transform-origin: 0 50%;
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page #performance .exi-stage > article > p {
   color: #e6dfd0;
@@ -840,7 +841,58 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page #performance .exi-s
   line-height: 1.7;
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page #performance .exi-stage .exi-band {
-  display: none;
+  z-index: 3;
+  grid-column: 1 / -1;
+  grid-row: 1;
+  align-self: center;
+  height: 2px;
+  margin-inline: -10px;
+  rotate: -14deg;
+  translate: 0 0;
+  pointer-events: none;
+}
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  #performance
+  .exi-stage
+  .exi-band::before {
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--ext-gold) 22%,
+    #fff7df 50%,
+    var(--exe-cyan) 78%,
+    transparent
+  );
+  box-shadow:
+    0 0 18px rgb(244 204 123 / 44%),
+    0 0 28px rgb(114 228 255 / 28%);
+}
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  .exi-figure[data-exi-counting="true"]
+  > .exi-tally {
+  color: #fff7df;
+  text-shadow:
+    0 0 22px rgb(244 204 123 / 54%),
+    0 2px 10px rgb(0 0 0 / 72%);
+}
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  :is(
+    #performance .exi-stage > article:nth-child(2),
+    #performance .rxs-comparison-metrics > article[data-exf-win="rival"]
+  )
+  .exi-figure[data-exi-counting="true"]
+  > .exi-tally {
+  color: #eefbff;
+  text-shadow:
+    0 0 22px rgb(114 228 255 / 56%),
+    0 2px 10px rgb(0 0 0 / 72%);
 }
 html[data-family="special"]
   body
@@ -848,7 +900,7 @@ html[data-family="special"]
   #performance
   .exi-stage
   .exi-rays {
-  color: rgb(244 204 123 / 22%);
+  color: rgb(244 204 123 / 28%);
 }
 html[data-family="special"]
   body
@@ -856,7 +908,7 @@ html[data-family="special"]
   #performance
   .exi-stage
   .exi-streaks {
-  color: rgb(114 228 255 / 24%);
+  color: rgb(114 228 255 / 32%);
 }
 html[data-family="special"]
   body
@@ -2310,6 +2362,12 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page :is(a, button, summ
     grid-row: 2;
     padding: 26px 22px;
     border-left: 0;
+  }
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page #performance .exi-stage .exi-band {
+    grid-column: 1;
+    grid-row: 1 / -1;
+    margin-block: 0;
+    rotate: -8deg;
   }
   html[data-family="special"]
     body

@@ -94,6 +94,13 @@ html body .load-gate.has-cine.is-over-zeztz-cutin {
   --dwc-lock: #c8f6ff;
 }
 
+html body .load-gate.has-cine.is-extreme-dive {
+  --dwc-accent: #f4cc7b;
+  --dwc-gold: #72e4ff;
+  --dwc-lock: #fce7af;
+  --dwc-arm: 32px;
+}
+
 /* A cut-in's stage takes over sooner: its iris closes in 260 ms. */
 html body .load-gate.has-cine.rider-route-cutin {
   --dwc-close: 260ms;
@@ -408,6 +415,16 @@ html body .load-gate.has-cine.rider-route-dive .rider-dive-mark > i {
   -webkit-text-stroke: 1.5px var(--dwc-accent);
   filter: drop-shadow(0 6px 18px rgb(2 6 14 / 0.72));
   transform: none;
+}
+
+html body .load-gate.has-cine.is-extreme-dive .rider-dive-mark > i {
+  color: rgb(244 204 123 / 0.24);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  -webkit-text-stroke: 2px #f4cc7b;
+  filter:
+    drop-shadow(0 0 22px rgb(244 204 123 / 0.5))
+    drop-shadow(0 8px 24px rgb(2 6 14 / 0.85));
 }
 
 html body .load-gate.has-cine.rider-route-dive .cine-dive-status {
@@ -901,6 +918,29 @@ html body .load-gate.has-cine.is-cine-flip .rider-cutin-caption {
     animation-name: dwc-mark-out-centre;
   }
 
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-extreme-dive.is-covering
+    .cine-dive-tunnel {
+    --dwc-o: 0.78;
+    animation: dwc-extreme-tunnel 300ms cubic-bezier(0.12, 0.9, 0.14, 1) both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-extreme-dive.is-covering
+    .rider-dive-mark {
+    animation: dwc-extreme-mark-in 240ms cubic-bezier(0.12, 0.96, 0.2, 1) 80ms both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-extreme-dive.is-revealing
+    .rider-dive-mark {
+    animation: dwc-extreme-mark-out calc(var(--dwc-reveal) * 0.42) cubic-bezier(0.3, 0, 0.2, 1)
+      both;
+  }
+
   /* A docked file takes the portrait at once: the numeral and the status
      that sat on its foot give way first, so neither is left over the page's
      own image (on a phone the portrait sits where the held file did). */
@@ -1176,17 +1216,35 @@ html body .load-gate.has-cine.is-rexonance-dive .archive-dive-space {
 }
 
 html body .load-gate.has-cine.is-extreme-dive .archive-dive-space {
+  --dwc-o: 0.96;
+  opacity: 0.96;
   background:
     linear-gradient(
+      -18deg,
+      transparent 48.2%,
+      rgb(244 204 123 / 0.16) 49.3%,
+      rgb(252 246 232 / 0.86) 49.85% 50.15%,
+      rgb(114 228 255 / 0.36) 50.7%,
+      transparent 51.8%
+    ),
+    linear-gradient(
+      14deg,
+      transparent 48.8%,
+      rgb(114 228 255 / 0.48) 49.9% 50.1%,
+      transparent 51.2%
+    ),
+    linear-gradient(
         90deg,
-        transparent 8%,
-        rgb(255 213 122 / 0.5) 30%,
-        rgb(122 232 255 / 0.5) 60%,
-        rgb(236 246 250 / 0.42) 80%,
+        transparent 6%,
+        rgb(255 213 122 / 0.65) 28%,
+        rgb(252 246 232 / 0.78) 50%,
+        rgb(122 232 255 / 0.65) 72%,
         transparent 94%
       )
-      50% 74% / 100% 1px no-repeat,
-    radial-gradient(ellipse at 50% 74%, rgb(255 198 91 / 0.1), transparent 50%);
+      50% 74% / 100% 2px no-repeat,
+    repeating-linear-gradient(90deg, rgb(244 204 123 / 0.05) 0 1px, transparent 1px 56px),
+    radial-gradient(ellipse 56% 42% at 50% 48%, rgb(244 204 123 / 0.24), transparent 68%),
+    radial-gradient(ellipse 48% 36% at 50% 74%, rgb(114 228 255 / 0.18), transparent 62%);
 }
 
 html body .load-gate.has-cine.is-final-stage-dive .archive-dive-space {
@@ -1719,6 +1777,46 @@ html body .load-gate.has-cine:is(.is-cine-calm, .is-cine-reduced) .rider-cutin-c
   to {
     opacity: 0;
     transform: translate3d(-50%, -50%, 0) scale(0.92);
+  }
+}
+
+@keyframes dwc-extreme-tunnel {
+  from {
+    opacity: 0.24;
+    transform: translate(-50%, -50%) scale(0.28) rotate(-8deg);
+  }
+  45% {
+    opacity: 0.88;
+  }
+  to {
+    opacity: 0.78;
+    transform: translate(-50%, -50%) scale(1.14) rotate(0deg);
+  }
+}
+
+@keyframes dwc-extreme-mark-in {
+  0% {
+    opacity: 0;
+    transform: translate3d(-50%, -50%, 0) scale(1.68) rotate(-4deg);
+  }
+  62% {
+    opacity: 1;
+    transform: translate3d(-50%, -50%, 0) scale(0.95) rotate(0.5deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(-50%, -50%, 0) scale(1) rotate(0deg);
+  }
+}
+
+@keyframes dwc-extreme-mark-out {
+  from {
+    opacity: 1;
+    transform: translate3d(-50%, -50%, 0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(-50%, -50%, 0) scale(1.28);
   }
 }
 

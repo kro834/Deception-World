@@ -768,6 +768,33 @@
     .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
     #exs-stage-panel[data-exo-cut="true"]
     > div
+    > .exs-form-facts
+    > div {
+    animation: exo-tick 280ms var(--exo-hit) 110ms backwards;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    #exs-stage-panel[data-exo-cut="true"]
+    > div
+    > .exs-form-facts
+    > div:nth-child(2) {
+    animation-delay: 150ms;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    #exs-stage-panel[data-exo-cut="true"]
+    > div
+    > .exs-form-facts
+    > div:nth-child(3) {
+    animation-delay: 190ms;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.exs-page[data-motion-ready="true"]
+    #exs-stage-panel[data-exo-cut="true"]
+    > div
     > ul
     li {
     animation: exo-tick 260ms var(--exo-hit) 140ms backwards;
