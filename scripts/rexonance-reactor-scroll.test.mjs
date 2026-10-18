@@ -24,6 +24,9 @@ function recorder() {
     drawImage: (...args) => operations.push(["drawImage", ...args]),
     moveTo: (...args) => operations.push(["moveTo", ...args]),
     arc: (...args) => operations.push(["arc", ...args]),
+    // The forming edge's light (owner, 2026-10-18).
+    lineTo: (...args) => operations.push(["lineTo", ...args]),
+    stroke: () => operations.push(["stroke"]),
     restore: () => operations.push(["restore"]),
     rotate: (...args) => operations.push(["rotate", ...args]),
     save: () => operations.push(["save"]),

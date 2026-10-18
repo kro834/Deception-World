@@ -105,4 +105,33 @@ export function drawReactorFormation(context, layers, core, u) {
     context.drawImage(layers.disc, x, y, w, h);
     context.restore();
   }
+  // The forming edge: a thin gold-to-pink line where the nanites are laying
+  // the coil, turning with it and fading out as it closes (owner, 2026-10-18).
+  if (u > 0 && u < 1) {
+    const [cx, cy] = core;
+    const front = -Math.PI / 2 + Math.PI * 2 * reactorFormation(u);
+    const reach = Math.max(w, h) * 0.5;
+    const cos = Math.cos(front);
+    const sin = Math.sin(front);
+    context.save();
+    context.translate(cx, cy);
+    context.rotate(reactorCoilAngle(u));
+    const scale = reactorCoilScale(u);
+    context.scale(scale, scale);
+    context.globalCompositeOperation = "lighter";
+    context.globalAlpha = Math.sin(Math.PI * Math.min(1, u * 1.15)) * 0.85;
+    context.lineWidth = 1.6;
+    context.lineCap = "round";
+    for (const [from, to, tone] of [
+      [0.2, 0.62, "rgb(240 207 134)"],
+      [0.62, 0.95, "rgb(255 143 216)"],
+    ]) {
+      context.strokeStyle = tone;
+      context.beginPath();
+      context.moveTo(cos * reach * from, sin * reach * from);
+      context.lineTo(cos * reach * to, sin * reach * to);
+      context.stroke();
+    }
+    context.restore();
+  }
 }
