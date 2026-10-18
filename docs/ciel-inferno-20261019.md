@@ -89,3 +89,54 @@ iPhone/iPad Home Screen app test. The owner performs physical-device checks.
 Publication must use the existing verified-main deployment workflow and confirm
 the exact public release SHA plus delivered art/jet hashes and the real ten-tap
 flow. A source commit or successful push is not itself public verification.
+
+### Local release checks
+
+- `npm test`: 2,572 tests, 2,567 passed, zero failed, five existing skips.
+- TypeScript passed. ESLint has zero errors and 12 existing warnings.
+- All 15 source-part groups match; both authored asset check modes pass.
+- Startup graph: entry 415,170 decoded / 132,576 gzip bytes; total critical
+  graph 552,100 / 180,112 bytes. Existing budgets pass unchanged, with no
+  secret-renderer markers in the critical graph. These are file-byte counts,
+  not elapsed loading-time measurements. Removing the lazy component's
+  unnecessary router-hook dependency preserved the original chunk boundary;
+  no build configuration or budget was loosened.
+- `output/playwright/ciel-inferno-v6/chromium-boundaries/report.json` verifies
+  stalled import, blocked large illustration, forced colours and no-WebGL.
+  Every case releases focus/scroll/settings/animation work; blocked artwork
+  decodes the compact supplied illustration, not a missing-image placeholder.
+
+An input-timing regression was reproduced before the final hit-area fix: the
+550ms gap's cleanup timer (with 20ms grace) could expire while navigation was busy,
+leaving about 120ms in which a physical pointerdown hit the page but its
+pointerup hit the button. Final pending-import evidence deliberately crosses
+`navigating=true / armed=false`: pointerdown reaches the button's own hit span,
+and all three bursts (tap-cancel, Escape-cancel, 12-second cap) succeed. Ordinary
+navigation was not replaced or bypassed to make the test pass.
+
+The final `chromium-auto-three` and `webkit-auto-three` reports under that same
+v6 directory exercise desktop 1440px, touch 320px/DPR3 and WebKit touch
+1024px/DPR2. All three profiles pass real-pointer nine/tenth activation,
+keyboard activation and explicit close, then three consecutive natural endings
+each: **9/9** auto endings return focus to the live Ciel, preserve scroll and
+preferences, and leave zero queued inferno animation work. Every case actually
+draws all 32 source frames and records no JavaScript errors. The desktop flow
+also passes synthetic visibility hiding, actual WebGL context loss and real
+browser Back cancellation; those departures do not steal destination focus.
+The 6.6-second final-coal capture confirms the dragon has faded to zero opacity.
+
+Auto-completion observations (including locator polling) range from 9.36–9.87s;
+they verify bounded recovery, not frame-rate or elapsed loading improvements.
+An earlier one-rAF restoration raced native dialog/portal teardown. The final
+bounded three-frame repair is validated above, not inferred from an explicit
+close alone. Superseded v4/v5 failures remain diagnostic evidence, not accepted
+release results. Reduced-motion/economy and missing-atlas cases were additionally
+checked in those earlier runs without changes to their rendering paths afterward.
+
+Existing-control regression also passes: `verify-ciel-button.mjs` at 320, 390,
+844, 1024 and 1440px verifies supplied normal artwork, personal toggle persistence,
+pagehide cancellation and subsequent ordinary top navigation. The four
+`verify-zeus-viewport-drag.mjs` cases (390/1024px, height ±60px) preserve a held
+drag, final finger position and saved location. Those scripts use mouse-driven
+holds in a touch-capable context; the secret's normal flows above use actual
+Playwright touch input for the touch profiles. Neither is a physical iPad test.
