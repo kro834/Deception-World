@@ -1169,6 +1169,44 @@
   margin-bottom: 0;
 }
 
+.rd-file-appendix {
+  max-width: 42em;
+  margin: 3em auto 0;
+  padding-top: 2em;
+  border-top: 1px solid currentColor;
+  overflow-wrap: anywhere;
+}
+
+.rd-file-appendix h3 {
+  font-size: 24px;
+}
+
+.rd-file-appendix .world-dossier-reading {
+  margin-top: 2em;
+  columns: auto;
+}
+
+.rd-file-appendix .world-mystery-chapter {
+  margin: 2em 0;
+}
+
+.rd-file-appendix .world-mystery-chapter h4 {
+  font-size: 18px;
+}
+
+.rd-file-appendix .world-mystery-chapter h4 span {
+  margin-right: 0.7em;
+}
+
+.rd-file-appendix .world-dossier-title > * {
+  display: block;
+}
+
+.rd-file-appendix .world-mystery-chapter p {
+  margin: 1.2em 0;
+  white-space: pre-wrap;
+}
+
 .rd-file-footer {
   display: flex;
   align-items: center;

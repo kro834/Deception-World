@@ -1,7 +1,6 @@
 // Owner-supplied record (2026-10-17): the species dossier of the 『犬』, word
-// for word. It is a spoiler, so the World page shows column 06 as 『？？？』
-// with a warning, and the dossier only once the reader slides the plus open.
-// The site search indexes the column's title and warning, never the dossier.
+// for word. Formerly column 06, now an appendix in the post-RISING file.
+// Keep its 『？？？』 label and spoiler warning; never index the dossier.
 export const DOG_DOSSIER = {
   title: "終の来訪者『犬』",
   subtitle: "種族設定・総合資料",

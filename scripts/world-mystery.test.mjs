@@ -69,8 +69,8 @@ test("Column 05 is appended to both existing controls; the first four documents 
       elements = initializer.elements;
     }
   }
-  // 2026-10-17: column 06 『？？？』 (world-dog-dossier-data.ts) follows 05.
-  assert.equal(elements.length, 6);
+  // 2026-10-19: column 06 moved to the post-RISING file; 01-05 stay intact.
+  assert.equal(elements.length, 5);
   assert.equal(elements[4].getText(file), "DOG_ISAKU_COLUMN");
   assert.equal(
     hash(
@@ -160,9 +160,8 @@ test("transcription is optional, scoped only to the voices log and does not repl
   );
 });
 
-test("six tabs reflow without undersized labels; the facsimile has no endless or full-screen glitch", () => {
-  // 2026-10-17: column 06 『？？？』 joined the rail (five → six columns).
-  assert.match(css, /grid-template-columns: repeat\(6, minmax\(0, 1fr\)\)/);
+test("five tabs reflow without undersized labels; the facsimile has no endless or full-screen glitch", () => {
+  assert.match(css, /grid-template-columns: repeat\(5, minmax\(0, 1fr\)\)/);
   assert.match(css, /grid-template-columns: repeat\(3, minmax\(0, 1fr\)\)/);
   assert.match(css, /display: grid !important;/);
   assert.match(css, /grid-auto-rows: minmax\(90px, auto\)/);

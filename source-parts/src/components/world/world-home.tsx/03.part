@@ -1,3 +1,11 @@
+    if (locationHash !== "manager-archive-unmanaged") return;
+    setManagerTab(1);
+    syncRail(managerRail.current, 1);
+  }, [locationHash]);
+
+  // A search result opens one column: /world#world-column-02.
+  useLayoutEffect(() => {
+    const index = COLUMNS.findIndex((item) => locationHash === `world-column-${item.no}`);
     if (index < 0) return;
     setColumnTab(index);
     syncRail(columnRail.current, index);
@@ -497,18 +505,3 @@
     shuffleTimers.current = [];
 
     const randomBelow = (upperBound: number) => {
-      if (typeof window.crypto?.getRandomValues !== "function") {
-        return Math.floor(Math.random() * upperBound);
-      }
-      const values = new Uint32Array(1);
-      const rejectionLimit = Math.floor(0x1_0000_0000 / upperBound) * upperBound;
-      do {
-        window.crypto.getRandomValues(values);
-      } while (values[0] >= rejectionLimit);
-      return values[0] % upperBound;
-    };
-    const posterSequence = POSTERS.map((_, index) => index).filter((index) => index !== poster);
-    for (let index = posterSequence.length - 1; index > 0; index -= 1) {
-      const swapIndex = randomBelow(index + 1);
-      [posterSequence[index], posterSequence[swapIndex]] = [
-        posterSequence[swapIndex],

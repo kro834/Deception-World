@@ -1,12 +1,8 @@
 import { memo } from "react";
 import { DOG_DOSSIER } from "./world-dog-dossier-data";
 
-/* Column 06 『？？？』: the owner's 『犬』 dossier, set like the mystery
-   column's record (the same reading classes), shown only once the plus has
-   been slid open. */
+/* The owner's unchanged 『犬』 dossier, now in the post-RISING file. */
 export const DogDossierProse = memo(function DogDossierProse({ id }: { id?: string }) {
-  // The reading block is the pane's own child, so column 06's reading rules
-  // (one measure, no newspaper columns) apply to it as they do to column 05's.
   return (
     <div className="world-mystery-reading world-dossier-reading" id={id}>
       <p className="world-dossier-title">

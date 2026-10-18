@@ -40,12 +40,13 @@ test("world-home preserves its layout and copy outside explicitly approved edits
     // 2026-10-12: three owner-requested EP4 pickups; all other records retained.
     // 2026-10-17: the owner's column 06 『？？？』 (a spoiler warning, the 『犬』
     // dossier behind its plus slider); all other records retained.
-    records: "768f5232d1c64ebcf310fccf0e6178c6bc61dbe928d02ddca160de3a24ddfa1a",
+    // 2026-10-19: remove 06 from the ordinary columns; preserve it in the RE DIVE book.
+    records: "a8a58478067394707675b3e9bd7ceda47f2e37d3ddb9e68c6dc7c4ee1593be3b",
     // rx14 F3/F29: responsive poster and WebP related-image attributes only.
     // The owner's records and exact copy above remain unchanged.
     // Each pickup may now land on its matching form's hash via GuardedLink.
     // 2026-10-17: column 06's slider label and its dialog pane (gate, then dossier).
-    markup: "0674b2f2e3fa0dadad1e575f2b603c58a75590fd4d553699b385fd87623882a9",
+    markup: "d7c68347ead458ee2912bed4fcddc0a5a2d76e40acb26e149bdde2da14f6d69f",
   });
   // The WorldAnnexRiders hook stays where it was (this file is pinned), but
   // renders nothing: 02 RIDERS and 03 RECORDS sit back to back, and the
