@@ -1411,6 +1411,9 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   let frame = 0;
   let images = null;
   let loading = null;
+  let retryTimer = 0;
+  let retryCount = 0;
+  const restLoad = runway.dataset.rznLoad;
   let plan = null;
   let goldPlan = null;
   let raw = null;
@@ -1466,24 +1469,60 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       html.dataset.worldEffects !== "economy"
     );
   };
+  runway.dataset.rznLoad = motionAllowed() ? "waiting" : "static";
 
   // Pictures still downloading when the scene goes (audit #31): each one's
   // handlers hold this scene, and through it the runway and its page.
   const loaders = new Set();
+  const decodeWaiters = new Set();
+  // Decoding and bitmap conversion are optimisations after onload. A hung
+  // optimisation must not block the scene; its loaded image is usable. Kit
+  // sheets are optional too, so their request cannot hold the whole figure.
+  const boundedImage = (pending, fallback, wait, closeLate = false) =>
+    new Promise((resolve) => {
+      let complete = false;
+      let timer = 0;
+      const finish = (value) => {
+        if (complete) {
+          if (closeLate && value !== fallback) value?.close?.();
+          return;
+        }
+        complete = true;
+        environment.clearTimeout(timer);
+        decodeWaiters.delete(cancel);
+        resolve(value);
+      };
+      const cancel = () => finish(fallback);
+      decodeWaiters.add(cancel);
+      timer = environment.setTimeout(cancel, wait);
+      Promise.resolve(pending).then(finish, cancel);
+    });
   const picture = (src, priority) =>
     new Promise((resolve, reject) => {
       const image = new environment.Image();
+      let complete = false;
+      let timer = 0;
+      const finish = (loaded, error) => {
+        if (complete) return;
+        complete = true;
+        environment.clearTimeout(timer);
+        loaders.delete(image);
+        decodeWaiters.delete(cancel);
+        image.onload = image.onerror = null;
+        if (loaded) resolve(image);
+        else {
+          releasePendingImage(image);
+          reject(error);
+        }
+      };
+      const cancel = () => finish(false, new Error("assembly image request timed out"));
       loaders.add(image);
+      decodeWaiters.add(cancel);
       image.decoding = "async";
       if (priority) image.fetchPriority = priority;
-      image.onload = () => {
-        loaders.delete(image);
-        resolve(image);
-      };
-      image.onerror = (error) => {
-        loaders.delete(image);
-        reject(error);
-      };
+      image.onload = () => finish(true);
+      image.onerror = (error) => finish(false, error);
+      timer = environment.setTimeout(cancel, 8000);
       image.src = src;
     });
   // The network half of the preparation, fetched ahead (owner, 2026-10-17:
@@ -1495,8 +1534,17 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   let modulesLoading = null;
   const modules = () => {
     modulesLoading ??= Promise.all([
-      import("./rexonance-assembly-nanites.js"),
-      typeof config.nanites === "function" ? config.nanites() : (config.nanites ?? null),
+      boundedImage(import("./rexonance-assembly-nanites.js"), null, 8000).then((module) => {
+        if (!module) throw new Error("assembly module request timed out");
+        return module;
+      }),
+      boundedImage(
+        Promise.resolve().then(() =>
+          typeof config.nanites === "function" ? config.nanites() : (config.nanites ?? null),
+        ),
+        null,
+        2000,
+      ),
     ]).catch((error) => {
       modulesLoading = null;
       throw error;
@@ -1544,6 +1592,8 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     return loading;
   };
   const pictures = () => {
+    let failed = false;
+    const decoded = [];
     // A sheet fetched ahead is taken as it is (or fetched again if that
     // failed); the rest are asked for now, ahead of the page's own images.
     const take = (src) => {
@@ -1557,33 +1607,33 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       take(src)
         .then((image) =>
           image.decode
-            ? image.decode().then(
-                () => image,
-                () => image,
-              )
+            ? boundedImage(image.decode().then(() => image), image, 500)
             : image,
         )
         // Drawn into a canvas, an <img> is decoded again on the main thread
         // (tens of ms on a slow phone); a bitmap arrives decoded.
         .then((image) =>
-          typeof environment.createImageBitmap === "function"
-            ? environment.createImageBitmap(image).then(
-                (bitmap) => bitmap,
-                () => image,
-              )
+          !disposed && !failed && typeof environment.createImageBitmap === "function"
+            ? boundedImage(environment.createImageBitmap(image), image, 500, true)
             : image,
-        );
+        )
+        .then((image) => {
+          if (failed || disposed) image?.close?.();
+          else decoded.push(image);
+          return image;
+        });
     // The nanite kit (owner, 2026-10-16): each sheet optional; touch
     // screens draw no comets.
-    const optional = (src) => (src ? decode(src).catch(() => null) : null);
+    const optional = (src) =>
+      src ? boundedImage(decode(src), null, 2000, true) : null;
     return Promise.all([
       decode(config.figure),
       decode(config.undersuit),
-      config.gold?.atlas ? decode(config.gold.atlas).catch(() => null) : null,
-      config.atlas ? decode(config.atlas).catch(() => null) : null,
+      optional(config.gold?.atlas),
+      optional(config.atlas),
       // The figure without its ornaments (owner, 2026-10-16); the scene
       // plays from the full figure alone without it.
-      config.base ? decode(config.base).catch(() => null) : null,
+      optional(config.base),
       optional(kit?.cells?.src),
       coarse.matches ? null : optional(kit?.comets?.src),
       optional(kit?.fx?.src),
@@ -1596,6 +1646,10 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       }
       images = { figure, undersuit, gold, atlas, base, cells, comets, fx, guide };
       return images;
+    }).catch((error) => {
+      failed = true;
+      for (const image of decoded) image?.close?.();
+      throw error;
     });
   };
 
@@ -1609,17 +1663,22 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     let bitmap = null;
     try {
       if (typeof environment.createImageBitmap === "function") {
-        bitmap = await environment.createImageBitmap(
-          source,
-          0,
-          0,
-          cols * tile,
-          rows * tile,
-          {
-            resizeWidth: cols,
-            resizeHeight: rows,
-            resizeQuality: "medium",
-          },
+        bitmap = await boundedImage(
+          environment.createImageBitmap(
+            source,
+            0,
+            0,
+            cols * tile,
+            rows * tile,
+            {
+              resizeWidth: cols,
+              resizeHeight: rows,
+              resizeQuality: "medium",
+            },
+          ),
+          null,
+          500,
+          true,
         );
       }
     } catch {
@@ -1703,8 +1762,12 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     new Promise((resolve, reject) => {
       if (disposed || !pageActive || document.hidden || !motionAllowed()) return resolve(null);
       const key = {};
+      let idleId = 0;
+      let watchdog = 0;
       const run = (deadline, opensFallback = false) => {
         if (!idleJobs.delete(key)) return;
+        if (watchdog) environment.clearTimeout(watchdog);
+        if (idleId) environment.cancelIdleCallback?.(idleId);
         if (disposed || !pageActive || document.hidden || !motionAllowed()) return resolve(null);
         try {
           if (opensFallback) fallbackUntil = clock() + 4;
@@ -1737,17 +1800,28 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         idleJobs.set(key, () => resolve(null));
         return;
       }
-      const id = idle
-        ? environment.requestIdleCallback(run, { timeout: 1000 })
-        : environment.setTimeout(() => run(null, true), 16);
+      // Some WebKit lifecycle/throttling paths abandon native idle work
+      // without delivering even its timeout callback. A separate timer owns
+      // liveness; it opens the same bounded, yielding fallback as Safari.
+      // Near the reader, recovery must begin before they pass the runway.
+      if (idle) {
+        idleId = environment.requestIdleCallback(run, { timeout: 1000 });
+        watchdog = environment.setTimeout(() => {
+          idleFallbackGeneration = generation;
+          run(null, true);
+        }, near && !live ? 160 : 600);
+      } else watchdog = environment.setTimeout(() => run(null, true), 16);
       idleJobs.set(key, () => {
-        if (idle) environment.cancelIdleCallback?.(id);
-        else environment.clearTimeout(id);
+        if (idleId) environment.cancelIdleCallback?.(idleId);
+        if (watchdog) environment.clearTimeout(watchdog);
         resolve(null);
       });
     });
   const cancelPreparation = () => {
     generation += 1;
+    environment.clearTimeout(retryTimer);
+    retryTimer = retryCount = 0;
+    if (!live) runway.dataset.rznLoad = motionAllowed() ? "waiting" : "static";
     idleFallbackGeneration = -1;
     fallbackUntil = 0;
     for (const cancel of idleJobs.values()) cancel();
@@ -2334,6 +2408,8 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         goldCount = 0;
         buffers = nextBuffers;
         complete = true;
+        retryCount = 0;
+        runway.dataset.rznLoad = "ready";
         if (partialBuild === state) partialBuild = null;
       })
       .finally(() => {
@@ -3473,6 +3549,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       return;
     if (!plan || !settled || !buffers) return;
     live = true;
+    runway.dataset.rznLoad = "ready";
     // The still that was showing stays up under the (transparent) canvas
     // until the first live frame is drawn: no frame of nothing between
     // them (owner, 2026-10-16: 「スクロールする前から完成済みなこともあるので
@@ -3491,6 +3568,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   const goStill = () => {
     cancelPreparation();
     live = false;
+    runway.dataset.rznLoad = motionAllowed() ? "waiting" : "static";
     listen(false);
     resizeObserver?.disconnect();
     restHud();
@@ -3572,24 +3650,47 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       }
     }
     if (preparing) return;
+    if (retryTimer) return;
     const token = generation;
+    runway.dataset.rznLoad = images ? "preparing" : "loading";
     preparing = idleTask(() => images || load())
       .then(() => {
-        if (token === generation && images && !(plan && settled && buffers)) return build();
+        if (token === generation && images && !(plan && settled && buffers)) {
+          runway.dataset.rznLoad = "preparing";
+          return build();
+        }
       })
       .then(() => {
+        if (token === generation && pageActive && !document.hidden && motionAllowed() && !(plan && settled && buffers))
+          throw new Error("assembly preparation did not complete");
         if (token === generation && near) return prime(token);
       })
       .then(() => {
         if (token === generation) goLive();
       })
       .catch(() => {
+        if (token !== generation) return;
         loading = null;
-        if (!disposed && !live) restHud();
+        if (disposed || live) return;
+        restHud();
+        if (retryCount < 2 && pageActive && !document.hidden && motionAllowed()) {
+          retryCount += 1;
+          retryTimer = environment.setTimeout(() => {
+            retryTimer = 0;
+            if (near || warm || eager) wake();
+          }, retryCount * 250);
+        } else runway.dataset.rznLoad = "error";
       })
       .finally(() => {
         if (token === generation) preparing = null;
       });
+  };
+  const retryAssembly = () => {
+    if (runway.dataset.rznLoad !== "error" || !near || !pageActive || document.hidden || disposed)
+      return;
+    retryCount = 0;
+    loading = null;
+    wake();
   };
   const nearObserver =
     typeof environment.IntersectionObserver === "function"
@@ -3738,6 +3839,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   forcedColors.addEventListener?.("change", sync);
   connection?.addEventListener?.("change", sync);
   document.addEventListener("visibilitychange", sync);
+  runway.addEventListener?.("rexonance:assembly-retry", retryAssembly);
   environment.addEventListener("pagehide", onPageHide);
   environment.addEventListener("pageshow", onPageShow);
   environment.addEventListener("resize", observeWarmup);
@@ -3771,6 +3873,9 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     forcedColors.removeEventListener?.("change", sync);
     connection?.removeEventListener?.("change", sync);
     document.removeEventListener("visibilitychange", sync);
+    runway.removeEventListener?.("rexonance:assembly-retry", retryAssembly);
+    if (restLoad === undefined) delete runway.dataset.rznLoad;
+    else runway.dataset.rznLoad = restLoad;
     environment.removeEventListener("pagehide", onPageHide);
     environment.removeEventListener("pageshow", onPageShow);
     environment.removeEventListener("resize", observeWarmup);
@@ -3787,6 +3892,8 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     environment.clearTimeout(calmTimer);
     for (const image of loaders) releasePendingImage(image);
     loaders.clear();
+    for (const cancel of decodeWaiters) cancel();
+    decodeWaiters.clear();
     if (formsState)
       for (const sheet of [
         formsState.fig,

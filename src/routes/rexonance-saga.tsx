@@ -23,6 +23,7 @@ import stageRexonanceCssUrl from "@/styles-stage-rexonance.css?url";
 import rexonanceResonanceCssUrl from "@/styles-rexonance-resonance.css?url";
 import rexonanceZenithCssUrl from "@/styles-rexonance-zenith.css?url";
 import rexonanceForgeCssUrl from "@/styles-rexonance-forge.css?url";
+import rexonanceEditorialCssUrl from "@/styles-rexonance-editorial.css?url";
 import { rexonanceImage } from "@/lib/rexonance-images";
 import { REXONANCE_SITE_ARTWORK } from "@/lib/rexonance-site-artwork";
 import { syncRexonanceLayoutGate } from "@/lib/rexonance-layout-gate.js";
@@ -78,6 +79,7 @@ export const Route = createFileRoute("/rexonance-saga")({
       // FORGE (rx18): the page's type in four materials and its chrome in the
       // engines' grammar — chips, guideways, molten gold (styles-rexonance-forge.css).
       { rel: "stylesheet", href: rexonanceForgeCssUrl },
+      { rel: "stylesheet", href: rexonanceEditorialCssUrl },
       CINEMATIC_STYLESHEET_LINK,
       {
         rel: "preload",

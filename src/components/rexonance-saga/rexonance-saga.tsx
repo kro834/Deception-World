@@ -1,6 +1,10 @@
 import { Fragment, memo, useCallback, useEffect, useRef, useState } from "react";
 import { RexonanceCallSequence } from "./rexonance-call-sequence";
 import { RexonanceAperture } from "./rexonance-aperture";
+import { RexonanceAssemblyGuide, RexonanceAssemblyReplay } from "./rexonance-assembly-guide";
+import { RexonanceHeroRail, RexonanceChapterMap, RexonanceFormStatus } from "./rexonance-editorial";
+import { scheduleRexonancePageStep } from "@/lib/rexonance-page-step";
+import { RexonanceFormComparison } from "./rexonance-form-comparison";
 import {
   REXONANCE_ENTRY_CALLS,
   REXONANCE_STAGE_DURATION_MS,
@@ -124,6 +128,7 @@ const STAGES: Record<
 // The forms the page shows (owner, 2026-10-12: EXCELSIOR withdrawn; its
 // data and art stay for later).
 const SHOWN_STAGES: RexonanceStage[] = ["standard", "max", "ultra"];
+const COMPARISON_FORMS = SHOWN_STAGES.map((key) => ({ key, ...STAGES[key] }));
 
 // FORGE (rx18): the hero's outlined name, one letter a nanite mote, so the
 // cold open can assemble it from both sides of the line (silent text).
@@ -475,116 +480,120 @@ const RexonanceSuitUp = memo(function RexonanceSuitUp({ stage }: { stage: Rexona
   const runwayRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => mountRexonanceAssembly(runwayRef.current, SUIT_UP), []);
   return (
-    <div
-      ref={runwayRef}
-      className="rzn-suitup"
-      aria-hidden="true"
-      // The suit-up ends on the form chosen in 03 (owner, 2026-10-11).
-      data-form={stage}
-      style={{
-        ["--rzn-aspect" as string]: `${REXONANCE_SUIT_SIZE.width} / ${REXONANCE_SUIT_SIZE.height}`,
-      }}
-    >
-      <div className="rzn-frame">
-        <i className="rzn-light" />
-        <i className="rzn-depth" />
-        <i className="rzn-aura" />
-        <i className="rzn-crown" />
-        <i className="rzn-floor" />
-        <img
-          className="rzn-still"
-          src={stage === "standard" ? REXONANCE_SUIT_FIGURE : REXONANCE_FORM_FIGURES[stage]}
-          alt=""
-          width={REXONANCE_SUIT_SIZE.width}
-          height={REXONANCE_SUIT_SIZE.height}
-          loading="lazy"
-          decoding="async"
-        />
-        {/* While the scene prepares, the undersuit stands in for the finished
+    <>
+      <RexonanceAssemblyGuide runwayRef={runwayRef} />
+      <div
+        ref={runwayRef}
+        className="rzn-suitup"
+        aria-hidden="true"
+        // The suit-up ends on the form chosen in 03 (owner, 2026-10-11).
+        data-form={stage}
+        style={{
+          ["--rzn-aspect" as string]: `${REXONANCE_SUIT_SIZE.width} / ${REXONANCE_SUIT_SIZE.height}`,
+        }}
+      >
+        <div className="rzn-frame">
+          <i className="rzn-light" />
+          <i className="rzn-depth" />
+          <i className="rzn-aura" />
+          <i className="rzn-crown" />
+          <i className="rzn-floor" />
+          <img
+            className="rzn-still"
+            src={stage === "standard" ? REXONANCE_SUIT_FIGURE : REXONANCE_FORM_FIGURES[stage]}
+            alt=""
+            width={REXONANCE_SUIT_SIZE.width}
+            height={REXONANCE_SUIT_SIZE.height}
+            loading="lazy"
+            decoding="async"
+          />
+          {/* While the scene prepares, the undersuit stands in for the finished
             figure (owner, 2026-10-16: never the finished suit before the scroll). */}
-        <img
-          className="rzn-under"
-          src={REXONANCE_SUIT_UNDERSUIT}
-          alt=""
-          width={REXONANCE_SUIT_SIZE.width}
-          height={REXONANCE_SUIT_SIZE.height}
-          loading="lazy"
-          decoding="async"
-        />
-        <img
-          className="rzn-driver-standin"
-          src="/rexonance-zenith-20261017/driver-standin.webp"
-          alt=""
-          width={REXONANCE_SUIT_SIZE.width}
-          height={REXONANCE_SUIT_SIZE.height}
-          loading="lazy"
-          decoding="async"
-        />
-        <canvas className="rzn-canvas" width={0} height={0} />
-        <div className="rzn-call">
-          <p className="rzn-kicker">
-            <span>SUIT-UP</span>
-            <span>NANITE ASSEMBLY</span>
-          </p>
-          <p className="rzn-phase">
-            <span data-phase="prepare">
-              <b>01</b>構成情報を読み込み
-            </span>
-            <span data-phase="assemble">
-              <b>02</b>装甲を装着
-            </span>
-            <span data-phase="seal">
-              <b>03</b>構造を固定
-            </span>
-            <span data-phase="ignite">
-              <b>04</b>出力を起動
-            </span>
-            <span data-phase="evolve">
-              <b>05</b>選択フォームへ進化
-            </span>
-            <span data-phase="complete">
-              <b>06</b>装着完了
-            </span>
-          </p>
-          <ol className="rzn-lines">
-            {SUIT_UP_LINES.map((units, index) => (
-              <li key={REXONANCE_ENTRY_CALLS[index]} className="rzn-line">
-                {units.map((unit, unitIndex) => (
-                  <span key={`${unit}-${unitIndex}`} className="rzn-chip">
-                    {unit}
-                  </span>
-                ))}
-              </li>
-            ))}
-          </ol>
-          <p className="rzn-hint">スクロールで装着</p>
+          <img
+            className="rzn-under"
+            src={REXONANCE_SUIT_UNDERSUIT}
+            alt=""
+            width={REXONANCE_SUIT_SIZE.width}
+            height={REXONANCE_SUIT_SIZE.height}
+            loading="lazy"
+            decoding="async"
+          />
+          <img
+            className="rzn-driver-standin"
+            src="/rexonance-zenith-20261017/driver-standin.webp"
+            alt=""
+            width={REXONANCE_SUIT_SIZE.width}
+            height={REXONANCE_SUIT_SIZE.height}
+            loading="lazy"
+            decoding="async"
+          />
+          <canvas className="rzn-canvas" width={0} height={0} />
+          <div className="rzn-call">
+            <p className="rzn-kicker">
+              <span>SUIT-UP</span>
+              <span>NANITE ASSEMBLY</span>
+            </p>
+            <p className="rzn-phase">
+              <span data-phase="prepare">
+                <b>01</b>構成情報を読み込み
+              </span>
+              <span data-phase="assemble">
+                <b>02</b>装甲を装着
+              </span>
+              <span data-phase="seal">
+                <b>03</b>構造を固定
+              </span>
+              <span data-phase="ignite">
+                <b>04</b>出力を起動
+              </span>
+              <span data-phase="evolve">
+                <b>05</b>選択フォームへ進化
+              </span>
+              <span data-phase="complete">
+                <b>06</b>装着完了
+              </span>
+            </p>
+            <ol className="rzn-lines">
+              {SUIT_UP_LINES.map((units, index) => (
+                <li key={REXONANCE_ENTRY_CALLS[index]} className="rzn-line">
+                  {units.map((unit, unitIndex) => (
+                    <span key={`${unit}-${unitIndex}`} className="rzn-chip">
+                      {unit}
+                    </span>
+                  ))}
+                </li>
+              ))}
+            </ol>
+            <p className="rzn-hint">スクロールで装着</p>
+          </div>
+          <div className="rzn-hud">
+            <p className="rzn-readout">
+              <b className="rzn-percent">100</b>
+              <span>%</span>
+            </p>
+            <p className="rzn-nanites">
+              <small>NANITES</small>
+              <span className="rzn-count">ONLINE</span>
+            </p>
+            <ol className="rzn-parts">
+              {ASSEMBLY_PARTS.map((part) => (
+                <li key={part} className="rzn-part">
+                  {part}
+                </li>
+              ))}
+            </ol>
+            <p className="rzn-stamp">
+              <span>REXONANCE SAGA</span>
+              <b>{STAGES[stage].code}</b>
+            </p>
+          </div>
+          <i className="rzn-rail">
+            <i />
+          </i>
         </div>
-        <div className="rzn-hud">
-          <p className="rzn-readout">
-            <b className="rzn-percent">100</b>
-            <span>%</span>
-          </p>
-          <p className="rzn-nanites">
-            <small>NANITES</small>
-            <span className="rzn-count">ONLINE</span>
-          </p>
-          <ol className="rzn-parts">
-            {ASSEMBLY_PARTS.map((part) => (
-              <li key={part} className="rzn-part">
-                {part}
-              </li>
-            ))}
-          </ol>
-          <p className="rzn-stamp">
-            <span>REXONANCE SAGA</span>
-            <b>{STAGES[stage].code}</b>
-          </p>
-        </div>
-        <i className="rzn-rail">
-          <i />
-        </i>
       </div>
-    </div>
+      <RexonanceAssemblyReplay />
+    </>
   );
 });
 
@@ -1323,32 +1332,60 @@ export function RexonanceSaga() {
       : 0,
   );
   const lower = step >= 3;
+  const pendingChapter = useRef<string | null>(null);
+  useEffect(() => {
+    if (!lower || !pendingChapter.current) return;
+    const hash = pendingChapter.current;
+    pendingChapter.current = null;
+    const target = document.getElementById(hash.slice(1));
+    if (!target) return;
+    if (window.location.hash !== hash) window.location.hash = hash;
+    else target.scrollIntoView({ block: "start" });
+  }, [lower]);
   useEffect(() => {
     if (lower) return;
     const root = document.documentElement;
-    let idle = 0;
+    let cancelStep = () => {};
     let timer = 0;
     const schedule = (next: () => void, delay = 16) => {
-      if (window.requestIdleCallback) idle = window.requestIdleCallback(next, { timeout: 220 });
-      // Safari has no idle callback: leave the reveal's last frames alone.
-      else timer = window.setTimeout(next, delay);
+      cancelStep();
+      cancelStep = scheduleRexonancePageStep(next, delay);
     };
     const advance = () => {
-      idle = 0;
       timer = 0;
       setStep((current) => (current < 3 ? current + 1 : 3));
     };
     const flushAll = () => {
       if (timer) window.clearTimeout(timer);
-      if (idle) window.cancelIdleCallback?.(idle);
-      timer = idle = 0;
+      cancelStep();
+      timer = 0;
       setStep(3);
     };
     const onHashClick = (event: MouseEvent) => {
       const link = (event.target as Element | null)?.closest?.('a[href^="#"]');
-      if (link && link.getAttribute("href") !== "#top") flushAll();
+      const hash = link?.getAttribute("href");
+      if (
+        !hash ||
+        hash === "#top" ||
+        event.defaultPrevented ||
+        event.button !== 0 ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey
+      )
+        return;
+      // Other chapters can still be inserted above an existing target.
+      // Commit the entire layout before asking the browser for hash arrival.
+      event.preventDefault();
+      pendingChapter.current = hash;
+      flushAll();
     };
-    window.addEventListener("hashchange", flushAll);
+    const onHashChange = () => {
+      pendingChapter.current = window.location.hash;
+      flushAll();
+    };
+    window.addEventListener("hashchange", onHashChange);
     document.addEventListener("click", onHashClick, true);
     const later = () => {
       if (step === 0) {
@@ -1370,10 +1407,10 @@ export function RexonanceSaga() {
     else later();
     return () => {
       observer.disconnect();
-      window.removeEventListener("hashchange", flushAll);
+      window.removeEventListener("hashchange", onHashChange);
       document.removeEventListener("click", onHashClick, true);
       if (timer) window.clearTimeout(timer);
-      if (idle) window.cancelIdleCallback?.(idle);
+      cancelStep();
     };
   }, [lower, step]);
 
@@ -1779,6 +1816,7 @@ export function RexonanceSaga() {
               <span>全てが最高峰で。</span>
             </span>
           </p>
+          <RexonanceHeroRail />
           {/* FORGE (rx18): the name's ghost, assembled from nanites on arrival. */}
           <span className="rxf-mark" aria-hidden="true">
             {FORGE_MARK.map((letter, index) => (
@@ -1858,97 +1896,81 @@ export function RexonanceSaga() {
         </a>
       </section>
 
-      <nav className="rxs-chapter-index" aria-label="レクソナンスの見どころ">
-        <a href="#p14">
-          <small>P14</small>
-          <span>演算基盤</span>
-          <i aria-hidden="true">↗</i>
-        </a>
-        <a href="#stages">
-          <small>3 STAGES</small>
-          <span>三つの形態</span>
-          <i aria-hidden="true">↗</i>
-        </a>
-        <a href="#system">
-          <small>SELF-RESONANCE</small>
-          <span>共鳴構造</span>
-          <i aria-hidden="true">↗</i>
-        </a>
-      </nav>
+      <RexonanceChapterMap />
 
       {step >= 1 ? <RexonancePerformance /> : null}
 
       {lower ? (
         <section id="p14" className="rxs-p14 rxs-section" aria-labelledby="rxs-p14-title">
-            <header className="rxs-section-heading rxs-reveal">
-              <p>PROCESSING CORE / P14</p>
-              <h2 id="rxs-p14-title">
-                同じエーテルで、
-                <br />
-                P1の9倍。
-              </h2>
-              <span>
-                P14は、出力変換・位相制御・能力間調停を
-                <span className="rxp-nowrap">一体化した</span>
-                <span className="rxp-nowrap">第14世代</span>
-                演算基盤です。同じエーテル量からP1の9倍に相当する性能を引き出し、熱・位相ノイズ・能力間干渉による損失を合計7%まで抑えます。
-              </span>
-            </header>
+          <header className="rxs-section-heading rxs-reveal">
+            <p>PROCESSING CORE / P14</p>
+            <h2 id="rxs-p14-title">
+              同じエーテルで、
+              <br />
+              P1の9倍。
+            </h2>
+            <span>
+              P14は、出力変換・位相制御・能力間調停を
+              <span className="rxp-nowrap">一体化した</span>
+              <span className="rxp-nowrap">第14世代</span>
+              演算基盤です。同じエーテル量からP1の9倍に相当する性能を引き出し、熱・位相ノイズ・能力間干渉による損失を合計7%まで抑えます。
+            </span>
+          </header>
 
-            <div className="rxs-p14-overview rxs-reveal">
-              <figure>
-                <img
-                  src="/rexonance-p14-core.jpg"
-                  {...rexonanceImage("/rexonance-p14-core.jpg", true)}
-                  ref={p14ImageRef}
-                  alt="青い回路に接続されたP14演算コア"
-                  width="1000"
-                  height="1000"
-                  loading="lazy"
-                  decoding="async"
-                />
-                {/* RESONANCE (rx11): the light the chip catches as it turns. */}
-                <i className="rsn-glint" aria-hidden="true" />
-              </figure>
-              <div className="rxs-p14-copy">
-                <small>P14 / FOURTEENTH GENERATION</small>
-                <h3>最大出力を支える、安定性。</h3>
-                <p>
-                  入力されたエーテルを攻撃・機動・防御へ変換する際の損失を局所ごとに抑え、必要な部位へ出力を再配分します。急激な負荷変動にも99.4%で追従し、連続最大出力でも96%の安定率を維持します。マックスでは、このP14を完全加速して全神飾の連続実装を支えます。
-                </p>
-                <dl aria-label="P14の主要指標">
-                  <div>
-                    <dt>実効変換率</dt>
-                    <dd data-rsn-count="">
+          <div className="rxs-p14-overview rxs-reveal">
+            <figure>
+              <img
+                src="/rexonance-p14-core.jpg"
+                {...rexonanceImage("/rexonance-p14-core.jpg", true)}
+                ref={p14ImageRef}
+                alt="青い回路に接続されたP14演算コア"
+                width="1000"
+                height="1000"
+                loading="lazy"
+                decoding="async"
+              />
+              {/* RESONANCE (rx11): the light the chip catches as it turns. */}
+              <i className="rsn-glint" aria-hidden="true" />
+            </figure>
+            <div className="rxs-p14-copy">
+              <small>P14 / FOURTEENTH GENERATION</small>
+              <h3>最大出力を支える、安定性。</h3>
+              <p>
+                入力されたエーテルを攻撃・機動・防御へ変換する際の損失を局所ごとに抑え、必要な部位へ出力を再配分します。急激な負荷変動にも99.4%で追従し、連続最大出力でも96%の安定率を維持します。マックスでは、このP14を完全加速して全神飾の連続実装を支えます。
+              </p>
+              <dl aria-label="P14の主要指標">
+                <div>
+                  <dt>実効変換率</dt>
+                  <dd data-rsn-count="">
+                    90%
+                    <b className="rsn-count" aria-hidden="true">
                       90%
-                      <b className="rsn-count" aria-hidden="true">
-                        90%
-                      </b>
-                    </dd>
-                  </div>
-                  <div>
-                    <dt>応答時間</dt>
-                    <dd data-rsn-count="">
+                    </b>
+                  </dd>
+                </div>
+                <div>
+                  <dt>応答時間</dt>
+                  <dd data-rsn-count="">
+                    約0.06ms
+                    <b className="rsn-count" aria-hidden="true">
                       約0.06ms
-                      <b className="rsn-count" aria-hidden="true">
-                        約0.06ms
-                      </b>
-                    </dd>
-                  </div>
-                  <div>
-                    <dt>最大出力安定率</dt>
-                    <dd data-rsn-count="">
+                    </b>
+                  </dd>
+                </div>
+                <div>
+                  <dt>最大出力安定率</dt>
+                  <dd data-rsn-count="">
+                    96%
+                    <b className="rsn-count" aria-hidden="true">
                       96%
-                      <b className="rsn-count" aria-hidden="true">
-                        96%
-                      </b>
-                    </dd>
-                  </div>
-                </dl>
-              </div>
+                    </b>
+                  </dd>
+                </div>
+              </dl>
             </div>
+          </div>
 
-            <P14Comparator nativeIOSSelection={nativeIOSSelection} />
+          <P14Comparator nativeIOSSelection={nativeIOSSelection} />
         </section>
       ) : null}
 
@@ -1995,6 +2017,13 @@ export function RexonanceSaga() {
               <p id="rxs-stage-hint" className="rxs-stage-hint">
                 タップ・長押し・左右スライド・矢印キーで切り替え
               </p>
+              <RexonanceFormStatus
+                stage={stage === "max" || stage === "ultra" ? stage : "standard"}
+                label={activeStage.label}
+                code={activeStage.code}
+                purpose={activeStage.points[0]}
+                accent={activeStage.accent}
+              />
 
               <div
                 id="rxs-stage-panel"
@@ -2065,6 +2094,11 @@ export function RexonanceSaga() {
                 </div>
               </div>
             </div>
+            <RexonanceFormComparison
+              forms={COMPARISON_FORMS}
+              selected={stage}
+              onChoose={selectStage}
+            />
           </section>
 
           <section id="system" className="rxs-system rxs-section">

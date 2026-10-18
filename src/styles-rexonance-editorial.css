@@ -1,0 +1,792 @@
+/* Rexonance editorial layer. Route-only layout and reading hierarchy; no
+   additional image, animation, observer, or rendering work. */
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero .rxs-hero-copy {
+  text-wrap: pretty;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero .rxs-hero-lede {
+  max-inline-size: 28ch;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero .rxe-hero-rail {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 18px;
+  margin-block-start: clamp(24px, 3vw, 38px);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rxs-hero
+  .rxe-hero-rail
+  a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  min-height: 48px;
+  padding: 10px 15px;
+  font: 600 13px / 1.4 var(--dx-display);
+  letter-spacing: 0.07em;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rxs-hero
+  .rxe-hero-primary {
+  color: #061019;
+  background: #c4eff6;
+  border: 1px solid #e5faff;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rxs-hero
+  .rxe-hero-secondary {
+  color: #f2f7fb;
+  background: rgb(3 9 16 / 75%);
+  border: 1px solid rgb(195 236 246 / 47%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rxs-hero
+  .rxe-hero-rail
+  a:focus-visible {
+  outline: 2px solid #f2d896;
+  outline-offset: 3px;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rxs-hero
+  .rxe-hero-rail
+  i {
+  font: normal 17px / 1 var(--dx-hud);
+}
+
+/* A five-part contents map follows the actual chapter order. It remains a
+   flat set of links so native hash navigation and the page's lazy loading
+   behavior are unchanged. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rxs-chapter-index.rxe-chapter-map {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0;
+  border-block: 1px solid rgb(121 232 255 / 23%);
+  background: rgb(3 9 16 / 76%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rxe-chapter-map
+  .rxe-chapter-map-heading {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0;
+  padding: 13px 20px;
+  color: #9adfeb;
+  border-bottom: 1px solid rgb(121 232 255 / 16%);
+  font: 500 11px / 1.4 var(--dx-hud);
+  letter-spacing: 0.18em;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rxe-chapter-map
+  .rxe-chapter-map-heading
+  small {
+  color: #ccd5db;
+  font: inherit;
+  white-space: nowrap;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxe-chapter-map a {
+  display: grid;
+  grid-template-columns: 31px minmax(0, 1fr) 16px;
+  grid-template-rows: auto auto auto;
+  align-content: center;
+  gap: 3px 12px;
+  min-height: 118px;
+  min-width: 0;
+  padding: 18px 20px;
+  border: 0;
+  background: transparent;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxe-chapter-map a + a {
+  border-left: 0;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rxe-chapter-map
+  a:nth-of-type(even) {
+  border-left: 1px solid rgb(121 232 255 / 16%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rxe-chapter-map
+  a:nth-of-type(n + 3) {
+  border-top: 1px solid rgb(121 232 255 / 16%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rxe-chapter-map
+  a:last-child {
+  grid-column: 1 / -1;
+  min-height: 92px;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxe-chapter-map a b {
+  grid-column: 1;
+  grid-row: 1 / -1;
+  align-self: start;
+  color: #f2d896;
+  font: 600 16px / 1.1 var(--rxf-forge, var(--dx-hud));
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxe-chapter-map a small {
+  grid-column: 2;
+  grid-row: 1;
+  color: #9adfeb;
+  font-size: 10px;
+  letter-spacing: 0.13em;
+  overflow-wrap: anywhere;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxe-chapter-map a span {
+  grid-column: 2;
+  grid-row: 2;
+  color: #f2f7fb;
+  font: 700 clamp(17px, 1.6vw, 21px) / 1.3 var(--dx-display);
+  letter-spacing: 0.03em;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxe-chapter-map a em {
+  grid-column: 2;
+  grid-row: 3;
+  min-width: 0;
+  color: #aebdc7;
+  font: 400 12px / 1.5 var(--dx-body);
+  font-style: normal;
+  overflow-wrap: anywhere;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxe-chapter-map a i {
+  grid-column: 3;
+  grid-row: 1 / -1;
+  align-self: center;
+  color: #f2d896;
+  font: 400 15px / 1 var(--dx-hud);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rxe-chapter-map
+  a:focus-visible {
+  outline: 2px solid #a5edff;
+  outline-offset: -3px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rxe-chapter-map
+    a:hover {
+    background: rgb(121 232 255 / 8%);
+  }
+}
+
+/* Keep chapter headings as readable editorial blocks next to the persistent
+   suit stage, instead of letting long body lines run the entire script width. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rxs-section
+  > .rxs-section-heading
+  > span {
+  max-inline-size: 46ch;
+  line-height: 1.85;
+  text-wrap: pretty;
+}
+
+/* The assembly chapter gives the scroll scene a readable start, completion
+   state and replay controls outside the decorative canvas. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-assembly-heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 14px clamp(18px, 4vw, 56px);
+  align-items: end;
+  padding: clamp(22px, 3vw, 42px) var(--rxt-gutter, 24px);
+  border-block: 1px solid rgb(121 232 255 / 20%);
+  background: #08111a;
+  scroll-margin-block-start: 84px;
+}
+
+/* The assembly guide is chapter 03 but intentionally has no oversized
+   numeral; the following two chapter marks must still agree with the map. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #stages
+  > .rxs-section-heading::before {
+  content: "04" / "";
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #system
+  > .rxs-section-heading::before {
+  content: "05" / "";
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-assembly-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 24px var(--rxt-gutter, 24px);
+  border-block: 1px solid rgb(121 232 255 / 20%);
+  background: #08111a;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-assembly-footer > p {
+  flex: 1 1 260px;
+  margin: 0;
+  color: #b6c6ce;
+  font: 400 13px / 1.8 var(--dx-body);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-assembly-heading h2 {
+  margin: 0;
+  color: #f2f7fb;
+  font: 700 clamp(26px, 3.5vw, 48px) / 1.2 var(--dx-display);
+  text-wrap: balance;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-assembly-heading p {
+  max-inline-size: 52ch;
+  margin: 8px 0 0;
+  color: #b6c6ce;
+  font: 400 14px / 1.8 var(--dx-body);
+  text-wrap: pretty;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-assembly-status {
+  color: #d7edf2;
+  font: 500 12px / 1.5 var(--dx-body);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-assembly-controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rxs-assembly-controls
+  :is(button, a) {
+  min-height: 44px;
+  padding: 9px 15px;
+  border: 1px solid rgb(195 236 246 / 52%);
+  border-radius: 0;
+  color: #f2f7fb;
+  background: #101d27;
+  font: 600 12px / 1.4 var(--dx-display);
+  cursor: pointer;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rxs-assembly-controls
+  :is(button, a):focus-visible {
+  outline: 2px solid #f2d896;
+  outline-offset: 3px;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .rxs-p14-copy > p,
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #stages
+  .rxs-stage-panel
+  > div
+  > p,
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #system
+  .rxs-system-grid
+  > article
+  > p {
+  max-inline-size: 48ch;
+  text-wrap: pretty;
+}
+
+/* The existing LiquidLens remains the primary form control. This ledger
+   makes its place in the three-form sequence legible at a glance. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-status {
+  display: grid;
+  gap: 9px;
+  width: min(100%, 780px);
+  margin: 0 auto clamp(24px, 3vw, 40px);
+  padding: 16px 18px;
+  border-block: 1px solid rgb(121 232 255 / 22%);
+  color: #eaf3f7;
+  background: rgb(4 10 17 / 62%);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-status-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  color: #a8cbd4;
+  font: 500 11px / 1.4 var(--dx-hud);
+  letter-spacing: 0.15em;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rxe-form-status-heading
+  span:last-child {
+  color: #f2d896;
+  white-space: nowrap;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-status-track {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 5px;
+  height: 3px;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-status-track i {
+  display: block;
+  background: rgb(121 232 255 / 17%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rxe-form-status-track
+  i.is-reached {
+  background: var(--rxs-stage-accent, #79e8ff);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-status p {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 3px 12px;
+  margin: 0;
+  font: 400 12px / 1.5 var(--dx-body);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-status p > span {
+  color: #acbac2;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-status p strong {
+  color: #f2f7fb;
+  font: 700 17px / 1.4 var(--dx-display);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-status p small {
+  color: var(--rxs-stage-accent, #79e8ff);
+  font: 500 11px / 1.4 var(--dx-hud);
+  letter-spacing: 0.08em;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-status p em {
+  flex-basis: 100%;
+  color: #d5e3e9;
+  font: 500 13px / 1.5 var(--dx-display);
+  font-style: normal;
+}
+
+/* The transformation guide and replay footer are direct children of the
+   desktop page grid. Give them explicit rows so DOM, chapter navigation and
+   the visual sequence remain the same. */
+@media (min-width: 1100px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-assembly-heading {
+    grid-column: 1 / -1;
+    grid-row: 5;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup {
+    grid-row: 6;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-assembly-footer {
+    grid-column: 1 / -1;
+    grid-row: 7;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages {
+    grid-row: 8;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #system {
+    grid-row: 9;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-footer {
+    grid-row: 10;
+  }
+}
+
+/* An opt-in contact sheet shares the existing form selection handler.
+   Closed details render no comparison images or card content. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-comparison {
+  max-width: var(--dxs-wrap, 1180px);
+  margin: clamp(36px, 5vw, 72px) auto 0;
+  border-block: 1px solid rgb(121 232 255 / 24%);
+  background: rgb(3 9 16 / 78%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rxe-form-comparison
+  > summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 5px 24px;
+  align-items: center;
+  min-height: 72px;
+  padding: 17px clamp(16px, 2.5vw, 32px);
+  color: #f2f7fb;
+  cursor: pointer;
+  list-style: none;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rxe-form-comparison
+  > summary::-webkit-details-marker {
+  display: none;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rxe-form-comparison
+  > summary
+  > span {
+  grid-column: 1;
+  color: #9adfeb;
+  font: 500 10px / 1.4 var(--dx-hud);
+  letter-spacing: 0.17em;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rxe-form-comparison
+  > summary
+  > strong {
+  grid-column: 1;
+  font: 700 clamp(17px, 1.7vw, 23px) / 1.35 var(--dx-display);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rxe-form-comparison
+  > summary
+  > i {
+  grid-column: 2;
+  grid-row: 1 / 3;
+  display: grid;
+  place-items: center;
+  inline-size: 44px;
+  block-size: 44px;
+  border: 1px solid rgb(121 232 255 / 35%);
+  color: #f2d896;
+  font: normal 24px / 1 var(--dx-hud);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rxe-form-comparison[open]
+  > summary
+  > i {
+  rotate: 45deg;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rxe-form-comparison
+  > summary:focus-visible,
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rxe-comparison-card
+  button:focus-visible {
+  outline: 2px solid #f2d896;
+  outline-offset: -3px;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-comparison-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-top: 1px solid rgb(121 232 255 / 18%);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-comparison-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: clamp(17px, 2vw, 28px);
+  border-right: 1px solid rgb(121 232 255 / 16%);
+  color: #d6e2e8;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rxe-comparison-card:last-child {
+  border-right: 0;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rxe-comparison-card[data-selected="true"] {
+  background: linear-gradient(180deg, rgb(121 232 255 / 8%), transparent 45%);
+  box-shadow: inset 0 2px 0 var(--rxs-stage-accent, #79e8ff);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rxe-comparison-card
+  > p:first-child {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 22px;
+  margin: 0 0 16px;
+  color: #a6d9e3;
+  font: 500 10px / 1.4 var(--dx-hud);
+  letter-spacing: 0.1em;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rxe-comparison-card
+  > p:first-child
+  span {
+  color: var(--rxs-stage-accent, #79e8ff);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rxe-comparison-card
+  > p:first-child
+  b {
+  font: inherit;
+  text-align: end;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-comparison-card > img {
+  display: block;
+  width: 100%;
+  height: clamp(210px, 30vw, 410px);
+  margin: 0 0 20px;
+  object-fit: contain;
+  object-position: center bottom;
+  background: rgb(5 12 20 / 80%);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-comparison-card h3 {
+  margin: 0 0 8px;
+  color: #f2f7fb;
+  font: 700 clamp(19px, 2vw, 27px) / 1.3 var(--dx-display);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rxe-comparison-card
+  .rxe-comparison-title {
+  margin: 0 0 16px;
+  color: #dce8ee;
+  font: 500 14px / 1.65 var(--dx-body);
+  text-wrap: pretty;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-comparison-card ul {
+  display: grid;
+  gap: 7px;
+  margin: 0 0 22px;
+  padding: 0;
+  list-style: none;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-comparison-card li {
+  padding-left: 14px;
+  color: #aebdc7;
+  font: 400 12px / 1.6 var(--dx-body);
+  overflow-wrap: anywhere;
+  position: relative;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rxe-comparison-card
+  li::before {
+  content: "";
+  position: absolute;
+  top: 0.7em;
+  left: 0;
+  width: 5px;
+  height: 5px;
+  background: var(--rxs-stage-accent, #79e8ff);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-comparison-card button {
+  width: 100%;
+  min-height: 44px;
+  margin-top: auto;
+  padding: 9px 12px;
+  border: 1px solid var(--rxs-stage-accent, #79e8ff);
+  border-radius: 0;
+  color: #f2f7fb;
+  background: #0a1720;
+  font: 600 12px / 1.4 var(--dx-display);
+  cursor: pointer;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rxe-comparison-card
+  button[aria-pressed="true"] {
+  color: #071118;
+  background: var(--rxs-stage-accent, #79e8ff);
+}
+
+@media (max-width: 900px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-comparison-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-comparison-card {
+    border-right: 0;
+    border-bottom: 1px solid rgb(121 232 255 / 16%);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    .rxe-comparison-card:last-child {
+    border-bottom: 0;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    .rxe-comparison-card
+    > img {
+    height: min(65vw, 340px);
+  }
+}
+
+@media (max-width: 700px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rxs-chapter-index.rxe-chapter-map {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxe-chapter-map a {
+    grid-template-columns: 28px minmax(0, 1fr) 16px;
+    min-height: 79px;
+    padding: 12px 14px;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rxe-chapter-map
+    a:nth-of-type(even) {
+    border-left: 0;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxe-chapter-map a + a {
+    border-top: 1px solid rgb(121 232 255 / 16%);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rxe-chapter-map
+    a:last-child {
+    grid-column: 1;
+    min-height: 79px;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-assembly-heading {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-assembly-controls {
+    justify-content: flex-start;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxe-chapter-map a em {
+    font-size: 11px;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-status {
+    padding: 14px 12px;
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxe-chapter-map a,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-status {
+    border: 1px solid CanvasText;
+    background: Canvas;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-status-track i {
+    background: CanvasText;
+  }
+}

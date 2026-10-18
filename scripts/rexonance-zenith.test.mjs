@@ -641,6 +641,7 @@ function environment({
   const counter = textHost("ONLINE");
   let top = 900;
   const runway = element({
+    ...target("runway"),
     ownerDocument: document,
     offsetHeight: 2700,
     getBoundingClientRect: () => ({ top, height: 2700 }),
@@ -810,6 +811,7 @@ test("reduced motion, economy and forced colours keep the still and leave nothin
     t.observers[0].callback([{ isIntersecting: true }]);
     await new Promise((resolve) => setTimeout(resolve, 5));
     assert.equal(t.runway.dataset.rznState, undefined, JSON.stringify(options));
+    assert.equal(t.runway.dataset.rznLoad, "static", "intentional still settings are not pending work");
     assert.equal(t.canvas.width, 0);
     dispose();
     assert.equal([...t.listeners.keys()].length, 0, [...t.listeners.keys()].join());
@@ -1437,6 +1439,167 @@ test("a timed-out empty idle deadline switches the generation to bounded timer s
     dispose();
   }
   assert.equal(t.idle.size, 0);
+});
+
+test("an abandoned native idle callback cannot strand a visible scene in loading", async () => {
+  const t = environment({ idleHeld: true });
+  t.env.setTimeout = (callback, ms) => setTimeout(callback, Math.min(ms, 2));
+  const dispose = mountRexonanceAssembly(t.runway, engineConfig, t.env);
+  try {
+    t.observers[0].callback([{ isIntersecting: true }]);
+    await until(() => t.runway.dataset.rznState === "live", "independent watchdog rescues native idle starvation");
+    assert.ok(t.prepared(), "the complete plan was prepared");
+  } finally {
+    dispose();
+  }
+  assert.equal(t.idle.size, 0, "abandoned native callbacks are cancelled");
+});
+
+test("hung image decode and bitmap optimisations fall back to loaded art", async () => {
+  for (const phase of ["decode", "bitmap"]) {
+    const t = environment();
+    t.env.setTimeout = (callback, ms) => setTimeout(callback, Math.min(ms, 2));
+    const BaseImage = t.env.Image;
+    t.env.Image = class extends BaseImage {
+      decode() {
+        return phase === "decode" ? new Promise(() => {}) : Promise.resolve();
+      }
+    };
+    const late = [];
+    let closed = 0;
+    if (phase === "bitmap")
+      t.env.createImageBitmap = () => new Promise((resolve) => late.push(resolve));
+    const dispose = mountRexonanceAssembly(t.runway, engineConfig, t.env);
+    try {
+      t.observers[0].callback([{ isIntersecting: true }]);
+      await until(() => t.runway.dataset.rznState === "live", `${phase}: loaded images remain usable`);
+      assert.equal(t.runway.dataset.rznLoad, "ready");
+      for (const resolve of late) resolve({ close() { closed += 1; } });
+      await Promise.resolve();
+      assert.equal(closed, late.length, "abandoned late bitmaps are released");
+    } finally {
+      dispose();
+    }
+  }
+});
+
+test("an optional nanite image that never finishes cannot block the figure", async () => {
+  const { REXONANCE_NANITES } = await import("../src/lib/rexonance-nanites.ts");
+  const t = environment();
+  t.env.setTimeout = (callback, ms) => setTimeout(callback, Math.min(ms, 2));
+  const BaseImage = t.env.Image;
+  t.env.Image = class extends BaseImage {
+    set src(value) {
+      if (value === REXONANCE_NANITES.cells.src) {
+        this._src = value;
+        return;
+      }
+      super.src = value;
+    }
+  };
+  const dispose = mountRexonanceAssembly(t.runway, { ...engineConfig, nanites: REXONANCE_NANITES }, t.env);
+  try {
+    t.observers[0].callback([{ isIntersecting: true }]);
+    await until(() => t.runway.dataset.rznState === "live", "optional sheet failure leaves a live figure");
+    assert.equal(t.runway.dataset.rznLoad, "ready");
+  } finally {
+    dispose();
+  }
+});
+
+test("optional kit metadata failure or abandonment cannot block the required engine", async () => {
+  await import("../src/lib/rexonance-assembly-nanites.js");
+  for (const failure of ["pending", "reject"]) {
+    const t = environment();
+    t.env.setTimeout = (callback, ms) => setTimeout(callback, ms === 8000 ? 30 : Math.min(ms, 2));
+    const nanites = () => failure === "pending"
+      ? new Promise(() => {})
+      : Promise.reject(new Error("kit unavailable"));
+    const dispose = mountRexonanceAssembly(t.runway, { ...engineConfig, nanites }, t.env);
+    try {
+      t.observers[0].callback([{ isIntersecting: true }]);
+      await until(() => t.runway.dataset.rznState === "live", `${failure}: kit metadata is optional`);
+      assert.equal(t.runway.dataset.rznLoad, "ready");
+    } finally { dispose(); }
+  }
+});
+
+test("failed image attempts release successful sibling bitmaps before retry", async () => {
+  await import("../src/lib/rexonance-assembly-nanites.js");
+  const t = environment();
+  t.env.setTimeout = (callback, ms) => setTimeout(callback, ms === 8000 ? 30 : Math.min(ms, 2));
+  const BaseImage = t.env.Image;
+  let requests = 0;
+  t.env.Image = class extends BaseImage {
+    set src(value) {
+      if (value === engineConfig.figure && ++requests === 1) {
+        this._src = value;
+        setTimeout(() => this.onerror?.(new Error("temporary failure")), 5);
+        return;
+      }
+      super.src = value;
+    }
+  };
+  const bitmaps = [];
+  t.env.createImageBitmap = (image) => {
+    const bitmap = { source: image._src, closed: 0, close() { this.closed += 1; } };
+    bitmaps.push(bitmap);
+    return Promise.resolve(bitmap);
+  };
+  const dispose = mountRexonanceAssembly(t.runway, engineConfig, t.env);
+  try {
+    t.observers[0].callback([{ isIntersecting: true }]);
+    await until(() => t.runway.dataset.rznState === "live", "a fresh image attempt completes");
+    const siblings = bitmaps.filter((bitmap) => bitmap.source === engineConfig.undersuit);
+    assert.equal(siblings.length, 2, "one undersuit bitmap per attempt");
+    assert.ok(siblings[0].closed > 0, "failed attempt's successful sibling is released");
+    assert.equal(siblings[1].closed, 0, "current attempt retains its usable bitmap");
+  } finally { dispose(); }
+});
+
+test("transient required-image failure retries and explicit retry recovers a terminal error once", async () => {
+  for (const failure of ["transient", "error", "timeout"]) {
+    const permanent = failure !== "transient";
+    const t = environment();
+    t.env.setTimeout = (callback, ms) => setTimeout(callback, Math.min(ms, 2));
+    const BaseImage = t.env.Image;
+    let requests = 0;
+    let failing = true;
+    t.env.Image = class extends BaseImage {
+      set src(value) {
+        if (value === engineConfig.figure) {
+          requests += 1;
+          if (failing && (permanent || requests === 1)) {
+            this._src = value;
+            if (failure !== "timeout") queueMicrotask(() => this.onerror?.(new Error("offline")));
+            return;
+          }
+        }
+        super.src = value;
+      }
+    };
+    const dispose = mountRexonanceAssembly(t.runway, engineConfig, t.env);
+    try {
+      assert.equal(t.runway.dataset.rznLoad, "waiting");
+      t.observers[0].callback([{ isIntersecting: true }]);
+      if (permanent) {
+        await until(() => t.runway.dataset.rznLoad === "error", "terminal error is visible to the accessible status");
+        assert.equal(requests, 3, "initial request plus two bounded retries");
+        failing = false;
+        const retry = t.listeners.get("runway:rexonance:assembly-retry");
+        assert.equal(typeof retry, "function");
+        retry();
+        retry();
+      }
+      await until(() => t.runway.dataset.rznState === "live", "image request recovery reaches a live scene");
+      assert.equal(requests, permanent ? 4 : 2, "duplicate retry does not start parallel requests");
+      assert.equal(t.runway.dataset.rznLoad, "ready");
+    } finally {
+      dispose();
+    }
+    assert.equal(t.runway.dataset.rznLoad, undefined);
+    assert.equal(t.listeners.has("runway:rexonance:assembly-retry"), false);
+  }
 });
 
 test("a hidden tab releases partial crop canvases, then resumes from decoded images", async () => {

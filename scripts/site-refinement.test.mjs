@@ -35,12 +35,16 @@ test("refinement assets are delivered by their own routes", () => {
 
 test("Rexonance chapter shortcuts use native anchors with real section targets", () => {
   const source = read("src/components/rexonance-saga/rexonance-saga.tsx");
-  const index = source.match(/<nav className="rxs-chapter-index"[^>]*>[\s\S]*?<\/nav>/)?.[0];
+  const editorial = read("src/components/rexonance-saga/rexonance-editorial.tsx");
+  const guide = read("src/components/rexonance-saga/rexonance-assembly-guide.tsx");
+  assert.match(source, /<RexonanceChapterMap\s*\/>/);
+  const index = editorial.match(/<nav className="rxs-chapter-index\b[^>]*>[\s\S]*?<\/nav>/)?.[0];
   assert.ok(index);
   assert.match(index, /aria-label=/);
-  for (const target of ["p14", "stages", "system"]) {
-    assert.ok(index.includes(`href="#${target}"`));
-    assert.ok(source.includes(`<section id="${target}"`));
+  assert.match(index, /<a key=\{chapter.href\} href=\{chapter.href\}>/);
+  for (const target of ["performance", "p14", "assembly", "stages", "system"]) {
+    assert.ok(editorial.includes(`href: "#${target}"`));
+    assert.match(source + guide, new RegExp(`<section\\b[^>]*\\bid="${target}"`));
   }
   assert.doesNotMatch(index, /onClick|onPointer|tabIndex/);
 });

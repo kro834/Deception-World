@@ -91,6 +91,19 @@ async function verifyStageCopy(page) {
   });
 }
 
+async function waitForStableScroll(page) {
+  let lastScroll = null;
+  let stableFrames = 0;
+  for (let attempt = 0; attempt < 30 && stableFrames < 3; attempt += 1) {
+    await page.waitForTimeout(120);
+    const scroll = await page.evaluate(() => scrollY);
+    stableFrames =
+      lastScroll !== null && Math.abs(scroll - lastScroll) < 0.5 ? stableFrames + 1 : 0;
+    lastScroll = scroll;
+  }
+  return stableFrames >= 3;
+}
+
 async function verifyAnchor(page, id) {
   const desktopLink = page.locator(`.rxs-local-nav nav a[href="#${id}"]`);
   if (await desktopLink.isVisible()) {
@@ -102,15 +115,7 @@ async function verifyAnchor(page, id) {
   }
   // Long upward jumps from P14 can animate for more than 800ms. Sample the
   // settled destination, not a point along the browser's smooth scroll.
-  let lastScroll = null;
-  let stableFrames = 0;
-  for (let attempt = 0; attempt < 30 && stableFrames < 3; attempt += 1) {
-    await page.waitForTimeout(120);
-    const scroll = await page.evaluate(() => scrollY);
-    stableFrames =
-      lastScroll !== null && Math.abs(scroll - lastScroll) < 0.5 ? stableFrames + 1 : 0;
-    lastScroll = scroll;
-  }
+  assert.ok(await waitForStableScroll(page), `${id}: hash scroll must settle`);
   const position = await page.evaluate((target) => {
     const nav = document.querySelector(".rxs-local-nav").getBoundingClientRect();
     const section = document.getElementById(target).getBoundingClientRect();
@@ -209,20 +214,27 @@ try {
 
       // Focus the controls with actual Tab navigation from the slider and
       // confirm that browser scrolling leaves them clear of the fixed bar.
+      // The new assembly guide is the next Tab stop, and normal motion uses
+      // smooth focus scrolling; sample its settled position as for anchors.
       await page.keyboard.press("Tab");
+      assert.ok(await waitForStableScroll(page), "Tab focus scroll must settle");
       const focusPosition = await page.evaluate(() => {
         const active = document.activeElement;
         const bounds = active.getBoundingClientRect();
         const nav = document.querySelector(".rxs-local-nav").getBoundingClientRect();
         return {
           tag: active.tagName,
+          href: active.getAttribute("href"),
           top: bounds.top,
           bottom: bounds.bottom,
           navBottom: nav.bottom,
+          viewportBottom: innerHeight,
         };
       });
+      assert.equal(focusPosition.href, "#stages", "Tab must focus the assembly-guide link");
       assert.ok(
-        focusPosition.top >= focusPosition.navBottom,
+        focusPosition.top >= focusPosition.navBottom &&
+          focusPosition.bottom <= focusPosition.viewportBottom,
         `Tab focus must clear the fixed bar (${JSON.stringify(focusPosition)})`,
       );
 
