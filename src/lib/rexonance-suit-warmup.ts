@@ -509,12 +509,10 @@ export function scheduleRexonancePagePreload(preload: () => Promise<unknown>, de
       .catch(() => {
         pagePreloaded = false;
       });
-    // Its artwork, fetched and decoded ahead: the hero first, then the forms.
-    for (const source of [
-      REXONANCE_SITE_ARTWORK.standard,
-      REXONANCE_SITE_ARTWORK.max,
-      REXONANCE_SITE_ARTWORK.ultra,
-    ]) {
+    // Only the destination hero is needed for arrival. MAX / ULTRA warm
+    // sequentially near their rail in rexonance-saga.tsx; fetching them on
+    // every unrelated page wasted 939,704 bytes even without a visit.
+    for (const source of [REXONANCE_SITE_ARTWORK.standard]) {
       const image = new Image();
       image.decoding = "async";
       image.fetchPriority = "low";

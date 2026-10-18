@@ -76,7 +76,7 @@ test("World episode records follow the actual chapter boundaries and later conse
     WORLD_EPISODE_NOTES.map(({ no, title }) => [no, title]),
     [["01", "HIDE-AND-SEEK"], ["02", "LEGENDS"], ["03", "DECEPTION WORLD"]],
   );
-  assert.deepEqual(WORLD_EPISODE_NOTES.map(({ synopsis }) => synopsis.length), [3, 3, 6]);
+  assert.deepEqual(WORLD_EPISODE_NOTES.map(({ synopsis }) => synopsis.length), [3, 3, 9]);
   for (const { synopsis } of WORLD_EPISODE_NOTES) {
     assert.ok(synopsis.every((paragraph) => paragraph.length > 80));
   }

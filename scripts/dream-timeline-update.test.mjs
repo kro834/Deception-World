@@ -8,7 +8,7 @@ import { DREAM_CHRONICLE } from "../src/components/dream-chapter/dream-chapter-e
 // 2026/10/08 and 2026/10/12 are chat-post dates, not elapsed story days.
 // The source remains outside the repository; opt in to direct comparison with
 // DREAM_TIMELINE_SOURCE=/absolute/path/to/the/attachment.
-const additions = DREAM_CHRONICLE.slice(44);
+const additions = DREAM_CHRONICLE.slice(44, 49);
 const expected = [
   [45, "58050", "58024"],
   [46, "58207,58261", "58207"],
@@ -28,7 +28,7 @@ test("new events identify their source revision and preserve the battle-opening 
   }
   assert.ok(DREAM_CHRONICLE.slice(0, 44).every((event) => event.sourceRevision === undefined));
   const synopsis = DREAM_CASES[5].paragraphs;
-  assert.equal(synopsis.length, 8);
+  assert.equal(synopsis.length, 13);
   assert.match(synopsis[6], /永遠亭へ向かう/);
   assert.match(synopsis[6], /後を追って/);
   assert.match(synopsis[6], /決戦へ向かうよう促す/);

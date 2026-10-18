@@ -143,13 +143,15 @@ test("the World columns are the owner's text, word for word", () => {
   }
 });
 
-test("the Dream Chapter story records keep their plain wording", () => {
+test("the Dream Chapter story records keep their reviewed October 12 wording", () => {
   assert.deepEqual(
     DREAM_CASES.map(({ no, title, lead, paragraphs }) => ({
       no,
       title,
       lead,
-      paragraphs: [...paragraphs],
+      // October 18 appends five paragraphs, checked in timeline-20261018.test.mjs.
+      // Preserve every previously reviewed paragraph and its bookmark position.
+      paragraphs: no === "5" ? paragraphs.slice(0, 8) : [...paragraphs],
     })),
     DREAM,
   );

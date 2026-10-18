@@ -26,7 +26,7 @@ test("episode 03 advances within its recorded chapter and keeps discoveries unre
     ["01 HIDE-AND-SEEK", "02 LEGENDS", "03 DECEPTION WORLD"],
   );
   const episode = WORLD_EPISODE_NOTES[2];
-  assert.equal(episode.synopsis.length, 6);
+  assert.equal(episode.synopsis.length, 9);
   assert.match(episode.synopsis[2], /フェイブルが現れ、悠真を扉の奥へ連れていく/);
   assert.match(episode.synopsis[3], /改造に着手/);
   assert.match(episode.synopsis[3], /碧栄壊滅の元凶はアザトでありサーガではないと報告/);

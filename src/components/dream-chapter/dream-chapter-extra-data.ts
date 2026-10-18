@@ -11,7 +11,7 @@
 // Events 45–49 use the 2026-10-12 attachment (58,405 physical lines), identified by
 // sourceRevision. Earlier lines shifted within that export; do not offset legacy anchors.
 // Chat dates identify source posts, not elapsed story days. The new endpoint is the
-// opening of the final battle, without a rescue, victory, full recovery or return.
+// ongoing battles through 2026-10-18, without a rescue, final victory or return.
 import type { DreamCharacter, DreamDolminence } from "./dream-chapter-data";
 
 /** Global line references into the source log, e.g. "2243,2247,2897". Not rendered. */
@@ -27,7 +27,7 @@ type DreamArchivePassageBase = {
   /** Caption for the whole passage when it is one speaker's words ("―― by"). */
   readonly by?: string;
   readonly lines: DreamSourceLines;
-  readonly sourceRevision?: "2026-10-12";
+  readonly sourceRevision?: "2026-10-12" | "2026-10-18";
 };
 
 /** A passage: one `text` ("\n" = line break) or speaker `segments`, never both. */
@@ -1047,6 +1047,46 @@ export const DREAM_CHRONICLE: readonly DreamChronicleEvent[] = [
       },
     ],
     lines: "58385,58398,58404",
+  },
+  {
+    no: 50,
+    case: "5",
+    sourceRevision: "2026-10-18",
+    title: { text: "永遠亭の面々", lines: "58703" },
+    place: "永遠亭",
+    cast: ["八意永琳", "サヨ"],
+    text: "永琳の鋭い指示のもと、永遠亭の面々は再び戦闘態勢を固め、押し寄せる無数の悪夢の軍勢へと立ち向かっていく。",
+    lines: "58703",
+  },
+  {
+    no: 51,
+    case: "5",
+    sourceRevision: "2026-10-18",
+    title: { text: "マスタースパーク", lines: "59041" },
+    place: "魔法の森",
+    cast: ["霧雨魔理沙", "真達羅"],
+    text: "解き放たれた極大の光の奔流が、世界を白く染め上げながら真達羅を完全に呑み込んだ。真達羅は咄嗟に双剣を十字に交差させ、その極大の光線を剣で防ごうと全身の神威を注ぎ込む。",
+    lines: "59044",
+  },
+  {
+    no: 52,
+    case: "5",
+    sourceRevision: "2026-10-18",
+    title: { text: "この手で守るべきもの", lines: "59394" },
+    place: "命蓮寺",
+    cast: ["寅丸星"],
+    segments: [{ by: "寅丸星", text: "「だが……それでは、私が守ろうとしてきたものまで失ってしまう！　もう、誰か一人に全てを背負わせたりはしない、この手で守るべきもののために、私は戦う！」" }],
+    lines: "59394",
+  },
+  {
+    no: 53,
+    case: "5",
+    sourceRevision: "2026-10-18",
+    title: { text: "二人の武神", lines: "59531" },
+    place: "太陽の畑",
+    cast: ["風見幽香", "宮毘羅", "迷企羅"],
+    text: "恐怖に歪んだ表情で後退する二人の武神を、幽香は底冷えするような美しい微笑みを浮かべながら見据える。",
+    lines: "59531",
   },
 ] as const;
 
