@@ -1,73 +1,75 @@
-/* Extreme — Forged Editorial Championship Edition.
-   Elevates every round of /extreme-saga into a high-contrast obsidian,
-   burnished-gold, and hyper-cyan technical showcase while preserving
-   all DOM contracts, density caps, and one-shot motion lifecycles. */
+/* Extreme — Heavyweight Overdrive & Forged Championship Edition.
+   Unleashes the full manga-impact audacity of /extreme-saga: chamfered
+   armor-plate geometry, colossal forged-metal numerals, diagonal slash
+   cuts, 14-point clash starbursts, and crystal-clear KHAOS/KOSMOS Ultra
+   reactor telemetry across every viewport. */
 html[data-family="special"] body .rxs-page.rxs-page.exs-page {
-  --ext-gold: #f0ca7d;
-  --ext-gold-rgb: 240 202 125;
-  --ext-amber: #cc8b3c;
-  --ext-amber-rgb: 204 139 60;
+  --ext-gold: #f4cc7b;
+  --ext-gold-rgb: 244 204 123;
+  --ext-amber: #d4882a;
+  --ext-amber-rgb: 212 136 42;
   --ext-ink: #070706;
-  --ext-ink-2: #0e0d0b;
+  --ext-ink-2: #0f0e0b;
   --ext-gutter: clamp(20px, 5vw, 80px);
   --ext-slant: clamp(18px, 2.4vw, 36px);
-  --exe-rule: rgb(240 202 125 / 24%);
-  --exe-rule-strong: rgb(240 202 125 / 48%);
-  --exe-rule-subtle: rgb(255 246 224 / 10%);
-  --exe-muted: #c2bdb2;
-  --exe-ivory: #f8f3e8;
-  --exe-cyan: #7ce2ff;
-  --exe-cyan-rgb: 124 226 255;
-  --exe-surface-1: linear-gradient(165deg, rgb(24 22 18 / 96%) 0%, rgb(12 11 9 / 98%) 100%);
+  --exe-rule: rgb(244 204 123 / 28%);
+  --exe-rule-strong: rgb(244 204 123 / 58%);
+  --exe-rule-subtle: rgb(255 246 224 / 12%);
+  --exe-muted: #c8c2b6;
+  --exe-ivory: #fbf6ec;
+  --exe-cyan: #72e4ff;
+  --exe-cyan-rgb: 114 228 255;
+  --exe-surface-1: linear-gradient(160deg, rgb(26 23 18 / 96%) 0%, rgb(10 9 7 / 99%) 100%);
   --exe-surface-2: linear-gradient(
-    145deg,
-    rgb(32 28 21 / 95%) 0%,
-    rgb(16 15 12 / 98%) 62%,
-    rgb(11 10 8 / 99%) 100%
+    140deg,
+    rgb(38 32 22 / 96%) 0%,
+    rgb(17 15 11 / 98%) 58%,
+    rgb(9 8 6 / 100%) 100%
   );
   --exe-surface-gold: linear-gradient(
     135deg,
-    rgb(240 202 125 / 16%) 0%,
-    rgb(24 21 16 / 94%) 44%,
-    rgb(12 11 9 / 98%) 100%
+    rgb(244 204 123 / 22%) 0%,
+    rgb(30 25 17 / 95%) 42%,
+    rgb(11 10 8 / 99%) 100%
   );
   --exe-surface-cyan: linear-gradient(
     135deg,
-    rgb(124 226 255 / 15%) 0%,
-    rgb(16 23 28 / 95%) 46%,
-    rgb(10 13 16 / 99%) 100%
+    rgb(114 228 255 / 20%) 0%,
+    rgb(15 25 32 / 96%) 44%,
+    rgb(9 12 16 / 99%) 100%
   );
   --exe-gold-metal: linear-gradient(
     180deg,
-    #fffdf7 0%,
-    #fff0c7 20%,
-    #f0ca7d 46%,
-    #b98233 76%,
-    #f7dda0 100%
+    #ffffff 0%,
+    #fff3cf 18%,
+    #f6cf7d 44%,
+    #b87924 74%,
+    #ffe3a3 100%
   );
   --exe-ivory-metal: linear-gradient(
     180deg,
     #ffffff 0%,
-    #f8f3e8 38%,
-    #dfd5c2 78%,
-    #f7f1e5 100%
+    #fbf5e9 36%,
+    #dfd2bc 76%,
+    #fff8eb 100%
   );
   --exe-cyan-metal: linear-gradient(
     180deg,
-    #f4feff 0%,
-    #c8f5ff 32%,
-    #74ddff 68%,
-    #bcefff 100%
+    #ffffff 0%,
+    #d8f8ff 30%,
+    #66dfff 66%,
+    #c9f6ff 100%
   );
-  --exe-gold-pill: linear-gradient(135deg, #fff6db 0%, #f1cb80 45%, #c78d3a 100%);
+  --exe-gold-pill: linear-gradient(135deg, #fff8e2 0%, #f5cd79 44%, #c98627 100%);
+  --exe-cyan-pill: linear-gradient(135deg, #effdff 0%, #7ee5ff 46%, #268eb5 100%);
   --exe-card-shadow:
-    0 22px 52px -24px rgb(0 0 0 / 88%),
-    inset 0 1px 0 rgb(255 248 230 / 16%),
+    0 26px 64px -22px rgb(0 0 0 / 92%),
+    inset 0 1px 0 rgb(255 248 230 / 22%),
     inset 0 0 0 1px var(--exe-rule);
   --exe-art-density: 1;
   --dxs-wrap: 1240px;
   background:
-    radial-gradient(ellipse 80% 45% at 50% 0%, rgb(240 202 125 / 9%), transparent 70%),
+    radial-gradient(ellipse 85% 48% at 50% 0%, rgb(244 204 123 / 12%), transparent 72%),
     var(--ext-ink);
   color: var(--exe-ivory);
 }
@@ -89,7 +91,7 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page {
 }
 
 /* ================================================================
-   LOCAL NAVIGATION — Frosted Obsidian Telemetry Header
+   LOCAL NAVIGATION — Championship Fight-Night Header
    ================================================================ */
 html[data-family="special"] body .rxs-page.rxs-page.exs-page .rxs-local-nav {
   top: 0;
@@ -97,8 +99,8 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page .rxs-local-nav {
   background: #080807;
   border-bottom: 1px solid var(--exe-rule-strong);
   box-shadow:
-    0 12px 36px rgb(0 0 0 / 48%),
-    inset 0 -1px 0 rgb(255 244 214 / 8%);
+    0 14px 40px rgb(0 0 0 / 62%),
+    inset 0 -1px 0 rgb(255 244 214 / 12%);
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page .rxs-local-nav-inner {
   width: min(var(--dxs-wrap), calc(100% - 2 * var(--ext-gutter)));
@@ -110,22 +112,22 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page .rxs-brand {
 html[data-family="special"] body .rxs-page.rxs-page.exs-page .rxs-brand span {
   display: inline-flex;
   align-items: center;
-  padding: 5px 13px 4px 11px;
+  padding: 6px 15px 5px 12px;
   color: #080807;
   background: var(--exe-gold-pill);
   font: 700 11px/1 var(--dx-hud);
-  letter-spacing: 0.16em;
-  clip-path: polygon(0 0, 100% 0, calc(100% - 7px) 100%, 0 100%);
-  box-shadow: 0 4px 16px rgb(240 202 125 / 26%);
+  letter-spacing: 0.18em;
+  clip-path: polygon(0 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+  box-shadow: 0 6px 20px rgb(244 204 123 / 32%);
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page .rxs-brand b {
   color: var(--exe-ivory);
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: 0.08em;
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page .rxs-local-nav nav {
   display: flex;
-  gap: clamp(8px, 1.6vw, 22px);
+  gap: clamp(8px, 1.8vw, 24px);
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page .rxs-local-nav nav a {
   display: inline-flex;
@@ -134,19 +136,16 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page .rxs-local-nav nav 
   gap: 6px;
   min-height: 44px;
   padding-inline: 10px;
-  border-radius: 6px;
-  color: #c9c4b8;
+  color: #ccc6b9;
   font-size: 12px;
+  font-weight: 700;
   letter-spacing: 0.08em;
   white-space: nowrap;
+  clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
   transition:
     color 180ms ease,
     background-color 180ms ease,
     box-shadow 180ms ease;
-}
-html[data-family="special"] body .rxs-page.rxs-page.exs-page .rxs-local-nav nav a:hover {
-  color: #fff6e0;
-  background: rgb(240 202 125 / 8%);
 }
 html[data-family="special"]
   body
@@ -155,101 +154,95 @@ html[data-family="special"]
   nav
   a[aria-current="location"] {
   color: var(--ext-gold);
-  background: linear-gradient(180deg, rgb(240 202 125 / 15%), rgb(240 202 125 / 4%));
-  box-shadow:
-    inset 0 0 0 1px rgb(240 202 125 / 32%),
-    0 4px 14px rgb(0 0 0 / 30%);
+  background: linear-gradient(180deg, rgb(244 204 123 / 20%), rgb(244 204 123 / 5%));
+  box-shadow: inset 0 -2px 0 var(--ext-gold);
 }
 
 /* ================================================================
-   COLD OPEN HERO — Grand Championship Arena Poster
+   COLD OPEN HERO — Colossus Main Event Poster
    ================================================================ */
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-hero {
   background:
-    radial-gradient(54% 62% at 68% 44%, rgb(240 202 125 / 20%), transparent 72%),
-    radial-gradient(44% 38% at 24% 26%, rgb(204 139 60 / 12%), transparent 70%),
-    radial-gradient(50% 28% at 50% 100%, rgb(240 202 125 / 16%), transparent 74%),
-    linear-gradient(180deg, #090807 0%, #0d0c09 56%, #070706 100%);
+    radial-gradient(56% 64% at 64% 44%, rgb(244 204 123 / 25%), transparent 70%),
+    radial-gradient(46% 42% at 22% 28%, rgb(212 136 42 / 16%), transparent 68%),
+    radial-gradient(56% 32% at 50% 100%, rgb(244 204 123 / 22%), transparent 72%),
+    linear-gradient(180deg, #090806 0%, #100d09 54%, #070706 100%);
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-hero > .exf-billing {
   left: 50%;
   translate: -50% 0;
-  -webkit-text-stroke: 1px rgb(240 202 125 / 24%);
-  opacity: 0.78;
+  -webkit-text-stroke: 1.5px rgb(244 204 123 / 34%);
+  opacity: 0.9;
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-hero > .exi-rays {
-  color: rgb(240 202 125 / 22%);
+  color: rgb(244 204 123 / 30%);
+}
+html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-hero > .exi-shards {
+  color: #ffe29c;
+  opacity: 0.95;
 }
 html[data-family="special"]
   body
   .rxs-page.rxs-page.exs-page
   .exs-hero
   .rxs-hero-copy
-  > .rxs-kicker {
+  > p:first-child {
   display: inline-flex;
   align-items: center;
   gap: 10px;
   width: fit-content;
-  margin: 0 0 14px;
-  padding: 7px 14px;
-  border: 1px solid var(--exe-rule-strong);
-  border-radius: 999px;
-  color: #ffe8b3;
-  background: linear-gradient(90deg, rgb(240 202 125 / 18%), rgb(240 202 125 / 5%));
-  box-shadow:
-    inset 0 1px 0 rgb(255 250 235 / 20%),
-    0 8px 24px rgb(0 0 0 / 35%);
-  font-size: 11px;
-  letter-spacing: 0.2em;
+  margin: 0 0 16px;
+  padding: 7px 18px 6px 14px;
+  color: #080807;
+  background: var(--exe-gold-pill);
+  clip-path: polygon(0 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+  box-shadow: 0 10px 28px rgb(244 204 123 / 30%);
+  font: 700 11px/1.2 var(--dx-hud);
+  letter-spacing: 0.22em;
 }
 html[data-family="special"]
   body
   .rxs-page.rxs-page.exs-page
   .exs-hero
   .rxs-hero-copy
-  > .rxs-kicker::before {
-  content: "";
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--ext-gold);
-  box-shadow: 0 0 10px var(--ext-gold);
-}
-html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-hero .rxs-wordmark {
+  > h1
+  > span {
   display: block;
-  margin: 0 0 14px;
-  color: #ffe6ae;
-  background: var(--exe-gold-metal);
+  margin: 0 0 12px;
+  color: #ffe8b0;
+  background-image: var(--exe-gold-metal);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  font-size: clamp(16px, 2vw, 24px);
+  font: 700 clamp(15px, 1.8vw, 22px) / 1.2 var(--dx-hud);
   letter-spacing: 0.28em;
-  filter: drop-shadow(0 4px 18px rgb(240 202 125 / 20%));
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-hero h1 {
-  margin: 0 0 20px;
-  font-size: clamp(44px, 6.2vw, 88px);
-  line-height: 1.06;
+  margin: 0 0 22px;
+  font-size: clamp(48px, 6.8vw, 96px);
+  line-height: 1.02;
   letter-spacing: -0.03em;
   background-image: var(--exe-gold-metal);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 14px 34px rgb(0 0 0 / 72%));
+  filter:
+    drop-shadow(0 16px 36px rgb(0 0 0 / 85%))
+    drop-shadow(0 0 28px rgb(244 204 123 / 22%));
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-hero .rxs-hero-lede {
   max-width: 34em;
   margin: 0;
-  padding: 14px 18px;
-  border-left: 3px solid var(--ext-gold);
-  border-radius: 0 10px 10px 0;
-  color: #e9e2d4;
-  background: linear-gradient(90deg, rgb(18 16 12 / 86%), rgb(12 11 9 / 68%));
+  padding: 16px 22px;
+  border-left: 4px solid var(--ext-gold);
+  color: #f4eee2;
+  background: linear-gradient(90deg, rgb(22 19 13 / 92%), rgb(10 9 7 / 78%));
+  clip-path: polygon(0 0, 100% 0, calc(100% - 14px) 100%, 0 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 248 230 / 10%),
-    0 12px 28px rgb(0 0 0 / 42%);
-  font-size: clamp(14px, 1.25vw, 16px);
+    inset 0 1px 0 rgb(255 248 230 / 16%),
+    0 16px 36px rgb(0 0 0 / 55%);
+  font-size: clamp(14px, 1.3vw, 17px);
+  font-weight: 600;
   line-height: 1.85;
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-hero .rxs-hero-lede::before {
@@ -257,35 +250,27 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-hero .rxs-hero
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-hero .rxs-hero-visual img {
   filter:
-    drop-shadow(0 28px 56px rgb(0 0 0 / 82%))
-    drop-shadow(0 0 42px rgb(240 202 125 / 20%));
+    drop-shadow(0 32px 64px rgb(0 0 0 / 88%))
+    drop-shadow(0 0 54px rgb(244 204 123 / 28%));
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-hero .rxs-scroll-cue {
   display: inline-flex;
   align-items: center;
   gap: 14px;
   width: fit-content;
-  min-height: 48px;
-  padding: 10px 20px 10px 12px;
+  min-height: 52px;
+  padding: 10px 24px 10px 12px;
   border: 1px solid var(--exe-rule-strong);
-  border-radius: 999px;
   color: var(--exe-ivory);
-  background: linear-gradient(180deg, rgb(28 24 18 / 92%), rgb(12 11 9 / 96%));
+  background: linear-gradient(135deg, rgb(34 28 19 / 95%), rgb(12 11 9 / 98%));
+  clip-path: polygon(0 0, 100% 0, calc(100% - 14px) 100%, 0 100%);
   box-shadow:
-    0 14px 32px rgb(0 0 0 / 56%),
-    inset 0 1px 0 rgb(255 248 230 / 18%);
+    0 16px 36px rgb(0 0 0 / 68%),
+    inset 0 1px 0 rgb(255 248 230 / 24%);
   transition:
     transform 180ms ease,
     border-color 180ms ease,
     box-shadow 180ms ease;
-}
-html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-hero .rxs-scroll-cue:hover {
-  transform: translateY(-2px);
-  border-color: var(--ext-gold);
-  box-shadow:
-    0 16px 36px rgb(0 0 0 / 68%),
-    0 0 24px rgb(240 202 125 / 22%),
-    inset 0 1px 0 rgb(255 248 230 / 28%);
 }
 html[data-family="special"]
   body
@@ -297,8 +282,8 @@ html[data-family="special"]
   align-items: center;
   gap: 12px;
   color: var(--exe-ivory);
-  font: 700 13px/1.4 var(--dx-display);
-  letter-spacing: 0.08em;
+  font: 800 14px/1.4 var(--dx-display);
+  letter-spacing: 0.1em;
 }
 html[data-family="special"]
   body
@@ -308,21 +293,19 @@ html[data-family="special"]
   > span::before {
   display: inline-grid;
   place-items: center;
-  min-width: 34px;
-  height: 26px;
+  min-width: 38px;
+  height: 28px;
   margin: 0;
   padding: 0 10px;
-  border-radius: 999px;
   color: #080807;
   background: var(--exe-gold-pill);
-  clip-path: none;
-  font: 700 12px/1 var(--dx-mono);
-  letter-spacing: 0.08em;
-  box-shadow: 0 2px 10px rgb(240 202 125 / 32%);
+  clip-path: polygon(0 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
+  font: 700 14px/1 var(--dx-mono);
+  letter-spacing: 0.04em;
 }
 
 /* ================================================================
-   CHAPTER INDEX — Four-Bout Telemetry Strip
+   CHAPTER INDEX — Four-Bout Fight Card Strip
    ================================================================ */
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-index {
   grid-column: 1;
@@ -334,12 +317,18 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-inde
   margin: 0;
   padding: 0 max(var(--ext-gutter), calc((100% - var(--dxs-wrap)) / 2));
   background:
-    linear-gradient(90deg, rgb(240 202 125 / 6%), transparent 25%, transparent 75%, rgb(240 202 125 / 6%)),
-    #0e0d0b;
-  border-block: 1px solid var(--exe-rule-strong);
+    linear-gradient(
+      90deg,
+      rgb(244 204 123 / 10%),
+      rgb(18 16 12 / 98%) 22%,
+      rgb(18 16 12 / 98%) 78%,
+      rgb(244 204 123 / 10%)
+    ),
+    #0d0c09;
+  border-block: 2px solid var(--exe-rule-strong);
   box-shadow:
-    0 18px 44px rgb(0 0 0 / 55%),
-    inset 0 1px 0 rgb(255 248 230 / 10%);
+    0 24px 56px rgb(0 0 0 / 72%),
+    inset 0 1px 0 rgb(255 248 230 / 16%);
   clip-path: none;
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-index a {
@@ -347,16 +336,12 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-inde
   grid-template-columns: minmax(0, 1fr) auto;
   grid-template-rows: auto auto auto;
   gap: 8px 14px;
-  min-height: 148px;
+  min-height: 152px;
   padding: 26px clamp(16px, 2.2vw, 28px);
-  background: linear-gradient(180deg, rgb(240 202 125 / 0%), rgb(240 202 125 / 0%));
+  background: linear-gradient(180deg, rgb(244 204 123 / 4%), transparent 65%);
   transition:
-    background 200ms ease,
-    box-shadow 200ms ease;
-}
-html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-index a:hover {
-  background: linear-gradient(180deg, rgb(240 202 125 / 12%), rgb(240 202 125 / 3%));
-  box-shadow: inset 0 2px 0 var(--ext-gold);
+    background 180ms ease,
+    box-shadow 180ms ease;
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-index a + a {
   border-top: 0;
@@ -374,19 +359,25 @@ html[data-family="special"]
   font-style: normal;
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-index small {
-  color: var(--ext-gold);
+  display: inline-block;
+  width: fit-content;
+  padding: 3px 9px 2px 7px;
+  color: #080807;
+  background: var(--exe-gold-pill);
+  clip-path: polygon(0 0, 100% 0, calc(100% - 5px) 100%, 0 100%);
   font-size: 10px;
+  font-weight: 700;
   letter-spacing: 0.16em;
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-index span {
   color: var(--exe-ivory);
-  font-size: 17px;
-  font-weight: 700;
+  font-size: 18px;
+  font-weight: 800;
   letter-spacing: 0.03em;
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-index em {
   color: var(--exe-muted);
-  font: 400 12px/1.65 var(--dx-body);
+  font: 500 12px/1.65 var(--dx-body);
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-index i {
   grid-column: 2;
@@ -394,52 +385,43 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-inde
   align-self: center;
   display: inline-grid;
   place-items: center;
-  width: 32px;
-  height: 32px;
-  border: 1px solid var(--exe-rule);
-  border-radius: 999px;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--exe-rule-strong);
   color: var(--ext-gold);
-  background: rgb(240 202 125 / 6%);
-  font-size: 14px;
-  transition:
-    transform 180ms ease,
-    border-color 180ms ease,
-    background-color 180ms ease;
-}
-html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-index a:hover i {
-  transform: translateX(3px);
-  border-color: var(--ext-gold);
-  background: rgb(240 202 125 / 18%);
+  background: rgb(244 204 123 / 10%);
+  clip-path: polygon(0 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
+  font-size: 15px;
 }
 
 /* ================================================================
-   ROUND HEADINGS — Sculpted Championship Section Headers
+   ROUND HEADINGS — Slanted Gold Bout Plates & Colossal Titles
    ================================================================ */
 html[data-family="special"]
   body
   .rxs-page.rxs-page.exs-page
   > :is(#performance, #p14, #stages, #system) {
-  padding-top: calc(clamp(72px, 9vw, 124px) + var(--ext-slant));
-  padding-bottom: clamp(72px, 9vw, 124px);
+  padding-top: calc(clamp(76px, 9.5vw, 132px) + var(--ext-slant));
+  padding-bottom: clamp(76px, 9.5vw, 132px);
 }
 html[data-family="special"]
   body
   .rxs-page.rxs-page.exs-page
   > :is(#performance, #p14, #stages, #system)
   > .rxs-section-heading {
-  grid-template-columns: 72px minmax(0, 1fr);
+  grid-template-columns: 76px minmax(0, 1fr);
   grid-template-rows: auto auto auto;
-  gap: 12px clamp(20px, 3vw, 40px);
-  margin-bottom: clamp(40px, 5.5vw, 72px);
+  gap: 12px clamp(20px, 3vw, 42px);
+  margin-bottom: clamp(44px, 6vw, 76px);
   padding-bottom: 32px;
   background:
     linear-gradient(
       90deg,
       var(--ext-gold) 0%,
-      rgb(240 202 125 / 38%) 34%,
-      rgb(240 202 125 / 8%) 100%
+      rgb(244 204 123 / 52%) 42%,
+      rgb(244 204 123 / 10%) 100%
     )
-    0 100% / 100% 1px no-repeat;
+    0 100% / 100% 2px no-repeat;
 }
 html[data-family="special"]
   body
@@ -451,20 +433,17 @@ html[data-family="special"]
   align-self: start;
   display: grid;
   place-items: center;
-  width: 58px;
-  height: 58px;
+  width: 66px;
+  height: 62px;
   margin: 0;
-  padding: 0;
-  border: 1px solid var(--exe-rule-strong);
-  border-radius: 12px;
-  color: var(--ext-gold);
-  background: linear-gradient(145deg, rgb(240 202 125 / 18%) 0%, rgb(17 15 12 / 94%) 100%);
-  box-shadow:
-    inset 0 1px 0 rgb(255 248 230 / 22%),
-    0 10px 24px rgb(0 0 0 / 45%);
-  font-size: 24px;
+  padding: 0 6px 0 0;
+  color: #080807;
+  background: var(--exe-gold-pill);
+  clip-path: polygon(0 0, 100% 0, calc(100% - 12px) 100%, 0 100%);
+  box-shadow: 0 12px 28px rgb(244 204 123 / 30%);
+  font-size: 30px;
+  font-weight: 800;
   line-height: 1;
-  clip-path: none;
 }
 html[data-family="special"]
   body
@@ -484,7 +463,8 @@ html[data-family="special"]
   margin: 0;
   color: var(--ext-gold);
   font-size: 11px;
-  letter-spacing: 0.2em;
+  font-weight: 700;
+  letter-spacing: 0.22em;
 }
 html[data-family="special"]
   body
@@ -499,13 +479,14 @@ html[data-family="special"]
   width: auto;
   margin: 0;
   color: var(--exe-ivory);
-  background: var(--exe-ivory-metal);
+  background: var(--exe-gold-metal);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  font-size: clamp(30px, 4vw, 56px);
-  line-height: 1.28;
+  font-size: clamp(34px, 4.4vw, 64px);
+  line-height: 1.22;
   letter-spacing: -0.03em;
+  filter: drop-shadow(0 10px 26px rgb(0 0 0 / 70%));
 }
 html[data-family="special"]
   body
@@ -534,7 +515,7 @@ html[data-family="special"]
   grid-column: 2;
   grid-row: 3;
   max-width: 44em;
-  margin: 6px 0 0;
+  margin: 8px 0 0;
   padding: 0;
   border: 0;
   color: var(--exe-muted);
@@ -543,7 +524,7 @@ html[data-family="special"]
 }
 
 /* ================================================================
-   ROUND 01 / IMPACT — Headline Gauges & Tale of the Tape Console
+   ROUND 01 / IMPACT — Colossal Twin Blows & Tale of the Tape
    ================================================================ */
 html[data-family="special"]
   body
@@ -551,26 +532,28 @@ html[data-family="special"]
   > #performance
   > .rxs-headline-metrics {
   background:
-    radial-gradient(48% 64% at 24% 38%, rgb(240 202 125 / 14%), transparent 72%),
-    radial-gradient(46% 62% at 78% 66%, rgb(124 226 255 / 10%), transparent 72%),
-    linear-gradient(180deg, #0d0c0a 0%, #090908 100%);
-  border-block: 1px solid var(--exe-rule-strong);
+    radial-gradient(52% 68% at 24% 38%, rgb(244 204 123 / 20%), transparent 72%),
+    radial-gradient(50% 66% at 78% 66%, rgb(114 228 255 / 16%), transparent 72%),
+    repeating-linear-gradient(-11deg, transparent 0 46px, rgb(244 204 123 / 4%) 46px 48px),
+    linear-gradient(180deg, #0d0c09 0%, #080807 100%);
+  border-block: 2px solid var(--exe-rule-strong);
   box-shadow:
-    inset 0 1px 0 rgb(255 248 230 / 10%),
-    0 24px 60px rgb(0 0 0 / 55%);
+    inset 0 1px 0 rgb(255 248 230 / 16%),
+    0 28px 68px rgb(0 0 0 / 68%);
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page #performance .exi-stage {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   grid-template-rows: auto;
-  gap: clamp(24px, 3.6vw, 48px);
-  padding-block: clamp(40px, 5.5vw, 68px);
+  gap: clamp(24px, 3.8vw, 52px);
+  padding-block: clamp(44px, 6vw, 76px);
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page #performance .exi-stage > article {
   position: relative;
   z-index: 1;
-  padding: clamp(24px, 3.2vw, 40px);
-  border-radius: 14px;
+  padding: clamp(28px, 3.6vw, 46px);
+  border-top: 4px solid var(--ext-gold);
   background: var(--exe-surface-gold);
+  clip-path: polygon(0 0, calc(100% - 22px) 0, 100% 22px, 100% 100%, 22px 100%, 0 calc(100% - 22px));
   box-shadow: var(--exe-card-shadow);
 }
 html[data-family="special"]
@@ -584,14 +567,15 @@ html[data-family="special"]
   justify-self: stretch;
   justify-items: start;
   margin: 0;
-  padding: clamp(24px, 3.2vw, 40px);
+  padding: clamp(28px, 3.6vw, 46px);
   border-left: 0;
-  border-radius: 14px;
+  border-top: 4px solid var(--exe-cyan);
   background: var(--exe-surface-cyan);
+  clip-path: polygon(0 0, calc(100% - 22px) 0, 100% 22px, 100% 100%, 22px 100%, 0 calc(100% - 22px));
   box-shadow:
-    0 22px 52px -24px rgb(0 0 0 / 88%),
-    inset 0 1px 0 rgb(220 250 255 / 18%),
-    inset 0 0 0 1px rgb(124 226 255 / 28%);
+    0 26px 64px -22px rgb(0 0 0 / 92%),
+    inset 0 1px 0 rgb(220 250 255 / 22%),
+    inset 0 0 0 1px rgb(114 228 255 / 34%);
   text-align: start;
 }
 html[data-family="special"]
@@ -604,12 +588,12 @@ html[data-family="special"]
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 5px 12px;
-  border: 1px solid var(--exe-rule);
-  border-radius: 999px;
-  color: #ffe7b3;
-  background: rgb(240 202 125 / 10%);
+  padding: 5px 14px 4px 10px;
+  color: #080807;
+  background: var(--exe-gold-pill);
+  clip-path: polygon(0 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
   font-size: 11px;
+  font-weight: 700;
   letter-spacing: 0.18em;
 }
 html[data-family="special"]
@@ -619,9 +603,8 @@ html[data-family="special"]
   .exi-stage
   > article:nth-child(2)
   > small {
-  border-color: rgb(124 226 255 / 32%);
-  color: #c8f4ff;
-  background: rgb(124 226 255 / 10%);
+  color: #061015;
+  background: var(--exe-cyan-pill);
 }
 html[data-family="special"]
   body
@@ -640,12 +623,27 @@ html[data-family="special"]
   display: flex;
   align-items: baseline;
   flex-wrap: wrap;
-  gap: 0.14em;
-  color: #fffaf0;
-  font-size: clamp(52px, 7.2vw, 104px);
-  line-height: 1;
+  gap: 0.12em;
+  color: #ffffff;
+  font-size: clamp(64px, 8.8vw, 128px);
+  font-weight: 700;
+  line-height: 0.94;
+  letter-spacing: -0.03em;
   font-variant-numeric: tabular-nums;
-  text-shadow: 0 8px 28px rgb(0 0 0 / 65%);
+  text-shadow:
+    0 12px 32px rgb(0 0 0 / 85%),
+    0 0 36px rgb(244 204 123 / 24%);
+}
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  #performance
+  .exi-stage
+  > article:nth-child(2)
+  > strong {
+  text-shadow:
+    0 12px 32px rgb(0 0 0 / 85%),
+    0 0 36px rgb(114 228 255 / 26%);
 }
 html[data-family="special"]
   body
@@ -658,7 +656,7 @@ html[data-family="special"]
   margin-left: 0.08em;
   color: var(--ext-gold);
   font-size: 0.32em;
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: 0.08em;
 }
 html[data-family="special"]
@@ -677,8 +675,10 @@ html[data-family="special"]
   #performance
   .exi-stage
   > article:first-child::after {
-  height: 12px;
-  background: linear-gradient(90deg, var(--ext-amber), var(--ext-gold) 65%, #fff5d6);
+  height: 15px;
+  background: linear-gradient(90deg, var(--ext-amber), var(--ext-gold) 62%, #ffffff);
+  -webkit-mask: repeating-linear-gradient(108deg, #000 0 10px, transparent 10px 14px);
+  mask: repeating-linear-gradient(108deg, #000 0 10px, transparent 10px 14px);
 }
 html[data-family="special"]
   body
@@ -691,12 +691,12 @@ html[data-family="special"]
   grid-column: 1;
   grid-row: 3;
   display: block;
-  width: min(100%, 460px);
-  height: 12px;
+  width: 100%;
+  height: 15px;
   margin: 0;
-  background: linear-gradient(90deg, #2d95bd, var(--exe-cyan) 68%, #effcff);
-  -webkit-mask: repeating-linear-gradient(90deg, #000 0 9px, transparent 9px 12px);
-  mask: repeating-linear-gradient(90deg, #000 0 9px, transparent 9px 12px);
+  background: linear-gradient(90deg, #1f86b0, var(--exe-cyan) 64%, #ffffff);
+  -webkit-mask: repeating-linear-gradient(108deg, #000 0 10px, transparent 10px 14px);
+  mask: repeating-linear-gradient(108deg, #000 0 10px, transparent 10px 14px);
   border: 0;
   border-radius: 0;
   box-shadow: none;
@@ -705,9 +705,10 @@ html[data-family="special"]
   transform: none;
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page #performance .exi-stage > article > p {
-  color: #ddd6c7;
-  font-size: 13px;
-  line-height: 1.75;
+  color: #e6dfd0;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.7;
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page #performance .exi-stage .exi-band {
   display: none;
@@ -717,26 +718,34 @@ html[data-family="special"]
   .rxs-page.rxs-page.exs-page
   #performance
   .exi-stage
-  :is(.exi-rays, .exi-streaks) {
-  color: rgb(240 202 125 / 9%);
+  .exi-rays {
+  color: rgb(244 204 123 / 22%);
+}
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  #performance
+  .exi-stage
+  .exi-streaks {
+  color: rgb(114 228 255 / 24%);
 }
 html[data-family="special"]
   body
   .rxs-page.rxs-page.exs-page
   > #performance
   > .rxs-headline-metrics::before {
-  opacity: 0.24;
+  opacity: 0.35;
 }
 
 /* Tale of the Tape Comparator Console */
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > #performance .rxs-comparison {
   grid-template-columns: minmax(0, 0.72fr) minmax(0, 1fr);
   grid-template-rows: auto auto auto auto;
-  padding: clamp(24px, 3.5vw, 44px);
-  border-radius: 16px;
+  padding: clamp(26px, 3.6vw, 48px);
+  border-top: 3px solid var(--ext-gold);
   background:
-    radial-gradient(ellipse 60% 50% at 15% 0%, rgb(240 202 125 / 12%), transparent 70%),
-    radial-gradient(ellipse 60% 50% at 88% 0%, rgb(124 226 255 / 9%), transparent 70%),
+    radial-gradient(ellipse 60% 50% at 15% 0%, rgb(244 204 123 / 15%), transparent 70%),
+    radial-gradient(ellipse 60% 50% at 88% 0%, rgb(114 228 255 / 12%), transparent 70%),
     var(--exe-surface-1);
   box-shadow: var(--exe-card-shadow);
 }
@@ -758,14 +767,14 @@ html[data-family="special"]
   .rxs-comparison
   > .rxs-comparison-key
   > span:first-child {
-  min-height: 54px;
-  padding: 10px 26px 10px 18px;
+  min-height: 58px;
+  padding: 12px 30px 12px 20px;
   color: #080807;
-  font-size: clamp(18px, 2vw, 24px);
+  font-size: clamp(19px, 2.2vw, 26px);
   font-weight: 800;
   background: var(--exe-gold-pill);
-  clip-path: polygon(0 0, 100% 0, calc(100% - 16px) 100%, 0 100%);
-  box-shadow: 0 10px 26px rgb(240 202 125 / 22%);
+  clip-path: polygon(0 0, 100% 0, calc(100% - 18px) 100%, 0 100%);
+  box-shadow: 0 12px 30px rgb(244 204 123 / 28%);
 }
 html[data-family="special"]
   body
@@ -774,12 +783,12 @@ html[data-family="special"]
   .rxs-comparison
   > .rxs-comparison-key
   > .exf-vs {
-  width: 44px;
-  height: 44px;
-  border: 1px solid var(--exe-rule-strong);
-  color: var(--ext-gold);
-  background: #0c0b09;
-  box-shadow: 0 8px 20px rgb(0 0 0 / 60%);
+  width: 48px;
+  height: 48px;
+  border: 2px solid var(--ext-gold);
+  color: #fff6df;
+  background: #0b0a08;
+  box-shadow: 0 10px 24px rgb(0 0 0 / 72%);
 }
 html[data-family="special"]
   body
@@ -808,35 +817,26 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-opponent-label
   grid-column: 1 / -1;
   margin: 0 0 6px;
   color: var(--ext-gold);
-  font: 600 12px/1.5 var(--dx-body);
-  letter-spacing: 0.08em;
+  font: 700 12px/1.5 var(--dx-body);
+  letter-spacing: 0.1em;
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-opponent-options button {
   display: grid;
   align-content: center;
   gap: 4px;
   min-width: 0;
-  min-height: 56px;
+  min-height: 58px;
   padding: 12px 16px;
-  border: 1px solid rgb(255 248 230 / 16%);
-  border-radius: 10px;
-  color: #d6d1c6;
-  background: linear-gradient(180deg, rgb(24 23 20 / 92%), rgb(14 13 11 / 96%));
+  border: 1px solid rgb(255 248 230 / 20%);
+  color: #dcd6ca;
+  background: linear-gradient(180deg, rgb(28 26 22 / 94%), rgb(14 13 11 / 98%));
+  clip-path: polygon(0 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
   font: 700 14px/1.45 var(--dx-body);
   cursor: pointer;
-  transition:
-    border-color 180ms ease,
-    background 180ms ease,
-    transform 180ms ease,
-    box-shadow 180ms ease;
-}
-html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-opponent-options button:hover {
-  border-color: var(--exe-rule-strong);
-  transform: translateY(-1px);
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-opponent-options button small {
   color: var(--exe-muted);
-  font: 500 10px/1.6 var(--dx-hud);
+  font: 600 10px/1.6 var(--dx-hud);
   letter-spacing: 0.08em;
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-sr-only {
@@ -855,9 +855,9 @@ html[data-family="special"]
   .rxs-page.rxs-page.exs-page
   .exs-opponent-options
   button[aria-pressed="true"] {
-  color: #fff6df;
+  color: #fff8e6;
   border-color: var(--ext-gold);
-  background: linear-gradient(145deg, rgb(240 202 125 / 24%), rgb(36 29 18 / 95%));
+  background: linear-gradient(145deg, rgb(244 204 123 / 28%), rgb(42 33 19 / 96%));
   box-shadow: inset 0 -2px 0 var(--ext-gold);
 }
 html[data-family="special"]
@@ -878,11 +878,10 @@ html[data-family="special"]
   grid-row: 2;
   justify-self: stretch;
   margin: 26px 0 14px;
-  padding: 12px 16px;
-  border-left: 3px solid var(--ext-gold);
-  border-radius: 0 8px 8px 0;
-  color: #e4ddd0;
-  background: rgb(240 202 125 / 7%);
+  padding: 12px 18px;
+  border-left: 4px solid var(--ext-gold);
+  color: #ede6d8;
+  background: linear-gradient(90deg, rgb(244 204 123 / 12%), transparent 85%);
   text-align: start;
 }
 html[data-family="special"]
@@ -894,7 +893,7 @@ html[data-family="special"]
   grid-column: 1 / -1;
   grid-row: 3;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 20px clamp(24px, 3.6vw, 44px);
+  gap: 22px clamp(24px, 3.6vw, 44px);
   padding: 0;
 }
 html[data-family="special"]
@@ -905,13 +904,25 @@ html[data-family="special"]
   > article {
   row-gap: 18px;
   align-content: start;
-  margin-block: 10px;
-  padding: clamp(20px, 2.5vw, 28px);
-  border-radius: 12px;
-  background: linear-gradient(165deg, rgb(24 22 18 / 90%), rgb(12 11 9 / 96%));
+  margin-block: 6px;
+  padding: clamp(22px, 2.6vw, 30px);
+  border-top: 2px solid var(--ext-gold);
+  background: linear-gradient(160deg, rgb(28 25 19 / 94%), rgb(12 11 9 / 98%));
+  clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 248 230 / 10%),
-    inset 0 0 0 1px rgb(240 202 125 / 18%);
+    0 18px 40px -20px rgb(0 0 0 / 85%),
+    inset 0 0 0 1px rgb(244 204 123 / 22%);
+}
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #performance
+  .rxs-comparison-metrics
+  > article[data-exf-win="rival"] {
+  border-top-color: var(--exe-cyan);
+  box-shadow:
+    0 18px 40px -20px rgb(0 0 0 / 85%),
+    inset 0 0 0 1px rgb(114 228 255 / 26%);
 }
 html[data-family="special"]
   body
@@ -922,7 +933,7 @@ html[data-family="special"]
   > header
   > div
   > strong {
-  color: #fffaf0;
+  color: #ffffff;
   font-variant-numeric: tabular-nums;
 }
 html[data-family="special"]
@@ -931,10 +942,10 @@ html[data-family="special"]
   > #performance
   .rxs-comparison-metrics
   .rxs-comparison-result {
-  padding: 6px 12px;
-  border: 1px solid var(--exe-rule);
-  border-radius: 8px;
-  background: rgb(240 202 125 / 10%);
+  padding: 8px 14px;
+  border: 1px solid var(--exe-rule-strong);
+  background: rgb(244 204 123 / 12%);
+  clip-path: polygon(0 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
 }
 html[data-family="special"]
   body
@@ -942,9 +953,7 @@ html[data-family="special"]
   > #performance
   .rxs-comparison
   .rxs-bars {
-  height: 9px;
-  border-radius: 999px;
-  background: rgb(255 255 255 / 7%);
+  height: 16px;
 }
 html[data-family="special"]
   body
@@ -953,9 +962,8 @@ html[data-family="special"]
   .rxs-comparison
   .rxs-bars
   > i::before {
-  -webkit-mask: none;
-  mask: none;
-  border-radius: 999px;
+  -webkit-mask: repeating-linear-gradient(106deg, #000 0 8px, transparent 8px 11px);
+  mask: repeating-linear-gradient(106deg, #000 0 8px, transparent 8px 11px);
 }
 html[data-family="special"]
   body
@@ -964,16 +972,16 @@ html[data-family="special"]
   .rxs-comparison
   .rxs-bars
   > i.is-rexonance::after {
-  width: 3px;
-  height: 15px;
-  clip-path: none;
+  width: clamp(28px, 2.6vw, 36px);
+  height: auto;
+  aspect-ratio: 1;
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-catalog-details {
   grid-column: 1 / -1;
   grid-row: 4;
   min-width: 0;
-  margin-top: 16px;
-  border-top: 1px solid var(--exe-rule);
+  margin-top: 20px;
+  border-top: 1px solid var(--exe-rule-strong);
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-catalog-details > summary {
   display: flex;
@@ -982,7 +990,7 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-catalog-detail
   gap: 10px 20px;
   min-height: 64px;
   padding: 18px 0;
-  color: #f4eee2;
+  color: #f8f2e6;
   font: 700 14px/1.5 var(--dx-body);
   cursor: pointer;
   list-style: none;
@@ -998,14 +1006,14 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-catalog-detail
   content: "+";
   display: inline-grid;
   place-items: center;
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   margin-left: auto;
-  border: 1px solid var(--exe-rule);
-  border-radius: 999px;
-  color: var(--ext-gold);
-  background: rgb(240 202 125 / 10%);
-  font: 400 20px/1 var(--dx-mono);
+  border: 1px solid var(--exe-rule-strong);
+  color: #080807;
+  background: var(--exe-gold-pill);
+  clip-path: polygon(0 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
+  font: 700 20px/1 var(--dx-mono);
 }
 html[data-family="special"]
   body
@@ -1013,7 +1021,6 @@ html[data-family="special"]
   .exs-catalog-details[open]
   > summary::after {
   content: "−";
-  background: rgb(240 202 125 / 20%);
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-catalog-details > summary small {
   color: var(--exe-muted);
@@ -1037,7 +1044,7 @@ html[data-family="special"]
   .exs-catalog-details
   .rxs-processing-comparison
   > div {
-  gap: 16px;
+  gap: 18px;
 }
 html[data-family="special"]
   body
@@ -1046,9 +1053,20 @@ html[data-family="special"]
   .rxs-processing-comparison
   > div
   > section {
-  padding: 20px 22px;
-  border-radius: 12px;
-  background: rgb(16 15 12 / 90%);
+  padding: 22px 24px;
+  border-top: 3px solid var(--exe-cyan);
+  background: rgb(14 18 22 / 92%);
+  box-shadow: inset 0 0 0 1px rgb(114 228 255 / 24%);
+}
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  .exs-catalog-details
+  .rxs-processing-comparison
+  > div
+  > section:last-child {
+  border-top: 3px solid var(--ext-gold);
+  background: rgb(22 19 13 / 94%);
   box-shadow: inset 0 0 0 1px var(--exe-rule);
 }
 
@@ -1056,15 +1074,17 @@ html[data-family="special"]
    ROUND 02 / P14 CORE — Dual-Reactor Architecture & Causal Flow
    ================================================================ */
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > #p14 .rxs-p14-overview {
-  grid-template-columns: minmax(0, 1.06fr) minmax(300px, 0.88fr);
+  grid-template-columns: minmax(0, 1.08fr) minmax(300px, 0.86fr);
   grid-template-rows: auto;
   align-items: center;
   gap: clamp(32px, 5.5vw, 72px);
-  padding: clamp(24px, 3.5vw, 44px);
-  border-radius: 18px;
+  padding: clamp(28px, 3.8vw, 48px);
+  border-top: 3px solid var(--ext-gold);
   background:
-    radial-gradient(ellipse 55% 65% at 80% 50%, rgb(240 202 125 / 12%), transparent 70%),
+    radial-gradient(ellipse 58% 68% at 80% 50%, rgb(114 228 255 / 16%), transparent 68%),
+    radial-gradient(ellipse 50% 55% at 18% 20%, rgb(244 204 123 / 14%), transparent 70%),
     var(--exe-surface-1);
+  clip-path: polygon(0 0, calc(100% - 26px) 0, 100% 26px, 100% 100%, 26px 100%, 0 calc(100% - 26px));
   box-shadow: var(--exe-card-shadow);
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > #p14 .rxs-p14-overview figure {
@@ -1074,6 +1094,9 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page > #p14 .rxs-p14-ove
   grid-row: 1;
   justify-self: center;
   width: min(100%, 400px, calc(1200px / var(--exe-art-density)));
+  box-shadow:
+    0 28px 64px rgb(0 0 0 / 82%),
+    0 0 56px rgb(114 228 255 / 22%);
 }
 html[data-family="special"]
   body
@@ -1082,7 +1105,7 @@ html[data-family="special"]
   .rxs-p14-overview
   figure
   > .exi-rays {
-  color: rgb(240 202 125 / 12%);
+  color: rgb(244 204 123 / 20%);
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > #p14 .rxs-p14-copy {
   position: relative;
@@ -1096,19 +1119,19 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page > #p14 .rxs-p14-cop
   display: inline-flex;
   align-items: center;
   margin: 0 0 16px;
-  padding: 5px 12px;
-  border: 1px solid var(--exe-rule);
-  border-radius: 999px;
-  color: var(--ext-gold);
-  background: rgb(240 202 125 / 10%);
+  padding: 6px 14px 5px 10px;
+  color: #080807;
+  background: var(--exe-gold-pill);
+  clip-path: polygon(0 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
   font-size: 10px;
-  letter-spacing: 0.16em;
+  font-weight: 700;
+  letter-spacing: 0.18em;
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > #p14 .rxs-p14-copy > h3 {
   margin: 0 0 18px;
   color: var(--exe-ivory);
-  font-size: clamp(24px, 2.7vw, 38px);
-  line-height: 1.42;
+  font-size: clamp(26px, 3vw, 42px);
+  line-height: 1.35;
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > #p14 .rxs-p14-copy > p {
   max-width: 38em;
@@ -1117,23 +1140,23 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page > #p14 .rxs-p14-cop
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > #p14 .rxs-p14-copy dl {
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px 18px;
+  gap: 16px 20px;
   margin-top: 28px;
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > #p14 .rxs-p14-copy dl > div {
   display: grid;
   align-content: start;
-  gap: 8px;
-  padding: 18px 20px;
-  border: 1px solid var(--exe-rule);
-  border-radius: 12px;
+  gap: 10px;
+  padding: 20px 22px;
+  border: 1px solid var(--exe-rule-strong);
+  border-left: 4px solid var(--ext-gold);
   background:
-    linear-gradient(155deg, rgb(240 202 125 / 11%) 0%, rgb(16 15 12 / 94%) 72%),
-    #11100d;
+    linear-gradient(145deg, rgb(244 204 123 / 18%) 0%, rgb(18 16 12 / 96%) 70%),
+    #12100c;
+  clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 248 230 / 12%),
-    0 12px 28px -18px rgb(0 0 0 / 80%);
-  clip-path: none;
+    inset 0 1px 0 rgb(255 248 230 / 16%),
+    0 16px 34px -18px rgb(0 0 0 / 88%);
 }
 html[data-family="special"]
   body
@@ -1142,10 +1165,11 @@ html[data-family="special"]
   .rxs-p14-copy
   dl
   > div:nth-child(2) {
-  border-color: rgb(124 226 255 / 38%);
+  border-color: rgb(114 228 255 / 48%);
+  border-left: 4px solid var(--exe-cyan);
   background:
-    linear-gradient(155deg, rgb(124 226 255 / 14%) 0%, rgb(13 19 23 / 95%) 72%),
-    #0e1316;
+    linear-gradient(145deg, rgb(114 228 255 / 20%) 0%, rgb(12 20 26 / 96%) 70%),
+    #0d1419;
 }
 html[data-family="special"]
   body
@@ -1155,11 +1179,12 @@ html[data-family="special"]
   dl
   > div:last-child {
   grid-column: 1 / -1;
+  border-left-color: #fff2cf;
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > #p14 .rxs-p14-copy dt {
   color: var(--ext-gold);
-  font: 700 12px/1.4 var(--dx-display);
-  letter-spacing: 0.14em;
+  font: 800 12px/1.4 var(--dx-display);
+  letter-spacing: 0.16em;
 }
 html[data-family="special"]
   body
@@ -1179,12 +1204,12 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page > #p14 .rxs-p14-cop
   row-gap: 4px;
   margin: 0;
   color: #fff8ea;
-  font-size: clamp(24px, 2.5vw, 34px);
-  font-weight: 700;
-  line-height: 1.15;
+  font-size: clamp(26px, 2.8vw, 38px);
+  font-weight: 800;
+  line-height: 1.1;
   letter-spacing: 0.01em;
   font-variant-numeric: tabular-nums;
-  text-shadow: 0 2px 16px rgb(0 0 0 / 65%);
+  text-shadow: 0 4px 18px rgb(0 0 0 / 75%);
 }
 html[data-family="special"]
   body
@@ -1194,7 +1219,7 @@ html[data-family="special"]
   dd
   > .exi-figure {
   margin-right: 0.28em;
-  color: #fffdf7;
+  color: #ffffff;
   font-variant-numeric: tabular-nums;
 }
 html[data-family="special"]
@@ -1205,7 +1230,7 @@ html[data-family="special"]
   dl
   > div:nth-child(2)
   dd {
-  color: #e9fbff;
+  color: #f0fcff;
 }
 
 /* 3-Step Causal Pipeline */
@@ -1215,68 +1240,72 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-core-flow {
   justify-content: space-between;
   gap: 14px;
   max-width: var(--dxs-wrap);
-  margin: 36px auto 28px;
+  margin: 38px auto 30px;
   padding: 20px 24px;
-  border: 1px solid var(--exe-rule);
-  border-radius: 14px;
-  color: #ede6d8;
+  border: 1px solid var(--exe-rule-strong);
+  color: #f2ebde;
   background:
-    linear-gradient(90deg, rgb(240 202 125 / 8%), rgb(124 226 255 / 6%) 50%, rgb(240 202 125 / 10%)),
-    #0f0e0c;
+    linear-gradient(
+      90deg,
+      rgb(244 204 123 / 12%),
+      rgb(114 228 255 / 10%) 50%,
+      rgb(244 204 123 / 14%)
+    ),
+    #0e0d0a;
+  clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px));
   box-shadow: var(--exe-card-shadow);
-  font: 600 13px/1.6 var(--dx-body);
+  font: 700 14px/1.6 var(--dx-body);
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-core-flow > span {
   flex: 1;
-  padding: 12px 16px;
-  border: 1px solid var(--exe-rule-subtle);
-  border-radius: 10px;
-  background: rgb(10 10 8 / 72%);
+  padding: 14px 16px;
+  border: 1px solid var(--exe-rule);
+  border-top: 2px solid var(--ext-gold);
+  background: rgb(9 9 7 / 82%);
+  clip-path: polygon(0 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
   text-align: center;
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-core-flow > span small {
   display: block;
   margin-bottom: 6px;
   color: var(--ext-gold);
-  font: 600 10px/1.5 var(--dx-hud);
-  letter-spacing: 0.14em;
+  font: 700 10px/1.5 var(--dx-hud);
+  letter-spacing: 0.16em;
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-core-flow :is(i, b) {
   flex: none;
   align-self: center;
   display: inline-grid;
   place-items: center;
-  width: 30px;
-  height: 30px;
-  border: 1px solid var(--exe-rule);
-  border-radius: 999px;
-  color: var(--ext-gold);
-  background: rgb(240 202 125 / 10%);
+  width: 34px;
+  height: 34px;
+  color: #080807;
+  background: var(--exe-gold-pill);
+  clip-path: polygon(0 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
   font-style: normal;
+  font-weight: 800;
 }
 
-/* P14 Dual Chamber Cards (KHAOS Ultra vs KOSMOS Ultra) */
+/* P14 Dual Chamber Cards (KHAOS Ultra Expansion vs KOSMOS Ultra Fixation) */
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > #p14 .exs-p14-comparison > article {
-  padding: clamp(26px, 3.2vw, 42px);
-  border-radius: 16px;
-  background: var(--exe-surface-cyan);
-  box-shadow:
-    0 22px 52px -24px rgb(0 0 0 / 88%),
-    inset 0 2px 0 rgb(124 226 255 / 45%),
-    inset 0 0 0 1px rgb(124 226 255 / 26%);
-  clip-path: none;
+  padding: clamp(28px, 3.4vw, 44px);
+  border-top: 4px solid var(--ext-gold);
+  background: var(--exe-surface-gold);
+  clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px));
+  box-shadow: var(--exe-card-shadow);
 }
 html[data-family="special"]
   body
   .rxs-page.rxs-page.exs-page
   > #p14
   .exs-p14-comparison
-  > article.is-kosmos {
-  background: var(--exe-surface-gold);
+  > article:last-of-type {
+  border-top: 4px solid var(--exe-cyan);
+  background: var(--exe-surface-cyan);
   box-shadow:
-    0 22px 52px -24px rgb(0 0 0 / 88%),
-    inset 0 2px 0 var(--ext-gold),
-    inset 0 0 0 1px var(--exe-rule-strong);
+    0 26px 64px -22px rgb(0 0 0 / 92%),
+    inset 0 1px 0 rgb(220 250 255 / 22%),
+    inset 0 0 0 1px rgb(114 228 255 / 34%);
 }
 html[data-family="special"]
   body
@@ -1284,7 +1313,7 @@ html[data-family="special"]
   > #p14
   .exs-p14-comparison
   > article::after {
-  opacity: 0.22;
+  opacity: 0.28;
 }
 html[data-family="special"]
   body
@@ -1292,17 +1321,20 @@ html[data-family="special"]
   > #p14
   .exs-p14-comparison
   > .exo-arrow {
-  width: 42px;
-  height: 42px;
-  color: var(--ext-gold);
-  border: 1px solid var(--exe-rule-strong);
-  border-radius: 999px;
-  background: #12110e;
-  box-shadow: 0 8px 22px rgb(0 0 0 / 55%);
+  width: 52px;
+  height: 52px;
+  color: #080807;
+  border: 0;
+  border-radius: 50%;
+  background: var(--exe-gold-pill);
+  box-shadow:
+    0 0 0 6px rgb(244 204 123 / 18%),
+    0 12px 28px rgb(0 0 0 / 70%);
+  font-weight: 800;
 }
 
 /* ================================================================
-   ROUND 03 / STAGES — Two-Phase Combat Form Showcase
+   ROUND 03 / STAGES — Two-Phase Combat Form Duel
    ================================================================ */
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > #stages > .rxs-section-heading {
   width: min(var(--dxs-wrap), calc(100% - 2 * var(--ext-gutter)));
@@ -1328,11 +1360,10 @@ html[data-family="special"]
   margin: 0 0 14px;
   padding: 6px;
   border: 1px solid var(--exe-rule-strong);
-  border-radius: 14px;
-  background: #0d0c0a;
+  background: #0d0c09;
   box-shadow:
-    inset 0 1px 0 rgb(255 248 230 / 10%),
-    0 12px 30px rgb(0 0 0 / 50%);
+    inset 0 1px 0 rgb(255 248 230 / 14%),
+    0 14px 34px rgb(0 0 0 / 58%);
 }
 html[data-family="special"]
   body
@@ -1351,35 +1382,25 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-stage-status {
   min-height: 1.6em;
   margin: 0 0 22px;
   color: var(--ext-gold);
-  font: 600 12px/1.6 var(--dx-body);
-  letter-spacing: 0.04em;
+  font: 700 12px/1.6 var(--dx-body);
+  letter-spacing: 0.06em;
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > #stages #exs-stage-panel {
   grid-column: 1;
   grid-row: 4;
-  grid-template-columns: minmax(0, 0.98fr) minmax(0, 1.02fr);
+  grid-template-columns: minmax(0, 0.96fr) minmax(0, 1.04fr);
   grid-template-rows: auto;
   align-items: center;
   gap: clamp(32px, 5.5vw, 76px);
   min-height: 0;
-  padding: clamp(28px, 3.8vw, 48px);
-  border: 1px solid var(--exe-rule-strong);
-  border-radius: 18px;
+  padding: clamp(28px, 4vw, 52px);
+  border-top: 4px solid var(--ext-gold);
   background:
-    radial-gradient(ellipse 52% 65% at 76% 45%, rgb(240 202 125 / 14%), transparent 65%),
+    radial-gradient(ellipse 56% 68% at 76% 45%, rgb(244 204 123 / 20%), transparent 66%),
+    radial-gradient(ellipse 46% 52% at 18% 20%, rgb(212 136 42 / 12%), transparent 68%),
     var(--exe-surface-1);
+  clip-path: polygon(0 0, calc(100% - 26px) 0, 100% 26px, 100% 100%, 26px 100%, 0 calc(100% - 26px));
   box-shadow: var(--exe-card-shadow);
-}
-html[data-family="special"]
-  body
-  .rxs-page.rxs-page.exs-page
-  > #stages
-  #exs-stage-panel[data-stage="ultra"] {
-  border-color: rgb(124 226 255 / 42%);
-  background:
-    radial-gradient(ellipse 55% 68% at 76% 45%, rgb(124 226 255 / 15%), transparent 65%),
-    radial-gradient(ellipse 45% 50% at 20% 20%, rgb(240 202 125 / 12%), transparent 68%),
-    var(--exe-surface-1);
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > #stages #exs-stage-panel > figure {
   grid-column: 2;
@@ -1391,11 +1412,12 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page > #stages #exs-stag
   max-height: calc(1538px / var(--exf-art-density));
   aspect-ratio: 1022 / 1538;
   margin: 0;
-  border-radius: 14px;
   background:
-    radial-gradient(circle at 50% 38%, rgb(240 202 125 / 16%), transparent 68%),
-    rgb(10 10 8 / 72%);
-  box-shadow: inset 0 0 0 1px var(--exe-rule);
+    radial-gradient(circle at 50% 38%, rgb(244 204 123 / 22%), transparent 68%),
+    rgb(9 9 7 / 86%);
+  box-shadow:
+    0 28px 64px rgb(0 0 0 / 82%),
+    inset 0 0 0 1px var(--exe-rule-strong);
   transform: none;
   scale: none;
 }
@@ -1435,21 +1457,23 @@ html[data-family="special"]
   #exs-stage-panel
   > div
   > small {
-  display: inline-flex;
-  align-items: center;
+  display: inline-block;
   margin-bottom: 18px;
-  padding: 6px 14px;
-  border: 1px solid var(--exe-rule-strong);
-  border-radius: 999px;
-  color: var(--ext-gold);
-  background: rgb(240 202 125 / 12%);
-  clip-path: none;
+  padding: 6px 16px 5px 12px;
+  color: #080807;
+  background: var(--exe-gold-pill);
+  clip-path: polygon(0 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+  font-weight: 800;
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > #stages #exs-stage-panel > div > h3 {
   margin: 0 0 16px;
   color: var(--exe-ivory);
-  font-size: clamp(28px, 3.3vw, 46px);
-  line-height: 1.34;
+  background: var(--exe-gold-metal);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-size: clamp(30px, 3.6vw, 50px);
+  line-height: 1.28;
   letter-spacing: -0.03em;
 }
 html[data-family="special"]
@@ -1476,14 +1500,14 @@ html[data-family="special"]
   > div
   > ul
   > li {
-  padding: 7px 13px;
-  border: 1px solid var(--exe-rule);
-  border-radius: 999px;
-  color: #efe7d7;
-  background: linear-gradient(180deg, rgb(30 27 20 / 90%), rgb(16 15 12 / 94%));
+  padding: 8px 16px 7px 13px;
+  border: 1px solid var(--exe-rule-strong);
+  border-left: 3px solid var(--ext-gold);
+  color: #f6efe2;
+  background: linear-gradient(90deg, rgb(36 30 20 / 94%), rgb(14 13 10 / 96%));
   font-size: 12px;
-  font-weight: 600;
-  clip-path: none;
+  font-weight: 700;
+  clip-path: polygon(0 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-form-facts {
   display: grid;
@@ -1494,10 +1518,11 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-form-facts {
   border-top: 1px solid var(--exe-rule);
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-form-facts > div {
-  padding: 14px 16px;
-  border: 1px solid var(--exe-rule-subtle);
-  border-radius: 10px;
-  background: rgb(12 11 9 / 76%);
+  padding: 16px 18px;
+  border: 1px solid var(--exe-rule);
+  border-left: 3px solid var(--ext-gold);
+  background: rgb(11 10 8 / 84%);
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%);
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-form-facts dt {
   margin-bottom: 6px;
@@ -1507,12 +1532,12 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-form-facts dt 
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-form-facts dd {
   margin: 0;
-  color: #f0eadd;
-  font: 500 13px/1.75 var(--dx-body);
+  color: #f6f0e4;
+  font: 700 14px/1.65 var(--dx-body);
 }
 
 /* ================================================================
-   ROUND 04 / SYSTEM — Three-Pillar Drive Train & Dual Spec Deck
+   ROUND 04 / SYSTEM — Three-Pillar Drive Train & Twin Reactor Deck
    ================================================================ */
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > #system .rxs-system-grid {
   gap: 24px;
@@ -1531,13 +1556,11 @@ html[data-family="special"]
   .rxs-system-grid
   > article:nth-child(2) {
   margin-top: 0;
-  padding: clamp(26px, 3vw, 34px);
-  border-radius: 16px;
+  padding: clamp(28px, 3.2vw, 38px);
+  border-top: 4px solid var(--ext-gold);
   background: var(--exe-surface-2);
-  box-shadow:
-    0 22px 48px -24px rgb(0 0 0 / 88%),
-    inset 0 2px 0 var(--ext-gold),
-    inset 0 0 0 1px var(--exe-rule);
+  clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 18px 100%, 0 calc(100% - 18px));
+  box-shadow: var(--exe-card-shadow);
 }
 html[data-family="special"]
   body
@@ -1557,15 +1580,15 @@ html[data-family="special"]
   .exo-number {
   display: inline-grid;
   place-items: center;
-  min-width: 44px;
-  height: 44px;
-  padding: 0 10px;
-  border: 1px solid var(--exe-rule-strong);
-  border-radius: 10px;
-  color: var(--ext-gold);
-  background: rgb(240 202 125 / 12%);
-  font-size: 22px;
-  clip-path: none;
+  min-width: 54px;
+  height: 46px;
+  padding: 0 14px 0 10px;
+  color: #080807;
+  background: var(--exe-gold-pill);
+  font-size: 28px;
+  font-weight: 800;
+  clip-path: polygon(0 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+  box-shadow: 0 8px 20px rgb(244 204 123 / 28%);
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > #system .rxs-system-grid header {
   align-items: center;
@@ -1579,40 +1602,38 @@ html[data-family="special"]
   header
   small {
   max-width: 16em;
-  color: #dfd8ca;
+  color: #e6dfd1;
   font-size: 10px;
-  letter-spacing: 0.1em;
+  font-weight: 700;
+  letter-spacing: 0.12em;
   line-height: 1.75;
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > #system .rxs-system-grid h3 {
   color: var(--exe-ivory);
+  font-size: clamp(21px, 2vw, 27px);
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > #system .rxs-system-grid p {
   color: var(--exe-muted);
   line-height: 1.85;
 }
 
-/* System Spec Deck: KHAOS Ultra & KOSMOS Ultra Readout Plates */
+/* System Spec Deck: KHAOS Ultra (20,000 YOPS) & KOSMOS Ultra (5,000 TOPS) */
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > #system .rxs-specs {
   position: relative;
-  gap: 24px;
-  margin-top: clamp(32px, 4vw, 48px);
-}
-html[data-family="special"] body .rxs-page.rxs-page.exs-page > #system .rxs-specs > .exi-rays {
-  z-index: 0;
-  color: rgb(240 202 125 / 8%);
+  margin-top: clamp(36px, 4.5vw, 56px);
 }
 html[data-family="special"]
   body
   .rxs-page.rxs-page.exs-page
   > #system
   .rxs-specs
-  > .rxs-spec-group {
+  > div {
   position: relative;
   z-index: 2;
-  padding: clamp(24px, 3vw, 36px);
-  border-radius: 16px;
+  padding: clamp(28px, 3.4vw, 44px);
+  border-top: 4px solid var(--ext-gold);
   background: var(--exe-surface-gold);
+  clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px));
   box-shadow: var(--exe-card-shadow);
 }
 html[data-family="special"]
@@ -1620,76 +1641,29 @@ html[data-family="special"]
   .rxs-page.rxs-page.exs-page
   > #system
   .rxs-specs
-  > .rxs-spec-group:nth-of-type(2) {
+  > div:last-child {
+  border-top: 4px solid var(--exe-cyan);
   background: var(--exe-surface-cyan);
   box-shadow:
-    0 22px 52px -24px rgb(0 0 0 / 88%),
-    inset 0 1px 0 rgb(220 250 255 / 20%),
-    inset 0 0 0 1px rgb(124 226 255 / 34%);
+    0 26px 64px -22px rgb(0 0 0 / 92%),
+    inset 0 1px 0 rgb(220 250 255 / 24%),
+    inset 0 0 0 1px rgb(114 228 255 / 38%);
 }
 html[data-family="special"]
   body
   .rxs-page.rxs-page.exs-page
   > #system
   .rxs-specs
-  > .rxs-spec-group
-  > h3 {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  margin: 0 0 18px;
-  padding: 6px 14px;
-  border: 1px solid var(--exe-rule-strong);
-  border-radius: 999px;
-  color: #ffe8b6;
-  background: rgb(240 202 125 / 12%);
-  font-size: 13px;
-  letter-spacing: 0.16em;
-  clip-path: none;
-}
-html[data-family="special"]
-  body
-  .rxs-page.rxs-page.exs-page
-  > #system
-  .rxs-specs
-  > .rxs-spec-group:nth-of-type(2)
-  > h3 {
-  border-color: rgb(124 226 255 / 42%);
-  color: #d8f8ff;
-  background: rgb(124 226 255 / 14%);
-}
-html[data-family="special"]
-  body
-  .rxs-page.rxs-page.exs-page
-  > #system
-  .rxs-specs
-  > .rxs-spec-group
-  dl {
-  gap: 16px;
-}
-html[data-family="special"]
-  body
-  .rxs-page.rxs-page.exs-page
-  > #system
-  .rxs-specs
-  > .rxs-spec-group
-  dl
-  > div {
-  padding: 18px 20px;
-  border: 1px solid rgb(255 248 230 / 12%);
-  border-radius: 12px;
-  background: rgb(9 9 8 / 74%);
-}
-html[data-family="special"]
-  body
-  .rxs-page.rxs-page.exs-page
-  > #system
-  .rxs-specs
-  > .rxs-spec-group
-  dt {
-  margin-bottom: 6px;
-  color: var(--exe-muted);
-  font-size: 11px;
+  > div
+  > small {
+  display: inline-block;
+  margin: 0 0 16px;
+  padding: 6px 14px 5px 10px;
+  color: #080807;
+  background: var(--exe-gold-pill);
+  clip-path: polygon(0 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+  font-size: 12px;
+  font-weight: 800;
   letter-spacing: 0.16em;
 }
 html[data-family="special"]
@@ -1697,52 +1671,52 @@ html[data-family="special"]
   .rxs-page.rxs-page.exs-page
   > #system
   .rxs-specs
-  > .rxs-spec-group
-  dd {
+  > div:last-child
+  > small {
+  color: #061015;
+  background: var(--exe-cyan-pill);
+}
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #system
+  .rxs-specs
+  > div
+  strong,
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #system
+  .rxs-specs
+  > div:last-child
+  strong {
   display: flex;
   align-items: baseline;
   flex-wrap: wrap;
-  gap: 0.28em;
-  margin: 0;
+  gap: 0.22em;
   color: #fffaf0;
-  font-size: clamp(26px, 3vw, 40px);
-  font-weight: 700;
-  line-height: 1.1;
-  letter-spacing: 0.01em;
+  -webkit-text-fill-color: #fffaf0;
+  background: none;
+  font-size: clamp(44px, 5.6vw, 84px);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
-  text-shadow: 0 4px 18px rgb(0 0 0 / 70%);
+  text-shadow: 0 10px 28px rgb(0 0 0 / 80%);
 }
 html[data-family="special"]
   body
   .rxs-page.rxs-page.exs-page
   > #system
   .rxs-specs
-  > .rxs-spec-group:nth-of-type(2)
-  dd {
-  color: #f0fcff;
-}
-html[data-family="special"]
-  body
-  .rxs-page.rxs-page.exs-page
-  > #system
-  .rxs-specs
-  > .rxs-spec-group
-  dd
-  > .exi-figure {
-  color: #ffffff;
-  font-variant-numeric: tabular-nums;
-}
-html[data-family="special"]
-  body
-  .rxs-page.rxs-page.exs-page
-  > #system
-  .rxs-specs
-  > .rxs-spec-group
-  dd
-  > span:not(.exi-figure) {
+  > div
+  strong
+  > span {
+  margin-left: 0.08em;
   color: var(--ext-gold);
-  font-size: 0.56em;
-  font-weight: 700;
+  -webkit-text-fill-color: var(--ext-gold);
+  font-size: 0.34em;
+  font-weight: 800;
   letter-spacing: 0.14em;
 }
 html[data-family="special"]
@@ -1750,76 +1724,100 @@ html[data-family="special"]
   .rxs-page.rxs-page.exs-page
   > #system
   .rxs-specs
-  > .rxs-spec-group:nth-of-type(2)
-  dd
-  > span:not(.exi-figure) {
+  > div:last-child
+  strong
+  > span {
   color: var(--exe-cyan);
+  -webkit-text-fill-color: var(--exe-cyan);
+}
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #system
+  .rxs-specs
+  > div
+  > p {
+  display: inline-block;
+  margin-top: 14px;
+  padding: 5px 12px;
+  border: 1px solid var(--exe-rule);
+  color: #f0e9da;
+  background: rgb(8 8 7 / 72%);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+}
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #system
+  .rxs-specs
+  > div:last-child
+  > p {
+  border-color: rgb(114 228 255 / 36%);
+  color: #dff9ff;
 }
 
 /* ================================================================
-   FOOTER — Championship Finale & Return Stage
+   FOOTER — Molten Gold & Obsidian Championship Finale
    ================================================================ */
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer {
-  padding: clamp(88px, 12vw, 168px) max(var(--ext-gutter), calc((100% - var(--dxs-wrap)) / 2))
-    clamp(72px, 9vw, 116px);
-  color: #f3ecde;
+  padding: clamp(92px, 12vw, 176px) max(var(--ext-gutter), calc((100% - var(--dxs-wrap)) / 2))
+    clamp(76px, 9vw, 120px);
+  color: #f6efe2;
   background:
-    radial-gradient(ellipse 70% 60% at 82% 100%, rgb(240 202 125 / 16%), transparent 66%),
-    radial-gradient(ellipse 50% 50% at 16% 0%, rgb(240 202 125 / 10%), transparent 68%),
-    #090907;
-  border-top: 1px solid var(--exe-rule-strong);
+    radial-gradient(ellipse 75% 65% at 80% 100%, rgb(244 204 123 / 24%), transparent 66%),
+    radial-gradient(ellipse 55% 55% at 18% 0%, rgb(212 136 42 / 16%), transparent 68%),
+    repeating-linear-gradient(-14deg, transparent 0 48px, rgb(244 204 123 / 4%) 48px 50px),
+    #080806;
+  border-top: 3px solid var(--ext-gold);
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer h2 {
-  color: #f6efe2;
+  color: #fbf5e8;
   background: var(--exe-gold-metal);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  font-size: clamp(38px, 6.2vw, 86px);
-  line-height: 1.22;
+  font-size: clamp(42px, 6.6vw, 96px);
+  line-height: 1.16;
   letter-spacing: -0.03em;
+  filter: drop-shadow(0 14px 34px rgb(0 0 0 / 80%));
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer > div > p {
-  color: var(--ext-gold);
+  display: inline-block;
+  padding: 5px 14px 4px 10px;
+  color: #080807;
+  background: var(--exe-gold-pill);
+  clip-path: polygon(0 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
   font-size: 11px;
-  letter-spacing: 0.18em;
+  font-weight: 800;
+  letter-spacing: 0.2em;
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer > a,
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer > a.rxs-footer-return {
+  min-height: 56px;
+  padding: 0 24px;
   border: 1px solid var(--exe-rule-strong);
-  border-radius: 10px;
-  color: #f4ede0;
-  background: linear-gradient(180deg, rgb(28 25 19 / 92%), rgb(14 13 10 / 96%));
+  color: #f6efe2;
+  background: linear-gradient(180deg, rgb(32 28 20 / 95%), rgb(14 13 10 / 98%));
+  clip-path: polygon(0 0, 100% 0, calc(100% - 14px) 100%, 0 100%);
   box-shadow:
-    0 12px 28px rgb(0 0 0 / 48%),
-    inset 0 1px 0 rgb(255 248 230 / 14%);
-  clip-path: none;
-  transition:
-    transform 180ms ease,
-    border-color 180ms ease,
-    box-shadow 180ms ease;
+    0 14px 32px rgb(0 0 0 / 58%),
+    inset 0 1px 0 rgb(255 248 230 / 18%);
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer > a:first-of-type {
   color: #080807;
   border-color: var(--ext-gold);
   background: var(--exe-gold-pill);
-  font-weight: 700;
-}
-html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer > a:hover,
-html[data-family="special"]
-  body
-  .rxs-page.rxs-page.exs-page
-  > .rxs-footer
-  > a.rxs-footer-return:hover {
-  transform: translateY(-2px);
-  border-color: var(--ext-gold);
+  font-weight: 800;
+  box-shadow: 0 14px 34px rgb(244 204 123 / 28%);
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer > .exf-billing {
   bottom: -0.22em;
-  -webkit-text-stroke: 1px rgb(240 202 125 / 14%);
+  -webkit-text-stroke: 1.5px rgb(244 204 123 / 20%);
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer > .exi-rays {
-  color: rgb(240 202 125 / 6%);
+  color: rgb(244 204 123 / 14%);
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page :is(a, button, summary):focus-visible {
   outline: 2px solid #ffe1a1;
@@ -1834,7 +1832,7 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page :is(a, button, summ
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-index a {
-    min-height: 122px;
+    min-height: 124px;
     padding: 20px 18px;
   }
   html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-index a:nth-child(3) {
@@ -1860,15 +1858,6 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page :is(a, button, summ
     .rxs-system-grid
     > article {
     padding: 28px;
-  }
-  html[data-family="special"]
-    body
-    .rxs-page.rxs-page.exs-page
-    > #system
-    .rxs-specs
-    > .rxs-spec-group
-    dl {
-    grid-template-columns: minmax(0, 1fr);
   }
 }
 
@@ -1933,7 +1922,7 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page :is(a, button, summ
     .rxs-page.rxs-page.exs-page
     > :is(#performance, #p14, #stages, #system)
     > .rxs-section-heading {
-    grid-template-columns: 48px minmax(0, 1fr);
+    grid-template-columns: 52px minmax(0, 1fr);
     gap: 10px 14px;
     padding-bottom: 24px;
   }
@@ -1942,9 +1931,9 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page :is(a, button, summ
     .rxs-page.rxs-page.exs-page
     > :is(#performance, #p14, #stages, #system)
     > .rxs-section-heading::before {
-    width: 42px;
-    height: 42px;
-    font-size: 18px;
+    width: 48px;
+    height: 44px;
+    font-size: 20px;
   }
   html[data-family="special"]
     body
@@ -1952,8 +1941,8 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page :is(a, button, summ
     > :is(#performance, #p14, #stages, #system)
     > .rxs-section-heading
     > h2 {
-    font-size: clamp(26px, 6.7vw, 40px);
-    line-height: 1.42;
+    font-size: clamp(28px, 7.2vw, 42px);
+    line-height: 1.38;
   }
   html[data-family="special"]
     body
@@ -1968,8 +1957,8 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page :is(a, button, summ
   html[data-family="special"] body .rxs-page.rxs-page.exs-page #performance .exi-stage {
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: auto auto;
-    gap: 20px;
-    padding-block: 32px;
+    gap: 22px;
+    padding-block: 34px;
   }
   html[data-family="special"]
     body
@@ -1979,7 +1968,7 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page :is(a, button, summ
     > article:nth-child(2) {
     grid-column: 1;
     grid-row: 2;
-    padding: 24px 20px;
+    padding: 26px 22px;
     border-left: 0;
   }
   html[data-family="special"]
@@ -1996,7 +1985,7 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page :is(a, button, summ
     .exi-stage
     > article:nth-child(2)
     > strong {
-    font-size: clamp(54px, 16vw, 88px);
+    font-size: clamp(58px, 18vw, 96px);
   }
   html[data-family="special"] body .rxs-page.rxs-page.exs-page > #performance .rxs-comparison {
     grid-template-columns: minmax(0, 1fr);
@@ -2115,7 +2104,7 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page :is(a, button, summ
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: auto auto;
     gap: 32px;
-    padding: 22px 18px;
+    padding: 24px 18px;
   }
   html[data-family="special"] body .rxs-page.rxs-page.exs-page > #p14 .rxs-p14-overview figure {
     grid-column: 1;
@@ -2150,7 +2139,7 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page :is(a, button, summ
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: auto auto;
     gap: 24px;
-    padding: 22px 18px;
+    padding: 24px 18px;
   }
   html[data-family="special"] body .rxs-page.rxs-page.exs-page > #stages #exs-stage-panel > figure {
     grid-column: 1;
@@ -2174,8 +2163,24 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page :is(a, button, summ
     .rxs-page.rxs-page.exs-page
     > #system
     .rxs-specs
-    > .rxs-spec-group {
-    padding: 22px 18px;
+    > div {
+    padding: 24px 20px;
+  }
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #system
+    .rxs-specs
+    > div
+    strong,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #system
+    .rxs-specs
+    > div:last-child
+    strong {
+    font-size: clamp(38px, 12vw, 60px);
   }
 }
 
@@ -2249,7 +2254,7 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page :is(a, button, summ
     border-color: #ffe1a1;
   }
   html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-index a:hover {
-    background: rgb(240 202 125 / 8%);
+    background: rgb(244 204 123 / 10%);
   }
 }
 
@@ -2260,7 +2265,7 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page :is(a, button, summ
     .rxs-page.rxs-page.exs-page
     > :is(#performance, #p14)
     > .rxs-section-heading {
-    grid-template-columns: 72px minmax(0, 1.3fr) minmax(240px, 0.7fr);
+    grid-template-columns: 76px minmax(0, 1.3fr) minmax(240px, 0.7fr);
     grid-template-rows: auto auto;
   }
   html[data-family="special"]

@@ -172,19 +172,21 @@ test("KOSMOS Ultra readouts stay above core rays, separate figures from units, a
   assert.equal(declaration(p14Value, "font-variant-numeric"), "tabular-nums");
   const p14FigureSpan = find("> #p14 .rxs-p14-copy dd > .exi-figure");
   assert.equal(declaration(p14FigureSpan, "margin-right"), "0.28em");
-  const specsCard = find("> #system .rxs-specs > .rxs-spec-group");
+  const specsCard = find("> #system .rxs-specs > div");
   assert.equal(declaration(specsCard, "z-index"), "2");
-  assert.match(declaration(specsCard, "padding"), /clamp\(24px/);
-  const specsDd = find("> #system .rxs-specs > .rxs-spec-group dd");
-  assert.equal(declaration(specsDd, "color"), "#fffaf0");
-  assert.equal(declaration(specsDd, "font-variant-numeric"), "tabular-nums");
-  assert.equal(declaration(specsDd, "gap"), "0.28em");
-  const mobileSpecs = find("> #system .rxs-specs > .rxs-spec-group", "(max-width: 680px)");
-  assert.equal(declaration(mobileSpecs, "padding"), "22px 18px");
+  assert.match(declaration(specsCard, "padding"), /clamp\(28px/);
+  const specsStrong = find("> #system .rxs-specs > div:last-child strong");
+  assert.equal(declaration(specsStrong, "color"), "#fffaf0");
+  assert.equal(declaration(specsStrong, "-webkit-text-fill-color"), "#fffaf0");
+  assert.equal(declaration(specsStrong, "font-variant-numeric"), "tabular-nums");
+  assert.equal(declaration(specsStrong, "gap"), "0.22em");
+  const mobileSpecs = find("> #system .rxs-specs > div", "(max-width: 680px)");
+  assert.equal(declaration(mobileSpecs, "padding"), "24px 20px");
   const scrollCueSpan = find("> .exs-hero .rxs-scroll-cue > span");
   assert.equal(declaration(scrollCueSpan, "display"), "inline-flex");
   const secondMeter = find("#performance .exi-stage > article:nth-child(2)::after");
   assert.equal(declaration(secondMeter, "grid-row"), "3");
 });
+
 
 
