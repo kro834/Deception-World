@@ -1211,7 +1211,7 @@ html body .ciel-button .zeus-button-secret-hit {
   pointer-events: none;
 }
 
-html body .ciel-button[data-secret-armed="true"][data-navigating="true"] .zeus-button-secret-hit {
+html body .ciel-button[data-navigating="true"] .zeus-button-secret-hit {
   pointer-events: auto;
 }
 

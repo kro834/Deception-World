@@ -17,13 +17,13 @@ export function guardTapThrough() {
     // not the touch's compatibility click on the control underneath.
     if (event.type === "click" && event instanceof MouseEvent && event.detail === 0) return;
     // A deliberate Ciel burst stays on the same visible control. Permit
-    // only that armed button (including its hit-area child), never anything
+    // only that armed/busy button (including its hit-area child), never anything
     // behind it when navigation or the tenth tap removes the original node.
     if (
       typeof Element !== "undefined" &&
       event.target instanceof Element &&
       event.target.closest(
-        'button.ciel-button[data-secret-armed="true"], dialog.ciel-inferno[open] :is(button.ciel-inferno-close, button.ciel-inferno-return)',
+        'button.ciel-button:is([data-secret-armed="true"], [data-navigating="true"]), dialog.ciel-inferno[open] :is(button.ciel-inferno-close, button.ciel-inferno-return)',
       )
     )
       return;

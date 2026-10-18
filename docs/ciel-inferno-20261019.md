@@ -66,7 +66,7 @@ The illustration's four edges are feathered without repainting its contents.
 
 The native modal traps background interaction; its own close controls remain
 usable even while the ordinary touch-through guard is active. That guard exempts
-only the armed Ciel control and the two open-modal exit controls, never the page
+only the armed/busy Ciel control and the two open-modal exit controls, never the page
 underneath. The Ciel portal excludes this temporary modal, preventing a removed
 dialog from taking the button's return focus with it.
 

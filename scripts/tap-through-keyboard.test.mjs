@@ -19,9 +19,9 @@ function mount() {
     closest(selector) {
       assert.equal(
         selector,
-        'button.ciel-button[data-secret-armed="true"], dialog.ciel-inferno[open] :is(button.ciel-inferno-close, button.ciel-inferno-return)',
+        'button.ciel-button:is([data-secret-armed="true"], [data-navigating="true"]), dialog.ciel-inferno[open] :is(button.ciel-inferno-close, button.ciel-inferno-return)',
       );
-      return [true, "close", "return"].includes(this.armed) ? this : null;
+      return [true, "busy", "close", "return"].includes(this.armed) ? this : null;
     }
   }
   class MouseEvent {
@@ -79,9 +79,9 @@ test("trusted pointer compatibility input is still swallowed", () => {
   }
 });
 
-test("only the armed Ciel control can receive a deliberate rapid burst through the guard", () => {
+test("only the armed or busy Ciel control can receive a deliberate rapid burst through the guard", () => {
   const ui = mount();
-  for (const armed of [false, true]) {
+  for (const armed of [false, true, "busy"]) {
     for (const type of ["pointerdown", "mousedown", "click"]) {
       const event = new ui.MouseEvent(type, 1);
       event.target = new ui.Element(armed);
@@ -90,6 +90,18 @@ test("only the armed Ciel control can receive a deliberate rapid burst through t
       assert.equal(event.stopped, !armed);
     }
   }
+});
+
+test("the busy Ciel hit area cannot lapse when the short burst timer expires before navigation", () => {
+  const css = readFileSync(new URL("../src/styles-chrome-elevation.css", import.meta.url), "utf8");
+  assert.match(
+    css,
+    /\.ciel-button\[data-navigating="true"\] \.zeus-button-secret-hit\s*\{\s*pointer-events: auto;/,
+  );
+  assert.doesNotMatch(
+    css,
+    /\.ciel-button\[data-secret-armed="true"\]\[data-navigating="true"\] \.zeus-button-secret-hit/,
+  );
 });
 
 test("secret exit controls stay immediately usable while backdrop and underlying controls remain guarded", () => {
