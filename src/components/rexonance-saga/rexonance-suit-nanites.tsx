@@ -20,6 +20,7 @@ import {
 import { REXONANCE_SUIT_LIGHT, REXONANCE_SUIT_REVEAL_MS } from "@/lib/rexonance-calls";
 import { REXONANCE_SUIT_MARKS } from "@/lib/rexonance-suit";
 import { reactorCoilAngle, reactorCoilScale } from "@/lib/rexonance-reactor.js";
+import { drawNaniteFlame } from "@/lib/rexonance-flame.js";
 import type { SuitExtrasEnv } from "./rexonance-suit-extras";
 import { suitExtrasApi } from "./rexonance-suit-extras-hook";
 
@@ -70,6 +71,8 @@ import { suitExtrasApi } from "./rexonance-suit-extras-hook";
 
 /** The engine takes over only if it is ready before the first tile is due. */
 const START_BY = 420;
+// The flame: fades in over 180 ms, holds, fades out from 900 ms over 420 ms.
+const CALL_FLAME = [180, 900, 420];
 
 // The extras through their hook (round 3, review 33): the call's chunk never
 // imports them, so a still tier never downloads the kit's code; until the
@@ -371,6 +374,15 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
           // The extras' back of the frame: the cocoon behind, the guideways
           // built on the body ahead of each plate, the lifted plates' shadows.
           extras?.before(t);
+          // The nanites' source (owner, 2026-10-18): the forest-green flame
+          // at the reactor, burning as the first plates stream in.
+          {
+            const flame = Math.min(
+              Math.min(1, Math.max(0, t / CALL_FLAME[0])),
+              1 - Math.min(1, Math.max(0, (t - CALL_FLAME[1]) / CALL_FLAME[2])),
+            );
+            if (flame > 0) drawNaniteFlame(flight, REXONANCE_SUIT_MARKS.core, flame, t / 1000, s);
+          }
           for (let p = 0; p < all.length; p += 1) {
             const plate = all[p];
             if (t < plate.spawn || (done[p] && t >= plate.last)) continue;
