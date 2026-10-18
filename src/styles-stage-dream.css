@@ -43,9 +43,9 @@ html[data-family="dream"] main.dream-page.dream-page {
   --dr-plate-2: #22152a;
   --dr-plate-hi: #2a1a31;
   --dr-wall: #160e1b;
-  --dr-rule: rgb(200 164 92 / 38%);
-  --dr-rule-2: rgb(200 164 92 / 20%);
-  --dr-rule-3: rgb(200 164 92 / 12%);
+  --dr-rule: rgb(200 164 92 / 44%);
+  --dr-rule-2: rgb(200 164 92 / 24%);
+  --dr-rule-3: rgb(200 164 92 / 14%);
   --dr-gold: var(--ts-kin, #c8a45c);
   --dr-gold-hi: var(--ts-kin-light, #e6c28e);
   --dr-gold-deep: var(--ts-kin-deep, #8a6a2f);
@@ -54,8 +54,8 @@ html[data-family="dream"] main.dream-page.dream-page {
   --dr-shu-text: var(--ts-shu-text, #e0664f);
   --dr-ebicha: var(--ts-ebicha-deep, #4a1d27);
   --dr-text: var(--ts-kinari, #f4ecdc);
-  --dr-text-2: #ddd0ba;
-  --dr-text-3: #b9ab9c;
+  --dr-text-2: #e2d5bf;
+  --dr-text-3: #c1b3a3;
   --dr-display: var(
     --ts-display,
     "Shippori Mincho B1",
@@ -72,16 +72,25 @@ html[data-family="dream"] main.dream-page.dream-page {
   /* The column's inset from the screen edge (vw, so a full-bleed child can
      take it back exactly). */
   --dr-inset: max(var(--dr-gut), calc((100vw - 1240px) / 2));
-  --dr-bevel: inset 0 1px 0 rgb(243 224 176 / 9%);
+  --dr-bevel:
+    inset 0 1px 0 rgb(243 224 176 / 14%),
+    0 14px 34px -18px rgb(0 0 0 / 55%);
   --dr-plate-fill:
-    linear-gradient(174deg, rgb(243 224 176 / 5%) 0, transparent 22%), var(--dr-plate);
+    linear-gradient(var(--dr-gold) 0 0) 0 0 / 28px 1px no-repeat,
+    linear-gradient(var(--dr-gold) 0 0) 0 0 / 1px 28px no-repeat,
+    linear-gradient(174deg, rgb(243 224 176 / 6.5%) 0, transparent 26%),
+    var(--dr-plate);
   --dr-ticks:
-    linear-gradient(var(--dr-gold) 0 0) 0 0 / 14px 1px,
-    linear-gradient(var(--dr-gold) 0 0) 0 0 / 1px 14px,
-    linear-gradient(var(--dr-gold) 0 0) 100% 100% / 14px 1px,
-    linear-gradient(var(--dr-gold) 0 0) 100% 100% / 1px 14px;
+    linear-gradient(var(--dr-gold) 0 0) 0 0 / 18px 1.5px,
+    linear-gradient(var(--dr-gold) 0 0) 0 0 / 1.5px 18px,
+    linear-gradient(var(--dr-gold) 0 0) 100% 0 / 18px 1.5px,
+    linear-gradient(var(--dr-gold) 0 0) 100% 0 / 1.5px 18px,
+    linear-gradient(var(--dr-gold) 0 0) 0 100% / 18px 1.5px,
+    linear-gradient(var(--dr-gold) 0 0) 0 100% / 1.5px 18px,
+    linear-gradient(var(--dr-gold) 0 0) 100% 100% / 18px 1.5px,
+    linear-gradient(var(--dr-gold) 0 0) 100% 100% / 1.5px 18px;
   background:
-    radial-gradient(70% 40% at 50% 0, rgb(200 164 92 / 5%), transparent 70%),
+    radial-gradient(70% 40% at 50% 0, rgb(200 164 92 / 7%), transparent 70%),
     var(--dr-night);
 }
 
@@ -1034,12 +1043,12 @@ html[data-family="dream"] main.dream-page.dream-page > .dream-contents a:focus-v
 html[data-family="dream"] main.dream-page.dream-page .dream-poster-stage {
   outline: 0;
   background:
-    radial-gradient(60% 34% at 42% 0, rgb(243 224 176 / 12%), transparent 72%),
-    repeating-linear-gradient(90deg, rgb(200 164 92 / 3%) 0 1px, transparent 1px 22px),
-    repeating-linear-gradient(0deg, rgb(200 164 92 / 2%) 0 1px, transparent 1px 22px),
+    radial-gradient(62% 38% at 42% 0, rgb(243 224 176 / 16%), transparent 72%),
+    repeating-linear-gradient(90deg, rgb(200 164 92 / 3.5%) 0 1px, transparent 1px 22px),
+    repeating-linear-gradient(0deg, rgb(200 164 92 / 2.5%) 0 1px, transparent 1px 22px),
     var(--dr-wall);
   box-shadow:
-    0 0 0 1px var(--dr-rule-2),
+    0 0 0 1px var(--dr-rule),
     var(--dr-bevel);
 }
 
@@ -1050,7 +1059,7 @@ html[data-family="dream"] main.dream-page.dream-page .dream-poster-stage > figur
   border: 1px solid var(--dr-rule-2);
   outline: 0;
   background:
-    radial-gradient(56% 70% at 50% 0, rgb(243 224 176 / 11%), transparent 76%),
+    radial-gradient(58% 72% at 50% 0, rgb(243 224 176 / 14%), transparent 76%),
     transparent;
   box-shadow: none;
 }
@@ -1066,14 +1075,16 @@ html[data-family="dream"] main.dream-page.dream-page .dream-poster-stage > figur
   outline: 1px solid var(--dr-rule);
   outline-offset: 3px;
   background: #0a070d;
-  box-shadow: 0 24px 40px -24px rgb(0 0 0 / 95%);
+  box-shadow:
+    0 0 28px rgb(200 164 92 / 14%),
+    0 26px 46px -22px rgb(0 0 0 / 95%);
 }
 
 /* The caption reads as the brass label under the picture. */
 html[data-family="dream"] main.dream-page.dream-page .dream-poster-current > figcaption {
   border-top: 1px solid var(--dr-rule);
   background:
-    linear-gradient(180deg, rgb(243 224 176 / 7%), transparent 70%),
+    linear-gradient(180deg, rgb(243 224 176 / 9%), transparent 70%),
     #140d18;
 }
 
@@ -1108,11 +1119,14 @@ html[data-family="dream"] main.dream-page.dream-page .dream-screening-trigger {
   max-width: 100%;
   padding: 8px 18px;
   margin-left: auto;
-  border: 1px solid #bf995d;
-  color: #f3e0b0;
-  background: #241625;
+  border: 1px solid #d2ad6e;
+  color: #f6e7be;
+  background: linear-gradient(180deg, #321d33 0%, #211323 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(243 224 176 / 18%),
+    0 6px 16px rgb(0 0 0 / 32%);
   font: 600 13px/1.5 var(--dr-serif);
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
   cursor: pointer;
 }
 html[data-family="dream"] main.dream-page.dream-page .dream-screening-trigger:focus-visible {
@@ -1133,23 +1147,24 @@ html[data-family="dream"] main.dream-page.dream-page .dream-character-grid {
   --dr-floor: clamp(150px, 15vw, 196px);
   position: relative;
   padding: clamp(28px, 3.4vw, 48px) clamp(16px, 2.4vw, 36px) clamp(24px, 3vw, 40px);
-  border: 1px solid var(--dr-rule-2);
+  border: 1px solid var(--dr-rule);
+  box-shadow: var(--dr-bevel);
   background:
-    radial-gradient(16% 54% at 16.6% 0, rgb(243 224 176 / 13%), transparent 100%),
-    radial-gradient(16% 54% at 50% 0, rgb(243 224 176 / 13%), transparent 100%),
-    radial-gradient(16% 54% at 83.4% 0, rgb(243 224 176 / 13%), transparent 100%),
+    radial-gradient(18% 58% at 16.6% 0, rgb(243 224 176 / 16%), transparent 100%),
+    radial-gradient(18% 58% at 50% 0, rgb(243 224 176 / 16%), transparent 100%),
+    radial-gradient(18% 58% at 83.4% 0, rgb(243 224 176 / 16%), transparent 100%),
     linear-gradient(
       0deg,
       var(--dr-ink) 0,
-      rgb(42 26 49 / 80%) var(--dr-floor),
-      rgb(200 164 92 / 40%) var(--dr-floor) calc(var(--dr-floor) + 1px),
+      rgb(42 26 49 / 84%) var(--dr-floor),
+      rgb(200 164 92 / 46%) var(--dr-floor) calc(var(--dr-floor) + 1px),
       transparent calc(var(--dr-floor) + 1px)
     ),
     var(--dr-wall);
 }
 
 html[data-family="dream"] main.dream-page.dream-page .dream-character-grid button img {
-  box-shadow: 0 30px 40px -28px rgb(0 0 0 / 95%);
+  box-shadow: 0 32px 44px -26px rgb(0 0 0 / 95%);
 }
 
 html[data-family="dream"] main.dream-page.dream-page .dream-character-copy small {
@@ -1288,17 +1303,18 @@ html[data-family="dream"] main.dream-page.dream-page .dream-dolminence-grid {
   --dr-floor: clamp(118px, 11vw, 150px);
   gap: clamp(12px, 1.6vw, 22px);
   padding: clamp(24px, 3vw, 40px) clamp(14px, 2vw, 28px) clamp(18px, 2.4vw, 28px);
-  border: 1px solid var(--dr-rule-2);
+  border: 1px solid var(--dr-rule);
+  box-shadow: var(--dr-bevel);
   background:
-    radial-gradient(12% 52% at 12.5% 0, rgb(224 97 79 / 15%), transparent 100%),
-    radial-gradient(12% 52% at 37.5% 0, rgb(224 97 79 / 15%), transparent 100%),
-    radial-gradient(12% 52% at 62.5% 0, rgb(224 97 79 / 15%), transparent 100%),
-    radial-gradient(12% 52% at 87.5% 0, rgb(224 97 79 / 15%), transparent 100%),
+    radial-gradient(14% 56% at 12.5% 0, rgb(224 97 79 / 19%), transparent 100%),
+    radial-gradient(14% 56% at 37.5% 0, rgb(224 97 79 / 19%), transparent 100%),
+    radial-gradient(14% 56% at 62.5% 0, rgb(224 97 79 / 19%), transparent 100%),
+    radial-gradient(14% 56% at 87.5% 0, rgb(224 97 79 / 19%), transparent 100%),
     linear-gradient(
       0deg,
       var(--dr-ink) 0,
-      rgb(50 20 28 / 80%) var(--dr-floor),
-      rgb(200 164 92 / 40%) var(--dr-floor) calc(var(--dr-floor) + 1px),
+      rgb(50 20 28 / 84%) var(--dr-floor),
+      rgb(200 164 92 / 46%) var(--dr-floor) calc(var(--dr-floor) + 1px),
       transparent calc(var(--dr-floor) + 1px)
     ),
     #1a0d15;
@@ -1307,9 +1323,11 @@ html[data-family="dream"] main.dream-page.dream-page .dream-dolminence-grid {
 html[data-family="dream"] main.dream-page.dream-page .dream-dolminence-grid > article {
   border: 1px solid var(--dr-rule-2);
   outline: 0;
+  box-shadow: var(--dr-bevel);
   background:
     linear-gradient(var(--dr-gold) 0 0) top / 100% 2px no-repeat,
-    rgb(13 9 18 / 88%);
+    linear-gradient(180deg, rgb(204 73 59 / 9%), transparent 42%),
+    rgb(13 9 18 / 90%);
 }
 
 html[data-family="dream"] main.dream-page.dream-page .dream-dolminence-grid button img {
@@ -1991,17 +2009,34 @@ html[data-family="dream"] main.dream-page.dream-page .dream-footer-end {
   height: 96px;
   margin-top: 8px;
   border-radius: 0;
-  border: 1px solid rgb(243 224 176 / 55%);
+  border: 1px solid rgb(243 224 176 / 65%);
   outline: 1px solid var(--dr-shu);
   outline-offset: 4px;
   color: var(--dr-text);
-  background: var(--dr-shu-deep);
+  background:
+    radial-gradient(60% 60% at 50% 35%, rgb(224 102 79 / 28%), transparent 75%),
+    var(--dr-shu-deep);
+  box-shadow:
+    inset 0 0 0 2px rgb(243 224 176 / 22%),
+    0 18px 40px rgb(0 0 0 / 60%);
   font-size: 46px;
 }
 
 html[data-family="dream"] main.dream-page.dream-page > .dream-footer > a {
   min-width: min(100%, 320px);
   margin-top: 8px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="dream"] main.dream-page.dream-page > .dream-contents a:hover {
+    color: var(--dr-gold-hi);
+    background: rgb(200 164 92 / 10%);
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-screening-trigger:hover {
+    border-color: var(--dr-gold-hi);
+    background: linear-gradient(180deg, #432645 0%, #2c192f 100%);
+  }
 }
 
 /* ----------------------------------------------------------------

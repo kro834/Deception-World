@@ -8,34 +8,48 @@
   gap: 24px;
   padding: clamp(24px, 4vw, 44px);
   margin-bottom: 28px;
-  border: 1px solid #8c7047;
-  background: linear-gradient(120deg, #302336, #191722);
+  border: 1px solid #b59258;
+  background:
+    linear-gradient(#c8a45c 0 0) 0 0 / 56px 2px no-repeat,
+    linear-gradient(#c8a45c 0 0) 0 0 / 2px 32px no-repeat,
+    linear-gradient(#c8a45c 0 0) 100% 100% / 56px 2px no-repeat,
+    linear-gradient(#c8a45c 0 0) 100% 100% / 2px 32px no-repeat,
+    radial-gradient(60% 80% at 12% 0%, rgb(200 164 92 / 14%), transparent 70%),
+    linear-gradient(120deg, #34233b 0%, #1f1729 56%, #15121d 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(243 224 176 / 16%),
+    0 20px 44px rgb(0 0 0 / 34%);
   color: #eee4d0;
   scroll-margin-top: calc(var(--dream-nav-offset, 160px) + 20px);
 }
 .dream-page .dream-reading-entry p {
   margin: 0;
-  font: 10px/1.8 sans-serif;
-  letter-spacing: 0.22em;
-  color: #c5a676;
+  font: 600 12px/1.8 var(--ts-latin, sans-serif);
+  letter-spacing: 0.24em;
+  color: #ddb97d;
 }
 .dream-page .dream-reading-entry h3 {
   margin: 10px 0;
   font-family: var(--ts-display);
   font-size: clamp(22px, 3vw, 32px);
-  letter-spacing: 0.12em;
+  letter-spacing: 0.14em;
+  text-shadow: 0 2px 16px rgb(0 0 0 / 45%);
 }
 .dream-page .dream-reading-entry > div > span {
   font: 13px/2 var(--ts-text);
-  color: #cdbfb5;
+  color: #d6c8bc;
 }
 .dream-page .dream-reading-entry button {
   min-height: 48px;
-  padding: 14px 24px;
-  border: 1px solid #c5a676;
-  background: #e8d8b7;
-  color: #29202c;
-  font: 15px/1.5 var(--ts-text);
+  padding: 14px 26px;
+  border: 1px solid #d4af6e;
+  background: linear-gradient(180deg, #f3e6c8 0%, #e2cfa8 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 65%),
+    0 10px 24px rgb(0 0 0 / 36%);
+  color: #261b29;
+  font: 700 15px/1.5 var(--ts-display, var(--ts-text));
+  letter-spacing: 0.08em;
   cursor: pointer;
 }
 .dream-page .dream-reading-entry button:disabled {
@@ -60,8 +74,13 @@
 .dream-page.dream-page .dream-reader-support {
   margin: 0 0 24px;
   padding: clamp(14px, 2vw, 22px);
-  border: 1px solid rgb(200 164 92 / 38%);
-  background: #19111f;
+  border: 1px solid rgb(200 164 92 / 44%);
+  background:
+    linear-gradient(var(--ts-kin, #c8a45c) 0 0) top / 100% 2px no-repeat,
+    linear-gradient(180deg, #211628 0%, #160f1c 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(243 224 176 / 10%),
+    0 14px 32px rgb(0 0 0 / 26%);
   color: var(--ts-kinari);
   font-family: var(--ts-text);
 }
@@ -75,8 +94,11 @@
 }
 .dream-page.dream-page .dream-reader-support-heading p {
   margin: 0;
+  color: var(--ts-kin-hi, #f3e0b0);
   font-family: var(--ts-display);
   font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
 }
 .dream-page.dream-page .dream-reader-support-heading > span,
 .dream-page.dream-page .dream-reader-bookmark small {
@@ -96,6 +118,7 @@
 }
 .dream-page.dream-page .dream-reader-settings legend {
   margin-bottom: 8px;
+  color: var(--ts-kin-light, #e6c28e);
   font-size: 14px;
 }
 .dream-page.dream-page .dream-reader-settings fieldset > div {
@@ -110,10 +133,10 @@
   min-width: 44px;
   min-height: 44px;
   padding: 8px 12px;
-  border: 1px solid rgb(200 164 92 / 40%);
+  border: 1px solid rgb(200 164 92 / 42%);
   border-radius: 0;
   color: var(--ts-kinari);
-  background: transparent;
+  background: rgb(255 255 255 / 2.5%);
   font: inherit;
   font-size: 14px;
   line-height: 1.5;
@@ -124,7 +147,7 @@
 }
 .dream-page.dream-page .dream-reader-support button[aria-pressed="true"] {
   border-color: var(--ts-kin);
-  background: #33202b;
+  background: linear-gradient(180deg, #3e2534 0%, #2c1a25 100%);
   box-shadow: inset 0 -2px #c8a45c;
 }
 .dream-page.dream-page .dream-reader-bookmark {
@@ -153,6 +176,7 @@
 }
 .dream-page.dream-page .dream-reader-bookmark-actions a {
   border-color: var(--ts-kin);
+  background: rgb(200 164 92 / 12%);
 }
 .dream-page.dream-page .dream-reader-storage-note {
   margin: 12px 0 0;

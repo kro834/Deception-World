@@ -36,7 +36,10 @@
   padding: max(8px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right))
     max(8px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
   box-sizing: border-box;
-  background: radial-gradient(60% 46% at 50% 10%, rgb(200 164 92 / 9%), transparent 75%), #0d0912;
+  background:
+    radial-gradient(64% 48% at 50% 8%, rgb(230 194 142 / 12%), transparent 75%),
+    radial-gradient(50% 36% at 50% 92%, rgb(204 73 59 / 8%), transparent 72%),
+    #0d0912;
 }
 
 .dream-screening-header,
@@ -51,7 +54,8 @@
 .dream-screening-header {
   min-height: 60px;
   padding: 4px clamp(4px, 2vw, 28px) 8px;
-  border-bottom: 1px solid rgb(200 164 92 / 38%);
+  border-bottom: 1px solid rgb(200 164 92 / 44%);
+  background: linear-gradient(180deg, rgb(243 224 176 / 5%), transparent);
 }
 
 .dream-screening-title {
@@ -59,11 +63,11 @@
 }
 .dream-screening-title > span {
   display: block;
-  color: #d0aa65;
+  color: #d8b46e;
   font:
     600 10px/1.3 Georgia,
     serif;
-  letter-spacing: 0.15em;
+  letter-spacing: 0.16em;
   white-space: nowrap;
 }
 .dream-screening-title h2 {
@@ -71,10 +75,11 @@
   font-size: clamp(17px, 2.5vw, 27px);
   line-height: 1.1;
   letter-spacing: 0.25em;
+  text-shadow: 0 2px 16px rgb(0 0 0 / 50%);
 }
 .dream-screening-count {
   flex: none;
-  color: #e6c28e;
+  color: #ebd09e;
   font:
     600 14px/1 Georgia,
     serif;
@@ -82,7 +87,7 @@
   letter-spacing: 0.14em;
 }
 .dream-screening-count > span {
-  color: #9f886b;
+  color: #a79072;
 }
 
 .dream-screening-dialog button {
@@ -92,10 +97,11 @@
   flex: none;
   min-width: 44px;
   min-height: 44px;
-  border: 1px solid rgb(200 164 92 / 50%);
+  border: 1px solid rgb(200 164 92 / 54%);
   border-radius: 0;
   color: #f4ecdc;
-  background: #211522;
+  background: linear-gradient(180deg, #2b1b2d 0%, #1d121f 100%);
+  box-shadow: inset 0 1px 0 rgb(243 224 176 / 14%);
   font: inherit;
   cursor: pointer;
   touch-action: manipulation;
@@ -105,7 +111,8 @@
   outline-offset: 2px;
 }
 .dream-screening-dialog button:hover {
-  background: #372239;
+  border-color: #e6c28e;
+  background: linear-gradient(180deg, #3e2641 0%, #2c1b2e 100%);
 }
 .dream-screening-close {
   gap: 7px;
@@ -141,10 +148,12 @@
   min-width: 0;
   min-height: 0;
   overflow: hidden;
+  border: 1px solid rgb(200 164 92 / 24%);
   background:
-    linear-gradient(90deg, rgb(200 164 92 / 17%), transparent 18% 82%, rgb(200 164 92 / 17%))
+    radial-gradient(56% 56% at 50% 50%, rgb(230 194 142 / 7%), transparent 75%),
+    linear-gradient(90deg, rgb(200 164 92 / 18%), transparent 18% 82%, rgb(200 164 92 / 18%))
       center / 100% 1px no-repeat,
-    #08060b;
+    #07050a;
 }
 .dream-screening-picture > img {
   display: block;
@@ -155,7 +164,7 @@
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
-  box-shadow: 0 14px 32px rgb(0 0 0 / 55%);
+  box-shadow: 0 18px 42px rgb(0 0 0 / 68%);
 }
 .dream-screening-placeholder {
   margin: 0;

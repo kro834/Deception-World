@@ -101,6 +101,13 @@ html body .load-gate.has-cine.is-extreme-dive {
   --dwc-arm: 32px;
 }
 
+html body .load-gate.has-cine.is-dream-dive {
+  --dwc-accent: #f0c978;
+  --dwc-gold: #cc493b;
+  --dwc-lock: #f7dfb0;
+  --dwc-arm: 30px;
+}
+
 /* A cut-in's stage takes over sooner: its iris closes in 260 ms. */
 html body .load-gate.has-cine.rider-route-cutin {
   --dwc-close: 260ms;
@@ -425,6 +432,16 @@ html body .load-gate.has-cine.is-extreme-dive .rider-dive-mark > i {
   filter:
     drop-shadow(0 0 22px rgb(244 204 123 / 0.5))
     drop-shadow(0 8px 24px rgb(2 6 14 / 0.85));
+}
+
+html body .load-gate.has-cine.is-dream-dive .rider-dive-mark > i {
+  color: rgb(240 201 120 / 0.22);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  -webkit-text-stroke: 1.8px #f0c978;
+  filter:
+    drop-shadow(0 0 20px rgb(204 73 59 / 0.45))
+    drop-shadow(0 6px 22px rgb(6 4 10 / 0.88));
 }
 
 html body .load-gate.has-cine.rider-route-dive .cine-dive-status {
@@ -941,6 +958,29 @@ html body .load-gate.has-cine.is-cine-flip .rider-cutin-caption {
       both;
   }
 
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-dream-dive.is-covering
+    .cine-dive-tunnel {
+    --dwc-o: 0.74;
+    animation: dwc-dream-tunnel 300ms cubic-bezier(0.14, 0.88, 0.16, 1) both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-dream-dive.is-covering
+    .rider-dive-mark {
+    animation: dwc-dream-mark-in 240ms cubic-bezier(0.14, 0.94, 0.2, 1) 70ms both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-dream-dive.is-revealing
+    .rider-dive-mark {
+    animation: dwc-dream-mark-out calc(var(--dwc-reveal) * 0.4) cubic-bezier(0.28, 0, 0.2, 1)
+      both;
+  }
+
   /* A docked file takes the portrait at once: the numeral and the status
      that sat on its foot give way first, so neither is left over the page's
      own image (on a phone the portrait sits where the held file did). */
@@ -1198,10 +1238,29 @@ html body .load-gate.has-cine.is-vandal-dive .archive-dive-space {
 }
 
 html body .load-gate.has-cine.is-dream-dive .archive-dive-space {
+  --dwc-o: 0.94;
+  opacity: 0.94;
   background:
-    repeating-linear-gradient(60deg, transparent 0 22px, rgb(255 196 92 / 0.07) 22px 23px),
-    repeating-linear-gradient(-60deg, transparent 0 22px, rgb(255 196 92 / 0.07) 22px 23px),
-    radial-gradient(ellipse at 50% 30%, rgb(255 180 62 / 0.12), transparent 55%);
+    linear-gradient(
+        90deg,
+        transparent 8%,
+        rgb(204 73 59 / 0.52) 26%,
+        rgb(240 201 120 / 0.82) 50%,
+        rgb(204 73 59 / 0.52) 74%,
+        transparent 92%
+      )
+      50% 72% / 100% 2px no-repeat,
+    linear-gradient(
+      90deg,
+      rgb(122 38 32 / 0.24) 0%,
+      transparent 16%,
+      transparent 84%,
+      rgb(122 38 32 / 0.24) 100%
+    ),
+    repeating-linear-gradient(60deg, transparent 0 22px, rgb(240 201 120 / 0.085) 22px 23px),
+    repeating-linear-gradient(-60deg, transparent 0 22px, rgb(240 201 120 / 0.085) 22px 23px),
+    radial-gradient(ellipse 56% 42% at 50% 34%, rgb(240 201 120 / 0.2), transparent 64%),
+    radial-gradient(ellipse 50% 38% at 50% 72%, rgb(204 73 59 / 0.18), transparent 62%);
 }
 
 html body .load-gate.has-cine.is-rexonance-dive .archive-dive-space {
@@ -1817,6 +1876,46 @@ html body .load-gate.has-cine:is(.is-cine-calm, .is-cine-reduced) .rider-cutin-c
   to {
     opacity: 0;
     transform: translate3d(-50%, -50%, 0) scale(1.28);
+  }
+}
+
+@keyframes dwc-dream-tunnel {
+  from {
+    opacity: 0.22;
+    transform: translate(-50%, -50%) scale(0.32) rotate(-5deg);
+  }
+  45% {
+    opacity: 0.84;
+  }
+  to {
+    opacity: 0.74;
+    transform: translate(-50%, -50%) scale(1.12) rotate(0deg);
+  }
+}
+
+@keyframes dwc-dream-mark-in {
+  0% {
+    opacity: 0;
+    transform: translate3d(-50%, -50%, 0) scale(1.52) rotate(-3deg);
+  }
+  65% {
+    opacity: 1;
+    transform: translate3d(-50%, -50%, 0) scale(0.96) rotate(0.4deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(-50%, -50%, 0) scale(1) rotate(0deg);
+  }
+}
+
+@keyframes dwc-dream-mark-out {
+  from {
+    opacity: 1;
+    transform: translate3d(-50%, -50%, 0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(-50%, -50%, 0) scale(1.22);
   }
 }
 
