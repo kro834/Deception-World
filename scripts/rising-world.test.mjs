@@ -1047,8 +1047,8 @@ test("review 3, 2026-09-24: flames rise straight up, capped and translucent; the
 
   const shader = await read("src/components/world/rising.frag.glsl");
   assert.match(shader, /uniform sampler2D uFire;/);
-  // The breakthrough bloom leans to amber before it multiplies.
-  assert.match(shader, /col = mix\(col, lumB \* vec3\(1\.0, 0\.62, 0\.3\), bloom \* 0\.4\);/);
+  // Owner 2026-10-19: forest-green breakthrough replaces amber; the bloom envelope stays pinned.
+  assert.match(shader, /col = mix\(col, lumB \* vec3\(0\.31, 0\.72, 0\.455\), bloom \* 0\.4\);/);
   // Char: two plate sizes, most fissures shut, a minority gaping; the net
   // fades as the art emerges and on coarse rungs instead of stair-stepping.
   assert.match(shader, /float big = smoothstep\(0\.46, 0\.54, lowN\);/);

@@ -1674,8 +1674,8 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
   inset: 10% 0 0;
   opacity: 0;
   background:
-    radial-gradient(ellipse 48% 44% at 40% 72%, rgb(255 118 48 / 0.42), transparent 72%),
-    radial-gradient(ellipse 64% 54% at 54% 62%, rgb(206 46 18 / 0.26), transparent 76%),
+    radial-gradient(ellipse 48% 44% at 40% 72%, rgb(59 184 78 / 0.42), transparent 72%),
+    radial-gradient(ellipse 64% 54% at 54% 62%, rgb(23 148 30 / 0.26), transparent 76%),
     radial-gradient(ellipse 52% 40% at 50% 42%, rgb(164 139 255 / 0.14), transparent 70%);
 }
 
@@ -1744,7 +1744,7 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
 
 /* The prism logo glows ember-hot where it has just been uncovered, then cools. */
 .cine-burn-hot {
-  filter: sepia(1) saturate(4.2) hue-rotate(-18deg) brightness(1.08);
+  filter: sepia(1) saturate(4.2) hue-rotate(72deg) brightness(1.08);
   opacity: 0.9;
 }
 
@@ -1771,15 +1771,15 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
   position: absolute;
   inset: 0 -8%;
   background:
-    linear-gradient(to top, transparent, rgb(255 170 92 / 0.72) 9%, rgb(255 84 30 / 0.38) 22%, transparent 42%),
-    radial-gradient(ellipse 4% 62% at 7% 100%, rgb(255 132 58 / 0.82), rgb(180 28 10 / 0.42) 58%, transparent),
-    radial-gradient(ellipse 5% 86% at 19% 100%, rgb(255 120 48 / 0.8), rgb(170 24 8 / 0.4) 60%, transparent),
-    radial-gradient(ellipse 3.5% 58% at 31% 100%, rgb(255 146 70 / 0.8), rgb(180 30 10 / 0.4) 58%, transparent),
-    radial-gradient(ellipse 5% 96% at 44% 100%, rgb(255 118 46 / 0.82), rgb(170 24 8 / 0.42) 60%, transparent),
-    radial-gradient(ellipse 4% 70% at 57% 100%, rgb(255 138 62 / 0.8), rgb(180 28 10 / 0.4) 58%, transparent),
-    radial-gradient(ellipse 5% 90% at 70% 100%, rgb(255 120 48 / 0.8), rgb(170 24 8 / 0.4) 60%, transparent),
-    radial-gradient(ellipse 3.5% 60% at 82% 100%, rgb(255 146 70 / 0.8), rgb(180 30 10 / 0.4) 58%, transparent),
-    radial-gradient(ellipse 4.5% 80% at 93% 100%, rgb(255 126 52 / 0.8), rgb(170 24 8 / 0.4) 60%, transparent);
+    linear-gradient(to top, transparent, rgb(85 184 135 / 0.72) 9%, rgb(42 184 51 / 0.38) 22%, transparent 42%),
+    radial-gradient(ellipse 4% 62% at 7% 100%, rgb(66 184 91 / 0.82), rgb(14 130 17 / 0.42) 58%, transparent),
+    radial-gradient(ellipse 5% 86% at 19% 100%, rgb(60 184 78 / 0.8), rgb(12 122 14 / 0.4) 60%, transparent),
+    radial-gradient(ellipse 3.5% 58% at 31% 100%, rgb(73 184 107 / 0.8), rgb(15 130 18 / 0.4) 58%, transparent),
+    radial-gradient(ellipse 5% 96% at 44% 100%, rgb(59 184 76 / 0.82), rgb(12 122 14 / 0.42) 60%, transparent),
+    radial-gradient(ellipse 4% 70% at 57% 100%, rgb(69 184 97 / 0.8), rgb(14 130 17 / 0.4) 58%, transparent),
+    radial-gradient(ellipse 5% 90% at 70% 100%, rgb(60 184 78 / 0.8), rgb(12 122 14 / 0.4) 60%, transparent),
+    radial-gradient(ellipse 3.5% 60% at 82% 100%, rgb(73 184 107 / 0.8), rgb(15 130 18 / 0.4) 58%, transparent),
+    radial-gradient(ellipse 4.5% 80% at 93% 100%, rgb(63 184 84 / 0.8), rgb(12 122 14 / 0.4) 60%, transparent);
 }
 
 .cine-burn-flame > i:nth-child(2) {
@@ -1795,8 +1795,8 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
   width: 3px;
   height: 3px;
   border-radius: 50%;
-  background: rgb(255 170 90);
-  box-shadow: 0 0 6px rgb(255 96 30 / 0.8);
+  background: rgb(85 184 133);
+  box-shadow: 0 0 6px rgb(48 184 54 / 0.8);
   opacity: 0;
 }
 

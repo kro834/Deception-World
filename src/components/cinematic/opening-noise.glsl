@@ -61,14 +61,14 @@ float fbm(vec2 p) {
   return v / norm;
 }
 
-// Red-biased flame ramp: orange only near the base, yellow-white only in rare
-// cores, so most burning area stays a deep red of moderate luminance.
+// Forest-green flame ramp (owner, 2026-10-19): shaded tips, forest body,
+// pale green only in rare cores. The existing intensity envelope is unchanged.
 vec3 fireRamp(float h) {
-  vec3 c = mix(vec3(0.0), vec3(0.36, 0.012, 0.006), smoothstep(0.02, 0.22, h));
-  c = mix(c, vec3(0.86, 0.07, 0.015), smoothstep(0.2, 0.5, h));
-  c = mix(c, vec3(1.0, 0.24, 0.035), smoothstep(0.6, 0.88, h));
-  c = mix(c, vec3(1.0, 0.5, 0.13), smoothstep(0.9, 1.06, h));
-  c = mix(c, vec3(1.0, 0.78, 0.48), smoothstep(1.08, 1.2, h));
+  vec3 c = mix(vec3(0.0), vec3(0.006, 0.2592, 0.009), smoothstep(0.02, 0.22, h));
+  c = mix(c, vec3(0.08, 0.4, 0.08), smoothstep(0.2, 0.5, h));
+  c = mix(c, vec3(0.1333, 0.5451, 0.1333), smoothstep(0.6, 0.88, h));
+  c = mix(c, vec3(0.25, 0.72, 0.255), smoothstep(0.9, 1.06, h));
+  c = mix(c, vec3(0.39, 0.72, 0.675), smoothstep(1.08, 1.2, h));
   return c;
 }
 

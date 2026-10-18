@@ -54,7 +54,7 @@ vec3 endStill(vec2 s, float lift) {
   vec3 art = texture2D(uArt, clamp(a, 0.0, 1.0)).rgb;
   float alpha = mix(0.56, 0.9, lift) * inside * mask;
   vec3 col = mix(bg, art, alpha);
-  return mix(col, vec3(0.329, 0.0706, 0.0235), 0.2 * (1.0 - lift * 0.6));
+  return mix(col, vec3(0.0353, 0.2369, 0.0411), 0.2 * (1.0 - lift * 0.6));
 }
 
 // The RE DIVE section's ground as the page shows it at landing, its top just
@@ -73,7 +73,7 @@ vec3 ground(vec2 s, vec2 px, float aspect) {
   }
   if (gy >= 0.0) {
     vec2 d = vec2((s.x - 0.5) * aspect / 1.57, gy / uRes.y / 0.55);
-    col = mix(col, vec3(0.42, 0.09, 0.02), 0.144 * max(0.0, 1.0 - length(d)));
+    col = mix(col, vec3(0.045, 0.3024, 0.0425), 0.144 * max(0.0, 1.0 - length(d)));
   }
   return col;
 }
@@ -102,7 +102,7 @@ void main() {
   }
 
   // ---- Heat: the grade only warms as the camera goes in.
-  col *= mix(vec3(1.0), vec3(1.12, 0.78, 0.62), uDive * 0.7);
+  col *= mix(vec3(1.0), vec3(0.39, 0.8064, 0.815), uDive * 0.7);
 
   // ---- Ember speed lines and the tunnel.
   if (uDive > 0.001) {
@@ -114,13 +114,13 @@ void main() {
     float seg = fract(log(r + 0.02) * 1.35 - uTime * (0.8 + rnd * 1.3) * (0.7 + uDive * 1.8) + rnd * 9.0);
     float streak = step(0.52, rnd) * smoothstep(0.0, 0.12, seg) * fall(0.7, 0.12, seg);
     streak *= pow(1.0 - across, 3.0) * smoothstep(0.05, 0.5, r) * smoothstep(0.0, 0.35, uDive);
-    vec3 lineCol = mix(vec3(1.0, 0.62, 0.3), vec3(1.0, 0.3, 0.09), step(0.8, rnd));
+    vec3 lineCol = mix(vec3(0.31, 0.72, 0.455), vec3(0.15, 0.72, 0.165), step(0.8, rnd));
     col *= mix(1.0, 0.45, smoothstep(0.3, 1.0, uDive)) * mix(1.0, fall(1.2, 0.2, r), uDive * 0.7);
     col += lineCol * streak * 0.85;
   }
 
   // ---- One slow amber swell at the mouth of the tunnel; blacks stay black.
-  col += vec3(1.0, 0.6, 0.3) * uWarp * 0.32 * fall(0.85, 0.0, r);
+  col += vec3(0.3, 0.72, 0.45) * uWarp * 0.32 * fall(0.85, 0.0, r);
 
   // ---- Landing on the section's ground.
   if (uLand > 0.001) col = mix(col, ground(s, px, aspect), uLand);
@@ -128,7 +128,7 @@ void main() {
   // ---- Sparks rise through the dive and over the ground.
   vec2 q = (s - 0.5) * vec2(aspect, 1.0);
   float sparks = emberLayer(q, uTime, 17.0, 0.55, 2.0) + emberLayer(q, uTime, 10.0, 0.36, 6.0) * 0.8;
-  col += vec3(1.0, 0.46, 0.13) * sparks * (uDive * 0.9 + uLand * 0.8);
+  col += vec3(0.23, 0.72, 0.245) * sparks * (uDive * 0.9 + uLand * 0.8);
 
   gl_FragColor = vec4(clamp(col, 0.0, 1.0), 1.0);
 }

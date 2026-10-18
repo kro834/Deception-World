@@ -117,16 +117,16 @@ float nearEmbers(vec2 q, vec2 cells, float speed, float seed, float radius) {
   return (disc * 0.55 + core * 0.45) * alive;
 }
 
-// Incandescence for a normalised temperature (0 ~ 800 K, 1 ~ 2400 K): the hue
-// runs deep red -> orange -> yellow, and the radiance climbs steeply with it,
-// so red only ever shows dim and yellow-white only in the hottest cores. HDR:
+// Stylised forest-green emission for a normalised temperature; geometry and
+// radiance envelopes retain the original fire model, not a physical blackbody hue.
+// Green-white is confined to the hottest cores. HDR:
 // the result is tone-mapped (1 - exp(-x)) after everything has been added up.
 vec3 blackbody(float t) {
   t = clamp(t, 0.0, 1.15);
-  vec3 hue = vec3(1.0, 0.035, 0.006);
-  hue = mix(hue, vec3(1.0, 0.2, 0.03), smoothstep(0.25, 0.55, t));
-  hue = mix(hue, vec3(1.0, 0.46, 0.1), smoothstep(0.5, 0.8, t));
-  hue = mix(hue, vec3(1.0, 0.7, 0.36), smoothstep(0.78, 1.05, t));
+  vec3 hue = vec3(0.055, 0.3, 0.055);
+  hue = mix(hue, vec3(0.1333, 0.5451, 0.1333), smoothstep(0.25, 0.55, t));
+  hue = mix(hue, vec3(0.23, 0.72, 0.215), smoothstep(0.5, 0.8, t));
+  hue = mix(hue, vec3(0.35, 0.72, 0.535), smoothstep(0.78, 1.05, t));
   return hue * (3.4 * t * t * t + 0.35 * t);
 }
 
@@ -306,7 +306,7 @@ void main() {
     emit += blackbody(temp) * flameA;
     // The glow a lens sees around a fire.
     float fuel = exp(min(hy, 0.0) / 0.04);
-    emit += vec3(0.5, 0.12, 0.02) * exp(-hyc / (0.07 + 0.05 * roar)) * fuel * uFlame * (0.26 + 0.14 * roar);
+    emit += vec3(0.06, 0.36, 0.05) * exp(-hyc / (0.07 + 0.05 * roar)) * fuel * uFlame * (0.26 + 0.14 * roar);
 
     // Warm, flickering light from the fire on what is left of the print: it
     // follows the flames below (each tongue on its own beat: local, gentle).
@@ -340,7 +340,7 @@ void main() {
     float shade = fire.a / max(fire.b, 0.004);
     float warm = exp(-max(hy - 0.12, 0.0) / 0.22) * uFlame;
     smokeCol = mix(vec3(0.07, 0.075, 0.085), vec3(0.36, 0.355, 0.365), shade)
-             + vec3(0.62, 0.24, 0.07) * warm * shade * shade;
+             + vec3(0.12, 0.4464, 0.13) * warm * shade * shade;
   }
 
   // ---- The print: cover fit, dive zoom, radial blur. At zoom 1 the frame is
@@ -393,7 +393,7 @@ void main() {
   vec3 grade = mix(vec3(0.78, 0.96, 1.08), vec3(1.04, 0.9, 0.84), uHeat);
   world *= mix(vec3(1.0), grade, settle);
   float lum0 = dot(world, vec3(0.299, 0.587, 0.114));
-  world = world * (1.0 + light * vec3(1.25, 0.55, 0.22)) + light * vec3(0.055, 0.016, 0.003);
+  world = world * (1.0 + light * vec3(0.275, 0.9, 0.3575)) + light * vec3(0.008, 0.0396, 0.007);
 
   // The surface of the print: plates about 40 and about 22 px across (on a
   // 915 px screen), their outlines wobbled by a fine field. Ahead of the
@@ -418,9 +418,9 @@ void main() {
   if (burning > 0.5) {
     float cellsL = chA.b;
     float lum = dot(world, vec3(0.299, 0.587, 0.114));
-    vec3 sepia = lum * vec3(1.16, 0.8, 0.5) + vec3(0.018, 0.007, 0.0);
+    vec3 sepia = lum * vec3(0.4, 0.8352, 0.7) + vec3(0.0035, 0.013, 0.0018);
     world = mix(world, sepia, smoothstep(0.0, 0.45, browned) * 0.9);
-    vec3 brown = vec3(0.15, 0.065, 0.024) * (0.3 + lum * 1.4);
+    vec3 brown = vec3(0.0325, 0.108, 0.0403) * (0.3 + lum * 1.4);
     world = mix(world, brown, smoothstep(0.35, 0.85, browned));
     // Blisters: raised bubbles catch the firelight, their rims stay dark. They
     // come in patches, small here and large there, and the rims melt under
@@ -430,9 +430,9 @@ void main() {
     float large = smoothstep(0.35, 0.55, lowN) * (1.0 - patchy);
     float bubble = max(smoothstep(0.42, 0.62, cells) * patchy, smoothstep(0.4, 0.6, cellsL) * large);
     float rim = smoothstep(0.3, 0.38, cells) * fall(0.46, 0.38, cells) * patchy;
-    world = mix(world, world * 1.45 + vec3(0.04, 0.016, 0.003) * (0.4 + light), bubble * band * 0.7);
+    world = mix(world, world * 1.45 + vec3(0.008, 0.0288, 0.007) * (0.4 + light), bubble * band * 0.7);
     world *= 1.0 - rim * band * 0.4 * (1.0 - flameA);
-    world = mix(world, vec3(0.014, 0.007, 0.004), smoothstep(0.72, 1.0, scorch));
+    world = mix(world, vec3(0.0035, 0.0101, 0.0057), smoothstep(0.72, 1.0, scorch));
   }
 
   // ---- Char: carbon that keeps a ghost of the print, in patches of large
@@ -461,7 +461,7 @@ void main() {
       float net = smoothstep(9.0, 18.0, platePx) * (1.0 - emerge);
       float ashN = chA.a;
       float dome = smoothstep(0.05, 0.5, e);
-      vec3 charCol = vec3(0.018, 0.015, 0.013) * (0.6 + 0.5 * ashN + 0.4 * dome)
+      vec3 charCol = vec3(0.0075, 0.013, 0.0168) * (0.6 + 0.5 * ashN + 0.4 * dome)
                    + lum0 * vec3(0.05, 0.046, 0.043);
       float greyAsh = smoothstep(0.58, 0.8, ashN * 0.55 + cf.a * 0.45) * smoothstep(0.4, 2.2, since);
       charCol = mix(charCol, vec3(0.1, 0.094, 0.088) * (0.7 + 0.5 * dome), greyAsh * 0.6);
@@ -477,7 +477,7 @@ void main() {
       float whiten = smoothstep(0.02, 0.4, since);
       charCol = mix(charCol, ashRim, (lip * 0.75 + craze * 0.14) * whiten * net);
       charCol = mix(charCol, vec3(0.006, 0.004, 0.004), max(hair * 0.65, gap * 0.9) * net);
-      charCol += light * vec3(0.12, 0.04, 0.01) * cool;
+      charCol += light * vec3(0.02, 0.0864, 0.02) * cool;
       // The char falls apart: a second or two after the front has passed it
       // flakes away, breaking along its fissures and holing through the
       // plates, into a lace that thins until nothing is left but the void the
@@ -494,7 +494,7 @@ void main() {
       charCol = mix(charCol, vec3(0.062, 0.058, 0.054) * (0.45 + 0.6 * dome + 0.6 * (cf.a - 0.5)),
                     smoothstep(0.0, 0.35, crumble) * 0.7);
       charCol = mix(charCol, ashRim, breaking * 0.35);
-      charCol = mix(vec3(0.006, 0.004, 0.004) + light * vec3(0.04, 0.012, 0.003), charCol, plate);
+      charCol = mix(vec3(0.006, 0.004, 0.004) + light * vec3(0.006, 0.0288, 0.006), charCol, plate);
       crumbleEnv = crumble * (1.0 - crumble) * 4.0 * burnt;
       vec2 ruv = (uv + haze * 0.5 - 0.5) * uRiderScale + vec2(0.5, 0.5);
       float inFrame = step(0.0, ruv.x) * step(ruv.x, 1.0) * smoothstep(0.0, 0.08, ruv.x) * fall(1.0, 0.92, ruv.x);
@@ -505,8 +505,8 @@ void main() {
       // the canvas cross-fades into a picture of the same colour.
       vec3 rtex = tex(uRider, ruv);
       float settled = clamp((1.0 - uFlame) / 0.72, 0.0, 1.0) * uReveal;
-      vec3 rider = mix(rtex * vec3(1.0, 0.58, 0.46) * 0.58, rtex * 0.448 + vec3(0.066, 0.014, 0.005), settled) * inFrame;
-      charCol += vec3(0.066, 0.014, 0.005) * settled;
+      vec3 rider = mix(rtex * vec3(0.29, 0.72, 0.605) * 0.58, rtex * 0.448 + vec3(0.007, 0.0475, 0.0085), settled) * inFrame;
+      charCol += vec3(0.007, 0.0475, 0.0085) * settled;
       charCol = max(charCol, rider * emerge * (0.88 + 0.24 * ashN));
       col = mix(world, charCol, burnt);
 
@@ -563,7 +563,7 @@ void main() {
       vec3 sheet = ashSheet(p + vec2(0.37, 0.0), vec2(7.0, 5.0), 0.36, 23.0);
       float sheetA = sheet.x * sheetEnv;
       vec3 sheetCol = vec3(0.02, 0.018, 0.017) + vec3(0.13, 0.122, 0.115) * sheet.y
-                    + vec3(0.2, 0.075, 0.02) * sheet.y * light;
+                    + vec3(0.0375, 0.144, 0.0387) * sheet.y * light;
       col = mix(col, sheetCol, sheetA);
       emit *= 1.0 - sheetA;
       emit += blackbody(0.6 * hot) * sheet.z * sheetEnv * 1.2;
@@ -573,14 +573,14 @@ void main() {
     if (crumbleEnv > 0.002) {
       vec2 flake = ashLayer(fq + vec2(0.61, 0.33), vec2(11.0, 8.0), 0.14, 29.0);
       float flakeA = flake.x * crumbleEnv;
-      col = mix(col, vec3(0.13, 0.12, 0.11) + light * vec3(0.4, 0.16, 0.05), flakeA);
+      col = mix(col, vec3(0.13, 0.12, 0.11) + light * vec3(0.08, 0.288, 0.09), flakeA);
       emit *= 1.0 - flakeA * 0.6;
       emit += blackbody(0.52) * flake.y * crumbleEnv * smoothstep(0.28, 0.7, uFlame) * 1.2;
     }
     if (ashNear > 0.002) {
       vec2 ash = ashLayer(fq + vec2(0.2, 0.1), vec2(9.0, 6.0), 0.2, 13.0);
       float flakeA = ash.x * ashNear * 0.9;
-      col = mix(col, vec3(0.15, 0.14, 0.13) + light * vec3(0.4, 0.16, 0.05), flakeA);
+      col = mix(col, vec3(0.15, 0.14, 0.13) + light * vec3(0.08, 0.288, 0.09), flakeA);
       emit *= 1.0 - flakeA * 0.8;
       emit += blackbody(0.55) * ash.y * ashNear * 1.2;
     }
@@ -636,8 +636,8 @@ void main() {
     float seg = fract(log(r + 0.02) * 1.4 - T * (0.9 + rnd * 1.4) * (0.6 + uDive * 1.8) + rnd * 9.0);
     float streak = step(0.5, rnd) * smoothstep(0.0, 0.12, seg) * fall(0.7, 0.12, seg);
     streak *= pow(1.0 - across, 3.0) * smoothstep(0.05, 0.5, r) * smoothstep(0.0, 0.35, uDive);
-    vec3 lineCol = mix(mix(vec3(0.48, 0.91, 1.0), vec3(0.94, 0.81, 0.53), step(0.85, rnd)),
-                       vec3(1.0, 0.62, 0.3), smoothstep(0.6, 1.0, uDive));
+    vec3 lineCol = mix(mix(vec3(0.48, 0.91, 1.0), vec3(0.25, 0.65, 0.32), step(0.85, rnd)),
+                       vec3(0.31, 0.72, 0.455), smoothstep(0.6, 1.0, uDive));
     col = col * mix(1.0, fall(1.15, 0.15, r), uDive * 0.75);
     col += lineCol * streak * 1.1;
   }
@@ -648,9 +648,9 @@ void main() {
   // black; never a strobe.
   float bloom = uWarp * exp(-r * r / 0.22);
   float lumB = dot(col, vec3(0.299, 0.587, 0.114));
-  col = mix(col, lumB * vec3(1.0, 0.62, 0.3), bloom * 0.4);
-  col *= 1.0 + vec3(1.1, 0.5, 0.14) * bloom;
-  col += vec3(0.5, 0.2, 0.05) * bloom * 0.12;
+  col = mix(col, lumB * vec3(0.31, 0.72, 0.455), bloom * 0.4);
+  col *= 1.0 + vec3(0.25, 0.792, 0.265) * bloom;
+  col += vec3(0.1, 0.36, 0.1) * bloom * 0.12;
 
   // Everything incandescent, tone-mapped once: overlapping orange saturates
   // towards yellow-white the way film does, never past it.

@@ -80,10 +80,10 @@ float cellEdge(vec2 p, float period) {
 }
 vec3 blackbody(float t) {
   t = clamp(t, 0.0, 1.15);
-  vec3 hue = vec3(1.0, 0.035, 0.006);
-  hue = mix(hue, vec3(1.0, 0.2, 0.03), smoothstep(0.25, 0.55, t));
-  hue = mix(hue, vec3(1.0, 0.46, 0.1), smoothstep(0.5, 0.8, t));
-  hue = mix(hue, vec3(1.0, 0.7, 0.36), smoothstep(0.78, 1.05, t));
+  vec3 hue = vec3(0.055, 0.3, 0.055);
+  hue = mix(hue, vec3(0.1333, 0.5451, 0.1333), smoothstep(0.25, 0.55, t));
+  hue = mix(hue, vec3(0.23, 0.72, 0.215), smoothstep(0.5, 0.8, t));
+  hue = mix(hue, vec3(0.35, 0.72, 0.535), smoothstep(0.78, 1.05, t));
   return hue * (3.4 * t * t * t + 0.35 * t);
 }
 // Straight alpha from a premultiplied colour.
@@ -170,7 +170,7 @@ void main() {
   // Just ahead of the lip the print blackens (the flames, drawn behind the
   // strip, rise from here).
   float sc = smoothstep(-7.0, 0.0, d);
-  vec3 pm = vec3(0.04, 0.016, 0.006) * sc * 0.7;
+  vec3 pm = vec3(0.008, 0.0288, 0.01) * sc * 0.7;
   float a = sc * 0.7;
 
   // Char: plates split by cracks that gape in stretches, their edges
@@ -182,7 +182,7 @@ void main() {
   float crack = (1.0 - smoothstep(0.02, 0.07, e)) * (0.35 + 0.65 * gape);
   float rim = smoothstep(0.05, 0.1, e) * (1.0 - smoothstep(0.12, 0.22, e)) * (0.4 + 0.6 * gape);
   float tone = fbm(b / 900.0 + 9.0);
-  vec3 charCol = vec3(0.022, 0.017, 0.015) * (0.65 + 0.7 * tone);
+  vec3 charCol = vec3(0.0085, 0.0158, 0.0192) * (0.65 + 0.7 * tone);
   charCol = mix(charCol, vec3(0.15, 0.14, 0.13), rim * 0.5 * smoothstep(4.0, 30.0, d));
   charCol = mix(charCol, vec3(0.005, 0.004, 0.004), crack * 0.8);
   float aC = smoothstep(-1.5, 1.5, d);
@@ -223,13 +223,13 @@ void main() {
   float reach = 12.0 + 26.0 * fbm(vec2(x / 260.0, 3.0)) + 10.0 * (fbm(b / 60.0 + 5.0) - 0.5);
   float t = clamp(-d / reach, 0.0, 1.0);                             // 0 at the lip
   float ahead = (1.0 - smoothstep(0.35, 1.0, t)) * (1.0 - smoothstep(-1.0, 3.0, d));
-  vec3 col = mix(vec3(0.05, 0.02, 0.008), vec3(0.3, 0.17, 0.06), smoothstep(0.05, 0.7, t));
+  vec3 col = mix(vec3(0.01, 0.036, 0.013), vec3(0.085, 0.216, 0.1025), smoothstep(0.05, 0.7, t));
   float a = ahead * mix(0.9, 0.2, smoothstep(0.0, 0.8, t));
   // Blisters: raised bubbles in the brown band catch the firelight.
   float e = cellEdge(px / 7.0 + 7.0, 0.0);
   float bubble = smoothstep(0.35, 0.6, e) * smoothstep(0.15, 0.4, t) * (1.0 - smoothstep(0.55, 0.85, t))
                * smoothstep(0.42, 0.62, fbm(b / 90.0 + 11.0));
-  col = mix(col, vec3(0.5, 0.24, 0.08), bubble * 0.6);
+  col = mix(col, vec3(0.12, 0.36, 0.14), bubble * 0.6);
   outColor = vec4(col, clamp(a, 0.0, 1.0));
 }`;
 
@@ -242,7 +242,7 @@ void main() {
   float rim = smoothstep(0.06, 0.12, e) * (1.0 - smoothstep(0.14, 0.26, e));
   float tone = fbm(t, 1.0);
   float ash = smoothstep(0.62, 0.82, fbm(t + 0.37, 1.0));
-  vec3 col = vec3(0.022, 0.017, 0.015) * (0.6 + 0.8 * tone);
+  vec3 col = vec3(0.0085, 0.0158, 0.0192) * (0.6 + 0.8 * tone);
   col = mix(col, vec3(0.085, 0.08, 0.075), ash * 0.5);
   col = mix(col, vec3(0.13, 0.12, 0.11), rim * 0.42);
   col = mix(col, vec3(0.005, 0.004, 0.004), crack * 0.85);
@@ -261,7 +261,7 @@ void main() {
   r -= (fbm(uv * 0.6) - 0.5) * 0.55 + 0.07 * sin(ang * 5.0 + 1.3) + 0.04 * sin(ang * 9.0);
   float dens = (1.0 - smoothstep(0.3, 0.95, r)) * (0.55 + 0.6 * fbm(uv * 1.3 + 3.0));
   float lit = 1.0 - smoothstep(0.15, 0.7, uv.y);
-  vec3 col = mix(vec3(0.3, 0.27, 0.25), vec3(0.62, 0.33, 0.15), lit * 0.8) * (0.75 + 0.35 * fbm(uv * 2.0 + 8.0));
+  vec3 col = mix(vec3(0.3, 0.27, 0.25), vec3(0.165, 0.4464, 0.2325), lit * 0.8) * (0.75 + 0.35 * fbm(uv * 2.0 + 8.0));
   float a = clamp(dens, 0.0, 1.0) * 0.8;
   outColor = vec4(col, a);
 }`;
@@ -282,7 +282,7 @@ void main() {
   float d = (dist - r0) / r0;                                        // < 0 inside
   // Inside: char, glowing close to the rim and along a few cracks.
   float e = cellEdge(uv * 11.0 + 3.0, 0.0);
-  vec3 col = vec3(0.02, 0.016, 0.014) * (0.7 + 0.6 * fbm(uv * 3.0 + 9.0));
+  vec3 col = vec3(0.008, 0.0144, 0.018) * (0.7 + 0.6 * fbm(uv * 3.0 + 9.0));
   col = mix(col, vec3(0.006, 0.004, 0.004), (1.0 - smoothstep(0.02, 0.07, e)) * 0.8);
   float inside = 1.0 - smoothstep(-0.02, 0.02, d);
   vec3 emit = blackbody(0.56) * exp(min(d, 0.0) / 0.12) * inside * 0.9;
@@ -293,7 +293,7 @@ void main() {
   emit += blackbody(0.66) * exp(-pow((d - 0.02) / 0.12, 2.0)) * run * 0.35;
   // Outside: blackened at the lip, browning further out, fading away.
   float outside = smoothstep(-0.02, 0.02, d);
-  vec3 scorchCol = mix(vec3(0.02, 0.01, 0.006), vec3(0.26, 0.13, 0.05), smoothstep(0.05, 0.45, d));
+  vec3 scorchCol = mix(vec3(0.005, 0.0144, 0.0085), vec3(0.065, 0.1872, 0.0825), smoothstep(0.05, 0.45, d));
   col = mix(col, scorchCol, outside);
   float a = mix(1.0, 0.9 * (1.0 - smoothstep(0.12, 0.75, d)), outside);
   vec3 tm = 1.0 - exp(-emit);

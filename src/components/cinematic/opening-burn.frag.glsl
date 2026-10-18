@@ -89,7 +89,7 @@ void main() {
   first.b = mix(first.b, sampleTop(uFirst, luv + haze - fx).b, fringeA * 0.86);
   float fl = lum(first);
   float scorch = fall(0.14, 0.0, d) * uHeat;
-  first.rgb = mix(first.rgb, vec3(1.0, 0.38, 0.09) * fl * 1.38, scorch * 0.88);
+  first.rgb = mix(first.rgb, vec3(0.19, 0.72, 0.185) * fl * 1.38, scorch * 0.88);
   first.rgb *= 1.0 - 0.56 * fall(0.036, 0.0, d) * uHeat;
 
   // ---- Behind the front: ash with ember veins, then the prism logo, hot, cooling.
@@ -104,13 +104,13 @@ void main() {
     vec3(0.96, 0.5, 0.88),
     smoothstep(0.48, 0.92, luv.x)
   );
-  fin.rgb = mix(fin.rgb, vec3(1.0, 0.36, 0.08) * fn * 1.32, hot * 0.92);
+  fin.rgb = mix(fin.rgb, vec3(0.1333, 0.5451, 0.1333) * fn * 1.32, hot * 0.92);
   fin.rgb += prismTint * fn * prismSheen * 0.46;
   fin *= reveal;
   float ash = lum(sampleTop(uFirst, luv));
   float veins = smoothstep(0.52, 0.68, fbm(lp * 7.2 + 3.0));
   float charA = clamp(ash * 2.25, 0.0, 1.0) * (1.0 - reveal) * 0.88;
-  vec3 charC = (vec3(0.03, 0.017, 0.013) + vec3(0.96, 0.28, 0.05) * veins * (1.0 - age) * 0.84) * charA;
+  vec3 charC = (vec3(0.0085, 0.0216, 0.0173) + vec3(0.14, 0.6912, 0.12) * veins * (1.0 - age) * 0.84) * charA;
   vec4 behind = fin + vec4(charC, charA) * (1.0 - fin.a);
 
   float burnt = fall(0.0, -0.02, d);
@@ -147,7 +147,7 @@ void main() {
   // Faint smoke above the flames, and the fire's light on the air around it.
   float smokeA = smoothstep(0.46, 0.8, fbm(lp * 2.6 + vec2(0.0, -t * 0.45)))
                * smoothstep(0.05, 0.3, d) * fall(0.75, 0.3, d) * uFlame * env * 0.32;
-  vec3 spill = vec3(1.0, 0.34, 0.08) * fall(0.42, 0.0, abs(d - 0.06)) * env * uFlame * 0.14;
+  vec3 spill = vec3(0.17, 0.72, 0.165) * fall(0.42, 0.0, abs(d - 0.06)) * env * uFlame * 0.14;
 
   float embers = emberLayer(lp, t, 13.0, 0.55, 1.0) + emberLayer(lp, t, 8.0, 0.38, 5.0) * 0.95;
   // Sparks leave the fire zone and drift above it.
@@ -165,12 +165,12 @@ void main() {
   outC = vec4(vec3(0.012, 0.01, 0.01) * smokeA, smokeA) + outC * (1.0 - smokeA);
   outC.rgb = outC.rgb * (1.0 - fireA * 0.38) + fire * fireA;
   outC.a = max(outC.a, fireA * 0.64);
-  outC.rgb += vec3(1.0, 0.52, 0.16) * rim * 1.42 + vec3(1.0, 0.46, 0.12) * embers * 1.58 + spill;
+  outC.rgb += vec3(0.26, 0.72, 0.29) * rim * 1.42 + vec3(0.23, 0.72, 0.235) * embers * 1.58 + spill;
   // Ash covers (soot with an ember-lit edge), then the near embers add their light.
   float flakeA = clamp(flakes, 0.0, 1.0) * 0.85;
-  vec3 flakeC = vec3(0.1, 0.075, 0.065) + vec3(0.98, 0.34, 0.08) * fall(0.13, 0.0, -d) * 0.58;
+  vec3 flakeC = vec3(0.0375, 0.072, 0.0838) + vec3(0.17, 0.7056, 0.165) * fall(0.13, 0.0, -d) * 0.58;
   outC = vec4(flakeC * flakeA, flakeA) + outC * (1.0 - flakeA);
-  outC.rgb += vec3(1.0, 0.54, 0.18) * bokeh * 0.68;
+  outC.rgb += vec3(0.27, 0.72, 0.315) * bokeh * 0.68;
   outC = clamp(outC, 0.0, 1.0);
   // Light needs coverage in a premultiplied canvas (rgb <= alpha).
   outC.a = max(outC.a, max(outC.r, max(outC.g, outC.b)));

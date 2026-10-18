@@ -22,10 +22,10 @@
   --rw-void: #050203;
   --rw-ink: #0b0303;
   /* The label keeps at least 4.8:1 against the ember across its text band. */
-  --rw-ember: #dc401d;
-  --rw-ember-deep: #a3130a;
+  --rw-ember: #228b22;
+  --rw-ember-deep: #0a600f;
   --rw-ash: #f7e9df;
-  --rw-flare: #ff8a3d;
+  --rw-flare: #45b860;
   --rw-gold: #f0cf86;
   --rw-hud: "Michroma", "Oxanium", "Noto Sans JP", sans-serif;
   --rw-chamfer: polygon(
@@ -81,7 +81,7 @@
     rgb(122 232 255 / 0.3) 28%,
     rgb(255 95 200 / 0.42) 40%,
     rgb(255 92 200 / 0.5) 46%,
-    rgb(255 138 61 / 0.85) 50%,
+    rgb(69 184 96 / 0.85) 50%,
     rgb(255 92 200 / 0.5) 54%,
     rgb(255 95 200 / 0.42) 60%,
     rgb(122 232 255 / 0.3) 72%,
@@ -110,17 +110,17 @@
      coming to rest, on the same scroll timeline; still one compositor layer. */
   transform-origin: 50% var(--rw-horizon-at);
   background:
-    radial-gradient(circle, rgb(255 190 120 / 0.55) 0 1px, transparent 1.6px) 37px 29px / 173px
+    radial-gradient(circle, rgb(95 184 168 / 0.55) 0 1px, transparent 1.6px) 37px 29px / 173px
       211px,
-    radial-gradient(circle, rgb(255 120 60 / 0.45) 0 0.8px, transparent 1.4px) 91px 71px / 257px
+    radial-gradient(circle, rgb(60 184 90 / 0.45) 0 0.8px, transparent 1.4px) 91px 71px / 257px
       139px,
-    radial-gradient(circle, rgb(255 210 150 / 0.4) 0 0.7px, transparent 1.2px) 13px 101px / 311px
+    radial-gradient(circle, rgb(105 184 203 / 0.4) 0 0.7px, transparent 1.2px) 13px 101px / 311px
       181px,
-    radial-gradient(34% 30% at 50% 100%, rgb(255 150 70 / 0.3), transparent 70%),
+    radial-gradient(34% 30% at 50% 100%, rgb(75 184 108 / 0.3), transparent 70%),
     radial-gradient(
       120% 86% at 50% 100%,
-      rgb(255 78 32 / 0.36),
-      rgb(170 22 10 / 0.16) 42%,
+      rgb(39 184 52 / 0.36),
+      rgb(11 122 16 / 0.16) 42%,
       transparent 72%
     );
 }
@@ -136,9 +136,9 @@
   background: linear-gradient(
     90deg,
     transparent 4%,
-    rgb(255 120 60 / 0.3) 26%,
-    rgb(255 196 128 / 0.8) 50%,
-    rgb(255 120 60 / 0.3) 74%,
+    rgb(60 184 90 / 0.3) 26%,
+    rgb(98 184 177 / 0.8) 50%,
+    rgb(60 184 90 / 0.3) 74%,
     transparent 96%
   );
 }
@@ -157,20 +157,20 @@
     linear-gradient(
       180deg,
       transparent calc(7% - 1px),
-      rgb(255 150 90 / 0.2) calc(7% - 1px) 7%,
+      rgb(75 184 128 / 0.2) calc(7% - 1px) 7%,
       transparent 7% calc(16% - 1px),
-      rgb(255 150 90 / 0.22) calc(16% - 1px) 16%,
+      rgb(75 184 128 / 0.22) calc(16% - 1px) 16%,
       transparent 16% calc(29% - 1px),
-      rgb(255 150 90 / 0.24) calc(29% - 1px) 29%,
+      rgb(75 184 128 / 0.24) calc(29% - 1px) 29%,
       transparent 29% calc(47% - 1px),
-      rgb(255 150 90 / 0.26) calc(47% - 1px) 47%,
+      rgb(75 184 128 / 0.26) calc(47% - 1px) 47%,
       transparent 47% calc(72% - 1px),
-      rgb(255 150 90 / 0.28) calc(72% - 1px) 72%,
+      rgb(75 184 128 / 0.28) calc(72% - 1px) 72%,
       transparent 72%
     ),
     repeating-conic-gradient(
       from 90deg at 50% 0,
-      rgb(255 140 80 / 0.24) 0deg 0.16deg,
+      rgb(70 184 115 / 0.24) 0deg 0.16deg,
       transparent 0.32deg 6deg
     );
   /* Faint at the horizon and towards the sides, where the rays run long. */
@@ -197,7 +197,7 @@
     rgb(122 232 255 / 0.42) 26%,
     rgb(255 95 200 / 0.5) 52%,
     rgb(255 92 200 / 0.55) 72%,
-    rgb(255 138 61 / 0.9)
+    rgb(69 184 96 / 0.9)
   );
   transform-origin: 50% 0;
   translate: -50% 0;
@@ -222,7 +222,7 @@
     linear-gradient(var(--rw-gold) 0 0) 0 100% / 2px 22px no-repeat,
     linear-gradient(var(--rw-gold) 0 0) 100% 100% / 22px 2px no-repeat,
     linear-gradient(var(--rw-gold) 0 0) 100% 100% / 2px 22px no-repeat;
-  box-shadow: inset 0 0 0 1px rgb(255 138 61 / 0.12);
+  box-shadow: inset 0 0 0 1px rgb(69 184 96 / 0.12);
 }
 
 .site-shell.film-edition.mirage-edition .rw-gate-frame::before {
@@ -233,9 +233,9 @@
   width: 9px;
   height: 9px;
   content: "";
-  border: 1px solid #ffc08a;
+  border: 1px solid #60b8ba;
   background: var(--rw-ink);
-  box-shadow: 0 0 12px rgb(255 120 50 / 0.45);
+  box-shadow: 0 0 12px rgb(60 184 80 / 0.45);
   translate: -50% -50%;
   rotate: 45deg;
 }
@@ -250,9 +250,9 @@
   background: linear-gradient(
     90deg,
     transparent,
-    rgb(255 138 61 / 0.6) 26px,
+    rgb(69 184 96 / 0.6) 26px,
     transparent 34px calc(100% - 34px),
-    rgb(255 138 61 / 0.6) calc(100% - 26px),
+    rgb(69 184 96 / 0.6) calc(100% - 26px),
     transparent
   );
 }
@@ -262,7 +262,7 @@
    away there) under a bevel of light along its top. */
 .site-shell.film-edition.mirage-edition .rw-gate-button {
   /* The rim, and a second line inside it (the focus ring's ink). */
-  --rw-rim: rgb(255 214 170 / 0.55);
+  --rw-rim: rgb(107 184 224 / 0.55);
   --rw-rim-w: 1px;
   --rw-rim-in: var(--rw-rim);
   --rw-rim-in-w: 0px;
@@ -316,7 +316,7 @@
   font: 400 14px / 1.2 var(--rw-hud);
   letter-spacing: 0.26em;
   text-indent: 0.26em; /* balances the trailing tracking */
-  text-shadow: 0 1px 0 rgb(90 10 4 / 0.55);
+  text-shadow: 0 1px 0 rgb(5 65 7 / 0.55);
   text-transform: none;
   white-space: nowrap;
   cursor: pointer;
@@ -457,7 +457,7 @@
 .site-shell.film-edition.mirage-edition .rw-dialog {
   --rw-void: #050203;
   --rw-ash: #f7e9df;
-  --rw-flare: #ff8a3d;
+  --rw-flare: #45b860;
   --rw-gold: #f0cf86;
   /* RE DIVE…? and もう一度 share one width at the end still. */
   --rw-deck-w: 216px;
@@ -529,7 +529,7 @@
 .site-shell.film-edition.mirage-edition .rw-end {
   z-index: 0;
   background:
-    linear-gradient(0deg, rgb(120 22 8 / 0.2), rgb(60 8 4 / 0.06) 30%, transparent 55%),
+    linear-gradient(0deg, rgb(11 86 14 / 0.2), rgb(4 43 6 / 0.06) 30%, transparent 55%),
     radial-gradient(90% 70% at 50% 42%, transparent 36%, rgb(0 0 0 / 0.78) 100%), var(--rw-void);
 }
 
@@ -549,7 +549,7 @@
   position: absolute;
   inset: 0;
   content: "";
-  background: rgb(84 18 6 / 0.2);
+  background: rgb(9 60 11 / 0.2);
 }
 
 /* Landscape: the rider is fitted by height, like the shader, and its sides
@@ -611,10 +611,10 @@
   background: linear-gradient(
     0deg,
     transparent 44%,
-    rgb(255 118 38 / 0.36) 50%,
-    rgb(214 70 18 / 0.22) 55%,
-    rgb(150 36 10 / 0.1) 63%,
-    rgb(110 24 8 / 0.04) 70%,
+    rgb(59 184 68 / 0.36) 50%,
+    rgb(35 154 36 / 0.22) 55%,
+    rgb(18 108 19 / 0.1) 63%,
+    rgb(12 79 14 / 0.04) 70%,
     transparent 78%
   );
   /* The fire's leading edge starts just below the frame, so it is already
@@ -781,11 +781,11 @@
   background: linear-gradient(
     0deg,
     transparent,
-    rgb(255 96 24 / 0.55) 45%,
-    rgb(255 170 70) 78%,
-    #ffe6b4 90%
+    rgb(48 184 48 / 0.55) 45%,
+    rgb(85 184 113) 78%,
+    #ccebd1 90%
   );
-  box-shadow: 0 -4px 6px 0 rgb(255 120 30 / 0.55);
+  box-shadow: 0 -4px 6px 0 rgb(60 184 60 / 0.55);
 }
 
 /* Reduced motion keeps only the cross-fade to the still: the whole burn
@@ -897,8 +897,8 @@
   display: block;
   font: 400 clamp(26px, 7.4cqw, 88px) / 1 var(--rw-hud);
   letter-spacing: 0.18em;
-  color: #ffd9b8;
-  text-shadow: 0 0 22px rgb(255 90 42 / 0.55);
+  color: #6db8ee;
+  text-shadow: 0 0 22px rgb(45 184 65 / 0.55);
 }
 
 .site-shell.film-edition.mirage-edition .rw-title-name {
@@ -911,10 +911,10 @@
      background-clip or filters (cheap on Android). */
   color: #fff4e8;
   text-shadow:
-    -3px 0 rgb(255 36 18 / 0.78),
-    3px 0 rgb(255 168 80 / 0.5),
-    0 0 36px rgb(255 58 20 / 0.7),
-    0 0 90px rgb(200 20 8 / 0.5);
+    -3px 0 rgb(18 184 27 / 0.78),
+    3px 0 rgb(84 184 122 / 0.5),
+    0 0 36px rgb(29 184 35 / 0.7),
+    0 0 90px rgb(10 144 13 / 0.5);
 }
 
 /* Landscape phones: RE DIVE…? and もう一度 take the bottom ~140px of a short
@@ -956,11 +956,11 @@
    gold. Hover, press and focus change the custom properties, so the rim
    along the cuts always matches the straight edges. */
 .site-shell.film-edition.mirage-edition :is(.rw-controls button, .rw-close) {
-  --rw-rim: rgb(255 138 61 / 0.55);
+  --rw-rim: rgb(69 184 96 / 0.55);
   --rw-rim-w: 1px;
   --rw-rim-in: var(--rw-rim);
   --rw-rim-in-w: 0px;
-  --rw-fill: linear-gradient(180deg, rgb(30 10 8 / 0.88), rgb(12 4 4 / 0.9));
+  --rw-fill: linear-gradient(180deg, rgb(5 22 11 / 0.88), rgb(12 4 4 / 0.9));
   box-sizing: border-box;
   min-height: 48px;
   margin: 0;
@@ -997,8 +997,8 @@
     linear-gradient(
         90deg,
         transparent 16px,
-        rgb(255 200 150 / 0.24) 30%,
-        rgb(255 200 150 / 0.24) 70%,
+        rgb(100 184 200 / 0.24) 30%,
+        rgb(100 184 200 / 0.24) 70%,
         transparent calc(100% - 16px)
       )
       0 1px / 100% 1px no-repeat,
@@ -1101,7 +1101,7 @@
   box-sizing: border-box;
   width: 26px;
   height: 26px;
-  border: 1px solid rgb(255 168 96 / 0.4);
+  border: 1px solid rgb(84 184 138 / 0.4);
 }
 
 .site-shell.film-edition.mirage-edition .rw-close i::before,
@@ -1131,18 +1131,18 @@
 
   .site-shell.film-edition.mirage-edition
     :is(.rw-controls button, .rw-close):hover:not(:focus-visible, :active) {
-    --rw-rim: rgb(255 168 96 / 0.95);
-    --rw-fill: linear-gradient(180deg, rgb(64 17 9 / 0.92), rgb(30 8 5 / 0.92));
-    box-shadow: inset 0 0 0 1px rgb(255 168 96 / 0.95);
+    --rw-rim: rgb(84 184 138 / 0.95);
+    --rw-fill: linear-gradient(180deg, rgb(9 46 13 / 0.92), rgb(4 22 7 / 0.92));
+    box-shadow: inset 0 0 0 1px rgb(84 184 138 / 0.95);
   }
 }
 
 /* The keyboard ring (:focus-visible, below) still wins while Space is held. */
 .site-shell.film-edition.mirage-edition :is(.rw-controls button, .rw-close):active {
   scale: 0.97;
-  --rw-rim: rgb(255 168 96 / 0.95);
-  --rw-fill: linear-gradient(180deg, rgb(82 21 11 / 0.94), rgb(40 10 6 / 0.94));
-  box-shadow: inset 0 0 0 1px rgb(255 168 96 / 0.95);
+  --rw-rim: rgb(84 184 138 / 0.95);
+  --rw-fill: linear-gradient(180deg, rgb(11 59 16 / 0.94), rgb(5 29 9 / 0.94));
+  box-shadow: inset 0 0 0 1px rgb(84 184 138 / 0.95);
 }
 
 .site-shell.film-edition.mirage-edition :is(.rw-controls button, .rw-close):focus-visible {
@@ -1159,7 +1159,7 @@
 
 @media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
   .site-shell.film-edition.mirage-edition :is(.rw-controls button, .rw-close) {
-    --rw-fill: #140605;
+    --rw-fill: #030e07;
   }
 }
 

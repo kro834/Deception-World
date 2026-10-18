@@ -62,12 +62,12 @@
   bottom: 0;
   left: 0;
   background:
-    radial-gradient(circle, rgb(255 168 90 / 0.75) 0 1px, transparent 2px) 23px 41px / 131px 173px,
-    radial-gradient(circle, rgb(255 110 44 / 0.6) 0 1.2px, transparent 2.4px) 71px 12px / 197px
+    radial-gradient(circle, rgb(84 184 132 / 0.75) 0 1px, transparent 2px) 23px 41px / 131px 173px,
+    radial-gradient(circle, rgb(55 184 72 / 0.6) 0 1.2px, transparent 2.4px) 71px 12px / 197px
       151px,
-    radial-gradient(circle, rgb(255 196 120 / 0.5) 0 0.8px, transparent 1.6px) 5px 97px / 89px 113px,
-    radial-gradient(157svh 55svh at 50% 0, rgb(107 23 5 / 0.16), transparent),
-    radial-gradient(70% 40% at 50% 100%, rgb(128 26 6 / 0.3), transparent 72%);
+    radial-gradient(circle, rgb(98 184 169 / 0.5) 0 0.8px, transparent 1.6px) 5px 97px / 89px 113px,
+    radial-gradient(157svh 55svh at 50% 0, rgb(12 77 11 / 0.16), transparent),
+    radial-gradient(70% 40% at 50% 100%, rgb(13 92 13 / 0.3), transparent 72%);
   opacity: 0.9;
 }
 
@@ -113,7 +113,7 @@
 .site-shell.film-edition.mirage-edition
   .re-dive-section
   .threat-panel.re-dive-archive.re-dive-archive {
-  --rd-ember: #ff8a3d;
+  --rd-ember: #228b22;
   --rd-gold: #f0cf86;
   --rd-saga: #6fb6ff;
   --rd-line: rgb(255 160 110 / 0.2);
@@ -212,7 +212,7 @@
   border: 1px solid rgb(255 170 120 / 0.3);
   border-radius: 0;
   background:
-    linear-gradient(var(--rd-ember, #ff8a3d) 0 0) 0 0 / 100% 2px no-repeat,
+    linear-gradient(var(--rd-ember, #228b22) 0 0) 0 0 / 100% 2px no-repeat,
     linear-gradient(var(--rd-gold, #f0cf86) 0 0) 0 100% / 12px 2px no-repeat,
     linear-gradient(var(--rd-gold, #f0cf86) 0 0) 100% 100% / 12px 2px no-repeat,
     rgb(18 7 6 / 0.92);
@@ -274,7 +274,7 @@
   height: 2px;
   margin-top: 8px;
   border-radius: 0;
-  background: linear-gradient(90deg, var(--rd-ember, #ff8a3d), transparent);
+  background: linear-gradient(90deg, var(--rd-ember, #228b22), transparent);
   box-shadow: none;
 }
 
