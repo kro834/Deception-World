@@ -1,8 +1,10 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, type RefObject } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type RefObject } from "react";
 import { acquireViewportScrollLock } from "@/lib/viewport-scroll-lock.js";
 import { guardTapThrough } from "@/lib/tap-through-guard";
 import { useDialogHistoryDismiss } from "./use-dialog-history-dismiss";
 import { RE_DIVE_CLASSIFIED_REPORT } from "./re-dive-classified-report";
+import { DOG_DOSSIER_COLUMN } from "./world-dog-dossier-data";
+import { DogDossierProse } from "./dog-dossier-prose";
 
 const paragraphs = RE_DIVE_CLASSIFIED_REPORT.text.split("\n\n");
 
@@ -15,6 +17,7 @@ export function ReDiveFileDialog({
   returnFocusRef: RefObject<HTMLButtonElement | null>;
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const [dossierOpen, setDossierOpen] = useState(false);
   const closeRef = useRef<HTMLButtonElement>(null);
   const returnRef = useRef<HTMLButtonElement>(null);
   const releaseRef = useRef<(() => void) | null>(null);
@@ -133,6 +136,23 @@ export function ReDiveFileDialog({
             </p>
           ),
         )}
+        <section className="rd-file-appendix" aria-labelledby="rd-file-appendix-title">
+          <p className="rd-file-label">別添資料</p>
+          <h3 id="rd-file-appendix-title">{DOG_DOSSIER_COLUMN.title}</h3>
+          <p>{DOG_DOSSIER_COLUMN.body}</p>
+          <button
+            type="button"
+            className="rd-file-close"
+            aria-expanded={dossierOpen}
+            aria-controls="rd-file-dog-dossier"
+            onClick={() => setDossierOpen((open) => !open)}
+          >
+            {dossierOpen ? "資料を閉じる" : "ネタバレを開く"}
+          </button>
+          <div id="rd-file-dog-dossier">
+            {dossierOpen ? <DogDossierProse /> : null}
+          </div>
+        </section>
       </article>
       <footer className="rd-file-footer">
         <span>{RE_DIVE_CLASSIFIED_REPORT.edition}</span>

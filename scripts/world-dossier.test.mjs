@@ -67,40 +67,22 @@ test("the dossier is the owner's record, section by section", () => {
   );
 });
 
-test("column 06 is 『？？？』 with a warning; the dossier stays out of the search", () => {
-  assert.equal(DOG_DOSSIER_COLUMN.no, "06");
+test("the dossier moves out of ordinary columns into the post-RISING book", () => {
   assert.equal(DOG_DOSSIER_COLUMN.title, "？？？");
-  assert.equal(DOG_DOSSIER_COLUMN.spoiler, true);
   assert.match(DOG_DOSSIER_COLUMN.body, /ネタバレ/);
   assert.equal(DOG_DOSSIER_COLUMN.pickup.length, 57);
-  const columns = read("src/components/world/world-columns-data.ts");
-  assert.match(
-    columns,
-    /DOG_ISAKU_COLUMN,\s*(?:\/\/[^\n]*\n\s*)*DOG_DOSSIER_COLUMN,\s*\] as const;/,
-  );
-  const search = read("src/components/search/search-data.ts");
-  assert.match(search, /"spoiler" in column && column\.spoiler \? "" : column\.pickup\.join/);
-});
-
-test("the World page shows the warning and the plus slider first, the dossier once slid open", () => {
+  const columns = loadData("src/components/world/world-columns-data.ts").WORLD_COLUMNS;
+  assert.equal(columns.length, 5);
+  assert.ok(columns.every((column) => column.no !== "06"));
   const home = read("src/components/world/world-home.tsx");
-  assert.match(home, /const \[dossierOpen, setDossierOpen\] = useState\(false\);/);
-  // The column panel's slider opens the dossier for column 06, the pickup otherwise.
-  assert.match(home, /label=\{"spoiler" in column \? "ネタバレを開く" : "ピックアップ"\}/);
-  assert.match(home, /setDossierOpen\(true\);\s*openPickup\(\);/);
-  // The dialog pane: gate first, dossier after.
-  assert.match(
-    home,
-    /item\.no === "06" \? \(\s*dossierOpen \? \(\s*<DogDossierProse id="world-column-dossier" \/>/,
-  );
-  assert.match(
-    home,
-    /className="world-column-spoiler-gate">\s*<p>\{item\.body\}<\/p>[\s\S]*?\{pickupOpen \? \(\s*<SlideOpenControl/,
-  );
-  assert.match(home, /opensDialog=\{false\}\s*onOpen=\{\(\) => setDossierOpen\(true\)\}/);
-  const prose = read("src/components/world/dog-dossier-prose.tsx");
-  assert.match(prose, /world-mystery-reading world-dossier-reading/);
-  const css = read("src/styles-world-transcript.css");
-  assert.match(css, /#column-dialog-panel-5 \.world-mystery-chapter \{/);
-  assert.match(css, /#column-dialog-panel-5 \.world-column-spoiler-gate \{/);
+  assert.doesNotMatch(home, /DogDossierProse|dossierOpen|world-column-dossier/);
+  const viewer = read("src/components/world/re-dive-file-dialog.tsx");
+  assert.match(viewer, /const \[dossierOpen, setDossierOpen\] = useState\(false\)/);
+  assert.match(viewer, /DOG_DOSSIER_COLUMN\.title/);
+  assert.match(viewer, /DOG_DOSSIER_COLUMN\.body/);
+  assert.match(viewer, /aria-expanded=\{dossierOpen\}/);
+  assert.match(viewer, /aria-controls="rd-file-dog-dossier"/);
+  assert.match(viewer, /\{dossierOpen \? <DogDossierProse \/> : null\}/);
+  assert.ok(viewer.indexOf("rd-file-appendix") > viewer.indexOf("paragraphs.map"));
+  assert.match(read("src/components/world/re-dive-section.tsx"), /fileOpen \? <ReDiveFileDialog/);
 });

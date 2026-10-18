@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { mkdir, writeFile } from "node:fs/promises";
 import { chromium, webkit } from "playwright";
 import { RE_DIVE_CLASSIFIED_REPORT as report } from "../src/components/world/re-dive-classified-report.ts";
+import { DOG_DOSSIER } from "../src/components/world/world-dog-dossier-data.ts";
 
 const base = process.env.BASE_URL ?? "http://127.0.0.1:8199";
 const engine = process.env.PW_ENGINE ?? "chromium";
@@ -63,6 +64,8 @@ try {
         .join("\n\n"),
     );
     assert.equal(actualText, report.text, name + ": complete unchanged report");
+    assert.equal(await page.locator("#world-column-06").count(), 0, "removed from ordinary columns");
+    assert.equal(await dialog.locator(".world-dossier-reading").count(), 0, "spoiler initially hidden");
     assert.equal(await dialog.evaluate((node) => node.matches(":modal")), true);
     assert.equal(await page.evaluate(() => document.body.style.position), "fixed");
     const geometry = await dialog.evaluate((node) => {
@@ -102,6 +105,22 @@ try {
     await page.keyboard.press("PageDown");
     await page.waitForFunction(() => document.querySelector(".rd-file-reader")?.scrollTop > 0);
     await page.screenshot({ path: output + "/" + engine + "-" + name + "-reader.png" });
+    const reveal = dialog.getByRole("button", { name: "ネタバレを開く", exact: true });
+    await reveal.click();
+    assert.equal(await dialog.locator('[aria-controls="rd-file-dog-dossier"]').getAttribute("aria-expanded"), "true");
+    const dossier = dialog.locator(".world-dossier-reading");
+    assert.deepEqual(
+      await dossier.locator(".world-mystery-chapter > p").allTextContents(),
+      DOG_DOSSIER.sections.flatMap((section) => section.paragraphs),
+      "all 57 moved paragraphs remain verbatim",
+    );
+    assert.ok(await reader.evaluate((node) => node.scrollWidth <= node.clientWidth + 1));
+    await dossier.scrollIntoViewIfNeeded();
+    await page.screenshot({ path: output + "/" + engine + "-" + name + "-appendix.png" });
+    await dialog.getByRole("button", { name: "資料を閉じる", exact: true }).click();
+    assert.equal(await dialog.locator(".world-dossier-reading").count(), 0);
+    await dialog.getByRole("button", { name: "ネタバレを開く", exact: true }).click();
+    assert.equal(await dialog.locator(".world-mystery-chapter").count(), 10, "can reopen appendix");
     await page.keyboard.press("Escape");
     await page.locator(".rd-file-dialog").waitFor({ state: "detached" });
     assert.equal(await page.evaluate(() => document.body.style.position), "");

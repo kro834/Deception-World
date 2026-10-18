@@ -1,3 +1,8 @@
+        pos: "50% 0%",
+        alt: "仮面ライダールーラー・ポラリスモード",
+        width: 1023,
+        height: 1537,
+        to: "/characters/dante",
         hash: "ruler-polaris",
         assets: ["/character-dante.webp", "/rider-ruler-polaris.webp"],
       },
@@ -423,9 +428,6 @@ export function WorldHome() {
   const [episode, setEpisode] = useState(0);
   const [episodePickup, setEpisodePickup] = useState<number | null>(null);
   const [pickupOpen, setPickupOpen] = useState(false);
-  // Column 06 『？？？』 (owner, 2026-10-17): the dossier shows only after the
-  // reader slides its plus open; once opened it stays open for the visit.
-  const [dossierOpen, setDossierOpen] = useState(false);
   const [sideMenuOpen, setSideMenuOpen] = useState(false);
   const [heroVisible, setHeroVisible] = useState(true);
   // Read by the poster timer at once; the state follows when scrolling settles.
@@ -503,11 +505,3 @@ export function WorldHome() {
   }, [locationHash]);
 
   useLayoutEffect(() => {
-    if (locationHash !== "manager-archive-unmanaged") return;
-    setManagerTab(1);
-    syncRail(managerRail.current, 1);
-  }, [locationHash]);
-
-  // A search result opens one column: /world#world-column-02.
-  useLayoutEffect(() => {
-    const index = COLUMNS.findIndex((item) => locationHash === `world-column-${item.no}`);

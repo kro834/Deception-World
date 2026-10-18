@@ -2,10 +2,9 @@
    only an aria-hidden facsimile receives finite, viewport-gated effects. */
 .site-shell.film-edition.mirage-edition .world-column-tabs.liquid-swipe-tabs {
   /* The shared frosted sheet forces a one-row flex rail. Only this expanded
-     six-column selector needs a grid; its glass and lens remain unchanged
-     (2026-10-17: column 06 『？？？』 joined the rail). */
+     five-column selector needs a grid; its glass and lens remain unchanged. */
   display: grid !important;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
 }
 
 .site-shell.film-edition.mirage-edition .world-column-tabs.liquid-swipe-tabs > button b {
@@ -14,7 +13,7 @@
 }
 
 @media (max-width: 899px) {
-  /* Six labels remain readable in two rows of three; the lens supports both rows. */
+  /* Five labels remain readable in two rows; the lens supports both rows. */
   .site-shell.film-edition.mirage-edition .world-column-tabs.liquid-swipe-tabs {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     grid-auto-rows: minmax(90px, auto);
