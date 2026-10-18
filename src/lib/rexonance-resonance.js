@@ -2955,12 +2955,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
           // The bare undersuit shows where the reactor will form (owner).
           const ux = (undersuit.width || W) / W;
           const uy = (undersuit.height || H) / H;
-          context.fillStyle = "#05070c";
-          context.fillRect(rx - R, ry - R, R * 2, R * 2);
           context.drawImage(undersuit, (rx - R) * ux, (ry - R) * uy, R * 2 * ux, R * 2 * uy, rx - R, ry - R, R * 2, R * 2);
-        } else {
-          context.fillStyle = "#05070c";
-          context.fillRect(rx - R, ry - R, R * 2, R * 2);
         }
         if (u > 0) {
           const grow = easeOut(u);
@@ -3035,18 +3030,25 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     // which gives way as the squares arrive.
     const glow = config.glow;
     const hollow = 1 - clamp01((progress - fillFrom) / 0.03);
-    if (glow?.length > 2 && progress >= B.rexonance[0] && hollow > 0) {
+    if (glow?.length > 2 && undersuit && progress >= B.rexonance[0] && hollow > 0) {
+      // Not a black patch: the undersuit's own visor shows through.
+      const ux = (undersuit.width || W) / W;
+      const uy = (undersuit.height || H) / H;
+      const xs = glow.map(([x]) => x);
+      const ys = glow.map(([, y]) => y);
+      const x0 = Math.min(...xs) - 3;
+      const y0 = Math.min(...ys) - 3;
+      const w = Math.max(...xs) - x0 + 6;
+      const h = Math.max(...ys) - y0 + 6;
       context.save();
       context.globalAlpha = hollow;
-      context.fillStyle = "#04060b";
       context.beginPath();
       context.moveTo(glow[0][0], glow[0][1]);
       for (let i = 1; i < glow.length; i += 1) context.lineTo(glow[i][0], glow[i][1]);
       context.closePath();
-      context.fill();
-      context.lineWidth = 2;
-      context.strokeStyle = "#04060b";
-      context.stroke();
+      context.lineWidth = 3;
+      context.clip();
+      context.drawImage(undersuit, x0 * ux, y0 * uy, w * ux, h * uy, x0, y0, w, h);
       context.restore();
     }
     if (pixels.length && progress >= fillFrom && progress < burstTo) {
