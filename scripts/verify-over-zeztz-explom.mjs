@@ -24,7 +24,7 @@ try {
     await page.waitForTimeout(1200);
     for (const text of ["205.9cm（est.）", "110.0kg（est.）", "77.7〜t（est.）", "エクスプロムオーバースマッシュ"])
       assert.ok((await dialog.innerText()).includes(text), text);
-    const image = dialog.locator('img[src="/rider-over-zeztz-explom-20261018.jpeg"]').first();
+    const image = dialog.locator('img[src="/rider-over-zeztz-explom-20261019.png"]').first();
     await image.evaluate(i => i.decode());
     assert.ok(await image.evaluate(i => i.naturalWidth > 1000 && i.currentSrc.includes("explom")));
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));

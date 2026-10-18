@@ -1044,7 +1044,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
         ],
       },
       {
-        img: "/rider-over-zeztz-explom-20261018.jpeg",
+        img: "/rider-over-zeztz-explom-20261019.png",
         pos: "50% 8%",
         system: "ゼッツドライバー",
         name: "オーバーゼッツ",

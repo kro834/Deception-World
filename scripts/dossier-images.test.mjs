@@ -56,7 +56,8 @@ test("the 六詠 riders' and Realm's Earth/Moon form pickups are delivered as We
     "/rider-realm-earth.jpeg",
     "/rider-realm-moon.jpeg",
   ]) {
-    assert.equal(dossierImage(source).srcSet, source.replace(/\.jpeg$/, "-delivery.webp"));
+    // Owner 2026-10-19: Explom's replacement is preserved as PNG; both source formats use WebP delivery.
+    assert.equal(dossierImage(source).srcSet, source.replace(/\.(?:jpeg|png)$/, "-delivery.webp"));
     const output = new URL(`../public${dossierImage(source).srcSet}`, import.meta.url);
     const original = new URL(`../public${source}`, import.meta.url);
     // q80 (scripts/build-dossier-images.mjs): about a third of the supplied JPEG.

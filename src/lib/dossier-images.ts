@@ -30,7 +30,7 @@ export const dossierImageSources = [
   "/rider-profile-leddic.jpeg",
   "/rider-profile-argenome.jpeg",
   "/rider-profile-over-zeztz.jpeg",
-  "/rider-over-zeztz-explom-20261018.jpeg",
+  "/rider-over-zeztz-explom-20261019.png",
   "/rider-leddic-ishihen.jpeg",
   "/rider-leddic-hoko.jpeg",
   "/rider-leddic-rekka-20260829.jpeg",
@@ -137,7 +137,7 @@ export function formPickupImage(source: string): { srcSet?: string; sizes?: stri
 
 export function dossierImage(source: string): { srcSet?: string; sizes?: string } {
   const path = source.split("?")[0];
-  if (sources.has(path)) return { srcSet: path.replace(/\.jpeg$/, "-delivery.webp") };
+  if (sources.has(path)) return { srcSet: path.replace(/\.(?:jpeg|png)$/, "-delivery.webp") };
   if (managerWebp.has(path)) return { srcSet: path.replace(/\.jpeg$/, ".webp") };
   const hero = DOSSIER_HERO_IMAGES[path];
   if (hero) {
