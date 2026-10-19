@@ -63,10 +63,41 @@
 /* The bar stays on screen (2026-10-08). It was sticky, but the site-wide
    body overflow-x makes <body> the scroll container, so it never stuck and
    the refresh control scrolled away; fixed, with the page padded by its
-   height, it reads the same at rest. */
+   height, it reads the same at rest.
+   On iPad, styles-viewport-chrome.css sets overscroll-behavior-y: none on
+   body; if styles-world-addon.css leaves body with overflow-x: hidden and
+   overflow-y: auto, WebKit routes touch pans to the 0px-range <body> and
+   refuses to chain them to <html>. Keep <html> as the sole scroller. */
+html[data-family="gallery"]:not([data-rail-lock]):not([data-loading]):not([data-side-menu-open]):not(
+    [data-dialog-open]
+  ),
+html[data-mode="world"]:not([data-rail-lock]):not([data-loading]):not([data-side-menu-open]):not(
+    [data-dialog-open]
+  ):has(.gallery-page) {
+  height: auto;
+  overflow-x: clip;
+  overflow-y: auto;
+}
+
+html[data-family="gallery"]:not([data-rail-lock]):not([data-loading]):not([data-side-menu-open]):not(
+    [data-dialog-open]
+  )
+  body:not([data-gallery-viewer-lock]),
+html[data-mode="world"]:not([data-rail-lock]):not([data-loading]):not([data-side-menu-open]):not(
+    [data-dialog-open]
+  )
+  body:not([data-gallery-viewer-lock]):has(.gallery-page) {
+  height: auto;
+  min-height: 100%;
+  overflow-x: clip;
+  overflow-y: visible;
+  touch-action: pan-y pinch-zoom;
+}
+
 .gallery-page {
   --gallery-bar: 78px;
   padding-top: calc(var(--gallery-bar) + env(safe-area-inset-top, 0px));
+  touch-action: pan-y pinch-zoom;
 }
 
 .gallery-topbar {

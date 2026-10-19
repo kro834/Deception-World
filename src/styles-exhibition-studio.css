@@ -1,10 +1,30 @@
 /* Physical exhibition space is local to the selected artwork, never a page backdrop. */
+html[data-family="gallery"]:not([data-rail-lock]):not([data-loading]):not([data-side-menu-open]):not(
+    [data-dialog-open]
+  ):has(.exhibition-room) {
+  height: auto;
+  overflow-x: clip;
+  overflow-y: auto;
+}
+
+html[data-family="gallery"]:not([data-rail-lock]):not([data-loading]):not([data-side-menu-open]):not(
+    [data-dialog-open]
+  )
+  body:has(.exhibition-room) {
+  height: auto;
+  min-height: 100%;
+  overflow-x: clip;
+  overflow-y: visible;
+  touch-action: pan-y pinch-zoom;
+}
+
 .exhibition-room {
   min-height: 100svh;
   padding: calc(26px + env(safe-area-inset-top, 0px)) max(22px, env(safe-area-inset-right, 0px))
     calc(32px + env(safe-area-inset-bottom, 0px)) max(22px, env(safe-area-inset-left, 0px));
   background: #191816;
   color: #e8dfcd;
+  touch-action: pan-y pinch-zoom;
 }
 .exhibition-room-heading,
 .exhibition-room-selector,

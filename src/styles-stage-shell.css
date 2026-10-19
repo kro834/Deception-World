@@ -678,6 +678,30 @@ html[data-family="library"][data-mode="world"] body {
   overflow-y: visible;
 }
 
+/* Gallery routes (/gallery, /gallery-tours, /exhibition) share the World
+   core sheet and iPad's contained viewport chrome (overscroll-behavior-y:
+   none on body). Keeping <html> as the sole scroll container and clipping X
+   on <body> without overflow-y: auto prevents iPad WebKit from latching
+   vertical touch pans onto a non-scrolling <body>. */
+html[data-family="gallery"]:not([data-rail-lock]):not([data-loading]):not([data-side-menu-open]):not(
+    [data-dialog-open]
+  ) {
+  height: auto;
+  overflow-x: clip;
+  overflow-y: auto;
+}
+
+html[data-family="gallery"]:not([data-rail-lock]):not([data-loading]):not([data-side-menu-open]):not(
+    [data-dialog-open]
+  )
+  body:not([data-gallery-viewer-lock]) {
+  height: auto;
+  min-height: 100%;
+  overflow-x: clip;
+  overflow-y: visible;
+  touch-action: pan-y pinch-zoom;
+}
+
 html[data-family="library"] body .library-page > header.library-topbar > a,
 html[data-family="library"] body .search-page > header.search-topbar > a.search-brand {
   display: inline-grid;

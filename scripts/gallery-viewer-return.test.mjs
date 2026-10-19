@@ -70,3 +70,22 @@ test("the refresh control: in the pinned bar, busy rather than disabled, announc
   assert.match(button, /min-width: 44px;/);
   assert.match(button, /min-height: 44px;/);
 });
+
+test("gallery routes keep <html> as the sole scroller so iPad overscroll containment on <body> never traps touch pans", () => {
+  const shellCss = read("src/styles-stage-shell.css");
+  const studioCss = read("src/styles-exhibition-studio.css");
+  for (const sheet of [shellCss, css]) {
+    assert.match(
+      sheet,
+      /html\[data-family="gallery"\]:not\(\[data-rail-lock\]\):not\(\[data-loading\]\):not\(\[data-side-menu-open\]\):not\(\s*\[data-dialog-open\]\s*\)\s*body:not\(\[data-gallery-viewer-lock\]\)/,
+    );
+    assert.match(
+      sheet,
+      /overflow-x:\s*clip;\s*overflow-y:\s*visible;\s*touch-action:\s*pan-y pinch-zoom;/,
+    );
+  }
+  assert.match(
+    studioCss,
+    /html\[data-family="gallery"\]:not\(\[data-rail-lock\]\):not\(\[data-loading\]\):not\(\[data-side-menu-open\]\):not\(\s*\[data-dialog-open\]\s*\)\s*body:has\(\.exhibition-room\)/,
+  );
+});
