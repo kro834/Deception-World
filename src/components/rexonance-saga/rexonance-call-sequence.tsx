@@ -28,7 +28,11 @@ import {
   type RexonanceSuitPiece,
 } from "@/lib/rexonance-suit";
 import { SuitNanites } from "./rexonance-suit-nanites";
-import { NANITE_FIRE_PHASES, naniteMaterialLanding } from "@/lib/rexonance-ignition.js";
+import {
+  NANITE_FIRE_PHASES,
+  entryElapsedTime,
+  naniteMaterialLanding,
+} from "@/lib/rexonance-ignition.js";
 
 type RexonanceCallSequenceProps = {
   mode: "entry" | "stage";
@@ -319,6 +323,18 @@ const SUIT_STACK = SUIT_ORDER.flatMap((group) =>
   REXONANCE_SUIT_PIECES.filter((piece) => piece.group === group).reverse(),
 );
 const SUIT_GROW = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] } as const;
+const entrySpan = (start: number, duration: number) =>
+  entryElapsedTime(start + duration) - entryElapsedTime(start);
+const bootClock = (index: number): CSSProperties => {
+  const label = 40 + index * 32;
+  const value = 120 + index * 32;
+  return {
+    "--rx-suit-boot-label-start": `${entryElapsedTime(label)}ms`,
+    "--rx-suit-boot-label-duration": `${entrySpan(label, 60)}ms`,
+    "--rx-suit-boot-value-start": `${entryElapsedTime(value)}ms`,
+    "--rx-suit-boot-value-duration": `${entrySpan(value, 60)}ms`,
+  } as CSSProperties;
+};
 // Where a plate's cell sits in the atlas, as background percentages.
 const atlasCell = (piece: RexonanceSuitPiece, half: 0 | 1): CSSProperties => {
   const { width, height, src } = REXONANCE_SUIT_ATLAS;
@@ -336,13 +352,16 @@ const pieceClock = (piece: RexonanceSuitPiece) => {
   const start = naniteMaterialLanding(fit - REXONANCE_SUIT_REVEAL_MS, fit);
   const materialStart = NANITE_FIRE_PHASES.materialStart * 2400;
   const gatherStart = Math.max(materialStart, start - 160);
+  const elapsedStart = entryElapsedTime(start);
+  const elapsedFit = entryElapsedTime(fit);
+  const elapsedGather = entryElapsedTime(gatherStart);
   const [gx, gy] = SUIT_GROW[piece.dir];
   return {
     ...place(piece.x, piece.y, piece.w, piece.h),
-    "--rx-suit-t": `${start}ms`,
-    "--rx-suit-grow-duration": `${fit - start}ms`,
-    "--rx-suit-gather-start": `${gatherStart}ms`,
-    "--rx-suit-gather-duration": `${Math.max(1, fit + 40 - gatherStart)}ms`,
+    "--rx-suit-t": `${elapsedStart}ms`,
+    "--rx-suit-grow-duration": `${elapsedFit - elapsedStart}ms`,
+    "--rx-suit-gather-start": `${elapsedGather}ms`,
+    "--rx-suit-gather-duration": `${Math.max(1, entryElapsedTime(fit + 40) - elapsedGather)}ms`,
     "--rx-suit-gx": gx,
     "--rx-suit-gy": gy,
     "--rx-suit-k": REXONANCE_SUIT_ACCENTS.includes(piece.id) ? 1.07 : 1.025,
@@ -485,7 +504,13 @@ function Suit({ suit, animate }: { suit: "build" | "whole"; animate: boolean }) 
       data-swarm={swarm}
       style={
         {
-          "--rx-suit-material-start": `${NANITE_FIRE_PHASES.materialStart * 2400}ms`,
+          "--rx-suit-material-start": `${entryElapsedTime(NANITE_FIRE_PHASES.materialStart * 2400)}ms`,
+          "--rx-suit-heading-duration": `${entrySpan(60, 300)}ms`,
+          "--rx-suit-scan-duration": `${entrySpan(70, 250)}ms`,
+          "--rx-suit-sweep-duration": `${entrySpan(70, 330)}ms`,
+          "--rx-suit-under-duration": `${entrySpan(330, 60)}ms`,
+          "--rx-suit-core-start": `${entryElapsedTime(370)}ms`,
+          "--rx-suit-core-duration": `${entrySpan(370, 420)}ms`,
         } as CSSProperties
       }
     >
@@ -517,7 +542,14 @@ function Suit({ suit, animate }: { suit: "build" | "whole"; animate: boolean }) 
           <i
             key={joint.join()}
             className="rx-suit-joint"
-            style={{ ...at(joint), "--rx-suit-j": index } as CSSProperties}
+            style={
+              {
+                ...at(joint),
+                "--rx-suit-j": index,
+                "--rx-suit-joint-start": `${entryElapsedTime(330 + index * 24)}ms`,
+                "--rx-suit-joint-duration": `${entrySpan(330 + index * 24, 900)}ms`,
+              } as CSSProperties
+            }
           />
         ))}
         {/* RIDER！: nanite motes gather in the air round the body. */}
@@ -591,7 +623,7 @@ function Suit({ suit, animate }: { suit: "build" | "whole"; animate: boolean }) 
               style={
                 {
                   ...at(piece.seat),
-                  "--rx-suit-s": `${REXONANCE_SUIT_FIT[piece.id]}ms`,
+                  "--rx-suit-s": `${entryElapsedTime(REXONANCE_SUIT_FIT[piece.id])}ms`,
                 } as CSSProperties
               }
             />
@@ -655,11 +687,17 @@ function Suit({ suit, animate }: { suit: "build" | "whole"; animate: boolean }) 
         </p>
       </div>
       <div className="rx-suit-boot">
-        <p className="rx-suit-boot-title" style={{ "--rx-suit-i": 0 } as CSSProperties}>
+        <p
+          className="rx-suit-boot-title"
+          style={{ ...bootClock(0), "--rx-suit-i": 0 } as CSSProperties}
+        >
           SYSTEM CHECK
         </p>
         {REXONANCE_SUIT_SYSTEMS.map(([name, status], index) => (
-          <p key={name} style={{ "--rx-suit-i": index + 1 } as CSSProperties}>
+          <p
+            key={name}
+            style={{ ...bootClock(index + 1), "--rx-suit-i": index + 1 } as CSSProperties}
+          >
             {name}
             <b>{status}</b>
           </p>
@@ -680,6 +718,11 @@ export function RexonanceCallSequence({
   suit = "whole",
 }: RexonanceCallSequenceProps) {
   const entry = mode === "entry";
+  const clock = entry && tier === "full" ? entryElapsedTime : (time: number) => time;
+  const beatDuration = (index: number) => {
+    const beat = REXONANCE_CALL_BEATS[index];
+    return clock(beat.start + beat.duration) - clock(beat.start);
+  };
   return (
     <div
       className="rx-call-sequence"
@@ -693,13 +736,14 @@ export function RexonanceCallSequence({
           "--rx-call-cover": `${REXONANCE_ENTRY_TIMINGS.cover}ms`,
           "--rx-call-reveal": `${REXONANCE_ENTRY_TIMINGS.reveal}ms`,
           "--rx-call-stage-duration": `${REXONANCE_STAGE_DURATION_MS}ms`,
+          "--rx-call-frame-duration": `${clock(560)}ms`,
           // The call and its answer, for the ornaments that keep their beat.
-          "--rx-call-rider-start": `${REXONANCE_CALL_BEATS[1].start}ms`,
-          "--rx-call-chant-start": `${REXONANCE_CALL_BEATS[2].start}ms`,
-          "--rx-call-chant-duration": `${REXONANCE_CALL_BEATS[2].duration}ms`,
-          "--rx-call-response-start": `${REXONANCE_CALL_BEATS[3].start}ms`,
-          "--rx-call-response-duration": `${REXONANCE_CALL_BEATS[3].duration}ms`,
-          "--rx-call-final-start": `${REXONANCE_CALL_BEATS[4].start}ms`,
+          "--rx-call-rider-start": `${clock(REXONANCE_CALL_BEATS[1].start)}ms`,
+          "--rx-call-chant-start": `${clock(REXONANCE_CALL_BEATS[2].start)}ms`,
+          "--rx-call-chant-duration": `${beatDuration(2)}ms`,
+          "--rx-call-response-start": `${clock(REXONANCE_CALL_BEATS[3].start)}ms`,
+          "--rx-call-response-duration": `${beatDuration(3)}ms`,
+          "--rx-call-final-start": `${clock(REXONANCE_CALL_BEATS[4].start)}ms`,
           // rx12: the suit's box keeps the artwork's aspect.
           ...(entry ? { "--rx-suit-ar": (FIG.width / FIG.height).toFixed(4) } : null),
         } as CSSProperties
@@ -741,8 +785,8 @@ export function RexonanceCallSequence({
               data-call={call}
               style={
                 {
-                  "--rx-call-start": `${REXONANCE_CALL_BEATS[index].start}ms`,
-                  "--rx-call-duration": `${REXONANCE_CALL_BEATS[index].duration}ms`,
+                  "--rx-call-start": `${clock(REXONANCE_CALL_BEATS[index].start)}ms`,
+                  "--rx-call-duration": `${beatDuration(index)}ms`,
                 } as CSSProperties
               }
             >

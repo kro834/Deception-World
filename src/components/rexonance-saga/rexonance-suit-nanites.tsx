@@ -36,6 +36,7 @@ import {
 } from "@/lib/rexonance-flame.js";
 import {
   NANITE_FIRE_PHASES,
+  entryCanonicalTime,
   naniteFlameEnvelope,
   naniteMaterialLanding,
 } from "@/lib/rexonance-ignition.js";
@@ -144,9 +145,12 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
       const meter = box?.closest(".rx-call-sequence")?.querySelector(".rx-call-meter > i");
       if (cancelled || !box || !build || !meter || getComputedStyle(build).display === "none")
         return;
+      let elapsed = 0;
       const clock = () => {
         const animation = meter.getAnimations()[0];
-        return animation ? Number(animation.currentTime) : null;
+        if (!animation) return null;
+        elapsed = Number(animation.currentTime);
+        return entryCanonicalTime(elapsed);
       };
       const start = () => {
         const now = clock();
@@ -404,16 +408,14 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
           const flame = naniteFlameEnvelope(flamePhase);
           const material = t >= MATERIAL_FROM;
           if (flame > 0) {
-            drawBodyFlame(flight, FIG, flame, t / 1000, s, "back", flamePhase);
-            drawNaniteFlame(flight, REXONANCE_SUIT_MARKS.core, flame, t / 1000, s);
+            // The choreography lingers, while the fire itself keeps rolling
+            // at real speed throughout the longer vortex window.
+            drawBodyFlame(flight, FIG, flame, elapsed / 1000, s, "back", flamePhase);
+            drawNaniteFlame(flight, REXONANCE_SUIT_MARKS.core, flame, elapsed / 1000, s);
           }
           for (let p = 0; p < all.length; p += 1) {
             const plate = all[p];
-            if (
-              (!material && plate.fit > 0) ||
-              t < plate.spawn ||
-              (done[p] && t >= plate.last)
-            )
+            if ((!material && plate.fit > 0) || t < plate.spawn || (done[p] && t >= plate.last))
               continue;
             const { piece } = plate;
             if (t < plate.fit && extras) {
@@ -669,7 +671,7 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
           }
           if (extras) extras.after(t);
           else if (material) grains();
-          if (flame > 0) drawBodyFlame(flight, FIG, flame, t / 1000, s, "front", flamePhase);
+          if (flame > 0) drawBodyFlame(flight, FIG, flame, elapsed / 1000, s, "front", flamePhase);
           // Burning fragments carry material out of the broad fire. Their
           // machine crossfade remains visible on the near side of the plume.
           extras?.firebrands(t);

@@ -1,16 +1,17 @@
 # Rexonance: fire vortex → explosive clearing → nanomachine assembly
 
-This supersedes the individual body-root flames of `c2b9716` and the broad
-firestorm of `e427350`. It changes both the entry call and the scroll-driven
-assembly, not the separate Ciel easter egg.
+This extends the vortex of `104e2bd`, which superseded the individual body-root
+flames of `c2b9716` and broad firestorm of `e427350`. It changes both the entry
+call and scroll-driven assembly, not the separate Ciel easter egg.
 
 ## Visible contract
 
 The opening quietly kindles for 280 ms and winds into a broad rolling vortex
-around the entire figure. It bursts outward over 420–560 ms and clears before
-the first nanomachines appear at 600 ms. Metal does not coexist with the
-intact vortex. Machines materialize from the airborne fragments and feed coherent
-surface currents. Nearby grains merge into carriers, unfold as keyed cells,
+around the entire figure for an extra second. It bursts outward over
+1,420–1,560 ms and clears before the first nanomachines appear at 1,600 ms.
+Metal does not coexist with the intact vortex. Machines materialize from
+airborne fragments, expand through a 2.25-turn helix with depth, then contract
+into shared helical surface currents. Nearby grains merge into carriers, unfold as keyed cells,
 form local laminae and seat against the actual armour. The scroll scene uses
 the same normalized ignition contract and reproducible body-space sources.
 
@@ -20,14 +21,23 @@ flame-shaped mask. Its breakup follows the shared phase, not frame history.
 Entry canvases share one pixel-aligned, padded box
 on fine and coarse pointers so the broad plume is not cut flat at the soles.
 
-The original final-fit/sound clocks, final artwork, completed driver, unlit visor,
+The authored fit ordering, final artwork, completed driver, unlit visor,
 stationary reactor disc, independent rotating coil, feet-up gold guideways,
-and separate ornament art remain intact. The earliest boot cell-growth window
-is compressed from 610–710 ms to 660–710 ms without moving its 710 ms fit;
-metal emergence and its first guideway begin only after the fire clears.
+and separate ornament art remain intact. A pure invertible entry clock stretches
+canonical 280–420 ms into elapsed 280–1,420 ms. Later events shift by 1,000 ms
+without compressing material formation: the first boot still grows over
+canonical 660–710 ms (elapsed 1,660–1,710 ms). Flame texture motion follows real
+elapsed time rather than slowing or freezing with the choreography. DOM
+fallback, call labels, reticles and the full entry cover (3,730 ms) share the
+same mapping. Light/reduced entry timing remains unchanged.
+Metal emergence and its first guideway begin only after the fire clears.
 The same absence-before-materialization rule applies to canvas and DOM/SVG
 fallbacks. Reverse scroll uses closed-form
 poses rather than an accumulated simulation.
+Scroll retains its canonical progress and exact docks, with a longer animated
+runway (desktop 2,400 px/420 svh minimum; touch 1,950 px/360 svh minimum).
+Thus the vortex and material current get more scroll travel without changing
+the single-screen reduced/economy/constrained fallback.
 
 ## Rendering and resources
 
@@ -43,6 +53,15 @@ poses rather than an accumulated simulation.
 - Firebrand painting shares the same atlas/fallback and is charged against
   each nanite engine's existing draw budget. Typed data is prepared before
   animation; touch tiers retain their bounded particle/armour work.
+- Nanite spirals are closed-form trajectories, not independent decorative
+  hoops. Their radius grows from the exact firebrand endpoint, winds with
+  changing depth, then contracts into the existing docking current. Fine
+  entry filaments sample eight intervals of those real trajectories; touch
+  keeps its existing lower-work path. No particle count or sprite cap grows.
+- Immutable endpoints, birth radii and per-cell flight times are prepared in
+  retained Float64 buffers (16 bytes per art cell plus 48 bytes per swarm
+  chip). The crown-width lookup adds 392 bytes. This trades bounded retained
+  storage for less repeated per-frame calculation; no rounding is introduced.
 - Missing assets retain the procedural fallback. Reduced motion/economy
   preserve the finished still rather than forcing this animation.
 
@@ -68,7 +87,46 @@ The owner performs those physical-device checks. Local build identity, pushed
 commit, deployment state, canonical release identity and public browser QA
 must be recorded separately when releasing this candidate.
 
-### Vortex candidate acceptance (2026-10-19)
+### Extended vortex and orbital material acceptance (2026-10-19)
+
+- Full repository checks: 2,620 tests, 2,615 passed, no failures and five
+  existing skips. Typecheck, production build and 15 source groups passed;
+  lint has no errors and retains 12 pre-existing warnings.
+- Entry verification now samples 13 real elapsed times, including 900 and
+  1,250 ms with positive native atlas draws in both intervals. The first
+  metal remains absent through 1,590 ms and appears at 1,600 ms; full
+  extinction is checked at 3,600 ms. The actual canonical clock is recorded
+  separately, so delaying everything cannot masquerade as longer fire.
+- Direct geometry tests require more than two turns, substantial radius,
+  changing depth, contraction and exact reverse poses in both material
+  engines. Existing firebrand handoff, current-to-flight continuity and
+  exact armour docking tests remain in place.
+- Chrome desktop normal and Chrome 320 px/WebKit 1024 px normal, blocked
+  atlas and reduced-motion paths passed, with zero JavaScript errors.
+  Evidence lives under `rexonance-orbital-v2/desktop`,
+  `rexonance-orbital-v3/webkit1024` and `rexonance-orbital-v4/phone320`
+  in `output/playwright/`. The last optimization changes no drawing output
+  (the dense trace below covers both fine and touch paths).
+- An independent initial visit uses the real World menu with no init
+  script, clock seeking, animation pause or prototype wrappers. Its entry
+  naturally lasted 3,837.4 ms before navigation; destination cover release,
+  zero console/page errors and screenshots/video were verified. Natural
+  screenshot bounds are recorded rather than called exact phase samples.
+- The allocation sampler now waits for the actual entry to detach instead
+  of cutting off at the old fixed 3,200 ms. Its rich/classic classification
+  and acceptance ceiling are unchanged. Final optimized measurement passed
+  at 23.68 MB rich extras versus 23.94 MB classic engine. The 0.26 MB margin
+  is one cumulative sampled-JS result, not repeated-run stability, peak RAM
+  or a physical-device FPS guarantee. Earlier failed candidates remain in
+  the local evidence, and no unchanged candidate was retried for a pass.
+- Precomputation preserves every traced canvas argument/state operation at
+  5 ms intervals from canonical 0 to 2,700 ms: 3,160,172 fine-pointer and
+  1,732,683 touch operations across 541 frames each. Paths, transforms,
+  sprite arguments, alpha/style assignments and draw counts match exactly,
+  including negative zero. The 49 crown factors are likewise cached in
+  Float64 without changing their expression or precision.
+
+### Previous vortex acceptance (104e2bd)
 
 - Full repository checks: 2,616 tests, 2,611 passed, no failures, five existing
   skips. Typecheck, production build and all 15 source-sync groups passed;

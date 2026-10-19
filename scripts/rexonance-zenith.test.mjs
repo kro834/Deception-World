@@ -343,6 +343,39 @@ test("the pinned runway is a layout of the persistent preferences, never of the 
   }
 });
 
+test("longer vortex travel belongs only to the animated runway, with still fallbacks left unpinned", () => {
+  const runways = sheet.rules.filter(
+    ({ selector, body, context }) =>
+      /> \.rzn-suitup$/.test(selector) &&
+      declaration(body, "height") &&
+      !context.includes("@media print"),
+  );
+  assert.deepEqual(
+    runways.map(({ body }) => declaration(body, "height")),
+    ["max(2400px, 420svh)", "max(1950px, 360svh)"],
+    "desktop and touch retain the longer travel without adding a base height",
+  );
+  for (const { selector, context } of runways) {
+    assert.match(selector, /:not\(\[data-world-effects="economy"\]\)/);
+    assert.match(selector, /:not\(\[data-rzn-constrained\]\)/);
+    const media = context.filter((at) => at.startsWith("@media")).join(" ");
+    for (const branch of splitTopLevel(media)) {
+      assert.match(branch, REDUCED, "every media alternative opts into full motion");
+      assert.match(branch, /forced-colors: none/, "forced-colour stills never inherit the runway");
+    }
+  }
+  assert.match(runways[1].context.join(" "), /max-width: 760px/);
+  assert.match(runways[1].context.join(" "), /orientation: portrait/);
+  for (const { selector, body, context } of sheet.rules.filter(
+    ({ body }) => declaration(body, "position") === "sticky",
+  )) {
+    assert.match(selector, /:not\(\[data-world-effects="economy"\]\)/);
+    assert.match(selector, /:not\(\[data-rzn-constrained\]\)/);
+    assert.ok(context.some((at) => REDUCED.test(at) && /forced-colors: none/.test(at)));
+    assert.equal(declaration(body, "top"), "var(--dxs-nav)");
+  }
+});
+
 test("text keeps its 12px floor; generated text is silent; forced colours drop the ornaments", () => {
   for (const [, value] of css.matchAll(/font(?:-size)?:\s*([^;]+);/g)) {
     for (const [, px] of value.matchAll(/(?<![\d.])(\d+(?:\.\d+)?)px/g)) {

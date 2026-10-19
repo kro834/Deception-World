@@ -4,11 +4,60 @@ import test from "node:test";
 import sharp from "sharp";
 import {
   NANITE_FIRE_PHASES,
+  REXONANCE_ENTRY_VORTEX_HOLD_MS,
+  entryCanonicalTime,
+  entryElapsedTime,
   naniteFlameEnvelope,
   naniteFlameScatter,
   naniteMaterialLanding,
   sampleFlameBirth,
 } from "../src/lib/rexonance-ignition.js";
+
+test("the entry sustains its flame for one extra second before preserving every material clock", () => {
+  assert.equal(REXONANCE_ENTRY_VORTEX_HOLD_MS, 1000);
+  for (const [canonical, elapsed] of [
+    [0, 0],
+    [180, 180],
+    [280, 280],
+    [420, 1420],
+    [560, 1560],
+    [600, 1600],
+    [2730, 3730],
+  ]) {
+    assert.equal(entryElapsedTime(canonical), elapsed);
+    assert.equal(entryCanonicalTime(elapsed), canonical);
+  }
+  let previous = -Infinity;
+  for (let elapsed = 0; elapsed <= 4500; elapsed++) {
+    const canonical = entryCanonicalTime(elapsed);
+    assert.ok(canonical >= previous, "the real entry clock never runs its painter backwards");
+    assert.ok(
+      Math.abs(entryElapsedTime(canonical) - elapsed) < 1e-9,
+      "real/canonical clocks are exact inverses",
+    );
+    if (elapsed < 1600)
+      assert.ok(canonical < 600, "the extra flame interval cannot release material early");
+    previous = canonical;
+  }
+  for (const elapsed of [280, 1420]) {
+    const at = entryCanonicalTime(elapsed);
+    assert.ok(Math.abs(entryCanonicalTime(elapsed - 1e-7) - at) < 1e-6);
+    assert.ok(Math.abs(entryCanonicalTime(elapsed + 1e-7) - at) < 1e-6);
+  }
+  assert.ok(
+    naniteFlameEnvelope(entryCanonicalTime(900) / 2400) > 0.6,
+    "a visible flame survives the extended middle",
+  );
+  assert.ok(
+    naniteFlameEnvelope(entryCanonicalTime(1250) / 2400) > 0.9,
+    "the vortex remains strong near the end of the added second",
+  );
+  assert.equal(
+    naniteFlameEnvelope(entryCanonicalTime(1600) / 2400),
+    0,
+    "the material floor still follows complete clearing",
+  );
+});
 
 test("shared phases keep the vortex, explosive clearing and first metal in that order", () => {
   assert.deepEqual(NANITE_FIRE_PHASES, {

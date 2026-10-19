@@ -54,10 +54,10 @@ import {
    it, drawn from the Blender-rendered nanite kit (rexonance-nanites):
 
    - The continuous body fire releases material from the same sampled skin
-     surface used by the flame field. A short, violent outward spray brakes
-     into anatomy-following streams; neighbouring machines align, fuse into
-     thicker cells and laminate each plate locally. There are no detached
-     orbital hoops or core pump waves. The helmet's material hugs the face
+     surface used by the flame field. Its airborne fragments open into
+     connected helical currents, then contract into anatomy-following
+     streams; neighbouring machines align, fuse into thicker cells and
+     laminate each plate locally. The helmet's material hugs the face
      instead of circling above it; unused material feeds the reactor at seal.
    - Each plate is built in raw nanite metal (gunmetal hex relief with the
      art's own values) on a lifted, tilted stage over its own contact shadow,
@@ -375,6 +375,8 @@ type Layout = {
   cx: Float32Array;
   cy: Float32Array;
   land: Float32Array;
+  flightStart: Float64Array;
+  flightMs: Float64Array;
   tp: Float32Array;
   f0: Float32Array;
   spin: Float32Array;
@@ -418,6 +420,12 @@ type Layout = {
   emitY: Float32Array;
   emitNX: Float32Array;
   emitNY: Float32Array;
+  brandSin: Float64Array;
+  brandTravel: Float64Array;
+  brandLift: Float64Array;
+  brandEndX: Float64Array;
+  brandEndY: Float64Array;
+  birthRadius: Float64Array;
   arm: Float32Array;
   armDir: Int8Array;
   chipPlate: Int16Array;
@@ -540,6 +548,8 @@ function* layoutSteps(all: Plate[], gold: Cells): Generator<undefined, Layout, u
     cx: f32(N),
     cy: f32(N),
     land: f32(N),
+    flightStart: new Float64Array(N),
+    flightMs: new Float64Array(N),
     tp: f32(N),
     f0: f32(N),
     spin: f32(N),
@@ -576,6 +586,12 @@ function* layoutSteps(all: Plate[], gold: Cells): Generator<undefined, Layout, u
     emitY: f32(CHIPS),
     emitNX: f32(CHIPS),
     emitNY: f32(CHIPS),
+    brandSin: new Float64Array(CHIPS),
+    brandTravel: new Float64Array(CHIPS),
+    brandLift: new Float64Array(CHIPS),
+    brandEndX: new Float64Array(CHIPS),
+    brandEndY: new Float64Array(CHIPS),
+    birthRadius: new Float64Array(CHIPS),
     arm: f32(CHIPS),
     armDir: new Int8Array(CHIPS),
     chipPlate: new Int16Array(CHIPS).fill(-1),
@@ -793,6 +809,10 @@ function* layoutSteps(all: Plate[], gold: Cells): Generator<undefined, Layout, u
       L.cx[i] = cx;
       L.cy[i] = cy;
       L.land[i] = naniteMaterialLanding(tile.land, plate.fit);
+      // Land is final here. Cache from its stored Float32 value, retaining
+      // the drawing expression's double precision and exact association.
+      L.flightStart[i] = Math.max(FIRE_BIRTH, L.land[i] - FLIGHT);
+      L.flightMs[i] = L.land[i] - L.flightStart[i];
       if (L.land[i] <= plate.fit - SW.seat) landedBy += 1;
       const along = Math.min(1, Math.hypot(cx - sx, cy - sy) / reach);
       L.tp[i] = plate.fit + SW.paint[0] + (helm ? SW.paint[2] : SW.paint[1]) * along;
@@ -1161,6 +1181,21 @@ function* layoutSteps(all: Plate[], gold: Cells): Generator<undefined, Layout, u
     L.lane[c] = L.lane[lead];
     L.phi[c] = L.phi[lead] + 0.4 * rank;
     if (L.chipTone[c] === WHITE) L.chipTone[c] = hash(c, 3539) < 0.5 ? ICE : PINK;
+  }
+  // Squad followers have their final stored phase only now. Each endpoint
+  // is the original firebrand pose at u=1, including sin(PI)'s tiny curl;
+  // Float64 preserves the exact values formerly recalculated per sample.
+  for (let c = 0; c < CHIPS; c += 1) {
+    const sinPhi = Math.sin(L.phi[c]);
+    const travel = 80 + 50 * (0.5 + 0.5 * sinPhi);
+    const lift = 18 + 17 * (0.5 + 0.5 * Math.cos(L.phi[c]));
+    const curl = 5 * Math.sin(Math.PI) * sinPhi;
+    L.brandSin[c] = sinPhi;
+    L.brandTravel[c] = travel;
+    L.brandLift[c] = lift;
+    L.brandEndX[c] = L.emitX[c] + L.emitNX[c] * travel - L.emitNY[c] * curl;
+    L.brandEndY[c] = L.emitY[c] + L.emitNY[c] * travel + L.emitNX[c] * curl - lift;
+    L.birthRadius[c] = 38 + 18 * (0.5 + 0.5 * sinPhi);
   }
   yield;
   // Occupancy: the body plates' tiles (not the ribbons or the tail), softened.
@@ -2775,58 +2810,67 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
   };
 
   /* Body-born material flow. */
-  // A closed-form, three-dimensional skin stream, not an orbital lane.
-  // Adjacent machines share the broad advection but retain small inertial
-  // eddies, so the spray coheres into material rather than a particle halo.
+  // A shared three-dimensional current winds along the burning surface.
+  // Phase follows body height and normal, so neighbouring machines travel
+  // round the same helix rather than spinning independently in place.
   const surfacePose = (c: number) => {
     const t = pose[ARG_T];
     const lead = L.squad[c];
     const rank = L.rank[c];
     const nx = L.emitNX[c];
     const ny = L.emitNY[c];
-    const th = t * 0.006 + L.phi[c] + rank * 0.28;
+    const th = t * 0.026 + (L.emitY[c] / H) * 9 + nx * 1.7 + rank * 0.24;
     const phase = t * 0.0027 + L.phi[lead];
-    const slip = 7 * Math.sin(phase) + rank * 2.8;
-    const lift = 17 + 9 * Math.sin(th * 0.61) + 5 * Math.sin(phase * 1.4);
-    const curl = 5 * Math.sin(th);
-    pose[PX] = L.emitX[c] + nx * lift - ny * (slip + curl);
-    pose[PY] = L.emitY[c] + ny * lift + nx * (slip + curl) - 12;
-    pose[PZ] = 0.72 * Math.sin(L.theta0[c] + t * 0.0034);
-    const dx = nx * 5.49 * Math.cos(th * 0.61) - ny * (5 * Math.cos(th) + 3.15 * Math.cos(phase));
-    const dy = ny * 5.49 * Math.cos(th * 0.61) + nx * (5 * Math.cos(th) + 3.15 * Math.cos(phase));
+    const sinTh = Math.sin(th);
+    const cosTh = Math.cos(th);
+    const radius = 20 + 6 * Math.sin(phase);
+    const slip = radius * cosTh + rank * 2.8;
+    const lift = 18 + 0.46 * radius * sinTh;
+    pose[PX] = L.emitX[c] + nx * lift - ny * slip;
+    pose[PY] = L.emitY[c] + ny * lift + nx * slip - 12;
+    pose[PZ] = 0.78 * sinTh;
+    const dr = 0.0162 * Math.cos(phase);
+    const ds = dr * cosTh - radius * 0.026 * sinTh;
+    const dl = 0.46 * (dr * sinTh + radius * 0.026 * cosTh);
+    const dx = nx * dl - ny * ds;
+    const dy = ny * dl + nx * ds;
     const tl = (dx * dx + dy * dy) ** 0.5 || 1;
     pose[TX] = dx / tl;
     pose[TY] = dy / tl;
-    pose[SPEED] = tl * 0.006;
+    pose[SPEED] = tl;
     pose[ROLL] = L.chipF0[c] + (FRAMES * th) / TAU;
   };
   // A burning firebrand first leaves the body. Its endpoint is also the
   // machine's birth coordinate, so no chip materialises back on the skin.
   const firebrandPose = (c: number) => {
     const u = unit(pose[ARG_U]);
-    const travel = (80 + 50 * (0.5 + 0.5 * Math.sin(L.phi[c]))) * u * u;
-    const up = (18 + 17 * (0.5 + 0.5 * Math.cos(L.phi[c]))) * u;
-    const curl = 5 * Math.sin(Math.PI * u) * Math.sin(L.phi[c]);
+    const travel = L.brandTravel[c] * u * u;
+    const up = L.brandLift[c] * u;
+    const curl = 5 * Math.sin(Math.PI * u) * L.brandSin[c];
     pose[PX] = L.emitX[c] + L.emitNX[c] * travel - L.emitNY[c] * curl;
     pose[PY] = L.emitY[c] + L.emitNY[c] * travel + L.emitNX[c] * curl - up;
   };
-  // Explosive airborne release: inherited firebrand momentum, then
-  // magnetic braking into the neighbouring body-following material flow.
+  // The inherited firebrand opens into a two-turn material helix. Its
+  // radius grows from zero at the same airborne point, then contracts
+  // into the shared current with zero added position or velocity at joins.
   const bornPose = (c: number) => {
     const born = pose[ARG_U];
     const u = born < 0 ? 0 : born > 1 ? 1 : born;
     const flowX = pose[PX];
     const flowY = pose[PY];
-    pose[ARG_U] = 1;
-    firebrandPose(c);
-    pose[ARG_U] = born;
-    const impulse = (30 + 38 * (0.5 + 0.5 * Math.sin(L.phi[c]))) * Math.sin(Math.PI * u);
-    const curl = 14 * Math.sin(TAU * u + L.phi[c]) * u * (1 - u);
-    const sx = pose[PX] + L.emitNX[c] * impulse - L.emitNY[c] * curl;
-    const sy = pose[PY] + L.emitNY[c] * impulse + L.emitNX[c] * curl - 34 * Math.sin(Math.PI * u);
-    const m = smooth((u - 0.35) / 0.65);
-    pose[PX] = sx + (flowX - sx) * m;
-    pose[PY] = sy + (flowY - sy) * m;
+    const flowZ = pose[PZ];
+    const m = smooth(u);
+    const envelope = Math.sin(Math.PI * u) ** 2;
+    const radius = L.birthRadius[c] * envelope;
+    const angle = TAU * 2.25 * u + (L.emitY[c] / H) * 9 + L.emitNX[c] * 1.7 + L.rank[c] * 0.24;
+    const sinAngle = Math.sin(angle);
+    const across = radius * Math.cos(angle);
+    const outward = 0.55 * radius * sinAngle + 22 * envelope;
+    const sx = L.brandEndX[c];
+    const sy = L.brandEndY[c];
+    pose[PX] = sx + (flowX - sx) * m + L.emitNX[c] * outward - L.emitNY[c] * across;
+    pose[PY] = sy + (flowY - sy) * m + L.emitNY[c] * outward + L.emitNX[c] * across - 24 * envelope;
+    pose[PZ] = 0.5 + (flowZ - 0.5) * m + 0.72 * sinAngle * envelope;
   };
   // A free chip imploding (fraction u of the window) from its ring pose
   // (PX, PY on entry) into the reactor.
@@ -2910,7 +2954,7 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
         bornPose(c);
         x = pose[PX];
         y = pose[PY];
-        z = 0.5 + (z - 0.5) * smooth((born - 0.4) / 0.6);
+        z = pose[PZ];
         size *= 0.28 + 0.72 * smooth(born);
         alpha *= smooth((t - birth) / FIREBRAND_COOL);
         if (born < 0.62) tone = WHITE;
@@ -3113,8 +3157,9 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
       }
     }
   };
-  // A few short material filaments follow actual emitted machines. They
-  // dissolve after flash-over: no decorative hoops remain round the body.
+  // A bounded set of filaments traces the machines' actual helical paths.
+  // Sampling the closed-form pose keeps the curl visible even between
+  // sparse carrier sprites, and gives reverse playback the identical wake.
   const lanes = (front: boolean, t: number) => {
     const fade = 1 - smooth((t - 600) / 350);
     if (fade <= 0 || TOUCH || governed) return;
@@ -3127,17 +3172,17 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
       if (!band || (front ? band < 3 : band >= 3)) continue;
       const age = t - L.birth[c];
       if (age < 12 || age > L.sprayMs[c]) continue;
-      const x = chipX[c];
-      const y = chipY[c];
-      const sx = L.emitX[c] * s;
-      const sy = L.emitY[c] * s;
-      flight.moveTo(Math.round(sx + (x - sx) * 0.4), Math.round(sy + (y - sy) * 0.4));
-      flight.quadraticCurveTo(
-        Math.round(sx + (x - sx) * 0.7 - 3 * s),
-        Math.round(sy + (y - sy) * 0.7),
-        Math.round(x),
-        Math.round(y),
-      );
+      const trail = Math.min(age, L.sprayMs[c] * 0.5);
+      for (let k = 0; k <= 8; k += 1) {
+        pose[ARG_T] = t - trail * (1 - k / 8);
+        surfacePose(c);
+        pose[ARG_U] = (pose[ARG_T] - L.birth[c]) / L.sprayMs[c];
+        bornPose(c);
+        const x = Math.round(pose[PX] * s);
+        const y = Math.round(pose[PY] * s);
+        if (k === 0) flight.moveTo(x, y);
+        else flight.lineTo(x, y);
+      }
     }
     flight.stroke();
   };
@@ -4069,8 +4114,8 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
     const bu = p * 2;
     for (let i = first; i < end; i += 1) {
       const since = t - L.land[i];
-      const flightStart = Math.max(FIRE_BIRTH, L.land[i] - FLIGHT);
-      const flightMs = L.land[i] - flightStart;
+      const flightStart = L.flightStart[i];
+      const flightMs = L.flightMs[i];
       const u = (t - flightStart) / flightMs;
       if (u <= 0) continue;
       const Cx = a00 * L.cx[i] + a01 * L.cy[i] + ex;

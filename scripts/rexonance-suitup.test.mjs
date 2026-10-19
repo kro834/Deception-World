@@ -29,7 +29,11 @@ import {
   REXONANCE_SUIT_SIZE,
 } from "../src/lib/rexonance-suit.ts";
 import { REXONANCE_STAGE_CARD_LEAVE_MS } from "../src/lib/rexonance-stage-call.ts";
-import { NANITE_FIRE_PHASES, naniteMaterialLanding } from "../src/lib/rexonance-ignition.js";
+import {
+  NANITE_FIRE_PHASES,
+  entryElapsedTime,
+  naniteMaterialLanding,
+} from "../src/lib/rexonance-ignition.js";
 
 /* 2026-10-11 rx13 (owner): finer pieces, formed by nanites right on the
    undersuit and fitted one after another. The figure is cut into 60 plates
@@ -231,7 +235,9 @@ test("the suit is entry-only, the badge stage-only, both inside the aria-hidden 
   }
 });
 
-// The call clock, as the component hands it to the sheet.
+// Canonical fallback clocks keep the authored armour choreography pinned.
+// Production inline clocks are remapped separately below and in the native
+// browser verifier; the reticle's fixed keyframes use real elapsed time.
 const CLOCK = {
   "--rx-call-rider-start": REXONANCE_CALL_BEATS[1].start,
   "--rx-call-chant-start": REXONANCE_CALL_BEATS[2].start,
@@ -251,14 +257,28 @@ const derived = Object.fromEntries(
 );
 function ms(expression, element) {
   let value = expression;
-  for (let pass = 0; pass < 4; pass += 1) {
-    value = value.replace(/var\((--[\w-]+)(?:,\s*([^()]+))?\)/g, (_, name, fallback) => {
-      if (name in element) return String(element[name]);
-      if (name in derived) return derived[name];
-      if (name in CLOCK) return String(CLOCK[name]);
-      if (fallback !== undefined) return fallback;
-      throw new Error(`unknown ${name} in ${expression}`);
-    });
+  for (let pass = 0; pass < 32; pass += 1) {
+    const start = value.indexOf("var(");
+    if (start < 0) break;
+    let end = start + 4,
+      depth = 1;
+    while (end < value.length && depth) {
+      if (value[end] === "(") depth++;
+      if (value[end] === ")") depth--;
+      end++;
+    }
+    assert.equal(depth, 0, `balanced variable in ${expression}`);
+    const argument = value.slice(start + 4, end - 1),
+      comma = argument.indexOf(",");
+    const name = (comma < 0 ? argument : argument.slice(0, comma)).trim();
+    const fallback = comma < 0 ? undefined : argument.slice(comma + 1).trim();
+    let replacement;
+    if (name in element) replacement = String(element[name]);
+    else if (name in derived) replacement = derived[name];
+    else if (name in CLOCK) replacement = String(CLOCK[name]);
+    else if (fallback !== undefined) replacement = fallback;
+    else throw new Error(`unknown ${name} in ${expression}`);
+    value = value.slice(0, start) + replacement + value.slice(end);
   }
   const arithmetic = value.replace(/calc\(/g, "(").replace(/(\d)(?:ms|deg|px)\b/g, "$1");
   assert.match(arithmetic, /^[\d\s.+\-*/()]+$/, expression);
@@ -481,8 +501,14 @@ test("the suit keeps the call clock and is finished before the hand-over", () =>
     ...keyframes.get("rxSuitReticle").matchAll(/([\d.]+)% \{\s*opacity: ([\d.]+);/g),
   ].map(([, offset, opacity]) => [Math.round(at(Number(offset)) * 2) / 2, Number(opacity)]);
   assert.ok(reticle.delay < REXONANCE_CALL_BEATS[1].start, "acquired on FAR UP！");
-  assert.deepEqual(stops.filter(([, opacity]) => opacity === 0.8).at(-1)[0], response.start);
-  assert.deepEqual(stops.filter(([, opacity]) => opacity === 0.32).at(-1)[0], final);
+  assert.deepEqual(
+    stops.filter(([, opacity]) => opacity === 0.8).at(-1)[0],
+    entryElapsedTime(response.start),
+  );
+  assert.deepEqual(
+    stops.filter(([, opacity]) => opacity === 0.32).at(-1)[0],
+    entryElapsedTime(final),
+  );
   assert.equal(
     layerTimes(declaration(covering(".rx-suit-lock::after").body, "animation"), {}).delay,
     final,
@@ -776,7 +802,7 @@ test("rx12/rx13: the raster suit — the artwork's plates, delivery-sized, decod
   );
   assert.match(
     sheet,
-    /\.rx-suit\[data-nanites="canvas"\] \.rx-suit-build > :is\(\.rx-suit-mote, \.rx-suit-plate\) \{\s*display: none;/,
+    /\.rx-suit\[data-nanites="canvas"\]\s+\.rx-suit-build\s+> :is\(\.rx-suit-mote, \.rx-suit-plate\) \{\s*display: none;/,
   );
   assert.match(component, /const seeded = \(seed: number\)/);
   assert.doesNotMatch(component, /Math\.random/);

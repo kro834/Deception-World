@@ -11,6 +11,7 @@ import { join } from "node:path";
 import { chromium, webkit } from "playwright";
 import sharp from "sharp";
 import { connectedFireEvidence } from "./rexonance-fire-evidence.mjs";
+import { entryCanonicalTime } from "../src/lib/rexonance-ignition.js";
 
 const base = process.env.BASE_URL || "http://127.0.0.1:8197";
 const out = process.env.OUT_DIR || "output/playwright/rexonance-flame";
@@ -20,8 +21,9 @@ const naturalClock = process.env.FLAME_NATURAL === "1";
 // inside WebKit's non-pausable route-coordinator wall-clock deadline.
 const detailedEntry = process.env.FLAME_ENTRY_DETAIL === "1";
 const entrySamples = detailedEntry
-  ? [180, 280, 360, 400, 420, 460, 520, 560, 590, 600, 620, 700, 850, 1600, 2600]
-  : [180, 280, 420, 460, 560, 590, 600, 620, 850, 1600, 2600];
+  ? [180, 280, 420, 900, 1250, 1360, 1400, 1420, 1460, 1520, 1560, 1590, 1600, 1620, 1850, 3600]
+  : [180, 280, 420, 900, 1250, 1420, 1460, 1560, 1590, 1600, 1620, 1850, 3600];
+const entryPeak = (shot) => shot.target === 1420 || shot.target === 1460;
 const coverageMinimum = process.env.FLAME_COVERAGE_MIN
   ? Number(process.env.FLAME_COVERAGE_MIN)
   : null;
@@ -260,8 +262,14 @@ async function nativeNaniteWindow(page, kind) {
     (kind) =>
       new Promise((resolve) => {
         const before = window.__flameQA.nativeNanites[kind];
+        const atlasBefore = window.__flameQA.atlas[kind];
         requestAnimationFrame(() =>
-          requestAnimationFrame(() => resolve(window.__flameQA.nativeNanites[kind] - before)),
+          requestAnimationFrame(() =>
+            resolve({
+              nanites: window.__flameQA.nativeNanites[kind] - before,
+              atlas: window.__flameQA.atlas[kind] - atlasBefore,
+            }),
+          ),
         );
       }),
     kind,
@@ -687,7 +695,7 @@ try {
             }, target);
           }
           if (naturalClock && !(await page.locator(".rx-call-sequence").count())) break;
-          const nativeNaniteDraws = await nativeNaniteWindow(page, "entry");
+          const nativeWindow = await nativeNaniteWindow(page, "entry");
           const state = await page.evaluate(() => {
             const suit = document.querySelector(".rx-suit");
             const sequence = document.querySelector(".rx-call-sequence");
@@ -711,11 +719,13 @@ try {
           record.entry.push({
             target,
             ...state,
+            canonicalClock: entryCanonicalTime(state.clock),
             pixels,
-            nativeNaniteDraws,
+            nativeNaniteDraws: nativeWindow.nanites,
+            nativeAtlasDraws: nativeWindow.atlas,
             file,
           });
-          if (target === 2600) {
+          if (target === 3600) {
             const before = await page.evaluate(
               () => window.__flameQA.atlas.entry + window.__flameQA.fallback.entry,
             );
@@ -749,19 +759,19 @@ try {
           );
           assert.equal(
             record.entryExtinguished?.target,
-            2600,
+            3600,
             "the entry extinction sample cannot be silently skipped",
           );
           if (!baseline) {
             assert.ok(
               record.entry
-                .filter((shot) => shot.target < 600)
+                .filter((shot) => shot.canonicalClock < 600)
                 .every((shot) => shot.nativeNaniteDraws === 0),
               "the real kit bitmap pass stays empty until the explosive clearing finishes",
             );
             assert.ok(
               record.entry
-                .filter((shot) => shot.target >= 620 && shot.target <= 1600)
+                .filter((shot) => shot.canonicalClock >= 620 && shot.canonicalClock <= 1600)
                 .some((shot) => shot.nativeNaniteDraws > 0),
               "kit bitmap material actually appears after, not merely disabled forever",
             );
@@ -775,9 +785,15 @@ try {
           );
           assert.ok(
             record.entry
-              .filter((shot) => shot.target === 420 || shot.target === 460)
+              .filter(entryPeak)
               .every((shot) => shot.atlasDraws > 0 && shot.pixels?.green > 0),
             `${name}: initial flame frames must be drawn, not only a later return call`,
+          );
+          const sustained = record.entry.filter((shot) => [900, 1250].includes(shot.target));
+          assert.equal(sustained.length, 2, "both added-duration flame samples must be captured");
+          assert.ok(
+            sustained.every((shot) => shot.nativeAtlasDraws > 0 && shot.pixels?.green > 0),
+            `${name}: the added second retains an actively painted visible flame at both sustained samples`,
           );
         }
         await page.evaluate(() =>
@@ -914,10 +930,7 @@ try {
               "the scroll native kit tracer observes later real material, making the pre-material zero check non-vacuous",
             );
           record.bodyCoverage = {
-            entry: coverageSummary(
-              record.entry,
-              (shot) => shot.target === 420 || shot.target === 460,
-            ),
+            entry: coverageSummary(record.entry, entryPeak),
             scroll: coverageSummary(
               record.scroll,
               (shot) =>
@@ -957,11 +970,7 @@ try {
             note: "Early ignition, wrapped volume, explosive clearing and later metal are captured from the real engines. All twelve exterior wrap patches must pass together, not as maxima assembled from different frames. Native kit bitmap draws are checked before the material floor; typed-metal emptiness and exact reverse poses are verified by the actual drawing-pass unit harness. Browser atlas phase is intentionally free-running.",
           };
           if (mode === "normal" && !baseline) {
-            assertVortexPeak(
-              record.entry,
-              (shot) => shot.target === 420 || shot.target === 460,
-              `${name}/entry`,
-            );
+            assertVortexPeak(record.entry, entryPeak, `${name}/entry`);
             assertVortexPeak(
               record.scroll,
               (shot) => shot.direction === "forward" && [0.065, 0.069625].includes(shot.progress),
@@ -974,7 +983,7 @@ try {
             );
             if (!naturalClock) {
               const quiet = record.entry.filter((shot) => shot.target <= 280);
-              const flare = record.entry.filter((shot) => [420, 460].includes(shot.target));
+              const flare = record.entry.filter(entryPeak);
               const energy = (shot) => shot.fireEvidence?.meanGreenExcess ?? 0;
               record.ignitionEnergy = {
                 quiet: quiet.map((shot) => [shot.target, energy(shot)]),
@@ -985,7 +994,7 @@ try {
                 "the real field grows from quiet ignition into a rapid flare, not a constant bright overlay",
               );
               const clearing = record.entry.filter(
-                (shot) => shot.target === 560 || shot.target === 590,
+                (shot) => shot.target === 1560 || shot.target === 1590,
               );
               assert.equal(clearing.length, 2, "both explosion end and clear gap are captured");
               assert.ok(

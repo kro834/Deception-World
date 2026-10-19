@@ -135,6 +135,12 @@ const BODY_H = 472;
 const VORTEX_STRANDS = 3;
 const VORTEX_STEPS = 48;
 const VORTEX_STRIDE = 7;
+// Crown width depends only on the authored step, not on time or power.
+// Bake its exact double values once instead of repeating float helper
+// crossings for all three strands on every frame of the extended fire.
+const VORTEX_CROWN_WIDTH = new Float64Array(VORTEX_STEPS + 1);
+for (let i = 0; i <= VORTEX_STEPS; i += 1)
+  VORTEX_CROWN_WIDTH[i] = 1 + 0.35 * smooth(clamp((i / VORTEX_STEPS - 0.65) / 0.25));
 // Reused geometry: x/y, transverse normal, thickness, front/back depth,
 // local breakup. A whole coil is continuous, never assembled from strips.
 const VORTEX = new Float32Array(VORTEX_STRANDS * (VORTEX_STEPS + 1) * VORTEX_STRIDE);
@@ -454,6 +460,10 @@ function poseVortex(power, clock, phase) {
         VORTEX_W *
         (0.075 + 0.045 * Math.sin(t * Math.PI)) *
         Math.sqrt(Math.max(0.15, Math.sin(t * Math.PI))) *
+        // Keep the crown wrapped as the longer-lived vortex turns through
+        // other angles; this widens the same irregular volume, not a mask
+        // over the face or additional independent head flames.
+        VORTEX_CROWN_WIDTH[i] *
         (0.65 + power * 0.35) *
         (1 - burst * 0.65) *
         tear;

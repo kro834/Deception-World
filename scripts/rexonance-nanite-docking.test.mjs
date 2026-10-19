@@ -58,6 +58,10 @@ function runtimeFactory() {
     .replace(
       returnMarker,
       `  return {
+    __testFreeCurrent(j, q) {
+      surfaceCurrent(free.emission, j * 4, free.hsh[j], free.birth[j], q);
+      return Array.from(RG);
+    },
     __testPose(i, q) {
       poseTile(i, q, 0);
       const p = PO[i];
@@ -212,6 +216,63 @@ test("every scroll machine uses the shared burning surface and one unquantized b
       bands.add(Math.floor((births[i] - 0.08625) * 1000));
     }
     assert.ok(bands.size >= 20, `${bands.size} continuous release times, not six pumps`);
+  }
+});
+
+test("scroll machines wind around a substantial contracting helix in position and projected depth", () => {
+  const { nano, gold } = fixture();
+  const swarm = createSwarm(nano, gold);
+  const H = REXONANCE_SUIT_SIZE.height;
+  const smooth = (u) => (u = Math.max(0, Math.min(1, u))) * u * (3 - 2 * u);
+  for (let j = 0; j < nano.free.birth.length; j += 17) {
+    const born = nano.free.birth[j],
+      seed = nano.free.hsh[j];
+    const [sx, sy, nx, ny] = nano.free.emission.slice(j * 4, j * 4 + 4);
+    const normal2 = nx * nx + ny * ny,
+      angles = [],
+      radii = [],
+      depths = [];
+    for (let step = 1; step <= 90; step++) {
+      const age = step / 1000,
+        q = born + age;
+      const [x, y, z] = swarm.__testFreeCurrent(j, q);
+      const release = smooth(age / 0.012),
+        returning = smooth((age - 0.012) / 0.075);
+      // Detonation has finished before these material samples. De-trend its
+      // inherited launch to measure the real current's orbital displacement.
+      const thrown = (((80 + 50 * seed) * H) / 1000) * (1 - 0.9 * returning);
+      const lift = ((18 + 17 * seed) * H) / 1000;
+      const reach = thrown + H * (0.024 + 0.018 * seed) * release;
+      const dx = x - sx - nx * reach;
+      const dy = y - sy - ny * reach + lift + H * 0.018 * release;
+      const tangent = (-ny * dx + nx * dy) / normal2;
+      const normal = (nx * dx + ny * dy) / normal2 / 0.5;
+      let angle = Math.atan2(normal, tangent);
+      if (angles.length) while (angle < angles.at(-1) - Math.PI) angle += Math.PI * 2;
+      angles.push(angle);
+      radii.push(Math.hypot(tangent, normal));
+      depths.push(z);
+    }
+    assert.ok(
+      angles.at(-1) - angles[0] > Math.PI * 4,
+      `${j}: multiple complete orbital turns after emergence`,
+    );
+    assert.ok(Math.max(...radii) > H * 0.035, `${j}: orbit visibly leaves a straight launch path`);
+    assert.ok(
+      radii.at(-1) < Math.max(...radii) * 0.4,
+      `${j}: the orbit contracts towards assembly`,
+    );
+    assert.ok(
+      Math.max(...depths) - Math.min(...depths) > 1.4,
+      `${j}: front/back depth changes with orbit`,
+    );
+    const reference = swarm.__testFreeCurrent(j, born + 0.04);
+    swarm.__testFreeCurrent(j, born + 0.09);
+    assert.deepEqual(
+      swarm.__testFreeCurrent(j, born + 0.04),
+      reference,
+      "reverse uses the same closed-form current",
+    );
   }
 });
 

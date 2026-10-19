@@ -255,7 +255,7 @@ html body:has(.rx-call-sequence[data-mode="stage"]) .zeus-button {
 /* The first call cuts onto an opaque ground immediately. The departure
    menu must not bleed through while its own closing transition settles. */
 .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"] .rx-call-frame {
-  animation: rxCallFrameLock 560ms var(--rx-call-ease) both;
+  animation: rxCallFrameLock var(--rx-call-frame-duration, 560ms) var(--rx-call-ease) both;
 }
 .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"] .rx-call-meter > i {
   animation: rxCallMeter var(--rx-call-cover) linear both;
@@ -1241,7 +1241,6 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   translate: -50% -50%;
 }
 
-
 /* RIDER！'s nanite motes: squares in the air round the body (full tier). */
 .rx-call-sequence .rx-suit-figure > .rx-suit-motes {
   inset: 0;
@@ -1328,7 +1327,10 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   visibility: hidden;
 }
 
-.rx-call-sequence .rx-suit[data-nanites="canvas"] .rx-suit-build > :is(.rx-suit-mote, .rx-suit-plate) {
+.rx-call-sequence
+  .rx-suit[data-nanites="canvas"]
+  .rx-suit-build
+  > :is(.rx-suit-mote, .rx-suit-plate) {
   display: none;
 }
 
@@ -1352,11 +1354,16 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   aspect-ratio: 1;
   opacity: 0;
   background:
-    linear-gradient(90deg, transparent, rgb(255 255 255 / 92%) 46% 54%, transparent) 50% 50% /
-      100% 2px no-repeat,
-    linear-gradient(transparent, rgb(255 255 255 / 92%) 46% 54%, transparent) 50% 50% / 2px
-      62% no-repeat,
-    radial-gradient(circle, rgb(255 251 236 / 95%) 0 7%, rgb(121 232 255 / 40%) 18%, transparent 46%);
+    linear-gradient(90deg, transparent, rgb(255 255 255 / 92%) 46% 54%, transparent) 50% 50% / 100%
+      2px no-repeat,
+    linear-gradient(transparent, rgb(255 255 255 / 92%) 46% 54%, transparent) 50% 50% / 2px 62%
+      no-repeat,
+    radial-gradient(
+      circle,
+      rgb(255 251 236 / 95%) 0 7%,
+      rgb(121 232 255 / 40%) 18%,
+      transparent 46%
+    );
   translate: -50% -50%;
 }
 
@@ -1836,7 +1843,7 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
     .rx-suit-heading::before {
-    animation: rxSuitHeading 300ms steps(5, jump-end) 60ms both;
+    animation: rxSuitHeading var(--rx-suit-heading-duration, 300ms) steps(5, jump-end) 60ms both;
   }
 
   /* The check gives way as the first pieces form. */
@@ -1850,14 +1857,16 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
     .rx-suit-boot
     p {
-    animation: rxSuitTick 60ms steps(2, jump-end) calc(40ms + var(--rx-suit-i) * 32ms) both;
+    animation: rxSuitTick var(--rx-suit-boot-label-duration, 60ms) steps(2, jump-end)
+      var(--rx-suit-boot-label-start, calc(40ms + var(--rx-suit-i) * 32ms)) both;
   }
 
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
     .rx-suit-boot
     b {
-    animation: rxSuitTick 60ms steps(2, jump-end) calc(120ms + var(--rx-suit-i) * 32ms) both;
+    animation: rxSuitTick var(--rx-suit-boot-value-duration, 60ms) steps(2, jump-end)
+      var(--rx-suit-boot-value-start, calc(120ms + var(--rx-suit-i) * 32ms)) both;
   }
 
   /* FAR UP！ scans the bare undersuit: a single sweep runs top to bottom
@@ -1866,7 +1875,8 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
     .rx-suit-scan {
-    animation: rxSuitScanWindow 250ms cubic-bezier(0.45, 0, 0.55, 1) 70ms both;
+    animation: rxSuitScanWindow var(--rx-suit-scan-duration, 250ms) cubic-bezier(0.45, 0, 0.55, 1)
+      70ms both;
   }
 
   html:not([data-world-effects="economy"])
@@ -1874,8 +1884,9 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
     .rx-suit-scan
     > i {
     animation:
-      rxSuitScanHold 250ms cubic-bezier(0.45, 0, 0.55, 1) 70ms both,
-      rxSuitUndersuit 60ms steps(2, jump-end) var(--rx-call-rider-start) both;
+      rxSuitScanHold var(--rx-suit-scan-duration, 250ms) cubic-bezier(0.45, 0, 0.55, 1) 70ms both,
+      rxSuitUndersuit var(--rx-suit-under-duration, 60ms) steps(2, jump-end)
+        var(--rx-call-rider-start) both;
   }
 
   html:not([data-world-effects="economy"])
@@ -1884,7 +1895,7 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
     .rx-suit-scan::after {
-    animation: rxSuitSweep 330ms linear 70ms both;
+    animation: rxSuitSweep var(--rx-suit-sweep-duration, 330ms) linear 70ms both;
   }
 
   /* RIDER！: alignment brackets bite on the joints, core first, then
@@ -1894,14 +1905,15 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
     .rx-suit-joint {
-    animation: rxSuitJoint 900ms linear calc(var(--rx-call-rider-start) + var(--rx-suit-j) * 24ms)
-      both;
+    animation: rxSuitJoint var(--rx-suit-joint-duration, 900ms) linear
+      var(--rx-suit-joint-start, calc(var(--rx-call-rider-start) + var(--rx-suit-j) * 24ms)) both;
   }
 
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
     .rx-suit-halo.is-core {
-    animation: rxSuitHalo 420ms var(--rx-call-ease) calc(var(--rx-call-rider-start) + 40ms) both;
+    animation: rxSuitHalo var(--rx-suit-core-duration, 420ms) var(--rx-call-ease)
+      var(--rx-suit-core-start, calc(var(--rx-call-rider-start) + 40ms)) both;
   }
 
   html:not([data-world-effects="economy"])
@@ -2016,12 +2028,12 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
 
   /* The reticle acquires on FAR UP！, dims as the helmet forms above it
      through REXONANCE！, and on REXONANCE DEUS！ hands over to the gold
-     lock. Its keyframes sit on the call clock: 1300 ms (61.386 %) and the
-     last call at 1980 ms (95.05 %). */
+     lock. Its canonical 1300/1980 ms events now land at elapsed 2300/2980
+     ms after the entry-only vortex hold. */
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
     .rx-suit-lock::before {
-    animation: rxSuitReticle 2020ms linear 60ms both;
+    animation: rxSuitReticle 3020ms linear 60ms both;
   }
 
   /* REXONANCE DEUS！: the lock settles on the visor; the bodysuit between
@@ -2190,7 +2202,7 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
     transform: none;
   }
 }
-/* Material is absent until the flame vortex has burst and cleared (600ms).
+/* Material is absent until the flame vortex has burst and cleared (1600ms).
    This also applies when only the DOM/SVG fallback is available. */
 @keyframes rxSuitMotes {
   0% {
@@ -2397,19 +2409,19 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
     opacity: 0;
     transform: scale(1.5) rotate(-30deg);
   }
-  4% {
+  2.6755% {
     opacity: 0.8;
   }
-  10% {
+  6.6887% {
     transform: scale(1.06) rotate(0deg);
   }
-  61.386% {
+  74.1722% {
     opacity: 0.8;
   }
-  64.356% {
+  76.1589% {
     opacity: 0.32;
   }
-  95.05% {
+  96.6887% {
     opacity: 0.32;
     transform: scale(1.06);
   }

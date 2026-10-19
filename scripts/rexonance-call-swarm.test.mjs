@@ -95,8 +95,8 @@ test("the swarm rides the pinned call: its timeline, and the pinned clocks uncha
   );
   assert.ok(release <= calls.REXONANCE_SUIT_PIXELS.scatter, String(release));
   assert.ok(swarm.implode[1] < calls.REXONANCE_SUIT_PIXELS.scatter);
-  // The owner's pinned clocks are untouched.
-  assert.equal(calls.REXONANCE_ENTRY_TIMINGS.cover, 2730);
+  // Authored armour clocks remain canonical; the real entry adds 1 s of flame.
+  assert.equal(calls.REXONANCE_ENTRY_TIMINGS.cover, 3730);
   assert.equal(calls.REXONANCE_SUIT_REVEAL_MS, 100);
   assert.equal(calls.REXONANCE_SUIT_CLANK_MS, 40);
   assert.equal(calls.REXONANCE_SUIT_PIXELS.fill, 1990);
@@ -1191,6 +1191,67 @@ test("the layout preserves bottom-up drains and exact tile timing with one conti
   assert.equal(free, 160);
   assert.ok(legRings / legs >= 5, `leg chips' mean ring ${legRings / legs}`);
   assert.ok(legs > 60 && helm > 20, `${legs} leg chips, ${helm} helmet chips`);
+});
+
+test("entrance machines open into a visible two-turn helix with depth, then rejoin their current", async () => {
+  const { plan, extras } = await extrasRuntime({ touch: false });
+  const all = plan.plates();
+  const L = extras.rexonanceNaniteLayout();
+  const ex = extras.createSuitExtras({
+    flight: recorder().context,
+    s: 1,
+    ox: 0,
+    oy: 0,
+    all,
+    gold: plan.cells(),
+    source: { kind: "work" },
+    sheet: { kind: "motes" },
+  });
+  for (let c = 0; c < L.birth.length; c += 137) {
+    const origin = ex.firebrandAt(c, L.birth[c]);
+    const nx = L.emitNX[c],
+      ny = L.emitNY[c],
+      normal2 = nx * nx + ny * ny;
+    const angles = [],
+      radii = [],
+      depths = [];
+    for (let step = 5; step <= 95; step++) {
+      const u = step / 100,
+        t = L.birth[c] + L.sprayMs[c] * u;
+      const pose = ex.firePoseAt(c, t),
+        current = ex.firePoseAt(c, t, false);
+      const mix = u * u * (3 - 2 * u),
+        envelope = Math.sin(Math.PI * u) ** 2;
+      // Remove the inherited trajectory and vertical arc, then recover the
+      // visible ellipse in its local tangent/normal plane from actual poses.
+      const dx = pose[0] - (origin[0] + (current[0] - origin[0]) * mix);
+      const dy = pose[1] - (origin[1] + (current[1] - origin[1]) * mix) + 24 * envelope;
+      const tangent = (-ny * dx + nx * dy) / normal2;
+      const normal = ((nx * dx + ny * dy) / normal2 - 22 * envelope) / 0.55;
+      let angle = Math.atan2(normal, tangent);
+      if (angles.length) while (angle < angles.at(-1) - Math.PI) angle += Math.PI * 2;
+      angles.push(angle);
+      radii.push(Math.hypot(tangent, normal));
+      depths.push(pose[2] - (0.5 + (current[2] - 0.5) * mix));
+    }
+    assert.ok(angles.at(-1) - angles[0] > Math.PI * 4, `${c}: more than two visible orbital turns`);
+    assert.ok(
+      Math.max(...radii) >= 38 && Math.max(...radii) <= 57,
+      `${c}: substantial bounded orbit radius`,
+    );
+    assert.ok(
+      Math.max(...depths) - Math.min(...depths) > 0.8,
+      `${c}: projected depth crosses front and back`,
+    );
+    assert.ok(
+      radii[0] < Math.max(...radii) / 10 && radii.at(-1) < Math.max(...radii) / 10,
+      `${c}: radius opens and contracts at both joins`,
+    );
+    const t = L.birth[c] + L.sprayMs[c] * 0.57;
+    const reference = ex.firePoseAt(c, t);
+    ex.firePoseAt(c, L.birth[c] + L.sprayMs[c]);
+    assert.deepEqual(ex.firePoseAt(c, t), reference, "the helix is exact under reverse scrubbing");
+  }
 });
 
 test("entrance fire leaves the shared surface before a machine appears at the exact airborne handoff", async () => {

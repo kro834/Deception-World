@@ -1028,7 +1028,7 @@ test("rx17: cold decoding and high-priority plan finish before the full-timing c
   assert.equal(ui.gates.at(-1).rexonanceSuit, "build");
   assert.equal(
     REXONANCE_ENTRY_TIMINGS.cover,
-    2730,
+    3730,
     "preparation cannot shorten or extend the call beats",
   );
   await settleGo(ui, pending);

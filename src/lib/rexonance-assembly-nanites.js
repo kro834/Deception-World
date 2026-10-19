@@ -2591,9 +2591,10 @@ export function createAssemblyNanites({
   const RG = new Float64Array(5);
 
   /* -- draw passes: allocation-free from here -- */
-  // One continuous curl field round the burning body. Nearby origins share
-  // the same low-frequency current, while their small phase offsets stop
-  // it reading as rigid rings. A firebrand leaves the burning body before
+  // A continuous helical current opens out of the airborne firebrands.
+  // Neighbouring body origins share its winding phase; the radius opens
+  // after metal birth, then contracts towards the anatomical assembly.
+  // A firebrand leaves the burning body before
   // a metal cell exists. The airborne handoff has no position/velocity pop.
   // The flight samples this same function at t0, including its depth and
   // tangent, so slow or reverse scrubbing never teleports a cell.
@@ -2608,19 +2609,20 @@ export function createAssemblyNanites({
     const launch = smooth(clamp01((q - FIRE_START) / (FIRE_END - FIRE_START)));
     // An actual detonation ejects the fragments beyond the torso, not a
     // short green shimmer still sitting on its skin after the storm clears.
-    const thrown = (((80 + 50 * seed) * H) / 1000) * launch;
+    const returnToBody = smooth(clamp01((age - BIRTH) / 0.075));
+    const thrown = (((80 + 50 * seed) * H) / 1000) * launch * (1 - 0.9 * returnToBody);
     const lift = (((18 + 17 * seed) * H) / 1000) * launch;
     const release = smooth(clamp01(age / BIRTH));
-    const ph = (sy / H) * 9 + nx * 1.7 + q * 21 + seed * 0.45;
-    const gust = Math.sin(ph);
-    const curl = (gust + 0.35 * Math.sin(2 * ph + 0.7)) * H * 0.026 * release;
-    const reach = H * (0.035 + 0.045 * seed) * release * (0.88 + 0.12 * Math.cos(ph));
+    const ph = (sy / H) * 9 + nx * 1.7 + age * TAU * 2.4 / 0.09 + seed * 0.45;
+    const radius = H * (0.042 + 0.016 * seed) * release * (1 - 0.72 * returnToBody);
+    const curl = radius * Math.cos(ph);
+    const reach = H * (0.024 + 0.018 * seed) * release + 0.5 * radius * Math.sin(ph);
     RG[0] = sx + nx * (thrown + reach) + tx * curl;
     RG[1] =
-      sy + ny * (thrown + reach) + ty * curl - lift - H * 0.025 * release * (0.65 + 0.35 * gust);
-    RG[2] = 0.72 * Math.sin(ph * 0.65 + (sx / W) * 6 + seed * TAU) * release;
-    const dx = tx * Math.cos(ph) + nx * 0.35;
-    const dy = ty * Math.cos(ph) + ny * 0.35 - 0.25;
+      sy + ny * (thrown + reach) + ty * curl - lift - H * 0.018 * release;
+    RG[2] = 0.82 * Math.sin(ph) * release;
+    const dx = -tx * Math.sin(ph) + nx * 0.5 * Math.cos(ph);
+    const dy = -ty * Math.sin(ph) + ny * 0.5 * Math.cos(ph);
     const length = Math.hypot(dx, dy) || 1;
     RG[3] = dx / length;
     RG[4] = dy / length;

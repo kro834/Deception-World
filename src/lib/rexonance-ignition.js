@@ -10,6 +10,37 @@ const BODY = new Float32Array([
 const clamp = (x) => Math.max(0, Math.min(1, x));
 const smooth = (x) => x * x * (3 - 2 * x);
 
+// Give the vortex a visible rolling interval without compressing or moving
+// any authored materialization, docking or final-light choreography relative
+// to one another. Wall time continues driving the flame's texture motion.
+export const REXONANCE_ENTRY_VORTEX_HOLD_MS = 1000;
+const VORTEX_LINGER_FROM = 280;
+const VORTEX_LINGER_TO = 420;
+const VORTEX_LINGER_SPAN = VORTEX_LINGER_TO - VORTEX_LINGER_FROM;
+export function entryCanonicalTime(elapsedMs) {
+  if (!Number.isFinite(elapsedMs) || elapsedMs <= 0) return 0;
+  if (elapsedMs <= VORTEX_LINGER_FROM) return elapsedMs;
+  if (elapsedMs >= VORTEX_LINGER_TO + REXONANCE_ENTRY_VORTEX_HOLD_MS)
+    return elapsedMs - REXONANCE_ENTRY_VORTEX_HOLD_MS;
+  return (
+    VORTEX_LINGER_FROM +
+    ((elapsedMs - VORTEX_LINGER_FROM) * VORTEX_LINGER_SPAN) /
+      (VORTEX_LINGER_SPAN + REXONANCE_ENTRY_VORTEX_HOLD_MS)
+  );
+}
+export function entryElapsedTime(canonicalMs) {
+  if (!Number.isFinite(canonicalMs) || canonicalMs <= 0) return 0;
+  if (canonicalMs <= VORTEX_LINGER_FROM) return canonicalMs;
+  if (canonicalMs >= VORTEX_LINGER_TO)
+    return canonicalMs + REXONANCE_ENTRY_VORTEX_HOLD_MS;
+  return (
+    VORTEX_LINGER_FROM +
+    ((canonicalMs - VORTEX_LINGER_FROM) *
+      (VORTEX_LINGER_SPAN + REXONANCE_ENTRY_VORTEX_HOLD_MS)) /
+      VORTEX_LINGER_SPAN
+  );
+}
+
 // The fire must finish breaking apart before any metal can materialize.
 // Entry uses t/2400; scroll uses (q-.015)/.285, so both scenes retain the
 // same causal order even when the reader reverses or jumps the clock.

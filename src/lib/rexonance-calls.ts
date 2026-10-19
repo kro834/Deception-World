@@ -27,8 +27,11 @@ export const REXONANCE_STAGE_LABELS: Record<RexonanceStage, string> = {
 
 // rx12 (owner, 2026-10-10): the face holds its pixel squares ~0.6 s before
 // they scatter, so the last call holds 580 ms longer (cover 2300 -> 2880).
-// Owner, 2026-10-11: that hold a little shorter (~0.45 s): cover 2730.
-export const REXONANCE_ENTRY_TIMINGS = { cover: 2730, reveal: 480 } as const;
+// Owner, 2026-10-11: that hold a little shorter (~0.45 s): canonical cover 2730.
+// The entry vortex now holds for one extra second before its burst. The
+// authored calls and suit plan below stay canonical; only entry elapsed
+// time is stretched, so scroll and stage transformations keep their clocks.
+export const REXONANCE_ENTRY_TIMINGS = { cover: 3730, reveal: 480 } as const;
 export const REXONANCE_STAGE_DURATION_MS = 650;
 
 // Cover time is a minimum: the final call holds if the destination is late.

@@ -50,7 +50,12 @@ async function play(rich) {
   await page.locator('.rx-call-sequence[data-mode="entry"]').waitFor({ timeout: 10000 });
   await page.waitForTimeout(600);
   const swarm = await page.evaluate(() => document.querySelector(".rx-suit")?.dataset.swarm ?? null);
-  await page.waitForTimeout(2600);
+  // The vortex now adds a second to the entry. Observe the actual end of
+  // both calls instead of truncating the longer choreography at 3200 ms.
+  // Classification and the rich-versus-classic allocation ceiling stay equal.
+  await page
+    .locator('.rx-call-sequence[data-mode="entry"]')
+    .waitFor({ state: "detached", timeout: 15000 });
   const { profile } = await cdp.send("HeapProfiler.stopSampling");
   const bytes = { extras: 0, engine: 0 };
   const sites = new Map();

@@ -85,12 +85,11 @@ test("rx17: each plate's gold forms right after it seats, quickly, and is done i
   // The nanites' flight and cooling are short beats of the formation.
   assert.ok(REXONANCE_SUIT_GOLD.approach < REXONANCE_SUIT_GOLD.form / 2);
   assert.ok(REXONANCE_SUIT_GOLD.cool < REXONANCE_SUIT_GOLD.form / 2);
-  // Keep the published short-cover clocks while retaining the material
-  // repair. No merge may silently restore the earlier long face hold.
+  // Preserve authored gold/face clocks while the preceding flame gains 1 s.
   assert.equal(Math.max(...Object.values(REXONANCE_SUIT_GOLD_AT).map(([, to]) => to)), 1986);
   assert.equal(REXONANCE_SUIT_PIXELS.fill, 1990);
   assert.equal(REXONANCE_SUIT_PIXELS.scatter, 2520);
-  assert.equal(REXONANCE_ENTRY_TIMINGS.cover, 2730);
+  assert.equal(REXONANCE_ENTRY_TIMINGS.cover, 3730);
 });
 
 test("rx17: the gold atlas and the gold cells, generated with the plates", async () => {
