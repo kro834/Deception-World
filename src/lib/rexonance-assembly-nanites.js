@@ -3233,10 +3233,13 @@ export function createAssemblyNanites({
   // become dim specks by index hash; the near bands are always sprites.
   const firebrandPass = (ctx, list, count) => {
     let rects = 0;
+    // Match entry: no isolated flame bodies survive the departing burst.
+    const tailSpan = (0.285 * 40) / 2400;
+    const fireTail = 1 - smooth(clamp01((Q - (FIRE_END - tailSpan)) / tailSpan));
     const limit = coarse ? FIREBRANDS_TOUCH : FIREBRANDS;
     for (let c = 0; c < count; c += 1) {
       const slot = list[c];
-      const fire = FIRE[slot];
+      const fire = FIRE[slot] * fireTail;
       if (fire <= 0.02) continue;
       if (!CALM && firebrandsDrawn < limit && sprites_ + 2 <= ASSEMBLY_SPRITE_BUDGET) {
         drawNaniteFirebrand(ctx, X[slot], Y[slot], fire, Q * 10);

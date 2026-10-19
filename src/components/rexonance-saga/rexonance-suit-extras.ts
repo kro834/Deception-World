@@ -3194,6 +3194,8 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
     if (t < FIREBRAND_START || t >= FIRE_BIRTH + FIRE_BIRTH_SPAN + FIREBRAND_CARRIER)
       return;
     base();
+    // Extinguish detached tongues with the burst; keep the later metal handoff.
+    const fireTail = 1 - smooth(unit((t - (FIREBRAND_END - 40)) / 40));
     for (let c = 0; c < CHIPS; c += FIREBRAND_STRIDE) {
       const age = t - L.birth[c];
       if (t < L.brandStart[c] || age >= FIREBRAND_CARRIER) continue;
@@ -3223,6 +3225,7 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
       pose[SY] = pose[PY] * s;
       fenceFade();
       const power =
+        fireTail *
         smooth((t - L.brandStart[c]) / 18) *
         (1 - smooth(age / FIREBRAND_COOL)) *
         pose[FADE];

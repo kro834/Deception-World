@@ -1338,6 +1338,8 @@ test("entrance fire leaves the shared surface before a machine appears at the ex
   };
   assert.equal(fireDraws(419), 0);
   assert.ok(fireDraws(540) > 0, "flame fragments, never metal, precede the 600ms material floor");
+  for (let t = 560; t <= 900; t += 5)
+    assert.equal(fireDraws(t), 0, `${t}: no detached flame survives the departing burst`);
   assert.equal(fireDraws(900), 0, "firebrands cool completely after the last crossfade");
 });
 
