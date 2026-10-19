@@ -3,16 +3,28 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 import sharp from "sharp";
 import {
+  NANITE_FIRE_PHASES,
   naniteFlameEnvelope,
   naniteFlameScatter,
+  naniteMaterialLanding,
   sampleFlameBirth,
 } from "../src/lib/rexonance-ignition.js";
 
-test("one shared envelope ignites quietly, flares quickly, then hands off without a second ignition", () => {
+test("shared phases keep the vortex, explosive clearing and first metal in that order", () => {
+  assert.deepEqual(NANITE_FIRE_PHASES, {
+    burstStart: 0.175,
+    burstEnd: 7 / 30,
+    materialStart: 0.25,
+  });
+  assert.ok(Object.isFrozen(NANITE_FIRE_PHASES));
+  assert.equal(NANITE_FIRE_PHASES.burstStart * 2400, 420);
+  assert.equal(NANITE_FIRE_PHASES.burstEnd * 2400, 560);
+  assert.equal(NANITE_FIRE_PHASES.materialStart * 2400, 600);
+  assert.equal(0.015 + 0.285 * NANITE_FIRE_PHASES.materialStart, 0.08625);
   assert.equal(naniteFlameEnvelope(0), 0);
   assert.equal(naniteFlameEnvelope(280 / 2400), 0.09);
   assert.equal(naniteFlameEnvelope(420 / 2400), 1);
-  assert.equal(naniteFlameEnvelope(960 / 2400), 1);
+  assert.equal(naniteFlameEnvelope(600 / 2400), 0);
   assert.equal(naniteFlameEnvelope(1), 0);
   const slow = naniteFlameEnvelope(200 / 2400);
   assert.ok(slow > 0 && slow < 0.09);
@@ -21,20 +33,28 @@ test("one shared envelope ignites quietly, flares quickly, then hands off withou
     "an actual flare, not a steady global fade",
   );
   let previous = 0;
-  for (let i = 0; i <= 960; i++) {
+  for (let i = 0; i <= 420; i++) {
     const value = naniteFlameEnvelope(i / 2400);
     assert.ok(value >= previous && value <= 1, "kindling/flare/hold is monotonic and bounded");
     previous = value;
   }
-  for (let i = 960; i <= 2400; i++) {
+  for (let i = 420; i <= 2400; i++) {
     const value = naniteFlameEnvelope(i / 2400);
     assert.ok(value <= previous && value >= 0, "the handoff cannot respawn a second blaze");
     previous = value;
+    if (i >= 600) assert.equal(value, 0, "the body blaze cannot remain over later metal formation");
   }
 });
 
 test("phase joins are continuous and preserve the same value after a reverse scrub", () => {
-  for (const boundary of [0, 280 / 2400, 420 / 2400, 960 / 2400, 1]) {
+  for (const boundary of [
+    0,
+    280 / 2400,
+    NANITE_FIRE_PHASES.burstStart,
+    NANITE_FIRE_PHASES.burstEnd,
+    NANITE_FIRE_PHASES.materialStart,
+    1,
+  ]) {
     assert.ok(
       Math.abs(naniteFlameEnvelope(boundary - 1e-8) - naniteFlameEnvelope(boundary)) < 1e-6,
     );
@@ -49,8 +69,8 @@ test("phase joins are continuous and preserve the same value after a reverse scr
 });
 
 test("the outward scatter is a single continuous detonation, not a respawning particle clock", () => {
-  assert.equal(naniteFlameScatter(0.16), 0);
-  assert.equal(naniteFlameScatter(0.36), 1);
+  assert.equal(naniteFlameScatter(NANITE_FIRE_PHASES.burstStart), 0);
+  assert.equal(naniteFlameScatter(NANITE_FIRE_PHASES.burstEnd), 1);
   let previous = 0;
   const reference = [];
   for (let i = 0; i <= 100; i++) {
@@ -61,6 +81,27 @@ test("the outward scatter is a single continuous detonation, not a respawning pa
   }
   for (let i = 100; i >= 0; i--) assert.equal(naniteFlameScatter(i / 100), reference[i]);
   for (const phase of [NaN, Infinity, -Infinity]) assert.equal(naniteFlameScatter(phase), 0);
+});
+
+test("early boot growth is remapped after the clearing without moving fit or late armour", () => {
+  assert.equal(naniteMaterialLanding(610, 710), 660);
+  assert.equal(naniteMaterialLanding(660, 710), 685);
+  assert.equal(naniteMaterialLanding(710, 710), 710);
+  assert.equal(naniteMaterialLanding(750, 850), 750);
+  for (const fit of [710, 720, 730, 740, 850, 1500, 2600]) {
+    let previous = -Infinity;
+    for (let i = 0; i <= 100; i++) {
+      const before = fit - 100 + i;
+      const actual = naniteMaterialLanding(before, fit);
+      assert.ok(actual >= previous && actual <= fit && actual >= Math.min(fit, 660));
+      previous = actual;
+    }
+    assert.equal(
+      naniteMaterialLanding(fit, fit),
+      fit,
+      "the artwork keeps its original seating clock",
+    );
+  }
 });
 
 test("emission samples reuse the supplied buffer and invalid/periodic seeds agree deterministically", () => {

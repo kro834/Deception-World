@@ -2,7 +2,7 @@
 // field feeds both nanite engines: a quiet ignition, one explosive front,
 // then material shed from that surface. The Blender volume adds turbulent
 // detail inside the field, rather than twenty unrelated miniature fires.
-import { naniteFlameScatter, sampleFlameBirth } from "./rexonance-ignition.js";
+import { NANITE_FIRE_PHASES, naniteFlameScatter, sampleFlameBirth } from "./rexonance-ignition.js";
 export const NANITE_FLAME_ATLAS = Object.freeze({
   src: "/rexonance-flame-natural-20261019/flame.webp",
   width: 1024,
@@ -109,22 +109,57 @@ for (let i = 0; i < 48; i += 1) {
   SOURCES.set(sourceScratch, i * 4);
 }
 
-// Three small surfaces (~1.8 MiB), prepared once and retained across calls.
+// Three small surfaces (~2.75 MiB), prepared once and retained across calls.
 // A source image is already decoded by the suit warm-up: no extra request.
 let bodySource = null;
 let bodyMask = null;
 let bodyField = null;
 let bodyFlow = null;
 let bodyContext = null;
+let maskContext = null;
 let fieldClock = -Infinity;
 let fieldPower = -1;
-const FIELD_W = 288;
-const FIELD_H = 528;
+let fieldPhase = -1;
+const VORTEX_W = 288;
+const VORTEX_H = 528;
+const FIELD_PAD = 48;
+const FIELD_W = VORTEX_W + FIELD_PAD * 2;
+const FIELD_H = VORTEX_H + FIELD_PAD * 2;
 // Room for a broad, rolling plume outside the figure (not a human cutout).
-const BODY_X = 48;
-const BODY_Y = 28;
-const BODY_W = FIELD_W - BODY_X * 2;
-const BODY_H = FIELD_H - BODY_Y * 2;
+// Extra transparent padding protects the rotated volume's irregular tips;
+// it does not stretch the flame or alter the real body's registration.
+const BODY_X = 48 + FIELD_PAD;
+const BODY_Y = 28 + FIELD_PAD;
+const BODY_W = 192;
+const BODY_H = 472;
+const VORTEX_STRANDS = 3;
+const VORTEX_STEPS = 48;
+const VORTEX_STRIDE = 7;
+// Reused geometry: x/y, transverse normal, thickness, front/back depth,
+// local breakup. A whole coil is continuous, never assembled from strips.
+const VORTEX = new Float32Array(VORTEX_STRANDS * (VORTEX_STEPS + 1) * VORTEX_STRIDE);
+const DENSITY = new Float32Array(64 * 64);
+for (let i = 0; i < DENSITY.length; i += 1) DENSITY[i] = hash(i + 51.7);
+// The one-time density bake crosses this helper almost a million times.
+// Reusable double slots keep its inputs/output out of boxed-number call
+// arguments and returns without changing a single density or RGBA value.
+const DENSITY_SAMPLE = new Float64Array(3);
+const density = (period) => {
+  const x = DENSITY_SAMPLE[0];
+  const y = DENSITY_SAMPLE[1];
+  const ix = Math.floor(x);
+  const iy = Math.floor(y);
+  const u = smooth(x - ix);
+  const v = smooth(y - iy);
+  const mask = period - 1;
+  const x0 = ix & mask;
+  const x1 = (ix + 1) & mask;
+  const y0 = (iy & mask) * 64;
+  const y1 = ((iy + 1) & mask) * 64;
+  const a = DENSITY[y0 + x0] + (DENSITY[y0 + x1] - DENSITY[y0 + x0]) * u;
+  const b = DENSITY[y1 + x0] + (DENSITY[y1 + x1] - DENSITY[y1 + x0]) * u;
+  DENSITY_SAMPLE[2] = a + (b - a) * v;
+};
 
 export function prepareBodyFlame(source, size, environment = globalThis) {
   if (!source || !size?.width || !size?.height || !environment.document?.createElement)
@@ -140,125 +175,42 @@ export function prepareBodyFlame(source, size, environment = globalThis) {
     const c = field.getContext("2d");
     const f = flow.getContext("2d");
     if (!m?.clearRect || !c?.ellipse || !f?.createImageData) return false;
-    // Physical silhouette, softly dilated around limbs: no rectangular base,
-    // centre root in the crotch, detached cheek orb or crown chimney.
-    m.filter = "blur(4px)";
-    for (let i = 0; i < 8; i += 1) {
-      const a = (i / 8) * TAU;
-      m.drawImage(source, BODY_X + Math.cos(a) * 3, BODY_Y + Math.sin(a) * 3, BODY_W, BODY_H);
-    }
-    m.filter = "none";
+    // Keep the real registration as the low-density interior. The visible
+    // outer shape is rebuilt from continuous vortex geometry each frame.
     m.drawImage(source, BODY_X, BODY_Y, BODY_W, BODY_H);
-    // A continuous firestorm around the body. These loose, asymmetric
-    // folds deliberately do not copy the head, arms or legs. The volume
-    // can roll into the air between/around them instead of wearing a suit
-    // made of green light. No horizontal lower edge is authored here.
-    m.filter = "blur(5px)";
-    m.fillStyle = "rgb(255 255 255 / 0.9)";
-    m.beginPath();
-    m.moveTo(FIELD_W * 0.18, FIELD_H * 0.96);
-    m.bezierCurveTo(
-      FIELD_W * 0.02,
-      FIELD_H * 0.85,
-      FIELD_W * 0.13,
-      FIELD_H * 0.77,
-      FIELD_W * 0.04,
-      FIELD_H * 0.64,
-    );
-    m.bezierCurveTo(
-      FIELD_W * 0.16,
-      FIELD_H * 0.72,
-      FIELD_W * 0.13,
-      FIELD_H * 0.47,
-      FIELD_W * 0.04,
-      FIELD_H * 0.42,
-    );
-    m.bezierCurveTo(
-      FIELD_W * 0.23,
-      FIELD_H * 0.52,
-      FIELD_W * 0.18,
-      FIELD_H * 0.23,
-      FIELD_W * 0.33,
-      FIELD_H * 0.12,
-    );
-    m.bezierCurveTo(
-      FIELD_W * 0.25,
-      FIELD_H * 0.3,
-      FIELD_W * 0.43,
-      FIELD_H * 0.27,
-      FIELD_W * 0.49,
-      FIELD_H * 0.02,
-    );
-    m.bezierCurveTo(
-      FIELD_W * 0.62,
-      FIELD_H * 0.19,
-      FIELD_W * 0.5,
-      FIELD_H * 0.23,
-      FIELD_W * 0.68,
-      FIELD_H * 0.13,
-    );
-    m.bezierCurveTo(
-      FIELD_W * 0.64,
-      FIELD_H * 0.32,
-      FIELD_W * 0.9,
-      FIELD_H * 0.28,
-      FIELD_W * 0.86,
-      FIELD_H * 0.44,
-    );
-    m.bezierCurveTo(
-      FIELD_W * 0.8,
-      FIELD_H * 0.52,
-      FIELD_W * 0.94,
-      FIELD_H * 0.49,
-      FIELD_W * 0.96,
-      FIELD_H * 0.7,
-    );
-    m.bezierCurveTo(
-      FIELD_W * 0.85,
-      FIELD_H * 0.63,
-      FIELD_W * 0.96,
-      FIELD_H * 0.87,
-      FIELD_W * 0.78,
-      FIELD_H * 0.97,
-    );
-    m.bezierCurveTo(
-      FIELD_W * 0.64,
-      FIELD_H * 1.01,
-      FIELD_W * 0.57,
-      FIELD_H * 0.95,
-      FIELD_W * 0.51,
-      FIELD_H * 0.9,
-    );
-    m.bezierCurveTo(
-      FIELD_W * 0.47,
-      FIELD_H * 0.97,
-      FIELD_W * 0.32,
-      FIELD_H * 1.01,
-      FIELD_W * 0.18,
-      FIELD_H * 0.96,
-    );
-    m.closePath();
-    m.fill();
-    m.filter = "none";
+    m.shadowColor = "#fff";
+    m.shadowBlur = 12;
     const pixels = f.createImageData(FIELD_W, FIELD_H);
-    // A seamless advected density, made only during preparation. It keeps
-    // adjacent limbs visibly joined even between the Blender's hot curls.
+    // Domain-warped, multi-scale density has billows and voids rather than
+    // repeating diagonal sine bands. This toroidal sheet is made once.
     for (let y = 0; y < FIELD_H; y += 1) {
-      const v = (y / FIELD_H) * TAU;
+      const v = (y / FIELD_H) * 64;
       for (let x = 0; x < FIELD_W; x += 1) {
-        const u = (x / FIELD_W) * TAU;
-        const warp = u + Math.sin(v * 3 + u * 2) * 0.8;
-        const noise =
-          0.5 +
-          Math.sin(warp * 7 - v * 4) * 0.2 +
-          Math.sin(u * 17 + Math.sin(v * 5) * 2 - v * 11) * 0.16 +
-          Math.sin(u * 31 + v * 19) * 0.1;
-        const hot = Math.pow(clamp(noise), 2);
+        const u = (x / FIELD_W) * 64;
+        DENSITY_SAMPLE[0] = u * 0.125;
+        DENSITY_SAMPLE[1] = v * 0.125;
+        density(8);
+        const wx = DENSITY_SAMPLE[2] * 10;
+        DENSITY_SAMPLE[0] = u * 0.125 + 23;
+        DENSITY_SAMPLE[1] = v * 0.125 + 41;
+        density(8);
+        const wy = DENSITY_SAMPLE[2] * 10;
+        DENSITY_SAMPLE[0] = u * 0.5 + wx;
+        DENSITY_SAMPLE[1] = v * 0.5 + wy;
+        density(32);
+        const billow = DENSITY_SAMPLE[2];
+        DENSITY_SAMPLE[0] = u + wx * 1.7;
+        DENSITY_SAMPLE[1] = v + wy * 1.7;
+        density(64);
+        const detail = DENSITY_SAMPLE[2];
+        const hot = smooth(clamp((billow * 0.72 + detail * 0.28 - 0.17) * 1.6));
         const k = (y * FIELD_W + x) * 4;
-        pixels.data[k] = 8 + hot * 166;
-        pixels.data[k + 1] = 64 + hot * 188;
-        pixels.data[k + 2] = 22 + hot * 80;
-        pixels.data[k + 3] = 104 + hot * 135;
+        pixels.data[k] = 4 + hot * 65;
+        pixels.data[k + 1] = 46 + hot * 160;
+        pixels.data[k + 2] = 12 + hot * 54;
+        // Empty density really is transparent. The Cycles volume below,
+        // not an opaque procedural sheet, carries the luminous boundary.
+        pixels.data[k + 3] = Math.pow(clamp((hot - 0.28) / 0.72), 2.4) * 52;
       }
     }
     f.putImageData(pixels, 0, 0);
@@ -267,7 +219,9 @@ export function prepareBodyFlame(source, size, environment = globalThis) {
     bodyField = field;
     bodyFlow = flow;
     bodyContext = c;
+    maskContext = m;
     fieldClock = -Infinity;
+    fieldPhase = -1;
     return true;
   } catch {
     // A blocked/low-memory canvas keeps the safe authored volume fallback.
@@ -466,12 +420,154 @@ export function drawNaniteFirebrand(context, x, y, strength, clock, scale = 1) {
   }
 }
 
-// One textured field is reused by the back and front passes of a frame.
-// The body alpha is applied after advection, so texture may flow without
-// translating or stretching a cheek, foot or a separate flame's root.
-function paintBodyField(power, clock) {
-  if (!bodyContext || !bodyFlow || !bodyMask || !bodyField) return false;
-  if (fieldClock === clock && fieldPower === power) return true;
+// Three real projected helices surround the body. Their front/back depth
+// travels with a shared angular clock, not with independent per-part roots.
+// The burst pulls the same ribbons outward, thins and tears them, then
+// clears their centre before the first machine can become visible.
+function poseVortex(power, clock, phase) {
+  const burst = smooth(
+    clamp(
+      (phase - NANITE_FIRE_PHASES.burstStart) /
+        (NANITE_FIRE_PHASES.burstEnd - NANITE_FIRE_PHASES.burstStart),
+    ),
+  );
+  const spin = clock * 0.55 + TAU * (phase * 1.1 + 1.1 * smooth(clamp((phase - 0.08) / 0.095)));
+  for (let strand = 0; strand < VORTEX_STRANDS; strand += 1) {
+    const base = strand * (VORTEX_STEPS + 1) * VORTEX_STRIDE;
+    for (let i = 0; i <= VORTEX_STEPS; i += 1) {
+      const t = i / VORTEX_STEPS;
+      const at = base + i * VORTEX_STRIDE;
+      const angle =
+        spin +
+        (strand * TAU) / VORTEX_STRANDS +
+        t * TAU * 1.45 +
+        Math.sin(t * TAU * 1.3 - clock * 2 + strand) * 0.22;
+      const s = Math.sin(angle);
+      const c = Math.cos(angle);
+      const radius = VORTEX_W * (0.205 + 0.065 * Math.sin(t * Math.PI) + burst * 0.11);
+      const split = smooth(clamp((Math.sin(t * TAU * 2.3 + strand * 1.7 - spin) + 0.55) * 1.8));
+      const tear = 1 - burst * split * 0.94;
+      VORTEX[at] = FIELD_W * 0.5 + radius * c + burst * c * VORTEX_W * 0.045;
+      VORTEX[at + 1] =
+        FIELD_PAD + VORTEX_H * (0.94 - 0.87 * t) + radius * 0.16 * s - burst * VORTEX_H * 0.025;
+      VORTEX[at + 4] =
+        VORTEX_W *
+        (0.075 + 0.045 * Math.sin(t * Math.PI)) *
+        Math.sqrt(Math.max(0.15, Math.sin(t * Math.PI))) *
+        (0.65 + power * 0.35) *
+        (1 - burst * 0.65) *
+        tear;
+      VORTEX[at + 5] = s;
+      VORTEX[at + 6] = tear;
+    }
+    for (let i = 0; i <= VORTEX_STEPS; i += 1) {
+      const at = base + i * VORTEX_STRIDE;
+      const before = base + Math.max(0, i - 1) * VORTEX_STRIDE;
+      const after = base + Math.min(VORTEX_STEPS, i + 1) * VORTEX_STRIDE;
+      const dx = VORTEX[after] - VORTEX[before];
+      const dy = VORTEX[after + 1] - VORTEX[before + 1];
+      const length = Math.hypot(dx, dy) || 1;
+      VORTEX[at + 2] = -dy / length;
+      VORTEX[at + 3] = dx / length;
+    }
+  }
+}
+
+// Closed, overlapping curved cells form a continuous ribbon; there are no
+// displaced source rows or rectangular lower bounds. Side selects depth.
+function vortexPath(context, side, clock, phase) {
+  const burst = smooth(
+    clamp(
+      (phase - NANITE_FIRE_PHASES.burstStart) /
+        (NANITE_FIRE_PHASES.burstEnd - NANITE_FIRE_PHASES.burstStart),
+    ),
+  );
+  context.beginPath();
+  for (let strand = 0; strand < VORTEX_STRANDS; strand += 1) {
+    const base = strand * (VORTEX_STEPS + 1) * VORTEX_STRIDE;
+    for (let i = 0; i < VORTEX_STEPS; i += 1) {
+      const a = base + i * VORTEX_STRIDE;
+      const b = a + VORTEX_STRIDE;
+      const depth = (VORTEX[a + 5] + VORTEX[b + 5]) * 0.5;
+      if (side && depth * side < -0.05) continue;
+      if (VORTEX[a + 6] + VORTEX[b + 6] < 0.23) continue;
+      const ax = VORTEX[a] + VORTEX[a + 2] * VORTEX[a + 4];
+      const ay = VORTEX[a + 1] + VORTEX[a + 3] * VORTEX[a + 4];
+      const bx = VORTEX[b] + VORTEX[b + 2] * VORTEX[b + 4];
+      const by = VORTEX[b + 1] + VORTEX[b + 3] * VORTEX[b + 4];
+      const cx = VORTEX[b] - VORTEX[b + 2] * VORTEX[b + 4];
+      const cy = VORTEX[b + 1] - VORTEX[b + 3] * VORTEX[b + 4];
+      const dx = VORTEX[a] - VORTEX[a + 2] * VORTEX[a + 4];
+      const dy = VORTEX[a + 1] - VORTEX[a + 3] * VORTEX[a + 4];
+      context.moveTo(ax, ay);
+      context.bezierCurveTo(ax, ay, bx, by, bx, by);
+      context.bezierCurveTo(bx, by, cx, cy, cx, cy);
+      context.bezierCurveTo(cx, cy, dx, dy, dx, dy);
+      context.bezierCurveTo(dx, dy, ax, ay, ax, ay);
+      context.closePath();
+    }
+    // Secondary rolling curls split off the same stream, at two scales.
+    for (let branch = 0; branch < 2; branch += 1) {
+      const at = base + (12 + branch * 22) * VORTEX_STRIDE;
+      if (side && VORTEX[at + 5] * side < 0) continue;
+      const turn = clock * 2.1 + strand * 2.3 + branch * 1.7;
+      const x = VORTEX[at];
+      const y = VORTEX[at + 1];
+      const margin = Math.min(x, FIELD_W - x, y, FIELD_H - y);
+      const radius = Math.min((10 + branch * 8) * (1 + burst * 0.6), Math.max(0, margin * 0.42));
+      const nx = Math.cos(turn);
+      const ny = Math.sin(turn);
+      const tx = -ny;
+      const ty = nx;
+      context.moveTo(x - nx * 7, y - ny * 7);
+      context.bezierCurveTo(
+        x + tx * radius * 2,
+        y + ty * radius * 2,
+        x + nx * radius * 2 + tx * radius,
+        y + ny * radius * 2 + ty * radius,
+        x + nx * radius * 1.8,
+        y + ny * radius * 1.8,
+      );
+      context.bezierCurveTo(
+        x + nx * radius + tx * radius * 0.4,
+        y + ny * radius + ty * radius * 0.4,
+        x + tx * radius * 0.5,
+        y + ty * radius * 0.5,
+        x + nx * 7,
+        y + ny * 7,
+      );
+      context.closePath();
+    }
+  }
+}
+
+function paintBodyField(power, clock, phase) {
+  if (!bodyContext || !maskContext || !bodyFlow || !bodyMask || !bodyField) return false;
+  if (fieldClock === clock && fieldPower === power && fieldPhase === phase) return true;
+  poseVortex(power, clock, phase);
+  const burst = smooth(
+    clamp(
+      (phase - NANITE_FIRE_PHASES.burstStart) /
+        (NANITE_FIRE_PHASES.burstEnd - NANITE_FIRE_PHASES.burstStart),
+    ),
+  );
+  const m = maskContext;
+  m.save();
+  try {
+    m.globalCompositeOperation = "source-over";
+    m.globalAlpha = 1;
+    m.clearRect(0, 0, FIELD_W, FIELD_H);
+    // A faint interior joins the wrapping fire before detonation; unlike
+    // the former stencil it is gone as the rotating bands fly apart.
+    m.globalAlpha = 0.15 * (1 - burst);
+    if (m.globalAlpha > 0.001) m.drawImage(bodySource, BODY_X, BODY_Y, BODY_W, BODY_H);
+    m.globalAlpha = 1;
+    m.fillStyle = "#fff";
+    vortexPath(m, 0, clock, phase);
+    m.fill();
+  } finally {
+    m.restore();
+  }
   const c = bodyContext;
   const W = FIELD_W;
   const H = FIELD_H;
@@ -492,50 +588,50 @@ function paintBodyField(power, clock) {
       TAU,
     );
     c.clip();
-    const offset = (((clock * 69) % H) + H) % H;
+    const offset = (((clock * 83) % H) + H) % H;
     c.drawImage(bodyFlow, 0, offset - H, W, H);
     c.drawImage(bodyFlow, 0, offset, W, H);
+    c.globalCompositeOperation = "destination-in";
+    c.drawImage(bodyMask, 0, 0);
     // Overlapping sheets are texture within the one connected field. The
     // participating-volume detail is still the real Cycles-rendered asset.
-    c.globalCompositeOperation = "lighter";
-    for (let i = 0; i < 8; i += 1) {
+    c.globalCompositeOperation = "source-over";
+    const volumes = coarse ? 18 : 24;
+    for (let i = 0; i < volumes; i += 1) {
       const k = i * 8;
-      const column = i % 2;
-      const row = i >> 1;
+      const strand = i % VORTEX_STRANDS;
+      const along = Math.floor(i / VORTEX_STRANDS);
+      const step = Math.round((along * VORTEX_STEPS) / (volumes / VORTEX_STRANDS - 1));
+      const at = (strand * (VORTEX_STEPS + 1) + step) * VORTEX_STRIDE;
+      const angle = Math.atan2(-VORTEX[at + 2], VORTEX[at + 3]) + Math.PI / 2;
+      const tearing = VORTEX[at + 6];
       tongue(
         c,
-        W * (0.23 + column * 0.52) + Math.sin(clock * 1.7 + row * 1.8) * 8,
-        H * (0.32 + row * 0.255),
-        W * 0.84,
-        H * (0.43 + Math.sin(clock * 2.1 + i) * 0.025),
+        VORTEX[at],
+        VORTEX[at + 1],
+        VORTEX_W * (0.36 + SEED[k] * 0.2) * (0.45 + tearing * 0.55),
+        VORTEX_H * (0.19 + SEED[k + 1] * 0.09) * (0.5 + tearing * 0.5),
         clock * 16 + SEED[k + 2] * 32,
-        0.82,
-        Math.sin(clock * 1.9 + row) * 0.09,
+        Math.min(1, 0.94 + VORTEX[at + 5] * 0.1) * tearing,
+        angle,
       );
     }
   } finally {
     c.restore();
   }
-  c.globalCompositeOperation = "destination-in";
-  c.globalAlpha = 1;
-  // A continuous soft boundary sways from the feet while the internal
-  // volume curls independently. Unlike strip displacement this has no
-  // horizontal seams/notches, and costs only one mask draw per frame.
-  c.save();
-  c.translate(FIELD_W * 0.5, FIELD_H * 0.9);
-  c.rotate(Math.sin(clock * 1.7) * 0.018 * power);
-  c.scale(1 + Math.sin(clock * 2.1) * 0.018 * power, 1);
-  c.drawImage(bodyMask, -FIELD_W * 0.5, -FIELD_H * 0.9);
-  c.restore();
   c.globalCompositeOperation = "source-over";
   fieldClock = clock;
   fieldPower = power;
+  fieldPhase = phase;
   return true;
 }
 
 /** Back/front sample the same connected body volume. Phase is the shared
  * ignition clock, not wall-clock history; it drives one scatter impulse. */
 export function drawBodyFlame(context, size, strength, clock, scale = 1, layer = "all", phase = 0) {
+  // The storm is already gone when material becomes visible. Even an
+  // isolated legacy caller cannot leave a green body stencil over armour.
+  if (Number.isFinite(phase) && phase >= NANITE_FIRE_PHASES.materialStart) return;
   if (
     !valid(strength, clock, scale) ||
     !size ||
@@ -555,10 +651,15 @@ export function drawBodyFlame(context, size, strength, clock, scale = 1, layer =
   const H = size.height;
   const unit = H / 1000;
   const power = clamp(strength);
+  const progress = Number.isFinite(phase) ? clamp(phase) : 0;
   // Extinction sheds density across the broad volume. It must not contract
   // the ignition ellipse back onto the chest like a hard circular wipe.
-  const connected = paintBodyField(phase > 0.175 ? 1 : power, clock);
-  const scatter = naniteFlameScatter(phase);
+  const connected = paintBodyField(
+    progress >= NANITE_FIRE_PHASES.burstStart ? 1 : power,
+    clock,
+    progress,
+  );
+  const scatter = naniteFlameScatter(progress);
   context.save();
   try {
     if (scale !== 1) context.scale(scale, scale);
@@ -566,39 +667,56 @@ export function drawBodyFlame(context, size, strength, clock, scale = 1, layer =
       context.globalCompositeOperation = layer === "back" ? "lighter" : "source-over";
       // Quiet ignition is a small but visible lick, not an invisible delay.
       // Its spatial front remains small; only its local radiance is lifted.
-      const radiance = phase > 0 && phase < 0.175 ? Math.sqrt(power) : power;
-      context.globalAlpha = radiance * (layer === "back" ? 0.5 : 0.98);
-      context.drawImage(
-        bodyField,
-        (-W * BODY_X) / BODY_W,
-        (-H * BODY_Y) / BODY_H,
-        (W * FIELD_W) / BODY_W,
-        (H * FIELD_H) / BODY_H,
-      );
+      const radiance =
+        progress > 0 && progress < NANITE_FIRE_PHASES.burstStart ? Math.sqrt(power) : power;
+      context.globalAlpha = radiance * (layer === "back" ? 0.72 : 0.12);
+      if (layer === "front") {
+        // Only a tenuous spill crosses the whole body. Real near-volume
+        // tongues below supply the occluding front arcs with their own
+        // irregular alpha: there is no hard front/back polygon cut.
+        context.drawImage(
+          bodyField,
+          (-W * BODY_X) / BODY_W,
+          (-H * BODY_Y) / BODY_H,
+          (W * FIELD_W) / BODY_W,
+          (H * FIELD_H) / BODY_H,
+        );
+      } else {
+        context.drawImage(
+          bodyField,
+          (-W * BODY_X) / BODY_W,
+          (-H * BODY_Y) / BODY_H,
+          (W * FIELD_W) / BODY_W,
+          (H * FIELD_H) / BODY_H,
+        );
+      }
     }
-    // Escaping tongues are edge detail, never the source of body coverage.
-    // Broad shared gusts couple neighbouring strands instead of separate
-    // miniature candles. The face stays on the same flow as the shoulders.
-    const count = coarse ? 8 : 10;
+    // Authored volume follows the same revolving ribbons, not separate
+    // candles assigned to the head, arms or legs. Its lean follows the
+    // curve's tangent as that stream wraps round to the far side.
+    const count = coarse ? 14 : 18;
     context.globalCompositeOperation = "lighter";
     for (let i = 0; i < count; i += 1) {
-      const j = Math.floor((i * 48) / count);
       const k = i * 8;
-      const root = j * 4;
-      const v = SOURCES[root + 1];
+      const strand = i % VORTEX_STRANDS;
+      const along = Math.floor(i / VORTEX_STRANDS);
+      const step = Math.round((along * VORTEX_STEPS) / Math.ceil(count / VORTEX_STRANDS - 1));
+      const at = (strand * (VORTEX_STEPS + 1) + step) * VORTEX_STRIDE;
+      if (connected && VORTEX[at + 5] * (layer === "back" ? -1 : 1) < -0.1) continue;
+      const v = connected ? (VORTEX[at + 1] - BODY_Y) / BODY_H : SOURCES[i * 4 + 1];
       const local = smooth(clamp((power - Math.abs(v - 0.34) * 0.23) / 0.77));
-      const gust = Math.sin(clock * 1.8 + v * 9);
-      const curl = Math.sin(clock * 2.7 - v * 13 + SEED[k] * TAU);
-      const y = v * H;
+      const x = connected ? ((VORTEX[at] - BODY_X) * W) / BODY_W : SOURCES[i * 4] * W;
+      const y = connected ? ((VORTEX[at + 1] - BODY_Y) * H) / BODY_H : v * H;
+      const lean = connected ? Math.atan2(-VORTEX[at + 2], VORTEX[at + 3]) + Math.PI / 2 : 0;
       tongue(
         context,
-        SOURCES[root] * W + gust * 3 * unit,
+        x,
         y,
-        (45 + SEED[k + 1] * 40) * unit,
-        Math.min((90 + SEED[k + 2] * 90) * unit * local * (1 + curl * 0.15), y - H * 0.02),
+        (75 + SEED[k + 1] * 65) * unit,
+        (125 + SEED[k + 2] * 100) * unit * local,
         clock * 16 + SEED[k + 3] * 32,
-        local * (connected ? 0.56 : 0.92),
-        SOURCES[root + 2] * 0.07 + gust * 0.14,
+        local * (connected ? 0.98 : 0.92) * (connected ? VORTEX[at + 6] : 1),
+        lean,
       );
     }
     if (layer !== "back" && scatter > 0 && scatter < 1) {

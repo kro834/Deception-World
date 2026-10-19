@@ -10,6 +10,25 @@ const BODY = new Float32Array([
 const clamp = (x) => Math.max(0, Math.min(1, x));
 const smooth = (x) => x * x * (3 - 2 * x);
 
+// The fire must finish breaking apart before any metal can materialize.
+// Entry uses t/2400; scroll uses (q-.015)/.285, so both scenes retain the
+// same causal order even when the reader reverses or jumps the clock.
+export const NANITE_FIRE_PHASES = Object.freeze({
+  burstStart: 0.175,
+  burstEnd: 7 / 30,
+  materialStart: 0.25,
+});
+
+/** Delay only the earliest boot's cell-growth window, not its final fit or
+ * audio cue. Metal gets time to emerge from the cleared fire before the
+ * first local shell forms. All later windows keep their exact schedule. */
+export function naniteMaterialLanding(land, fit) {
+  if (!Number.isFinite(land) || !Number.isFinite(fit) || fit <= 0) return land;
+  const oldFrom = fit - 100;
+  const newFrom = Math.min(fit, Math.max(oldFrom, NANITE_FIRE_PHASES.materialStart * 2400 + 60));
+  return newFrom <= oldFrom ? land : newFrom + ((land - oldFrom) * (fit - newFrom)) / 100;
+}
+
 /** Seed is periodic (0 and 1 agree); invalid input safely samples the head.
  * Returns the supplied buffer: [normalized x, y, outward normal x, y].
  * Sampling the surface's interior, not a halo, means every emitted chip
@@ -31,19 +50,31 @@ export function sampleFlameBirth(seed, out) {
 }
 
 /** Shared phase: entry t/2400; scroll (q-.015)/.285. A quiet, local
- * kindle is followed by a fast combustion front, then a long handoff to
- * the machines. No accumulating simulation state: scrubbing is exact. */
+ * kindle is followed by a rolling vortex and an outward detonation. The
+ * bulk fire clears completely before machines exist, not behind them.
+ * No accumulating simulation state: scrubbing is exact. */
 export function naniteFlameEnvelope(phase) {
-  if (!Number.isFinite(phase) || phase <= 0 || phase >= 1) return 0;
+  if (!Number.isFinite(phase) || phase <= 0 || phase >= NANITE_FIRE_PHASES.materialStart) return 0;
   if (phase < 7 / 60) return 0.09 * smooth(clamp(phase / (7 / 60)));
-  if (phase < 0.175) return 0.09 + 0.91 * smooth((phase - 7 / 60) / (0.175 - 7 / 60));
-  if (phase < 0.4) return 1;
-  return 1 - smooth(clamp((phase - 0.4) / 0.6));
+  if (phase < NANITE_FIRE_PHASES.burstStart)
+    return 0.09 + 0.91 * smooth((phase - 7 / 60) / (NANITE_FIRE_PHASES.burstStart - 7 / 60));
+  return (
+    1 -
+    smooth(
+      (phase - NANITE_FIRE_PHASES.burstStart) /
+        (NANITE_FIRE_PHASES.materialStart - NANITE_FIRE_PHASES.burstStart),
+    )
+  );
 }
 
 /** A single outward detonation, not continuously respawning decorative
  * sparks. The nanite engines take over these same body-space sources. */
 export function naniteFlameScatter(phase) {
   if (!Number.isFinite(phase)) return 0;
-  return smooth(clamp((phase - 0.16) / 0.2));
+  return smooth(
+    clamp(
+      (phase - NANITE_FIRE_PHASES.burstStart) /
+        (NANITE_FIRE_PHASES.burstEnd - NANITE_FIRE_PHASES.burstStart),
+    ),
+  );
 }

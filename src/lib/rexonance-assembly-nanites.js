@@ -30,13 +30,16 @@
 
 import { naniteHexHeight, naniteHexLight } from "./rexonance-unlit.js";
 import { sampleFlameBirth } from "./rexonance-ignition.js";
+import { NANITE_FIRE_PHASES } from "./rexonance-ignition.js";
 import { drawNaniteFirebrand } from "./rexonance-flame.js";
 
 const TAU = Math.PI * 2;
 const DEG = Math.PI / 180;
 const MERGE_FROM = 0.62;
 const ABSORB = 0.026;
-const FIRE_LEAD = 0.006;
+const FIRE_START = 0.015 + 0.285 * NANITE_FIRE_PHASES.burstStart;
+const FIRE_END = 0.015 + 0.285 * NANITE_FIRE_PHASES.burstEnd;
+const MATERIAL_START = 0.015 + 0.285 * NANITE_FIRE_PHASES.materialStart;
 const FIRE_HANDOFF = 0.008;
 const FIREBRANDS = 24;
 const FIREBRANDS_TOUCH = 8;
@@ -671,7 +674,7 @@ export function* assemblyNanitePlanSteps({
   for (let i = 0; i < n; i += 1)
     if (owner[i] >= 0 && npieces[npOf[owner[i]]].helm)
       helmReach = Math.max(helmReach, Math.hypot(CX[i] - eyeX, CY[i] - eyeY));
-  const m0 = 0.063;
+  const m0 = MATERIAL_START;
   for (let i = 0; i < n; i += 1) {
     const p = owner[i] >= 0 ? npOf[owner[i]] : -1;
     pieceOf[i] = p;
@@ -704,7 +707,9 @@ export function* assemblyNanitePlanSteps({
     emission[e + 1] = emit[1] * H;
     emission[e + 2] = emit[2];
     emission[e + 3] = emit[3];
-    birth[i] = Math.min(M[i], m0 + 0.027 * naniteHash(i, 18));
+    // All cells are fire-only debris until the vortex has cleared. The
+    // earliest flight is .163, so these later births preserve every seat.
+    birth[i] = m0 + 0.027 * naniteHash(i, 18);
     arm[i] = Math.floor(naniteHash(i, 19) * 3) % 3;
     armDir[i] = emit[2] < 0 ? -1 : 1;
     gateJ[i] = (naniteHash(i, 21) - 0.5) * 0.024 * H;
@@ -2600,9 +2605,11 @@ export function createAssemblyNanites({
     const tx = -ny;
     const ty = nx;
     const age = Math.max(0, q - born);
-    const launch = smooth(clamp01((q - (born - FIRE_LEAD)) / FIRE_LEAD));
-    const thrown = (((20 + 25 * seed) * H) / 1000) * launch;
-    const lift = (((10 + 10 * seed) * H) / 1000) * launch;
+    const launch = smooth(clamp01((q - FIRE_START) / (FIRE_END - FIRE_START)));
+    // An actual detonation ejects the fragments beyond the torso, not a
+    // short green shimmer still sitting on its skin after the storm clears.
+    const thrown = (((80 + 50 * seed) * H) / 1000) * launch;
+    const lift = (((18 + 17 * seed) * H) / 1000) * launch;
     const release = smooth(clamp01(age / BIRTH));
     const ph = (sy / H) * 9 + nx * 1.7 + q * 21 + seed * 0.45;
     const gust = Math.sin(ph);
@@ -2638,8 +2645,9 @@ export function createAssemblyNanites({
     const t0 = T0[i];
     const t1 = T1[i];
     FIRE[slot] = 0;
-    if (q < b - FIRE_LEAD || q >= t1) {
+    if (q < FIRE_START || q >= t1) {
       KIND[slot] = 0;
+      A[slot] = 0;
       return;
     }
     const p = PO[i];
@@ -2662,7 +2670,7 @@ export function createAssemblyNanites({
       const s = clamp01(age / BIRTH);
       FIRE[slot] =
         age < 0
-          ? smooth(clamp01((q - (b - FIRE_LEAD)) / FIRE_LEAD))
+          ? smooth(clamp01((q - FIRE_START) / (FIRE_END - FIRE_START)))
           : 1 - smooth(clamp01(age / FIRE_HANDOFF));
       if (s < 1) {
         size *= 0.25 + 0.75 * smooth(s);
@@ -2841,8 +2849,9 @@ export function createAssemblyNanites({
   const poseFree = (j, q, slot) => {
     const b = free.birth[j];
     FIRE[slot] = 0;
-    if (q < b - FIRE_LEAD || q >= N.implode[1]) {
+    if (q < FIRE_START || q >= N.implode[1]) {
       KIND[slot] = 0;
+      A[slot] = 0;
       return;
     }
     surfaceCurrent(free.emission, j * 4, free.hsh[j], b, q);
@@ -2860,7 +2869,7 @@ export function createAssemblyNanites({
     const s = clamp01(age / BIRTH);
     FIRE[slot] =
       age < 0
-        ? smooth(clamp01((q - (b - FIRE_LEAD)) / FIRE_LEAD))
+        ? smooth(clamp01((q - FIRE_START) / (FIRE_END - FIRE_START)))
         : 1 - smooth(clamp01(age / FIRE_HANDOFF));
     if (s < 1) {
       size *= 0.25 + 0.75 * smooth(s);
@@ -3233,14 +3242,11 @@ export function createAssemblyNanites({
         // The helper uses at most two atlas samples, sharing the retained
         // flame sheet. Count both conservatively even for its fallback.
         sprites_ += 2;
-      } else {
-        const width = ((1.2 + fire * 2.4) * H) / 1000;
-        const height = ((1.8 + fire * 4.2) * H) / 1000;
-        pushRect(fireRects, rects, X[slot] - width / 2, Y[slot] - height / 2, width, height);
-        rects += 4;
       }
     }
-    fillBatch(ctx, fireRects, rects, "rgb(153 255 112)", 0.68);
+    // Unselected fragments are not replaced by thousands of green square
+    // pixels: those read as early machines while the fire is still bursting.
+    // The bounded real volume fragments are the entire fire-only prelude.
     // The forming metal stays visible through the last hot gas. Fade its
     // airborne highlight into the normal depth-sorted current, with no
     // additional texture draws or a hard disappearance at the handoff.

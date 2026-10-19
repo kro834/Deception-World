@@ -7,6 +7,7 @@ import ts from "typescript";
 import postcss from "postcss";
 import * as calls from "../src/lib/rexonance-calls.ts";
 import * as suit from "../src/lib/rexonance-suit.ts";
+import * as ignition from "../src/lib/rexonance-ignition.js";
 import {
   reactorFormation,
   reactorCoilAngle,
@@ -74,6 +75,7 @@ test("the cold DOM coil uses the same reactor window and pivot behind the existi
       require(name) {
         if (name === "@/lib/rexonance-calls") return calls;
         if (name === "@/lib/rexonance-suit") return suit;
+        if (name === "@/lib/rexonance-ignition.js") return ignition;
         if (name === "./rexonance-suit-nanites") return { SuitNanites() {} };
         return require(name);
       },

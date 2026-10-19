@@ -1316,10 +1316,10 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
    canvas to the other does not move (review 2026-10-16). */
 .rx-call-sequence .rx-suit-build > .rx-suit-nanites[data-bleed] > canvas:last-child {
   inset: auto;
-  top: -6%;
+  top: -18%;
   left: -25%;
   width: 150%;
-  height: 114%;
+  height: 134%;
 }
 
 /* With the nanite kit ready, the engine's own swarm (hex chips in an
@@ -1907,7 +1907,7 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
     .rx-suit-motes {
-    animation: rxSuitMotes 970ms linear var(--rx-call-rider-start) both;
+    animation: rxSuitMotes 970ms linear var(--rx-suit-material-start, 600ms) both;
   }
 
   /* SA-GA！DEUS！ and REXONANCE！: the plates fit one after another up the
@@ -1920,20 +1920,23 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
     .rx-suit-mote {
-    animation: rxSuitGather 300ms linear calc(var(--rx-suit-t) - 160ms) both;
+    animation: rxSuitGather var(--rx-suit-gather-duration, 300ms) linear
+      var(--rx-suit-gather-start, 600ms) both;
   }
 
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
     .rx-suit-plate:not(.is-driver) {
-    animation: rxSuitWipe 140ms linear var(--rx-suit-t) both;
+    animation: rxSuitWipe calc(var(--rx-suit-grow-duration, 100ms) * 1.4) linear var(--rx-suit-t)
+      both;
   }
 
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
     .rx-suit-plate:not(.is-driver)
     > .rx-suit-art {
-    animation: rxSuitHold 100ms cubic-bezier(0.3, 0.55, 0.35, 1) var(--rx-suit-t) both;
+    animation: rxSuitHold var(--rx-suit-grow-duration, 100ms) cubic-bezier(0.3, 0.55, 0.35, 1)
+      var(--rx-suit-t) both;
   }
 
   /* Cold DOM fallback: the isolated painted coil shares the reactor's
@@ -2187,7 +2190,8 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
     transform: none;
   }
 }
-/* RIDER！'s motes gather in (330-650 ms) and are spent through the chant. */
+/* Material is absent until the flame vortex has burst and cleared (600ms).
+   This also applies when only the DOM/SVG fallback is available. */
 @keyframes rxSuitMotes {
   0% {
     opacity: 0;

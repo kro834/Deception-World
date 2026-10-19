@@ -34,7 +34,11 @@ import {
   prepareBodyFlame,
   warmNaniteFlame,
 } from "@/lib/rexonance-flame.js";
-import { naniteFlameEnvelope } from "@/lib/rexonance-ignition.js";
+import {
+  NANITE_FIRE_PHASES,
+  naniteFlameEnvelope,
+  naniteMaterialLanding,
+} from "@/lib/rexonance-ignition.js";
 import type { SuitExtrasEnv } from "./rexonance-suit-extras";
 import { suitExtrasApi } from "./rexonance-suit-extras-hook";
 
@@ -87,6 +91,7 @@ import { suitExtrasApi } from "./rexonance-suit-extras-hook";
 const START_BY = 420;
 // One shared quiet-kindling / explosive-front / material-handoff clock.
 const CALL_FLAME_MS = 2400;
+const MATERIAL_FROM = CALL_FLAME_MS * NANITE_FIRE_PHASES.materialStart;
 
 // The extras through their hook (round 3, review 33): the call's chunk never
 // imports them, so a still tier never downloads the kit's code; until the
@@ -397,13 +402,19 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
           // at the reactor, burning as the first plates stream in.
           const flamePhase = t / CALL_FLAME_MS;
           const flame = naniteFlameEnvelope(flamePhase);
+          const material = t >= MATERIAL_FROM;
           if (flame > 0) {
             drawBodyFlame(flight, FIG, flame, t / 1000, s, "back", flamePhase);
             drawNaniteFlame(flight, REXONANCE_SUIT_MARKS.core, flame, t / 1000, s);
           }
           for (let p = 0; p < all.length; p += 1) {
             const plate = all[p];
-            if (t < plate.spawn || (done[p] && t >= plate.last)) continue;
+            if (
+              (!material && plate.fit > 0) ||
+              t < plate.spawn ||
+              (done[p] && t >= plate.last)
+            )
+              continue;
             const { piece } = plate;
             if (t < plate.fit && extras) {
               // Staged in raw metal under its jig; its tiles fly the river,
@@ -440,7 +451,7 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
               flight.save();
               flight.beginPath();
               for (const tile of plate.tiles) {
-                if (t - tile.land < 0) continue;
+                if (t < naniteMaterialLanding(tile.land, plate.fit)) continue;
                 const x0 = Math.round(tile.dx * s);
                 const y0 = Math.round(tile.dy * s);
                 flight.rect(
@@ -468,7 +479,9 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
               }
               flight.restore();
               for (const tile of plate.tiles) {
-                const u = (t - tile.land + FLIGHT) / FLIGHT;
+                const land = naniteMaterialLanding(tile.land, plate.fit);
+                const flightStart = Math.max(MATERIAL_FROM, land - FLIGHT);
+                const u = (t - flightStart) / (land - flightStart);
                 if (u <= 0 || u >= 1) continue;
                 const e = 1 - (1 - u) ** 3;
                 const x = (tile.dx + tile.ox * (1 - e)) * s;
@@ -607,7 +620,7 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
           // With the extras, the pinned grains first: the front passes (seams,
           // rings, spall, links, latches, clamps, the molten band and its
           // droplets, the front of the cocoon) come after the light, over them.
-          if (extras) grains();
+          if (extras && material) grains();
           // The suit is whole: the reactor ignites and the light runs out
           // through the body; a bloom rides it and settles.
           if (held && t >= REXONANCE_SUIT_LIGHT.from) {
@@ -655,7 +668,7 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
             }
           }
           if (extras) extras.after(t);
-          else grains();
+          else if (material) grains();
           if (flame > 0) drawBodyFlame(flight, FIG, flame, t / 1000, s, "front", flamePhase);
           // Burning fragments carry material out of the broad fire. Their
           // machine crossfade remains visible on the near side of the plume.

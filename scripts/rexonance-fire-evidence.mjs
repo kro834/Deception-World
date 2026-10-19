@@ -44,6 +44,7 @@ export function connectedFireEvidence({
   const allowed = dilate(body, bodyPadding);
   const exterior = dilate(body, exteriorPadding);
   const green = new Uint8Array(count);
+  const rawGreen = new Uint8Array(count);
   let greenPixels = 0;
   let supportedPixels = 0;
   let energy = 0;
@@ -53,6 +54,7 @@ export function connectedFireEvidence({
   for (let i = 0; i < count; i++) {
     const p = i * 4;
     const excess = pixels[p + 1] - Math.max(pixels[p] * 1.2, pixels[p + 2] * 1.15);
+    if (pixels[p + 3] > 24 && pixels[p + 1] > 28 && excess > 0) rawGreen[i] = 1;
     if (!allowed[i] && exterior[i]) {
       exteriorPixels++;
       if (pixels[p + 3] > 24 && pixels[p + 1] > 28 && excess > 0) {
@@ -121,6 +123,64 @@ export function connectedFireEvidence({
     regional[name] = { greenPixels: all, pixels, ratio: pixels ? all / pixels : 0 };
     largestRegional[name] = { greenPixels: joined, pixels, ratio: pixels ? joined / pixels : 0 };
   }
+  // A hollow, depth-separated vortex need not paint the person's centre.
+  // Measure actual flame just outside both real body boundaries instead:
+  // all six anatomical levels must be wrapped in the same screenshot.
+  const wrapRegions = {};
+  const radius = Math.max(2, Math.round(width * 0.17));
+  const gap = Math.max(1, Math.round(width * 0.012));
+  for (const [band, key] of [
+    ["head", "head"],
+    ["chest", "chest"],
+    ["waist", "abdomen"],
+    ["thigh", "thighLeft"],
+    ["shin", "shinLeft"],
+    ["foot", "footLeft"],
+  ]) {
+    const region = regions[key];
+    if (!region) continue;
+    const y0 = Math.max(0, Math.floor((region[1] / referenceHeight) * height));
+    const y1 = Math.min(height, Math.ceil(((region[1] + region[3]) / referenceHeight) * height));
+    const sums = [
+      [0, 0],
+      [0, 0],
+    ];
+    for (let y = y0; y < y1; y++) {
+      let left = width,
+        right = -1;
+      for (let x = 0; x < width; x++)
+        if (body[y * width + x]) {
+          left = Math.min(left, x);
+          right = Math.max(right, x);
+        }
+      if (right < left) continue;
+      for (const [side, a, b] of [
+        [0, Math.max(0, left - radius), Math.max(0, left - gap)],
+        [1, Math.min(width, right + gap + 1), Math.min(width, right + radius + 1)],
+      ]) {
+        for (let x = a; x < b; x++) {
+          sums[side][0]++;
+          sums[side][1] += rawGreen[y * width + x];
+        }
+      }
+    }
+    for (const [side, label] of [
+      [0, "left"],
+      [1, "right"],
+    ])
+      wrapRegions[`${band}-${label}`] = {
+        pixels: sums[side][0],
+        greenPixels: sums[side][1],
+        ratio: sums[side][0] ? sums[side][1] / sums[side][0] : 0,
+      };
+  }
+  let centerPixels = 0,
+    centerGreen = 0;
+  for (let y = Math.floor(height * 0.15); y < Math.ceil(height * 0.85); y++)
+    for (let x = Math.floor(width * 0.35); x < Math.ceil(width * 0.65); x++) {
+      centerPixels++;
+      centerGreen += rawGreen[y * width + x];
+    }
   return {
     width,
     height,
@@ -130,6 +190,17 @@ export function connectedFireEvidence({
     supportedPixels,
     meanGreenExcess: supportedPixels ? energy / supportedPixels : 0,
     componentCount: components.length,
+    wrap: {
+      radius,
+      gap,
+      regions: wrapRegions,
+      minimum: Math.min(...Object.values(wrapRegions).map((r) => r.ratio)),
+    },
+    center: {
+      pixels: centerPixels,
+      greenPixels: centerGreen,
+      ratio: centerPixels ? centerGreen / centerPixels : 0,
+    },
     exterior: {
       padding: exteriorPadding,
       pixels: exteriorPixels,

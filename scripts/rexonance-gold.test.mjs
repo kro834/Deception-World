@@ -283,7 +283,10 @@ test("rx17: the engine forms each plate's gold on it right after it seats and en
   // (Safari copies a canvas that is drawn into and from in one frame); the
   // locked cells are drawn from the art through one clip.
   assert.doesNotMatch(nanites, /atlasWork\.drawImage/);
-  assert.match(nanites, /flight\.rect\(gold\.fx\[i\] \* s, gold\.fy\[i\] \* s, gold\.cw\[i\] \* s, gold\.ch\[i\] \* s\);\s*flight\.clip\(\);/);
+  assert.match(
+    nanites,
+    /flight\.rect\(gold\.fx\[i\] \* s, gold\.fy\[i\] \* s, gold\.cw\[i\] \* s, gold\.ch\[i\] \* s\);\s*flight\.clip\(\);/,
+  );
   // ... and a finished plate is painted whole from the art itself, so the
   // finished suit equals the artwork.
   assert.match(
@@ -303,7 +306,11 @@ test("rx17: the engine forms each plate's gold on it right after it seats and en
     /\bnew |\.map\(|\.filter\(|\.slice\(|\.concat\(|\[\]|Array\.from|\.push\(/,
   );
   // Only what is still forming is drawn: settled plates skip the frame.
-  assert.match(draw, /if \(t < plate\.spawn \|\| \(done\[p\] && t >= plate\.last\)\) continue;/);
+  assert.match(
+    draw,
+    /if\s*\(\s*\(!material && plate\.fit > 0\) \|\|\s*t < plate\.spawn \|\|\s*\(done\[p\] && t >= plate\.last\)\s*\)\s*continue;/,
+  );
+  assert.match(draw, /const material = t >= MATERIAL_FROM;/);
   // The plan and the working atlas are prepared in idle slices ahead of the call.
   assert.match(plan, /export function prepareRexonanceSuit\(priority: "low" \| "high" = "low"\)/);
   // Background preparation keeps its idle budget; foreground intent can

@@ -171,7 +171,7 @@ test("the call decides once, gives the firestorm room on every pointer, and keep
   assert.match(component, /data-swarm=\{swarm\}/);
   assert.match(
     sheet,
-    /\.rx-call-sequence \.rx-suit-build > \.rx-suit-nanites\[data-bleed\] > canvas:last-child \{\s*inset: auto;\s*top: -6%;\s*left: -25%;\s*width: 150%;\s*height: 114%;\s*\}/,
+    /\.rx-call-sequence \.rx-suit-build > \.rx-suit-nanites\[data-bleed\] > canvas:last-child \{\s*inset: auto;\s*top: -18%;\s*left: -25%;\s*width: 150%;\s*height: 134%;\s*\}/,
   );
   assert.doesNotMatch(sheet, /\.rx-suit-nanites\[data-bleed\] \{/);
   assert.match(
@@ -348,7 +348,7 @@ test("the kit warms with ImageBitmaps only, after the plan, under the suit's ski
 
 // A 2D context that records what is drawn (draws per frame, by source).
 function recorder() {
-  const log = { draws: 0, sources: new Map(), transforms: 0, last: null, saves: 0 };
+  const log = { draws: 0, paints: 0, sources: new Map(), transforms: 0, last: null, saves: 0 };
   const context = {
     globalAlpha: 1,
     fillStyle: "",
@@ -390,6 +390,7 @@ function recorder() {
     "putImageData",
   ])
     context[name] = (...args) => {
+      if (["fill", "fillRect", "stroke"].includes(name) && context.globalAlpha > 0) log.paints++;
       for (const value of args)
         if (typeof value === "number") assert.ok(Number.isFinite(value), name);
     };
@@ -488,13 +489,13 @@ async function extrasRuntime({ touch }) {
         pose[ARG_T] = t;
         surfacePose(c);
         if (born) {
-          pose[ARG_U] = (t - L.birth[c]) / FIRE_SPRAY;
+          pose[ARG_U] = (t - L.birth[c]) / L.sprayMs[c];
           bornPose(c);
         }
         return Array.from(pose.subarray(0, 3));
       },
       firebrandAt(c, t) {
-        pose[ARG_U] = (t-L.birth[c]+FIREBRAND_LEAD)/FIREBRAND_LEAD;
+        pose[ARG_U] = (t-L.brandStart[c])/(FIREBRAND_END-L.brandStart[c]);
         firebrandPose(c);
         return Array.from(pose.subarray(0,2));
       },
@@ -627,7 +628,7 @@ test("desktop: the swarm stays within 2,600 draws a frame and fills the call", a
   // It is a swarm, not a sprinkle: well over a thousand sprites at its peak,
   // and drawing through every stage of the call.
   assert.ok(most > 1000, `peak ${most}`);
-  for (const t of [400, 600, 800, 1000, 1300, 1700, 2000])
+  for (const t of [620, 800, 1000, 1300, 1700, 2000])
     assert.ok(frames.find((frame) => frame.t === t).kit > 20, `${t}: kit sprites drawn`);
   // Nothing of the swarm remains once the seal has passed.
   assert.equal(frames.find((frame) => frame.t === 2600).draws, 0);
@@ -887,7 +888,7 @@ test("carriage reservations stay fixed through each plate's complete formation",
       const staged = ex.staged();
       assert.ok(staged.reduce((sum, value) => sum + value, 0) <= (touch ? 4 : 12), "carriage cap");
       for (let p = 0; p < all.length; p += 1) {
-        if (t < all[p].spawn || t >= all[p].fit) continue;
+        if (t < Math.max(600, all[p].spawn) || t >= all[p].fit) continue;
         if (firstState[p] < 0) firstState[p] = staged[p];
         assert.equal(staged[p], firstState[p], `${all[p].piece.id} at ${t}: no late promotion`);
       }
@@ -1161,12 +1162,12 @@ test("the layout preserves bottom-up drains and exact tile timing with one conti
   for (let c = 0; c < chips; c += 1) {
     assert.ok(L.ring[c] >= 0 && L.ring[c] < 8);
     assert.ok(
-      L.birth[c] >= 400 && L.birth[c] <= 620,
-      "born in the shared flash, not the six old pumps",
+      L.birth[c] >= 600 && L.birth[c] <= 820,
+      "born only after the vortex explosion has cleared",
     );
     assert.ok(
-      ignition.naniteFlameEnvelope(L.birth[c] / 2400) > 0.9,
-      "the fire exists before the machine",
+      ignition.naniteFlameEnvelope(L.birth[c] / 2400) === 0,
+      "the full body fire must be gone before a machine exists",
     );
     const p = L.chipPlate[c];
     if (p < 0) {
@@ -1174,10 +1175,7 @@ test("the layout preserves bottom-up drains and exact tile timing with one conti
       assert.equal(L.drainAt[c], Infinity);
       continue;
     }
-    assert.ok(
-      L.drainAt[c] >= L.birth[c] + calls.REXONANCE_SUIT_SWARM.wave - 0.01,
-      "drains after its birth",
-    );
+    assert.ok(L.drainAt[c] >= L.birth[c] + L.sprayMs[c] - 0.01, "drains after its birth");
     if (all[p].piece.group === "legs") {
       legs += 1;
       legRings += L.ring[c];
@@ -1230,7 +1228,7 @@ test("entrance fire leaves the shared surface before a machine appears at the ex
       assert.ok(Math.abs(values[c] - expected[i]) < 0.0001, `${c}/${i}: shared body source`);
     distinct.add(`${Math.floor(L.emitX[c] / 20)},${Math.floor(L.emitY[c] / 20)}`);
     const born = ex.firePoseAt(c, L.birth[c]);
-    const prelude = ex.firebrandAt(c, L.birth[c] - 60);
+    const prelude = ex.firebrandAt(c, L.brandStart[c]);
     const inherited = ex.firebrandAt(c, L.birth[c]);
     assert.ok(
       Math.hypot(prelude[0] - L.emitX[c], prelude[1] - L.emitY[c]) < 0.0001,
@@ -1241,10 +1239,10 @@ test("entrance fire leaves the shared surface before a machine appears at the ex
       "the nanite inherits the same airborne flame coordinate without a jump",
     );
     assert.ok(
-      Math.hypot(born[0] - L.emitX[c], born[1] - L.emitY[c]) >= 18,
-      "the machine forms in the flying fire, not directly on the body",
+      Math.hypot(born[0] - L.emitX[c], born[1] - L.emitY[c]) >= 80 - 0.001,
+      "the machine forms in the thrown-off fire, at least 80px beyond its body source",
     );
-    const boundary = L.birth[c] + 160;
+    const boundary = L.birth[c] + L.sprayMs[c];
     const before = ex.firePoseAt(c, boundary - 1e-5);
     const surface = ex.firePoseAt(c, boundary, false);
     assert.ok(
@@ -1277,9 +1275,65 @@ test("entrance fire leaves the shared surface before a machine appears at the ex
     visible.firebrands(t);
     return log.sources.get(flameAsset) ?? 0;
   };
-  assert.equal(fireDraws(330), 0);
-  assert.ok(fireDraws(380) > 0, "real flame is rendered before the earliest 400ms metal birth");
-  assert.equal(fireDraws(665), 0, "firebrands cool completely after the last crossfade");
+  assert.equal(fireDraws(419), 0);
+  assert.ok(fireDraws(540) > 0, "flame fragments, never metal, precede the 600ms material floor");
+  assert.equal(fireDraws(900), 0, "firebrands cool completely after the last crossfade");
+});
+
+test("neither chips nor non-driver armour draw before the explosion has cleared at 600ms", async () => {
+  for (const touch of [false, true]) {
+    const { plan, extras } = await extrasRuntime({ touch });
+    const all = plan.plates(),
+      { context, log } = recorder();
+    const ex = extras.createSuitExtras({
+      flight: context,
+      s: 1,
+      ox: 0,
+      oy: 0,
+      all,
+      gold: plan.cells(),
+      source: { kind: "work" },
+      sheet: { kind: "motes" },
+    });
+    for (let t = 0; t < 600; t += 5) {
+      log.draws = 0;
+      log.paints = 0;
+      log.sources.clear();
+      ex.before(t);
+      for (let p = 0; p < all.length; p++)
+        if (!calls.REXONANCE_SUIT_DRIVER.includes(all[p].piece.id)) {
+          ex.forming(p, t);
+          ex.seat(p, t);
+          ex.unseat();
+          ex.conduit(p, t);
+        }
+      ex.after(t);
+      assert.equal(log.draws, 0, `${touch ? "touch" : "fine"}/${t}: no material bitmap`);
+      assert.equal(
+        log.paints,
+        0,
+        `${touch ? "touch" : "fine"}/${t}: no typed-metal rectangle, facet fill or stroke`,
+      );
+      ex.firebrands(t);
+      assert.ok(
+        [...log.sources.keys()].every((key) => key === flameAsset),
+        "only fire, not early machine sprites, may render",
+      );
+      assert.equal(
+        log.paints,
+        0,
+        "flying fire uses actual irregular-alpha volumes, not early square machines",
+      );
+    }
+    const L = extras.rexonanceNaniteLayout();
+    for (let p = 0; p < all.length; p++)
+      if (L.kind[p] >= 0)
+        for (let i = L.tileFirst[p]; i < L.tileFirst[p + 1]; i++)
+          assert.ok(
+            L.land[i] >= 660,
+            "first plate cells start growing after the first metal can emerge",
+          );
+  }
 });
 
 test("keyed nanites stay continuous through braking, alignment, capture and insertion", async () => {
@@ -1422,11 +1476,18 @@ test("the guideway grows from the toe tips up; clamps slide in; nothing descends
     const id = plate.piece.id;
     // Never long before its plate, whole before its first tile lands.
     assert.ok(L.buildA[p] >= F - lead - 0.01, `${id} starts ${F - L.buildA[p]} before F`);
-    assert.ok(L.buildB[p] <= F - build.done + 0.01, `${id} whole ${F - L.buildB[p]} before F`);
-    assert.ok(
-      L.buildB[p] <= Math.min(...plate.tiles.map((tile) => tile.land)),
-      `${id} before its tiles`,
+    const retimed = L.buildA[p] === 600;
+    const firstLand = Math.min(
+      ...plate.tiles.map((tile) => ignition.naniteMaterialLanding(tile.land, F)),
     );
+    assert.ok(L.buildA[p] >= 600, `${id} guide metal waits until the explosion clears`);
+    // Only the early guide window is squeezed after 600ms. Its original
+    // cell order is preserved and it remains whole before the first plate cell.
+    assert.ok(
+      L.buildB[p] <= (retimed ? Math.max(640, F - build.done) : F - build.done) + 0.01,
+      `${id} whole ${F - L.buildB[p]} before F`,
+    );
+    assert.ok(L.buildB[p] <= firstLand - (retimed ? 10 : 0) + 0.01, `${id} before its tiles`);
     assert.ok(L.buildB[p] - L.buildA[p] >= 40, id);
     // Monotone along the plate's build; each cell inside the window.
     let bottom = -Infinity;

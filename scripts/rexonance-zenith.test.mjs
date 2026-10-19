@@ -1903,7 +1903,10 @@ test("touch with the nanite kit keeps its 64 art draws and at most 16 nanite spr
     }
     let kitDraws = 0;
     let drawn = 0;
-    for (const progress of [0.058, 0.063, 0.07, 0.085, 0.09, 0.1, 0.3, 0.35, 0.5, 0.7, 0.8, 0.84]) {
+    for (const progress of [
+      0.058, 0.063, 0.065, 0.069625, 0.0815, 0.0855, 0.08625, 0.09, 0.1, 0.3, 0.35, 0.5, 0.7, 0.8,
+      0.84,
+    ]) {
       t.calls.length = 0;
       t.drawCalls.length = 0;
       t.scrollTo(progress);
@@ -2016,7 +2019,10 @@ test("the nanite stage plan: paint order, the shared cells, and timings before .
       assert.ok(parent < i, "the lattice parent locked earlier");
       assert.equal(nano.pieceOf[parent], nano.pieceOf[i]);
     }
-    assert.ok(nano.birth[i] <= plan.tiles[i].m + 1e-9 && nano.birth[i] >= 0.063);
+    assert.ok(
+      nano.birth[i] <= plan.tiles[i].t0 + 1e-9 && nano.birth[i] >= 0.08625 - 1e-9,
+      "metal waits for the cleared burst but is born before its unchanged flight/landing window",
+    );
   }
   // Every plate: its seam, gold box and clamps release before .9 (tail
   // ≤ .878, helmet ≤ .892), the driver never staged.

@@ -20,8 +20,8 @@ const naturalClock = process.env.FLAME_NATURAL === "1";
 // inside WebKit's non-pausable route-coordinator wall-clock deadline.
 const detailedEntry = process.env.FLAME_ENTRY_DETAIL === "1";
 const entrySamples = detailedEntry
-  ? [180, 280, 360, 400, 460, 520, 620, 700, 850, 1000, 1150, 1600, 1950, 2200, 2600]
-  : [180, 280, 460, 620, 850, 1000, 1150, 1600, 1950, 2200, 2600];
+  ? [180, 280, 360, 400, 420, 460, 520, 560, 590, 600, 620, 700, 850, 1600, 2600]
+  : [180, 280, 420, 460, 560, 590, 600, 620, 850, 1600, 2600];
 const coverageMinimum = process.env.FLAME_COVERAGE_MIN
   ? Number(process.env.FLAME_COVERAGE_MIN)
   : null;
@@ -86,6 +86,8 @@ async function installProbe(context) {
       draws: { entry: 0, scroll: 0, other: 0 },
       atlas: { entry: 0, scroll: 0, other: 0 },
       fallback: { entry: 0, scroll: 0, other: 0 },
+      nativeNanites: { entry: 0, scroll: 0, other: 0 },
+      nativeFrames: { entry: null, scroll: null, other: null },
       atlasFrames: [],
       samples: [],
       lastDraw: 0,
@@ -95,18 +97,125 @@ async function installProbe(context) {
       drawMs: [],
     };
     window.__flameQA = state;
+    // Track the actual native images (including prepared ImageBitmaps and
+    // their cached canvas descendants), not a source-string assertion.
+    // This observes the real kit bitmap pass. Typed-metal geometry is
+    // separately proved empty in the in-memory drawing-pass tests.
+    const naniteSources = new WeakSet();
+    const nativeFrames = new WeakMap();
+    const lastPaintFrames = new WeakMap();
+    let frameSerial = 0;
+    const canvasKind = (canvas) =>
+      canvas?.matches?.(".rx-suit-nanites canvas")
+        ? "entry"
+        : canvas?.matches?.("canvas.rzn-canvas")
+          ? "scroll"
+          : "other";
+    const beginNativeFrame = (canvas, reason) => {
+      naniteSources.delete(canvas);
+      const kind = canvasKind(canvas),
+        geometry = state.scrollGeometry;
+      const frame = {
+        id: ++frameSerial,
+        reason,
+        width: canvas.width,
+        height: canvas.height,
+        images: 0,
+        nanites: 0,
+        startedAt: performance.now(),
+        actual:
+          kind === "scroll" && geometry
+            ? (scrollY - (geometry.top - geometry.pin)) / (geometry.height - geometry.frameHeight)
+            : null,
+      };
+      nativeFrames.set(canvas, frame);
+    };
+    const naniteURL = /\/rexonance-nanites-20261018\/(?:cells|comets|guide|fx)\.webp/;
+    const isNanite = (source) =>
+      Boolean(
+        source &&
+        (naniteSources.has(source) ||
+          (typeof source.src === "string" && naniteURL.test(source.src))),
+      );
+    // The real kit intentionally decodes fetch(Response.blob()), not Image.
+    // Preserve that native path and carry the response URL's provenance to
+    // the Blob and its bitmap; otherwise a zero count would be vacuous.
+    const blob = Response.prototype.blob;
+    Response.prototype.blob = async function (...args) {
+      const result = await blob.apply(this, args);
+      if (naniteURL.test(this.url)) naniteSources.add(result);
+      return result;
+    };
+    if (typeof window.createImageBitmap === "function") {
+      const create = window.createImageBitmap;
+      window.createImageBitmap = async function (source, ...args) {
+        const result = await create.call(this, source, ...args);
+        if (isNanite(source)) naniteSources.add(result);
+        return result;
+      };
+    }
+    const clear = CanvasRenderingContext2D.prototype.clearRect;
+    CanvasRenderingContext2D.prototype.clearRect = function (x, y, width, height) {
+      const matrix = this.getTransform();
+      if (
+        matrix.a === 1 &&
+        matrix.d === 1 &&
+        !matrix.b &&
+        !matrix.c &&
+        !matrix.e &&
+        !matrix.f &&
+        x <= 0 &&
+        y <= 0 &&
+        x + width >= this.canvas.width &&
+        y + height >= this.canvas.height
+      )
+        beginNativeFrame(this.canvas, "full-clear");
+      return clear.call(this, x, y, width, height);
+    };
+    if (typeof CanvasRenderingContext2D.prototype.reset === "function") {
+      const reset = CanvasRenderingContext2D.prototype.reset;
+      CanvasRenderingContext2D.prototype.reset = function (...args) {
+        beginNativeFrame(this.canvas, "context-reset");
+        return reset.apply(this, args);
+      };
+    }
+    for (const dimension of ["width", "height"]) {
+      const descriptor = Object.getOwnPropertyDescriptor(HTMLCanvasElement.prototype, dimension);
+      if (descriptor?.set && descriptor.configurable)
+        Object.defineProperty(HTMLCanvasElement.prototype, dimension, {
+          ...descriptor,
+          set(value) {
+            beginNativeFrame(this, `resize-${dimension}`);
+            descriptor.set.call(this, value);
+          },
+        });
+    }
+    window.__flameQAInspect = (canvas) => ({
+      tagged: naniteSources.has(canvas),
+      frame: { ...nativeFrames.get(canvas) },
+      lastPaint: { ...lastPaintFrames.get(canvas) },
+    });
     window.__rexonanceDrawMs = (ms, progress, calm) => {
       if (progress > 0.02 && progress < 0.3 && !calm && state.drawMs.length < 2000)
         state.drawMs.push(ms);
     };
     const original = CanvasRenderingContext2D.prototype.drawImage;
     CanvasRenderingContext2D.prototype.drawImage = function (...args) {
-      const kind = this.canvas?.matches?.(".rx-suit-nanites canvas")
-        ? "entry"
-        : this.canvas?.matches?.("canvas.rzn-canvas")
-          ? "scroll"
-          : "other";
+      const kind = canvasKind(this.canvas);
       const source = args[0];
+      const frame = nativeFrames.get(this.canvas);
+      if (frame) {
+        frame.images++;
+        lastPaintFrames.set(this.canvas, frame);
+        state.nativeFrames[kind] = frame;
+      }
+      if (isNanite(source)) {
+        naniteSources.add(this.canvas);
+        if (this.globalAlpha > 0) {
+          state.nativeNanites[kind]++;
+          if (frame) frame.nanites++;
+        }
+      }
       const isAtlas = typeof source?.src === "string" && source.src.includes(path);
       if (source instanceof HTMLCanvasElement && source.width === 96 && source.height === 192)
         state.fallback[kind]++;
@@ -146,6 +255,19 @@ async function installProbe(context) {
   }, asset);
 }
 
+async function nativeNaniteWindow(page, kind) {
+  return page.evaluate(
+    (kind) =>
+      new Promise((resolve) => {
+        const before = window.__flameQA.nativeNanites[kind];
+        requestAnimationFrame(() =>
+          requestAnimationFrame(() => resolve(window.__flameQA.nativeNanites[kind] - before)),
+        );
+      }),
+    kind,
+  );
+}
+
 const settled = (page) =>
   page.waitForFunction(
     () =>
@@ -171,7 +293,7 @@ async function readRunway(page) {
   return page.evaluate(() => {
     const runway = document.querySelector(".rzn-suitup");
     const frame = runway?.querySelector(".rzn-frame");
-    return {
+    const geometry = {
       top: runway?.getBoundingClientRect().top + scrollY,
       height: runway?.offsetHeight,
       frameHeight: frame?.offsetHeight,
@@ -179,10 +301,13 @@ async function readRunway(page) {
       state: runway?.dataset.rznState || null,
       scrollY,
     };
+    window.__flameQA.scrollGeometry = geometry;
+    return geometry;
   });
 }
 
 async function scrollToProgress(page, progress) {
+  const nativeBefore = await page.evaluate(() => window.__flameQA.nativeNanites.scroll);
   for (let attempt = 0; attempt < 3; attempt++) {
     const state = await readRunway(page);
     await page.evaluate(
@@ -196,7 +321,23 @@ async function scrollToProgress(page, progress) {
     await page.waitForTimeout(420);
     const next = await readRunway(page);
     const actual = (next.scrollY - (next.top - next.pin)) / (next.height - next.frameHeight);
-    if (Math.abs(actual - progress) < 0.002) return { ...next, actual };
+    if (Math.abs(actual - progress) < 0.002)
+      return {
+        ...next,
+        actual,
+        nativeBeforeReady: await page.evaluate(() => {
+          const canvas = document.querySelector(".rzn-suitup canvas.rzn-canvas");
+          return {
+            backing: canvas ? [canvas.width, canvas.height] : null,
+            load: canvas?.closest(".rzn-suitup")?.dataset.rznLoad,
+            inspected: canvas ? window.__flameQAInspect(canvas) : null,
+          };
+        }),
+        nativeTransitionDraws: await page.evaluate(
+          (before) => window.__flameQA.nativeNanites.scroll - before,
+          nativeBefore,
+        ),
+      };
   }
   throw new Error(`Scroll target ${progress} was not reached with current geometry`);
 }
@@ -390,24 +531,22 @@ async function screenCoverage(capture, figure) {
   };
 }
 
-function assertConnectedPeak(shots, isPeak, label) {
+function assertVortexPeak(shots, isPeak, label) {
   const peaks = shots.filter(isPeak);
-  assert.ok(peaks.length >= 2, `${label}: multiple real connected-field peak samples`);
+  assert.ok(peaks.length >= 2, `${label}: multiple real vortex peak samples`);
   const required = coverageMinimum ?? 0.05;
   assert.ok(
     peaks.some(
       (shot) =>
-        Object.values(shot.fireEvidence?.largest.regional ?? {}).length === 11 &&
-        Object.values(shot.fireEvidence.largest.regional).every(
-          (region) => region.ratio >= required,
-        ),
+        Object.values(shot.fireEvidence?.wrap.regions ?? {}).length === 12 &&
+        Object.values(shot.fireEvidence.wrap.regions).every((region) => region.ratio >= required),
     ),
-    `${label}: one actual connected component must reach all eleven body regions; ` +
+    `${label}: one actual frame must wrap both outside boundaries at all six body levels; ` +
       peaks
         .map(
           (shot) =>
             `${shot.target ?? shot.progress}:` +
-            Object.entries(shot.fireEvidence?.largest.regional ?? {})
+            Object.entries(shot.fireEvidence?.wrap.regions ?? {})
               .sort(([, a], [, b]) => a.ratio - b.ratio)
               .slice(0, 2)
               .map(([name, r]) => `${name}=${(r.ratio * 100).toFixed(2)}%`)
@@ -447,23 +586,6 @@ function coverageSummary(shots, isPeak) {
       ]),
     ),
   };
-}
-
-function assertPeakCoverage(summary, label) {
-  assert.ok(summary.frames.length >= 2, `${label}: multiple near-peak frames were sampled`);
-  for (const frame of summary.frames)
-    assert.ok(
-      Object.keys(frame.regions ?? {}).length === Object.keys(bodyRegions).length &&
-        Object.values(frame.regions).every((region) => region.inBounds && region.pixels > 0),
-      `${label}/${frame.at}: visible screen samples cover all eleven body regions`,
-    );
-  if (coverageMinimum !== null)
-    assert.ok(
-      summary.frames.some((frame) => frame.minimum >= coverageMinimum),
-      `${label}: one peak frame must cover every body region by at least ${coverageMinimum}; ${summary.frames
-        .map((frame) => `${frame.at}/${frame.minimumRegion}=${(frame.minimum * 100).toFixed(2)}%`)
-        .join(", ")}`,
-    );
 }
 
 try {
@@ -563,14 +685,9 @@ try {
                 meter.currentTime = time;
               }
             }, target);
-            await page.evaluate(
-              () =>
-                new Promise((resolve) =>
-                  requestAnimationFrame(() => requestAnimationFrame(resolve)),
-                ),
-            );
           }
           if (naturalClock && !(await page.locator(".rx-call-sequence").count())) break;
+          const nativeNaniteDraws = await nativeNaniteWindow(page, "entry");
           const state = await page.evaluate(() => {
             const suit = document.querySelector(".rx-suit");
             const sequence = document.querySelector(".rx-call-sequence");
@@ -595,6 +712,7 @@ try {
             target,
             ...state,
             pixels,
+            nativeNaniteDraws,
             file,
           });
           if (target === 2600) {
@@ -634,6 +752,20 @@ try {
             2600,
             "the entry extinction sample cannot be silently skipped",
           );
+          if (!baseline) {
+            assert.ok(
+              record.entry
+                .filter((shot) => shot.target < 600)
+                .every((shot) => shot.nativeNaniteDraws === 0),
+              "the real kit bitmap pass stays empty until the explosive clearing finishes",
+            );
+            assert.ok(
+              record.entry
+                .filter((shot) => shot.target >= 620 && shot.target <= 1600)
+                .some((shot) => shot.nativeNaniteDraws > 0),
+              "kit bitmap material actually appears after, not merely disabled forever",
+            );
+          }
         }
         if (mode === "normal" && !baseline) {
           assert.equal(
@@ -643,7 +775,7 @@ try {
           );
           assert.ok(
             record.entry
-              .filter((shot) => shot.target >= 620 && shot.target <= 1600)
+              .filter((shot) => shot.target === 420 || shot.target === 460)
               .every((shot) => shot.atlasDraws > 0 && shot.pixels?.green > 0),
             `${name}: initial flame frames must be drawn, not only a later return call`,
           );
@@ -676,12 +808,21 @@ try {
             Math.max(0, geometry.top - profiles[name].viewport.height * 4.4),
           );
           await page.waitForTimeout(1800);
-          // Retain the old all-region peak gate and completed-armour shots,
-          // but also inspect ignition and shrinking extinction. The final
-          // five samples travel backwards through the same live scene.
+          // A hollow rolling vortex wraps both sides of the figure before
+          // its centre clears. Preserve final armour and reverse traversal.
+          const forwardSamples = [
+            0.025, 0.04, 0.0625, 0.065, 0.069625, 0.0815, 0.084, 0.0855, 0.08625, 0.09, 0.14, 0.22,
+            0.3, 0.34, 0.92, 0.99,
+          ];
           const progressSamples = [
-            0.025, 0.04, 0.049, 0.058, 0.065, 0.085, 0.1, 0.14, 0.22, 0.27, 0.3, 0.34, 0.92, 0.99,
-            0.27, 0.14, 0.1, 0.065, 0.025,
+            ...forwardSamples,
+            0.14,
+            0.09,
+            0.0855,
+            0.0815,
+            0.069625,
+            0.065,
+            0.025,
           ];
           for (const [index, progress] of progressSamples.entries()) {
             const state = await scrollToProgress(page, progress);
@@ -690,16 +831,62 @@ try {
               null,
               { timeout: 30000 },
             );
+            // Preparing is a valid asynchronous state: read the native frame
+            // only after the live renderer has a real backing canvas and has
+            // completed its first paint, not from the earlier geometry read.
+            await page.evaluate(
+              () =>
+                new Promise((resolve) =>
+                  requestAnimationFrame(() => requestAnimationFrame(resolve)),
+                ),
+            );
+            Object.assign(
+              state,
+              await page.evaluate(() => {
+                const canvas = document.querySelector(
+                  '.rzn-suitup[data-rzn-state="live"] canvas.rzn-canvas',
+                );
+                const inspected = canvas ? window.__flameQAInspect(canvas) : null;
+                return {
+                  nativeFrame: inspected?.lastPaint,
+                  nativePendingFrame: inspected?.frame,
+                  nativeNaniteDraws: inspected?.lastPaint?.nanites ?? null,
+                };
+              }),
+            );
             const pixels = await canvasPixels(page, "canvas.rzn-canvas");
+            const nativeNaniteDraws = state.nativeNaniteDraws;
+            if (!baseline) {
+              assert.ok(
+                state.nativeFrame?.images > 0,
+                `a stopped/no-draw window cannot masquerade as a zero-material frame: ${JSON.stringify({ lastPaint: state.nativeFrame, pending: state.nativePendingFrame })}`,
+              );
+              assert.ok(
+                Math.abs(state.nativeFrame.actual - state.actual) < 0.002,
+                "the inspected last actual drawing frame belongs to the settled target, not the prior scroll position",
+              );
+            }
+            if (!baseline && state.actual < 0.08625) {
+              assert.ok(
+                state.nativeFrame.actual < 0.08625,
+                "the actual drawing frame is also before the material floor",
+              );
+              assert.equal(
+                nativeNaniteDraws,
+                0,
+                `${name}/${progress}: no real kit images before material, in either direction`,
+              );
+            }
             assert.ok(pixels?.visible > 20, `${name}/${progress}: painted scroll canvas`);
             const file = join(dir, `scroll-${progress}-${record.scroll.length}.png`);
             const capture = await page.screenshot({ path: file, scale: "css" });
             const coverage = await screenCoverage(capture, pixels?.viewportFigure);
             record.scroll.push({
               progress,
-              direction: index < 14 ? "forward" : "reverse",
+              direction: index < forwardSamples.length ? "forward" : "reverse",
               ...state,
               pixels,
+              nativeNaniteDraws,
               screenCoverage: coverage?.regions,
               fireEvidence: coverage?.fire,
               file,
@@ -721,22 +908,29 @@ try {
               );
             }
           }
+          if (!baseline)
+            assert.ok(
+              record.scroll.some((shot) => shot.actual >= 0.08625 && shot.nativeNaniteDraws > 0),
+              "the scroll native kit tracer observes later real material, making the pre-material zero check non-vacuous",
+            );
           record.bodyCoverage = {
             entry: coverageSummary(
               record.entry,
-              (shot) => shot.target >= 460 && shot.target <= 850,
+              (shot) => shot.target === 420 || shot.target === 460,
             ),
             scroll: coverageSummary(
               record.scroll,
               (shot) =>
-                shot.direction === "forward" && (shot.progress === 0.1 || shot.progress === 0.14),
+                shot.direction === "forward" &&
+                (shot.progress === 0.065 || shot.progress === 0.069625),
             ),
             reverse: coverageSummary(
               record.scroll,
               (shot) =>
-                shot.direction === "reverse" && (shot.progress === 0.1 || shot.progress === 0.14),
+                shot.direction === "reverse" &&
+                (shot.progress === 0.065 || shot.progress === 0.069625),
             ),
-            note: "Inner body patches are measured from the actual visible screenshot, including the DOM undersuit, both canvas layers and their opacity. Source-canvas coverage is retained per shot for diagnostics. Regional maxima cannot satisfy the optional gate: all regions must pass together in one peak frame. Extinguished and final armour frames are retained separately.",
+            note: "Inner eleven-body-patch and connected-component measurements remain diagnostics. The hollow vortex is accepted only when its real outside flame reaches both sides of all six body heights together in one peak frame. Source-canvas coverage, centre clearing and completed armour are retained separately.",
           };
           const temporalCoverage = (shots) =>
             shots.map((shot) => {
@@ -760,30 +954,27 @@ try {
           record.naturalness = {
             entry: temporalCoverage(record.entry),
             scroll: temporalCoverage(record.scroll),
-            note: "Early ignition, full-body peak, lowering extinction and reverse ignition are captured from the real engines. Region timing and intensity are diagnostics for visual review, not a substitute for the unchanged simultaneous eleven-region peak coverage gate. Reverse clocks are tested exactly in the unit renderer; browser atlas phase is intentionally free-running.",
+            note: "Early ignition, wrapped volume, explosive clearing and later metal are captured from the real engines. All twelve exterior wrap patches must pass together, not as maxima assembled from different frames. Native kit bitmap draws are checked before the material floor; typed-metal emptiness and exact reverse poses are verified by the actual drawing-pass unit harness. Browser atlas phase is intentionally free-running.",
           };
           if (mode === "normal" && !baseline) {
-            assertPeakCoverage(record.bodyCoverage.entry, `${name}/entry`);
-            assertPeakCoverage(record.bodyCoverage.scroll, `${name}/scroll`);
-            assertPeakCoverage(record.bodyCoverage.reverse, `${name}/reverse`);
-            assertConnectedPeak(
+            assertVortexPeak(
               record.entry,
-              (shot) => shot.target >= 460 && shot.target <= 850,
+              (shot) => shot.target === 420 || shot.target === 460,
               `${name}/entry`,
             );
-            assertConnectedPeak(
+            assertVortexPeak(
               record.scroll,
-              (shot) => shot.direction === "forward" && [0.065, 0.085, 0.1].includes(shot.progress),
+              (shot) => shot.direction === "forward" && [0.065, 0.069625].includes(shot.progress),
               `${name}/scroll`,
             );
-            assertConnectedPeak(
+            assertVortexPeak(
               record.scroll,
-              (shot) => shot.direction === "reverse" && [0.065, 0.1, 0.14].includes(shot.progress),
+              (shot) => shot.direction === "reverse" && [0.065, 0.069625].includes(shot.progress),
               `${name}/reverse`,
             );
             if (!naturalClock) {
               const quiet = record.entry.filter((shot) => shot.target <= 280);
-              const flare = record.entry.filter((shot) => [460, 620].includes(shot.target));
+              const flare = record.entry.filter((shot) => [420, 460].includes(shot.target));
               const energy = (shot) => shot.fireEvidence?.meanGreenExcess ?? 0;
               record.ignitionEnergy = {
                 quiet: quiet.map((shot) => [shot.target, energy(shot)]),
@@ -793,13 +984,38 @@ try {
                 Math.max(...flare.map(energy)) > Math.max(...quiet.map(energy)) * 2,
                 "the real field grows from quiet ignition into a rapid flare, not a constant bright overlay",
               );
+              const clearing = record.entry.filter(
+                (shot) => shot.target === 560 || shot.target === 590,
+              );
+              assert.equal(clearing.length, 2, "both explosion end and clear gap are captured");
+              assert.ok(
+                clearing.some((shot) => shot.fireEvidence.center.ratio <= 0.05),
+                "the explosive vortex clears the body centre before metal can appear",
+              );
+              record.burstClear = {
+                entry: clearing.map((shot) => ({
+                  at: shot.target,
+                  center: shot.fireEvidence.center,
+                })),
+                scroll: record.scroll
+                  .filter((shot) => shot.progress === 0.0815 || shot.progress === 0.084)
+                  .map((shot) => ({
+                    q: shot.progress,
+                    direction: shot.direction,
+                    center: shot.fireEvidence.center,
+                  })),
+              };
+              assert.ok(
+                record.burstClear.scroll.some((shot) => shot.center.ratio <= 0.05),
+                "scroll explosion clears its centre before the material floor",
+              );
             }
             assert.ok(
               record.scroll
                 .filter(
                   (shot) =>
                     shot.direction === "reverse" &&
-                    (shot.progress === 0.1 || shot.progress === 0.14),
+                    (shot.progress === 0.065 || shot.progress === 0.069625),
                 )
                 .every((shot) => shot.pixels?.green > 0),
               "reverse scroll re-ignites the actual flame at both peak samples",
@@ -872,6 +1088,58 @@ try {
           end: performance.now(),
           requestsBefore: beforeRepeat,
         };
+        if (mode === "normal" && !baseline) {
+          record.nativeTracerSelfTest = await page.evaluate(async () => {
+            const bitmap = await createImageBitmap(
+              await (await fetch("/rexonance-nanites-20261018/cells.webp")).blob(),
+            );
+            const canvas = document.createElement("canvas");
+            canvas.width = 32;
+            canvas.height = 32;
+            const c = canvas.getContext("2d"),
+              neutral = document.createElement("canvas");
+            neutral.width = 32;
+            neutral.height = 32;
+            neutral.getContext("2d").fillRect(0, 0, 32, 32);
+            c.clearRect(0, 0, 32, 32);
+            c.drawImage(bitmap, 0, 0, 32, 32);
+            const positive = window.__flameQAInspect(canvas);
+            c.clearRect(0, 0, 32, 32);
+            c.drawImage(neutral, 0, 0);
+            const cleared = window.__flameQAInspect(canvas);
+            const sink = document.createElement("canvas");
+            sink.width = 32;
+            sink.height = 32;
+            sink.getContext("2d").drawImage(canvas, 0, 0);
+            const derived = window.__flameQAInspect(sink);
+            c.drawImage(bitmap, 0, 0, 32, 32);
+            canvas.width = 32;
+            const resized = window.__flameQAInspect(canvas);
+            if (typeof c.reset === "function") {
+              c.drawImage(bitmap, 0, 0, 32, 32);
+              c.reset();
+            }
+            const reset = window.__flameQAInspect(canvas);
+            bitmap.close();
+            return { positive, cleared, derived, resized, reset };
+          });
+          const check = record.nativeTracerSelfTest;
+          assert.equal(check.positive.tagged, true);
+          assert.equal(check.positive.frame.nanites, 1);
+          assert.ok(check.positive.frame.images > 0);
+          for (const key of ["cleared", "derived", "resized", "reset"]) {
+            assert.equal(
+              check[key].tagged,
+              false,
+              `${key}: cleared pixels cannot retain old kit provenance`,
+            );
+            assert.equal(check[key].frame.nanites, 0);
+          }
+          assert.ok(
+            check.cleared.frame.id > check.positive.frame.id && check.cleared.frame.images > 0,
+            "a new actually drawn non-kit frame supplies the negative control",
+          );
+        }
         record.probe = await page.evaluate(() => window.__flameQA);
         const summarize = (values) => {
           const sorted = [...values].sort((a, b) => a - b);

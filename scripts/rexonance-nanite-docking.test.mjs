@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
 import test from "node:test";
 import { naniteHexHeight, naniteHexLight } from "../src/lib/rexonance-unlit.js";
-import { sampleFlameBirth } from "../src/lib/rexonance-ignition.js";
+import { sampleFlameBirth, NANITE_FIRE_PHASES } from "../src/lib/rexonance-ignition.js";
 import { REXONANCE_NANITES } from "../src/lib/rexonance-nanites.ts";
 import {
   REXONANCE_SUIT_GOLD_CELL,
@@ -37,6 +37,7 @@ function runtimeFactory() {
   const importLine = 'import { naniteHexHeight, naniteHexLight } from "./rexonance-unlit.js";';
   const fireImport = 'import { sampleFlameBirth } from "./rexonance-ignition.js";';
   const firePainterImport = 'import { drawNaniteFirebrand } from "./rexonance-flame.js";';
+  const phaseImport = 'import { NANITE_FIRE_PHASES } from "./rexonance-ignition.js";';
   assert.equal(
     source.split(importLine).length - 1,
     1,
@@ -52,6 +53,7 @@ function runtimeFactory() {
     .replace(importLine, "")
     .replace(fireImport, "")
     .replace(firePainterImport, "")
+    .replace(phaseImport, "")
     .replace(/\bexport\s+(?=(?:const|function|class)\b)/g, "")
     .replace(
       returnMarker,
@@ -77,6 +79,11 @@ function runtimeFactory() {
       const piece = P[p];
       return { id: piece.id, group: piece.group, fixed: piece.fixed, seatX: piece.seatX, seatHold: piece.seatHold, bank: piece.bank };
     },
+    __testMaterials() {
+      let metal=0,fire=0;
+      for(let i=0;i<n+F;i++) {if(A[i]>.01 && KIND[i]) metal++;if(FIRE[i]>.02 && KIND[i]) fire++;}
+      return {metal,fire};
+    },
     state,`,
     )
     .concat("\nglobalThis.__createAssemblyNanites = createAssemblyNanites;\n");
@@ -84,6 +91,7 @@ function runtimeFactory() {
     naniteHexHeight,
     naniteHexLight,
     sampleFlameBirth,
+    NANITE_FIRE_PHASES,
     drawNaniteFirebrand(ctx, x, y, strength, clock, scale = 1) {
       for (let i = 0; i < 2; i++)
         ctx.drawImage({ id: "firebrand" }, x - 20 * scale, y - 50 * scale, 40 * scale, 70 * scale);
@@ -200,8 +208,8 @@ test("every scroll machine uses the shared burning surface and one unquantized b
       const expected = [out[0] * 571, out[1] * 1040, out[2], out[3]];
       for (let k = 0; k < 4; k++)
         close(emission[i * 4 + k], expected[k], 0.0001, `${i}/${k}: same burning source`);
-      assert.ok(births[i] >= 0.063 - 1e-7 && births[i] <= 0.09 + 1e-7);
-      bands.add(Math.floor((births[i] - 0.063) * 1000));
+      assert.ok(births[i] >= 0.08625 - 1e-7 && births[i] <= 0.11325 + 1e-7);
+      bands.add(Math.floor((births[i] - 0.08625) * 1000));
     }
     assert.ok(bands.size >= 20, `${bands.size} continuous release times, not six pumps`);
   }
@@ -216,14 +224,16 @@ test("scroll fire leaves the surface first, forms metal at its airborne point, a
   for (const i of samples) {
     const born = nano.birth[i];
     if (nano.T0[i] <= born + 1e-7) continue;
-    swarm.frame(born - 0.006, 0, true, 1, false);
-    const origin = swarm.__testPose(i, born - 0.006);
+    const fireStart = 0.015 + 0.285 * NANITE_FIRE_PHASES.burstStart;
+    const fireEnd = 0.015 + 0.285 * NANITE_FIRE_PHASES.burstEnd;
+    swarm.frame(fireStart, 0, true, 1, false);
+    const origin = swarm.__testPose(i, fireStart);
     close(origin.x, nano.emission[i * 4], 0.0001, `${i}: prelude start x`);
     close(origin.y, nano.emission[i * 4 + 1], 0.0001, `${i}: prelude start y`);
     assert.equal(origin.alpha, 0);
     close(origin.fire, 0, 1e-12, "floating-point prelude zero");
-    swarm.frame(born - 0.003, 0, true, 1, false);
-    const flying = swarm.__testPose(i, born - 0.003);
+    swarm.frame((fireStart + fireEnd) / 2, 0, true, 1, false);
+    const flying = swarm.__testPose(i, (fireStart + fireEnd) / 2);
     assert.ok(flying.fire > 0 && flying.alpha === 0, "flame flies before any metal exists");
     swarm.frame(born - 1e-9, 0, true, 1, false);
     const predecessor = swarm.__testPose(i, born - 1e-9);
@@ -232,7 +242,8 @@ test("scroll fire leaves the surface first, forms metal at its airborne point, a
     close(first.x, predecessor.x, 0.001, `${i}: fire-to-machine x`);
     close(first.y, predecessor.y, 0.001, `${i}: fire-to-machine y`);
     assert.ok(
-      Math.hypot(first.x - nano.emission[i * 4], first.y - nano.emission[i * 4 + 1]) >= 18,
+      Math.hypot(first.x - nano.emission[i * 4], first.y - nano.emission[i * 4 + 1]) >=
+        80 * (REXONANCE_SUIT_SIZE.height / 1000) - 0.001,
       "the machine begins in the airborne fragment, not at a new body origin",
     );
     assert.equal(first.fire, 1);
@@ -265,6 +276,90 @@ test("scroll fire leaves the surface first, forms metal at its airborne point, a
       "no previous frame alters the handoff",
     );
   }
+});
+
+test("all real scroll metal passes stay empty before the global material floor, including reverse scrubbing", () => {
+  const { nano, gold } = fixture(),
+    swarm = createSwarm(nano, gold);
+  let operations = 0;
+  const noop = () => {};
+  const context = new Proxy(
+    {
+      drawImage() {
+        operations++;
+      },
+      fillRect() {
+        operations++;
+      },
+      fill() {
+        operations++;
+      },
+    },
+    { get: (target, key) => (key in target ? target[key] : noop), set: () => true },
+  );
+  for (const q of [0.2, 0.06, 0.065, 0.075, 0.0815, 0.084, 0.08625 - 1e-7, 0.01, 0.0855]) {
+    swarm.frame(q, 0, false, 1, false);
+    if (q >= 0.08625) continue;
+    assert.equal(swarm.__testMaterials().metal, 0, `${q}: no positive-alpha metal cell`);
+    operations = 0;
+    swarm.backPass(context);
+    swarm.midPass(context);
+    swarm.frontPass(context);
+    swarm.flightPass(context);
+    swarm.stagedPass(context);
+    swarm.seatedPass(context, swarm.paintedBy(q));
+    swarm.freePass(context);
+    assert.equal(operations, 0, `${q}: no actual metal image, facet rectangle or fill`);
+  }
+  swarm.frame(0.1, 0, false, 1, false);
+  assert.ok(
+    swarm.__testMaterials().metal > 0,
+    "material actually appears after clearing, rather than being disabled permanently",
+  );
+});
+
+test("the explosive scroll prelude contains only bounded alpha-volume fire, never a field of square pseudo-machines", () => {
+  const { nano, gold } = fixture(),
+    swarm = createSwarm(nano, gold);
+  let images = [],
+    paints = 0,
+    visibleFire = 0;
+  const noop = () => {};
+  const context = new Proxy(
+    {
+      drawImage(image) {
+        images.push(image.id);
+      },
+      fillRect() {
+        paints++;
+      },
+      fill() {
+        paints++;
+      },
+      stroke() {
+        paints++;
+      },
+    },
+    { get: (target, key) => (key in target ? target[key] : noop), set: () => true },
+  );
+  for (const q of [0.2, 0.065, 0.075, 0.0815, 0.0855, 0.075, 0.065]) {
+    swarm.frame(q, 0, false, 1, false);
+    if (q >= 0.08625) continue;
+    images = [];
+    paints = 0;
+    swarm.firebrands(context);
+    assert.equal(paints, 0, `${q}: no square/facet fallback may mimic early nanomachines`);
+    visibleFire += images.length;
+    assert.ok(images.length <= 48, `${q}: at most 24 actual two-frame fire volumes`);
+    assert.ok(
+      images.every((id) => id === "firebrand"),
+      "only the real flame helper is used before metal appears",
+    );
+  }
+  assert.ok(
+    visibleFire > 0,
+    "the later explosion actually renders authored fire instead of silently disabling the pass",
+  );
 });
 
 test("non-helmet tile pose stays continuous at river, braking, and unfold boundaries", () => {

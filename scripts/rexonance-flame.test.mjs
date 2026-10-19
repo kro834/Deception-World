@@ -5,6 +5,7 @@ import test from "node:test";
 import sharp from "sharp";
 import ts from "typescript";
 import {
+  NANITE_FIRE_PHASES,
   naniteFlameEnvelope,
   naniteFlameScatter,
   sampleFlameBirth,
@@ -72,14 +73,31 @@ function painter({ throwAt = 0 } = {}) {
     createImageData(width, height) {
       return { data: new Uint8ClampedArray(width * height * 4) };
     },
-    putImageData() {
+    putImageData(pixels) {
       operations.push(["pixels"]);
+      this.__qaPixels = pixels.data;
     },
-    beginPath() {},
-    moveTo() {},
-    bezierCurveTo() {},
-    closePath() {},
-    fill() {},
+    beginPath() {
+      operations.push(["pathStart"]);
+    },
+    moveTo(...args) {
+      operations.push(["move", ...args]);
+    },
+    bezierCurveTo(...args) {
+      operations.push(["curve", ...args]);
+    },
+    quadraticCurveTo(...args) {
+      operations.push(["quadratic", ...args]);
+    },
+    lineTo(...args) {
+      operations.push(["line", ...args]);
+    },
+    closePath() {
+      operations.push(["pathClose"]);
+    },
+    fill() {
+      operations.push(["fill", this.globalAlpha, this.globalCompositeOperation]);
+    },
   };
   return { context, operations, states };
 }
@@ -131,8 +149,8 @@ function prepareField(module, f, source = { src: "actual-undersuit" }) {
   flow.canvas.__qaRole = "body-flow";
   for (const surface of [mask, field, flow])
     assert.ok(
-      surface.canvas.width * surface.canvas.height * 4 <= 640000,
-      "bounded preparation surface",
+      surface.canvas.width * surface.canvas.height * 4 <= 1024 * 1024,
+      "bounded preparation surface, including the approved 48px transparent vortex-tip margin",
     );
   return { source, mask, field, flow };
 }
@@ -145,6 +163,34 @@ function flameRoots(operations) {
   }
   return roots.filter((root) => root.images.length);
 }
+
+test("the allocation-optimized prepared density is byte-identical to the approved rendered field", async () => {
+  const module = await fresh(),
+    f = fixture();
+  await ready(module, f);
+  const body = prepareField(module, f),
+    pixels = body.flow.context.__qaPixels;
+  assert.ok(
+    pixels instanceof Uint8ClampedArray,
+    "inspect actual putImageData RGBA, not source literals or a manifest",
+  );
+  assert.equal(pixels.length, 384 * 624 * 4);
+  assert.equal(
+    createHash("sha256").update(pixels).digest("hex"),
+    "ec156b05e9d196df405dcc8e8fe49c27922d4f0601b0b5ac8a5cbb3d89904034",
+  );
+  const before = f.canvases.length;
+  assert.equal(
+    module.prepareBodyFlame(body.source, { width: 571, height: 1040 }, f.environment),
+    true,
+  );
+  assert.equal(
+    f.canvases.length,
+    before,
+    "the exact approved image is retained rather than rebuilt per appearance",
+  );
+  assert.equal(body.flow.context.__qaPixels, pixels);
+});
 
 test("the Blender flame is one transparent 32-frame atlas, not repeated radial discs", async () => {
   const { NANITE_FLAME_ATLAS: atlas } = await fresh();
@@ -464,7 +510,7 @@ test("a browser without image.decode can use a fully loaded correctly sized shee
   assert.equal(module.naniteFlameReady(), true);
 });
 
-test("touch retains one connected field while reducing detail within the total frame budget", async () => {
+test("touch retains the shared volume while reducing detail within the total frame budget", async () => {
   const counts = [];
   for (const coarse of [false, true]) {
     const module = await fresh(),
@@ -493,7 +539,7 @@ test("touch retains one connected field while reducing detail within the total f
   assert.ok(counts[1] < counts[0], "touch reduces detail, not the shared body field");
 });
 
-test("one prepared physical mask and one advected field feed both body layers", async () => {
+test("one prepared field and a clock-driven depth-separated vortex feed both body layers", async () => {
   const module = await fresh(),
     f = fixture();
   await ready(module, f);
@@ -510,15 +556,22 @@ test("one prepared physical mask and one advected field feed both body layers", 
   );
   assert.equal(f.canvases.length, allocated, "return calls reuse the prepared surfaces");
   body.field.operations.length = 0;
+  body.mask.operations.length = 0;
   const back = painter(),
     front = painter();
   module.drawBodyFlame(back.context, { width: 571, height: 1040 }, 1, 0.42, 1, "back", 0.175);
   const firstField = [...body.field.operations];
+  const firstMask = [...body.mask.operations];
   module.drawBodyFlame(front.context, { width: 571, height: 1040 }, 1, 0.42, 1, "front", 0.175);
   assert.deepEqual(
     body.field.operations,
     firstField,
     "both passes reuse the same clock/strength field without rebuilding it",
+  );
+  assert.deepEqual(
+    body.mask.operations,
+    firstMask,
+    "front/back share the same cached vortex geometry",
   );
   assert.ok(
     firstField.some(
@@ -530,18 +583,17 @@ test("one prepared physical mask and one advected field feed both body layers", 
   assert.equal(
     maskDraws.length,
     1,
-    "one continuously soft mask, not separately displaced horizontal strips",
+    "one curved volume mask, not separately displaced horizontal strips",
+  );
+  assert.equal(maskDraws[0].length, 6, "draw the whole mask, never clip source slices");
+  assert.ok(
+    firstMask.filter((row) => row[0] === "curve").length >= 144,
+    "the shape itself winds through continuous curved ribbons",
   );
   assert.equal(
-    maskDraws[0].length,
-    6,
-    "draw the whole mask at its translated origin, never clip source slices",
-  );
-  const maskAt = firstField.indexOf(maskDraws[0]);
-  assert.deepEqual(
-    firstField.slice(maskAt - 3, maskAt).map((row) => row[0]),
-    ["translate", "rotate", "scale"],
-    "the soft outline sways continuously from an anchored affine transform",
+    firstMask.filter((row) => row[0] === "fill" && row.at(-1) === "destination-out").length,
+    0,
+    "depth comes from authored alpha, never punched-out oval holes",
   );
   assert.doesNotMatch(
     JSON.stringify(firstField),
@@ -555,73 +607,55 @@ test("one prepared physical mask and one advected field feed both body layers", 
   for (const p of [back, front]) {
     const field = p.operations.find((row) => row[0] === "image" && row[1] === "body-field");
     assert.ok(field, "one shared volume covers head, connected torso, limbs and feet");
-    const sourceBox = body.mask.operations
+    const sourceBox = firstMask
       .filter((row) => row[0] === "image" && row[1] === body.source.src)
       .at(-1);
-    const [x, y, width, height] = field.slice(2, 6);
-    assert.ok(
-      x < 0 && y < 0 && width >= 571 * 1.4 && height > 1040,
-      "retain air around the figure for the rolling plume",
-    );
-    assert.ok(Math.abs(x + (sourceBox[2] / body.field.canvas.width) * width) < 1e-9);
-    assert.ok(Math.abs(y + (sourceBox[3] / body.field.canvas.height) * height) < 1e-9);
-    assert.ok(Math.abs((sourceBox[4] / body.field.canvas.width) * width - 571) < 1e-9);
-    assert.ok(
-      Math.abs((sourceBox[5] / body.field.canvas.height) * height - 1040) < 1e-9,
-      "the broad field never shifts the actual suit registration",
-    );
+    if (p === back) {
+      const [x, y, width, height] = field.slice(2, 6);
+      assert.ok(
+        x < 0 && y < 0 && width >= 571 * 1.4 && height > 1040,
+        "retain air around the figure for the rolling plume",
+      );
+      assert.ok(Math.abs(x + (sourceBox[2] / body.field.canvas.width) * width) < 1e-9);
+      assert.ok(Math.abs(y + (sourceBox[3] / body.field.canvas.height) * height) < 1e-9);
+      assert.ok(Math.abs((sourceBox[4] / body.field.canvas.width) * width - 571) < 1e-9);
+      assert.ok(
+        Math.abs((sourceBox[5] / body.field.canvas.height) * height - 1040) < 1e-9,
+        "the broad field never shifts the actual suit registration",
+      );
+    } else {
+      assert.equal(
+        p.operations.some((row) => row[0] === "clip"),
+        false,
+        "front depth never hard-cuts the rolling volumes to polygon outlines",
+      );
+      assert.ok(
+        field.at(-2) <= 0.12,
+        "whole-field spill is faint; near volumes, not a green stencil, supply the foreground",
+      );
+    }
     assert.equal(p.states.length, 0);
     assert.equal(p.context.globalAlpha, 0.73);
     assert.equal(p.context.globalCompositeOperation, "multiply");
   }
+  body.mask.operations.length = 0;
+  module.drawBodyFlame(painter().context, { width: 571, height: 1040 }, 1, 0.7, 1, "back", 0.175);
+  assert.notDeepEqual(
+    body.mask.operations,
+    firstMask,
+    "clock changes the actual curved shape, not only its texture offset",
+  );
+  const turned = [...body.mask.operations];
+  body.mask.operations.length = 0;
+  module.drawBodyFlame(painter().context, { width: 571, height: 1040 }, 1, 0.7, 1, "back", 0.21);
+  assert.notDeepEqual(
+    body.mask.operations,
+    turned,
+    "burst phase tears and expands the geometry even at the same clock",
+  );
 });
 
-test("near fire is rooted on the supplied body instead of dangling below its hands or across the leg gap", async () => {
-  const { data, info } = await sharp(
-    readFileSync(file("public/rexonance-suit-20261016/undersuit.webp")),
-  )
-    .ensureAlpha()
-    .raw()
-    .toBuffer({ resolveWithObject: true });
-  assert.deepEqual([info.width, info.height], [571, 1040]);
-  const radius = 24;
-  for (const coarse of [false, true]) {
-    const module = await fresh();
-    const f = fixture();
-    f.environment.matchMedia = (query) => ({
-      matches: coarse && query.includes("pointer: coarse"),
-    });
-    await ready(module, f);
-    for (const clock of [0.2, 0.85, 1.3, 2.1]) {
-      const p = painter();
-      module.drawBodyFlame(p.context, info, 1, clock, 1, "front");
-      for (const [index, root] of flameRoots(p.operations).entries()) {
-        let touchesBody = false;
-        for (
-          let y = Math.max(0, Math.floor(root.y - radius));
-          y <= Math.min(info.height - 1, root.y + radius);
-          y++
-        )
-          for (
-            let x = Math.max(0, Math.floor(root.x - radius));
-            x <= Math.min(info.width - 1, root.x + radius);
-            x++
-          )
-            if (
-              (x - root.x) ** 2 + (y - root.y) ** 2 <= radius ** 2 &&
-              data[(y * info.width + x) * 4 + 3] > 32
-            )
-              touchesBody = true;
-        assert.ok(
-          touchesBody,
-          `${coarse ? "coarse" : "fine"}/${clock}/root ${index}: its feathered root contacts the actual body within ${radius}px`,
-        );
-      }
-    }
-  }
-});
-
-test("face and body detail originate on the same body sources rather than a separate crown", async () => {
+test("authored fire detail follows a body-height revolving volume with bounded, changing roots", async () => {
   for (const coarse of [false, true]) {
     const module = await fresh(),
       f = fixture();
@@ -630,20 +664,65 @@ test("face and body detail originate on the same body sources rather than a sepa
     });
     await ready(module, f);
     prepareField(module, f);
-    for (const clock of [0.35, 1.37, 2.1]) {
+    const rootsAt = (clock) => {
       const p = painter();
-      module.drawBodyFlame(p.context, { width: 571, height: 1040 }, 1, clock, 1, "front", 0.175);
-      assert.equal(
-        p.operations.filter((row) => row[0] === "image" && row[1] === "body-field").length,
+      module.drawBodyFlame(
+        p.context,
+        { width: 571, height: 1040 },
         1,
+        clock,
+        1,
+        "all",
+        NANITE_FIRE_PHASES.burstStart,
       );
-      const face = flameRoots(p.operations).filter((root) => root.y < 1040 * 0.21);
-      assert.ok(face.length > 0);
+      const roots = flameRoots(p.operations).filter((root) =>
+        root.images.some((image) => image[1] === module.NANITE_FLAME_ATLAS.src),
+      );
+      assert.ok(roots.length >= 5, "the wrapping field has multiple genuine volume detail samples");
       assert.ok(
-        face.every((root) => root.y >= 1040 * 0.077),
-        "no new source is emitted above the real head",
+        roots.every(
+          (root) =>
+            Number.isFinite(root.x) &&
+            Number.isFinite(root.y) &&
+            root.x >= -571 * 0.4 &&
+            root.x <= 571 * 1.4 &&
+            root.y >= -1040 * 0.15 &&
+            root.y <= 1040 * 1.15,
+        ),
+        "curved roots remain within the deliberate padded volume",
       );
-    }
+      assert.ok(Math.min(...roots.map((root) => root.y)) < 1040 * 0.2);
+      assert.ok(
+        Math.max(...roots.map((root) => root.y)) > 1040 * 0.8,
+        "head to lower-leg volume is present",
+      );
+      assert.ok(
+        Math.max(...roots.map((root) => root.x)) - Math.min(...roots.map((root) => root.x)) >
+          571 * 0.3,
+        "the vortex wraps broadly, not a central chimney",
+      );
+      return roots.map(({ x, y }) => [x, y]);
+    };
+    const first = rootsAt(0.7);
+    rootsAt(1.4);
+    assert.notDeepEqual(rootsAt(1.1), first, "the sources themselves orbit, not only atlas pixels");
+    assert.deepEqual(rootsAt(0.7), first, "reverse restores the same volume geometry");
+  }
+});
+
+test("the main vortex is completely gone before any material phase, even for an isolated legacy caller", async () => {
+  const module = await fresh(),
+    f = fixture();
+  await ready(module, f);
+  const body = prepareField(module, f);
+  for (const phase of [NANITE_FIRE_PHASES.materialStart, 0.3, 0.6, 1]) {
+    const p = painter();
+    body.field.operations.length = 0;
+    body.mask.operations.length = 0;
+    module.drawBodyFlame(p.context, { width: 571, height: 1040 }, 1, 0.8, 1, "all", phase);
+    assert.deepEqual(p.operations, [], "no centre fire overlays newly appearing metal");
+    assert.deepEqual(body.field.operations, []);
+    assert.deepEqual(body.mask.operations, []);
   }
 });
 
@@ -666,13 +745,13 @@ test("a single scatter impulse leaves the shared burning surface and reverses ex
     assert.equal(p.states.length, 0);
     return p.operations;
   };
-  for (const phase of [0.1, 0.16, 0.36, 0.6, 1])
+  for (const phase of [0.1, NANITE_FIRE_PHASES.burstStart, NANITE_FIRE_PHASES.burstEnd, 0.6, 1])
     assert.equal(
       render(phase).filter((row) => row[0] === "rect").length,
       0,
       "no continuously respawning decorative sparks",
     );
-  const phase = 0.25,
+  const phase = (NANITE_FIRE_PHASES.burstStart + NANITE_FIRE_PHASES.burstEnd) / 2,
     scatter = naniteFlameScatter(phase);
   const reference = render(phase);
   const drops = reference.filter((row) => row[0] === "rect");
@@ -932,7 +1011,7 @@ test("valid draws use atlas frame rectangles with interpolation and deterministi
     (row) => row[0] === "image" && row[1] === module.NANITE_FLAME_ATLAS.src,
   );
   assert.ok(
-    atlasDraws.length >= 60 && atlasDraws.length <= 130,
+    atlasDraws.length >= 24 && atlasDraws.length <= 128,
     `${atlasDraws.length} atlas draws, not hundreds of blobs`,
   );
   assert.ok(new Set(atlasDraws.map((row) => `${row[2]},${row[3]}`)).size > 8);

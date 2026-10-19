@@ -28,6 +28,7 @@ import {
   type RexonanceSuitPiece,
 } from "@/lib/rexonance-suit";
 import { SuitNanites } from "./rexonance-suit-nanites";
+import { NANITE_FIRE_PHASES, naniteMaterialLanding } from "@/lib/rexonance-ignition.js";
 
 type RexonanceCallSequenceProps = {
   mode: "entry" | "stage";
@@ -332,10 +333,16 @@ const atlasCell = (piece: RexonanceSuitPiece, half: 0 | 1): CSSProperties => {
 };
 const pieceClock = (piece: RexonanceSuitPiece) => {
   const fit = REXONANCE_SUIT_FIT[piece.id];
+  const start = naniteMaterialLanding(fit - REXONANCE_SUIT_REVEAL_MS, fit);
+  const materialStart = NANITE_FIRE_PHASES.materialStart * 2400;
+  const gatherStart = Math.max(materialStart, start - 160);
   const [gx, gy] = SUIT_GROW[piece.dir];
   return {
     ...place(piece.x, piece.y, piece.w, piece.h),
-    "--rx-suit-t": `${fit - REXONANCE_SUIT_REVEAL_MS}ms`,
+    "--rx-suit-t": `${start}ms`,
+    "--rx-suit-grow-duration": `${fit - start}ms`,
+    "--rx-suit-gather-start": `${gatherStart}ms`,
+    "--rx-suit-gather-duration": `${Math.max(1, fit + 40 - gatherStart)}ms`,
     "--rx-suit-gx": gx,
     "--rx-suit-gy": gy,
     "--rx-suit-k": REXONANCE_SUIT_ACCENTS.includes(piece.id) ? 1.07 : 1.025,
@@ -471,7 +478,17 @@ function Suit({ suit, animate }: { suit: "build" | "whole"; animate: boolean }) 
     setSwarm(rich ? "canvas" : "svg");
   }, []);
   return (
-    <div className="rx-suit" data-suit={suit} data-nanites={nanites} data-swarm={swarm}>
+    <div
+      className="rx-suit"
+      data-suit={suit}
+      data-nanites={nanites}
+      data-swarm={swarm}
+      style={
+        {
+          "--rx-suit-material-start": `${NANITE_FIRE_PHASES.materialStart * 2400}ms`,
+        } as CSSProperties
+      }
+    >
       {/* Interior HUD: the visor's curved edges and a heading strip. */}
       <i className="rx-suit-rim is-left" />
       <i className="rx-suit-rim is-right" />

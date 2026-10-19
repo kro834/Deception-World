@@ -31,6 +31,9 @@ export function drawNaniteFlame(
   clock: number,
   scale?: number,
 ): void;
+/** Three depth-separated fire vortices wrap, tear outward during the
+ * shared burst interval, then disappear by materialStart. Phase uses the
+ * shared entry/scroll ignition clock; omitted phase retains legacy draws. */
 export function drawBodyFlame(
   context: CanvasRenderingContext2D,
   size: { readonly width: number; readonly height: number },

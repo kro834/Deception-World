@@ -29,6 +29,7 @@ import {
   REXONANCE_SUIT_SIZE,
 } from "../src/lib/rexonance-suit.ts";
 import { REXONANCE_STAGE_CARD_LEAVE_MS } from "../src/lib/rexonance-stage-call.ts";
+import { NANITE_FIRE_PHASES, naniteMaterialLanding } from "../src/lib/rexonance-ignition.js";
 
 /* 2026-10-11 rx13 (owner): finer pieces, formed by nanites right on the
    undersuit and fitted one after another. The figure is cut into 60 plates
@@ -287,10 +288,22 @@ const pieceClocks = REXONANCE_SUIT_PIECES.filter(
   (piece) => !REXONANCE_SUIT_DRIVER.includes(piece.id),
 ).map((piece) => ({
   piece,
-  t: REXONANCE_SUIT_FIT[piece.id] - REXONANCE_SUIT_REVEAL_MS,
+  t: naniteMaterialLanding(
+    REXONANCE_SUIT_FIT[piece.id] - REXONANCE_SUIT_REVEAL_MS,
+    REXONANCE_SUIT_FIT[piece.id],
+  ),
   s: REXONANCE_SUIT_FIT[piece.id],
 }));
-const vars = ({ t, s }) => ({ "--rx-suit-t": t, "--rx-suit-s": s });
+const vars = ({ t, s }) => {
+  const gather = Math.max(NANITE_FIRE_PHASES.materialStart * 2400, t - REXONANCE_SUIT_GATHER_MS);
+  return {
+    "--rx-suit-t": t,
+    "--rx-suit-s": s,
+    "--rx-suit-grow-duration": s - t,
+    "--rx-suit-gather-start": gather,
+    "--rx-suit-gather-duration": s + REXONANCE_SUIT_CLANK_MS - gather,
+  };
+};
 
 test("the suit keeps the call clock and is finished before the hand-over", () => {
   const cover = REXONANCE_ENTRY_TIMINGS.cover;
@@ -363,7 +376,7 @@ test("the suit keeps the call clock and is finished before the hand-over", () =>
   // grows and go once it seats; it grows from its seam over REVEAL (its
   // window and its art on one easing, so the art holds still) and clanks
   // over CLANK; the spark bites on the fit.
-  const piece = { "--rx-suit-t": 1000, "--rx-suit-s": 1100 };
+  const piece = vars({ t: 1000, s: 1100 });
   const gather = layerTimes(declaration(covering(".rx-suit-mote").body, "animation"), piece);
   const wipe = layerTimes(
     declaration(covering(".rx-suit-plate:not(.is-driver)").body, "animation"),
@@ -788,8 +801,16 @@ test("rx12/rx13: the raster suit — the artwork's plates, delivery-sized, decod
   assert.match(gate, /performance\.now\(\) - startedAt > REXONANCE_SUIT_LATE_MS/);
   assert.match(gate, /suit=\{rexonanceSuit\}/);
   assert.match(component, /suit = "whole",/);
-  // Motes gather on RIDER！ and are spent by the chant's end.
+  // The cold fallback obeys the same material floor as the actual canvas.
   const motes = layerTimes(declaration(covering(".rx-suit-motes").body, "animation"), {});
-  assert.equal(motes.delay, REXONANCE_CALL_BEATS[1].start);
-  assert.ok(motes.end <= REXONANCE_CALL_BEATS[3].start);
+  assert.equal(motes.delay, NANITE_FIRE_PHASES.materialStart * 2400);
+  assert.equal(
+    motes.duration,
+    970,
+    "the material floor shifts the finite original mote life, not its speed",
+  );
+  assert.ok(
+    motes.end <= REXONANCE_CALL_BEATS[4].start,
+    "the fallback motes are spent before the final declaration",
+  );
 });

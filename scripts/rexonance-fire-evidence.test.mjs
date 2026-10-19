@@ -61,6 +61,27 @@ test("one connected body field reaches all eleven real regions", () => {
   assert.ok(allJoined(evidence));
 });
 
+test("a hollow vortex wraps both sides of every body level without requiring a green human centre", () => {
+  const f = fixture();
+  f.fire.fill(255);
+  for (let i = 0; i < f.fire.length; i++) if (f.bodyMask[i]) f.fire[i] = 0;
+  const evidence = analyse(f);
+  assert.equal(evidence.wrap.regions["head-left"].ratio, 1);
+  assert.equal(evidence.wrap.regions["foot-right"].ratio, 1);
+  assert.equal(Object.keys(evidence.wrap.regions).length, 12);
+  assert.ok(
+    evidence.wrap.minimum >= 0.9,
+    "the genuine outside vortex reaches all anatomical bands",
+  );
+  f.fire.fill(0);
+  f.fire.set(f.bodyMask);
+  assert.equal(
+    analyse(f).wrap.minimum,
+    0,
+    "a coloured human stencil alone cannot satisfy the wrap gate",
+  );
+});
+
 test("exterior evidence distinguishes a broad nearby plume from a coloured human stencil or distant HUD", () => {
   const f = fixture();
   f.fire.set(f.bodyMask);
