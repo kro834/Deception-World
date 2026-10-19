@@ -679,7 +679,8 @@ export function drawBodyFlame(context, size, strength, clock, scale = 1, layer =
       // Its spatial front remains small; only its local radiance is lifted.
       const radiance =
         progress > 0 && progress < NANITE_FIRE_PHASES.burstStart ? Math.sqrt(power) : power;
-      context.globalAlpha = radiance * (layer === "back" ? 0.72 : 0.12);
+      // Owner, 2026-10-20: less fog, so the tongues read as fire.
+      context.globalAlpha = radiance * (layer === "back" ? 0.4 : 0.08);
       if (layer === "front") {
         // Only a tenuous spill crosses the whole body. Real near-volume
         // tongues below supply the occluding front arcs with their own

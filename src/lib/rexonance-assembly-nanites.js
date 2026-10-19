@@ -3234,14 +3234,18 @@ export function createAssemblyNanites({
   const firebrandPass = (ctx, list, count) => {
     let rects = 0;
     // Match entry: no isolated flame bodies survive the departing burst.
+    // Owner, 2026-10-20: the flying fire overlaps the first births, so there
+    // is no empty beat between the flame and the swarm.
     const tailSpan = (0.285 * 40) / 2400;
-    const fireTail = 1 - smooth(clamp01((Q - (FIRE_END - tailSpan)) / tailSpan));
+    const tailEnd = MATERIAL_START + BIRTH * 0.5;
+    const fireTail = 1 - smooth(clamp01((Q - (tailEnd - tailSpan)) / tailSpan));
     const limit = coarse ? FIREBRANDS_TOUCH : FIREBRANDS;
     for (let c = 0; c < count; c += 1) {
       const slot = list[c];
       const fire = FIRE[slot] * fireTail;
       if (fire <= 0.02) continue;
-      if (!CALM && firebrandsDrawn < limit && sprites_ + 2 <= ASSEMBLY_SPRITE_BUDGET) {
+      // (Also at rest: the brand's flicker is a function of the progress.)
+      if (firebrandsDrawn < limit && sprites_ + 2 <= ASSEMBLY_SPRITE_BUDGET) {
         drawNaniteFirebrand(ctx, X[slot], Y[slot], fire, Q * 10);
         firebrandsDrawn += 1;
         // The helper uses at most two atlas samples, sharing the retained
