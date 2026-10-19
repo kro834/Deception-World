@@ -2821,31 +2821,31 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page :is(a, button, summ
    on a landscape tablet the copy column is narrower than five characters at
    the desktop size, so 「、」 fell to a line of its own; the title is sized
    to the column there. The command bar's name stays on one line. */
-html body .rxs-page.exs-page .rxs-hero-copy > h1#exs-title {
+html[data-family="special"] body .rxs-page.rxs-page.exs-page .rxs-hero-copy > h1#exs-title {
   white-space: nowrap;
 }
 @media (min-width: 900px) and (max-width: 1366px) and (orientation: landscape) {
-  html body .rxs-page.exs-page .rxs-hero-copy > h1#exs-title {
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page .rxs-hero-copy > h1#exs-title {
     font-size: clamp(44px, 6vw, 84px);
   }
 }
-html body .rxs-page.exs-page > header.rxs-local-nav .rxs-brand > b {
+html[data-family="special"] body .rxs-page.rxs-page.exs-page > header.rxs-local-nav .rxs-brand > b {
   white-space: nowrap;
 }
 @media (min-width: 761px) and (max-width: 1024px) {
-  html body .rxs-page.exs-page > header.rxs-local-nav .rxs-brand > b {
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page > header.rxs-local-nav .rxs-brand > b {
     font-size: min(1em, 2.2vw);
   }
 }
-html body .rxs-page.exs-page > header.rxs-local-nav .rxs-brand > b > * {
+html[data-family="special"] body .rxs-page.rxs-page.exs-page > header.rxs-local-nav .rxs-brand > b > * {
   white-space: nowrap;
 }
-html body .rxs-page.exs-page > header.rxs-local-nav .rxs-brand > b > wbr {
+html[data-family="special"] body .rxs-page.rxs-page.exs-page > header.rxs-local-nav .rxs-brand > b > wbr {
   display: none;
 }
 @media (min-width: 761px) and (max-width: 900px) {
   /* Room for the name on one line beside the section links. */
-  html body .rxs-page.exs-page > header.rxs-local-nav .rxs-brand > span {
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page > header.rxs-local-nav .rxs-brand > span {
     display: none !important;
   }
 }
