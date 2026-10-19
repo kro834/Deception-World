@@ -1250,6 +1250,217 @@
   }
 }
 
+@media (min-width: 981px) {
+  html[data-family="dream"] main.dream-page.dream-page {
+    grid-auto-flow: dense;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page > .dream-programme-desk {
+    width: var(--dr-col, min(1420px, calc(100% - 88px)));
+    margin-inline: auto;
+  }
+}
+
+/* ---------- Wave 4: Stage Choreography, Proscenium Sheen & Tactile Elevation ---------- */
+
+@keyframes dr-prog-obi-sheen {
+  0%,
+  100% {
+    background-position: 0% 50%, 0 0, 0 0;
+  }
+  50% {
+    background-position: 100% 50%, 0 0, 0 0;
+  }
+}
+
+@keyframes dr-prog-dot-pulse {
+  0%,
+  100% {
+    scale: 1;
+    opacity: 1;
+  }
+  50% {
+    scale: 1.32;
+    opacity: 0.78;
+  }
+}
+
+@keyframes dr-prog-seal-stamp {
+  0% {
+    opacity: 0;
+    scale: 1.18;
+    rotate: -7deg;
+  }
+  100% {
+    opacity: 1;
+    scale: 1;
+    rotate: -2deg;
+  }
+}
+
+@keyframes dr-prog-meter-fill {
+  0% {
+    scale: 0 1;
+  }
+  100% {
+    scale: 1 1;
+  }
+}
+
+@keyframes dr-prog-progress-sheen {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-poster-progress {
+  height: 3px;
+  background: linear-gradient(90deg, #9d241f 0%, #f1d99a 48%, #d2a853 74%, #9d241f 100%);
+  background-size: 200% 100%;
+  box-shadow: 0 0 12px rgb(241 217 154 / 38%);
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-poster-hud-status {
+  border-color: rgb(210 168 83 / 54%);
+  background:
+    linear-gradient(90deg, rgb(241 217 154 / 34%), transparent 65%) 0 0 / 100% 1px no-repeat,
+    linear-gradient(180deg, rgb(22 14 28 / 92%) 0%, rgb(11 7 15 / 94%) 100%);
+  box-shadow:
+    inset 0 0 0 1px rgb(241 217 154 / 14%),
+    0 12px 28px rgb(0 0 0 / 56%);
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-poster-hud-step button {
+  border-color: rgb(210 168 83 / 56%);
+  background: linear-gradient(180deg, rgb(34 20 36 / 92%) 0%, rgb(15 10 21 / 94%) 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(241 217 154 / 22%),
+    0 10px 24px rgb(0 0 0 / 52%);
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-character-spec-badge,
+html[data-family="dream"] main.dream-page.dream-page .dream-dolminence-spec-badge {
+  border-color: rgb(210 168 83 / 58%);
+  background:
+    linear-gradient(90deg, #9d241f, #f1d99a) 0 0 / 28px 2px no-repeat,
+    linear-gradient(180deg, rgb(22 14 28 / 92%) 0%, rgb(11 7 15 / 94%) 100%);
+  box-shadow:
+    inset 0 0 0 1px rgb(241 217 154 / 14%),
+    0 10px 24px rgb(0 0 0 / 52%);
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-roster > li[data-roster-dimmed="true"] {
+  opacity: 0.28;
+  filter: saturate(0.45);
+  scale: 0.985;
+}
+
+dialog.dream-dossier-dialog[open] .dream-profile-meter {
+  position: relative;
+  overflow: hidden;
+}
+
+dialog.dream-dossier-dialog[open] .dream-profile-meter > i {
+  transform-origin: 0 50%;
+  box-shadow: 0 0 10px rgb(241 217 154 / 42%);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html[data-family="dream"]:not([data-world-effects="economy"])
+    main.dream-page.dream-page
+    .dream-hero-obi {
+    background-size: 220% 100%, 100% 100%, 100% 100%;
+    animation: dr-prog-obi-sheen 9s ease-in-out infinite;
+  }
+
+  html[data-family="dream"]:not([data-world-effects="economy"])
+    main.dream-page.dream-page
+    .dream-poster-progress {
+    transition: width 420ms cubic-bezier(0.22, 1, 0.36, 1);
+    animation: dr-prog-progress-sheen 6s linear infinite;
+  }
+
+  html[data-family="dream"]:not([data-world-effects="economy"])
+    main.dream-page.dream-page
+    .dream-poster-hud-status
+    > i.is-live,
+  html[data-family="dream"]:not([data-world-effects="economy"])
+    main.dream-page.dream-page
+    .dream-poster-hud-status
+    > i.is-shuffling {
+    animation: dr-prog-dot-pulse 2.2s ease-in-out infinite;
+  }
+
+  html[data-family="dream"]:not([data-world-effects="economy"])
+    main.dream-page.dream-page
+    > section[data-film-reveal]
+    > .dream-section-heading
+    > b.dream-act-mark {
+    animation: dr-prog-seal-stamp 560ms cubic-bezier(0.22, 1, 0.36, 1) 140ms both;
+  }
+
+  html[data-family="dream"]:not([data-world-effects="economy"])
+    dialog.dream-dossier-dialog[open]
+    .dream-profile-meter
+    > i {
+    animation: dr-prog-meter-fill 740ms cubic-bezier(0.22, 1, 0.36, 1) 240ms both;
+  }
+
+  html[data-family="dream"]:not([data-world-effects="economy"])
+    dialog.dream-dossier-dialog[open]
+    .dream-dossier-visuals
+    > figure {
+    transition:
+      opacity 280ms ease,
+      scale 280ms cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 240ms ease,
+      box-shadow 280ms ease;
+  }
+
+  html[data-family="dream"]:not([data-world-effects="economy"])
+    main.dream-page.dream-page
+    :is(
+      .dream-character-card,
+      .dream-dolminence-card,
+      .dream-case-card,
+      .dream-roster > li,
+      .dream-chronicle > li,
+      .dream-atlas > article,
+      .dream-relations-ties > li,
+      .dream-arsenal > article,
+      .dream-glossary > div,
+      .dream-poster-thumbnails button,
+      .dream-poster-controls button,
+      .dream-poster-hud-step button,
+      .dream-roster-filters button,
+      .dream-roster-bulk,
+      .dream-glossary-jump a,
+      .dream-footer-nav a,
+      .dream-character-spec-badge,
+      .dream-dolminence-spec-badge
+    ) {
+    transition:
+      translate 280ms cubic-bezier(0.22, 1, 0.36, 1),
+      scale 280ms cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 260ms ease,
+      filter 260ms ease,
+      border-color 220ms ease,
+      background-color 220ms ease,
+      box-shadow 280ms ease;
+  }
+
+  html[data-family="dream"]:not([data-world-effects="economy"])
+    main.dream-page.dream-page
+    :is(.dream-character-portrait img, .dream-dolminence-card > figure > img) {
+    transition:
+      scale 520ms cubic-bezier(0.22, 1, 0.36, 1),
+      filter 360ms ease;
+  }
+}
+
 @media (hover: hover) and (pointer: fine) {
   .dream-page.dream-page .dream-programme-ticket:hover,
   .dream-page.dream-page .dream-programme-dossier-chip:hover,
@@ -1271,8 +1482,63 @@
   .dream-page.dream-page .dream-roster-bulk:hover,
   .dream-page.dream-page .dream-glossary-jump a:hover,
   .dream-page.dream-page .dream-footer-nav a:hover {
+    translate: 0 -2px;
     border-color: var(--ts-kin-hi);
     background-color: #3d2738;
+    box-shadow:
+      inset 0 1px 0 rgb(243 224 176 / 28%),
+      0 12px 26px rgb(0 0 0 / 48%);
+  }
+
+  html[data-family="dream"]
+    main.dream-page.dream-page
+    :is(.dream-character-card:hover, .dream-dolminence-card:hover) {
+    translate: 0 -6px;
+    border-color: #f1d99a;
+    box-shadow:
+      inset 0 0 0 1px rgb(241 217 154 / 36%),
+      inset 0 0 0 7px rgb(210 168 83 / 24%),
+      0 26px 56px rgb(0 0 0 / 64%);
+  }
+
+  html[data-family="dream"]
+    main.dream-page.dream-page
+    :is(
+      .dream-character-card:hover .dream-character-portrait img,
+      .dream-dolminence-card:hover > figure > img
+    ) {
+    scale: 1.035;
+  }
+
+  html[data-family="dream"]
+    main.dream-page.dream-page
+    :is(
+      .dream-character-card:hover .dream-character-spec-badge,
+      .dream-dolminence-card:hover .dream-dolminence-spec-badge
+    ) {
+    border-color: #f1d99a;
+    box-shadow:
+      inset 0 0 0 1px rgb(241 217 154 / 28%),
+      0 12px 28px rgb(0 0 0 / 62%);
+  }
+
+  html[data-family="dream"]
+    main.dream-page.dream-page
+    :is(
+      .dream-roster > li:not([data-roster-dimmed="true"]):hover,
+      .dream-chronicle > li:hover,
+      .dream-atlas > article:hover,
+      .dream-relations-ties > li:hover,
+      .dream-arsenal > article:hover,
+      .dream-glossary > div:hover
+    ) {
+    translate: 0 -3px;
+    border-color: rgb(241 217 154 / 64%);
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-poster-thumbnails button:hover {
+    translate: 0 -3px;
+    border-color: #f1d99a;
   }
 
   .dream-page.dream-page .dream-credits dd a:hover {
@@ -1301,10 +1567,19 @@
   .dream-page.dream-page .dream-programme-ledger-cell,
   .dream-page.dream-page .dream-programme-ticket-foot > span,
   .dream-page.dream-page .dream-reader-index a,
-  .dream-page.dream-page .dream-chapter-companion {
+  .dream-page.dream-page .dream-chapter-companion,
+  .dream-page.dream-page .dream-poster-progress,
+  .dream-page.dream-page .dream-poster-hud-status > i,
+  .dream-page.dream-page .dream-poster-hud-step button,
+  .dream-page.dream-page .dream-character-card,
+  .dream-page.dream-page .dream-dolminence-card,
+  .dream-page.dream-page .dream-roster > li,
+  dialog.dream-dossier-dialog[open] .dream-profile-meter > i,
+  dialog.dream-dossier-dialog[open] .dream-dossier-visuals > figure {
     animation: none;
     transition: none;
     translate: none;
+    scale: none;
   }
 }
 

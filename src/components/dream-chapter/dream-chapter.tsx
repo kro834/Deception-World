@@ -1618,6 +1618,45 @@ export function DreamChapter() {
               if (event.animationName === "dream-poster-enter") setPreviousPosterIndex(null);
             }}
           >
+            <img
+              key={activePoster.src}
+              src={activePoster.src}
+              {...posterImage(activePoster.src)}
+              alt={activePoster.alt}
+              width={activePoster.width}
+              height={activePoster.height}
+              style={{
+                objectFit: activePoster.fit,
+                objectPosition: activePoster.position,
+              }}
+              loading="lazy"
+              decoding="async"
+            />
+            <figcaption>
+              <i
+                className="dream-poster-progress"
+                aria-hidden="true"
+                style={{ width: `${((posterIndex + 1) / DREAM_POSTERS.length) * 100}%` }}
+              />
+              <span>其ノ{toKanjiNumber(posterIndex + 1)}</span>
+              <b>{activePoster.alt}</b>
+              <DreamScreeningLauncher
+                index={posterIndex}
+                onActiveChange={handleScreeningActive}
+                onSelection={selectPoster}
+              />
+            </figcaption>
+            <p
+              className="dream-poster-load-status"
+              role="status"
+              hidden={!posterLoadFailed && !posterLoading}
+            >
+              {posterLoadFailed
+                ? "画像を読み込めませんでした。もう一度選択してください。"
+                : posterLoading
+                  ? "ポスターを読み込み中です。"
+                  : ""}
+            </p>
             <div className="dream-poster-hud">
               <div className="dream-poster-hud-status" aria-hidden="true">
                 <i
@@ -1661,45 +1700,6 @@ export function DreamChapter() {
                 </button>
               </div>
             </div>
-            <img
-              key={activePoster.src}
-              src={activePoster.src}
-              {...posterImage(activePoster.src)}
-              alt={activePoster.alt}
-              width={activePoster.width}
-              height={activePoster.height}
-              style={{
-                objectFit: activePoster.fit,
-                objectPosition: activePoster.position,
-              }}
-              loading="lazy"
-              decoding="async"
-            />
-            <figcaption>
-              <i
-                className="dream-poster-progress"
-                aria-hidden="true"
-                style={{ width: `${((posterIndex + 1) / DREAM_POSTERS.length) * 100}%` }}
-              />
-              <span>其ノ{toKanjiNumber(posterIndex + 1)}</span>
-              <b>{activePoster.alt}</b>
-              <DreamScreeningLauncher
-                index={posterIndex}
-                onActiveChange={handleScreeningActive}
-                onSelection={selectPoster}
-              />
-            </figcaption>
-            <p
-              className="dream-poster-load-status"
-              role="status"
-              hidden={!posterLoadFailed && !posterLoading}
-            >
-              {posterLoadFailed
-                ? "画像を読み込めませんでした。もう一度選択してください。"
-                : posterLoading
-                  ? "ポスターを読み込み中です。"
-                  : ""}
-            </p>
           </figure>
           <div className="dream-poster-thumbnails" role="tablist" aria-label="ポスターを選択">
             {DREAM_POSTERS.map((poster, index) => (
