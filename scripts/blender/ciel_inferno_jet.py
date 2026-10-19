@@ -90,28 +90,43 @@ def material(index, core):
     mapping.operation = "ADD"
     links.new(coordinates.outputs["Object"], mapping.inputs[0])
     mapping.inputs[1].default_value = (0, 0, 0)
+    stretch = nodes.new("ShaderNodeVectorMath")
+    stretch.operation = "MULTIPLY"
+    stretch.inputs[1].default_value = (0.62, 1.65, 1.65)
+    links.new(mapping.outputs[0], stretch.inputs[0])
     noise = nodes.new("ShaderNodeTexNoise")
     noise.noise_dimensions = "4D"
-    noise.inputs["Scale"].default_value = 4.8
-    noise.inputs["Detail"].default_value = 5
-    noise.inputs["Roughness"].default_value = 0.74
-    noise.inputs["Distortion"].default_value = 1.1
-    links.new(mapping.outputs[0], noise.inputs["Vector"])
-    density = scalar(nodes, links, "SUBTRACT", noise.outputs["Fac"], 0.52 if core else 0.46)
-    density = scalar(nodes, links, "MAXIMUM", scalar(nodes, links, "MULTIPLY", density, 16), 0)
-    links.new(scalar(nodes, links, "MULTIPLY", density, 2.4 if core else 2.8), volume.inputs["Density"])
-    links.new(scalar(nodes, links, "MULTIPLY", density, 7.0 if core else 2.2), volume.inputs["Emission Strength"])
+    noise.inputs["Scale"].default_value = 3.7
+    noise.inputs["Detail"].default_value = 4
+    noise.inputs["Roughness"].default_value = 0.68
+    noise.inputs["Distortion"].default_value = 1.8
+    links.new(stretch.outputs[0], noise.inputs["Vector"])
+    fine = nodes.new("ShaderNodeTexNoise")
+    fine.noise_dimensions = "4D"
+    fine.inputs["Scale"].default_value = 13
+    fine.inputs["Detail"].default_value = 2
+    fine.inputs["Roughness"].default_value = 0.7
+    links.new(stretch.outputs[0], fine.inputs["Vector"])
+    # A shared periodic phase drives the large rolling tongues and their torn
+    # surface detail. Low absorption leaves the pressure filaments visible.
+    fields.append((fine, mapping, index + 11))
+    combined = scalar(nodes, links, "ADD", noise.outputs["Fac"], scalar(nodes, links, "MULTIPLY", fine.outputs["Fac"], 0.22))
+    density = scalar(nodes, links, "SUBTRACT", combined, 0.53 if core else 0.55)
+    density = scalar(nodes, links, "MAXIMUM", scalar(nodes, links, "MULTIPLY", density, 12), 0)
+    links.new(scalar(nodes, links, "MULTIPLY", density, 1.3 if core else 1.35), volume.inputs["Density"])
+    heat = scalar(nodes, links, "POWER", density, 1.35)
+    links.new(scalar(nodes, links, "MULTIPLY", heat, 10.0 if core else 4.1), volume.inputs["Emission Strength"])
     if core:
-        volume.inputs["Emission Color"].default_value = (0.70, 1, 0.56, 1)
+        volume.inputs["Emission Color"].default_value = (0.42, 1, 0.25, 1)
     else:
         ramp = nodes.new("ShaderNodeValToRGB")
         ramp.color_ramp.elements.remove(ramp.color_ramp.elements[1])
         for position, colour in (
-            (0, (0.007, 0.065, 0.018, 1)),
-            (0.44, (0.016, 0.24, 0.035, 1)),
-            (0.56, (0.075, 0.55, 0.11, 1)),
-            (0.68, (0.42, 0.88, 0.30, 1)),
-            (0.8, (0.80, 1, 0.67, 1)),
+            (0, (0.003, 0.024, 0.011, 1)),
+            (0.43, (0.008, 0.075, 0.026, 1)),
+            (0.54, (0.015, 0.30, 0.095, 1)),
+            (0.64, (0.10, 0.65, 0.22, 1)),
+            (0.77, (0.62, 1, 0.43, 1)),
         ):
             element = ramp.color_ramp.elements[0] if position == 0 else ramp.color_ramp.elements.new(position)
             element.color = colour
@@ -122,12 +137,12 @@ def material(index, core):
 
 
 def jet(index, length, radius, branch, phase, core=False):
-    rings, sides = 52, 14
+    rings, sides = 68, 20
     vertices, faces = [], []
     for ring in range(rings):
         t = ring / (rings - 1)
         # Thin nozzle, accelerating shear expansion, disintegrating tip.
-        width = radius * (0.20 + 1.65 * t) * (1 - t) ** 0.32 + 0.004
+        width = radius * (0.18 + 1.60 * t) * (1 - t) ** 0.56 + 0.003
         for side in range(sides):
             angle = math.tau * side / sides
             vertices.append((length * t, math.sin(angle) * width, math.cos(angle) * width))
@@ -150,34 +165,38 @@ def jet(index, length, radius, branch, phase, core=False):
 
 
 for spec in (
-    (0, 4.45, 0.32, 0.00, 0.0),
-    (1, 4.08, 0.22, 0.36, 1.1),
-    (2, 4.23, 0.20, -0.39, 2.7),
-    (3, 3.78, 0.15, 0.64, 4.0),
-    (4, 4.05, 0.15, -0.62, 5.1),
-    (5, 4.18, 0.058, 0.00, 0.0, True),
-    (6, 3.95, 0.045, 0.19, 1.1, True),
-    (7, 3.88, 0.044, -0.22, 2.7, True),
+    (0, 4.45, 0.29, 0.00, 0.0),
+    (1, 4.18, 0.21, 0.36, 1.1),
+    (2, 4.23, 0.19, -0.39, 2.7),
+    (3, 3.84, 0.16, 0.72, 4.0),
+    (4, 4.05, 0.15, -0.68, 5.1),
+    (5, 3.42, 0.107, 0.00, 0.0, True),
+    (6, 2.79, 0.065, 0.18, 1.1, True),
+    (7, 3.09, 0.061, -0.21, 2.7, True),
 ):
     jet(*spec)
 
 
 def pose(frame):
-    phase = math.tau * frame / 32
+    phase = math.tau * (frame % 32) / 32
     for obj, vertices, branch, initial, rings, sides, core in meshes:
         for ring in range(rings):
             t = ring / (rings - 1)
             envelope = t ** 1.2
             # Pressure waves travel toward the tip; opposing helices roll up
             # into coherent three-dimensional eddies in the mixing layer.
-            pulse = 1 + 0.17 * math.sin(phase * 3 - t * 23 + initial)
-            curl = math.sin(phase * 2 - t * 14 + initial) * 0.12 * envelope
-            depth = math.cos(phase * 2 - t * 14 + initial) * 0.10 * envelope
+            pulse = 1 + (0.20 if core else 0.31) * math.sin(phase * 3 - t * 24 + initial)
+            pulse += (0.07 if core else 0.12) * math.sin(phase * 5 - t * 49 + initial * 2)
+            curl = math.sin(phase * 2 - t * 15 + initial) * 0.16 * envelope
+            curl += math.sin(phase * 4 - t * 31 + initial) * 0.045 * envelope
+            depth = math.cos(phase * 2 - t * 15 + initial) * 0.14 * envelope
             centre = branch * t ** 2 + curl
             for side in range(sides):
                 k = ring * sides + side
                 x, y, z = vertices[k]
-                obj.data.vertices[k].co = (x, y * pulse + depth, z * pulse + centre)
+                angle = math.tau * side / sides
+                roll = 1 + (0.10 if core else 0.18) * math.sin(angle * 3 + t * 21 - phase * 3 + initial)
+                obj.data.vertices[k].co = (x, y * pulse * roll + depth, z * pulse * roll + centre)
         obj.data.update()
     for noise, mapping, index in fields:
         noise.inputs["W"].default_value = math.sin(phase) * 0.95 + index * 2.1
@@ -226,7 +245,7 @@ with open(os.path.join(args.output, "render-provenance.json"), "w", encoding="ut
         "vertices": sum(len(obj.data.vertices) for obj, *_ in meshes),
         "enclosureNormals": "outward",
         "signedVolumeMin": min(signed_volumes),
-        "shader": "heterogeneous fBm absorption/emission volumes with independent white-green pressure filaments",
+        "shader": "anisotropic multiscale fBm absorption/emission volumes with rolling lobes and three white-green pressure filaments",
         "loopGeometryMaxDelta": seam,
         "loopCheckRendered": args.loop_check,
         "flow": "left to right",

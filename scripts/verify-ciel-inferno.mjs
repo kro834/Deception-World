@@ -507,9 +507,24 @@ try {
             open: node.open,
             modal: node.matches(":modal"),
             scrollY,
+            visibleControls: [
+              ...node.querySelectorAll(
+                'button, a[href], input, select, textarea, [role="button"], [tabindex]:not([tabindex="-1"])',
+              ),
+            ].filter(
+              (element) =>
+                element.getClientRects().length &&
+                getComputedStyle(element).display !== "none" &&
+                getComputedStyle(element).visibility !== "hidden",
+            ).length,
           }));
           assert.equal(active.open, true);
           assert.equal(active.modal, true, "the native modal blocks accidental taps into the page");
+          assert.equal(
+            active.visibleControls,
+            0,
+            "the live effect exposes no stop or close controls",
+          );
           assert.ok(["webgl2", "webgl", "2d", "calm"].includes(active.renderer));
           if (mode === "no-webgl") assert.equal(active.renderer, "2d");
           if (calm) assert.equal(active.calm, "true");
@@ -562,6 +577,17 @@ try {
               { timeout: 6000 },
             );
             await page.screenshot({ path: join(cycleDir, "engulf.png"), scale: "css" });
+            await page.waitForFunction(
+              () =>
+                [...(document.querySelector(".ciel-inferno-dragon")?.getAnimations() || [])].some(
+                  (animation) =>
+                    animation.animationName === "ci-dragon-cooldown" &&
+                    Number(animation.currentTime) >= 4250,
+                ),
+              null,
+              { timeout: 6000 },
+            );
+            await page.screenshot({ path: join(cycleDir, "engulf-mid.png"), scale: "css" });
             await page.waitForFunction(
               () =>
                 [...(document.querySelector(".ciel-inferno-dragon")?.getAnimations() || [])].some(

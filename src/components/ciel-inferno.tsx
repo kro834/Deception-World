@@ -56,7 +56,6 @@ export default function CielInferno({
   const field = useRef<HTMLCanvasElement>(null);
   const detail = useRef<HTMLCanvasElement>(null);
   const art = useRef<HTMLDivElement>(null);
-  const stopButton = useRef<HTMLButtonElement>(null);
   const settle = useRef(() => {});
   const committed = useRef(false);
   const commit = useRef(onCommit);
@@ -374,7 +373,7 @@ export default function CielInferno({
       }
       modal.dataset.renderer = renderer?.backend ?? "calm";
       modal.dataset.ready = "true";
-      stopButton.current?.focus({ preventScroll: true });
+      modal.focus({ preventScroll: true });
       started = performance.now();
       timers.duration = window.setTimeout(settleBurned, duration);
       if (!source.calm) frame = requestAnimationFrame(tick);
@@ -450,7 +449,7 @@ export default function CielInferno({
       <p id={`${id}-description`} className="ciel-inferno-sr" style={SR_ONLY} aria-live="polite">
         {burned
           ? "画面は焼失しました。ページを再読み込みすると元に戻ります。"
-          : "緑の炎が画面を包みます。演出を止めても焼失状態が残ります。再読み込みで元に戻ります。"}
+          : "緑の炎が画面を包み、その後は焼失状態が残ります。再読み込みで元に戻ります。"}
       </p>
       {!burned && (
         <>
@@ -479,15 +478,6 @@ export default function CielInferno({
           <p className="ciel-inferno-kicker" aria-hidden="true">
             CIEL <span>EMERALD INFERNO</span>
           </p>
-          <button
-            ref={stopButton}
-            type="button"
-            className="ciel-inferno-close"
-            aria-label="炎を止める"
-            onClick={() => settle.current()}
-          >
-            <span aria-hidden="true">×</span> 炎を止める
-          </button>
         </>
       )}
     </dialog>,

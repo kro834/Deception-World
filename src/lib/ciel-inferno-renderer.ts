@@ -46,7 +46,7 @@ ${NOISE}
 void main(){
  vec2 uv=vec2(vUV.x,1.-vUV.y), aspect=vec2(uSize.x/uSize.y,1.);
  vec2 p=(uv-uMouth)*aspect, dir=normalize(uDir), side=vec2(-dir.y,dir.x);
- float t=uTime, along=dot(p,dir), across=dot(p,side), d=length(p);
+ float t=uTime, along=dot(p,dir), across=dot(p,side);
  float flow=fbm(vec2(along*4.-t*2.7,across*11.+t*.7));
  float curl=fbm(vec2(across*13.+flow*2.7,along*5.-t*3.2));
  float rib=pow(clamp(1.-abs(curl*2.-1.),0.,1.),3.);
@@ -55,23 +55,38 @@ void main(){
  float breadth=.016+max(along,0.)*.17;
  float cone=(1.-smoothstep(breadth*.35,breadth*1.6,abs(across+(flow-.5)*breadth*.8)))*step(0.,along)*(1.-smoothstep(reach*.8,reach,along));
  float jet=cone*(.24+.76*rib)*jetOn;
- vec2 adv=uv*vec2(6.,8.)+vec2(fbm(uv*5.+t*.13),-t*.9);
- float billow=fbm(adv*2.+vec2(flow,-t*.35));
- float burn=smoothstep(2.1,5.25,t), radius=burn*length(aspect)*1.22;
- float front=d-radius+(billow-.5)*.21;
- float inside=(1.-smoothstep(-.045,.06,front))*smoothstep(2.1,2.4,t);
- float crown=exp(-abs(front)*27.)*(.3+.7*billow)*smoothstep(2.15,2.8,t)*(1.-smoothstep(5.3,6.5,t));
- float tongues=pow(clamp(billow*1.8-.35,0.,1.),1.6)*inside*(1.-smoothstep(5.,6.8,t));
- float cracks=pow(clamp(fbm(uv*vec2(45.,59.))-.52,0.,1.)*2.3,3.);
- float coal=smoothstep(4.3,6.25,t);
- float heat=clamp(jet*.92+crown*.9+tongues*.46,0.,1.);
- vec3 forest=vec3(.015,.11,.045), emerald=vec3(.075,.58,.17), core=vec3(.72,.96,.39);
- vec3 fire=mix(forest,emerald,smoothstep(.05,.5,heat));fire=mix(fire,core,pow(heat,3.)*.65);
- vec3 ash=vec3(.006,.012,.009)+vec3(.015,.021,.017)*fbm(uv*22.);
- vec3 colour=mix(fire*(jet+crown+tongues),ash,coal*inside);
- colour+=vec3(.1,.42,.08)*cracks*coal*(1.-smoothstep(6.1,7.8,t));
+ // The pressure jet ignites along its axis first, then crawls sideways and
+ // back toward its source. Unlike a radial wipe, each region has a burn age.
+ float distanceToFire=max(along,0.)*.48+abs(across)*1.28+max(-along,0.)*1.65;
+ float travel=smoothstep(2.05,5.65,t)*length(aspect)*1.95;
+ vec2 adv=uv*aspect*vec2(8.,6.5)+vec2(0.,t*1.22);
+ vec2 warp=vec2(fbm(adv*.8+vec2(t*.14,0.)),fbm(adv*.73+vec2(9.1,t*.23)));
+ float billow=fbm(adv*1.9+warp*3.4);
+ float detail=noise(adv*7.+warp*5.);
+ float front=distanceToFire-travel+(billow-.5)*.22;
+ float inside=(1.-smoothstep(-.04,.065,front))*smoothstep(2.05,2.4,t);
+ float age=max(0.,-front);
+ float life=(1.-smoothstep(5.25,6.7,t));
+ // Tall, split tongues flow upward in screen space, not sideways with the
+ // ignition mask. Dark valleys retain depth between the luminous folds.
+ float tongues=pow(smoothstep(.38,.77,billow),2.)*(.5+.5*detail);
+ float crown=exp(-abs(front+.055)*13.)*smoothstep(.25,.7,billow);
+ float fuel=(1.-smoothstep(.15,1.7,age))*.8+.2;
+ float flame=(tongues*inside*fuel+crown*.85)*life;
+ float heat=clamp(jet*.82+flame,0.,1.);
+ vec3 forest=vec3(.008,.075,.024), emerald=vec3(.04,.48,.105), core=vec3(.5,.98,.38);
+ vec3 fire=mix(forest,emerald,smoothstep(.025,.6,heat));
+ fire=mix(fire,core,pow(heat,4.)*.8);
+ float charred=smoothstep(.12,.7,age)*inside;
+ float cracks=pow(1.-abs(noise(uv*vec2(91.,117.))*2.-1.),16.);
+ vec3 ash=vec3(.004,.009,.006)+vec3(.012,.018,.012)*detail;
+ vec3 colour=ash*inside+fire*(jet+flame)*1.25;
+ colour+=vec3(.08,.24,.025)*cracks*charred*exp(-age*2.)*life;
+ // Transparent rolling smoke precedes the edge, never an opaque green disc.
+ float smoke=exp(-abs(front-.16)*5.)*billow*.2*smoothstep(2.,3.,t)*life;
+ colour+=vec3(.018,.035,.022)*smoke;
  float dim=.24*smoothstep(0.,.65,t);
- float alpha=max(dim,max(inside*.96,max(jet*.84,crown*.86)));
+ float alpha=max(dim,max(inside*.96,max(jet*.84,max(flame*.8,smoke))));
  // Burn remains opaque; never reveal the untouched page behind the shell.
  float black=smoothstep(6.6,9.,t);
  OUTPUT=vec4(colour*(1.-black),clamp(max(alpha,black),0.,1.));
@@ -186,15 +201,19 @@ function paintFallback(context: CanvasRenderingContext2D, g: InfernoGeometry, t:
   context.globalAlpha = Math.max(ease(0, 0.65, t) * 0.24, black);
   context.fillStyle = "#020a07";
   context.fillRect(0, 0, w, h);
-  const radius = ease(2.1, 5.25, t) * Math.hypot(w, h) * 1.22;
+  const travel = ease(2.05, 5.65, t) * Math.hypot(w, h) * 1.95;
   if (t > 2.1) {
     context.globalAlpha = 0.97 + black * 0.03;
-    context.fillStyle = t < 5.3 ? "#07351b" : "#000";
+    context.fillStyle = t < 5.3 ? "#03140b" : "#000";
     context.beginPath();
     for (let i = 0; i <= 80; i++) {
       const angle = (i / 80) * TAU;
+      const along = Math.cos(angle - g.angle);
+      const across = Math.sin(angle - g.angle);
+      const resistance =
+        Math.max(along, 0) * 0.48 + Math.abs(across) * 1.28 + Math.max(-along, 0) * 1.65;
       const edge =
-        radius +
+        travel / resistance +
         (Math.sin(angle * 13 + t * 2.3) * 18 + Math.sin(angle * 27 - t * 3.1) * 9) *
           ease(2.1, 2.8, t);
       const px = x + Math.cos(angle) * edge;
@@ -204,11 +223,47 @@ function paintFallback(context: CanvasRenderingContext2D, g: InfernoGeometry, t:
     }
     context.closePath();
     context.fill();
-    if (t < 6.3) {
-      context.globalAlpha = (1 - ease(5.3, 6.3, t)) * 0.65;
-      context.strokeStyle = "#56be49";
-      context.lineWidth = 15 + 9 * Math.sin(t * 2);
-      context.stroke();
+    // Independently rising, split flame tips replace the flat outlined wipe.
+    const fade = ease(2.1, 2.8, t) * (1 - ease(5.2, 6.7, t));
+    for (let i = 0; i < 18; i++) {
+      const phase = i * 2.39996;
+      const along = Math.cos(phase - g.angle);
+      const resistance =
+        Math.max(along, 0) * 0.48 +
+        Math.abs(Math.sin(phase - g.angle)) * 1.28 +
+        Math.max(-along, 0) * 1.65;
+      const r = (travel / resistance) * (0.65 + SEEDS[i * 6] * 0.3);
+      const px = x + Math.cos(phase) * r;
+      const py = y + Math.sin(phase) * r;
+      const height = Math.min(h, w) * (0.16 + SEEDS[i * 6 + 1] * 0.32);
+      const width = height * 0.22;
+      const curl = Math.sin(t * 2.8 + phase) * width;
+      if (px < -height || px > w + height || py < -height || py > h + height) continue;
+      for (let layer = 0; layer < 3; layer++) {
+        const scale = 1 - layer * 0.24;
+        context.globalAlpha = fade * (layer === 0 ? 0.3 : 0.42);
+        context.fillStyle = ["#116b32", "#36b448", "#b9eb82"][layer];
+        context.beginPath();
+        context.moveTo(px - width * scale, py);
+        context.bezierCurveTo(
+          px - width * 2,
+          py - height * 0.32,
+          px + curl,
+          py - height * 0.62,
+          px + curl * 2,
+          py - height * scale,
+        );
+        context.bezierCurveTo(
+          px + width * 2,
+          py - height * 0.43,
+          px + width * scale,
+          py - height * 0.35,
+          px + width * scale,
+          py,
+        );
+        context.closePath();
+        context.fill();
+      }
     }
   }
 }
@@ -222,6 +277,7 @@ export function createCielInfernoRenderer(options: Options) {
   let disposed = false;
   let jet: HTMLImageElement | null = null;
   let loaded = false;
+  let atlasStarted = -1;
   let geometry: InfernoGeometry = { width: 1, height: 1, mouthX: 0, mouthY: 0, angle: 2.45 };
   let ratio = 1;
   let quality = 1;
@@ -342,6 +398,8 @@ export function createCielInfernoRenderer(options: Options) {
     if (background) background.render(geometry, seconds);
     else paintFallback(context, geometry, seconds);
     const pressure = ease(1.02, 1.65, seconds) * (1 - ease(4.6, 5.6, seconds));
+    if (loaded && atlasStarted < 0) atlasStarted = seconds;
+    const atlasMix = loaded ? ease(atlasStarted, atlasStarted + 0.24, seconds) : 0;
     const emberFade = 1 - ease(6.8, 8.7, seconds);
     const reach = Math.hypot(w, h) * (0.13 + ease(1.1, 3.2, seconds) * 0.97);
     context.globalCompositeOperation = "lighter";
@@ -352,11 +410,12 @@ export function createCielInfernoRenderer(options: Options) {
         const throat = Math.min(reach, Math.min(w, h) * 0.82);
         const sway = Math.sin(seconds * 1.8) * 0.025;
         context.globalCompositeOperation = "screen";
-        sprite(x, y, throat, throat * 0.48, angle + sway, seconds * 16, pressure * 0.7);
+        sprite(x, y, throat, throat * 0.48, angle + sway, seconds * 16, pressure * atlasMix * 0.85);
         const packets = coarse ? 4 : 6;
         for (let i = 0; i < packets; i++) {
           const k = i * 6;
-          const age = (seconds * 0.61 + i / packets) % 1;
+          const age =
+            (seconds * (0.5 + SEEDS[k + 3] * 0.14) + i / packets + SEEDS[k + 4] * 0.12) % 1;
           const distance = age * reach * 0.92;
           const curl = Math.sin(seconds * 2.4 - age * 6 + SEEDS[k] * 2) * distance * 0.09;
           const px = x + Math.cos(angle) * distance - Math.sin(angle) * curl;
@@ -370,19 +429,28 @@ export function createCielInfernoRenderer(options: Options) {
             length * (0.49 + age * 0.23),
             angle + Math.sin(seconds * 2.1 - age * 6 + i) * 0.09,
             seconds * 16 * (0.83 + SEEDS[k + 1] * 0.3) + SEEDS[k + 2] * 32,
-            pressure * Math.sin(age * Math.PI) * 0.48,
+            pressure * atlasMix * Math.sin(age * Math.PI) * 0.52,
           );
         }
         // The white-green core occupies only the short mouth nozzle.
         context.globalCompositeOperation = "lighter";
-        sprite(x, y, throat * 0.22, throat * 0.1, angle + sway, seconds * 16 + 11, pressure * 0.26);
-      } else {
+        sprite(
+          x,
+          y,
+          throat * 0.22,
+          throat * 0.1,
+          angle + sway,
+          seconds * 16 + 11,
+          pressure * atlasMix * 0.24,
+        );
+      }
+      if (atlasMix < 1) {
         // Six tapered, pressure-driven ribbons replace an unavailable atlas.
         for (let ribbon = 0; ribbon < 6; ribbon++) {
           context.save();
           context.translate(x, y);
           context.rotate(angle);
-          context.globalAlpha = pressure * (0.33 - ribbon * 0.035);
+          context.globalAlpha = pressure * (1 - atlasMix) * (0.33 - ribbon * 0.035);
           context.fillStyle = ribbon < 2 ? "#b7ef8c" : "#218842";
           context.beginPath();
           context.moveTo(0, 0);
@@ -409,19 +477,45 @@ export function createCielInfernoRenderer(options: Options) {
     // The burn front is one continuous shader volume (or the 2D field),
     // never a circular necklace of isolated, leaf-shaped jet sprites.
     // Embers become fine ash and fall; no random state or React updates.
-    const count = coarse ? 64 : 104;
+    const count = coarse ? 52 : 84;
     const ash = ease(4.2, 6.5, seconds);
     context.globalCompositeOperation = "source-over";
-    context.fillStyle = ash > 0.6 ? "#9caca0" : "#9de475";
     for (let i = 0; i < count; i++) {
       const k = i * 6;
       const life = (((seconds * (0.16 + SEEDS[k] * 0.2) + SEEDS[k + 1]) % 1) + 1) % 1;
-      const px = SEEDS[k + 2] * w + Math.sin(life * 8 + i) * 24;
-      const py = (SEEDS[k + 3] * h + life * h * (ash > 0.6 ? 0.5 : -0.4) + h) % h;
-      context.globalAlpha =
+      const spread = (SEEDS[k + 2] - 0.5) * life * Math.min(w, h) * 0.85;
+      const distance = life * reach;
+      const ignition = ease(2.8, 4.8, seconds);
+      const jetX = x + Math.cos(angle) * distance - Math.sin(angle) * spread;
+      const jetY =
+        y + Math.sin(angle) * distance + Math.cos(angle) * spread - life * life * h * 0.2;
+      const ashX = SEEDS[k + 2] * w + Math.sin(life * 8 + i) * 24;
+      const ashY = (SEEDS[k + 3] * h + life * h * (ash > 0.6 ? 0.5 : -0.4) + h) % h;
+      const px = jetX + (ashX - jetX) * ignition;
+      const py = jetY + (ashY - jetY) * ignition;
+      const opacity =
         Math.sin(life * Math.PI) * emberFade * ease(1.8, 3, seconds) * (0.36 + ash * 0.12);
+      if (opacity < 0.004 || px < -12 || px > w + 12 || py < -12 || py > h + 12) continue;
+      context.globalAlpha = opacity;
       const size = 0.7 + SEEDS[k + 4] * (ash > 0.6 ? 1.3 : 2);
-      context.fillRect(px, py, size, size * (ash > 0.6 ? 1.3 : 2.4));
+      context.fillStyle = ash > 0.6 ? "#819186" : "#a7e879";
+      context.save();
+      context.translate(px, py);
+      context.rotate(ash > 0.6 ? seconds * (SEEDS[k + 5] - 0.5) * 3 + i : angle - life * 0.5);
+      if (ash > 0.6) {
+        context.beginPath();
+        context.moveTo(-size, 0);
+        context.lineTo(size * 0.25, -size * 0.6);
+        context.lineTo(size, size * 0.3);
+        context.lineTo(-size * 0.4, size);
+        context.closePath();
+        context.fill();
+      } else {
+        context.fillRect(-size * 2.6, -size * 0.35, size * 3.4, size * 0.7);
+        context.globalAlpha *= 0.22;
+        context.fillRect(-size * 6, -size * 0.55, size * 6, size * 1.1);
+      }
+      context.restore();
     }
     context.globalAlpha = 1;
   };

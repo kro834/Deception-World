@@ -544,6 +544,8 @@ test("the actual component naturally becomes a GPU-free burned shell and does no
   const host = mountInferno();
   assert.equal(host.commits, 1);
   assert.equal(host.nodes("canvas").length, 2);
+  assert.equal(host.nodes("button").length, 0, "the live effect has no stop or close control");
+  assert.equal(host.doc.activeElement, host.modal, "keyboard focus stays on the modal");
   host.advance(9200);
   assertBurned(host);
   assert.equal(host.disposals, 1);

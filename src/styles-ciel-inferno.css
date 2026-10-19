@@ -10,6 +10,7 @@
   padding: 0;
   overflow: hidden;
   border: 0;
+  outline: none;
   isolation: isolate;
   background: transparent;
   color: #e8f7e5;
@@ -18,8 +19,38 @@
   -webkit-tap-highlight-color: transparent;
 }
 .ciel-inferno::backdrop {
-  background: rgb(0 8 4 / 0.12);
-  backdrop-filter: blur(2px);
+  background:
+    radial-gradient(ellipse at 73% 42%, rgb(35 112 48 / 0.2), transparent 62%), rgb(0 6 3 / 0.34);
+  backdrop-filter: blur(3px) saturate(0.82);
+  -webkit-backdrop-filter: blur(3px) saturate(0.82);
+}
+.ciel-inferno::before,
+.ciel-inferno::after {
+  position: absolute;
+  inset: -8%;
+  z-index: 2;
+  content: "";
+  pointer-events: none;
+}
+.ciel-inferno::before {
+  background:
+    radial-gradient(ellipse at 72% 39%, rgb(121 255 93 / 0.16), transparent 27%),
+    radial-gradient(ellipse at 65% 48%, rgb(46 191 74 / 0.12), transparent 41%),
+    radial-gradient(ellipse at 38% 72%, rgb(26 127 63 / 0.12), transparent 40%),
+    linear-gradient(112deg, transparent 38%, rgb(104 206 76 / 0.055) 54%, transparent 72%);
+  mix-blend-mode: screen;
+  opacity: 0.72;
+  animation: ci-reflected-light 7200ms ease-in-out infinite alternate;
+}
+.ciel-inferno::after {
+  z-index: 3;
+  background:
+    radial-gradient(ellipse at 57% 46%, transparent 18%, rgb(14 42 25 / 0.12) 48%, transparent 67%),
+    radial-gradient(ellipse at 82% 73%, rgb(7 26 17 / 0.18), transparent 38%),
+    radial-gradient(ellipse at 18% 24%, rgb(16 39 25 / 0.13), transparent 42%);
+  filter: blur(19px);
+  opacity: 0.72;
+  animation: ci-smoke-drift 11800ms ease-in-out infinite alternate;
 }
 .ciel-inferno[data-ready="false"] {
   visibility: hidden;
@@ -73,16 +104,15 @@
   width: 100%;
   height: 100%;
   object-fit: contain;
+  filter: drop-shadow(0 0 26px rgb(90 237 82 / 0.2)) drop-shadow(0 0 72px rgb(28 142 58 / 0.14));
   animation: ci-dragon-breathe 3400ms ease-in-out 1100ms 2;
 }
 .ciel-inferno-vignette {
   z-index: 3;
-  background: radial-gradient(
-    ellipse at 65% 42%,
-    transparent 28%,
-    rgb(0 8 3 / 0.16) 65%,
-    rgb(0 5 2 / 0.5)
-  );
+  background:
+    radial-gradient(ellipse at 72% 42%, transparent 22%, rgb(1 10 5 / 0.17) 60%, rgb(0 4 2 / 0.62)),
+    linear-gradient(90deg, rgb(0 5 2 / 0.32), transparent 36%, transparent 76%, rgb(0 7 3 / 0.22));
+  box-shadow: inset 0 0 16vw rgb(0 0 0 / 0.2);
   animation: ci-vignette var(--ci-duration) ease-in-out both;
 }
 .ciel-inferno-kicker {
@@ -106,45 +136,6 @@
   font-size: 0.65em;
   letter-spacing: 0.18em;
 }
-.ciel-inferno-close {
-  position: absolute;
-  z-index: 10;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 46px;
-  border: 1px solid rgb(200 236 190 / 0.48);
-  border-radius: 999px;
-  background: rgb(3 16 10 / 0.9);
-  color: #eef9ea;
-  box-shadow:
-    0 6px 28px rgb(0 0 0 / 0.35),
-    inset 0 1px 0 rgb(231 255 220 / 0.1);
-  font:
-    500 13px/1.2 system-ui,
-    sans-serif;
-  letter-spacing: 0.04em;
-  cursor: pointer;
-  touch-action: manipulation;
-}
-.ciel-inferno-close {
-  right: max(18px, calc(env(safe-area-inset-right) + 12px));
-  top: max(18px, calc(env(safe-area-inset-top) + 10px));
-  gap: 7px;
-  padding: 10px 16px 10px 12px;
-}
-.ciel-inferno-close > span {
-  font:
-    26px/0.7 system-ui,
-    sans-serif;
-}
-.ciel-inferno :is(button:focus-visible) {
-  outline: 3px solid #c4f1aa;
-  outline-offset: 4px;
-}
-.ciel-inferno :is(button:hover) {
-  background: #143921;
-}
 .ciel-inferno[data-calm="true"] {
   background: rgb(0 12 6 / 0.82);
 }
@@ -157,8 +148,30 @@
   animation: none;
 }
 .ciel-inferno[data-calm="true"] .ciel-inferno-field,
-.ciel-inferno[data-calm="true"] .ciel-inferno-detail {
+.ciel-inferno[data-calm="true"] .ciel-inferno-detail,
+.ciel-inferno[data-calm="true"]::before,
+.ciel-inferno[data-calm="true"]::after {
   display: none;
+}
+@keyframes ci-reflected-light {
+  from {
+    opacity: 0.54;
+    transform: translate3d(-0.6%, 0.35%, 0) scale(1);
+  }
+  to {
+    opacity: 0.82;
+    transform: translate3d(0.7%, -0.45%, 0) scale(1.025);
+  }
+}
+@keyframes ci-smoke-drift {
+  from {
+    opacity: 0.55;
+    transform: translate3d(0.7%, -0.4%, 0) scale(1.01);
+  }
+  to {
+    opacity: 0.78;
+    transform: translate3d(-0.8%, 0.5%, 0) scale(1.045);
+  }
 }
 @keyframes ci-dragon-awaken {
   from {
@@ -238,11 +251,18 @@
   .ciel-inferno-kicker span {
     max-width: 110px;
   }
-  .ciel-inferno-close {
-    right: max(12px, env(safe-area-inset-right));
-    padding: 10px 12px;
-    font-size: 12px;
+}
+/* Retain the same composition without large filtered surfaces on touch GPUs. */
+@media (any-pointer: coarse) {
+  .ciel-inferno::after {
+    filter: none;
   }
+  .ciel-inferno-dragon img {
+    filter: drop-shadow(0 0 18px rgb(90 237 82 / 0.18));
+  }
+}
+.ciel-inferno[data-renderer="2d"]::after {
+  filter: none;
 }
 @media (prefers-reduced-motion: reduce) {
   .ciel-inferno *,
@@ -258,14 +278,10 @@
   }
   .ciel-inferno-dragon,
   .ciel-inferno-kicker,
-  .ciel-inferno-vignette {
+  .ciel-inferno-vignette,
+  .ciel-inferno::before,
+  .ciel-inferno::after {
     display: none;
-  }
-  .ciel-inferno-close {
-    background: ButtonFace;
-    color: ButtonText;
-    border-color: ButtonText;
-    box-shadow: none;
   }
 }
 .ciel-inferno[data-phase="burned"] {
@@ -277,6 +293,10 @@
   outline: none !important;
   box-shadow: none !important;
   cursor: default;
+}
+.ciel-inferno[data-phase="burned"]::before,
+.ciel-inferno[data-phase="burned"]::after {
+  display: none;
 }
 .ciel-inferno[data-phase="burned"]::backdrop {
   background: #000;
