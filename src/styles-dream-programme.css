@@ -6,15 +6,17 @@
   width: min(1120px, calc(100% - 40px));
   margin: clamp(44px, 6vw, 76px) auto 0;
   padding: clamp(18px, 2.8vw, 32px);
-  border: 1px solid rgb(230 194 142 / 52%);
+  border: 1px solid rgb(230 194 142 / 58%);
   color: var(--ts-kinari);
   background:
-    radial-gradient(58% 48% at 50% 0%, rgb(230 194 142 / 14%), transparent 72%),
-    linear-gradient(120deg, rgb(25 47 96 / 26%), transparent 48%),
-    linear-gradient(180deg, #27172d 0%, #170f20 58%, #110b18 100%);
+    radial-gradient(64% 54% at 50% 0%, rgb(243 224 176 / 18%), transparent 72%),
+    radial-gradient(48% 42% at 88% 100%, rgb(204 73 59 / 12%), transparent 70%),
+    linear-gradient(125deg, rgb(25 47 96 / 30%), transparent 50%),
+    linear-gradient(180deg, #2a1831 0%, #181022 58%, #110b18 100%);
   box-shadow:
-    inset 0 1px 0 rgb(243 224 176 / 18%),
-    0 24px 56px rgb(0 0 0 / 42%);
+    inset 0 1px 0 rgb(243 224 176 / 24%),
+    inset 0 -1px 0 rgb(200 164 92 / 16%),
+    0 28px 64px rgb(0 0 0 / 52%);
 }
 
 .dream-page.dream-page .dream-programme-desk::before {
@@ -22,16 +24,16 @@
   position: absolute;
   inset: 7px;
   z-index: -1;
-  border: 1px solid var(--ts-hair-soft);
+  border: 1px solid rgb(230 194 142 / 24%);
   background:
-    linear-gradient(var(--ts-kin, #c8a45c) 0 0) 0 0 / 18px 2px no-repeat,
-    linear-gradient(var(--ts-kin, #c8a45c) 0 0) 0 0 / 2px 18px no-repeat,
-    linear-gradient(var(--ts-kin, #c8a45c) 0 0) 100% 0 / 18px 2px no-repeat,
-    linear-gradient(var(--ts-kin, #c8a45c) 0 0) 100% 0 / 2px 18px no-repeat,
-    linear-gradient(var(--ts-kin, #c8a45c) 0 0) 0 100% / 18px 2px no-repeat,
-    linear-gradient(var(--ts-kin, #c8a45c) 0 0) 0 100% / 2px 18px no-repeat,
-    linear-gradient(var(--ts-kin, #c8a45c) 0 0) 100% 100% / 18px 2px no-repeat,
-    linear-gradient(var(--ts-kin, #c8a45c) 0 0) 100% 100% / 2px 18px no-repeat;
+    linear-gradient(var(--ts-kin-light, #e6c28e) 0 0) 0 0 / 22px 2px no-repeat,
+    linear-gradient(var(--ts-kin-light, #e6c28e) 0 0) 0 0 / 2px 22px no-repeat,
+    linear-gradient(var(--ts-kin-light, #e6c28e) 0 0) 100% 0 / 22px 2px no-repeat,
+    linear-gradient(var(--ts-kin-light, #e6c28e) 0 0) 100% 0 / 2px 22px no-repeat,
+    linear-gradient(var(--ts-kin-light, #e6c28e) 0 0) 0 100% / 22px 2px no-repeat,
+    linear-gradient(var(--ts-kin-light, #e6c28e) 0 0) 0 100% / 2px 22px no-repeat,
+    linear-gradient(var(--ts-kin-light, #e6c28e) 0 0) 100% 100% / 22px 2px no-repeat,
+    linear-gradient(var(--ts-kin-light, #e6c28e) 0 0) 100% 100% / 2px 22px no-repeat;
   pointer-events: none;
 }
 
@@ -42,7 +44,7 @@
   gap: 6px 18px;
   margin: 0 0 22px;
   padding-bottom: 17px;
-  border-bottom: 3px double var(--ts-hair);
+  border-bottom: 3px double rgb(230 194 142 / 46%);
 }
 
 .dream-page.dream-page .dream-programme-heading > p {
@@ -53,6 +55,7 @@
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.24em;
+  text-shadow: 0 1px 10px rgb(200 164 92 / 24%);
 }
 
 .dream-page.dream-page .dream-programme-heading h2 {
@@ -62,7 +65,9 @@
   font-size: clamp(24px, 3.1vw, 36px);
   font-weight: 800;
   letter-spacing: 0.14em;
-  text-shadow: 0 2px 18px rgb(200 164 92 / 22%);
+  text-shadow:
+    0 2px 18px rgb(200 164 92 / 28%),
+    0 1px 2px rgb(0 0 0 / 65%);
 }
 
 .dream-page.dream-page .dream-programme-heading > span {
@@ -86,16 +91,18 @@
   min-width: 0;
   min-height: 174px;
   padding: 16px 18px 13px;
-  border: 1px solid rgb(200 164 92 / 44%);
+  border: 1px solid rgb(200 164 92 / 48%);
   color: var(--ts-kinari);
   background:
-    linear-gradient(var(--ticket-accent) 0 0) top left / 56px 3px no-repeat,
-    radial-gradient(80% 60% at 0% 0%, rgb(224 102 79 / 14%), transparent 70%),
-    linear-gradient(138deg, rgb(243 224 176 / 6%), transparent 46%),
-    #211525;
+    linear-gradient(90deg, var(--ticket-accent), transparent 88%) top left / 84px 3px no-repeat,
+    linear-gradient(var(--ts-kin) 0 0) 100% 100% / 20px 2px no-repeat,
+    linear-gradient(var(--ts-kin) 0 0) 100% 100% / 2px 20px no-repeat,
+    radial-gradient(85% 65% at 0% 0%, rgb(224 102 79 / 18%), transparent 72%),
+    linear-gradient(138deg, rgb(243 224 176 / 8%), transparent 48%),
+    linear-gradient(180deg, #26172b 0%, #1b1120 100%);
   box-shadow:
-    inset 0 1px 0 rgb(243 224 176 / 12%),
-    0 12px 28px rgb(0 0 0 / 28%);
+    inset 0 1px 0 rgb(243 224 176 / 16%),
+    0 14px 32px rgb(0 0 0 / 34%);
   text-decoration: none;
   transition:
     translate 220ms cubic-bezier(0.22, 1, 0.36, 1),
@@ -107,26 +114,30 @@
 .dream-page.dream-page .dream-programme-ticket:nth-child(2) {
   --ticket-accent: var(--ts-kin-light);
   background:
-    linear-gradient(var(--ticket-accent) 0 0) top left / 56px 3px no-repeat,
-    radial-gradient(80% 60% at 0% 0%, rgb(230 194 142 / 14%), transparent 70%),
-    linear-gradient(138deg, rgb(243 224 176 / 6%), transparent 46%),
-    #281f2c;
+    linear-gradient(90deg, var(--ticket-accent), transparent 88%) top left / 84px 3px no-repeat,
+    linear-gradient(var(--ts-kin) 0 0) 100% 100% / 20px 2px no-repeat,
+    linear-gradient(var(--ts-kin) 0 0) 100% 100% / 2px 20px no-repeat,
+    radial-gradient(85% 65% at 0% 0%, rgb(230 194 142 / 18%), transparent 72%),
+    linear-gradient(138deg, rgb(243 224 176 / 8%), transparent 48%),
+    linear-gradient(180deg, #2d2232 0%, #201825 100%);
 }
 
 .dream-page.dream-page .dream-programme-ticket:nth-child(3) {
   --ticket-accent: var(--ts-fuji);
   background:
-    linear-gradient(var(--ticket-accent) 0 0) top left / 56px 3px no-repeat,
-    radial-gradient(80% 60% at 0% 0%, rgb(185 163 222 / 14%), transparent 70%),
-    linear-gradient(138deg, rgb(243 224 176 / 6%), transparent 46%),
-    #1b1f32;
+    linear-gradient(90deg, var(--ticket-accent), transparent 88%) top left / 84px 3px no-repeat,
+    linear-gradient(var(--ts-kin) 0 0) 100% 100% / 20px 2px no-repeat,
+    linear-gradient(var(--ts-kin) 0 0) 100% 100% / 2px 20px no-repeat,
+    radial-gradient(85% 65% at 0% 0%, rgb(185 163 222 / 18%), transparent 72%),
+    linear-gradient(138deg, rgb(243 224 176 / 8%), transparent 48%),
+    linear-gradient(180deg, #1f243a 0%, #161a2b 100%);
 }
 
 .dream-page.dream-page .dream-programme-ticket::after {
   content: "";
   position: absolute;
   inset: 5px;
-  border: 1px solid rgb(200 164 92 / 22%);
+  border: 1px solid rgb(200 164 92 / 24%);
   pointer-events: none;
 }
 
@@ -149,6 +160,7 @@
   color: var(--ticket-accent);
   font-size: 16px;
   font-weight: 700;
+  text-shadow: 0 0 12px rgb(200 164 92 / 22%);
 }
 
 .dream-page.dream-page .dream-programme-ticket-main {
@@ -167,10 +179,11 @@
   border: 1px solid var(--ticket-accent);
   border-radius: 50%;
   color: var(--ticket-accent);
-  background: rgb(13 9 18 / 48%);
+  background:
+    radial-gradient(circle at 35% 30%, rgb(243 224 176 / 16%), transparent 65%), rgb(13 9 18 / 62%);
   box-shadow:
-    inset 0 0 0 2px rgb(13 9 18 / 72%),
-    0 0 14px rgb(200 164 92 / 14%);
+    inset 0 0 0 2px rgb(13 9 18 / 78%),
+    0 0 16px rgb(200 164 92 / 20%);
   font-family: var(--ts-display);
   font-size: 15px;
   font-weight: 800;
@@ -178,16 +191,18 @@
 
 .dream-page.dream-page .dream-programme-ticket-main strong {
   min-width: 0;
+  color: var(--ts-kin-hi);
   font-family: var(--ts-display);
   font-size: clamp(18px, 2vw, 23px);
   font-weight: 800;
   line-height: 1.45;
   letter-spacing: 0.08em;
+  text-shadow: 0 2px 12px rgb(0 0 0 / 45%);
 }
 
 .dream-page.dream-page .dream-programme-ticket-foot {
   padding-top: 10px;
-  border-top: 1px dashed rgb(200 164 92 / 34%);
+  border-top: 1px dashed rgb(200 164 92 / 38%);
   color: var(--ts-zoge);
   font-size: 12px;
   line-height: 1.6;
@@ -202,21 +217,335 @@
 }
 
 .dream-page.dream-page .dream-programme-ticket:focus-visible,
+.dream-page.dream-page .dream-programme-dossier-chip:focus-visible,
+.dream-page.dream-page .dream-programme-ledger-cell:focus-visible,
+.dream-page.dream-page .dream-programme-spotlight :is(button, a):focus-visible,
+.dream-page.dream-page .dream-reader-index-actions button:focus-visible,
 .dream-page.dream-page .dream-chapter-companion :is(summary, a):focus-visible {
   outline: 2px solid var(--ts-fuji);
   outline-offset: 3px;
 }
 
+.dream-page.dream-page .dream-programme-dossiers {
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid rgb(200 164 92 / 34%);
+}
+
+.dream-page.dream-page .dream-programme-dossier-strip {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dream-page.dream-page .dream-programme-dossier-chip {
+  display: grid;
+  gap: 3px;
+  min-height: 76px;
+  padding: 10px 10px 9px;
+  border: 1px solid rgb(200 164 92 / 38%);
+  color: var(--ts-kinari);
+  background:
+    linear-gradient(90deg, var(--dossier-chip-accent, var(--ts-kin-light)), transparent 88%) 0 0 /
+      100% 3px no-repeat,
+    radial-gradient(85% 65% at 0% 0%, rgb(243 224 176 / 10%), transparent 72%),
+    linear-gradient(180deg, rgb(34 21 40 / 94%) 0%, rgb(20 12 25 / 96%) 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(243 224 176 / 12%),
+    0 8px 18px rgb(0 0 0 / 28%);
+  text-decoration: none;
+  transition:
+    translate 200ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 200ms ease,
+    background-color 200ms ease,
+    box-shadow 200ms ease;
+}
+
+.dream-page.dream-page .dream-programme-dossier-chip small {
+  color: var(--dossier-chip-accent, var(--ts-kin-light));
+  font-family: var(--ts-latin);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.dream-page.dream-page .dream-programme-dossier-chip strong {
+  color: var(--ts-kin-hi);
+  font-family: var(--ts-display);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.dream-page.dream-page .dream-programme-dossier-chip > span {
+  color: var(--ts-ginnezu);
+  font-family: var(--ts-latin);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  overflow-wrap: anywhere;
+}
+
+.dream-page.dream-page .dream-programme-ledger {
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid rgb(200 164 92 / 34%);
+}
+
+.dream-page.dream-page .dream-programme-ledger-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin-bottom: 12px;
+}
+
+.dream-page.dream-page .dream-programme-ledger-head > span {
+  color: var(--ts-kin-light);
+  font-family: var(--ts-latin);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+}
+
+.dream-page.dream-page .dream-programme-ledger-head > small {
+  color: var(--ts-ginnezu);
+  font-family: var(--ts-text);
+  font-size: 12px;
+}
+
+.dream-page.dream-page .dream-programme-ledger-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dream-page.dream-page .dream-programme-ledger-cell {
+  display: grid;
+  gap: 4px;
+  padding: 11px 13px;
+  border: 1px solid rgb(200 164 92 / 36%);
+  color: var(--ts-kinari);
+  background:
+    linear-gradient(90deg, var(--ts-kin-light), transparent 80%) 0 0 / 36px 2px no-repeat,
+    radial-gradient(85% 65% at 0% 0%, rgb(230 194 142 / 12%), transparent 72%),
+    linear-gradient(180deg, rgb(32 20 38 / 92%) 0%, rgb(20 13 26 / 95%) 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(243 224 176 / 12%),
+    0 8px 18px rgb(0 0 0 / 26%);
+  text-decoration: none;
+  transition:
+    translate 200ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 200ms ease,
+    background-color 200ms ease,
+    box-shadow 200ms ease;
+}
+
+.dream-page.dream-page .dream-programme-ledger-code {
+  color: var(--ts-kin-light);
+  font-family: var(--ts-latin);
+  font-size: 12px;
+  letter-spacing: 0.16em;
+}
+
+.dream-page.dream-page .dream-programme-ledger-value {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  color: var(--ts-kin-hi);
+  font-family: var(--ts-display);
+  font-size: clamp(20px, 2.2vw, 26px);
+  font-weight: 800;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 2px 10px rgb(200 164 92 / 24%);
+}
+
+.dream-page.dream-page .dream-programme-ledger-value small {
+  color: var(--ts-ginnezu);
+  font-family: var(--ts-latin);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+}
+
+.dream-page.dream-page .dream-programme-ledger-label {
+  color: var(--ts-zoge);
+  font-family: var(--ts-text);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.dream-page.dream-page .dream-programme-spotlight {
+  margin-top: 18px;
+  padding: 15px 18px;
+  border: 1px solid rgb(200 164 92 / 44%);
+  background:
+    linear-gradient(90deg, var(--ts-shu), var(--ts-kin-light) 55%, transparent) 0 0 / 100% 2px
+      no-repeat,
+    radial-gradient(75% 65% at 15% 0%, rgb(204 73 59 / 15%), transparent 70%),
+    linear-gradient(180deg, rgb(34 19 36 / 94%) 0%, rgb(21 12 24 / 96%) 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(243 224 176 / 16%),
+    0 12px 28px rgb(0 0 0 / 34%);
+}
+
+.dream-page.dream-page .dream-programme-spotlight-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  margin-bottom: 10px;
+}
+
+.dream-page.dream-page .dream-programme-spotlight-kicker {
+  color: var(--ts-kin-light);
+  font-family: var(--ts-latin);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  font-variant-numeric: tabular-nums;
+}
+
+.dream-page.dream-page .dream-programme-spotlight-modes,
+.dream-page.dream-page .dream-programme-spotlight-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dream-page.dream-page .dream-programme-spotlight-modes button,
+.dream-page.dream-page .dream-programme-spotlight-controls button {
+  min-height: 36px;
+  padding: 5px 12px;
+  border: 1px solid rgb(200 164 92 / 46%);
+  color: var(--ts-kinari);
+  background: linear-gradient(180deg, #2d1c33 0%, #1c1222 100%);
+  box-shadow: inset 0 1px 0 rgb(243 224 176 / 14%);
+  font-family: var(--ts-text);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.dream-page.dream-page .dream-programme-spotlight-modes button[aria-pressed="true"] {
+  border-color: var(--ts-kin-hi);
+  color: var(--ts-kin-hi);
+  background:
+    radial-gradient(80% 60% at 50% 0%, rgb(204 73 59 / 22%), transparent 70%),
+    linear-gradient(180deg, #432739 0%, #2d1a26 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(243 224 176 / 20%),
+    inset 0 -2px var(--ts-kin-light);
+}
+
+.dream-page.dream-page .dream-programme-spotlight-motto {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--ts-kin-light);
+  font-family: var(--ts-latin);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+}
+
+.dream-page.dream-page .dream-programme-spotlight-quote {
+  margin: 0;
+}
+
+.dream-page.dream-page .dream-programme-spotlight-quote p {
+  margin: 0 0 10px;
+  color: var(--ts-kin-hi);
+  font-family: var(--ts-display);
+  font-size: clamp(15px, 1.7vw, 19px);
+  font-weight: 700;
+  line-height: 1.75;
+  letter-spacing: 0.04em;
+}
+
+.dream-page.dream-page .dream-programme-spotlight-quote footer {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  padding-top: 8px;
+  border-top: 1px dashed rgb(200 164 92 / 32%);
+  font-size: 12px;
+}
+
+.dream-page.dream-page .dream-programme-spotlight-quote footer strong {
+  color: var(--ts-shu-text);
+  font-family: var(--ts-display);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.dream-page.dream-page .dream-programme-spotlight-quote footer span {
+  color: var(--ts-zoge);
+}
+
+.dream-page.dream-page .dream-programme-spotlight-quote footer a {
+  margin-left: auto;
+  color: var(--ts-kin-light);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
 /* Six chapters are a legible 3×2 route, with state and exact paragraph counts. */
 .dream-page.dream-page .dream-reader-index {
   padding: clamp(16px, 2vw, 24px);
-  border: 1px solid rgb(200 164 92 / 48%);
+  border: 1px solid rgb(200 164 92 / 54%);
   background:
-    radial-gradient(64% 52% at 50% 0%, rgb(200 164 92 / 12%), transparent 72%),
-    linear-gradient(180deg, #1f1527 0%, #160e1d 100%);
+    linear-gradient(var(--ts-kin-light) 0 0) 0 0 / 28px 2px no-repeat,
+    linear-gradient(var(--ts-kin-light) 0 0) 0 0 / 2px 28px no-repeat,
+    linear-gradient(var(--ts-kin-light) 0 0) 100% 100% / 28px 2px no-repeat,
+    linear-gradient(var(--ts-kin-light) 0 0) 100% 100% / 2px 28px no-repeat,
+    radial-gradient(64% 54% at 50% 0%, rgb(230 194 142 / 15%), transparent 72%),
+    linear-gradient(180deg, #23172c 0%, #160e1d 100%);
   box-shadow:
-    inset 0 1px 0 rgb(243 224 176 / 12%),
-    0 16px 38px rgb(0 0 0 / 28%);
+    inset 0 1px 0 rgb(243 224 176 / 16%),
+    0 18px 42px rgb(0 0 0 / 36%);
+}
+
+.dream-page.dream-page .dream-reader-index-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.dream-page.dream-page .dream-reader-index-actions button {
+  min-height: 36px;
+  padding: 5px 12px;
+  border: 1px solid rgb(200 164 92 / 44%);
+  color: var(--ts-kinari);
+  background: linear-gradient(180deg, #2d1c33 0%, #1c1222 100%);
+  box-shadow: inset 0 1px 0 rgb(243 224 176 / 14%);
+  font-family: var(--ts-text);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.dream-page.dream-page .dream-reader-index-actions button[aria-pressed="true"] {
+  border-color: var(--ts-kin-hi);
+  color: var(--ts-kin-hi);
+  background:
+    radial-gradient(80% 60% at 50% 0%, rgb(204 73 59 / 22%), transparent 70%),
+    linear-gradient(180deg, #432739 0%, #2d1a26 100%);
+}
+
+.dream-page.dream-page .dream-reader-index-actions button:disabled {
+  opacity: 0.48;
+  cursor: default;
 }
 
 .dream-page.dream-page .dream-reader-index ol {
@@ -231,13 +560,15 @@
   gap: 8px 12px;
   min-height: 116px;
   padding: 15px;
-  border: 1px solid rgb(200 164 92 / 28%);
+  border: 1px solid rgb(200 164 92 / 34%);
   background:
-    linear-gradient(var(--ts-kin) 0 0) 0 0 / 32px 2px no-repeat,
-    linear-gradient(var(--ts-kin) 0 0) 0 0 / 2px 18px no-repeat,
-    linear-gradient(155deg, rgb(243 224 176 / 5%), transparent 46%),
-    #251a28;
-  box-shadow: inset 0 1px 0 rgb(243 224 176 / 8%);
+    linear-gradient(var(--ts-kin) 0 0) 0 0 / 36px 2px no-repeat,
+    linear-gradient(var(--ts-kin) 0 0) 0 0 / 2px 20px no-repeat,
+    linear-gradient(155deg, rgb(243 224 176 / 7%), transparent 48%),
+    linear-gradient(180deg, #281c2c 0%, #1f1523 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(243 224 176 / 10%),
+    0 8px 20px rgb(0 0 0 / 24%);
   transition:
     translate 200ms cubic-bezier(0.22, 1, 0.36, 1),
     border-color 200ms ease,
@@ -250,9 +581,11 @@
   place-items: center;
   width: 34px;
   height: 34px;
-  border: 1px solid var(--ts-hair);
+  border: 1px solid rgb(230 194 142 / 46%);
   color: var(--ts-kin-light);
-  background: rgb(13 9 18 / 45%);
+  background:
+    radial-gradient(circle at 50% 30%, rgb(230 194 142 / 14%), transparent 70%), rgb(13 9 18 / 55%);
+  box-shadow: inset 0 1px 0 rgb(243 224 176 / 14%);
   font-size: 18px;
   font-weight: 700;
 }
@@ -297,29 +630,35 @@
 }
 
 .dream-page.dream-page .dream-reader-index a[aria-current="location"] {
-  border-color: var(--ts-kin);
+  border-color: var(--ts-kin-light);
   background:
-    linear-gradient(var(--ts-kin-light) 0 0) 0 0 / 48px 2px no-repeat,
-    radial-gradient(80% 60% at 0% 0%, rgb(204 73 59 / 18%), transparent 70%),
-    #3b2433;
+    linear-gradient(90deg, var(--ts-kin-hi), var(--ts-shu)) 0 0 / 64px 2px no-repeat,
+    radial-gradient(85% 65% at 0% 0%, rgb(204 73 59 / 22%), transparent 72%),
+    linear-gradient(180deg, #412738 0%, #2f1b28 100%);
   box-shadow:
-    inset 0 -3px var(--ts-kin),
-    0 10px 24px rgb(0 0 0 / 34%);
+    inset 0 1px 0 rgb(243 224 176 / 22%),
+    inset 0 -3px var(--ts-kin-light),
+    0 12px 28px rgb(0 0 0 / 38%);
 }
 
 .dream-page.dream-page .dream-reader-index a[aria-current="location"] .dream-reader-index-number {
   color: #1b1321;
   border-color: var(--ts-kin-hi);
-  background: var(--ts-kin-light);
+  background: linear-gradient(180deg, var(--ts-kin-hi) 0%, var(--ts-kin) 100%);
+  box-shadow: 0 2px 10px rgb(200 164 92 / 35%);
 }
 
 /* A folded chapter reference never competes with the synopsis paragraphs. */
 .dream-page.dream-page .dream-chapter-companion {
   margin-top: 22px;
-  border: 1px solid rgb(110 44 53 / 36%);
+  border: 1px solid rgb(110 44 53 / 42%);
   color: #382638;
-  background: linear-gradient(165deg, #f1e7d4 0%, #e6dac4 100%);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 45%);
+  background:
+    linear-gradient(90deg, #79353c, #b58d3d 65%, transparent) 0 0 / 100% 2px no-repeat,
+    linear-gradient(165deg, #f4ebd9 0%, #e7dbc5 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 58%),
+    0 8px 22px rgb(34 18 28 / 12%);
 }
 
 .dream-page.dream-page .dream-chapter-companion summary {
@@ -349,7 +688,8 @@
   height: 22px;
   border: 1px solid #79353c;
   color: #79353c;
-  background: rgb(121 53 60 / 8%);
+  background: rgb(121 53 60 / 10%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 45%);
   font-family: var(--ts-latin);
   font-size: 16px;
   line-height: 1;
@@ -358,7 +698,8 @@
 .dream-page.dream-page .dream-chapter-companion[open] summary::before {
   content: "−";
   color: #f4ecdc;
-  background: #79353c;
+  background: linear-gradient(180deg, #8e3d46 0%, #682830 100%);
+  box-shadow: 0 2px 6px rgb(110 44 53 / 28%);
 }
 
 .dream-page.dream-page .dream-chapter-companion summary > span {
@@ -374,7 +715,7 @@
 
 .dream-page.dream-page .dream-chapter-companion-body {
   padding: 0 15px 16px;
-  border-top: 1px solid rgb(110 44 53 / 22%);
+  border-top: 1px solid rgb(110 44 53 / 24%);
 }
 
 .dream-page.dream-page .dream-chapter-companion-places {
@@ -387,6 +728,56 @@
 .dream-page.dream-page .dream-chapter-companion-places span {
   margin-right: 10px;
   color: #79353c;
+  font-weight: 800;
+}
+
+.dream-page.dream-page .dream-chapter-companion-cast {
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  border: 1px solid rgb(110 44 53 / 26%);
+  background: rgb(255 255 255 / 42%);
+}
+
+.dream-page.dream-page .dream-chapter-companion-cast > span {
+  display: block;
+  margin-bottom: 8px;
+  color: #79353c;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.dream-page.dream-page .dream-chapter-companion-cast > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.dream-page.dream-page .dream-chapter-companion-cast a {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  min-height: 36px;
+  padding: 5px 10px;
+  border: 1px solid rgb(110 44 53 / 34%);
+  background: linear-gradient(180deg, #faf3e6 0%, #ede1cb 100%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 68%);
+  color: #3d2430;
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.dream-page.dream-page .dream-chapter-companion-cast a small {
+  color: #79353c;
+  font-family: var(--ts-latin);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.dream-page.dream-page .dream-chapter-companion-cast a b {
+  font-family: var(--ts-display);
+  font-size: 13px;
   font-weight: 800;
 }
 
@@ -410,12 +801,17 @@
   gap: 2px 8px;
   min-height: 52px;
   padding: 6px 9px;
-  border: 1px solid rgb(110 44 53 / 24%);
+  border: 1px solid rgb(110 44 53 / 28%);
   background:
-    linear-gradient(#79353c 0 0) 0 0 / 3px 100% no-repeat,
-    rgb(255 255 255 / 32%);
+    linear-gradient(180deg, #8e3d46, #682830) 0 0 / 3px 100% no-repeat,
+    linear-gradient(180deg, rgb(255 255 255 / 48%), rgb(255 255 255 / 22%));
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 55%);
   color: #47303b;
   text-decoration: none;
+  transition:
+    border-color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 180ms ease;
 }
 
 .dream-page.dream-page .dream-chapter-companion li a span {
@@ -454,9 +850,320 @@
   scroll-margin-top: calc(var(--dream-nav-offset, 160px) + 20px);
 }
 
+/* ---------- Wave 3: Poster HUD, Card Spec Badges, Roster Toolbar, Glossary Jump & Footer ---------- */
+
+.dream-page.dream-page .dream-poster-stage > figure.dream-poster-current {
+  position: relative;
+}
+
+.dream-page.dream-page .dream-poster-hud {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  left: 12px;
+  z-index: 3;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.dream-page.dream-page .dream-poster-hud-status {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border: 1px solid rgb(200 164 92 / 46%);
+  border-radius: 2px;
+  background: rgb(13 9 18 / 86%);
+  box-shadow: 0 8px 22px rgb(0 0 0 / 48%);
+}
+
+.dream-page.dream-page .dream-poster-hud-status > i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #48d18a;
+  box-shadow: 0 0 8px #48d18a;
+}
+
+.dream-page.dream-page .dream-poster-hud-status > i.is-locked {
+  background: var(--ts-kin-hi);
+  box-shadow: 0 0 8px var(--ts-kin-hi);
+}
+
+.dream-page.dream-page .dream-poster-hud-status > i.is-shuffling {
+  background: var(--ts-shu);
+  box-shadow: 0 0 8px var(--ts-shu);
+}
+
+.dream-page.dream-page .dream-poster-hud-status > b {
+  color: var(--ts-kin-hi);
+  font-family: var(--ts-latin);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+}
+
+.dream-page.dream-page .dream-poster-hud-status > span {
+  padding: 2px 6px;
+  border: 1px solid rgb(200 164 92 / 34%);
+  color: var(--ts-kinari);
+  background: rgb(42 26 39 / 88%);
+  font-family: var(--ts-latin);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+}
+
+.dream-page.dream-page .dream-poster-hud-status > small {
+  color: var(--ts-ginnezu);
+  font-family: var(--ts-latin);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+}
+
+.dream-page.dream-page .dream-poster-hud-step {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  pointer-events: auto;
+}
+
+.dream-page.dream-page .dream-poster-hud-step button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 5px 11px;
+  border: 1px solid rgb(200 164 92 / 52%);
+  border-radius: 2px;
+  color: var(--ts-kinari);
+  background: rgb(13 9 18 / 88%);
+  box-shadow: 0 8px 20px rgb(0 0 0 / 44%);
+  font-family: var(--ts-latin);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  cursor: pointer;
+}
+
+.dream-page.dream-page .dream-poster-hud-step button small {
+  font-size: 12px;
+  letter-spacing: 0.16em;
+}
+
+.dream-page.dream-page .dream-poster-hud-step button:focus-visible {
+  outline: 2px solid var(--ts-fuji);
+  outline-offset: 2px;
+}
+
+.dream-page.dream-page .dream-poster-stage figcaption {
+  position: relative;
+}
+
+.dream-page.dream-page .dream-poster-progress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--ts-shu), var(--ts-kin-hi));
+  pointer-events: none;
+}
+
+.dream-page.dream-page .dream-character-spec-badge {
+  position: relative;
+  z-index: 1;
+  grid-column: 1;
+  grid-row: 1;
+  align-self: end;
+  justify-self: end;
+  margin: 0 12px 14px 0;
+  padding: 5px 9px;
+  border: 1px solid rgb(200 164 92 / 52%);
+  border-radius: 2px;
+  color: var(--ts-kin-hi);
+  background: rgb(13 9 18 / 86%);
+  font-family: var(--ts-latin);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  pointer-events: none;
+}
+
+.dream-page.dream-page .dream-dolminence-spec-badge {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  z-index: 1;
+  padding: 5px 9px;
+  border: 1px solid rgb(200 164 92 / 52%);
+  border-radius: 2px;
+  color: var(--ts-kin-hi);
+  background: rgb(13 9 18 / 88%);
+  font-family: var(--ts-latin);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  pointer-events: none;
+}
+
+.dream-page.dream-page .dream-roster-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+  margin: -18px 0 20px;
+}
+
+.dream-page.dream-page .dream-roster-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.dream-page.dream-page .dream-roster-filters button,
+.dream-page.dream-page .dream-roster-bulk {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 5px 11px;
+  border: 1px solid rgb(200 164 92 / 34%);
+  border-radius: 2px;
+  color: var(--ts-zoge);
+  background: rgb(25 16 28 / 88%);
+  font-family: var(--ts-text);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+}
+
+.dream-page.dream-page .dream-roster-filters button small {
+  padding: 1px 5px;
+  border: 1px solid rgb(200 164 92 / 28%);
+  color: var(--ts-kin-light);
+  font-family: var(--ts-latin);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+}
+
+.dream-page.dream-page .dream-roster-filters button[aria-pressed="true"] {
+  border-color: var(--ts-kin-hi);
+  color: var(--ts-kinari);
+  background: var(--ts-ebicha-deep);
+  box-shadow: inset 0 0 0 1px rgb(243 224 176 / 26%);
+}
+
+.dream-page.dream-page .dream-roster-filters button:focus-visible,
+.dream-page.dream-page .dream-roster-bulk:focus-visible {
+  outline: 2px solid var(--ts-fuji);
+  outline-offset: 2px;
+}
+
+.dream-page.dream-page .dream-roster > li[data-roster-dimmed="true"] {
+  opacity: 0.34;
+}
+
+.dream-page.dream-page .dream-glossary-jump {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: -18px 0 20px;
+}
+
+.dream-page.dream-page .dream-glossary-jump a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 4px 10px;
+  border: 1px solid rgb(200 164 92 / 32%);
+  border-radius: 2px;
+  color: var(--ts-kinari);
+  background: rgb(25 16 28 / 86%);
+  font-family: var(--ts-text);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+}
+
+.dream-page.dream-page .dream-glossary-jump a small {
+  color: var(--ts-kin-light);
+  font-family: var(--ts-latin);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.dream-page.dream-page .dream-glossary-jump a:focus-visible {
+  outline: 2px solid var(--ts-fuji);
+  outline-offset: 2px;
+}
+
+.dream-page.dream-page .dream-glossary > div {
+  scroll-margin-top: max(164px, calc(136px + env(safe-area-inset-top)));
+}
+
+.dream-page.dream-page .dream-credits dd a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: rgb(200 164 92 / 42%);
+  text-underline-offset: 4px;
+}
+
+.dream-page.dream-page .dream-credits dd a:focus-visible,
+.dream-page.dream-page .dream-footer-nav a:focus-visible {
+  outline: 2px solid var(--ts-fuji);
+  outline-offset: 2px;
+}
+
+.dream-page.dream-page .dream-footer-nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px 12px;
+  margin: 22px auto 8px;
+}
+
+.dream-page.dream-page .dream-footer-nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 38px;
+  padding: 6px 14px;
+  border: 1px solid rgb(200 164 92 / 36%);
+  border-radius: 2px;
+  color: var(--ts-kin-light);
+  background: rgb(25 16 28 / 84%);
+  font-family: var(--ts-text);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-decoration: none;
+}
+
+@media (max-width: 980px) {
+  .dream-page.dream-page .dream-programme-dossier-strip {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 760px) {
   .dream-page.dream-page .dream-programme-routes {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .dream-page.dream-page .dream-programme-dossier-strip,
+  .dream-page.dream-page .dream-programme-ledger-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .dream-page.dream-page .dream-programme-ticket {
@@ -476,6 +1183,51 @@
     min-height: 112px;
     padding: 12px;
   }
+
+  .dream-page.dream-page .dream-poster-hud-status > small {
+    display: none;
+  }
+
+  .dream-page.dream-page .dream-character-spec-badge,
+  .dream-page.dream-page .dream-dolminence-spec-badge {
+    display: none;
+  }
+
+  .dream-page.dream-page .dream-roster-toolbar,
+  .dream-page.dream-page .dream-glossary-jump {
+    display: none;
+  }
+}
+
+@media (max-width: 1299px) {
+  .dream-page.dream-page .dream-roster-toolbar,
+  .dream-page.dream-page .dream-glossary-jump {
+    position: absolute;
+    top: 12px;
+    right: 0;
+    margin: 0;
+  }
+
+  .dream-page.dream-page .dream-glossary-jump {
+    display: none;
+  }
+
+  .dream-page.dream-page .dream-roster-bulk {
+    display: none;
+  }
+}
+
+@media (min-width: 1300px) {
+  .dream-page.dream-page .dream-roster-toolbar {
+    position: absolute;
+    top: 16px;
+    right: 0;
+    margin: 0;
+  }
+
+  .dream-page.dream-page .dream-glossary-jump {
+    margin: -22px 0 18px;
+  }
 }
 
 @media (max-width: 359px) {
@@ -484,6 +1236,8 @@
     padding: 16px;
   }
 
+  .dream-page.dream-page .dream-programme-dossier-strip,
+  .dream-page.dream-page .dream-programme-ledger-grid,
   .dream-page.dream-page .dream-reader-index ol,
   .dream-page.dream-page .dream-chapter-companion ol {
     grid-template-columns: minmax(0, 1fr);
@@ -498,28 +1252,53 @@
 
 @media (hover: hover) and (pointer: fine) {
   .dream-page.dream-page .dream-programme-ticket:hover,
+  .dream-page.dream-page .dream-programme-dossier-chip:hover,
+  .dream-page.dream-page .dream-programme-ledger-cell:hover,
   .dream-page.dream-page .dream-reader-index a:hover {
     translate: 0 -2px;
-    border-color: var(--ts-kin-light);
-    background-color: #3a2634;
+    border-color: var(--ts-kin-hi);
+    background-color: #3d2738;
     box-shadow:
-      inset 0 1px 0 rgb(243 224 176 / 22%),
-      0 16px 34px rgb(0 0 0 / 42%);
+      inset 0 1px 0 rgb(243 224 176 / 26%),
+      0 18px 38px rgb(0 0 0 / 46%);
+  }
+
+  .dream-page.dream-page .dream-programme-spotlight-modes button:hover,
+  .dream-page.dream-page .dream-programme-spotlight-controls button:hover,
+  .dream-page.dream-page .dream-reader-index-actions button:not(:disabled):hover,
+  .dream-page.dream-page .dream-poster-hud-step button:hover,
+  .dream-page.dream-page .dream-roster-filters button:hover,
+  .dream-page.dream-page .dream-roster-bulk:hover,
+  .dream-page.dream-page .dream-glossary-jump a:hover,
+  .dream-page.dream-page .dream-footer-nav a:hover {
+    border-color: var(--ts-kin-hi);
+    background-color: #3d2738;
+  }
+
+  .dream-page.dream-page .dream-credits dd a:hover {
+    color: var(--ts-kin-hi);
+    text-decoration-color: var(--ts-kin-hi);
   }
 
   .dream-page.dream-page .dream-programme-ticket:hover .dream-programme-ticket-foot > span {
     translate: 4px 0;
   }
 
+  .dream-page.dream-page .dream-chapter-companion-cast a:hover,
   .dream-page.dream-page .dream-chapter-companion li a:hover {
     border-color: #79353c;
-    background-color: #f7f0e2;
+    background-color: #faf3e6;
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 70%),
+      0 4px 12px rgb(110 44 53 / 14%);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .dream-page.dream-page .dream-programme-desk,
   .dream-page.dream-page .dream-programme-ticket,
+  .dream-page.dream-page .dream-programme-dossier-chip,
+  .dream-page.dream-page .dream-programme-ledger-cell,
   .dream-page.dream-page .dream-programme-ticket-foot > span,
   .dream-page.dream-page .dream-reader-index a,
   .dream-page.dream-page .dream-chapter-companion {
@@ -534,9 +1313,24 @@
     :is(
       .dream-programme-desk,
       .dream-programme-ticket,
+      .dream-programme-dossier-chip,
+      .dream-programme-ledger-cell,
+      .dream-programme-spotlight,
+      .dream-programme-spotlight-modes button,
+      .dream-programme-spotlight-controls button,
+      .dream-reader-index-actions button,
       .dream-reader-index a,
       .dream-chapter-companion,
-      .dream-chapter-companion li a
+      .dream-chapter-companion-cast a,
+      .dream-chapter-companion li a,
+      .dream-poster-hud-status,
+      .dream-poster-hud-step button,
+      .dream-character-spec-badge,
+      .dream-dolminence-spec-badge,
+      .dream-roster-filters button,
+      .dream-roster-bulk,
+      .dream-glossary-jump a,
+      .dream-footer-nav a
     ) {
     border-color: CanvasText;
     color: CanvasText;

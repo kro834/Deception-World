@@ -439,15 +439,13 @@
   html:not([data-world-effects="economy"]) .dream-page.dream-page .dream-story-case-body {
     background:
       repeating-linear-gradient(0deg, rgb(110 72 40 / 2.5%) 0 1px, transparent 1px 5px),
-      repeating-linear-gradient(90deg, transparent 0 53px, rgb(110 72 40 / 3.5%) 53px 54px),
-      #eee4cd;
+      repeating-linear-gradient(90deg, transparent 0 53px, rgb(110 72 40 / 3.5%) 53px 54px), #eee4cd;
   }
 
   html:not([data-world-effects="economy"]) .dream-page.dream-page #glossary {
     background:
       repeating-linear-gradient(0deg, rgb(110 72 40 / 2.5%) 0 1px, transparent 1px 5px),
-      repeating-linear-gradient(90deg, transparent 0 53px, rgb(110 72 40 / 3.5%) 53px 54px),
-      #eee5d4;
+      repeating-linear-gradient(90deg, transparent 0 53px, rgb(110 72 40 / 3.5%) 53px 54px), #eee5d4;
   }
 }
 
@@ -560,6 +558,261 @@
   translate: 0 1px;
 }
 
+/* Chrome & Dossier elevation: richer gilt rules, warm chandelier sheen on
+   the header and act bar, and museum-grade framing inside opened files. */
+.dream-page.dream-page .dream-site-header {
+  border-bottom: 1px solid rgb(200 164 92 / 42%);
+  background: radial-gradient(56% 100% at 50% 0, rgb(230 194 142 / 9%), transparent 75%), #130c17;
+  box-shadow: inset 0 -1px 0 rgb(243 224 176 / 10%);
+}
+
+.dream-page.dream-page .dream-back-link {
+  border-color: rgb(200 164 92 / 38%);
+  background:
+    linear-gradient(var(--ts-kin) 0 0) 0 0 / 8px 1px no-repeat,
+    linear-gradient(var(--ts-kin) 0 0) 0 0 / 1px 8px no-repeat,
+    linear-gradient(var(--ts-kin) 0 0) 100% 100% / 8px 1px no-repeat,
+    linear-gradient(var(--ts-kin) 0 0) 100% 100% / 1px 8px no-repeat,
+    rgb(26 16 35 / 65%);
+}
+
+.dream-page.dream-page .dream-chapter-nav {
+  border-bottom: 1px solid rgb(200 164 92 / 36%);
+  background:
+    linear-gradient(
+        90deg,
+        transparent,
+        var(--ts-kin) 20%,
+        var(--ts-kin-hi) 50%,
+        var(--ts-kin) 80%,
+        transparent
+      )
+      bottom / 100% 1px no-repeat,
+    radial-gradient(50% 100% at 50% 0, rgb(200 164 92 / 6%), transparent 72%),
+    var(--ts-ink);
+}
+
+.dream-page.dream-page .dream-chapter-nav a[aria-current="location"] {
+  color: var(--ts-kinari);
+  background:
+    linear-gradient(90deg, var(--ts-kin), var(--ts-shu) 50%, var(--ts-kin)) 50% calc(100% - 3px) /
+      calc(100% - 24px) 2px no-repeat,
+    radial-gradient(70% 90% at 50% 100%, rgb(204 73 59 / 22%), transparent 72%),
+    linear-gradient(180deg, rgb(110 44 53 / 28%), transparent 72%);
+}
+
+.dream-page.dream-page .dream-dossier-shell {
+  border: 1px solid rgb(200 164 92 / 55%);
+  outline: 1px solid rgb(200 164 92 / 22%);
+  outline-offset: -6px;
+  box-shadow:
+    inset 0 1px 0 rgb(243 224 176 / 18%),
+    0 28px 64px -20px rgb(0 0 0 / 88%);
+}
+
+.dream-page.dream-page .dream-dossier-visuals figure {
+  border: 1px solid rgb(200 164 92 / 46%);
+  outline: 1px solid rgb(200 164 92 / 18%);
+  outline-offset: -5px;
+  box-shadow: 0 18px 38px -18px rgb(0 0 0 / 85%);
+}
+
+.dream-page.dream-page .dream-dossier-title > span {
+  border: 1px solid var(--ts-shu);
+  outline: 1px solid rgb(204 73 59 / 38%);
+  outline-offset: 2px;
+  color: var(--ts-kinari);
+  background:
+    radial-gradient(70% 60% at 50% 25%, rgb(224 102 79 / 26%), transparent 75%), var(--ts-shu-deep);
+}
+
+.dream-page.dream-page :is(.dream-profile-grid, .dream-ability-list article) {
+  border: 1px solid rgb(200 164 92 / 34%);
+  background:
+    linear-gradient(var(--ts-kin) 0 0) 0 0 / 20px 1.5px no-repeat,
+    linear-gradient(var(--ts-kin) 0 0) 0 0 / 1.5px 20px no-repeat,
+    linear-gradient(174deg, rgb(243 224 176 / 6%) 0, transparent 36%),
+    #110b16;
+  box-shadow: inset 0 1px 0 rgb(243 224 176 / 10%);
+}
+
+.dream-page.dream-page .dream-dossier-switcher {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgb(200 164 92 / 34%);
+}
+
+.dream-page.dream-page .dream-dossier-switcher button {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  min-height: 40px;
+  padding: 8px 14px;
+  border: 1px solid rgb(200 164 92 / 38%);
+  color: var(--ts-zoge);
+  background:
+    linear-gradient(var(--ts-kin) 0 0) 0 0 / 10px 1.5px no-repeat,
+    linear-gradient(var(--ts-kin) 0 0) 0 0 / 1.5px 10px no-repeat,
+    linear-gradient(180deg, #211528 0%, #150d1b 100%);
+  box-shadow: inset 0 1px 0 rgb(243 224 176 / 12%);
+  font-family: var(--ts-display);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.dream-page.dream-page .dream-dossier-switcher button small {
+  color: var(--ts-kin-light);
+  font-family: var(--ts-latin);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+}
+
+.dream-page.dream-page .dream-dossier-switcher button[aria-current="true"] {
+  border-color: var(--ts-kin-hi);
+  color: var(--ts-kin-hi);
+  background:
+    linear-gradient(90deg, var(--ts-shu), var(--ts-kin-hi)) 0 0 / 100% 2px no-repeat,
+    radial-gradient(80% 70% at 20% 0%, rgb(204 73 59 / 24%), transparent 72%),
+    linear-gradient(180deg, #382032 0%, #241422 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(243 224 176 / 22%),
+    0 8px 20px rgb(0 0 0 / 38%);
+}
+
+.dream-page.dream-page .dream-dossier-switcher button:focus-visible,
+.dream-page.dream-page .dream-dossier-plate-controls button:focus-visible,
+.dream-page.dream-page .dream-dossier-relations-grid a:focus-visible,
+.dream-page.dream-page .dream-dossier-chronicle-grid a:focus-visible {
+  outline: 2px solid var(--ts-fuji);
+  outline-offset: 2px;
+}
+
+.dream-page.dream-page .dream-dossier-plate-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+  padding: 9px 12px;
+  border: 1px solid rgb(200 164 92 / 34%);
+  background: rgb(22 14 27 / 86%);
+}
+
+.dream-page.dream-page .dream-dossier-plate-controls > span {
+  margin-right: 4px;
+  color: var(--ts-kin-light);
+  font-family: var(--ts-latin);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+}
+
+.dream-page.dream-page .dream-dossier-plate-controls button {
+  min-height: 34px;
+  padding: 5px 11px;
+  border: 1px solid rgb(200 164 92 / 38%);
+  color: var(--ts-kinari);
+  background: linear-gradient(180deg, #281930 0%, #170e1d 100%);
+  font-family: var(--ts-text);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.dream-page.dream-page .dream-dossier-plate-controls button[aria-pressed="true"] {
+  border-color: var(--ts-kin-hi);
+  color: var(--ts-kin-hi);
+  background:
+    radial-gradient(80% 70% at 50% 0%, rgb(204 73 59 / 22%), transparent 72%),
+    linear-gradient(180deg, #3c2235 0%, #241422 100%);
+}
+
+.dream-page.dream-page .dream-dossier-visuals[data-plate-focus="primary"] figure:nth-of-type(2),
+.dream-page.dream-page .dream-dossier-visuals[data-plate-focus="secondary"] figure:nth-of-type(1) {
+  display: none;
+}
+
+.dream-page.dream-page
+  .dream-dossier-visuals:is([data-plate-focus="primary"], [data-plate-focus="secondary"])
+  figure
+  img {
+  max-height: 720px;
+  object-fit: contain;
+}
+
+.dream-page.dream-page .dream-profile-meter {
+  display: block;
+  width: 100%;
+  height: 5px;
+  margin-top: 7px;
+  border: 1px solid rgb(200 164 92 / 34%);
+  background: rgb(11 7 15 / 82%);
+  overflow: hidden;
+}
+
+.dream-page.dream-page .dream-profile-meter > i {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--ts-shu), var(--ts-kin) 60%, var(--ts-kin-hi));
+  box-shadow: 0 0 10px rgb(230 194 142 / 38%);
+}
+
+.dream-page.dream-page .dream-dossier-relations-grid,
+.dream-page.dream-page .dream-dossier-chronicle-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 10px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dream-page.dream-page .dream-dossier-relations-grid a,
+.dream-page.dream-page .dream-dossier-chronicle-grid a {
+  display: grid;
+  gap: 4px;
+  padding: 11px 13px;
+  border: 1px solid rgb(200 164 92 / 36%);
+  color: var(--ts-kinari);
+  background:
+    linear-gradient(180deg, var(--ts-shu), var(--ts-kin)) 0 0 / 3px 100% no-repeat,
+    linear-gradient(165deg, rgb(243 224 176 / 8%), transparent 48%),
+    linear-gradient(180deg, #211528 0%, #140d1a 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(243 224 176 / 12%),
+    0 8px 18px rgb(0 0 0 / 28%);
+  text-decoration: none;
+}
+
+.dream-page.dream-page .dream-dossier-relations-grid a small,
+.dream-page.dream-page .dream-dossier-chronicle-grid a small {
+  color: var(--ts-kin-light);
+  font-family: var(--ts-latin);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+}
+
+.dream-page.dream-page .dream-dossier-relations-grid a strong,
+.dream-page.dream-page .dream-dossier-chronicle-grid a strong {
+  color: var(--ts-kin-hi);
+  font-family: var(--ts-display);
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.dream-page.dream-page .dream-dossier-relations-grid a span,
+.dream-page.dream-page .dream-dossier-chronicle-grid a span {
+  color: var(--ts-zoge);
+  font-size: 12px;
+}
+
 /* PROFILE, the agent file button, the hero and footer plates: presses
    settle a pixel too. */
 .dream-page.dream-page
@@ -576,6 +829,11 @@
     color: var(--ts-kin-hi);
   }
 
+  .dream-page.dream-page .dream-back-link:hover {
+    border-color: var(--ts-kin-light);
+    color: var(--ts-kin-hi);
+  }
+
   .dream-page.dream-page .dream-contents a:hover::after {
     opacity: 1;
     translate: 0 -50%;
@@ -585,8 +843,18 @@
     border-color: var(--ts-kin);
   }
 
+  .dream-page.dream-page .dream-poster-controls button.ios26-glass:hover {
+    border-color: var(--ts-kin-light);
+    color: var(--ts-kin-hi);
+  }
+
   .dream-page.dream-page .dream-dossier-dialog .dream-dossier-close.ios26-glass:hover {
     border-color: var(--ts-kin-light);
+  }
+
+  .dream-page.dream-page :is(.dream-hero-actions a, .dream-footer > a, .dream-agent-open):hover {
+    border-color: var(--ts-kin-hi);
+    color: var(--ts-kin-hi);
   }
 
   .dream-page.dream-page .dream-archive-fold > summary:hover > i {
@@ -636,8 +904,12 @@
    light; they never take a pointer, sit under the CLOSE plate, and rest
    off screen until the file closes. */
 @media (prefers-reduced-motion: no-preference) {
-  html:not([data-world-effects="economy"]) .dream-page.dream-page .dream-dossier-dialog[open]::before,
-  html:not([data-world-effects="economy"]) .dream-page.dream-page .dream-dossier-dialog[open]::after {
+  html:not([data-world-effects="economy"])
+    .dream-page.dream-page
+    .dream-dossier-dialog[open]::before,
+  html:not([data-world-effects="economy"])
+    .dream-page.dream-page
+    .dream-dossier-dialog[open]::after {
     content: "";
     position: fixed;
     top: 0;
@@ -648,21 +920,27 @@
       radial-gradient(circle at 50% 50%, transparent 7px, var(--ts-kin) 7px 8px, transparent 8.5px)
         var(--kn-pull, right 22px) center / 24px 24px no-repeat,
       linear-gradient(var(--ts-hair-soft) 0 0) 50% 18px / calc(100% - 36px) 1px no-repeat,
-      linear-gradient(var(--ts-hair-soft) 0 0) 50% calc(100% - 18px) / calc(100% - 36px) 1px no-repeat,
+      linear-gradient(var(--ts-hair-soft) 0 0) 50% calc(100% - 18px) / calc(100% - 36px) 1px
+        no-repeat,
       linear-gradient(var(--ts-hair-soft) 0 0) 18px 50% / 1px calc(100% - 36px) no-repeat,
-      linear-gradient(var(--ts-hair-soft) 0 0) calc(100% - 18px) 50% / 1px calc(100% - 36px) no-repeat,
+      linear-gradient(var(--ts-hair-soft) 0 0) calc(100% - 18px) 50% / 1px calc(100% - 36px)
+        no-repeat,
       repeating-linear-gradient(0deg, rgb(255 255 255 / 1.6%) 0 1px, transparent 1px 9px),
       linear-gradient(180deg, #160e1b, #0d0912 70%);
     pointer-events: none;
     animation: kn-fusuma-left 620ms cubic-bezier(0.65, 0, 0.2, 1) 130ms both;
   }
 
-  html:not([data-world-effects="economy"]) .dream-page.dream-page .dream-dossier-dialog[open]::before {
+  html:not([data-world-effects="economy"])
+    .dream-page.dream-page
+    .dream-dossier-dialog[open]::before {
     left: 0;
     border-right: 2px solid var(--ts-kin);
   }
 
-  html:not([data-world-effects="economy"]) .dream-page.dream-page .dream-dossier-dialog[open]::after {
+  html:not([data-world-effects="economy"])
+    .dream-page.dream-page
+    .dream-dossier-dialog[open]::after {
     --kn-pull: left 22px;
     right: 0;
     border-left: 2px solid var(--ts-kin);

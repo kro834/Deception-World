@@ -124,6 +124,15 @@ export function DreamReadingRoom({ trigger, onClose }: Props) {
     setStatus("");
     setChapter(no);
   };
+  const jumpToParagraph = (targetNo: number) => {
+    const scroller = viewport.current;
+    const target = scroller?.querySelector<HTMLElement>(`[data-room-paragraph="${targetNo}"]`);
+    if (scroller && target) {
+      scroller.scrollTop +=
+        target.getBoundingClientRect().top - scroller.getBoundingClientRect().top - 24;
+    }
+    setParagraph(targetNo);
+  };
   const save = () => {
     const paragraph = visibleParagraph(viewport.current);
     setParagraph(paragraph);
@@ -138,6 +147,7 @@ export function DreamReadingRoom({ trigger, onClose }: Props) {
       setStatus("このブラウザーでは保存できません。読書室はこのまま利用できます。");
     }
   };
+  const totalChars = episode.paragraphs.join("").length;
 
   return (
     <dialog
@@ -208,6 +218,25 @@ export function DreamReadingRoom({ trigger, onClose }: Props) {
                 </button>
               ))}
             </nav>
+            <div className="dream-reading-paragraph-jump" role="group" aria-label="段落へ移動">
+              <small className="dream-reading-kicker">段落へ移動</small>
+              <div className="dream-reading-paragraph-pills">
+                {episode.paragraphs.map((_, i) => {
+                  const no = i + 1;
+                  return (
+                    <button
+                      key={no}
+                      type="button"
+                      aria-current={paragraph === no ? "location" : undefined}
+                      aria-label={`${no}段落目へ移動`}
+                      onClick={() => jumpToParagraph(no)}
+                    >
+                      {String(no).padStart(2, "0")}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
             <details className="dream-reading-options">
               <summary>表示を整える</summary>
               <div>
@@ -249,6 +278,9 @@ export function DreamReadingRoom({ trigger, onClose }: Props) {
                 <p lang="en">
                   CASE 0{chapter} / {episode.reading}
                 </p>
+                <small className="dream-reading-char-count">
+                  全{episode.paragraphs.length}段落 · {totalChars}字
+                </small>
                 <h3>{episode.title}</h3>
                 <span>{episode.lead}</span>
               </header>

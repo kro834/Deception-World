@@ -55,7 +55,12 @@ import {
   RosterSupplement,
   VoicesLeaf,
 } from "./dream-chapter-extra";
-import { DREAM_ARCHIVE_CORNERS, type DreamArchiveCornerId } from "./dream-chapter-extra-data";
+import {
+  DREAM_ARCHIVE_CORNERS,
+  DREAM_CHRONICLE,
+  DREAM_RELATIONS,
+  type DreamArchiveCornerId,
+} from "./dream-chapter-extra-data";
 import { DreamScreeningLauncher } from "./dream-screening-launcher";
 import { DreamReadingLauncher } from "./dream-reading-launcher";
 import { DreamProgrammeDesk } from "./dream-programme-desk";
@@ -233,7 +238,117 @@ function lockDreamViewport() {
   };
 }
 
-function DossierContent({ character }: { character: DreamCharacter }) {
+function resolveSpecMeter(label: string, value: string): number | null {
+  if (value.includes("計測不能") || value.includes("∞")) return 100;
+  const numeric = parseFloat(value.replace(/[^0-9.]/g, ""));
+  if (!Number.isFinite(numeric) || numeric <= 0) return null;
+  switch (label) {
+    case "HEIGHT":
+      return Math.min(100, Math.max(24, Math.round((numeric / 225) * 100)));
+    case "WEIGHT":
+      return Math.min(100, Math.max(24, Math.round((numeric / 165) * 100)));
+    case "PUNCH":
+    case "KICK":
+      return Math.min(100, Math.max(18, Math.round((Math.sqrt(numeric) / Math.sqrt(175)) * 100)));
+    case "JUMP":
+      return Math.min(100, Math.max(24, Math.round((numeric / 60) * 100)));
+    case "RUN": {
+      const secMatch = value.match(/(\d+(?:\.\d+)?)\s*秒/);
+      const seconds = secMatch ? parseFloat(secMatch[1]) : numeric;
+      return Math.min(100, Math.max(28, Math.round((1 - Math.min(seconds, 8) / 9.5) * 100)));
+    }
+    default:
+      return null;
+  }
+}
+
+const ROSTER_FILTERS = [
+  { id: "all", label: "全て", count: DREAM_CAST_ROSTER.length },
+  { id: "shrine", label: "神社・森・山", count: 5 },
+  { id: "nether", label: "冥界・紅魔・地底", count: 3 },
+  { id: "village", label: "人里・永守組・同行", count: 5 },
+  { id: "dream", label: "夢境・深層", count: 3 },
+] as const;
+
+type RosterFilterId = (typeof ROSTER_FILTERS)[number]["id"];
+
+function matchesRosterFilter(affiliation: string, filter: RosterFilterId): boolean {
+  if (filter === "all") return true;
+  if (filter === "shrine") {
+    return /博麗神社|幻想郷|守矢神社|魔法の森|烏天狗/.test(affiliation);
+  }
+  if (filter === "nether") {
+    return /白玉楼|紅魔館|旧地獄/.test(affiliation);
+  }
+  if (filter === "village") {
+    return /妹|人里|永守組|浪人/.test(affiliation);
+  }
+  if (filter === "dream") {
+    return /ベルベットルーム|悪夢/.test(affiliation);
+  }
+  return true;
+}
+
+function resolveCharacterCardSpec(item: DreamCharacter): string {
+  const totalEntries = item.sections.reduce(
+    (sum, section) => sum + (section.items?.length ?? section.paragraphs?.length ?? 0),
+    0,
+  );
+  return `${item.sections.length} SECTIONS · ${totalEntries} RECORDS`;
+}
+
+function resolveDolminenceCardSpec(record: DreamDolminence): string {
+  const punch = record.profile.find((row) => row.label === "PUNCH")?.value.replace(/（.*?）/g, "");
+  const kick = record.profile.find((row) => row.label === "KICK")?.value.replace(/（.*?）/g, "");
+  if (punch && kick) return `PUNCH ${punch} · KICK ${kick}`;
+  const device = record.profile.find((row) => row.label === "DEVICE")?.value;
+  return device ? `DEVICE: ${device}` : `${record.items.length}CLASSIFIED SPECS`;
+}
+
+const DOSSIER_CHRONICLE_CAST: Record<string, readonly string[]> = {
+  ciel: ["シエル"],
+  keiya: ["慶弥", "東風谷慶弥"],
+  kaisaku: ["怪作"],
+  "lord-knight": ["ロードナイト", "ワン"],
+  "lord-chaos": ["ロードケイオス", "ケイオス"],
+  dread: ["シンソウ", "ドレッド", "エイト"],
+  lupin: ["サヨ", "ルパン"],
+};
+
+function resolveDossierChronicleEvents(id: string) {
+  const names = DOSSIER_CHRONICLE_CAST[id];
+  if (!names) return [];
+  return DREAM_CHRONICLE.filter((event) =>
+    event.cast.some((member) => names.some((name) => member.includes(name))),
+  );
+}
+
+function resolveDossierRelations(id: string) {
+  const names = DOSSIER_CHRONICLE_CAST[id];
+  if (!names) return [];
+  return DREAM_RELATIONS.filter((tie) =>
+    names.some((name) => tie.a.includes(name) || tie.b.includes(name)),
+  );
+}
+
+function DossierContent({
+  character,
+  onSelect,
+  onSelectDolminence,
+  onClose,
+}: {
+  character: DreamCharacter;
+  onSelect?: (next: DreamCharacter) => void;
+  onSelectDolminence?: (next: DreamDolminence) => void;
+  onClose?: () => void;
+}) {
+  const [plateFocus, setPlateFocus] = useState<"split" | "primary" | "secondary">("split");
+  useEffect(() => {
+    setPlateFocus("split");
+  }, [character.id]);
+  const chronicleEvents = resolveDossierChronicleEvents(character.id);
+  const relationTies = resolveDossierRelations(character.id);
+
   return (
     <div
       className="dream-dossier-layout"
@@ -243,6 +358,7 @@ function DossierContent({ character }: { character: DreamCharacter }) {
         className={`dream-dossier-visuals${character.secondary ? "" : " is-single"}`}
         data-ts-order={character.order}
         data-ts-roman={character.roman}
+        data-plate-focus={character.secondary ? plateFocus : undefined}
       >
         <figure>
           <img
@@ -276,6 +392,61 @@ function DossierContent({ character }: { character: DreamCharacter }) {
       {character.secondary ? <i className="dream-dossier-rail-mark" aria-hidden="true" /> : null}
 
       <div className="dream-dossier-copy">
+        {onSelect ? (
+          <nav className="dream-dossier-switcher" aria-label="人物・機密ファイルの切り替え">
+            {DREAM_CHARACTERS.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                aria-current={item.id === character.id ? "true" : undefined}
+                onClick={() => onSelect(item)}
+              >
+                <small>CAST {item.order}</small>
+                <span>{item.name}</span>
+              </button>
+            ))}
+            {onSelectDolminence
+              ? DREAM_DOLMINENCE.map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => onSelectDolminence(item)}
+                  >
+                    <small>AGENT {item.order}</small>
+                    <span>{item.name}</span>
+                  </button>
+                ))
+              : null}
+          </nav>
+        ) : null}
+
+        {character.secondary ? (
+          <div className="dream-dossier-plate-controls" role="group" aria-label="図版表示モード">
+            <span lang="en">VISUAL PLATE</span>
+            <button
+              type="button"
+              aria-pressed={plateFocus === "split"}
+              onClick={() => setPlateFocus("split")}
+            >
+              並置表示
+            </button>
+            <button
+              type="button"
+              aria-pressed={plateFocus === "primary"}
+              onClick={() => setPlateFocus("primary")}
+            >
+              第一図版拡大
+            </button>
+            <button
+              type="button"
+              aria-pressed={plateFocus === "secondary"}
+              onClick={() => setPlateFocus("secondary")}
+            >
+              第二図版拡大
+            </button>
+          </div>
+        ) : null}
+
         <header className="dream-dossier-title">
           <p>CHARACTER FILE / {character.order}</p>
           <span>{character.tagline}</span>
@@ -289,12 +460,20 @@ function DossierContent({ character }: { character: DreamCharacter }) {
         ))}
 
         <dl className="dream-profile-grid">
-          {character.profile.map((row) => (
-            <div key={row.label}>
-              <dt>{row.label}</dt>
-              <dd>{row.value}</dd>
-            </div>
-          ))}
+          {character.profile.map((row) => {
+            const meter = resolveSpecMeter(row.label, row.value);
+            return (
+              <div key={row.label}>
+                <dt>{row.label}</dt>
+                <dd>{row.value}</dd>
+                {meter != null ? (
+                  <span className="dream-profile-meter" aria-hidden="true">
+                    <i style={{ width: `${meter}%` }} />
+                  </span>
+                ) : null}
+              </div>
+            );
+          })}
         </dl>
 
         <div className="dream-dossier-sections">
@@ -321,6 +500,48 @@ function DossierContent({ character }: { character: DreamCharacter }) {
             </section>
           ))}
           <DossierSupplement id={character.id} after={character.sections.length} />
+          {relationTies.length ? (
+            <section className="dream-dossier-relations-links">
+              <header>
+                <span>RELATIONS</span>
+                <h3>因縁・関係性の記録（{relationTies.length}件）</h3>
+              </header>
+              <ol className="dream-dossier-relations-grid">
+                {relationTies.map((tie) => (
+                  <li key={`${tie.a}/${tie.b}/${tie.label.lines}`}>
+                    <a href="#relations" onClick={() => onClose?.()}>
+                      <small>{tie.circle}</small>
+                      <strong>
+                        {tie.a} ⇄ {tie.b}
+                      </strong>
+                      <span>{tie.label.text}</span>
+                    </a>
+                  </li>
+                ))}
+              </ol>
+            </section>
+          ) : null}
+          {chronicleEvents.length ? (
+            <section className="dream-dossier-chronicle-links">
+              <header>
+                <span>CHRONICLE</span>
+                <h3>登場する出来事の記録（{chronicleEvents.length}件）</h3>
+              </header>
+              <ol className="dream-dossier-chronicle-grid">
+                {chronicleEvents.slice(0, 12).map((event) => (
+                  <li key={event.no}>
+                    <a href={`#dream-chronicle-event-${event.no}`} onClick={() => onClose?.()}>
+                      <small>
+                        #{event.no} · CASE {event.case}
+                      </small>
+                      <strong>{event.title.text}</strong>
+                      <span>{event.place}</span>
+                    </a>
+                  </li>
+                ))}
+              </ol>
+            </section>
+          ) : null}
         </div>
       </div>
     </div>
@@ -332,11 +553,15 @@ function CharacterDialog({
   openedByKeyboard,
   trigger,
   onClose,
+  onSelect,
+  onSelectDolminence,
 }: {
   character: DreamCharacter | null;
   openedByKeyboard: boolean;
   trigger: HTMLButtonElement | null;
   onClose: () => void;
+  onSelect?: (next: DreamCharacter) => void;
+  onSelectDolminence?: (next: DreamDolminence) => void;
 }) {
   const router = useRouter();
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -420,13 +645,35 @@ function CharacterDialog({
             <path d="M6 6l12 12M18 6L6 18" />
           </svg>
         </button>
-        <DossierContent character={character} />
+        <DossierContent
+          character={character}
+          onSelect={onSelect}
+          onSelectDolminence={onSelectDolminence}
+          onClose={onClose}
+        />
       </div>
     </dialog>
   );
 }
 
-function DolminenceContent({ record }: { record: DreamDolminence }) {
+function DolminenceContent({
+  record,
+  onSelect,
+  onSelectCharacter,
+  onClose,
+}: {
+  record: DreamDolminence;
+  onSelect?: (next: DreamDolminence) => void;
+  onSelectCharacter?: (next: DreamCharacter) => void;
+  onClose?: () => void;
+}) {
+  const [plateFocus, setPlateFocus] = useState<"split" | "primary" | "secondary">("split");
+  useEffect(() => {
+    setPlateFocus("split");
+  }, [record.id]);
+  const chronicleEvents = resolveDossierChronicleEvents(record.id);
+  const relationTies = resolveDossierRelations(record.id);
+
   return (
     <div
       className="dream-dossier-layout dream-dolminence-dossier"
@@ -436,6 +683,7 @@ function DolminenceContent({ record }: { record: DreamDolminence }) {
         className={`dream-dossier-visuals dream-dolminence-visuals${record.secondary ? "" : " is-single"}`}
         data-ts-order={record.order}
         data-ts-roman={record.roman}
+        data-plate-focus={record.secondary ? plateFocus : undefined}
       >
         <figure>
           <img
@@ -467,6 +715,61 @@ function DolminenceContent({ record }: { record: DreamDolminence }) {
       {record.secondary ? <i className="dream-dossier-rail-mark" aria-hidden="true" /> : null}
 
       <div className="dream-dossier-copy">
+        {onSelect ? (
+          <nav className="dream-dossier-switcher" aria-label="人物・機密ファイルの切り替え">
+            {onSelectCharacter
+              ? DREAM_CHARACTERS.map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => onSelectCharacter(item)}
+                  >
+                    <small>CAST {item.order}</small>
+                    <span>{item.name}</span>
+                  </button>
+                ))
+              : null}
+            {DREAM_DOLMINENCE.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                aria-current={item.id === record.id ? "true" : undefined}
+                onClick={() => onSelect(item)}
+              >
+                <small>AGENT {item.order}</small>
+                <span>{item.name}</span>
+              </button>
+            ))}
+          </nav>
+        ) : null}
+
+        {record.secondary ? (
+          <div className="dream-dossier-plate-controls" role="group" aria-label="図版表示モード">
+            <span lang="en">VISUAL PLATE</span>
+            <button
+              type="button"
+              aria-pressed={plateFocus === "split"}
+              onClick={() => setPlateFocus("split")}
+            >
+              並置表示
+            </button>
+            <button
+              type="button"
+              aria-pressed={plateFocus === "primary"}
+              onClick={() => setPlateFocus("primary")}
+            >
+              第一図版拡大
+            </button>
+            <button
+              type="button"
+              aria-pressed={plateFocus === "secondary"}
+              onClick={() => setPlateFocus("secondary")}
+            >
+              設定画拡大
+            </button>
+          </div>
+        ) : null}
+
         <header className="dream-dossier-title">
           <p>DOLMINENCE FILE / {record.order}</p>
           <span>CLASSIFIED AGENT RECORD</span>
@@ -476,12 +779,20 @@ function DolminenceContent({ record }: { record: DreamDolminence }) {
         </header>
 
         <dl className="dream-profile-grid">
-          {record.profile.map((row) => (
-            <div key={row.label}>
-              <dt>{row.label}</dt>
-              <dd>{row.value}</dd>
-            </div>
-          ))}
+          {record.profile.map((row) => {
+            const meter = resolveSpecMeter(row.label, row.value);
+            return (
+              <div key={row.label}>
+                <dt>{row.label}</dt>
+                <dd>{row.value}</dd>
+                {meter != null ? (
+                  <span className="dream-profile-meter" aria-hidden="true">
+                    <i style={{ width: `${meter}%` }} />
+                  </span>
+                ) : null}
+              </div>
+            );
+          })}
         </dl>
 
         <div className="dream-dossier-sections">
@@ -509,6 +820,48 @@ function DolminenceContent({ record }: { record: DreamDolminence }) {
             </div>
           </section>
           <DossierSupplement id={record.id} after={2} />
+          {relationTies.length ? (
+            <section className="dream-dossier-relations-links">
+              <header>
+                <span>RELATIONS</span>
+                <h3>因縁・関係性の記録（{relationTies.length}件）</h3>
+              </header>
+              <ol className="dream-dossier-relations-grid">
+                {relationTies.map((tie) => (
+                  <li key={`${tie.a}/${tie.b}/${tie.label.lines}`}>
+                    <a href="#relations" onClick={() => onClose?.()}>
+                      <small>{tie.circle}</small>
+                      <strong>
+                        {tie.a} ⇄ {tie.b}
+                      </strong>
+                      <span>{tie.label.text}</span>
+                    </a>
+                  </li>
+                ))}
+              </ol>
+            </section>
+          ) : null}
+          {chronicleEvents.length ? (
+            <section className="dream-dossier-chronicle-links">
+              <header>
+                <span>CHRONICLE</span>
+                <h3>交戦・出現の記録（{chronicleEvents.length}件）</h3>
+              </header>
+              <ol className="dream-dossier-chronicle-grid">
+                {chronicleEvents.slice(0, 12).map((event) => (
+                  <li key={event.no}>
+                    <a href={`#dream-chronicle-event-${event.no}`} onClick={() => onClose?.()}>
+                      <small>
+                        #{event.no} · CASE {event.case}
+                      </small>
+                      <strong>{event.title.text}</strong>
+                      <span>{event.place}</span>
+                    </a>
+                  </li>
+                ))}
+              </ol>
+            </section>
+          ) : null}
         </div>
       </div>
     </div>
@@ -520,11 +873,15 @@ function DolminenceDialog({
   openedByKeyboard,
   trigger,
   onClose,
+  onSelect,
+  onSelectCharacter,
 }: {
   record: DreamDolminence | null;
   openedByKeyboard: boolean;
   trigger: HTMLButtonElement | null;
   onClose: () => void;
+  onSelect?: (next: DreamDolminence) => void;
+  onSelectCharacter?: (next: DreamCharacter) => void;
 }) {
   const router = useRouter();
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -607,7 +964,12 @@ function DolminenceDialog({
             <path d="M6 6l12 12M18 6L6 18" />
           </svg>
         </button>
-        <DolminenceContent record={record} />
+        <DolminenceContent
+          record={record}
+          onSelect={onSelect}
+          onSelectCharacter={onSelectCharacter}
+          onClose={onClose}
+        />
       </div>
     </dialog>
   );
@@ -638,6 +1000,7 @@ export function DreamChapter() {
   // (styles-dream-annex.css shows every profile on tablets and desktops and
   // hides the switch there, so the server markup is right at every width).
   const [openProfiles, setOpenProfiles] = useState<ReadonlySet<string>>(() => new Set());
+  const [rosterFilter, setRosterFilter] = useState<RosterFilterId>("all");
   const characterTriggerRef = useRef<HTMLButtonElement | null>(null);
   const dolminenceTriggerRef = useRef<HTMLButtonElement | null>(null);
   const pageRef = useRef<HTMLElement | null>(null);
@@ -1255,6 +1618,49 @@ export function DreamChapter() {
               if (event.animationName === "dream-poster-enter") setPreviousPosterIndex(null);
             }}
           >
+            <div className="dream-poster-hud">
+              <div className="dream-poster-hud-status" aria-hidden="true">
+                <i
+                  className={
+                    posterShuffling ? "is-shuffling" : posterLocked ? "is-locked" : "is-live"
+                  }
+                />
+                <b>
+                  REEL {String(posterIndex + 1).padStart(2, "0")} /{" "}
+                  {String(DREAM_POSTERS.length).padStart(2, "0")}
+                </b>
+                <span>{posterShuffling ? "SHUFFLING" : posterLocked ? "LOCKED" : "AUTO CYCLE"}</span>
+                <small>
+                  {activePoster.width}×{activePoster.height}PX · {activePoster.fit.toUpperCase()}
+                </small>
+              </div>
+              <div className="dream-poster-hud-step" role="group" aria-label="ポスター送り">
+                <button
+                  type="button"
+                  aria-label="前のポスターを表示"
+                  onClick={(event) => {
+                    cancelShuffle();
+                    selectPoster((posterIndex - 1 + DREAM_POSTERS.length) % DREAM_POSTERS.length);
+                    if (event.detail !== 0) event.currentTarget.blur();
+                  }}
+                >
+                  <span aria-hidden="true">◀</span>
+                  <small lang="en">PREV</small>
+                </button>
+                <button
+                  type="button"
+                  aria-label="次のポスターを表示"
+                  onClick={(event) => {
+                    cancelShuffle();
+                    selectPoster((posterIndex + 1) % DREAM_POSTERS.length);
+                    if (event.detail !== 0) event.currentTarget.blur();
+                  }}
+                >
+                  <small lang="en">NEXT</small>
+                  <span aria-hidden="true">▶</span>
+                </button>
+              </div>
+            </div>
             <img
               key={activePoster.src}
               src={activePoster.src}
@@ -1270,6 +1676,11 @@ export function DreamChapter() {
               decoding="async"
             />
             <figcaption>
+              <i
+                className="dream-poster-progress"
+                aria-hidden="true"
+                style={{ width: `${((posterIndex + 1) / DREAM_POSTERS.length) * 100}%` }}
+              />
               <span>其ノ{toKanjiNumber(posterIndex + 1)}</span>
               <b>{activePoster.alt}</b>
               <DreamScreeningLauncher
@@ -1456,6 +1867,9 @@ export function DreamChapter() {
                 />
                 <span className="dream-character-shade" aria-hidden="true" />
                 <span className="dream-character-number">{item.order}</span>
+                <span className="dream-character-spec-badge" aria-hidden="true">
+                  {resolveCharacterCardSpec(item)}
+                </span>
                 <span className="dream-character-copy">
                   <b>{item.name}</b>
                   <small>{item.tagline}</small>
@@ -1474,9 +1888,44 @@ export function DreamChapter() {
           <h2 id="cast-roster-title">人物一覧</h2>
           <span>{String(DREAM_CAST_ROSTER.length).padStart(2, "0")} PERSONS</span>
         </header>
+        <div className="dream-roster-toolbar" role="toolbar" aria-label="人物一覧の絞り込み">
+          <div className="dream-roster-filters">
+            {ROSTER_FILTERS.map((group) => (
+              <button
+                key={group.id}
+                type="button"
+                aria-pressed={rosterFilter === group.id}
+                onClick={() => setRosterFilter(group.id)}
+              >
+                <span>{group.label}</span>
+                <small>{group.count}</small>
+              </button>
+            ))}
+          </div>
+          <button
+            type="button"
+            className="dream-roster-bulk"
+            onClick={() =>
+              setOpenProfiles((current) =>
+                current.size === DREAM_CAST_ROSTER.length
+                  ? new Set()
+                  : new Set(DREAM_CAST_ROSTER.map((entry) => entry.id)),
+              )
+            }
+          >
+            {openProfiles.size === DREAM_CAST_ROSTER.length
+              ? "全プロフィールを閉じる"
+              : "全プロフィールを展開"}
+          </button>
+        </div>
         <ol className="dream-roster" data-dream-reveal>
           {DREAM_CAST_ROSTER.map((entry, index) => (
-            <li key={entry.id}>
+            <li
+              key={entry.id}
+              data-roster-dimmed={
+                !matchesRosterFilter(entry.affiliation, rosterFilter) ? "true" : undefined
+              }
+            >
               <article aria-labelledby={`dream-roster-${entry.id}`}>
                 <span className="dream-roster-seal" aria-hidden="true">
                   {toKanjiNumber(index + 1)}
@@ -1580,6 +2029,9 @@ export function DreamChapter() {
                 />
                 <span className="dream-character-shade" aria-hidden="true" />
                 <span className="dream-dolminence-number">{record.order}</span>
+                <span className="dream-dolminence-spec-badge" aria-hidden="true">
+                  {resolveDolminenceCardSpec(record)}
+                </span>
                 <span className="dream-dolminence-copy">
                   <small>{record.agent}</small>
                   <b>
@@ -1859,9 +2311,17 @@ export function DreamChapter() {
           <h2 id="glossary-title">用語集</h2>
           <span>{String(DREAM_GLOSSARY.length).padStart(2, "0")} TERMS</span>
         </header>
+        <nav className="dream-glossary-jump" aria-label="用語集の索引">
+          {DREAM_GLOSSARY.map((entry, index) => (
+            <a key={entry.term} href={`#dream-term-${index + 1}`}>
+              <small>{String(index + 1).padStart(2, "0")}</small>
+              <span>{entry.term}</span>
+            </a>
+          ))}
+        </nav>
         <dl className="dream-glossary" data-dream-reveal>
-          {DREAM_GLOSSARY.map((entry) => (
-            <div key={entry.term}>
+          {DREAM_GLOSSARY.map((entry, index) => (
+            <div key={entry.term} id={`dream-term-${index + 1}`}>
               <dt>{entry.term}</dt>
               <dd>
                 {entry.body.map((paragraph) => (
@@ -1906,7 +2366,9 @@ export function DreamChapter() {
             <dt>登場人物</dt>
             <dd>
               {DREAM_CHARACTERS.map((item) => (
-                <span key={item.id}>{item.name}</span>
+                <span key={item.id}>
+                  <a href={`#dream-character-${item.id}`}>{item.name}</a>
+                </span>
               ))}
             </dd>
           </div>
@@ -1914,7 +2376,9 @@ export function DreamChapter() {
             <dt>ドルミネンス</dt>
             <dd>
               {DREAM_DOLMINENCE.map((record) => (
-                <span key={record.id}>{record.name}</span>
+                <span key={record.id}>
+                  <a href={`#dream-dolminence-${record.id}`}>{record.name}</a>
+                </span>
               ))}
             </dd>
           </div>
@@ -1922,11 +2386,20 @@ export function DreamChapter() {
             <dt>舞台</dt>
             <dd>
               {DREAM_STORY_CROSSINGS.map((place) => (
-                <span key={place.name}>{place.name}</span>
+                <span key={place.name}>
+                  <a href="#atlas">{place.name}</a>
+                </span>
               ))}
             </dd>
           </div>
         </dl>
+        <nav className="dream-footer-nav" aria-label="幕間クイック移動">
+          <a href="#top">↑ 巻頭へ戻る</a>
+          <a href="#posters">第一幕・絵看板</a>
+          <a href="#characters">第二幕・登場人物</a>
+          <a href="#dolminence">第三幕・ドルミネンス</a>
+          <a href="#cases">第四幕・物語の記録</a>
+        </nav>
         <span className="dream-footer-end" aria-hidden="true">
           終
         </span>
@@ -1941,12 +2414,22 @@ export function DreamChapter() {
         openedByKeyboard={characterOpenedByKeyboard}
         trigger={characterTriggerRef.current}
         onClose={closeCharacter}
+        onSelect={setCharacter}
+        onSelectDolminence={(nextRecord) => {
+          setCharacter(null);
+          setDolminenceRecord(nextRecord);
+        }}
       />
       <DolminenceDialog
         record={dolminenceRecord}
         openedByKeyboard={dolminenceOpenedByKeyboard}
         trigger={dolminenceTriggerRef.current}
         onClose={closeDolminenceRecord}
+        onSelect={setDolminenceRecord}
+        onSelectCharacter={(nextCharacter) => {
+          setDolminenceRecord(null);
+          setCharacter(nextCharacter);
+        }}
       />
     </main>
   );
