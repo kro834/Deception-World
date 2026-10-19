@@ -190,6 +190,92 @@ html[data-family="gallery"] .gallery-page .gallery-favorite-toggle {
   color: #d9d3c8;
 }
 
+html[data-family="gallery"] .gallery-page .gallery-account {
+  border-color: rgb(255 255 255 / 10%);
+  background: #0c0d12;
+}
+
+html[data-family="gallery"] .gallery-page .gallery-account h3 {
+  color: #f7f4ee;
+  font-family: "Hiragino Sans", "Yu Gothic", "Noto Sans JP", system-ui, sans-serif;
+  font-weight: 500;
+}
+
+html[data-family="gallery"] .gallery-page .gallery-submission-specs span {
+  border-color: rgb(255 255 255 / 12%);
+  background: #101218;
+  color: #c9c2b6;
+}
+
+html[data-family="gallery"] .gallery-page .gallery-personal-controls > .gallery-personal-add {
+  border: 1px solid #f4f1ea;
+  border-radius: 0;
+  background: #f4f1ea;
+  box-shadow: none;
+  color: #111216;
+  font-weight: 500;
+  transform: none;
+}
+
+html[data-family="gallery"] .gallery-page .gallery-personal-controls > .gallery-personal-add:disabled {
+  border-color: rgb(255 255 255 / 14%);
+  background: #1a1c22;
+  color: #a7a095;
+  opacity: 1;
+}
+
+html[data-family="gallery"] .gallery-page .gallery-feature-settings :is(a, button) {
+  border-color: rgb(255 255 255 / 16%);
+  border-radius: 0;
+  background: #12141a;
+  color: #f7f4ee;
+  font-family: "Hiragino Sans", "Yu Gothic", "Noto Sans JP", system-ui, sans-serif;
+}
+
+html[data-family="gallery"] .gallery-page .gallery-browse-panel {
+  border-color: rgb(255 255 255 / 10%);
+  background: #0c0d12;
+}
+
+html[data-family="gallery"] .gallery-page .gallery-browse-panel .gallery-filters button,
+html[data-family="gallery"] .gallery-page .gallery-browse-panel .gallery-favorites-filter,
+html[data-family="gallery"] .gallery-page .gallery-browse-panel .gallery-reset-filter,
+html[data-family="gallery"] .gallery-page .gallery-search-input-row input,
+html[data-family="gallery"] .gallery-page .gallery-search-clear {
+  border-radius: 0;
+  border-color: rgb(255 255 255 / 12%);
+}
+
+html[data-family="gallery"] .gallery-page .gallery-search-clear {
+  background: transparent;
+  color: #f4f1ea;
+}
+
+html[data-family="gallery"] .gallery-page .gallery-shuffle-start,
+html[data-family="gallery"] .gallery-page .gallery-shuffle-end button {
+  border-color: rgb(255 255 255 / 16%);
+  border-radius: 0;
+  background: #12141a;
+  color: #f4f1ea;
+}
+
+html[data-family="gallery"] .gallery-page .gallery-display-choice,
+html[data-family="gallery"] .gallery-page .gallery-display-reset {
+  border-color: rgb(255 255 255 / 14%);
+  background: #101218;
+  color: #f4f1ea;
+}
+
+html[data-family="gallery"] .gallery-page .gallery-display-choice:has(input:checked) {
+  border-color: #f4f1ea;
+  background: #f4f1ea;
+  color: #111216;
+}
+
+html[data-family="gallery"] .gallery-page .gallery-display-choice input {
+  accent-color: #f4f1ea;
+}
+
 @media (hover: hover) and (pointer: fine) {
   html[data-family="gallery"] .gallery-page .gallery-work-open:hover .gallery-work-frame,
   html[data-family="gallery"] .gallery-page .gallery-work-open:focus-visible .gallery-work-frame {
@@ -198,9 +284,19 @@ html[data-family="gallery"] .gallery-page .gallery-favorite-toggle {
   }
 
   html[data-family="gallery"] .gallery-page .gallery-enter:hover,
-  html[data-family="gallery"] .gallery-page .gallery-filters button:hover {
+  html[data-family="gallery"] .gallery-page .gallery-filters button:hover,
+  html[data-family="gallery"] .gallery-page .gallery-feature-settings :is(a, button):hover,
+  html[data-family="gallery"] .gallery-page .gallery-shuffle-start:hover {
     border-color: rgb(255 255 255 / 36%);
     color: #fff;
+  }
+
+  html[data-family="gallery"] .gallery-page .gallery-personal-controls > .gallery-personal-add:hover:not(:disabled) {
+    border-color: #fff;
+    background: #fff;
+    box-shadow: none;
+    color: #111216;
+    transform: none;
   }
 }
 
@@ -216,7 +312,11 @@ html[data-family="gallery"] .gallery-page .gallery-favorite-toggle {
   html[data-family="gallery"] .gallery-page .gallery-work-frame,
   html[data-family="gallery"] .gallery-page .gallery-feature-open,
   html[data-family="gallery"] .gallery-page .gallery-filters button,
-  html[data-family="gallery"] .gallery-page .gallery-enter {
+  html[data-family="gallery"] .gallery-page .gallery-enter,
+  html[data-family="gallery"] .gallery-page .gallery-personal-add,
+  html[data-family="gallery"] .gallery-page .gallery-account,
+  html[data-family="gallery"] .gallery-page .gallery-browse-panel,
+  html[data-family="gallery"] .gallery-page .gallery-shuffle-start {
     background: Canvas;
     color: CanvasText;
     border-color: CanvasText;
