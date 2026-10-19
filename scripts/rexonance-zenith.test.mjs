@@ -811,7 +811,11 @@ test("reduced motion, economy and forced colours keep the still and leave nothin
     t.observers[0].callback([{ isIntersecting: true }]);
     await new Promise((resolve) => setTimeout(resolve, 5));
     assert.equal(t.runway.dataset.rznState, undefined, JSON.stringify(options));
-    assert.equal(t.runway.dataset.rznLoad, "static", "intentional still settings are not pending work");
+    assert.equal(
+      t.runway.dataset.rznLoad,
+      "static",
+      "intentional still settings are not pending work",
+    );
     assert.equal(t.canvas.width, 0);
     dispose();
     assert.equal([...t.listeners.keys()].length, 0, [...t.listeners.keys()].join());
@@ -1163,7 +1167,9 @@ test("never the finished suit before the scroll: near and not yet live, the unde
   );
   assert.equal(hidden.length, 1);
   assert.match(hidden[0].selector, /\[data-rzn-state\]:not\(\[data-rzn-arming="still"\]\)/);
-  const under = sheet.rules.filter(({ selector }) => /> :is\(\.rzn-under, \.rzn-driver-standin\)$/.test(selector));
+  const under = sheet.rules.filter(({ selector }) =>
+    /> :is\(\.rzn-under, \.rzn-driver-standin\)$/.test(selector),
+  );
   assert.ok(under.some(({ body }) => /display: none/.test(body)));
   const shown = under.filter(({ body }) => /display: block/.test(body));
   assert.equal(shown.length, 1);
@@ -1257,7 +1263,12 @@ test("gold preparation yields within the idle budget, cancels midway and finishe
         },
       }),
     },
-    glow: [[0, 0], [24, 0], [24, 24], [0, 24]],
+    glow: [
+      [0, 0],
+      [24, 0],
+      [24, 24],
+      [0, 24],
+    ],
   };
   const dispose = mountRexonanceAssembly(t.runway, config, t.env);
   // A depleted deadline permits exactly one generator checkpoint per slot.
@@ -1313,30 +1324,26 @@ test("gold preparation yields within the idle budget, cancels midway and finishe
       "buffer-face-buckets",
       "buffer-heat",
       "ready",
-    ]) assert.ok(t.preparationPhases.includes(phase), `preparation exposes ${phase}`);
+    ])
+      assert.ok(t.preparationPhases.includes(phase), `preparation exposes ${phase}`);
     assert.ok(
-      t.preparationPhases.indexOf("gold-raw-sheet") < t.preparationPhases.indexOf("gold-art-sheet") &&
-        t.preparationPhases.indexOf("gold-art-sheet") < t.preparationPhases.indexOf("gold-layer-sheet"),
+      t.preparationPhases.indexOf("gold-raw-sheet") <
+        t.preparationPhases.indexOf("gold-art-sheet") &&
+        t.preparationPhases.indexOf("gold-art-sheet") <
+          t.preparationPhases.indexOf("gold-layer-sheet"),
       "three gold sheets are separately staged in the original order",
     );
     const expectedPreset = config.pieces
       .filter((piece) => piece.preset)
       .reverse()
-      .map((piece) => [
-        piece.ax,
-        piece.ay,
-        piece.w,
-        piece.h,
-        piece.x,
-        piece.y,
-        piece.w,
-        piece.h,
-      ]);
+      .map((piece) => [piece.ax, piece.ay, piece.w, piece.h, piece.x, piece.y, piece.w, piece.h]);
     // Reactor masks also crop the atlas into small local sheets. The driver
     // contract concerns its figure-sized sheet, not those independent masks.
-    const driverDraws = t.drawCalls.filter((call) =>
-      call.source === "/atlas.webp" &&
-      t.canvases.find((canvas) => canvas.testCanvasId === call.target)?.width === config.size.width,
+    const driverDraws = t.drawCalls.filter(
+      (call) =>
+        call.source === "/atlas.webp" &&
+        t.canvases.find((canvas) => canvas.testCanvasId === call.target)?.width ===
+          config.size.width,
     );
     assert.deepEqual(
       driverDraws.map((call) => call.rect),
@@ -1405,7 +1412,10 @@ test("Safari fallback batches tiny slices but yields to timers after each bounde
     }
   };
   t.env.setTimeout = (callback, ms) => {
-    if (ms === 16) { timers++; burst = 0; }
+    if (ms === 16) {
+      timers++;
+      burst = 0;
+    }
     return setTimeout(callback, 0);
   };
   const dispose = mountRexonanceAssembly(t.runway, engineConfig, t.env);
@@ -1423,7 +1433,9 @@ test("Safari fallback batches tiny slices but yields to timers after each bounde
     assert.ok(maxBurst <= 4, "task chaining stops at the 4 ms burst boundary");
     t.scrollTo(0.5);
     assert.notEqual(t.percent.textContent, "000", "scroll advances after preparation");
-  } finally { dispose(); }
+  } finally {
+    dispose();
+  }
   assert.equal(t.frames.size, 0);
 });
 
@@ -1437,7 +1449,11 @@ test("a timed-out empty idle deadline switches the generation to bounded timer s
     t.idle.delete(id);
     callback({ didTimeout: true, timeRemaining: () => 0 });
     await new Promise((resolve) => setTimeout(resolve, 30));
-    assert.equal(t.idleRequestCount(), 1, "the same generation does not request another one-second idle timeout");
+    assert.equal(
+      t.idleRequestCount(),
+      1,
+      "the same generation does not request another one-second idle timeout",
+    );
     await until(t.prepared, "bounded timer slices complete preparation after idle timeout");
     assert.equal(t.idleRequestCount(), 1);
   } finally {
@@ -1452,7 +1468,10 @@ test("an abandoned native idle callback cannot strand a visible scene in loading
   const dispose = mountRexonanceAssembly(t.runway, engineConfig, t.env);
   try {
     t.observers[0].callback([{ isIntersecting: true }]);
-    await until(() => t.runway.dataset.rznState === "live", "independent watchdog rescues native idle starvation");
+    await until(
+      () => t.runway.dataset.rznState === "live",
+      "independent watchdog rescues native idle starvation",
+    );
     assert.ok(t.prepared(), "the complete plan was prepared");
   } finally {
     dispose();
@@ -1477,9 +1496,17 @@ test("hung image decode and bitmap optimisations fall back to loaded art", async
     const dispose = mountRexonanceAssembly(t.runway, engineConfig, t.env);
     try {
       t.observers[0].callback([{ isIntersecting: true }]);
-      await until(() => t.runway.dataset.rznState === "live", `${phase}: loaded images remain usable`);
+      await until(
+        () => t.runway.dataset.rznState === "live",
+        `${phase}: loaded images remain usable`,
+      );
       assert.equal(t.runway.dataset.rznLoad, "ready");
-      for (const resolve of late) resolve({ close() { closed += 1; } });
+      for (const resolve of late)
+        resolve({
+          close() {
+            closed += 1;
+          },
+        });
       await Promise.resolve();
       assert.equal(closed, late.length, "abandoned late bitmaps are released");
     } finally {
@@ -1502,10 +1529,17 @@ test("an optional nanite image that never finishes cannot block the figure", asy
       super.src = value;
     }
   };
-  const dispose = mountRexonanceAssembly(t.runway, { ...engineConfig, nanites: REXONANCE_NANITES }, t.env);
+  const dispose = mountRexonanceAssembly(
+    t.runway,
+    { ...engineConfig, nanites: REXONANCE_NANITES },
+    t.env,
+  );
   try {
     t.observers[0].callback([{ isIntersecting: true }]);
-    await until(() => t.runway.dataset.rznState === "live", "optional sheet failure leaves a live figure");
+    await until(
+      () => t.runway.dataset.rznState === "live",
+      "optional sheet failure leaves a live figure",
+    );
     assert.equal(t.runway.dataset.rznLoad, "ready");
   } finally {
     dispose();
@@ -1517,15 +1551,19 @@ test("optional kit metadata failure or abandonment cannot block the required eng
   for (const failure of ["pending", "reject"]) {
     const t = environment();
     t.env.setTimeout = (callback, ms) => setTimeout(callback, ms === 8000 ? 30 : Math.min(ms, 2));
-    const nanites = () => failure === "pending"
-      ? new Promise(() => {})
-      : Promise.reject(new Error("kit unavailable"));
+    const nanites = () =>
+      failure === "pending" ? new Promise(() => {}) : Promise.reject(new Error("kit unavailable"));
     const dispose = mountRexonanceAssembly(t.runway, { ...engineConfig, nanites }, t.env);
     try {
       t.observers[0].callback([{ isIntersecting: true }]);
-      await until(() => t.runway.dataset.rznState === "live", `${failure}: kit metadata is optional`);
+      await until(
+        () => t.runway.dataset.rznState === "live",
+        `${failure}: kit metadata is optional`,
+      );
       assert.equal(t.runway.dataset.rznLoad, "ready");
-    } finally { dispose(); }
+    } finally {
+      dispose();
+    }
   }
 });
 
@@ -1547,7 +1585,13 @@ test("failed image attempts release successful sibling bitmaps before retry", as
   };
   const bitmaps = [];
   t.env.createImageBitmap = (image) => {
-    const bitmap = { source: image._src, closed: 0, close() { this.closed += 1; } };
+    const bitmap = {
+      source: image._src,
+      closed: 0,
+      close() {
+        this.closed += 1;
+      },
+    };
     bitmaps.push(bitmap);
     return Promise.resolve(bitmap);
   };
@@ -1559,7 +1603,9 @@ test("failed image attempts release successful sibling bitmaps before retry", as
     assert.equal(siblings.length, 2, "one undersuit bitmap per attempt");
     assert.ok(siblings[0].closed > 0, "failed attempt's successful sibling is released");
     assert.equal(siblings[1].closed, 0, "current attempt retains its usable bitmap");
-  } finally { dispose(); }
+  } finally {
+    dispose();
+  }
 });
 
 test("transient required-image failure retries and explicit retry recovers a terminal error once", async () => {
@@ -1588,7 +1634,10 @@ test("transient required-image failure retries and explicit retry recovers a ter
       assert.equal(t.runway.dataset.rznLoad, "waiting");
       t.observers[0].callback([{ isIntersecting: true }]);
       if (permanent) {
-        await until(() => t.runway.dataset.rznLoad === "error", "terminal error is visible to the accessible status");
+        await until(
+          () => t.runway.dataset.rznLoad === "error",
+          "terminal error is visible to the accessible status",
+        );
         assert.equal(requests, 3, "initial request plus two bounded retries");
         failing = false;
         const retry = t.listeners.get("runway:rexonance:assembly-retry");
@@ -1596,7 +1645,10 @@ test("transient required-image failure retries and explicit retry recovers a ter
         retry();
         retry();
       }
-      await until(() => t.runway.dataset.rznState === "live", "image request recovery reaches a live scene");
+      await until(
+        () => t.runway.dataset.rznState === "live",
+        "image request recovery reaches a live scene",
+      );
       assert.equal(requests, permanent ? 4 : 2, "duplicate retry does not start parallel requests");
       assert.equal(t.runway.dataset.rznLoad, "ready");
     } finally {
@@ -1630,8 +1682,7 @@ test("a hidden tab releases partial crop canvases, then resumes from decoded ima
   };
   try {
     t.observers[1].callback([{ isIntersecting: true }]);
-    for (let i = 0; i < 6000 && !t.preparationPhases.includes("gold-crops"); i += 1)
-      await step();
+    for (let i = 0; i < 6000 && !t.preparationPhases.includes("gold-crops"); i += 1) await step();
     assert.ok(t.preparationPhases.includes("gold-crops"), "gold atlas crop phase starts");
     assert.ok(t.canvases.slice(1).some((canvas) => canvas.width > 0 && canvas.height > 0));
     const decoded = [...t.decodedSources];
@@ -1830,7 +1881,8 @@ test("the gold forms by nanites right after each plate lands; the driver is on f
 /* ---------------- the nanite swarm (owner, 2026-10-16: 超大幅な改善) ---------------- */
 
 test("touch with the nanite kit keeps its 64 art draws and at most 16 nanite sprites a frame", async () => {
-  const { REXONANCE_NANITES, REXONANCE_NANITE_DIR } = await import("../src/lib/rexonance-nanites.ts");
+  const { REXONANCE_NANITES, REXONANCE_NANITE_DIR } =
+    await import("../src/lib/rexonance-nanites.ts");
   // Both with the kit and without it (two-tone rect chips, traced frames).
   for (const nanites of [REXONANCE_NANITES, undefined]) {
     const t = environment({ coarse: true });
@@ -1843,12 +1895,15 @@ test("touch with the nanite kit keeps its 64 art draws and at most 16 nanite spr
     // ResizeObserver notice is a later task), so these frames really draw.
     await new Promise((resolve) => setTimeout(resolve, 5));
     if (nanites) {
-      assert.ok(t.decodedSources.some((src) => src.startsWith(REXONANCE_NANITE_DIR)), "kit fetched");
+      assert.ok(
+        t.decodedSources.some((src) => src.startsWith(REXONANCE_NANITE_DIR)),
+        "kit fetched",
+      );
       assert.ok(!t.decodedSources.some((src) => /comets/.test(src)), "touch fetches no comets");
     }
     let kitDraws = 0;
     let drawn = 0;
-    for (const progress of [0.3, 0.35, 0.5, 0.7, 0.8, 0.84]) {
+    for (const progress of [0.058, 0.063, 0.07, 0.085, 0.09, 0.1, 0.3, 0.35, 0.5, 0.7, 0.8, 0.84]) {
       t.calls.length = 0;
       t.drawCalls.length = 0;
       t.scrollTo(progress);
@@ -1890,15 +1945,18 @@ test("the swarm's draw passes allocate nothing", () => {
     .split("\n")
     .filter((line) => /=>/.test(line) && !/^ {2}\S/.test(line) && !/^\s*\/\//.test(line));
   assert.deepEqual(nested, [], "no closures made inside the draw passes");
-  assert.doesNotMatch(passes, /\b(?:const|let) \[[^\]]*\] =/, "no array destructuring in the draw passes");
+  assert.doesNotMatch(
+    passes,
+    /\b(?:const|let) \[[^\]]*\] =/,
+    "no array destructuring in the draw passes",
+  );
 });
 
 test("the nanite stage plan: paint order, the shared cells, and timings before .9", async () => {
   // (Round 3: the swarm's timings live with the swarm, which the scene now
   // loads with its pictures.)
-  const { planAssemblyNanites, ASSEMBLY_NANITES } = await import(
-    "../src/lib/rexonance-assembly-nanites.js"
-  );
+  const { planAssemblyNanites, ASSEMBLY_NANITES } =
+    await import("../src/lib/rexonance-assembly-nanites.js");
   const { REXONANCE_NANITES } = await import("../src/lib/rexonance-nanites.ts");
   const { planAssemblyGold } = await import("../src/lib/rexonance-resonance.js");
   const { REXONANCE_SUIT_GOLD_CELL, REXONANCE_SUIT_GOLD_CELLS } =
@@ -1924,7 +1982,8 @@ test("the nanite stage plan: paint order, the shared cells, and timings before .
     landed: (() => {
       const landed = new Map();
       for (const tile of plan.tiles)
-        if (tile.pieceId) landed.set(tile.pieceId, Math.max(landed.get(tile.pieceId) ?? 0, tile.t1));
+        if (tile.pieceId)
+          landed.set(tile.pieceId, Math.max(landed.get(tile.pieceId) ?? 0, tile.t1));
       return landed;
     })(),
   });
@@ -1957,7 +2016,7 @@ test("the nanite stage plan: paint order, the shared cells, and timings before .
       assert.ok(parent < i, "the lattice parent locked earlier");
       assert.equal(nano.pieceOf[parent], nano.pieceOf[i]);
     }
-    assert.ok(nano.birth[i] <= plan.tiles[i].m + 1e-9 && nano.birth[i] >= 0.07);
+    assert.ok(nano.birth[i] <= plan.tiles[i].m + 1e-9 && nano.birth[i] >= 0.063);
   }
   // Every plate: its seam, gold box and clamps release before .9 (tail
   // ≤ .878, helmet ≤ .892), the driver never staged.
@@ -1968,7 +2027,10 @@ test("the nanite stage plan: paint order, the shared cells, and timings before .
     assert.ok(piece.loopCount >= 1, `${piece.id} has a seam`);
     assert.ok(piece.contact > piece.to && piece.contact <= piece.to + ASSEMBLY_NANITES.seat + 1e-9);
     assert.ok(piece.g0 >= piece.contact, `${piece.id}: the gold pours after contact`);
-    assert.ok(piece.releaseEnd < (piece.helm ? 0.8921 : 0.8781), `${piece.id}: ${piece.releaseEnd}`);
+    assert.ok(
+      piece.releaseEnd < (piece.helm ? 0.8921 : 0.8781),
+      `${piece.id}: ${piece.releaseEnd}`,
+    );
     if (piece.helm) assert.equal(piece.lift, 0, "the helmet forms in place");
   }
   // The DEUS！ accents and the crest.
@@ -1981,9 +2043,8 @@ test("the gold guideway is built from the toe tips up, along the trims, never la
   // 滑らかに作られていく。」 Each plate's conduit grows from its lowest cell
   // along its trims; each beat's front climbs the body ahead of its fittings,
   // the legs from the toes; a slow scroll lengthens it cell by cell.
-  const { planAssemblyNanites, createAssemblyNanites, ASSEMBLY_GUIDEWAY } = await import(
-    "../src/lib/rexonance-assembly-nanites.js"
-  );
+  const { planAssemblyNanites, createAssemblyNanites, ASSEMBLY_GUIDEWAY } =
+    await import("../src/lib/rexonance-assembly-nanites.js");
   const { REXONANCE_NANITES } = await import("../src/lib/rexonance-nanites.ts");
   const { planAssemblyGold } = await import("../src/lib/rexonance-resonance.js");
   const { REXONANCE_SUIT_GOLD_CELL, REXONANCE_SUIT_GOLD_CELLS } =
@@ -2035,7 +2096,8 @@ test("the gold guideway is built from the toe tips up, along the trims, never la
     if (piece.group === "tail" && piece.seg + (piece.id.endsWith("b") ? 1 : 0) > 0) continue;
     // It starts at the plate's lowest cell.
     let bottom = 0;
-    for (let k = a; k < b; k += 1) bottom = Math.max(bottom, gold.y[nano.buildIdx[k]] + gold.h[nano.buildIdx[k]]);
+    for (let k = a; k < b; k += 1)
+      bottom = Math.max(bottom, gold.y[nano.buildIdx[k]] + gold.h[nano.buildIdx[k]]);
     const entry = nano.buildIdx[a];
     assert.equal(gold.y[entry] + gold.h[entry], bottom, `${piece.id} grows from its lowest cell`);
     assert.equal(nano.buildB[entry], 0);
@@ -2130,7 +2192,11 @@ test("the gold guideway is built from the toe tips up, along the trims, never la
     swarm.hologramPass(context);
     return calls.filter((call) => call.sx === foot.ax && call.sy === foot.ay);
   };
-  assert.equal(clipsFor(foot.buildStart - ASSEMBLY_GUIDEWAY.holo - 0.001).length, 0, "nothing before");
+  assert.equal(
+    clipsFor(foot.buildStart - ASSEMBLY_GUIDEWAY.holo - 0.001).length,
+    0,
+    "nothing before",
+  );
   // (Round 3: the conduit is drawn in bands — solid, then its front feathered
   // over three cell steps and filled sub-cell — so the built cells are the
   // union of its guide draws' clips, each rect inside one cell.)
@@ -2141,7 +2207,9 @@ test("the gold guideway is built from the toe tips up, along the trims, never la
       if (call.source === "guide")
         for (const [x, y, w, h] of call.rects) {
           rects.push([x, y, w, h]);
-          cells.add(`${Math.floor((x + w / 2 - foot.x) / REXONANCE_SUIT_GOLD_CELL)},${Math.floor((y + h / 2 - foot.y) / REXONANCE_SUIT_GOLD_CELL)}`);
+          cells.add(
+            `${Math.floor((x + w / 2 - foot.x) / REXONANCE_SUIT_GOLD_CELL)},${Math.floor((y + h / 2 - foot.y) / REXONANCE_SUIT_GOLD_CELL)}`,
+          );
         }
     return { count: cells.size, rects };
   };
@@ -2174,7 +2242,8 @@ test("the gold guideway is built from the toe tips up, along the trims, never la
     const context = new Proxy(
       {
         drawImage(source, sx, sy, sw, sh, dx, dy, dw, dh) {
-          if (source === fx && sy < 192) draws.push({ frame: sx / 48, corner: sy / 48, dx, dy, dw, dh });
+          if (source === fx && sy < 192)
+            draws.push({ frame: sx / 48, corner: sy / 48, dx, dy, dw, dh });
         },
       },
       { get: (target, key) => (key in target ? target[key] : noop), set: () => true },
@@ -2186,8 +2255,14 @@ test("the gold guideway is built from the toe tips up, along the trims, never la
   // (Round 3: the clamps come in .010 before the last tile, over .006.)
   const start = foot.to - 0.01;
   const slide = [0.0005, 0.0015, 0.0025, 0.0045].map((d) => clampDraws(start + d));
-  for (const draws of slide) for (const draw of draws) assert.ok(draw.frame === 7 || draw.frame >= 8);
-  const lowerLeft = slide.map((draws) => draws.find((draw) => draw.corner === 2 && Math.abs(draw.dw - slide[3].find((d) => d.corner === 2).dw) < 1e-9));
+  for (const draws of slide)
+    for (const draw of draws) assert.ok(draw.frame === 7 || draw.frame >= 8);
+  const lowerLeft = slide.map((draws) =>
+    draws.find(
+      (draw) =>
+        draw.corner === 2 && Math.abs(draw.dw - slide[3].find((d) => d.corner === 2).dw) < 1e-9,
+    ),
+  );
   assert.ok(lowerLeft.every(Boolean), "the lower-left clamp is drawn at one size throughout");
   for (let k = 1; k < 4; k += 1) {
     assert.ok(lowerLeft[k].dx >= lowerLeft[k - 1].dx, "it slides inward");
@@ -2200,9 +2275,11 @@ test("a landed tile stays drawn until its paint: the helmet's, formed in place, 
   // The helmet is never staged, and its outer tiles land up to ~.05 before
   // their paint: the seated pass once looked only .0125 ahead along the
   // paint order, so they vanished after landing and popped back as metal.
-  const { planAssemblyNanites, createAssemblyNanites, ASSEMBLY_NANITES: N } = await import(
-    "../src/lib/rexonance-assembly-nanites.js"
-  );
+  const {
+    planAssemblyNanites,
+    createAssemblyNanites,
+    ASSEMBLY_NANITES: N,
+  } = await import("../src/lib/rexonance-assembly-nanites.js");
   const { REXONANCE_NANITES } = await import("../src/lib/rexonance-nanites.ts");
   const { planAssemblyGold } = await import("../src/lib/rexonance-resonance.js");
   const { REXONANCE_SUIT_GOLD_CELL, REXONANCE_SUIT_GOLD_CELLS } =
@@ -2290,7 +2367,11 @@ test("a landed tile stays drawn until its paint: the helmet's, formed in place, 
     for (let i = 0; i < tiles.length; i += 1) {
       if (tiles[i].t1 + N.recoil > q || nano.tp[i] <= q) continue;
       const key = `${tiles[i].src ?? 1}:${tiles[i].sx}:${tiles[i].sy}`;
-      assert.equal(draws.get(key), 1, `q ${q.toFixed(3)}: tile ${i} (${tiles[i].pieceId}) drawn once`);
+      assert.equal(
+        draws.get(key),
+        1,
+        `q ${q.toFixed(3)}: tile ${i} (${tiles[i].pieceId}) drawn once`,
+      );
       checked += 1;
     }
   }
@@ -2304,9 +2385,11 @@ test("no plate shifts when it completes: narrow hanging plates form in place, an
   // its plate is staged (no flip between a jigged and a seated pose, also
   // on touch's lower cap), be the seat itself from contact on, and the
   // tasset and the plates much taller than wide never leave their seat.
-  const { planAssemblyNanites, createAssemblyNanites, ASSEMBLY_NANITES: N } = await import(
-    "../src/lib/rexonance-assembly-nanites.js"
-  );
+  const {
+    planAssemblyNanites,
+    createAssemblyNanites,
+    ASSEMBLY_NANITES: N,
+  } = await import("../src/lib/rexonance-assembly-nanites.js");
   const { REXONANCE_NANITES } = await import("../src/lib/rexonance-nanites.ts");
   const { planAssemblyGold } = await import("../src/lib/rexonance-resonance.js");
   const { REXONANCE_SUIT_GOLD_CELL, REXONANCE_SUIT_GOLD_CELLS } =
@@ -2347,7 +2430,10 @@ test("no plate shifts when it completes: narrow hanging plates form in place, an
     const nano = planAssemblyNanites({ ...nanoArgs, coarse });
     for (const piece of nano.pieces)
       if (/^tasset/.test(piece.id) || (piece.kind === 0 && piece.h > 1.85 * piece.w))
-        assert.ok(piece.fixed && piece.offX === 0 && piece.offY === 0 && piece.theta === 0, piece.id);
+        assert.ok(
+          piece.fixed && piece.offX === 0 && piece.offY === 0 && piece.theta === 0,
+          piece.id,
+        );
     const metal = [{ id: "m0" }, { id: "m1" }];
     const swarm = createAssemblyNanites({
       nano,
@@ -2421,7 +2507,10 @@ test("no plate shifts when it completes: narrow hanging plates form in place, an
         const cy = tile.sy + tile.th / 2;
         if (piece.fixed || q >= piece.contact) {
           const off = Math.hypot(at[0] - cx, at[1] - cy);
-          assert.ok(off < 1e-6, `${coarse ? "touch" : "desktop"} q ${q.toFixed(4)}: ${tile.pieceId} off its seat by ${off.toFixed(2)}`);
+          assert.ok(
+            off < 1e-6,
+            `${coarse ? "touch" : "desktop"} q ${q.toFixed(4)}: ${tile.pieceId} off its seat by ${off.toFixed(2)}`,
+          );
         }
         const before = last.get(key);
         if (before && before[2] === Math.round(q / STEP) - 1) {
@@ -2429,7 +2518,10 @@ test("no plate shifts when it completes: narrow hanging plates form in place, an
           worst = Math.max(worst, step);
           // (The fastest slam home, the tail's last turn, is ~5.5 px a step;
           // a flip between poses is 10–25 px.)
-          assert.ok(step < 7, `${coarse ? "touch" : "desktop"} q ${q.toFixed(4)}: ${tile.pieceId} jumps ${step.toFixed(1)} px`);
+          assert.ok(
+            step < 7,
+            `${coarse ? "touch" : "desktop"} q ${q.toFixed(4)}: ${tile.pieceId} jumps ${step.toFixed(1)} px`,
+          );
         }
         last.set(key, [at[0], at[1], Math.round(q / STEP)]);
         checked += 1;
@@ -2458,7 +2550,11 @@ test("an armour tile never carries an ornament's pixels: the ribbon beside the k
     const { fileURLToPath } = await import("node:url");
     const { data } = await sharp(fileURLToPath(new URL(file, import.meta.url)))
       .ensureAlpha()
-      .extend({ right: cols * tile - W, bottom: rows * tile - H, background: { r: 0, g: 0, b: 0, alpha: 0 } })
+      .extend({
+        right: cols * tile - W,
+        bottom: rows * tile - H,
+        background: { r: 0, g: 0, b: 0, alpha: 0 },
+      })
       .resize(cols, rows, { kernel: "linear" })
       .raw()
       .toBuffer({ resolveWithObject: true });
@@ -2501,9 +2597,8 @@ test("a resting frame is a function of the progress alone: the same moment draws
   // The far band's sprite share once came from the previous frame's tally,
   // so a calm frame at one progress drew differently after a forward scrub,
   // a reverse scrub or a jump. It is now a function of q.
-  const { planAssemblyNanites, createAssemblyNanites } = await import(
-    "../src/lib/rexonance-assembly-nanites.js"
-  );
+  const { planAssemblyNanites, createAssemblyNanites } =
+    await import("../src/lib/rexonance-assembly-nanites.js");
   const { REXONANCE_NANITES } = await import("../src/lib/rexonance-nanites.ts");
   const { planAssemblyGold } = await import("../src/lib/rexonance-resonance.js");
   const { REXONANCE_SUIT_GOLD_CELL, REXONANCE_SUIT_GOLD_CELLS } =
@@ -2553,11 +2648,15 @@ test("a resting frame is a function of the progress alone: the same moment draws
   });
   const record = () => {
     const log = [];
-    const round = (value) => (typeof value === "number" ? Math.round(value * 1000) / 1000 : value?.id ?? value);
+    const round = (value) =>
+      typeof value === "number" ? Math.round(value * 1000) / 1000 : (value?.id ?? value);
     const context = new Proxy(
       {},
       {
-        get: (_, key) => (...args) => log.push(`${String(key)}(${args.map(round).join(",")})`),
+        get:
+          (_, key) =>
+          (...args) =>
+            log.push(`${String(key)}(${args.map(round).join(",")})`),
         set: (_, key, value) => {
           log.push(`${String(key)}=${round(value)}`);
           return true;
@@ -2584,9 +2683,32 @@ test("a resting frame is a function of the progress alone: the same moment draws
     return log;
   };
   for (const q of [0.15, 0.25, 0.3, 0.4]) {
-    const forward = frameAt(q, [[q - 0.02, true], [q - 0.01, true], [q, true]], true);
-    const reverse = frameAt(q, [[q + 0.02, true], [q + 0.01, true], [q, true]], true);
-    const jump = frameAt(q, [[0.95, true], [q, true]], true);
+    const forward = frameAt(
+      q,
+      [
+        [q - 0.02, true],
+        [q - 0.01, true],
+        [q, true],
+      ],
+      true,
+    );
+    const reverse = frameAt(
+      q,
+      [
+        [q + 0.02, true],
+        [q + 0.01, true],
+        [q, true],
+      ],
+      true,
+    );
+    const jump = frameAt(
+      q,
+      [
+        [0.95, true],
+        [q, true],
+      ],
+      true,
+    );
     const cold = frameAt(q, [], true);
     assert.ok(forward.length > 1000, `${q}: the cocoon is drawn (${forward.length} calls)`);
     assert.deepEqual(reverse, forward, `${q}: reverse scrub`);
@@ -2604,7 +2726,8 @@ test("the raw metal and the molten gold are made in bands of rows, byte for byte
   // phone; the scene now reads a band of rows a slice. The bytes are the
   // kit's own (createNaniteMetalJob / createNaniteMoltenJob).
   const { createAssemblyLayerJob } = await import("../src/lib/rexonance-assembly-nanites.js");
-  const { createNaniteMetalJob, createNaniteMoltenJob } = await import("../src/lib/rexonance-unlit.js");
+  const { createNaniteMetalJob, createNaniteMoltenJob } =
+    await import("../src/lib/rexonance-unlit.js");
   // A pixel-exact fake canvas (unscaled copies only).
   const reads = [];
   const document = {
@@ -2633,7 +2756,8 @@ test("the raw metal and the molten gold are made in bands of rows, byte for byte
         },
         clearRect(x, y, w, h) {
           const dst = sized();
-          for (let yy = y; yy < y + h; yy += 1) dst.fill(0, (yy * canvas.width + x) * 4, (yy * canvas.width + x + w) * 4);
+          for (let yy = y; yy < y + h; yy += 1)
+            dst.fill(0, (yy * canvas.width + x) * 4, (yy * canvas.width + x + w) * 4);
         },
         getImageData(x, y, w, h) {
           reads.push(h);
@@ -2645,7 +2769,19 @@ test("the raw metal and the molten gold are made in bands of rows, byte for byte
           return { width: w, height: h, data: new Uint8ClampedArray(w * h * 4) };
         },
         putImageData(image, dx, dy, x0 = 0, y0 = 0, w = image.width, h = image.height) {
-          copy(image.data, image.width, x0, y0, sized(), canvas.width, dx + x0, dy + y0, w, h, canvas.height);
+          copy(
+            image.data,
+            image.width,
+            x0,
+            y0,
+            sized(),
+            canvas.width,
+            dx + x0,
+            dy + y0,
+            w,
+            h,
+            canvas.height,
+          );
         },
         pixels: sized,
       });
@@ -2679,11 +2815,31 @@ test("the raw metal and the molten gold are made in bands of rows, byte for byte
   const kitMolten = run(createNaniteMoltenJob(source, 0, 0, W, H, document, { mask }), 1);
   for (const slice of [0.5, 3, 100]) {
     reads.length = 0;
-    const metal = run(createAssemblyLayerJob({ source, width: W, height: H, kind: "metal", silhouette: true, document }), slice);
-    assert.ok(reads.length > 0 && reads.every((rows) => rows <= 4), "native readbacks: two rows plus rim halo only");
+    const metal = run(
+      createAssemblyLayerJob({
+        source,
+        width: W,
+        height: H,
+        kind: "metal",
+        silhouette: true,
+        document,
+      }),
+      slice,
+    );
+    assert.ok(
+      reads.length > 0 && reads.every((rows) => rows <= 4),
+      "native readbacks: two rows plus rim halo only",
+    );
     assert.deepEqual(bytes(metal.metal), bytes(kitMetal.metal), `metal, slice ${slice}`);
-    assert.deepEqual(bytes(metal.silhouette), bytes(kitMetal.silhouette), `silhouette, slice ${slice}`);
-    const molten = run(createAssemblyLayerJob({ source, width: W, height: H, kind: "molten", mask, document }), slice);
+    assert.deepEqual(
+      bytes(metal.silhouette),
+      bytes(kitMetal.silhouette),
+      `silhouette, slice ${slice}`,
+    );
+    const molten = run(
+      createAssemblyLayerJob({ source, width: W, height: H, kind: "molten", mask, document }),
+      slice,
+    );
     assert.deepEqual(bytes(molten.molten), bytes(kitMolten.molten), `molten, slice ${slice}`);
   }
   // And the scene uses them, not the whole-figure jobs.

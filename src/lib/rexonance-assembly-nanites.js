@@ -4,9 +4,9 @@
    「超大幅な改善で。」): the living swarm that builds the suit on the scroll.
 
    Every nanite is a Blender-rendered hex chip (REXONANCE_NANITE_CELLS) in an
-   orbital cocoon of eight tilted rings with real depth: born from the P14
-   core in six pump waves, it rides its ring, leaves at its tile's flight
-   down a river through its plate's gate, circles to aim, dives, unfolds
+   continuous body-space current with real depth: condensed inside the
+   same burning surface as the flame, it is expelled through the fire,
+   curls into a connected wake, follows its plate's gate, aligns, unfolds
    into its tile and recoils as it locks. Each plate is built in front of
    the body in raw nanite metal on a lifted, tilted stage, over its own
    contact shadow, a hardpoint latch biting at its seat and a scaffold
@@ -29,11 +29,17 @@
    ===================================================================== */
 
 import { naniteHexHeight, naniteHexLight } from "./rexonance-unlit.js";
+import { sampleFlameBirth } from "./rexonance-ignition.js";
+import { drawNaniteFirebrand } from "./rexonance-flame.js";
 
 const TAU = Math.PI * 2;
 const DEG = Math.PI / 180;
 const MERGE_FROM = 0.62;
 const ABSORB = 0.026;
+const FIRE_LEAD = 0.006;
+const FIRE_HANDOFF = 0.008;
+const FIREBRANDS = 24;
+const FIREBRANDS_TOUCH = 8;
 const clamp01 = (value) => (value < 0 ? 0 : value > 1 ? 1 : value);
 const smooth = (u) => u * u * (3 - 2 * u);
 const easeOut = (u) => 1 - (1 - u) * (1 - u) * (1 - u);
@@ -49,16 +55,18 @@ export function armorSeatLift(piece, q) {
   if (piece.ornament) return (1 - piece.seatHold) * (1 - smooth(u));
   const at = piece.catchAt;
   const hold = piece.catchLift;
-  return (1 - piece.seatHold) * (u < at
-    ? 1 - (1 - hold) * smooth(u / at)
-    : hold * (1 - smooth((u - at) / (1 - at))));
+  return (
+    (1 - piece.seatHold) *
+    (u < at ? 1 - (1 - hold) * smooth(u / at) : hold * (1 - smooth((u - at) / (1 - at))))
+  );
 }
 
 /** Write the socket's rail, jaw and contact phases into a reusable buffer.
  * All values depend only on displayed progress; callers allocate the buffer
  * once, outside the frame path. */
 export function armorDockState(piece, q, out) {
-  out[0] = smooth(clamp01((q - (piece.to - 0.014)) / 0.004)) *
+  out[0] =
+    smooth(clamp01((q - (piece.to - 0.014)) / 0.004)) *
     smooth(clamp01((piece.contact - q) / 0.003));
   out[1] = smooth(clamp01((q - (piece.contact - 0.004)) / 0.004));
   out[2] = 1 - smooth(clamp01((q - piece.contact) / 0.014));
@@ -66,7 +74,7 @@ export function armorDockState(piece, q, out) {
   return out;
 }
 
-const armorClampOrder = (corner) => corner === 2 ? 0 : corner === 1 ? 1 : corner === 3 ? 2 : 3;
+const armorClampOrder = (corner) => (corner === 2 ? 0 : corner === 1 ? 1 : corner === 3 ? 2 : 3);
 export function armorClampBite(piece, corner, q) {
   const lead = 0.006 - armorClampOrder(corner) * 0.0015;
   return q < piece.contact
@@ -128,7 +136,6 @@ export const ASSEMBLY_TOUCH_HERO_BUDGET = 16;
 
 const BIRTH = 0.012;
 // The crown ring's height above the visor (figure px): over the head.
-const CROWN_LIFT = 96;
 const RING_COUNT = 8;
 const FREE_CHIPS = 240;
 const FREE_CHIPS_TOUCH = 96;
@@ -454,17 +461,30 @@ export function* assemblyNanitePlanSteps({
     // The shell arrives from the side of the anatomy it covers. Arms key
     // laterally, shoulders fold down and in, legs rise from below, while
     // torso shells approach the chest/waist from their natural edges.
-    const approachX = piece.group === "arms" ? side * 0.76
-      : piece.group === "shoulders" ? side * 0.62
-        : piece.group === "legs" ? side * 0.27
-          : piece.group === "waist" ? side * 0.28
-            : piece.group === "chest" ? side * 0.4 * Math.abs(hx)
-              : 0.55 * hx - 0.3;
-    const approachY = piece.group === "arms" ? -0.2
-      : piece.group === "shoulders" ? -0.48
-        : piece.group === "legs" ? 0.76
-          : piece.group === "waist" ? 0.62
-            : piece.group === "chest" ? -0.68 : -0.55;
+    const approachX =
+      piece.group === "arms"
+        ? side * 0.76
+        : piece.group === "shoulders"
+          ? side * 0.62
+          : piece.group === "legs"
+            ? side * 0.27
+            : piece.group === "waist"
+              ? side * 0.28
+              : piece.group === "chest"
+                ? side * 0.4 * Math.abs(hx)
+                : 0.55 * hx - 0.3;
+    const approachY =
+      piece.group === "arms"
+        ? -0.2
+        : piece.group === "shoulders"
+          ? -0.48
+          : piece.group === "legs"
+            ? 0.76
+            : piece.group === "waist"
+              ? 0.62
+              : piece.group === "chest"
+                ? -0.68
+                : -0.55;
     const accent = accentOf.includes(p);
     const isCrest = p === crest;
     const contact = to + (helm ? 0.003 : N.seat);
@@ -554,10 +574,18 @@ export function* assemblyNanitePlanSteps({
           : piece.group === "legs"
             ? 0.3
             : 0.16,
-      catchAt: piece.group === "arms" || piece.group === "shoulders" ? 0.4
-        : piece.group === "legs" ? 0.25 : 0.32,
-      catchLift: piece.group === "arms" || piece.group === "shoulders" ? 0.64
-        : piece.group === "legs" ? 0.52 : 0.58,
+      catchAt:
+        piece.group === "arms" || piece.group === "shoulders"
+          ? 0.4
+          : piece.group === "legs"
+            ? 0.25
+            : 0.32,
+      catchLift:
+        piece.group === "arms" || piece.group === "shoulders"
+          ? 0.64
+          : piece.group === "legs"
+            ? 0.52
+            : 0.58,
       bank: fixed
         ? 0
         : (seatX < W / 2 ? -1 : 1) *
@@ -630,6 +658,8 @@ export function* assemblyNanitePlanSteps({
   const r0 = new Float32Array(n);
   const psi0 = new Float32Array(n);
   const birth = new Float64Array(n);
+  const emission = new Float32Array(n * 4);
+  const emit = new Float64Array(4);
   const arm = new Uint8Array(n);
   const armDir = new Int8Array(n);
   const gateJ = new Float32Array(n);
@@ -641,7 +671,7 @@ export function* assemblyNanitePlanSteps({
   for (let i = 0; i < n; i += 1)
     if (owner[i] >= 0 && npieces[npOf[owner[i]]].helm)
       helmReach = Math.max(helmReach, Math.hypot(CX[i] - eyeX, CY[i] - eyeY));
-  const [m0, m1] = [0.07, 0.16];
+  const m0 = 0.063;
   for (let i = 0; i < n; i += 1) {
     const p = owner[i] >= 0 ? npOf[owner[i]] : -1;
     pieceOf[i] = p;
@@ -666,10 +696,17 @@ export function* assemblyNanitePlanSteps({
     spin[i] = 0.2 + 0.3 * naniteHash(i, 15);
     r0[i] = 10 + 12 * naniteHash(i, 16);
     psi0[i] = TAU * naniteHash(i, 17);
-    const wave = Math.min(5, Math.max(0, Math.floor((M[i] - m0) / BIRTH)));
-    birth[i] = Math.min(M[i], m0 + BIRTH * wave + 0.003 * naniteHash(i, 18));
+    // The fire's surface, not the reactor: no quantized pump or horizontal
+    // ring is visible at birth. Keep the assembly's original tile schedule.
+    sampleFlameBirth(naniteHash(i, 50), emit);
+    const e = i * 4;
+    emission[e] = emit[0] * W;
+    emission[e + 1] = emit[1] * H;
+    emission[e + 2] = emit[2];
+    emission[e + 3] = emit[3];
+    birth[i] = Math.min(M[i], m0 + 0.027 * naniteHash(i, 18));
     arm[i] = Math.floor(naniteHash(i, 19) * 3) % 3;
-    armDir[i] = wave % 2 ? -1 : 1;
+    armDir[i] = emit[2] < 0 ? -1 : 1;
     gateJ[i] = (naniteHash(i, 21) - 0.5) * 0.024 * H;
     hsh[i] = naniteHash(i, 22);
     if (piece?.helm) helmD[i] = Math.hypot(CX[i] - eyeX, CY[i] - eyeY) / helmReach;
@@ -680,7 +717,6 @@ export function* assemblyNanitePlanSteps({
     } else tp[i] = T1[i] + 0.0005;
     if (tick()) yield;
   }
-  void m1;
 
   // The lattice parent (the nearest earlier 8-neighbour of its plate) and
   // the tile sharing its cell (an ornament over the armour).
@@ -1151,11 +1187,13 @@ export function* assemblyNanitePlanSteps({
         }
       pc.clamp = anchors;
       const lateral = Math.abs(pc.railX) > Math.abs(pc.railY);
-      const first = lateral ? (pc.railX > 0 ? 1 : 0) : (pc.railY > 0 ? 2 : 0);
+      const first = lateral ? (pc.railX > 0 ? 1 : 0) : pc.railY > 0 ? 2 : 0;
       const second = lateral ? first + 2 : first + 1;
       pc.railAnchors = new Float32Array([
-        anchors[first * 2], anchors[first * 2 + 1],
-        anchors[second * 2], anchors[second * 2 + 1],
+        anchors[first * 2],
+        anchors[first * 2 + 1],
+        anchors[second * 2],
+        anchors[second * 2 + 1],
       ]);
       if (tick()) yield;
     }
@@ -1180,8 +1218,8 @@ export function* assemblyNanitePlanSteps({
     }
   }
 
-  // The free chips: born in the pump waves, they never fly; at the seal
-  // they spiral into the reactor.
+  // Free cells share the fire's surface and continuous wake. At the final
+  // seal only, the remaining machines gather into the reactor.
   const F = coarse ? FREE_CHIPS_TOUCH : FREE_CHIPS;
   const free = {
     count: F,
@@ -1192,6 +1230,7 @@ export function* assemblyNanitePlanSteps({
     f0: new Float32Array(F),
     spin: new Float32Array(F),
     birth: new Float64Array(F),
+    emission: new Float32Array(F * 4),
     arm: new Uint8Array(F),
     armDir: new Int8Array(F),
     tone: new Uint8Array(F),
@@ -1205,7 +1244,13 @@ export function* assemblyNanitePlanSteps({
     free.phi[j] = TAU * naniteHash(k, 43);
     free.f0[j] = 24 * naniteHash(k, 44);
     free.spin[j] = 0.2 + 0.3 * naniteHash(k, 45);
-    free.birth[j] = m0 + BIRTH * (j % 6) + 0.003 * naniteHash(k, 46);
+    free.birth[j] = m0 + 0.027 * naniteHash(k, 46);
+    sampleFlameBirth(naniteHash(k, 50), emit);
+    const e = j * 4;
+    free.emission[e] = emit[0] * W;
+    free.emission[e + 1] = emit[1] * H;
+    free.emission[e + 2] = emit[2];
+    free.emission[e + 3] = emit[3];
     free.arm[j] = Math.floor(naniteHash(k, 47) * 3) % 3;
     free.armDir[j] = (j % 6) % 2 ? -1 : 1;
     free.tone[j] = j % 9 === 0 ? 2 : j % 2;
@@ -1241,6 +1286,7 @@ export function* assemblyNanitePlanSteps({
     r0,
     psi0,
     birth,
+    emission,
     arm,
     armDir,
     gateJ,
@@ -2164,7 +2210,6 @@ export function createAssemblyNanites({
   const F = free.count;
   const total = n + F;
   const SC = total;
-  const rings = nano.rings;
   const [coreX, coreY] = core;
   const [visorX, visorY] = visor ?? [W / 2, H * 0.14];
   const cells = sprites?.cells ?? null;
@@ -2293,6 +2338,31 @@ export function createAssemblyNanites({
   const goldArt = layers.goldArt ?? null;
   const lattice = layers.lattice ?? null;
   const metalOf = (src) => metal[src] || art[src];
+  // Preparation owns the primer canvases, including their lifetime. The
+  // first visible fusion must not allocate a full-size sheet in a frame.
+  const primers = [null, null];
+  if (doc?.createElement)
+    for (let src = 0; src < 2; src += 1) {
+      const sheet = metalOf(src);
+      if (!sheet) continue;
+      let canvas = null;
+      try {
+        canvas = doc.createElement("canvas");
+        canvas.width = W;
+        canvas.height = H;
+        const c = canvas.getContext("2d");
+        if (c) {
+          c.drawImage(sheet, 0, 0, W, H);
+          c.globalCompositeOperation = "source-atop";
+          c.fillStyle = "rgb(14 18 28 / 0.66)";
+          c.fillRect(0, 0, W, H);
+          primers[src] = canvas;
+        }
+      } catch {
+        // A missing preparation context keeps the metal fallback usable.
+      }
+      if (canvas && !primers[src]) canvas.width = canvas.height = 0;
+    }
   const s0 = 10;
   const T0 = nano.T0;
   const T1 = nano.T1;
@@ -2307,19 +2377,14 @@ export function createAssemblyNanites({
   const TONE = nano.TONE;
   const COV = nano.COV;
   const PO = nano.pieceOf;
-  const RING = nano.ring;
-  const LANE = nano.lane;
-  const TH0 = nano.th0;
   const PHI = nano.phi;
   const F0 = nano.f0;
   const SPIN = nano.spin;
   const R0 = nano.r0;
   const PSI0 = nano.psi0;
   const BIRTHS = nano.birth;
-  const ARM = nano.arm;
-  const ARMDIR = nano.armDir;
+  const EMISSION = nano.emission;
   const GATEJ = nano.gateJ;
-  const HELMD = nano.helmD;
   const HSH = nano.hsh;
   const TP = nano.tp;
   const PARENT = nano.parent;
@@ -2354,13 +2419,6 @@ export function createAssemblyNanites({
   const BIDX = nano.buildIdx ?? new Int32Array(0);
   const BDX = nano.buildDX ?? new Int8Array(goldCountOf(gold));
   const BDY = nano.buildDY ?? new Int8Array(goldCountOf(gold));
-  const RCY = rings.cy;
-  const RRX = rings.rx;
-  const RRY = rings.ry;
-  const RCOS = rings.cos;
-  const RSIN = rings.sin;
-  const RDIR = rings.dir;
-  const ROM = rings.omega;
   const SEAMX = nano.seams.x;
   const SEAMY = nano.seams.y;
   const SEAMC = nano.seams.cum;
@@ -2373,6 +2431,8 @@ export function createAssemblyNanites({
   const Y = new Float32Array(total + 1);
   const S = new Float32Array(total + 1);
   const A = new Float32Array(total + 1);
+  const FIRE = new Float32Array(total + 1);
+  const fireRects = new Float32Array((total + 1) * 4);
   const Z = new Float32Array(total + 1);
   const FR = new Float32Array(total + 1);
   const U = new Float32Array(total + 1);
@@ -2507,6 +2567,8 @@ export function createAssemblyNanites({
   let heroes = 0;
   let conduitDraws = 0;
   let nanitesDrawn = 0;
+  let firebrandsDrawn = 0;
+  let firebrandReserve = 0;
   const state = {
     shakeX: 0,
     shakeY: 0,
@@ -2514,60 +2576,59 @@ export function createAssemblyNanites({
     heroes: 0,
     nanites: 0,
     comets: 0,
+    firebrands: 0,
   };
 
-  // Ring geometry scratch: one typed slot, written per chip (a double in a
+  // Current geometry scratch: one typed slot, written per chip (a double in a
   // closure \`let\` is boxed into a fresh heap number on every write, which
   // is a per-frame allocation — the review's finding on the call, 2026-10-16;
   // no per-frame allocation, owner 2026-10-16).
   const RG = new Float64Array(5);
 
   /* -- draw passes: allocation-free from here -- */
-  const ringPoint = (r, theta, ln, ph, tangent) => {
-    const kk = 1 + 0.045 * ln;
-    const R = RRX[r] * kk;
-    const Ry = RRY[r] * kk;
-    const c = Math.cos(theta);
-    const s = Math.sin(theta);
-    const lx = R * c;
-    const ly = Ry * s + 3 * Math.sin(5 * theta + ph);
-    const tc = RCOS[r];
-    const ts = RSIN[r];
-    RG[0] = W / 2 + lx * tc - ly * ts;
-    RG[1] = RCY[r] + 4 * ln + lx * ts + ly * tc;
-    RG[2] = s;
-    if (tangent) {
-      const dir = RDIR[r];
-      const dlx = -R * s * dir;
-      const dly = (Ry * c + 15 * Math.cos(5 * theta + ph)) * dir;
-      const tx = dlx * tc - dly * ts;
-      const ty = dlx * ts + dly * tc;
-      const len = Math.hypot(tx, ty) || 1;
-      RG[3] = tx / len;
-      RG[4] = ty / len;
-    }
+  // One continuous curl field round the burning body. Nearby origins share
+  // the same low-frequency current, while their small phase offsets stop
+  // it reading as rigid rings. A firebrand leaves the burning body before
+  // a metal cell exists. The airborne handoff has no position/velocity pop.
+  // The flight samples this same function at t0, including its depth and
+  // tangent, so slow or reverse scrubbing never teleports a cell.
+  const surfaceCurrent = (sources, offset, seed, born, q) => {
+    const sx = sources[offset];
+    const sy = sources[offset + 1];
+    const nx = sources[offset + 2];
+    const ny = sources[offset + 3];
+    const tx = -ny;
+    const ty = nx;
+    const age = Math.max(0, q - born);
+    const launch = smooth(clamp01((q - (born - FIRE_LEAD)) / FIRE_LEAD));
+    const thrown = (((20 + 25 * seed) * H) / 1000) * launch;
+    const lift = (((10 + 10 * seed) * H) / 1000) * launch;
+    const release = smooth(clamp01(age / BIRTH));
+    const ph = (sy / H) * 9 + nx * 1.7 + q * 21 + seed * 0.45;
+    const gust = Math.sin(ph);
+    const curl = (gust + 0.35 * Math.sin(2 * ph + 0.7)) * H * 0.026 * release;
+    const reach = H * (0.035 + 0.045 * seed) * release * (0.88 + 0.12 * Math.cos(ph));
+    RG[0] = sx + nx * (thrown + reach) + tx * curl;
+    RG[1] =
+      sy + ny * (thrown + reach) + ty * curl - lift - H * 0.025 * release * (0.65 + 0.35 * gust);
+    RG[2] = 0.72 * Math.sin(ph * 0.65 + (sx / W) * 6 + seed * TAU) * release;
+    const dx = tx * Math.cos(ph) + nx * 0.35;
+    const dy = ty * Math.cos(ph) + ny * 0.35 - 0.25;
+    const length = Math.hypot(dx, dy) || 1;
+    RG[3] = dx / length;
+    RG[4] = dy / length;
   };
-  // N13, traffic in the cocoon: each ring carries three density packets
-  // travelling at half its chips' speed, so the chips bunch and stream
-  // through them rather than turning like a rigid wheel, and each weaves
-  // across its ring's lanes as it goes round. A function of the chip's angle
-  // and q (the river leaves from exactly this pose).
-  const orbit = (r, theta, ln, ph, tangent, q) => {
-    const th = theta + 0.2333 * Math.sin(3 * theta - 1.5 * ROM[r] * q + 1.7 * r);
-    ringPoint(r, th, ln + 0.9 * Math.sin(2 * th + ph), ph, tangent);
-  };
-  // The birth spiral (N2): out of the core along one of three arms; s 0–1.
-  // Every chip of a wave shares the arms' curve (radius and angle are
-  // functions of s alone), so a pump reads as three spiral arms; in its last
-  // 40% each chip swings onto its own ring pose.
-  const spiral = (s, armK, dir, tx, ty) => {
-    const angle = (TAU * armK) / 3 + dir * 3 * Math.PI * (1 - s);
-    const rho = 210 * s ** 0.9;
-    const ax = coreX + rho * Math.cos(angle);
-    const ay = coreY + rho * Math.sin(angle) * 0.8;
-    const e = smooth(clamp01((s - 0.6) / 0.4));
-    RG[0] = ax + (tx - ax) * e;
-    RG[1] = ay + (ty - ay) * e;
+  const tileCurrent = (i, q) => {
+    surfaceCurrent(EMISSION, i * 4, HSH[i], BIRTHS[i], q);
+    const p = PO[i];
+    if (p < 0 || !P[p].helm || q < N.crown[0]) return;
+    const beta = smooth(clamp01((q - N.crown[0]) / (N.crown[1] - N.crown[0])));
+    // Face cells gather beside their real sockets, never in a separate
+    // crown above the head. The flight takes this exact starting pose.
+    RG[0] += (CX[i] + 14 * Math.sin(PHI[i] + q * 12) - RG[0]) * beta;
+    RG[1] += (CY[i] - 18 - 10 * Math.cos(PHI[i] + q * 12) - RG[1]) * beta;
+    RG[2] += (0.25 - RG[2]) * beta;
+    if (RG[2] > 0.6) RG[2] = 0.6;
   };
   const jigX = (p, x, y) => jig[p * 6] * x + jig[p * 6 + 2] * y + jig[p * 6 + 4];
   const jigY = (p, x, y) => jig[p * 6 + 1] * x + jig[p * 6 + 3] * y + jig[p * 6 + 5];
@@ -2576,12 +2637,12 @@ export function createAssemblyNanites({
     const b = BIRTHS[i];
     const t0 = T0[i];
     const t1 = T1[i];
-    if (q < b || q >= t1) {
+    FIRE[slot] = 0;
+    if (q < b - FIRE_LEAD || q >= t1) {
       KIND[slot] = 0;
       return;
     }
     const p = PO[i];
-    const r = RING[i];
     const m = M[i];
     const rate = 2400 * SPIN[i];
     let fr = F0[i] + rate * (q - m);
@@ -2591,30 +2652,20 @@ export function createAssemblyNanites({
     TRX[slot] = NaN;
     const helm = p >= 0 && P[p].helm;
     if (q < t0) {
-      orbit(r, TH0[i] + ROM[r] * (q - m), LANE[i], PHI[i], false, q);
-      let x = RG[0];
-      let y = RG[1];
-      let z = RG[2];
-      let kind = 2;
-      if (helm && q >= N.crown[0]) {
-        const beta = smooth(clamp01((q - N.crown[0]) / (N.crown[1] - N.crown[0])));
-        const ang = TH0[i] + (3 * Math.PI * (q - N.crown[0])) / 0.05;
-        const rc = 60 + 30 * HELMD[i];
-        x += (visorX + rc * Math.cos(ang) - x) * beta;
-        y += (visorY - CROWN_LIFT + 0.35 * rc * Math.sin(ang) - y) * beta;
-        z += (Math.sin(ang) - z) * beta;
-        // (Never as near as the bokeh: the crown stays a ring of crisp chips,
-        // round 3.)
-        if (z > 0.6) z = 0.6;
-        kind = 3;
-      }
+      tileCurrent(i, q);
+      const x = RG[0];
+      const y = RG[1];
+      const z = RG[2];
+      let kind = helm && q >= N.crown[0] ? 3 : 2;
       let size = s0 * (1 + 0.45 * z);
-      const s = (q - b) / BIRTH;
+      const age = q - b;
+      const s = clamp01(age / BIRTH);
+      FIRE[slot] =
+        age < 0
+          ? smooth(clamp01((q - (b - FIRE_LEAD)) / FIRE_LEAD))
+          : 1 - smooth(clamp01(age / FIRE_HANDOFF));
       if (s < 1) {
-        spiral(s, ARM[i], ARMDIR[i], x, y);
-        x = RG[0];
-        y = RG[1];
-        size *= 0.6 + 0.4 * s;
+        size *= 0.25 + 0.75 * smooth(s);
         if (s < 0.5) TN[slot] = 2;
         kind = 1;
       }
@@ -2622,7 +2673,7 @@ export function createAssemblyNanites({
       Y[slot] = y;
       Z[slot] = z;
       S[slot] = size;
-      A[slot] = 0.45 + 0.25 * (z + 1);
+      A[slot] = (0.45 + 0.25 * (z + 1)) * smooth(clamp01(s / 0.45));
       FR[slot] = fr;
       U[slot] = -1;
       KIND[slot] = kind;
@@ -2646,27 +2697,11 @@ export function createAssemblyNanites({
     let alpha = 0.95;
     let kind;
     const dive = helm ? 0.7 : 0.8;
-    if (helm && u < dive) {
-      // The helmet skips the lanes: from the crown it spirals inward.
-      const ang = TH0[i] + (3 * Math.PI * (t0 - N.crown[0])) / 0.05;
-      const rc = 60 + 30 * HELMD[i];
-      const px0 = visorX + rc * Math.cos(ang) - hx;
-      const py0 = visorY - CROWN_LIFT + 0.35 * rc * Math.sin(ang) - hy;
-      const w = u / dive;
-      const turn = RDIR[0] * 1.5 * Math.PI * w;
-      const c = Math.cos(turn);
-      const s = Math.sin(turn);
-      const shrink = (1 - w) ** 1.3;
-      x = hx + (px0 * c - py0 * s) * shrink;
-      y = hy + (px0 * s + py0 * c) * shrink;
-      size = s0 * (1 + 0.3 * Math.sin(Math.PI * w));
-      fr += rate * 1.5 * (q - t0);
-      kind = 5;
-    } else if (u < 0.55) {
-      // The river: from its ring pose at t0, out along the ring, through the
-      // plate's gate, onto its orbit.
+    if (u < 0.55) {
+      // A current peels off the burning surface and feeds a local assembly
+      // front. It leaves from the exact waiting pose, not a reactor pump.
       fr += rate * 2 * (q - t0);
-      orbit(r, TH0[i] + ROM[r] * (t0 - m), LANE[i], PHI[i], true, t0);
+      tileCurrent(i, t0);
       const p0x = RG[0];
       const p0y = RG[1];
       const z0 = RG[2];
@@ -2785,10 +2820,7 @@ export function createAssemblyNanites({
           TRY[slot] = ty;
         }
       }
-      let f = fr % 24;
-      if (f < 0) f += 24;
-      if (f > 12) f -= 24;
-      fr = helm ? f * (1 - w) * (1 - w) : 0;
+      fr = 0;
       if (u >= 0.86) {
         const g = (u - 0.86) / 0.14;
         UF[slot] = Math.min(6, Math.floor(g * 7));
@@ -2808,12 +2840,12 @@ export function createAssemblyNanites({
 
   const poseFree = (j, q, slot) => {
     const b = free.birth[j];
-    if (q < b || q >= N.implode[1]) {
+    FIRE[slot] = 0;
+    if (q < b - FIRE_LEAD || q >= N.implode[1]) {
       KIND[slot] = 0;
       return;
     }
-    const r = free.ring[j];
-    orbit(r, free.th0[j] + ROM[r] * (q - b), free.lane[j], free.phi[j], false, q);
+    surfaceCurrent(free.emission, j * 4, free.hsh[j], b, q);
     let x = RG[0];
     let y = RG[1];
     const z = RG[2];
@@ -2824,12 +2856,15 @@ export function createAssemblyNanites({
     GL[slot] = 0;
     TRX[slot] = NaN;
     let kind = 7;
-    const s = (q - b) / BIRTH;
+    const age = q - b;
+    const s = clamp01(age / BIRTH);
+    FIRE[slot] =
+      age < 0
+        ? smooth(clamp01((q - (b - FIRE_LEAD)) / FIRE_LEAD))
+        : 1 - smooth(clamp01(age / FIRE_HANDOFF));
     if (s < 1) {
-      spiral(s, free.arm[j], free.armDir[j], x, y);
-      x = RG[0];
-      y = RG[1];
-      size *= 0.6 + 0.4 * s;
+      size *= 0.25 + 0.75 * smooth(s);
+      alpha *= smooth(clamp01(s / 0.45));
       if (s < 0.5) TN[slot] = 2;
     }
     if (q >= N.gather[0]) {
@@ -3185,12 +3220,52 @@ export function createAssemblyNanites({
   // defocused).
   // Beyond the sprite budget (or a slow last frame), the far band's chips
   // become dim specks by index hash; the near bands are always sprites.
+  const firebrandPass = (ctx, list, count) => {
+    let rects = 0;
+    const limit = coarse ? FIREBRANDS_TOUCH : FIREBRANDS;
+    for (let c = 0; c < count; c += 1) {
+      const slot = list[c];
+      const fire = FIRE[slot];
+      if (fire <= 0.02) continue;
+      if (!CALM && firebrandsDrawn < limit && sprites_ + 2 <= ASSEMBLY_SPRITE_BUDGET) {
+        drawNaniteFirebrand(ctx, X[slot], Y[slot], fire, Q * 10);
+        firebrandsDrawn += 1;
+        // The helper uses at most two atlas samples, sharing the retained
+        // flame sheet. Count both conservatively even for its fallback.
+        sprites_ += 2;
+      } else {
+        const width = ((1.2 + fire * 2.4) * H) / 1000;
+        const height = ((1.8 + fire * 4.2) * H) / 1000;
+        pushRect(fireRects, rects, X[slot] - width / 2, Y[slot] - height / 2, width, height);
+        rects += 4;
+      }
+    }
+    fillBatch(ctx, fireRects, rects, "rgb(153 255 112)", 0.68);
+    // The forming metal stays visible through the last hot gas. Fade its
+    // airborne highlight into the normal depth-sorted current, with no
+    // additional texture draws or a hard disappearance at the handoff.
+    rects = 0;
+    for (let c = 0; c < count; c += 1) {
+      const slot = list[c];
+      const born = slot < n ? BIRTHS[slot] : free.birth[slot - n];
+      const age = Q - born;
+      if (age < 0 || age >= 0.025 || A[slot] <= 0.01) continue;
+      const fade = 1 - smooth(clamp01((age - FIRE_HANDOFF) / (0.025 - FIRE_HANDOFF)));
+      const size = S[slot] * 0.45 * Math.sqrt(A[slot] * fade);
+      if (size <= 0.1) continue;
+      pushRect(fireRects, rects, X[slot] - size / 2, Y[slot] - size / 2, size, size);
+      rects += 4;
+    }
+    fillBatch(ctx, fireRects, rects, "rgb(215 248 236)", 0.9);
+  };
   const band = (ctx, list, count, front, far) => {
     const rich = cells && !coarse;
     const comets = cometSheet && !CALM && DQ > 0;
     const share = far ? (BACKRECTS ? 0 : keep) : 1;
     for (let c = 0; c < count; c += 1) {
       const slot = list[c];
+      // A firebrand has no metal chip until the airborne handoff begins.
+      if (A[slot] <= 0.01) continue;
       const hash = slot >= n ? free.hsh[slot - n] : HSH[slot];
       if (comets && hash < 1 / 3) comet(ctx, slot, slot);
       if (rich && hash < share) spriteChip(ctx, slot, front ? 0.7 : 1, front);
@@ -3240,6 +3315,8 @@ export function createAssemblyNanites({
     heroes = 0;
     conduitDraws = 0;
     nanitesDrawn = 0;
+    firebrandsDrawn = 0;
+    firebrandReserve = 0;
     for (let p = 0; p < NP; p += 1) jigFor(p, q, JIGGED[p] === 1);
     let conduits = 0;
     for (let p = 0; p < NP; p += 1) {
@@ -3288,6 +3365,7 @@ export function createAssemblyNanites({
     }
     nBack = nMid = nFront = nFlight = nImplode = 0;
     let visible = 0;
+    let burning = 0;
     for (let b = 0; b < NP * 2; b += 1) {
       beamI[b] = -1;
       beamU[b] = -1;
@@ -3302,6 +3380,7 @@ export function createAssemblyNanites({
       const kind = KIND[i];
       topChip[i] = 0;
       if (!kind) continue;
+      if (FIRE[i] > 0.02) burning += 1;
       visible += 1;
       if (ripN && kind < 4) ripple(i);
       if (kind >= 4) {
@@ -3343,6 +3422,7 @@ export function createAssemblyNanites({
       const slot = n + j;
       poseFree(j, q, slot);
       if (!KIND[slot]) continue;
+      if (FIRE[slot] > 0.02) burning += 1;
       visible += 1;
       if (ripN && KIND[slot] === 7) ripple(slot);
       // (The far side of the imploding rings stays behind the body.)
@@ -3382,7 +3462,8 @@ export function createAssemblyNanites({
     // the flights, the gold's incoming chips and droplets and the effects —
     // every term a function of q, never of the last frame.
     const near = visible - nBack;
-    let reserve = FX_RESERVE;
+    firebrandReserve = calm ? 0 : 2 * Math.min(coarse ? FIREBRANDS_TOUCH : FIREBRANDS, burning);
+    let reserve = FX_RESERVE + firebrandReserve;
     if (gold && goldCount && !coarse) {
       const head = goldBy(q);
       reserve += Math.ceil(POUR_SHARE * (goldBy(q + 0.007) - head));
@@ -3909,7 +3990,9 @@ export function createAssemblyNanites({
   };
 
   // The landed, unpainted tiles of plate p with source `src`, as a path.
-  // Every tile of plate p (from src) not yet painted at q.
+  // Unpainted cells condense locally ahead of their own landing front.
+  // The dark seed expands through the cell; only the locked cell receives
+  // full-thickness metal, rather than a complete plate popping into view.
   const pendingPath = (ctx, p, src, q) => {
     const ids = P[p].tiles;
     let any = false;
@@ -3917,29 +4000,15 @@ export function createAssemblyNanites({
     for (let kk = 0; kk < ids.length; kk += 1) {
       const i = ids[kk];
       if (SRC[i] !== src || TP[i] <= q) continue;
-      ctx.rect(SX[i], SY[i], TW[i], TH[i]);
+      const age = (q - T0[i] + 0.008) / (T1[i] - T0[i] + 0.008);
+      if (age <= 0) continue;
+      const grow = 0.16 + 0.84 * smooth(clamp01(age));
+      const w = TW[i] * grow;
+      const h = TH[i] * grow;
+      ctx.rect(SX[i] + (TW[i] - w) / 2, SY[i] + (TH[i] - h) / 2, w, h);
       any = true;
     }
     return any;
-  };
-  // A darkened copy of each metal sheet (built once): the primer.
-  const primers = [null, null];
-  const primerOf = (src) => {
-    if (primers[src]) return primers[src];
-    const sheet = metalOf(src);
-    const doc = globalThis.document;
-    if (!sheet || !doc?.createElement) return null;
-    const canvas = doc.createElement("canvas");
-    canvas.width = W;
-    canvas.height = H;
-    const c = canvas.getContext("2d");
-    if (!c) return null;
-    c.drawImage(sheet, 0, 0, W, H);
-    c.globalCompositeOperation = "source-atop";
-    c.fillStyle = "rgb(14 18 28 / 0.66)";
-    c.fillRect(0, 0, W, H);
-    primers[src] = canvas;
-    return canvas;
   };
   const landedPath = (ctx, p, src, q) => {
     const pc = P[p];
@@ -4029,15 +4098,14 @@ export function createAssemblyNanites({
         ctx.drawImage(lattice, 0, 0, W, H);
         ctx.restore();
       }
-      // The whole plate first, in dark primed metal in its own shape, so a
-      // staged plate never reads as scattered fragments with holes; its
-      // tiles land over it (owner, 2026-10-18).
+      // Nanite seeds sinter into a dark underlayer along each tile's real
+      // build front. Locked cells then add depth and the painted surface.
       {
         const fade = clamp01((q - (pc.from - 0.02)) / 0.02);
         if (fade > 0)
           for (let src = 0; src < 2; src += 1) {
             if (!(pc.srcMask & (1 << src))) continue;
-            const primer = primerOf(src);
+            const primer = primers[src];
             if (!primer) continue;
             ctx.save();
             if (pendingPath(ctx, p, src, q)) {
@@ -4358,8 +4426,7 @@ export function createAssemblyNanites({
           const w = (q - at) / 0.006;
           slide = 1 - easeOut(w);
           alpha = clamp01(w * 2.5);
-        } else if (q < pc.contact && bite > 0)
-          f = 8 + Math.min(3, Math.floor(bite * 4));
+        } else if (q < pc.contact && bite > 0) f = 8 + Math.min(3, Math.floor(bite * 4));
         else if (q >= pc.contact && q < pc.contact + 0.002) f = 11;
         else if (q >= pc.contact + 0.002 && q < relStart) f = 11;
         else if (q >= relStart) {
@@ -4458,10 +4525,14 @@ export function createAssemblyNanites({
       const depth = Math.max(5, Math.min(12, pc.railLength * 0.36));
       if (runner > 0) {
         ctx.beginPath();
-        ctx.moveTo(jigX(p, pc.railAnchors[0], pc.railAnchors[1]),
-          jigY(p, pc.railAnchors[0], pc.railAnchors[1]));
-        ctx.lineTo(jigX(p, pc.railAnchors[2], pc.railAnchors[3]),
-          jigY(p, pc.railAnchors[2], pc.railAnchors[3]));
+        ctx.moveTo(
+          jigX(p, pc.railAnchors[0], pc.railAnchors[1]),
+          jigY(p, pc.railAnchors[0], pc.railAnchors[1]),
+        );
+        ctx.lineTo(
+          jigX(p, pc.railAnchors[2], pc.railAnchors[3]),
+          jigY(p, pc.railAnchors[2], pc.railAnchors[3]),
+        );
         ctx.lineWidth = 2;
         ctx.strokeStyle = "rgb(220 247 255)";
         ctx.globalAlpha = 0.78 * runner;
@@ -4577,7 +4648,7 @@ export function createAssemblyNanites({
       for (let c = 0; c < TOUCH_CHIPS; c += 1) if (topI[c] >= 0) chips += 1;
       // (+1: the undersuit's own nine-argument draw shares the canvas, so a
       // frame stays within 64 in all.)
-      const reserve = conduitDraws + (cells ? chips : 0) + TOUCH_RINGS + 1;
+      const reserve = conduitDraws + (cells ? chips : 0) + TOUCH_RINGS + 1 + firebrandReserve;
       budget = Math.max(0, Math.min(arts, touchArtBudget - reserve));
     }
     let drawnArts = 0;
@@ -4642,9 +4713,10 @@ export function createAssemblyNanites({
       }
     }
     flushChips(ctx);
-    // Small cells gather into the big one (owner, 2026-10-18): over each
-    // chip's last approach four small cells close in on it and merge as its
-    // metal tile appears.
+    // Local sintering: four constituent cells approach along the socket's
+    // keyed tangent/normal, each slightly later than its neighbour. They
+    // flatten into interleaved laminae as the full metal cell materializes,
+    // rather than circling it like a second decorative particle system.
     if (!coarse && !CALM) {
       ctx.fillStyle = "rgb(214 246 255)";
       ctx.beginPath();
@@ -4654,12 +4726,20 @@ export function createAssemblyNanites({
         const u = U[i];
         if (u < MERGE_FROM || u >= 0.9 || A[i] <= 0.05) continue;
         const v = (u - MERGE_FROM) / (0.9 - MERGE_FROM);
-        const spread = (1 - v) * (1 - v) * Math.max(TW[i], TH[i]) * 2.2;
-        const size = 1.8 + 1.6 * (1 - v);
+        const nx = DOCKX[i];
+        const ny = DOCKY[i];
+        const qx = -ny;
+        const qy = nx;
         for (let k = 0; k < 4; k += 1) {
-          const a = HSH[i] * TAU + k * 1.5708 + v * 2.2;
-          const r = spread * (0.6 + 0.4 * ((k * 0.37 + HSH[i]) % 1));
-          ctx.rect(X[i] + Math.cos(a) * r - size / 2, Y[i] + Math.sin(a) * r - size / 2, size, size);
+          const local = smooth(clamp01((v - k * 0.06) / (1 - k * 0.06)));
+          const spread = (1 - local) * Math.max(TW[i], TH[i]) * (1.25 + 0.5 * HSH[i]);
+          const edge = k < 2 ? -1 : 1;
+          const depth = k % 2 ? 0.55 : -0.55;
+          const x = X[i] + spread * (qx * edge + nx * depth);
+          const y = Y[i] + spread * (qy * edge + ny * depth);
+          const width = 1.8 + 2.4 * (1 - local);
+          const height = 1.2 + 1.4 * (1 - local);
+          ctx.rect(x - width / 2, y - height / 2, width, height);
         }
         merging += 1;
       }
@@ -5112,6 +5192,14 @@ export function createAssemblyNanites({
     cometLimit = ASSEMBLY_COMET_BUDGET;
     band(ctx, frontList, nFront, true, false);
   };
+  // Called after the connected front flame: these are actual flying
+  // fragments of that fire, not cells hidden underneath its volume.
+  const firebrands = (ctx) => {
+    firebrandPass(ctx, backList, nBack);
+    firebrandPass(ctx, midList, nMid);
+    firebrandPass(ctx, frontList, nFront);
+    ctx.globalAlpha = 1;
+  };
   const freePass = (ctx) => {
     const rich = cells && !coarse;
     if (rich && nImplode && !CALM) {
@@ -5182,6 +5270,7 @@ export function createAssemblyNanites({
     state.heroes = heroes + conduitDraws;
     state.nanites = nanitesDrawn + (face ? conduitDraws : 0);
     state.comets = cometsDrawn;
+    state.firebrands = firebrandsDrawn;
   };
   /* -- end of the draw passes -- */
 
@@ -5204,6 +5293,7 @@ export function createAssemblyNanites({
     impactPass,
     goldPass,
     frontPass,
+    firebrands,
     freePass,
     endFrame,
     release,

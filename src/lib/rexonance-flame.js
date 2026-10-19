@@ -1,9 +1,8 @@
-// The nanites' source (owner): forest-green fire, kindling and dying down
-// slowly from head to feet. Both suit-up engines use this renderer. Its
-// tongues are a Blender-rendered, turbulent participating volume, not a
-// cloud of overlapping radial-gradient discs. Their roots follow the body
-// and floor; its near layer burns across the entire unfinished body before
-// the existing slow envelope lets the final armour emerge unchanged.
+// A connected combustion volume, clipped to the real undersuit. The same
+// field feeds both nanite engines: a quiet ignition, one explosive front,
+// then material shed from that surface. The Blender volume adds turbulent
+// detail inside the field, rather than twenty unrelated miniature fires.
+import { naniteFlameScatter, sampleFlameBirth } from "./rexonance-ignition.js";
 export const NANITE_FLAME_ATLAS = Object.freeze({
   src: "/rexonance-flame-natural-20261019/flame.webp",
   width: 1024,
@@ -103,67 +102,178 @@ const TAU = Math.PI * 2;
 const COUNT = 64;
 const SEED = new Float32Array(COUNT * 8);
 for (let i = 0; i < SEED.length; i += 1) SEED[i] = hash(i + 0.37);
-const PROFILE = [
-  [0.14, 0.08],
-  [0.18, 0.06],
-  [0.2, 0.12],
-  [0.24, 0.25],
-  [0.4, 0.33],
-  [0.54, 0.37],
-  [0.57, 0.35],
-  [0.6, 0.24],
-  [0.8, 0.27],
-  [0.98, 0.36],
-];
-const halfWidth = (v) => {
-  for (let k = 1; k < PROFILE.length; k += 1) {
-    const [y1, w1] = PROFILE[k];
-    if (v <= y1) {
-      const [y0, w0] = PROFILE[k - 1];
-      return w0 + (w1 - w0) * clamp((v - y0) / (y1 - y0));
-    }
-  }
-  return PROFILE[PROFILE.length - 1][1];
-};
-const ROOTS = new Float32Array(40 * 3);
-for (let i = 0; i < 40; i += 1) {
-  // Begin on the temples, not in the air above the crown. The profile then
-  // follows shoulders, hands and legs rather than a wide rectangular halo.
-  const v = 0.14 + ((i >> 1) / 19) * 0.835;
-  const side = i % 2 ? 1 : -1;
-  ROOTS[i * 3] = 0.5 + side * (halfWidth(v) + 0.006);
-  ROOTS[i * 3 + 1] = v;
-  ROOTS[i * 3 + 2] = side;
+const SOURCES = new Float32Array(48 * 4);
+const sourceScratch = new Float32Array(4);
+for (let i = 0; i < 48; i += 1) {
+  sampleFlameBirth((i + 0.5) / 48, sourceScratch);
+  SOURCES.set(sourceScratch, i * 4);
 }
-// Near-surface roots follow the actual body, not just its silhouette.
-// x/y are figure fractions; width is figure px at H=1000; height is H's
-// fraction. The first seventeen cover every region even on a coarse pointer.
-// Mandatory upper-thigh roots join the knee flames instead of relying on
-// their thin tips. Extra fine-pointer strands fill the waist mixing layer.
-const FRONT = new Float32Array([
-  // Head, chest, abdomen and hips overlap along the body centreline.
-  0.455, 0.184, 105, 0.16, -0.025, 0.485, 0.345, 230, 0.25, 0.015, 0.515, 0.425, 220, 0.24, -0.02,
-  0.49, 0.465, 195, 0.195, 0.015,
-  // Arms and forearms; volume roots sit below their visible body patches.
-  0.21, 0.452, 150, 0.28, -0.12, 0.79, 0.469, 150, 0.28, 0.12, 0.19, 0.58, 145, 0.29, -0.1, 0.81,
-  0.585, 145, 0.29, 0.1,
-  // The shins/feet splay wider than the thighs in the supplied undersuit.
-  0.335, 0.75, 175, 0.35, -0.08, 0.665, 0.765, 175, 0.35, 0.08, 0.28, 0.86, 180, 0.25, -0.035, 0.72,
-  0.87, 180, 0.25, 0.035, 0.255, 0.986, 155, 0.16, -0.045, 0.745, 0.986, 155, 0.16, 0.045, 0.37,
-  0.635, 170, 0.23, -0.035, 0.63, 0.648, 170, 0.23, 0.035, 0.55, 0.187, 105, 0.16, 0.025, 0.63,
-  0.596, 120, 0.23, 0.04, 0.345, 0.7, 115, 0.22, -0.025, 0.655, 0.715, 115, 0.22, 0.025,
-]);
-// A fire begins at the chest, catches the more distant limbs, then contracts
-// into shorter surface flames as the caller's envelope dies away. This is a
-// pure function of strength/position: reverse scrubbing needs no particle
-// history, extra clock or animation loop. The peak still reaches every root.
-const surfacePower = (strength, v, seed) => {
-  const delay = 0.035 + Math.abs(v - 0.32) * 0.2 + seed * 0.09;
-  return smooth(clamp((strength - delay) / (1 - delay)));
-};
-// Contact follows the two soles; a regular row across the empty space between
-// the legs had read as a green platform rather than fire touching the ground.
-const SOLES = new Float32Array([0.17, 0.235, 0.285, 0.335, 0.655, 0.715, 0.775, 0.83]);
+
+// Three small surfaces (~1.8 MiB), prepared once and retained across calls.
+// A source image is already decoded by the suit warm-up: no extra request.
+let bodySource = null;
+let bodyMask = null;
+let bodyField = null;
+let bodyFlow = null;
+let bodyContext = null;
+let fieldClock = -Infinity;
+let fieldPower = -1;
+const FIELD_W = 288;
+const FIELD_H = 528;
+// Room for a broad, rolling plume outside the figure (not a human cutout).
+const BODY_X = 48;
+const BODY_Y = 28;
+const BODY_W = FIELD_W - BODY_X * 2;
+const BODY_H = FIELD_H - BODY_Y * 2;
+
+export function prepareBodyFlame(source, size, environment = globalThis) {
+  if (!source || !size?.width || !size?.height || !environment.document?.createElement)
+    return false;
+  if (bodySource === source && bodyField) return true;
+  try {
+    const mask = environment.document.createElement("canvas");
+    const field = environment.document.createElement("canvas");
+    const flow = environment.document.createElement("canvas");
+    mask.width = field.width = flow.width = FIELD_W;
+    mask.height = field.height = flow.height = FIELD_H;
+    const m = mask.getContext("2d");
+    const c = field.getContext("2d");
+    const f = flow.getContext("2d");
+    if (!m?.clearRect || !c?.ellipse || !f?.createImageData) return false;
+    // Physical silhouette, softly dilated around limbs: no rectangular base,
+    // centre root in the crotch, detached cheek orb or crown chimney.
+    m.filter = "blur(4px)";
+    for (let i = 0; i < 8; i += 1) {
+      const a = (i / 8) * TAU;
+      m.drawImage(source, BODY_X + Math.cos(a) * 3, BODY_Y + Math.sin(a) * 3, BODY_W, BODY_H);
+    }
+    m.filter = "none";
+    m.drawImage(source, BODY_X, BODY_Y, BODY_W, BODY_H);
+    // A continuous firestorm around the body. These loose, asymmetric
+    // folds deliberately do not copy the head, arms or legs. The volume
+    // can roll into the air between/around them instead of wearing a suit
+    // made of green light. No horizontal lower edge is authored here.
+    m.filter = "blur(5px)";
+    m.fillStyle = "rgb(255 255 255 / 0.9)";
+    m.beginPath();
+    m.moveTo(FIELD_W * 0.18, FIELD_H * 0.96);
+    m.bezierCurveTo(
+      FIELD_W * 0.02,
+      FIELD_H * 0.85,
+      FIELD_W * 0.13,
+      FIELD_H * 0.77,
+      FIELD_W * 0.04,
+      FIELD_H * 0.64,
+    );
+    m.bezierCurveTo(
+      FIELD_W * 0.16,
+      FIELD_H * 0.72,
+      FIELD_W * 0.13,
+      FIELD_H * 0.47,
+      FIELD_W * 0.04,
+      FIELD_H * 0.42,
+    );
+    m.bezierCurveTo(
+      FIELD_W * 0.23,
+      FIELD_H * 0.52,
+      FIELD_W * 0.18,
+      FIELD_H * 0.23,
+      FIELD_W * 0.33,
+      FIELD_H * 0.12,
+    );
+    m.bezierCurveTo(
+      FIELD_W * 0.25,
+      FIELD_H * 0.3,
+      FIELD_W * 0.43,
+      FIELD_H * 0.27,
+      FIELD_W * 0.49,
+      FIELD_H * 0.02,
+    );
+    m.bezierCurveTo(
+      FIELD_W * 0.62,
+      FIELD_H * 0.19,
+      FIELD_W * 0.5,
+      FIELD_H * 0.23,
+      FIELD_W * 0.68,
+      FIELD_H * 0.13,
+    );
+    m.bezierCurveTo(
+      FIELD_W * 0.64,
+      FIELD_H * 0.32,
+      FIELD_W * 0.9,
+      FIELD_H * 0.28,
+      FIELD_W * 0.86,
+      FIELD_H * 0.44,
+    );
+    m.bezierCurveTo(
+      FIELD_W * 0.8,
+      FIELD_H * 0.52,
+      FIELD_W * 0.94,
+      FIELD_H * 0.49,
+      FIELD_W * 0.96,
+      FIELD_H * 0.7,
+    );
+    m.bezierCurveTo(
+      FIELD_W * 0.85,
+      FIELD_H * 0.63,
+      FIELD_W * 0.96,
+      FIELD_H * 0.87,
+      FIELD_W * 0.78,
+      FIELD_H * 0.97,
+    );
+    m.bezierCurveTo(
+      FIELD_W * 0.64,
+      FIELD_H * 1.01,
+      FIELD_W * 0.57,
+      FIELD_H * 0.95,
+      FIELD_W * 0.51,
+      FIELD_H * 0.9,
+    );
+    m.bezierCurveTo(
+      FIELD_W * 0.47,
+      FIELD_H * 0.97,
+      FIELD_W * 0.32,
+      FIELD_H * 1.01,
+      FIELD_W * 0.18,
+      FIELD_H * 0.96,
+    );
+    m.closePath();
+    m.fill();
+    m.filter = "none";
+    const pixels = f.createImageData(FIELD_W, FIELD_H);
+    // A seamless advected density, made only during preparation. It keeps
+    // adjacent limbs visibly joined even between the Blender's hot curls.
+    for (let y = 0; y < FIELD_H; y += 1) {
+      const v = (y / FIELD_H) * TAU;
+      for (let x = 0; x < FIELD_W; x += 1) {
+        const u = (x / FIELD_W) * TAU;
+        const warp = u + Math.sin(v * 3 + u * 2) * 0.8;
+        const noise =
+          0.5 +
+          Math.sin(warp * 7 - v * 4) * 0.2 +
+          Math.sin(u * 17 + Math.sin(v * 5) * 2 - v * 11) * 0.16 +
+          Math.sin(u * 31 + v * 19) * 0.1;
+        const hot = Math.pow(clamp(noise), 2);
+        const k = (y * FIELD_W + x) * 4;
+        pixels.data[k] = 8 + hot * 166;
+        pixels.data[k + 1] = 64 + hot * 188;
+        pixels.data[k + 2] = 22 + hot * 80;
+        pixels.data[k + 3] = 104 + hot * 135;
+      }
+    }
+    f.putImageData(pixels, 0, 0);
+    bodySource = source;
+    bodyMask = mask;
+    bodyField = field;
+    bodyFlow = flow;
+    bodyContext = c;
+    fieldClock = -Infinity;
+    return true;
+  } catch {
+    // A blocked/low-memory canvas keeps the safe authored volume fallback.
+    return false;
+  }
+}
 
 let fallback = null;
 let heat = null;
@@ -300,9 +410,9 @@ export function drawNaniteFlame(context, core, strength, clock, scale = 1) {
     // The volume already stores dark/low-density emission. Add its radiance
     // rather than dimming it against the dark stage for a second time.
     context.globalCompositeOperation = "lighter";
-    // The reactor remains readable: narrow fire springs from its rim,
-    // rather than a white-green bloom covering the central mechanism.
-    for (let i = 0; i < 8; i += 1) {
+    // The reactor remains readable: two faint rim curls join the field,
+    // rather than a separate bonfire covering the central mechanism.
+    for (let i = 0; i < 2; i += 1) {
       const k = i * 8;
       const angle = SEED[k] * TAU;
       const pulse = 0.84 + 0.16 * Math.sin(clock * (3 + SEED[k + 1]) + i * 2.1);
@@ -313,7 +423,7 @@ export function drawNaniteFlame(context, core, strength, clock, scale = 1) {
         (25 + SEED[k + 2] * 25) * 1.65,
         (67 + SEED[k + 3] * 73) * 1.25 * (0.45 + 0.55 * power) * pulse,
         clock * 16 * (0.8 + SEED[k + 4] * 0.35) + SEED[k + 5] * 32,
-        power * (0.66 + SEED[k + 6] * 0.26),
+        power * (0.28 + SEED[k + 6] * 0.12),
         Math.cos(angle) * 0.12,
       );
     }
@@ -322,28 +432,110 @@ export function drawNaniteFlame(context, core, strength, clock, scale = 1) {
       context.globalAlpha = power * 0.18;
       context.drawImage(heat, cx - 89, cy - 43, 178, 86);
     }
-    context.fillStyle = "rgb(164 235 119)";
-    context.globalCompositeOperation = "source-over";
-    for (let i = 0; i < 14; i += 1) {
-      const k = i * 8;
-      const age = (((clock * (0.34 + SEED[k] * 0.23) + SEED[k + 1]) % 1) + 1) % 1;
-      context.globalAlpha = power * Math.sin(age * Math.PI) * 0.55;
-      context.fillRect(
-        cx + (SEED[k + 2] - 0.5) * 95 + Math.sin(age * 6 + i) * age * 13,
-        cy + 14 - age * (115 + SEED[k + 3] * 110),
-        0.7 + SEED[k + 4],
-        1.3 + SEED[k + 5],
-      );
-    }
+    // No separately respawning nucleus sparks: the one body-wide scatter
+    // and its real nanite engines now own material birth.
   } finally {
     context.restore();
   }
 }
 
-/** `back` is behind the body's plates; `front` burns across the whole body
- * and adds embers. The default preserves the old API for isolated uses/tests. No new
- * particle can appear beyond the figure's head/feet clipping bounds. */
-export function drawBodyFlame(context, size, strength, clock, scale = 1, layer = "all") {
+/** A real burning fragment, shared with both materialization engines.
+ * Their closed-form trajectory supplies its position; this only paints the
+ * fire carried by it, at a ceiling of two atlas draws (one cached fallback).
+ * No independent particle clock, resource, canvas or allocation is added. */
+export function drawNaniteFirebrand(context, x, y, strength, clock, scale = 1) {
+  if (!valid(strength, clock, scale) || !Number.isFinite(x) || !Number.isFinite(y) || !prepare())
+    return;
+  const power = clamp(strength);
+  context.save();
+  try {
+    if (scale !== 1) context.scale(scale, scale);
+    context.globalCompositeOperation = "lighter";
+    tongue(
+      context,
+      x,
+      y,
+      22 + power * 28,
+      35 + power * 72,
+      clock * 16,
+      power,
+      Math.sin(clock * 5.3 + x * 0.07) * 0.13,
+    );
+  } finally {
+    context.restore();
+  }
+}
+
+// One textured field is reused by the back and front passes of a frame.
+// The body alpha is applied after advection, so texture may flow without
+// translating or stretching a cheek, foot or a separate flame's root.
+function paintBodyField(power, clock) {
+  if (!bodyContext || !bodyFlow || !bodyMask || !bodyField) return false;
+  if (fieldClock === clock && fieldPower === power) return true;
+  const c = bodyContext;
+  const W = FIELD_W;
+  const H = FIELD_H;
+  c.save();
+  try {
+    c.globalCompositeOperation = "source-over";
+    c.globalAlpha = 1;
+    c.clearRect(0, 0, W, H);
+    // A single rising combustion front (not a per-part on/off stagger).
+    c.beginPath();
+    c.ellipse(
+      BODY_X + BODY_W * 0.5,
+      BODY_Y + BODY_H * 0.34,
+      BODY_W * (0.1 + power * 1.8),
+      BODY_H * (0.025 + power * 0.94),
+      0,
+      0,
+      TAU,
+    );
+    c.clip();
+    const offset = (((clock * 69) % H) + H) % H;
+    c.drawImage(bodyFlow, 0, offset - H, W, H);
+    c.drawImage(bodyFlow, 0, offset, W, H);
+    // Overlapping sheets are texture within the one connected field. The
+    // participating-volume detail is still the real Cycles-rendered asset.
+    c.globalCompositeOperation = "lighter";
+    for (let i = 0; i < 8; i += 1) {
+      const k = i * 8;
+      const column = i % 2;
+      const row = i >> 1;
+      tongue(
+        c,
+        W * (0.23 + column * 0.52) + Math.sin(clock * 1.7 + row * 1.8) * 8,
+        H * (0.32 + row * 0.255),
+        W * 0.84,
+        H * (0.43 + Math.sin(clock * 2.1 + i) * 0.025),
+        clock * 16 + SEED[k + 2] * 32,
+        0.82,
+        Math.sin(clock * 1.9 + row) * 0.09,
+      );
+    }
+  } finally {
+    c.restore();
+  }
+  c.globalCompositeOperation = "destination-in";
+  c.globalAlpha = 1;
+  // A continuous soft boundary sways from the feet while the internal
+  // volume curls independently. Unlike strip displacement this has no
+  // horizontal seams/notches, and costs only one mask draw per frame.
+  c.save();
+  c.translate(FIELD_W * 0.5, FIELD_H * 0.9);
+  c.rotate(Math.sin(clock * 1.7) * 0.018 * power);
+  c.scale(1 + Math.sin(clock * 2.1) * 0.018 * power, 1);
+  c.drawImage(bodyMask, -FIELD_W * 0.5, -FIELD_H * 0.9);
+  c.restore();
+  c.globalCompositeOperation = "source-over";
+  fieldClock = clock;
+  fieldPower = power;
+  return true;
+}
+
+/** Back/front sample the same connected body volume. Phase is the shared
+ * ignition clock, not wall-clock history; it drives one scatter impulse. */
+export function drawBodyFlame(context, size, strength, clock, scale = 1, layer = "all", phase = 0) {
   if (
     !valid(strength, clock, scale) ||
     !size ||
@@ -354,116 +546,85 @@ export function drawBodyFlame(context, size, strength, clock, scale = 1, layer =
     !prepare()
   )
     return;
+  if (layer === "all") {
+    drawBodyFlame(context, size, strength, clock, scale, "back", phase);
+    drawBodyFlame(context, size, strength, clock, scale, "front", phase);
+    return;
+  }
   const W = size.width;
   const H = size.height;
   const unit = H / 1000;
-  const power = smooth(clamp(strength));
+  const power = clamp(strength);
+  // Extinction sheds density across the broad volume. It must not contract
+  // the ignition ellipse back onto the chest like a hard circular wipe.
+  const connected = paintBodyField(phase > 0.175 ? 1 : power, clock);
+  const scatter = naniteFlameScatter(phase);
   context.save();
   try {
     if (scale !== 1) context.scale(scale, scale);
-    // The silhouette still occludes the back fire. Redistribute its budget
-    // toward the near body surface within the existing draw ceiling.
-    context.globalCompositeOperation = "lighter";
-    if (layer !== "front") {
-      // Nine/thirteen pairs preserve head-to-feet coverage behind the body;
-      // their budget supports seventeen/twenty near-surface roots, including
-      // both cheeks, while staying within the same 104/128 draw ceilings.
-      const rootPairs = coarse ? 9 : 13;
-      for (let n = 0; n < rootPairs * 2; n += 1) {
-        const i = Math.round(((n >> 1) * 19) / (rootPairs - 1)) * 2 + (n % 2);
-        const k = i * 8;
-        const side = ROOTS[i * 3 + 2];
-        const v = ROOTS[i * 3 + 1];
-        const local = surfacePower(strength, v, SEED[k + 5]);
-        const wave = Math.sin(clock * 1.8 + v * 9 + side * 0.6);
-        const curl = Math.sin(clock * (2.2 + SEED[k]) - v * 13 + SEED[k + 1] * TAU);
-        const height =
-          (72 + SEED[k + 1] * 79) * unit * 1.3 * (0.24 + local * 0.76) * (0.94 + curl * 0.09);
-        const y = v * H + Math.sin(clock * 2.4 + i * 2.1) * 3 * unit * local;
-        tongue(
-          context,
-          ROOTS[i * 3] * W + (wave * 4 + curl * 2) * unit * local,
-          y,
-          (25 + SEED[k + 2] * 22) * unit * 1.8 * (0.91 + local * 0.09),
-          Math.min(height, Math.max(5, y - H * 0.012)),
-          clock * 16 * (0.78 + SEED[k + 3] * 0.4) + SEED[k + 4] * 32,
-          local * (0.7 + SEED[k + 5] * 0.28),
-          side * (0.04 + SEED[k + 6] * 0.1) + wave * 0.085 + curl * 0.025,
-        );
-      }
-      // Separate contact fire: low, spreading tongues, never hovering balls.
-      for (let i = 0; i < 8; i += 1) {
-        const k = (i + 40) * 8;
-        tongue(
-          context,
-          W * SOLES[i],
-          H * 0.986,
-          (43 + SEED[k] * 30) * unit * 1.3,
-          (35 + SEED[k + 1] * 47) *
-            unit *
-            1.2 *
-            power *
-            (0.9 + 0.1 * Math.sin(clock * 3.3 + i * 2.4)),
-          clock * 16 * (0.85 + SEED[k + 2] * 0.3) + SEED[k + 3] * 32,
-          power * 0.85,
-          (i - 3.5) * 0.055,
-        );
-      }
-      if (heat) {
-        context.globalCompositeOperation = "lighter";
-        context.globalAlpha = power * 0.32;
-        context.drawImage(heat, W * 0.1, H * 0.947, W * 0.8, H * 0.055);
-        context.globalCompositeOperation = "source-over";
-      }
+    if (connected) {
+      context.globalCompositeOperation = layer === "back" ? "lighter" : "source-over";
+      // Quiet ignition is a small but visible lick, not an invisible delay.
+      // Its spatial front remains small; only its local radiance is lifted.
+      const radiance = phase > 0 && phase < 0.175 ? Math.sqrt(power) : power;
+      context.globalAlpha = radiance * (layer === "back" ? 0.5 : 0.98);
+      context.drawImage(
+        bodyField,
+        (-W * BODY_X) / BODY_W,
+        (-H * BODY_Y) / BODY_H,
+        (W * FIELD_W) / BODY_W,
+        (H * FIELD_H) / BODY_H,
+      );
     }
-    if (layer !== "back") {
-      context.globalCompositeOperation = "source-over";
-      // Overlapping, upward-moving volume tongues cross head, sternum,
-      // abdomen, both arms, thighs, shins and feet. Preserve the volume's
-      // authored absorption as well as emission: screen blending on bright
-      // silver/blue plates had reduced the fire to almost invisible lines.
-      const nearRoots = coarse ? 17 : 20;
-      for (let i = 0; i < nearRoots; i += 1) {
-        const k = (i + 44) * 8;
-        const root = i * 5;
-        const v = FRONT[root + 1];
-        const local = surfacePower(strength, v, SEED[k + 4]);
-        const face = i === 0 || i === 16;
-        // A shared upward travelling gust links the fire from the soles to
-        // the shoulders. Smaller local curls keep the left/right limbs from
-        // swinging as mirrored blocks. Roots stay attached to real surfaces;
-        // there is deliberately no centre root in the hollow below the hips.
-        const gust = Math.sin(clock * 1.8 + v * 9);
-        const curl = Math.sin(clock * (2.3 + SEED[k]) - v * 13 + SEED[k + 1] * TAU);
-        const y = v * H + curl * 3 * unit * local;
-        const lift = FRONT[root + 3] * H * (0.25 + 0.75 * Math.sqrt(local));
-        const pulse = 1 + gust * 0.065 + curl * 0.065;
-        tongue(
-          context,
-          FRONT[root] * W + (gust * 3.5 + curl * 2) * unit * local,
-          y,
-          FRONT[root + 2] * unit * (0.9 + 0.1 * local) * (1 - curl * 0.045),
-          Math.min(lift * pulse, Math.max(5, y - H * 0.012)),
-          clock * 16 * (0.8 + SEED[k + 2] * 0.3) + SEED[k + 3] * 32,
-          local * (0.94 + SEED[k + 4] * 0.06) * (0.97 + 0.03 * gust),
-          FRONT[root + 4] + (gust * 0.095 + curl * 0.04) * (face ? 0.55 : 1),
-        );
-      }
-      context.fillStyle = "rgb(146 224 106)";
-      for (let i = 0; i < 16; i += 1) {
+    // Escaping tongues are edge detail, never the source of body coverage.
+    // Broad shared gusts couple neighbouring strands instead of separate
+    // miniature candles. The face stays on the same flow as the shoulders.
+    const count = coarse ? 8 : 10;
+    context.globalCompositeOperation = "lighter";
+    for (let i = 0; i < count; i += 1) {
+      const j = Math.floor((i * 48) / count);
+      const k = i * 8;
+      const root = j * 4;
+      const v = SOURCES[root + 1];
+      const local = smooth(clamp((power - Math.abs(v - 0.34) * 0.23) / 0.77));
+      const gust = Math.sin(clock * 1.8 + v * 9);
+      const curl = Math.sin(clock * 2.7 - v * 13 + SEED[k] * TAU);
+      const y = v * H;
+      tongue(
+        context,
+        SOURCES[root] * W + gust * 3 * unit,
+        y,
+        (45 + SEED[k + 1] * 40) * unit,
+        Math.min((90 + SEED[k + 2] * 90) * unit * local * (1 + curl * 0.15), y - H * 0.02),
+        clock * 16 + SEED[k + 3] * 32,
+        local * (connected ? 0.56 : 0.92),
+        SOURCES[root + 2] * 0.07 + gust * 0.14,
+      );
+    }
+    if (layer !== "back" && scatter > 0 && scatter < 1) {
+      const fade = Math.sin(scatter * Math.PI);
+      context.fillStyle = "rgb(166 255 126)";
+      for (let i = 0; i < 40; i += 1) {
         const k = i * 8;
-        const age = (((clock * (0.28 + SEED[k] * 0.3) + SEED[k + 1]) % 1) + 1) % 1;
-        const root = (i * 7 + 3) % 40;
-        const y = ROOTS[root * 3 + 1] * H - age * 95 * unit;
-        if (y < H * 0.02) continue;
-        context.globalAlpha =
-          surfacePower(strength, ROOTS[root * 3 + 1], SEED[k]) * (1 - age) * 0.5;
-        context.fillRect(
-          ROOTS[root * 3] * W + Math.sin(age * 7 + i) * age * 14 * unit,
-          y,
-          unit * (0.7 + SEED[k + 2]),
-          unit * (1.2 + SEED[k + 3]),
-        );
+        const root = i * 4;
+        const travel = (55 + SEED[k] * 100) * unit * scatter;
+        const x = SOURCES[root] * W + SOURCES[root + 2] * travel;
+        const y = SOURCES[root + 1] * H + SOURCES[root + 3] * travel - scatter * 35 * unit;
+        context.globalAlpha = power * fade * (0.45 + SEED[k + 1] * 0.5);
+        // Hot droplets stretch with their impulse, then shrink into chips.
+        context.fillRect(x, y, unit * (1.2 + fade * 2), unit * (1 + fade * 4));
+        if (i % (coarse ? 7 : 4) === 0) {
+          tongue(
+            context,
+            x,
+            y,
+            unit * (35 + 32 * SEED[k + 2]),
+            unit * (65 + 100 * SEED[k + 3]) * fade,
+            clock * 16 + SEED[k + 4] * 32,
+            power * fade * 0.78,
+            SOURCES[root + 2] * (0.6 + 0.35 * scatter),
+          );
+        }
       }
     }
   } finally {

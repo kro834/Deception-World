@@ -1,6 +1,14 @@
 import { useEffect, useRef } from "react";
-import { REXONANCE_SUIT_ATLAS, REXONANCE_SUIT_GOLD_ATLAS } from "@/lib/rexonance-suit";
-import { rexonanceSuitSource, warmRexonanceSuit } from "@/lib/rexonance-suit-warmup";
+import {
+  REXONANCE_SUIT_ATLAS,
+  REXONANCE_SUIT_GOLD_ATLAS,
+  REXONANCE_SUIT_UNDERSUIT,
+} from "@/lib/rexonance-suit";
+import {
+  rexonanceSuitPicture,
+  rexonanceSuitSource,
+  warmRexonanceSuit,
+} from "@/lib/rexonance-suit-warmup";
 import {
   FIG,
   FLIGHT,
@@ -20,7 +28,13 @@ import {
 import { REXONANCE_SUIT_LIGHT, REXONANCE_SUIT_REVEAL_MS } from "@/lib/rexonance-calls";
 import { REXONANCE_SUIT_MARKS } from "@/lib/rexonance-suit";
 import { reactorCoilAngle, reactorCoilScale } from "@/lib/rexonance-reactor.js";
-import { drawBodyFlame, drawNaniteFlame, warmNaniteFlame } from "@/lib/rexonance-flame.js";
+import {
+  drawBodyFlame,
+  drawNaniteFlame,
+  prepareBodyFlame,
+  warmNaniteFlame,
+} from "@/lib/rexonance-flame.js";
+import { naniteFlameEnvelope } from "@/lib/rexonance-ignition.js";
 import type { SuitExtrasEnv } from "./rexonance-suit-extras";
 import { suitExtrasApi } from "./rexonance-suit-extras-hook";
 
@@ -71,8 +85,8 @@ import { suitExtrasApi } from "./rexonance-suit-extras-hook";
 
 /** The engine takes over only if it is ready before the first tile is due. */
 const START_BY = 420;
-// The flame kindles over 600 ms and dies down from 1000 ms over 1400 ms.
-const CALL_FLAME = [600, 1000, 1400];
+// One shared quiet-kindling / explosive-front / material-handoff clock.
+const CALL_FLAME_MS = 2400;
 
 // The extras through their hook (round 3, review 33): the call's chunk never
 // imports them, so a still tier never downloads the kit's code; until the
@@ -135,6 +149,8 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
         const atlas = rexonanceSuitSource(REXONANCE_SUIT_ATLAS.src);
         const raw = rexonanceSuitSource(REXONANCE_SUIT_GOLD_ATLAS.src);
         if (!atlas || !raw) return;
+        const bare = rexonanceSuitPicture(REXONANCE_SUIT_UNDERSUIT);
+        if (bare) prepareBodyFlame(bare, FIG);
         const atlasWork = forming(atlas, raw);
         // Touch screens draw at up to 1.25x (the tiles are 9 px of art; a 2x
         // backing store only doubled the fill work on a tablet).
@@ -146,7 +162,9 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
         // the flight canvas then bleeds past the figure (CSS) for the cocoon
         // and spall, and the settled canvas shares its box (below).
         const rich = isRexonanceNaniteReady();
-        if (rich && !coarse) box.dataset.bleed = "";
+        // Fire now rolls outside the silhouette on touch screens too.
+        // Both canvases still receive the same pixel-aligned box below.
+        box.dataset.bleed = "";
         const make = () => {
           const canvas = globalThis.document.createElement("canvas");
           box.append(canvas);
@@ -377,13 +395,10 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
           extras?.before(t);
           // The nanites' source (owner, 2026-10-18): the forest-green flame
           // at the reactor, burning as the first plates stream in.
-          const rawFlame = Math.min(
-            Math.min(1, Math.max(0, t / CALL_FLAME[0])),
-            1 - Math.min(1, Math.max(0, (t - CALL_FLAME[1]) / CALL_FLAME[2])),
-          );
-          const flame = rawFlame * rawFlame * (3 - 2 * rawFlame);
+          const flamePhase = t / CALL_FLAME_MS;
+          const flame = naniteFlameEnvelope(flamePhase);
           if (flame > 0) {
-            drawBodyFlame(flight, FIG, flame, t / 1000, s, "back");
+            drawBodyFlame(flight, FIG, flame, t / 1000, s, "back", flamePhase);
             drawNaniteFlame(flight, REXONANCE_SUIT_MARKS.core, flame, t / 1000, s);
           }
           for (let p = 0; p < all.length; p += 1) {
@@ -641,7 +656,10 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
           }
           if (extras) extras.after(t);
           else grains();
-          if (flame > 0) drawBodyFlame(flight, FIG, flame, t / 1000, s, "front");
+          if (flame > 0) drawBodyFlame(flight, FIG, flame, t / 1000, s, "front", flamePhase);
+          // Burning fragments carry material out of the broad fire. Their
+          // machine crossfade remains visible on the near side of the plume.
+          extras?.firebrands(t);
           flight.globalAlpha = 1;
           if (keepOut) flight.restore();
         };

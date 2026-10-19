@@ -7,7 +7,13 @@ import {
   warpPicture,
 } from "./rexonance-overwrite.js";
 import { createSplitLightsJob } from "./rexonance-unlit.js";
-import { drawBodyFlame, drawNaniteFlame, warmNaniteFlame } from "./rexonance-flame.js";
+import {
+  drawBodyFlame,
+  drawNaniteFlame,
+  prepareBodyFlame,
+  warmNaniteFlame,
+} from "./rexonance-flame.js";
+import { naniteFlameEnvelope } from "./rexonance-ignition.js";
 import { releasePendingImage } from "./release-pending-images.js";
 import {
   createReactorLayers,
@@ -1370,9 +1376,9 @@ const BURSTS = [
   [4.8, 16],
 ];
 
-// Kindles slowly and dies down slowly (owner, 2026-10-18).
-const NANITE_FLAME_IN = [0.02, 0.1];
-const NANITE_FLAME_OUT = [0.14, 0.3];
+// The same combustion choreography as the entrance's 2400 ms clock.
+const NANITE_FLAME_START = 0.015;
+const NANITE_FLAME_SPAN = 0.285;
 /**
  * Mounts the suit-up scene on its runway. `config`: { figure, undersuit,
  * size: { width, height }, pieces: [{ id, group, x, y, w, h, seat }],
@@ -1661,6 +1667,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
           return null;
         }
         images = { figure, undersuit, gold, atlas, base, cells, comets, fx, guide };
+        prepareBodyFlame(undersuit, config.size, environment);
         return images;
       })
       .catch((error) => {
@@ -2896,14 +2903,13 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     context.setTransform(view.scale, 0, 0, view.scale, vx, vy);
     context.imageSmoothingEnabled = true;
 
-    const flame = smooth(
-      Math.min(span(progress, NANITE_FLAME_IN), 1 - span(progress, NANITE_FLAME_OUT)),
-    );
+    const flamePhase = (progress - NANITE_FLAME_START) / NANITE_FLAME_SPAN;
+    const flame = naniteFlameEnvelope(flamePhase);
     const flameClock = calm ? progress * 60 : (environment.performance?.now?.() ?? 0) / 1000;
 
     // The cocoon's far side, behind the body.
     if (nanites) nanites.backPass(context);
-    if (flame > 0) drawBodyFlame(context, config.size, flame, flameClock, 1, "back");
+    if (flame > 0) drawBodyFlame(context, config.size, flame, flameClock, 1, "back", flamePhase);
     // FAR UP！: the scan wakes the undersuit, top to bottom.
     const scan = span(progress, B.scan);
     if (seal < 1) {
@@ -3177,7 +3183,6 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       nanites.goldPass(context);
       nanites.frontPass(context);
       nanites.freePass(context);
-      nanites.endFrame();
     }
 
     // The disc forms without rotating; only its surrounding coil turns.
@@ -3292,7 +3297,13 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     }
 
     // Sparse near-side fire crosses the outer armour, not the core/face.
-    if (flame > 0) drawBodyFlame(context, config.size, flame, flameClock, 1, "front");
+    if (flame > 0) drawBodyFlame(context, config.size, flame, flameClock, 1, "front", flamePhase);
+    // The fire carries these fragments out first; their metal handoff is
+    // on the near side so it cannot disappear under the broad plume.
+    if (nanites) {
+      nanites.firebrands(context);
+      nanites.endFrame();
+    }
 
     // REXONANCE DEUS！: the face fills with pixel squares, which scatter.
     const [visorX, visorY] = config.visor;

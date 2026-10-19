@@ -11,6 +11,19 @@ export const NANITE_FLAME_ATLAS: Readonly<{
 }>;
 export function warmNaniteFlame(environment?: typeof globalThis): Promise<boolean>;
 export function naniteFlameReady(): boolean;
+export function drawNaniteFirebrand(
+  context: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  strength: number,
+  clock: number,
+  scale?: number,
+): void;
+export function prepareBodyFlame(
+  source: CanvasImageSource,
+  size: { readonly width: number; readonly height: number },
+  environment?: typeof globalThis,
+): boolean;
 export function drawNaniteFlame(
   context: CanvasRenderingContext2D,
   core: readonly [number, number],
@@ -25,4 +38,5 @@ export function drawBodyFlame(
   clock: number,
   scale?: number,
   layer?: "back" | "front" | "all",
+  phase?: number,
 ): void;

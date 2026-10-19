@@ -154,7 +154,11 @@ export interface NanitePlan {
   spin: Float32Array;
   r0: Float32Array;
   psi0: Float32Array;
+  /** Metal handoff time; a firebrand leaves the surface .006 earlier. */
   birth: Float64Array;
+  /** Packed [pixel x, pixel y, outward nx, outward ny], sampled once from
+   * the same body-space source used by the continuous flame. */
+  emission: Float32Array;
   arm: Uint8Array;
   armDir: Int8Array;
   gateJ: Float32Array;
@@ -189,6 +193,8 @@ export interface NanitePlan {
     f0: Float32Array;
     spin: Float32Array;
     birth: Float64Array;
+    /** Packed body-space emission positions and outward normals. */
+    emission: Float32Array;
     arm: Uint8Array;
     armDir: Int8Array;
     tone: Uint8Array;
@@ -264,6 +270,8 @@ export interface AssemblyNanitesState {
   heroes: number;
   nanites: number;
   comets: number;
+  /** Detailed airborne flames, included in the existing sprite budget. */
+  firebrands: number;
 }
 
 type Pass = (context: CanvasRenderingContext2D) => void;
@@ -294,6 +302,8 @@ export interface AssemblyNanites {
   impactPass: Pass;
   goldPass: Pass;
   frontPass: Pass;
+  /** Airborne flame fragments and their metal handoff; after front fire. */
+  firebrands: Pass;
   freePass: Pass;
   endFrame(): void;
   /** Releases the swarm's own small sheets. */
@@ -363,7 +373,10 @@ export interface NaniteConduitIO {
   H: number;
 }
 /** One plate's conduit, row by row (yields after every row). */
-export function naniteConduitRows(cell: NaniteConduitCell, io: NaniteConduitIO): Generator<void, void, void>;
+export function naniteConduitRows(
+  cell: NaniteConduitCell,
+  io: NaniteConduitIO,
+): Generator<void, void, void>;
 
 export interface AssemblyConduitResult {
   face: HTMLCanvasElement;
@@ -396,7 +409,13 @@ export function createAssemblyConduitJob(options: {
     fade?: number;
   }[];
   size: { readonly width: number; readonly height: number };
-  goldPlan?: { count: number; x: ArrayLike<number>; y: ArrayLike<number>; w: ArrayLike<number>; h: ArrayLike<number> } | null;
+  goldPlan?: {
+    count: number;
+    x: ArrayLike<number>;
+    y: ArrayLike<number>;
+    w: ArrayLike<number>;
+    h: ArrayLike<number>;
+  } | null;
   holo?: boolean;
   walls?: boolean;
   figureFace?: boolean;

@@ -3,17 +3,25 @@
 // [FLAME_CASES=normal,blocked,reduced] [BROWSER=webkit] node scripts/verify-rexonance-flame.mjs
 // [FLAME_COVERAGE_MIN=0.05] opts into a measured per-region peak coverage gate.
 // [OUT_DIR=output/playwright/rexonance-flame] [FLAME_NATURAL=1] controls evidence/real-clock capture.
+// [FLAME_ENTRY_DETAIL=1] adds four diagnostic prelude/handoff shots; leave off for WebKit's bounded entry wall clock.
 // The disposable profile never posts gallery images or changes public data.
 import assert from "node:assert/strict";
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { chromium, webkit } from "playwright";
 import sharp from "sharp";
+import { connectedFireEvidence } from "./rexonance-fire-evidence.mjs";
 
 const base = process.env.BASE_URL || "http://127.0.0.1:8197";
 const out = process.env.OUT_DIR || "output/playwright/rexonance-flame";
 const baseline = process.env.FLAME_BASELINE === "1";
 const naturalClock = process.env.FLAME_NATURAL === "1";
+// Extra ignition/firebrand shots are diagnostic, not another four waits
+// inside WebKit's non-pausable route-coordinator wall-clock deadline.
+const detailedEntry = process.env.FLAME_ENTRY_DETAIL === "1";
+const entrySamples = detailedEntry
+  ? [180, 280, 360, 400, 460, 520, 620, 700, 850, 1000, 1150, 1600, 1950, 2200, 2600]
+  : [180, 280, 460, 620, 850, 1000, 1150, 1600, 1950, 2200, 2600];
 const coverageMinimum = process.env.FLAME_COVERAGE_MIN
   ? Number(process.env.FLAME_COVERAGE_MIN)
   : null;
@@ -38,6 +46,16 @@ const bodyRegions = {
   footRight: [404, 955, 45, 45],
 };
 const asset = "/rexonance-flame-natural-20261019/flame.webp";
+const evidenceWidth = 171;
+const evidenceHeight = 312;
+const bodyMask = await sharp(
+  await readFile(new URL("../public/rexonance-suit-20261016/undersuit.webp", import.meta.url)),
+)
+  .ensureAlpha()
+  .resize(evidenceWidth, evidenceHeight)
+  .extractChannel(3)
+  .raw()
+  .toBuffer();
 const engine = process.env.BROWSER === "webkit" ? webkit : chromium;
 const browser = await engine.launch(engine === chromium ? { channel: "chrome" } : {});
 const profiles = {
@@ -314,7 +332,7 @@ async function screenCoverage(capture, figure) {
     .ensureAlpha()
     .raw()
     .toBuffer({ resolveWithObject: true });
-  return Object.fromEntries(
+  const regions = Object.fromEntries(
     Object.entries(bodyRegions).map(([name, [x, y, width, height]]) => {
       const x0 = Math.floor(figure.x + (x / 571) * figure.width);
       const y0 = Math.floor(figure.y + (y / 1040) * figure.height);
@@ -346,6 +364,64 @@ async function screenCoverage(capture, figure) {
         },
       ];
     }),
+  );
+  const pixels = new Uint8Array(evidenceWidth * evidenceHeight * 4);
+  for (let y = 0; y < evidenceHeight; y++) {
+    const sy = Math.floor(figure.y + ((y + 0.5) / evidenceHeight) * figure.height);
+    if (sy < 0 || sy >= info.height) continue;
+    for (let x = 0; x < evidenceWidth; x++) {
+      const sx = Math.floor(figure.x + ((x + 0.5) / evidenceWidth) * figure.width);
+      if (sx < 0 || sx >= info.width) continue;
+      const start = (sy * info.width + sx) * 4;
+      pixels.set(data.subarray(start, start + 4), (y * evidenceWidth + x) * 4);
+    }
+  }
+  return {
+    regions,
+    fire: connectedFireEvidence({
+      pixels,
+      width: evidenceWidth,
+      height: evidenceHeight,
+      bodyMask,
+      regions: bodyRegions,
+      referenceWidth: 571,
+      referenceHeight: 1040,
+    }),
+  };
+}
+
+function assertConnectedPeak(shots, isPeak, label) {
+  const peaks = shots.filter(isPeak);
+  assert.ok(peaks.length >= 2, `${label}: multiple real connected-field peak samples`);
+  const required = coverageMinimum ?? 0.05;
+  assert.ok(
+    peaks.some(
+      (shot) =>
+        Object.values(shot.fireEvidence?.largest.regional ?? {}).length === 11 &&
+        Object.values(shot.fireEvidence.largest.regional).every(
+          (region) => region.ratio >= required,
+        ),
+    ),
+    `${label}: one actual connected component must reach all eleven body regions; ` +
+      peaks
+        .map(
+          (shot) =>
+            `${shot.target ?? shot.progress}:` +
+            Object.entries(shot.fireEvidence?.largest.regional ?? {})
+              .sort(([, a], [, b]) => a.ratio - b.ratio)
+              .slice(0, 2)
+              .map(([name, r]) => `${name}=${(r.ratio * 100).toFixed(2)}%`)
+              .join(","),
+        )
+        .join("; "),
+  );
+  assert.ok(
+    peaks.some(
+      (shot) =>
+        shot.fireEvidence?.exterior.greenPixels >= 100 &&
+        shot.fireEvidence.exterior.relativeToBody >= 0.1,
+    ),
+    `${label}: meaningful flame extends outside the real body rather than merely colouring its silhouette`,
   );
 }
 
@@ -404,15 +480,27 @@ try {
       const page = await context.newPage();
       const errors = [];
       const requests = [];
+      const requestTimeline = [];
+      const trackedRequests = new Map();
       page.on("pageerror", (error) => errors.push(error.message));
       page.on("request", (request) => {
-        if (request.url().includes(asset)) requests.push(request.url());
+        if (request.url().includes(asset)) {
+          requests.push(request.url());
+          const entry = { url: request.url(), startedAt: performance.now(), failedAt: null };
+          requestTimeline.push(entry);
+          trackedRequests.set(request, entry);
+        }
+      });
+      page.on("requestfailed", (request) => {
+        const entry = trackedRequests.get(request);
+        if (entry) entry.failedAt = performance.now();
       });
       const record = {
         profile: name,
         mode,
         baseline,
         naturalClock,
+        detailedEntry,
         coverageMinimum,
         entry: [],
         scroll: [],
@@ -453,9 +541,7 @@ try {
               .map((entry) => new URL(entry.name).pathname),
           }));
         }
-        for (const target of mode === "reduced"
-          ? []
-          : [320, 460, 600, 850, 1000, 1150, 1600, 1950, 2200, 2600]) {
+        for (const target of mode === "reduced" ? [] : entrySamples) {
           if (!(await page.locator(".rx-call-sequence").count())) break;
           // Seek the actual CSS meter read by the real canvas engine. Only
           // its clock is controlled; no replacement painter or synthetic draw.
@@ -477,8 +563,14 @@ try {
                 meter.currentTime = time;
               }
             }, target);
-            await page.waitForTimeout(80);
+            await page.evaluate(
+              () =>
+                new Promise((resolve) =>
+                  requestAnimationFrame(() => requestAnimationFrame(resolve)),
+                ),
+            );
           }
+          if (naturalClock && !(await page.locator(".rx-call-sequence").count())) break;
           const state = await page.evaluate(() => {
             const suit = document.querySelector(".rx-suit");
             const sequence = document.querySelector(".rx-call-sequence");
@@ -494,12 +586,15 @@ try {
           });
           const pixels = await canvasPixels(page, ".rx-suit-nanites > canvas:nth-child(2)");
           const file = join(dir, `entry-${target}.png`);
-          const capture = await page.screenshot({ path: file, scale: "css" });
+          // Keep this critical path short. The CSS painter clock can be
+          // paused, but the real route handover still has a wall-clock cap;
+          // running CPU-heavy connected-component analysis between shots
+          // could accidentally capture the next route as the late entry.
+          await page.screenshot({ path: file, scale: "css" });
           record.entry.push({
             target,
             ...state,
             pixels,
-            screenCoverage: await screenCoverage(capture, pixels?.viewportFigure),
             file,
           });
           if (target === 2600) {
@@ -514,6 +609,32 @@ try {
             assert.equal(after, before, `${name}: entry flame stops after its slow extinction`);
           }
         }
+        for (const shot of record.entry) {
+          const coverage = await screenCoverage(
+            await readFile(shot.file),
+            shot.pixels?.viewportFigure,
+          );
+          shot.screenCoverage = coverage?.regions;
+          shot.fireEvidence = coverage?.fire;
+        }
+        if (mode !== "reduced" && !naturalClock) {
+          assert.deepEqual(
+            record.entry.map((shot) => shot.target),
+            entrySamples,
+            "all mandatory entry phases must be captured before the wall-clock handover; a partial sequence cannot pass",
+          );
+          assert.ok(
+            record.entry.every(
+              (shot) => Number.isFinite(shot.clock) && Math.abs(shot.clock - shot.target) < 1,
+            ),
+            "each seeked entry sample belongs to the actual call clock, never to the destination route",
+          );
+          assert.equal(
+            record.entryExtinguished?.target,
+            2600,
+            "the entry extinction sample cannot be silently skipped",
+          );
+        }
         if (mode === "normal" && !baseline) {
           assert.equal(
             record.initialEntry.nanites,
@@ -522,7 +643,7 @@ try {
           );
           assert.ok(
             record.entry
-              .filter((shot) => shot.target >= 600 && shot.target <= 1600)
+              .filter((shot) => shot.target >= 620 && shot.target <= 1600)
               .every((shot) => shot.atlasDraws > 0 && shot.pixels?.green > 0),
             `${name}: initial flame frames must be drawn, not only a later return call`,
           );
@@ -559,8 +680,8 @@ try {
           // but also inspect ignition and shrinking extinction. The final
           // five samples travel backwards through the same live scene.
           const progressSamples = [
-            0.025, 0.04, 0.065, 0.085, 0.1, 0.14, 0.22, 0.27, 0.3, 0.34, 0.92, 0.99, 0.27, 0.14,
-            0.1, 0.065, 0.025,
+            0.025, 0.04, 0.049, 0.058, 0.065, 0.085, 0.1, 0.14, 0.22, 0.27, 0.3, 0.34, 0.92, 0.99,
+            0.27, 0.14, 0.1, 0.065, 0.025,
           ];
           for (const [index, progress] of progressSamples.entries()) {
             const state = await scrollToProgress(page, progress);
@@ -573,12 +694,14 @@ try {
             assert.ok(pixels?.visible > 20, `${name}/${progress}: painted scroll canvas`);
             const file = join(dir, `scroll-${progress}-${record.scroll.length}.png`);
             const capture = await page.screenshot({ path: file, scale: "css" });
+            const coverage = await screenCoverage(capture, pixels?.viewportFigure);
             record.scroll.push({
               progress,
-              direction: index < 12 ? "forward" : "reverse",
+              direction: index < 14 ? "forward" : "reverse",
               ...state,
               pixels,
-              screenCoverage: await screenCoverage(capture, pixels?.viewportFigure),
+              screenCoverage: coverage?.regions,
+              fireEvidence: coverage?.fire,
               file,
             });
             if (progress === 0.34 || progress === 0.92 || progress === 0.99) {
@@ -601,7 +724,7 @@ try {
           record.bodyCoverage = {
             entry: coverageSummary(
               record.entry,
-              (shot) => shot.target >= 850 && shot.target <= 1150,
+              (shot) => shot.target >= 460 && shot.target <= 850,
             ),
             scroll: coverageSummary(
               record.scroll,
@@ -643,6 +766,34 @@ try {
             assertPeakCoverage(record.bodyCoverage.entry, `${name}/entry`);
             assertPeakCoverage(record.bodyCoverage.scroll, `${name}/scroll`);
             assertPeakCoverage(record.bodyCoverage.reverse, `${name}/reverse`);
+            assertConnectedPeak(
+              record.entry,
+              (shot) => shot.target >= 460 && shot.target <= 850,
+              `${name}/entry`,
+            );
+            assertConnectedPeak(
+              record.scroll,
+              (shot) => shot.direction === "forward" && [0.065, 0.085, 0.1].includes(shot.progress),
+              `${name}/scroll`,
+            );
+            assertConnectedPeak(
+              record.scroll,
+              (shot) => shot.direction === "reverse" && [0.065, 0.1, 0.14].includes(shot.progress),
+              `${name}/reverse`,
+            );
+            if (!naturalClock) {
+              const quiet = record.entry.filter((shot) => shot.target <= 280);
+              const flare = record.entry.filter((shot) => [460, 620].includes(shot.target));
+              const energy = (shot) => shot.fireEvidence?.meanGreenExcess ?? 0;
+              record.ignitionEnergy = {
+                quiet: quiet.map((shot) => [shot.target, energy(shot)]),
+                flare: flare.map((shot) => [shot.target, energy(shot)]),
+              };
+              assert.ok(
+                Math.max(...flare.map(energy)) > Math.max(...quiet.map(energy)) * 2,
+                "the real field grows from quiet ignition into a rapid flare, not a constant bright overlay",
+              );
+            }
             assert.ok(
               record.scroll
                 .filter(
@@ -695,6 +846,7 @@ try {
           record.syntheticVisibility = { hiddenDraws: hiddenAfter - hiddenBefore, resumed: true };
         }
         const beforeRepeat = requests.length;
+        const repeatStart = performance.now();
         await page.locator(".rxs-brand").click();
         await page.waitForURL((url) => url.pathname === "/world", { timeout: 45000 });
         await settled(page);
@@ -714,6 +866,12 @@ try {
         });
         record.repeatRequests = requests.length - beforeRepeat;
         record.requests = requests.length;
+        record.requestTimeline = requestTimeline;
+        record.repeatWindow = {
+          start: repeatStart,
+          end: performance.now(),
+          requestsBefore: beforeRepeat,
+        };
         record.probe = await page.evaluate(() => window.__flameQA);
         const summarize = (values) => {
           const sorted = [...values].sort((a, b) => a - b);
@@ -745,11 +903,44 @@ try {
         };
         record.errors = errors;
         assert.deepEqual(errors, [], `${name}/${mode}: no JavaScript errors`);
-        assert.equal(
-          record.repeatRequests,
-          0,
-          `${name}/${mode}: returning through world reuses the shared atlas/failure state`,
-        );
+        if (mode === "blocked") {
+          assert.ok(
+            record.repeatRequests <= 1,
+            `${name}: returning cannot start parallel or storming retries`,
+          );
+          for (let i = 1; i < requestTimeline.length; i++) {
+            const previous = requestTimeline[i - 1],
+              next = requestTimeline[i];
+            assert.ok(
+              Number.isFinite(previous.failedAt),
+              "a retry follows a recorded image/network failure",
+            );
+            assert.ok(
+              next.startedAt - previous.failedAt >= 30000,
+              `${name}: failed flame retry must respect the 30s cooldown (${(next.startedAt - previous.failedAt).toFixed(1)}ms)`,
+            );
+          }
+          const failedAt = requestTimeline[beforeRepeat - 1]?.failedAt;
+          assert.ok(Number.isFinite(failedAt), "the initial failed attempt was observed");
+          record.failureCooldown = {
+            retryAfterMs: 30000,
+            ageAtRepeatStart: repeatStart - failedAt,
+            ageAtRepeatEnd: record.repeatWindow.end - failedAt,
+            retryAge: requestTimeline[beforeRepeat]?.startedAt - failedAt || null,
+          };
+          if (record.repeatWindow.end - failedAt < 30000)
+            assert.equal(
+              record.repeatRequests,
+              0,
+              "a return wholly before the cooldown cannot retry",
+            );
+        } else {
+          assert.equal(
+            record.repeatRequests,
+            0,
+            `${name}/${mode}: returning through world reuses the retained atlas without a request`,
+          );
+        }
         assert.ok(
           await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
           "no horizontal overflow",

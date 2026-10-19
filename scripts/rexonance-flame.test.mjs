@@ -4,6 +4,11 @@ import { readFileSync, statSync } from "node:fs";
 import test from "node:test";
 import sharp from "sharp";
 import ts from "typescript";
+import {
+  naniteFlameEnvelope,
+  naniteFlameScatter,
+  sampleFlameBirth,
+} from "../src/lib/rexonance-ignition.js";
 
 let serial = 0;
 const fresh = () => import(`../src/lib/rexonance-flame.js?unit=${serial++}`);
@@ -12,6 +17,7 @@ const file = (path) => new URL(`../${path}`, import.meta.url);
 function painter({ throwAt = 0 } = {}) {
   const operations = [];
   const states = [];
+  let draws = 0;
   const context = {
     globalAlpha: 0.73,
     globalCompositeOperation: "multiply",
@@ -25,12 +31,13 @@ function painter({ throwAt = 0 } = {}) {
     drawImage(image, ...args) {
       operations.push([
         "image",
-        image.src || "fallback",
+        image.src || image.__qaRole || "fallback",
         ...args,
         this.globalAlpha,
         this.globalCompositeOperation,
       ]);
-      if (throwAt && operations.length === throwAt) throw new Error("draw failure");
+      draws += 1;
+      if (throwAt && draws === throwAt) throw new Error("draw failure");
     },
     fillRect(...args) {
       operations.push(["rect", ...args, this.globalAlpha, this.globalCompositeOperation]);
@@ -50,6 +57,24 @@ function painter({ throwAt = 0 } = {}) {
     createRadialGradient() {
       return { addColorStop() {} };
     },
+    clearRect(...args) {
+      operations.push(["clear", ...args]);
+    },
+    ellipse(...args) {
+      operations.push(["ellipse", ...args]);
+    },
+    rect(...args) {
+      operations.push(["pathRect", ...args]);
+    },
+    clip() {
+      operations.push(["clip"]);
+    },
+    createImageData(width, height) {
+      return { data: new Uint8ClampedArray(width * height * 4) };
+    },
+    putImageData() {
+      operations.push(["pixels"]);
+    },
     beginPath() {},
     moveTo() {},
     bezierCurveTo() {},
@@ -61,11 +86,17 @@ function painter({ throwAt = 0 } = {}) {
 
 function fixture() {
   const images = [];
+  const canvases = [];
   const document = {
     hidden: false,
     documentElement: { dataset: {} },
     createElement(tag) {
-      if (tag === "canvas") return { getContext: () => painter().context };
+      if (tag === "canvas") {
+        const p = painter();
+        const canvas = { getContext: () => p.context };
+        canvases.push({ canvas, ...p });
+        return canvas;
+      }
       assert.equal(tag, "img");
       const image = { naturalWidth: 1024, naturalHeight: 1024, decode: () => Promise.resolve() };
       images.push(image);
@@ -74,6 +105,7 @@ function fixture() {
   };
   return {
     images,
+    canvases,
     environment: {
       document,
       navigator: { connection: {} },
@@ -89,6 +121,22 @@ async function ready(module, fixture) {
   assert.equal(await promise, true);
 }
 
+function prepareField(module, f, source = { src: "actual-undersuit" }) {
+  const before = f.canvases.length;
+  assert.equal(module.prepareBodyFlame(source, { width: 571, height: 1040 }, f.environment), true);
+  assert.equal(f.canvases.length - before, 3, "one mask, one field and one prepared density sheet");
+  const [mask, field, flow] = f.canvases.slice(-3);
+  mask.canvas.__qaRole = "body-mask";
+  field.canvas.__qaRole = "body-field";
+  flow.canvas.__qaRole = "body-flow";
+  for (const surface of [mask, field, flow])
+    assert.ok(
+      surface.canvas.width * surface.canvas.height * 4 <= 640000,
+      "bounded preparation surface",
+    );
+  return { source, mask, field, flow };
+}
+
 function flameRoots(operations) {
   const roots = [];
   for (const row of operations) {
@@ -97,8 +145,6 @@ function flameRoots(operations) {
   }
   return roots.filter((root) => root.images.length);
 }
-
-const rootEnergy = (root) => root.images.reduce((sum, image) => sum + image.at(-2), 0);
 
 test("the Blender flame is one transparent 32-frame atlas, not repeated radial discs", async () => {
   const { NANITE_FLAME_ATLAS: atlas } = await fresh();
@@ -418,107 +464,115 @@ test("a browser without image.decode can use a fully loaded correctly sized shee
   assert.equal(module.naniteFlameReady(), true);
 });
 
-test("touch uses fewer interpolated tongues while retaining body, floor and reactor fire", async () => {
+test("touch retains one connected field while reducing detail within the total frame budget", async () => {
   const counts = [];
   for (const coarse of [false, true]) {
-    const module = await fresh();
-    const f = fixture();
+    const module = await fresh(),
+      f = fixture();
     f.environment.matchMedia = (query) => ({
       matches: coarse && query.includes("pointer: coarse"),
     });
     await ready(module, f);
+    const body = prepareField(module, f);
+    body.field.operations.length = 0;
     const p = painter();
-    module.drawBodyFlame(p.context, { width: 571, height: 1040 }, 1, 1.7);
-    module.drawNaniteFlame(p.context, [285, 335], 1, 1.7);
-    counts.push(p.operations.filter((row) => row[0] === "image").length);
+    module.drawBodyFlame(p.context, { width: 571, height: 1040 }, 1, 0.42, 1, "back", 0.175);
+    module.drawNaniteFlame(p.context, [285, 335], 1, 0.42);
+    module.drawBodyFlame(p.context, { width: 571, height: 1040 }, 1, 0.42, 1, "front", 0.175);
+    const all = [...p.operations, ...body.field.operations];
+    counts.push(all.filter((row) => row[0] === "image").length);
+    assert.equal(
+      p.operations.filter((row) => row[0] === "image" && row[1] === "body-field").length,
+      2,
+    );
   }
-  assert.ok(counts[0] <= 128 && counts[1] <= 104);
   assert.ok(
-    counts[1] >= 80 && counts[1] < counts[0],
-    `touch ${counts[1]} vs fine ${counts[0]} drawImage calls`,
+    counts[0] <= 128 && counts[1] <= 104,
+    `total draws including internal field: ${counts}`,
   );
+  assert.ok(counts[1] < counts[0], "touch reduces detail, not the shared body field");
 });
 
-test("front fire crosses the entire head, torso, arms, thighs, shins and feet on both input tiers", async () => {
-  const W = 571;
-  const H = 1040;
-  const regions = [
-    ["head", 0.5, 0.13],
-    ["upper torso", 0.5, 0.266],
-    ["abdomen", 0.5, 0.362],
-    // The supplied undersuit splits into two legs below y=.46. Its centre
-    // at .58 is transparent: demanding coverage there created a hanging
-    // curtain in the empty crotch rather than fire attached to the waist.
-    ["waist", 0.5, 0.445],
-    ["left upper arm", 0.22, 0.437],
-    ["right upper arm", 0.78, 0.437],
-    ["left forearm", 0.18, 0.54],
-    ["right forearm", 0.82, 0.54],
-    ["left thigh", 0.36, 0.56],
-    ["right thigh", 0.64, 0.56],
-    ["left shin", 0.28, 0.77],
-    ["right shin", 0.72, 0.77],
-    ["left foot", 0.25, 0.94],
-    ["right foot", 0.75, 0.94],
-  ];
-  for (const coarse of [false, true]) {
-    const module = await fresh();
-    const f = fixture();
-    f.environment.matchMedia = (query) => ({
-      matches: coarse && query.includes("pointer: coarse"),
-    });
-    await ready(module, f);
-    const p = painter();
-    module.drawBodyFlame(p.context, { width: W, height: H }, 1, 1.7, 1, "front");
-    const roots = flameRoots(p.operations);
-    assert.equal(
-      roots.length,
-      coarse ? 17 : 20,
-      "reuse the old edge-fire budget for body-surface roots",
-    );
-    for (const [region, x, y] of regions) {
-      assert.ok(
-        // Sample the body's inner surface, not a copy of the authored root
-        // array. A flame's visible middle must reach this point: anchoring a
-        // transparent sprite below it is not enough. Browser PNGs additionally
-        // verify the real absorbed/emitted colour over the original undersuit.
-        roots.some((root) => {
-          const image = root.images[0];
-          return (
-            Math.abs(root.x - x * W) < image[8] * 0.32 &&
-            y * H > root.y + image[7] + image[9] * 0.1 &&
-            y * H < root.y + image[7] + image[9] * 0.95
-          );
-        }),
-        `${coarse ? "coarse" : "fine"}: ${region} receives near-surface fire, not only an edge halo`,
-      );
-    }
-    const centre = roots.slice(0, 4).map((root) => {
-      const image = root.images[0];
-      return [
-        root.y + image[7] + image[9] * ((24 - 0.5) / 255),
-        root.y + image[7] + image[9] * ((245 - 0.5) / 255),
-      ];
-    });
+test("one prepared physical mask and one advected field feed both body layers", async () => {
+  const module = await fresh(),
+    f = fixture();
+  await ready(module, f);
+  const body = prepareField(module, f);
+  assert.ok(
+    body.mask.operations.filter((row) => row[0] === "image" && row[1] === body.source.src).length >=
+      1,
+    "the mask is derived from the actual undersuit, not a rectangle or twenty root islands",
+  );
+  const allocated = f.canvases.length;
+  assert.equal(
+    module.prepareBodyFlame(body.source, { width: 571, height: 1040 }, f.environment),
+    true,
+  );
+  assert.equal(f.canvases.length, allocated, "return calls reuse the prepared surfaces");
+  body.field.operations.length = 0;
+  const back = painter(),
+    front = painter();
+  module.drawBodyFlame(back.context, { width: 571, height: 1040 }, 1, 0.42, 1, "back", 0.175);
+  const firstField = [...body.field.operations];
+  module.drawBodyFlame(front.context, { width: 571, height: 1040 }, 1, 0.42, 1, "front", 0.175);
+  assert.deepEqual(
+    body.field.operations,
+    firstField,
+    "both passes reuse the same clock/strength field without rebuilding it",
+  );
+  assert.ok(
+    firstField.some(
+      (row) => row[0] === "image" && row[1] === "body-mask" && row.at(-1) === "destination-in",
+    ),
+    "the complete flow is clipped to the actual body alpha after advection",
+  );
+  const maskDraws = firstField.filter((row) => row[0] === "image" && row[1] === "body-mask");
+  assert.equal(
+    maskDraws.length,
+    1,
+    "one continuously soft mask, not separately displaced horizontal strips",
+  );
+  assert.equal(
+    maskDraws[0].length,
+    6,
+    "draw the whole mask at its translated origin, never clip source slices",
+  );
+  const maskAt = firstField.indexOf(maskDraws[0]);
+  assert.deepEqual(
+    firstField.slice(maskAt - 3, maskAt).map((row) => row[0]),
+    ["translate", "rotate", "scale"],
+    "the soft outline sways continuously from an anchored affine transform",
+  );
+  assert.doesNotMatch(
+    JSON.stringify(firstField),
+    /pathRect/,
+    "no row-wise mask clipping can leave stepped outer notches",
+  );
+  assert.ok(
+    firstField.some((row) => row[0] === "image" && row[1] === module.NANITE_FLAME_ATLAS.src),
+    "the continuous field still contains the real Blender volume texture",
+  );
+  for (const p of [back, front]) {
+    const field = p.operations.find((row) => row[0] === "image" && row[1] === "body-field");
+    assert.ok(field, "one shared volume covers head, connected torso, limbs and feet");
+    const sourceBox = body.mask.operations
+      .filter((row) => row[0] === "image" && row[1] === body.source.src)
+      .at(-1);
+    const [x, y, width, height] = field.slice(2, 6);
     assert.ok(
-      centre[0][0] < H * 0.085,
-      "the flame reaches the supplied head's real upper surface near y=.077, not an airborne crown",
+      x < 0 && y < 0 && width >= 571 * 1.4 && height > 1040,
+      "retain air around the figure for the rolling plume",
     );
-    for (let i = 1; i < centre.length; i++)
-      assert.ok(
-        centre[i][0] <= centre[i - 1][1] + H * 0.012,
-        "overlapping fire joins the body centre instead of leaving a hollow sternum",
-      );
-    assert.ok(centre.at(-1)[1] > H * 0.43, "the joined flame reaches the solid waist");
+    assert.ok(Math.abs(x + (sourceBox[2] / body.field.canvas.width) * width) < 1e-9);
+    assert.ok(Math.abs(y + (sourceBox[3] / body.field.canvas.height) * height) < 1e-9);
+    assert.ok(Math.abs((sourceBox[4] / body.field.canvas.width) * width - 571) < 1e-9);
     assert.ok(
-      roots.slice(0, 4).every((root) => root.y <= H * 0.48),
-      "wide centre fire is rooted on the solid torso, not suspended in the leg gap",
-    );
-    assert.ok(
-      p.operations.filter((row) => row[0] === "image").every((row) => row.at(-1) === "source-over"),
-      "near fire retains the authored volume absorption over bright armour",
+      Math.abs((sourceBox[5] / body.field.canvas.height) * height - 1040) < 1e-9,
+      "the broad field never shifts the actual suit registration",
     );
     assert.equal(p.states.length, 0);
+    assert.equal(p.context.globalAlpha, 0.73);
+    assert.equal(p.context.globalCompositeOperation, "multiply");
   }
 });
 
@@ -567,110 +621,82 @@ test("near fire is rooted on the supplied body instead of dangling below its han
   }
 });
 
-test("face fire begins on both cheeks with independent volume phases, never as a floating crown", async () => {
+test("face and body detail originate on the same body sources rather than a separate crown", async () => {
   for (const coarse of [false, true]) {
-    const module = await fresh();
-    const f = fixture();
+    const module = await fresh(),
+      f = fixture();
     f.environment.matchMedia = (query) => ({
       matches: coarse && query.includes("pointer: coarse"),
     });
     await ready(module, f);
+    prepareField(module, f);
     for (const clock of [0.35, 1.37, 2.1]) {
-      const front = painter();
-      module.drawBodyFlame(front.context, { width: 571, height: 1040 }, 1, clock, 1, "front");
-      const cheeks = flameRoots(front.operations)
-        .filter((root) => root.y < 1040 * 0.24)
-        .sort((a, b) => a.x - b.x);
-      assert.equal(cheeks.length, 2, "both input tiers retain left/right face contact");
-      assert.ok(cheeks[0].x < 571 * 0.5 && cheeks[1].x > 571 * 0.5);
-      assert.ok(
-        cheeks.every((root) => root.y >= 1040 * 0.13),
-        "fire is attached to the face, not emitted above the head",
+      const p = painter();
+      module.drawBodyFlame(p.context, { width: 571, height: 1040 }, 1, clock, 1, "front", 0.175);
+      assert.equal(
+        p.operations.filter((row) => row[0] === "image" && row[1] === "body-field").length,
+        1,
       );
-      assert.notDeepEqual(
-        cheeks[0].images.map((image) => [image[2], image[3], image.at(-2)]),
-        cheeks[1].images.map((image) => [image[2], image[3], image.at(-2)]),
-        "the cheeks are not mirrored copies of the same atlas phase/opacity",
-      );
-      const back = painter();
-      module.drawBodyFlame(back.context, { width: 571, height: 1040 }, 1, clock, 1, "back");
+      const face = flameRoots(p.operations).filter((root) => root.y < 1040 * 0.21);
+      assert.ok(face.length > 0);
       assert.ok(
-        flameRoots(back.operations).every((root) => root.y >= 1040 * 0.12),
-        "the rear layer cannot introduce a second fire origin over the forehead",
+        face.every((root) => root.y >= 1040 * 0.077),
+        "no new source is emitted above the real head",
       );
     }
   }
 });
 
-test("body fire kindles by region, converges continuously, and reverses without retained ignition state", async () => {
-  for (const coarse of [false, true]) {
-    const module = await fresh();
-    const f = fixture();
-    f.environment.matchMedia = (query) => ({
-      matches: coarse && query.includes("pointer: coarse"),
-    });
-    await ready(module, f);
-    const render = (strength, clock = 1.73) => {
-      const p = painter();
-      module.drawBodyFlame(p.context, { width: 571, height: 1040 }, strength, clock, 1, "front");
-      assert.equal(p.states.length, 0);
-      assert.equal(p.context.globalAlpha, 0.73);
-      assert.equal(p.context.globalCompositeOperation, "multiply");
-      return p.operations;
-    };
-    const peak = flameRoots(render(1));
-    const early = flameRoots(render(0.15));
-    const growing = flameRoots(render(0.55));
-    assert.equal(peak.length, coarse ? 17 : 20, "peak still burns over the whole body");
-    assert.ok(growing.length > 0, "the intermediate fire is visible, not a delayed jump");
-    const relativeEnergy = early.map((root, index) => rootEnergy(root) / rootEnergy(peak[index]));
-    assert.ok(
-      early.length < peak.length ||
-        Math.max(...relativeEnergy) - Math.min(...relativeEnergy) > 0.025,
-      "early roots have different local ignition envelopes, not one synchronous global fade",
+test("a single scatter impulse leaves the shared burning surface and reverses exactly", async () => {
+  const module = await fresh(),
+    f = fixture();
+  await ready(module, f);
+  prepareField(module, f);
+  const render = (phase) => {
+    const p = painter();
+    module.drawBodyFlame(
+      p.context,
+      { width: 571, height: 1040 },
+      naniteFlameEnvelope(phase),
+      0.65,
+      1,
+      "front",
+      phase,
     );
-    assert.ok(
-      early.some((root) => root.y < 1040 * 0.5 && Math.abs(root.x - 571 * 0.5) < 80),
-      "ignition begins on the torso rather than waiting for a whole-body flash",
+    assert.equal(p.states.length, 0);
+    return p.operations;
+  };
+  for (const phase of [0.1, 0.16, 0.36, 0.6, 1])
+    assert.equal(
+      render(phase).filter((row) => row[0] === "rect").length,
+      0,
+      "no continuously respawning decorative sparks",
     );
+  const phase = 0.25,
+    scatter = naniteFlameScatter(phase);
+  const reference = render(phase);
+  const drops = reference.filter((row) => row[0] === "rect");
+  assert.ok(drops.length > 20 && drops.length <= 40);
+  const source = new Float32Array(4);
+  for (const [i, drop] of drops.entries()) {
+    sampleFlameBirth((i + 0.5) / 48, source);
+    const dx = drop[1] - source[0] * 571;
+    const dy = drop[2] - source[1] * 1040 + scatter * 35 * 1.04;
     assert.ok(
-      early.every((root) => root.y < 1040 * 0.85),
-      "the distant feet ignite after the torso, not at the same instant",
+      Math.abs(dx * source[3] - dy * source[2]) < 0.01,
+      "outward travel begins on the same shared source",
     );
-    const meanHeight = (roots) => {
-      const energy = roots.reduce((sum, root) => sum + rootEnergy(root), 0);
-      return roots.reduce((sum, root) => sum + root.images[0][9] * rootEnergy(root), 0) / energy;
-    };
-    assert.ok(meanHeight(growing) < meanHeight(peak), "dying fire loses height as well as opacity");
-    let previousEnergy = 0;
-    const peakEnergy = peak.reduce((sum, root) => sum + rootEnergy(root), 0);
-    const snapshots = new Map();
-    for (let i = 0; i <= 50; i++) {
-      const strength = i / 50;
-      const operations = render(strength);
-      const roots = flameRoots(operations);
-      const energy = roots.reduce((sum, root) => sum + rootEnergy(root), 0);
-      assert.ok(Number.isFinite(energy) && energy >= 0);
-      assert.ok(
-        Math.abs(energy - previousEnergy) < peakEnergy * 0.16,
-        `${coarse ? "coarse" : "fine"}/${strength}: no single-step brightness pop`,
-      );
-      for (const root of roots)
-        for (const image of root.images) {
-          assert.ok(image.at(-2) >= 0 && image.at(-2) <= 1, "bounded local alpha");
-          assert.ok(image[8] > 0 && image[9] > 0, "no inverted extinction geometry");
-        }
-      snapshots.set(strength, operations);
-      previousEnergy = energy;
-    }
-    for (let i = 50; i >= 0; i--)
-      assert.deepEqual(
-        render(i / 50),
-        snapshots.get(i / 50),
-        "reverse scroll recovers identical fire even after all regions have fully ignited",
-      );
-    assert.deepEqual(render(0), [], "extinguished fire has no remaining sprite or ember calls");
+    assert.ok(dx * source[2] + dy * source[3] >= 0, "the impulse travels out of the fire");
+    assert.ok(drop.at(-2) >= 0 && drop.at(-2) <= 1);
   }
+  render(0.85);
+  render(0.03);
+  assert.deepEqual(
+    render(phase),
+    reference,
+    "reverse cannot retain a spent burst or respawn particles",
+  );
+  assert.deepEqual(render(1), [], "the handoff leaves the completed armour unobscured");
 });
 
 test("warmed ignition, peak, extinction and reverse frames allocate no new canvas, gradients or random state", async (t) => {
@@ -687,14 +713,20 @@ test("warmed ignition, peak, extinction and reverse frames allocate no new canva
         value: f.environment.document,
       });
       await ready(module, f);
+      const body = prepareField(module, f);
       const noAllocation = () => assert.fail("a warmed frame must reuse its prepared resources");
       f.environment.document.createElement = noAllocation;
+      body.field.context.createLinearGradient =
+        body.field.context.createRadialGradient =
+        body.field.context.createImageData =
+          noAllocation;
       const random = t.mock.method(Math, "random", noAllocation);
       try {
         for (let i = 0; i <= 80; i++) {
           const strength = (i <= 40 ? i : 80 - i) / 40;
           const clock = (i <= 40 ? i : 80 - i) / 17;
           const p = painter();
+          body.field.operations.length = 0;
           p.context.createLinearGradient = p.context.createRadialGradient = noAllocation;
           module.drawBodyFlame(p.context, { width: 571, height: 1040 }, strength, clock, 1, "back");
           module.drawNaniteFlame(p.context, [285, 335], strength, clock);
@@ -706,7 +738,9 @@ test("warmed ignition, peak, extinction and reverse frames allocate no new canva
             1,
             "front",
           );
-          const images = p.operations.filter((row) => row[0] === "image");
+          const images = [...p.operations, ...body.field.operations].filter(
+            (row) => row[0] === "image",
+          );
           assert.ok(images.length <= (coarse ? 104 : 128), `${images.length} total frame draws`);
           assert.equal(p.states.length, 0);
         }
@@ -742,7 +776,7 @@ test("the warmed drawing call graph constructs no per-frame objects, arrays, clo
         )
           functions.set(declaration.name.text, declaration.initializer);
   }
-  const pending = ["drawBodyFlame", "drawNaniteFlame"];
+  const pending = ["drawBodyFlame", "drawNaniteFlame", "drawNaniteFirebrand"];
   const visited = new Set();
   const forbidden = [];
   while (pending.length) {
@@ -784,7 +818,55 @@ test("the warmed drawing call graph constructs no per-frame objects, arrays, clo
   assert.deepEqual(forbidden, [], "retain prepared numeric seed tables and scalar frame math");
 });
 
-test("whole-body near fire remains within the existing 128/104 draw budgets including both contact lights", async () => {
+test("a material firebrand uses the same decoded volume, at most two draws, and restores state even on failure", async () => {
+  const module = await fresh(),
+    f = fixture();
+  await ready(module, f);
+  const before = f.canvases.length;
+  f.environment.document.createElement = () => {
+    throw new Error("new resource after warm-up");
+  };
+  const draw = (clock) => {
+    const p = painter();
+    module.drawNaniteFirebrand(p.context, 180, 420, 0.75, clock, 1.5);
+    assert.equal(p.states.length, 0);
+    assert.equal(p.context.globalAlpha, 0.73);
+    assert.equal(p.context.globalCompositeOperation, "multiply");
+    const images = p.operations.filter((row) => row[0] === "image");
+    assert.ok(images.length > 0 && images.length <= 2);
+    assert.ok(images.every((row) => row[1] === module.NANITE_FLAME_ATLAS.src));
+    return p.operations;
+  };
+  const reference = draw(0.63);
+  draw(1.5);
+  draw(0.2);
+  assert.deepEqual(
+    draw(0.63),
+    reference,
+    "reverse samples retain the same real flame texture and pose",
+  );
+  assert.equal(f.canvases.length, before, "fire fragments reuse the already decoded atlas");
+  const failing = painter({ throwAt: 1 });
+  assert.throws(
+    () => module.drawNaniteFirebrand(failing.context, 180, 420, 0.75, 0.63),
+    /draw failure/,
+  );
+  assert.equal(failing.states.length, 0);
+  assert.equal(failing.context.globalAlpha, 0.73);
+  assert.equal(failing.context.globalCompositeOperation, "multiply");
+  const invalid = painter();
+  for (const args of [
+    [NaN, 20, 1, 1],
+    [20, Infinity, 1, 1],
+    [20, 20, 0, 1],
+    [20, 20, 1, NaN],
+    [20, 20, 1, 1, 0],
+  ])
+    module.drawNaniteFirebrand(invalid.context, ...args);
+  assert.deepEqual(invalid.operations, []);
+});
+
+test("the connected field, volume detail and contact light share the existing 128/104 frame budgets", async () => {
   const previous = Object.getOwnPropertyDescriptor(globalThis, "document");
   try {
     for (const coarse of [false, true]) {
@@ -798,15 +880,19 @@ test("whole-body near fire remains within the existing 128/104 draw budgets incl
         value: f.environment.document,
       });
       await ready(module, f);
+      const body = prepareField(module, f);
+      body.field.operations.length = 0;
       const p = painter();
       module.drawBodyFlame(p.context, { width: 571, height: 1040 }, 1, 1.7, 1, "back");
       module.drawNaniteFlame(p.context, [285, 335], 1, 1.7);
       module.drawBodyFlame(p.context, { width: 571, height: 1040 }, 1, 1.7, 1, "front");
-      const images = p.operations.filter((row) => row[0] === "image");
+      const images = [...p.operations, ...body.field.operations].filter(
+        (row) => row[0] === "image",
+      );
       assert.equal(
         images.filter((row) => row[1] === "fallback").length,
-        2,
-        "include the reactor and floor contact-light draws in the budget",
+        1,
+        "include the faint reactor contact light instead of omitting hidden work",
       );
       assert.ok(images.length <= (coarse ? 104 : 128), `${images.length} total draws`);
       assert.equal(p.context.globalAlpha, 0.73);
@@ -822,8 +908,10 @@ test("valid draws use atlas frame rectangles with interpolation and deterministi
   const module = await fresh();
   const f = fixture();
   await ready(module, f);
+  const body = prepareField(module, f);
   const render = (clock) => {
     const p = painter();
+    body.field.operations.length = 0;
     module.drawBodyFlame(p.context, { width: 571, height: 1040 }, 0.8, clock, 1.25, "back");
     module.drawNaniteFlame(p.context, [285, 335], 0.8, clock, 1.25);
     module.drawBodyFlame(p.context, { width: 571, height: 1040 }, 0.8, clock, 1.25, "front");
@@ -831,7 +919,7 @@ test("valid draws use atlas frame rectangles with interpolation and deterministi
     assert.equal(p.context.globalAlpha, 0.73);
     assert.equal(p.context.globalCompositeOperation, "multiply");
     assert.equal(p.context.fillStyle, "#123456");
-    return p.operations;
+    return [...p.operations, ...body.field.operations];
   };
   const first = render(1.37);
   assert.notDeepEqual(render(2.7), first);
@@ -840,7 +928,9 @@ test("valid draws use atlas frame rectangles with interpolation and deterministi
     first,
     "returning to an exact clock restores exact source/destination/alpha values",
   );
-  const atlasDraws = first.filter((row) => row[0] === "image");
+  const atlasDraws = first.filter(
+    (row) => row[0] === "image" && row[1] === module.NANITE_FLAME_ATLAS.src,
+  );
   assert.ok(
     atlasDraws.length >= 60 && atlasDraws.length <= 130,
     `${atlasDraws.length} atlas draws, not hundreds of blobs`,
@@ -885,6 +975,7 @@ test("the default API includes both body layers, and exceptions cannot leak canv
   const module = await fresh();
   const f = fixture();
   await ready(module, f);
+  prepareField(module, f);
   const back = painter(),
     front = painter(),
     all = painter();

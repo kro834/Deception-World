@@ -317,6 +317,9 @@ export const isRexonanceSuitReady = () => ready;
 /** rx17: a layer the nanite engine draws, decoded (an ImageBitmap where
  * supported, else the decoded image), once the warm-up has it. */
 export const rexonanceSuitSource = (source: string) => sources.get(source) ?? null;
+/** Reuse the decoded CSS undersuit as the connected fire's physical mask.
+ * It needs no second bitmap, fetch or change to suit readiness. */
+export const rexonanceSuitPicture = (source: string) => decodedPictures.get(source) ?? null;
 
 function abortWarmup(preserveIntent = false) {
   if (!activeBatch || (preserveIntent && activeBatch.priority === "high")) return;

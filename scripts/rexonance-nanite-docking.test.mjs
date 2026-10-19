@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
 import test from "node:test";
 import { naniteHexHeight, naniteHexLight } from "../src/lib/rexonance-unlit.js";
+import { sampleFlameBirth } from "../src/lib/rexonance-ignition.js";
 import { REXONANCE_NANITES } from "../src/lib/rexonance-nanites.ts";
 import {
   REXONANCE_SUIT_GOLD_CELL,
@@ -17,7 +18,11 @@ import {
 import { REXONANCE_SUIT_DRIVER } from "../src/lib/rexonance-calls.ts";
 import { planAssembly, planAssemblyGold } from "../src/lib/rexonance-resonance.js";
 import {
-  armorClampBite, armorDockState, armorSeatLift, planAssemblyNanites,
+  armorClampBite,
+  armorDockState,
+  armorSeatLift,
+  naniteHash,
+  planAssemblyNanites,
 } from "../src/lib/rexonance-assembly-nanites.js";
 
 const source = readFileSync(
@@ -30,6 +35,8 @@ let cachedFixture;
 function runtimeFactory() {
   if (cachedCreate) return cachedCreate;
   const importLine = 'import { naniteHexHeight, naniteHexLight } from "./rexonance-unlit.js";';
+  const fireImport = 'import { sampleFlameBirth } from "./rexonance-ignition.js";';
+  const firePainterImport = 'import { drawNaniteFirebrand } from "./rexonance-flame.js";';
   assert.equal(
     source.split(importLine).length - 1,
     1,
@@ -43,6 +50,8 @@ function runtimeFactory() {
   );
   const instrumented = source
     .replace(importLine, "")
+    .replace(fireImport, "")
+    .replace(firePainterImport, "")
     .replace(/\bexport\s+(?=(?:const|function|class)\b)/g, "")
     .replace(
       returnMarker,
@@ -51,7 +60,7 @@ function runtimeFactory() {
       poseTile(i, q, 0);
       const p = PO[i];
       return {
-        x: X[0], y: Y[0], size: S[0], frame: FR[0], kind: KIND[0], progress: U[0],
+        x: X[0], y: Y[0], size: S[0], alpha: A[0], fire: FIRE[0], frame: FR[0], kind: KIND[0], progress: U[0],
         targetX: p >= 0 ? jigX(p, CX[i], CY[i]) : CX[i],
         targetY: p >= 0 ? jigY(p, CX[i], CY[i]) : CY[i],
       };
@@ -71,7 +80,15 @@ function runtimeFactory() {
     state,`,
     )
     .concat("\nglobalThis.__createAssemblyNanites = createAssemblyNanites;\n");
-  const context = { naniteHexHeight, naniteHexLight };
+  const context = {
+    naniteHexHeight,
+    naniteHexLight,
+    sampleFlameBirth,
+    drawNaniteFirebrand(ctx, x, y, strength, clock, scale = 1) {
+      for (let i = 0; i < 2; i++)
+        ctx.drawImage({ id: "firebrand" }, x - 20 * scale, y - 50 * scale, 40 * scale, 70 * scale);
+    },
+  };
   runInNewContext(instrumented, context);
   cachedCreate = context.__createAssemblyNanites;
   return cachedCreate;
@@ -168,6 +185,87 @@ const qAt = (nano, i, u) => nano.T0[i] + (nano.T1[i] - nano.T0[i]) * u;
 const close = (a, b, tolerance, label) =>
   assert.ok(Math.abs(a - b) <= tolerance, `${label}: ${a} vs ${b} (tol ${tolerance})`);
 const frameDistance = (a, b) => Math.abs(((((a - b + 12) % 24) + 24) % 24) - 12);
+
+test("every scroll machine uses the shared burning surface and one unquantized birth interval", () => {
+  const { nano } = fixture();
+  const out = new Float64Array(4);
+  for (const [count, emission, births, offset] of [
+    [nano.count, nano.emission, nano.birth, 0],
+    [nano.free.birth.length, nano.free.emission, nano.free.birth, 100003],
+  ]) {
+    assert.equal(emission.length, count * 4, "preallocated source and normal slots");
+    const bands = new Set();
+    for (let i = 0; i < count; i++) {
+      sampleFlameBirth(naniteHash(i + offset, 50), out);
+      const expected = [out[0] * 571, out[1] * 1040, out[2], out[3]];
+      for (let k = 0; k < 4; k++)
+        close(emission[i * 4 + k], expected[k], 0.0001, `${i}/${k}: same burning source`);
+      assert.ok(births[i] >= 0.063 - 1e-7 && births[i] <= 0.09 + 1e-7);
+      bands.add(Math.floor((births[i] - 0.063) * 1000));
+    }
+    assert.ok(bands.size >= 20, `${bands.size} continuous release times, not six pumps`);
+  }
+});
+
+test("scroll fire leaves the surface first, forms metal at its airborne point, and joins the armour flight continuously", () => {
+  const { nano, gold } = fixture();
+  const swarm = createSwarm(nano, gold);
+  const samples = representativeTiles(nano);
+  const helmet = Array.from(nano.pieceOf).findIndex((p) => p >= 0 && nano.pieces[p].helm);
+  if (helmet >= 0) samples.push(helmet);
+  for (const i of samples) {
+    const born = nano.birth[i];
+    if (nano.T0[i] <= born + 1e-7) continue;
+    swarm.frame(born - 0.006, 0, true, 1, false);
+    const origin = swarm.__testPose(i, born - 0.006);
+    close(origin.x, nano.emission[i * 4], 0.0001, `${i}: prelude start x`);
+    close(origin.y, nano.emission[i * 4 + 1], 0.0001, `${i}: prelude start y`);
+    assert.equal(origin.alpha, 0);
+    close(origin.fire, 0, 1e-12, "floating-point prelude zero");
+    swarm.frame(born - 0.003, 0, true, 1, false);
+    const flying = swarm.__testPose(i, born - 0.003);
+    assert.ok(flying.fire > 0 && flying.alpha === 0, "flame flies before any metal exists");
+    swarm.frame(born - 1e-9, 0, true, 1, false);
+    const predecessor = swarm.__testPose(i, born - 1e-9);
+    swarm.frame(born, 0, true, 1, false);
+    const first = swarm.__testPose(i, born);
+    close(first.x, predecessor.x, 0.001, `${i}: fire-to-machine x`);
+    close(first.y, predecessor.y, 0.001, `${i}: fire-to-machine y`);
+    assert.ok(
+      Math.hypot(first.x - nano.emission[i * 4], first.y - nano.emission[i * 4 + 1]) >= 18,
+      "the machine begins in the airborne fragment, not at a new body origin",
+    );
+    assert.equal(first.fire, 1);
+    assert.equal(
+      first.alpha,
+      0,
+      "material fades out of the existing fire instead of appearing opaque",
+    );
+    if (nano.T0[i] > born + 0.008) {
+      swarm.frame(born + 0.008, 0, true, 1, false);
+      const cooled = swarm.__testPose(i, born + 0.008);
+      assert.ok(
+        cooled.fire < 1e-7 && cooled.alpha > 0,
+        "fire cools into the metal without restarting",
+      );
+    }
+    const q = nano.T0[i];
+    swarm.frame(q - 1e-9, 0, true, 1, false);
+    const before = swarm.__testPose(i, q - 1e-9);
+    swarm.frame(q, 0, true, 1, false);
+    const after = swarm.__testPose(i, q);
+    close(before.x, after.x, 0.001, `${i}: rolling current/flight x`);
+    close(before.y, after.y, 0.001, `${i}: rolling current/flight y`);
+    const reference = { ...after };
+    swarm.frame(nano.T1[i] + 0.01, 0, true, 1, false);
+    swarm.frame(q, 0, true, 1, false);
+    assert.deepEqual(
+      { ...swarm.__testPose(i, q) },
+      reference,
+      "no previous frame alters the handoff",
+    );
+  }
+});
 
 test("non-helmet tile pose stays continuous at river, braking, and unfold boundaries", () => {
   const { nano, gold } = fixture();
@@ -298,11 +396,17 @@ test("armor runners are keyed to each plate's actual travel vector", () => {
     for (let k = 0; k < 4; k += 2) {
       const ax = piece.railAnchors[k];
       const ay = piece.railAnchors[k + 1];
-      assert.ok(Math.hypot(ax - piece.seatX, ay - piece.seatY) > 1,
-        `${piece.id} runner attaches to an edge rather than the seat centre`);
-      assert.ok(Array.from({ length: 4 }, (_, c) =>
-        Math.hypot(ax - piece.clamp[c * 2], ay - piece.clamp[c * 2 + 1]) < 1e-5).some(Boolean),
-      `${piece.id} runner uses an actual contour clamp anchor`);
+      assert.ok(
+        Math.hypot(ax - piece.seatX, ay - piece.seatY) > 1,
+        `${piece.id} runner attaches to an edge rather than the seat centre`,
+      );
+      assert.ok(
+        Array.from(
+          { length: 4 },
+          (_, c) => Math.hypot(ax - piece.clamp[c * 2], ay - piece.clamp[c * 2 + 1]) < 1e-5,
+        ).some(Boolean),
+        `${piece.id} runner uses an actual contour clamp anchor`,
+      );
     }
     const side = piece.seatX < REXONANCE_SUIT_SIZE.width / 2 ? -1 : 1;
     if (piece.group === "arms" || piece.group === "shoulders")
@@ -324,14 +428,25 @@ test("anatomical capture pauses on the rail then seats with continuous endpoints
     const after = armorSeatLift(piece, at + 1e-8);
     close(before, held, 1e-7, `${piece.id} capture starts continuously`);
     close(after, held, 1e-7, `${piece.id} capture exits continuously`);
-    close(held, (1 - piece.seatHold) * piece.catchLift, 1e-9,
-      `${piece.id} capture holds clear of socket`);
-    close(armorSeatLift(piece, piece.to - 1e-8), armorSeatLift(piece, piece.to), 1e-6,
-      `${piece.id} approach joins capture`);
-    close(armorSeatLift(piece, piece.contact - 1e-8), 0, 1e-6,
-      `${piece.id} final lock has no jump`);
-    close(armorSeatLift(piece, piece.contact), 0, 1e-9,
-      `${piece.id} remains seated`);
+    close(
+      held,
+      (1 - piece.seatHold) * piece.catchLift,
+      1e-9,
+      `${piece.id} capture holds clear of socket`,
+    );
+    close(
+      armorSeatLift(piece, piece.to - 1e-8),
+      armorSeatLift(piece, piece.to),
+      1e-6,
+      `${piece.id} approach joins capture`,
+    );
+    close(
+      armorSeatLift(piece, piece.contact - 1e-8),
+      0,
+      1e-6,
+      `${piece.id} final lock has no jump`,
+    );
+    close(armorSeatLift(piece, piece.contact), 0, 1e-9, `${piece.id} remains seated`);
   }
 });
 
@@ -372,17 +487,29 @@ test("seam-anchored clamp keys bite in diagonal order and meet at contact", () =
     const diagonal = armorClampBite(piece, 1, sample);
     const opposite = armorClampBite(piece, 3, sample);
     const last = armorClampBite(piece, 0, sample);
-    assert.ok(first > diagonal && diagonal > opposite && opposite >= last,
-      `${piece.id} lower key, diagonal mate, opposite pair`);
+    assert.ok(
+      first > diagonal && diagonal > opposite && opposite >= last,
+      `${piece.id} lower key, diagonal mate, opposite pair`,
+    );
     for (let c = 0; c < 4; c += 1) {
       const lead = 0.006 - [3, 1, 0, 2][c] * 0.0015;
-      close(armorClampBite(piece, c, piece.contact - lead), 0, 1e-9,
-        `${piece.id} corner ${c} begins without a tooth jump`);
+      close(
+        armorClampBite(piece, c, piece.contact - lead),
+        0,
+        1e-9,
+        `${piece.id} corner ${c} begins without a tooth jump`,
+      );
       close(armorClampBite(piece, c, piece.contact), 1, 1e-9, `${piece.id} corner ${c} seated`);
-      close(armorClampBite(piece, c, piece.contact + 0.006), 0, 1e-9,
-        `${piece.id} corner ${c} released`);
-      assert.ok(Number.isFinite(piece.clamp[c * 2]) && Number.isFinite(piece.clamp[c * 2 + 1]),
-        `${piece.id} corner ${c} has a seam anchor`);
+      close(
+        armorClampBite(piece, c, piece.contact + 0.006),
+        0,
+        1e-9,
+        `${piece.id} corner ${c} released`,
+      );
+      assert.ok(
+        Number.isFinite(piece.clamp[c * 2]) && Number.isFinite(piece.clamp[c * 2 + 1]),
+        `${piece.id} corner ${c} has a seam anchor`,
+      );
     }
     checked += 1;
   }

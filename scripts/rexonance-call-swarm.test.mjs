@@ -18,6 +18,7 @@ import * as suit from "../src/lib/rexonance-suit.ts";
 import * as gold from "../src/lib/rexonance-suit-gold.ts";
 import * as kit from "../src/lib/rexonance-nanites.ts";
 import * as reactor from "../src/lib/rexonance-reactor.js";
+import * as ignition from "../src/lib/rexonance-ignition.js";
 import { createRexonanceCallRetention } from "../src/lib/rexonance-call-retention.ts";
 
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
@@ -28,6 +29,7 @@ const component = read("src/components/rexonance-saga/rexonance-call-sequence.ts
 const warmup = read("src/lib/rexonance-suit-warmup.ts");
 const kitWarmup = read("src/lib/rexonance-nanites-warmup.ts");
 const sheet = read("src/styles-rexonance-calls.css");
+const flameAsset = "/rexonance-flame-natural-20261019/flame.webp";
 const transpile = (source) =>
   ts.transpileModule(source, {
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
@@ -35,7 +37,8 @@ const transpile = (source) =>
 
 test("the swarm rides the pinned call: its timeline, and the pinned clocks unchanged", () => {
   const swarm = calls.REXONANCE_SUIT_SWARM;
-  // RIDER！: six pump waves of chips spiral out of the core.
+  // Historical metadata remains compatible with guideway schedules; the
+  // actual emission now has one continuous surface-born flash (below).
   assert.deepEqual([...swarm.waves], [330, 380, 430, 480, 530, 580]);
   assert.equal(swarm.wave, 160);
   // Each plate's latch from F − 360; the lattice F − 270 → F − 60; clamps
@@ -106,10 +109,11 @@ test("the swarm rides the pinned call: its timeline, and the pinned clocks uncha
   assert.match(component, /const SUIT_SPARKS = REXONANCE_SUIT_SPARKS;/);
 });
 
-test("the call decides once, bleeds only on fine pointers, and keeps the classic call", () => {
+test("the call decides once, gives the firestorm room on every pointer, and keeps the classic call", () => {
   // Decided at the engine's start; the classic tile path stays the fallback.
   assert.match(nanites, /const rich = isRexonanceNaniteReady\(\);/);
-  assert.match(nanites, /if \(rich && !coarse\) box\.dataset\.bleed = "";/);
+  assert.match(nanites, /box\.dataset\.bleed = "";/);
+  assert.doesNotMatch(nanites, /if \(rich && !coarse\) box\.dataset\.bleed/);
   // Round 3 (review 30): `let`, so a pass that throws drops the extras mid-call.
   assert.match(nanites, /let extras = rich\s*\?\s*createSuitExtras\(/);
   // Round 3 (review 33): reached through their hook, never imported by the call.
@@ -153,8 +157,8 @@ test("the call decides once, bleeds only on fine pointers, and keeps the classic
   // Round 4 (patch A): the settled canvas draws under the same whole-pixel offset (was: no transform).
   assert.match(nanites, /settled\.setTransform\(1, 0, 0, 1, ox, oy\);/);
   // Its swarm replaces the SVG motes only when it runs; the motes' own
-  // clock is unchanged, and the bleed never reaches below the figure nor
-  // more than 4 % to its left.
+  // clock is unchanged; both canvases reserve the same broad transparent
+  // padding for the firestorm without changing the figure's registration.
   assert.match(
     component,
     /const onNanites = useCallback\(\(rich\?: boolean\) => \{\s*setNanites\("canvas"\);\s*setSwarm\(rich \? "canvas" : "svg"\);/,
@@ -167,7 +171,7 @@ test("the call decides once, bleeds only on fine pointers, and keeps the classic
   assert.match(component, /data-swarm=\{swarm\}/);
   assert.match(
     sheet,
-    /\.rx-call-sequence \.rx-suit-build > \.rx-suit-nanites\[data-bleed\] > canvas:last-child \{\s*inset: auto;\s*top: -2%;\s*left: -4%;\s*width: 114%;\s*height: 102%;\s*\}/,
+    /\.rx-call-sequence \.rx-suit-build > \.rx-suit-nanites\[data-bleed\] > canvas:last-child \{\s*inset: auto;\s*top: -6%;\s*left: -25%;\s*width: 150%;\s*height: 114%;\s*\}/,
   );
   assert.doesNotMatch(sheet, /\.rx-suit-nanites\[data-bleed\] \{/);
   assert.match(
@@ -189,8 +193,14 @@ test("the extras use no timers, randomness, filters or composites, and allocate 
   assert.ok(from > 0 && to > from);
   const draw = extrasSource.slice(from, to);
   assert.ok(draw.length > 20_000, String(draw.length));
+  const executable = ts.transpileModule(draw, {
+    compilerOptions: {
+      target: ts.ScriptTarget.ES2022,
+      removeComments: true,
+    },
+  }).outputText;
   assert.doesNotMatch(
-    draw,
+    executable,
     /\bnew |\.map\(|\.filter\(|\.slice\(|\.concat\(|\[\]|Array\.from|\.push\(|`/,
   );
   // The plan stays free of the kit (its runtime test pins its modules).
@@ -220,6 +230,7 @@ test("the draw passes keep per-frame values in typed slots, not boxed lets", () 
     "draws",
     "fadeCount",
     "frames",
+    "fusionCount", // bounded integer count into a preallocated fusion batch
     "governed",
     "heroes",
     "laserCount",
@@ -259,7 +270,9 @@ test("the draw passes keep per-frame values in typed slots, not boxed lets", () 
   // The poses read their inputs from the slots.
   assert.match(draw, /const tilePose = \(p: number, i: number, helm: boolean\) => \{/);
   assert.match(draw, /const chip = \(frame: number, tone: number, hero = false\) => \{/);
-  assert.match(draw, /const ringPose = \(c: number\) => \{\s*const t = pose\[ARG_T\];/);
+  assert.match(draw, /const surfacePose = \(c: number\) => \{\s*const t = pose\[ARG_T\];/);
+  assert.match(draw, /const bornPose = \(c: number\) => \{\s*const born = pose\[ARG_U\];/);
+  assert.doesNotMatch(draw, /const ringPose\s*=/);
   // Primed once prepared, on a throwaway instance, never while a call draws.
   assert.match(extrasSource, /READY = true;\s*settle\(true\);\s*primeNanites\(\);/);
   assert.match(extrasSource, /if \(work\.drawing > 0\) return queue\(\);/);
@@ -297,9 +310,30 @@ test("the kit warms with ImageBitmaps only, after the plan, under the suit's ski
   // The suit's warm-up only imports the kit's chunk once its plan is
   // prepared (no static import: its own fetches and stage pins are its own).
   assert.doesNotMatch(warmup, /^import[^;]*rexonance-nanites/m);
+  const clean = ts.transpileModule(warmup, {
+    compilerOptions: { target: ts.ScriptTarget.ESNext, removeComments: true },
+  }).outputText;
+  const planStage = clean.slice(
+    clean.indexOf("function warmPlanWhenIdle()"),
+    clean.indexOf("function resumeKit()"),
+  );
+  const kitStage = clean.slice(
+    clean.indexOf("function resumeKit()"),
+    clean.indexOf("function picture("),
+  );
+  assert.match(planStage, /return plan\.prepareRexonanceSuit\(\);/);
   assert.match(
-    warmup,
-    /return plan\.prepareRexonanceSuit\(\);\s*\},\s*\(\) => undefined,\s*\)\.then\(\(prepared\) => \{[^]*?import\("\.\/rexonance-nanites-warmup\.ts"\)/,
+    planStage,
+    /\.then\(\(prepared\) => \{\s*if \(prepared !== true \|\| saving\(\) \|\| still\(\)\)\s*return;\s*kitWaiting = true;\s*resumeKit\(\);/,
+  );
+  assert.doesNotMatch(planStage, /import\("\.\/rexonance-nanites-warmup\.ts"\)/);
+  assert.match(
+    kitStage,
+    /if \(!kitWaiting \|\| !ready \|\| document\.hidden \|\| backgroundPauses \|\| saving\(\) \|\| still\(\)\)\s*return;/,
+  );
+  assert.match(
+    kitStage,
+    /kitWaiting = false;\s*void import\("\.\/rexonance-nanites-warmup\.ts"\)\.then\(\(kit\) => kit\.warmRexonanceNanites\(\)/,
   );
   assert.deepEqual(
     [...kit.REXONANCE_NANITE_ASSETS],
@@ -450,6 +484,21 @@ async function extrasRuntime({ touch }) {
         tilePose(p, i, L.kind[p] === 3);
         return Array.from(pose);
       },
+      firePoseAt(c, t, born = true) {
+        pose[ARG_T] = t;
+        surfacePose(c);
+        if (born) {
+          pose[ARG_U] = (t - L.birth[c]) / FIRE_SPRAY;
+          bornPose(c);
+        }
+        return Array.from(pose.subarray(0, 3));
+      },
+      firebrandAt(c, t) {
+        pose[ARG_U] = (t-L.birth[c]+FIREBRAND_LEAD)/FIREBRAND_LEAD;
+        firebrandPose(c);
+        return Array.from(pose.subarray(0,2));
+      },
+      fireHash: hash,
       docking() { return Array.from(docks.subarray(0, dockCount * 8)); },
       platePose(p, t) {
         const lambda = lambdaAt(p, t);
@@ -474,6 +523,23 @@ async function extrasRuntime({ touch }) {
       if (name === "@/lib/rexonance-suit") return suit;
       if (name === "@/lib/rexonance-nanites") return kit;
       if (name === "@/lib/rexonance-reactor.js") return reactor;
+      if (name === "@/lib/rexonance-ignition.js") return ignition;
+      if (name === "@/lib/rexonance-flame.js")
+        return {
+          drawNaniteFirebrand(context, x, y, power, clock, scale) {
+            // Worst-case real helper contract: two interpolated atlas draws.
+            // The helper's own unit verifies actual resource/state semantics;
+            // never make this a no-op that hides the caller's sprite cost.
+            for (let i = 0; i < 2; i++)
+              context.drawImage(
+                { kind: flameAsset },
+                x - 20 * scale,
+                y - 50 * scale,
+                40 * scale,
+                70 * scale,
+              );
+          },
+        };
       if (name === "@/lib/rexonance-call-retention") return { createRexonanceCallRetention };
       // Round 3 (reviews 8/27/9): the call phases its own read-backs and
       // shares the kit's row formulas (their bytes: rexonance-nanites-unlit).
@@ -521,6 +587,7 @@ async function playCall(touch) {
   assert.ok(ex, "the call's extras are created");
   const frames = [];
   const kitSources = new Set(kit.REXONANCE_NANITE_ASSETS);
+  kitSources.add(flameAsset);
   for (let t = 0; t <= 2600; t += 5) {
     log.draws = 0;
     log.sources.clear();
@@ -539,9 +606,10 @@ async function playCall(touch) {
       ex.conduit(p, t);
     }
     ex.after(t);
+    ex.firebrands(t);
     assert.equal(log.saves, 0, `${t}: every save is restored`);
     assert.deepEqual(log.last, [1, 0, 0, 1, 34, 31], `${t}: the frame ends on the base transform`);
-    // Hero sprites: chips, latches, rings and sparks from the kit's sheets;
+    // Hero sprites: chips, latches, rings, sparks and real firebrand atlas;
     // the conduit (the guide sheet) is counted on its own.
     let kitDraws = 0;
     for (const [kind, count] of log.sources)
@@ -662,6 +730,7 @@ test("the tassets form in place, and every plate is at rest from its fit on", as
         assert.deepEqual(args, [1, 0, 0, 1, 34, 31], `${plate.piece.id} at ${t}: at rest`);
     }
     ex.after(t);
+    ex.firebrands(t);
   }
 });
 
@@ -1060,7 +1129,7 @@ test("the swarm's life: squads, strings, and frames that depend on the clock alo
   }
 });
 
-test("the layout: every chip has a ring, the cocoon drains bottom-up, every tile a pose", async () => {
+test("the layout preserves bottom-up drains and exact tile timing with one continuous birth interval", async () => {
   const { plan, extras } = await extrasRuntime({ touch: false });
   const all = plan.plates();
   const L = extras.rexonanceNaniteLayout();
@@ -1081,8 +1150,8 @@ test("the layout: every chip has a ring, the cocoon drains bottom-up, every tile
     }
   });
   assert.ok(loops >= 55);
-  // 512 cocoon chips and 160 free chips on eight rings; each cocoon chip
-  // drains into its plate after it is born, on the ring nearest its seat.
+  // Preserve the material and reservation counts, but not the former
+  // eight decorative orbital birth lanes.
   const chips = L.ring.length;
   assert.equal(chips, 672);
   let free = 0;
@@ -1092,7 +1161,12 @@ test("the layout: every chip has a ring, the cocoon drains bottom-up, every tile
   for (let c = 0; c < chips; c += 1) {
     assert.ok(L.ring[c] >= 0 && L.ring[c] < 8);
     assert.ok(
-      calls.REXONANCE_SUIT_SWARM.waves.some((wave) => L.birth[c] >= wave && L.birth[c] < wave + 80),
+      L.birth[c] >= 400 && L.birth[c] <= 620,
+      "born in the shared flash, not the six old pumps",
+    );
+    assert.ok(
+      ignition.naniteFlameEnvelope(L.birth[c] / 2400) > 0.9,
+      "the fire exists before the machine",
     );
     const p = L.chipPlate[c];
     if (p < 0) {
@@ -1107,18 +1181,105 @@ test("the layout: every chip has a ring, the cocoon drains bottom-up, every tile
     if (all[p].piece.group === "legs") {
       legs += 1;
       legRings += L.ring[c];
-      assert.ok(L.ring[c] >= 3, "leg chips ride the lower rings");
+      assert.ok(L.ring[c] >= 3, "leg drain ordering stays compatible");
       assert.ok(L.drainAt[c] < 900, "and drain first");
     }
     if (all[p].piece.group === "helm") {
       helm += 1;
-      assert.equal(L.ring[c], 0, "the helmet's chips ride the top ring, then the crown");
+      assert.equal(L.ring[c], 0, "helmet reservations remain in the top group");
       assert.ok(L.drainAt[c] >= calls.REXONANCE_SUIT_SWARM.crown[1]);
     }
   }
   assert.equal(free, 160);
   assert.ok(legRings / legs >= 5, `leg chips' mean ring ${legRings / legs}`);
   assert.ok(legs > 60 && helm > 20, `${legs} leg chips, ${helm} helmet chips`);
+});
+
+test("entrance fire leaves the shared surface before a machine appears at the exact airborne handoff", async () => {
+  const { plan, extras } = await extrasRuntime({ touch: false });
+  const all = plan.plates();
+  const L = extras.rexonanceNaniteLayout();
+  const ex = extras.createSuitExtras({
+    flight: recorder().context,
+    s: 1,
+    ox: 0,
+    oy: 0,
+    all,
+    gold: plan.cells(),
+    source: { kind: "work" },
+    sheet: { kind: "motes" },
+  });
+  const source = new Float64Array(4);
+  const distinct = new Set();
+  for (let c = 0; c < L.birth.length; c++) {
+    const p = L.chipPlate[c];
+    const h2 = ex.fireHash(c, 2111);
+    let best = Infinity;
+    let expected;
+    for (let k = 0; k < (p < 0 ? 1 : 12); k++) {
+      ignition.sampleFlameBirth(p < 0 ? h2 : (k + h2) / 12, source);
+      const x = source[0] * 571,
+        y = source[1] * 1040;
+      const distance = p < 0 ? 0 : (x - L.seatX[p]) ** 2 + (y - L.seatY[p]) ** 2;
+      if (distance < best) {
+        best = distance;
+        expected = [x, y, source[2], source[3]];
+      }
+    }
+    for (const [i, values] of [L.emitX, L.emitY, L.emitNX, L.emitNY].entries())
+      assert.ok(Math.abs(values[c] - expected[i]) < 0.0001, `${c}/${i}: shared body source`);
+    distinct.add(`${Math.floor(L.emitX[c] / 20)},${Math.floor(L.emitY[c] / 20)}`);
+    const born = ex.firePoseAt(c, L.birth[c]);
+    const prelude = ex.firebrandAt(c, L.birth[c] - 60);
+    const inherited = ex.firebrandAt(c, L.birth[c]);
+    assert.ok(
+      Math.hypot(prelude[0] - L.emitX[c], prelude[1] - L.emitY[c]) < 0.0001,
+      "the visible flame starts on the real burning surface before the machine",
+    );
+    assert.ok(
+      Math.hypot(born[0] - inherited[0], born[1] - inherited[1]) < 0.0001,
+      "the nanite inherits the same airborne flame coordinate without a jump",
+    );
+    assert.ok(
+      Math.hypot(born[0] - L.emitX[c], born[1] - L.emitY[c]) >= 18,
+      "the machine forms in the flying fire, not directly on the body",
+    );
+    const boundary = L.birth[c] + 160;
+    const before = ex.firePoseAt(c, boundary - 1e-5);
+    const surface = ex.firePoseAt(c, boundary, false);
+    assert.ok(
+      Math.hypot(before[0] - surface[0], before[1] - surface[1]) < 0.001,
+      "scatter joins the material stream without teleporting",
+    );
+    const middle = [...ex.firePoseAt(c, L.birth[c] + 70)];
+    ex.firePoseAt(c, boundary + 300);
+    assert.deepEqual(
+      [...ex.firePoseAt(c, L.birth[c] + 70)],
+      middle,
+      "reverse timing is history-free",
+    );
+  }
+  assert.ok(distinct.size >= 30, `${distinct.size} body cells feed the machines, not a few pumps`);
+  const { context, log } = recorder();
+  const visible = extras.createSuitExtras({
+    flight: context,
+    s: 1,
+    ox: 0,
+    oy: 0,
+    all,
+    gold: plan.cells(),
+    source: { kind: "work" },
+    sheet: { kind: "motes" },
+  });
+  const fireDraws = (t) => {
+    log.sources.clear();
+    visible.before(t);
+    visible.firebrands(t);
+    return log.sources.get(flameAsset) ?? 0;
+  };
+  assert.equal(fireDraws(330), 0);
+  assert.ok(fireDraws(380) > 0, "real flame is rendered before the earliest 400ms metal birth");
+  assert.equal(fireDraws(665), 0, "firebrands cool completely after the last crossfade");
 });
 
 test("keyed nanites stay continuous through braking, alignment, capture and insertion", async () => {
