@@ -1,0 +1,224 @@
+/* Gallery present — a current night exhibition.
+
+   Last sheet on /gallery. The brass double-frames, warm brown room and
+   catalog underlines give way to a cool ink stage: the picture is the
+   plate, type is quiet, and controls stay at least 12px with their
+   existing hit areas. No new words, images, or looping motion. */
+
+html[data-family="gallery"] .gallery-page {
+  --gallery-ink: #07080c;
+  --gallery-ink-soft: #12141a;
+  --gallery-ivory: #f4f1ea;
+  --gallery-muted: #a7a095;
+  --gallery-brass: #d7c4a2;
+  --gallery-rule: rgb(255 255 255 / 10%);
+  background:
+    radial-gradient(ellipse at 70% -10%, rgb(255 255 255 / 4%), transparent 42%),
+    #07080c;
+  color: #f4f1ea;
+}
+
+html[data-family="gallery"] .gallery-page .gallery-topbar {
+  border-bottom-color: rgb(255 255 255 / 8%);
+  background: #07080c;
+}
+
+html[data-family="gallery"] .gallery-page .gallery-brand {
+  font-family: "Hiragino Sans", "Yu Gothic", "Noto Sans JP", system-ui, sans-serif;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
+html[data-family="gallery"] .gallery-page .gallery-intro {
+  min-height: 0;
+  align-items: center;
+  padding-block: clamp(28px, 4vw, 56px) clamp(20px, 3vw, 40px);
+}
+
+html[data-family="gallery"] .gallery-page .gallery-eyebrow {
+  color: #d7c4a2;
+  letter-spacing: 0.18em;
+}
+
+html[data-family="gallery"] .gallery-page .gallery-intro h1,
+html[data-family="gallery"] .gallery-page .gallery-intro h1 span,
+html[data-family="gallery"] .gallery-page .gallery-intro h1 .gallery-title-opening {
+  color: #f7f4ee;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  line-height: 1.25;
+}
+
+html[data-family="gallery"] .gallery-page .gallery-intro h1 {
+  margin: 14px 0 16px;
+  font-size: clamp(34px, 4.6vw, 58px);
+}
+
+html[data-family="gallery"] .gallery-page .gallery-intro-description {
+  color: #c9c2b6;
+  font-size: 16px;
+  letter-spacing: 0.01em;
+  line-height: 1.85;
+}
+
+html[data-family="gallery"] .gallery-page .gallery-enter {
+  min-height: 48px;
+  margin-top: 22px;
+  padding: 0 18px;
+  border: 1px solid rgb(255 255 255 / 16%);
+  border-bottom-color: rgb(255 255 255 / 16%);
+  background: #12141a;
+  color: #f7f4ee;
+  font-family: "Hiragino Sans", "Yu Gothic", "Noto Sans JP", system-ui, sans-serif;
+  font-size: 14px;
+  letter-spacing: 0.06em;
+}
+
+html[data-family="gallery"] .gallery-page .gallery-enter span {
+  color: #f7f4ee;
+  font-size: 16px;
+}
+
+html[data-family="gallery"] .gallery-page .gallery-edition b {
+  font-family: "Hiragino Sans", "Yu Gothic", "Noto Sans JP", system-ui, sans-serif;
+  font-size: 20px;
+  font-weight: 500;
+  color: #f7f4ee;
+}
+
+html[data-family="gallery"] .gallery-page .gallery-feature::before,
+html[data-family="gallery"] .gallery-page .gallery-feature-open::after,
+html[data-family="gallery"] .gallery-page .gallery-work-frame::after {
+  content: none;
+  display: none;
+  border: 0;
+  background: none;
+}
+
+html[data-family="gallery"] .gallery-page .gallery-feature-open {
+  border: 0;
+  background: #0c0d12;
+  box-shadow: none;
+}
+
+html[data-family="gallery"] .gallery-page .gallery-feature figcaption {
+  font-family: "Hiragino Sans", "Yu Gothic", "Noto Sans JP", system-ui, sans-serif;
+  color: #c9c2b6;
+}
+
+html[data-family="gallery"] .gallery-page .gallery-collection-heading {
+  border-top-color: rgb(255 255 255 / 10%);
+}
+
+html[data-family="gallery"] .gallery-page .gallery-collection-heading h2 {
+  color: #f7f4ee;
+  font-family: "Hiragino Sans", "Yu Gothic", "Noto Sans JP", system-ui, sans-serif;
+  font-size: clamp(22px, 2vw, 28px);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+}
+
+html[data-family="gallery"] .gallery-page .gallery-filters button,
+html[data-family="gallery"] .gallery-page .gallery-favorites-filter,
+html[data-family="gallery"] .gallery-page .gallery-order select,
+html[data-family="gallery"] .gallery-page .gallery-reset-filter,
+html[data-family="gallery"] .gallery-page .gallery-search input {
+  border-color: rgb(255 255 255 / 12%);
+  border-radius: 0;
+  background: #101218;
+  color: #f4f1ea;
+}
+
+html[data-family="gallery"] .gallery-page .gallery-filters button[aria-pressed="true"],
+html[data-family="gallery"] .gallery-page .gallery-favorites-filter[aria-pressed="true"],
+html[data-family="gallery"] .gallery-page .gallery-favorite-toggle[aria-pressed="true"] {
+  border-color: #f4f1ea;
+  background: #f4f1ea;
+  color: #111216;
+}
+
+html[data-family="gallery"] .gallery-page .gallery-filters button[aria-pressed="true"] span,
+html[data-family="gallery"] .gallery-page .gallery-favorites-filter[aria-pressed="true"] span {
+  color: #111216;
+}
+
+html[data-family="gallery"] .gallery-page .gallery-grid {
+  --gallery-mat: 0px;
+  row-gap: clamp(28px, 3.2vw, 44px);
+}
+
+html[data-family="gallery"] .gallery-page .gallery-work-frame {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+html[data-family="gallery"] .gallery-page .gallery-work-frame img {
+  background: #0c0d12;
+}
+
+html[data-family="gallery"] .gallery-page .gallery-work figcaption,
+html[data-family="gallery"] .gallery-page .gallery-work figcaption h3,
+html[data-family="gallery"] .gallery-page .gallery-work-number {
+  font-family: "Hiragino Sans", "Yu Gothic", "Noto Sans JP", system-ui, sans-serif;
+}
+
+html[data-family="gallery"] .gallery-page .gallery-work figcaption h3 {
+  color: #f7f4ee;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+html[data-family="gallery"] .gallery-page .gallery-work-number {
+  color: #a7a095;
+}
+
+html[data-family="gallery"] .gallery-page .gallery-work-hint,
+html[data-family="gallery"] .gallery-page .gallery-work-hint > span {
+  border: 0;
+  background: none;
+  color: #a7a095;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+}
+
+html[data-family="gallery"] .gallery-page .gallery-favorite-toggle {
+  border-color: rgb(255 255 255 / 14%);
+  background: transparent;
+  color: #d9d3c8;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="gallery"] .gallery-page .gallery-work-open:hover .gallery-work-frame,
+  html[data-family="gallery"] .gallery-page .gallery-work-open:focus-visible .gallery-work-frame {
+    border-color: transparent;
+    box-shadow: none;
+  }
+
+  html[data-family="gallery"] .gallery-page .gallery-enter:hover,
+  html[data-family="gallery"] .gallery-page .gallery-filters button:hover {
+    border-color: rgb(255 255 255 / 36%);
+    color: #fff;
+  }
+}
+
+@media (max-width: 700px) {
+  html[data-family="gallery"] .gallery-page .gallery-intro h1 {
+    font-size: clamp(32px, 9vw, 44px);
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-family="gallery"] .gallery-page,
+  html[data-family="gallery"] .gallery-page .gallery-topbar,
+  html[data-family="gallery"] .gallery-page .gallery-work-frame,
+  html[data-family="gallery"] .gallery-page .gallery-feature-open,
+  html[data-family="gallery"] .gallery-page .gallery-filters button,
+  html[data-family="gallery"] .gallery-page .gallery-enter {
+    background: Canvas;
+    color: CanvasText;
+    border-color: CanvasText;
+  }
+}

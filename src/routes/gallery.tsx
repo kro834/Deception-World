@@ -9,6 +9,7 @@ import galleryShuffleCssUrl from "@/styles-gallery-shuffle.css?url";
 import galleryImageFallbackCssUrl from "@/styles-gallery-image-fallback.css?url";
 import exhibitionStudioCssUrl from "@/styles-exhibition-studio.css?url";
 import galleryRefinementCssUrl from "@/styles-gallery-refinement.css?url";
+import galleryPresentCssUrl from "@/styles-gallery-present.css?url";
 import { GALLERY_CURTAIN_STICKERS } from "@/components/gallery/gallery-curtain";
 
 export const Route = createFileRoute("/gallery")({
@@ -27,11 +28,12 @@ export const Route = createFileRoute("/gallery")({
         { rel: "stylesheet", href: galleryImageFallbackCssUrl },
         { rel: "stylesheet", href: exhibitionStudioCssUrl },
         { rel: "stylesheet", href: galleryRefinementCssUrl },
+        { rel: "stylesheet", href: galleryPresentCssUrl },
       ],
     });
     return {
       ...head,
-      meta: [...(head.meta ?? []), { name: "theme-color", content: "#171614" }],
+      meta: [...(head.meta ?? []), { name: "theme-color", content: "#07080c" }],
       links: [
         ...(head.links ?? []),
         // A direct visit opens on the curtain: its stickers load with the page.
