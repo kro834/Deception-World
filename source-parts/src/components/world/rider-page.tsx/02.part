@@ -1,12 +1,3 @@
-      pos: "50% 8%",
-      to: "/final-stage",
-      hash: "far-from-saga",
-      assets: FINAL_STAGE_ENTER_ASSETS,
-      label: "特設サイトへ",
-    },
-  },
-  {
-    id: "realm",
     no: "02",
     name: "REALM",
     ja: "レルム",
@@ -340,3 +331,22 @@
           {
             name: "SUPPORT To GRASS",
             body: "支援、妨害、拘束、回復を一つの戦闘へ混在させ、豪快な近接戦闘と同居させる。",
+          },
+        ],
+      },
+      {
+        img: "/rider-leddic-ishihen.jpeg",
+        pos: "50% 8%",
+        system: "四八式腕時計型偏装甲装置 × レディックウォッチ",
+        name: "レディック",
+        sub: "石偏フォーム",
+        calls: ["石偏！！！！", "GUARD By ROCK！！"],
+        quote: "他者を護る盾として、圧倒的な頑強さを。",
+        overview: [
+          "在原華火が変身する第二形態。草かんむりフォームと同じタイミングで与えられていたが、華火が存在ごと忘れていたため、登場は少し遅れる。",
+          "後に登場するフォームを含めても頭3つほど抜き出た圧倒的な頑強さを誇り、他者を護る盾として存分に力を発揮する。武器の岩山盾は『重い』と言いながら、華火がすぐに放り投げてしまう。",
+        ],
+        stats: [
+          { dt: "HEIGHT", dd: "230cm" },
+          { dt: "WEIGHT", dd: "308kg" },
+          { dt: "PUNCH", dd: "10.6t" },

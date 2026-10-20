@@ -340,3 +340,12 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
       quote:
         "レクソナンスの超共鳴と、ヴィンクルムの接続を一つの戦闘体系へ。ファイナルステージ限定の超究極フォーム。",
       img: "/rider-far-from-saga-middle.webp",
+      pos: "50% 8%",
+      to: "/final-stage",
+      hash: "far-from-saga",
+      assets: FINAL_STAGE_ENTER_ASSETS,
+      label: "特設サイトへ",
+    },
+  },
+  {
+    id: "realm",
