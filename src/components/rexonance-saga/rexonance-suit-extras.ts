@@ -1098,7 +1098,9 @@ function* layoutSteps(all: Plate[], gold: Cells): Generator<undefined, Layout, u
     L.birth[c] = plate < 0 ? born : Math.min(born, all[plate].fit - 80);
     L.brandStart[c] = FIREBRAND_START + 100 * h2;
     L.sprayMs[c] =
-      plate < 0 ? FIRE_SPRAY : Math.min(FIRE_SPRAY, Math.max(32, (all[plate].fit - L.birth[c]) * 0.45));
+      plate < 0
+        ? FIRE_SPRAY
+        : Math.min(FIRE_SPRAY, Math.max(32, (all[plate].fit - L.birth[c]) * 0.45));
     L.drainMs[c] =
       plate < 0
         ? 120
@@ -3175,8 +3177,7 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
   };
   // Keep only the short metal handoff above the shared flame field.
   const firebrands = (t: number) => {
-    if (t < FIREBRAND_START || t >= FIRE_BIRTH + FIRE_BIRTH_SPAN + FIREBRAND_CARRIER)
-      return;
+    if (t < FIREBRAND_START || t >= FIRE_BIRTH + FIRE_BIRTH_SPAN + FIREBRAND_CARRIER) return;
     base();
     for (let c = 0; c < CHIPS; c += FIREBRAND_STRIDE) {
       const age = t - L.birth[c];
@@ -3750,9 +3751,7 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
     // existing 24-image hero allowance. Machines use rect batches instead;
     // this handoff must not silently increase the low-tier GPU budget.
     heroes =
-      TOUCH &&
-      t >= FIREBRAND_START &&
-      t < FIRE_BIRTH + FIRE_BIRTH_SPAN + FIREBRAND_COOL
+      TOUCH && t >= FIREBRAND_START && t < FIRE_BIRTH + FIRE_BIRTH_SPAN + FIREBRAND_COOL
         ? FIREBRANDS * 2
         : 0;
     linkCount = 0;
@@ -3928,8 +3927,12 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
       const w = (u - 0.46) / 0.22;
       const r = r0 * (1 - smooth(w));
       const cross = Math.cos(psi0) + 0.14 * Math.sin(TAU * w) * (1 - w);
-      pose[PX] = kx + r * (cross * qx + 0.45 * Math.sin(psi0) * nx);
-      pose[PY] = ky + r * (cross * qy + 0.45 * Math.sin(psi0) * ny);
+      // Polarized capture flattens the incoming helix across the socket
+      // before the machine turns face-on and begins its axial insertion.
+      // The ends still meet the flight and alignment poses exactly.
+      const flatten = 0.45 * (1 - 0.7 * smooth(w));
+      pose[PX] = kx + r * (cross * qx + flatten * Math.sin(psi0) * nx);
+      pose[PY] = ky + r * (cross * qy + flatten * Math.sin(psi0) * ny);
       size *= 1 + 0.14 * Math.sin(Math.PI * w);
       frame += spin * (3 * 0.46 + 0.6 * (u - 0.46));
     } else if (!helm && u < 0.8) {
@@ -4567,21 +4570,25 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
       }
     }
   };
-  // Articulated receiver jaws and a short, cooling weld. Drawn in nine
+  // Articulated receiver jaws and a short, cooling weld. Drawn in fifteen
   // line batches regardless of chip count; the dark undercut gives each
   // physical key depth, while the open jaws expose the original art.
   const dockingPass = () => {
     if (!dockCount) return;
     flight.lineCap = "round";
     flight.lineJoin = "round";
-    for (let stage = 0; stage < 3; stage += 1) {
+    for (let stage = 0; stage < 5; stage += 1) {
       for (let pass = 0; pass < 3; pass += 1) {
         flight.beginPath();
         let any = false;
         for (let k = 0; k < dockCount; k += 1) {
           const o = k * 8;
           const since = docks[o + 6];
-          if ((since < 0 ? 0 : since < 12 ? 1 : 2) !== stage || docks[o + 7] < 0.15) continue;
+          if (
+            (since < 0 ? 0 : since < 8 ? 1 : since < 20 ? 2 : since < 32 ? 3 : 4) !== stage ||
+            docks[o + 7] < 0.04
+          )
+            continue;
           const x = docks[o];
           const y = docks[o + 1];
           const nx = docks[o + 2];
@@ -4605,17 +4612,33 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
             // The fusion seam travels toward the last attached neighbour,
             // changing white-hot to gold as it contracts and cools.
             const progress = since < 12 ? since / 12 : 1;
-            flight.moveTo(Math.round(x), Math.round(y));
-            flight.lineTo(Math.round(x - nx * span * progress), Math.round(y - ny * span * progress));
+            const tail = smooth((since - 8) / 36);
+            flight.moveTo(Math.round(x - nx * span * tail), Math.round(y - ny * span * tail));
+            flight.lineTo(
+              Math.round(x - nx * span * progress),
+              Math.round(y - ny * span * progress),
+            );
           } else continue;
           any = true;
         }
         if (!any) continue;
         flight.strokeStyle =
-          pass === 0 ? "#241707" : pass === 1 ? "#e9b356" : stage === 1 ? "#fff9e2" : "#b77b35";
+          pass === 0
+            ? "#241707"
+            : pass === 1
+              ? stage < 2
+                ? "#e9b356"
+                : "#a77a45"
+              : stage === 1
+                ? "#f2ffed"
+                : stage === 2
+                  ? "#ffd179"
+                  : "#9c6331";
         flight.lineWidth =
           pass === 0 ? Math.max(1.7, 2.1 * s) : Math.max(0.65, (pass === 1 ? 0.9 : 1.2) * s);
-        flight.globalAlpha = pass === 0 ? 0.65 : stage === 0 ? 0.48 : stage === 1 ? 0.92 : 0.4;
+        flight.globalAlpha =
+          (pass === 0 ? 0.65 : stage === 0 ? 0.48 : stage === 1 ? 0.92 : 0.64) *
+          (stage < 3 ? 1 : stage === 3 ? 0.48 : 0.14);
         flight.stroke();
       }
     }
@@ -4909,7 +4932,8 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
       const cool = 1 - smooth((t - F) / RECEIVER_COOL);
       const alpha = reveal * cool;
       const jo = p * 6;
-      for (let pass = 0; pass < 3; pass += 1) {
+      for (let pass = 0; pass < 4; pass += 1) {
+        if (pass === 3 && t >= F) continue;
         flight.beginPath();
         for (let key = 0; key < L.receiverN[p]; key += TOUCH ? 2 : 1) {
           const o = (p * RECEIVER_KEYS + key) * 4;
@@ -4963,7 +4987,7 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
               );
               flight.closePath();
             }
-          } else {
+          } else if (pass === 2) {
             // A thin bevel traces the keyed shoulder; light crosses
             // each fastener only as that pair bites, then cools to steel.
             const heat = Math.max(0, 1 - Math.abs(t - catchAt - 24) / 42);
@@ -5000,14 +5024,40 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
               Math.round(x + tx * length - nx * (depth + 1.8 * s)),
               Math.round(y + ty * length - ny * (depth + 1.8 * s)),
             );
+          } else {
+            // A short induction front runs down each real rail toward its
+            // fixed socket. Paired keys share the approach, then lock in
+            // the same stagger as their shutters; no detached HUD frame.
+            const head = smooth((t - F + RAIL_LEAD - rank * 3) / (RAIL_LEAD - 22));
+            const tail = Math.max(0, head - 0.24);
+            for (let side = -1; side <= 1; side += 2) {
+              const dx = tx * side * (width + 1.6 * s);
+              const dy = ty * side * (width + 1.6 * s);
+              flight.moveTo(
+                Math.round(px + (x - px) * tail + dx),
+                Math.round(py + (y - py) * tail + dy),
+              );
+              flight.lineTo(
+                Math.round(px + (x - px) * head + dx),
+                Math.round(py + (y - py) * head + dy),
+              );
+            }
           }
         }
-        flight.globalAlpha = alpha * (pass === 0 ? 0.6 : pass === 1 ? 0.88 : 0.8);
+        flight.globalAlpha =
+          alpha * (pass === 0 ? 0.6 : pass === 1 ? 0.88 : pass === 2 ? 0.8 : 0.54);
         if (pass === 1) {
           flight.fillStyle = "#293843";
           flight.fill();
         } else {
-          flight.strokeStyle = pass === 0 ? "#18242e" : "#c3e4ef";
+          flight.strokeStyle =
+            pass === 0
+              ? "#18242e"
+              : pass === 3 || t < F + 12
+                ? "#c3e4ef"
+                : t < F + 34
+                  ? "#e9b86d"
+                  : "#8d6a44";
           flight.lineWidth = Math.max(0.7, (pass === 0 ? 2.5 : 0.8) * s);
           flight.stroke();
         }

@@ -2760,8 +2760,13 @@ export function createAssemblyNanites({
       const e = smooth(w);
       const psi = PSI0[i] + 1.5 * Math.PI * e;
       const rr = R0[i] * (1 - e);
-      x = hx + rr * (Math.cos(psi) * qx + 0.45 * Math.sin(psi) * nx);
-      y = hy + rr * (Math.cos(psi) * qy + 0.45 * Math.sin(psi) * ny);
+      // The magnetic field flattens the incoming helix across the key.
+      // Sideways correction damps before the axial insertion begins, so
+      // the final machine reads as an aligned part rather than a last
+      // decorative orbit. Both endpoints retain their exact old pose.
+      const flatten = 0.45 * (1 - 0.7 * e);
+      x = hx + rr * (Math.cos(psi) * qx + flatten * Math.sin(psi) * nx);
+      y = hy + rr * (Math.cos(psi) * qy + flatten * Math.sin(psi) * ny);
       size = s0 * (1.375 - 0.375 * e + 0.08 * Math.sin(Math.PI * w) ** 2);
       const gateFrame = F0[i] + rate * (t0 - m + 3 * 0.55 * span);
       const faceFrame = gateFrame - Math.round(gateFrame / 24) * 24;
@@ -4518,18 +4523,23 @@ export function createAssemblyNanites({
       const gap = 5 * (1 - closed);
       const depth = Math.max(5, Math.min(12, pc.railLength * 0.36));
       if (runner > 0) {
+        // Opposed induction rails converge from the still-moving anchors
+        // onto the fixed body sockets. They shorten with the real carriage
+        // travel rather than lighting an unrelated rectangle in the air.
         ctx.beginPath();
-        ctx.moveTo(
-          jigX(p, pc.railAnchors[0], pc.railAnchors[1]),
-          jigY(p, pc.railAnchors[0], pc.railAnchors[1]),
-        );
-        ctx.lineTo(
-          jigX(p, pc.railAnchors[2], pc.railAnchors[3]),
-          jigY(p, pc.railAnchors[2], pc.railAnchors[3]),
-        );
-        ctx.lineWidth = 2;
-        ctx.strokeStyle = "rgb(220 247 255)";
-        ctx.globalAlpha = 0.78 * runner;
+        for (let anchor = 0; anchor < 4; anchor += 2) {
+          const ax = pc.railAnchors[anchor];
+          const ay = pc.railAnchors[anchor + 1];
+          const mx = jigX(p, ax, ay);
+          const my = jigY(p, ax, ay);
+          for (let side = -1; side <= 1; side += 2) {
+            ctx.moveTo(mx + tx * side * gap, my + ty * side * gap);
+            ctx.lineTo(ax + tx * side * gap, ay + ty * side * gap);
+          }
+        }
+        ctx.lineWidth = 1.2;
+        ctx.strokeStyle = "rgb(174 225 239)";
+        ctx.globalAlpha = 0.48 * runner;
         ctx.stroke();
       }
       if (collar <= 0) continue;
@@ -4554,8 +4564,26 @@ export function createAssemblyNanites({
       ctx.globalAlpha = 0.7 * collar;
       ctx.stroke();
       if (q >= pc.contact) {
-        ctx.lineWidth = 2;
-        ctx.strokeStyle = "rgb(224 248 255)";
+        // Two small weld fronts leave the keys and travel into the panel.
+        // Incandescence cools from white through gold to copper while the
+        // shell stays precisely seated. Existing geometry/sprite budgets
+        // remain bounded by the reserved visible carriage count.
+        const age = q - pc.contact;
+        const weld = smooth(clamp01(age / 0.006));
+        const tail = smooth(clamp01((age - 0.003) / 0.008));
+        ctx.beginPath();
+        for (let anchor = 0; anchor < 4; anchor += 2) {
+          const ax = pc.railAnchors[anchor];
+          const ay = pc.railAnchors[anchor + 1];
+          const dx = pc.seatX - ax;
+          const dy = pc.seatY - ay;
+          const reach = Math.min(1, 18 / (Math.hypot(dx, dy) || 1));
+          ctx.moveTo(ax + dx * reach * tail, ay + dy * reach * tail);
+          ctx.lineTo(ax + dx * reach * weld, ay + dy * reach * weld);
+        }
+        ctx.lineWidth = age < 0.003 ? 1.8 : 1.1;
+        ctx.strokeStyle =
+          age < 0.003 ? "rgb(242 255 238)" : age < 0.008 ? "rgb(255 207 118)" : "rgb(156 99 49)";
         ctx.globalAlpha = 0.86 * collar * cool;
         ctx.stroke();
       }

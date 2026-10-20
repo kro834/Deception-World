@@ -7,6 +7,14 @@ const ease = (a: number, b: number, t: number) => {
   const p = clamp((t - a) / (b - a));
   return p * p * (3 - 2 * p);
 };
+/** Retarded emission: the nozzle closes first; already emitted gas keeps
+ * travelling and cooling. Pure sampling also makes skipped frames harmless. */
+export function sampleCielFireLife(seconds: number, travel = 0) {
+  const emittedAt = seconds - Math.max(0, Math.min(1.25, travel));
+  return (
+    ease(0.92, 1.72, emittedAt) * (1 - ease(4.35, 5.5, emittedAt)) * (1 - ease(6.25, 7.15, seconds))
+  );
+}
 const random = (n: number) => {
   const p = Math.sin(n * 127.1 + 77.7) * 43758.5453;
   return p - Math.floor(p);
@@ -50,10 +58,12 @@ void main(){
  float flow=fbm(vec2(along*4.-t*2.7,across*11.+t*.7));
  float curl=fbm(vec2(across*13.+flow*2.7,along*5.-t*3.2));
  float rib=pow(clamp(1.-abs(curl*2.-1.),0.,1.),3.);
- float jetOn=smoothstep(1.02,1.65,t)*(1.-smoothstep(4.4,5.5,t));
+ float emittedAt=t-clamp(max(along,0.)*.85,0.,1.25);
+ float jetOn=smoothstep(.92,1.72,emittedAt)*(1.-smoothstep(4.35,5.5,emittedAt))*(1.-smoothstep(6.25,7.15,t));
  float reach=mix(.05,length(aspect)*1.15,smoothstep(1.15,3.1,t));
  float breadth=.016+max(along,0.)*.17;
- float cone=(1.-smoothstep(breadth*.35,breadth*1.6,abs(across+(flow-.5)*breadth*.8)))*step(0.,along)*(1.-smoothstep(reach*.8,reach,along));
+ float lift=smoothstep(4.6,6.8,t)*max(along,0.)*.18;
+ float cone=(1.-smoothstep(breadth*.35,breadth*1.6,abs(across+(flow-.5)*breadth*.8-lift)))*step(0.,along)*(1.-smoothstep(reach*.8,reach,along));
  float jet=cone*(.24+.76*rib)*jetOn;
  // The pressure jet ignites along its axis first, then crawls sideways and
  // back toward its source. Unlike a radial wipe, each region has a burn age.
@@ -66,7 +76,10 @@ void main(){
  float front=distanceToFire-travel+(billow-.5)*.22;
  float inside=(1.-smoothstep(-.04,.065,front))*smoothstep(2.05,2.4,t);
  float age=max(0.,-front);
- float life=(1.-smoothstep(5.25,6.7,t));
+ // Each tongue burns out at its own temperature rather than dissolving as
+ // one translucent sheet. The char layer underneath never becomes clear.
+ float cooling=smoothstep(5.15,6.95,t);
+ float life=(1.-smoothstep(.35,.92,cooling+(.5-billow)*.32));
  // Tall, split tongues flow upward in screen space, not sideways with the
  // ignition mask. Dark valleys retain depth between the luminous folds.
  float tongues=pow(smoothstep(.38,.77,billow),2.)*(.5+.5*detail);
@@ -84,6 +97,7 @@ void main(){
  colour+=vec3(.08,.24,.025)*cracks*charred*exp(-age*2.)*life;
  // Transparent rolling smoke precedes the edge, never an opaque green disc.
  float smoke=exp(-abs(front-.16)*5.)*billow*.2*smoothstep(2.,3.,t)*life;
+ smoke+=inside*billow*.10*smoothstep(4.9,6.2,t)*(1.-smoothstep(7.,8.5,t));
  colour+=vec3(.018,.035,.022)*smoke;
  float dim=.24*smoothstep(0.,.65,t);
  float alpha=max(dim,max(inside*.96,max(jet*.84,max(flame*.8,smoke))));
@@ -397,13 +411,14 @@ export function createCielInfernoRenderer(options: Options) {
     context.setTransform(ratio, 0, 0, ratio, 0, 0);
     if (background) background.render(geometry, seconds);
     else paintFallback(context, geometry, seconds);
-    const pressure = ease(1.02, 1.65, seconds) * (1 - ease(4.6, 5.6, seconds));
+    const pressure = sampleCielFireLife(seconds);
+    const wake = sampleCielFireLife(seconds, 1.15);
     if (loaded && atlasStarted < 0) atlasStarted = seconds;
     const atlasMix = loaded ? ease(atlasStarted, atlasStarted + 0.24, seconds) : 0;
     const emberFade = 1 - ease(6.8, 8.7, seconds);
     const reach = Math.hypot(w, h) * (0.13 + ease(1.1, 3.2, seconds) * 0.97);
     context.globalCompositeOperation = "lighter";
-    if (pressure > 0) {
+    if (pressure > 0 || wake > 0) {
       if (loaded) {
         // Keep the volume's proportions: a short pressure throat feeds
         // broad, independently advected curls, never one stretched pencil.
@@ -419,7 +434,11 @@ export function createCielInfernoRenderer(options: Options) {
           const distance = age * reach * 0.92;
           const curl = Math.sin(seconds * 2.4 - age * 6 + SEEDS[k] * 2) * distance * 0.09;
           const px = x + Math.cos(angle) * distance - Math.sin(angle) * curl;
-          const py = y + Math.sin(angle) * distance + Math.cos(angle) * curl;
+          const py =
+            y +
+            Math.sin(angle) * distance +
+            Math.cos(angle) * curl -
+            ease(4.6, 6.9, seconds) * age * age * Math.min(w, h) * 0.24;
           const length = throat * (0.46 + age * 0.2);
           if (px < -length || py < -length || px > w + length || py > h + length) continue;
           sprite(
@@ -429,7 +448,7 @@ export function createCielInfernoRenderer(options: Options) {
             length * (0.49 + age * 0.23),
             angle + Math.sin(seconds * 2.1 - age * 6 + i) * 0.09,
             seconds * 16 * (0.83 + SEEDS[k + 1] * 0.3) + SEEDS[k + 2] * 32,
-            pressure * atlasMix * Math.sin(age * Math.PI) * 0.52,
+            sampleCielFireLife(seconds, age * 1.15) * atlasMix * Math.sin(age * Math.PI) * 0.52,
           );
         }
         // The white-green core occupies only the short mouth nozzle.
@@ -450,18 +469,21 @@ export function createCielInfernoRenderer(options: Options) {
           context.save();
           context.translate(x, y);
           context.rotate(angle);
-          context.globalAlpha = pressure * (1 - atlasMix) * (0.33 - ribbon * 0.035);
+          const tail = sampleCielFireLife(seconds, ribbon * 0.18);
+          context.globalAlpha = tail * (1 - atlasMix) * (0.33 - ribbon * 0.035);
           context.fillStyle = ribbon < 2 ? "#b7ef8c" : "#218842";
           context.beginPath();
-          context.moveTo(0, 0);
-          for (let j = 1; j < 30; j++) {
+          const released = ease(4.35, 6.75, seconds);
+          const start = Math.floor(released * 27);
+          context.moveTo((start / 29) * reach, 0);
+          for (let j = start; j < 30; j++) {
             const p = j / 29;
             context.lineTo(
               p * reach,
               Math.sin(p * 18 - seconds * 8 + ribbon) * p * 29 + p * (ribbon - 2.5) * 15,
             );
           }
-          for (let j = 29; j > 0; j--) {
+          for (let j = 29; j >= start; j--) {
             const p = j / 29;
             context.lineTo(
               p * reach,
@@ -482,7 +504,12 @@ export function createCielInfernoRenderer(options: Options) {
     context.globalCompositeOperation = "source-over";
     for (let i = 0; i < count; i++) {
       const k = i * 6;
-      const life = (((seconds * (0.16 + SEEDS[k] * 0.2) + SEEDS[k + 1]) % 1) + 1) % 1;
+      // A finite emission window, never a modulo emitter that creates fresh
+      // sparks after the source is extinguished. Late particles cool to ash.
+      const birth = 1.15 + SEEDS[k + 1] * 4.2;
+      const lifetime = 1.5 + SEEDS[k] * 2.35;
+      const life = (seconds - birth) / lifetime;
+      if (life <= 0 || life >= 1) continue;
       const spread = (SEEDS[k + 2] - 0.5) * life * Math.min(w, h) * 0.85;
       const distance = life * reach;
       const ignition = ease(2.8, 4.8, seconds);
@@ -490,7 +517,7 @@ export function createCielInfernoRenderer(options: Options) {
       const jetY =
         y + Math.sin(angle) * distance + Math.cos(angle) * spread - life * life * h * 0.2;
       const ashX = SEEDS[k + 2] * w + Math.sin(life * 8 + i) * 24;
-      const ashY = (SEEDS[k + 3] * h + life * h * (ash > 0.6 ? 0.5 : -0.4) + h) % h;
+      const ashY = SEEDS[k + 3] * h + life * h * (ash > 0.6 ? 0.5 : -0.4);
       const px = jetX + (ashX - jetX) * ignition;
       const py = jetY + (ashY - jetY) * ignition;
       const opacity =

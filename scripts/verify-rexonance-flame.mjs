@@ -266,11 +266,13 @@ async function nativeNaniteWindow(page, kind) {
       new Promise((resolve) => {
         const before = window.__flameQA.nativeNanites[kind];
         const atlasBefore = window.__flameQA.atlas[kind];
+        const fallbackBefore = window.__flameQA.fallback[kind];
         requestAnimationFrame(() =>
           requestAnimationFrame(() =>
             resolve({
               nanites: window.__flameQA.nativeNanites[kind] - before,
               atlas: window.__flameQA.atlas[kind] - atlasBefore,
+              fallback: window.__flameQA.fallback[kind] - fallbackBefore,
             }),
           ),
         );
@@ -726,6 +728,7 @@ try {
             pixels,
             nativeNaniteDraws: nativeWindow.nanites,
             nativeAtlasDraws: nativeWindow.atlas,
+            nativeFallbackDraws: nativeWindow.fallback,
             file,
           });
           if (target === 3600) {
@@ -772,13 +775,20 @@ try {
                 .every((shot) => shot.nativeNaniteDraws === 0),
               "the real kit bitmap pass waits for the trailing explosion",
             );
+            // A blocked atlas must never draw. Demand its real procedural
+            // fallback in the very same native frame window as the kit,
+            // instead of the contradictory positive-atlas condition. The
+            // normal case still requires real atlas draws: fallback alone
+            // cannot satisfy its overlap gate.
             assert.ok(
               record.entry.some(
                 (shot) =>
                   shot.canonicalClock >= materialEntry &&
                   shot.canonicalClock < NANITE_FIRE_PHASES.flameEnd * 2400 &&
                   shot.nativeNaniteDraws > 0 &&
-                  shot.nativeAtlasDraws > 0,
+                  (mode === "blocked"
+                    ? shot.nativeAtlasDraws === 0 && shot.nativeFallbackDraws > 0
+                    : shot.nativeAtlasDraws > 0),
               ),
               "actual nanites and flame coexist briefly before the fire finishes",
             );

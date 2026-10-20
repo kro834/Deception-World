@@ -145,7 +145,7 @@ function harness({ coarse = false, dpr = 1, webgl = true } = {}) {
       stats.atlasStates.push(state);
     },
   });
-  return { renderer, field, detail, stats, listeners };
+  return { renderer, field, detail, stats, listeners, sampleLife: exports.sampleCielFireLife };
 }
 
 const dimensions = (field, detail) => ({
@@ -265,4 +265,41 @@ test("dispose is idempotent and prevents all later rendering work", () => {
   assert.equal(host.detail.height, 1);
   assert.equal(host.stats.image.onload, null);
   assert.equal(host.stats.image.onerror, null);
+});
+
+test("nozzle lights first, closes before travelling gas, and all fire extinguishes", () => {
+  const { renderer, sampleLife } = harness();
+  assert.equal(sampleLife(0), 0);
+  assert.ok(sampleLife(1.5, 0) > sampleLife(1.5, 0.8), "ignition propagates from the mouth");
+  assert.equal(sampleLife(3, 0), 1);
+  assert.equal(sampleLife(5.6, 0), 0, "source has closed");
+  assert.ok(sampleLife(5.6, 1) > 0.8, "previously emitted gas still burns downstream");
+  for (const travel of [0, 0.3, 0.8, 1.25]) {
+    let previous = 1;
+    for (let t = 4.35 + travel; t <= 9.2; t += 0.03) {
+      const value = sampleLife(t, travel);
+      assert.ok(value <= previous + 1e-9, "cooling does not reignite");
+      assert.ok(value >= 0 && value <= 1);
+      previous = value;
+    }
+    assert.equal(sampleLife(7.15, travel), 0);
+  }
+  renderer.dispose();
+});
+
+test("late smoke and ash do not respawn fire sprites after extinction", () => {
+  const host = harness();
+  host.renderer.resize({ width: 1024, height: 768, mouthX: 740, mouthY: 280, angle: 2.52 });
+  host.stats.image.naturalWidth = 2048;
+  host.stats.image.naturalHeight = 512;
+  host.stats.image.onload();
+  host.renderer.render(3000);
+  host.renderer.render(3300);
+  const litDraws = host.stats.context2d.drawImage;
+  assert.ok(litDraws > 0);
+  host.renderer.render(7150);
+  host.renderer.render(8000);
+  host.renderer.render(9100);
+  assert.equal(host.stats.context2d.drawImage, litDraws, "cooldown samples no new flames");
+  host.renderer.dispose();
 });

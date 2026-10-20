@@ -478,9 +478,17 @@ function poseVortex(power, clock, phase) {
       const split = smooth(clamp((Math.sin(t * TAU * 2.3 + strand * 1.7 - spin) + 0.55) * 1.8));
       const tear = 1 - burst * split * 0.94;
       const billow = 0.94 + 0.12 * Math.sin(t * TAU * 3.2 - clock * 4.8 + strand * 1.9);
+      // Two broad thermal crests climb the same helix. Their phase travels
+      // toward its crown (negative canvas Y), so its silhouette rolls up
+      // with the advected density instead of merely breathing in place.
+      const thermal = 0.9 + 0.18 * Math.sin(t * TAU * 2 - clock * 3.8 + strand * 1.3);
+      // The extinction plume lifts bodily out of the burst. Keep the foot
+      // contact through ignition, then lift the crown farther than the
+      // root so the last density stretches upward rather than shrinking
+      // into isolated green lumps on the armour.
+      const lift = burst * VORTEX_H * (0.028 + 0.05 * t);
       VORTEX[at] = FIELD_W * 0.5 + radius * c + burst * c * VORTEX_W * 0.045;
-      VORTEX[at + 1] =
-        FIELD_PAD + VORTEX_H * (0.99 - 0.92 * t) + radius * 0.16 * s - burst * VORTEX_H * 0.025;
+      VORTEX[at + 1] = FIELD_PAD + VORTEX_H * (0.99 - 0.92 * t) + radius * 0.16 * s - lift;
       VORTEX[at + 4] =
         VORTEX_W *
         (0.078 + 0.046 * Math.sin(t * Math.PI)) *
@@ -491,6 +499,7 @@ function poseVortex(power, clock, phase) {
         // over the face or additional independent head flames.
         VORTEX_CROWN_WIDTH[i] *
         billow *
+        thermal *
         (0.65 + power * 0.35) *
         (1 - burst * 0.65) *
         tear;
@@ -565,7 +574,9 @@ function vortexPath(context, side, clock, phase) {
       context.bezierCurveTo(dx - tx * cap, dy - ty * cap, ax - tx * cap, ay - ty * cap, ax, ay);
       context.closePath();
     }
-    // Secondary rolling curls split off the same stream across four heights.
+    // Side curls inherit the exact thickness and breakup of their parent.
+    // A fixed seven-pixel root used to outlive a torn, hair-thin main band,
+    // leaving rounded flame islands during the material handoff.
     for (let branch = 0; branch < 3; branch += 1) {
       const at = base + (9 + branch * 15) * VORTEX_STRIDE;
       if (side && VORTEX[at + 5] * side < 0) continue;
@@ -573,12 +584,16 @@ function vortexPath(context, side, clock, phase) {
       const x = VORTEX[at];
       const y = VORTEX[at + 1];
       const margin = Math.min(x, FIELD_W - x, y, FIELD_H - y);
-      const radius = Math.min((11 + branch * 6) * (1 + burst * 0.6), Math.max(0, margin * 0.42));
+      const surviving = VORTEX[at + 6] * (1 - burst * 0.82);
+      const root = Math.min(7, VORTEX[at + 4] * 0.24) * surviving;
+      if (root < 0.12) continue;
+      const radius =
+        Math.min((11 + branch * 6) * (1 + burst * 0.6), Math.max(0, margin * 0.42)) * surviving;
       const nx = Math.cos(turn);
       const ny = Math.sin(turn);
       const tx = -ny;
       const ty = nx;
-      context.moveTo(x - nx * 7, y - ny * 7);
+      context.moveTo(x - nx * root, y - ny * root);
       context.bezierCurveTo(
         x + tx * radius * 2.1,
         y + ty * radius * 2.1 - radius * 0.35,
@@ -592,8 +607,8 @@ function vortexPath(context, side, clock, phase) {
         y + ny * radius + ty * radius * 0.45,
         x + tx * radius * 0.5,
         y + ty * radius * 0.5,
-        x + nx * 7,
-        y + ny * 7,
+        x + nx * root,
+        y + ny * root,
       );
       context.closePath();
     }

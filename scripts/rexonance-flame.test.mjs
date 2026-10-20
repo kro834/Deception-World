@@ -1132,3 +1132,60 @@ test("upward thermal advection, sculpted bezier lobes, additive core tongues and
     "simultaneous firebrands across the body sample desynchronized atlas frames",
   );
 });
+
+test("extinction lifts the real volume roots while side curls dissipate with their parent stream", async () => {
+  const module = await fresh();
+  const f = fixture();
+  await ready(module, f);
+  const body = prepareField(module, f);
+  const sample = (phase) => {
+    body.field.operations.length = 0;
+    body.mask.operations.length = 0;
+    module.drawBodyFlame(
+      painter().context,
+      { width: 571, height: 1040 },
+      1,
+      0.42,
+      1,
+      "back",
+      phase,
+    );
+    const roots = flameRoots(body.field.operations);
+    const curls = [];
+    let points = [];
+    let curves = 0;
+    for (const row of body.mask.operations) {
+      if (row[0] === "move") {
+        points = row.slice(1);
+        curves = 0;
+      } else if (row[0] === "curve") {
+        points.push(...row.slice(1));
+        curves++;
+      } else if (row[0] === "pathClose" && curves === 2) {
+        const xs = points.filter((_, i) => i % 2 === 0);
+        const ys = points.filter((_, i) => i % 2 === 1);
+        curls.push(
+          Math.hypot(Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys)),
+        );
+      }
+    }
+    return { roots, curls, field: [...body.field.operations], mask: [...body.mask.operations] };
+  };
+  const peak = sample(NANITE_FIRE_PHASES.burstStart);
+  const late = sample(NANITE_FIRE_PHASES.burstEnd);
+  assert.equal(late.roots.length, peak.roots.length, "retain the same bounded real volume samples");
+  const lifts = peak.roots.map((root, i) => root.y - late.roots[i].y);
+  assert.ok(Math.min(...lifts) > 8, "every body-height volume sample rises during extinction");
+  assert.ok(Math.max(...lifts) > 30, "the crown visibly stretches out of the storm");
+  assert.equal(peak.curls.length, 9, "secondary curl geometry belongs to the three parent streams");
+  assert.ok(late.curls.length > 0, "extinction remains a continuous dissipating stream");
+  assert.ok(
+    Math.max(...late.curls) < Math.max(...peak.curls) * 0.4,
+    "curl lobes shrink with parent tear instead of outliving it as solid green islands",
+  );
+  assert.deepEqual(
+    sample(NANITE_FIRE_PHASES.burstStart),
+    peak,
+    "reverse scrub restores the exact pre-burst geometry",
+  );
+});

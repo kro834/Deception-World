@@ -1004,13 +1004,26 @@ const P14Comparator = memo(function P14Comparator({
               <option value="p1">P1比</option>
               <option value="p2">P2比</option>
             </select>
+            <span className="rxs-p14-native-rail" data-value={p14Baseline} aria-hidden="true">
+              <i />
+              <b className="rxs-p14-native-anchor-p1"><i /></b>
+              <b className="rxs-p14-native-anchor-p2"><i /></b>
+            </span>
           </label>
         ) : (
           <div className="rxs-p14-ios-slider" data-value={p14Baseline}>
             <span className="rxs-p14-ios-track" aria-hidden="true">
               <i />
             </span>
-            <span className="rxs-p14-ios-thumb" aria-hidden="true" />
+            <span className="rxs-p14-core-anchor rxs-p14-core-anchor-p1" aria-hidden="true">
+              <i />
+            </span>
+            <span className="rxs-p14-core-anchor rxs-p14-core-anchor-p2" aria-hidden="true">
+              <i />
+            </span>
+            <span className="rxs-p14-ios-thumb" aria-hidden="true">
+              <i />
+            </span>
             <input
               id="rxs-p14-baseline"
               type="range"
