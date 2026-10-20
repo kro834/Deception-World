@@ -82,6 +82,7 @@ html[data-family="special"]
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0;
+  contain: layout style;
   border-block: 1px solid rgb(121 232 255 / 23%);
   background: rgb(3 9 16 / 76%);
 }
@@ -238,10 +239,20 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-asse
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 14px clamp(18px, 4vw, 56px);
   align-items: end;
+  contain: layout style;
   padding: clamp(22px, 3vw, 42px) var(--rxt-gutter, 24px);
   border-block: 1px solid rgb(121 232 255 / 20%);
   background: #08111a;
   scroll-margin-block-start: 84px;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup
+  > .rzn-frame
+  > :is(.rzn-call, .rzn-hud) {
+  contain: layout style;
 }
 
 /* The assembly guide is chapter 03 but intentionally has no oversized
@@ -268,6 +279,7 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-asse
   align-items: center;
   justify-content: space-between;
   gap: 16px;
+  contain: layout style;
   padding: 24px var(--rxt-gutter, 24px);
   border-block: 1px solid rgb(121 232 255 / 20%);
   background: #08111a;
@@ -358,6 +370,7 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form
   width: min(100%, 780px);
   margin: 0 auto clamp(24px, 3vw, 40px);
   padding: 16px 18px;
+  contain: layout style;
   border-block: 1px solid rgb(121 232 255 / 22%);
   color: #eaf3f7;
   background: rgb(4 10 17 / 62%);

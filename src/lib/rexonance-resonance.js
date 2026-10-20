@@ -1465,10 +1465,15 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   let lastProgress = -1;
   let calmTimer = 0;
   const hud = {
+    progress: -1,
+    form: "",
+    formReady: false,
     line: -1,
     chips: "",
     parts: -1,
     percent: "",
+    landedCount: -1,
+    totalFormatted: "",
     count: "",
     complete: null,
     phase: "",
@@ -3400,6 +3405,12 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     } else if (element.hasAttribute(name)) element.removeAttribute(name);
   };
   const updateHud = (progress) => {
+    const form = runway.dataset.form || "standard";
+    const formReady = form === "standard" || Boolean(formsState?.[form]);
+    if (progress === hud.progress && form === hud.form && formReady === hud.formReady) return;
+    hud.progress = progress;
+    hud.form = form;
+    hud.formReady = formReady;
     const B = ASSEMBLY_BEATS;
     const line =
       progress < B.scan[1]
@@ -3418,7 +3429,15 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     // only at the beat's end, the frame the line was dimmed). DEUS！ also
     // lights as each group lands, if that is sooner.
     const chantLit = (beat) => Math.min(4, Math.floor(span(progress, beat) * 5));
-    const deusDone = plan.partDone.slice(0, 4).filter((done) => progress >= done).length;
+    let deusDone = 0;
+    let landed = 0;
+    for (let i = 0; i < plan.partDone.length; i += 1) {
+      const done = plan.partDone[i];
+      if (done && progress >= done) {
+        landed += 1;
+        if (i < 4) deusDone += 1;
+      }
+    }
     const deusLit = Math.min(4, Math.max(deusDone, chantLit(B.deus)));
     const rexonanceLit = chantLit(B.rexonance);
     const chips = `${deusLit}:${rexonanceLit}`;
@@ -3441,7 +3460,6 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         );
       });
     }
-    const landed = plan.partDone.filter((done) => done && progress >= done).length;
     if (landed !== hud.parts) {
       hud.parts = landed;
       parts.forEach((part, index) =>
@@ -3456,18 +3474,24 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       // chips (they stayed dark until the lock). One write per percent.
       runway.style?.setProperty?.("--rzn-glow", (Number(share) / 100).toFixed(2));
     }
-    const count = `${grouped(landedBy(progress))} / ${grouped(plan.tiles.length)}`;
-    if (counter && count !== hud.count) {
-      hud.count = count;
-      writeText(counter, count);
+    if (counter) {
+      const landedCount = landedBy(progress);
+      if (landedCount !== hud.landedCount) {
+        hud.landedCount = landedCount;
+        if (!hud.totalFormatted) hud.totalFormatted = grouped(plan.tiles.length);
+        const count = `${grouped(landedCount)} / ${hud.totalFormatted}`;
+        if (count !== hud.count) {
+          hud.count = count;
+          writeText(counter, count);
+        }
+      }
     }
     const complete = progress >= B.complete;
     if (complete !== hud.complete) {
       hud.complete = complete;
       setFlag(runway, "data-rzn-complete", complete);
     }
-    const form = runway.dataset.form || "standard";
-    const state = assemblyPhase(progress, form, form === "standard" || Boolean(formsState?.[form]));
+    const state = assemblyPhase(progress, form, formReady);
     if (state.phase !== hud.phase) {
       hud.phase = state.phase;
       runway.dataset.rznPhase = state.phase;
@@ -3601,8 +3625,10 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         progress < ASSEMBLY_BEATS.light[0] &&
         lastProgress < ASSEMBLY_BEATS.light[0]
       ) {
-        shown = lastProgress + gap * (1 - Math.exp(-dt / (coarse.matches ? 40 : 60)));
-        if (Math.abs(progress - shown) < 0.0004) shown = progress;
+        const tau = fresh ? (coarse.matches ? 24 : 34) : coarse.matches ? 40 : 60;
+        const snap = fresh ? 0.0008 : 0.0004;
+        shown = lastProgress + gap * (1 - Math.exp(-dt / tau));
+        if (Math.abs(progress - shown) < snap) shown = progress;
       }
     }
     force = false;
@@ -3713,10 +3739,15 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     }
     parts.forEach((part) => setFlag(part, "data-on", false));
     Object.assign(hud, {
+      progress: -1,
+      form: "",
+      formReady: false,
       line: -1,
       chips: "",
       parts: -1,
       percent: "",
+      landedCount: -1,
+      totalFormatted: "",
       count: "",
       complete: null,
       phase: "",

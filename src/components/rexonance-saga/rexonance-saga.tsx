@@ -1385,16 +1385,33 @@ export function RexonanceSaga() {
       pendingChapter.current = window.location.hash;
       flushAll();
     };
+    const onScrollIntent = () => {
+      if (!root.hasAttribute("data-loading")) flushAll();
+    };
+    const onKeyScrollIntent = (event: KeyboardEvent) => {
+      if (
+        !root.hasAttribute("data-loading") &&
+        (event.key === "ArrowDown" ||
+          event.key === "PageDown" ||
+          event.key === " " ||
+          event.key === "End")
+      ) {
+        flushAll();
+      }
+    };
     window.addEventListener("hashchange", onHashChange);
+    window.addEventListener("wheel", onScrollIntent, { passive: true });
+    window.addEventListener("touchmove", onScrollIntent, { passive: true });
+    window.addEventListener("keydown", onKeyScrollIntent, { passive: true });
     document.addEventListener("click", onHashClick, true);
     const later = () => {
       if (step === 0) {
         timer = window.setTimeout(() => {
           timer = 0;
-          schedule(advance, 400);
+          schedule(advance, 120);
         }, REXONANCE_ENTRY_TIMINGS.reveal + 80);
       } else {
-        schedule(advance, 32);
+        schedule(advance, 24);
       }
     };
     const observer = new MutationObserver(() => {
@@ -1408,6 +1425,9 @@ export function RexonanceSaga() {
     return () => {
       observer.disconnect();
       window.removeEventListener("hashchange", onHashChange);
+      window.removeEventListener("wheel", onScrollIntent);
+      window.removeEventListener("touchmove", onScrollIntent);
+      window.removeEventListener("keydown", onKeyScrollIntent);
       document.removeEventListener("click", onHashClick, true);
       if (timer) window.clearTimeout(timer);
       cancelStep();
@@ -1900,7 +1920,7 @@ export function RexonanceSaga() {
 
       {step >= 1 ? <RexonancePerformance /> : null}
 
-      {lower ? (
+      {step >= 2 ? (
         <section id="p14" className="rxs-p14 rxs-section" aria-labelledby="rxs-p14-title">
           <header className="rxs-section-heading rxs-reveal">
             <p>PROCESSING CORE / P14</p>
@@ -1974,7 +1994,7 @@ export function RexonanceSaga() {
         </section>
       ) : null}
 
-      {step >= 2 ? (
+      {lower ? (
         <>
           <RexonanceSuitUp stage={stage} />
 
