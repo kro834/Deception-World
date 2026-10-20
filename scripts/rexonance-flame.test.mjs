@@ -629,9 +629,10 @@ test("one prepared field and a clock-driven depth-separated vortex feed both bod
         false,
         "front depth never hard-cuts the rolling volumes to polygon outlines",
       );
-      assert.ok(
-        field.at(-2) <= 0.12,
-        "whole-field spill is faint; near volumes, not a green stencil, supply the foreground",
+      assert.equal(
+        field.at(-2),
+        0.72,
+        "the clipped volume supplies foreground radiance without independent flame sprites",
       );
     }
     assert.equal(p.states.length, 0);
@@ -663,9 +664,13 @@ test("authored fire detail follows a body-height revolving volume with bounded, 
       matches: coarse && query.includes("pointer: coarse"),
     });
     await ready(module, f);
-    prepareField(module, f);
+    const body = prepareField(module, f);
+    const sourceBox = body.mask.operations
+      .filter((row) => row[0] === "image" && row[1] === body.source.src)
+      .at(-1);
     const rootsAt = (clock) => {
       const p = painter();
+      body.field.operations.length = 0;
       module.drawBodyFlame(
         p.context,
         { width: 571, height: 1040 },
@@ -675,9 +680,19 @@ test("authored fire detail follows a body-height revolving volume with bounded, 
         "all",
         NANITE_FIRE_PHASES.burstStart,
       );
-      const roots = flameRoots(p.operations).filter((root) =>
-        root.images.some((image) => image[1] === module.NANITE_FLAME_ATLAS.src),
+      assert.equal(
+        p.operations.filter((row) => row[0] === "image" && row[1] === module.NANITE_FLAME_ATLAS.src)
+          .length,
+        0,
+        "no independent flame sprites are painted over the connected field",
       );
+      const roots = flameRoots(body.field.operations)
+        .filter((root) => root.images.some((image) => image[1] === module.NANITE_FLAME_ATLAS.src))
+        .map((root) => ({
+          ...root,
+          x: ((root.x - sourceBox[2]) * 571) / sourceBox[4],
+          y: ((root.y - sourceBox[3]) * 1040) / sourceBox[5],
+        }));
       assert.ok(roots.length >= 5, "the wrapping field has multiple genuine volume detail samples");
       assert.ok(
         roots.every(
@@ -1067,7 +1082,7 @@ test("the default API includes both body layers, and exceptions cannot leak canv
     (context) => module.drawBodyFlame(context, ...args),
     (context) => module.drawNaniteFlame(context, [285, 335], 1, 0.6),
   ]) {
-    const p = painter({ throwAt: 3 });
+    const p = painter({ throwAt: 1 });
     assert.throws(() => draw(p.context), /draw failure/);
     assert.equal(p.states.length, 0);
     assert.equal(p.context.globalAlpha, 0.73);
@@ -1117,4 +1132,3 @@ test("upward thermal advection, sculpted bezier lobes, additive core tongues and
     "simultaneous firebrands across the body sample desynchronized atlas frames",
   );
 });
-

@@ -140,7 +140,10 @@ const VORTEX_STRIDE = 7;
 // crossings for all three strands on every frame of the extended fire.
 const VORTEX_CROWN_WIDTH = new Float64Array(VORTEX_STEPS + 1);
 for (let i = 0; i <= VORTEX_STEPS; i += 1)
-  VORTEX_CROWN_WIDTH[i] = 1 + 0.35 * smooth(clamp((i / VORTEX_STEPS - 0.65) / 0.25));
+  VORTEX_CROWN_WIDTH[i] =
+    1 +
+    0.65 * smooth(clamp((i / VORTEX_STEPS - 0.65) / 0.25)) +
+    0.45 * (1 - smooth(clamp((i / VORTEX_STEPS - 0.03) / 0.22)));
 // Reused geometry: x/y, transverse normal, thickness, front/back depth,
 // local breakup. A whole coil is continuous, never assembled from strips.
 const VORTEX = new Float32Array(VORTEX_STRANDS * (VORTEX_STEPS + 1) * VORTEX_STRIDE);
@@ -477,10 +480,11 @@ function poseVortex(power, clock, phase) {
       const billow = 0.94 + 0.12 * Math.sin(t * TAU * 3.2 - clock * 4.8 + strand * 1.9);
       VORTEX[at] = FIELD_W * 0.5 + radius * c + burst * c * VORTEX_W * 0.045;
       VORTEX[at + 1] =
-        FIELD_PAD + VORTEX_H * (0.94 - 0.87 * t) + radius * 0.16 * s - burst * VORTEX_H * 0.025;
+        FIELD_PAD + VORTEX_H * (0.99 - 0.92 * t) + radius * 0.16 * s - burst * VORTEX_H * 0.025;
       VORTEX[at + 4] =
         VORTEX_W *
         (0.078 + 0.046 * Math.sin(t * Math.PI)) *
+        1.7 *
         Math.sqrt(Math.max(0.15, Math.sin(t * Math.PI))) *
         // Keep the crown wrapped as the longer-lived vortex turns through
         // other angles; this widens the same irregular volume, not a mask
@@ -549,14 +553,7 @@ function vortexPath(context, side, clock, phase) {
         bx,
         by,
       );
-      context.bezierCurveTo(
-        bx + tx * cap,
-        by + ty * cap,
-        cx + tx * cap,
-        cy + ty * cap,
-        cx,
-        cy,
-      );
+      context.bezierCurveTo(bx + tx * cap, by + ty * cap, cx + tx * cap, cy + ty * cap, cx, cy);
       context.bezierCurveTo(
         cx - tx * 0.35 - mx * swell * 0.7,
         cy - ty * 0.35 - my * swell * 0.7,
@@ -565,14 +562,7 @@ function vortexPath(context, side, clock, phase) {
         dx,
         dy,
       );
-      context.bezierCurveTo(
-        dx - tx * cap,
-        dy - ty * cap,
-        ax - tx * cap,
-        ay - ty * cap,
-        ax,
-        ay,
-      );
+      context.bezierCurveTo(dx - tx * cap, dy - ty * cap, ax - tx * cap, ay - ty * cap, ax, ay);
       context.closePath();
     }
     // Secondary rolling curls split off the same stream across four heights.
@@ -660,8 +650,6 @@ function paintBodyField(power, clock, phase) {
     const offset = (((-clock * 88) % H) + H) % H;
     c.drawImage(bodyFlow, 0, offset - H, W, H);
     c.drawImage(bodyFlow, 0, offset, W, H);
-    c.globalCompositeOperation = "destination-in";
-    c.drawImage(bodyMask, 0, 0);
     // Overlapping sheets are texture within the one connected field. The
     // participating-volume detail is still the real Cycles-rendered asset.
     const volumes = coarse ? 18 : 24;
@@ -688,6 +676,11 @@ function paintBodyField(power, clock, phase) {
         angle,
       );
     }
+    // Volume detail belongs inside the continuous coil, not separate
+    // candle silhouettes above its tips or outside its moving boundary.
+    c.globalCompositeOperation = "destination-in";
+    c.globalAlpha = 1;
+    c.drawImage(bodyMask, 0, 0);
   } finally {
     c.restore();
   }
@@ -741,12 +734,11 @@ export function drawBodyFlame(context, size, strength, clock, scale = 1, layer =
       // Its spatial front remains small; only its local radiance is lifted.
       const radiance =
         progress > 0 && progress < NANITE_FIRE_PHASES.burstStart ? Math.sqrt(power) : power;
-      // Owner, 2026-10-20: less fog, so the tongues read as fire.
-      context.globalAlpha = radiance * (layer === "back" ? 0.4 : 0.08);
+      // Brightness lives in the clipped volume, never floating overlays.
+      context.globalAlpha = radiance * (layer === "back" ? 0.4 : 0.72);
       if (layer === "front") {
-        // Only a tenuous spill crosses the whole body. Real near-volume
-        // tongues below supply the occluding front arcs with their own
-        // irregular alpha: there is no hard front/back polygon cut.
+        // Retain the volume's irregular alpha, including its gaps. This
+        // replaces the former separate foreground candle silhouettes.
         context.drawImage(
           bodyField,
           (-W * BODY_X) / BODY_W,
@@ -767,7 +759,7 @@ export function drawBodyFlame(context, size, strength, clock, scale = 1, layer =
     // Authored volume follows the same revolving ribbons, not separate
     // candles assigned to the head, arms or legs. Its lean follows the
     // curve's tangent as that stream wraps round to the far side.
-    const count = coarse ? 14 : 18;
+    const count = connected ? 0 : coarse ? 14 : 18;
     const span = Math.ceil(count / VORTEX_STRANDS - 1);
     context.globalCompositeOperation = "lighter";
     for (let i = 0; i < count; i += 1) {
