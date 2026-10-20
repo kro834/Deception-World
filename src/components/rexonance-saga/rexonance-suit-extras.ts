@@ -30,7 +30,6 @@ import {
   naniteMaterialLanding,
   sampleFlameBirth,
 } from "@/lib/rexonance-ignition.js";
-import { drawNaniteFirebrand } from "@/lib/rexonance-flame.js";
 import { REXONANCE_SUIT_REVEAL_MS } from "@/lib/rexonance-calls";
 import {
   FIG,
@@ -113,7 +112,6 @@ const FIRE_SPRAY = 160;
 // Airborne burning material precedes the machine, then cools into it at
 // the very same coordinate. No machine, guide or raw plate precedes 600ms.
 const FIREBRAND_START = NANITE_FIRE_PHASES.burstStart * 2400;
-const FIREBRAND_END = NANITE_FIRE_PHASES.burstEnd * 2400;
 const FIREBRAND_COOL = 45;
 const FIREBRAND_CARRIER = 80;
 const FIREBRANDS = TOUCH ? 8 : 24;
@@ -2840,16 +2838,6 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
     pose[SPEED] = tl;
     pose[ROLL] = L.chipF0[c] + (FRAMES * th) / TAU;
   };
-  // A burning firebrand first leaves the body. Its endpoint is also the
-  // machine's birth coordinate, so no chip materialises back on the skin.
-  const firebrandPose = (c: number) => {
-    const u = unit(pose[ARG_U]);
-    const travel = L.brandTravel[c] * u * u;
-    const up = L.brandLift[c] * u;
-    const curl = 5 * Math.sin(Math.PI * u) * L.brandSin[c];
-    pose[PX] = L.emitX[c] + L.emitNX[c] * travel - L.emitNY[c] * curl;
-    pose[PY] = L.emitY[c] + L.emitNY[c] * travel + L.emitNX[c] * curl - up;
-  };
   // The inherited firebrand opens into a two-turn material helix. Its
   // radius grows from zero at the same airborne point, then contracts
   // into the shared current with zero added position or velocity at joins.
@@ -3186,53 +3174,16 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
     }
     flight.stroke();
   };
-  // Fire travels first; the machine inherits its airborne point. Rendered
-  // after the broad front field so the short causal handoff remains visible.
-  // Each hero reserves two image draws in the existing frame budget, and
-  // every one cools completely before normal machine transport takes over.
+  // Keep only the short metal handoff above the shared flame field.
   const firebrands = (t: number) => {
     if (t < FIREBRAND_START || t >= FIRE_BIRTH + FIRE_BIRTH_SPAN + FIREBRAND_CARRIER)
       return;
     base();
-    // Extinguish detached tongues with the burst; keep the later metal handoff.
-    const fireTail = 1 - smooth(unit((t - (FIREBRAND_END - 40)) / 40));
     for (let c = 0; c < CHIPS; c += FIREBRAND_STRIDE) {
       const age = t - L.birth[c];
-      if (t < L.brandStart[c] || age >= FIREBRAND_CARRIER) continue;
-      if (age < 0) {
-        pose[ARG_U] = (t - L.brandStart[c]) / (FIREBRAND_END - L.brandStart[c]);
-        firebrandPose(c);
-        if (t >= FIREBRAND_END) {
-          // Every launch has ended at 560ms. Residual fire drifts in the
-          // air, never launches again from a body whose bulk fire is gone.
-          // The drift returns to its inherited endpoint at metal birth.
-          const hover = unit((t - FIREBRAND_END) / (L.birth[c] - FIREBRAND_END));
-          const breathe = Math.sin(Math.PI * hover);
-          pose[PX] += 3 * Math.sin(TAU * hover + L.phi[c]) * breathe;
-          pose[PY] -= (2 + Math.sin(L.phi[c])) * breathe;
-        }
-      } else {
-        pose[ARG_T] = t;
-        surfacePose(c);
-        pose[ARG_U] = age / L.sprayMs[c];
-        bornPose(c);
-        if (chipBand[c] > 0) {
-          pose[PX] = chipX[c] / s;
-          pose[PY] = chipY[c] / s;
-        }
-      }
-      pose[SX] = pose[PX] * s;
-      pose[SY] = pose[PY] * s;
-      fenceFade();
-      const power =
-        fireTail *
-        smooth((t - L.brandStart[c]) / 18) *
-        (1 - smooth(age / FIREBRAND_COOL)) *
-        pose[FADE];
-      if (power > 0.01 && draws + 2 <= limit[0]) {
-        draws += 2;
-        drawNaniteFirebrand(flight, pose[PX], pose[PY], power, t / 1000 + L.phi[c], s);
-      }
+      // The connected vortex owns all fire. Airborne endpoints still seed
+      // the nanite spiral, but never carry detached candle-like sprites.
+      if (age < 0 || age >= FIREBRAND_CARRIER) continue;
       if (age >= 0 && chipBand[c] > 0) {
         // The broad surrounding plume would otherwise hide the little
         // metal carrier at the handoff. Bring only its birth interval to

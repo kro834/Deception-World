@@ -379,7 +379,7 @@ test("all real scroll metal passes stay empty before the global material floor, 
   );
 });
 
-test("the explosive scroll prelude contains only bounded alpha-volume fire, never a field of square pseudo-machines", () => {
+test("the explosive scroll prelude never adds detached flame blobs or square pseudo-machines", () => {
   const { nano, gold } = fixture(),
     swarm = createSwarm(nano, gold);
   let images = [],
@@ -411,16 +411,9 @@ test("the explosive scroll prelude contains only bounded alpha-volume fire, neve
     swarm.firebrands(context);
     assert.equal(paints, 0, `${q}: no square/facet fallback may mimic early nanomachines`);
     visibleFire += images.length;
-    assert.ok(images.length <= 48, `${q}: at most 24 actual two-frame fire volumes`);
-    assert.ok(
-      images.every((id) => id === "firebrand"),
-      "only the real flame helper is used before metal appears",
-    );
+    assert.equal(images.length, 0, `${q}: the shared vortex owns fire, never detached sprites`);
   }
-  assert.ok(
-    visibleFire > 0,
-    "the later explosion actually renders authored fire instead of silently disabling the pass",
-  );
+  assert.equal(visibleFire, 0, "no floating flame blob on forward or reverse scroll");
 });
 
 test("non-helmet tile pose stays continuous at river, braking, and unfold boundaries", () => {

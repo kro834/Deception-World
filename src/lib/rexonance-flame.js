@@ -741,18 +741,6 @@ export function drawBodyFlame(context, size, strength, clock, scale = 1, layer =
         context.globalAlpha = power * fade * (0.45 + SEED[k + 1] * 0.5);
         // Hot droplets stretch with their impulse, then shrink into chips.
         context.fillRect(x, y, unit * (1.2 + fade * 2), unit * (1 + fade * 4));
-        if (i % (coarse ? 7 : 4) === 0) {
-          tongue(
-            context,
-            x,
-            y,
-            unit * (35 + 32 * SEED[k + 2]),
-            unit * (65 + 100 * SEED[k + 3]) * fade,
-            clock * 16 + SEED[k + 4] * 32,
-            power * fade * 0.78,
-            SOURCES[root + 2] * (0.6 + 0.35 * scatter),
-          );
-        }
       }
     }
   } finally {

@@ -495,9 +495,11 @@ async function extrasRuntime({ touch }) {
         return Array.from(pose.subarray(0, 3));
       },
       firebrandAt(c, t) {
-        pose[ARG_U] = (t-L.brandStart[c])/(FIREBRAND_END-L.brandStart[c]);
-        firebrandPose(c);
-        return Array.from(pose.subarray(0,2));
+        const u = unit((t-L.brandStart[c])/(NANITE_FIRE_PHASES.burstEnd*2400-L.brandStart[c]));
+        const travel = L.brandTravel[c]*u*u;
+        const curl = 5*Math.sin(Math.PI*u)*L.brandSin[c];
+        return [L.emitX[c]+L.emitNX[c]*travel-L.emitNY[c]*curl,
+          L.emitY[c]+L.emitNY[c]*travel+L.emitNX[c]*curl-L.brandLift[c]*u];
       },
       fireHash: hash,
       docking() { return Array.from(docks.subarray(0, dockCount * 8)); },
@@ -1337,9 +1339,8 @@ test("entrance fire leaves the shared surface before a machine appears at the ex
     return log.sources.get(flameAsset) ?? 0;
   };
   assert.equal(fireDraws(419), 0);
-  assert.ok(fireDraws(540) > 0, "flame fragments, never metal, precede the 600ms material floor");
-  for (let t = 560; t <= 900; t += 5)
-    assert.equal(fireDraws(t), 0, `${t}: no detached flame survives the departing burst`);
+  for (let t = 420; t <= 900; t += 5)
+    assert.equal(fireDraws(t), 0, `${t}: airborne nanites never carry detached flame blobs`);
   assert.equal(fireDraws(900), 0, "firebrands cool completely after the last crossfade");
 });
 

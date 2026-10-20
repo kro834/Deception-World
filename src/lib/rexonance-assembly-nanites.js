@@ -31,7 +31,6 @@
 import { naniteHexHeight, naniteHexLight } from "./rexonance-unlit.js";
 import { sampleFlameBirth } from "./rexonance-ignition.js";
 import { NANITE_FIRE_PHASES } from "./rexonance-ignition.js";
-import { drawNaniteFirebrand } from "./rexonance-flame.js";
 
 const TAU = Math.PI * 2;
 const DEG = Math.PI / 180;
@@ -3233,22 +3232,7 @@ export function createAssemblyNanites({
   // become dim specks by index hash; the near bands are always sprites.
   const firebrandPass = (ctx, list, count) => {
     let rects = 0;
-    // Match entry: no isolated flame bodies survive the departing burst.
-    const tailSpan = (0.285 * 40) / 2400;
-    const fireTail = 1 - smooth(clamp01((Q - (FIRE_END - tailSpan)) / tailSpan));
-    const limit = coarse ? FIREBRANDS_TOUCH : FIREBRANDS;
-    for (let c = 0; c < count; c += 1) {
-      const slot = list[c];
-      const fire = FIRE[slot] * fireTail;
-      if (fire <= 0.02) continue;
-      if (!CALM && firebrandsDrawn < limit && sprites_ + 2 <= ASSEMBLY_SPRITE_BUDGET) {
-        drawNaniteFirebrand(ctx, X[slot], Y[slot], fire, Q * 10);
-        firebrandsDrawn += 1;
-        // The helper uses at most two atlas samples, sharing the retained
-        // flame sheet. Count both conservatively even for its fallback.
-        sprites_ += 2;
-      }
-    }
+    // Fire belongs to the connected vortex, never individual floating chips.
     // Unselected fragments are not replaced by thousands of green square
     // pixels: those read as early machines while the fire is still bursting.
     // The bounded real volume fragments are the entire fire-only prelude.
