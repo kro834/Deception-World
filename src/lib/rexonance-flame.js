@@ -694,9 +694,9 @@ function paintBodyField(power, clock, phase) {
 /** Back/front sample the same connected body volume. Phase is the shared
  * ignition clock, not wall-clock history; it drives one scatter impulse. */
 export function drawBodyFlame(context, size, strength, clock, scale = 1, layer = "all", phase = 0) {
-  // The storm is already gone when material becomes visible. Even an
+  // Only the first 72ms of material overlap the fading storm. Even an
   // isolated legacy caller cannot leave a green body stencil over armour.
-  if (Number.isFinite(phase) && phase >= NANITE_FIRE_PHASES.materialStart) return;
+  if (Number.isFinite(phase) && phase >= NANITE_FIRE_PHASES.flameEnd) return;
   if (
     !valid(strength, clock, scale) ||
     !size ||

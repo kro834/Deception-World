@@ -2053,8 +2053,8 @@ test("the nanite stage plan: paint order, the shared cells, and timings before .
       assert.equal(nano.pieceOf[parent], nano.pieceOf[i]);
     }
     assert.ok(
-      nano.birth[i] <= plan.tiles[i].t0 + 1e-9 && nano.birth[i] >= 0.08625 - 1e-9,
-      "metal waits for the cleared burst but is born before its unchanged flight/landing window",
+      nano.birth[i] <= plan.tiles[i].t0 + 1e-9 && nano.birth[i] >= 0.0777 - 1e-9,
+      "metal enters the trailing burst before its unchanged flight/landing window",
     );
   }
   // Every plate: its seam, gold box and clamps release before .9 (tail

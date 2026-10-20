@@ -11,7 +11,10 @@ import { join } from "node:path";
 import { chromium, webkit } from "playwright";
 import sharp from "sharp";
 import { connectedFireEvidence } from "./rexonance-fire-evidence.mjs";
-import { entryCanonicalTime } from "../src/lib/rexonance-ignition.js";
+import { entryCanonicalTime, NANITE_FIRE_PHASES } from "../src/lib/rexonance-ignition.js";
+
+const materialEntry = NANITE_FIRE_PHASES.materialStart * 2400;
+const materialScroll = 0.015 + 0.285 * NANITE_FIRE_PHASES.materialStart;
 
 const base = process.env.BASE_URL || "http://127.0.0.1:8197";
 const out = process.env.OUT_DIR || "output/playwright/rexonance-flame";
@@ -765,9 +768,19 @@ try {
           if (!baseline) {
             assert.ok(
               record.entry
-                .filter((shot) => shot.canonicalClock < 600)
+                .filter((shot) => shot.canonicalClock < materialEntry)
                 .every((shot) => shot.nativeNaniteDraws === 0),
-              "the real kit bitmap pass stays empty until the explosive clearing finishes",
+              "the real kit bitmap pass waits for the trailing explosion",
+            );
+            assert.ok(
+              record.entry.some(
+                (shot) =>
+                  shot.canonicalClock >= materialEntry &&
+                  shot.canonicalClock < NANITE_FIRE_PHASES.flameEnd * 2400 &&
+                  shot.nativeNaniteDraws > 0 &&
+                  shot.nativeAtlasDraws > 0,
+              ),
+              "actual nanites and flame coexist briefly before the fire finishes",
             );
             assert.ok(
               record.entry
@@ -882,9 +895,9 @@ try {
                 "the inspected last actual drawing frame belongs to the settled target, not the prior scroll position",
               );
             }
-            if (!baseline && state.actual < 0.08625) {
+            if (!baseline && state.actual < materialScroll) {
               assert.ok(
-                state.nativeFrame.actual < 0.08625,
+                state.nativeFrame.actual < materialScroll,
                 "the actual drawing frame is also before the material floor",
               );
               assert.equal(
@@ -924,11 +937,15 @@ try {
               );
             }
           }
-          if (!baseline)
+          if (!baseline) {
+            // Touch uses batched metal geometry before its first bitmap.
+            // The real drawing-pass tests prove overlap for both tiers;
+            // this tracer only asserts native image provenance, not fills.
             assert.ok(
               record.scroll.some((shot) => shot.actual >= 0.08625 && shot.nativeNaniteDraws > 0),
               "the scroll native kit tracer observes later real material, making the pre-material zero check non-vacuous",
             );
+          }
           record.bodyCoverage = {
             entry: coverageSummary(record.entry, entryPeak),
             scroll: coverageSummary(
@@ -999,7 +1016,7 @@ try {
               assert.equal(clearing.length, 2, "both explosion end and clear gap are captured");
               assert.ok(
                 clearing.some((shot) => shot.fireEvidence.center.ratio <= 0.05),
-                "the explosive vortex clears the body centre before metal can appear",
+                "the declining explosion releases the centre as nanites begin forming",
               );
               record.burstClear = {
                 entry: clearing.map((shot) => ({
@@ -1016,7 +1033,7 @@ try {
               };
               assert.ok(
                 record.burstClear.scroll.some((shot) => shot.center.ratio <= 0.05),
-                "scroll explosion clears its centre before the material floor",
+                "scroll explosion releases its centre during the brief material overlap",
               );
             }
             assert.ok(

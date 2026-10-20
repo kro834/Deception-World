@@ -1919,7 +1919,7 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
     .rx-suit-motes {
-    animation: rxSuitMotes 970ms linear var(--rx-suit-material-start, 600ms) both;
+    animation: rxSuitMotes 970ms linear var(--rx-suit-material-start, 528ms) both;
   }
 
   /* SA-GA！DEUS！ and REXONANCE！: the plates fit one after another up the
@@ -1933,7 +1933,7 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
     .rx-suit-mote {
     animation: rxSuitGather var(--rx-suit-gather-duration, 300ms) linear
-      var(--rx-suit-gather-start, 600ms) both;
+      var(--rx-suit-gather-start, 528ms) both;
   }
 
   html:not([data-world-effects="economy"])
@@ -2202,7 +2202,7 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
     transform: none;
   }
 }
-/* Material is absent until the flame vortex has burst and cleared (1600ms).
+/* Material enters the trailing explosion (1528ms), before fire clears at 1600ms.
    This also applies when only the DOM/SVG fallback is available. */
 @keyframes rxSuitMotes {
   0% {

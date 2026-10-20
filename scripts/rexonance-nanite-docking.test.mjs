@@ -180,7 +180,7 @@ function representativeTiles(nano) {
   return samples;
 }
 
-function createSwarm(nano, gold) {
+function createSwarm(nano, gold, coarse = false) {
   return runtimeFactory()({
     nano,
     size: REXONANCE_SUIT_SIZE,
@@ -189,6 +189,7 @@ function createSwarm(nano, gold) {
     sprites: { cells: null, comets: null, fx: null },
     kit: REXONANCE_NANITES,
     gold,
+    coarse,
     document: null,
   });
 }
@@ -212,8 +213,8 @@ test("every scroll machine uses the shared burning surface and one unquantized b
       const expected = [out[0] * 571, out[1] * 1040, out[2], out[3]];
       for (let k = 0; k < 4; k++)
         close(emission[i * 4 + k], expected[k], 0.0001, `${i}/${k}: same burning source`);
-      assert.ok(births[i] >= 0.08625 - 1e-7 && births[i] <= 0.11325 + 1e-7);
-      bands.add(Math.floor((births[i] - 0.08625) * 1000));
+      assert.ok(births[i] >= 0.0777 - 1e-7 && births[i] <= 0.1047 + 1e-7);
+      bands.add(Math.floor((births[i] - 0.0777) * 1000));
     }
     assert.ok(bands.size >= 20, `${bands.size} continuous release times, not six pumps`);
   }
@@ -360,7 +361,7 @@ test("all real scroll metal passes stay empty before the global material floor, 
   );
   for (const q of [0.2, 0.06, 0.065, 0.075, 0.0815, 0.084, 0.08625 - 1e-7, 0.01, 0.0855]) {
     swarm.frame(q, 0, false, 1, false);
-    if (q >= 0.08625) continue;
+    if (q >= 0.0777) continue;
     assert.equal(swarm.__testMaterials().metal, 0, `${q}: no positive-alpha metal cell`);
     operations = 0;
     swarm.backPass(context);
@@ -377,6 +378,40 @@ test("all real scroll metal passes stay empty before the global material floor, 
     swarm.__testMaterials().metal > 0,
     "material actually appears after clearing, rather than being disabled permanently",
   );
+});
+
+test("fine and touch metal draw during the fading fire, including reversed progress", () => {
+  const { nano, gold } = fixture();
+  for (const coarse of [false, true]) {
+    const swarm = createSwarm(nano, gold, coarse);
+    let draws = 0;
+    const noop = () => {};
+    const context = new Proxy(
+      {
+        fillRect() {
+          draws++;
+        },
+        fill() {
+          draws++;
+        },
+        drawImage() {
+          draws++;
+        },
+      },
+      { get: (target, key) => (key in target ? target[key] : noop), set: () => true },
+    );
+    for (const q of [0.0815, 0.084, 0.2, 0.0815]) {
+      swarm.frame(q, 0, false, 1, false);
+      if (q >= 0.08625) continue;
+      assert.ok(swarm.__testMaterials().metal > 0, `${coarse}/${q}: material in flame tail`);
+      draws = 0;
+      swarm.backPass(context);
+      swarm.midPass(context);
+      swarm.frontPass(context);
+      swarm.freePass(context);
+      assert.ok(draws > 0, `${coarse}/${q}: actual batched metal paints before full clearing`);
+    }
+  }
 });
 
 test("the explosive scroll prelude never adds detached flame blobs or square pseudo-machines", () => {
@@ -405,7 +440,7 @@ test("the explosive scroll prelude never adds detached flame blobs or square pse
   );
   for (const q of [0.2, 0.065, 0.075, 0.0815, 0.0855, 0.075, 0.065]) {
     swarm.frame(q, 0, false, 1, false);
-    if (q >= 0.08625) continue;
+    if (q >= 0.0777) continue;
     images = [];
     paints = 0;
     swarm.firebrands(context);

@@ -730,7 +730,7 @@ test("the main vortex is completely gone before any material phase, even for an 
     f = fixture();
   await ready(module, f);
   const body = prepareField(module, f);
-  for (const phase of [NANITE_FIRE_PHASES.materialStart, 0.3, 0.6, 1]) {
+  for (const phase of [NANITE_FIRE_PHASES.flameEnd, 0.3, 0.6, 1]) {
     const p = painter();
     body.field.operations.length = 0;
     body.mask.operations.length = 0;

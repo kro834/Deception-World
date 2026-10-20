@@ -21,6 +21,8 @@ test("the entry sustains its flame for one extra second before preserving every 
     [280, 280],
     [420, 1420],
     [560, 1560],
+    [528, 1528],
+    [588, 1588],
     [600, 1600],
     [2730, 3730],
   ]) {
@@ -59,17 +61,23 @@ test("the entry sustains its flame for one extra second before preserving every 
   );
 });
 
-test("shared phases keep the vortex, explosive clearing and first metal in that order", () => {
+test("first metal overlaps only the final 72ms of the declining explosion", () => {
   assert.deepEqual(NANITE_FIRE_PHASES, {
     burstStart: 0.175,
     burstEnd: 7 / 30,
-    materialStart: 0.25,
+    materialStart: 0.22,
+    flameEnd: 0.25,
   });
   assert.ok(Object.isFrozen(NANITE_FIRE_PHASES));
   assert.equal(NANITE_FIRE_PHASES.burstStart * 2400, 420);
   assert.equal(NANITE_FIRE_PHASES.burstEnd * 2400, 560);
-  assert.equal(NANITE_FIRE_PHASES.materialStart * 2400, 600);
-  assert.equal(0.015 + 0.285 * NANITE_FIRE_PHASES.materialStart, 0.08625);
+  assert.equal(NANITE_FIRE_PHASES.materialStart * 2400, 528);
+  assert.ok(Math.abs(0.015 + 0.285 * NANITE_FIRE_PHASES.materialStart - 0.0777) < 1e-10);
+  assert.equal(NANITE_FIRE_PHASES.flameEnd * 2400, 600);
+  assert.ok(
+    naniteFlameEnvelope(NANITE_FIRE_PHASES.materialStart) > 0,
+    "nanites start while the last explosion is still glowing",
+  );
   assert.equal(naniteFlameEnvelope(0), 0);
   assert.equal(naniteFlameEnvelope(280 / 2400), 0.09);
   assert.equal(naniteFlameEnvelope(420 / 2400), 1);
@@ -102,6 +110,7 @@ test("phase joins are continuous and preserve the same value after a reverse scr
     NANITE_FIRE_PHASES.burstStart,
     NANITE_FIRE_PHASES.burstEnd,
     NANITE_FIRE_PHASES.materialStart,
+    NANITE_FIRE_PHASES.flameEnd,
     1,
   ]) {
     assert.ok(
@@ -132,17 +141,21 @@ test("the outward scatter is a single continuous detonation, not a respawning pa
   for (const phase of [NaN, Infinity, -Infinity]) assert.equal(naniteFlameScatter(phase), 0);
 });
 
-test("early boot growth is remapped after the clearing without moving fit or late armour", () => {
-  assert.equal(naniteMaterialLanding(610, 710), 660);
-  assert.equal(naniteMaterialLanding(660, 710), 685);
+test("early boot growth starts just before clearing without moving fit or late armour", () => {
+  assert.equal(naniteMaterialLanding(610, 710), 588);
+  assert.equal(naniteMaterialLanding(660, 710), 649);
   assert.equal(naniteMaterialLanding(710, 710), 710);
   assert.equal(naniteMaterialLanding(750, 850), 750);
+  assert.ok(
+    naniteMaterialLanding(610, 710) < NANITE_FIRE_PHASES.flameEnd * 2400,
+    "the first armour growth starts before the last flame disappears",
+  );
   for (const fit of [710, 720, 730, 740, 850, 1500, 2600]) {
     let previous = -Infinity;
     for (let i = 0; i <= 100; i++) {
       const before = fit - 100 + i;
       const actual = naniteMaterialLanding(before, fit);
-      assert.ok(actual >= previous && actual <= fit && actual >= Math.min(fit, 660));
+      assert.ok(actual >= previous && actual <= fit && actual >= Math.min(fit, 588));
       previous = actual;
     }
     assert.equal(
