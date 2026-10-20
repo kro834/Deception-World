@@ -1540,7 +1540,7 @@ test("hung image decode and bitmap optimisations fall back to loaded art", async
             closed += 1;
           },
         });
-      await Promise.resolve();
+      await new Promise((resolve) => setImmediate(resolve));
       assert.equal(closed, late.length, "abandoned late bitmaps are released");
     } finally {
       dispose();
@@ -1641,8 +1641,8 @@ test("failed image attempts release successful sibling bitmaps before retry", as
   }
 });
 
-test("transient required-image failure retries and explicit retry recovers a terminal error once", async () => {
-  for (const failure of ["transient", "error", "timeout"]) {
+test("transient required-image failure retries and explicit/online recovery restarts once", async () => {
+  for (const failure of ["transient", "error", "timeout", "online"]) {
     const permanent = failure !== "transient";
     const t = environment();
     t.env.setTimeout = (callback, ms) => setTimeout(callback, Math.min(ms, 2));
@@ -1673,7 +1673,9 @@ test("transient required-image failure retries and explicit retry recovers a ter
         );
         assert.equal(requests, 3, "initial request plus two bounded retries");
         failing = false;
-        const retry = t.listeners.get("runway:rexonance:assembly-retry");
+        const retry = t.listeners.get(
+          failure === "online" ? "window:online" : "runway:rexonance:assembly-retry",
+        );
         assert.equal(typeof retry, "function");
         retry();
         retry();
@@ -1689,6 +1691,108 @@ test("transient required-image failure retries and explicit retry recovers a ter
     }
     assert.equal(t.runway.dataset.rznLoad, undefined);
     assert.equal(t.listeners.has("runway:rexonance:assembly-retry"), false);
+    assert.equal(t.listeners.has("window:online"), false);
+  }
+});
+
+test("synchronous decode and bitmap exceptions retain loaded source art", async () => {
+  for (const phase of ["decode", "bitmap"]) {
+    const t = environment();
+    const BaseImage = t.env.Image;
+    t.env.Image = class extends BaseImage {
+      decode() {
+        if (phase === "decode") throw new Error("decoder unavailable");
+        return Promise.resolve();
+      }
+    };
+    if (phase === "bitmap")
+      t.env.createImageBitmap = () => {
+        throw new Error("bitmap unavailable");
+      };
+    const dispose = mountRexonanceAssembly(t.runway, engineConfig, t.env);
+    try {
+      t.observers[0].callback([{ isIntersecting: true }]);
+      await until(() => t.runway.dataset.rznState === "live", `${phase}: recover with loaded art`);
+      t.scrollTo(0.4);
+      assert.ok(t.canvas.width > 0);
+      assert.equal(t.readyCount(), 1);
+    } finally {
+      dispose();
+    }
+  }
+});
+
+test("first live frame renders even when ResizeObserver never delivers its initial notice", async () => {
+  const t = environment();
+  t.env.ResizeObserver = class {
+    observe() {}
+    disconnect() {}
+  };
+  const dispose = mountRexonanceAssembly(t.runway, engineConfig, t.env);
+  try {
+    t.observers[0].callback([{ isIntersecting: true }]);
+    await until(
+      () => t.runway.dataset.rznState === "live" && t.frames.size > 0,
+      "first frame queued without resize notice",
+    );
+    t.scrollTo(0.4);
+    assert.ok(t.canvas.width > 0 && t.canvas.height > 0);
+    assert.equal(t.runway.dataset.rznArming, undefined);
+    assert.equal(t.readyCount(), 1);
+  } finally {
+    dispose();
+  }
+  assert.equal(t.frames.size, 0);
+});
+
+test("failed optional form loading can retry instead of staying permanently busy", async () => {
+  const t = environment();
+  const BaseImage = t.env.Image;
+  let requests = 0;
+  let failing = true;
+  t.env.Image = class extends BaseImage {
+    set src(value) {
+      if (value === "/max.webp") {
+        requests++;
+        if (failing) {
+          this._src = value;
+          queueMicrotask(() => this.onerror?.(new Error("temporary form failure")));
+          return;
+        }
+      }
+      super.src = value;
+    }
+  };
+  const dispose = mountRexonanceAssembly(
+    t.runway,
+    {
+      ...engineConfig,
+      forms: { max: "/max.webp", ultra: "/ultra.webp" },
+    },
+    t.env,
+  );
+  try {
+    t.observers[0].callback([{ isIntersecting: true }]);
+    await until(
+      () => t.runway.dataset.rznState === "live" && t.frames.size > 0,
+      "base scene ready",
+    );
+    t.runway.dataset.form = "max";
+    t.scrollTo(0.99);
+    await until(() => requests === 1, "first form request");
+    await new Promise((resolve) => setImmediate(resolve));
+    t.scrollTo(0.98);
+    await new Promise((resolve) => setImmediate(resolve));
+    assert.equal(requests, 1, "scrolling does not hammer failed form requests");
+    failing = false;
+    t.listeners.get("window:online")();
+    t.flush();
+    await until(() => requests === 2, "network recovery retries failed form loading");
+    await new Promise((resolve) => setImmediate(resolve));
+    t.scrollTo(1);
+    assert.equal(requests, 2, "successful form stays cached");
+  } finally {
+    dispose();
   }
 });
 
@@ -2053,7 +2157,7 @@ test("the nanite stage plan: paint order, the shared cells, and timings before .
       assert.equal(nano.pieceOf[parent], nano.pieceOf[i]);
     }
     assert.ok(
-      nano.birth[i] <= plan.tiles[i].t0 + 1e-9 && nano.birth[i] >= 0.0777 - 1e-9,
+      nano.birth[i] <= plan.tiles[i].t0 + 1e-9 && nano.birth[i] >= 0.070575 - 1e-9,
       "metal enters the trailing burst before its unchanged flight/landing window",
     );
   }

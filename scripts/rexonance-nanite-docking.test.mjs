@@ -213,8 +213,8 @@ test("every scroll machine uses the shared burning surface and one unquantized b
       const expected = [out[0] * 571, out[1] * 1040, out[2], out[3]];
       for (let k = 0; k < 4; k++)
         close(emission[i * 4 + k], expected[k], 0.0001, `${i}/${k}: same burning source`);
-      assert.ok(births[i] >= 0.0777 - 1e-7 && births[i] <= 0.1047 + 1e-7);
-      bands.add(Math.floor((births[i] - 0.0777) * 1000));
+      assert.ok(births[i] >= 0.070575 - 1e-7 && births[i] <= 0.097575 + 1e-7);
+      bands.add(Math.floor((births[i] - 0.070575) * 1000));
     }
     assert.ok(bands.size >= 20, `${bands.size} continuous release times, not six pumps`);
   }
@@ -287,7 +287,7 @@ test("scroll fire leaves the surface first, forms metal at its airborne point, a
     const born = nano.birth[i];
     if (nano.T0[i] <= born + 1e-7) continue;
     const fireStart = 0.015 + 0.285 * NANITE_FIRE_PHASES.burstStart;
-    const fireEnd = 0.015 + 0.285 * NANITE_FIRE_PHASES.burstEnd;
+    const fireEnd = Math.min(born, 0.015 + 0.285 * NANITE_FIRE_PHASES.burstEnd);
     swarm.frame(fireStart, 0, true, 1, false);
     const origin = swarm.__testPose(i, fireStart);
     close(origin.x, nano.emission[i * 4], 0.0001, `${i}: prelude start x`);
@@ -361,7 +361,7 @@ test("all real scroll metal passes stay empty before the global material floor, 
   );
   for (const q of [0.2, 0.06, 0.065, 0.075, 0.0815, 0.084, 0.08625 - 1e-7, 0.01, 0.0855]) {
     swarm.frame(q, 0, false, 1, false);
-    if (q >= 0.0777) continue;
+    if (q >= 0.070575) continue;
     assert.equal(swarm.__testMaterials().metal, 0, `${q}: no positive-alpha metal cell`);
     operations = 0;
     swarm.backPass(context);
@@ -440,7 +440,7 @@ test("the explosive scroll prelude never adds detached flame blobs or square pse
   );
   for (const q of [0.2, 0.065, 0.075, 0.0815, 0.0855, 0.075, 0.065]) {
     swarm.frame(q, 0, false, 1, false);
-    if (q >= 0.0777) continue;
+    if (q >= 0.070575) continue;
     images = [];
     paints = 0;
     swarm.firebrands(context);

@@ -1164,11 +1164,11 @@ test("the layout preserves bottom-up drains and exact tile timing with one conti
   for (let c = 0; c < chips; c += 1) {
     assert.ok(L.ring[c] >= 0 && L.ring[c] < 8);
     assert.ok(
-      L.birth[c] >= 528 && L.birth[c] <= 748,
+      L.birth[c] >= 468 && L.birth[c] <= 688,
       "born in the trailing explosion, with the same bounded release interval",
     );
     assert.ok(
-      ignition.naniteFlameEnvelope(L.birth[c] / 2400) <= 0.36,
+      ignition.naniteFlameEnvelope(L.birth[c] / 2400) <= 0.83,
       "metal overlaps only the declining explosion, never the strong vortex",
     );
     const p = L.chipPlate[c];
@@ -1344,7 +1344,7 @@ test("entrance fire leaves the shared surface before a machine appears at the ex
   assert.equal(fireDraws(900), 0, "firebrands cool completely after the last crossfade");
 });
 
-test("neither chips nor non-driver armour draw before the trailing explosion at 528ms", async () => {
+test("neither chips nor non-driver armour draw before the explosion at 468ms", async () => {
   for (const touch of [false, true]) {
     const { plan, extras } = await extrasRuntime({ touch });
     const all = plan.plates(),
@@ -1359,7 +1359,7 @@ test("neither chips nor non-driver armour draw before the trailing explosion at 
       source: { kind: "work" },
       sheet: { kind: "motes" },
     });
-    for (let t = 0; t < 528; t += 5) {
+    for (let t = 0; t < 468; t += 5) {
       log.draws = 0;
       log.paints = 0;
       log.sources.clear();
@@ -1394,7 +1394,7 @@ test("neither chips nor non-driver armour draw before the trailing explosion at 
       if (L.kind[p] >= 0)
         for (let i = L.tileFirst[p]; i < L.tileFirst[p + 1]; i++)
           assert.ok(
-            L.land[i] >= 588,
+            L.land[i] >= 528,
             "first plate cells start growing after the first metal can emerge",
           );
   }
@@ -1540,15 +1540,15 @@ test("the guideway grows from the toe tips up; clamps slide in; nothing descends
     const id = plate.piece.id;
     // Never long before its plate, whole before its first tile lands.
     assert.ok(L.buildA[p] >= F - lead - 0.01, `${id} starts ${F - L.buildA[p]} before F`);
-    const retimed = L.buildA[p] === 528;
+    const retimed = L.buildA[p] === 468;
     const firstLand = Math.min(
       ...plate.tiles.map((tile) => ignition.naniteMaterialLanding(tile.land, F)),
     );
-    assert.ok(L.buildA[p] >= 528, `${id} guide metal waits until the trailing explosion`);
+    assert.ok(L.buildA[p] >= 468, `${id} guide metal waits until the explosion begins`);
     // Only the early guide window is squeezed after 600ms. Its original
     // cell order is preserved and it remains whole before the first plate cell.
     assert.ok(
-      L.buildB[p] <= (retimed ? Math.max(568, F - build.done) : F - build.done) + 0.01,
+      L.buildB[p] <= (retimed ? Math.max(508, F - build.done) : F - build.done) + 0.01,
       `${id} whole ${F - L.buildB[p]} before F`,
     );
     assert.ok(L.buildB[p] <= firstLand - (retimed ? 10 : 0) + 0.01, `${id} before its tiles`);

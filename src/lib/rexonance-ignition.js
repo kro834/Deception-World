@@ -39,13 +39,13 @@ export function entryElapsedTime(canonicalMs) {
   );
 }
 
-// First metal enters the trailing explosion, 72ms before the fire clears.
+// First metal enters the explosion 132ms before the fire clears.
 // Entry uses t/2400; scroll uses (q-.015)/.285, so both scenes retain the
 // same causal order even when the reader reverses or jumps the clock.
 export const NANITE_FIRE_PHASES = Object.freeze({
   burstStart: 0.175,
   burstEnd: 7 / 30,
-  materialStart: 0.22,
+  materialStart: 0.195,
   flameEnd: 0.25,
 });
 
@@ -83,7 +83,7 @@ export function sampleFlameBirth(seed, out) {
 
 /** Shared phase: entry t/2400; scroll (q-.015)/.285. A quiet, local
  * kindle is followed by a rolling vortex and an outward detonation. The
- * last 72ms overlap the first machines; the strong vortex stays fire-only.
+ * last 132ms overlap the first machines; the strong vortex stays fire-only.
  * No accumulating simulation state: scrubbing is exact. */
 export function naniteFlameEnvelope(phase) {
   if (!Number.isFinite(phase) || phase <= 0 || phase >= NANITE_FIRE_PHASES.flameEnd) return 0;

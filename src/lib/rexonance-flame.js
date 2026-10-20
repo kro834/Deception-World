@@ -450,7 +450,7 @@ export function drawNaniteFirebrand(context, x, y, strength, clock, scale = 1) {
 // Three real projected helices surround the body. Their front/back depth
 // travels with a shared angular clock, not with independent per-part roots.
 // The burst pulls the same ribbons outward, thins and tears them, then
-// clears their centre before the first machine can become visible.
+// opens their centre as the first machines enter the declining explosion.
 function poseVortex(power, clock, phase) {
   const burst = smooth(
     clamp(
@@ -694,7 +694,7 @@ function paintBodyField(power, clock, phase) {
 /** Back/front sample the same connected body volume. Phase is the shared
  * ignition clock, not wall-clock history; it drives one scatter impulse. */
 export function drawBodyFlame(context, size, strength, clock, scale = 1, layer = "all", phase = 0) {
-  // Only the first 72ms of material overlap the fading storm. Even an
+  // Only the first 132ms of material overlap the fading storm. Even an
   // isolated legacy caller cannot leave a green body stencil over armour.
   if (Number.isFinite(phase) && phase >= NANITE_FIRE_PHASES.flameEnd) return;
   if (

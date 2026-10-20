@@ -1631,7 +1631,9 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         .then((image) =>
           image.decode
             ? boundedImage(
-                image.decode().then(() => image),
+                Promise.resolve()
+                  .then(() => image.decode())
+                  .then(() => image),
                 image,
                 500,
               )
@@ -1641,7 +1643,12 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         // (tens of ms on a slow phone); a bitmap arrives decoded.
         .then((image) =>
           !disposed && !failed && typeof environment.createImageBitmap === "function"
-            ? boundedImage(environment.createImageBitmap(image), image, 500, true)
+            ? boundedImage(
+                Promise.resolve().then(() => environment.createImageBitmap(image)),
+                image,
+                500,
+                true,
+              )
             : image,
         )
         .then((image) => {
@@ -3507,8 +3514,10 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   // a form other than Rexonance is chosen (null until then).
   let formsState = null;
   let formsLoading = false;
+  let formsRetryAt = 0;
   const formFigures = () => {
-    if (formsState || formsLoading || !config.forms || !images) return formsState;
+    if (formsState || formsLoading || !config.forms || !images || clock() < formsRetryAt)
+      return formsState;
     formsLoading = true;
     Promise.all([
       picture(config.forms.max),
@@ -3577,7 +3586,12 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         lastProgress = -1;
         schedule();
       })
-      .catch(() => undefined);
+      .catch(() => {
+        formsRetryAt = clock() + 1000;
+      })
+      .finally(() => {
+        formsLoading = false;
+      });
     return null;
   };
   const formObserver =
@@ -3602,7 +3616,10 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   let force = false;
   const render = (stamp) => {
     frame = 0;
-    if (disposed || !live || document.hidden || !view) return;
+    if (disposed || !live || document.hidden) return;
+    // ResizeObserver can be delayed across WebKit restoration. The first
+    // animation frame may establish geometry without waiting indefinitely.
+    if (!view && !measure()) return;
     const progress = readProgress();
     if (pendingSize) {
       const [width, height] = pendingSize;
@@ -3801,7 +3818,8 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     if (resizeObserver) {
       resizeObserver.observe(canvas);
       resizeObserver.observe(runway);
-    } else if (measure()) schedule();
+    }
+    schedule();
   };
   const goStill = () => {
     cancelPreparation();
@@ -3943,6 +3961,21 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     retryCount = 0;
     loading = null;
     wake();
+  };
+  const onOnline = () => {
+    if (disposed || !pageActive || document.hidden || !motionAllowed()) return;
+    if (live) {
+      formsRetryAt = 0;
+      lastProgress = -1;
+      schedule();
+      return;
+    }
+    if (runway.dataset.rznLoad === "error") {
+      retryCount = 0;
+      loading = null;
+      modulesLoading = null;
+    }
+    if (near || warm || eager) wake();
   };
   const nearObserver =
     typeof environment.IntersectionObserver === "function"
@@ -4092,6 +4125,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   runway.addEventListener?.("rexonance:assembly-retry", retryAssembly);
   environment.addEventListener("pagehide", onPageHide);
   environment.addEventListener("pageshow", onPageShow);
+  environment.addEventListener("online", onOnline);
   environment.addEventListener("resize", observeWarmup);
   nearObserver?.observe(runway);
   observeWarmup();
@@ -4128,6 +4162,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     else runway.dataset.rznLoad = restLoad;
     environment.removeEventListener("pagehide", onPageHide);
     environment.removeEventListener("pageshow", onPageShow);
+    environment.removeEventListener("online", onOnline);
     environment.removeEventListener("resize", observeWarmup);
     images?.figure?.close?.();
     images?.undersuit?.close?.();

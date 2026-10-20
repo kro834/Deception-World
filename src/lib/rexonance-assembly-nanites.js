@@ -2605,20 +2605,19 @@ export function createAssemblyNanites({
     const tx = -ny;
     const ty = nx;
     const age = Math.max(0, q - born);
-    const launch = smooth(clamp01((q - FIRE_START) / (FIRE_END - FIRE_START)));
+    const launch = smooth(clamp01((q - FIRE_START) / (Math.min(FIRE_END, born) - FIRE_START)));
     // An actual detonation ejects the fragments beyond the torso, not a
     // short green shimmer still sitting on its skin after the storm clears.
     const returnToBody = smooth(clamp01((age - BIRTH) / 0.075));
     const thrown = (((80 + 50 * seed) * H) / 1000) * launch * (1 - 0.9 * returnToBody);
     const lift = (((18 + 17 * seed) * H) / 1000) * launch;
     const release = smooth(clamp01(age / BIRTH));
-    const ph = (sy / H) * 9 + nx * 1.7 + age * TAU * 2.4 / 0.09 + seed * 0.45;
+    const ph = (sy / H) * 9 + nx * 1.7 + (age * TAU * 2.4) / 0.09 + seed * 0.45;
     const radius = H * (0.042 + 0.016 * seed) * release * (1 - 0.72 * returnToBody);
     const curl = radius * Math.cos(ph);
     const reach = H * (0.024 + 0.018 * seed) * release + 0.5 * radius * Math.sin(ph);
     RG[0] = sx + nx * (thrown + reach) + tx * curl;
-    RG[1] =
-      sy + ny * (thrown + reach) + ty * curl - lift - H * 0.018 * release;
+    RG[1] = sy + ny * (thrown + reach) + ty * curl - lift - H * 0.018 * release;
     RG[2] = 0.82 * Math.sin(ph) * release;
     const dx = -tx * Math.sin(ph) + nx * 0.5 * Math.cos(ph);
     const dy = -ty * Math.sin(ph) + ny * 0.5 * Math.cos(ph);

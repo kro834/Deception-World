@@ -20,6 +20,7 @@ test("the entry sustains its flame for one extra second before preserving every 
     [180, 180],
     [280, 280],
     [420, 1420],
+    [468, 1468],
     [560, 1560],
     [528, 1528],
     [588, 1588],
@@ -61,19 +62,22 @@ test("the entry sustains its flame for one extra second before preserving every 
   );
 });
 
-test("first metal overlaps only the final 72ms of the declining explosion", () => {
+test("first metal overlaps the final 132ms of the explosion", () => {
   assert.deepEqual(NANITE_FIRE_PHASES, {
     burstStart: 0.175,
     burstEnd: 7 / 30,
-    materialStart: 0.22,
+    materialStart: 0.195,
     flameEnd: 0.25,
   });
   assert.ok(Object.isFrozen(NANITE_FIRE_PHASES));
   assert.equal(NANITE_FIRE_PHASES.burstStart * 2400, 420);
   assert.equal(NANITE_FIRE_PHASES.burstEnd * 2400, 560);
-  assert.equal(NANITE_FIRE_PHASES.materialStart * 2400, 528);
-  assert.ok(Math.abs(0.015 + 0.285 * NANITE_FIRE_PHASES.materialStart - 0.0777) < 1e-10);
+  assert.equal(NANITE_FIRE_PHASES.materialStart * 2400, 468);
+  assert.ok(Math.abs(0.015 + 0.285 * NANITE_FIRE_PHASES.materialStart - 0.070575) < 1e-10);
   assert.equal(NANITE_FIRE_PHASES.flameEnd * 2400, 600);
+  assert.ok(
+    Math.abs((NANITE_FIRE_PHASES.flameEnd - NANITE_FIRE_PHASES.materialStart) * 2400 - 132) < 1e-9,
+  );
   assert.ok(
     naniteFlameEnvelope(NANITE_FIRE_PHASES.materialStart) > 0,
     "nanites start while the last explosion is still glowing",
@@ -142,8 +146,8 @@ test("the outward scatter is a single continuous detonation, not a respawning pa
 });
 
 test("early boot growth starts just before clearing without moving fit or late armour", () => {
-  assert.equal(naniteMaterialLanding(610, 710), 588);
-  assert.equal(naniteMaterialLanding(660, 710), 649);
+  assert.equal(naniteMaterialLanding(610, 710), 528);
+  assert.equal(naniteMaterialLanding(660, 710), 619);
   assert.equal(naniteMaterialLanding(710, 710), 710);
   assert.equal(naniteMaterialLanding(750, 850), 750);
   assert.ok(
@@ -155,7 +159,7 @@ test("early boot growth starts just before clearing without moving fit or late a
     for (let i = 0; i <= 100; i++) {
       const before = fit - 100 + i;
       const actual = naniteMaterialLanding(before, fit);
-      assert.ok(actual >= previous && actual <= fit && actual >= Math.min(fit, 588));
+      assert.ok(actual >= previous && actual <= fit && actual >= Math.min(fit, 528));
       previous = actual;
     }
     assert.equal(

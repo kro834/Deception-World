@@ -103,13 +103,13 @@ const [CORE_X, CORE_Y] = REXONANCE_SUIT_MARKS.core;
 const ART_W = REXONANCE_SUIT_ATLAS.width / 2;
 const ART_H = REXONANCE_SUIT_ATLAS.height;
 const RINGS = 8;
-// Material starts in the explosion's tail at 528ms. Early boot growth
-// starts at 588ms, while all authored final fitting clocks stay pinned.
+// Material starts in the explosion at 468ms. Early boot growth
+// starts at 528ms, while all authored final fitting clocks stay pinned.
 const FIRE_BIRTH = NANITE_FIRE_PHASES.materialStart * 2400;
 const FIRE_BIRTH_SPAN = 220;
 const FIRE_SPRAY = 160;
 // Airborne burning material precedes the machine, then cools into it at
-// the very same coordinate. No machine, guide or raw plate precedes 528ms.
+// the very same coordinate. No machine, guide or raw plate precedes 468ms.
 const FIREBRAND_START = NANITE_FIRE_PHASES.burstStart * 2400;
 const FIREBRAND_COOL = 45;
 const FIREBRAND_CARRIER = 80;
