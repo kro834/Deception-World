@@ -1075,3 +1075,46 @@ test("the default API includes both body layers, and exceptions cannot leak canv
     assert.equal(p.context.fillStyle, "#123456");
   }
 });
+
+test("upward thermal advection, sculpted bezier lobes, additive core tongues and spatial firebrand phase avoid flat stamps", async () => {
+  const module = await fresh();
+  const f = fixture();
+  await ready(module, f);
+  const body = prepareField(module, f);
+  body.field.operations.length = 0;
+  body.mask.operations.length = 0;
+  module.drawBodyFlame(painter().context, { width: 571, height: 1040 }, 1, 0.2, 1, "back", 0.14);
+  const flowEarly = body.field.operations.filter(
+    (row) => row[0] === "image" && row[1] === "body-flow",
+  )[1][3];
+  const curves = body.mask.operations.filter((row) => row[0] === "curve");
+  assert.ok(
+    curves.some((row) => Math.hypot(row[1] - row[5], row[2] - row[6]) > 0.5),
+    "vortex ribbon curves use genuine tangent/swell control points rather than straight-line segments",
+  );
+  const fieldAtlas = body.field.operations.filter(
+    (row) => row[0] === "image" && row[1] === module.NANITE_FLAME_ATLAS.src,
+  );
+  assert.ok(
+    fieldAtlas.some((row) => row.at(-1) === "lighter") &&
+      fieldAtlas.some((row) => row.at(-1) === "source-over"),
+    "bodyField combines deep absorption volume with additive incandescent inner-stream tongues",
+  );
+  body.field.operations.length = 0;
+  module.drawBodyFlame(painter().context, { width: 571, height: 1040 }, 1, 0.3, 1, "back", 0.14);
+  const flowLate = body.field.operations.filter(
+    (row) => row[0] === "image" && row[1] === "body-flow",
+  )[1][3];
+  assert.ok(flowLate < flowEarly, "turbulent density sheet advects upward as clock advances");
+
+  const leftBrand = painter();
+  const rightBrand = painter();
+  module.drawNaniteFirebrand(leftBrand.context, 140, 360, 0.8, 0.5);
+  module.drawNaniteFirebrand(rightBrand.context, 420, 620, 0.8, 0.5);
+  assert.notDeepEqual(
+    leftBrand.operations.filter((row) => row[0] === "image").map((row) => [row[2], row[3]]),
+    rightBrand.operations.filter((row) => row[0] === "image").map((row) => [row[2], row[3]]),
+    "simultaneous firebrands across the body sample desynchronized atlas frames",
+  );
+});
+

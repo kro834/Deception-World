@@ -247,19 +247,35 @@ const makeFallback = () => {
   const c = canvas.getContext("2d");
   if (!c?.createLinearGradient || !c.bezierCurveTo) return null;
   const colour = c.createLinearGradient(0, 192, 0, 0);
-  colour.addColorStop(0, "rgb(156 243 112 / 0)");
-  colour.addColorStop(0.13, "rgb(156 243 112 / 0.76)");
-  colour.addColorStop(0.2, "rgb(58 180 67 / 0.66)");
-  colour.addColorStop(0.6, "rgb(22 101 49 / 0.38)");
-  colour.addColorStop(1, "rgb(9 47 27 / 0)");
+  colour.addColorStop(0, "rgb(172 252 128 / 0)");
+  colour.addColorStop(0.11, "rgb(172 252 128 / 0.84)");
+  colour.addColorStop(0.24, "rgb(66 196 76 / 0.72)");
+  colour.addColorStop(0.58, "rgb(20 108 48 / 0.44)");
+  colour.addColorStop(0.86, "rgb(11 62 32 / 0.18)");
+  colour.addColorStop(1, "rgb(7 38 22 / 0)");
   c.fillStyle = colour;
   c.beginPath();
-  c.moveTo(28, 188);
-  c.bezierCurveTo(5, 147, 31, 121, 37, 104);
-  c.bezierCurveTo(45, 76, 18, 53, 63, 5);
-  c.bezierCurveTo(45, 58, 84, 62, 68, 109);
-  c.bezierCurveTo(58, 139, 90, 154, 70, 183);
-  c.bezierCurveTo(58, 176, 46, 189, 28, 188);
+  c.moveTo(26, 188);
+  c.bezierCurveTo(4, 146, 29, 119, 36, 101);
+  c.bezierCurveTo(44, 73, 17, 50, 62, 4);
+  c.bezierCurveTo(46, 56, 86, 61, 69, 108);
+  c.bezierCurveTo(59, 138, 91, 154, 71, 184);
+  c.bezierCurveTo(58, 176, 45, 189, 26, 188);
+  c.closePath();
+  c.fill();
+  const coreColour = c.createLinearGradient(0, 188, 0, 28);
+  coreColour.addColorStop(0, "rgb(212 255 168 / 0)");
+  coreColour.addColorStop(0.16, "rgb(212 255 168 / 0.68)");
+  coreColour.addColorStop(0.45, "rgb(116 236 102 / 0.42)");
+  coreColour.addColorStop(1, "rgb(34 142 58 / 0)");
+  c.fillStyle = coreColour;
+  c.beginPath();
+  c.moveTo(38, 184);
+  c.bezierCurveTo(26, 152, 41, 126, 46, 98);
+  c.bezierCurveTo(50, 74, 42, 54, 58, 28);
+  c.bezierCurveTo(54, 62, 68, 82, 60, 118);
+  c.bezierCurveTo(55, 144, 67, 162, 58, 182);
+  c.bezierCurveTo(51, 178, 44, 185, 38, 184);
   c.closePath();
   c.fill();
   const glow = document.createElement("canvas");
@@ -267,8 +283,9 @@ const makeFallback = () => {
   const g = glow.getContext("2d");
   if (g?.createRadialGradient) {
     const gradient = g.createRadialGradient(32, 32, 0, 32, 32, 32);
-    gradient.addColorStop(0, "rgb(111 226 94 / 0.5)");
-    gradient.addColorStop(0.25, "rgb(30 138 55 / 0.28)");
+    gradient.addColorStop(0, "rgb(164 252 124 / 0.62)");
+    gradient.addColorStop(0.24, "rgb(56 188 72 / 0.36)");
+    gradient.addColorStop(0.58, "rgb(20 108 46 / 0.16)");
     gradient.addColorStop(1, "rgb(9 66 35 / 0)");
     g.fillStyle = gradient;
     g.fillRect(0, 0, 64, 64);
@@ -374,23 +391,23 @@ export function drawNaniteFlame(context, core, strength, clock, scale = 1) {
     // rather than a separate bonfire covering the central mechanism.
     for (let i = 0; i < 2; i += 1) {
       const k = i * 8;
-      const angle = SEED[k] * TAU;
-      const pulse = 0.84 + 0.16 * Math.sin(clock * (3 + SEED[k + 1]) + i * 2.1);
+      const angle = SEED[k] * TAU + clock * (1.45 - i * 0.55);
+      const pulse = 0.86 + 0.18 * Math.sin(clock * (3.4 + SEED[k + 1]) + i * 2.1);
       tongue(
         context,
-        cx + Math.cos(angle) * (27 + 31 * power),
-        cy + 20 + Math.sin(angle) * 17,
-        (25 + SEED[k + 2] * 25) * 1.65,
-        (67 + SEED[k + 3] * 73) * 1.25 * (0.45 + 0.55 * power) * pulse,
-        clock * 16 * (0.8 + SEED[k + 4] * 0.35) + SEED[k + 5] * 32,
-        power * (0.28 + SEED[k + 6] * 0.12),
-        Math.cos(angle) * 0.12,
+        cx + Math.cos(angle) * (26 + 32 * power),
+        cy + 20 + Math.sin(angle) * 16,
+        (26 + SEED[k + 2] * 26) * 1.68,
+        (68 + SEED[k + 3] * 75) * 1.28 * (0.46 + 0.54 * power) * pulse,
+        clock * 16 * (0.82 + SEED[k + 4] * 0.35) + SEED[k + 5] * 32,
+        power * (0.31 + SEED[k + 6] * 0.13),
+        Math.cos(angle) * 0.16 + Math.sin(clock * 4.2 + i) * 0.05,
       );
     }
     if (heat) {
       context.globalCompositeOperation = "lighter";
-      context.globalAlpha = power * 0.18;
-      context.drawImage(heat, cx - 89, cy - 43, 178, 86);
+      context.globalAlpha = power * (0.2 + 0.04 * Math.sin(clock * 5.2));
+      context.drawImage(heat, cx - 94, cy - 46, 188, 92);
     }
     // No separately respawning nucleus sparks: the one body-wide scatter
     // and its real nanite engines now own material birth.
@@ -411,15 +428,16 @@ export function drawNaniteFirebrand(context, x, y, strength, clock, scale = 1) {
   try {
     if (scale !== 1) context.scale(scale, scale);
     context.globalCompositeOperation = "lighter";
+    const spatialPhase = x * 0.17 + y * 0.11;
     tongue(
       context,
       x,
       y,
-      22 + power * 28,
-      35 + power * 72,
-      clock * 16,
+      23 + power * 30,
+      37 + power * 75,
+      clock * 17 + spatialPhase,
       power,
-      Math.sin(clock * 5.3 + x * 0.07) * 0.13,
+      Math.sin(clock * 5.8 + x * 0.07 + y * 0.03) * 0.15 + ((x - 285.5) / 571) * 0.14,
     );
   } finally {
     context.restore();
@@ -437,33 +455,38 @@ function poseVortex(power, clock, phase) {
         (NANITE_FIRE_PHASES.burstEnd - NANITE_FIRE_PHASES.burstStart),
     ),
   );
-  const spin = clock * 0.55 + TAU * (phase * 1.1 + 1.1 * smooth(clamp((phase - 0.08) / 0.095)));
+  const spin = clock * 0.65 + TAU * (phase * 1.1 + 1.1 * smooth(clamp((phase - 0.08) / 0.095)));
   for (let strand = 0; strand < VORTEX_STRANDS; strand += 1) {
     const base = strand * (VORTEX_STEPS + 1) * VORTEX_STRIDE;
     for (let i = 0; i <= VORTEX_STEPS; i += 1) {
       const t = i / VORTEX_STEPS;
       const at = base + i * VORTEX_STRIDE;
+      const flutter = Math.sin(t * TAU * 2.6 - clock * 4.4 + strand * 2.09);
       const angle =
         spin +
         (strand * TAU) / VORTEX_STRANDS +
         t * TAU * 1.45 +
-        Math.sin(t * TAU * 1.3 - clock * 2 + strand) * 0.22;
+        Math.sin(t * TAU * 1.3 - clock * 2.2 + strand) * 0.22 +
+        flutter * 0.06;
       const s = Math.sin(angle);
       const c = Math.cos(angle);
-      const radius = VORTEX_W * (0.205 + 0.065 * Math.sin(t * Math.PI) + burst * 0.11);
+      const radius =
+        VORTEX_W * (0.205 + 0.065 * Math.sin(t * Math.PI) + flutter * 0.008 + burst * 0.11);
       const split = smooth(clamp((Math.sin(t * TAU * 2.3 + strand * 1.7 - spin) + 0.55) * 1.8));
       const tear = 1 - burst * split * 0.94;
+      const billow = 0.94 + 0.12 * Math.sin(t * TAU * 3.2 - clock * 4.8 + strand * 1.9);
       VORTEX[at] = FIELD_W * 0.5 + radius * c + burst * c * VORTEX_W * 0.045;
       VORTEX[at + 1] =
         FIELD_PAD + VORTEX_H * (0.94 - 0.87 * t) + radius * 0.16 * s - burst * VORTEX_H * 0.025;
       VORTEX[at + 4] =
         VORTEX_W *
-        (0.075 + 0.045 * Math.sin(t * Math.PI)) *
+        (0.078 + 0.046 * Math.sin(t * Math.PI)) *
         Math.sqrt(Math.max(0.15, Math.sin(t * Math.PI))) *
         // Keep the crown wrapped as the longer-lived vortex turns through
         // other angles; this widens the same irregular volume, not a mask
         // over the face or additional independent head flames.
         VORTEX_CROWN_WIDTH[i] *
+        billow *
         (0.65 + power * 0.35) *
         (1 - burst * 0.65) *
         tear;
@@ -501,46 +524,82 @@ function vortexPath(context, side, clock, phase) {
       const depth = (VORTEX[a + 5] + VORTEX[b + 5]) * 0.5;
       if (side && depth * side < -0.05) continue;
       if (VORTEX[a + 6] + VORTEX[b + 6] < 0.23) continue;
-      const ax = VORTEX[a] + VORTEX[a + 2] * VORTEX[a + 4];
-      const ay = VORTEX[a + 1] + VORTEX[a + 3] * VORTEX[a + 4];
-      const bx = VORTEX[b] + VORTEX[b + 2] * VORTEX[b + 4];
-      const by = VORTEX[b + 1] + VORTEX[b + 3] * VORTEX[b + 4];
-      const cx = VORTEX[b] - VORTEX[b + 2] * VORTEX[b + 4];
-      const cy = VORTEX[b + 1] - VORTEX[b + 3] * VORTEX[b + 4];
-      const dx = VORTEX[a] - VORTEX[a + 2] * VORTEX[a + 4];
-      const dy = VORTEX[a + 1] - VORTEX[a + 3] * VORTEX[a + 4];
+      const wa = VORTEX[a + 4];
+      const wb = VORTEX[b + 4];
+      const ax = VORTEX[a] + VORTEX[a + 2] * wa;
+      const ay = VORTEX[a + 1] + VORTEX[a + 3] * wa;
+      const bx = VORTEX[b] + VORTEX[b + 2] * wb;
+      const by = VORTEX[b + 1] + VORTEX[b + 3] * wb;
+      const cx = VORTEX[b] - VORTEX[b + 2] * wb;
+      const cy = VORTEX[b + 1] - VORTEX[b + 3] * wb;
+      const dx = VORTEX[a] - VORTEX[a + 2] * wa;
+      const dy = VORTEX[a + 1] - VORTEX[a + 3] * wa;
+      const mx = (VORTEX[a + 2] + VORTEX[b + 2]) * 0.5;
+      const my = (VORTEX[a + 3] + VORTEX[b + 3]) * 0.5;
+      const tx = VORTEX[b] - VORTEX[a];
+      const ty = VORTEX[b + 1] - VORTEX[a + 1];
+      const swell = (wa + wb) * (0.14 + 0.08 * Math.sin(clock * 4.6 + i * 0.45 + strand * 2.1));
+      const cap = 0.28 + burst * 0.18;
       context.moveTo(ax, ay);
-      context.bezierCurveTo(ax, ay, bx, by, bx, by);
-      context.bezierCurveTo(bx, by, cx, cy, cx, cy);
-      context.bezierCurveTo(cx, cy, dx, dy, dx, dy);
-      context.bezierCurveTo(dx, dy, ax, ay, ax, ay);
+      context.bezierCurveTo(
+        ax + tx * 0.35 + mx * swell,
+        ay + ty * 0.35 + my * swell,
+        bx - tx * 0.35 + mx * swell,
+        by - ty * 0.35 + my * swell,
+        bx,
+        by,
+      );
+      context.bezierCurveTo(
+        bx + tx * cap,
+        by + ty * cap,
+        cx + tx * cap,
+        cy + ty * cap,
+        cx,
+        cy,
+      );
+      context.bezierCurveTo(
+        cx - tx * 0.35 - mx * swell * 0.7,
+        cy - ty * 0.35 - my * swell * 0.7,
+        dx + tx * 0.35 - mx * swell * 0.7,
+        dy + ty * 0.35 - my * swell * 0.7,
+        dx,
+        dy,
+      );
+      context.bezierCurveTo(
+        dx - tx * cap,
+        dy - ty * cap,
+        ax - tx * cap,
+        ay - ty * cap,
+        ax,
+        ay,
+      );
       context.closePath();
     }
-    // Secondary rolling curls split off the same stream, at two scales.
-    for (let branch = 0; branch < 2; branch += 1) {
-      const at = base + (12 + branch * 22) * VORTEX_STRIDE;
+    // Secondary rolling curls split off the same stream across four heights.
+    for (let branch = 0; branch < 3; branch += 1) {
+      const at = base + (9 + branch * 15) * VORTEX_STRIDE;
       if (side && VORTEX[at + 5] * side < 0) continue;
-      const turn = clock * 2.1 + strand * 2.3 + branch * 1.7;
+      const turn = clock * 2.4 + strand * 2.3 + branch * 1.7;
       const x = VORTEX[at];
       const y = VORTEX[at + 1];
       const margin = Math.min(x, FIELD_W - x, y, FIELD_H - y);
-      const radius = Math.min((10 + branch * 8) * (1 + burst * 0.6), Math.max(0, margin * 0.42));
+      const radius = Math.min((11 + branch * 6) * (1 + burst * 0.6), Math.max(0, margin * 0.42));
       const nx = Math.cos(turn);
       const ny = Math.sin(turn);
       const tx = -ny;
       const ty = nx;
       context.moveTo(x - nx * 7, y - ny * 7);
       context.bezierCurveTo(
-        x + tx * radius * 2,
-        y + ty * radius * 2,
+        x + tx * radius * 2.1,
+        y + ty * radius * 2.1 - radius * 0.35,
         x + nx * radius * 2 + tx * radius,
-        y + ny * radius * 2 + ty * radius,
-        x + nx * radius * 1.8,
-        y + ny * radius * 1.8,
+        y + ny * radius * 2 + ty * radius - radius * 0.25,
+        x + nx * radius * 1.85,
+        y + ny * radius * 1.85,
       );
       context.bezierCurveTo(
-        x + nx * radius + tx * radius * 0.4,
-        y + ny * radius + ty * radius * 0.4,
+        x + nx * radius + tx * radius * 0.45,
+        y + ny * radius + ty * radius * 0.45,
         x + tx * radius * 0.5,
         y + ty * radius * 0.5,
         x + nx * 7,
@@ -598,29 +657,32 @@ function paintBodyField(power, clock, phase) {
       TAU,
     );
     c.clip();
-    const offset = (((clock * 83) % H) + H) % H;
+    const offset = (((-clock * 88) % H) + H) % H;
     c.drawImage(bodyFlow, 0, offset - H, W, H);
     c.drawImage(bodyFlow, 0, offset, W, H);
     c.globalCompositeOperation = "destination-in";
     c.drawImage(bodyMask, 0, 0);
     // Overlapping sheets are texture within the one connected field. The
     // participating-volume detail is still the real Cycles-rendered asset.
-    c.globalCompositeOperation = "source-over";
     const volumes = coarse ? 18 : 24;
+    const span = volumes / VORTEX_STRANDS - 1;
     for (let i = 0; i < volumes; i += 1) {
       const k = i * 8;
       const strand = i % VORTEX_STRANDS;
       const along = Math.floor(i / VORTEX_STRANDS);
-      const step = Math.round((along * VORTEX_STEPS) / (volumes / VORTEX_STRANDS - 1));
+      const stagger = along > 0 && along < span ? strand - 1 : 0;
+      const step = Math.round((along * VORTEX_STEPS) / span) + stagger;
       const at = (strand * (VORTEX_STEPS + 1) + step) * VORTEX_STRIDE;
-      const angle = Math.atan2(-VORTEX[at + 2], VORTEX[at + 3]) + Math.PI / 2;
+      const rawAngle = Math.atan2(-VORTEX[at + 2], VORTEX[at + 3]) + Math.PI / 2;
+      const angle = rawAngle * 0.64 + Math.sin(clock * 4.8 + i * 1.3) * 0.06;
       const tearing = VORTEX[at + 6];
+      c.globalCompositeOperation = i % 3 === 2 ? "lighter" : "source-over";
       tongue(
         c,
         VORTEX[at],
         VORTEX[at + 1],
-        VORTEX_W * (0.36 + SEED[k] * 0.2) * (0.45 + tearing * 0.55),
-        VORTEX_H * (0.19 + SEED[k + 1] * 0.09) * (0.5 + tearing * 0.5),
+        VORTEX_W * (0.37 + SEED[k] * 0.21) * (0.45 + tearing * 0.55),
+        VORTEX_H * (0.2 + SEED[k + 1] * 0.095) * (0.5 + tearing * 0.5),
         clock * 16 + SEED[k + 2] * 32,
         Math.min(1, 0.94 + VORTEX[at + 5] * 0.1) * tearing,
         angle,
@@ -706,25 +768,28 @@ export function drawBodyFlame(context, size, strength, clock, scale = 1, layer =
     // candles assigned to the head, arms or legs. Its lean follows the
     // curve's tangent as that stream wraps round to the far side.
     const count = coarse ? 14 : 18;
+    const span = Math.ceil(count / VORTEX_STRANDS - 1);
     context.globalCompositeOperation = "lighter";
     for (let i = 0; i < count; i += 1) {
       const k = i * 8;
       const strand = i % VORTEX_STRANDS;
       const along = Math.floor(i / VORTEX_STRANDS);
-      const step = Math.round((along * VORTEX_STEPS) / Math.ceil(count / VORTEX_STRANDS - 1));
+      const stagger = along > 0 && along < span ? strand - 1 : 0;
+      const step = Math.round((along * VORTEX_STEPS) / span) + stagger;
       const at = (strand * (VORTEX_STEPS + 1) + step) * VORTEX_STRIDE;
       if (connected && VORTEX[at + 5] * (layer === "back" ? -1 : 1) < -0.1) continue;
       const v = connected ? (VORTEX[at + 1] - BODY_Y) / BODY_H : SOURCES[i * 4 + 1];
       const local = smooth(clamp((power - Math.abs(v - 0.34) * 0.23) / 0.77));
       const x = connected ? ((VORTEX[at] - BODY_X) * W) / BODY_W : SOURCES[i * 4] * W;
       const y = connected ? ((VORTEX[at + 1] - BODY_Y) * H) / BODY_H : v * H;
-      const lean = connected ? Math.atan2(-VORTEX[at + 2], VORTEX[at + 3]) + Math.PI / 2 : 0;
+      const rawLean = connected ? Math.atan2(-VORTEX[at + 2], VORTEX[at + 3]) + Math.PI / 2 : 0;
+      const lean = connected ? rawLean * 0.64 + Math.sin(clock * 5.2 + i * 1.4) * 0.07 : 0;
       tongue(
         context,
         x,
         y,
-        (75 + SEED[k + 1] * 65) * unit,
-        (125 + SEED[k + 2] * 100) * unit * local,
+        (78 + SEED[k + 1] * 68) * unit,
+        (130 + SEED[k + 2] * 104) * unit * local,
         clock * 16 + SEED[k + 3] * 32,
         local * (connected ? 0.98 : 0.92) * (connected ? VORTEX[at + 6] : 1),
         lean,
@@ -732,26 +797,26 @@ export function drawBodyFlame(context, size, strength, clock, scale = 1, layer =
     }
     if (layer !== "back" && scatter > 0 && scatter < 1) {
       const fade = Math.sin(scatter * Math.PI);
-      context.fillStyle = "rgb(166 255 126)";
+      context.fillStyle = "rgb(176 255 134)";
       for (let i = 0; i < 40; i += 1) {
         const k = i * 8;
         const root = i * 4;
         const travel = (55 + SEED[k] * 100) * unit * scatter;
         const x = SOURCES[root] * W + SOURCES[root + 2] * travel;
         const y = SOURCES[root + 1] * H + SOURCES[root + 3] * travel - scatter * 35 * unit;
-        context.globalAlpha = power * fade * (0.45 + SEED[k + 1] * 0.5);
+        context.globalAlpha = power * fade * (0.48 + SEED[k + 1] * 0.5);
         // Hot droplets stretch with their impulse, then shrink into chips.
-        context.fillRect(x, y, unit * (1.2 + fade * 2), unit * (1 + fade * 4));
+        context.fillRect(x, y, unit * (1.2 + fade * 2.1), unit * (1 + fade * 4.2));
         if (i % (coarse ? 7 : 4) === 0) {
           tongue(
             context,
             x,
             y,
-            unit * (35 + 32 * SEED[k + 2]),
-            unit * (65 + 100 * SEED[k + 3]) * fade,
-            clock * 16 + SEED[k + 4] * 32,
-            power * fade * 0.78,
-            SOURCES[root + 2] * (0.6 + 0.35 * scatter),
+            unit * (37 + 34 * SEED[k + 2]),
+            unit * (68 + 104 * SEED[k + 3]) * fade,
+            clock * 16 + SEED[k + 4] * 32 + i * 1.9,
+            power * fade * 0.82,
+            SOURCES[root + 2] * (0.55 + 0.35 * scatter),
           );
         }
       }
