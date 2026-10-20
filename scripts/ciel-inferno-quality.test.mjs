@@ -20,6 +20,7 @@ function harness({ coarse = false, dpr = 1, webgl = true } = {}) {
     fieldDraws: 0,
     fieldDisposals: 0,
     context2d: Object.create(null),
+    pathCalls: [],
     atlasStates: [],
     image: null,
   };
@@ -33,8 +34,17 @@ function harness({ coarse = false, dpr = 1, webgl = true } = {}) {
       fillStyle: "#000",
       strokeStyle: "#000",
       lineWidth: 1,
-      bezierCurveTo(..._points) {
+      moveTo(...points) {
+        count("moveTo");
+        stats.pathCalls.push(["moveTo", ...points]);
+      },
+      lineTo(...points) {
+        count("lineTo");
+        stats.pathCalls.push(["lineTo", ...points]);
+      },
+      bezierCurveTo(...points) {
         count("bezierCurveTo");
+        stats.pathCalls.push(["bezierCurveTo", ...points]);
       },
     },
     {
@@ -145,8 +155,151 @@ function harness({ coarse = false, dpr = 1, webgl = true } = {}) {
       stats.atlasStates.push(state);
     },
   });
-  return { renderer, field, detail, stats, listeners, sampleLife: exports.sampleCielFireLife };
+  return {
+    renderer,
+    field,
+    detail,
+    stats,
+    listeners,
+    sampleLife: exports.sampleCielFireLife,
+    sampleArrival: exports.sampleCielBurnArrival,
+  };
 }
+
+test("burn arrival follows the contact seam and unequal upward fingers, not a radius", () => {
+  const { sampleArrival, renderer } = harness();
+  for (const [width, height] of [
+    [320, 844],
+    [1024, 768],
+    [1440, 900],
+  ]) {
+    for (const angle of [-0.65, 2.45]) {
+      const g = { width, height, mouthX: width * 0.82, mouthY: height * 0.72, angle };
+      const arrivals = [];
+      for (let x = 0; x <= 20; x++)
+        for (let y = 0; y <= 30; y++) {
+          const arrival = sampleArrival((x * width) / 20, (y * height) / 30, g);
+          assert.ok(Number.isFinite(arrival) && arrival >= 2.1 && arrival <= 5.8);
+          arrivals.push(arrival);
+        }
+      const coverage = [2.15, 2.5, 3, 4, 5.8].map((t) => arrivals.filter((a) => a <= t).length);
+      for (let i = 1; i < coverage.length; i++) assert.ok(coverage[i] > coverage[i - 1]);
+      assert.equal(coverage.at(-1), arrivals.length, "full coverage before extinction");
+      const above = sampleArrival(g.mouthX, g.mouthY - height * 0.2, g);
+      const radius = Math.min(width, height) * 0.15;
+      const ring = Array.from({ length: 12 }, (_, i) =>
+        sampleArrival(
+          g.mouthX + Math.cos((i * Math.PI) / 6) * radius,
+          g.mouthY + Math.sin((i * Math.PI) / 6) * radius,
+          g,
+        ),
+      );
+      assert.ok(Math.max(...ring) - Math.min(...ring) > 0.15, "equal radius is not equal arrival");
+      assert.ok(
+        sampleArrival(g.mouthX, g.mouthY, g) < above,
+        "contact catches before flame climbs",
+      );
+    }
+  }
+  renderer.dispose();
+});
+
+test("fallback arrival cells stay contiguous in each column and only grow over time", () => {
+  const { sampleArrival, renderer } = harness();
+  const profiles = [
+    { width: 320, height: 844, mouthY: 0.31 },
+    { width: 768, height: 1024, mouthY: 0.31 },
+    { width: 1440, height: 900, mouthY: 0.34 },
+  ];
+  const times = [2.12, 2.3, 2.6, 3.1, 4.2, 5.8];
+  for (const profile of profiles) {
+    for (const angle of [-0.65, 2.52]) {
+      const { width, height } = profile;
+      const geometry = {
+        width,
+        height,
+        mouthX: width * 0.73,
+        mouthY: height * profile.mouthY,
+        angle,
+      };
+      const previous = Array(48).fill(0);
+      for (const time of times) {
+        for (let column = 0; column < 48; column++) {
+          const burned = [];
+          for (let row = 0; row < 72; row++) {
+            const arrival = sampleArrival(
+              ((column + 0.5) * width) / 48,
+              ((row + 0.5) * height) / 72,
+              geometry,
+            );
+            burned.push(arrival <= time);
+          }
+          const first = burned.indexOf(true);
+          const last = burned.lastIndexOf(true);
+          const count = first < 0 ? 0 : last - first + 1;
+          assert.equal(
+            burned.filter(Boolean).length,
+            count,
+            `${width}x${height}, angle ${angle}, column ${column}, time ${time}: one interval`,
+          );
+          assert.ok(
+            count >= previous[column],
+            `${width}x${height}, angle ${angle}, column ${column}: coverage never shrinks`,
+          );
+          previous[column] = count;
+        }
+      }
+      assert.ok(
+        previous.every((count) => count === 72),
+        "all rows are burned by 5.8 seconds",
+      );
+    }
+  }
+  renderer.dispose();
+});
+
+test("fallback mask paths stay finite and inside the viewport while tongues may extend beyond it", () => {
+  for (const { width, height } of [
+    { width: 320, height: 844 },
+    { width: 768, height: 1024 },
+    { width: 1440, height: 900 },
+  ]) {
+    const host = harness({ webgl: false });
+    host.renderer.resize({
+      width,
+      height,
+      mouthX: width * 0.73,
+      mouthY: height * (width < 700 ? 0.31 : 0.34),
+      angle: 2.52,
+    });
+    host.renderer.render(3300);
+    const firstTongue = host.stats.pathCalls.findIndex((call) => call[0] === "bezierCurveTo");
+    assert.ok(firstTongue > 0, "the char mask is drawn before flame tongues");
+    assert.equal(
+      host.stats.pathCalls[firstTongue - 1][0],
+      "moveTo",
+      "the first tongue starts a separate path",
+    );
+    const maskCalls = host.stats.pathCalls.slice(0, firstTongue - 1);
+    for (const [operation, ...coordinates] of host.stats.pathCalls) {
+      assert.ok(
+        coordinates.every(Number.isFinite),
+        `${operation} has only finite coordinates at ${width}x${height}`,
+      );
+    }
+    for (const [operation, ...coordinates] of maskCalls) {
+      assert.ok(operation === "moveTo" || operation === "lineTo");
+      for (let index = 0; index < coordinates.length; index += 2) {
+        assert.ok(coordinates[index] >= 0 && coordinates[index] <= width, "mask x stays in view");
+        assert.ok(
+          coordinates[index + 1] >= 0 && coordinates[index + 1] <= height,
+          "mask y stays in view",
+        );
+      }
+    }
+    host.renderer.dispose();
+  }
+});
 
 const dimensions = (field, detail) => ({
   field: [field.width, field.height],
