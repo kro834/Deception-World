@@ -1,0 +1,303 @@
+/* Dream lamplight — the programme, read by lamplight.
+
+   Linked after the stage sheet and before the cinematic skin. Paint and
+   type only: the same doubled page scope, no new words, no motion, no
+   images, nothing under 12px, and none of the measured chrome (header,
+   act bar, poster console, dossier columns, story folds). The phone
+   title stays inside the proscenium. Long Japanese reads in kinari on
+   the lacquer, and the theatre desk, the tanzaku and the open chapter
+   share one warm lamp. */
+
+/* ----------------------------------------------------------------
+   1. The ground: one lantern, not another skin
+   ---------------------------------------------------------------- */
+html[data-family="dream"] main.dream-page.dream-page {
+  background:
+    radial-gradient(42% 28% at 50% 0%, rgb(230 194 142 / 9%), transparent 70%),
+    radial-gradient(36% 22% at 100% 18%, rgb(204 73 59 / 7%), transparent 68%),
+    #0d0912;
+}
+
+html[data-family="dream"] main.dream-page.dream-page :focus-visible {
+  outline: 2px solid #f3e0b0;
+  outline-offset: 3px;
+}
+
+/* ----------------------------------------------------------------
+   2. The title stage on a phone: the picture leads
+   The vertical title was tall enough to climb over the act bar and
+   starve the key art. It now fits the proscenium, and the stage takes
+   the first screen.
+   ---------------------------------------------------------------- */
+@media (max-width: 760px) and (min-height: 521px) {
+  html[data-family="dream"] main.dream-page.dream-page > .dream-hero {
+    --ts-title-size: clamp(22px, 4.15svh, 30px);
+    --dr-stage-h: clamp(390px, 64svh, 680px);
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page > .dream-hero > .dream-hero-title {
+    align-self: center;
+    max-height: calc(var(--dr-stage-h) - 8px);
+    overflow: hidden;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-hero-title-name > span {
+    letter-spacing: 0.04em;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-hero-title-name > span + span {
+    margin-top: 0.55em;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page > .dream-hero .dream-hero-art {
+    object-position: 46% 16%;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page > .dream-hero > .dream-hero-catch {
+    font-size: 18px;
+    line-height: 1.7;
+    letter-spacing: 0.18em;
+    color: #f4ecdc;
+  }
+}
+
+/* ----------------------------------------------------------------
+   3. Reading: kinari on lacquer, a book measure
+   ---------------------------------------------------------------- */
+html[data-family="dream"] main.dream-page.dream-page .dream-prologue-card > p:not(.dream-prologue-sign),
+html[data-family="dream"] main.dream-page.dream-page .dream-story-case-body > p,
+html[data-family="dream"] main.dream-page.dream-page .dream-story-case-body > h3,
+html[data-family="dream"] main.dream-page.dream-page .dream-reader-preview,
+html[data-family="dream"] main.dream-page.dream-page .dream-roster-profile,
+html[data-family="dream"] main.dream-page.dream-page .dream-character-copy p,
+html[data-family="dream"] main.dream-page.dream-page .dream-glossary dd,
+html[data-family="dream"] main.dream-page.dream-page .dream-glossary dd p,
+html[data-family="dream"] main.dream-page.dream-page .dream-faction p,
+html[data-family="dream"] main.dream-page.dream-page .dream-agent-copy p,
+html[data-family="dream"] main.dream-page.dream-page .dream-case-notes li p,
+html[data-family="dream"] main.dream-page.dream-page .dream-atlas-grid p,
+html[data-family="dream"] main.dream-page.dream-page .dream-chronicle-cases p,
+html[data-family="dream"] main.dream-page.dream-page .dream-relations-tie p,
+html[data-family="dream"] main.dream-page.dream-page .dream-annex-quote blockquote p {
+  color: #f4ecdc;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-prologue-card > p:not(.dream-prologue-sign) {
+  font-size: clamp(17px, 1.35vw, 20px);
+  line-height: 2.05;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-reader-preview {
+  color: #f3ead8;
+  font-size: 16px;
+  line-height: 1.85;
+  letter-spacing: 0.04em;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-story-case > summary {
+  align-items: center;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-story-case-heading > small {
+  color: #e6c28e;
+  letter-spacing: 0.22em;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-story-case-body {
+  margin-top: 4px;
+  padding: clamp(22px, 3vw, 36px) clamp(18px, 3vw, 40px) clamp(28px, 4vw, 44px);
+  background:
+    linear-gradient(180deg, rgb(243 224 176 / 7%), transparent 28%),
+    #140e18;
+  box-shadow: inset 0 1px 0 rgb(243 224 176 / 28%);
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-story-case-body > h3 {
+  border-top: 0;
+  padding-top: 0;
+  margin-bottom: 18px;
+  color: #f3e0b0;
+  font-family: "Shippori Mincho", "Yu Mincho", "Hiragino Mincho ProN", serif;
+  font-size: clamp(16px, 1.35vw, 19px);
+  font-weight: 500;
+  line-height: 1.9;
+  letter-spacing: 0.06em;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-story-case-body > p {
+  font-size: 17px;
+  line-height: 2.08;
+  letter-spacing: 0.04em;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-roster-profile,
+html[data-family="dream"] main.dream-page.dream-page .dream-character-copy p,
+html[data-family="dream"] main.dream-page.dream-page .dream-glossary dd,
+html[data-family="dream"] main.dream-page.dream-page .dream-glossary dd p,
+html[data-family="dream"] main.dream-page.dream-page .dream-faction p,
+html[data-family="dream"] main.dream-page.dream-page .dream-case-notes li p {
+  font-size: 16px;
+  line-height: 1.95;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-roster h3,
+html[data-family="dream"] main.dream-page.dream-page .dream-glossary dt {
+  color: #f3e0b0;
+}
+
+/* ----------------------------------------------------------------
+   4. Tanzaku: the line is the plate
+   ---------------------------------------------------------------- */
+html[data-family="dream"] main.dream-page.dream-page .dream-quote-band > li {
+  inline-size: auto;
+  max-inline-size: 18em;
+  padding: 22px 16px;
+  border-color: rgb(230 194 142 / 55%);
+  background:
+    linear-gradient(180deg, rgb(243 224 176 / 10%), transparent 36%),
+    linear-gradient(270deg, rgb(110 44 53 / 28%), transparent 72%),
+    #161018;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-quote-band .dream-annex-quote blockquote p {
+  color: #f8f1e4;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.85;
+  letter-spacing: 0.12em;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-quote-band .dream-annex-quote figcaption {
+  color: #e7a090;
+  font-size: 13px;
+  letter-spacing: 0.22em;
+}
+
+/* ----------------------------------------------------------------
+   5. Theatre desk: three tickets, then the index
+   ---------------------------------------------------------------- */
+html[data-family="dream"] main.dream-page.dream-page .dream-programme-desk {
+  background:
+    radial-gradient(70% 48% at 50% 0%, rgb(243 224 176 / 12%), transparent 70%),
+    linear-gradient(180deg, #221428 0%, #120c18 100%);
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-programme-heading h2 {
+  color: #f3e0b0;
+  font-size: clamp(28px, 3vw, 40px);
+  letter-spacing: 0.28em;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-programme-heading > span {
+  color: #f4ecdc;
+  font-size: 15px;
+  letter-spacing: 0.12em;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-programme-ticket {
+  min-height: 128px;
+  border-color: rgb(230 194 142 / 42%);
+  background:
+    linear-gradient(165deg, rgb(243 224 176 / 8%), transparent 42%),
+    #1a1022;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-programme-ticket strong {
+  color: #f8f1e4;
+  font-size: clamp(20px, 2vw, 26px);
+  letter-spacing: 0.12em;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-programme-ticket-foot small,
+html[data-family="dream"] main.dream-page.dream-page .dream-programme-ledger-head small,
+html[data-family="dream"] main.dream-page.dream-page .dream-programme-dossier-chip span {
+  color: #e6d7c4;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-programme-dossier-chip strong,
+html[data-family="dream"] main.dream-page.dream-page .dream-programme-ledger-value {
+  color: #f8f1e4;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-programme-ledger-cell,
+html[data-family="dream"] main.dream-page.dream-page .dream-programme-dossier-chip {
+  border-color: rgb(200 164 92 / 32%);
+  background: #160f1c;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-reading-entry h3,
+html[data-family="dream"] main.dream-page.dream-page .dream-record-explorer h2,
+html[data-family="dream"] main.dream-page.dream-page .dream-record-explorer h3 {
+  color: #f3e0b0;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-reading-entry p,
+html[data-family="dream"] main.dream-page.dream-page .dream-record-explorer p {
+  color: #f4ecdc;
+  font-size: 16px;
+  line-height: 1.9;
+}
+
+/* ----------------------------------------------------------------
+   6. Cast and records: the name clears the plate
+   ---------------------------------------------------------------- */
+html[data-family="dream"] main.dream-page.dream-page .dream-character-copy b {
+  color: #f8f1e4;
+  text-shadow: 0 2px 16px rgb(13 9 18 / 80%);
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-dolminence-grid > article h3,
+html[data-family="dream"] main.dream-page.dream-page .dream-agent-copy h4,
+html[data-family="dream"] main.dream-page.dream-page .dream-agent-copy h5 {
+  color: #f8f1e4;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-section-heading h2 {
+  color: #f6edd8;
+}
+
+/* Fine pointers: a ticket lifts its gilt edge. No loop. */
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-programme-ticket,
+  html[data-family="dream"] main.dream-page.dream-page .dream-programme-ledger-cell,
+  html[data-family="dream"] main.dream-page.dream-page .dream-programme-dossier-chip,
+  html[data-family="dream"] main.dream-page.dream-page .dream-quote-band > li {
+    transition:
+      border-color 180ms ease,
+      background-color 180ms ease;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-programme-ticket:hover,
+  html[data-family="dream"] main.dream-page.dream-page .dream-programme-ledger-cell:hover,
+  html[data-family="dream"] main.dream-page.dream-page .dream-programme-dossier-chip:hover {
+    border-color: #e6c28e;
+    background-color: #24182c;
+  }
+}
+
+/* ----------------------------------------------------------------
+   7. Forced colours: the lamp gives way
+   ---------------------------------------------------------------- */
+@media (forced-colors: active) {
+  html[data-family="dream"] main.dream-page.dream-page,
+  html[data-family="dream"] main.dream-page.dream-page .dream-programme-desk,
+  html[data-family="dream"] main.dream-page.dream-page .dream-programme-ticket,
+  html[data-family="dream"] main.dream-page.dream-page .dream-programme-ledger-cell,
+  html[data-family="dream"] main.dream-page.dream-page .dream-programme-dossier-chip,
+  html[data-family="dream"] main.dream-page.dream-page .dream-story-case-body,
+  html[data-family="dream"] main.dream-page.dream-page .dream-quote-band > li,
+  html[data-family="dream"] main.dream-page.dream-page .dream-reading-entry,
+  html[data-family="dream"] main.dream-page.dream-page .dream-record-explorer {
+    background: Canvas;
+    color: CanvasText;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-reader-preview,
+  html[data-family="dream"] main.dream-page.dream-page .dream-story-case-body > p,
+  html[data-family="dream"] main.dream-page.dream-page .dream-story-case-body > h3,
+  html[data-family="dream"] main.dream-page.dream-page .dream-quote-band .dream-annex-quote blockquote p,
+  html[data-family="dream"] main.dream-page.dream-page .dream-programme-ticket strong,
+  html[data-family="dream"] main.dream-page.dream-page .dream-roster-profile {
+    color: CanvasText;
+  }
+}

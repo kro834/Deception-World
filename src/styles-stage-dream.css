@@ -43,9 +43,9 @@ html[data-family="dream"] main.dream-page.dream-page {
   --dr-plate-2: #22152a;
   --dr-plate-hi: #2a1a31;
   --dr-wall: #160e1b;
-  --dr-rule: rgb(200 164 92 / 44%);
-  --dr-rule-2: rgb(200 164 92 / 24%);
-  --dr-rule-3: rgb(200 164 92 / 14%);
+  --dr-rule: rgb(200 164 92 / 48%);
+  --dr-rule-2: rgb(200 164 92 / 28%);
+  --dr-rule-3: rgb(200 164 92 / 16%);
   --dr-gold: var(--ts-kin, #c8a45c);
   --dr-gold-hi: var(--ts-kin-light, #e6c28e);
   --dr-gold-deep: var(--ts-kin-deep, #8a6a2f);
@@ -54,8 +54,8 @@ html[data-family="dream"] main.dream-page.dream-page {
   --dr-shu-text: var(--ts-shu-text, #e0664f);
   --dr-ebicha: var(--ts-ebicha-deep, #4a1d27);
   --dr-text: var(--ts-kinari, #f4ecdc);
-  --dr-text-2: #e2d5bf;
-  --dr-text-3: #c1b3a3;
+  --dr-text-2: #e6dac5;
+  --dr-text-3: #c7b9a8;
   --dr-display: var(
     --ts-display,
     "Shippori Mincho B1",
@@ -73,25 +73,26 @@ html[data-family="dream"] main.dream-page.dream-page {
      take it back exactly). */
   --dr-inset: max(var(--dr-gut), calc((100vw - 1240px) / 2));
   --dr-bevel:
-    inset 0 1px 0 rgb(243 224 176 / 14%),
-    0 14px 34px -18px rgb(0 0 0 / 55%);
+    inset 0 1px 0 rgb(243 224 176 / 20%), inset 0 0 0 1px rgb(200 164 92 / 12%),
+    0 18px 42px -18px rgb(0 0 0 / 72%);
   --dr-plate-fill:
-    linear-gradient(var(--dr-gold) 0 0) 0 0 / 28px 1px no-repeat,
-    linear-gradient(var(--dr-gold) 0 0) 0 0 / 1px 28px no-repeat,
-    linear-gradient(174deg, rgb(243 224 176 / 6.5%) 0, transparent 26%),
+    linear-gradient(var(--dr-gold) 0 0) 0 0 / 28px 1.5px no-repeat,
+    linear-gradient(var(--dr-gold) 0 0) 0 0 / 1.5px 28px no-repeat,
+    linear-gradient(var(--dr-gold) 0 0) 100% 100% / 20px 1px no-repeat,
+    linear-gradient(var(--dr-gold) 0 0) 100% 100% / 1px 20px no-repeat,
+    linear-gradient(174deg, rgb(243 224 176 / 8.5%) 0, rgb(110 44 53 / 6%) 32%, transparent 62%),
     var(--dr-plate);
   --dr-ticks:
-    linear-gradient(var(--dr-gold) 0 0) 0 0 / 18px 1.5px,
-    linear-gradient(var(--dr-gold) 0 0) 0 0 / 1.5px 18px,
-    linear-gradient(var(--dr-gold) 0 0) 100% 0 / 18px 1.5px,
-    linear-gradient(var(--dr-gold) 0 0) 100% 0 / 1.5px 18px,
-    linear-gradient(var(--dr-gold) 0 0) 0 100% / 18px 1.5px,
-    linear-gradient(var(--dr-gold) 0 0) 0 100% / 1.5px 18px,
-    linear-gradient(var(--dr-gold) 0 0) 100% 100% / 18px 1.5px,
-    linear-gradient(var(--dr-gold) 0 0) 100% 100% / 1.5px 18px;
+    linear-gradient(var(--dr-gold) 0 0) 0 0 / 20px 1.5px,
+    linear-gradient(var(--dr-gold) 0 0) 0 0 / 1.5px 20px,
+    linear-gradient(var(--dr-gold) 0 0) 100% 0 / 20px 1.5px,
+    linear-gradient(var(--dr-gold) 0 0) 100% 0 / 1.5px 20px,
+    linear-gradient(var(--dr-gold) 0 0) 0 100% / 20px 1.5px,
+    linear-gradient(var(--dr-gold) 0 0) 0 100% / 1.5px 20px,
+    linear-gradient(var(--dr-gold) 0 0) 100% 100% / 20px 1.5px,
+    linear-gradient(var(--dr-gold) 0 0) 100% 100% / 1.5px 20px;
   background:
-    radial-gradient(70% 40% at 50% 0, rgb(200 164 92 / 7%), transparent 70%),
-    var(--dr-night);
+    radial-gradient(75% 42% at 50% 0, rgb(200 164 92 / 9%), transparent 72%), var(--dr-night);
 }
 
 /* Japanese: strict breaking; titles and names never split inside a word. */
@@ -128,7 +129,9 @@ html[data-family="dream"] main.dream-page.dream-page > .dream-annex {
 }
 
 html[data-family="dream"] main.dream-page.dream-page > .dream-annex,
-html[data-family="dream"] main.dream-page.dream-page > .dream-annex:is(#chronicle, #atlas, #relations, #arsenal) {
+html[data-family="dream"]
+  main.dream-page.dream-page
+  > .dream-annex:is(#chronicle, #atlas, #relations, #arsenal) {
   padding: clamp(32px, 4vw, 60px) var(--dr-inset) clamp(36px, 4.6vw, 64px);
   border-image-source: none;
 }
@@ -137,21 +140,29 @@ html[data-family="dream"] main.dream-page.dream-page > .dream-annex:is(#chronicl
    night for the organisation, indigo lacquer for the story and its
    archive, ink for the appendix. */
 html[data-family="dream"] main.dream-page.dream-page > #cast-roster {
-  background: linear-gradient(180deg, var(--dr-night), #170f1c 60%, var(--dr-night));
+  background:
+    radial-gradient(64% 36% at 50% 0, rgb(200 164 92 / 6%), transparent 72%),
+    linear-gradient(180deg, var(--dr-night), #180f1e 55%, var(--dr-night));
 }
 
 html[data-family="dream"] main.dream-page.dream-page > #factions {
-  background: linear-gradient(180deg, #160c14, #1b0e17 50%, var(--dr-night));
+  background:
+    radial-gradient(64% 36% at 50% 0, rgb(204 73 59 / 7%), transparent 72%),
+    linear-gradient(180deg, #160c14, #1c0e18 50%, var(--dr-night));
 }
 
-html[data-family="dream"] main.dream-page.dream-page > :is(#case-notes, #chronicle, #atlas, #relations, #arsenal) {
+html[data-family="dream"]
+  main.dream-page.dream-page
+  > :is(#case-notes, #chronicle, #atlas, #relations, #arsenal) {
   background:
-    repeating-linear-gradient(90deg, rgb(185 163 222 / 2%) 0 1px, transparent 1px 48px),
-    linear-gradient(180deg, #11111f, #131326 50%, #11111f);
+    radial-gradient(60% 32% at 50% 0, rgb(185 163 222 / 5%), transparent 72%),
+    repeating-linear-gradient(90deg, rgb(185 163 222 / 2.2%) 0 1px, transparent 1px 48px),
+    linear-gradient(180deg, #11111f, #141428 50%, #11111f);
 }
 
 html[data-family="dream"] main.dream-page.dream-page > :is(#glossary, #quotes) {
-  background: var(--dr-ink);
+  background:
+    radial-gradient(58% 34% at 50% 0, rgb(200 164 92 / 6%), transparent 74%), var(--dr-ink);
 }
 
 html[data-family="dream"]
@@ -184,12 +195,16 @@ html[data-family="dream"] main.dream-page.dream-page > .dream-section > .dream-s
   margin: 0 calc(-1 * var(--dr-inset)) clamp(28px, 3.6vw, 52px);
   padding: clamp(40px, 5vw, 64px) var(--dr-gut);
   border: 0;
-  border-block: 1px solid var(--dr-rule-2);
+  border-block: 1px solid var(--dr-rule);
+  box-shadow:
+    inset 0 1px 0 rgb(243 224 176 / 14%),
+    inset 0 -1px 0 rgb(243 224 176 / 10%),
+    0 24px 48px -24px rgb(0 0 0 / 80%);
   text-align: center;
   background:
-    radial-gradient(46% 70% at 50% 0, rgb(230 194 142 / 13%), transparent 72%),
-    radial-gradient(38% 50% at 50% 100%, rgb(204 73 59 / 9%), transparent 74%),
-    repeating-linear-gradient(90deg, rgb(200 164 92 / 2.5%) 0 1px, transparent 1px 64px),
+    radial-gradient(50% 74% at 50% 0, rgb(230 194 142 / 16%), transparent 72%),
+    radial-gradient(42% 54% at 50% 100%, rgb(204 73 59 / 11%), transparent 74%),
+    repeating-linear-gradient(90deg, rgb(200 164 92 / 2.8%) 0 1px, transparent 1px 64px),
     linear-gradient(180deg, var(--dr-ink) 0, var(--dr-lacquer) 52%, var(--dr-ink) 100%);
 }
 
@@ -282,17 +297,18 @@ html[data-family="dream"]
   inset: clamp(10px, 1.6vw, 22px) max(var(--dr-gut), calc(var(--dr-inset) - 40px));
   z-index: -1;
   border: 1px solid var(--dr-rule);
-  outline: 1px solid var(--dr-rule-3);
+  outline: 1px solid var(--dr-rule-2);
   outline-offset: 5px;
+  box-shadow: inset 0 0 36px rgb(200 164 92 / 7%);
   background:
-    linear-gradient(var(--dr-gold) 0 0) 0 0 / 40px 2px,
-    linear-gradient(var(--dr-gold) 0 0) 0 0 / 2px 40px,
-    linear-gradient(var(--dr-gold) 0 0) 100% 0 / 40px 2px,
-    linear-gradient(var(--dr-gold) 0 0) 100% 0 / 2px 40px,
-    linear-gradient(var(--dr-gold) 0 0) 0 100% / 40px 2px,
-    linear-gradient(var(--dr-gold) 0 0) 0 100% / 2px 40px,
-    linear-gradient(var(--dr-gold) 0 0) 100% 100% / 40px 2px,
-    linear-gradient(var(--dr-gold) 0 0) 100% 100% / 2px 40px;
+    linear-gradient(var(--dr-gold-hi) 0 0) 0 0 / 44px 2px,
+    linear-gradient(var(--dr-gold-hi) 0 0) 0 0 / 2px 44px,
+    linear-gradient(var(--dr-gold-hi) 0 0) 100% 0 / 44px 2px,
+    linear-gradient(var(--dr-gold-hi) 0 0) 100% 0 / 2px 44px,
+    linear-gradient(var(--dr-gold-hi) 0 0) 0 100% / 44px 2px,
+    linear-gradient(var(--dr-gold-hi) 0 0) 0 100% / 2px 44px,
+    linear-gradient(var(--dr-gold-hi) 0 0) 100% 100% / 44px 2px,
+    linear-gradient(var(--dr-gold-hi) 0 0) 100% 100% / 2px 44px;
   background-repeat: no-repeat;
   pointer-events: none;
 }
@@ -308,14 +324,18 @@ html[data-family="dream"]
   justify-self: center;
   margin: 0 0 clamp(16px, 2vw, 24px);
   padding: 12px 9px;
-  border: 1px solid rgb(243 224 176 / 55%);
+  border: 1px solid rgb(243 224 176 / 68%);
   outline: 1px solid var(--dr-shu);
   outline-offset: 3px;
   writing-mode: vertical-rl;
   color: var(--dr-text);
-  background: var(--dr-shu-deep);
+  background:
+    radial-gradient(70% 60% at 50% 25%, rgb(224 102 79 / 32%), transparent 75%),
+    linear-gradient(180deg, #b83a30 0%, var(--dr-shu-deep) 60%, #7d231c 100%);
   clip-path: none;
-  box-shadow: 0 10px 24px -14px rgb(0 0 0 / 90%);
+  box-shadow:
+    inset 0 0 0 1px rgb(243 224 176 / 20%),
+    0 12px 28px -12px rgb(0 0 0 / 92%);
   font-family: var(--dr-display);
   font-size: clamp(16px, 1.4vw, 19px);
   font-weight: 800;
@@ -323,11 +343,7 @@ html[data-family="dream"]
   letter-spacing: 0.32em;
 }
 
-html[data-family="dream"]
-  main.dream-page.dream-page
-  > .dream-section
-  > .dream-section-heading
-  > p {
+html[data-family="dream"] main.dream-page.dream-page > .dream-section > .dream-section-heading > p {
   grid-area: kicker;
   margin: 0 0 clamp(8px, 1vw, 12px);
   padding: 0;
@@ -339,11 +355,7 @@ html[data-family="dream"]
   letter-spacing: 0.42em;
 }
 
-html[data-family="dream"]
-  main.dream-page.dream-page
-  > .dream-section
-  > .dream-section-heading
-  h2 {
+html[data-family="dream"] main.dream-page.dream-page > .dream-section > .dream-section-heading h2 {
   grid-area: title;
   max-width: 100%;
   margin: 0;
@@ -367,7 +379,7 @@ html[data-family="dream"]
   margin: clamp(10px, 1.4vw, 16px) 0 0;
   padding: 0;
   border: 0;
-  color: var(--dr-text-3);
+  color: var(--dr-text-2);
   font-family: var(--dr-latin);
   font-size: 12px;
   letter-spacing: 0.3em;
@@ -386,7 +398,7 @@ html[data-family="dream"]
   content: "";
   width: clamp(28px, 4vw, 56px);
   height: 1px;
-  background: var(--dr-rule);
+  background: var(--dr-gold);
 }
 
 html[data-family="dream"]
@@ -411,7 +423,7 @@ html[data-family="dream"]
   left: 0;
   z-index: -1;
   text-align: center;
-  -webkit-text-stroke: 1px rgb(200 164 92 / 15%);
+  -webkit-text-stroke: 1px rgb(200 164 92 / 18%);
   font-size: clamp(200px, 30vw, 420px);
   line-height: 1;
 }
@@ -423,22 +435,40 @@ html[data-family="dream"]
   right: 0;
 }
 
-/* Act III is the playbill act: its card is lit in vermilion. */
-html[data-family="dream"] main.dream-page.dream-page > .dream-dolminence-section > .dream-section-heading {
+/* Act II is the cast act: lit in warm plum and gold footlights. */
+html[data-family="dream"]
+  main.dream-page.dream-page
+  > .dream-character-section
+  > .dream-section-heading {
   background:
-    radial-gradient(46% 70% at 50% 0, rgb(204 73 59 / 20%), transparent 72%),
-    radial-gradient(38% 50% at 50% 100%, rgb(200 164 92 / 8%), transparent 74%),
-    repeating-linear-gradient(90deg, rgb(200 164 92 / 2.5%) 0 1px, transparent 1px 64px),
-    linear-gradient(180deg, var(--dr-ink) 0, #200f19 52%, var(--dr-ink) 100%);
+    radial-gradient(48% 72% at 50% 0, rgb(230 194 142 / 18%), transparent 72%),
+    radial-gradient(40% 52% at 50% 100%, rgb(156 64 78 / 14%), transparent 74%),
+    repeating-linear-gradient(90deg, rgb(200 164 92 / 2.8%) 0 1px, transparent 1px 64px),
+    linear-gradient(180deg, var(--dr-ink) 0, #1f1124 52%, var(--dr-ink) 100%);
+}
+
+/* Act III is the playbill act: its card is lit in vermilion. */
+html[data-family="dream"]
+  main.dream-page.dream-page
+  > .dream-dolminence-section
+  > .dream-section-heading {
+  background:
+    radial-gradient(48% 72% at 50% 0, rgb(204 73 59 / 22%), transparent 72%),
+    radial-gradient(40% 52% at 50% 100%, rgb(200 164 92 / 10%), transparent 74%),
+    repeating-linear-gradient(90deg, rgb(200 164 92 / 2.8%) 0 1px, transparent 1px 64px),
+    linear-gradient(180deg, var(--dr-ink) 0, #230f1a 52%, var(--dr-ink) 100%);
 }
 
 /* Act IV, the story, is lit in indigo like the archive corners after it. */
-html[data-family="dream"] main.dream-page.dream-page > .dream-case-section > .dream-section-heading {
+html[data-family="dream"]
+  main.dream-page.dream-page
+  > .dream-case-section
+  > .dream-section-heading {
   background:
-    radial-gradient(46% 70% at 50% 0, rgb(185 163 222 / 12%), transparent 72%),
-    radial-gradient(38% 50% at 50% 100%, rgb(200 164 92 / 8%), transparent 74%),
-    repeating-linear-gradient(90deg, rgb(200 164 92 / 2.5%) 0 1px, transparent 1px 64px),
-    linear-gradient(180deg, var(--dr-ink) 0, #141429 52%, var(--dr-ink) 100%);
+    radial-gradient(48% 72% at 50% 0, rgb(185 163 222 / 15%), transparent 72%),
+    radial-gradient(40% 52% at 50% 100%, rgb(200 164 92 / 10%), transparent 74%),
+    repeating-linear-gradient(90deg, rgb(200 164 92 / 2.8%) 0 1px, transparent 1px 64px),
+    linear-gradient(180deg, var(--dr-ink) 0, #15152c 52%, var(--dr-ink) 100%);
 }
 
 /* ----------------------------------------------------------------
@@ -456,7 +486,8 @@ html[data-family="dream"] main.dream-page.dream-page .dream-annex-heading {
   margin: 0 0 clamp(20px, 2.6vw, 32px);
   padding: 0 0 clamp(12px, 1.4vw, 16px);
   background:
-    linear-gradient(var(--dr-gold) 0 0) 0 100% / 100% 1px no-repeat,
+    linear-gradient(90deg, var(--dr-gold-hi), var(--dr-gold) 45%, var(--dr-rule)) 0 100% / 100%
+      1.5px no-repeat,
     linear-gradient(var(--dr-rule-2) 0 0) 0 calc(100% - 4px) / 100% 1px no-repeat;
 }
 
@@ -471,11 +502,16 @@ html[data-family="dream"] main.dream-page.dream-page .dream-annex-heading::befor
   min-height: 52px;
   margin: 0;
   padding: 6px 8px;
-  border: 1px solid rgb(243 224 176 / 50%);
+  border: 1px solid rgb(243 224 176 / 62%);
   outline: 1px solid var(--dr-shu);
   outline-offset: 2px;
   color: var(--dr-text);
-  background: var(--dr-shu-deep);
+  background:
+    radial-gradient(75% 65% at 50% 25%, rgb(224 102 79 / 28%), transparent 75%),
+    linear-gradient(180deg, #b83a30 0%, var(--dr-shu-deep) 65%, #7d231c 100%);
+  box-shadow:
+    inset 0 0 0 1px rgb(243 224 176 / 18%),
+    0 8px 20px -10px rgb(0 0 0 / 85%);
   clip-path: none;
   font-family: var(--dr-num);
   font-size: 14px;
@@ -673,7 +709,11 @@ html[data-family="dream"] main.dream-page.dream-page > .dream-hero > .dream-hero
     text-shadow: none;
   }
 
-  html[data-family="dream"] main.dream-page.dream-page > .dream-hero > .dream-hero-catch > span:last-child {
+  html[data-family="dream"]
+    main.dream-page.dream-page
+    > .dream-hero
+    > .dream-hero-catch
+    > span:last-child {
     padding-top: 4em;
   }
 
@@ -685,7 +725,8 @@ html[data-family="dream"] main.dream-page.dream-page > .dream-hero > .dream-hero
     justify-self: start;
     align-self: end;
     width: clamp(320px, 30vw, 420px);
-    margin: 0 0 calc(var(--dr-stage-gap) + clamp(24px, 4svh, 48px)) calc(var(--dr-gut) + clamp(24px, 3vw, 48px));
+    margin: 0 0 calc(var(--dr-stage-gap) + clamp(24px, 4svh, 48px))
+      calc(var(--dr-gut) + clamp(24px, 3vw, 48px));
   }
 
   html[data-family="dream"] main.dream-page.dream-page > .dream-hero > .dream-hero-obi {
@@ -712,8 +753,7 @@ html[data-family="dream"] main.dream-page.dream-page > .dream-hero > .dream-hero
     min-height: 0;
     padding: calc(var(--ts-chrome) + 10px) 0 0;
     background:
-      radial-gradient(70% 40% at 100% 10%, rgb(230 194 142 / 10%), transparent 70%),
-      var(--dr-ink);
+      radial-gradient(70% 40% at 100% 10%, rgb(230 194 142 / 10%), transparent 70%), var(--dr-ink);
   }
 
   html[data-family="dream"] main.dream-page.dream-page > .dream-hero::after {
@@ -836,8 +876,7 @@ html[data-family="dream"] main.dream-page.dream-page > .dream-hero > .dream-hero
 
 html[data-family="dream"] main.dream-page.dream-page > .dream-prologue {
   background:
-    radial-gradient(50% 60% at 80% 50%, rgb(230 194 142 / 6%), transparent 70%),
-    var(--dr-night);
+    radial-gradient(54% 64% at 80% 50%, rgb(230 194 142 / 8%), transparent 72%), var(--dr-night);
 }
 
 @media (max-width: 980px) {
@@ -854,11 +893,12 @@ html[data-family="dream"] main.dream-page.dream-page > .dream-contents {
   gap: 14px;
   padding: clamp(18px, 2.2vw, 28px);
   border: 1px solid var(--dr-rule);
-  outline: 1px solid var(--dr-rule-3);
+  outline: 1px solid var(--dr-rule-2);
   outline-offset: 5px;
+  box-shadow: var(--dr-bevel);
   background:
     var(--dr-ticks),
-    linear-gradient(174deg, rgb(243 224 176 / 6%), transparent 30%),
+    linear-gradient(174deg, rgb(243 224 176 / 8.5%) 0, rgb(110 44 53 / 6%) 32%, transparent 60%),
     var(--dr-lacquer);
   background-repeat: no-repeat;
 }
@@ -878,7 +918,8 @@ html[data-family="dream"] main.dream-page.dream-page > .dream-contents h2 {
   padding: 0 0 10px;
   writing-mode: horizontal-tb;
   color: var(--dr-gold-hi);
-  background: linear-gradient(var(--dr-gold) 0 0) 0 100% / 100% 1px no-repeat;
+  background: linear-gradient(90deg, var(--dr-gold-hi), var(--dr-gold) 65%, transparent) 0 100% /
+    100% 1.5px no-repeat;
   clip-path: none;
   font-family: var(--dr-display);
   font-size: clamp(20px, 1.8vw, 24px);
@@ -1043,9 +1084,10 @@ html[data-family="dream"] main.dream-page.dream-page > .dream-contents a:focus-v
 html[data-family="dream"] main.dream-page.dream-page .dream-poster-stage {
   outline: 0;
   background:
-    radial-gradient(62% 38% at 42% 0, rgb(243 224 176 / 16%), transparent 72%),
-    repeating-linear-gradient(90deg, rgb(200 164 92 / 3.5%) 0 1px, transparent 1px 22px),
-    repeating-linear-gradient(0deg, rgb(200 164 92 / 2.5%) 0 1px, transparent 1px 22px),
+    radial-gradient(66% 42% at 42% 0, rgb(243 224 176 / 20%), transparent 74%),
+    radial-gradient(48% 36% at 80% 100%, rgb(110 44 53 / 16%), transparent 72%),
+    repeating-linear-gradient(90deg, rgb(200 164 92 / 4%) 0 1px, transparent 1px 22px),
+    repeating-linear-gradient(0deg, rgb(200 164 92 / 3%) 0 1px, transparent 1px 22px),
     var(--dr-wall);
   box-shadow:
     0 0 0 1px var(--dr-rule),
@@ -1055,13 +1097,15 @@ html[data-family="dream"] main.dream-page.dream-page .dream-poster-stage {
 /* The poster hangs in its own frame on the wall: the picture box takes
    the poster's proportions (still object-fit: contain, so a wide poster
    letterboxes inside it), with a gilt moulding and a dark mat. */
-html[data-family="dream"] main.dream-page.dream-page .dream-poster-stage > figure.dream-poster-current {
-  border: 1px solid var(--dr-rule-2);
+html[data-family="dream"]
+  main.dream-page.dream-page
+  .dream-poster-stage
+  > figure.dream-poster-current {
+  border: 1px solid var(--dr-rule);
   outline: 0;
   background:
-    radial-gradient(58% 72% at 50% 0, rgb(243 224 176 / 14%), transparent 76%),
-    transparent;
-  box-shadow: none;
+    radial-gradient(60% 76% at 50% 0, rgb(243 224 176 / 17%), transparent 76%), transparent;
+  box-shadow: inset 0 0 32px rgb(0 0 0 / 55%);
 }
 
 html[data-family="dream"] main.dream-page.dream-page .dream-poster-stage > figure > img {
@@ -1071,20 +1115,22 @@ html[data-family="dream"] main.dream-page.dream-page .dream-poster-stage > figur
   max-width: calc(100% - 2 * clamp(12px, 2.4vw, 32px));
   height: calc(100% - 2 * clamp(12px, 2vw, 24px));
   padding: clamp(5px, 0.6vw, 8px);
-  border: 2px solid var(--dr-gold);
+  border: 2px solid var(--dr-gold-hi);
   outline: 1px solid var(--dr-rule);
   outline-offset: 3px;
   background: #0a070d;
   box-shadow:
-    0 0 28px rgb(200 164 92 / 14%),
-    0 26px 46px -22px rgb(0 0 0 / 95%);
+    0 0 36px rgb(200 164 92 / 18%),
+    0 28px 52px -20px rgb(0 0 0 / 96%);
 }
 
 /* The caption reads as the brass label under the picture. */
 html[data-family="dream"] main.dream-page.dream-page .dream-poster-current > figcaption {
   border-top: 1px solid var(--dr-rule);
   background:
-    linear-gradient(180deg, rgb(243 224 176 / 9%), transparent 70%),
+    linear-gradient(var(--dr-gold) 0 0) 0 0 / 16px 1.5px no-repeat,
+    linear-gradient(var(--dr-gold) 0 0) 100% 0 / 16px 1.5px no-repeat,
+    linear-gradient(180deg, rgb(243 224 176 / 11%), transparent 70%),
     #140d18;
 }
 
@@ -1096,7 +1142,7 @@ html[data-family="dream"] main.dream-page.dream-page .dream-poster-current > fig
 }
 
 html[data-family="dream"] main.dream-page.dream-page .dream-poster-current > figcaption > b {
-  color: var(--dr-text-2);
+  color: var(--dr-text);
   font-family: var(--dr-serif);
   font-weight: 500;
 }
@@ -1119,28 +1165,40 @@ html[data-family="dream"] main.dream-page.dream-page .dream-screening-trigger {
   max-width: 100%;
   padding: 8px 18px;
   margin-left: auto;
-  border: 1px solid #d2ad6e;
-  color: #f6e7be;
-  background: linear-gradient(180deg, #321d33 0%, #211323 100%);
+  border: 1px solid var(--dr-gold);
+  outline: 1px solid rgb(243 224 176 / 24%);
+  outline-offset: -4px;
+  color: #f8ebca;
+  background:
+    linear-gradient(var(--dr-gold-hi) 0 0) 0 0 / 10px 1.5px no-repeat,
+    linear-gradient(var(--dr-gold-hi) 0 0) 0 0 / 1.5px 10px no-repeat,
+    linear-gradient(var(--dr-gold-hi) 0 0) 100% 100% / 10px 1.5px no-repeat,
+    linear-gradient(var(--dr-gold-hi) 0 0) 100% 100% / 1.5px 10px no-repeat,
+    linear-gradient(180deg, #3c213d 0%, #241326 100%);
   box-shadow:
-    inset 0 1px 0 rgb(243 224 176 / 18%),
-    0 6px 16px rgb(0 0 0 / 32%);
+    inset 0 1px 0 rgb(243 224 176 / 22%),
+    0 8px 20px -6px rgb(0 0 0 / 48%);
   font: 600 13px/1.5 var(--dr-serif);
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   cursor: pointer;
 }
 html[data-family="dream"] main.dream-page.dream-page .dream-screening-trigger:focus-visible {
   outline: 3px solid #fff0b5;
   outline-offset: 3px;
 }
-html[data-family="dream"] main.dream-page.dream-page .dream-screening-trigger:disabled { opacity: 0.7; }
+html[data-family="dream"] main.dream-page.dream-page .dream-screening-trigger:disabled {
+  opacity: 0.7;
+}
 html[data-family="dream"] main.dream-page.dream-page .dream-screening-load-error {
   flex-basis: 100%;
   font-size: 12px;
   line-height: 1.6;
 }
 @media (max-width: 520px) {
-  html[data-family="dream"] main.dream-page.dream-page .dream-screening-trigger { width: 100%; margin-left: 0; }
+  html[data-family="dream"] main.dream-page.dream-page .dream-screening-trigger {
+    width: 100%;
+    margin-left: 0;
+  }
 }
 
 html[data-family="dream"] main.dream-page.dream-page .dream-character-grid {
@@ -1150,21 +1208,24 @@ html[data-family="dream"] main.dream-page.dream-page .dream-character-grid {
   border: 1px solid var(--dr-rule);
   box-shadow: var(--dr-bevel);
   background:
-    radial-gradient(18% 58% at 16.6% 0, rgb(243 224 176 / 16%), transparent 100%),
-    radial-gradient(18% 58% at 50% 0, rgb(243 224 176 / 16%), transparent 100%),
-    radial-gradient(18% 58% at 83.4% 0, rgb(243 224 176 / 16%), transparent 100%),
+    var(--dr-ticks), radial-gradient(20% 62% at 16.6% 0, rgb(243 224 176 / 20%), transparent 100%),
+    radial-gradient(20% 62% at 50% 0, rgb(243 224 176 / 20%), transparent 100%),
+    radial-gradient(20% 62% at 83.4% 0, rgb(243 224 176 / 20%), transparent 100%),
     linear-gradient(
       0deg,
       var(--dr-ink) 0,
-      rgb(42 26 49 / 84%) var(--dr-floor),
-      rgb(200 164 92 / 46%) var(--dr-floor) calc(var(--dr-floor) + 1px),
+      rgb(46 28 54 / 88%) var(--dr-floor),
+      rgb(230 194 142 / 58%) var(--dr-floor) calc(var(--dr-floor) + 1px),
       transparent calc(var(--dr-floor) + 1px)
     ),
     var(--dr-wall);
+  background-repeat: no-repeat;
 }
 
 html[data-family="dream"] main.dream-page.dream-page .dream-character-grid button img {
-  box-shadow: 0 32px 44px -26px rgb(0 0 0 / 95%);
+  box-shadow:
+    0 0 28px rgb(200 164 92 / 14%),
+    0 32px 48px -24px rgb(0 0 0 / 96%);
 }
 
 html[data-family="dream"] main.dream-page.dream-page .dream-character-copy small {
@@ -1177,10 +1238,9 @@ html[data-family="dream"] main.dream-page.dream-page .dream-character-copy small
     gap: 22px 12px;
     padding: 20px 12px 16px;
     background:
-      radial-gradient(40% 30% at 50% 0, rgb(243 224 176 / 13%), transparent 100%),
-      radial-gradient(30% 24% at 25% 55%, rgb(243 224 176 / 8%), transparent 100%),
-      radial-gradient(30% 24% at 75% 55%, rgb(243 224 176 / 8%), transparent 100%),
-      var(--dr-wall);
+      radial-gradient(40% 30% at 50% 0, rgb(243 224 176 / 15%), transparent 100%),
+      radial-gradient(30% 24% at 25% 55%, rgb(243 224 176 / 10%), transparent 100%),
+      radial-gradient(30% 24% at 75% 55%, rgb(243 224 176 / 10%), transparent 100%), var(--dr-wall);
   }
 
   html[data-family="dream"] main.dream-page.dream-page .dream-character-grid > article:first-child {
@@ -1270,7 +1330,7 @@ html[data-family="dream"] main.dream-page.dream-page .dream-character-copy small
 
 /* The thumbnails hang as small frames on the same wall. */
 html[data-family="dream"] main.dream-page.dream-page .dream-poster-thumbnails button.ios26-glass {
-  outline: 1px solid rgb(200 164 92 / 16%);
+  outline: 1px solid rgb(200 164 92 / 22%);
   outline-offset: 2px;
 }
 
@@ -1306,33 +1366,36 @@ html[data-family="dream"] main.dream-page.dream-page .dream-dolminence-grid {
   border: 1px solid var(--dr-rule);
   box-shadow: var(--dr-bevel);
   background:
-    radial-gradient(14% 56% at 12.5% 0, rgb(224 97 79 / 19%), transparent 100%),
-    radial-gradient(14% 56% at 37.5% 0, rgb(224 97 79 / 19%), transparent 100%),
-    radial-gradient(14% 56% at 62.5% 0, rgb(224 97 79 / 19%), transparent 100%),
-    radial-gradient(14% 56% at 87.5% 0, rgb(224 97 79 / 19%), transparent 100%),
+    var(--dr-ticks), radial-gradient(16% 60% at 12.5% 0, rgb(224 97 79 / 22%), transparent 100%),
+    radial-gradient(16% 60% at 37.5% 0, rgb(224 97 79 / 22%), transparent 100%),
+    radial-gradient(16% 60% at 62.5% 0, rgb(224 97 79 / 22%), transparent 100%),
+    radial-gradient(16% 60% at 87.5% 0, rgb(224 97 79 / 22%), transparent 100%),
     linear-gradient(
       0deg,
       var(--dr-ink) 0,
-      rgb(50 20 28 / 84%) var(--dr-floor),
-      rgb(200 164 92 / 46%) var(--dr-floor) calc(var(--dr-floor) + 1px),
+      rgb(54 20 30 / 88%) var(--dr-floor),
+      rgb(230 194 142 / 54%) var(--dr-floor) calc(var(--dr-floor) + 1px),
       transparent calc(var(--dr-floor) + 1px)
     ),
     #1a0d15;
+  background-repeat: no-repeat;
 }
 
 html[data-family="dream"] main.dream-page.dream-page .dream-dolminence-grid > article {
-  border: 1px solid var(--dr-rule-2);
+  border: 1px solid var(--dr-rule);
   outline: 0;
   box-shadow: var(--dr-bevel);
   background:
-    linear-gradient(var(--dr-gold) 0 0) top / 100% 2px no-repeat,
-    linear-gradient(180deg, rgb(204 73 59 / 9%), transparent 42%),
-    rgb(13 9 18 / 90%);
+    linear-gradient(var(--dr-gold-hi) 0 0) top / 100% 2px no-repeat,
+    linear-gradient(var(--dr-gold) 0 0) 0 3px / 100% 1px no-repeat,
+    linear-gradient(180deg, rgb(204 73 59 / 12%), transparent 46%),
+    rgb(13 9 18 / 92%);
 }
 
 html[data-family="dream"] main.dream-page.dream-page .dream-dolminence-grid button img {
   border-radius: 999px 999px 0 0;
-  border-color: var(--dr-rule);
+  border-color: var(--dr-gold);
+  box-shadow: 0 18px 34px -18px rgb(0 0 0 / 90%);
 }
 
 @media (max-width: 760px) and (min-height: 521px) {
@@ -1341,11 +1404,10 @@ html[data-family="dream"] main.dream-page.dream-page .dream-dolminence-grid butt
     gap: 10px;
     padding: 14px 10px 12px;
     background:
-      radial-gradient(30% 30% at 25% 0, rgb(224 97 79 / 15%), transparent 100%),
-      radial-gradient(30% 30% at 75% 0, rgb(224 97 79 / 15%), transparent 100%),
-      radial-gradient(30% 30% at 25% 52%, rgb(224 97 79 / 12%), transparent 100%),
-      radial-gradient(30% 30% at 75% 52%, rgb(224 97 79 / 12%), transparent 100%),
-      #1a0d15;
+      radial-gradient(30% 30% at 25% 0, rgb(224 97 79 / 17%), transparent 100%),
+      radial-gradient(30% 30% at 75% 0, rgb(224 97 79 / 17%), transparent 100%),
+      radial-gradient(30% 30% at 25% 52%, rgb(224 97 79 / 14%), transparent 100%),
+      radial-gradient(30% 30% at 75% 52%, rgb(224 97 79 / 14%), transparent 100%), #1a0d15;
   }
 
   html[data-family="dream"] main.dream-page.dream-page .dream-dolminence-grid button.ios26-glass {
@@ -1399,8 +1461,9 @@ html[data-family="dream"] main.dream-page.dream-page .dream-roster {
   gap: 1px;
   padding: 1px;
   border: 1px solid var(--dr-rule);
-  outline: 1px solid var(--dr-rule-3);
+  outline: 1px solid var(--dr-rule-2);
   outline-offset: 4px;
+  box-shadow: var(--dr-bevel);
   background: transparent;
 }
 
@@ -1416,7 +1479,9 @@ html[data-family="dream"] main.dream-page.dream-page .dream-roster article {
   border: 0;
   outline: 0;
   background:
-    linear-gradient(180deg, rgb(110 44 53 / 12%), transparent 46%),
+    linear-gradient(var(--dr-gold) 0 0) 0 0 / 22px 1.5px no-repeat,
+    linear-gradient(var(--dr-gold) 0 0) 0 0 / 1.5px 22px no-repeat,
+    linear-gradient(180deg, rgb(110 44 53 / 15%), transparent 48%),
     var(--dr-plate);
 }
 
@@ -1438,7 +1503,12 @@ html[data-family="dream"]
   --dr-band: clamp(120px, 11vw, 168px);
   padding-top: calc(var(--dr-band) + 10px);
   background:
-    linear-gradient(180deg, rgb(27 17 32 / 0%) 0, rgb(27 17 32 / 35%) calc(var(--dr-band) * 0.55), var(--dr-plate) calc(var(--dr-band) + 4px)),
+    linear-gradient(
+      180deg,
+      rgb(27 17 32 / 0%) 0,
+      rgb(27 17 32 / 35%) calc(var(--dr-band) * 0.55),
+      var(--dr-plate) calc(var(--dr-band) + 4px)
+    ),
     var(--dr-art) var(--dr-art-pos) / 100% auto no-repeat,
     var(--dr-plate);
 }
@@ -1450,9 +1520,21 @@ html[data-family="dream"]
   .dream-roster
   article[aria-labelledby="dream-roster-bell"] {
   background:
-    linear-gradient(180deg, rgb(27 17 32 / 0%) 0, rgb(27 17 32 / 30%) calc(var(--dr-band) * 0.6), var(--dr-plate) calc(var(--dr-band) + 4px)),
-    linear-gradient(90deg, var(--dr-plate) 0, rgb(27 17 32 / 0%) 30%, rgb(27 17 32 / 0%) 70%, var(--dr-plate) 100%),
-    url("/civilian-bell-20260826-delivery-360.webp") 50% 0 / auto calc(var(--dr-band) * 1.9) no-repeat,
+    linear-gradient(
+      180deg,
+      rgb(27 17 32 / 0%) 0,
+      rgb(27 17 32 / 30%) calc(var(--dr-band) * 0.6),
+      var(--dr-plate) calc(var(--dr-band) + 4px)
+    ),
+    linear-gradient(
+      90deg,
+      var(--dr-plate) 0,
+      rgb(27 17 32 / 0%) 30%,
+      rgb(27 17 32 / 0%) 70%,
+      var(--dr-plate) 100%
+    ),
+    url("/civilian-bell-20260826-delivery-360.webp") 50% 0 / auto calc(var(--dr-band) * 1.9)
+      no-repeat,
     var(--dr-plate);
 }
 
@@ -1527,8 +1609,7 @@ html[data-family="dream"] main.dream-page.dream-page .dream-faction {
 
 html[data-family="dream"] main.dream-page.dream-page .dream-faction.is-dolminence {
   background:
-    radial-gradient(60% 40% at 0 0, rgb(204 73 59 / 10%), transparent 70%),
-    var(--dr-plate-fill);
+    radial-gradient(60% 42% at 0 0, rgb(204 73 59 / 13%), transparent 70%), var(--dr-plate-fill);
 }
 
 html[data-family="dream"] main.dream-page.dream-page .dream-faction h3 {
@@ -1595,18 +1676,18 @@ html[data-family="dream"] main.dream-page.dream-page .dream-agent-copy > .dream-
 
 html[data-family="dream"] main.dream-page.dream-page .dream-agent-roster > li.is-filed {
   border-color: var(--dr-rule);
-  background:
-    linear-gradient(180deg, rgb(110 44 53 / 28%), transparent 60%),
-    var(--dr-plate-fill);
+  background: linear-gradient(180deg, rgb(110 44 53 / 34%), transparent 62%), var(--dr-plate-fill);
 }
 
 html[data-family="dream"] main.dream-page.dream-page .dream-agent-code {
   padding: 6px 0 8px;
   border: 1px solid var(--dr-shu);
-  outline: 1px solid rgb(204 73 59 / 34%);
+  outline: 1px solid rgb(204 73 59 / 42%);
   outline-offset: 2px;
   color: var(--dr-text);
-  background: rgb(74 29 39 / 60%);
+  background:
+    radial-gradient(75% 65% at 50% 25%, rgb(224 102 79 / 22%), transparent 75%), rgb(74 29 39 / 75%);
+  box-shadow: inset 0 1px 0 rgb(243 224 176 / 16%);
 }
 
 html[data-family="dream"] main.dream-page.dream-page .dream-agent-code small {
@@ -1638,7 +1719,10 @@ html[data-family="dream"] main.dream-page.dream-page .dream-story-case {
 }
 
 html[data-family="dream"] main.dream-page.dream-page .dream-story-case[open] {
-  border-color: var(--dr-rule);
+  border-color: var(--dr-gold);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 45%),
+    0 22px 48px -18px rgb(0 0 0 / 82%);
 }
 
 /* The case number stands in a vermilion seal under 其ノ一 and CASE. */
@@ -1656,10 +1740,12 @@ html[data-family="dream"] main.dream-page.dream-page .dream-story-case-number b 
   min-width: 1.7em;
   min-height: 1.7em;
   border: 1px solid var(--dr-shu);
-  outline: 1px solid rgb(204 73 59 / 34%);
+  outline: 1px solid rgb(204 73 59 / 44%);
   outline-offset: 2px;
   color: var(--dr-text);
-  background: rgb(74 29 39 / 70%);
+  background:
+    radial-gradient(70% 60% at 50% 25%, rgb(224 102 79 / 24%), transparent 75%), rgb(74 29 39 / 82%);
+  box-shadow: inset 0 1px 0 rgb(243 224 176 / 18%);
   font-family: var(--dr-num);
 }
 
@@ -1679,7 +1765,9 @@ html[data-family="dream"] main.dream-page.dream-page .dream-case-note-head > spa
   margin-left: 4px;
   border: 1px solid var(--dr-shu);
   color: var(--dr-text);
-  background: rgb(74 29 39 / 70%);
+  background:
+    radial-gradient(70% 60% at 50% 25%, rgb(224 102 79 / 24%), transparent 75%), rgb(74 29 39 / 82%);
+  box-shadow: inset 0 1px 0 rgb(243 224 176 / 16%);
   font-family: var(--dr-num);
 }
 
@@ -1709,11 +1797,12 @@ html[data-family="dream"] main.dream-page.dream-page > #glossary > .dream-glossa
 html[data-family="dream"] main.dream-page.dream-page > #glossary > .dream-glossary-index {
   padding: clamp(14px, 2.2vw, 32px);
   border: 1px solid var(--dr-rule);
-  outline: 1px solid var(--dr-rule-3);
+  outline: 1px solid var(--dr-rule-2);
   outline-offset: 4px;
+  box-shadow: var(--dr-bevel);
   background:
     var(--dr-ticks),
-    linear-gradient(174deg, rgb(243 224 176 / 6%), transparent 20%),
+    linear-gradient(174deg, rgb(243 224 176 / 8%) 0, rgb(110 44 53 / 5%) 24%, transparent 48%),
     #120c11;
   background-repeat: no-repeat;
 }
@@ -1788,7 +1877,9 @@ html[data-family="dream"] main.dream-page.dream-page #glossary .dream-annex-quot
      characters), so the rail is a board they hang on: a ruled ground
      between a gilt top rule and a floor line, the same wall as the poster
      act's, standing still while the plates slide over it. */
-  html[data-family="dream"] main.dream-page.dream-page :is(.dream-agent-roster, .dream-case-notes, .dream-atlas-grid) {
+  html[data-family="dream"]
+    main.dream-page.dream-page
+    :is(.dream-agent-roster, .dream-case-notes, .dream-atlas-grid) {
     padding-block: 14px 18px;
     background:
       linear-gradient(var(--dr-rule) 0 0) 0 0 / 100% 1px no-repeat,
@@ -1882,7 +1973,10 @@ html[data-family="dream"] main.dream-page.dream-page #glossary .dream-annex-quot
     text-align: start;
   }
 
-  html[data-family="dream"] main.dream-page.dream-page .dream-relations-knot + .dream-relations-name {
+  html[data-family="dream"]
+    main.dream-page.dream-page
+    .dream-relations-knot
+    + .dream-relations-name {
     text-align: end;
   }
 
@@ -1925,6 +2019,7 @@ html[data-family="dream"] main.dream-page.dream-page #glossary .dream-annex-quot
   html[data-family="dream"] main.dream-page.dream-page .dream-quote-band > li {
     padding-inline: 10px;
     border-color: var(--dr-rule);
+    box-shadow: var(--dr-bevel);
   }
 }
 
@@ -1938,11 +2033,11 @@ html[data-family="dream"] main.dream-page.dream-page > .dream-footer {
   isolation: isolate;
   gap: clamp(14px, 1.8vw, 20px);
   padding: clamp(56px, 7vw, 96px) var(--dr-gut) clamp(56px, 7vw, 96px);
-  border-top: 1px solid var(--dr-rule-2);
+  border-top: 1px solid var(--dr-rule);
   background:
-    radial-gradient(46% 60% at 50% 0, rgb(230 194 142 / 12%), transparent 72%),
-    radial-gradient(38% 46% at 50% 100%, rgb(204 73 59 / 10%), transparent 74%),
-    repeating-linear-gradient(90deg, rgb(200 164 92 / 2.5%) 0 1px, transparent 1px 64px),
+    radial-gradient(50% 66% at 50% 0, rgb(230 194 142 / 16%), transparent 72%),
+    radial-gradient(42% 52% at 50% 100%, rgb(204 73 59 / 14%), transparent 74%),
+    repeating-linear-gradient(90deg, rgb(200 164 92 / 2.8%) 0 1px, transparent 1px 64px),
     linear-gradient(180deg, var(--dr-ink) 0, var(--dr-lacquer) 52%, var(--dr-ink) 100%);
 }
 
@@ -1957,17 +2052,18 @@ html[data-family="dream"] main.dream-page.dream-page > .dream-footer::before {
   translate: 0 0;
   rotate: 0deg;
   border: 1px solid var(--dr-rule);
-  outline: 1px solid var(--dr-rule-3);
+  outline: 1px solid var(--dr-rule-2);
   outline-offset: 5px;
+  box-shadow: inset 0 0 42px rgb(200 164 92 / 8%);
   background:
-    linear-gradient(var(--dr-gold) 0 0) 0 0 / 40px 2px,
-    linear-gradient(var(--dr-gold) 0 0) 0 0 / 2px 40px,
-    linear-gradient(var(--dr-gold) 0 0) 100% 0 / 40px 2px,
-    linear-gradient(var(--dr-gold) 0 0) 100% 0 / 2px 40px,
-    linear-gradient(var(--dr-gold) 0 0) 0 100% / 40px 2px,
-    linear-gradient(var(--dr-gold) 0 0) 0 100% / 2px 40px,
-    linear-gradient(var(--dr-gold) 0 0) 100% 100% / 40px 2px,
-    linear-gradient(var(--dr-gold) 0 0) 100% 100% / 2px 40px;
+    linear-gradient(var(--dr-gold-hi) 0 0) 0 0 / 44px 2px,
+    linear-gradient(var(--dr-gold-hi) 0 0) 0 0 / 2px 44px,
+    linear-gradient(var(--dr-gold-hi) 0 0) 100% 0 / 44px 2px,
+    linear-gradient(var(--dr-gold-hi) 0 0) 100% 0 / 2px 44px,
+    linear-gradient(var(--dr-gold-hi) 0 0) 0 100% / 44px 2px,
+    linear-gradient(var(--dr-gold-hi) 0 0) 0 100% / 2px 44px,
+    linear-gradient(var(--dr-gold-hi) 0 0) 100% 100% / 44px 2px,
+    linear-gradient(var(--dr-gold-hi) 0 0) 100% 100% / 2px 44px;
   background-repeat: no-repeat;
 }
 
@@ -2009,16 +2105,16 @@ html[data-family="dream"] main.dream-page.dream-page .dream-footer-end {
   height: 96px;
   margin-top: 8px;
   border-radius: 0;
-  border: 1px solid rgb(243 224 176 / 65%);
+  border: 1px solid rgb(243 224 176 / 72%);
   outline: 1px solid var(--dr-shu);
   outline-offset: 4px;
   color: var(--dr-text);
   background:
-    radial-gradient(60% 60% at 50% 35%, rgb(224 102 79 / 28%), transparent 75%),
-    var(--dr-shu-deep);
+    radial-gradient(64% 64% at 50% 30%, rgb(224 102 79 / 34%), transparent 75%),
+    linear-gradient(180deg, #b83a30 0%, var(--dr-shu-deep) 62%, #7d231c 100%);
   box-shadow:
-    inset 0 0 0 2px rgb(243 224 176 / 22%),
-    0 18px 40px rgb(0 0 0 / 60%);
+    inset 0 0 0 2px rgb(243 224 176 / 26%),
+    0 20px 44px rgb(0 0 0 / 68%);
   font-size: 46px;
 }
 
@@ -2116,7 +2212,10 @@ html[data-family="dream"] main.dream-page.dream-page > .dream-footer > a {
       "quote";
   }
 
-  html[data-family="dream"] main.dream-page.dream-page .dream-relations-knot + .dream-relations-name {
+  html[data-family="dream"]
+    main.dream-page.dream-page
+    .dream-relations-knot
+    + .dream-relations-name {
     text-align: start;
   }
 }
@@ -2192,20 +2291,22 @@ html[data-family="dream"]
       "name . art"
       "name quote art";
     padding-top: clamp(16px, 1.8vw, 22px);
-    background:
-      linear-gradient(180deg, rgb(110 44 53 / 12%), transparent 46%),
-      var(--dr-plate);
+    background: linear-gradient(180deg, rgb(110 44 53 / 12%), transparent 46%), var(--dr-plate);
   }
 
   html[data-family="dream"]
     main.dream-page.dream-page
     .dream-roster
-    article:is([aria-labelledby="dream-roster-bell"], [aria-labelledby="dream-roster-machiavel"])::before {
+    article:is(
+      [aria-labelledby="dream-roster-bell"],
+      [aria-labelledby="dream-roster-machiavel"]
+    )::before {
     content: "";
     grid-area: art;
     align-self: stretch;
     min-height: 220px;
-    margin: calc(-1 * clamp(16px, 1.8vw, 22px)) calc(-1 * clamp(16px, 1.8vw, 22px)) calc(-1 * clamp(14px, 1.6vw, 18px)) 0;
+    margin: calc(-1 * clamp(16px, 1.8vw, 22px)) calc(-1 * clamp(16px, 1.8vw, 22px))
+      calc(-1 * clamp(14px, 1.6vw, 18px)) 0;
     border-left: 1px solid var(--dr-rule);
     background: var(--dr-art-wide);
   }
@@ -2832,11 +2933,30 @@ html[data-family="dream"] main.dream-page.dream-page #quotes {
    ---------------------------------------------------------------- */
 @media (forced-colors: active) {
   html[data-family="dream"] main.dream-page.dream-page,
-  html[data-family="dream"] main.dream-page.dream-page > :is(.dream-hero, .dream-prologue, .dream-contents, .dream-section, .dream-annex, .dream-footer),
+  html[data-family="dream"]
+    main.dream-page.dream-page
+    > :is(
+      .dream-hero,
+      .dream-prologue,
+      .dream-contents,
+      .dream-section,
+      .dream-annex,
+      .dream-footer
+    ),
   html[data-family="dream"] main.dream-page.dream-page > .dream-section > .dream-section-heading,
   html[data-family="dream"]
     main.dream-page.dream-page
-    > :is(#cast-roster, #factions, #case-notes, #chronicle, #atlas, #relations, #arsenal, #glossary, #quotes),
+    > :is(
+      #cast-roster,
+      #factions,
+      #case-notes,
+      #chronicle,
+      #atlas,
+      #relations,
+      #arsenal,
+      #glossary,
+      #quotes
+    ),
   html[data-family="dream"]
     main.dream-page.dream-page
     :is(
@@ -2862,21 +2982,33 @@ html[data-family="dream"] main.dream-page.dream-page #quotes {
   html[data-family="dream"] main.dream-page.dream-page .dream-annex-heading::before,
   html[data-family="dream"]
     main.dream-page.dream-page
-    :is(.dream-agent-code, .dream-story-case-number b, .dream-case-note-head > span b, .dream-footer-end) {
+    :is(
+      .dream-agent-code,
+      .dream-story-case-number b,
+      .dream-case-note-head > span b,
+      .dream-footer-end
+    ) {
     border-color: CanvasText;
     outline-color: CanvasText;
     color: CanvasText;
     background: Canvas;
   }
 
-  html[data-family="dream"] main.dream-page.dream-page > .dream-section > .dream-section-heading > .dream-act-mark {
+  html[data-family="dream"]
+    main.dream-page.dream-page
+    > .dream-section
+    > .dream-section-heading
+    > .dream-act-mark {
     border-color: CanvasText;
     outline-color: CanvasText;
     color: CanvasText;
     background: Canvas;
   }
 
-  html[data-family="dream"] main.dream-page.dream-page > .dream-section > .dream-section-heading::before,
+  html[data-family="dream"]
+    main.dream-page.dream-page
+    > .dream-section
+    > .dream-section-heading::before,
   html[data-family="dream"] main.dream-page.dream-page > .dream-footer::before {
     border-color: CanvasText;
     background: none;
@@ -2885,7 +3017,6 @@ html[data-family="dream"] main.dream-page.dream-page #quotes {
   html[data-family="dream"] main.dream-page.dream-page .dream-poster-stage > figure > img {
     border-color: CanvasText;
   }
-
 
   html[data-family="dream"] main.dream-page.dream-page > .dream-annex#factions::before,
   html[data-family="dream"] main.dream-page.dream-page > .dream-annex#atlas::before {

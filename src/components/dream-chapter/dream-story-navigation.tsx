@@ -109,6 +109,54 @@ export function DreamReaderSupport() {
   );
 }
 
+const CHAPTER_CAST_LINKS = [
+  { match: ["シエル"], label: "シエル", kind: "FILE 01", href: "#dream-character-ciel" },
+  { match: ["慶弥"], label: "東風谷 慶弥", kind: "FILE 02", href: "#dream-character-keiya" },
+  { match: ["怪作"], label: "怪作", kind: "FILE 03", href: "#dream-character-kaisaku" },
+  {
+    match: ["ロードナイト", "ワン"],
+    label: "ロードナイト",
+    kind: "AGENT 01",
+    href: "#dream-dolminence-lord-knight",
+  },
+  {
+    match: ["ロードケイオス", "ケイオス"],
+    label: "ロードケイオス",
+    kind: "AGENT 02",
+    href: "#dream-dolminence-lord-chaos",
+  },
+  {
+    match: ["シンソウ", "ドレッド"],
+    label: "ドレッド / シンソウ",
+    kind: "AGENT 03",
+    href: "#dream-dolminence-dread",
+  },
+  {
+    match: ["サヨ", "ルパン"],
+    label: "ルパン / サヨ",
+    kind: "AGENT 04",
+    href: "#dream-dolminence-lupin",
+  },
+  { match: ["霊夢"], label: "博麗 霊夢", kind: "ROSTER", href: "#dream-roster-reimu" },
+  { match: ["早苗"], label: "東風谷 早苗", kind: "ROSTER", href: "#dream-roster-sanae" },
+  { match: ["咲夜"], label: "十六夜 咲夜", kind: "ROSTER", href: "#dream-roster-sakuya" },
+  { match: ["鈴仙"], label: "鈴仙・U・イナバ", kind: "ROSTER", href: "#dream-roster-reisen" },
+  { match: ["永琳"], label: "八意 永琳", kind: "ROSTER", href: "#dream-roster-eirin" },
+  { match: ["輝夜"], label: "蓬莱山 輝夜", kind: "ROSTER", href: "#dream-roster-kaguya" },
+  { match: ["狗瓦"], label: "狗瓦", kind: "ROSTER", href: "#dream-roster-kugawara" },
+  { match: ["花火屋"], label: "花火屋", kind: "ROSTER", href: "#dream-roster-hanabiya" },
+  { match: ["幽々子"], label: "西行寺 幽々子", kind: "ROSTER", href: "#dream-roster-yuyuko" },
+  { match: ["妖夢"], label: "魂魄 妖夢", kind: "ROSTER", href: "#dream-roster-youmu" },
+  { match: ["さとり"], label: "古明地 さとり", kind: "ROSTER", href: "#dream-roster-satori" },
+  { match: ["こいし"], label: "古明地 こいし", kind: "ROSTER", href: "#dream-roster-koishi" },
+  {
+    match: ["ヴァルトマン"],
+    label: "ヴァルトマン",
+    kind: "ROSTER",
+    href: "#dream-roster-waldmann",
+  },
+] as const;
+
 /** The six chapters remain independent native folds; the map names one URL location. */
 export function DreamStoryIndex() {
   const navRef = useRef<HTMLElement>(null);
@@ -120,6 +168,21 @@ export function DreamStoryIndex() {
     () => mountDreamChapterNavigation(navRef.current?.closest(".dream-page"), setLocation),
     [],
   );
+  const toggleAllCases = (nextOpen: boolean) => {
+    const page = navRef.current?.closest(".dream-page");
+    if (!page) return;
+    const folds = page.querySelectorAll<HTMLDetailsElement>(".dream-story-case");
+    folds.forEach((fold) => {
+      fold.open = nextOpen;
+    });
+    setLocation((current) => ({
+      ...current,
+      open: nextOpen ? DREAM_CASES.map((episode) => episode.no) : [],
+    }));
+  };
+  const allOpen = location.open.length === DREAM_CASES.length;
+  const anyOpen = location.open.length > 0;
+
   return (
     <>
       <DreamReaderSupport />
@@ -133,26 +196,41 @@ export function DreamStoryIndex() {
         <div className="dream-reader-index-head">
           <p>六章を辿る</p>
           <span>CASE 0–5</span>
+          <div className="dream-reader-index-actions" role="group" aria-label="全章の開閉">
+            <button type="button" onClick={() => toggleAllCases(true)} aria-pressed={allOpen}>
+              全章を開く
+            </button>
+            <button type="button" onClick={() => toggleAllCases(false)} disabled={!anyOpen}>
+              全章を閉じる
+            </button>
+          </div>
         </div>
         <ol>
-          {DREAM_CASES.map((episode) => (
-            <li key={episode.no}>
-              <a
-                href={`#dream-case-${episode.no}`}
-                aria-current={location.current === episode.no ? "location" : undefined}
-              >
-                <span className="dream-reader-index-number">{episode.no}</span>
-                <span className="dream-reader-index-title">
-                  <strong>{episode.title}</strong>
-                  <span lang="en">{episode.reading}</span>
-                </span>
-                <span className="dream-reader-index-meta">
-                  <small>{episode.paragraphs.length}段落</small>
-                  <small>{location.open.includes(episode.no) ? "開いている" : "あらすじ"}</small>
-                </span>
-              </a>
-            </li>
-          ))}
+          {DREAM_CASES.map((episode) => {
+            const eventCount = DREAM_CHRONICLE.filter((event) => event.case === episode.no).length;
+            const charCount = episode.paragraphs.reduce((sum, p) => sum + p.length, 0);
+            return (
+              <li key={episode.no}>
+                <a
+                  href={`#dream-case-${episode.no}`}
+                  aria-current={location.current === episode.no ? "location" : undefined}
+                >
+                  <span className="dream-reader-index-number">{episode.no}</span>
+                  <span className="dream-reader-index-title">
+                    <strong>{episode.title}</strong>
+                    <span lang="en">{episode.reading}</span>
+                  </span>
+                  <span className="dream-reader-index-meta">
+                    <small>{episode.paragraphs.length}段落</small>
+                    <small>
+                      {eventCount}件 · {charCount.toLocaleString("ja-JP")}字
+                    </small>
+                    <small>{location.open.includes(episode.no) ? "開いている" : "あらすじ"}</small>
+                  </span>
+                </a>
+              </li>
+            );
+          })}
         </ol>
       </nav>
     </>
@@ -164,18 +242,37 @@ export function DreamChapterCompanion({ no }: { no: string }) {
   const events = DREAM_CHRONICLE.filter((event) => event.case === no);
   if (!events.length) return null;
   const places = [...new Set(events.map((event) => event.place))];
+  const castMembers = events.flatMap((event) => event.cast);
+  const appearingCast = CHAPTER_CAST_LINKS.filter((entry) =>
+    entry.match.some((keyword) => castMembers.some((member) => member.includes(keyword))),
+  );
 
   return (
     <details className="dream-chapter-companion">
       <summary>
-        <span>この章の出来事</span>
-        <small>{events.length}件の記録</small>
+        <span>この章の出来事・登場人物</span>
+        <small>
+          {events.length}件の記録 · {appearingCast.length}名
+        </small>
       </summary>
       <div className="dream-chapter-companion-body">
         <p className="dream-chapter-companion-places">
           <span>舞台</span>
           {places.join("・")}
         </p>
+        {appearingCast.length ? (
+          <div className="dream-chapter-companion-cast" aria-label={`CASE ${no}の主な登場人物`}>
+            <span>主な登場人物</span>
+            <div>
+              {appearingCast.map((person) => (
+                <a key={person.href} href={person.href}>
+                  <small lang="en">{person.kind}</small>
+                  <b>{person.label}</b>
+                </a>
+              ))}
+            </div>
+          </div>
+        ) : null}
         <ol>
           {events.map((event) => (
             <li key={event.no}>

@@ -22,6 +22,7 @@ export function DreamScreeningRoom({ initialIndex, trigger, onClose }: DreamScre
   const [failedIndex, setFailedIndex] = useState<number | null>(null);
   const [imageReady, setImageReady] = useState(false);
   const [zoomed, setZoomed] = useState(false);
+  const [ambience, setAmbience] = useState<"theatre" | "darkroom">("theatre");
   const dialogRef = useRef<HTMLDialogElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const imageViewportRef = useRef<HTMLDivElement>(null);
@@ -123,7 +124,14 @@ export function DreamScreeningRoom({ initialIndex, trigger, onClose }: DreamScre
   }, [index]);
 
   const handleKeys = (event: KeyboardEvent<HTMLDialogElement>) => {
-    if (zoomed || event.altKey || event.ctrlKey || event.metaKey) return;
+    if (event.altKey || event.ctrlKey || event.metaKey) return;
+    if ((event.key === "z" || event.key === "Z") && imageReady) {
+      event.preventDefault();
+      setZoomed((value) => !value);
+      imageViewportRef.current?.scrollTo({ top: 0, left: 0, behavior: "instant" });
+      return;
+    }
+    if (zoomed) return;
     if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
       event.preventDefault();
       select(currentIndexRef.current + (event.key === "ArrowRight" ? 1 : -1));
@@ -135,6 +143,7 @@ export function DreamScreeningRoom({ initialIndex, trigger, onClose }: DreamScre
     <dialog
       ref={dialogRef}
       className="dream-screening-dialog"
+      data-ambience={ambience}
       aria-label="ドリームチャプター 映写室"
       onCancel={(event) => {
         event.preventDefault();
@@ -151,6 +160,9 @@ export function DreamScreeningRoom({ initialIndex, trigger, onClose }: DreamScre
           <span className="dream-screening-count" aria-live="polite">
             {String(index + 1).padStart(2, "0")} <span aria-hidden="true">/</span>{" "}
             {String(DREAM_POSTERS.length).padStart(2, "0")}
+            <i className="dream-screening-reel-bar" aria-hidden="true">
+              <b style={{ width: `${((index + 1) / DREAM_POSTERS.length) * 100}%` }} />
+            </i>
           </span>
           <button
             ref={closeRef}
@@ -206,20 +218,35 @@ export function DreamScreeningRoom({ initialIndex, trigger, onClose }: DreamScre
 
         <div className="dream-screening-controls">
           <p className="dream-screening-caption" aria-live="polite">
-            {poster.alt}
+            <small className="dream-screening-spec" lang="en">
+              REEL {String(index + 1).padStart(2, "0")} · {poster.width}×{poster.height}
+            </small>
+            <span>{poster.alt}</span>
           </p>
-          <button
-            type="button"
-            className="dream-screening-zoom"
-            aria-pressed={zoomed}
-            disabled={!imageReady}
-            onClick={() => {
-              setZoomed((value) => !value);
-              imageViewportRef.current?.scrollTo({ top: 0, left: 0, behavior: "instant" });
-            }}
-          >
-            {zoomed ? "全体表示" : "100% / 拡大"}
-          </button>
+          <div className="dream-screening-actions">
+            <button
+              type="button"
+              className="dream-screening-ambience"
+              aria-pressed={ambience === "darkroom"}
+              onClick={() =>
+                setAmbience((current) => (current === "theatre" ? "darkroom" : "theatre"))
+              }
+            >
+              {ambience === "darkroom" ? "照明：暗室" : "照明：劇場灯"}
+            </button>
+            <button
+              type="button"
+              className="dream-screening-zoom"
+              aria-pressed={zoomed}
+              disabled={!imageReady}
+              onClick={() => {
+                setZoomed((value) => !value);
+                imageViewportRef.current?.scrollTo({ top: 0, left: 0, behavior: "instant" });
+              }}
+            >
+              {zoomed ? "全体表示" : "100% / 拡大"}
+            </button>
+          </div>
         </div>
         <div className="dream-screening-message">
           <p className="dream-screening-status" role="status" aria-live="polite">

@@ -1,9 +1,9 @@
 .dream-reading-room {
-  --room-bg: #15131e;
-  --room-paper: #211b27;
-  --room-ink: #eee4d0;
-  --room-muted: #b7a99a;
-  --room-rule: #847053;
+  --room-bg: #14111d;
+  --room-paper: #221b29;
+  --room-ink: #f2e8d5;
+  --room-muted: #bfb09f;
+  --room-rule: #967e5b;
   position: fixed;
   inset: 0;
   width: 100%;
@@ -20,14 +20,14 @@
   font-family: "Shippori Mincho", "Yu Mincho", serif;
 }
 .dream-reading-room::backdrop {
-  background: #100e17;
+  background: rgb(10 7 15 / 92%);
 }
 .dream-reading-room[data-paper="true"] {
-  --room-bg: #ded2ba;
-  --room-paper: #f3e9d3;
-  --room-ink: #312a2a;
-  --room-muted: #64544b;
-  --room-rule: #a48a60;
+  --room-bg: #ddd0b7;
+  --room-paper: #f6ede0;
+  --room-ink: #2c2425;
+  --room-muted: #615046;
+  --room-rule: #9e8256;
   color-scheme: light;
 }
 .dream-reading-room > .zeus-button {
@@ -62,9 +62,16 @@
 .dream-reading-room :is(button, select) {
   border: 1px solid var(--room-rule);
   padding: 8px 14px;
-  background: var(--room-bg);
+  background:
+    linear-gradient(var(--room-rule) 0 0) 0 0 / 12px 2px no-repeat,
+    var(--room-bg);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 8%);
   border-radius: 2px;
   cursor: pointer;
+  transition:
+    border-color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 180ms ease;
 }
 .dream-reading-room button:disabled {
   opacity: 0.4;
@@ -76,6 +83,9 @@
 }
 .dream-reading-room button:not(:disabled):hover {
   background: var(--room-paper);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 16%),
+    0 4px 12px rgb(0 0 0 / 18%);
 }
 .dream-reading-topbar {
   display: flex;
@@ -83,8 +93,10 @@
   justify-content: space-between;
   gap: 12px;
   padding: 12px clamp(16px, 4vw, 64px);
-  border-bottom: 1px solid var(--room-rule);
-  background: linear-gradient(180deg, rgb(200 164 92 / 6%), transparent);
+  border-bottom: 3px double var(--room-rule);
+  background:
+    radial-gradient(56% 90% at 50% 0%, rgb(200 164 92 / 14%), transparent 74%),
+    linear-gradient(180deg, rgb(200 164 92 / 8%), transparent);
 }
 .dream-reading-topbar > div {
   display: flex;
@@ -111,6 +123,7 @@
   padding: 28px 22px;
   overflow: auto;
   border-right: 1px solid var(--room-rule);
+  background: linear-gradient(180deg, rgb(200 164 92 / 4%), transparent 65%);
 }
 .dream-reading-chapter-select {
   display: none;
@@ -142,8 +155,33 @@
 }
 .dream-reading-chapters [aria-current] {
   border-left: 4px solid #c89b54;
+  background: linear-gradient(90deg, rgb(200 155 84 / 16%), transparent 70%), var(--room-paper);
+  box-shadow:
+    inset 0 1px 0 rgb(243 224 176 / 18%),
+    0 6px 18px rgb(0 0 0 / 16%);
+}
+.dream-reading-paragraph-jump {
+  display: grid;
+  gap: 8px;
+  padding: 14px 0;
+  border-top: 1px solid var(--room-rule);
+}
+.dream-reading-paragraph-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.dream-reading-paragraph-pills button {
+  min-width: 36px;
+  min-height: 36px;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.dream-reading-paragraph-pills button[aria-current="location"] {
+  border-color: #c89b54;
   background: var(--room-paper);
-  box-shadow: inset 0 1px 0 rgb(243 224 176 / 12%);
+  box-shadow: inset 0 -3px #c89b54;
 }
 .dream-reading-options {
   border-top: 1px solid var(--room-rule);
@@ -170,25 +208,33 @@
   overscroll-behavior: contain;
   min-height: 0;
   padding: clamp(20px, 4vw, 64px);
-  background: radial-gradient(ellipse at top, #b8873c28, transparent 72%);
+  background:
+    radial-gradient(64% 48% at 50% 0%, rgb(200 155 84 / 18%), transparent 74%),
+    radial-gradient(48% 42% at 50% 100%, rgb(164 73 59 / 8%), transparent 70%);
 }
 .dream-reading-paper {
   max-width: 800px;
   margin: 0 auto;
   background:
-    linear-gradient(var(--room-rule) 0 0) 0 0 / 28px 2px no-repeat,
-    linear-gradient(var(--room-rule) 0 0) 0 0 / 2px 28px no-repeat,
-    linear-gradient(var(--room-rule) 0 0) 100% 100% / 28px 2px no-repeat,
-    linear-gradient(var(--room-rule) 0 0) 100% 100% / 2px 28px no-repeat,
+    linear-gradient(var(--room-rule) 0 0) 0 0 / 32px 2px no-repeat,
+    linear-gradient(var(--room-rule) 0 0) 0 0 / 2px 32px no-repeat,
+    linear-gradient(var(--room-rule) 0 0) 100% 0 / 32px 2px no-repeat,
+    linear-gradient(var(--room-rule) 0 0) 100% 0 / 2px 32px no-repeat,
+    linear-gradient(var(--room-rule) 0 0) 0 100% / 32px 2px no-repeat,
+    linear-gradient(var(--room-rule) 0 0) 0 100% / 2px 32px no-repeat,
+    linear-gradient(var(--room-rule) 0 0) 100% 100% / 32px 2px no-repeat,
+    linear-gradient(var(--room-rule) 0 0) 100% 100% / 2px 32px no-repeat,
+    radial-gradient(70% 45% at 50% 0%, rgb(200 164 92 / 9%), transparent 72%),
     var(--room-paper);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 8%),
-    0 20px 56px #0004;
+    inset 0 1px 0 rgb(255 255 255 / 12%),
+    inset 0 0 0 6px rgb(200 155 84 / 6%),
+    0 28px 68px rgb(0 0 0 / 38%);
   border: 1px solid var(--room-rule);
   padding: clamp(24px, 5vw, 72px);
 }
 .dream-reading-paper > header {
-  border-bottom: 1px solid var(--room-rule);
+  border-bottom: 3px double var(--room-rule);
   padding-bottom: 32px;
   margin-bottom: 36px;
 }
@@ -196,6 +242,15 @@
   font: 600 11px/1.6 sans-serif;
   letter-spacing: 0.25em;
   color: var(--room-muted);
+}
+.dream-reading-char-count {
+  display: inline-block;
+  margin-top: 4px;
+  padding: 2px 8px;
+  border: 1px solid var(--room-rule);
+  color: var(--room-muted);
+  font-size: 11px;
+  letter-spacing: 0.08em;
 }
 .dream-reading-paper h3 {
   font-size: clamp(38px, 5vw, 64px);
@@ -230,7 +285,7 @@
 }
 .dream-reading-paper > footer {
   text-align: center;
-  border-top: 1px solid var(--room-rule);
+  border-top: 3px double var(--room-rule);
   padding-top: 30px;
   color: var(--room-muted);
   font-size: 13px;
@@ -252,7 +307,7 @@
 .dream-reading-room .dream-reading-bottom {
   display: grid;
   padding: 10px clamp(16px, 4vw, 64px);
-  background: var(--room-bg);
+  background: linear-gradient(180deg, rgb(200 164 92 / 6%), transparent), var(--room-bg);
 }
 .dream-reading-bottom > div {
   display: grid;
@@ -262,17 +317,17 @@
 }
 .dream-reading-bottom progress {
   width: 100%;
-  height: 3px;
-  accent-color: #ba8e4e;
+  height: 4px;
+  accent-color: #c89b54;
 }
 .dream-reading-bottom progress::-webkit-progress-bar {
   background: var(--room-rule);
 }
 .dream-reading-bottom progress::-webkit-progress-value {
-  background: #ba8e4e;
+  background: linear-gradient(90deg, #b8873c, #e6c28e);
 }
 .dream-reading-bottom progress::-moz-progress-bar {
-  background: #ba8e4e;
+  background: linear-gradient(90deg, #b8873c, #e6c28e);
 }
 .dream-reading-bottom > p {
   grid-column: 1 / -1;
@@ -303,6 +358,7 @@
   }
   .dream-reading-kicker,
   .dream-reading-chapters,
+  .dream-reading-paragraph-jump,
   .dream-reading-disclaimer {
     display: none;
   }
@@ -363,6 +419,7 @@
     --room-rule: CanvasText;
   }
   .dream-reading-chapters [aria-current],
+  .dream-reading-paragraph-pills button[aria-current="location"],
   .dream-reading-options button[aria-pressed="true"] {
     outline: 2px solid Highlight;
   }

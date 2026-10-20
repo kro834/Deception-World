@@ -1,5 +1,21 @@
-import { DREAM_CASES, DREAM_POSTERS } from "./dream-chapter-data";
-import { DREAM_CHRONICLE } from "./dream-chapter-extra-data";
+import { useState } from "react";
+import {
+  DREAM_CASE_NOTES,
+  DREAM_CASES,
+  DREAM_CAST_ROSTER,
+  DREAM_CHARACTERS,
+  DREAM_DOLMINENCE,
+  DREAM_GLOSSARY,
+  DREAM_POSTERS,
+  DREAM_QUOTES,
+} from "./dream-chapter-data";
+import {
+  DREAM_ARSENAL,
+  DREAM_ATLAS,
+  DREAM_CHRONICLE,
+  DREAM_RELATIONS,
+  DREAM_VOICES,
+} from "./dream-chapter-extra-data";
 
 const routes = [
   {
@@ -28,8 +44,115 @@ const routes = [
   },
 ] as const;
 
-/** Three existing ways into the programme, without adding story material. */
+const totalArsenalItems = DREAM_ARSENAL.reduce((sum, group) => sum + group.entries.length, 0);
+const totalVoiceLines =
+  DREAM_QUOTES.length + DREAM_VOICES.reduce((sum, voice) => sum + voice.quotes.length, 0);
+
+const ledgerItems = [
+  {
+    code: "ACT II",
+    label: "主要人物資料",
+    value: String(DREAM_CHARACTERS.length).padStart(2, "0"),
+    unit: "FILES",
+    href: "#characters",
+  },
+  {
+    code: "ROSTER",
+    label: "登場人物一覧",
+    value: String(DREAM_CAST_ROSTER.length).padStart(2, "0"),
+    unit: "CAST",
+    href: "#cast-roster",
+  },
+  {
+    code: "ACT III",
+    label: "ドルミネンス機密",
+    value: String(DREAM_DOLMINENCE.length).padStart(2, "0"),
+    unit: "AGENTS",
+    href: "#dolminence",
+  },
+  {
+    code: "ATLAS",
+    label: "舞台と領域",
+    value: String(DREAM_ATLAS.length).padStart(2, "0"),
+    unit: "PLACES",
+    href: "#atlas",
+  },
+  {
+    code: "BONDS",
+    label: "因縁と繋がり",
+    value: String(DREAM_RELATIONS.length).padStart(2, "0"),
+    unit: "TIES",
+    href: "#relations",
+  },
+  {
+    code: "ARSENAL",
+    label: "武装・能力・術式",
+    value: String(totalArsenalItems).padStart(2, "0"),
+    unit: "ITEMS",
+    href: "#arsenal",
+  },
+  {
+    code: "LEXICON",
+    label: "用語集",
+    value: String(DREAM_GLOSSARY.length).padStart(2, "0"),
+    unit: "TERMS",
+    href: "#glossary",
+  },
+  {
+    code: "VOICES",
+    label: "収録台詞・声",
+    value: String(totalVoiceLines).padStart(2, "0"),
+    unit: "LINES",
+    href: "#quotes",
+  },
+] as const;
+
+const dossierQuickLinks = [
+  ...DREAM_CHARACTERS.map((item) => ({
+    id: `dream-character-${item.id}`,
+    badge: `CAST ${item.order}`,
+    name: item.name,
+    roman: item.roman,
+    accent: item.accent,
+  })),
+  ...DREAM_DOLMINENCE.map((record) => ({
+    id: `dream-dolminence-${record.id}`,
+    badge: `AGENT ${record.order}`,
+    name: record.name,
+    roman: record.roman,
+    accent: record.accent,
+  })),
+];
+
+function resolveSpeakerHref(by: string) {
+  if (by.includes("シエル")) return "#dream-character-ciel";
+  if (by.includes("慶弥")) return "#dream-character-keiya";
+  if (by.includes("怪作")) return "#dream-character-kaisaku";
+  return "#quotes";
+}
+
+/** Three existing ways into the programme, plus live archival telemetry, dossier quick-launch, and quote reel. */
 export function DreamProgrammeDesk() {
+  const [reelMode, setReelMode] = useState<"quotes" | "notes">("quotes");
+  const [quoteIndex, setQuoteIndex] = useState(0);
+  const [noteIndex, setNoteIndex] = useState(0);
+  const activeQuote = DREAM_QUOTES[quoteIndex] ?? DREAM_QUOTES[0];
+  const activeNote = DREAM_CASE_NOTES[noteIndex] ?? DREAM_CASE_NOTES[0];
+  const activeNoteCase = DREAM_CASES.find((episode) => episode.no === activeNote?.no);
+
+  const stepReel = (delta: number) => {
+    if (reelMode === "quotes") {
+      setQuoteIndex((current) => (current + delta + DREAM_QUOTES.length) % DREAM_QUOTES.length);
+    } else {
+      setNoteIndex(
+        (current) => (current + delta + DREAM_CASE_NOTES.length) % DREAM_CASE_NOTES.length,
+      );
+    }
+  };
+
+  const reelIndex = reelMode === "quotes" ? quoteIndex : noteIndex;
+  const reelTotal = reelMode === "quotes" ? DREAM_QUOTES.length : DREAM_CASE_NOTES.length;
+
   return (
     <section className="dream-programme-desk" aria-labelledby="dream-programme-title">
       <header className="dream-programme-heading">
@@ -55,6 +178,109 @@ export function DreamProgrammeDesk() {
           </a>
         ))}
       </nav>
+
+      <div className="dream-programme-dossiers" aria-label="主要人物・機密ファイル直通">
+        <div className="dream-programme-ledger-head">
+          <span lang="en">DOSSIER QUICK LAUNCH / 07 CLASSIFIED FILES</span>
+          <small>選択すると詳細資料モーダルを直接開きます</small>
+        </div>
+        <ul className="dream-programme-dossier-strip">
+          {dossierQuickLinks.map((entry) => (
+            <li key={entry.id}>
+              <a
+                href={`#${entry.id}`}
+                className="dream-programme-dossier-chip"
+                style={{ ["--dossier-chip-accent" as string]: entry.accent }}
+              >
+                <small lang="en">{entry.badge}</small>
+                <strong>{entry.name}</strong>
+                <span lang="en">{entry.roman}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div className="dream-programme-ledger" aria-label="収録アーカイブ総覧">
+        <div className="dream-programme-ledger-head">
+          <span lang="en">ARCHIVE TELEMETRY / DIRECT INDEX</span>
+          <small>各記録コーナーへ直接移動できます</small>
+        </div>
+        <ul className="dream-programme-ledger-grid">
+          {ledgerItems.map((item) => (
+            <li key={item.code}>
+              <a href={item.href} className="dream-programme-ledger-cell">
+                <span className="dream-programme-ledger-code" lang="en">
+                  {item.code}
+                </span>
+                <strong className="dream-programme-ledger-value">
+                  {item.value}
+                  <small lang="en">{item.unit}</small>
+                </strong>
+                <span className="dream-programme-ledger-label">{item.label}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <aside className="dream-programme-spotlight" aria-label="幕間の言葉">
+        <div className="dream-programme-spotlight-meta">
+          <span className="dream-programme-spotlight-kicker" lang="en">
+            {reelMode === "quotes" ? "STAGE VOICE REEL" : "CASE MOTTO REEL"} ·{" "}
+            {String(reelIndex + 1).padStart(2, "0")} / {String(reelTotal).padStart(2, "0")}
+          </span>
+          <div className="dream-programme-spotlight-modes" role="group" aria-label="表示切替">
+            <button
+              type="button"
+              aria-pressed={reelMode === "quotes"}
+              onClick={() => setReelMode("quotes")}
+            >
+              名台詞 ({DREAM_QUOTES.length})
+            </button>
+            <button
+              type="button"
+              aria-pressed={reelMode === "notes"}
+              onClick={() => setReelMode("notes")}
+            >
+              章の言葉 ({DREAM_CASE_NOTES.length})
+            </button>
+          </div>
+          <div className="dream-programme-spotlight-controls">
+            <button type="button" onClick={() => stepReel(-1)} aria-label="前の台詞を表示">
+              ← 前へ
+            </button>
+            <button type="button" onClick={() => stepReel(1)} aria-label="次の台詞を表示">
+              次へ →
+            </button>
+          </div>
+        </div>
+        {reelMode === "quotes" && activeQuote ? (
+          <blockquote className="dream-programme-spotlight-quote">
+            <p>「{activeQuote.text}」</p>
+            <footer>
+              <strong>{activeQuote.by}</strong>
+              <a href={resolveSpeakerHref(activeQuote.by)}>関連記録へ ↗</a>
+            </footer>
+          </blockquote>
+        ) : activeNote ? (
+          <blockquote className="dream-programme-spotlight-quote">
+            {activeNote.motto ? (
+              <small className="dream-programme-spotlight-motto" lang="en">
+                CASE {activeNote.no} {activeNoteCase?.reading} — {activeNote.motto}
+              </small>
+            ) : null}
+            <p>「{activeNote.line}」</p>
+            <footer>
+              <strong>{activeNote.by}</strong>
+              <span>
+                CASE {activeNote.no}「{activeNoteCase?.title}」
+              </span>
+              <a href={`#dream-case-${activeNote.no}`}>この章を読む ↗</a>
+            </footer>
+          </blockquote>
+        ) : null}
+      </aside>
     </section>
   );
 }

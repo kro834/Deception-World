@@ -30,10 +30,38 @@ const DREAM_RECORD_PEOPLE = [
 
 const DREAM_RECORD_OPTIONS = buildDreamRecordOptions(DREAM_CHRONICLE);
 
+const DREAM_RECORD_QUICK_TAGS = [
+  "悪夢",
+  "ベルベットルーム",
+  "サードアイ",
+  "ロードナイト",
+  "博麗神社",
+  "永遠亭",
+  "十二神将",
+  "ディルクルム",
+] as const;
+
 export function DreamRecordExplorer() {
   const [filters, setFilters] = useState({ query: "", case: "", person: "", place: "" });
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const results = useMemo(() => filterDreamRecords(DREAM_CHRONICLE, filters), [filters]);
+  const caseDistribution = useMemo(() => {
+    const baseFilters = { ...filters, case: "" };
+    const pool = filterDreamRecords(DREAM_CHRONICLE, baseFilters);
+    const maxCount = Math.max(
+      1,
+      ...DREAM_CASES.map((episode) => pool.filter((item) => item.case === episode.no).length),
+    );
+    return DREAM_CASES.map((episode) => {
+      const count = pool.filter((item) => item.case === episode.no).length;
+      return {
+        no: episode.no,
+        title: episode.title,
+        count,
+        ratio: Math.round((count / maxCount) * 100),
+      };
+    });
+  }, [filters]);
   const visibleResults = results.slice(0, visibleCount);
   const hasFacets = Boolean(filters.case || filters.person || filters.place);
   const hasQuery = Boolean(filters.query.trim());
@@ -93,6 +121,22 @@ export function DreamRecordExplorer() {
         <p id="dream-record-search-help">
           見出し・本文・人物・舞台を検索。空白で区切ると、すべての言葉を含む記録に絞ります。
         </p>
+        <div className="dream-record-quick-tags" role="group" aria-label="注目キーワード">
+          <span className="dream-record-quick-label">注目語句</span>
+          {DREAM_RECORD_QUICK_TAGS.map((tag) => {
+            const active = filters.query.trim() === tag;
+            return (
+              <button
+                key={tag}
+                type="button"
+                aria-pressed={active}
+                onClick={() => updateFilter("query", active ? "" : tag)}
+              >
+                #{tag}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       <div className="dream-record-filters" aria-label="記録の絞り込み">
@@ -144,6 +188,30 @@ export function DreamRecordExplorer() {
         <button type="button" onClick={clearFilters} disabled={!hasFilters}>
           条件をクリア
         </button>
+      </div>
+
+      <div className="dream-record-telemetry" role="group" aria-label="章別の記録件数">
+        {caseDistribution.map((item) => {
+          const selected = filters.case === item.no;
+          return (
+            <button
+              key={item.no}
+              type="button"
+              className="dream-record-telemetry-bar"
+              aria-pressed={selected}
+              onClick={() => updateFilter("case", selected ? "" : item.no)}
+            >
+              <span className="dream-record-telemetry-head">
+                <small lang="en">CASE {item.no}</small>
+                <strong>{item.count}件</strong>
+              </span>
+              <span className="dream-record-telemetry-title">{item.title}</span>
+              <span className="dream-record-telemetry-track" aria-hidden="true">
+                <i style={{ width: `${item.ratio}%` }} />
+              </span>
+            </button>
+          );
+        })}
       </div>
 
       {hasFilters ? (

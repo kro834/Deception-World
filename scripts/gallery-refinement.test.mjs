@@ -183,16 +183,20 @@ test("new controls retain 44px targets and reduced-motion, economy, forced-color
   assert.match(searchCss, /\.gallery-search-clear:focus-visible\s*\{[^}]*outline:\s*2px/);
 });
 
-test("refinement stylesheet is the final gallery-specific route layer", () => {
+test("refinement stylesheet stays above the present exhibition layer", () => {
   assert.match(
     route,
     /import galleryRefinementCssUrl from "@\/styles-gallery-refinement\.css\?url"/,
   );
+  assert.match(route, /import galleryPresentCssUrl from "@\/styles-gallery-present\.css\?url"/);
   const links = route.slice(
     route.indexOf("stylesheetLinks: ["),
     route.indexOf("\n      ],", route.indexOf("stylesheetLinks: [")),
   );
-  assert.match(links, /\{ rel: "stylesheet", href: galleryRefinementCssUrl \},\s*$/);
+  const refinement = links.indexOf("href: galleryRefinementCssUrl");
+  const present = links.indexOf("href: galleryPresentCssUrl");
+  assert.ok(refinement > 0 && present > refinement, `${refinement} ${present}`);
+  assert.match(links, /\{ rel: "stylesheet", href: galleryPresentCssUrl \},\s*$/);
   assert.match(refinementCss, /@media \(max-width: 700px\)/);
   assert.match(refinementCss, /@media \(max-width: 390px\)/);
 });
