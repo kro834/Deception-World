@@ -852,6 +852,10 @@
 
 /* ---------- Wave 3: Poster HUD, Card Spec Badges, Roster Toolbar, Glossary Jump & Footer ---------- */
 
+html[data-family="dream"] main.dream-page.dream-page > :is(#cast-roster, #glossary) {
+  position: relative;
+}
+
 .dream-page.dream-page .dream-poster-stage > figure.dream-poster-current {
   position: relative;
 }
@@ -1151,6 +1155,11 @@
 }
 
 @media (max-width: 980px) {
+  .dream-page.dream-page .dream-programme-desk {
+    width: var(--dr-col, min(1120px, calc(100% - 32px)));
+    margin: clamp(20px, 4vw, 36px) auto 0;
+  }
+
   .dream-page.dream-page .dream-programme-dossier-strip {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
@@ -1161,9 +1170,37 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .dream-page.dream-page .dream-programme-dossier-strip,
+  .dream-page.dream-page .dream-programme-dossier-strip {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 8px;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+  }
+
+  .dream-page.dream-page .dream-programme-dossier-strip::-webkit-scrollbar {
+    display: none;
+  }
+
+  .dream-page.dream-page .dream-programme-dossier-strip > li {
+    flex: 0 0 156px;
+    min-width: 0;
+  }
+
   .dream-page.dream-page .dream-programme-ledger-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dream-page.dream-page .dream-programme-spotlight-modes,
+  .dream-page.dream-page .dream-programme-spotlight-controls {
+    gap: 6px;
+  }
+
+  .dream-page.dream-page .dream-programme-spotlight-modes button,
+  .dream-page.dream-page .dream-programme-spotlight-controls button {
+    min-height: 34px;
+    padding: 4px 9px;
   }
 
   .dream-page.dream-page .dream-programme-ticket {
@@ -1184,8 +1221,30 @@
     padding: 12px;
   }
 
-  .dream-page.dream-page .dream-poster-hud-status > small {
+  .dream-page.dream-page .dream-poster-hud {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+    flex-wrap: nowrap;
+    gap: 6px;
+  }
+
+  .dream-page.dream-page .dream-poster-hud-status {
+    padding: 4px 9px;
+    gap: 6px;
+  }
+
+  .dream-page.dream-page .dream-poster-hud-status > span,
+  .dream-page.dream-page .dream-poster-hud-status > small,
+  .dream-page.dream-page .dream-poster-hud-step button small {
     display: none;
+  }
+
+  .dream-page.dream-page .dream-poster-hud-step button {
+    min-width: 34px;
+    min-height: 32px;
+    padding: 4px 8px;
+    justify-content: center;
   }
 
   .dream-page.dream-page .dream-character-spec-badge,
@@ -1199,19 +1258,23 @@
   }
 }
 
-@media (max-width: 1299px) {
+@media (max-width: 1100px) {
   .dream-page.dream-page .dream-roster-toolbar,
-  .dream-page.dream-page .dream-glossary-jump {
-    position: absolute;
-    top: 12px;
-    right: 0;
-    margin: 0;
-  }
-
   .dream-page.dream-page .dream-glossary-jump {
     display: none;
   }
+}
 
+@media (min-width: 1101px) and (max-width: 1299px) {
+  .dream-page.dream-page .dream-roster-toolbar {
+    position: absolute;
+    top: clamp(34px, 4vw, 58px);
+    right: calc(var(--dr-inset, 48px) + 132px);
+    margin: 0;
+    z-index: 2;
+  }
+
+  .dream-page.dream-page .dream-glossary-jump,
   .dream-page.dream-page .dream-roster-bulk {
     display: none;
   }
@@ -1220,13 +1283,30 @@
 @media (min-width: 1300px) {
   .dream-page.dream-page .dream-roster-toolbar {
     position: absolute;
-    top: 16px;
-    right: 0;
+    top: clamp(36px, 4vw, 62px);
+    right: calc(var(--dr-inset, 48px) + 136px);
     margin: 0;
+    z-index: 2;
   }
 
   .dream-page.dream-page .dream-glossary-jump {
     margin: -22px 0 18px;
+  }
+}
+
+@media (max-height: 520px) and (orientation: landscape) {
+  .dream-page.dream-page .dream-poster-hud {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+    flex-wrap: nowrap;
+    gap: 6px;
+  }
+
+  .dream-page.dream-page .dream-poster-hud-status > span,
+  .dream-page.dream-page .dream-poster-hud-status > small,
+  .dream-page.dream-page .dream-poster-hud-step button small {
+    display: none;
   }
 }
 
@@ -1236,7 +1316,10 @@
     padding: 16px;
   }
 
-  .dream-page.dream-page .dream-programme-dossier-strip,
+  .dream-page.dream-page .dream-programme-dossier-strip > li {
+    flex-basis: 140px;
+  }
+
   .dream-page.dream-page .dream-programme-ledger-grid,
   .dream-page.dream-page .dream-reader-index ol,
   .dream-page.dream-page .dream-chapter-companion ol {
@@ -1262,16 +1345,6 @@
 }
 
 /* ---------- Wave 4: Stage Choreography, Proscenium Sheen & Tactile Elevation ---------- */
-
-@keyframes dr-prog-obi-sheen {
-  0%,
-  100% {
-    background-position: 0% 50%, 0 0, 0 0;
-  }
-  50% {
-    background-position: 100% 50%, 0 0, 0 0;
-  }
-}
 
 @keyframes dr-prog-dot-pulse {
   0%,
@@ -1307,19 +1380,9 @@
   }
 }
 
-@keyframes dr-prog-progress-sheen {
-  0% {
-    background-position: 0% 50%;
-  }
-  100% {
-    background-position: 200% 50%;
-  }
-}
-
 html[data-family="dream"] main.dream-page.dream-page .dream-poster-progress {
   height: 3px;
   background: linear-gradient(90deg, #9d241f 0%, #f1d99a 48%, #d2a853 74%, #9d241f 100%);
-  background-size: 200% 100%;
   box-shadow: 0 0 12px rgb(241 217 154 / 38%);
 }
 
@@ -1354,8 +1417,6 @@ html[data-family="dream"] main.dream-page.dream-page .dream-dolminence-spec-badg
 
 html[data-family="dream"] main.dream-page.dream-page .dream-roster > li[data-roster-dimmed="true"] {
   opacity: 0.28;
-  filter: saturate(0.45);
-  scale: 0.985;
 }
 
 dialog.dream-dossier-dialog[open] .dream-profile-meter {
@@ -1369,25 +1430,17 @@ dialog.dream-dossier-dialog[open] .dream-profile-meter > i {
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  html[data-family="dream"]:not([data-world-effects="economy"])
-    main.dream-page.dream-page
-    .dream-hero-obi {
-    background-size: 220% 100%, 100% 100%, 100% 100%;
-    animation: dr-prog-obi-sheen 9s ease-in-out infinite;
-  }
-
-  html[data-family="dream"]:not([data-world-effects="economy"])
+  html[data-family="dream"]:not([data-world-effects="economy"]):not([data-android-renderer])
     main.dream-page.dream-page
     .dream-poster-progress {
     transition: width 420ms cubic-bezier(0.22, 1, 0.36, 1);
-    animation: dr-prog-progress-sheen 6s linear infinite;
   }
 
-  html[data-family="dream"]:not([data-world-effects="economy"])
+  html[data-family="dream"]:not([data-world-effects="economy"]):not([data-android-renderer])
     main.dream-page.dream-page
     .dream-poster-hud-status
     > i.is-live,
-  html[data-family="dream"]:not([data-world-effects="economy"])
+  html[data-family="dream"]:not([data-world-effects="economy"]):not([data-android-renderer])
     main.dream-page.dream-page
     .dream-poster-hud-status
     > i.is-shuffling {
@@ -1408,8 +1461,10 @@ dialog.dream-dossier-dialog[open] .dream-profile-meter > i {
     > i {
     animation: dr-prog-meter-fill 740ms cubic-bezier(0.22, 1, 0.36, 1) 240ms both;
   }
+}
 
-  html[data-family="dream"]:not([data-world-effects="economy"])
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  html[data-family="dream"]:not([data-world-effects="economy"]):not([data-android-renderer])
     dialog.dream-dossier-dialog[open]
     .dream-dossier-visuals
     > figure {
@@ -1420,7 +1475,7 @@ dialog.dream-dossier-dialog[open] .dream-profile-meter > i {
       box-shadow 280ms ease;
   }
 
-  html[data-family="dream"]:not([data-world-effects="economy"])
+  html[data-family="dream"]:not([data-world-effects="economy"]):not([data-android-renderer])
     main.dream-page.dream-page
     :is(
       .dream-character-card,
@@ -1446,18 +1501,15 @@ dialog.dream-dossier-dialog[open] .dream-profile-meter > i {
       translate 280ms cubic-bezier(0.22, 1, 0.36, 1),
       scale 280ms cubic-bezier(0.22, 1, 0.36, 1),
       opacity 260ms ease,
-      filter 260ms ease,
       border-color 220ms ease,
       background-color 220ms ease,
       box-shadow 280ms ease;
   }
 
-  html[data-family="dream"]:not([data-world-effects="economy"])
+  html[data-family="dream"]:not([data-world-effects="economy"]):not([data-android-renderer])
     main.dream-page.dream-page
     :is(.dream-character-portrait img, .dream-dolminence-card > figure > img) {
-    transition:
-      scale 520ms cubic-bezier(0.22, 1, 0.36, 1),
-      filter 360ms ease;
+    transition: scale 520ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 }
 
