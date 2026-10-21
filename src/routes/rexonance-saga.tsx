@@ -26,6 +26,7 @@ import rexonanceForgeCssUrl from "@/styles-rexonance-forge.css?url";
 import rexonanceEditorialCssUrl from "@/styles-rexonance-editorial.css?url";
 import p14CalibrationCssUrl from "@/styles-p14-calibration.css?url";
 import rexonanceLayoutCssUrl from "@/styles-rexonance-layout-20261021.css?url";
+import rexonanceTypeCssUrl from "@/styles-rexonance-type-20261021.css?url";
 import rexonanceKineticCssUrl from "@/styles-rexonance-motion-20261021.css?url";
 import { rexonanceImage } from "@/lib/rexonance-images";
 import { REXONANCE_SITE_ARTWORK } from "@/lib/rexonance-site-artwork";
@@ -47,7 +48,8 @@ export const Route = createFileRoute("/rexonance-saga")({
       { property: "og:title", content: "レクソナンスサーガ｜Deception World" },
       {
         property: "og:description",
-        content: "覚醒する、全てが最高峰で。レクソナンスサーガの性能、P14、三つの形態、悠真自身の終焉を制御する自己共鳴構造。",
+        content:
+          "覚醒する、全てが最高峰で。レクソナンスサーガの性能、P14、三つの形態、悠真自身の終焉を制御する自己共鳴構造。",
       },
       { property: "og:image", content: REXONANCE_SITE_ARTWORK.standard },
     ],
@@ -89,6 +91,11 @@ export const Route = createFileRoute("/rexonance-saga")({
       // (styles-rexonance-layout-20261021.css). Type and motion editions
       // follow in their own sheets.
       { rel: "stylesheet", href: rexonanceLayoutCssUrl },
+      // TYPE (rx21): the page's type system — the Mincho titles and ledes,
+      // the tokens, the kickers' one voice — after the layout sheet; only
+      // the motion sheet follows it (the cinematic skin follows every
+      // feature's sheet).
+      { rel: "stylesheet", href: rexonanceTypeCssUrl },
       // KINETIC (rxk, 2026-10-21): the chapters' entrances, the reading rail,
       // hover and press, the end card (styles-rexonance-motion-20261021.css;
       // src/lib/rexonance-choreography.js arms and plays them). Last of the
@@ -119,6 +126,24 @@ export const Route = createFileRoute("/rexonance-saga")({
         as: "font",
         type: "font/woff2",
         href: "/fonts/rexonance-forge-outline-20261016.woff2",
+        crossOrigin: "anonymous",
+      },
+      // TYPE (rx21): the Mincho's first-screen subsets — the hero's line and
+      // the bar's name (4.6 KB, ExtraBold), the hero's lede and scroll cue
+      // (5.7 KB, Medium) — so the first screen never draws in a fallback
+      // and then swaps; the lower chapters' Mincho loads when they need it.
+      {
+        rel: "preload",
+        as: "font",
+        type: "font/woff2",
+        href: "/fonts/rexonance-mincho-display-first-20261021.woff2",
+        crossOrigin: "anonymous",
+      },
+      {
+        rel: "preload",
+        as: "font",
+        type: "font/woff2",
+        href: "/fonts/rexonance-mincho-text-first-20261021.woff2",
         crossOrigin: "anonymous",
       },
     ],

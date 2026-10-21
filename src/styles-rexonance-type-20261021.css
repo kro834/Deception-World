@@ -1,0 +1,828 @@
+/* ================================================================
+   TYPE — Rexonance, set in Mincho (rx21, 2026-10-21)
+
+   The owner asked for the Rexonance site's fonts, motion and everything
+   else to be brushed up a great deal. This sheet is the page's type
+   system, the last of the page's own sheets on the route, scoped to the
+   doubled page class. Six faces, each with one job:
+
+   - DISPLAY (Japanese): "Rexonance Mincho", Shippori Mincho B1 ExtraBold
+     (OFL, self-hosted). Every Japanese title: the hero line, the chapter
+     and plate titles, the forms' names, the end line, the bar's name.
+     A sharp, heavy Mincho cut close with palt: a film's key visual.
+   - TEXT (Japanese): "Rexonance Mincho Text", the same family at Medium,
+     for the ledes under the titles and the chapter map's lines.
+   - PRINTED (Japanese): Noto Sans JP for reading text and small labels;
+     Zen Kaku Gothic New (CARVED) for buttons, tabs and the form points.
+   - FORGED (Latin): "Rexonance Forge" (Saira, FORGE's sheet) for the
+     name and every figure, tabular and lining.
+   - ETCHED (Latin): Michroma with "Rexonance Etch" for every kicker and
+     instrument label: one size (12px), one tracking (0.3em), one ice.
+
+   The Mincho faces are subsets of the glyphs the page really prints, two
+   files a weight (public/fonts/rexonance-mincho-*-20261021.woff2): a
+   FIRST file with only the first screen's glyphs (the hero's line, lede
+   and scroll cue, the bar's name; 4.6 KB and 5.7 KB, preloaded on this
+   route only) and the rest of the page's (fetched once a chapter below
+   the hero needs them). The FIRST faces are declared after the others,
+   so a glyph they hold is drawn from them (CSS Fonts: the last face
+   declared is tried first) and the larger files are never on the first
+   screen's path. The copy each file holds is read from the components
+   by scripts/rexonance-type-copy.mjs, which the guard checks the files
+   against. Until a face arrives the text draws in a metric-matched local
+   Mincho, so the swap never moves a line or a baseline.
+
+   Tokens (--rxt-*): the owner's colours (pink rgb(255 143 216), ice
+   rgb(150 236 255), gold, black), three text tiers that pass AA on the
+   page's black, a type scale from step -1 to 6, and the leading and
+   tracking each role uses. Japanese sets palt with strict line breaking;
+   ledes break between phrases where the browser can (word-break:
+   auto-phrase) and keep off a one-word last line (text-wrap: pretty), and
+   titles are sized so Safari, which has neither phrase breaking nor the
+   titles' break markers everywhere, never splits one inside a word.
+
+   No animation, transition or keyframe lives here (the motion sheet owns
+   motion), and no rule changes a component's geometry beyond its glyphs.
+   Every selector carries :not(#rxt):not(#rxt) (two ids that match every
+   element), so the type rules outrank the earlier sheets' id-scoped
+   rules (> #p14 …) without repeating their ids.
+   Guard: scripts/rexonance-type.test.mjs.
+   ================================================================ */
+
+/* ---------- Faces ---------- */
+/* The page's titles below the hero (ExtraBold): the lower chapters' kana
+   and kanji, the CJK punctuation, the digits and the Latin they print. */
+@font-face {
+  font-family: "Rexonance Mincho";
+  src: url("/fonts/rexonance-mincho-display-20261021.woff2") format("woff2");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0020-007E, U+00A0, U+3000-303F, U+3041-3096, U+30A1-30FC, U+4E00-9FFF, U+FF01-FF5E;
+}
+
+/* The first screen's titles: the hero's line and the bar's name, and the
+   zero (the glyph the ch unit measures). */
+@font-face {
+  font-family: "Rexonance Mincho";
+  src: url("/fonts/rexonance-mincho-display-first-20261021.woff2") format("woff2");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0020, U+0030, U+00A0, U+3002, U+304C, U+307E, U+308B, U+30AC, U+30AF, U+30B5, U+30B9, U+30BD, U+30CA, U+30EC, U+30F3, U+30FC, U+59CB, U+6975, U+7A76;
+}
+
+/* The page's ledes below the hero (Medium). */
+@font-face {
+  font-family: "Rexonance Mincho Text";
+  src: url("/fonts/rexonance-mincho-text-20261021.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0020-007E, U+00A0, U+3000-303F, U+3041-3096, U+30A1-30FC, U+4E00-9FFF, U+FF01-FF5E;
+}
+
+/* The first screen's lede and scroll cue, and the zero: the lede is 28ch
+   wide (the editorial sheet), so its measure is Shippori's from the start
+   and never re-wraps when the larger file lands. */
+@font-face {
+  font-family: "Rexonance Mincho Text";
+  src: url("/fonts/rexonance-mincho-text-first-20261021.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0020, U+0030, U+00A0, U+3001-3002, U+304B-304C, U+3059-305A, U+3066-3067, U+307E, U+3089, U+308B, U+5168, U+5B57, U+5CF0, U+6570, U+6700, U+899A, U+9192, U+9AD8;
+}
+
+/* Metric-matched local fallbacks (Shippori's hhea: 1160 / 288 / 0 at
+   1000 upm; CJK advances are 1em in every candidate), so a late swap
+   never moves a line or a baseline: the system's Mincho first (Apple,
+   Windows, Android, Linux), then its Japanese gothic, so a system with
+   no Mincho still holds the lines while the subsets load. */
+@font-face {
+  font-family: "Rexonance Mincho Fallback";
+  src:
+    local("Hiragino Mincho ProN W6"), local("HiraMinProN-W6"), local("Hiragino Mincho Pro W6"),
+    local("Yu Mincho Demibold"), local("YuMincho-Demibold"), local("YuMincho"), local("Yu Mincho"),
+    local("Noto Serif CJK JP Bold"), local("Noto Serif JP Bold"), local("NotoSerifJP-Bold"),
+    local("IPAexMincho"), local("IPAMincho"),
+    local("Noto Sans CJK JP Bold"), local("NotoSansCJKjp-Bold"), local("Noto Sans JP Bold"),
+    local("IPAPGothic"), local("IPAGothic");
+  font-weight: 600 900;
+  font-display: swap;
+  size-adjust: 100%;
+  ascent-override: 116%;
+  descent-override: 28.8%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "Rexonance Mincho Fallback";
+  src:
+    local("Hiragino Mincho ProN W3"), local("HiraMinProN-W3"), local("Hiragino Mincho Pro W3"),
+    local("Yu Mincho"), local("YuMincho"), local("YuMincho-Regular"),
+    local("Noto Serif CJK JP"), local("Noto Serif JP"), local("NotoSerifJP-Regular"),
+    local("IPAexMincho"), local("IPAMincho"),
+    local("Noto Sans CJK JP Regular"), local("NotoSansCJKjp-Regular"), local("Noto Sans JP Regular"),
+    local("IPAPGothic"), local("IPAGothic");
+  font-weight: 300 500;
+  font-display: swap;
+  size-adjust: 100%;
+  ascent-override: 116%;
+  descent-override: 28.8%;
+  line-gap-override: 0%;
+}
+
+/* ---------- Tokens ---------- */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) {
+  /* Faces. */
+  --rxt-mincho: "Rexonance Mincho", "Rexonance Mincho Fallback", "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif JP", "Noto Sans JP", "Zen Kaku Gothic New", serif;
+  --rxt-mincho-text: "Rexonance Mincho Text", "Rexonance Mincho Fallback", "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif JP", "Noto Sans JP", serif;
+  --rxt-sans: "Noto Sans JP", "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", system-ui, sans-serif;
+  --rxt-gothic: "Zen Kaku Gothic New", "Noto Sans JP", "Hiragino Sans", "Yu Gothic", system-ui, sans-serif;
+  --rxt-forge: var(--rxf-forge, "Rexonance Forge", sans-serif);
+  --rxt-etch: var(--rxf-etch, "Michroma", "Oxanium", sans-serif);
+
+  /* The owner's palette. */
+  --rxt-pink: rgb(255 143 216);
+  --rxt-ice: rgb(150 236 255);
+  --rxt-gold: #f2d896;
+  --rxt-gold-deep: #c98a2e;
+  --rxt-ink: #02050a;
+
+  /* Text tiers on the page's black (#000207): 19.7:1, 15.5:1, 9.5:1; the
+     kicker ice 15.6:1, the gold 14.9:1, the pink 10.1:1 (all past AAA's 7:1). */
+  --rxt-text-1: #f7f9fc;
+  --rxt-text-2: #d6e0ea;
+  --rxt-text-3: #a2b1c0;
+  --rxt-text-kicker: #96ecff;
+
+  /* Scale: 12 · 14 · 16 · 18 fixed, then fluid titles to 112px. */
+  --rxt-step--1: 12px;
+  --rxt-step-0: 14px;
+  --rxt-step-1: 16px;
+  --rxt-step-2: clamp(17px, 0.3vw + 14px, 18px);
+  --rxt-step-3: clamp(20px, 0.6vw + 15px, 24px);
+  --rxt-step-4: clamp(24px, 1.1vw + 16px, 34px);
+  --rxt-step-5: clamp(40px, 2.8vw + 24px, 68px);
+  --rxt-step-6: clamp(52px, 6.4vw + 16px, 112px);
+
+  /* Leading and tracking pairs. */
+  --rxt-lead-display: 1.1;
+  --rxt-lead-title: 1.24;
+  --rxt-lead-lede: 1.95;
+  --rxt-lead-body: 1.9;
+  --rxt-track-display: 0.02em;
+  --rxt-track-lede: 0.05em;
+  --rxt-track-kicker: 0.3em;
+  --rxt-track-label: 0.12em;
+  --rxt-track-button: 0.1em;
+
+  /* Japanese: proportional kana/kanji and punctuation, strict breaks. */
+  font-feature-settings: "palt" 1, "kern" 1;
+  font-kerning: normal;
+  line-break: strict;
+  text-spacing-trim: trim-start;
+}
+
+/* ================================================================
+   Display: the Mincho titles
+   ================================================================ */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-hero h1,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-section-heading h2,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-footer h2,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) #rxs-assembly-title,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-stage-panel > div > h3,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-system-grid h3,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-p14-copy h3,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-p14-comparator > header h3,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-processing-comparison > header > h3,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-processing-comparison section > h4,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxe-form-comparison h3,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxe-form-comparison .rxe-comparison-title,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxe-form-comparison > summary > strong,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxe-form-status strong,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxe-chapter-map a > span {
+  color: var(--rxt-text-1);
+  font-family: var(--rxt-mincho);
+  font-weight: 800;
+  font-feature-settings: "palt" 1, "kern" 1;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* The hero line: the biggest Mincho on the page, cut close, with a short
+   drop and a soft deep shadow so it sits in the armour's light. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-hero h1 {
+  font-size: var(--rxt-step-6);
+  line-height: 1.04;
+  letter-spacing: var(--rxt-track-display);
+  text-shadow:
+    0 2px 0 rgb(0 2 7 / 55%),
+    0 18px 48px rgb(0 0 0 / 45%);
+}
+
+/* The Latin name stays forged (gold); only its seat under the Mincho moves. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-hero h1 > span {
+  margin-bottom: 0.22em;
+  font-family: var(--rxt-forge);
+  letter-spacing: 0.04em;
+  text-shadow: none;
+}
+
+/* Chapter titles: one size for every chapter, the suit-up's included. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-section-heading h2,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) #rxs-assembly-title {
+  font-size: var(--rxt-step-5);
+  line-height: var(--rxt-lead-display);
+  letter-spacing: var(--rxt-track-display);
+  text-wrap: balance;
+}
+
+/* The end line: the page's last word, a step above a chapter title. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-footer h2 {
+  font-size: clamp(44px, 4.2vw + 24px, 88px);
+  line-height: 1.1;
+  letter-spacing: var(--rxt-track-display);
+}
+
+/* The form's title beside its art. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-stage-panel > div > h3 {
+  font-size: clamp(30px, 2.6vw + 14px, 54px);
+  line-height: 1.14;
+  letter-spacing: 0.01em;
+  text-wrap: balance;
+}
+
+/* Plate, core and comparator titles. (No balance: a balanced Japanese
+   title can split inside a phrase, 「悠真自身に／よる」.) */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-p14-copy h3,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-system-grid h3,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-p14-comparator > header h3,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-processing-comparison > header > h3 {
+  font-size: var(--rxt-step-4);
+  line-height: var(--rxt-lead-title);
+  letter-spacing: 0.01em;
+}
+
+/* Three plates stand side by side from 761px, each about a quarter of the
+   screen wide. Safari has no phrase breaking and the earlier sheets hold
+   the titles keep-all, so 「悠真自身による自己共鳴」 (10.5em, no break
+   marker) must fit one line or it splits at the edge (「…自己共／鳴」 on an
+   iPad): the plates' titles follow the screen there (23.6px at 1024). */
+@media (min-width: 761px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-system-grid h3 {
+    font-size: min(var(--rxt-step-4), 2.3vw);
+  }
+}
+
+/* Names: the drawer's bar, the selected form, the chapter map's labels. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxe-form-status strong,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxe-form-comparison > summary > strong,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxe-chapter-map a > span,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxe-form-comparison h3 {
+  font-size: var(--rxt-step-3);
+  line-height: 1.3;
+  letter-spacing: 0.02em;
+}
+
+/* Small Mincho: the comparison columns' names and the cards' form titles. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-processing-comparison section > h4,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxe-form-comparison .rxe-comparison-title {
+  font-size: var(--rxt-step-1);
+  line-height: 1.5;
+  letter-spacing: 0.04em;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxe-form-comparison .rxe-comparison-title {
+  color: var(--rxt-text-2);
+}
+
+/* A Latin figure inside a Mincho title (P1, 9, i-2, P14) is forged where
+   the markup gives it its own element, so a digit never reads as serif. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-section-heading h2 b,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-section-heading h2 em,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-section-heading h2 i {
+  font-family: var(--rxt-forge);
+  font-weight: 600;
+  font-variant-numeric: lining-nums proportional-nums;
+}
+
+/* ================================================================
+   Text: the Mincho ledes
+   ================================================================ */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-hero .rxs-hero-lede,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-section-heading > span,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-stage-panel > div > p,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) #rxs-assembly-title + p,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxe-chapter-map a > em,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-scroll-cue span {
+  color: var(--rxt-text-2);
+  font-family: var(--rxt-mincho-text);
+  font-weight: 500;
+  font-style: normal;
+  font-feature-settings: "palt" 1, "kern" 1;
+  font-synthesis: none;
+  letter-spacing: var(--rxt-track-lede);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* The hero's lede: the title's second voice, wide and bright. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-hero .rxs-hero-lede {
+  color: var(--rxt-text-1);
+  font-size: clamp(18px, 0.9vw + 12px, 26px);
+  line-height: 1.7;
+  letter-spacing: 0.08em;
+}
+
+/* The chapter ledes. pretty: no line of one or two characters at the end
+   (Safari's breaks have no phrases, 「…姿／です。」). */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-section-heading > span,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-stage-panel > div > p,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) #rxs-assembly-title + p {
+  font-size: var(--rxt-step-2);
+  line-height: var(--rxt-lead-lede);
+  text-wrap: pretty;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxe-chapter-map a > em {
+  color: var(--rxt-text-3);
+  font-size: 13px;
+  line-height: 1.7;
+  letter-spacing: 0.04em;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-scroll-cue span {
+  font-size: 13px;
+  letter-spacing: 0.16em;
+}
+
+/* ================================================================
+   Kickers: one etched voice (Michroma), one tracking, one ice
+   ================================================================ */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-hero-copy > p:first-child,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-section-heading > p,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-assembly-eyebrow,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxe-chapter-map-heading > span,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxe-chapter-map a > small,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-headline-metrics small,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-p14-copy > small,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-p14-comparator > header small,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-processing-comparison > header > small,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rzn-kicker span,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rzn-stamp span,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rzn-callout em,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxe-form-status-heading span,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-stage-panel > div > small,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-system-grid article > header > small,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-specs small,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxe-form-comparison > summary > span:not(.rxe-comparison-codes) {
+  font-family: var(--rxt-etch);
+  font-weight: 400;
+  font-style: normal;
+  font-feature-settings: "palt" 1, "pwid" 1;
+  letter-spacing: var(--rxt-track-kicker);
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-hero-copy > p:first-child,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-section-heading > p,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-assembly-eyebrow,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-p14-copy > small,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-p14-comparator > header small,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-processing-comparison > header > small,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rzn-kicker span,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rzn-callout em,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-system-grid article > header > small,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxe-form-comparison > summary > span:not(.rxe-comparison-codes) {
+  color: var(--rxt-text-kicker);
+}
+
+/* The kickers' one size. The hero's sits a size up: it is the title's. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-section-heading > p,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-assembly-eyebrow,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-p14-copy > small,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-p14-comparator > header small,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-processing-comparison > header > small,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxe-form-status-heading span,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxe-form-comparison > summary > span:not(.rxe-comparison-codes) {
+  font-size: var(--rxt-step--1);
+  line-height: 1.5;
+}
+
+/* The chapter map's heading is its kicker, in the bright tier. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxe-chapter-map-heading > span {
+  color: var(--rxt-text-1);
+  font-size: var(--rxt-step--1);
+}
+
+/* The chapter map's codes stand in a 150px column on the desktop line
+   (LAYOUT's grid); Michroma is wide, so they close up there. */
+@media (min-width: 1100px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxe-chapter-map a > small {
+    letter-spacing: var(--rxt-track-label);
+  }
+}
+
+/* The end card's kicker: gold, etched, the same tracking as the kickers. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-footer > div > p {
+  color: var(--rxt-gold);
+  font-family: var(--rxt-etch);
+  font-weight: 400;
+  font-size: var(--rxt-step--1);
+  letter-spacing: var(--rxt-track-kicker);
+}
+
+/* Small etched codes lifted to the 12px floor. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxe-chapter-map-heading > small,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxe-form-status p > small,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxe-comparison-card > p > span,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxe-comparison-card > p > b {
+  font-size: var(--rxt-step--1);
+  letter-spacing: var(--rxt-track-label);
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+/* ================================================================
+   The stage slate and the comparison codes (LAYOUT's new marks)
+   ================================================================ */
+/* The slate on the hero's stage (desktop; the layout sheet places it):
+   a forged take number, the etched form line beside it, and under both
+   the gold etched role, every line on the kickers' tracking. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-hero-visual > .rxl-stage-slate {
+  color: var(--rxt-text-kicker);
+  font-family: var(--rxt-etch);
+  font-size: var(--rxt-step--1);
+  font-weight: 400;
+  line-height: 1.3;
+  letter-spacing: var(--rxt-track-kicker);
+  font-feature-settings: "palt" 1, "pwid" 1;
+  font-variant-numeric: lining-nums tabular-nums;
+  white-space: nowrap;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-hero-visual > .rxl-stage-slate > b {
+  color: var(--rxt-text-1);
+  font-family: var(--rxt-forge);
+  font-size: var(--rxt-step-4);
+  font-weight: 300;
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-hero-visual > .rxl-stage-slate > small {
+  color: var(--rxt-gold);
+  font-size: var(--rxt-step--1);
+}
+
+/* The form codes on the comparison drawer's bar: etched chips in each
+   form's accent (the layout sheet draws the chip), one tracking. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxe-comparison-codes > b {
+  color: var(--rxe-code-accent, var(--rxt-ice));
+  font-family: var(--rxt-etch);
+  font-size: var(--rxt-step--1);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: var(--rxt-track-label);
+  font-feature-settings: "palt" 1, "pwid" 1;
+  font-variant-numeric: lining-nums tabular-nums;
+  white-space: nowrap;
+}
+
+/* ================================================================
+   Figures: forged, tabular, lining
+   ================================================================ */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-headline-metrics strong,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-specs strong,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-comparison-metrics strong,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-comparison-result b,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-comparison-result em,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-comparison-formula b,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-processing-comparison li,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-p14-copy dd,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-p14-values strong,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-p14-values b,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-p14-metrics article > p b,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rzn-readout,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rzn-callout b,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxe-chapter-map a > b,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxe-chapter-map-heading > small,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxe-form-status-heading span + span,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-system-grid article > header > span {
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: "tnum" 1, "lnum" 1, "kern" 1;
+}
+
+/* The hero's lock-on figures were Oxanium; they are forged like every
+   other figure, with the unit sized as a unit. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rzn-callout b {
+  font-family: var(--rxt-forge);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rzn-callout b small {
+  color: var(--rxt-gold);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+/* The P14 comparator's readout of its baseline: forged like its figures. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-p14-comparator > header > output {
+  font-family: var(--rxt-forge);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+/* ================================================================
+   Printed: reading text, labels, HUD lines
+   ================================================================ */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-p14-copy p,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-system-grid p,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-p14-method-note,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-processing-comparison > p,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-comparison-note,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-headline-metrics p,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-assembly-status,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-assembly-footer > p,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-stage-hint {
+  font-family: var(--rxt-sans);
+  font-feature-settings: "palt" 1, "kern" 1;
+  letter-spacing: 0.02em;
+  text-wrap: pretty;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-p14-copy p,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-system-grid p {
+  color: var(--rxt-text-2);
+  font-size: 15px;
+  line-height: var(--rxt-lead-body);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-processing-comparison > p,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-assembly-footer > p {
+  color: var(--rxt-text-2);
+  line-height: 1.85;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-headline-metrics p {
+  color: var(--rxt-text-2);
+  font-family: var(--rxt-gothic);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+}
+
+/* Small Japanese labels: one tracking, the muted tier (9.5:1 on black). */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-p14-copy dt,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-p14-values i,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-p14-metrics article > p > span,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-comparison-selector > span,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-comparison-result > i,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-specs p > span,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxe-form-status p > span,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-stage-hint,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-assembly-status,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-p14-method-note {
+  color: var(--rxt-text-3);
+  font-family: var(--rxt-sans);
+  font-weight: 500;
+  font-style: normal;
+  letter-spacing: var(--rxt-track-label);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-comparison-selector > span {
+  color: var(--rxt-text-kicker);
+}
+
+/* The metrics' names (パンチ力 …) and the core's lead line: printed, bright. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-comparison-metrics header small,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-p14-metrics article > small {
+  color: var(--rxt-text-1);
+  font-family: var(--rxt-gothic);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+/* The form's points and status line: gothic, a touch wider. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-stage-panel li,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxe-form-status em {
+  color: var(--rxt-text-1);
+  font-family: var(--rxt-gothic);
+  font-weight: 500;
+  font-style: normal;
+  letter-spacing: 0.06em;
+}
+
+/* The HUD's Japanese lines (the phases and the hint) are printed, spaced
+   like instrument labels; their sizes and seats are ZENITH's. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rzn-phase span,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rzn-hint {
+  font-family: var(--rxt-sans);
+  font-weight: 500;
+  letter-spacing: var(--rxt-track-label);
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rzn-phase span > b {
+  font-family: var(--rxt-forge);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+/* ================================================================
+   The bar: the name in Mincho, the links as labels
+   ================================================================ */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-brand b {
+  font-family: var(--rxt-mincho);
+  font-weight: 800;
+  font-size: 17px;
+  letter-spacing: 0.04em;
+  font-feature-settings: "palt" 1, "kern" 1;
+  font-synthesis: none;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-brand span {
+  font-family: var(--rxt-etch);
+  letter-spacing: 0.22em;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-local-nav nav a {
+  color: var(--rxt-text-2);
+  font-family: var(--rxt-sans);
+  font-weight: 500;
+  font-size: 13px;
+  letter-spacing: var(--rxt-track-label);
+  font-feature-settings: "palt" 1, "kern" 1;
+}
+
+/* ================================================================
+   Buttons and links: carved labels, one tracking
+   ================================================================ */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxe-hero-primary,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxe-hero-secondary,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-footer > a,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-footer > a span,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-stage-tabs button span,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-assembly-controls > a,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-assembly-controls > button,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxe-comparison-card > button {
+  font-family: var(--rxt-gothic);
+  font-weight: 700;
+  font-feature-settings: "palt" 1, "kern" 1;
+  letter-spacing: var(--rxt-track-button);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxe-hero-primary,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxe-hero-secondary,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-footer > a span,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-assembly-controls > a,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-assembly-controls > button,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxe-comparison-card > button {
+  font-size: 13px;
+}
+
+/* ================================================================
+   States: the label's colour and the focus ring
+   ================================================================ */
+/* Rest: the bar's links and the chapter map's lines in the second tier;
+   hover, keyboard focus and the current chapter brighten to the first;
+   the pressed instant takes the ice. The fills, rails and arrows are the
+   earlier sheets' (their timing is the motion sheet's). */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-local-nav nav a:is(:hover, :focus-visible, [aria-current]),
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxe-chapter-map a:is(:hover, :focus-visible) > em {
+  color: var(--rxt-text-1);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxe-chapter-map a:is(:hover, :focus-visible) > span,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-local-nav nav a:active,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxe-chapter-map a:active > span,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxe-hero-secondary:is(:hover, :focus-visible, :active),
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-assembly-controls > a:is(:hover, :focus-visible, :active) {
+  color: var(--rxt-ice);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxe-hero-secondary:is(:hover, :focus-visible) {
+  border-color: color-mix(in srgb, var(--rxt-ice) 72%, transparent);
+}
+
+/* The keyboard's ring: ice, 2px, clear of the label, on every link and
+   button the sheet sets. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxe-hero-primary:focus-visible,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxe-hero-secondary:focus-visible,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-footer > a:focus-visible,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-local-nav nav a:focus-visible,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-assembly-controls > :is(a, button):focus-visible,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxe-comparison-card > button:focus-visible,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxe-form-comparison > summary:focus-visible {
+  outline: 2px solid var(--rxt-ice);
+  outline-offset: 3px;
+}
+
+/* The chapter map's rows sit edge to edge: their ring is drawn inside. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxe-chapter-map a:focus-visible {
+  outline: 2px solid var(--rxt-ice);
+  outline-offset: -3px;
+}
+
+/* ================================================================
+   Japanese line breaking
+   ================================================================ */
+/* The ledes (two to four lines under a title, a wide measure) break
+   between phrases where the browser can, so a line never ends 「犬と」
+   and starts 「して」. Reading paragraphs in the narrow plate columns keep
+   the ordinary strict breaks: phrase breaks there left the right edge too
+   ragged at 1024. */
+@supports (word-break: auto-phrase) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-section-heading > span,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-stage-panel > div > p,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) #rxs-assembly-title + p {
+    word-break: auto-phrase;
+  }
+}
+
+/* A phrase the markup keeps whole stays whole in every face. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxp-nowrap {
+  white-space: nowrap;
+}
+
+/* ================================================================
+   The iPad column and phones
+   ================================================================ */
+@media (max-width: 1099px) {
+  /* The plates stand three across at 1024: their codes close up so each
+     holds two lines, not three. */
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-system-grid article > header > small {
+    letter-spacing: 0.18em;
+  }
+}
+
+@media (max-width: 1023px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-section-heading h2,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) #rxs-assembly-title {
+    letter-spacing: 0.01em;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-section-heading > span,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-stage-panel > div > p,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) #rxs-assembly-title + p {
+    letter-spacing: 0.03em;
+  }
+}
+
+@media (max-width: 560px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-hero h1 {
+    letter-spacing: 0;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-hero .rxs-hero-lede {
+    letter-spacing: 0.06em;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-section-heading h2,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) #rxs-assembly-title,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-stage-panel > div > h3,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-footer h2 {
+    letter-spacing: 0;
+  }
+
+  /* Every kicker closes from 0.3em to 0.22em on a phone's measure, so
+     「REACTION / VS VINCULUM」 and the plates' codes hold their lines. */
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-section-heading > p,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-hero-copy > p:first-child,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-assembly-eyebrow,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxe-chapter-map-heading > span,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxe-chapter-map a > small,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-headline-metrics small,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-p14-copy > small,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-p14-comparator > header small,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-processing-comparison > header > small,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rzn-kicker span,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rzn-stamp span,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rzn-callout em,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxe-form-status-heading span,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-stage-panel > div > small,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-system-grid article > header > small,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-specs small,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxe-form-comparison > summary > span:not(.rxe-comparison-codes),
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-footer > div > p {
+    letter-spacing: 0.22em;
+  }
+}
+
+/* ================================================================
+   Forced colours and more contrast: plain text, no shadows
+   ================================================================ */
+@media (forced-colors: active) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-hero h1 {
+    text-shadow: none;
+  }
+}
+
+@media (prefers-contrast: more) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) {
+    --rxt-text-2: #eef3f8;
+    --rxt-text-3: #c9d4de;
+  }
+}
