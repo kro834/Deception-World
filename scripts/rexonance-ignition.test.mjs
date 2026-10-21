@@ -5,9 +5,13 @@ import sharp from "sharp";
 import {
   NANITE_FIRE_FRAGMENTS,
   NANITE_FIRE_PHASES,
+  REXONANCE_ENTRY_SCAN,
+  REXONANCE_ENTRY_SCAN_END,
   REXONANCE_ENTRY_VORTEX_HOLD_MS,
   entryCanonicalTime,
   entryElapsedTime,
+  entryFlamePhase,
+  entryFlameTime,
   fireFragmentPose,
   naniteCombustion,
   naniteEngulf,
@@ -48,8 +52,89 @@ test("the entry stretches the fire's whole run uniformly over one extra second b
   const rate = (a, b) => (entryCanonicalTime(b) - entryCanonicalTime(a)) / (b - a);
   assert.ok(Math.abs(rate(100, 200) - rate(1200, 1300)) < 1e-9, "uniform stretch");
   assert.ok(Math.abs(rate(100, 200) - 420 / 1420) < 1e-9);
-  assert.equal(naniteFlameEnvelope(entryCanonicalTime(900) / 2400), 1);
-  assert.equal(naniteFlameEnvelope(entryCanonicalTime(1600) / 2400), 0);
+  assert.equal(naniteFlameEnvelope(entryFlamePhase(entryCanonicalTime(1300))), 1);
+  assert.equal(naniteFlameEnvelope(entryFlamePhase(entryCanonicalTime(1600))), 0);
+});
+
+test("the entry's fire lights only once the scan has drawn the undersuit, then engulfs it before the unchanged burst", () => {
+  const P = NANITE_FIRE_PHASES;
+  const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
+  // The scan: the stylesheet's own delay (elapsed) and the component's
+  // stretched span of canonical 70 → 320 ms; its window reaches the soles
+  // (the undersuit's last rows) at its very end.
+  assert.deepEqual({ ...REXONANCE_ENTRY_SCAN }, { delay: 70, from: 70, span: 250 });
+  assert.match(
+    read("src/styles-rexonance-calls.css"),
+    /animation: rxSuitScanWindow var\(--rx-suit-scan-duration, 250ms\) cubic-bezier\(0\.45, 0, 0\.55, 1\)\s+70ms both;/,
+  );
+  assert.match(
+    read("src/components/rexonance-saga/rexonance-call-sequence.tsx"),
+    /"--rx-suit-scan-duration": `\$\{entrySpan\(REXONANCE_ENTRY_SCAN\.from, REXONANCE_ENTRY_SCAN\.span\)\}ms`/,
+  );
+  const scanEnd = 70 + entryElapsedTime(320) - entryElapsedTime(70);
+  assert.ok(Math.abs(scanEnd - (70 + (250 * 1420) / 420)) < 1e-9);
+  assert.ok(Math.abs(entryElapsedTime(REXONANCE_ENTRY_SCAN_END) - scanEnd) < 1e-9);
+  assert.ok(Math.abs(REXONANCE_ENTRY_SCAN_END - (scanEnd * 420) / 1420) < 1e-9);
+  // Nothing burns before the scan's end (or on an invalid clock).
+  for (const t of [NaN, -Infinity, -5, 0, 70, 200, 270, REXONANCE_ENTRY_SCAN_END])
+    assert.equal(entryFlamePhase(t), 0);
+  for (let elapsed = 0; elapsed <= scanEnd; elapsed += 0.5)
+    assert.equal(naniteFlameEnvelope(entryFlamePhase(entryCanonicalTime(elapsed))), 0);
+  assert.ok(entryFlamePhase(REXONANCE_ENTRY_SCAN_END + 1e-6) > 0);
+  assert.ok(naniteFlameEnvelope(entryFlamePhase(entryCanonicalTime(scanEnd + 40))) > 0);
+  // The burst exactly at canonical 420, and t / 2400 from there on: the
+  // burst, the material, the fire's end and every fragment keep their clocks.
+  assert.equal(entryFlamePhase(420), P.burstStart);
+  for (let t = 420; t <= 4000; t += 0.25) assert.equal(entryFlamePhase(t), t / 2400);
+  for (const phase of ["burstStart", "burstEnd", "materialStart", "flameEnd"])
+    assert.ok(Math.abs(entryFlameTime(P[phase]) - P[phase] * 2400) < 1e-9, phase);
+  // The whole engulf (kindle → cover → torch) plays between the scan's end
+  // and the burst, in the time the hold leaves (≈505 ms elapsed).
+  const at = (phase) => entryElapsedTime(entryFlameTime(phase));
+  assert.ok(Math.abs(at(0) - scanEnd) < 1e-9);
+  assert.ok(at(P.kindle) > scanEnd && at(P.kindle) < at(P.cover));
+  assert.ok(at(P.cover) < 1420 && Math.abs(at(P.burstStart) - 1420) < 1e-9);
+  assert.ok(1420 - scanEnd > 500, "a visible engulf, feet to head");
+  // Monotone and continuous on the real (elapsed) clock.
+  let previous = 0;
+  for (let elapsed = 0; elapsed <= 4000; elapsed += 0.25) {
+    const phase = entryFlamePhase(entryCanonicalTime(elapsed));
+    assert.ok(phase >= previous, "the fire never runs backwards");
+    assert.ok(phase - previous < 1.5e-4, "no jump");
+    previous = phase;
+  }
+  // Exact inverse after the ignition, and an exact reverse scrub.
+  for (let t = REXONANCE_ENTRY_SCAN_END; t <= 3000; t += 0.37)
+    assert.ok(Math.abs(entryFlameTime(entryFlamePhase(t)) - t) < 1e-9);
+  for (let phase = 0.001; phase <= 0.4; phase += 0.0007)
+    assert.ok(Math.abs(entryFlamePhase(entryFlameTime(phase)) - phase) < 1e-12);
+  assert.equal(entryFlameTime(0), REXONANCE_ENTRY_SCAN_END);
+  assert.equal(entryFlameTime(NaN), REXONANCE_ENTRY_SCAN_END);
+  const sweep = [];
+  for (let t = 0; t <= 700; t += 0.5) sweep.push(entryFlamePhase(t));
+  for (let t = 700, k = sweep.length - 1; t >= 0; t -= 0.5, k -= 1)
+    assert.equal(entryFlamePhase(t), sweep[k]);
+  // The fragments' handoff: at rest (cold) on the body before the burst,
+  // and from the burst on exactly the poses of the canonical t / 2400.
+  const a = new Float64Array(6);
+  const b = new Float64Array(6);
+  for (let t = 0; t <= 900; t += 7) {
+    for (const seed of [0.03, 0.31, 0.62, 0.97]) {
+      fireFragmentPose(seed, entryFlamePhase(t), a);
+      fireFragmentPose(seed, t / 2400, b);
+      if (t >= 420) assert.deepEqual([...a], [...b]);
+      else assert.equal(a[4], 0, "cold before the burst");
+    }
+  }
+  // The call's engine draws every fire layer from this one phase.
+  const nanites = read("src/components/rexonance-saga/rexonance-suit-nanites.tsx");
+  assert.match(nanites, /const flamePhase = entryFlamePhase\(t\);/);
+  assert.doesNotMatch(nanites, /t \/ CALL_FLAME_MS/);
+  for (const draw of [
+    /drawBodyFlame\(flight, FIG, flame, elapsed \/ 1000, s, "back", flamePhase\)/,
+    /drawBodyFlame\(flight, FIG, flame, elapsed \/ 1000, s, "front", flamePhase\)/,
+  ])
+    assert.match(nanites, draw);
 });
 
 test("the fire's phases keep their causal order: kindle, engulf, colour, torch, burst, material, end", () => {

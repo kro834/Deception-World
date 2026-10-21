@@ -10,11 +10,12 @@ const BODY = new Float32Array([
 const clamp = (x) => Math.max(0, Math.min(1, x));
 const smooth = (x) => x * x * (3 - 2 * x);
 
-// The entry stretches the fire's whole run (canonical 0–420 ms) uniformly
-// over one extra second, so the engulf climbs the body at one steady pace
-// (owner, 2026-10-21: 「炎がアンダースーツを段々と覆っていき、爆散」). Every
-// authored materialization, docking and final-light clock after it keeps
-// its canonical value; wall time continues driving the flame's texture.
+// The entry stretches its opening (canonical 0–420 ms, up to the 爆散)
+// uniformly over one extra second, so the engulf climbs the body at one
+// steady pace (owner, 2026-10-21: 「炎がアンダースーツを段々と覆っていき、
+// 爆散」). Every authored materialization, docking and final-light clock
+// after it keeps its canonical value; wall time continues driving the
+// flame's texture. The fire itself waits for the undersuit (entryFlamePhase).
 export const REXONANCE_ENTRY_VORTEX_HOLD_MS = 1000;
 const VORTEX_LINGER_FROM = 0;
 const VORTEX_LINGER_TO = 420;
@@ -52,8 +53,9 @@ export function entryElapsedTime(canonicalMs) {
 //   burstStart → burstEnd   爆散: the fire detonates outward into fragments;
 //   materialStart   the first fragments have cooled into nanite chips;
 //   flameEnd   the last fragment is a chip; nothing of the fire remains.
-// Entry uses t/2400; scroll uses (q-.02)/.48, so both scenes retain the
-// same causal order even when the reader reverses or jumps the clock.
+// Entry uses entryFlamePhase(t) (t/2400 from the burst on); scroll uses
+// (q-.02)/.48, so both scenes retain the same causal order even when the
+// reader reverses or jumps the clock.
 export const NANITE_FIRE_PHASES = Object.freeze({
   kindle: 0.025,
   cleanFrom: 0.095,
@@ -64,6 +66,47 @@ export const NANITE_FIRE_PHASES = Object.freeze({
   materialStart: 0.195,
   flameEnd: 0.25,
 });
+
+// The entry's undersuit scan (FAR UP！, rexonance-call-sequence.tsx and the
+// stylesheet's rxSuitScanWindow): authored over canonical 70 → 320 ms, its
+// window starts at the stylesheet's own 70 ms delay and runs the stretched
+// span, so the bare undersuit is whole, soles last, at elapsed
+// 70 + entrySpan(70, 250) ≈ 915 ms (canonical ≈ 270.7).
+export const REXONANCE_ENTRY_SCAN = Object.freeze({ delay: 70, from: 70, span: 250 });
+export const REXONANCE_ENTRY_SCAN_END = entryCanonicalTime(
+  REXONANCE_ENTRY_SCAN.delay +
+    entryElapsedTime(REXONANCE_ENTRY_SCAN.from + REXONANCE_ENTRY_SCAN.span) -
+    entryElapsedTime(REXONANCE_ENTRY_SCAN.from),
+);
+const ENTRY_FLAME_MS = 2400;
+const ENTRY_BURST = NANITE_FIRE_PHASES.burstStart * ENTRY_FLAME_MS;
+
+/** The entry's fire phase at canonical `t` ms. Nothing burns until the scan
+ * has revealed the whole undersuit (0 up to REXONANCE_ENTRY_SCAN_END: no
+ * flame in the air where the legs are not yet drawn); the kindle, engulf
+ * and torch then run in the time left, reaching burstStart exactly at the
+ * unchanged 爆散 (canonical 420), and from there it is t / 2400, so the
+ * burst, the material, the fire's end and every fragment's handoff keep
+ * their clocks. Monotone, continuous, closed-form: a reversed clock
+ * retreats over the very same frames. */
+export function entryFlamePhase(canonicalMs) {
+  if (!Number.isFinite(canonicalMs) || canonicalMs <= REXONANCE_ENTRY_SCAN_END) return 0;
+  if (canonicalMs >= ENTRY_BURST) return canonicalMs / ENTRY_FLAME_MS;
+  return (
+    (NANITE_FIRE_PHASES.burstStart * (canonicalMs - REXONANCE_ENTRY_SCAN_END)) /
+    (ENTRY_BURST - REXONANCE_ENTRY_SCAN_END)
+  );
+}
+/** The inverse: the canonical ms at which the entry's fire reaches `phase`
+ * (a phase of 0 or less: the ignition, at the scan's end). */
+export function entryFlameTime(phase) {
+  if (!Number.isFinite(phase) || phase <= 0) return REXONANCE_ENTRY_SCAN_END;
+  if (phase >= NANITE_FIRE_PHASES.burstStart) return phase * ENTRY_FLAME_MS;
+  return (
+    REXONANCE_ENTRY_SCAN_END +
+    (phase * (ENTRY_BURST - REXONANCE_ENTRY_SCAN_END)) / NANITE_FIRE_PHASES.burstStart
+  );
+}
 // The engulf front overshoots the farthest body point (arrival 1) so its
 // irregular edge noise cannot leave an unburnt island before the torch.
 const COVER_OVERSHOOT = 1.12;

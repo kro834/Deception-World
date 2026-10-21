@@ -13,8 +13,8 @@ import { REXONANCE_SUIT_MARKS, REXONANCE_SUIT_PIECES, REXONANCE_SUIT_SIZE } from
 import { FIELD_WAKE, fieldScore } from "./index.js";
 import type { FieldScore } from "./index.js";
 
-/** The entry's fire phase is its canonical clock over this (rexonance-
- * ignition.js: entry t / 2400). */
+/** The entry's fire phase is its canonical clock over this from the burst
+ * on, where the wake begins (rexonance-ignition.js: entryFlamePhase). */
 const ENTRY_FLAME_MS = 2400;
 
 /** The groups the field converges on, in the fixed fit order: the cascade's

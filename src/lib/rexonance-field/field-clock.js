@@ -1,8 +1,9 @@
 /* RESONANCE FIELD: the fire's clocks, in one place. The entry maps its
-   canonical clock to the shared fire phase as t / 2400 (rexonance-
-   ignition.js); the scroll maps its progress q through REXONANCE_SCROLL_
-   FLAME; and the field's wake (the burst's fragments becoming the field) is
-   one window of that phase both scenes read. The owner's new opening
+   canonical clock to the shared fire phase as t / 2400 from the burst on
+   (entryFlamePhase, rexonance-ignition.js); the scroll maps its progress q
+   through REXONANCE_SCROLL_FLAME; and the field's wake (the burst's
+   fragments becoming the field) is one window of that phase both scenes
+   read. The owner's new opening
    (2026-10-21: 「炎がアンダースーツを段々と覆っていき、爆散。ナノマシンと化し、
    そこから装着シークエンスが始まります。」) gives the engulf a long runway:
    every scroll-side clock (the swarm's births, the field's wake, the scene's
