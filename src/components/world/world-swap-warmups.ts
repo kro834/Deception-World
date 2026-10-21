@@ -22,17 +22,22 @@ export function riderArtCandidates(source: string) {
   return { srcSet: source.replace(/\.jpe?g$/i, ".webp"), sizes: RIDER_ART_SIZES };
 }
 
-/** The pictures REVERSE (ダンテ) and RELATED show, cheapest first. They are
- * plain sources (no srcset) in world-home.tsx and other-artwork-card.tsx. */
+/** The archive portraits, cheapest first; Varg uses responsive candidates. */
 export const ARCHIVE_TAB_PICTURES: readonly string[] = [
   "/character-dante-thumb.webp",
+  "/character-varg-20261021-360.webp",
   ...OTHER_ARTWORK.map((artwork) => artwork.thumb),
   "/character-yoake-mamori.jpeg",
   "/character-terra-thumb.jpeg",
   "/character-luna-thumb.jpeg",
 ];
 
-const plainSource = (source: string) => dossierImage(source);
+const plainSource = (source: string) => source.includes("character-varg-")
+  ? {
+      srcSet: `${source} 360w, ${source.replace("-360", "-720")} 720w, ${source.replace("-360", "")} 1088w`,
+      sizes: "(max-width: 760px) 45vw, 360px",
+    }
+  : dossierImage(source);
 
 /** Warm the riders after the shown one (in rail order, wrapping) and the
  * archive's other tabs. Returns the cleanup. */

@@ -1,3 +1,12 @@
+              </div>
+              <div className="world-column-summary-stack">
+                {COLUMNS.map((item, index) => (
+                  <div
+                    key={item.no}
+                    className={`world-column-summary-pane world-column-stack-item${index === columnTab ? " is-active" : ""}`}
+                    aria-hidden={index !== columnTab}
+                  >
+                    <p>{item.body}</p>
                   </div>
                 ))}
               </div>

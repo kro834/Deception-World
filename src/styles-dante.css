@@ -1,6 +1,25 @@
 /* The illustration is shown whole (contain) on its own paper; the frame
    takes that paper so the room below the figure reads as part of it. The
    shared dark frame rule is more specific than a page class alone. */
+.dante-page .varg-portrait {
+  width: min(100%, 640px);
+  margin: 0 0 32px;
+  border: 1px solid rgba(237, 102, 126, 0.35);
+  background: #090b10;
+}
+.dante-page .varg-portrait img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+.dante-page .varg-portrait figcaption {
+  padding: 14px 16px;
+  color: var(--manager-accent);
+  font-size: 13px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
 .dante-page.manager-page:not(.is-sovereign) .manager-portrait-frame {
   background: #ede8ea;
 }

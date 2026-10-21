@@ -25,7 +25,18 @@ try {
     await page.goto(`${base}/characters/dante`);
     await ready(page);
     assert.match(await page.title(), /ダンテ/);
-    assert.equal(await page.locator("h1 .manager-display-name").textContent(), "ダンテ");
+    assert.equal(await page.locator("h1 .manager-display-name").textContent(), "ダンテ／ヴァルグ");
+    assert.equal(await page.locator('[aria-label="ヴァルグの人物録"] > div').count(), 10);
+    for (const name of ["原圧", "界外実体", "重勢", "不退", "深紅冠", "重相復元", "存在捕食", "認知追跡"])
+      assert.equal(await page.getByRole("heading", { name, exact: true }).count(), 1);
+    assert.equal(await page.locator(".manager-copy-section").count(), 17);
+    const varg = page.locator(".varg-portrait img");
+    await show(varg);
+    await varg.evaluate((img) => img.decode());
+    // Width-descriptor srcsets report density-corrected naturalWidth, not file pixels.
+    assert.ok(await varg.evaluate((img) => img.naturalWidth > 0 && img.currentSrc.includes("character-varg-20261021")));
+    assert.equal(await varg.evaluate((img) => getComputedStyle(img).objectFit), "contain");
+    await page.screenshot({ path: `/tmp/varg-${process.env.PW_ENGINE || "chromium"}-${viewport.width}.png` });
     await page.waitForFunction(
       () => getComputedStyle(document.querySelector(".dante-entry-glitch")).opacity === "0",
     );
@@ -74,15 +85,26 @@ try {
       const back = page.locator(selector);
       await show(back);
       await back.click();
-      await page.waitForURL("**/world#manager-archive-unmanaged");
+      await page.waitForURL("**/world#manager-archive-dogs");
       await ready(page);
       await page.waitForFunction(
-        () => document.querySelector("#manager-tab-1")?.getAttribute("aria-selected") === "true",
+        () => document.querySelector("#manager-tab-3")?.getAttribute("aria-selected") === "true",
       );
-      const entry = page.locator('.dante-archive[href="/characters/dante"]');
+      assert.deepEqual(await page.locator('.manager-archive-tabs button b').allTextContents(), ["六詠", "管理外", "その他", "犬"]);
+      await page.locator('#manager-tab-2').click();
+      await page.locator('#manager-panel-2').waitFor();
+      assert.equal(await page.locator('#manager-panel-2 a[href="/characters/terra"]').count(), 1);
+      assert.equal(await page.locator('#manager-panel-2 a[href="/characters/dante"]').count(), 0);
+      await page.locator('#manager-tab-3').click();
+      await page.locator('#manager-panel-3').waitFor();
+      const entry = page.getByRole("link", { name: "第二の犬 ダンテ／ヴァルグの人物資料を開く", exact: true });
       await show(entry);
+      await entry.locator("img").evaluate((img) => img.decode());
+      assert.ok(await entry.locator("img").evaluate((img) => img.currentSrc.includes("character-varg-20261021")));
+      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), "four-tab archive horizontal overflow");
+      await page.screenshot({ path: `/tmp/dogs-fourth-${process.env.PW_ENGINE || "chromium"}-${viewport.width}.png` });
       await entry.click();
-      await page.waitForURL("**/characters/dante");
+      await page.waitForURL("**/characters/dante#character-section-04");
       await ready(page);
     }
     await page.emulateMedia({ reducedMotion: "reduce" });
