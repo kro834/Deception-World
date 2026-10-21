@@ -799,3 +799,103 @@ export function drawBodyFlame(context, size, strength, clock, scale = 1, layer =
     context.restore();
   }
 }
+
+// The fire's heat (owner, 2026-10-21: 炎を改善): the volume above reads as
+// smoke without a hot core, so bright tongues rise from a burning bed that
+// hugs the body's outline, cooling from a near-white green core through
+// green to forest green, with sparks. Additive, a pure function of the
+// clock (no particles kept between frames), sprites built once.
+const HEAT_TONES = [
+  [226, 255, 208],
+  [120, 236, 110],
+  [44, 170, 52],
+];
+let heatSprites = null;
+const heatSpritesFor = () => {
+  if (heatSprites) return heatSprites;
+  const doc = globalThis.document;
+  if (!doc?.createElement) return null;
+  heatSprites = HEAT_TONES.map(([r, g, b]) => {
+    const canvas = doc.createElement("canvas");
+    canvas.width = canvas.height = 64;
+    const c = canvas.getContext("2d");
+    if (c?.createRadialGradient) {
+      const glow = c.createRadialGradient(32, 32, 0, 32, 32, 32);
+      glow.addColorStop(0, `rgb(${r} ${g} ${b} / 1)`);
+      glow.addColorStop(0.3, `rgb(${r} ${g} ${b} / 0.6)`);
+      glow.addColorStop(1, `rgb(${r} ${g} ${b} / 0)`);
+      c.fillStyle = glow;
+      c.fillRect(0, 0, 64, 64);
+    }
+    return canvas;
+  });
+  return heatSprites;
+};
+const heatHash = (n) => {
+  const x = Math.sin(n * 127.1 + 311.7) * 43758.5453;
+  return x - Math.floor(x);
+};
+// The body's half-width at a height (fractions of the figure).
+const HEAT_PROFILE = [
+  [0.06, 0.07],
+  [0.18, 0.08],
+  [0.24, 0.38],
+  [0.4, 0.34],
+  [0.5, 0.23],
+  [0.62, 0.25],
+  [0.8, 0.23],
+  [0.97, 0.27],
+];
+const heatHalfWidth = (v) => {
+  for (let k = 1; k < HEAT_PROFILE.length; k += 1) {
+    const [y1, w1] = HEAT_PROFILE[k];
+    if (v <= y1) {
+      const [y0, w0] = HEAT_PROFILE[k - 1];
+      return w0 + ((w1 - w0) * (v - y0)) / (y1 - y0);
+    }
+  }
+  return HEAT_PROFILE[HEAT_PROFILE.length - 1][1];
+};
+const HEAT_TONGUES = 220;
+const HEAT_SPARKS = 40;
+
+export function drawFlameHeat(context, size, strength, clock, scale = 1) {
+  if (!(strength > 0) || !Number.isFinite(clock) || !size) return;
+  const sprites = heatSpritesFor();
+  if (!sprites) return;
+  const W = size.width;
+  const H = size.height;
+  context.save();
+  if (scale !== 1) context.scale(scale, scale);
+  context.globalCompositeOperation = "lighter";
+  for (let i = 0; i < HEAT_TONGUES; i += 1) {
+    if (heatHash(i + 0.5) > strength * 1.1) continue;
+    const age = (clock * (0.6 + 0.5 * heatHash(i + 1.3)) + heatHash(i + 2.7)) % 1;
+    const v = 0.05 + 0.93 * heatHash(i + 3.9);
+    const side = heatHash(i + 4.7) < 0.5 ? -1 : 1;
+    const floor = heatHash(i + 5.3) < 0.18;
+    const bx = floor
+      ? W * (0.5 + (heatHash(i + 6.1) - 0.5) * 0.7)
+      : W * (0.5 + side * (heatHalfWidth(v) + 0.005 + 0.025 * heatHash(i + 6.9)));
+    const by = floor ? H * 0.985 : H * v;
+    const lift = (70 + 90 * heatHash(i + 7.7)) * age;
+    const sway = Math.sin(clock * 3.1 + i * 1.3 + age * 6) * 6 * age;
+    const s = (26 + 30 * heatHash(i + 8.3)) * (1 - age * 0.55);
+    const tone = age < 0.22 ? 0 : age < 0.55 ? 1 : 2;
+    context.globalAlpha = Math.min(1, Math.sin(Math.PI * Math.min(1, age * 1.2)) * strength * (tone ? 0.8 : 1));
+    context.drawImage(sprites[tone], bx + sway - s / 2, by - lift - s * 0.7, s, s * 1.4);
+  }
+  context.fillStyle = "rgb(200 255 180)";
+  for (let i = 0; i < HEAT_SPARKS; i += 1) {
+    if (heatHash(i + 40.5) > strength) continue;
+    const age = (clock * (0.4 + 0.3 * heatHash(i + 41.1)) + heatHash(i + 42.7)) % 1;
+    const v = 0.08 + 0.9 * heatHash(i + 43.3);
+    const side = heatHash(i + 44.9) < 0.5 ? -1 : 1;
+    const x = W * (0.5 + side * (heatHalfWidth(v) + 0.02)) + Math.sin(clock * 2 + i) * 10 * age;
+    const y = H * v - 110 * age;
+    const d = 1.2 + 1.6 * (1 - age);
+    context.globalAlpha = (1 - age) * 0.85 * strength;
+    context.fillRect(x - d / 2, y - d / 2, d, d);
+  }
+  context.restore();
+}

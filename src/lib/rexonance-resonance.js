@@ -9,6 +9,7 @@ import {
 import { createSplitLightsJob } from "./rexonance-unlit.js";
 import {
   drawBodyFlame,
+  drawFlameHeat,
   drawNaniteFlame,
   prepareBodyFlame,
   warmNaniteFlame,
@@ -2974,7 +2975,10 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
 
     // The cocoon's far side, behind the body.
     if (nanites) nanites.backPass(context);
-    if (flame > 0) drawBodyFlame(context, config.size, flame, flameClock, 1, "back", flamePhase);
+    if (flame > 0) {
+      drawBodyFlame(context, config.size, flame, flameClock, 1, "back", flamePhase);
+      drawFlameHeat(context, config.size, Math.min(1, Math.sqrt(flame) * 1.4), flameClock);
+    }
     // FAR UP！: the scan wakes the undersuit, top to bottom.
     const scan = span(progress, B.scan);
     if (seal < 1) {
