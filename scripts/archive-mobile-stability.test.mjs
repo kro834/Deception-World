@@ -21,9 +21,9 @@ const embeddedArchives = [
 test("the app uses memory-safe embedded archives and recreates the iframe when switching", () => {
   assert.match(route, /\/saga-form-archive-embedded\.html/);
   assert.match(route, /\/realm-form-archive-embedded\.html/);
-  // r51: the archives gained URL state and the spec difference (rx6).
-  assert.match(route, /saga-form-archive-embedded\.html\?v=20261010-cockpit/);
-  assert.match(route, /realm-form-archive-embedded\.html\?v=20261010-cockpit/);
+  // Owner (2026-10-21): the archives link the Zenith sheet (archive-zenith.css).
+  assert.match(route, /saga-form-archive-embedded\.html\?v=20261021-zenith/);
+  assert.match(route, /realm-form-archive-embedded\.html\?v=20261021-zenith/);
   assert.match(route, /<iframe[\s\S]*?key=\{`\$\{archive\}:\$\{transitionGeneration\}`\}/);
   assert.doesNotMatch(route, /-standalone\.html/);
   // A history step to another form of the same archive reopens it (reopen).
