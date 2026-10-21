@@ -133,6 +133,54 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > header.
   translate: 0 -1px;
 }
 
+/* Phones (360–680): the bar had no chapters at all. It now carries the
+   chapter in view beside the name — the same link, its lit line, and
+   from 390px its numeral — so the reader always knows where they are and
+   one tap returns to the chapter's start. The other links stay in the box
+   tree (their numerals still count, their styles stay current) but take
+   no room, no pointer and no focus; over the hero the bar shows none. */
+@media (min-width: 360px) and (max-width: 680px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > header.rxs-local-nav .rxs-local-nav-inner {
+    grid-template-columns: minmax(0, 1fr) auto 48px;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > header.rxs-local-nav nav {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0;
+    min-width: 0;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > header.rxs-local-nav nav a:not([aria-current="location"]) {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1px;
+    min-width: 0;
+    height: 1px;
+    min-height: 0;
+    overflow: hidden;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > header.rxs-local-nav nav a[aria-current="location"] {
+    padding-inline: 6px 2px;
+    white-space: nowrap;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > header.rxs-local-nav .rxs-brand > b {
+    white-space: nowrap;
+  }
+}
+
+@media (min-width: 390px) and (max-width: 680px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > header.rxs-local-nav nav {
+    --rxa-nav-numeral: counter(rxa-nav, decimal-leading-zero);
+  }
+}
+
 /* The chapter in view: its numeral in gold. */
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > header.rxs-local-nav nav a[aria-current="location"]::before {
   color: var(--rxa-gold);
