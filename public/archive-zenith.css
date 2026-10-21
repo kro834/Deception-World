@@ -7,11 +7,10 @@
    labels, dialogs and controls are the documents' own and stay in their
    order; the document stays the only page scroller.
 
-   1. Tablets (621–900px): the form index becomes one card grid. The
+   1. Tablets (621–900px): the form index becomes a stack of bays. The
       six tier plates stood in three columns at unequal heights, so a
       two-form tier left a dark void under its cards. Now each tier
-      heads a row of its own cards and the rows pack; the empty plates
-      are gone.
+      heads a bay of its own cards; the empty plates are gone.
    2. The rail (901px and up): a tier's odd last card (S-05, ULTRA, the
       one-form Realm tiers) spans both columns as a wide portrait
       instead of leaving a dead cell.
@@ -27,15 +26,20 @@
    ================================================================ */
 
 /* ================================================================
-   1. Tablets: one card grid; each tier opens its row with a head plate.
+   1. Tablets: a stack of bays; each tier opens its bay with a head plate.
    ================================================================ */
 @media (min-width: 621px) and (max-width: 900px) {
+  /* The index: the tiers stack, one bay each. (2026-10-22: a bay is the
+     tier's own grid, so a tier wider than the row — Saga's five ultimate
+     forms at 768px and below — wraps its cards under its first card, not
+     under the next tier's heads.) */
   html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="form-selector"] .progression {
     --zn-card-h: 148px;
+    --zn-head-w: 120px;
+    --zn-card-min: 100px;
     display: grid !important;
-    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)) !important;
+    grid-template-columns: minmax(0, 1fr) !important;
     grid-auto-flow: row !important;
-    grid-auto-rows: var(--zn-card-h) !important;
     align-items: stretch !important;
     gap: 8px !important;
     width: auto !important;
@@ -51,36 +55,69 @@
   @media (min-width: 768px) {
     html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="form-selector"] .progression {
       --zn-card-h: 160px;
-      grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)) !important;
+      --zn-card-min: 118px;
     }
   }
 
-  /* The tier box and its card box dissolve: the head and the cards
-     join the grid directly, in document order. */
-  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="form-selector"] .progression .stage,
-  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="form-selector"] .progression .stage .stage-forms {
-    display: contents !important;
-  }
-
-  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="form-selector"] .progression .stage::before,
-  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="form-selector"] .progression .stage::after,
   html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="form-selector"] .progression::before,
-  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="form-selector"] .progression::after {
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="form-selector"] .progression::after,
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="form-selector"] .progression .stage::before,
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="form-selector"] .progression .stage::after {
     display: none !important;
   }
 
-  /* A tier's head: a plate the size of a card that opens the tier's
-     row — the index in ice at the top, the name set large, the count at
-     the foot, a lit left edge. */
+  /* A bay: the head plate, then the tier's cards on a faint track that
+     runs to the panel's edge, so a short tier's open slots read as the
+     empty bays of its row, not as a void. */
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="form-selector"] .progression .stage {
+    display: grid !important;
+    grid-template-columns: var(--zn-head-w) minmax(0, 1fr) !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+    flex: none !important;
+    width: auto !important;
+    min-width: 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 3px !important;
+    background:
+      linear-gradient(rgb(122 232 255 / 10%) 0 0) 0 0 / 100% 1px no-repeat,
+      linear-gradient(90deg, rgb(122 232 255 / 4%), rgb(122 232 255 / 2.5%)) !important;
+    box-shadow: none !important;
+    scroll-snap-align: none !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="form-selector"] .progression .stage .stage-forms {
+    display: grid !important;
+    grid-column: 2 !important;
+    grid-template-columns: repeat(auto-fill, minmax(var(--zn-card-min), 1fr)) !important;
+    grid-auto-rows: var(--zn-card-h) !important;
+    gap: 8px !important;
+    width: auto !important;
+    min-width: 0 !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* A tier's head: a plate the width of a card that opens the tier's
+     bay — the index in ice at the top, the name set large, the count at
+     the foot, a lit left edge. A two-row bay gives it both rows. */
   html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="form-selector"] .progression .stage .stage-head {
-    grid-column: 1 / span 1 !important;
+    grid-column: 1 !important;
     display: grid !important;
     grid-template-rows: auto minmax(0, 1fr) auto !important;
     align-content: stretch !important;
     align-items: start !important;
     justify-items: start !important;
     gap: 0 !important;
-    min-height: 0 !important;
+    width: auto !important;
+    min-width: 0 !important;
+    height: auto !important;
+    min-height: var(--zn-card-h) !important;
     margin: 0 !important;
     padding: 9px 8px 9px 11px !important;
     border: 0 !important;
@@ -129,9 +166,10 @@
     line-height: 1.25 !important;
     letter-spacing: 0.04em !important;
     white-space: normal !important;
-    overflow-wrap: anywhere;
   }
 
+  /* The count breaks at its spaces only (03 SYSTEMS, BASE / MAX /
+     ULTRA), never inside a word. */
   html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="form-selector"] .progression .stage .stage-meta {
     grid-row: 3 !important;
     align-self: end !important;
@@ -143,18 +181,20 @@
     color: var(--ar-text-3, #8fa6ba) !important;
     font-size: 12px !important;
     line-height: 1.35 !important;
-    letter-spacing: 0.06em !important;
+    letter-spacing: 0.04em !important;
     text-align: left !important;
     text-overflow: clip !important;
     white-space: normal !important;
-    overflow-wrap: anywhere;
+    overflow-wrap: normal !important;
   }
 
-  /* The cards: portraits the height of the row. */
-  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="form-selector"] .progression .form-chip {
+  /* The cards: portraits the height of the row (the poster sheet's 4:5
+     would make them taller than their row in a wider bay). */
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="form-selector"] .progression .stage[data-tier] .stage-forms > .form-chip {
     scroll-margin-block: 16px;
     width: auto !important;
     height: var(--zn-card-h) !important;
+    aspect-ratio: auto !important;
     min-height: 0 !important;
     min-width: 0 !important;
   }
@@ -249,11 +289,27 @@ html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm
   background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, repeat, repeat, no-repeat !important;
 }
 
+/* EXPAND VISUAL used to show the art at its file size (400 x 600) inside
+   a 1118 x 761 plate, smaller than the record shows it (556 x 798 at
+   1440px). The art now fills the plate's window, contained at its own
+   proportions (the arts run from 400 x 441 to 1086 x 1448), and the
+   window's one row is a definite 1fr, so a tall art shrinks to fit
+   instead of scrolling the plate by 8px (1024 x 768). The shadow follows
+   the painted art, not the window. */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .lightbox-image-wrap {
+  grid-template-columns: minmax(0, 1fr) !important;
+  grid-template-rows: minmax(0, 1fr) !important;
+  overflow: hidden !important;
+}
+
 html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .lightbox-image {
-  box-shadow:
-    0 0 0 1px rgb(255 255 255 / 8%),
-    0 24px 60px -24px rgb(var(--active-rgb, 122 232 255) / 60%),
-    0 40px 90px -30px rgb(0 0 0 / 90%) !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  object-fit: contain !important;
+  box-shadow: none !important;
+  filter: drop-shadow(0 22px 34px rgb(var(--active-rgb, 122 232 255) / 34%));
 }
 
 /* ================================================================
@@ -429,8 +485,13 @@ html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm
   text-wrap: pretty;
 }
 
-html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .form-detail .spec-value {
-  text-wrap: balance;
+/* Balanced figures where the engine also breaks by phrase (Chromium):
+   WebKit's balance broke 150TOPS / 50Core（Spark G2） after its opening
+   bracket, so Safari keeps its own wrap. */
+@supports (word-break: auto-phrase) {
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .form-detail .spec-value {
+    text-wrap: balance;
+  }
 }
 
 /* A record with an odd number of figures (Realm's nine) lets the last
