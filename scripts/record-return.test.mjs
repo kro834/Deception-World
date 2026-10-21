@@ -928,6 +928,8 @@ function openHarness({ store, deferGo = false } = {}) {
         };
       if (name === "@/lib/record-arrival")
         return { watchRecordArrival: (...args) => calls.push(["arrival", ...args]) };
+      // Owner (2026-10-21): the opener hands the landing ring's sheet to the arrival watcher.
+      if (name === "@/styles-record-landing.css?url") return { default: "/record-landing.css" };
       if (name === "@/lib/record-return-state")
         return {
           ...state,

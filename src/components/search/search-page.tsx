@@ -191,11 +191,16 @@ export function SearchPage({
     window.clearTimeout(queryTimerRef.current);
     queryTimerRef.current = undefined;
     writtenRef.current = draft;
-    void openResult(result, fromKeyboard, {
-      pathname: "/search",
-      search: { q: draft, category, shown },
-      cardId: recordReturnCardId("search", result.document.id),
-    });
+    void openResult(
+      result,
+      fromKeyboard,
+      {
+        pathname: "/search",
+        search: { q: draft, category, shown },
+        cardId: recordReturnCardId("search", result.document.id),
+      },
+      draft.trim() ? `「${draft.trim()}」` : undefined,
+    );
   };
 
   // Cards keep one handler, so moving the active option re-renders two cards.
@@ -437,6 +442,7 @@ export function SearchPage({
                               key={document.id}
                               art={documentArt(document, RECORD_NUMBER.get(document.id) ?? 0)}
                               title={document.title}
+                              slot="peek"
                             />
                           ))}
                         </span>
@@ -473,8 +479,12 @@ export function SearchPage({
               query={trimmed}
               filtered={category !== "all"}
               elsewhere={all.length}
+              elsewhereByCategory={CATEGORY_ORDER.flatMap((id) =>
+                id !== category && counts.get(id) ? [[id, counts.get(id) ?? 0] as const] : [],
+              )}
               suggestions={suggestions}
               onSuggest={setQuery}
+              onCategory={onCategoryChange}
               onClearCategory={() => onCategoryChange("all")}
               onClearQuery={() => setQuery("")}
             />
@@ -538,22 +548,29 @@ function EmptyState({
   query,
   filtered,
   elsewhere,
+  elsewhereByCategory,
   suggestions,
   onSuggest,
+  onCategory,
   onClearCategory,
   onClearQuery,
 }: {
   query: string;
   filtered: boolean;
   elsewhere: number;
+  elsewhereByCategory: readonly (readonly [string, number])[];
   suggestions: readonly string[];
   onSuggest: (value: string) => void;
+  onCategory: (value: string) => void;
   onClearCategory: () => void;
   onClearQuery: () => void;
 }) {
   return (
     <div className="search-empty">
       <SearchGlyph />
+      <p className="search-empty-code" aria-hidden="true">
+        NO MATCH
+      </p>
       <h3>一致する資料が見つかりませんでした。</h3>
       {suggestions.length ? (
         <div className="search-close-matches">
@@ -568,6 +585,15 @@ function EmptyState({
         </div>
       ) : null}
       <p>名前の一部や短い言葉で探してみてください。分類を解除すると、ほかの資料も検索できます。</p>
+      {filtered && elsewhereByCategory.length ? (
+        <div className="search-empty-kinds" role="group" aria-label="ほかの分類にある資料">
+          {elsewhereByCategory.map(([id, count]) => (
+            <button key={id} type="button" onClick={() => onCategory(id)}>
+              {categoryLabel(id)} <span>{count}</span>
+            </button>
+          ))}
+        </div>
+      ) : null}
       <div>
         {filtered && elsewhere ? (
           <button type="button" onClick={onClearCategory}>

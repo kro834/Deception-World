@@ -153,8 +153,10 @@ const PAGES: Record<string, Picture & { edition: RecordEdition; code: string }> 
     code: "DREAM",
   },
   "/gallery": { src: "/gallery/g01-480.webp", pos: "50% 30%", edition: "gallery", code: "GALLERY" },
-  // Vertex, not Multi: the archive's own Multi form card sits next to it in /search.
-  "/form-archive": { ...formThumb("saga", "vertex"), edition: "archive", code: "ARCHIVE" },
+  // Realm Royal (a 1200px supplied file, so the window stays sharp at every
+  // size; Vertex and Multi are 400px): the archive's own Saga form cards sit
+  // next to it in /search, and the Realm side of the archive shows here.
+  "/form-archive": { ...formThumb("realm", "royal"), edition: "archive", code: "ARCHIVE" },
   "/rexonance-saga": {
     ...formThumb("saga", "rexonance-ultra"),
     edition: "rexonance",
@@ -314,6 +316,24 @@ export function documentArt(document: ArtDocument, number: number): RecordArt {
 export function plateWords(title: string): string {
   const match = /^(?:CASE\s*\d+|コラム\s*\d+)\s*[／/]?\s*[「『]?(.+?)[」』]?$/u.exec(title.trim());
   return match ? match[1] : title;
+}
+
+/** A plate's words down its spine as CSS variables, so a card's plate can
+ * set the name to fit its window's height (styles-library-zenith.css):
+ * --dxl-plate-em is the run's advance in ems (a full-width letter 1, a Latin
+ * letter or digit, set sideways, about 0.62, a space 0.3) and --dxl-plate-n
+ * its letters, each followed by the plate's letter-spacing. */
+export function plateRunStyle(words: string): CSSProperties {
+  let em = 0;
+  let letters = 0;
+  for (const letter of words) {
+    letters += 1;
+    em += /\s/u.test(letter) ? 0.3 : letter.charCodeAt(0) < 0x250 ? 0.62 : 1;
+  }
+  return {
+    "--dxl-plate-em": Math.round(em * 100) / 100,
+    "--dxl-plate-n": letters,
+  } as CSSProperties;
 }
 
 /** The widest run of a title that cannot wrap, in ems: no space, no name seam
