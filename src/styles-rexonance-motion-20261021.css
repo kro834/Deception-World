@@ -1,0 +1,803 @@
+/* ================================================================
+   KINETIC (rxk, 2026-10-21): the Rexonance page's motion, brushed up.
+
+   Owner (2026-10-21): 「フォントやアニメーションなど、全てを大きくブラッシュ
+   アップして」. This sheet is the motion half, outside the suit-up canvas
+   and the fire: how each chapter opens, how the reader is handed from the
+   call to the page, what answers the pointer, and the end card.
+
+   The beats, in page order:
+   - the hand-over: the contents slate cascades in as the cover lifts;
+   - each chapter's English call is set letter by letter and rises; its
+     title arrives line by line through a mask; the lede follows
+     (src/lib/rexonance-choreography.js arms and plays these once);
+   - the instruments' rows cascade a beat further than before;
+   - a reading rail at the right edge of wide screens fills with the
+     scroll and names the chapter that holds the screen;
+   - links, tabs and cards answer a hover and a press;
+   - the end card: the last call, the last line through its mask, the
+     links in a cascade.
+
+   Rules kept: transform and opacity only; every run finite (480–900 ms)
+   or scroll-driven (compositor, no scroll listener); nothing hidden
+   until the script arms it, so the page is complete without JS;
+   reduced motion, economy rendering and the Android tier rest fully
+   drawn; the menu and dialogs never replay a beat; no element becomes
+   a scroll container (the html stays the sole scroller). Loaded last of
+   the page's sheets, before the cinematic sheet; type rules are the
+   type sheets' and are not touched here.
+   ================================================================ */
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page {
+  --rxk-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --rxk-snap: cubic-bezier(0.7, 0, 0.2, 1);
+  --rxk-ice: 121 232 255;
+  --rxk-gold: 242 216 150;
+}
+
+/* ---------------- The split structure (the script's) ---------------- */
+/* The hidden copy of a lettered call: the words stay whole for assistive
+   technology; the letters are decoration. */
+.rxs-page.rxs-page.rxs-rexonance-page .rxk-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxk-word {
+  display: inline;
+}
+
+/* A letter must be a box to move; it keeps the call's own tracking. */
+.rxs-page.rxs-page.rxs-rexonance-page .rxk-ch {
+  display: inline-block;
+  font: inherit;
+  color: inherit;
+  letter-spacing: inherit;
+  font-style: normal;
+  will-change: auto;
+}
+
+/* A split title's lines are blocks (its <br> made them lines already; the
+   break is kept in the markup and hidden while the blocks stand). Each
+   line is a mask: the text slides up into it. The mask leaves room above
+   and below for ascenders, the 。 and the balanced wrap. */
+.rxs-page.rxs-page.rxs-rexonance-page [data-rxk-split="lines"] > br,
+.rxs-page.rxs-page.rxs-rexonance-page [data-rxk-split="lines"] > wbr {
+  display: none;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxk-line {
+  display: block;
+  clip-path: inset(-0.14em -0.1em -0.2em -0.1em);
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxk-line-in {
+  display: block;
+  transform-origin: 0 100%;
+}
+
+/* ---------------- Armed: hidden until the reader reaches it ---------------- */
+/* Only the script sets these (and only on what is still below the fold or
+   under the cover), so the page without it rests fully drawn. */
+@media (prefers-reduced-motion: no-preference) {
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    [data-rxk="armed"]
+    .rxk-ch {
+    opacity: 0;
+    transform: translate3d(0, 0.7em, 0);
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    [data-rxk="armed"]
+    .rxk-line-in {
+    transform: translate3d(0, 118%, 0) skewY(3deg);
+  }
+
+  /* A split title no longer fades on the scroll (the mask is its entrance);
+     it keeps a short drift, so it still settles with the lede. */
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    :is(.rxs-section-heading h2, .rxs-footer h2)[data-rxk-split] {
+    animation-name: rxk-drift;
+  }
+
+  /* The end card's links: armed, they wait below their line; "in", they
+     cascade up, the return last. */
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    > .rxs-footer[data-rxk="armed"]
+    > a {
+    opacity: 0;
+    translate: 0 26px;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    > .rxs-footer[data-rxk="in"]
+    > a {
+    opacity: 1;
+    translate: 0 0;
+    transition:
+      opacity 640ms var(--rxk-out) 120ms,
+      translate 640ms var(--rxk-out) 120ms;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    > .rxs-footer[data-rxk="in"]
+    > a:nth-of-type(2) {
+    transition-delay: 230ms;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    > .rxs-footer[data-rxk="in"]
+    > a:nth-of-type(3) {
+    transition-delay: 340ms;
+  }
+}
+
+@keyframes rxk-drift {
+  from {
+    translate: 0 28px;
+  }
+
+  to {
+    translate: 0 0;
+  }
+}
+
+/* ---------------- The hand-over: the contents slate ---------------- */
+/* Keyed to the load gate exactly as the hero's arrival is (styles-showcase-
+   cinema.css): while html[data-loading] stands the slate rests drawn under
+   the cover; as the cover lifts its five chapters rise in order under
+   their heading, a beat after the hero's own beats (the shared --sx-delay).
+   A direct load plays it from the first paint with the hero, never after
+   hydration, so the rows never blink. Finite, and at rest fully drawn. */
+@media (prefers-reduced-motion: no-preference) {
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-loading])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rxe-chapter-map
+    > a {
+    animation: rxk-slate 620ms var(--rxk-out) calc(var(--sx-delay, 0ms) + 360ms) both;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-loading])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rxe-chapter-map
+    > a:nth-of-type(2) {
+    animation-delay: calc(var(--sx-delay, 0ms) + 440ms);
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-loading])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rxe-chapter-map
+    > a:nth-of-type(3) {
+    animation-delay: calc(var(--sx-delay, 0ms) + 520ms);
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-loading])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rxe-chapter-map
+    > a:nth-of-type(4) {
+    animation-delay: calc(var(--sx-delay, 0ms) + 600ms);
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-loading])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rxe-chapter-map
+    > a:nth-of-type(5) {
+    animation-delay: calc(var(--sx-delay, 0ms) + 680ms);
+  }
+
+  /* The slate's heading slides in from the left as the first row lands. */
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-loading])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rxe-chapter-map
+    > .rxe-chapter-map-heading {
+    animation: rxk-slate-head 520ms var(--rxk-out) calc(var(--sx-delay, 0ms) + 280ms) both;
+  }
+}
+
+@keyframes rxk-slate {
+  from {
+    opacity: 0;
+    translate: 0 18px;
+  }
+
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@keyframes rxk-slate-head {
+  from {
+    opacity: 0;
+    translate: -14px 0;
+  }
+
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+/* ---------------- The instruments: the rows cascade to the end ---------------- */
+/* The Premiere's measure-row cascade stopped at the fourth row; the nine
+   rows of the comparison and the P14 cards now run on to their last, at
+   the same step. */
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    .rxs-comparison.is-visible
+    .rxs-comparison-metrics
+    > article:nth-child(5) {
+    animation-delay: 280ms;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    .rxs-comparison.is-visible
+    .rxs-comparison-metrics
+    > article:nth-child(6) {
+    animation-delay: 350ms;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    .rxs-comparison.is-visible
+    .rxs-comparison-metrics
+    > article:nth-child(7) {
+    animation-delay: 420ms;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    .rxs-comparison.is-visible
+    .rxs-comparison-metrics
+    > article:nth-child(8) {
+    animation-delay: 490ms;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    .rxs-comparison.is-visible
+    .rxs-comparison-metrics
+    > article:nth-child(n + 9) {
+    animation-delay: 560ms;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    .rxs-p14-comparator.is-visible
+    .rxs-p14-metrics
+    > article:nth-child(2) {
+    animation-delay: 60ms;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    .rxs-p14-comparator.is-visible
+    .rxs-p14-metrics
+    > article:nth-child(3) {
+    animation-delay: 120ms;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    .rxs-p14-comparator.is-visible
+    .rxs-p14-metrics
+    > article:nth-child(4) {
+    animation-delay: 180ms;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    .rxs-p14-comparator.is-visible
+    .rxs-p14-metrics
+    > article:nth-child(5) {
+    animation-delay: 240ms;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    .rxs-p14-comparator.is-visible
+    .rxs-p14-metrics
+    > article:nth-child(6) {
+    animation-delay: 300ms;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    .rxs-p14-comparator.is-visible
+    .rxs-p14-metrics
+    > article:nth-child(n + 7) {
+    animation-delay: 360ms;
+  }
+
+  /* The form comparison's three cards, opened: each stands up in turn
+     (they only exist once opened, so nothing rests hidden). */
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    .rxe-comparison-grid
+    > .rxe-comparison-card {
+    animation: rxk-card 560ms var(--rxk-out) both;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    .rxe-comparison-grid
+    > .rxe-comparison-card:nth-child(2) {
+    animation-delay: 90ms;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+    .rxe-comparison-grid
+    > .rxe-comparison-card:nth-child(3) {
+    animation-delay: 180ms;
+  }
+}
+
+@keyframes rxk-card {
+  from {
+    opacity: 0;
+    translate: 0 22px;
+    scale: 0.985;
+  }
+
+  to {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+  }
+}
+
+/* ---------------- The reading rail (wide screens) ---------------- */
+/* A hairline at the right edge, filled by the scroll (a scroll timeline on
+   the compositor; no listener), with a tick per chapter; the chapter that
+   holds the screen lights its tick (the script names it). Decoration:
+   no hit area, out of the way of the menu, dialogs and the cover. */
+.rxs-page.rxs-page.rxs-rexonance-page > .rxk-rail {
+  display: none;
+}
+
+@media (min-width: 1100px) and (prefers-reduced-motion: no-preference) {
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]:not([data-route-covered])
+    > .rxk-rail {
+    display: block;
+    position: fixed;
+    z-index: 40;
+    top: 50%;
+    right: 14px;
+    width: 34px;
+    height: 220px;
+    translate: 0 -50%;
+    pointer-events: none;
+    opacity: 1;
+    transition: opacity 240ms ease;
+  }
+
+  html[data-family="special"]:is([data-side-menu-open], [data-dialog-open], [data-loading])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rxk-rail {
+    opacity: 0;
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page > .rxk-rail > .rxk-rail-track {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 6px;
+    width: 1px;
+    background: rgb(var(--rxk-ice) / 22%);
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page > .rxk-rail > .rxk-rail-track > .rxk-rail-fill {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgb(var(--rxk-ice)), rgb(var(--rxk-gold)));
+    box-shadow: 0 0 10px rgb(var(--rxk-ice) / 55%);
+    transform-origin: 50% 0;
+    scale: 1 0;
+  }
+
+  @supports (animation-timeline: scroll()) {
+    .rxs-page.rxs-page.rxs-rexonance-page > .rxk-rail > .rxk-rail-track > .rxk-rail-fill {
+      animation: rxk-rail-fill linear both;
+      animation-timeline: scroll(root block);
+    }
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page > .rxk-rail > .rxk-rail-tick {
+    position: absolute;
+    right: 3px;
+    width: 7px;
+    height: 7px;
+    translate: 0 -50%;
+    border: 1px solid rgb(var(--rxk-ice) / 60%);
+    border-radius: 50%;
+    background: #02050a;
+    transition:
+      scale 320ms var(--rxk-out),
+      border-color 320ms ease;
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page > .rxk-rail > .rxk-rail-tick:nth-of-type(1) {
+    top: 2%;
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page > .rxk-rail > .rxk-rail-tick:nth-of-type(2) {
+    top: 26%;
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page > .rxk-rail > .rxk-rail-tick:nth-of-type(3) {
+    top: 50%;
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page > .rxk-rail > .rxk-rail-tick:nth-of-type(4) {
+    top: 74%;
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page > .rxk-rail > .rxk-rail-tick:nth-of-type(5) {
+    top: 98%;
+  }
+
+  /* The chapter's number stands left of its tick, in the HUD face. */
+  .rxs-page.rxs-page.rxs-rexonance-page > .rxk-rail > .rxk-rail-tick > b {
+    position: absolute;
+    top: 50%;
+    right: 13px;
+    translate: 6px -50%;
+    color: rgb(var(--rxk-ice));
+    font: 400 9px / 1 var(--dx-hud, sans-serif);
+    letter-spacing: 0.08em;
+    opacity: 0;
+    transition:
+      opacity 320ms ease,
+      translate 420ms var(--rxk-out);
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page[data-rxk-chapter="performance"]
+    > .rxk-rail
+    > .rxk-rail-tick[data-chapter="performance"],
+  .rxs-page.rxs-page.rxs-rexonance-page[data-rxk-chapter="p14"]
+    > .rxk-rail
+    > .rxk-rail-tick[data-chapter="p14"],
+  .rxs-page.rxs-page.rxs-rexonance-page[data-rxk-chapter="assembly"]
+    > .rxk-rail
+    > .rxk-rail-tick[data-chapter="assembly"],
+  .rxs-page.rxs-page.rxs-rexonance-page[data-rxk-chapter="stages"]
+    > .rxk-rail
+    > .rxk-rail-tick[data-chapter="stages"],
+  .rxs-page.rxs-page.rxs-rexonance-page[data-rxk-chapter="system"]
+    > .rxk-rail
+    > .rxk-rail-tick[data-chapter="system"] {
+    scale: 1.6;
+    border-color: rgb(var(--rxk-gold));
+    box-shadow: 0 0 8px rgb(var(--rxk-gold) / 60%);
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page[data-rxk-chapter="performance"]
+    > .rxk-rail
+    > .rxk-rail-tick[data-chapter="performance"]
+    > b,
+  .rxs-page.rxs-page.rxs-rexonance-page[data-rxk-chapter="p14"]
+    > .rxk-rail
+    > .rxk-rail-tick[data-chapter="p14"]
+    > b,
+  .rxs-page.rxs-page.rxs-rexonance-page[data-rxk-chapter="assembly"]
+    > .rxk-rail
+    > .rxk-rail-tick[data-chapter="assembly"]
+    > b,
+  .rxs-page.rxs-page.rxs-rexonance-page[data-rxk-chapter="stages"]
+    > .rxk-rail
+    > .rxk-rail-tick[data-chapter="stages"]
+    > b,
+  .rxs-page.rxs-page.rxs-rexonance-page[data-rxk-chapter="system"]
+    > .rxk-rail
+    > .rxk-rail-tick[data-chapter="system"]
+    > b {
+    opacity: 1;
+    translate: 0 -50%;
+    /* The number stays its own size as the tick grows. */
+    scale: 0.625;
+    transform-origin: 100% 50%;
+  }
+}
+
+@keyframes rxk-rail-fill {
+  from {
+    scale: 1 0;
+  }
+
+  to {
+    scale: 1 1;
+  }
+}
+
+/* ---------------- The pointer: hover and press ---------------- */
+/* Fine pointers: arrows lead the way, slates lift, the plus turns; every
+   control sinks a touch on press (fine and coarse). Transforms only. */
+@media (prefers-reduced-motion: no-preference) {
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    :is(.rxe-chapter-map a, .rxe-hero-rail a, .rxs-footer > a, .rxe-comparison-card button, .rxe-form-comparison > summary) {
+    transition:
+      scale 160ms var(--rxk-out),
+      translate 220ms var(--rxk-out),
+      background-color 220ms ease,
+      border-color 220ms ease,
+      box-shadow 220ms ease,
+      color 220ms ease;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    :is(.rxe-chapter-map a, .rxe-hero-rail a, .rxs-footer > a, .rxe-comparison-card button):active {
+    scale: 0.975;
+    transition-duration: 80ms;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    :is(.rxe-chapter-map a, .rxe-hero-rail a, .rxs-footer > a)
+    i,
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    .rxe-chapter-map
+    a
+    :is(b, em),
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    .rxe-form-comparison
+    > summary
+    i {
+    display: inline-block;
+    transition:
+      translate 260ms var(--rxk-out),
+      rotate 320ms var(--rxk-out),
+      opacity 220ms ease;
+  }
+
+  /* The plus turns to a cross while the comparison is open. */
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    .rxe-form-comparison[open]
+    > summary
+    i {
+    rotate: 45deg;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    html[data-family="special"]:not([data-world-effects="economy"])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page
+      .rxe-chapter-map
+      a:hover
+      i {
+      translate: 3px -3px;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page
+      .rxe-chapter-map
+      a:hover
+      em {
+      translate: 4px 0;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page
+      .rxe-chapter-map
+      a:hover
+      b {
+      translate: 0 -2px;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page
+      .rxe-hero-rail
+      a:hover {
+      translate: 0 -2px;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page
+      .rxe-hero-rail
+      .rxe-hero-primary:hover
+      i {
+      translate: 3px 3px;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page
+      .rxe-hero-rail
+      .rxe-hero-secondary:hover
+      i,
+    html[data-family="special"]:not([data-world-effects="economy"])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page
+      .rxs-footer
+      > a:not(.rxs-footer-return):hover
+      i {
+      translate: 3px -3px;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page
+      .rxs-footer
+      > a.rxs-footer-return:hover
+      i {
+      translate: -4px 0;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page
+      .rxe-form-comparison:not([open])
+      > summary:hover
+      i {
+      rotate: 90deg;
+    }
+
+    /* A comparison card lifts; its figure comes forward a touch. */
+    html[data-family="special"]:not([data-world-effects="economy"])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page
+      .rxe-comparison-card {
+      transition: translate 300ms var(--rxk-out);
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page
+      .rxe-comparison-card:hover {
+      translate: 0 -4px;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page
+      .rxe-comparison-card
+      > img {
+      transition: scale 480ms var(--rxk-out);
+      transform-origin: 50% 100%;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page
+      .rxe-comparison-card:hover
+      > img {
+      scale: 1.03;
+    }
+
+    /* The local navigation's chapters nudge up under the pointer. */
+    html[data-family="special"]:not([data-world-effects="economy"])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page
+      .rxs-local-nav
+      nav
+      a {
+      transition:
+        translate 220ms var(--rxk-out),
+        color 180ms ease,
+        background-color 180ms ease;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page
+      .rxs-local-nav
+      nav
+      a:hover {
+      translate: 0 -1px;
+    }
+  }
+}
+
+/* ---------------- Depth: the comparison cards' figures ---------------- */
+/* Opened cards: each figure settles from a touch larger as the card is
+   scrolled through (the stage and chip settle the same way). */
+@supports (animation-timeline: view()) and (animation-range: entry 0% entry 100%) {
+  @media (prefers-reduced-motion: no-preference) {
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-android-renderer])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
+      .rxe-comparison-card
+      > img {
+      animation: rxk-settle linear both;
+      animation-timeline: view(block);
+      animation-range: entry 0% entry 100%;
+    }
+  }
+}
+
+@keyframes rxk-settle {
+  from {
+    scale: 1.08;
+    opacity: 0.6;
+  }
+
+  to {
+    scale: 1;
+    opacity: 1;
+  }
+}
+
+/* ---------------- Calm tiers ---------------- */
+/* Reduced motion, economy rendering and forced colours: every armed state
+   above is inside the motion gate, so nothing here is hidden; the rail
+   does not show; what remains is still. */
+@media (prefers-reduced-motion: reduce) {
+  .rxs-page.rxs-page.rxs-rexonance-page .rxk-ch,
+  .rxs-page.rxs-page.rxs-rexonance-page .rxk-line-in,
+  .rxs-page.rxs-page.rxs-rexonance-page > .rxs-footer > a,
+  .rxs-page.rxs-page.rxs-rexonance-page > .rxe-chapter-map > a,
+  .rxs-page.rxs-page.rxs-rexonance-page .rxe-comparison-card {
+    animation: none;
+    transition: none;
+    opacity: 1;
+    transform: none;
+    translate: none;
+    scale: none;
+  }
+}
+
+html[data-world-effects="economy"] .rxs-page.rxs-page.rxs-rexonance-page .rxk-ch,
+html[data-world-effects="economy"] .rxs-page.rxs-page.rxs-rexonance-page .rxk-line-in,
+html[data-world-effects="economy"] .rxs-page.rxs-page.rxs-rexonance-page > .rxs-footer > a {
+  opacity: 1;
+  transform: none;
+  translate: none;
+}
+
+/* Forced colours: the rail's lit states carry no meaning; keep it out. */
+@media (forced-colors: active) {
+  .rxs-page.rxs-page.rxs-rexonance-page > .rxk-rail {
+    display: none;
+  }
+}

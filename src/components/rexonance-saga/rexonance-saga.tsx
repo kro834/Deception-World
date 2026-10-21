@@ -26,6 +26,7 @@ import {
   mountRexonanceResonance,
   type RexonanceAssemblyConfig,
 } from "@/lib/rexonance-resonance.js";
+import { mountRexonanceChoreography } from "@/lib/rexonance-choreography.js";
 import { REXONANCE_SUIT_GOLD_CELL, REXONANCE_SUIT_GOLD_CELLS } from "@/lib/rexonance-suit-gold";
 import {
   REXONANCE_SUIT_ATLAS,
@@ -1699,6 +1700,10 @@ export function RexonanceSaga() {
   // never restarts it.
   // (Once the whole page is rendered: it reads every section.)
   useEffect(() => (lower ? mountRexonanceResonance(pageRef.current) : undefined), [lower]);
+  // KINETIC (rxk, 2026-10-21): the chapters' calls and titles, the end card
+  // and the reading rail (src/lib/rexonance-choreography.js). Once the whole
+  // page is rendered; it arms only what is still unseen.
+  useEffect(() => (lower ? mountRexonanceChoreography(pageRef.current) : undefined), [lower]);
   useEffect(
     () =>
       lower
