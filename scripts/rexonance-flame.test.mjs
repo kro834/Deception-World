@@ -1036,7 +1036,7 @@ test("the warmed drawing call graph constructs no per-frame objects, arrays, clo
         )
           functions.set(declaration.name.text, declaration.initializer);
   }
-  const pending = ["drawBodyFlame", "drawNaniteFlame", "drawNaniteFirebrand"];
+  const pending = ["drawBodyFlame", "drawNaniteFlame", "drawNaniteFirebrand", "drawBodyAfterburn"];
   const visited = new Set();
   const forbidden = [];
   while (pending.length) {
@@ -1354,4 +1354,85 @@ test("extinction lifts the real volume roots while pointed forks dissipate with 
     peak,
     "reverse scrub restores the exact pre-burst geometry",
   );
+});
+
+test("the afterburn is a bounded, exact, state-safe rooted fire in two layers", async () => {
+  const previous = Object.getOwnPropertyDescriptor(globalThis, "document");
+  try {
+    for (const coarse of [false, true]) {
+      const module = await fresh();
+      const f = fixture();
+      f.environment.matchMedia = (query) => ({
+        matches: coarse && query.includes("pointer: coarse"),
+      });
+      Object.defineProperty(globalThis, "document", {
+        configurable: true,
+        value: f.environment.document,
+      });
+      await ready(module, f);
+      const size = { width: 571, height: 1040 };
+      const silent = painter();
+      for (const burn of [0, -0.2, 1, 1.4, NaN])
+        module.drawBodyAfterburn(silent.context, size, 1, 1.3, 1, burn);
+      for (const strength of [0, NaN])
+        module.drawBodyAfterburn(silent.context, size, strength, 1.3, 1, 0.4);
+      module.drawBodyAfterburn(silent.context, null, 1, 1.3, 1, 0.4);
+      assert.deepEqual(silent.operations, [], "outside its window it paints nothing");
+
+      const layers = (clock, burn) => {
+        const back = painter();
+        const front = painter();
+        const all = painter();
+        module.drawBodyAfterburn(back.context, size, 1, clock, 1, burn, "back");
+        module.drawBodyAfterburn(front.context, size, 1, clock, 1, burn, "front");
+        module.drawBodyAfterburn(all.context, size, 1, clock, 1, burn);
+        assert.deepEqual(all.operations, [...back.operations, ...front.operations]);
+        for (const p of [back, front, all]) {
+          assert.equal(p.states.length, 0);
+          assert.equal(p.context.globalAlpha, 0.73);
+          assert.equal(p.context.globalCompositeOperation, "multiply");
+          assert.equal(p.context.fillStyle, "#123456");
+        }
+        return { back: back.operations, front: front.operations };
+      };
+      const draws = (rows) => rows.filter((row) => row[0] === "image");
+      const peak = layers(1.3, 0.4);
+      assert.ok(
+        draws(peak.back).every((row) => row.at(-1) === "lighter") &&
+          draws(peak.front).every((row) => row.at(-1) === "lighter"),
+        "fire adds light; it never paints an opaque sheet over the armour",
+      );
+      assert.ok(draws(peak.back).some((row) => row[1] === module.NANITE_FLAME_ATLAS.src));
+      assert.ok(
+        draws(peak.front).length < draws(peak.back).length / 2,
+        "the near side keeps to thin cores over the plates",
+      );
+      assert.ok(
+        peak.front.some((row) => row[0] === "rect"),
+        "embers rise on the near side",
+      );
+      assert.ok(
+        draws(peak.back).length + draws(peak.front).length <= (coarse ? 104 : 128),
+        "within the flame's existing per-frame draw budget",
+      );
+      assert.deepEqual(layers(1.3, 0.4), peak, "the same clock and burn paint the same frame");
+      assert.notDeepEqual(layers(1.45, 0.4), peak, "the fire keeps moving with its clock");
+
+      // Quenching: late in the burn the legs' tongues are lower than the
+      // crown's, and every root still carries some fire.
+      const late = layers(1.3, 0.72);
+      const alphaAt = (rows, top) =>
+        flameRoots(rows)
+          .filter((root) => (top ? root.y < 1040 * 0.4 : root.y > 1040 * 0.8))
+          .map((root) => root.images[0].at(-2));
+      const crown = alphaAt(late.back, true);
+      const legs = alphaAt(late.back, false);
+      assert.ok(crown.length && legs.length);
+      assert.ok(Math.max(...legs) < Math.max(...crown), "seated legs burn lower than the crown");
+      assert.ok(Math.min(...legs) > 0, "a low fire survives the seated metal");
+    }
+  } finally {
+    if (previous) Object.defineProperty(globalThis, "document", previous);
+    else delete globalThis.document;
+  }
 });

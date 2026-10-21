@@ -8,12 +8,17 @@ import {
 } from "./rexonance-overwrite.js";
 import { createSplitLightsJob } from "./rexonance-unlit.js";
 import {
+  drawBodyAfterburn,
   drawBodyFlame,
   drawNaniteFlame,
   prepareBodyFlame,
   warmNaniteFlame,
 } from "./rexonance-flame.js";
-import { naniteFlameEnvelope } from "./rexonance-ignition.js";
+import {
+  naniteAfterburnProgress,
+  naniteFlameEnvelope,
+  REXONANCE_SCROLL_AFTERBURN,
+} from "./rexonance-ignition.js";
 import { releasePendingImage } from "./release-pending-images.js";
 import {
   createReactorLayers,
@@ -1379,6 +1384,13 @@ const BURSTS = [
 // The same combustion choreography as the entrance's 2400 ms clock.
 const NANITE_FLAME_START = 0.015;
 const NANITE_FLAME_SPAN = 0.285;
+// While anything burns (the vortex, then its afterburn), a resting scroll
+// keeps the fire alive at a modest rate instead of freezing it; touch draws
+// fewer of these frames. Before and after the fire, rest stays still.
+const FIRE_IDLE_MS = 33;
+const FIRE_IDLE_TOUCH_MS = 48;
+const burning = (progress) =>
+  progress > NANITE_FLAME_START && progress < REXONANCE_SCROLL_AFTERBURN.to;
 /**
  * Mounts the suit-up scene on its runway. `config`: { figure, undersuit,
  * size: { width, height }, pieces: [{ id, group, x, y, w, h, seat }],
@@ -2917,10 +2929,17 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
 
     const flamePhase = (progress - NANITE_FLAME_START) / NANITE_FLAME_SPAN;
     const flame = naniteFlameEnvelope(flamePhase);
-    const flameClock = calm ? progress * 60 : (environment.performance?.now?.() ?? 0) / 1000;
+    const burn = naniteAfterburnProgress(progress, REXONANCE_SCROLL_AFTERBURN);
+    // A burning rest keeps real time: live fire, never a frozen stamp.
+    const flameClock =
+      calm && !burning(progress) ? progress * 60 : (environment.performance?.now?.() ?? 0) / 1000;
 
     // The cocoon's far side, behind the body.
     if (nanites) nanites.backPass(context);
+    // What the detonation leaves: burning behind the body and under every
+    // plate until the armour has quenched it.
+    if (burn > 0 && burn < 1)
+      drawBodyAfterburn(context, config.size, 1, flameClock, 1, burn, "back");
     if (flame > 0) drawBodyFlame(context, config.size, flame, flameClock, 1, "back", flamePhase);
     // FAR UP！: the scan wakes the undersuit, top to bottom.
     const scan = span(progress, B.scan);
@@ -3310,6 +3329,8 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
 
     // Sparse near-side fire crosses the outer armour, not the core/face.
     if (flame > 0) drawBodyFlame(context, config.size, flame, flameClock, 1, "front", flamePhase);
+    if (burn > 0 && burn < 1)
+      drawBodyAfterburn(context, config.size, 1, flameClock, 1, burn, "front");
     // The fire carries these fragments out first; their metal handoff is
     // on the near side so it cannot disappear under the broad plume.
     if (nanites) {
@@ -3675,7 +3696,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       return;
     }
     // Once the scroll rests, redraw the moment without its transient effects.
-    calmTimer = environment.setTimeout(() => {
+    const rest = () => {
       calmTimer = 0;
       if (
         !disposed &&
@@ -3693,8 +3714,15 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         backRects = false;
         quickFrames = 0;
         draw(lastProgress, true);
+        // Every path that stops the scene already clears calmTimer.
+        if (burning(lastProgress))
+          calmTimer = environment.setTimeout(
+            rest,
+            coarse.matches ? FIRE_IDLE_TOUCH_MS : FIRE_IDLE_MS,
+          );
       }
-    }, CALM_MS);
+    };
+    calmTimer = environment.setTimeout(rest, CALM_MS);
     if (behind) {
       force = true;
       schedule();

@@ -43,3 +43,14 @@ export function drawBodyFlame(
   layer?: "back" | "front" | "all",
   phase?: number,
 ): void;
+/** The lingering fire after the detonation: drawn under the plates for the
+ * whole assembly; burn is the scene's afterburn progress (0..1). */
+export function drawBodyAfterburn(
+  context: CanvasRenderingContext2D,
+  size: { readonly width: number; readonly height: number },
+  strength: number,
+  clock: number,
+  scale?: number,
+  burn?: number,
+  layer?: "back" | "front" | "all",
+): void;

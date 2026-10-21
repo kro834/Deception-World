@@ -29,6 +29,7 @@ import { REXONANCE_SUIT_LIGHT, REXONANCE_SUIT_REVEAL_MS } from "@/lib/rexonance-
 import { REXONANCE_SUIT_MARKS } from "@/lib/rexonance-suit";
 import { reactorCoilAngle, reactorCoilScale } from "@/lib/rexonance-reactor.js";
 import {
+  drawBodyAfterburn,
   drawBodyFlame,
   drawNaniteFlame,
   prepareBodyFlame,
@@ -36,7 +37,9 @@ import {
 } from "@/lib/rexonance-flame.js";
 import {
   NANITE_FIRE_PHASES,
+  REXONANCE_ENTRY_AFTERBURN,
   entryCanonicalTime,
+  naniteAfterburnProgress,
   naniteFlameEnvelope,
   naniteMaterialLanding,
 } from "@/lib/rexonance-ignition.js";
@@ -402,6 +405,11 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
           // The extras' back of the frame: the cocoon behind, the guideways
           // built on the body ahead of each plate, the lifted plates' shadows.
           extras?.before(t);
+          // The fire the detonation leaves keeps burning under the plates
+          // (owner, 2026-10-21), quenched part by part as armour seats.
+          const burn = naniteAfterburnProgress(t, REXONANCE_ENTRY_AFTERBURN);
+          if (burn > 0 && burn < 1)
+            drawBodyAfterburn(flight, FIG, 1, elapsed / 1000, s, burn, "back");
           // The nanites' source (owner, 2026-10-18): the forest-green flame
           // at the reactor, burning as the first plates stream in.
           const flamePhase = t / CALL_FLAME_MS;
@@ -672,6 +680,8 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
           if (extras) extras.after(t);
           else if (material) grains();
           if (flame > 0) drawBodyFlame(flight, FIG, flame, elapsed / 1000, s, "front", flamePhase);
+          if (burn > 0 && burn < 1)
+            drawBodyAfterburn(flight, FIG, 1, elapsed / 1000, s, burn, "front");
           // Burning fragments carry material out of the broad fire. Their
           // machine crossfade remains visible on the near side of the plume.
           extras?.firebrands(t);

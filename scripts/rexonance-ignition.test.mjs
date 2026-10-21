@@ -3,8 +3,14 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 import sharp from "sharp";
 import {
+  NANITE_AFTERBURN,
   NANITE_FIRE_PHASES,
+  REXONANCE_ENTRY_AFTERBURN,
   REXONANCE_ENTRY_VORTEX_HOLD_MS,
+  REXONANCE_SCROLL_AFTERBURN,
+  naniteAfterburnEnvelope,
+  naniteAfterburnProgress,
+  naniteAfterburnQuench,
   entryCanonicalTime,
   entryElapsedTime,
   naniteFlameEnvelope,
@@ -209,4 +215,57 @@ test("every emitted nanite originates in the actual burning body rather than the
     visited.add(`${Math.round(out[0] * 20)},${Math.round(out[1] * 20)}`);
   }
   assert.ok(visited.size > 35, "distributed body sources, not one central pump");
+});
+
+test("the afterburn takes over from the detonation and burns through the assembly", () => {
+  // Both scenes start it at the burst, not before: the intact vortex alone
+  // precedes metal, as before.
+  assert.equal(REXONANCE_ENTRY_AFTERBURN.from, NANITE_FIRE_PHASES.burstStart * 2400);
+  assert.equal(REXONANCE_SCROLL_AFTERBURN.from, 0.015 + 0.285 * NANITE_FIRE_PHASES.burstStart);
+  // Far beyond the old flame end, yet out before the entry's extinction
+  // check (elapsed 3,600 ms) and before the scroll's clamp/seal (.86).
+  assert.ok(REXONANCE_ENTRY_AFTERBURN.to > NANITE_FIRE_PHASES.flameEnd * 2400 * 3);
+  assert.ok(entryElapsedTime(REXONANCE_ENTRY_AFTERBURN.to) < 3600);
+  assert.ok(REXONANCE_SCROLL_AFTERBURN.to > 0.015 + 0.285 * NANITE_FIRE_PHASES.flameEnd + 0.6);
+  assert.ok(REXONANCE_SCROLL_AFTERBURN.to < 0.86);
+  for (const window of [REXONANCE_ENTRY_AFTERBURN, REXONANCE_SCROLL_AFTERBURN]) {
+    assert.equal(naniteAfterburnProgress(window.from, window), 0);
+    assert.equal(naniteAfterburnProgress(window.to, window), 1);
+  }
+  assert.equal(naniteAfterburnProgress(NaN, REXONANCE_ENTRY_AFTERBURN), 0);
+
+  for (const burn of [-1, 0, 1, 2, NaN, Infinity]) assert.equal(naniteAfterburnEnvelope(burn), 0);
+  // Continuous through its rise, sustained middle and die-down.
+  let previous = 0;
+  for (let i = 1; i < 2000; i += 1) {
+    const value = naniteAfterburnEnvelope(i / 2000);
+    assert.ok(Math.abs(value - previous) < 0.03, `continuous at ${i / 2000}`);
+    previous = value;
+  }
+  assert.ok(previous < 0.001, "dies down to nothing at its end");
+  assert.equal(naniteAfterburnEnvelope(NANITE_AFTERBURN.rise), 1);
+  for (const burn of [0.2, 0.4, 0.6, 0.79])
+    assert.ok(naniteAfterburnEnvelope(burn) > 0.8, `still burning strongly at ${burn}`);
+
+  // When the vortex has gone, the afterburn is already alight: no dark gap.
+  for (let t = REXONANCE_ENTRY_AFTERBURN.from; t <= 1200; t += 5) {
+    const fire =
+      naniteFlameEnvelope(t / 2400) +
+      naniteAfterburnEnvelope(naniteAfterburnProgress(t, REXONANCE_ENTRY_AFTERBURN));
+    assert.ok(fire > 0.5, `fire at canonical ${t} ms`);
+  }
+});
+
+test("seated armour quenches the afterburn from the legs up, leaving a low fire", () => {
+  assert.equal(naniteAfterburnQuench(NaN, 0.5), 0);
+  assert.equal(naniteAfterburnQuench(0.5, NaN), 0);
+  for (const y of [0, 0.3, 0.6, 1]) {
+    assert.equal(naniteAfterburnQuench(0.1, y), 0, "nothing is quenched before metal seats");
+    assert.ok(naniteAfterburnQuench(1, y) <= 0.5, "half the fire survives on every part");
+  }
+  // At every moment the soles are at least as quenched as the crown.
+  for (let burn = 0; burn <= 1; burn += 0.05)
+    assert.ok(naniteAfterburnQuench(burn, 0.95) >= naniteAfterburnQuench(burn, 0.1));
+  assert.ok(naniteAfterburnQuench(0.6, 0.95) > 0.4);
+  assert.equal(naniteAfterburnQuench(0.6, 0.05), 0);
 });
