@@ -445,21 +445,24 @@ export function SideMenuLayer({
       panel.querySelector<HTMLElement>('.side-panel-links > [aria-current="location"]');
     if (current) {
       const clearance = parseFloat(window.getComputedStyle(panel).paddingBottom) || 24;
-      const panelBottom = panel.getBoundingClientRect().bottom;
-      let shift = Math.max(0, current.getBoundingClientRect().bottom + clearance - panelBottom);
-      // The menu opens on the group the reader is in, its kicker (RIDERS,
-      // SPECIAL, STORIES) in full under the sticky head: the head's ink runs
-      // on 32px below its rule (the fade a row passes under), so the kicker
-      // lands below that fade, never half inside it. A group taller than the
-      // screen from its kicker to the current row keeps the row in view and
-      // lets the kicker pass under the head instead.
-      const group = current.closest<HTMLElement>(".side-panel-group");
-      const head = panel.querySelector(".side-panel-head");
-      if (group && head) {
-        const top = head.getBoundingClientRect().bottom + SIDE_MENU_GROUP_CLEARANCE_PX;
-        shift = Math.max(shift, group.getBoundingClientRect().top - top);
-      }
-      if (shift > 0) panel.scrollTop += shift;
+      const overflow =
+        current.getBoundingClientRect().bottom + clearance - panel.getBoundingClientRect().bottom;
+      if (overflow > 0) panel.scrollTop += overflow;
+    }
+    // Then the menu opens on the group the reader is in, its kicker (RIDERS,
+    // SPECIAL, STORIES) in full under the sticky head: the head's ink runs on
+    // 32px below its rule (the fade a row passes under), so the kicker lands
+    // below that fade, never half inside it. Scrolling further only ever
+    // moves the current row up, so it stays in view; a group taller than the
+    // screen from its kicker to that row keeps the row where it is and lets
+    // the kicker pass under the head instead (the kicker is never pulled
+    // back down).
+    const group = current?.closest<HTMLElement>(".side-panel-group");
+    const head = panel.querySelector(".side-panel-head");
+    if (group && head) {
+      const top = head.getBoundingClientRect().bottom + SIDE_MENU_GROUP_CLEARANCE_PX;
+      const below = group.getBoundingClientRect().top - top;
+      if (below > 0) panel.scrollTop += below;
     }
     // Android's back gesture (and Esc from outside the menu) asks the
     // browser's CloseWatcher to close the menu instead of leaving the page.
