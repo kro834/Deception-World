@@ -1,4 +1,4 @@
-import { plateWords, type RecordArt } from "@/lib/record-art";
+import { plateRunStyle, plateWords, type RecordArt } from "@/lib/record-art";
 import { recordImage, type RecordArtSlot } from "@/lib/record-images";
 
 /** The window's slot (its decode width) from the frame's variant class. */
@@ -44,7 +44,8 @@ export function RecordArtFrame({
           style={art.pos ? { objectPosition: art.pos } : undefined}
         />
       ) : (
-        <b>{plateWords(title)}</b>
+        // The name's run goes to the sheet, which fits it to the window.
+        <b style={plateRunStyle(plateWords(title))}>{plateWords(title)}</b>
       )}
       <i>{art.code}</i>
     </span>

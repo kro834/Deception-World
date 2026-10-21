@@ -122,6 +122,18 @@ html [data-skip-mark][data-record-reticle][data-record-reticle] {
     0 18px 44px -24px rgb(var(--rl-pink) / 70%);
 }
 
+/* A frame round the on-screen part of a destination with no heading in
+   view is nearly the screen: no floor and no sweep over the page, only the
+   hairline and the brackets. */
+.record-landing-reticle[data-whole]::before {
+  background: none;
+  box-shadow: 0 0 0 1px rgb(3 6 12 / 40%);
+}
+
+.record-landing-reticle[data-whole] > .record-landing-scan {
+  display: none;
+}
+
 /* The brackets: ice, 2px, a pink glow. */
 .record-landing-reticle > i {
   --rl-dx: 0px;
@@ -189,9 +201,12 @@ html [data-skip-mark][data-record-reticle][data-record-reticle] {
 }
 
 /* The tag: the HUD code on an ice key, then what found it. It sits on the
-   frame's top line beside the bracket (on the bottom line when the bar is in
-   the way), so it covers as little of the page around the words as it can. */
+   frame's top line beside the bracket; where the page has words there (an
+   eyebrow over the heading) or the bar is in the way, record-arrival.ts sets
+   it beside the frame's top right, or on its bottom line, whichever is free.
+   After three seconds it fades (the brackets keep the place). */
 .record-landing-tag {
+  --rl-tag-y: -50%;
   position: absolute;
   top: 0;
   left: 20px;
@@ -214,11 +229,22 @@ html [data-skip-mark][data-record-reticle][data-record-reticle] {
     sans-serif;
   letter-spacing: 0.04em;
   white-space: nowrap;
-  transform: translateY(-50%);
+  transform: translateY(var(--rl-tag-y));
 }
 
 .record-landing-reticle[data-tag="below"] > .record-landing-tag {
   top: 100%;
+}
+
+.record-landing-reticle[data-tag="side"] > .record-landing-tag {
+  --rl-tag-y: 0%;
+  left: calc(100% + 12px);
+}
+
+/* The still tier's tag leaves with a plain fade: no movement. */
+.record-landing-layer[data-mode="still"] .record-landing-tag[data-faded] {
+  opacity: 0;
+  transition: opacity 360ms ease-in;
 }
 
 .record-landing-tag > b {
@@ -334,7 +360,7 @@ html [data-skip-mark][data-record-reticle][data-record-reticle] {
 @keyframes record-reticle-tag {
   from {
     opacity: 0;
-    transform: translate(-8px, -50%);
+    transform: translate(-8px, var(--rl-tag-y));
   }
 }
 

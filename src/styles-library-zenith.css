@@ -192,6 +192,7 @@ html[data-family="library"] .library-page .library-jump-links a:first-child {
    (exhibits ice, people gold, the Dream red), each kind a way into the
    shelf below. */
 html[data-family="library"] .library-page .library-index-meter {
+  container: library-meter / inline-size;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px 6px;
@@ -239,13 +240,18 @@ html[data-family="library"] .library-page .library-index-bar > i {
   transform-origin: 0 50%;
 }
 
+/* A key: its count over its kind. The kinds keep their words whole
+   (展示・アーカイブ breaks after its dot, never inside アーカイブ), since
+   the keys are narrow in the hero's column at 900-1920 and on phones. */
 html[data-family="library"] .library-page .library-index-meter > button {
-  display: inline-flex;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-content: start;
   align-items: center;
-  gap: 9px;
+  gap: 6px 7px;
   min-width: 0;
-  min-height: 40px;
-  padding: 0 10px;
+  min-height: 60px;
+  padding: 8px 10px;
   border: 1px solid var(--dxl-line-2);
   border-radius: 3px;
   color: var(--dx-text-2);
@@ -253,6 +259,7 @@ html[data-family="library"] .library-page .library-index-meter > button {
   box-shadow: inset 0 1px 0 rgb(255 255 255 / 6%);
   font-size: 12px;
   letter-spacing: 0.06em;
+  text-align: left;
   cursor: pointer;
 }
 
@@ -266,14 +273,39 @@ html[data-family="library"] .library-page .library-index-meter > button::before 
 }
 
 html[data-family="library"] .library-page .library-index-meter > button > span {
+  grid-column: 1 / -1;
   min-width: 0;
+  line-height: 1.35;
+  letter-spacing: 0.04em;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
 }
 
 html[data-family="library"] .library-page .library-index-meter > button > b {
   min-width: 1.3em;
   color: var(--kind-tone);
-  font: 600 15px / 1 var(--dx-mono);
+  font: 600 18px / 1 var(--dx-mono);
   font-variant-numeric: tabular-nums;
+}
+
+/* A card wide enough for each kind on one line beside its count (the
+   tablets' 600px card): the keys run as one row of lamps. */
+@container library-meter (min-width: 560px) {
+  html[data-family="library"] .library-page .library-index-meter > button {
+    display: inline-flex;
+    gap: 9px;
+    min-height: var(--library-meter-key, 40px);
+    padding: 0 10px;
+  }
+
+  html[data-family="library"] .library-page .library-index-meter > button > span {
+    line-height: inherit;
+    letter-spacing: inherit;
+  }
+
+  html[data-family="library"] .library-page .library-index-meter > button > b {
+    font-size: 15px;
+  }
 }
 
 html[data-family="library"] .library-page .library-index-meter > button:hover {
@@ -310,41 +342,15 @@ html[data-family="library"] .library-page .library-index-meter > button:focus-vi
 }
 
 @media (hover: none) and (pointer: coarse) {
-  html[data-family="library"] .library-page .library-index-meter > button {
-    min-height: 44px;
+  html[data-family="library"] .library-page .library-index-meter {
+    --library-meter-key: 44px;
   }
 }
 
-/* Phones: three equal keys, the count under its kind. */
+/* Phones: the card's edge a little closer to its three keys. */
 @media (max-width: 559px) {
   html[data-family="library"] .library-page .library-index-meter {
     padding-inline: 10px;
-  }
-
-  html[data-family="library"] .library-page .library-index-meter > button {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    align-content: start;
-    gap: 6px 7px;
-    min-height: 60px;
-    padding: 8px 10px;
-    text-align: left;
-  }
-
-  html[data-family="library"] .library-page .library-index-meter > button::before {
-    align-self: center;
-  }
-
-  html[data-family="library"] .library-page .library-index-meter > button > b {
-    font-size: 18px;
-  }
-
-  html[data-family="library"] .library-page .library-index-meter > button > span {
-    grid-column: 1 / -1;
-    min-width: 0;
-    line-height: 1.35;
-    letter-spacing: 0.02em;
-    overflow-wrap: anywhere;
   }
 }
 
@@ -522,8 +528,10 @@ html[data-family="library"] .library-page .library-browse-controls .library-scop
   box-shadow: inset 0 1px 0 rgb(0 0 0 / 60%);
 }
 
+/* Each side keeps the console's 44px target (styles-library.css): the
+   track's own 4px rim sits outside it. */
 html[data-family="library"] .library-page .library-browse-controls .library-scope-row button {
-  min-height: 40px;
+  min-height: 44px;
   border: 1px solid transparent;
   border-radius: 4px;
   background: transparent;
@@ -956,6 +964,51 @@ html[data-family="library"] .search-page .search-more-option > b {
 html[data-family="library"] .search-page .search-more {
   position: relative;
   box-shadow: var(--dx-bevel), var(--dx-drop);
+}
+
+/* A card's plate sets its name to its window's height, whole: down a 4:5
+   window the 48px spine lost the last letters of a four or five letter
+   name (マキャベ for マキャベル, 博麗霊 at 1194-1920, more on tablets),
+   because the STAGE size, written in cqi on vertical text, resolved
+   against the viewport's height. The run of the name (record-art.tsx,
+   --dxl-plate-em and -n) shares the window's height under the tab, less
+   the foot's fade (down to the phones' 18px); short names keep the 48px
+   spine. */
+html[data-family="library"] :is(.library-card, .search-result-card) > .dxl-art[data-plate="type"] {
+  container-type: size;
+}
+
+html[data-family="library"]
+  :is(.library-card, .search-result-card)
+  > .dxl-art[data-plate="type"]
+  > b {
+  --dxl-plate-ls: 0.08;
+  font-size: clamp(
+    18px,
+    min(
+      24cqw,
+      (100cqh - 46px) * 0.9 /
+        (var(--dxl-plate-em, 4) + var(--dxl-plate-n, 4) * var(--dxl-plate-ls))
+    ),
+    48px
+  );
+}
+
+html[data-family="library"]
+  :is(.library-card, .search-result-card)
+  > .dxl-art[data-edition="dream"][data-plate="type"]
+  > b {
+  --dxl-plate-ls: 0.16;
+}
+
+/* Phones' row cards keep their 18px spine (their names fit it). */
+@media (max-width: 439px) {
+  html[data-family="library"]
+    :is(.library-card, .search-result-card)
+    > .dxl-art[data-plate="type"]
+    > b {
+    font-size: 18px;
+  }
 }
 
 html[data-family="library"] .search-page .search-more::before {

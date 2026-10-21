@@ -318,6 +318,24 @@ export function plateWords(title: string): string {
   return match ? match[1] : title;
 }
 
+/** A plate's words down its spine as CSS variables, so a card's plate can
+ * set the name to fit its window's height (styles-library-zenith.css):
+ * --dxl-plate-em is the run's advance in ems (a full-width letter 1, a Latin
+ * letter or digit, set sideways, about 0.62, a space 0.3) and --dxl-plate-n
+ * its letters, each followed by the plate's letter-spacing. */
+export function plateRunStyle(words: string): CSSProperties {
+  let em = 0;
+  let letters = 0;
+  for (const letter of words) {
+    letters += 1;
+    em += /\s/u.test(letter) ? 0.3 : letter.charCodeAt(0) < 0x250 ? 0.62 : 1;
+  }
+  return {
+    "--dxl-plate-em": Math.round(em * 100) / 100,
+    "--dxl-plate-n": letters,
+  } as CSSProperties;
+}
+
 /** The widest run of a title that cannot wrap, in ems: no space, no name seam
  * (nameWords), no break after 、。 or a closing quote or before an opening
  * one. A full-width letter counts 1, a Latin letter or digit about 0.62. The

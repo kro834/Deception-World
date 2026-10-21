@@ -29,12 +29,17 @@
   line-height: 1.5;
   letter-spacing: 0.04em;
 }
+/* The words hold one line: WebKit shrank the link in the fixed plate and
+   wrapped it as 検索結果 / へ戻る (2026-10-22). The plate's 232px cap is
+   wider than either label with its close button. */
 .record-return-navigation a {
   display: flex;
+  flex: none;
   align-items: center;
   gap: 8px;
   min-height: 44px;
   min-width: 0;
+  white-space: nowrap;
   padding: 6px 12px;
   color: inherit;
   text-decoration: none;
@@ -53,8 +58,11 @@
   background: rgb(var(--rr-pink-rgb));
   box-shadow: 0 0 8px rgb(var(--rr-pink-rgb) / 70%);
 }
+/* A set width as well as the basis: WebKit sized the plate from the
+   button's glyph, not its 44px, and the link was squeezed. */
 .record-return-navigation button {
   flex: 0 0 44px;
+  width: 44px;
   min-height: 44px;
   border: 0;
   border-left: 1px solid rgb(var(--rr-ice-rgb) / 24%);
