@@ -256,7 +256,10 @@ html[data-family="dream"] main.dream-page.dream-page .dream-reader-index-actions
   }
 }
 
-@media (max-width: 760px) {
+/* A tablet held upright: the tray's two button pairs take the full width
+   and the bookmark sits under them (side by side, 「ゆったり」 broke over two
+   lines on an iPad mini). */
+@media (max-width: 1000px) {
   html[data-family="dream"] main.dream-page.dream-page .dream-reader-support {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -268,7 +271,9 @@ html[data-family="dream"] main.dream-page.dream-page .dream-reader-index-actions
     border-left: 0;
     border-top: 1px solid var(--zn-hair-soft);
   }
+}
 
+@media (max-width: 760px) {
   html[data-family="dream"] main.dream-page.dream-page .dream-reader-index {
     padding: 16px 14px 20px;
     background:
@@ -937,5 +942,15 @@ html[data-family="dream"] main.dream-page.dream-page .dream-record-card nav a:fi
   html[data-family="dream"] main.dream-page.dream-page .dream-poster-hud-step button {
     min-width: 44px;
     min-height: 44px;
+  }
+}
+
+/* The three tickets side by side on an upright tablet (761–900px): the
+   titles step down to 18px, so 「絵看板を見る」 keeps one line on an iPad
+   mini as its two neighbours do. */
+@media (min-width: 761px) and (max-width: 900px) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-programme-ticket strong {
+    font-size: 18px;
+    letter-spacing: 0.08em;
   }
 }
