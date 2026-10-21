@@ -39,7 +39,8 @@ html :is(main, iframe)[data-record-landing][data-record-landing][data-record-lan
 
 /* The reticle carries the mark: the element keeps no second ring, and the
    brief skip cue (styles-route-transitions.css) is not drawn over it. */
-html [data-record-landing][data-record-reticle][data-record-reticle][data-record-reticle],
+html
+  [data-record-landing][data-record-reticle][data-record-reticle][data-record-reticle][data-record-reticle],
 html [data-skip-mark][data-record-reticle][data-record-reticle] {
   outline: none;
   box-shadow: none;
