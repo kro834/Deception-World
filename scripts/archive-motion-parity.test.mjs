@@ -41,7 +41,8 @@ test("Windows and Unix source archives generate identical controllers", () => {
 test("Realm archive loads its normalized motion controller in both deliverables", () => {
   for (const html of [realmStandalone, realmEmbedded]) {
     // r51: the controller now opens on a requested form (rx6).
-    assert.match(html, /<script src="\/realm-archive-motion\.js\?v=20261009-r51" defer><\/script>/);
+    // Owner (2026-10-21): r52 releases the lightbox's closing fill, so a second opening shows its art.
+    assert.match(html, /<script src="\/realm-archive-motion\.js\?v=20261022-r52" defer><\/script>/);
   }
 });
 

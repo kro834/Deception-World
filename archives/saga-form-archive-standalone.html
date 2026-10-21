@@ -5576,8 +5576,12 @@ document.addEventListener('DOMContentLoaded', () => {
       lastLightboxTrigger = trigger;
       if (typeof lightbox.showModal === 'function') lightbox.showModal();
       else lightbox.setAttribute('open', '');
+      const inner = lightbox.querySelector('.lightbox-inner');
+      // A close that was cut short must not leave its faded end state on
+      // the plate under this opening.
+      inner?.getAnimations?.().forEach(animation => animation.cancel());
       if (!reducedMotion.matches && supportsWaapi) {
-        lightbox.querySelector('.lightbox-inner')?.animate([
+        inner?.animate([
           { opacity: 0, transform: 'translate3d(0,18px,0) scale(.975)' },
           { opacity: 1, transform: 'translate3d(0,0,0) scale(1)' }
         ], { duration: 380, easing: 'cubic-bezier(.16,.82,.22,1)' });
@@ -5609,6 +5613,14 @@ document.addEventListener('DOMContentLoaded', () => {
         { opacity: 0, transform: 'translate3d(0,12px,0) scale(.985)' }
       ], { duration: 210, easing: 'cubic-bezier(.4,0,.6,1)', fill: 'both' });
       try { await closing.finished; } catch (_) {}
+      // A reset may already have closed it (and a new opening cancelled
+      // this fade): only a close still in progress is finished here.
+      if (lightbox.classList.contains('is-closing')) finalizeLightboxClose({ restoreFocus: true });
+      // The fill held the plate faded while the dialog closed; released
+      // now, so the next opening starts from the plate's own state (an
+      // unreleased fill left a second opening as an empty dark plate).
+      closing.cancel();
+      return;
     }
     finalizeLightboxClose({ restoreFocus: true });
   }
@@ -7037,7 +7049,7 @@ html:not(.saga-compare-ready) #saga-form-compare-ios .compare-sync-rail span { a
 <link rel="stylesheet" href="/archive-versus.css?v=20261010-rx9">
 <link rel="stylesheet" href="/archive-poster.css?v=20261010-rx9">
 <link rel="stylesheet" href="/archive-profile.css?v=20261010-rx9">
-<link rel="stylesheet" href="/archive-zenith.css?v=20261021-zenith">
+<link rel="stylesheet" href="/archive-zenith.css?v=20261022-zenith2">
 <script id="saga-runtime-v16-script">
 document.addEventListener('DOMContentLoaded', () => {
   'use strict';
