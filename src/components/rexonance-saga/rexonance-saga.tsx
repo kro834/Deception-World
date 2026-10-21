@@ -486,6 +486,7 @@ const RexonanceSuitUp = memo(function RexonanceSuitUp({ stage }: { stage: Rexona
         ref={runwayRef}
         className="rzn-suitup"
         aria-hidden="true"
+        id="assembly-runway"
         // The suit-up ends on the form chosen in 03 (owner, 2026-10-11).
         data-form={stage}
         style={{
@@ -1814,6 +1815,11 @@ export function RexonanceSaga() {
           <nav aria-label="レクソナンスサーガ ページ内ナビゲーション">
             <a href="#performance">性能</a>
             <a href="#p14">P14</a>
+            {/* APEX (rx19): the bar lists all five chapters, numbered as the
+                chapter index; 03 stays lit through the runway and the replay. */}
+            <a href="#assembly" data-local-nav-through="assembly-runway assembly-replay">
+              変身
+            </a>
             <a href="#stages">形態</a>
             <a href="#system">システム</a>
           </nav>

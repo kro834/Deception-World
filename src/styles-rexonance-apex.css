@@ -91,33 +91,52 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-
 /* ================================================================
    The local bar: numbered chapters, the one in view in gold
    ================================================================ */
-/* From 800px the bar has room for the numerals (an iPad Pro in portrait;
-   the 681–799 band keeps the four plain links). */
-@media (min-width: 800px) {
+/* The bar lists the five chapters, so its numerals are the chapter
+   index's (03 is the suit-up). Below 1024px the brand keeps its mark and
+   its Japanese name (the Latin word drops, as on phones) so the five links
+   fit beside it; the numerals join them from 768px (an iPad mini in
+   portrait), and the 681–767 band keeps five plain links. */
+@media (min-width: 681px) and (max-width: 1023.98px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > header.rxs-local-nav .rxs-brand > span {
+    display: none;
+  }
+}
+
+/* The media queries set the bar only (the nav): its links read the
+   numeral and their inset from it. (A media-scoped rule on the links
+   themselves left WebKit's computed style of the hidden phone bar stale
+   once aria-current moved after a rotation; the bar's own rules do not.) */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > header.rxs-local-nav nav {
+  counter-reset: rxa-nav;
+}
+
+@media (min-width: 768px) {
   html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > header.rxs-local-nav nav {
-    counter-reset: rxa-nav;
+    --rxa-nav-numeral: counter(rxa-nav, decimal-leading-zero);
+    --rxa-nav-inset: 10px;
     gap: 6px;
   }
+}
 
-  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > header.rxs-local-nav nav a {
-    gap: 7px;
-    padding: 0 10px;
-  }
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > header.rxs-local-nav nav a {
+  gap: 7px;
+  padding-inline: var(--rxa-nav-inset, 0px);
+}
 
-  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > header.rxs-local-nav nav a::before {
-    counter-increment: rxa-nav;
-    content: counter(rxa-nav, decimal-leading-zero);
-    color: rgb(242 216 150 / 62%);
-    font: 500 12px / 1 var(--rxf-forge, var(--dx-hud));
-    font-variant-numeric: tabular-nums lining-nums;
-    letter-spacing: 0.04em;
-    translate: 0 -1px;
-  }
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > header.rxs-local-nav nav a::before {
+  counter-increment: rxa-nav;
+  content: var(--rxa-nav-numeral, none);
+  color: rgb(242 216 150 / 62%);
+  font: 500 12px / 1 var(--rxf-forge, var(--dx-hud));
+  font-variant-numeric: tabular-nums lining-nums;
+  letter-spacing: 0.04em;
+  translate: 0 -1px;
+}
 
-  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > header.rxs-local-nav nav a[aria-current="location"]::before {
-    color: var(--rxa-gold);
-    text-shadow: 0 0 10px rgb(242 216 150 / 45%);
-  }
+/* The chapter in view: its numeral in gold. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > header.rxs-local-nav nav a[aria-current="location"]::before {
+  color: var(--rxa-gold);
+  text-shadow: 0 0 10px rgb(242 216 150 / 45%);
 }
 
 @media (min-width: 901px) and (hover: hover) and (pointer: fine) {
@@ -136,8 +155,9 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-se
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-section > .rxs-section-heading > .rxa-index {
   position: absolute;
   z-index: 1;
-  /* An absolutely placed grid child is boxed by its grid area; the whole
-     head is the area, so the index sits at the head's own right edge. */
+  /* An absolutely placed grid child is boxed by its grid area: the
+     columns run the head's width, so the index sits at its right edge
+     (the rows are implicit, so the area is the running head's row). */
   grid-area: 1 / 1 / -1 / -1;
   top: 1px;
   right: 0;
@@ -162,6 +182,29 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-se
   font: 600 15px / 1 var(--rxf-forge, var(--dx-hud));
   font-variant-numeric: tabular-nums lining-nums;
   letter-spacing: 0.02em;
+}
+
+/* The script column beside the stage (1100–1299: an iPad in landscape, a
+   1280 laptop) is narrow: P14's running head reaches the index, and the
+   headline's first line 「同じエーテルで、」 no longer fits at 4.4vw, so its
+   comma fell to a line of its own. The two heads set their headline to
+   the column (eight characters always fit), and the index moves to the
+   foot of the head, beside the intro's last line (the intro stops short
+   of the column), without its lead. */
+@media (min-width: 1100px) and (max-width: 1299.98px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > :is(#performance, #p14) > .rxs-section-heading > h2 {
+    font-size: calc(4.9vw - 12px);
+  }
+
+  /* grid-row auto: the head's padding box, not its first (running head)
+     row, is then the index's containing block in the block axis. */
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > :is(#performance, #p14) > .rxs-section-heading > .rxa-index {
+    grid-row: auto;
+    top: auto;
+    bottom: 7px;
+    padding-left: 0;
+    background: none;
+  }
 }
 
 /* 05: on wide screens the trinity rings stand at the head's right, so its

@@ -13,10 +13,13 @@ function harness({
   available = true,
   hrefs = ["#performance", "#p14", "#stages", "#system"],
   height = 900,
+  ids = ["performance", "p14", "stages", "system"],
+  through = {},
 } = {}) {
-  const targets = new Map(["performance", "p14", "stages", "system"].map((id) => [id, { id }]));
+  const targets = new Map(ids.map((id) => [id, { id }]));
   const links = hrefs.map((href) => {
     const attributes = new Map([["href", href]]);
+    if (through[href]) attributes.set("data-local-nav-through", through[href]);
     return {
       attributes,
       getAttribute: (name) => attributes.get(name) ?? null,
@@ -146,6 +149,44 @@ test("overlap resolves in chapter order and leaving all sections clears the old 
   ui.cross([["performance", false]]);
   assert.deepEqual(ui.current(), []);
   cleanup();
+});
+
+// rx19 (2026-10-22): Rexonance's bar lists the suit-up (03), whose heading is
+// followed by its decorative runway and the replay row; the chapter spans all three.
+test("a chapter can span the elements it names, in bar order, without extra observers or links", () => {
+  const ui = harness({
+    hrefs: ["#performance", "#p14", "#assembly", "#stages", "#system"],
+    ids: ["performance", "p14", "assembly", "assembly-runway", "assembly-replay", "stages", "system"],
+    through: { "#assembly": "assembly-runway  assembly-replay missing p14" },
+  });
+  const cleanup = ui.mount(ui.nav);
+  assert.deepEqual(
+    [...ui.observers[0].observed].map((target) => target.id),
+    ["performance", "p14", "assembly", "assembly-runway", "assembly-replay", "stages", "system"],
+    "named parts are observed once each; a missing id or another chapter's section is ignored",
+  );
+  ui.cross([["assembly", true]]);
+  assert.deepEqual(ui.current(), ["#assembly"]);
+  ui.cross([
+    ["assembly", false],
+    ["assembly-runway", true],
+  ]);
+  assert.deepEqual(ui.current(), ["#assembly"], "the runway keeps the suit-up chapter lit");
+  ui.cross([
+    ["assembly-runway", false],
+    ["assembly-replay", true],
+    ["stages", true],
+  ]);
+  assert.deepEqual(ui.current(), ["#stages"], "the next chapter still wins an overlap");
+  ui.cross([["stages", false]]);
+  assert.deepEqual(ui.current(), ["#assembly"]);
+  ui.cross([
+    ["assembly-replay", false],
+    ["p14", true],
+  ]);
+  assert.deepEqual(ui.current(), ["#p14"], "p14 keeps its own link despite being named");
+  cleanup();
+  assert.deepEqual(ui.current(), []);
 });
 
 test("only resolvable local section targets are observed, including encoded ids", () => {

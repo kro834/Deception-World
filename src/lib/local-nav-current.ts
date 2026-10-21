@@ -3,7 +3,12 @@
  * value the World header gives its chapter, so assistive tech hears where the
  * reader is and the bar can light it without a scroll timeline. Pages with a
  * scroll-linked light keep it; this mark is the fallback and the semantics.
- * Only same-page links whose target exists are followed. */
+ * Only same-page links whose target exists are followed.
+ *
+ * A chapter whose content continues past its own section (Rexonance's 03:
+ * the suit-up heading, then its decorative runway and the replay row) names
+ * those elements in `data-local-nav-through` (space-separated ids); each
+ * one that exists counts as the chapter, in the bar's order (rx19). */
 export function mountLocalNavCurrent(nav: Element | null | undefined): () => void {
   if (!nav || typeof IntersectionObserver === "undefined") return () => {};
   const links = Array.from(nav.querySelectorAll<HTMLAnchorElement>('a[href^="#"]'));
@@ -16,7 +21,12 @@ export function mountLocalNavCurrent(nav: Element | null | undefined): () => voi
       continue;
     }
     const section = id ? document.getElementById(id) : null;
-    if (section) sections.set(section, link);
+    if (!section) continue;
+    sections.set(section, link);
+    for (const extra of (link.getAttribute("data-local-nav-through") || "").split(/\s+/)) {
+      const part = extra ? document.getElementById(extra) : null;
+      if (part && !sections.has(part)) sections.set(part, link);
+    }
   }
   if (!sections.size) return () => {};
   const crossing = new Set<Element>();
