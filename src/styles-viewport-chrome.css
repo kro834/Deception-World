@@ -78,14 +78,15 @@ html:root[data-ipad-viewport="contained"] .ipad-menu-toggle {
   align-items: center;
 }
 
+/* The labels' floor: 12px at 0.9 (it was 11px at 0.8, under the floor). */
 .ipad-menu-description {
   display: block;
   margin-top: 6px;
   color: inherit;
-  font-size: 11px;
-  line-height: 1.8;
+  font-size: 12px;
+  line-height: 1.7;
   letter-spacing: 0.03em;
-  opacity: 0.8;
+  opacity: 0.9;
 }
 
 .ipad-menu-toggle[aria-pressed="true"] {
