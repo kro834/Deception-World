@@ -1908,17 +1908,34 @@ html[data-family]
     > .side-panel-links
     > a
     > span {
-    /* 映画四部作「仮面ライダーサーガ」 is 15 characters: one line where the
-       tile is wide enough, two balanced lines where it is not (the names
-       break between characters here, never on an orphaned 」). */
+    /* 映画四部作「仮面ライダーサーガ」 is 16 characters: one line where the
+       tile is widest, two where it is not, broken between its phrases. */
     font-size: clamp(12px, calc((100cqi - 26px) / 15.2), 17px);
-    word-break: normal;
-    /* Where the browser knows Japanese phrases, a name that must wrap
-       breaks between them (ディセプション / ワールド), not inside one. */
-    word-break: auto-phrase;
+    /* A name breaks only where its markup allows (the phrases below, the
+       DisplayName words): WebKit has no auto-phrase, and its normal
+       breaking split 「ドリー / ムチャプター」 (2026-10-22). */
+    word-break: keep-all;
     line-break: strict;
-    overflow-wrap: normal;
+    overflow-wrap: anywhere;
   }
+}
+
+/* The films' and the site's phrases (映画第一作 / 「ドリームチャプター」,
+   ディセプション / ワールド): each stays whole on its line and the name
+   wraps between them (<wbr>) in every engine. Nowrap, because WebKit's
+   keep-all still breaks after an opening bracket (映画四部作「 / 仮面…);
+   inline, not inline-block, so the links' accessible names gain no space
+   between the phrases. The narrowest STORIES tile (169px, a 768 iPad's)
+   holds 「仮面ライダーサーガ」 on its line at the 12px floor. */
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  .side-panel-links
+  > :is(a, button)
+  > span
+  > .side-panel-phrase {
+  display: inline;
+  white-space: nowrap;
 }
 
 /* Which art each destination shows (delivery files the site already
@@ -2994,11 +3011,15 @@ html[data-family]
   }
 }
 
-/* Up to 1439px SPECIAL and STORIES stand in two rows beside the chapters
+/* Up to 1799px SPECIAL and STORIES stand in two rows beside the chapters
    (four STORIES tiles in three columns were 87px wide at 1180, an iPad
    on its side), a little shorter so the pair still closes the first
-   screen. From 1440 the six tiles share one row again. */
-@media (min-width: 1180px) and (max-width: 1439px) {
+   screen. Sharing one row at 1440, the Dream Chapter's and the Cinema's
+   four STORIES tiles were 149px: their names fell to 12px and three lines
+   (「仮面ライダーサー / ガ」), and the World's three dropped from 345px to
+   202px across one pixel (2026-10-22). Four STORIES tiles keep their own
+   row at every width. */
+@media (min-width: 1180px) and (max-width: 1799px) {
   html[data-family]
     body
     #site-side-panel.side-panel
@@ -3015,8 +3036,52 @@ html[data-family]
   }
 }
 
-@media (min-width: 1440px) {
-  html[data-family] body #site-side-panel.side-panel[data-liquid-pointer] {
+@media (min-width: 1800px) {
+  html[data-family]
+    body
+    #site-side-panel.side-panel:where(
+      :has(
+        > .side-panel-head
+          + .side-panel-group
+          + .side-panel-group
+          + .side-panel-group
+          + .side-panel-group
+          > .side-panel-links
+          > a:nth-of-type(4)
+      )
+    )
+    > :is(
+      .side-panel-head + .side-panel-group + .side-panel-group + .side-panel-group,
+      .side-panel-head
+        + .side-panel-group
+        + .side-panel-group
+        + .side-panel-group
+        + .side-panel-group
+    )
+    > .side-panel-links {
+    --sh-tile-h: clamp(150px, 19vh, 210px);
+  }
+
+  /* From 1800 three STORIES tiles (the World's) share the row with the
+     two SPECIAL tiles: each is 250px or wider, its name 13px or more on
+     one line (at 1600 they were 232px and 12px).
+     :where() keeps this rule's weight, so the World/dossier file menu's
+     own areas (below) still win. */
+  html[data-family]
+    body
+    #site-side-panel.side-panel[data-liquid-pointer]:where(
+      :not(
+        :has(
+          > .side-panel-head
+            + .side-panel-group
+            + .side-panel-group
+            + .side-panel-group
+            + .side-panel-group
+            > .side-panel-links
+            > a:nth-of-type(4)
+        )
+      )
+    ) {
     grid-template-areas:
       "head head head head head head"
       "find find find find find find"
@@ -3315,6 +3380,18 @@ html[data-family] body #site-side-panel.side-panel > .side-panel-files > .side-p
   isolation: isolate;
   border: 1px solid rgb(var(--sh-l1-rgb) / 28%);
   background: var(--sh-ink-2);
+  /* The number stands beside the name where the tile is wide and under
+     it where it is narrow, alike in every tile of the row: beside it in a
+     130px tile, レックス・ロワ broke before its ・ (1180-1194, 2026-10-22). */
+  container: dw-file-tile / inline-size;
+  flex-wrap: wrap;
+  align-content: end;
+  gap: 4px 12px;
+}
+@container dw-file-tile (max-width: 139px) {
+  html[data-family] body #site-side-panel.side-panel > .side-panel-files > .side-panel-links > a > span {
+    flex-basis: 100%;
+  }
 }
 html[data-family] body #site-side-panel.side-panel > .side-panel-files a > img {
   position: absolute;
@@ -3333,6 +3410,16 @@ html[data-family] body #site-side-panel.side-panel > .side-panel-files a::before
      the link rules; this scrim is not that tick, and without it the names
      stood straight on the light portraits (テラ unreadable; 2026-10-15). */
   display: block;
+  /* None of the rows' tick geometry reaches the scrim (its 18px height,
+     pill radius, 0.35 scale, lift and glow): with them it covered only
+     the tile's top edge, and the names stood on the portraits again. */
+  width: auto;
+  height: auto;
+  border-radius: 0;
+  scale: none;
+  translate: none;
+  box-shadow: none;
+  transition: none;
   opacity: 1;
   background: linear-gradient(transparent, rgb(var(--sh-ink-rgb) / 96%));
   z-index: -1;
@@ -3374,6 +3461,17 @@ html[data-family] body #site-side-panel.side-panel > .side-panel-files a:focus-v
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
+/* Phones on their side: three RIKUEI tiles to a row. Six were 121px at
+   844x390 and broke their names inside words (レック / ス・ / ロワ). */
+@media (orientation: landscape) and (max-height: 600px) and (min-width: 761px) {
+  html[data-family] body #site-side-panel.side-panel > .side-panel-rikuei > .side-panel-links {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  html[data-family] body #site-side-panel.side-panel > .side-panel-rikuei > .side-panel-links > a {
+    min-height: 100px;
+    padding-top: 50px;
+  }
+}
 @media (min-width: 1180px) {
   html[data-family] body #site-side-panel.side-panel[data-file-menu="true"][data-liquid-pointer] {
     grid-template-areas:
@@ -3383,7 +3481,7 @@ html[data-family] body #site-side-panel.side-panel > .side-panel-files a:focus-v
       "sec unm inf inf inf inf" "sys sys sys sys sys sys";
   }
 }
-@media (min-width: 1440px) {
+@media (min-width: 1800px) {
   html[data-family] body #site-side-panel.side-panel[data-file-menu="true"][data-liquid-pointer] {
     grid-template-areas:
       "head head head head head head" "find find find find find find"

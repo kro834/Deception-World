@@ -43,7 +43,10 @@ test("Final Stage is listed under STORIES after Dream Chapter, not under SPECIAL
   );
   assert.equal(specialNavigation.indexOf("<span>ファイナルステージ</span>"), -1);
   const stories = menu.slice(menu.indexOf("<p>STORIES</p>"), menu.indexOf("<p>RIDERS</p>"));
-  const dreamPosition = stories.lastIndexOf("<span>映画第一作「ドリームチャプター」</span>");
+  // Owner (2026-10-21): the films' names are marked up in their phrases (映画第一作 / 「…」).
+  const dreamPosition = stories.lastIndexOf(
+    '<span className="side-panel-phrase">映画第一作</span>',
+  );
   const finalStagePosition = stories.indexOf("<span>ファイナルステージ</span>");
   assert.ok(dreamPosition >= 0);
   assert.ok(finalStagePosition > dreamPosition);

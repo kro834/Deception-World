@@ -29,6 +29,7 @@
    ================================================================ */
 :root {
   --dwc-ink: #04080f;
+  --dwc-ink-rgb: 4 8 15;
   --dwc-head: #03060c;
   --dwc-deck: #0a1220;
   --dwc-ice: #7ae8ff;
@@ -223,18 +224,20 @@ html body #site-side-panel .side-panel-head b {
    quick search's plates). No red and no spin on hover. */
 html body #site-side-panel .side-panel-close.ios26-glass,
 html body #site-announcement-dialog .site-announcement-close.ios26-glass {
-  border: 1px solid rgb(122 232 255 / 36%);
+  /* Tokens: the Dream Chapter's notices light it vermilion with the rest
+     of their sheet; the launcher keeps the World values (the defaults). */
+  border: 1px solid rgb(var(--dwc-ice-rgb) / 36%);
   border-radius: 3px;
-  background: rgb(4 8 15 / 92%) !important;
-  box-shadow: inset 0 0 0 1px rgb(122 232 255 / 8%) !important;
+  background: rgb(var(--dwc-ink-rgb) / 92%) !important;
+  box-shadow: inset 0 0 0 1px rgb(var(--dwc-ice-rgb) / 8%) !important;
   color: var(--dwc-text);
 }
 
 @media (hover: hover) and (pointer: fine) {
   html body #site-side-panel .side-panel-close.ios26-glass:hover,
   html body #site-announcement-dialog .site-announcement-close.ios26-glass:hover {
-    border-color: rgb(122 232 255 / 58%);
-    background: rgb(122 232 255 / 8%) !important;
+    border-color: rgb(var(--dwc-ice-rgb) / 58%);
+    background: rgb(var(--dwc-ice-rgb) / 8%) !important;
     rotate: none;
   }
 }
@@ -613,6 +616,7 @@ html body #site-announcement-dialog .site-announcement-hub {
    tokens change here. */
 html[data-family="dream"] body #site-announcement-dialog {
   --dwc-ink: var(--sh-ink, #130c17);
+  --dwc-ink-rgb: var(--sh-ink-rgb, 19 12 23);
   --dwc-head: #0f0912;
   --dwc-deck: var(--sh-ink-2, #1c1120);
   --dwc-deck-rgb: 28 17 32;
@@ -733,7 +737,9 @@ html body #site-announcement-dialog .site-announcement-header h2 {
 }
 
 /* Phones: the kicker keeps its one line across the top of the head, and
-   the plate stands beside the title under it. */
+   the plate stands beside the title under it. INFORMATION / ARCHIVE is
+   271px at 0.24em: a closer tracking under 390px keeps it on one line
+   (it wrapped at 375 and 360), INFORMATION alone under 360 (320). */
 @media (max-width: 560px) {
   html body #site-announcement-dialog .site-announcement-header > div {
     grid-template-columns: 36px minmax(0, 1fr);
@@ -762,6 +768,22 @@ html body #site-announcement-dialog .site-announcement-header h2 {
 
   html body #site-announcement-dialog .site-announcement-header h2 {
     grid-area: title;
+  }
+}
+
+@media (max-width: 389px) {
+  html body #site-announcement-dialog .site-announcement-header > div > p {
+    letter-spacing: 0.12em;
+  }
+}
+
+@media (max-width: 359px) {
+  html body #site-announcement-dialog .site-announcement-header > div > p {
+    letter-spacing: 0.24em;
+  }
+
+  html body #site-announcement-dialog .site-announcement-kicker-tail {
+    display: none;
   }
 }
 
@@ -822,6 +844,13 @@ html body #site-announcement-dialog .site-announcement-list-visual {
   border-radius: 2px;
 }
 
+/* The phones' 3:4 thumbnails crop at each poster's own focus too. */
+@media (max-width: 760px) {
+  html body #site-announcement-dialog .site-announcement-list-visual img {
+    object-position: 50% var(--poster-y-thumb, 50%);
+  }
+}
+
 html body #site-announcement-dialog .site-announcement-list-arrow {
   border-color: rgb(var(--dwc-gold-rgb) / 40%);
   border-radius: 2px;
@@ -858,6 +887,11 @@ html body #site-announcement-dialog .site-announcement-list-copy b {
   color: var(--dwc-text);
   font-family: var(--dwc-display-jp);
   font-weight: 600;
+  /* The title breaks only between its phrases (<wbr> from PhrasedTitle):
+     balanced in WebKit, 性能 was split 性 / 能 (2026-10-22). A phrase wider
+     than its column still wraps (overflow-wrap: anywhere). */
+  word-break: keep-all;
+  line-break: strict;
 }
 
 /* Hover (mouse only): the edge brightens and the plate lifts a pixel. */
@@ -917,8 +951,10 @@ html[data-press-ready] body #site-announcement-dialog .site-announcement-list-it
     aspect-ratio: 4 / 5;
   }
 
+  /* Each poster's own crop focus (SITE_ANNOUNCEMENTS posterY): at 18%
+     the 4:5 frame sliced the EX. mark along its foot (2026-10-22). */
   html body #site-announcement-dialog .site-announcement-list-visual img {
-    object-position: 50% 18%;
+    object-position: 50% var(--poster-y-tall, 18%);
   }
 
   html body #site-announcement-dialog .site-announcement-list-copy {
@@ -1032,6 +1068,11 @@ html[data-press-ready] body #site-announcement-dialog .site-announcement-list-it
     aspect-ratio: 1 / 1;
   }
 
+  /* At 18% the square frame cut through the letters of Deus. */
+  html body #site-announcement-dialog .site-announcement-list-visual img {
+    object-position: 50% var(--poster-y-square, 18%);
+  }
+
   html body #site-announcement-dialog .site-announcement-index {
     gap: 18px;
     padding-block: 22px 26px;
@@ -1105,6 +1146,14 @@ html[data-press-ready] body #site-announcement-dialog .site-announcement-list-it
   html body #site-announcement-dialog .site-announcement-list-copy b {
     font-size: 17px;
     line-height: 1.45;
+  }
+}
+
+/* A 320px phone: レクソナンスサーガの keeps its line at 16px (at 17px the
+   170px column lacked 2px and the title broke before の). */
+@media (max-width: 359px) {
+  html body #site-announcement-dialog .site-announcement-list-copy b {
+    font-size: 16px;
   }
 }
 
