@@ -174,28 +174,59 @@
    the title stage asked for (a 390px phone, an 834px iPad, a 1024px iPad
    Pro alike). Viewport lengths only, as the landscape rule does; the
    values are the ones the stage sheet and section 2 meant (and the ones
-   posterImage's `sizes` already announces). */
+   posterImage's `sizes` already announces).
+   Every height term carries a 256px floor: below about 244px the caption
+   and the controls' labels break (KEY / VISUAL, 01 / above 33, RESET out
+   of its button), and short Safari viewports reached it (an iPhone SE at
+   375 x 548 drew a 219px print, an iPad mini with its tab bar at 768 x
+   914 a 196px one, a 720 x 760 Stage Manager window 93px). The page
+   scrolls past the floor; the print stays legible. */
 @media (max-width: 699px) and (orientation: portrait) {
   html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
     > .hero
     > .poster-stage {
-    --poster-width: min(78vw, 440px, calc((100svh - 220px) * 2 / 3));
+    --poster-width: min(78vw, 440px, max(256px, calc((100svh - 220px) * 2 / 3)));
   }
 }
 
 @media (min-width: 700px) and (max-width: 900px) and (orientation: portrait) {
+  /* 40vw is the visual column itself (0.92 of the two columns between
+     the 4.4vw gutters and the 4vw gap), so the print and its controls
+     never run past it. The height term only bites on 4:3 iPads (768 ×
+     1024: 269px); shorter windows stop at the 256px floor. Held on the
+     hero as --zn-print so its padding below can read the same width. */
+  html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > .hero {
+    --zn-print: min(40vw, 390px, max(256px, calc((100svh - 620px) * 2 / 3)));
+  }
+
   html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
     > .hero
     > .poster-stage {
-    /* 40vw is the visual column itself (0.92 of the two columns between
-       the 4.4vw gutters and the 4vw gap), so the print and its controls
-       never run past it. The height term only bites on 4:3 iPads (768 ×
-       1024): there the controls would end under the fixed Zeus button. */
-    --poster-width: min(40vw, 390px, calc((100svh - 620px) * 2 / 3));
+    --poster-width: var(--zn-print);
+  }
+}
+
+/* The fixed Zeus button floats at 82dvh, over the visual column's foot.
+   Where the title block fits the screen (an iPad mini or a 9.7" iPad in
+   Safari, 768 × 914 to 810 × 1010), the hero's padding below grows just
+   enough that the centred block ends 18px above the button (clear of its
+   ring and outline, which stand 7px out): the print keeps its floor and
+   the AUTO control stays clear. The stage is the print (1.5 × its width)
+   plus 156px (the caption, the gaps and the two 48px control rows); the
+   block is centred, so the stage's foot sits at (top padding + 100svh -
+   bottom padding + stage) / 2. Taller iPads (834 × 1194, 744 × 1133) and
+   768 × 1024 keep the 11vh padding. Shorter windows scroll the block
+   anyway and keep it too. */
+@media (min-width: 700px) and (max-width: 900px) and (orientation: portrait) and (min-height: 860px) {
+  html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > .hero {
+    padding-bottom: max(
+      clamp(60px, 11vh, 132px),
+      calc(var(--film-topbar-height, 64px) + 24px + var(--zn-print) * 1.5 + 264px - 64svh)
+    );
   }
 }
 
@@ -211,7 +242,7 @@
     --poster-width: min(
       31vw,
       430px,
-      calc((100svh - var(--film-topbar-height, 76px) - 210px) * 2 / 3)
+      max(256px, calc((100svh - var(--film-topbar-height, 76px) - 210px) * 2 / 3))
     );
   }
 }
@@ -228,7 +259,7 @@
     --poster-width: min(
       24vw,
       512px,
-      calc((100svh - var(--film-topbar-height, 76px) - 210px) * 2 / 3)
+      max(256px, calc((100svh - var(--film-topbar-height, 76px) - 210px) * 2 / 3))
     );
   }
 }
@@ -244,6 +275,27 @@
     > .poster-stage {
     --poster-width: min(40vw, 430px, calc((100svh - 300px) * 2 / 3));
   }
+}
+
+/* The caption's two labels hold their line (KEY VISUAL, 01 / 33): at the
+   256px floor they still sit side by side with room between them. */
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > .hero
+  > .poster-stage
+  > .film-visual-caption {
+  column-gap: 12px;
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > .hero
+  > .poster-stage
+  > .film-visual-caption
+  > span {
+  white-space: nowrap;
 }
 
 /* ----------------------------------------------------------------
@@ -645,10 +697,14 @@ html[data-family="world"]:root
 /* ----------------------------------------------------------------
    5. The annex after the cast wall: rhythm in the archive log
    ---------------------------------------------------------------- */
-/* 04: アザト's plate. No art exists for him; the socket is a sealed
-   record rather than an empty hatch: a ring seal in the chapter's light
-   with the logo's pink, the prism cross at its centre, the name and the
-   NO FILE label as before. */
+/* 04: アザト's plate. No art exists for him; rx14 F6 made the socket a
+   typographic spine (no invented portrait), and the spine stays: the
+   vertical name leads. Behind it, a sealed record rather than an empty
+   hatch: a ring seal in the chapter's light with the logo's pink, sized
+   from the plate's own short side (the 170px phone plate keeps both rings
+   inside it), and the prism band across the centre, broken where the
+   name's column runs so no glyph is struck through. The name is lifted
+   above the decoration; the old crosshair's vertical arm stays off. */
 @media (forced-colors: none) {
   html[data-family="world"]:root
     body
@@ -656,34 +712,28 @@ html[data-family="world"]:root
     > #cast-roster
     .wa-person.is-none
     > .wa-portrait.is-vacant {
+    --zn-name: clamp(30px, 4vw, 56px);
     background:
       radial-gradient(
-        circle at 50% 50%,
-        transparent 66px,
-        rgb(var(--sw-light-rgb) / 62%) 67px,
-        transparent 68px
+        circle closest-side at 50% 50%,
+        transparent calc(60% - 1px),
+        rgb(var(--sw-light-rgb) / 62%) calc(60% - 0.5px),
+        rgb(var(--sw-light-rgb) / 62%) calc(60% + 0.5px),
+        transparent calc(60% + 1px)
       ),
       radial-gradient(
-        circle at 50% 50%,
-        transparent 84px,
-        rgb(255 79 195 / 36%) 85px,
-        rgb(255 79 195 / 36%) 85.5px,
-        transparent 86.5px
+        circle closest-side at 50% 50%,
+        transparent calc(82% - 1px),
+        rgb(255 79 195 / 36%) calc(82% - 0.5px),
+        rgb(255 79 195 / 36%) calc(82% + 0.5px),
+        transparent calc(82% + 1px)
       ),
       radial-gradient(
-        circle at 50% 50%,
+        circle closest-side at 50% 50%,
         rgb(255 79 195 / 14%),
-        rgb(79 123 255 / 9%) 34%,
-        transparent 62%
+        rgb(79 123 255 / 9%) 52%,
+        transparent 100%
       ),
-      linear-gradient(
-          180deg,
-          transparent,
-          rgb(var(--sw-light-rgb) / 50%) 30%,
-          rgb(255 79 195 / 50%) 70%,
-          transparent
-        )
-        50% 50% / 1px 240px no-repeat,
       repeating-linear-gradient(135deg, rgb(var(--sw-light-rgb) / 5%) 0 1px, transparent 1px 12px),
       linear-gradient(180deg, #071410, #04100c);
     box-shadow: inset 0 0 0 1px rgb(var(--sw-light-rgb) / 24%);
@@ -694,16 +744,24 @@ html[data-family="world"]:root
     main.site-shell.film-edition.mirage-edition
     > #cast-roster
     .wa-person.is-none
-    > .wa-portrait.is-vacant::before,
-  html[data-family="world"]:root
-    body
-    main.site-shell.film-edition.mirage-edition
-    > #cast-roster
-    .wa-person.is-none
-    > .wa-portrait.is-vacant::after {
+    > .wa-portrait.is-vacant::before {
     content: "";
-    inset: 50% auto auto 50%;
-    background: linear-gradient(90deg, rgb(var(--sw-light-rgb) / 0%), var(--sw-light) 40%, #ff4fc3 60%, rgb(255 79 195 / 0%));
+    z-index: 0;
+    inset: 50% 6% auto;
+    width: auto;
+    height: 1px;
+    translate: 0 -0.5px;
+    background: linear-gradient(
+      90deg,
+      rgb(var(--sw-light-rgb) / 0%),
+      var(--sw-light) 26%,
+      var(--sw-light) calc(50% - var(--zn-name) / 2 - 12px),
+      transparent calc(50% - var(--zn-name) / 2 - 12px),
+      transparent calc(50% + var(--zn-name) / 2 + 12px),
+      #ff4fc3 calc(50% + var(--zn-name) / 2 + 12px),
+      #ff4fc3 74%,
+      rgb(255 79 195 / 0%)
+    );
     opacity: 0.9;
   }
 
@@ -712,22 +770,22 @@ html[data-family="world"]:root
     main.site-shell.film-edition.mirage-edition
     > #cast-roster
     .wa-person.is-none
-    > .wa-portrait.is-vacant::before {
-    width: 120px;
-    height: 1px;
-    translate: -60px 0;
+    > .wa-portrait.is-vacant
+    > b {
+    position: relative;
+    z-index: 2;
   }
 
+  /* The NO FILE chip stays on top of the name, as before the lift (on the
+     smallest plates the name's foot reaches it). */
   html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
     > #cast-roster
     .wa-person.is-none
-    > .wa-portrait.is-vacant::after {
-    width: 1px;
-    height: 120px;
-    translate: 0 -60px;
-    background: linear-gradient(180deg, rgb(var(--sw-light-rgb) / 0%), var(--sw-light) 40%, #ff4fc3 60%, rgb(255 79 195 / 0%));
+    > .wa-portrait.is-vacant
+    > small {
+    z-index: 3;
   }
 }
 
@@ -1179,8 +1237,12 @@ html[data-family="world"]:root
    9. 06.3 on wide screens: the transmission log in two channels. One
       column of seventeen rows left the line at the left and the speaker
       at the far right, a dead middle between them. From 1100px the log
-      runs down two columns (01-09, then 10-17, the reading order), each
-      line with its speaker under it; a hairline between the channels.
+      runs down two columns in the reading order (the first half, then
+      the rest), each line with its speaker under it; a hairline between
+      the channels. A multi-column flow balances the two channels for any
+      number of lines (a fixed row count in a column-flow grid opened a
+      third, narrower column as soon as the data grew past it); no line
+      breaks across the channels.
       Below 1100px the stage sheet's rows and the phones' rail stay.
    ---------------------------------------------------------------- */
 @media (min-width: 1100px) {
@@ -1189,9 +1251,8 @@ html[data-family="world"]:root
     main.site-shell.film-edition.mirage-edition
     > #quotes
     .wa-quote-band {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    grid-template-rows: repeat(9, auto);
-    grid-auto-flow: column;
+    display: block;
+    columns: 2;
     column-gap: clamp(40px, 4.4vw, 72px);
   }
 
@@ -1204,6 +1265,7 @@ html[data-family="world"]:root
     grid-template-columns: 48px minmax(0, 1fr);
     column-gap: 24px;
     padding: 16px 0 18px;
+    break-inside: avoid;
   }
 
   html[data-family="world"]:root
