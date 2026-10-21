@@ -256,7 +256,8 @@ export function DreamStoryIndex() {
           })}
         </ol>
         {/* The bulk toggles follow the six links in the focus order (the keyboard
-            reaches the chapters first); the sheet seats them beside the head. */}
+            reaches the chapters first); the sheet sets them as the index's foot,
+            so what the eye sees follows the same order. */}
         <div className="dream-reader-index-actions" role="group" aria-label="全章の開閉">
           <button type="button" onClick={() => toggleAllCases(true)} aria-pressed={allOpen}>
             全章を開く
