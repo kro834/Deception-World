@@ -193,8 +193,9 @@
     > .poster-stage {
     /* 40vw is the visual column itself (0.92 of the two columns between
        the 4.4vw gutters and the 4vw gap), so the print and its controls
-       never run past it. */
-    --poster-width: min(40vw, 390px, calc((100svh - 300px) * 2 / 3));
+       never run past it. The height term only bites on 4:3 iPads (768 ×
+       1024): there the controls would end under the fixed Zeus button. */
+    --poster-width: min(40vw, 390px, calc((100svh - 620px) * 2 / 3));
   }
 }
 
