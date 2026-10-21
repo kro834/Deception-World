@@ -4,6 +4,7 @@ import { runInNewContext } from "node:vm";
 import test from "node:test";
 import { naniteHexHeight, naniteHexLight } from "../src/lib/rexonance-unlit.js";
 import { sampleFlameBirth, NANITE_FIRE_PHASES } from "../src/lib/rexonance-ignition.js";
+import { scrollFlameAt } from "../src/lib/rexonance-field/field-clock.js";
 import { REXONANCE_NANITES } from "../src/lib/rexonance-nanites.ts";
 import {
   REXONANCE_SUIT_GOLD_CELL,
@@ -38,6 +39,7 @@ function runtimeFactory() {
   const fireImport = 'import { sampleFlameBirth } from "./rexonance-ignition.js";';
   const firePainterImport = 'import { drawNaniteFirebrand } from "./rexonance-flame.js";';
   const phaseImport = 'import { NANITE_FIRE_PHASES } from "./rexonance-ignition.js";';
+  const clockImport = 'import { scrollFlameAt } from "./rexonance-field/field-clock.js";';
   assert.equal(
     source.split(importLine).length - 1,
     1,
@@ -54,6 +56,7 @@ function runtimeFactory() {
     .replace(fireImport, "")
     .replace(firePainterImport, "")
     .replace(phaseImport, "")
+    .replace(clockImport, "")
     .replace(/\bexport\s+(?=(?:const|function|class)\b)/g, "")
     .replace(
       returnMarker,
@@ -106,6 +109,7 @@ function runtimeFactory() {
         ctx.drawImage({ id: "firebrand" }, x - 20 * scale, y - 50 * scale, 40 * scale, 70 * scale);
     },
   };
+  context.scrollFlameAt = scrollFlameAt;
   runInNewContext(instrumented, context);
   cachedCreate = context.__createAssemblyNanites;
   return cachedCreate;

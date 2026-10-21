@@ -31,14 +31,16 @@
 import { naniteHexHeight, naniteHexLight } from "./rexonance-unlit.js";
 import { sampleFlameBirth } from "./rexonance-ignition.js";
 import { NANITE_FIRE_PHASES } from "./rexonance-ignition.js";
+import { scrollFlameAt } from "./rexonance-field/field-clock.js";
 
 const TAU = Math.PI * 2;
 const DEG = Math.PI / 180;
 const MERGE_FROM = 0.62;
 const ABSORB = 0.026;
-const FIRE_START = 0.015 + 0.285 * NANITE_FIRE_PHASES.burstStart;
-const FIRE_END = 0.015 + 0.285 * NANITE_FIRE_PHASES.burstEnd;
-const MATERIAL_START = 0.015 + 0.285 * NANITE_FIRE_PHASES.materialStart;
+// (The runway's fire mapping lives in rexonance-field/field-clock.js.)
+const FIRE_START = scrollFlameAt(NANITE_FIRE_PHASES.burstStart);
+const FIRE_END = scrollFlameAt(NANITE_FIRE_PHASES.burstEnd);
+const MATERIAL_START = scrollFlameAt(NANITE_FIRE_PHASES.materialStart);
 const FIRE_HANDOFF = 0.008;
 const FIREBRANDS = 24;
 const FIREBRANDS_TOUCH = 8;
@@ -2866,10 +2868,13 @@ export function createAssemblyNanites({
       x = hx + rr * (Math.cos(psi) * qx + flatten * Math.sin(psi) * nx);
       y = hy + rr * (Math.cos(psi) * qy + flatten * Math.sin(psi) * ny);
       size = s0 * (1.375 - 0.375 * e + 0.08 * Math.sin(Math.PI * w) ** 2);
-      // (The frame it reached the gate in: the river's.)
+      // (The frame it reached the gate in: the river's.) An ornament's chip
+      // stays banked through its braking and capture (2026-10-21: the
+      // tail's and ribbons' long flights left face-on rings hanging at
+      // their hover points); it turns face-on only as it unfolds.
       const gateFrame = riverFrame(i, t0, m, rate, t0 + 0.55 * span);
       const faceFrame = gateFrame - Math.round(gateFrame / 24) * 24;
-      fr = faceFrame * (1 - e);
+      fr = p >= 0 && P[p].ornament ? faceFrame : faceFrame * (1 - e);
       TN[slot] = 2;
       // N15: banking round the hover point, its lit face catches the key
       // light once a turn — a glint, and the face-on frame.
@@ -2933,6 +2938,12 @@ export function createAssemblyNanites({
         }
       }
       fr = 0;
+      if (p >= 0 && P[p].ornament && u < 0.86) {
+        // Banked still, turning face-on by the unfold (the shortest way).
+        const gateFrame = riverFrame(i, t0, m, rate, t0 + 0.55 * span);
+        const faceFrame = gateFrame - Math.round(gateFrame / 24) * 24;
+        fr = faceFrame * (1 - smooth((u - dive) / (0.86 - dive)));
+      }
       if (u >= 0.86) {
         const g = (u - 0.86) / 0.14;
         UF[slot] = Math.min(6, Math.floor(g * 7));
