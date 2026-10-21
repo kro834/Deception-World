@@ -21,6 +21,21 @@ Forge", "Rexonance Forge Outline" and "Rexonance Etch". Neither copyright
 statement declares a Reserved Font Name. All are licensed under the SIL
 Open Font License, Version 1.1, copied below.
 
+rexonance-mincho-display-first-20261021.woff2 ("Rexonance Mincho", CSS alias)
+rexonance-mincho-display-20261021.woff2 ("Rexonance Mincho", CSS alias)
+rexonance-mincho-text-first-20261021.woff2 ("Rexonance Mincho Text", CSS alias)
+rexonance-mincho-text-20261021.woff2 ("Rexonance Mincho Text", CSS alias)
+  Subsets of Shippori Mincho B1 ExtraBold (800: display) and Medium (500:
+  text), designed by FONTDASU, holding only the glyphs the Rexonance page
+  prints in them: the -first files the first screen's (the hero's line,
+  lede and scroll cue, the bar's name), the others the rest of the page's
+  titles and ledes, with the digits (fontTools subsetter, palt kept,
+  unhinted; the copy is read by scripts/rexonance-type-copy.mjs).
+  Copyright 2021 The Shippori Mincho Project Authors
+  (https://github.com/fontdasu/ShipporiMincho). No Reserved Font Name;
+  the name tables are unchanged. License: rexonance-mincho-OFL.txt (the
+  same SIL Open Font License, Version 1.1).
+
 
 This Font Software is licensed under the SIL Open Font License, Version 1.1.
 This license is copied below, and is also available with a FAQ at:

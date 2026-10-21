@@ -198,7 +198,10 @@ test("the forged face is preloaded on this route only; the files are small woff2
     "g",
   );
   assert.equal(route.match(outlinePreload)?.length, 1);
-  assert.equal(route.match(/as: "font"/g)?.length, 2, "two font preloads on the route");
+  // owner request 2026-10-21: TYPE (rx21) — the Mincho's two first-screen
+  // subsets are the third and fourth preloads (scripts/rexonance-type.test.mjs
+  // pins them); still no other.
+  assert.equal(route.match(/as: "font"/g)?.length, 4, "four font preloads on the route");
   for (const path of [
     "src/routes/world.tsx",
     "src/routes/extreme-saga.tsx",
