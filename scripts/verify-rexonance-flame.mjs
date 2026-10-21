@@ -12,11 +12,7 @@ import { chromium, webkit } from "playwright";
 import sharp from "sharp";
 import { connectedFireEvidence } from "./rexonance-fire-evidence.mjs";
 import { assertSpreadSequence, flameSpreadEvidence } from "./rexonance-spread-evidence.mjs";
-import {
-  entryCanonicalTime,
-  NANITE_FIRE_PHASES,
-  REXONANCE_SCROLL_AFTERBURN,
-} from "../src/lib/rexonance-ignition.js";
+import { entryCanonicalTime, NANITE_FIRE_PHASES } from "../src/lib/rexonance-ignition.js";
 
 const materialEntry = NANITE_FIRE_PHASES.materialStart * 2400;
 const materialScroll = 0.015 + 0.285 * NANITE_FIRE_PHASES.materialStart;
@@ -966,16 +962,11 @@ try {
               );
               record.scrollExtinguished ??= [];
               record.scrollExtinguished.push({ progress, flameDrawsAfter: after - before });
-              // The afterburn (owner, 2026-10-21) still burns mid-assembly
-              // and stays alive at rest; it is out before the seal.
-              if (progress < REXONANCE_SCROLL_AFTERBURN.to)
-                assert.ok(after > before, `${name}/${progress}: the afterburn burns at rest`);
-              else
-                assert.equal(
-                  after,
-                  before,
-                  `${name}/${progress}: extinguished flame cannot obscure the completed armour`,
-                );
+              assert.equal(
+                after,
+                before,
+                `${name}/${progress}: extinguished flame cannot obscure the completed armour`,
+              );
             }
           }
           if (!baseline) {
