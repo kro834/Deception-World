@@ -28,7 +28,10 @@
    STAGE sheets. Motion is finite or scroll-linked on a named timeline,
    gated by reduced motion, economy rendering, the open menu, the load
    gate and open dialogs; nothing loops. Labels hold the 12px floor and
-   hit targets 44px. No markup changes.
+   hit targets 44px. Markup (src/components/final-stage/final-stage.tsx):
+   CallOuts is a labelled list (role=list / listitem), and the Realm Royal
+   visuals list the record-art candidates (srcset/sizes) on both the card
+   and the record's figure.
    ================================================================ */
 
 html[data-family="special"] body .rxs-page.rxs-page.fst-page {
@@ -303,7 +306,9 @@ html[data-family="special"]
 }
 
 /* The record's eyebrow (RIDER RECORD 01 / FAR FROM SAGA) holds one line
-   on a phone: tighter tracking, balanced if it must break. */
+   on a 390px phone: at 0.06em the longer one sets 334px in its 344px
+   column (0.12em set 356px and broke "/ FAR FROM SAGA" to a second line).
+   Narrower phones break it, balanced. */
 @media (max-width: 480px) {
   html[data-family="special"]
     body
@@ -312,7 +317,7 @@ html[data-family="special"]
     .fst-pickup-heading
     small {
     display: block;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.06em;
     text-wrap: balance;
   }
 }
@@ -547,7 +552,9 @@ html[data-family="special"]
     :is(.fst-ffs-stage-tabs, .fst-rr-form-tabs).rxs-stage-tabs.liquid-swipe-tabs
     > button[role="tab"] {
     flex: 1 1 auto;
-    min-width: 0;
+    /* Content-sized, but never under the 44px touch floor: ハイ would be
+       41px at 360px and 34px at 320px; the wider tabs give up the rest. */
+    min-width: 44px;
     padding-inline: 4px;
   }
 
@@ -820,17 +827,11 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer > a.r
     justify-content: stretch;
     margin: -8px 0 0;
     padding: 0 0 2px;
-    overflow-x: auto;
-    scrollbar-width: none;
+    /* No scroller: the three links fit down to 320px (nav 16–304), and an
+       overflow box would clip each link's focus ring (2px, 3px outside the
+       link) to a thin line at its right edge. */
+    overflow: visible;
     border-top: 1px solid rgb(var(--fsx-violet-rgb) / 12%);
-  }
-
-  html[data-family="special"]
-    body
-    .rxs-page.rxs-page.fst-page
-    > .rxs-local-nav
-    nav::-webkit-scrollbar {
-    display: none;
   }
 
   html[data-family="special"] body .rxs-page.rxs-page.fst-page > .rxs-local-nav nav a {

@@ -182,6 +182,29 @@ test("labels hold the 12px floor", async () => {
   }
 });
 
+test("the phone chapter strip keeps its focus rings and the record tabs the 44px floor", async () => {
+  const { rules } = parse(await read(SHEET));
+  // An overflow box on the strip clipped each link's outline (3px outside it).
+  const strip = rules.filter(({ selector }) =>
+    /> \.rxs-local-nav nav(?:::[\w-]+)?$/.test(selector),
+  );
+  assert.ok(strip.length > 0);
+  for (const { selector, body } of strip) {
+    assert.doesNotMatch(selector, /::-webkit-scrollbar/);
+    for (const property of ["overflow", "overflow-x", "overflow-y"]) {
+      for (const value of declarations(body, property)) assert.equal(value, "visible", selector);
+    }
+  }
+  // Content-sized tabs, never narrower than a touch target.
+  const tabs = rules.filter(({ selector }) => /> button\[role="tab"\]$/.test(selector));
+  assert.ok(tabs.some(({ body }) => declarations(body, "min-width").length > 0));
+  for (const { selector, body } of tabs) {
+    for (const value of declarations(body, "min-width")) {
+      assert.ok(Number(value.match(/^(\d+)px$/)?.[1] ?? 0) >= 44, `${selector}: ${value}`);
+    }
+  }
+});
+
 test("the end card's letterbox leaves forced colours and the calls' generated numbers are silent", async () => {
   const source = strip(await read(SHEET));
   const forced = source.slice(source.indexOf("@media (forced-colors: active)"));
