@@ -1721,7 +1721,13 @@ html[data-family]
     > .side-panel-links
     > a
     > span {
-    font-size: clamp(12px, calc((100cqi - 26px) / 11.6), 17px);
+    /* 映画四部作「仮面ライダーサーガ」 is 15 characters: one line where the
+       tile is wide enough, two balanced lines where it is not (the names
+       break between characters here, never on an orphaned 」). */
+    font-size: clamp(12px, calc((100cqi - 26px) / 15.2), 17px);
+    word-break: normal;
+    line-break: strict;
+    overflow-wrap: normal;
   }
 }
 
@@ -1963,6 +1969,100 @@ html[data-family]:not([data-world-effects="economy"])
   > .side-panel-links
   > a[href="/riders/cipher"] {
   --sh-art: url("/rider-cipher-thumbnail-20260825-400.webp");
+}
+
+/* The riders' tiles are 150-200px wide from tablets up: a 1x screen takes
+   the 240w delivery and only a 2x screen the 400w one (phones keep 240w
+   below). Engines without image-set() keep the 400w file above. */
+@media (min-width: 761px) {
+  @supports (background-image: image-set(url("/rider-realm-240.webp") 1x)) {
+    html[data-family]:not([data-world-effects="economy"])
+      body
+      #site-side-panel.side-panel[data-open="true"]
+      > .side-panel-riders
+      > .side-panel-links
+      > a[href="/riders/saga"] {
+      --sh-art: image-set(
+        url("/rider-saga-rexonance-thumbnail-20260827-240.webp") 1x,
+        url("/rider-saga-rexonance-thumbnail-20260827-400.webp") 2x
+      );
+    }
+
+    html[data-family]:not([data-world-effects="economy"])
+      body
+      #site-side-panel.side-panel[data-open="true"]
+      > .side-panel-riders
+      > .side-panel-links
+      > a[href="/riders/realm"] {
+      --sh-art: image-set(url("/rider-realm-240.webp") 1x, url("/rider-realm-400.webp") 2x);
+    }
+
+    html[data-family]:not([data-world-effects="economy"])
+      body
+      #site-side-panel.side-panel[data-open="true"]
+      > .side-panel-riders
+      > .side-panel-links
+      > a[href="/riders/lore"] {
+      --sh-art: image-set(url("/rider-loa-240.webp") 1x, url("/rider-loa-400.webp") 2x);
+    }
+
+    html[data-family]:not([data-world-effects="economy"])
+      body
+      #site-side-panel.side-panel[data-open="true"]
+      > .side-panel-riders
+      > .side-panel-links
+      > a[href="/riders/vandal"] {
+      --sh-art: image-set(
+        url("/rider-vandal-thumbnail-20260827-240.webp") 1x,
+        url("/rider-vandal-thumbnail-20260827-400.webp") 2x
+      );
+    }
+
+    html[data-family]:not([data-world-effects="economy"])
+      body
+      #site-side-panel.side-panel[data-open="true"]
+      > .side-panel-riders
+      > .side-panel-links
+      > a[href="/riders/leddic"] {
+      --sh-art: image-set(
+        url("/rider-leddic-home-240.webp") 1x,
+        url("/rider-leddic-home-400.webp") 2x
+      );
+    }
+
+    html[data-family]:not([data-world-effects="economy"])
+      body
+      #site-side-panel.side-panel[data-open="true"]
+      > .side-panel-riders
+      > .side-panel-links
+      > a[href="/riders/argenome"] {
+      --sh-art: image-set(url("/rider-algenome-240.webp") 1x, url("/rider-algenome-400.webp") 2x);
+    }
+
+    html[data-family]:not([data-world-effects="economy"])
+      body
+      #site-side-panel.side-panel[data-open="true"]
+      > .side-panel-riders
+      > .side-panel-links
+      > a[href="/riders/over-zeztz"] {
+      --sh-art: image-set(
+        url("/rider-over-zeztz-thumbnail-20260829-240.webp") 1x,
+        url("/rider-over-zeztz-thumbnail-20260829-400.webp") 2x
+      );
+    }
+
+    html[data-family]:not([data-world-effects="economy"])
+      body
+      #site-side-panel.side-panel[data-open="true"]
+      > .side-panel-riders
+      > .side-panel-links
+      > a[href="/riders/cipher"] {
+      --sh-art: image-set(
+        url("/rider-cipher-thumbnail-20260825-240.webp") 1x,
+        url("/rider-cipher-thumbnail-20260825-400.webp") 2x
+      );
+    }
+  }
 }
 
 /* The page the reader is on, among the tiles. */
@@ -2943,7 +3043,7 @@ html[data-family] body #site-side-panel.side-panel > .side-panel-files a:focus-v
       "head head head head head head" "find find find find find find"
       "sec spe spe sto sto sto" "sec rid rid rid rid rid"
       "sec rik rik rik rik rik" "sec rel rel rel rel rel"
-      "sec unm inf inf inf inf" "sys sys sys sys sys sys sys";
+      "sec unm inf inf inf inf" "sys sys sys sys sys sys";
   }
 }
 @media (max-width: 760px) {
