@@ -8,15 +8,20 @@
 
    The beats, in page order:
    - the hand-over: the contents slate cascades in as the cover lifts;
-   - each chapter's English call is set letter by letter and rises; its
-     title arrives line by line through a mask; the lede follows
-     (src/lib/rexonance-choreography.js arms and plays these once);
+   - each chapter's English call (01 to 05, the suit-up's eyebrow too) is
+     set letter by letter and rises; its title arrives line by line
+     through a mask and drifts up on its heading's timeline; the lede
+     keeps its scroll fade (src/lib/rexonance-choreography.js arms and
+     plays these once);
+   - the plates' codes (P14, the three systems, the specs) type in the
+     same way as their plates come up;
    - the instruments' rows cascade a beat further than before;
    - a reading rail at the right edge of wide screens fills with the
-     scroll and names the chapter that holds the screen;
-   - links, tabs and cards answer a hover and a press;
-   - the end card: the last call, the last line through its mask, the
-     links in a cascade.
+     scroll, its ticks where the chapters fall, and names the chapter
+     that holds the screen;
+   - links, controls, plates and cards answer a hover and a press;
+   - the end card: the last call in its gold, the last line through its
+     mask, the links in a cascade in the same run.
 
    Rules kept: transform and opacity only; every run finite (480–900 ms)
    or scroll-driven (compositor, no scroll listener); nothing hidden
@@ -65,10 +70,27 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page {
   will-change: auto;
 }
 
+/* A word's letters are one unbreakable run: boxes could otherwise break
+   anywhere, and the call must wrap only where its words did (the script
+   ends a run at each space and after each hyphen). */
+.rxs-page.rxs-page.rxs-rexonance-page .rxk-run {
+  display: inline;
+  white-space: nowrap;
+}
+
+/* A call painted through its text (the end card's gold bevel, the forge
+   sheet's): a letter in flight is its own layer and drops out of its
+   parent's text clip, so the paint is carried down to every letter (the
+   bevel is sized per line, so each letter box takes it whole). The
+   contrast tiers' own paint carries down the same way. */
+.rxs-page.rxs-page.rxs-rexonance-page [data-rxk-paint="text"] :is(.rxk-word, .rxk-run, .rxk-ch) {
+  background: inherit;
+}
+
 /* A split title's lines are blocks (its <br> made them lines already; the
-   break is kept in the markup and hidden while the blocks stand). Each
-   line is a mask: the text slides up into it. The mask leaves room above
-   and below for ascenders, the 。 and the balanced wrap. */
+   break is kept in the markup and hidden while the blocks stand). While
+   the title is armed and running, each line is a mask (below): the text
+   slides up into it. */
 .rxs-page.rxs-page.rxs-rexonance-page [data-rxk-split="lines"] > br,
 .rxs-page.rxs-page.rxs-rexonance-page [data-rxk-split="lines"] > wbr {
   display: none;
@@ -76,7 +98,6 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page {
 
 .rxs-page.rxs-page.rxs-rexonance-page .rxk-line {
   display: block;
-  clip-path: inset(-0.14em -0.1em -0.2em -0.1em);
 }
 
 .rxs-page.rxs-page.rxs-rexonance-page .rxk-line-in {
@@ -86,8 +107,9 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page {
 
 /* ---------------- Armed: hidden until the reader reaches it ---------------- */
 /* Only the script sets these (and only on what is still below the fold or
-   under the cover), so the page without it rests fully drawn. */
-@media (prefers-reduced-motion: no-preference) {
+   under the cover), so the page without it rests fully drawn; on screen
+   only, so a printed page is whole wherever the reader stopped. */
+@media screen and (prefers-reduced-motion: no-preference) {
   html[data-family="special"]:not([data-world-effects="economy"])
     body
     .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
@@ -105,52 +127,68 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page {
     transform: translate3d(0, 118%, 0) skewY(3deg);
   }
 
-  /* A split title no longer fades on the scroll (the mask is its entrance);
-     it keeps a short drift, so it still settles with the lede. */
+  /* The mask: room above and below for ascenders, the 。 and the balanced
+     wrap. Only while armed or running (the run keeps the armed state until
+     it settles), so the title at rest keeps its whole glow. */
   html[data-family="special"]:not([data-world-effects="economy"])
     body
     .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
-    :is(.rxs-section-heading h2, .rxs-footer h2)[data-rxk-split] {
-    animation-name: rxk-drift;
+    [data-rxk="armed"]
+    > .rxk-line {
+    clip-path: inset(-0.14em -0.1em -0.2em -0.1em);
   }
 
-  /* The end card's links: armed, they wait below their line; "in", they
-     cascade up, the return last. */
+  /* The end card's links: armed, they wait below their line; the script
+     runs them up in order as that line lands (the return last), in the
+     line's own run, and the card rests when the last link does. The rise
+     is a transform: PREMIERE's scroll step (rxp-step-up) holds translate. */
   html[data-family="special"]:not([data-world-effects="economy"])
     body
     .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
     > .rxs-footer[data-rxk="armed"]
     > a {
     opacity: 0;
-    translate: 0 26px;
+    transform: translate3d(0, 26px, 0);
   }
+}
 
-  html[data-family="special"]:not([data-world-effects="economy"])
-    body
-    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
-    > .rxs-footer[data-rxk="in"]
-    > a {
-    opacity: 1;
-    translate: 0 0;
-    transition:
-      opacity 640ms var(--rxk-out) 120ms,
-      translate 640ms var(--rxk-out) 120ms;
-  }
+/* A split title no longer fades or cuts in on the scroll (RESONANCE's
+   rsn-cut-in and PREMIERE's rxp-fade/rxp-lock-x held it at opacity 0 for
+   the first part of its entry, which could hide the mask's run): the mask
+   is its entrance. It keeps a short drift on its heading's own timeline, a
+   touch of depth as the chapter comes up. The selectors carry the same
+   gates as the rules they replace, one step more specific. */
+@supports (animation-timeline: view()) and (animation-range: entry 0% entry 100%) {
+  @media (prefers-reduced-motion: no-preference) {
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
+      > .rxs-section
+      > .rxs-section-heading
+      > h2[data-rxk-split],
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
+      > .rxs-footer
+      > div
+      > h2[data-rxk-split] {
+      animation-name: rxk-drift;
+      animation-duration: auto;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: --sc-chapter;
+      animation-range: entry 0% entry 100%;
+    }
 
-  html[data-family="special"]:not([data-world-effects="economy"])
-    body
-    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
-    > .rxs-footer[data-rxk="in"]
-    > a:nth-of-type(2) {
-    transition-delay: 230ms;
-  }
-
-  html[data-family="special"]:not([data-world-effects="economy"])
-    body
-    .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
-    > .rxs-footer[data-rxk="in"]
-    > a:nth-of-type(3) {
-    transition-delay: 340ms;
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
+      > .rxs-footer
+      > div
+      > h2[data-rxk-split] {
+      animation-timeline: --sc-end;
+      animation-range: entry 0% entry 60%;
+    }
   }
 }
 
@@ -177,7 +215,7 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page {
     .rxs-page.rxs-page.rxs-rexonance-page
     > .rxe-chapter-map
     > a {
-    animation: rxk-slate 620ms var(--rxk-out) calc(var(--sx-delay, 0ms) + 360ms) both;
+    animation: rxk-slate 620ms var(--rxk-out) calc(var(--sx-delay, 0ms) + 360ms) backwards;
   }
 
   html[data-family="special"]:not([data-world-effects="economy"]):not([data-loading])
@@ -218,7 +256,7 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page {
     .rxs-page.rxs-page.rxs-rexonance-page
     > .rxe-chapter-map
     > .rxe-chapter-map-heading {
-    animation: rxk-slate-head 520ms var(--rxk-out) calc(var(--sx-delay, 0ms) + 280ms) both;
+    animation: rxk-slate-head 520ms var(--rxk-out) calc(var(--sx-delay, 0ms) + 280ms) backwards;
   }
 }
 
@@ -355,13 +393,14 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page {
   }
 
   /* The form comparison's three cards, opened: each stands up in turn
-     (they only exist once opened, so nothing rests hidden). */
+     (they only exist once opened, so nothing rests hidden). Backwards fill
+     only: a held end frame would pin translate and block the hover lift. */
   html[data-family="special"]:not([data-world-effects="economy"])
     body
     .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
     .rxe-comparison-grid
     > .rxe-comparison-card {
-    animation: rxk-card 560ms var(--rxk-out) both;
+    animation: rxk-card 560ms var(--rxk-out) backwards;
   }
 
   html[data-family="special"]:not([data-world-effects="economy"])
@@ -454,8 +493,12 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page {
     }
   }
 
+  /* Each tick stands where its chapter takes the middle of the screen, as
+     a share of the whole scroll (the script measures --rxk-at; the even
+     spacing below is the fallback before it has). */
   .rxs-page.rxs-page.rxs-rexonance-page > .rxk-rail > .rxk-rail-tick {
     position: absolute;
+    top: var(--rxk-at);
     right: 3px;
     width: 7px;
     height: 7px;
@@ -469,23 +512,23 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page {
   }
 
   .rxs-page.rxs-page.rxs-rexonance-page > .rxk-rail > .rxk-rail-tick:nth-of-type(1) {
-    top: 2%;
+    --rxk-at: 2%;
   }
 
   .rxs-page.rxs-page.rxs-rexonance-page > .rxk-rail > .rxk-rail-tick:nth-of-type(2) {
-    top: 26%;
+    --rxk-at: 26%;
   }
 
   .rxs-page.rxs-page.rxs-rexonance-page > .rxk-rail > .rxk-rail-tick:nth-of-type(3) {
-    top: 50%;
+    --rxk-at: 50%;
   }
 
   .rxs-page.rxs-page.rxs-rexonance-page > .rxk-rail > .rxk-rail-tick:nth-of-type(4) {
-    top: 74%;
+    --rxk-at: 74%;
   }
 
   .rxs-page.rxs-page.rxs-rexonance-page > .rxk-rail > .rxk-rail-tick:nth-of-type(5) {
-    top: 98%;
+    --rxk-at: 98%;
   }
 
   /* The chapter's number stands left of its tick, in the HUD face. */
@@ -568,7 +611,14 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page {
   html[data-family="special"]:not([data-world-effects="economy"])
     body
     .rxs-page.rxs-page.rxs-rexonance-page
-    :is(.rxe-chapter-map a, .rxe-hero-rail a, .rxs-footer > a, .rxe-comparison-card button, .rxe-form-comparison > summary) {
+    :is(
+      .rxe-chapter-map a,
+      .rxe-hero-rail a,
+      .rxs-footer > a,
+      .rxe-comparison-card button,
+      .rxe-form-comparison > summary,
+      .rxs-assembly-controls :is(a, button)
+    ) {
     transition:
       scale 160ms var(--rxk-out),
       translate 220ms var(--rxk-out),
@@ -581,7 +631,13 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page {
   html[data-family="special"]:not([data-world-effects="economy"])
     body
     .rxs-page.rxs-page.rxs-rexonance-page
-    :is(.rxe-chapter-map a, .rxe-hero-rail a, .rxs-footer > a, .rxe-comparison-card button):active {
+    :is(
+      .rxe-chapter-map a,
+      .rxe-hero-rail a,
+      .rxs-footer > a,
+      .rxe-comparison-card button,
+      .rxs-assembly-controls :is(a, button)
+    ):active {
     scale: 0.975;
     transition-duration: 80ms;
   }
@@ -696,6 +752,38 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page {
       > summary:hover
       i {
       rotate: 90deg;
+    }
+
+    /* The suit-up's controls lift and take the ice edge. */
+    html[data-family="special"]:not([data-world-effects="economy"])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page
+      .rxs-assembly-controls
+      :is(a, button):hover {
+      translate: 0 -2px;
+      border-color: rgb(var(--rxk-ice) / 85%);
+      box-shadow: 0 10px 26px -14px rgb(var(--rxk-ice) / 70%);
+    }
+
+    /* A system plate answers the pointer with a lift (a transform: the
+       scroll's entrance holds translate); the plate is not a control, so
+       it does not sink on a press. */
+    html[data-family="special"]:not([data-world-effects="economy"])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page
+      .rxs-system-grid
+      > article {
+      transition:
+        transform 320ms var(--rxk-out),
+        box-shadow 220ms ease;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page
+      .rxs-system-grid
+      > article:hover {
+      transform: translate3d(0, -4px, 0);
     }
 
     /* A comparison card lifts; its figure comes forward a touch. */
