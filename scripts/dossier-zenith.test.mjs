@@ -60,7 +60,10 @@ test("every rule is scoped to the dossier family", () => {
 test("nothing under 12px, no loops, no !important, and generated numbers stay silent", () => {
   assert.doesNotMatch(css, /@keyframes|infinite|!important|backdrop-filter/);
   for (const [, value] of css.matchAll(/(?<![\w-])content:\s*([^;]+);/g)) {
-    assert.ok(/^(?:""|none|counter\([^)]*\)\s*\/\s*"")$/.test(value.trim()), value);
+    assert.ok(
+      /^(?:""|none|(?:"[A-Z ]+"\s*)?counter\([^)]*\)\s*\/\s*"")$/.test(value.trim()),
+      value,
+    );
   }
   for (const [, size] of css.matchAll(/font(?:-size)?:\s*(?:\d{3}\s+)?(\d+(?:\.\d+)?)px/g)) {
     assert.ok(Number(size) >= 12, size);
@@ -113,6 +116,9 @@ test("every form card carries its calls and its spec sheet; the record viewer ke
     /\.form-pickup-spec\s*> div:last-child:nth-child\(odd\)\s*\{\s*grid-column: 1 \/ -1;/,
   );
   assert.match(css, /\.form-pickup-stats\s*> div:last-child:nth-child\(odd\)/);
+  // A file of several forms numbers them beside PICKUP (silent); one form needs none.
+  assert.match(css, /content: "FORM " counter\(zenith-form, decimal-leading-zero\) \/ "";/);
+  assert.match(css, /:has\(\s*\.form-pickup ~ \.form-pickup,\s*> div ~ div > \.form-pickup\s*\)/);
   // A short landscape split stage leaves the strip to the record.
   assert.match(
     css,
@@ -149,5 +155,13 @@ test("the next file's numeral is decorative and hidden in forced colours", async
   assert.match(
     css,
     /@media \(forced-colors: active\)\s*\{\s*html\[data-family="dossier"\][^{]*\.dossier-nav-numeral\s*\{\s*display: none;/,
+  );
+});
+
+test("related records stack their art over their words in a narrow reading column", () => {
+  assert.match(css, /#identity-records \{\s*container: identity-records \/ inline-size;/);
+  assert.match(
+    css,
+    /@container identity-records \(max-width: 540px\)\s*\{[^}]*> :is\(\.rider-archive-civilian, \.rider-nightmare-card\)\s*\{\s*grid-template-columns: minmax\(0, 1fr\);/,
   );
 });

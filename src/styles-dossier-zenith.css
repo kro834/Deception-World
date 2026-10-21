@@ -13,6 +13,7 @@
       calls as the same numbered sequence, the spec sheet as the same ruled
       plate, so card and record read as one system.
    4. The next file's numeral on the end card.
+   5. Related records in a narrow column: art over words.
 
    Every rule is scoped to html[data-family="dossier"] and the doubled
    page class, so it sits above the older sheets without !important. It
@@ -368,6 +369,49 @@ html[data-family="dossier"]
     gap: 3px;
     padding: 8px 10px 9px;
   }
+}
+
+/* A file with several forms numbers them in its order (FORM 01, 02 ...)
+   beside PICKUP, as the calls are numbered; a single form needs none.
+   Decorative: silent to screen readers. */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  :is(#form-records, .rider-partner-forms .rider-form-pickup-stack) {
+  counter-reset: zenith-form;
+}
+
+html[data-family="dossier"] main.manager-page.manager-page.manager-page .form-pickup {
+  counter-increment: zenith-form;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  :is(#form-records, .rider-partner-forms .rider-form-pickup-stack):has(
+    .form-pickup ~ .form-pickup,
+    > div ~ div > .form-pickup
+  )
+  .form-pickup-copy
+  > small {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  :is(#form-records, .rider-partner-forms .rider-form-pickup-stack):has(
+    .form-pickup ~ .form-pickup,
+    > div ~ div > .form-pickup
+  )
+  .form-pickup-copy
+  > small::after {
+  content: "FORM " counter(zenith-form, decimal-leading-zero) / "";
+  padding: 1px 7px;
+  border: 1px solid color-mix(in srgb, var(--sd-accent) 40%, transparent);
+  border-radius: 2px;
+  color: var(--sd-accent);
+  font: 400 12px/1.4 var(--sd-hud);
+  letter-spacing: 0.12em;
 }
 
 /* The narrow split columns (landscape tablets, 1024-1194px): a third of
@@ -1105,5 +1149,44 @@ html[data-family="dossier"]
     > a
     > .dossier-nav-numeral {
     display: none;
+  }
+}
+
+/* ----------------------------------------------------------------
+   5. Related records in a narrow column
+   From 761px the partner, nightmare (and Ciel's BEFORE) cards set their
+   art beside their words. In the split stage's reading column on a
+   landscape tablet (about 400-480px) that left the words a column of ten
+   characters; under 540px of card the art stands over the words instead.
+   ---------------------------------------------------------------- */
+@media (min-width: 761px) {
+  html[data-family="dossier"] main.manager-page.manager-page.manager-page #identity-records {
+    container: identity-records / inline-size;
+  }
+
+  @container identity-records (max-width: 540px) {
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      #identity-records
+      > :is(.rider-archive-civilian, .rider-nightmare-card) {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      #identity-records
+      :is(.rider-archive-civilian-visual, .rider-nightmare-card-visual) {
+      aspect-ratio: 16 / 11;
+      min-height: 0;
+    }
+
+    /* A person (the partner, Ciel's BEFORE) keeps the head in a squarer
+       frame; the nightmare's wide scene keeps the wider one. */
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      #identity-records
+      .rider-archive-civilian-visual {
+      aspect-ratio: 1;
+    }
   }
 }
