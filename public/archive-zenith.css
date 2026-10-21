@@ -376,6 +376,229 @@ html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm
 }
 
 /* ================================================================
+   6. Reading rhythm (2026-10-22). Line breaks only: no word changes.
+   HUD kickers balance their two lines instead of orphaning one word
+   (CELESTIAL RELAY / FORM | SELECTOR). Japanese lines break at phrase
+   boundaries where the engine can (word-break: auto-phrase; others keep
+   their normal breaking), so 統合アーカイブ or エクスプリーム never
+   splits across a line. Long figures balance their wrap.
+   ================================================================ */
+/* The "A / B" kickers break after their slash, never before it, and
+   never leave one word alone: a phone tracks them at 0.02em (0.06em
+   left SELECTOR and RESILIENT alone on a second line at 390px) so they
+   keep one line; where they must take two (the rail, phones under
+   380px) a measure ends the first line at the slash. */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .hero-eyebrow {
+  text-wrap: balance;
+}
+
+@media (max-width: 620px) {
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) :is(.selector-kicker.selector-kicker, .compare-kicker.compare-kicker) {
+    letter-spacing: 0.02em !important;
+  }
+}
+
+@media (max-width: 379px), (min-width: 901px) {
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="form-selector"] .selector-kicker {
+    max-width: 200px !important;
+  }
+}
+
+/* The cover's caption keeps FOUR RIDERS / KEY VISUAL on one line where
+   the hero is narrowest beside the rail (901–1180px): it grows to the
+   left over the art instead of breaking into three. */
+@media (min-width: 901px) and (max-width: 1180px) {
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .solo-cover-caption-v14 {
+    left: auto !important;
+    width: auto !important;
+    max-width: calc(100% - 64px) !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .solo-cover-caption-v14 strong {
+    white-space: nowrap !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .solo-cover-caption-v14 i {
+    display: none !important;
+  }
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)
+  :is(.hero-lead, .selector-footnote, .detail-lead, .compare-description, .ability-cards li, .fact-list li, .finisher-list li) {
+  word-break: auto-phrase;
+  text-wrap: pretty;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .form-detail .spec-value {
+  text-wrap: balance;
+}
+
+/* A record with an odd number of figures (Realm's nine) lets the last
+   one take the whole row instead of leaving an empty cell beside it. */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .form-detail .viz-grid > .spec-item:nth-child(odd):last-child {
+  grid-column: 1 / -1 !important;
+}
+
+/* The ability chart's names: the script breaks each after its ・; the
+   box never breaks them again by character (射 | 程・ | 範囲). */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-profile__axis--ability {
+  white-space: pre !important;
+}
+
+/* ================================================================
+   7. The rail's count bar and the hero readout.
+   ================================================================ */
+/* From 1181px the deck's console grid centres the count bar; in the
+   rail's single column that shrank its track to a 2px stub before
+   01 / 17. It runs the rail's width again. */
+@media (min-width: 901px) {
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="form-selector"].selector-console > .files-form-progress-v14 {
+    align-self: stretch !important;
+  }
+}
+
+/* The hero readout (FORMS / TIERS / STATUS): every figure stands the
+   same distance off its rule, the first included, and the three keep
+   one row from 901px (STATUS wrapped under FORMS at 1024). */
+@media (min-width: 901px) {
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .hero-metrics {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    gap: 0 !important;
+    width: max-content !important;
+    max-width: 100% !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .hero-metrics > div {
+    flex: 0 0 auto !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 1px 12px 3px 10px !important;
+  }
+
+  @media (min-width: 1181px) {
+    html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .hero-metrics > div {
+      padding: 1px 22px 3px 14px !important;
+    }
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .hero-metrics > div:first-child {
+    border-left-color: var(--ar-lock, #a8eeff) !important;
+  }
+}
+
+/* ================================================================
+   8. The analyzer's profile plate stands on its own ground, so the VS
+   spine behind it no longer shows through its glass.
+   ================================================================ */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-versus-profile {
+  background-color: var(--aa-card, #060c15) !important;
+}
+
+/* ================================================================
+   9. Dialog close keys: a drawn cross, 2px strokes in the plate's ink,
+   instead of an 8px multiplication sign. The key keeps its label
+   (aria-label) and its 44px plate; the glyph is hidden, not removed.
+   ================================================================ */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .lightbox-close {
+  position: relative !important;
+  color: transparent !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .lightbox-close::before,
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .lightbox-close::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 16px;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--ar-text, #f1f7fb);
+  pointer-events: none;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .lightbox-close::before {
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .lightbox-close::after {
+  transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .lightbox-close:hover::before,
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .lightbox-close:hover::after {
+    background: var(--ar-ice, #7ae8ff);
+  }
+}
+
+/* ================================================================
+   10. Touch keys: a full 44px. The record's arrows, the table sorts and
+   the footer's PAGE TOP measured 43.65px (2.75rem).
+   ================================================================ */
+@media (any-pointer: coarse) {
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) :is(.detail-nav button, .archive-sort, .archive-footer a) {
+    min-height: 44px !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .detail-nav button {
+    min-width: 44px !important;
+  }
+}
+
+/* ================================================================
+   11. A card answers a fine pointer with one pass of light across its
+   art (once per hover, a narrow band; nothing loops, nothing moves).
+   ================================================================ */
+@media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
+  html[data-embedded-archive]:not([data-world-effects="economy"]) :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="form-selector"] .form-chip::after {
+    content: "";
+    position: absolute;
+    z-index: 1;
+    inset: 0;
+    background: linear-gradient(112deg, transparent 34%, rgb(214 246 255 / 16%) 46%, rgb(255 255 255 / 22%) 50%, rgb(214 246 255 / 16%) 54%, transparent 66%);
+    opacity: 0;
+    pointer-events: none;
+    translate: -110% 0;
+  }
+
+  html[data-embedded-archive]:not([data-world-effects="economy"]) :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="form-selector"] .form-chip:hover::after {
+    opacity: 1;
+    translate: 110% 0;
+    transition:
+      translate 760ms cubic-bezier(0.45, 0.05, 0.25, 1),
+      opacity 160ms ease;
+  }
+}
+
+/* ================================================================
+   12. The ability matrix reads as a crosshair under a fine pointer: the
+   tile under it rings in white, and its column's head lights as its
+   row's name already does, so a tile in the middle of the 17 x 8 grid
+   names both its form and its system. No tile moves or resizes.
+   ================================================================ */
+@media (hover: hover) and (pointer: fine) {
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .table.ability-table tbody td:hover {
+    outline: 1px solid rgb(255 255 255 / 72%);
+    outline-offset: 1px;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .table.ability-table:has(tbody td:nth-child(2):hover) thead th:nth-child(2),
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .table.ability-table:has(tbody td:nth-child(3):hover) thead th:nth-child(3),
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .table.ability-table:has(tbody td:nth-child(4):hover) thead th:nth-child(4),
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .table.ability-table:has(tbody td:nth-child(5):hover) thead th:nth-child(5),
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .table.ability-table:has(tbody td:nth-child(6):hover) thead th:nth-child(6),
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .table.ability-table:has(tbody td:nth-child(7):hover) thead th:nth-child(7),
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .table.ability-table:has(tbody td:nth-child(8):hover) thead th:nth-child(8),
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .table.ability-table:has(tbody td:nth-child(9):hover) thead th:nth-child(9) {
+    background: linear-gradient(180deg, #16304a, #0c1a2c) !important;
+    box-shadow: inset 0 -2px 0 var(--ar-ice, #7ae8ff), inset 0 0 0 1px rgb(122 232 255 / 34%) !important;
+    color: #ffffff !important;
+  }
+}
+
+/* ================================================================
    Forced colours: the dividers keep a system rule.
    ================================================================ */
 @media (forced-colors: active) and (min-width: 621px) and (max-width: 900px) {
