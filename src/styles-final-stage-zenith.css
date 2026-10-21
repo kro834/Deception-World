@@ -516,6 +516,63 @@ html[data-family="special"]
   }
 }
 
+/* Phones: the stage and form rails size each tab to its words. Five
+   equal fifths gave エックスハイ 49–63px for its 65px, so it broke as
+   エック／スハイ over three lines; the lens measures each tab, so tabs of
+   their own widths keep one line for every label down to 320px. */
+@media (max-width: 480px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.fst-page
+    .fst-pickup-dialog
+    :is(.fst-ffs-stage-tabs, .fst-rr-form-tabs).rxs-stage-tabs.liquid-swipe-tabs
+    > button[role="tab"] {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding-inline: 4px;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.fst-page
+    .fst-pickup-dialog
+    :is(.fst-ffs-stage-tabs, .fst-rr-form-tabs).rxs-stage-tabs.liquid-swipe-tabs
+    > button[role="tab"]
+    small {
+    white-space: nowrap;
+    letter-spacing: 0;
+    font-feature-settings: "palt" 1;
+  }
+}
+
+/* The arsenal's names break at their own seams (・／), never inside a
+   word (レルムスレイ／ヤー); a phone gives each name its own row. */
+html[data-family="special"] body .rxs-page.rxs-page.fst-page .fst-pickup-dialog .fst-arsenal li {
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 480px) {
+  html[data-family="special"] body .rxs-page.rxs-page.fst-page .fst-pickup-dialog .fst-arsenal ul {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
+  }
+}
+
+/* Portrait tablets set the three-up grids in two columns; a third card
+   alone in its row took half the width and left a hole beside it. The
+   odd last card takes the whole row. */
+@media (min-width: 681px) and (max-width: 1024px) and (orientation: portrait) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.fst-page
+    .fst-pickup-dialog
+    .fst-articles-3
+    > article:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+}
+
 /* FAR FROM SAGA's stages: on a tablet the record is wide enough for the
    stage art beside its text (the base stacks them under 900px, which put
    a 700px-tall still over every line). */
