@@ -3981,7 +3981,8 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
       const full = T * (32 / 28) * (0.6 + 0.4 * L.cov[i]);
       size += (full - size) * open;
     }
-    if (u >= 0.86) alpha *= 1 - (u - 0.86) / 0.14;
+    // Eased out as its metal tile eases in: no linear pop at either end.
+    if (u >= 0.86) alpha *= 1 - smooth((u - 0.86) / 0.14);
     pose[SIZE] = size;
     const turn = Math.floor(frame) % FRAMES;
     pose[FRAME] = turn < 0 ? turn + FRAMES : turn;
@@ -4200,7 +4201,7 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
       else chip(pose[FRAME] | 0, tone, u >= 0.9);
       if (u >= 0.86 && fadeCount < fades.length) {
         fades[fadeCount] = i;
-        fadeA[fadeCount] = (u - 0.86) / 0.14;
+        fadeA[fadeCount] = smooth((u - 0.86) / 0.14);
         fadeCount += 1;
       }
       // N9: the beam from the latch to the two tiles nearest lock.
