@@ -27,14 +27,3 @@ export function fireFragmentPose<T extends Float32Array | Float64Array>(
   phase: number,
   out: T,
 ): T;
-export const REXONANCE_ENTRY_AFTERBURN: Readonly<{ from: number; to: number }>;
-export const REXONANCE_SCROLL_AFTERBURN: Readonly<{ from: number; to: number }>;
-export const NANITE_AFTERBURN: Readonly<{ rise: number; fade: number }>;
-export function naniteAfterburnProgress(
-  value: number,
-  window: Readonly<{ from: number; to: number }>,
-): number;
-/** Retired: always 0. */
-export function naniteAfterburnEnvelope(burn?: number): number;
-/** Retired: always 0. */
-export function naniteAfterburnQuench(burn?: number, y?: number): number;

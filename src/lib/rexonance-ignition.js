@@ -207,35 +207,3 @@ export function fireFragmentPose(seed, phase, out) {
   out[5] = (0.012 + 0.012 * h3) * (1 - 0.45 * u);
   return out;
 }
-
-// The afterburn (owner, 2026-10-21, first brief) is retired by the owner's
-// newer direction: the fire covers the undersuit, detonates into the
-// nanites, and the suit-up begins from that. Nothing burns during the
-// assembly. The windows below now end with the fire itself, so a resting
-// scroll stops redrawing when the last fragment has cooled; the helpers
-// stay exported for the scenes' existing calls and always report nothing.
-export const REXONANCE_ENTRY_AFTERBURN = Object.freeze({
-  from: NANITE_FIRE_PHASES.burstStart * 2400,
-  to: NANITE_FIRE_PHASES.flameEnd * 2400,
-});
-export const REXONANCE_SCROLL_AFTERBURN = Object.freeze({
-  from: 0.015 + 0.285 * NANITE_FIRE_PHASES.burstStart,
-  to: 0.015 + 0.285 * NANITE_FIRE_PHASES.flameEnd,
-});
-export const NANITE_AFTERBURN = Object.freeze({ rise: 0, fade: 0 });
-
-/** Clock → burn progress; 0 or less before the burst, 1 or more once out. */
-export function naniteAfterburnProgress(value, window) {
-  if (!Number.isFinite(value) || !window) return 0;
-  return (value - window.from) / (window.to - window.from);
-}
-
-/** Retired: no fire lingers after the detonation. Always 0. */
-export function naniteAfterburnEnvelope() {
-  return 0;
-}
-
-/** Retired with the afterburn. Always 0. */
-export function naniteAfterburnQuench() {
-  return 0;
-}

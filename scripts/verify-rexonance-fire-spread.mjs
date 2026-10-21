@@ -393,13 +393,11 @@ try {
             .every((shot) => shot.frame.nanites === 0 && shot.frame.naniteHexes === 0),
           "actual kit images and touch hexes wait for material onset",
         );
-        // The vortex ends at the shared flame end; its afterburn (owner,
-        // 2026-10-21) keeps burning under the forming armour after it.
         assert.ok(
           shots
             .filter((shot) => shot.phase >= NANITE_FIRE_PHASES.flameEnd)
-            .every((shot) => shot.frame.flames > 0),
-          "the afterburn keeps burning after the vortex has cleared",
+            .every((shot) => shot.frame.flames === 0),
+          "actual flames stop at the shared flame end",
         );
         assert.ok(
           shots.some(
