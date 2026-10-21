@@ -208,9 +208,11 @@
     linear-gradient(#e6c28e 0 0) 0 100% / 2px 28px no-repeat,
     linear-gradient(#e6c28e 0 0) 100% 100% / 28px 2px no-repeat,
     linear-gradient(#e6c28e 0 0) 100% 100% / 2px 28px no-repeat,
+    /* Registration ticks at the screen's mid-height, left and right (a full
+       hairline across the frame read as a seam beside the picture). */
+    linear-gradient(#e6c28e 0 0) 0 50% / 14px 1px no-repeat,
+    linear-gradient(#e6c28e 0 0) 100% 50% / 14px 1px no-repeat,
     radial-gradient(60% 60% at 50% 45%, rgb(243 224 176 / 10%), transparent 75%),
-    linear-gradient(90deg, rgb(200 164 92 / 22%), transparent 18% 82%, rgb(200 164 92 / 22%))
-      center / 100% 1px no-repeat,
     #060409;
   box-shadow:
     inset 0 0 0 5px rgb(200 164 92 / 8%),
@@ -335,6 +337,14 @@
   box-shadow:
     0 0 0 2px #f0c77c inset,
     0 0 14px rgb(240 199 124 / 36%);
+}
+/* A strip that fits sits centred under the screen; one that overflows starts
+   at its first frame (auto margins resolve to zero), so nothing is clipped. */
+.dream-screening-filmstrip > button:first-child {
+  margin-inline-start: auto;
+}
+.dream-screening-filmstrip > button:last-child {
+  margin-inline-end: auto;
 }
 .dream-screening-filmstrip img {
   width: 100%;

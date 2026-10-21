@@ -197,9 +197,36 @@
 .dream-reading-options {
   border-top: 1px solid var(--room-rule);
 }
+/* The fold reads as a control: a gilt box carries ＋ closed and − open
+   (the native triangle was the only cue, and on a phone it was gone). */
 .dream-reading-options summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0;
   cursor: pointer;
-  padding: 12px 0;
+  list-style: none;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+}
+.dream-reading-options summary::-webkit-details-marker {
+  display: none;
+}
+.dream-reading-options summary::after {
+  content: "";
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--room-rule);
+  background:
+    linear-gradient(currentColor 0 0) center / 10px 1.5px no-repeat,
+    linear-gradient(currentColor 0 0) center / 1.5px 10px no-repeat;
+}
+.dream-reading-options[open] summary::after {
+  border-color: var(--room-gilt);
+  background: linear-gradient(currentColor 0 0) center / 10px 1.5px no-repeat;
 }
 .dream-reading-options > div {
   display: grid;
@@ -421,10 +448,6 @@
     border: 0;
   }
   .dream-reading-options summary {
-    display: inline-flex;
-    align-items: center;
-    min-height: 36px;
-    padding: 0;
     font-size: 13px;
   }
   .dream-reading-options > div {
@@ -451,6 +474,32 @@
   .dream-reading-room .dream-reading-bottom {
     padding: 8px 14px;
     gap: 4px 10px;
+  }
+}
+/* A laptop or an iPad on its side: the six chapters, the paragraph pills and
+   the display fold fit the sidebar without its own scroll. */
+@media (min-width: 761px) and (max-height: 960px) {
+  .dream-reading-sidebar {
+    padding-block: 18px;
+  }
+  .dream-reading-chapters {
+    gap: 6px;
+    margin: 12px 0 14px;
+  }
+  .dream-reading-chapters button {
+    padding: 7px 12px;
+    font-size: 18px;
+    line-height: 1.45;
+  }
+  .dream-reading-chapters button > span {
+    padding-top: 2px;
+  }
+  .dream-reading-paragraph-jump {
+    padding: 10px 0;
+  }
+  .dream-reading-disclaimer {
+    margin: 8px 0 0;
+    line-height: 1.7;
   }
 }
 @media (max-height: 500px) {

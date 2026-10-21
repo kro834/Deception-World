@@ -672,3 +672,170 @@ html[data-family="dream"] main.dream-page.dream-page .dream-reader-index > ol {
     margin-bottom: 8px;
   }
 }
+
+/* ----------------------------------------------------------------
+   13. The record search: the focus ring draws round the whole field, the
+       lens included. It was drawn round the input alone, 3px out, and cut
+       across the ⌕ glyph.
+   ---------------------------------------------------------------- */
+html[data-family="dream"] main.dream-page.dream-page .dream-record-search-field:focus-within {
+  border-color: #f0d594;
+  outline: 2px solid #f0d594;
+  outline-offset: 3px;
+}
+
+html[data-family="dream"]
+  main.dream-page.dream-page
+  .dream-record-search-field
+  input:focus-visible {
+  outline: 0;
+}
+
+@media (forced-colors: active) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-record-search-field:focus-within {
+    outline-color: Highlight;
+  }
+}
+
+/* ----------------------------------------------------------------
+   14. An open chapter's foot: the lamplight sheet turned the chapter body
+       to lacquer, but its foot kept the paper's ink — lacquer-red links,
+       a grey-white "next chapter" plate with red type, both unreadable on
+       the dark body. The foot now reads as the desk does: gilt on lacquer.
+   ---------------------------------------------------------------- */
+html[data-family="dream"] main.dream-page.dream-page .dream-story-case-body .dream-reader-footer {
+  border-top-color: var(--zn-hair-soft);
+  color: var(--zn-kin-light);
+}
+
+html[data-family="dream"]
+  main.dream-page.dream-page
+  .dream-story-case-body
+  .dream-reader-related
+  > span {
+  color: var(--zn-ginnezu);
+  letter-spacing: 0.12em;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-story-case-body .dream-reader-related a,
+html[data-family="dream"]
+  main.dream-page.dream-page
+  .dream-story-case-body
+  .dream-reader-pagination
+  .dream-reader-return {
+  color: var(--zn-kin-light);
+  text-decoration-color: rgb(230 194 142 / 46%);
+  letter-spacing: 0.08em;
+}
+
+html[data-family="dream"]
+  main.dream-page.dream-page
+  .dream-story-case-body
+  .dream-reader-pagination
+  a:not(.dream-reader-return) {
+  border-color: var(--zn-hair);
+  background:
+    linear-gradient(var(--zn-kin-light) 0 0) 0 0 / 18px 2px no-repeat,
+    linear-gradient(var(--zn-kin-light) 0 0) 100% 100% / 18px 2px no-repeat,
+    linear-gradient(180deg, #2a1c30 0%, #1c1323 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(243 224 176 / 14%),
+    0 10px 24px rgb(0 0 0 / 30%);
+  color: var(--zn-kinari);
+  letter-spacing: 0.08em;
+}
+
+html[data-family="dream"]
+  main.dream-page.dream-page
+  .dream-story-case-body
+  .dream-reader-pagination
+  a
+  small {
+  color: var(--zn-kin-light);
+  letter-spacing: 0.14em;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-story-case-body .dream-reader-end {
+  color: var(--zn-ginnezu);
+  font-family: var(--zn-latin);
+  letter-spacing: 0.18em;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="dream"]
+    main.dream-page.dream-page
+    .dream-story-case-body
+    .dream-reader-pagination
+    a:not(.dream-reader-return):hover {
+    border-color: var(--zn-kin-hi);
+    background:
+      linear-gradient(var(--zn-kin-hi) 0 0) 0 0 / 24px 2px no-repeat,
+      linear-gradient(var(--zn-kin-hi) 0 0) 100% 100% / 24px 2px no-repeat,
+      linear-gradient(180deg, #382540 0%, #251829 100%);
+  }
+
+  html[data-family="dream"]
+    main.dream-page.dream-page
+    .dream-story-case-body
+    .dream-reader-related
+    a:hover,
+  html[data-family="dream"]
+    main.dream-page.dream-page
+    .dream-story-case-body
+    .dream-reader-pagination
+    .dream-reader-return:hover {
+    color: var(--zn-kin-hi);
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-family="dream"]
+    main.dream-page.dream-page
+    .dream-story-case-body
+    .dream-reader-footer
+    :is(a, span, small) {
+    color: CanvasText;
+  }
+}
+
+/* ----------------------------------------------------------------
+   15. 繋がり on Safari: the knot's two gilt threads are empty flex items
+       (flex: 1 0 20px). WebKit sized the knot's grid column without their
+       20px, then laid them out at 20px each and squeezed the label plate:
+       「お前は独りじゃない」 broke over three lines and 「主人公」 stood
+       one character a line on an iPad. A minimum width makes both engines
+       count the threads.
+   ---------------------------------------------------------------- */
+@media (min-width: 761px) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-relations-knot > i {
+    min-width: 20px;
+  }
+}
+
+/* ----------------------------------------------------------------
+   16. The ticket book on the narrowest phones (320–374px): the count
+       moves under the title, so 「絵看板を見る」「六章を読む」「記録を探す」
+       keep one line instead of breaking after their third character.
+   ---------------------------------------------------------------- */
+@media (max-width: 374px) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-programme-ticket {
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas:
+      "head main"
+      "head foot";
+    row-gap: 4px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-programme-ticket strong {
+    white-space: nowrap;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-programme-ticket-foot {
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+    padding-inline-start: 44px;
+    text-align: start;
+  }
+}
