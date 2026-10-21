@@ -2,6 +2,8 @@ import { getInquiryGuide, INQUIRY_GUIDES } from "@/lib/inquiry-guides";
 import { Link } from "@tanstack/react-router";
 import { pathArt, titleRunStyle } from "@/lib/record-art";
 import { recordImage } from "@/lib/record-images";
+import { watchRecordArrival } from "@/lib/record-arrival";
+import landingCssUrl from "@/styles-record-landing.css?url";
 import { RecordArtFrame } from "./record-art";
 
 export function LibraryInquiry({
@@ -95,6 +97,16 @@ export function LibraryInquiry({
                       search={{ guide: selected.id }}
                       hash={stop.hash}
                       aria-label={`${stop.sourceLabel}を読む`}
+                      onClick={(event) => {
+                        if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
+                          return;
+                        // The stop's place is marked where it lands: GUIDE 入口 n.
+                        watchRecordArrival(stop.to, stop.hash, {
+                          stylesheet: landingCssUrl,
+                          code: "GUIDE",
+                          label: `入口 ${index + 1} · ${stop.title}`,
+                        });
+                      }}
                     >
                       元資料を読む <span aria-hidden="true">↗</span>
                     </Link>

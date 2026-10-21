@@ -132,7 +132,7 @@ function drawReticle(target: HTMLElement, live: boolean, options?: RecordArrival
     window.matchMedia("(forced-colors: active)").matches
   )
     return;
-  const anchor = anchorOf(target);
+  let anchor = anchorOf(target);
   const layer = document.createElement("div");
   layer.className = "record-landing-layer";
   layer.dataset.mode = live ? "live" : "still";
@@ -178,7 +178,18 @@ function drawReticle(target: HTMLElement, live: boolean, options?: RecordArrival
       release();
       return;
     }
+    // A tall destination whose heading was not yet on screen (still sliding
+    // in, or below the fold while the page settled) keeps looking for it.
+    if (anchor === target && !target.matches(HEADING)) {
+      const heading = anchorOf(target);
+      if (heading !== target) {
+        anchor = heading;
+        size = "";
+      }
+    }
     const box = anchor.getBoundingClientRect();
+    // No heading at all: frame the part of the destination on screen.
+    const whole = anchor === target && box.height > window.innerHeight * 0.42;
     const shape = `${Math.round(box.width)}x${Math.round(box.height)}`;
     if (shape !== size) {
       size = shape;
@@ -188,8 +199,10 @@ function drawReticle(target: HTMLElement, live: boolean, options?: RecordArrival
     const width = document.documentElement.clientWidth || window.innerWidth;
     const left = Math.max(6, box.left + inset.left - pad);
     const right = Math.min(width - 6, box.right - inset.right + pad);
-    const top = box.top + inset.top - pad;
-    const bottom = box.bottom - inset.bottom + pad;
+    const top = whole ? Math.max(box.top, clip + 14) : box.top + inset.top - pad;
+    const bottom = whole
+      ? Math.min(box.bottom, window.innerHeight - 14)
+      : box.bottom - inset.bottom + pad;
     const next = `${Math.round(left)},${Math.round(top)},${Math.max(24, Math.round(right - left))},${Math.max(24, Math.round(bottom - top))}`;
     if (next !== last) {
       last = next;
