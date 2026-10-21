@@ -3484,7 +3484,7 @@ export function createAssemblyNanites({
 
   /**
    * Poses the frame: every plate's jig and every chip, sorted into its
-   * band. Returns the shake (figure px) the view takes this frame.
+   * band. Returns its state; the shake is always zero (the body stands still).
    */
   const frame = (q, dq, calm, scale, backRects) => {
     Q = q;
@@ -3520,19 +3520,12 @@ export function createAssemblyNanites({
       GMODE[p] = 1;
       conduits += 1;
     }
-    // Micro-shake (A5): the four DEUS！ accents and the crest.
+    // No shake (owner, 2026-10-21: 「スクロールに伴って全身が上下に移動する
+    // 不具合を修正して。」): the old micro-shake on the DEUS！ accents and the
+    // crest moved the whole body with the scroll. The body stands still; the
+    // accents keep their recoil, sparks and ripples on the plates themselves.
     state.shakeX = 0;
     state.shakeY = 0;
-    if (!calm && !coarse)
-      for (let p = 0; p < NP; p += 1) {
-        const pc = P[p];
-        if (!pc.accent && !pc.crest) continue;
-        const t = (q - pc.contact) / 0.006;
-        if (t < 0 || t >= 1) continue;
-        const e = 1.6 * Math.exp(-6 * t);
-        state.shakeX += e * Math.sin(41 * t);
-        state.shakeY += e * Math.cos(37 * t);
-      }
     // The plates seating now, newest first (their ripples, N17).
     ripN = 0;
     for (let p = NP - 1; p >= 0 && ripN < RIPPLE_MAX; p -= 1) {

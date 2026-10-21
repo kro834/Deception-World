@@ -596,6 +596,7 @@ function environment({
   if (economy) html.setAttribute("data-world-effects", "economy");
   const calls = [];
   const drawCalls = [];
+  const transforms = [];
   const canvases = [];
   const decodedSources = [];
   const context2d = new Proxy(
@@ -622,6 +623,11 @@ function environment({
       getContext: () =>
         new Proxy(context2d, {
           get: (ctx, key) => {
+            if (key === "setTransform")
+              return (...args) => {
+                calls.push([key, args.length]);
+                transforms.push({ target: id, args });
+              };
             if (key === "drawImage")
               return (...args) => {
                 calls.push([key, args.length, id]);
@@ -806,6 +812,7 @@ function environment({
     parts,
     calls,
     drawCalls,
+    transforms,
     canvases,
     decodedSources,
     idle,
@@ -2990,4 +2997,118 @@ test("the raw metal and the molten gold are made in bands of rows, byte for byte
   assert.match(engine, /createAssemblyLayerJob\(\{[\s\S]*?kind: "metal"/);
   assert.match(engine, /createAssemblyLayerJob\(\{[\s\S]*?kind: "molten"/);
   assert.doesNotMatch(engine, /createNaniteMetalJob\(|createNaniteMoltenJob\(/);
+});
+
+// Owner (2026-10-21): 「スクロールに伴って全身が上下に移動する不具合を修正して。」
+// While the frame is pinned the whole figure stands at one place: the
+// scene's view (scale and origin) is the same on every frame of the runway,
+// forwards, backwards and on jumps, and the swarm never shakes it.
+test("the pinned figure never moves with the scroll: one view transform for every progress", async () => {
+  const t = environment();
+  const dispose = mountRexonanceAssembly(t.runway, engineConfig, t.env);
+  t.observers[0].callback([
+    { isIntersecting: true, boundingClientRect: { top: 400, bottom: 3100 } },
+  ]);
+  await until(() => t.runway.dataset.rznState === "live" && t.frames.size > 0, "scene live");
+  const scene = t.canvas.testCanvasId;
+  // Each frame starts from identity (the clear), then sets the view.
+  const identity = (args) =>
+    args[0] === 1 &&
+    args[1] === 0 &&
+    args[2] === 0 &&
+    args[3] === 1 &&
+    args[4] === 0 &&
+    args[5] === 0;
+  const views = () => {
+    const own = t.transforms.filter(({ target }) => target === scene);
+    return own.filter((entry, i) => i > 0 && identity(own[i - 1].args) && !identity(entry.args));
+  };
+  t.transforms.length = 0;
+  const path = [];
+  for (let q = 0; q <= 1.0001; q += 0.0025) path.push(q);
+  for (let q = 1; q >= -0.0001; q -= 0.01) path.push(q);
+  path.push(0.5, 0.05, 0.95, 0.2, 0.8);
+  for (const q of path) {
+    t.scrollTo(Math.max(0, Math.min(1, q)));
+    for (let k = 0; k < 4 && t.frames.size; k += 1) t.flush();
+  }
+  const drawn = views();
+  assert.ok(drawn.length > path.length, `${drawn.length} scene frames drawn`);
+  const [first] = drawn;
+  // 1440 × 837 css px at ratio 2 (the harness): the figure's place in the frame.
+  assert.ok(first.args[0] > 0 && first.args[5] >= 0, String(first.args));
+  for (const { args } of drawn) assert.deepEqual(args, first.args, "the view moved");
+  dispose();
+});
+
+test("the swarm never shakes the view: zero shake on every frame, desktop and touch", async () => {
+  const { planAssemblyNanites, createAssemblyNanites } =
+    await import("../src/lib/rexonance-assembly-nanites.js");
+  const { REXONANCE_NANITES } = await import("../src/lib/rexonance-nanites.ts");
+  const { planAssemblyGold } = await import("../src/lib/rexonance-resonance.js");
+  const { REXONANCE_SUIT_GOLD_CELL, REXONANCE_SUIT_GOLD_CELLS } =
+    await import("../src/lib/rexonance-suit-gold.ts");
+  const { REXONANCE_SUIT_DRIVER } = await import("../src/lib/rexonance-calls.ts");
+  const pieces = REXONANCE_SUIT_PIECES.map((piece) => ({
+    ...piece,
+    preset: REXONANCE_SUIT_DRIVER.includes(piece.id),
+  }));
+  const plan = planAssembly({
+    size: REXONANCE_SUIT_SIZE,
+    pieces,
+    core: REXONANCE_SUIT_MARKS.core,
+    visor: REXONANCE_SUIT_MARKS.visor,
+    maskTile: REXONANCE_SUIT_TILE,
+    tile: 12,
+  });
+  const landed = new Map();
+  for (const tile of plan.tiles)
+    if (tile.pieceId) landed.set(tile.pieceId, Math.max(landed.get(tile.pieceId) ?? 0, tile.t1));
+  const gold = planAssemblyGold({
+    pieces,
+    gold: { atlas: "", cell: REXONANCE_SUIT_GOLD_CELL, cells: REXONANCE_SUIT_GOLD_CELLS },
+    landed,
+  });
+  for (const coarse of [false, true]) {
+    const nano = planAssemblyNanites({
+      plan,
+      pieces,
+      size: REXONANCE_SUIT_SIZE,
+      core: REXONANCE_SUIT_MARKS.core,
+      visor: REXONANCE_SUIT_MARKS.visor,
+      gold,
+      seams: REXONANCE_NANITES.seams,
+      goldBoxes: REXONANCE_NANITES.goldBoxes,
+      goldCell: REXONANCE_SUIT_GOLD_CELL,
+      coarse,
+    });
+    const swarm = createAssemblyNanites({
+      nano,
+      size: REXONANCE_SUIT_SIZE,
+      core: REXONANCE_SUIT_MARKS.core,
+      visor: REXONANCE_SUIT_MARKS.visor,
+      sprites: { cells: null, comets: null, fx: null },
+      kit: REXONANCE_NANITES,
+      gold,
+      layers: { metal: [] },
+      coarse,
+    });
+    swarm.view(1, 0, 0);
+    // The accents' and the crest's contacts, where the old shake played.
+    const contacts = nano.pieces.map((piece) => piece.contact).filter(Number.isFinite);
+    const qs = [];
+    for (let q = 0; q <= 1; q += 0.0005) qs.push(q);
+    for (const c of contacts) for (let d = 0; d < 0.007; d += 0.0005) qs.push(c + d);
+    for (const q of qs)
+      for (const calm of [false, true]) {
+        const state = swarm.frame(q, 0.002, calm, 1, false);
+        assert.ok(
+          state.shakeX === 0 && state.shakeY === 0,
+          `${coarse ? "touch" : "desktop"} q ${q.toFixed(4)}: shake ${state.shakeX}, ${state.shakeY}`,
+        );
+      }
+  }
+  // And the scene adds nothing to its view from the swarm.
+  const engine = read("src/lib/rexonance-resonance.js");
+  assert.doesNotMatch(engine, /\bv[xy] \+= shake/);
 });
