@@ -115,13 +115,22 @@ export const FIRE_TUNING = Object.freeze({
   burstCentreV: 0.589,
   burstDissolve: 0.4,
   burstSkin: 0.14,
-  ringSpeed: 0.55,
+  // The shock ring is a quick pulse: it sweeps off the figure while it is
+  // bright and is gone before the fragments scatter, so it never lingers
+  // round the bare undersuit as a ghost outline.
+  ringSpeed: 0.8,
+  ringDecay: 4,
   ringWidth: 0.04,
   ringWiden: 0.05,
   ringGain: 0.4,
   flashDecay: 18,
   flashReach: 0.22,
   flashGain: 1,
+  // The flash and the ring fade out before the fire rect's edges (figure
+  // widths in from each side), so the canvas never shows as a lit panel.
+  edgeFadeSide: 0.3,
+  edgeFadeTop: 0.42,
+  edgeFadeBottom: 0.16,
   // Burst fragments read as streaks flung along their velocity (widths per
   // phase unit), thinner than long, shortening as the drag slows them.
   // A streak is no longer than its flight so far: at the detonation's

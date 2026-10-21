@@ -34,8 +34,13 @@ import {
   POSE_COVER,
   POSE_MIX,
   POSE_SLOTS,
+  POSE_VIEW_X0,
+  POSE_VIEW_X1,
+  POSE_VIEW_Y0,
+  POSE_VIEW_Y1,
   poseFire,
   poseFragments,
+  poseView,
 } from "./rexonance-fire/fire-pose.js";
 import {
   createFireRenderer,
@@ -115,6 +120,9 @@ let framePhase = NaN;
 let frameClock = NaN;
 let frameStrength = NaN;
 let frameDetail = -1;
+// The visible part of the fire rect on the destination canvas (rect uv).
+const VIEW = new Float64Array([0, 0, 1, 1]);
+const frameView = new Float64Array([NaN, NaN, NaN, NaN]);
 let lastDrawAt = -Infinity;
 let retentionTimer = 0;
 let listening = false;
@@ -442,10 +450,15 @@ function renderFrame(phase, strength, clock) {
     framePhase === phase &&
     frameClock === clock &&
     frameStrength === strength &&
-    frameDetail === detail
+    frameDetail === detail &&
+    frameView[0] === VIEW[0] &&
+    frameView[1] === VIEW[1] &&
+    frameView[2] === VIEW[2] &&
+    frameView[3] === VIEW[3]
   )
     return frameMode;
   poseFire(phase, strength, clock, detail, POSE);
+  poseView(POSE, VIEW[0], VIEW[1], VIEW[2], VIEW[3]);
   poseFragments(phase, FIRE_RECT, FRAGMENTS);
   frameMode = 0;
   if (prepareRenderer()) {
@@ -468,6 +481,7 @@ function renderFrame(phase, strength, clock) {
     frameClock = clock;
     frameStrength = strength;
     frameDetail = detail;
+    frameView.set(VIEW);
     touchRetention();
   }
   return frameMode;
@@ -504,6 +518,40 @@ function paintRasterSparks(context, W, H, strength) {
   }
 }
 
+// Which part of the fire rect the context's canvas shows, in rect uv, from
+// the caller's transform (figure units to canvas pixels) and the scale
+// drawBodyFlame applies on top. The scenes' canvases bleed less than the
+// rect past the figure (the entry's a quarter width at the sides), so the
+// flash and the ring must fade at the canvas's edge, not the rect's. An
+// unknown or rotated transform keeps the whole rect.
+// (getTransform hands back one small matrix per draw: the only reading of
+// the caller's transform a 2D context offers.)
+function measureView(context, W, H, scale) {
+  VIEW[0] = VIEW[1] = 0;
+  VIEW[2] = VIEW[3] = 1;
+  const canvas = context.canvas;
+  const m = typeof context.getTransform === "function" ? context.getTransform() : null;
+  if (!m || !canvas || !(canvas.width > 0) || !(canvas.height > 0) || m.b || m.c) return;
+  // Canvas pixels → figure units → rect uv, per axis.
+  const kx = 1 / (m.a * scale * W * FIRE_RECT.width);
+  const ky = 1 / (m.d * scale * H * FIRE_RECT.height);
+  if (!(kx > 0) || !(ky > 0) || !Number.isFinite(kx) || !Number.isFinite(ky)) return;
+  const ox = FIRE_RECT.x / FIRE_RECT.width;
+  const oy = FIRE_RECT.y / FIRE_RECT.height;
+  poseView(
+    VIEW_SCRATCH,
+    -m.e * kx - ox,
+    -m.f * ky - oy,
+    (canvas.width - m.e) * kx - ox,
+    (canvas.height - m.f) * ky - oy,
+  );
+  VIEW[0] = VIEW_SCRATCH[POSE_VIEW_X0];
+  VIEW[1] = VIEW_SCRATCH[POSE_VIEW_Y0];
+  VIEW[2] = VIEW_SCRATCH[POSE_VIEW_X1];
+  VIEW[3] = VIEW_SCRATCH[POSE_VIEW_Y1];
+}
+const VIEW_SCRATCH = new Float64Array(POSE_SLOTS);
+
 /** Back/front sample the same frame of the body fire. Phase is the shared
  * ignition clock, not wall-clock history; an omitted phase lets strength
  * stand for how far along a full torch is (legacy callers). */
@@ -529,6 +577,7 @@ export function drawBodyFlame(context, size, strength, clock, scale = 1, layer =
   const power = clamp(strength);
   const progress =
     Number.isFinite(phase) && phase > 0 ? phase : NANITE_FIRE_PHASES.burstStart * power;
+  measureView(context, W, H, scale);
   const mode = renderFrame(progress, power, clock);
   if (!mode) return;
   const back = layer === "back";

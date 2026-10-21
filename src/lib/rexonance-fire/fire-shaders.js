@@ -31,6 +31,7 @@ void main() {
 // uLife: cover, combustion mix, burst (linear 0..1), flash.
 // uClock: global flicker, strength, layer (0 back / 1 front), detail.
 // uRing: radius (widths), strength.
+// uView: the part of the rect the canvas shows (x0, y0, x1, y1; rect uv).
 // uFlow / uDrift: the clock's drifts, already wrapped into the noise's
 // period on the CPU (fire-pose.js): tongues, turbulence, flutter, reach /
 // front edge, local flicker, hot patches.
@@ -48,6 +49,7 @@ uniform vec4 uRect;
 uniform vec4 uLife;
 uniform vec4 uClock;
 uniform vec2 uRing;
+uniform vec4 uView;
 uniform vec4 uFlow;
 uniform vec4 uDrift;
 ${ramp("rampSooty", RAMP_SOOTY)}
@@ -140,11 +142,15 @@ void main() {
   vec3 E = colour * emit * share;
   float absorb = dens * (1.0 - 0.5 * temp) * (${f(T.absorbSooty)} * (1.0 - mLocal) + ${f(T.absorbClean)}) * share;
   if (layer < 0.5) {
-    float bloom = uLife.w * exp(-d / ${f(T.flashReach)}) * ${f(T.flashGain)};
+    float sideIn = min(vUv.x - uView.x, uView.z - vUv.x) * uRect.z;
+    float edgeWindow = smoothstep(0.0, ${f(T.edgeFadeSide)}, sideIn)
+      * smoothstep(0.0, ${f(T.edgeFadeTop)}, (vUv.y - uView.y) * uRect.w)
+      * smoothstep(0.0, ${f(T.edgeFadeBottom)}, (uView.w - vUv.y) * uRect.w);
+    float bloom = uLife.w * exp(-d / ${f(T.flashReach)}) * ${f(T.flashGain)} * edgeWindow;
     E += vec3(0.75, 0.92, 1.0) * bloom;
     float ringW = ${f(T.ringWidth)} + ${f(T.ringWiden)} * b;
     float rd = (d - uRing.x) / ringW;
-    float ring = exp(-rd * rd) * uRing.y * (0.3 + 0.9 * nr.b) * step(0.001, d);
+    float ring = exp(-rd * rd) * uRing.y * (0.3 + 0.9 * nr.b) * step(0.001, d) * edgeWindow;
     E += mix(vec3(0.6, 0.85, 1.0), vec3(0.9, 0.97, 1.0), ring) * ring * ${f(T.ringGain)};
   }
   E = min(E * uClock.y, vec3(1.0));

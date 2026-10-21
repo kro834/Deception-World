@@ -41,7 +41,8 @@ export function entryElapsedTime(canonicalMs) {
   );
 }
 
-// The fire's life in shared phase units (entry t/2400; scroll (q-.015)/.285):
+// The fire's life in shared phase units (entry t/2400; scroll (q-.02)/.48,
+// REXONANCE_SCROLL_FLAME in rexonance-field/field-clock.js):
 //   0 → kindle   the first licks at the soles grow;
 //   kindle → cover   the engulf front climbs the undersuit (feet, legs,
 //                    hips, torso, shoulders, arms, crown, hands last) and the
@@ -51,7 +52,7 @@ export function entryElapsedTime(canonicalMs) {
 //   burstStart → burstEnd   爆散: the fire detonates outward into fragments;
 //   materialStart   the first fragments have cooled into nanite chips;
 //   flameEnd   the last fragment is a chip; nothing of the fire remains.
-// Entry uses t/2400; scroll uses (q-.015)/.285, so both scenes retain the
+// Entry uses t/2400; scroll uses (q-.02)/.48, so both scenes retain the
 // same causal order even when the reader reverses or jumps the clock.
 export const NANITE_FIRE_PHASES = Object.freeze({
   kindle: 0.025,
@@ -138,7 +139,7 @@ export function paintBodySilhouette(alpha, w, h, x, y, width, height) {
   return alpha;
 }
 
-/** Shared phase: entry t/2400; scroll (q-.015)/.285. The fire's overall
+/** Shared phase: entry t/2400; scroll (q-.02)/.48. The fire's overall
  * radiance: it fades in with the kindle, holds through the engulf and the
  * torch, then dies away through the detonation as its fragments cool. The
  * first machines overlap only the declining explosion (at most 0.83).

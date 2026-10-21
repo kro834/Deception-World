@@ -30,6 +30,10 @@ import {
   POSE_RING_RADIUS,
   POSE_RING_STRENGTH,
   POSE_STRENGTH,
+  POSE_VIEW_X0,
+  POSE_VIEW_X1,
+  POSE_VIEW_Y0,
+  POSE_VIEW_Y1,
   POSE_WARP,
 } from "./fire-pose.js";
 import { FIRE_TUNING as T, RAMP_CLEAN, RAMP_SOOTY } from "./fire-tuning.js";
@@ -212,14 +216,21 @@ export function fireKernel(u0, v0, pose, field, noise, out) {
     let eg = cg * emit * share;
     let eb = cb * emit * share;
     if (!layer) {
-      const bloom = pose[POSE_FLASH] * Math.exp(-d / T.flashReach) * T.flashGain;
+      const sideIn = Math.min(u0 - pose[POSE_VIEW_X0], pose[POSE_VIEW_X1] - u0) * RW;
+      const edgeWindow =
+        smoothstep(0, T.edgeFadeSide, sideIn) *
+        smoothstep(0, T.edgeFadeTop, (v0 - pose[POSE_VIEW_Y0]) * RH) *
+        smoothstep(0, T.edgeFadeBottom, (pose[POSE_VIEW_Y1] - v0) * RH);
+      const bloom = pose[POSE_FLASH] * Math.exp(-d / T.flashReach) * T.flashGain * edgeWindow;
       er += 0.75 * bloom;
       eg += 0.92 * bloom;
       eb += bloom;
       const ringW = T.ringWidth + T.ringWiden * b;
       const rd = (d - pose[POSE_RING_RADIUS]) / ringW;
       const ring =
-        d >= 0.001 ? Math.exp(-rd * rd) * pose[POSE_RING_STRENGTH] * (0.3 + 0.9 * NS[2]) : 0;
+        d >= 0.001
+          ? Math.exp(-rd * rd) * pose[POSE_RING_STRENGTH] * (0.3 + 0.9 * NS[2]) * edgeWindow
+          : 0;
       er += (0.6 + 0.3 * ring) * ring * T.ringGain;
       eg += (0.85 + 0.12 * ring) * ring * T.ringGain;
       eb += ring * T.ringGain;

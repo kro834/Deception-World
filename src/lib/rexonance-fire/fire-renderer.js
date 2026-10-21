@@ -23,6 +23,10 @@ import {
   POSE_RING_RADIUS,
   POSE_RING_STRENGTH,
   POSE_STRENGTH,
+  POSE_VIEW_X0,
+  POSE_VIEW_X1,
+  POSE_VIEW_Y0,
+  POSE_VIEW_Y1,
   POSE_WARP,
 } from "./fire-pose.js";
 import { FIRE_FRAGMENT, FIRE_VERTEX, SPARK_FRAGMENT, SPARK_VERTEX } from "./fire-shaders.js";
@@ -123,6 +127,7 @@ export function createFireRenderer(gl) {
     uLife: gl.getUniformLocation(fire, "uLife"),
     uClock: gl.getUniformLocation(fire, "uClock"),
     uRing: gl.getUniformLocation(fire, "uRing"),
+    uView: gl.getUniformLocation(fire, "uView"),
     uFlow: gl.getUniformLocation(fire, "uFlow"),
     uDrift: gl.getUniformLocation(fire, "uDrift"),
     aCentre: gl.getAttribLocation(spark, "aCentre"),
@@ -195,6 +200,13 @@ export function drawFireLayer(state, pose, layer, x, y, w, h) {
   gl.uniform4f(state.uLife, pose[POSE_COVER], pose[POSE_MIX], pose[POSE_BURST], pose[POSE_FLASH]);
   gl.uniform4f(state.uClock, pose[POSE_FLICKER], pose[POSE_STRENGTH], layer, pose[POSE_DETAIL]);
   gl.uniform2f(state.uRing, pose[POSE_RING_RADIUS], pose[POSE_RING_STRENGTH]);
+  gl.uniform4f(
+    state.uView,
+    pose[POSE_VIEW_X0],
+    pose[POSE_VIEW_Y0],
+    pose[POSE_VIEW_X1],
+    pose[POSE_VIEW_Y1],
+  );
   gl.uniform4f(
     state.uFlow,
     pose[POSE_FLOW_A],

@@ -22,11 +22,19 @@ import {
 } from "../src/lib/rexonance-fire/fire-field.js";
 import { buildNoiseTable } from "../src/lib/rexonance-fire/fire-noise.js";
 import {
+  POSE_FLASH,
   POSE_FLICKER,
   POSE_FLOW_A,
+  POSE_RING_RADIUS,
+  POSE_RING_STRENGTH,
   POSE_SLOTS,
   POSE_TIME,
+  POSE_VIEW_X0,
+  POSE_VIEW_X1,
+  POSE_VIEW_Y0,
+  POSE_VIEW_Y1,
   poseFire,
+  poseView,
 } from "../src/lib/rexonance-fire/fire-pose.js";
 import { fireKernel, rasterFire } from "../src/lib/rexonance-fire/fire-raster.js";
 import { RAMP_CLEAN, RAMP_SOOTY } from "../src/lib/rexonance-fire/fire-tuning.js";
@@ -442,6 +450,117 @@ test("the detonation dissolves the body fire into fragments that cool into the n
   assert.ok(cooledByMaterial > 0 && cooledByMaterial < NANITE_FIRE_FRAGMENTS / 2);
 });
 
+test("the detonation's flash and shock ring fade out before the canvas's or the rect's edges, and the ring is a brief pulse", () => {
+  const P = NANITE_FIRE_PHASES;
+  const span = P.burstEnd - P.burstStart;
+  // A flash still lit where the drawing ends shows as a hard-edged panel
+  // behind the figure. The drawing ends at the fire rect, or sooner where
+  // the scene's canvas bleeds less past the figure: the desktop entry's
+  // canvas ends a quarter width beside the figure and 0.18 heights above
+  // it, inside the rect. The flash and ring's own light (the back layer
+  // with and without them) is measured on the view's outermost texels and
+  // 0.03 figure widths in, from the detonation's first instant (full
+  // flash) on through the blast carrying the envelope out.
+  const bare = new Float64Array(POSE_SLOTS);
+  const plain = new Float64Array(8);
+  const inX = 0.03 / FIRE_RECT.width;
+  const inY = 0.03 / (FIRE_RECT.height * (1040 / 571));
+  const entry = [
+    (-0.25 - FIRE_RECT.x) / FIRE_RECT.width,
+    (-0.18 - FIRE_RECT.y) / FIRE_RECT.height,
+    (1.25 - FIRE_RECT.x) / FIRE_RECT.width,
+    1,
+  ];
+  for (const [x0, y0, x1, y1] of [[0, 0, 1, 1], entry])
+    for (const share of [0, 0.05, 0.15, 0.3, 0.5]) {
+      const phase = P.burstStart + share * span;
+      poseFire(phase, naniteFlameEnvelope(phase), 0.5, 1, pose);
+      poseView(pose, x0, y0, x1, y1);
+      bare.set(pose);
+      bare[POSE_FLASH] = 0;
+      bare[POSE_RING_STRENGTH] = 0;
+      let edge = 0;
+      let near = 0;
+      for (let i = 0; i < 240; i += 1) {
+        const su = x0 + ((i + 0.5) / 240) * (x1 - x0);
+        const sv = y0 + ((i + 0.5) / 240) * (y1 - y0);
+        for (const [u, v, inset] of [
+          [x0 + 0.001, sv, false],
+          [x1 - 0.001, sv, false],
+          [su, y0 + 0.001, false],
+          [su, y1 - 0.001, false],
+          [x0 + inX, sv, true],
+          [x1 - inX, sv, true],
+          [su, y0 + inY, true],
+          [su, y1 - inY, true],
+        ]) {
+          fireKernel(u, v, pose, undersuitField, noise, pixel);
+          fireKernel(u, v, bare, undersuitField, noise, plain);
+          const light = Math.max(pixel[0] - plain[0], pixel[1] - plain[1], pixel[2] - plain[2]);
+          if (inset) near = Math.max(near, light);
+          else edge = Math.max(edge, light);
+        }
+      }
+      const at = `${share} in [${[x0, y0, x1, y1].map((n) => n.toFixed(3))}]`;
+      assert.ok(edge < 0.002, `no flash on the drawing's edge ${at}: ${edge.toFixed(4)}`);
+      assert.ok(near < 0.06, `the flash has faded just inside the edge ${at}: ${near.toFixed(4)}`);
+    }
+  // poseFire always starts from the whole rect; a degenerate view keeps it.
+  poseFire(P.burstStart, 1, 0.5, 1, pose);
+  assert.deepEqual(
+    [pose[POSE_VIEW_X0], pose[POSE_VIEW_Y0], pose[POSE_VIEW_X1], pose[POSE_VIEW_Y1]],
+    [0, 0, 1, 1],
+  );
+  poseView(pose, 0.6, 0.2, 0.4, 0.9);
+  assert.deepEqual(
+    [pose[POSE_VIEW_X0], pose[POSE_VIEW_Y0], pose[POSE_VIEW_X1], pose[POSE_VIEW_Y1]],
+    [0, 0, 1, 1],
+  );
+  poseView(pose, NaN, 0.2, 0.8, 0.9);
+  assert.deepEqual(
+    [pose[POSE_VIEW_X0], pose[POSE_VIEW_Y0], pose[POSE_VIEW_X1], pose[POSE_VIEW_Y1]],
+    [0, 0, 1, 1],
+  );
+  poseView(pose, -0.2, 0.1, 1.4, 0.9);
+  assert.deepEqual(
+    [pose[POSE_VIEW_X0], pose[POSE_VIEW_Y0], pose[POSE_VIEW_X1], pose[POSE_VIEW_Y1]],
+    [0, 0.1, 1, 0.9],
+  );
+  // The flash still lights the air round the figure: beside the waist,
+  // just off the skin, at the detonation.
+  poseFire(P.burstStart, naniteFlameEnvelope(P.burstStart), 0.5, 1, pose);
+  assert.equal(pose[POSE_FLASH], 1);
+  let flash = 0;
+  for (let xx = -0.12; xx < 0; xx += 0.01) {
+    fireKernel(
+      (xx - FIRE_RECT.x) / FIRE_RECT.width,
+      (0.45 - FIRE_RECT.y) / FIRE_RECT.height,
+      pose,
+      undersuitField,
+      noise,
+      pixel,
+    );
+    flash = Math.max(flash, pixel[2]);
+  }
+  assert.ok(flash > 0.3, `the flash lights the air beside the body: ${flash.toFixed(3)}`);
+  // The ring sweeps out while bright and has died away by mid-burst, before
+  // the fragments have scattered, so it never lingers as a ghost outline.
+  let previous = Infinity;
+  for (let share = 0; share <= 1.0001; share += 0.05) {
+    const phase = P.burstStart + share * span;
+    poseFire(phase, 1, 0.5, 1, pose);
+    assert.ok(pose[POSE_RING_STRENGTH] <= previous, "the ring only fades");
+    previous = pose[POSE_RING_STRENGTH];
+    if (share >= 0.5) assert.ok(pose[POSE_RING_STRENGTH] < 0.1, `faded by mid-burst ${share}`);
+  }
+  assert.equal(previous, 0, "gone by the burst's end");
+  poseFire(P.burstStart + 0.2 * span, 1, 0.5, 1, pose);
+  assert.ok(
+    pose[POSE_RING_STRENGTH] > 0.3 && pose[POSE_RING_RADIUS] > 0.1,
+    "a bright pulse off the body",
+  );
+});
+
 // Visible fire (emission, not alpha) over a rectangle of body units, on the
 // air or on the skin: the fraction of samples brighter than a flame tip.
 function visibleFire(phase, clock, x0, x1, y0, y1, onSkin) {
@@ -692,6 +811,42 @@ test("both layers of one frame come from one render; the GPU path draws two quad
   assert.equal(gl.calls.texImage2D, 2, "no per-frame uploads");
   assert.equal(inspect.glCanvas.width, module.NANITE_FIRE_BACKING.width);
   assert.equal(inspect.glCanvas.height, module.NANITE_FIRE_BACKING.height * 2);
+});
+
+test("the fire measures how much of its rect the destination canvas shows, from the caller's transform, and re-renders when that changes", async () => {
+  for (const gl of [false, true]) {
+    const { module } = await warmed({ gl });
+    const view = () => {
+      const p = module.inspectBodyFlame().pose;
+      return [p[POSE_VIEW_X0], p[POSE_VIEW_Y0], p[POSE_VIEW_X1], p[POSE_VIEW_Y1]];
+    };
+    const phase = NANITE_FIRE_PHASES.burstStart;
+    // A canvas of 400×800 pixels; the caller maps the 571×1040 figure to
+    // half size at (60, 80), and the fire scales it by 1.2 on top.
+    const clipped = painter();
+    clipped.context.canvas = { width: 400, height: 800 };
+    clipped.context.getTransform = () => ({ a: 0.5, b: 0, c: 0, d: 0.5, e: 60, f: 80 });
+    module.drawBodyFlame(clipped.context, SIZE, 1, 0.5, 1.2, "back", phase);
+    const k = 0.5 * 1.2;
+    const expected = [
+      (-60 / (k * SIZE.width) - FIRE_RECT.x) / FIRE_RECT.width,
+      (-80 / (k * SIZE.height) - FIRE_RECT.y) / FIRE_RECT.height,
+      ((400 - 60) / (k * SIZE.width) - FIRE_RECT.x) / FIRE_RECT.width,
+      1,
+    ];
+    assert.ok(expected[0] > 0 && expected[1] > 0 && expected[2] < 1, "the canvas clips the rect");
+    assert.ok(((800 - 80) / (k * SIZE.height) - FIRE_RECT.y) / FIRE_RECT.height > 1);
+    for (let i = 0; i < 4; i += 1) assert.ok(Math.abs(view()[i] - expected[i]) < 1e-9, `${view()}`);
+    // The same frame on a context that does not report its transform (or
+    // rotates) is the whole rect again: a new render, not the cached one.
+    module.drawBodyFlame(painter().context, SIZE, 1, 0.5, 1.2, "back", phase);
+    assert.deepEqual(view(), [0, 0, 1, 1]);
+    const rotated = painter();
+    rotated.context.canvas = { width: 400, height: 800 };
+    rotated.context.getTransform = () => ({ a: 0, b: 0.5, c: -0.5, d: 0, e: 60, f: 80 });
+    module.drawBodyFlame(rotated.context, SIZE, 1, 0.5, 1.2, "back", phase);
+    assert.deepEqual(view(), [0, 0, 1, 1]);
+  }
 });
 
 test("without WebGL, or once the context is lost, the CPU kernel paints the same frames and sparks", async () => {
