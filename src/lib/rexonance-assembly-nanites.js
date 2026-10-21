@@ -196,6 +196,33 @@ const GATHER_SIN = [Math.sin(0.2), Math.sin(-0.12), Math.sin(0.28)];
 // only the nearest chips, smaller and fainter, never over the head or a plate
 // being built.
 const BOKEH_Z = 0.95;
+// The settled current (owner, 2026-10-21: 「レクソナンスの特設ページにて、ナノマシ
+// ンの挙動…を改善して」; review: uniform white rings stacked in flat columns
+// beside the body, glitter rather than machines). Once the burst has thrown
+// them out, the chips braid into STRANDS intertwined helical streams round an
+// axis beside each body line (a double helix: one strand sweeps past near
+// while the other runs behind): one turn of a strand per PITCH of figure height,
+// every orbit seen a little from above (TILT, its minor axis), turning at the
+// burst's own rate FLOW (radians per unit progress). The phase is the
+// progress plus a smooth function of the body position — never the chip's
+// age — so neighbours travel together, a seed's small lag keeping them out of
+// lockstep, and the turning helices read as streams climbing the figure.
+const BRAID_STRANDS = 2;
+const BRAID_PITCH = 0.3;
+const BRAID_TILT = 0.38;
+const FLOW = (TAU * 2.4) / 0.09;
+// Depth (near larger and brighter, far smaller and dimmer): size and alpha by
+// z, −1 far … 1 near (a banked flake shows less of itself than a face-on
+// ring, hence the slightly larger mean).
+const depthSize = (z) => 1.08 + 0.52 * z;
+const depthAlpha = (z) => 0.32 + 0.31 * (z + 1);
+// Each flowing chip's trail: where its closed-form current had it TRAIL
+// progress ago (at most TRAIL_MAX figure px; none below TRAIL_MIN), and the
+// lit-face glints the banking chips throw beside the body a frame.
+const TRAIL = 0.003;
+const TRAIL_MIN = 4;
+const TRAIL_MAX = 22;
+const BAND_GLINTS = 48;
 
 /** A stable hash of an index into [0, 1) (no PRNG state). */
 export function naniteHash(index, salt) {
@@ -2565,6 +2592,7 @@ export function createAssemblyNanites({
   let keep = 1;
   let sprites_ = 0;
   let cometsDrawn = 0;
+  let bandGlints = 0;
   // Each pass's share of the comet budget: the far band (behind the body)
   // takes little, the near bands and the flights the rest.
   let cometLimit = 0;
@@ -2587,23 +2615,31 @@ export function createAssemblyNanites({
   // closure \`let\` is boxed into a fresh heap number on every write, which
   // is a per-frame allocation — the review's finding on the call, 2026-10-16;
   // no per-frame allocation, owner 2026-10-16).
-  const RG = new Float64Array(5);
+  // Slots: x, y, depth, heading x, y (unit), speed (figure px per unit
+  // progress), the banked tumble frame, the settle weight, the glint, and
+  // the bank's angle, centre frame and swing.
+  const RG = new Float64Array(12);
 
   /* -- draw passes: allocation-free from here -- */
   // A continuous helical current opens out of the airborne firebrands.
-  // Neighbouring body origins share its winding phase; the radius opens
-  // after metal birth, then contracts towards the anatomical assembly.
+  // The radius opens after metal birth; as the burst returns towards the
+  // body its wide orbit hands over to the braid (BRAID_*): the same phase,
+  // the same turning sense, so no chip stalls or reverses at the blend.
   // A firebrand leaves the burning body before
   // a metal cell exists. The airborne handoff has no position/velocity pop.
-  // The flight samples this same function at t0, including its depth and
-  // tangent, so slow or reverse scrubbing never teleports a cell.
+  // The flight samples this same function at t0, including its depth,
+  // heading and banked frame, so slow or reverse scrubbing never teleports
+  // a cell. Its heading and speed are the closed-form derivative (no pose
+  // of a previous frame), so the trails scrub exactly too.
   const surfaceCurrent = (sources, offset, seed, born, q) => {
     const sx = sources[offset];
     const sy = sources[offset + 1];
     const nx = sources[offset + 2];
     const ny = sources[offset + 3];
-    const tx = -ny;
-    const ty = nx;
+    // The body line's tangent, turned down the screen on either side.
+    const flip = nx < 0 ? -1 : 1;
+    const tx = -ny * flip;
+    const ty = nx * flip;
     const age = Math.max(0, q - born);
     const launch = smooth(clamp01((q - FIRE_START) / (Math.min(FIRE_END, born) - FIRE_START)));
     // An actual detonation ejects the fragments beyond the torso, not a
@@ -2612,18 +2648,64 @@ export function createAssemblyNanites({
     const thrown = (((80 + 50 * seed) * H) / 1000) * launch * (1 - 0.9 * returnToBody);
     const lift = (((18 + 17 * seed) * H) / 1000) * launch;
     const release = smooth(clamp01(age / BIRTH));
-    const ph = (sy / H) * 9 + nx * 1.7 + (age * TAU * 2.4) / 0.09 + seed * 0.45;
-    const radius = H * (0.042 + 0.016 * seed) * release * (1 - 0.72 * returnToBody);
-    const curl = radius * Math.cos(ph);
-    const reach = H * (0.024 + 0.018 * seed) * release + 0.5 * radius * Math.sin(ph);
-    RG[0] = sx + nx * (thrown + reach) + tx * curl;
-    RG[1] = sy + ny * (thrown + reach) + ty * curl - lift - H * 0.018 * release;
-    RG[2] = 0.82 * Math.sin(ph) * release;
-    const dx = -tx * Math.sin(ph) + nx * 0.5 * Math.cos(ph);
-    const dy = -ty * Math.sin(ph) + ny * 0.5 * Math.cos(ph);
-    const length = Math.hypot(dx, dy) || 1;
-    RG[3] = dx / length;
-    RG[4] = dy / length;
+    // The progress, never the age (births spread over .027 would scatter
+    // neighbours' phases into glitter); a seed's lag; its strand.
+    const lag = (seed * 7.13) % 1;
+    const strand = Math.floor(((seed * 13.37) % 1) * BRAID_STRANDS);
+    const ph =
+      FLOW * (q - MATERIAL_START) +
+      (TAU * sy) / (BRAID_PITCH * H) +
+      nx * 1.7 +
+      (TAU * strand) / BRAID_STRANDS +
+      0.3 * (lag - 0.5);
+    const sin = Math.sin(ph);
+    const cos = Math.cos(ph);
+    // The burst's wide orbit runs along the body line, half as far across
+    // it, its outside near; the braid's runs across its axis, out and back,
+    // its near side below (the tilt). Each strand's chips at their own radius.
+    const burst = H * (0.042 + 0.016 * seed) * release * (1 - returnToBody);
+    const braid = H * (0.02 + 0.013 * ((seed * 29.71) % 1)) * returnToBody;
+    const along = burst + BRAID_TILT * braid;
+    const across = 0.5 * burst + braid;
+    const reach = H * (0.024 + 0.018 * seed) * release;
+    RG[0] = sx + nx * (thrown + reach + across * sin) + tx * along * cos;
+    RG[1] =
+      sy + ny * (thrown + reach + across * sin) + ty * along * cos - lift - H * 0.018 * release;
+    // (Just short of the defocused band: the braid stays crisp.)
+    RG[2] = 0.82 * sin * release * (1 - returnToBody) + 0.94 * cos * returnToBody;
+    const vx = FLOW * (nx * across * cos - tx * along * sin);
+    const vy = FLOW * (ny * across * cos - ty * along * sin);
+    const speed = Math.sqrt(vx * vx + vy * vy);
+    RG[3] = speed > 1e-6 ? vx / speed : tx;
+    RG[4] = speed > 1e-6 ? vy / speed : ty;
+    RG[5] = speed;
+    // Banked to its orbit: a flake rocking through the kit's oblique frames
+    // (4–8, or 17–21 for half the chips: lit edge to sliver), never the
+    // face-on rings or hollow backs that read as bubbles at this size. Its
+    // lit core turns to the viewer at the outside of each turn, beside the
+    // body, where it glints.
+    const angle = ph + 0.9 * (((seed * 3.71) % 1) - 0.5);
+    const bank = Math.sin(angle);
+    const lower = (seed * 5.31) % 1 < 0.5;
+    RG[10] = lower ? 6.2 : 19.2;
+    RG[11] = lower ? -2.2 : 2.2;
+    RG[6] = RG[10] + RG[11] * bank;
+    RG[7] = returnToBody;
+    RG[8] = bank > 0.94 ? (returnToBody * (bank - 0.94)) / 0.06 : 0;
+    RG[9] = angle;
+  };
+  // A tile's frame in its river (q ≥ t0): from its waiting frame at t0, the
+  // flake rocks on three times as fast; a chip not yet settled tumbles on.
+  const riverFrame = (i, t0, m, rate, q) => {
+    tileCurrent(i, t0);
+    const fr0 = F0[i] + rate * (t0 - m);
+    const settle = RG[7];
+    return (
+      fr0 +
+      settle * (RG[6] - fr0) +
+      (1 - settle) * 3 * rate * (q - t0) +
+      settle * RG[11] * (Math.sin(RG[9] + 3 * FLOW * (q - t0)) - Math.sin(RG[9]))
+    );
   };
   const tileCurrent = (i, q) => {
     surfaceCurrent(EMISSION, i * 4, HSH[i], BIRTHS[i], q);
@@ -2639,6 +2721,18 @@ export function createAssemblyNanites({
   };
   const jigX = (p, x, y) => jig[p * 6] * x + jig[p * 6 + 2] * y + jig[p * 6 + 4];
   const jigY = (p, x, y) => jig[p * 6 + 1] * x + jig[p * 6 + 3] * y + jig[p * 6 + 5];
+  // A flowing chip's glint and trail, from the current just sampled (RG):
+  // its closed-form heading and speed, never a previous frame's pose. Touch
+  // draws no trails.
+  const flowTrail = (slot) => {
+    GL[slot] = RG[8];
+    if (coarse) return;
+    let length = RG[5] * TRAIL;
+    if (length < TRAIL_MIN) return;
+    if (length > TRAIL_MAX) length = TRAIL_MAX;
+    TRX[slot] = X[slot] - RG[3] * length;
+    TRY[slot] = Y[slot] - RG[4] * length;
+  };
 
   const poseTile = (i, q, slot) => {
     const b = BIRTHS[i];
@@ -2665,7 +2759,7 @@ export function createAssemblyNanites({
       const y = RG[1];
       const z = RG[2];
       let kind = helm && q >= N.crown[0] ? 3 : 2;
-      let size = s0 * (1 + 0.45 * z);
+      let size = s0 * depthSize(z);
       const age = q - b;
       const s = clamp01(age / BIRTH);
       FIRE[slot] =
@@ -2681,10 +2775,12 @@ export function createAssemblyNanites({
       Y[slot] = y;
       Z[slot] = z;
       S[slot] = size;
-      A[slot] = (0.45 + 0.25 * (z + 1)) * smooth(clamp01(s / 0.45));
-      FR[slot] = fr;
+      A[slot] = depthAlpha(z) * smooth(clamp01(s / 0.45));
+      // The free tumble settles into the braid's banking.
+      FR[slot] = fr + RG[7] * (RG[6] - fr);
       U[slot] = -1;
       KIND[slot] = kind;
+      if (kind === 2) flowTrail(slot);
       return;
     }
     const span = t1 - t0;
@@ -2707,9 +2803,10 @@ export function createAssemblyNanites({
     const dive = helm ? 0.7 : 0.8;
     if (u < 0.55) {
       // A current peels off the burning surface and feeds a local assembly
-      // front. It leaves from the exact waiting pose, not a reactor pump.
-      fr += rate * 2 * (q - t0);
-      tileCurrent(i, t0);
+      // front. It leaves from the exact waiting pose (its banked frame and
+      // heading too), not a reactor pump.
+      // (riverFrame leaves the current at t0 in RG.)
+      fr = riverFrame(i, t0, m, rate, q);
       const p0x = RG[0];
       const p0y = RG[1];
       const z0 = RG[2];
@@ -2748,10 +2845,11 @@ export function createAssemblyNanites({
       }
       // Each river stands out from the cocoon (round 3, review N4): its chips
       // white and a quarter larger.
-      const ring0 = s0 * (1 + 0.45 * z0);
+      const ring0 = s0 * depthSize(z0);
       size = ring0 + (s0 * 1.375 - ring0) * v;
       TN[slot] = 2;
-      alpha = 0.45 + 0.25 * (z0 + 1) + (0.95 - 0.45 - 0.25 * (z0 + 1)) * v;
+      const alpha0 = depthAlpha(z0);
+      alpha = alpha0 + (0.95 - alpha0) * v;
       kind = 4;
     } else if (u < dive) {
       // Braking orbit: zero speed at both handoffs, then turn the keyed
@@ -2768,7 +2866,8 @@ export function createAssemblyNanites({
       x = hx + rr * (Math.cos(psi) * qx + flatten * Math.sin(psi) * nx);
       y = hy + rr * (Math.cos(psi) * qy + flatten * Math.sin(psi) * ny);
       size = s0 * (1.375 - 0.375 * e + 0.08 * Math.sin(Math.PI * w) ** 2);
-      const gateFrame = F0[i] + rate * (t0 - m + 3 * 0.55 * span);
+      // (The frame it reached the gate in: the river's.)
+      const gateFrame = riverFrame(i, t0, m, rate, t0 + 0.55 * span);
       const faceFrame = gateFrame - Math.round(gateFrame / 24) * 24;
       fr = faceFrame * (1 - e);
       TN[slot] = 2;
@@ -2838,7 +2937,8 @@ export function createAssemblyNanites({
         const g = (u - 0.86) / 0.14;
         UF[slot] = Math.min(6, Math.floor(g * 7));
         size = s0 + (tile * (0.6 + 0.4 * COV[i]) - s0) * g;
-        alpha = 0.95 * (1 - g);
+        // Eased out as its metal eases in (flightPass): no linear pop.
+        alpha = 0.95 * (1 - smooth(g));
       }
       kind = 6;
     }
@@ -2863,8 +2963,11 @@ export function createAssemblyNanites({
     let x = RG[0];
     let y = RG[1];
     const z = RG[2];
-    let size = s0 * (1 + 0.45 * z);
-    let alpha = 0.45 + 0.25 * (z + 1);
+    let size = s0 * depthSize(z);
+    let alpha = depthAlpha(z);
+    // The free tumble settles into the braid's banking.
+    const tumble = free.f0[j] + 2400 * free.spin[j] * (q - b);
+    const frame = tumble + RG[7] * (RG[6] - tumble);
     TN[slot] = free.tone[j];
     UF[slot] = -1;
     GL[slot] = 0;
@@ -2905,15 +3008,20 @@ export function createAssemblyNanites({
       x += (coreX + lx * GATHER_COS[g] - ly * GATHER_SIN[g] - x) * e;
       y += (coreY + lx * GATHER_SIN[g] + ly * GATHER_COS[g] - y) * e;
       const gz = z + (0.9 * sn - z) * e;
-      size = s0 * (1 + 0.3 * gz) * (1 - 0.35 * u);
-      alpha = (0.55 + 0.2 * (gz + 1)) * (u > 0.7 ? 1 - smooth((u - 0.7) / 0.3) : 1);
+      // (From the cocoon's depth scale into the rings', with the gather.)
+      const near = depthSize(gz);
+      const lit = depthAlpha(gz);
+      size = s0 * (near + (1 + 0.3 * gz - near) * e) * (1 - 0.35 * u);
+      alpha =
+        (lit + (0.55 + 0.2 * (gz + 1) - lit) * e) * (u > 0.7 ? 1 - smooth((u - 0.7) / 0.3) : 1);
       if (u > 0) kind = 8;
       X[slot] = x;
       Y[slot] = y;
       Z[slot] = gz;
       S[slot] = size;
       A[slot] = alpha;
-      FR[slot] = free.f0[j] + 2400 * free.spin[j] * (q - b);
+      // (Still rocking in the rings; tumbling free only as each falls in.)
+      FR[slot] = frame + (u > 0 ? 2400 * free.spin[j] * (q - N.implode[0]) : 0);
       U[slot] = -1;
       KIND[slot] = kind;
       return;
@@ -2923,9 +3031,10 @@ export function createAssemblyNanites({
     Z[slot] = z;
     S[slot] = size;
     A[slot] = alpha;
-    FR[slot] = free.f0[j] + 2400 * free.spin[j] * (q - b);
+    FR[slot] = frame;
     U[slot] = -1;
     KIND[slot] = kind;
+    flowTrail(slot);
   };
 
   // N17, the seating ripple: a plate that seats sends a ring wave out
@@ -2943,6 +3052,9 @@ export function createAssemblyNanites({
       const w = Math.exp(-g * g) * (1 - t) * (1 - t) * RIP[o + 3];
       X[slot] += (dx / d) * 12 * w;
       Y[slot] += (dy / d) * 12 * w;
+      // (Its trail rides with it; none stays none.)
+      TRX[slot] += (dx / d) * 12 * w;
+      TRY[slot] += (dy / d) * 12 * w;
       const a = A[slot] * (1 + 0.9 * w);
       A[slot] = a > 1 ? 1 : a;
       S[slot] *= 1 + 0.3 * w;
@@ -3261,6 +3373,7 @@ export function createAssemblyNanites({
     const rich = cells && !coarse;
     const comets = cometSheet && !CALM && DQ > 0;
     const share = far ? (BACKRECTS ? 0 : keep) : 1;
+    flowTrails(ctx, list, count, far ? 0.45 : front ? 1 : 0.7);
     for (let c = 0; c < count; c += 1) {
       const slot = list[c];
       // A firebrand has no metal chip until the airborne handoff begins.
@@ -3271,7 +3384,48 @@ export function createAssemblyNanites({
       else rectChip(slot, Z[slot] > -0.15, rich);
     }
     flushChips(ctx);
+    // The banking chips' lit faces: the kit's star as each turns its face to
+    // the viewer at the outside of its orbit, so a glint runs along a strand
+    // (near bands only, a constant few a frame).
+    if (rich && !far) {
+      ctx.globalCompositeOperation = "lighter";
+      for (let c = 0; c < count && bandGlints < BAND_GLINTS; c += 1) {
+        const slot = list[c];
+        const g = GL[slot];
+        if (g <= 0.05 || A[slot] <= 0.2) continue;
+        const draw = S[slot] * (1 + 1.2 * g);
+        ctx.globalAlpha = 0.75 * g * A[slot];
+        ctx.drawImage(cells, SPX, SPY, 32, 32, X[slot] - draw / 2, Y[slot] - draw / 2, draw, draw);
+        sprites_ += 1;
+        bandGlints += 1;
+      }
+      ctx.globalCompositeOperation = "source-over";
+    }
     ctx.globalAlpha = 1;
+  };
+  // The flowing chips' trails (N16's tracers, for the cocoon): a hairline
+  // from where each was TRAIL ago along its current, faint over its length,
+  // brighter over the half nearest the chip; one batched stroke a half.
+  const flowTrails = (ctx, list, count, light) => {
+    if (coarse) return;
+    ctx.strokeStyle = "rgb(196 244 255)";
+    ctx.lineWidth = 0.8;
+    for (let half = 0; half < 2; half += 1) {
+      let traced = 0;
+      ctx.beginPath();
+      for (let c = 0; c < count; c += 1) {
+        const slot = list[c];
+        const tx = TRX[slot];
+        if (tx !== tx || A[slot] <= 0.12) continue;
+        const k = half ? 0.5 : 0;
+        ctx.moveTo(tx + (X[slot] - tx) * k, TRY[slot] + (Y[slot] - TRY[slot]) * k);
+        ctx.lineTo(X[slot], Y[slot]);
+        traced += 1;
+      }
+      if (!traced) break;
+      ctx.globalAlpha = (half ? 0.5 : 0.2) * light;
+      ctx.stroke();
+    }
   };
 
   // Cocoon chips within 40 px of a running gate, at half their light.
@@ -3311,6 +3465,7 @@ export function createAssemblyNanites({
     BACKRECTS = backRects;
     sprites_ = 0;
     cometsDrawn = 0;
+    bandGlints = 0;
     heroes = 0;
     conduitDraws = 0;
     nanitesDrawn = 0;
@@ -3462,7 +3617,7 @@ export function createAssemblyNanites({
     // every term a function of q, never of the last frame.
     const near = visible - nBack;
     firebrandReserve = calm ? 0 : 2 * Math.min(coarse ? FIREBRANDS_TOUCH : FIREBRANDS, burning);
-    let reserve = FX_RESERVE + firebrandReserve;
+    let reserve = FX_RESERVE + firebrandReserve + (cells && !coarse ? BAND_GLINTS : 0);
     if (gold && goldCount && !coarse) {
       const head = goldBy(q);
       reserve += Math.ceil(POUR_SHARE * (goldBy(q + 0.007) - head));
@@ -4719,7 +4874,8 @@ export function createAssemblyNanites({
           drawnArts += 1;
           const w = TW[i] * (0.7 + 0.3 * g);
           const h = TH[i] * (0.7 + 0.3 * g);
-          ctx.globalAlpha = g;
+          // (Eased in as its chip eases out: no linear pop at either end.)
+          ctx.globalAlpha = smooth(g);
           ctx.drawImage(
             metalOf(SRC[i]),
             SX[i],
