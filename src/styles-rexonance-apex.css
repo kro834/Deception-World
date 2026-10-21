@@ -501,10 +501,133 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-comp
   border: 1px solid var(--rxa-line-soft);
 }
 
-/* Desktop: the sheet follows the status plate without the dead band. */
+/* Tablets in portrait (681–900): the three forms side by side, as on
+   desktop (the sheet stacked them from 900px down, so the comparison
+   never stood in one view). */
+@media (min-width: 681px) and (max-width: 900px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-comparison-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-comparison-card {
+    padding: 18px 16px 20px;
+    border-right: 1px solid rgb(121 232 255 / 16%);
+    border-bottom: 0;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-comparison-card:last-child {
+    border-right: 0;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-comparison-card > img {
+    height: auto;
+    aspect-ratio: 1086 / 1448;
+    margin-bottom: 16px;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-comparison-card > h3 {
+    font-size: 19px;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-comparison-card > button {
+    min-height: 48px;
+  }
+}
+
+/* Phones: each form is a spec card — its art beside its name, line and
+   points, the choice across the foot — so the three forms compare within
+   a screen or two (stacked, each card stood ~1,100px tall: art, then copy,
+   then the button). Type and copy as before. */
+@media (max-width: 680px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-comparison-card {
+    display: grid;
+    grid-template-columns: minmax(112px, min(40%, 236px)) minmax(0, 1fr);
+    grid-template-rows: auto auto auto 1fr auto;
+    grid-template-areas:
+      "head head"
+      "art name"
+      "art line"
+      "art points"
+      "choose choose";
+    column-gap: clamp(16px, 4vw, 28px);
+    align-items: start;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-comparison-card > p:first-child {
+    grid-area: head;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-comparison-card > img {
+    grid-area: art;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1086 / 1448;
+    margin: 0;
+    object-position: 50% 100%;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-comparison-card > h3 {
+    grid-area: name;
+    margin-top: 2px;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-comparison-card > .rxe-comparison-title {
+    grid-area: line;
+    margin-bottom: 14px;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-comparison-card > ul {
+    grid-area: points;
+    margin: 0;
+    padding-top: 12px;
+    border-top: 1px solid var(--rxa-line-soft);
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-comparison-card > button {
+    grid-area: choose;
+    min-height: 48px;
+    margin-top: 18px;
+  }
+
+  /* The form on show: its accent along the card's left edge as well. */
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-comparison-card[data-selected="true"] {
+    box-shadow:
+      inset 0 2px 0 var(--rxs-stage-accent, #79e8ff),
+      inset 2px 0 0 color-mix(in srgb, var(--rxs-stage-accent, #79e8ff) 55%, transparent);
+  }
+}
+
+/* Desktop: the sheet follows the switcher without the dead band. */
 @media (min-width: 1100px) {
   html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-comparison {
     margin-top: 40px;
+  }
+}
+
+/* Desktop: the status plate reads the switcher, so it stands under the
+   tabs and their hint (it fell to an implicit row under the copy and the
+   form's outlined code, its bracket on the code's letters). The copy
+   takes the fourth row; the art still spans the column. DOM order (tabs,
+   hint, status, panel) is unchanged. */
+@media (min-width: 1100px) {
+  @supports (grid-template-rows: subgrid) {
+    html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages .rxs-stage-switcher {
+      grid-template-rows: auto auto auto 1fr;
+    }
+
+    html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages .rxs-stage-switcher > .rxe-form-status {
+      grid-column: 1;
+      grid-row: 3;
+      z-index: 3;
+      align-self: start;
+      width: 100%;
+      margin: 10px 0 0;
+    }
+
+    html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages .rxs-stage-switcher > .rxs-stage-panel > div {
+      grid-row: 4;
+      padding-top: clamp(28px, 2.6vw, 44px);
+    }
   }
 }
 
@@ -595,6 +718,43 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxe-ch
 
   html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-metrics > article:hover {
     background: rgb(121 232 255 / 4%);
+  }
+}
+
+/* ================================================================
+   The hero: the name's ghost clear of the scroll cue
+   ================================================================ */
+/* FORGE sets the outlined name between the rail and the scroll cue where
+   the window is tall enough, and above the kicker where it is not. Its
+   switch heights predate the cue's place at the foot of the title row
+   (STAGE), so just above each one the cue's 「まず、数字から。」 ran into
+   the ghost's letters (1440 × 900: 9px into them; 1920 × 1040, 1366 ×
+   865, 1280 × 840 likewise). Measured again in 80px bands, each at its
+   widest window, for a 10px clearance: below these heights the ghost
+   heads the copy. */
+@media
+  (min-width: 1100px) and (max-width: 1179.98px) and (max-height: 825.98px),
+  (min-width: 1180px) and (max-width: 1259.98px) and (max-height: 865.98px),
+  (min-width: 1260px) and (max-width: 1339.98px) and (max-height: 899.98px),
+  (min-width: 1340px) and (max-width: 1419.98px) and (max-height: 931.98px),
+  (min-width: 1420px) and (max-width: 1499.98px) and (max-height: 961.98px),
+  (min-width: 1500px) and (max-width: 1579.98px) and (max-height: 989.98px),
+  (min-width: 1580px) and (max-width: 1659.98px) and (max-height: 1017.98px),
+  (min-width: 1660px) and (max-width: 1739.98px) and (max-height: 1041.98px),
+  (min-width: 1740px) and (max-width: 1819.98px) and (max-height: 1059.98px),
+  (min-width: 1820px) and (max-width: 1899.98px) and (max-height: 1069.98px),
+  (min-width: 1900px) and (max-width: 1979.98px) and (max-height: 1083.98px),
+  (min-width: 1980px) and (max-width: 2059.98px) and (max-height: 1095.98px),
+  (min-width: 2060px) and (max-width: 2139.98px) and (max-height: 1107.98px),
+  (min-width: 2140px) and (max-width: 2219.98px) and (max-height: 1121.98px),
+  (min-width: 2220px) and (max-width: 2299.98px) and (max-height: 1133.98px),
+  (min-width: 2300px) and (max-width: 2379.98px) and (max-height: 1147.98px),
+  (min-width: 2380px) and (max-width: 2459.98px) and (max-height: 1159.98px),
+  (min-width: 2460px) and (max-height: 1169.98px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero .rxs-hero-copy > .rxf-mark {
+    top: auto;
+    bottom: calc(100% + 20px);
+    font-size: clamp(56px, min(13svh, calc((51vw - 80px - clamp(40px, 5vw, 96px)) / 6.95)), 160px);
   }
 }
 
