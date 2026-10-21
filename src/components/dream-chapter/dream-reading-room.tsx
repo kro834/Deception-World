@@ -12,12 +12,34 @@ type Props = { trigger: HTMLButtonElement | null; onClose: () => void };
 
 function visibleParagraph(scroller: HTMLDivElement | null) {
   if (!scroller) return 1;
+  const paragraphs = scroller.querySelectorAll<HTMLElement>("[data-room-paragraph]");
+  // Scrolled to the foot of the sheet, the reader has reached the last
+  // paragraph even when its first line never crossed the reading line (a
+  // short closing paragraph on a tall screen read "2 / 3" at the end).
+  const atEnd =
+    scroller.scrollTop > 0 &&
+    scroller.scrollTop + scroller.clientHeight >= scroller.scrollHeight - 2;
+  if (atEnd && paragraphs.length)
+    return Number(paragraphs[paragraphs.length - 1].dataset.roomParagraph);
   const line = scroller.getBoundingClientRect().top + Math.min(120, scroller.clientHeight * 0.3);
   let current = 1;
-  for (const node of scroller.querySelectorAll<HTMLElement>("[data-room-paragraph]")) {
+  for (const node of paragraphs) {
     if (node.getBoundingClientRect().top <= line) current = Number(node.dataset.roomParagraph);
   }
   return current;
+}
+
+type Pin = { no: number; top: number } | null;
+
+/** An explicit landing (a paragraph pill, the saved bookmark) holds until the
+    reader scrolls on: a sheet clamped at its foot could not bring the chosen
+    paragraph up to the reading line, and the count fell back a paragraph. */
+function readParagraph(scroller: HTMLDivElement | null, pin: { current: Pin }) {
+  if (scroller && pin.current && Math.abs(scroller.scrollTop - pin.current.top) < 2) {
+    return pin.current.no;
+  }
+  pin.current = null;
+  return visibleParagraph(scroller);
 }
 
 export function DreamReadingRoom({ trigger, onClose }: Props) {
@@ -43,6 +65,7 @@ export function DreamReadingRoom({ trigger, onClose }: Props) {
   const closeButton = useRef<HTMLButtonElement>(null);
   const onCloseRef = useRef(onClose);
   const firstLanding = useRef(initial.bookmark?.paragraph ?? 1);
+  const pinned = useRef<Pin>(null);
   const closing = useRef(false);
   onCloseRef.current = onClose;
   const episode = DREAM_CASES.find((item) => item.no === chapter) ?? DREAM_CASES[0];
@@ -95,6 +118,7 @@ export function DreamReadingRoom({ trigger, onClose }: Props) {
       scroller.scrollTop +=
         target.getBoundingClientRect().top - scroller.getBoundingClientRect().top - 24;
     } else scroller.scrollTop = 0;
+    pinned.current = landing > 1 && target ? { no: landing, top: scroller.scrollTop } : null;
     setParagraph(landing);
   }, [chapter]);
 
@@ -104,7 +128,7 @@ export function DreamReadingRoom({ trigger, onClose }: Props) {
     let frame = 0;
     const sync = () => {
       frame = 0;
-      setParagraph(visibleParagraph(scroller));
+      setParagraph(readParagraph(scroller, pinned));
     };
     const queue = () => {
       if (!frame) frame = requestAnimationFrame(sync);
@@ -130,11 +154,12 @@ export function DreamReadingRoom({ trigger, onClose }: Props) {
     if (scroller && target) {
       scroller.scrollTop +=
         target.getBoundingClientRect().top - scroller.getBoundingClientRect().top - 24;
+      pinned.current = { no: targetNo, top: scroller.scrollTop };
     }
     setParagraph(targetNo);
   };
   const save = () => {
-    const paragraph = visibleParagraph(viewport.current);
+    const paragraph = readParagraph(viewport.current, pinned);
     setParagraph(paragraph);
     try {
       localStorage.setItem(

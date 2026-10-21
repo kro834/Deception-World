@@ -2427,7 +2427,8 @@ html[data-family="dream"]
    the skipped scenes hold their drawn heights. These are this sheet's
    layouts measured at the ten viewports of verify-dream-estimates.mjs
    (1920, 1440, 1194, 1024, 768, 412, 390, 320, 844 x 390, 667 x 375),
-   rounded up to 5px, in cascade order.
+   rounded up to 5px, in cascade order. Re-measured 2026-10-22, after the
+   zenith sheet (styles-dream-zenith.css) re-laid the desk and the records.
    ---------------------------------------------------------------- */
 html[data-family="dream"] main.dream-page.dream-page #posters {
   contain-intrinsic-size: auto 1255px;
@@ -2442,19 +2443,19 @@ html[data-family="dream"] main.dream-page.dream-page #dolminence {
 }
 
 html[data-family="dream"] main.dream-page.dream-page #cast-roster {
-  contain-intrinsic-size: auto 3090px;
+  contain-intrinsic-size: auto 3525px;
 }
 
 html[data-family="dream"] main.dream-page.dream-page #factions {
-  contain-intrinsic-size: auto 3935px;
+  contain-intrinsic-size: auto 4840px;
 }
 
 html[data-family="dream"] main.dream-page.dream-page #case-notes {
-  contain-intrinsic-size: auto 760px;
+  contain-intrinsic-size: auto 825px;
 }
 
 html[data-family="dream"] main.dream-page.dream-page #chronicle {
-  contain-intrinsic-size: auto 3795px;
+  contain-intrinsic-size: auto 4300px;
 }
 
 html[data-family="dream"] main.dream-page.dream-page #atlas {
@@ -2470,11 +2471,11 @@ html[data-family="dream"] main.dream-page.dream-page #arsenal {
 }
 
 html[data-family="dream"] main.dream-page.dream-page #glossary {
-  contain-intrinsic-size: auto 2520px;
+  contain-intrinsic-size: auto 3075px;
 }
 
 html[data-family="dream"] main.dream-page.dream-page #quotes {
-  contain-intrinsic-size: auto 1335px;
+  contain-intrinsic-size: auto 1550px;
 }
 
 @media (max-width: 1299px) {
@@ -2491,19 +2492,19 @@ html[data-family="dream"] main.dream-page.dream-page #quotes {
   }
 
   html[data-family="dream"] main.dream-page.dream-page #cast-roster {
-    contain-intrinsic-size: auto 3205px;
+    contain-intrinsic-size: auto 3680px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #factions {
-    contain-intrinsic-size: auto 4100px;
+    contain-intrinsic-size: auto 5195px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #case-notes {
-    contain-intrinsic-size: auto 780px;
+    contain-intrinsic-size: auto 850px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #chronicle {
-    contain-intrinsic-size: auto 3815px;
+    contain-intrinsic-size: auto 4295px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #atlas {
@@ -2519,11 +2520,11 @@ html[data-family="dream"] main.dream-page.dream-page #quotes {
   }
 
   html[data-family="dream"] main.dream-page.dream-page #glossary {
-    contain-intrinsic-size: auto 2715px;
+    contain-intrinsic-size: auto 3240px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #quotes {
-    contain-intrinsic-size: auto 1705px;
+    contain-intrinsic-size: auto 1545px;
   }
 }
 
@@ -2541,19 +2542,19 @@ html[data-family="dream"] main.dream-page.dream-page #quotes {
   }
 
   html[data-family="dream"] main.dream-page.dream-page #cast-roster {
-    contain-intrinsic-size: auto 3390px;
+    contain-intrinsic-size: auto 4000px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #factions {
-    contain-intrinsic-size: auto 3750px;
+    contain-intrinsic-size: auto 4660px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #case-notes {
-    contain-intrinsic-size: auto 1070px;
+    contain-intrinsic-size: auto 1170px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #chronicle {
-    contain-intrinsic-size: auto 3990px;
+    contain-intrinsic-size: auto 4600px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #atlas {
@@ -2569,7 +2570,7 @@ html[data-family="dream"] main.dream-page.dream-page #quotes {
   }
 
   html[data-family="dream"] main.dream-page.dream-page #glossary {
-    contain-intrinsic-size: auto 3090px;
+    contain-intrinsic-size: auto 3780px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #quotes {
@@ -2591,19 +2592,19 @@ html[data-family="dream"] main.dream-page.dream-page #quotes {
   }
 
   html[data-family="dream"] main.dream-page.dream-page #cast-roster {
-    contain-intrinsic-size: auto 4265px;
+    contain-intrinsic-size: auto 5045px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #factions {
-    contain-intrinsic-size: auto 5480px;
+    contain-intrinsic-size: auto 6505px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #case-notes {
-    contain-intrinsic-size: auto 1020px;
+    contain-intrinsic-size: auto 1185px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #chronicle {
-    contain-intrinsic-size: auto 4075px;
+    contain-intrinsic-size: auto 4745px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #atlas {
@@ -2619,25 +2620,25 @@ html[data-family="dream"] main.dream-page.dream-page #quotes {
   }
 
   html[data-family="dream"] main.dream-page.dream-page #glossary {
-    contain-intrinsic-size: auto 3345px;
+    contain-intrinsic-size: auto 4140px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #quotes {
-    contain-intrinsic-size: auto 1625px;
+    contain-intrinsic-size: auto 1920px;
   }
 }
 
 @media (max-width: 760px) {
   html[data-family="dream"] main.dream-page.dream-page #posters {
-    contain-intrinsic-size: auto 1150px;
+    contain-intrinsic-size: auto 1105px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #characters {
-    contain-intrinsic-size: auto 1340px;
+    contain-intrinsic-size: auto 1290px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #dolminence {
-    contain-intrinsic-size: auto 1305px;
+    contain-intrinsic-size: auto 1260px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #cast-roster {
@@ -2645,15 +2646,15 @@ html[data-family="dream"] main.dream-page.dream-page #quotes {
   }
 
   html[data-family="dream"] main.dream-page.dream-page #factions {
-    contain-intrinsic-size: auto 3810px;
+    contain-intrinsic-size: auto 4530px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #case-notes {
-    contain-intrinsic-size: auto 450px;
+    contain-intrinsic-size: auto 490px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #chronicle {
-    contain-intrinsic-size: auto 6710px;
+    contain-intrinsic-size: auto 7215px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #atlas {
@@ -2669,25 +2670,25 @@ html[data-family="dream"] main.dream-page.dream-page #quotes {
   }
 
   html[data-family="dream"] main.dream-page.dream-page #glossary {
-    contain-intrinsic-size: auto 4085px;
+    contain-intrinsic-size: auto 5145px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #quotes {
-    contain-intrinsic-size: auto 1895px;
+    contain-intrinsic-size: auto 1925px;
   }
 }
 
 @media (max-width: 400px) {
   html[data-family="dream"] main.dream-page.dream-page #posters {
-    contain-intrinsic-size: auto 1130px;
+    contain-intrinsic-size: auto 1100px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #characters {
-    contain-intrinsic-size: auto 1305px;
+    contain-intrinsic-size: auto 1275px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #dolminence {
-    contain-intrinsic-size: auto 1280px;
+    contain-intrinsic-size: auto 1250px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #cast-roster {
@@ -2695,15 +2696,15 @@ html[data-family="dream"] main.dream-page.dream-page #quotes {
   }
 
   html[data-family="dream"] main.dream-page.dream-page #factions {
-    contain-intrinsic-size: auto 3970px;
+    contain-intrinsic-size: auto 4590px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #case-notes {
-    contain-intrinsic-size: auto 445px;
+    contain-intrinsic-size: auto 490px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #chronicle {
-    contain-intrinsic-size: auto 6785px;
+    contain-intrinsic-size: auto 7495px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #atlas {
@@ -2719,25 +2720,25 @@ html[data-family="dream"] main.dream-page.dream-page #quotes {
   }
 
   html[data-family="dream"] main.dream-page.dream-page #glossary {
-    contain-intrinsic-size: auto 4210px;
+    contain-intrinsic-size: auto 5235px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #quotes {
-    contain-intrinsic-size: auto 1895px;
+    contain-intrinsic-size: auto 1925px;
   }
 }
 
 @media (max-width: 359px) {
   html[data-family="dream"] main.dream-page.dream-page #posters {
-    contain-intrinsic-size: auto 1125px;
+    contain-intrinsic-size: auto 1100px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #characters {
-    contain-intrinsic-size: auto 1170px;
+    contain-intrinsic-size: auto 1140px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #dolminence {
-    contain-intrinsic-size: auto 1335px;
+    contain-intrinsic-size: auto 1305px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #cast-roster {
@@ -2745,15 +2746,15 @@ html[data-family="dream"] main.dream-page.dream-page #quotes {
   }
 
   html[data-family="dream"] main.dream-page.dream-page #factions {
-    contain-intrinsic-size: auto 4540px;
+    contain-intrinsic-size: auto 5320px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #case-notes {
-    contain-intrinsic-size: auto 480px;
+    contain-intrinsic-size: auto 565px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #chronicle {
-    contain-intrinsic-size: auto 7180px;
+    contain-intrinsic-size: auto 8590px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #atlas {
@@ -2769,11 +2770,11 @@ html[data-family="dream"] main.dream-page.dream-page #quotes {
   }
 
   html[data-family="dream"] main.dream-page.dream-page #glossary {
-    contain-intrinsic-size: auto 4770px;
+    contain-intrinsic-size: auto 5995px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #quotes {
-    contain-intrinsic-size: auto 2015px;
+    contain-intrinsic-size: auto 2045px;
   }
 }
 
@@ -2795,15 +2796,15 @@ html[data-family="dream"] main.dream-page.dream-page #quotes {
   }
 
   html[data-family="dream"] main.dream-page.dream-page #factions {
-    contain-intrinsic-size: auto 5300px;
+    contain-intrinsic-size: auto 6365px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #case-notes {
-    contain-intrinsic-size: auto 1030px;
+    contain-intrinsic-size: auto 1135px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #chronicle {
-    contain-intrinsic-size: auto 3965px;
+    contain-intrinsic-size: auto 4630px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #atlas {
@@ -2819,25 +2820,25 @@ html[data-family="dream"] main.dream-page.dream-page #quotes {
   }
 
   html[data-family="dream"] main.dream-page.dream-page #glossary {
-    contain-intrinsic-size: auto 3190px;
+    contain-intrinsic-size: auto 3805px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #quotes {
-    contain-intrinsic-size: auto 1630px;
+    contain-intrinsic-size: auto 1925px;
   }
 }
 
 @media (max-height: 520px) and (orientation: landscape) and (max-width: 760px) {
   html[data-family="dream"] main.dream-page.dream-page #posters {
-    contain-intrinsic-size: auto 1150px;
+    contain-intrinsic-size: auto 1125px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #characters {
-    contain-intrinsic-size: auto 830px;
+    contain-intrinsic-size: auto 800px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #dolminence {
-    contain-intrinsic-size: auto 1620px;
+    contain-intrinsic-size: auto 1595px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #cast-roster {
@@ -2845,15 +2846,15 @@ html[data-family="dream"] main.dream-page.dream-page #quotes {
   }
 
   html[data-family="dream"] main.dream-page.dream-page #factions {
-    contain-intrinsic-size: auto 3340px;
+    contain-intrinsic-size: auto 3790px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #case-notes {
-    contain-intrinsic-size: auto 425px;
+    contain-intrinsic-size: auto 495px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #chronicle {
-    contain-intrinsic-size: auto 4375px;
+    contain-intrinsic-size: auto 5375px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #atlas {
@@ -2869,11 +2870,11 @@ html[data-family="dream"] main.dream-page.dream-page #quotes {
   }
 
   html[data-family="dream"] main.dream-page.dream-page #glossary {
-    contain-intrinsic-size: auto 3800px;
+    contain-intrinsic-size: auto 4555px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #quotes {
-    contain-intrinsic-size: auto 1645px;
+    contain-intrinsic-size: auto 1680px;
   }
 }
 
@@ -2891,19 +2892,19 @@ html[data-family="dream"] main.dream-page.dream-page #quotes {
   }
 
   html[data-family="dream"] main.dream-page.dream-page #cast-roster {
-    contain-intrinsic-size: auto 3090px;
+    contain-intrinsic-size: auto 3525px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #factions {
-    contain-intrinsic-size: auto 3935px;
+    contain-intrinsic-size: auto 4925px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #case-notes {
-    contain-intrinsic-size: auto 760px;
+    contain-intrinsic-size: auto 825px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #chronicle {
-    contain-intrinsic-size: auto 3795px;
+    contain-intrinsic-size: auto 4300px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #atlas {
@@ -2919,11 +2920,11 @@ html[data-family="dream"] main.dream-page.dream-page #quotes {
   }
 
   html[data-family="dream"] main.dream-page.dream-page #glossary {
-    contain-intrinsic-size: auto 2520px;
+    contain-intrinsic-size: auto 3080px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #quotes {
-    contain-intrinsic-size: auto 1335px;
+    contain-intrinsic-size: auto 1550px;
   }
 }
 
