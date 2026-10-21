@@ -1,0 +1,104 @@
+/* ZENITH (2026-10-21): the Dream programme read as one desk.
+   Linked after the lamplight sheet and before the cinematic skin, on Dream
+   only. Every rule is scoped to html[data-family="dream"] main.dream-page.
+   Paint, type and layout; motion only where the page already moves, gated
+   by prefers-reduced-motion and the economy tier; nothing under 12px, no
+   !important, no words of its own.
+
+   1. Corrections
+      - 口上: the lamplight sheet set kinari ink on the prologue's paragraph,
+        but the refinement sheet had already made the card kinari paper; the
+        synopsis was paper on paper. The paper keeps its ink.
+      - The record explorer's labels fell back to the generic monospace; the
+        index speaks the programme's Latin face (Cinzel) over Shippori.
+      - The chapter telemetry chips wrapped "CASE 5 / 17件" on an iPad
+        portrait; six chips drop to three columns below 1100px.
+      - The case fold's CASE caption sat on its numeral's outline. */
+
+html[data-family="dream"] main.dream-page.dream-page {
+  --zn-latin: "Cinzel", "Shippori Mincho", "Yu Mincho", "Hiragino Mincho ProN", "Noto Serif JP",
+    serif;
+  --zn-ink: #2d2230;
+  --zn-kin: #c8a45c;
+  --zn-kin-light: #e6c28e;
+  --zn-kin-hi: #f3e0b0;
+  --zn-kinari: #f4ecdc;
+  --zn-ginnezu: #b3adb8;
+  --zn-shu: #cc493b;
+  --zn-night: #120d18;
+  --zn-lacquer: #1b1423;
+  --zn-hair: rgb(200 164 92 / 46%);
+  --zn-hair-soft: rgb(200 164 92 / 24%);
+}
+
+/* ----------------------------------------------------------------
+   1. 口上 keeps its ink on the paper
+   ---------------------------------------------------------------- */
+html[data-family="dream"] main.dream-page.dream-page .dream-prologue-card > p:not(.dream-prologue-sign) {
+  color: var(--zn-ink);
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-prologue-card h2 {
+  color: #79353c;
+}
+
+/* ----------------------------------------------------------------
+   2. The record explorer speaks the programme's Latin face
+   ---------------------------------------------------------------- */
+html[data-family="dream"] main.dream-page.dream-page .dream-record-explorer-heading > p,
+html[data-family="dream"] main.dream-page.dream-page .dream-record-telemetry-head small,
+html[data-family="dream"] main.dream-page.dream-page .dream-record-meta {
+  font-family: var(--zn-latin);
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-record-explorer-heading > p {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-shadow: none;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-record-telemetry-head {
+  flex-wrap: nowrap;
+  white-space: nowrap;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-record-telemetry-head small {
+  font-weight: 600;
+  letter-spacing: 0.14em;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-record-telemetry-head strong {
+  font-family: var(--zn-latin);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-record-meta {
+  font-weight: 600;
+  letter-spacing: 0.12em;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-record-meta span + span {
+  font-family: var(--ts-text);
+  letter-spacing: 0.04em;
+}
+
+@media (max-width: 1100px) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-record-telemetry {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-record-telemetry {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ----------------------------------------------------------------
+   3. The case fold's numeral breathes under its caption
+   ---------------------------------------------------------------- */
+html[data-family="dream"] main.dream-page.dream-page .dream-reader .dream-story-case-number {
+  row-gap: 7px;
+}

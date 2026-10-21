@@ -514,3 +514,4 @@ const EPISODES: EpisodeRecord[] = [
         assets: ["/character-dante.webp", "/rider-ruler-polaris.webp"],
       },
     ],
+  },

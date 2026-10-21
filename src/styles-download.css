@@ -586,6 +586,146 @@ html[data-world-effects="economy"] .export-page h1 {
 }
 
 /* ================================================================
+   Wide screens (2026-10-21): the export slip opens into a two-panel
+   poster. The key visual stands in the card's left panel (::before, a
+   grid item now, under an ink fall towards the slip) with a prism
+   hairline on its edge; the slip keeps its own rhythm in the right
+   panel, and the way back is the foot of both. iPad landscape and up.
+   ================================================================ */
+@media (min-width: 960px) and (min-height: 600px) {
+  .export-page {
+    --dl-art: 0px;
+    --dl-step: clamp(16px, 3vh, 30px);
+    grid-template-columns: [art-start] minmax(280px, 380px) [art-end slip-start] 460px [slip-end];
+    grid-template-rows: minmax(28px, 1fr) repeat(7, auto) minmax(28px, 1fr) auto;
+    padding: clamp(24px, 5vh, 56px) 24px;
+    background:
+      radial-gradient(ellipse 60% 40% at 78% 8%, rgb(122 232 255 / 12%), transparent 70%),
+      radial-gradient(ellipse 50% 36% at 14% 86%, rgb(255 79 195 / 9%), transparent 70%),
+      radial-gradient(ellipse 40% 30% at 50% 50%, rgb(79 123 255 / 6%), transparent 70%),
+      repeating-linear-gradient(90deg, rgb(122 232 255 / 2.5%) 0 1px, transparent 1px 28px),
+      repeating-linear-gradient(0deg, rgb(122 232 255 / 2.5%) 0 1px, transparent 1px 28px),
+      var(--dl-ink);
+  }
+
+  .export-page > * {
+    grid-column: slip-start / slip-end;
+  }
+
+  /* The art panel: the key visual, the ink falling towards the slip, the
+     prism hairline on its edge, and ice and gold marks in its corners. */
+  .export-page::before {
+    position: relative;
+    inset: auto;
+    z-index: 1;
+    grid-column: art-start / art-end;
+    grid-row: 1 / 10;
+    justify-self: stretch;
+    align-self: stretch;
+    margin: 1px 0 0 1px;
+    border-radius: 5px 0 0 0;
+    opacity: 1;
+    overflow: hidden;
+    background-image:
+      linear-gradient(
+        180deg,
+        var(--dl-ice),
+        var(--dl-violet) 34%,
+        var(--dl-magenta) 66%,
+        var(--dl-gold)
+      ),
+      linear-gradient(var(--dl-lock) 0 0),
+      linear-gradient(var(--dl-lock) 0 0),
+      linear-gradient(var(--dl-gold) 0 0),
+      linear-gradient(var(--dl-gold) 0 0),
+      linear-gradient(
+        90deg,
+        rgb(4 8 15 / 10%) 0,
+        rgb(4 8 15 / 4%) 50%,
+        rgb(4 8 15 / 58%) 86%,
+        #070d16 100%
+      ),
+      linear-gradient(180deg, rgb(4 8 15 / 36%), transparent 28%, transparent 62%, rgb(4 8 15 / 72%)),
+      url("/deception-world-poster-delivery-720.webp");
+    background-position:
+      100% 0,
+      18px 18px,
+      18px 18px,
+      18px calc(100% - 18px),
+      18px calc(100% - 18px),
+      0 0,
+      0 0,
+      50% 18%;
+    background-size:
+      1px 100%,
+      22px 2px,
+      2px 22px,
+      22px 2px,
+      2px 22px,
+      100% 100%,
+      100% 100%,
+      cover;
+    background-repeat: no-repeat;
+  }
+
+  /* The slip's foot spans both panels. */
+  .export-page > :nth-child(8) {
+    grid-column: art-start / slip-end;
+    grid-row: 10;
+  }
+
+  /* No art band on top of the slip now: the card is flat ink. */
+  .export-page::after {
+    background:
+      var(--dl-prism) top / 100% 2px no-repeat,
+      linear-gradient(var(--dl-lock) 0 0) 0 0 / 22px 2px,
+      linear-gradient(var(--dl-lock) 0 0) 0 0 / 2px 22px,
+      linear-gradient(var(--dl-lock) 0 0) 100% 0 / 22px 2px,
+      linear-gradient(var(--dl-lock) 0 0) 100% 0 / 2px 22px,
+      linear-gradient(var(--dl-gold) 0 0) 0 100% / 22px 2px,
+      linear-gradient(var(--dl-gold) 0 0) 0 100% / 2px 22px,
+      linear-gradient(var(--dl-gold) 0 0) 100% 100% / 22px 2px,
+      linear-gradient(var(--dl-gold) 0 0) 100% 100% / 2px 22px,
+      linear-gradient(172deg, rgb(244 251 255 / 7%) 0, rgb(122 232 255 / 3%) 6%, transparent 24%),
+      #070d16;
+    background-repeat: no-repeat;
+  }
+
+  /* The sigil heads the slip instead of straddling the art's edge. */
+  .export-page-sigil {
+    width: 72px;
+    height: 72px;
+    margin-top: 0;
+  }
+
+  .export-page-sigil > i {
+    font-size: 20px;
+  }
+
+  .export-page h1 {
+    font-size: clamp(36px, 3vw + 14px, 52px);
+  }
+
+  .export-page small {
+    max-width: 22em;
+  }
+}
+
+/* Wider desktops: a taller, wider panel. */
+@media (min-width: 1280px) and (min-height: 700px) {
+  .export-page {
+    grid-template-columns: [art-start] 440px [art-end slip-start] 480px [slip-end];
+  }
+}
+
+/* iPad portrait: one column, but the slip takes the width it is given. */
+@media (min-width: 700px) and (max-width: 959px) {
+  .export-page {
+    grid-template-columns: min(100%, 520px);
+  }
+}
+
+/* ================================================================
    Reduced transparency and forced colours
    ================================================================ */
 @media (prefers-reduced-transparency: reduce) {
@@ -603,6 +743,14 @@ html[data-world-effects="economy"] .export-page h1 {
   }
   .export-page::before {
     display: none;
+  }
+  /* The wide layout keeps its art column as an empty Canvas panel. */
+  @media (min-width: 960px) and (min-height: 600px) {
+    .export-page::before {
+      display: block;
+      background: Canvas;
+      border-right: 1px solid CanvasText;
+    }
   }
   .export-page::after {
     background: Canvas;

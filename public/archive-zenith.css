@@ -1,0 +1,406 @@
+/* ================================================================
+   Form Archive — the Zenith brush-up (2026-10-21)
+
+   Linked last in both standalone documents (after archive-profile.css),
+   scoped to the same root and answering the earlier layers' !important.
+   It changes no markup, no script and no word: the chips, radios,
+   labels, dialogs and controls are the documents' own and stay in their
+   order; the document stays the only page scroller.
+
+   1. Tablets (621–900px): the form index becomes one card grid. The
+      six tier plates stood in three columns at unequal heights, so a
+      two-form tier left a dark void under its cards. Now each tier
+      heads a row of its own cards and the rows pack; the empty plates
+      are gone.
+   2. The rail (901px and up): a tier's odd last card (S-05, ULTRA, the
+      one-form Realm tiers) spans both columns as a wide portrait
+      instead of leaving a dead cell.
+   3. The lightbox: a HUD plate — a FORM VISUAL label over the name, a
+      halo in the form's own light behind the art, a one-shot settle on
+      open.
+   4. The search's empty state, the phone dock and the tablet analyzer
+      (a VS mark between the two legends) in the same grammar.
+   5. Micro-interactions: cards, buttons and nav answer the pointer
+      (a lift of light, a press), each once, only with
+      prefers-reduced-motion: no-preference and a fine pointer. Nothing
+      loops.
+   ================================================================ */
+
+/* ================================================================
+   1. Tablets: one card grid; each tier opens its row with a head plate.
+   ================================================================ */
+@media (min-width: 621px) and (max-width: 900px) {
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="form-selector"] .progression {
+    --zn-card-h: 148px;
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)) !important;
+    grid-auto-flow: row !important;
+    grid-auto-rows: var(--zn-card-h) !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+    width: auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 2px !important;
+    overflow: visible !important;
+    scroll-snap-type: none !important;
+  }
+
+  @media (min-width: 768px) {
+    html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="form-selector"] .progression {
+      --zn-card-h: 160px;
+      grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)) !important;
+    }
+  }
+
+  /* The tier box and its card box dissolve: the head and the cards
+     join the grid directly, in document order. */
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="form-selector"] .progression .stage,
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="form-selector"] .progression .stage .stage-forms {
+    display: contents !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="form-selector"] .progression .stage::before,
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="form-selector"] .progression .stage::after,
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="form-selector"] .progression::before,
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="form-selector"] .progression::after {
+    display: none !important;
+  }
+
+  /* A tier's head: a plate the size of a card that opens the tier's
+     row — the index in ice at the top, the name set large, the count at
+     the foot, a lit left edge. */
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="form-selector"] .progression .stage .stage-head {
+    grid-column: 1 / span 1 !important;
+    display: grid !important;
+    grid-template-rows: auto minmax(0, 1fr) auto !important;
+    align-content: stretch !important;
+    align-items: start !important;
+    justify-items: start !important;
+    gap: 0 !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 9px 8px 9px 11px !important;
+    border: 0 !important;
+    border-radius: 3px !important;
+    background:
+      linear-gradient(180deg, rgb(122 232 255 / 100%) 0 24%, rgb(164 139 255 / 100%) 50%, rgb(240 207 134 / 100%) 76%, rgb(240 207 134 / 0%)) 0 0 / 2px 100% no-repeat,
+      linear-gradient(90deg, rgb(122 232 255 / 10%), rgb(122 232 255 / 0%) 70%),
+      var(--aa-sheen, none),
+      var(--aa-card, #060c15) !important;
+    box-shadow: var(--aa-bevel-soft, inset 0 1px 0 rgb(255 255 255 / 8%)), inset 0 0 0 1px rgb(122 232 255 / 10%) !important;
+    text-align: left !important;
+  }
+
+  /* The tier that holds the selected form lights its plate. */
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="form-selector"] .progression .stage:has(.form-chip.is-selected) .stage-head {
+    background:
+      linear-gradient(180deg, rgb(122 232 255 / 100%) 0 24%, rgb(164 139 255 / 100%) 50%, rgb(240 207 134 / 100%) 76%, rgb(240 207 134 / 0%)) 0 0 / 2px 100% no-repeat,
+      linear-gradient(90deg, rgb(122 232 255 / 20%), rgb(122 232 255 / 2%) 70%),
+      var(--aa-sheen, none),
+      #0d2230 !important;
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 14%), inset 0 0 0 1px rgb(122 232 255 / 34%) !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="form-selector"] .progression .stage .stage-index {
+    grid-row: 1 !important;
+    flex: none !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    color: var(--ar-ice, #7ae8ff) !important;
+    font-size: 12px !important;
+    line-height: 1.3 !important;
+    letter-spacing: 0.12em !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="form-selector"] .progression .stage .stage-label {
+    grid-row: 2 !important;
+    align-self: center !important;
+    flex: none !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    color: #fff !important;
+    font-size: 17px !important;
+    font-weight: 700 !important;
+    line-height: 1.25 !important;
+    letter-spacing: 0.04em !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="form-selector"] .progression .stage .stage-meta {
+    grid-row: 3 !important;
+    align-self: end !important;
+    flex: none !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    color: var(--ar-text-3, #8fa6ba) !important;
+    font-size: 12px !important;
+    line-height: 1.35 !important;
+    letter-spacing: 0.06em !important;
+    text-align: left !important;
+    text-overflow: clip !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere;
+  }
+
+  /* The cards: portraits the height of the row. */
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="form-selector"] .progression .form-chip {
+    scroll-margin-block: 16px;
+    width: auto !important;
+    height: var(--zn-card-h) !important;
+    min-height: 0 !important;
+    min-width: 0 !important;
+  }
+}
+
+/* ================================================================
+   2. The rail: a tier's odd last card spans the row.
+   ================================================================ */
+@media (min-width: 901px) {
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="form-selector"] .progression .stage .stage-forms > .form-chip:nth-child(odd):last-child {
+    grid-column: 1 / -1 !important;
+  }
+
+  /* A wide card shows the figure's head and shoulders, not its crown. */
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="form-selector"] .progression .stage .stage-forms > .form-chip:nth-child(odd):last-child:not(.is-selected) {
+    background-position: 0 0, 0 0, 50% 16%, 0 0 !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="form-selector"] .progression .stage .stage-forms > .form-chip:nth-child(odd):last-child.is-selected {
+    background-position: 0 0, 0 0, 50% 16% !important;
+  }
+}
+
+/* ================================================================
+   3. The lightbox: a HUD plate. The bar carries a FORM VISUAL label
+   over the form's name; the art stands in a halo of the form's own
+   light inside a wider reticle. (The document's own 380ms open motion
+   stays; nothing here moves.)
+   ================================================================ */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .lightbox-bar {
+  align-items: center !important;
+  gap: 14px !important;
+  min-height: 0 !important;
+  padding: 10px 10px 10px 16px !important;
+  background:
+    var(--ar-prism) 0 100% / 100% 1px no-repeat,
+    linear-gradient(90deg, rgb(var(--active-rgb, 122 232 255) / 14%), rgb(var(--active-rgb, 122 232 255) / 0%) 60%),
+    #03060c !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .image-lightbox .lightbox-bar strong {
+  display: grid !important;
+  gap: 3px !important;
+  color: #fff !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  line-height: 1.35 !important;
+  letter-spacing: 0.02em !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .image-lightbox .lightbox-bar strong::before {
+  content: "FORM VISUAL // EXPANDED";
+  display: block;
+  color: var(--ar-ice, #7ae8ff);
+  font-family: var(--ar-hud, "Michroma", sans-serif);
+  font-size: 12px;
+  font-synthesis: none;
+  font-weight: 400;
+  line-height: 1.3;
+  letter-spacing: 0.14em;
+  white-space: normal;
+}
+
+/* Phones: the label alone, so the bar keeps to two lines beside the close. */
+@media (max-width: 480px) {
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .image-lightbox .lightbox-bar strong::before {
+    content: "FORM VISUAL";
+  }
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .lightbox-close {
+  border-radius: 3px !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .lightbox-image-wrap {
+  --zn-arm: 28px;
+  padding: 24px !important;
+  background:
+    linear-gradient(var(--ar-lock, #a8eeff) 0 0) 10px 10px / var(--zn-arm) 2px,
+    linear-gradient(var(--ar-lock, #a8eeff) 0 0) 10px 10px / 2px var(--zn-arm),
+    linear-gradient(var(--ar-lock, #a8eeff) 0 0) calc(100% - 10px) 10px / var(--zn-arm) 2px,
+    linear-gradient(var(--ar-lock, #a8eeff) 0 0) calc(100% - 10px) 10px / 2px var(--zn-arm),
+    linear-gradient(var(--ar-gold, #f0cf86) 0 0) 10px calc(100% - 10px) / var(--zn-arm) 2px,
+    linear-gradient(var(--ar-gold, #f0cf86) 0 0) 10px calc(100% - 10px) / 2px var(--zn-arm),
+    linear-gradient(var(--ar-gold, #f0cf86) 0 0) calc(100% - 10px) calc(100% - 10px) / var(--zn-arm) 2px,
+    linear-gradient(var(--ar-gold, #f0cf86) 0 0) calc(100% - 10px) calc(100% - 10px) / 2px var(--zn-arm),
+    radial-gradient(ellipse 46% 42% at 50% 56%, rgb(var(--active-rgb, 122 232 255) / 26%), transparent 70%),
+    radial-gradient(ellipse 70% 30% at 50% 100%, rgb(var(--active-rgb, 122 232 255) / 16%), transparent 70%),
+    repeating-linear-gradient(90deg, rgb(122 232 255 / 3%) 0 1px, transparent 1px 48px),
+    repeating-linear-gradient(0deg, rgb(122 232 255 / 3%) 0 1px, transparent 1px 48px),
+    #04080f !important;
+  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, repeat, repeat, no-repeat !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .lightbox-image {
+  box-shadow:
+    0 0 0 1px rgb(255 255 255 / 8%),
+    0 24px 60px -24px rgb(var(--active-rgb, 122 232 255) / 60%),
+    0 40px 90px -30px rgb(0 0 0 / 90%) !important;
+}
+
+/* ================================================================
+   4. The search's empty state, the phone dock, the tablet analyzer.
+   ================================================================ */
+/* No match: a bracketed plate with a HUD line over the note; the reset
+   is the console's one lit action. */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .selector-empty {
+  position: relative;
+  gap: 10px !important;
+  padding: 24px 16px 22px !important;
+  border-color: rgb(122 232 255 / 16%) !important;
+  border-radius: 3px !important;
+  background:
+    linear-gradient(var(--ar-lock, #a8eeff) 0 0) 6px 6px / 18px 2px no-repeat,
+    linear-gradient(var(--ar-lock, #a8eeff) 0 0) 6px 6px / 2px 18px no-repeat,
+    linear-gradient(var(--ar-lock, #a8eeff) 0 0) calc(100% - 6px) 6px / 18px 2px no-repeat,
+    linear-gradient(var(--ar-lock, #a8eeff) 0 0) calc(100% - 6px) 6px / 2px 18px no-repeat,
+    linear-gradient(var(--ar-gold, #f0cf86) 0 0) 6px calc(100% - 6px) / 18px 2px no-repeat,
+    linear-gradient(var(--ar-gold, #f0cf86) 0 0) 6px calc(100% - 6px) / 2px 18px no-repeat,
+    linear-gradient(var(--ar-gold, #f0cf86) 0 0) calc(100% - 6px) calc(100% - 6px) / 18px 2px no-repeat,
+    linear-gradient(var(--ar-gold, #f0cf86) 0 0) calc(100% - 6px) calc(100% - 6px) / 2px 18px no-repeat,
+    radial-gradient(ellipse 60% 70% at 50% 100%, rgb(122 232 255 / 8%), transparent 70%),
+    #070d16 !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .selector-empty::before {
+  content: "NO RECORD // CLEAR THE FILTER";
+  color: var(--ar-ice, #7ae8ff);
+  font-family: var(--ar-hud, "Michroma", sans-serif);
+  font-size: 12px;
+  font-synthesis: none;
+  font-weight: 400;
+  line-height: 1.3;
+  letter-spacing: 0.14em;
+  text-align: center;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .selector-empty-reset {
+  border-color: transparent !important;
+  border-radius: 3px !important;
+  background:
+    linear-gradient(var(--aa-gold, #f0cf86) 0 0) 0 100% / 12px 2px no-repeat,
+    linear-gradient(118deg, transparent 38%, rgb(255 255 255 / 30%) 50%, transparent 62%),
+    linear-gradient(180deg, #effcff, #9eeeff 60%, #6fd6f2) !important;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 80%),
+    inset 0 -1px 0 rgb(0 40 60 / 30%),
+    0 0 0 1px rgb(122 232 255 / 60%),
+    0 0 18px -4px rgb(122 232 255 / 55%) !important;
+  color: #04121c !important;
+}
+
+/* The phone dock's current plate rings in the selected form's light. */
+@media (max-width: 620px) {
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .mobile-dock .dock-current {
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 26%),
+      inset 0 -1px 0 rgb(0 0 0 / 60%),
+      0 0 0 1px rgb(var(--active-rgb, 122 232 255) / 72%),
+      0 0 16px -2px rgb(var(--active-rgb, 122 232 255) / 45%) !important;
+  }
+}
+
+/* The tablet analyzer: a VS mark between the two channel legends (the
+   desktop spine and mark live in the deck sheet from 901px). */
+@media (min-width: 621px) and (max-width: 900px) {
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .compare-layout {
+    position: relative !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .compare-layout::after {
+    content: "VS";
+    position: absolute;
+    z-index: 4;
+    top: 14px;
+    left: 50%;
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    translate: -50% 0;
+    background:
+      linear-gradient(118deg, transparent 38%, rgb(255 255 255 / 30%) 50%, transparent 62%),
+      linear-gradient(135deg, #c6f5ff, var(--aa-ice, #7ae8ff) 40%, var(--aa-violet, #a48bff));
+    clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+    color: #02050a;
+    font: 700 13px/1 "Oxanium", var(--ar-mono, monospace);
+    font-synthesis: none;
+    letter-spacing: 0.04em;
+    pointer-events: none;
+  }
+}
+
+/* ================================================================
+   5. Micro-interactions: light answers the pointer once; a press sinks
+   a pixel. Fine pointers only for the transitions; the press for all.
+   The analyzer's compared rows are not in this list: they never move.
+   ================================================================ */
+@media (prefers-reduced-motion: no-preference) and (any-pointer: fine) {
+  html[data-embedded-archive]:not([data-world-effects="economy"]) :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)
+    :is(.form-chip, .hero-action, .detail-nav button, .selector-collapse, .compare-swap, .mobile-dock button, .archive-footer a, .lightbox-close, .selector-empty-reset, .archive-nav a, .search-clear, .selector-sheet-close, .archive-sort, .art-trigger) {
+    transition:
+      box-shadow 180ms ease,
+      background-color 180ms ease,
+      color 180ms ease,
+      border-color 180ms ease,
+      translate 120ms ease;
+  }
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)
+  :is(.hero-action, .detail-nav button, .selector-collapse, .compare-swap, .mobile-dock button, .archive-footer a, .lightbox-close, .selector-empty-reset, .search-clear, .selector-sheet-close, .archive-sort):active {
+  translate: 0 1px;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .form-chip:not(.is-selected):active {
+  translate: 0 1px;
+  box-shadow: inset 0 0 0 1px rgb(122 232 255 / 70%), inset 0 2px 10px rgb(0 0 0 / 50%) !important;
+}
+
+/* ================================================================
+   Forced colours: the dividers keep a system rule.
+   ================================================================ */
+@media (forced-colors: active) and (min-width: 621px) and (max-width: 900px) {
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="form-selector"] .progression .stage .stage-head {
+    border-bottom: 1px solid CanvasText !important;
+    background: none !important;
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .compare-layout::after {
+    forced-color-adjust: none;
+    background: CanvasText;
+    color: Canvas;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) :is(.selector-empty, .lightbox-image-wrap, .selector-empty-reset) {
+    border: 1px solid CanvasText !important;
+    background: Canvas !important;
+    box-shadow: none !important;
+    color: CanvasText !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .selector-empty::before,
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .image-lightbox .lightbox-bar strong::before {
+    color: CanvasText;
+  }
+}

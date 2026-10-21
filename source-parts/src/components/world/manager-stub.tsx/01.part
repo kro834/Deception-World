@@ -334,8 +334,11 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
                 alt=""
                 style={{ objectPosition: rider.pos }}
                 decoding="async"
-                loading={isRexonance ? "eager" : "lazy"}
-                fetchPriority={isRexonance ? "high" : "auto"}
+                // The record's own figure waits like every other: the gate's
+                // warm-up (open) fetches the Rexonance file at high priority
+                // when the record is asked for, not against the hero at load.
+                loading="lazy"
+                fetchPriority="auto"
               />
               <figcaption>
                 <span>FORM VISUAL</span>
@@ -421,5 +424,3 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
               {extraForms.length > 1 ? (
                 <div className="form-pickup-gallery">
                   {extraForms.map((f) => (
-                    <figure key={`${f.name}-${f.sub ?? ""}`} data-form-theme={f.theme}>
-                      <img

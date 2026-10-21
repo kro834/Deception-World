@@ -1,3 +1,5 @@
+                    <figure key={`${f.name}-${f.sub ?? ""}`} data-form-theme={f.theme}>
+                      <img
                         src={f.img}
                         {...dossierImage(f.img)}
                         alt=""
@@ -35,6 +37,7 @@
                     <div>
                       <img
                         src={weapon.img}
+                        {...dossierImage(weapon.img)}
                         alt={`${weapon.name}の武装ビジュアル`}
                         style={{ objectPosition: weapon.pos ?? "50% 50%" }}
                         decoding="async"
@@ -422,4 +425,3 @@ export const REX_LOI: Profile = {
     ],
     arsenal: [
       {
-        name: "サーパスアタノール",

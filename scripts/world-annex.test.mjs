@@ -51,7 +51,8 @@ test("world-home preserves its layout and copy outside explicitly approved edits
     // preserving the related-person cards as a distinct labelled group.
     // Owner supplied Varg's artwork: responsive, uncropped, distinct from Dante.
     // Owner: Dogs is the fourth tab; Related remains the third tab.
-    markup: "b110e6afc56af6f5d109a28e7a6cabf97c80412d733ac9718a5f6ddbd42349ae",
+    // Owner (2026-10-21): the hero gains an aria-hidden light layer (.zn-hero-light: two streamline trails and a bloom, styles-world-zenith.css); copy and records unchanged.
+    markup: "e7ff13e9e76c3d5509faf771c66c8cc1a95b25d4c3d6ad70c65a4abd6e339396",
   });
   // The WorldAnnexRiders hook stays where it was (this file is pinned), but
   // renders nothing: 02 RIDERS and 03 RECORDS sit back to back, and the

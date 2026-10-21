@@ -133,6 +133,17 @@ main.form-archive-page[data-archive-kind]::before {
   }
 }
 
+/* The label names the linked archive. */
+@media (min-width: 700px) {
+  main.form-archive-page[data-archive-kind="saga"] .form-archive-toolbar::before {
+    content: "FORM INTERFACE // SAGA LINKED";
+  }
+
+  main.form-archive-page[data-archive-kind="realm"] .form-archive-toolbar::before {
+    content: "FORM INTERFACE // REALM LINKED";
+  }
+}
+
 /* ================================================================
    Switcher: square ink plates. The shell, the lens and the tabs keep
    their boxes; the stadium becomes a 6px plate and the lens a raised
@@ -324,10 +335,25 @@ html body .form-archive-page .form-archive-menu-trigger::before {
   letter-spacing: 0.24em;
 }
 
-/* The seam under the status, fading at both ends. */
+/* The second line: the index being linked, 12px HUD in the quiet grey. */
+.form-archive-page .form-archive-frame-status small {
+  margin-top: -4px;
+  color: var(--fa-text-3);
+  font-family: var(--fa-hud);
+  font-size: 12px;
+  font-synthesis: none;
+  font-weight: 400;
+  line-height: 1.4;
+  letter-spacing: 0.16em;
+}
+
+/* The seam under the status, fading at both ends. It draws once from
+   the centre as the cover comes up (the one motion here besides the
+   reticle's lock), then holds. */
 .form-archive-page .form-archive-frame-status::after {
   content: "";
-  width: 120px;
+  order: 1;
+  width: 160px;
   height: 1px;
   background: linear-gradient(
     90deg,
@@ -338,6 +364,30 @@ html body .form-archive-page .form-archive-menu-trigger::before {
     #f0cf86 84%,
     transparent
   );
+}
+
+.form-archive-page .form-archive-frame-status small {
+  order: 2;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"])
+    .form-archive-page
+    .form-archive-frame-status:not(.is-loaded)::after {
+    animation: fa-cover-seam 720ms cubic-bezier(0.16, 0.82, 0.22, 1) 200ms both;
+  }
+}
+
+@keyframes fa-cover-seam {
+  from {
+    opacity: 0;
+    scale: 0 1;
+  }
+
+  to {
+    opacity: 1;
+    scale: 1 1;
+  }
 }
 
 @media (prefers-reduced-motion: no-preference) {

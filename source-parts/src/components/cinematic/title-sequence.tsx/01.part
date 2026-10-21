@@ -203,8 +203,9 @@ const CinematicDepthField = memo(function CinematicDepthField() {
 });
 
 // The cinema light (styles-opening-cinema.css): the pre-roll strike, the halo
-// and the god rays behind the title, the two anamorphic streaks over it and
-// the frame rails. Textless ornament; every boot is finite and gated there.
+// and the god rays behind the title, the two streamline trails that race
+// through with the trace, the two anamorphic streaks over it and the frame
+// rails. Textless ornament; every boot is finite and gated there.
 const CinematicLight = memo(function CinematicLight() {
   return (
     <>
@@ -212,6 +213,8 @@ const CinematicLight = memo(function CinematicLight() {
         <i className="cine-strike" />
         <i className="cine-halo" />
         <i className="cine-rays" />
+        <i className="cine-trail cine-trail-a" />
+        <i className="cine-trail cine-trail-b" />
       </div>
       <div className="cine-cinema cine-cinema-front" aria-hidden="true">
         <i className="cine-streak cine-streak-a" />

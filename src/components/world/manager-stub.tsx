@@ -334,8 +334,11 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
                 alt=""
                 style={{ objectPosition: rider.pos }}
                 decoding="async"
-                loading={isRexonance ? "eager" : "lazy"}
-                fetchPriority={isRexonance ? "high" : "auto"}
+                // The record's own figure waits like every other: the gate's
+                // warm-up (open) fetches the Rexonance file at high priority
+                // when the record is asked for, not against the hero at load.
+                loading="lazy"
+                fetchPriority="auto"
               />
               <figcaption>
                 <span>FORM VISUAL</span>
@@ -460,6 +463,7 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
                     <div>
                       <img
                         src={weapon.img}
+                        {...dossierImage(weapon.img)}
                         alt={`${weapon.name}の武装ビジュアル`}
                         style={{ objectPosition: weapon.pos ?? "50% 50%" }}
                         decoding="async"

@@ -102,8 +102,10 @@ test("Rexonance opens through an isolated cyan-pink spiral gate", () => {
   assert.match(pickup, /createPortal\(/);
   assert.match(pickup, /if \(gatePending\.current\) return/);
   assert.match(pickup, /aria-busy=\{gateActive\}/);
-  assert.match(pickup, /fetchPriority=\{isRexonance \? "high" : "auto"\}/);
-  assert.match(pickup, /loading=\{isRexonance \? "eager" : "lazy"\}/);
+  // Owner (2026-10-21): the closed record's figure no longer preloads the 382 KB file at high priority against the hero; the gate's warm-up fetches it on open.
+  assert.doesNotMatch(pickup, /fetchPriority=\{isRexonance \? "high" : "auto"\}/);
+  assert.doesNotMatch(pickup, /loading=\{isRexonance \? "eager" : "lazy"\}/);
+  assert.match(pickup, /preload\.fetchPriority = "high"/);
   assert.match(pickup, /rexonance-gate-spiral is-cyan/);
   assert.match(pickup, /rexonance-gate-spiral is-pink/);
   assert.match(pickup, /rexonance-gate-stars/);
