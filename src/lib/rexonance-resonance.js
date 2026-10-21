@@ -1466,10 +1466,15 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   let lastProgress = -1;
   let calmTimer = 0;
   const hud = {
+    progress: -1,
+    form: "",
+    formReady: false,
     line: -1,
     chips: "",
     parts: -1,
     percent: "",
+    landedCount: -1,
+    totalFormatted: "",
     count: "",
     complete: null,
     phase: "",
@@ -1627,7 +1632,9 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         .then((image) =>
           image.decode
             ? boundedImage(
-                image.decode().then(() => image),
+                Promise.resolve()
+                  .then(() => image.decode())
+                  .then(() => image),
                 image,
                 500,
               )
@@ -1637,7 +1644,12 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         // (tens of ms on a slow phone); a bitmap arrives decoded.
         .then((image) =>
           !disposed && !failed && typeof environment.createImageBitmap === "function"
-            ? boundedImage(environment.createImageBitmap(image), image, 500, true)
+            ? boundedImage(
+                Promise.resolve().then(() => environment.createImageBitmap(image)),
+                image,
+                500,
+                true,
+              )
             : image,
         )
         .then((image) => {
@@ -3404,6 +3416,12 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     } else if (element.hasAttribute(name)) element.removeAttribute(name);
   };
   const updateHud = (progress) => {
+    const form = runway.dataset.form || "standard";
+    const formReady = form === "standard" || Boolean(formsState?.[form]);
+    if (progress === hud.progress && form === hud.form && formReady === hud.formReady) return;
+    hud.progress = progress;
+    hud.form = form;
+    hud.formReady = formReady;
     const B = ASSEMBLY_BEATS;
     const line =
       progress < B.scan[1]
@@ -3422,7 +3440,15 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     // only at the beat's end, the frame the line was dimmed). DEUS！ also
     // lights as each group lands, if that is sooner.
     const chantLit = (beat) => Math.min(4, Math.floor(span(progress, beat) * 5));
-    const deusDone = plan.partDone.slice(0, 4).filter((done) => progress >= done).length;
+    let deusDone = 0;
+    let landed = 0;
+    for (let i = 0; i < plan.partDone.length; i += 1) {
+      const done = plan.partDone[i];
+      if (done && progress >= done) {
+        landed += 1;
+        if (i < 4) deusDone += 1;
+      }
+    }
     const deusLit = Math.min(4, Math.max(deusDone, chantLit(B.deus)));
     const rexonanceLit = chantLit(B.rexonance);
     const chips = `${deusLit}:${rexonanceLit}`;
@@ -3445,7 +3471,6 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         );
       });
     }
-    const landed = plan.partDone.filter((done) => done && progress >= done).length;
     if (landed !== hud.parts) {
       hud.parts = landed;
       parts.forEach((part, index) =>
@@ -3460,18 +3485,24 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       // chips (they stayed dark until the lock). One write per percent.
       runway.style?.setProperty?.("--rzn-glow", (Number(share) / 100).toFixed(2));
     }
-    const count = `${grouped(landedBy(progress))} / ${grouped(plan.tiles.length)}`;
-    if (counter && count !== hud.count) {
-      hud.count = count;
-      writeText(counter, count);
+    if (counter) {
+      const landedCount = landedBy(progress);
+      if (landedCount !== hud.landedCount) {
+        hud.landedCount = landedCount;
+        if (!hud.totalFormatted) hud.totalFormatted = grouped(plan.tiles.length);
+        const count = `${grouped(landedCount)} / ${hud.totalFormatted}`;
+        if (count !== hud.count) {
+          hud.count = count;
+          writeText(counter, count);
+        }
+      }
     }
     const complete = progress >= B.complete;
     if (complete !== hud.complete) {
       hud.complete = complete;
       setFlag(runway, "data-rzn-complete", complete);
     }
-    const form = runway.dataset.form || "standard";
-    const state = assemblyPhase(progress, form, form === "standard" || Boolean(formsState?.[form]));
+    const state = assemblyPhase(progress, form, formReady);
     if (state.phase !== hud.phase) {
       hud.phase = state.phase;
       runway.dataset.rznPhase = state.phase;
@@ -3487,8 +3518,10 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   // a form other than Rexonance is chosen (null until then).
   let formsState = null;
   let formsLoading = false;
+  let formsRetryAt = 0;
   const formFigures = () => {
-    if (formsState || formsLoading || !config.forms || !images) return formsState;
+    if (formsState || formsLoading || !config.forms || !images || clock() < formsRetryAt)
+      return formsState;
     formsLoading = true;
     Promise.all([
       picture(config.forms.max),
@@ -3557,7 +3590,12 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         lastProgress = -1;
         schedule();
       })
-      .catch(() => undefined);
+      .catch(() => {
+        formsRetryAt = clock() + 1000;
+      })
+      .finally(() => {
+        formsLoading = false;
+      });
     return null;
   };
   const formObserver =
@@ -3582,7 +3620,10 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   let force = false;
   const render = (stamp) => {
     frame = 0;
-    if (disposed || !live || document.hidden || !view) return;
+    if (disposed || !live || document.hidden) return;
+    // ResizeObserver can be delayed across WebKit restoration. The first
+    // animation frame may establish geometry without waiting indefinitely.
+    if (!view && !measure()) return;
     const progress = readProgress();
     if (pendingSize) {
       const [width, height] = pendingSize;
@@ -3605,8 +3646,10 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         progress < ASSEMBLY_BEATS.light[0] &&
         lastProgress < ASSEMBLY_BEATS.light[0]
       ) {
-        shown = lastProgress + gap * (1 - Math.exp(-dt / (coarse.matches ? 40 : 60)));
-        if (Math.abs(progress - shown) < 0.0004) shown = progress;
+        const tau = fresh ? (coarse.matches ? 24 : 34) : coarse.matches ? 40 : 60;
+        const snap = fresh ? 0.0008 : 0.0004;
+        shown = lastProgress + gap * (1 - Math.exp(-dt / tau));
+        if (Math.abs(progress - shown) < snap) shown = progress;
       }
     }
     force = false;
@@ -3717,10 +3760,15 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     }
     parts.forEach((part) => setFlag(part, "data-on", false));
     Object.assign(hud, {
+      progress: -1,
+      form: "",
+      formReady: false,
       line: -1,
       chips: "",
       parts: -1,
       percent: "",
+      landedCount: -1,
+      totalFormatted: "",
       count: "",
       complete: null,
       phase: "",
@@ -3774,7 +3822,8 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     if (resizeObserver) {
       resizeObserver.observe(canvas);
       resizeObserver.observe(runway);
-    } else if (measure()) schedule();
+    }
+    schedule();
   };
   const goStill = () => {
     cancelPreparation();
@@ -3916,6 +3965,21 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     retryCount = 0;
     loading = null;
     wake();
+  };
+  const onOnline = () => {
+    if (disposed || !pageActive || document.hidden || !motionAllowed()) return;
+    if (live) {
+      formsRetryAt = 0;
+      lastProgress = -1;
+      schedule();
+      return;
+    }
+    if (runway.dataset.rznLoad === "error") {
+      retryCount = 0;
+      loading = null;
+      modulesLoading = null;
+    }
+    if (near || warm || eager) wake();
   };
   const nearObserver =
     typeof environment.IntersectionObserver === "function"
@@ -4065,6 +4129,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   runway.addEventListener?.("rexonance:assembly-retry", retryAssembly);
   environment.addEventListener("pagehide", onPageHide);
   environment.addEventListener("pageshow", onPageShow);
+  environment.addEventListener("online", onOnline);
   environment.addEventListener("resize", observeWarmup);
   nearObserver?.observe(runway);
   observeWarmup();
@@ -4101,6 +4166,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     else runway.dataset.rznLoad = restLoad;
     environment.removeEventListener("pagehide", onPageHide);
     environment.removeEventListener("pageshow", onPageShow);
+    environment.removeEventListener("online", onOnline);
     environment.removeEventListener("resize", observeWarmup);
     images?.figure?.close?.();
     images?.undersuit?.close?.();

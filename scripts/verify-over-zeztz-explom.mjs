@@ -22,8 +22,9 @@ try {
     const dialog = page.locator(".form-pickup-dialog[open]");
     await dialog.waitFor();
     await page.waitForTimeout(1200);
-    for (const text of ["205.9cm（est.）", "110.0kg（est.）", "77.7〜t（est.）", "エクスプロムオーバースマッシュ"])
+    for (const text of ["205.9cm（est.）", "110.0kg（est.）", "77.7〜t（est.）", "炸ける", "エクスプロムスマッシュ", "クリムゾンオブザームロッド", "ベリルオプチカム", "ベリルシグナム", "ロバストクラッシャム", "オーバーゼッツネイキッド", "アメイジングマスキュラー", "オーバーゼッツゲイムライン", "エクスプロムアーム", "エクスプロムレッグ", "エクスプロムカプセム"])
       assert.ok((await dialog.innerText()).includes(text), text);
+    assert.ok(!(await dialog.innerText()).includes("エクスプロムオーバースマッシュ"));
     const image = dialog.locator('img[src="/rider-over-zeztz-explom-20261019-v2.jpeg"]').first();
     await image.evaluate(i => i.decode());
     // Owner's replacement is 904 × 1280; pin its actual dimensions rather than the previous artwork's width.

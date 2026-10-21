@@ -30,7 +30,6 @@ import {
   naniteMaterialLanding,
   sampleFlameBirth,
 } from "@/lib/rexonance-ignition.js";
-import { drawNaniteFirebrand } from "@/lib/rexonance-flame.js";
 import { REXONANCE_SUIT_REVEAL_MS } from "@/lib/rexonance-calls";
 import {
   FIG,
@@ -104,16 +103,14 @@ const [CORE_X, CORE_Y] = REXONANCE_SUIT_MARKS.core;
 const ART_W = REXONANCE_SUIT_ATLAS.width / 2;
 const ART_H = REXONANCE_SUIT_ATLAS.height;
 const RINGS = 8;
-// The wrap and outward explosion finish before material exists. The first
-// boots' growth is compressed to 660–710ms; their pinned fit and audio stay
-// at 710ms, with a readable 60ms flight after material appears at 600ms.
+// Material starts in the explosion at 468ms. Early boot growth
+// starts at 528ms, while all authored final fitting clocks stay pinned.
 const FIRE_BIRTH = NANITE_FIRE_PHASES.materialStart * 2400;
 const FIRE_BIRTH_SPAN = 220;
 const FIRE_SPRAY = 160;
 // Airborne burning material precedes the machine, then cools into it at
-// the very same coordinate. No machine, guide or raw plate precedes 600ms.
+// the very same coordinate. No machine, guide or raw plate precedes 468ms.
 const FIREBRAND_START = NANITE_FIRE_PHASES.burstStart * 2400;
-const FIREBRAND_END = NANITE_FIRE_PHASES.burstEnd * 2400;
 const FIREBRAND_COOL = 45;
 const FIREBRAND_CARRIER = 80;
 const FIREBRANDS = TOUCH ? 8 : 24;
@@ -1101,7 +1098,9 @@ function* layoutSteps(all: Plate[], gold: Cells): Generator<undefined, Layout, u
     L.birth[c] = plate < 0 ? born : Math.min(born, all[plate].fit - 80);
     L.brandStart[c] = FIREBRAND_START + 100 * h2;
     L.sprayMs[c] =
-      plate < 0 ? FIRE_SPRAY : Math.min(FIRE_SPRAY, Math.max(32, (all[plate].fit - L.birth[c]) * 0.45));
+      plate < 0
+        ? FIRE_SPRAY
+        : Math.min(FIRE_SPRAY, Math.max(32, (all[plate].fit - L.birth[c]) * 0.45));
     L.drainMs[c] =
       plate < 0
         ? 120
@@ -2840,16 +2839,6 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
     pose[SPEED] = tl;
     pose[ROLL] = L.chipF0[c] + (FRAMES * th) / TAU;
   };
-  // A burning firebrand first leaves the body. Its endpoint is also the
-  // machine's birth coordinate, so no chip materialises back on the skin.
-  const firebrandPose = (c: number) => {
-    const u = unit(pose[ARG_U]);
-    const travel = L.brandTravel[c] * u * u;
-    const up = L.brandLift[c] * u;
-    const curl = 5 * Math.sin(Math.PI * u) * L.brandSin[c];
-    pose[PX] = L.emitX[c] + L.emitNX[c] * travel - L.emitNY[c] * curl;
-    pose[PY] = L.emitY[c] + L.emitNY[c] * travel + L.emitNX[c] * curl - up;
-  };
   // The inherited firebrand opens into a two-turn material helix. Its
   // radius grows from zero at the same airborne point, then contracts
   // into the shared current with zero added position or velocity at joins.
@@ -3186,53 +3175,15 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
     }
     flight.stroke();
   };
-  // Fire travels first; the machine inherits its airborne point. Rendered
-  // after the broad front field so the short causal handoff remains visible.
-  // Each hero reserves two image draws in the existing frame budget, and
-  // every one cools completely before normal machine transport takes over.
+  // Keep only the short metal handoff above the shared flame field.
   const firebrands = (t: number) => {
-    if (t < FIREBRAND_START || t >= FIRE_BIRTH + FIRE_BIRTH_SPAN + FIREBRAND_CARRIER)
-      return;
+    if (t < FIREBRAND_START || t >= FIRE_BIRTH + FIRE_BIRTH_SPAN + FIREBRAND_CARRIER) return;
     base();
-    // Extinguish detached tongues with the burst; keep the later metal handoff.
-    const fireTail = 1 - smooth(unit((t - (FIREBRAND_END - 40)) / 40));
     for (let c = 0; c < CHIPS; c += FIREBRAND_STRIDE) {
       const age = t - L.birth[c];
-      if (t < L.brandStart[c] || age >= FIREBRAND_CARRIER) continue;
-      if (age < 0) {
-        pose[ARG_U] = (t - L.brandStart[c]) / (FIREBRAND_END - L.brandStart[c]);
-        firebrandPose(c);
-        if (t >= FIREBRAND_END) {
-          // Every launch has ended at 560ms. Residual fire drifts in the
-          // air, never launches again from a body whose bulk fire is gone.
-          // The drift returns to its inherited endpoint at metal birth.
-          const hover = unit((t - FIREBRAND_END) / (L.birth[c] - FIREBRAND_END));
-          const breathe = Math.sin(Math.PI * hover);
-          pose[PX] += 3 * Math.sin(TAU * hover + L.phi[c]) * breathe;
-          pose[PY] -= (2 + Math.sin(L.phi[c])) * breathe;
-        }
-      } else {
-        pose[ARG_T] = t;
-        surfacePose(c);
-        pose[ARG_U] = age / L.sprayMs[c];
-        bornPose(c);
-        if (chipBand[c] > 0) {
-          pose[PX] = chipX[c] / s;
-          pose[PY] = chipY[c] / s;
-        }
-      }
-      pose[SX] = pose[PX] * s;
-      pose[SY] = pose[PY] * s;
-      fenceFade();
-      const power =
-        fireTail *
-        smooth((t - L.brandStart[c]) / 18) *
-        (1 - smooth(age / FIREBRAND_COOL)) *
-        pose[FADE];
-      if (power > 0.01 && draws + 2 <= limit[0]) {
-        draws += 2;
-        drawNaniteFirebrand(flight, pose[PX], pose[PY], power, t / 1000 + L.phi[c], s);
-      }
+      // The connected vortex owns all fire. Airborne endpoints still seed
+      // the nanite spiral, but never carry detached candle-like sprites.
+      if (age < 0 || age >= FIREBRAND_CARRIER) continue;
       if (age >= 0 && chipBand[c] > 0) {
         // The broad surrounding plume would otherwise hide the little
         // metal carrier at the handoff. Bring only its birth interval to
@@ -3800,9 +3751,7 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
     // existing 24-image hero allowance. Machines use rect batches instead;
     // this handoff must not silently increase the low-tier GPU budget.
     heroes =
-      TOUCH &&
-      t >= FIREBRAND_START &&
-      t < FIRE_BIRTH + FIRE_BIRTH_SPAN + FIREBRAND_COOL
+      TOUCH && t >= FIREBRAND_START && t < FIRE_BIRTH + FIRE_BIRTH_SPAN + FIREBRAND_COOL
         ? FIREBRANDS * 2
         : 0;
     linkCount = 0;
@@ -3978,8 +3927,12 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
       const w = (u - 0.46) / 0.22;
       const r = r0 * (1 - smooth(w));
       const cross = Math.cos(psi0) + 0.14 * Math.sin(TAU * w) * (1 - w);
-      pose[PX] = kx + r * (cross * qx + 0.45 * Math.sin(psi0) * nx);
-      pose[PY] = ky + r * (cross * qy + 0.45 * Math.sin(psi0) * ny);
+      // Polarized capture flattens the incoming helix across the socket
+      // before the machine turns face-on and begins its axial insertion.
+      // The ends still meet the flight and alignment poses exactly.
+      const flatten = 0.45 * (1 - 0.7 * smooth(w));
+      pose[PX] = kx + r * (cross * qx + flatten * Math.sin(psi0) * nx);
+      pose[PY] = ky + r * (cross * qy + flatten * Math.sin(psi0) * ny);
       size *= 1 + 0.14 * Math.sin(Math.PI * w);
       frame += spin * (3 * 0.46 + 0.6 * (u - 0.46));
     } else if (!helm && u < 0.8) {
@@ -4028,7 +3981,8 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
       const full = T * (32 / 28) * (0.6 + 0.4 * L.cov[i]);
       size += (full - size) * open;
     }
-    if (u >= 0.86) alpha *= 1 - (u - 0.86) / 0.14;
+    // Eased out as its metal tile eases in: no linear pop at either end.
+    if (u >= 0.86) alpha *= 1 - smooth((u - 0.86) / 0.14);
     pose[SIZE] = size;
     const turn = Math.floor(frame) % FRAMES;
     pose[FRAME] = turn < 0 ? turn + FRAMES : turn;
@@ -4247,7 +4201,7 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
       else chip(pose[FRAME] | 0, tone, u >= 0.9);
       if (u >= 0.86 && fadeCount < fades.length) {
         fades[fadeCount] = i;
-        fadeA[fadeCount] = (u - 0.86) / 0.14;
+        fadeA[fadeCount] = smooth((u - 0.86) / 0.14);
         fadeCount += 1;
       }
       // N9: the beam from the latch to the two tiles nearest lock.
@@ -4617,21 +4571,25 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
       }
     }
   };
-  // Articulated receiver jaws and a short, cooling weld. Drawn in nine
+  // Articulated receiver jaws and a short, cooling weld. Drawn in fifteen
   // line batches regardless of chip count; the dark undercut gives each
   // physical key depth, while the open jaws expose the original art.
   const dockingPass = () => {
     if (!dockCount) return;
     flight.lineCap = "round";
     flight.lineJoin = "round";
-    for (let stage = 0; stage < 3; stage += 1) {
+    for (let stage = 0; stage < 5; stage += 1) {
       for (let pass = 0; pass < 3; pass += 1) {
         flight.beginPath();
         let any = false;
         for (let k = 0; k < dockCount; k += 1) {
           const o = k * 8;
           const since = docks[o + 6];
-          if ((since < 0 ? 0 : since < 12 ? 1 : 2) !== stage || docks[o + 7] < 0.15) continue;
+          if (
+            (since < 0 ? 0 : since < 8 ? 1 : since < 20 ? 2 : since < 32 ? 3 : 4) !== stage ||
+            docks[o + 7] < 0.04
+          )
+            continue;
           const x = docks[o];
           const y = docks[o + 1];
           const nx = docks[o + 2];
@@ -4655,17 +4613,33 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
             // The fusion seam travels toward the last attached neighbour,
             // changing white-hot to gold as it contracts and cools.
             const progress = since < 12 ? since / 12 : 1;
-            flight.moveTo(Math.round(x), Math.round(y));
-            flight.lineTo(Math.round(x - nx * span * progress), Math.round(y - ny * span * progress));
+            const tail = smooth((since - 8) / 36);
+            flight.moveTo(Math.round(x - nx * span * tail), Math.round(y - ny * span * tail));
+            flight.lineTo(
+              Math.round(x - nx * span * progress),
+              Math.round(y - ny * span * progress),
+            );
           } else continue;
           any = true;
         }
         if (!any) continue;
         flight.strokeStyle =
-          pass === 0 ? "#241707" : pass === 1 ? "#e9b356" : stage === 1 ? "#fff9e2" : "#b77b35";
+          pass === 0
+            ? "#241707"
+            : pass === 1
+              ? stage < 2
+                ? "#e9b356"
+                : "#a77a45"
+              : stage === 1
+                ? "#f2ffed"
+                : stage === 2
+                  ? "#ffd179"
+                  : "#9c6331";
         flight.lineWidth =
           pass === 0 ? Math.max(1.7, 2.1 * s) : Math.max(0.65, (pass === 1 ? 0.9 : 1.2) * s);
-        flight.globalAlpha = pass === 0 ? 0.65 : stage === 0 ? 0.48 : stage === 1 ? 0.92 : 0.4;
+        flight.globalAlpha =
+          (pass === 0 ? 0.65 : stage === 0 ? 0.48 : stage === 1 ? 0.92 : 0.64) *
+          (stage < 3 ? 1 : stage === 3 ? 0.48 : 0.14);
         flight.stroke();
       }
     }
@@ -4959,7 +4933,8 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
       const cool = 1 - smooth((t - F) / RECEIVER_COOL);
       const alpha = reveal * cool;
       const jo = p * 6;
-      for (let pass = 0; pass < 3; pass += 1) {
+      for (let pass = 0; pass < 4; pass += 1) {
+        if (pass === 3 && t >= F) continue;
         flight.beginPath();
         for (let key = 0; key < L.receiverN[p]; key += TOUCH ? 2 : 1) {
           const o = (p * RECEIVER_KEYS + key) * 4;
@@ -5013,7 +4988,7 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
               );
               flight.closePath();
             }
-          } else {
+          } else if (pass === 2) {
             // A thin bevel traces the keyed shoulder; light crosses
             // each fastener only as that pair bites, then cools to steel.
             const heat = Math.max(0, 1 - Math.abs(t - catchAt - 24) / 42);
@@ -5050,14 +5025,40 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
               Math.round(x + tx * length - nx * (depth + 1.8 * s)),
               Math.round(y + ty * length - ny * (depth + 1.8 * s)),
             );
+          } else {
+            // A short induction front runs down each real rail toward its
+            // fixed socket. Paired keys share the approach, then lock in
+            // the same stagger as their shutters; no detached HUD frame.
+            const head = smooth((t - F + RAIL_LEAD - rank * 3) / (RAIL_LEAD - 22));
+            const tail = Math.max(0, head - 0.24);
+            for (let side = -1; side <= 1; side += 2) {
+              const dx = tx * side * (width + 1.6 * s);
+              const dy = ty * side * (width + 1.6 * s);
+              flight.moveTo(
+                Math.round(px + (x - px) * tail + dx),
+                Math.round(py + (y - py) * tail + dy),
+              );
+              flight.lineTo(
+                Math.round(px + (x - px) * head + dx),
+                Math.round(py + (y - py) * head + dy),
+              );
+            }
           }
         }
-        flight.globalAlpha = alpha * (pass === 0 ? 0.6 : pass === 1 ? 0.88 : 0.8);
+        flight.globalAlpha =
+          alpha * (pass === 0 ? 0.6 : pass === 1 ? 0.88 : pass === 2 ? 0.8 : 0.54);
         if (pass === 1) {
           flight.fillStyle = "#293843";
           flight.fill();
         } else {
-          flight.strokeStyle = pass === 0 ? "#18242e" : "#c3e4ef";
+          flight.strokeStyle =
+            pass === 0
+              ? "#18242e"
+              : pass === 3 || t < F + 12
+                ? "#c3e4ef"
+                : t < F + 34
+                  ? "#e9b86d"
+                  : "#8d6a44";
           flight.lineWidth = Math.max(0.7, (pass === 0 ? 2.5 : 0.8) * s);
           flight.stroke();
         }

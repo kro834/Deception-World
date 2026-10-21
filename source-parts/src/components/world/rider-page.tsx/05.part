@@ -1,3 +1,12 @@
+          <div className="manager-quotes">
+            {rider.quotes.map((q) => (
+              <q key={q}>{q}</q>
+            ))}
+          </div>
+          <dl className="manager-facts">
+            {rider.facts.map((f) => (
+              <div key={f.dt}>
+                <dt>{f.dt}</dt>
                 <dd>
                   <NameText value={f.dd} seams />
                 </dd>

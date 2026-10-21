@@ -1004,13 +1004,26 @@ const P14Comparator = memo(function P14Comparator({
               <option value="p1">P1比</option>
               <option value="p2">P2比</option>
             </select>
+            <span className="rxs-p14-native-rail" data-value={p14Baseline} aria-hidden="true">
+              <i />
+              <b className="rxs-p14-native-anchor-p1"><i /></b>
+              <b className="rxs-p14-native-anchor-p2"><i /></b>
+            </span>
           </label>
         ) : (
           <div className="rxs-p14-ios-slider" data-value={p14Baseline}>
             <span className="rxs-p14-ios-track" aria-hidden="true">
               <i />
             </span>
-            <span className="rxs-p14-ios-thumb" aria-hidden="true" />
+            <span className="rxs-p14-core-anchor rxs-p14-core-anchor-p1" aria-hidden="true">
+              <i />
+            </span>
+            <span className="rxs-p14-core-anchor rxs-p14-core-anchor-p2" aria-hidden="true">
+              <i />
+            </span>
+            <span className="rxs-p14-ios-thumb" aria-hidden="true">
+              <i />
+            </span>
             <input
               id="rxs-p14-baseline"
               type="range"
@@ -1385,16 +1398,33 @@ export function RexonanceSaga() {
       pendingChapter.current = window.location.hash;
       flushAll();
     };
+    const onScrollIntent = () => {
+      if (!root.hasAttribute("data-loading")) flushAll();
+    };
+    const onKeyScrollIntent = (event: KeyboardEvent) => {
+      if (
+        !root.hasAttribute("data-loading") &&
+        (event.key === "ArrowDown" ||
+          event.key === "PageDown" ||
+          event.key === " " ||
+          event.key === "End")
+      ) {
+        flushAll();
+      }
+    };
     window.addEventListener("hashchange", onHashChange);
+    window.addEventListener("wheel", onScrollIntent, { passive: true });
+    window.addEventListener("touchmove", onScrollIntent, { passive: true });
+    window.addEventListener("keydown", onKeyScrollIntent, { passive: true });
     document.addEventListener("click", onHashClick, true);
     const later = () => {
       if (step === 0) {
         timer = window.setTimeout(() => {
           timer = 0;
-          schedule(advance, 400);
+          schedule(advance, 120);
         }, REXONANCE_ENTRY_TIMINGS.reveal + 80);
       } else {
-        schedule(advance, 32);
+        schedule(advance, 24);
       }
     };
     const observer = new MutationObserver(() => {
@@ -1408,6 +1438,9 @@ export function RexonanceSaga() {
     return () => {
       observer.disconnect();
       window.removeEventListener("hashchange", onHashChange);
+      window.removeEventListener("wheel", onScrollIntent);
+      window.removeEventListener("touchmove", onScrollIntent);
+      window.removeEventListener("keydown", onKeyScrollIntent);
       document.removeEventListener("click", onHashClick, true);
       if (timer) window.clearTimeout(timer);
       cancelStep();
@@ -1900,7 +1933,7 @@ export function RexonanceSaga() {
 
       {step >= 1 ? <RexonancePerformance /> : null}
 
-      {lower ? (
+      {step >= 2 ? (
         <section id="p14" className="rxs-p14 rxs-section" aria-labelledby="rxs-p14-title">
           <header className="rxs-section-heading rxs-reveal">
             <p>PROCESSING CORE / P14</p>
@@ -1974,7 +2007,7 @@ export function RexonanceSaga() {
         </section>
       ) : null}
 
-      {step >= 2 ? (
+      {lower ? (
         <>
           <RexonanceSuitUp stage={stage} />
 

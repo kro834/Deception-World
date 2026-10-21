@@ -2,6 +2,7 @@ export const NANITE_FIRE_PHASES: Readonly<{
   burstStart: number;
   burstEnd: number;
   materialStart: number;
+  flameEnd: number;
 }>;
 export function naniteMaterialLanding(land: number, fit: number): number;
 export const REXONANCE_ENTRY_VORTEX_HOLD_MS: 1000;

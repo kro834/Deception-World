@@ -96,10 +96,14 @@ async function enterRexonance(cycle, covered) {
     );
   } else {
     await settle();
-    // The lower sections (P14 on) render in an idle slot after the reveal.
-    await page.waitForFunction(() => Boolean(document.getElementById("p14")), undefined, {
-      timeout: 30000,
-    });
+    // The lower sections (P14 on) render in idle slots after the reveal.
+    await page.waitForFunction(
+      () => Boolean(document.getElementById("p14") && document.getElementById("stages")),
+      undefined,
+      {
+        timeout: 30000,
+      },
+    );
   }
   await assertClientNavigation(`cycle ${cycle} arrival`);
 }

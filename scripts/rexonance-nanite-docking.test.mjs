@@ -62,11 +62,16 @@ function runtimeFactory() {
       surfaceCurrent(free.emission, j * 4, free.hsh[j], free.birth[j], q);
       return Array.from(RG);
     },
+    __testTileCurrent(i, q) {
+      tileCurrent(i, q);
+      return Array.from(RG);
+    },
     __testPose(i, q) {
       poseTile(i, q, 0);
       const p = PO[i];
       return {
         x: X[0], y: Y[0], size: S[0], alpha: A[0], fire: FIRE[0], frame: FR[0], kind: KIND[0], progress: U[0],
+        depth: Z[0], trailX: TRX[0], trailY: TRY[0], glint: GL[0],
         targetX: p >= 0 ? jigX(p, CX[i], CY[i]) : CX[i],
         targetY: p >= 0 ? jigY(p, CX[i], CY[i]) : CY[i],
       };
@@ -180,7 +185,7 @@ function representativeTiles(nano) {
   return samples;
 }
 
-function createSwarm(nano, gold) {
+function createSwarm(nano, gold, coarse = false) {
   return runtimeFactory()({
     nano,
     size: REXONANCE_SUIT_SIZE,
@@ -189,6 +194,7 @@ function createSwarm(nano, gold) {
     sprites: { cells: null, comets: null, fx: null },
     kit: REXONANCE_NANITES,
     gold,
+    coarse,
     document: null,
   });
 }
@@ -212,14 +218,25 @@ test("every scroll machine uses the shared burning surface and one unquantized b
       const expected = [out[0] * 571, out[1] * 1040, out[2], out[3]];
       for (let k = 0; k < 4; k++)
         close(emission[i * 4 + k], expected[k], 0.0001, `${i}/${k}: same burning source`);
-      assert.ok(births[i] >= 0.08625 - 1e-7 && births[i] <= 0.11325 + 1e-7);
-      bands.add(Math.floor((births[i] - 0.08625) * 1000));
+      assert.ok(births[i] >= 0.070575 - 1e-7 && births[i] <= 0.097575 + 1e-7);
+      bands.add(Math.floor((births[i] - 0.070575) * 1000));
     }
     assert.ok(bands.size >= 20, `${bands.size} continuous release times, not six pumps`);
   }
 });
 
-test("scroll machines wind around a substantial contracting helix in position and projected depth", () => {
+// Owner (2026-10-21): 「レクソナンスの特設ページにて、ナノマシンの挙動…を改善して」.
+// The burst's wide helix no longer contracts into a small per-chip circle at
+// an age-scattered phase (which read as glitter in flat columns): it hands
+// over, in the same turning sense, to a narrower braided current whose phase
+// follows the progress and the body position, never the chip's age.
+const braidFrame = (nx, ny) => {
+  // The body line's tangent, turned down the screen on either side.
+  const flip = nx < 0 ? -1 : 1;
+  return [-ny * flip, nx * flip];
+};
+
+test("scroll machines open a wide helix out of the burst, then braid into a narrower current that keeps turning in depth", () => {
   const { nano, gold } = fixture();
   const swarm = createSwarm(nano, gold);
   const H = REXONANCE_SUIT_SIZE.height;
@@ -228,44 +245,62 @@ test("scroll machines wind around a substantial contracting helix in position an
     const born = nano.free.birth[j],
       seed = nano.free.hsh[j];
     const [sx, sy, nx, ny] = nano.free.emission.slice(j * 4, j * 4 + 4);
-    const normal2 = nx * nx + ny * ny,
-      angles = [],
-      radii = [],
-      depths = [];
-    for (let step = 1; step <= 90; step++) {
-      const age = step / 1000,
-        q = born + age;
-      const [x, y, z] = swarm.__testFreeCurrent(j, q);
+    const [tx, ty] = braidFrame(nx, ny);
+    const normal2 = nx * nx + ny * ny;
+    // De-trend the launch, its lift and its standoff from the body line
+    // (unchanged), leaving the orbit across (normal) and along (tangent).
+    const orbit = (age) => {
+      const [x, y, z] = swarm.__testFreeCurrent(j, born + age);
       const release = smooth(age / 0.012),
         returning = smooth((age - 0.012) / 0.075);
-      // Detonation has finished before these material samples. De-trend its
-      // inherited launch to measure the real current's orbital displacement.
       const thrown = (((80 + 50 * seed) * H) / 1000) * (1 - 0.9 * returning);
       const lift = ((18 + 17 * seed) * H) / 1000;
       const reach = thrown + H * (0.024 + 0.018 * seed) * release;
       const dx = x - sx - nx * reach;
       const dy = y - sy - ny * reach + lift + H * 0.018 * release;
-      const tangent = (-ny * dx + nx * dy) / normal2;
-      const normal = (nx * dx + ny * dy) / normal2 / 0.5;
-      let angle = Math.atan2(normal, tangent);
-      if (angles.length) while (angle < angles.at(-1) - Math.PI) angle += Math.PI * 2;
-      angles.push(angle);
-      radii.push(Math.hypot(tangent, normal));
-      depths.push(z);
-    }
+      return { along: tx * dx + ty * dy, across: (nx * dx + ny * dy) / normal2, z };
+    };
+    const turned = (from, to) => {
+      const angles = [],
+        alongs = [],
+        acrosses = [],
+        depths = [];
+      for (let step = from; step <= to; step++) {
+        const { along, across, z } = orbit(step / 1000);
+        let angle = Math.atan2(across, along);
+        if (angles.length) {
+          while (angle < angles.at(-1) - Math.PI) angle += Math.PI * 2;
+          while (angle > angles.at(-1) + Math.PI) angle -= Math.PI * 2;
+        }
+        angles.push(angle);
+        alongs.push(Math.abs(along));
+        acrosses.push(Math.abs(across));
+        depths.push(z);
+      }
+      return { turns: (angles.at(-1) - angles[0]) / (Math.PI * 2), alongs, acrosses, depths };
+    };
+    // The burst: more than two turns in one sense, wide, through the depth.
+    const burst = turned(1, 90);
+    assert.ok(burst.turns > 2, `${j}: ${burst.turns} turns after emergence`);
+    assert.ok(Math.max(...burst.alongs) > H * 0.035, `${j}: the orbit leaves a straight launch`);
     assert.ok(
-      angles.at(-1) - angles[0] > Math.PI * 4,
-      `${j}: multiple complete orbital turns after emergence`,
-    );
-    assert.ok(Math.max(...radii) > H * 0.035, `${j}: orbit visibly leaves a straight launch path`);
-    assert.ok(
-      radii.at(-1) < Math.max(...radii) * 0.4,
-      `${j}: the orbit contracts towards assembly`,
-    );
-    assert.ok(
-      Math.max(...depths) - Math.min(...depths) > 1.4,
+      Math.max(...burst.depths) - Math.min(...burst.depths) > 1.4,
       `${j}: front/back depth changes with orbit`,
     );
+    // Settled: still turning (a full turn in .0375), narrower along the body
+    // line than the burst, a substantial orbit across it, near and far.
+    const braid = turned(100, 138);
+    assert.ok(braid.turns > 0.95, `${j}: the braid keeps turning (${braid.turns})`);
+    assert.ok(
+      Math.max(...braid.alongs) < 0.4 * Math.max(...burst.alongs),
+      `${j}: the braid is narrower along the body than the burst`,
+    );
+    assert.ok(Math.max(...braid.acrosses) > H * 0.018, `${j}: the braid still orbits its axis`);
+    assert.ok(
+      Math.min(...braid.depths) < -0.9 && Math.max(...braid.depths) > 0.9,
+      `${j}: the braid passes near and far`,
+    );
+    assert.ok(Math.max(...braid.depths) < 0.95, `${j}: the braid stays out of the bokeh band`);
     const reference = swarm.__testFreeCurrent(j, born + 0.04);
     swarm.__testFreeCurrent(j, born + 0.09);
     assert.deepEqual(
@@ -273,6 +308,111 @@ test("scroll machines wind around a substantial contracting helix in position an
       reference,
       "reverse uses the same closed-form current",
     );
+  }
+});
+
+test("neighbouring scroll machines travel together, not in lockstep, whatever their birth", () => {
+  const { nano, gold } = fixture();
+  const swarm = createSwarm(nano, gold);
+  // The braid's strand (two, by the seed), as the engine derives it.
+  const strand = (seed) => Math.floor(((seed * 13.37) % 1) * 2);
+  const sources = [];
+  for (let i = 0; i < nano.count; i++)
+    sources.push({
+      i,
+      x: nano.emission[i * 4],
+      y: nano.emission[i * 4 + 1],
+      nx: nano.emission[i * 4 + 2],
+      strand: strand(nano.hsh[i]),
+    });
+  sources.sort((a, b) => a.y - b.y);
+  let pairs = 0,
+    births = 0,
+    aligned = 0,
+    apart = 0;
+  for (let k = 0; k < sources.length && pairs < 400; k++)
+    for (let m = k + 1; m < sources.length && sources[m].y - sources[k].y < 3; m++) {
+      const a = sources[k],
+        b = sources[m];
+      if (a.nx !== b.nx || a.strand !== b.strand || Math.abs(a.x - b.x) > 3) continue;
+      if (Math.min(nano.T0[a.i], nano.T0[b.i]) <= 0.3) continue;
+      pairs += 1;
+      if (Math.abs(nano.birth[a.i] - nano.birth[b.i]) > 0.008) births += 1;
+      const ha = swarm.__testTileCurrent(a.i, 0.25),
+        hb = swarm.__testTileCurrent(b.i, 0.25);
+      // Their headings (the closed-form derivative) agree…
+      if (ha[3] * hb[3] + ha[4] * hb[4] > Math.cos(0.75)) aligned += 1;
+      // …but the two are never one point moving in lockstep: over a turn
+      // they part by more than a pixel.
+      let gap = 0;
+      for (let q = 0.25; q < 0.2875; q += 0.0025) {
+        const pa = swarm.__testTileCurrent(a.i, q),
+          pb = swarm.__testTileCurrent(b.i, q);
+        gap = Math.max(gap, Math.hypot(pa[0] - pb[0], pa[1] - pb[1]));
+      }
+      if (gap > 1) apart += 1;
+    }
+  assert.ok(pairs >= 60, `${pairs} neighbouring pairs sampled`);
+  assert.ok(births >= pairs / 4, `${births} of the pairs were born well apart`);
+  assert.ok(aligned >= pairs * 0.85, `${aligned}/${pairs} neighbours head the same way`);
+  // (Only a near-collision of two index hashes at one source coincides.)
+  assert.ok(apart >= pairs * 0.98, `${apart}/${pairs} keep their own radius and lag`);
+});
+
+test("settled scroll machines scale with depth and trail their closed-form heading, exactly on reverse", () => {
+  const { nano, gold } = fixture();
+  for (const coarse of [false, true]) {
+    const swarm = createSwarm(nano, gold, coarse);
+    let checked = 0;
+    for (let i = 0; i < nano.count && checked < 40; i += 23) {
+      if (nano.T0[i] < 0.36 || nano.pieces[nano.pieceOf[i]]?.helm) continue;
+      checked += 1;
+      // One full turn of its orbit, settled.
+      let near = null,
+        far = null;
+      for (let step = 0; step < 40; step++) {
+        const q = 0.3 + step * 0.001;
+        swarm.frame(q, 0, true, 1, false);
+        const pose = swarm.__testPose(i, q);
+        assert.equal(pose.kind, 2, "waiting in the current");
+        if (!near || pose.depth > near.depth) near = pose;
+        if (!far || pose.depth < far.depth) far = pose;
+        if (coarse) {
+          assert.ok(Number.isNaN(pose.trailX), "touch draws no trails");
+          continue;
+        }
+        // Its trail lies behind it along the heading the current actually
+        // takes (a later pose minus an earlier one), within its bounds.
+        const back = swarm.__testPose(i, q - 0.0004);
+        const ahead = swarm.__testPose(i, q + 0.0004);
+        swarm.__testPose(i, q);
+        const hx = ahead.x - back.x,
+          hy = ahead.y - back.y;
+        const tx = pose.x - pose.trailX,
+          ty = pose.y - pose.trailY;
+        const length = Math.hypot(tx, ty);
+        if (Number.isNaN(pose.trailX)) continue;
+        assert.ok(length >= 4 - 1e-6 && length <= 22 + 1e-6, `trail length ${length}`);
+        assert.ok(
+          (hx * tx + hy * ty) / (Math.hypot(hx, hy) * length) > 0.97,
+          "trail along the actual heading",
+        );
+      }
+      assert.ok(near.depth > 0.9 && far.depth < -0.9, "a full turn passes near and far");
+      assert.ok(near.size > 2.4 * far.size, `near ${near.size} vs far ${far.size}: larger`);
+      assert.ok(near.alpha > 2.4 * far.alpha, `near ${near.alpha} vs far ${far.alpha}: brighter`);
+    }
+    assert.ok(checked >= 20, `${checked} settled chips sampled`);
+    // Reverse scrubbing and jumps return the identical pose, trail and frame.
+    let i = 0;
+    while (nano.T0[i] < 0.4 || nano.pieces[nano.pieceOf[i]]?.helm) i += 1;
+    swarm.frame(0.31, 0, true, 1, false);
+    const reference = swarm.__testPose(i, 0.31);
+    for (const q of [0.5, 0.2, 0.3105, 0.95, 0.31]) {
+      swarm.frame(q, 0, true, 1, false);
+      swarm.__testPose(i, q);
+    }
+    assert.deepEqual(swarm.__testPose(i, 0.31), reference, `${coarse}: history-free`);
   }
 });
 
@@ -286,7 +426,7 @@ test("scroll fire leaves the surface first, forms metal at its airborne point, a
     const born = nano.birth[i];
     if (nano.T0[i] <= born + 1e-7) continue;
     const fireStart = 0.015 + 0.285 * NANITE_FIRE_PHASES.burstStart;
-    const fireEnd = 0.015 + 0.285 * NANITE_FIRE_PHASES.burstEnd;
+    const fireEnd = Math.min(born, 0.015 + 0.285 * NANITE_FIRE_PHASES.burstEnd);
     swarm.frame(fireStart, 0, true, 1, false);
     const origin = swarm.__testPose(i, fireStart);
     close(origin.x, nano.emission[i * 4], 0.0001, `${i}: prelude start x`);
@@ -360,7 +500,7 @@ test("all real scroll metal passes stay empty before the global material floor, 
   );
   for (const q of [0.2, 0.06, 0.065, 0.075, 0.0815, 0.084, 0.08625 - 1e-7, 0.01, 0.0855]) {
     swarm.frame(q, 0, false, 1, false);
-    if (q >= 0.08625) continue;
+    if (q >= 0.070575) continue;
     assert.equal(swarm.__testMaterials().metal, 0, `${q}: no positive-alpha metal cell`);
     operations = 0;
     swarm.backPass(context);
@@ -379,7 +519,41 @@ test("all real scroll metal passes stay empty before the global material floor, 
   );
 });
 
-test("the explosive scroll prelude contains only bounded alpha-volume fire, never a field of square pseudo-machines", () => {
+test("fine and touch metal draw during the fading fire, including reversed progress", () => {
+  const { nano, gold } = fixture();
+  for (const coarse of [false, true]) {
+    const swarm = createSwarm(nano, gold, coarse);
+    let draws = 0;
+    const noop = () => {};
+    const context = new Proxy(
+      {
+        fillRect() {
+          draws++;
+        },
+        fill() {
+          draws++;
+        },
+        drawImage() {
+          draws++;
+        },
+      },
+      { get: (target, key) => (key in target ? target[key] : noop), set: () => true },
+    );
+    for (const q of [0.0815, 0.084, 0.2, 0.0815]) {
+      swarm.frame(q, 0, false, 1, false);
+      if (q >= 0.08625) continue;
+      assert.ok(swarm.__testMaterials().metal > 0, `${coarse}/${q}: material in flame tail`);
+      draws = 0;
+      swarm.backPass(context);
+      swarm.midPass(context);
+      swarm.frontPass(context);
+      swarm.freePass(context);
+      assert.ok(draws > 0, `${coarse}/${q}: actual batched metal paints before full clearing`);
+    }
+  }
+});
+
+test("the explosive scroll prelude never adds detached flame blobs or square pseudo-machines", () => {
   const { nano, gold } = fixture(),
     swarm = createSwarm(nano, gold);
   let images = [],
@@ -405,22 +579,15 @@ test("the explosive scroll prelude contains only bounded alpha-volume fire, neve
   );
   for (const q of [0.2, 0.065, 0.075, 0.0815, 0.0855, 0.075, 0.065]) {
     swarm.frame(q, 0, false, 1, false);
-    if (q >= 0.08625) continue;
+    if (q >= 0.070575) continue;
     images = [];
     paints = 0;
     swarm.firebrands(context);
     assert.equal(paints, 0, `${q}: no square/facet fallback may mimic early nanomachines`);
     visibleFire += images.length;
-    assert.ok(images.length <= 48, `${q}: at most 24 actual two-frame fire volumes`);
-    assert.ok(
-      images.every((id) => id === "firebrand"),
-      "only the real flame helper is used before metal appears",
-    );
+    assert.equal(images.length, 0, `${q}: the shared vortex owns fire, never detached sprites`);
   }
-  assert.ok(
-    visibleFire > 0,
-    "the later explosion actually renders authored fire instead of silently disabling the pass",
-  );
+  assert.equal(visibleFire, 0, "no floating flame blob on forward or reverse scroll");
 });
 
 test("non-helmet tile pose stays continuous at river, braking, and unfold boundaries", () => {

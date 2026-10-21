@@ -738,11 +738,38 @@
 }
 
 .dream-page.dream-page
+  .dream-dossier-visuals:is([data-plate-focus="primary"], [data-plate-focus="secondary"]) {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.dream-page.dream-page
+  .dream-dossier-visuals:is([data-plate-focus="primary"], [data-plate-focus="secondary"])
+  figure {
+  flex-basis: 100%;
+}
+
+.dream-page.dream-page
   .dream-dossier-visuals:is([data-plate-focus="primary"], [data-plate-focus="secondary"])
   figure
   img {
   max-height: 720px;
   object-fit: contain;
+}
+
+@media (max-width: 760px) {
+  .dream-page.dream-page .dream-dossier-switcher {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .dream-page.dream-page .dream-dossier-switcher::-webkit-scrollbar {
+    display: none;
+  }
+
+  .dream-page.dream-page .dream-dossier-switcher button {
+    flex: none;
+  }
 }
 
 .dream-page.dream-page .dream-profile-meter {

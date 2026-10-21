@@ -495,9 +495,11 @@ async function extrasRuntime({ touch }) {
         return Array.from(pose.subarray(0, 3));
       },
       firebrandAt(c, t) {
-        pose[ARG_U] = (t-L.brandStart[c])/(FIREBRAND_END-L.brandStart[c]);
-        firebrandPose(c);
-        return Array.from(pose.subarray(0,2));
+        const u = unit((t-L.brandStart[c])/(Math.min(NANITE_FIRE_PHASES.burstEnd*2400,L.birth[c])-L.brandStart[c]));
+        const travel = L.brandTravel[c]*u*u;
+        const curl = 5*Math.sin(Math.PI*u)*L.brandSin[c];
+        return [L.emitX[c]+L.emitNX[c]*travel-L.emitNY[c]*curl,
+          L.emitY[c]+L.emitNY[c]*travel+L.emitNX[c]*curl-L.brandLift[c]*u];
       },
       fireHash: hash,
       docking() { return Array.from(docks.subarray(0, dockCount * 8)); },
@@ -1046,6 +1048,93 @@ test("receiver frames follow armour contours and opposed shutters fasten in stag
   L.receiverSlot[p] = savedSlot;
 });
 
+test("real receiver induction fronts advance along their rails, then cool from ice through gold to copper", async () => {
+  const { plan, extras } = await extrasRuntime({ touch: false });
+  const all = plan.plates();
+  const L = extras.rexonanceNaniteLayout();
+  const p = all.findIndex(({ piece }) => piece.id === "shoulder-outer-l");
+  const saved = [...L.receiverN];
+  const savedSlot = L.receiverSlot[p];
+  L.receiverN.fill(0);
+  L.receiverN[p] = 6;
+  L.receiverSlot[p] = 0;
+  const { context } = recorder();
+  const strokes = [];
+  let path = [];
+  context.beginPath = () => {
+    path = [];
+  };
+  context.moveTo = (x, y) => path.push([x, y]);
+  context.lineTo = (x, y) => path.push([x, y]);
+  context.stroke = () =>
+    strokes.push({ color: context.strokeStyle, alpha: context.globalAlpha, path });
+  const ex = extras.createSuitExtras({
+    flight: context,
+    s: 1,
+    ox: 0,
+    oy: 0,
+    all,
+    gold: plan.cells(),
+    source: { kind: "work" },
+    sheet: { kind: "motes" },
+  });
+  try {
+    const inductionAt = (before) => {
+      const t = all[p].fit - before;
+      const pose = ex.platePose(p, t);
+      strokes.length = 0;
+      ex.receiversAt(t);
+      const pulse = strokes.at(-1);
+      assert.equal(
+        pulse.path.length,
+        24,
+        "two bounded induction segments at each of six real keys",
+      );
+      const x = L.receiver[p * 24];
+      const y = L.receiver[p * 24 + 1];
+      const tx = -L.receiver[p * 24 + 3];
+      const ty = L.receiver[p * 24 + 2];
+      const px = pose[0] * x + pose[2] * y + pose[4];
+      const py = pose[1] * x + pose[3] * y + pose[5];
+      const head = pulse.path[1];
+      const dx = x - px;
+      const dy = y - py;
+      const u = ((head[0] + tx * 5 - px) * dx + (head[1] + ty * 5 - py) * dy) / (dx * dx + dy * dy);
+      assert.ok(u > 0 && u < 1.05, "the visible front lies on the actual moving-to-fixed rail");
+      return u;
+    };
+    assert.ok(
+      inductionAt(65) > inductionAt(120) + 0.25,
+      "the front travels toward the fixed socket before locking",
+    );
+    const cooling = [4, 24, 48].map((after) => {
+      strokes.length = 0;
+      const t = all[p].fit + after;
+      ex.platePose(p, t);
+      ex.receiversAt(t);
+      return strokes.at(-1);
+    });
+    assert.deepEqual(
+      cooling.map(({ color }) => color),
+      ["#c3e4ef", "#e9b86d", "#8d6a44"],
+    );
+    assert.ok(
+      cooling[0].alpha > cooling[1].alpha && cooling[1].alpha > cooling[2].alpha,
+      "actual receiver strokes fade throughout cooling",
+    );
+    strokes.length = 0;
+    ex.receiversAt(all[p].fit + 64);
+    assert.equal(
+      strokes.length,
+      0,
+      "no heat or induction remains after the existing cooling window",
+    );
+  } finally {
+    L.receiverN.set(saved);
+    L.receiverSlot[p] = savedSlot;
+  }
+});
+
 // Owner (2026-10-16): 「更にナノマシンの挙動をブラッシュアップして。」 — squads
 // that hop lanes behind a white leader, the core's heartbeat breathing the
 // rings, seat ripples, tile strings behind white pathfinders that lock on
@@ -1162,12 +1251,12 @@ test("the layout preserves bottom-up drains and exact tile timing with one conti
   for (let c = 0; c < chips; c += 1) {
     assert.ok(L.ring[c] >= 0 && L.ring[c] < 8);
     assert.ok(
-      L.birth[c] >= 600 && L.birth[c] <= 820,
-      "born only after the vortex explosion has cleared",
+      L.birth[c] >= 468 && L.birth[c] <= 688,
+      "born in the trailing explosion, with the same bounded release interval",
     );
     assert.ok(
-      ignition.naniteFlameEnvelope(L.birth[c] / 2400) === 0,
-      "the full body fire must be gone before a machine exists",
+      ignition.naniteFlameEnvelope(L.birth[c] / 2400) <= 0.83,
+      "metal overlaps only the declining explosion, never the strong vortex",
     );
     const p = L.chipPlate[c];
     if (p < 0) {
@@ -1337,13 +1426,12 @@ test("entrance fire leaves the shared surface before a machine appears at the ex
     return log.sources.get(flameAsset) ?? 0;
   };
   assert.equal(fireDraws(419), 0);
-  assert.ok(fireDraws(540) > 0, "flame fragments, never metal, precede the 600ms material floor");
-  for (let t = 560; t <= 900; t += 5)
-    assert.equal(fireDraws(t), 0, `${t}: no detached flame survives the departing burst`);
+  for (let t = 420; t <= 900; t += 5)
+    assert.equal(fireDraws(t), 0, `${t}: airborne nanites never carry detached flame blobs`);
   assert.equal(fireDraws(900), 0, "firebrands cool completely after the last crossfade");
 });
 
-test("neither chips nor non-driver armour draw before the explosion has cleared at 600ms", async () => {
+test("neither chips nor non-driver armour draw before the explosion at 468ms", async () => {
   for (const touch of [false, true]) {
     const { plan, extras } = await extrasRuntime({ touch });
     const all = plan.plates(),
@@ -1358,7 +1446,7 @@ test("neither chips nor non-driver armour draw before the explosion has cleared 
       source: { kind: "work" },
       sheet: { kind: "motes" },
     });
-    for (let t = 0; t < 600; t += 5) {
+    for (let t = 0; t < 468; t += 5) {
       log.draws = 0;
       log.paints = 0;
       log.sources.clear();
@@ -1393,7 +1481,7 @@ test("neither chips nor non-driver armour draw before the explosion has cleared 
       if (L.kind[p] >= 0)
         for (let i = L.tileFirst[p]; i < L.tileFirst[p + 1]; i++)
           assert.ok(
-            L.land[i] >= 660,
+            L.land[i] >= 528,
             "first plate cells start growing after the first metal can emerge",
           );
   }
@@ -1539,15 +1627,15 @@ test("the guideway grows from the toe tips up; clamps slide in; nothing descends
     const id = plate.piece.id;
     // Never long before its plate, whole before its first tile lands.
     assert.ok(L.buildA[p] >= F - lead - 0.01, `${id} starts ${F - L.buildA[p]} before F`);
-    const retimed = L.buildA[p] === 600;
+    const retimed = L.buildA[p] === 468;
     const firstLand = Math.min(
       ...plate.tiles.map((tile) => ignition.naniteMaterialLanding(tile.land, F)),
     );
-    assert.ok(L.buildA[p] >= 600, `${id} guide metal waits until the explosion clears`);
+    assert.ok(L.buildA[p] >= 468, `${id} guide metal waits until the explosion begins`);
     // Only the early guide window is squeezed after 600ms. Its original
     // cell order is preserved and it remains whole before the first plate cell.
     assert.ok(
-      L.buildB[p] <= (retimed ? Math.max(640, F - build.done) : F - build.done) + 0.01,
+      L.buildB[p] <= (retimed ? Math.max(508, F - build.done) : F - build.done) + 0.01,
       `${id} whole ${F - L.buildB[p]} before F`,
     );
     assert.ok(L.buildB[p] <= firstLand - (retimed ? 10 : 0) + 0.01, `${id} before its tiles`);

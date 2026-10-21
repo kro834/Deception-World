@@ -40,7 +40,7 @@
     linear-gradient(112deg, transparent 38%, rgb(104 206 76 / 0.055) 54%, transparent 72%);
   mix-blend-mode: screen;
   opacity: 0.72;
-  animation: ci-reflected-light 7200ms ease-in-out infinite alternate;
+  animation: ci-reflected-light var(--ci-duration) ease-in-out both;
 }
 .ciel-inferno::after {
   z-index: 3;
@@ -50,7 +50,7 @@
     radial-gradient(ellipse at 18% 24%, rgb(16 39 25 / 0.13), transparent 42%);
   filter: blur(19px);
   opacity: 0.72;
-  animation: ci-smoke-drift 11800ms ease-in-out infinite alternate;
+  animation: ci-smoke-drift var(--ci-duration) ease-in-out both;
 }
 .ciel-inferno[data-ready="false"] {
   visibility: hidden;
@@ -154,23 +154,36 @@
   display: none;
 }
 @keyframes ci-reflected-light {
-  from {
-    opacity: 0.54;
+  0%,
+  8% {
+    opacity: 0;
     transform: translate3d(-0.6%, 0.35%, 0) scale(1);
   }
-  to {
+  25%,
+  48% {
     opacity: 0.82;
     transform: translate3d(0.7%, -0.45%, 0) scale(1.025);
   }
+  72%,
+  100% {
+    opacity: 0;
+    transform: translate3d(0.2%, -0.8%, 0) scale(1.04);
+  }
 }
 @keyframes ci-smoke-drift {
-  from {
-    opacity: 0.55;
+  0%,
+  22% {
+    opacity: 0;
     transform: translate3d(0.7%, -0.4%, 0) scale(1.01);
   }
-  to {
-    opacity: 0.78;
-    transform: translate3d(-0.8%, 0.5%, 0) scale(1.045);
+  63% {
+    opacity: 0.68;
+    transform: translate3d(-0.6%, -1.5%, 0) scale(1.045);
+  }
+  94%,
+  100% {
+    opacity: 0;
+    transform: translate3d(-1.8%, -4%, 0) scale(1.09);
   }
 }
 @keyframes ci-dragon-awaken {

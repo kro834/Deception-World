@@ -140,3 +140,30 @@ html[data-android-renderer][data-world-effects="economy"]
     }
   }
 }
+
+/* Dream Chapter on Android: opaque dossier backdrop (since backdrop-filter is
+   off), bounded shadow blur radii on large programme and portrait plates, and
+   no idle hover-transition state machines on touch cards. */
+html[data-android-renderer] .dream-dossier-dialog {
+  background-color: rgb(8 6 12 / 96%);
+}
+
+html[data-android-renderer] .dream-page.dream-page .dream-programme-desk {
+  box-shadow:
+    inset 0 1px 0 rgb(243 224 176 / 24%),
+    inset 0 -1px 0 rgb(200 164 92 / 16%),
+    0 16px 28px rgb(0 0 0 / 48%);
+}
+
+html[data-android-renderer]
+  .dream-page.dream-page
+  :is(
+    .dream-programme-ticket,
+    .dream-programme-ticket-foot > span,
+    .dream-programme-dossier-chip,
+    .dream-programme-ledger-cell,
+    .dream-reader-index a
+  ) {
+  transition: none;
+}
+
