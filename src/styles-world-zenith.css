@@ -96,7 +96,6 @@
    ---------------------------------------------------------------- */
 @media (min-width: 700px) and (max-width: 900px) and (orientation: portrait) {
   html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > .hero {
-    --poster-width: min(43vw, 390px);
     grid-template:
       "identity visual" auto
       "copy visual" auto
@@ -165,6 +164,66 @@
     > .poster-stage
     .poster-control-cluster {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+  }
+}
+
+/* The print's width is set on the poster stage itself: the programme
+   sheet gives .poster-stage its own --poster-width, min(100%, 360px), and
+   that percentage resolves against the stage's shrink-to-fit width (a
+   circular size), so every portrait layout drew a 244.5px print whatever
+   the title stage asked for (a 390px phone, an 834px iPad, a 1024px iPad
+   Pro alike). Viewport lengths only, as the landscape rule does; the
+   values are the ones the stage sheet and section 2 meant (and the ones
+   posterImage's `sizes` already announces). */
+@media (max-width: 699px) and (orientation: portrait) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero
+    > .poster-stage {
+    --poster-width: min(78vw, 440px, calc((100svh - 220px) * 2 / 3));
+  }
+}
+
+@media (min-width: 700px) and (max-width: 900px) and (orientation: portrait) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero
+    > .poster-stage {
+    /* 40vw is the visual column itself (0.92 of the two columns between
+       the 4.4vw gutters and the 4vw gap), so the print and its controls
+       never run past it. */
+    --poster-width: min(40vw, 390px, calc((100svh - 300px) * 2 / 3));
+  }
+}
+
+/* iPad Pro 12.9" portrait (1024 × 1366) and its kin: the larger print the
+   stage sheet asked for, and the title stage fills the screen like the
+   smaller iPads' (it ended 560px short of the fold, the story's ground
+   showing under it). */
+@media (min-width: 901px) and (max-width: 1100px) and (orientation: portrait) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero
+    > .poster-stage {
+    --poster-width: min(40vw, 430px, calc((100svh - 300px) * 2 / 3));
+  }
+
+  html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > .hero {
+    align-content: center;
+    min-height: 100svh;
+    padding-top: calc(var(--film-topbar-height, 76px) + 24px);
+    padding-bottom: clamp(60px, 9vh, 132px);
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero
+    > .poster-stage {
+    align-self: center;
   }
 }
 

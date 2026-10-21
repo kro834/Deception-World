@@ -347,7 +347,7 @@ export function posterImage(source: string, reuseWarmedFull = false) {
       src: set.variants[0].path,
       srcSet: srcSet(set),
       sizes:
-        "(max-width: 699px) min(78vw, 440px), (max-width: 900px) and (orientation: portrait) min(43vw, 390px), (max-width: 900px) min(78vw, 440px), (max-width: 1100px) and (orientation: portrait) min(40vw, 430px), (max-width: 1440px) and (orientation: landscape) min(36vw, 440px), min(31vw, 430px)",
+        "(max-width: 699px) min(78vw, 440px), (max-width: 900px) and (orientation: portrait) min(40vw, 390px), (max-width: 900px) min(78vw, 440px), (max-width: 1100px) and (orientation: portrait) min(40vw, 430px), (max-width: 1440px) and (orientation: landscape) min(36vw, 440px), min(31vw, 430px)",
     };
   }
   if (source === "/deception-world-poster-delivery.webp" && reuseWarmedFull) {
