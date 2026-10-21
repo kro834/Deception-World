@@ -5,8 +5,8 @@ import {
   mountDreamReader,
   type DreamReaderState,
 } from "@/lib/dream-reader-state.js";
-import { DREAM_CASES } from "./dream-chapter-data";
-import { DREAM_CHRONICLE } from "./dream-chapter-extra-data";
+import { DREAM_CASES, DREAM_CAST_ROSTER } from "./dream-chapter-data";
+import { DREAM_CHRONICLE, type DreamChronicleEvent } from "./dream-chapter-extra-data";
 
 /** Local reading preferences affect only the canonical synopsis paragraphs. */
 export function DreamReaderSupport() {
@@ -157,6 +157,31 @@ const CHAPTER_CAST_LINKS = [
   },
 ] as const;
 
+type ChapterCastLink = {
+  match: readonly string[];
+  label: string;
+  kind: string;
+  href: string;
+};
+
+const ROSTER_PREFIX = "#dream-roster-";
+const ROSTER_IDS = new Set(DREAM_CAST_ROSTER.map((entry) => entry.id));
+
+/** A cast chip lands on its roster plate when the roster files that person;
+    otherwise on the first canonical event of this chapter they appear in, so
+    no chip ever points at an id the page does not render. */
+function resolveChapterCastLink(
+  entry: ChapterCastLink,
+  events: readonly DreamChronicleEvent[],
+): ChapterCastLink | null {
+  if (!entry.href.startsWith(ROSTER_PREFIX)) return entry;
+  if (ROSTER_IDS.has(entry.href.slice(ROSTER_PREFIX.length))) return entry;
+  const event = events.find((item) =>
+    item.cast.some((member) => entry.match.some((keyword) => member.includes(keyword))),
+  );
+  return event ? { ...entry, kind: "EVENT", href: `#dream-chronicle-event-${event.no}` } : null;
+}
+
 /** The six chapters remain independent native folds; the map names one URL location. */
 export function DreamStoryIndex() {
   const navRef = useRef<HTMLElement>(null);
@@ -245,7 +270,10 @@ export function DreamChapterCompanion({ no }: { no: string }) {
   const castMembers = events.flatMap((event) => event.cast);
   const appearingCast = CHAPTER_CAST_LINKS.filter((entry) =>
     entry.match.some((keyword) => castMembers.some((member) => member.includes(keyword))),
-  );
+  ).flatMap((entry) => {
+    const resolved = resolveChapterCastLink(entry, events);
+    return resolved ? [resolved] : [];
+  });
 
   return (
     <details className="dream-chapter-companion">
