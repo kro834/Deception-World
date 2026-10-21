@@ -198,6 +198,40 @@
   }
 }
 
+/* Desktops past 1440px (1536, 1680, 1920, 2560): the landscape rule stops
+   at 1440, so the same circular width drew a 244.5px print in a 1920 ×
+   1080 title stage. The stage sheet's desktop value, on the stage. */
+@media (min-width: 1441px) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero
+    > .poster-stage {
+    --poster-width: min(
+      31vw,
+      430px,
+      calc((100svh - var(--film-topbar-height, 76px) - 210px) * 2 / 3)
+    );
+  }
+}
+
+/* Wide desktops (1920, 2560): the print grows with the stage instead of
+   stopping at 430px in a stage of 1,300px; 512px is the 1024px file at
+   2x, so a retina screen never enlarges it. */
+@media (min-width: 1800px) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero
+    > .poster-stage {
+    --poster-width: min(
+      24vw,
+      512px,
+      calc((100svh - var(--film-topbar-height, 76px) - 210px) * 2 / 3)
+    );
+  }
+}
+
 /* iPad Pro 12.9" portrait (1024 × 1366) and its kin: the larger print the
    stage sheet asked for, and the title stage fills the screen like the
    smaller iPads' (it ended 560px short of the fold, the story's ground
