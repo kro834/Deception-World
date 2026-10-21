@@ -2,14 +2,22 @@
    RECORD LANDING — where a search or library hit lands (2026-10-21)
 
    The element an index result opened (a heading, a roster row, a case
-   section, a card) is marked [data-record-landing] by
+   section, a dossier's whole profile) is marked [data-record-landing] by
    src/lib/record-arrival.ts once the route and its cover have settled,
-   and keeps the mark for six seconds or until focus moves on. The ring
-   is the site's ice with the key visual's pink light under it: a
-   one-shot lock-on (the ring closes in from outside) when motion is
-   allowed, a still ring under reduced motion or economy rendering. The
-   sheet is linked only while a landing is pending or shown
-   (record-return-navigation.tsx). Outline and shadow only: no layout.
+   and keeps the mark for six seconds or until focus moves on.
+
+   The mark is a reticle on its own fixed layer (.record-landing-layer,
+   aria-hidden, pointer-events: none): four ice brackets that close in on
+   the words once, pink to ice, a single light sweep, and a tag that says
+   what found it (HIT 「ゼウス」). A tall destination is marked at its first
+   heading on screen. Under reduced motion or economy rendering the same
+   frame stands still. The layer is clipped under the top chrome and
+   follows the anchor while it is held.
+
+   Without the layer (forced colours, or before it is drawn) the element
+   itself carries a ring: the site's ice with the key visual's pink light
+   under it. Outline and shadow only: no layout. The sheet is linked by
+   the opener (library-page.tsx, use-open-result.ts).
    ================================================================ */
 html [data-record-landing][data-record-landing][data-record-landing] {
   --rl-ice: 122 232 255;
@@ -27,6 +35,15 @@ html [data-record-landing][data-record-landing][data-record-landing] {
 html :is(main, iframe)[data-record-landing][data-record-landing][data-record-landing] {
   outline-offset: -4px;
   box-shadow: none;
+}
+
+/* The reticle carries the mark: the element keeps no second ring, and the
+   brief skip cue (styles-route-transitions.css) is not drawn over it. */
+html [data-record-landing][data-record-reticle][data-record-reticle][data-record-reticle],
+html [data-skip-mark][data-record-reticle][data-record-reticle] {
+  outline: none;
+  box-shadow: none;
+  animation: none;
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -64,10 +81,276 @@ html :is(main, iframe)[data-record-landing][data-record-landing][data-record-lan
   }
 }
 
+/* ================================================================
+   The reticle layer
+   ================================================================ */
+.record-landing-layer {
+  --record-landing-visible: 1;
+  --rl-ice: 122 232 255;
+  --rl-pink: 240 92 207;
+  --rl-gold: 240 207 134;
+  position: fixed;
+  inset: 0;
+  z-index: 29;
+  overflow: hidden;
+  contain: strict;
+  pointer-events: none;
+}
+
+.record-landing-reticle {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 24px;
+  height: 24px;
+  will-change: transform;
+}
+
+/* The frame: a hairline and a faint floor of ice, the pink light under it. */
+.record-landing-reticle::before {
+  position: absolute;
+  inset: 0;
+  content: "";
+  border: 1px solid rgb(var(--rl-ice) / 30%);
+  border-radius: 3px;
+  background:
+    linear-gradient(90deg, rgb(var(--rl-ice) / 7%), rgb(var(--rl-ice) / 0%) 55%),
+    linear-gradient(180deg, rgb(var(--rl-pink) / 0%) 60%, rgb(var(--rl-pink) / 8%));
+  box-shadow:
+    0 0 0 1px rgb(3 6 12 / 40%),
+    0 18px 44px -24px rgb(var(--rl-pink) / 70%);
+}
+
+/* The brackets: ice, 2px, a pink glow. */
+.record-landing-reticle > i {
+  --rl-dx: 0px;
+  --rl-dy: 0px;
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border: 0 solid rgb(var(--rl-ice));
+  filter: drop-shadow(0 0 5px rgb(var(--rl-pink) / 80%));
+}
+
+.record-landing-reticle > i[data-corner="tl"] {
+  --rl-dx: -18px;
+  --rl-dy: -18px;
+  top: -2px;
+  left: -2px;
+  border-width: 2px 0 0 2px;
+}
+
+.record-landing-reticle > i[data-corner="tr"] {
+  --rl-dx: 18px;
+  --rl-dy: -18px;
+  top: -2px;
+  right: -2px;
+  border-width: 2px 2px 0 0;
+}
+
+.record-landing-reticle > i[data-corner="bl"] {
+  --rl-dx: -18px;
+  --rl-dy: 18px;
+  bottom: -2px;
+  left: -2px;
+  border-width: 0 0 2px 2px;
+}
+
+.record-landing-reticle > i[data-corner="br"] {
+  --rl-dx: 18px;
+  --rl-dy: 18px;
+  right: -2px;
+  bottom: -2px;
+  border-width: 0 2px 2px 0;
+}
+
+/* The sweep: one pass of light, its leading edge ice (still: none). */
+.record-landing-scan {
+  position: absolute;
+  inset: 1px;
+  overflow: hidden;
+  border-radius: 2px;
+  opacity: 0;
+}
+
+.record-landing-scan::before {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background: linear-gradient(
+    90deg,
+    rgb(var(--rl-ice) / 0%) 0%,
+    rgb(var(--rl-ice) / 0%) 78%,
+    rgb(var(--rl-pink) / 14%) 94%,
+    rgb(var(--rl-ice) / 55%) 100%
+  );
+  transform: translateX(-100%);
+}
+
+/* The tag: the HUD code on an ice key, then what found it. It sits on the
+   frame's top line beside the bracket (on the bottom line when the bar is in
+   the way), so it covers as little of the page around the words as it can. */
+.record-landing-tag {
+  position: absolute;
+  top: 0;
+  left: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: min(30em, calc(100vw - 48px));
+  padding: 2px 9px 2px 2px;
+  border: 1px solid rgb(var(--rl-ice) / 55%);
+  border-radius: 3px;
+  color: #eafcff;
+  background: linear-gradient(90deg, rgb(4 12 22 / 94%), rgb(10 8 22 / 92%));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 10%),
+    0 0 0 1px rgb(var(--rl-pink) / 22%),
+    0 10px 24px -12px rgb(0 0 0 / 80%);
+  font:
+    600 12px / 1.4 "Noto Sans JP",
+    "Hiragino Sans",
+    sans-serif;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  transform: translateY(-50%);
+}
+
+.record-landing-reticle[data-tag="below"] > .record-landing-tag {
+  top: 100%;
+}
+
+.record-landing-tag > b {
+  flex: none;
+  padding: 3px 7px 2px;
+  border-radius: 2px;
+  color: #03141c;
+  background: linear-gradient(90deg, rgb(var(--rl-ice)), #c9f6ff);
+  font:
+    400 12px / 1 "Michroma",
+    "Oxanium",
+    sans-serif;
+  letter-spacing: 0.16em;
+}
+
+.record-landing-tag > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ================================================================
+   Motion: the lock-on, once; gated by reduced motion and economy
+   ================================================================ */
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]) .record-landing-layer[data-mode="live"] {
+    animation: record-reticle-in 180ms ease-out both;
+  }
+
+  html:not([data-world-effects="economy"])
+    .record-landing-layer[data-mode="live"]
+    .record-landing-reticle
+    > i {
+    animation: record-reticle-close 640ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+
+  html:not([data-world-effects="economy"])
+    .record-landing-layer[data-mode="live"]
+    .record-landing-reticle::before {
+    animation: record-reticle-in 520ms 240ms ease-out both;
+  }
+
+  html:not([data-world-effects="economy"])
+    .record-landing-layer[data-mode="live"]
+    .record-landing-scan {
+    animation: record-reticle-sweep-fade 820ms 260ms ease-out both;
+  }
+
+  html:not([data-world-effects="economy"])
+    .record-landing-layer[data-mode="live"]
+    .record-landing-scan::before {
+    animation: record-reticle-sweep 820ms 260ms cubic-bezier(0.4, 0, 0.2, 1) both;
+  }
+
+  html:not([data-world-effects="economy"])
+    .record-landing-layer[data-mode="live"]
+    .record-landing-tag {
+    /* In beside the bracket, then out after three seconds: the brackets
+       keep the place, the words around them come back. */
+    animation:
+      record-reticle-tag 420ms 380ms cubic-bezier(0.2, 0.7, 0.2, 1) both,
+      record-reticle-tag-out 420ms 3200ms ease-in forwards;
+  }
+}
+
+@keyframes record-reticle-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* Each bracket comes in from outside its corner, pink, and settles ice. */
+@keyframes record-reticle-close {
+  from {
+    border-color: rgb(var(--rl-pink));
+    opacity: 0;
+    transform: translate(var(--rl-dx), var(--rl-dy));
+  }
+
+  45% {
+    opacity: 1;
+  }
+
+  70% {
+    border-color: rgb(var(--rl-ice));
+  }
+}
+
+@keyframes record-reticle-sweep {
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes record-reticle-sweep-fade {
+  0% {
+    opacity: 0;
+  }
+
+  20% {
+    opacity: 1;
+  }
+
+  70% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes record-reticle-tag {
+  from {
+    opacity: 0;
+    transform: translate(-8px, -50%);
+  }
+}
+
+@keyframes record-reticle-tag-out {
+  to {
+    opacity: 0;
+  }
+}
+
 @media (forced-colors: active) {
   html [data-record-landing][data-record-landing][data-record-landing] {
     outline: 3px solid Highlight;
     box-shadow: none;
     animation: none;
+  }
+
+  .record-landing-layer {
+    display: none;
   }
 }

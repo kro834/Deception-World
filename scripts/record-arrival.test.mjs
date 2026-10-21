@@ -240,3 +240,42 @@ test("a hidden destination stays pending only until the bounded deadline", () =>
   assert.equal(h.active(), false);
   assert.equal(h.listeners.size, 0);
 });
+
+test("the landing reticle is decorative, follows its anchor and leaves with the ring", () => {
+  const source = readFileSync(new URL("../src/lib/record-arrival.ts", import.meta.url), "utf8");
+  // Its own fixed layer: hidden from assistive tech, never in the way of a pointer.
+  assert.match(source, /layer\.setAttribute\("aria-hidden", "true"\)/);
+  assert.match(source, /pointer-events:none/);
+  // Unstyled until the sheet applies: invisible rather than raw text.
+  assert.match(source, /opacity:var\(--record-landing-visible,0\)/);
+  // Forced colours keep the element's own Highlight ring instead.
+  assert.match(source, /matchMedia\("\(forced-colors: active\)"\)\.matches/);
+  // A tall destination is marked at its first heading on screen.
+  assert.match(source, /function anchorOf\(target: HTMLElement\)/);
+  // Hold and blur both release it; a newer arrival releases the old one.
+  assert.match(source, /target\.removeAttribute\("data-record-landing"\);\s*release\?\.\(\);/);
+  assert.match(source, /window\.clearTimeout\(hold\);\s*release\?\.\(\);/);
+  assert.match(source, /cancelPending\?\.\(\);\s*releaseReticle\?\.\(\);/);
+});
+
+test("the landing sheet keeps the 12px floor, gated finite motion and forced colours", () => {
+  const css = readFileSync(new URL("../src/styles-record-landing.css", import.meta.url), "utf8");
+  for (const [, size] of css.matchAll(/font:\s*(?:\d+\s+)?([\d.]+)px/g))
+    assert.ok(Number(size) >= 12, `font ${size}px`);
+  let outside = css;
+  for (let at = outside.indexOf("@media (prefers-reduced-motion: no-preference)"); at >= 0; ) {
+    let depth = 0;
+    let end = outside.indexOf("{", at);
+    for (; end < outside.length; end += 1) {
+      if (outside[end] === "{") depth += 1;
+      else if (outside[end] === "}" && --depth === 0) break;
+    }
+    const block = outside.slice(at, end + 1);
+    assert.match(block, /html:not\(\[data-world-effects="economy"\]\)/);
+    assert.doesNotMatch(block, /infinite/);
+    outside = outside.slice(0, at) + outside.slice(end + 1);
+    at = outside.indexOf("@media (prefers-reduced-motion: no-preference)");
+  }
+  assert.doesNotMatch(outside, /\banimation\s*:\s*record-/, "ungated motion");
+  assert.match(css, /@media \(forced-colors: active\)[\s\S]*\.record-landing-layer\s*\{\s*display: none;/);
+});

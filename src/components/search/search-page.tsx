@@ -191,11 +191,16 @@ export function SearchPage({
     window.clearTimeout(queryTimerRef.current);
     queryTimerRef.current = undefined;
     writtenRef.current = draft;
-    void openResult(result, fromKeyboard, {
-      pathname: "/search",
-      search: { q: draft, category, shown },
-      cardId: recordReturnCardId("search", result.document.id),
-    });
+    void openResult(
+      result,
+      fromKeyboard,
+      {
+        pathname: "/search",
+        search: { q: draft, category, shown },
+        cardId: recordReturnCardId("search", result.document.id),
+      },
+      draft.trim() ? `「${draft.trim()}」` : undefined,
+    );
   };
 
   // Cards keep one handler, so moving the active option re-renders two cards.

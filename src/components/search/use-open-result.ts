@@ -30,6 +30,8 @@ export function useOpenResult() {
       result: Pick<SearchResult, "document" | "hash">,
       fromKeyboard: boolean,
       source?: RecordReturnInput["source"],
+      // The landing reticle's tag: what found the record (the query).
+      label?: string,
     ) => {
       const { document } = result;
       const hash = result.hash ?? document.hash;
@@ -64,7 +66,7 @@ export function useOpenResult() {
         captured = captureRecordReturn({ source: context.source, target }, true);
       } else clearRecordReturn();
       try {
-        watchRecordArrival(document.to, hash, { stylesheet: landingCssUrl });
+        watchRecordArrival(document.to, hash, { stylesheet: landingCssUrl, label, code: "HIT" });
         if (document.search) {
           await router.navigate({ to: document.to, search: document.search as never, hash });
         } else {

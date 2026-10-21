@@ -52,12 +52,15 @@ const CAST = RIDER_ART.flatMap((rider) => {
 
 function EntryCard({
   entry,
+  query,
   bookmarked,
   ready,
   beforeOpen,
   onBookmark,
 }: {
   entry: LibraryEntry;
+  /** The field's words, for the landing reticle's tag. */
+  query: string;
   bookmarked: boolean;
   ready: boolean;
   beforeOpen: (entry: LibraryEntry) => Promise<(() => RecordReturnContext | null) | undefined>;
@@ -92,7 +95,11 @@ function EntryCard({
             const captured = commit?.();
             if (!captured) return;
             try {
-              watchRecordArrival(entry.path, entry.hash, { stylesheet: landingCssUrl });
+              watchRecordArrival(entry.path, entry.hash, {
+                stylesheet: landingCssUrl,
+                code: "FILE",
+                label: query ? `「${query}」` : entry.title,
+              });
               await go({
                 to: entry.path,
                 hash: entry.hash,
@@ -757,6 +764,7 @@ export function LibraryPage({
                         <EntryCard
                           key={entry.id}
                           entry={entry}
+                          query={draft.trim()}
                           bookmarked={saved.bookmarks.includes(entry.id)}
                           ready={ready}
                           beforeOpen={beforeOpen}
