@@ -130,6 +130,18 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .rxs-section::bef
 }
 
 /* ================================================================
+   01 STORY: room between the reel mark and the first lamp
+   ================================================================ */
+/* 761–1099px: the gap (clamp(24px, 4vw, 64px), 33px on an iPad) left the
+   first paragraph's lamp 8px from the mark's last letter, so it read
+   "FINAL○". A wider gap gives the lamp its own air; the measure gives way. */
+@media (min-width: 761px) and (max-width: 1099.98px) {
+  html[data-family="special"] body .rxs-page.rxs-page.fst-page > #story .fst-story-layout {
+    column-gap: clamp(48px, 6.4vw, 64px);
+  }
+}
+
+/* ================================================================
    02 CHARACTERS: the billing slots and the still
    ================================================================ */
 /* Every slot shows its frame and the role's colour as a tick at its head
@@ -141,7 +153,8 @@ html[data-family="special"]
   .fst-cast-tabs.rxs-stage-tabs.liquid-swipe-tabs
   > button[role="tab"] {
   border-radius: 4px;
-  background: linear-gradient(var(--liquid-accent, var(--fsx-violet)) 0 0) 50% 0 / 22px 2px no-repeat;
+  background: linear-gradient(var(--liquid-accent, var(--fsx-violet)) 0 0) 50% 0 / 22px 2px
+    no-repeat;
   box-shadow: inset 0 0 0 1px rgb(var(--fsx-violet-rgb) / 11%);
 }
 
@@ -229,6 +242,62 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > #characters .fst-
 /* ================================================================
    The records: calls as a sequence, the Royal forms as one band
    ================================================================ */
+/* WebKit clips a background-clip: text fill to the element's own inline
+   boxes only, never through an inline-block's: the protected word of the
+   record's gradient name (サーガ) painted nothing on iPad, and the title read
+   "ファーフロム". Inside the gradient name the word stays inline; nowrap
+   still holds it whole. (The shared name sheet sets the inline-block with
+   !important, so the override must carry it too: display only.) */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.fst-page
+  .fst-pickup-dialog
+  .fst-pickup-heading
+  h2
+  b
+  .name-word--protected {
+  display: inline !important;
+}
+
+/* The record's sign (RIDER PICKUP) is one line. WebKit sizes a
+   fit-content flex plate from its items' content, not their flex-basis:
+   the empty dash (flex: 0 0 36px) counted as 0px, the plate came out 36px
+   short and broke its label in two. The dash carries its width. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.fst-page
+  .fst-pickup-dialog
+  .fst-pickup-heading
+  > p::after {
+  width: 36px;
+  min-width: 36px;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.fst-page
+  .fst-pickup-dialog
+  .fst-pickup-heading
+  > p
+  > span {
+  white-space: nowrap;
+}
+
+/* The record's eyebrow (RIDER RECORD 01 / FAR FROM SAGA) holds one line
+   on a phone: tighter tracking, balanced if it must break. */
+@media (max-width: 480px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.fst-page
+    .fst-pickup-dialog
+    .fst-pickup-heading
+    small {
+    display: block;
+    letter-spacing: 0.12em;
+    text-wrap: balance;
+  }
+}
+
 /* 変身音声: each call carries its place in the sequence (silent for
    assistive tech: the list is already labelled), and the call that
    completes the change is lit in the form's colour. */
@@ -418,9 +487,7 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer > div
   height: 14px;
   margin: 0;
   border-radius: 50%;
-  background:
-    radial-gradient(circle, var(--fsz-lamp) 0 2.2px, transparent 3px),
-    var(--fsx-house);
+  background: radial-gradient(circle, var(--fsz-lamp) 0 2.2px, transparent 3px), var(--fsx-house);
   box-shadow:
     0 0 0 1px rgb(var(--fsx-violet-rgb) / 70%),
     0 0 18px 3px rgb(var(--fsz-lamp-rgb) / 28%);
@@ -475,7 +542,11 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer > a.r
 /* 600–900px (iPad mini and iPad Pro portrait among them): the links stay
    in the bar between the brand and the menu. */
 @media (min-width: 600px) and (max-width: 900px) {
-  html[data-family="special"] body .rxs-page.rxs-page.fst-page > .rxs-local-nav .rxs-local-nav-inner {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.fst-page
+    > .rxs-local-nav
+    .rxs-local-nav-inner {
     grid-template-columns: auto minmax(0, 1fr) 48px;
     gap: 16px;
   }
@@ -496,7 +567,11 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer > a.r
 /* Phones: a chapter strip under the brand, each chapter a 44px target,
    the one in view lit by the lamp line (styles-final-stage-lamplight.css). */
 @media (max-width: 599.98px) {
-  html[data-family="special"] body .rxs-page.rxs-page.fst-page > .rxs-local-nav .rxs-local-nav-inner {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.fst-page
+    > .rxs-local-nav
+    .rxs-local-nav-inner {
     grid-template-columns: minmax(0, 1fr) 48px;
     grid-template-rows: auto auto;
     row-gap: 0;
@@ -515,7 +590,11 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer > a.r
     border-top: 1px solid rgb(var(--fsx-violet-rgb) / 12%);
   }
 
-  html[data-family="special"] body .rxs-page.rxs-page.fst-page > .rxs-local-nav nav::-webkit-scrollbar {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.fst-page
+    > .rxs-local-nav
+    nav::-webkit-scrollbar {
     display: none;
   }
 
@@ -580,7 +659,14 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer > a.r
   html[data-family="special"]:not([data-world-effects="economy"])
     body
     .rxs-page.rxs-page.fst-page
-    > :is(.fst-footer > a, #characters .fst-cast-copy a) {
+    > .fst-footer
+    > a,
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.fst-page
+    > #characters
+    .fst-cast-copy
+    a {
     transition:
       scale 160ms var(--fsz-ease),
       border-color 220ms ease,
@@ -590,7 +676,14 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer > a.r
   html[data-family="special"]:not([data-world-effects="economy"])
     body
     .rxs-page.rxs-page.fst-page
-    > :is(.fst-footer > a, #characters .fst-cast-copy a):active {
+    > .fst-footer
+    > a:active,
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.fst-page
+    > #characters
+    .fst-cast-copy
+    a:active {
     scale: 0.97;
   }
 

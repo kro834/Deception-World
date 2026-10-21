@@ -11,6 +11,7 @@ import { initRail } from "@/lib/liquid/boot.js";
 import { dossierImage } from "@/lib/dossier-images";
 import { DisplayName } from "@/components/name-text";
 import { rexonanceImage } from "@/lib/rexonance-images";
+import { FORM_RECORD_IMAGES } from "@/lib/record-form-images";
 import { mountLocalNavCurrent } from "@/lib/local-nav-current";
 import { warmRexonanceStages } from "@/lib/warm-rexonance-stages";
 import { useDialogHistoryDismiss } from "@/components/world/use-dialog-history-dismiss";
@@ -132,6 +133,7 @@ function RiderPickup({
   imageWidth,
   imageHeight,
   imagePos,
+  imageSet,
   eyebrow,
   name,
   sub,
@@ -144,6 +146,8 @@ function RiderPickup({
   imageWidth: number;
   imageHeight: number;
   imagePos: string;
+  /* The picture's candidates when they are not the Rexonance cuts. */
+  imageSet?: { srcSet?: string; sizes?: string };
   eyebrow: string;
   name: string;
   sub: string;
@@ -207,7 +211,7 @@ function RiderPickup({
         <div className="fst-pickup-visual">
           <img
             src={image}
-            {...rexonanceImage(image)}
+            {...(imageSet ?? rexonanceImage(image))}
             alt={`仮面ライダー${name}のフォームビジュアル`}
             style={{ objectPosition: imagePos }}
             width={imageWidth}
@@ -305,6 +309,25 @@ function RiderPickup({
 /* A portrait's candidates, exactly as CastVisual spreads them, so a warm-up
    fetches and decodes the file the keyed figure will paint. */
 const castImage = (source: string) => ({ ...dossierImage(source), ...rexonanceImage(source) });
+
+/* The Realm Royal form visuals' candidates: the record-art cuts (480, 960)
+   of the same 1200px files (scripts/build-record-art.mjs), then the file
+   itself. The card and the record's figure list the same set and both stay
+   under ~640px (a phone's column, a fixed column beyond), so the figure
+   paints the candidate the card already fetched. */
+const ROYAL_ART = new Map(Object.values(FORM_RECORD_IMAGES).map((art) => [art.source, art]));
+const royalVisualImage = (source: string, width: number) => {
+  const art = ROYAL_ART.get(source);
+  if (!art) return rexonanceImage(source);
+  return {
+    srcSet: art.variants
+      .filter((variant) => variant.width < width)
+      .map((variant) => `${variant.path} ${variant.width}w`)
+      .concat(`${source} ${width}w`)
+      .join(", "),
+    sizes: "(max-width: 680px) calc(100vw - 48px), 640px",
+  };
+};
 
 function CastVisual({ person }: { person: CastEntry }) {
   if (person.image) {
@@ -830,6 +853,7 @@ export function FinalStage() {
           imageWidth={activeVisual.width}
           imageHeight={activeVisual.height}
           imagePos="50% 10%"
+          imageSet={royalVisualImage(activeVisual.image, activeVisual.width)}
           eyebrow={`RIDER RECORD 02 / ${REALM_ROYAL.en}`}
           name={REALM_ROYAL.name}
           sub={REALM_ROYAL.formsLine}
@@ -898,6 +922,7 @@ export function FinalStage() {
             <figure key={activeVisual.image} role="listitem">
               <img
                 src={activeVisual.image}
+                {...royalVisualImage(activeVisual.image, activeVisual.width)}
                 alt={activeVisual.alt}
                 width={activeVisual.width}
                 height={activeVisual.height}
