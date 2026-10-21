@@ -49,30 +49,49 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .rxs-section::bef
   width: min(640px, 76%);
   height: 11px;
   /* The elevation's draw (fst-draw-x) grows the rule from its left end;
-     from its centre, the lamp stays put and the hairline opens both ways. */
+     from its centre, the hairline opens both ways from the lamp. */
   transform-origin: 50% 50%;
+  background: linear-gradient(
+      90deg,
+      transparent,
+      var(--fsx-line-2) 26%,
+      var(--fsx-line-2) calc(50% - 12px),
+      transparent calc(50% - 12px),
+      transparent calc(50% + 12px),
+      var(--fsx-line-2) calc(50% + 12px),
+      var(--fsx-line-2) 74%,
+      transparent
+    )
+    0 5px / 100% 1px no-repeat;
+}
+
+/* The lamp is its own box (STAGE retired the section's ::after, kiro's
+   route drop): drawn inside the hairline's box, the draw's scale across
+   squeezed it into a sliver while the join drew, and it rested so at the
+   foot of a phone's cold open. Here it only ever scales evenly. */
+html[data-family="special"] body .rxs-page.rxs-page.fst-page > .rxs-section::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  z-index: 1;
+  display: block;
+  width: 11px;
+  height: 11px;
+  margin: 0;
   background:
-    radial-gradient(circle at 50% 5.5px, var(--fsz-lamp) 0 1.7px, transparent 2.4px) 0 0 / 100% 11px
-      no-repeat,
+    radial-gradient(circle, var(--fsz-lamp) 0 1.7px, transparent 2.4px),
     radial-gradient(
-        circle at 50% 5.5px,
-        transparent 3.6px,
-        rgb(var(--fsx-violet-rgb) / 70%) 4.2px 5px,
-        transparent 5.7px
-      )
-      0 0 / 100% 11px no-repeat,
-    linear-gradient(
-        90deg,
-        transparent,
-        var(--fsx-line-2) 26%,
-        var(--fsx-line-2) calc(50% - 12px),
-        transparent calc(50% - 12px),
-        transparent calc(50% + 12px),
-        var(--fsx-line-2) calc(50% + 12px),
-        var(--fsx-line-2) 74%,
-        transparent
-      )
-      0 5px / 100% 1px no-repeat;
+      circle,
+      transparent 3.6px,
+      rgb(var(--fsx-violet-rgb) / 70%) 4.2px 5px,
+      transparent 5.7px
+    );
+  -webkit-mask: none;
+  mask: none;
+  translate: -50% 0;
+  transform-origin: 50% 50%;
+  pointer-events: none;
 }
 
 /* ================================================================
@@ -930,6 +949,19 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer > a.r
       animation-range: entry 60% entry 100%;
     }
 
+    /* The join's lamp comes on as the hairline opens, on the section's
+       own timeline (it replaces kiro's route drop on this box). */
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.fst-page[data-motion-ready="true"]
+      > .rxs-section::after {
+      animation: fsz-lamp-light linear both;
+      animation-timeline: --fst-section;
+      animation-range: entry 0% entry 40%;
+    }
+
     /* The letterbox closes in over the last half-screen of the walk, on
        the end card's own timeline: open picture while the records leave,
        the bars home as the last scroll lands on the end card. */
@@ -992,6 +1024,7 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer > a.r
    Forced colours
    ================================================================ */
 @media (forced-colors: active) {
+  html[data-family="special"] body .rxs-page.rxs-page.fst-page > .rxs-section::after,
   html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer::before,
   html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer::after,
   html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer > div::before,

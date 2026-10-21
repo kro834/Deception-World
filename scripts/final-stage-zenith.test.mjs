@@ -147,7 +147,10 @@ test("motion is scroll-linked on named timelines or a press, gated, and never lo
       selector,
     );
     for (const part of splitTopLevel(selector)) assert.match(part, FULL_GATE, part);
-    assert.match(declarations(body, "animation-timeline").at(-1), /^--(?:fsk-end|fsz-card)$/);
+    assert.match(
+      declarations(body, "animation-timeline").at(-1),
+      /^--(?:fsk-end|fsz-card|fst-section)$/,
+    );
     assert.equal(declarations(body, "animation-range").length, 1, selector);
     for (const value of animations) assert.doesNotMatch(value, /\d+m?s\b/, value);
   }
