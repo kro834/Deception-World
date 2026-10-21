@@ -104,7 +104,9 @@
   color: #bccbd8;
   font-size: 14px;
   line-height: 1.8;
-  /* Lines break between phrases (Chromium), never inside a word. */
+  /* Lines break between phrases (Chromium, auto-phrase); elsewhere at the
+     punctuation (keep-all), with anywhere (above) as the last resort. */
+  word-break: keep-all;
   word-break: auto-phrase;
   text-wrap: pretty;
 }

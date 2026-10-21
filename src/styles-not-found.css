@@ -350,8 +350,11 @@
   color: var(--lr-text-2);
   font-size: clamp(14px, 3.6vw, 16px);
   line-height: 1.9;
-  /* Lines break between phrases (Chromium), never inside a word. */
+  /* Lines break between phrases (Chromium, auto-phrase); elsewhere at the
+     punctuation (keep-all), with anywhere as the last resort. */
+  word-break: keep-all;
   word-break: auto-phrase;
+  overflow-wrap: anywhere;
   text-wrap: pretty;
 }
 
@@ -651,6 +654,16 @@
   /* The heading holds one line in the 460-500px copy column. */
   .app-not-found.app-not-found > h1 {
     font-size: clamp(26px, 4.6vw, 40px);
+  }
+}
+
+/* iPad mini portrait and its neighbours (760-859px): a narrower slot, so
+   the header's two labels keep a gap (at 768px they ran into each other). */
+@media (min-width: 760px) and (max-width: 859px) {
+  .app-not-found.app-not-found {
+    grid-template-columns:
+      minmax(16px, 1fr) [plate-start] var(--lr-pad-x) [slot-start] 168px [slot-end] 28px
+      [copy-start] minmax(0, 500px) [copy-end] var(--lr-pad-x) [plate-end] minmax(16px, 1fr);
   }
 }
 
