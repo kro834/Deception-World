@@ -354,6 +354,17 @@ html[data-family="special"]
   letter-spacing: 0.08em;
 }
 
+/* Both cards fill their half of the stage. The IMPACT sheet sets the punch
+   card to its content (its 126px figure used to fill the column anyway);
+   with the smaller figure it stood 80-150px narrower than the time card
+   beside it. Its plate and figure keep their own widths, as the time
+   card's do, so the focus lines and the shock ring that ride the figure
+   still hug the number; the meter runs the card. */
+html[data-family="special"] body .rxs-page.rxs-page.exs-page #performance .exi-stage > article {
+  justify-self: stretch;
+  justify-items: start;
+}
+
 /* ================================================================
    6. The tale of the tape
    ================================================================ */
@@ -630,7 +641,8 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-unavailable {
   margin-top: 14px;
 }
 
-/* The notes run the catalog's full measure (a 528px cap left a third of a
+/* The verdict and the notes run the catalog's full measure (a 528px cap
+   on the notes, and the showcase's 64ch on the verdict, left a third of a
    tablet's console empty beside them). */
 html[data-family="special"]
   body
@@ -638,7 +650,14 @@ html[data-family="special"]
   > #performance
   .exs-catalog-details
   .exs-unavailable
-  > li {
+  > li,
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #performance
+  .exs-catalog-details
+  .rxs-processing-comparison
+  > p {
   max-width: none;
 }
 
@@ -1007,8 +1026,43 @@ html[data-family="special"]
   .rxs-page.rxs-page.exs-page
   > :is(#performance, #p14, #stages, #system, .exs-hero, .rxs-local-nav, .rxs-footer)
   :is(nav a, .exs-opponent-options button, .rxs-scroll-cue, a.exo-door, a.rxs-footer-return, .rxs-brand):focus-visible {
-  outline: 2px solid #ffe1a1;
+  outline: 2px solid var(--exz-outline, #ffe1a1);
   outline-offset: -4px;
+}
+
+/* The footer's three doors draw the ring in their own slanted shape (the
+   outline is a rectangle, and the 14px slant cut away its right side),
+   2-4px inside the edge where the outline stood. The gold door takes an
+   ink ring: pale gold on its gold face read about 1.2:1. */
+html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer > a {
+  --exz-ring: #ffe1a1;
+  --exz-outline: transparent;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer > a:first-of-type {
+  --exz-ring: #080807;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer > a:focus-visible::after {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  inset: -1px;
+  background: var(--exz-ring);
+  clip-path: polygon(
+    evenodd,
+    2px 2px,
+    calc(100% - 2.6px) 2px,
+    calc(100% - 15.6px) calc(100% - 2px),
+    2px calc(100% - 2px),
+    2px 2px,
+    4px 4px,
+    calc(100% - 5.1px) 4px,
+    calc(100% - 17.1px) calc(100% - 4px),
+    4px calc(100% - 4px),
+    4px 4px
+  );
+  pointer-events: none;
 }
 
 /* ================================================================
@@ -1151,10 +1205,50 @@ html[data-family="special"]
   }
 }
 
+/* Phones: each bout's plate takes the card's whole measure, the arrow
+   stands beside the title and the line under both runs the full width.
+   In the plate's own column PERFORMANCE ran under the arrow, 2 STAGES
+   broke in two at 360-374px and 可能性から、勝利へ wrapped. */
 @media (max-width: 480px) {
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-index a {
+    row-gap: 6px;
+  }
+
   html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-index small {
+    grid-column: 1 / -1;
+    grid-row: 1;
     padding: 3px 7px 2px 6px;
     letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-index span {
+    grid-row: 2;
+    align-self: center;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-index em {
+    grid-column: 1 / -1;
+    grid-row: 3;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-index i {
+    grid-row: 2;
+    width: 30px;
+    height: 30px;
+    font-size: 13px;
+  }
+}
+
+/* 360-389px: the plate keeps its 12px and sets PERFORMANCE without the
+   tracking, inside the card's padding (it reached 5px from the divider). */
+@media (min-width: 360px) and (max-width: 389px) {
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-index a {
+    padding-inline: 11px;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-index small {
+    letter-spacing: 0;
   }
 }
 
@@ -1192,6 +1286,37 @@ html[data-family="special"]
     > .rxs-section-heading
     > h2 {
     font-size: 25px;
+  }
+
+  /* The four bouts stand one a row: at the 12px floor PERFORMANCE needs
+     ~150px and a card of the 2 x 2 strip holds 126-146px (it crossed the
+     divider into P14's plate). A row has the room for the arrow again. */
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-index {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-index a {
+    grid-template-columns: minmax(0, 1fr) auto;
+    min-height: 0;
+    padding: 14px 14px 15px;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-index a + a {
+    border-top: 1px solid var(--exe-rule);
+    border-left: 0;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-index small {
+    grid-column: 1;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-index em {
+    grid-column: 1;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-index i {
+    display: inline-grid;
+    grid-row: 1 / -1;
   }
 
   /* The challenger plates stand one over the other: side by side in 256px
@@ -1292,6 +1417,16 @@ html[data-family="special"]
 
   html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-opponent-options button::before {
     background: ButtonText;
+  }
+
+  /* The doors' painted ring would take the Canvas colour; the outline
+     stands in for it. */
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer > a {
+    --exz-outline: Highlight;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer > a:focus-visible::after {
+    content: none;
   }
 
   html[data-family="special"]

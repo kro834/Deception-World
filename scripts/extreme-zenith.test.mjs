@@ -113,6 +113,31 @@ test("floors: HUD labels at 12px or more, one-line titles at 320px, rings inside
   assert.equal(declaration(focus, "outline-offset"), "-4px");
 });
 
+test("review fixes: equal ROUND 1 cards, whole chapter plates, gold-door ring, uncapped verdict", () => {
+  // Both stage cards fill their column (the punch card had shrunk to its figure).
+  const card = find("#performance .exi-stage > article");
+  assert.equal(declaration(card, "justify-self"), "stretch");
+  assert.equal(declaration(card, "justify-items"), "start");
+  // Phones: the plate spans the card; below 360px the four bouts stand one a row.
+  assert.equal(declaration(find("> .exs-chapter-index small", "(max-width: 480px)"), "grid-column"), "1 / -1");
+  assert.equal(declaration(find("> .exs-chapter-index small", "(max-width: 480px)"), "white-space"), "nowrap");
+  assert.equal(declaration(find("> .exs-chapter-index", "(max-width: 359px)"), "grid-template-columns"), "minmax(0, 1fr)");
+  // The footer doors paint the ring in their slanted shape; the gold door's is ink.
+  assert.equal(declaration(find("> .rxs-footer > a:first-of-type"), "--exz-ring"), "#080807");
+  const ring = find("> .rxs-footer > a:focus-visible::after");
+  assert.equal(declaration(ring, "background"), "var(--exz-ring)");
+  assert.match(declaration(ring, "clip-path"), /^polygon\( ?evenodd/);
+  assert.equal(declaration(find("> .rxs-footer > a:focus-visible::after", "(forced-colors: active)"), "content"), "none");
+  // The verdict runs the console's measure at every width, as its notes do.
+  const verdict = rules.find(
+    (rule) =>
+      mediaOf(rule) === null &&
+      rule.selectors.some((selector) => normal(selector).endsWith("> #performance .exs-catalog-details .rxs-processing-comparison > p")) &&
+      declaration(rule, "max-width") === "none",
+  );
+  assert.ok(verdict, "the verdict is uncapped outside the wide media query");
+});
+
 test("motion here is hover and focus only, and stands still under reduced motion", () => {
   sheet.walkDecls(/^animation/, (item) => assert.fail(`${item.parent.selector} animates`));
   let reduced = false;
