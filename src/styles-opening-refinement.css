@@ -204,6 +204,66 @@ html[data-world-effects="economy"] .cine-stage .cine-logo-wrap {
   }
 }
 
+/* The motto (THE WORLD IS MADE OF DECEPTION.) stood on SKIP's row once SKIP
+   took its own row above ENTER, and SKIP covered its second half. On
+   upright phones the motto now stands just above SKIP (its 48px plate plus
+   a 10px gap, 6px on short screens), under the title's caption; margin
+   only, measured from the editorial box's foot (--editorial-inset-y). Under
+   390px it closes up to one line where one line fits (360px and up). */
+@media (max-width: 700px) and (orientation: portrait) {
+  .cine-stage .cine-editorial-caption {
+    --op-motto-gap: 10px;
+    margin-bottom: calc(
+      max(10vh, 72px) + 52px + 12px + 48px + var(--op-motto-gap) - var(--editorial-inset-y)
+    );
+  }
+}
+
+@media (max-width: 700px) and (max-height: 700px) and (orientation: portrait) {
+  .cine-stage .cine-editorial-caption {
+    --op-motto-gap: 6px;
+  }
+}
+
+@media (max-width: 389px) and (orientation: portrait) {
+  .cine-stage .cine-editorial-caption {
+    letter-spacing: 0;
+  }
+}
+
+@media (max-width: 360px) and (orientation: portrait) {
+  .cine-stage .cine-editorial-caption {
+    margin-bottom: calc(
+      max(8vh, 56px) + 52px + 12px + 48px + var(--op-motto-gap) - var(--editorial-inset-y)
+    );
+  }
+}
+
+/* Under 375px the cue used to step up over SKIP; since SKIP took its own
+   row above ENTER that put the cue under SKIP's plate (TRACE DECEPTION ran
+   beneath スキップ). It keeps the ENTER row's line instead, as on wider
+   phones: that row is empty while the opening plays. */
+@media (max-width: 374px) and (orientation: portrait) {
+  .cine-stage .cine-cue {
+    bottom: calc(var(--cine-bar) + 12px + 14px);
+  }
+}
+
+/* The narrowest short phones (320 x 568): the motto takes two lines and
+   there is no room for them above SKIP, so they sit just under it, in the
+   ENTER row's place, with the cue 6px under them, 12px over the bar. That
+   row is empty while the opening plays, and the motto and the cue have
+   retired before the title holds and ENTER appears. */
+@media (max-width: 359px) and (max-height: 700px) and (orientation: portrait) {
+  .cine-stage .cine-editorial-caption {
+    margin-bottom: calc(var(--cine-bar) + 12px + 20px + 6px - var(--editorial-inset-y));
+  }
+
+  .cine-stage .cine-cue {
+    bottom: calc(var(--cine-bar) + 12px);
+  }
+}
+
 @media (max-height: 560px) and (orientation: landscape) {
   .cine-stage .cine-btn {
     min-height: 44px;
