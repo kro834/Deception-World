@@ -11,37 +11,37 @@ const hash = (x, y, salt) => {
 };
 const fade = (t) => t * t * t * (t * (t * 6 - 15) + 10);
 
-function gradient(ix, iy, period, salt, out) {
-  const angle = hash(ix % period, iy % period, salt) * Math.PI * 2;
-  out[0] = Math.cos(angle);
-  out[1] = Math.sin(angle);
-}
-
 /** Builds the RGBA noise bytes (size*size*4). */
 export function buildNoiseTable(size = NOISE_SIZE) {
   const out = new Uint8Array(size * size * 4);
-  const g = new Float64Array(2);
   for (let channel = 0; channel < 4; channel += 1) {
     const period = NOISE_PERIODS[channel];
     const salt = 3.7 + channel * 11.3;
+    // The lattice's unit gradients, once per cell corner.
+    const gx = new Float64Array(period * period);
+    const gy = new Float64Array(period * period);
+    for (let iy = 0; iy < period; iy += 1)
+      for (let ix = 0; ix < period; ix += 1) {
+        const angle = hash(ix, iy, salt) * Math.PI * 2;
+        gx[iy * period + ix] = Math.cos(angle);
+        gy[iy * period + ix] = Math.sin(angle);
+      }
+    const cell = size / period;
     for (let y = 0; y < size; y += 1) {
-      const py = (y / size) * period;
-      const iy = Math.floor(py);
-      const fy = py - iy;
+      const iy = Math.floor(y / cell);
+      const fy = (y - iy * cell) / cell;
       const vy = fade(fy);
+      const row0 = iy * period;
+      const row1 = ((iy + 1) % period) * period;
       for (let x = 0; x < size; x += 1) {
-        const px = (x / size) * period;
-        const ix = Math.floor(px);
-        const fx = px - ix;
+        const ix = Math.floor(x / cell);
+        const fx = (x - ix * cell) / cell;
         const vx = fade(fx);
-        gradient(ix, iy, period, salt, g);
-        const n00 = g[0] * fx + g[1] * fy;
-        gradient(ix + 1, iy, period, salt, g);
-        const n10 = g[0] * (fx - 1) + g[1] * fy;
-        gradient(ix, iy + 1, period, salt, g);
-        const n01 = g[0] * fx + g[1] * (fy - 1);
-        gradient(ix + 1, iy + 1, period, salt, g);
-        const n11 = g[0] * (fx - 1) + g[1] * (fy - 1);
+        const ix1 = (ix + 1) % period;
+        const n00 = gx[row0 + ix] * fx + gy[row0 + ix] * fy;
+        const n10 = gx[row0 + ix1] * (fx - 1) + gy[row0 + ix1] * fy;
+        const n01 = gx[row1 + ix] * fx + gy[row1 + ix] * (fy - 1);
+        const n11 = gx[row1 + ix1] * (fx - 1) + gy[row1 + ix1] * (fy - 1);
         const nx0 = n00 + (n10 - n00) * vx;
         const nx1 = n01 + (n11 - n01) * vx;
         const value = nx0 + (nx1 - nx0) * vy;

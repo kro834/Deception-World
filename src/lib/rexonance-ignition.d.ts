@@ -27,3 +27,12 @@ export function fireFragmentPose<T extends Float32Array | Float64Array>(
   phase: number,
   out: T,
 ): T;
+export function paintBodySilhouette<T extends Uint8Array | Uint8ClampedArray>(
+  alpha: T,
+  w: number,
+  h: number,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+): T;

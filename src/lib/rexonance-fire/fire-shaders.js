@@ -61,50 +61,54 @@ void main() {
   float cover = uLife.x;
   float m = uLife.y;
   float b = uLife.z;
-  // The engulf front, with a noisy branching edge that creeps upward.
+  // The engulf front, with a noisy branching edge that creeps upward; the
+  // freshly lit band flares, and the oldest fire burns clean first.
   float ne = texture2D(uNoise, pw * ${f(T.edgeScale)} + vec2(0.0, t * ${f(T.edgeSpeed)})).g;
   float aEff = arrival + (ne - 0.5) * ${f(T.edgeAmp)};
   float fresh = clamp((cover - aEff) / ${f(T.frontWidth)}, 0.0, 1.0);
   float lit = fresh * fresh * (3.0 - 2.0 * fresh);
   float age = clamp((cover - aEff) / ${f(T.ageSpan)}, 0.0, 1.0);
   float mLocal = m * (age + (1.0 - age) * m * m);
-  float flare = 1.0 + 6.4 * lit * (1.0 - lit) * (1.0 - mLocal);
-  // The envelope: how far above the surface this pixel lies.
-  vec4 na = texture2D(uNoise, pw * 0.9 + vec2(0.0, t * 0.35));
-  float grow = 1.0 + ${f(T.burstReach)} * b;
-  float reachS = (${f(T.reachSide)} + ${f(T.reachSideNoise)} * na.r) * grow;
-  float reachU = (${f(T.reachUp)} + ${f(T.reachUpNoise)} * na.g) * grow;
-  float env = clamp(max(1.0 - d / reachS, 1.0 - lift / reachU), 0.0, 1.0);
-  env = max(env, skin);
-  // Turbulence advected upward, faster away from the body, domain-warped.
-  float speed = (${f(T.flowBase)} + ${f(T.flowAccel)} * (1.0 - env)) * (1.0 - 0.25 * mLocal);
+  float flare = 1.0 + 4.0 * lit * (1.0 - lit) * (1.0 - mLocal);
+  // Height above the surface: straight down to the body below, or the
+  // weighted sideways distance; the skin itself is height zero.
+  float height = min(max(lift, d), d * ${f(T.sideWeight)}) * (1.0 - skin);
+  vec4 na = texture2D(uNoise, pw * 0.7 + vec2(0.0, t * 0.3));
+  float reach = (${f(T.reachUp)} + ${f(T.reachUpNoise)} * na.r) * (1.0 + ${f(T.burstReach)} * b);
+  float fall = clamp(height / reach, 0.0, 1.0);
+  // Turbulence advected upward, faster with height, vertically stretched
+  // and gently warped; the clean flame is calmer and more laminar.
+  float speed = (${f(T.flowBase)} + ${f(T.flowAccel)} * fall) * (1.0 - 0.3 * mLocal);
   vec2 pwarp = pw * ${f(T.warpScale)} + vec2(0.0, t * ${f(T.warpSpeed)});
   vec2 warp = vec2(texture2D(uNoise, pwarp).r, texture2D(uNoise, pwarp + vec2(0.37, 0.61)).r) - 0.5;
-  vec2 pn = (pw + warp * ${f(T.warpAmp)} * (1.0 - 0.5 * mLocal)) * ${f(T.noiseScale)}
-    + vec2(0.0, t * speed * ${f(T.noiseScale)});
+  vec2 pn = (pw + warp * ${f(T.warpAmp)} * (1.0 - 0.5 * mLocal)) * ${f(T.noiseScale)};
+  pn.y = (pn.y + t * speed * ${f(T.noiseScale)}) / ${f(T.stretch)};
   vec4 s = texture2D(uNoise, pn);
   float nAll = dot(s, uOctaves);
   float nLow = s.r * 0.6667 + s.g * 0.3333;
-  float n = mix(nAll, nLow, 0.6 * mLocal);
-  float hi = mix(${f(T.threshHiAir)}, ${f(T.threshHiSurface)}, env);
-  float shaped = n * (0.75 + 0.55 * env) - (1.0 - env) * 0.95;
-  float dens = smoothstep(${f(T.threshLo)}, hi, shaped) * pow(env, 0.35);
+  float n = (mix(nAll, nLow, 0.6 * mLocal) - 0.5) * ${f(T.gain)} + 0.5;
+  // Density: only noise peaks survive with height, as tongues that narrow,
+  // tear and vanish; a sharp base and a soft top.
+  float shaped = n - mix(${f(T.bias)}, ${f(T.biasSkin)}, skin) - fall * ${f(T.fall)};
+  float soft = mix(${f(T.softBase)}, ${f(T.softTop)}, fall) * (1.0 + 0.6 * mLocal);
   float dissolve = 1.0 - smoothstep(0.0, ${f(T.burstDissolve)}, b);
-  dens *= lit * dissolve;
+  float dens = smoothstep(0.0, soft, shaped) * lit * dissolve;
   // Flicker: a global 8–14 Hz beat and fast local intermittency.
   float nf = texture2D(uNoise, pw * ${f(T.localScale)} + vec2(0.0, t * ${f(T.localSpeed)})).b;
   float calm = 1.0 - 0.65 * mLocal;
   float flick = (1.0 + ${f(T.flickerGlobal)} * calm * (sin(t * 60.9) + 0.6 * sin(t * 83.6 + 1.7)))
     * (1.0 - ${f(T.flickerLocal)} * calm * 0.5 + ${f(T.flickerLocal)} * calm * nf);
-  float rim = exp(-(din + d) / ${f(T.rim)});
-  float temp = dens * (0.4 + 0.6 * env) * flare;
-  temp = temp * (0.75 + 0.25 * rim) + rim * lit * dissolve * 0.35;
+  // Temperature: hot at the base and in moving patches over the skin, cool
+  // at the tips; the silhouette seen edge-on glows a little brighter.
+  float nt = texture2D(uNoise, pw * ${f(T.patchScale)} + vec2(0.0, t * ${f(T.patchSpeed)})).a;
+  float rim = exp(-(din + d) / ${f(T.rim)}) * ${f(T.rimGain)};
+  float temp = dens * (1.0 - ${f(T.tipCool)} * fall) * (1.0 - ${f(T.patch)} + ${f(T.patch)} * nt) * flare * (1.0 + rim);
   temp = clamp(temp * flick, 0.0, 1.0);
   vec3 colour = mix(rampSooty(temp), rampClean(temp), mLocal);
-  float emit = clamp(dens * flick, 0.0, 1.0) * (1.0 - 0.15 * mLocal);
+  float emit = clamp(dens * flick * (1.0 + rim), 0.0, 1.0) * (1.0 - 0.15 * mLocal);
   float share = mix(1.0 - ${f(T.frontShare)} * skin, ${f(T.frontShare)} * skin, layer);
   vec3 E = colour * emit * share;
-  float absorb = dens * (${f(T.absorbSooty)} * (1.0 - mLocal) + ${f(T.absorbClean)}) * share;
+  float absorb = dens * (1.0 - 0.5 * temp) * (${f(T.absorbSooty)} * (1.0 - mLocal) + ${f(T.absorbClean)}) * share;
   if (layer < 0.5) {
     float bloom = uLife.w * exp(-d / ${f(T.flashReach)});
     E += vec3(0.75, 0.92, 1.0) * bloom * 1.2;
@@ -127,7 +131,7 @@ attribute vec2 aCentre;
 attribute vec2 aCorner;
 attribute vec4 aData;
 uniform vec4 uRect;
-uniform vec2 uSpark;
+uniform mediump vec2 uSpark;
 varying vec2 vCorner;
 varying float vHeat;
 void main() {
@@ -147,7 +151,7 @@ export const SPARK_FRAGMENT = `
 precision mediump float;
 varying vec2 vCorner;
 varying float vHeat;
-uniform vec2 uSpark;
+uniform mediump vec2 uSpark;
 ${ramp("rampHeat", RAMP_HEAT)}
 void main() {
   float r2 = dot(vCorner, vCorner);

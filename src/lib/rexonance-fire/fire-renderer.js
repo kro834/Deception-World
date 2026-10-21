@@ -185,8 +185,8 @@ export function drawFireLayer(state, pose, layer, x, y, w, h) {
   gl.uniform4f(state.uLife, pose[POSE_COVER], pose[POSE_MIX], pose[POSE_BURST], pose[POSE_FLASH]);
   gl.uniform4f(state.uClock, pose[POSE_TIME], pose[POSE_STRENGTH], layer, 0);
   gl.uniform2f(state.uRing, pose[POSE_RING_RADIUS], pose[POSE_RING_STRENGTH]);
-  if (pose[POSE_DETAIL] > 0.5) gl.uniform4f(state.uOctaves, 0.5333, 0.2667, 0.1333, 0.0667);
-  else gl.uniform4f(state.uOctaves, 0.6, 0.3, 0.1, 0);
+  if (pose[POSE_DETAIL] > 0.5) gl.uniform4f(state.uOctaves, 0.6, 0.3, 0.1, 0);
+  else gl.uniform4f(state.uOctaves, 0.7, 0.3, 0, 0);
   gl.bindBuffer(gl.ARRAY_BUFFER, state.quad);
   gl.enableVertexAttribArray(state.aPos);
   gl.vertexAttribPointer(state.aPos, 2, gl.FLOAT, false, 0, 0);

@@ -31,6 +31,8 @@ export const FIELD_BODY = Object.freeze({
 });
 
 const INSIDE_ALPHA = 96;
+const LIFT_BLUR = 4;
+const LIFT_CAP = 1e6;
 const SQRT2 = Math.SQRT2;
 const INF = 1e9;
 
@@ -83,33 +85,68 @@ function chamfer(seed, label, w, h, dist, carried) {
     dist[i] = seed[i] ? 0 : INF;
     carried[i] = seed[i] ? label[i] : 0;
   }
-  const relax = (i, j, cost) => {
-    const d = dist[j] + cost;
-    if (d < dist[i]) {
-      dist[i] = d;
-      carried[i] = carried[j];
-    }
-  };
-  for (let y = 0; y < h; y += 1)
+  for (let y = 0; y < h; y += 1) {
+    const row = y * w;
     for (let x = 0; x < w; x += 1) {
-      const i = y * w + x;
-      if (x > 0) relax(i, i - 1, 1);
+      const i = row + x;
+      let best = dist[i];
+      let from = -1;
+      let d;
+      if (x > 0 && (d = dist[i - 1] + 1) < best) {
+        best = d;
+        from = i - 1;
+      }
       if (y > 0) {
-        relax(i, i - w, 1);
-        if (x > 0) relax(i, i - w - 1, SQRT2);
-        if (x < w - 1) relax(i, i - w + 1, SQRT2);
+        if ((d = dist[i - w] + 1) < best) {
+          best = d;
+          from = i - w;
+        }
+        if (x > 0 && (d = dist[i - w - 1] + SQRT2) < best) {
+          best = d;
+          from = i - w - 1;
+        }
+        if (x < w - 1 && (d = dist[i - w + 1] + SQRT2) < best) {
+          best = d;
+          from = i - w + 1;
+        }
+      }
+      if (from >= 0) {
+        dist[i] = best;
+        carried[i] = carried[from];
       }
     }
-  for (let y = h - 1; y >= 0; y -= 1)
+  }
+  for (let y = h - 1; y >= 0; y -= 1) {
+    const row = y * w;
     for (let x = w - 1; x >= 0; x -= 1) {
-      const i = y * w + x;
-      if (x < w - 1) relax(i, i + 1, 1);
+      const i = row + x;
+      let best = dist[i];
+      let from = -1;
+      let d;
+      if (x < w - 1 && (d = dist[i + 1] + 1) < best) {
+        best = d;
+        from = i + 1;
+      }
       if (y < h - 1) {
-        relax(i, i + w, 1);
-        if (x < w - 1) relax(i, i + w + 1, SQRT2);
-        if (x > 0) relax(i, i + w - 1, SQRT2);
+        if ((d = dist[i + w] + 1) < best) {
+          best = d;
+          from = i + w;
+        }
+        if (x < w - 1 && (d = dist[i + w + 1] + SQRT2) < best) {
+          best = d;
+          from = i + w + 1;
+        }
+        if (x > 0 && (d = dist[i + w - 1] + SQRT2) < best) {
+          best = d;
+          from = i + w - 1;
+        }
+      }
+      if (from >= 0) {
+        dist[i] = best;
+        carried[i] = carried[from];
       }
     }
+  }
 }
 
 /**
@@ -136,8 +173,8 @@ export function buildFireField(alpha, w, h, out) {
 
   // Geodesic climb over the body from the soles (the lowest 2.5% of it).
   const arrival = new Float32Array(n).fill(INF);
-  const keys = new Float32Array(n * 8);
-  const ids = new Int32Array(n * 8);
+  const keys = new Float32Array(n * 3);
+  const ids = new Int32Array(n * 3);
   let size = 0;
   const soles = bottom - Math.max(1, Math.round((bottom - top) * 0.025));
   for (let i = 0; i < n; i += 1)
@@ -187,21 +224,38 @@ export function buildFireField(alpha, w, h, out) {
   const unused = new Float32Array(n);
   chamfer(air, unused, w, h, insideDist, unused);
 
-  const scaleD = 255 / (FIELD_D * (w / FIRE_RECT.width));
-  const scaleIn = 255 / (FIELD_IN * (w / FIRE_RECT.width));
+  // Lift: the distance straight down to the first body texel below, then
+  // blurred sideways so a plume's column has no hard edges.
+  const lift = new Float32Array(n);
   for (let x = 0; x < w; x += 1) {
-    // Lift: the distance straight down to the first body texel below.
     let below = INF;
     for (let y = h - 1; y >= 0; y -= 1) {
       const i = y * w + x;
       if (inside[i]) below = y;
-      const lift = inside[i] ? 0 : below - y;
-      const k = i * 4;
-      out[k] = Math.min(255, Math.round(outsideDist[i] * scaleD));
-      out[k + 1] = Math.round(outsideArrival[i] * 255);
-      out[k + 2] = Math.min(255, Math.round(lift * scaleD));
-      out[k + 3] = inside[i] ? Math.min(255, Math.round(insideDist[i] * scaleIn)) : 0;
+      lift[i] = inside[i] ? 0 : Math.min(below - y, LIFT_CAP);
     }
+  }
+  const blurred = new Float32Array(n);
+  for (let y = 0; y < h; y += 1)
+    for (let x = 0; x < w; x += 1) {
+      let sum = 0;
+      let count = 0;
+      for (let k = -LIFT_BLUR; k <= LIFT_BLUR; k += 1) {
+        const xx = x + k;
+        if (xx < 0 || xx >= w) continue;
+        sum += lift[y * w + xx];
+        count += 1;
+      }
+      blurred[y * w + x] = sum / count;
+    }
+  const scaleD = 255 / (FIELD_D * (w / FIRE_RECT.width));
+  const scaleIn = 255 / (FIELD_IN * (w / FIRE_RECT.width));
+  for (let i = 0; i < n; i += 1) {
+    const k = i * 4;
+    out[k] = Math.min(255, Math.round(outsideDist[i] * scaleD));
+    out[k + 1] = Math.round(outsideArrival[i] * 255);
+    out[k + 2] = Math.min(255, Math.round(blurred[i] * scaleD));
+    out[k + 3] = inside[i] ? Math.min(255, Math.round(insideDist[i] * scaleIn)) : 0;
   }
   return true;
 }

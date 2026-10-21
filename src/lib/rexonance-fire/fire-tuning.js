@@ -3,40 +3,51 @@
 // same expressions with them (fire-raster.js), so a frame of either path is
 // the same closed-form function of (phase, seed); the clock only flickers.
 export const FIRE_TUNING = Object.freeze({
-  // Reach of the flame envelope above the body, in figure widths: sideways
-  // licks, and plumes rising above surfaces that face upward.
-  reachSide: 0.075,
-  reachSideNoise: 0.075,
+  // Height above the surface, in figure widths: flames rise, so vertical
+  // distance to the body below counts once and sideways distance counts
+  // sideWeight times. Plume heights vary with a large slow noise.
+  sideWeight: 2.6,
   reachUp: 0.16,
-  reachUpNoise: 0.34,
+  reachUpNoise: 0.5,
   // Upward advection of the turbulence (widths per second), accelerating
-  // away from the surface, and its slow domain warp.
-  flowBase: 0.42,
-  flowAccel: 0.5,
-  warpScale: 0.8,
-  warpAmp: 0.32,
-  warpSpeed: 0.22,
-  noiseScale: 1.6,
+  // with height; the noise is stretched vertically and gently warped.
+  flowBase: 0.7,
+  flowAccel: 0.7,
+  noiseScale: 1,
+  stretch: 2.2,
+  warpScale: 0.55,
+  warpAmp: 0.09,
+  warpSpeed: 0.16,
   // The engulf front's irregular, branching edge.
   edgeScale: 2.2,
   edgeAmp: 0.16,
   edgeSpeed: 0.12,
   frontWidth: 0.07,
   ageSpan: 0.35,
-  // Density threshold: sharp at the base, soft at the torn top.
-  threshLo: 0.02,
-  threshHiSurface: 0.25,
-  threshHiAir: 0.5,
+  // Density: contrast-boosted noise minus height; a sharp base and a
+  // soft, torn top; the skin keeps holes the suit shows through.
+  gain: 1.9,
+  bias: 0.12,
+  biasSkin: 0.4,
+  fall: 0.72,
+  softBase: 0.12,
+  softTop: 0.3,
+  // Temperature: hot at the base, cool at the tips, patchy over the skin.
+  tipCool: 0.65,
+  patch: 0.45,
+  patchScale: 1.6,
+  patchSpeed: 1.2,
   // 8–14 Hz global flicker and fast local intermittency.
   flickerGlobal: 0.1,
-  flickerLocal: 0.44,
-  localScale: 5,
+  flickerLocal: 0.3,
+  localScale: 2.5,
   localSpeed: 3.5,
-  // Silhouette rim (widths) and the suit-skin/plume layer split.
+  // The silhouette's edge-on brightening and the skin/plume layer split.
   rim: 0.03,
+  rimGain: 0.18,
   frontShare: 0.7,
   // Sooty absorption of the green fire (clean fire is nearly transparent).
-  absorbSooty: 0.3,
+  absorbSooty: 0.45,
   absorbClean: 0.06,
   // 爆散: the envelope blows outward and dissolves; a body-shaped shock
   // ring and a flash leave the figure.

@@ -100,6 +100,44 @@ export function sampleFlameBirth(seed, out) {
   return out;
 }
 
+// Capsules of the default silhouette: the six chip-birth paths, a wider
+// head, and the shoulder bars that join the arms to the torso.
+const SILHOUETTE = new Float32Array([
+  0.5, 0.09, 0.5, 0.2, 0.055, 0.5, 0.215, 0.5, 0.43, 0.082, 0.307, 0.265, 0.172, 0.55, 0.024, 0.69,
+  0.265, 0.825, 0.55, 0.024, 0.397, 0.48, 0.267, 0.96, 0.032, 0.6, 0.48, 0.73, 0.96, 0.032, 0.5,
+  0.25, 0.307, 0.265, 0.03, 0.5, 0.25, 0.69, 0.265, 0.03,
+]);
+
+/** Paints the authored body (capsules along the same paths the chips are
+ * born on) as a silhouette alpha into `alpha` (w×h bytes), with the figure
+ * occupying the rectangle (x, y, width, height) in that grid. The fire can
+ * then burn even when no undersuit image was prepared. */
+export function paintBodySilhouette(alpha, w, h, x, y, width, height) {
+  const aspect = height / width;
+  for (let row = 0; row < h; row += 1) {
+    const py = (row + 0.5 - y) / height;
+    for (let column = 0; column < w; column += 1) {
+      const px = (column + 0.5 - x) / width;
+      let best = Infinity;
+      for (let k = 0; k < SILHOUETTE.length; k += 5) {
+        const ax = SILHOUETTE[k];
+        const ay = SILHOUETTE[k + 1];
+        const dx = SILHOUETTE[k + 2] - ax;
+        const dy = (SILHOUETTE[k + 3] - ay) * aspect;
+        const length = dx * dx + dy * dy || 1;
+        const t = clamp(((px - ax) * dx + (py - ay) * aspect * dy) / length);
+        const ex = px - (ax + dx * t);
+        const ey = (py - ay) * aspect - dy * t;
+        const distance = Math.sqrt(ex * ex + ey * ey) - SILHOUETTE[k + 4];
+        if (distance < best) best = distance;
+      }
+      alpha[row * w + column] =
+        best < 0 ? 255 : best < 0.012 ? Math.round(255 * (1 - best / 0.012)) : 0;
+    }
+  }
+  return alpha;
+}
+
 /** Shared phase: entry t/2400; scroll (q-.015)/.285. The fire's overall
  * radiance: it fades in with the kindle, holds through the engulf and the
  * torch, then dies away through the detonation as its fragments cool. The
@@ -126,7 +164,9 @@ export function naniteEngulf(phase) {
   const P = NANITE_FIRE_PHASES;
   if (phase < P.kindle) return KINDLE_COVER * smooth(phase / P.kindle);
   if (phase < P.cover)
-    return KINDLE_COVER + (COVER_OVERSHOOT - KINDLE_COVER) * ((phase - P.kindle) / (P.cover - P.kindle));
+    return (
+      KINDLE_COVER + (COVER_OVERSHOOT - KINDLE_COVER) * ((phase - P.kindle) / (P.cover - P.kindle))
+    );
   // Still creeping over the torch: no frozen front while the colour turns.
   return COVER_OVERSHOOT + 0.08 * clamp((phase - P.cover) / (P.burstStart - P.cover));
 }
@@ -161,7 +201,8 @@ export const NANITE_FIRE_FRAGMENTS = 144;
 const FRAGMENT_DRAG = 4.5;
 const FRAGMENT_SETTLE = 1 - Math.exp(-FRAGMENT_DRAG);
 const BODY_ASPECT = 1040 / 571;
-const fragmentHash = (seed, salt) => {
+// A pure function of the seed (no random state): each fragment's jitter.
+const fragmentJitter = (seed, salt) => {
   const x = Math.sin(seed * 127.1 + salt * 311.7) * 43758.5453;
   return x - Math.floor(x);
 };
@@ -179,10 +220,10 @@ export function fireFragmentPose(seed, phase, out) {
   const by = out[1];
   const nx = out[2];
   const ny = out[3];
-  const h1 = fragmentHash(s, 1.3);
-  const h2 = fragmentHash(s, 2.7);
-  const h3 = fragmentHash(s, 3.9);
-  const h4 = fragmentHash(s, 5.1);
+  const h1 = fragmentJitter(s, 1.3);
+  const h2 = fragmentJitter(s, 2.7);
+  const h3 = fragmentJitter(s, 3.9);
+  const h4 = fragmentJitter(s, 5.1);
   const P = NANITE_FIRE_PHASES;
   const span = P.flameEnd - P.burstStart;
   const u = Number.isFinite(phase) ? clamp((phase - P.burstStart) / span) : 0;
@@ -197,13 +238,14 @@ export function fireFragmentPose(seed, phase, out) {
   const along = (travel * (1 - decay)) / FRAGMENT_SETTLE;
   const rate = (travel * FRAGMENT_DRAG * decay) / FRAGMENT_SETTLE / span;
   // Gravity sags the slower, heavier fragments (W units, then to H units).
-  const sag = 0.05 * u * u;
+  const sag = 0.05 * u * (2 - u);
   out[0] = bx + dx * along;
   out[1] = by + (dy * along + sag) / BODY_ASPECT;
   out[2] = u > 0 && u < 1 ? dx * rate : 0;
-  out[3] = u > 0 && u < 1 ? (dy * rate + (0.1 * u) / span) / BODY_ASPECT : 0;
-  const cool = (P.materialStart - P.burstStart) / span + h2 * (1 - (P.materialStart - P.burstStart) / span);
+  out[3] = u > 0 && u < 1 ? (dy * rate + (0.1 * (1 - u)) / span) / BODY_ASPECT : 0;
+  const cool =
+    (P.materialStart - P.burstStart) / span + h2 * (1 - (P.materialStart - P.burstStart) / span);
   out[4] = u > 0 ? Math.pow(clamp(1 - u / cool), 0.8) : 0;
-  out[5] = (0.012 + 0.012 * h3) * (1 - 0.45 * u);
+  out[5] = (0.02 + 0.016 * h3) * (1 - 0.45 * u);
   return out;
 }
