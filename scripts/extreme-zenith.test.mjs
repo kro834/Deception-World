@@ -89,6 +89,11 @@ test("the tape's figures never run under their result plates, and the slants cut
   // The P14 dials: the unit etched small beside the number.
   assert.equal(declaration(find("> #p14 .rxs-p14-copy dd:has(> .exi-figure)"), "font-size"), "15px");
   assert.equal(declaration(find("> #p14 .rxs-p14-copy dd > .exi-figure"), "font-size"), "clamp(26px, 2.8vw, 38px)");
+  // Below 1280px the dials stack across the copy column (two were 108–246px wide).
+  assert.equal(
+    declaration(find("> #p14 .rxs-p14-copy dl", "(min-width: 681px) and (max-width: 1279px)"), "grid-template-columns"),
+    "minmax(0, 1fr)",
+  );
 });
 
 test("floors: HUD labels at 12px or more, one-line titles at 320px, rings inside slanted controls", () => {

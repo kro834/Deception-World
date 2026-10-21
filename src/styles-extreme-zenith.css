@@ -691,6 +691,17 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page > #p14 .rxs-p14-cop
   letter-spacing: 0.01em;
 }
 
+/* Tablets and small laptops: the copy column holds two dials only 108–246px
+   wide, where KOSMOS Ultra broke inside its word, 20,000 ran past the dial
+   at 700px and YOPS dropped under its number. The dials stack, each across
+   the column, every readout on one line. */
+@media (min-width: 681px) and (max-width: 1279px) {
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page > #p14 .rxs-p14-copy dl {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+}
+
 html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-core-flow > span small {
   font-size: 12px;
   letter-spacing: 0.12em;
