@@ -13,7 +13,10 @@
   color: #f4ecdc;
   background: #0d0912;
   overflow: hidden;
-  font-family: "Shippori Mincho", "Yu Mincho", serif;
+  font-family: "Shippori Mincho", "Yu Mincho", "Hiragino Mincho ProN", "Noto Serif JP", serif;
+  --screen-latin: "Cinzel", "Shippori Mincho", "Yu Mincho", "Hiragino Mincho ProN", serif;
+  --screen-display:
+    "Shippori Mincho B1", "Shippori Mincho", "Yu Mincho", "Hiragino Mincho ProN", serif;
 }
 
 .dream-screening-dialog::backdrop {
@@ -66,32 +69,31 @@
 .dream-screening-title > span {
   display: block;
   color: #e6c28e;
-  font:
-    600 10px/1.3 Georgia,
-    serif;
-  letter-spacing: 0.16em;
+  font: 600 12px/1.3 var(--screen-latin);
+  letter-spacing: 0.18em;
   white-space: nowrap;
   text-shadow: 0 1px 8px rgb(200 164 92 / 24%);
 }
 .dream-screening-title h2 {
   margin: 2px 0 0;
   color: #f6e7c1;
+  font-family: var(--screen-display);
   font-size: clamp(17px, 2.5vw, 27px);
+  font-weight: 800;
   line-height: 1.1;
   letter-spacing: 0.25em;
   text-shadow:
     0 2px 18px rgb(200 164 92 / 28%),
     0 2px 14px rgb(0 0 0 / 60%);
 }
+/* One line, "01 / 15", with the reel bar beneath: block flow keeps the
+   count readable as a sentence (a grid put each part on its own row). */
 .dream-screening-count {
-  display: grid;
-  gap: 5px;
-  justify-items: center;
+  display: block;
   flex: none;
+  text-align: center;
   color: #f0d7a7;
-  font:
-    600 14px/1 Georgia,
-    serif;
+  font: 600 14px/1 var(--screen-latin);
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.14em;
 }
@@ -102,6 +104,7 @@
   display: block;
   width: 68px;
   height: 3px;
+  margin: 6px auto 0;
   border: 1px solid rgb(200 164 92 / 42%);
   background: rgb(10 7 14 / 85%);
   overflow: hidden;
@@ -174,6 +177,7 @@
 }
 
 .dream-screening-stage {
+  position: relative;
   display: grid;
   grid-template-columns: 52px minmax(0, 1fr) 52px;
   align-items: stretch;
@@ -185,9 +189,7 @@
   align-self: center;
   width: 100%;
   height: 52px;
-  font:
-    24px/1 Georgia,
-    serif;
+  font: 24px/1 var(--screen-latin);
 }
 .dream-screening-picture {
   display: grid;
@@ -264,9 +266,7 @@
 }
 .dream-screening-spec {
   color: #e6c28e;
-  font:
-    600 10px/1.2 Georgia,
-    serif;
+  font: 600 12px/1.3 var(--screen-latin);
   letter-spacing: 0.14em;
 }
 .dream-screening-actions {
@@ -275,16 +275,19 @@
   gap: 8px;
   flex: none;
 }
-.dream-screening-ambience,
-.dream-screening-zoom {
+.dream-screening-dialog .dream-screening-ambience,
+.dream-screening-dialog .dream-screening-zoom {
   padding: 0 12px;
   white-space: nowrap;
-  font-size: 12px !important;
+  font-size: 13px;
 }
-.dream-screening-ambience[aria-pressed="true"],
-.dream-screening-zoom[aria-pressed="true"] {
+.dream-screening-dialog .dream-screening-ambience[aria-pressed="true"],
+.dream-screening-dialog .dream-screening-zoom[aria-pressed="true"] {
   color: #241821;
-  background: linear-gradient(180deg, #f5e6c5 0%, #e2cda4 100%);
+  border-color: #f3e0b0;
+  background:
+    linear-gradient(#79353c 0 0) 0 0 / 12px 2px no-repeat,
+    linear-gradient(180deg, #f5e6c5 0%, #e2cda4 100%);
 }
 .dream-screening-message {
   display: flex;
@@ -346,22 +349,20 @@
   color: #f6e7c1;
   border: 1px solid rgb(200 164 92 / 42%);
   background: rgb(13 9 18 / 86%);
-  font:
-    10px/1.3 Georgia,
-    serif;
+  font: 12px/1.3 var(--screen-latin);
 }
 
 @media (max-width: 540px) {
   .dream-screening-header {
     min-height: 52px;
   }
+  /* The kicker yields to the title on a phone; 映写室 and the reel count stay. */
   .dream-screening-title > span {
-    font-size: 8px;
-    letter-spacing: 0.07em;
+    display: none;
   }
   .dream-screening-count {
     font-size: 12px;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.06em;
   }
   .dream-screening-close {
     padding: 0 4px;
@@ -369,11 +370,48 @@
   .dream-screening-close > span:last-child {
     display: none;
   }
+  /* The picture takes the whole width; the arrows ride its lower corners
+     on translucent lacquer, as a lightbox's do. */
   .dream-screening-stage {
-    grid-template-columns: 44px minmax(0, 1fr) 44px;
+    grid-template-columns: minmax(0, 1fr);
+    padding-inline: 6px;
   }
   .dream-screening-stage > .dream-screening-arrow {
-    height: 44px;
+    position: absolute;
+    bottom: calc(clamp(8px, 1.8vh, 20px) + 10px);
+    z-index: 1;
+    width: 44px;
+    height: 48px;
+    border-color: rgb(200 164 92 / 62%);
+    background:
+      linear-gradient(#e6c28e 0 0) 0 0 / 12px 2px no-repeat,
+      rgb(13 9 18 / 78%);
+  }
+  .dream-screening-stage > .dream-screening-arrow:first-child {
+    left: 16px;
+  }
+  .dream-screening-stage > .dream-screening-arrow:last-child {
+    right: 16px;
+  }
+  /* The caption takes the row; the two lamps sit under it, side by side. */
+  .dream-screening-controls {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+    padding-block: 8px 6px;
+  }
+  .dream-screening-caption {
+    font-size: 13px;
+  }
+  .dream-screening-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .dream-screening-dialog .dream-screening-ambience,
+  .dream-screening-dialog .dream-screening-zoom {
+    width: 100%;
+    padding-inline: 8px;
   }
   .dream-screening-filmstrip {
     height: 70px;

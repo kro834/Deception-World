@@ -16,8 +16,8 @@
       - The case fold's CASE caption sat on its numeral's outline. */
 
 html[data-family="dream"] main.dream-page.dream-page {
-  --zn-latin: "Cinzel", "Shippori Mincho", "Yu Mincho", "Hiragino Mincho ProN", "Noto Serif JP",
-    serif;
+  --zn-latin:
+    "Cinzel", "Shippori Mincho", "Yu Mincho", "Hiragino Mincho ProN", "Noto Serif JP", serif;
   --zn-ink: #2d2230;
   --zn-kin: #c8a45c;
   --zn-kin-light: #e6c28e;
@@ -34,7 +34,10 @@ html[data-family="dream"] main.dream-page.dream-page {
 /* ----------------------------------------------------------------
    1. 口上 keeps its ink on the paper
    ---------------------------------------------------------------- */
-html[data-family="dream"] main.dream-page.dream-page .dream-prologue-card > p:not(.dream-prologue-sign) {
+html[data-family="dream"]
+  main.dream-page.dream-page
+  .dream-prologue-card
+  > p:not(.dream-prologue-sign) {
   color: var(--zn-ink);
 }
 
@@ -101,4 +104,571 @@ html[data-family="dream"] main.dream-page.dream-page .dream-record-meta span + s
    ---------------------------------------------------------------- */
 html[data-family="dream"] main.dream-page.dream-page .dream-reader .dream-story-case-number {
   row-gap: 7px;
+}
+
+/* ----------------------------------------------------------------
+   4. The reading desk: the room's door, the reader's tray and the
+      six-chapter index were three boxes in three idioms. One piece of
+      furniture now: a gilt frame whose top corners open the desk and whose
+      bottom corners close it, the tray as a ruled band between them.
+   ---------------------------------------------------------------- */
+html[data-family="dream"] main.dream-page.dream-page .dream-reading-entry {
+  margin: 0;
+  padding: clamp(22px, 3.4vw, 36px) clamp(18px, 3.4vw, 40px);
+  border: 1px solid var(--zn-hair);
+  border-bottom: 0;
+  background:
+    linear-gradient(var(--zn-kin-light) 0 0) 0 0 / 44px 2px no-repeat,
+    linear-gradient(var(--zn-kin-light) 0 0) 0 0 / 2px 44px no-repeat,
+    linear-gradient(var(--zn-kin-light) 0 0) 100% 0 / 44px 2px no-repeat,
+    linear-gradient(var(--zn-kin-light) 0 0) 100% 0 / 2px 44px no-repeat,
+    radial-gradient(70% 90% at 12% 0%, rgb(230 194 142 / 14%), transparent 70%),
+    radial-gradient(40% 70% at 92% 100%, rgb(204 73 59 / 10%), transparent 70%),
+    linear-gradient(125deg, #2b1c33 0%, #1d1426 58%, #16101d 100%);
+  box-shadow: inset 0 1px 0 rgb(243 224 176 / 16%);
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-reading-entry p {
+  margin: 0;
+  color: var(--zn-kin-light);
+  font: 600 12px/1.8 var(--zn-latin);
+  letter-spacing: 0.26em;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-reading-entry h3 {
+  margin: 8px 0 6px;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-reading-entry > div > span {
+  color: #d9cdbf;
+  font-size: 14px;
+  line-height: 1.9;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-reading-entry > p[role="status"] {
+  flex-basis: 100%;
+  color: var(--zn-kinari);
+  font: 14px/1.8 var(--ts-text);
+  letter-spacing: 0.02em;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-reader-support {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  gap: 12px clamp(20px, 3vw, 40px);
+  margin: 0;
+  padding: clamp(16px, 2.4vw, 24px) clamp(18px, 3.4vw, 40px);
+  border: 1px solid var(--zn-hair);
+  border-top: 1px solid var(--zn-hair-soft);
+  border-bottom: 0;
+  background: linear-gradient(180deg, rgb(243 224 176 / 4%), transparent 60%), #17101e;
+  box-shadow: none;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-reader-support-heading {
+  grid-column: 1 / -1;
+  margin-bottom: 4px;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-reader-support-heading p {
+  font-size: 16px;
+  letter-spacing: 0.12em;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-reader-support-heading > span {
+  font-family: var(--zn-latin), var(--ts-text);
+  letter-spacing: 0.08em;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-reader-settings {
+  grid-column: 1;
+  align-self: start;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-reader-settings legend {
+  margin-bottom: 8px;
+  color: var(--zn-kin-light);
+  font-size: 13px;
+  letter-spacing: 0.1em;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-reader-bookmark {
+  grid-column: 2;
+  grid-row: 2;
+  align-self: stretch;
+  margin: 0;
+  padding: 2px 0 0 clamp(16px, 2.4vw, 28px);
+  border-top: 0;
+  border-left: 1px solid var(--zn-hair-soft);
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-reader-bookmark p {
+  font-size: 15px;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-reader-bookmark small {
+  color: var(--zn-kin-light);
+  font-family: var(--zn-latin), var(--ts-text);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-reader-storage-note {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-reader-index {
+  margin: 0 0 32px;
+  padding: clamp(16px, 2.4vw, 24px) clamp(18px, 3.4vw, 40px) clamp(20px, 3vw, 32px);
+  border: 1px solid var(--zn-hair);
+  border-top: 1px solid var(--zn-hair-soft);
+  background:
+    linear-gradient(var(--zn-kin-light) 0 0) 0 100% / 44px 2px no-repeat,
+    linear-gradient(var(--zn-kin-light) 0 0) 0 100% / 2px 44px no-repeat,
+    linear-gradient(var(--zn-kin-light) 0 0) 100% 100% / 44px 2px no-repeat,
+    linear-gradient(var(--zn-kin-light) 0 0) 100% 100% / 2px 44px no-repeat,
+    linear-gradient(180deg, #1b1222 0%, #140d1a 100%);
+  box-shadow:
+    inset 0 -1px 0 rgb(200 164 92 / 14%),
+    0 24px 56px rgb(0 0 0 / 40%);
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-reader-index-head p {
+  font-size: 16px;
+  letter-spacing: 0.12em;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-reader-index-head > span {
+  font-family: var(--zn-latin);
+  letter-spacing: 0.18em;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-reader-index-actions button {
+  min-height: 40px;
+  padding-inline: 14px;
+}
+
+@media (hover: none) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-reader-index-actions button,
+  html[data-family="dream"] main.dream-page.dream-page .dream-record-quick-tags button {
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 760px) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-reader-support {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-reader-bookmark {
+    grid-column: 1;
+    grid-row: auto;
+    padding: 14px 0 0;
+    border-left: 0;
+    border-top: 1px solid var(--zn-hair-soft);
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-reader-index {
+    padding: 16px 14px 20px;
+    background:
+      linear-gradient(var(--zn-kin-light) 0 0) 0 100% / 36px 2px no-repeat,
+      linear-gradient(var(--zn-kin-light) 0 0) 0 100% / 2px 36px no-repeat,
+      linear-gradient(var(--zn-kin-light) 0 0) 100% 100% / 36px 2px no-repeat,
+      linear-gradient(var(--zn-kin-light) 0 0) 100% 100% / 2px 36px no-repeat,
+      linear-gradient(180deg, #1b1222 0%, #140d1a 100%);
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-reading-entry {
+    padding: 22px 16px;
+    background:
+      linear-gradient(var(--zn-kin-light) 0 0) 0 0 / 36px 2px no-repeat,
+      linear-gradient(var(--zn-kin-light) 0 0) 0 0 / 2px 36px no-repeat,
+      linear-gradient(var(--zn-kin-light) 0 0) 100% 0 / 36px 2px no-repeat,
+      linear-gradient(var(--zn-kin-light) 0 0) 100% 0 / 2px 36px no-repeat,
+      radial-gradient(70% 90% at 12% 0%, rgb(230 194 142 / 14%), transparent 70%),
+      linear-gradient(125deg, #2b1c33 0%, #1d1426 58%, #16101d 100%);
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-reader-support {
+    padding: 16px;
+  }
+}
+
+/* ----------------------------------------------------------------
+   5. The record explorer sits on the same lacquer as the desk
+   ---------------------------------------------------------------- */
+html[data-family="dream"] main.dream-page.dream-page .dream-record-explorer {
+  border-color: var(--zn-hair);
+  background:
+    linear-gradient(var(--zn-kin-light) 0 0) 0 0 / 44px 2px no-repeat,
+    linear-gradient(var(--zn-kin-light) 0 0) 0 0 / 2px 44px no-repeat,
+    linear-gradient(var(--zn-kin-light) 0 0) 100% 0 / 44px 2px no-repeat,
+    linear-gradient(var(--zn-kin-light) 0 0) 100% 0 / 2px 44px no-repeat,
+    linear-gradient(var(--zn-kin-light) 0 0) 0 100% / 44px 2px no-repeat,
+    linear-gradient(var(--zn-kin-light) 0 0) 0 100% / 2px 44px no-repeat,
+    linear-gradient(var(--zn-kin-light) 0 0) 100% 100% / 44px 2px no-repeat,
+    linear-gradient(var(--zn-kin-light) 0 0) 100% 100% / 2px 44px no-repeat,
+    radial-gradient(64% 52% at 50% 0%, rgb(230 194 142 / 10%), transparent 72%),
+    radial-gradient(40% 44% at 90% 100%, rgb(204 73 59 / 9%), transparent 70%),
+    linear-gradient(180deg, #1c1424 0%, #130d19 56%, #0f0a14 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(243 224 176 / 16%),
+    0 24px 56px rgb(0 0 0 / 40%);
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-record-explorer-heading h3 {
+  font-family: var(--ts-display);
+  letter-spacing: 0.14em;
+  text-shadow: 0 2px 14px rgb(0 0 0 / 50%);
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-record-explorer-heading > span {
+  font-size: 13px;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-record-search > label,
+html[data-family="dream"] main.dream-page.dream-page .dream-record-filters label,
+html[data-family="dream"] main.dream-page.dream-page .dream-record-quick-label {
+  color: var(--zn-kin-light);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-record-quick-tags button {
+  min-height: 40px;
+  font-size: 13px;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-record-count {
+  font-family: var(--ts-text);
+  font-size: 14px;
+}
+
+/* ----------------------------------------------------------------
+   6. The programme tickets keep their small print legible (12px floor)
+   ---------------------------------------------------------------- */
+html[data-family="dream"] main.dream-page.dream-page .dream-programme-ticket-head small,
+html[data-family="dream"] main.dream-page.dream-page .dream-programme-ticket-foot small {
+  font-size: 12px;
+}
+
+/* ----------------------------------------------------------------
+   7. The programme desk on a phone: three tickets as one ticket book
+      (a row each), the dossier rail snaps and shows its next edge, the
+      ledger cells sit two to a row at reading height.
+   ---------------------------------------------------------------- */
+@media (max-width: 760px) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-programme-routes {
+    gap: 0;
+    border: 1px solid var(--zn-hair);
+    background: #170f1e;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-programme-ticket {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-rows: auto;
+    grid-template-areas: "head main foot";
+    align-items: center;
+    column-gap: 12px;
+    min-height: 68px;
+    padding: 10px 14px;
+    border: 0;
+    border-top: 1px solid var(--zn-hair-soft);
+    background:
+      linear-gradient(var(--ticket-accent) 0 0) 0 0 / 3px 100% no-repeat,
+      linear-gradient(90deg, rgb(243 224 176 / 5%), transparent 60%);
+    box-shadow: none;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-programme-ticket:first-child {
+    border-top: 0;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-programme-ticket-head {
+    grid-area: head;
+    flex-direction: column;
+    align-items: start;
+    gap: 2px;
+    min-width: 2.2em;
+  }
+
+  html[data-family="dream"]
+    main.dream-page.dream-page
+    .dream-programme-ticket-head
+    small:last-child {
+    display: none;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-programme-ticket-main {
+    grid-area: main;
+    margin: 0;
+    gap: 10px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-programme-ticket-main > span {
+    width: 34px;
+    height: 34px;
+    font-size: 13px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-programme-ticket strong {
+    font-size: 18px;
+    letter-spacing: 0.08em;
+    line-height: 1.3;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-programme-ticket-foot {
+    grid-area: foot;
+    flex-direction: column;
+    align-items: end;
+    gap: 2px;
+    padding: 0;
+    border: 0;
+    text-align: right;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-programme-ticket-foot small {
+    white-space: nowrap;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-programme-ticket-foot > span {
+    font-size: 16px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-programme-dossier-strip {
+    margin-inline: -16px;
+    padding: 2px 16px 8px;
+    scroll-padding-inline: 16px;
+    scroll-snap-type: x proximity;
+    overscroll-behavior-x: contain;
+    /* The rail fades at its trailing edge: the next chip shows its own edge. */
+    mask-image: linear-gradient(90deg, #000 0, #000 calc(100% - 36px), transparent);
+    -webkit-mask-image: linear-gradient(90deg, #000 0, #000 calc(100% - 36px), transparent);
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-programme-dossier-strip > li {
+    flex-basis: 164px;
+    scroll-snap-align: start;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-programme-ledger-grid {
+    gap: 8px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-programme-ledger-cell {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "code value"
+      "label value";
+    align-items: center;
+    column-gap: 10px;
+    row-gap: 2px;
+    min-height: 64px;
+    padding: 10px 12px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-programme-ledger-code {
+    grid-area: code;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-programme-ledger-value {
+    grid-area: value;
+    flex-direction: column;
+    align-items: end;
+    gap: 0;
+    font-size: 22px;
+    line-height: 1.1;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-programme-ledger-label {
+    grid-area: label;
+  }
+}
+
+/* ----------------------------------------------------------------
+   8. The credits in the end card: the site's footer pill rule reached the
+      names (an inline anchor with 15px of padding drew overlapping ovals).
+      They are the programme's seals now: hairline pills on one baseline.
+   ---------------------------------------------------------------- */
+html[data-family="dream"] main.dream-page.dream-page .dream-credits dd a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 3px 12px;
+  border: 1px solid var(--zn-hair-soft);
+  border-radius: 999px;
+  color: var(--zn-kinari);
+  text-decoration: none;
+  letter-spacing: 0.1em;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-credits dd {
+  gap: 6px 8px;
+  font-size: 15px;
+}
+
+@media (hover: none) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-credits dd a {
+    min-height: 44px;
+    padding-inline: 14px;
+  }
+}
+
+@media (max-width: 760px) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-credits > div {
+    gap: 8px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-credits dd {
+    justify-content: center;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-footer-nav {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    width: 100%;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-footer-nav a {
+    justify-content: center;
+    min-height: 44px;
+    text-align: center;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-footer-nav a:first-child {
+    grid-column: 1 / -1;
+  }
+}
+
+/* ----------------------------------------------------------------
+   9. Rails: the phone rails (case notes, atlas, agents, quotes) show the
+      next plate's edge through a trailing fade, the same hint as the
+      dossier rail. A paint only; the rails keep their snap and scrolling.
+   ---------------------------------------------------------------- */
+@media (max-width: 760px) {
+  html[data-family="dream"]
+    main.dream-page.dream-page
+    :is(.dream-case-notes, .dream-atlas-grid, .dream-quote-band) {
+    mask-image: linear-gradient(90deg, #000 0, #000 calc(100% - 28px), rgb(0 0 0 / 15%));
+    -webkit-mask-image: linear-gradient(90deg, #000 0, #000 calc(100% - 28px), rgb(0 0 0 / 15%));
+  }
+}
+
+/* ----------------------------------------------------------------
+   10. Motion: the desk, the index and the explorer rise once with the
+       page's own reveal (the page sets data-dream-visible when a block
+       crosses the line 12% above the foot of the screen). Full motion only
+       with no reduced-motion preference and outside the economy tier;
+       otherwise every block stands still and visible.
+   ---------------------------------------------------------------- */
+@media (prefers-reduced-motion: no-preference) {
+  html[data-family="dream"]:not([data-world-effects="economy"])
+    main.dream-page.dream-page
+    :is(
+      .dream-reading-entry,
+      .dream-reader-support,
+      .dream-reader-index,
+      .dream-record-explorer
+    )[data-dream-reveal] {
+    transition:
+      opacity 640ms cubic-bezier(0.2, 0.7, 0.1, 1),
+      transform 760ms cubic-bezier(0.2, 0.7, 0.1, 1),
+      clip-path 760ms cubic-bezier(0.2, 0.7, 0.1, 1);
+  }
+
+  html[data-family="dream"]:not([data-world-effects="economy"])
+    main.dream-page.dream-page
+    .dream-reader-support[data-dream-reveal] {
+    transition-delay: 90ms;
+  }
+
+  html[data-family="dream"]:not([data-world-effects="economy"])
+    main.dream-page.dream-page
+    .dream-reader-index[data-dream-reveal] {
+    transition-delay: 160ms;
+  }
+}
+
+/* ----------------------------------------------------------------
+   11. The poster console's door to the screening room reads as the
+       desk's buttons do: gold hairline, kinari face, 44px.
+   ---------------------------------------------------------------- */
+html[data-family="dream"] main.dream-page.dream-page .dream-screening-trigger {
+  font-family: var(--ts-display);
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+/* The same footer rule gave each name a 50px top margin; the seals sit on
+   their row. */
+html[data-family="dream"] main.dream-page.dream-page .dream-credits dd a {
+  margin: 0;
+}
+
+/* ----------------------------------------------------------------
+   12. An open chapter's numeral: the fold's head turns to paper when it
+       opens, and the numeral's digit had turned to dark lacquer red on a
+       dark lacquer box (invisible). On paper the numeral is a shu seal with
+       a kinari digit.
+   ---------------------------------------------------------------- */
+html[data-family="dream"]
+  main.dream-page.dream-page
+  .dream-story-case[open]
+  .dream-story-case-number
+  b {
+  color: var(--zn-kinari);
+  border-color: #a8352c;
+  outline-color: rgb(168 53 44 / 42%);
+  background:
+    radial-gradient(70% 60% at 50% 25%, rgb(243 224 176 / 22%), transparent 75%),
+    linear-gradient(180deg, #b83a30 0%, #a8352c 100%);
+  box-shadow: inset 0 1px 0 rgb(243 224 176 / 30%);
+  opacity: 1;
+}
+
+/* The footer pill rule reached the act links too (50px above each). */
+html[data-family="dream"] main.dream-page.dream-page .dream-footer-nav a {
+  margin: 0;
+}
+
+/* The index seats its bulk toggles beside the head while the DOM keeps them
+   after the six links (Tab from the index reaches CASE 0 first). */
+html[data-family="dream"] main.dream-page.dream-page .dream-reader-index {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "head actions"
+    "list list";
+  align-items: center;
+  column-gap: 16px;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-reader-index-head {
+  grid-area: head;
+  margin-bottom: 14px;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-reader-index-actions {
+  grid-area: actions;
+  margin-bottom: 14px;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-reader-index > ol {
+  grid-area: list;
+}
+
+@media (max-width: 520px) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-reader-index {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "head"
+      "actions"
+      "list";
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-reader-index-head {
+    margin-bottom: 8px;
+  }
 }
