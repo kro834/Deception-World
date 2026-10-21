@@ -242,6 +242,23 @@ test("the state is a pure function of the clock: charge, attractor, tightness, i
   const backward = [850, 760, 700, 520.5, 450, 401, 300].map(at).reverse();
   forward.forEach((state, k) => assert.deepEqual([...state], [...backward[k]]));
   assert.equal(at(Number.NaN)[F.CHARGE], 0);
+  // The groups locked so far, oldest first; the field thinning to the
+  // score's settle floor from the first lock to the last.
+  assert.equal(at(399)[F.LOCKED], 0);
+  assert.equal(at(401)[F.LOCKED], 1);
+  assert.deepEqual([...at(401).subarray(F.LOCK, F.LOCK + 4)], [280, 800, 100, 200]);
+  assert.equal(at(701)[F.LOCKED], 3);
+  assert.deepEqual([...at(701).subarray(F.LOCK + 8, F.LOCK + 12)], [280, 160, 20, 60]);
+  assert.equal(at(300)[F.SETTLE], 1);
+  const thinned = fieldScore({ ...score, groups: [
+    { x: 280, y: 800, from: 250, lock: 400 },
+    { x: 280, y: 160, from: 560, lock: 700 },
+  ], wake: [100, 200], collapse: [700, 800], detonate: [800, 900], end: 900, origin: [284.2, 275.3], impulse: 100, settle: 0.3 });
+  const thin = fieldStateBuffer();
+  assert.equal(fieldState(thinned, 400, thin)[F.SETTLE], 1);
+  assert.ok(Math.abs(fieldState(thinned, 550, thin)[F.SETTLE] - 0.65) < 1e-6);
+  assert.ok(Math.abs(fieldState(thinned, 700, thin)[F.SETTLE] - 0.3) < 1e-6);
+  assert.throws(() => fieldScore({ ...thinned, settle: 2 }), RangeError);
 });
 
 test("the camera pushes, punches and follows while charged, and is exact identity around the climax", () => {
@@ -472,6 +489,33 @@ test("a particle's pose is closed-form: depth both sides, tightening, impulses o
     collapsed += Math.hypot(p[0] - 284.2 / H, p[1] - 275.3 / H);
   }
   assert.ok(collapsed / n < 0.08, String(collapsed / n));
+  // Over a locked group's plates the light is shaded (the metal reads);
+  // outside its box it is not.
+  fieldState(score, 450, state);
+  const o = F.LOCK;
+  let over = 0;
+  let overN = 0;
+  let off = 0;
+  let offN = 0;
+  for (let i = 0; i < n; i += 1) {
+    fieldSeeds(i, take.arms, seeds);
+    const p = fieldPose(seeds, state[F.S], state, take, H, out);
+    const inX = Math.abs(p[0] - state[o] / H) < state[o + 2] / H;
+    const inY = Math.abs(p[1] - state[o + 1] / H) < state[o + 3] / H;
+    const far =
+      Math.abs(p[0] - state[o] / H) > state[o + 2] / H + 0.12 ||
+      Math.abs(p[1] - state[o + 1] / H) > state[o + 3] / H + 0.12;
+    const bare = p[4] / (seeds[FIELD_SEEDS.SIZE] > 0 ? 1 : 1);
+    if (inX && inY) {
+      over += bare;
+      overN += 1;
+    } else if (far) {
+      off += bare;
+      offN += 1;
+    }
+  }
+  assert.ok(overN > 10 && offN > 10);
+  assert.ok(over / overN < (off / offN) * 0.5, `${over / overN} over the plates, ${off / offN} off`);
 });
 
 /* ---------------- the WebGL layer, against a recording context ---------------- */
@@ -605,6 +649,8 @@ test("the shaders carry the pose's constants and share no uniform between stages
   assert.match(FIELD_VERTEX_SHADER, /attribute vec4 aBirth;/);
   assert.match(FIELD_VERTEX_SHADER, /uniform float uWake;/);
   assert.match(FIELD_VERTEX_SHADER, /uniform float uWakeRate;/);
+  assert.match(FIELD_VERTEX_SHADER, /uniform vec4 uLock\[8\];/);
+  assert.match(FIELD_VERTEX_SHADER, /uniform float uSettle;/);
   assert.match(FIELD_VERTEX_SHADER, /uniform vec4 uImpulse\[4\];/);
   // The fragment stage declares no uniform: a highp/mediump mismatch on a
   // shared uniform fails the link on real drivers (uSize did).
@@ -798,6 +844,10 @@ test("both scenes compose the field lazily, through their own clocks, and releas
   assert.match(scroll, /if \(fielding && !calm && fieldState\[fieldLib\.FIELD_STATE\.IMPULSES\] > 0\)/);
   assert.equal(scroll.match(/releaseField\(\);/g).length, 2, "still (and disposed through it), hidden");
   assert.match(scroll, /className: "rzn-field"/);
+  assert.match(scroll, /settle: 0\.3,/);
+  // The layer renders after the governor's measure: its GPU submit never
+  // pushes the 2D band into its rect fallback.
+  assert.ok(scroll.indexOf("lastDrawMs = (environment.performance") < scroll.indexOf("field.render("));
   // The entry's engine: the chunk imported lazily, the camera on the figure's
   // box through scale/translate (never transform: the jolt animates it),
   // identity restored at the end, the layer released at finish and stop.

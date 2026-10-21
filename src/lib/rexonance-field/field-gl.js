@@ -78,6 +78,9 @@ uniform float uDetonate;
 uniform vec4 uAttract;
 uniform vec4 uImpulse[4];
 uniform float uImpulses;
+uniform vec4 uLock[8];
+uniform float uLocked;
+uniform float uSettle;
 uniform vec4 uTake;
 uniform float uPhase;
 uniform float uSide;
@@ -115,6 +118,8 @@ const float SWEEP1 = ${f(B.sweep[1])};
 const float HEAT = ${f(B.heat)};
 const float GLOW = ${f(B.glow)};
 const float FRINGE = ${f(1 - B.fringeShare)};
+const float LOCKMARGIN = ${f(P.lockMargin)};
+const float LOCKSHADE = ${f(P.lockShade)};
 vec3 pose(float s, float wk, float a0, float r0, float yp, float spd, float pick, float arm, vec4 birth, out float light, out float flash, out float heat) {
   float theta = a0 * TAU + uPhase + uTake.y * TAU * ORBITS * spd * s + arm * TAU / uTake.x + uTake.z * (yp - 0.5) * 2.0;
   float rho = r0 * (RW + (RT - RW) * uTight);
@@ -158,8 +163,18 @@ vec3 pose(float s, float wk, float a0, float r0, float yp, float spd, float pick
       if (age < 0.2) flash += (1.0 - age / 0.2) * im.w * near;
     }
   }
+  // Off the seated armour: shaded over every locked group's box.
+  float shade = 1.0;
+  for (int k = 0; k < 8; k++) {
+    if (float(k) < uLocked) {
+      vec4 lk = uLock[k];
+      float ix = 1.0 - clamp((abs(x - lk.x) - lk.z - LOCKMARGIN) / LOCKMARGIN, 0.0, 1.0);
+      float iy = 1.0 - clamp((abs(y - lk.y) - lk.w - LOCKMARGIN) / LOCKMARGIN, 0.0, 1.0);
+      shade = min(shade, 1.0 - (1.0 - LOCKSHADE) * ix * iy);
+    }
+  }
   float depth = max(0.0, -z);
-  light = born * uCharge * (0.55 + 0.45 * spd) * (1.0 - BOKEHDIM * depth) * (1.0 - PACK * uTight) * (1.0 + FLASHGAIN * flash) * (1.0 + GLOW * heat);
+  light = born * uCharge * (0.55 + 0.45 * spd) * (1.0 - BOKEHDIM * depth) * (1.0 - PACK * uTight) * (1.0 + FLASHGAIN * flash) * (1.0 + GLOW * heat) * shade * uSettle;
   return vec3(x, y, z);
 }
 void main() {
@@ -336,6 +351,9 @@ const UNIFORMS = [
   "uAttract",
   "uImpulse",
   "uImpulses",
+  "uLock",
+  "uLocked",
+  "uSettle",
   "uTake",
   "uPhase",
   "uSide",
@@ -521,6 +539,7 @@ export function createFieldLayer({
   let cssHeight = 0;
   let released = false;
   const impulses = new Float32Array(16);
+  const locks = new Float32Array(32);
   const F = FIELD_STATE;
   const layer = {
     canvases: surfaces.map((surface) => surface.canvas),
@@ -564,6 +583,14 @@ export function createFieldLayer({
         impulses[k * 4 + 2] = state[o + 2];
         impulses[k * 4 + 3] = state[o + 3];
       }
+      const locked = Math.min(F.MAX_LOCKED, state[F.LOCKED] | 0);
+      for (let k = 0; k < F.MAX_LOCKED; k += 1) {
+        const o = F.LOCK + k * F.LOCK_STRIDE;
+        locks[k * 4] = state[o] / height;
+        locks[k * 4 + 1] = state[o + 1] / height;
+        locks[k * 4 + 2] = state[o + 2] / height;
+        locks[k * 4 + 3] = state[o + 3] / height;
+      }
       for (const surface of surfaces) {
         if (!surface.ready || surface.lost) continue;
         const { gl, location: L } = surface;
@@ -587,6 +614,9 @@ export function createFieldLayer({
         );
         gl.uniform4fv(L.uImpulse, impulses);
         gl.uniform1f(L.uImpulses, count);
+        gl.uniform4fv(L.uLock, locks);
+        gl.uniform1f(L.uLocked, locked);
+        gl.uniform1f(L.uSettle, state[F.SETTLE]);
         gl.uniform4f(L.uTake, take.arms, take.hand, take.twist, take.tilt);
         gl.uniform1f(L.uPhase, take.phase);
         gl.uniform1f(L.uSide, surface.side);

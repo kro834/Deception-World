@@ -96,6 +96,7 @@ export function entryFieldScore() {
     // Woken, the field cocoons the whole body: the reactor's height to the
     // soles, a little past the shoulders.
     spread: [REXONANCE_SUIT_SIZE.width * 0.2, REXONANCE_SUIT_SIZE.height * 0.36],
+    settle: 0.55,
   });
   return SCORE;
 }

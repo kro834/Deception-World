@@ -39,11 +39,20 @@ export const FIELD_STATE = Object.freeze({
   WAKE: 12,
   /** Wake per unit of S (a streak's tail reads the wake it had). */
   WAKE_RATE: 13,
+  /** 0..1: how much of the field is left as the armour seats (the score's
+   * settle floor by its end): the metal must read, not the swarm. */
+  SETTLE: 14,
+  /** How many groups have locked (each shades the particles over it). */
+  LOCKED: 15,
   /** Impulses: x, y, age (0..1 over the impulse span), strength. */
   IMPULSE: 16,
   IMPULSE_STRIDE: 4,
   MAX_IMPULSES: 4,
-  LENGTH: 32,
+  /** Locked groups: x, y, half extents (figure px), oldest first. */
+  LOCK: 32,
+  LOCK_STRIDE: 4,
+  MAX_LOCKED: 8,
+  LENGTH: 64,
 });
 
 /** The charge rises over this share of the wake: the burst itself. */
@@ -70,6 +79,8 @@ export function fieldScore({
   // The whole body's extent the woken field spreads over before the first
   // group draws it in (figure px, half extents).
   spread = [0, 0],
+  // The field left by the time the last group locks (1: none of it goes).
+  settle = 1,
 }) {
   const pair = (value, name) => {
     if (!Array.isArray(value) || value.length !== 2 || !(value[0] < value[1]))
@@ -85,6 +96,8 @@ export function fieldScore({
   if (!Number.isFinite(end) || end < C[1]) throw new RangeError("field score: end");
   if (!Array.isArray(spread) || spread.length < 2 || !spread.every(Number.isFinite))
     throw new RangeError("field score: spread");
+  if (!Number.isFinite(settle) || settle < 0 || settle > 1)
+    throw new RangeError("field score: settle");
   const n = groups.length;
   const gx = new Float32Array(n);
   const gy = new Float32Array(n);
@@ -116,6 +129,7 @@ export function fieldScore({
     impulse,
     origin: Object.freeze([origin[0], origin[1]]),
     spread: Object.freeze([spread[0], spread[1]]),
+    settle,
     count: n,
     gx,
     gy,
@@ -216,6 +230,22 @@ export function fieldState(score, clock, out) {
     count += 1;
   }
   out[F.IMPULSES] = count;
+  // The groups locked so far (their boxes shade the particles over them),
+  // and the field thinning from the first lock to the last.
+  let locked = 0;
+  for (let k = 0; k < score.count && locked < F.MAX_LOCKED; k += 1) {
+    if (t < score.glock[k]) continue;
+    const o = F.LOCK + locked * F.LOCK_STRIDE;
+    out[o] = score.gx[k];
+    out[o + 1] = score.gy[k];
+    out[o + 2] = score.gsx[k];
+    out[o + 3] = score.gsy[k];
+    locked += 1;
+  }
+  out[F.LOCKED] = locked;
+  const first = score.glock[0];
+  const last = score.glock[score.count - 1];
+  out[F.SETTLE] = 1 - (1 - score.settle) * smooth(span(t, first, last));
   out[F.FLASH] = Math.min(1, flash);
   return out;
 }

@@ -3455,9 +3455,12 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       }
     }
     context.globalAlpha = 1;
+    lastDrawMs = (environment.performance?.now?.() ?? 0) - started;
     // The field's lines on their own canvases, behind and in front of this
     // one, through the same zoomed view (CSS px: the layer has its own
     // backing ratio); a resting frame at the same progress is not redrawn.
+    // (After the governor's measure: the layer's GPU submit must not push
+    // the 2D band into its rect fallback.)
     if (fielding) {
       if (fieldProgress !== progress) {
         fieldProgress = progress;
@@ -3474,7 +3477,6 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       fieldProgress = -1;
       field.clear();
     }
-    lastDrawMs = (environment.performance?.now?.() ?? 0) - started;
     try {
       environment.__rexonanceDrawMs?.(lastDrawMs, progress, calm);
     } catch {
@@ -3923,6 +3925,9 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         impulse: 0.03,
         origin: config.core,
         spread: [W * 0.2, H * 0.36],
+        // The armour must read as it seats: the field thins to this by the
+        // last lock and stays off the locked groups' plates.
+        settle: 0.3,
       });
     } catch {
       return null;

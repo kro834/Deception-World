@@ -53,6 +53,10 @@ export const FIELD_SHAPE = Object.freeze({
   /** Depth: how much bigger and dimmer a particle gets behind the body. */
   bokeh: 0.8,
   bokehDim: 0.45,
+  /** Over a locked group's plates (its box, grown by this margin in figure
+   * heights) a particle's light is cut to this share: seated metal reads. */
+  lockMargin: 0.05,
+  lockShade: 0.12,
 });
 
 /** The birth: how a burst fragment becomes a particle of the field. */
@@ -242,6 +246,17 @@ export function fieldPose(seeds, s, state, take, height, out, wake = state[FIELD
     y += dy * inv * push;
     if (age < 0.2) flash += (1 - age / 0.2) * strength * near;
   }
+  // Off the seated armour: shaded over every locked group's box.
+  let shade = 1;
+  const locks = state[F.LOCKED];
+  for (let k = 0; k < locks; k += 1) {
+    const o = F.LOCK + k * F.LOCK_STRIDE;
+    const hx = state[o + 2] / height + P.lockMargin;
+    const hy = state[o + 3] / height + P.lockMargin;
+    const ix = 1 - clamp01((Math.abs(x - state[o] / height) - hx) / P.lockMargin);
+    const iy = 1 - clamp01((Math.abs(y - state[o + 1] / height) - hy) / P.lockMargin);
+    shade = Math.min(shade, 1 - (1 - P.lockShade) * ix * iy);
+  }
   const depth = Math.max(0, -z);
   out[0] = x;
   out[1] = y;
@@ -254,7 +269,9 @@ export function fieldPose(seeds, s, state, take, height, out, wake = state[FIELD
     (1 - P.bokehDim * depth) *
     (1 - P.pack * tight) *
     (1 + P.flashGain * flash) *
-    (1 + B.glow * heat);
+    (1 + B.glow * heat) *
+    shade *
+    state[F.SETTLE];
   out[5] = heat;
   return out;
 }

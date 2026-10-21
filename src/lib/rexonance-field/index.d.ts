@@ -28,6 +28,7 @@ export type FieldScore = {
   readonly impulse: number;
   readonly origin: readonly [number, number];
   readonly spread: readonly [number, number];
+  readonly settle: number;
   readonly count: number;
   readonly gx: Float32Array;
   readonly gy: Float32Array;
@@ -78,10 +79,15 @@ export const FIELD_STATE: {
   readonly GROUP: 11;
   readonly WAKE: 12;
   readonly WAKE_RATE: 13;
+  readonly SETTLE: 14;
+  readonly LOCKED: 15;
   readonly IMPULSE: 16;
   readonly IMPULSE_STRIDE: 4;
   readonly MAX_IMPULSES: 4;
-  readonly LENGTH: 32;
+  readonly LOCK: 32;
+  readonly LOCK_STRIDE: 4;
+  readonly MAX_LOCKED: 8;
+  readonly LENGTH: 64;
 };
 export const FIELD_FLASH_SHARE: number;
 export const FIELD_WAKE_RISE: number;
@@ -173,6 +179,7 @@ export function fieldScore(options: {
   impulse: number;
   origin: readonly number[];
   spread?: readonly number[];
+  settle?: number;
 }): FieldScore;
 export function fieldStateBuffer(): Float32Array;
 export function fieldState(score: FieldScore, clock: number, out: Float32Array): Float32Array;
