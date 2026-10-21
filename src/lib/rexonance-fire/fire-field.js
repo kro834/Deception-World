@@ -5,9 +5,11 @@
 //   G  arrival: geodesic climb from the soles over the body (0 soles, 1 the
 //      farthest point: crown and hands); outside the body the nearest body
 //      texel's arrival, so a plume above a shoulder lights with the shoulder
-//   B  lift: distance straight down to the body top below (/ FIELD_D), so
+//   B  lift: distance straight down to the body top below (/ FIELD_LIFT), so
 //      heat rises above surfaces that face up; 1 where nothing lies below
 //   A  distance inside the body (/ FIELD_IN), 0 outside: silhouette rim.
+// R and A are the two halves of one smoothed signed distance, so the skin
+// can be anti-aliased at sub-texel precision.
 // Both the WebGL fire and the CPU fallback sample exactly this texture.
 
 /** The fire's drawing rectangle in normalized body units (x over the
@@ -19,6 +21,9 @@ export const FIELD_H = 300;
 export const BODY_ASPECT = 1040 / 571;
 /** Normalizers of the packed distances, in figure widths. */
 export const FIELD_D = 0.6;
+/** The lift's normalizer: beyond every plume's reach, so air with no body
+ * below it is always too high to burn. */
+export const FIELD_LIFT = 1.5;
 export const FIELD_IN = 0.12;
 /** Texels per figure width (square texels: the rect's aspect matches). */
 export const FIELD_TEXELS_PER_WIDTH = FIELD_W / FIRE_RECT.width;
@@ -32,7 +37,8 @@ export const FIELD_BODY = Object.freeze({
 
 const INSIDE_ALPHA = 96;
 const LIFT_BLUR = 4;
-const LIFT_CAP = 1e6;
+const AIR_BLUR = 4;
+const AIR_BLUR_PASSES = 3;
 const SQRT2 = Math.SQRT2;
 const INF = 1e9;
 
@@ -149,6 +155,46 @@ function chamfer(seed, label, w, h, dist, carried) {
   }
 }
 
+// Separable box blur of the air texels only (the body keeps its own values
+// and still feeds the blur, so the rim stays continuous).
+function blurAir(values, inside, w, h, scratch, radius, passes) {
+  for (let pass = 0; pass < passes; pass += 1) {
+    for (let y = 0; y < h; y += 1) {
+      const row = y * w;
+      for (let x = 0; x < w; x += 1) {
+        const i = row + x;
+        if (inside[i]) {
+          scratch[i] = values[i];
+          continue;
+        }
+        let sum = 0;
+        let count = 0;
+        for (let k = -radius; k <= radius; k += 1) {
+          const xx = x + k;
+          if (xx < 0 || xx >= w) continue;
+          sum += values[row + xx];
+          count += 1;
+        }
+        scratch[i] = sum / count;
+      }
+    }
+    for (let y = 0; y < h; y += 1)
+      for (let x = 0; x < w; x += 1) {
+        const i = y * w + x;
+        if (inside[i]) continue;
+        let sum = 0;
+        let count = 0;
+        for (let k = -radius; k <= radius; k += 1) {
+          const yy = y + k;
+          if (yy < 0 || yy >= h) continue;
+          sum += scratch[yy * w + x];
+          count += 1;
+        }
+        values[i] = sum / count;
+      }
+  }
+}
+
 /**
  * Builds the packed field from a silhouette alpha grid of w×h texels into
  * `out` (RGBA bytes, w*h*4). Returns false when the grid holds no body.
@@ -223,16 +269,23 @@ export function buildFireField(alpha, w, h, out) {
   const insideDist = new Float32Array(n);
   const unused = new Float32Array(n);
   chamfer(air, unused, w, h, insideDist, unused);
+  // The carried arrival is piecewise constant over the air (each texel
+  // takes its nearest body texel's), so a tongue rising between the head
+  // and a shoulder would be cut along their boundary: blur it over the air.
+  blurAir(outsideArrival, inside, w, h, unused, AIR_BLUR, AIR_BLUR_PASSES);
 
   // Lift: the distance straight down to the first body texel below, then
   // blurred sideways so a plume's column has no hard edges.
+  // Capped at the normalizer first, so the sideways blur of a column with
+  // nothing below it never swamps its neighbours above a body edge.
+  const liftCap = FIELD_LIFT * (w / FIRE_RECT.width);
   const lift = new Float32Array(n);
   for (let x = 0; x < w; x += 1) {
     let below = INF;
     for (let y = h - 1; y >= 0; y -= 1) {
       const i = y * w + x;
       if (inside[i]) below = y;
-      lift[i] = inside[i] ? 0 : Math.min(below - y, LIFT_CAP);
+      lift[i] = inside[i] ? 0 : Math.min(below - y, liftCap);
     }
   }
   const blurred = new Float32Array(n);
@@ -248,16 +301,47 @@ export function buildFireField(alpha, w, h, out) {
       }
       blurred[y * w + x] = sum / count;
     }
+  // The silhouette as one signed distance (texels, the boundary halfway
+  // between the last body texel and the first air texel), smoothed so the
+  // texel staircase of a diagonal edge never shows when the field is
+  // magnified: R and A are its two halves, so their bilinear difference is
+  // the smooth signed distance the kernels anti-alias against.
+  const signed = new Float32Array(n);
+  for (let i = 0; i < n; i += 1) signed[i] = inside[i] ? 0.5 - insideDist[i] : outsideDist[i] - 0.5;
+  smoothSigned(signed, w, h, unused);
   const scaleD = 255 / (FIELD_D * (w / FIRE_RECT.width));
+  const scaleLift = 255 / (FIELD_LIFT * (w / FIRE_RECT.width));
   const scaleIn = 255 / (FIELD_IN * (w / FIRE_RECT.width));
   for (let i = 0; i < n; i += 1) {
     const k = i * 4;
-    out[k] = Math.min(255, Math.round(outsideDist[i] * scaleD));
+    const sd = signed[i];
+    out[k] = sd > 0 ? Math.min(255, Math.round(sd * scaleD)) : 0;
     out[k + 1] = Math.round(outsideArrival[i] * 255);
-    out[k + 2] = Math.min(255, Math.round(blurred[i] * scaleD));
-    out[k + 3] = inside[i] ? Math.min(255, Math.round(insideDist[i] * scaleIn)) : 0;
+    out[k + 2] = Math.min(255, Math.round(blurred[i] * scaleLift));
+    out[k + 3] = sd < 0 ? Math.min(255, Math.round(-sd * scaleIn)) : 0;
   }
   return true;
+}
+
+// Two passes of a separable 3-tap box (a 5-texel tent) over the signed
+// distance: rounds the staircase off the silhouette, keeps its position.
+function smoothSigned(values, w, h, scratch) {
+  for (let pass = 0; pass < 2; pass += 1) {
+    for (let y = 0; y < h; y += 1) {
+      const row = y * w;
+      for (let x = 0; x < w; x += 1) {
+        const a = values[row + Math.max(0, x - 1)];
+        const c = values[row + Math.min(w - 1, x + 1)];
+        scratch[row + x] = (a + values[row + x] + c) / 3;
+      }
+    }
+    for (let y = 0; y < h; y += 1) {
+      const up = Math.max(0, y - 1) * w;
+      const down = Math.min(h - 1, y + 1) * w;
+      for (let x = 0; x < w; x += 1)
+        values[y * w + x] = (scratch[up + x] + scratch[y * w + x] + scratch[down + x]) / 3;
+    }
+  }
 }
 
 /** Bilinear read of the packed field at texture coordinates (u, v in 0..1,

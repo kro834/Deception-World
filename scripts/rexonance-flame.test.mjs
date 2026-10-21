@@ -12,14 +12,24 @@ import {
 } from "../src/lib/rexonance-ignition.js";
 import {
   FIELD_BODY,
+  FIELD_D,
   FIELD_H,
+  FIELD_IN,
+  FIELD_TEXELS_PER_WIDTH,
   FIELD_W,
   FIRE_RECT,
   buildFireField,
 } from "../src/lib/rexonance-fire/fire-field.js";
 import { buildNoiseTable } from "../src/lib/rexonance-fire/fire-noise.js";
-import { POSE_SLOTS, poseFire } from "../src/lib/rexonance-fire/fire-pose.js";
+import {
+  POSE_FLICKER,
+  POSE_FLOW_A,
+  POSE_SLOTS,
+  POSE_TIME,
+  poseFire,
+} from "../src/lib/rexonance-fire/fire-pose.js";
 import { fireKernel, rasterFire } from "../src/lib/rexonance-fire/fire-raster.js";
+import { RAMP_CLEAN, RAMP_SOOTY } from "../src/lib/rexonance-fire/fire-tuning.js";
 
 let serial = 0;
 const fresh = () => import(`../src/lib/rexonance-flame.js?unit=${serial++}`);
@@ -244,7 +254,7 @@ function fixture({ gl = false, coarse = false } = {}) {
 // The real undersuit's alpha, registered into the field's body rectangle.
 const undersuitAlpha = await (async () => {
   const { data, info } = await sharp(
-    readFileSync(file("public/rexonance-suit-20261016/undersuit.webp")),
+    readFileSync(file("public/rexonance-suit-20261016/undersuit-20261021.webp")),
   )
     .ensureAlpha()
     .resize(Math.round(FIELD_BODY.width), Math.round(FIELD_BODY.height))
@@ -430,6 +440,174 @@ test("the detonation dissolves the body fire into fragments that cool into the n
     assert.ok([...out].every(Number.isFinite));
   }
   assert.ok(cooledByMaterial > 0 && cooledByMaterial < NANITE_FIRE_FRAGMENTS / 2);
+});
+
+// Visible fire (emission, not alpha) over a rectangle of body units, on the
+// air or on the skin: the fraction of samples brighter than a flame tip.
+function visibleFire(phase, clock, x0, x1, y0, y1, onSkin) {
+  poseFire(phase, naniteFlameEnvelope(phase), clock, 1, pose);
+  let lit = 0;
+  let count = 0;
+  for (let yy = y0; yy < y1; yy += 0.01)
+    for (let xx = x0; xx < x1; xx += 0.01) {
+      const i =
+        Math.round(FIELD_BODY.y + yy * FIELD_BODY.height) * FIELD_W +
+        Math.round(FIELD_BODY.x + xx * FIELD_BODY.width);
+      const skin = i >= 0 && i < undersuitAlpha.length && undersuitAlpha[i] > 96;
+      if (skin !== onSkin) continue;
+      count += 1;
+      fireKernel(
+        (xx - FIRE_RECT.x) / FIRE_RECT.width,
+        (yy - FIRE_RECT.y) / FIRE_RECT.height,
+        pose,
+        undersuitField,
+        noise,
+        pixel,
+      );
+      if (Math.max(pixel[0] + pixel[4], pixel[1] + pixel[5], pixel[2] + pixel[6]) > 0.25) lit += 1;
+    }
+  return count ? lit / count : 0;
+}
+
+test("the fire is mostly what rises off the body: licks above the crown and shoulders, none under the soles, a covered skin, visible tips", () => {
+  const P = NANITE_FIRE_PHASES;
+  const torch = P.cover + 0.005;
+  const clocks = [0.3, 0.5, 0.9, 1.7];
+  // Tongues above the crown come and go (the plume's reach drifts), but
+  // they are there on most clocks and tall on some; the shoulders always
+  // shed licks; nothing hangs below the soles; the whole lit undersuit
+  // reads as covered, not a half-speckled coating.
+  const crown = clocks.map((clock) => visibleFire(torch, clock, 0.38, 0.62, -0.3, -0.02, false));
+  assert.ok(crown.filter((ratio) => ratio > 0.08).length >= 3, `licks above the crown ${crown}`);
+  assert.ok(Math.max(...crown) > 0.15, `tall licks above the crown ${crown}`);
+  for (const clock of clocks) {
+    const left = visibleFire(torch, clock, 0.18, 0.42, 0.1, 0.25, false);
+    const right = visibleFire(torch, clock, 0.58, 0.82, 0.1, 0.25, false);
+    assert.ok(
+      Math.max(left, right) > 0.1,
+      `licks off the shoulders at ${clock} (${left}, ${right})`,
+    );
+    const floor = visibleFire(torch, clock, 0.25, 0.75, 1.03, 1.12, false);
+    assert.ok(floor < 0.02, `the fire sits on the floor at ${clock} (${floor})`);
+    const skin = visibleFire(torch, clock, -0.35, 1.35, -0.36, 1.1, true);
+    assert.ok(skin > 0.7, `the covered undersuit reads as covered at ${clock} (${skin})`);
+  }
+  // The kindle lights the soles only: no fire in the air above the crown.
+  assert.equal(visibleFire(0.03, 0.5, 0.38, 0.62, -0.3, -0.02, false), 0);
+  // A tongue's cool fringe is a visible flame colour, never black: deep
+  // green while sooty, pink-violet once clean; it fades by its emission.
+  const [, sr, sg, sb] = RAMP_SOOTY[0];
+  assert.ok(sg >= 0.2 && sg > sr * 2 && sg > sb * 2, `a deep green fringe ${RAMP_SOOTY[0]}`);
+  const [, cr, cg, cb] = RAMP_CLEAN[0];
+  assert.ok(cb >= 0.4 && cr > cg && cb > cr, `a pink-violet fringe ${RAMP_CLEAN[0]}`);
+  // The air's arrival (the lit/unlit boundary a plume inherits from the
+  // body below it) is smooth, so a tongue rising between the head and a
+  // shoulder is never cut along their boundary.
+  let jump = 0;
+  for (let y = 0; y < FIELD_H; y += 1)
+    for (let x = 0; x < FIELD_W; x += 1) {
+      const i = y * FIELD_W + x;
+      if (undersuitAlpha[i] > 96) continue;
+      for (const j of [i + 1, i + FIELD_W]) {
+        if (j >= undersuitAlpha.length || (j === i + 1 && x === FIELD_W - 1)) continue;
+        if (undersuitAlpha[j] > 96) continue;
+        jump = Math.max(jump, Math.abs(undersuitField[i * 4 + 1] - undersuitField[j * 4 + 1]));
+      }
+    }
+  assert.ok(jump <= 0.12 * 255, `the air's arrival has no cut (max step ${jump / 255})`);
+});
+
+// Roughness of the back layer's emission (mean absolute step between
+// neighbouring pixels, over the mean emission) and its lit fraction, at a
+// clock: what a shear of the turbulence or a dither would raise.
+function texture(phase, clock) {
+  const w = 72;
+  const h = 112;
+  const back = new Uint8ClampedArray(w * h * 4);
+  const front = new Uint8ClampedArray(w * h * 4);
+  poseFire(phase, naniteFlameEnvelope(phase), clock, 1, pose);
+  rasterFire(pose, undersuitField, noise, w, h, back, front);
+  const e = (x, y) => {
+    const k = (y * w + x) * 4;
+    return ((back[k] + back[k + 1] + back[k + 2]) * back[k + 3]) / (3 * 255 * 255);
+  };
+  let step = 0;
+  let sum = 0;
+  let lit = 0;
+  for (let y = 0; y < h - 1; y += 1)
+    for (let x = 0; x < w - 1; x += 1) {
+      const here = e(x, y);
+      step += Math.abs(e(x + 1, y) - here) + Math.abs(e(x, y + 1) - here);
+      sum += here;
+      if (here > 0.1) lit += 1;
+    }
+  return { roughness: step / Math.max(sum, 1e-9), lit: lit / ((w - 1) * (h - 1)) };
+}
+
+test("a clock of hours (the scroll's page time) burns the same smooth fire as a clock of seconds: no shear, no speckle", () => {
+  const torch = NANITE_FIRE_PHASES.cover + 0.005;
+  const near = [0.5, 1.7].map((clock) => texture(torch, clock));
+  const roughest = Math.max(...near.map((frame) => frame.roughness));
+  const sparsest = Math.min(...near.map((frame) => frame.lit));
+  for (const clock of [3.1, 400.3, 4000.7, 86400.1]) {
+    const far = texture(torch, clock);
+    assert.ok(
+      far.roughness < roughest * 1.25,
+      `smooth at ${clock}s: ${far.roughness} against ${roughest}`,
+    );
+    assert.ok(far.lit > sparsest * 0.7, `the same body of fire at ${clock}s (${far.lit})`);
+    // Every drift is wrapped into the noise's period on the CPU: no
+    // kernel, and no GPU precision, ever sees the large clock.
+    poseFire(torch, 1, clock, 1, pose);
+    assert.equal(pose[POSE_TIME], clock);
+    for (let slot = POSE_FLOW_A; slot < POSE_SLOTS; slot += 1)
+      if (slot !== POSE_FLICKER)
+        assert.ok(pose[slot] >= 0 && pose[slot] < 1, `drift ${slot} wrapped at ${clock}s`);
+    assert.ok(Math.abs(pose[POSE_FLICKER]) < 0.2);
+  }
+});
+
+test("the silhouette is anti-aliased: one smooth signed distance on the alpha threshold, and a skin edge without a step", () => {
+  const signed = (i) =>
+    ((undersuitField[i * 4] / 255) * FIELD_D - (undersuitField[i * 4 + 3] / 255) * FIELD_IN) *
+    FIELD_TEXELS_PER_WIDTH;
+  let steepest = 0;
+  let misplaced = 0;
+  for (let y = 1; y < FIELD_H - 1; y += 1)
+    for (let x = 1; x < FIELD_W - 1; x += 1) {
+      const i = y * FIELD_W + x;
+      const sd = signed(i);
+      if (Math.abs(sd) > 4) continue;
+      steepest = Math.max(
+        steepest,
+        Math.abs(signed(i + 1) - sd),
+        Math.abs(signed(i + FIELD_W) - sd),
+      );
+      // Wherever the 3×3 neighbourhood is all body (or all air), the
+      // smoothed distance keeps its side of the silhouette.
+      let body = 0;
+      for (let dy = -1; dy <= 1; dy += 1)
+        for (let dx = -1; dx <= 1; dx += 1)
+          if (undersuitAlpha[i + dy * FIELD_W + dx] > 96) body += 1;
+      if ((body === 9 && sd > 0) || (body === 0 && sd < 0)) misplaced += 1;
+    }
+  assert.ok(steepest < 1.3, `a distance field's slope (${steepest} texels per texel)`);
+  assert.equal(misplaced, 0, "the boundary stays where the undersuit's alpha puts it");
+  // Across the torso's left edge at a tenth of a texel per sample, the
+  // front layer (the skin's share) rises through several intermediate
+  // values: the edge is a ramp, not a step of the field's texel grid.
+  poseFire(NANITE_FIRE_PHASES.cover + 0.005, 1, 0.5, 1, pose);
+  const row = 0.33;
+  const v = (row - FIRE_RECT.y) / FIRE_RECT.height;
+  const samples = [];
+  for (let xx = 0.2; xx < 0.42; xx += 0.1 / FIELD_BODY.width) {
+    fireKernel((xx - FIRE_RECT.x) / FIRE_RECT.width, v, pose, undersuitField, noise, pixel);
+    samples.push(pixel[7]);
+  }
+  const top = Math.max(...samples);
+  const between = samples.filter((a) => a > top * 0.1 && a < top * 0.9).length;
+  assert.ok(top > 0.2, "the skin burns at the torch");
+  assert.ok(between >= 6, `${between} intermediate samples across the edge`);
 });
 
 test("a frame is a closed-form function of (phase, clock): identical on reverse scrub, changed by the clock", () => {
@@ -788,6 +966,27 @@ test("GPU and fallback surfaces are released when the page hides or leaves the r
   f.listeners().pagehide();
   module.releaseBodyFlame();
   assert.equal(module.inspectBodyFlame().retained, false);
+});
+
+// drawFlameHeat (owner's other session, 2026-10-21) laid 220 radial tongue
+// sprites and 40 sparks, white-green cooling to forest green, along the
+// sides of a fixed body profile. The body fire subsumes it: its plume rises
+// off the real silhouette (the shoulders, head, arms and feet) in the
+// fire's own colour of the moment, hot at the base and cooling to the
+// tips, and the detonation's fragments are its sparks. Drawn as well, it
+// would lay green sprites over the blue torch and double the light.
+test("drawFlameHeat is subsumed by the body fire: the scenes' calls draw nothing over it", async () => {
+  const { module } = await warmed({ gl: true });
+  for (const phase of [0.04, 0.12, NANITE_FIRE_PHASES.cover, 0.19]) {
+    const p = painter();
+    module.drawBodyFlame(p.context, SIZE, naniteFlameEnvelope(phase), 0.5, 1, "back", phase);
+    const before = p.operations.length;
+    module.drawFlameHeat(p.context, SIZE, 1, 0.5, 1.5);
+    assert.equal(p.operations.length, before, `no second fire at ${phase}`);
+    assert.equal(p.states.length, 0);
+    assert.equal(p.context.globalAlpha, 0.73);
+    assert.equal(p.context.globalCompositeOperation, "multiply");
+  }
 });
 
 test("the reactor glow follows the fire's reach and colour: nothing before the chest burns, green then blue, two draws", async () => {

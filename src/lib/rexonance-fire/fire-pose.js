@@ -20,25 +20,49 @@ export const POSE_TIME = 6;
 export const POSE_STRENGTH = 7;
 export const POSE_DETAIL = 8;
 export const POSE_PHASE = 9;
-export const POSE_SLOTS = 10;
+// The clock's drifts, each a constant speed times the clock wrapped into
+// the noise's unit period (so no kernel ever sees a large time, and the
+// GPU's precision never decides the look), and the global flicker.
+export const POSE_FLOW_A = 10;
+export const POSE_FLOW_B = 11;
+export const POSE_WARP = 12;
+export const POSE_REACH = 13;
+export const POSE_EDGE = 14;
+export const POSE_LOCAL = 15;
+export const POSE_PATCH = 16;
+export const POSE_FLICKER = 17;
+export const POSE_FLOW_S = 18;
+export const POSE_SLOTS = 19;
 
 const clamp = (x) => Math.max(0, Math.min(1, x));
+const wrap = (x) => x - Math.floor(x);
 
 /** Fills `out` (POSE_SLOTS doubles) for a frame of the fire. */
 export function poseFire(phase, strength, clock, detail, out) {
   const P = NANITE_FIRE_PHASES;
+  const T = FIRE_TUNING;
   const burst = clamp((phase - P.burstStart) / (P.burstEnd - P.burstStart));
   const bursting = phase >= P.burstStart;
+  const t = Number.isFinite(clock) ? clock : 0;
   out[POSE_COVER] = naniteEngulf(phase);
   out[POSE_MIX] = naniteCombustion(phase);
   out[POSE_BURST] = burst;
-  out[POSE_FLASH] = bursting ? Math.exp(-burst * FIRE_TUNING.flashDecay) : 0;
-  out[POSE_RING_RADIUS] = burst * FIRE_TUNING.ringSpeed;
+  out[POSE_FLASH] = bursting ? Math.exp(-burst * T.flashDecay) : 0;
+  out[POSE_RING_RADIUS] = burst * T.ringSpeed;
   out[POSE_RING_STRENGTH] = bursting ? Math.pow(1 - burst, 1.2) : 0;
-  out[POSE_TIME] = clock;
+  out[POSE_TIME] = t;
   out[POSE_STRENGTH] = clamp(strength);
   out[POSE_DETAIL] = detail;
   out[POSE_PHASE] = phase;
+  out[POSE_FLOW_A] = wrap((t * T.flowA * T.scaleA) / T.stretchA);
+  out[POSE_FLOW_B] = wrap((t * T.flowB * T.scaleB) / T.stretchB);
+  out[POSE_WARP] = wrap(t * T.warpSpeed);
+  out[POSE_REACH] = wrap(t * T.reachSpeed);
+  out[POSE_EDGE] = wrap(t * T.edgeSpeed);
+  out[POSE_LOCAL] = wrap(t * T.localSpeed);
+  out[POSE_PATCH] = wrap(t * T.patchSpeed);
+  out[POSE_FLOW_S] = wrap((t * T.flowS * T.scaleS) / T.stretchS);
+  out[POSE_FLICKER] = T.flickerGlobal * (Math.sin(t * 60.9) + 0.6 * Math.sin(t * 83.6 + 1.7));
   return out;
 }
 

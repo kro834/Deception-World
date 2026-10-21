@@ -3,11 +3,18 @@
 // climbs the figure as an irregular engulf front until the whole undersuit
 // is covered, turns from sooty forest green to complete combustion as it
 // nears its end, detonates (爆散) into incandescent fragments that cool into
-// the nanites, and is gone before the suit-up proceeds. Nothing is a sprite:
-// the WebGL kernel (src/lib/rexonance-fire) advects turbulence upward
-// through a distance field of the body; a CPU kernel of the same maths is
-// the fallback and the unit tests' oracle. Every frame is a closed-form
-// function of (phase, seed); the clock only flickers, so scrubbing is exact.
+// the nanites, and is gone before the suit-up proceeds. Fire on a body is
+// mostly what rises off it: tongues lick up off the shoulders, head, arms
+// and feet, their tips detaching and vanishing as they rise; the sheet is
+// brightest where it is seen edge-on along the silhouette, and flows as a
+// translucent haze over the skin. Nothing is a sprite: the WebGL kernel
+// (src/lib/rexonance-fire) advects two layers of turbulence upward through
+// a distance field of the body, accelerating with height through a static
+// remapping (never a position-dependent speed times the clock, which
+// sheared the scroll scene's long-running clock into speckle), with every
+// drift wrapped into the noise's period on the CPU; a CPU kernel of the
+// same maths is the fallback and the unit tests' oracle. Every frame is a
+// closed-form function of (phase, clock), so scrubbing is exact.
 import {
   NANITE_FIRE_FRAGMENTS,
   NANITE_FIRE_PHASES,
@@ -36,9 +43,11 @@ import {
   drawFireSparks,
   fireRendererReady,
   releaseFireRenderer,
+  sparkStretch,
   uploadFireField,
   uploadFireNoise,
 } from "./rexonance-fire/fire-renderer.js";
+import { FIRE_TUNING } from "./rexonance-fire/fire-tuning.js";
 import {
   RASTER_H,
   RASTER_TOUCH_H,
@@ -476,6 +485,7 @@ const HEAT_CSS = [
 ];
 function paintRasterSparks(context, W, H, strength) {
   const step = coarse ? 2 : 1;
+  const grow = sparkStretch(POSE[POSE_BURST]);
   for (let i = 0; i < NANITE_FIRE_FRAGMENTS; i += step) {
     const k = i * FRAGMENT_STRIDE;
     const heat = FRAGMENTS[k + 2];
@@ -486,10 +496,11 @@ function paintRasterSparks(context, W, H, strength) {
     const speed = Math.sqrt(
       FRAGMENTS[k + 4] * FRAGMENTS[k + 4] + FRAGMENTS[k + 5] * FRAGMENTS[k + 5],
     );
-    const stretch = 1 + Math.min(2, speed * 0.0007);
+    const stretch = 1 + Math.min(FIRE_TUNING.rasterSparkStretch, speed * grow);
+    const across = size * FIRE_TUNING.rasterSparkWidth;
     context.fillStyle = HEAT_CSS[Math.min(5, Math.floor(heat * 6))];
     context.globalAlpha = Math.pow(heat, 0.6) * strength;
-    context.fillRect(x - size / 2, y - (size * stretch) / 2, size, size * stretch);
+    context.fillRect(x - across / 2, y - (size * stretch) / 2, across, size * stretch);
   }
 }
 
@@ -668,9 +679,15 @@ export function inspectBodyFlame() {
   };
 }
 
-/** Owner (2026-10-21, 炎を改善): the hot-cored tongues and sparks this call
- * once added as radial blobs are now part of the body fire itself (its
- * incandescent base, rising tongues and the burst's fragments). Drawing
- * them again would double the light over the same flames, so this stays a
- * no-op with its signature, for the scenes' existing calls. */
+/** Owner (2026-10-21, 炎を改善): the heat this call once added over the
+ * fire (220 radial tongue sprites and 40 sparks, white-green cooling to
+ * forest green, placed along the sides of a fixed body profile) is
+ * subsumed by the body fire. Its tongues are drawBodyFlame's plume, which
+ * rises off the real undersuit silhouette (licks off the shoulders, head,
+ * arms and feet, hugging the limbs' sides, accelerating and tearing into
+ * detached tips) in the fire's colour of the moment, hot at the base and
+ * cooling to the tips; its sparks are the detonation's fragments. Drawn as
+ * well, it would lay green sprites over the clean blue torch and double
+ * the light, so it stays a no-op with its signature, for the scenes'
+ * existing calls (rexonance-resonance.js, rexonance-suit-nanites.tsx). */
 export function drawFlameHeat() {}

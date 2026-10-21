@@ -10,14 +10,23 @@ import {
   POSE_BURST,
   POSE_COVER,
   POSE_DETAIL,
+  POSE_EDGE,
   POSE_FLASH,
+  POSE_FLICKER,
+  POSE_FLOW_A,
+  POSE_FLOW_B,
+  POSE_FLOW_S,
+  POSE_LOCAL,
   POSE_MIX,
+  POSE_PATCH,
+  POSE_REACH,
   POSE_RING_RADIUS,
   POSE_RING_STRENGTH,
   POSE_STRENGTH,
-  POSE_TIME,
+  POSE_WARP,
 } from "./fire-pose.js";
 import { FIRE_FRAGMENT, FIRE_VERTEX, SPARK_FRAGMENT, SPARK_VERTEX } from "./fire-shaders.js";
+import { FIRE_TUNING } from "./fire-tuning.js";
 import { NANITE_FIRE_FRAGMENTS } from "../rexonance-ignition.js";
 
 const SPARK_FLOATS = 8;
@@ -114,7 +123,8 @@ export function createFireRenderer(gl) {
     uLife: gl.getUniformLocation(fire, "uLife"),
     uClock: gl.getUniformLocation(fire, "uClock"),
     uRing: gl.getUniformLocation(fire, "uRing"),
-    uOctaves: gl.getUniformLocation(fire, "uOctaves"),
+    uFlow: gl.getUniformLocation(fire, "uFlow"),
+    uDrift: gl.getUniformLocation(fire, "uDrift"),
     aCentre: gl.getAttribLocation(spark, "aCentre"),
     aCorner: gl.getAttribLocation(spark, "aCorner"),
     aData: gl.getAttribLocation(spark, "aData"),
@@ -183,10 +193,22 @@ export function drawFireLayer(state, pose, layer, x, y, w, h) {
     FIRE_RECT.height * BODY_ASPECT,
   );
   gl.uniform4f(state.uLife, pose[POSE_COVER], pose[POSE_MIX], pose[POSE_BURST], pose[POSE_FLASH]);
-  gl.uniform4f(state.uClock, pose[POSE_TIME], pose[POSE_STRENGTH], layer, 0);
+  gl.uniform4f(state.uClock, pose[POSE_FLICKER], pose[POSE_STRENGTH], layer, pose[POSE_DETAIL]);
   gl.uniform2f(state.uRing, pose[POSE_RING_RADIUS], pose[POSE_RING_STRENGTH]);
-  if (pose[POSE_DETAIL] > 0.5) gl.uniform4f(state.uOctaves, 0.6, 0.3, 0.1, 0);
-  else gl.uniform4f(state.uOctaves, 0.7, 0.3, 0, 0);
+  gl.uniform4f(
+    state.uFlow,
+    pose[POSE_FLOW_A],
+    pose[POSE_FLOW_B],
+    pose[POSE_WARP],
+    pose[POSE_REACH],
+  );
+  gl.uniform4f(
+    state.uDrift,
+    pose[POSE_EDGE],
+    pose[POSE_LOCAL],
+    pose[POSE_PATCH],
+    pose[POSE_FLOW_S],
+  );
   gl.bindBuffer(gl.ARRAY_BUFFER, state.quad);
   gl.enableVertexAttribArray(state.aPos);
   gl.vertexAttribPointer(state.aPos, 2, gl.FLOAT, false, 0, 0);
@@ -233,7 +255,7 @@ export function drawFireSparks(state, pose, fragments, count, x, y, w, h) {
     FIRE_RECT.width,
     FIRE_RECT.height * BODY_ASPECT,
   );
-  gl.uniform2f(state.uSpark, pose[POSE_STRENGTH], 0.0007);
+  gl.uniform2f(state.uSpark, pose[POSE_STRENGTH], sparkStretch(pose[POSE_BURST]));
   gl.bindBuffer(gl.ARRAY_BUFFER, state.sparks);
   gl.bufferSubData(gl.ARRAY_BUFFER, 0, data);
   gl.enableVertexAttribArray(state.aCentre);
@@ -245,6 +267,13 @@ export function drawFireSparks(state, pose, fragments, count, x, y, w, h) {
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, state.sparkIndex);
   gl.drawElements(gl.TRIANGLES, quads * 6, gl.UNSIGNED_SHORT, 0);
   gl.disable(gl.BLEND);
+}
+
+/** Streak length per unit speed at a burst progress: a fragment's streak
+ * grows with its flight, from a point at the detonation. */
+export function sparkStretch(burst) {
+  const t = Math.max(0, Math.min(1, burst / FIRE_TUNING.sparkGrow));
+  return FIRE_TUNING.sparkStretch * t * t * (3 - 2 * t);
 }
 
 /** Frees every GPU object this renderer created. */
