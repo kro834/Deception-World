@@ -57,6 +57,15 @@ export const dossierImageSources = [
   "/dream-chapter-lord-chaos-spec.jpeg",
   "/dream-chapter-dread.jpeg",
   "/dream-chapter-lupin.jpeg",
+  // The Saga file's ULTRA step in the record's gallery and the Rexonance
+  // record's five armaments (214-426 KB as supplied): WebP delivery like
+  // the other form art (2026-10-21).
+  "/saga-extreme-ultra-20261006.jpeg",
+  "/weapon-realm-slayer-mark-vi.jpeg",
+  "/weapon-realm-slayer-mark-xiv.jpeg",
+  "/weapon-axis-raker-mark-vii-arcs.jpeg",
+  "/weapon-axis-raker-mark-vii-launcher.jpeg",
+  "/weapon-unite-edge-lancer.jpeg",
 ] as const;
 const sources = new Set<string>(dossierImageSources);
 // レジャス's page draws its own two-layer hero (lejas-page.tsx, a 72 KB WebP):
