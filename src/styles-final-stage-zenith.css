@@ -550,17 +550,68 @@ html[data-family="special"]
 /* ================================================================
    The end card: the final title, the route home, the last credits
    ================================================================ */
+/* The film's last frame. At the end of the page the end card is the whole
+   screen under the bar (the page's last box, so the last scroll lands on
+   it exactly): letterbox bars at its top and bottom edges, the route home
+   coming down from under the top bar to the lamp, the closing title at the
+   centre of the frame and the ways out under it as the last credits. */
 html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer {
+  --fsz-bar: clamp(28px, 6.4svh, 72px);
   position: relative;
-  padding-top: clamp(150px, 22svh, 240px);
+  min-height: calc(100svh - var(--rxs-local-nav-reserve, var(--dxs-nav, 77px)));
+  align-content: center;
+  padding-top: calc(var(--fsz-bar) + clamp(96px, 14svh, 168px));
+  padding-bottom: calc(var(--fsz-bar) + clamp(40px, 6svh, 72px));
   overflow: clip;
   background:
-    linear-gradient(90deg, transparent, var(--fsx-line-2) 30%, var(--fsx-line-2) 70%, transparent)
-      50% 0 / 100% 1px no-repeat,
-    radial-gradient(50% 44% at 50% 62%, rgb(var(--fsx-violet-rgb) / 11%), transparent 72%),
-    radial-gradient(36% 30% at 50% 100%, rgb(var(--fsx-lilac-rgb) / 8%), transparent 72%),
+    radial-gradient(46% 34% at 50% 50%, rgb(var(--fsx-violet-rgb) / 12%), transparent 72%),
+    radial-gradient(
+      36% 24% at 50% calc(100% - var(--fsz-bar)),
+      rgb(var(--fsx-lilac-rgb) / 8%),
+      transparent 72%
+    ),
     var(--fsx-house);
   border-top: 0;
+}
+
+/* Portrait tablets watch the last frame as a widescreen picture: the
+   bars take what the portrait screen has beyond a 1.6:1 picture (300px
+   each on an 11-inch iPad), so the end card is a frame in the middle of
+   the glass, not a short title in a tall empty house. */
+@media (orientation: portrait) and (min-width: 600px) and (max-width: 1099.98px) {
+  html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer {
+    --fsz-bar: max(
+      clamp(28px, 6.4svh, 72px),
+      calc((100svh - var(--rxs-local-nav-reserve, var(--dxs-nav, 77px)) - 62vw) / 2)
+    );
+    padding-top: calc(var(--fsz-bar) + clamp(56px, 6svh, 96px));
+    padding-bottom: calc(var(--fsz-bar) + 32px);
+  }
+}
+
+/* The letterbox: true black, a hairline on the picture's edge. */
+html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer::before,
+html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer::after {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  left: 0;
+  right: 0;
+  height: var(--fsz-bar);
+  background: #000;
+  pointer-events: none;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer::before {
+  top: 0;
+  box-shadow: 0 1px 0 rgb(var(--fsx-violet-rgb) / 24%);
+  transform-origin: 50% 0;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer::after {
+  bottom: 0;
+  box-shadow: 0 -1px 0 rgb(var(--fsx-violet-rgb) / 18%);
+  transform-origin: 50% 100%;
 }
 
 /* The route home: a dashed line from the records down to the last board,
@@ -637,10 +688,6 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer > a.r
     letter-spacing: 0.06em;
     text-align: center;
     text-wrap: balance;
-  }
-
-  html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer {
-    padding-top: clamp(120px, 16svh, 160px);
   }
 }
 
@@ -821,6 +868,40 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer > a.r
       animation-timeline: --fsk-end;
       animation-range: entry 60% entry 100%;
     }
+
+    /* The letterbox closes in over the last half-screen of the walk, on
+       the end card's own timeline: open picture while the records leave,
+       the bars home as the last scroll lands on the end card. */
+    html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer {
+      view-timeline: --fsz-card block;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.fst-page[data-motion-ready="true"]
+      > .fst-footer::before,
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.fst-page[data-motion-ready="true"]
+      > .fst-footer::after {
+      animation: fsz-bar-close cubic-bezier(0.45, 0, 0.2, 1) both;
+      animation-timeline: --fsz-card;
+      animation-range: entry 40% entry 100%;
+    }
+  }
+}
+
+@keyframes fsz-bar-close {
+  from {
+    scale: 1 0;
+  }
+
+  to {
+    scale: 1 1;
   }
 }
 
@@ -850,6 +931,8 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer > a.r
    Forced colours
    ================================================================ */
 @media (forced-colors: active) {
+  html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer::before,
+  html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer::after,
   html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer > div::before,
   html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer > div::after {
     content: none;
