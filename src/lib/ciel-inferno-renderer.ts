@@ -1,12 +1,19 @@
 /** A short-lived, self-contained effect. No page pixels are captured or changed. */
 export const CIEL_INFERNO_DURATION = 9200;
 export const CIEL_INFERNO_JET = "/ciel-inferno-20261019/jet.webp";
-const TAU = Math.PI * 2;
 const clamp = (x: number) => Math.max(0, Math.min(1, x));
 const ease = (a: number, b: number, t: number) => {
   const p = clamp((t - a) / (b - a));
   return p * p * (3 - 2 * p);
 };
+/** Retarded emission: the nozzle closes first; already emitted gas keeps
+ * travelling and cooling. Pure sampling also makes skipped frames harmless. */
+export function sampleCielFireLife(seconds: number, travel = 0) {
+  const emittedAt = seconds - Math.max(0, Math.min(1.25, travel));
+  return (
+    ease(0.92, 1.72, emittedAt) * (1 - ease(4.35, 5.5, emittedAt)) * (1 - ease(6.25, 7.15, seconds))
+  );
+}
 const random = (n: number) => {
   const p = Math.sin(n * 127.1 + 77.7) * 43758.5453;
   return p - Math.floor(p);
@@ -22,6 +29,33 @@ export type InfernoGeometry = {
   angle: number;
 };
 
+/** Ignition follows the jet's contact seam, then climbs uneven fuel fingers.
+ * This is a fixed arrival-time field, not an expanding radius: cooling and
+ * skipped frames cannot move an already burned edge back over intact content.
+ * Keep the arithmetic paired with burnArrival in FIELD below. */
+export function sampleCielBurnArrival(x: number, y: number, g: InfernoGeometry) {
+  const u = x / g.width,
+    v = y / g.height;
+  const dx = u - g.mouthX / g.width;
+  const direction = Math.cos(g.angle) < 0 ? -1 : 1;
+  const slope = (Math.sin(g.angle) / Math.max(0.25, Math.abs(Math.cos(g.angle)))) * direction;
+  const seam = clamp(g.mouthY / g.height + dx * (g.width / g.height) * slope);
+  const rise = Math.max(0, seam - v),
+    fall = Math.max(0, v - seam);
+  const fingers = Math.sin(u * 23) * 0.22 + Math.sin(u * 59 + v * 5) * 0.11;
+  return Math.min(
+    5.8,
+    2.1 +
+      Math.abs(dx) * 0.9 +
+      Math.max(0, -dx * direction) * 0.5 +
+      rise * (1.9 + Math.sin(u * 19) * 0.55) +
+      fall * 2.4 +
+      Math.max(0, fingers) * Math.min(1, rise * 6 + 0.1),
+  );
+}
+const BURN_COLUMNS = 48;
+const BURN_ROWS = 72;
+
 type Options = {
   field: HTMLCanvasElement;
   detail: HTMLCanvasElement;
@@ -29,6 +63,15 @@ type Options = {
   onFailure: () => void;
   onAtlasState?: (state: "ready" | "fallback") => void;
 };
+type FlameSprite = (
+  x: number,
+  y: number,
+  length: number,
+  thickness: number,
+  angle: number,
+  phase: number,
+  alpha: number,
+) => void;
 
 const NOISE = `
 float hash(vec2 p) { vec3 p3=fract(vec3(p.xyx)*.1031);p3+=dot(p3,p3.yzx+33.33);return fract((p3.x+p3.y)*p3.z); }
@@ -43,6 +86,16 @@ uniform vec2 uDir;
 uniform float uTime;
 VARYING vec2 vUV;
 ${NOISE}
+float burnArrival(vec2 uv){
+ float dx=uv.x-uMouth.x, direction=uDir.x<0.?-1.:1.;
+ float slope=uDir.y/max(.25,abs(uDir.x))*direction;
+ float seam=clamp(uMouth.y+dx*(uSize.x/uSize.y)*slope,0.,1.);
+ float rise=max(0.,seam-uv.y), fall=max(0.,uv.y-seam);
+ float fingers=sin(uv.x*23.)*.22+sin(uv.x*59.+uv.y*5.)*.11;
+ return min(5.8,2.1+abs(dx)*.9+max(0.,-dx*direction)*.5
+   +rise*(1.9+sin(uv.x*19.)*.55)+fall*2.4
+   +max(0.,fingers)*min(1.,rise*6.+.1));
+}
 void main(){
  vec2 uv=vec2(vUV.x,1.-vUV.y), aspect=vec2(uSize.x/uSize.y,1.);
  vec2 p=(uv-uMouth)*aspect, dir=normalize(uDir), side=vec2(-dir.y,dir.x);
@@ -50,23 +103,26 @@ void main(){
  float flow=fbm(vec2(along*4.-t*2.7,across*11.+t*.7));
  float curl=fbm(vec2(across*13.+flow*2.7,along*5.-t*3.2));
  float rib=pow(clamp(1.-abs(curl*2.-1.),0.,1.),3.);
- float jetOn=smoothstep(1.02,1.65,t)*(1.-smoothstep(4.4,5.5,t));
+ float emittedAt=t-clamp(max(along,0.)*.85,0.,1.25);
+ float jetOn=smoothstep(.92,1.72,emittedAt)*(1.-smoothstep(4.35,5.5,emittedAt))*(1.-smoothstep(6.25,7.15,t));
  float reach=mix(.05,length(aspect)*1.15,smoothstep(1.15,3.1,t));
  float breadth=.016+max(along,0.)*.17;
- float cone=(1.-smoothstep(breadth*.35,breadth*1.6,abs(across+(flow-.5)*breadth*.8)))*step(0.,along)*(1.-smoothstep(reach*.8,reach,along));
+ float lift=smoothstep(4.6,6.8,t)*max(along,0.)*.18;
+ float cone=(1.-smoothstep(breadth*.35,breadth*1.6,abs(across+(flow-.5)*breadth*.8-lift)))*step(0.,along)*(1.-smoothstep(reach*.8,reach,along));
  float jet=cone*(.24+.76*rib)*jetOn;
- // The pressure jet ignites along its axis first, then crawls sideways and
- // back toward its source. Unlike a radial wipe, each region has a burn age.
- float distanceToFire=max(along,0.)*.48+abs(across)*1.28+max(-along,0.)*1.65;
- float travel=smoothstep(2.05,5.65,t)*length(aspect)*1.95;
+ // The impact seam catches progressively, sending unequal fingers upward.
+ // Static arrival geometry keeps the char continuous beneath moving tongues.
  vec2 adv=uv*aspect*vec2(8.,6.5)+vec2(0.,t*1.22);
  vec2 warp=vec2(fbm(adv*.8+vec2(t*.14,0.)),fbm(adv*.73+vec2(9.1,t*.23)));
  float billow=fbm(adv*1.9+warp*3.4);
  float detail=noise(adv*7.+warp*5.);
- float front=distanceToFire-travel+(billow-.5)*.22;
+ float front=burnArrival(uv)-t;
  float inside=(1.-smoothstep(-.04,.065,front))*smoothstep(2.05,2.4,t);
  float age=max(0.,-front);
- float life=(1.-smoothstep(5.25,6.7,t));
+ // Each tongue burns out at its own temperature rather than dissolving as
+ // one translucent sheet. The char layer underneath never becomes clear.
+ float cooling=smoothstep(5.15,6.95,t);
+ float life=(1.-smoothstep(.35,.92,cooling+(.5-billow)*.32));
  // Tall, split tongues flow upward in screen space, not sideways with the
  // ignition mask. Dark valleys retain depth between the luminous folds.
  float tongues=pow(smoothstep(.38,.77,billow),2.)*(.5+.5*detail);
@@ -84,6 +140,7 @@ void main(){
  colour+=vec3(.08,.24,.025)*cracks*charred*exp(-age*2.)*life;
  // Transparent rolling smoke precedes the edge, never an opaque green disc.
  float smoke=exp(-abs(front-.16)*5.)*billow*.2*smoothstep(2.,3.,t)*life;
+ smoke+=inside*billow*.10*smoothstep(4.9,6.2,t)*(1.-smoothstep(7.,8.5,t));
  colour+=vec3(.018,.035,.022)*smoke;
  float dim=.24*smoothstep(0.,.65,t);
  float alpha=max(dim,max(inside*.96,max(jet*.84,max(flame*.8,smoke))));
@@ -194,51 +251,94 @@ function createField(canvas: HTMLCanvasElement) {
 }
 
 /** Canvas2D is a real lower-cost alternative, not a blank error screen. */
-function paintFallback(context: CanvasRenderingContext2D, g: InfernoGeometry, t: number) {
-  const { width: w, height: h, mouthX: x, mouthY: y } = g;
+function paintFallback(
+  context: CanvasRenderingContext2D,
+  g: InfernoGeometry,
+  t: number,
+  arrivals: Float32Array,
+  edges: Float32Array,
+  sprite: FlameSprite | null,
+) {
+  const { width: w, height: h } = g;
   const black = ease(6.6, 9, t);
   context.globalCompositeOperation = "source-over";
   context.globalAlpha = Math.max(ease(0, 0.65, t) * 0.24, black);
   context.fillStyle = "#020a07";
   context.fillRect(0, 0, w, h);
-  const travel = ease(2.05, 5.65, t) * Math.hypot(w, h) * 1.95;
   if (t > 2.1) {
+    const cellW = w / BURN_COLUMNS,
+      cellH = h / BURN_ROWS;
+    const fade = ease(2.1, 2.8, t) * (1 - ease(5.2, 6.7, t));
+    // Cache the arrival field on resize. Interpolate its contour instead of
+    // exposing grid stair-steps, then paint tongues after the whole char mask
+    // so the next column cannot overpaint the preceding tongue.
+    for (let i = 0; i < BURN_COLUMNS; i++) {
+      let first = BURN_ROWS,
+        last = -1;
+      for (let j = 0; j < BURN_ROWS; j++) {
+        if (arrivals[i * BURN_ROWS + j] > t) continue;
+        first = Math.min(first, j);
+        last = j;
+      }
+      edges[i * 2] = edges[i * 2 + 1] = -1;
+      if (last < 0) continue;
+      const offset = i * BURN_ROWS;
+      const a = arrivals[offset + first],
+        b = arrivals[offset + last];
+      edges[i * 2] =
+        first === 0
+          ? 0
+          : (first -
+              0.5 +
+              clamp((arrivals[offset + first - 1] - t) / (arrivals[offset + first - 1] - a))) *
+            cellH;
+      edges[i * 2 + 1] =
+        last === BURN_ROWS - 1
+          ? h
+          : (last + 0.5 + clamp((t - b) / (arrivals[offset + last + 1] - b))) * cellH;
+    }
     context.globalAlpha = 0.97 + black * 0.03;
     context.fillStyle = t < 5.3 ? "#03140b" : "#000";
-    context.beginPath();
-    for (let i = 0; i <= 80; i++) {
-      const angle = (i / 80) * TAU;
-      const along = Math.cos(angle - g.angle);
-      const across = Math.sin(angle - g.angle);
-      const resistance =
-        Math.max(along, 0) * 0.48 + Math.abs(across) * 1.28 + Math.max(-along, 0) * 1.65;
-      const edge =
-        travel / resistance +
-        (Math.sin(angle * 13 + t * 2.3) * 18 + Math.sin(angle * 27 - t * 3.1) * 9) *
-          ease(2.1, 2.8, t);
-      const px = x + Math.cos(angle) * edge;
-      const py = y + Math.sin(angle) * edge;
-      if (i === 0) context.moveTo(px, py);
-      else context.lineTo(px, py);
+    for (let start = 0; start < BURN_COLUMNS; start++) {
+      if (edges[start * 2] < 0) continue;
+      let end = start;
+      while (end + 1 < BURN_COLUMNS && edges[(end + 1) * 2] >= 0) end++;
+      context.beginPath();
+      context.moveTo(start * cellW, edges[start * 2]);
+      for (let i = start; i <= end; i++) context.lineTo((i + 0.5) * cellW, edges[i * 2]);
+      context.lineTo((end + 1) * cellW, edges[end * 2]);
+      context.lineTo((end + 1) * cellW, edges[end * 2 + 1]);
+      for (let i = end; i >= start; i--) context.lineTo((i + 0.5) * cellW, edges[i * 2 + 1]);
+      context.lineTo(start * cellW, edges[start * 2 + 1]);
+      context.closePath();
+      context.fill();
+      start = end;
     }
-    context.closePath();
-    context.fill();
-    // Independently rising, split flame tips replace the flat outlined wipe.
-    const fade = ease(2.1, 2.8, t) * (1 - ease(5.2, 6.7, t));
-    for (let i = 0; i < 18; i++) {
+    for (let i = 0; i < BURN_COLUMNS; i += 2) {
+      const top = edges[i * 2],
+        bottom = edges[i * 2 + 1];
+      if (top < 0 || fade <= 0 || (top === 0 && bottom === h)) continue;
       const phase = i * 2.39996;
-      const along = Math.cos(phase - g.angle);
-      const resistance =
-        Math.max(along, 0) * 0.48 +
-        Math.abs(Math.sin(phase - g.angle)) * 1.28 +
-        Math.max(-along, 0) * 1.65;
-      const r = (travel / resistance) * (0.65 + SEEDS[i * 6] * 0.3);
-      const px = x + Math.cos(phase) * r;
-      const py = y + Math.sin(phase) * r;
-      const height = Math.min(h, w) * (0.16 + SEEDS[i * 6 + 1] * 0.32);
-      const width = height * 0.22;
+      const px = (i + 0.5) * cellW,
+        py = top > 0 ? top + cellH : bottom;
+      const height = Math.min(h, w) * (0.12 + SEEDS[i * 6 + 1] * 0.24);
+      const width = Math.max(cellW * 1.4, height * 0.17);
       const curl = Math.sin(t * 2.8 + phase) * width;
       if (px < -height || px > w + height || py < -height || py > h + height) continue;
+      if (sprite) {
+        context.globalCompositeOperation = "screen";
+        sprite(
+          px,
+          py,
+          height * 1.4,
+          width * 3,
+          -Math.PI / 2 + curl * 0.003,
+          t * 16 + i * 0.7,
+          fade * 0.78,
+        );
+        context.globalCompositeOperation = "source-over";
+        continue;
+      }
       for (let layer = 0; layer < 3; layer++) {
         const scale = 1 - layer * 0.24;
         context.globalAlpha = fade * (layer === 0 ? 0.3 : 0.42);
@@ -284,6 +384,8 @@ export function createCielInfernoRenderer(options: Options) {
   let lastFrame = 0;
   let slowFrames = 0;
   let sizing = false;
+  const burnArrivals = new Float32Array(BURN_COLUMNS * BURN_ROWS);
+  const burnEdges = new Float32Array(BURN_COLUMNS * 2);
   const lost = (event: Event) => {
     event.preventDefault();
     if (!disposed) onFailure();
@@ -320,6 +422,16 @@ export function createCielInfernoRenderer(options: Options) {
     if (disposed || sizing) return;
     sizing = true;
     geometry = next;
+    if (!background) {
+      for (let i = 0; i < BURN_COLUMNS; i++)
+        for (let j = 0; j < BURN_ROWS; j++) {
+          burnArrivals[i * BURN_ROWS + j] = sampleCielBurnArrival(
+            ((i + 0.5) * next.width) / BURN_COLUMNS,
+            ((j + 0.5) * next.height) / BURN_ROWS,
+            next,
+          );
+        }
+    }
     // Limited pixel count, DPR and cadence prevent a nine-second effect
     // becoming an unbounded high-DPR tablet workload.
     ratio =
@@ -396,14 +508,15 @@ export function createCielInfernoRenderer(options: Options) {
     context.clearRect(0, 0, detail.width, detail.height);
     context.setTransform(ratio, 0, 0, ratio, 0, 0);
     if (background) background.render(geometry, seconds);
-    else paintFallback(context, geometry, seconds);
-    const pressure = ease(1.02, 1.65, seconds) * (1 - ease(4.6, 5.6, seconds));
+    else paintFallback(context, geometry, seconds, burnArrivals, burnEdges, loaded ? sprite : null);
+    const pressure = sampleCielFireLife(seconds);
+    const wake = sampleCielFireLife(seconds, 1.15);
     if (loaded && atlasStarted < 0) atlasStarted = seconds;
     const atlasMix = loaded ? ease(atlasStarted, atlasStarted + 0.24, seconds) : 0;
     const emberFade = 1 - ease(6.8, 8.7, seconds);
     const reach = Math.hypot(w, h) * (0.13 + ease(1.1, 3.2, seconds) * 0.97);
     context.globalCompositeOperation = "lighter";
-    if (pressure > 0) {
+    if (pressure > 0 || wake > 0) {
       if (loaded) {
         // Keep the volume's proportions: a short pressure throat feeds
         // broad, independently advected curls, never one stretched pencil.
@@ -419,7 +532,11 @@ export function createCielInfernoRenderer(options: Options) {
           const distance = age * reach * 0.92;
           const curl = Math.sin(seconds * 2.4 - age * 6 + SEEDS[k] * 2) * distance * 0.09;
           const px = x + Math.cos(angle) * distance - Math.sin(angle) * curl;
-          const py = y + Math.sin(angle) * distance + Math.cos(angle) * curl;
+          const py =
+            y +
+            Math.sin(angle) * distance +
+            Math.cos(angle) * curl -
+            ease(4.6, 6.9, seconds) * age * age * Math.min(w, h) * 0.24;
           const length = throat * (0.46 + age * 0.2);
           if (px < -length || py < -length || px > w + length || py > h + length) continue;
           sprite(
@@ -429,7 +546,7 @@ export function createCielInfernoRenderer(options: Options) {
             length * (0.49 + age * 0.23),
             angle + Math.sin(seconds * 2.1 - age * 6 + i) * 0.09,
             seconds * 16 * (0.83 + SEEDS[k + 1] * 0.3) + SEEDS[k + 2] * 32,
-            pressure * atlasMix * Math.sin(age * Math.PI) * 0.52,
+            sampleCielFireLife(seconds, age * 1.15) * atlasMix * Math.sin(age * Math.PI) * 0.52,
           );
         }
         // The white-green core occupies only the short mouth nozzle.
@@ -450,18 +567,21 @@ export function createCielInfernoRenderer(options: Options) {
           context.save();
           context.translate(x, y);
           context.rotate(angle);
-          context.globalAlpha = pressure * (1 - atlasMix) * (0.33 - ribbon * 0.035);
+          const tail = sampleCielFireLife(seconds, ribbon * 0.18);
+          context.globalAlpha = tail * (1 - atlasMix) * (0.33 - ribbon * 0.035);
           context.fillStyle = ribbon < 2 ? "#b7ef8c" : "#218842";
           context.beginPath();
-          context.moveTo(0, 0);
-          for (let j = 1; j < 30; j++) {
+          const released = ease(4.35, 6.75, seconds);
+          const start = Math.floor(released * 27);
+          context.moveTo((start / 29) * reach, 0);
+          for (let j = start; j < 30; j++) {
             const p = j / 29;
             context.lineTo(
               p * reach,
               Math.sin(p * 18 - seconds * 8 + ribbon) * p * 29 + p * (ribbon - 2.5) * 15,
             );
           }
-          for (let j = 29; j > 0; j--) {
+          for (let j = 29; j >= start; j--) {
             const p = j / 29;
             context.lineTo(
               p * reach,
@@ -482,7 +602,12 @@ export function createCielInfernoRenderer(options: Options) {
     context.globalCompositeOperation = "source-over";
     for (let i = 0; i < count; i++) {
       const k = i * 6;
-      const life = (((seconds * (0.16 + SEEDS[k] * 0.2) + SEEDS[k + 1]) % 1) + 1) % 1;
+      // A finite emission window, never a modulo emitter that creates fresh
+      // sparks after the source is extinguished. Late particles cool to ash.
+      const birth = 1.15 + SEEDS[k + 1] * 4.2;
+      const lifetime = 1.5 + SEEDS[k] * 2.35;
+      const life = (seconds - birth) / lifetime;
+      if (life <= 0 || life >= 1) continue;
       const spread = (SEEDS[k + 2] - 0.5) * life * Math.min(w, h) * 0.85;
       const distance = life * reach;
       const ignition = ease(2.8, 4.8, seconds);
@@ -490,7 +615,7 @@ export function createCielInfernoRenderer(options: Options) {
       const jetY =
         y + Math.sin(angle) * distance + Math.cos(angle) * spread - life * life * h * 0.2;
       const ashX = SEEDS[k + 2] * w + Math.sin(life * 8 + i) * 24;
-      const ashY = (SEEDS[k + 3] * h + life * h * (ash > 0.6 ? 0.5 : -0.4) + h) % h;
+      const ashY = SEEDS[k + 3] * h + life * h * (ash > 0.6 ? 0.5 : -0.4);
       const px = jetX + (ashX - jetX) * ignition;
       const py = jetY + (ashY - jetY) * ignition;
       const opacity =

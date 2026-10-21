@@ -43,3 +43,10 @@ export function drawBodyFlame(
   layer?: "back" | "front" | "all",
   phase?: number,
 ): void;
+export function drawFlameHeat(
+  context: CanvasRenderingContext2D,
+  size: { readonly width: number; readonly height: number },
+  strength: number,
+  clock: number,
+  scale?: number,
+): void;

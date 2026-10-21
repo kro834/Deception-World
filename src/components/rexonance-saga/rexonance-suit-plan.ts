@@ -37,8 +37,10 @@ export const T = REXONANCE_SUIT_TILE * BLOCK;
 export const G = REXONANCE_SUIT_GOLD_CELL;
 export const FIG = REXONANCE_SUIT_SIZE;
 export const GOLD = REXONANCE_SUIT_GOLD;
-/** How long a tile streams before it locks (ms). */
+/** How long a tile streams before it locks (ms), and the share of it each
+ * tile's own flight takes (owner, 2026-10-21: never one fixed 170 ms). */
 export const FLIGHT = 170;
+export const FLIGHT_SPREAD = [0.72, 1.28] as const;
 const GROW = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] } as const;
 // The plates' own motes are ice, pink and white; gold belongs to the gold
 // nanites (rx17).
@@ -286,7 +288,7 @@ function step() {
   // The driver is on the body finished: no gold forms there (owner).
   if (!REXONANCE_SUIT_DRIVER.includes(piece.id)) goldAt = goldOf(piece, index, goldAt, cells());
   const [from, to] = REXONANCE_SUIT_GOLD_AT[piece.id] ?? [fit, fit];
-  const spawn = Math.min(...tiles.map((tile) => tile.land)) - FLIGHT;
+  const spawn = Math.min(...tiles.map((tile) => tile.land)) - FLIGHT * FLIGHT_SPREAD[1];
   building.push({
     piece,
     fit,

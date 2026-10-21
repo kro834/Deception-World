@@ -1,7 +1,6 @@
-// A connected combustion volume, clipped to the real undersuit. The same
-// field feeds both nanite engines: a quiet ignition, one explosive front,
-// then material shed from that surface. The Blender volume adds turbulent
-// detail inside the field, rather than twenty unrelated miniature fires.
+// Connected combustion spreads from the feet through branching body paths.
+// Both nanite engines share its irregular advancing fronts and extinction;
+// the Blender volume supplies turbulent detail inside those burning paths.
 import { NANITE_FIRE_PHASES, naniteFlameScatter, sampleFlameBirth } from "./rexonance-ignition.js";
 export const NANITE_FLAME_ATLAS = Object.freeze({
   src: "/rexonance-flame-natural-20261019/flame.webp",
@@ -95,7 +94,6 @@ const hash = (n) => {
 };
 const clamp = (n) => Math.min(1, Math.max(0, n));
 const smooth = (n) => n * n * (3 - 2 * n);
-const TAU = Math.PI * 2;
 
 // Immutable seeds: the warmed engines allocate no particle objects,
 // gradients or random/hash state in a frame (including reverse scrubbing).
@@ -125,27 +123,32 @@ const VORTEX_H = 528;
 const FIELD_PAD = 48;
 const FIELD_W = VORTEX_W + FIELD_PAD * 2;
 const FIELD_H = VORTEX_H + FIELD_PAD * 2;
-// Room for a broad, rolling plume outside the figure (not a human cutout).
-// Extra transparent padding protects the rotated volume's irregular tips;
+// Room for branching plumes outside the figure (not a human cutout).
+// Extra transparent padding protects the rising volume's irregular tips;
 // it does not stretch the flame or alter the real body's registration.
 const BODY_X = 48 + FIELD_PAD;
 const BODY_Y = 28 + FIELD_PAD;
 const BODY_W = 192;
 const BODY_H = 472;
-const VORTEX_STRANDS = 3;
-const VORTEX_STEPS = 48;
+const VORTEX_STRANDS = 6;
+const VORTEX_STEPS = 24;
 const VORTEX_STRIDE = 7;
-// Crown width depends only on the authored step, not on time or power.
-// Bake its exact double values once instead of repeating float helper
-// crossings for all three strands on every frame of the extended fire.
-const VORTEX_CROWN_WIDTH = new Float64Array(VORTEX_STEPS + 1);
-for (let i = 0; i <= VORTEX_STEPS; i += 1)
-  VORTEX_CROWN_WIDTH[i] =
-    1 +
-    0.65 * smooth(clamp((i / VORTEX_STEPS - 0.65) / 0.25)) +
-    0.45 * (1 - smooth(clamp((i / VORTEX_STEPS - 0.03) / 0.22)));
-// Reused geometry: x/y, transverse normal, thickness, front/back depth,
-// local breakup. A whole coil is continuous, never assembled from strips.
+// Cubic paths in registered body coordinates: two foot-to-crown trunks,
+// two waist-to-arm branches, then two shoulder/crown forks. Arrival times
+// travel along connected paths rather than expanding a chest-centred disc.
+// x0/y0, x1/y1, x2/y2, x3/y3, birth, travel, half-width, depth.
+const BURN_PATHS = new Float32Array([
+  // Left/right foot-to-crown trunks.
+  0.25, 0.99, 0.29, 0.7, 0.55, 0.48, 0.44, -0.04, 0, 0.94, 27, -0.65, 0.74, 1, 0.66, 0.64, 0.43,
+  0.4, 0.55, -0.035, 0.045, 0.9, 29, 0.65,
+  // Left/right waist-to-arm branches.
+  0.43, 0.53, 0.35, 0.45, 0.09, 0.6, 0.09, 0.26, 0.43, 0.4, 24, 0.4, 0.56, 0.51, 0.67, 0.44, 0.95,
+  0.58, 0.91, 0.22, 0.49, 0.39, 25, -0.4,
+  // Left/right shoulder-to-crown forks.
+  0.45, 0.3, 0.32, 0.23, 0.3, 0.07, 0.35, -0.09, 0.72, 0.27, 21, -0.5, 0.55, 0.28, 0.72, 0.23, 0.7,
+  0.05, 0.67, -0.06, 0.75, 0.25, 22, 0.5,
+]);
+// Reused x/y, transverse normal, thickness, depth and surviving density.
 const VORTEX = new Float32Array(VORTEX_STRANDS * (VORTEX_STEPS + 1) * VORTEX_STRIDE);
 const DENSITY = new Float32Array(64 * 64);
 for (let i = 0; i < DENSITY.length; i += 1) DENSITY[i] = hash(i + 51.7);
@@ -183,9 +186,9 @@ export function prepareBodyFlame(source, size, environment = globalThis) {
     const m = mask.getContext("2d");
     const c = field.getContext("2d");
     const f = flow.getContext("2d");
-    if (!m?.clearRect || !c?.ellipse || !f?.createImageData) return false;
+    if (!m?.clearRect || !c?.drawImage || !f?.createImageData) return false;
     // Keep the real registration as the low-density interior. The visible
-    // outer shape is rebuilt from continuous vortex geometry each frame.
+    // outer shape is rebuilt from the advancing burn paths each frame.
     m.drawImage(source, BODY_X, BODY_Y, BODY_W, BODY_H);
     m.shadowColor = "#fff";
     m.shadowBlur = 12;
@@ -394,17 +397,17 @@ export function drawNaniteFlame(context, core, strength, clock, scale = 1) {
     // rather than a separate bonfire covering the central mechanism.
     for (let i = 0; i < 2; i += 1) {
       const k = i * 8;
-      const angle = SEED[k] * TAU + clock * (1.45 - i * 0.55);
+      const side = i ? 1 : -1;
       const pulse = 0.86 + 0.18 * Math.sin(clock * (3.4 + SEED[k + 1]) + i * 2.1);
       tongue(
         context,
-        cx + Math.cos(angle) * (26 + 32 * power),
-        cy + 20 + Math.sin(angle) * 16,
+        cx + side * (32 + 18 * power) + Math.sin(clock * 2.7 + i * 3.4) * 5,
+        cy + 20 + Math.sin(clock * 3.1 + i * 2.3) * 4,
         (26 + SEED[k + 2] * 26) * 1.68,
         (68 + SEED[k + 3] * 75) * 1.28 * (0.46 + 0.54 * power) * pulse,
         clock * 16 * (0.82 + SEED[k + 4] * 0.35) + SEED[k + 5] * 32,
         power * (0.31 + SEED[k + 6] * 0.13),
-        Math.cos(angle) * 0.16 + Math.sin(clock * 4.2 + i) * 0.05,
+        side * 0.12 + Math.sin(clock * 4.2 + i) * 0.05,
       );
     }
     if (heat) {
@@ -447,10 +450,8 @@ export function drawNaniteFirebrand(context, x, y, strength, clock, scale = 1) {
   }
 }
 
-// Three real projected helices surround the body. Their front/back depth
-// travels with a shared angular clock, not with independent per-part roots.
-// The burst pulls the same ribbons outward, thins and tears them, then
-// opens their centre as the first machines enter the declining explosion.
+// Heat advances along rooted branches. Time only bends/lifts those paths:
+// it cannot revolve them around the figure or form a circular fire shell.
 function poseVortex(power, clock, phase) {
   const burst = smooth(
     clamp(
@@ -458,43 +459,46 @@ function poseVortex(power, clock, phase) {
         (NANITE_FIRE_PHASES.burstEnd - NANITE_FIRE_PHASES.burstStart),
     ),
   );
-  const spin = clock * 0.65 + TAU * (phase * 1.1 + 1.1 * smooth(clamp((phase - 0.08) / 0.095)));
+  const ignition = phase > 0 ? clamp(phase / 0.155) : power;
   for (let strand = 0; strand < VORTEX_STRANDS; strand += 1) {
     const base = strand * (VORTEX_STEPS + 1) * VORTEX_STRIDE;
+    const path = strand * 12;
     for (let i = 0; i <= VORTEX_STEPS; i += 1) {
       const t = i / VORTEX_STEPS;
+      const u = 1 - t;
       const at = base + i * VORTEX_STRIDE;
-      const flutter = Math.sin(t * TAU * 2.6 - clock * 4.4 + strand * 2.09);
-      const angle =
-        spin +
-        (strand * TAU) / VORTEX_STRANDS +
-        t * TAU * 1.45 +
-        Math.sin(t * TAU * 1.3 - clock * 2.2 + strand) * 0.22 +
-        flutter * 0.06;
-      const s = Math.sin(angle);
-      const c = Math.cos(angle);
-      const radius =
-        VORTEX_W * (0.205 + 0.065 * Math.sin(t * Math.PI) + flutter * 0.008 + burst * 0.11);
-      const split = smooth(clamp((Math.sin(t * TAU * 2.3 + strand * 1.7 - spin) + 0.55) * 1.8));
-      const tear = 1 - burst * split * 0.94;
-      const billow = 0.94 + 0.12 * Math.sin(t * TAU * 3.2 - clock * 4.8 + strand * 1.9);
-      VORTEX[at] = FIELD_W * 0.5 + radius * c + burst * c * VORTEX_W * 0.045;
-      VORTEX[at + 1] =
-        FIELD_PAD + VORTEX_H * (0.99 - 0.92 * t) + radius * 0.16 * s - burst * VORTEX_H * 0.025;
+      const x =
+        u * u * u * BURN_PATHS[path] +
+        3 * u * u * t * BURN_PATHS[path + 2] +
+        3 * u * t * t * BURN_PATHS[path + 4] +
+        t * t * t * BURN_PATHS[path + 6];
+      const y =
+        u * u * u * BURN_PATHS[path + 1] +
+        3 * u * u * t * BURN_PATHS[path + 3] +
+        3 * u * t * t * BURN_PATHS[path + 5] +
+        t * t * t * BURN_PATHS[path + 7];
+      const flutter =
+        Math.sin(t * 10.3 - clock * 4.4 + strand * 2.09) +
+        Math.sin(t * 23.7 - clock * 2.7 + strand * 1.3) * 0.37;
+      const arrival = BURN_PATHS[path + 8] + t * BURN_PATHS[path + 9];
+      const burning = smooth(clamp((ignition - arrival + 0.075) / 0.15));
+      const split = smooth(clamp((Math.sin(t * 13.4 - clock * 2.6 + strand * 1.7) + 0.55) * 1.8));
+      const tear = (1 - burst * split * 0.94) * burning;
+      const billow = 0.94 + 0.17 * Math.sin(t * 17.3 - clock * 4.8 + strand * 1.9);
+      // Extinction stretches the existing branches upward; horizontal
+      // displacement is local wind, never an expanding radial impulse.
+      const lift = burst * VORTEX_H * (0.028 + 0.05 * (1 - y));
+      VORTEX[at] = BODY_X + BODY_W * x + flutter * (3 + t * 6) + burst * flutter * 4;
+      VORTEX[at + 1] = BODY_Y + BODY_H * y - lift;
       VORTEX[at + 4] =
-        VORTEX_W *
-        (0.078 + 0.046 * Math.sin(t * Math.PI)) *
-        1.7 *
-        Math.sqrt(Math.max(0.15, Math.sin(t * Math.PI))) *
-        // Keep the crown wrapped as the longer-lived vortex turns through
-        // other angles; this widens the same irregular volume, not a mask
-        // over the face or additional independent head flames.
-        VORTEX_CROWN_WIDTH[i] *
+        BURN_PATHS[path + 10] *
+        (0.38 + 0.62 * Math.sin(Math.PI * (0.15 + t * 0.85))) *
+        Math.sqrt(Math.max(0, 1 - t)) *
         billow *
         (0.65 + power * 0.35) *
         (1 - burst * 0.65) *
         tear;
-      VORTEX[at + 5] = s;
+      VORTEX[at + 5] = BURN_PATHS[path + 11];
       VORTEX[at + 6] = tear;
     }
     for (let i = 0; i <= VORTEX_STEPS; i += 1) {
@@ -510,8 +514,8 @@ function poseVortex(power, clock, phase) {
   }
 }
 
-// Closed, overlapping curved cells form a continuous ribbon; there are no
-// displaced source rows or rectangular lower bounds. Side selects depth.
+// Overlapping curved cells form tapered branching tongues. They remain
+// rooted while the advancing front widens each newly burning section.
 function vortexPath(context, side, clock, phase) {
   const burst = smooth(
     clamp(
@@ -527,7 +531,7 @@ function vortexPath(context, side, clock, phase) {
       const b = a + VORTEX_STRIDE;
       const depth = (VORTEX[a + 5] + VORTEX[b + 5]) * 0.5;
       if (side && depth * side < -0.05) continue;
-      if (VORTEX[a + 6] + VORTEX[b + 6] < 0.23) continue;
+      if (VORTEX[a + 6] + VORTEX[b + 6] < 0.02) continue;
       const wa = VORTEX[a + 4];
       const wb = VORTEX[b + 4];
       const ax = VORTEX[a] + VORTEX[a + 2] * wa;
@@ -565,35 +569,36 @@ function vortexPath(context, side, clock, phase) {
       context.bezierCurveTo(dx - tx * cap, dy - ty * cap, ax - tx * cap, ay - ty * cap, ax, ay);
       context.closePath();
     }
-    // Secondary rolling curls split off the same stream across four heights.
+    // Smaller pointed forks share the parent front and die with it. Each
+    // bends upward from its root instead of curling around a circular lobe.
     for (let branch = 0; branch < 3; branch += 1) {
-      const at = base + (9 + branch * 15) * VORTEX_STRIDE;
+      const at = base + (5 + branch * 7) * VORTEX_STRIDE;
       if (side && VORTEX[at + 5] * side < 0) continue;
-      const turn = clock * 2.4 + strand * 2.3 + branch * 1.7;
       const x = VORTEX[at];
       const y = VORTEX[at + 1];
       const margin = Math.min(x, FIELD_W - x, y, FIELD_H - y);
-      const radius = Math.min((11 + branch * 6) * (1 + burst * 0.6), Math.max(0, margin * 0.42));
-      const nx = Math.cos(turn);
-      const ny = Math.sin(turn);
-      const tx = -ny;
-      const ty = nx;
-      context.moveTo(x - nx * 7, y - ny * 7);
+      const surviving = VORTEX[at + 6] * (1 - burst * 0.82);
+      const root = Math.min(7, VORTEX[at + 4] * 0.24) * surviving;
+      if (root < 0.12) continue;
+      const radius =
+        Math.min((11 + branch * 6) * (1 + burst * 0.6), Math.max(0, margin * 0.42)) * surviving;
+      const lean = (strand % 2 ? 1 : -1) * (0.7 + 0.22 * Math.sin(clock * 3.1 + branch + strand));
+      context.moveTo(x - root, y);
       context.bezierCurveTo(
-        x + tx * radius * 2.1,
-        y + ty * radius * 2.1 - radius * 0.35,
-        x + nx * radius * 2 + tx * radius,
-        y + ny * radius * 2 + ty * radius - radius * 0.25,
-        x + nx * radius * 1.85,
-        y + ny * radius * 1.85,
+        x - root + lean * radius * 0.35,
+        y - radius * 0.55,
+        x + lean * radius * 1.4,
+        y - radius * 0.9,
+        x + lean * radius,
+        y - radius * 2,
       );
       context.bezierCurveTo(
-        x + nx * radius + tx * radius * 0.45,
-        y + ny * radius + ty * radius * 0.45,
-        x + tx * radius * 0.5,
-        y + ty * radius * 0.5,
-        x + nx * 7,
-        y + ny * 7,
+        x + lean * radius * 0.7,
+        y - radius,
+        x + root + lean * radius * 0.25,
+        y - radius * 0.3,
+        x + root,
+        y,
       );
       context.closePath();
     }
@@ -616,9 +621,10 @@ function paintBodyField(power, clock, phase) {
     m.globalCompositeOperation = "source-over";
     m.globalAlpha = 1;
     m.clearRect(0, 0, FIELD_W, FIELD_H);
-    // A faint interior joins the wrapping fire before detonation; unlike
-    // the former stencil it is gone as the rotating bands fly apart.
-    m.globalAlpha = 0.15 * (1 - burst);
+    // Interior heat appears only after the advancing paths reach the upper
+    // body. Early ignition cannot illuminate the entire suit at once.
+    const ignition = phase > 0 ? clamp(phase / 0.155) : power;
+    m.globalAlpha = 0.12 * (1 - burst) * smooth(clamp((ignition - 0.7) / 0.3));
     if (m.globalAlpha > 0.001) m.drawImage(bodySource, BODY_X, BODY_Y, BODY_W, BODY_H);
     m.globalAlpha = 1;
     m.fillStyle = "#fff";
@@ -635,31 +641,19 @@ function paintBodyField(power, clock, phase) {
     c.globalCompositeOperation = "source-over";
     c.globalAlpha = 1;
     c.clearRect(0, 0, W, H);
-    // A single rising combustion front (not a per-part on/off stagger).
-    c.beginPath();
-    c.ellipse(
-      BODY_X + BODY_W * 0.5,
-      BODY_Y + BODY_H * 0.34,
-      BODY_W * (0.1 + power * 1.8),
-      BODY_H * (0.025 + power * 0.94),
-      0,
-      0,
-      TAU,
-    );
-    c.clip();
+    // Arrival is already encoded in each branch's mask. No ellipse or
+    // radial wipe can turn the ignition into a growing circular shell.
     const offset = (((-clock * 88) % H) + H) % H;
     c.drawImage(bodyFlow, 0, offset - H, W, H);
     c.drawImage(bodyFlow, 0, offset, W, H);
-    // Overlapping sheets are texture within the one connected field. The
-    // participating-volume detail is still the real Cycles-rendered asset.
+    // Overlapping sheets texture the branches with the shared Cycles asset.
     const volumes = coarse ? 18 : 24;
     const span = volumes / VORTEX_STRANDS - 1;
     for (let i = 0; i < volumes; i += 1) {
       const k = i * 8;
       const strand = i % VORTEX_STRANDS;
       const along = Math.floor(i / VORTEX_STRANDS);
-      const stagger = along > 0 && along < span ? strand - 1 : 0;
-      const step = Math.round((along * VORTEX_STEPS) / span) + stagger;
+      const step = Math.min(VORTEX_STEPS - 1, Math.round((along * (VORTEX_STEPS - 1)) / span));
       const at = (strand * (VORTEX_STEPS + 1) + step) * VORTEX_STRIDE;
       const rawAngle = Math.atan2(-VORTEX[at + 2], VORTEX[at + 3]) + Math.PI / 2;
       const angle = rawAngle * 0.64 + Math.sin(clock * 4.8 + i * 1.3) * 0.06;
@@ -676,8 +670,7 @@ function paintBodyField(power, clock, phase) {
         angle,
       );
     }
-    // Volume detail belongs inside the continuous coil, not separate
-    // candle silhouettes above its tips or outside its moving boundary.
+    // Detail stays inside the connected burning branches and their tips.
     c.globalCompositeOperation = "destination-in";
     c.globalAlpha = 1;
     c.drawImage(bodyMask, 0, 0);
@@ -717,13 +710,15 @@ export function drawBodyFlame(context, size, strength, clock, scale = 1, layer =
   const unit = H / 1000;
   const power = clamp(strength);
   const progress = Number.isFinite(phase) ? clamp(phase) : 0;
-  // Extinction sheds density across the broad volume. It must not contract
-  // the ignition ellipse back onto the chest like a hard circular wipe.
+  // Extinction sheds density along the same branches without contracting
+  // the advancing front back onto the chest.
   const connected = paintBodyField(
     progress >= NANITE_FIRE_PHASES.burstStart ? 1 : power,
     clock,
     progress,
   );
+  if (!connected)
+    poseVortex(progress >= NANITE_FIRE_PHASES.burstStart ? 1 : power, clock, progress);
   const scatter = naniteFlameScatter(progress);
   context.save();
   try {
@@ -756,9 +751,8 @@ export function drawBodyFlame(context, size, strength, clock, scale = 1, layer =
         );
       }
     }
-    // Authored volume follows the same revolving ribbons, not separate
-    // candles assigned to the head, arms or legs. Its lean follows the
-    // curve's tangent as that stream wraps round to the far side.
+    // Without a prepared field, sample the same advancing branches. This
+    // keeps load failure and the normal path on the same ignition topology.
     const count = connected ? 0 : coarse ? 14 : 18;
     const span = Math.ceil(count / VORTEX_STRANDS - 1);
     context.globalCompositeOperation = "lighter";
@@ -766,24 +760,24 @@ export function drawBodyFlame(context, size, strength, clock, scale = 1, layer =
       const k = i * 8;
       const strand = i % VORTEX_STRANDS;
       const along = Math.floor(i / VORTEX_STRANDS);
-      const stagger = along > 0 && along < span ? strand - 1 : 0;
-      const step = Math.round((along * VORTEX_STEPS) / span) + stagger;
+      const step = Math.min(VORTEX_STEPS - 1, Math.round((along * (VORTEX_STEPS - 1)) / span));
       const at = (strand * (VORTEX_STEPS + 1) + step) * VORTEX_STRIDE;
-      if (connected && VORTEX[at + 5] * (layer === "back" ? -1 : 1) < -0.1) continue;
-      const v = connected ? (VORTEX[at + 1] - BODY_Y) / BODY_H : SOURCES[i * 4 + 1];
-      const local = smooth(clamp((power - Math.abs(v - 0.34) * 0.23) / 0.77));
-      const x = connected ? ((VORTEX[at] - BODY_X) * W) / BODY_W : SOURCES[i * 4] * W;
-      const y = connected ? ((VORTEX[at + 1] - BODY_Y) * H) / BODY_H : v * H;
-      const rawLean = connected ? Math.atan2(-VORTEX[at + 2], VORTEX[at + 3]) + Math.PI / 2 : 0;
-      const lean = connected ? rawLean * 0.64 + Math.sin(clock * 5.2 + i * 1.4) * 0.07 : 0;
+      if (VORTEX[at + 5] * (layer === "back" ? -1 : 1) < -0.1) continue;
+      const radiance =
+        progress > 0 && progress < NANITE_FIRE_PHASES.burstStart ? Math.sqrt(power) : power;
+      const local = radiance * VORTEX[at + 6];
+      const x = ((VORTEX[at] - BODY_X) * W) / BODY_W;
+      const y = ((VORTEX[at + 1] - BODY_Y) * H) / BODY_H;
+      const rawLean = Math.atan2(-VORTEX[at + 2], VORTEX[at + 3]) + Math.PI / 2;
+      const lean = rawLean * 0.64 + Math.sin(clock * 5.2 + i * 1.4) * 0.07;
       tongue(
         context,
         x,
         y,
         (78 + SEED[k + 1] * 68) * unit,
-        (130 + SEED[k + 2] * 104) * unit * local,
+        (130 + SEED[k + 2] * 104) * unit * (0.4 + local * 0.6),
         clock * 16 + SEED[k + 3] * 32,
-        local * (connected ? 0.98 : 0.92) * (connected ? VORTEX[at + 6] : 1),
+        local * 0.92,
         lean,
       );
     }
@@ -804,4 +798,104 @@ export function drawBodyFlame(context, size, strength, clock, scale = 1, layer =
   } finally {
     context.restore();
   }
+}
+
+// The fire's heat (owner, 2026-10-21: 炎を改善): the volume above reads as
+// smoke without a hot core, so bright tongues rise from a burning bed that
+// hugs the body's outline, cooling from a near-white green core through
+// green to forest green, with sparks. Additive, a pure function of the
+// clock (no particles kept between frames), sprites built once.
+const HEAT_TONES = [
+  [226, 255, 208],
+  [120, 236, 110],
+  [44, 170, 52],
+];
+let heatSprites = null;
+const heatSpritesFor = () => {
+  if (heatSprites) return heatSprites;
+  const doc = globalThis.document;
+  if (!doc?.createElement) return null;
+  heatSprites = HEAT_TONES.map(([r, g, b]) => {
+    const canvas = doc.createElement("canvas");
+    canvas.width = canvas.height = 64;
+    const c = canvas.getContext("2d");
+    if (c?.createRadialGradient) {
+      const glow = c.createRadialGradient(32, 32, 0, 32, 32, 32);
+      glow.addColorStop(0, `rgb(${r} ${g} ${b} / 1)`);
+      glow.addColorStop(0.3, `rgb(${r} ${g} ${b} / 0.6)`);
+      glow.addColorStop(1, `rgb(${r} ${g} ${b} / 0)`);
+      c.fillStyle = glow;
+      c.fillRect(0, 0, 64, 64);
+    }
+    return canvas;
+  });
+  return heatSprites;
+};
+const heatHash = (n) => {
+  const x = Math.sin(n * 127.1 + 311.7) * 43758.5453;
+  return x - Math.floor(x);
+};
+// The body's half-width at a height (fractions of the figure).
+const HEAT_PROFILE = [
+  [0.06, 0.07],
+  [0.18, 0.08],
+  [0.24, 0.38],
+  [0.4, 0.34],
+  [0.5, 0.23],
+  [0.62, 0.25],
+  [0.8, 0.23],
+  [0.97, 0.27],
+];
+const heatHalfWidth = (v) => {
+  for (let k = 1; k < HEAT_PROFILE.length; k += 1) {
+    const [y1, w1] = HEAT_PROFILE[k];
+    if (v <= y1) {
+      const [y0, w0] = HEAT_PROFILE[k - 1];
+      return w0 + ((w1 - w0) * (v - y0)) / (y1 - y0);
+    }
+  }
+  return HEAT_PROFILE[HEAT_PROFILE.length - 1][1];
+};
+const HEAT_TONGUES = 220;
+const HEAT_SPARKS = 40;
+
+export function drawFlameHeat(context, size, strength, clock, scale = 1) {
+  if (!(strength > 0) || !Number.isFinite(clock) || !size) return;
+  const sprites = heatSpritesFor();
+  if (!sprites) return;
+  const W = size.width;
+  const H = size.height;
+  context.save();
+  if (scale !== 1) context.scale(scale, scale);
+  context.globalCompositeOperation = "lighter";
+  for (let i = 0; i < HEAT_TONGUES; i += 1) {
+    if (heatHash(i + 0.5) > strength * 1.1) continue;
+    const age = (clock * (0.6 + 0.5 * heatHash(i + 1.3)) + heatHash(i + 2.7)) % 1;
+    const v = 0.05 + 0.93 * heatHash(i + 3.9);
+    const side = heatHash(i + 4.7) < 0.5 ? -1 : 1;
+    const floor = heatHash(i + 5.3) < 0.18;
+    const bx = floor
+      ? W * (0.5 + (heatHash(i + 6.1) - 0.5) * 0.7)
+      : W * (0.5 + side * (heatHalfWidth(v) + 0.005 + 0.025 * heatHash(i + 6.9)));
+    const by = floor ? H * 0.985 : H * v;
+    const lift = (70 + 90 * heatHash(i + 7.7)) * age;
+    const sway = Math.sin(clock * 3.1 + i * 1.3 + age * 6) * 6 * age;
+    const s = (26 + 30 * heatHash(i + 8.3)) * (1 - age * 0.55);
+    const tone = age < 0.22 ? 0 : age < 0.55 ? 1 : 2;
+    context.globalAlpha = Math.min(1, Math.sin(Math.PI * Math.min(1, age * 1.2)) * strength * (tone ? 0.8 : 1));
+    context.drawImage(sprites[tone], bx + sway - s / 2, by - lift - s * 0.7, s, s * 1.4);
+  }
+  context.fillStyle = "rgb(200 255 180)";
+  for (let i = 0; i < HEAT_SPARKS; i += 1) {
+    if (heatHash(i + 40.5) > strength) continue;
+    const age = (clock * (0.4 + 0.3 * heatHash(i + 41.1)) + heatHash(i + 42.7)) % 1;
+    const v = 0.08 + 0.9 * heatHash(i + 43.3);
+    const side = heatHash(i + 44.9) < 0.5 ? -1 : 1;
+    const x = W * (0.5 + side * (heatHalfWidth(v) + 0.02)) + Math.sin(clock * 2 + i) * 10 * age;
+    const y = H * v - 110 * age;
+    const d = 1.2 + 1.6 * (1 - age);
+    context.globalAlpha = (1 - age) * 0.85 * strength;
+    context.fillRect(x - d / 2, y - d / 2, d, d);
+  }
+  context.restore();
 }

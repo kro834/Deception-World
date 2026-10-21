@@ -1,0 +1,68 @@
+{
+  "date": "2026-10-21",
+  "base": "08a0e725559e54bb0baca193d67dc464b82e787e",
+  "changes": {
+    "ciel": [
+      "Regenerated the 32-frame Cycles volume atlas with axial thermal cooling and directional scattering.",
+      "Retarded emission separates nozzle shutdown from the travel and cooling of already emitted flame.",
+      "Finite sparks cool to ash instead of restarting after extinction; reflected light and smoke have a one-shot lifecycle."
+    ],
+    "rexonance": [
+      "Both entry and scroll flames have rising thermal crests, a stretched extinction plume, and branches that inherit parent breakup.",
+      "Incoming nanites flatten their capture helix before axial insertion.",
+      "Induction rails follow actual moving anchors into fixed sockets; moving weld fronts cool from white to gold to copper."
+    ],
+    "p14": [
+      "Two-core calibration rail replaces the plain comparator presentation, with a seated luminous thumb and active endpoint.",
+      "Preserves binary P1/P2 values, exact comparison data, native iOS select, vertical touch scrolling and keyboard operation.",
+      "Forced colors use system paints; economy and reduced motion disable decorative transitions."
+    ]
+  },
+  "preserved": [
+    "Central reactor is fixed; surrounding coil formation and rotation are unchanged.",
+    "Supplied artwork, authored face pixels, cover timing and final armour positions are unchanged.",
+    "Ciel requires ten deliberate taps, exposes no stop button, and retains the burned page until real reload.",
+    "Existing canvas pixel, sprite and adaptive quality limits remain bounded; no startup 3D dependency was added."
+  ],
+  "blender": {
+    "version": "5.2.0 LTS",
+    "renderer": "Cycles CPU",
+    "samples": 64,
+    "atlasBytes": 295752,
+    "atlasSha256": "3622300b9c39d3650482dfb5016f821eef0af2e8cc6835b4dfd8a83f5ff6596f",
+    "independentLoopEndpointPixelDifference": 0,
+    "geometryLoopDifference": 0,
+    "method": "Procedural closed volume meshes; not a fluid dynamics simulation"
+  },
+  "verification": {
+    "unit": { "total": 2635, "passed": 2630, "skipped": 5, "failed": 0 },
+    "typecheck": "passed",
+    "lint": "passed; 12 pre-existing warnings, no errors",
+    "build": "passed",
+    "sourceParts": "15 groups verified",
+    "startupBudget": "passed without increasing limits",
+    "ciel": {
+      "chromium": "320px, 1024px landscape, desktop; normal, extended recovery/input/retention checks",
+      "webkit": "320px; normal, reduced motion, no WebGL, blocked jet asset",
+      "artifacts": "output/playwright/cinema-polish-ciel-20261021 and cinema-polish-ciel-webkit-20261021"
+    },
+    "rexonance": {
+      "chromium": "320px normal/blocked/reduced; 1024px landscape normal/reduced",
+      "webkit": "320px normal/blocked, including entry, forward/reverse scroll, finish, hidden stop and natural return",
+      "loadingRecovery": "WebKit resize-notice, decode-exception, network-recovery: all passed",
+      "sampledAllocation": "Existing regression passed: rich extras 17.06 MiB versus classic 33.91 MiB; not a speedup or zero-allocation claim",
+      "artifacts": "output/playwright/cinema-polish-rexonance-20261021",
+      "verifierCorrection": "Blocked mode now requires real procedural fallback and zero atlas draws in the same native frame window as nanites. Normal mode still requires actual atlas draws."
+    },
+    "p14": {
+      "artifacts": "output/playwright/cinema-polish-p14-20261021",
+      "checks": "320px/1024px, endpoint and track clicks, Home/End, vertical touch, native iPad-UA select, forced colors, reduced motion, economy, final comparison values"
+    }
+  },
+  "limitations": [
+    "Browser emulation is not physical iPhone or iPad verification; the native OS picker requires a physical device.",
+    "The optional natural-clock Rexonance screenshot run missed a narrow target because screenshot capture was late; its failure evidence is retained. Native painter observation and exact canonical boundary checks passed.",
+    "No claim of a fixed performance improvement or real-time ray tracing.",
+    "Publication is verified separately against the exact commit and public asset hashes."
+  ]
+}

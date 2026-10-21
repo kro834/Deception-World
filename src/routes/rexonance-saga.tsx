@@ -24,6 +24,7 @@ import rexonanceResonanceCssUrl from "@/styles-rexonance-resonance.css?url";
 import rexonanceZenithCssUrl from "@/styles-rexonance-zenith.css?url";
 import rexonanceForgeCssUrl from "@/styles-rexonance-forge.css?url";
 import rexonanceEditorialCssUrl from "@/styles-rexonance-editorial.css?url";
+import p14CalibrationCssUrl from "@/styles-p14-calibration.css?url";
 import { rexonanceImage } from "@/lib/rexonance-images";
 import { REXONANCE_SITE_ARTWORK } from "@/lib/rexonance-site-artwork";
 import { syncRexonanceLayoutGate } from "@/lib/rexonance-layout-gate.js";
@@ -80,6 +81,7 @@ export const Route = createFileRoute("/rexonance-saga")({
       // engines' grammar — chips, guideways, molten gold (styles-rexonance-forge.css).
       { rel: "stylesheet", href: rexonanceForgeCssUrl },
       { rel: "stylesheet", href: rexonanceEditorialCssUrl },
+      { rel: "stylesheet", href: p14CalibrationCssUrl },
       CINEMATIC_STYLESHEET_LINK,
       {
         rel: "preload",

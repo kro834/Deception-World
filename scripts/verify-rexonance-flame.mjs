@@ -1,7 +1,7 @@
 // Real browser evidence for the Blender flame, not a source-string audit.
 // BASE_URL=... [FLAME_BASELINE=1] [FLAME_PROFILES=desktop,phone320,tablet1024]
 // [FLAME_CASES=normal,blocked,reduced] [BROWSER=webkit] node scripts/verify-rexonance-flame.mjs
-// [FLAME_COVERAGE_MIN=0.05] opts into a measured per-region peak coverage gate.
+// [FLAME_COVERAGE_MIN=0.05] overrides the default registered eleven-region peak gate.
 // [OUT_DIR=output/playwright/rexonance-flame] [FLAME_NATURAL=1] controls evidence/real-clock capture.
 // [FLAME_ENTRY_DETAIL=1] adds four diagnostic prelude/handoff shots; leave off for WebKit's bounded entry wall clock.
 // The disposable profile never posts gallery images or changes public data.
@@ -11,6 +11,7 @@ import { join } from "node:path";
 import { chromium, webkit } from "playwright";
 import sharp from "sharp";
 import { connectedFireEvidence } from "./rexonance-fire-evidence.mjs";
+import { assertSpreadSequence, flameSpreadEvidence } from "./rexonance-spread-evidence.mjs";
 import { entryCanonicalTime, NANITE_FIRE_PHASES } from "../src/lib/rexonance-ignition.js";
 
 const materialEntry = NANITE_FIRE_PHASES.materialStart * 2400;
@@ -24,9 +25,9 @@ const naturalClock = process.env.FLAME_NATURAL === "1";
 // inside WebKit's non-pausable route-coordinator wall-clock deadline.
 const detailedEntry = process.env.FLAME_ENTRY_DETAIL === "1";
 const entrySamples = detailedEntry
-  ? [180, 280, 420, 900, 1250, 1360, 1400, 1420, 1460, 1520, 1560, 1590, 1600, 1620, 1850, 3600]
-  : [180, 280, 420, 900, 1250, 1420, 1460, 1560, 1590, 1600, 1620, 1850, 3600];
-const entryPeak = (shot) => shot.target === 1420 || shot.target === 1460;
+  ? [60, 180, 280, 420, 900, 1250, 1360, 1400, 1420, 1460, 1520, 1560, 1590, 1600, 1620, 1850, 3600]
+  : [60, 180, 280, 420, 900, 1250, 1420, 1460, 1560, 1590, 1600, 1620, 1850, 3600];
+const entryPeak = (shot) => [1250, 1420, 1460].includes(shot.target);
 const coverageMinimum = process.env.FLAME_COVERAGE_MIN
   ? Number(process.env.FLAME_COVERAGE_MIN)
   : null;
@@ -54,7 +55,7 @@ const asset = "/rexonance-flame-natural-20261019/flame.webp";
 const evidenceWidth = 171;
 const evidenceHeight = 312;
 const bodyMask = await sharp(
-  await readFile(new URL("../public/rexonance-suit-20261016/undersuit.webp", import.meta.url)),
+  await readFile(new URL("../public/rexonance-suit-20261016/undersuit-20261021.webp", import.meta.url)),
 )
   .ensureAlpha()
   .resize(evidenceWidth, evidenceHeight)
@@ -107,6 +108,7 @@ async function installProbe(context) {
     // This observes the real kit bitmap pass. Typed-metal geometry is
     // separately proved empty in the in-memory drawing-pass tests.
     const naniteSources = new WeakSet();
+    const flameSources = new WeakSet();
     const nativeFrames = new WeakMap();
     const lastPaintFrames = new WeakMap();
     let frameSerial = 0;
@@ -118,6 +120,7 @@ async function installProbe(context) {
           : "other";
     const beginNativeFrame = (canvas, reason) => {
       naniteSources.delete(canvas);
+      flameSources.delete(canvas);
       const kind = canvasKind(canvas),
         geometry = state.scrollGeometry;
       const frame = {
@@ -127,6 +130,7 @@ async function installProbe(context) {
         height: canvas.height,
         images: 0,
         nanites: 0,
+        flames: 0,
         startedAt: performance.now(),
         actual:
           kind === "scroll" && geometry
@@ -135,7 +139,7 @@ async function installProbe(context) {
       };
       nativeFrames.set(canvas, frame);
     };
-    const naniteURL = /\/rexonance-nanites-20261018\/(?:cells|comets|guide|fx)\.webp/;
+    const naniteURL = /\/rexonance-nanites-\d{8}\/(?:cells|comets|guide|fx)\.webp/;
     const isNanite = (source) =>
       Boolean(
         source &&
@@ -222,8 +226,20 @@ async function installProbe(context) {
         }
       }
       const isAtlas = typeof source?.src === "string" && source.src.includes(path);
-      if (source instanceof HTMLCanvasElement && source.width === 96 && source.height === 192)
-        state.fallback[kind]++;
+      const isFallback =
+        source instanceof HTMLCanvasElement && source.width === 96 && source.height === 192;
+      if ((isAtlas || isFallback || flameSources.has(source)) && this.globalAlpha > 0) {
+        flameSources.add(this.canvas);
+        if (frame) frame.flames++;
+        if (
+          kind !== "other" &&
+          source instanceof HTMLCanvasElement &&
+          source.width === 384 &&
+          source.height === 624
+        )
+          state.latestField = source;
+      }
+      if (isFallback) state.fallback[kind]++;
       state.draws[kind] += 1;
       if (kind !== "other") state.lastDraw = performance.now();
       if (isAtlas) {
@@ -266,11 +282,13 @@ async function nativeNaniteWindow(page, kind) {
       new Promise((resolve) => {
         const before = window.__flameQA.nativeNanites[kind];
         const atlasBefore = window.__flameQA.atlas[kind];
+        const fallbackBefore = window.__flameQA.fallback[kind];
         requestAnimationFrame(() =>
           requestAnimationFrame(() =>
             resolve({
               nanites: window.__flameQA.nativeNanites[kind] - before,
               atlas: window.__flameQA.atlas[kind] - atlasBefore,
+              fallback: window.__flameQA.fallback[kind] - fallbackBefore,
             }),
           ),
         );
@@ -378,6 +396,11 @@ async function canvasPixels(page, selector) {
         visible,
         green,
         hash: (hash >>> 0).toString(16),
+        fieldPNG:
+          window.__flameQA.nativeFrames[source.matches(".rzn-canvas") ? "scroll" : "entry"]
+            ?.flames > 0
+            ? window.__flameQA.latestField?.toDataURL("image/png")
+            : null,
       };
       const rect = source.getBoundingClientRect();
       const host = source.closest(".rx-suit-nanites");
@@ -542,29 +565,28 @@ async function screenCoverage(capture, figure) {
   };
 }
 
-function assertVortexPeak(shots, isPeak, label) {
+async function inspectSpread(shot) {
+  const png = shot.pixels?.fieldPNG;
+  if (shot.pixels) delete shot.pixels.fieldPNG;
+  if (!png) return;
+  const input = Buffer.from(png.split(",")[1], "base64");
+  await writeFile(shot.file.replace(/\.png$/, "-field.png"), input);
+  const { data, info } = await sharp(input)
+    .ensureAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  shot.spread = flameSpreadEvidence(data, info.width, info.height);
+}
+
+function assertCombustionPeak(shots, isPeak, label) {
   const peaks = shots.filter(isPeak);
-  assert.ok(peaks.length >= 2, `${label}: multiple real vortex peak samples`);
-  const required = coverageMinimum ?? 0.05;
-  assert.ok(
-    peaks.some(
-      (shot) =>
-        Object.values(shot.fireEvidence?.wrap.regions ?? {}).length === 12 &&
-        Object.values(shot.fireEvidence.wrap.regions).every((region) => region.ratio >= required),
-    ),
-    `${label}: one actual frame must wrap both outside boundaries at all six body levels; ` +
-      peaks
-        .map(
-          (shot) =>
-            `${shot.target ?? shot.progress}:` +
-            Object.entries(shot.fireEvidence?.wrap.regions ?? {})
-              .sort(([, a], [, b]) => a.ratio - b.ratio)
-              .slice(0, 2)
-              .map(([name, r]) => `${name}=${(r.ratio * 100).toFixed(2)}%`)
-              .join(","),
-        )
-        .join("; "),
-  );
+  assert.ok(peaks.length >= 2, `${label}: multiple actual full-body combustion samples`);
+  assertSpreadSequence(assert, shots, {
+    peak: isPeak,
+    kindle: (shot) => shot.target === 60 || shot.progress === 0.025,
+    minimum: coverageMinimum ?? 0.05,
+    label,
+  });
   assert.ok(
     peaks.some(
       (shot) =>
@@ -726,6 +748,7 @@ try {
             pixels,
             nativeNaniteDraws: nativeWindow.nanites,
             nativeAtlasDraws: nativeWindow.atlas,
+            nativeFallbackDraws: nativeWindow.fallback,
             file,
           });
           if (target === 3600) {
@@ -741,6 +764,7 @@ try {
           }
         }
         for (const shot of record.entry) {
+          await inspectSpread(shot);
           const coverage = await screenCoverage(
             await readFile(shot.file),
             shot.pixels?.viewportFigure,
@@ -772,13 +796,20 @@ try {
                 .every((shot) => shot.nativeNaniteDraws === 0),
               "the real kit bitmap pass waits for the trailing explosion",
             );
+            // A blocked atlas must never draw. Demand its real procedural
+            // fallback in the very same native frame window as the kit,
+            // instead of the contradictory positive-atlas condition. The
+            // normal case still requires real atlas draws: fallback alone
+            // cannot satisfy its overlap gate.
             assert.ok(
               record.entry.some(
                 (shot) =>
                   shot.canonicalClock >= materialEntry &&
                   shot.canonicalClock < NANITE_FIRE_PHASES.flameEnd * 2400 &&
                   shot.nativeNaniteDraws > 0 &&
-                  shot.nativeAtlasDraws > 0,
+                  (mode === "blocked"
+                    ? shot.nativeAtlasDraws === 0 && shot.nativeFallbackDraws > 0
+                    : shot.nativeAtlasDraws > 0),
               ),
               "actual nanites and flame coexist briefly before the fire finishes",
             );
@@ -837,8 +868,8 @@ try {
             Math.max(0, geometry.top - profiles[name].viewport.height * 4.4),
           );
           await page.waitForTimeout(1800);
-          // A hollow rolling vortex wraps both sides of the figure before
-          // its centre clears. Preserve final armour and reverse traversal.
+          // Branching fire rises from the feet before fading into the first
+          // machines. Preserve final armour and reverse traversal as well.
           const forwardSamples = [
             0.025, 0.04, 0.0625, 0.065, 0.069625, 0.0815, 0.084, 0.0855, 0.08625, 0.09, 0.14, 0.22,
             0.3, 0.34, 0.92, 0.99,
@@ -920,6 +951,7 @@ try {
               fireEvidence: coverage?.fire,
               file,
             });
+            await inspectSpread(record.scroll.at(-1));
             if (progress === 0.34 || progress === 0.92 || progress === 0.99) {
               const before = await page.evaluate(
                 () => window.__flameQA.atlas.scroll + window.__flameQA.fallback.scroll,
@@ -960,7 +992,7 @@ try {
                 shot.direction === "reverse" &&
                 (shot.progress === 0.065 || shot.progress === 0.069625),
             ),
-            note: "Inner eleven-body-patch and connected-component measurements remain diagnostics. The hollow vortex is accepted only when its real outside flame reaches both sides of all six body heights together in one peak frame. Source-canvas coverage, centre clearing and completed armour are retained separately.",
+            note: "Actual cached combustion must begin at the feet, propagate upward and cover all eleven body patches together in one full/peak frame. Both arm branches must burn. Final screenshot coverage, connected components, exterior flame, centre clearing and completed armour are retained separately; circular wrapping is no longer the requested topology.",
           };
           const temporalCoverage = (shots) =>
             shots.map((shot) => {
@@ -984,16 +1016,16 @@ try {
           record.naturalness = {
             entry: temporalCoverage(record.entry),
             scroll: temporalCoverage(record.scroll),
-            note: "Early ignition, wrapped volume, explosive clearing and later metal are captured from the real engines. All twelve exterior wrap patches must pass together, not as maxima assembled from different frames. Native kit bitmap draws are checked before the material floor; typed-metal emptiness and exact reverse poses are verified by the actual drawing-pass unit harness. Browser atlas phase is intentionally free-running.",
+            note: "Early ignition, upward branching combustion, extinction and later metal are captured from the real engines. Eleven registered body patches must pass together in one frame, alongside the foot-to-crown front and both lateral arms. Native kit bitmap draws are checked before the material floor; typed-metal emptiness and exact reverse poses are verified by the actual drawing-pass unit harness. Browser atlas phase is intentionally free-running.",
           };
           if (mode === "normal" && !baseline) {
-            assertVortexPeak(record.entry, entryPeak, `${name}/entry`);
-            assertVortexPeak(
+            assertCombustionPeak(record.entry, entryPeak, `${name}/entry`);
+            assertCombustionPeak(
               record.scroll,
               (shot) => shot.direction === "forward" && [0.065, 0.069625].includes(shot.progress),
               `${name}/scroll`,
             );
-            assertVortexPeak(
+            assertCombustionPeak(
               record.scroll,
               (shot) => shot.direction === "reverse" && [0.065, 0.069625].includes(shot.progress),
               `${name}/reverse`,
@@ -1117,7 +1149,7 @@ try {
         if (mode === "normal" && !baseline) {
           record.nativeTracerSelfTest = await page.evaluate(async () => {
             const bitmap = await createImageBitmap(
-              await (await fetch("/rexonance-nanites-20261018/cells.webp")).blob(),
+              await (await fetch("/rexonance-nanites-20261021/cells.webp")).blob(),
             );
             const canvas = document.createElement("canvas");
             canvas.width = 32;

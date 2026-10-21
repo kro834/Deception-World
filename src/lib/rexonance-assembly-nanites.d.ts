@@ -44,6 +44,9 @@ export const ASSEMBLY_TOUCH_HERO_BUDGET: number;
 
 export function naniteHash(index: number, salt: number): number;
 
+/** A chip's size relative to the swarm's base, from its hash (0.78–1.75). */
+export function naniteSizeScale(hash: number): number;
+
 export interface NaniteRings {
   count: number;
   cy: Float64Array;

@@ -1048,6 +1048,93 @@ test("receiver frames follow armour contours and opposed shutters fasten in stag
   L.receiverSlot[p] = savedSlot;
 });
 
+test("real receiver induction fronts advance along their rails, then cool from ice through gold to copper", async () => {
+  const { plan, extras } = await extrasRuntime({ touch: false });
+  const all = plan.plates();
+  const L = extras.rexonanceNaniteLayout();
+  const p = all.findIndex(({ piece }) => piece.id === "shoulder-outer-l");
+  const saved = [...L.receiverN];
+  const savedSlot = L.receiverSlot[p];
+  L.receiverN.fill(0);
+  L.receiverN[p] = 6;
+  L.receiverSlot[p] = 0;
+  const { context } = recorder();
+  const strokes = [];
+  let path = [];
+  context.beginPath = () => {
+    path = [];
+  };
+  context.moveTo = (x, y) => path.push([x, y]);
+  context.lineTo = (x, y) => path.push([x, y]);
+  context.stroke = () =>
+    strokes.push({ color: context.strokeStyle, alpha: context.globalAlpha, path });
+  const ex = extras.createSuitExtras({
+    flight: context,
+    s: 1,
+    ox: 0,
+    oy: 0,
+    all,
+    gold: plan.cells(),
+    source: { kind: "work" },
+    sheet: { kind: "motes" },
+  });
+  try {
+    const inductionAt = (before) => {
+      const t = all[p].fit - before;
+      const pose = ex.platePose(p, t);
+      strokes.length = 0;
+      ex.receiversAt(t);
+      const pulse = strokes.at(-1);
+      assert.equal(
+        pulse.path.length,
+        24,
+        "two bounded induction segments at each of six real keys",
+      );
+      const x = L.receiver[p * 24];
+      const y = L.receiver[p * 24 + 1];
+      const tx = -L.receiver[p * 24 + 3];
+      const ty = L.receiver[p * 24 + 2];
+      const px = pose[0] * x + pose[2] * y + pose[4];
+      const py = pose[1] * x + pose[3] * y + pose[5];
+      const head = pulse.path[1];
+      const dx = x - px;
+      const dy = y - py;
+      const u = ((head[0] + tx * 5 - px) * dx + (head[1] + ty * 5 - py) * dy) / (dx * dx + dy * dy);
+      assert.ok(u > 0 && u < 1.05, "the visible front lies on the actual moving-to-fixed rail");
+      return u;
+    };
+    assert.ok(
+      inductionAt(65) > inductionAt(120) + 0.25,
+      "the front travels toward the fixed socket before locking",
+    );
+    const cooling = [4, 24, 48].map((after) => {
+      strokes.length = 0;
+      const t = all[p].fit + after;
+      ex.platePose(p, t);
+      ex.receiversAt(t);
+      return strokes.at(-1);
+    });
+    assert.deepEqual(
+      cooling.map(({ color }) => color),
+      ["#c3e4ef", "#e9b86d", "#8d6a44"],
+    );
+    assert.ok(
+      cooling[0].alpha > cooling[1].alpha && cooling[1].alpha > cooling[2].alpha,
+      "actual receiver strokes fade throughout cooling",
+    );
+    strokes.length = 0;
+    ex.receiversAt(all[p].fit + 64);
+    assert.equal(
+      strokes.length,
+      0,
+      "no heat or induction remains after the existing cooling window",
+    );
+  } finally {
+    L.receiverN.set(saved);
+    L.receiverSlot[p] = savedSlot;
+  }
+});
+
 // Owner (2026-10-16): 「更にナノマシンの挙動をブラッシュアップして。」 — squads
 // that hop lanes behind a white leader, the core's heartbeat breathing the
 // rings, seat ripples, tile strings behind white pathfinders that lock on

@@ -83,7 +83,7 @@ def material(index, core):
     output = nodes.new("ShaderNodeOutputMaterial")
     volume = nodes.new("ShaderNodeVolumePrincipled")
     volume.inputs["Color"].default_value = (0.016, 0.105, 0.032, 1)
-    volume.inputs["Anisotropy"].default_value = 0.22
+    volume.inputs["Anisotropy"].default_value = 0.35
     links.new(volume.outputs[0], output.inputs["Volume"])
     coordinates = nodes.new("ShaderNodeTexCoord")
     mapping = nodes.new("ShaderNodeVectorMath")
@@ -115,7 +115,16 @@ def material(index, core):
     density = scalar(nodes, links, "MAXIMUM", scalar(nodes, links, "MULTIPLY", density, 12), 0)
     links.new(scalar(nodes, links, "MULTIPLY", density, 1.3 if core else 1.35), volume.inputs["Density"])
     heat = scalar(nodes, links, "POWER", density, 1.35)
-    links.new(scalar(nodes, links, "MULTIPLY", heat, 10.0 if core else 4.1), volume.inputs["Emission Strength"])
+    # Heat leaves the nozzle before the outer shear envelope. Cool the real
+    # volume downstream so its rolling tips retain detail instead of turning
+    # into uniformly white billboards when the runtime overlaps two poses.
+    position = nodes.new("ShaderNodeSeparateXYZ")
+    links.new(coordinates.outputs["Object"], position.inputs[0])
+    cooling = scalar(nodes, links, "MAXIMUM",
+                     scalar(nodes, links, "SUBTRACT", 1.12,
+                            scalar(nodes, links, "MULTIPLY", position.outputs["X"], 0.16)), 0.30)
+    thermal = scalar(nodes, links, "MULTIPLY", heat, cooling)
+    links.new(scalar(nodes, links, "MULTIPLY", thermal, 10.0 if core else 4.1), volume.inputs["Emission Strength"])
     if core:
         volume.inputs["Emission Color"].default_value = (0.42, 1, 0.25, 1)
     else:
@@ -245,7 +254,7 @@ with open(os.path.join(args.output, "render-provenance.json"), "w", encoding="ut
         "vertices": sum(len(obj.data.vertices) for obj, *_ in meshes),
         "enclosureNormals": "outward",
         "signedVolumeMin": min(signed_volumes),
-        "shader": "anisotropic multiscale fBm absorption/emission volumes with rolling lobes and three white-green pressure filaments",
+        "shader": "anisotropic multiscale fBm absorption/emission volumes with downstream thermal cooling, rolling lobes and three white-green pressure filaments",
         "loopGeometryMaxDelta": seam,
         "loopCheckRendered": args.loop_check,
         "flow": "left to right",

@@ -6,7 +6,7 @@
 //     [--only=cells,fx,guide] [--work=<dir>] [--debug=<dir>] [--placeholder]
 //     [--hardware]
 //
-// writes public/rexonance-nanites-20261018/{cells,comets,fx,guide}.webp and
+// writes public/rexonance-nanites-20261021/{cells,comets,fx,guide}.webp and
 // the generated module src/lib/rexonance-nanites.ts.
 //
 // - --blender=<path>: renders the three Blender scenes headless
@@ -41,7 +41,9 @@ const require = createRequire(import.meta.url);
 const sharp = require(process.env.SHARP_MODULE || "sharp");
 
 const ROOT = fileURLToPath(new URL("..", import.meta.url));
-const VERSION = "20261018";
+const VERSION = "20261021";
+// The kit this one re-renders from: its untouched sheets carry over.
+const PREVIOUS = "20261018";
 const DIR = `/rexonance-nanites-${VERSION}`;
 const OUT_DIR = join(ROOT, "public", DIR.slice(1));
 const MODULE = join(ROOT, "src/lib/rexonance-nanites.ts");
@@ -1278,19 +1280,25 @@ if (PLACEHOLDER) {
     encoded.fx = await encode("fx", raw);
     delete encoded.comets;
   }
-  const rendered = !HARDWARE && ["cells", "fx", "guide"].every((dir) => existsSync(join(WORK, dir)) && readdirSync(join(WORK, dir)).length);
+  // The chips alone may be re-rendered (2026-10-21, the machined chip): with
+  // only cells in the work folder, fx and guide carry over from the
+  // previous kit untouched.
+  const have = (dir) => existsSync(join(WORK, dir)) && readdirSync(join(WORK, dir)).length > 0;
+  const rendered = !HARDWARE && have("cells");
   if (rendered) {
     const atCells = pngFrames(join(WORK, "cells"));
-    const atFx = pngFrames(join(WORK, "fx"));
+    const atFx = have("fx") ? pngFrames(join(WORK, "fx")) : null;
     frames = async (name) => ((/^(tumble|unfold|bead)-/.test(name) ? atCells : atFx)(name));
-    guideRaw = await renderedGuide(mask);
+    frames.fx = Boolean(atFx);
+    guideRaw = have("guide") ? await renderedGuide(mask) : null;
   } else if (!HARDWARE) console.log("no renders in the work folder: cells, fx and guide stay as committed");
 }
 if (frames) {
   // Over budget at the contract's settings, the alpha's quality steps down
   // first (85 → 65), then the colour's: each sheet reports what it used.
-  const sheets = { cells: await packCells(frames, sparks), fx: await packFx(frames, !PLACEHOLDER) };
-  for (const name of ["cells", "fx"]) {
+  const sheets = { cells: await packCells(frames, sparks) };
+  if (PLACEHOLDER || frames.fx) sheets.fx = await packFx(frames, !PLACEHOLDER);
+  for (const name of Object.keys(sheets)) {
     const ladder = [];
     for (let alphaQuality = WEBP[name].alphaQuality; alphaQuality >= 65; alphaQuality -= 5) ladder.push({ ...WEBP[name], alphaQuality });
     for (let quality = WEBP[name].quality - 4; quality >= 40; quality -= 4) ladder.push({ ...WEBP[name], alphaQuality: 65, quality });
@@ -1309,6 +1317,7 @@ if (frames) {
   for (let quality = 62; quality >= 48; quality -= 2) guideLadder.push({ ...WEBP.guide, quality, alphaQuality: 55 });
   for (let quality = 58; quality >= 48; quality -= 2) guideLadder.push({ ...WEBP.guide, quality, alphaQuality: 45 });
   for (const options of guideLadder) {
+    if (!guideRaw) break;
     encoded.guide = await encode("guide", guideRaw, options);
     if (encoded.guide.length <= BUDGET.guide) {
       if (options !== guideLadder[0]) console.log(`guide.webp encoded at quality ${options.quality}, alpha ${options.alphaQuality}`);
@@ -1316,6 +1325,11 @@ if (frames) {
     }
   }
 }
+// A sheet neither encoded now nor already in this kit's folder carries over
+// from the previous kit (a new version re-rendering only some scenes).
+for (const name of FILES)
+  if (!encoded[name] && !existsSync(filePath(name)) && existsSync(join(ROOT, "public", `rexonance-nanites-${PREVIOUS}`, `${name}.webp`)))
+    encoded[name] = readFileSync(join(ROOT, "public", `rexonance-nanites-${PREVIOUS}`, `${name}.webp`));
 const bytes = {};
 for (const name of FILES) {
   bytes[name] = encoded[name] ? encoded[name].length : existsSync(filePath(name)) ? statSync(filePath(name)).size : NaN;

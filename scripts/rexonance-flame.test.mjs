@@ -150,7 +150,7 @@ function prepareField(module, f, source = { src: "actual-undersuit" }) {
   for (const surface of [mask, field, flow])
     assert.ok(
       surface.canvas.width * surface.canvas.height * 4 <= 1024 * 1024,
-      "bounded preparation surface, including the approved 48px transparent vortex-tip margin",
+      "bounded preparation surface, including the 48px transparent flame-tip margin",
     );
   return { source, mask, field, flow };
 }
@@ -163,6 +163,168 @@ function flameRoots(operations) {
   }
   return roots.filter((root) => root.images.length);
 }
+
+// Read the geometry actually submitted to Canvas. Four-curve cells carry
+// both sides of each burn path; their opposite edges recover its centreline.
+function combustionGeometry(operations) {
+  const cells = [];
+  const forks = [];
+  let start = null;
+  let curves = [];
+  for (const row of operations) {
+    if (row[0] === "move") {
+      start = row.slice(1);
+      curves = [];
+    } else if (row[0] === "curve") curves.push(row.slice(1));
+    else if (row[0] === "pathClose" && start) {
+      if (curves.length === 4)
+        cells.push({
+          x: (start[0] + curves[2][4]) / 2,
+          y: (start[1] + curves[2][5]) / 2,
+          toX: (curves[0][4] + curves[1][4]) / 2,
+          toY: (curves[0][5] + curves[1][5]) / 2,
+          width: Math.hypot(start[0] - curves[2][4], start[1] - curves[2][5]),
+        });
+      if (curves.length === 2)
+        forks.push({ root: start, tip: curves[0].slice(4), end: curves[1].slice(4) });
+    }
+  }
+  return { cells, forks };
+}
+
+test("ignition advances from the feet through the torso to arms and crown without a radial clip", async () => {
+  const module = await fresh(),
+    f = fixture();
+  await ready(module, f);
+  const body = prepareField(module, f);
+  const sourceBox = body.mask.operations.find(
+    (row) => row[0] === "image" && row[1] === body.source.src,
+  );
+  const sample = (phase) => {
+    body.field.operations.length = body.mask.operations.length = 0;
+    module.drawBodyFlame(
+      painter().context,
+      { width: 571, height: 1040 },
+      naniteFlameEnvelope(phase),
+      0.42,
+      1,
+      "all",
+      phase,
+    );
+    assert.equal(
+      body.field.operations.some((row) => row[0] === "ellipse" || row[0] === "clip"),
+      false,
+      "the runtime never expands a disc/ellipse from the chest",
+    );
+    const geometry = combustionGeometry(body.mask.operations);
+    return {
+      ...geometry,
+      normalized: geometry.cells.map((cell) => ({
+        x: (cell.x - sourceBox[2]) / sourceBox[4],
+        y: (cell.y - sourceBox[3]) / sourceBox[5],
+      })),
+      mask: [...body.mask.operations],
+    };
+  };
+  const foot = sample(0.025),
+    torso = sample(0.065),
+    branches = sample(0.11),
+    full = sample(0.17);
+  assert.ok(foot.cells.length > 0, "ignition immediately has rooted, curved geometry");
+  assert.ok(
+    foot.normalized.every((point) => point.y > 0.65),
+    "only the feet and lower legs ignite first",
+  );
+  assert.ok(
+    Math.min(...torso.normalized.map((point) => point.y)) < 0.65,
+    "fire reaches the torso next",
+  );
+  assert.ok(
+    Math.min(...branches.normalized.map((point) => point.y)) <
+      Math.min(...torso.normalized.map((point) => point.y)),
+    "new fronts continue climbing",
+  );
+  assert.ok(
+    branches.cells.length > torso.cells.length,
+    "the waist and shoulder fronts branch as they spread",
+  );
+  assert.ok(
+    full.normalized.some((point) => point.y < 0.05),
+    "the crown burns before the burst",
+  );
+  assert.ok(
+    full.normalized.some((point) => point.x < 0.2 && point.y < 0.55),
+    "left arm joins the fire",
+  );
+  assert.ok(
+    full.normalized.some((point) => point.x > 0.8 && point.y < 0.55),
+    "right arm joins the fire",
+  );
+  assert.ok(
+    full.normalized.some((point) => point.y > 0.95),
+    "full-body fire retains foot contact",
+  );
+  for (const fork of full.forks) {
+    assert.ok(
+      fork.tip[1] < fork.root[1],
+      "every secondary tongue points upward, never loops around its root",
+    );
+    assert.ok(
+      Math.abs(fork.end[1] - fork.root[1]) < 1e-6,
+      "each pointed fork remains attached at its base",
+    );
+  }
+  assert.deepEqual(sample(0.025), foot, "reverse scrubbing restores the exact advancing front");
+});
+
+test("thermal movement bends rooted branches instead of orbiting a circular shell", async () => {
+  const module = await fresh(),
+    f = fixture();
+  await ready(module, f);
+  const body = prepareField(module, f);
+  const sample = (clock) => {
+    body.mask.operations.length = 0;
+    module.drawBodyFlame(
+      painter().context,
+      { width: 571, height: 1040 },
+      1,
+      clock,
+      1,
+      "all",
+      NANITE_FIRE_PHASES.burstStart,
+    );
+    return combustionGeometry(body.mask.operations).cells;
+  };
+  const reference = sample(0.42);
+  assert.equal(
+    reference.length,
+    6 * 24,
+    "six connected paths keep the previous 144-cell geometry budget",
+  );
+  for (const clock of [0.7, 1.4, 2.8, 4.4, 9.1]) {
+    const moving = sample(clock);
+    assert.equal(moving.length, reference.length);
+    assert.ok(
+      moving.every((cell, i) => Math.abs(cell.x - reference[i].x) < 26),
+      "local gusts cannot carry any path around the body axis",
+    );
+    assert.ok(
+      moving.every((cell, i) => Math.abs(cell.y - reference[i].y) < 1e-5),
+      "thermal texture rises along rooted paths without a revolving depth wave",
+    );
+    assert.ok(
+      moving.every((cell) => cell.toY <= cell.y),
+      "every parent path advances upward",
+    );
+  }
+  for (let branch = 0; branch < 6; branch++) {
+    const cells = reference.slice(branch * 24, (branch + 1) * 24);
+    assert.ok(
+      cells.at(-1).width < cells[12].width * 0.4,
+      "burn paths taper to irregular tongues, not closed bands",
+    );
+  }
+});
 
 test("the allocation-optimized prepared density is byte-identical to the approved rendered field", async () => {
   const module = await fresh(),
@@ -539,7 +701,7 @@ test("touch retains the shared volume while reducing detail within the total fra
   assert.ok(counts[1] < counts[0], "touch reduces detail, not the shared body field");
 });
 
-test("one prepared field and a clock-driven depth-separated vortex feed both body layers", async () => {
+test("one prepared field and clock-driven branching combustion feed both body layers", async () => {
   const module = await fresh(),
     f = fixture();
   await ready(module, f);
@@ -571,7 +733,7 @@ test("one prepared field and a clock-driven depth-separated vortex feed both bod
   assert.deepEqual(
     body.mask.operations,
     firstMask,
-    "front/back share the same cached vortex geometry",
+    "front/back share the same cached combustion geometry",
   );
   assert.ok(
     firstField.some(
@@ -588,7 +750,7 @@ test("one prepared field and a clock-driven depth-separated vortex feed both bod
   assert.equal(maskDraws[0].length, 6, "draw the whole mask, never clip source slices");
   assert.ok(
     firstMask.filter((row) => row[0] === "curve").length >= 144,
-    "the shape itself winds through continuous curved ribbons",
+    "the shape itself follows continuous curved burn paths",
   );
   assert.equal(
     firstMask.filter((row) => row[0] === "fill" && row.at(-1) === "destination-out").length,
@@ -652,11 +814,11 @@ test("one prepared field and a clock-driven depth-separated vortex feed both bod
   assert.notDeepEqual(
     body.mask.operations,
     turned,
-    "burst phase tears and expands the geometry even at the same clock",
+    "burst phase tears and lifts the geometry even at the same clock",
   );
 });
 
-test("authored fire detail follows a body-height revolving volume with bounded, changing roots", async () => {
+test("authored fire detail follows body-height branching volumes with bounded, changing roots", async () => {
   for (const coarse of [false, true]) {
     const module = await fresh(),
       f = fixture();
@@ -714,18 +876,22 @@ test("authored fire detail follows a body-height revolving volume with bounded, 
       assert.ok(
         Math.max(...roots.map((root) => root.x)) - Math.min(...roots.map((root) => root.x)) >
           571 * 0.3,
-        "the vortex wraps broadly, not a central chimney",
+        "branches reach both arms and the full body width",
       );
       return roots.map(({ x, y }) => [x, y]);
     };
     const first = rootsAt(0.7);
     rootsAt(1.4);
-    assert.notDeepEqual(rootsAt(1.1), first, "the sources themselves orbit, not only atlas pixels");
+    assert.notDeepEqual(
+      rootsAt(1.1),
+      first,
+      "local wind bends the roots as well as the atlas pixels",
+    );
     assert.deepEqual(rootsAt(0.7), first, "reverse restores the same volume geometry");
   }
 });
 
-test("the main vortex is completely gone before any material phase, even for an isolated legacy caller", async () => {
+test("the main combustion field clears at the shared flame end, even for an isolated legacy caller", async () => {
   const module = await fresh(),
     f = fixture();
   await ready(module, f);
@@ -1105,7 +1271,7 @@ test("upward thermal advection, sculpted bezier lobes, additive core tongues and
   const curves = body.mask.operations.filter((row) => row[0] === "curve");
   assert.ok(
     curves.some((row) => Math.hypot(row[1] - row[5], row[2] - row[6]) > 0.5),
-    "vortex ribbon curves use genuine tangent/swell control points rather than straight-line segments",
+    "burn paths use genuine tangent/swell control points rather than straight-line segments",
   );
   const fieldAtlas = body.field.operations.filter(
     (row) => row[0] === "image" && row[1] === module.NANITE_FLAME_ATLAS.src,
@@ -1130,5 +1296,62 @@ test("upward thermal advection, sculpted bezier lobes, additive core tongues and
     leftBrand.operations.filter((row) => row[0] === "image").map((row) => [row[2], row[3]]),
     rightBrand.operations.filter((row) => row[0] === "image").map((row) => [row[2], row[3]]),
     "simultaneous firebrands across the body sample desynchronized atlas frames",
+  );
+});
+
+test("extinction lifts the real volume roots while pointed forks dissipate with their parent stream", async () => {
+  const module = await fresh();
+  const f = fixture();
+  await ready(module, f);
+  const body = prepareField(module, f);
+  const sample = (phase) => {
+    body.field.operations.length = 0;
+    body.mask.operations.length = 0;
+    module.drawBodyFlame(
+      painter().context,
+      { width: 571, height: 1040 },
+      1,
+      0.42,
+      1,
+      "back",
+      phase,
+    );
+    const roots = flameRoots(body.field.operations);
+    const curls = [];
+    let points = [];
+    let curves = 0;
+    for (const row of body.mask.operations) {
+      if (row[0] === "move") {
+        points = row.slice(1);
+        curves = 0;
+      } else if (row[0] === "curve") {
+        points.push(...row.slice(1));
+        curves++;
+      } else if (row[0] === "pathClose" && curves === 2) {
+        const xs = points.filter((_, i) => i % 2 === 0);
+        const ys = points.filter((_, i) => i % 2 === 1);
+        curls.push(
+          Math.hypot(Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys)),
+        );
+      }
+    }
+    return { roots, curls, field: [...body.field.operations], mask: [...body.mask.operations] };
+  };
+  const peak = sample(NANITE_FIRE_PHASES.burstStart);
+  const late = sample(NANITE_FIRE_PHASES.burstEnd);
+  assert.equal(late.roots.length, peak.roots.length, "retain the same bounded real volume samples");
+  const lifts = peak.roots.map((root, i) => root.y - late.roots[i].y);
+  assert.ok(Math.min(...lifts) > 8, "every body-height volume sample rises during extinction");
+  assert.ok(Math.max(...lifts) > 30, "the crown visibly stretches out of the storm");
+  assert.equal(peak.curls.length, 18, "three pointed forks belong to each of the six burn paths");
+  assert.ok(late.curls.length > 0, "extinction remains a continuous dissipating stream");
+  assert.ok(
+    Math.max(...late.curls) < Math.max(...peak.curls) * 0.4,
+    "curl lobes shrink with parent tear instead of outliving it as solid green islands",
+  );
+  assert.deepEqual(
+    sample(NANITE_FIRE_PHASES.burstStart),
+    peak,
+    "reverse scrub restores the exact pre-burst geometry",
   );
 });

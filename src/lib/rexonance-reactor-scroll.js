@@ -2,7 +2,6 @@ import { reactorCoilAngle, reactorCoilScale, reactorFormation } from "./rexonanc
 
 const IDS = new Set(["core-disc", "core-swirl"]);
 const CELL = 3;
-const HEX = 4.5;
 const CELL_BAND = 0.5;
 const CELL_LEAD = 0.45;
 const FRESH = [];
@@ -72,28 +71,13 @@ export function createReactorLayers({ document, pieces, atlas, art, undersuit, s
     bc.drawImage(disc, 0, 0);
     bc.globalCompositeOperation = "source-in";
     bc.drawImage(undersuit, 0, 0, size.width, size.height, -x, -y, size.width, size.height);
-    // Only the reactor itself, unfinished, hides under a honeycomb (owner,
-    // 2026-10-18/19): dark hex cells with steel-blue edges on the disc.
-    bc.globalCompositeOperation = "source-atop";
-    bc.fillStyle = "rgb(8 12 20 / 0.55)";
-    bc.fillRect(0, 0, w, h);
-    const r = HEX;
-    const dx = r * Math.sqrt(3);
-    bc.beginPath();
-    for (let row = 0, cy = 0; cy < h + r * 2; row += 1, cy += r * 1.5) {
-      for (let cx = row % 2 ? dx / 2 : 0; cx < w + dx; cx += dx) {
-        for (let k = 0; k < 6; k += 1) {
-          const a = Math.PI / 6 + (k * Math.PI) / 3;
-          if (k) bc.lineTo(cx + r * Math.cos(a), cy + r * Math.sin(a));
-          else bc.moveTo(cx + r * Math.cos(a), cy + r * Math.sin(a));
-        }
-        bc.closePath?.();
-      }
-    }
-    bc.lineWidth = 0.8;
-    bc.strokeStyle = "rgb(132 182 214 / 0.6)";
-    bc.stroke();
-    bc.globalCompositeOperation = "source-over";
+    // The reactor itself, unfinished, hides under a honeycomb (owner,
+    // 2026-10-18/19) — since 2026-10-21 a real one: the undersuit carries the
+    // uninstalled reactor as a lit relief (scripts/blender/
+    // rexonance_undersuit.py: a recessed chamber with machined rings, coil
+    // bays, contact pins, a dark core lens and a bevelled hex grille), so the
+    // disc shows that mechanism as it is, unlit, and the entry call's DOM
+    // undersuit shows the same one. No flat strokes over it.
     sc.drawImage(bare, 0, 0);
   }
   bare.width = bare.height = 0;
@@ -125,12 +109,14 @@ export function deferReactorPieces(pieces) {
   return pieces.map((piece) => (IDS.has(piece.id) ? { ...piece, preset: true } : piece));
 }
 
-/** Reversible scroll-time pose; u=1 is the original artwork exactly. */
-export function drawReactorFormation(context, layers, core, u) {
+/** Reversible scroll-time pose; u=1 is the original artwork exactly.
+ * `fade` (0..1) brings the primed socket in (owner, 2026-10-21: it used to
+ * appear whole in one frame); the disc and coil form on `u` as before. */
+export function drawReactorFormation(context, layers, core, u, fade = 1) {
   const { x, y, w, h, art, socket } = layers;
   context.save();
-  context.globalAlpha = 1;
-  context.drawImage(socket, x, y, w, h);
+  context.globalAlpha = Math.max(0, Math.min(1, fade));
+  if (context.globalAlpha > 0) context.drawImage(socket, x, y, w, h);
   if (u > 0) {
     const [cx, cy] = core;
     const formation = reactorFormation(u);

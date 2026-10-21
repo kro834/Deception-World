@@ -2,10 +2,10 @@
 // The Rexonance nanite kit (owner, 2026-10-16: 「超大幅な改善で。」): Blender-
 // rendered hex nanite chips, comets, clamps, latches, scan planes, molten
 // droplets, shock rings and the gold guideway conduit, with each plate's
-// real outline (seams) and gold box. 4 files, 251834 bytes.
+// real outline (seams) and gold box. 4 files, 256326 bytes.
 
 /** The kit's folder (public/). */
-export const REXONANCE_NANITE_DIR = "/rexonance-nanites-20261018" as const;
+export const REXONANCE_NANITE_DIR = "/rexonance-nanites-20261021" as const;
 
 /** The swarm's tones, sRGB. */
 export const REXONANCE_NANITE_TONES = {
@@ -27,7 +27,7 @@ export const REXONANCE_NANITE_TONES = {
  * Spark: (spark.x + 32k, spark.y, 32, 32), k 0–3, a 4-point star from its
  * largest and brightest; centre pixel (16, 16). */
 export const REXONANCE_NANITE_CELLS = {
-  src: "/rexonance-nanites-20261018/cells.webp",
+  src: "/rexonance-nanites-20261021/cells.webp",
   width: 768,
   height: 224,
   cell: 32,
@@ -47,7 +47,7 @@ export const REXONANCE_NANITE_CELLS = {
  * (tail 15 px). The head is the brightest pixel, (16, 16): draw centred on
  * it, scaled uniformly by k = ℓ / tail[length]. */
 export const REXONANCE_NANITE_COMETS = {
-  src: "/rexonance-nanites-20261018/comets.webp",
+  src: "/rexonance-nanites-20261021/comets.webp",
   width: 512,
   height: 192,
   cell: 32,
@@ -78,7 +78,7 @@ export const REXONANCE_NANITE_COMETS = {
  * fading to transparent (never to black), with flung shards; centre (the
  * contact point) at (96, 36). */
 export const REXONANCE_NANITE_FX = {
-  src: "/rexonance-nanites-20261018/fx.webp",
+  src: "/rexonance-nanites-20261021/fx.webp",
   width: 1024,
   height: 384,
   clamp: {
@@ -127,7 +127,7 @@ export const REXONANCE_NANITE_FX = {
  * gold (alpha 0 where gold.webp's alpha ≤ 32, dilated by 2 px). Draw a plate
  * with drawImage(sheet, ax, ay, w, h, x, y, w, h). */
 export const REXONANCE_NANITE_GUIDE = {
-  src: "/rexonance-nanites-20261018/guide.webp",
+  src: "/rexonance-nanites-20261021/guide.webp",
   width: 1024,
   height: 1488,
 } as const;
@@ -323,11 +323,11 @@ export const REXONANCE_NANITE_ASSETS = [
 
 /** The files' bytes. */
 export const REXONANCE_NANITE_BYTES = {
-  cells: 51560,
+  cells: 56052,
   comets: 9722,
   fx: 42004,
   guide: 148548,
-  total: 251834,
+  total: 256326,
 } as const;
 
 /** The suit files the guide and the seams were built from (the first 16 hex

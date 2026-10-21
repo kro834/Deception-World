@@ -1,5 +1,6 @@
-# The Rexonance nanite chip (owner, 2026-10-16: 「超大幅な改善で。」), for
-# public/rexonance-nanites-20261018/cells.webp. Blender 4.2+, Cycles.
+# The Rexonance nanite chip (owner, 2026-10-16: 「超大幅な改善で。」; 2026-10-21:
+# 「ナノマシンのクオリティも上げて。」— a machined part, not a glowing disc), for
+# public/rexonance-nanites-20261021/cells.webp. Blender 4.2+, Cycles.
 #
 #   Blender -b --factory-startup -P scripts/blender/nanite_cells.py -- <out dir> [px=128]
 #
@@ -8,12 +9,14 @@
 #   tumble-<tone>-<f>.png  f 00-23: R_f = quaternion(normalize(0.45, 0.8, 0.4), 2πf/24)
 #   unfold-<tone>-<k>.png  k 1-6 (k0 is tumble f0): the hex prism → a square slab
 #   bead-<k>.png           k 0-7: the molten gold bead's wobble
-# The chip: a hex prism r 1.0, depth 0.34, its top inset 0.30 then 0.06 at
-# -0.08 (a recess), bevelled 0.07 x 3; an emissive hex core r 0.42 at z 0.12
-# (7 at its white-hot centre, 15% over the rest of the lens, so the tone
-# survives the Standard view's clip), an emissive corner pin r 0.10 at (0.78, 0, 0.17) so a tumble
-# reads, and on its back a dark anodised plate with an emissive hex seam
-# (0.8). Lit by RIG-A.
+# The chip: a hex prism r 1.0, depth 0.40, its top inset 0.20 (a wide
+# polished chrome lip) then 0.05 at -0.10 (a dark machined deck), bevelled
+# 0.08 x 4; across the deck a chrome bridge bar with two bolt heads, a small
+# emissive hex core r 0.28 at z 0.11 (an LED: 7 at its white-hot centre,
+# 15% over the rest), a key notch cut into the lip at -x, an emissive corner
+# pin r 0.09 at (0.78, 0, 0.19) so a tumble reads, and on its back a dark
+# anodised plate with an emissive hex seam (0.8). Lit by RIG-A plus a small
+# hard specular light, so the lip throws a crisp highlight even at 16 px.
 import math
 import os
 import sys
@@ -30,10 +33,10 @@ os.makedirs(OUT, exist_ok=True)
 ORTHO = 2.08  # the 32 px cell: the hex (2.0 vertex to vertex) and the 1.92 slab fit
 TONES = {
     # body base colour (linear), roughness, core emission colour (linear)
-    "ice": ((0.16, 0.18, 0.21), 0.30, (0.47, 0.91, 1.0)),
-    "pink": ((0.18, 0.15, 0.19), 0.30, (1.0, 0.56, 0.85)),
-    "white": ((0.22, 0.23, 0.26), 0.30, (0.96, 0.98, 1.0)),
-    "gold": ((1.0, 0.70, 0.30), 0.22, (1.0, 0.95, 0.80)),
+    "ice": ((0.34, 0.40, 0.46), 0.16, (0.47, 0.91, 1.0)),
+    "pink": ((0.42, 0.34, 0.42), 0.16, (1.0, 0.56, 0.85)),
+    "white": ((0.46, 0.48, 0.52), 0.16, (0.96, 0.98, 1.0)),
+    "gold": ((1.0, 0.70, 0.30), 0.18, (1.0, 0.95, 0.80)),
 }
 AXIS = Vector((0.45, 0.8, 0.4)).normalized()
 
@@ -84,9 +87,10 @@ def scene(width, height, samples=96):
 def rig_a(sc, key_gain=1.0):
     """RIG-A: area lights aimed at the origin; key upper-left, ice rim lower-right."""
     for name, location, power, size, colour in (
-        ("key", (-4.5, 4.5, 7), 700 * key_gain, 5, (1, 0.94, 0.85)),
-        ("rim", (6, -1, 2), 380, 2.5, (0.55, 0.9, 1)),
-        ("under", (-1.2, -6.5, 1.5), 180, 3, (1, 0.7, 0.9)),
+        ("key", (-4.5, 4.5, 7), 900 * key_gain, 4, (1, 0.94, 0.85)),
+        ("spec", (-3.2, 3.4, 8.5), 420, 0.7, (1, 0.97, 0.9)),
+        ("rim", (6, -1, 2), 600, 2.5, (0.55, 0.9, 1)),
+        ("under", (-1.2, -6.5, 1.5), 150, 3, (1, 0.7, 0.9)),
     ):
         light = bpy.data.lights.new(name, "AREA")
         light.energy = power
@@ -215,9 +219,9 @@ def hex_to_square(x, y, half):
 def build_chip(sc):
     bm = bmesh.new()
     # Each side split in four, so the unfold can put vertices on the square's corners.
-    top, bottom = hex_prism(bm, 1.0, 0.34, split=4)
-    bmesh.ops.inset_region(bm, faces=[top], thickness=0.30, depth=0.0)
-    bmesh.ops.inset_region(bm, faces=[top], thickness=0.06, depth=-0.08)
+    top, bottom = hex_prism(bm, 1.0, 0.40, split=4)
+    bmesh.ops.inset_region(bm, faces=[top], thickness=0.20, depth=0.0)
+    bmesh.ops.inset_region(bm, faces=[top], thickness=0.05, depth=-0.10)
     # The dark machined well separates the lens from the high, reflective lip.
     top.material_index = 3
     # The back: a dark plate (slot 2) with a hex seam ring 0.05 wide, 0.22 in
@@ -236,8 +240,8 @@ def build_chip(sc):
     body = bpy.data.objects.new("chip", mesh)
     sc.collection.objects.link(body)
     bevel = body.modifiers.new("bevel", "BEVEL")
-    bevel.width = 0.07
-    bevel.segments = 3
+    bevel.width = 0.08
+    bevel.segments = 4
     bevel.limit_method = "ANGLE"
     bevel.harden_normals = True
 
@@ -248,11 +252,11 @@ def build_chip(sc):
     for vertex, point in zip(mesh.vertices, slab.data):
         x, y, z = vertex.co
         x, y = hex_to_square(x, y, 0.96)
-        point.co = (x, y, z * (0.04 / 0.17))
+        point.co = (x, y, z * (0.04 / 0.20))
 
     core_mesh = bpy.data.meshes.new("core")
     bm = bmesh.new()
-    hex_prism(bm, 0.42, 0.05)
+    hex_prism(bm, 0.28, 0.05)
     bm.to_mesh(core_mesh)
     bm.free()
     core = bpy.data.objects.new("core", core_mesh)
@@ -278,9 +282,33 @@ def build_chip(sc):
         return obj
 
     # A pair of independent lips gives the face depth even after downsampling.
-    bezel = hex_ring("raised face bezel", 0.73, 0.185, 0.028, 6, "bezel")
-    optic = hex_ring("inner optic seal", 0.46, 0.105, 0.018, 6, "seal")
-    back_socket = hex_ring("back service socket", 0.46, -0.185, 0.022, 6, "back")
+    bezel = hex_ring("raised face bezel", 0.78, 0.215, 0.026, 6, "bezel")
+    optic = hex_ring("inner optic seal", 0.34, 0.105, 0.018, 6, "seal")
+    back_socket = hex_ring("back service socket", 0.46, -0.215, 0.022, 6, "back")
+
+    # The machined deck's hardware: a chrome bridge bar across it with a bolt
+    # head at each end, and a key notch cut into the lip at -x (the part has
+    # a front and a way in, so every tumble frame reads as the same part).
+    hardware = []
+    bpy.ops.mesh.primitive_cube_add(size=1)
+    bridge = bpy.context.active_object
+    bridge.name = "bridge bar"
+    bridge.location = (0, 0, 0.10)
+    bridge.scale = (0.66, 0.085, 0.045)
+    hardware.append(bridge)
+    for sx in (-0.52, 0.52):
+        bpy.ops.mesh.primitive_cylinder_add(radius=0.075, depth=0.05, vertices=24, location=(sx, 0, 0.145))
+        bolt = bpy.context.active_object
+        bolt.name = f"bolt {sx}"
+        for poly in bolt.data.polygons:
+            poly.use_smooth = True
+        hardware.append(bolt)
+    bpy.ops.mesh.primitive_cube_add(size=1)
+    notch = bpy.context.active_object
+    notch.name = "key notch"
+    notch.location = (-0.88, 0, 0.145)
+    notch.scale = (0.22, 0.09, 0.12)
+    notch_cuts = [notch]
 
     # Six recessed transverse cuts distinguish the solid sidewall from a flat
     # polygon when the chip tumbles edge-on.
@@ -295,17 +323,17 @@ def build_chip(sc):
         groove.scale = (0.16, 0.025, 0.10)
         side_cuts.append(groove)
 
-    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.10, segments=24, ring_count=12, location=(0.78, 0, 0.17))
+    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.09, segments=24, ring_count=12, location=(0.78, 0, 0.19))
     pin = bpy.context.active_object
     for poly in pin.data.polygons:
         poly.use_smooth = True
 
     root = bpy.data.objects.new("nanite", None)
     sc.collection.objects.link(root)
-    for obj in (body, core, pin, bezel, optic, back_socket, *side_cuts):
+    for obj in (body, core, pin, bezel, optic, back_socket, *side_cuts, *hardware, *notch_cuts):
         obj.parent = root
     root.rotation_mode = "QUATERNION"
-    return root, body, core, pin, bezel, optic, back_socket, side_cuts
+    return root, body, core, pin, bezel, optic, back_socket, side_cuts, hardware, notch_cuts
 
 
 def render(sc, name):
@@ -316,7 +344,7 @@ def render(sc, name):
 sc = scene(PX, PX)
 camera(sc, ORTHO)
 rig_a(sc)
-root, body, core, pin, bezel, optic, back_socket, side_cuts = build_chip(sc)
+root, body, core, pin, bezel, optic, back_socket, side_cuts, hardware, notch_cuts = build_chip(sc)
 # Three slots on the body (0 the metal, 1 the back seam, 2 the back plate), one on the core and
 # the pin; each tone swaps the slots' materials (clearing the slots would
 # reset the faces' material indices).
@@ -330,25 +358,35 @@ for tone, (base, roughness, glow) in TONES.items():
     # chip seen from behind is a dark hex lit by its seam (RIG-A's under
     # light would otherwise mirror off it brighter than the face).
     body.data.materials[2] = principled(f"{tone}-back", (0.10, 0.11, 0.13), 1.0, 0.45)
-    body.data.materials[3] = principled(f"{tone}-well", (0.035, 0.048, 0.065), 0.75, 0.48)
-    bezel.data.materials[0] = principled(f"{tone}-bezel", tuple(min(1.0, v * 1.8 + 0.09) for v in base), 1.0, 0.19)
+    body.data.materials[3] = principled(f"{tone}-well", (0.030, 0.040, 0.055), 0.85, 0.42)
+    bezel.data.materials[0] = principled(f"{tone}-bezel", tuple(min(1.0, v * 1.5 + 0.12) for v in base), 1.0, 0.12)
+    for part in hardware:
+        part.data.materials.clear()
+        part.data.materials.append(principled(f"{tone}-hardware", tuple(min(1.0, v * 1.3 + 0.10) for v in base), 1.0, 0.14))
+    for cut in notch_cuts:
+        cut.data.materials.clear()
+        cut.data.materials.append(principled(f"{tone}-notch", (0.020, 0.028, 0.038), 0.9, 0.5))
     optic.data.materials[0] = emitter(f"{tone}-seal", glow, 1.25)
     back_socket.data.materials[0] = principled(f"{tone}-socket", (0.23, 0.26, 0.31), 1.0, 0.25)
     for groove in side_cuts:
         groove.data.materials.clear()
         groove.data.materials.append(principled(f"{tone}-side-cut", (0.025, 0.035, 0.045), 0.9, 0.48))
-    core_material = emitter(f"{tone}-core", glow, 7.0, radius=0.42)
+    core_material = emitter(f"{tone}-core", glow, 7.0, radius=0.28)
     pin_material = emitter(f"{tone}-pin", glow, 7.0)
     core.data.materials[0] = core_material
     pin.data.materials[0] = pin_material
     body.data.shape_keys.key_blocks["slab"].value = 0.0
     core.location.z = 0.11
-    pin.location.z = 0.17
+    pin.location.z = 0.19
     # The previous tone ends on the compressed slab pose. Every new tone
     # begins from the same full-size chip before its 24 tumble renders.
     bezel.scale = (1, 1, 1)
     optic.scale = (1, 1, 1)
     pin.scale = (1, 1, 1)
+    for part in (*hardware, *notch_cuts):
+        part.scale.z = 1.0
+        part.location.z = part["z0"] if "z0" in part else part.location.z
+        part["z0"] = part.location.z
     for f in range(24):
         root.rotation_quaternion = Quaternion(AXIS, 2 * math.pi * f / 24)
         render(sc, f"tumble-{tone}-{f:02d}")
@@ -362,8 +400,11 @@ for tone, (base, roughness, glow) in TONES.items():
         core.location.z = 0.11 * (1 - s) + 0.045 * s
         bezel.scale = (1 - 0.04 * s,) * 3
         optic.scale = (1 - 0.05 * s,) * 3
-        pin.location.z = 0.17 * (1 - s) + 0.05 * s
+        pin.location.z = 0.19 * (1 - s) + 0.05 * s
         pin.scale = (1 - 0.5 * s,) * 3
+        for part in (*hardware, *notch_cuts):
+            part.scale.z = 1 - 0.6 * s
+            part.location.z = part["z0"] * (1 - s) + 0.03 * s
         strength = 7.0 - 5.5 * s
         nodes = core_material.node_tree.nodes
         ramp = next(n for n in nodes if n.type == "MAP_RANGE")

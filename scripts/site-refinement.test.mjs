@@ -82,3 +82,32 @@ test("frequent comparison and section updates stay inside memoised controls", ()
   assert.match(dream, /const invalidateLayout = \(\) => \{\s*landings = null/);
   assert.match(dream, /removeEventListener\("visibilitychange", invalidateLayout\)/);
 });
+
+test("P14 calibration rail keeps two discrete baselines and an iOS native picker", () => {
+  const source = read("src/components/rexonance-saga/rexonance-saga.tsx");
+  const route = read("src/routes/rexonance-saga.tsx");
+  const css = read("src/styles-p14-calibration.css");
+  const comparator = source.slice(source.indexOf("const P14Comparator"), source.indexOf("// Keep performance selection"));
+  assert.match(comparator, /min="1"\s+max="2"\s+step="1"/);
+  assert.match(comparator, /value=\{p14Baseline === "p1" \? 1 : 2\}/);
+  assert.match(comparator, /nativeIOSSelection\s*\?\s*\(/);
+  assert.match(comparator, /<option value="p1">P1比<\/option>/);
+  assert.match(comparator, /<option value="p2">P2比<\/option>/);
+  assert.match(comparator, /rxs-p14-core-anchor-p1/);
+  assert.match(comparator, /rxs-p14-core-anchor-p2/);
+  assert.match(comparator, /rxs-p14-native-rail" data-value=\{p14Baseline\} aria-hidden="true"/);
+  assert.match(route, /p14CalibrationCssUrl/);
+  assert.match(css, /html body \.rxs-page\.rxs-page\.rxs-rexonance-page \.rxs-p14-ios-slider[\s\S]*?background:[\s\S]*?!important/);
+  assert.match(css, /html body \.rxs-page\.rxs-page\.rxs-rexonance-page \.rxs-p14-ios-thumb[\s\S]*?background:[\s\S]*?!important/);
+  assert.doesNotMatch(css, /html body \.rxs-p14-ios-slider\s*\{/);
+  assert.match(css, /touch-action:\s*pan-y/);
+  assert.match(css, /@media\s*\(max-width:\s*520px\)/);
+  assert.match(css, /prefers-reduced-motion:\s*reduce/);
+  assert.match(css, /data-world-effects="economy"/);
+  assert.match(css, /@media\s*\(forced-colors:\s*active\)/);
+  assert.match(css, /\.rxs-p14-ios-slider\s*\{\s*background:\s*Canvas\s*!important;\s*box-shadow:\s*none\s*!important;/);
+  assert.match(css, /\.rxs-p14-ios-thumb\s*\{\s*background:\s*Canvas\s*!important;\s*box-shadow:\s*none\s*!important;/);
+  assert.match(css, /html\[data-world-effects="economy"\] body \.rxs-page\.rxs-page\.rxs-rexonance-page \.rxs-p14-ios-slider[\s\S]*?box-shadow:\s*none\s*!important;/);
+  assert.match(css, /html\[data-world-effects="economy"\] \.rxs-page\.rxs-page\.rxs-rexonance-page \.rxs-p14-ios-thumb[\s\S]*?box-shadow:\s*none\s*!important;/);
+  assert.doesNotMatch(css, /\binfinite\b|@keyframes/);
+});
