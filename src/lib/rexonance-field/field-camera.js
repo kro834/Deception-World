@@ -10,20 +10,25 @@
 import { FIELD_STATE } from "./field-score.js";
 
 export const FIELD_CAMERA = Object.freeze({
+  // Owner (2026-10-21, on production): 「全身が上下するのも治して」 — the whole
+  // figure bobbed with the camera's push, punches and follow. The body must
+  // stand still: every motion below is zero, and the rig stays identity
+  // throughout (the constants are kept so a subtle zoom can return, but no
+  // pan may ever move the body vertically).
   /** The push while the field is charged, by take (restrained, standard, bold). */
-  push: Object.freeze([0.018, 0.03, 0.042]),
+  push: Object.freeze([0, 0, 0]),
   /** A lock's punch at full strength; the burst's (爆散) punch, over this
    * share of the wake. */
-  punch: 0.03,
-  burst: 0.045,
+  punch: 0,
+  burst: 0,
   burstSpan: 0.5,
   /** The punch's attack (share of the impulse span) and its decay rate. */
   attack: 0.1,
   decay: 5.5,
   /** The follow toward the group, as a share of its offset from the pivot. */
-  follow: 0.085,
+  follow: 0,
   /** The lateral drift at full charge (figure heights). */
-  drift: 0.006,
+  drift: 0,
   /** The pivot the zoom is about, in figure heights down from the crown
    * (just above the soles, so the boots stay in the frame). */
   pivotY: 0.86,

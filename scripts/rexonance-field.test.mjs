@@ -261,7 +261,7 @@ test("the state is a pure function of the clock: charge, attractor, tightness, i
   assert.throws(() => fieldScore({ ...thinned, settle: 2 }), RangeError);
 });
 
-test("the camera pushes, punches and follows while charged, and is exact identity around the climax", () => {
+test("the camera is exact identity throughout: the body never moves (owner, 2026-10-21)", () => {
   const score = entryFieldScore();
   const state = fieldStateBuffer();
   const out = fieldCameraBuffer();
@@ -284,36 +284,13 @@ test("the camera pushes, punches and follows while charged, and is exact identit
       assert.ok(out[0] >= 1 && out[0] <= FIELD_CAMERA.maxZoom, `zoom at ${t}`);
       assert.ok(Math.abs(out[1]) <= FIELD_CAMERA.maxPan && Math.abs(out[2]) <= FIELD_CAMERA.maxPan);
     }
-    // Charged: a push; on a DEUS！: a punch over the push.
-    fieldState(score, 850, state);
-    fieldCamera(state, take, H, out);
-    const pushed = out[0];
-    assert.ok(pushed > 1.01, String(pushed));
-    fieldState(score, REXONANCE_SUIT_SNAP.legs + 30, state);
-    fieldCamera(state, take, H, out);
-    assert.ok(out[0] > pushed + 0.01, `the punch: ${out[0]} over ${pushed}`);
-    // The follow tilts the camera toward the group: the legs lie near the
-    // pivot (barely a pan), the chest above it (the content shifts down).
-    fieldState(score, 870, state);
-    fieldCamera(state, take, H, out);
-    assert.ok(Math.abs(out[2]) < 0.012, String(out[2]));
-    fieldState(score, REXONANCE_SUIT_SNAP.chest - 10, state);
-    fieldCamera(state, take, H, out);
-    assert.ok(out[2] > 0.01, String(out[2]));
+    // Owner (2026-10-21): 「全身が上下するのも治して」 — charged, on a DEUS！,
+    // on the burst, following a group: identity, every frame, every take.
+    for (const t of [421, 850, 870, REXONANCE_SUIT_SNAP.legs + 30, REXONANCE_SUIT_SNAP.chest - 10, 1500])
+      assert.ok(identity(t, take), `identity at ${t} for take ${seed}`);
   }
-  // The takes differ in their push.
-  const zooms = new Set();
-  for (let seed = 0; seed < 30; seed += 1) {
-    fieldState(score, 850, state);
-    fieldCamera(state, fieldTake(seed), H, out);
-    zooms.add(out[0].toFixed(4));
-  }
-  assert.ok(zooms.size >= 3);
-  // The burst (爆散) punches the camera as the fragments fly, before the
-  // field is charged, and settles as it forms.
-  fieldState(score, 421, state);
-  fieldCamera(state, fieldTake(1), H, out);
-  assert.ok(out[0] > 1.002, `the burst's punch: ${out[0]}`);
+  assert.deepEqual([...FIELD_CAMERA.push], [0, 0, 0]);
+  assert.equal(FIELD_CAMERA.punch + FIELD_CAMERA.burst + FIELD_CAMERA.follow + FIELD_CAMERA.drift, 0);
   assert.equal(fieldPunch(0), 0);
   assert.equal(fieldPunch(1), 0);
   assert.equal(fieldPunch(1.5), 0);

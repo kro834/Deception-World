@@ -610,6 +610,7 @@ const TONE_CSS = TONES.map(([r, g, b]) => `rgb(${r} ${g} ${b})`);
 const grouped = (value) => String(value).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 const REACTOR_RADIUS = 40;
 const REACTOR_SWIRL = [0.74, 0.82];
+const REACTOR_SOCKET_FADE = [0.16, 0.24];
 const REACTOR_MOTES = ["rgb(240 207 134)", "rgb(150 236 255)", "rgb(255 143 216)"];
 const PRIMER_LEAD = 0.035;
 const clamp01 = (value) => (value < 0 ? 0 : value > 1 ? 1 : value);
@@ -3262,7 +3263,15 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       const [swirlFrom, swirlTo] = REACTOR_SWIRL;
       if (reactor && progress >= B.deus[0] && progress < B.light[0]) {
         // Separate masks share one clock but never share the coil transform.
-        drawReactorFormation(context, reactor, config.core, span(progress, REACTOR_SWIRL));
+        // The primed socket condenses in over the first beat (owner,
+        // 2026-10-21: it appeared whole in one frame), never pops.
+        drawReactorFormation(
+          context,
+          reactor,
+          config.core,
+          span(progress, REACTOR_SWIRL),
+          smooth(span(progress, REACTOR_SOCKET_FADE)),
+        );
       }
       if (progress >= B.deus[0] && progress < swirlTo) {
         const u = span(progress, REACTOR_SWIRL);

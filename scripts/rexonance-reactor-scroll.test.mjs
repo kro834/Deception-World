@@ -314,6 +314,6 @@ test("live scroll uses one shared reactor clock and only defers pieces when crop
   assert.ok((source.match(/pieces: planningPieces/g) ?? []).length >= 2);
   assert.match(
     source,
-    /drawReactorFormation\(context, reactor, config\.core, span\(progress, REACTOR_SWIRL\)\)/,
+    /drawReactorFormation\(\s*context,\s*reactor,\s*config\.core,\s*span\(progress, REACTOR_SWIRL\),\s*smooth\(span\(progress, REACTOR_SOCKET_FADE\)\),\s*\)/,
   );
 });

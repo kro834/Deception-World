@@ -109,12 +109,14 @@ export function deferReactorPieces(pieces) {
   return pieces.map((piece) => (IDS.has(piece.id) ? { ...piece, preset: true } : piece));
 }
 
-/** Reversible scroll-time pose; u=1 is the original artwork exactly. */
-export function drawReactorFormation(context, layers, core, u) {
+/** Reversible scroll-time pose; u=1 is the original artwork exactly.
+ * `fade` (0..1) brings the primed socket in (owner, 2026-10-21: it used to
+ * appear whole in one frame); the disc and coil form on `u` as before. */
+export function drawReactorFormation(context, layers, core, u, fade = 1) {
   const { x, y, w, h, art, socket } = layers;
   context.save();
-  context.globalAlpha = 1;
-  context.drawImage(socket, x, y, w, h);
+  context.globalAlpha = Math.max(0, Math.min(1, fade));
+  if (context.globalAlpha > 0) context.drawImage(socket, x, y, w, h);
   if (u > 0) {
     const [cx, cy] = core;
     const formation = reactorFormation(u);
