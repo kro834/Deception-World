@@ -1831,6 +1831,12 @@ export function WorldHome() {
             <i />
           </span>
         </div>
+        {/* The key visual's streamlined light behind the stage (styles-world-zenith.css). */}
+        <div className="zn-hero-light" aria-hidden="true">
+          <i className="zn-trail zn-trail-a" />
+          <i className="zn-trail zn-trail-b" />
+          <i className="zn-bloom" />
+        </div>
         <div className="film-hero-identity" data-film-reveal>
           <FilmTextScan />
           <p className="anime-work-title">
