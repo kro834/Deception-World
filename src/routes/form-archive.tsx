@@ -321,7 +321,13 @@ function FormArchive() {
   }, []);
 
   return (
-    <main className="form-archive-page" data-archive-kind={archive}>
+    // data-archive-ready lets the toolbar's status lamp say LINKING until the
+    // frame reports ready, then LINKED (styles-form-archive.css).
+    <main
+      className="form-archive-page"
+      data-archive-kind={archive}
+      data-archive-ready={loaded ? "true" : "false"}
+    >
       <header className="form-archive-toolbar" aria-label="フォームアーカイブ操作">
         <div
           ref={switcherRef}
