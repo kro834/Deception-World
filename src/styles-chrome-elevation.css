@@ -1038,6 +1038,30 @@ html[data-press-ready] body #site-announcement-dialog .site-announcement-list-it
   }
 }
 
+/* A phone on its side (500px tall or less): the posters crop wide, 2:1
+   on the key visual's upper half, so the whole board reads in one screen
+   beside its head. */
+@media (min-width: 761px) and (max-height: 500px) {
+  html body #site-announcement-dialog .site-announcement-list-visual {
+    aspect-ratio: 2 / 1;
+  }
+
+  html body #site-announcement-dialog .site-announcement-list-visual img {
+    object-position: 50% 24%;
+  }
+
+  html body #site-announcement-dialog .site-announcement-index {
+    gap: 12px;
+    padding-block: 12px 16px;
+  }
+}
+
+@media (min-width: 761px) and (max-height: 400px) {
+  html body #site-announcement-dialog .site-announcement-list-visual {
+    aspect-ratio: 5 / 2;
+  }
+}
+
 /* The posters keep a readable copy column on a 768px iPad: the sheet is
    narrower, so the titles take one step down and the gap closes. */
 @media (min-width: 761px) and (max-width: 899px) {
@@ -1310,6 +1334,24 @@ html body #site-announcement-dialog .site-announcement-note {
 
   html body #site-announcement-dialog .site-announcement-header h2 {
     font-size: 20px;
+  }
+
+  /* The kicker steps aside on a phone on its side (the base sheet hides
+     it): the plate and the title share one row, centred together. */
+  html body #site-announcement-dialog .site-announcement-header > div {
+    grid-template-columns: 40px minmax(0, 1fr);
+    grid-template-rows: auto;
+    grid-template-areas: none;
+  }
+
+  html body #site-announcement-dialog .site-announcement-header > div::before {
+    grid-area: 1 / 1;
+    width: 40px;
+    height: 40px;
+  }
+
+  html body #site-announcement-dialog .site-announcement-header h2 {
+    grid-area: 1 / 2;
   }
 
   html body #site-announcement-dialog .site-announcement-count {

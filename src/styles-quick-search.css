@@ -384,8 +384,25 @@ dialog.quick-search mark {
 }
 /* ---------- Nothing found: a gold note and a few leads ---------- */
 .quick-search-empty {
-  padding: 18px 18px 8px;
+  padding: 16px 18px 10px;
   border-top: 1px solid rgb(var(--qs-ice-rgb) / 0.14);
+  background: linear-gradient(180deg, rgb(240 207 134 / 0.05), transparent 70%);
+}
+/* A HUD kicker over the note, in gold: the search answered, with nothing.
+   Text that is not read out (the note itself is the status). */
+.quick-search-empty::before {
+  content: "NO MATCH";
+  content: "NO MATCH" / "";
+  display: block;
+  margin-bottom: 8px;
+  padding-left: 22px;
+  background: linear-gradient(90deg, var(--qs-gold), rgb(240 207 134 / 0.2)) 0 50% / 12px 2px
+    no-repeat;
+  color: var(--qs-gold);
+  font-family: var(--qs-hud);
+  font-size: 12px;
+  line-height: 17px;
+  letter-spacing: 0.22em;
 }
 .quick-search-empty > p {
   margin: 0 0 10px;
@@ -408,7 +425,15 @@ dialog.quick-search mark {
   border: 1px solid rgb(240 207 134 / 0.55);
   border-radius: 3px;
   color: #fbe8bf;
-  background: rgb(240 207 134 / 0.08);
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.05), transparent 60%), rgb(240 207 134 / 0.08);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.08);
+}
+@media (hover: hover) and (pointer: fine) {
+  .quick-search-empty button:hover {
+    border-color: rgb(240 207 134 / 0.85);
+    background: rgb(240 207 134 / 0.16);
+  }
 }
 /* ---------- The foot: keys and the count ---------- */
 .quick-search-foot {
@@ -525,10 +550,16 @@ dialog.quick-search :is(button, a):focus-visible {
   }
   .quick-search-panel::before,
   .quick-search-panel::after,
+  .quick-search-empty::before,
   .quick-search-head > p::before,
   .quick-search-group-label::before,
   .quick-search-group-label::after {
     display: none;
+  }
+  /* The plate is gone here: the kicker and the title take the head's
+     one column. */
+  .quick-search-head > p {
+    grid-template-columns: minmax(0, 1fr);
   }
   .quick-search-option[data-active="true"] {
     outline: 3px solid Highlight;

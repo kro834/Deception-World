@@ -2957,6 +2957,43 @@ html[data-family]
   }
 }
 
+/* Phones on their side (761px and wider, 600px tall or less): SPECIAL
+   and STORIES stand in a row each, so the tiles are shorter and the two
+   rows close well inside two screens of a 390px-tall phone. */
+@media (orientation: landscape) and (max-height: 600px) and (min-width: 761px) {
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > :is(
+      .side-panel-head + .side-panel-group + .side-panel-group + .side-panel-group,
+      .side-panel-head
+        + .side-panel-group
+        + .side-panel-group
+        + .side-panel-group
+        + .side-panel-group
+    )
+    > .side-panel-links {
+    --sh-tile-h: 132px;
+  }
+
+  html[data-family] body #site-side-panel.side-panel > .side-panel-riders > .side-panel-links {
+    --sh-tile-h: 150px;
+  }
+
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-group:nth-last-child(3)
+    > .side-panel-links,
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-group:nth-last-child(2)
+    > .side-panel-links {
+    --sh-tile-h: 96px;
+  }
+}
+
 /* Up to 1439px SPECIAL and STORIES stand in two rows beside the chapters
    (four STORIES tiles in three columns were 87px wide at 1180, an iPad
    on its side), a little shorter so the pair still closes the first
