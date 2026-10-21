@@ -1,4 +1,3 @@
-  },
   {
     no: "05",
     title: "FARCE",
@@ -514,3 +513,5 @@ export function WorldHome() {
   }, [locationHash]);
 
   useLayoutEffect(() => {
+    if (locationHash !== "manager-archive-dogs") return;
+    setManagerTab(3);

@@ -1,0 +1,758 @@
+/* ================================================================
+   ZENITH — /world brush-up (owner, 2026-10-21)
+   The 2026-10-16 key visual runs ice → blue → pink → gold light trails
+   through the black. This sheet threads that light through the World
+   page itself: the title stage carries two streamlined trails and a pink
+   bloom under the print, the chapter breaks carry a prism seam, and the
+   annex gains visual rhythm after the cast wall. The title stage is also
+   made whole on touch devices (the key art shows behind the wordmark; a
+   portrait tablet keeps the two-column stage instead of a centred print
+   with empty wings).
+   Linked on /world only, after the reading sheet and before the HUD face
+   and the Mirage sheet (which stays last): every rule carries the stage
+   sheet's scope (html[data-family="world"]:root, body, the full shell
+   class chain) and adds one attribute where it must outrank the Mirage
+   layer. Decoration sits under forced-colors: none. Motion is one-shot
+   (a trail sweeps in once after the boot), full motion gated by
+   prefers-reduced-motion: no-preference and html:not([data-world-effects=
+   "economy"]); the reduced and economy tiers show the same light at rest.
+   No Japanese face changes; text stays 12px or more.
+   ================================================================ */
+
+/* ----------------------------------------------------------------
+   1. The title stage: the key art on touch devices
+   ---------------------------------------------------------------- */
+/* The film sheet hides the backdrop on coarse pointers (a 2025 rule for a
+   blurred, filtered layer). The Mirage backdrop is one plain image with a
+   scroll-driven translate, cheap on an iPad or a phone, and without it the
+   title stage opened on flat black there. */
+@media (pointer: coarse) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero
+    > .hero-backdrop {
+    visibility: visible;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero
+    > .hero-backdrop {
+    visibility: hidden;
+  }
+}
+
+@media (max-width: 1023px) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero
+    > .hero-backdrop {
+    opacity: 0.46;
+  }
+}
+
+/* One column (phones, small landscape): the art stands behind the wordmark
+   and the print, then dissolves into the ink before the credits. */
+@media (max-width: 699px), (max-width: 900px) and (orientation: landscape) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero
+    > .hero-backdrop {
+    inset: 0 0 auto;
+    height: min(100%, 124svh);
+  }
+
+  @media (forced-colors: none) {
+    html[data-family="world"]:root
+      body
+      main.site-shell.film-edition.mirage-edition
+      > .hero
+      > .hero-backdrop::after {
+      background:
+        linear-gradient(
+          180deg,
+          rgb(3 6 12 / 58%) 0%,
+          rgb(3 6 12 / 18%) 24%,
+          rgb(3 6 12 / 22%) 56%,
+          rgb(3 6 12 / 72%) 82%,
+          #03060c 100%
+        ),
+        linear-gradient(90deg, rgb(3 6 12 / 40%), transparent 40%, transparent 60%, rgb(3 6 12 / 40%));
+    }
+  }
+}
+
+/* ----------------------------------------------------------------
+   2. Portrait tablets (iPad mini 768, iPad 820/834): the two-column
+      title stage, as on desktops, instead of a centred print between
+      two empty wings. The 901–1100 portrait rule already does this
+      for the 11" and 13" iPads.
+   ---------------------------------------------------------------- */
+@media (min-width: 700px) and (max-width: 900px) and (orientation: portrait) {
+  html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > .hero {
+    --poster-width: min(43vw, 390px);
+    grid-template:
+      "identity visual" auto
+      "copy visual" auto
+      "context visual" auto
+      / minmax(0, 1.08fr) minmax(0, 0.92fr);
+    align-content: center;
+    align-items: start;
+    min-height: 100svh;
+    padding-top: calc(var(--film-topbar-height, 64px) + 24px);
+    /* The block sits a little above centre: the art's head room stays
+       above the wordmark, the floor stays short. */
+    padding-bottom: clamp(60px, 11vh, 132px);
+    gap: 24px clamp(24px, 4vw, 40px);
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero
+    > .film-hero-identity
+    .anime-work-title
+    b {
+    font-size: clamp(46px, 7.2vw, 66px);
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero
+    > .hero-copy
+    h1 {
+    font-size: clamp(30px, 4.8vw, 44px);
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero
+    > .poster-stage {
+    align-self: center;
+    margin-top: 0;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero
+    > .hero-context {
+    align-self: start;
+    margin-top: 6px;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero
+    > .hero-context
+    > .hero-metadata {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero
+    > .poster-stage
+    .poster-control-cluster {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+  }
+}
+
+/* ----------------------------------------------------------------
+   3. The key visual's light on the title stage: two streamlined trails
+      (the logo's ice → blue → pink → gold) behind the content, a pink
+      bloom under the print, the print's floor glow in the same light.
+   ---------------------------------------------------------------- */
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > .hero
+  > .zn-hero-light {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  display: block;
+  overflow: clip;
+  pointer-events: none;
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > .hero
+  > .zn-hero-light
+  > i {
+  position: absolute;
+  display: block;
+  pointer-events: none;
+}
+
+@media (forced-colors: none) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero
+    > .zn-hero-light
+    > .zn-trail {
+    --zn-o: 0.44;
+    left: var(--zn-x, 58%);
+    top: var(--zn-y, 66%);
+    width: var(--zn-w, 128vw);
+    height: var(--zn-h, 210px);
+    border-radius: 50%;
+    background: linear-gradient(
+      100deg,
+      transparent 0,
+      rgb(122 232 255 / 70%) 18%,
+      rgb(79 123 255 / 78%) 38%,
+      rgb(255 79 195 / 92%) 60%,
+      rgb(240 207 134 / 72%) 82%,
+      transparent 100%
+    );
+    -webkit-mask: radial-gradient(50% 50% at 50% 50%, #000 0, rgb(0 0 0 / 60%) 34%, transparent 70%);
+    mask: radial-gradient(50% 50% at 50% 50%, #000 0, rgb(0 0 0 / 60%) 34%, transparent 70%);
+    opacity: var(--zn-o);
+    translate: -50% -50%;
+    rotate: var(--zn-r, -14deg);
+  }
+
+  /* The bright core of each trail, inside the same soft mask: the logo's
+     thin streamline through its halo. */
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero
+    > .zn-hero-light
+    > .zn-trail::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: 0;
+    left: 0;
+    height: 2px;
+    translate: 0 -50%;
+    background: linear-gradient(
+      90deg,
+      transparent 0,
+      rgb(200 240 255 / 90%) 22%,
+      rgb(255 255 255 / 96%) 50%,
+      rgb(255 214 240 / 90%) 74%,
+      transparent 100%
+    );
+    opacity: 0.85;
+  }
+
+  /* The second, thinner trail crosses the upper right behind the print,
+     pink and gold first. */
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero
+    > .zn-hero-light
+    > .zn-trail-b {
+    --zn-o: 0.34;
+    --zn-x: 74%;
+    --zn-y: 30%;
+    --zn-w: 96vw;
+    --zn-h: 110px;
+    --zn-r: -22deg;
+    background: linear-gradient(
+      100deg,
+      transparent 0,
+      rgb(255 79 195 / 70%) 26%,
+      rgb(200 77 255 / 80%) 46%,
+      rgb(240 207 134 / 80%) 66%,
+      rgb(122 232 255 / 50%) 84%,
+      transparent 100%
+    );
+  }
+
+  /* The pink bloom under the print: the logo's own light on the floor. */
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero
+    > .zn-hero-light
+    > .zn-bloom {
+    left: 60%;
+    right: -10%;
+    top: 46%;
+    bottom: -8%;
+    background: radial-gradient(
+      55% 50% at 50% 62%,
+      rgb(255 79 195 / 26%),
+      rgb(79 123 255 / 12%) 46%,
+      transparent 74%
+    );
+  }
+
+  /* The print's floor glow and shadow carry the same light. */
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero
+    > .poster-stage
+    .poster-deck::after {
+    left: -24%;
+    right: -24%;
+    bottom: -52px;
+    height: 84px;
+    background: radial-gradient(
+      50% 50% at 50% 30%,
+      rgb(255 79 195 / 30%),
+      rgb(122 232 255 / 12%) 48%,
+      transparent 72%
+    );
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero
+    > .poster-stage
+    .poster-frame {
+    box-shadow:
+      0 0 0 6px rgb(3 6 12 / 82%),
+      0 0 0 7px rgb(122 232 255 / 18%),
+      0 40px 60px -30px rgb(0 0 0 / 90%),
+      0 0 70px -14px rgb(255 79 195 / 34%),
+      0 0 120px -30px rgb(122 232 255 / 30%);
+  }
+}
+
+/* One column: the long trail climbs behind the print, the bloom sits
+   under it. */
+@media (forced-colors: none) and (max-width: 699px),
+  (forced-colors: none) and (max-width: 900px) and (orientation: landscape) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero
+    > .zn-hero-light
+    > .zn-trail-a {
+    --zn-x: 50%;
+    --zn-y: 52%;
+    --zn-w: 210vw;
+    --zn-h: 150px;
+    --zn-r: -34deg;
+    --zn-o: 0.4;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero
+    > .zn-hero-light
+    > .zn-trail-b {
+    --zn-x: 42%;
+    --zn-y: 20%;
+    --zn-w: 150vw;
+    --zn-h: 80px;
+    --zn-r: -28deg;
+    --zn-o: 0.3;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero
+    > .zn-hero-light
+    > .zn-bloom {
+    left: -10%;
+    right: -10%;
+    top: 34%;
+    bottom: 14%;
+    background: radial-gradient(
+      50% 42% at 50% 56%,
+      rgb(255 79 195 / 24%),
+      rgb(79 123 255 / 10%) 50%,
+      transparent 76%
+    );
+  }
+}
+
+/* The trails sweep in once, after the boot has sealed (the reduced and
+   economy tiers show them at rest). Full motion only; one iteration;
+   a dim gradient sliding over a dark ground, never a luminance flash. */
+@media (prefers-reduced-motion: no-preference) and (forced-colors: none) {
+  html[data-family="world"]:not([data-world-effects="economy"]):root
+    body
+    main.site-shell.film-edition.mirage-edition:not([data-mirage-boot="done"])
+    > .hero
+    > .zn-hero-light
+    > .zn-trail {
+    opacity: 0;
+  }
+
+  html[data-family="world"]:not([data-world-effects="economy"]):root
+    body
+    main.site-shell.film-edition.mirage-edition[data-mirage-boot="done"]
+    > .hero
+    > .zn-hero-light
+    > .zn-trail {
+    animation: zn-trail-in 1900ms cubic-bezier(0.16, 0.7, 0.2, 1) 1 both;
+  }
+
+  html[data-family="world"]:not([data-world-effects="economy"]):root
+    body
+    main.site-shell.film-edition.mirage-edition[data-mirage-boot="done"]
+    > .hero
+    > .zn-hero-light
+    > .zn-trail-b {
+    animation-duration: 2300ms;
+    animation-delay: 160ms;
+  }
+
+  @keyframes zn-trail-in {
+    from {
+      opacity: 0;
+      translate: calc(-50% - 18vw) calc(-50% + 6vh);
+    }
+
+    to {
+      opacity: var(--zn-o);
+      translate: -50% -50%;
+    }
+  }
+}
+
+/* ----------------------------------------------------------------
+   4. The chapter breaks: the prism seam under every chapter head
+      (01-03 .section-index, 04-06 .wa-chapter), the numeral's pink
+      echo, and a light that runs the seam once as the head rises.
+   ---------------------------------------------------------------- */
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > section
+  > .section-index,
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > .world-annex
+  .wa-chapter {
+  position: relative;
+}
+
+@media (forced-colors: none) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > section
+    > .section-index,
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .world-annex
+    .wa-chapter {
+    background:
+      linear-gradient(
+          90deg,
+          var(--sw-light) 0%,
+          #4f7bff 26%,
+          #ff4fc3 56%,
+          var(--sw-gold) 80%,
+          transparent 100%
+        )
+        0 100% / min(440px, 62%) 1px no-repeat,
+      radial-gradient(
+          60% 100% at 22% 100%,
+          rgb(255 79 195 / 16%),
+          rgb(var(--sw-light-rgb) / 7%) 50%,
+          transparent 100%
+        )
+        0 100% / min(560px, 76%) 22px no-repeat;
+  }
+
+  /* The outlined numeral's pink echo: the wordmark's misregistered
+     channel, at rest. */
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > section
+    > .section-index
+    > span,
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .world-annex
+    .wa-chapter
+    > span {
+    text-shadow:
+      0.06em 0.03em 0 rgb(255 79 195 / 22%),
+      -0.03em 0 0 rgb(var(--sw-light-rgb) / 14%);
+  }
+
+  /* The kicker's short rule over each chapter title. */
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > section
+    :is(.story-heading, .section-title, .records-heading)
+    > .eyebrow
+    > i {
+    background: linear-gradient(90deg, var(--sw-light), #ff4fc3);
+  }
+
+  /* The annex headings' line between kicker and count. */
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .world-annex
+    .wa-heading::before {
+    background: linear-gradient(
+      90deg,
+      rgb(var(--sw-light-rgb) / 44%),
+      rgb(255 79 195 / 40%) 48%,
+      rgb(var(--sw-gold-rgb) / 34%) 80%,
+      transparent
+    );
+  }
+}
+
+/* The light runs the seam once as the head rises through the lower part
+   of the screen (scroll-driven, so it never loops). Full motion only. */
+@media (prefers-reduced-motion: no-preference) and (forced-colors: none) {
+  html[data-family="world"]:not([data-world-effects="economy"]):root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > section
+    > .section-index::after,
+  html[data-family="world"]:not([data-world-effects="economy"]):root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .world-annex
+    .wa-chapter::after {
+    content: "";
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 140px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #fff 50%, transparent);
+    opacity: 0;
+    translate: -140px 0;
+    pointer-events: none;
+    animation: zn-seam-run linear both;
+    animation-timeline: view();
+    animation-range: entry 0% cover 55%;
+  }
+
+  @keyframes zn-seam-run {
+    0% {
+      opacity: 0;
+      translate: -140px 0;
+    }
+
+    12% {
+      opacity: 1;
+    }
+
+    100% {
+      opacity: 0;
+      translate: 520px 0;
+    }
+  }
+}
+
+/* ----------------------------------------------------------------
+   5. The annex after the cast wall: rhythm in the archive log
+   ---------------------------------------------------------------- */
+/* 04: アザト's plate. No art exists for him; the socket is a sealed
+   record rather than an empty hatch: a ring seal in the chapter's light
+   with the logo's pink, the prism cross at its centre, the name and the
+   NO FILE label as before. */
+@media (forced-colors: none) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #cast-roster
+    .wa-person.is-none
+    > .wa-portrait.is-vacant {
+    background:
+      radial-gradient(
+        circle at 50% 50%,
+        transparent 66px,
+        rgb(var(--sw-light-rgb) / 62%) 67px,
+        transparent 68px
+      ),
+      radial-gradient(
+        circle at 50% 50%,
+        transparent 84px,
+        rgb(255 79 195 / 36%) 85px,
+        rgb(255 79 195 / 36%) 85.5px,
+        transparent 86.5px
+      ),
+      radial-gradient(
+        circle at 50% 50%,
+        rgb(255 79 195 / 14%),
+        rgb(79 123 255 / 9%) 34%,
+        transparent 62%
+      ),
+      linear-gradient(
+          180deg,
+          transparent,
+          rgb(var(--sw-light-rgb) / 50%) 30%,
+          rgb(255 79 195 / 50%) 70%,
+          transparent
+        )
+        50% 50% / 1px 240px no-repeat,
+      repeating-linear-gradient(135deg, rgb(var(--sw-light-rgb) / 5%) 0 1px, transparent 1px 12px),
+      linear-gradient(180deg, #071410, #04100c);
+    box-shadow: inset 0 0 0 1px rgb(var(--sw-light-rgb) / 24%);
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #cast-roster
+    .wa-person.is-none
+    > .wa-portrait.is-vacant::before,
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #cast-roster
+    .wa-person.is-none
+    > .wa-portrait.is-vacant::after {
+    content: "";
+    inset: 50% auto auto 50%;
+    background: linear-gradient(90deg, rgb(var(--sw-light-rgb) / 0%), var(--sw-light) 40%, #ff4fc3 60%, rgb(255 79 195 / 0%));
+    opacity: 0.9;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #cast-roster
+    .wa-person.is-none
+    > .wa-portrait.is-vacant::before {
+    width: 120px;
+    height: 1px;
+    translate: -60px 0;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #cast-roster
+    .wa-person.is-none
+    > .wa-portrait.is-vacant::after {
+    width: 1px;
+    height: 120px;
+    translate: 0 -60px;
+    background: linear-gradient(180deg, rgb(var(--sw-light-rgb) / 0%), var(--sw-light) 40%, #ff4fc3 60%, rgb(255 79 195 / 0%));
+  }
+}
+
+/* 06.1: on wide screens the three records open on tall key-art plates
+   (one poster beat before each column of notes), their foot a prism seam;
+   phones and tablets keep their banners. */
+@media (min-width: 1100px) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #episode-notes
+    .wa-episode-art {
+    aspect-ratio: 5 / 6;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #episode-notes
+    .wa-episode-head
+    strong {
+    font-size: clamp(20px, 1.9vw, 26px);
+  }
+}
+
+@media (forced-colors: none) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #episode-notes
+    .wa-episode-art::after {
+    background:
+      linear-gradient(90deg, var(--sw-light), #4f7bff 30%, #ff4fc3 62%, var(--sw-gold) 86%, transparent)
+        0 100% / 72% 1px no-repeat,
+      radial-gradient(50% 40% at 30% 100%, rgb(255 79 195 / 18%), transparent 100%) 0 100% / 100% 60px no-repeat,
+      linear-gradient(0deg, var(--sw-deck), transparent 55%);
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #episode-notes
+    .wa-episode-head {
+    border-left-color: #ff4fc3;
+    box-shadow: inset 1px 0 0 rgb(var(--sw-light-rgb) / 60%);
+  }
+}
+
+/* 06.2: the glossary plate takes a pink bloom at its head and a rule
+   between its two columns; each term opens on a prism chip. */
+@media (forced-colors: none) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #glossary
+    .wa-glossary {
+    background:
+      var(--sw-ticks),
+      radial-gradient(42% 26% at 100% 0%, rgb(255 79 195 / 11%), transparent 100%),
+      radial-gradient(36% 22% at 0% 100%, rgb(var(--sw-light-rgb) / 9%), transparent 100%),
+      linear-gradient(180deg, var(--sw-deck), var(--sw-deck-2));
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #glossary
+    .wa-glossary
+    dt::before {
+    width: 9px;
+    height: 9px;
+    margin-right: 12px;
+    border: 0;
+    background: linear-gradient(135deg, var(--sw-light), #ff4fc3 60%, var(--sw-gold));
+    rotate: 45deg;
+    vertical-align: 0.15em;
+  }
+}
+
+@media (min-width: 1100px) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #glossary
+    .wa-glossary {
+    column-gap: 64px;
+    column-rule: 1px solid rgb(var(--sw-light-rgb) / 14%);
+  }
+}
+
+/* ----------------------------------------------------------------
+   6. Polish: the WORLD COLUMN plate's top rule runs gold → pink, and a
+      pink bloom sits in its far corner, so the reading plate under the
+      六詠 line-up carries the same light as the title stage.
+   ---------------------------------------------------------------- */
+@media (forced-colors: none) {
+  html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > #story > .world-column {
+    background:
+      var(--sw-ticks),
+      linear-gradient(90deg, var(--sw-gold), #ff4fc3 34%, rgb(var(--sw-light-rgb) / 40%) 62%, transparent 86%)
+        0 0 / 100% 1px no-repeat,
+      radial-gradient(40% 50% at 100% 0%, rgb(255 79 195 / 10%), transparent 100%),
+      linear-gradient(180deg, var(--sw-deck), var(--sw-deck-2));
+  }
+}

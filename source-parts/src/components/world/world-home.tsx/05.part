@@ -1,3 +1,5 @@
+                      <path
+                        d="M8 10V8a4 4 0 0 1 7.5-2"
                         fill="none"
                         stroke="currentColor"
                         strokeWidth="1.8"
@@ -513,4 +515,3 @@
                   >
                     {item.title}
                   </h3>
-                ))}

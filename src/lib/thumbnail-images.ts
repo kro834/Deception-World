@@ -339,10 +339,15 @@ export const TITLE_LOGO_IMAGES: Record<string, ImageSet> = {
 export function posterImage(source: string, reuseWarmedFull = false) {
   const set = POSTER_IMAGES[source];
   if (source === "/deception-world-poster-delivery.webp" && !reuseWarmedFull) {
+    // The print's CSS width at each title-stage layout (styles-stage-world
+    // and styles-world-zenith): one column to 699 px and on small
+    // landscapes, two columns on portrait tablets, the viewport-resolved
+    // print on landscape tablets, the desktop stage above 1440.
     return {
       src: set.variants[0].path,
       srcSet: srcSet(set),
-      sizes: "(max-width: 760px) 70vw, (max-width: 1100px) 40vw, min(31vw, 430px)",
+      sizes:
+        "(max-width: 699px) min(78vw, 440px), (max-width: 900px) and (orientation: portrait) min(43vw, 390px), (max-width: 900px) min(78vw, 440px), (max-width: 1100px) and (orientation: portrait) min(40vw, 430px), (max-width: 1440px) and (orientation: landscape) min(36vw, 440px), min(31vw, 430px)",
     };
   }
   if (source === "/deception-world-poster-delivery.webp" && reuseWarmedFull) {
