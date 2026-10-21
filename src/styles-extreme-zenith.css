@@ -43,6 +43,17 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page .rxs-brand span {
   text-shadow: none;
 }
 
+/* The pill's slanted cut was inherited by the name's own words (the pill
+   rule matches every span in the brand): it sheared the foot of ム and ガ
+   in エクスプリームサーガ. The name stands uncut, in the bar's ivory. */
+html[data-family="special"] body .rxs-page.rxs-page.exs-page .rxs-brand b span {
+  color: inherit;
+  -webkit-text-fill-color: inherit;
+  background: none;
+  box-shadow: none;
+  clip-path: none;
+}
+
 /* The chapter numbers are plates: gold text on the bar, ink on a gold
    plate for the chapter in view. Every number carries the same padding, so
    the bar never shifts when the light moves. */
@@ -446,6 +457,76 @@ html[data-family="special"]
   font-size: 12px;
 }
 
+/* Tablets (681–1023px): two rows of tape stand side by side, and a card's
+   figure no longer fits beside its 190px result plate (205.6t〜 ran 16–85px
+   under the plate on an iPad). The card stacks as on a phone: the figure,
+   then the plate across the card. */
+@media (min-width: 681px) and (max-width: 1023px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #performance
+    .rxs-comparison-metrics
+    > article
+    > header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+    row-gap: 14px;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #performance
+    .rxs-comparison-metrics
+    .rxs-comparison-result {
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: baseline;
+    justify-items: start;
+    gap: 6px 12px;
+    min-width: 0;
+    width: 100%;
+    margin: 0;
+    text-align: start;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #performance
+    .rxs-comparison-metrics
+    .rxs-comparison-result
+    > em {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Large phones and small tablets (481–680px): one card a row, figure and
+   plate side by side; the figure keeps its width and the plate takes the
+   rest (the plate had grown over the figure's last characters). */
+@media (min-width: 481px) and (max-width: 680px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #performance
+    .rxs-comparison-metrics
+    > article
+    > header
+    > div {
+    flex: none;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #performance
+    .rxs-comparison-metrics
+    .rxs-comparison-result {
+    min-width: 0;
+  }
+}
+
 /* The catalog under the tape. */
 html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-catalog-details > summary {
   transition: color 160ms ease;
@@ -576,6 +657,38 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page > #performance .rxs
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > #p14 .rxs-p14-copy > small {
   font-size: 12px;
   letter-spacing: 0.14em;
+}
+
+/* The dials read like the rest of the page's figures: a struck number with
+   its unit etched small at the baseline in the dial's own light (the unit
+   was set as large as the number and fell to a second line). */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #p14
+  .rxs-p14-copy
+  dd:has(> .exi-figure) {
+  column-gap: 0;
+  color: var(--ext-gold);
+  font-size: 15px;
+  letter-spacing: 0.12em;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #p14
+  .rxs-p14-copy
+  dl
+  > div:nth-child(2)
+  dd:has(> .exi-figure) {
+  color: var(--exe-cyan);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.exs-page > #p14 .rxs-p14-copy dd > .exi-figure {
+  margin-right: 10px;
+  font-size: clamp(26px, 2.8vw, 38px);
+  letter-spacing: 0.01em;
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-core-flow > span small {
@@ -954,7 +1067,30 @@ html[data-family="special"]
   }
 }
 
-/* The 320px bar: four chapters, each number as a plate, nothing clipped. */
+/* The 320–389px bar: four chapters in cells of 72–87px, each number as a
+   plate, nothing clipped (04 システム is 84px wide). */
+@media (max-width: 389px) {
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page .rxs-local-nav nav {
+    gap: 0;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page .rxs-local-nav nav a {
+    gap: 3px;
+    padding-inline: 0;
+    letter-spacing: 0;
+    font-feature-settings: "palt" 1;
+    /* The slanted ends took the last character of システム. */
+    clip-path: none;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page .rxs-local-nav nav a > span {
+    min-width: 0;
+    padding-inline: 3px 4px;
+    font-variation-settings: "wdth" 100;
+    letter-spacing: -0.02em;
+  }
+}
+
 @media (max-width: 359px) {
   /* Every struck line holds on one line beside its plate (at 28px
      「ウルトラで決める。」 broke after で in the 222px title column). */
@@ -967,30 +1103,19 @@ html[data-family="special"]
     font-size: 25px;
   }
 
-  html[data-family="special"] body .rxs-page.rxs-page.exs-page .rxs-local-nav nav {
-    gap: 0;
+  /* The challenger plates stand one over the other: side by side in 256px
+     the slanted edge cut the last letters of DILUCULUM and STANDARD. */
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-opponent-options {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
   }
 
-  html[data-family="special"] body .rxs-page.rxs-page.exs-page .rxs-local-nav nav a {
-    gap: 3px;
-    padding-inline: 0;
-    letter-spacing: 0;
-    font-feature-settings: "palt" 1;
-    /* The slanted ends took the last character of システム at 72px a cell. */
-    clip-path: none;
-  }
-
-  html[data-family="special"] body .rxs-page.rxs-page.exs-page .rxs-local-nav nav a > span {
-    min-width: 0;
-    padding-inline: 3px 4px;
-    font-variation-settings: "wdth" 100;
-    letter-spacing: -0.02em;
-  }
-
-  /* Two challenger plates in 256px: the names set with proportional kana
-     and never clipped. */
   html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-opponent-options button {
-    padding: 12px 6px 12px 12px;
+    padding: 12px 16px 12px 14px;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-opponent-options button small {
+    letter-spacing: 0.04em;
   }
 
   html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-opponent-options button span {
