@@ -506,6 +506,20 @@ html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm
   grid-column: 1 / -1 !important;
 }
 
+/* From 1181px the record sits beside the rail and its figures are
+   187-230px tiles: the four-way ratio (1.00× / 1.00× / 1.00× / 1.00×)
+   broke there with its second line led by a slash. A record of six
+   figures (Saga's) sets its first and last as whole rows with the two
+   pairs between them, in their own order: [body] [punch | jump]
+   [compute | EMP] [ratio]. No empty cell, no figure changes place, and
+   the ratio sets on one line. */
+@media (min-width: 1181px) {
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .form-detail .viz-grid > .spec-item:first-child:nth-last-child(6),
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .form-detail .viz-grid > .spec-item:nth-child(6):last-child {
+    grid-column: 1 / -1 !important;
+  }
+}
+
 /* The ability chart's names: the script breaks each after its ・; the
    box never breaks them again by character (射 | 程・ | 範囲). */
 html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-profile__axis--ability {
@@ -617,9 +631,13 @@ html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm
 /* ================================================================
    11. A card answers a fine pointer with one pass of light across its
    art (once per hover, a narrow band; nothing loops, nothing moves).
+   Only a plain card: the selected, pending and activating cards keep
+   the document's own ::after (the selection glint and the pending
+   ring), whose geometry this pass would otherwise take over and leave
+   as a band over the selected card's name.
    ================================================================ */
 @media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
-  html[data-embedded-archive]:not([data-world-effects="economy"]) :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="form-selector"] .form-chip::after {
+  html[data-embedded-archive]:not([data-world-effects="economy"]) :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="form-selector"] .form-chip:not(.is-selected):not(.is-pending):not(.is-activating)::after {
     content: "";
     position: absolute;
     z-index: 1;
@@ -630,7 +648,7 @@ html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm
     translate: -110% 0;
   }
 
-  html[data-embedded-archive]:not([data-world-effects="economy"]) :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="form-selector"] .form-chip:hover::after {
+  html[data-embedded-archive]:not([data-world-effects="economy"]) :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="form-selector"] .form-chip:not(.is-selected):not(.is-pending):not(.is-activating):hover::after {
     opacity: 1;
     translate: 110% 0;
     transition:

@@ -119,14 +119,23 @@ main.form-archive-page[data-archive-kind]::before {
   opacity: 0.62;
 }
 
-/* FORM INTERFACE // LINKED: a 12px HUD label. Between 700 and 1023px the
-   gutter beside the rail is narrower than the label, so it sets in two
-   lines there; the rail never moves. */
+/* FORM INTERFACE // LINKED: a 12px HUD label. It never runs wider than
+   the gutter beside the rail (the rail is 310px wide and centred; the label
+   starts 22px in and keeps 16px clear of it, its lamp included), so the
+   rail never moves and the label never reaches it:
+     700-743px  no label: the gutter cannot hold even FORM INTERFACE on a
+                line (it set in three or four broken lines);
+     744-1119px two lines, broken at the phrase: FORM INTERFACE | // SAGA
+                LINKED (the longest second line, // REALM LINKING, needs
+                744px; a greedy wrap left a lone LINKED or a lone FORM);
+     1120px up  one line (REALM LINKING, the longest, fits from 1119px).
+   LINKING and LINKED keep the same number of lines at every width. */
 @media (min-width: 700px) {
   .form-archive-page .form-archive-toolbar::before {
     top: calc(env(safe-area-inset-top, 0px) + 36px);
     bottom: auto;
-    max-width: calc(50vw - 155px - 40px);
+    box-sizing: border-box;
+    max-width: calc(50vw - 155px - 38px);
     color: rgb(122 232 255 / 78%);
     font-family: var(--fa-hud);
     font-size: 12px;
@@ -140,9 +149,7 @@ main.form-archive-page[data-archive-kind]::before {
 
 @media (min-width: 1024px) {
   .form-archive-page .form-archive-toolbar::before {
-    max-width: none;
     letter-spacing: 0.12em;
-    white-space: nowrap;
   }
 }
 
@@ -176,6 +183,34 @@ main.form-archive-page[data-archive-kind]::before {
 
   main.form-archive-page[data-archive-ready="false"] .form-archive-toolbar::before {
     color: rgb(240 207 134 / 82%);
+  }
+}
+
+@media (min-width: 700px) and (max-width: 743.98px) {
+  main.form-archive-page[data-archive-kind] .form-archive-toolbar::before {
+    display: none;
+  }
+}
+
+@media (min-width: 744px) and (max-width: 1119.98px) {
+  main.form-archive-page[data-archive-kind] .form-archive-toolbar::before {
+    white-space: pre-line;
+  }
+
+  main.form-archive-page[data-archive-kind="saga"] .form-archive-toolbar::before {
+    content: "FORM INTERFACE\A// SAGA LINKED";
+  }
+
+  main.form-archive-page[data-archive-kind="realm"] .form-archive-toolbar::before {
+    content: "FORM INTERFACE\A// REALM LINKED";
+  }
+
+  main.form-archive-page[data-archive-kind="saga"][data-archive-ready="false"] .form-archive-toolbar::before {
+    content: "FORM INTERFACE\A// SAGA LINKING";
+  }
+
+  main.form-archive-page[data-archive-kind="realm"][data-archive-ready="false"] .form-archive-toolbar::before {
+    content: "FORM INTERFACE\A// REALM LINKING";
   }
 }
 
