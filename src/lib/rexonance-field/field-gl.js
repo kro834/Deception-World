@@ -90,10 +90,12 @@ uniform vec2 uTone;
 uniform float uPixel;
 uniform float uAlpha;
 uniform float uEdge;
+uniform vec4 uKeep;
 varying vec2 vLocal;
 varying float vLen;
 varying float vW;
 varying vec4 vColor;
+varying vec2 vKeep;
 const float TAU = 6.283185307179586;
 const float RW = ${f(P.radiusWide)};
 const float RT = ${f(P.radiusTight)};
@@ -233,6 +235,11 @@ void main() {
   vec3 hot = pick > FRINGE ? vec3(${vec3(B.fringe)}) : vec3(${vec3(B.hot)});
   tone = mix(tone, hot, heat);
   vColor = vec4(tone * a, a);
+  // The keep-out (a caption's glyphs; sweep 2, F25): the position in its
+  // box's own units, (0, 1) on both axes inside it — affine in pos, so it
+  // interpolates exactly, and a few units of mediump in the fragment stage
+  // are exact to a fraction of a pixel. No box: never inside.
+  vKeep = uKeep.z > uKeep.x && uKeep.w > uKeep.y ? (pos - uKeep.xy) / (uKeep.zw - uKeep.xy) : vec2(-1.0);
   vec2 clip = (pos / uSize) * 2.0 - 1.0;
   gl_Position = vis > 0.5 ? vec4(clip.x, -clip.y, 0.0, 1.0) : vec4(-4.0, -4.0, 0.0, 1.0);
 }
@@ -244,7 +251,12 @@ varying vec2 vLocal;
 varying float vLen;
 varying float vW;
 varying vec4 vColor;
+varying vec2 vKeep;
 void main() {
+  // Nothing over the keep-out box, a hard cut as the 2D scene's clip: its
+  // fragments add nothing (additive blending), and every fragment still
+  // writes, so a tiled GPU keeps its fast path.
+  float open = 1.0 - step(0.0, vKeep.x) * step(vKeep.x, 1.0) * step(0.0, vKeep.y) * step(vKeep.y, 1.0);
   float x = clamp(vLocal.x, 0.0, vLen);
   float d = length(vec2(vLocal.x - x, vLocal.y)) / max(vW, 0.001);
   float core = 1.0 - clamp(d, 0.0, 1.0);
@@ -253,7 +265,7 @@ void main() {
   // (2026-10-21): a lit metal particle, not a soft tinted smear.
   float hot = max(0.0, 1.0 - d * 2.4);
   hot *= hot;
-  float taper = vLen > 0.001 ? mix(0.2, 1.0, clamp(x / vLen, 0.0, 1.0)) : 1.0;
+  float taper = open * (vLen > 0.001 ? mix(0.2, 1.0, clamp(x / vLen, 0.0, 1.0)) : 1.0);
   gl_FragColor = vColor * (core * taper) + vec4(vColor.a) * (0.45 * hot * taper);
 }
 `;
@@ -375,6 +387,7 @@ const UNIFORMS = [
   "uPixel",
   "uAlpha",
   "uEdge",
+  "uKeep",
 ];
 
 // One canvas: its context, program and buffers (`vertexBytes()` the
@@ -586,9 +599,10 @@ export function createFieldLayer({
     /**
      * Draws the field at `state` for the figure drawn at `scale` CSS px per
      * figure px from (`x`, `y`) CSS px in the canvases' box; `height` is the
-     * figure's height in figure px; `quality` (0..1) draws a prefix.
+     * figure's height in figure px; `quality` (0..1) draws a prefix; `keep`
+     * ([x0, y0, x1, y1] CSS px in the box, or null) is left clear.
      */
-    render(state, scale, x, y, height, quality = 1) {
+    render(state, scale, x, y, height, quality = 1, keep = null) {
       if (released || !cssWidth || !cssHeight) return 0;
       const visible = Math.max(0, Math.min(n, Math.floor(n * (quality > 0 ? quality : 0))));
       const charge = state[F.CHARGE];
@@ -645,6 +659,9 @@ export function createFieldLayer({
         gl.uniform1f(L.uPixel, unit * G.width);
         gl.uniform1f(L.uAlpha, alpha);
         gl.uniform1f(L.uEdge, G.edgeFade * ratio);
+        if (keep && keep[2] > keep[0] && keep[3] > keep[1])
+          gl.uniform4f(L.uKeep, keep[0] * ratio, keep[1] * ratio, keep[2] * ratio, keep[3] * ratio);
+        else gl.uniform4f(L.uKeep, 0, 0, 0, 0);
         gl.drawElements(gl.TRIANGLES, visible * G.indicesPerParticle, gl.UNSIGNED_SHORT, 0);
         drawn += visible;
       }

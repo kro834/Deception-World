@@ -70,10 +70,15 @@ export const FIELD_FLASH_SHARE = 0.18;
 
 /**
  * Builds a score. `groups` lock in order; each is { x, y, sx, sy, from, lock,
- * strength? } (its centre, half extents, when the field starts converging on
- * it, when it locks). `wake`, `collapse`, `detonate` are [from, to]; `end`
+ * strength?, ix?, iy? } (its centre, half extents, when the field starts
+ * converging on it, when it locks; where its lock's impulse strikes, its
+ * centre by default). `wake`, `collapse`, `detonate` are [from, to]; `end`
  * is when the field is wholly gone; `impulse` is one impulse's span;
  * `origin` is the reactor. Validated and frozen.
+ *
+ * (The impulse's own anchor, sweep 2, F30: a two-sided group's centre —
+ * the legs', the arms', the shoulders' — is the body's midline, the empty
+ * gap between them, and the lock's starburst sat there, on no plate.)
  */
 export function fieldScore({
   wake,
@@ -113,15 +118,19 @@ export function fieldScore({
   const gfrom = new Float64Array(n);
   const glock = new Float64Array(n);
   const gstrength = new Float32Array(n);
+  const gix = new Float32Array(n);
+  const giy = new Float32Array(n);
   let previous = -Infinity;
   groups.forEach((group, k) => {
-    const { x, y, sx = 0, sy = 0, from, lock, strength = 1 } = group;
-    if (![x, y, sx, sy, from, lock, strength].every(Number.isFinite) || !(from < lock))
+    const { x, y, sx = 0, sy = 0, from, lock, strength = 1, ix = x, iy = y } = group;
+    if (![x, y, sx, sy, from, lock, strength, ix, iy].every(Number.isFinite) || !(from < lock))
       throw new RangeError(`field score: group ${k}`);
     if (lock < previous) throw new RangeError(`field score: group ${k} locks out of order`);
     previous = lock;
     gx[k] = x;
     gy[k] = y;
+    gix[k] = ix;
+    giy[k] = iy;
     gsx[k] = sx;
     gsy[k] = sy;
     gfrom[k] = from;
@@ -145,6 +154,8 @@ export function fieldScore({
     gfrom,
     glock,
     gstrength,
+    gix,
+    giy,
   });
 }
 
@@ -220,7 +231,9 @@ export function fieldState(score, clock, out) {
   out[F.SPREAD_Y] = sy;
   out[F.TIGHT] = tight;
   out[F.GROUP] = group;
-  // Impulses: the locks within their span, freshest first.
+  // Impulses: the locks within their span, freshest first, each where its
+  // group's last plate seats (the attractor and the lock boxes keep the
+  // group's centre).
   let count = 0;
   let flash = 0;
   for (let k = score.count - 1; k >= 0 && count < F.MAX_IMPULSES; k -= 1) {
@@ -229,8 +242,8 @@ export function fieldState(score, clock, out) {
     const age = (t - lock) / score.impulse;
     if (age >= 1) continue;
     const o = F.IMPULSE + count * F.IMPULSE_STRIDE;
-    out[o] = score.gx[k];
-    out[o + 1] = score.gy[k];
+    out[o] = score.gix[k];
+    out[o + 1] = score.giy[k];
     out[o + 2] = age;
     out[o + 3] = score.gstrength[k];
     if (count === 0) flash = Math.max(0, 1 - age / FIELD_FLASH_SHARE) * score.gstrength[k];

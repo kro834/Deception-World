@@ -177,6 +177,94 @@ test("a score is validated and frozen; the entry's follows the pinned call table
   assert.deepEqual([...entry.origin], [...REXONANCE_SUIT_MARKS.core]);
 });
 
+test("a lock's impulse strikes the plate that locks it, never the gap on the body's midline (sweep 2, F30)", async () => {
+  // The two-sided groups' centres (legs, arms, shoulders) are the body's
+  // midline: the lock's 22-ray starburst sat between the shins.
+  const { REXONANCE_SUIT_PIECES, REXONANCE_SUIT_TILE } = await import("../src/lib/rexonance-suit.ts");
+  const { REXONANCE_SUIT_CASCADE, REXONANCE_SUIT_FIT, REXONANCE_SUIT_DRIVER } =
+    await import("../src/lib/rexonance-calls.ts");
+  const { planAssembly } = await import("../src/lib/rexonance-resonance.js");
+  const byId = new Map(REXONANCE_SUIT_PIECES.map((piece) => [piece.id, piece]));
+  const inside = (piece, x, y) =>
+    x >= piece.x && x <= piece.x + piece.w && y >= piece.y && y <= piece.y + piece.h;
+  // The entry: at each lock, the freshest impulse is on the group's last
+  // plate to fit (its accent), and off the midline for the two-sided groups.
+  const entry = entryFieldScore();
+  const out = fieldStateBuffer();
+  const groupOrder = ["legs", "waist", "arms", "chest", "shoulders", "tail", "helm"];
+  groupOrder.forEach((group, k) => {
+    const ids = REXONANCE_SUIT_CASCADE.filter(
+      (cascade) => cascade.group === group || (group === "tail" && cascade.group === "ribbon"),
+    ).flatMap((cascade) => cascade.order);
+    const lock = Math.max(...ids.map((id) => REXONANCE_SUIT_FIT[id]));
+    assert.equal(entry.glock[k], lock, group);
+    fieldState(entry, lock + 1, out);
+    assert.ok(out[F.IMPULSES] >= 1, `${group}: its impulse is live`);
+    const x = out[F.IMPULSE];
+    const y = out[F.IMPULSE + 1];
+    const accent = byId.get(ids.filter((id) => REXONANCE_SUIT_FIT[id] === lock).at(-1));
+    assert.ok(inside(accent, x, y), `${group}: on ${accent.id} (${x}, ${y})`);
+    if (["legs", "arms", "shoulders"].includes(group))
+      assert.ok(Math.abs(x - W / 2) >= 60, `${group}: off the midline (${x})`);
+    // The attractor and the lock box keep the group's centre.
+    assert.equal(out[F.LOCK + k * F.LOCK_STRIDE], entry.gx[k]);
+  });
+  // The scroll: each beat's lock strikes the seat of its last tile's plate.
+  const pieces = REXONANCE_SUIT_PIECES.map((piece) => ({
+    ...piece,
+    preset: REXONANCE_SUIT_DRIVER.includes(piece.id),
+  }));
+  const plan = planAssembly({
+    size: REXONANCE_SUIT_SIZE,
+    pieces,
+    core: REXONANCE_SUIT_MARKS.core,
+    visor: REXONANCE_SUIT_MARKS.visor,
+    maskTile: REXONANCE_SUIT_TILE,
+    tile: 12,
+  });
+  assert.equal(plan.anchors.length, plan.partDone.length);
+  for (const beat of [0, 1]) {
+    const last = plan.tiles.filter((tile) => tile.beat === beat).at(-1);
+    assert.equal(last.t1, plan.partDone[beat], `beat ${beat}: the lock is its last tile`);
+    const plate = byId.get(last.pieceId);
+    assert.deepEqual(plan.anchors[beat], [...plate.seat], `beat ${beat}: ${plate.id}'s seat`);
+    assert.ok(inside(plate, ...plan.anchors[beat]));
+    assert.ok(Math.abs(plan.anchors[beat][0] - W / 2) >= 60, `beat ${beat}: off the midline`);
+    assert.ok(
+      Math.abs(plan.centroids[beat][0] - W / 2) < 30,
+      `beat ${beat}: (the centroid is the midline, ${plan.centroids[beat][0]})`,
+    );
+  }
+  // And the scene hands the anchors to its score.
+  const scroll = read("src/lib/rexonance-resonance.js");
+  assert.match(scroll, /const \[ix, iy\] = plan\.anchors\?\.\[beat\] \?\? \[x, y\];/);
+  // A score without anchors strikes the centre, as before.
+  const plain = sampleScore();
+  fieldState(plain, 401, out);
+  assert.deepEqual([out[F.IMPULSE], out[F.IMPULSE + 1]], [280, 800]);
+  const anchored = fieldScore({
+    wake: [100, 200],
+    groups: [{ x: 280, y: 800, from: 250, lock: 400, ix: 350, iy: 820 }],
+    collapse: [700, 800],
+    end: 900,
+    impulse: 100,
+    origin: [284.2, 275.3],
+  });
+  fieldState(anchored, 401, out);
+  assert.deepEqual([out[F.IMPULSE], out[F.IMPULSE + 1]], [350, 820]);
+  assert.deepEqual([out[F.AX], out[F.AY]].map(Math.round), [280, 800], "the attractor stays");
+  assert.throws(() =>
+    fieldScore({
+      wake: [100, 200],
+      groups: [{ x: 280, y: 800, from: 250, lock: 400, ix: NaN }],
+      collapse: [700, 800],
+      end: 900,
+      impulse: 100,
+      origin: [0, 0],
+    }),
+  );
+});
+
 test("the state is a pure function of the clock: charge, attractor, tightness, impulses, flash", () => {
   const score = sampleScore();
   const out = fieldStateBuffer();
@@ -770,6 +858,13 @@ test("the shaders carry the pose's constants and share no uniform between stages
   // shared uniform fails the link on real drivers (uSize did).
   assert.doesNotMatch(FIELD_FRAGMENT_SHADER, /uniform/);
   assert.match(FIELD_FRAGMENT_SHADER, /gl_FragColor = vColor \* /, "premultiplied, additive");
+  // The keep-out: a vertex-stage uniform, its box's own units handed on as
+  // a varying; the fragment adds nothing inside it (no discard).
+  assert.match(FIELD_VERTEX_SHADER, /uniform vec4 uKeep;/);
+  assert.match(FIELD_VERTEX_SHADER, /vKeep = uKeep\.z > uKeep\.x && uKeep\.w > uKeep\.y \? \(pos - uKeep\.xy\) \/ \(uKeep\.zw - uKeep\.xy\) : vec2\(-1\.0\);/);
+  assert.match(FIELD_FRAGMENT_SHADER, /varying vec2 vKeep;/);
+  assert.match(FIELD_FRAGMENT_SHADER, /float taper = open \* /);
+  assert.doesNotMatch(FIELD_FRAGMENT_SHADER, /\bdiscard\b/);
   assert.doesNotMatch(FIELD_VERTEX_SHADER, /\bsign\b\s*=/, "no shadowed built-in names");
 });
 
@@ -890,6 +985,19 @@ test("the layer draws a quality prefix through both surfaces, clears when unchar
   const view = back.gl.calls.find(([name]) => name === "uniform3f");
   const ratio = 2 * FIELD_GL.resolution.fine;
   assert.deepEqual(view.slice(2), [0.5 * H * ratio, 100 * ratio, 20 * ratio]);
+  // The keep-out (sweep 2, F25): off by default, a box in surface px when
+  // given (the entry's caption), on every surface.
+  const keepOf = (gl) =>
+    gl.calls.filter(([name, uniform]) => name === "uniform4f" && uniform === "uKeep").map((call) => call.slice(2));
+  assert.deepEqual(keepOf(back.gl), [[0, 0, 0, 0]]);
+  back.gl.calls.length = 0;
+  fine.canvases[1].gl.calls.length = 0;
+  layer.render(state, 0.5, 100, 20, H, 1, [10, 20, 110, 60]);
+  for (const canvas of fine.canvases)
+    assert.deepEqual(keepOf(canvas.gl), [[10 * ratio, 20 * ratio, 110 * ratio, 60 * ratio]]);
+  back.gl.calls.length = 0;
+  layer.render(state, 0.5, 100, 20, H, 1, [10, 20, 10, 60]);
+  assert.deepEqual(keepOf(back.gl), [[0, 0, 0, 0]], "an empty box is no keep-out");
   // The governor's prefix.
   back.gl.calls.length = 0;
   layer.render(state, 0.5, 100, 20, H, 0.5);
@@ -976,7 +1084,25 @@ test("both scenes compose the field lazily, through their own clocks, and releas
   assert.doesNotMatch(entry, /figure\.style\.transform =/);
   assert.match(entry, /box\.insertBefore\(canvas, settledCanvas\);/);
   assert.equal(entry.match(/releaseField\(\);/g).length, 2, "finish and stop");
-  assert.match(entry, /extras\?\.governed\(\) \? 0\.5 : 1/);
+  // The governor's half density, eased a step a frame in both scenes, never
+  // in one frame (sweep 2, F26); whole on the scroll's calm frame.
+  assert.match(entry, /if \(extras\?\.governed\(\)\) \{\s*if \(fieldLevel > 0\) fieldLevel -= 1;\s*\} else if \(fieldLevel < FIELD_LEVELS\) fieldLevel \+= 1;/);
+  assert.match(entry, /0\.5 \+ \(0\.5 \* fieldLevel\) \/ FIELD_LEVELS,\s*fieldKeep,/);
+  assert.doesNotMatch(entry, /governed\(\) \? 0\.5 : 1/);
+  assert.match(scroll, /if \(calm\) fieldLevel = FIELD_LEVELS;\s*else if \(backRects && fieldLevel > 0\) fieldLevel -= 1;\s*else if \(!backRects && fieldLevel < FIELD_LEVELS\) fieldLevel \+= 1;/);
+  assert.match(scroll, /fieldProgress !== progress \|\| fieldDrawnLevel !== fieldLevel/);
+  assert.doesNotMatch(scroll, /backRects && !calm \? 0\.5 : 1/);
+  // The entry's caption keep-out reaches the field's canvases (sweep 2, F25).
+  assert.match(entry, /const fieldKeep = keepOut\s*\? Float32Array\.of\(\s*fence\[5\] \/ scale \+ left,\s*fence\[6\] \/ scale \+ top,\s*fence\[7\] \/ scale \+ left,\s*fence\[8\] \/ scale \+ top,\s*\)\s*: null;/);
+  // The layer is made outside the frame's measure, and in idle time once the
+  // preparation is done or a hidden tab is back (sweep 2, F27).
+  assert.ok(
+    scroll.indexOf("makeField();", scroll.indexOf("const draw = (progress")) <
+      scroll.indexOf("const started = environment.performance", scroll.indexOf("const draw = (progress")),
+    "the layer's creation is outside lastDrawMs",
+  );
+  assert.match(scroll, /if \(token === generation\) return fieldIdle\(token\);/);
+  assert.match(scroll, /if \(live\) void fieldIdle\(generation\);/);
   assert.match(entry, /if \(!coarse && fieldState\[fieldLib\.FIELD_STATE\.IMPULSES\] > 0\)/);
   assert.match(entry, /fieldLib\.fieldHash,\s*true,\s*false,/, "rays, no composite operation");
   // The stylesheets: light only, never input; the front canvas over the engine's.

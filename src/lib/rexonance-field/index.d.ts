@@ -18,6 +18,9 @@ export type FieldGroup = {
   from: number;
   lock: number;
   strength?: number;
+  /** Where the lock's impulse strikes (its last plate's seat); x, y by default. */
+  ix?: number;
+  iy?: number;
 };
 
 export type FieldScore = {
@@ -37,6 +40,8 @@ export type FieldScore = {
   readonly gfrom: Float64Array;
   readonly glock: Float64Array;
   readonly gstrength: Float32Array;
+  readonly gix: Float32Array;
+  readonly giy: Float32Array;
 };
 
 /** A particle's birth: the burst fragment's handoff, x and y in figure
@@ -61,6 +66,8 @@ export type FieldLayer = {
     y: number,
     height: number,
     quality?: number,
+    /** Left clear: [x0, y0, x1, y1] CSS px in the canvases' box. */
+    keep?: ArrayLike<number> | null,
   ): number;
   clear(): void;
   release(): void;

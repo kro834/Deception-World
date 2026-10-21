@@ -10,8 +10,15 @@ import {
   REXONANCE_SUIT_SNAP,
 } from "../rexonance-calls.ts";
 import { REXONANCE_SUIT_MARKS, REXONANCE_SUIT_PIECES, REXONANCE_SUIT_SIZE } from "../rexonance-suit.ts";
-import { FIELD_WAKE, fieldScore } from "./index.js";
+// The score's own modules, never the barrel (sweep 2, F29): this file is on
+// the entry engine's static path, and the barrel (the WebGL layer and its
+// shaders) is the field's lazy chunk, which the still tiers never fetch.
+import { FIELD_WAKE } from "./field-clock.js";
+import { fieldScore as scoreOf } from "./field-score.js";
 import type { FieldScore } from "./index.js";
+
+/** The barrel's declared signature for the module's own function. */
+const fieldScore = scoreOf as unknown as typeof import("./index.js").fieldScore;
 
 /** The entry's fire phase is its canonical clock over this from the burst
  * on, where the wake begins (rexonance-ignition.js: entryFlamePhase). */
@@ -79,10 +86,27 @@ export function entryFieldScore() {
   const groups = GROUPS.map((ids) => {
     const cascades = REXONANCE_SUIT_CASCADE.filter((cascade) => ids.includes(cascade.group));
     const from = Math.min(...cascades.map((cascade) => cascade.from));
-    const lock = Math.max(
-      ...cascades.flatMap((cascade) => cascade.order.map((id) => REXONANCE_SUIT_FIT[id])),
-    );
-    return { ...extent(ids), from, lock, strength: STRENGTH[ids[0]] ?? 0.7 };
+    // The lock is the group's last fit; its impulse strikes that plate's
+    // seat (the accent: thigh-top-r for the legs), never the group's mean,
+    // which for a two-sided group is the gap on the body's midline.
+    let lock = -Infinity;
+    let accent = "";
+    for (const cascade of cascades)
+      for (const id of cascade.order)
+        if (REXONANCE_SUIT_FIT[id] >= lock) {
+          lock = REXONANCE_SUIT_FIT[id];
+          accent = id;
+        }
+    const seat = REXONANCE_SUIT_PIECES.find((piece) => piece.id === accent)?.seat;
+    const box = extent(ids);
+    return {
+      ...box,
+      from,
+      lock,
+      strength: STRENGTH[ids[0]] ?? 0.7,
+      ix: seat?.[0] ?? box.x,
+      iy: seat?.[1] ?? box.y,
+    };
   });
   SCORE = fieldScore({
     // The wake is the burst (owner, 2026-10-21: the fire engulfs the
