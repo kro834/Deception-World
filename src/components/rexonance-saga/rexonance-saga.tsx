@@ -1863,6 +1863,13 @@ export function RexonanceSaga() {
           </span>
         </div>
         <div className="rxs-hero-visual" aria-hidden="true">
+          {/* LAYOUT (2026-10-21): the stage's slate — what the frame holds
+              while the script runs beside it (desktop only; decorative). */}
+          <span className="rxl-stage-slate">
+            <b>01</b>
+            <span>STANDARD / HIGH</span>
+            <small>KEY VISUAL</small>
+          </span>
           <RexonanceAperture />
           {/* Three rings settle once onto the aperture's circles (rx2 arrival). */}
           <i className="rxp-ring is-ice" />

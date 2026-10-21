@@ -1,0 +1,1149 @@
+/* ======================================================================
+   REXONANCE — LAYOUT EDITION (2026-10-21)
+
+   Owner: 「フォントやアニメーションなど、全てを大きくブラッシュアップして。」
+   This sheet owns the page's composition: grid, spacing, framing, imagery
+   treatment, backgrounds, borders and panels — the things ~20 earlier
+   sheets each set a little differently. It is linked last on the route,
+   after every edition sheet, so it is the one place that decides layout.
+
+   It sets NO font families, type sizes, keyframes or transitions: the
+   typography edition and the motion edition own those in their sheets.
+   Layout-driven dimensions (a ghost mark's span, a numeral column) are set
+   as sizes of boxes, not of type.
+
+   Selector prefix: one class deeper than the edition sheets'
+   `html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page`,
+   so an equal rule here wins without !important.
+
+   Off-limits (untouched): .rx-call*, .rzn-* canvas internals, the suit-up
+   runway's frame, the fire, the nanite engines.
+   ====================================================================== */
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-page.rxs-rexonance-page {
+  /* The page's frame language, used by every plate below. */
+  --rxl-wrap: 1240px;
+  --rxl-gutter: var(--rxt-gutter, clamp(20px, 3.4vw, 56px));
+  --rxl-section: clamp(64px, 8vw, 120px);
+  --rxl-line: rgb(121 232 255 / 18%);
+  --rxl-line-soft: rgb(121 232 255 / 10%);
+  --rxl-plate: linear-gradient(180deg, rgb(10 18 29 / 86%), rgb(3 8 14 / 92%));
+  --rxl-plate-edge: rgb(121 232 255 / 22%);
+  --rxl-tick: rgb(242 216 150 / 90%);
+  --rxl-tick-size: 18px;
+  /* Four corner ticks, drawn as background layers so no element is needed. */
+  --rxl-corners:
+    linear-gradient(var(--rxl-tick), var(--rxl-tick)) 0 0 / var(--rxl-tick-size) 1px no-repeat,
+    linear-gradient(var(--rxl-tick), var(--rxl-tick)) 0 0 / 1px var(--rxl-tick-size) no-repeat,
+    linear-gradient(var(--rxl-tick), var(--rxl-tick)) 100% 0 / var(--rxl-tick-size) 1px no-repeat,
+    linear-gradient(var(--rxl-tick), var(--rxl-tick)) 100% 0 / 1px var(--rxl-tick-size) no-repeat,
+    linear-gradient(var(--rxl-tick), var(--rxl-tick)) 0 100% / var(--rxl-tick-size) 1px no-repeat,
+    linear-gradient(var(--rxl-tick), var(--rxl-tick)) 0 100% / 1px var(--rxl-tick-size) no-repeat,
+    linear-gradient(var(--rxl-tick), var(--rxl-tick)) 100% 100% / var(--rxl-tick-size) 1px
+      no-repeat,
+    linear-gradient(var(--rxl-tick), var(--rxl-tick)) 100% 100% / 1px var(--rxl-tick-size)
+      no-repeat;
+  /* The inner hairline of a plate: a lit top edge and a dark base. */
+  --rxl-plate-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 12%), inset 0 0 0 1px var(--rxl-plate-edge),
+    0 24px 60px -32px rgb(0 0 0 / 80%);
+}
+
+/* ----------------------------------------------------------------------
+   The chapter slates: every section heading rules the full content width
+   (the edition sheets ended the rule at 240 px, so each chapter opened on
+   a different line). The numeral column stays as the FORGE sheet set it.
+   ---------------------------------------------------------------------- */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > .rxs-section
+  > .rxs-section-heading {
+  background:
+    linear-gradient(90deg, var(--rxt-ice, #79e8ff), rgb(255 143 216 / 60%) 36%, var(--rxl-line) 70%, transparent)
+      no-repeat 0 100% / 100% 1px;
+  padding-block-end: clamp(18px, 2.4vw, 28px);
+  margin-block-end: clamp(36px, 4.6vw, 56px);
+}
+
+/* ----------------------------------------------------------------------
+   01 / 02 plates: the comparison console and the P14 comparator share one
+   material (they had two gradients, two shadows and two paddings).
+   ---------------------------------------------------------------------- */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > :is(#performance, #p14)
+  :is(.rxs-comparison, .rxs-p14-comparator) {
+  position: relative;
+  padding: clamp(24px, 3vw, 40px) clamp(20px, 3vw, 40px);
+  border: 0;
+  border-radius: 0;
+  background: var(--rxl-corners), var(--rxl-plate);
+  box-shadow: var(--rxl-plate-shadow);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > #performance
+  .rxs-headline-metrics
+  article {
+  border: 0;
+  border-block: 1px solid var(--rxl-line-soft);
+}
+
+/* The comparison legend and formula read as one header line. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > #performance
+  .rxs-comparison
+  > .rxs-comparison-selector {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 52%);
+  align-items: center;
+  gap: 16px 24px;
+  padding-block-end: clamp(16px, 2vw, 22px);
+  margin-block-end: clamp(16px, 2vw, 22px);
+  border-block-end: 1px solid var(--rxl-line);
+}
+
+/* ----------------------------------------------------------------------
+   02 — the P14 comparator rows. Values stood in two uneven columns whose
+   widths (and so their labels' positions) changed with every figure. One
+   grid per row: label + delta at the left, two fixed, right-aligned value
+   columns at the right.
+   ---------------------------------------------------------------------- */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > #p14
+  .rxs-p14-metrics
+  article {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "label values"
+    "delta values";
+  align-items: center;
+  column-gap: clamp(16px, 2.4vw, 32px);
+  row-gap: 4px;
+  padding: clamp(14px, 1.6vw, 18px) 4px;
+  border-block-end: 1px solid var(--rxl-line-soft);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > #p14
+  .rxs-p14-metrics
+  article
+  > small {
+  grid-area: label;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > #p14
+  .rxs-p14-metrics
+  article
+  > p {
+  grid-area: delta;
+  margin: 0;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > #p14
+  .rxs-p14-metrics
+  .rxs-p14-values {
+  grid-area: values;
+  display: grid;
+  grid-template-columns: 96px 132px;
+  align-items: start;
+  justify-items: end;
+  column-gap: clamp(14px, 2vw, 28px);
+  width: auto;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > #p14
+  .rxs-p14-values
+  > span {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+  width: 100%;
+  text-align: right;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > #p14
+  .rxs-p14-values
+  > span
+  > i {
+  white-space: nowrap;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > #p14
+  .rxs-p14-values
+  > span
+  > :is(b, strong) {
+  display: block;
+  position: relative;
+  white-space: nowrap;
+}
+
+/* The P14 core: a specimen plate. The chip stands in a framed box with the
+   copy beside it; the box keeps its ratio, so nothing is ever cut off. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > #p14
+  .rxs-p14-overview {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(24px, 3vw, 36px);
+  align-items: start;
+  padding: 0;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > #p14
+  .rxs-p14-overview
+  > figure {
+  width: 100%;
+  max-width: none;
+  aspect-ratio: 16 / 9;
+  margin: 0;
+  border: 1px solid var(--rxl-plate-edge);
+  box-shadow: var(--rxl-plate-shadow);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > #p14
+  .rxs-p14-overview
+  > figure
+  > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > #p14
+  .rxs-p14-copy
+  > dl {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+  margin-block-start: clamp(20px, 2.6vw, 28px);
+  border-block: 1px solid var(--rxl-line);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > #p14
+  .rxs-p14-copy
+  > dl
+  > div {
+  padding: 14px 16px 14px 0;
+  border: 0;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > #p14
+  .rxs-p14-copy
+  > dl
+  > div
+  + div {
+  padding-inline-start: 16px;
+  border-inline-start: 1px solid var(--rxl-line-soft);
+}
+
+/* ----------------------------------------------------------------------
+   03 — the suit-up's guide and replay bands align to the same wrap as the
+   chapters below them (they ran edge to edge while 04 and 05 were centred).
+   ---------------------------------------------------------------------- */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  :is(.rxs-assembly-heading, .rxs-assembly-footer) {
+  padding-inline: max(var(--rxl-gutter), calc((100% - var(--rxl-wrap)) / 2));
+  background:
+    linear-gradient(90deg, var(--rxt-ice, #79e8ff), rgb(255 143 216 / 60%) 40%, transparent 80%)
+      no-repeat 0 100% / 100% 1px,
+    linear-gradient(180deg, rgb(12 22 34), rgb(6 12 20));
+  border-block: 1px solid var(--rxl-line);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  .rxs-assembly-heading {
+  padding-block: clamp(28px, 3.6vw, 48px);
+}
+
+/* ----------------------------------------------------------------------
+   04 — the forms. The chapter opens closer to the replay band (a near-empty
+   screen stood between them); the switcher is one console plate: the tabs
+   and the copy at the left, the figure on its lit floor at the right.
+   ---------------------------------------------------------------------- */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-page.rxs-rexonance-page > #stages {
+  padding-block: clamp(56px, 7vw, 96px) var(--rxl-section);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > #stages
+  .rxs-stage-panel
+  > figure {
+  border: 1px solid var(--rxl-plate-edge);
+  background:
+    radial-gradient(58% 26% at 50% 100%, rgb(121 232 255 / 22%), transparent 72%),
+    radial-gradient(70% 60% at 50% 42%, rgb(182 163 255 / 12%), transparent 70%),
+    linear-gradient(180deg, rgb(8 15 26 / 60%), rgb(2 6 12 / 92%));
+  box-shadow: var(--rxl-plate-shadow);
+}
+
+/* The floor line the figure stands on, and the form's accent at the crown. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > #stages
+  .rxs-stage-panel
+  > figure
+  > span[aria-hidden] {
+  position: absolute;
+  inset: auto 0 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--rxs-stage-accent, #63e2ff) 50%, transparent);
+  opacity: 0.9;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > #stages
+  .rxe-form-status {
+  padding: clamp(16px, 2vw, 22px) clamp(16px, 2vw, 24px);
+  border: 1px solid var(--rxl-plate-edge);
+  background: var(--rxl-corners), var(--rxl-plate);
+  box-shadow: var(--rxl-plate-shadow);
+}
+
+/* The form comparison: a console drawer. Its closed bar lists the three
+   codes; open, three plates with the figure on each one's floor. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > #stages
+  .rxe-form-comparison {
+  max-width: var(--rxl-wrap);
+  margin-inline: auto;
+  margin-block-start: clamp(40px, 5vw, 72px);
+  border: 1px solid var(--rxl-plate-edge);
+  background: var(--rxl-corners), var(--rxl-plate);
+  box-shadow: var(--rxl-plate-shadow);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > #stages
+  .rxe-form-comparison
+  > summary {
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  column-gap: clamp(16px, 2.4vw, 32px);
+  padding: 18px clamp(18px, 2.6vw, 32px);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > #stages
+  .rxe-form-comparison
+  > summary
+  > .rxe-comparison-codes {
+  grid-column: 2;
+  grid-row: 1 / 3;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > #stages
+  .rxe-form-comparison
+  > summary
+  > .rxe-comparison-codes
+  > b {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 10px;
+  border: 1px solid var(--rxl-plate-edge);
+  border-block-start-color: var(--rxe-code-accent, var(--rxl-plate-edge));
+  background: rgb(121 232 255 / 6%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > #stages
+  .rxe-form-comparison
+  > summary
+  > i {
+  grid-column: 3;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > #stages
+  .rxe-comparison-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+  padding: 0;
+  border-block-start: 1px solid var(--rxl-line);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > #stages
+  .rxe-comparison-card {
+  display: grid;
+  grid-template-rows: auto auto auto auto 1fr auto;
+  gap: 10px;
+  padding: clamp(18px, 2.4vw, 28px);
+  border: 0;
+  border-inline-start: 1px solid var(--rxl-line-soft);
+  background: none;
+  box-shadow: inset 0 2px 0 var(--rxs-stage-accent, #63e2ff);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > #stages
+  .rxe-comparison-card:first-child {
+  border-inline-start: 0;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > #stages
+  .rxe-comparison-card[data-selected="true"] {
+  background: linear-gradient(180deg, rgb(121 232 255 / 7%), transparent 60%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > #stages
+  .rxe-comparison-card
+  > img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3 / 4;
+  object-fit: contain;
+  object-position: 50% 100%;
+  margin: 0;
+  background:
+    radial-gradient(56% 20% at 50% 100%, color-mix(in srgb, var(--rxs-stage-accent, #63e2ff) 34%, transparent), transparent 72%),
+    linear-gradient(180deg, rgb(8 15 26 / 40%), rgb(2 6 12 / 80%));
+  border: 1px solid var(--rxl-line-soft);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > #stages
+  .rxe-comparison-card
+  > button {
+  align-self: end;
+  width: 100%;
+}
+
+/* ----------------------------------------------------------------------
+   05 — the system. Three plates on one slab, the third (the decision, his)
+   lit; the two processors below in one readout bar.
+   ---------------------------------------------------------------------- */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-page.rxs-rexonance-page > #system {
+  padding-block: var(--rxl-section) clamp(56px, 7vw, 96px);
+}
+
+/* The chapter's slate stands level with the trinity's rings beside it (it
+   sat at the foot of that row, under a screen of empty lattice). */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > #system
+  > .rxs-section-heading {
+  align-self: center;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > #system
+  > .rxs-system-grid {
+  gap: 0;
+  border: 1px solid var(--rxl-plate-edge);
+  background: var(--rxl-corners), var(--rxl-plate);
+  box-shadow: var(--rxl-plate-shadow);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > #system
+  > .rxs-system-grid
+  > article {
+  padding: clamp(28px, 3.4vw, 44px) clamp(22px, 2.8vw, 36px);
+  border: 0;
+  border-inline-start: 1px solid var(--rxl-line-soft);
+  background: none;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > #system
+  > .rxs-system-grid
+  > article:first-child {
+  border-inline-start: 0;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > #system
+  > .rxs-system-grid
+  > article:nth-child(3) {
+  background: linear-gradient(180deg, rgb(242 216 150 / 9%), rgb(242 216 150 / 2%) 60%, transparent);
+  box-shadow: inset 0 2px 0 var(--rxt-gold, #f2d896);
+}
+
+/* The bracket drawn under the slab belonged to an older composition. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > #system
+  > .rxs-system-grid::after {
+  display: none;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > #system
+  > .rxs-specs {
+  margin-block-start: clamp(28px, 3.4vw, 44px);
+  padding: clamp(24px, 3vw, 36px) clamp(20px, 3vw, 44px);
+  border: 1px solid var(--rxl-plate-edge);
+  background:
+    var(--rxl-corners),
+    linear-gradient(90deg, transparent 10%, rgb(121 232 255 / 5%) 50%, transparent 90%),
+    var(--rxl-plate);
+  box-shadow: var(--rxl-plate-shadow);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > #system
+  > .rxs-specs
+  > div {
+  padding: 0;
+}
+
+/* ----------------------------------------------------------------------
+   The final slate. The suit stands at the right edge, the line at the left;
+   the three ways on sit in one row under it. The dead band above (05's
+   padding stacked on the footer's) is closed.
+   ---------------------------------------------------------------------- */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-page.rxs-rexonance-page > .rxs-footer {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: center;
+  gap: clamp(24px, 3vw, 40px) 0;
+  min-height: max(620px, 86svh);
+  padding: clamp(80px, 10vw, 140px) max(var(--rxl-gutter), calc((100% - var(--rxl-wrap)) / 2))
+    clamp(72px, 9vw, 120px);
+  border-block-start: 1px solid var(--rxl-line);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > .rxs-footer
+  > div {
+  grid-column: 1;
+  grid-row: 1;
+  max-width: min(100%, 720px);
+  margin: 0;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > .rxs-footer
+  > a {
+  grid-column: 1;
+  grid-row: 2;
+  justify-self: start;
+  align-self: start;
+  position: relative;
+  z-index: 1;
+  margin: 0;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > .rxs-footer
+  > .rzn-end-figure {
+  right: clamp(16px, 6vw, 120px);
+  left: auto;
+  top: 50%;
+  translate: 0 -50%;
+  height: min(92%, 720px);
+  width: auto;
+}
+
+/* ======================================================================
+   DESKTOP (≥1100): the stage holds beside the script
+   ====================================================================== */
+@media (min-width: 1100px) {
+  /* The stage slate: what the frame is holding. */
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > .rxs-hero
+    .rxs-hero-visual
+    > .rxl-stage-slate {
+    position: absolute;
+    top: clamp(18px, 2.4vw, 28px);
+    left: clamp(18px, 2.4vw, 28px);
+    z-index: 5;
+    display: grid;
+    grid-template-columns: auto auto;
+    align-items: center;
+    column-gap: 12px;
+    padding-inline-start: 14px;
+    border-inline-start: 2px solid var(--rxt-gold, #f2d896);
+    pointer-events: none;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > .rxs-hero
+    .rxs-hero-visual
+    > .rxl-stage-slate
+    > small {
+    grid-column: 1 / -1;
+  }
+
+  /* The figure fills the stage: a hand's breadth more than before. */
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > .rxs-hero
+    .rxs-hero-visual
+    img {
+    max-width: 96%;
+    height: 93%;
+    bottom: 1%;
+  }
+
+  /* The title card's copy sits a little lower, over the figure's shoulder line. */
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > .rxs-hero
+    .rxs-hero-copy {
+    padding-block-start: clamp(24px, 5svh, 56px);
+  }
+
+  /* The chapter index: a tracklist under the title — number, code, name,
+     one line on the scene, the arrow — one chapter per line, five lines. */
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > .rxs-chapter-index.rxe-chapter-map {
+    grid-template-columns: minmax(0, 1fr);
+    margin-inline: clamp(40px, 5vw, 96px) var(--rxl-gutter);
+    border-block: 1px solid var(--rxl-line);
+    background: linear-gradient(180deg, rgb(3 9 16 / 70%), rgb(3 9 16 / 40%));
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > .rxe-chapter-map
+    .rxe-chapter-map-heading {
+    padding: 12px 20px;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > .rxe-chapter-map
+    a {
+    grid-template-columns: 44px 150px minmax(0, auto) minmax(0, 1fr) 20px;
+    grid-template-rows: auto;
+    align-items: baseline;
+    gap: 0 18px;
+    min-height: 60px;
+    padding: 16px 20px;
+    border: 0;
+    border-block-start: 1px solid var(--rxl-line-soft);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > .rxe-chapter-map
+    a:last-child {
+    grid-column: 1;
+    min-height: 60px;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > .rxe-chapter-map
+    a
+    > b {
+    grid-column: 1;
+    grid-row: 1;
+    align-self: baseline;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > .rxe-chapter-map
+    a
+    > small {
+    grid-column: 2;
+    grid-row: 1;
+    white-space: nowrap;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > .rxe-chapter-map
+    a
+    > span {
+    grid-column: 3;
+    grid-row: 1;
+    white-space: nowrap;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > .rxe-chapter-map
+    a
+    > em {
+    grid-column: 4;
+    grid-row: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > .rxe-chapter-map
+    a
+    > i {
+    grid-column: 5;
+    grid-row: 1;
+    align-self: center;
+    justify-self: end;
+  }
+
+  /* The script column's chapters keep one left margin with the index. */
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > :is(#performance, #p14) {
+    padding-block: clamp(64px, 8vw, 104px) clamp(56px, 7vw, 88px);
+  }
+
+  /* 04: the console's left column — tabs, hint, copy, status — has one gutter
+     from the figure; the figure plate sits flush with the tabs' top. */
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > #stages
+    .rxs-stage-switcher {
+    max-width: var(--rxl-wrap);
+    column-gap: clamp(32px, 4vw, 64px);
+  }
+
+  /* The footer links stand side by side. */
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > .rxs-footer {
+    grid-template-columns: auto auto auto minmax(0, 1fr);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > .rxs-footer
+    > div {
+    grid-column: 1 / -1;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > .rxs-footer
+    > a:nth-of-type(1) {
+    grid-column: 1;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > .rxs-footer
+    > a:nth-of-type(2) {
+    grid-column: 2;
+    margin-inline-start: 10px;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > .rxs-footer
+    > a:nth-of-type(3) {
+    grid-column: 3;
+    margin-inline-start: 10px;
+  }
+}
+
+/* A wider stage from 1300 up: the figure is the page's subject. */
+@media (min-width: 1300px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-page.rxs-rexonance-page {
+    --rxt-stage: 46fr;
+    --rxt-script: 54fr;
+  }
+}
+
+/* ======================================================================
+   TABLET (700–1099): one column, the plates keep their frames
+   ====================================================================== */
+@media (max-width: 1099px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > .rxs-hero
+    .rxs-hero-visual
+    > .rxl-stage-slate {
+    display: none;
+  }
+
+  /* 04 stacked: the figure's plate is the picture's own box (it stood in a
+     screen-tall box with a third of it empty above the head), a little wider. */
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > #stages
+    .rxs-stage-panel
+    > figure {
+    width: min(100%, 560px);
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    aspect-ratio: 1086 / 1448;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > #stages
+    .rxs-stage-panel
+    > figure
+    > img {
+    width: 100%;
+    height: 100%;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > .rxs-footer
+    > a {
+    grid-row: auto;
+    width: min(100%, 420px);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > .rxs-footer
+    > a:nth-of-type(2) {
+    margin-inline-start: 0;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > .rxs-footer
+    > .rzn-end-figure {
+    right: clamp(8px, 4vw, 48px);
+    height: min(80%, 560px);
+    opacity: 0.9;
+  }
+}
+
+@media (min-width: 701px) and (max-width: 1099px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > #p14
+    .rxs-p14-overview {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: center;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > #p14
+    .rxs-p14-overview
+    > figure {
+    aspect-ratio: 4 / 5;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > #stages
+    .rxe-comparison-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* ======================================================================
+   PHONE (≤700): one column; each comparator row is two lines
+   ====================================================================== */
+@media (max-width: 700px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > :is(#performance, #p14)
+    :is(.rxs-comparison, .rxs-p14-comparator) {
+    padding: 20px 16px;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > #performance
+    .rxs-comparison
+    > .rxs-comparison-selector {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > #p14
+    .rxs-p14-metrics
+    article {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "label label"
+      "delta values";
+    row-gap: 10px;
+    padding: 16px 0;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > #p14
+    .rxs-p14-metrics
+    .rxs-p14-values {
+    grid-template-columns: minmax(72px, auto) minmax(92px, auto);
+    column-gap: 16px;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > #p14
+    .rxs-p14-copy
+    > dl {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > #p14
+    .rxs-p14-copy
+    > dl
+    > div {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 0;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > #p14
+    .rxs-p14-copy
+    > dl
+    > div
+    + div {
+    padding-inline-start: 0;
+    border-inline-start: 0;
+    border-block-start: 1px solid var(--rxl-line-soft);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > #stages
+    .rxe-form-comparison
+    > summary {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > #stages
+    .rxe-form-comparison
+    > summary
+    > .rxe-comparison-codes {
+    grid-column: 1;
+    grid-row: 3;
+    justify-content: flex-start;
+    margin-block-start: 6px;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > #stages
+    .rxe-form-comparison
+    > summary
+    > i {
+    grid-column: 2;
+    grid-row: 1 / 4;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > #stages
+    .rxe-comparison-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > #stages
+    .rxe-comparison-card {
+    border-inline-start: 0;
+    border-block-start: 1px solid var(--rxl-line-soft);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > #stages
+    .rxe-comparison-card
+    > img {
+    aspect-ratio: 4 / 3;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > #system
+    > .rxs-system-grid
+    > article {
+    border-inline-start: 0;
+    border-block-start: 1px solid var(--rxl-line-soft);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > #system
+    > .rxs-system-grid
+    > article:first-child {
+    border-block-start: 0;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > .rxs-footer {
+    min-height: 0;
+  }
+}
+
+/* Forced colours: frames become real borders; the painted corners vanish. */
+@media (forced-colors: active) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    :is(
+      .rxs-comparison,
+      .rxs-p14-comparator,
+      .rxe-form-status,
+      .rxe-form-comparison,
+      .rxs-system-grid,
+      .rxs-specs,
+      .rxs-p14-overview > figure
+    ) {
+    border: 1px solid CanvasText;
+    background: Canvas;
+    box-shadow: none;
+  }
+}
