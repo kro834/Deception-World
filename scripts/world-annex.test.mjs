@@ -49,7 +49,8 @@ test("world-home preserves its layout and copy outside explicitly approved edits
     // 2026-10-17: column 06's slider label and its dialog pane (gate, then dossier).
     // Owner 2026-10-21: Other becomes Dogs; add second Dog Dante/Varg,
     // preserving the related-person cards as a distinct labelled group.
-    markup: "5209f0993d0371a71a6840e080da54b5e113fc1993ee375da69d194defc9e1de",
+    // Owner supplied Varg's artwork: responsive, uncropped, distinct from Dante.
+    markup: "b3d1ea5269914648fe0d2a2af5af925ec3f02e98370e145653240a449de7ac20",
   });
   // The WorldAnnexRiders hook stays where it was (this file is pinned), but
   // renders nothing: 02 RIDERS and 03 RECORDS sit back to back, and the

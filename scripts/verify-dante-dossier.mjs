@@ -30,6 +30,13 @@ try {
     for (const name of ["原圧", "界外実体", "重勢", "不退", "深紅冠", "重相復元", "存在捕食", "認知追跡"])
       assert.equal(await page.getByRole("heading", { name, exact: true }).count(), 1);
     assert.equal(await page.locator(".manager-copy-section").count(), 17);
+    const varg = page.locator(".varg-portrait img");
+    await show(varg);
+    await varg.evaluate((img) => img.decode());
+    // Width-descriptor srcsets report density-corrected naturalWidth, not file pixels.
+    assert.ok(await varg.evaluate((img) => img.naturalWidth > 0 && img.currentSrc.includes("character-varg-20261021")));
+    assert.equal(await varg.evaluate((img) => getComputedStyle(img).objectFit), "contain");
+    await page.screenshot({ path: `/tmp/varg-${process.env.PW_ENGINE || "chromium"}-${viewport.width}.png` });
     await page.waitForFunction(
       () => getComputedStyle(document.querySelector(".dante-entry-glitch")).opacity === "0",
     );
@@ -86,6 +93,8 @@ try {
       assert.equal(await page.locator('#manager-tab-2 b').textContent(), "犬");
       const entry = page.getByRole("link", { name: "第二の犬 ダンテ／ヴァルグの人物資料を開く", exact: true });
       await show(entry);
+      await entry.locator("img").evaluate((img) => img.decode());
+      assert.ok(await entry.locator("img").evaluate((img) => img.currentSrc.includes("character-varg-20261021")));
       await entry.click();
       await page.waitForURL("**/characters/dante#character-section-04");
       await ready(page);

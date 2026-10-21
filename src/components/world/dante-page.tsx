@@ -102,6 +102,21 @@ export function DantePage() {
               </div>
               <div className="manager-copy-body">
                 {section.no === "04" ? (
+                  <figure className="varg-portrait">
+                    <img
+                      src="/character-varg-20261021-720.webp"
+                      srcSet="/character-varg-20261021-360.webp 360w, /character-varg-20261021-720.webp 720w, /character-varg-20261021.webp 1088w"
+                      sizes="(max-width: 760px) calc(100vw - 40px), 640px"
+                      width={1088}
+                      height={1445}
+                      alt="第二の犬・ヴァルグの本来形態。漆黒の巨躯、深紅の棘と紋様、浮遊する深紅冠。"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                    <figcaption>第二の犬・ヴァルグ ／ 本来形態<br /><a href="/character-varg-20261021-original.webp">原寸画像を見る</a></figcaption>
+                  </figure>
+                ) : null}
+                {section.no === "04" ? (
                   <dl className="manager-facts" aria-label="ヴァルグの人物録">
                     {VARG_FACTS.map((fact) => (
                       <div key={fact.dt}><dt>{fact.dt}</dt><dd>{fact.dd}</dd></div>

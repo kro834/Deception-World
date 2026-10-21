@@ -357,10 +357,10 @@
                     className="other-archive-card"
                     to="/characters/dante"
                     hash="character-section-04"
-                    assets={["/character-dante.webp"]}
+                    assets={["/character-varg-20261021-720.webp"]}
                     aria-label="第二の犬 ダンテ／ヴァルグの人物資料を開く"
                   >
-                    <img src="/character-dante-thumb.webp" alt="宿主ダンテのキャラクタービジュアル" width={360} height={450} loading="lazy" decoding="async" />
+                    <img src="/character-varg-20261021-360.webp" srcSet="/character-varg-20261021-360.webp 360w, /character-varg-20261021-720.webp 720w, /character-varg-20261021.webp 1088w" sizes="(max-width: 760px) 45vw, 360px" alt="第二の犬・ヴァルグの本来形態" width={1088} height={1445} style={{ objectFit: "contain" }} loading="lazy" decoding="async" />
                     <span className="other-card-shade" aria-hidden="true" />
                     <span className="other-card-code">SECOND DOG / 02</span>
                     <span className="other-card-copy"><small>第二の犬・ヴァルグ</small><b>ダンテ／ヴァルグ</b><i>始原的管理外存在</i></span>

@@ -39,3 +39,19 @@ test("Dogs category has a second individual link without relabeling related peop
   for (const path of ["src/components/search/search-data.ts", "src/lib/library-data.ts", "src/components/world/world-chrome.tsx", "src/routes/characters/dante.tsx"])
     assert.ok(read(path).includes("ダンテ／ヴァルグ"), path);
 });
+
+test("supplied Varg artwork is distinct from the host, responsive and not cropped", () => {
+  for (const suffix of ["-360", "-720", "", "-original"]) {
+    const bytes = readFileSync(new URL(`../public/character-varg-20261021${suffix}.webp`, import.meta.url));
+    assert.equal(bytes.subarray(8, 12).toString(), "WEBP");
+    if (suffix !== "-original") assert.ok(bytes.length < 400_000);
+  }
+  const home = read("src/components/world/world-home.tsx");
+  const page = read("src/components/world/dante-page.tsx");
+  assert.match(home, /alt="第二の犬・ヴァルグの本来形態"/);
+  assert.match(home, /src="\/character-dante-thumb.webp"/);
+  assert.match(page, /src="\/character-dante.webp"/);
+  assert.match(page, /character-varg-20261021-360.webp 360w, \/character-varg-20261021-720.webp 720w, \/character-varg-20261021.webp 1088w/);
+  assert.match(page, /href="\/character-varg-20261021-original.webp"/);
+  assert.match(read("src/styles-dante.css"), /\.varg-portrait img[\s\S]*?height: auto;\s*object-fit: contain;/);
+});
