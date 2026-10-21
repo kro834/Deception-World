@@ -1,0 +1,677 @@
+/* ================================================================
+   ZENITH — Final Stage: the final cut (2026-10-21)
+
+   The last pass over the third film's site, drawn over STAGE
+   (styles-stage-final-stage.css) with the same scope and specificity, so
+   every rule here is the one that paints. It fixes what the audit found
+   and finishes the page as one cinematic object:
+
+   - the chapter joins are station lamps on a broken hairline, not two
+     crossed strokes that read as an "×" on phones and tablets.
+   - the cold open on portrait tablets: a 16:9 screen fills the house
+     instead of a 2.39:1 strip floating in a dark void.
+   - the cast still fills its column on every width (the 4:5 ratio and a
+     stretched row let it grow past the column and over the billing on
+     iPad); the billing slots show their frame and the role's colour tick.
+   - the records' 変身音声 read as a call sequence: numbered, the
+     completing call lit in the form's colour; the Realm Royal form panel
+     is one band (name, calls) over a three-column spec grid, not two
+     unequal columns with a void.
+   - the end card closes the film: letterbox hairlines, the route home
+     drawn down from the records to the last board, the dash centred
+     under the title's visible run, the ways out as the last credits.
+   - the bar keeps the chapter links on tablets (600–900px, inline) and
+     gives phones a chapter strip under the brand, so the chapter in view
+     (aria-current="location") always has somewhere to show.
+
+   Scope: html[data-family="special"] and the doubled page class, as the
+   STAGE sheets. Motion is finite or scroll-linked on a named timeline,
+   gated by reduced motion, economy rendering, the open menu, the load
+   gate and open dialogs; nothing loops. Labels hold the 12px floor and
+   hit targets 44px. No markup changes.
+   ================================================================ */
+
+html[data-family="special"] body .rxs-page.rxs-page.fst-page {
+  --fsz-lamp: var(--fsx-lamp, #e9d3a0);
+  --fsz-lamp-rgb: 233 211 160;
+  --fsz-route: repeating-linear-gradient(
+    180deg,
+    rgb(var(--fsx-violet-rgb) / 46%) 0 6px,
+    transparent 6px 12px
+  );
+  --fsz-ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ================================================================
+   Chapter joins: a station lamp on the reel's hairline
+   ================================================================ */
+html[data-family="special"] body .rxs-page.rxs-page.fst-page > .rxs-section::before {
+  width: min(640px, 76%);
+  height: 11px;
+  /* The elevation's draw (fst-draw-x) grows the rule from its left end;
+     from its centre, the lamp stays put and the hairline opens both ways. */
+  transform-origin: 50% 50%;
+  background:
+    radial-gradient(circle at 50% 5.5px, var(--fsz-lamp) 0 1.7px, transparent 2.4px) 0 0 / 100% 11px
+      no-repeat,
+    radial-gradient(
+        circle at 50% 5.5px,
+        transparent 3.6px,
+        rgb(var(--fsx-violet-rgb) / 70%) 4.2px 5px,
+        transparent 5.7px
+      )
+      0 0 / 100% 11px no-repeat,
+    linear-gradient(
+        90deg,
+        transparent,
+        var(--fsx-line-2) 26%,
+        var(--fsx-line-2) calc(50% - 12px),
+        transparent calc(50% - 12px),
+        transparent calc(50% + 12px),
+        var(--fsx-line-2) calc(50% + 12px),
+        var(--fsx-line-2) 74%,
+        transparent
+      )
+      0 5px / 100% 1px no-repeat;
+}
+
+/* ================================================================
+   Cold open
+   ================================================================ */
+/* Portrait tablets: the 2.39:1 screen left the house half empty; a 3:2
+   screen takes the width and the title stands under it with the cue at
+   the foot of the first view. */
+@media (orientation: portrait) and (min-width: 600px) and (max-width: 1099.98px) {
+  html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero {
+    min-height: min(calc(100svh - var(--dxs-nav)), 960px);
+    padding-block: clamp(24px, 3.5svh, 40px) clamp(28px, 4svh, 48px);
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero .fst-hero-logo {
+    width: min(100%, calc((100svh - var(--dxs-nav) - 420px) * 3 / 2));
+    min-width: min(100%, 560px);
+    aspect-ratio: 3 / 2;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero .fst-hero-logo img {
+    max-width: 76%;
+  }
+}
+
+/* Phones: the credit line keeps "KAMEN RIDER SAGA / FINAL STAGE" on one
+   line at 390px (no side dashes, tighter tracking); narrower, it balances
+   its two lines. */
+@media (max-width: 480px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.fst-page
+    > .fst-hero
+    .rxs-hero-copy
+    > p:first-child {
+    gap: 0;
+    letter-spacing: 0.12em;
+    text-wrap: balance;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.fst-page
+    > .fst-hero
+    .rxs-hero-copy
+    > p:first-child::before,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.fst-page
+    > .fst-hero
+    .rxs-hero-copy
+    > p:first-child::after {
+    display: none;
+  }
+}
+
+/* ================================================================
+   02 CHARACTERS: the billing slots and the still
+   ================================================================ */
+/* Every slot shows its frame and the role's colour as a tick at its head
+   (the liquid lens still draws the chosen one). */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.fst-page
+  > #characters
+  .fst-cast-tabs.rxs-stage-tabs.liquid-swipe-tabs
+  > button[role="tab"] {
+  border-radius: 4px;
+  background: linear-gradient(var(--liquid-accent, var(--fsx-violet)) 0 0) 50% 0 / 22px 2px no-repeat;
+  box-shadow: inset 0 0 0 1px rgb(var(--fsx-violet-rgb) / 11%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.fst-page
+  > #characters
+  .fst-cast-tabs.rxs-stage-tabs.liquid-swipe-tabs
+  > button[role="tab"][aria-selected="true"] {
+  box-shadow: none;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.fst-page
+  > #characters
+  .fst-cast-tabs.rxs-stage-tabs.liquid-swipe-tabs
+  > button[role="tab"]
+  span {
+  color: var(--liquid-accent, var(--fsx-violet));
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.fst-page
+  > #characters
+  .fst-cast-tabs.rxs-stage-tabs.liquid-swipe-tabs
+  > button[role="tab"][aria-selected="true"]
+  span {
+  color: var(--dx-text);
+}
+
+/* Two rows of four share one height (the second row no longer grows to
+   the longest name). */
+@media (max-width: 1099.98px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.fst-page
+    > #characters
+    .fst-cast-tabs.liquid-swipe-tabs {
+    grid-auto-rows: 1fr;
+  }
+}
+
+/* The still fills its column. STAGE gave the figure a 4:5 ratio inside a
+   stretched row, so a tall billing (Yuma) made it wider than its column
+   and it painted over the first characters of every line (iPad portrait,
+   iPad mini, every width from 761px). Both axes stretch now; the ratio
+   only sets the row's floor. */
+@media (min-width: 761px) {
+  html[data-family="special"] body .rxs-page.rxs-page.fst-page > #characters .fst-cast-detail {
+    min-height: clamp(520px, 56vw, 640px);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.fst-page
+    > #characters
+    .fst-cast-detail
+    > figure {
+    justify-self: stretch;
+    align-self: stretch;
+    width: auto;
+    height: auto;
+    min-height: 0;
+    aspect-ratio: auto;
+  }
+}
+
+/* The billing's link answers a press. */
+html[data-family="special"] body .rxs-page.rxs-page.fst-page > #characters .fst-cast-copy a {
+  border-color: rgb(var(--fsx-violet-rgb) / 40%);
+}
+
+/* ================================================================
+   03 RIDERS: the credits under the stills
+   ================================================================ */
+@media (max-width: 480px) {
+  html[data-family="special"] body .rxs-page.rxs-page.fst-page > #riders .fst-pickup-copy > p {
+    letter-spacing: 0.14em;
+    text-wrap: balance;
+  }
+}
+
+/* ================================================================
+   The records: calls as a sequence, the Royal forms as one band
+   ================================================================ */
+/* 変身音声: each call carries its place in the sequence (silent for
+   assistive tech: the list is already labelled), and the call that
+   completes the change is lit in the form's colour. */
+html[data-family="special"] body .rxs-page.rxs-page.fst-page .fst-pickup-dialog .fst-calls {
+  counter-reset: fsz-call;
+  gap: 10px 8px;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.fst-page .fst-pickup-dialog .fst-calls b {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 9px;
+  min-height: 36px;
+  padding: 8px 14px 8px 11px;
+  border-radius: 3px;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.fst-page
+  .fst-pickup-dialog
+  .fst-calls
+  b::before {
+  counter-increment: fsz-call;
+  content: counter(fsz-call, decimal-leading-zero) / "";
+  flex: none;
+  color: var(--fst-accent, var(--fsx-violet));
+  font: 600 12px / 1 var(--dx-mono);
+  letter-spacing: 0.04em;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.fst-page
+  .fst-pickup-dialog
+  .fst-calls
+  b:last-child {
+  border-color: transparent;
+  color: var(--fsx-ink);
+  background: var(--fst-accent, var(--fsx-violet));
+  font-weight: 700;
+  box-shadow:
+    0 0 0 1px rgb(255 255 255 / 10%),
+    0 10px 28px color-mix(in srgb, var(--fst-accent, var(--fsx-violet)) 30%, transparent);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.fst-page
+  .fst-pickup-dialog
+  .fst-calls
+  b:last-child::before {
+  color: rgb(5 6 26 / 70%);
+}
+
+/* One call alone (a finisher with a single line) needs no number. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.fst-page
+  .fst-pickup-dialog
+  .fst-calls
+  b:only-child::before {
+  content: none;
+}
+
+/* Realm Royal: the form's name and its calls as one band, the spec grid
+   under them in three columns (two at the record's narrower widths, one
+   row per key on phones, as the FAR FROM SAGA grid). */
+html[data-family="special"] body .rxs-page.rxs-page.fst-page .fst-pickup-dialog .fst-form-panel {
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(20px, 3vw, 32px);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.fst-page .fst-pickup-dialog .fst-form-copy {
+  padding: 0 0 clamp(18px, 2.4vw, 26px);
+  border-right: 0;
+  border-bottom: 1px solid rgb(var(--fsx-violet-rgb) / 14%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.fst-page
+  .fst-pickup-dialog
+  .fst-form-copy
+  .fst-calls {
+  margin-bottom: 0;
+}
+
+@media (min-width: 681px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.fst-page
+    .fst-pickup-dialog
+    .fst-form-specs
+    .fst-specs {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 681px) and (max-width: 900px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.fst-page
+    .fst-pickup-dialog
+    .fst-form-specs
+    .fst-specs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* FAR FROM SAGA's stages: on a tablet the record is wide enough for the
+   stage art beside its text (the base stacks them under 900px, which put
+   a 700px-tall still over every line). */
+@media (min-width: 681px) and (max-width: 900px) {
+  html[data-family="special"] body .rxs-page.rxs-page.fst-page .fst-pickup-dialog .rxs-stage-panel {
+    grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+    gap: clamp(20px, 3vw, 32px);
+    align-items: center;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.fst-page
+    .fst-pickup-dialog
+    .rxs-stage-panel
+    figure {
+    height: auto;
+    aspect-ratio: 3 / 4;
+    max-height: none;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.fst-page
+    .fst-pickup-dialog
+    .rxs-stage-panel
+    > div {
+    max-width: none;
+  }
+}
+
+/* ================================================================
+   The end card: the final title, the route home, the last credits
+   ================================================================ */
+html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer {
+  position: relative;
+  padding-top: clamp(150px, 22svh, 240px);
+  overflow: clip;
+  background:
+    linear-gradient(90deg, transparent, var(--fsx-line-2) 30%, var(--fsx-line-2) 70%, transparent)
+      50% 0 / 100% 1px no-repeat,
+    radial-gradient(50% 44% at 50% 62%, rgb(var(--fsx-violet-rgb) / 11%), transparent 72%),
+    radial-gradient(36% 30% at 50% 100%, rgb(var(--fsx-lilac-rgb) / 8%), transparent 72%),
+    var(--fsx-house);
+  border-top: 0;
+}
+
+/* The route home: a dashed line from the records down to the last board,
+   drawn on the board itself so it always meets its top edge. */
+html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer > div {
+  position: relative;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer > div::before {
+  content: "";
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  display: block;
+  width: 2px;
+  height: 100vh;
+  margin: 0;
+  background: var(--fsz-route);
+  translate: -50% 0;
+  transform-origin: 50% 100%;
+  pointer-events: none;
+}
+
+/* The terminus: the last station's lamp, hung on the board's top edge. */
+html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer > div::after {
+  content: "";
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  display: block;
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, var(--fsz-lamp) 0 2.2px, transparent 3px),
+    var(--fsx-house);
+  box-shadow:
+    0 0 0 1px rgb(var(--fsx-violet-rgb) / 70%),
+    0 0 18px 3px rgb(var(--fsz-lamp-rgb) / 28%);
+  translate: -50% 0;
+  pointer-events: none;
+}
+
+/* The dash under the title sits under its visible run: the title's
+   tracking (0.12em) trails the last glyph and 「。」 holds its ink at the
+   left of its box, so the box's centre lies ~0.31em right of the ink's.
+   (rx14 #14.) */
+html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer h2::after {
+  translate: -0.31em 0;
+}
+
+/* The ways out as the last credits: one row, the return set apart. */
+html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer > a {
+  position: relative;
+  min-height: 52px;
+  padding: 0 24px;
+  border-color: rgb(var(--fsx-violet-rgb) / 38%);
+  background:
+    linear-gradient(var(--fsx-violet) 0 0) 0 0 / 16px 2px no-repeat,
+    rgb(var(--fsx-violet-rgb) / 6%);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer > a.rxs-footer-return {
+  border-color: transparent;
+  background: none;
+}
+
+@media (max-width: 680px) {
+  /* The slate holds one centred line at 390px (tighter tracking, less
+     plate), two balanced lines under 360px. */
+  html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer > div > p {
+    width: fit-content;
+    max-width: 100%;
+    padding: 7px 12px;
+    letter-spacing: 0.06em;
+    text-align: center;
+    text-wrap: balance;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer {
+    padding-top: clamp(120px, 16svh, 160px);
+  }
+}
+
+/* ================================================================
+   The bar: the chapter links on tablets and phones
+   ================================================================ */
+/* 600–900px (iPad mini and iPad Pro portrait among them): the links stay
+   in the bar between the brand and the menu. */
+@media (min-width: 600px) and (max-width: 900px) {
+  html[data-family="special"] body .rxs-page.rxs-page.fst-page > .rxs-local-nav .rxs-local-nav-inner {
+    grid-template-columns: auto minmax(0, 1fr) 48px;
+    gap: 16px;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.fst-page > .rxs-local-nav nav {
+    display: flex;
+    justify-content: flex-end;
+    gap: 6px;
+    min-width: 0;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.fst-page > .rxs-local-nav nav a {
+    padding-inline: 10px;
+    white-space: nowrap;
+  }
+}
+
+/* Phones: a chapter strip under the brand, each chapter a 44px target,
+   the one in view lit by the lamp line (styles-final-stage-lamplight.css). */
+@media (max-width: 599.98px) {
+  html[data-family="special"] body .rxs-page.rxs-page.fst-page > .rxs-local-nav .rxs-local-nav-inner {
+    grid-template-columns: minmax(0, 1fr) 48px;
+    grid-template-rows: auto auto;
+    row-gap: 0;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.fst-page > .rxs-local-nav nav {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    display: flex;
+    gap: 0;
+    justify-content: stretch;
+    margin: -8px 0 0;
+    padding: 0 0 2px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    border-top: 1px solid rgb(var(--fsx-violet-rgb) / 12%);
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.fst-page > .rxs-local-nav nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.fst-page > .rxs-local-nav nav a {
+    flex: 1 1 0;
+    gap: 7px;
+    min-height: 44px;
+    padding-inline: 6px;
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+  }
+
+  /* The strip is a chapter index: each link carries its number (silent
+     for assistive tech). The lamplight sheet's chalk hover line on ::before
+     has no pointer to answer on a phone; the numeral takes its place. */
+  html[data-family="special"] body .rxs-page.rxs-page.fst-page > .rxs-local-nav nav a::before {
+    content: "01" / "";
+    position: static;
+    inset: auto;
+    width: auto;
+    height: auto;
+    color: var(--fsx-violet);
+    font: 600 12px / 1 var(--dx-mono);
+    letter-spacing: 0.04em;
+    background: none;
+    scale: none;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.fst-page
+    > .rxs-local-nav
+    nav
+    a:nth-child(2)::before {
+    content: "02" / "";
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.fst-page
+    > .rxs-local-nav
+    nav
+    a:nth-child(3)::before {
+    content: "03" / "";
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.fst-page
+    > .rxs-local-nav
+    nav
+    a[aria-current="location"]::before {
+    color: var(--fsz-lamp);
+  }
+}
+
+/* ================================================================
+   Motion: answers to the reader, the route drawn on arrival
+   ================================================================ */
+@media (prefers-reduced-motion: no-preference) {
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.fst-page
+    > :is(.fst-footer > a, #characters .fst-cast-copy a) {
+    transition:
+      scale 160ms var(--fsz-ease),
+      border-color 220ms ease,
+      background-color 220ms ease;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.fst-page
+    > :is(.fst-footer > a, #characters .fst-cast-copy a):active {
+    scale: 0.97;
+  }
+
+  /* The route home draws down as the last board comes into view, on the
+     board's own timeline (--fsk-end, styles-final-stage-kiro.css). */
+  @supports (animation-timeline: view()) and (animation-range: entry 0% entry 100%) {
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.fst-page[data-motion-ready="true"]
+      > .fst-footer
+      > div::before {
+      animation: fsz-route-draw linear both;
+      animation-timeline: --fsk-end;
+      animation-range: entry 0% entry 90%;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.fst-page[data-motion-ready="true"]
+      > .fst-footer
+      > div::after {
+      animation: fsz-lamp-light linear both;
+      animation-timeline: --fsk-end;
+      animation-range: entry 60% entry 100%;
+    }
+  }
+}
+
+@keyframes fsz-route-draw {
+  from {
+    scale: 1 0;
+  }
+
+  to {
+    scale: 1 1;
+  }
+}
+
+@keyframes fsz-lamp-light {
+  from {
+    opacity: 0;
+    scale: 0.6;
+  }
+
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+/* ================================================================
+   Forced colours
+   ================================================================ */
+@media (forced-colors: active) {
+  html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer > div::before,
+  html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer > div::after {
+    content: none;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.fst-page
+    .fst-pickup-dialog
+    .fst-calls
+    b:last-child {
+    color: CanvasText;
+    background: Canvas;
+    border: 1px solid CanvasText;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.fst-page
+    > #characters
+    .fst-cast-tabs.rxs-stage-tabs.liquid-swipe-tabs
+    > button[role="tab"] {
+    box-shadow: none;
+    border: 1px solid CanvasText;
+  }
+}

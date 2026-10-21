@@ -14,6 +14,7 @@ import motionEditionCssUrl from "@/styles-motion-edition.css?url";
 import rexonanceSagaCssUrl from "@/styles-rexonance-saga.css?url";
 import stageSpecialCssUrl from "@/styles-stage-special.css?url";
 import stageFinalStageCssUrl from "@/styles-stage-final-stage.css?url";
+import finalStageZenithCssUrl from "@/styles-final-stage-zenith.css?url";
 import { rexonanceImage } from "@/lib/rexonance-images";
 
 export const Route = createFileRoute("/final-stage")({
@@ -51,6 +52,10 @@ export const Route = createFileRoute("/final-stage")({
       // special-site grammar, then this page's scenes).
       { rel: "stylesheet", href: stageSpecialCssUrl },
       { rel: "stylesheet", href: stageFinalStageCssUrl },
+      // ZENITH (2026-10-21): the final cut over STAGE — layout fixes, the
+      // call sequence, the end card and the bar's chapter links on
+      // tablets and phones (styles-final-stage-zenith.css).
+      { rel: "stylesheet", href: finalStageZenithCssUrl },
       CINEMATIC_STYLESHEET_LINK,
       {
         rel: "preload",
