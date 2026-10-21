@@ -587,7 +587,11 @@ html body #site-announcement-dialog {
 html body #site-announcement-dialog .site-announcement-hub {
   border: 1px solid rgb(122 232 255 / 28%);
   border-radius: 6px;
+  /* The key visual's two light trails at the sheet's corners (the
+     streamline sheet's images; none where that sheet is not loaded). */
   background:
+    var(--saga-trail-ne-soft, none) right top / min(52%, 520px) min(34%, 230px) no-repeat,
+    var(--saga-trail-sw-soft, none) left bottom / min(56%, 560px) min(38%, 260px) no-repeat,
     radial-gradient(ellipse 60% 40% at 0% 0%, rgb(122 232 255 / 10%), transparent 70%),
     radial-gradient(ellipse 50% 40% at 100% 100%, rgb(255 95 200 / 7%), transparent 70%),
     var(--dwc-grid),
@@ -744,6 +748,104 @@ html body #site-announcement-dialog .site-announcement-list-copy b {
 html[data-press-ready] body #site-announcement-dialog .site-announcement-list-item {
   --dw-press-scale: 0.982;
   --dw-press-light: 1.08;
+}
+
+/* ================================================================
+   Announcements: the board (2026-10-21). From tablets up the index is a
+   board of transmissions: each record stands as a poster, its key visual
+   4:5 across the top of the plate, the sequence, date and title under
+   it, the arrow at the foot. Three in a row fill the sheet that three
+   short rows left empty; the phone keeps its rows (visual beside copy).
+   ================================================================ */
+@media (min-width: 761px) {
+  html body #site-announcement-dialog .site-announcement-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  html body #site-announcement-dialog .site-announcement-list-item {
+    height: 100%;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      "visual"
+      "copy"
+      "arrow";
+    align-items: start;
+    gap: 14px 0;
+    padding: 10px;
+  }
+
+  html body #site-announcement-dialog .site-announcement-list-visual {
+    grid-area: visual;
+    align-self: start;
+    width: 100%;
+    aspect-ratio: 4 / 5;
+  }
+
+  html body #site-announcement-dialog .site-announcement-list-visual img {
+    object-position: 50% 18%;
+  }
+
+  html body #site-announcement-dialog .site-announcement-list-copy {
+    grid-area: copy;
+    align-content: start;
+    gap: 8px;
+    padding-left: 4px;
+  }
+
+  html body #site-announcement-dialog .site-announcement-list-copy b {
+    font-size: clamp(15px, 1.3vw, 19px);
+    line-height: 1.45;
+    text-wrap: balance;
+  }
+
+  /* PRODUCT BRIEFING 03 keeps to one line across a poster; the date
+     drops under it where the two cannot share the line. */
+  html
+    body
+    #site-announcement-dialog
+    :is(.site-announcement-list-copy small, .site-announcement-list-copy time) {
+    letter-spacing: 0.06em;
+  }
+
+  html body #site-announcement-dialog .site-announcement-list-copy > span {
+    row-gap: 2px;
+  }
+
+  html body #site-announcement-dialog .site-announcement-list-arrow {
+    grid-area: arrow;
+    justify-self: end;
+    align-self: end;
+    width: 40px;
+    height: 40px;
+    margin-top: -4px;
+  }
+}
+
+/* A short screen (an iPad on its side, a small laptop): the posters are
+   square so the board still closes inside the sheet without a scroll. */
+@media (min-width: 761px) and (max-height: 860px) {
+  html body #site-announcement-dialog .site-announcement-list-visual {
+    aspect-ratio: 1 / 1;
+  }
+
+  html body #site-announcement-dialog .site-announcement-index {
+    gap: 18px;
+    padding-block: 22px 26px;
+  }
+}
+
+/* The posters keep a readable copy column on a 768px iPad: the sheet is
+   narrower, so the titles take one step down and the gap closes. */
+@media (min-width: 761px) and (max-width: 899px) {
+  html body #site-announcement-dialog .site-announcement-list {
+    gap: 10px;
+  }
+
+  html body #site-announcement-dialog .site-announcement-list-copy b {
+    font-size: 14px;
+  }
 }
 
 /* Phones: the picture spans the card's height and the arrow sits in its
@@ -1383,8 +1485,9 @@ html body .dw-skip-link {
     0 100%,
     0 8px
   );
+  /* The plate's seam runs the prism: ice into pink into gold. */
   background:
-    linear-gradient(var(--dwc-gold) 0 0) 0 100% / 100% 2px no-repeat,
+    var(--dwc-prism) 0 100% / 100% 2px no-repeat,
     linear-gradient(180deg, #dff9ff, #7ae8ff);
   box-shadow: none;
   color: var(--dwc-ink);

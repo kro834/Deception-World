@@ -801,6 +801,25 @@ html[data-family] body #site-side-panel.side-panel[data-liquid-pointer] {
   color: var(--sh-text);
 }
 
+/* The key visual's two light trails at the sheet's corners (the
+   streamline sheet's images, loaded on every route but the title): the
+   launcher opens onto the same light as the page behind it. Dream and the
+   gallery keep their own editions. The sheet's background is attached to
+   its box, so the trails stay at the corners while the list scrolls. */
+html[data-family]:not([data-family="dream"]):not([data-family="gallery"])
+  body
+  #site-side-panel.side-panel[data-liquid-pointer] {
+  background:
+    var(--saga-trail-ne-soft, none) right top max(96px, 12vh) / min(50vw, 720px) min(30vh, 300px)
+      no-repeat,
+    var(--saga-trail-sw-soft, none) left bottom / min(50vw, 700px) min(34vh, 340px) no-repeat,
+    radial-gradient(ellipse 55% 42% at 100% 0%, rgb(var(--sh-l1-rgb) / 11%), transparent 70%),
+    radial-gradient(ellipse 50% 40% at 0% 100%, rgb(var(--sh-l2-rgb) / 9%), transparent 70%),
+    repeating-linear-gradient(90deg, rgb(var(--sh-l1-rgb) / 3%) 0 1px, transparent 1px 32px),
+    repeating-linear-gradient(0deg, rgb(var(--sh-l1-rgb) / 3%) 0 1px, transparent 1px 32px),
+    var(--sh-ink) !important;
+}
+
 /* The launcher sets its own face, so a route sheet that persists from an
    earlier page (the special sites' .rxs-page face) cannot restyle it. The
    Dream Chapter's launcher keeps the chapter's Mincho, as before. */
@@ -1181,17 +1200,23 @@ html[data-family] body #site-side-panel.side-panel .side-panel-links > .library-
   margin: 0;
 }
 
+/* The bookmark (資料を保存 / しおりを解除): a plate like its neighbours,
+   with a drawn bookmark that fills in gold once the record is kept. */
 html[data-family]
   body
   #site-side-panel.side-panel
   .side-panel-links
   > .library-current-control
   > button {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
   min-height: 48px;
   padding: 10px 14px;
-  border: 1px dashed rgb(var(--sh-l1-rgb) / 42%);
+  border: 1px solid rgb(var(--sh-l1-rgb) / 30%);
   border-radius: 3px;
-  background: transparent;
+  background: linear-gradient(180deg, rgb(255 255 255 / 4%), transparent 55%), var(--sh-ink-2);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 6%);
   color: var(--sh-text-2);
   font-family: var(--sh-display);
   font-size: 14px;
@@ -1204,10 +1229,77 @@ html[data-family]
   #site-side-panel.side-panel
   .side-panel-links
   > .library-current-control
+  > button::before {
+  content: "";
+  width: 10px;
+  height: 14px;
+  flex: 0 0 10px;
+  background: rgb(var(--sh-l1-rgb) / 72%);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 72%, 0 100%);
+}
+
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  .side-panel-links
+  > .library-current-control
+  > button:disabled {
+  color: var(--sh-text-3);
+  cursor: default;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    .side-panel-links
+    > .library-current-control
+    > button:not(:disabled):hover {
+    border-color: rgb(var(--sh-l1-rgb) / 58%);
+    background: rgb(var(--sh-l1-rgb) / 8%);
+    color: var(--sh-text);
+  }
+}
+
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  .side-panel-links
+  > .library-current-control
   > button[aria-pressed="true"] {
-  border-style: solid;
-  border-color: var(--sh-l1);
+  border-color: rgb(240 207 134 / 70%);
+  background: linear-gradient(90deg, rgb(240 207 134 / 10%), transparent 70%), var(--sh-ink-2);
   color: var(--sh-text);
+}
+
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  .side-panel-links
+  > .library-current-control
+  > button[aria-pressed="true"]::before {
+  background: #f0cf86;
+}
+
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  .side-panel-links
+  > .library-current-control
+  > button:focus-visible {
+  outline: 2px solid var(--sh-focus);
+  outline-offset: 2px;
+}
+
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  .side-panel-links
+  > .library-current-control
+  > span[role="status"] {
+  color: var(--sh-text-2);
+  font-size: 12px;
+  line-height: 1.6;
 }
 
 /* ---------- SECTIONS: the page's chapters, numbered ---------- */
@@ -2836,6 +2928,78 @@ html[data-family]
     > .side-panel-links
     > :is(a, button.side-panel-link-button)::before {
     transform: none;
+  }
+}
+
+/* The groups arrive in order as the sheet opens: each is drawn in from
+   its kicker down (a clip, no layout change, so the scroll to the
+   current group measures true boxes) and lights up, 45ms after the one
+   before. Once: the animation runs backwards-fill only, so the group
+   returns to its plain style and nothing stays clipped (focus rings at
+   a group's edge are drawn whole). Closing shows the groups still, the
+   sheet carries them out. */
+@media (prefers-reduced-motion: no-preference) {
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    #site-side-panel.side-panel[data-open="true"]
+    > .side-panel-group {
+    animation: sh-group-arrive 0.56s var(--sh-ease) var(--sp-arrive, 0.04s) backwards;
+  }
+
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    #site-side-panel.side-panel[data-open="true"]
+    > .side-panel-group:nth-child(3) {
+    --sp-arrive: 0.09s;
+  }
+
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    #site-side-panel.side-panel[data-open="true"]
+    > .side-panel-group:nth-child(4) {
+    --sp-arrive: 0.14s;
+  }
+
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    #site-side-panel.side-panel[data-open="true"]
+    > .side-panel-group:nth-child(5) {
+    --sp-arrive: 0.19s;
+  }
+
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    #site-side-panel.side-panel[data-open="true"]
+    > .side-panel-group:nth-child(6) {
+    --sp-arrive: 0.24s;
+  }
+
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    #site-side-panel.side-panel[data-open="true"]
+    > .side-panel-group:nth-child(7) {
+    --sp-arrive: 0.29s;
+  }
+
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    #site-side-panel.side-panel[data-open="true"]
+    > .side-panel-group:nth-child(n + 8) {
+    --sp-arrive: 0.34s;
+  }
+}
+
+@keyframes sh-group-arrive {
+  from {
+    opacity: 0;
+    clip-path: inset(0 0 100% 0);
+  }
+  60% {
+    opacity: 1;
+  }
+  to {
+    opacity: 1;
+    clip-path: inset(0 0 0 0);
   }
 }
 
