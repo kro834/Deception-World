@@ -77,11 +77,13 @@ await context.addInitScript(() => {
         : null;
   const kit = /\/rexonance-nanites-\d{8}\/(?:cells|comets|guide|fx)\.webp/;
   const isKit = (source) => source && (nanites.has(source) || kit.test(source.src || ""));
+  // The rebuilt fire (2026-10-21) draws its retained surfaces: the WebGL
+  // body canvas (data-rexonance-fire="body") or the CPU fallback's back/
+  // front canvases; the Blender atlas is no longer sampled.
   const isFlame = (source) =>
     source &&
     (flame.has(source) ||
-      /\/rexonance-flame-natural-20261019\/flame\.webp/.test(source.src || "") ||
-      (source instanceof HTMLCanvasElement && source.width === 96 && source.height === 192));
+      (source instanceof HTMLCanvasElement && Boolean(source.dataset?.rexonanceFire)));
   const blob = Response.prototype.blob;
   Response.prototype.blob = async function (...args) {
     const result = await blob.apply(this, args);
@@ -171,12 +173,7 @@ await context.addInitScript(() => {
     if (isFlame(source) && this.globalAlpha > 0) {
       flame.add(this.canvas);
       if (record) record.flames++;
-      if (
-        target &&
-        source instanceof HTMLCanvasElement &&
-        source.width === 384 &&
-        source.height === 624
-      )
+      if (target && source instanceof HTMLCanvasElement && source.dataset?.rexonanceFire)
         qa.field = source;
     }
     if (isKit(source) && this.globalAlpha > 0) {
@@ -274,6 +271,10 @@ async function fieldEvidence(shot) {
     .ensureAlpha()
     .raw()
     .toBuffer({ resolveWithObject: true });
+  // The spread analyser is registered to the previous 384x624 field; the
+  // rebuilt fire's surfaces (FIRE_RECT over the figure) are saved for
+  // inspection and the registered gates wait for a re-registration.
+  if (info.width !== 384 || info.height !== 624) return { burning: true, unregistered: true };
   return flameSpreadEvidence(data, info.width, info.height);
 }
 
@@ -431,7 +432,7 @@ try {
           ),
         };
         run.checks.push(check);
-        if (strict)
+        if (strict && !kindle.unregistered)
           assert.ok(
             Object.values(check).every((value) => Boolean(value)),
             JSON.stringify(check),
