@@ -262,6 +262,35 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
             </em>
           ) : null}
           <q>{rider.quote ?? rider.system}</q>
+          {/* The record strip (2026-10-21): the transformation calls as a
+              numbered sequence and the spec sheet, on the card itself, the
+              same on every file; the full record stays behind HOLD + SLIDE. */}
+          <div className="form-pickup-record">
+            <div className="form-pickup-record-calls">
+              <small>CALL SEQUENCE</small>
+              <ol className="form-pickup-calls" aria-label="変身音声">
+                {rider.calls.map((call, index) => (
+                  <li key={`${call}-${index}`}>
+                    <i aria-hidden="true">{String(index + 1).padStart(2, "0")}</i>
+                    <b>{call}</b>
+                  </li>
+                ))}
+              </ol>
+            </div>
+            {stats.length ? (
+              <div className="form-pickup-record-spec">
+                <small>SPEC SHEET</small>
+                <dl className="form-pickup-spec" aria-label="スペック">
+                  {stats.map((s) => (
+                    <div key={s.dt}>
+                      <dt>{s.dt}</dt>
+                      <dd>{s.dd}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+            ) : null}
+          </div>
         </div>
       </article>
       <dialog

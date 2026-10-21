@@ -9,6 +9,7 @@ import pickupCinemaCssUrl from "@/styles-pickup-cinema.css?url";
 import dossierReadingCssUrl from "@/styles-dossier-reading.css?url";
 import stageDossierCssUrl from "@/styles-stage-dossier.css?url";
 import formSignatureCssUrl from "@/styles-form-signature.css?url";
+import dossierZenithCssUrl from "@/styles-dossier-zenith.css?url";
 
 export type RouteStylesheetLink = {
   rel: "stylesheet";
@@ -64,6 +65,14 @@ export const STAGE_DOSSIER_STYLESHEET_LINK: RouteStylesheetLink = {
   rel: "stylesheet",
   href: stageDossierCssUrl,
 };
+// ZENITH (2026-10-21): the record strip on the form cards, the roster rail
+// at the end of a file and the record viewer's finish, on top of the STAGE
+// sheet. Last of the dossier sheets; the first-rank file links it
+// after its own sheet.
+export const DOSSIER_ZENITH_STYLESHEET_LINK: RouteStylesheetLink = {
+  rel: "stylesheet",
+  href: dossierZenithCssUrl,
+};
 export const DOSSIER_STYLESHEET_LINKS: RouteStylesheetLink[] = [
   ...WORLD_STYLESHEET_LINKS,
   { rel: "stylesheet", href: DOSSIER_HUD_FONTS_URL },
@@ -72,6 +81,7 @@ export const DOSSIER_STYLESHEET_LINKS: RouteStylesheetLink[] = [
   PICKUP_CINEMA_STYLESHEET_LINK,
   { rel: "stylesheet", href: dossierReadingCssUrl },
   STAGE_DOSSIER_STYLESHEET_LINK,
+  DOSSIER_ZENITH_STYLESHEET_LINK,
 ];
 
 type WorldHeadInput = {

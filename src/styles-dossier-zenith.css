@@ -1,0 +1,739 @@
+/* ================================================================
+   ZENITH — the character files' brush-up (2026-10-21)
+
+   On top of the STAGE sheet (styles-stage-dossier.css), for the nineteen
+   files (/riders/*, /managers/*, /characters/*):
+
+   1. The record strip: every form card carries its transformation calls
+      as a numbered sequence and its spec sheet, the same on every file
+      (the full record stays behind HOLD + SLIDE).
+   2. The roster rail at the end of a file: every file of the list, the
+      current one marked, 欠番 inert.
+   3. The record viewer (the form dialog) and the nightmare record: the
+      calls as the same numbered sequence, the spec sheet as the same ruled
+      plate, so card and record read as one system.
+
+   Every rule is scoped to html[data-family="dossier"] and the doubled
+   page class, so it sits above the older sheets without !important. It
+   uses the STAGE sheet's tokens (--sd-*). No animation loops; the only
+   motion is a one-shot arrival, gated by prefers-reduced-motion and the
+   economy tier.
+   ================================================================ */
+
+/* ----------------------------------------------------------------
+   1. The record strip on the form cards
+   ---------------------------------------------------------------- */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup-copy
+  > .form-pickup-record {
+  display: grid;
+  gap: 18px;
+  width: 100%;
+  min-width: 0;
+  margin: 18px 0 0;
+  padding: 18px 0 0;
+  border-top: 1px solid var(--sd-line);
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup-record
+  > :is(.form-pickup-record-calls, .form-pickup-record-spec) {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup-record
+  > div
+  > small {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  color: var(--sd-text-3);
+  font: 400 12px/1.4 var(--sd-hud);
+  letter-spacing: 0.16em;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup-record
+  > div
+  > small::after {
+  content: "";
+  flex: 1 1 auto;
+  height: 1px;
+  background: linear-gradient(90deg, var(--sd-rule), transparent);
+}
+
+/* The calls: chips in sequence, each with its beat number in the file's
+   light. Oxanium carries the calls' lowercase (Rollout!). */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup-record
+  .form-pickup-calls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup-record
+  .form-pickup-calls
+  > li {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-sizing: border-box;
+  max-width: 100%;
+  min-width: 0;
+  min-height: 32px;
+  margin: 0;
+  padding: 5px 11px 5px 9px;
+  border: 1px solid var(--sd-line-2);
+  border-left: 2px solid var(--sd-accent);
+  border-radius: 3px;
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--sd-accent) 10%, transparent), transparent 46%),
+    var(--sd-plate);
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup-record
+  .form-pickup-calls
+  > li
+  > i {
+  flex: 0 0 auto;
+  color: var(--sd-accent);
+  font: 500 12px/1 var(--sd-hud);
+  font-style: normal;
+  letter-spacing: 0.08em;
+  font-variant-numeric: tabular-nums;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup-record
+  .form-pickup-calls
+  > li
+  > b {
+  min-width: 0;
+  color: var(--sd-text);
+  font: 600 13px/1.35 var(--sd-mono);
+  letter-spacing: 0.06em;
+  overflow-wrap: anywhere;
+}
+
+/* The spec sheet: one plate ruled into cells; label over figure. */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup-record
+  .form-pickup-spec {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--sd-line);
+  border-radius: 3px;
+  background: var(--sd-line);
+  overflow: clip;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup-record
+  .form-pickup-spec
+  > div {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  min-width: 0;
+  margin: 0;
+  padding: 11px 10px 12px;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--sd-accent) 7%, transparent), transparent 70%),
+    var(--sd-plate);
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup-record
+  .form-pickup-spec
+  > div::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 12px;
+  height: 2px;
+  background: var(--sd-accent);
+  opacity: 0.9;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup-record
+  .form-pickup-spec
+  dt {
+  margin: 0;
+  color: var(--sd-text-3);
+  font: 400 12px/1.3 var(--sd-hud);
+  letter-spacing: 0.08em;
+  overflow-wrap: anywhere;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup-record
+  .form-pickup-spec
+  dd {
+  margin: 0;
+  color: var(--sd-text);
+  font: 600 clamp(15px, 1.2vw, 18px) / 1.3 var(--sd-mono);
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+/* A long sheet (Rexonance's eleven, Cipher's nine): four cells a row
+   where the column allows (CALCULATION in Michroma needs the wider cell). */
+@media (min-width: 1500px) {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    .form-pickup-record
+    .form-pickup-spec:has(> div:nth-child(8)) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* Narrow phones: two cells a row, so 205.6t／測定不能 keeps its figure. */
+@media (max-width: 420px) {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    .form-pickup-record
+    .form-pickup-spec {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* The split stage holds the card's words beside the art (sticky): on a
+   short landscape screen the strip would push them past the stage, so it
+   waits for the record (HOLD + SLIDE), where it is whole. */
+@media (min-width: 900px) and (max-height: 699px) and (orientation: landscape) {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    .form-pickup-copy
+    > .form-pickup-record {
+    display: none;
+  }
+}
+
+/* The premium (Rexonance) pickup keeps its own light in the chips. */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .is-rexonance-pickup
+  .form-pickup-record
+  .form-pickup-calls
+  > li {
+  border-left-color: var(--sd-accent-2, var(--sd-accent));
+}
+
+/* Forced colours: the chips and cells keep their edges. */
+@media (forced-colors: active) {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    .form-pickup-record
+    :is(.form-pickup-calls > li, .form-pickup-spec > div) {
+    border: 1px solid CanvasText;
+    background: Canvas;
+  }
+}
+
+/* Short split stages (a 900px-tall desktop, a landscape tablet): the
+   card's words sit tighter beside the art, so the strip stays in view. */
+@media (min-width: 900px) and (min-height: 700px) and (max-height: 920px) and (orientation: landscape) {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    .form-pickup-card
+    > .form-pickup-copy:has(> .form-pickup-record) {
+    gap: 6px;
+    padding-top: 44px;
+    padding-bottom: 28px;
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    .form-pickup-copy
+    > .form-pickup-record {
+    gap: 12px;
+    margin-top: 12px;
+    padding-top: 12px;
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    .form-pickup-record
+    .form-pickup-calls
+    > li {
+    min-height: 28px;
+    padding-block: 3px;
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    .form-pickup-record
+    .form-pickup-spec
+    > div {
+    gap: 3px;
+    padding: 8px 10px 9px;
+  }
+}
+
+/* ----------------------------------------------------------------
+   2. The end of the file: the roster rail
+   The index (一覧へ戻る) and the rail take the file's last row, under the
+   next person's card; the previous file keeps the row above the card.
+   ---------------------------------------------------------------- */
+/* The STAGE sheet places the index by the list's shape (no next, no
+   previous, a list of one) with selectors of unequal weight; these rules
+   outweigh every one of them with the tripled nav class and the doubled
+   index class, so the cascade order below decides. */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .manager-pagination.manager-pagination.manager-pagination
+  > a:first-child {
+  grid-row: 1;
+  grid-column: 1 / -1;
+  border-right: 0;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .manager-pagination.manager-pagination.manager-pagination
+  > .manager-pagination-index.manager-pagination-index {
+  grid-row: 3;
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  gap: 0;
+  border-top: 1px solid var(--sd-line);
+  border-bottom: 0;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--sd-accent) 5%, transparent),
+    transparent 60%
+  );
+}
+
+/* A list of one (ダンテ): the index is the end card, as before. */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .manager-pagination.manager-pagination.manager-pagination:not(:has(> a))
+  > .manager-pagination-index.manager-pagination-index {
+  grid-row: 1;
+  border-top: 0;
+  background: none;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .manager-pagination
+  > .manager-pagination-index
+  > .dossier-index-return {
+  align-self: start;
+  min-height: 64px;
+  padding: 18px var(--sd-pad) 14px;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .manager-pagination
+  > .manager-pagination-index
+  > .dossier-roster {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(156px, 1fr));
+  gap: 1px;
+  margin: 0 var(--sd-pad) clamp(24px, 6vw, 40px);
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--sd-line);
+  border-radius: 3px;
+  background: var(--sd-line);
+  overflow: clip;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .manager-pagination
+  .dossier-roster
+  > li {
+  display: grid;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  background: var(--sd-plate);
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .manager-pagination
+  .dossier-roster
+  > li
+  > :is(a, span) {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  min-height: 56px;
+  padding: 10px 14px 10px 12px;
+  color: var(--sd-text-2);
+  background: none;
+  text-decoration: none;
+  transition:
+    background-color 180ms ease,
+    color 180ms ease;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .manager-pagination
+  .dossier-roster
+  > li
+  > :is(a, span)::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 2px;
+  height: 100%;
+  background: var(--sd-line-2);
+  transition: background-color 180ms ease;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .manager-pagination
+  .dossier-roster
+  > li
+  > :is(a, span)
+  > i {
+  color: var(--sd-text-3);
+  font: 500 12px/1 var(--sd-hud);
+  font-style: normal;
+  letter-spacing: 0.1em;
+  font-variant-numeric: tabular-nums;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .manager-pagination
+  .dossier-roster
+  > li
+  > :is(a, span)
+  > b {
+  min-width: 0;
+  font: 600 14px/1.4 var(--sd-display);
+  letter-spacing: 0.02em;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+/* The file at hand: lit, its numeral in the file's light. */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .manager-pagination
+  .dossier-roster
+  > li.is-current
+  > span {
+  color: var(--sd-text);
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--sd-accent) 16%, transparent),
+    transparent 70%
+  );
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .manager-pagination
+  .dossier-roster
+  > li.is-current
+  > span::before,
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .manager-pagination
+  .dossier-roster
+  > li.is-current
+  > span
+  > i {
+  color: var(--sd-accent);
+  background-color: var(--sd-accent);
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .manager-pagination
+  .dossier-roster
+  > li.is-current
+  > span
+  > i {
+  background: none;
+}
+
+/* 欠番: present, inert. */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .manager-pagination
+  .dossier-roster
+  > li.is-void
+  > span {
+  color: var(--sd-text-3);
+  opacity: 0.7;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    > .manager-pagination
+    .dossier-roster
+    > li
+    > a:hover {
+    color: var(--sd-text);
+    background: linear-gradient(90deg, var(--sd-glow-soft), transparent 80%);
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    > .manager-pagination
+    .dossier-roster
+    > li
+    > a:hover::before {
+    background: var(--sd-accent);
+  }
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .manager-pagination
+  .dossier-roster
+  > li
+  > a:focus-visible {
+  outline: 2px solid var(--sd-accent);
+  outline-offset: -2px;
+}
+
+/* Wide screens: the row keeps to the split; the return link stands on the
+   stage side, the rail in the reading column. */
+@supports (grid-template-rows: subgrid) {
+  @media (min-width: 1100px) and (min-height: 540px),
+    (min-width: 900px) and (min-height: 600px) and (orientation: landscape) {
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      > .manager-pagination.manager-pagination.manager-pagination
+      > a:first-child {
+      grid-column: 2 / -1;
+    }
+
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      > .manager-pagination.manager-pagination.manager-pagination
+      > .manager-pagination-index.manager-pagination-index {
+      grid-column: 1 / -1;
+      grid-template-columns: minmax(0, var(--sd-stage-w)) minmax(0, 1fr);
+      align-items: stretch;
+    }
+
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      > .manager-pagination.manager-pagination.manager-pagination:not(:has(> a))
+      > .manager-pagination-index.manager-pagination-index {
+      grid-column: 2 / -1;
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      > .manager-pagination
+      > .manager-pagination-index
+      > .dossier-index-return {
+      align-self: stretch;
+      align-content: start;
+      min-height: 0;
+      padding: 32px var(--sd-pad) 32px var(--sd-pad);
+      border-right: 1px solid var(--sd-line);
+    }
+
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      > .manager-pagination
+      > .manager-pagination-index
+      > .dossier-roster {
+      grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
+      max-width: calc(var(--sd-read) + 120px);
+      margin: 32px var(--sd-pad-end) 32px var(--sd-pad);
+    }
+  }
+}
+
+/* Phones: two cells a row, so every name has its line. */
+@media (max-width: 560px) {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    > .manager-pagination
+    > .manager-pagination-index
+    > .dossier-roster {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    > .manager-pagination
+    .dossier-roster
+    > li {
+    border: 1px solid CanvasText;
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    > .manager-pagination
+    .dossier-roster
+    > li.is-current
+    > span {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
+}
+
+/* ----------------------------------------------------------------
+   3. The record viewer: the same sequence and the same plate
+   (the standard form record and the nightmare record; the premium
+   Rexonance record and Final Stage's keep their own)
+   ---------------------------------------------------------------- */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup-dialog.form-pickup-dialog:not(.is-rexonance-dialog, .fst-pickup-dialog)
+  .form-pickup-heading
+  .rider-call {
+  counter-reset: zenith-call;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup-dialog.form-pickup-dialog:not(.is-rexonance-dialog, .fst-pickup-dialog)
+  .form-pickup-heading
+  .rider-call
+  > b {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  counter-increment: zenith-call;
+  color: var(--pc-text);
+  border-left-width: 2px;
+}
+
+/* The beat number: the one the card shows (decorative; the call reads as
+   written). */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup-dialog.form-pickup-dialog:not(.is-rexonance-dialog, .fst-pickup-dialog)
+  .form-pickup-heading
+  .rider-call
+  > b::before {
+  content: counter(zenith-call, decimal-leading-zero);
+  flex: 0 0 auto;
+  color: var(--pc-lock);
+  font: 500 12px/1 var(--pc-hud);
+  letter-spacing: 0.08em;
+  font-variant-numeric: tabular-nums;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup-dialog.form-pickup-dialog:not(.is-rexonance-dialog, .fst-pickup-dialog)
+  .form-pickup-stats,
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .rider-nightmare-dialog.rider-nightmare-dialog
+  .rider-nightmare-dialog-record
+  > dl {
+  gap: 1px;
+  border: 1px solid var(--pc-line);
+  border-radius: 3px;
+  background: var(--pc-line);
+  overflow: clip;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup-dialog.form-pickup-dialog:not(.is-rexonance-dialog, .fst-pickup-dialog)
+  .form-pickup-stats
+  > div,
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .rider-nightmare-dialog.rider-nightmare-dialog
+  .rider-nightmare-dialog-record
+  > dl
+  > div {
+  align-content: start;
+  gap: 6px;
+  padding: 12px 12px 13px;
+  border: 0;
+  border-radius: 0;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--pc-accent) 8%, transparent), transparent 70%),
+    var(--pc-plate);
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup-dialog.form-pickup-dialog:not(.is-rexonance-dialog, .fst-pickup-dialog)
+  .form-pickup-stats
+  > div::before,
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .rider-nightmare-dialog.rider-nightmare-dialog
+  .rider-nightmare-dialog-record
+  > dl
+  > div::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 12px;
+  height: 2px;
+  background: var(--pc-lock);
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup-dialog.form-pickup-dialog:not(.is-rexonance-dialog, .fst-pickup-dialog)
+  .form-pickup-stats
+  dt {
+  letter-spacing: 0.08em;
+}
+
+/* Wide records: the sheet's figures in four cells a row when it is long. */
+@media (min-width: 1100px) {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    .form-pickup-dialog.form-pickup-dialog:not(.is-rexonance-dialog, .fst-pickup-dialog)
+    .form-pickup-stats:has(> div:nth-child(8)) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
