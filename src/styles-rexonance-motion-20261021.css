@@ -339,6 +339,21 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page {
     animation-delay: 360ms;
   }
 
+  /* LAYOUT (2026-10-21) set the P14 rows' values in fixed, right-aligned
+     columns (P14 at 132px). The lock's punch (RESONANCE's rsn-punch, a
+     scale from 1.2) grew from the figure's left and ran a long value such
+     as 約11.4% out of its column; it now grows from the column's right edge,
+     where the figure is anchored, so the hit stays inside its column. */
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > #p14
+    .rxs-p14-values
+    strong[data-rsn-count]
+    > .rsn-count {
+    transform-origin: right center;
+  }
+
   /* The form comparison's three cards, opened: each stands up in turn
      (they only exist once opened, so nothing rests hidden). */
   html[data-family="special"]:not([data-world-effects="economy"])
