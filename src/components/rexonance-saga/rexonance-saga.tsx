@@ -1107,7 +1107,7 @@ const RexonancePerformance = memo(function RexonancePerformance() {
         {/* APEX (rx19): the chapter's index at the head's right (decorative;
             the forged numeral and the bar carry the chapter). */}
         <small className="rxa-index" aria-hidden="true">
-          <b>01</b>/ 05
+          <b>01</b>{"/ 05"}
         </small>
         <p>PERFORMANCE</p>
         <h2>
@@ -1960,7 +1960,7 @@ export function RexonanceSaga() {
         <section id="p14" className="rxs-p14 rxs-section" aria-labelledby="rxs-p14-title">
           <header className="rxs-section-heading rxs-reveal">
             <small className="rxa-index" aria-hidden="true">
-              <b>02</b>/ 05
+              <b>02</b>{"/ 05"}
             </small>
             <p>PROCESSING CORE / P14</p>
             <h2 id="rxs-p14-title">
@@ -2040,7 +2040,7 @@ export function RexonanceSaga() {
           <section id="stages" className="rxs-stages rxs-section">
             <header className="rxs-section-heading rxs-reveal">
               <small className="rxa-index" aria-hidden="true">
-                <b>04</b>/ 05
+                <b>04</b>{"/ 05"}
               </small>
               <p>THREE OPERATING STAGES</p>
               <h2>まだ、次元は変わる。</h2>
@@ -2166,7 +2166,7 @@ export function RexonanceSaga() {
           <section id="system" className="rxs-system rxs-section">
             <header className="rxs-section-heading rxs-reveal">
               <small className="rxa-index" aria-hidden="true">
-                <b>05</b>/ 05
+                <b>05</b>{"/ 05"}
               </small>
               <p>SELF-RESONANCE</p>
               <h2>
