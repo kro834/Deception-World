@@ -149,6 +149,65 @@ test("the roster rail lists the whole list: the current file marked, 欠番 iner
   assert.ok(Number(tile[1].match(/min-height:\s*(\d+)px/)[1]) >= 44);
 });
 
+test("the end of a file reads down the screen in the source's (and the Tab) order", async () => {
+  // Owner (2026-10-22): the index and rail sat in row 3 under the next card; on phones
+  // they shared row 3 with it (hidden, untappable) and on wider screens Tab skipped the card.
+  const nav = await read("src/components/world/dossier-nav.tsx");
+  const render = nav.slice(nav.indexOf('<nav className="manager-pagination"'));
+  const prev = render.indexOf("to={prev.href}");
+  const index = render.indexOf('<div className="manager-pagination-index">');
+  const next = render.indexOf("to={next.href}");
+  assert.ok(prev > 0 && prev < index && index < next, `${prev} ${index} ${next}`);
+  const nav3 = "> \\.manager-pagination\\.manager-pagination\\.manager-pagination";
+  assert.match(css, new RegExp(`${nav3}\\s*> a:first-child:first-child \\{\\s*grid-row: 1;`));
+  assert.match(
+    css,
+    new RegExp(
+      `${nav3}\\s*> \\.manager-pagination-index\\.manager-pagination-index \\{\\s*grid-row: 2;`,
+    ),
+  );
+  assert.match(
+    css,
+    new RegExp(`> nav${nav3.slice(2)}\\s*> a:last-child:not\\(:first-child\\) \\{\\s*grid-row: 3;`),
+  );
+  assert.doesNotMatch(css, /grid-row: 3;\s*grid-column: 1 \/ -1;\s*display: grid;/);
+});
+
+test("on a short split stage the card's words clear the chapter ruler and a long sheet waits for the record", () => {
+  // Owner (2026-10-22): 44px put TRANSFORMATION RECORD under the sticky ruler while stuck.
+  const short = css.slice(
+    css.indexOf(
+      "@media (min-width: 900px) and (min-height: 700px) and (max-height: 920px) and (orientation: landscape)",
+    ),
+  );
+  const block = short.slice(0, short.indexOf("\n}\n"));
+  const top = block.match(
+    /\.form-pickup-copy:has\(> \.form-pickup-record\)\s*\{[^}]*padding-top:\s*(\d+)px/,
+  );
+  assert.ok(top && Number(top[1]) >= 64, top?.[1]);
+  assert.match(
+    block,
+    /> \.form-pickup-record-spec:has\(> \.form-pickup-spec > div:nth-child\(8\)\)\s*\{\s*display: none;/,
+  );
+});
+
+test("the next file's numeral takes the card's first row, sized by the screen's height too", () => {
+  // Owner (2026-10-22): absolutely placed, it ran into NEXT FILE and the name on short screens.
+  const rules = [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)].filter(([, selector]) =>
+    /\.dossier-nav-numeral\s*$/.test(selector.trim()),
+  );
+  assert.ok(rules.length >= 3, String(rules.length));
+  for (const [, , body] of rules) assert.doesNotMatch(body, /position:\s*absolute/);
+  assert.ok(rules.some(([, , body]) => /grid-row: 1;/.test(body)));
+  const sizes = rules
+    .map(([, , body]) => body.match(/font(?:-size)?:[^;]*clamp\(([^;]+)\)/)?.[1])
+    .filter(Boolean);
+  assert.ok(sizes.length >= 2, String(sizes.length));
+  for (const size of sizes) assert.match(size, /min\(\d+vw, \d+svh\)/);
+  assert.match(css, /> a:last-child:not\(:first-child\)::before \{\s*grid-row: 2;/);
+  assert.match(css, /> a:last-child:not\(:first-child\)\s*> b \{\s*grid-row: 3;/);
+});
+
 test("the next file's numeral is decorative and hidden in forced colours", async () => {
   const nav = await read("src/components/world/dossier-nav.tsx");
   assert.match(nav, /<i className="dossier-nav-numeral" aria-hidden="true">/);

@@ -8,7 +8,8 @@
       as a numbered sequence and its spec sheet, the same on every file
       (the full record stays behind HOLD + SLIDE).
    2. The roster rail at the end of a file: every file of the list, the
-      current one marked, 欠番 inert.
+      current one marked, 欠番 inert; between the previous file and the
+      next person's card, in the source's (and the Tab) order.
    3. The record viewer (the form dialog) and the nightmare record: the
       calls as the same numbered sequence, the spec sheet as the same ruled
       plate, so card and record read as one system.
@@ -332,14 +333,18 @@ html[data-family="dossier"]
 }
 
 /* Short split stages (a 900px-tall desktop, a landscape tablet): the
-   card's words sit tighter beside the art, so the strip stays in view. */
+   card's words sit tighter beside the art, so the strip stays in view.
+   The words' top keeps clear of the sticky chapter ruler (01 人物紹介 …,
+   about 53px under the 76px head) while they hold: TRANSFORMATION RECORD
+   starts 64px down, 11px under the ruler; the height comes back from the
+   strip's own spacing instead. */
 @media (min-width: 900px) and (min-height: 700px) and (max-height: 920px) and (orientation: landscape) {
   html[data-family="dossier"]
     main.manager-page.manager-page.manager-page
     .form-pickup-card
     > .form-pickup-copy:has(> .form-pickup-record) {
-    gap: 6px;
-    padding-top: 44px;
+    gap: 4px;
+    padding-top: 64px;
     padding-bottom: 28px;
   }
 
@@ -347,9 +352,16 @@ html[data-family="dossier"]
     main.manager-page.manager-page.manager-page
     .form-pickup-copy
     > .form-pickup-record {
-    gap: 12px;
-    margin-top: 12px;
-    padding-top: 12px;
+    gap: 10px;
+    margin-top: 8px;
+    padding-top: 10px;
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    .form-pickup-record
+    > :is(.form-pickup-record-calls, .form-pickup-record-spec) {
+    gap: 6px;
   }
 
   html[data-family="dossier"]
@@ -367,7 +379,17 @@ html[data-family="dossier"]
     .form-pickup-spec
     > div {
     gap: 3px;
-    padding: 8px 10px 9px;
+    padding: 7px 10px 8px;
+  }
+
+  /* A long sheet (Rexonance's eleven, Cipher's nine) would carry the
+     words past the stage while they hold beside the art: the card keeps
+     the calls, and the sheet waits for the record (HOLD + SLIDE). */
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    .form-pickup-record
+    > .form-pickup-record-spec:has(> .form-pickup-spec > div:nth-child(8)) {
+    display: none;
   }
 }
 
@@ -431,17 +453,22 @@ html[data-family="dossier"]
 
 /* ----------------------------------------------------------------
    2. The end of the file: the roster rail
-   The index (一覧へ戻る) and the rail take the file's last row, under the
-   next person's card; the previous file keeps the row above the card.
+   At every width the previous file, then the index (一覧へ戻る) with the
+   rail, then the next person's card, one row each: the source's order,
+   so the Tab order reads down the screen (as the STAGE sheet keeps it)
+   and the file still ends on the next card.
    ---------------------------------------------------------------- */
-/* The STAGE sheet places the index by the list's shape (no next, no
-   previous, a list of one) with selectors of unequal weight; these rules
-   outweigh every one of them with the tripled nav class and the doubled
-   index class, so the cascade order below decides. */
+/* The STAGE sheet places the three by the list's shape (no next, no
+   previous, a list of one) and by width, with selectors of unequal weight
+   (up to 0,8,4 for a last file's previous link, 0,9,3 for a first file's
+   next card on a phone). These rules outweigh every one of them: the
+   tripled nav class with a doubled :first-child (previous), a doubled
+   index class (index) and the nav element (next), so the cascade order
+   below decides. A first file's empty first row takes no height. */
 html[data-family="dossier"]
   main.manager-page.manager-page.manager-page
   > .manager-pagination.manager-pagination.manager-pagination
-  > a:first-child {
+  > a:first-child:first-child {
   grid-row: 1;
   grid-column: 1 / -1;
   border-right: 0;
@@ -451,19 +478,26 @@ html[data-family="dossier"]
   main.manager-page.manager-page.manager-page
   > .manager-pagination.manager-pagination.manager-pagination
   > .manager-pagination-index.manager-pagination-index {
-  grid-row: 3;
+  grid-row: 2;
   grid-column: 1 / -1;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   align-items: start;
   gap: 0;
-  border-top: 1px solid var(--sd-line);
-  border-bottom: 0;
+  border-top: 0;
+  border-bottom: 1px solid var(--sd-line);
   background: linear-gradient(
     180deg,
     color-mix(in srgb, var(--sd-accent) 5%, transparent),
     transparent 60%
   );
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > nav.manager-pagination.manager-pagination.manager-pagination
+  > a:last-child:not(:first-child) {
+  grid-row: 3;
 }
 
 /* A list of one (ダンテ): the index is the end card, as before. */
@@ -473,6 +507,7 @@ html[data-family="dossier"]
   > .manager-pagination-index.manager-pagination-index {
   grid-row: 1;
   border-top: 0;
+  border-bottom: 0;
   background: none;
 }
 
@@ -692,7 +727,7 @@ html[data-family="dossier"]
     html[data-family="dossier"]
       main.manager-page.manager-page.manager-page
       > .manager-pagination.manager-pagination.manager-pagination
-      > a:first-child {
+      > a:first-child:first-child {
       grid-column: 2 / -1;
     }
 
@@ -967,8 +1002,11 @@ html[data-family="dossier"]
 /* ----------------------------------------------------------------
    4. The next file's numeral
    The end card names the next person; its numeral (03, III) stands
-   large in outline on the card's open side, so the card reads as the
-   next file's cover rather than a row with an empty field beside it.
+   large in outline over NEXT FILE, so the card reads as the next file's
+   cover rather than a row with an empty field beside it. It takes the
+   card's first row (the label, the name and the NEXT / RIDER line move
+   one row down), so at any height it stays above the label and the name
+   instead of running into them; a short screen sizes it by its height.
    ---------------------------------------------------------------- */
 html[data-family="dossier"]
   main.manager-page.manager-page.manager-page
@@ -978,81 +1016,91 @@ html[data-family="dossier"]
   display: none;
 }
 
-html[data-family="dossier"]
-  main.manager-page.manager-page.manager-page
-  > .manager-pagination
-  > a:last-child:not(:first-child)
-  > .dossier-nav-numeral {
-  position: absolute;
-  z-index: 1;
-  top: clamp(18px, 5vw, 28px);
-  right: var(--sd-pad);
-  display: block;
-  margin: 0;
-  color: transparent;
-  font: 400 clamp(64px, 22vw, 120px) / 0.86 var(--sd-hud);
-  font-style: normal;
-  letter-spacing: 0.02em;
-  font-variant-numeric: tabular-nums;
-  -webkit-text-stroke: 1px color-mix(in srgb, var(--sd-accent) 78%, transparent);
-  opacity: 0.72;
-  pointer-events: none;
-  user-select: none;
-}
+/* From 561px. Phones keep it hidden: the person fills the card, so the
+   numeral would sit on the art; the card's own NEXT / RIDER 03 line
+   carries the number there. */
+@media (min-width: 561px) {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    > .manager-pagination
+    > a:last-child:not(:first-child) {
+    grid-template-rows: auto auto auto auto;
+  }
 
-/* Under the numeral, a short rule in the file's light. */
-html[data-family="dossier"]
-  main.manager-page.manager-page.manager-page
-  > .manager-pagination
-  > a:last-child:not(:first-child)
-  > .dossier-nav-numeral::after {
-  content: "";
-  display: block;
-  width: 36%;
-  height: 2px;
-  margin: 14px 0 0 auto;
-  background: linear-gradient(270deg, var(--sd-accent), transparent);
-  opacity: 0.8;
-}
-
-/* Phones: the person fills the card, so the numeral would sit on the
-   art; the card's own NEXT / RIDER 03 line carries the number there. */
-@media (max-width: 560px) {
   html[data-family="dossier"]
     main.manager-page.manager-page.manager-page
     > .manager-pagination
     > a:last-child:not(:first-child)
     > .dossier-nav-numeral {
-    display: none;
+    position: relative;
+    z-index: 1;
+    grid-row: 1;
+    grid-column: 1 / -1;
+    justify-self: start;
+    display: block;
+    margin: 0 0 14px;
+    color: transparent;
+    /* Wide phones and portrait tablets: the person stands on the right;
+       the numeral takes the ink on the left, above the name. */
+    font: 400 clamp(64px, min(15vw, 24svh), 152px) / 0.86 var(--sd-hud);
+    font-style: normal;
+    letter-spacing: 0.02em;
+    font-variant-numeric: tabular-nums;
+    -webkit-text-stroke: 1px color-mix(in srgb, var(--sd-accent) 78%, transparent);
+    opacity: 0.72;
+    pointer-events: none;
+    user-select: none;
   }
-}
 
-/* Wide phones and portrait tablets: the person stands on the right; the
-   numeral takes the ink on the left, above the name. */
-@media (min-width: 561px) and (max-width: 1099px) {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    > .manager-pagination
+    > a:last-child:not(:first-child)::before {
+    grid-row: 2;
+  }
+
   html[data-family="dossier"]
     main.manager-page.manager-page.manager-page
     > .manager-pagination
     > a:last-child:not(:first-child)
-    > .dossier-nav-numeral {
-    top: 40px;
-    right: auto;
-    left: var(--sd-pad);
-    font-size: clamp(96px, 15vw, 152px);
+    > b {
+    grid-row: 3;
   }
 
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    > .manager-pagination
+    > a:last-child:not(:first-child)
+    > small {
+    grid-row: 4;
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    > .manager-pagination
+    > a:last-child:not(:first-child)
+    > span:last-child {
+    grid-row: 3 / span 2;
+  }
+
+  /* Under the numeral, a short rule in the file's light. */
   html[data-family="dossier"]
     main.manager-page.manager-page.manager-page
     > .manager-pagination
     > a:last-child:not(:first-child)
     > .dossier-nav-numeral::after {
+    content: "";
+    display: block;
+    width: 36%;
+    height: 2px;
     margin: 16px auto 0 0;
     background: linear-gradient(90deg, var(--sd-accent), transparent);
+    opacity: 0.8;
   }
 }
 
 /* The split stage: the person on the stage side, the name beside; the
-   numeral holds the open field above it, at the reading column's end. */
+   numeral stands over it in the reading column. */
 @supports (grid-template-rows: subgrid) {
   @media (min-width: 1100px) and (min-height: 540px),
     (min-width: 900px) and (min-height: 600px) and (orientation: landscape) {
@@ -1061,10 +1109,9 @@ html[data-family="dossier"]
       > .manager-pagination
       > a:last-child:not(:first-child)
       > .dossier-nav-numeral {
-      top: clamp(40px, 7vh, 72px);
-      right: auto;
-      left: calc(var(--sd-stage-w) + var(--sd-pad));
-      font-size: clamp(120px, 12vw, 216px);
+      grid-column: 2 / -1;
+      margin: 0 0 18px var(--sd-pad);
+      font-size: clamp(72px, min(12vw, 24svh), 216px);
     }
 
     html[data-family="dossier"]
@@ -1073,8 +1120,7 @@ html[data-family="dossier"]
       > a:last-child:not(:first-child)
       > .dossier-nav-numeral::after {
       width: min(36%, 120px);
-      margin: 20px auto 0 0;
-      background: linear-gradient(90deg, var(--sd-accent), transparent);
+      margin-top: 20px;
     }
   }
 }
