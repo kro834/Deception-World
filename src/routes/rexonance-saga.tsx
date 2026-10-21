@@ -25,6 +25,7 @@ import rexonanceZenithCssUrl from "@/styles-rexonance-zenith.css?url";
 import rexonanceForgeCssUrl from "@/styles-rexonance-forge.css?url";
 import rexonanceEditorialCssUrl from "@/styles-rexonance-editorial.css?url";
 import p14CalibrationCssUrl from "@/styles-p14-calibration.css?url";
+import rexonanceLayoutCssUrl from "@/styles-rexonance-layout-20261021.css?url";
 import { rexonanceImage } from "@/lib/rexonance-images";
 import { REXONANCE_SITE_ARTWORK } from "@/lib/rexonance-site-artwork";
 import { syncRexonanceLayoutGate } from "@/lib/rexonance-layout-gate.js";
@@ -82,6 +83,11 @@ export const Route = createFileRoute("/rexonance-saga")({
       { rel: "stylesheet", href: rexonanceForgeCssUrl },
       { rel: "stylesheet", href: rexonanceEditorialCssUrl },
       { rel: "stylesheet", href: p14CalibrationCssUrl },
+      // LAYOUT (2026-10-21): the page's composition — grid, spacing, frames,
+      // plates, imagery treatment — decided once, after every edition sheet
+      // (styles-rexonance-layout-20261021.css). Type and motion editions
+      // follow in their own sheets.
+      { rel: "stylesheet", href: rexonanceLayoutCssUrl },
       CINEMATIC_STYLESHEET_LINK,
       {
         rel: "preload",
