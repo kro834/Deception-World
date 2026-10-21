@@ -13,9 +13,10 @@ import sharp from "sharp";
 import { connectedFireEvidence } from "./rexonance-fire-evidence.mjs";
 import { assertSpreadSequence, flameSpreadEvidence } from "./rexonance-spread-evidence.mjs";
 import { entryCanonicalTime, NANITE_FIRE_PHASES } from "../src/lib/rexonance-ignition.js";
+import { scrollFlameAt } from "../src/lib/rexonance-field/field-clock.js";
 
 const materialEntry = NANITE_FIRE_PHASES.materialStart * 2400;
-const materialScroll = 0.015 + 0.285 * NANITE_FIRE_PHASES.materialStart;
+const materialScroll = scrollFlameAt(NANITE_FIRE_PHASES.materialStart);
 
 const base = process.env.BASE_URL || "http://127.0.0.1:8197";
 const out = process.env.OUT_DIR || "output/playwright/rexonance-flame";

@@ -14,9 +14,9 @@ import {
   prepareBodyFlame,
   warmNaniteFlame,
 } from "./rexonance-flame.js";
-import { NANITE_FIRE_PHASES, naniteFlameEnvelope } from "./rexonance-ignition.js";
+import { naniteFlameEnvelope } from "./rexonance-ignition.js";
 import { releasePendingImage } from "./release-pending-images.js";
-import { REXONANCE_SCROLL_FLAME, scrollFlameAt } from "./rexonance-field/field-clock.js";
+import { FIELD_WAKE, REXONANCE_SCROLL_FLAME, scrollFlameAt } from "./rexonance-field/field-clock.js";
 import {
   createReactorLayers,
   deferReactorPieces,
@@ -527,8 +527,12 @@ export function mountRexonanceResonance(page, environment = window) {
    follows the module's piece list whatever its granularity (only each
    piece's id, group, box and seat are read). Over the bare undersuit:
 
-   - FAR UP！ a scan wakes the undersuit, top to bottom;
-   - RIDER！ every tile hangs in the air round the body as a nanite mote;
+   - FAR UP！ a scan wakes the undersuit, top to bottom, as the fire
+     kindles at its soles and climbs it (REXONANCE_SCROLL_FLAME,
+     rexonance-field/field-clock.js);
+   - RIDER！ the fire covers the undersuit whole, bursts, and its
+     fragments cool into the nanites (the field's particles and every
+     tile, hanging in the air round the body) before the first DEUS！;
    - SA-GA！DEUS！ ×4: on each DEUS！ one group lands (legs, arms, chest
      and shoulders, waist, as the call snaps them), piece after piece,
      each piece growing out of its seam: a mote flies in, swells into a
@@ -3929,9 +3933,10 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     groups.sort((a, b) => a.lock - b.lock);
     try {
       return fieldLib.fieldScore({
-        // The wake is the burst (owner, 2026-10-21): from the detonation
-        // to the first plates, the fragments cool and take their lines.
-        wake: [scrollFlameAt(NANITE_FIRE_PHASES.burstStart), B.motes[1]],
+        // The wake is the burst (owner, 2026-10-21): the field's one window
+        // of the fire's phase (the detonation, every fragment's cooling into
+        // a chip, the last chip's sweep onto its line) on the runway.
+        wake: [scrollFlameAt(FIELD_WAKE[0]), scrollFlameAt(FIELD_WAKE[1])],
         groups,
         collapse: [Math.min(last, B.seal[0] - 0.006), B.seal[0]],
         detonate: [B.light[0], B.complete],

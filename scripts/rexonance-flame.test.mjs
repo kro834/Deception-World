@@ -20,6 +20,7 @@ import {
 import { buildNoiseTable } from "../src/lib/rexonance-fire/fire-noise.js";
 import { POSE_SLOTS, poseFire } from "../src/lib/rexonance-fire/fire-pose.js";
 import { fireKernel, rasterFire } from "../src/lib/rexonance-fire/fire-raster.js";
+import { REXONANCE_SUIT_UNDERSUIT } from "../src/lib/rexonance-suit.ts";
 
 let serial = 0;
 const fresh = () => import(`../src/lib/rexonance-flame.js?unit=${serial++}`);
@@ -241,11 +242,10 @@ function fixture({ gl = false, coarse = false } = {}) {
   return { images, canvases, environment, timers, listeners: () => listeners, advance };
 }
 
-// The real undersuit's alpha, registered into the field's body rectangle.
+// The real undersuit's alpha (the published picture the suit module names),
+// registered into the field's body rectangle.
 const undersuitAlpha = await (async () => {
-  const { data, info } = await sharp(
-    readFileSync(file("public/rexonance-suit-20261016/undersuit.webp")),
-  )
+  const { data, info } = await sharp(readFileSync(file(`public${REXONANCE_SUIT_UNDERSUIT}`)))
     .ensureAlpha()
     .resize(Math.round(FIELD_BODY.width), Math.round(FIELD_BODY.height))
     .raw()
