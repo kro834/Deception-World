@@ -30,6 +30,7 @@ import { REXONANCE_SUIT_MARKS } from "@/lib/rexonance-suit";
 import { reactorCoilAngle, reactorCoilScale } from "@/lib/rexonance-reactor.js";
 import {
   drawBodyFlame,
+  drawFlameHeat,
   drawNaniteFlame,
   prepareBodyFlame,
   warmNaniteFlame,
@@ -411,6 +412,7 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
             // The choreography lingers, while the fire itself keeps rolling
             // at real speed throughout the longer vortex window.
             drawBodyFlame(flight, FIG, flame, elapsed / 1000, s, "back", flamePhase);
+            drawFlameHeat(flight, FIG, Math.min(1, Math.sqrt(flame) * 1.4), elapsed / 1000, s);
             drawNaniteFlame(flight, REXONANCE_SUIT_MARKS.core, flame, elapsed / 1000, s);
           }
           for (let p = 0; p < all.length; p += 1) {
