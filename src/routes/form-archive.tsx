@@ -106,8 +106,8 @@ function FormArchive() {
   >(() => {});
   const isSaga = archive === "saga";
   const archiveDocument = isSaga
-    ? "/saga-form-archive-embedded.html?v=20261021-zenith"
-    : "/realm-form-archive-embedded.html?v=20261021-zenith";
+    ? "/saga-form-archive-embedded.html?v=20261022-zenith2"
+    : "/realm-form-archive-embedded.html?v=20261022-zenith2";
 
   // An SSR iframe can finish before hydration and lose its one-shot load
   // event. Mount it only after React can own that event and its ready fallback.

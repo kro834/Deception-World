@@ -693,4 +693,15 @@ html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm
   html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .image-lightbox .lightbox-bar strong::before {
     color: CanvasText;
   }
+
+  /* The close key shows its own × in the system colour; the drawn cross
+     (two backgrounds) would be painted over. */
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .lightbox-close {
+    color: ButtonText !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .lightbox-close::before,
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .lightbox-close::after {
+    display: none;
+  }
 }
