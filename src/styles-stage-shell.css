@@ -844,8 +844,19 @@ html[data-family] body #site-side-panel.side-panel > .side-panel-head {
     var(--sh-ink);
 }
 
+/* The head locks on as the notices and the quick search do: four
+   bracket arms around the plate, the name and the close plate, the
+   first light at the top corners and gold at the foot (the brackets'
+   paint is chrome-elevation's; their lights follow the family here). */
 html[data-family] body #site-side-panel.side-panel > .side-panel-head::after {
-  content: none;
+  --dwc-arm: 16px;
+  --dwc-lock: var(--sh-l1);
+  inset: calc(var(--sp-pad-top) - 10px) calc(var(--sp-pad-inline) - 10px) 8px;
+  z-index: 0;
+}
+
+html[data-family="dream"] body #site-side-panel.side-panel > .side-panel-head::after {
+  --dwc-gold: var(--sh-l2);
 }
 
 html[data-family] body #site-side-panel.side-panel > .side-panel-head::before {
@@ -1202,8 +1213,46 @@ html[data-family]
   font-size: 14px;
 }
 
+/* From tablets up FIND A RECORD is one flexible row: the search field
+   takes 2.4 parts and each short way in one, so a page without the
+   bookmark (the library, the search) closes the row instead of leaving
+   an empty cell at its end. */
+@media (min-width: 761px) {
+  html[data-family]
+    body
+    #site-side-panel.side-panel[data-liquid-pointer]
+    > .side-panel-head
+    + .side-panel-group
+    > .side-panel-links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+  }
+
+  html[data-family]
+    body
+    #site-side-panel.side-panel[data-liquid-pointer]
+    > .side-panel-head
+    + .side-panel-group
+    > .side-panel-links
+    > * {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  html[data-family]
+    body
+    #site-side-panel.side-panel[data-liquid-pointer]
+    > .side-panel-head
+    + .side-panel-group
+    > .side-panel-links
+    > button.side-panel-quick-search {
+    flex-grow: 2.4;
+  }
+}
+
 /* An iPad mini or a 768 iPad held upright: the search field takes the
-   row's full width and the three short ways in share the next, so
+   row's full width and the short ways in share the next, so
    資料室・しおり keeps one line. */
 @media (min-width: 761px) and (max-width: 899px) {
   html[data-family]
@@ -1211,16 +1260,9 @@ html[data-family]
     #site-side-panel.side-panel[data-liquid-pointer]
     > .side-panel-head
     + .side-panel-group
-    > .side-panel-links {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  html[data-family]
-    body
-    #site-side-panel.side-panel[data-liquid-pointer]
-    .side-panel-links
+    > .side-panel-links
     > button.side-panel-quick-search {
-    grid-column: 1 / -1;
+    flex-basis: 100%;
   }
 }
 
