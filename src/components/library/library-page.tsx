@@ -44,6 +44,10 @@ import { LibraryHub } from "./library-hub";
 import { RecordArtFrame } from "./record-art";
 
 const byPath = new Map(LIBRARY_ENTRIES.map((entry) => [entry.path, entry]));
+// The hero's index read-out: how the entrances divide by kind.
+const KIND_COUNTS = (Object.keys(LIBRARY_KINDS) as LibraryKind[]).map(
+  (id) => [id, LIBRARY_ENTRIES.filter((entry) => entry.kind === id).length] as const,
+);
 // The hero's visual index: the eight riders' files, in the World's order.
 const CAST = RIDER_ART.flatMap((rider) => {
   const entry = byPath.get(`/riders/${rider.id}`);
@@ -394,6 +398,16 @@ export function LibraryPage({
     openSequenceRef.current += 1;
     void writeBrowse({ ...selection(), kind: next }, false).catch(() => undefined);
   };
+  // The hero's kinds: the shelf takes that kind, and the reader is taken to
+  // its read-out (focus there too, as after a submitted search).
+  const openKind = (next: LibraryKind) => {
+    changeKind(next);
+    window.requestAnimationFrame(() => {
+      const motion = window.matchMedia("(prefers-reduced-motion: no-preference)").matches;
+      resultsRef.current?.scrollIntoView({ block: "start", behavior: motion ? "smooth" : "auto" });
+      resultsRef.current?.focus({ preventScroll: true });
+    });
+  };
   const changeScope = (next: LibraryBrowseScope) => {
     openSequenceRef.current += 1;
     void writeBrowse({ ...selection(), scope: next }, false).catch(() => undefined);
@@ -469,8 +483,23 @@ export function LibraryPage({
                 人物の名前から、物語の章へ。公開された資料を横断して探し、気になるページにしおりを残せます。
               </p>
               <div className="library-index-summary">
-                <span>{LIBRARY_ENTRIES.length} 資料への入口</span>
+                <span>
+                  <b>{LIBRARY_ENTRIES.length}</b> 資料への入口
+                </span>
                 <span>人物 / 章 / 展示</span>
+              </div>
+              <div className="library-index-meter" role="group" aria-label="種類から探す">
+                <span className="library-index-bar" aria-hidden="true">
+                  {KIND_COUNTS.map(([id, count]) => (
+                    <i key={id} data-kind={id} style={{ flexGrow: count }} />
+                  ))}
+                </span>
+                {KIND_COUNTS.map(([id, count]) => (
+                  <button key={id} type="button" data-kind={id} onClick={() => openKind(id)}>
+                    <b>{count}</b>
+                    <span>{LIBRARY_KINDS[id]}</span>
+                  </button>
+                ))}
               </div>
               <GuardedLink to="/search" assets={[]} className="library-fulltext-link">
                 本文から検索 <span aria-hidden="true">↗</span>
@@ -597,13 +626,18 @@ export function LibraryPage({
                       setQuery(event.currentTarget.value);
                     }}
                     onKeyDown={(event) => {
-                      if (
-                        event.key === "Enter" &&
-                        (composingRef.current ||
-                          event.nativeEvent.isComposing ||
-                          event.nativeEvent.keyCode === 229)
-                      )
+                      const composingKey =
+                        composingRef.current ||
+                        event.nativeEvent.isComposing ||
+                        event.nativeEvent.keyCode === 229;
+                      if (event.key === "Enter" && composingKey) event.preventDefault();
+                      // Escape clears the words (as on /search); an empty field
+                      // leaves Escape to the page.
+                      if (event.key === "Escape" && !composingKey && draft) {
                         event.preventDefault();
+                        setQuery("");
+                        void writeBrowse({ ...selection(), q: "" }).catch(() => undefined);
+                      }
                     }}
                   />
                   {draft ? (

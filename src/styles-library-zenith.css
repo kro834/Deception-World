@@ -124,15 +124,56 @@ html[data-family="library"] .library-page .library-card-actions button[aria-pres
 /* ================================================================
    /library — the hero: the index read-out and the files' tones
    ================================================================ */
+/* The index card: the entrance count and the kinds' read-out are one
+   instrument (the summary is its head, the meter its body). */
+html[data-family="library"] .library-page .library-index-summary {
+  position: relative;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 12px;
+  margin-top: 20px;
+  padding: 12px 14px 10px;
+  border: 1px solid var(--dxl-line-2);
+  border-bottom: 0;
+  border-radius: 5px 5px 0 0;
+  background:
+    linear-gradient(90deg, rgb(var(--dxl-gold-rgb) / 9%), transparent 55%),
+    rgb(3 6 12 / 62%);
+}
+
+html[data-family="library"] .library-page .library-index-summary::before {
+  position: absolute;
+  inset: -1px 18px auto;
+  height: 1px;
+  content: "";
+  background: var(--dxz-prism-fade);
+}
+
 html[data-family="library"] .library-page .library-index-summary > span {
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: none;
   font-family: var(--dx-mono);
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.1em;
 }
 
 html[data-family="library"] .library-page .library-index-summary > span:first-child {
-  background:
-    linear-gradient(90deg, rgb(var(--dxl-gold-rgb) / 18%), transparent 60%), rgb(3 6 12 / 55%);
+  color: var(--dx-text);
+  background: none;
+}
+
+html[data-family="library"] .library-page .library-index-summary > span:first-child > b {
+  margin-right: 4px;
+  color: var(--dx-gold);
+  font: 600 26px / 1 var(--dx-mono);
+  letter-spacing: 0.02em;
+  text-shadow: 0 0 22px rgb(var(--dxl-gold-rgb) / 35%);
+}
+
+html[data-family="library"] .library-page .library-index-summary > span:last-child {
+  color: var(--dx-text-3);
 }
 
 html[data-family="library"] .library-page .library-fulltext-link {
@@ -145,6 +186,166 @@ html[data-family="library"] .library-page .library-fulltext-link {
 html[data-family="library"] .library-page .library-jump-links a:first-child {
   color: var(--dx-text);
   text-decoration-color: var(--dxz-pink);
+}
+
+/* The index read-out: the entrances by kind, one bar in their lights
+   (exhibits ice, people gold, the Dream red), each kind a way into the
+   shelf below. */
+html[data-family="library"] .library-page .library-index-meter {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px 6px;
+  padding: 0 14px 14px;
+  border: 1px solid var(--dxl-line-2);
+  border-top: 0;
+  border-radius: 0 0 5px 5px;
+  background: rgb(3 6 12 / 62%);
+  box-shadow: var(--dx-drop);
+}
+
+html[data-family="library"] .library-page .library-index-meter [data-kind="page"] {
+  --kind-tone: var(--dx-edition);
+  --kind-rgb: var(--dx-edition-rgb);
+}
+
+html[data-family="library"] .library-page .library-index-meter [data-kind="person"] {
+  --kind-tone: var(--dx-gold);
+  --kind-rgb: var(--dxl-gold-rgb);
+}
+
+html[data-family="library"] .library-page .library-index-meter [data-kind="chapter"] {
+  --kind-tone: #ec7a67;
+  --kind-rgb: 236 122 103;
+}
+
+html[data-family="library"] .library-page .library-index-bar {
+  display: flex;
+  grid-column: 1 / -1;
+  gap: 3px;
+  height: 10px;
+  padding: 2px;
+  border: 1px solid var(--dxl-line-2);
+  border-radius: 3px;
+  background: rgb(2 5 10 / 72%);
+  box-shadow: inset 0 1px 0 rgb(0 0 0 / 60%);
+}
+
+html[data-family="library"] .library-page .library-index-bar > i {
+  flex-basis: 0;
+  min-width: 8px;
+  border-radius: 1px;
+  background: linear-gradient(90deg, rgb(var(--kind-rgb) / 70%), var(--kind-tone));
+  box-shadow: 0 0 10px rgb(var(--kind-rgb) / 40%);
+  transform-origin: 0 50%;
+}
+
+html[data-family="library"] .library-page .library-index-meter > button {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  min-height: 40px;
+  padding: 0 10px;
+  border: 1px solid var(--dxl-line-2);
+  border-radius: 3px;
+  color: var(--dx-text-2);
+  background: rgb(3 6 12 / 55%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 6%);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+}
+
+html[data-family="library"] .library-page .library-index-meter > button::before {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  content: "";
+  background: var(--kind-tone);
+  box-shadow: 0 0 8px rgb(var(--kind-rgb) / 60%);
+}
+
+html[data-family="library"] .library-page .library-index-meter > button > span {
+  min-width: 0;
+}
+
+html[data-family="library"] .library-page .library-index-meter > button > b {
+  min-width: 1.3em;
+  color: var(--kind-tone);
+  font: 600 15px / 1 var(--dx-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+html[data-family="library"] .library-page .library-index-meter > button:hover {
+  border-color: rgb(var(--kind-rgb) / 80%);
+  color: var(--dx-text);
+  background: linear-gradient(180deg, rgb(var(--kind-rgb) / 12%), rgb(var(--kind-rgb) / 4%));
+}
+
+html[data-family="library"] .library-page .library-index-meter > button:focus-visible {
+  outline: 2px solid var(--dx-focus);
+  outline-offset: 2px;
+}
+
+@media (min-width: 900px) {
+  html[data-family="library"] .library-intro-copy {
+    grid-template-areas:
+      "eyebrow eyebrow"
+      "title lede"
+      "title summary"
+      "title meter"
+      "title link";
+  }
+
+  html[data-family="library"] .library-intro-copy > .library-index-meter {
+    grid-area: meter;
+  }
+}
+
+/* Tablets: the card stays an instrument, not a band across the page. */
+@media (min-width: 560px) and (max-width: 899px) {
+  html[data-family="library"] .library-page :is(.library-index-summary, .library-index-meter) {
+    max-width: 600px;
+  }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  html[data-family="library"] .library-page .library-index-meter > button {
+    min-height: 44px;
+  }
+}
+
+/* Phones: three equal keys, the count under its kind. */
+@media (max-width: 559px) {
+  html[data-family="library"] .library-page .library-index-meter {
+    padding-inline: 10px;
+  }
+
+  html[data-family="library"] .library-page .library-index-meter > button {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-content: start;
+    gap: 6px 7px;
+    min-height: 60px;
+    padding: 8px 10px;
+    text-align: left;
+  }
+
+  html[data-family="library"] .library-page .library-index-meter > button::before {
+    align-self: center;
+  }
+
+  html[data-family="library"] .library-page .library-index-meter > button > b {
+    font-size: 18px;
+  }
+
+  html[data-family="library"] .library-page .library-index-meter > button > span {
+    grid-column: 1 / -1;
+    min-width: 0;
+    line-height: 1.35;
+    letter-spacing: 0.02em;
+    overflow-wrap: anywhere;
+  }
 }
 
 /* A file's tone lights its floor and its number under a pointer. */
@@ -794,6 +995,28 @@ html[data-family="library"] .search-page .search-scope-note {
   html[data-family="library"] .library-page .library-results-heading > p > strong {
     font-size: 26px;
   }
+
+  /* A card's foot keeps its order on a phone: the record opens on the left
+     (the whole card does, the line says so), the bookmark is a compact key
+     on the right instead of an empty bar the width of the card. */
+  html[data-family="library"] .library-page .library-card-actions {
+    flex-wrap: nowrap;
+    gap: 8px;
+    padding-block: 6px;
+  }
+
+  html[data-family="library"] .library-page .library-card-actions > a {
+    display: inline-flex;
+    flex: 1 1 auto;
+    min-width: 0;
+    white-space: nowrap;
+  }
+
+  html[data-family="library"] .library-page .library-card-actions button {
+    flex: none;
+    min-width: 84px;
+    padding: 0 12px;
+  }
 }
 
 /* ================================================================
@@ -820,7 +1043,8 @@ html[data-family="library"] .search-page .search-scope-note {
       .library-rows button,
       .library-data-controls > button,
       .library-search-chips a,
-      .library-fulltext-inline
+      .library-fulltext-inline,
+      .library-index-meter > button
     ) {
     transition:
       transform 220ms cubic-bezier(0.2, 0.7, 0.2, 1),
@@ -834,6 +1058,23 @@ html[data-family="library"] .search-page .search-scope-note {
     :is(.search-result-open, .library-card-actions > a)
     > span {
     transition: transform 220ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  /* The read-out boots once: each kind's light fills in from the left. */
+  html:not([data-world-effects="economy"])[data-family="library"] .library-index-bar > i {
+    animation: library-index-fill 900ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+
+  html:not([data-world-effects="economy"])[data-family="library"]
+    .library-index-bar
+    > i:nth-child(2) {
+    animation-delay: 120ms;
+  }
+
+  html:not([data-world-effects="economy"])[data-family="library"]
+    .library-index-bar
+    > i:nth-child(3) {
+    animation-delay: 240ms;
   }
 
   html:not([data-world-effects="economy"])[data-family="library"] .library-cast-art::after,
@@ -866,6 +1107,13 @@ html[data-family="library"] .search-page .search-scope-note {
   }
 }
 
+@keyframes library-index-fill {
+  from {
+    opacity: 0.3;
+    transform: scaleX(0);
+  }
+}
+
 /* ================================================================
    Forced colours: the system's colours, every edge drawn
    ================================================================ */
@@ -891,6 +1139,16 @@ html[data-family="library"] .search-page .search-scope-note {
   html[data-family="library"] .search-page .search-empty-code {
     color: CanvasText;
     -webkit-text-stroke: 0;
+  }
+
+  html[data-family="library"] .library-page .library-index-bar > i,
+  html[data-family="library"] .library-page .library-index-meter > button::before {
+    background: CanvasText;
+    box-shadow: none;
+  }
+
+  html[data-family="library"] .library-page .library-index-meter > button {
+    border: 1px solid ButtonText;
   }
 
   html[data-family="library"] .library-page .library-card:hover,
