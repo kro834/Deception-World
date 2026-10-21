@@ -55,7 +55,7 @@ const asset = "/rexonance-flame-natural-20261019/flame.webp";
 const evidenceWidth = 171;
 const evidenceHeight = 312;
 const bodyMask = await sharp(
-  await readFile(new URL("../public/rexonance-suit-20261016/undersuit.webp", import.meta.url)),
+  await readFile(new URL("../public/rexonance-suit-20261016/undersuit-20261021.webp", import.meta.url)),
 )
   .ensureAlpha()
   .resize(evidenceWidth, evidenceHeight)
