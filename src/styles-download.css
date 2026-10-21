@@ -385,6 +385,13 @@ html[data-world-effects="economy"] .export-page h1 {
   letter-spacing: 0.02em;
   color: var(--dl-text-3);
   text-wrap: pretty;
+  /* Between phrases (Chromium, auto-phrase): 公開サイトの配信版 no longer
+     splits. Elsewhere (Safari, WebKit) at the punctuation (keep-all), with
+     anywhere as the last resort, as the 404 and load-error sheets do. */
+  word-break: keep-all;
+  word-break: auto-phrase;
+  overflow-wrap: anywhere;
+  line-break: strict;
 }
 
 /* The way back: the poster's foot, the full width of the card. */
@@ -646,7 +653,7 @@ html[data-world-effects="economy"] .export-page h1 {
         #070d16 100%
       ),
       linear-gradient(180deg, rgb(4 8 15 / 36%), transparent 28%, transparent 62%, rgb(4 8 15 / 72%)),
-      url("/deception-world-poster-delivery-720.webp");
+      var(--dl-art-image, url("/deception-world-poster-delivery-720.webp"));
     background-position:
       100% 0,
       18px 18px,
@@ -674,8 +681,11 @@ html[data-world-effects="economy"] .export-page h1 {
     grid-row: 10;
   }
 
-  /* No art band on top of the slip now: the card is flat ink. */
+  /* No art band on top of the slip now: the card is flat ink, and it is
+     the frame of both panels (column 1 alone left the slip, its foot and
+     its right-hand locks floating outside the card). */
   .export-page::after {
+    grid-column: art-start / slip-end;
     background:
       var(--dl-prism) top / 100% 2px no-repeat,
       linear-gradient(var(--dl-lock) 0 0) 0 0 / 22px 2px,
@@ -706,8 +716,11 @@ html[data-world-effects="economy"] .export-page h1 {
     font-size: clamp(36px, 3vw + 14px, 52px);
   }
 
+  /* 23em: the clause 公開サイトの配信版とは異なる場合があります。 holds one
+     line with its full stop (at 22em Safari's keep-all left the 。 to start
+     the next line). */
   .export-page small {
-    max-width: 22em;
+    max-width: 23em;
   }
 }
 
@@ -715,6 +728,16 @@ html[data-world-effects="economy"] .export-page h1 {
 @media (min-width: 1280px) and (min-height: 700px) {
   .export-page {
     grid-template-columns: [art-start] 440px [art-end slip-start] 480px [slip-end];
+  }
+}
+
+/* The art panel is drawn up to about 900 CSS px tall: on a 2x screen, or
+   once the panel is that tall, it takes the 1024 x 1536 delivery cut
+   instead of upscaling the 720 one (phones keep the 720 file). */
+@media (min-width: 960px) and (min-height: 600px) and (min-resolution: 1.5dppx),
+  (min-width: 1280px) and (min-height: 900px) {
+  .export-page::before {
+    --dl-art-image: url("/deception-world-poster-delivery.webp");
   }
 }
 
