@@ -728,14 +728,21 @@ function ArchiveLog() {
                       <i lang="en">STAGE</i> {episode.stage}
                     </small>
                   </p>
-                  <div className="wa-episode-synopsis">
-                    {episode.synopsis.map((paragraph) => (
-                      <p key={paragraph} className="wa-prose">
-                        {paragraph}
-                      </p>
-                    ))}
+                  {/* The notes and the lines as one column beside the art on
+                      wide screens; below 900px both wrappers are
+                      display: contents (the plate's own stack). */}
+                  <div className="wa-episode-body">
+                    <div className="wa-episode-synopsis">
+                      {episode.synopsis.map((paragraph) => (
+                        <p key={paragraph} className="wa-prose">
+                          {paragraph}
+                        </p>
+                      ))}
+                    </div>
+                    <div className="wa-episode-lines">
+                      <Lines lines={episode.lines} />
+                    </div>
                   </div>
-                  <Lines lines={episode.lines} />
                 </li>
               );
             })}
