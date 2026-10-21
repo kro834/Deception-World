@@ -249,7 +249,7 @@ html[data-family="dream"] main.dream-page.dream-page .dream-reader-index-actions
   padding-inline: 14px;
 }
 
-@media (hover: none) {
+@media (hover: none), (pointer: coarse) {
   html[data-family="dream"] main.dream-page.dream-page .dream-reader-index-actions button,
   html[data-family="dream"] main.dream-page.dream-page .dream-record-quick-tags button {
     min-height: 44px;
@@ -508,7 +508,7 @@ html[data-family="dream"] main.dream-page.dream-page .dream-credits dd {
   font-size: 15px;
 }
 
-@media (hover: none) {
+@media (hover: none), (pointer: coarse) {
   html[data-family="dream"] main.dream-page.dream-page .dream-credits dd a {
     min-height: 44px;
     padding-inline: 14px;
@@ -837,5 +837,105 @@ html[data-family="dream"] main.dream-page.dream-page .dream-story-case-body .dre
     gap: 8px;
     padding-inline-start: 44px;
     text-align: start;
+  }
+}
+
+/* ----------------------------------------------------------------
+   17. A record's way onward: its links are framed chips, so the underline
+       inside each frame goes; the first (出来事を読む) is the kinari plate
+       the desk's own primary buttons wear. On a phone the chips wrap two
+       or three to a row instead of standing one per row — a card's five
+       links had made eight results nearly three screens tall.
+   ---------------------------------------------------------------- */
+html[data-family="dream"] main.dream-page.dream-page .dream-record-card nav a {
+  text-decoration: none;
+  letter-spacing: 0.04em;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-record-card nav a:first-child {
+  color: #241821;
+  border-color: var(--zn-kin-hi);
+  background:
+    linear-gradient(#79353c 0 0) 0 0 / 12px 2px no-repeat,
+    linear-gradient(180deg, #f5e6c5 0%, #e2cda4 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 60%),
+    0 6px 16px rgb(0 0 0 / 28%);
+  font-weight: 600;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-record-card nav a:first-child:hover {
+    border-color: #fff3d2;
+    background:
+      linear-gradient(#79353c 0 0) 0 0 / 16px 2px no-repeat,
+      linear-gradient(180deg, #fbefd4 0%, #ead7b1 100%);
+  }
+}
+
+@media (hover: none), (pointer: coarse) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-record-card nav a {
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 760px) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-record-card nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-record-card nav a {
+    flex: 1 1 auto;
+    justify-content: center;
+    padding-inline: 12px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-record-card nav a:first-child {
+    flex-basis: 100%;
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-record-card nav a:first-child {
+    color: LinkText;
+    background: Canvas;
+    border-color: LinkText;
+  }
+}
+
+/* ----------------------------------------------------------------
+   18. The touch floor: on a touch screen every control the Dream page
+       draws reaches 44px — the chapter companion's cast chips (36px),
+       the stage voice reel's modes and steps (34px), its 関連記録へ link
+       (an 18px line of text) and the poster HUD's PREV / NEXT (34 × 32).
+   ---------------------------------------------------------------- */
+@media (hover: none), (pointer: coarse) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-chapter-companion-cast a {
+    align-items: center;
+    min-height: 44px;
+  }
+
+  html[data-family="dream"]
+    main.dream-page.dream-page
+    :is(.dream-programme-spotlight-modes, .dream-programme-spotlight-controls)
+    button {
+    min-height: 44px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-programme-spotlight-quote footer {
+    align-items: center;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-programme-spotlight-quote footer a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-poster-hud-step button {
+    min-width: 44px;
+    min-height: 44px;
   }
 }
