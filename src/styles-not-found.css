@@ -509,10 +509,13 @@
   color: var(--lr-ice);
 }
 
+/* A name that wraps (資料室・しおり on a phone) stays centred on its tile,
+   as the one-line names are. */
 .app-not-found.app-not-found > nav.recovery-tiles > a > b {
   font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.04em;
+  text-align: center;
   color: #f2f7fb;
 }
 
@@ -557,17 +560,30 @@
   }
 }
 
-/* Phones and narrow tablets: the card rides a little above the middle, so
-   its foot (the recovery files and the gold locks) ends clear of the Zeus
-   button that stands over the lower right corner. The same rows as above;
-   only the two outer spacers differ (one class more than the recovery
-   sheet's own rows rule, which would win otherwise). */
+/* Phones and narrow tablets: the card's foot (the recovery files and the
+   gold locks) ends clear of the Zeus button that stands over the lower
+   right corner, at any height. The page keeps the button's reach free at
+   its foot as padding (its centre stands at 82dvh: 18vh, which is never
+   less, plus half its 60px, less the 24px spacer under the card, plus a
+   10px gap), so the card is centred in the screen above that reach, and
+   where the card is taller than that (short phones) the page scrolls until
+   its foot clears the button. Padding, not a taller spacer track: a
+   spacer's minimum also sets the fr unit of an auto-height grid, which
+   grew the top spacer with it and scrolled pages that fit. Above that
+   reach the card sits a little below the middle of the free space (2:1),
+   so it does not ride up under the top frame on tall phones. The same rows
+   as above; only the two outer spacers differ (one class more than the
+   recovery sheet's own rows rule, which would win otherwise). */
 @media (max-width: 759px) {
+  .app-not-found.app-not-found {
+    padding-bottom: max(env(safe-area-inset-bottom), calc(18vh + 16px));
+  }
+
   .app-not-found.app-not-found.app-not-found:has(> .recovery-tiles) {
     grid-template-rows:
-      minmax(24px, 0.62fr) [plate-start] var(--lr-pad-y) [slot-start] auto [slot-end head-start] auto
+      minmax(24px, 1fr) [plate-start] var(--lr-pad-y) [slot-start] auto [slot-end head-start] auto
       auto [head-end] auto auto auto auto var(--lr-pad-y) [plate-end] auto [recovery-end]
-      minmax(112px, 1fr);
+      minmax(24px, 0.5fr);
   }
 }
 
@@ -588,6 +604,109 @@
 
   .app-not-found.app-not-found > nav.recovery-tiles > a > b {
     font-size: 12px;
+  }
+}
+
+/* Under 430px the tiles are about 100px wide: the HUD code closes up (still
+   12px) so a recent record's CONTINUE stays inside its tile, and the foot's
+   inline padding and gap hand the tiles that width back. */
+@media (max-width: 429px) {
+  .app-not-found.app-not-found > nav.recovery-tiles {
+    gap: 6px;
+    padding-inline: 8px;
+  }
+
+  .app-not-found.app-not-found > nav.recovery-tiles > a {
+    padding-inline: 6px;
+  }
+
+  .app-not-found.app-not-found > nav.recovery-tiles > a > small {
+    letter-spacing: 0.06em;
+  }
+}
+
+/* Under 390px (tiles about 100px): tighter still, so CONTINUE keeps about
+   5px inside its tile at 360px. */
+@media (max-width: 389px) {
+  .app-not-found.app-not-found > nav.recovery-tiles {
+    gap: 5px;
+    padding-inline: 6px;
+  }
+
+  .app-not-found.app-not-found > nav.recovery-tiles > a {
+    padding-inline: 4px;
+  }
+
+  .app-not-found.app-not-found > nav.recovery-tiles > a > small {
+    letter-spacing: 0.02em;
+  }
+}
+
+/* Under 360px (320px phones, tiles under 90px) Michroma's CONTINUE is wider
+   than the tile at any tracking: the codes take the page's narrower HUD
+   face, Oxanium (already on the page for the outlined 404), still 12px. */
+@media (max-width: 359px) {
+  .app-not-found.app-not-found > nav.recovery-tiles > a > small {
+    font-family: "Oxanium", "Michroma", sans-serif;
+    letter-spacing: 0.12em;
+  }
+}
+
+/* Short phones (iPhone SE/8 and shorter, and phones held sideways): the
+   card closes up, so on load its foot already ends above the Zeus button.
+   The photo slot becomes a low band, the plate's padding and the gaps
+   between the words tighten and the files are lower; every label keeps its
+   size. Under 600px tall the empty slot (ornament only) steps aside. */
+@media (max-width: 759px) and (max-height: 720px) {
+  .app-not-found.app-not-found {
+    --lr-pad-y: 16px;
+  }
+
+  .app-not-found.app-not-found > .app-not-found-sigil {
+    min-height: 76px;
+    margin-bottom: 14px;
+    padding-block: 10px;
+  }
+
+  .app-not-found.app-not-found > .app-not-found-sigil > i {
+    width: 56px;
+    height: 56px;
+    font-size: 16px;
+  }
+
+  .app-not-found.app-not-found > .app-not-found-sigil::after {
+    font-size: 48px;
+  }
+
+  .app-not-found.app-not-found > h1 {
+    margin-top: 14px;
+  }
+
+  .app-not-found.app-not-found > p:last-of-type {
+    margin-top: 8px;
+    line-height: 1.8;
+  }
+
+  .app-not-found.app-not-found > a {
+    margin-top: 18px;
+  }
+
+  .app-not-found.app-not-found > a.app-not-found-search {
+    margin-top: 10px;
+  }
+
+  .app-not-found.app-not-found > nav.recovery-tiles {
+    padding-top: 12px;
+  }
+
+  .app-not-found.app-not-found > nav.recovery-tiles > a {
+    min-height: 88px;
+  }
+}
+
+@media (max-width: 759px) and (max-height: 600px) {
+  .app-not-found.app-not-found > .app-not-found-sigil {
+    display: none;
   }
 }
 
@@ -668,7 +787,9 @@
 }
 
 /* Desktop: the case file leans left and the key visual stands on the
-   right, the rider in the clear, under the outlined number. */
+   right, the rider in the clear, under the outlined number. It is drawn
+   about as tall as the screen, so it takes the 1024 x 1536 delivery cut
+   (phones keep the 720 one under their ink fall). */
 @media (min-width: 1100px) {
   .app-not-found.app-not-found {
     grid-template-columns:
@@ -686,7 +807,7 @@
         rgb(3 6 12 / 28%) 100%
       ),
       linear-gradient(180deg, rgb(3 6 12 / 10%), transparent 30%, rgb(3 6 12 / 70%) 100%),
-      url("/deception-world-poster-delivery-720.webp") right 12% / auto 112% no-repeat;
+      url("/deception-world-poster-delivery.webp") right 12% / auto 112% no-repeat;
   }
 
   .app-not-found.app-not-found::after {
