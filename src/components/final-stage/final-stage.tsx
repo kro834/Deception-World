@@ -55,11 +55,15 @@ function bindRail<K extends string>(
   };
 }
 
+/* The calls are an ordered sequence; as a list the label is announced
+   (a name on a plain div is ignored) with the count of calls. */
 function CallOuts({ calls, label }: { calls: readonly string[]; label: string }) {
   return (
-    <div className="fst-calls" aria-label={label}>
+    <div className="fst-calls" role="list" aria-label={label}>
       {calls.map((call, index) => (
-        <b key={`${call}-${index}`}>{call}</b>
+        <b key={`${call}-${index}`} role="listitem">
+          {call}
+        </b>
       ))}
     </div>
   );

@@ -363,6 +363,114 @@ html[data-family="special"]
   content: none;
 }
 
+/* The calls run as one line of track. From 601px they flow, each cell
+   coupled to the one before by a short rail across the gap (a row that
+   wraps opens on the same coupling, a carry mark at the column's edge). */
+html[data-family="special"] body .rxs-page.rxs-page.fst-page .fst-pickup-dialog .fst-calls b {
+  position: relative;
+}
+
+@media (min-width: 601px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.fst-page
+    .fst-pickup-dialog
+    .fst-calls
+    b
+    + b::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: 100%;
+    width: 9px;
+    height: 1px;
+    margin-right: 1px;
+    background: color-mix(in srgb, var(--fst-accent, var(--fsx-violet)) 58%, transparent);
+    pointer-events: none;
+  }
+}
+
+/* Phones: the calls stand as a timetable down a line of stations, one
+   call a row at the column's full width, so the sequence reads in order
+   instead of as a ragged heap of chips. Each cell's station hangs at its
+   first line with the rail down to the next; the completing call is the
+   terminus, the lamp lit at the end of the line. */
+@media (max-width: 600px) {
+  html[data-family="special"] body .rxs-page.rxs-page.fst-page .fst-pickup-dialog .fst-calls {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: stretch;
+    gap: 8px;
+    padding-left: 24px;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.fst-page .fst-pickup-dialog .fst-calls b {
+    display: flex;
+    width: auto;
+    min-width: 0;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.fst-page
+    .fst-pickup-dialog
+    .fst-calls
+    b::after {
+    content: "";
+    position: absolute;
+    top: 12px;
+    left: -24px;
+    width: 12px;
+    height: calc(100% + 8px);
+    background:
+      radial-gradient(
+          circle at 6px 6px,
+          var(--fsx-house) 0 3.1px,
+          var(--fst-accent, var(--fsx-violet)) 3.6px 5.1px,
+          transparent 5.6px
+        )
+        0 0 / 12px 12px no-repeat,
+      repeating-linear-gradient(180deg, rgb(var(--fsx-violet-rgb) / 52%) 0 4px, transparent 4px 8px)
+        5px 13px / 2px calc(100% - 13px) no-repeat;
+    pointer-events: none;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.fst-page
+    .fst-pickup-dialog
+    .fst-calls
+    b:last-child::after {
+    height: 12px;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle at 6px 6px,
+      #fff8e8 0 1.4px,
+      var(--fsz-lamp) 2px 3.6px,
+      rgb(var(--fsz-lamp-rgb) / 34%) 4.2px 6px
+    );
+    box-shadow: 0 0 16px 3px rgb(var(--fsz-lamp-rgb) / 32%);
+  }
+
+  /* A call alone is not a line: no station, no indent. */
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.fst-page
+    .fst-pickup-dialog
+    .fst-calls:has(> b:only-child) {
+    padding-left: 0;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.fst-page
+    .fst-pickup-dialog
+    .fst-calls
+    b:only-child::after {
+    content: none;
+  }
+}
+
 /* Realm Royal: the form's name and its calls as one band, the spec grid
    under them in three columns (two at the record's narrower widths, one
    row per key on phones, as the FAR FROM SAGA grid). */
