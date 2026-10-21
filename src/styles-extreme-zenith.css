@@ -1,0 +1,928 @@
+/* ================================================================
+   Extreme — ZENITH (2026-10-21): the brush-up on top of the editorial
+   sheet. Loaded on /extreme-saga only, after styles-extreme-editorial.css
+   and before the cinematic sheet; every rule is scoped to
+   html[data-family="special"] body .rxs-page.rxs-page.exs-page.
+
+   What this layer does, in order:
+   - Repairs: the hero wordmark's 3-D copies sat 10px off their text (the
+     stage sheet's padding was never reset); the command bar's EXTREME pill
+     printed gold on gold; ROUND 1's unit fell under its figure on wide and
+     narrow screens; the eyebrow broke in two on a landscape tablet; the
+     catalog <details> was squeezed into the console's left column on wide
+     screens; the two-line wide headlines left a hole between their corners;
+     "04 システム" was clipped on a 320px bar.
+   - Floors: every HUD label reads at 12px or more; focus rings stay visible
+     inside the slanted (clip-path) controls.
+   - Quality: the current chapter's number lights as a gold plate, the
+     chapter cards and the console answer the pointer, the form's code pill
+     and facts take the form's own light, the move cards and doors lift.
+   Motion here is hover/focus transitions only, held back under reduced
+   motion; nothing rides the scroll, nothing loops.
+   ================================================================ */
+
+html[data-family="special"] body .rxs-page.rxs-page.exs-page {
+  --exz-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --exz-steel-rail: linear-gradient(180deg, #dfe7ef, #8fa0b3 50%, #3c4756);
+  --exz-gold-rail-v: linear-gradient(180deg, #fff3cf, var(--ext-gold) 50%, #d99a3a);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.exs-page ::selection {
+  color: #fffaf0;
+  background: rgb(244 204 123 / 38%);
+}
+
+/* ================================================================
+   1. Command bar
+   ================================================================ */
+/* The pill reads ink on gold (the overdrive sheet's gold text fill is
+   withdrawn). */
+html[data-family="special"] body .rxs-page.rxs-page.exs-page .rxs-brand span {
+  color: #080807;
+  -webkit-text-fill-color: #080807;
+  text-shadow: none;
+}
+
+/* The chapter numbers are plates: gold text on the bar, ink on a gold
+   plate for the chapter in view. Every number carries the same padding, so
+   the bar never shifts when the light moves. */
+html[data-family="special"] body .rxs-page.rxs-page.exs-page .rxs-local-nav nav a > span {
+  display: inline-grid;
+  place-items: center;
+  min-width: 26px;
+  padding: 3px 6px 2px 5px;
+  clip-path: polygon(0 0, 100% 0, calc(100% - 4px) 100%, 0 100%);
+  transition:
+    color 160ms ease,
+    background-color 160ms ease;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  .rxs-local-nav
+  nav
+  a[aria-current="location"]
+  > span {
+  color: #080807;
+  background: var(--exe-gold-pill);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  .rxs-local-nav
+  nav
+  a[aria-current="location"] {
+  color: #fff6df;
+}
+
+/* ================================================================
+   2. Cold open: the wordmark's copies sit on their text again
+   ================================================================ */
+html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-hero .rxs-hero-copy > h1 > span {
+  padding: 0;
+  clip-path: none;
+  background-color: transparent;
+  white-space: nowrap;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  .exs-hero
+  .rxs-hero-copy
+  > h1
+  > span::before,
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  .exs-hero
+  .rxs-hero-copy
+  > h1
+  > span::after {
+  font: inherit;
+  font-variation-settings: inherit;
+  letter-spacing: inherit;
+  white-space: inherit;
+  text-indent: 0;
+}
+
+/* The eyebrow at the 12px floor, on one line wherever the copy column
+   holds it. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  .exs-hero
+  .rxs-hero-copy
+  > p:first-child {
+  max-width: 100%;
+  font-size: 12px;
+  letter-spacing: 0.18em;
+}
+
+@media (min-width: 761px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    .exs-hero
+    .rxs-hero-copy
+    > p:first-child {
+    white-space: nowrap;
+  }
+}
+
+@media (min-width: 761px) and (max-width: 1366px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    .exs-hero
+    .rxs-hero-copy
+    > p:first-child {
+    letter-spacing: 0.12em;
+  }
+}
+
+/* ================================================================
+   3. Chapter index: the four bouts answer the pointer
+   ================================================================ */
+html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-index small {
+  font-size: 12px;
+  letter-spacing: 0.1em;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-index a::after {
+  transition: opacity 180ms ease;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-index i {
+  transition:
+    color 180ms ease,
+    background-color 180ms ease,
+    border-color 180ms ease,
+    translate 240ms var(--exz-ease);
+}
+
+/* ================================================================
+   4. Round headings
+   ================================================================ */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > :is(#performance, #p14, #stages, #system)
+  > .rxs-section-heading
+  > p {
+  font-size: 12px;
+  letter-spacing: 0.2em;
+}
+
+/* The bout plates read ROUND again: the label stands over the number, in
+   the kicker's row, and the plate drops to the title's row beside it. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > :is(#performance, #p14, #stages, #system)
+  > .rxs-section-heading::after {
+  content: "ROUND" / "";
+  grid-column: 1;
+  grid-row: 1;
+  align-self: end;
+  justify-self: start;
+  position: static;
+  display: block;
+  width: auto;
+  height: auto;
+  margin: 0 0 2px;
+  padding: 0;
+  color: var(--ext-gold);
+  background: none;
+  border: 0;
+  box-shadow: none;
+  opacity: 1;
+  transform: none;
+  /* The plate's own forged face, so ROUND and its number read as one
+     stamp (and fit the 52px plate column of a phone). */
+  font: 800 12px / 1 var(--exe-forge);
+  font-variation-settings: "wdth" 110;
+  letter-spacing: 0.14em;
+  white-space: nowrap;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > :is(#performance, #p14, #stages, #system)
+  > .rxs-section-heading::before {
+  grid-row: 2;
+}
+
+/* Wide bouts without an introduction: the two struck lines stand in both
+   corners with a gold rail between them, instead of a hole. */
+@media (min-width: 1100px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > :is(#stages, #system)
+    > .rxs-section-heading
+    > h2 {
+    grid-template-columns: auto minmax(48px, 1fr) auto;
+    column-gap: 0;
+    align-items: baseline;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > :is(#stages, #system)
+    > .rxs-section-heading
+    > h2
+    > .exo-line:first-child {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > :is(#stages, #system)
+    > .rxs-section-heading
+    > h2
+    > .exo-line:last-child {
+    grid-column: 3;
+    grid-row: 1;
+    text-align: end;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > :is(#stages, #system)
+    > .rxs-section-heading
+    > h2::before {
+    content: "";
+    grid-column: 2;
+    grid-row: 1;
+    align-self: center;
+    display: block;
+    height: 3px;
+    margin: 0 clamp(20px, 2.4vw, 40px);
+    background: var(--exe-rail-gold);
+    opacity: 0.82;
+  }
+}
+
+/* ================================================================
+   5. ROUND 1: the figures fit their half of the panel, unit on the line
+   ================================================================ */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  #performance
+  .exi-stage
+  > article
+  > small {
+  font-size: 12px;
+  letter-spacing: 0.14em;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  #performance
+  .exi-stage
+  > article
+  > strong,
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  #performance
+  .exi-stage
+  > article:nth-child(2)
+  > strong {
+  font-size: clamp(56px, 6.9vw, 108px);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  #performance
+  .exi-stage
+  > article
+  > strong
+  > span {
+  font-size: 0.3em;
+  letter-spacing: 0.08em;
+}
+
+/* ================================================================
+   6. The tale of the tape
+   ================================================================ */
+/* The catalog stands across the whole console on wide screens (the IMPACT
+   column rule for the console's children caught the <details>). */
+@media (min-width: 1100px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #performance
+    .rxs-comparison
+    > .exs-catalog-details {
+    grid-column: 1 / -1;
+  }
+}
+
+/* The challengers' plates: a steel bar on the edge, gold for the one in
+   the ring; they lift under the pointer and press under the finger. */
+html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-opponent-options button {
+  position: relative;
+  padding-left: 20px;
+  transition:
+    color 160ms ease,
+    border-color 160ms ease,
+    background-color 160ms ease,
+    box-shadow 160ms ease,
+    translate 200ms var(--exz-ease);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-opponent-options button::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: var(--exz-steel-rail);
+  transition: background 160ms ease;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  .exs-opponent-options
+  button[aria-pressed="true"]::before {
+  background: var(--exz-gold-rail-v);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-opponent-options button small {
+  font-size: 12px;
+  line-height: 1.45;
+  letter-spacing: 0.06em;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-opponent-options button:active {
+  translate: 0 1px;
+}
+
+/* The rows: the metric's name and the result's label at the floor; the
+   row answers the pointer. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #performance
+  .rxs-comparison-metrics
+  > article {
+  transition:
+    box-shadow 200ms ease,
+    border-color 200ms ease;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #performance
+  .rxs-comparison-metrics
+  > article
+  > header
+  > div
+  > small {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #performance
+  .rxs-comparison-metrics
+  .rxs-comparison-result
+  > i {
+  font-size: 12px;
+  letter-spacing: 0.1em;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #performance
+  .rxs-comparison-metrics
+  .rxs-comparison-result
+  > em {
+  font-size: 12px;
+}
+
+/* The catalog under the tape. */
+html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-catalog-details > summary {
+  transition: color 160ms ease;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-catalog-details > summary::after {
+  transition: box-shadow 160ms ease;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-catalog-details[open] > summary {
+  color: var(--ext-gold);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  .exs-catalog-details
+  .rxs-processing-comparison
+  > header
+  > small {
+  font-size: 12px;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  .exs-catalog-details
+  .rxs-processing-comparison
+  > div
+  > section
+  > h4 {
+  margin: 0 0 14px;
+  color: var(--exe-cyan);
+  font: 800 12px / 1.5 var(--exe-etch);
+  letter-spacing: 0.14em;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  .exs-catalog-details
+  .rxs-processing-comparison
+  > div
+  > section:last-child
+  > h4 {
+  color: var(--ext-gold);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  .exs-catalog-details
+  .rxs-processing-comparison
+  > div
+  > section
+  li {
+  color: #e6dfd1;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  .exs-catalog-details
+  .rxs-processing-comparison
+  > div
+  > section
+  li::before {
+  color: var(--exe-cyan);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  .exs-catalog-details
+  .rxs-processing-comparison
+  > div
+  > section:last-child
+  li::before {
+  color: var(--ext-gold);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  .exs-catalog-details
+  .rxs-processing-comparison
+  > p {
+  margin: 20px 0 0;
+  padding: 14px 18px;
+  border-left: 3px solid var(--ext-gold);
+  color: #efe8da;
+  background: rgb(244 204 123 / 6%);
+  font-size: 13px;
+  line-height: 1.85;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-unavailable {
+  gap: 10px;
+  margin-top: 14px;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-unavailable li {
+  padding: 12px 16px 12px 14px;
+  border: 1px solid var(--exe-rule);
+  border-left: 3px solid rgb(244 204 123 / 55%);
+  border-radius: 0;
+  color: var(--exe-muted);
+  background: rgb(244 204 123 / 4%);
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%);
+  font-size: 12px;
+  line-height: 1.75;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-unavailable li::before {
+  color: var(--ext-gold);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.exs-page > #performance .rxs-comparison-note {
+  font-size: 12px;
+  line-height: 1.9;
+}
+
+/* ================================================================
+   7. ROUND 2: the core's labels at the floor
+   ================================================================ */
+html[data-family="special"] body .rxs-page.rxs-page.exs-page > #p14 .rxs-p14-copy > small {
+  font-size: 12px;
+  letter-spacing: 0.14em;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-core-flow > span small {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #p14
+  .exs-p14-comparison
+  > article
+  > small {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #p14
+  .exs-p14-comparison
+  > article
+  > p {
+  font-size: 13px;
+}
+
+/* ================================================================
+   8. ROUND 3: the form on stage carries its own light
+   ================================================================ */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #stages
+  #exs-stage-panel
+  > div
+  > small {
+  font-size: 12px;
+  letter-spacing: 0.16em;
+}
+
+/* Middle stands in the suit's cyan, Ultra in the gold it ignites into. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #stages
+  #exs-stage-panel
+  > figure[data-form="middle"]
+  + div
+  > small {
+  color: #061015;
+  background: var(--exe-cyan-pill);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #stages
+  #exs-stage-panel
+  > figure[data-form="middle"]
+  + div
+  .exs-form-facts
+  > div {
+  border-left-color: var(--exe-cyan);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #stages
+  #exs-stage-panel
+  > figure[data-form="middle"]
+  + div
+  .exs-form-facts
+  dt {
+  color: var(--exe-cyan);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #stages
+  #exs-stage-panel
+  > div
+  > ul
+  > li {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.exs-page > #stages .rxs-stage-hint {
+  font-size: 12px;
+}
+
+/* ================================================================
+   9. ROUND 4: the moves lift, their codes at the floor
+   ================================================================ */
+html[data-family="special"] body .rxs-page.rxs-page.exs-page > #system .rxs-system-grid header small {
+  max-width: 14em;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  line-height: 1.6;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.exs-page > #system .rxs-system-grid > article {
+  transition:
+    box-shadow 220ms ease,
+    translate 260ms var(--exz-ease);
+}
+
+/* ================================================================
+   10. The end card
+   ================================================================ */
+html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer > div > p {
+  font-size: 12px;
+  letter-spacing: 0.16em;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer > a {
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    translate 220ms var(--exz-ease);
+}
+
+/* ================================================================
+   11. Focus inside the slanted controls (clip-path clips an outline
+   drawn outside the box, so the ring stands 4px inside it).
+   ================================================================ */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > :is(#performance, #p14, #stages, #system, .exs-hero, .rxs-local-nav, .rxs-footer)
+  :is(nav a, .exs-opponent-options button, .rxs-scroll-cue, a.exo-door, a.rxs-footer-return, .rxs-brand):focus-visible {
+  outline: 2px solid #ffe1a1;
+  outline-offset: -4px;
+}
+
+/* ================================================================
+   12. Pointer
+   ================================================================ */
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page .rxs-local-nav nav a:hover {
+    color: #fff6df;
+    background: rgb(244 204 123 / 9%);
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-index a:hover {
+    background: linear-gradient(180deg, rgb(244 204 123 / 14%), rgb(244 204 123 / 3%));
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-index a:hover::after {
+    opacity: 1;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-index a:hover i {
+    color: #080807;
+    border-color: var(--ext-gold);
+    background: var(--exe-gold-pill);
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-opponent-options button:hover {
+    color: #fff8e6;
+    border-color: #ffe1a1;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #performance
+    .rxs-comparison-metrics
+    > article:hover {
+    box-shadow:
+      0 22px 44px -20px rgb(0 0 0 / 90%),
+      inset 0 0 0 1px rgb(244 204 123 / 50%);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #performance
+    .rxs-comparison-metrics
+    > article[data-exf-win="rival"]:hover {
+    box-shadow:
+      0 22px 44px -20px rgb(0 0 0 / 90%),
+      inset 0 0 0 1px rgb(114 228 255 / 52%);
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-catalog-details > summary:hover {
+    color: #ffffff;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    .exs-catalog-details
+    > summary:hover::after {
+    box-shadow: 0 0 0 4px rgb(244 204 123 / 20%);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #system
+    .rxs-system-grid
+    > article:hover {
+    box-shadow:
+      0 34px 70px -24px rgb(0 0 0 / 95%),
+      inset 0 1px 0 rgb(255 248 230 / 30%),
+      inset 0 0 0 1px var(--exe-rule-strong);
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer > a:hover {
+    box-shadow:
+      0 18px 38px rgb(0 0 0 / 64%),
+      inset 0 1px 0 rgb(255 248 230 / 26%);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-index a:hover i {
+    translate: 2px -2px;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-opponent-options button:hover {
+    translate: 0 -1px;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #system
+    .rxs-system-grid
+    > article:hover {
+    translate: 0 -4px;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer > a:hover {
+    translate: 0 -2px;
+  }
+}
+
+/* ================================================================
+   13. Narrow screens
+   ================================================================ */
+@media (max-width: 680px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    #performance
+    .exi-stage
+    > article
+    > strong,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    #performance
+    .exi-stage
+    > article:nth-child(2)
+    > strong {
+    font-size: clamp(50px, 15.2vw, 92px);
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-opponent-options button {
+    padding-left: 14px;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > :is(#performance, #p14, #stages, #system)
+    > .rxs-section-heading::after {
+    /* The plate column is 52px here. */
+    font-variation-settings: "wdth" 100;
+    letter-spacing: 0.08em;
+  }
+}
+
+@media (max-width: 480px) {
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-index small {
+    padding: 3px 7px 2px 6px;
+    letter-spacing: 0.04em;
+  }
+}
+
+/* The 320px bar: four chapters, each number as a plate, nothing clipped. */
+@media (max-width: 359px) {
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page .rxs-local-nav nav {
+    gap: 0;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page .rxs-local-nav nav a {
+    gap: 3px;
+    padding-inline: 0;
+    letter-spacing: 0;
+    font-feature-settings: "palt" 1;
+    /* The slanted ends took the last character of システム at 72px a cell. */
+    clip-path: none;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page .rxs-local-nav nav a > span {
+    min-width: 0;
+    padding-inline: 3px 4px;
+    font-variation-settings: "wdth" 100;
+    letter-spacing: -0.02em;
+  }
+
+  /* Two challenger plates in 256px: the names set with proportional kana
+     and never clipped. */
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-opponent-options button {
+    padding: 12px 6px 12px 12px;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-opponent-options button span {
+    font-feature-settings: "palt" 1;
+    letter-spacing: -0.01em;
+    overflow-wrap: anywhere;
+  }
+}
+
+/* ================================================================
+   14. Calm tiers and forced colours
+   ================================================================ */
+@media (prefers-reduced-motion: reduce) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    :is(
+      .rxs-local-nav nav a > span,
+      .exs-chapter-index a::after,
+      .exs-chapter-index i,
+      .exs-opponent-options button,
+      .exs-opponent-options button::before,
+      .rxs-comparison-metrics > article,
+      .exs-catalog-details > summary,
+      .exs-catalog-details > summary::after,
+      .rxs-system-grid > article,
+      .rxs-footer > a
+    ) {
+    transition: none;
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page .rxs-brand span,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    .rxs-local-nav
+    nav
+    a[aria-current="location"]
+    > span {
+    color: HighlightText;
+    -webkit-text-fill-color: HighlightText;
+    background: Highlight;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > :is(#stages, #system)
+    > .rxs-section-heading
+    > h2::before {
+    background: CanvasText;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-opponent-options button::before {
+    background: ButtonText;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    .exs-opponent-options
+    button[aria-pressed="true"]::before {
+    background: HighlightText;
+  }
+}
