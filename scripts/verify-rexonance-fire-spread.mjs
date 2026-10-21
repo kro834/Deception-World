@@ -12,6 +12,7 @@ import { join } from "node:path";
 import { chromium, webkit } from "playwright";
 import sharp from "sharp";
 import { entryElapsedTime, NANITE_FIRE_PHASES } from "../src/lib/rexonance-ignition.js";
+import { scrollFlameAt } from "../src/lib/rexonance-field/field-clock.js";
 import { flameSpreadEvidence } from "./rexonance-spread-evidence.mjs";
 
 const base = process.env.BASE_URL || "http://127.0.0.1:8594";
@@ -245,7 +246,7 @@ async function capture(visit, kind, name, phase) {
 }
 
 async function scrollPhase(phase) {
-  const progress = 0.015 + 0.285 * phase;
+  const progress = scrollFlameAt(phase);
   for (let attempt = 0; attempt < 3; attempt++) {
     const actual = await page.evaluate((progress) => {
       const runway = document.querySelector(".rzn-suitup"),

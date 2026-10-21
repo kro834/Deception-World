@@ -4,21 +4,24 @@
 
    Owner (2026-10-21): 「炎がアンダースーツを段々と覆っていき、爆散。ナノマシン
    と化し、そこから装着シークエンスが始まります。」 Every particle is a
-   fragment of the burst: born at its fragment's handoff position with its
-   velocity (the fire's own `fireFragmentPose` once it lands; until then the
-   model below, thrown off the burning body), still hot in the combustion's
-   pale cyan with a pink-violet fringe, it flies out under drag, cools into
-   its spark tone (pink / cyan — the nanites), and is swept onto its helical
-   field line about the attractor. From there: the angle advances with the
-   score's phase, the radius closes as the group tightens, the height
-   spreads over the group, each lock's impulse flings it outward and lets
-   it settle, the collapse draws it into the reactor, the detonation throws
-   it out. Units: figure heights (x from the figure's left edge, y from the
-   crown, z toward the viewer); the wake is 0..1 over the score's wake. */
+   fragment of the burst: the fire's own `fireFragmentPose` (rexonance-
+   ignition.js) flings it off the burning body, white hot, and it is born
+   into the field at the very phase that fragment cools (its heat 0, the
+   fire no longer drawing it), at that position, carrying that velocity;
+   still hot in the combustion's pale cyan with a pink-violet fringe, it
+   flies on under drag, cools into its spark tone (pink / cyan — the
+   nanites), and is swept onto its helical field line about the attractor.
+   From there: the angle advances with the score's phase, the radius closes
+   as the group tightens, the height spreads over the group, each lock's
+   impulse flings it outward and lets it settle, the collapse draws it into
+   the reactor, the detonation throws it out. Units: figure heights (x from
+   the figure's left edge, y from the crown, z toward the viewer); the wake
+   is 0..1 over the score's wake (FIELD_WAKE, field-clock.js). */
 
 import { fieldHash } from "./field-seed.js";
 import { FIELD_STATE } from "./field-score.js";
-import { sampleFlameBirth } from "../rexonance-ignition.js";
+import { FIELD_WAKE, FIELD_WAKE_BIRTHS } from "./field-clock.js";
+import { NANITE_FIRE_PHASES, fireFragmentPose } from "../rexonance-ignition.js";
 
 const TAU = Math.PI * 2;
 const clamp01 = (value) => (value < 0 ? 0 : value > 1 ? 1 : value);
@@ -61,9 +64,12 @@ export const FIELD_SHAPE = Object.freeze({
 
 /** The birth: how a burst fragment becomes a particle of the field. */
 export const FIELD_BIRTH = Object.freeze({
-  /** Each particle is born within this share of the wake (staggered). */
-  stagger: 0.35,
-  /** Its ballistic flight (figure heights per wake) and its drag. */
+  /** Each particle is born within this share of the wake: its own birth,
+   * the share (a byte, as the shader reads it) at which its fragment has
+   * cooled. */
+  stagger: FIELD_WAKE_BIRTHS,
+  /** Its flight on from the handoff (figure heights per wake at unit
+   * velocity seed) and its drag. */
   drift: 0.55,
   drag: 3,
   /** From this share of its life to that, it is swept onto its line. */
@@ -72,24 +78,21 @@ export const FIELD_BIRTH = Object.freeze({
   heat: 0.55,
   /** How much brighter a hot fragment burns. */
   glow: 1.2,
-  /** The charge rises over this share of the wake (the burst itself). */
-  rise: 0.25,
-  /** The thrown speed of the model fragments (figure heights per wake). */
-  speed: Object.freeze([0.5, 1]),
-  /** Their swirl off the normal (rad) and their lift. */
-  swirl: 0.35,
-  lift: 0.2,
+  /** Its light rises over this share of its life: the spark the fire drew
+   * has just faded to nothing where it appears, so no streak pops in whole. */
+  ignite: 0.08,
   /** Combustion, nearly out: pale cyan, a pink-violet fringe on this share. */
   hot: Object.freeze([0.8, 0.96, 1]),
   fringe: Object.freeze([0.93, 0.72, 1]),
   fringeShare: 0.18,
 });
 
-/** The figure's width over its height (the suit's 571 × 1040), for the
- * model fragments' normalized body x. */
+/** The figure's width over its height (the suit's 571 × 1040): the fire's
+ * fragments measure x in figure widths. */
 export const FIELD_FIGURE_ASPECT = 571 / 1040;
 
-/** The seeds' layout: the particle's helix seeds, then its birth (the
+/** The seeds' layout: the particle's helix seeds, its birth's stagger (the
+ * share of FIELD_BIRTH.stagger of the wake, a byte), then its birth (the
  * fragment's handoff: x, y in figure heights; velocity in figure heights per
  * wake). */
 export const FIELD_SEEDS = Object.freeze({
@@ -113,32 +116,67 @@ export const FIELD_SEEDS = Object.freeze({
 const byte = (value) => Math.round(clamp01(value) * 255) / 255;
 const fract = (value) => value - Math.floor(value);
 
+/** The fire's fragment of a particle: a periodic seed of `fireFragmentPose`
+ * (any value is a fragment; the fire draws 144 of them, the field's
+ * thousands lie on the same family of trajectories). */
+export const fieldFragmentSeed = (index) => fieldHash(index, 21);
+
+const FLAME_SPAN = NANITE_FIRE_PHASES.flameEnd - NANITE_FIRE_PHASES.burstStart;
+const WAKE_SPAN = FIELD_WAKE[1] - FIELD_WAKE[0];
+/** The first cooling's share of the burst: every fragment is still hot at
+ * materialStart, or cold at that very instant. */
+const COOL_FIRST = (NANITE_FIRE_PHASES.materialStart - NANITE_FIRE_PHASES.burstStart) / FLAME_SPAN;
+
 /**
- * The model fragment: thrown off the burning body's surface (the fire's
- * sampled skin, rexonance-ignition.js) along its normal with a swirl and a
- * lift. Writes [x, y, vx, vy] (figure heights; per wake) into `out`. The
- * fire's own `fireFragmentPose` replaces this once it lands.
+ * The fragment's handoff: the fire's burst fragment of this particle (the
+ * same `fireFragmentPose` the fire draws), sampled at the particle's birth
+ * — the first wake share, as the shader reads it (a byte of
+ * FIELD_BIRTH.stagger), at which the fragment has cooled to heat 0, so the
+ * fire's spark has just faded to nothing where the streak appears. Writes
+ * [x, y, vx, vy, stagger share] into `out`: figure heights, a velocity in
+ * the pose's flight units (figure heights per wake, less the flight's
+ * drift and the birth's remaining life, so the streak leaves at exactly the
+ * fragment's speed), the share in 0..1. Pure in the index.
  */
-export function fieldFragment(index, out, aspect = FIELD_FIGURE_ASPECT) {
-  const sample = fieldFragment.sample;
-  sampleFlameBirth(fieldHash(index, 21), sample);
+export function fieldFragment(index, out) {
   const B = FIELD_BIRTH;
-  const speed = B.speed[0] + (B.speed[1] - B.speed[0]) * fieldHash(index, 22);
-  const swirl = (fieldHash(index, 24) - 0.5) * 2 * B.swirl;
-  const cos = Math.cos(swirl);
-  const sin = Math.sin(swirl);
-  const nx = sample[2];
-  const ny = sample[3];
-  out[0] = sample[0] * aspect;
+  const P = NANITE_FIRE_PHASES;
+  const seed = fieldFragmentSeed(index);
+  const sample = fieldFragment.sample;
+  // Its cooling: heat = (1 - u / cool)^0.8 over the burst (u 0..1 from
+  // burstStart to flameEnd; rexonance-ignition.js), inverted from the one
+  // sample at materialStart, the earliest any fragment cools.
+  fireFragmentPose(seed, P.materialStart, sample);
+  const cool = COOL_FIRST / Math.max(1e-9, 1 - Math.pow(clamp01(sample[4]), 1.25));
+  const cooled = P.burstStart + Math.min(1, cool) * FLAME_SPAN;
+  // Its birth: the first byte of the births' share of the wake at or after
+  // the cooling, never a frame before it (the fire still drawing it).
+  let share = Math.min(1, Math.ceil(((cooled - FIELD_WAKE[0]) / WAKE_SPAN / B.stagger) * 255) / 255);
+  let phase = FIELD_WAKE[0] + share * B.stagger * WAKE_SPAN;
+  fireFragmentPose(seed, phase, sample);
+  while (sample[4] > 0 && share < 1) {
+    share = Math.min(1, share + 1 / 255);
+    phase = FIELD_WAKE[0] + share * B.stagger * WAKE_SPAN;
+    fireFragmentPose(seed, phase, sample);
+  }
+  // The fragment's velocity is in body units per phase unit; the pose flies
+  // the streak from its birth at bvel × drift per unit of its remaining
+  // life ((1 - stagger) of the wake).
+  const stagger = share * B.stagger;
+  const velocity = (WAKE_SPAN * (1 - stagger)) / B.drift;
+  out[0] = sample[0] * FIELD_FIGURE_ASPECT;
   out[1] = sample[1];
-  out[2] = (nx * cos - ny * sin) * speed;
-  out[3] = (nx * sin + ny * cos) * speed - B.lift * speed;
+  out[2] = sample[2] * FIELD_FIGURE_ASPECT * velocity;
+  out[3] = sample[3] * velocity;
+  out[4] = share;
   return out;
 }
-fieldFragment.sample = new Float64Array(4);
+fieldFragment.sample = new Float64Array(6);
 
 /** A particle's seeds, as the shader reads them (0..1 except the arm and
- * the birth), from `fragment(index, out)` for its birth. */
+ * the birth), from `fragment(index, out)` for its birth (x, y, vx, vy and
+ * its stagger share; a source that gives no share leaves the birth's
+ * stagger to its byte seeds). */
 export function fieldSeeds(index, arms, out, fragment = fieldFragment) {
   const S = FIELD_SEEDS;
   out[S.A0] = fieldHash(index, 11); // its angle on the ring (turns)
@@ -149,16 +187,21 @@ export function fieldSeeds(index, arms, out, fragment = fieldFragment) {
   out[S.ARM] = index % arms;
   out[S.SIZE] = 0.6 + fieldHash(index, 15);
   out[S.MARKER] = fieldHash(index, 17) < 0.22 ? 1 : 0; // a line marker (a long trail)
-  // Its birth's stagger, as the shader derives it from its byte seeds.
-  out[S.STAGGER] = fract(byte(out[S.A0]) * 13 + byte(out[S.YP]) * 7);
-  fragment(index, fieldFragment.birth);
-  out[S.BX] = fieldFragment.birth[0];
-  out[S.BY] = fieldFragment.birth[1];
-  out[S.BVX] = fieldFragment.birth[2];
-  out[S.BVY] = fieldFragment.birth[3];
+  const birth = fieldFragment.birth;
+  birth[4] = Number.NaN;
+  fragment(index, birth);
+  // Its birth's stagger: the fragment's share, as the shader reads it (a
+  // byte); without one, derived from its byte seeds.
+  out[S.STAGGER] = Number.isFinite(birth[4])
+    ? byte(birth[4])
+    : byte(fract(byte(out[S.A0]) * 13 + byte(out[S.YP]) * 7));
+  out[S.BX] = birth[0];
+  out[S.BY] = birth[1];
+  out[S.BVX] = birth[2];
+  out[S.BVY] = birth[3];
   return out;
 }
-fieldFragment.birth = new Float64Array(4);
+fieldFragment.birth = new Float64Array(5);
 
 /** An impulse's fling by its age: a quick throw that settles. */
 export function fieldFling(age) {
@@ -209,12 +252,14 @@ export function fieldPose(seeds, s, state, take, height, out, wake = state[FIELD
     (yp - 0.5) * spreadY * (1 - collapse) +
     P.wobble * Math.sin(theta * 0.5 + yp * TAU) +
     take.tilt * z * (1 - collapse);
-  // Its birth: not yet born, nothing; born, a fragment flying out under
-  // drag, cooling, swept onto its line by the wake's end.
+  // Its birth: not yet born, nothing; born (its fragment cooled), a chip
+  // flying on under drag, its light rising as the fire's spark has faded,
+  // cooling, swept onto its line by the wake's end.
   const stagger = seeds[S.STAGGER] * B.stagger;
   let born = 1;
   let tau = 1;
   let heat = 0;
+  let lit = 1;
   if (wake < 1) {
     born = wake > stagger ? 1 : 0;
     tau = born ? clamp01((wake - stagger) / (1 - stagger)) : 0;
@@ -228,6 +273,7 @@ export function fieldPose(seeds, s, state, take, height, out, wake = state[FIELD
     y = by + (y - by) * sweep;
     z = 0.02 + (z - 0.02) * sweep;
     heat = 1 - smooth(clamp01(tau / B.heat));
+    lit = smooth(clamp01(tau / B.ignite));
   }
   // Impulses: an outward fling from each recent lock, settling.
   const count = state[F.IMPULSES];
@@ -264,6 +310,7 @@ export function fieldPose(seeds, s, state, take, height, out, wake = state[FIELD
   out[3] = seeds[S.SIZE] * (1 + P.bokeh * depth);
   out[4] =
     born *
+    lit *
     state[F.CHARGE] *
     (0.55 + 0.45 * spd) *
     (1 - P.bokehDim * depth) *

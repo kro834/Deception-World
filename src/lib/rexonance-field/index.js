@@ -27,10 +27,17 @@ export {
   FIELD_SHAPE,
   fieldFling,
   fieldFragment,
+  fieldFragmentSeed,
   fieldPose,
   fieldSeeds,
 } from "./field-pose.js";
-export { REXONANCE_SCROLL_FLAME, scrollFlameAt, scrollFlamePhase } from "./field-clock.js";
+export {
+  FIELD_WAKE,
+  FIELD_WAKE_BIRTHS,
+  REXONANCE_SCROLL_FLAME,
+  scrollFlameAt,
+  scrollFlamePhase,
+} from "./field-clock.js";
 export {
   FIELD_FRAGMENT_SHADER,
   FIELD_GL,

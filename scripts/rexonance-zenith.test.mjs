@@ -20,6 +20,8 @@ import {
   REXONANCE_LAYOUT_BOOT_SCRIPT,
   syncRexonanceLayoutGate,
 } from "../src/lib/rexonance-layout-gate.js";
+import { NANITE_FIRE_PHASES } from "../src/lib/rexonance-ignition.js";
+import { scrollFlameAt } from "../src/lib/rexonance-field/field-clock.js";
 import { runInNewContext } from "node:vm";
 
 /* 2026-10-11 rx15: Rexonance, ZENITH — the suit-up on the page
@@ -2164,7 +2166,8 @@ test("the nanite stage plan: paint order, the shared cells, and timings before .
       assert.equal(nano.pieceOf[parent], nano.pieceOf[i]);
     }
     assert.ok(
-      nano.birth[i] <= plan.tiles[i].t0 + 1e-9 && nano.birth[i] >= 0.070575 - 1e-9,
+      nano.birth[i] <= plan.tiles[i].t0 + 1e-9 &&
+        nano.birth[i] >= scrollFlameAt(NANITE_FIRE_PHASES.materialStart) - 1e-9,
       "metal enters the trailing burst before its unchanged flight/landing window",
     );
   }

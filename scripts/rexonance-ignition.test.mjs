@@ -17,6 +17,7 @@ import {
   paintBodySilhouette,
   sampleFlameBirth,
 } from "../src/lib/rexonance-ignition.js";
+import { scrollFlameAt } from "../src/lib/rexonance-field/field-clock.js";
 
 const ASPECT = 1040 / 571;
 
@@ -71,7 +72,8 @@ test("the fire's phases keep their causal order: kindle, engulf, colour, torch, 
   assert.equal(P.burstEnd * 2400, 560);
   assert.equal(P.materialStart * 2400, 468);
   assert.equal(P.flameEnd * 2400, 600);
-  assert.ok(Math.abs(0.015 + 0.285 * P.materialStart - 0.070575) < 1e-10);
+  // The scroll's runway (field-clock.js): the first chips at q ≈ .114.
+  assert.ok(Math.abs(scrollFlameAt(P.materialStart) - 0.1136) < 1e-10);
 });
 
 test("the envelope fades in with the kindle, holds through the torch and dies away through the detonation", () => {
