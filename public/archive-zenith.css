@@ -218,6 +218,13 @@ html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm
   white-space: normal;
 }
 
+/* Phones: the label alone, so the bar keeps to two lines beside the close. */
+@media (max-width: 480px) {
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .image-lightbox .lightbox-bar strong::before {
+    content: "FORM VISUAL";
+  }
+}
+
 html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .lightbox-close {
   border-radius: 3px !important;
 }
