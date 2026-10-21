@@ -25,6 +25,7 @@ import rexonanceZenithCssUrl from "@/styles-rexonance-zenith.css?url";
 import rexonanceForgeCssUrl from "@/styles-rexonance-forge.css?url";
 import rexonanceEditorialCssUrl from "@/styles-rexonance-editorial.css?url";
 import p14CalibrationCssUrl from "@/styles-p14-calibration.css?url";
+import rexonanceApexCssUrl from "@/styles-rexonance-apex.css?url";
 import { rexonanceImage } from "@/lib/rexonance-images";
 import { REXONANCE_SITE_ARTWORK } from "@/lib/rexonance-site-artwork";
 import { syncRexonanceLayoutGate } from "@/lib/rexonance-layout-gate.js";
@@ -82,6 +83,10 @@ export const Route = createFileRoute("/rexonance-saga")({
       { rel: "stylesheet", href: rexonanceForgeCssUrl },
       { rel: "stylesheet", href: rexonanceEditorialCssUrl },
       { rel: "stylesheet", href: p14CalibrationCssUrl },
+      // APEX (rx19): the page interface around the suit-up as one HUD
+      // instrument — chapter index, numbered bar, plates, rows, floors
+      // (styles-rexonance-apex.css), last before the cinematic sheet.
+      { rel: "stylesheet", href: rexonanceApexCssUrl },
       CINEMATIC_STYLESHEET_LINK,
       {
         rel: "preload",

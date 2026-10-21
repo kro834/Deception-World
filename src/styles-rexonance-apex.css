@@ -1,0 +1,633 @@
+/* ================================================================
+   APEX — the Rexonance page interface as one instrument (rx19, 2026-10-21)
+
+   The owner asked for every interface to reach its best quality. This
+   layer draws the page's own chrome around the scroll suit-up — the
+   chapter heads, the local bar, the stat plates, the form switcher, the
+   comparison and the P14 instrument, the contents map and the end — in
+   one HUD grammar, so every panel reads as the same machine:
+
+   - PLATE: a dark glass slab with four ice corner brackets and one gold
+     tick at its top left (the engines' guideway, budgeted);
+   - ROW: a 1px ice hairline between readings; labels ≥ 12px, Michroma
+     for the instrument voice, the forged face for every figure;
+   - INDEX: each chapter head carries "0N / 05" at its right, the local
+     bar numbers its links, and the chapter in view is lit in gold.
+
+   Route-only, after P14's calibration and before the cinematic sheet,
+   scoped to the doubled Rexonance page class. Copy is untouched (type
+   and layout only). No keyframes: the few micro-interactions are
+   finite transitions on transform and opacity, gated by
+   prefers-reduced-motion and the economy tier; forced colours draw
+   borders instead of brackets. Floors: text ≥ 12px, touch targets
+   ≥ 44px (the two native selects reach 48px on coarse pointers).
+   ================================================================ */
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page {
+  --rxa-ice: #79e8ff;
+  --rxa-pink: #ff8fd8;
+  --rxa-gold: #f2d896;
+  --rxa-line: rgb(121 232 255 / 16%);
+  --rxa-line-soft: rgb(121 232 255 / 10%);
+  --rxa-plate: linear-gradient(180deg, rgb(255 255 255 / 3.5%), transparent 38%), rgb(3 9 16 / 74%);
+  --rxa-bracket: rgb(121 232 255 / 62%);
+  --rxa-label: #a8cbd4;
+  --rxa-ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ---------- The plate grammar ---------- */
+/* Four corner brackets, drawn as eight 1px strokes on one pseudo-element,
+   and the gold tick at the top left. The plate itself keeps whatever paint
+   it already had; only the frame is new. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-comparison,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-comparator,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-status,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-comparison {
+  position: relative;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-comparison::before,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-comparator::before,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-status::before,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-comparison::before {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(var(--rxa-bracket), var(--rxa-bracket)) 0 0 / 18px 1px,
+    linear-gradient(var(--rxa-bracket), var(--rxa-bracket)) 0 0 / 1px 18px,
+    linear-gradient(var(--rxa-bracket), var(--rxa-bracket)) 100% 0 / 18px 1px,
+    linear-gradient(var(--rxa-bracket), var(--rxa-bracket)) 100% 0 / 1px 18px,
+    linear-gradient(var(--rxa-bracket), var(--rxa-bracket)) 0 100% / 18px 1px,
+    linear-gradient(var(--rxa-bracket), var(--rxa-bracket)) 0 100% / 1px 18px,
+    linear-gradient(var(--rxa-bracket), var(--rxa-bracket)) 100% 100% / 18px 1px,
+    linear-gradient(var(--rxa-bracket), var(--rxa-bracket)) 100% 100% / 1px 18px,
+    linear-gradient(var(--rxa-gold), var(--rxa-gold)) 26px 0 / 34px 2px;
+  background-repeat: no-repeat;
+}
+
+/* The two selectable plates wear the chosen form's light on their frame. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-status::before {
+  --rxa-bracket: var(--rxs-stage-accent, #79e8ff);
+}
+
+/* The comparison and the P14 instrument are cut at their top right (the
+   STAGE chamfer): that corner is its own mark, so it carries no bracket. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-comparison::before,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-comparator::before {
+  background:
+    linear-gradient(var(--rxa-bracket), var(--rxa-bracket)) 0 0 / 18px 1px,
+    linear-gradient(var(--rxa-bracket), var(--rxa-bracket)) 0 0 / 1px 18px,
+    linear-gradient(var(--rxa-bracket), var(--rxa-bracket)) 0 100% / 18px 1px,
+    linear-gradient(var(--rxa-bracket), var(--rxa-bracket)) 0 100% / 1px 18px,
+    linear-gradient(var(--rxa-bracket), var(--rxa-bracket)) 100% 100% / 18px 1px,
+    linear-gradient(var(--rxa-bracket), var(--rxa-bracket)) 100% 100% / 1px 18px,
+    linear-gradient(var(--rxa-gold), var(--rxa-gold)) 26px 0 / 34px 2px;
+  background-repeat: no-repeat;
+}
+
+/* ================================================================
+   The local bar: numbered chapters, the one in view in gold
+   ================================================================ */
+/* From 800px the bar has room for the numerals (an iPad Pro in portrait;
+   the 681–799 band keeps the four plain links). */
+@media (min-width: 800px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > header.rxs-local-nav nav {
+    counter-reset: rxa-nav;
+    gap: 6px;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > header.rxs-local-nav nav a {
+    gap: 7px;
+    padding: 0 10px;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > header.rxs-local-nav nav a::before {
+    counter-increment: rxa-nav;
+    content: counter(rxa-nav, decimal-leading-zero);
+    color: rgb(242 216 150 / 62%);
+    font: 500 12px / 1 var(--rxf-forge, var(--dx-hud));
+    font-variant-numeric: tabular-nums lining-nums;
+    letter-spacing: 0.04em;
+    translate: 0 -1px;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > header.rxs-local-nav nav a[aria-current="location"]::before {
+    color: var(--rxa-gold);
+    text-shadow: 0 0 10px rgb(242 216 150 / 45%);
+  }
+}
+
+@media (min-width: 901px) and (hover: hover) and (pointer: fine) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > header.rxs-local-nav nav a:hover::before {
+    color: var(--rxa-gold);
+  }
+}
+
+/* ================================================================
+   Chapter heads: the index at the right
+   ================================================================ */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-section > .rxs-section-heading {
+  position: relative;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-section > .rxs-section-heading > .rxa-index {
+  position: absolute;
+  z-index: 1;
+  /* An absolutely placed grid child is boxed by its grid area; the whole
+     head is the area, so the index sits at the head's own right edge. */
+  grid-area: 1 / 1 / -1 / -1;
+  top: 1px;
+  right: 0;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0;
+  padding: 0 0 0 46px;
+  color: rgb(168 203 212 / 78%);
+  background:
+    linear-gradient(90deg, var(--rxa-gold), var(--rxa-gold)) 0 55% / 28px 1px no-repeat,
+    radial-gradient(circle, var(--rxa-gold) 0 1.5px, transparent 2px) 30px 55% / 6px 6px no-repeat;
+  background-position: 0 55%, 29px 50%;
+  font: 500 12px / 1 var(--dx-hud);
+  letter-spacing: 0.22em;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-section > .rxs-section-heading > .rxa-index > b {
+  color: var(--rxa-gold);
+  font: 600 15px / 1 var(--rxf-forge, var(--dx-hud));
+  font-variant-numeric: tabular-nums lining-nums;
+  letter-spacing: 0.02em;
+}
+
+/* 05: on wide screens the trinity rings stand at the head's right, so its
+   index takes the free corner at the top left, above the forged numeral. */
+@media (min-width: 1100px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #system > .rxs-section-heading > .rxa-index {
+    right: auto;
+    left: 0;
+  }
+}
+
+/* Phones: the forged numeral beside the kicker already names the chapter;
+   the index would crowd the kicker's one line. */
+@media (max-width: 760px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-section > .rxs-section-heading > .rxa-index {
+    display: none;
+  }
+}
+
+/* ================================================================
+   01 PERFORMANCE: the comparison as one instrument
+   ================================================================ */
+/* The plate lays out as a grid: the selector row, then the formula and the
+   key on one legend line, then the readings and the processing columns. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-comparison {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 24px;
+  align-items: center;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-comparison > .rxs-comparison-selector,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-comparison > .rxs-comparison-metrics,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-comparison > .rxs-processing-comparison {
+  grid-column: 1 / -1;
+}
+
+/* The selector row: the label keeps one line, the control takes the rest
+   (a narrow script column — an iPad in landscape — no longer wraps 「比較
+   する相手」 beside a fixed 360px control). */
+@media (min-width: 681px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-comparison > .rxs-comparison-selector {
+    grid-template-columns: max-content minmax(0, 1fr);
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-comparison > .rxs-comparison-selector > span {
+    white-space: nowrap;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-comparison > .rxs-comparison-selector > select {
+    width: 100%;
+    max-width: 360px;
+    justify-self: end;
+  }
+}
+
+/* Phones keep the label above a full-width control. */
+@media (max-width: 680px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-comparison > .rxs-comparison-selector {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-comparison > .rxs-comparison-selector > select {
+    width: 100%;
+  }
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-comparison > .rxs-comparison-formula {
+  grid-column: 1;
+  margin: 0;
+  padding: 0 0 0 14px;
+  border-left: 2px solid var(--rxa-gold);
+  color: rgb(240 246 255 / 72%);
+  font-size: 13px;
+  line-height: 1.5;
+  text-align: start;
+  text-wrap: balance;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-comparison > .rxs-comparison-formula b {
+  color: #fff;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-comparison > .rxs-comparison-key {
+  grid-column: 2;
+  justify-content: flex-end;
+  margin: 0;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-comparison > .rxs-comparison-metrics {
+  margin-top: 18px;
+  padding-top: 6px;
+  border-top: 1px solid var(--rxa-line);
+}
+
+/* Where the plate is narrow (phones; the script column beside the stage on
+   an iPad in landscape) the legend stacks: formula, then the key. */
+@media (max-width: 680px), (min-width: 1100px) and (max-width: 1299.98px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-comparison > .rxs-comparison-formula,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-comparison > .rxs-comparison-key {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-comparison > .rxs-comparison-key {
+    margin-top: 12px;
+    padding-left: 16px;
+  }
+}
+
+/* Each reading is a row: hairline between, the result right. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-comparison-metrics > article + article {
+  padding-top: 22px;
+  border-top: 1px solid var(--rxa-line-soft);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-comparison-metrics > article > header > div > small {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-comparison-result > i {
+  font-size: 12px;
+  letter-spacing: 0.1em;
+}
+
+/* The processing columns: each a sub-plate with its own index. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-processing-comparison > header > small {
+  font-size: 12px;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-processing-comparison > div > section {
+  position: relative;
+  border: 1px solid var(--rxa-line-soft);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-processing-comparison > div > section > h4 {
+  border-bottom: 1px solid var(--rxa-line);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-processing-comparison > div > section:last-child {
+  border-color: rgb(121 232 255 / 28%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 34%), inset 0 0 0 1px rgb(121 232 255 / 6%);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-processing-comparison > div > section:last-child > h4 {
+  color: var(--rxa-ice);
+}
+
+/* ================================================================
+   02 P14: the three readings as cells, the comparator's rows
+   ================================================================ */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-copy > dl > div {
+  position: relative;
+  padding-top: 14px;
+  background: linear-gradient(90deg, var(--rxa-gold), var(--rxa-gold)) 0 0 / 22px 1px no-repeat;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-copy > dl > div > dt {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-comparator > header > small {
+  font-size: 12px;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-comparator > header > output {
+  font-size: 12px;
+  letter-spacing: 0.1em;
+}
+
+/* The readings: one hairline per row, the row in reach lit a little. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-metrics > article {
+  border-top: 1px solid var(--rxa-line-soft);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-metrics > article:first-child {
+  border-top-color: var(--rxa-line);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-metrics > article:last-child {
+  border-bottom: 1px solid var(--rxa-line);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-values > span > i,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-metrics > article > p > span {
+  font-size: 12px;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-method-note,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-comparison-note {
+  padding-left: 14px;
+  border-left: 1px solid var(--rxa-line);
+}
+
+/* The segmented P1 / P2 control and the native select: 44px floors, a
+   little more on a finger. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-range-labels > button {
+  min-height: 44px;
+  min-width: 72px;
+}
+
+/* On a finger the two native selects stand 48px tall. WebKit sizes a
+   menulist select by its own appearance and ignores a min-height, so the
+   control is drawn by the page here (its native picker is unchanged): the
+   plate, a 1px ice edge and one etched chevron at the right. */
+@media (any-pointer: coarse) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-comparison-selector > select,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-native-select > select {
+    appearance: none;
+    -webkit-appearance: none;
+    box-sizing: border-box;
+    height: auto;
+    min-height: 48px;
+    padding: 10px 44px 10px 14px;
+    border: 1px solid rgb(121 232 255 / 42%);
+    border-radius: 2px;
+    color: #f0f6ff;
+    background:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9'%3E%3Cpath d='M1 1l6 6 6-6' fill='none' stroke='%2379e8ff' stroke-width='1.5'/%3E%3C/svg%3E")
+        right 16px center / 14px 9px no-repeat,
+      rgb(10 17 25);
+    font-size: 16px;
+    line-height: 1.4;
+  }
+}
+
+/* ================================================================
+   04 THREE STAGES: the switcher and the status plate
+   ================================================================ */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-stage-hint {
+  font-size: 12px;
+  letter-spacing: 0.06em;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-status {
+  padding: 18px 20px 18px 22px;
+  border-block: 1px solid var(--rxa-line);
+  background: var(--rxa-plate);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-status-heading {
+  font-size: 12px;
+  letter-spacing: 0.18em;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-status-track {
+  height: 4px;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-status-track i.is-reached {
+  box-shadow: 0 0 10px color-mix(in srgb, var(--rxs-stage-accent, #79e8ff) 55%, transparent);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-status p small {
+  padding: 2px 7px;
+  border: 1px solid color-mix(in srgb, var(--rxs-stage-accent, #79e8ff) 55%, transparent);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-status p em {
+  padding-left: 12px;
+  border-left: 2px solid var(--rxs-stage-accent, #79e8ff);
+}
+
+/* The comparison sheet: a 12px label on its 72px control, the plus turning
+   as it opens, the cards' index at 12px. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-comparison {
+  border-block: 1px solid var(--rxa-line);
+  background: var(--rxa-plate);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-comparison > summary > span,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-comparison-card > p:first-child {
+  font-size: 12px;
+  letter-spacing: 0.16em;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-comparison > summary > i {
+  border-color: rgb(242 216 150 / 55%);
+  background: rgb(3 9 16 / 70%);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-comparison[open] > summary {
+  border-bottom: 1px solid var(--rxa-line);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-comparison-card > img {
+  border: 1px solid var(--rxa-line-soft);
+}
+
+/* Desktop: the sheet follows the status plate without the dead band. */
+@media (min-width: 1100px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-comparison {
+    margin-top: 40px;
+  }
+}
+
+/* ================================================================
+   05 SELF-RESONANCE and the end
+   ================================================================ */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-system-grid > article {
+  position: relative;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-system-grid > article::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 34px;
+  width: 34px;
+  height: 2px;
+  background: var(--rxa-gold);
+  pointer-events: none;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-system-grid > article > header > small {
+  font-size: 12px;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-footer > a:focus-visible {
+  outline: 2px solid var(--rxa-gold);
+  outline-offset: 3px;
+}
+
+/* ================================================================
+   CONTENTS: the map at 12px, each entry a cell with an accent edge
+   ================================================================ */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxe-chapter-map .rxe-chapter-map-heading {
+  font-size: 12px;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxe-chapter-map a small {
+  font-size: 12px;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxe-chapter-map a em {
+  font-size: 12px;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxe-chapter-map a {
+  position: relative;
+}
+
+/* PREMIERE drew a 2px rail along the cell's top edge on hover; the same
+   pseudo-element is now the cell's accent edge, standing at its left. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxe-chapter-map a::before {
+  content: "";
+  position: absolute;
+  top: 18px;
+  right: auto;
+  bottom: 18px;
+  left: 0;
+  width: 2px;
+  height: auto;
+  background: linear-gradient(180deg, var(--rxa-ice), var(--rxa-gold));
+  transform: scaleY(0);
+  transform-origin: 50% 0;
+  pointer-events: none;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxe-chapter-map a:focus-visible::before {
+  transform: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxe-chapter-map a:hover::before {
+    transform: none;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxe-chapter-map a:hover i {
+    translate: 2px -2px;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-comparison > summary:hover {
+    background: rgb(121 232 255 / 5%);
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-comparison > summary:hover > i {
+    border-color: var(--rxa-gold);
+    color: #fff;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-metrics > article:hover {
+    background: rgb(121 232 255 / 4%);
+  }
+}
+
+/* ================================================================
+   Tablets in landscape: the fixed ZEUS button stands over the right
+   44px of the script column; the right-aligned readings keep clear.
+   ================================================================ */
+@media (min-width: 1100px) and (max-width: 1299.98px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #performance,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 {
+    padding-right: max(var(--rxt-gutter, 40px), 96px);
+  }
+}
+
+/* ================================================================
+   Motion: finite transitions, only where motion is welcome
+   ================================================================ */
+@media (prefers-reduced-motion: no-preference) {
+  html[data-family="special"]:not([data-world-effects="economy"]) body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-section > .rxs-section-heading.rxs-reveal:not(.is-visible) > .rxa-index {
+    opacity: 0;
+    translate: 12px 0;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]) body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-section > .rxs-section-heading > .rxa-index {
+    transition:
+      opacity 520ms var(--rxa-ease) 260ms,
+      translate 620ms var(--rxa-ease) 260ms;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]) body .rxs-page.rxs-page.rxs-rexonance-page > header.rxs-local-nav nav a::before {
+    transition: color 200ms ease;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]) body .rxs-page.rxs-page.rxs-rexonance-page > .rxe-chapter-map a::before {
+    transition: transform 260ms var(--rxa-ease);
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]) body .rxs-page.rxs-page.rxs-rexonance-page > .rxe-chapter-map a i {
+    transition: translate 220ms var(--rxa-ease);
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]) body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-comparison > summary > i {
+    transition:
+      rotate 320ms var(--rxa-ease),
+      border-color 200ms ease,
+      color 200ms ease;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]) body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-status-track i {
+    transition: box-shadow 320ms ease;
+  }
+}
+
+/* ================================================================
+   Forced colours: borders for brackets, no painted light
+   ================================================================ */
+@media (forced-colors: active) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-comparison::before,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-comparator::before,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-status::before,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-comparison::before,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-system-grid > article::before,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxe-chapter-map a::before {
+    background: none;
+    border: 1px solid CanvasText;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-section > .rxs-section-heading > .rxa-index {
+    background: none;
+    padding-left: 0;
+    color: CanvasText;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-section > .rxs-section-heading > .rxa-index > b,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > header.rxs-local-nav nav a::before {
+    color: CanvasText;
+    text-shadow: none;
+  }
+}
