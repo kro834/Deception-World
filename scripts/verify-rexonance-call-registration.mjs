@@ -15,8 +15,9 @@
 //     box and backing (round 4, patch A);
 //  2. the pixels: across each plate's hand-off (`to` − 2 ms → `to` + 2 ms)
 //     the best sub-pixel fit of the frame after onto the frame before is no
-//     shift at all. The figure's own jolt (rxSuitJolt) is held at one time
-//     for both frames, so only the canvases' drawing differs; the fit ignores
+//     shift at all. Any animation on the figure and its ancestors is held
+//     at one time for both frames (the figure itself never moves since the
+//     jolt went, sweep 2 F84), so only the canvases' drawing differs; the fit ignores
 //     the fifth of the pixels that change most (chips and sparks passing,
 //     the glint starting);
 //  3. the screen: last, the engine's draws are muted and the same grid of
@@ -69,7 +70,7 @@ const failures = [];
 const check = (ok, message) => ok || failures.push(message);
 
 // Every document animation to `time` (the engine reads the call meter's);
-// those on the figure and its ancestors (its jolt) to `hold`.
+// those on the figure and its ancestors to `hold`.
 const seek = (time, hold = time) =>
   page.evaluate(
     ([at, still]) => {
