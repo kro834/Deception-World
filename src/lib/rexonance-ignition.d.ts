@@ -11,12 +11,3 @@ export function entryElapsedTime(canonicalMs: number): number;
 export function sampleFlameBirth<T extends Float32Array | Float64Array>(seed: number, out: T): T;
 export function naniteFlameEnvelope(phase: number): number;
 export function naniteFlameScatter(phase: number): number;
-export const REXONANCE_ENTRY_AFTERBURN: Readonly<{ from: number; to: number }>;
-export const REXONANCE_SCROLL_AFTERBURN: Readonly<{ from: number; to: number }>;
-export const NANITE_AFTERBURN: Readonly<{ rise: number; fade: number }>;
-export function naniteAfterburnProgress(
-  value: number,
-  window: Readonly<{ from: number; to: number }>,
-): number;
-export function naniteAfterburnEnvelope(burn: number): number;
-export function naniteAfterburnQuench(burn: number, y: number): number;

@@ -1,13 +1,7 @@
 // Connected combustion spreads from the feet through branching body paths.
 // Both nanite engines share its irregular advancing fronts and extinction;
 // the Blender volume supplies turbulent detail inside those burning paths.
-import {
-  NANITE_FIRE_PHASES,
-  naniteAfterburnEnvelope,
-  naniteAfterburnQuench,
-  naniteFlameScatter,
-  sampleFlameBirth,
-} from "./rexonance-ignition.js";
+import { NANITE_FIRE_PHASES, naniteFlameScatter, sampleFlameBirth } from "./rexonance-ignition.js";
 export const NANITE_FLAME_ATLAS = Object.freeze({
   src: "/rexonance-flame-natural-20261019/flame.webp",
   width: 1024,
@@ -111,28 +105,6 @@ const sourceScratch = new Float32Array(4);
 for (let i = 0; i < 48; i += 1) {
   sampleFlameBirth((i + 0.5) / 48, sourceScratch);
   SOURCES.set(sourceScratch, i * 4);
-}
-
-// Afterburn roots sit on the silhouette's edge, nudged outward, so the
-// lingering fire licks past the body instead of painting over its armour.
-// Two more crown the shoulders, so fire still climbs above the pauldrons
-// once they have seated; four stand at the soles, where the heat pools.
-const AFTER_ROOTS = 24;
-const AFTER_EDGE = AFTER_ROOTS - 6;
-const AFTER = new Float32Array(AFTER_ROOTS * 4);
-for (let i = 0; i < AFTER_EDGE; i += 1) {
-  sampleFlameBirth((i + 0.5) / AFTER_EDGE, sourceScratch);
-  AFTER[i * 4] = sourceScratch[0] + sourceScratch[2] * 0.034;
-  AFTER[i * 4 + 1] = sourceScratch[1] + sourceScratch[3] * 0.012;
-  AFTER[i * 4 + 2] = sourceScratch[2];
-  AFTER[i * 4 + 3] = sourceScratch[3];
-}
-for (let i = 0; i < 6; i += 1) {
-  const at = (AFTER_EDGE + i) * 4;
-  AFTER[at] = [0.21, 0.79, 0.2, 0.34, 0.66, 0.8][i];
-  AFTER[at + 1] = i < 2 ? 0.215 : 0.975;
-  AFTER[at + 2] = i % 2 ? 0.4 : -0.4;
-  AFTER[at + 3] = i < 2 ? -0.9 : 0;
 }
 
 // Three small surfaces (~2.75 MiB), prepared once and retained across calls.
@@ -478,127 +450,6 @@ export function drawNaniteFirebrand(context, x, y, strength, clock, scale = 1) {
   }
 }
 
-/** The fire the detonation leaves behind (owner, 2026-10-21). Drawn in the
- * scenes' back slot, under the plates, for the whole assembly. Rooted
- * tongues rise and lean with a gust that travels up the body; each pairs a
- * broad outer flame with a narrow additive core, so overlapping emission
- * reaches a pale incandescent centre instead of a flat green haze. Seated
- * armour quenches the fire beneath it. The front layer, drawn after the
- * plates, adds only thin cores licking the armour's edge and the embers, so
- * the finished metal reads through the fire rather than under a green sheet.
- * Embers follow closed-form lifetimes: the same clock and burn always paint
- * the same frame. */
-export function drawBodyAfterburn(
-  context,
-  size,
-  strength,
-  clock,
-  scale = 1,
-  burn = 0,
-  layer = "all",
-) {
-  if (
-    !valid(strength, clock, scale) ||
-    !Number.isFinite(burn) ||
-    burn <= 0 ||
-    burn >= 1 ||
-    !size ||
-    !Number.isFinite(size.width) ||
-    size.width <= 0 ||
-    !Number.isFinite(size.height) ||
-    size.height <= 0 ||
-    !prepare()
-  )
-    return;
-  if (layer === "all") {
-    drawBodyAfterburn(context, size, strength, clock, scale, burn, "back");
-    drawBodyAfterburn(context, size, strength, clock, scale, burn, "front");
-    return;
-  }
-  const W = size.width;
-  const H = size.height;
-  const unit = H / 1000;
-  const power = clamp(strength) * naniteAfterburnEnvelope(burn);
-  if (power < 0.002) return;
-  const back = layer === "back";
-  // Back: broad flame + core per root. Front: every other root's core.
-  const stride = (coarse ? 2 : 1) * (back ? 1 : 2);
-  // Touch skips every other root; its remaining tongues grow to fill in.
-  const grow = coarse ? 1.3 : 1;
-  context.save();
-  try {
-    if (scale !== 1) context.scale(scale, scale);
-    context.globalCompositeOperation = "lighter";
-    if (heat && back) {
-      // Emitted light: the suit and floor take the fire's colour.
-      const breathe = 0.9 + 0.1 * Math.sin(clock * 3.3) * Math.sin(clock * 1.7 + 0.6);
-      context.globalAlpha = power * 0.17 * breathe;
-      context.drawImage(heat, -W * 0.12, H * 0.02, W * 1.24, H * 0.98);
-      context.globalAlpha = power * 0.36 * breathe * (1 - naniteAfterburnQuench(burn, 1));
-      context.drawImage(heat, W * 0.08, H * 0.92, W * 0.84, H * 0.12);
-    }
-    for (let i = 0; i < AFTER_ROOTS; i += stride) {
-      const at = i * 4;
-      const k = (i % COUNT) * 8;
-      // Near-side cores stand a little further out, at the armour's rim.
-      const x = (AFTER[at] + (back ? 0 : AFTER[at + 2] * 0.04)) * W;
-      const y = AFTER[at + 1] * H;
-      const local = power * (1 - naniteAfterburnQuench(burn, AFTER[at + 1]));
-      if (local < 0.01) continue;
-      // Two incommensurate flickers plus a slow gust climbing the figure.
-      const flicker =
-        0.8 +
-        0.14 * Math.sin(clock * (5.3 + SEED[k] * 2.9) + SEED[k + 1] * 40) +
-        0.08 * Math.sin(clock * (11.9 + SEED[k + 2] * 4.1) + SEED[k + 3] * 17);
-      const gust = Math.sin(clock * 1.9 - AFTER[at + 1] * 4.4 + SEED[k + 4] * 2.2);
-      const lean =
-        AFTER[at + 2] * 0.2 + gust * 0.09 + Math.sin(clock * 4.6 + SEED[k + 5] * 11) * 0.04;
-      const width = (66 + SEED[k + 6] * 52) * unit * grow;
-      const height = (150 + SEED[k + 7] * 150) * unit * grow * (0.45 + 0.55 * local) * flicker;
-      const frame = clock * 16 * (0.86 + SEED[k + 2] * 0.3) + SEED[k + 5] * 32;
-      if (back) tongue(context, x, y, width, height, frame, local * 0.74, lean);
-      tongue(
-        context,
-        x + gust * 2 * unit,
-        y,
-        width * (back ? 0.5 : 0.58),
-        height * 0.64,
-        frame + 11,
-        local * (back ? 0.86 : 0.52),
-        lean * 0.7,
-      );
-    }
-    if (back) return;
-    // Embers shed by the tongues: they rise, drift with the same gust,
-    // cool and shrink. Count is fixed; only their phase follows the clock.
-    const embers = coarse ? 18 : 40;
-    context.fillStyle = "rgb(206 255 160)";
-    for (let e = 0; e < embers; e += 1) {
-      const k = (e % COUNT) * 8;
-      const root = ((e * 7) % AFTER_ROOTS) * 4;
-      const local = power * (1 - naniteAfterburnQuench(burn, AFTER[root + 1]));
-      if (local < 0.01) continue;
-      const life = 0.7 + SEED[k + 3] * 0.9;
-      const cycle = (clock + SEED[k + 4] * 13) / life;
-      const age = cycle - Math.floor(cycle);
-      const fade = Math.pow(1 - age, 1.6) * Math.min(1, age / 0.06);
-      const rise = (150 + SEED[k + 5] * 190) * unit * age;
-      const drift =
-        AFTER[root + 2] * age * 28 * unit + Math.sin(age * 7 + SEED[k + 6] * 9) * 10 * unit * age;
-      const w = (1.2 + SEED[k + 7] * 1.4) * unit * (1 - 0.6 * age);
-      context.globalAlpha = local * fade * 0.9;
-      context.fillRect(
-        AFTER[root] * W + drift - w / 2,
-        AFTER[root + 1] * H - rise,
-        w,
-        w * (1.6 + SEED[k + 1] * 1.2),
-      );
-    }
-  } finally {
-    context.restore();
-  }
-}
-
 // Heat advances along rooted branches. Time only bends/lifts those paths:
 // it cannot revolve them around the figure or form a circular fire shell.
 function poseVortex(power, clock, phase) {
@@ -807,9 +658,7 @@ function paintBodyField(power, clock, phase) {
       const rawAngle = Math.atan2(-VORTEX[at + 2], VORTEX[at + 3]) + Math.PI / 2;
       const angle = rawAngle * 0.64 + Math.sin(clock * 4.8 + i * 1.3) * 0.06;
       const tearing = VORTEX[at + 6];
-      // Mostly emission: two of three sheets add their radiance, so dense
-      // overlaps glow toward a pale core; one keeps the deep absorbing body.
-      c.globalCompositeOperation = i % 3 === 0 ? "source-over" : "lighter";
+      c.globalCompositeOperation = i % 3 === 2 ? "lighter" : "source-over";
       tongue(
         c,
         VORTEX[at],
@@ -819,34 +668,6 @@ function paintBodyField(power, clock, phase) {
         clock * 16 + SEED[k + 2] * 32,
         Math.min(1, 0.94 + VORTEX[at + 5] * 0.1) * tearing,
         angle,
-      );
-    }
-    // Incandescent cores ride the burning branches: narrow additive tongues
-    // whose overlap turns pale, so the volume reads as flame with a hot
-    // centre rather than a uniformly lit green cloud. Like every other
-    // detail they stay inside the connected branches (the mask below).
-    const cores = coarse ? 12 : 18;
-    const coreSpan = cores / VORTEX_STRANDS - 1;
-    c.globalCompositeOperation = "lighter";
-    for (let i = 0; i < cores; i += 1) {
-      const k = ((i + 23) % COUNT) * 8;
-      const strand = i % VORTEX_STRANDS;
-      const along = Math.floor(i / VORTEX_STRANDS);
-      const step = Math.min(VORTEX_STEPS - 1, 3 + Math.round((along * 14) / coreSpan));
-      const at = (strand * (VORTEX_STEPS + 1) + step) * VORTEX_STRIDE;
-      // Cores thin and rise with their stream; they never outlive it.
-      const tearing = Math.max(0.05, VORTEX[at + 6]) * (1 - burst * 0.85);
-      const rawAngle = Math.atan2(-VORTEX[at + 2], VORTEX[at + 3]) + Math.PI / 2;
-      const across = 6 + VORTEX[at + 4] * 0.9;
-      tongue(
-        c,
-        VORTEX[at],
-        VORTEX[at + 1],
-        across,
-        across * (2.4 + SEED[k] * 0.9),
-        clock * 18 + SEED[k + 1] * 32,
-        tearing * 0.62,
-        rawAngle * 0.5 + Math.sin(clock * 5.6 + i * 1.9) * 0.08,
       );
     }
     // Detail stays inside the connected burning branches and their tips.
@@ -903,9 +724,7 @@ export function drawBodyFlame(context, size, strength, clock, scale = 1, layer =
   try {
     if (scale !== 1) context.scale(scale, scale);
     if (connected) {
-      // Fire emits light; it does not paint an opaque green sheet over the
-      // suit. Both layers add, the near one more strongly.
-      context.globalCompositeOperation = "lighter";
+      context.globalCompositeOperation = layer === "back" ? "lighter" : "source-over";
       // Quiet ignition is a small but visible lick, not an invisible delay.
       // Its spatial front remains small; only its local radiance is lifted.
       const radiance =
