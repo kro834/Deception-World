@@ -139,7 +139,7 @@ async function installProbe(context) {
       };
       nativeFrames.set(canvas, frame);
     };
-    const naniteURL = /\/rexonance-nanites-20261018\/(?:cells|comets|guide|fx)\.webp/;
+    const naniteURL = /\/rexonance-nanites-\d{8}\/(?:cells|comets|guide|fx)\.webp/;
     const isNanite = (source) =>
       Boolean(
         source &&
@@ -1149,7 +1149,7 @@ try {
         if (mode === "normal" && !baseline) {
           record.nativeTracerSelfTest = await page.evaluate(async () => {
             const bitmap = await createImageBitmap(
-              await (await fetch("/rexonance-nanites-20261018/cells.webp")).blob(),
+              await (await fetch("/rexonance-nanites-20261021/cells.webp")).blob(),
             );
             const canvas = document.createElement("canvas");
             canvas.width = 32;

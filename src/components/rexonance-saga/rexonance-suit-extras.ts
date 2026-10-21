@@ -201,6 +201,15 @@ const FIT_WINDOW = 0.3;
 const LED_MS = 60;
 
 const HEROES = 24;
+/** Lock flashes a frame (desktop). */
+const LOCK_FLASHES = 32;
+/** A chip's size relative to the swarm's base, from its hash: most
+ * 0.78–1.12, the top 4.5% hero parts 1.45–1.75 (the scroll engine's
+ * naniteSizeScale, inlined: the call's runtime loads no second engine). */
+const sizeScale = (h0: number) => {
+  const h = (h0 * 11.73) % 1;
+  return h > 0.955 ? 1.45 + (0.3 * (h - 0.955)) / 0.045 : 0.78 + 0.34 * h * h;
+};
 /** Chips drawn per hex frame: mip and cell columns, tone rows. */
 const MIP_X = Int16Array.from(KIT_CELLS.mip.x);
 const MIP_Y = Int16Array.from(KIT_CELLS.mip.y);
@@ -1153,7 +1162,8 @@ function* layoutSteps(all: Plate[], gold: Cells): Generator<undefined, Layout, u
     L.phi[c] = TAU * hash(c, 2441);
     L.chipF0[c] = FRAMES * hash(c, 2557);
     L.chipSpin[c] = 1.2 + 1.4 * hash(c, 2663);
-    L.chipSize[c] = (TOUCH ? 6 : 8) * (0.85 + 0.3 * hash(c, 2777));
+    // A scale hierarchy (2026-10-21): parts at several sizes, a few heroes.
+    L.chipSize[c] = (TOUCH ? 6 : 8) * sizeScale(hash(c, 2777));
     L.chipTone[c] =
       c % 9 === 0
         ? WHITE
@@ -2469,6 +2479,8 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
   let draws = 0;
   let comets = 0;
   let heroes = 0;
+  // The lock flashes drawn this frame (a typed slot, not a boxed let).
+  const lockFlashes = new Int32Array(1);
   let governed = false;
   let slow = 0;
   let frames = 0;
@@ -3758,6 +3770,7 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
   const before = (t: number) => {
     frames += 1;
     draws = 0;
+    lockFlashes[0] = 0;
     limit[0] = governed ? GOVERNED_BUDGET : BUDGET;
     limit[1] = governed ? GOVERNED_JIGS : JIGS;
     comets = 0;
@@ -4215,8 +4228,31 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
         comet(tone);
       }
       const unfolded = pose[UNFOLD];
-      if (unfolded >= 0 && tone < 3) unfold(unfolded | 0, tone);
-      else chip(pose[FRAME] | 0, tone, u >= 0.9);
+      if (unfolded >= 0 && tone < 3) {
+        unfold(unfolded | 0, tone);
+        // The lock flash (2026-10-21): a short weld-bright star over the
+        // tile as its metal materialises, gone by the lock — a part locking
+        // in, not a chip fading out (desktop, a bounded few a frame).
+        if (!TOUCH && !governed && lockFlashes[0] < LOCK_FLASHES && draws < limit[0]) {
+          const g = unfolded / 6;
+          const f = g < 0.3 ? g / 0.3 : 1 - (g - 0.3) / 0.7;
+          if (f > 0.05) {
+            draws += 1;
+            lockFlashes[0] += 1;
+            flight.globalAlpha = 0.6 * f;
+            sprite(
+              cellsImage,
+              KIT_CELLS.spark.x + 32 * (f > 0.66 ? 0 : f > 0.33 ? 1 : 2),
+              KIT_CELLS.spark.y,
+              32,
+              32,
+              x,
+              y,
+              pose[SD] * 1.8,
+            );
+          }
+        }
+      } else chip(pose[FRAME] | 0, tone, u >= 0.9);
       if (u >= 0.86 && fadeCount < fades.length) {
         fades[fadeCount] = i;
         fadeA[fadeCount] = smooth((u - 0.86) / 0.14);

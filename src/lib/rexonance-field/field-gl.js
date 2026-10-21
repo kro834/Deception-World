@@ -242,8 +242,12 @@ void main() {
   float d = length(vec2(vLocal.x - x, vLocal.y)) / max(vW, 0.001);
   float core = 1.0 - clamp(d, 0.0, 1.0);
   core *= core;
+  // A hot white filament down the streak's middle inside its tinted glow
+  // (2026-10-21): a lit metal particle, not a soft tinted smear.
+  float hot = max(0.0, 1.0 - d * 2.4);
+  hot *= hot;
   float taper = vLen > 0.001 ? mix(0.2, 1.0, clamp(x / vLen, 0.0, 1.0)) : 1.0;
-  gl_FragColor = vColor * (core * taper);
+  gl_FragColor = vColor * (core * taper) + vec4(vColor.a) * (0.45 * hot * taper);
 }
 `;
 

@@ -75,7 +75,7 @@ await context.addInitScript(() => {
       : canvas?.matches?.("canvas.rzn-canvas")
         ? "scroll"
         : null;
-  const kit = /\/rexonance-nanites-20261018\/(?:cells|comets|guide|fx)\.webp/;
+  const kit = /\/rexonance-nanites-\d{8}\/(?:cells|comets|guide|fx)\.webp/;
   const isKit = (source) => source && (nanites.has(source) || kit.test(source.src || ""));
   const isFlame = (source) =>
     source &&

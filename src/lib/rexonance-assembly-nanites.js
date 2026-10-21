@@ -226,6 +226,13 @@ const TRAIL_MIN = 4;
 const TRAIL_MAX = 22;
 const BAND_GLINTS = 48;
 
+/** A chip's size relative to the swarm's base (s0), from its hash: most
+ * 0.78–1.12, the top 4.5% hero parts 1.45–1.75. */
+export function naniteSizeScale(hash) {
+  const h = (hash * 11.73) % 1;
+  return h > 0.955 ? 1.45 + (0.3 * (h - 0.955)) / 0.045 : 0.78 + 0.34 * h * h;
+}
+
 /** A stable hash of an index into [0, 1) (no PRNG state). */
 export function naniteHash(index, salt) {
   let x = Math.imul((index + 1) ^ Math.imul(salt + 0x51ed27, 0x9e3779b1), 0x85ebca6b);
@@ -2421,6 +2428,16 @@ export function createAssemblyNanites({
   const HSH = nano.hsh;
   const TP = nano.tp;
   const PARENT = nano.parent;
+  // A scale hierarchy (owner, 2026-10-21: 「ナノマシンのクオリティも上げて。」):
+  // machine parts come in sizes. Each chip's own size by its hash — most
+  // 0.78–1.12 × s0, one in twenty a larger hero part up to 1.75 × — so a
+  // stream reads as a flock of parts at several scales, not confetti of
+  // one. A tile's size eases back to s0 along its river, so every hover,
+  // unfold and lock is exactly as before.
+  const SZT = new Float32Array(n);
+  const SZF = new Float32Array(F);
+  for (let i = 0; i < n; i += 1) SZT[i] = naniteSizeScale(HSH[i]);
+  for (let j = 0; j < F; j += 1) SZF[j] = naniteSizeScale(free.hsh[j]);
   // Each socket is keyed to an already-formed neighbour. Keep the approach
   // on the outward side of that edge rather than diving every cell along
   // the same plate normal. Two floats per cell, prepared outside the frame.
@@ -2761,7 +2778,7 @@ export function createAssemblyNanites({
       const y = RG[1];
       const z = RG[2];
       let kind = helm && q >= N.crown[0] ? 3 : 2;
-      let size = s0 * depthSize(z);
+      let size = s0 * SZT[i] * depthSize(z);
       const age = q - b;
       const s = clamp01(age / BIRTH);
       FIRE[slot] =
@@ -2847,7 +2864,7 @@ export function createAssemblyNanites({
       }
       // Each river stands out from the cocoon (round 3, review N4): its chips
       // white and a quarter larger.
-      const ring0 = s0 * depthSize(z0);
+      const ring0 = s0 * SZT[i] * depthSize(z0);
       size = ring0 + (s0 * 1.375 - ring0) * v;
       TN[slot] = 2;
       const alpha0 = depthAlpha(z0);
@@ -2974,7 +2991,8 @@ export function createAssemblyNanites({
     let x = RG[0];
     let y = RG[1];
     const z = RG[2];
-    let size = s0 * depthSize(z);
+    const own = s0 * SZF[j];
+    let size = own * depthSize(z);
     let alpha = depthAlpha(z);
     // The free tumble settles into the braid's banking.
     const tumble = free.f0[j] + 2400 * free.spin[j] * (q - b);
@@ -3022,7 +3040,7 @@ export function createAssemblyNanites({
       // (From the cocoon's depth scale into the rings', with the gather.)
       const near = depthSize(gz);
       const lit = depthAlpha(gz);
-      size = s0 * (near + (1 + 0.3 * gz - near) * e) * (1 - 0.35 * u);
+      size = own * (near + (1 + 0.3 * gz - near) * e) * (1 - 0.35 * u);
       alpha =
         (lit + (0.55 + 0.2 * (gz + 1) - lit) * e) * (u > 0.7 ? 1 - smooth((u - 0.7) / 0.3) : 1);
       if (u > 0) kind = 8;
@@ -3420,7 +3438,7 @@ export function createAssemblyNanites({
   const flowTrails = (ctx, list, count, light) => {
     if (coarse) return;
     ctx.strokeStyle = "rgb(196 244 255)";
-    ctx.lineWidth = 0.8;
+    ctx.lineWidth = 1;
     for (let half = 0; half < 2; half += 1) {
       let traced = 0;
       ctx.beginPath();
@@ -3434,7 +3452,7 @@ export function createAssemblyNanites({
         traced += 1;
       }
       if (!traced) break;
-      ctx.globalAlpha = (half ? 0.5 : 0.2) * light;
+      ctx.globalAlpha = (half ? 0.58 : 0.24) * light;
       ctx.stroke();
     }
   };
@@ -4846,7 +4864,7 @@ export function createAssemblyNanites({
     // tapering — faint over its whole length, brighter over the half nearest
     // the chip.
     ctx.strokeStyle = "rgb(196 244 255)";
-    ctx.lineWidth = 0.8;
+    ctx.lineWidth = 1;
     for (let half = 0; half < 2; half += 1) {
       let traced = 0;
       ctx.beginPath();
@@ -4860,7 +4878,7 @@ export function createAssemblyNanites({
         traced += 1;
       }
       if (!traced) break;
-      ctx.globalAlpha = (half ? 0.42 : 0.18) * (coarse ? 0.85 : 1);
+      ctx.globalAlpha = (half ? 0.5 : 0.22) * (coarse ? 0.85 : 1);
       ctx.stroke();
     }
     for (let c = 0; c < nFlight; c += 1) {
@@ -4948,6 +4966,33 @@ export function createAssemblyNanites({
         const draw = S[i] * (1.1 + 1.3 * g);
         ctx.globalAlpha = 0.85 * g;
         ctx.drawImage(cells, SPX, SPY, 32, 32, X[i] - draw / 2, Y[i] - draw / 2, draw, draw);
+        sprites_ += 1;
+        glints += 1;
+      }
+      // The lock flash (2026-10-21): as a tile's metal materialises on its
+      // seat, a short weld-bright star over it, gone by the lock — a part
+      // locking in, not a chip fading out. (Within the glints' budget; its
+      // alpha is 0 at u = 1, so the finished suit's pixels are untouched.)
+      for (let c = 0; c < nFlight && glints < GLINT_MAX; c += 1) {
+        const i = flightList[c];
+        const u = U[i];
+        if (u < 0.86 || A[i] < 0) continue;
+        const g = (u - 0.86) / 0.14;
+        const f = g < 0.3 ? g / 0.3 : 1 - (g - 0.3) / 0.7;
+        if (f <= 0.05) continue;
+        const draw = (TW[i] > TH[i] ? TW[i] : TH[i]) * (1.2 + 0.9 * f);
+        ctx.globalAlpha = 0.62 * f;
+        ctx.drawImage(
+          cells,
+          SPX + 32 * (f > 0.66 ? 0 : f > 0.33 ? 1 : 2),
+          SPY,
+          32,
+          32,
+          X[i] - draw / 2,
+          Y[i] - draw / 2,
+          draw,
+          draw,
+        );
         sprites_ += 1;
         glints += 1;
       }
