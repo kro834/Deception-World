@@ -30,6 +30,7 @@ import { REXONANCE_SUIT_MARKS } from "@/lib/rexonance-suit";
 import { reactorCoilAngle, reactorCoilScale } from "@/lib/rexonance-reactor.js";
 import {
   drawBodyFlame,
+  drawFlameHeat,
   drawNaniteFlame,
   prepareBodyFlame,
   warmNaniteFlame,
@@ -42,6 +43,8 @@ import {
 } from "@/lib/rexonance-ignition.js";
 import type { SuitExtrasEnv } from "./rexonance-suit-extras";
 import { suitExtrasApi } from "./rexonance-suit-extras-hook";
+import { entryFieldScore } from "@/lib/rexonance-field/field-entry";
+import type { FieldLayer, FieldTake } from "@/lib/rexonance-field/index.js";
 
 /* rx13 (owner, 2026-10-11): "subdivide extremely finely so it feels like
    nanomachines, and fit it on in turn". The armour assembles out of the
@@ -125,6 +128,22 @@ const MOTE_A = [0.08, 0.22, 0.65] as const;
 
 /** The light's wave is drawn in this many arcs (each fades near an edge). */
 const RING_ARCS = 48;
+
+/* RESONANCE FIELD (owner, 2026-10-21: 「装着方式はダイナミックでありつつ、何度
+   見ても飽きない様な革新性や素晴らしさを追求して」): the call's engine also
+   runs the field (src/lib/rexonance-field) — a WebGL layer of nanites on
+   helical field lines about the body, charged on RIDER！, converging on each
+   group as it prints, whipping on every DEUS！, imploding into the reactor
+   from the helmet's clamp and detonating with the light — with its camera
+   (a push, a punch on each lock, a follow, exact identity again before the
+   light) on the figure's box and its impact grammar on the flight canvas.
+   Its chunk is imported here, lazily, and joins when it arrives (every
+   value is closed-form in the call clock, so a late start is seamless); a
+   visit's take is rolled once per call. Nothing here touches the pinned
+   clocks, plan, gold or light; the finished frame is the classic call's. */
+type FieldLib = typeof import("@/lib/rexonance-field/index.js");
+/** The camera's inline writes are quantized so a settled frame writes nothing. */
+const CAMERA_STEP = 0.0005;
 
 export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
   const host = useRef<HTMLDivElement>(null);
@@ -263,6 +282,92 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
         const keepOut = fence[7] > fence[5];
         const settled = settledCanvas.getContext("2d");
         const flight = flightCanvas.getContext("2d");
+        // The field (its chunk arrives in a frame or two; the call goes on
+        // without it until then, and without it altogether if WebGL is not
+        // to be had). Its canvases take the flight canvas's box, before the
+        // engine's own two so `canvas:last-child` stays the flight canvas.
+        let fieldLib: FieldLib | null = null;
+        let field: FieldLayer | null = null;
+        let fieldTake: FieldTake | null = null;
+        let fieldState: Float32Array | null = null;
+        let fieldCamera: Float32Array | null = null;
+        const fieldScore = entryFieldScore();
+        const figure = box.closest(".rx-suit-figure") as HTMLElement | null;
+        let cameraZoom = 1;
+        let cameraX = 0;
+        let cameraY = 0;
+        let fieldDone = false;
+        const fieldWidth = box.clientWidth + left + right;
+        const fieldHeight = box.clientHeight + top + bottom;
+        const fieldScale = s / scale;
+        const restCamera = () => {
+          if (!figure) return;
+          if (cameraZoom !== 1 || cameraX !== 0 || cameraY !== 0) {
+            figure.style.scale = "";
+            figure.style.translate = "";
+            figure.style.transformOrigin = "";
+          }
+          cameraZoom = 1;
+          cameraX = 0;
+          cameraY = 0;
+        };
+        const quantize = (value: number) => Math.round(value / CAMERA_STEP) * CAMERA_STEP;
+        const moveCamera = (camera: Float32Array) => {
+          if (!figure) return;
+          const zoom = quantize(camera[0]);
+          const x = quantize(camera[1]) * box.clientHeight;
+          const y = quantize(camera[2]) * box.clientHeight;
+          if (zoom === cameraZoom && x === cameraX && y === cameraY) return;
+          if (zoom === 1 && x === 0 && y === 0) {
+            restCamera();
+            return;
+          }
+          if (cameraZoom === 1 && cameraX === 0 && cameraY === 0)
+            figure.style.transformOrigin = `50% ${(camera[3] * 100).toFixed(1)}%`;
+          cameraZoom = zoom;
+          cameraX = x;
+          cameraY = y;
+          figure.style.scale = zoom === 1 ? "" : zoom.toFixed(4);
+          figure.style.translate =
+            x === 0 && y === 0
+              ? ""
+              : `calc(-50% + ${x.toFixed(2)}px) calc(-50% + ${y.toFixed(2)}px)`;
+        };
+        const releaseField = () => {
+          fieldDone = true;
+          field?.release();
+          field = null;
+          restCamera();
+        };
+        void import("@/lib/rexonance-field/index.js").then(
+          (lib) => {
+            if (cancelled || fieldDone) return;
+            fieldLib = lib;
+            fieldTake = lib.fieldTake(lib.fieldVisitSeed(globalThis));
+            fieldState = lib.fieldStateBuffer();
+            fieldCamera = lib.fieldCameraBuffer();
+            const layer = lib.createFieldLayer({
+              document: globalThis.document,
+              coarse,
+              take: fieldTake,
+              className: "rx-suit-field",
+            });
+            if (!layer) return;
+            for (const canvas of layer.canvases) {
+              if (left + top + right + bottom > 0)
+                Object.assign(canvas.style, {
+                  left: `${-left}px`,
+                  top: `${-top}px`,
+                  width: `calc(100% + ${left + right}px)`,
+                  height: `calc(100% + ${top + bottom}px)`,
+                });
+              box.insertBefore(canvas, settledCanvas);
+            }
+            layer.resize(fieldWidth, fieldHeight, globalThis.devicePixelRatio || 1);
+            field = layer;
+          },
+          () => undefined,
+        );
         const source = work.canvas;
         const all = plates();
         const sheet = moteSheet(atlas);
@@ -411,6 +516,7 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
             // The choreography lingers, while the fire itself keeps rolling
             // at real speed throughout the longer vortex window.
             drawBodyFlame(flight, FIG, flame, elapsed / 1000, s, "back", flamePhase);
+            drawFlameHeat(flight, FIG, Math.min(1, Math.sqrt(flame) * 1.4), elapsed / 1000, s);
             drawNaniteFlame(flight, REXONANCE_SUIT_MARKS.core, flame, elapsed / 1000, s);
           }
           for (let p = 0; p < all.length; p += 1) {
@@ -671,6 +777,40 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
           }
           if (extras) extras.after(t);
           else if (material) grains();
+          // The field: its state at this clock, its camera on the figure's
+          // box, its impact grammar (the pop and the rays of the freshest
+          // lock) on the flight canvas, its lines on its own canvases.
+          // (The camera and the impacts are the field's: without its layer,
+          // no WebGL, the call is exactly the call it was.)
+          if (field && fieldLib && fieldState && fieldCamera && fieldTake) {
+            fieldLib.fieldState(fieldScore, t, fieldState);
+            fieldLib.fieldCamera(fieldState, fieldTake, FIG.height, fieldCamera);
+            moveCamera(fieldCamera);
+            // (Fine pointers: the rays. No composite operation here, so no
+            // disc pop: the lock's flash is the field's and the camera's.)
+            if (!coarse && fieldState[fieldLib.FIELD_STATE.IMPULSES] > 0) {
+              flight.save();
+              flight.scale(s, s);
+              fieldLib.drawFieldImpact(
+                flight,
+                fieldState,
+                FIG.width,
+                FIG.height,
+                fieldLib.fieldHash,
+                true,
+                false,
+              );
+              flight.restore();
+            }
+            field.render(
+              fieldState,
+              fieldScale,
+              left,
+              top,
+              FIG.height,
+              extras?.governed() ? 0.5 : 1,
+            );
+          }
           if (flame > 0) drawBodyFlame(flight, FIG, flame, elapsed / 1000, s, "front", flamePhase);
           // Burning fragments carry material out of the broad fire. Their
           // machine crossfade remains visible on the near side of the plume.
@@ -685,6 +825,9 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
           work.drawing -= 1;
           flight.setTransform(1, 0, 0, 1, 0, 0);
           flight.clearRect(0, 0, width, height);
+          // The field is gone and the camera at rest before the finished
+          // frame (its canvases removed, its context released).
+          releaseField();
           // A call that drew its swarm hands RIDER！'s motes back their own end
           // state (the finished frame is the classic call's exactly). One
           // that started before the kit was ready leaves the kit to the next
@@ -702,6 +845,7 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
         stop = () => {
           if (!finished) work.drawing -= 1;
           finished = true;
+          releaseField();
           if (used) suitExtrasApi()?.release();
         };
         const tick = () => {

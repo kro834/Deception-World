@@ -1321,6 +1321,18 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   height: 134%;
 }
 
+/* RESONANCE FIELD (owner, 2026-10-21): the WebGL field's canvases, placed
+   by the engine before its own two on the flight canvas's box: the back one
+   under the plates (the lines passing behind the body), the front one over
+   them (fine pointers). Light only; they never take input. */
+.rx-call-sequence .rx-suit-nanites > .rx-suit-field {
+  pointer-events: none;
+}
+
+.rx-call-sequence .rx-suit-nanites > .rx-suit-field.is-front {
+  z-index: 1;
+}
+
 /* With the nanite kit ready, the engine's own swarm (hex chips in an
    orbital cocoon) replaces RIDER！'s SVG motes; they stay the fallback. */
 .rx-call-sequence .rx-suit[data-swarm="canvas"] .rx-suit-figure > .rx-suit-motes {

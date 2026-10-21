@@ -9,12 +9,14 @@ import {
 import { createSplitLightsJob } from "./rexonance-unlit.js";
 import {
   drawBodyFlame,
+  drawFlameHeat,
   drawNaniteFlame,
   prepareBodyFlame,
   warmNaniteFlame,
 } from "./rexonance-flame.js";
-import { naniteFlameEnvelope } from "./rexonance-ignition.js";
+import { NANITE_FIRE_PHASES, naniteFlameEnvelope } from "./rexonance-ignition.js";
 import { releasePendingImage } from "./release-pending-images.js";
+import { REXONANCE_SCROLL_FLAME, scrollFlameAt } from "./rexonance-field/field-clock.js";
 import {
   createReactorLayers,
   deferReactorPieces,
@@ -1376,9 +1378,11 @@ const BURSTS = [
   [4.8, 16],
 ];
 
-// The same combustion choreography as the entrance's 2400 ms clock.
-const NANITE_FLAME_START = 0.015;
-const NANITE_FLAME_SPAN = 0.285;
+// The same combustion choreography as the entrance's 2400 ms clock, mapped
+// onto the runway in one place (rexonance-field/field-clock.js: the fire's
+// engulf is getting a longer runway, owner 2026-10-21).
+const NANITE_FLAME_START = REXONANCE_SCROLL_FLAME.start;
+const NANITE_FLAME_SPAN = REXONANCE_SCROLL_FLAME.span;
 /**
  * Mounts the suit-up scene on its runway. `config`: { figure, undersuit,
  * size: { width, height }, pieces: [{ id, group, x, y, w, h, seat }],
@@ -1450,6 +1454,23 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   let nano = null;
   let swarm = null;
   let naniteSheets = [];
+  // RESONANCE FIELD (owner, 2026-10-21: 「装着方式はダイナミックでありつつ、何度
+  // 見ても飽きない様な革新性や素晴らしさを追求して」): the field's module
+  // (src/lib/rexonance-field, loaded with the swarm's), its WebGL layer
+  // (made once the scene is live, released when it is still or hidden), the
+  // visit's take (rolled when the scene goes live, fixed while it is: every
+  // frame is closed-form in the progress, so scrubbing stays exact), its
+  // score (from the plan's beats) and the frame's state and camera buffers.
+  let fieldLib = null;
+  let field = null;
+  let fieldFailed = false;
+  let fieldTake = null;
+  let fieldScore = null;
+  let fieldState = null;
+  let fieldCamera = null;
+  let fieldView = null;
+  let fieldCss = null;
+  let fieldProgress = -1;
   // The swarm's module and kit, loaded with the pictures (round 3: the still
   // tiers — reduced motion, economy, Save-Data — never mount the scene, so
   // they never download them). `config.nanites` is the kit or its loader.
@@ -1566,6 +1587,12 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         null,
         2000,
       ),
+      // The field's module is optional: without it the scene plays as before.
+      boundedImage(
+        import("./rexonance-field/index.js").catch(() => null),
+        null,
+        4000,
+      ),
     ]).catch((error) => {
       modulesLoading = null;
       throw error;
@@ -1608,10 +1635,17 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   };
   const load = () => {
     if (loading) return loading;
-    loading = modules().then(([module, nanites]) => {
+    loading = modules().then(([module, nanites, fieldModule]) => {
       if (disposed) return null;
       lib = module;
       kit = nanites ?? null;
+      if (fieldModule && !fieldLib) {
+        fieldLib = fieldModule;
+        fieldState = fieldLib.fieldStateBuffer();
+        fieldCamera = fieldLib.fieldCameraBuffer();
+        // (Doubles: an identity camera hands the view back exactly.)
+        fieldView = new Float64Array(3);
+      }
       return pictures();
     });
     return loading;
@@ -2540,6 +2574,8 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       Math.max(1, Math.round(cssWidth * ratio)),
       Math.max(1, Math.round(cssHeight * ratio)),
     ];
+    // The field's canvases share this box (resized with it, next frame).
+    fieldCss = [cssWidth, cssHeight];
     const style = environment.getComputedStyle(canvas);
     const heightShare = Number.parseFloat(style.getPropertyValue("--rzn-fig-h")) || 0.84;
     const widthShare = Number.parseFloat(style.getPropertyValue("--rzn-fig-w")) || 0.9;
@@ -2904,15 +2940,33 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     // The swarm (owner, 2026-10-16: 超大幅な改善) runs until the seal is
     // whole; from .9 on nothing new is drawn.
     const nanites = swarm && progress < B.seal[1] ? swarm : null;
+    // The field's state at this progress and its camera: the whole frame is
+    // drawn through the zoomed view (the swarm sizes its sprites by it), and
+    // the view is identity again from the collapse's end, so the seal, the
+    // light and the finished figure land exactly where they always have.
+    // The camera and the impacts are the field's: without its layer (no
+    // WebGL) the scene is exactly the 2D scene it was.
+    let vs = view.scale;
     let vx = view.x;
     let vy = view.y;
-    if (nanites) {
-      const shake = nanites.frame(progress, dq, calm, view.scale, backRects && !calm);
-      vx += shake.shakeX * view.scale;
-      vy += shake.shakeY * view.scale;
-      nanites.view(view.scale, vx, vy);
+    if (fieldLib && fieldScore && fieldTake && !field && !fieldFailed && progress < B.complete)
+      makeField();
+    const fielding = Boolean(field && fieldScore && fieldTake && progress < B.complete);
+    if (fielding) {
+      fieldLib.fieldState(fieldScore, progress, fieldState);
+      fieldLib.fieldCamera(fieldState, fieldTake, H, fieldCamera);
+      fieldLib.fieldCameraView(fieldCamera, W, H, view.scale, view.x, view.y, fieldView);
+      vs = fieldView[0];
+      vx = fieldView[1];
+      vy = fieldView[2];
     }
-    context.setTransform(view.scale, 0, 0, view.scale, vx, vy);
+    if (nanites) {
+      const shake = nanites.frame(progress, dq, calm, vs, backRects && !calm);
+      vx += shake.shakeX * vs;
+      vy += shake.shakeY * vs;
+      nanites.view(vs, vx, vy);
+    }
+    context.setTransform(vs, 0, 0, vs, vx, vy);
     context.imageSmoothingEnabled = true;
 
     const flamePhase = (progress - NANITE_FLAME_START) / NANITE_FLAME_SPAN;
@@ -2921,7 +2975,10 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
 
     // The cocoon's far side, behind the body.
     if (nanites) nanites.backPass(context);
-    if (flame > 0) drawBodyFlame(context, config.size, flame, flameClock, 1, "back", flamePhase);
+    if (flame > 0) {
+      drawBodyFlame(context, config.size, flame, flameClock, 1, "back", flamePhase);
+      drawFlameHeat(context, config.size, Math.min(1, Math.sqrt(flame) * 1.4), flameClock);
+    }
     // FAR UP！: the scan wakes the undersuit, top to bottom.
     const scan = span(progress, B.scan);
     if (seal < 1) {
@@ -3308,6 +3365,11 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       context.globalAlpha = 1;
     }
 
+    // The field's impact grammar on a lock: a luminance pop about it and a
+    // radial burst (fine pointers), on moving frames only — a resting scrub
+    // never holds a flash.
+    if (fielding && !calm && fieldState[fieldLib.FIELD_STATE.IMPULSES] > 0)
+      fieldLib.drawFieldImpact(context, fieldState, W, H, fieldLib.fieldHash, !coarse.matches);
     // Sparse near-side fire crosses the outer armour, not the core/face.
     if (flame > 0) drawBodyFlame(context, config.size, flame, flameClock, 1, "front", flamePhase);
     // The fire carries these fragments out first; their metal handoff is
@@ -3398,6 +3460,27 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     }
     context.globalAlpha = 1;
     lastDrawMs = (environment.performance?.now?.() ?? 0) - started;
+    // The field's lines on their own canvases, behind and in front of this
+    // one, through the same zoomed view (CSS px: the layer has its own
+    // backing ratio); a resting frame at the same progress is not redrawn.
+    // (After the governor's measure: the layer's GPU submit must not push
+    // the 2D band into its rect fallback.)
+    if (fielding) {
+      if (fieldProgress !== progress) {
+        fieldProgress = progress;
+        field.render(
+          fieldState,
+          vs / view.ratio,
+          vx / view.ratio,
+          vy / view.ratio,
+          H,
+          backRects && !calm ? 0.5 : 1,
+        );
+      }
+    } else if (field && fieldProgress >= 0) {
+      fieldProgress = -1;
+      field.clear();
+    }
     try {
       environment.__rexonanceDrawMs?.(lastDrawMs, progress, calm);
     } catch {
@@ -3626,6 +3709,8 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       pendingSize = null;
       if (canvas.width !== width) canvas.width = width;
       if (canvas.height !== height) canvas.height = height;
+      if (field && fieldCss) field.resize(fieldCss[0], fieldCss[1], environment.devicePixelRatio);
+      fieldProgress = -1;
       lastProgress = -1;
     }
     const fresh = typeof stamp === "number" && stamp > lastStamp;
@@ -3799,11 +3884,103 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     if (!nearPast) showLoading();
     else if (runway.dataset.rznState === "loading") restHud();
   };
+  // The field's score from the plan's beats: the four DEUS！ groups, the
+  // tail's and the helmet's, each converged on over its window and locked
+  // when its last tile lands; the field implodes from the helmet's lock
+  // to the seal and detonates with the light, gone at `complete`.
+  const FIELD_STRENGTH = [1, 1, 1.1, 0.85, 0.55, 0.5];
+  const buildFieldScore = () => {
+    if (!fieldLib || !plan) return null;
+    const B = ASSEMBLY_BEATS;
+    const groups = [];
+    let last = 0;
+    for (let beat = 0; beat < plan.partDone.length; beat += 1) {
+      const lock = plan.partDone[beat];
+      if (!lock) continue;
+      const [from] = beatWindow(beat);
+      const [x, y] = plan.centroids[beat];
+      let x0 = Infinity;
+      let y0 = Infinity;
+      let x1 = -Infinity;
+      let y1 = -Infinity;
+      for (const piece of config.pieces) {
+        if (piece.preset || beatOfPiece(piece, config.size) !== beat) continue;
+        x0 = Math.min(x0, piece.x);
+        y0 = Math.min(y0, piece.y);
+        x1 = Math.max(x1, piece.x + piece.w);
+        y1 = Math.max(y1, piece.y + piece.h);
+      }
+      const sx = x1 > x0 ? Math.max(0, (x1 - x0) / 2 - 40) : 0;
+      const sy = y1 > y0 ? Math.max(0, (y1 - y0) / 2 - 30) : 0;
+      groups.push({ x, y, sx, sy, from: Math.min(from, lock - 0.01), lock, strength: FIELD_STRENGTH[beat] ?? 0.7 });
+      last = Math.max(last, lock);
+    }
+    if (!groups.length) return null;
+    groups.sort((a, b) => a.lock - b.lock);
+    try {
+      return fieldLib.fieldScore({
+        // The wake is the burst (owner, 2026-10-21): from the detonation
+        // to the first plates, the fragments cool and take their lines.
+        wake: [scrollFlameAt(NANITE_FIRE_PHASES.burstStart), B.motes[1]],
+        groups,
+        collapse: [Math.min(last, B.seal[0] - 0.006), B.seal[0]],
+        detonate: [B.light[0], B.complete],
+        end: B.complete,
+        impulse: 0.03,
+        origin: config.core,
+        spread: [W * 0.2, H * 0.36],
+        // The armour must read as it seats: the field thins to this by the
+        // last lock and stays off the locked groups' plates.
+        settle: 0.3,
+      });
+    } catch {
+      return null;
+    }
+  };
+  // The field's layer, made on the first live frame that wants it: its
+  // canvases on the scene canvas's box, the back one under it and the front
+  // one over it. Null where WebGL is not to be had (the scene is unchanged).
+  const makeField = () => {
+    if (field || fieldFailed || !fieldLib || !fieldTake) return;
+    const parent = canvas.parentNode;
+    if (!parent || typeof parent.insertBefore !== "function") {
+      fieldFailed = true;
+      return;
+    }
+    const layer = fieldLib.createFieldLayer({
+      document,
+      coarse: coarse.matches,
+      take: fieldTake,
+      className: "rzn-field",
+    });
+    if (!layer) {
+      fieldFailed = true;
+      return;
+    }
+    for (const sheet of layer.canvases) {
+      if (sheet.dataset?.side === "front") parent.insertBefore(sheet, canvas.nextSibling);
+      else parent.insertBefore(sheet, canvas);
+    }
+    if (fieldCss) layer.resize(fieldCss[0], fieldCss[1], environment.devicePixelRatio);
+    field = layer;
+    fieldProgress = -1;
+  };
+  const releaseField = () => {
+    field?.release();
+    field = null;
+    fieldProgress = -1;
+  };
   const goLive = () => {
     if (disposed || !pageActive || live || !near || document.hidden || !images || !motionAllowed())
       return;
     if (!plan || !settled || !buffers) return;
     live = true;
+    // A visit's take: rolled here, kept for as long as the scene is live.
+    if (fieldLib) {
+      fieldTake = fieldLib.fieldTake(fieldLib.fieldVisitSeed(environment));
+      fieldScore = buildFieldScore();
+      fieldFailed = false;
+    }
     runway.dataset.rznLoad = "ready";
     // The still that was showing stays up under the (transparent) canvas
     // until the first live frame is drawn: no frame of nothing between
@@ -3829,6 +4006,9 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     resizeObserver?.disconnect();
     restHud();
     pendingSize = null;
+    releaseField();
+    fieldScore = null;
+    fieldTake = null;
     canvas.width = canvas.height = 0;
     if (settled) settled.width = settled.height = 0;
     settled = null;
@@ -4096,6 +4276,8 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       frame = 0;
       environment.clearTimeout(calmTimer);
       calmTimer = 0;
+      // A hidden page holds no GPU field; the next live frame remakes it.
+      releaseField();
       return;
     }
     standIn();

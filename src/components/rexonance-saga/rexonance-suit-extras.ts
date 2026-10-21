@@ -34,6 +34,7 @@ import { REXONANCE_SUIT_REVEAL_MS } from "@/lib/rexonance-calls";
 import {
   FIG,
   FLIGHT,
+  FLIGHT_SPREAD,
   G,
   T,
   cells,
@@ -111,8 +112,13 @@ const FIRE_SPRAY = 160;
 // Airborne burning material precedes the machine, then cools into it at
 // the very same coordinate. No machine, guide or raw plate precedes 468ms.
 const FIREBRAND_START = NANITE_FIRE_PHASES.burstStart * 2400;
-const FIREBRAND_COOL = 45;
-const FIREBRAND_CARRIER = 80;
+// Owner (2026-10-21): a longer, smoother handoff — the chip fades in over
+// COOL and its carrier lingers to CARRIER (was 45 / 80).
+const FIREBRAND_COOL = 72;
+const FIREBRAND_CARRIER = 136;
+// The docking's inertia (owner, 2026-10-21): a chip darts in and overshoots
+// the insertion gap by this share of its stand before settling back on it.
+const DOCK_BACK = 1.2;
 const FIREBRANDS = TOUCH ? 8 : 24;
 /** Cocoon chips (each drains into a plate) and free chips (they gather round
  * the reactor, then implode); more than the brief's 384 + 96 by design (see
@@ -808,7 +814,13 @@ function* layoutSteps(all: Plate[], gold: Cells): Generator<undefined, Layout, u
       L.land[i] = naniteMaterialLanding(tile.land, plate.fit);
       // Land is final here. Cache from its stored Float32 value, retaining
       // the drawing expression's double precision and exact association.
-      L.flightStart[i] = Math.max(FIRE_BIRTH, L.land[i] - FLIGHT);
+      // Each tile's own flight (owner, 2026-10-21: never one fixed 170 ms):
+      // FLIGHT_SPREAD of FLIGHT, within its plate's spawn, never before the
+      // first metal can emerge.
+      const flight =
+        FLIGHT *
+        (FLIGHT_SPREAD[0] + (FLIGHT_SPREAD[1] - FLIGHT_SPREAD[0]) * hash(i * 13 + 7, 733));
+      L.flightStart[i] = Math.max(FIRE_BIRTH, L.land[i] - flight);
       L.flightMs[i] = L.land[i] - L.flightStart[i];
       if (L.land[i] <= plate.fit - SW.seat) landedBy += 1;
       const along = Math.min(1, Math.hypot(cx - sx, cy - sy) / reach);
@@ -1094,6 +1106,8 @@ function* layoutSteps(all: Plate[], gold: Cells): Generator<undefined, Layout, u
     L.chipPlate[c] = plate;
     // The first feet coalesce after the explosion and still seat at 710ms.
     // Later body regions share one birth interval, never six pump waves.
+    // (Owner, 2026-10-21: every nanite is a fragment of the burst, cooled;
+    // nothing burns on through the assembly, so nothing is born later.)
     const born = FIRE_BIRTH + (plate >= 0 && all[plate].fit < 850 ? 24 : FIRE_BIRTH_SPAN) * h1;
     L.birth[c] = plate < 0 ? born : Math.min(born, all[plate].fit - 80);
     L.brandStart[c] = FIREBRAND_START + 100 * h2;
@@ -3886,7 +3900,7 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
     const ky = hy + ay * 0.35;
     const r0 = L.r0[i];
     const psi0 = L.psi0[i];
-    const spin = (FRAMES * L.spin[i] * FLIGHT) / 1000;
+    const spin = (FRAMES * L.spin[i] * L.flightMs[i]) / 1000;
     // A pathfinder is a size up (and white, with its comet: the layout).
     let size = L.tflags[i] & 8 ? 1.6 * L.size[i] : L.size[i];
     let frame = L.f0[i];
@@ -3957,7 +3971,11 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
       const aim = helm ? 0.7 : 0.8;
       const v = (u - aim) / (0.94 - aim);
       const w = v < 0 ? 0 : v > 1 ? 1 : v;
-      const e = w * w * (3 - 2 * w);
+      // Inertial (owner, 2026-10-21): it darts in, overshoots the gap by a
+      // share of its stand (never into the plate) and settles back onto it
+      // exactly by 0.94; the insertion's compression then rings it down.
+      const back = w - 1;
+      const e = 1 + (DOCK_BACK + 1) * back * back * back + DOCK_BACK * back * back;
       const compression = u < 0.94 ? 0 : (u - 0.94) / 0.06;
       const gap = 2 * (1 - smooth(compression));
       const ring = compression > 0 ? 0.9 * Math.sin(TAU * compression) * (1 - compression) : 0;
