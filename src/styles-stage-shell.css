@@ -3162,3 +3162,121 @@ html[data-family="special"]
     display: none;
   }
 }
+
+/* ================================================================
+   8. One trigger geometry on every bar (2026-10-21)
+   The lit launcher square is 48px, 3px corners, one gutter in from the
+   right edge and centred in the bar on every family. Measured before:
+   the World's phone trigger was 48x44, Saga Cinema's 44x44 / 48x46 with
+   4px corners at 4-5% of the width, the form archive's 10-16px in and
+   3px low on phones.
+   ================================================================ */
+/* The World bar: the cinematic sheet shrinks its trigger to 44px on
+   phones; the files beside it keep 48. */
+@media (max-width: 760px) {
+  html[data-family="world"]
+    body
+    main.site-shell.film-edition
+    > header.topbar
+    .topbar-actions
+    > .side-panel-trigger.side-panel-trigger {
+    width: 48px;
+    height: 48px;
+    min-height: 48px;
+  }
+}
+
+/* Saga Cinema: its header keeps its own height and its brand; the
+   trigger takes the lane's geometry and the lit square. */
+html[data-family="special"] body .saga-cinema .site-header {
+  padding-inline: max(var(--sh-gutter), env(safe-area-inset-left, 0px))
+    max(var(--sh-gutter), env(safe-area-inset-right, 0px));
+}
+
+html[data-family="special"] body .saga-cinema .site-header > .side-panel-trigger.menu-button {
+  width: 48px;
+  min-width: 48px;
+  height: 48px;
+  min-height: 48px;
+  gap: 0;
+}
+
+html[data-family="special"]:not([data-ipad-menu-scrolled="true"]):not([data-ipad-menu-motion])
+  body
+  .saga-cinema
+  .site-header
+  > .side-panel-trigger.side-panel-trigger.menu-button {
+  border: 0 !important;
+  border-radius: 3px !important;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 26%), transparent 46%), var(--sh-l1) !important;
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 22%),
+    0 0 0 1px rgb(var(--sh-l1-rgb) / 30%) !important;
+  clip-path: none !important;
+  color: var(--sh-on-l1) !important;
+}
+
+@media (forced-colors: active) {
+  html[data-family="special"]
+    body
+    .saga-cinema
+    .site-header
+    > .side-panel-trigger.side-panel-trigger.menu-button {
+    border: 1px solid ButtonText !important;
+  }
+}
+
+/* The form archive: the bar takes the lane's height, the trigger its
+   place; the switcher and the embedded document follow the bar's own
+   variable. */
+html[data-family="archive"] body .form-archive-page {
+  --archive-toolbar-height: calc(env(safe-area-inset-top, 0px) + var(--sh-bar-h));
+}
+
+html[data-family="archive"]
+  body
+  .form-archive-page
+  > header.form-archive-toolbar
+  > .side-panel-trigger.form-archive-menu-trigger {
+  top: calc(env(safe-area-inset-top, 0px) + (var(--sh-bar-h) - 48px) / 2);
+  right: max(var(--sh-gutter), env(safe-area-inset-right, 0px));
+  bottom: auto;
+}
+
+/* The SAGA / REALM switcher stood 68px tall in a 68-72px bar, its top
+   edge above the bar. It now fills the bar's lane 4px in from both
+   edges (its two tabs stay 46px and more, the 44px floor and over). */
+html[data-family="archive"]
+  body
+  .form-archive-page
+  > header.form-archive-toolbar
+  > #archive-switcher.form-archive-switcher.liquid-swipe-tabs {
+  top: calc(env(safe-area-inset-top, 0px) + 4px);
+  bottom: 4px;
+  height: auto;
+  min-height: 0;
+}
+
+html[data-family="archive"]
+  body
+  .form-archive-page
+  > header.form-archive-toolbar
+  > #archive-switcher.form-archive-switcher.liquid-swipe-tabs
+  > button[role="tab"] {
+  min-height: 44px;
+}
+
+@media (min-width: 700px) {
+  html[data-family="archive"] body .form-archive-page > header.form-archive-toolbar::before {
+    top: calc(env(safe-area-inset-top, 0px) + var(--sh-bar-h) / 2);
+    left: max(var(--sh-gutter), env(safe-area-inset-left, 0px));
+  }
+}
+
+/* Landscape phones keep the archive's shorter bar (62px). */
+@media (max-height: 500px) and (orientation: landscape) {
+  html[data-family="archive"] body .form-archive-page {
+    --sh-bar-h: 62px;
+  }
+}
