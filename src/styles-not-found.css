@@ -350,6 +350,9 @@
   color: var(--lr-text-2);
   font-size: clamp(14px, 3.6vw, 16px);
   line-height: 1.9;
+  /* Lines break between phrases (Chromium), never inside a word. */
+  word-break: auto-phrase;
+  text-wrap: pretty;
 }
 
 /* The way back: the card's one filled ice plate, its arrow first, held in
@@ -548,6 +551,20 @@
 
   .app-not-found.app-not-found > .app-not-found-sigil {
     padding-inline: 16px;
+  }
+}
+
+/* Phones and narrow tablets: the card rides a little above the middle, so
+   its foot (the recovery files and the gold locks) ends clear of the Zeus
+   button that stands over the lower right corner. The same rows as above;
+   only the two outer spacers differ (one class more than the recovery
+   sheet's own rows rule, which would win otherwise). */
+@media (max-width: 759px) {
+  .app-not-found.app-not-found.app-not-found:has(> .recovery-tiles) {
+    grid-template-rows:
+      minmax(24px, 0.62fr) [plate-start] var(--lr-pad-y) [slot-start] auto [slot-end head-start] auto
+      auto [head-end] auto auto auto auto var(--lr-pad-y) [plate-end] auto [recovery-end]
+      minmax(112px, 1fr);
   }
 }
 

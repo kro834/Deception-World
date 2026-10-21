@@ -659,9 +659,17 @@ html[data-world-effects="economy"] .cine-stage.is-playing .cine-editorial-frame:
 /* The band: a thin streamline on the edge (88% down the element, where the
    wipe's edge runs), ice to blue to pink to gold across the lockup, with a
    bright core line. The second layer is its softer wash. */
+/* Its ends fade out over the lockup's edges (2026-10-22): the core line ran
+   the box's full width and stopped square, a lit bar instead of light. */
 .cine-stage .cine-burn-flame {
-  -webkit-mask-image: linear-gradient(180deg, transparent 64%, #000 84%, #000 91%, transparent);
-  mask-image: linear-gradient(180deg, transparent 64%, #000 84%, #000 91%, transparent);
+  -webkit-mask-image:
+    linear-gradient(180deg, transparent 64%, #000 84%, #000 91%, transparent),
+    linear-gradient(90deg, transparent 2%, #000 18%, #000 82%, transparent 98%);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(180deg, transparent 64%, #000 84%, #000 91%, transparent),
+    linear-gradient(90deg, transparent 2%, #000 18%, #000 82%, transparent 98%);
+  mask-composite: intersect;
 }
 
 .cine-stage .cine-burn-flame > i {

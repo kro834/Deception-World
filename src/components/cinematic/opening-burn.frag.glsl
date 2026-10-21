@@ -113,18 +113,21 @@ void main() {
   // red and blue split a little to either side by the nearing light.
   vec4 first = sampleTop(uFirst, luv + haze);
   float fringeA = fall(0.09, 0.0, d) * uHeat * (1.0 - uCool) * env;
-  vec2 fx = vec2(0.0072, 0.0) * fringeA;
-  first.r = mix(first.r, sampleTop(uFirst, luv + haze + fx).r, fringeA * 0.86);
-  first.b = mix(first.b, sampleTop(uFirst, luv + haze - fx).b, fringeA * 0.86);
+  vec2 fx = vec2(0.0046, 0.0) * fringeA;
+  first.r = mix(first.r, sampleTop(uFirst, luv + haze + fx).r, fringeA * 0.7);
+  first.b = mix(first.b, sampleTop(uFirst, luv + haze - fx).b, fringeA * 0.7);
   first.rgb *= 1.0 - 0.3 * uHeat * (1.0 - uCool) * smoothstep(0.0, 0.1, d);
 
   // ---- Behind: the traced logo, charged with a prism sheen, cooling to itself.
   float age = clamp(-d / 0.5, 0.0, 1.0);
-  float charged = (1.0 - smoothstep(0.1, 1.0, age)) * (1.0 - uCool);
+  // The charge is a sheen that rides close behind the front and lets the
+  // glyphs keep their own colours (a gain, then a thin tint), not a pink
+  // wash over the whole traced lockup.
+  float charged = (1.0 - smoothstep(0.04, 0.6, age)) * (1.0 - uCool);
   vec4 fin = sampleTop(uFinal, luv + haze * 0.5);
   float fn = lum(fin);
-  fin.rgb *= 1.0 + 0.3 * charged;
-  fin.rgb += tint * fn * charged * 0.42;
+  fin.rgb *= 1.0 + 0.16 * charged;
+  fin.rgb += tint * fn * charged * 0.2;
   fin.rgb = min(fin.rgb, vec3(1.0));
 
   float traced = fall(0.0, -0.016, d);
@@ -132,17 +135,24 @@ void main() {
 
   // ---- Light trails: the glyph light the front has crossed streams back
   // along the sweep, from each glyph towards the lower left, and lingers.
+  // Each pixel starts its taps at its own fraction of a step (a fixed
+  // per-pixel offset, no temporal noise), so the taps blend into one streak
+  // instead of stacking copies of the glyph; only the neon cores (the
+  // brightest light) stream, so the trail reads as light, not as a smear.
   float trail = 0.0;
+  // Interleaved gradient noise: a fine, even jitter (white noise read as grain).
+  float jit = fract(52.9829189 * fract(dot(floor(gl_FragCoord.xy), vec2(0.06711056, 0.00583715))));
   for (int k = 1; k <= 14; k += 1) {
-    float fk = float(k);
+    float fk = float(k) - jit;
     float w = 1.0 - fk / 15.0;
-    float side = mod(fk, 2.0) * 2.0 - 1.0;
+    float side = mod(float(k), 2.0) * 2.0 - 1.0;
     // That sample's own distance to the front (dot(TRAIL, GRAD) per step).
     float dk = d + fk * 0.0121;
     vec2 at = luv + TRAIL * fk + ACROSS * side * (0.2 + 0.8 * fk / 14.0);
-    trail += lum(sampleTop(uFinal, at)) * w * w * w * fall(0.0, -0.01, dk);
+    float hot = smoothstep(0.42, 0.95, lum(sampleTop(uFinal, at)));
+    trail += hot * w * w * w * fall(0.0, -0.01, dk);
   }
-  trail = clamp(trail * 0.46, 0.0, 1.0) * fall(0.66, 0.04, -d) * env * live;
+  trail = clamp(trail * 0.5, 0.0, 1.0) * fall(0.36, 0.02, -d) * env * live;
 
   // The glyph edges flare as the front crosses them.
   float edge = abs(fn - lum(sampleTop(uFinal, luv - TRAIL * 1.6)));
@@ -150,15 +160,21 @@ void main() {
 
   // ---- The bar: the streamline across the lockup, a bright core on the
   // glyphs, a slow shimmer along it, and its wider glow in the air.
-  float band = fall(0.07, 0.0, abs(d)) * env * live;
+  float band = fall(0.048, 0.0, abs(d)) * env * live;
   float core = fall(0.011, 0.0, abs(d)) * env * live;
   float shimmer = 0.78 + 0.44 * vnoise(vec2(s * 9.0, t * 2.2));
   // Two fainter lines run with it, one ahead and one behind: the key
   // visual's parallel streaks.
   float echo = (fall(0.016, 0.0, abs(d + 0.1)) * 0.55 + fall(0.012, 0.0, abs(d - 0.07)) * 0.35) * env * live;
-  vec3 bar = tint * band * (0.3 + 0.7 * fuel) * shimmer + CORE * core * (0.3 + 0.7 * fuel)
-           + tint * echo * (0.25 + 0.75 * fuel);
-  float glow = fall(0.26, 0.0, abs(d)) * env * live * 0.22;
+  // The leading edge refracts: ice just ahead of the core, pink just behind,
+  // a prism split of the bar itself (no extra taps).
+  vec3 prism = (ICE * fall(0.012, 0.0, abs(d - 0.017)) + PINK * fall(0.012, 0.0, abs(d + 0.017))) * env * live;
+  // The core stays the stream's colour on the glyphs (a thin pale line, not
+  // a white-out of the lettering under it).
+  vec3 coreC = mix(tint, CORE, 0.45);
+  vec3 bar = tint * band * (0.24 + 0.5 * fuel) * shimmer + coreC * core * (0.3 + 0.55 * fuel)
+           + tint * echo * (0.25 + 0.75 * fuel) + prism * (0.35 + 0.65 * fuel) * 0.8;
+  float glow = fall(0.2, 0.0, abs(d)) * env * live * 0.13;
 
   // ---- Sparks ride just ahead of the front and drift up; pink bokeh in
   // the near plane; motes lift off the glyphs the front has passed.
@@ -171,8 +187,8 @@ void main() {
 
   // Premultiplied: everything here is light, added to the logo it traces.
   vec4 outC = col;
-  outC.rgb += bar + tint * glow + CORE * flare * 0.9;
-  outC.rgb += tint * trail * 1.2;
+  outC.rgb += bar + tint * glow + mix(tint, CORE, 0.4) * flare * 0.75;
+  outC.rgb += tint * trail * 0.95;
   outC.rgb += sparkC * embers * 1.7 + PINK * bokeh * 0.55;
   outC.rgb += mix(ICE, GOLD, 0.4) * clamp(flakes, 0.0, 1.0) * 0.6;
   outC = clamp(outC, 0.0, 1.0);

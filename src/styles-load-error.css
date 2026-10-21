@@ -104,6 +104,9 @@
   color: #bccbd8;
   font-size: 14px;
   line-height: 1.8;
+  /* Lines break between phrases (Chromium), never inside a word. */
+  word-break: auto-phrase;
+  text-wrap: pretty;
 }
 
 .app-load-error-actions {

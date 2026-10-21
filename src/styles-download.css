@@ -385,6 +385,8 @@ html[data-world-effects="economy"] .export-page h1 {
   letter-spacing: 0.02em;
   color: var(--dl-text-3);
   text-wrap: pretty;
+  /* Between phrases (Chromium): 公開サイトの配信版 no longer splits. */
+  word-break: auto-phrase;
 }
 
 /* The way back: the poster's foot, the full width of the card. */
@@ -674,8 +676,11 @@ html[data-world-effects="economy"] .export-page h1 {
     grid-row: 10;
   }
 
-  /* No art band on top of the slip now: the card is flat ink. */
+  /* No art band on top of the slip now: the card is flat ink, and it is
+     the frame of both panels (column 1 alone left the slip, its foot and
+     its right-hand locks floating outside the card). */
   .export-page::after {
+    grid-column: art-start / slip-end;
     background:
       var(--dl-prism) top / 100% 2px no-repeat,
       linear-gradient(var(--dl-lock) 0 0) 0 0 / 22px 2px,
