@@ -14,9 +14,9 @@ import {
   prepareBodyFlame,
   warmNaniteFlame,
 } from "./rexonance-flame.js";
-import { NANITE_FIRE_PHASES, naniteFlameEnvelope } from "./rexonance-ignition.js";
+import { naniteFlameEnvelope } from "./rexonance-ignition.js";
 import { releasePendingImage } from "./release-pending-images.js";
-import { REXONANCE_SCROLL_FLAME, scrollFlameAt } from "./rexonance-field/field-clock.js";
+import { FIELD_WAKE, REXONANCE_SCROLL_FLAME, scrollFlameAt } from "./rexonance-field/field-clock.js";
 import {
   createReactorLayers,
   deferReactorPieces,
@@ -527,8 +527,12 @@ export function mountRexonanceResonance(page, environment = window) {
    follows the module's piece list whatever its granularity (only each
    piece's id, group, box and seat are read). Over the bare undersuit:
 
-   - FAR UP！ a scan wakes the undersuit, top to bottom;
-   - RIDER！ every tile hangs in the air round the body as a nanite mote;
+   - FAR UP！ a scan wakes the undersuit, top to bottom, as the fire
+     kindles at its soles and climbs it (REXONANCE_SCROLL_FLAME,
+     rexonance-field/field-clock.js);
+   - RIDER！ the fire covers the undersuit whole, bursts, and its
+     fragments cool into the nanites (the field's particles and every
+     tile, hanging in the air round the body) before the first DEUS！;
    - SA-GA！DEUS！ ×4: on each DEUS！ one group lands (legs, arms, chest
      and shoulders, waist, as the call snaps them), piece after piece,
      each piece growing out of its seam: a mote flies in, swells into a
@@ -2921,9 +2925,10 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   };
 
   // `calm`: the scroll has rested: the frame is a pure function of the
-  // progress, without the transient effects (comets, sparks, links, recoil,
-  // seams, shock rings, spall, pulses, lacquer, droplets, beams, the glint,
-  // the scan sweep and the shake).
+  // progress (the fire's texture aside, which keeps the wall clock),
+  // without the transient effects (comets, sparks, links, recoil, seams,
+  // shock rings, spall, pulses, lacquer, droplets, beams, the glint, the
+  // scan sweep and the shake).
   let backRects = false;
   let lastDrawMs = 0;
   let quickFrames = 0;
@@ -2973,7 +2978,10 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
 
     const flamePhase = (progress - NANITE_FLAME_START) / NANITE_FLAME_SPAN;
     const flame = naniteFlameEnvelope(flamePhase);
-    const flameClock = calm ? progress * 60 : (environment.performance?.now?.() ?? 0) / 1000;
+    // The fire's texture runs on the wall clock in every frame, the calm
+    // one included: a clock of its own (once progress × 60) re-posed the
+    // whole flame 260 ms into each rest and again when the scroll resumed.
+    const flameClock = (environment.performance?.now?.() ?? 0) / 1000;
 
     // The cocoon's far side, behind the body.
     if (nanites) nanites.backPass(context);
@@ -3707,6 +3715,19 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   let lastTarget = -1;
   let lastStamp = 0;
   let force = false;
+  // The fire at rest (review of 2ce6712): a fire that sits still is the
+  // 固体 look the owner rejected, so while it burns at the resting progress
+  // the moment is redrawn every frame on the wall clock, with the arguments
+  // it was last drawn with — the same suit-up moment, only the flame (and
+  // the reactor's light) flowing — until the scroll moves on, the fire is
+  // spent, or the scene stops being shown. Touch screens redraw it at
+  // about 30 fps.
+  let restCalm = false;
+  let restStep = 0;
+  let restStamp = -Infinity;
+  const burningAt = (q) => naniteFlameEnvelope((q - NANITE_FLAME_START) / NANITE_FLAME_SPAN) > 0;
+  const REST_FRAME_MS = 1000 / 60;
+  const REST_TOUCH_FRAME_MS = 1000 / 31;
   const render = (stamp) => {
     frame = 0;
     if (disposed || !live || document.hidden) return;
@@ -3729,7 +3750,18 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     let shown = progress;
     if (lastProgress >= 0) {
       const settledHere = lastProgress === lastTarget;
-      if (!force && settledHere && Math.abs(progress - lastProgress) < 0.0005) return;
+      if (!force && settledHere && Math.abs(progress - lastProgress) < 0.0005) {
+        if (!burningAt(lastProgress)) return;
+        // At rest the fire keeps flowing (the HUD, the governor and the
+        // calm timer stay as the last moving frame left them).
+        const at = typeof stamp === "number" ? stamp : NaN;
+        if (!(at - restStamp < (coarse.matches ? REST_TOUCH_FRAME_MS : REST_FRAME_MS) - 2)) {
+          restStamp = Number.isFinite(at) ? at : -Infinity;
+          draw(lastProgress, restCalm, restStep);
+        }
+        schedule();
+        return;
+      }
       const gap = progress - lastProgress;
       if (
         Math.abs(gap) <= 0.06 &&
@@ -3760,6 +3792,9 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       if (quickFrames >= 30) backRects = false;
     } else quickFrames = 0;
     draw(shown, false, step);
+    restCalm = false;
+    restStep = step;
+    restStamp = typeof stamp === "number" && Number.isFinite(stamp) ? stamp : -Infinity;
     updateHud(progress);
     // The first live frame is on the canvas: the still under it goes.
     if (runway.dataset.rznArming) delete runway.dataset.rznArming;
@@ -3769,6 +3804,8 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       schedule();
       return;
     }
+    // Resting with the fire alive: keep it flowing.
+    if (burningAt(shown)) schedule();
     // Once the scroll rests, redraw the moment without its transient effects.
     calmTimer = environment.setTimeout(() => {
       calmTimer = 0;
@@ -3788,6 +3825,11 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         backRects = false;
         quickFrames = 0;
         draw(lastProgress, true);
+        restCalm = true;
+        restStep = 0;
+        // The calm frame continues the fire's wall clock (never a pose of
+        // its own), and the fire flows on from it.
+        if (burningAt(lastProgress)) schedule();
       }
     }, CALM_MS);
     if (behind) {
@@ -3929,9 +3971,10 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     groups.sort((a, b) => a.lock - b.lock);
     try {
       return fieldLib.fieldScore({
-        // The wake is the burst (owner, 2026-10-21): from the detonation
-        // to the first plates, the fragments cool and take their lines.
-        wake: [scrollFlameAt(NANITE_FIRE_PHASES.burstStart), B.motes[1]],
+        // The wake is the burst (owner, 2026-10-21): the field's one window
+        // of the fire's phase (the detonation, every fragment's cooling into
+        // a chip, the last chip's sweep onto its line) on the runway.
+        wake: [scrollFlameAt(FIELD_WAKE[0]), scrollFlameAt(FIELD_WAKE[1])],
         groups,
         collapse: [Math.min(last, B.seal[0] - 0.006), B.seal[0]],
         detonate: [B.light[0], B.complete],

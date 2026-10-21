@@ -4,16 +4,18 @@
    are unchanged. */
 
 import {
-  REXONANCE_CALL_BEATS,
   REXONANCE_SUIT_CASCADE,
   REXONANCE_SUIT_FIT,
   REXONANCE_SUIT_LIGHT,
   REXONANCE_SUIT_SNAP,
 } from "../rexonance-calls.ts";
 import { REXONANCE_SUIT_MARKS, REXONANCE_SUIT_PIECES, REXONANCE_SUIT_SIZE } from "../rexonance-suit.ts";
-import { NANITE_FIRE_PHASES } from "../rexonance-ignition.js";
-import { fieldScore } from "./index.js";
+import { FIELD_WAKE, fieldScore } from "./index.js";
 import type { FieldScore } from "./index.js";
+
+/** The entry's fire phase is its canonical clock over this from the burst
+ * on, where the wake begins (rexonance-ignition.js: entryFlamePhase). */
+const ENTRY_FLAME_MS = 2400;
 
 /** The groups the field converges on, in the fixed fit order: the cascade's
  * groups, the ribbons folded into the tail's. */
@@ -84,9 +86,11 @@ export function entryFieldScore() {
   });
   SCORE = fieldScore({
     // The wake is the burst (owner, 2026-10-21: the fire engulfs the
-    // undersuit, bursts, and its fragments are the nanites): from the
-    // detonation to the chant, the fragments cool and take their lines.
-    wake: [NANITE_FIRE_PHASES.burstStart * 2400, REXONANCE_CALL_BEATS[2].start],
+    // undersuit, bursts, and its fragments are the nanites): the field's
+    // one window of the fire's phase (from the detonation, through every
+    // fragment's cooling into a chip, to the last chip's sweep onto its
+    // line) on the entry's canonical clock.
+    wake: [FIELD_WAKE[0] * ENTRY_FLAME_MS, FIELD_WAKE[1] * ENTRY_FLAME_MS],
     groups,
     collapse: [...REXONANCE_FIELD_ENTRY.collapse],
     detonate: [...REXONANCE_FIELD_ENTRY.detonate],

@@ -30,6 +30,7 @@ import {
 import { SuitNanites } from "./rexonance-suit-nanites";
 import {
   NANITE_FIRE_PHASES,
+  REXONANCE_ENTRY_SCAN,
   entryElapsedTime,
   naniteMaterialLanding,
 } from "@/lib/rexonance-ignition.js";
@@ -506,7 +507,8 @@ function Suit({ suit, animate }: { suit: "build" | "whole"; animate: boolean }) 
         {
           "--rx-suit-material-start": `${entryElapsedTime(NANITE_FIRE_PHASES.materialStart * 2400)}ms`,
           "--rx-suit-heading-duration": `${entrySpan(60, 300)}ms`,
-          "--rx-suit-scan-duration": `${entrySpan(70, 250)}ms`,
+          // The fire lights at this scan's end (entryFlamePhase).
+          "--rx-suit-scan-duration": `${entrySpan(REXONANCE_ENTRY_SCAN.from, REXONANCE_ENTRY_SCAN.span)}ms`,
           "--rx-suit-sweep-duration": `${entrySpan(70, 330)}ms`,
           "--rx-suit-under-duration": `${entrySpan(330, 60)}ms`,
           "--rx-suit-core-start": `${entryElapsedTime(370)}ms`,

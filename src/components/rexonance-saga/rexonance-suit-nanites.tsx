@@ -38,6 +38,7 @@ import {
 import {
   NANITE_FIRE_PHASES,
   entryCanonicalTime,
+  entryFlamePhase,
   naniteFlameEnvelope,
   naniteMaterialLanding,
 } from "@/lib/rexonance-ignition.js";
@@ -508,8 +509,11 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
           // built on the body ahead of each plate, the lifted plates' shadows.
           extras?.before(t);
           // The nanites' source (owner, 2026-10-18): the forest-green flame
-          // at the reactor, burning as the first plates stream in.
-          const flamePhase = t / CALL_FLAME_MS;
+          // at the reactor, burning as the first plates stream in. It lights
+          // once the scan has drawn the undersuit's soles and covers it
+          // before the burst (entryFlamePhase: t / 2400 from the burst on,
+          // so every fragment and the field's wake keep their handoff).
+          const flamePhase = entryFlamePhase(t);
           const flame = naniteFlameEnvelope(flamePhase);
           const material = t >= MATERIAL_FROM;
           if (flame > 0) {

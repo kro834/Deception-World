@@ -7,6 +7,9 @@
    outward whip, played in reverse when scrubbing back), collapse and
    detonation. Positions are figure pixels. */
 
+import { NANITE_FIRE_PHASES } from "../rexonance-ignition.js";
+import { FIELD_WAKE } from "./field-clock.js";
+
 const clamp01 = (value) => (value < 0 ? 0 : value > 1 ? 1 : value);
 const smooth = (u) => u * u * (3 - 2 * u);
 const span = (value, from, to) => (to > from ? clamp01((value - from) / (to - from)) : value >= to ? 1 : 0);
@@ -55,8 +58,12 @@ export const FIELD_STATE = Object.freeze({
   LENGTH: 64,
 });
 
-/** The charge rises over this share of the wake: the burst itself. */
-export const FIELD_WAKE_RISE = 0.25;
+/** The charge rises over this share of the wake: the burst itself, from
+ * the detonation to the first fragment's cooling (materialStart), so every
+ * chip is born into a whole field (a score's wake is FIELD_WAKE in its own
+ * clock: field-clock.js). */
+export const FIELD_WAKE_RISE =
+  (NANITE_FIRE_PHASES.materialStart - FIELD_WAKE[0]) / (FIELD_WAKE[1] - FIELD_WAKE[0]);
 
 /** How far into an impulse the impact frame lasts (share of its span). */
 export const FIELD_FLASH_SHARE = 0.18;
