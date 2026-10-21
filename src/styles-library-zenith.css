@@ -718,7 +718,7 @@ html[data-family="library"] .search-page .search-empty::before {
   background: var(--dxz-prism-fade);
 }
 
-html[data-family="library"] .library-page .library-empty-code,
+html[data-family="library"] .library-page .library-empty > p.library-empty-code,
 html[data-family="library"] .search-page .search-empty-code {
   margin: 0;
   color: transparent;
@@ -844,6 +844,13 @@ html[data-family="library"] .library-page .library-empty-actions > .library-full
 /* ================================================================
    /search — the workbench: the key hint as a HUD line, the suggestions
    ================================================================ */
+/* The lede is centred text in a centred column: it takes the column's
+   width, so WebKit's max-content rounding no longer breaks its first line
+   one character early (気にな／る言葉から。 on iPad). */
+html[data-family="library"] .search-page .search-lede {
+  justify-self: stretch;
+}
+
 html[data-family="library"] .search-page .search-key-hint {
   display: block;
   margin-top: 6px;
@@ -925,6 +932,27 @@ html[data-family="library"] .search-page .search-more-option > b {
   text-shadow: 0 0 18px rgb(var(--dx-edition-rgb) / 45%);
 }
 
+/* A see-all bar whose next records have no pictures (世界・用語) showed a
+   run of empty dark panels: along the bar's right side, clear of the kind's
+   outlined mark, each plate keeps its name, set small down its spine. */
+@container (max-height: 180px) {
+  html[data-family="library"]
+    .search-page
+    .search-more-peek
+    > .dxl-art[data-plate="type"]
+    > b {
+    /* The upper half only: the count holds the bar's lower right. */
+    top: 12px;
+    right: auto;
+    bottom: 46%;
+    left: 50%;
+    display: block;
+    color: rgb(var(--tint-rgb) / 72%);
+    font-size: clamp(16px, 1.6vw, 22px);
+    transform: translateX(-50%);
+  }
+}
+
 html[data-family="library"] .search-page .search-more {
   position: relative;
   box-shadow: var(--dx-bevel), var(--dx-drop);
@@ -954,16 +982,39 @@ html[data-family="library"] .search-page .search-scope-note {
    Tablets (768-1194): the console breathes, the hub keeps two columns
    ================================================================ */
 @media (min-width: 700px) and (max-width: 1179px) {
+  /* The continue line across the top, the saved and history shelves side by
+     side (their names keep a readable measure), and the recent searches
+     across the foot, their chips in one run (a two-column grid had left
+     最近の検索 alone beside an empty cell). */
   html[data-family="library"] .library-page .library-hub-grid {
     gap: 12px;
   }
 
-  html[data-family="library"] .library-page .library-hub-grid > .library-continue {
+  html[data-family="library"]
+    .library-page
+    .library-hub-grid
+    > :is(.library-continue, .library-searches) {
     grid-column: 1 / -1;
   }
 
   html[data-family="library"] .library-page .library-data-controls {
     grid-column: 1 / -1;
+  }
+}
+
+/* /search on tablets: the eight kinds ran off the console's edge in a
+   sideways row with no scrollbar (ページ was cut at 768-959px). They stand
+   in two even rows of four instead, every chip and its count on screen. */
+@media (min-width: 560px) and (max-width: 959px) {
+  html[data-family="library"] .search-page .search-categories {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    overflow-x: visible;
+  }
+
+  html[data-family="library"] .search-page .search-categories button {
+    justify-content: space-between;
+    min-width: 0;
   }
 }
 
@@ -1135,7 +1186,7 @@ html[data-family="library"] .search-page .search-scope-note {
     display: none;
   }
 
-  html[data-family="library"] .library-page .library-empty-code,
+  html[data-family="library"] .library-page .library-empty > p.library-empty-code,
   html[data-family="library"] .search-page .search-empty-code {
     color: CanvasText;
     -webkit-text-stroke: 0;
