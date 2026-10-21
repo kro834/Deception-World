@@ -617,7 +617,19 @@ const ManagerRail = memo(
           aria-controls="manager-panel-2"
           style={{ ["--liquid-accent" as string]: "#69df74" }}
         >
-          <small>DOGS / 03</small>
+          <small>RELATED / 03</small>
+          <b>その他</b>
+        </button>
+        <button
+          id="manager-tab-3"
+          type="button"
+          role="tab"
+          tabIndex={-1}
+          aria-selected="false"
+          aria-controls="manager-panel-3"
+          style={{ ["--liquid-accent" as string]: "#ed667e" }}
+        >
+          <small>DOGS / 04</small>
           <b>犬</b>
         </button>
       </div>
@@ -1015,6 +1027,12 @@ export function WorldHome() {
     if (locationHash !== "manager-archive-unmanaged") return;
     setManagerTab(1);
     syncRail(managerRail.current, 1);
+  }, [locationHash]);
+
+  useLayoutEffect(() => {
+    if (locationHash !== "manager-archive-dogs") return;
+    setManagerTab(3);
+    syncRail(managerRail.current, 3);
   }, [locationHash]);
 
   // A search result opens one column: /world#world-column-02.
@@ -2149,6 +2167,11 @@ export function WorldHome() {
 
         <div className="threat-panel" id="manager-archive" data-performance-region>
           <span
+            id="manager-archive-dogs"
+            className="manager-archive-return-anchor"
+            aria-hidden="true"
+          />
+          <span
             id="manager-archive-other"
             className="manager-archive-return-anchor"
             aria-hidden="true"
@@ -2173,6 +2196,12 @@ export function WorldHome() {
                   <br />
                   THE SYSTEM.
                 </>
+              ) : managerTab === 2 ? (
+                <>
+                  OTHER
+                  <br />
+                  RECORDS.
+                </>
               ) : (
                 <>
                   DOGS
@@ -2186,7 +2215,9 @@ export function WorldHome() {
                 ? "最上位管理人、六詠。六つの個体記録を照合できます。"
                 : managerTab === 1
                   ? "六詠にも通常の管理人体系にも属さない、ダンテ／ヴァルグの人物資料を閲覧できます。"
-                  : "終の来訪者『犬』の個体記録と、関連人物の資料を閲覧できます。"}
+                  : managerTab === 2
+                    ? "物語に関わる、その他の人物資料を閲覧できます。"
+                    : "終の来訪者『犬』の個体記録を閲覧できます。"}
             </p>
           </div>
           <div className="signal-column">
@@ -2381,13 +2412,13 @@ export function WorldHome() {
                   ))}
                 </div>
               </div>
-            ) : (
+            ) : managerTab === 3 ? (
               <div
-                id="manager-panel-2"
-                key="other"
-                className="manager-archive-panel is-other"
+                id="manager-panel-3"
+                key="dogs"
+                className="manager-archive-panel is-other is-dogs"
                 role="tabpanel"
-                aria-labelledby="manager-tab-2"
+                aria-labelledby="manager-tab-3"
               >
                 <h4>終の来訪者『犬』</h4>
                 <div className="manager-slot-grid other-array" aria-label="犬の個体記録">
@@ -2404,7 +2435,15 @@ export function WorldHome() {
                     <span className="other-card-copy"><small>第二の犬・ヴァルグ</small><b>ダンテ／ヴァルグ</b><i>始原的管理外存在</i></span>
                   </GuardedLink>
                 </div>
-                <h4>関連人物</h4>
+              </div>
+            ) : (
+              <div
+                id="manager-panel-2"
+                key="other"
+                className="manager-archive-panel is-other"
+                role="tabpanel"
+                aria-labelledby="manager-tab-2"
+              >
                 <div className="manager-slot-grid other-array" aria-label="関連人物">
                   <GuardedLink
                     className="other-archive-card"

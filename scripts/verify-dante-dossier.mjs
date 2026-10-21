@@ -85,16 +85,24 @@ try {
       const back = page.locator(selector);
       await show(back);
       await back.click();
-      await page.waitForURL("**/world#manager-archive-other");
+      await page.waitForURL("**/world#manager-archive-dogs");
       await ready(page);
       await page.waitForFunction(
-        () => document.querySelector("#manager-tab-2")?.getAttribute("aria-selected") === "true",
+        () => document.querySelector("#manager-tab-3")?.getAttribute("aria-selected") === "true",
       );
-      assert.equal(await page.locator('#manager-tab-2 b').textContent(), "犬");
+      assert.deepEqual(await page.locator('.manager-archive-tabs button b').allTextContents(), ["六詠", "管理外", "その他", "犬"]);
+      await page.locator('#manager-tab-2').click();
+      await page.locator('#manager-panel-2').waitFor();
+      assert.equal(await page.locator('#manager-panel-2 a[href="/characters/terra"]').count(), 1);
+      assert.equal(await page.locator('#manager-panel-2 a[href="/characters/dante"]').count(), 0);
+      await page.locator('#manager-tab-3').click();
+      await page.locator('#manager-panel-3').waitFor();
       const entry = page.getByRole("link", { name: "第二の犬 ダンテ／ヴァルグの人物資料を開く", exact: true });
       await show(entry);
       await entry.locator("img").evaluate((img) => img.decode());
       assert.ok(await entry.locator("img").evaluate((img) => img.currentSrc.includes("character-varg-20261021")));
+      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), "four-tab archive horizontal overflow");
+      await page.screenshot({ path: `/tmp/dogs-fourth-${process.env.PW_ENGINE || "chromium"}-${viewport.width}.png` });
       await entry.click();
       await page.waitForURL("**/characters/dante#character-section-04");
       await ready(page);

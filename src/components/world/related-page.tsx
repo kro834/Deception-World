@@ -174,7 +174,7 @@ export function RelatedPage({ id }: { id: "terra" | "luna" }) {
       <DossierTopbar
         fileLabel={`RELATED / ${person.code}`}
         returnHash="manager-archive-other"
-        returnLabel="犬・関連人物の一覧へ戻る"
+        returnLabel="その他の人物一覧へ戻る"
       />
       <section className="manager-hero" id="dossier-profile">
         <div className="manager-portrait-column">

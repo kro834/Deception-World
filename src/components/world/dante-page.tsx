@@ -34,7 +34,7 @@ export function DantePage() {
       </div>
       <DossierTopbar
         fileLabel="SECOND DOG / DANTE / VARG"
-        returnHash="manager-archive-other"
+        returnHash="manager-archive-dogs"
         returnLabel="犬の一覧へ戻る"
       />
       <section className="manager-hero" id="dossier-profile">
@@ -138,7 +138,7 @@ export function DantePage() {
           </div>
         ))}
       </div>
-      <DossierNav items={UNMANAGED_NAV} currentHref="/characters/dante" indexLabel="犬" returnHash="manager-archive-other" />
+      <DossierNav items={UNMANAGED_NAV} currentHref="/characters/dante" indexLabel="犬" returnHash="manager-archive-dogs" />
     </main>
   );
 }

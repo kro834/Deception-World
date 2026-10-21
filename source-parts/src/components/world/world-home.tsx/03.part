@@ -1,3 +1,7 @@
+    if (locationHash !== "manager-archive-dogs") return;
+    setManagerTab(3);
+    syncRail(managerRail.current, 3);
+  }, [locationHash]);
 
   // A search result opens one column: /world#world-column-02.
   useLayoutEffect(() => {
@@ -509,3 +513,4 @@
       do {
         window.crypto.getRandomValues(values);
       } while (values[0] >= rejectionLimit);
+      return values[0] % upperBound;

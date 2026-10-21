@@ -28,14 +28,16 @@ test("Varg preserves all eight abilities, limitations and final combat account",
 test("Dogs category has a second individual link without relabeling related people as Dogs", () => {
   const home = read("src/components/world/world-home.tsx");
   assert.match(home, /<b>犬<\/b>/);
-  assert.doesNotMatch(home, /<b>その他<\/b>/);
+  assert.match(home, /<b>その他<\/b>/);
+  assert.match(home, /id="manager-tab-3"[\s\S]*?<small>DOGS \/ 04<\/small>\s*<b>犬<\/b>/);
+  assert.match(home, /locationHash !== "manager-archive-dogs"[\s\S]*?setManagerTab\(3\)/);
   assert.match(home, /SECOND DOG \/ 02/);
   assert.match(home, /hash="character-section-04"/);
   assert.match(home, /aria-label="関連人物"/);
   const page = read("src/components/world/dante-page.tsx");
   assert.match(page, /aria-label="宿主・ダンテの人物録"/);
   assert.match(page, /aria-label="ヴァルグの人物録"/);
-  assert.equal(page.match(/returnHash="manager-archive-other"/g).length, 2);
+  assert.equal(page.match(/returnHash="manager-archive-dogs"/g).length, 2);
   for (const path of ["src/components/search/search-data.ts", "src/lib/library-data.ts", "src/components/world/world-chrome.tsx", "src/routes/characters/dante.tsx"])
     assert.ok(read(path).includes("ダンテ／ヴァルグ"), path);
 });
