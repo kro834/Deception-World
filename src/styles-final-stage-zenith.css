@@ -730,6 +730,10 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer > a.r
     grid-template-columns: minmax(0, 1fr) 48px;
     grid-template-rows: auto auto;
     row-gap: 0;
+    /* The two rows outgrow the bar's 64px floor, so its centring no longer
+       spaces the brand row: the menu button sat flush on the glass's top
+       edge. The brand row keeps the 8px the one-row bar gave it. */
+    padding-top: 8px;
   }
 
   html[data-family="special"] body .rxs-page.rxs-page.fst-page > .rxs-local-nav nav {
