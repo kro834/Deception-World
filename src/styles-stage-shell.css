@@ -950,13 +950,16 @@ html[data-family] body #site-side-panel.side-panel > .side-panel-group > p {
   letter-spacing: 0.22em;
 }
 
+/* The kicker every chrome sheet shares (the notices' and the quick
+   search's too): a tick from the first light into the second, the label,
+   and a rule that fades the same way. */
 html[data-family] body #site-side-panel.side-panel > .side-panel-group > p::before {
   content: "";
   width: 12px;
   height: 2px;
   flex: 0 0 12px;
   border: 0;
-  background: var(--sh-l1);
+  background: linear-gradient(90deg, var(--sh-l1), var(--sh-l2));
   transform: none;
 }
 
@@ -964,7 +967,12 @@ html[data-family] body #site-side-panel.side-panel > .side-panel-group > p::afte
   content: "";
   flex: 1 1 auto;
   height: 1px;
-  background: linear-gradient(90deg, rgb(var(--sh-l1-rgb) / 34%), rgb(var(--sh-l1-rgb) / 0%));
+  background: linear-gradient(
+    90deg,
+    rgb(var(--sh-l1-rgb) / 34%) 0%,
+    rgb(var(--sh-l2-rgb) / 18%) 42%,
+    rgb(var(--sh-l2-rgb) / 0%) 94%
+  );
 }
 
 html[data-family] body #site-side-panel.side-panel > .side-panel-group > .side-panel-links {
@@ -1192,6 +1200,47 @@ html[data-family]
   > a
   > span {
   font-size: 14px;
+}
+
+/* An iPad mini or a 768 iPad held upright: the search field takes the
+   row's full width and the three short ways in share the next, so
+   資料室・しおり keeps one line. */
+@media (min-width: 761px) and (max-width: 899px) {
+  html[data-family]
+    body
+    #site-side-panel.side-panel[data-liquid-pointer]
+    > .side-panel-head
+    + .side-panel-group
+    > .side-panel-links {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  html[data-family]
+    body
+    #site-side-panel.side-panel[data-liquid-pointer]
+    .side-panel-links
+    > button.side-panel-quick-search {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Where the two short ways in are narrow (tablets, small laptops), each
+   code drops under its name, so 資料を探す and 資料室・しおり keep one
+   rhythm instead of one code beside its name and the other below. */
+@media (min-width: 761px) and (max-width: 1439px) {
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-head
+    + .side-panel-group
+    > .side-panel-links
+    > a {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 2px;
+  }
 }
 
 html[data-family] body #site-side-panel.side-panel .side-panel-links > .library-current-control {
@@ -1781,6 +1830,10 @@ html[data-family]
   line-height: 1.2;
   letter-spacing: 0.08em;
   white-space: normal;
+  /* A chip that must wrap breaks between its words (FINAL / STAGE), never
+     inside one: 本編リメイク once lost its ク to a second line. */
+  word-break: keep-all;
+  text-wrap: balance;
 }
 
 /* The films' and sites' names are long: their size follows the tile's
@@ -1818,6 +1871,9 @@ html[data-family]
        break between characters here, never on an orphaned 」). */
     font-size: clamp(12px, calc((100cqi - 26px) / 15.2), 17px);
     word-break: normal;
+    /* Where the browser knows Japanese phrases, a name that must wrap
+       breaks between them (ディセプション / ワールド), not inside one. */
+    word-break: auto-phrase;
     line-break: strict;
     overflow-wrap: normal;
   }
@@ -2603,7 +2659,10 @@ html[data-family]
   }
 }
 
-/* Tablets: the chapters in two columns, the tiles in wider rows. */
+/* Tablets: the chapters in two columns, the tiles in wider rows. SPECIAL
+   and STORIES take a row each: sharing one, six tiles of 110-120px on an
+   iPad held upright clipped PERFORMANCE SITE and broke 本編リメイク and
+   the films' names mid-word (2026-10-22). */
 @media (min-width: 761px) {
   html[data-family] body #site-side-panel.side-panel[data-liquid-pointer] {
     grid-template-columns: repeat(6, minmax(0, 1fr));
@@ -2611,7 +2670,8 @@ html[data-family]
       "head head head head head head"
       "find find find find find find"
       "sec  sec  sec  sec  sec  sec"
-      "spe  spe  sto  sto  sto  sto"
+      "spe  spe  spe  spe  spe  spe"
+      "sto  sto  sto  sto  sto  sto"
       "rid  rid  rid  rid  rid  rid"
       "unm  unm  inf  inf  inf  inf"
       "sys  sys  sys  sys  sys  sys";
@@ -2714,7 +2774,8 @@ html[data-family]
     grid-template-areas:
       "head head head head head head"
       "find find find find find find"
-      "sec  spe  spe  sto  sto  sto"
+      "sec  spe  spe  spe  spe  spe"
+      "sec  sto  sto  sto  sto  sto"
       "sec  rid  rid  rid  rid  rid"
       "sec  unm  inf  inf  inf  inf"
       "sys  sys  sys  sys  sys  sys";
@@ -2851,6 +2912,39 @@ html[data-family]
 @media (min-width: 1180px) and (max-width: 1279px) {
   html[data-family] body #site-side-panel.side-panel > .side-panel-group:nth-last-child(3) > p {
     letter-spacing: 0.12em;
+  }
+}
+
+/* Up to 1439px SPECIAL and STORIES stand in two rows beside the chapters
+   (four STORIES tiles in three columns were 87px wide at 1180, an iPad
+   on its side), a little shorter so the pair still closes the first
+   screen. From 1440 the six tiles share one row again. */
+@media (min-width: 1180px) and (max-width: 1439px) {
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > :is(
+      .side-panel-head + .side-panel-group + .side-panel-group + .side-panel-group,
+      .side-panel-head
+        + .side-panel-group
+        + .side-panel-group
+        + .side-panel-group
+        + .side-panel-group
+    )
+    > .side-panel-links {
+    --sh-tile-h: clamp(150px, 19vh, 210px);
+  }
+}
+
+@media (min-width: 1440px) {
+  html[data-family] body #site-side-panel.side-panel[data-liquid-pointer] {
+    grid-template-areas:
+      "head head head head head head"
+      "find find find find find find"
+      "sec  spe  spe  sto  sto  sto"
+      "sec  rid  rid  rid  rid  rid"
+      "sec  unm  inf  inf  inf  inf"
+      "sys  sys  sys  sys  sys  sys";
   }
 }
 
@@ -3190,7 +3284,7 @@ html[data-family] body #site-side-panel.side-panel > .side-panel-files a:focus-v
   html[data-family] body #site-side-panel.side-panel[data-file-menu="true"][data-liquid-pointer] {
     grid-template-areas:
       "head head head head head head" "find find find find find find"
-      "sec sec sec sec sec sec" "spe spe sto sto sto sto"
+      "sec sec sec sec sec sec" "spe spe spe spe spe spe" "sto sto sto sto sto sto"
       "rid rid rid rid rid rid" "rik rik rik rik rik rik"
       "rel rel rel rel rel rel" "unm unm inf inf inf inf" "sys sys sys sys sys sys";
   }
@@ -3202,6 +3296,15 @@ html[data-family] body #site-side-panel.side-panel > .side-panel-files a:focus-v
   }
 }
 @media (min-width: 1180px) {
+  html[data-family] body #site-side-panel.side-panel[data-file-menu="true"][data-liquid-pointer] {
+    grid-template-areas:
+      "head head head head head head" "find find find find find find"
+      "sec spe spe spe spe spe" "sec sto sto sto sto sto" "sec rid rid rid rid rid"
+      "sec rik rik rik rik rik" "sec rel rel rel rel rel"
+      "sec unm inf inf inf inf" "sys sys sys sys sys sys";
+  }
+}
+@media (min-width: 1440px) {
   html[data-family] body #site-side-panel.side-panel[data-file-menu="true"][data-liquid-pointer] {
     grid-template-areas:
       "head head head head head head" "find find find find find find"

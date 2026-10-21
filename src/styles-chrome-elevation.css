@@ -32,8 +32,13 @@
   --dwc-head: #03060c;
   --dwc-deck: #0a1220;
   --dwc-ice: #7ae8ff;
+  --dwc-ice-rgb: 122 232 255;
   --dwc-ice-hi: #c6f5ff;
   --dwc-gold: #f0cf86;
+  --dwc-gold-rgb: 240 207 134;
+  --dwc-pink: #ff5fc8;
+  --dwc-pink-rgb: 255 95 200;
+  --dwc-deck-rgb: 10 18 32;
   --dwc-lock: color-mix(in srgb, #7ae8ff 62%, #dff9ff);
   --dwc-text: #f1f7fb;
   --dwc-text-2: #b9cad8;
@@ -214,12 +219,12 @@ html body #site-side-panel .side-panel-head b {
   }
 }
 
-/* Close plate: ink, one ice edge, 4px corners. No red and no spin on
-   hover. */
+/* Close plate: ink, one ice edge, 3px corners (the launcher's and the
+   quick search's plates). No red and no spin on hover. */
 html body #site-side-panel .side-panel-close.ios26-glass,
 html body #site-announcement-dialog .site-announcement-close.ios26-glass {
   border: 1px solid rgb(122 232 255 / 36%);
-  border-radius: 4px;
+  border-radius: 3px;
   background: rgb(4 8 15 / 92%) !important;
   box-shadow: inset 0 0 0 1px rgb(122 232 255 / 8%) !important;
   color: var(--dwc-text);
@@ -585,21 +590,63 @@ html body #site-announcement-dialog {
 /* Ink under the ice grid, square 6px corners, one drop shadow. The sheen
    and aura loops stop; the sheet arrives once (below). */
 html body #site-announcement-dialog .site-announcement-hub {
-  border: 1px solid rgb(122 232 255 / 28%);
+  border: 1px solid rgb(var(--dwc-ice-rgb) / 28%);
   border-radius: 6px;
   /* The key visual's two light trails at the sheet's corners (the
      streamline sheet's images; none where that sheet is not loaded). */
   background:
     var(--saga-trail-ne-soft, none) right top / min(52%, 520px) min(34%, 230px) no-repeat,
     var(--saga-trail-sw-soft, none) left bottom / min(56%, 560px) min(38%, 260px) no-repeat,
-    radial-gradient(ellipse 60% 40% at 0% 0%, rgb(122 232 255 / 10%), transparent 70%),
-    radial-gradient(ellipse 50% 40% at 100% 100%, rgb(255 95 200 / 7%), transparent 70%),
+    radial-gradient(ellipse 60% 40% at 0% 0%, rgb(var(--dwc-ice-rgb) / 10%), transparent 70%),
+    radial-gradient(ellipse 50% 40% at 100% 100%, rgb(var(--dwc-pink-rgb) / 7%), transparent 70%),
     var(--dwc-grid),
     var(--dwc-ink);
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
   box-shadow: 0 36px 100px rgb(0 0 0 / 62%);
   animation: none;
+}
+
+/* The Dream Chapter's notices take the chapter's own lights, as its
+   launcher and its search do: vermilion and gold on night plum, and no
+   key-visual trail. The sheet's rules read these tokens, so only the
+   tokens change here. */
+html[data-family="dream"] body #site-announcement-dialog {
+  --dwc-ink: var(--sh-ink, #130c17);
+  --dwc-head: #0f0912;
+  --dwc-deck: var(--sh-ink-2, #1c1120);
+  --dwc-deck-rgb: 28 17 32;
+  --dwc-ice: var(--sh-l1, #e0614f);
+  --dwc-ice-rgb: var(--sh-l1-rgb, 224 97 79);
+  --dwc-ice-hi: #f8cfc4;
+  --dwc-lock: var(--sh-l1, #e0614f);
+  --dwc-pink: var(--sh-l2, #c9a15a);
+  --dwc-pink-rgb: var(--sh-l2-rgb, 201 161 90);
+  --dwc-text: var(--sh-text, #f6ecdf);
+  --dwc-text-2: var(--sh-text-2, #dccbb6);
+  --dwc-text-3: var(--sh-text-3, #b7a18c);
+  --dwc-line: rgb(224 97 79 / 20%);
+  --dwc-line-strong: rgb(224 97 79 / 52%);
+  --dwc-prism: linear-gradient(90deg, #e0614f 0%, #c9a15a 62%, #f0cf86 100%);
+  --dwc-prism-soft: linear-gradient(
+    90deg,
+    rgb(224 97 79 / 62%) 0%,
+    rgb(201 161 90 / 62%) 62%,
+    rgb(240 207 134 / 62%) 100%
+  );
+  --dwc-grid:
+    repeating-linear-gradient(90deg, rgb(224 97 79 / 2.6%) 0 1px, transparent 1px 96px),
+    repeating-linear-gradient(0deg, rgb(224 97 79 / 2.6%) 0 1px, transparent 1px 96px);
+  --dwc-chrome-ink: linear-gradient(180deg, #fff 0%, #fbeae3 36%, #efb7a7 100%);
+  --dwc-ghost: drop-shadow(3px 0 rgb(224 97 79 / 28%)) drop-shadow(-2px 0 rgb(201 161 90 / 22%));
+}
+
+html[data-family="dream"] body #site-announcement-dialog .site-announcement-hub {
+  background:
+    radial-gradient(ellipse 60% 40% at 0% 0%, rgb(var(--dwc-ice-rgb) / 10%), transparent 70%),
+    radial-gradient(ellipse 50% 40% at 100% 100%, rgb(var(--dwc-pink-rgb) / 8%), transparent 70%),
+    var(--dwc-grid),
+    var(--dwc-ink);
 }
 
 html body #site-announcement-dialog .site-announcement-hub::before {
@@ -643,10 +690,85 @@ html body #site-announcement-dialog .site-announcement-header h2 {
   letter-spacing: 0.04em;
 }
 
+/* One head for every chrome sheet (the launcher, these notices, the quick
+   search): the DW plate with its cut corner and lit rim, the kicker over
+   the title, the status and the close plate at the end, the prism under
+   it. The plate is text that is not read out. */
+html body #site-announcement-dialog .site-announcement-header > div {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  column-gap: 14px;
+  align-items: center;
+  min-width: 0;
+}
+
+html body #site-announcement-dialog .site-announcement-header > div::before {
+  content: "DW";
+  content: "DW" / "";
+  grid-row: 1 / 3;
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  box-sizing: border-box;
+  border: 1px solid rgb(var(--dwc-ice-rgb) / 62%);
+  background:
+    linear-gradient(225deg, var(--dwc-ice) 0 7px, transparent 7px),
+    linear-gradient(145deg, rgb(var(--dwc-ice-rgb) / 20%), transparent 62%),
+    var(--dwc-deck);
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%);
+  color: var(--dwc-ice);
+  font-family: var(--dwc-hud);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+}
+
+html body #site-announcement-dialog .site-announcement-header > div > p {
+  margin: 0 0 6px;
+}
+
+html body #site-announcement-dialog .site-announcement-header h2 {
+  line-height: 1.1;
+}
+
+/* Phones: the kicker keeps its one line across the top of the head, and
+   the plate stands beside the title under it. */
+@media (max-width: 560px) {
+  html body #site-announcement-dialog .site-announcement-header > div {
+    grid-template-columns: 36px minmax(0, 1fr);
+    grid-template-areas:
+      "kicker kicker"
+      "plate  title";
+    column-gap: 12px;
+  }
+
+  html body #site-announcement-dialog .site-announcement-header > div::before {
+    grid-area: plate;
+    width: 36px;
+    height: 36px;
+    clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%);
+    background:
+      linear-gradient(225deg, var(--dwc-ice) 0 6px, transparent 6px),
+      linear-gradient(145deg, rgb(var(--dwc-ice-rgb) / 20%), transparent 62%),
+      var(--dwc-deck);
+    font-size: 12px;
+  }
+
+  html body #site-announcement-dialog .site-announcement-header > div > p {
+    grid-area: kicker;
+    margin-bottom: 10px;
+  }
+
+  html body #site-announcement-dialog .site-announcement-header h2 {
+    grid-area: title;
+  }
+}
+
 html body #site-announcement-dialog .site-announcement-count {
-  border-color: rgb(122 232 255 / 30%);
+  border-color: rgb(var(--dwc-ice-rgb) / 30%);
   border-radius: 2px;
-  background: rgb(122 232 255 / 6%);
+  background: rgb(var(--dwc-ice-rgb) / 6%);
   color: var(--dwc-ice-hi);
   font-size: 12px;
   line-height: 1.4;
@@ -657,7 +779,7 @@ html body #site-announcement-dialog .site-announcement-count {
    Announcements: the index
    ================================================================ */
 html body #site-announcement-dialog .site-announcement-index-copy {
-  border-bottom-color: rgb(122 232 255 / 14%);
+  border-bottom-color: rgb(var(--dwc-ice-rgb) / 14%);
 }
 
 html body #site-announcement-dialog .site-announcement-index-copy p {
@@ -665,31 +787,43 @@ html body #site-announcement-dialog .site-announcement-index-copy p {
 }
 
 html body #site-announcement-dialog .site-announcement-index-copy span {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
   color: var(--dwc-ice);
   font-size: 12px;
   line-height: 1.4;
   letter-spacing: 0.18em;
 }
 
+/* The shared kicker tick: the first light into the second. */
+html body #site-announcement-dialog .site-announcement-index-copy span::before {
+  content: "";
+  width: 12px;
+  height: 2px;
+  flex: 0 0 12px;
+  background: linear-gradient(90deg, var(--dwc-ice), var(--dwc-pink));
+}
+
 /* Cards: square deck plates with the prism along the top. No brackets:
    they mark the sheet, not each record in it. */
 html body #site-announcement-dialog .site-announcement-list-item {
-  border: 1px solid rgb(122 232 255 / 18%);
+  border: 1px solid rgb(var(--dwc-ice-rgb) / 18%);
   border-radius: 4px;
   background:
     var(--dwc-prism-soft) top / 100% 1px no-repeat,
-    linear-gradient(135deg, rgb(122 232 255 / 6%), transparent 42%),
-    rgb(10 18 32 / 82%);
+    linear-gradient(135deg, rgb(var(--dwc-ice-rgb) / 6%), transparent 42%),
+    rgb(var(--dwc-deck-rgb) / 82%);
   box-shadow: none;
 }
 
 html body #site-announcement-dialog .site-announcement-list-visual {
-  border-color: rgb(122 232 255 / 35%);
+  border-color: rgb(var(--dwc-ice-rgb) / 35%);
   border-radius: 2px;
 }
 
 html body #site-announcement-dialog .site-announcement-list-arrow {
-  border-color: rgb(240 207 134 / 40%);
+  border-color: rgb(var(--dwc-gold-rgb) / 40%);
   border-radius: 2px;
   color: var(--dwc-gold);
 }
@@ -729,17 +863,17 @@ html body #site-announcement-dialog .site-announcement-list-copy b {
 /* Hover (mouse only): the edge brightens and the plate lifts a pixel. */
 @media (hover: hover) and (pointer: fine) {
   html body #site-announcement-dialog .site-announcement-list-item:hover {
-    border-color: rgb(122 232 255 / 55%);
+    border-color: rgb(var(--dwc-ice-rgb) / 55%);
     background:
       var(--dwc-prism) top / 100% 1px no-repeat,
-      linear-gradient(135deg, rgb(122 232 255 / 10%), transparent 46%),
-      rgb(10 18 32 / 92%);
+      linear-gradient(135deg, rgb(var(--dwc-ice-rgb) / 10%), transparent 46%),
+      rgb(var(--dwc-deck-rgb) / 92%);
     transform: none;
     translate: 0 -1px;
   }
 
   html body #site-announcement-dialog .site-announcement-list-item:hover .site-announcement-list-arrow {
-    border-color: rgb(240 207 134 / 70%);
+    border-color: rgb(var(--dwc-gold-rgb) / 70%);
     transform: none;
   }
 }
@@ -823,6 +957,74 @@ html[data-press-ready] body #site-announcement-dialog .site-announcement-list-it
   }
 }
 
+/* The posters read across: each takes four rows of the board (the key
+   visual, the code and date, the title, OPEN RECORD with the arrow)
+   through two subgrids, so a code that wraps (PRODUCT BRIEFING 03 on a
+   narrow poster) moves every title down with it, and the titles, the
+   OPEN RECORD lines and the arrows each share one line across the board.
+   The arrow stands at the end of the OPEN RECORD line, not under it. */
+@supports (grid-template-rows: subgrid) {
+  @media (min-width: 761px) {
+    html body #site-announcement-dialog .site-announcement-list > li {
+      display: grid;
+      grid-row: span 4;
+      grid-template-rows: subgrid;
+      row-gap: 0;
+    }
+
+    html body #site-announcement-dialog .site-announcement-list-item {
+      grid-row: 1 / -1;
+      height: auto;
+      grid-template-rows: subgrid;
+      grid-template-areas: none;
+      row-gap: 0;
+    }
+
+    html body #site-announcement-dialog .site-announcement-list-visual {
+      grid-row: 1;
+      grid-column: 1;
+      margin-bottom: 14px;
+    }
+
+    html body #site-announcement-dialog .site-announcement-list-copy {
+      display: grid;
+      grid-row: 2 / span 3;
+      grid-column: 1;
+      grid-template-rows: subgrid;
+      row-gap: 8px;
+    }
+
+    html body #site-announcement-dialog .site-announcement-list-copy > span {
+      align-self: start;
+    }
+
+    html body #site-announcement-dialog .site-announcement-list-copy b {
+      align-self: start;
+    }
+
+    html body #site-announcement-dialog .site-announcement-list-copy i {
+      align-self: center;
+      padding-right: 48px;
+    }
+
+    /* A 768 iPad's posters are 200px: OPEN RECORD keeps its line beside
+       the arrow at a closer tracking. */
+    @media (max-width: 899px) {
+      html body #site-announcement-dialog .site-announcement-list-copy i {
+        padding-right: 44px;
+        letter-spacing: 0.1em;
+      }
+    }
+
+    html body #site-announcement-dialog .site-announcement-list-arrow {
+      grid-row: 4;
+      grid-column: 1;
+      align-self: center;
+      margin-top: 0;
+    }
+  }
+}
+
 /* A short screen (an iPad on its side, a small laptop): the posters are
    square so the board still closes inside the sheet without a scroll. */
 @media (min-width: 761px) and (max-height: 860px) {
@@ -886,7 +1088,7 @@ html[data-press-ready] body #site-announcement-dialog .site-announcement-list-it
    Announcements: a transmission
    ================================================================ */
 html body #site-announcement-dialog .site-announcement-back {
-  border: 1px solid rgb(122 232 255 / 30%);
+  border: 1px solid rgb(var(--dwc-ice-rgb) / 30%);
   border-radius: 4px;
   background: var(--dwc-ink);
   color: var(--dwc-text);
@@ -900,8 +1102,8 @@ html body #site-announcement-dialog .site-announcement-back span {
 
 @media (hover: hover) and (pointer: fine) {
   html body #site-announcement-dialog .site-announcement-back:hover {
-    border-color: rgb(122 232 255 / 58%);
-    background: rgb(122 232 255 / 8%);
+    border-color: rgb(var(--dwc-ice-rgb) / 58%);
+    background: rgb(var(--dwc-ice-rgb) / 8%);
   }
 }
 
@@ -914,7 +1116,7 @@ html body #site-announcement-dialog .site-announcement-back span {
     margin: -16px -16px 0;
     padding-inline: 16px;
     border-width: 0 0 1px;
-    border-color: rgb(122 232 255 / 22%);
+    border-color: rgb(var(--dwc-ice-rgb) / 22%);
     border-radius: 0;
     background: var(--dwc-ink);
     -webkit-backdrop-filter: none;
@@ -937,7 +1139,7 @@ html body #site-announcement-dialog .site-announcement-back span {
    why it no longer clips. */
 html body #site-announcement-dialog .site-announcement-visual {
   overflow: visible;
-  border-color: rgb(122 232 255 / 40%);
+  border-color: rgb(var(--dwc-ice-rgb) / 40%);
   border-radius: 2px;
   box-shadow: none;
 }
@@ -953,7 +1155,7 @@ html body #site-announcement-dialog .site-announcement-visual::before {
 }
 
 html body #site-announcement-dialog .site-announcement-detail.is-product-release .site-announcement-visual {
-  border-color: rgb(240 207 134 / 55%);
+  border-color: rgb(var(--dwc-gold-rgb) / 55%);
   box-shadow: none;
 }
 
@@ -1026,7 +1228,7 @@ html body #site-announcement-dialog .site-announcement-lede {
 }
 
 html body #site-announcement-dialog .site-announcement-release {
-  border-top-color: rgb(122 232 255 / 16%);
+  border-top-color: rgb(var(--dwc-ice-rgb) / 16%);
 }
 
 html body #site-announcement-dialog .site-announcement-release-title {
@@ -1039,17 +1241,23 @@ html body #site-announcement-dialog .site-announcement-release-title {
 
 /* Metrics: deck plates with the prism along the top. */
 html body #site-announcement-dialog .site-announcement-metric {
-  border: 1px solid rgb(122 232 255 / 20%);
+  border: 1px solid rgb(var(--dwc-ice-rgb) / 20%);
   border-radius: 4px;
   background:
     var(--dwc-prism-soft) top / 100% 1px no-repeat,
-    linear-gradient(135deg, rgb(122 232 255 / 7%), transparent 42%),
-    rgb(10 18 32 / 82%);
+    linear-gradient(135deg, rgb(var(--dwc-ice-rgb) / 7%), transparent 42%),
+    rgb(var(--dwc-deck-rgb) / 82%);
   box-shadow: none;
 }
 
 html body #site-announcement-dialog .site-announcement-metric b {
-  background: linear-gradient(90deg, #c6f5ff 0%, #7ae8ff 40%, #ff5fc8 75%, #f0cf86 100%);
+  background: linear-gradient(
+    90deg,
+    var(--dwc-ice-hi) 0%,
+    var(--dwc-ice) 40%,
+    var(--dwc-pink) 75%,
+    var(--dwc-gold) 100%
+  );
   -webkit-background-clip: text;
   background-clip: text;
   font-family: var(--dwc-mono);
@@ -1086,7 +1294,7 @@ html body #site-announcement-dialog .site-announcement-body {
 }
 
 html body #site-announcement-dialog .site-announcement-note {
-  border-left-color: rgb(240 207 134 / 60%);
+  border-left-color: rgb(var(--dwc-gold-rgb) / 60%);
   color: var(--dwc-text-3);
 }
 
