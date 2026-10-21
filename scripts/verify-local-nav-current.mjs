@@ -22,7 +22,12 @@ const profiles = [
 ].filter((profile) => !process.env.PW_PROFILE || process.env.PW_PROFILE === profile.name);
 assert.ok(profiles.length, "PW_PROFILE must name an existing viewport profile");
 const routes = ["rexonance-saga", "extreme-saga"];
-const chapters = ["performance", "p14", "stages", "system"];
+const chapterList = ["performance", "p14", "stages", "system"];
+// Owner (2026-10-21): Rexonance's bar lists its five chapters (03 = the suit-up, #assembly).
+const routeChapters = {
+  "rexonance-saga": ["performance", "p14", "assembly", "stages", "system"],
+  "extreme-saga": chapterList,
+};
 const report = { base, engine, startedAt: new Date().toISOString(), results: [], ok: false };
 await mkdir(output, { recursive: true });
 
@@ -42,7 +47,7 @@ async function ready(page, route) {
     await page
       .locator(".rxs-local-nav nav a")
       .evaluateAll((links) => links.map((link) => link.hash.slice(1))),
-    chapters,
+    routeChapters[route],
   );
 }
 
@@ -56,6 +61,12 @@ async function snapshot(page) {
     const links = [...document.querySelectorAll(".rxs-local-nav nav a")].map((link) => {
       const target = document.getElementById(decodeURIComponent(link.hash.slice(1)));
       const bounds = target.getBoundingClientRect();
+      // A chapter also spans the elements its link names (rx19: the suit-up's runway).
+      const parts = (link.dataset.localNavThrough || "")
+        .split(/\s+/)
+        .map((id) => (id ? document.getElementById(id) : null))
+        .filter(Boolean)
+        .map((part) => part.getBoundingClientRect());
       const style = getComputedStyle(link);
       // The bar's own line under a link (its hover/focus line), lit for the chapter.
       const line = getComputedStyle(link, "::after");
@@ -64,7 +75,9 @@ async function snapshot(page) {
         id: target.id,
         current: link.getAttribute("aria-current"),
         section: { top: bounds.top, bottom: bounds.bottom, height: bounds.height },
-        crossing: bounds.top <= band.bottom && bounds.bottom >= band.top,
+        crossing: [bounds, ...parts].some(
+          (part) => part.top <= band.bottom && part.bottom >= band.top,
+        ),
         color: style.color,
         underline: style.textDecorationLine,
         lit:
@@ -189,6 +202,7 @@ try {
         await ready(page, route);
         await page.evaluate(() => scrollTo({ top: 0, behavior: "instant" }));
         result.checks.push(await verifyCurrent(page, null, "hero has no stale current chapter"));
+        const chapters = routeChapters[route];
         for (const id of chapters)
           result.checks.push(await visitChapter(page, id, `forward/${id}`));
         for (const id of [...chapters].reverse())

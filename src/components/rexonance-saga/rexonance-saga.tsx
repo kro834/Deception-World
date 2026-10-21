@@ -487,6 +487,7 @@ const RexonanceSuitUp = memo(function RexonanceSuitUp({ stage }: { stage: Rexona
         ref={runwayRef}
         className="rzn-suitup"
         aria-hidden="true"
+        id="assembly-runway"
         // The suit-up ends on the form chosen in 03 (owner, 2026-10-11).
         data-form={stage}
         style={{
@@ -1103,6 +1104,11 @@ const RexonancePerformance = memo(function RexonancePerformance() {
   return (
     <section id="performance" className="rxs-performance rxs-section">
       <header className="rxs-section-heading rxs-reveal">
+        {/* APEX (rx19): the chapter's index at the head's right (decorative;
+            the forged numeral and the bar carry the chapter). */}
+        <small className="rxa-index" aria-hidden="true">
+          <b>01</b>/ 05
+        </small>
         <p>PERFORMANCE</p>
         <h2>
           これで、
@@ -1814,6 +1820,11 @@ export function RexonanceSaga() {
           <nav aria-label="レクソナンスサーガ ページ内ナビゲーション">
             <a href="#performance">性能</a>
             <a href="#p14">P14</a>
+            {/* APEX (rx19): the bar lists all five chapters, numbered as the
+                chapter index; 03 stays lit through the runway and the replay. */}
+            <a href="#assembly" data-local-nav-through="assembly-runway assembly-replay">
+              変身
+            </a>
             <a href="#stages">形態</a>
             <a href="#system">システム</a>
           </nav>
@@ -1948,6 +1959,9 @@ export function RexonanceSaga() {
       {step >= 2 ? (
         <section id="p14" className="rxs-p14 rxs-section" aria-labelledby="rxs-p14-title">
           <header className="rxs-section-heading rxs-reveal">
+            <small className="rxa-index" aria-hidden="true">
+              <b>02</b>/ 05
+            </small>
             <p>PROCESSING CORE / P14</p>
             <h2 id="rxs-p14-title">
               同じエーテルで、
@@ -2025,6 +2039,9 @@ export function RexonanceSaga() {
 
           <section id="stages" className="rxs-stages rxs-section">
             <header className="rxs-section-heading rxs-reveal">
+              <small className="rxa-index" aria-hidden="true">
+                <b>04</b>/ 05
+              </small>
               <p>THREE OPERATING STAGES</p>
               <h2>まだ、次元は変わる。</h2>
             </header>
@@ -2148,6 +2165,9 @@ export function RexonanceSaga() {
 
           <section id="system" className="rxs-system rxs-section">
             <header className="rxs-section-heading rxs-reveal">
+              <small className="rxa-index" aria-hidden="true">
+                <b>05</b>/ 05
+              </small>
               <p>SELF-RESONANCE</p>
               <h2>
                 悠真自身が、
