@@ -2878,3 +2878,1144 @@ html[data-route-cover="covering"] .zeus-button:not([data-navigating="true"]) {
     transform: translateX(70%);
   }
 }
+
+
+/* ---- Each rider's own light (2026-10-22) --------------------------------
+   The block above gives every dive one burst and every cut-in one slash;
+   here each rider gets a gesture of their own, under the same rules (ink or
+   tinted light, never white; once; opacity, transform and clip-path only;
+   full motion only). サーガ keeps the owner's green fire and the classic
+   tunnel; the other three dives replace the tunnel's radial streaks.
+   レルム, the blade: the tunnel becomes a wind of dashes along the texture's
+     own -16deg, a crimson cut is drawn across the stage and the held file
+     from the lower left and an amber counter-cut answers from the right.
+   ローア, the frost record: the tunnel becomes a six-fold lattice of rings
+     and spokes that turns into place with frost glints, a hexagonal ring
+     leaves the file and the record grid rises.
+   ヴァンダル, the shatter: the tunnel becomes a ring of hard-edged shards
+     that slams out with one tremor, the seam is drawn through the file and
+     its two edges part, magenta and violet.
+   Cut-ins: レディック a warm paper light down the doors; アルゲノム two
+   scarlet cuts cross; オーバーゼッツ a vertical impact band and a pressure
+   ring; サイファー a stepped scan and a cyan return line. */
+@media (prefers-reduced-motion: no-preference) {
+  /* The hand-over: the reveal only fades the tunnel, so it keeps the scale
+     its rush ended on instead of snapping back to the sheet's 28 %. */
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-revealing:not(.is-extreme-dive):not(
+      .is-dream-dive
+    )
+    .cine-dive-tunnel {
+    transform: translate(-50%, -50%) scale(1.06);
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-extreme-dive.is-revealing
+    .cine-dive-tunnel {
+    transform: translate(-50%, -50%) scale(1.14);
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-dream-dive.is-revealing
+    .cine-dive-tunnel {
+    transform: translate(-50%, -54%) scale(1.08, 0.88);
+  }
+
+  /* The three fields cover the stage itself (the old sheet's field is a
+     1540 px disc masked round its own centre, off the file). */
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.rider-route-dive:is(
+      .is-realm-dive,
+      .is-lore-dive,
+      .is-vandal-dive
+    )
+    > .rider-dive-vector-field {
+    inset: 0;
+    width: auto;
+    height: auto;
+    overflow: hidden;
+    border-radius: 0;
+    -webkit-mask-image: none;
+    mask-image: none;
+    transform: none;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.rider-route-dive:is(
+      .is-realm-dive,
+      .is-lore-dive,
+      .is-vandal-dive
+    )
+    > .rider-dive-vector-field::before,
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.rider-route-dive:is(
+      .is-realm-dive,
+      .is-lore-dive,
+      .is-vandal-dive
+    )
+    > .rider-dive-vector-field::after {
+    position: absolute;
+    content: "";
+    pointer-events: none;
+    opacity: 0;
+  }
+
+  /* The three tunnels drop the sheet's disc: each draws its own field. */
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.rider-route-dive:is(
+      .is-realm-dive,
+      .is-lore-dive,
+      .is-vandal-dive
+    )
+    .cine-dive-tunnel
+    > i {
+    inset: 0;
+    border-radius: 0;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+
+  /* レルム ---------------------------------------------------------- */
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.rider-route-dive.is-realm-dive
+    .cine-dive-tunnel {
+    --dwc-o: 0.5;
+    width: min(116vmax, 1800px);
+    height: min(116vmax, 1800px);
+    border-radius: 0;
+    background:
+      radial-gradient(
+          64px 1.4px at 50% 50%,
+          rgb(255 194 120 / 0.85),
+          rgb(241 74 96 / 0.4) 50%,
+          transparent
+        )
+        0 0 / 233px 29px,
+      radial-gradient(
+          96px 1.2px at 50% 50%,
+          rgb(255 120 138 / 0.7),
+          rgb(241 74 96 / 0.3) 50%,
+          transparent
+        )
+        91px 13px / 317px 43px,
+      radial-gradient(40px 1px at 50% 50%, rgb(255 184 196 / 0.6), transparent)
+        37px 21px / 173px 61px;
+    -webkit-mask-image: radial-gradient(
+      ellipse 54% 26% at 50% 50%,
+      #000 0 30%,
+      transparent 100%
+    );
+    mask-image: radial-gradient(
+      ellipse 54% 26% at 50% 50%,
+      #000 0 30%,
+      transparent 100%
+    );
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.rider-route-dive.is-realm-dive.is-covering:not(
+      .is-cine-flip
+    ):not(.is-cine-calm):not(.is-cine-reduced)
+    .cine-dive-tunnel {
+    animation: dwc-realm-wind 340ms cubic-bezier(0.1, 0.8, 0.1, 1) 20ms both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.rider-route-dive.is-realm-dive.is-revealing:not(
+      .is-cine-flip
+    )
+    .cine-dive-tunnel {
+    transform: translate(-50%, -50%) rotate(-16deg);
+  }
+
+  /* The grain along the blade, and a nearer, faster rank of dashes. */
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.rider-route-dive.is-realm-dive
+    .cine-dive-tunnel
+    > i {
+    background: repeating-linear-gradient(
+      180deg,
+      transparent 0 37px,
+      rgb(241 74 96 / 0.22) 37px 38px,
+      transparent 38px 59px,
+      rgb(255 194 120 / 0.14) 59px 60px,
+      transparent 60px 101px
+    );
+    animation: dwc-realm-grain 340ms cubic-bezier(0.1, 0.8, 0.1, 1) 20ms both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.rider-route-dive.is-realm-dive
+    .cine-dive-tunnel
+    > i:nth-child(2) {
+    background:
+      radial-gradient(
+          130px 1.6px at 50% 50%,
+          rgb(255 206 160 / 0.9),
+          rgb(241 74 96 / 0.42) 50%,
+          transparent
+        )
+        0 0 / 521px 83px,
+      radial-gradient(
+          84px 1.3px at 50% 50%,
+          rgb(255 138 152 / 0.8),
+          transparent
+        )
+        203px 37px / 389px 107px;
+    animation-name: dwc-realm-dash;
+  }
+
+  /* The cut and the counter-cut: over the held file, under the numeral. */
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.rider-route-dive.is-realm-dive:not(
+      .is-rexonance-dive
+    ):not(.is-extreme-dive):not(.is-final-stage-dive)
+    > .rider-dive-vector-field {
+    z-index: 26;
+    background: linear-gradient(
+      -16deg,
+      transparent 45%,
+      rgb(241 74 96 / 0.08) 48.6%,
+      rgb(255 194 120 / 0.13) 50%,
+      rgb(241 74 96 / 0.08) 51.4%,
+      transparent 55%
+    );
+    animation: dwc-realm-wake 640ms cubic-bezier(0.2, 0.7, 0.3, 1) 60ms both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.rider-route-dive.is-realm-dive
+    > .rider-dive-vector-field::before,
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.rider-route-dive.is-realm-dive
+    > .rider-dive-vector-field::after {
+    top: 50%;
+    left: 50%;
+    width: 150vmax;
+    height: 2px;
+    margin: -1px 0 0 -75vmax;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgb(241 74 96 / 0.5) 16%,
+      rgb(255 120 138 / 0.92) 58%,
+      rgb(255 206 160) 84%,
+      rgb(255 228 200 / 0.5) 96%,
+      transparent
+    );
+    box-shadow:
+      0 0 10px rgb(241 74 96 / 0.72),
+      0 0 28px rgb(241 74 96 / 0.32);
+    transform: rotate(-16deg);
+    clip-path: inset(-40px 100% -40px 0);
+    animation: dwc-realm-cut 540ms cubic-bezier(0.16, 0.9, 0.3, 1) 30ms both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.rider-route-dive.is-realm-dive
+    > .rider-dive-vector-field::after {
+    height: 1px;
+    margin-top: 14px;
+    background: linear-gradient(
+      270deg,
+      transparent,
+      rgb(255 194 120 / 0.42) 16%,
+      rgb(255 210 150 / 0.86) 58%,
+      rgb(255 184 196) 84%,
+      transparent
+    );
+    box-shadow: 0 0 10px rgb(255 194 120 / 0.42);
+    clip-path: inset(-40px 0 -40px 100%);
+    animation-name: dwc-realm-counter;
+    animation-duration: 480ms;
+    animation-delay: 150ms;
+  }
+
+  /* ローア ---------------------------------------------------------- */
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.rider-route-dive.is-lore-dive
+    .cine-dive-tunnel {
+    --dwc-o: 0.46;
+    background:
+      repeating-conic-gradient(
+        from 0deg,
+        rgb(200 245 255 / 0.4) 0deg 0.4deg,
+        transparent 0.45deg 60deg
+      ),
+      repeating-conic-gradient(
+        from 30deg,
+        rgb(160 230 255 / 0.2) 0deg 0.3deg,
+        transparent 0.3deg 60deg
+      ),
+      repeating-radial-gradient(
+        circle,
+        transparent 0 52px,
+        rgb(200 245 255 / 0.24) 52px 53.5px,
+        transparent 53.5px 104px
+      );
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.rider-route-dive.is-lore-dive.is-covering:not(
+      .is-cine-flip
+    ):not(.is-cine-calm):not(.is-cine-reduced)
+    .cine-dive-tunnel {
+    animation: dwc-lore-lattice 400ms cubic-bezier(0.16, 0.84, 0.3, 1) 20ms both;
+  }
+
+  /* Finer rings opening like a sounding, and the frost glints. */
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.rider-route-dive.is-lore-dive
+    .cine-dive-tunnel
+    > i {
+    background: repeating-radial-gradient(
+      circle,
+      transparent 0 19px,
+      rgb(142 232 255 / 0.2) 19px 20px,
+      transparent 20px 34px
+    );
+    animation: dwc-lore-sound 420ms cubic-bezier(0.2, 0.8, 0.3, 1) 40ms both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.rider-route-dive.is-lore-dive
+    .cine-dive-tunnel
+    > i:nth-child(2) {
+    background:
+      radial-gradient(
+        0.22% 1.9% at 31% 34%,
+        rgb(216 244 255 / 0.95),
+        transparent
+      ),
+      radial-gradient(
+        1.9% 0.22% at 31% 34%,
+        rgb(216 244 255 / 0.95),
+        transparent
+      ),
+      radial-gradient(
+        0.18% 1.4% at 70% 29%,
+        rgb(200 245 255 / 0.9),
+        transparent
+      ),
+      radial-gradient(
+        1.4% 0.18% at 70% 29%,
+        rgb(200 245 255 / 0.9),
+        transparent
+      ),
+      radial-gradient(
+        0.2% 1.6% at 76% 64%,
+        rgb(216 244 255 / 0.9),
+        transparent
+      ),
+      radial-gradient(
+        1.6% 0.2% at 76% 64%,
+        rgb(216 244 255 / 0.9),
+        transparent
+      ),
+      radial-gradient(
+        0.16% 1.2% at 25% 69%,
+        rgb(200 245 255 / 0.85),
+        transparent
+      ),
+      radial-gradient(
+        1.2% 0.16% at 25% 69%,
+        rgb(200 245 255 / 0.85),
+        transparent
+      ),
+      radial-gradient(0.14% 1% at 58% 80%, rgb(216 244 255 / 0.8), transparent),
+      radial-gradient(1% 0.14% at 58% 80%, rgb(216 244 255 / 0.8), transparent),
+      radial-gradient(0.14% 1% at 46% 19%, rgb(216 244 255 / 0.8), transparent),
+      radial-gradient(1% 0.14% at 46% 19%, rgb(216 244 255 / 0.8), transparent);
+    animation: dwc-lore-glint 520ms cubic-bezier(0.2, 0.8, 0.3, 1) 110ms both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.rider-route-dive.is-lore-dive:not(
+      .is-rexonance-dive
+    ):not(.is-extreme-dive):not(.is-final-stage-dive)
+    > .rider-dive-vector-field {
+    background: radial-gradient(
+      44% 44% at calc((var(--fx) + var(--fw) / 2) * 1px)
+        calc((var(--fy) + var(--fh) / 2) * 1px),
+      rgb(160 230 255 / 22%),
+      rgb(142 232 255 / 7%) 48%,
+      transparent 72%
+    );
+    animation: dwc-lore-frost 700ms cubic-bezier(0.2, 0.8, 0.3, 1) both;
+  }
+
+  /* The hexagonal frost ring, flat-topped, off the held file. */
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.rider-route-dive.is-lore-dive
+    > .rider-dive-vector-field::before {
+    top: calc((var(--fy) + var(--fh) / 2) * 1px);
+    left: calc((var(--fx) + var(--fw) / 2) * 1px);
+    width: calc(var(--fw) * 1.36px);
+    height: calc(var(--fw) * 1.178px);
+    margin: calc(var(--fw) * -0.589px) 0 0 calc(var(--fw) * -0.68px);
+    background: linear-gradient(
+      135deg,
+      rgb(216 244 255 / 0.95),
+      rgb(142 232 255 / 0.72) 50%,
+      rgb(200 245 255 / 0.95)
+    );
+    clip-path: polygon(
+      evenodd,
+      25% 0,
+      75% 0,
+      100% 50%,
+      75% 100%,
+      25% 100%,
+      0 50%,
+      25% 0,
+      25.45% 0.9%,
+      0.9% 50%,
+      25.45% 99.1%,
+      74.55% 99.1%,
+      99.1% 50%,
+      74.55% 0.9%,
+      25.45% 0.9%
+    );
+    transform: scale(0.72);
+    animation: dwc-lore-hex 640ms cubic-bezier(0.16, 0.84, 0.3, 1) 70ms both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.rider-route-dive.is-lore-dive
+    > .rider-dive-vector-field::after {
+    inset: 0;
+    background:
+      repeating-linear-gradient(
+        0deg,
+        rgb(200 245 255 / 0.14) 0 1px,
+        transparent 1px 40px
+      ),
+      repeating-linear-gradient(
+        90deg,
+        rgb(200 245 255 / 0.08) 0 1px,
+        transparent 1px 64px
+      );
+    -webkit-mask-image: radial-gradient(
+      60% 60% at calc((var(--fx) + var(--fw) / 2) * 1px)
+        calc((var(--fy) + var(--fh) / 2) * 1px),
+      #000,
+      transparent 70%
+    );
+    mask-image: radial-gradient(
+      60% 60% at calc((var(--fx) + var(--fw) / 2) * 1px)
+        calc((var(--fy) + var(--fh) / 2) * 1px),
+      #000,
+      transparent 70%
+    );
+    transform: translateY(5%);
+    animation: dwc-lore-grid 680ms cubic-bezier(0.2, 0.7, 0.2, 1) 40ms both;
+  }
+
+  /* ヴァンダル ------------------------------------------------------- */
+  /* Two fans of facets from two centres: where they overlap, the wedges
+     cut each other into shards. */
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.rider-route-dive.is-vandal-dive
+    .cine-dive-tunnel {
+    --dwc-o: 0.52;
+    border-radius: 0;
+    background:
+      conic-gradient(
+        from 8deg at 44% 53%,
+        rgb(231 26 156 / 0.112) 0deg 21deg,
+        rgb(255 190 236 / 0.5) 21deg 21.35deg,
+        transparent 21.35deg 47deg,
+        rgb(151 79 255 / 0.098) 47deg 83deg,
+        rgb(255 190 236 / 0.38) 83deg 83.3deg,
+        rgb(231 26 156 / 0.045) 83.3deg 104deg,
+        transparent 104deg 129deg,
+        rgb(244 100 200 / 0.105) 129deg 158deg,
+        rgb(255 190 236 / 0.46) 158deg 158.35deg,
+        transparent 158.35deg 187deg,
+        rgb(151 79 255 / 0.112) 187deg 226deg,
+        rgb(231 26 156 / 0.053) 226deg 241deg,
+        rgb(255 190 236 / 0.42) 241deg 241.3deg,
+        transparent 241.3deg 268deg,
+        rgb(231 26 156 / 0.098) 268deg 302deg,
+        rgb(255 190 236 / 0.46) 302deg 302.35deg,
+        rgb(151 79 255 / 0.068) 302.35deg 331deg,
+        transparent 331deg
+      ),
+      conic-gradient(
+        from -14deg at 57% 45%,
+        transparent 0deg 33deg,
+        rgb(151 79 255 / 0.075) 33deg 61deg,
+        rgb(255 190 236 / 0.36) 61deg 61.3deg,
+        transparent 61.3deg 112deg,
+        rgb(231 26 156 / 0.075) 112deg 139deg,
+        transparent 139deg 196deg,
+        rgb(244 100 200 / 0.068) 196deg 233deg,
+        rgb(255 190 236 / 0.34) 233deg 233.3deg,
+        transparent 233.3deg 284deg,
+        rgb(151 79 255 / 0.083) 284deg 318deg,
+        transparent 318deg
+      );
+    -webkit-mask-image: radial-gradient(
+      circle,
+      transparent 0 9%,
+      #000 20% 62%,
+      transparent 82%
+    );
+    mask-image: radial-gradient(
+      circle,
+      transparent 0 9%,
+      #000 20% 62%,
+      transparent 82%
+    );
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.rider-route-dive.is-vandal-dive.is-covering:not(
+      .is-cine-flip
+    ):not(.is-cine-calm):not(.is-cine-reduced)
+    .cine-dive-tunnel {
+    animation: dwc-vandal-shatter 380ms cubic-bezier(0.2, 0.8, 0.25, 1) 20ms
+      both;
+  }
+
+  /* The cracks: thin lines from two more points, at no regular angle. */
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.rider-route-dive.is-vandal-dive
+    .cine-dive-tunnel
+    > i {
+    background: conic-gradient(
+      from 0deg at 48% 50%,
+      transparent 0deg 17deg,
+      rgb(255 190 236 / 0.62) 17deg 17.25deg,
+      transparent 17.25deg 64deg,
+      rgb(255 190 236 / 0.5) 64deg 64.2deg,
+      transparent 64.2deg 101deg,
+      rgb(255 190 236 / 0.58) 101deg 101.22deg,
+      transparent 101.22deg 172deg,
+      rgb(255 190 236 / 0.5) 172deg 172.2deg,
+      transparent 172.2deg 215deg,
+      rgb(255 190 236 / 0.6) 215deg 215.24deg,
+      transparent 215.24deg 279deg,
+      rgb(255 190 236 / 0.46) 279deg 279.2deg,
+      transparent 279.2deg 333deg,
+      rgb(255 190 236 / 0.56) 333deg 333.22deg,
+      transparent 333.22deg
+    );
+    animation: dwc-vandal-crack 420ms cubic-bezier(0.3, 0.7, 0.2, 1) 40ms both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.rider-route-dive.is-vandal-dive
+    .cine-dive-tunnel
+    > i:nth-child(2) {
+    background: conic-gradient(
+      from 0deg at 53% 48%,
+      transparent 0deg 39deg,
+      rgb(201 158 255 / 0.5) 39deg 39.22deg,
+      transparent 39.22deg 128deg,
+      rgb(201 158 255 / 0.46) 128deg 128.2deg,
+      transparent 128.2deg 197deg,
+      rgb(201 158 255 / 0.52) 197deg 197.22deg,
+      transparent 197.22deg 256deg,
+      rgb(201 158 255 / 0.44) 256deg 256.2deg,
+      transparent 256.2deg 308deg,
+      rgb(201 158 255 / 0.5) 308deg 308.22deg,
+      transparent 308.22deg
+    );
+    animation-delay: 70ms;
+  }
+
+  /* The seam, drawn through the held file at 28deg, over it. */
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.rider-route-dive.is-vandal-dive:not(
+      .is-rexonance-dive
+    ):not(.is-extreme-dive):not(.is-final-stage-dive)
+    > .rider-dive-vector-field {
+    z-index: 26;
+    inset: auto;
+    top: calc((var(--fy) + var(--fh) / 2) * 1px);
+    left: calc((var(--fx) + var(--fw) / 2) * 1px);
+    width: 2px;
+    height: 220vmax;
+    margin: -110vmax 0 0 -1px;
+    overflow: visible;
+    background: linear-gradient(
+      180deg,
+      transparent,
+      rgb(255 190 236 / 0.8) 34%,
+      rgb(255 214 244 / 0.95) 50%,
+      rgb(255 190 236 / 0.8) 66%,
+      transparent
+    );
+    box-shadow:
+      0 0 10px rgb(231 26 156 / 0.72),
+      0 0 30px rgb(151 79 255 / 0.42);
+    transform: rotate(28deg) scaleY(0.2);
+    transform-origin: 50% 50%;
+    animation: dwc-vandal-seam 560ms cubic-bezier(0.3, 0.7, 0.2, 1) 20ms both;
+  }
+
+  /* Its two edges part: magenta to the left, violet to the right, each
+     with its light falling away from the seam. */
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.rider-route-dive.is-vandal-dive
+    > .rider-dive-vector-field::before,
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.rider-route-dive.is-vandal-dive
+    > .rider-dive-vector-field::after {
+    top: 0;
+    bottom: 0;
+    left: -63px;
+    width: 64px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgb(231 26 156 / 0.1) 40%,
+      rgb(231 26 156 / 0.3) 86%,
+      rgb(255 170 228 / 0.9) 97%,
+      transparent
+    );
+    -webkit-mask-image: linear-gradient(
+      180deg,
+      transparent 18%,
+      #000 42% 58%,
+      transparent 82%
+    );
+    mask-image: linear-gradient(
+      180deg,
+      transparent 18%,
+      #000 42% 58%,
+      transparent 82%
+    );
+    animation: dwc-vandal-part-l 560ms cubic-bezier(0.3, 0.7, 0.2, 1) 90ms both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.rider-route-dive.is-vandal-dive
+    > .rider-dive-vector-field::after {
+    left: 1px;
+    background: linear-gradient(
+      270deg,
+      transparent,
+      rgb(151 79 255 / 0.1) 40%,
+      rgb(151 79 255 / 0.3) 86%,
+      rgb(214 180 255 / 0.9) 97%,
+      transparent
+    );
+    animation-name: dwc-vandal-part-r;
+  }
+
+  /* The cut-ins: the stage's two pseudo layers carry each rider's light. */
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.rider-route-cutin:not(.is-ciel-cutin):not(
+      .is-leddic-cutin
+    )
+    > .rider-cutin-stage::before {
+    position: absolute;
+    z-index: 5;
+    inset: -10%;
+    content: "";
+    pointer-events: none;
+    opacity: 0;
+  }
+
+  /* レディック: a lantern carried behind the paper, its warm light
+     crossing both doors from the left. */
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.rider-route-cutin.is-leddic-cutin
+    > .rider-cutin-stage::after {
+    background: radial-gradient(
+      30% 62% at 50% 52%,
+      rgb(255 222 168 / 0.24),
+      rgb(242 207 136 / 0.11) 46%,
+      transparent 72%
+    );
+    transform: translateX(-55%);
+    animation: dwc-leddic-light 940ms cubic-bezier(0.45, 0, 0.3, 1) 60ms both;
+  }
+
+  /* アルゲノム: the sever, a thin scarlet cut and a second crossing it. */
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.rider-route-cutin.is-argenome-cutin
+    > .rider-cutin-stage::after {
+    background: linear-gradient(
+      112deg,
+      transparent 47.4%,
+      rgb(255 138 152 / 0.28) 49.1%,
+      rgb(255 196 130 / 0.96) 50%,
+      rgb(255 138 152 / 0.28) 50.9%,
+      transparent 52.6%
+    );
+    animation: dwc-rider-slash 440ms cubic-bezier(0.6, 0, 0.2, 1) 30ms both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.rider-route-cutin.is-argenome-cutin
+    > .rider-cutin-stage::before {
+    background: linear-gradient(
+      68deg,
+      transparent 48%,
+      rgb(255 138 152 / 0.22) 49.4%,
+      rgb(255 184 192 / 0.9) 50%,
+      rgb(255 138 152 / 0.22) 50.6%,
+      transparent 52%
+    );
+    animation: dwc-argenome-cross 400ms cubic-bezier(0.6, 0, 0.2, 1) 190ms both;
+  }
+
+  /* オーバーゼッツ: the impact, a vertical band punched through the stage
+     and a pressure ring off its centre. */
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.rider-route-cutin.is-over-zeztz-cutin
+    > .rider-cutin-stage::after {
+    background: linear-gradient(
+      90deg,
+      transparent 43%,
+      rgb(140 236 255 / 0.28) 48%,
+      rgb(200 246 255 / 0.92) 50%,
+      rgb(140 236 255 / 0.28) 52%,
+      transparent 57%
+    );
+    transform: scaleX(0.05);
+    animation: dwc-zeztz-punch 460ms cubic-bezier(0.2, 0.9, 0.2, 1) 40ms both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.rider-route-cutin.is-over-zeztz-cutin
+    > .rider-cutin-stage::before {
+    inset: auto;
+    top: 50%;
+    left: 50%;
+    width: 44vmin;
+    height: 44vmin;
+    margin: -22vmin 0 0 -22vmin;
+    border: 2px solid rgb(168 216 255 / 0.85);
+    border-radius: 50%;
+    box-shadow: 0 0 20px rgb(140 236 255 / 0.5);
+    transform: scale(0.2);
+    animation: dwc-zeztz-ring 520ms cubic-bezier(0.16, 0.84, 0.3, 1) 90ms both;
+  }
+
+  /* サイファー: the scan, a band stepping down the stage (a digital clock),
+     and a cyan return line rising behind it. */
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.rider-route-cutin.is-cipher-cutin
+    > .rider-cutin-stage::after {
+    background: linear-gradient(
+      180deg,
+      transparent 42%,
+      rgb(255 155 228 / 0.3) 47.5%,
+      rgb(124 228 255 / 0.92) 50%,
+      rgb(255 155 228 / 0.3) 52.5%,
+      transparent 58%
+    );
+    transform: translateY(-70%);
+    animation:
+      dwc-cipher-scan 560ms steps(10, jump-end) 40ms both,
+      dwc-cipher-scan-fade 560ms linear 40ms both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.rider-route-cutin.is-cipher-cutin
+    > .rider-cutin-stage::before {
+    background: linear-gradient(
+      180deg,
+      transparent 49.2%,
+      rgb(124 228 255 / 0.85) 49.8% 50.2%,
+      transparent 50.8%
+    );
+    transform: translateY(70%);
+    animation: dwc-cipher-return 520ms cubic-bezier(0.4, 0, 0.2, 1) 140ms both;
+  }
+}
+
+@keyframes dwc-realm-wind {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(-16deg) translateX(-16%)
+      scaleX(0.42);
+  }
+  38% {
+    opacity: 0.95;
+  }
+  to {
+    opacity: 0.5;
+    transform: translate(-50%, -50%) rotate(-16deg) translateX(0) scaleX(1);
+  }
+}
+
+@keyframes dwc-realm-grain {
+  from {
+    opacity: 0;
+    transform: scaleX(0.3);
+  }
+  40% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.7;
+    transform: scaleX(1);
+  }
+}
+
+@keyframes dwc-realm-dash {
+  from {
+    opacity: 0;
+    transform: translateX(-26%) scaleX(0.5);
+  }
+  34% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.55;
+    transform: translateX(3%) scaleX(1.1);
+  }
+}
+
+@keyframes dwc-realm-wake {
+  0% {
+    opacity: 0;
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Drawn from the lower left in a stroke, held a beat, let go. */
+@keyframes dwc-realm-cut {
+  0% {
+    opacity: 1;
+    clip-path: inset(-40px 100% -40px 0);
+  }
+  32% {
+    opacity: 1;
+    clip-path: inset(-40px 0 -40px 0);
+  }
+  52% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    clip-path: inset(-40px 0 -40px 0);
+  }
+}
+
+@keyframes dwc-realm-counter {
+  0% {
+    opacity: 1;
+    clip-path: inset(-40px 0 -40px 100%);
+  }
+  34% {
+    opacity: 1;
+    clip-path: inset(-40px 0 -40px 0);
+  }
+  100% {
+    opacity: 0;
+    clip-path: inset(-40px 0 -40px 0);
+  }
+}
+
+/* The lattice turns half a period into place. */
+@keyframes dwc-lore-lattice {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.5) rotate(-30deg);
+  }
+  42% {
+    opacity: 0.85;
+  }
+  to {
+    opacity: 0.46;
+    transform: translate(-50%, -50%) scale(1.06) rotate(0deg);
+  }
+}
+
+@keyframes dwc-lore-sound {
+  from {
+    opacity: 0;
+    transform: scale(0.45);
+  }
+  36% {
+    opacity: 0.9;
+  }
+  to {
+    opacity: 0.45;
+    transform: scale(1.12);
+  }
+}
+
+@keyframes dwc-lore-glint {
+  0% {
+    opacity: 0;
+    transform: scale(0.82) rotate(-8deg);
+  }
+  36% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.5;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+@keyframes dwc-lore-frost {
+  0% {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+  34% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.3);
+  }
+}
+
+@keyframes dwc-lore-hex {
+  0% {
+    opacity: 0.95;
+    transform: scale(0.72);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2.1);
+  }
+}
+
+@keyframes dwc-lore-grid {
+  0% {
+    opacity: 0;
+    transform: translateY(5%);
+  }
+  40% {
+    opacity: 0.9;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-3%);
+  }
+}
+
+/* The shards slam out past their rest and settle on it. */
+@keyframes dwc-vandal-shatter {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.62) rotate(7deg);
+  }
+  26% {
+    opacity: 0.95;
+    transform: translate(-50%, -50%) scale(1.1) rotate(-1.6deg);
+  }
+  46% {
+    transform: translate(-50%, -50%) scale(1.04) rotate(0.6deg);
+  }
+  100% {
+    opacity: 0.52;
+    transform: translate(-50%, -50%) scale(1.06) rotate(0deg);
+  }
+}
+
+/* One tremor through the cracks, then still. */
+@keyframes dwc-vandal-crack {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  20% {
+    opacity: 1;
+    transform: scale(1) translate(5px, -3px);
+  }
+  32% {
+    transform: scale(1) translate(-3px, 2px);
+  }
+  44% {
+    transform: scale(1) translate(1px, -1px);
+  }
+  56%,
+  100% {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+}
+
+@keyframes dwc-vandal-seam {
+  0% {
+    opacity: 0;
+    transform: rotate(28deg) scaleY(0.2);
+  }
+  22% {
+    opacity: 1;
+    transform: rotate(28deg) scaleY(1);
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(28deg) scaleY(1);
+  }
+}
+
+@keyframes dwc-vandal-part-l {
+  0% {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+  26% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-34px);
+  }
+}
+
+@keyframes dwc-vandal-part-r {
+  0% {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  26% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(34px);
+  }
+}
+
+@keyframes dwc-leddic-light {
+  0% {
+    opacity: 0;
+    transform: translateX(-55%);
+  }
+  30% {
+    opacity: 1;
+  }
+  72% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(55%);
+  }
+}
+
+@keyframes dwc-argenome-cross {
+  0% {
+    opacity: 0;
+    transform: translateY(70%);
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-70%);
+  }
+}
+
+@keyframes dwc-zeztz-punch {
+  0% {
+    opacity: 0;
+    transform: scaleX(0.05);
+  }
+  28% {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scaleX(1.7);
+  }
+}
+
+@keyframes dwc-zeztz-ring {
+  0% {
+    opacity: 0.9;
+    transform: scale(0.2);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(3);
+  }
+}
+
+@keyframes dwc-cipher-scan {
+  0% {
+    transform: translateY(-70%);
+  }
+  100% {
+    transform: translateY(70%);
+  }
+}
+
+@keyframes dwc-cipher-scan-fade {
+  0% {
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes dwc-cipher-return {
+  0% {
+    opacity: 0;
+    transform: translateY(70%);
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-70%);
+  }
+}
