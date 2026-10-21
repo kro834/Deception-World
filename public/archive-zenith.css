@@ -437,7 +437,7 @@ html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm
    (CELESTIAL RELAY / FORM | SELECTOR). Japanese lines break at phrase
    boundaries where the engine can (word-break: auto-phrase; others keep
    their normal breaking), so 統合アーカイブ or エクスプリーム never
-   splits across a line. Long figures balance their wrap.
+   splits across a line. Section titles balance.
    ================================================================ */
 /* The "A / B" kickers break after their slash, never before it, and
    never leave one word alone: a phone tracks them at 0.02em (0.06em
@@ -458,6 +458,11 @@ html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm
   html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="form-selector"] .selector-kicker {
     max-width: 200px !important;
   }
+}
+
+/* The open phone sheet sets its close key beside the heading. */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="form-selector"][aria-modal="true"] .selector-kicker {
+  max-width: 200px !important;
 }
 
 /* The cover's caption keeps FOUR RIDERS / KEY VISUAL on one line where
@@ -485,13 +490,14 @@ html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm
   text-wrap: pretty;
 }
 
-/* Balanced figures where the engine also breaks by phrase (Chromium):
-   WebKit's balance broke 150TOPS / 50Core（Spark G2） after its opening
-   bracket, so Safari keeps its own wrap. */
-@supports (word-break: auto-phrase) {
-  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .form-detail .spec-value {
-    text-wrap: balance;
-  }
+/* Section titles break at a phrase and balance their two lines
+   (マルチ基準の | パフォーマンス比率, not a lone 率 on a phone). The
+   figures keep the greedy wrap: balancing them led a line with its
+   slash (1.00× / 1.00× | / 1.00× / 1.00×), and WebKit broke one after
+   its opening bracket. */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .section h2 {
+  word-break: auto-phrase;
+  text-wrap: balance;
 }
 
 /* A record with an odd number of figures (Realm's nine) lets the last
