@@ -216,6 +216,35 @@ html[data-family="special"]
   grid-row: 2;
 }
 
+/* Each struck line carries its own metal. The gold was clipped to the h2's
+   text, and a line the hit lifts onto its own layer (the smash animates its
+   transform and opacity) drops out of its parent's text clip: in Chrome and
+   Safari the title vanished the moment its round was struck and only came
+   back when the key retired 2.1 s later, so the smash itself never showed.
+   Clipped to each line, the metal travels with the line. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > :is(#performance, #p14, #stages, #system)
+  > .rxs-section-heading
+  > h2 {
+  background: none;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > :is(#performance, #p14, #stages, #system)
+  > .rxs-section-heading
+  > h2
+  > .exo-line {
+  color: var(--exe-ivory);
+  background: var(--exe-gold-metal);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
 /* Wide bouts without an introduction: the two struck lines stand in both
    corners with a gold rail between them, instead of a hole. */
 @media (min-width: 1100px) {
@@ -642,6 +671,98 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page > #stages .rxs-stag
   font-size: 12px;
 }
 
+/* The live status line carries a gold tally mark: a solid stamp for the
+   form on stage, hollow while the next one is being prepared. */
+html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-stage-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-stage-status::before {
+  content: "";
+  flex: none;
+  width: 8px;
+  height: 8px;
+  background: var(--ext-gold);
+  box-shadow: 0 0 10px rgb(244 204 123 / 55%);
+  rotate: 45deg;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #stages
+  .rxs-stage-switcher
+  > .exs-stage-status:has(+ #exs-stage-panel[aria-busy="true"])::before {
+  background: transparent;
+  box-shadow: inset 0 0 0 2px var(--ext-gold);
+}
+
+/* Wide screens: one control row over the duel. The switch holds the left
+   corner, its hint and the live readout stand in the right one, and a gold
+   rail runs between them (the round headings' rail), instead of the rail
+   sitting alone over an empty half of the stage. */
+@media (min-width: 1024px) {
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page > #stages .rxs-stage-switcher {
+    grid-template-columns: minmax(0, 500px) minmax(48px, 1fr) auto;
+    grid-template-rows: auto auto auto;
+    column-gap: 0;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page > #stages .rxs-stage-switcher::before {
+    content: "";
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    align-self: center;
+    height: 1px;
+    margin-inline: clamp(20px, 2.2vw, 32px);
+    background: linear-gradient(90deg, rgb(244 204 123 / 14%), rgb(244 204 123 / 72%));
+    pointer-events: none;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #stages
+    .rxs-stage-switcher
+    > .rxs-stage-tabs.liquid-swipe-tabs {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+    align-self: center;
+    width: 100%;
+    margin: 0;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #stages
+    .rxs-stage-switcher
+    > .rxs-stage-hint {
+    grid-column: 3;
+    grid-row: 1;
+    align-self: end;
+    justify-self: end;
+    margin: 0 0 6px;
+    text-align: end;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page > #stages .exs-stage-status {
+    grid-column: 3;
+    grid-row: 2;
+    align-self: start;
+    justify-self: end;
+    margin: 0;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page > #stages #exs-stage-panel {
+    grid-column: 1 / -1;
+    grid-row: 3;
+    margin-top: 28px;
+  }
+}
+
 /* ================================================================
    9. ROUND 4: the moves lift, their codes at the floor
    ================================================================ */
@@ -835,6 +956,17 @@ html[data-family="special"]
 
 /* The 320px bar: four chapters, each number as a plate, nothing clipped. */
 @media (max-width: 359px) {
+  /* Every struck line holds on one line beside its plate (at 28px
+     「ウルトラで決める。」 broke after で in the 222px title column). */
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > :is(#performance, #p14, #stages, #system)
+    > .rxs-section-heading
+    > h2 {
+    font-size: 25px;
+  }
+
   html[data-family="special"] body .rxs-page.rxs-page.exs-page .rxs-local-nav nav {
     gap: 0;
   }
@@ -891,7 +1023,35 @@ html[data-family="special"]
   }
 }
 
+/* The struck lines follow their heading into the plain ink of the
+   high-contrast and forced-colour modes. */
+@media (prefers-contrast: more) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > :is(#performance, #p14, #stages, #system)
+    > .rxs-section-heading
+    > h2
+    > .exo-line {
+    color: #fff6e0;
+    background: none;
+    -webkit-text-fill-color: currentcolor;
+  }
+}
+
 @media (forced-colors: active) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > :is(#performance, #p14, #stages, #system)
+    > .rxs-section-heading
+    > h2
+    > .exo-line {
+    color: CanvasText;
+    background: none;
+    -webkit-text-fill-color: CanvasText;
+  }
+
   html[data-family="special"] body .rxs-page.rxs-page.exs-page .rxs-brand span,
   html[data-family="special"]
     body
