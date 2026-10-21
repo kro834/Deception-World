@@ -47,6 +47,15 @@ html[data-mode="world"]:has(.site-shell) {
 
 /* A search result opens one column (/world#world-column-02): its number and
    heading land below the fixed header. */
+.site-shell #manager-archive-dogs {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  scroll-margin-top: calc(96px + env(safe-area-inset-top));
+  pointer-events: none;
+}
 .site-shell .world-column-heading-stack > h3[id^="world-column-"] {
   scroll-margin-top: calc(150px + env(safe-area-inset-top));
 }

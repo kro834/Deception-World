@@ -1,12 +1,3 @@
-        pos: "50% 0%",
-        alt: "仮面ライダールーラー・ポラリスモード",
-        width: 1023,
-        height: 1537,
-        to: "/characters/dante",
-        hash: "ruler-polaris",
-        assets: ["/character-dante.webp", "/rider-ruler-polaris.webp"],
-      },
-    ],
   },
   {
     no: "05",
@@ -112,6 +103,18 @@ const ManagerRail = memo(
         >
           <small>RELATED / 03</small>
           <b>その他</b>
+        </button>
+        <button
+          id="manager-tab-3"
+          type="button"
+          role="tab"
+          tabIndex={-1}
+          aria-selected="false"
+          aria-controls="manager-panel-3"
+          style={{ ["--liquid-accent" as string]: "#ed667e" }}
+        >
+          <small>DOGS / 04</small>
+          <b>犬</b>
         </button>
       </div>
     );
@@ -502,6 +505,12 @@ export function WorldHome() {
     if (locationHash !== "manager-archive-other") return;
     setManagerTab(2);
     syncRail(managerRail.current, 2);
+  }, [locationHash]);
+
+  useLayoutEffect(() => {
+    if (locationHash !== "manager-archive-unmanaged") return;
+    setManagerTab(1);
+    syncRail(managerRail.current, 1);
   }, [locationHash]);
 
   useLayoutEffect(() => {

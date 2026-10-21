@@ -620,6 +620,18 @@ const ManagerRail = memo(
           <small>RELATED / 03</small>
           <b>その他</b>
         </button>
+        <button
+          id="manager-tab-3"
+          type="button"
+          role="tab"
+          tabIndex={-1}
+          aria-selected="false"
+          aria-controls="manager-panel-3"
+          style={{ ["--liquid-accent" as string]: "#ed667e" }}
+        >
+          <small>DOGS / 04</small>
+          <b>犬</b>
+        </button>
       </div>
     );
   }),
@@ -1015,6 +1027,12 @@ export function WorldHome() {
     if (locationHash !== "manager-archive-unmanaged") return;
     setManagerTab(1);
     syncRail(managerRail.current, 1);
+  }, [locationHash]);
+
+  useLayoutEffect(() => {
+    if (locationHash !== "manager-archive-dogs") return;
+    setManagerTab(3);
+    syncRail(managerRail.current, 3);
   }, [locationHash]);
 
   // A search result opens one column: /world#world-column-02.
@@ -2149,6 +2167,11 @@ export function WorldHome() {
 
         <div className="threat-panel" id="manager-archive" data-performance-region>
           <span
+            id="manager-archive-dogs"
+            className="manager-archive-return-anchor"
+            aria-hidden="true"
+          />
+          <span
             id="manager-archive-other"
             className="manager-archive-return-anchor"
             aria-hidden="true"
@@ -2173,9 +2196,15 @@ export function WorldHome() {
                   <br />
                   THE SYSTEM.
                 </>
-              ) : (
+              ) : managerTab === 2 ? (
                 <>
                   OTHER
+                  <br />
+                  RECORDS.
+                </>
+              ) : (
+                <>
+                  DOGS
                   <br />
                   RECORDS.
                 </>
@@ -2185,8 +2214,10 @@ export function WorldHome() {
               {managerTab === 0
                 ? "最上位管理人、六詠。六つの個体記録を照合できます。"
                 : managerTab === 1
-                  ? "六詠にも通常の管理人体系にも属さない、ダンテの人物資料を閲覧できます。"
-                  : "物語に関わる、その他の人物資料を閲覧できます。"}
+                  ? "六詠にも通常の管理人体系にも属さない、ダンテ／ヴァルグの人物資料を閲覧できます。"
+                  : managerTab === 2
+                    ? "物語に関わる、その他の人物資料を閲覧できます。"
+                    : "終の来訪者『犬』の個体記録を閲覧できます。"}
             </p>
           </div>
           <div className="signal-column">
@@ -2357,7 +2388,7 @@ export function WorldHome() {
                     className="dante-archive"
                     to="/characters/dante"
                     assets={["/character-dante.webp"]}
-                    aria-label="管理人殺し ダンテの人物資料へ"
+                    aria-label="ダンテ／ヴァルグの人物資料へ"
                   >
                     <span className="dante-visual">
                       <img
@@ -2371,14 +2402,38 @@ export function WorldHome() {
                     </span>
                     <span className="dante-copy">
                       <small>ANOMALOUS RECORD</small>
-                      <b>DANTE</b>
-                      <em>管理人殺し</em>
+                      <b>ダンテ／ヴァルグ</b>
+                      <em>管理人殺し ／ 第二の犬</em>
                       <i>ACCESS //</i>
                     </span>
                   </GuardedLink>
                   {Array.from({ length: 5 }, (_, index) => (
                     <ArchivePlaceholder key={index} index={index + 2} tone="unmanaged" />
                   ))}
+                </div>
+              </div>
+            ) : managerTab === 3 ? (
+              <div
+                id="manager-panel-3"
+                key="dogs"
+                className="manager-archive-panel is-other is-dogs"
+                role="tabpanel"
+                aria-labelledby="manager-tab-3"
+              >
+                <h4>終の来訪者『犬』</h4>
+                <div className="manager-slot-grid other-array" aria-label="犬の個体記録">
+                  <GuardedLink
+                    className="other-archive-card"
+                    to="/characters/dante"
+                    hash="character-section-04"
+                    assets={["/character-varg-20261021-720.webp"]}
+                    aria-label="第二の犬 ダンテ／ヴァルグの人物資料を開く"
+                  >
+                    <img src="/character-varg-20261021-360.webp" srcSet="/character-varg-20261021-360.webp 360w, /character-varg-20261021-720.webp 720w, /character-varg-20261021.webp 1088w" sizes="(max-width: 760px) 45vw, 360px" alt="第二の犬・ヴァルグの本来形態" width={1088} height={1445} style={{ objectFit: "contain" }} loading="lazy" decoding="async" />
+                    <span className="other-card-shade" aria-hidden="true" />
+                    <span className="other-card-code">SECOND DOG / 02</span>
+                    <span className="other-card-copy"><small>第二の犬・ヴァルグ</small><b>ダンテ／ヴァルグ</b><i>始原的管理外存在</i></span>
+                  </GuardedLink>
                 </div>
               </div>
             ) : (
@@ -2389,8 +2444,7 @@ export function WorldHome() {
                 role="tabpanel"
                 aria-labelledby="manager-tab-2"
               >
-                <p className="visually-hidden">その他の関連資料</p>
-                <div className="manager-slot-grid other-array" aria-label="その他">
+                <div className="manager-slot-grid other-array" aria-label="関連人物">
                   <GuardedLink
                     className="other-archive-card"
                     to="/characters/terra"

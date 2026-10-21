@@ -2600,3 +2600,281 @@ html[data-route-cover] .zeus-button:not([data-navigating="true"]) {
 html[data-route-cover="covering"] .zeus-button:not([data-navigating="true"]) {
   transition: none;
 }
+
+/* ---- The eight riders, strengthened (owner, 2026-10-21) ----------------
+   Dives (サーガ, レルム, ローア, ヴァンダル): a one-shot burst of the rider's
+   light radiating from the held file, and the numeral punching in. サーガ's
+   burst is a forest-green fire instead, its tongues rising round the file
+   and dying away. Cut-ins (レディック, アルジェノム, オーバーゼッツ,
+   サイファー): one slash of the rider's light across the stage.
+   Every layer is ink-dark or tinted (never white), runs once and moves
+   only opacity/transform; economy and reduced motion keep the plain
+   shutter (these rules exist only in full motion). */
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.rider-route-dive:not(.is-rexonance-dive):not(
+      .is-extreme-dive
+    ):not(.is-final-stage-dive)
+    > .rider-dive-vector-field {
+    position: absolute;
+    z-index: 20;
+    inset: 0;
+    display: block;
+    pointer-events: none;
+    background: repeating-conic-gradient(
+      from 0deg at calc((var(--fx) + var(--fw) / 2) * 1px) calc((var(--fy) + var(--fh) / 2) * 1px),
+      color-mix(in srgb, var(--dwc-accent) 38%, transparent) 0deg 1.4deg,
+      transparent 1.4deg 9deg
+    );
+    opacity: 0;
+    transform-origin: calc((var(--fx) + var(--fw) / 2) * 1px) calc((var(--fy) + var(--fh) / 2) * 1px);
+    animation: dwc-rider-burst 760ms cubic-bezier(0.16, 0.84, 0.3, 1) both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.rider-route-dive
+    .rider-dive-mark
+    > i {
+    animation: dwc-rider-punch 520ms cubic-bezier(0.2, 1.4, 0.4, 1) both;
+  }
+
+  /* サーガ: the green fire — tall tongues rising from the file's foot and
+     sides, a low glow at its base, a second rank of tongues behind. */
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.rider-route-dive.is-saga-dive:not(.is-rexonance-dive):not(
+      .is-extreme-dive
+    ):not(.is-final-stage-dive)
+    > .rider-dive-vector-field {
+    background:
+      radial-gradient(
+        4% 30% at calc((var(--fx) + var(--fw) * -0.04) * 1px) calc((var(--fy) + var(--fh) * 0.78) * 1px),
+        rgb(150 240 130 / 80%),
+        rgb(34 139 34 / 38%) 46%,
+        transparent 72%
+      ),
+      radial-gradient(
+        4.5% 34% at calc((var(--fx) + var(--fw) * 0.12) * 1px) calc((var(--fy) + var(--fh) * 0.98) * 1px),
+        rgb(120 236 110 / 78%),
+        rgb(34 139 34 / 38%) 46%,
+        transparent 72%
+      ),
+      radial-gradient(
+        3.5% 28% at calc((var(--fx) + var(--fw) * 0.3) * 1px) calc((var(--fy) + var(--fh) * 1.02) * 1px),
+        rgb(170 246 150 / 76%),
+        rgb(34 139 34 / 38%) 46%,
+        transparent 72%
+      ),
+      radial-gradient(
+        5% 38% at calc((var(--fx) + var(--fw) * 0.5) * 1px) calc((var(--fy) + var(--fh) * 1.04) * 1px),
+        rgb(150 240 130 / 82%),
+        rgb(34 139 34 / 38%) 46%,
+        transparent 72%
+      ),
+      radial-gradient(
+        3.5% 30% at calc((var(--fx) + var(--fw) * 0.7) * 1px) calc((var(--fy) + var(--fh) * 1.02) * 1px),
+        rgb(170 246 150 / 76%),
+        rgb(34 139 34 / 38%) 46%,
+        transparent 72%
+      ),
+      radial-gradient(
+        4.5% 34% at calc((var(--fx) + var(--fw) * 0.88) * 1px) calc((var(--fy) + var(--fh) * 0.98) * 1px),
+        rgb(120 236 110 / 78%),
+        rgb(34 139 34 / 38%) 46%,
+        transparent 72%
+      ),
+      radial-gradient(
+        4% 28% at calc((var(--fx) + var(--fw) * 1.04) * 1px) calc((var(--fy) + var(--fh) * 0.74) * 1px),
+        rgb(150 240 130 / 80%),
+        rgb(34 139 34 / 38%) 46%,
+        transparent 72%
+      ),
+      radial-gradient(
+        34% 16% at calc((var(--fx) + var(--fw) / 2) * 1px) calc((var(--fy) + var(--fh) * 1.04) * 1px),
+        rgb(96 214 92 / 55%),
+        rgb(34 139 34 / 30%) 50%,
+        transparent 78%
+      );
+    transform-origin: 50% calc((var(--fy) + var(--fh)) * 1px);
+    animation: dwc-saga-fire 1000ms cubic-bezier(0.22, 0.7, 0.3, 1) both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.rider-route-dive.is-saga-dive:not(.is-rexonance-dive):not(
+      .is-extreme-dive
+    ):not(.is-final-stage-dive)
+    > .rider-dive-vector-field::before,
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.rider-route-dive.is-saga-dive:not(.is-rexonance-dive):not(
+      .is-extreme-dive
+    ):not(.is-final-stage-dive)
+    > .rider-dive-vector-field::after {
+    position: absolute;
+    inset: 0;
+    content: "";
+    background:
+      radial-gradient(
+        3% 22% at calc((var(--fx) + var(--fw) * 0.02) * 1px) calc((var(--fy) + var(--fh) * 0.5) * 1px),
+        rgb(96 214 92 / 72%),
+        rgb(34 139 34 / 38%) 46%,
+        transparent 72%
+      ),
+      radial-gradient(
+        3% 24% at calc((var(--fx) + var(--fw) * 0.98) * 1px) calc((var(--fy) + var(--fh) * 0.46) * 1px),
+        rgb(96 214 92 / 72%),
+        rgb(34 139 34 / 38%) 46%,
+        transparent 72%
+      ),
+      radial-gradient(
+        3% 22% at calc((var(--fx) + var(--fw) * 0.22) * 1px) calc((var(--fy) + var(--fh) * 1.0) * 1px),
+        rgb(120 236 110 / 70%),
+        rgb(34 139 34 / 38%) 46%,
+        transparent 72%
+      ),
+      radial-gradient(
+        3% 24% at calc((var(--fx) + var(--fw) * 0.62) * 1px) calc((var(--fy) + var(--fh) * 1.0) * 1px),
+        rgb(120 236 110 / 70%),
+        rgb(34 139 34 / 38%) 46%,
+        transparent 72%
+      ),
+      radial-gradient(
+        2.6% 20% at calc((var(--fx) + var(--fw) * 0.4) * 1px) calc((var(--fy) + var(--fh) * 0.98) * 1px),
+        rgb(170 246 150 / 70%),
+        rgb(34 139 34 / 38%) 46%,
+        transparent 72%
+      ),
+      radial-gradient(
+        2.6% 20% at calc((var(--fx) + var(--fw) * 0.8) * 1px) calc((var(--fy) + var(--fh) * 0.94) * 1px),
+        rgb(170 246 150 / 70%),
+        rgb(34 139 34 / 38%) 46%,
+        transparent 72%
+      );
+    transform-origin: 50% calc((var(--fy) + var(--fh)) * 1px);
+    animation: dwc-saga-tongues 880ms cubic-bezier(0.3, 0.6, 0.3, 1) both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.rider-route-dive.is-saga-dive:not(.is-rexonance-dive):not(
+      .is-extreme-dive
+    ):not(.is-final-stage-dive)
+    > .rider-dive-vector-field::after {
+    transform: scaleX(-1);
+    animation-name: dwc-saga-tongues-b;
+    animation-delay: 160ms;
+  }
+
+  /* The cut-ins: one slash of the rider's light. */
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.rider-route-cutin:not(.is-ciel-cutin)
+    > .rider-cutin-stage::after {
+    position: absolute;
+    z-index: 5;
+    inset: -10%;
+    content: "";
+    pointer-events: none;
+    background: linear-gradient(
+      112deg,
+      transparent 42%,
+      color-mix(in srgb, var(--dwc-accent) 30%, transparent) 47%,
+      color-mix(in srgb, var(--dwc-accent) 62%, transparent) 50%,
+      color-mix(in srgb, var(--dwc-accent) 30%, transparent) 53%,
+      transparent 58%
+    );
+    opacity: 0;
+    animation: dwc-rider-slash 620ms cubic-bezier(0.5, 0, 0.2, 1) 60ms both;
+  }
+}
+
+@keyframes dwc-rider-burst {
+  0% {
+    opacity: 0;
+    transform: scale(0.35) rotate(-6deg);
+  }
+  28% {
+    opacity: 0.85;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.7) rotate(4deg);
+  }
+}
+
+@keyframes dwc-rider-punch {
+  0% {
+    opacity: 0;
+    transform: scale(1.45);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes dwc-saga-fire {
+  0% {
+    opacity: 0;
+    transform: translateY(18%) scaleY(0.55);
+  }
+  34% {
+    opacity: 0.95;
+    transform: translateY(0) scaleY(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-10%) scaleY(1.25);
+  }
+}
+
+@keyframes dwc-saga-tongues {
+  0% {
+    opacity: 0;
+    transform: translateY(14%) scaleY(0.6);
+  }
+  40% {
+    opacity: 1;
+    transform: translateY(-4%) scaleY(1.1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-22%) scaleY(1.4);
+  }
+}
+
+@keyframes dwc-saga-tongues-b {
+  0% {
+    opacity: 0;
+    transform: scaleX(-1) translateY(14%) scaleY(0.6);
+  }
+  40% {
+    opacity: 1;
+    transform: scaleX(-1) translateY(-6%) scaleY(1.15);
+  }
+  100% {
+    opacity: 0;
+    transform: scaleX(-1) translateY(-26%) scaleY(1.45);
+  }
+}
+
+@keyframes dwc-rider-slash {
+  0% {
+    opacity: 0;
+    transform: translateX(-70%);
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(70%);
+  }
+}

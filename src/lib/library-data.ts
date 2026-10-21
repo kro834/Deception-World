@@ -107,7 +107,7 @@ export const LIBRARY_ENTRIES: readonly LibraryEntry[] = [
   person("ciel", "シエル", "/characters/ciel", ["ciel", "六詠"]),
   person("terra", "テラ・アレイン", "/characters/terra", ["terra", "テラアレイン"]),
   person("luna", "ルナ・アレイン", "/characters/luna", ["luna", "ルナアレイン"]),
-  person("dante", "ダンテ", "/characters/dante", ["dante", "無管理"]),
+  person("dante", "ダンテ／ヴァルグ", "/characters/dante", ["dante", "無管理", "ヴァルグ", "varg", "第二の犬", "原圧"]),
   person("yoake-mamori", "夜明護尊", "/characters/yoake-mamori", ["yoake mamori"]),
   ...["交わる", "開く", "開ける", "明ける", "来たる", "叛く"].map((title, i): LibraryEntry => ({
     id: `dream-case-${i}`,

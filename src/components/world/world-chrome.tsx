@@ -1277,8 +1277,8 @@ export function SideMenuLayer({
               beforeNavigate={close}
               aria-current={pathname === "/characters/dante" ? "page" : undefined}
             >
-              <span>ダンテ</span>
-              <i>管理人殺し</i>
+              <span>ダンテ／ヴァルグ</span>
+              <i>第二の犬</i>
             </GuardedLink>
           </div>
         </div>

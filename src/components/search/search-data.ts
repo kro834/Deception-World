@@ -1,6 +1,7 @@
 import type { SearchDocument } from "./search-engine";
 import { FORM_ARCHIVE_FORMS } from "./form-archive-index";
 import { DANTE_FACTS, DANTE_FORMS, DANTE_SECTIONS } from "../world/dante-data";
+import { VARG_FACTS } from "../world/varg-data";
 import { RELATED_SECTIONS } from "../world/related-data";
 import { YOAKE_MAMORI_SECTIONS } from "../world/yoake-mamori-data";
 import { WORLD_COLUMNS } from "../world/world-columns-data";
@@ -536,13 +537,15 @@ export const SEARCH_DOCUMENTS: readonly SearchCatalogueDocument[] = [
   ...DOSSIER_DOCUMENTS,
   {
     id: "person-dante",
-    title: "ダンテ",
+    title: "ダンテ／ヴァルグ",
     category: "people",
     description: DANTE_SECTIONS[0].title,
     body: DANTE_SECTIONS.flatMap((section) => [section.title, ...section.body]).join("\n"),
     sections: DANTE_SECTIONS.map(({ no, title }) => ({ no, title })),
     keywords: [
       ...DANTE_FACTS.map((row) => row.dd),
+      ...VARG_FACTS.map((row) => row.dd),
+      "第二の犬", "終の来訪者", "Varg",
       ...DANTE_FORMS.flatMap((form) => [form.name, form.system]),
     ],
     to: "/characters/dante",

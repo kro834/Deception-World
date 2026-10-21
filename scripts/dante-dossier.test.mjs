@@ -55,7 +55,7 @@ test("Dante assets are local lightweight WebP images and route is reachable from
   assert.match(home, /id="manager-archive-unmanaged"/);
   assert.match(
     read("src/components/world/dante-page.tsx"),
-    /returnHash="manager-archive-unmanaged"/,
+    /returnHash="manager-archive-dogs"/,
   );
   assert.match(read("src/routes/characters/dante.tsx"), /createWorldHead/);
 });
