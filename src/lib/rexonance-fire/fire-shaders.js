@@ -56,9 +56,12 @@ ${ramp("rampSooty", RAMP_SOOTY)}
 ${ramp("rampClean", RAMP_CLEAN)}
 void main() {
   // 爆散: the fire is sampled ever closer to the body's middle, so its
-  // envelope blows outward off the skin while it dissolves.
+  // envelope is thrown outward off the skin (fastest at the detonation,
+  // wider than tall) while it dissolves.
   vec2 centre = vec2(${f(T.burstCentreU)}, ${f(T.burstCentreV)});
-  vec2 uv = centre + (vUv - centre) / (1.0 + ${f(T.burstExpand)} * uLife.z);
+  float thrownAt = clamp(uLife.z / ${f(T.burstDissolve)}, 0.0, 1.0);
+  float thrown = 1.0 - (1.0 - thrownAt) * (1.0 - thrownAt);
+  vec2 uv = centre + (vUv - centre) / (1.0 + vec2(${f(T.burstExpand)}, ${f(T.burstExpandY)}) * thrown);
   vec4 field = texture2D(uField, uv);
   float d = field.r * ${f(FIELD_D)};
   float arrival = field.g;
@@ -78,8 +81,7 @@ void main() {
   float height = (min(lift, d * ${f(T.sideWeight)}) + max(0.0, pw.y - ${f(BODY_ASPECT)}) * ${f(T.floorWeight)}) * air;
   vec4 nr = texture2D(uNoise, vec2(pw.x * ${f(T.reachScale)}, pw.y * ${f(T.reachScale * 0.5)} + uFlow.w));
   float column = (pw.x - 0.5) * ${f(1 / T.columnWidth)};
-  float reach = (${f(T.reachBase)} + ${f(T.reachVar)} * nr.r) * (1.0 + ${f(T.columnBoost)} * exp(-column * column))
-    * (1.0 + ${f(T.burstReach)} * b);
+  float reach = (${f(T.reachBase)} + ${f(T.reachVar)} * nr.r) * (1.0 + ${f(T.columnBoost)} * exp(-column * column));
   float fall = clamp(height / reach, 0.0, 1.0);
   // The rise: two layers of turbulence flowing up at different speeds (so
   // a tongue's shape never translates rigidly), accelerating with height
@@ -115,16 +117,27 @@ void main() {
   float thr = mix(${f(T.thrBase)}, ${f(T.thrTop)}, pow(fall, ${f(T.thrCurve)}));
   float core = smoothstep(thr, thr + ${f(T.coreSoft)}, n);
   float halo = smoothstep(thr - ${f(T.haloSoft)}, thr + ${f(T.coreSoft)}, n);
-  float plume = (core * ${f(T.coreWeight)} + halo * ${f(1 - T.coreWeight)}) * air
+  // The blast tears the tongues' roots off the skin, ragged and soft.
+  float tear = smoothstep(0.0, ${f(T.burstTear)}, b);
+  float torn = smoothstep(0.0, ${f(T.burstTearDepth)}, d - din + (n - 0.5) * ${f(T.burstTearJag)});
+  float rooted = air * (1.0 + (torn - 1.0) * tear);
+  float plume = (core * ${f(T.coreWeight)} + halo * ${f(1 - T.coreWeight)}) * rooted
     * (1.0 - smoothstep(${f(T.tipFade)}, 1.0, fall));
   float plumeHeat = (0.4 + 0.6 * clamp((n - thr) / ${f(T.hotSpan)}, 0.0, 1.0)) * (1.0 - ${f(T.tipCool)} * fall);
   float rim = exp(-din / ${f(T.rimWidth)}) * skin * (0.3 + 0.7 * smoothstep(0.3, 0.75, n));
   vec4 ss = texture2D(uNoise, vec2(pw.x * ${f(T.scaleS)} + 0.53, pw.y * ${f(T.scaleS / T.stretchS)} + uDrift.w));
   float nS = ((ss.g * 0.6 + ss.b * 0.4) * ${f(T.sheetStreak)} + (sa.r * 0.62 + sa.g * 0.38) * ${f(1 - T.sheetStreak)} - 0.5) * ${f(T.gain)} + 0.5;
   float sheet = (${f(T.sheetHaze)} + ${f(1 - T.sheetHaze)} * smoothstep(${f(T.sheetThr)}, ${f(T.sheetThr + T.sheetSoft)}, nS)) * skin;
+  // The thrown fire fades before whichever edge of the drawing clips first.
+  float sideIn = min(vUv.x - uView.x, uView.z - vUv.x) * uRect.z;
+  float topIn = (vUv.y - uView.y) * uRect.w;
+  float bottomIn = (uView.w - vUv.y) * uRect.w;
+  float inView = smoothstep(0.0, ${f(T.throwFadeSide)}, sideIn)
+    * smoothstep(0.0, ${f(T.throwFadeTop)}, topIn)
+    * smoothstep(0.0, ${f(T.throwFadeBottom)}, bottomIn);
   // The detonation thins the fire away without cooling it: it blows out
   // bright, never as a dull cloud.
-  float dissolve = 1.0 - smoothstep(0.0, ${f(T.burstDissolve)}, b);
+  float dissolve = (1.0 - smoothstep(0.0, ${f(T.burstDissolve)}, b)) * (1.0 + (inView - 1.0) * tear);
   // The sheet on the skin is torn off first; the tongues fly on.
   float bare = 1.0 - smoothstep(0.0, ${f(T.burstSkin)}, b);
   rim *= bare;
@@ -142,10 +155,9 @@ void main() {
   vec3 E = colour * emit * share;
   float absorb = dens * (1.0 - 0.5 * temp) * (${f(T.absorbSooty)} * (1.0 - mLocal) + ${f(T.absorbClean)}) * share;
   if (layer < 0.5) {
-    float sideIn = min(vUv.x - uView.x, uView.z - vUv.x) * uRect.z;
     float edgeWindow = smoothstep(0.0, ${f(T.edgeFadeSide)}, sideIn)
-      * smoothstep(0.0, ${f(T.edgeFadeTop)}, (vUv.y - uView.y) * uRect.w)
-      * smoothstep(0.0, ${f(T.edgeFadeBottom)}, (uView.w - vUv.y) * uRect.w);
+      * smoothstep(0.0, ${f(T.edgeFadeTop)}, topIn)
+      * smoothstep(0.0, ${f(T.edgeFadeBottom)}, bottomIn);
     float bloom = uLife.w * exp(-d / ${f(T.flashReach)}) * ${f(T.flashGain)} * edgeWindow;
     E += vec3(0.75, 0.92, 1.0) * bloom;
     float ringW = ${f(T.ringWidth)} + ${f(T.ringWiden)} * b;

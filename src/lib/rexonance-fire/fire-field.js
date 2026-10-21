@@ -11,6 +11,7 @@
 // R and A are the two halves of one smoothed signed distance, so the skin
 // can be anti-aliased at sub-texel precision.
 // Both the WebGL fire and the CPU fallback sample exactly this texture.
+import { FIRE_TUNING } from "./fire-tuning.js";
 
 /** The fire's drawing rectangle in normalized body units (x over the
  * figure's width, y over its height): air for plumes above the crown,
@@ -37,6 +38,8 @@ export const FIELD_BODY = Object.freeze({
 
 const INSIDE_ALPHA = 96;
 const LIFT_BLUR = 4;
+// Lift gained per texel across (the kernels' sideWeight: square texels).
+const LIFT_SLOPE = FIRE_TUNING.sideWeight;
 const AIR_BLUR = 4;
 const AIR_BLUR_PASSES = 3;
 const SQRT2 = Math.SQRT2;
@@ -287,6 +290,20 @@ export function buildFireField(alpha, w, h, out) {
       if (inside[i]) below = y;
       lift[i] = inside[i] ? 0 : Math.min(below - y, liftCap);
     }
+  }
+  // A column over the body's outermost point (a hand, a shoulder's edge)
+  // lies just beside one with nothing below it: straight up, the lift jumps
+  // there from the distance to that point to the cap, so the fire burnt to
+  // one side of a vertical line and not the other, and the turbulence
+  // advected through the jump tore along it as a seam. Sideways, the lift
+  // never grows faster than a lick's height off a limb's side (sideWeight
+  // per unit across): a 1D distance transform along each row.
+  for (let y = 0; y < h; y += 1) {
+    const row = y * w;
+    for (let x = 1; x < w; x += 1)
+      lift[row + x] = Math.min(lift[row + x], lift[row + x - 1] + LIFT_SLOPE);
+    for (let x = w - 2; x >= 0; x -= 1)
+      lift[row + x] = Math.min(lift[row + x], lift[row + x + 1] + LIFT_SLOPE);
   }
   const blurred = new Float32Array(n);
   for (let y = 0; y < h; y += 1)

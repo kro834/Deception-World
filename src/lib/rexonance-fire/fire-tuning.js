@@ -107,14 +107,31 @@ export const FIRE_TUNING = Object.freeze({
   absorbClean: 0.05,
   // 爆散: the envelope blows outward and dissolves; a body-shaped shock
   // ring and a flash leave the figure.
-  burstReach: 1.6,
-  // The blast carries the whole envelope outward from the body's middle
-  // (rect uv), off the skin, as it thins away.
-  burstExpand: 0.5,
+  // The blast never lengthens the plume's reach: past FIELD_LIFT (the
+  // lift's cap) every column with the body below it would burn to the
+  // drawing's top while the air beside it stayed too high to, so the fire
+  // stood as a straight-sided pillar on the vertical lines through the
+  // body's outermost points (review of 2ce6712). Instead the blast throws
+  // the envelope it has outward from the body's middle (rect uv), fastest
+  // at the detonation (an ease-out over the dissolve), wider than tall,
+  // as it thins away.
+  burstExpand: 0.42,
+  burstExpandY: 0.16,
   burstCentreU: 0.5,
   burstCentreV: 0.589,
   burstDissolve: 0.4,
   burstSkin: 0.14,
+  // The tongues' roots are torn off the skin ragged and soft (figure
+  // widths deep inside the thrown silhouette, the turbulence's jag), so the
+  // gap the blast opens round the bare undersuit never reads as a
+  // silhouette-shaped shadow; the thrown fire fades before whichever edge
+  // of the drawing clips first (widths in from the sides, top, bottom).
+  burstTear: 0.06,
+  burstTearDepth: 0.09,
+  burstTearJag: 0.12,
+  throwFadeSide: 0.12,
+  throwFadeTop: 0.2,
+  throwFadeBottom: 0.08,
   // The shock ring is a quick pulse: it sweeps off the figure while it is
   // bright and is gone before the fragments scatter, so it never lingers
   // round the bare undersuit as a ghost outline.

@@ -88,9 +88,11 @@ const ramp = (stops, t, out, at) => {
  * fragment shader of fire-shaders.js.
  */
 export function fireKernel(u0, v0, pose, field, noise, out) {
-  const expand = 1 + T.burstExpand * pose[POSE_BURST];
-  const u = T.burstCentreU + (u0 - T.burstCentreU) / expand;
-  const v = T.burstCentreV + (v0 - T.burstCentreV) / expand;
+  // 爆散: the envelope is thrown outward, fastest at the detonation.
+  const thrownAt = clamp(pose[POSE_BURST] / T.burstDissolve);
+  const thrown = 1 - (1 - thrownAt) * (1 - thrownAt);
+  const u = T.burstCentreU + (u0 - T.burstCentreU) / (1 + T.burstExpand * thrown);
+  const v = T.burstCentreV + (v0 - T.burstCentreV) / (1 + T.burstExpandY * thrown);
   sampleFireField(field, FIELD_W, FIELD_H, u, v, FS, 0);
   const d = FS[0] * FIELD_D;
   const arrival = FS[1];
@@ -116,9 +118,7 @@ export function fireKernel(u0, v0, pose, field, noise, out) {
   );
   const column = (pwx - 0.5) * (1 / T.columnWidth);
   const reach =
-    (T.reachBase + T.reachVar * NS[0]) *
-    (1 + T.columnBoost * Math.exp(-column * column)) *
-    (1 + T.burstReach * b);
+    (T.reachBase + T.reachVar * NS[0]) * (1 + T.columnBoost * Math.exp(-column * column));
   const fall = clamp(height / reach);
   // The rise: two layers flowing up at different speeds, accelerating
   // through a static remapping of height, with a flutter toward the tips.
@@ -170,8 +170,14 @@ export function fireKernel(u0, v0, pose, field, noise, out) {
   const thr = T.thrBase + (T.thrTop - T.thrBase) * Math.pow(fall, T.thrCurve);
   const core = smoothstep(thr, thr + T.coreSoft, n);
   const halo = smoothstep(thr - T.haloSoft, thr + T.coreSoft, n);
+  // The blast tears the tongues' roots off the skin, ragged and soft.
+  const tear = smoothstep(0, T.burstTear, b);
+  const torn = smoothstep(0, T.burstTearDepth, d - din + (n - 0.5) * T.burstTearJag);
+  const rooted = air * (1 + (torn - 1) * tear);
   const plume =
-    (core * T.coreWeight + halo * (1 - T.coreWeight)) * air * (1 - smoothstep(T.tipFade, 1, fall));
+    (core * T.coreWeight + halo * (1 - T.coreWeight)) *
+    rooted *
+    (1 - smoothstep(T.tipFade, 1, fall));
   const plumeHeat = (0.4 + 0.6 * clamp((n - thr) / T.hotSpan)) * (1 - T.tipCool * fall);
   // The sheet on the skin is torn off first; the tongues fly on.
   const bare = 1 - smoothstep(0, T.burstSkin, b);
@@ -194,7 +200,15 @@ export function fireKernel(u0, v0, pose, field, noise, out) {
     (T.sheetHaze + (1 - T.sheetHaze) * smoothstep(T.sheetThr, T.sheetThr + T.sheetSoft, nS)) *
     skin *
     bare;
-  const dissolve = 1 - smoothstep(0, T.burstDissolve, b);
+  // The thrown fire fades before whichever edge of the drawing clips first.
+  const sideIn = Math.min(u0 - pose[POSE_VIEW_X0], pose[POSE_VIEW_X1] - u0) * RW;
+  const topIn = (v0 - pose[POSE_VIEW_Y0]) * RH;
+  const bottomIn = (pose[POSE_VIEW_Y1] - v0) * RH;
+  const inView =
+    smoothstep(0, T.throwFadeSide, sideIn) *
+    smoothstep(0, T.throwFadeTop, topIn) *
+    smoothstep(0, T.throwFadeBottom, bottomIn);
+  const dissolve = (1 - smoothstep(0, T.burstDissolve, b)) * (1 + (inView - 1) * tear);
   const dens = Math.min(1, plume + rim * T.rimGain + sheet * T.sheetGain) * lit * dissolve;
   // Temperature and colour.
   sampleNoise(noise, NOISE_SIZE, pwx * T.patchScale, pwy * T.patchScale + pose[POSE_PATCH], NS, 28);
@@ -216,11 +230,10 @@ export function fireKernel(u0, v0, pose, field, noise, out) {
     let eg = cg * emit * share;
     let eb = cb * emit * share;
     if (!layer) {
-      const sideIn = Math.min(u0 - pose[POSE_VIEW_X0], pose[POSE_VIEW_X1] - u0) * RW;
       const edgeWindow =
         smoothstep(0, T.edgeFadeSide, sideIn) *
-        smoothstep(0, T.edgeFadeTop, (v0 - pose[POSE_VIEW_Y0]) * RH) *
-        smoothstep(0, T.edgeFadeBottom, (pose[POSE_VIEW_Y1] - v0) * RH);
+        smoothstep(0, T.edgeFadeTop, topIn) *
+        smoothstep(0, T.edgeFadeBottom, bottomIn);
       const bloom = pose[POSE_FLASH] * Math.exp(-d / T.flashReach) * T.flashGain * edgeWindow;
       er += 0.75 * bloom;
       eg += 0.92 * bloom;

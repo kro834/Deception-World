@@ -21,6 +21,8 @@ import {
   syncRexonanceLayoutGate,
 } from "../src/lib/rexonance-layout-gate.js";
 import { NANITE_FIRE_PHASES } from "../src/lib/rexonance-ignition.js";
+import { inspectBodyFlame } from "../src/lib/rexonance-flame.js";
+import { POSE_TIME } from "../src/lib/rexonance-fire/fire-pose.js";
 import { scrollFlameAt } from "../src/lib/rexonance-field/field-clock.js";
 import { runInNewContext } from "node:vm";
 
@@ -907,9 +909,13 @@ test("near the view it goes live, scrubs with the scroll, writes the HUD on chan
   // Back to the start: the welds come off again.
   t.scrollTo(0.1);
   assert.match(t.counter.textContent, /^0 \/ /);
-  // An unchanged position draws nothing.
+  // An unchanged position draws nothing (past the fire, which keeps
+  // flowing at rest: see "at rest the fire keeps flowing").
+  t.scrollTo(0.3);
+  for (let k = 0; k < 120 && t.frames.size; k += 1) t.flush();
+  assert.equal(t.frames.size, 0, "settled past the fire");
   const before = t.calls.length;
-  t.scrollTo(0.1);
+  t.scrollTo(0.3);
   assert.equal(t.calls.length, before);
   // Hidden: no frame is queued.
   t.env.document = undefined;
@@ -1098,6 +1104,88 @@ test("a mid-runway arrival resumes at its progress: the first live frame needs n
   assert.equal(t.percent.textContent, "043");
   assert.equal(t.frames.size, 0, "the first frame drew the moment whole (nothing left behind)");
   dispose();
+});
+
+test("at rest the fire keeps flowing on the wall clock, the calm frame included, until the fire is spent or the scene is hidden (review of 2ce6712)", async () => {
+  // A fire that sits still is the 固体 look the owner rejected. The scene
+  // once drew only on scroll, then 260 ms into each rest re-posed the
+  // whole flame on a clock of its own (progress × 60) and froze it there.
+  const t = environment();
+  let now = 5000;
+  t.env.performance = { now: () => now };
+  const drawn = [];
+  t.env.__rexonanceDrawMs = (ms, progress, calm) => drawn.push({ progress, calm });
+  const dispose = mountRexonanceAssembly(t.runway, engineConfig, t.env);
+  t.observers[1].callback([{ isIntersecting: true }]);
+  await until(t.prepared, "warm preparation completed");
+  t.observers[0].callback([{ isIntersecting: true }]);
+  await until(() => t.runway.dataset.rznState === "live" && t.frames.size > 0, "scene live");
+  // The layout's first notice (a task, as in the browser) re-measures.
+  await new Promise((resolve) => setTimeout(resolve, 10));
+  t.flush();
+  let stamp = 0;
+  const tick = (count) => {
+    for (let k = 0; k < count; k += 1) {
+      stamp += 1000 / 60;
+      now += 1000 / 60;
+      for (const [id, callback] of [...t.frames]) {
+        t.frames.delete(id);
+        callback(stamp);
+      }
+    }
+  };
+  const flameClock = () => inspectBodyFlame().pose[POSE_TIME];
+  // Mid-engulf: the scroll comes to rest there.
+  const burning = scrollFlameAt((NANITE_FIRE_PHASES.kindle + NANITE_FIRE_PHASES.cover) / 2);
+  t.scrollTo(burning);
+  tick(12);
+  const shown = drawn.at(-1).progress;
+  assert.ok(Math.abs(shown - burning) < 0.001, `settled at the fire (${shown})`);
+  drawn.length = 0;
+  const before = t.percent.textContent;
+  tick(6);
+  assert.equal(drawn.length, 6, "every frame at rest redraws the burning moment");
+  assert.ok(
+    drawn.every((d) => d.progress === shown && !d.calm),
+    JSON.stringify(drawn),
+  );
+  assert.equal(flameClock(), now / 1000, "on the wall clock");
+  assert.equal(t.percent.textContent, before, "the HUD is untouched by the fire's frames");
+  assert.equal(t.frames.size, 1, "and the next is queued");
+  // The calm frame continues the same clock (no re-pose), and the fire
+  // flows on from it with the transient effects still off.
+  await new Promise((resolve) => setTimeout(resolve, 320));
+  const calm = drawn.findIndex((d) => d.calm);
+  assert.ok(calm >= 0, "the calm frame was drawn");
+  assert.equal(flameClock(), now / 1000, "the calm frame keeps the wall clock");
+  drawn.length = 0;
+  const calmClock = flameClock();
+  tick(4);
+  assert.equal(drawn.length, 4);
+  assert.ok(
+    drawn.every((d) => d.progress === shown && d.calm),
+    JSON.stringify(drawn),
+  );
+  assert.ok(flameClock() > calmClock, "and keeps flowing after it");
+  // Past the fire (the assembly proper): an unchanged position draws
+  // nothing and nothing stays queued.
+  t.scrollTo(0.3);
+  tick(30);
+  drawn.length = 0;
+  tick(6);
+  assert.equal(drawn.length, 0, "no fire, no redraw at rest");
+  assert.equal(t.frames.size, 0);
+  // Back in the fire, then out of view: the loop stops with the scene.
+  t.scrollTo(burning);
+  tick(12);
+  assert.equal(t.frames.size, 1);
+  t.observers[0].callback([{ isIntersecting: false }]);
+  assert.equal(t.frames.size, 0, "offscreen, nothing is queued");
+  drawn.length = 0;
+  tick(6);
+  assert.equal(drawn.length, 0);
+  dispose();
+  assert.equal(t.frames.size, 0);
 });
 
 test("3.5 screens ahead preparation is idle-only, does not activate layout, and cancels on exit", async () => {

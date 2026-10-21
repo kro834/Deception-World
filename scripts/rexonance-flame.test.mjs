@@ -15,6 +15,7 @@ import {
   FIELD_D,
   FIELD_H,
   FIELD_IN,
+  FIELD_LIFT,
   FIELD_TEXELS_PER_WIDTH,
   FIELD_W,
   FIRE_RECT,
@@ -37,7 +38,7 @@ import {
   poseView,
 } from "../src/lib/rexonance-fire/fire-pose.js";
 import { fireKernel, rasterFire } from "../src/lib/rexonance-fire/fire-raster.js";
-import { RAMP_CLEAN, RAMP_SOOTY } from "../src/lib/rexonance-fire/fire-tuning.js";
+import { FIRE_TUNING, RAMP_CLEAN, RAMP_SOOTY } from "../src/lib/rexonance-fire/fire-tuning.js";
 import { REXONANCE_SUIT_UNDERSUIT } from "../src/lib/rexonance-suit.ts";
 
 let serial = 0;
@@ -448,6 +449,104 @@ test("the detonation dissolves the body fire into fragments that cool into the n
     assert.ok([...out].every(Number.isFinite));
   }
   assert.ok(cooledByMaterial > 0 && cooledByMaterial < NANITE_FIRE_FRAGMENTS / 2);
+});
+
+test("the 爆散 throws the torch's own fire outward: it never lights air the torch left dark, so no straight-sided pillar (review of 2ce6712)", () => {
+  const P = NANITE_FIRE_PHASES;
+  const T = FIRE_TUNING;
+  const span = P.burstEnd - P.burstStart;
+  // The lift (B) once jumped from the distance down to the body's
+  // outermost point to its cap across the vertical line through it, and
+  // the blast stretched the plume's reach past that cap: every column with
+  // the body below burnt to the drawing's top while the air beside it
+  // stayed dark, a slab with straight sides at the climax. Sideways the
+  // lift now grows no faster than a lick's height off a limb's side.
+  const perTexel = (FIELD_LIFT * FIELD_TEXELS_PER_WIDTH) / 255;
+  let steepest = 0;
+  for (let y = 0; y < FIELD_H; y += 1)
+    for (let x = 0; x + 1 < FIELD_W; x += 1) {
+      const i = (y * FIELD_W + x) * 4;
+      if (!undersuitField[i] || !undersuitField[i + 4]) continue;
+      steepest = Math.max(
+        steepest,
+        Math.abs(undersuitField[i + 2] - undersuitField[i + 6]) * perTexel,
+      );
+    }
+  assert.ok(
+    steepest <= T.sideWeight + 2 * perTexel,
+    `the lift's sideways slope ${steepest.toFixed(2)} stays within ${T.sideWeight}`,
+  );
+  // The blast only carries the torch's fire outward from the body's middle
+  // (an ease-out over the dissolve) and thins it: wherever it shows in the
+  // air, the torch burnt at the point it was thrown from. Light only (the
+  // flash and the ring have their own test), back and front layers.
+  const torch = new Float64Array(POSE_SLOTS);
+  const blast = new Float64Array(POSE_SLOTS);
+  const back = new Float64Array(8);
+  const light = (px) => Math.max(px[0] + px[4], px[1] + px[5], px[2] + px[6]);
+  for (const clock of [0.5, 3.1, 12.3])
+    for (const share of [0.05, 0.1, 0.15, 0.2, 0.3]) {
+      poseFire(P.burstStart, 1, clock, 1, torch);
+      torch[POSE_FLASH] = 0;
+      torch[POSE_RING_STRENGTH] = 0;
+      const phase = P.burstStart + share * span;
+      poseFire(phase, naniteFlameEnvelope(phase), clock, 1, blast);
+      blast[POSE_FLASH] = 0;
+      blast[POSE_RING_STRENGTH] = 0;
+      const t = Math.min(1, share / T.burstDissolve);
+      const thrown = 1 - (1 - t) * (1 - t);
+      let worst = 0;
+      let lit = 0;
+      for (let v = 0.01; v < 1; v += 0.02)
+        for (let u = 0.01; u < 1; u += 0.02) {
+          fireKernel(u, v, blast, undersuitField, noise, pixel);
+          const shown = light(pixel);
+          if (shown > 0.05) lit += 1;
+          const su = T.burstCentreU + (u - T.burstCentreU) / (1 + T.burstExpand * thrown);
+          const sv = T.burstCentreV + (v - T.burstCentreV) / (1 + T.burstExpandY * thrown);
+          fireKernel(su, sv, torch, undersuitField, noise, back);
+          worst = Math.max(worst, shown - light(back));
+        }
+      assert.ok(lit > 40, `the thrown fire still shows at ${share} (${lit})`);
+      assert.ok(
+        worst < 0.02,
+        `no fire the torch did not have at ${share}, clock ${clock}: ${worst.toFixed(3)}`,
+      );
+    }
+  // The thrown fire fades before whichever edge of the drawing clips first
+  // (the whole rect, and the desktop entry's narrower canvas).
+  const entry = [
+    (-0.25 - FIRE_RECT.x) / FIRE_RECT.width,
+    (-0.18 - FIRE_RECT.y) / FIRE_RECT.height,
+    (1.25 - FIRE_RECT.x) / FIRE_RECT.width,
+    1,
+  ];
+  for (const [x0, y0, x1, y1] of [[0, 0, 1, 1], entry])
+    for (const share of [0.1, 0.2, 0.3]) {
+      const phase = P.burstStart + share * span;
+      poseFire(phase, naniteFlameEnvelope(phase), 12.3, 1, blast);
+      poseView(blast, x0, y0, x1, y1);
+      blast[POSE_FLASH] = 0;
+      blast[POSE_RING_STRENGTH] = 0;
+      let edge = 0;
+      for (let i = 0; i < 200; i += 1) {
+        const su = x0 + ((i + 0.5) / 200) * (x1 - x0);
+        const sv = y0 + ((i + 0.5) / 200) * (y1 - y0);
+        for (const [u, v] of [
+          [x0 + 0.001, sv],
+          [x1 - 0.001, sv],
+          [su, y0 + 0.001],
+          [su, y1 - 0.001],
+        ]) {
+          fireKernel(u, v, blast, undersuitField, noise, pixel);
+          edge = Math.max(edge, pixel[3], pixel[7]);
+        }
+      }
+      assert.ok(
+        edge < 0.01,
+        `no thrown fire on the drawing's edge at ${share}: ${edge.toFixed(4)}`,
+      );
+    }
 });
 
 test("the detonation's flash and shock ring fade out before the canvas's or the rect's edges, and the ring is a brief pulse", () => {
