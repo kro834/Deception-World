@@ -1,10 +1,11 @@
 import type { RiderForm } from "./manager-stub";
 import type { DossierLink } from "./dossier-nav";
+import { VARG_SECTIONS } from "./varg-data.ts";
 
 export const UNMANAGED_NAV: DossierLink[] = [
   {
     id: "dante",
-    name: "ダンテ",
+    name: "ダンテ／ヴァルグ",
     href: "/characters/dante",
     assets: ["/character-dante.webp"],
     kicker: "UNMANAGED 01",
@@ -57,6 +58,7 @@ export const DANTE_SECTIONS = [
       "一つの欲望をグリードプラズムへ変える通常のグリードゴチゾウとは異なり、戦場で得た複数のグリードシグナルを一時保存し、人格や記憶から切り離した『欲望の方向情報』として燃料を供給する。反転操作により、変身を解除せずポラリスとエニグマを切り替えられる。",
     ],
   },
+  ...VARG_SECTIONS,
 ];
 
 export const DANTE_FORMS: (RiderForm & { id: string })[] = [

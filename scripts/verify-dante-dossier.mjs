@@ -25,7 +25,11 @@ try {
     await page.goto(`${base}/characters/dante`);
     await ready(page);
     assert.match(await page.title(), /ダンテ/);
-    assert.equal(await page.locator("h1 .manager-display-name").textContent(), "ダンテ");
+    assert.equal(await page.locator("h1 .manager-display-name").textContent(), "ダンテ／ヴァルグ");
+    assert.equal(await page.locator('[aria-label="ヴァルグの人物録"] > div').count(), 10);
+    for (const name of ["原圧", "界外実体", "重勢", "不退", "深紅冠", "重相復元", "存在捕食", "認知追跡"])
+      assert.equal(await page.getByRole("heading", { name, exact: true }).count(), 1);
+    assert.equal(await page.locator(".manager-copy-section").count(), 17);
     await page.waitForFunction(
       () => getComputedStyle(document.querySelector(".dante-entry-glitch")).opacity === "0",
     );
@@ -74,15 +78,16 @@ try {
       const back = page.locator(selector);
       await show(back);
       await back.click();
-      await page.waitForURL("**/world#manager-archive-unmanaged");
+      await page.waitForURL("**/world#manager-archive-other");
       await ready(page);
       await page.waitForFunction(
-        () => document.querySelector("#manager-tab-1")?.getAttribute("aria-selected") === "true",
+        () => document.querySelector("#manager-tab-2")?.getAttribute("aria-selected") === "true",
       );
-      const entry = page.locator('.dante-archive[href="/characters/dante"]');
+      assert.equal(await page.locator('#manager-tab-2 b').textContent(), "犬");
+      const entry = page.getByRole("link", { name: "第二の犬 ダンテ／ヴァルグの人物資料を開く", exact: true });
       await show(entry);
       await entry.click();
-      await page.waitForURL("**/characters/dante");
+      await page.waitForURL("**/characters/dante#character-section-04");
       await ready(page);
     }
     await page.emulateMedia({ reducedMotion: "reduce" });

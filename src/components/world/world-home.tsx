@@ -617,8 +617,8 @@ const ManagerRail = memo(
           aria-controls="manager-panel-2"
           style={{ ["--liquid-accent" as string]: "#69df74" }}
         >
-          <small>RELATED / 03</small>
-          <b>その他</b>
+          <small>DOGS / 03</small>
+          <b>犬</b>
         </button>
       </div>
     );
@@ -2175,7 +2175,7 @@ export function WorldHome() {
                 </>
               ) : (
                 <>
-                  OTHER
+                  DOGS
                   <br />
                   RECORDS.
                 </>
@@ -2185,8 +2185,8 @@ export function WorldHome() {
               {managerTab === 0
                 ? "最上位管理人、六詠。六つの個体記録を照合できます。"
                 : managerTab === 1
-                  ? "六詠にも通常の管理人体系にも属さない、ダンテの人物資料を閲覧できます。"
-                  : "物語に関わる、その他の人物資料を閲覧できます。"}
+                  ? "六詠にも通常の管理人体系にも属さない、ダンテ／ヴァルグの人物資料を閲覧できます。"
+                  : "終の来訪者『犬』の個体記録と、関連人物の資料を閲覧できます。"}
             </p>
           </div>
           <div className="signal-column">
@@ -2357,7 +2357,7 @@ export function WorldHome() {
                     className="dante-archive"
                     to="/characters/dante"
                     assets={["/character-dante.webp"]}
-                    aria-label="管理人殺し ダンテの人物資料へ"
+                    aria-label="ダンテ／ヴァルグの人物資料へ"
                   >
                     <span className="dante-visual">
                       <img
@@ -2371,8 +2371,8 @@ export function WorldHome() {
                     </span>
                     <span className="dante-copy">
                       <small>ANOMALOUS RECORD</small>
-                      <b>DANTE</b>
-                      <em>管理人殺し</em>
+                      <b>ダンテ／ヴァルグ</b>
+                      <em>管理人殺し ／ 第二の犬</em>
                       <i>ACCESS //</i>
                     </span>
                   </GuardedLink>
@@ -2389,8 +2389,23 @@ export function WorldHome() {
                 role="tabpanel"
                 aria-labelledby="manager-tab-2"
               >
-                <p className="visually-hidden">その他の関連資料</p>
-                <div className="manager-slot-grid other-array" aria-label="その他">
+                <h4>終の来訪者『犬』</h4>
+                <div className="manager-slot-grid other-array" aria-label="犬の個体記録">
+                  <GuardedLink
+                    className="other-archive-card"
+                    to="/characters/dante"
+                    hash="character-section-04"
+                    assets={["/character-dante.webp"]}
+                    aria-label="第二の犬 ダンテ／ヴァルグの人物資料を開く"
+                  >
+                    <img src="/character-dante-thumb.webp" alt="宿主ダンテのキャラクタービジュアル" width={360} height={450} loading="lazy" decoding="async" />
+                    <span className="other-card-shade" aria-hidden="true" />
+                    <span className="other-card-code">SECOND DOG / 02</span>
+                    <span className="other-card-copy"><small>第二の犬・ヴァルグ</small><b>ダンテ／ヴァルグ</b><i>始原的管理外存在</i></span>
+                  </GuardedLink>
+                </div>
+                <h4>関連人物</h4>
+                <div className="manager-slot-grid other-array" aria-label="関連人物">
                   <GuardedLink
                     className="other-archive-card"
                     to="/characters/terra"

@@ -1,13 +1,3 @@
-                        strokeWidth="1.8"
-                        strokeLinecap="round"
-                      />
-                      <rect
-                        x="6"
-                        y="10"
-                        width="12"
-                        height="10"
-                        rx="2"
-                        fill="none"
                         stroke="currentColor"
                         strokeWidth="1.8"
                       />
@@ -147,7 +137,7 @@
                 </>
               ) : (
                 <>
-                  OTHER
+                  DOGS
                   <br />
                   RECORDS.
                 </>
@@ -157,8 +147,8 @@
               {managerTab === 0
                 ? "最上位管理人、六詠。六つの個体記録を照合できます。"
                 : managerTab === 1
-                  ? "六詠にも通常の管理人体系にも属さない、ダンテの人物資料を閲覧できます。"
-                  : "物語に関わる、その他の人物資料を閲覧できます。"}
+                  ? "六詠にも通常の管理人体系にも属さない、ダンテ／ヴァルグの人物資料を閲覧できます。"
+                  : "終の来訪者『犬』の個体記録と、関連人物の資料を閲覧できます。"}
             </p>
           </div>
           <div className="signal-column">
@@ -329,7 +319,7 @@
                     className="dante-archive"
                     to="/characters/dante"
                     assets={["/character-dante.webp"]}
-                    aria-label="管理人殺し ダンテの人物資料へ"
+                    aria-label="ダンテ／ヴァルグの人物資料へ"
                   >
                     <span className="dante-visual">
                       <img
@@ -343,8 +333,8 @@
                     </span>
                     <span className="dante-copy">
                       <small>ANOMALOUS RECORD</small>
-                      <b>DANTE</b>
-                      <em>管理人殺し</em>
+                      <b>ダンテ／ヴァルグ</b>
+                      <em>管理人殺し ／ 第二の犬</em>
                       <i>ACCESS //</i>
                     </span>
                   </GuardedLink>
@@ -361,8 +351,23 @@
                 role="tabpanel"
                 aria-labelledby="manager-tab-2"
               >
-                <p className="visually-hidden">その他の関連資料</p>
-                <div className="manager-slot-grid other-array" aria-label="その他">
+                <h4>終の来訪者『犬』</h4>
+                <div className="manager-slot-grid other-array" aria-label="犬の個体記録">
+                  <GuardedLink
+                    className="other-archive-card"
+                    to="/characters/dante"
+                    hash="character-section-04"
+                    assets={["/character-dante.webp"]}
+                    aria-label="第二の犬 ダンテ／ヴァルグの人物資料を開く"
+                  >
+                    <img src="/character-dante-thumb.webp" alt="宿主ダンテのキャラクタービジュアル" width={360} height={450} loading="lazy" decoding="async" />
+                    <span className="other-card-shade" aria-hidden="true" />
+                    <span className="other-card-code">SECOND DOG / 02</span>
+                    <span className="other-card-copy"><small>第二の犬・ヴァルグ</small><b>ダンテ／ヴァルグ</b><i>始原的管理外存在</i></span>
+                  </GuardedLink>
+                </div>
+                <h4>関連人物</h4>
+                <div className="manager-slot-grid other-array" aria-label="関連人物">
                   <GuardedLink
                     className="other-archive-card"
                     to="/characters/terra"
@@ -503,5 +508,3 @@
                     key={item.no}
                     className={`world-column-summary-pane world-column-stack-item${index === columnTab ? " is-active" : ""}`}
                     aria-hidden={index !== columnTab}
-                  >
-                    <p>{item.body}</p>

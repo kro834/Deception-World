@@ -47,7 +47,9 @@ test("world-home preserves its layout and copy outside explicitly approved edits
     // The owner's records and exact copy above remain unchanged.
     // Each pickup may now land on its matching form's hash via GuardedLink.
     // 2026-10-17: column 06's slider label and its dialog pane (gate, then dossier).
-    markup: "d7c68347ead458ee2912bed4fcddc0a5a2d76e40acb26e149bdde2da14f6d69f",
+    // Owner 2026-10-21: Other becomes Dogs; add second Dog Dante/Varg,
+    // preserving the related-person cards as a distinct labelled group.
+    markup: "5209f0993d0371a71a6840e080da54b5e113fc1993ee375da69d194defc9e1de",
   });
   // The WorldAnnexRiders hook stays where it was (this file is pinned), but
   // renders nothing: 02 RIDERS and 03 RECORDS sit back to back, and the

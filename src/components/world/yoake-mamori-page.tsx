@@ -33,7 +33,7 @@ export function YoakeMamoriPage() {
       <DossierTopbar
         fileLabel="CHARACTER FILE // 05"
         returnHash="manager-archive-other"
-        returnLabel="その他の人物一覧へ戻る"
+        returnLabel="犬・関連人物の一覧へ戻る"
       />
       <section className="manager-hero" id="dossier-profile">
         <div className="manager-portrait-column">

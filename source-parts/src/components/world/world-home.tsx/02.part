@@ -1,5 +1,3 @@
-        pos: "50% 0%",
-        alt: "仮面ライダールーラー・ポラリスモード",
         width: 1023,
         height: 1537,
         to: "/characters/dante",
@@ -110,8 +108,8 @@ const ManagerRail = memo(
           aria-controls="manager-panel-2"
           style={{ ["--liquid-accent" as string]: "#69df74" }}
         >
-          <small>RELATED / 03</small>
-          <b>その他</b>
+          <small>DOGS / 03</small>
+          <b>犬</b>
         </button>
       </div>
     );
@@ -505,3 +503,7 @@ export function WorldHome() {
   }, [locationHash]);
 
   useLayoutEffect(() => {
+    if (locationHash !== "manager-archive-unmanaged") return;
+    setManagerTab(1);
+    syncRail(managerRail.current, 1);
+  }, [locationHash]);

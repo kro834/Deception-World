@@ -52,10 +52,10 @@ test("all four delivered WebP assets are valid and lightweight", () => {
 
 test("the Other archive keeps Terra and Luna and fills exactly six slots", () => {
   const panel = worldHome.slice(
-    worldHome.indexOf('className="manager-archive-panel is-other"'),
+    worldHome.indexOf('aria-label="関連人物"'),
     worldHome.indexOf(
       "</div>\n              </div>",
-      worldHome.indexOf('className="manager-archive-panel is-other"'),
+      worldHome.indexOf('aria-label="関連人物"'),
     ),
   );
   assert.match(panel, /to="\/characters\/terra"/);
