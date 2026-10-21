@@ -1,0 +1,904 @@
+/* ================================================================
+   ZENITH — the index pages' brush-up: /library and /search (2026-10-21)
+
+   On top of the STAGE sheet (styles-stage-library.css, which it follows
+   in both routes' heads). The reference room and the record index become
+   an archive terminal in the key visual's light: the ice stays the
+   working colour, the streamline pink is the live edge (a lit seam under
+   a pointer, the active chip's lamp, the read-outs' second light), gold
+   remains the saved/record read-out. Every record window decodes the
+   pixels it paints (src/lib/record-images.ts), the browse form is one
+   console with a mono read-out, the no-result states say where the hits
+   are, and a result landed on is ringed (styles-record-landing.css).
+
+   Every rule is scoped to html[data-family="library"]. Text is 12px or
+   more; motion is transform/opacity/colour only, finite, gated by
+   reduced motion and economy rendering; forced colours keep every edge.
+   ================================================================ */
+html[data-family="library"] {
+  --dxz-pink: var(--saga-pink, #ff4fc3);
+  --dxz-pink-rgb: var(--saga-pink-rgb, 255 79 195);
+  --dxz-blue-rgb: var(--saga-blue-rgb, 79 123 255);
+  --dxz-prism: var(
+    --saga-prism-rule,
+    linear-gradient(90deg, #7ae8ff 0%, #4f7bff 32%, #ff4fc3 66%, #f0cf86 100%)
+  );
+  --dxz-prism-fade: var(
+    --saga-prism-fade,
+    linear-gradient(90deg, rgb(122 232 255 / 72%), rgb(255 79 195 / 72%) 62%, transparent)
+  );
+  --dxz-top: calc(104px + env(safe-area-inset-top));
+}
+
+/* ================================================================
+   The art window: a lighter floor (the picture reads to its foot), the
+   file code lit by its edition, the pressed/hovered window brightens.
+   ================================================================ */
+html[data-family="library"] .dxl-art::after {
+  background:
+    linear-gradient(90deg, var(--tint), rgb(var(--tint-rgb) / 0%) 70%) 0 100% / 100% 2px no-repeat,
+    linear-gradient(180deg, rgb(3 6 12 / 0%) 58%, rgb(3 6 12 / 56%) 100%);
+}
+
+html[data-family="library"] .dxl-art > i {
+  border-bottom: 1px solid rgb(var(--tint-rgb) / 45%);
+  background: rgb(3 6 12 / 86%);
+}
+
+/* ================================================================
+   Cards: a landing position under the bar, a lit seam under a pointer,
+   the edition's light on a result's rim.
+   ================================================================ */
+html[data-family="library"] .library-page .library-card,
+html[data-family="library"] .search-page :is(.search-result-card, .search-more-option),
+html[data-family="library"] .library-page .library-shelf-title,
+html[data-family="library"] .search-page .search-group,
+html[data-family="library"] .library-page .library-cast-tile,
+html[data-family="library"] .library-page .inquiry-choice {
+  scroll-margin-top: var(--dxz-top);
+}
+
+html[data-family="library"] .search-page .search-result-card {
+  --dxz-rim-rgb: var(--dx-edition-rgb);
+}
+
+html[data-family="library"] .search-page .search-result-card:has(> .dxl-art[data-edition="dream"]) {
+  --dxz-rim-rgb: 224 97 79;
+}
+
+html[data-family="library"]
+  .search-page
+  .search-result-card:has(> .dxl-art[data-edition="extreme"]) {
+  --dxz-rim-rgb: 240 207 134;
+}
+
+html[data-family="library"] .search-page .search-result-card:has(> .dxl-art[data-edition="final"]) {
+  --dxz-rim-rgb: 157 140 255;
+}
+
+html[data-family="library"]
+  .search-page
+  .search-result-card:has(> .dxl-art[data-edition="gallery"]) {
+  --dxz-rim-rgb: 216 178 122;
+}
+
+html[data-family="library"] .library-page .library-card:hover,
+html[data-family="library"]
+  .search-page
+  :is(.search-result-card, .search-more-option):is(:hover, [data-active="true"]) {
+  border-color: rgb(var(--dxz-rim-rgb, var(--dx-edition-rgb)) / 70%);
+  box-shadow:
+    inset 0 1px 0 rgb(var(--dxz-pink-rgb) / 70%),
+    var(--dx-bevel),
+    0 26px 48px -26px rgb(var(--dxz-pink-rgb) / 38%),
+    var(--dx-drop);
+}
+
+html[data-family="library"] .library-page .library-card:hover::before,
+html[data-family="library"]
+  .search-page
+  :is(.search-result-card, .search-more-option):is(:hover, [data-active="true"])::before {
+  opacity: 1;
+}
+
+/* The listbox's active record: the focus ring and the lit seam together,
+   so the keyboard's place is never mistaken for a hover. */
+html[data-family="library"]
+  .search-page
+  :is(.search-result-card, .search-more-option)[data-active="true"] {
+  outline: 2px solid var(--dx-focus);
+  outline-offset: 3px;
+}
+
+/* The open line: its arrow steps out under a pointer. */
+html[data-family="library"] .search-page .search-result-open > span,
+html[data-family="library"] .library-page .library-card-actions > a > span {
+  display: inline-block;
+}
+
+/* The saved state is gold; a pressed bookmark reads as a stamped tab. */
+html[data-family="library"] .library-page .library-card-actions button[aria-pressed="true"] {
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 35%);
+}
+
+/* ================================================================
+   /library — the hero: the index read-out and the files' tones
+   ================================================================ */
+html[data-family="library"] .library-page .library-index-summary > span {
+  font-family: var(--dx-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.1em;
+}
+
+html[data-family="library"] .library-page .library-index-summary > span:first-child {
+  background:
+    linear-gradient(90deg, rgb(var(--dxl-gold-rgb) / 18%), transparent 60%), rgb(3 6 12 / 55%);
+}
+
+html[data-family="library"] .library-page .library-fulltext-link {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 45%),
+    0 0 0 1px rgb(var(--dxz-pink-rgb) / 35%),
+    0 14px 30px -14px rgb(var(--dx-edition-rgb) / 70%);
+}
+
+html[data-family="library"] .library-page .library-jump-links a:first-child {
+  color: var(--dx-text);
+  text-decoration-color: var(--dxz-pink);
+}
+
+/* A file's tone lights its floor and its number under a pointer. */
+html[data-family="library"] .library-page .library-cast-tile:hover {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 22%),
+    0 0 0 1px color-mix(in srgb, var(--cast-tone) 55%, transparent),
+    0 24px 44px -24px color-mix(in srgb, var(--cast-tone) 70%, transparent),
+    var(--dx-drop);
+}
+
+html[data-family="library"] .library-page .library-cast-tile:hover .library-cast-no {
+  color: var(--cast-tone);
+}
+
+html[data-family="library"] .library-page .library-cast-tile:hover .library-cast-art::after {
+  background:
+    linear-gradient(90deg, var(--cast-tone), transparent 80%) 0 100% / 100% 3px no-repeat,
+    radial-gradient(
+      70% 40% at 50% 100%,
+      color-mix(in srgb, var(--cast-tone) 38%, transparent),
+      transparent 70%
+    ),
+    linear-gradient(180deg, transparent 58%, rgb(3 6 12 / 72%));
+}
+
+/* ================================================================
+   /library — My Library: each instrument's top light, the rows' hover
+   ================================================================ */
+html[data-family="library"]
+  .library-page
+  .library-hub-grid
+  > :is(.library-continue, .library-shelf, .library-history, .library-searches) {
+  box-shadow: inset 0 1px 0 rgb(var(--dx-edition-rgb) / 38%);
+}
+
+html[data-family="library"] .library-page .library-hub-grid > .library-shelf {
+  box-shadow: inset 0 1px 0 rgb(var(--dxl-gold-rgb) / 45%);
+}
+
+html[data-family="library"] .library-page .library-hub-grid > .library-continue {
+  box-shadow: inset 0 1px 0 rgb(var(--dxz-pink-rgb) / 55%);
+}
+
+html[data-family="library"] .library-page .library-rows > li > a:hover {
+  background: linear-gradient(90deg, rgb(var(--dx-edition-rgb) / 10%), transparent 80%);
+}
+
+html[data-family="library"] .library-page .library-rows button:hover,
+html[data-family="library"] .library-page .library-data-controls > button:hover:not(:disabled),
+html[data-family="library"] .library-page .library-search-chips a:hover {
+  border-color: var(--dx-edition);
+  color: var(--dx-text);
+}
+
+html[data-family="library"] .library-page .library-primary-link {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 45%),
+    0 0 0 1px rgb(var(--dxz-pink-rgb) / 30%);
+}
+
+/* ================================================================
+   /library — 問いから辿る: the tiles' light, and the strips on phones
+   ================================================================ */
+html[data-family="library"] .library-page .inquiry-choice:hover .inquiry-choice-art::after,
+html[data-family="library"]
+  .library-page
+  .inquiry-choice[aria-pressed="true"]
+  .inquiry-choice-art::after {
+  background:
+    linear-gradient(180deg, rgb(3 6 12 / 4%) 0%, rgb(3 6 12 / 38%) 38%, rgb(3 6 12 / 92%) 74%),
+    linear-gradient(90deg, rgb(3 6 12 / 62%), transparent 70%);
+}
+
+html[data-family="library"] .library-page .inquiry-choice-action {
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 10%);
+}
+
+html[data-family="library"] .library-page .inquiry-choice:hover .inquiry-choice-action {
+  background: color-mix(in srgb, var(--inquiry-accent) 14%, rgb(3 6 12 / 60%));
+}
+
+html[data-family="library"] .library-page .inquiry-stop-body:hover {
+  border-color: color-mix(in srgb, var(--inquiry-accent) 55%, transparent);
+}
+
+@media (max-width: 699px) {
+  /* Three standing strips on a phone are narrow: the first takes a little
+     less, the scrim lifts, and the pictures keep their faces. */
+  html[data-family="library"] .inquiry-choice-art > img:first-child {
+    flex-grow: 1.35;
+  }
+
+  html[data-family="library"] .inquiry-choice-art::after {
+    background:
+      linear-gradient(180deg, rgb(3 6 12 / 6%) 0%, rgb(3 6 12 / 34%) 36%, rgb(3 6 12 / 93%) 74%),
+      linear-gradient(90deg, rgb(3 6 12 / 52%), transparent 58%);
+  }
+}
+
+/* ================================================================
+   /library — the browse console: one lit instrument, a mono read-out
+   ================================================================ */
+html[data-family="library"] .library-page .library-browse-controls {
+  position: relative;
+  padding: clamp(16px, 2.4vw, 28px);
+  border: 1px solid var(--dxl-line-2);
+  border-radius: var(--dx-radius);
+  background:
+    var(--dxl-ticks),
+    radial-gradient(80% 120% at 50% 0%, rgb(var(--dx-edition-rgb) / 11%), transparent 70%),
+    var(--dx-plate);
+  background-repeat: no-repeat;
+  box-shadow:
+    var(--dx-bevel),
+    0 40px 90px -46px rgb(var(--dx-edition-rgb) / 30%),
+    var(--dx-drop);
+}
+
+html[data-family="library"] .library-page .library-browse-controls::before {
+  position: absolute;
+  inset: -1px 28px auto;
+  height: 1px;
+  content: "";
+  background: var(--dx-seam, var(--dxz-prism));
+  pointer-events: none;
+}
+
+html[data-family="library"] .library-page .library-search-label {
+  margin-top: 14px;
+  color: var(--dx-text);
+  font-weight: 600;
+}
+
+html[data-family="library"] .library-page .library-browse-controls .library-search {
+  background:
+    linear-gradient(90deg, var(--dx-edition), rgb(var(--dxz-pink-rgb) / 70%) 60%, transparent) 0 0 /
+      160px 1px no-repeat,
+    rgb(2 5 10 / 85%);
+  box-shadow:
+    inset 0 0 0 1px rgb(3 6 12 / 80%),
+    0 0 0 4px rgb(var(--dx-edition-rgb) / 6%);
+}
+
+html[data-family="library"] .library-page .library-browse-controls .library-browse-submit {
+  gap: 12px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: 4px;
+  color: #03141c;
+  background: linear-gradient(180deg, #c6f5ff, var(--dx-edition));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 45%),
+    0 0 0 1px rgb(var(--dxz-pink-rgb) / 30%);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
+html[data-family="library"] .library-page .library-browse-controls .library-query-clear {
+  color: var(--dx-text-2);
+}
+
+/* The scope is a two-way switch: one recessed track, the chosen side lit. */
+html[data-family="library"] .library-page .library-browse-controls .library-scope-row {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  max-width: 100%;
+  margin-top: 16px;
+  padding: 4px;
+  border: 1px solid var(--dxl-line-2);
+  border-radius: 6px;
+  background: rgb(2 5 10 / 70%);
+  box-shadow: inset 0 1px 0 rgb(0 0 0 / 60%);
+}
+
+html[data-family="library"] .library-page .library-browse-controls .library-scope-row button {
+  min-height: 40px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+}
+
+html[data-family="library"]
+  .library-page
+  .library-browse-controls
+  .library-scope-row
+  button[aria-pressed="true"] {
+  border-color: rgb(var(--dx-edition-rgb) / 60%);
+  color: var(--dx-text);
+  background: linear-gradient(
+    180deg,
+    rgb(var(--dx-edition-rgb) / 24%),
+    rgb(var(--dx-edition-rgb) / 12%)
+  );
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 14%);
+}
+
+html[data-family="library"]
+  .library-page
+  .library-browse-controls
+  .library-scope-row
+  button[aria-pressed="true"]
+  > span {
+  color: var(--dx-edition);
+  opacity: 1;
+}
+
+/* The kinds: chips with their counts set mono; the chosen one carries a
+   pink lamp on its edge. */
+html[data-family="library"] .library-page .library-browse-controls .library-filter-row button,
+html[data-family="library"] .search-page .search-categories button {
+  position: relative;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 6%);
+}
+
+html[data-family="library"]
+  .library-page
+  .library-browse-controls
+  .library-filter-row
+  button
+  > span {
+  font: 500 12px / 1 var(--dx-mono);
+}
+
+html[data-family="library"] .library-page .library-browse-controls .library-filter-row button:hover,
+html[data-family="library"] .search-page .search-categories button:hover,
+html[data-family="library"] .search-page .search-suggestions button:hover,
+html[data-family="library"] .library-page .library-active-filters button:hover,
+html[data-family="library"] .library-page .library-empty button:hover,
+html[data-family="library"] .search-page .search-empty button:hover,
+html[data-family="library"] .search-page .search-close-matches button:hover {
+  border-color: var(--dx-edition);
+  color: var(--dx-text);
+}
+
+html[data-family="library"]
+  .library-page
+  .library-browse-controls
+  .library-filter-row
+  button[aria-pressed="true"],
+html[data-family="library"] .search-page .search-categories button[aria-pressed="true"] {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 45%),
+    0 0 0 1px rgb(var(--dxz-pink-rgb) / 45%),
+    0 10px 22px -12px rgb(var(--dx-edition-rgb) / 70%);
+}
+
+/* The current conditions: a HUD line with a live lamp. */
+html[data-family="library"] .library-page .library-active-filters {
+  align-items: center;
+  margin-top: 18px;
+  padding-top: 14px;
+}
+
+html[data-family="library"] .library-page .library-active-filters p {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--dx-text-2);
+  letter-spacing: 0.06em;
+}
+
+html[data-family="library"] .library-page .library-active-filters p::before {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  content: "";
+  border-radius: 50%;
+  background: var(--dxz-pink);
+  box-shadow: 0 0 10px rgb(var(--dxz-pink-rgb) / 70%);
+}
+
+html[data-family="library"] .library-page .library-active-filters .library-query-summary {
+  padding: 2px 8px;
+  border: 1px solid var(--dxl-line-2);
+  border-radius: 3px;
+  background: rgb(var(--dx-edition-rgb) / 7%);
+}
+
+/* The read-out: how many records the shelf holds, set as an instrument. */
+html[data-family="library"] .library-page .library-results-heading {
+  align-items: baseline;
+  gap: 6px 20px;
+  margin: 26px 0 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--dxl-line);
+  background: linear-gradient(
+      90deg,
+      var(--dx-edition),
+      rgb(var(--dxz-pink-rgb) / 70%) 50%,
+      transparent
+    )
+    0 100% / min(220px, 40%) 1px no-repeat;
+}
+
+html[data-family="library"] .library-page .library-results-heading > p {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  color: var(--dx-text-2);
+  font-family: var(--dx-body);
+  letter-spacing: 0.04em;
+}
+
+html[data-family="library"] .library-page .library-results-heading > p > strong {
+  color: var(--dx-gold);
+  font: 600 clamp(26px, 3vw, 38px) / 1 var(--dx-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+}
+
+html[data-family="library"] .library-page .library-results-heading > p:focus {
+  outline: 2px solid var(--dx-focus);
+  outline-offset: 6px;
+}
+
+html[data-family="library"] .library-page .library-fulltext-inline {
+  gap: 8px;
+  padding: 0 12px;
+  border: 1px solid var(--dxl-line-2);
+  border-radius: 4px;
+  color: var(--dx-text);
+  background: rgb(var(--dx-edition-rgb) / 6%);
+  font-size: 13px;
+}
+
+html[data-family="library"] .library-page .library-fulltext-inline:hover {
+  border-color: var(--dx-edition);
+}
+
+html[data-family="library"] .library-page .library-fulltext-inline > span {
+  color: var(--dx-edition);
+}
+
+html[data-family="library"] .library-page .library-shelf-title::before {
+  border-color: var(--dxz-pink);
+  box-shadow: 0 0 10px rgb(var(--dxz-pink-rgb) / 55%);
+}
+
+/* ================================================================
+   Nothing found: a panel that says where the hits are
+   ================================================================ */
+html[data-family="library"] .library-page .library-empty,
+html[data-family="library"] .search-page .search-empty {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  max-width: 48em;
+  margin-inline: auto;
+  padding: clamp(28px, 4vw, 48px) clamp(18px, 3vw, 36px);
+  border: 1px solid var(--dxl-line-2);
+  border-radius: var(--dx-radius);
+  background:
+    var(--dxl-ticks),
+    radial-gradient(70% 90% at 50% 0%, rgb(var(--dxz-pink-rgb) / 7%), transparent 70%),
+    var(--dx-plate);
+  background-repeat: no-repeat;
+  box-shadow: var(--dx-bevel), var(--dx-drop);
+  text-align: center;
+}
+
+html[data-family="library"] .library-page .library-empty::before,
+html[data-family="library"] .search-page .search-empty::before {
+  position: absolute;
+  inset: -1px 28px auto;
+  height: 1px;
+  content: "";
+  background: var(--dxz-prism-fade);
+}
+
+html[data-family="library"] .library-page .library-empty-code,
+html[data-family="library"] .search-page .search-empty-code {
+  margin: 0;
+  color: transparent;
+  font: 400 clamp(22px, 3vw, 34px) / 1 var(--dx-hud);
+  letter-spacing: 0.3em;
+  text-indent: 0.3em;
+  -webkit-text-stroke: 1px rgb(var(--dxz-pink-rgb) / 70%);
+}
+
+html[data-family="library"] .search-page .search-empty > svg {
+  width: 28px;
+  height: 28px;
+  margin-bottom: 2px;
+}
+
+html[data-family="library"] .library-page .library-empty h3,
+html[data-family="library"] .search-page .search-empty h3 {
+  margin: 4px 0 0;
+  color: var(--dx-text);
+  font: 700 clamp(18px, 2vw, 24px) / 1.4 var(--dx-display);
+  letter-spacing: 0.04em;
+}
+
+html[data-family="library"] .library-page .library-empty p:not(.library-empty-code),
+html[data-family="library"] .search-page .search-empty > p:not(.search-empty-code) {
+  max-width: 36em;
+  margin: 0;
+  color: var(--dx-text-2);
+  font-size: 13px;
+  line-height: 1.9;
+}
+
+html[data-family="library"] .search-page .search-close-matches {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+html[data-family="library"] .search-page .search-close-matches > p {
+  margin: 0;
+  color: var(--dx-edition);
+  font: 400 12px / 1.4 var(--dx-hud);
+  letter-spacing: 0.16em;
+}
+
+html[data-family="library"] .search-page .search-close-matches > div {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+}
+
+html[data-family="library"] .search-page .search-close-matches button {
+  border-color: rgb(var(--dx-edition-rgb) / 50%);
+  color: var(--dx-text);
+  font-weight: 600;
+}
+
+html[data-family="library"] .library-page .library-empty-kinds,
+html[data-family="library"] .search-page .search-empty-kinds {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+html[data-family="library"] .library-page .library-empty-kinds button,
+html[data-family="library"] .search-page .search-empty-kinds button {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--dxl-line-2);
+  border-radius: 999px;
+  color: var(--dx-text);
+  background: rgb(3 6 12 / 55%);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+}
+
+html[data-family="library"] .library-page .library-empty-kinds button > span,
+html[data-family="library"] .search-page .search-empty-kinds button > span,
+html[data-family="library"] .library-page .library-empty-actions button > span {
+  color: var(--dx-gold);
+  font: 600 13px / 1 var(--dx-mono);
+}
+
+html[data-family="library"] .library-page .library-empty-kinds button:hover,
+html[data-family="library"] .search-page .search-empty-kinds button:hover {
+  border-color: var(--dx-gold);
+}
+
+html[data-family="library"] .library-page .library-empty-actions,
+html[data-family="library"] .search-page .search-empty > div:last-child {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+html[data-family="library"] .library-page .library-empty-actions button,
+html[data-family="library"] .search-page .search-empty > div:last-child button {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--dxl-line-2);
+  border-radius: 4px;
+  color: var(--dx-text);
+  background: rgb(3 6 12 / 55%);
+  font-size: 13px;
+}
+
+html[data-family="library"] .library-page .library-empty-actions > .library-fulltext-inline {
+  min-height: 44px;
+}
+
+/* ================================================================
+   /search — the workbench: the key hint as a HUD line, the suggestions
+   ================================================================ */
+html[data-family="library"] .search-page .search-key-hint {
+  display: block;
+  margin-top: 6px;
+  color: var(--dx-edition);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  html[data-family="library"] .search-page .search-key-hint {
+    display: none;
+  }
+}
+
+html[data-family="library"] .search-page .search-suggestions button > span {
+  color: var(--dx-edition);
+}
+
+html[data-family="library"] .search-page .search-recent > span {
+  color: var(--dxz-pink);
+}
+
+html[data-family="library"] .search-page .search-recent-clear {
+  color: var(--dx-text-3);
+  font-size: 12px;
+}
+
+html[data-family="library"] .search-page .search-submit,
+html[data-family="library"] .search-page .search-input-row:focus-within .search-submit {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 45%),
+    0 0 0 1px rgb(var(--dxz-pink-rgb) / 30%);
+}
+
+html[data-family="library"] .search-page .search-input-row:focus-within {
+  box-shadow:
+    0 0 0 2px var(--dx-focus),
+    0 0 0 6px rgb(var(--dx-edition-rgb) / 10%);
+}
+
+html[data-family="library"] .search-page .search-categories button span {
+  font: 500 12px / 1 var(--dx-mono);
+}
+
+/* ================================================================
+   /search — results: the group rule in the key visual's light, the
+   see-all tile, the next page
+   ================================================================ */
+html[data-family="library"] .search-page .search-results-heading {
+  background: linear-gradient(
+      90deg,
+      var(--dx-edition),
+      rgb(var(--dxz-pink-rgb) / 70%) 50%,
+      transparent
+    )
+    0 100% / min(220px, 40%) 1px no-repeat;
+}
+
+html[data-family="library"] .search-page .search-group-head {
+  background: linear-gradient(
+      90deg,
+      var(--dx-edition),
+      rgb(var(--dxz-pink-rgb) / 60%) 55%,
+      transparent
+    )
+    0 100% / 160px 1px no-repeat;
+}
+
+html[data-family="library"] .search-page .search-result-meta > span:first-child {
+  background: rgb(var(--dx-edition-rgb) / 6%);
+}
+
+html[data-family="library"] .search-page .search-result-section {
+  padding-left: 10px;
+  border-left: 2px solid rgb(var(--dx-edition-rgb) / 55%);
+}
+
+html[data-family="library"] .search-page .search-more-option > b {
+  text-shadow: 0 0 18px rgb(var(--dx-edition-rgb) / 45%);
+}
+
+html[data-family="library"] .search-page .search-more {
+  position: relative;
+  box-shadow: var(--dx-bevel), var(--dx-drop);
+}
+
+html[data-family="library"] .search-page .search-more::before {
+  position: absolute;
+  inset: -1px 24px auto;
+  height: 1px;
+  content: "";
+  background: var(--dxz-prism-fade);
+}
+
+html[data-family="library"] .search-page .search-more:hover {
+  border-color: var(--dx-edition);
+}
+
+html[data-family="library"] .search-page .search-more > span {
+  font-variant-numeric: tabular-nums;
+}
+
+html[data-family="library"] .search-page .search-scope-note {
+  background: var(--dxz-prism-fade) 50% 0 / 60% 1px no-repeat;
+}
+
+/* ================================================================
+   Tablets (768-1194): the console breathes, the hub keeps two columns
+   ================================================================ */
+@media (min-width: 700px) and (max-width: 1179px) {
+  html[data-family="library"] .library-page .library-hub-grid {
+    gap: 12px;
+  }
+
+  html[data-family="library"] .library-page .library-hub-grid > .library-continue {
+    grid-column: 1 / -1;
+  }
+
+  html[data-family="library"] .library-page .library-data-controls {
+    grid-column: 1 / -1;
+  }
+}
+
+/* ================================================================
+   Phones: the console's rows stack, the actions fill
+   ================================================================ */
+@media (max-width: 559px) {
+  html[data-family="library"] .library-page .library-browse-controls .library-scope-row {
+    display: flex;
+  }
+
+  html[data-family="library"] .library-page .library-browse-controls .library-scope-row button {
+    flex: 1 1 auto;
+    justify-content: space-between;
+  }
+
+  html[data-family="library"] .library-page .library-active-filters button {
+    width: 100%;
+    margin-left: 0;
+    justify-content: center;
+  }
+
+  html[data-family="library"] .library-page .library-empty-actions > *,
+  html[data-family="library"] .search-page .search-empty > div:last-child > button {
+    flex: 1 1 100%;
+    justify-content: center;
+  }
+
+  html[data-family="library"] .library-page .library-results-heading > p > strong {
+    font-size: 26px;
+  }
+}
+
+/* ================================================================
+   Motion: colour, shadow and the arrow's step, finite and gated
+   ================================================================ */
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"])[data-family="library"]
+    :is(
+      .library-card,
+      .search-result-card,
+      .search-more-option,
+      .library-cast-tile,
+      .inquiry-choice,
+      .inquiry-stop-body,
+      .library-browse-controls button,
+      .search-categories button,
+      .search-suggestions button,
+      .library-empty-kinds button,
+      .search-empty-kinds button,
+      .library-empty-actions button,
+      .search-empty button,
+      .search-more,
+      .library-rows > li > a,
+      .library-rows button,
+      .library-data-controls > button,
+      .library-search-chips a,
+      .library-fulltext-inline
+    ) {
+    transition:
+      transform 220ms cubic-bezier(0.2, 0.7, 0.2, 1),
+      border-color 180ms ease,
+      box-shadow 220ms ease,
+      background-color 180ms ease,
+      color 180ms ease;
+  }
+
+  html:not([data-world-effects="economy"])[data-family="library"]
+    :is(.search-result-open, .library-card-actions > a)
+    > span {
+    transition: transform 220ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  html:not([data-world-effects="economy"])[data-family="library"] .library-cast-art::after,
+  html:not([data-world-effects="economy"])[data-family="library"] .inquiry-choice-art::after {
+    transition: opacity 220ms ease;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
+  html:not([data-world-effects="economy"])[data-family="library"]
+    .search-page
+    .search-result-card:hover
+    .search-result-open
+    > span,
+  html:not([data-world-effects="economy"])[data-family="library"]
+    .library-page
+    .library-card:hover
+    .library-card-actions
+    > a
+    > span {
+    transform: translate(3px, -3px);
+  }
+
+  html:not([data-world-effects="economy"])[data-family="library"]
+    .library-page
+    .inquiry-choice:hover
+    .inquiry-choice-art
+    > img {
+    transform: scale(1.03);
+  }
+}
+
+/* ================================================================
+   Forced colours: the system's colours, every edge drawn
+   ================================================================ */
+@media (forced-colors: active) {
+  html[data-family="library"] .library-page .library-browse-controls,
+  html[data-family="library"] .library-page .library-empty,
+  html[data-family="library"] .search-page .search-empty,
+  html[data-family="library"] .library-page .library-browse-controls .library-scope-row {
+    border: 1px solid CanvasText;
+    background: Canvas;
+    box-shadow: none;
+  }
+
+  html[data-family="library"] .library-page .library-browse-controls::before,
+  html[data-family="library"] .library-page .library-empty::before,
+  html[data-family="library"] .search-page .search-empty::before,
+  html[data-family="library"] .search-page .search-more::before,
+  html[data-family="library"] .library-page .library-active-filters p::before {
+    display: none;
+  }
+
+  html[data-family="library"] .library-page .library-empty-code,
+  html[data-family="library"] .search-page .search-empty-code {
+    color: CanvasText;
+    -webkit-text-stroke: 0;
+  }
+
+  html[data-family="library"] .library-page .library-card:hover,
+  html[data-family="library"]
+    .search-page
+    :is(.search-result-card, .search-more-option):is(:hover, [data-active="true"]),
+  html[data-family="library"] .library-page .library-cast-tile:hover {
+    box-shadow: none;
+    border-color: Highlight;
+  }
+}

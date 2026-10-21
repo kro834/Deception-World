@@ -1,10 +1,30 @@
 let cancelPending: (() => void) | undefined;
 
+// The landing ring (styles-record-landing.css, handed in by the opener as
+// `stylesheet`) stays on the destination for this long, or until focus moves
+// on; the brief skip-style cue keeps its own 2.4s. Both go when focus leaves.
+const LANDING_HOLD_MS = 6000;
+
+/** The landing ring's sheet, linked once per document the first time an
+ * index hit is opened (from /search, /library or the quick search), so the
+ * ring is styled by the time the route settles. */
+function linkLandingSheet(href: string | undefined) {
+  if (!href || typeof document.createElement !== "function") return;
+  const head = document.head;
+  if (!head || head.querySelector("link[data-record-landing-sheet]")) return;
+  const link = document.createElement("link");
+  link.rel = "stylesheet";
+  link.href = href;
+  link.setAttribute("data-record-landing-sheet", "true");
+  head.append(link);
+}
+
 /** A search/library selection is an explicit reading destination. Wait for
  * its route and cover to settle, without touching scroll/history or dialogs. */
-export function watchRecordArrival(path: string, hash?: string) {
+export function watchRecordArrival(path: string, hash?: string, options?: { stylesheet?: string }) {
   cancelPending?.();
   if (!hash || typeof document === "undefined") return () => {};
+  linkLandingSheet(options?.stylesheet);
   const root = document.documentElement;
   let frame = 0;
   const stop = () => {
@@ -44,11 +64,19 @@ export function watchRecordArrival(path: string, hash?: string) {
       !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (marked) target.dataset.skipMark = "true";
     const timer = window.setTimeout(() => target.removeAttribute("data-skip-mark"), 2400);
+    // The landing ring: a one-shot lock-on when motion is allowed, else still.
+    target.dataset.recordLanding = marked ? "live" : "still";
+    const hold = window.setTimeout(
+      () => target.removeAttribute("data-record-landing"),
+      LANDING_HOLD_MS,
+    );
     target.addEventListener(
       "blur",
       () => {
         window.clearTimeout(timer);
+        window.clearTimeout(hold);
         target.removeAttribute("data-skip-mark");
+        target.removeAttribute("data-record-landing");
         if (ownedTab) {
           target.removeAttribute("tabindex");
           target.removeAttribute("data-route-focus");

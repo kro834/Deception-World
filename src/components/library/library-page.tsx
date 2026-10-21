@@ -21,7 +21,9 @@ import {
   type LibraryKind,
 } from "@/lib/library-data";
 import { pathArt, RIDER_ART, titleRunStyle } from "@/lib/record-art";
+import { recordImage } from "@/lib/record-images";
 import { watchRecordArrival } from "@/lib/record-arrival";
+import landingCssUrl from "@/styles-record-landing.css?url";
 import {
   captureRecordReturn,
   finishRecordReturnOpening,
@@ -90,7 +92,7 @@ function EntryCard({
             const captured = commit?.();
             if (!captured) return;
             try {
-              watchRecordArrival(entry.path, entry.hash);
+              watchRecordArrival(entry.path, entry.hash, { stylesheet: landingCssUrl });
               await go({
                 to: entry.path,
                 hash: entry.hash,
@@ -303,6 +305,13 @@ export function LibraryPage({
   const savedCount = filterLibraryBrowse({ q: draft, kind, scope: "saved" }, saved.bookmarks)
     .entries.length;
   const allCount = searchLibrary(draft, kind).length;
+  // A kind with nothing: the other kinds that do hold the query (in scope).
+  const otherKinds =
+    kind === "all"
+      ? []
+      : (Object.keys(LIBRARY_KINDS) as LibraryKind[])
+          .filter((id) => id !== kind && counts[id] > 0)
+          .map((id) => [id, counts[id]] as const);
   const savedKnown = ready && (!error || saved.bookmarks.length > 0);
   const savedUnavailable = scope === "saved" && !savedKnown;
   const filtersActive = Boolean(draft.trim()) || kind !== "all" || scope !== "all";
@@ -496,7 +505,7 @@ export function LibraryPage({
                         rest of the rail loads as it comes near (not
                         preloaded with the page). */}
                     <img
-                      src={src}
+                      {...recordImage(src, "cast")}
                       alt=""
                       loading={index < 2 ? undefined : "lazy"}
                       decoding="async"
@@ -694,13 +703,19 @@ export function LibraryPage({
               aria-busy={savedUnavailable && !ready}
             >
               <p ref={resultsRef} tabIndex={-1} role="status" aria-live="polite" aria-atomic="true">
-                {savedUnavailable
-                  ? !ready
-                    ? "しおりを確認しています…"
-                    : "しおりを確認できません"
-                  : `${visible.length}件の資料`}
+                {savedUnavailable ? (
+                  !ready ? (
+                    "しおりを確認しています…"
+                  ) : (
+                    "しおりを確認できません"
+                  )
+                ) : (
+                  <>
+                    <strong>{visible.length}</strong>件の資料
+                  </>
+                )}
               </p>
-              {draft.trim() ? (
+              {draft.trim() && visible.length ? (
                 <Link
                   to="/search"
                   search={{ q: draft.trim() }}
@@ -754,15 +769,48 @@ export function LibraryPage({
               )
             ) : (
               <div className="library-empty">
+                <p className="library-empty-code" aria-hidden="true">
+                  NO MATCH
+                </p>
                 <h3>条件に合う資料が見つかりません</h3>
                 <p>
                   {scope === "saved" && !saved.bookmarks.length
                     ? "「すべての資料」に切り替え、資料カードや人物資料のメニューからしおりを保存してください。"
                     : "短い名前や別の表記で検索するか、資料の種類・範囲を戻してください。"}
                 </p>
-                <button type="button" onClick={clearFilters}>
-                  検索条件をクリア
-                </button>
+                {otherKinds.length ? (
+                  <div
+                    className="library-empty-kinds"
+                    role="group"
+                    aria-label="ほかの種類にある資料"
+                  >
+                    {otherKinds.map(([id, count]) => (
+                      <button key={id} type="button" onClick={() => changeKind(id)}>
+                        {LIBRARY_KINDS[id]} <span>{count}</span>
+                      </button>
+                    ))}
+                  </div>
+                ) : null}
+                <div className="library-empty-actions">
+                  {scope === "saved" && allCount ? (
+                    <button type="button" onClick={() => changeScope("all")}>
+                      すべての資料から探す <span>{allCount}</span>
+                    </button>
+                  ) : null}
+                  <button type="button" onClick={clearFilters}>
+                    検索条件をクリア
+                  </button>
+                  {draft.trim() ? (
+                    <Link
+                      to="/search"
+                      search={{ q: draft.trim() }}
+                      className="library-fulltext-inline"
+                      onClick={quietFlush}
+                    >
+                      「{draft.trim()}」を本文から検索 <span aria-hidden="true">↗</span>
+                    </Link>
+                  ) : null}
+                </div>
               </div>
             )}
           </section>

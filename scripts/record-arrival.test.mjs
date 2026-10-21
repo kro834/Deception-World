@@ -148,12 +148,14 @@ test("search/library arrival waits for the route cover and focuses without scrol
   assert.equal(h.focused(), 1);
   assert.equal(h.dataset.routeFocus, "true");
   assert.equal(h.dataset.skipMark, "true");
+  // Owner (2026-10-21): the landing ring (data-record-landing, styles-record-landing.css) holds 6s beside the 2.4s cue.
+  assert.equal(h.dataset.recordLanding, "live");
   assert.equal(h.active(), false);
   assert.equal(h.frames.size, 0);
   assert.equal(h.listeners.size, 0);
   assert.deepEqual(
     [...h.timers.values()].map((timer) => timer.delay),
-    [2400],
+    [2400, 6000],
   );
   h.blur();
   assert.equal(h.timers.size, 0);
@@ -169,6 +171,11 @@ test("arrival cue expires while keyboard destination remains until blur", () => 
   h.expire(2400);
   assert.equal(h.dataset.skipMark, undefined);
   assert.equal(h.dataset.routeFocus, "true");
+  // Owner (2026-10-21): the landing ring outlasts the brief cue, then goes on its own.
+  assert.equal(h.dataset.recordLanding, "live");
+  h.expire(6000);
+  assert.equal(h.dataset.recordLanding, undefined);
+  assert.equal(h.dataset.routeFocus, "true");
   h.blur();
   assert.equal(h.dataset.routeFocus, undefined);
 });
@@ -182,8 +189,11 @@ test("interactive targets keep their existing tabindex, and reduced/economy mode
     h.flush();
     assert.equal(h.focused(), 1);
     assert.equal(h.dataset.skipMark, undefined);
+    // Owner (2026-10-21): reduced motion and economy keep a still landing ring (no lock-on animation).
+    assert.equal(h.dataset.recordLanding, "still");
     assert.equal(h.dataset.routeFocus, undefined);
     h.blur();
+    assert.equal(h.dataset.recordLanding, undefined);
     assert.equal(h.attributes.has("tabindex"), true);
   }
 });

@@ -1,45 +1,80 @@
+/* The way back to the index a record was opened from (record-return-
+   navigation.tsx): a small fixed plate at the bottom left in the STAGE
+   language (ice edge, a pink lamp, HUD-sized words), kept clear of the
+   Zeus control on the right. 2026-10-21: restyled, same layout and targets. */
 .record-return-navigation {
+  --rr-ice-rgb: 122 232 255;
+  --rr-pink-rgb: 255 79 195;
   position: fixed;
   left: max(12px, env(safe-area-inset-left));
   bottom: max(12px, env(safe-area-inset-bottom));
   z-index: 70;
   display: flex;
   max-width: min(
-    208px,
+    232px,
     calc(100vw - 100px - env(safe-area-inset-left) - env(safe-area-inset-right))
   );
-  border: 1px solid #9faeb8;
+  border: 1px solid rgb(var(--rr-ice-rgb) / 42%);
   border-radius: 4px;
-  background: #101a23;
-  box-shadow: 0 4px 18px #0006;
-  color: #f4eee2;
-  font-family: "Noto Sans JP", sans-serif;
+  background:
+    linear-gradient(90deg, rgb(var(--rr-ice-rgb) / 10%), transparent 70%),
+    linear-gradient(180deg, #0c1826, #060c15);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 12%),
+    0 0 0 1px rgb(var(--rr-pink-rgb) / 18%),
+    0 12px 30px rgb(0 0 0 / 70%);
+  color: #f2f7fb;
+  font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Hiragino Sans", sans-serif;
   font-size: 12px;
   line-height: 1.5;
+  letter-spacing: 0.04em;
 }
 .record-return-navigation a {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   min-height: 44px;
   min-width: 0;
-  padding: 6px 10px;
+  padding: 6px 12px;
   color: inherit;
   text-decoration: none;
   box-sizing: border-box;
+}
+.record-return-navigation a > span {
+  color: #7ae8ff;
+  font-weight: 600;
+}
+.record-return-navigation a::before {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  content: "";
+  border-radius: 50%;
+  background: rgb(var(--rr-pink-rgb));
+  box-shadow: 0 0 8px rgb(var(--rr-pink-rgb) / 70%);
 }
 .record-return-navigation button {
   flex: 0 0 44px;
   min-height: 44px;
   border: 0;
-  border-left: 1px solid #9faeb850;
+  border-left: 1px solid rgb(var(--rr-ice-rgb) / 24%);
   background: transparent;
-  color: inherit;
+  color: #bccbd8;
   font: inherit;
+  font-size: 16px;
   cursor: pointer;
 }
+@media (hover: hover) and (pointer: fine) {
+  .record-return-navigation a:hover {
+    color: #fff;
+  }
+  .record-return-navigation button:hover {
+    color: #fff;
+    background: rgb(var(--rr-ice-rgb) / 10%);
+  }
+}
 .record-return-navigation :focus-visible {
-  outline: 2px solid #ecc991;
+  outline: 2px solid #fff0b5;
   outline-offset: 3px;
 }
 html[data-loading] .record-return-navigation,
@@ -54,6 +89,10 @@ body:has(dialog[open], .side-panel[data-open="true"]) .record-return-navigation 
     color: LinkText;
     background: Canvas;
     border-color: ButtonText;
+    box-shadow: none;
+  }
+  .record-return-navigation a::before {
+    display: none;
   }
   .record-return-navigation button {
     border-color: ButtonText;

@@ -1,6 +1,7 @@
 import { getInquiryGuide, INQUIRY_GUIDES } from "@/lib/inquiry-guides";
 import { Link } from "@tanstack/react-router";
 import { pathArt, titleRunStyle } from "@/lib/record-art";
+import { recordImage } from "@/lib/record-images";
 import { RecordArtFrame } from "./record-art";
 
 export function LibraryInquiry({
@@ -34,7 +35,7 @@ export function LibraryInquiry({
                 return art.src ? (
                   <img
                     key={stop.id}
-                    src={art.src}
+                    {...recordImage(art.src, "strip")}
                     alt=""
                     loading="lazy"
                     decoding="async"
