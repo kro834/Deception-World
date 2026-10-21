@@ -32,6 +32,14 @@ export const RexonanceFormComparison = memo(function RexonanceFormComparison({
       <summary>
         <span>FORM COMPARISON</span>
         <strong>三つの形態を並べて比較</strong>
+        {/* LAYOUT (2026-10-21): the drawer's bar lists what it holds. */}
+        <span className="rxe-comparison-codes" aria-hidden="true">
+          {forms.map((form) => (
+            <b key={form.key} style={{ ["--rxe-code-accent" as string]: form.accent }}>
+              {form.code}
+            </b>
+          ))}
+        </span>
         <i aria-hidden="true">＋</i>
       </summary>
       {open ? (
