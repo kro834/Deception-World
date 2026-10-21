@@ -2962,9 +2962,10 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       vy = fieldView[2];
     }
     if (nanites) {
-      const shake = nanites.frame(progress, dq, calm, vs, backRects && !calm);
-      vx += shake.shakeX * vs;
-      vy += shake.shakeY * vs;
+      // The swarm never moves the view: the whole figure stands at one place
+      // in the pinned frame for every progress (owner, 2026-10-21:
+      // 「スクロールに伴って全身が上下に移動する不具合を修正して。」).
+      nanites.frame(progress, dq, calm, vs, backRects && !calm);
       nanites.view(vs, vx, vy);
     }
     context.setTransform(vs, 0, 0, vs, vx, vy);
