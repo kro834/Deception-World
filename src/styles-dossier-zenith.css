@@ -12,6 +12,7 @@
    3. The record viewer (the form dialog) and the nightmare record: the
       calls as the same numbered sequence, the spec sheet as the same ruled
       plate, so card and record read as one system.
+   4. The next file's numeral on the end card.
 
    Every rule is scoped to html[data-family="dossier"] and the doubled
    page class, so it sits above the older sheets without !important. It
@@ -218,6 +219,58 @@ html[data-family="dossier"]
   }
 }
 
+/* The last cell closes its row (an eleven-figure sheet in three columns
+   leaves no empty slot): it spans what is left. */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup-record
+  .form-pickup-spec
+  > div:last-child:nth-child(3n + 1) {
+  grid-column: 1 / -1;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup-record
+  .form-pickup-spec
+  > div:last-child:nth-child(3n + 2) {
+  grid-column: span 2;
+}
+
+@media (min-width: 1500px) {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    .form-pickup-record
+    .form-pickup-spec:has(> div:nth-child(8))
+    > div:last-child:nth-child(n) {
+    grid-column: auto;
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    .form-pickup-record
+    .form-pickup-spec:has(> div:nth-child(8))
+    > div:last-child:nth-child(4n + 1) {
+    grid-column: 1 / -1;
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    .form-pickup-record
+    .form-pickup-spec:has(> div:nth-child(8))
+    > div:last-child:nth-child(4n + 2) {
+    grid-column: span 3;
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    .form-pickup-record
+    .form-pickup-spec:has(> div:nth-child(8))
+    > div:last-child:nth-child(4n + 3) {
+    grid-column: span 2;
+  }
+}
+
 /* Narrow phones: two cells a row, so 205.6t／測定不能 keeps its figure. */
 @media (max-width: 420px) {
   html[data-family="dossier"]
@@ -225,6 +278,22 @@ html[data-family="dossier"]
     .form-pickup-record
     .form-pickup-spec {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    .form-pickup-record
+    .form-pickup-spec
+    > div:last-child:nth-child(n) {
+    grid-column: auto;
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    .form-pickup-record
+    .form-pickup-spec
+    > div:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
   }
 }
 
@@ -301,6 +370,21 @@ html[data-family="dossier"]
   }
 }
 
+/* The narrow split columns (landscape tablets, 1024-1194px): a third of
+   the column can be narrower than CALCULATION set in Michroma, so the
+   labels take the figures' Oxanium there and keep every word whole. */
+@media (min-width: 900px) and (max-width: 1199px) and (orientation: landscape) {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    .form-pickup-record
+    .form-pickup-spec
+    dt {
+    font-family: var(--sd-mono);
+    font-weight: 500;
+    letter-spacing: 0.1em;
+  }
+}
+
 /* ----------------------------------------------------------------
    2. The end of the file: the roster rail
    The index (一覧へ戻る) and the rail take the file's last row, under the
@@ -364,15 +448,13 @@ html[data-family="dossier"]
   > .manager-pagination-index
   > .dossier-roster {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(156px, 1fr));
-  gap: 1px;
+  grid-template-columns: repeat(auto-fill, minmax(172px, 1fr));
+  gap: 6px;
   margin: 0 var(--sd-pad) clamp(24px, 6vw, 40px);
   padding: 0;
   list-style: none;
-  border: 1px solid var(--sd-line);
-  border-radius: 3px;
-  background: var(--sd-line);
-  overflow: clip;
+  border: 0;
+  background: none;
 }
 
 html[data-family="dossier"]
@@ -384,7 +466,29 @@ html[data-family="dossier"]
   min-width: 0;
   margin: 0;
   padding: 0;
+  border: 1px solid var(--sd-line);
+  border-radius: 3px;
   background: var(--sd-plate);
+  overflow: clip;
+}
+
+/* The file at hand: its tile edged in the file's light. */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .manager-pagination
+  .dossier-roster
+  > li.is-current {
+  border-color: color-mix(in srgb, var(--sd-accent) 46%, transparent);
+}
+
+/* 欠番: a dashed, empty slot. */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .manager-pagination
+  .dossier-roster
+  > li.is-void {
+  border-style: dashed;
+  background: none;
 }
 
 html[data-family="dossier"]
@@ -655,7 +759,7 @@ html[data-family="dossier"]
   .form-pickup-heading
   .rider-call
   > b::before {
-  content: counter(zenith-call, decimal-leading-zero);
+  content: counter(zenith-call, decimal-leading-zero) / "";
   flex: 0 0 auto;
   color: var(--pc-lock);
   font: 500 12px/1 var(--pc-hud);
@@ -728,12 +832,278 @@ html[data-family="dossier"]
   letter-spacing: 0.08em;
 }
 
-/* Wide records: the sheet's figures in four cells a row when it is long. */
-@media (min-width: 1100px) {
+/* Wide records: the sheet's figures in four cells a row when it is long
+   (from 1280px, where CALCULATION keeps its word in a cell). */
+@media (min-width: 1280px) {
   html[data-family="dossier"]
     main.manager-page.manager-page.manager-page
     .form-pickup-dialog.form-pickup-dialog:not(.is-rexonance-dialog, .fst-pickup-dialog)
     .form-pickup-stats:has(> div:nth-child(8)) {
     grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* The record's last plate closes its row too: two plates a row up to
+   1023px (pickup-cinema), three above, four on a wide record (1280px+)
+   with a long sheet. The nightmare record pairs its plates. */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup-dialog.form-pickup-dialog:not(.is-rexonance-dialog, .fst-pickup-dialog)
+  .form-pickup-stats
+  > div:last-child:nth-child(odd),
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .rider-nightmare-dialog.rider-nightmare-dialog
+  .rider-nightmare-dialog-record
+  > dl
+  > div:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}
+
+@media (min-width: 1024px) {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    .form-pickup-dialog.form-pickup-dialog:not(.is-rexonance-dialog, .fst-pickup-dialog)
+    .form-pickup-stats
+    > div:last-child:nth-child(n) {
+    grid-column: auto;
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    .form-pickup-dialog.form-pickup-dialog:not(.is-rexonance-dialog, .fst-pickup-dialog)
+    .form-pickup-stats
+    > div:last-child:nth-child(3n + 1) {
+    grid-column: 1 / -1;
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    .form-pickup-dialog.form-pickup-dialog:not(.is-rexonance-dialog, .fst-pickup-dialog)
+    .form-pickup-stats
+    > div:last-child:nth-child(3n + 2) {
+    grid-column: span 2;
+  }
+}
+
+@media (min-width: 1280px) {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    .form-pickup-dialog.form-pickup-dialog:not(.is-rexonance-dialog, .fst-pickup-dialog)
+    .form-pickup-stats:has(> div:nth-child(8))
+    > div:last-child:nth-child(n) {
+    grid-column: auto;
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    .form-pickup-dialog.form-pickup-dialog:not(.is-rexonance-dialog, .fst-pickup-dialog)
+    .form-pickup-stats:has(> div:nth-child(8))
+    > div:last-child:nth-child(4n + 1) {
+    grid-column: 1 / -1;
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    .form-pickup-dialog.form-pickup-dialog:not(.is-rexonance-dialog, .fst-pickup-dialog)
+    .form-pickup-stats:has(> div:nth-child(8))
+    > div:last-child:nth-child(4n + 2) {
+    grid-column: span 3;
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    .form-pickup-dialog.form-pickup-dialog:not(.is-rexonance-dialog, .fst-pickup-dialog)
+    .form-pickup-stats:has(> div:nth-child(8))
+    > div:last-child:nth-child(4n + 3) {
+    grid-column: span 2;
+  }
+}
+
+/* ----------------------------------------------------------------
+   4. The next file's numeral
+   The end card names the next person; its numeral (03, III) stands
+   large in outline on the card's open side, so the card reads as the
+   next file's cover rather than a row with an empty field beside it.
+   ---------------------------------------------------------------- */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .manager-pagination
+  > a
+  > .dossier-nav-numeral {
+  display: none;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .manager-pagination
+  > a:last-child:not(:first-child)
+  > .dossier-nav-numeral {
+  position: absolute;
+  z-index: 1;
+  top: clamp(18px, 5vw, 28px);
+  right: var(--sd-pad);
+  display: block;
+  margin: 0;
+  color: transparent;
+  font: 400 clamp(64px, 22vw, 120px) / 0.86 var(--sd-hud);
+  font-style: normal;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+  -webkit-text-stroke: 1px color-mix(in srgb, var(--sd-accent) 78%, transparent);
+  opacity: 0.72;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Under the numeral, a short rule in the file's light. */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .manager-pagination
+  > a:last-child:not(:first-child)
+  > .dossier-nav-numeral::after {
+  content: "";
+  display: block;
+  width: 36%;
+  height: 2px;
+  margin: 14px 0 0 auto;
+  background: linear-gradient(270deg, var(--sd-accent), transparent);
+  opacity: 0.8;
+}
+
+/* Phones: the person fills the card, so the numeral would sit on the
+   art; the card's own NEXT / RIDER 03 line carries the number there. */
+@media (max-width: 560px) {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    > .manager-pagination
+    > a:last-child:not(:first-child)
+    > .dossier-nav-numeral {
+    display: none;
+  }
+}
+
+/* Wide phones and portrait tablets: the person stands on the right; the
+   numeral takes the ink on the left, above the name. */
+@media (min-width: 561px) and (max-width: 1099px) {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    > .manager-pagination
+    > a:last-child:not(:first-child)
+    > .dossier-nav-numeral {
+    top: 40px;
+    right: auto;
+    left: var(--sd-pad);
+    font-size: clamp(96px, 15vw, 152px);
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    > .manager-pagination
+    > a:last-child:not(:first-child)
+    > .dossier-nav-numeral::after {
+    margin: 16px auto 0 0;
+    background: linear-gradient(90deg, var(--sd-accent), transparent);
+  }
+}
+
+/* The split stage: the person on the stage side, the name beside; the
+   numeral holds the open field above it, at the reading column's end. */
+@supports (grid-template-rows: subgrid) {
+  @media (min-width: 1100px) and (min-height: 540px),
+    (min-width: 900px) and (min-height: 600px) and (orientation: landscape) {
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      > .manager-pagination
+      > a:last-child:not(:first-child)
+      > .dossier-nav-numeral {
+      top: clamp(40px, 7vh, 72px);
+      right: auto;
+      left: calc(var(--sd-stage-w) + var(--sd-pad));
+      font-size: clamp(120px, 12vw, 216px);
+    }
+
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      > .manager-pagination
+      > a:last-child:not(:first-child)
+      > .dossier-nav-numeral::after {
+      width: min(36%, 120px);
+      margin: 20px auto 0 0;
+      background: linear-gradient(90deg, var(--sd-accent), transparent);
+    }
+  }
+}
+
+/* Pointer hover and keyboard focus: the numeral fills with a little light
+   and the arrow leans toward the file. One-shot transitions, full motion
+   only. */
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    > .manager-pagination
+    > a:last-child:not(:first-child):hover
+    > .dossier-nav-numeral {
+    opacity: 0.95;
+  }
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .manager-pagination
+  > a:last-child:not(:first-child):focus-visible
+  > .dossier-nav-numeral {
+  opacity: 0.95;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"])[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    > .manager-pagination
+    > a:last-child:not(:first-child)
+    > :is(.dossier-nav-numeral, span:last-child) {
+    transition:
+      opacity 240ms ease,
+      translate 320ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  html:not([data-world-effects="economy"])[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    > .manager-pagination
+    > a:last-child:not(:first-child)
+    > .dossier-nav-portrait
+    img {
+    transition:
+      opacity 320ms ease,
+      scale 900ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    html:not([data-world-effects="economy"])[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      > .manager-pagination
+      > a:last-child:not(:first-child):hover
+      > span:last-child {
+      translate: 4px 0;
+    }
+
+    html:not([data-world-effects="economy"])[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      > .manager-pagination
+      > a:last-child:not(:first-child):hover
+      > .dossier-nav-portrait
+      img {
+      scale: 1.025;
+    }
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    > .manager-pagination
+    > a
+    > .dossier-nav-numeral {
+    display: none;
   }
 }

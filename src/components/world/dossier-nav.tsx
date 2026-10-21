@@ -220,10 +220,14 @@ function neighbors(items: DossierLink[], currentHref: string) {
   return { idx, prev, next };
 }
 
+/** A file's numeral: its kicker's last word (01, II), else its place. */
+function fileNumeral(item: DossierLink, index: number) {
+  return item.kicker?.split(" ").at(-1) ?? String(index + 1).padStart(2, "0");
+}
+
 /** The roster rail (2026-10-21): every file of the list at the end of
  * each file, the current one marked, 欠番 inert. Inside .manager-pagination,
- * so a press keeps the file flip (load-gate.tsx). The numeral is the
- * kicker's last word (01, II). */
+ * so a press keeps the file flip (load-gate.tsx). */
 function DossierRoster({
   items,
   idx,
@@ -236,7 +240,7 @@ function DossierRoster({
   return (
     <ol className="dossier-roster" aria-label="この一覧の資料">
       {items.map((item, index) => {
-        const numeral = item.kicker?.split(" ").at(-1) ?? String(index + 1).padStart(2, "0");
+        const numeral = fileNumeral(item, index);
         const body = (
           <>
             <i aria-hidden="true">{numeral}</i>
@@ -340,6 +344,11 @@ export function DossierNav({
       {next?.href ? (
         <GuardedLink to={next.href} search={originSearch} assets={next.assets} aria-label={`${next.name}の資料へ`}>
           <NavPortrait item={next} />
+          {/* The next file's numeral, large and drawn in outline on the
+              card's open side (decorative; the link is named by its label). */}
+          <i className="dossier-nav-numeral" aria-hidden="true">
+            {fileNumeral(next, items.indexOf(next))}
+          </i>
           <small>NEXT / {next.kicker}</small>
           <b>
             <NameText value={next.name} />
