@@ -20,7 +20,12 @@
 // raw gunmetal channel over the trims' soft mask), ships in gold.webp at
 // the same atlas places as the art, and its gold cells (4 px squares the
 // trims touch) in rexonance-suit-gold.ts, for the nanite engine to form.
-import { mkdirSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+// 2026-10-21: the bare undersuit is no longer painted here; it is a lit
+// relief (scripts/blender/rexonance_undersuit.py, packed by
+// scripts/build-rexonance-undersuit.mjs) over this build's body polygon,
+// whose delivery-size raster this build writes to design/rexonance-suit/
+// as the registration contract. This build keeps that file and registers it.
+import { mkdirSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -43,6 +48,12 @@ const OUT_DIR = fileURLToPath(
   new URL(`../public/rexonance-suit-${ASSET_VERSION}/`, import.meta.url),
 );
 const PUBLIC_PATH = `/rexonance-suit-${ASSET_VERSION}`;
+// The bodysuit, rendered and packed by its own scripts (see the header);
+// versioned on its own so a cached mannequin never meets the new module.
+const UNDERSUIT_FILE = "undersuit-20261021.webp";
+const MASK_FILE = fileURLToPath(
+  new URL("../design/rexonance-suit/rexonance-undersuit-mask-20261016.png", import.meta.url),
+);
 const MODULE = fileURLToPath(new URL("../src/lib/rexonance-suit.ts", import.meta.url));
 const GOLD_MODULE = fileURLToPath(new URL("../src/lib/rexonance-suit-gold.ts", import.meta.url));
 const debugArg = process.argv.find((arg) => arg.startsWith("--debug="));
@@ -141,52 +152,6 @@ const BODY_LEFT = [
   [527, 898],
 ];
 const BODY = [...BODY_LEFT, ...mirror(BODY_LEFT.slice(1, -1)).reverse()];
-// Thin seams on the bodysuit (left; mirrored), and the centre line.
-const SEAMS_LEFT = [
-  [
-    [527, 470],
-    [480, 500],
-    [440, 560],
-    [420, 640],
-  ],
-  [
-    [420, 790],
-    [470, 802],
-    [527, 806],
-  ],
-  [
-    [330, 480],
-    [300, 560],
-    [270, 660],
-    [225, 760],
-    [205, 860],
-    [200, 940],
-  ],
-  [
-    [420, 880],
-    [380, 1000],
-    [350, 1150],
-    [320, 1300],
-    [296, 1450],
-    [290, 1600],
-    [270, 1750],
-  ],
-  [
-    [500, 960],
-    [470, 1100],
-    [430, 1250],
-    [395, 1400],
-    [380, 1560],
-  ],
-];
-const SEAMS = [
-  [
-    [527, 420],
-    [527, 896],
-  ],
-  ...SEAMS_LEFT,
-  ...SEAMS_LEFT.map(mirror),
-];
 
 // The face's lights: the V of cyan and pink under the crest.
 const FACE_GLOW = [
@@ -1432,7 +1397,7 @@ for (const [index, region] of PIECES.entries()) {
 
 // --- Outputs ------------------------------------------------------------------
 mkdirSync(OUT_DIR, { recursive: true });
-for (const file of readdirSync(OUT_DIR)) rmSync(join(OUT_DIR, file));
+for (const file of readdirSync(OUT_DIR)) if (file !== UNDERSUIT_FILE) rmSync(join(OUT_DIR, file));
 const files = [];
 async function writeWebp(name, raw, width, height, options = {}) {
   const path = `${OUT_DIR}${name}`;
@@ -1447,187 +1412,20 @@ async function writeWebp(name, raw, width, height, options = {}) {
 const figureRaw = await toDelivery(rgba(alpha));
 const FIGURE = await writeWebp("figure.webp", figureRaw, FIG_W, FIG_H, { quality: 68 });
 
-// The bodysuit: the body's own form, desaturated and sunk into a dark
-// suit, a faint nanite hex mesh, thin cyan seams and a cool edge light.
-// Owner, 2026-10-18: sharper — a crisper outline, form and seams.
+// The bodysuit (owner, 2026-10-21: the bare undersuit, its face above all,
+// looked like a cheap AI cut-out) is no longer painted here. It is a lit
+// relief rendered by scripts/blender/rexonance_undersuit.py and packed by
+// scripts/build-rexonance-undersuit.mjs into UNDERSUIT_FILE, which this
+// build keeps in place and registers. Both clip to this build's body
+// polygon, written at delivery size as the registration contract: the
+// plates, the driver, the flame mask and the nanite targets seat on it.
 const bodyMask = await rasterise([BODY], 0, 0.35);
-const formLight = await blurField(
-  Float32Array.from({ length: N }, (_, i) => {
-    const l = (0.2126 * rgb[i * 3] + 0.7152 * rgb[i * 3 + 1] + 0.0722 * rgb[i * 3 + 2]) / 255;
-    return l * bodyMask[i];
-  }),
-  5,
-);
-const inner = await blurField(bodyMask, 5);
-const seamSvg = (width, colour) =>
-  `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}"><rect width="${W}" height="${H}" fill="#000"/>${SEAMS.map(
-    (line) =>
-      `<polyline points="${line.map(([x, y]) => `${x},${y}`).join(" ")}" fill="none" stroke="${colour}" stroke-width="${width}" stroke-linecap="round" stroke-linejoin="round"/>`,
-  ).join("")}</svg>`;
-const seamField = async (width, blur) => {
-  let image = sharp(Buffer.from(seamSvg(width, "#fff"))).greyscale();
-  if (blur) image = image.blur(blur);
-  const { data } = await image.raw().toBuffer({ resolveWithObject: true });
-  const step = data.length / N;
-  return Float32Array.from({ length: N }, (_, i) => data[i * step] / 255);
-};
-const seamLine = await seamField(1.6, 0);
-const seamGlow = await seamField(5, 2.5);
-const suit = Buffer.alloc(N * 3);
-// The compound eyes' frame: the V's outline (a ring) and its inside.
-const eyeGlass = await rasterise([FACE_GLOW], 0, 0.6);
-const eyeRim = await (async () => {
-  const outer = await rasterise([FACE_GLOW], 3.2, 0.5);
-  return Float32Array.from(outer, (v, i) => Math.max(0, Math.min(1, v - eyeGlass[i] * 0.85)));
-})();
-// Owner, 2026-10-11: the bare body before the armour has its own detail —
-// no ornament, but a muscle-fibre grain running the way each muscle runs
-// (pecs fanning to the armpit, deltoids from the shoulder, the arms along
-// their length, the abdomen's columns and bands, the thighs' long diagonal,
-// the calves), with a soft volume; its face is only its lights.
-const CX = MID / 2;
-const fibreNoise = (x, y) => {
-  const xi = Math.floor(x);
-  const yi = Math.floor(y);
-  const fx = x - xi;
-  const fy = y - yi;
-  const h = (a, b) => hash(a * 7 + 13, b * 11 + 5);
-  const sx = fx * fx * (3 - 2 * fx);
-  const sy = fy * fy * (3 - 2 * fy);
-  const top = h(xi, yi) + (h(xi + 1, yi) - h(xi, yi)) * sx;
-  const bottom = h(xi, yi + 1) + (h(xi + 1, yi + 1) - h(xi, yi + 1)) * sx;
-  return top + (bottom - top) * sy;
-};
-// The fibre's cross coordinate (px) and its spacing at a point of the body.
-const fibre = (x, y) => {
-  const ax = Math.abs(x - CX);
-  if (y < 380) return null; // the head: smooth
-  if (y < 440) return [ax, 6.5]; // the neck: upright
-  if (y < 640 && ax < 190) {
-    // The pecs fan from the sternum to the armpit.
-    return [Math.atan2(y - 500, 205 - ax) * 150, 7];
-  }
-  if (y < 660) {
-    // The deltoids fall from the top of the shoulder.
-    return [Math.atan2(y - 430, ax - 225) * 120, 6.5];
-  }
-  if (ax > 175 && y < 1110) {
-    // The arms, along their length (shoulder to wrist leans outward).
-    return [(ax * 500 - y * 160) / 525, 6];
-  }
-  if (y < 885) {
-    // The abdomen: two columns either side of the midline; obliques beyond.
-    if (ax < 105) return [ax, 7.5];
-    return [ax * 0.72 + y * 0.69, 7];
-  }
-  // The legs: the thigh's long diagonal to the knee, then the calf upright.
-  if (y < 1300) return [ax + (y - 885) * 0.22, 6.5];
-  return [ax, 6];
-};
-const bands = [700, 762, 824]; // the abdomen's tendinous bands
-for (let i = 0; i < N; i += 1) {
-  const x = i % W;
-  const y = (i - x) / W;
-  const m = bodyMask[i];
-  if (!m) continue;
-  const form = formLight[i];
-  // Lit from the top left, cool on the left and warm-violet on the right.
-  const side = x < CX ? 0 : 1;
-  const edge = Math.max(0, m - inner[i]) * 2.6;
-  // Volume: brighter on the muscle's crown, darker toward the body's edge.
-  const volume = 0.72 + 0.4 * inner[i];
-  let grain = 1;
-  const f = fibre(x, y);
-  if (f) {
-    const [p, spacing] = f;
-    const warp = fibreNoise(x / 38, y / 38) * 2.2;
-    const wave = 0.5 + 0.5 * Math.cos((2 * Math.PI * p) / spacing + warp);
-    // Raised fibres with fine dark grooves between them.
-    grain = 0.6 + 0.58 * wave ** 2.2;
-    const ax = Math.abs(x - CX);
-    if (y > 650 && y < 885 && ax < 105) {
-      for (const band of bands) {
-        const d = Math.abs(y - band - (ax * ax) / 900);
-        if (d < 4) grain *= 0.55 + 0.45 * (d / 4);
-      }
-      if (ax < 3) grain *= 0.62; // the linea alba
-    }
-  }
-  const seam = seamLine[i] * 0.34 + seamGlow[i] * 0.06;
-  const base = [9 + form * 62, 13 + form * 74, 22 + form * 96];
-  const rim = side ? [255, 150, 225] : CYAN;
-  for (let c = 0; c < 3; c += 1) {
-    const value = base[c] * grain * volume + edge * rim[c] * 0.36 + seam * CYAN[c];
-    suit[i * 3 + c] = Math.round(Math.min(255, value));
-  }
-  // The face (owner, 2026-10-11): only the compound eyes' frame — neither
-  // formed nor lit: a thin steel rim round the V, its inside dark glass.
-  const frame = eyeRim[i];
-  const glass = eyeGlass[i];
-  if (frame || glass) {
-    const steel = [88, 102, 120];
-    for (let c = 0; c < 3; c += 1) {
-      const dark = suit[i * 3 + c] * (1 - glass * 0.55);
-      suit[i * 3 + c] = Math.round(dark * (1 - frame) + steel[c] * frame);
-    }
-  }
-}
-// Owner, 2026-10-18: the bare face carries sharp machined detail — the
-// compound eyes' double rim, a pointed crest, angular brow chevrons, facets
-// from the visor's corners, raked vents, cheek blades and a chin grille —
-// baked into the undersuit so the scroll scene and the call show the same.
-const bareFaceSvg = (() => {
-  const xs = FACE_GLOW.map(([x]) => x);
-  const ys = FACE_GLOW.map(([, y]) => y);
-  const [x0, x1, y0, y1] = [Math.min(...xs), Math.max(...xs), Math.min(...ys), Math.max(...ys)];
-  const vx = (x0 + x1) / 2;
-  const hw = (x1 - x0) / 2;
-  const eh = y1 - y0;
-  const top = y0 - eh * 0.3;
-  const chin = y1 + eh * 0.08;
-  const k = CROP.width / FIG_W; // delivery px to source px
-  const pt = (x, y) => `${x.toFixed(1)},${y.toFixed(1)}`;
-  const poly = (scale, dy) =>
-    FACE_GLOW.map(([x, y]) => pt(vx + (x - vx) * scale, y0 + dy + (y - y0) * (scale === 1 ? 1 : 0.86))).join(" ");
-  const lines = [];
-  const seg = (...points) => lines.push(`M${points.map(([x, y]) => pt(x, y)).join(" L")}`);
-  seg([vx, top + eh * 0.02], [vx, y0 + eh * 0.04]);
-  seg([vx - hw * 0.16, top + eh * 0.12], [vx, top + eh * 0.01], [vx + hw * 0.16, top + eh * 0.12]);
-  for (const side of [-1, 1]) {
-    seg([vx + side, y0 - eh * 0.03], [vx + side * hw * 0.46, y0 - eh * 0.16], [vx + side * hw * 0.94, y0 + eh * 0.01]);
-    seg([vx + side, y0 - eh * 0.15], [vx + side * hw * 0.4, y0 - eh * 0.27], [vx + side * hw * 0.8, y0 - eh * 0.17]);
-    seg([vx + side * hw * 0.9, y0 + eh * 0.01], [vx + side * hw * 0.24, top + eh * 0.06]);
-    for (let n = 0; n < 3; n += 1) {
-      const ty = y0 + eh * (0.18 + n * 0.09);
-      seg([vx + side * hw * 0.99, ty], [vx + side * hw * 0.8, ty + eh * 0.07]);
-    }
-    seg([vx + side * hw * 0.97, y0 + eh * 0.5], [vx + side * hw * 0.62, y1 - eh * 0.02]);
-  }
-  const grille = [];
-  for (let n = 0; n < 3; n += 1) {
-    const gy = y1 - eh * (0.16 - n * 0.07);
-    const gw = hw * (0.22 - n * 0.05);
-    grille.push(`M${pt(vx - gw, gy)} L${pt(vx - gw * 0.25, gy)}`, `M${pt(vx + gw * 0.25, gy)} L${pt(vx + gw, gy)}`);
-  }
-  const cy = (top + chin) / 2;
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}"><defs><clipPath id="h"><ellipse cx="${vx}" cy="${cy}" rx="${hw * 0.98}" ry="${(chin - top) / 2}"/></clipPath></defs><g clip-path="url(#h)" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="${poly(1, 0)}" stroke="rgb(196,216,236)" stroke-opacity="0.85" stroke-width="${(1.1 * k).toFixed(2)}"/><polygon points="${poly(0.84, eh * 0.06)}" stroke="rgb(122,168,204)" stroke-opacity="0.5" stroke-width="${(0.7 * k).toFixed(2)}"/><path d="${lines.join(" ")}" stroke="rgb(176,202,228)" stroke-opacity="0.72" stroke-width="${(0.75 * k).toFixed(2)}"/><path d="${grille.join(" ")}" stroke="rgb(122,150,182)" stroke-opacity="0.6" stroke-width="${(0.9 * k).toFixed(2)}"/></g></svg>`;
-})();
-const undersuitRaw = await sharp(rgba(bodyMask, suit), { raw: { width: W, height: H, channels: 4 } })
-  .composite([{ input: Buffer.from(bareFaceSvg) }])
-  .raw()
-  .toBuffer();
-// The detail never leaves the body's own outline.
-for (let i = 0; i < N; i += 1)
-  undersuitRaw[i * 4 + 3] = Math.min(undersuitRaw[i * 4 + 3], Math.round(bodyMask[i] * 255));
-const UNDERSUIT = await writeWebp(
-  "undersuit.webp",
-  await toDelivery(undersuitRaw),
-  FIG_W,
-  FIG_H,
-  {
-    quality: 80,
-  },
-);
+await sharp(await toDelivery(rgba(bodyMask)), { raw: { width: FIG_W, height: FIG_H, channels: 4 } })
+  .extractChannel(3)
+  .png({ compressionLevel: 9 })
+  .toFile(MASK_FILE);
+const UNDERSUIT = `${PUBLIC_PATH}/${UNDERSUIT_FILE}`;
+files.push({ name: UNDERSUIT_FILE, bytes: statSync(`${OUT_DIR}${UNDERSUIT_FILE}`).size });
 
 // The bodysuit between the plates (what no piece claims), as painted.
 const bodyBox = deliveryBox(bounds(body), 2);

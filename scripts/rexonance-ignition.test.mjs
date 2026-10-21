@@ -188,7 +188,7 @@ test("emission samples reuse the supplied buffer and invalid/periodic seeds agre
 
 test("every emitted nanite originates in the actual burning body rather than the halo or leg gap", async () => {
   const { data, info } = await sharp(
-    readFileSync(new URL("../public/rexonance-suit-20261016/undersuit.webp", import.meta.url)),
+    readFileSync(new URL("../public/rexonance-suit-20261016/undersuit-20261021.webp", import.meta.url)),
   )
     .ensureAlpha()
     .raw()
