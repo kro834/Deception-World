@@ -233,9 +233,8 @@
 }
 
 /* iPad Pro 12.9" portrait (1024 × 1366) and its kin: the larger print the
-   stage sheet asked for, and the title stage fills the screen like the
-   smaller iPads' (it ended 560px short of the fold, the story's ground
-   showing under it). */
+   stage sheet asked for (the hero keeps rx14's min-height: 0, no
+   artificial floor: the larger print fills it instead). */
 @media (min-width: 901px) and (max-width: 1100px) and (orientation: portrait) {
   html[data-family="world"]:root
     body
@@ -243,21 +242,6 @@
     > .hero
     > .poster-stage {
     --poster-width: min(40vw, 430px, calc((100svh - 300px) * 2 / 3));
-  }
-
-  html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > .hero {
-    align-content: center;
-    min-height: 100svh;
-    padding-top: calc(var(--film-topbar-height, 76px) + 24px);
-    padding-bottom: clamp(60px, 9vh, 132px);
-  }
-
-  html[data-family="world"]:root
-    body
-    main.site-shell.film-edition.mirage-edition
-    > .hero
-    > .poster-stage {
-    align-self: center;
   }
 }
 
