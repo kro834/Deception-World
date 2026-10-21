@@ -1,4 +1,5 @@
-/* 404 / LOST RECORD as a STAGE poster card (rx10, 2026-10-10).
+/* 404 / LOST RECORD as a STAGE poster card (rx10, 2026-10-10; composed as a
+   case file on the key visual, 2026-10-21).
 
    Linked by NotFoundComponent itself (src/lib/error-component.tsx) as a
    hoisted stylesheet, so no other route loads it. React may put it ahead of
@@ -7,18 +8,20 @@
    sheet arrives). A 404 can render under any page family, so the sheet
    keys on the page class rather than html[data-family].
 
-   The page keeps its words and their order. The record plate becomes a
+   The page keeps its words and their order. The record plate is a
    case-file card: an empty ID-photo slot (lattice, corner ticks, the DW
    sigil where the picture should be, the lost record's number outlined at
    its foot), a HUD header (status left, archive right), the heading, the
-   line, then the way back as the card's one filled ice plate and the
-   record index as a quiet second way. On phones the slot is a band above
-   the words.
+   line, and the three recovery files as the card's own foot. Behind it the
+   World's key visual stands on the right of a wide screen, under the
+   outlined number and the frame's corner marks; on a phone it is the sky
+   above the card. On phones the slot is a band above the words.
 
    Motion is one finite boot (the card locks on, the prism draws, the
-   heading is wiped in), under 1.2 s, with transform, opacity and clip-path
-   only, and only without reduced motion or economy rendering. Nothing
-   flashes: the card is dark and the control is already lit. */
+   heading is wiped in, the files rise), under 1.3 s, with transform,
+   opacity and clip-path only, and only without reduced motion or economy
+   rendering. Nothing flashes: the card is dark and the controls are
+   already lit. */
 
 .app-not-found.app-not-found {
   position: relative;
@@ -29,6 +32,8 @@
   --lr-ice-hi: #c6f5ff;
   --lr-violet: #ff5fc8;
   --lr-magenta: #ff5cc8;
+  --lr-pink: #ff4fc3;
+  --lr-blue: #4f7bff;
   --lr-gold: #f0cf86;
   --lr-signal: #ff5a7e;
   --lr-text-2: #bccbd8;
@@ -36,14 +41,24 @@
   --lr-hud: "Michroma", "Oxanium", "Noto Sans JP", sans-serif;
   --lr-pad-x: clamp(20px, 5vw, 44px);
   --lr-pad-y: clamp(22px, 5vw, 40px);
-  /* The card is the grid's middle columns and rows; the words sit inside. */
+  --lr-prism: linear-gradient(
+    90deg,
+    var(--lr-ice),
+    var(--lr-blue) 32%,
+    var(--lr-pink) 66%,
+    var(--lr-gold)
+  );
+  /* The card is the grid's middle columns and rows; the words sit inside,
+     and the recovery files take the row under the plate's padding (the
+     recovery sheet declares the same rows). */
   display: grid;
   grid-template-columns:
     minmax(16px, 1fr) [plate-start] var(--lr-pad-x) [slot-start copy-start] minmax(0, 560px)
     [slot-end copy-end] var(--lr-pad-x) [plate-end] minmax(16px, 1fr);
   grid-template-rows:
-    minmax(32px, 1fr) [plate-start] var(--lr-pad-y) [slot-start] auto [slot-end head-start] auto
-    auto [head-end] auto auto auto auto var(--lr-pad-y) [plate-end] minmax(32px, 1fr);
+    minmax(24px, 1fr) [plate-start] var(--lr-pad-y) [slot-start] auto [slot-end head-start] auto
+    auto [head-end] auto auto auto auto var(--lr-pad-y) [plate-end] auto [recovery-end]
+    minmax(24px, 1fr);
   place-content: stretch;
   gap: 0;
   min-height: 100svh;
@@ -61,31 +76,74 @@
     var(--lr-ink);
 }
 
-/* A restrained trace of the World's published key visual behind the
-   recovery card. The copy and controls remain on their opaque plate. */
+/* The World's key visual behind the recovery card: the sky above it on a
+   phone, falling to ink under the card. The copy and controls remain on
+   their opaque plate. */
 .app-not-found.app-not-found::before {
   content: "";
   position: fixed;
   inset: 0;
   z-index: -1;
   background:
-    linear-gradient(90deg, rgb(3 6 12 / 80%), rgb(3 6 12 / 72%)),
-    url("/deception-world-poster-delivery-720.webp") center 32% / cover no-repeat;
+    linear-gradient(
+      180deg,
+      rgb(3 6 12 / 42%),
+      rgb(3 6 12 / 58%) 34%,
+      rgb(3 6 12 / 88%) 62%,
+      var(--lr-ink) 84%
+    ),
+    url("/deception-world-poster-delivery-720.webp") center 16% / cover no-repeat;
   pointer-events: none;
 }
+
+/* The frame over the key visual: the lost record's number outlined in the
+   corner, a prism hairline along the top, ice marks on the top corners and
+   gold on the bottom (the opening's gate). Silent: the number is the
+   page's own, already read out by the header. */
+.app-not-found.app-not-found::after {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  display: grid;
+  align-content: start;
+  justify-content: end;
+  box-sizing: border-box;
+  padding: max(28px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) 0 0;
+  content: "404" / "";
+  color: transparent;
+  font:
+    700 clamp(72px, 24vw, 120px) / 0.9 "Oxanium",
+    sans-serif;
+  letter-spacing: -0.04em;
+  -webkit-text-stroke: 1px rgb(122 232 255 / 22%);
+  background:
+    var(--lr-prism) 0 0 / 100% 2px no-repeat,
+    linear-gradient(var(--lr-ice) 0 0) 14px 14px / 24px 2px no-repeat,
+    linear-gradient(var(--lr-ice) 0 0) 14px 14px / 2px 24px no-repeat,
+    linear-gradient(var(--lr-ice) 0 0) calc(100% - 14px) 14px / 24px 2px no-repeat,
+    linear-gradient(var(--lr-ice) 0 0) calc(100% - 14px) 14px / 2px 24px no-repeat,
+    linear-gradient(var(--lr-gold) 0 0) 14px calc(100% - 14px) / 24px 2px no-repeat,
+    linear-gradient(var(--lr-gold) 0 0) 14px calc(100% - 14px) / 2px 24px no-repeat,
+    linear-gradient(var(--lr-gold) 0 0) calc(100% - 14px) calc(100% - 14px) / 24px 2px no-repeat,
+    linear-gradient(var(--lr-gold) 0 0) calc(100% - 14px) calc(100% - 14px) / 2px 24px no-repeat;
+  pointer-events: none;
+}
+
 @media (forced-colors: active) {
-  .app-not-found.app-not-found::before {
+  .app-not-found.app-not-found::before,
+  .app-not-found.app-not-found::after {
     display: none;
   }
 }
 
 /* The card: deck ink, an ice rim, ice ticks over gold, the prism on top
-   (::before) and the outlined 404 (::after, phones). */
+   (::before) and the outlined 404 (::after, phones). It spans the recovery
+   row too: the three files are its foot. */
 .app-not-found.app-not-found > .app-not-found-plate {
   position: relative;
   z-index: 0;
   grid-column: plate-start / plate-end;
-  grid-row: plate-start / plate-end;
+  grid-row: plate-start / recovery-end;
   overflow: hidden;
   border: 1px solid rgb(122 232 255 / 22%);
   border-radius: 6px;
@@ -99,6 +157,13 @@
     linear-gradient(var(--lr-gold) 0 0) 100% 100% / 22px 2px no-repeat,
     linear-gradient(var(--lr-gold) 0 0) 100% 100% / 2px 22px no-repeat,
     linear-gradient(172deg, rgb(244 251 255 / 8%) 0, rgb(122 232 255 / 4%) 5%, transparent 22%),
+    linear-gradient(
+      112deg,
+      transparent 56%,
+      rgb(255 79 195 / 5%) 66%,
+      rgb(122 232 255 / 4%) 74%,
+      transparent 84%
+    ),
     var(--lr-deck);
   box-shadow:
     inset 0 1px 0 rgb(255 255 255 / 14%),
@@ -113,13 +178,7 @@
   left: 0;
   height: 2px;
   content: "";
-  background: linear-gradient(
-    90deg,
-    var(--lr-ice),
-    var(--lr-violet) 34%,
-    var(--lr-magenta) 66%,
-    var(--lr-gold)
-  );
+  background: var(--lr-prism);
   transform-origin: 0 50%;
 }
 
@@ -147,7 +206,8 @@
   margin: 0;
 }
 
-/* The ID-photo slot, empty: lattice, ticks, the DW sigil in its place. */
+/* The ID-photo slot, empty: lattice, ticks, a streamline of the key
+   visual's light crossing it, and the DW sigil in the picture's place. */
 .app-not-found.app-not-found > .app-not-found-sigil {
   grid-column: slot-start / slot-end;
   grid-row: slot-start / slot-end;
@@ -166,6 +226,14 @@
     linear-gradient(var(--lr-ice) 0 0) 0 0 / 1px 14px no-repeat,
     linear-gradient(var(--lr-gold) 0 0) 100% 100% / 14px 1px no-repeat,
     linear-gradient(var(--lr-gold) 0 0) 100% 100% / 1px 14px no-repeat,
+    linear-gradient(
+      106deg,
+      transparent 30%,
+      rgb(122 232 255 / 10%) 44%,
+      rgb(255 79 195 / 16%) 52%,
+      rgb(240 207 134 / 8%) 60%,
+      transparent 72%
+    ),
     radial-gradient(70% 90% at 30% 40%, rgb(122 232 255 / 12%), transparent 70%),
     repeating-linear-gradient(90deg, rgb(122 232 255 / 6%) 0 1px, transparent 1px 16px),
     repeating-linear-gradient(0deg, rgb(122 232 255 / 6%) 0 1px, transparent 1px 16px),
@@ -182,7 +250,7 @@
   width: 84px;
   height: 84px;
   color: #dff9ff;
-  background: linear-gradient(135deg, var(--lr-ice), var(--lr-violet) 55%, var(--lr-gold));
+  background: linear-gradient(135deg, var(--lr-ice), var(--lr-pink) 55%, var(--lr-gold));
   clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
   font:
     700 20px / 1 "Oxanium",
@@ -383,6 +451,82 @@
   outline-offset: 4px;
 }
 
+/* The recovery files: the card's foot. Three files on the deck, their art
+   under an ink fall, the HUD code above the name, a prism rule on top. The
+   element selector outranks the recovery sheet's own placement. */
+.app-not-found.app-not-found > nav.recovery-tiles {
+  grid-column: plate-start / plate-end;
+  grid-row: plate-end / recovery-end;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(8px, 2vw, 16px);
+  width: auto;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 16px var(--lr-pad-x) var(--lr-pad-y);
+  border-top: 1px solid rgb(122 232 255 / 16%);
+  background:
+    repeating-linear-gradient(90deg, rgb(122 232 255 / 38%) 0 1px, transparent 1px 24px) 0 0 /
+      100% 5px no-repeat,
+    linear-gradient(180deg, rgb(122 232 255 / 5%), transparent 60%);
+}
+
+.app-not-found.app-not-found > nav.recovery-tiles > a {
+  justify-self: stretch;
+  min-height: 112px;
+  margin: 0;
+  padding: 12px;
+  border: 1px solid rgb(122 232 255 / 26%);
+  border-radius: 3px;
+  background:
+    linear-gradient(var(--lr-ice) 0 0) 0 0 / 12px 1px no-repeat,
+    linear-gradient(var(--lr-ice) 0 0) 0 0 / 1px 12px no-repeat,
+    linear-gradient(var(--lr-gold) 0 0) 100% 100% / 12px 1px no-repeat,
+    linear-gradient(var(--lr-gold) 0 0) 100% 100% / 1px 12px no-repeat,
+    #060c15;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.app-not-found.app-not-found > nav.recovery-tiles > a > img {
+  opacity: 0.5;
+}
+
+.app-not-found.app-not-found > nav.recovery-tiles > a::before {
+  background: linear-gradient(180deg, rgb(3 6 12 / 10%), rgb(3 6 12 / 92%) 78%);
+}
+
+.app-not-found.app-not-found > nav.recovery-tiles > a > small {
+  font: 400 12px / 1.2 var(--lr-hud);
+  letter-spacing: 0.16em;
+  color: var(--lr-ice);
+}
+
+.app-not-found.app-not-found > nav.recovery-tiles > a > b {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: #f2f7fb;
+}
+
+.app-not-found.app-not-found > nav.recovery-tiles > a:hover {
+  border-color: rgb(122 232 255 / 62%);
+  background:
+    linear-gradient(var(--lr-ice) 0 0) 0 0 / 12px 1px no-repeat,
+    linear-gradient(var(--lr-ice) 0 0) 0 0 / 1px 12px no-repeat,
+    linear-gradient(var(--lr-gold) 0 0) 100% 100% / 12px 1px no-repeat,
+    linear-gradient(var(--lr-gold) 0 0) 100% 100% / 1px 12px no-repeat,
+    #091423;
+  box-shadow: 0 0 24px rgb(122 232 255 / 14%);
+  transform: translateY(-2px);
+}
+
+.app-not-found.app-not-found > nav.recovery-tiles > a:focus-visible {
+  outline: 2px solid #fff0b5;
+  outline-offset: 3px;
+}
+
 /* Narrow phones: WORLD ARCHIVEへ戻る holds one line. The Michroma label
    closes up to the allowed tracking, and under 375px the plate takes the
    record card's whole width (its brackets 6px inside the card's edge),
@@ -404,6 +548,26 @@
 
   .app-not-found.app-not-found > .app-not-found-sigil {
     padding-inline: 16px;
+  }
+}
+
+/* Phones: the outlined number sits small over the sky; the files close up. */
+@media (max-width: 559px) {
+  .app-not-found.app-not-found::after {
+    font-size: 64px;
+  }
+
+  .app-not-found.app-not-found > nav.recovery-tiles {
+    padding-inline: 14px;
+  }
+
+  .app-not-found.app-not-found > nav.recovery-tiles > a {
+    min-height: 104px;
+    padding: 10px 8px;
+  }
+
+  .app-not-found.app-not-found > nav.recovery-tiles > a > b {
+    font-size: 12px;
   }
 }
 
@@ -461,6 +625,54 @@
     translate: -50% 0;
     font-size: 88px;
   }
+
+  .app-not-found.app-not-found > nav.recovery-tiles > a {
+    min-height: 128px;
+    padding: 14px;
+  }
+
+  /* The heading holds one line in the 460-500px copy column. */
+  .app-not-found.app-not-found > h1 {
+    font-size: clamp(26px, 4.6vw, 40px);
+  }
+}
+
+/* Desktop: the case file leans left and the key visual stands on the
+   right, the rider in the clear, under the outlined number. */
+@media (min-width: 1100px) {
+  .app-not-found.app-not-found {
+    grid-template-columns:
+      minmax(48px, 0.9fr) [plate-start] var(--lr-pad-x) [slot-start] 232px [slot-end] 40px
+      [copy-start] minmax(0, 520px) [copy-end] var(--lr-pad-x) [plate-end] minmax(48px, 1.5fr);
+  }
+
+  .app-not-found.app-not-found::before {
+    background:
+      linear-gradient(
+        90deg,
+        var(--lr-ink) 0 30%,
+        rgb(3 6 12 / 84%) 46%,
+        rgb(3 6 12 / 46%) 64%,
+        rgb(3 6 12 / 28%) 100%
+      ),
+      linear-gradient(180deg, rgb(3 6 12 / 10%), transparent 30%, rgb(3 6 12 / 70%) 100%),
+      url("/deception-world-poster-delivery-720.webp") right 12% / auto 112% no-repeat;
+  }
+
+  .app-not-found.app-not-found::after {
+    align-content: end;
+    padding: 0 max(28px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom)) 0;
+    font-size: clamp(160px, 22vw, 300px);
+    -webkit-text-stroke-color: rgb(122 232 255 / 16%);
+  }
+
+  .app-not-found.app-not-found > .app-not-found-sigil::after {
+    font-size: 96px;
+  }
+
+  .app-not-found.app-not-found > h1 {
+    font-size: 42px;
+  }
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -480,6 +692,29 @@
 
   html:not([data-world-effects="economy"]) .app-not-found.app-not-found > .app-not-found-sigil > i {
     animation: lr-sigil 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) 0.25s both;
+  }
+
+  /* The files rise onto the foot one after another; the number fades in. */
+  html:not([data-world-effects="economy"]) .app-not-found.app-not-found > nav.recovery-tiles > a {
+    animation: lr-file 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.45s both;
+  }
+
+  html:not([data-world-effects="economy"])
+    .app-not-found.app-not-found
+    > nav.recovery-tiles
+    > a:nth-child(2) {
+    animation-delay: 0.55s;
+  }
+
+  html:not([data-world-effects="economy"])
+    .app-not-found.app-not-found
+    > nav.recovery-tiles
+    > a:nth-child(3) {
+    animation-delay: 0.65s;
+  }
+
+  html:not([data-world-effects="economy"]) .app-not-found.app-not-found::after {
+    animation: lr-mark 1.2s ease-out 0.2s both;
   }
 }
 
@@ -510,6 +745,19 @@
   from {
     opacity: 0;
     scale: 0.86;
+  }
+}
+
+@keyframes lr-file {
+  from {
+    opacity: 0;
+    translate: 0 10px;
+  }
+}
+
+@keyframes lr-mark {
+  from {
+    opacity: 0;
   }
 }
 
@@ -566,5 +814,20 @@
 
   .app-not-found.app-not-found > a::after {
     display: none;
+  }
+
+  .app-not-found.app-not-found > nav.recovery-tiles {
+    border-top: 1px solid CanvasText;
+    background: Canvas;
+  }
+
+  .app-not-found.app-not-found > nav.recovery-tiles > a {
+    border: 1px solid LinkText;
+    background: Canvas;
+  }
+
+  .app-not-found.app-not-found > nav.recovery-tiles > a > small,
+  .app-not-found.app-not-found > nav.recovery-tiles > a > b {
+    color: LinkText;
   }
 }

@@ -2,17 +2,29 @@
    screens keep their own typography, images and layout. Static recovery
    controls remain readable even when cinematic assets cannot be fetched.
 
-   rx10 STAGE: the failure reads as the same card as the 404 (the lost
-   record): deck ink under the lattice, an ice rim with ice ticks over gold,
-   the prism on top, the reload as the one filled ice plate and the way back
-   as an outlined one. Still: no motion, no blur, nothing fetched. */
+   rx10 STAGE (composed 2026-10-21): the failure reads as the same card as
+   the 404 (the lost record): deck ink under the lattice, an ice rim with
+   ice ticks over gold on every corner, the prism on top, the warning sign
+   on a cut plate, the reload as the one filled ice plate held in brackets
+   and the way back as an outlined one; the ground carries the gate's
+   corner marks. Still: no motion, no blur, nothing fetched. */
 .app-load-error {
   box-sizing: border-box;
   min-height: 100svh;
   padding: max(24px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right))
     max(24px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
   background:
+    linear-gradient(90deg, #7ae8ff, #4f7bff 32%, #ff4fc3 66%, #f0cf86) 0 0 / 100% 2px no-repeat,
+    linear-gradient(#7ae8ff 0 0) 14px 14px / 24px 2px no-repeat,
+    linear-gradient(#7ae8ff 0 0) 14px 14px / 2px 24px no-repeat,
+    linear-gradient(#7ae8ff 0 0) calc(100% - 14px) 14px / 24px 2px no-repeat,
+    linear-gradient(#7ae8ff 0 0) calc(100% - 14px) 14px / 2px 24px no-repeat,
+    linear-gradient(#f0cf86 0 0) 14px calc(100% - 14px) / 24px 2px no-repeat,
+    linear-gradient(#f0cf86 0 0) 14px calc(100% - 14px) / 2px 24px no-repeat,
+    linear-gradient(#f0cf86 0 0) calc(100% - 14px) calc(100% - 14px) / 24px 2px no-repeat,
+    linear-gradient(#f0cf86 0 0) calc(100% - 14px) calc(100% - 14px) / 2px 24px no-repeat,
     radial-gradient(ellipse 70% 42% at 50% 0%, rgb(122 232 255 / 11%), transparent 70%),
+    radial-gradient(ellipse 60% 34% at 50% 104%, rgb(255 79 195 / 8%), transparent 70%),
     repeating-linear-gradient(90deg, rgb(122 232 255 / 3%) 0 1px, transparent 1px 28px),
     repeating-linear-gradient(0deg, rgb(122 232 255 / 3%) 0 1px, transparent 1px 28px), #03060c;
 }
@@ -20,7 +32,7 @@
 .app-load-error-panel {
   position: relative;
   display: grid;
-  width: min(100%, 34rem);
+  width: min(100%, 36rem);
   gap: 18px;
   justify-items: center;
   box-sizing: border-box;
@@ -28,16 +40,42 @@
   border: 1px solid rgb(122 232 255 / 24%);
   border-radius: 6px;
   background:
-    linear-gradient(90deg, #7ae8ff, #ff5fc8 34%, #ff5cc8 66%, #f0cf86) 0 0 / 100% 2px no-repeat,
+    linear-gradient(90deg, #7ae8ff, #4f7bff 32%, #ff4fc3 66%, #f0cf86) 0 0 / 100% 2px no-repeat,
     linear-gradient(#7ae8ff 0 0) 0 0 / 22px 2px no-repeat,
     linear-gradient(#7ae8ff 0 0) 0 0 / 2px 22px no-repeat,
+    linear-gradient(#7ae8ff 0 0) 100% 0 / 22px 2px no-repeat,
+    linear-gradient(#7ae8ff 0 0) 100% 0 / 2px 22px no-repeat,
+    linear-gradient(#f0cf86 0 0) 0 100% / 22px 2px no-repeat,
+    linear-gradient(#f0cf86 0 0) 0 100% / 2px 22px no-repeat,
     linear-gradient(#f0cf86 0 0) 100% 100% / 22px 2px no-repeat,
     linear-gradient(#f0cf86 0 0) 100% 100% / 2px 22px no-repeat,
     linear-gradient(172deg, rgb(244 251 255 / 8%) 0, rgb(122 232 255 / 4%) 6%, transparent 24%),
+    linear-gradient(
+      112deg,
+      transparent 56%,
+      rgb(255 79 195 / 5%) 66%,
+      rgb(122 232 255 / 4%) 74%,
+      transparent 84%
+    ),
     #08111c;
   box-shadow:
     inset 0 1px 0 rgb(255 255 255 / 12%),
     0 40px 90px rgb(0 0 0 / 50%);
+}
+
+/* The warning sign stands on a cut plate, the gold-keyed mark of the card. */
+.app-load-error-panel > span:first-child {
+  display: grid;
+  place-items: center;
+  width: 76px;
+  height: 76px;
+  margin-bottom: 4px;
+  color: #f0cf86;
+  background:
+    linear-gradient(135deg, rgb(240 207 134 / 22%), rgb(240 207 134 / 4%) 60%),
+    #070d16;
+  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+  box-shadow: inset 0 0 0 1px rgb(240 207 134 / 55%);
 }
 
 .app-load-error h1,
@@ -49,16 +87,20 @@
 .app-load-error h1 {
   color: #c6f5ff;
   font-family: "Zen Kaku Gothic New", "Noto Sans JP", sans-serif;
-  font-size: clamp(16px, 4.9vw, 26px);
+  font-size: clamp(18px, 4.9vw, 28px);
   font-weight: 700;
   line-height: 1.4;
   letter-spacing: 0.02em;
   word-break: keep-all;
   line-break: strict;
   overflow-wrap: anywhere;
+  text-shadow:
+    -2px 0 rgb(255 92 200 / 26%),
+    2px 0 rgb(122 232 255 / 32%);
 }
 
 .app-load-error p {
+  max-width: 30em;
   color: #bccbd8;
   font-size: 14px;
   line-height: 1.8;
@@ -68,18 +110,21 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 12px;
+  gap: 14px 18px;
   width: 100%;
-  margin-top: 6px;
+  margin-top: 10px;
+  padding-top: 22px;
+  border-top: 1px solid rgb(122 232 255 / 14%);
 }
 
 .app-load-error-actions button,
 .app-load-error-actions a {
+  position: relative;
   display: inline-flex;
   min-height: 48px;
   align-items: center;
   justify-content: center;
-  padding: 12px 20px;
+  padding: 12px 24px;
   border: 1px solid #7ae8ff;
   border-radius: 4px;
   background: linear-gradient(180deg, #c6f5ff, #7ae8ff);
@@ -88,29 +133,85 @@
   font-size: 14px;
   font-weight: 600;
   line-height: 1.5;
+  letter-spacing: 0.04em;
   text-decoration: none;
   cursor: pointer;
+  box-shadow: 0 0 28px rgb(122 232 255 / 20%);
+}
+
+/* The reload's brackets: ice on top, gold at the foot, 12px arms. */
+.app-load-error-actions button::before {
+  position: absolute;
+  inset: -5px;
+  content: "";
+  pointer-events: none;
+  background:
+    linear-gradient(#dff9ff 0 0) 0 0 / 12px 2px,
+    linear-gradient(#dff9ff 0 0) 0 0 / 2px 12px,
+    linear-gradient(#dff9ff 0 0) 100% 0 / 12px 2px,
+    linear-gradient(#dff9ff 0 0) 100% 0 / 2px 12px,
+    linear-gradient(#f0cf86 0 0) 0 100% / 12px 2px,
+    linear-gradient(#f0cf86 0 0) 0 100% / 2px 12px,
+    linear-gradient(#f0cf86 0 0) 100% 100% / 12px 2px,
+    linear-gradient(#f0cf86 0 0) 100% 100% / 2px 12px;
+  background-repeat: no-repeat;
 }
 
 .app-load-error-actions a {
   border-color: rgb(122 232 255 / 45%);
   background: rgb(122 232 255 / 6%);
   color: #f2f7fb;
+  box-shadow: none;
+}
+
+.app-load-error-actions button:hover {
+  background: linear-gradient(180deg, #fff, #a6f0ff);
+}
+
+.app-load-error-actions a:hover {
+  border-color: rgb(122 232 255 / 70%);
+  background: rgb(122 232 255 / 14%);
 }
 
 .app-load-error-actions :focus-visible {
   outline: 3px solid #fff0b5;
-  outline-offset: 4px;
+  outline-offset: 7px;
+}
+
+@media (max-width: 420px) {
+  .app-load-error-actions button,
+  .app-load-error-actions a {
+    width: 100%;
+  }
 }
 
 @media (forced-colors: active) {
+  .app-load-error {
+    background: Canvas;
+  }
+
   .app-load-error-panel {
     border-color: CanvasText;
     background: Canvas;
   }
 
+  .app-load-error-panel > span:first-child {
+    border: 1px solid CanvasText;
+    background: Canvas;
+    clip-path: none;
+    box-shadow: none;
+  }
+
+  .app-load-error h1 {
+    text-shadow: none;
+  }
+
   .app-load-error-actions button,
   .app-load-error-actions a {
     border-color: ButtonText;
+  }
+
+  .app-load-error-actions button::before {
+    display: none;
   }
 }

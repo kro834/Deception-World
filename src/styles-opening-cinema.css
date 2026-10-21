@@ -128,6 +128,50 @@
   mask-composite: intersect;
 }
 
+/* The streamline trails (2026-10-21): two of the key visual's light trails,
+   ice then pink, race through the stage behind the title while the trace
+   crosses it, tilted like the wordmark's own streaks. Gone on every still
+   state (the plane's base opacity). */
+.cine-trail {
+  top: 47%;
+  left: 50%;
+  width: min(124vw, 1560px);
+  height: 4px;
+  border-radius: 2px;
+  transform: translate(-50%, -50%) rotate(-13deg) translateX(-46%) scaleX(0.3);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(79 123 255 / 0.3) 18%,
+    rgb(122 232 255 / 0.78) 42%,
+    rgb(223 249 255 / 0.96) 56%,
+    rgb(122 232 255 / 0.62) 70%,
+    rgb(79 123 255 / 0.22) 86%,
+    transparent
+  );
+  box-shadow:
+    0 0 14px 3px rgb(122 232 255 / 0.5),
+    0 0 44px 8px rgb(79 123 255 / 0.26);
+}
+
+.cine-trail-b {
+  top: 55%;
+  transform: translate(-50%, -50%) rotate(-11deg) translateX(-46%) scaleX(0.3);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(200 77 255 / 0.3) 16%,
+    rgb(255 79 195 / 0.8) 40%,
+    rgb(255 214 244 / 0.96) 54%,
+    rgb(255 79 195 / 0.66) 68%,
+    rgb(240 207 134 / 0.36) 86%,
+    transparent
+  );
+  box-shadow:
+    0 0 14px 3px rgb(255 79 195 / 0.48),
+    0 0 44px 8px rgb(200 77 255 / 0.24);
+}
+
 /* The anamorphic streaks: one lens flare line across the title's centre with
    a magenta fringe above and a gold fringe below (the chromatic split of a
    cinema lens). A: ice and white, at the score's impact. B: the prism, as
@@ -229,7 +273,8 @@
    it, as the flare and the rings do. */
 @media (max-width: 700px) and (orientation: portrait) {
   .cine-halo,
-  .cine-streak {
+  .cine-streak,
+  .cine-trail {
     translate: 0 calc(-1 * var(--op-lift));
   }
 
@@ -241,7 +286,8 @@
 
 @media (max-height: 560px) and (orientation: landscape) {
   .cine-halo,
-  .cine-streak {
+  .cine-streak,
+  .cine-trail {
     translate: 0 calc(-1 * var(--cine-lift));
   }
 
@@ -346,6 +392,16 @@ html[data-world-effects="economy"] .cine-stage.is-playing .cine-editorial-frame:
 
   html:not([data-world-effects="economy"]) .cine-stage.is-playing .cine-streak-b {
     animation: op-streak 1s cubic-bezier(0.16, 1, 0.3, 1) 6s both;
+  }
+
+  /* The trails run with the trace (2.6-5.6 s): ice as the front enters the
+     lockup, pink as it crosses the middle. */
+  html:not([data-world-effects="economy"]) .cine-stage.is-playing .cine-trail-a {
+    animation: op-trail 1.5s cubic-bezier(0.3, 0, 0.2, 1) 2.9s both;
+  }
+
+  html:not([data-world-effects="economy"]) .cine-stage.is-playing .cine-trail-b {
+    animation: op-trail-b 1.5s cubic-bezier(0.3, 0, 0.2, 1) 3.8s both;
   }
 
   html:not([data-world-effects="economy"]) .cine-stage.is-playing .cine-rails {
@@ -456,6 +512,44 @@ html[data-world-effects="economy"] .cine-stage.is-playing .cine-editorial-frame:
   }
 }
 
+@keyframes op-trail {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(-13deg) translateX(-46%) scaleX(0.3);
+  }
+  30% {
+    opacity: 0.95;
+    transform: translate(-50%, -50%) rotate(-13deg) translateX(-14%) scaleX(1);
+  }
+  70% {
+    opacity: 0.7;
+    transform: translate(-50%, -50%) rotate(-13deg) translateX(22%) scaleX(1.1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(-13deg) translateX(52%) scaleX(0.5);
+  }
+}
+
+@keyframes op-trail-b {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(-11deg) translateX(-46%) scaleX(0.3);
+  }
+  30% {
+    opacity: 0.95;
+    transform: translate(-50%, -50%) rotate(-11deg) translateX(-14%) scaleX(1);
+  }
+  70% {
+    opacity: 0.7;
+    transform: translate(-50%, -50%) rotate(-11deg) translateX(22%) scaleX(1.1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(-11deg) translateX(52%) scaleX(0.5);
+  }
+}
+
 @keyframes op-rails-in {
   from {
     opacity: 0;
@@ -538,6 +632,84 @@ html[data-world-effects="economy"] .cine-stage.is-playing .cine-editorial-frame:
     opacity: 1;
     transform: scale(1);
   }
+}
+
+/* The trace's light on the title (2026-10-21) ---------------------------------
+   The title logo is one picture now (logo-title-saga-20261016), so the burn
+   became the key visual's streamline light scanning it. The WebGL tier is
+   the shader (opening-burn.frag.glsl); these rules repaint the layers that
+   styles.css still owns for both tiers: the pool of light behind the trace
+   (ice, pink and gold instead of the old fire), and the CSS tier's band
+   (the streamline riding the wipe's edge), its charged copy and its sparks.
+   Paint only: the clocks, masks' geometry and the wipe/reveal travel stay
+   in styles.css. */
+.cine-stage .cine-burn-light {
+  background:
+    radial-gradient(ellipse 44% 40% at 34% 70%, rgb(122 232 255 / 0.3), transparent 72%),
+    radial-gradient(ellipse 56% 48% at 56% 58%, rgb(255 79 195 / 0.22), transparent 74%),
+    radial-gradient(ellipse 40% 34% at 72% 44%, rgb(240 207 134 / 0.14), transparent 70%);
+}
+
+/* The charged copy: the logo brighter and more saturated where the band has
+   just passed, cooling on the sheet's own clock. */
+.cine-stage .cine-burn-hot {
+  filter: brightness(1.32) saturate(1.28) contrast(1.04);
+}
+
+/* The band: a thin streamline on the edge (88% down the element, where the
+   wipe's edge runs), ice to blue to pink to gold across the lockup, with a
+   bright core line. The second layer is its softer wash. */
+.cine-stage .cine-burn-flame {
+  -webkit-mask-image: linear-gradient(180deg, transparent 64%, #000 84%, #000 91%, transparent);
+  mask-image: linear-gradient(180deg, transparent 64%, #000 84%, #000 91%, transparent);
+}
+
+.cine-stage .cine-burn-flame > i {
+  background:
+    linear-gradient(
+        180deg,
+        transparent 86.6%,
+        rgb(240 250 255 / 0.9) 88%,
+        rgb(240 250 255 / 0.9) 88.7%,
+        transparent 90.4%
+      )
+      0 0 / 100% 100% no-repeat,
+    linear-gradient(
+      90deg,
+      transparent,
+      rgb(122 232 255 / 0.82) 12%,
+      rgb(79 123 255 / 0.86) 32%,
+      rgb(255 79 195 / 0.92) 58%,
+      rgb(240 207 134 / 0.86) 84%,
+      transparent
+    );
+}
+
+.cine-stage .cine-burn-flame > i:nth-child(2) {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(122 232 255 / 0.5) 16%,
+    rgb(255 79 195 / 0.6) 52%,
+    rgb(240 207 134 / 0.5) 86%,
+    transparent
+  );
+}
+
+/* The sparks: ice, pink and gold in turn. */
+.cine-stage .cine-burn-embers > i {
+  background: #9ff0ff;
+  box-shadow: 0 0 6px rgb(122 232 255 / 0.85);
+}
+
+.cine-stage .cine-burn-embers > i:nth-child(3n + 2) {
+  background: #ff8ad8;
+  box-shadow: 0 0 6px rgb(255 79 195 / 0.85);
+}
+
+.cine-stage .cine-burn-embers > i:nth-child(3n) {
+  background: #ffe2a6;
+  box-shadow: 0 0 6px rgb(240 207 134 / 0.85);
 }
 
 /* Forced colours: the ornament goes; the title keeps its Canvas field. */

@@ -5,9 +5,11 @@ import { readFile } from "node:fs/promises";
 const read = (path) => readFile(new URL("../" + path, import.meta.url), "utf8");
 
 test("opening and Rising use the owner's forest-green flame body in both rendering tiers", async () => {
+  // Owner (2026-10-21): the opening's title is one logo now, so its burn
+  // became the key visual's streamline trace (opening-burn.frag.glsl, no
+  // flame body); the shared ramp, RISING and the CSS tier keep the green.
   for (const path of [
     "src/components/cinematic/opening-noise.glsl",
-    "src/components/cinematic/opening-burn.frag.glsl",
     "src/components/world/rising.frag.glsl",
     "scripts/render-rising-calm-sprites.mjs",
   ]) {
