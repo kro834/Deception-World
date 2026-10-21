@@ -80,6 +80,12 @@ test("the tape's figures never run under their result plates, and the slants cut
   // Large phones keep the row, the figure keeps its width.
   const phone = "(min-width: 481px) and (max-width: 680px)";
   assert.equal(declaration(find("> #performance .rxs-comparison-metrics > article > header > div", phone), "flex"), "none");
+  // The catalog: closes in two columns on wide screens, one list a row on phones.
+  const catalog = "> #performance .exs-catalog-details .rxs-processing-comparison";
+  assert.equal(declaration(find(catalog, "(min-width: 1100px)"), "grid-template-columns"), "repeat(2, minmax(0, 1fr))");
+  assert.equal(declaration(find(`${catalog} > p`, "(min-width: 1100px)"), "grid-column"), "1");
+  assert.equal(declaration(find(`${catalog} > .exs-unavailable`, "(min-width: 1100px)"), "grid-column"), "2");
+  assert.equal(declaration(find(`${catalog} > div`, "(max-width: 680px)"), "grid-template-columns"), "minmax(0, 1fr)");
   // The name in the brand does not inherit the pill's slanted cut.
   assert.equal(declaration(find(".rxs-brand b span"), "clip-path"), "none");
   // 320px: the challenger plates stand one over the other.

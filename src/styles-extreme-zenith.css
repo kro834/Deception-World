@@ -630,6 +630,86 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-unavailable {
   margin-top: 14px;
 }
 
+/* The notes run the catalog's full measure (a 528px cap left a third of a
+   tablet's console empty beside them). */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #performance
+  .exs-catalog-details
+  .exs-unavailable
+  > li {
+  max-width: none;
+}
+
+/* Wide screens: the catalog closes in its own two columns. The verdict
+   stands under the Extreme column, the values that cannot be converted
+   under the challenger's, instead of both running half-width on the left
+   with the right half of the console empty. */
+@media (min-width: 1100px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #performance
+    .exs-catalog-details
+    .rxs-processing-comparison {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: clamp(10px, 1.6vw, 20px);
+    align-items: start;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #performance
+    .exs-catalog-details
+    .rxs-processing-comparison
+    > :is(header, div) {
+    grid-column: 1 / -1;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #performance
+    .exs-catalog-details
+    .rxs-processing-comparison
+    > p {
+    grid-column: 1;
+    max-width: none;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #performance
+    .exs-catalog-details
+    .rxs-processing-comparison
+    > .exs-unavailable {
+    grid-column: 2;
+    max-width: none;
+    margin-top: 20px;
+  }
+
+}
+
+/* Phones: one list a row (the FIGHT CARD's two columns, held by its ID
+   selector, set each spec in ~150px and broke every line two or three
+   times). The Extreme list keeps its place first. */
+@media (max-width: 680px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #performance
+    .exs-catalog-details
+    .rxs-processing-comparison
+    > div {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+  }
+}
+
 html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-unavailable li {
   padding: 12px 16px 12px 14px;
   border: 1px solid var(--exe-rule);
