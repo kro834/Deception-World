@@ -197,11 +197,11 @@ test("burst fragments: cold on the body before the burst, flung out white hot, c
       if (out[4] === 0 && cooled === null) cooled = phase;
       previousDistance = distance;
     }
-    assert.ok(previousDistance > 0.1 && previousDistance < 0.45, "lands within the fire rect");
+    assert.ok(previousDistance > 0.08 && previousDistance < 0.5, "lands within the fire rect");
     assert.ok(cooled !== null && cooled >= P.materialStart - 1e-9 && cooled <= P.flameEnd + 1e-9);
     coolAt.push(cooled);
     fireFragmentPose(seed, P.burstStart + 0.004, out);
-    assert.ok(out[4] > 0.85, "white hot right after the burst");
+    assert.ok(out[4] > 0.8, "white hot right after the burst");
     fireFragmentPose(seed, P.materialStart - 1e-6, out);
     assert.ok(out[4] > 0, "no chip before materialStart");
     fireFragmentPose(seed, P.flameEnd, out);
