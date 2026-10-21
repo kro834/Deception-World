@@ -10,11 +10,13 @@ const BODY = new Float32Array([
 const clamp = (x) => Math.max(0, Math.min(1, x));
 const smooth = (x) => x * x * (3 - 2 * x);
 
-// Give the vortex a visible rolling interval without compressing or moving
-// any authored materialization, docking or final-light choreography relative
-// to one another. Wall time continues driving the flame's texture motion.
+// The entry stretches the fire's whole run (canonical 0–420 ms) uniformly
+// over one extra second, so the engulf climbs the body at one steady pace
+// (owner, 2026-10-21: 「炎がアンダースーツを段々と覆っていき、爆散」). Every
+// authored materialization, docking and final-light clock after it keeps
+// its canonical value; wall time continues driving the flame's texture.
 export const REXONANCE_ENTRY_VORTEX_HOLD_MS = 1000;
-const VORTEX_LINGER_FROM = 280;
+const VORTEX_LINGER_FROM = 0;
 const VORTEX_LINGER_TO = 420;
 const VORTEX_LINGER_SPAN = VORTEX_LINGER_TO - VORTEX_LINGER_FROM;
 export function entryCanonicalTime(elapsedMs) {
@@ -39,15 +41,32 @@ export function entryElapsedTime(canonicalMs) {
   );
 }
 
-// First metal enters the explosion 132ms before the fire clears.
+// The fire's life in shared phase units (entry t/2400; scroll (q-.015)/.285):
+//   0 → kindle   the first licks at the soles grow;
+//   kindle → cover   the engulf front climbs the undersuit (feet, legs,
+//                    hips, torso, shoulders, arms, crown, hands last) and the
+//                    oldest fire burns toward complete combustion;
+//   cleanFrom → cleanTo   the colour shifts, sooty green → clean cyan-blue;
+//   cover → burstStart   the whole figure is a steady clean torch;
+//   burstStart → burstEnd   爆散: the fire detonates outward into fragments;
+//   materialStart   the first fragments have cooled into nanite chips;
+//   flameEnd   the last fragment is a chip; nothing of the fire remains.
 // Entry uses t/2400; scroll uses (q-.015)/.285, so both scenes retain the
 // same causal order even when the reader reverses or jumps the clock.
 export const NANITE_FIRE_PHASES = Object.freeze({
+  kindle: 0.025,
+  cleanFrom: 0.095,
+  cleanTo: 0.165,
+  cover: 0.16,
   burstStart: 0.175,
   burstEnd: 7 / 30,
   materialStart: 0.195,
   flameEnd: 0.25,
 });
+// The engulf front overshoots the farthest body point (arrival 1) so its
+// irregular edge noise cannot leave an unburnt island before the torch.
+const COVER_OVERSHOOT = 1.12;
+const KINDLE_COVER = 0.06;
 
 /** Start early boot growth just before the flame clears, preserving its
  * final fit and every later window. The first chips still get 60ms to fly. */
@@ -81,15 +100,15 @@ export function sampleFlameBirth(seed, out) {
   return out;
 }
 
-/** Shared phase: entry t/2400; scroll (q-.015)/.285. A quiet, local
- * kindle is followed by a rolling vortex and an outward detonation. The
- * last 132ms overlap the first machines; the strong vortex stays fire-only.
+/** Shared phase: entry t/2400; scroll (q-.015)/.285. The fire's overall
+ * radiance: it fades in with the kindle, holds through the engulf and the
+ * torch, then dies away through the detonation as its fragments cool. The
+ * first machines overlap only the declining explosion (at most 0.83).
  * No accumulating simulation state: scrubbing is exact. */
 export function naniteFlameEnvelope(phase) {
   if (!Number.isFinite(phase) || phase <= 0 || phase >= NANITE_FIRE_PHASES.flameEnd) return 0;
-  if (phase < 7 / 60) return 0.09 * smooth(clamp(phase / (7 / 60)));
-  if (phase < NANITE_FIRE_PHASES.burstStart)
-    return 0.09 + 0.91 * smooth((phase - 7 / 60) / (NANITE_FIRE_PHASES.burstStart - 7 / 60));
+  if (phase < NANITE_FIRE_PHASES.kindle) return smooth(phase / NANITE_FIRE_PHASES.kindle);
+  if (phase < NANITE_FIRE_PHASES.burstStart) return 1;
   return (
     1 -
     smooth(
@@ -97,6 +116,29 @@ export function naniteFlameEnvelope(phase) {
         (NANITE_FIRE_PHASES.flameEnd - NANITE_FIRE_PHASES.burstStart),
     )
   );
+}
+
+/** How far the engulf front has climbed, in arrival units (0 = the soles,
+ * 1 = the farthest body point, the hands and crown). Monotone, continuous,
+ * and closed-form: a reversed clock retreats over the very same frames. */
+export function naniteEngulf(phase) {
+  if (!Number.isFinite(phase) || phase <= 0) return 0;
+  const P = NANITE_FIRE_PHASES;
+  if (phase < P.kindle) return KINDLE_COVER * smooth(phase / P.kindle);
+  if (phase < P.cover)
+    return KINDLE_COVER + (COVER_OVERSHOOT - KINDLE_COVER) * ((phase - P.kindle) / (P.cover - P.kindle));
+  // Still creeping over the torch: no frozen front while the colour turns.
+  return COVER_OVERSHOOT + 0.08 * clamp((phase - P.cover) / (P.burstStart - P.cover));
+}
+
+/** 0 = the sooty forest-green diffusion fire, 1 = complete combustion: a
+ * transparent cyan-blue mantle round a pale inner cone. The whole fire has
+ * turned before the detonation, which is clean by definition. */
+export function naniteCombustion(phase) {
+  if (!Number.isFinite(phase)) return 0;
+  const P = NANITE_FIRE_PHASES;
+  if (phase >= P.burstStart) return 1;
+  return smooth(clamp((phase - P.cleanFrom) / (P.cleanTo - P.cleanFrom)));
 }
 
 /** A single outward detonation, not continuously respawning decorative
@@ -111,20 +153,76 @@ export function naniteFlameScatter(phase) {
   );
 }
 
-// Afterburn (owner, 2026-10-21: the green fire no longer vanishes at once).
-// The rolling vortex still detonates and clears before any metal; what it
-// leaves is a lower fire clinging to the body for the whole assembly. Each
-// scene maps its own clock to burn progress 0..1, starting at burstStart.
-// Entry: canonical ms. Scroll: page progress q (its armour seats .16–.82).
+// Fragments of the detonation: closed-form trajectories in normalized body
+// space (x over the figure's width, y over its height; velocities in those
+// units per phase unit). Seeds are periodic and share sampleFlameBirth with
+// the nanite engines, so a chip can be born exactly where its fragment cools.
+export const NANITE_FIRE_FRAGMENTS = 144;
+const FRAGMENT_DRAG = 4.5;
+const FRAGMENT_SETTLE = 1 - Math.exp(-FRAGMENT_DRAG);
+const BODY_ASPECT = 1040 / 571;
+const fragmentHash = (seed, salt) => {
+  const x = Math.sin(seed * 127.1 + salt * 311.7) * 43758.5453;
+  return x - Math.floor(x);
+};
+
+/** Pose of one burst fragment: out = [x, y, vx, vy, heat, size].
+ * Before burstStart it rests, cold, at its birth point on the burning body
+ * (heat 0). From burstStart it is flung outward and upward with drag, white
+ * hot, cooling through the suit's cyan and pink; heat reaches 0 at its own
+ * cooling time, between materialStart and flameEnd, where a nanite chip is
+ * born carrying this velocity. Size is in units of the figure's width. */
+export function fireFragmentPose(seed, phase, out) {
+  const s = Number.isFinite(seed) ? ((seed % 1) + 1) % 1 : 0;
+  sampleFlameBirth(s, out);
+  const bx = out[0];
+  const by = out[1];
+  const nx = out[2];
+  const ny = out[3];
+  const h1 = fragmentHash(s, 1.3);
+  const h2 = fragmentHash(s, 2.7);
+  const h3 = fragmentHash(s, 3.9);
+  const h4 = fragmentHash(s, 5.1);
+  const P = NANITE_FIRE_PHASES;
+  const span = P.flameEnd - P.burstStart;
+  const u = Number.isFinite(phase) ? clamp((phase - P.burstStart) / span) : 0;
+  // Outward along the surface normal, lifted, with a tangential scatter.
+  let dx = nx * (0.55 + 0.45 * h1) - ny * (h2 - 0.5) * 0.9;
+  let dy = ny * (0.55 + 0.45 * h1) + nx * (h2 - 0.5) * 0.9 - (0.75 + 0.55 * h3);
+  const length = Math.sqrt(dx * dx + dy * dy) || 1;
+  dx /= length;
+  dy /= length;
+  const travel = 0.14 + 0.26 * h4;
+  const decay = Math.exp(-FRAGMENT_DRAG * u);
+  const along = (travel * (1 - decay)) / FRAGMENT_SETTLE;
+  const rate = (travel * FRAGMENT_DRAG * decay) / FRAGMENT_SETTLE / span;
+  // Gravity sags the slower, heavier fragments (W units, then to H units).
+  const sag = 0.05 * u * u;
+  out[0] = bx + dx * along;
+  out[1] = by + (dy * along + sag) / BODY_ASPECT;
+  out[2] = u > 0 && u < 1 ? dx * rate : 0;
+  out[3] = u > 0 && u < 1 ? (dy * rate + (0.1 * u) / span) / BODY_ASPECT : 0;
+  const cool = (P.materialStart - P.burstStart) / span + h2 * (1 - (P.materialStart - P.burstStart) / span);
+  out[4] = u > 0 ? Math.pow(clamp(1 - u / cool), 0.8) : 0;
+  out[5] = (0.012 + 0.012 * h3) * (1 - 0.45 * u);
+  return out;
+}
+
+// The afterburn (owner, 2026-10-21, first brief) is retired by the owner's
+// newer direction: the fire covers the undersuit, detonates into the
+// nanites, and the suit-up begins from that. Nothing burns during the
+// assembly. The windows below now end with the fire itself, so a resting
+// scroll stops redrawing when the last fragment has cooled; the helpers
+// stay exported for the scenes' existing calls and always report nothing.
 export const REXONANCE_ENTRY_AFTERBURN = Object.freeze({
   from: NANITE_FIRE_PHASES.burstStart * 2400,
-  to: 2350,
+  to: NANITE_FIRE_PHASES.flameEnd * 2400,
 });
 export const REXONANCE_SCROLL_AFTERBURN = Object.freeze({
   from: 0.015 + 0.285 * NANITE_FIRE_PHASES.burstStart,
-  to: 0.84,
+  to: 0.015 + 0.285 * NANITE_FIRE_PHASES.flameEnd,
 });
-export const NANITE_AFTERBURN = Object.freeze({ rise: 0.035, fade: 0.8 });
+export const NANITE_AFTERBURN = Object.freeze({ rise: 0, fade: 0 });
 
 /** Clock → burn progress; 0 or less before the burst, 1 or more once out. */
 export function naniteAfterburnProgress(value, window) {
@@ -132,24 +230,12 @@ export function naniteAfterburnProgress(value, window) {
   return (value - window.from) / (window.to - window.from);
 }
 
-/** Rises out of the detonation, breathes at a sustained level while the
- * armour forms, then dies down. Pure function of progress: exact scrubbing. */
-export function naniteAfterburnEnvelope(burn) {
-  if (!Number.isFinite(burn) || burn <= 0 || burn >= 1) return 0;
-  if (burn < NANITE_AFTERBURN.rise) return smooth(burn / NANITE_AFTERBURN.rise);
-  if (burn < NANITE_AFTERBURN.fade)
-    return (
-      1 -
-      0.18 *
-        smooth((burn - NANITE_AFTERBURN.rise) / (NANITE_AFTERBURN.fade - NANITE_AFTERBURN.rise))
-    );
-  return 0.82 * (1 - smooth((burn - NANITE_AFTERBURN.fade) / (1 - NANITE_AFTERBURN.fade)));
+/** Retired: no fire lingers after the detonation. Always 0. */
+export function naniteAfterburnEnvelope() {
+  return 0;
 }
 
-/** Seated armour quenches the fire beneath it: legs first, the crown last.
- * y is normalized body height (0 crown, 1 soles); a low fire keeps burning. */
-export function naniteAfterburnQuench(burn, y) {
-  if (!Number.isFinite(burn) || !Number.isFinite(y)) return 0;
-  const from = 0.34 + 0.44 * (1 - clamp(y));
-  return 0.5 * smooth(clamp((burn - from) / 0.22));
+/** Retired with the afterburn. Always 0. */
+export function naniteAfterburnQuench() {
+  return 0;
 }
