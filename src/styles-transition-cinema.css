@@ -2859,7 +2859,7 @@ html[data-route-cover="covering"] .zeus-button:not([data-navigating="true"]) {
     transform: translateY(18%) scaleY(0.55);
   }
   34% {
-    opacity: 0.95;
+    opacity: 0.62;
     transform: translateY(0) scaleY(1);
   }
   100% {
@@ -2874,7 +2874,7 @@ html[data-route-cover="covering"] .zeus-button:not([data-navigating="true"]) {
     transform: translateY(14%) scaleY(0.6);
   }
   40% {
-    opacity: 1;
+    opacity: 0.66;
     transform: translateY(-4%) scaleY(1.1);
   }
   100% {
@@ -2889,7 +2889,7 @@ html[data-route-cover="covering"] .zeus-button:not([data-navigating="true"]) {
     transform: scaleX(-1) translateY(14%) scaleY(0.6);
   }
   40% {
-    opacity: 1;
+    opacity: 0.66;
     transform: scaleX(-1) translateY(-6%) scaleY(1.15);
   }
   100% {
