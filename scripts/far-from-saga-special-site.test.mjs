@@ -950,11 +950,65 @@ test("the HUD rebuilds the owner's interfaces as vector panels placed by the ref
     "60秒",
   ])
     assert.ok(record.includes(term), term);
-  // Deploy: unfold, then scan, then settle; the read-outs type on; the wrist
-  // rings open outward.
-  assert.match(ultraScene, /const u = easeOut\(span\(v, 0, 0\.35\)\);/);
-  assert.match(ultraScene, /const s = span\(v, 0\.3, 0\.72\);/);
-  assert.match(ultraScene, /const settleV = span\(v, 0\.7, 1\);/);
+  // Emergence (owner, 2026-10-22: 「補助パネルの出現含め、ウルトラはプロセスがかなり
+  // 未来的」): projected from an emitter on the arm — the beam, the cone — the
+  // wireframe tracing itself, the hex fill sweeping outward, the glass
+  // resolving through a glitch and a scan, the read-outs typing on, then
+  // settling; data packets on the tethers; one system sync pulse before the
+  // crown gauge starts. Every phase is a share of the panel's own window.
+  const EM = art.FAR_FROM_ULTRA_EMERGE;
+  for (const phase of ["beam", "cone", "wire", "fill", "glass", "glitch", "scan", "type", "settle"])
+    assert.ok(EM[phase][0] < EM[phase][1] && EM[phase][1] <= 1, phase);
+  assert.ok(EM.beam[0] < EM.wire[0] && EM.wire[0] < EM.fill[0] && EM.fill[0] < EM.glitch[0]);
+  assert.ok(EM.glitch[0] < EM.type[0] + 0.1 && EM.type[1] <= EM.settle[1]);
+  for (const line of [
+    /const beam = easeOut\(span\(v, EM\.beam\[0\], EM\.beam\[1\]\)\);/,
+    /const cone = bell\(span\(v, EM\.cone\[0\], EM\.cone\[1\]\)\);/,
+    /const wire = easeOut\(span\(v, EM\.wire\[0\], EM\.wire\[1\]\)\);/,
+    /const fill = span\(v, EM\.fill\[0\], EM\.fill\[1\]\);/,
+    /const glitch = span\(v, EM\.glitch\[0\], EM\.glitch\[1\]\);/,
+    /const s = span\(v, EM\.scan\[0\], EM\.scan\[1\]\);/,
+    /const settleV = span\(v, EM\.settle\[0\], EM\.settle\[1\]\);/,
+    /left = edge\(context, 0, 0, 0, -hh, left\);/,
+    /hexes\(context, xo, hh, radius, Math\.max\(0, fill - 0\.1\), fill \+ 0\.04\);/,
+    /const f = \(q \* 7 \+ m \/ 3 \+ p \* 0\.17\) % 1;/,
+    /const sync = bell\(span\(q, SYNC\[0\] \+ p \* 0\.006, SYNC\[1\] \+ p \* 0\.006\)\);/,
+  ])
+    assert.match(ultraScene, line);
+  const SYNC = art.FAR_FROM_ULTRA_SYNC;
+  const crownStart =
+    art.FAR_FROM_ULTRA_WINDOWS.interface[0] +
+    hud.crown.at *
+      (art.FAR_FROM_ULTRA_WINDOWS.interface[1] - art.FAR_FROM_ULTRA_WINDOWS.interface[0]);
+  const lastPanel = Math.max(...hud.panels.map((panel) => panel.at + panel.span));
+  const lastPanelEnd =
+    art.FAR_FROM_ULTRA_WINDOWS.interface[0] +
+    lastPanel * (art.FAR_FROM_ULTRA_WINDOWS.interface[1] - art.FAR_FROM_ULTRA_WINDOWS.interface[0]);
+  assert.ok(
+    lastPanelEnd <= SYNC[0] && SYNC[1] <= crownStart,
+    "panels settle, then the sync, then the gauge",
+  );
+  // The white is a digital wavefront (cells read ahead, rewritten at the
+  // front, an afterimage grid behind); the units arrive defocused, tumble,
+  // square into kit C's lit data tiles as they lock, and hold them on the
+  // armour before the crystal resolves; the halo rings counter-rotate into
+  // alignment with a locking flash.
+  assert.match(
+    ultraScene,
+    /const AHEAD = 2\.2 \* T;[^]*?const WRITE = 2\.6 \* T;[^]*?const AFTER = 7 \* T;/,
+  );
+  assert.match(ultraScene, /kitCells\.bokeh\.x\[tone\]/);
+  assert.match(ultraScene, /kitCells\.unfold\.x\[tone\] \+ CELL \* frameK/);
+  assert.match(
+    ultraScene,
+    /kitCells\.unfold\.x\[tone\] \+ CELL \* \(kitCells\.unfold\.frames - 1\)/,
+  );
+  assert.match(ultraScene, /const TILE_HOLD = 0\.04;/);
+  assert.match(ultraScene, /const turn = \(k % 2 \? -1\.4 : 1\.1\) \* easeOut\(v\);/);
+  assert.match(
+    ultraScene,
+    /const lock = bell\(span\(S\[S_HALO\], spec\.to, spec\.to \+ 0\.08\)\);/,
+  );
   assert.match(ultraScene, /context\.fillText\(chars\[k\], x \+ offsets\[at \+ k\], y\)/);
   assert.match(ultraScene, /const open = easeOut\(span\(v, 0\.12 \* r, 0\.5 \+ 0\.12 \* r\)\);/);
   // The owner's order: white, then the nanites' added parts, then the interfaces.

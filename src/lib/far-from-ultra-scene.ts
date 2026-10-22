@@ -32,12 +32,14 @@
 import {
   FAR_FROM_ULTRA_BUDGET,
   FAR_FROM_ULTRA_CORE,
+  FAR_FROM_ULTRA_EMERGE,
   FAR_FROM_ULTRA_FIGURE,
   FAR_FROM_ULTRA_FLIGHT,
   FAR_FROM_ULTRA_HUD,
   FAR_FROM_ULTRA_HUD_FONT,
   FAR_FROM_ULTRA_READOUTS,
   FAR_FROM_ULTRA_RINGS,
+  FAR_FROM_ULTRA_SYNC,
   FAR_FROM_ULTRA_TILE,
   FAR_FROM_ULTRA_WINDOWS,
   type FarFromUltraTier,
@@ -50,6 +52,11 @@ const W = FAR_FROM_ULTRA_FIGURE.width;
 const H = FAR_FROM_ULTRA_FIGURE.height;
 const T = FAR_FROM_ULTRA_TILE;
 const WIN = FAR_FROM_ULTRA_WINDOWS;
+const EM = FAR_FROM_ULTRA_EMERGE;
+const SYNC = FAR_FROM_ULTRA_SYNC;
+/** A landed tile holds its lit data-tile face this long (progress) before
+ * it resolves into the crystal beneath. */
+const TILE_HOLD = 0.04;
 const clamp01 = (v: number) => (v < 0 ? 0 : v > 1 ? 1 : v);
 const span = (v: number, a: number, b: number) => clamp01((v - a) / (b - a));
 const smooth = (u: number) => u * u * (3 - 2 * u);
@@ -308,6 +315,7 @@ const S_STRIDE = 10;
 const S_SCAN = 11; // the body scan before the interfaces
 const S_LANDED = 12;
 const S_TARGET = 13;
+const S_SYNC = 14; // the system sync pulse, 0 → 1 over its window
 const SLOTS = 16;
 
 const DIGITS = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
@@ -539,12 +547,13 @@ export function createFarFromUltraScene(options: FarFromUltraSceneOptions): FarF
     S[S_HALO] = span(q, WIN.halo[0], WIN.halo[1]);
     S[S_IFACE] = span(q, WIN.interface[0], WIN.interface[1]);
     S[S_SCAN] = span(q, WIN.interface[0] - 0.03, WIN.interface[0] + 0.05);
+    S[S_SYNC] = span(q, SYNC[0], SYNC[1]);
     S[S_MOTES] =
       span(q, WIN.armour[0] - 0.05, WIN.armour[0]) *
       (1 - span(q, WIN.halo[1], WIN.interface[0] + 0.04));
     // The tiles in flight or flashing: [lo, hi) of the plan's order.
     const flight = Math.max(FAR_FROM_ULTRA_FLIGHT.armour, FAR_FROM_ULTRA_FLIGHT.parts);
-    const lo = lowerBound(q - FAR_FROM_ULTRA_FLIGHT.flash);
+    const lo = lowerBound(q - Math.max(FAR_FROM_ULTRA_FLIGHT.flash, TILE_HOLD));
     const hi = upperBound(q + flight);
     S[S_LO] = lo;
     S[S_HI] = hi;
@@ -715,10 +724,15 @@ export function createFarFromUltraScene(options: FarFromUltraSceneOptions): FarF
     const rx = spec.rx * scale * (0.92 + 0.08 * easeOut(v));
     const ry = spec.ry * scale * (0.92 + 0.08 * easeOut(v));
     const e = Math.PI * easeOut(v);
-    const turn = S[S_Q] * (k % 2 ? -0.9 : 0.7);
-    context.strokeStyle = k === 1 ? WHITE : AQUA;
-    context.lineWidth = ratio * (k === 2 ? 1 : 1.4);
-    context.globalAlpha = (k === 2 ? 0.34 : 0.7) * Math.min(1, v * 2);
+    // Counter-rotating while they open, decelerating into alignment; a
+    // locking flash at alignment, and the sync pulse later.
+    const turn = (k % 2 ? -1.4 : 1.1) * easeOut(v);
+    const lock = bell(span(S[S_HALO], spec.to, spec.to + 0.08));
+    const pulse = bell(S[S_SYNC]);
+    const flash = Math.max(lock, pulse);
+    context.strokeStyle = k === 1 || flash > 0.5 ? WHITE : AQUA;
+    context.lineWidth = ratio * ((k === 2 ? 1 : 1.4) + 1.2 * flash);
+    context.globalAlpha = Math.min(1, ((k === 2 ? 0.34 : 0.7) + 0.5 * flash) * Math.min(1, v * 2));
     context.beginPath();
     if (spec.behind) {
       if (front) return;
@@ -833,41 +847,87 @@ export function createFarFromUltraScene(options: FarFromUltraSceneOptions): FarF
       );
       context.globalAlpha = 1;
     }
+    // The digital wavefront: the body's cells just ahead of the front read
+    // (dim outlines), the cells the front is crossing are rewritten (lit
+    // squares, brightest at the front), and behind it a grid afterimage
+    // fades as the white settles.
+    const front = S[S_FRONT];
+    const AHEAD = 2.2 * T;
+    const WRITE = 2.6 * T;
+    const AFTER = 7 * T;
+    const cell = Math.round(T * scale) - 1;
+    context.lineWidth = ratio;
+    context.strokeStyle = AQUA;
+    context.globalAlpha = 0.28;
+    context.beginPath();
+    for (let i = 0; i < plan.count; i += 1) {
+      if (plan.group[i] || plan.cov[i] < 0.3) continue;
+      const d = front - plan.cy[i];
+      if (d <= 0 || d > AHEAD) continue;
+      if (naniteHash(i, 21) > 0.55) continue;
+      context.rect(
+        Math.round(ox + plan.x[i] * scale) + 0.5,
+        Math.round(oy + plan.y[i] * scale) + 0.5,
+        cell,
+        cell,
+      );
+    }
+    context.stroke();
     context.fillStyle = WHITE;
-    context.globalAlpha = 0.22;
+    for (let i = 0; i < plan.count; i += 1) {
+      if (plan.group[i] || plan.cov[i] < 0.3) continue;
+      const d = plan.cy[i] - front;
+      if (d < 0 || d > WRITE) continue;
+      const h = naniteHash(i, 22);
+      context.globalAlpha = (0.2 + 0.5 * h) * (1 - d / WRITE);
+      context.fillRect(
+        Math.round(ox + plan.x[i] * scale) + 1,
+        Math.round(oy + plan.y[i] * scale) + 1,
+        cell - 1,
+        cell - 1,
+      );
+    }
+    context.strokeStyle = AQUA;
+    context.globalAlpha = 0.12;
+    context.beginPath();
+    for (let i = 0; i < plan.count; i += 1) {
+      if (plan.group[i] || plan.cov[i] < 0.3) continue;
+      const d = plan.cy[i] - front;
+      if (d < WRITE || d > AFTER) continue;
+      if (naniteHash(i, 23) > 0.5 * (1 - (d - WRITE) / (AFTER - WRITE))) continue;
+      context.rect(
+        Math.round(ox + plan.x[i] * scale) + 0.5,
+        Math.round(oy + plan.y[i] * scale) + 0.5,
+        cell,
+        cell,
+      );
+    }
+    context.stroke();
+    // The thin aqua front, a white core.
+    context.fillStyle = AQUA;
+    context.globalAlpha = 0.3;
     context.fillRect(
       Math.round(ox),
-      Math.round(y - 8 * ratio),
+      Math.round(y - 7 * ratio),
       Math.round(width),
-      Math.round(10 * ratio),
+      Math.round(8 * ratio),
     );
     context.globalAlpha = 0.95;
     context.fillRect(
       Math.round(ox),
       Math.round(y - ratio),
       Math.round(width),
-      Math.round(2 * ratio),
+      Math.round(ratio) || 1,
+    );
+    context.fillStyle = WHITE;
+    context.globalAlpha = 0.9;
+    context.fillRect(
+      Math.round(ox + width * 0.2),
+      Math.round(y - ratio),
+      Math.round(width * 0.6),
+      Math.round(ratio) || 1,
     );
     context.globalAlpha = 1;
-    // Sparks on the body tiles the front is crossing.
-    let drawn = 0;
-    const front = S[S_FRONT];
-    for (let i = 0; i < plan.count && drawn < 28; i += 1) {
-      if (plan.group[i] || plan.cov[i] < 0.5) continue;
-      const d = plan.cy[i] - front;
-      if (d < -T || d > T) continue;
-      const h = naniteHash(i, 21);
-      if (h > 0.35) continue;
-      drawn += 1;
-      const f = Math.floor(h * 40 + S[S_Q] * 400) & 3;
-      spark(
-        context,
-        f,
-        ox + plan.cx[i] * scale,
-        y + (h - 0.17) * 40 * scale,
-        Math.round((22 + 18 * h) * scale),
-      );
-    }
   };
 
   // The chips in flight to their tiles, their comets at speed, and each
@@ -887,25 +947,43 @@ export function createFarFromUltraScene(options: FarFromUltraSceneOptions): FarF
       const flight = parts ? FAR_FROM_ULTRA_FLIGHT.parts : FAR_FROM_ULTRA_FLIGHT.armour;
       const t = plan.t[i];
       if (q >= t) {
-        // Landed: the flash on the tile.
+        // Landed: the unit's lit data-tile face holds on the tile and
+        // resolves into the crystal beneath; a flash as it locks.
+        const hold = (q - t) / TILE_HOLD;
+        if (hold >= 1) continue;
+        const tx = Math.round(ox + plan.x[i] * scale);
+        const ty = Math.round(oy + plan.y[i] * scale);
+        const tw = Math.round(plan.w[i] * scale) || 1;
+        const th = Math.round(plan.h[i] * scale) || 1;
+        const tone = i % 3 === 0 ? toneAccent : toneMain;
+        if (cells && tone < kitCells.unfold.x.length) {
+          context.globalAlpha = 1 - hold * hold;
+          context.drawImage(
+            cells,
+            kitCells.unfold.x[tone] + CELL * (kitCells.unfold.frames - 1),
+            kitCells.unfold.y,
+            CELL,
+            CELL,
+            tx,
+            ty,
+            tw,
+            th,
+          );
+        }
         const f = (q - t) / FAR_FROM_ULTRA_FLIGHT.flash;
-        if (f >= 1) continue;
-        context.globalAlpha = (1 - f) * (parts ? 0.7 : 0.45);
-        context.fillStyle = WHITE;
-        context.fillRect(
-          Math.round(ox + plan.x[i] * scale),
-          Math.round(oy + plan.y[i] * scale),
-          Math.round(plan.w[i] * scale) || 1,
-          Math.round(plan.h[i] * scale) || 1,
-        );
+        if (f < 1) {
+          context.globalAlpha = (1 - f) * (parts ? 0.6 : 0.4);
+          context.fillStyle = WHITE;
+          context.fillRect(tx, ty, tw, th);
+          spark(
+            context,
+            Math.min(3, Math.floor(f * 4)),
+            ox + plan.cx[i] * scale,
+            oy + plan.cy[i] * scale,
+            Math.round((parts ? 44 : 32) * scale),
+          );
+        }
         context.globalAlpha = 1;
-        spark(
-          context,
-          Math.min(3, Math.floor(f * 4)),
-          ox + plan.cx[i] * scale,
-          oy + plan.cy[i] * scale,
-          Math.round((parts ? 46 : 34) * scale),
-        );
         continue;
       }
       const u = (q - (t - flight)) / flight;
@@ -923,16 +1001,51 @@ export function createFarFromUltraScene(options: FarFromUltraSceneOptions): FarF
         const x = ox + POSE[0] * scale;
         const y = oy + POSE[1] * scale;
         const tone = j % 3 === 0 ? toneAccent : toneMain;
-        if (uc > 0.12 && uc < 0.78 && plan.chipHash[j] > 0.45) {
+        if (uc < 0.22 && cells) {
+          // Far out: the unit defocused, for depth.
+          const k = Math.round(CHIP * plan.chipSize[j] * 1.6 * scale) | 1;
+          context.globalAlpha = 0.35 + 0.65 * (uc / 0.22);
+          context.drawImage(
+            cells,
+            kitCells.bokeh.x[tone],
+            kitCells.bokeh.y[tone],
+            CELL,
+            CELL,
+            Math.round(x - k / 2),
+            Math.round(y - k / 2),
+            k,
+            k,
+          );
+          context.globalAlpha = 1;
+        } else if (uc < 0.78 && plan.chipHash[j] > 0.45) {
           const speed = Math.sqrt(POSE[2] * POSE[2] + POSE[3] * POSE[3]) * scale;
           const k = Math.min(1.8, Math.max(0.6, speed / (kitComets.tail[1] * 14)));
           comet(context, cometRow, POSE[2], POSE[3], x, y, k);
+        } else if (uc > 0.8 && cells && tone < kitCells.unfold.x.length) {
+          // Locking in: the disc squares into its lit data tile, growing to
+          // the tile it will hold.
+          const un = (uc - 0.8) / 0.2;
+          const k0 = CHIP * plan.chipSize[j] * 0.95 * scale;
+          const k1 = plan.w[i] * scale;
+          const k = Math.round(k0 + (k1 - k0) * un) | 1;
+          const frameK = Math.min(
+            kitCells.unfold.frames - 1,
+            Math.floor(un * kitCells.unfold.frames),
+          );
+          context.drawImage(
+            cells,
+            kitCells.unfold.x[tone] + CELL * frameK,
+            kitCells.unfold.y,
+            CELL,
+            CELL,
+            Math.round(x - k / 2),
+            Math.round(y - k / 2),
+            k,
+            k,
+          );
         } else {
           const k = Math.round(CHIP * plan.chipSize[j] * (1.25 - 0.3 * uc) * scale) | 1;
-          const f =
-            uc > 0.88
-              ? kitCells.lockFrame
-              : litFrame(Math.floor(plan.chipHash[j] * LIT + uc * 40) % LIT);
+          const f = litFrame(Math.floor(plan.chipHash[j] * LIT + uc * 40) % LIT);
           chip(context, tone, f, x, y, k);
         }
       }
@@ -983,6 +1096,66 @@ export function createFarFromUltraScene(options: FarFromUltraSceneOptions): FarF
     if (v >= 100) context.fillText(DIGITS[hundreds], x - 3 * digitW, y);
   };
 
+  // One edge of a wireframe being traced: draws up to `left` of its length
+  // from (ax, ay) toward (bx, by) and returns what remains.
+  const edge = (
+    context: CanvasRenderingContext2D,
+    ax: number,
+    ay: number,
+    bx: number,
+    by: number,
+    left: number,
+  ) => {
+    if (left <= 0) return 0;
+    const length = Math.sqrt((bx - ax) * (bx - ax) + (by - ay) * (by - ay));
+    const f = left >= length ? 1 : left / length;
+    context.lineTo(ax + (bx - ax) * f, ay + (by - ay) * f);
+    return left - length;
+  };
+
+  // A panel's hex lattice (its fill sweeping outward from the inner edge):
+  // one path of the cells whose centre lies in [from, to) of the sweep,
+  // measured outward from the inner edge, 0 → 1.
+  const hexes = (
+    context: CanvasRenderingContext2D,
+    xo: number,
+    hh: number,
+    radius: number,
+    from: number,
+    to: number,
+  ) => {
+    const w = Math.abs(xo);
+    const dir = xo < 0 ? -1 : 1;
+    const dx = radius * 1.732;
+    const dy = radius * 1.5;
+    const cols = Math.floor(w / dx);
+    const rows = Math.floor((2 * hh) / dy);
+    context.beginPath();
+    for (let r = 0; r <= rows; r += 1) {
+      const cy = -hh + radius + r * dy;
+      const shift = r % 2 ? dx / 2 : 0;
+      for (let c = 0; c <= cols; c += 1) {
+        const across = radius + c * dx + shift;
+        if (across > w - radius * 0.5) continue;
+        const u = across / w;
+        if (u < from || u >= to) continue;
+        const cx = dir * across;
+        context.moveTo(cx, cy - radius * 0.92);
+        context.lineTo(cx + dx * 0.46, cy - radius * 0.46);
+        context.lineTo(cx + dx * 0.46, cy + radius * 0.46);
+        context.lineTo(cx, cy + radius * 0.92);
+        context.lineTo(cx - dx * 0.46, cy + radius * 0.46);
+        context.lineTo(cx - dx * 0.46, cy - radius * 0.46);
+        context.closePath();
+      }
+    }
+    context.fill();
+  };
+
+  // A panel's emergence: projected from an emitter on the arm (a beam,
+  // then a cone), its wireframe tracing itself, a hex fill sweeping
+  // outward, the glass resolving through a glitch and a scan, the
+  // read-outs typing on, then settling; data packets travel its tether.
   const panelPass = (context: CanvasRenderingContext2D) => {
     const q = S[S_Q];
     const ratio = V[V_RATIO];
@@ -991,81 +1164,158 @@ export function createFarFromUltraScene(options: FarFromUltraSceneOptions): FarF
       const v = span(q, P[base + PM_T0], P[base + PM_T1]);
       if (v <= 0) continue;
       const kind = panels[p].kind;
-      const u = easeOut(span(v, 0, 0.35));
-      const a = span(v, 0.22, 0.5);
-      const s = span(v, 0.3, 0.72);
-      const settleV = span(v, 0.7, 1);
+      const beam = easeOut(span(v, EM.beam[0], EM.beam[1]));
+      const cone = bell(span(v, EM.cone[0], EM.cone[1]));
+      const wire = easeOut(span(v, EM.wire[0], EM.wire[1]));
+      const fill = span(v, EM.fill[0], EM.fill[1]);
+      const glass = span(v, EM.glass[0], EM.glass[1]);
+      const glitch = span(v, EM.glitch[0], EM.glitch[1]);
+      const s = span(v, EM.scan[0], EM.scan[1]);
+      const a = span(v, EM.type[0] - 0.06, EM.type[0] + 0.08);
+      const settleV = span(v, EM.settle[0], EM.settle[1]);
+      const sync = bell(span(q, SYNC[0] + p * 0.006, SYNC[1] + p * 0.006));
       const w = P[base + PM_W];
       const x0 = P[base + PM_X0];
       const x1 = x0 + w;
+      const xo = x0 < 0 ? x0 : x1;
       const hh = P[base + PM_HH];
       const head = P[base + PM_HEAD];
       const pad = P[base + PM_PAD];
       const line = P[base + PM_LINE];
       const ox = P[base + PM_OX];
       const oy = P[base + PM_OY];
-      // The tether, from the inner edge's midpoint to the arm.
-      context.globalAlpha = 0.8 * a;
-      context.strokeStyle = AQUA;
-      context.lineWidth = ratio;
-      context.beginPath();
-      context.moveTo(ox, oy);
-      context.lineTo(P[base + PM_TX], P[base + PM_TY]);
-      context.stroke();
+      const tx = P[base + PM_TX];
+      const ty = P[base + PM_TY];
+      // The emitter on the arm, its beam to the panel's inner edge, and the
+      // projection cone opening to that edge.
       context.fillStyle = WHITE;
+      context.globalAlpha = 0.95;
       context.beginPath();
-      context.arc(P[base + PM_TX], P[base + PM_TY], 2.2 * ratio, 0, TAU);
+      context.arc(tx, ty, (2 + 4 * bell(span(v, 0, 0.2))) * ratio, 0, TAU);
       context.fill();
-      // The panel's frame, unfolding outward from its inner edge (x scaled
-      // about the origin, which sits on that edge).
-      const grow = u * (1 + 0.05 * bell(span(v, 0.3, 0.5)));
+      context.strokeStyle = WHITE;
+      context.lineWidth = ratio * (1 + 1.5 * (1 - beam));
+      context.globalAlpha = 0.5 + 0.5 * (1 - settleV) + 0.5 * sync;
+      context.beginPath();
+      context.moveTo(tx, ty);
+      context.lineTo(tx + (ox - tx) * beam, ty + (oy - ty) * beam);
+      context.stroke();
+      if (cone > 0) {
+        const ax = ox - P[base + PM_EYX] * hh;
+        const ay = oy - P[base + PM_EYY] * hh;
+        const bx = ox + P[base + PM_EYX] * hh;
+        const by = oy + P[base + PM_EYY] * hh;
+        context.fillStyle = AQUA;
+        context.globalAlpha = 0.16 * cone;
+        context.beginPath();
+        context.moveTo(tx, ty);
+        context.lineTo(ax, ay);
+        context.lineTo(bx, by);
+        context.closePath();
+        context.fill();
+        context.strokeStyle = AQUA;
+        context.lineWidth = ratio;
+        context.globalAlpha = 0.45 * cone;
+        context.stroke();
+      }
+      // Data packets along the tether, body → panel.
+      if (v > EM.wire[0]) {
+        context.fillStyle = WHITE;
+        context.globalAlpha = 0.9;
+        for (let m = 0; m < 3; m += 1) {
+          const f = (q * 7 + m / 3 + p * 0.17) % 1;
+          context.beginPath();
+          context.arc(tx + (ox - tx) * f, ty + (oy - ty) * f, 1.6 * ratio, 0, TAU);
+          context.fill();
+        }
+      }
       context.setTransform(
-        P[base + PM_EXX] * grow,
-        P[base + PM_EXY] * grow,
+        P[base + PM_EXX],
+        P[base + PM_EXY],
         P[base + PM_EYX],
         P[base + PM_EYY],
         ox,
         oy,
       );
-      const glow = 1 + 0.45 * (1 - settleV);
+      // The wireframe tracing itself from the inner edge's midpoint.
+      if (wire > 0 && glass < 1) {
+        const perimeter = 4 * hh + 2 * w;
+        let left = perimeter * wire;
+        context.strokeStyle = AQUA;
+        context.lineWidth = ratio;
+        context.globalAlpha = 0.95 * (1 - 0.6 * glass);
+        context.beginPath();
+        context.moveTo(0, 0);
+        left = edge(context, 0, 0, 0, -hh, left);
+        left = edge(context, 0, -hh, xo, -hh, left);
+        left = edge(context, xo, -hh, xo, hh, left);
+        left = edge(context, xo, hh, 0, hh, left);
+        edge(context, 0, hh, 0, 0, left);
+        context.stroke();
+      }
+      // The hex fill: a bright band at the sweep's front, a dim lattice
+      // behind it that fades as the glass resolves.
+      if (fill > 0) {
+        const radius = (coarse ? 5 : 6) * ratio;
+        const behind = 0.16 * (1 - span(v, EM.fill[1], EM.glitch[1]));
+        if (behind > 0) {
+          context.fillStyle = AQUA;
+          context.globalAlpha = behind;
+          hexes(context, xo, hh, radius, 0, fill);
+        }
+        if (fill < 1) {
+          context.fillStyle = WHITE;
+          context.globalAlpha = 0.55;
+          hexes(context, xo, hh, radius, Math.max(0, fill - 0.1), fill + 0.04);
+        }
+      }
+      const glow = 1 + 0.45 * (1 - settleV) + 0.9 * sync;
       // The glass: an ink backing (the read-outs stay legible over the
       // figure's brightest crystal), the blue tint, the lit header.
-      context.globalAlpha = 0.5;
-      context.fillStyle = INK;
-      context.fillRect(x0, -hh, w, 2 * hh);
-      context.globalAlpha = 0.18 * glow;
-      context.fillStyle = DEEP;
-      context.fillRect(x0, -hh, w, 2 * hh);
-      context.globalAlpha = 0.34 * glow;
-      context.fillStyle = AQUA;
-      context.fillRect(x0, -hh, w, head);
-      context.globalAlpha = 0.9;
-      context.strokeStyle = AQUA;
-      context.lineWidth = ratio;
-      context.strokeRect(x0 + 0.5, -hh + 0.5, w - 1, 2 * hh - 1);
-      // The corner brackets.
-      const b = Math.round(8 * ratio);
-      context.strokeStyle = WHITE;
-      context.lineWidth = 1.5 * ratio;
-      context.beginPath();
-      context.moveTo(x0, -hh + b);
-      context.lineTo(x0, -hh);
-      context.lineTo(x0 + b, -hh);
-      context.moveTo(x1 - b, -hh);
-      context.lineTo(x1, -hh);
-      context.lineTo(x1, -hh + b);
-      context.moveTo(x1, hh - b);
-      context.lineTo(x1, hh);
-      context.lineTo(x1 - b, hh);
-      context.moveTo(x0 + b, hh);
-      context.lineTo(x0, hh);
-      context.lineTo(x0, hh - b);
-      context.stroke();
-      // The seam at the leading (outer) edge while it unfolds.
-      if (u < 1) {
-        context.globalAlpha = 1 - u;
-        context.fillStyle = WHITE;
-        context.fillRect((x0 < 0 ? x0 : x1) - 1.5 * ratio, -hh, 3 * ratio, 2 * hh);
+      if (glass > 0) {
+        context.globalAlpha = 0.5 * glass;
+        context.fillStyle = INK;
+        context.fillRect(x0, -hh, w, 2 * hh);
+        context.globalAlpha = 0.18 * glow * glass;
+        context.fillStyle = DEEP;
+        context.fillRect(x0, -hh, w, 2 * hh);
+        context.globalAlpha = 0.34 * glow * glass;
+        context.fillStyle = AQUA;
+        context.fillRect(x0, -hh, w, head);
+        context.globalAlpha = 0.9 * glass;
+        context.strokeStyle = AQUA;
+        context.lineWidth = ratio * (1 + sync);
+        context.strokeRect(x0 + 0.5, -hh + 0.5, w - 1, 2 * hh - 1);
+        // The corner brackets.
+        const b = Math.round(8 * ratio);
+        context.strokeStyle = WHITE;
+        context.lineWidth = 1.5 * ratio;
+        context.beginPath();
+        context.moveTo(x0, -hh + b);
+        context.lineTo(x0, -hh);
+        context.lineTo(x0 + b, -hh);
+        context.moveTo(x1 - b, -hh);
+        context.lineTo(x1, -hh);
+        context.lineTo(x1, -hh + b);
+        context.moveTo(x1, hh - b);
+        context.lineTo(x1, hh);
+        context.lineTo(x1 - b, hh);
+        context.moveTo(x0 + b, hh);
+        context.lineTo(x0, hh);
+        context.lineTo(x0, hh - b);
+        context.stroke();
+      }
+      // The glitch as the content resolves: a few slices of the glass
+      // displaced sideways, settling.
+      if (glitch > 0 && glitch < 1) {
+        for (let g = 0; g < 4; g += 1) {
+          const yy = -hh + 2 * hh * naniteHash(g + p * 4, 61);
+          const hg = (2 + 6 * naniteHash(g + p * 4, 62)) * ratio;
+          const dx = (naniteHash(g + p * 4, 63) - 0.5) * 16 * ratio * (1 - glitch);
+          context.fillStyle = g % 2 ? WHITE : AQUA;
+          context.globalAlpha = 0.4 * bell(glitch);
+          context.fillRect(x0 + dx, yy, w, hg);
+        }
       }
       // The contents.
       if (a > 0) {
@@ -1097,7 +1347,8 @@ export function createFarFromUltraScene(options: FarFromUltraSceneOptions): FarF
           context.stroke();
           context.beginPath();
           for (let n = 0; n < 12; n += 1) {
-            const an = (TAU * n) / 12;
+            // The tick ring keeps turning with the scroll once the dial is live.
+            const an = (TAU * n) / 12 + q * TAU * 0.3;
             context.moveTo(cx + r * 0.86 * Math.cos(an), cy + r * 0.86 * Math.sin(an));
             context.lineTo(cx + r * Math.cos(an), cy + r * Math.sin(an));
           }
@@ -1124,7 +1375,9 @@ export function createFarFromUltraScene(options: FarFromUltraSceneOptions): FarF
           const ly = cy + r + pad + line / 2;
           context.fillStyle = AQUA;
           for (let l = 0; l < 3; l += 1) {
-            const visible = Math.floor(span(v, 0.36 + 0.08 * l, 0.6 + 0.08 * l) * (CHARS + 1));
+            const visible = Math.floor(
+              span(v, EM.type[0] + 0.07 * l, EM.type[0] + 0.22 + 0.07 * l) * (CHARS + 1),
+            );
             type(
               context,
               lines[p][l],
@@ -1145,9 +1398,11 @@ export function createFarFromUltraScene(options: FarFromUltraSceneOptions): FarF
           const floor = hh - pad - 3 * line;
           const height = floor - top - pad;
           for (let n = 0; n < bars; n += 1) {
+            // Each bar rises, overshoots and settles, then breathes with the scroll.
+            const rise = span(v, EM.type[0] + 0.05 * n, EM.type[0] + 0.3 + 0.05 * n);
             const level =
               (0.35 + 0.65 * naniteHash(n + p * 8, 31)) *
-              smooth(span(v, 0.3 + 0.05 * n, 0.6 + 0.05 * n));
+              (smooth(rise) + 0.12 * bell(rise) + 0.04 * Math.sin(q * 60 + n) * settleV);
             const x = left + n * (bw2 + gap);
             context.fillStyle = DEEP;
             context.globalAlpha = 0.5 * a;
@@ -1160,7 +1415,9 @@ export function createFarFromUltraScene(options: FarFromUltraSceneOptions): FarF
           }
           context.fillStyle = AQUA;
           for (let l = 0; l < 3; l += 1) {
-            const visible = Math.floor(span(v, 0.36 + 0.08 * l, 0.6 + 0.08 * l) * (CHARS + 1));
+            const visible = Math.floor(
+              span(v, EM.type[0] + 0.07 * l, EM.type[0] + 0.22 + 0.07 * l) * (CHARS + 1),
+            );
             type(
               context,
               lines[p][l],
@@ -1174,7 +1431,9 @@ export function createFarFromUltraScene(options: FarFromUltraSceneOptions): FarF
         } else if (kind === "text") {
           context.fillStyle = AQUA;
           for (let l = 0; l < LINES; l += 1) {
-            const visible = Math.floor(span(v, 0.3 + 0.07 * l, 0.5 + 0.07 * l) * (CHARS + 1));
+            const visible = Math.floor(
+              span(v, EM.type[0] + 0.06 * l, EM.type[0] + 0.18 + 0.06 * l) * (CHARS + 1),
+            );
             context.fillStyle = l === LINES - 1 ? WHITE : AQUA;
             type(
               context,
@@ -1193,7 +1452,8 @@ export function createFarFromUltraScene(options: FarFromUltraSceneOptions): FarF
           const cw = inner / cols;
           const ch = line * 0.8;
           for (let n = 0; n < cols * rowsN; n += 1) {
-            const lit = naniteHash(n + p * 64, 41) < smooth(s) * 0.9;
+            // The cells keep shifting with the scroll: live traffic.
+            const lit = (naniteHash(n + p * 64, 41) + q * 0.7 * settleV) % 1 < smooth(s) * 0.8;
             context.fillStyle = lit ? AQUA : DEEP;
             context.globalAlpha = (lit ? 0.75 : 0.3) * a;
             context.fillRect(
@@ -1220,23 +1480,29 @@ export function createFarFromUltraScene(options: FarFromUltraSceneOptions): FarF
           context.beginPath();
           for (let n = 0; n < points; n += 1) {
             const x = left + (inner * n) / (points - 1);
+            // The wave traces in left to right, then keeps drifting with the scroll.
+            const traced = smooth(
+              span(v, EM.type[0] + (0.3 * n) / points, EM.type[0] + 0.2 + (0.3 * n) / points),
+            );
             const y =
               mid -
-              amp *
-                (naniteHash(n + p * 32, 51) - 0.5) *
-                2 *
-                smooth(span(v, 0.3 + (0.4 * n) / points, 0.5 + (0.4 * n) / points));
+              amp * (naniteHash(n + p * 32, 51) - 0.5) * 2 * traced -
+              amp * 0.25 * Math.sin(q * 40 + n * 0.9) * settleV;
             if (n === 0) context.moveTo(x, y);
             else context.lineTo(x, y);
           }
           context.stroke();
-          if (s > 0 && s < 1) {
+          // The cursor crosses while it scans, then keeps sweeping.
+          const cursor = s < 1 ? s : (q * 2.5 + p * 0.3) % 1;
+          if (s > 0) {
             context.fillStyle = WHITE;
-            context.fillRect(left + inner * s, top, 1.5 * ratio, floor - top);
+            context.fillRect(left + inner * cursor, top, 1.5 * ratio, floor - top);
           }
           context.fillStyle = AQUA;
           for (let l = 0; l < 3; l += 1) {
-            const visible = Math.floor(span(v, 0.36 + 0.08 * l, 0.6 + 0.08 * l) * (CHARS + 1));
+            const visible = Math.floor(
+              span(v, EM.type[0] + 0.07 * l, EM.type[0] + 0.22 + 0.07 * l) * (CHARS + 1),
+            );
             type(
               context,
               lines[p][l],
@@ -1249,9 +1515,11 @@ export function createFarFromUltraScene(options: FarFromUltraSceneOptions): FarF
           }
         }
       }
-      // The scan line sweeping down the panel.
-      if (s > 0 && s < 1) {
-        const y = -hh + 2 * hh * s;
+      // The scan line sweeping down the panel; the sync pulse crosses it
+      // again, once, at the finish.
+      const sweep = s > 0 && s < 1 ? s : sync > 0 ? S[S_SYNC] : -1;
+      if (sweep >= 0 && sweep <= 1) {
+        const y = -hh + 2 * hh * sweep;
         context.fillStyle = WHITE;
         context.globalAlpha = 0.9;
         context.fillRect(x0, y, w, 1.5 * ratio);
@@ -1297,7 +1565,13 @@ export function createFarFromUltraScene(options: FarFromUltraSceneOptions): FarF
         context.stroke();
         context.beginPath();
         const ticks = 16 + 8 * r;
-        const turn = q * (r % 2 ? -5 : 4) + n;
+        // Counter-rotating, decelerating into alignment; the sync pulse later.
+        const turn = (r % 2 ? -2.4 : 1.8) * easeOut(open) + n;
+        const pulse = bell(S[S_SYNC]);
+        if (pulse > 0) {
+          context.globalAlpha = Math.min(1, context.globalAlpha + 0.5 * pulse);
+          context.lineWidth = ratio * (1.4 + 1.2 * pulse);
+        }
         for (let k = 0; k < ticks; k += 1) {
           const a = (TAU * k) / ticks + turn;
           const cos = Math.cos(a);

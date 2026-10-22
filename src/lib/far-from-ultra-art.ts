@@ -198,8 +198,30 @@ export const FAR_FROM_ULTRA_HUD = {
     { cx: 246, cy: 690, rx: 62, ry: 20, at: 0.36, span: 0.34 },
     { cx: 778, cy: 690, rx: 62, ry: 20, at: 0.4, span: 0.34 },
   ],
-  crown: { cx: 512, cy: 54, rx: 176, ry: 30, at: 0.52, span: 0.4, label: "ULTRA 60S" },
+  /** The crown gauge starts after the system sync (FAR_FROM_ULTRA_SYNC). */
+  crown: { cx: 512, cy: 54, rx: 176, ry: 30, at: 0.86, span: 0.14, label: "ULTRA 60S" },
 } as const;
+
+/** The system sync (progress): one pulse through every panel, tether and
+ * ring at once, once the last interface has settled and before the crown
+ * gauge starts. */
+export const FAR_FROM_ULTRA_SYNC = [0.885, 0.925] as const;
+
+/** A panel's emergence, as shares of its own window: the emitter's beam and
+ * projection cone, the wireframe tracing itself, the hex fill sweeping
+ * outward, the content resolving through a glitch and scan, the read-outs
+ * typing on, then settling. */
+export const FAR_FROM_ULTRA_EMERGE = {
+  beam: [0, 0.12],
+  cone: [0.06, 0.3],
+  wire: [0.1, 0.34],
+  fill: [0.28, 0.52],
+  glass: [0.32, 0.5],
+  glitch: [0.46, 0.62],
+  scan: [0.5, 0.72],
+  type: [0.5, 0.86],
+  settle: [0.72, 1],
+} as const satisfies Record<string, readonly [number, number]>;
 
 /** The HUD's face (the stage sheets' --dx-hud; Michroma's subset is A–Z,
  * digits and / - . : + # % & · | < >, so the read-outs use only those). */

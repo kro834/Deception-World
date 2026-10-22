@@ -30,6 +30,10 @@ export type FarFromUltraCells = {
     readonly y: readonly number[];
   };
   readonly spark: { readonly x: number; readonly y: number; readonly frames: number };
+  /** The unit squaring into a lit data tile, tones 0–2: (x[t] + cell·k, y), k 0–frames−1. */
+  readonly unfold: { readonly y: number; readonly frames: number; readonly x: readonly number[] };
+  /** The unit defocused, for depth. */
+  readonly bokeh: { readonly x: readonly number[]; readonly y: readonly number[] };
 };
 
 export type FarFromUltraComets = {
