@@ -151,10 +151,17 @@ async function decodeImageAsset(url: string, signal: AbortSignal, priority: Asse
     image.src = url;
     choosing.set(url, image);
     if (typeof image.decode === "function") {
-      void image.decode().then(
-        () => finish(image.naturalWidth > 0),
-        () => finish(false),
-      );
+      try {
+        void image.decode().then(
+          () => finish(image.naturalWidth > 0),
+          () => finish(false),
+        );
+      } catch {
+        // A decoder may throw before returning its promise. Release the same
+        // responsive candidate and abort listener as an asynchronous failure;
+        // otherwise a failed image can still be picked by an entry cover.
+        finish(false);
+      }
     }
   });
 }

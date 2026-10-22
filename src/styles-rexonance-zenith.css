@@ -2674,6 +2674,16 @@ html[data-family="special"]
     > .rxs-form-morph {
     display: none;
   }
+
+  /* The media setting may change while the canvas owns the picture. */
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    .rxs-stage-panel
+    figure
+    > img {
+    visibility: visible !important;
+  }
 }
 
 /* Until the lower sections render after a covered arrival, the page keeps

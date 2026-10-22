@@ -51,6 +51,7 @@ async function fixture(t, mode) {
       this.attributes.delete(name);
     }
     decode() {
+      if (mode === "sync-throw") throw new Error("decoder threw before returning a promise");
       if (mode === "failure") return Promise.reject(new Error("decoder failed"));
       if (mode === "pending")
         return new Promise((resolve) => {
@@ -98,6 +99,20 @@ test("a failed warm-up also releases responsive attributes without claiming a wa
   assert.equal(f.images[0].src, "");
   assert.equal(f.loader.assetsWarmed([source]), false);
   assert.equal(f.loader.warmedSource(source), source);
+});
+
+test("a synchronous decoder failure releases its candidate and remains retryable", async (t) => {
+  const f = await fixture(t, "sync-throw");
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    await f.loader.preloadAssets([source], () => {});
+    const image = f.images[attempt];
+    assert.deepEqual(image.removed, ["src", "srcset", "sizes"]);
+    assert.equal(image.onload, null);
+    assert.equal(image.onerror, null);
+    assert.equal(f.loader.assetsWarmed([source]), false);
+    assert.equal(f.loader.warmedSource(source), source, "a failed candidate cannot feed the entry cover");
+  }
+  assert.equal(f.images.length, 2, "failure releases the shared in-flight request for retry");
 });
 
 test("a cancelled decode releases all request attributes and cannot record a late success", async (t) => {

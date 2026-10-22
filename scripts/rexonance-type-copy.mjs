@@ -100,7 +100,8 @@ export function rexonanceTypeCopy() {
 
   // Every chapter heading's lede: the header minus its kicker and its title.
   const sectionLedes = [...page.matchAll(/<header className="rxs-section-heading rxs-reveal">([\s\S]*?)<\/header>/g)].map(
-    ([, inner]) => jsxText(inner.replace(/<p>[\s\S]*?<\/p>/, "").replace(/<h2[\s\S]*?<\/h2>/, "")),
+    ([, inner]) =>
+      jsxText(inner.replace(/<p(?:\s[^>]*)?>[\s\S]*?<\/p>/, "").replace(/<h2[\s\S]*?<\/h2>/, "")),
   );
   const guideLede = jsxText(between(guide, "</h2>", '<p className="rxs-assembly-status"'));
 
