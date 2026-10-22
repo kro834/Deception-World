@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ComponentType } from "react";
 import { createPortal } from "react-dom";
+import { useRouter } from "@tanstack/react-router";
 import type { DreamScreeningRoom } from "./dream-screening-room";
 import { prepareScreeningStyle } from "./dream-screening-style";
 
@@ -15,6 +16,7 @@ export function DreamScreeningLauncher({
   onActiveChange: (active: boolean) => void;
   onSelection: (index: number) => void;
 }) {
+  const router = useRouter();
   const [Room, setRoom] = useState<ScreeningRoom | null>(null);
   const [initialIndex, setInitialIndex] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
@@ -22,6 +24,7 @@ export function DreamScreeningLauncher({
   const [hydrated, setHydrated] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const generation = useRef(0);
+  const pending = useRef(false);
 
   useEffect(() => {
     setHydrated(true);
@@ -30,8 +33,22 @@ export function DreamScreeningLauncher({
     };
   }, []);
 
+  useEffect(
+    () =>
+      router.history.subscribe(({ action }) => {
+        if (!pending.current || !["BACK", "FORWARD", "GO"].includes(action.type)) return;
+        pending.current = false;
+        generation.current += 1;
+        setLoading(false);
+        setFailed(false);
+        onActiveChange(false);
+      }),
+    [onActiveChange, router],
+  );
+
   const open = async () => {
     const request = ++generation.current;
+    pending.current = true;
     const selected = index;
     onActiveChange(true);
     setLoading(true);
@@ -49,7 +66,10 @@ export function DreamScreeningLauncher({
       setFailed(true);
       onActiveChange(false);
     } finally {
-      if (request === generation.current) setLoading(false);
+      if (request === generation.current) {
+        pending.current = false;
+        setLoading(false);
+      }
     }
   };
 
