@@ -233,17 +233,11 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-se
 }
 
 /* The script column beside the stage (1100–1299: an iPad in landscape, a
-   1280 laptop) is narrow: P14's running head reaches the index, and the
-   headline's first line 「同じエーテルで、」 no longer fits at 4.4vw, so its
-   comma fell to a line of its own. The two heads set their headline to
-   the column (eight characters always fit), and the index moves to the
-   foot of the head, beside the intro's last line (the intro stops short
-   of the column), without its lead. */
+   1280 laptop) is narrow: P14's running head reaches the index, so the
+   index moves to the foot of the head, beside the intro's last line (the
+   intro stops short of the column), without its lead. (The headlines fit
+   the column by TYPE's 1100–1299 size.) */
 @media (min-width: 1100px) and (max-width: 1299.98px) {
-  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > :is(#performance, #p14) > .rxs-section-heading > h2 {
-    font-size: calc(4.9vw - 12px);
-  }
-
   /* grid-row auto: the head's padding box, not its first (running head)
      row, is then the index's containing block in the block axis. */
   html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > :is(#performance, #p14) > .rxs-section-heading > .rxa-index {
@@ -406,6 +400,32 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-proc
 }
 
 /* ================================================================
+   The forged figures' paint box
+   ================================================================ */
+/* WebKit lays a CJK glyph inside a forged figure (約0.06ms, 0.00021秒)
+   out about 3px wider than the box it gives the run, and FORGE paints the
+   figures' ice through the text (background-clip: text) inside that box
+   only, so on an iPad or iPhone the run's last glyph lost its edge (the
+   s of ms). The paint box reaches 0.12em past the figure; the figure's
+   place is unchanged (the counter inherits the padding, so it still sits
+   over its digits). :not(#rxa) outranks the id-scoped resets of the
+   figures' margins (STAGE's #p14 dd). */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page:not(#rxa)
+  :is(
+    .rxs-headline-metrics strong,
+    .rxs-specs strong,
+    .rxs-p14-copy dd,
+    .rxs-comparison-metrics header strong,
+    .rxs-comparison-result b,
+    .rxs-p14-values strong
+  ) {
+  padding-inline-end: 0.12em;
+  margin-inline-end: -0.12em;
+}
+
+/* ================================================================
    02 P14: the three readings as cells, the comparator's rows
    ================================================================ */
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-copy > dl > div {
@@ -446,78 +466,8 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-
   font-size: 12px;
 }
 
-/* The two reading columns line up through all nine rows, as on an
-   instrument (each row sized its own columns, so the base column jumped
-   with the width of the P14 figure: 900% / 約11.4% / 160.3%). The list,
-   each row and its pair of readings share one grid through subgrid; the
-   gutters become the readings' own inset. */
-@supports (grid-template-columns: subgrid) {
-  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .rxs-p14-metrics {
-    grid-template-columns: minmax(0, 1fr) auto auto;
-    column-gap: 0;
-  }
-
-  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .rxs-p14-metrics > article {
-    grid-column: 1 / -1;
-    grid-template-columns: subgrid;
-    grid-template-areas: none;
-    column-gap: 0;
-  }
-
-  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .rxs-p14-metrics > article > small {
-    grid-area: 1 / 1;
-  }
-
-  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .rxs-p14-metrics > article > p {
-    grid-area: 2 / 1;
-  }
-
-  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .rxs-p14-metrics > article > .rxs-p14-values {
-    grid-area: 1 / 2 / 3 / 4;
-    grid-template-columns: subgrid;
-    column-gap: 0;
-  }
-
-  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .rxs-p14-values > span:first-child {
-    padding-left: clamp(16px, 2vw, 28px);
-  }
-
-  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .rxs-p14-values > span:last-child {
-    padding-left: clamp(14px, 1.6vw, 24px);
-  }
-
-  /* Phones: the caption across the row, the readings under it at the right. */
-  @media (max-width: 760px) {
-    html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .rxs-p14-metrics > article > small {
-      grid-area: 1 / 1 / 2 / 4;
-    }
-
-    html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .rxs-p14-metrics > article > .rxs-p14-values {
-      grid-area: 2 / 2 / 3 / 4;
-    }
-
-    html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .rxs-p14-values > span:first-child {
-      padding-left: 12px;
-    }
-
-    html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .rxs-p14-values > span:last-child {
-      padding-left: 12px;
-    }
-  }
-
-  /* The narrowest phones: the delta takes its own line, the readings the
-     row under it (9.0倍 / +800% no longer runs into the base column). */
-  @media (max-width: 374.98px) {
-    html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .rxs-p14-metrics > article > p {
-      grid-area: 2 / 1 / 3 / 4;
-    }
-
-    html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .rxs-p14-metrics > article > .rxs-p14-values {
-      grid-area: 3 / 2 / 4 / 4;
-    }
-  }
-}
-
+/* (The two reading columns: LAYOUT's fixed value columns line every row
+   up, and its P14 column holds the widest figure.) */
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-method-note,
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-comparison-note {
   padding-left: 14px;
