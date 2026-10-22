@@ -940,24 +940,127 @@ html[data-family="library"] .search-page .search-more-option > b {
   text-shadow: 0 0 18px rgb(var(--dx-edition-rgb) / 45%);
 }
 
-/* A see-all bar whose next records have no pictures (世界・用語) showed a
-   run of empty dark panels: along the bar's right side, clear of the kind's
-   outlined mark, each plate keeps its name, set small down its spine. */
+/* The see-all tile's peek: a next record without a picture shows its name
+   whole (round 2). The STAGE plate hid it (a run of empty dark panels), and
+   the first ZENITH pass set it down a 47px band of the bar, where 神聖なる間,
+   東風谷早苗 or “犬”と“イサク”の謎 faded out after two letters.
+
+   A bar (a tile 180px tall or less) captions each plate like an index tab:
+   the name across the top of its column, two lines at most, clear of the
+   count at the bar's lower right. A tall tile (closing a row of cards) sets
+   the name down its column like the cards' spines, under the kind's
+   outlined mark and above the tile's fade, sized from the name's run
+   (record-art.tsx --dxl-plate-em / -n), wrapping to a second line when the
+   run is long. Decorative (aria-hidden): the label and the count carry it. */
+html[data-family="library"] .search-page .search-more-peek > .dxl-art[data-plate="type"] > b {
+  --dxl-plate-ls: 0.08;
+  top: calc(18px + 22cqh);
+  right: 50%;
+  bottom: auto;
+  left: auto;
+  display: block;
+  max-block-size: calc(100cqi - 20px);
+  block-size: auto;
+  inline-size: calc(36cqh - 18px);
+  overflow: hidden;
+  /* The edition's light, lifted toward white: the strip is dimmed as a
+     whole, and a deep tint (Dream's red) read as a shadow on the plate. */
+  color: color-mix(in srgb, rgb(var(--tint-rgb)) 72%, #fff);
+  font-size: clamp(
+    16px,
+    (36cqh - 18px) * 0.92 /
+      (var(--dxl-plate-em, 4) + var(--dxl-plate-n, 4) * var(--dxl-plate-ls)),
+    30px
+  );
+  line-height: 1.12;
+  white-space: normal;
+  line-break: strict;
+  /* A run longer than its line breaks by phrase where the engine reads
+     them (Chrome), else between letters. */
+  word-break: auto-phrase;
+  overflow-wrap: anywhere;
+  translate: 50% 0;
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+
+html[data-family="library"]
+  .search-page
+  .search-more-peek
+  > .dxl-art[data-edition="dream"][data-plate="type"]
+  > b {
+  --dxl-plate-ls: 0.16;
+}
+
+/* The name's words (record-art.tsx peekWords): a second line starts at a
+   word, never inside one that fits its line. */
+html[data-family="library"] .search-page .search-more-peek > .dxl-art[data-plate="type"] > b > span {
+  display: inline-block;
+}
+
+/* The plate's rule runs beside the name, not down an empty column. */
+html[data-family="library"] .search-page .search-more-peek > .dxl-art[data-plate="type"]::before {
+  inset: calc(18px + 22cqh) auto auto 12px;
+  height: calc(36cqh - 18px);
+}
+
 @container (max-height: 180px) {
   html[data-family="library"]
     .search-page
     .search-more-peek
     > .dxl-art[data-plate="type"]
     > b {
-    /* The upper half only: the count holds the bar's lower right. */
     top: 12px;
-    right: auto;
-    bottom: 46%;
-    left: 50%;
-    display: block;
-    color: rgb(var(--tint-rgb) / 72%);
-    font-size: clamp(16px, 1.6vw, 22px);
-    transform: translateX(-50%);
+    right: 10px;
+    left: 24px;
+    /* Two lines at most (WebKit's line clamp marked a whole second word
+       with an ellipsis): a third would be cut, none is that long. */
+    max-block-size: 2.9em;
+    inline-size: auto;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.45;
+    letter-spacing: 0.04em;
+    text-align: start;
+    text-wrap: balance;
+    writing-mode: horizontal-tb;
+    translate: none;
+  }
+
+  /* The tab's tick: the edition's light beside the caption's first line. */
+  html[data-family="library"]
+    .search-page
+    .search-more-peek
+    > .dxl-art[data-plate="type"]::before {
+    inset: 15px auto auto 14px;
+    width: 2px;
+    height: 13px;
+    background: var(--tint);
+    opacity: 0.9;
+  }
+
+  /* The strip comes in over a short edge, so the first column's caption is
+     not read through the fade (it was faint to its last letter at 1024). */
+  html[data-family="library"] .search-page .search-more-option > .search-more-peek {
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 56px);
+    mask-image: linear-gradient(90deg, transparent, #000 56px);
+  }
+}
+
+/* A phone's bar: one record at its right end, a column wide enough for a
+   caption of two whole lines, and the kind's mark set to the bar's left,
+   so the caption never runs through it. */
+@container (max-height: 180px) and (max-width: 559px) {
+  html[data-family="library"] .search-page .search-more-option > .search-more-peek {
+    left: 62%;
+  }
+
+  html[data-family="library"] .search-page .search-more-peek > :nth-child(n + 2) {
+    display: none;
+  }
+
+  html[data-family="library"] .search-page .search-more-option::after {
+    font-size: max(18px, min(calc((62cqi - 28px) / var(--dxl-mark, 7.7)), 47px));
   }
 }
 

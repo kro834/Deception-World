@@ -1,5 +1,17 @@
 import { plateRunStyle, plateWords, type RecordArt } from "@/lib/record-art";
 import { recordImage, type RecordArtSlot } from "@/lib/record-images";
+import { withWordBreaks } from "@/lib/name-breaks";
+
+/** The see-all strip wraps a long name to a second line between its words
+ * (each an inline block, styles-library-zenith.css): the name seams
+ * (仮面ライダー|, ・|) and one after a quoted word's particle
+ * (“犬”と|“イサク”の謎), where WebKit split イ|サク. */
+const peekWords = (words: string) =>
+  withWordBreaks(words)
+    .replace(/([”」』][とのや])(?=[“「『])/gu, "$1\u200b")
+    .split("\u200b")
+    .filter(Boolean)
+    .map((word, index) => <span key={index}>{word}</span>);
 
 /** The window's slot (its decode width) from the frame's variant class. */
 function slotOf(className?: string): RecordArtSlot {
@@ -45,7 +57,9 @@ export function RecordArtFrame({
         />
       ) : (
         // The name's run goes to the sheet, which fits it to the window.
-        <b style={plateRunStyle(plateWords(title))}>{plateWords(title)}</b>
+        <b style={plateRunStyle(plateWords(title))}>
+          {slot === "peek" ? peekWords(plateWords(title)) : plateWords(title)}
+        </b>
       )}
       <i>{art.code}</i>
     </span>
