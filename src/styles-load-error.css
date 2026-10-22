@@ -204,6 +204,102 @@
   }
 }
 
+/* Upright phones (round 2, 2026-10-22): the card ends above the Zeus
+   button's reach, so the button rests at home under it. Its centre stands
+   at 82% of the screen and it keeps 10px from what it avoids, so the page
+   keeps 18dvh + 40px free at its foot and centres the card above that. At
+   390 x 664 (Safari) the button had stepped to the left edge, onto the
+   corner of WORLD ARCHIVEへ戻る (the load-error's plates are not on its list
+   of controls). Under 630px tall the card needs the whole screen. */
+@media (max-width: 559px) and (min-height: 630px) {
+  .app-load-error {
+    padding-bottom: max(env(safe-area-inset-bottom), calc(18dvh + 40px));
+  }
+}
+
+/* Phones held sideways, and any screen under 500px tall: a landscape card.
+   The sign stands beside the heading and the line (left-aligned now), the
+   two plates sit side by side under the rule, and the card ends above the
+   Zeus button's reach as on upright phones. It scrolled 53-60px at 844 x
+   390 and 667 x 375, with the plates under the fold. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .app-load-error {
+    padding-top: max(12px, env(safe-area-inset-top));
+    padding-bottom: max(env(safe-area-inset-bottom), calc(18dvh + 40px));
+  }
+
+  .app-load-error-panel {
+    width: min(100%, 40rem);
+    grid-template-columns: auto minmax(0, 1fr);
+    column-gap: 22px;
+    row-gap: 6px;
+    justify-items: start;
+    padding: 18px 26px;
+    text-align: left;
+  }
+
+  .app-load-error-panel > span:first-child {
+    grid-row: 1 / span 2;
+    align-self: center;
+    width: 60px;
+    height: 60px;
+    margin: 0;
+  }
+
+  .app-load-error-panel > span:first-child svg {
+    width: 30px;
+    height: 30px;
+  }
+
+  .app-load-error h1 {
+    grid-column: 2;
+    align-self: end;
+    font-size: 22px;
+  }
+
+  .app-load-error p {
+    grid-column: 2;
+    align-self: start;
+    line-height: 1.6;
+  }
+
+  /* The plates start under the words (the sign's 60px and the 22px gap). */
+  .app-load-error-actions {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+    margin-top: 6px;
+    padding-top: 14px;
+    padding-inline-start: 82px;
+  }
+}
+
+/* Under 360px tall (568 x 320) the card needs the whole screen. */
+@media (orientation: landscape) and (max-height: 359px) {
+  .app-load-error {
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+  }
+}
+
+/* Desktop: the card at the screen's scale (the 14px line read small on a
+   1920px screen). */
+@media (min-width: 1100px) and (min-height: 600px) {
+  .app-load-error-panel {
+    width: min(100%, 40rem);
+    gap: 20px;
+  }
+
+  .app-load-error p {
+    font-size: 15px;
+  }
+
+  .app-load-error-actions button,
+  .app-load-error-actions a {
+    min-height: 52px;
+    padding-inline: 28px;
+    font-size: 15px;
+  }
+}
+
 @media (forced-colors: active) {
   .app-load-error {
     background: Canvas;
