@@ -17,22 +17,28 @@ export function splitLights(source, sx, sy, w, h, document = globalThis.document
   return job.commit();
 }
 
-// Rows read back a step (round 4: the nanite kit's phased jobs' READ_STRIP,
-// rexonance-suit-extras): every buffer of the pass is a strip of this many
-// rows, so no step reads, allocates or uploads a whole layer.
+// Rows shaded and uploaded a strip at a time (round 4: the nanite kit's
+// phased jobs' READ_STRIP, rexonance-suit-extras): the light and mote bytes
+// are one strip of this many rows, reused strip to strip, and every upload
+// is one strip of one canvas, so no step allocates or uploads a whole layer.
 const SPLIT_STRIP = 248;
 
 /** Setup only makes the job's canvases; the work is phased so that no
- * slice holds a whole layer (round 4: setup and commit were 7–9 ms each):
- * the first step takes the one snapshot (one drawImage of the borrowed
- * source), each later step reads back one strip of SPLIT_STRIP rows (with
- * that strip's output buffers), the rows run to the deadline, and each
- * output canvas is uploaded in a step of its own. commit() then only
- * publishes; partial pixels never escape this job. A short deadline still
- * advances one phase (or one row), so a busy host cannot starve
- * preparation forever; step(Infinity) without an expired idle deadline runs
- * the whole pass. Native readback/put operations and one row are
- * indivisible: the deadline bounds cooperative work, not those native
+ * slice holds a whole layer (round 4: setup and commit were 7–9 ms each).
+ * Every readback is a native round trip to the GPU (sweep 2, F02): with a
+ * GPU-backed source (the scene's driver sheet) each read waits for the GPU
+ * to drain, whatever its size, and one read a strip had made the driver's
+ * split the preparation's longest phase while the reader scrolled (0.9 s,
+ * up to 260 ms a read). So the first step takes the one snapshot (one
+ * drawImage of the borrowed source) and reads it back once, whole; the
+ * strips are then shaded from that memory, rows to the deadline, and each
+ * strip of each output canvas (unlit, lights, motes) is uploaded in a step
+ * of its own, straight into its canvas, as the assembly's layer job does.
+ * commit() then only publishes; partial pixels never escape this job. A
+ * short deadline still advances one phase (or one row), so a busy host
+ * cannot starve preparation forever; step(Infinity) without an expired idle
+ * deadline runs the whole pass. Native readback/put operations and one row
+ * are indivisible: the deadline bounds cooperative work, not those native
  * operations' wall time. The bytes are those of the one-pass split, whatever
  * the slices.
  *
@@ -70,84 +76,97 @@ export function createSplitLightsJob(
     const uc = scratch.getContext("2d", { willReadFrequently: true });
     if (!uc) throw new Error("unavailable light separation context");
     const count = Math.ceil(height / SPLIT_STRIP);
-    // Per strip: the art (turned unlit in place), the light and mote bytes.
-    let strips = Array.from({ length: count }, (_, index) => ({
-      top: index * SPLIT_STRIP,
-      rows: Math.min(SPLIT_STRIP, height - index * SPLIT_STRIP),
-      art: null,
-      glow: null,
-      heat: null,
-    }));
-    const layers = motes ? 3 : 2;
-    let drawn = false;
-    let read = 0; // strips read back
-    let strip = 0; // the row cursor: its strip and byte
+    const targets = motes ? [unlit, lights, motes] : [unlit, lights];
+    // Each output's context, taken at its first upload.
+    const contexts = targets.map(() => null);
+    let read = false;
+    // The region's pixels, read back once (turned unlit in place, so they
+    // are the unlit canvas's), and the current strip's light and mote bytes.
+    let art = null;
+    let glow = null;
+    let heat = null;
+    let view = null; // the current strip's rows of the art
+    let strip = 0; // the current strip, its row cursor (a byte) and uploads
     let at = 0;
-    let uploaded = 0; // output canvases uploaded
+    let uploaded = 0;
     let done = false;
     let cancelled = false;
     let result = null;
     const release = () => {
-      strips = null;
+      art = glow = heat = view = null;
       unlit.width = unlit.height = lights.width = lights.height = 0;
       if (motes) motes.width = motes.height = 0;
       scratch.width = scratch.height = 0;
     };
-    // One phase: the snapshot, one strip's read-back, rows to the deadline,
-    // or one canvas's upload. True once every canvas is uploaded.
+    // One phase: the snapshot and its one read-back, rows to the deadline,
+    // or one strip of one canvas's upload. True once the last is uploaded.
     const advance = (until, idleDeadline) => {
-      if (!drawn) {
+      if (!read) {
         uc.drawImage(source, sx, sy, w, h, 0, 0, w, h);
-        drawn = true;
+        art = uc.getImageData(0, 0, w, h);
+        const rows = Math.min(SPLIT_STRIP, height);
+        glow = uc.createImageData(w, rows);
+        if (motes) heat = uc.createImageData(w, rows);
+        const short = (image, size) => !(image?.data?.length >= size);
+        if (
+          short(art, height * rowBytes) ||
+          short(glow, rows * rowBytes) ||
+          (motes && short(heat, rows * rowBytes))
+        )
+          throw new Error("invalid light separation pixels");
+        // (Its canvas is not needed once the region is in memory.)
+        scratch.width = scratch.height = 0;
+        read = true;
         return false;
       }
-      if (read < count) {
-        const next = strips[read];
-        next.art = uc.getImageData(0, next.top, w, next.rows);
-        next.glow = uc.createImageData(w, next.rows);
-        if (motes) next.heat = uc.createImageData(w, next.rows);
-        read += 1;
-        return false;
-      }
-      if (strip < count) {
-        do {
-          const current = strips[strip];
-          const a = current.art.data;
-          const end = Math.min(at + rowBytes, a.length);
-          separate(a, current.glow.data, current.heat ? current.heat.data : null, at, end);
-          at = end;
-          if (at >= a.length) {
-            strip += 1;
-            at = 0;
-            if (strip >= count) return false;
+      const top = strip * SPLIT_STRIP;
+      const rows = Math.min(SPLIT_STRIP, height - top);
+      const length = rows * rowBytes;
+      if (at < length) {
+        if (!view) {
+          view = art.data.subarray(top * rowBytes, top * rowBytes + length);
+          // The strip's bytes again, from nothing (the last strip's lights
+          // and motes are uploaded).
+          if (strip) {
+            glow.data.fill(0, 0, length);
+            if (heat) heat.data.fill(0, 0, length);
           }
+        }
+        do {
+          const end = Math.min(at + rowBytes, length);
+          separate(view, glow.data, heat ? heat.data : null, at, end);
+          at = end;
         } while (
+          at < length &&
           (until === Infinity || globalThis.performance.now() < until) &&
           (!idleDeadline || idleDeadline.timeRemaining() >= 2)
         );
         return false;
       }
-      // One canvas a step, through the snapshot's canvas as the one-pass
-      // commit did (put, then a GPU-friendly copy): unlit, lights, motes.
-      const key = uploaded === 0 ? "art" : uploaded === 1 ? "glow" : "heat";
-      if (uploaded) uc.clearRect(0, 0, w, h);
-      for (const part of strips) uc.putImageData(part[key], 0, part.top);
-      const target = uploaded === 0 ? unlit : uploaded === 1 ? lights : motes;
-      const output = target.getContext("2d");
-      if (!output)
-        throw new Error(
-          uploaded === 0
-            ? "unavailable unlit output context"
-            : uploaded === 1
-              ? "unavailable light overlay context"
-              : "unavailable mote layer context",
-        );
-      output.drawImage(scratch, 0, 0);
-      for (const part of strips) part[key] = null;
+      // The strip's rows, one canvas a step: unlit (the art's own rows),
+      // lights, motes.
+      let output = contexts[uploaded];
+      if (!output) {
+        output = contexts[uploaded] = targets[uploaded].getContext("2d");
+        if (!output)
+          throw new Error(
+            uploaded === 0
+              ? "unavailable unlit output context"
+              : uploaded === 1
+                ? "unavailable light overlay context"
+                : "unavailable mote layer context",
+          );
+      }
+      if (uploaded === 0) output.putImageData(art, 0, 0, 0, top, w, rows);
+      else output.putImageData(uploaded === 1 ? glow : heat, 0, top, 0, 0, w, rows);
       uploaded += 1;
-      if (uploaded < layers) return false;
-      scratch.width = scratch.height = 0;
-      strips = null;
+      if (uploaded < targets.length) return false;
+      strip += 1;
+      at = 0;
+      uploaded = 0;
+      view = null;
+      if (strip < count) return false;
+      art = glow = heat = null;
       done = true;
       return true;
     };
