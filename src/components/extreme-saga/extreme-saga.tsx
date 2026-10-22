@@ -202,7 +202,7 @@ const COMPARISONS: Record<
     baselineSpecs: [
       "パンチ 98.8t（est.） / キック 198.8t（est.）",
       "ジャンプ 5000.0m（est.） / 100m 0.1秒（est.）",
-      "10,000YOPS / 500Core · KHAOS",
+      "10,000YOPS / ∞Core · KHAOS",
       "300TOPS / 300Core · KOSMOS",
       "P2",
       "Paranormal Realizer Pro",

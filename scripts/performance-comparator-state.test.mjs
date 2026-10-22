@@ -176,7 +176,7 @@ for (const config of cases) {
       );
       assert.equal(selectedBaseline(root, config), value);
       const metrics = byClass(root, "rxs-comparison-metrics");
-      assert.equal(metrics.key, value);
+      assert.equal(metrics.key, config.file === "rexonance-saga" ? null : value);
       assert.equal(metrics.props["data-baseline"], value);
       const expected = h.context.catalog[value];
       if (config.buttons) {
@@ -197,7 +197,7 @@ for (const config of cases) {
       assert.equal(rows.length, expected.metrics.length);
       expected.metrics.forEach((metric, index) => {
         const row = rows[index];
-        assert.equal(row.key, metric.label);
+        assert.equal(row.key, config.file === "rexonance-saga" ? `${value}-${metric.label}` : metric.label);
         for (const label of [
           metric.label,
           metric.current,

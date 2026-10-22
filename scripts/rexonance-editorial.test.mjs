@@ -25,6 +25,7 @@ const component = (name, state = undefined) => {
     {
       exports,
       Event,
+      requestAnimationFrame() {},
       require(name) {
         if (name === "react")
           return {
@@ -82,7 +83,8 @@ test("comparison cards create images only while open and retain the existing for
     [false, true, false],
   );
   assert.ok(buttons.every((node) => node.props["aria-controls"] === "rxs-stage-panel"));
-  buttons[2].props.onClick();
+  buttons[2].props.onClick({ detail: 1 });
+  assert.equal(buttons[1].props.children, "maxを表示中");
   assert.deepEqual(chosen, ["ultra"]);
   opened.props.onToggle({ currentTarget: { open: false } });
   assert.equal(

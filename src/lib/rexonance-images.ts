@@ -36,6 +36,12 @@ export function rexonanceImage(source: string, lazyLayout = false) {
       (lazyLayout ? "auto, " : "") +
       (source.includes("p14")
         ? "(max-width: 767px) 100vw, 40vw"
-        : "(max-width: 767px) 100vw, 64vw"),
+        : [
+              REXONANCE_SITE_ARTWORK.standard,
+              REXONANCE_SITE_ARTWORK.max,
+              REXONANCE_SITE_ARTWORK.ultra,
+            ].some((artwork) => artwork === source)
+          ? "(max-width: 767px) 100vw, (max-width: 1099px) 560px, (max-width: 1599px) 44vw, 720px"
+          : "(max-width: 767px) 100vw, 64vw"),
   };
 }

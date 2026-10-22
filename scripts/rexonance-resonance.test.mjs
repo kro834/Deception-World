@@ -973,10 +973,10 @@ test("each figure keeps the owner's value as its own text; its counter is a hidd
 
 test("the counter prints the owner's figures at every step without reflowing", () => {
   const cases = [
-    ["650", ["000", "325", "650"]],
-    ["50,000〜", ["00,000〜", "25,000〜", "50,000〜"]],
-    ["9,000", ["0,000", "4,500", "9,000"]],
-    ["90%", ["00%", "45%", "90%"]],
+    ["650", ["0", "325", "650"]],
+    ["50,000〜", ["0〜", "25,000〜", "50,000〜"]],
+    ["9,000", ["0", "4,500", "9,000"]],
+    ["90%", ["0%", "45%", "90%"]],
     ["約0.06ms", ["約0.00ms", "約0.03ms", "約0.06ms"]],
   ];
   for (const [text, expected] of cases) {
@@ -984,7 +984,10 @@ test("the counter prints the owner's figures at every step without reflowing", (
     assert.ok(template, text);
     const printed = [0, 0.5, 1].map((share) => formatCount(template, template.value * share));
     assert.deepEqual(printed, expected, text);
-    for (const step of printed) assert.equal(step.length, text.length, text);
+    // The host retains its final text and reserves layout. Its absolute
+    // mirror need not print fake zeroes to occupy the same character count.
+    for (const step of printed) assert.ok(step.length <= text.length, text);
+    assert.equal(printed.at(-1), text);
   }
   assert.equal(countTemplate("REXONANCE"), null);
 });
@@ -1163,7 +1166,7 @@ test("a figure counts once from zero, locks with a transient hit, and hands back
   const [cut, readout] = t.figures;
   // Armed: the mirror shows zeros; the figure's own text is untouched.
   assert.equal(cut.getAttribute("data-rsn-state"), "armed");
-  assert.equal(cut.overlay.childNodes[0].data, "000");
+  assert.equal(cut.overlay.childNodes[0].data, "0");
   assert.equal(readout.overlay.childNodes[0].data, "約0.00ms");
   assert.equal(cut.own.data, "650");
   // The arrival flag is set once the page is handed over, then cleared.
@@ -1208,7 +1211,7 @@ test("a figure the page renders later is armed and counts; one it removes is dro
   const pageObserver = t.mutationObservers.at(-1);
   pageObserver.callback();
   assert.equal(later.getAttribute("data-rsn-state"), "armed");
-  assert.equal(later.overlay.childNodes[0].data, "000.0%");
+  assert.equal(later.overlay.childNodes[0].data, "0.0%");
   assert.ok(counts.targets.has(later));
   counts.callback([{ isIntersecting: true, target: later }]);
   assert.equal(later.getAttribute("data-rsn-state"), "count");
@@ -1225,7 +1228,7 @@ test("a figure the page renders later is armed and counts; one it removes is dro
   pageObserver.callback();
   assert.ok(!counts.targets.has(gone));
   assert.equal(replacement.getAttribute("data-rsn-state"), "armed");
-  assert.equal(replacement.overlay.childNodes[0].data, "000.0%");
+  assert.equal(replacement.overlay.childNodes[0].data, "0.0%");
   assert.equal(t.timers.size, pending - 1, "the removed figure's lock timer is cleared");
   dispose();
   assert.equal(replacement.getAttribute("data-rsn-state"), null);

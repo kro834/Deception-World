@@ -86,7 +86,7 @@ test("Extreme comparison preserves Vinculum values and calculated physical ratio
     "198.8t（est.）",
     "5000.0m（est.）",
     "0.1秒（est.）",
-    "10,000YOPS / 500Core · KHAOS",
+    "10,000YOPS / ∞Core · KHAOS",
     "300TOPS / 300Core · KOSMOS",
     "P2",
     "Paranormal Realizer Pro",

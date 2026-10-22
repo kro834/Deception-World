@@ -22,6 +22,7 @@ export const SPECIAL_SITE_SECTIONS: Record<SpecialSiteId, readonly SpecialSiteSe
     ["top", "トップ", "TOP"],
     ["performance", "パフォーマンス", "PERFORMANCE"],
     ["p14", "P14", "PROCESSOR"],
+    ["assembly", "変身", "SUIT-UP"],
     ["stages", "三つの運用段階", "STAGES"],
     ["system", "トリニティ・レゾナンス", "SYSTEM"],
   ],

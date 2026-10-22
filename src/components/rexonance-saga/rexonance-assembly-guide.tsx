@@ -6,7 +6,8 @@ const LOAD_COPY: Record<string, string> = {
   preparing: "装甲とナノマシンの配置を準備しています。",
   ready: "準備完了。下へ進むと装着、上へ戻ると分解します。",
   error: "素材を読み込めませんでした。接続を確認して再試行できます。",
-  static: "現在は完成図を表示しています。動きを減らす設定や省エネ表示では、変身アニメーションを省略します。",
+  static:
+    "現在は完成図を表示しています。動きを減らす設定や省エネ表示では、変身アニメーションを省略します。",
 };
 
 /** Announced once each time the suit completes (sweep 2, F23). */
@@ -54,9 +55,7 @@ export function RexonanceAssemblyGuide({
       const complete = next === "ready" && runway.dataset.rznPhase === "complete";
       setLoad(next);
       setScene((current) =>
-        current.motion === motion && current.complete === complete
-          ? current
-          : { motion, complete },
+        current.motion === motion && current.complete === complete ? current : { motion, complete },
       );
     };
     update();
@@ -71,7 +70,9 @@ export function RexonanceAssemblyGuide({
   return (
     <section id="assembly" className="rxs-assembly-heading" aria-labelledby="rxs-assembly-title">
       <div>
-        <p className="rxs-assembly-eyebrow">SUIT-UP / INTERACTIVE ASSEMBLY</p>
+        <p className="rxs-assembly-eyebrow" lang="en">
+          SUIT-UP / INTERACTIVE ASSEMBLY
+        </p>
         <h2 id="rxs-assembly-title">装甲が、身体になる。</h2>
         <p>
           スクロールの速さで、装着の速さが変わる。装甲の接近から固定、出力の起動までを、自分のペースで。
@@ -118,11 +119,27 @@ export function RexonanceAssemblyGuide({
 }
 
 export function RexonanceAssemblyReplay() {
+  const [staticMode, setStaticMode] = useState(false);
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const root = document.documentElement;
+    const update = () => setStaticMode(media.matches || root.dataset.worldEffects === "economy");
+    update();
+    media.addEventListener("change", update);
+    const observer = new MutationObserver(update);
+    observer.observe(root, { attributes: true, attributeFilter: ["data-world-effects"] });
+    return () => {
+      media.removeEventListener("change", update);
+      observer.disconnect();
+    };
+  }, []);
   return (
     <div id="assembly-replay" className="rxs-assembly-footer">
-      <p>装甲の接近、固定、起動。気になる瞬間は、スクロールを戻してもう一度。</p>
+      {!staticMode ? (
+        <p>装甲の接近、固定、起動。気になる瞬間は、スクロールを戻してもう一度。</p>
+      ) : null}
       <div className="rxs-assembly-controls">
-        <a href="#assembly">もう一度、装着を体験</a>
+        <a href="#assembly">{staticMode ? "変身の資料を見る" : "もう一度、装着を体験"}</a>
         <a href="#stages">三つの形態へ</a>
       </div>
     </div>

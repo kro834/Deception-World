@@ -62,6 +62,7 @@ import { warmRexonanceStages } from "@/lib/warm-rexonance-stages";
 import { mountLocalNavCurrent } from "@/lib/local-nav-current";
 import { mountRexonanceAnchorNavigation } from "@/lib/rexonance-anchor-navigation.js";
 import { syncRexonanceRouteCover } from "@/lib/rexonance-route-cover";
+import { mountRexonanceReadingPosition } from "@/lib/rexonance-reading-position";
 import { releasePendingImage, releasePendingImages } from "@/lib/release-pending-images";
 
 type P14Baseline = "p1" | "p2";
@@ -255,7 +256,7 @@ const PERFORMANCE_BASELINES: Record<
     ],
     processing: {
       baseline: [
-        "10,000YOPS / 500Core · KHAOS",
+        "10,000YOPS / ∞Core · KHAOS",
         "300TOPS / 300Core · KOSMOS",
         "P2",
         "Paranormal Realizer Pro",
@@ -315,7 +316,11 @@ const PERFORMANCE_BASELINES: Record<
       },
     ],
     processing: {
-      baseline: ["20,000YOPS / ∞Core · KHAOS Ultra", "5,000TOPS / 300Core · KOSMOS Ultra"],
+      baseline: [
+        "20,000YOPS / ∞Core · KHAOS Ultra",
+        "5,000TOPS / 300Core · KOSMOS Ultra",
+        "P14（Extreme tuning）",
+      ],
       rexonance: ["50,000〜YOPS / ∞Core · KHAOS DeuX", "9,000TOPS / 300Core · KOSMOS DeuX", "P14"],
       verdict:
         "基準値比ではKHAOS系YOPSが2.5倍、KOSMOS系TOPSが1.8倍です。KHAOSの50,000YOPSは標準稼働時の基準値で、固定された最大性能を示しません。YOPSとTOPSを合算した総合倍率には換算していません。",
@@ -329,8 +334,8 @@ const P14_METRICS = [
     p1: "100%",
     p2: "180%",
     p14: "900%",
-    relative: { p1: "900%", p2: "650%" },
-    delta: { p1: "9.0倍 / +800%", p2: "6.5倍 / +550%" },
+    relative: { p1: "900%", p2: "500%" },
+    delta: { p1: "9.0倍 / +800%", p2: "5.0倍 / +400%" },
     deltaLabel: "性能向上",
   },
   {
@@ -412,7 +417,8 @@ const CORE_SYSTEMS = [
     number: "01",
     code: "i-2 / SECOND-GENERATION PROCESS",
     title: "i-2 第二世代無限縮小製造プロセス",
-    body: "無限縮小を可能にする第二世代の製造プロセスです。第五の犬としての悠真自身が持つ性質に合わせ、レクソナンスコア、ドライバー、全身の戦闘機構を同一の『終焉』へ同期させます。",
+    // F64: quote the owner's manufacturing definition, not plate 03's job.
+    body: "REALMS所属のフェイブルが開発した、第二世代無限縮小製造プロセス。『i』はInfinityに由来し、『2』は第二世代を表すため、2nmなどの回路寸法を意味する名称ではない。",
   },
   {
     number: "02",
@@ -649,6 +655,11 @@ function FormMorph({
           loaders.delete(image);
           reject(error);
         };
+        // The canvas must decode the same delivery file as the stage and
+        // warmup, not a second, full-resolution original (audit F19).
+        const responsive = rexonanceImage(src);
+        if (responsive.sizes) image.sizes = responsive.sizes;
+        if (responsive.srcSet) image.srcset = responsive.srcSet;
         image.src = src;
       });
     // A source is a form's panel art (drawn as the panel draws it) or, for
@@ -956,10 +967,9 @@ const P14Comparator = memo(function P14Comparator({
     <div className="rxs-p14-comparator rxs-reveal">
       <header>
         <div>
-          <small>GENERATION COMPARISON</small>
+          <small lang="en">GENERATION COMPARISON</small>
           <h3>P14 / {p14Baseline.toUpperCase()}比</h3>
         </div>
-        <output htmlFor="rxs-p14-baseline">{p14Baseline.toUpperCase()}比</output>
       </header>
 
       <div className="rxs-p14-range-control" data-baseline={p14Baseline}>
@@ -989,7 +999,7 @@ const P14Comparator = memo(function P14Comparator({
             <select
               id="rxs-p14-baseline"
               value={p14Baseline}
-              aria-label="P14の比較基準"
+              aria-label="基準にする世代：P14の比較基準"
               aria-describedby="rxs-p14-baseline-help"
               onPointerDown={(event) => {
                 event.currentTarget.dataset.pointerFocus = "true";
@@ -1006,8 +1016,12 @@ const P14Comparator = memo(function P14Comparator({
             </select>
             <span className="rxs-p14-native-rail" data-value={p14Baseline} aria-hidden="true">
               <i />
-              <b className="rxs-p14-native-anchor-p1"><i /></b>
-              <b className="rxs-p14-native-anchor-p2"><i /></b>
+              <b className="rxs-p14-native-anchor-p1">
+                <i />
+              </b>
+              <b className="rxs-p14-native-anchor-p2">
+                <i />
+              </b>
             </span>
           </label>
         ) : (
@@ -1031,7 +1045,7 @@ const P14Comparator = memo(function P14Comparator({
               max="2"
               step="1"
               value={p14Baseline === "p1" ? 1 : 2}
-              aria-label="P14の比較対象"
+              aria-label="P14の比較基準"
               aria-describedby="rxs-p14-baseline-help"
               aria-valuetext={`${p14Baseline.toUpperCase()}を100%とした比較`}
               onInput={(event) => syncP14Baseline(event.currentTarget.valueAsNumber)}
@@ -1055,14 +1069,13 @@ const P14Comparator = memo(function P14Comparator({
       </div>
 
       <div
-        key={p14Baseline}
         className="rxs-p14-metrics"
         data-baseline={p14Baseline}
         aria-live="polite"
         aria-atomic="true"
       >
         {P14_METRICS.map((metric) => (
-          <article key={metric.label}>
+          <article key={`${p14Baseline}-${metric.label}`}>
             <small>{metric.label}</small>
             <div className="rxs-p14-values">
               <span>
@@ -1105,7 +1118,8 @@ const RexonancePerformance = memo(function RexonancePerformance() {
         {/* APEX (rx19): the chapter's index at the head's right (decorative;
             the forged numeral and the bar carry the chapter). */}
         <small className="rxa-index" aria-hidden="true">
-          <b>01</b>{"/ 05"}
+          <b>01</b>
+          {"/ 05"}
         </small>
         <p>PERFORMANCE</p>
         <h2>
@@ -1171,12 +1185,12 @@ const RexonancePerformance = memo(function RexonancePerformance() {
         </article>
       </div>
 
-      <div className="rxs-comparison rxs-reveal" aria-label="標準カタログ値の比較">
+      <div className="rxs-comparison rxs-reveal" role="group" aria-label="標準カタログ値の比較">
         <label className="rxs-comparison-selector">
           <span>比較する相手</span>
           <select
             value={performanceBaseline}
-            aria-label="レクソナンスの比較対象"
+            aria-label="比較する相手：レクソナンスの比較対象"
             onPointerDown={(event) => {
               event.currentTarget.dataset.pointerFocus = "true";
             }}
@@ -1206,14 +1220,13 @@ const RexonancePerformance = memo(function RexonancePerformance() {
           </span>
         </div>
         <div
-          key={performanceBaseline}
           className="rxs-comparison-metrics"
           data-baseline={performanceBaseline}
           aria-live="polite"
           aria-atomic="true"
         >
           {activePerformanceBaseline.metrics.map((metric) => (
-            <article key={metric.label}>
+            <article key={`${performanceBaseline}-${metric.label}`}>
               <header>
                 <div>
                   <small>{metric.label}</small>
@@ -1244,6 +1257,7 @@ const RexonancePerformance = memo(function RexonancePerformance() {
               </header>
               <div
                 className="rxs-bars"
+                role="img"
                 aria-label={`${metric.label}、${activePerformanceBaseline.label}を100%としたレクソナンスの性能は${metric.relative}、${metric.multiplier}、増加分${metric.delta}`}
               >
                 <i className="is-rexonance" />
@@ -1269,7 +1283,7 @@ const RexonancePerformance = memo(function RexonancePerformance() {
           aria-label={`${activePerformanceBaseline.label}とレクソナンスの演算構成比較`}
         >
           <header>
-            <small>PROCESSING ARCHITECTURE</small>
+            <small lang="en">PROCESSING ARCHITECTURE</small>
             <h3>演算は、系統ごとに。</h3>
           </header>
           <div>
@@ -1477,6 +1491,11 @@ export function RexonanceSaga() {
   const stageTabsRef = useRef<HTMLDivElement | null>(null);
   const activeStage = STAGES[stage];
 
+  useEffect(() => {
+    const page = pageRef.current;
+    if (page) return mountRexonanceReadingPosition(page);
+  }, []);
+
   const cancelStageCall = useCallback(() => {
     stageCallId.current += 1;
     window.clearTimeout(stageCallTimer.current);
@@ -1588,6 +1607,15 @@ export function RexonanceSaga() {
       if (page.style.getPropertyValue("--rxs-local-nav-reserve") !== reserve) {
         page.style.setProperty("--rxs-local-nav-reserve", reserve);
       }
+      // The emitted ring belongs to the forged number's column, not half
+      // the entire title. Measure only on layout/font changes, never scroll.
+      for (const heading of page.querySelectorAll<HTMLElement>(".rxs-section-heading")) {
+        const width = parseFloat(getComputedStyle(heading, "::before").width);
+        if (Number.isFinite(width) && width > 0) {
+          const center = `${width / 2}px`;
+          if (heading.style.getPropertyValue("--rsn-emitter-x") !== center) heading.style.setProperty("--rsn-emitter-x", center);
+        }
+      }
     };
     // Rotation can deliver all three resize notifications in one frame.
     // Read layout once for that frame, keeping the first measurement immediate.
@@ -1603,13 +1631,16 @@ export function RexonanceSaga() {
     observer?.observe(nav);
     window.addEventListener("resize", queueNavReserve, { passive: true });
     window.visualViewport?.addEventListener("resize", queueNavReserve, { passive: true });
+    document.fonts?.addEventListener("loadingdone", queueNavReserve);
     syncNavReserve();
     return () => {
       observer?.disconnect();
       window.removeEventListener("resize", queueNavReserve);
       window.visualViewport?.removeEventListener("resize", queueNavReserve);
+      document.fonts?.removeEventListener("loadingdone", queueNavReserve);
       if (frame) window.cancelAnimationFrame(frame);
       page.style.removeProperty("--rxs-local-nav-reserve");
+      for (const heading of page.querySelectorAll<HTMLElement>(".rxs-section-heading")) heading.style.removeProperty("--rsn-emitter-x");
     };
   }, []);
 
@@ -1648,6 +1679,12 @@ export function RexonanceSaga() {
       dispose?.();
     };
   }, [selectStage, lower]);
+
+  // F57: comparison buttons change controlled state without a pointer on the
+  // rail. Synchronise its existing lens API after React commits aria-selected.
+  useEffect(() => {
+    stageTabsRef.current?.dispatchEvent(new Event("liquidrelayout"));
+  }, [stage]);
 
   useEffect(() => {
     const page = pageRef.current;
@@ -1802,16 +1839,16 @@ export function RexonanceSaga() {
           stage={stageCall.stage}
         />
       )}
-      <header className="rxs-local-nav">
+      <header className="rxs-local-nav" role="banner">
         <div className="rxs-local-nav-inner">
           <GuardedLink
             className="rxs-brand"
             to="/world"
             hash="top"
             assets={WORLD_ENTER_ASSETS}
-            aria-label="ディセプションワールドへ戻る"
+            aria-label="REXONANCE レクソナンスサーガ：ディセプションワールドへ戻る"
           >
-            <span>REXONANCE</span>
+            <span lang="en">REXONANCE</span>
             <b>
               <DisplayName value="レクソナンスサーガ" />
             </b>
@@ -1849,11 +1886,11 @@ export function RexonanceSaga() {
           <i />
         </div>
         <div className="rxs-hero-copy">
-          <p>
+          <p lang="en">
             THE NEXT GENERATION <span className="rxs-hero-kicker-tail">OF SA-GA</span>
           </p>
           <h1 id="rxs-title">
-            <span>REXONANCE SAGA</span>
+            <span lang="en">REXONANCE SAGA</span>
             究極が
             <br />
             始まる。
@@ -1877,8 +1914,8 @@ export function RexonanceSaga() {
               while the script runs beside it (desktop only; decorative). */}
           <span className="rxl-stage-slate">
             <b>01</b>
-            <span>STANDARD / HIGH</span>
-            <small>KEY VISUAL</small>
+            <span lang="en">STANDARD / HIGH</span>
+            <small lang="en">KEY VISUAL</small>
           </span>
           <RexonanceAperture />
           {/* Three rings settle once onto the aperture's circles (rx2 arrival). */}
@@ -1959,7 +1996,8 @@ export function RexonanceSaga() {
         <section id="p14" className="rxs-p14 rxs-section" aria-labelledby="rxs-p14-title">
           <header className="rxs-section-heading rxs-reveal">
             <small className="rxa-index" aria-hidden="true">
-              <b>02</b>{"/ 05"}
+              <b>02</b>
+              {"/ 05"}
             </small>
             <p>PROCESSING CORE / P14</p>
             <h2 id="rxs-p14-title">
@@ -2039,7 +2077,8 @@ export function RexonanceSaga() {
           <section id="stages" className="rxs-stages rxs-section">
             <header className="rxs-section-heading rxs-reveal">
               <small className="rxa-index" aria-hidden="true">
-                <b>04</b>{"/ 05"}
+                <b>04</b>
+                {"/ 05"}
               </small>
               <p>THREE OPERATING STAGES</p>
               <h2>まだ、次元は変わる。</h2>
@@ -2071,7 +2110,7 @@ export function RexonanceSaga() {
                     onPointerUp={(event) => releaseControlFocus(event.currentTarget)}
                   >
                     <span>{STAGES[key].label}</span>
-                    <small>{STAGES[key].code}</small>
+                    <small lang="en">{STAGES[key].code}</small>
                   </button>
                 ))}
               </div>
@@ -2091,7 +2130,6 @@ export function RexonanceSaga() {
                 className="rxs-stage-panel"
                 role="tabpanel"
                 aria-labelledby={`rxs-stage-tab-${stage}`}
-                aria-live="polite"
                 data-entrance={stageEntrance?.kind}
                 style={{
                   ["--rxs-stage-accent" as string]: activeStage.accent,
@@ -2165,7 +2203,8 @@ export function RexonanceSaga() {
           <section id="system" className="rxs-system rxs-section">
             <header className="rxs-section-heading rxs-reveal">
               <small className="rxa-index" aria-hidden="true">
-                <b>05</b>{"/ 05"}
+                <b>05</b>
+                {"/ 05"}
               </small>
               <p>SELF-RESONANCE</p>
               <h2>
@@ -2236,7 +2275,7 @@ export function RexonanceSaga() {
             </div>
           </section>
 
-          <footer className="rxs-footer">
+          <footer className="rxs-footer" role="contentinfo">
             {/* ZENITH (rx15): the suit, finished, stands behind the last line. */}
             <img
               className="rzn-end-figure"
@@ -2264,7 +2303,7 @@ export function RexonanceSaga() {
               </a>
             </p>
             <div>
-              <p>REXONANCE SAGA / FINAL ARRIVAL</p>
+              <p lang="en">REXONANCE SAGA / FINAL ARRIVAL</p>
               <h2>
                 理不尽すら
                 <wbr />
