@@ -48,7 +48,95 @@ const profiles = [
   },
 ];
 
+// The measurements of a call, taken in the page: live while the call is up,
+// else from the recorder's snapshot of its last visible frame.
+function measureCallLines(beat) {
+  return [...beat.querySelectorAll(":scope > span")].map((span) => {
+    const range = document.createRange();
+    range.selectNodeContents(span);
+    const box = range.getBoundingClientRect();
+    const row = span.getBoundingClientRect();
+    return {
+      left: box.left,
+      right: box.right,
+      top: box.top,
+      bottom: box.bottom,
+      width: box.width,
+      rowTop: row.top,
+      rowBottom: row.bottom,
+    };
+  });
+}
+
+function measureSuitClear(beat) {
+  const root = beat.closest(".rx-call-sequence");
+  const glyphs = [...beat.querySelectorAll(":scope > span")].map((span) => {
+    const range = document.createRange();
+    range.selectNodeContents(span);
+    return range.getBoundingClientRect();
+  });
+  const opacity = (element) => {
+    let value = 1;
+    for (let node = element; node && node !== root.parentElement; node = node.parentElement) {
+      const style = getComputedStyle(node);
+      if (style.display === "none") return 0;
+      value *= Number(style.opacity);
+    }
+    return value;
+  };
+  const hits = (box) =>
+    glyphs.some(
+      (glyph) =>
+        box.left < glyph.right &&
+        box.right > glyph.left &&
+        box.top < glyph.bottom &&
+        box.bottom > glyph.top,
+    );
+  const texts = [
+    ...root.querySelectorAll(".rx-suit-label, .rx-suit-boot p, .rx-suit-boot b"),
+  ].filter((element) => opacity(element) > 0.05);
+  const report = { shown: texts.length, overlaps: [], outside: [], small: [], badge: null };
+  for (const element of texts) {
+    const range = document.createRange();
+    range.selectNodeContents(element);
+    const box = range.getBoundingClientRect();
+    if (parseFloat(getComputedStyle(element).fontSize) < 12) report.small.push(element.textContent);
+    if (box.left < -1 || box.right > innerWidth + 1 || box.top < -1 || box.bottom > innerHeight + 1)
+      report.outside.push(element.textContent);
+    if (hits(box)) report.overlaps.push(element.textContent);
+  }
+  // The badge's place does not depend on its fade: check it whenever shown.
+  const badge = root.querySelector(".rx-suit-badge");
+  if (badge && getComputedStyle(badge).display !== "none") {
+    const box = badge.getBoundingClientRect();
+    report.badge = { clear: !hits(box), top: Math.round(box.top) };
+  }
+  return report;
+}
+
+async function measuredBeat(page, selector, kind) {
+  return page.locator(selector).evaluate(
+    (beat, [kind, source]) => {
+      const live = Number(getComputedStyle(beat).opacity) > 0.3;
+      const snapshot = window.__rexonanceCallSnapshots?.[beat.dataset.call];
+      if (!live && snapshot) return snapshot[kind];
+      return (0, eval)(`(${source})`)(beat);
+    },
+    [kind, (kind === "lines" ? measureCallLines : measureSuitClear).toString()],
+  );
+}
+
 async function installCallRecorder(page) {
+  await page.evaluate(
+    ([lines, suit]) => {
+      window.__rexonanceMeasureCall = {
+        lines: (0, eval)(`(${lines})`),
+        suit: (0, eval)(`(${suit})`),
+      };
+      window.__rexonanceCallSnapshots = {};
+    },
+    [measureCallLines.toString(), measureSuitClear.toString()],
+  );
   await page.evaluate(() => {
     window.__rexonanceEntryCalls = [];
     window.__rexonanceCallMaxRoots = 0;
@@ -81,6 +169,10 @@ async function installCallRecorder(page) {
           const call = beat.dataset.call;
           const seen = window.__rexonanceEntryCalls;
           if (seen.at(-1) !== call) seen.push(call);
+          window.__rexonanceCallSnapshots[call] = {
+            lines: window.__rexonanceMeasureCall.lines(beat),
+            suit: window.__rexonanceMeasureCall.suit(beat),
+          };
         }
       }
       requestAnimationFrame(sample);
@@ -90,28 +182,20 @@ async function installCallRecorder(page) {
 }
 
 async function waitForVisibleCall(page, selector, expectedLines) {
+  // Visible now, or seen visible by the in-page recorder (which keeps the
+  // measurements of a call's last visible frame): the first call shows for
+  // ~366 ms from the overlay's mount, and on touch profiles Playwright's tap
+  // and mount wait can return ~400 ms after it, past the call.
   await page.waitForFunction((target) => {
     const beat = document.querySelector(target);
-    return beat && Number(getComputedStyle(beat).opacity) > 0.3;
+    if (!beat) return false;
+    return (
+      Number(getComputedStyle(beat).opacity) > 0.3 ||
+      Boolean(window.__rexonanceCallSnapshots?.[beat.dataset.call])
+    );
   }, selector);
   // Lines only: a chant line nests its answer, DEUS！ (2026-10-05).
-  const boxes = await page.locator(selector).evaluate((beat) =>
-    [...beat.querySelectorAll(":scope > span")].map((span) => {
-      const range = document.createRange();
-      range.selectNodeContents(span);
-      const box = range.getBoundingClientRect();
-      const row = span.getBoundingClientRect();
-      return {
-        left: box.left,
-        right: box.right,
-        top: box.top,
-        bottom: box.bottom,
-        width: box.width,
-        rowTop: row.top,
-        rowBottom: row.bottom,
-      };
-    }),
-  );
+  const boxes = await measuredBeat(page, selector, "lines");
   assert.equal(
     boxes.length,
     expectedLines,
@@ -147,57 +231,7 @@ async function waitForVisibleCall(page, selector, expectedLines) {
 // callouts, LOCK) never covers a call's glyphs, keeps the 12px floor and
 // stays inside the frame; the stage card's badge sits clear of the name.
 async function verifySuitClear(page, selector, profileName, label) {
-  const report = await page.locator(selector).evaluate((beat) => {
-    const root = beat.closest(".rx-call-sequence");
-    const glyphs = [...beat.querySelectorAll(":scope > span")].map((span) => {
-      const range = document.createRange();
-      range.selectNodeContents(span);
-      return range.getBoundingClientRect();
-    });
-    const opacity = (element) => {
-      let value = 1;
-      for (let node = element; node && node !== root.parentElement; node = node.parentElement) {
-        const style = getComputedStyle(node);
-        if (style.display === "none") return 0;
-        value *= Number(style.opacity);
-      }
-      return value;
-    };
-    const hits = (box) =>
-      glyphs.some(
-        (glyph) =>
-          box.left < glyph.right &&
-          box.right > glyph.left &&
-          box.top < glyph.bottom &&
-          box.bottom > glyph.top,
-      );
-    const texts = [
-      ...root.querySelectorAll(".rx-suit-label, .rx-suit-boot p, .rx-suit-boot b"),
-    ].filter((element) => opacity(element) > 0.05);
-    const report = { shown: texts.length, overlaps: [], outside: [], small: [], badge: null };
-    for (const element of texts) {
-      const range = document.createRange();
-      range.selectNodeContents(element);
-      const box = range.getBoundingClientRect();
-      if (parseFloat(getComputedStyle(element).fontSize) < 12)
-        report.small.push(element.textContent);
-      if (
-        box.left < -1 ||
-        box.right > innerWidth + 1 ||
-        box.top < -1 ||
-        box.bottom > innerHeight + 1
-      )
-        report.outside.push(element.textContent);
-      if (hits(box)) report.overlaps.push(element.textContent);
-    }
-    // The badge's place does not depend on its fade: check it whenever shown.
-    const badge = root.querySelector(".rx-suit-badge");
-    if (badge && getComputedStyle(badge).display !== "none") {
-      const box = badge.getBoundingClientRect();
-      report.badge = { clear: !hits(box), top: Math.round(box.top) };
-    }
-    return report;
-  });
+  const report = await measuredBeat(page, selector, "suit");
   console.log(`${profileName} suit-clear ${label}`, JSON.stringify(report));
   assert.deepEqual(report.overlaps, [], `${profileName} ${label}: HUD text over a call`);
   assert.deepEqual(report.outside, [], `${profileName} ${label}: HUD text outside the frame`);
@@ -304,13 +338,10 @@ async function verifyProfile(profile) {
   }
   await verifySuitClear(page, entryCall(0), profile.name, "Ultra DEUS！ / REXONANCE！");
   // The system check has booted by RIDER！ (rx3).
-  await page.waitForFunction(
-    (target) => {
-      const beat = document.querySelector(target);
-      return beat && Number(getComputedStyle(beat).opacity) > 0.3;
-    },
-    entryCall(1),
-  );
+  await page.waitForFunction((target) => {
+    const beat = document.querySelector(target);
+    return beat && Number(getComputedStyle(beat).opacity) > 0.3;
+  }, entryCall(1));
   await verifySuitClear(page, entryCall(1), profile.name, "RIDER！");
   await waitForVisibleCall(
     page,
