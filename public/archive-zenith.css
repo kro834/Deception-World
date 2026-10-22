@@ -859,6 +859,26 @@ html[data-embedded-archive][data-zn-phrases] :is(#saga-forms-performance-v5, #ed
 }
 
 /* ================================================================
+   15. Round-2 review (2026-10-22).
+   The analyzer's profile legend: Safari sizes a flex row from its items'
+   widths, not their flex-basis, so the 22px swatch counted as 0 and the
+   name lost 22px: ステラフォ | ーム, レルムロイ | ヤル on an iPhone and on a
+   landscape iPad. The swatch now has its width too.
+   A card's name keeps its ・ with the word before it: Chrome set 12px
+   エクスプリーム・ 2px wider than a phone's 94px card and opened the next
+   line on ・. The name's ・ takes its half-width form (halt), as in set
+   Japanese type; only punctuation changes width.
+   ================================================================ */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-versus-profile__legend .archive-versus-profile__swatch {
+  width: 22px !important;
+  min-width: 22px !important;
+}
+
+html[data-embedded-archive][data-zn-breaks] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .form-chip .chip-name {
+  font-feature-settings: "halt" 1;
+}
+
+/* ================================================================
    Forced colours: the dividers keep a system rule.
    ================================================================ */
 @media (forced-colors: active) and (min-width: 621px) and (max-width: 900px) {
