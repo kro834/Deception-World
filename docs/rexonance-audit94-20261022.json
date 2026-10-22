@@ -347,7 +347,7 @@
       "category": "layout/med",
       "claim": "The Vinculum comparison figures contradict the Form Archive that the footer links to — src/components/rexonance-saga/rexonance-saga.tsx, public/saga-form-archive-embedded.html, src/components/extreme-saga/extreme-saga.tsx",
       "status": "needs-owner-decision",
-      "note": "実際に矛盾を確認。特設2ページはヴィンクルム5000.0m（est.）/500Core、公開Form Archiveとrider資料は188.8m/∞Core。どちらも現行なので、質問を送り正しい設定値を確認中。"
+      "note": "2026-10-22にオーナーがKHAOSのCore数は∞Coreと確定。レクソナンス・エクスプリーム両特設の比較と回帰テストを訂正。ジャンプ力は特設2ページの5000.0m（est.）とForm Archive・rider資料の188.8mが競合したままなので、推測せず変更を保留。"
     },
     {
       "id": "F66",

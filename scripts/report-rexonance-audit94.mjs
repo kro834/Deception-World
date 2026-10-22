@@ -101,7 +101,7 @@ F120:"現在のstageはobject-fit:containで支給画を表示。元絵の端を
 F121:"containで元画像を全体表示しているため、crestに新しい画素を足す/絵を描き直す判断はしない。画像差し替え案として残す。",
 F126:"装着・カウント・hover・場面転換は異なる目的。duration/curve数の集計だけでownerの場面ごとの時計を一律化しない。",
 });
-add("needs-owner-decision",{F65:"実際に矛盾を確認。特設2ページはヴィンクルム5000.0m（est.）/500Core、公開Form Archiveとrider資料は188.8m/∞Core。どちらも現行なので、質問を送り正しい設定値を確認中。"});
+add("needs-owner-decision",{F65:"2026-10-22にオーナーがKHAOSのCore数は∞Coreと確定。レクソナンス・エクスプリーム両特設の比較と回帰テストを訂正。ジャンプ力は特設2ページの5000.0m（est.）とForm Archive・rider資料の188.8mが競合したままなので、推測せず変更を保留。"});
 add("reproduced-open",{F78:"native details開閉のレイアウト変化は残る。表示位置を保つF112とは別問題。初期画像遅延・動き削減・閉鎖時アンマウントを維持した開閉アニメーションの実装と実測が未完。"});
 add("unverified",{
 F40:"ローカルMincho800/500とForgeは確認できたが、Google提供Zen/Michromaの成功ダウンロード時の実フォント照合はネットワーク障害で未完。",

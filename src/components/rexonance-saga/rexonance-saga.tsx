@@ -255,7 +255,7 @@ const PERFORMANCE_BASELINES: Record<
     ],
     processing: {
       baseline: [
-        "10,000YOPS / 500Core · KHAOS",
+        "10,000YOPS / ∞Core · KHAOS",
         "300TOPS / 300Core · KOSMOS",
         "P2",
         "Paranormal Realizer Pro",
