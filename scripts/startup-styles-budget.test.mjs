@@ -42,6 +42,9 @@ const original = [
   "../styles-chrome-elevation.css?url",
   "../styles-transition-cinema.css?url",
   "../styles-rexonance-calls.css?url",
+  // Owner (2026-10-22): FAR FROM's entry call plays in the transition screen
+  // too, so its differences ride beside the call sheet on every page.
+  "../styles-far-from-entry.css?url",
   "../styles-viewport-chrome.css?url",
   "@/styles-inquiry-navigation.css?url",
   "../styles-stage.css?url",
@@ -69,7 +72,12 @@ test("non-opening pages keep every original shared stylesheet and its cascade or
 
 test("opening removes only unused record UI CSS and preserves the same shell tokens", () => {
   // Owner (2026-10-14): faster startup only; Rexonance's complete head above is pinned unchanged.
-  const omitted = new Set([original[3], original[8], original[9], original[15]]);
+  const omitted = new Set([
+    "../styles-pickup-stability.css?url",
+    "../styles-name-words.css?url",
+    "../styles-pickup-visibility.css?url",
+    "@/styles-inquiry-navigation.css?url",
+  ]);
   const expected = original
     .filter((href) => !omitted.has(href))
     .filter((href) => href !== fonts.SITE_DISPLAY_FONTS_URL)
