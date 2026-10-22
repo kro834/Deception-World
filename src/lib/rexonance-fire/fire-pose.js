@@ -44,14 +44,17 @@ export const POSE_FLOW_S = 22;
 // bright (0 none) they are.
 export const POSE_TEAR_OPEN = 23;
 export const POSE_TEAR_GLOW = 24;
-export const POSE_SLOTS = 25;
+// The fire's end tone (fire-tuning.js FIRE_TONES): 0 clean cyan-blue, 1 gold.
+export const POSE_TONE = 25;
+export const POSE_SLOTS = 26;
 
 const clamp = (x) => Math.max(0, Math.min(1, x));
 const smooth = (x) => x * x * (3 - 2 * x);
 const wrap = (x) => x - Math.floor(x);
 
-/** Fills `out` (POSE_SLOTS doubles) for a frame of the fire. */
-export function poseFire(phase, strength, clock, detail, out) {
+/** Fills `out` (POSE_SLOTS doubles) for a frame of the fire. `tone` is the
+ * fire's end tone (FIRE_TONES: 0 clean cyan-blue, the default; 1 gold). */
+export function poseFire(phase, strength, clock, detail, out, tone = 0) {
   const P = NANITE_FIRE_PHASES;
   const T = FIRE_TUNING;
   const burst = clamp((phase - P.burstStart) / (P.burstEnd - P.burstStart));
@@ -84,6 +87,7 @@ export function poseFire(phase, strength, clock, detail, out) {
   out[POSE_TEAR_GLOW] = bursting
     ? 1 - smooth(clamp((burst - T.tearHold) / (T.tearFade - T.tearHold)))
     : 0;
+  out[POSE_TONE] = Number.isFinite(tone) ? clamp(tone) : 0;
   return out;
 }
 

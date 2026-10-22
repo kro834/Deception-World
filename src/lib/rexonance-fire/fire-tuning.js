@@ -262,3 +262,41 @@ export const RAMP_HEAT = Object.freeze([
   [0.6, 0.59, 0.93, 1],
   [1, 0.94, 0.98, 1],
 ]);
+
+// The fire's end tone (owner, 2026-10-22, FAR FROM SAGA: 「炎は最終的に金色に
+// なります」). Every scene's fire kindles the same sooty forest green, and
+// its complete combustion is one of these: 0 the clean cyan-blue mantle
+// above, which Rexonance ends in; 1 gold, which Far From ends in. A tone
+// between them mixes the two ramps and the detonation's tints. Both kernels
+// take it from the pose (fire-pose.js POSE_TONE); the scenes pass it to
+// drawBodyFlame / drawNaniteFlame / drawNaniteFirebrand (rexonance-flame.js).
+// Tone 0 is the untouched fire: every mix is written `clean + (gold −
+// clean) × tone`, so at 0 it is the single expression it replaced, bit for
+// bit (scripts/rexonance-fire-tone.test.mjs pins Rexonance's frames).
+export const FIRE_TONES = Object.freeze({ clean: 0, gold: 1 });
+// Complete combustion in gold: a deep amber fringe through orange to a pale
+// gold-white inner cone; it passes through the suit's gold rgb(255 206 120).
+export const RAMP_GOLD = Object.freeze([
+  [0, 0.52, 0.14, 0.04],
+  [0.25, 0.86, 0.34, 0.06],
+  [0.55, 1, 0.66, 0.16],
+  [0.8, 1, 0.84, 0.47],
+  [1, 1, 0.97, 0.84],
+]);
+// Burst fragments in gold cool from white heat through gold into amber.
+export const RAMP_HEAT_GOLD = Object.freeze([
+  [0, 0.72, 0.3, 0.08],
+  [0.3, 1, 0.56, 0.12],
+  [0.6, 1, 0.84, 0.4],
+  [1, 1, 0.98, 0.9],
+]);
+// The detonation's tints, [clean, gold] per entry: the flash; the shock
+// ring's colour as base + slope × ring (clean: rgb(0.6 0.85 1) to rgb(0.9
+// 0.97 1) across the ring); the tears' white core and halo.
+export const TONE_TINTS = Object.freeze({
+  flash: Object.freeze([Object.freeze([0.75, 0.92, 1]), Object.freeze([1, 0.86, 0.52])]),
+  ringBase: Object.freeze([Object.freeze([0.6, 0.85, 1]), Object.freeze([1, 0.72, 0.3])]),
+  ringSlope: Object.freeze([Object.freeze([0.3, 0.12, 0]), Object.freeze([0, 0.23, 0.48])]),
+  tearWhite: Object.freeze([Object.freeze([0.92, 0.98, 1]), Object.freeze([1, 0.97, 0.86])]),
+  tearHalo: Object.freeze([Object.freeze([0.42, 0.8, 1]), Object.freeze([1, 0.74, 0.28])]),
+});

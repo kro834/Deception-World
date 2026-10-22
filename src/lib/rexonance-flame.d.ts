@@ -17,6 +17,9 @@ export const NANITE_FIRE_BACKING: Readonly<{
 }>;
 export function warmNaniteFlame(environment?: typeof globalThis): Promise<boolean>;
 export function naniteFlameReady(): boolean;
+/** `tone` (every draw below): the fire's end tone, fire-tuning.js
+ * FIRE_TONES — 0 (the default) the clean cyan-blue combustion Rexonance
+ * ends in, 1 the gold Far From ends in, between them a mix. */
 export function drawNaniteFirebrand(
   context: CanvasRenderingContext2D,
   x: number,
@@ -24,6 +27,7 @@ export function drawNaniteFirebrand(
   strength: number,
   clock: number,
   scale?: number,
+  tone?: number,
 ): void;
 export function prepareBodyFlame(
   source: CanvasImageSource,
@@ -36,6 +40,7 @@ export function drawNaniteFlame(
   strength: number,
   clock: number,
   scale?: number,
+  tone?: number,
 ): void;
 /** The body fire: kindles at the soles, engulfs the undersuit, turns to
  * complete combustion and detonates into the nanites by flameEnd. Phase
@@ -49,6 +54,7 @@ export function drawBodyFlame(
   scale?: number,
   layer?: "back" | "front" | "all",
   phase?: number,
+  tone?: number,
 ): void;
 /** Frees the GPU objects and fallback surfaces; the next frame rebuilds. */
 export function releaseBodyFlame(): void;
@@ -64,6 +70,8 @@ export function inspectBodyFlame(): {
   rasterFront: HTMLCanvasElement | null;
   pose: Float64Array;
   fragments: Float32Array;
+  /** The end tone of the frame last rendered (FIRE_TONES). */
+  tone: number;
   retained: boolean;
 };
 /** Retired into the body fire (its hot core, tongues and sparks): a no-op

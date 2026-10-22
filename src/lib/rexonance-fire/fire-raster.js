@@ -33,13 +33,14 @@ import {
   POSE_STRENGTH,
   POSE_TEAR_GLOW,
   POSE_TEAR_OPEN,
+  POSE_TONE,
   POSE_VIEW_X0,
   POSE_VIEW_X1,
   POSE_VIEW_Y0,
   POSE_VIEW_Y1,
   POSE_WARP,
 } from "./fire-pose.js";
-import { FIRE_TUNING as T, RAMP_CLEAN, RAMP_SOOTY } from "./fire-tuning.js";
+import { FIRE_TUNING as T, RAMP_CLEAN, RAMP_GOLD, RAMP_SOOTY, TONE_TINTS } from "./fire-tuning.js";
 
 export const RASTER_W = 96;
 export const RASTER_H = 150;
@@ -57,12 +58,45 @@ const flatten = (stops) => {
 };
 const SOOTY = flatten(RAMP_SOOTY);
 const CLEAN = flatten(RAMP_CLEAN);
+const GOLD = flatten(RAMP_GOLD);
+// The detonation's tints by tone (TONE_TINTS), each as its clean value and
+// the gold value's difference from it: a tint at tone τ is clean + diff × τ,
+// so at tone 0 it is the clean literal itself (clean + diff × 0 = clean).
+const tint = (name, k) => TONE_TINTS[name][0][k];
+const tintDiff = (name, k) => TONE_TINTS[name][1][k] - TONE_TINTS[name][0][k];
+const FLASH = Float64Array.of(tint("flash", 0), tint("flash", 1), tint("flash", 2));
+const FLASH_D = Float64Array.of(tintDiff("flash", 0), tintDiff("flash", 1), tintDiff("flash", 2));
+const RING_B = Float64Array.of(tint("ringBase", 0), tint("ringBase", 1), tint("ringBase", 2));
+const RING_BD = Float64Array.of(
+  tintDiff("ringBase", 0),
+  tintDiff("ringBase", 1),
+  tintDiff("ringBase", 2),
+);
+const RING_S = Float64Array.of(tint("ringSlope", 0), tint("ringSlope", 1), tint("ringSlope", 2));
+const RING_SD = Float64Array.of(
+  tintDiff("ringSlope", 0),
+  tintDiff("ringSlope", 1),
+  tintDiff("ringSlope", 2),
+);
+const TEAR_W = Float64Array.of(tint("tearWhite", 0), tint("tearWhite", 1), tint("tearWhite", 2));
+const TEAR_WD = Float64Array.of(
+  tintDiff("tearWhite", 0),
+  tintDiff("tearWhite", 1),
+  tintDiff("tearWhite", 2),
+);
+const TEAR_H = Float64Array.of(tint("tearHalo", 0), tint("tearHalo", 1), tint("tearHalo", 2));
+const TEAR_HD = Float64Array.of(
+  tintDiff("tearHalo", 0),
+  tintDiff("tearHalo", 1),
+  tintDiff("tearHalo", 2),
+);
 const FS = new Float64Array(4);
 // Eight noise reads of a pixel, four channels each, by slot:
 // reach (0), flutter (4), tongues (8), turbulence (12), edge (16),
 // flicker (20), sheet streaks (24), patch (28).
 const NS = new Float64Array(32);
-const C = new Float64Array(6);
+// The ramps' colours of a pixel: sooty (0), clean (3), gold (6).
+const C = new Float64Array(9);
 // The tears' static noise read.
 const NT = new Float64Array(4);
 
@@ -278,9 +312,16 @@ export function fireKernel(u0, v0, pose, field, noise, out) {
   );
   ramp(SOOTY, temp, C, 0);
   ramp(CLEAN, temp, C, 3);
-  const cr = C[0] + (C[3] - C[0]) * mLocal;
-  const cg = C[1] + (C[4] - C[1]) * mLocal;
-  const cb = C[2] + (C[5] - C[2]) * mLocal;
+  ramp(GOLD, temp, C, 6);
+  // Complete combustion in the fire's end tone: clean, gold, or between
+  // (clean + (gold − clean) × 0 is clean exactly).
+  const tone = pose[POSE_TONE];
+  const er0 = C[3] + (C[6] - C[3]) * tone;
+  const eg0 = C[4] + (C[7] - C[4]) * tone;
+  const eb0 = C[5] + (C[8] - C[5]) * tone;
+  const cr = C[0] + (er0 - C[0]) * mLocal;
+  const cg = C[1] + (eg0 - C[1]) * mLocal;
+  const cb = C[2] + (eb0 - C[2]) * mLocal;
   const emit = clamp(dens * flick);
   const strength = pose[POSE_STRENGTH];
   const absorbUnit = dens * (1 - 0.5 * temp) * (T.absorbSooty * (1 - mLocal) + T.absorbClean);
@@ -295,18 +336,29 @@ export function fireKernel(u0, v0, pose, field, noise, out) {
         smoothstep(0, T.edgeFadeTop, topIn) *
         smoothstep(0, T.edgeFadeBottom, bottomIn);
       const bloom = pose[POSE_FLASH] * Math.exp(-d / T.flashReach) * T.flashGain * edgeWindow;
-      er += 0.75 * bloom;
-      eg += 0.92 * bloom;
-      eb += bloom;
+      // The flash and the ring in the end tone (TONE_TINTS): at tone 0 the
+      // clean tints exactly.
+      er += (FLASH[0] + FLASH_D[0] * tone) * bloom;
+      eg += (FLASH[1] + FLASH_D[1] * tone) * bloom;
+      eb += (FLASH[2] + FLASH_D[2] * tone) * bloom;
       const ringW = T.ringWidth + T.ringWiden * b;
       const rd = (d - pose[POSE_RING_RADIUS]) / ringW;
       const ring =
         d >= 0.001
           ? Math.exp(-rd * rd) * pose[POSE_RING_STRENGTH] * (0.3 + 0.9 * NS[2]) * edgeWindow
           : 0;
-      er += (0.6 + 0.3 * ring) * ring * T.ringGain;
-      eg += (0.85 + 0.12 * ring) * ring * T.ringGain;
-      eb += ring * T.ringGain;
+      er +=
+        (RING_B[0] + RING_BD[0] * tone + (RING_S[0] + RING_SD[0] * tone) * ring) *
+        ring *
+        T.ringGain;
+      eg +=
+        (RING_B[1] + RING_BD[1] * tone + (RING_S[1] + RING_SD[1] * tone) * ring) *
+        ring *
+        T.ringGain;
+      eb +=
+        (RING_B[2] + RING_BD[2] * tone + (RING_S[2] + RING_SD[2] * tone) * ring) *
+        ring *
+        T.ringGain;
     } else if (pose[POSE_TEAR_GLOW] > 0) {
       // The tears of the 爆散, on the body itself (never thrown outward):
       // white-hot ragged lines along the fragments' birth paths, their
@@ -328,9 +380,9 @@ export function fireKernel(u0, v0, pose, field, noise, out) {
       const glow = pose[POSE_TEAR_GLOW] * body;
       const white = Math.exp(-r * r) * glow * T.tearGain;
       const cyan = Math.exp(-h * h) * glow * T.tearHaloGain;
-      er += 0.92 * white + 0.42 * cyan;
-      eg += 0.98 * white + 0.8 * cyan;
-      eb += white + cyan;
+      er += (TEAR_W[0] + TEAR_WD[0] * tone) * white + (TEAR_H[0] + TEAR_HD[0] * tone) * cyan;
+      eg += (TEAR_W[1] + TEAR_WD[1] * tone) * white + (TEAR_H[1] + TEAR_HD[1] * tone) * cyan;
+      eb += (TEAR_W[2] + TEAR_WD[2] * tone) * white + (TEAR_H[2] + TEAR_HD[2] * tone) * cyan;
     }
     er = Math.min(1, er * strength);
     eg = Math.min(1, eg * strength);
