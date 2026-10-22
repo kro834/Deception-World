@@ -6,7 +6,9 @@ import test from "node:test";
 import {
   appNameFromHost,
   createHeadInjector,
+  descriptionFromDocument,
   grokXCreatorHeadTags,
+  imageFromDocument,
   injectGrokPwaHead,
   isDocumentPath,
   isInstallQuery,
@@ -258,4 +260,135 @@ test("nitro middleware and its bundled assets exist", () => {
   readFileSync(join(TEMPLATE_ROOT, "scripts/install-page.html"));
   readFileSync(join(TEMPLATE_ROOT, "public/__grok/icon-180.png"));
   readFileSync(join(TEMPLATE_ROOT, "public/__grok/install/styles.css"));
+});
+
+/* 2026-10-21 sweep F07: the share card of a route that describes itself
+   (/rexonance-saga) kept only its title. The injector stripped the route's
+   og:description and added one only from the site identity, never emitted
+   og:type, and gave no twitter:title or twitter:description. */
+const ROUTE_HEAD = (extra = "") =>
+  "<html><head><title>レクソナンスサーガ｜Deception World</title>" +
+  '<meta name="description" content="究極が始まる。">' +
+  '<meta property="og:title" content="レクソナンスサーガ｜Deception World">' +
+  '<meta property="og:description" content="覚醒する、全てが最高峰で。">' +
+  '<meta property="og:image" content="/rider-rexonance-saga-pickup-20260923.webp">' +
+  `${extra}</head><body></body></html>`;
+const SHARE = (html) =>
+  Object.fromEntries(
+    [...html.matchAll(/<meta (?:property|name)="((?:og|twitter):[^"]+)" content="([^"]*)">/g)].map(
+      ([, key, content]) => [key, content],
+    ),
+  );
+
+test("a route's own description, og:type and twitter title/description reach its card", () => {
+  const out = injectGrokPwaHead(ROUTE_HEAD(), {
+    host: "deception-world.grok.me",
+    site: { card: "custom", image: "/og.jpg" },
+  });
+  const share = SHARE(out);
+  assert.equal(share["og:title"], "レクソナンスサーガ｜Deception World");
+  assert.equal(share["twitter:title"], "レクソナンスサーガ｜Deception World");
+  assert.equal(share["og:description"], "覚醒する、全てが最高峰で。");
+  assert.equal(share["twitter:description"], "覚醒する、全てが最高峰で。");
+  assert.equal(share["og:type"], "website");
+  // The portrait WebP is not a share card: the absolute 1200x630 site card stays.
+  assert.equal(share["og:image"], "https://deception-world.grok.me/og.jpg");
+  assert.equal(share["og:image:width"], "1200");
+  assert.equal(share["og:image:height"], "630");
+  assert.equal(out.split('property="og:description"').length - 1, 1);
+  assert.equal(out.split('property="og:image"').length - 1, 1);
+  // Injecting the injected document again changes nothing.
+  assert.equal(
+    injectGrokPwaHead(out, {
+      host: "deception-world.grok.me",
+      site: { card: "custom", image: "/og.jpg" },
+    }),
+    out,
+  );
+});
+
+test("the meta description stands in for a missing og:description; the site's wins", () => {
+  const plain =
+    '<html><head><title>World</title><meta name="description" content="公式記録サイト。"></head></html>';
+  assert.equal(
+    descriptionFromDocument(plain),
+    "公式記録サイト。",
+    "the meta description when the route has no og:description",
+  );
+  assert.equal(
+    SHARE(injectGrokPwaHead(plain, { host: "a.grok.me", site: {} }))["og:description"],
+    "公式記録サイト。",
+  );
+  const site = SHARE(
+    injectGrokPwaHead(ROUTE_HEAD(), { host: "a.grok.me", site: { description: "Site-wide" } }),
+  );
+  assert.equal(site["og:description"], "Site-wide");
+  assert.equal(site["twitter:description"], "Site-wide");
+  // No description anywhere: none is invented.
+  const bare = injectGrokPwaHead("<html><head><title>x</title></head></html>", {
+    host: "a.grok.me",
+    site: {},
+  });
+  assert.doesNotMatch(bare, /og:description|twitter:description/);
+  // x:game identities keep their type.
+  assert.equal(
+    SHARE(injectGrokPwaHead(plain, { host: "a.grok.me", site: { type: "x:game" } }))["og:type"],
+    "x:game",
+  );
+});
+
+test("route share text is decoded once and escaped once", () => {
+  const html =
+    '<html><head><title>T</title><meta property="og:description" content="P14 &amp; &quot;MAX&quot; &lt;5&gt;"></head></html>';
+  assert.equal(descriptionFromDocument(html), 'P14 & "MAX" <5>');
+  const out = injectGrokPwaHead(html, { host: "a.grok.me", site: {} });
+  assert.match(out, /property="og:description" content="P14 &amp; &quot;MAX&quot; &lt;5&gt;"/);
+  assert.match(out, /name="twitter:description" content="P14 &amp; &quot;MAX&quot; &lt;5&gt;"/);
+});
+
+test("a route's own 1200x630 JPEG card replaces the site card, absolute and sized", () => {
+  const card =
+    '<meta property="og:image" content="/og-rexonance-saga.jpg">' +
+    '<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">';
+  const html =
+    "<html><head><title>T</title>" +
+    card +
+    '<meta property="og:description" content="D"></head></html>';
+  assert.deepEqual(imageFromDocument(html), {
+    path: "/og-rexonance-saga.jpg",
+    width: 1200,
+    height: 630,
+  });
+  const share = SHARE(
+    injectGrokPwaHead(html, { host: "deception-world.grok.me", site: { card: "custom" } }),
+  );
+  assert.equal(share["og:image"], "https://deception-world.grok.me/og-rexonance-saga.jpg");
+  assert.equal(share["og:image:width"], "1200");
+  assert.equal(share["og:image:height"], "630");
+  // Without a custom site card the placeholder service still draws the card.
+  assert.match(
+    SHARE(injectGrokPwaHead(html, { host: "a.grok.me", site: {} }))["og:image"],
+    /\/v1\/card\.png\?host=a\.grok\.me/,
+  );
+  // Not a card: a WebP, a card without its size, a remote or parent path.
+  for (const image of [
+    '<meta property="og:image" content="/key.webp"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">',
+    '<meta property="og:image" content="/key.jpg">',
+    '<meta property="og:image" content="https://elsewhere.example/key.jpg"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">',
+    '<meta property="og:image" content="//elsewhere.example/key.jpg"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">',
+    '<meta property="og:image" content="/a/../key.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">',
+  ]) {
+    const doc = `<html><head>${image}</head></html>`;
+    assert.equal(imageFromDocument(doc), null, image);
+    assert.equal(
+      SHARE(injectGrokPwaHead(doc, { host: "a.grok.me", site: { card: "custom" } }))["og:image"],
+      "https://a.grok.me/og.jpg",
+    );
+  }
+});
+
+test("the shipped /rexonance-saga head describes itself for its share card", () => {
+  const route = readFileSync(join(TEMPLATE_ROOT, "src/routes/rexonance-saga.tsx"), "utf8");
+  assert.match(route, /\{\s*property: "og:description",\s*content:/);
+  assert.match(route, /\{\s*name: "description",\s*content:/);
 });
