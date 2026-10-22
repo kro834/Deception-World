@@ -153,7 +153,9 @@ test("the end of a file reads down the screen in the source's (and the Tab) orde
   // Owner (2026-10-22): the index and rail sat in row 3 under the next card; on phones
   // they shared row 3 with it (hidden, untappable) and on wider screens Tab skipped the card.
   const nav = await read("src/components/world/dossier-nav.tsx");
-  const render = nav.slice(nav.indexOf('<nav className="manager-pagination"'));
+  // Owner (2026-10-22): the <nav> now also carries data-numerals, so its tag spans lines.
+  const render = nav.slice(nav.indexOf('<nav\n      className="manager-pagination"'));
+  assert.ok(render.length < nav.length, "the nav element");
   const prev = render.indexOf("to={prev.href}");
   const index = render.indexOf('<div className="manager-pagination-index">');
   const next = render.indexOf("to={next.href}");
@@ -223,4 +225,57 @@ test("related records stack their art over their words in a narrow reading colum
     css,
     /@container identity-records \(max-width: 540px\)\s*\{[^}]*> :is\(\.rider-archive-civilian, \.rider-nightmare-card\)\s*\{\s*grid-template-columns: minmax\(0, 1fr\);/,
   );
+});
+
+test("the index reads as a way back: an arrow ring, and on the split stage a plate with the file's place", async () => {
+  // Owner (2026-10-22): the stage side of the index row stood empty under two small lines.
+  const nav = await read("src/components/world/dossier-nav.tsx");
+  const index = nav.slice(nav.indexOf('className="dossier-index-return"'));
+  const link = index.slice(0, index.indexOf("</GuardedLink>"));
+  // Decorative: the link keeps its name (人物一覧へ戻る) and its text.
+  assert.match(link, /<em className="dossier-index-arrow" aria-hidden="true">/);
+  assert.match(link, /<b>一覧へ戻る<\/b>/);
+  assert.match(link, /\{items\.length > 1 \? <IndexMeter items=\{items\} idx=\{idx\} \/> : null\}/);
+  assert.match(nav, /<em className="dossier-index-meter" aria-hidden="true">/);
+  // The ring is a 44px target at the least; the plate puts the way back at the foot.
+  const ring = css.match(/> \.dossier-index-return\s*> \.dossier-index-arrow \{([^}]*)\}/)?.[1];
+  assert.ok(ring, "arrow ring rule");
+  assert.match(ring, /width: 44px;\s*height: 44px;/);
+  assert.match(css, /grid-template-rows: auto auto minmax\(28px, 1fr\) auto;/);
+  // Phones keep the count as the only place marker.
+  assert.match(css, /> \.dossier-index-meter \{\s*display: none;/);
+});
+
+test("roster faces: the launcher tile's widths with a phone-sized slot, set back in the ink but the file at hand", async () => {
+  const nav = await read("src/components/world/dossier-nav.tsx");
+  assert.match(nav, /const ROSTER_PORTRAIT_SIZES = "\(max-width: 560px\) 40vw, 64px";/);
+  assert.match(nav, /tile\.variants\.map\(\(cut\) => `\$\{cut\.path\} \$\{cut\.width\}w`\)/);
+  // Every tile keeps a face box (欠番 an empty frame), so the rail's columns line up.
+  assert.match(
+    nav,
+    /if \(!src\) return <span className="dossier-roster-portrait" aria-hidden="true" \/>;/,
+  );
+  // The face is at least 64px each way: the file flip lifts only a picture that large (load-gate pressedArt).
+  const face = css.match(/\.dossier-roster\s*\.dossier-roster-portrait \{([^}]*)\}/)?.[1];
+  assert.ok(face, "face rule");
+  assert.ok(Number(face.match(/width: (\d+)px/)[1]) >= 64);
+  assert.ok(Number(face.match(/height: (\d+)px/)[1]) >= 64);
+  assert.match(
+    css,
+    /> li:is\(\.is-current, :has\(> a:focus-visible\)\)\s*\.dossier-roster-portrait\s*> img \{\s*opacity: 1;/,
+  );
+});
+
+test("六詠's Roman numerals take the site's Roman face (Cinzel) on the end card and the rail", async () => {
+  // Owner (2026-10-22): in Michroma, II and III on the end card read as two and three bars.
+  const nav = await read("src/components/world/dossier-nav.tsx");
+  assert.match(nav, /data-numerals=\{romanList\(items\) \? "roman" : undefined\}/);
+  assert.match(nav, /\/\^\[IVX\]\+\$\/\.test\(fileNumeral\(item, index\)\)/);
+  const roman = [...css.matchAll(/\[data-numerals="roman"\][^{]*\{([^}]*)\}/g)].map(
+    ([, body]) => body,
+  );
+  assert.equal(roman.length, 2);
+  for (const body of roman) assert.match(body, /font-family: "Cinzel", "Times New Roman", serif;/);
+  // The site already loads Cinzel with its core fonts: no new font request.
+  assert.match(await read("src/lib/site-fonts.ts"), /family=Cinzel:wght@400\.\.700/);
 });
