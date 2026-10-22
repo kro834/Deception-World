@@ -441,6 +441,24 @@
   .dream-screening-title h2 {
     font-size: 16px;
   }
+  /* On a phone in landscape, keep the caption and lamps on one row so the
+     poster retains enough height to inspect. */
+  .dream-screening-controls {
+    display: flex;
+    gap: 8px;
+  }
+  .dream-screening-caption {
+    flex: 1;
+  }
+  .dream-screening-actions {
+    display: flex;
+    gap: 6px;
+  }
+  .dream-screening-dialog .dream-screening-ambience,
+  .dream-screening-dialog .dream-screening-zoom {
+    width: auto;
+    padding-inline: 8px;
+  }
   .dream-screening-stage {
     padding-block: 2px;
   }
@@ -451,6 +469,20 @@
   .dream-screening-filmstrip > button {
     height: 48px;
     min-height: 48px;
+  }
+}
+
+@media (max-width: 540px) and (max-height: 520px) and (orientation: landscape) {
+  .dream-screening-caption > span {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+  /* Keep the live region in the accessibility tree before its next update. */
+  .dream-screening-message:has(.dream-screening-status:empty),
+  .dream-screening-status:empty {
+    min-height: 0;
   }
 }
 

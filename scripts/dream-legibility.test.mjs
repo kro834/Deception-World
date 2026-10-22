@@ -9,10 +9,14 @@ const zenith = flat(read("styles-dream-zenith.css"));
 const cabinet = flat(read("styles-dream-karakuri-cabinet.css"));
 const kinema = flat(read("styles-dream-kinema.css"));
 
-test("lacquer prologue owns both its surface and readable ink, including the signature", () => {
-  assert.match(craft, /\.dream-prologue-card > p:not\(\.dream-prologue-sign\) \{ color: #f4ecdc;/);
-  assert.match(craft, /\.dream-prologue-card h2 \{ color: #edcb96;/);
-  assert.match(craft, /\.dream-prologue-card > p\.dream-prologue-sign \{ color: #d7c7b2;/);
+test("paper prologue owns its pale surface and dark ink as one readable palette", () => {
+  const surface = craft.match(/\.dream-prologue-card \{([^}]+)\}/)?.[1] ?? "";
+  assert.match(surface, /color: #2d2230;/);
+  assert.match(surface, /linear-gradient\(118deg, #f4ecdc, #e8ddc8\)/);
+  assert.match(craft, /\.dream-prologue-card > p:not\(\.dream-prologue-sign\) \{ color: #2d2230;/);
+  assert.match(craft, /\.dream-prologue-card h2 \{ color: #79353c;/);
+  assert.match(craft, /\.dream-prologue-card > p\.dream-prologue-sign \{ color: #655766;/);
+  assert.match(craft, /\.dream-prologue-card::after \{ color: #765627; background: #eee4d1;/);
 });
 
 test("open chapter titles and affordances no longer inherit paper-edition ink", () => {
@@ -51,5 +55,6 @@ test("chapter cabinet uses the programme faces and a 16px reading measure", () =
     cabinet,
     /\.dream-karakuri-excerpt \{[^}]*max-width: 43em;[^}]*font-size: 16px;[^}]*font-weight: 500;/,
   );
-  assert.match(cabinet, /\.dream-karakuri-chapter-heading p \{[^}]*color: #604b30;/);
+  // Owner (2026-10-21): kicker darkened from #604b30 to clear 4.5:1 on the aged paper.
+  assert.match(cabinet, /\.dream-karakuri-chapter-heading p \{[^}]*color: #574329;/);
 });

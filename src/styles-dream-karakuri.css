@@ -99,13 +99,10 @@ html[data-family="dream"] main.dream-page.dream-page .dream-stage-lantern-label 
   font-size: 15px;
 }
 
-/* 口上 stays on its paper: the earlier sheets set its ink (#2d2230) for a
-   kinari ground, so the karakuri frame keeps that ground and only adds the
-   wood rails (a night lacquer here left the prologue at 1.1:1). */
+/* Keep the kinari paper and its ink together. A surface-only merge must not
+   leave the lacquer edition's light lettering on this pale reading card. */
 html[data-family="dream"] main.dream-page.dream-page .dream-prologue-card {
-  /* This is lacquer, not the earlier refinement layer's ivory paper.
-     Pair the ink with the surface so the two cannot drift independently. */
-  color: #f4ecdc;
+  color: #2d2230;
   border-block: 1px solid rgb(214 180 123 / 50%);
   background:
     repeating-linear-gradient(90deg, transparent 0 39px, rgb(110 72 40 / 5%) 39px 40px),
@@ -119,15 +116,15 @@ html[data-family="dream"]
   main.dream-page.dream-page
   .dream-prologue-card
   > p:not(.dream-prologue-sign) {
-  color: #f4ecdc;
+  color: #2d2230;
 }
 
 html[data-family="dream"] main.dream-page.dream-page .dream-prologue-card h2 {
-  color: #edcb96;
+  color: #79353c;
 }
 
 html[data-family="dream"] main.dream-page.dream-page .dream-prologue-card > p.dream-prologue-sign {
-  color: #d7c7b2;
+  color: #655766;
   font-size: 13px;
   letter-spacing: 0.16em;
   line-height: 1.8;
@@ -135,8 +132,8 @@ html[data-family="dream"] main.dream-page.dream-page .dream-prologue-card > p.dr
 
 html[data-family="dream"] main.dream-page.dream-page .dream-prologue-card::before,
 html[data-family="dream"] main.dream-page.dream-page .dream-prologue-card::after {
-  color: #edcb96;
-  background: #241a24;
+  color: #765627;
+  background: #eee4d1;
 }
 
 html[data-family="dream"] main.dream-page.dream-page .dream-story-case {

@@ -7,9 +7,8 @@ import ts from "typescript";
 const source = readFileSync(new URL("../src/components/dream-chapter/dream-chapter.tsx", import.meta.url), "utf8");
 const file = ts.createSourceFile("dream-chapter.tsx", source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
 const chapter = file.statements.find((node) => ts.isFunctionDeclaration(node) && node.name?.text === "DreamChapter");
-const navigation = chapter.body.statements.find((node) => ts.isExpressionStatement(node)
-  && node.expression.expression?.getText(file) === "useLayoutEffect"
-  && node.expression.arguments.at(-1)?.getText(file) === "[dossierHash]");
+const navigation = chapter.body.statements.find((node) => ts.isVariableStatement(node)
+  && node.declarationList.declarations.some((declaration) => declaration.name.getText(file) === "openDossier"));
 assert.ok(navigation, "direct record links are handled by the mounted route's current hash");
 const data = {};
 runInNewContext(ts.transpileModule(readFileSync(new URL("../src/components/dream-chapter/dream-chapter-data.ts", import.meta.url), "utf8"), {
@@ -21,10 +20,10 @@ function openFragment(hash, { missing = false, outside = false } = {}) {
   const trigger = new Button();
   const result = { character: null, dolminence: null, menu: true };
   const refs = { character: { current: null }, dolminence: { current: null } };
-  runInNewContext(ts.transpileModule(navigation.getText(file), {
+  runInNewContext(ts.transpileModule(`${navigation.getText(file)}\nopenDossier(hash);`, {
     compilerOptions: { module: ts.ModuleKind.CommonJS },
   }).outputText, {
-    useLayoutEffect: (effect) => effect(), dossierHash: hash,
+    useCallback: (callback) => callback, hash,
     DREAM_CHARACTERS: data.DREAM_CHARACTERS, DREAM_DOLMINENCE: data.DREAM_DOLMINENCE,
     document: { getElementById: (id) => missing || id !== hash.replace(/^#/, "") ? null : trigger },
     HTMLButtonElement: Button, pageRef: { current: { contains: () => !outside } },
@@ -70,6 +69,7 @@ test("ordinary, malformed, unknown or absent fragment targets never open a dossi
     assert.equal(openFragment("dream-character-keiya", options).result.character, null);
   }
   assert.match(source, /useRouterState\(\{ select: \(state\) => state.location.hash \}\)/);
+  assert.match(source, /openDossier\(dossierHash\);\s*\}, \[dossierHash, openDossier\]\)/);
 });
 
 function mountDialog(name, record, keyboard = true) {

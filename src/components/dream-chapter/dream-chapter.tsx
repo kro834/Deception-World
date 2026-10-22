@@ -1022,18 +1022,19 @@ export function DreamChapter() {
 
   // Search links identify the existing record card. The same dialog and its
   // history dismissal/focus cleanup handle direct arrivals and revisits.
-  useLayoutEffect(() => {
+  const openDossier = useCallback((hash: string) => {
     let id: string;
     try {
-      id = decodeURIComponent(dossierHash.replace(/^#/, ""));
+      id = decodeURIComponent(hash.replace(/^#/, ""));
     } catch {
-      return;
+      return false;
     }
     const targetCharacter = DREAM_CHARACTERS.find((item) => id === `dream-character-${item.id}`);
     const targetRecord = DREAM_DOLMINENCE.find((item) => id === `dream-dolminence-${item.id}`);
-    if (!targetCharacter && !targetRecord) return;
+    if (!targetCharacter && !targetRecord) return false;
     const trigger = document.getElementById(id);
-    if (!(trigger instanceof HTMLButtonElement) || !pageRef.current?.contains(trigger)) return;
+    if (!(trigger instanceof HTMLButtonElement) || !pageRef.current?.contains(trigger))
+      return false;
     setMenuOpen(false);
     if (targetCharacter) {
       characterTriggerRef.current = trigger;
@@ -1046,7 +1047,36 @@ export function DreamChapter() {
       setCharacter(null);
       setDolminenceRecord(targetRecord);
     }
-  }, [dossierHash]);
+    return true;
+  }, []);
+  useLayoutEffect(() => {
+    openDossier(dossierHash);
+  }, [dossierHash, openDossier]);
+
+  // Closing a record leaves its fragment in the address bar. Its next explicit
+  // link visit still opens the file even though the router's hash is unchanged.
+  const revisitDossier = (event: MouseEvent<HTMLElement>) => {
+    if (
+      event.defaultPrevented ||
+      event.button !== 0 ||
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey ||
+      !(event.target instanceof Element)
+    )
+      return;
+    const link = event.target.closest<HTMLAnchorElement>('a[href^="#"]');
+    if (
+      !link ||
+      !event.currentTarget.contains(link) ||
+      (link.target && link.target !== "_self") ||
+      link.hasAttribute("download") ||
+      link.getAttribute("href") !== window.location.hash
+    )
+      return;
+    if (openDossier(link.hash)) event.preventDefault();
+  };
 
   // A search result that names a record inside a section (a roster plate, a
   // faction, a term) lands on it whole: the skipped sections above it are
@@ -1438,7 +1468,7 @@ export function DreamChapter() {
   }, [cancelShuffle, commitPoster, loadPoster, posterIndex, previousPosterIndex]);
 
   return (
-    <main ref={pageRef} id="top" className="dream-page">
+    <main ref={pageRef} id="top" className="dream-page" onClickCapture={revisitDossier}>
       <header className="dream-site-header">
         <GuardedLink
           className="dream-back-link"
