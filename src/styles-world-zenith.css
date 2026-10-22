@@ -1517,6 +1517,52 @@ html[data-family="world"]:root
   }
 }
 
+/* The 六詠 archive's rail since the owner's fourth tab (DOGS / 04): four
+   tabs in the stage sheet's 460px left 86px for each code, so REVERSE / 02
+   and RELATED / 03 broke as "REVERSE" / "/ 02" beside one-line FRONT and
+   DOGS; and up to 1359px the rail beside the heading squeezed the archive's
+   note into a column one to five characters wide (1024 × 768, 1194 × 834).
+   Desktop rails are 488px with every code on one line; up to 1359px the
+   rail takes its own row under the heading and its note. */
+@media (min-width: 861px) and (max-width: 1359px) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #story
+    > #manager-archive {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "copy"
+      "rail"
+      "panel";
+  }
+}
+
+@media (min-width: 861px) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #story
+    > #manager-archive
+    > .signal-column
+    > .manager-archive-tabs {
+    width: 488px;
+    max-width: 100%;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #story
+    > #manager-archive
+    .manager-archive-tabs
+    > button[role="tab"]
+    > small {
+    letter-spacing: 0.1em;
+    white-space: nowrap;
+  }
+}
+
 /* ----------------------------------------------------------------
    6. Polish: the WORLD COLUMN plate's top rule runs gold → pink, and a
       pink bloom sits in its far corner, so the reading plate under the
