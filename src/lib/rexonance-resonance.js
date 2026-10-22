@@ -4767,6 +4767,8 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     loaders.clear();
     for (const cancel of decodeWaiters) cancel();
     decodeWaiters.clear();
+    // A form chain's sheets (one per form, figure-sized) are freed first.
+    for (const sheet of Object.values(formsState?.sheets ?? {})) sheet.width = sheet.height = 0;
     if (formsState)
       for (const sheet of [
         formsState.fig,
@@ -4774,7 +4776,6 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         formsState.ultra,
         formsState.excelsior,
         ...formsState.warp,
-        ...Object.values(formsState.sheets ?? {}),
       ])
         if (sheet) sheet.width = sheet.height = 0;
     formsState = null;

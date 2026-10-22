@@ -403,7 +403,8 @@ test("the config is the engine's: FAR FROM's palette, reactor, chain, kits and a
   assert.match(swarm, /const KITOF = new Uint8Array\(total \+ 1\);/);
   assert.ok(swarm.indexOf("const KITOF") < swarm.indexOf("/* -- draw passes: allocation-free from here -- */"));
   assert.match(swarm, /const sheet = second \? cellsB : cells;/);
-  assert.match(engine, /cellsB: module\.REXONANCE_NANITE_CELLS/);
+  assert.match(engine, /cellsB: kitB\.FAR_FROM_NANITE_CELLS/);
+  assert.match(engine, /import\("\.\/far-from-nanites\.ts"\)/);
   assert.match(engine, /guide: FAR_FROM_SUIT_GUIDE/);
   assert.match(engine, /seams: FAR_FROM_SUIT_SEAMS/);
   assert.match(resonance, /optional\(kit\?\.cellsB\?\.src\)/);

@@ -174,7 +174,9 @@ test("every destination is an existing public route with its actual heading anch
     "/dream-chapter": dreamPage,
     "/extreme-saga": read("src/components/extreme-saga/extreme-saga.tsx"),
     "/rexonance-saga": read("src/components/rexonance-saga/rexonance-saga.tsx") + read("src/components/rexonance-saga/rexonance-assembly-guide.tsx"),
-    "/far-from-saga": read("src/components/far-from-saga/far-from-saga.tsx"),
+    "/far-from-saga":
+      read("src/components/far-from-saga/far-from-saga.tsx") +
+      read("src/components/far-from-saga/far-from-suitup.tsx"),
     "/final-stage": read("src/components/final-stage/final-stage.tsx"),
     "/form-archive": read("src/routes/form-archive.tsx"),
     "/gallery": read("src/components/gallery/gallery-page.tsx"),
@@ -193,6 +195,14 @@ test("every destination is an existing public route with its actual heading anch
     ...dream.DREAM_DOLMINENCE.map((entry) => `dream-dolminence-${entry.id}`),
     ...dream.DREAM_FACTIONS.map((entry) => `dream-faction-${entry.id}`),
   ]);
+  // FAR FROM's two comparison documents take their anchors from the owner's text.
+  const actualFarFromAnchors = new Set(
+    loadData("src/components/far-from-saga/far-from-report-data.ts").REPORT_PARTS.map(
+      (part) => part.id,
+    ),
+  );
+  assert.ok(read("src/components/far-from-saga/far-from-report.tsx").includes("<article id={part.id}"));
+  assert.ok(routeComponents["/far-from-saga"].includes("<FarFromReport />"));
   const columns = loadData("src/components/world/world-columns-data.ts").WORLD_COLUMNS;
   for (const column of columns) actualWorldAnchors.add(`world-column-${column.no}`);
   assert.ok(read("src/components/world/world-home.tsx").includes("id={`world-column-${item.no}`}"));
@@ -223,6 +233,7 @@ test("every destination is an existing public route with its actual heading anch
     assert.ok(source, `${doc.id}: route source exists`);
     if (doc.to === "/world" && actualWorldAnchors.has(doc.hash)) continue;
     if (doc.to === "/dream-chapter" && actualDreamAnchors.has(doc.hash)) continue;
+    if (doc.to === "/far-from-saga" && actualFarFromAnchors.has(doc.hash)) continue;
     if (doc.hash === "top" && /<(?:section|main|div)[^>]*\bid="top"/.test(source)) continue;
     assert.ok(source.includes(`id="${doc.hash}"`), `${doc.id}: actual anchor ${doc.hash}`);
   }

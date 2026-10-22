@@ -1368,12 +1368,14 @@ function buildGuide() {
       if (!solid[i]) continue;
       const d = depth[i];
       const lit = !inside(x - 1, y) || !inside(x, y - 1) || !inside(x - 1, y - 1);
+      // A hologram's weight, not a plate's: the rails thin and the channel
+      // a translucent ice glass (the formed gold is the art's own).
       let colour;
-      if (d === 0) colour = lit ? [255, 228, 158, 255] : [168, 118, 48, 255];
-      else if (d === 1) colour = lit ? [236, 196, 112, 236] : [124, 86, 34, 230];
-      else if (d === 2) colour = [150, 222, 255, 96];
-      else if (d === 3) colour = [184, 238, 255, 136];
-      else colour = [214, 247, 255, 168];
+      if (d === 0) colour = lit ? [255, 228, 158, 214] : [168, 118, 48, 196];
+      else if (d === 1) colour = lit ? [236, 196, 112, 120] : [124, 86, 34, 110];
+      else if (d === 2) colour = [150, 222, 255, 56];
+      else if (d === 3) colour = [184, 238, 255, 78];
+      else colour = [214, 247, 255, 96];
       raw.set(colour, i * 4);
     }
   return raw;

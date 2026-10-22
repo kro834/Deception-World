@@ -2,7 +2,7 @@
 // design/far-from-suit-20261022/middle.webp — do not edit by hand.
 // Figure coordinates are delivery pixels of the 693 x 1040 figure (the
 // owner's whole 1024 x 1536 cutout frame: src/lib/far-from-stage.ts).
-// 9 files, 1311058 bytes (figure.webp 183750, high.webp 166678, xhigh.webp 166596, max.webp 177652, undersuit.webp 45476, plates.webp 265464, gold.webp 140754, driver-standin.webp 37726, guide.webp 126962).
+// 9 files, 1313402 bytes (figure.webp 183750, high.webp 166678, xhigh.webp 166596, max.webp 177652, undersuit.webp 45476, plates.webp 265464, gold.webp 140754, driver-standin.webp 37726, guide.webp 129306).
 
 export const FAR_FROM_SUIT_SIZE = { width: 693, height: 1040 } as const;
 

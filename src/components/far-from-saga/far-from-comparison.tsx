@@ -1,133 +1,158 @@
-import { useId, useState } from "react";
+import { useId, useState, type CSSProperties } from "react";
 import {
-  COMPARISON_BASELINES,
-  COMPARISON_CITATIONS,
-  COMPARISON_COLUMNS,
-  NUMERIC_METRICS,
-  TEXT_ROWS,
-  UNPUBLISHED,
-  comparisonColumn,
+  BASELINES,
+  BASIC_METRICS,
+  BASIC_TABLE,
+  BASIC_TEXT_ROWS,
+  BENCHMARK_BASE,
+  BENCHMARK_ROWS,
+  BENCHMARK_SCALE,
+  BENCHMARK_TABLE,
+  FORMS,
+  form,
+  formatChange,
   formatMultiplier,
   formatPercent,
-  metricFigure,
-  metricRatio,
-  type ComparisonBaselineKey,
-  type ComparisonColumnKey,
-  type MetricValue,
-  type NumericMetric,
+  ratio,
+  type BaselineKey,
+  type BasicMetric,
+  type BenchmarkRow,
+  type CellValue,
+  type FormKey,
 } from "./far-from-comparison-data";
+import { reportChapter, sentence } from "./far-from-report-data";
 
-/* #performance — the comparison console.
+/* #performance — the comparison console (owner's comparison text, 2026-10-22).
 
-   One radio group picks the view: FAR FROM against Rexonance, FAR FROM
-   against Extreme (the baseline at 100%), or all three side by side. Every
-   figure on screen is a published value; the ratios are those values divided
-   by each other, nothing more. Rows without a shared number are listed as
-   text below the console, and the owner's own comparison sentences close the
-   chapter, quoted as written. */
+   One radio group picks the view: FAR FROM against ヴィンクルム, エクスプリーム
+   or レクソナンス (the baseline at 100%), or all four side by side. It drives
+   both panels: the owner's 【基本性能比較】 table as metric cards, and the
+   【同条件ベンチマーク・暫定評価】 indices as a bar chart (レクソナンス・ハイ =
+   100; 熱負荷 reads lower = better). Every figure on screen is one of the
+   owner's cells or the ratio of two cells in the same row; each table's ※
+   note is printed under it, verbatim. */
 
-type View = ComparisonBaselineKey | "all";
+type View = BaselineKey | "all";
 
 const VIEWS: readonly { key: View; label: string }[] = [
-  ...COMPARISON_BASELINES.map((key) => ({ key, label: `${comparisonColumn(key).label}と比較` })),
-  { key: "all", label: "3機を並べる" },
+  ...BASELINES.map((key) => ({ key, label: `${form(key).label}と比較` })),
+  { key: "all", label: "4機を並べる" },
 ];
 
-const SPECIAL_VALUES = new Set(["可変", "測定不能", "無制限", "無限大"]);
+/** The owner's sentence that names the indices 暫定指数. */
+const BENCHMARK_LEDE = sentence(
+  reportChapter("report-saga", "同条件ベンチマーク・暫定評価"),
+  "暫定指数となる",
+);
 
-const accentStyle = (key: ComparisonColumnKey) => ({
-  ["--ffs-col-accent" as string]: comparisonColumn(key).accent,
-});
+/** The ※ note: ヴィンクルムの身体値は提示された推定値. */
+const BODY_ROWS = new Set(["パンチ力", "キック力", "ジャンプ力", "100m走力"]);
 
-function FloorMark({ value }: { value: MetricValue }) {
-  return value.floor ? (
-    <span className="ffs-floor" title="「〜」付きの公表値">
-      ※
-    </span>
-  ) : null;
+const accentStyle = (key: FormKey) =>
+  ({ ["--ffs-col-accent" as string]: form(key).accent }) as CSSProperties;
+const barStyle = (fraction: number) =>
+  ({ ["--ffs-bar" as string]: Math.max(0, Math.min(1, fraction)) }) as CSSProperties;
+
+/** 推定値 / 下限値 marks, from the basic table's ※ note. */
+function CellMark({
+  metric,
+  formKey,
+  cell,
+}: {
+  metric: BasicMetric;
+  formKey: FormKey;
+  cell: CellValue;
+}) {
+  if (cell.floor)
+    return (
+      <span className="ffs-cell-mark" data-mark="floor">
+        下限値
+      </span>
+    );
+  if (formKey === "vinculum" && BODY_ROWS.has(metric.label))
+    return (
+      <span className="ffs-cell-mark" data-mark="estimate">
+        推定値
+      </span>
+    );
+  return null;
 }
 
-function PairMetric({
-  metric,
-  baseline,
-}: {
-  metric: NumericMetric;
-  baseline: ComparisonBaselineKey;
-}) {
-  const ratio = metricRatio(metric, baseline);
-  const base = comparisonColumn(baseline);
+function PairMetric({ metric, baseline }: { metric: BasicMetric; baseline: BaselineKey }) {
   const farFrom = metric.values.farFrom;
   const other = metric.values[baseline];
-  if (!ratio) return null;
-  const summary = metric.lowerIsBetter
-    ? `${metric.label}、${base.name}を100%としたファーフロムサーガの速さは${formatPercent(ratio.percent)}、${formatMultiplier(ratio.multiplier)}`
-    : `${metric.label}、${base.name}を100%としたファーフロムサーガの値は${formatPercent(ratio.percent)}、${formatMultiplier(ratio.multiplier)}`;
+  const result = ratio(farFrom.value, other.value, metric.reading);
+  const base = form(baseline);
+  const longer = Math.max(result.multiplier, 1);
+  const time = metric.reading === "time";
+  const summary = time
+    ? `${metric.label}、${base.name}を基準にした速さは${formatMultiplier(result.multiplier)}、所要時間は${formatPercent(result.timeCut ?? 0)}短縮`
+    : `${metric.label}、${base.name}を基準にした値は${formatChange(result.change)}、${formatMultiplier(result.multiplier)}`;
   return (
     <article className="ffs-metric">
       <header>
         <div>
           <small>{metric.label}</small>
-          <strong>
-            {metricFigure(farFrom)}
-            <FloorMark value={farFrom} />
-          </strong>
+          <strong>{farFrom.text}</strong>
         </div>
         <p className="ffs-metric-result">
-          <i>{metric.lowerIsBetter ? "速さの比" : "基準比"}</i>
-          <b>{formatPercent(ratio.percent)}</b>
-          <em>{formatMultiplier(ratio.multiplier)}</em>
+          <i>{time ? "速さの比" : "基準比"}</i>
+          <b>{time ? formatMultiplier(result.multiplier) : formatChange(result.change)}</b>
+          <em>
+            {time ? `速さ ${formatChange(result.change)}` : formatMultiplier(result.multiplier)}
+          </em>
         </p>
       </header>
       <div className="ffs-bars" role="img" aria-label={summary}>
         <span style={accentStyle("farFrom")}>
-          <i style={{ ["--ffs-bar" as string]: ratio.farFromBar / 100 }} />
+          <i style={barStyle(result.multiplier / longer)} />
         </span>
         <span style={accentStyle(baseline)}>
-          <i style={{ ["--ffs-bar" as string]: ratio.baselineBar / 100 }} />
+          <i style={barStyle(1 / longer)} />
         </span>
       </div>
       <p className="ffs-metric-base">
         <span>{base.label}</span>
         <span>
-          {metricFigure(other)}
-          <FloorMark value={other} />
+          {other.text}
+          <CellMark metric={metric} formKey={baseline} cell={other} />
         </span>
-        {ratio.timeCut !== null ? (
-          <span>100mの所要時間 {formatPercent(ratio.timeCut)}短縮</span>
+        {result.timeCut !== null ? (
+          <span>100mの所要時間 {formatPercent(result.timeCut)}短縮</span>
         ) : null}
       </p>
     </article>
   );
 }
 
-function TrioMetric({ metric }: { metric: NumericMetric }) {
-  // Bars on one scale: the best of the three at 100 (for 走力, the fastest).
-  const score = (value: MetricValue) =>
-    value.value === null ? null : metric.lowerIsBetter ? 1 / value.value : value.value;
-  const scores = COMPARISON_COLUMNS.map((column) => score(metric.values[column.key]) ?? 0);
-  const top = Math.max(...scores);
+function AllMetric({ metric }: { metric: BasicMetric }) {
+  // One scale per row: the best of the four at 100 (for 100m走力, the fastest).
+  const score = (cell: CellValue) => (metric.reading === "time" ? 1 / cell.value : cell.value);
+  const top = Math.max(...FORMS.map((item) => score(metric.values[item.key])));
   return (
-    <article className="ffs-metric ffs-metric-trio">
+    <article className="ffs-metric ffs-metric-all">
       <header>
         <div>
           <small>{metric.label}</small>
           <strong>
-            {metric.lowerIsBetter ? "100mの所要時間（バーは速さ）" : `単位：${metric.unit}`}
+            {metric.reading === "time"
+              ? "所要時間（バーは速さ）"
+              : `単位：${metric.values.farFrom.unit}`}
           </strong>
         </div>
       </header>
-      <ul className="ffs-trio" aria-label={`${metric.label}の公表値`}>
-        {COMPARISON_COLUMNS.map((column, index) => {
-          const value = metric.values[column.key];
+      <ul className="ffs-all" aria-label={`${metric.label}の4機の値`}>
+        {FORMS.map((item) => {
+          const cell = metric.values[item.key];
           return (
-            <li key={column.key} style={accentStyle(column.key)}>
-              <span>{column.label}</span>
+            <li key={item.key} style={accentStyle(item.key)}>
+              <span>{item.label}</span>
               <b>
-                {value.value === null ? "記載なし" : metricFigure(value)}
-                <FloorMark value={value} />
+                {cell.text}
+                <CellMark metric={metric} formKey={item.key} cell={cell} />
               </b>
-              <span className="ffs-trio-bar" aria-hidden="true">
-                <i style={{ ["--ffs-bar" as string]: top > 0 ? scores[index] / top : 0 }} />
+              <span className="ffs-all-bar" aria-hidden="true">
+                <i style={barStyle(score(cell) / top)} />
               </span>
             </li>
           );
@@ -137,125 +162,209 @@ function TrioMetric({ metric }: { metric: NumericMetric }) {
   );
 }
 
+function TextRows({ baseline }: { baseline: BaselineKey | null }) {
+  const shown = FORMS.filter(
+    (item) => !baseline || item.key === "farFrom" || item.key === baseline,
+  ).sort((a, b) => (baseline ? (a.key === "farFrom" ? -1 : b.key === "farFrom" ? 1 : 0) : 0));
+  return (
+    <div className="ffs-text-rows">
+      {BASIC_TEXT_ROWS.map((row) => (
+        <article key={row.label} className="ffs-text-row">
+          <h4>{row.label}</h4>
+          <dl>
+            {shown.map((item) => (
+              <div key={item.key} style={accentStyle(item.key)}>
+                <dt>{item.label}</dt>
+                <dd data-pending={row.values[item.key] === "個別比較値未確定" || undefined}>
+                  {row.values[item.key]}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </article>
+      ))}
+    </div>
+  );
+}
+
+function benchmarkDelta(row: BenchmarkRow, baseline: BaselineKey) {
+  const result = ratio(row.values.farFrom, row.values[baseline], row.reading);
+  return row.reading === "load"
+    ? {
+        main: `${formatPercent(-result.change)}削減`,
+        sub: `${row.values[baseline]} → ${row.values.farFrom}`,
+      }
+    : { main: formatChange(result.change), sub: formatMultiplier(result.multiplier) };
+}
+
+function BenchmarkChart({ baseline }: { baseline: BaselineKey | null }) {
+  const ticks = Array.from({ length: BENCHMARK_SCALE / 100 + 1 }, (_, index) => index * 100);
+  const reference = {
+    ["--ffs-ref" as string]: BENCHMARK_BASE / BENCHMARK_SCALE,
+  } as CSSProperties;
+  return (
+    <div className="ffs-bench" style={reference}>
+      <div className="ffs-bench-axis" aria-hidden="true">
+        <span className="ffs-bench-axis-pad" />
+        <div className="ffs-bench-scale">
+          <span />
+          <span className="ffs-bench-ticks">
+            {ticks.map((tick) => (
+              <i
+                key={tick}
+                style={{ ["--ffs-tick" as string]: tick / BENCHMARK_SCALE } as CSSProperties}
+              >
+                {tick}
+              </i>
+            ))}
+          </span>
+          <span />
+        </div>
+      </div>
+      <ol className="ffs-bench-rows">
+        {BENCHMARK_ROWS.map((row) => {
+          const delta = baseline ? benchmarkDelta(row, baseline) : null;
+          return (
+            <li key={row.label} data-reading={row.reading}>
+              <div className="ffs-bench-head">
+                <h4>{row.label}</h4>
+                {row.reading === "load" ? (
+                  <span className="ffs-bench-flag">
+                    <i aria-hidden="true">↓</i>低いほど優秀
+                  </span>
+                ) : null}
+                {delta ? (
+                  <p className="ffs-bench-delta">
+                    <span className="ffs-visually-hidden">
+                      {form(baseline as BaselineKey).label}比
+                    </span>
+                    <b>{delta.main}</b>
+                    <em>{delta.sub}</em>
+                  </p>
+                ) : null}
+              </div>
+              <ul>
+                {FORMS.map((item) => (
+                  <li
+                    key={item.key}
+                    style={accentStyle(item.key)}
+                    data-dim={
+                      (baseline && item.key !== "farFrom" && item.key !== baseline) || undefined
+                    }
+                  >
+                    <span>{item.label}</span>
+                    <span className="ffs-bench-track" aria-hidden="true">
+                      <i style={barStyle(row.values[item.key] / BENCHMARK_SCALE)} />
+                    </span>
+                    <b>{row.values[item.key]}</b>
+                  </li>
+                ))}
+              </ul>
+            </li>
+          );
+        })}
+      </ol>
+    </div>
+  );
+}
+
 export function FarFromComparison() {
   const [view, setView] = useState<View>("rexonance");
   const groupName = useId();
-  const baseline = view === "all" ? null : comparisonColumn(view);
+  const baseline = view === "all" ? null : view;
+  const baseForm = baseline ? form(baseline) : null;
 
   return (
-    <>
-      <div className="ffs-console rxs-reveal" role="group" aria-label="標準値の比較">
-        <div className="ffs-console-head">
-          <fieldset className="ffs-views">
-            <legend>表示する比較</legend>
-            <div>
-              {VIEWS.map((item) => (
-                <label key={item.key} className={view === item.key ? "is-active" : undefined}>
-                  <input
-                    type="radio"
-                    name={groupName}
-                    value={item.key}
-                    checked={view === item.key}
-                    onChange={() => setView(item.key)}
-                  />
-                  <span>{item.label}</span>
-                </label>
-              ))}
-            </div>
-          </fieldset>
-          <p className="ffs-console-formula">
-            {baseline ? (
-              <>
-                比較基準：<b>{baseline.name}＝100%</b>
-              </>
-            ) : (
-              <>
-                3機の公表値を、<b>項目ごとに同じ目盛り</b>で表示
-              </>
-            )}
-          </p>
-          <ul className="ffs-console-key" aria-hidden="true">
-            {COMPARISON_COLUMNS.filter(
-              (column) => !baseline || column.key === "farFrom" || column.key === baseline.key,
-            ).map((column) => (
-              <li key={column.key} style={accentStyle(column.key)}>
-                <i />
-                {column.label}
-              </li>
+    <div className="ffs-console rxs-reveal" role="group" aria-label="性能比較コンソール">
+      <div className="ffs-console-head">
+        <fieldset className="ffs-views">
+          <legend>表示する比較</legend>
+          <div>
+            {VIEWS.map((item) => (
+              <label key={item.key} className={view === item.key ? "is-active" : undefined}>
+                <input
+                  type="radio"
+                  name={groupName}
+                  value={item.key}
+                  checked={view === item.key}
+                  onChange={() => setView(item.key)}
+                />
+                <span>{item.label}</span>
+              </label>
             ))}
-          </ul>
-        </div>
-
-        <div className="ffs-metric-grid" data-view={view} aria-live="polite" aria-atomic="false">
-          {NUMERIC_METRICS.map((metric) =>
-            view === "all" ? (
-              <TrioMetric key={`all-${metric.key}`} metric={metric} />
-            ) : (
-              <PairMetric key={metric.key} metric={metric} baseline={view} />
-            ),
+          </div>
+        </fieldset>
+        <p className="ffs-console-formula">
+          {baseForm ? (
+            <>
+              比較基準：<b>{baseForm.name}＝100%</b>
+            </>
+          ) : (
+            <>
+              4機の値を、<b>項目ごとに同じ目盛り</b>で表示
+            </>
           )}
-        </div>
-
-        <ul className="ffs-console-notes">
-          <li>比率は、同じ単位の公表値どうしを割って算出しています。</li>
-          <li>走力は100mの所要時間です。値が小さいほど速く、比率は速さで表しています。</li>
-          <li>
-            <span className="ffs-floor">※</span>
-            は「〜」付きの公表値です。表記の数値で計算しています。
-          </li>
-          <li>ファーフロムサーガのハイ以降の数値は公表されていません。</li>
-        </ul>
-      </div>
-
-      <section className="ffs-text-compare rxs-reveal" aria-labelledby="ffs-text-compare-title">
-        <header>
-          <small lang="en">OTHER SPECS</small>
-          <h3 id="ffs-text-compare-title">数値で比べない項目</h3>
-        </header>
-        <div className="ffs-text-rows">
-          {TEXT_ROWS.map((row) => (
-            <article key={row.label} className="ffs-text-row">
-              <h4>{row.label}</h4>
-              <dl>
-                {COMPARISON_COLUMNS.map((column) => {
-                  const value = row.values[column.key];
-                  return (
-                    <div key={column.key} style={accentStyle(column.key)}>
-                      <dt>{column.label}</dt>
-                      <dd
-                        data-kind={
-                          value === UNPUBLISHED
-                            ? "none"
-                            : SPECIAL_VALUES.has(value)
-                              ? "special"
-                              : undefined
-                        }
-                      >
-                        {value === UNPUBLISHED ? "記載なし" : value}
-                      </dd>
-                    </div>
-                  );
-                })}
-              </dl>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="ffs-citations-block rxs-reveal" aria-labelledby="ffs-citations-title">
-        <header>
-          <small lang="en">FROM THE RECORD</small>
-          <h3 id="ffs-citations-title">設定資料での比較</h3>
-        </header>
-        <ul className="ffs-citations">
-          {COMPARISON_CITATIONS.map((citation) => (
-            <li key={citation.text}>
-              <small>{citation.source}</small>
-              <q>{citation.text}</q>
+        </p>
+        <ul className="ffs-console-key" aria-label="凡例">
+          {FORMS.map((item) => (
+            <li
+              key={item.key}
+              style={accentStyle(item.key)}
+              data-dim={(baseline && item.key !== "farFrom" && item.key !== baseline) || undefined}
+            >
+              <i aria-hidden="true" />
+              {item.label}
             </li>
           ))}
         </ul>
+      </div>
+
+      <section className="ffs-panel" aria-labelledby="ffs-basic-title">
+        <header className="ffs-panel-head">
+          <small lang="en">BASIC SPEC</small>
+          <h3 id="ffs-basic-title">{BASIC_TABLE.title}</h3>
+        </header>
+        <div className="ffs-metric-grid" data-view={view} aria-live="polite" aria-atomic="false">
+          {BASIC_METRICS.map((metric) =>
+            baseline ? (
+              <PairMetric key={`${baseline}-${metric.key}`} metric={metric} baseline={baseline} />
+            ) : (
+              <AllMetric key={`all-${metric.key}`} metric={metric} />
+            ),
+          )}
+        </div>
+        <TextRows baseline={baseline} />
+        <p className="ffs-table-note">{BASIC_TABLE.note}</p>
       </section>
-    </>
+
+      <section className="ffs-panel ffs-panel-bench" aria-labelledby="ffs-bench-title">
+        <header className="ffs-panel-head">
+          <small lang="en">PROVISIONAL INDEX</small>
+          <h3 id="ffs-bench-title">{BENCHMARK_TABLE.title}</h3>
+          <p className="ffs-bench-badges">
+            <span className="ffs-provisional-tag">暫定指数</span>
+            <span>
+              レクソナンス・ハイ＝{BENCHMARK_BASE}
+              <i aria-hidden="true" className="ffs-bench-ref-key" />
+            </span>
+            <span>
+              <i aria-hidden="true">↓</i>熱負荷は低いほど優秀
+            </span>
+          </p>
+          <p className="ffs-panel-lede">{BENCHMARK_LEDE}</p>
+        </header>
+        <BenchmarkChart baseline={baseline} />
+        <p className="ffs-table-note">{BENCHMARK_TABLE.note}</p>
+      </section>
+
+      <ul className="ffs-console-notes">
+        <li>
+          比率は、表の同じ行の値どうしを割って算出し、小数第2位で四捨五入しています。四捨五入した値には「約」を付けています。
+        </li>
+        <li>100m走力は所要時間です。値が小さいほど速く、比率は速さで表しています。</li>
+        <li>「〜」付きの値は、表記の数値で計算しています。</li>
+        <li>暫定指数は、比較基準の値を100%とした増減で表しています。熱負荷は削減率です。</li>
+      </ul>
+    </div>
   );
 }

@@ -17,6 +17,7 @@ import {
 import { FarFromEntryTransition } from "./far-from-entry-transition";
 import { FarFromComparison } from "./far-from-comparison";
 import { FarFromP16 } from "./far-from-p16";
+import { FarFromReport } from "./far-from-report";
 import { FarFromSuitUp } from "./far-from-suitup";
 
 /* FAR FROM SAGA special site (owner's record of 2026-10-22).
@@ -28,14 +29,14 @@ import { FarFromSuitUp } from "./far-from-suitup";
    sheets) draws the chrome; styles-far-from-saga.css adds what this page
    alone needs.
 
-   #performance is the comparison console (far-from-comparison.tsx) and #p16
-   the P16 chapter's frame (far-from-p16.tsx; P16's own specs are 準備中),
-   both drawing on far-from-comparison-data.ts. #suitup is the scroll
-   suit-up (far-from-suitup.tsx: the Rexonance runway playing FAR FROM's
-   suit through src/lib/far-from-assembly.ts, its engine chunk imported
-   under the motion gate once the page is idle). Still prepared, not built
-   (準備中): the nanite entry transition (far-from-entry-transition.tsx,
-   renders nothing). Nothing here delays first paint. */
+   #performance (far-from-comparison.tsx), #report (far-from-report.tsx) and
+   #p16 (far-from-p16.tsx) are built from the owner's comparison text
+   (far-from-report-text.ts, verbatim). #suitup is the scroll suit-up
+   (far-from-suitup.tsx: the Rexonance runway playing FAR FROM's suit
+   through src/lib/far-from-assembly.ts, its engine chunk imported under
+   the motion gate once the page is idle). Still prepared, not built: the
+   nanite entry transition (far-from-entry-transition.tsx, renders
+   nothing). Nothing here delays first paint. */
 
 const releaseControlFocus = (control: HTMLElement) => {
   window.requestAnimationFrame(() => {
@@ -80,16 +81,6 @@ function Articles({
         </article>
       ))}
     </div>
-  );
-}
-
-/** The 準備中 mark every prepared chapter wears: a short note, then the state. */
-function Pending({ line }: { line: string }) {
-  return (
-    <p className="ffs-pending" role="note">
-      <span>{line}</span>
-      <b>準備中</b>
-    </p>
   );
 }
 
@@ -260,25 +251,33 @@ export function FarFromSaga() {
           <p>03 / COMPARISON</p>
           <h2 id="ffs-performance-title">性能比較</h2>
           <span>
-            ファーフロムサーガの標準値を、レクソナンスサーガ、エクスプリームサーガの標準値と比較します。
+            ファーフロムサーガを、ヴィンクルムサーガ、エクスプリームサーガ、レクソナンスサーガと比較します。
           </span>
         </header>
         <FarFromComparison />
       </section>
 
-      {/* 準備中 — #p16: the chapter's frame from the record; P16's own specs
-          are not published yet (far-from-p16.tsx). */}
+      {/* #report: the owner's comparison text in full (far-from-report.tsx). */}
       <section
-        id="p16"
-        className="rxs-section ffs-p16 ffs-prepared"
-        aria-labelledby="ffs-p16-title"
+        id="report"
+        className="rxs-section ffs-report-section"
+        aria-labelledby="ffs-report-title"
       >
         <header className="rxs-section-heading rxs-reveal">
-          <p>04 / RECOGNITION</p>
-          <h2 id="ffs-p16-title">『P16』</h2>
-          <span>認識・制御の欄に記載された機構です。</span>
+          <p>03 / REPORT</p>
+          <h2 id="ffs-report-title">比較資料</h2>
+          <span>性能比較の設定資料を、全文で掲載します。</span>
         </header>
-        <Pending line="P16の詳細な仕様は現在準備中です。" />
+        <FarFromReport />
+      </section>
+
+      {/* #p16: the owner's two P16 chapters (far-from-p16.tsx). */}
+      <section id="p16" className="rxs-section ffs-p16" aria-labelledby="ffs-p16-title">
+        <header className="rxs-section-heading rxs-reveal">
+          <p>04 / PROCESSOR</p>
+          <h2 id="ffs-p16-title">『P16』</h2>
+          <span>レクソナンスサーガの『P14』を基礎とした、第16世代演算加速機構です。</span>
+        </header>
         <FarFromP16 />
       </section>
 

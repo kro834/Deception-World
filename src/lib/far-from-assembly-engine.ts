@@ -13,10 +13,10 @@
  * - the reactor completes like the compound eyes (owner): on FAR FROM
  *   DEUS！ pixel squares fill it, then scatter (`reactorGlow`);
  * - two kinds of nanite, mixed (owner): kit A is Rexonance's hex chips
- *   (src/lib/rexonance-nanites.ts); kit B lands as src/lib/far-from-nanites.ts
- *   (FAR_FROM_NANITE_CELLS, the same layout contract) — until it does, kit A
- *   stands in for it, so the two-kit path (each chip one kit's by its hash)
- *   already runs;
+ *   (src/lib/rexonance-nanites.ts), kit B Far From's Blender crystal
+ *   (src/lib/far-from-nanites.ts, FAR_FROM_NANITE_CELLS, the same layout
+ *   contract); each chip is one kit's by its hash and both draw through the
+ *   same sprite path;
  * - after the seal the suit-up runs ハイ → エックスハイ → マックス
  *   (`forms.chain`), each form overwriting the last with cells from the core
  *   out, and the runway ends on マックス;
@@ -103,19 +103,23 @@ export const FAR_FROM_REACTOR_RADIUS = 30;
 export const FAR_FROM_FIRE_TONE = 1;
 
 /** The nanite kits, loaded with the scene's pictures: kit A's chips, comets
- * and effects, kit B's chips (kit A until src/lib/far-from-nanites.ts lands),
- * and FAR FROM's own guide, seams and gold boxes. */
+ * and effects, kit B's crystal chips, and FAR FROM's own guide, seams and
+ * gold boxes. */
 export const loadFarFromNanites = () =>
-  import("./rexonance-nanites.ts").then((module) => ({
-    cells: module.REXONANCE_NANITE_CELLS,
-    // TODO(farfrom-nanite-kit): FAR_FROM_NANITE_CELLS from far-from-nanites.ts.
-    cellsB: module.REXONANCE_NANITE_CELLS,
-    comets: module.REXONANCE_NANITE_COMETS,
-    fx: module.REXONANCE_NANITE_FX,
-    guide: FAR_FROM_SUIT_GUIDE,
-    seams: FAR_FROM_SUIT_SEAMS,
-    goldBoxes: FAR_FROM_SUIT_GOLD_BOXES,
-  }));
+  Promise.all([import("./rexonance-nanites.ts"), import("./far-from-nanites.ts")]).then(
+    ([kitA, kitB]) => ({
+      // Kit A: Rexonance's hex chip. Kit B: Far From's own Blender crystal
+      // (the same sheet layout, so one sprite path draws both, mixed per
+      // chip). Comets, FX and the guide come from kit A and the suit build.
+      cells: kitA.REXONANCE_NANITE_CELLS,
+      cellsB: kitB.FAR_FROM_NANITE_CELLS,
+      comets: kitA.REXONANCE_NANITE_COMETS,
+      fx: kitA.REXONANCE_NANITE_FX,
+      guide: FAR_FROM_SUIT_GUIDE,
+      seams: FAR_FROM_SUIT_SEAMS,
+      goldBoxes: FAR_FROM_SUIT_GOLD_BOXES,
+    }),
+  );
 
 /** The scene's config: FAR FROM's suit in the Rexonance engine's terms. */
 export function farFromAssemblyConfig(): RexonanceAssemblyConfig {

@@ -87,10 +87,21 @@ for (const name of chosen) {
     const travel = state.height - state.frame;
     for (const step of steps) {
       await page.evaluate((y) => scrollTo(0, y), top + travel * step);
-      await page.waitForTimeout(650);
-      const frame = await page.$(".rzn-suitup .rzn-frame");
+      await page.waitForTimeout(600);
+      // The frame's box in the viewport, clipped from the page (an element
+      // screenshot would scroll it into view and wait for the live canvas
+      // to hold still, which the burning fire never does).
+      const clip = await page.evaluate(() => {
+        const box = document.querySelector(".rzn-suitup .rzn-frame").getBoundingClientRect();
+        return {
+          x: Math.max(0, box.left),
+          y: Math.max(0, box.top),
+          width: Math.min(innerWidth, box.width),
+          height: Math.min(innerHeight - Math.max(0, box.top), box.height),
+        };
+      });
       const label = step.toFixed(3).replace(".", "_");
-      await frame.screenshot({ path: join(out, `${path}-${name}-${label}.png`) });
+      await page.screenshot({ path: join(out, `${path}-${name}-${label}.png`), clip });
       const hud = await page.evaluate(() => {
         const runway = document.querySelector(".rzn-suitup");
         return {
