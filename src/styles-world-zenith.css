@@ -264,6 +264,120 @@
   }
 }
 
+/* Ultra-wide screens (2560 × 1440, 2560 × 1080, 3440 × 1440): the stage's
+   type stopped at 112px / 54px while its columns kept widening, so the
+   wordmark ran onto one line and the left column became a short block
+   over a screen of empty ink, with the print a long way off at the right.
+   Here the title card keeps a 19:10 frame centred in the stage (the key
+   art still runs edge to edge behind it); the wordmark keeps its two lines
+   and grows with the frame in a wider left column, the headline, the
+   credits and their labels grow with it, and the print takes the height. */
+@media (min-width: 2200px) and (orientation: landscape) {
+  html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > .hero {
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+    row-gap: clamp(32px, 3.4svh, 64px);
+    padding-top: calc(var(--film-topbar-height, 76px) + clamp(24px, 4.4svh, 72px));
+    padding-inline: max(var(--sw-gutter), calc((100% - 190svh) / 2 + var(--sw-gutter)));
+  }
+
+  /* DECEPTION is about 7.7em and the pair 10.8em, so 8.6em keeps two
+     lines; 6.4vw / 12svh keep DECEPTION inside the column beside the 02
+     tag (1,261px of 1,345px at 2560 × 1440). */
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero
+    > .film-hero-identity
+    .anime-work-title
+    b {
+    max-inline-size: 8.6em;
+    font-size: clamp(112px, min(6.4vw, 12svh), 176px);
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero
+    > .film-hero-identity
+    > .anime-work-title
+    > span {
+    font-size: 14px;
+  }
+
+  /* The programme sheet sets the headline's size on its two lines (52px
+     at most); the h1's own size never reached them. */
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero
+    > .hero-copy
+    h1
+    :is(span, strong) {
+    font-size: clamp(52px, min(3.3vw, 6.2svh), 80px);
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero
+    > .hero-copy
+    > .hero-actions
+    > :is(.primary-action, .text-action) {
+    font-size: 15px;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero
+    > .hero-copy
+    > .hero-actions
+    > .primary-action {
+    min-height: 62px;
+    padding-inline: 30px;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero
+    > .hero-context
+    > .hero-lead {
+    font-size: clamp(15px, 1.25svh, 18px);
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero
+    > .hero-context
+    > .hero-metadata {
+    max-width: 760px;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero
+    > .hero-context
+    > .hero-metadata
+    :is(small, b) {
+    font-size: 14px;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero
+    > .poster-stage {
+    --poster-width: min(
+      26vw,
+      680px,
+      max(256px, calc((100svh - var(--film-topbar-height, 76px) - 230px) * 2 / 3))
+    );
+  }
+}
+
 /* iPad Pro 12.9" portrait (1024 × 1366) and its kin: the larger print the
    stage sheet asked for (the hero keeps rx14's min-height: 0, no
    artificial floor: the larger print fills it instead). */
