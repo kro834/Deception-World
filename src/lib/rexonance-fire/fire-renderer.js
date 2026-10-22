@@ -23,6 +23,8 @@ import {
   POSE_RING_RADIUS,
   POSE_RING_STRENGTH,
   POSE_STRENGTH,
+  POSE_TEAR_GLOW,
+  POSE_TEAR_OPEN,
   POSE_VIEW_X0,
   POSE_VIEW_X1,
   POSE_VIEW_Y0,
@@ -199,7 +201,13 @@ export function drawFireLayer(state, pose, layer, x, y, w, h) {
   );
   gl.uniform4f(state.uLife, pose[POSE_COVER], pose[POSE_MIX], pose[POSE_BURST], pose[POSE_FLASH]);
   gl.uniform4f(state.uClock, pose[POSE_FLICKER], pose[POSE_STRENGTH], layer, pose[POSE_DETAIL]);
-  gl.uniform2f(state.uRing, pose[POSE_RING_RADIUS], pose[POSE_RING_STRENGTH]);
+  gl.uniform4f(
+    state.uRing,
+    pose[POSE_RING_RADIUS],
+    pose[POSE_RING_STRENGTH],
+    pose[POSE_TEAR_OPEN],
+    pose[POSE_TEAR_GLOW],
+  );
   gl.uniform4f(
     state.uView,
     pose[POSE_VIEW_X0],
@@ -267,7 +275,11 @@ export function drawFireSparks(state, pose, fragments, count, x, y, w, h) {
     FIRE_RECT.width,
     FIRE_RECT.height * BODY_ASPECT,
   );
-  gl.uniform2f(state.uSpark, pose[POSE_STRENGTH], sparkStretch(pose[POSE_BURST]));
+  gl.uniform2f(
+    state.uSpark,
+    pose[POSE_STRENGTH] * sparkEmerge(pose[POSE_BURST]),
+    sparkStretch(pose[POSE_BURST]),
+  );
   gl.bindBuffer(gl.ARRAY_BUFFER, state.sparks);
   gl.bufferSubData(gl.ARRAY_BUFFER, 0, data);
   gl.enableVertexAttribArray(state.aCentre);
@@ -286,6 +298,22 @@ export function drawFireSparks(state, pose, fragments, count, x, y, w, h) {
 export function sparkStretch(burst) {
   const t = Math.max(0, Math.min(1, burst / FIRE_TUNING.sparkGrow));
   return FIRE_TUNING.sparkStretch * t * t * (3 - 2 * t);
+}
+
+/** How far a fragment has come out of its tear at a burst progress: at
+ * the detonation's first instant they are still inside the incandescent
+ * tears (so no line of separate dots stands on the body), and they show
+ * as they fly clear of them. */
+export function sparkEmerge(burst) {
+  const t = Math.max(
+    0,
+    Math.min(
+      1,
+      (burst - FIRE_TUNING.sparkEmergeFrom) /
+        (FIRE_TUNING.sparkEmergeTo - FIRE_TUNING.sparkEmergeFrom),
+    ),
+  );
+  return t * t * (3 - 2 * t);
 }
 
 /** Frees every GPU object this renderer created. */
