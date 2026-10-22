@@ -1,23 +1,21 @@
 /* FAR FROM SAGA — the ウルトラ sequence's nanite kit (2026-10-22).
 
    The owner's ウルトラ uses nanites of its own, a third kind beside the
-   Rexonance swarm's and the #suitup runway's. Their kit (Blender-rendered
-   chips, comets and effects) lands as src/lib/far-from-nanites-ultra.ts:
-   FAR_FROM_ULTRA_NANITE_CELLS and its siblings, on the same layout contract
-   as REXONANCE_NANITE_CELLS / _COMETS / _FX (src/lib/rexonance-nanites.ts),
-   with its sheets under public/far-from-nanites-ultra-20261022/.
+   Rexonance swarm's (kit A) and the #suitup runway's (kit B): kit C,
+   src/lib/far-from-nanites-ultra.ts — the Ultra unit rendered in Blender in
+   kit A's exact sheet layout (FAR_FROM_ULTRA_NANITE_CELLS and _COMETS, under
+   public/far-from-nanites-ultra-20261022/). Kit C has no effects sheet of
+   its own: kit A's scan plane serves the white front.
 
-   Until that module exists the Rexonance kit stands in, drawn in its white
-   and ice tones only. This module is the one place the sequence reads the
-   kit from: swap the imports here and nothing else changes. Imported only by
-   the scene's chunk, never on the page's startup path. */
+   This module is the one place the sequence reads the kit from. Imported
+   only by the scene's chunk, never on the page's startup path. */
 import {
-  REXONANCE_NANITE_CELLS,
-  REXONANCE_NANITE_COMETS,
-  REXONANCE_NANITE_FX,
-} from "./rexonance-nanites.ts";
+  FAR_FROM_ULTRA_NANITE_CELLS,
+  FAR_FROM_ULTRA_NANITE_COMETS,
+} from "./far-from-nanites-ultra.ts";
+import { REXONANCE_NANITE_FX } from "./rexonance-nanites.ts";
 
-/** A chip sheet's layout (the contract both kits meet). */
+/** A chip sheet's layout (the contract kits A, B and C meet). */
 export type FarFromUltraCells = {
   readonly src: string;
   readonly width: number;
@@ -64,16 +62,21 @@ export type FarFromUltraKit = {
   readonly tones: { readonly main: string; readonly accent: string };
   /** The comets' row (a name in comets.rows). */
   readonly cometTone: string;
-  /** The files to fetch (sheets). */
+  /** The files to fetch: the cells, the comets, the effects, in that order. */
   readonly assets: readonly string[];
 };
 
-/** The kit the sequence draws from (stand-in: the Rexonance kit, white and ice). */
+/** The kit the sequence draws from: kit C's white and aqua units, its aqua
+ * data streaks (kit A's "ice" row slot), kit A's effects. */
 export const FAR_FROM_ULTRA_KIT: FarFromUltraKit = {
-  cells: REXONANCE_NANITE_CELLS,
-  comets: REXONANCE_NANITE_COMETS,
+  cells: FAR_FROM_ULTRA_NANITE_CELLS,
+  comets: FAR_FROM_ULTRA_NANITE_COMETS,
   fx: REXONANCE_NANITE_FX,
-  tones: { main: "white", accent: "ice" },
+  tones: { main: "white", accent: "aqua" },
   cometTone: "ice",
-  assets: [REXONANCE_NANITE_CELLS.src, REXONANCE_NANITE_COMETS.src, REXONANCE_NANITE_FX.src],
+  assets: [
+    FAR_FROM_ULTRA_NANITE_CELLS.src,
+    FAR_FROM_ULTRA_NANITE_COMETS.src,
+    REXONANCE_NANITE_FX.src,
+  ],
 };
