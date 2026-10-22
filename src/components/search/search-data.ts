@@ -21,6 +21,8 @@ import {
   DREAM_GLOSSARY,
 } from "../dream-chapter/dream-chapter-data";
 import { CAST, FAR_FROM_SAGA, REALM_ROYAL, STORY } from "../final-stage/final-stage-data";
+import { FAR_FROM_REPORT_TEXT } from "../far-from-saga/far-from-report-text";
+import { REPORT_PART_TITLES } from "../far-from-saga/far-from-report-data";
 import { LIBRARY_ENTRIES } from "../../lib/library-data";
 import {
   SPECIAL_SITE_PATHS,
@@ -808,6 +810,18 @@ export const SEARCH_DOCUMENTS: readonly SearchCatalogueDocument[] = [
     ],
     to: "/final-stage",
     hash: "far-from-saga",
+  },
+  {
+    // The owner's comparison text (2026-10-22), searchable in full; a hit
+    // opens the special site's first comparison document.
+    id: "far-from-comparison-report",
+    title: "ファーフロムサーガ 性能比較資料",
+    category: "pages",
+    description: REPORT_PART_TITLES.join("／"),
+    body: FAR_FROM_REPORT_TEXT,
+    keywords: ["性能比較", "暫定指数", "暫定ベンチマーク", "P16", "SA-GA OS 6.1"],
+    to: "/far-from-saga",
+    hash: "report-rexonance",
   },
   {
     id: "realm-royal",

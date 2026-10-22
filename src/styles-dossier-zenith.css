@@ -832,6 +832,9 @@ html[data-family="dossier"]
     > .manager-pagination-index
     > .dossier-roster {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    /* A lane at the end for Zeus: a long roster fills the screen with
+       faces, and the button has nowhere to rest but over one. (2026-10-23) */
+    padding-inline-end: calc(var(--zeus-button-size, 60px) + 8px);
   }
 }
 
