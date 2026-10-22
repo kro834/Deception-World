@@ -23,12 +23,12 @@ export const Route = createFileRoute("/far-from-saga")({
       {
         name: "description",
         content:
-          "遠く離れた機構までが、一つの拳になる。ファイナルステージ限定の超究極フォーム、仮面ライダーファーフロムサーガの公式特設サイト。変身音声、スペック、五つの形態段階、中核機構、神属権限、必殺技の記録。",
+          "ファイナルステージ限定の超究極フォーム、仮面ライダーファーフロムサーガの特設サイト。変身音声、スペック、5つの形態、中核機構、神属権限、武装、必殺技を掲載。",
       },
       { property: "og:title", content: "ファーフロムサーガ｜FAR FROM SAGA — Deception World" },
       {
         property: "og:description",
-        content: "遠く離れた機構までが、一つの拳になる。超共鳴と接続の、さらに先へ。",
+        content: "どこまで離れても、この拳の一部だ。ファイナルステージ限定の超究極フォーム、仮面ライダーファーフロムサーガ。",
       },
       { property: "og:image", content: FAR_FROM_SAGA_KEY_VISUAL.src },
     ],

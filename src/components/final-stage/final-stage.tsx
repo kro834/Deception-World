@@ -759,7 +759,7 @@ export function FinalStage() {
           eyebrow={`RIDER RECORD 01 / ${FAR_FROM_SAGA.en}`}
           name={FAR_FROM_SAGA.name}
           sub={FAR_FROM_SAGA.stagesLine}
-          quote="遠く離れた機構までが、一つの拳になる。超共鳴と接続が出会う、ファイナルステージ限定の超究極フォーム。"
+          quote="レクソナンスの超共鳴と、ヴィンクルムの接続能力を一つにした、ファイナルステージ限定の超究極フォーム。"
         >
           <CallOuts calls={FAR_FROM_SAGA.calls} label="ファーフロムサーガ 変身音声" />
 
