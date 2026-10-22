@@ -5,7 +5,7 @@ import { CIEL_PORTRAIT, cielPortrait } from "@/lib/thumbnail-images";
 import { useWorldMode } from "./use-world-mode";
 import { NameText, RE_DIVE_RIKUEI_NAV } from "./dossier-nav";
 import { FormPickup } from "./manager-stub";
-import { DossierContents, DossierReader } from "./dossier-reader";
+import { DossierContents, DossierReader, PhrasedText } from "./dossier-reader";
 import { RIDER_DOSSIERS } from "./rider-page";
 import { DossierTopbar } from "./world-chrome";
 
@@ -147,7 +147,9 @@ export function CielPage() {
               <div className="manager-copy-heading">
                 <span>{section.no}</span>
                 <p>{section.kicker}</p>
-                <h2>{section.title}</h2>
+                <h2>
+                  <PhrasedText text={section.title} />
+                </h2>
               </div>
               <div className="manager-copy-body">
                 {section.body.map((paragraph) => (

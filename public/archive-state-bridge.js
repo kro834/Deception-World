@@ -137,11 +137,23 @@
       }
     }
   };
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", () => window.setTimeout(settle, 0), {
+  // A deferred script runs while readyState is already "interactive", before
+  // DOMContentLoaded: a timer queued now could read the chips before the
+  // controllers had opened the requested form, and drop it from the page URL
+  // (a shared link, a reload, Back). Settle after DOMContentLoaded's handlers
+  // (load is the late net); a document already complete settles next.
+  let settled = false;
+  const settleOnce = () => {
+    if (settled) return;
+    settled = true;
+    settle();
+  };
+  if (document.readyState === "complete") {
+    window.setTimeout(settleOnce, 0);
+  } else {
+    document.addEventListener("DOMContentLoaded", () => window.setTimeout(settleOnce, 0), {
       once: true,
     });
-  } else {
-    window.setTimeout(settle, 0);
+    window.addEventListener("load", () => window.setTimeout(settleOnce, 0), { once: true });
   }
 })();

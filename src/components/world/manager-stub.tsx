@@ -8,7 +8,7 @@ import { UiVectorIcon } from "./ui-vector-icon";
 import { LiquidPointerGlow } from "./liquid-rail";
 import { resetPickupScroll, settlePickupScroll } from "./pickup-scroll-reset";
 import { DossierTopbar } from "./world-chrome";
-import { DossierContents, DossierReader } from "./dossier-reader";
+import { DossierContents, DossierReader, PhrasedText } from "./dossier-reader";
 import { DisplayName } from "@/components/name-text";
 import { dossierImage, formPickupImage } from "@/lib/dossier-images";
 import { useDialogHistoryDismiss } from "./use-dialog-history-dismiss";
@@ -733,7 +733,9 @@ function ManagerDossier({ profile }: { profile: Profile }) {
               <div className="manager-copy-heading">
                 <span>{s.no}</span>
                 <p>{s.kicker}</p>
-                <h2>{s.title}</h2>
+                <h2>
+                  <PhrasedText text={s.title} />
+                </h2>
               </div>
               <div className="manager-copy-body">
                 {s.body.map((p) => (

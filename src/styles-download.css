@@ -43,7 +43,7 @@
      vertical rhythm follow the screen's height, so the whole poster fits
      without the page's own scroll at every common size (Zeus does not follow
      that inner scroll, and would settle on the ZIP plate or the way back). */
-  --dl-art: clamp(84px, 30vh - 44px, 260px);
+  --dl-art: clamp(84px, 30vh - 48px, 260px);
   --dl-step: clamp(14px, 3.4vh, 34px);
 
   position: relative;
@@ -375,23 +375,31 @@ html[data-world-effects="economy"] .export-page h1 {
   display: block;
   margin: 8px 0 calc(var(--dl-step) * 0.6);
   padding-top: calc(var(--dl-step) * 0.4);
-  /* 17em: the first line holds exactly the clause before the ／ separator
-     (197px at 12px) and the second the rest, so nothing breaks mid-word.
-     Balance would prefer an even split inside a word. */
-  max-width: 17em;
+  /* Round 2 (2026-10-22): one sentence per line (each is a block span), and
+     23em holds the longer two whole (22 full-width characters, 269px at
+     12px), so the third breaks only after 個人設定・. At 17em Safari's
+     keep-all broke 場合|があります and node_modules|は, and Chromium's
+     phrases ran the sentences into each other. */
+  max-width: 23em;
   border-top: 1px solid rgb(122 232 255 / 14%);
   font-size: 12px;
   line-height: 1.75;
   letter-spacing: 0.02em;
   color: var(--dl-text-3);
-  text-wrap: pretty;
-  /* Between phrases (Chromium, auto-phrase): 公開サイトの配信版 no longer
-     splits. Elsewhere (Safari, WebKit) at the punctuation (keep-all), with
-     anywhere as the last resort, as the 404 and load-error sheets do. */
-  word-break: keep-all;
+  /* Plain wrapping: Safari's pretty pulled 人設定・ down to lengthen the last
+     line (…しおり・個 | 人設定・node_modules). */
+  text-wrap: wrap;
+  /* Between phrases (Chromium, auto-phrase). Safari breaks normally: each
+     sentence fits its line whole but the last, and keep-all found no break
+     between 個人設定・ and node_modules there (it broke after しおり・). */
+  word-break: normal;
   word-break: auto-phrase;
   overflow-wrap: anywhere;
   line-break: strict;
+}
+
+.export-page small > span {
+  display: block;
 }
 
 /* The way back: the poster's foot, the full width of the card. */
@@ -517,7 +525,27 @@ html[data-world-effects="economy"] .export-page h1 {
    a foot that made the card scroll let the button land on the ZIP plate). */
 @media (max-width: 400px) and (max-height: 640px) {
   .export-page {
+    /* 12px less art: the whole poster fits 320 x 568 (it scrolled 10px). */
+    --dl-art: clamp(84px, 30vh - 56px, 260px);
     padding-block: 12px;
+  }
+}
+
+/* Tall phones (round 2, 2026-10-22): the card ends above the Zeus button's
+   reach, so the button rests at home under it instead of on the card's
+   edge (or, once the notes took their sentences' width, at the top of the
+   screen). Its centre stands at 82% of the screen and it keeps 10px from
+   the controls, so the page keeps 18dvh + 40px free at its foot. The
+   steps close up (3.4vh - 10px) and the art takes what is left above
+   them (14px to spare): 173px at 412 x 839, 224px at 915, the full 260px
+   from 956. On shorter phones the card fills the screen and the button
+   steps up beside the retry link, clear of the words. */
+@media (max-width: 559px) and (min-height: 830px) {
+  .export-page {
+    --dl-art: clamp(84px, 66.9vh - 388px, 260px);
+    --dl-step: clamp(12px, 3.4vh - 10px, 30px);
+    padding-top: clamp(12px, 3vh, 40px);
+    padding-bottom: calc(18dvh + 40px);
   }
 }
 
@@ -597,9 +625,11 @@ html[data-world-effects="economy"] .export-page h1 {
    poster. The key visual stands in the card's left panel (::before, a
    grid item now, under an ink fall towards the slip) with a prism
    hairline on its edge; the slip keeps its own rhythm in the right
-   panel, and the way back is the foot of both. iPad landscape and up.
+   panel, and the way back is the foot of both. iPad landscape and up,
+   and phones held sideways (closed up below).
    ================================================================ */
-@media (min-width: 960px) and (min-height: 600px) {
+@media (min-width: 960px) and (min-height: 600px),
+  (orientation: landscape) and (max-height: 500px) and (min-width: 560px) {
   .export-page {
     --dl-art: 0px;
     --dl-step: clamp(16px, 3vh, 30px);
@@ -731,6 +761,37 @@ html[data-world-effects="economy"] .export-page h1 {
   }
 }
 
+/* Full HD and up (round 2, 2026-10-22): the poster stood 1000px tall in a
+   440px panel, so its cover crop cut the title's KAMEN RIDER at the left
+   edge, and the slip's 12px labels read small. The panel takes 560px (the
+   crop keeps the whole title), the slip 520px, and its words step up. */
+@media (min-width: 1600px) and (min-height: 1000px) {
+  .export-page {
+    grid-template-columns: [art-start] 560px [art-end slip-start] 520px [slip-end];
+  }
+
+  .export-page p,
+  .export-page b {
+    font-size: 13px;
+  }
+
+  .export-page-btn {
+    min-width: min(100% - 2 * var(--dl-inset), 360px);
+    min-height: 56px;
+    font-size: 17px;
+  }
+
+  .export-page-alt,
+  .export-page small {
+    font-size: 13px;
+  }
+
+  .export-page .export-page-back {
+    min-height: 56px;
+    font-size: 15px;
+  }
+}
+
 /* The art panel is drawn up to about 900 CSS px tall: on a 2x screen, or
    once the panel is that tall, it takes the 1024 x 1536 delivery cut
    instead of upscaling the 720 one (phones keep the 720 file). */
@@ -745,6 +806,128 @@ html[data-world-effects="economy"] .export-page h1 {
 @media (min-width: 700px) and (max-width: 959px) {
   .export-page {
     grid-template-columns: min(100%, 520px);
+  }
+}
+
+/* Tall tablets held upright (iPad mini and up, round 2, 2026-10-22): the
+   phone's poster card at the tablet's scale. The 520px slip stood in the
+   middle third of an 834 x 1194 screen with 12px notes. The card takes
+   600px, the key art a third of the screen's height, and the labels, the
+   plate and the notes step up a size. */
+@media (min-width: 700px) and (max-width: 959px) and (min-height: 900px) {
+  .export-page {
+    --dl-art: clamp(260px, 34vh - 40px, 440px);
+    --dl-step: clamp(18px, 2.8vh, 34px);
+    grid-template-columns: min(100%, 600px);
+  }
+
+  .export-page-sigil {
+    width: 80px;
+    height: 80px;
+    margin-top: -40px;
+  }
+
+  .export-page-sigil > i {
+    font-size: 22px;
+  }
+
+  .export-page p,
+  .export-page b {
+    font-size: 13px;
+  }
+
+  .export-page-btn {
+    min-width: min(100% - 2 * var(--dl-inset), 380px);
+    min-height: 58px;
+    font-size: 17px;
+  }
+
+  .export-page-alt {
+    font-size: 14px;
+  }
+
+  .export-page small {
+    font-size: 13px;
+  }
+
+  .export-page .export-page-back {
+    min-height: 58px;
+    font-size: 15px;
+  }
+}
+
+/* Phones held sideways (round 2, 2026-10-22): the wide screens' two-panel
+   poster, closed up to the screen's height. The single column scrolled
+   (67-82px at 844 x 390 and 667 x 375) with the way back under the fold,
+   and the sigil stood on EXPORT. Here the art panel is narrower, the sigil
+   steps aside (the key art heads the card), the steps are tighter, and the
+   way back heads the art panel, over the sky at the poster's top (its
+   foot is the poster's own logo), so the slip is only as tall as its own
+   words. */
+@media (orientation: landscape) and (max-height: 500px) and (min-width: 560px) {
+  .export-page {
+    --dl-step: 8px;
+    --dl-inset: clamp(16px, 4vw, 36px);
+    grid-template-columns:
+      [art-start] clamp(150px, 30vw, 300px)
+      [art-end slip-start] minmax(0, 440px)
+      [slip-end];
+    grid-template-rows: minmax(8px, 1fr) repeat(7, auto) minmax(8px, 1fr);
+    padding: 8px max(12px, env(safe-area-inset-right)) 8px max(12px, env(safe-area-inset-left));
+  }
+
+  .export-page-sigil {
+    display: none;
+  }
+
+  /* The panel's ice marks step down under the way back's band. */
+  .export-page::before {
+    background-position:
+      100% 0,
+      18px 66px,
+      18px 66px,
+      18px calc(100% - 18px),
+      18px calc(100% - 18px),
+      0 0,
+      0 0,
+      50% 18%;
+  }
+
+  .export-page p {
+    margin-top: 0;
+  }
+
+  .export-page h1 {
+    margin-top: 6px;
+    font-size: 28px;
+  }
+
+  .export-page-btn {
+    min-height: 48px;
+  }
+
+  .export-page-alt {
+    margin-top: 2px;
+  }
+
+  .export-page small {
+    margin-top: 2px;
+  }
+
+  .export-page > :nth-child(8) {
+    grid-column: art-start / art-end;
+    grid-row: 1 / -1;
+    align-self: start;
+  }
+
+  /* Under the card's prism hairline (2px), a band over the poster's sky. */
+  .export-page .export-page-back {
+    min-height: 48px;
+    margin: 2px 0 0 1px;
+    border-top: 0;
+    border-bottom: 1px solid rgb(122 232 255 / 18%);
+    border-radius: 0;
+    background: linear-gradient(180deg, rgb(7 13 22 / 94%), rgb(7 13 22 / 78%));
   }
 }
 
@@ -768,7 +951,8 @@ html[data-world-effects="economy"] .export-page h1 {
     display: none;
   }
   /* The wide layout keeps its art column as an empty Canvas panel. */
-  @media (min-width: 960px) and (min-height: 600px) {
+  @media (min-width: 960px) and (min-height: 600px),
+    (orientation: landscape) and (max-height: 500px) and (min-width: 560px) {
     .export-page::before {
       display: block;
       background: Canvas;

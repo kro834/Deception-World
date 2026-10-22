@@ -6,6 +6,7 @@
 // Mounted from dream-chapter.tsx; drawn by
 // styles-dream-extra.css. The owner's own text stays where it is; every Japanese string here
 // comes from the data file (the source's wording), the rest are English HUD labels.
+import { DisplayName } from "@/components/name-text";
 import { DREAM_CASES } from "./dream-chapter-data";
 import { DreamStoryBacklinks } from "./dream-story-navigation";
 import { DreamRecordExplorer } from "./dream-record-explorer";
@@ -464,12 +465,18 @@ export function AgentSupplement({ code }: { code: string }) {
         <p className="dream-agent-rider">
           <span>
             <small lang="en">RIDER</small>
-            {supplement.rider.text}
+            {/* The site's name seams (after 仮面ライダー, ・ and ／): Safari has no
+                auto-phrase and split device names mid-word in a narrow file. */}
+            <span>
+              <DisplayName value={supplement.rider.text} />
+            </span>
           </span>
           {supplement.device ? (
             <span>
               <small lang="en">DEVICE</small>
-              {supplement.device.text}
+              <span>
+                <DisplayName value={supplement.device.text} />
+              </span>
             </span>
           ) : null}
         </p>

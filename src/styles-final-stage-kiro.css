@@ -763,7 +763,11 @@ html .fst-page.fst-page .rxs-footer h2::after {
   }
 
   html:not([data-world-effects="economy"]) .fst-page.fst-page .fst-cast-detail figcaption {
-    animation: fsk-stamp 240ms steps(2, jump-end) 220ms both;
+    /* Backwards fill: the stub rests on its own style (the keyframes' end).
+       WebKit ends a delayed steps(jump-end) run at a progress of
+       0.9999999999999999, one step short, so a forwards fill left it at
+       half opacity, 1.35x and -4.25deg on iPhone and iPad. */
+    animation: fsk-stamp 240ms steps(2, jump-end) 220ms backwards;
   }
 
   /* A record opens like a board: the heading's lines rise in turn, the
@@ -785,7 +789,9 @@ html .fst-page.fst-page .rxs-footer h2::after {
   }
 
   html:not([data-world-effects="economy"]) .fst-page.fst-page .fst-pickup-dialog[open] .fst-calls b {
-    animation: fsk-flap-in 320ms steps(3, jump-end) 120ms both;
+    /* Backwards fill, as the stub: WebKit left some cells one step short,
+       tilted 6deg on their hinge. */
+    animation: fsk-flap-in 320ms steps(3, jump-end) 120ms backwards;
   }
 
   html:not([data-world-effects="economy"]) .fst-page.fst-page .fst-pickup-dialog[open] .fst-calls b:nth-child(2) {

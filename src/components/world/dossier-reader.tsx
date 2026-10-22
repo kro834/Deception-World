@@ -3,6 +3,26 @@ import { useEffect, useState } from "react";
 type Chapter = { no: string; title: string; kicker: string };
 type ReaderDestination = { id: string; label: string };
 
+/* A Japanese heading's phrase seams: after a particle or an ending (の, を,
+   に, より ...) where the next word starts in kanji or katakana (not on a
+   small kana or ー), so 変身後の / 能力を / 活かした / 遠距離戦。 */
+const PHRASE_SEAM =
+  /(より|から|まで|ので|[のをにへとがはでもやてたずなく])(?=(?![\u30a1\u30a3\u30a5\u30a7\u30a9\u30c3\u30e3\u30e5\u30e7\u30ee\u30f5\u30f6])[\u30a1-\u30fa\u4e00-\u9fff])/gu;
+const PHRASE_MARK = "\ue000";
+
+/** A dossier heading that wraps between its phrases (2026-10-22). WebKit
+ * has no word-break: auto-phrase; its keep-all found no break in a line
+ * such as 変身後の能力を活かした遠距離戦。 and split the last character off
+ * (。 alone on a line), and its normal breaking split words (瞬 / 間). <wbr>
+ * at the seams gives it the phrase breaks Chrome finds; the text is as
+ * written. */
+export function PhrasedText({ text }: { text: string }) {
+  return text
+    .replace(PHRASE_SEAM, `$1${PHRASE_MARK}`)
+    .split(PHRASE_MARK)
+    .flatMap((phrase, index) => (index ? [<wbr key={`seam-${index}`} />, phrase] : [phrase]));
+}
+
 /** Native anchors keep the archive navigable before hydration, too. */
 export function DossierContents({ sections }: { sections: readonly Chapter[] }) {
   return (
@@ -12,7 +32,9 @@ export function DossierContents({ sections }: { sections: readonly Chapter[] }) 
           <span className="dossier-contents-number">{section.no}</span>
           <span className="dossier-contents-copy">
             <small>{section.kicker}</small>
-            <b>{section.title}</b>
+            <b>
+              <PhrasedText text={section.title} />
+            </b>
           </span>
           <span className="dossier-contents-arrow" aria-hidden="true">
             ↗

@@ -307,3 +307,19 @@ test("the reticle keeps clear of the plates docked at the foot and of the words 
   // A frame round a whole screenful draws no floor and no sweep.
   assert.match(css, /\.record-landing-reticle\[data-whole\] > \.record-landing-scan \{\s*display: none;/);
 });
+
+test("the reticle's tag never covers the page's words: the code alone, inside the corner, or out", () => {
+  const source = readFileSync(new URL("../src/lib/record-arrival.ts", import.meta.url), "utf8");
+  const css = readFileSync(new URL("../src/styles-record-landing.css", import.meta.url), "utf8");
+  // Owner (2026-10-22): with words on every side (a phone's heading between
+  // its eyebrow and first line) the tag no longer takes the least-covered place.
+  assert.match(source, /\["inside", at\(right - 10 - width, top \+ 6\)\]/);
+  assert.match(source, /textUnder\(at, anchor, name === "inside"\) === 0/);
+  assert.match(source, /return \{ name: "none", compact: true \} as const;/);
+  assert.doesNotMatch(source, /covered < least/);
+  // Chosen again while the route settles, and a tag left out while it shows.
+  assert.match(source, /\(side === "none" && since < TAG_HOLD_MS\) \|\| \(since < SETTLE_MS && next !== chosenFor\)/);
+  assert.match(css, /\.record-landing-tag\[data-compact\] > span \{\s*display: none;/);
+  assert.match(css, /\[data-tag="none"\] > \.record-landing-tag \{\s*visibility: hidden;/);
+  assert.match(css, /\[data-tag="inside"\] > \.record-landing-tag \{[^}]*right: 10px;/);
+});

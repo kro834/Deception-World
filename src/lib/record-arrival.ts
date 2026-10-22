@@ -179,12 +179,13 @@ function fixedAncestor(element: Element) {
   return false;
 }
 
-/** How much of the page's words (not the anchor's own) lie under a box or
- * within a few pixels of it, in square pixels (Infinity under a fixed
- * control): the tag's place is probed at a few points, and the lines of the
- * first element under each (past the anchor's own letters) and of its parent
- * (an inline atom's line belongs to its block) are measured. */
-function textUnder(box: Box, anchor: HTMLElement) {
+/** How much of the page's words (not the anchor's own, unless `own`: a place
+ * inside the frame) lie under a box or within a few pixels of it, in square
+ * pixels (Infinity under a fixed control): the tag's place is probed at a few
+ * points, and the lines of the first element under each (past the anchor's
+ * own letters) and of its parent (an inline atom's line belongs to its block)
+ * are measured. */
+function textUnder(box: Box, anchor: HTMLElement, own = false) {
   if (
     typeof document.elementsFromPoint !== "function" ||
     typeof document.createRange !== "function" ||
@@ -198,7 +199,8 @@ function textUnder(box: Box, anchor: HTMLElement) {
     const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
     let budget = 48;
     for (let node = walker.nextNode(); node && budget > 0; node = walker.nextNode()) {
-      if (counted.has(node) || !node.textContent?.trim() || anchor.contains(node)) continue;
+      if (counted.has(node) || !node.textContent?.trim() || (!own && anchor.contains(node)))
+        continue;
       counted.add(node);
       budget -= 1;
       range.selectNodeContents(node);
@@ -221,7 +223,7 @@ function textUnder(box: Box, anchor: HTMLElement) {
             box.left + (box.right - box.left) * x,
             box.top + (box.bottom - box.top) * y,
           )
-          .find((hit) => !anchor.contains(hit));
+          .find((hit) => own || !anchor.contains(hit));
         if (!element) continue;
         // A fixed control (the Zeus button, a plate) paints over the layer.
         if (element.closest(FIXED_HINT) || fixedAncestor(element)) return Infinity;
@@ -293,6 +295,11 @@ function drawReticle(target: HTMLElement, live: boolean, options?: RecordArrival
   let foot = 0;
   let measured = 0;
   let side = "";
+  // The tag's full width (the code and the words) and the code's alone.
+  let tagWidth = 0;
+  let codeWidth = 0;
+  let chosenAt = 0;
+  let chosenFor = "";
   let last = "";
   let frame = 0;
   let released = false;
@@ -315,9 +322,16 @@ function drawReticle(target: HTMLElement, live: boolean, options?: RecordArrival
     }
   };
   // The tag's places around the frame: on its top line beside the bracket
-  // (the default), beside its top right, or on its bottom line.
-  const tagPlaces = (left: number, top: number, right: number, bottom: number) => {
-    const { width, height } = tag.getBoundingClientRect();
+  // (the default), beside its top right, or on its bottom line; at `width`
+  // (the whole tag, or its code alone).
+  const tagPlaces = (
+    left: number,
+    top: number,
+    right: number,
+    bottom: number,
+    width = tagWidth,
+  ) => {
+    const { height } = tag.getBoundingClientRect();
     const half = height / 2;
     const at = (x: number, y: number): Box => ({
       left: x,
@@ -329,28 +343,40 @@ function drawReticle(target: HTMLElement, live: boolean, options?: RecordArrival
       ["above", at(left + 20, top - half)],
       ["side", at(right + 12, top)],
       ["below", at(left + 20, bottom - half)],
+      // The code alone may also sit just inside the top right bracket, where
+      // a heading's shorter first line leaves the frame empty.
+      ...(width < tagWidth ? ([["inside", at(right - 10 - width, top + 6)]] as const) : []),
     ] as const;
   };
   const roomFor = (box: Box) =>
     box.top >= clip &&
     box.bottom <= window.innerHeight - foot &&
+    box.left >= 6 &&
     box.right <= (document.documentElement.clientWidth || window.innerWidth) - 6;
   // The first place with room under the chrome and none of the page's words
-  // under it (the eyebrow over a heading, the line under it); with none free
-  // the one over the fewest (and the tag leaves after TAG_HOLD_MS anyway).
-  const chooseTag = (places: ReturnType<typeof tagPlaces>) => {
-    let best = "";
-    let least = Infinity;
-    for (const [name, box] of places) {
-      if (!roomFor(box)) continue;
-      const covered = textUnder(box, anchor);
-      if (covered === 0) return name;
-      if (!best || covered < least) {
-        best = name;
-        least = covered;
-      }
-    }
-    return best || (places[0][1].top < clip ? "below" : "above");
+  // under it (the eyebrow over a heading, the line under it); then the code
+  // alone (HIT, GUIDE, FILE) in the same places or inside the corner; with
+  // no free place at all the tag stays out (on a phone the frame often has
+  // words on every side): the brackets keep the place, the words are read.
+  const chooseTag = (box: Box) => {
+    const passes = [
+      [tagPlaces(box.left, box.top, box.right, box.bottom), false],
+      [tagPlaces(box.left, box.top, box.right, box.bottom, codeWidth), true],
+    ] as const;
+    for (const [places, compact] of passes)
+      for (const [name, at] of places)
+        if (roomFor(at) && textUnder(at, anchor, name === "inside") === 0)
+          return { name, compact } as const;
+    return { name: "none", compact: true } as const;
+  };
+  // The tag's widths, read with the words shown (its compact form hides them).
+  const measureTag = () => {
+    const compact = tag.hasAttribute("data-compact");
+    if (compact) tag.removeAttribute("data-compact");
+    tagWidth = tag.getBoundingClientRect().width;
+    // The code, the tag's 2px inset each side and its 1px border.
+    codeWidth = code.getBoundingClientRect().width + 6;
+    if (compact) tag.setAttribute("data-compact", "");
   };
   const place = () => {
     frame = 0;
@@ -378,17 +404,34 @@ function drawReticle(target: HTMLElement, live: boolean, options?: RecordArrival
       size = shape;
       side = "";
       inset = textInset(anchor, box);
+      measureTag();
     }
     const pad = window.innerWidth < 600 ? 7 : 10;
     const width = document.documentElement.clientWidth || window.innerWidth;
     const left = Math.max(6, box.left + inset.left - pad);
     const right = Math.min(width - 6, box.right - inset.right + pad);
-    const top = whole ? Math.max(box.top, clip + 14) : box.top + inset.top - pad;
     const bottom = whole
       ? Math.min(box.bottom, window.innerHeight - foot - 14)
       : box.bottom - inset.bottom + pad;
+    // A heading at the very top of a page with no bar over it (the Form
+    // Archive's switcher) keeps its top brackets on screen, while most of it
+    // shows (a heading scrolled away leaves with its frame).
+    const edge = clip + 4;
+    const rise = box.top + inset.top - pad;
+    const top = whole
+      ? Math.max(box.top, clip + 14)
+      : rise < edge && bottom - edge >= 32
+        ? edge
+        : rise;
     const next = `${Math.round(left)},${Math.round(top)},${Math.max(24, Math.round(right - left))},${Math.max(24, Math.round(bottom - top))}`;
-    if (next !== last) {
+    // The tag's place is chosen again, at most every REMEASURE_MS, when the
+    // frame has moved since (the route still settling under it), and a tag
+    // left out is looked for again while it would still show.
+    const since = Date.now() - started;
+    const retry =
+      Date.now() - chosenAt > REMEASURE_MS &&
+      ((side === "none" && since < TAG_HOLD_MS) || (since < SETTLE_MS && next !== chosenFor));
+    if (next !== last || retry) {
       last = next;
       const [x, y, w, h] = next.split(",");
       reticle.style.transform = `translate3d(${x}px, ${y}px, 0)`;
@@ -398,9 +441,16 @@ function drawReticle(target: HTMLElement, live: boolean, options?: RecordArrival
       reticle.toggleAttribute("data-whole", whole);
       // The page is probed for the tag's place only when the frame changes
       // shape or its place runs out of room (under the bar, past a plate).
-      const places = tagPlaces(left, top, right, bottom);
+      const compact = tag.hasAttribute("data-compact");
+      const places = tagPlaces(left, top, right, bottom, compact ? codeWidth : tagWidth);
       const current = places.find(([name]) => name === side);
-      if (!current || !roomFor(current[1])) side = chooseTag(places);
+      if (retry || (side !== "none" && (!current || !roomFor(current[1])))) {
+        chosenAt = Date.now();
+        chosenFor = next;
+        const chosen = chooseTag({ left, top, right, bottom });
+        side = chosen.name;
+        tag.toggleAttribute("data-compact", chosen.compact);
+      }
       reticle.dataset.tag = side;
     }
     frame = window.requestAnimationFrame(place);

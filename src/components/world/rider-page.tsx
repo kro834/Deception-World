@@ -9,7 +9,7 @@ import { useWorldMode } from "./use-world-mode";
 import { useDialogHistoryDismiss } from "./use-dialog-history-dismiss";
 import { DossierNav, RIDER_NAV, NameText } from "./dossier-nav";
 import { FormPickup, REX_LOI } from "./manager-stub";
-import { DossierContents, DossierReader } from "./dossier-reader";
+import { DossierContents, DossierReader, PhrasedText } from "./dossier-reader";
 import { SlideOpenControl } from "./slide-open-control";
 import { UiVectorIcon } from "./ui-vector-icon";
 import { LiquidPointerGlow } from "./liquid-rail";
@@ -1542,7 +1542,9 @@ export function RiderPage({ id }: { id: string }) {
               <div className="manager-copy-heading">
                 <span>{s.no}</span>
                 <p>{s.kicker}</p>
-                <h2>{s.title}</h2>
+                <h2>
+                  <PhrasedText text={s.title} />
+                </h2>
               </div>
               <div className="manager-copy-body">
                 {s.body.map((p) => (

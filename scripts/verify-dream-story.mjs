@@ -20,6 +20,11 @@ const viewports = [
   { width: 1194, height: 834, name: "ipad-1194" },
 ];
 const expectedChapters = ["交わる", "開く", "開ける", "明ける", "来たる", "叛く"];
+// Owner (2026-10-21): the owner's 281376f records run three or more paragraphs a case (the
+// unit pin in dream-story.test.mjs is >= 3), and each case now holds its own nested
+// 「この章の出来事・登場人物」 fold, so the case's disclosure is its own direct summary.
+const MIN_STORY_PARAGRAPHS = 3;
+const caseSummary = (record) => record.locator(":scope > summary");
 
 await mkdir(output, { recursive: true });
 
@@ -112,14 +117,13 @@ async function assertStoryContract(page) {
     const record = details.nth(index);
     assert.equal(await record.getAttribute("open"), null, `Case ${index} starts closed`);
     assert.equal(
-      await record.locator("summary .dream-story-case-heading").count(),
+      await caseSummary(record).locator(".dream-story-case-heading").count(),
       1,
       `Case ${index} has a native summary heading`,
     );
-    assert.equal(
-      await record.locator(".dream-story-case-body > p").count(),
-      2,
-      `Case ${index} has two story paragraphs`,
+    assert.ok(
+      (await record.locator(".dream-story-case-body > p").count()) >= MIN_STORY_PARAGRAPHS,
+      `Case ${index} has at least ${MIN_STORY_PARAGRAPHS} story paragraphs`,
     );
   }
   const finalCase = (await details.nth(5).locator(".dream-story-case-body").textContent()) ?? "";
@@ -135,14 +139,13 @@ async function assertStoryContract(page) {
 async function verifyNativeDisclosure(page, details) {
   for (let index = 0; index < 6; index += 1) {
     const record = details.nth(index);
-    const summary = record.locator("summary");
+    const summary = caseSummary(record);
     await scrollIntoCenter(summary);
     await summary.focus();
     await page.keyboard.press("Enter");
     assert.equal(await record.getAttribute("open"), "", `Enter opens Case ${index}`);
-    assert.equal(
-      await record.locator(".dream-story-case-body > p").count(),
-      2,
+    assert.ok(
+      (await record.locator(".dream-story-case-body > p").count()) >= MIN_STORY_PARAGRAPHS,
       `Case ${index} body is available after opening`,
     );
 
@@ -198,20 +201,15 @@ try {
     await verifyNativeDisclosure(page, details);
 
     // Keep two records open for a visual and layout check, proving their states are independent.
-    await details.nth(0).locator("summary").click();
-    await details.nth(1).locator("summary").click();
+    await caseSummary(details.nth(0)).click();
+    await caseSummary(details.nth(1)).click();
     assert.equal(await details.nth(0).getAttribute("open"), "");
     assert.equal(await details.nth(1).getAttribute("open"), "");
     await assertNoHorizontalOverflow(page, `${viewport.name} expanded`);
     await page.locator("#cases").screenshot({ path: `${output}/${viewport.name}-expanded.png` });
 
     const cdp = engine === "chromium" ? await context.newCDPSession(page) : null;
-    await dispatchVerticalTouch(
-      page,
-      cdp,
-      details.nth(0).locator("summary"),
-      `${viewport.name} summary`,
-    );
+    await dispatchVerticalTouch(page, cdp, caseSummary(details.nth(0)), `${viewport.name} summary`);
     await dispatchVerticalTouch(
       page,
       cdp,

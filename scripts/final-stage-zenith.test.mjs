@@ -238,3 +238,97 @@ test("the calls are a labelled list and the Royal visual shares the record-art c
     }
   }
 });
+
+// Owner (2026-10-22): round 2 — calls break only between shouts, the end card keeps the
+// Zeus button's corner free on phones, the phone strip's ring stays inside its link.
+test("a call breaks only between its shouts, with the data's characters unchanged", async () => {
+  const page = await read("src/components/final-stage/final-stage.tsx");
+  const shouts = page.match(
+    /const callShouts = \(call: string\) => call\.match\((\/[^/]+\/g)\) \?\? \[call\];/,
+  );
+  assert.ok(shouts, "callShouts");
+  const pattern = new RegExp(shouts[1].slice(1, -2), "g");
+  const data = await read("src/components/final-stage/final-stage-data.ts");
+  const calls = [...data.matchAll(/calls: \[([^\]]*)\]/g)].flatMap(([, list]) =>
+    [...list.matchAll(/"([^"]+)"/g)].map(([, call]) => call),
+  );
+  assert.ok(calls.length > 20, String(calls.length));
+  for (const call of calls) {
+    const parts = call.match(pattern) ?? [call];
+    assert.equal(parts.join(""), call);
+  }
+  assert.deepEqual("SA-GA！SA-GA！SA-GA！DEUS！！！".match(pattern), [
+    "SA-GA！",
+    "SA-GA！",
+    "SA-GA！",
+    "DEUS！！！",
+  ]);
+  assert.match(
+    page,
+    /\{callShouts\(call\)\.map\(\(shout, part\) => \(\s*<span key=\{part\}>\{shout\}<\/span>/,
+  );
+  const { rules } = parse(await read(SHEET));
+  const nowrap = rules.find(({ selector }) => /\.fst-calls b > span > span$/.test(selector));
+  assert.ok(nowrap && declarations(nowrap.body, "white-space").includes("nowrap"));
+});
+
+test("on phones the end card keeps the Zeus corner clear and the strip's ring inside its link", async () => {
+  const { rules } = parse(await read(SHEET));
+  const footer = rules.find(
+    ({ selector, context }) =>
+      /> \.fst-footer$/.test(selector) && context.includes("@media (max-width: 480px)"),
+  );
+  assert.ok(footer);
+  const [padding] = declarations(footer.body, "padding-bottom");
+  // 60px button + 12px edge + 10px control gap, with the safe area on top.
+  const floor = Number(padding.match(/calc\((\d+)px \+ env\(safe-area-inset-bottom/)?.[1] ?? 0);
+  assert.ok(floor >= 82, padding);
+  const ring = rules.find(({ selector }) =>
+    /> \.rxs-local-nav nav a:focus-visible$/.test(selector),
+  );
+  assert.ok(ring && ring.context.includes("@media (max-width: 599.98px)"));
+  assert.equal(declarations(ring.body, "outline-offset").at(-1), "-3px");
+});
+
+test("the records' eyebrows wrap at their seam and the cast still fills its pass", async () => {
+  const page = await read("src/components/final-stage/final-stage.tsx");
+  assert.match(page, /const \[head, \.\.\.rest\] = value\.split\(" \/ "\);/);
+  assert.match(page, /<span>\{head\}<\/span> <span>\/ \{rest\.join\(" \/ "\)\}<\/span>/);
+  assert.equal((page.match(/<EyebrowParts value=\{eyebrow\} \/>/g) ?? []).length, 2);
+  const { rules } = parse(await read(SHEET));
+  const seam = rules.find(({ selector }) => /\.fst-pickup-heading small\) > span$/.test(selector));
+  assert.ok(seam && declarations(seam.body, "white-space").includes("nowrap"));
+  // Stacked, the still is as wide as the pass (its 4:5 under a 420px cap
+  // had sized it 336px wide), and the tear sits on the seam it marks.
+  const still = rules.find(
+    ({ selector, context }) =>
+      /\.fst-cast-detail > figure$/.test(selector) &&
+      context.includes("@media (max-width: 480px), (max-width: 760px) and (orientation: portrait)"),
+  );
+  assert.ok(still && declarations(still.body, "width").includes("100%"));
+  const tears = rules.filter(({ selector }) => /#characters \.fsl-tear$/.test(selector));
+  assert.equal(tears.length, 2);
+  for (const { body } of tears)
+    assert.match(declarations(body, "inset")[0], /^(?:0 auto 0 -1px|-1px 0 auto)$/);
+});
+
+test("delayed stepped runs end on the element's own style (WebKit stops them a step short)", async () => {
+  // WebKit ends a delayed steps(jump-end) run at a progress of 0.9999999999999999:
+  // a forwards fill left the cast stub at half opacity and some calls tilted.
+  for (const [path, names] of [
+    ["src/styles-final-stage-kiro.css", ["fsk-stamp", "fsk-flap-in"]],
+    ["src/styles-final-stage-lamplight.css", ["fsl-sign", "fsl-flip"]],
+    ["src/styles-final-stage-cinema.css", ["fsc-lock"]],
+  ]) {
+    const css = strip(await read(path));
+    for (const name of names) {
+      const uses = [...css.matchAll(new RegExp(`animation:\\s*${name} ([^;]+);`, "g"))].map(
+        ([, value]) => value.trim(),
+      );
+      assert.ok(uses.length > 0, name);
+      for (const value of uses) {
+        assert.match(value, /steps\(\d+, jump-end\) \S+ backwards$/, `${name}: ${value}`);
+      }
+    }
+  }
+});

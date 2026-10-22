@@ -26,7 +26,9 @@ test("contents render Japanese titles and original metadata with native chapter 
     }),
   );
   assert.match(markup, /href="#character-section-01"/);
-  assert.match(markup, /人物の記録。/);
+  // Owner (2026-10-22): the title carries <wbr> at its phrase seams (WebKit); its text is as written.
+  assert.match(markup.replaceAll("<wbr/>", ""), /人物の記録。/);
+  assert.match(markup, /人物の<wbr\/>記録。/);
   assert.match(markup, /CHARACTER \/ PROFILE/);
 });
 

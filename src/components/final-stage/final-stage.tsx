@@ -55,6 +55,24 @@ function bindRail<K extends string>(
   };
 }
 
+/* A call's shouts: each run up to and with its ！ ("SA-GA！", "DEUS！！！").
+   The zenith sheet keeps each whole, so a call wraps only between them,
+   never at a shout's hyphen or space. The characters are the data's. */
+const callShouts = (call: string) => call.match(/[^！]+！*|！+/g) ?? [call];
+
+/* A record's eyebrow wraps only at its " / " seam ("RIDER RECORD 01" over
+   "/ FAR FROM SAGA"), never inside the form's name; the zenith sheet keeps
+   each part whole. The text is the eyebrow's own. */
+function EyebrowParts({ value }: { value: string }) {
+  const [head, ...rest] = value.split(" / ");
+  if (!rest.length) return <>{value}</>;
+  return (
+    <>
+      <span>{head}</span> <span>/ {rest.join(" / ")}</span>
+    </>
+  );
+}
+
 /* The calls are an ordered sequence; as a list the label is announced
    (a name on a plain div is ignored) with the count of calls. */
 function CallOuts({ calls, label }: { calls: readonly string[]; label: string }) {
@@ -62,7 +80,11 @@ function CallOuts({ calls, label }: { calls: readonly string[]; label: string })
     <div className="fst-calls" role="list" aria-label={label}>
       {calls.map((call, index) => (
         <b key={`${call}-${index}`} role="listitem">
-          {call}
+          <span>
+            {callShouts(call).map((shout, part) => (
+              <span key={part}>{shout}</span>
+            ))}
+          </span>
         </b>
       ))}
     </div>
@@ -234,7 +256,9 @@ function RiderPickup({
           />
         </div>
         <div className="fst-pickup-copy">
-          <p>{eyebrow}</p>
+          <p>
+            <EyebrowParts value={eyebrow} />
+          </p>
           <small>PICKUP</small>
           <h3>
             <span>仮面ライダー</span>
@@ -284,7 +308,9 @@ function RiderPickup({
             <p>
               <span>RIDER PICKUP</span>
             </p>
-            <small>{eyebrow}</small>
+            <small>
+              <EyebrowParts value={eyebrow} />
+            </small>
             <h2>
               <span>仮面ライダー</span>
               <b>

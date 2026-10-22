@@ -104,7 +104,8 @@ async function assertManagerRailReadable(page, viewport) {
         };
       }),
     );
-  assert.equal(text.length, 6, `${viewport.name}: manager rail labels render`);
+  // Owner (2026-10-21): Dogs is the fourth manager tab (FRONT, REVERSE, RELATED, DOGS; two labels each).
+  assert.equal(text.length, 8, `${viewport.name}: manager rail labels render`);
   for (const label of text) {
     assert.ok(label.text, `${viewport.name}: manager rail label has text`);
     assert.ok(
