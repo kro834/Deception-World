@@ -379,11 +379,12 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > #characters .fsl-
 /* The rail's hint. On phones its box gave the Zeus button's corner 56px
    at its end only (styles-final-stage-elevation.css), and the console
    centres the box, so the line sat 28px left of the page's axis under a
-   centred rail. The room is shared by both ends: on the axis, its last
-   character still short of the button's corner at 390px. A hint that
-   wraps breaks between phrases, not inside 切り替え. */
+   centred rail. The room is shared by both ends, the line on the axis.
+   A hint that wraps (320px) breaks between phrases, not inside 切り替え
+   or または: Chrome by phrase, WebKit (no auto-phrase) at its 、. */
 html[data-family="special"] body .rxs-page.rxs-page.fst-page .rxs-stage-hint {
   text-wrap: balance;
+  word-break: keep-all;
   word-break: auto-phrase;
 }
 
