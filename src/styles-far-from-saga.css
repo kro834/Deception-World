@@ -15,6 +15,7 @@
    ================================================================ */
 
 @import "./styles-far-from-compare.css";
+@import "./styles-far-from-ultra.css";
 
 .ffs-page {
   --rxs-cyan: #7fe6ff;

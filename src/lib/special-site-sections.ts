@@ -42,6 +42,7 @@ export const SPECIAL_SITE_SECTIONS: Record<SpecialSiteId, readonly SpecialSiteSe
     ["performance", "性能比較", "COMPARISON"],
     ["p16", "P16", "PROCESSOR"],
     ["suitup", "変身シークエンス", "SUIT-UP"],
+    ["ultra", "ウルトラ", "ULTRA"],
     ["stages", "形態", "STAGES"],
     ["theories", "中核機構", "MECHANISM"],
     ["system", "装甲・OS", "ARMOR & OS"],
