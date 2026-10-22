@@ -415,9 +415,10 @@ for tone, (base, roughness, glow) in TONES.items():
     pin.scale = (1, 1, 1)
     print("NANITE rendered", tone, flush=True)
 
-# The molten gold bead: a metaball pair, wobbling.
+# The molten gold bead: a metaball pair, wobbling. Everything but the lights
+# and the camera goes, the chip's hex rings (curves) included.
 for obj in list(sc.collection.objects):
-    if obj.type in {"MESH", "EMPTY"}:
+    if obj.type not in {"LIGHT", "CAMERA"}:
         bpy.data.objects.remove(obj)
 ball = bpy.data.metaballs.new("bead")
 ball.resolution = 0.02
