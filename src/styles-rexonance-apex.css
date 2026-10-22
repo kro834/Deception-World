@@ -152,7 +152,11 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > header.
     min-width: 0;
   }
 
-  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > header.rxs-local-nav nav a:not([aria-current="location"]) {
+  /* Round 2 (2026-10-22): a link with keyboard focus stays shown when its
+     chapter scrolls away (it went visibility: hidden under the focus, and
+     focus fell back to <body>), and the new chapter's link waits until
+     focus moves on, so the bar still names one chapter. */
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > header.rxs-local-nav nav a:not([aria-current="location"]):not(:focus-visible) {
     position: absolute;
     top: 0;
     left: 0;
@@ -165,9 +169,30 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > header.
     pointer-events: none;
   }
 
-  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > header.rxs-local-nav nav a[aria-current="location"] {
+  /* (Its own rule: a browser without :has() keeps the one above.) */
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > header.rxs-local-nav nav:has(a:not([aria-current="location"]):focus-visible) a[aria-current="location"] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1px;
+    min-width: 0;
+    height: 1px;
+    min-height: 0;
+    overflow: hidden;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > header.rxs-local-nav nav a:is([aria-current="location"], :focus-visible) {
     padding-inline: 6px 2px;
     white-space: nowrap;
+  }
+
+  /* Over the hero and the CONTENTS map no chapter is current, and the
+     landmark stood empty for assistive tech: it leaves the tree there
+     (its box stays, so the bar does not shift). */
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > header.rxs-local-nav nav:not(:has(a:is([aria-current="location"], :focus-visible))) {
+    visibility: hidden;
   }
 
   html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > header.rxs-local-nav .rxs-brand > b {
@@ -255,6 +280,45 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-se
   html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #system > .rxs-section-heading > .rxa-index {
     right: auto;
     left: 0;
+  }
+}
+
+/* Round 2 (2026-10-22): 03, the suit-up's head, carries the index too
+   (the heads read 01, 02, 04, 05 while the bar and CONTENTS count 03).
+   The guide is live copy with no hidden markup (its status speaks), so
+   its index is drawn: two generated boxes with empty alternative text, on
+   the kicker's line (their static place) at the band's right edge, where
+   the controls end. "/ 05" is 42.8px in the HUD face; the numeral stands
+   8px before it, as in the other heads. */
+@media (min-width: 761px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-assembly-heading .rxs-assembly-eyebrow::before,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-assembly-heading .rxs-assembly-eyebrow::after {
+    position: absolute;
+    --rxa-band-edge: max(var(--rxl-gutter, 24px), calc((100% - var(--rxl-wrap, 1240px)) / 2));
+    margin-top: 1px;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-assembly-heading .rxs-assembly-eyebrow::before {
+    content: "03" / "";
+    right: calc(var(--rxa-band-edge) + 50.8px);
+    padding-left: 46px;
+    color: var(--rxa-gold);
+    background:
+      linear-gradient(90deg, var(--rxa-gold), var(--rxa-gold)) 0 55% / 28px 1px no-repeat,
+      radial-gradient(circle, var(--rxa-gold) 0 1.5px, transparent 2px) 29px 50% / 6px 6px no-repeat;
+    font: 600 15px / 15px var(--rxf-forge, var(--dx-hud));
+    font-variant-numeric: tabular-nums lining-nums;
+    letter-spacing: 0.02em;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-assembly-heading .rxs-assembly-eyebrow::after {
+    content: "/ 05" / "";
+    right: var(--rxa-band-edge);
+    color: rgb(168 203 212 / 78%);
+    font: 500 12px / 15px var(--dx-hud);
+    letter-spacing: 0.22em;
   }
 }
 
@@ -479,6 +543,27 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-comp
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-range-labels > button {
   min-height: 44px;
   min-width: 72px;
+}
+
+/* Round 2 (2026-10-22): on an iPhone or iPad the rail's two end labels
+   stand over the native select, not at a slider's ends, and read as one
+   boxed button beside loose text. There they join as one segmented
+   switch, two equal halves in one frame, the chosen half lit. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-range-control:has(> .rxs-p14-native-select) > .rxs-p14-range-labels {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 3px;
+  padding: 3px;
+  border: 1px solid rgb(121 232 255 / 22%);
+  background: linear-gradient(180deg, rgb(255 255 255 / 3%), transparent), rgb(3 9 16 / 72%);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-range-control:has(> .rxs-p14-native-select) > .rxs-p14-range-labels > button {
+  justify-content: center;
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  text-align: center;
 }
 
 /* On a finger the two native selects stand 48px tall. WebKit sizes a
@@ -908,6 +993,12 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxe-ch
   html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-section > .rxs-section-heading > .rxa-index {
     background: none;
     padding-left: 0;
+    color: CanvasText;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-assembly-heading .rxs-assembly-eyebrow::before,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-assembly-heading .rxs-assembly-eyebrow::after {
+    background: none;
     color: CanvasText;
   }
 
