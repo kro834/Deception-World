@@ -1017,6 +1017,9 @@ html[data-family="library"] .search-page .search-more-peek > .dxl-art[data-plate
        with an ellipsis): a third would be cut, none is that long. */
     max-block-size: 2.9em;
     inline-size: auto;
+    /* Paler than a spine: 13px under the strip's dimming read faint
+       (管理人 on the 1440 bar). */
+    color: color-mix(in srgb, rgb(var(--tint-rgb)) 48%, #fff);
     font-size: 13px;
     font-weight: 700;
     line-height: 1.45;
