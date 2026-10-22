@@ -2,7 +2,9 @@ import { useCallback, useEffect, useRef, useState, type CSSProperties } from "re
 import { acquireViewportScrollLock } from "@/lib/viewport-scroll-lock.js";
 
 /* FAR FROM SAGA — the entry transformation's controller (owner, 2026-10-22:
-   「遷移画面の変身アニメーション」, modelled on Rexonance's entry call).
+   「遷移画面の変身アニメーション」, modelled on Rexonance's entry call:
+   src/components/rexonance-saga/rexonance-call-sequence.tsx and its
+   controller).
 
    Mounted at the top of /far-from-saga. It renders nothing on the server
    and on the first client render, so it never gates the first paint: the
