@@ -6,7 +6,7 @@
 // frames, tone slots and sub-sheets), so the swarm draws both kinds mixed
 // through the same sprite code. Kit B has no comets of its own: draw kit A's
 // (REXONANCE_NANITE_COMETS, the same rows for the same tone slots). 1 file,
-// 50960 bytes.
+// 52018 bytes.
 
 /** The kit's folder (public/). */
 export const FAR_FROM_NANITE_DIR = "/far-from-nanites-20261022" as const;
@@ -69,6 +69,6 @@ export const FAR_FROM_NANITE_ASSETS = [FAR_FROM_NANITE_CELLS.src] as const;
 
 /** The files' bytes. */
 export const FAR_FROM_NANITE_BYTES = {
-  cells: 50960,
-  total: 50960,
+  cells: 52018,
+  total: 52018,
 } as const;
