@@ -7,7 +7,7 @@ import {
   farFromCallUnits,
   mountFarFromAssembly,
 } from "@/lib/far-from-assembly";
-import { FAR_FROM_SUIT_SIZE, FAR_FROM_STAGE_VARS, FAR_FROM_STAGE } from "@/lib/far-from-stage";
+import { FAR_FROM_SUIT_SIZE } from "@/lib/far-from-stage";
 import {
   FAR_FROM_SUIT_DRIVER_STANDIN,
   FAR_FROM_SUIT_FORMS,
@@ -128,15 +128,11 @@ export const FarFromSuitUp = memo(function FarFromSuitUp() {
           ["--rzn-aspect" as string]: `${FAR_FROM_SUIT_SIZE.width} / ${FAR_FROM_SUIT_SIZE.height}`,
         }}
       >
-        <div
-          className="rzn-frame"
-          style={{
-            [FAR_FROM_STAGE_VARS.height as string]: FAR_FROM_STAGE.height,
-            [FAR_FROM_STAGE_VARS.width as string]: FAR_FROM_STAGE.width,
-            [FAR_FROM_STAGE_VARS.x as string]: FAR_FROM_STAGE.x,
-            [FAR_FROM_STAGE_VARS.bottom as string]: FAR_FROM_STAGE.bottom,
-          }}
-        >
+        {/* The figure's placement (--rzn-fig-h/w/x/b) is the sheet's, by
+            layout tier (src/lib/far-from-stage.ts holds the same numbers for
+            the Ultra segment); an inline value would pin every tier to
+            the desktop's. */}
+        <div className="rzn-frame">
           <i className="rzn-light" />
           <i className="rzn-depth" />
           <i className="rzn-aura" />

@@ -76,8 +76,10 @@ html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup::before {
 }
 
 html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup > .rzn-frame {
+  /* The desktop placement (src/lib/far-from-stage.ts: FAR_FROM_STAGE_TIERS,
+     the same numbers; the tiers below switch them at the same breakpoints). */
   --rzn-fig-h: 0.86;
-  --rzn-fig-w: 0.9;
+  --rzn-fig-w: 0.92;
   --rzn-fig-x: 0.5;
   --rzn-fig-b: 0.035;
   position: relative;
@@ -1253,7 +1255,7 @@ html[data-family="special"]
     .rxs-page.ffs-page
     .rzn-suitup[data-form="excelsior"]
     > .rzn-frame {
-    --rzn-fig-w: 0.64774;
+    --rzn-fig-w: 0.64774; /* (Rexonance Excelsior only; inert here) */
   }
 
   html[data-family="special"]

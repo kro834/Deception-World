@@ -252,10 +252,26 @@ test("the stage geometry: the Ultra segment's first frame is the suit-up's last"
   assert.equal(farFromStageTier(820, 1180), "portrait");
   assert.equal(farFromStageTier(390, 844), "phone");
   assert.equal(farFromStageTier(320, 568), "narrow");
-  // The runway's frame carries the desktop shares as the engine's properties.
-  assert.match(suitup, /\[FAR_FROM_STAGE_VARS\.height as string\]: FAR_FROM_STAGE\.height/);
-  assert.match(sheet, /--rzn-fig-h: 0\.7;\n\s+--rzn-fig-b: 0\.06;/);
-  assert.match(sheet, /--rzn-fig-h: 0\.58;\n\s+--rzn-fig-w: 0\.92;\n\s+--rzn-fig-b: 0\.17;/);
+  // The sheet places the figure by tier with the module's numbers; the
+  // frame carries no inline placement (it would pin every tier to the
+  // desktop's, as the engine reads the computed properties).
+  assert.doesNotMatch(suitup, /\["--rzn-fig-|FAR_FROM_STAGE_VARS|FAR_FROM_STAGE\b/);
+  assert.match(suitup, /<div className="rzn-frame">/);
+  const { desktop, tablet, phone, narrow } = FAR_FROM_STAGE_TIERS;
+  assert.match(
+    sheet,
+    new RegExp(
+      `--rzn-fig-h: ${desktop.height};\\n\\s+--rzn-fig-w: ${desktop.width};\\n\\s+--rzn-fig-x: ${desktop.x};\\n\\s+--rzn-fig-b: ${desktop.bottom};`,
+    ),
+  );
+  assert.match(sheet, new RegExp(`--rzn-fig-h: ${tablet.height};\\n\\s+--rzn-fig-b: ${tablet.bottom};`));
+  assert.match(
+    sheet,
+    new RegExp(
+      `--rzn-fig-h: ${phone.height};\\n\\s+--rzn-fig-w: ${phone.width};\\n\\s+--rzn-fig-b: ${phone.bottom};`,
+    ),
+  );
+  assert.match(sheet, new RegExp(`--rzn-fig-h: ${narrow.height};\\n\\s+--rzn-fig-b: ${narrow.bottom};`));
 });
 
 test("the beats are the engine's, the HUD has one part per beat, the call is the record's", () => {
