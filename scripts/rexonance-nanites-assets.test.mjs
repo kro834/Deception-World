@@ -266,6 +266,24 @@ test("the hex chips: a lit face-on core, a dark back that still glows, a square 
   for (let k = 1; k < 4; k += 1) assert.ok(spark(k) < spark(k - 1), `spark frame ${k} is smaller than ${k - 1}`);
 });
 
+test("the molten bead is gold alone: no chip ring (cool or neutral metal) around it", async () => {
+  const { data, width } = await decode(REXONANCE_NANITE_CELLS.src);
+  const { cell: C, bead } = REXONANCE_NANITE_CELLS;
+  for (let k = 0; k < bead.frames; k += 1) {
+    let [opaque, cool] = [0, 0];
+    for (let y = 0; y < C; y += 1)
+      for (let x = 0; x < C; x += 1) {
+        const i = ((bead.y + y) * width + bead.x + C * k + x) * 4;
+        if (data[i + 3] < 64) continue;
+        opaque += 1;
+        // The bead's gold runs R − B ≥ 64; the chip's chrome rings sit near 0.
+        if (data[i] - data[i + 2] < 32) cool += 1;
+      }
+    assert.ok(opaque >= 100, `bead ${k}: ${opaque} opaque px`);
+    assert.equal(cool, 0, `bead ${k}: ${cool} cool or neutral opaque px`);
+  }
+});
+
 test("settled corner clamps retain their gold jaws and cool metal guards", async () => {
   const { data, width } = await decode(REXONANCE_NANITE_FX.src);
   const { clamp } = REXONANCE_NANITE_FX;
