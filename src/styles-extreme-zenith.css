@@ -1380,6 +1380,90 @@ html[data-family="special"]
 }
 
 /* ================================================================
+   13b. Round 2: words that stay whole
+   ================================================================ */
+/* The challenger's figure keeps its （est.）, and the note after it moves
+   to the next line whole: 5000.0m / （est.）, 0.4秒 / （est.） broke inside
+   the figure at 834 and 320, / ヴィンク / ルムが約4.84倍 inside the name at
+   1194. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #performance
+  .rxs-comparison-metrics
+  article
+  > p
+  > b {
+  white-space: nowrap;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #performance
+  .rxs-comparison-metrics
+  article
+  > p
+  > span {
+  display: inline-block;
+}
+
+/* A narrow copy column beside the art (681-899: iPad Mini, iPad Pro 11
+   portrait): the two fact cards were 83-109px wide and broke 一つの結|果へ
+   固定 and 勝利経路|を増殖 inside their words. Each fact reads across one
+   row, label then value (the values share one column), at the cards' old
+   height; the points close up so
+   LEARNING and DARK MATTER CHARGING share a row from 768px (three rows
+   there grew the panel 71px past ULTRA's on every change of form). */
+@media (min-width: 681px) and (max-width: 899px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #stages
+    #exs-stage-panel
+    .exs-form-facts {
+    grid-template-columns: max-content minmax(0, 1fr);
+    gap: 8px 0;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #stages
+    #exs-stage-panel
+    .exs-form-facts
+    > div {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
+    align-items: baseline;
+    column-gap: 14px;
+    padding: 12px 16px;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #stages
+    #exs-stage-panel
+    .exs-form-facts
+    dt {
+    margin: 0;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #stages
+    #exs-stage-panel
+    > div
+    > ul
+    > li {
+    padding-inline: 11px 12px;
+  }
+}
+
+/* ================================================================
    14. Calm tiers and forced colours
    ================================================================ */
 @media (prefers-reduced-motion: reduce) {

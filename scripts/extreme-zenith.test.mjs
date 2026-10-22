@@ -276,6 +276,31 @@ test("round 2: forced-colour figures and plates, the phone eyebrow, the door rin
     declaration(find("> #system .rxs-specs > .exo-joint", forced), "border-color"),
     "CanvasText",
   );
+  // Words that stay whole: the challenger's figure and its note, the facts
+  // beside the art on a narrow column (one row each, values in one column).
+  assert.equal(
+    declaration(find("> #performance .rxs-comparison-metrics article > p > b"), "white-space"),
+    "nowrap",
+  );
+  assert.equal(
+    declaration(find("> #performance .rxs-comparison-metrics article > p > span"), "display"),
+    "inline-block",
+  );
+  const narrow = "(min-width: 681px) and (max-width: 899px)";
+  assert.equal(
+    declaration(
+      find("> #stages #exs-stage-panel .exs-form-facts", narrow),
+      "grid-template-columns",
+    ),
+    "max-content minmax(0, 1fr)",
+  );
+  assert.equal(
+    declaration(
+      find("> #stages #exs-stage-panel .exs-form-facts > div", narrow),
+      "grid-template-columns",
+    ),
+    "subgrid",
+  );
   // The two-line phone eyebrow has room between its lines.
   assert.equal(
     declaration(
