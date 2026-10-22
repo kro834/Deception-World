@@ -1155,14 +1155,17 @@ html[data-family="dream"] main.dream-page.dream-page .dream-programme-dossier-ch
 
 /* ----------------------------------------------------------------
    22. 舞台 in columns on Safari. From 761px the fifteen places stand in
-       balanced CSS columns, and each place name was brushed in on its own
-       scroll-linked view timeline. On an iPad (portrait, mini) WebKit then
-       left the second column unpainted while the first column scrolled by:
-       places 12–15 were blank boards until something forced a repaint. In
-       columns the names stand drawn; the phone rail keeps the brush.
+       balanced CSS columns inside a content-visibility: auto section. While
+       any scroll-linked animation ran in that section (each place name's
+       brush, the heading's 栞 hanging from its rod), WebKit on an iPad
+       (portrait, mini) left the second column unpainted as the page
+       scrolled: places 9–15 stood as empty ground until something forced
+       a repaint. In columns the section holds still — the names stand
+       drawn and the 栞 hangs; the phone rail keeps the brush.
    ---------------------------------------------------------------- */
 @media (min-width: 761px) {
-  html[data-family="dream"] main.dream-page.dream-page #atlas .dream-atlas-grid h3 {
+  html[data-family="dream"] main.dream-page.dream-page #atlas .dream-atlas-grid h3,
+  html[data-family="dream"] main.dream-page.dream-page #atlas > .dream-annex-heading::before {
     animation: none;
   }
 }
