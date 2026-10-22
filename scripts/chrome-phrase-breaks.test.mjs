@@ -113,3 +113,23 @@ test("the close plate reads the sheet's tokens; small labels keep the 12px floor
     /@media \(max-width: 359px\) \{[\s\S]*?\.site-announcement-kicker-tail \{\s*display: none;/,
   );
 });
+
+// Round 2 (2026-10-22): the notice's own headline breaks as its poster does,
+// a short tail (紹介。) never stands alone, and SPECIAL's names carry no
+// inserted space in their accessible names.
+test("the detail headline breaks at the poster's phrases; a short tail rides along", () => {
+  assert.match(chrome, /<h3>\s*<PhrasedTitle text=\{selectedAnnouncement\.title\} \/>\s*<\/h3>/);
+  assert.match(chrome, /const TITLE_TAIL_MAX = 3;/);
+  assert.match(
+    chrome,
+    /phrases\.length > 1 && phrases\[phrases\.length - 1\]\.length <= TITLE_TAIL_MAX/,
+  );
+  assert.match(
+    elevation,
+    /\.site-announcement-copy h3 \{[\s\S]*?text-wrap: balance;[\s\S]*?word-break: keep-all;\s*line-break: strict;/,
+  );
+  assert.match(
+    shell,
+    /> span\s*> \.name-word--protected \{\s*display: inline !important;\s*white-space: nowrap;\s*\}/,
+  );
+});

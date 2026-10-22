@@ -1277,8 +1277,11 @@ html body #site-announcement-dialog .site-announcement-copy h3 {
   letter-spacing: 0;
   text-shadow: none;
   text-wrap: balance;
-  /* Japanese lines break between phrases, not inside a name. */
-  word-break: auto-phrase;
+  /* Japanese lines break between phrases, not inside a name: at the <wbr>
+     PhrasedTitle sets where a particle meets the next word, in every engine
+     (WebKit has no auto-phrase), as the posters' titles do. */
+  word-break: keep-all;
+  line-break: strict;
   filter: var(--dwc-ghost);
 }
 

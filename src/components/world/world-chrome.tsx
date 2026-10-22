@@ -140,8 +140,15 @@ function announcementPosterStyle({ posterY }: SiteAnnouncement): CSSProperties |
 const TITLE_PHRASE_SEAM =
   /([\u3041-\u309f])(?=(?![\u30a1\u30a3\u30a5\u30a7\u30a9\u30c3\u30e3\u30e5\u30e7\u30ee\u30f5\u30f6])[\u30a1-\u30fa\u4e00-\u9fff])/gu;
 
+// A tail this short (紹介。) rides with the phrase before it: balance left it
+// alone under a full line at 48px (1440 / 1920, 2026-10-22).
+const TITLE_TAIL_MAX = 3;
+
 function PhrasedTitle({ text }: { text: string }) {
   const phrases = text.replace(TITLE_PHRASE_SEAM, "$1\u200b").split("\u200b");
+  if (phrases.length > 1 && phrases[phrases.length - 1].length <= TITLE_TAIL_MAX) {
+    phrases.splice(-2, 2, phrases.slice(-2).join(""));
+  }
   return phrases.map((phrase, index) => (
     <Fragment key={`${index}-${phrase}`}>
       {index > 0 ? <wbr /> : null}
@@ -1519,7 +1526,9 @@ export function SideMenuLayer({
                       {selectedAnnouncement.eyebrow}
                     </span>
                   ) : null}
-                  <h3>{selectedAnnouncement.title}</h3>
+                  <h3>
+                    <PhrasedTitle text={selectedAnnouncement.title} />
+                  </h3>
                   {selectedAnnouncement.lede ? (
                     <p className="site-announcement-lede">{selectedAnnouncement.lede}</p>
                   ) : null}

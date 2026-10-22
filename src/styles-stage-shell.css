@@ -1938,6 +1938,22 @@ html[data-family]
   white-space: nowrap;
 }
 
+/* SPECIAL's names (エクスプリーム / サーガ, レクソナンス / サーガ) are the
+   shared DisplayName words; its protected words are inline-block, which
+   gave the links' accessible names a space (エクスプリーム サーガ). Inline
+   and nowrap here, like the phrases above: each word stays whole and the
+   name still wraps at its <wbr>. */
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  .side-panel-links
+  > :is(a, button)
+  > span
+  > .name-word--protected {
+  display: inline !important;
+  white-space: nowrap;
+}
+
 /* Which art each destination shows (delivery files the site already
    serves; the films' and sites' own warm-up images where they are small). */
 html[data-family]
