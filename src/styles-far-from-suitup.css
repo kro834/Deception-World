@@ -1537,3 +1537,19 @@ html[data-family="special"]
     display: none;
   }
 }
+
+/* The runway's script for assistive technology (far-from-suitup.tsx):
+   visually hidden here too. Rexonance hides .rxk-sr in its own motion
+   sheet, which this page does not load. */
+.ffs-page .ffs-assembly-guide .rxk-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}

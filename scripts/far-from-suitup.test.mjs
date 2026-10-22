@@ -655,3 +655,8 @@ test("budgets and the touch tier are the engine's; the markup is the Rexonance r
   // No AI-sounding copy: the section's words are plain.
   for (const source of [suitup, seam]) assert.doesNotMatch(source, /静かに|眠る|記録が|物語|輝きを放つ/);
 });
+
+test("the runway's assistive script stays visually hidden on this page", () => {
+  const sheet = readFileSync(new URL("../src/styles-far-from-suitup.css", import.meta.url), "utf8");
+  assert.match(sheet, /\.ffs-page \.ffs-assembly-guide \.rxk-sr \{[^}]*clip-path: inset\(50%\)/);
+});
