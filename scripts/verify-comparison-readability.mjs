@@ -28,8 +28,10 @@ async function checkNotices(page, width) {
         .querySelector(".site-announcement-list-visual")
         .getBoundingClientRect();
       const copy = node.getBoundingClientRect();
+      // The phone keeps the visual beside the copy; from 761px the notices are
+      // a board of posters with the visual above it (chrome, 2026-10-21).
       return {
-        clearOfImage: visual.right <= copy.left - 1,
+        clearOfImage: visual.right <= copy.left - 1 || visual.bottom <= copy.top - 1,
         titleClipped:
           title.scrollWidth > title.clientWidth + 1 || title.scrollHeight > title.clientHeight + 1,
         wraps: getComputedStyle(title).whiteSpace === "normal",
@@ -233,6 +235,19 @@ async function checkArchive(page, kind, width) {
   console.log(`PASS ${width}px ${kind}: labels, accessible results refresh, matched row heights`);
 }
 
+// Each area's check reports on its own, so one failing surface (the notices,
+// a special site, an archive) does not hide the others at the same width;
+// the run still fails if any of them did.
+const failures = [];
+async function check(label, run) {
+  try {
+    await run();
+  } catch (error) {
+    failures.push(`${label}: ${error.message}`);
+    console.log(`FAIL ${label}: ${error.message}`);
+  }
+}
+
 try {
   for (const width of [320, 390, 1024, 1280]) {
     const page = await browser.newPage({
@@ -241,13 +256,15 @@ try {
     });
     const errors = [];
     page.on("pageerror", (error) => errors.push(error.message));
-    await checkNotices(page, width);
+    await check(`${width}px notices`, () => checkNotices(page, width));
     for (const route of ["/rexonance-saga", "/extreme-saga"])
-      await checkSpecialComparison(page, route, width);
-    for (const kind of ["saga", "realm"]) await checkArchive(page, kind, width);
-    assert.deepEqual(errors, []);
+      await check(`${width}px ${route}`, () => checkSpecialComparison(page, route, width));
+    for (const kind of ["saga", "realm"])
+      await check(`${width}px ${kind}`, () => checkArchive(page, kind, width));
+    await check(`${width}px page errors`, () => assert.deepEqual(errors, []));
     await page.close();
   }
 } finally {
   await browser.close();
 }
+assert.deepEqual(failures, [], `${failures.length} comparison readability check(s) failed`);
