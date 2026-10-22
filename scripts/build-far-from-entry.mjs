@@ -104,7 +104,7 @@ const ZONES = [
   ["helmet-crest", "helm", "up", [512, 170], rect(425, 12, 600, 170)],
   ["helmet-visor", "helm", "up", [512, 255], rect(405, 165, 620, 255)],
   // The scarf round the neck.
-  ["scarf", "scarf", "up", [512, 350], rect(385, 240, 640, 350)],
+  ["scarf", "chest", "up", [512, 350], rect(385, 240, 640, 350)],
   // The shoulders' discs and pauldrons.
   ["shoulder-disc-l", "shoulders", "up", [392, 368], circle(392, 322, 46)],
   ["shoulder-disc-r", "shoulders", "up", [647, 368], circle(647, 322, 46)],

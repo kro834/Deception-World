@@ -1,4 +1,4 @@
-import { FAR_FROM_SAGA } from "@/components/final-stage/final-stage-data";
+import { FAR_FROM_SAGA } from "../components/final-stage/final-stage-data.ts";
 import { FAR_FROM_ENTRY_FIRE, FAR_FROM_ENTRY_MATERIAL } from "./far-from-entry-ignition.js";
 
 /* FAR FROM SAGA's entry transformation: the calls and their clock (owner,

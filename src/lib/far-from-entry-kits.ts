@@ -1,5 +1,5 @@
-import { REXONANCE_NANITE_CELLS } from "./rexonance-nanites";
-import { FAR_FROM_NANITE_CELLS } from "./far-from-nanites";
+import { REXONANCE_NANITE_CELLS } from "./rexonance-nanites.ts";
+import { FAR_FROM_NANITE_CELLS } from "./far-from-nanites.ts";
 
 /* FAR FROM SAGA's two nanite kinds (owner, 2026-10-22: 「ナノマシンが別の
    ものも使う様になり、二種類使う」). Every chip of the entry's swarm carries a

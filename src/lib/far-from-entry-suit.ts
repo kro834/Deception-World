@@ -18,8 +18,7 @@ export const FAR_FROM_ENTRY_LIGHTS = "/far-from-entry-20261022/lights.webp";
  * soles on its axis: where it is drawn, scanned and burnt. */
 export const FAR_FROM_ENTRY_UNDER = { x: 67.3, y: -7.2, w: 561.3, h: 1022.4 } as const;
 
-export type FarFromEntryGroup =
-  "bits" | "helm" | "scarf" | "shoulders" | "chest" | "waist" | "arms" | "legs" | "tail" | "ribbon";
+export type FarFromEntryGroup = "bits" | "helm" | "chest" | "shoulders" | "waist" | "arms" | "legs" | "tail" | "ribbon";
 /** One plate of the armour: its box in the figure, its cell in the atlas
  * (plates.webp, the art with its light held back), the way it grows from its
  * seam, and the seam. */
@@ -167,7 +166,7 @@ export const FAR_FROM_ENTRY_PIECES: readonly FarFromEntryPiece[] = [
   },
   {
     id: "scarf",
-    group: "scarf",
+    group: "chest",
     dir: "up",
     x: 261,
     y: 162,
@@ -252,8 +251,7 @@ export const FAR_FROM_ENTRY_PIECES: readonly FarFromEntryPiece[] = [
     w: 205,
     h: 277,
     seat: [264.1, 514.6],
-    tiles:
-      "AAAcAAAfAMAfAOAPAPgDAP4AgH8AwB8A8AcA/AEAfwCAHwDgBwD4AwB8AAA/AMALAPAAADwAAB8AwAcA4AMA+AAAPAAAHwCABwDAAwDgAABwAAAYAAAEAAAA",
+    tiles: "AAAcAAAfAMAfAOAPAPgDAP4AgH8AwB8A8AcA/AEAfwCAHwDgBwD4AwB8AAA/AMALAPAAADwAAB8AwAcA4AMA+AAAPAAAHwCABwDAAwDgAABwAAAYAAAEAAAA",
     ax: 674,
     ay: 0,
   },
@@ -266,8 +264,7 @@ export const FAR_FROM_ENTRY_PIECES: readonly FarFromEntryPiece[] = [
     w: 204,
     h: 277,
     seat: [429.3, 514.6],
-    tiles:
-      "HAAADwDADwDgDwDgDwDwDwDwBwDwBwDwBwDwAwD4AwD4AwD4AwDwAQD4AQD4AQDoAQDgAQDwAADwAAD4AAD4AAD4AAB8AAA8AAA+AAAeAAAOAAAHAAADAIAB",
+    tiles: "HAAADwDADwDgDwDgDwDwDwDwBwDwBwDwBwDwAwD4AwD4AwD4AwDwAQD4AQD4AQDoAQDgAQDwAADwAAD4AAD4AAD4AAB8AAA8AAA+AAAeAAAOAAAHAAADAIAB",
     ax: 0,
     ay: 389,
   },
@@ -488,8 +485,7 @@ export const FAR_FROM_ENTRY_PIECES: readonly FarFromEntryPiece[] = [
     w: 197,
     h: 264,
     seat: [433.3, 121.9],
-    tiles:
-      "gJ8D/P+B/3/4/x/+/8f///D/P/zAHx/jx+f44z/8+AM/PgCfA8AHAPAAADgAAAYAgAEA4AMA8AAAPAAADwDAAwAwAAAEAAAAAAAAAAAAMAAAHgA=",
+    tiles: "gJ8D/P+B/3/4/x/+/8f///D/P/zAHx/jx+f44z/8+AM/PgCfA8AHAPAAADgAAAYAgAEA4AMA8AAAPAAADwDAAwAwAAAEAAAAAAAAAAAAMAAAHgA=",
     ax: 206,
     ay: 389,
   },
@@ -502,8 +498,7 @@ export const FAR_FROM_ENTRY_PIECES: readonly FarFromEntryPiece[] = [
     w: 285,
     h: 387,
     seat: [203.1, 162.5],
-    tiles:
-      "AAAAOAAAADgAMAA4AD4AIIA/AADAPwAA4D8AAPAfAAD4HwAA/B8AAPwfAAD8HgAAfhgAAD4AAAAeAAAAHgAAAB4AAAAcAAcAPAAIHjgAAADAIAAA4DEAAPA7AAD4HwAA/C8AAP4vAED+fwBA/3cAAP8XAAD/BwAD/w8AA/8PAAP/DwAA5x8A/McfADwHHwAABhwAAAQAAABgAAAA4AAAAEAgAAAAAAAAADAAAA==",
+    tiles: "AAAAOAAAADgAMAA4AD4AIIA/AADAPwAA4D8AAPAfAAD4HwAA/B8AAPwfAAD8HgAAfhgAAD4AAAAeAAAAHgAAAB4AAAAcAAcAPAAIHjgAAADAIAAA4DEAAPA7AAD4HwAA/C8AAP4vAED+fwBA/3cAAP8XAAD/BwAD/w8AA/8PAAP/DwAA5x8A/McfADwHHwAABhwAAAQAAABgAAAA4AAAAEAgAAAAAAAAADAAAA==",
     ax: 0,
     ay: 0,
   },
@@ -516,8 +511,7 @@ export const FAR_FROM_ENTRY_PIECES: readonly FarFromEntryPiece[] = [
     w: 285,
     h: 375,
     seat: [490.2, 162.5],
-    tiles:
-      "DAAAAAwAAAAEAAAAAAAAAAAAAAAAAAAAAADAAQAAwAMAAMAPAADAHwAAwB8AAIA/AAAAPwAAAD4AAAA8AAAAMBgAADh4AAA8AAAAHAAADA8AANwHAAD4DwAA+B8AAPY/AgD+PwMA/n8AAP5/AADw/0AA8P9AAPD/AADw/wAA+O8/APjjMAD44QAAeGAAABhwAAAAEgAAAAMAAAYDAAACAAAABAAAAAYA",
+    tiles: "DAAAAAwAAAAEAAAAAAAAAAAAAAAAAAAAAADAAQAAwAMAAMAPAADAHwAAwB8AAIA/AAAAPwAAAD4AAAA8AAAAMBgAADh4AAA8AAAAHAAADA8AANwHAAD4DwAA+B8AAPY/AgD+PwMA/n8AAP5/AADw/0AA8P9AAPD/AADw/wAA+O8/APjjMAD44QAAeGAAABhwAAAAEgAAAAMAAAYDAAACAAAABAAAAAYA",
     ax: 287,
     ay: 0,
   },
