@@ -20,6 +20,19 @@
    load flags.
    ================================================================ */
 
+/* The STAGE tokens the runway and its guide read (styles-stage.css, which
+   this route does not load): the bar's reserve under the sticky frame, the
+   HUD's text colours and faces (Michroma is this route's HUD font). */
+html[data-family="special"] body .rxs-page.ffs-page :is(.ffs-suitup, .rzn-suitup) {
+  --dxs-nav: var(--rxs-local-nav-reserve, 62px);
+  --dx-text: #f2f7fb;
+  --dx-text-2: #bccbd8;
+  --dx-display: "Zen Kaku Gothic New", "Noto Sans JP", sans-serif;
+  --dx-body: "Noto Sans JP", "Zen Kaku Gothic New", sans-serif;
+  --dx-hud: "Michroma", "Oxanium", "Noto Sans JP", sans-serif;
+  --dx-mono: "Oxanium", "Noto Sans JP", sans-serif;
+}
+
 html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup {
   --rzn-ice: 127 230 255;
   --rzn-violet: 201 155 255;
@@ -62,9 +75,7 @@ html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup::before {
   pointer-events: none;
 }
 
-/* ---------------- The frame: one screen, the figure in the middle ---------------- */
 html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup > .rzn-frame {
-  /* Where the figure stands in the frame (shares; the engine reads them). */
   --rzn-fig-h: 0.86;
   --rzn-fig-w: 0.9;
   --rzn-fig-x: 0.5;
@@ -78,7 +89,8 @@ html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup > .rzn-frame {
 
 html[data-family="special"]
   body
-  .rxs-page.ffs-page .rzn-suitup
+  .rxs-page.ffs-page
+  .rzn-suitup
   > .rzn-frame
   > :is(.rzn-light, .rzn-floor) {
   position: absolute;
@@ -86,12 +98,7 @@ html[data-family="special"]
   pointer-events: none;
 }
 
-/* The prism stage: three shafts falling on the figure, a lattice. */
-html[data-family="special"]
-  body
-  .rxs-page.ffs-page .rzn-suitup
-  > .rzn-frame
-  > .rzn-light {
+html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup > .rzn-frame > .rzn-light {
   inset: 0;
   z-index: 0;
   background:
@@ -104,12 +111,7 @@ html[data-family="special"]
   mask-image: radial-gradient(70% 80% at 50% 46%, #000 30%, transparent 86%);
 }
 
-/* The floor: a lit ring under the boots. */
-html[data-family="special"]
-  body
-  .rxs-page.ffs-page .rzn-suitup
-  > .rzn-frame
-  > .rzn-floor {
+html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup > .rzn-frame > .rzn-floor {
   left: 50%;
   bottom: calc(var(--rzn-fig-b) * 100% - 26px);
   z-index: 0;
@@ -122,13 +124,7 @@ html[data-family="special"]
   box-shadow: 0 0 0 10px rgb(var(--rzn-ice) / 4%);
 }
 
-/* The finished figure: the still tiers' picture. Under the motion gate it
-   shows before live only at the runway's end (round 4). */
-html[data-family="special"]
-  body
-  .rxs-page.ffs-page .rzn-suitup
-  > .rzn-frame
-  > .rzn-still {
+html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup > .rzn-frame > .rzn-still {
   position: absolute;
   left: calc(var(--rzn-fig-x) * 100%);
   bottom: calc(var(--rzn-fig-b) * 100%);
@@ -143,11 +139,7 @@ html[data-family="special"]
   pointer-events: none;
 }
 
-html[data-family="special"]
-  body
-  .rxs-page.ffs-page .rzn-suitup
-  > .rzn-frame
-  > .rzn-canvas {
+html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup > .rzn-frame > .rzn-canvas {
   position: absolute;
   inset: 0;
   z-index: 1;
@@ -159,21 +151,14 @@ html[data-family="special"]
 
 html[data-family="special"]
   body
-  .rxs-page.ffs-page .rzn-suitup[data-rzn-state="live"]
+  .rxs-page.ffs-page
+  .rzn-suitup[data-rzn-state="live"]
   > .rzn-frame
   > .rzn-canvas {
   display: block;
 }
 
-/* RESONANCE FIELD (owner, 2026-10-21): the WebGL field's canvases, made by
-   the engine only once the scene is live (the still tiers never have them),
-   on the scene canvas's box: the back one under it, the front one over it
-   (fine pointers). Light only; they never take input. */
-html[data-family="special"]
-  body
-  .rxs-page.ffs-page .rzn-suitup
-  > .rzn-frame
-  > .rzn-field {
+html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup > .rzn-frame > .rzn-field {
   position: absolute;
   inset: 0;
   z-index: 1;
@@ -183,14 +168,10 @@ html[data-family="special"]
   pointer-events: none;
 }
 
-/* Motion allowed, not yet live (near or not, round 4; the preparation can take seconds):
-   the undersuit stands where the scene starts, as faint as the first live
-   frame draws it, never the finished suit (owner, 2026-10-16: 「スクロールする
-   前から完成済みなこともあるので修正して。」). Until the first live frame is on
-   the canvas, the still that was showing stays under it. */
 html[data-family="special"]
   body
-  .rxs-page.ffs-page .rzn-suitup[data-rzn-state]:not([data-rzn-arming="still"])
+  .rxs-page.ffs-page
+  .rzn-suitup[data-rzn-state]:not([data-rzn-arming="still"])
   > .rzn-frame
   > .rzn-still {
   visibility: hidden;
@@ -198,7 +179,8 @@ html[data-family="special"]
 
 html[data-family="special"]
   body
-  .rxs-page.ffs-page .rzn-suitup
+  .rxs-page.ffs-page
+  .rzn-suitup
   > .rzn-frame
   > :is(.rzn-under, .rzn-driver-standin) {
   position: absolute;
@@ -223,59 +205,55 @@ html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup > .rzn-frame > .
 
 html[data-family="special"]
   body
-  .rxs-page.ffs-page .rzn-suitup:is([data-rzn-state="loading"], [data-rzn-arming="under"])
+  .rxs-page.ffs-page
+  .rzn-suitup:is([data-rzn-state="loading"], [data-rzn-arming="under"])
   > .rzn-frame
   > :is(.rzn-under, .rzn-driver-standin) {
   display: block;
 }
 
-/* The handover (sweep 2, F01): when the scene goes live over the undersuit
-   stand-in, the live canvas fades in over it instead of replacing it in one
-   frame. While armed over the stand-in the canvas is held at 0 (it is empty
-   then, or still holds an earlier visit's last frame); once its first frame
-   is drawn it fades in over 240 ms, and the field's canvases with it (made
-   with that frame, they start from 0 too). The stand-in stays under the
-   canvas until the canvas is whole. The undersuit's faint copy fades out as
-   the canvas's comes in: two 24 % copies one over the other would read
-   brighter, then drop. The driver's opaque copy holds under the canvas's
-   and goes once it is covered, over the last 80 ms (the canvas is at 97 %
-   from 160 ms), so the bake's 1 px edge never snaps. Both then stay laid out
-   at 0 while live; they are absolute, so nothing moves. Opacity only, on the
-   compositor. The frame drawn is the reader's (the progress is never
-   tweened), and the fade ends before the first calm frame (CALM_MS, 260 ms
-   after the first). Like every transition of this sheet it sits behind
-   reduced motion, economy (the scene never goes live there either), the
-   menu, dialogs and the route cover; there the switch stays one frame. */
 @media (prefers-reduced-motion: no-preference) {
-  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-dialog-open]
+    )
     body
-    .rxs-page.ffs-page:not([data-route-covered]) .rzn-suitup[data-rzn-state="live"][data-rzn-arming="under"]
+    .rxs-page.ffs-page:not([data-route-covered])
+    .rzn-suitup[data-rzn-state="live"][data-rzn-arming="under"]
     > .rzn-frame
     > :is(.rzn-canvas, .rzn-field) {
     opacity: 0;
   }
 
-  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-dialog-open]
+    )
     body
-    .rxs-page.ffs-page:not([data-route-covered]) .rzn-suitup[data-rzn-state="live"]:not([data-rzn-arming])
+    .rxs-page.ffs-page:not([data-route-covered])
+    .rzn-suitup[data-rzn-state="live"]:not([data-rzn-arming])
     > .rzn-frame
     > :is(.rzn-canvas, .rzn-field) {
     transition: opacity 240ms cubic-bezier(0.2, 0.7, 0.2, 1);
   }
 
   @starting-style {
-    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-dialog-open]
+      )
       body
-      .rxs-page.ffs-page:not([data-route-covered]) .rzn-suitup[data-rzn-state="live"]
+      .rxs-page.ffs-page:not([data-route-covered])
+      .rzn-suitup[data-rzn-state="live"]
       > .rzn-frame
       > .rzn-field {
       opacity: 0;
     }
   }
 
-  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-dialog-open]
+    )
     body
-    .rxs-page.ffs-page:not([data-route-covered]) .rzn-suitup[data-rzn-state="live"]:not([data-rzn-arming])
+    .rxs-page.ffs-page:not([data-route-covered])
+    .rzn-suitup[data-rzn-state="live"]:not([data-rzn-arming])
     > .rzn-frame
     > .rzn-under {
     display: block;
@@ -283,9 +261,12 @@ html[data-family="special"]
     transition: opacity 240ms cubic-bezier(0.2, 0.7, 0.2, 1);
   }
 
-  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-dialog-open]
+    )
     body
-    .rxs-page.ffs-page:not([data-route-covered]) .rzn-suitup[data-rzn-state="live"]:not([data-rzn-arming])
+    .rxs-page.ffs-page:not([data-route-covered])
+    .rzn-suitup[data-rzn-state="live"]:not([data-rzn-arming])
     > .rzn-frame
     > .rzn-driver-standin {
     display: block;
@@ -294,7 +275,6 @@ html[data-family="special"]
   }
 }
 
-/* ---------------- The call (left) ---------------- */
 html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-call {
   position: absolute;
   top: clamp(36px, 9%, 96px);
@@ -315,17 +295,14 @@ html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-kicker {
   letter-spacing: 0.24em;
 }
 
-html[data-family="special"]
-  body
-  .rxs-page.ffs-page .rzn-suitup
-  .rzn-kicker
-  > span:last-child {
+html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-kicker > span:last-child {
   color: var(--dx-text-2);
 }
 
 html[data-family="special"]
   body
-  .rxs-page.ffs-page .rzn-suitup
+  .rxs-page.ffs-page
+  .rzn-suitup
   .rzn-kicker
   > span:first-child::before {
   content: "";
@@ -348,8 +325,6 @@ html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-lines {
 html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-line {
   display: flex;
   flex-wrap: wrap;
-  /* Rows packed at the top: where the lines share one cell (phones), a
-     shorter line never spreads its rows to the cell's height. */
   align-content: flex-start;
   gap: 0 0.5em;
   margin: 0;
@@ -359,28 +334,18 @@ html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-line {
   letter-spacing: 0.04em;
 }
 
-/* The chant runs two to a line; the final call is the largest. */
-html[data-family="special"]
-  body
-  .rxs-page.ffs-page .rzn-suitup
-  .rzn-line:nth-child(3) {
+html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-line:nth-child(3) {
+  font-size: clamp(14px, 1.2vw, 20px);
+}
+
+html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-line:nth-child(4) {
   font-size: clamp(14px, 1.2vw, 20px);
 }
 
 html[data-family="special"]
   body
-  .rxs-page.ffs-page .rzn-suitup
-  .rzn-line:nth-child(4) {
-  font-size: clamp(14px, 1.2vw, 20px);
-}
-
-/* Two beats to a line, never three and one (sweep 2, F81: the full-width
-   call at iPad portrait wrapped SA-GA！DEUS！ ×3, then one alone): a
-   full-width break after the second beat holds the pairs together; where
-   two do not fit, the beats still wrap one to a line. */
-html[data-family="special"]
-  body
-  .rxs-page.ffs-page .rzn-suitup
+  .rxs-page.ffs-page
+  .rzn-suitup
   .rzn-line:is(:nth-child(3), :nth-child(4))::after {
   content: "";
   flex: 0 0 100%;
@@ -390,16 +355,14 @@ html[data-family="special"]
 
 html[data-family="special"]
   body
-  .rxs-page.ffs-page .rzn-suitup
+  .rxs-page.ffs-page
+  .rzn-suitup
   .rzn-line:is(:nth-child(3), :nth-child(4))
   > .rzn-chip:nth-child(n + 3) {
   order: 2;
 }
 
-html[data-family="special"]
-  body
-  .rxs-page.ffs-page .rzn-suitup
-  .rzn-line:last-child {
+html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-line:last-child {
   margin-top: 0.2em;
   font-size: clamp(20px, 2.2vw, 38px);
   line-height: 1.15;
@@ -410,12 +373,7 @@ html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-chip {
   white-space: nowrap;
 }
 
-/* DEUS！ answers in pink, as in the call. */
-html[data-family="special"]
-  body
-  .rxs-page.ffs-page .rzn-suitup
-  .rzn-line:last-child
-  .rzn-chip {
+html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-line:last-child .rzn-chip {
   color: rgb(var(--rzn-white));
   text-shadow:
     0 0 1px rgb(var(--rzn-ice)),
@@ -432,17 +390,13 @@ html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-hint {
   letter-spacing: 0.12em;
 }
 
-html[data-family="special"]
-  body
-  .rxs-page.ffs-page .rzn-suitup
-  .rzn-hint::after {
+html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-hint::after {
   content: "";
   width: 1px;
   height: 28px;
   background: linear-gradient(180deg, rgb(var(--rzn-ice)), transparent);
 }
 
-/* ---------------- The read-out (right) ---------------- */
 html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-hud {
   position: absolute;
   top: clamp(36px, 9%, 96px);
@@ -467,11 +421,7 @@ html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-readout {
   letter-spacing: -0.01em;
 }
 
-html[data-family="special"]
-  body
-  .rxs-page.ffs-page .rzn-suitup
-  .rzn-readout
-  > span {
+html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-readout > span {
   color: rgb(var(--rzn-ice));
   font-size: max(12px, 0.28em);
 }
@@ -486,11 +436,7 @@ html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-nanites {
   letter-spacing: 0.06em;
 }
 
-html[data-family="special"]
-  body
-  .rxs-page.ffs-page .rzn-suitup
-  .rzn-nanites
-  > small {
+html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-nanites > small {
   color: rgb(var(--rzn-ice));
   font: 400 12px / 1.4 var(--dx-hud);
   letter-spacing: 0.22em;
@@ -515,11 +461,7 @@ html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-part {
   letter-spacing: 0.22em;
 }
 
-/* A lit cell per part: filled once the part has landed. */
-html[data-family="special"]
-  body
-  .rxs-page.ffs-page .rzn-suitup
-  .rzn-part::after {
+html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-part::after {
   content: "";
   flex: none;
   width: 9px;
@@ -528,16 +470,11 @@ html[data-family="special"]
   box-shadow: 0 0 0 3px rgb(var(--rzn-ice) / 18%);
 }
 
-html[data-family="special"]
-  body
-  .rxs-page.ffs-page .rzn-suitup
-  .rzn-part:nth-child(even)::after {
+html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-part:nth-child(even)::after {
   background: rgb(var(--rzn-pink));
   box-shadow: 0 0 0 3px rgb(var(--rzn-pink) / 18%);
 }
 
-/* The stamp lands under the parts, high in the column: the Zeus button
-   keeps the frame's bottom right corner. */
 html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-stamp {
   grid-row: 4;
   align-self: start;
@@ -550,11 +487,7 @@ html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-stamp {
   letter-spacing: 0.24em;
 }
 
-html[data-family="special"]
-  body
-  .rxs-page.ffs-page .rzn-suitup
-  .rzn-stamp
-  > b {
+html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-stamp > b {
   padding: 4px 12px 3px;
   color: #02050a;
   font: 400 clamp(18px, 1.8vw, 28px) / 1.1 var(--dx-hud);
@@ -570,7 +503,6 @@ html[data-family="special"]
   );
 }
 
-/* The progress rail: a hairline down the left edge. */
 html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-rail {
   position: absolute;
   top: clamp(36px, 9%, 96px);
@@ -595,17 +527,10 @@ html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-rail > i {
   transform-origin: 50% 0;
 }
 
-/* ---------------- The live state: unlit until the call reaches it ---------------- */
-/* Unlit is dimmed, never unreadable: the call is the script and the parts
-   are the checklist (sweep 2, F22: 0.2 measured 1.7:1, the parts at 0.32
-   2.0-2.6:1). On the runway's #03070d the white call reaches 5:1 at 0.52,
-   the chant's 14-20 px included (4.5:1); a passed line (0.62 on the line
-   × 0.9 on its chips, 0.56) keeps the floor, and the 12 px part names hold
-   4.5:1 at 0.66 over the plinth's glow too. The lit line keeps its full
-   white and ice glow, the lit part its filled cell. */
 html[data-family="special"]
   body
-  .rxs-page.ffs-page .rzn-suitup[data-rzn-state]
+  .rxs-page.ffs-page
+  .rzn-suitup[data-rzn-state]
   .rzn-chip:not([data-on]) {
   opacity: 0.52;
   translate: 0 0.14em;
@@ -613,7 +538,8 @@ html[data-family="special"]
 
 html[data-family="special"]
   body
-  .rxs-page.ffs-page .rzn-suitup[data-rzn-state]
+  .rxs-page.ffs-page
+  .rzn-suitup[data-rzn-state]
   .rzn-line[data-on]
   .rzn-chip[data-on] {
   color: rgb(var(--rzn-white));
@@ -624,7 +550,8 @@ html[data-family="special"]
 
 html[data-family="special"]
   body
-  .rxs-page.ffs-page .rzn-suitup[data-rzn-state]
+  .rxs-page.ffs-page
+  .rzn-suitup[data-rzn-state]
   .rzn-line[data-done]
   .rzn-chip {
   opacity: 0.9;
@@ -632,14 +559,16 @@ html[data-family="special"]
 
 html[data-family="special"]
   body
-  .rxs-page.ffs-page .rzn-suitup[data-rzn-state]
+  .rxs-page.ffs-page
+  .rzn-suitup[data-rzn-state]
   .rzn-part:not([data-on]) {
   opacity: 0.66;
 }
 
 html[data-family="special"]
   body
-  .rxs-page.ffs-page .rzn-suitup[data-rzn-state]
+  .rxs-page.ffs-page
+  .rzn-suitup[data-rzn-state]
   .rzn-part:not([data-on])::after {
   background: transparent;
   box-shadow: inset 0 0 0 1px rgb(var(--rzn-ice) / 60%);
@@ -647,7 +576,8 @@ html[data-family="special"]
 
 html[data-family="special"]
   body
-  .rxs-page.ffs-page .rzn-suitup[data-rzn-state]:not([data-rzn-complete])
+  .rxs-page.ffs-page
+  .rzn-suitup[data-rzn-state]:not([data-rzn-complete])
   .rzn-stamp {
   opacity: 0;
   scale: 1.35;
@@ -655,31 +585,27 @@ html[data-family="special"]
 
 html[data-family="special"]
   body
-  .rxs-page.ffs-page .rzn-suitup[data-rzn-state]:is([data-rzn-line="0"], [data-rzn-line="1"])
+  .rxs-page.ffs-page
+  .rzn-suitup[data-rzn-state]:is([data-rzn-line="0"], [data-rzn-line="1"])
   .rzn-hint {
   display: flex;
 }
 
-/* While the scene prepares, scrolling does nothing yet: the hint says the
-   suit is being readied, and becomes the scroll's cue once the scene is
-   live (sweep 2, F21). */
 html[data-family="special"]
   body
-  .rxs-page.ffs-page .rzn-suitup:not([data-rzn-state="loading"])
+  .rxs-page.ffs-page
+  .rzn-suitup:not([data-rzn-state="loading"])
   .rzn-hint-wait,
 html[data-family="special"]
   body
-  .rxs-page.ffs-page .rzn-suitup[data-rzn-state="loading"]
+  .rxs-page.ffs-page
+  .rzn-suitup[data-rzn-state="loading"]
   .rzn-hint-live {
   display: none;
 }
 
-/* ---------------- Tablets and phones ---------------- */
 @media (max-width: 1099.98px) {
-  html[data-family="special"]
-    body
-    .rxs-page.ffs-page .rzn-suitup
-    > .rzn-frame {
+  html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup > .rzn-frame {
     --rzn-fig-h: 0.7;
     --rzn-fig-b: 0.06;
   }
@@ -690,21 +616,15 @@ html[data-family="special"]
 }
 
 @media (max-width: 760px), (max-width: 1099.98px) and (orientation: portrait) {
-  html[data-family="special"]
-    body
-    .rxs-page.ffs-page .rzn-suitup
-    > .rzn-frame {
+  html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup > .rzn-frame {
     --rzn-fig-h: 0.58;
     --rzn-fig-w: 0.92;
     --rzn-fig-b: 0.17;
     --rzn-gutter: 18px;
     height: max(560px, calc(100svh - var(--dxs-nav)));
-    /* A portrait tablet (1024x1366) left a band of empty runway under the
-       read-out: stacked screens take the whole screen. */
     max-height: none;
   }
 
-  /* The call across the top, the read-out along the bottom. */
   html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-call {
     top: 20px;
     left: var(--rzn-gutter);
@@ -724,10 +644,7 @@ html[data-family="special"]
     font-size: clamp(13px, 2vw, 20px);
   }
 
-  html[data-family="special"]
-    body
-    .rxs-page.ffs-page .rzn-suitup
-    .rzn-line:last-child {
+  html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-line:last-child {
     font-size: clamp(18px, 3vw, 30px);
   }
 
@@ -745,8 +662,6 @@ html[data-family="special"]
     text-align: start;
   }
 
-  /* The parts in two rows above the read-out, clear of the Zeus button's
-     column at the right (it sits level with them on short phones). */
   html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-parts {
     grid-column: 1 / -1;
     grid-row: 1;
@@ -758,8 +673,6 @@ html[data-family="special"]
     margin: 0;
   }
 
-  /* Cell first, name after, each at the start of its column (in a
-     reversed row the start is flex-end). */
   html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-part {
     flex-direction: row-reverse;
     justify-content: flex-end;
@@ -767,28 +680,19 @@ html[data-family="special"]
     letter-spacing: 0.06em;
   }
 
-  html[data-family="special"]
-    body
-    .rxs-page.ffs-page .rzn-suitup
-    .rzn-part::after {
+  html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-part::after {
     width: 7px;
     height: 7px;
     box-shadow: none;
   }
 
-  html[data-family="special"]
-    body
-    .rxs-page.ffs-page .rzn-suitup
-    .rzn-readout {
+  html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-readout {
     grid-column: 1;
     grid-row: 2;
     font-size: clamp(50px, 8vw, 84px);
   }
 
-  html[data-family="special"]
-    body
-    .rxs-page.ffs-page .rzn-suitup
-    .rzn-nanites {
+  html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-nanites {
     grid-column: 2;
     grid-row: 2;
     margin: 0 0 4px;
@@ -803,19 +707,11 @@ html[data-family="special"]
     margin: 0 0 4px;
   }
 
-  html[data-family="special"]
-    body
-    .rxs-page.ffs-page .rzn-suitup
-    .rzn-stamp
-    > b {
+  html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-stamp > b {
     font-size: 16px;
   }
 
-  html[data-family="special"]
-    body
-    .rxs-page.ffs-page .rzn-suitup
-    .rzn-stamp
-    > span {
+  html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-stamp > span {
     display: none;
   }
 
@@ -824,23 +720,14 @@ html[data-family="special"]
   }
 }
 
-/* Portrait tablets: the whole screen is the frame; the figure takes more
-   of it (the call needs no more room than on a phone). */
 @media (min-width: 761px) and (max-width: 1099.98px) and (orientation: portrait) {
-  html[data-family="special"]
-    body
-    .rxs-page.ffs-page .rzn-suitup
-    > .rzn-frame {
+  html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup > .rzn-frame {
     --rzn-fig-h: 0.66;
   }
 }
 
-/* Narrow phones: the read-out row (percent, nanites, stamp) fits 320px. */
 @media (max-width: 420px) {
-  html[data-family="special"]
-    body
-    .rxs-page.ffs-page .rzn-suitup
-    .rzn-readout {
+  html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-readout {
     font-size: clamp(40px, 12.5vw, 50px);
   }
 
@@ -848,31 +735,18 @@ html[data-family="special"]
     column-gap: 8px;
   }
 
-  html[data-family="special"]
-    body
-    .rxs-page.ffs-page .rzn-suitup
-    .rzn-nanites
-    > small {
+  html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-nanites > small {
     letter-spacing: 0.12em;
   }
 
-  html[data-family="special"]
-    body
-    .rxs-page.ffs-page .rzn-suitup
-    .rzn-stamp
-    > b {
+  html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-stamp > b {
     padding: 3px 8px 2px;
     font-size: 13px;
   }
 }
 
-/* The narrowest phones: the parts take two columns (three rows) to stay
-   clear of the Zeus button, and the figure stands a little higher. */
 @media (max-width: 349.98px) {
-  html[data-family="special"]
-    body
-    .rxs-page.ffs-page .rzn-suitup
-    > .rzn-frame {
+  html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup > .rzn-frame {
     --rzn-fig-h: 0.55;
     --rzn-fig-b: 0.21;
   }
@@ -882,22 +756,25 @@ html[data-family="special"]
   }
 }
 
-/* ================================================================
-   Layout: the pinned runway (persistent preferences only)
-   ================================================================ */
+@media (min-width: 1100px) {
+  html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup {
+    grid-column: 1 / -1;
+    grid-row: 5;
+  }
+}
+
 @media (prefers-reduced-motion: no-preference) and (forced-colors: none) {
   html[data-family="special"]:not([data-world-effects="economy"]):not([data-rzn-constrained])
     body
-    .rxs-page.ffs-page .rzn-suitup {
-    /* Longer travel lets the vortex and orbital material current remain
-       legible during a swipe. The normalized, reversible choreography is
-       unchanged; reduced/economy still use the single-screen figure. */
+    .rxs-page.ffs-page
+    .rzn-suitup {
     height: max(2400px, 420svh);
   }
 
   html[data-family="special"]:not([data-world-effects="economy"]):not([data-rzn-constrained])
     body
-    .rxs-page.ffs-page .rzn-suitup
+    .rxs-page.ffs-page
+    .rzn-suitup
     > .rzn-frame {
     position: sticky;
     top: var(--dxs-nav);
@@ -908,21 +785,23 @@ html[data-family="special"]
   (prefers-reduced-motion: no-preference) and (forced-colors: none) and (max-width: 1099.98px) and (orientation: portrait) {
   html[data-family="special"]:not([data-world-effects="economy"]):not([data-rzn-constrained])
     body
-    .rxs-page.ffs-page .rzn-suitup {
+    .rxs-page.ffs-page
+    .rzn-suitup {
     height: max(1950px, 360svh);
   }
 
-  /* One line of the call at a time, large, across the top. */
   html[data-family="special"]:not([data-world-effects="economy"])
     body
-    .rxs-page.ffs-page .rzn-suitup[data-rzn-state]
+    .rxs-page.ffs-page
+    .rzn-suitup[data-rzn-state]
     .rzn-lines {
     grid-template-areas: "line";
   }
 
   html[data-family="special"]:not([data-world-effects="economy"])
     body
-    .rxs-page.ffs-page .rzn-suitup[data-rzn-state]
+    .rxs-page.ffs-page
+    .rzn-suitup[data-rzn-state]
     .rzn-line {
     grid-area: line;
     font-size: clamp(20px, 4vw, 36px);
@@ -930,54 +809,47 @@ html[data-family="special"]
 
   html[data-family="special"]:not([data-world-effects="economy"])
     body
-    .rxs-page.ffs-page .rzn-suitup[data-rzn-state]
+    .rxs-page.ffs-page
+    .rzn-suitup[data-rzn-state]
     .rzn-line:is(:nth-child(3), :nth-child(4)) {
     font-size: clamp(14px, 2.9vw, 26px);
   }
 
   html[data-family="special"]:not([data-world-effects="economy"])
     body
-    .rxs-page.ffs-page .rzn-suitup[data-rzn-state]
+    .rxs-page.ffs-page
+    .rzn-suitup[data-rzn-state]
     .rzn-line:last-child {
     font-size: clamp(20px, 4vw, 36px);
   }
 
   html[data-family="special"]:not([data-world-effects="economy"])
     body
-    .rxs-page.ffs-page .rzn-suitup[data-rzn-state]
+    .rxs-page.ffs-page
+    .rzn-suitup[data-rzn-state]
     .rzn-line:not([data-on]) {
     visibility: hidden;
   }
 }
 
-/* Under 420 px the opening call breaks where its words do (Ultra DEUS！ /
-   REXONANCE！): on one line at the phone size it ran 379 px wide, past the
-   frame's edge, which clips it (sweep 2, F04: 390 lost the last ！, 320
-   read "Ultra DEUS! REXONA"). Its size stays the call's; the shared cell
-   grows by the one line. */
 @media (prefers-reduced-motion: no-preference) and (forced-colors: none) and (max-width: 419.98px) {
   html[data-family="special"]:not([data-world-effects="economy"])
     body
-    .rxs-page.ffs-page .rzn-suitup[data-rzn-state]
+    .rxs-page.ffs-page
+    .rzn-suitup[data-rzn-state]
     .rzn-line:first-child
     .rzn-chip {
     white-space: pre-line;
   }
 }
 
-/* ================================================================
-   Motion: the HUD answers the engine's flags; the rail follows the
-   runway (named view timeline). Gated. The call's chips and the parts
-   switch on their beat (the scroll is their timing; a transition on
-   each of twenty cells started a compositor animation per beat and
-   re-layered the frame); only the stamp lands. Live only (round 3,
-   review: the switch from the finished still into loading faded the
-   HIGH stamp and aura out over 300 ms after a jump; it is now instant).
-   ================================================================ */
 @media (prefers-reduced-motion: no-preference) {
-  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-dialog-open]
+    )
     body
-    .rxs-page.ffs-page:not([data-route-covered]) .rzn-suitup[data-rzn-state="live"]
+    .rxs-page.ffs-page:not([data-route-covered])
+    .rzn-suitup[data-rzn-state="live"]
     .rzn-stamp {
     transition:
       opacity 160ms ease-out,
@@ -989,20 +861,27 @@ html[data-family="special"]
   @media (prefers-reduced-motion: no-preference) and (forced-colors: none) {
     html[data-family="special"]:not([data-world-effects="economy"])
       body
-      .rxs-page.ffs-page .rzn-suitup {
+      .rxs-page.ffs-page
+      .rzn-suitup {
       view-timeline: --rzn-run block;
     }
 
-    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-dialog-open]
+      )
       body
-      .rxs-page.ffs-page:not([data-route-covered]) .rzn-suitup[data-rzn-state]
+      .rxs-page.ffs-page:not([data-route-covered])
+      .rzn-suitup[data-rzn-state]
       .rzn-rail {
       display: block;
     }
 
-    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-dialog-open]
+      )
       body
-      .rxs-page.ffs-page:not([data-route-covered]) .rzn-suitup[data-rzn-state]
+      .rxs-page.ffs-page:not([data-route-covered])
+      .rzn-suitup[data-rzn-state]
       .rzn-rail
       > i {
       animation: rzn-rail linear both;
@@ -1022,33 +901,372 @@ html[data-family="special"]
   }
 }
 
+@media (forced-colors: active) {
+  html[data-family="special"]
+    body
+    .rxs-page.ffs-page
+    .rzn-suitup.rzn-suitup
+    > .rzn-frame
+    :is(.rzn-light, .rzn-floor, .rzn-canvas, .rzn-rail, .rzn-hint) {
+    display: none;
+  }
 
-/* Very tall, narrow screens can reach the width limit before the height
-   limit. Reserve room for the complete padded sheet in both render paths;
-   numeric values are deliberate because the renderer reads parseFloat. */
+  html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup::before {
+    display: none;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.ffs-page
+    .rzn-suitup
+    :is(
+      .rzn-line,
+      .rzn-chip,
+      .rzn-readout,
+      .rzn-readout > span,
+      .rzn-nanites,
+      .rzn-part,
+      .rzn-stamp > b
+    ) {
+    color: CanvasText;
+    text-shadow: none;
+    background: none;
+  }
+
+  html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-part:nth-child(n)::after {
+    background: CanvasText;
+    box-shadow: none;
+  }
+}
+
+@media print {
+  html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup {
+    height: auto;
+    break-inside: avoid;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.ffs-page
+    .rzn-suitup
+    :is(.rzn-canvas, .rzn-rail, .rzn-hint) {
+    display: none;
+  }
+}
+
+html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup {
+  background:
+    radial-gradient(ellipse at 50% 44%, rgb(33 46 73 / 32%), transparent 68%),
+    linear-gradient(180deg, #020409, #070b16 48%, #020409);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.ffs-page
+  .rzn-suitup
+  > .rzn-frame
+  > :is(.rzn-depth, .rzn-aura, .rzn-crown) {
+  position: absolute;
+  z-index: 0;
+  display: block;
+  pointer-events: none;
+}
+
+html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup > .rzn-frame > .rzn-depth {
+  inset: 0;
+  background:
+    linear-gradient(90deg, #020409 0%, transparent 28% 72%, #020409 100%),
+    radial-gradient(ellipse at 50% 105%, rgb(121 232 255 / 8%), transparent 44%),
+    linear-gradient(180deg, rgb(2 4 9 / 68%), transparent 24% 76%, rgb(2 4 9 / 72%));
+}
+
+html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup > .rzn-frame > .rzn-light {
+  opacity: 0.44;
+}
+
+html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup > .rzn-frame > .rzn-aura {
+  inset: 4% 14% 0;
+  background:
+    radial-gradient(ellipse at 32% 43%, rgb(var(--rzn-ice) / 22%), transparent 48%),
+    radial-gradient(ellipse at 68% 43%, rgb(var(--rzn-pink) / 20%), transparent 48%),
+    radial-gradient(ellipse at 50% 24%, rgb(var(--rzn-gold) / 10%), transparent 38%);
+  opacity: 0.78;
+  scale: 1;
+}
+
+html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup > .rzn-frame > .rzn-crown {
+  top: 14%;
+  left: 50%;
+  width: min(42%, 580px);
+  height: 64%;
+  border: 1px solid rgb(var(--rzn-gold) / 24%);
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 0%, rgb(var(--rzn-gold) / 9%), transparent 38%);
+  opacity: 0.7;
+  translate: -50% 0;
+  scale: 1;
+}
+
+html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-crown::before,
+html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-crown::after {
+  content: "";
+  position: absolute;
+  inset: 8% -16%;
+  border: 1px solid rgb(var(--rzn-gold) / 16%);
+  border-radius: 50%;
+  transform: rotate(25deg);
+}
+
+html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-crown::after {
+  inset: 20% -28%;
+  border-color: rgb(var(--rzn-ice) / 15%);
+  transform: rotate(-25deg);
+}
+
+html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup > .rzn-frame > .rzn-floor {
+  border-color: rgb(var(--rzn-ice) / 24%);
+  background: radial-gradient(closest-side, rgb(var(--rzn-ice) / 13%), transparent);
+  box-shadow:
+    0 0 0 10px rgb(var(--rzn-ice) / 3%),
+    0 0 0 30px rgb(var(--rzn-gold) / 2%);
+}
+
+html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-kicker {
+  margin-bottom: 12px;
+}
+
+html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-phase {
+  min-height: 22px;
+  margin: 0 0 clamp(18px, 2.6vh, 30px);
+  color: rgb(var(--rzn-white) / 76%);
+  font: 500 12px / 1.7 var(--dx-body);
+  letter-spacing: 0.12em;
+}
+
+html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-phase > span {
+  display: none;
+  align-items: baseline;
+  gap: 12px;
+}
+
+html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-phase b {
+  color: rgb(var(--rzn-ice));
+  font: 500 12px / 1.7 var(--dx-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.1em;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.ffs-page
+  .rzn-suitup:not([data-rzn-state])
+  .rzn-phase
+  > [data-phase="complete"],
+html[data-family="special"]
+  body
+  .rxs-page.ffs-page
+  .rzn-suitup[data-rzn-phase="prepare"]
+  .rzn-phase
+  > [data-phase="prepare"],
+html[data-family="special"]
+  body
+  .rxs-page.ffs-page
+  .rzn-suitup[data-rzn-phase="assemble"]
+  .rzn-phase
+  > [data-phase="assemble"],
+html[data-family="special"]
+  body
+  .rxs-page.ffs-page
+  .rzn-suitup[data-rzn-phase="seal"]
+  .rzn-phase
+  > [data-phase="seal"],
+html[data-family="special"]
+  body
+  .rxs-page.ffs-page
+  .rzn-suitup[data-rzn-phase="ignite"]
+  .rzn-phase
+  > [data-phase="ignite"],
+html[data-family="special"]
+  body
+  .rxs-page.ffs-page
+  .rzn-suitup[data-rzn-phase="evolve"]
+  .rzn-phase
+  > [data-phase="evolve"],
+html[data-family="special"]
+  body
+  .rxs-page.ffs-page
+  .rzn-suitup[data-rzn-phase="complete"]
+  .rzn-phase
+  > [data-phase="complete"] {
+  display: flex;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.ffs-page
+  .rzn-suitup[data-rzn-state]
+  .rzn-line[data-done] {
+  opacity: 0.62;
+}
+
+html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-readout {
+  font-size: clamp(56px, 6.2vw, 106px);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.ffs-page
+  .rzn-suitup[data-rzn-state]:not([data-rzn-form-complete])
+  > .rzn-frame
+  > .rzn-aura {
+  opacity: 0;
+  scale: 0.94;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.ffs-page
+  .rzn-suitup[data-rzn-state]:not([data-rzn-form-complete])
+  > .rzn-frame
+  > .rzn-crown {
+  opacity: 0;
+  scale: 0.9;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.ffs-page
+  .rzn-suitup[data-rzn-state]:is([data-rzn-phase="ignite"], [data-rzn-phase="evolve"])
+  > .rzn-frame
+  > .rzn-light {
+  opacity: 0.64;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.ffs-page
+  .rzn-suitup[data-rzn-state]:not([data-rzn-form-complete])
+  .rzn-stamp {
+  opacity: 0;
+  scale: 1.12;
+}
+
+html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup[data-rzn-form-complete] .rzn-stamp {
+  opacity: 1;
+  scale: 1;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.ffs-page
+  .rzn-suitup[data-rzn-form-complete]
+  :is(.rzn-readout, .rzn-nanites, .rzn-parts) {
+  opacity: 0.62;
+}
+
+html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup[data-rzn-form-complete] .rzn-lines {
+  opacity: 0.9;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.ffs-page
+  .rzn-suitup[data-rzn-form-complete]
+  .rzn-stamp
+  > b {
+  color: rgb(var(--rzn-white));
+  background: rgb(var(--rzn-ice) / 9%);
+  border: 1px solid rgb(var(--rzn-ice) / 40%);
+  clip-path: none;
+}
+
+@media (max-width: 760px), (max-width: 1099.98px) and (orientation: portrait) {
+  html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-kicker {
+    margin-bottom: 4px;
+  }
+
+  html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-phase {
+    margin-bottom: 8px;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+  }
+
+  html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup > .rzn-frame > .rzn-aura {
+    inset: 20% 0 15%;
+  }
+
+  html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup > .rzn-frame > .rzn-crown {
+    top: 27%;
+    width: 54%;
+    height: 46%;
+  }
+
+  html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-readout {
+    font-size: clamp(50px, 8vw, 84px);
+  }
+}
+
+@media (max-width: 420px) {
+  html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-readout {
+    font-size: clamp(40px, 12.5vw, 50px);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) and (forced-colors: none) {
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-dialog-open]
+    )
+    body
+    .rxs-page.ffs-page:not([data-route-covered])
+    .rzn-suitup[data-rzn-state="live"]
+    :is(.rzn-light, .rzn-aura, .rzn-crown, .rzn-lines, .rzn-readout, .rzn-nanites, .rzn-parts) {
+    transition:
+      opacity 240ms ease-out,
+      scale 420ms ease-out;
+  }
+}
+
+@media (forced-colors: active), print {
+  html[data-family="special"]
+    body
+    .rxs-page.ffs-page
+    .rzn-suitup
+    > .rzn-frame
+    > :is(.rzn-depth, .rzn-aura, .rzn-crown) {
+    display: none;
+  }
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.ffs-page
+  .rzn-suitup[data-form="excelsior"]
+  > .rzn-frame
+  > .rzn-still {
+  width: calc(var(--rzn-fig-w) * 100% * 811 / 571);
+  max-width: 100%;
+}
+
 @media (max-width: 760px), (max-width: 1099.98px) and (orientation: portrait) {
   html[data-family="special"]
     body
-    .rxs-page.ffs-page .rzn-suitup[data-form="excelsior"]
+    .rxs-page.ffs-page
+    .rzn-suitup[data-form="excelsior"]
     > .rzn-frame {
     --rzn-fig-w: 0.64774;
   }
 
-  /* Static mode keeps the call in the DOM, but gives its finished figure
-     one final line instead of stacking the entire chant across its face. */
   html[data-family="special"]
     body
-    .rxs-page.ffs-page .rzn-suitup:not([data-rzn-state])
+    .rxs-page.ffs-page
+    .rzn-suitup:not([data-rzn-state])
     .rzn-line:not(:last-child) {
     display: none;
   }
 }
 
 @media (max-width: 420px) and (orientation: portrait) {
-  html[data-family="special"]
-    body
-    .rxs-page.ffs-page .rzn-suitup
-    > .rzn-frame {
+  html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup > .rzn-frame {
     --rzn-fig-b: 0.18;
   }
 
@@ -1064,45 +1282,35 @@ html[data-family="special"]
     margin: 0;
   }
 
-  html[data-family="special"]
-    body
-    .rxs-page.ffs-page .rzn-suitup
-    .rzn-stamp
-    > b {
+  html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-stamp > b {
     white-space: nowrap;
   }
 }
 
 @media (max-width: 349.98px) and (orientation: portrait) {
-  html[data-family="special"]
-    body
-    .rxs-page.ffs-page .rzn-suitup
-    > .rzn-frame {
+  html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup > .rzn-frame {
     --rzn-fig-h: 0.5;
     --rzn-fig-b: 0.28;
   }
 
   html[data-family="special"]
     body
-    .rxs-page.ffs-page .rzn-suitup[data-rzn-state]
+    .rxs-page.ffs-page
+    .rzn-suitup[data-rzn-state]
     .rzn-line:last-child {
     font-size: 18px;
   }
 
-  html[data-family="special"]
-    body
-    .rxs-page.ffs-page .rzn-suitup[data-rzn-state]
-    .rzn-lines {
+  html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup[data-rzn-state] .rzn-lines {
     grid-template-columns: minmax(0, 1fr);
   }
 }
 
-/* Compact static phones can show the complete stage below the fixed bar.
-   The phase and final call carry the caption without a second HUD kicker. */
 @media (prefers-reduced-motion: reduce) and (max-width: 349.98px) and (max-height: 640px) and (orientation: portrait) {
   html[data-family="special"]
     body
-    .rxs-page.ffs-page .rzn-suitup:not([data-rzn-state])
+    .rxs-page.ffs-page
+    .rzn-suitup:not([data-rzn-state])
     > .rzn-frame {
     --rzn-fig-b: 0.3;
     height: max(460px, calc(100svh - var(--dxs-nav)));
@@ -1110,19 +1318,15 @@ html[data-family="special"]
 
   html[data-family="special"]
     body
-    .rxs-page.ffs-page .rzn-suitup:not([data-rzn-state])
+    .rxs-page.ffs-page
+    .rzn-suitup:not([data-rzn-state])
     .rzn-kicker {
     display: none;
   }
 }
 
-/* A short landscape phone has one usable screen, with compact side
-   columns. Its figure remains whole between the call and the readout. */
 @media (orientation: landscape) and (max-height: 540px) and (max-width: 1099.98px) {
-  html[data-family="special"]
-    body
-    .rxs-page.ffs-page .rzn-suitup
-    > .rzn-frame {
+  html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup > .rzn-frame {
     --rzn-fig-h: 0.88;
     --rzn-fig-b: 0.035;
     --rzn-gutter: 18px;
@@ -1156,30 +1360,22 @@ html[data-family="special"]
     font-size: 15px;
   }
 
-  html[data-family="special"]
-    body
-    .rxs-page.ffs-page .rzn-suitup
-    .rzn-line:last-child {
+  html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-line:last-child {
     font-size: 20px;
   }
 
-  html[data-family="special"]
-    body
-    .rxs-page.ffs-page .rzn-suitup[data-rzn-state]
-    .rzn-lines {
+  html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup[data-rzn-state] .rzn-lines {
     grid-template-areas: "line";
   }
 
-  html[data-family="special"]
-    body
-    .rxs-page.ffs-page .rzn-suitup[data-rzn-state]
-    .rzn-line {
+  html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup[data-rzn-state] .rzn-line {
     grid-area: line;
   }
 
   html[data-family="special"]
     body
-    .rxs-page.ffs-page .rzn-suitup[data-rzn-state]
+    .rxs-page.ffs-page
+    .rzn-suitup[data-rzn-state]
     .rzn-line:not([data-on]) {
     visibility: hidden;
   }
@@ -1198,19 +1394,13 @@ html[data-family="special"]
     text-align: end;
   }
 
-  html[data-family="special"]
-    body
-    .rxs-page.ffs-page .rzn-suitup
-    .rzn-readout {
+  html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-readout {
     grid-column: 1;
     grid-row: 1;
     font-size: 44px;
   }
 
-  html[data-family="special"]
-    body
-    .rxs-page.ffs-page .rzn-suitup
-    .rzn-nanites {
+  html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-nanites {
     grid-column: 1;
     grid-row: 2;
     margin: 8px 0 0;
@@ -1242,42 +1432,27 @@ html[data-family="special"]
     margin-top: 8px;
   }
 
-  html[data-family="special"]
-    body
-    .rxs-page.ffs-page .rzn-suitup
-    .rzn-stamp
-    > span {
+  html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-stamp > span {
     display: none;
   }
 
-  html[data-family="special"]
-    body
-    .rxs-page.ffs-page .rzn-suitup
-    .rzn-stamp
-    > b {
+  html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-stamp > b {
     padding-inline: 8px;
     font-size: 14px;
     white-space: nowrap;
   }
 
-  html[data-family="special"]
-    body
-    .rxs-page.ffs-page .rzn-suitup
-    > .rzn-frame
-    > .rzn-aura {
+  html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup > .rzn-frame > .rzn-aura {
     inset: 0 24%;
   }
 
-  html[data-family="special"]
-    body
-    .rxs-page.ffs-page .rzn-suitup
-    > .rzn-frame
-    > .rzn-crown {
+  html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup > .rzn-frame > .rzn-crown {
     top: 7%;
     width: 25%;
     height: 80%;
   }
 }
+
 /* ================================================================
    The section around the runway: the guide's status above it, the
    footer's links below it (the heading is the page's section grammar).
@@ -1345,7 +1520,11 @@ html[data-family="special"] body .rxs-page.ffs-page .ffs-assembly-controls > :is
   cursor: pointer;
 }
 
-html[data-family="special"] body .rxs-page.ffs-page .ffs-assembly-controls > :is(a, button):focus-visible {
+html[data-family="special"]
+  body
+  .rxs-page.ffs-page
+  .ffs-assembly-controls
+  > :is(a, button):focus-visible {
   outline: 2px solid rgb(255 215 122);
   outline-offset: 3px;
 }

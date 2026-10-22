@@ -620,12 +620,18 @@ test("budgets and the touch tier are the engine's; the markup is the Rexonance r
   // The sheet: scoped to the page, the pinned runway under the persistent
   // preferences, the still tiers unpinned, the canvas shown only live.
   assert.doesNotMatch(sheet, /rxs-rexonance-page/);
+  const flatSheet = sheet.replace(/\s+/g, " ");
   assert.match(
-    sheet,
-    /@media \(prefers-reduced-motion: no-preference\) and \(forced-colors: none\) \{\n\s+html\[data-family="special"\]:not\(\[data-world-effects="economy"\]\):not\(\[data-rzn-constrained\]\)\n\s+body\n\s+\.rxs-page\.ffs-page \.rzn-suitup \{\n[^}]*height: max\(2400px, 420svh\);/,
+    flatSheet,
+    /@media \(prefers-reduced-motion: no-preference\) and \(forced-colors: none\) \{ html\[data-family="special"\]:not\(\[data-world-effects="economy"\]\):not\(\[data-rzn-constrained\]\) body \.rxs-page\.ffs-page \.rzn-suitup \{[^}]*height: max\(2400px, 420svh\);/,
   );
-  assert.match(sheet, /position: sticky;\n\s+top: var\(--dxs-nav\);/);
-  assert.match(sheet, /\.rzn-suitup\[data-rzn-state="live"\]\n\s+> \.rzn-frame\n\s+> \.rzn-canvas \{\n\s+display: block;/);
+  assert.match(flatSheet, /position: sticky; top: var\(--dxs-nav\);/);
+  assert.match(
+    flatSheet,
+    /\.rzn-suitup\[data-rzn-state="live"\] > \.rzn-frame > \.rzn-canvas \{ display: block;/,
+  );
+  // The STAGE tokens the runway reads are its own on this route.
+  assert.match(flatSheet, /\.ffs-page :is\(\.ffs-suitup, \.rzn-suitup\) \{ --dxs-nav: var\(--rxs-local-nav-reserve, 62px\);/);
   assert.match(sheet, /--rzn-gold: 255 215 122;/);
   assert.match(route, /styles-far-from-suitup\.css\?url/);
   assert.ok(route.indexOf("farFromSagaCssUrl }") < route.indexOf("farFromSuitupCssUrl }"));
