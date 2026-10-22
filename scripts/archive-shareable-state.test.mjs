@@ -121,6 +121,7 @@ function bridgeHarness({
   prefix = "",
   embedded = true,
   selected = "multi",
+  readyState = "complete",
 } = {}) {
   const ids = ["multi", "last-multi", "rock", "vertex"];
   const elements = new Map();
@@ -145,7 +146,7 @@ function bridgeHarness({
     return chip;
   });
   const document = new FakeElement();
-  document.readyState = "complete";
+  document.readyState = readyState;
   document.documentElement = { dataset: { archiveKind: kind } };
   document.getElementById = (id) => elements.get(id) ?? null;
   document.querySelector = (selector) =>
@@ -158,6 +159,10 @@ function bridgeHarness({
     setTimeout: (callback) => timers.push(callback) && timers.length,
     clearTimeout: () => {},
     requestAnimationFrame: (callback) => timers.push(callback),
+    listeners: new Map(),
+    addEventListener(type, callback) {
+      this.listeners.set(type, [...(this.listeners.get(type) ?? []), callback]);
+    },
   };
   window.parent = embedded ? { postMessage: (message) => posted.push(message) } : window;
   const context = vm.createContext({
@@ -193,6 +198,27 @@ test("the bridge hands a requested form and pair to the archive before it starts
   assert.deepEqual(elements.get("saga-compare-select-b").events, ["change"]);
   flush();
   assert.deepEqual(posted, [], "a request the archive honoured needs no correction");
+});
+
+// A deferred script runs while readyState is "interactive", before
+// DOMContentLoaded and the controllers that open the requested form. The
+// bridge settled on a timer queued then, which could read the markup's default
+// chip and drop ?form from the page URL after a reload or Back (the
+// verify-archive-shareable-state flake). It settles after DOMContentLoaded now.
+test("the bridge reads the opened form only after the controllers start", () => {
+  const { document, posted, flush, chips } = bridgeHarness({
+    hash: "#form=vertex&compare=rock.vertex",
+    readyState: "interactive",
+  });
+  flush();
+  assert.deepEqual(posted, [], "nothing is read before DOMContentLoaded");
+  // The controller's DOMContentLoaded handler opens the requested form.
+  for (const chip of chips) {
+    chip.attributes["aria-checked"] = String(chip.dataset.formId === "vertex");
+  }
+  document.dispatchEvent({ type: "DOMContentLoaded" });
+  flush();
+  assert.deepEqual(posted, [], "the honoured request stays in the page URL");
 });
 
 test("unknown ids and default pairs are dropped from the page URL", () => {
