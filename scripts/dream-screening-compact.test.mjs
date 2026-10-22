@@ -49,8 +49,9 @@ test("the compact override is limited to short landscape viewports", () => {
   );
   assert.match(
     narrowLandscape,
-    /\.dream-screening-message:has\(\.dream-screening-status:empty\)\s*\{\s*display:\s*none;/,
+    /\.dream-screening-message:has\(\.dream-screening-status:empty\),\s*\.dream-screening-status:empty\s*\{\s*min-height:\s*0;/,
   );
+  assert.doesNotMatch(narrowLandscape, /display:\s*none|visibility:\s*hidden/);
   assert.ok(
     style.indexOf(
       "@media (max-width: 540px) and (max-height: 520px) and (orientation: landscape)",
