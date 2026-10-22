@@ -9,6 +9,10 @@
    - Hits: an element carrying data-exi-hit="" is keyed the first time it
      crosses the trigger line (the default inset, or 96px above the bottom
      for data-exi-line="mid"). IntersectionObservers only, no scroll listener.
+     A default-line hit that comes to rest on screen short of its line (on a
+     tall screen the bottom fifth is a full ROUND head) lands once it has
+     stood there for DWELL_MS: the reader who stops sees the head, not its
+     plate and kicker over an empty title.
      While the engine runs the page carries data-exi-armed="true", so the
      sheet holds an unreached arrival back only while something will
      release it; without the engine everything simply stands drawn.
@@ -44,6 +48,12 @@
 // -45% held the punch hundreds of pixels on portrait tablets. A bounded
 // inset makes the first hit arrive as its panel enters on every aspect ratio.
 const LINES = { base: "0px 0px -20% 0px", mid: "0px 0px -96px 0px" };
+// Round 2 (2026-10-22): the dwell. A default-line hit at least this far onto
+// the screen (its first line in view, past a phone's own fifth) that stays
+// short of the line for DWELL_MS lands where it rests. Leaving first cancels.
+const DWELL_LINE = "0px 0px -120px 0px";
+export const DWELL_MS = 600;
+const DWELL_KEY = "data-exi-dwell";
 // Scenes keyed by the engine itself (their opening tags stay as they are).
 const SCENES = ":scope > :is(.rxs-section, .rxs-footer), :scope :is(.rxs-system-grid, .rxs-specs)";
 const TALLY_MS = 900;
@@ -286,6 +296,10 @@ export function mountExtremeImpact(page, environment = window) {
 
   /* ---------- Hits ---------- */
   const land = (element) => {
+    // Whichever way it came (its line, the dwell, a combination), a landed
+    // hit leaves every observer and its pending dwell.
+    observers.forEach((observer) => observer.unobserve(element));
+    retire(element, DWELL_KEY);
     key(element, "data-exi-hit", BEATS.hit);
     talliesIn(element)
       .filter((tally) => scopeOf(tally) === element)
@@ -316,6 +330,31 @@ export function mountExtremeImpact(page, environment = window) {
       observer.unobserve(entry.target);
       if (page.contains(entry.target) && entry.target.getAttribute("data-exi-hit") === "")
         land(entry.target);
+    }
+  };
+  const onDwell = (entries, observer) => {
+    if (!running || !observers.includes(observer)) return;
+    for (const entry of entries) {
+      const element = entry.target;
+      if (!entry.isIntersecting) {
+        retire(element, DWELL_KEY);
+        continue;
+      }
+      if (!page.contains(element) || element.getAttribute("data-exi-hit") !== "") {
+        observer.unobserve(element);
+        continue;
+      }
+      let pending = false;
+      for (const timer of timers.values())
+        if (timer.element === element && timer.name === DWELL_KEY) pending = true;
+      if (pending) continue;
+      const id = environment.setTimeout(() => {
+        timers.delete(id);
+        if (!running || !page.contains(element) || element.getAttribute("data-exi-hit") !== "")
+          return;
+        land(element);
+      }, DWELL_MS);
+      timers.set(id, { element, name: DWELL_KEY });
     }
   };
   const onRekey = (records) => {
@@ -375,6 +414,14 @@ export function mountExtremeImpact(page, environment = window) {
         talliesIn(element)
           .filter((tally) => scopeOf(tally) === element)
           .forEach(wait);
+    }
+    if (byLine.base.length) {
+      const dwell = new environment.IntersectionObserver(onDwell, {
+        rootMargin: DWELL_LINE,
+        threshold: 0,
+      });
+      byLine.base.forEach((element) => dwell.observe(element));
+      observers.push(dwell);
     }
     const Watcher = environment.MutationObserver;
     for (const container of page.querySelectorAll("[data-exi-rekey]")) {
