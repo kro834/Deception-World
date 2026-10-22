@@ -12,7 +12,11 @@ import { chromium, webkit } from "playwright";
 import sharp from "sharp";
 import { connectedFireEvidence } from "./rexonance-fire-evidence.mjs";
 import { assertSpreadSequence, flameSpreadEvidence } from "./rexonance-spread-evidence.mjs";
-import { entryCanonicalTime, entryElapsedTime, NANITE_FIRE_PHASES } from "../src/lib/rexonance-ignition.js";
+import {
+  entryCanonicalTime,
+  entryElapsedTime,
+  NANITE_FIRE_PHASES,
+} from "../src/lib/rexonance-ignition.js";
 import { scrollFlameAt } from "../src/lib/rexonance-field/field-clock.js";
 
 const materialEntry = NANITE_FIRE_PHASES.materialStart * 2400;
@@ -61,6 +65,15 @@ const entrySamples = (
         .map(([, value]) => value)
 ).map(elapsedAt);
 const extinctionTarget = sampleAt.extinction;
+// The fire shifts sooty green -> clean cyan-blue over NANITE_FIRE_PHASES
+// cleanFrom..cleanTo, so a green-pixel read only applies before cleanTo; from
+// there the flame is judged by its real atlas draws.
+const cleanFromCanonical = NANITE_FIRE_PHASES.cleanTo * 2400;
+const flameVisible = (shot) =>
+  shot.atlasDraws > 0 &&
+  (shot.canonicalClock >= cleanFromCanonical ||
+    shot.pixels?.green > 0 ||
+    shot.fireEvidence?.greenPixels > 0);
 const entryPeak = (shot) =>
   [sampleAt.sustainedB, sampleAt.peak, sampleAt.peakLate].includes(shot.target);
 const coverageMinimum = process.env.FLAME_COVERAGE_MIN
@@ -90,7 +103,9 @@ const asset = "/rexonance-flame-natural-20261019/flame.webp";
 const evidenceWidth = 171;
 const evidenceHeight = 312;
 const bodyMask = await sharp(
-  await readFile(new URL("../public/rexonance-suit-20261016/undersuit-20261021.webp", import.meta.url)),
+  await readFile(
+    new URL("../public/rexonance-suit-20261016/undersuit-20261021.webp", import.meta.url),
+  ),
 )
   .ensureAlpha()
   .resize(evidenceWidth, evidenceHeight)
@@ -272,7 +287,11 @@ async function installProbe(context) {
       if ((isAtlas || isFallback || flameSources.has(source)) && this.globalAlpha > 0) {
         flameSources.add(this.canvas);
         if (frame) frame.flames++;
-        if (kind !== "other" && source instanceof HTMLCanvasElement && source.dataset?.rexonanceFire)
+        if (
+          kind !== "other" &&
+          source instanceof HTMLCanvasElement &&
+          source.dataset?.rexonanceFire
+        )
           state.latestField = source;
       }
       if (isFallback) state.fallback[kind]++;
@@ -867,15 +886,15 @@ try {
             `${name}: the naturally started initial call selected the real painter before any seek`,
           );
           assert.ok(
-            record.entry
-              .filter(entryPeak)
-              .every((shot) => shot.atlasDraws > 0 && shot.pixels?.green > 0),
+            record.entry.filter(entryPeak).every(flameVisible),
             `${name}: initial flame frames must be drawn, not only a later return call`,
           );
-          const sustained = record.entry.filter((shot) => [sampleAt.sustainedA, sampleAt.sustainedB].includes(shot.target));
+          const sustained = record.entry.filter((shot) =>
+            [sampleAt.sustainedA, sampleAt.sustainedB].includes(shot.target),
+          );
           assert.equal(sustained.length, 2, "both added-duration flame samples must be captured");
           assert.ok(
-            sustained.every((shot) => shot.nativeAtlasDraws > 0 && shot.pixels?.green > 0),
+            sustained.every((shot) => shot.nativeAtlasDraws > 0 && flameVisible(shot)),
             `${name}: the added second retains an actively painted visible flame at both sustained samples`,
           );
         }
@@ -1082,7 +1101,8 @@ try {
                 "the real field grows from quiet ignition into a rapid flare, not a constant bright overlay",
               );
               const clearing = record.entry.filter(
-                (shot) => shot.target === sampleAt.explosionEnd || shot.target === sampleAt.clearGap,
+                (shot) =>
+                  shot.target === sampleAt.explosionEnd || shot.target === sampleAt.clearGap,
               );
               assert.equal(clearing.length, 2, "both explosion end and clear gap are captured");
               assert.ok(
