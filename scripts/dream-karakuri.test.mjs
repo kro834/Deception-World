@@ -84,3 +84,9 @@ test("Karakuri stylesheet loads after Zenith and before the cinematic skin", () 
     /\{ rel: "stylesheet", href: dreamZenithCssUrl \}[\s\S]*?\{ rel: "stylesheet", href: dreamKarakuriCssUrl \}[\s\S]*?CINEMATIC_STYLESHEET_LINK/,
   );
 });
+
+test("口上 keeps its kinari paper under the karakuri frame (its ink is set for paper)", () => {
+  const rule = karakuriCss.match(/\.dream-prologue-card \{[^}]*\}/)?.[0] ?? "";
+  assert.match(rule, /linear-gradient\(118deg, #f4ecdc, #e8ddc8\)/);
+  assert.doesNotMatch(rule, /#241a24|#17111a/);
+});
