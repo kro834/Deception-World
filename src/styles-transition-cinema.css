@@ -1356,6 +1356,39 @@ html body .load-gate.has-cine.is-cine-flip .rider-cutin-caption {
     animation-duration: calc(var(--dwc-reveal) * 0.5);
   }
 
+  /* Round 2 (2026-10-22): アルゲノム's cut opens over the arriving file. Its
+     white-hot core and glow, swelling to 17 times its height, laid a pale
+     bar across the portrait's face for about 150 ms. Over the file the cut
+     burns scarlet-pink and swells to 4.5 times at most, mostly gone by
+     55%; the cover's own cut, over the ink, keeps its white heat. */
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-argenome-cutin.is-revealing
+    .argenome-slash.is-main {
+    background: linear-gradient(
+      90deg,
+      transparent 1%,
+      #5e0009 16%,
+      #ff1736 41%,
+      #ffb3bd 49.5% 50.5%,
+      #ff1736 59%,
+      #5e0009 84%,
+      transparent 99%
+    );
+    box-shadow:
+      0 0 6px 1px rgb(255 128 146 / 0.42),
+      0 0 16px 4px rgb(255 28 55 / 0.55),
+      0 0 40px 9px rgb(177 0 25 / 0.28);
+    animation-name: dwc-argenome-open;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-argenome-cutin.is-revealing
+    .argenome-slash.is-main::after {
+    background: linear-gradient(90deg, transparent 4%, #ff7587 25%, #ffd2d8 50%, #ff7587 75%, transparent 96%);
+  }
+
   /* On a flip the rider's stage stays out: the file is the identity. */
   html
     body
@@ -4001,6 +4034,25 @@ html[data-route-cover="covering"] .zeus-button:not([data-navigating="true"]) {
   100% {
     opacity: 0;
     transform: translateX(55%);
+  }
+}
+
+@keyframes dwc-argenome-open {
+  0% {
+    opacity: 0.74;
+    transform: translate3d(-50%, -50%, 0) rotate(-16deg) scaleX(1);
+  }
+  20% {
+    opacity: 0.9;
+    transform: translate3d(-50%, -50%, 0) rotate(-16deg) scaleX(1.035) scaleY(1.8);
+  }
+  55% {
+    opacity: 0.3;
+    transform: translate3d(-50%, -50%, 0) rotate(-16deg) scaleX(1.07) scaleY(3.2);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(-50%, -50%, 0) rotate(-16deg) scaleX(1.1) scaleY(4.5);
   }
 }
 
