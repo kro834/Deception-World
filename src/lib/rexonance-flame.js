@@ -35,6 +35,7 @@ import {
   POSE_COVER,
   POSE_MIX,
   POSE_SLOTS,
+  POSE_TONE,
   POSE_VIEW_X0,
   POSE_VIEW_X1,
   POSE_VIEW_Y0,
@@ -114,7 +115,7 @@ let rasterFrontPixels = null;
 let rasterW = 0;
 let rasterH = 0;
 let rasterFailedAt = -Infinity;
-// The frame cache: both layers of one (phase, clock, strength, tier).
+// The frame cache: both layers of one (phase, clock, strength, tier, tone).
 const POSE = new Float64Array(POSE_SLOTS);
 const FRAGMENTS = new Float32Array(NANITE_FIRE_FRAGMENTS * FRAGMENT_STRIDE);
 let frameMode = 0;
@@ -122,6 +123,7 @@ let framePhase = NaN;
 let frameClock = NaN;
 let frameStrength = NaN;
 let frameDetail = -1;
+let frameTone = NaN;
 // The visible part of the fire rect on the destination canvas (rect uv).
 const VIEW = new Float64Array([0, 0, 1, 1]);
 const frameView = new Float64Array([NaN, NaN, NaN, NaN]);
@@ -209,17 +211,21 @@ function prepare() {
   return noise !== null && field !== null;
 }
 
-// Four radial glows on one small sheet: the reactor's green and blue
-// light, and the white-cyan and pink of an airborne spark.
+// Six radial glows on one small sheet: the reactor's green and blue
+// light, the white-cyan and pink of an airborne spark, and (the gold end
+// tone, FIRE_TONES) the reactor's gold light and a spark's amber halo.
 const SPRITE = 64;
 const SPRITE_BLUE = 1;
 const SPRITE_WHITE = 2;
 const SPRITE_PINK = 3;
+const SPRITE_GOLD = 4;
+const SPRITE_AMBER = 5;
+const SPRITES = 6;
 function makeSprites() {
   const document = environment.document;
   if (!document?.createElement) return null;
   const canvas = document.createElement("canvas");
-  canvas.width = SPRITE * 4;
+  canvas.width = SPRITE * SPRITES;
   canvas.height = SPRITE;
   const c = canvas.getContext("2d");
   if (!c?.createRadialGradient) return null;
@@ -243,8 +249,20 @@ function makeSprites() {
       "rgb(200 100 200 / 0.14)",
       "rgb(160 80 190 / 0)",
     ],
+    [
+      "rgb(255 236 170 / 0.6)",
+      "rgb(255 190 72 / 0.34)",
+      "rgb(176 100 14 / 0.14)",
+      "rgb(120 60 10 / 0)",
+    ],
+    [
+      "rgb(255 232 170 / 0.9)",
+      "rgb(255 176 64 / 0.5)",
+      "rgb(200 110 24 / 0.14)",
+      "rgb(150 70 20 / 0)",
+    ],
   ];
-  for (let i = 0; i < 4; i += 1) {
+  for (let i = 0; i < SPRITES; i += 1) {
     const cx = i * SPRITE + SPRITE / 2;
     const gradient = c.createRadialGradient(cx, SPRITE / 2, 0, cx, SPRITE / 2, SPRITE / 2);
     gradient.addColorStop(0, glows[i][0]);
@@ -444,8 +462,8 @@ const valid = (strength, clock, scale) =>
   scale > 0;
 
 // Renders both layers of one frame into the retained surfaces, once per
-// distinct (phase, clock, strength, tier); the front draw reuses them.
-function renderFrame(phase, strength, clock) {
+// distinct (phase, clock, strength, tier, tone); the front draw reuses them.
+function renderFrame(phase, strength, clock, tone) {
   const detail = coarse ? 0 : 1;
   if (
     frameMode &&
@@ -453,13 +471,14 @@ function renderFrame(phase, strength, clock) {
     frameClock === clock &&
     frameStrength === strength &&
     frameDetail === detail &&
+    frameTone === tone &&
     frameView[0] === VIEW[0] &&
     frameView[1] === VIEW[1] &&
     frameView[2] === VIEW[2] &&
     frameView[3] === VIEW[3]
   )
     return frameMode;
-  poseFire(phase, strength, clock, detail, POSE);
+  poseFire(phase, strength, clock, detail, POSE, tone);
   poseView(POSE, VIEW[0], VIEW[1], VIEW[2], VIEW[3]);
   poseFragments(phase, FIRE_RECT, FRAGMENTS);
   frameMode = 0;
@@ -483,6 +502,7 @@ function renderFrame(phase, strength, clock) {
     frameClock = clock;
     frameStrength = strength;
     frameDetail = detail;
+    frameTone = tone;
     frameView.set(VIEW);
     touchRetention();
   }
@@ -490,7 +510,9 @@ function renderFrame(phase, strength, clock) {
 }
 
 // The CPU fallback's burst fragments: straight-alpha sparks in the heat
-// ramp's tones, stretched by their speed. Colours are prebuilt bands.
+// ramp's tones, stretched by their speed. Colours are prebuilt bands: the
+// clean tone's (RAMP_HEAT), and the gold tone's (RAMP_HEAT_GOLD) from a
+// tone of a half (a CSS colour cannot mix without building a string).
 const HEAT_CSS = [
   "rgb(205 110 182)",
   "rgb(255 143 216)",
@@ -499,11 +521,20 @@ const HEAT_CSS = [
   "rgb(190 245 255)",
   "rgb(240 250 255)",
 ];
+const HEAT_GOLD_CSS = [
+  "rgb(196 92 28)",
+  "rgb(255 150 40)",
+  "rgb(255 190 70)",
+  "rgb(255 215 110)",
+  "rgb(255 236 170)",
+  "rgb(255 250 230)",
+];
 function paintRasterSparks(context, W, H, strength) {
   const step = coarse ? 2 : 1;
   const grow = sparkStretch(POSE[POSE_BURST]);
   const emerge = sparkEmerge(POSE[POSE_BURST]) * strength;
   if (emerge <= 0) return;
+  const bands = POSE[POSE_TONE] >= 0.5 ? HEAT_GOLD_CSS : HEAT_CSS;
   for (let i = 0; i < NANITE_FIRE_FRAGMENTS; i += step) {
     const k = i * FRAGMENT_STRIDE;
     const heat = FRAGMENTS[k + 2];
@@ -516,7 +547,7 @@ function paintRasterSparks(context, W, H, strength) {
     );
     const stretch = 1 + Math.min(FIRE_TUNING.rasterSparkStretch, speed * grow);
     const across = size * FIRE_TUNING.rasterSparkWidth;
-    context.fillStyle = HEAT_CSS[Math.min(5, Math.floor(heat * 6))];
+    context.fillStyle = bands[Math.min(5, Math.floor(heat * 6))];
     context.globalAlpha = Math.pow(heat, 0.6) * emerge;
     context.fillRect(x - across / 2, y - (size * stretch) / 2, across, size * stretch);
   }
@@ -558,8 +589,19 @@ const VIEW_SCRATCH = new Float64Array(POSE_SLOTS);
 
 /** Back/front sample the same frame of the body fire. Phase is the shared
  * ignition clock, not wall-clock history; an omitted phase lets strength
- * stand for how far along a full torch is (legacy callers). */
-export function drawBodyFlame(context, size, strength, clock, scale = 1, layer = "all", phase = 0) {
+ * stand for how far along a full torch is (legacy callers). `tone` is the
+ * fire's end tone (fire-tuning.js FIRE_TONES): 0, the default, the clean
+ * cyan-blue combustion Rexonance ends in; 1 the gold Far From ends in. */
+export function drawBodyFlame(
+  context,
+  size,
+  strength,
+  clock,
+  scale = 1,
+  layer = "all",
+  phase = 0,
+  tone = 0,
+) {
   if (Number.isFinite(phase) && phase >= NANITE_FIRE_PHASES.flameEnd) return;
   if (
     !valid(strength, clock, scale) ||
@@ -572,8 +614,8 @@ export function drawBodyFlame(context, size, strength, clock, scale = 1, layer =
   )
     return;
   if (layer === "all") {
-    drawBodyFlame(context, size, strength, clock, scale, "back", phase);
-    drawBodyFlame(context, size, strength, clock, scale, "front", phase);
+    drawBodyFlame(context, size, strength, clock, scale, "back", phase, tone);
+    drawBodyFlame(context, size, strength, clock, scale, "front", phase, tone);
     return;
   }
   const W = size.width;
@@ -581,8 +623,9 @@ export function drawBodyFlame(context, size, strength, clock, scale = 1, layer =
   const power = clamp(strength);
   const progress =
     Number.isFinite(phase) && phase > 0 ? phase : NANITE_FIRE_PHASES.burstStart * power;
+  const end = Number.isFinite(tone) ? clamp(tone) : 0;
   measureView(context, W, H, scale);
-  const mode = renderFrame(progress, power, clock);
+  const mode = renderFrame(progress, power, clock, end);
   if (!mode) return;
   const back = layer === "back";
   context.save();
@@ -609,8 +652,10 @@ export function drawBodyFlame(context, size, strength, clock, scale = 1, layer =
 }
 
 /** The reactor's light: the core takes the fire's colour as the engulf
- * reaches the chest, and flares white at the detonation. Two glow draws. */
-export function drawNaniteFlame(context, core, strength, clock, scale = 1) {
+ * reaches the chest, and flares white at the detonation. Two glow draws
+ * (three between tones: the combustion's light is blue at tone 0, gold at
+ * tone 1, both between; a draw of alpha 0 is skipped). */
+export function drawNaniteFlame(context, core, strength, clock, scale = 1, tone = 0) {
   if (
     !valid(strength, clock, scale) ||
     !core ||
@@ -626,6 +671,7 @@ export function drawNaniteFlame(context, core, strength, clock, scale = 1) {
   const burst = POSE[POSE_BURST];
   const reach = clamp((cover - 0.3) / 0.3) * (1 - burst * 0.6);
   if (reach <= 0.001) return;
+  const end = Number.isFinite(tone) ? clamp(tone) : 0;
   const pulse = 0.86 + 0.14 * Math.sin(clock * 9.1) * Math.sin(clock * 5.3 + 0.7);
   const radius = (118 + 60 * burst) * (0.7 + 0.3 * reach);
   const cx = core[0];
@@ -647,11 +693,24 @@ export function drawNaniteFlame(context, core, strength, clock, scale = 1) {
         radius * 2,
         radius * 2,
       );
-    context.globalAlpha = power * reach * pulse * 0.42 * mix;
+    context.globalAlpha = power * reach * pulse * 0.42 * mix * (1 - end);
     if (context.globalAlpha > 0.004)
       context.drawImage(
         sprites,
         SPRITE * SPRITE_BLUE,
+        0,
+        SPRITE,
+        SPRITE,
+        cx - radius,
+        cy - radius,
+        radius * 2,
+        radius * 2,
+      );
+    context.globalAlpha = power * reach * pulse * 0.42 * mix * end;
+    if (context.globalAlpha > 0.004)
+      context.drawImage(
+        sprites,
+        SPRITE * SPRITE_GOLD,
         0,
         SPRITE,
         SPRITE,
@@ -666,9 +725,10 @@ export function drawNaniteFlame(context, core, strength, clock, scale = 1) {
 }
 
 /** A burning fragment carried by the nanite engines: an incandescent spark
- * (pink-violet halo, white-cyan core), never a rotated flame image. Their
- * closed-form trajectory supplies its position; two glow draws at most. */
-export function drawNaniteFirebrand(context, x, y, strength, clock, scale = 1) {
+ * (pink-violet halo, white-cyan core; the halo amber in the gold tone),
+ * never a rotated flame image. Their closed-form trajectory supplies its
+ * position; two glow draws at most (three between tones). */
+export function drawNaniteFirebrand(context, x, y, strength, clock, scale = 1, tone = 0) {
   if (
     !valid(strength, clock, scale) ||
     !Number.isFinite(x) ||
@@ -678,6 +738,7 @@ export function drawNaniteFirebrand(context, x, y, strength, clock, scale = 1) {
   )
     return;
   const power = clamp(strength);
+  const end = Number.isFinite(tone) ? clamp(tone) : 0;
   const flicker = 0.84 + 0.16 * Math.sin(clock * 37 + x * 0.11 + y * 0.07);
   const halo = (16 + 22 * power) * flicker;
   const core = (6 + 9 * power) * flicker;
@@ -685,18 +746,32 @@ export function drawNaniteFirebrand(context, x, y, strength, clock, scale = 1) {
   try {
     if (scale !== 1) context.scale(scale, scale);
     context.globalCompositeOperation = "lighter";
-    context.globalAlpha = power * 0.7;
-    context.drawImage(
-      sprites,
-      SPRITE * SPRITE_PINK,
-      0,
-      SPRITE,
-      SPRITE,
-      x - halo,
-      y - halo,
-      halo * 2,
-      halo * 2,
-    );
+    context.globalAlpha = power * 0.7 * (1 - end);
+    if (context.globalAlpha > 0.004)
+      context.drawImage(
+        sprites,
+        SPRITE * SPRITE_PINK,
+        0,
+        SPRITE,
+        SPRITE,
+        x - halo,
+        y - halo,
+        halo * 2,
+        halo * 2,
+      );
+    context.globalAlpha = power * 0.7 * end;
+    if (context.globalAlpha > 0.004)
+      context.drawImage(
+        sprites,
+        SPRITE * SPRITE_AMBER,
+        0,
+        SPRITE,
+        SPRITE,
+        x - halo,
+        y - halo,
+        halo * 2,
+        halo * 2,
+      );
     context.globalAlpha = power;
     context.drawImage(
       sprites,
@@ -728,6 +803,7 @@ export function inspectBodyFlame() {
     rasterFront,
     pose: POSE,
     fragments: FRAGMENTS,
+    tone: POSE[POSE_TONE],
     retained: Boolean(renderer || rasterBackContext),
   };
 }

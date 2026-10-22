@@ -1,13 +1,26 @@
 // GLSL ES 1.00 sources (WebGL1 and WebGL2) built from the shared tuning
 // table, so the GPU fire and the CPU fallback agree on every constant.
 import { BODY_ASPECT, FIELD_D, FIELD_IN, FIELD_LIFT, TEAR_LINES } from "./fire-field.js";
-import { FIRE_TUNING as T, RAMP_CLEAN, RAMP_HEAT, RAMP_SOOTY } from "./fire-tuning.js";
+import {
+  FIRE_TUNING as T,
+  RAMP_CLEAN,
+  RAMP_GOLD,
+  RAMP_HEAT,
+  RAMP_HEAT_GOLD,
+  RAMP_SOOTY,
+  TONE_TINTS,
+} from "./fire-tuning.js";
 
 const f = (x) => {
   const s = String(x);
   return /[.e]/.test(s) ? s : `${s}.0`;
 };
 const vec3 = (r, g, b) => `vec3(${f(r)}, ${f(g)}, ${f(b)})`;
+// A tint of the detonation in the end tone (TONE_TINTS): clean at uTone 0.
+const tint = (name) => {
+  const [clean, gold] = TONE_TINTS[name];
+  return `mix(${vec3(...clean)}, ${vec3(...gold)}, uTone.x)`;
+};
 const ramp = (name, stops) => {
   let body = `  vec3 c = ${vec3(stops[0][1], stops[0][2], stops[0][3])};\n`;
   for (let i = 1; i < stops.length; i += 1) {
@@ -47,6 +60,8 @@ void main() {
 // uFlow / uDrift: the clock's drifts, already wrapped into the noise's
 // period on the CPU (fire-pose.js): tongues, turbulence, flutter, reach /
 // front edge, local flicker, hot patches.
+// uTone: x the fire's end tone (fire-tuning.js FIRE_TONES: 0 the clean
+// cyan-blue combustion, 1 gold); y unused.
 // The CPU kernel (fire-raster.js) is this function line for line.
 export const FIRE_FRAGMENT = `
 #ifdef GL_FRAGMENT_PRECISION_HIGH
@@ -64,8 +79,10 @@ uniform vec4 uRing;
 uniform vec4 uView;
 uniform vec4 uFlow;
 uniform vec4 uDrift;
+uniform vec2 uTone;
 ${ramp("rampSooty", RAMP_SOOTY)}
 ${ramp("rampClean", RAMP_CLEAN)}
+${ramp("rampGold", RAMP_GOLD)}
 // The distance (figure widths) from p to one tear's line (start, run),
 // moved across by jag, tapering to nothing over its ends.
 float tearGap(vec2 p, vec4 line, float jag) {
@@ -190,7 +207,8 @@ void main() {
   float patch = ${f(1 - T.patchAmp)} + ${f(T.patchAmp)} * np;
   float temp = clamp((plume * plumeHeat + rim * ${f(T.rimHeat)} + sheet * ${f(T.sheetHeat)})
     * lit * flare * flick * patch, 0.0, 1.0);
-  vec3 colour = mix(rampSooty(temp), rampClean(temp), mLocal);
+  // Complete combustion in the fire's end tone: clean, gold, or between.
+  vec3 colour = mix(rampSooty(temp), mix(rampClean(temp), rampGold(temp), uTone.x), mLocal);
   float emit = clamp(dens * flick, 0.0, 1.0);
   float share = mix(1.0 - ${f(T.frontShare)} * skin, ${f(T.frontShare)} * skin, layer);
   vec3 E = colour * emit * share;
@@ -200,11 +218,12 @@ void main() {
       * smoothstep(0.0, ${f(T.edgeFadeTop)}, topIn)
       * smoothstep(0.0, ${f(T.edgeFadeBottom)}, bottomIn);
     float bloom = uLife.w * exp(-d / ${f(T.flashReach)}) * ${f(T.flashGain)} * edgeWindow;
-    E += vec3(0.75, 0.92, 1.0) * bloom;
+    // The flash and the ring in the end tone (TONE_TINTS).
+    E += ${tint("flash")} * bloom;
     float ringW = ${f(T.ringWidth)} + ${f(T.ringWiden)} * b;
     float rd = (d - uRing.x) / ringW;
     float ring = exp(-rd * rd) * uRing.y * (0.3 + 0.9 * nr.b) * step(0.001, d) * edgeWindow;
-    E += mix(vec3(0.6, 0.85, 1.0), vec3(0.9, 0.97, 1.0), ring) * ring * ${f(T.ringGain)};
+    E += (${tint("ringBase")} + ${tint("ringSlope")} * ring) * ring * ${f(T.ringGain)};
   } else if (uRing.w > 0.0) {
     // The tears of the 爆散, on the body itself (never thrown outward):
     // white-hot ragged lines along the fragments' birth paths, their
@@ -221,7 +240,7 @@ ${tearGaps()}    float width = (${f(T.tearHair)} + ${f(T.tearWidth - T.tearHair)
     float glow = uRing.w * bodySkin;
     float white = exp(-r * r) * glow * ${f(T.tearGain)};
     float cyan = exp(-h * h) * glow * ${f(T.tearHaloGain)};
-    E += vec3(0.92, 0.98, 1.0) * white + vec3(0.42, 0.8, 1.0) * cyan;
+    E += ${tint("tearWhite")} * white + ${tint("tearHalo")} * cyan;
   }
   E = min(E * uClock.y, vec3(1.0));
   float alpha = max(max(E.r, max(E.g, E.b)), min(1.0, absorb * uClock.y));
@@ -231,7 +250,8 @@ ${tearGaps()}    float width = (${f(T.tearHair)} + ${f(T.tearWidth - T.tearHair)
 
 // Burst fragments: quads stretched along their velocity, cooling from
 // white heat into the suit's tones. uRect as above; uSpark: strength,
-// stretch per unit speed.
+// stretch per unit speed; uSparkTone: x the fire's end tone (the fragments
+// cool through the suit's blue and pink at 0, through gold into amber at 1).
 export const SPARK_VERTEX = `
 attribute vec2 aCentre;
 attribute vec2 aCorner;
@@ -258,11 +278,13 @@ precision mediump float;
 varying vec2 vCorner;
 varying float vHeat;
 uniform mediump vec2 uSpark;
+uniform mediump vec2 uSparkTone;
 ${ramp("rampHeat", RAMP_HEAT)}
+${ramp("rampHeatGold", RAMP_HEAT_GOLD)}
 void main() {
   float r2 = dot(vCorner, vCorner);
   float g = exp(-r2 * 2.6) * (1.0 - smoothstep(0.55, 1.0, sqrt(r2)));
-  vec3 E = rampHeat(vHeat) * g * pow(vHeat, 0.6) * uSpark.x;
+  vec3 E = mix(rampHeat(vHeat), rampHeatGold(vHeat), uSparkTone.x) * g * pow(vHeat, 0.6) * uSpark.x;
   E += vec3(1.0) * g * g * vHeat * vHeat * 0.6 * uSpark.x;
   E = min(E, vec3(1.0));
   gl_FragColor = vec4(E, max(E.r, max(E.g, E.b)));

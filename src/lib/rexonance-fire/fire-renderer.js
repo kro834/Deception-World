@@ -25,6 +25,7 @@ import {
   POSE_STRENGTH,
   POSE_TEAR_GLOW,
   POSE_TEAR_OPEN,
+  POSE_TONE,
   POSE_VIEW_X0,
   POSE_VIEW_X1,
   POSE_VIEW_Y0,
@@ -132,11 +133,13 @@ export function createFireRenderer(gl) {
     uView: gl.getUniformLocation(fire, "uView"),
     uFlow: gl.getUniformLocation(fire, "uFlow"),
     uDrift: gl.getUniformLocation(fire, "uDrift"),
+    uTone: gl.getUniformLocation(fire, "uTone"),
     aCentre: gl.getAttribLocation(spark, "aCentre"),
     aCorner: gl.getAttribLocation(spark, "aCorner"),
     aData: gl.getAttribLocation(spark, "aData"),
     uSparkRect: gl.getUniformLocation(spark, "uRect"),
     uSpark: gl.getUniformLocation(spark, "uSpark"),
+    uSparkTone: gl.getUniformLocation(spark, "uSparkTone"),
   };
 }
 
@@ -229,6 +232,7 @@ export function drawFireLayer(state, pose, layer, x, y, w, h) {
     pose[POSE_PATCH],
     pose[POSE_FLOW_S],
   );
+  gl.uniform2f(state.uTone, pose[POSE_TONE], 0);
   gl.bindBuffer(gl.ARRAY_BUFFER, state.quad);
   gl.enableVertexAttribArray(state.aPos);
   gl.vertexAttribPointer(state.aPos, 2, gl.FLOAT, false, 0, 0);
@@ -280,6 +284,7 @@ export function drawFireSparks(state, pose, fragments, count, x, y, w, h) {
     pose[POSE_STRENGTH] * sparkEmerge(pose[POSE_BURST]),
     sparkStretch(pose[POSE_BURST]),
   );
+  gl.uniform2f(state.uSparkTone, pose[POSE_TONE], 0);
   gl.bindBuffer(gl.ARRAY_BUFFER, state.sparks);
   gl.bufferSubData(gl.ARRAY_BUFFER, 0, data);
   gl.enableVertexAttribArray(state.aCentre);
