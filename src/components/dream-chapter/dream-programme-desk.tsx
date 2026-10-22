@@ -131,27 +131,47 @@ function resolveSpeakerHref(by: string) {
   return "#quotes";
 }
 
-/** Three existing ways into the programme, plus live archival telemetry, dossier quick-launch, and quote reel. */
+/** The programme's routes and catalogue sit beside a manually operated paper reel. */
 export function DreamProgrammeDesk() {
-  const [reelMode, setReelMode] = useState<"quotes" | "notes">("quotes");
-  const [quoteIndex, setQuoteIndex] = useState(0);
-  const [noteIndex, setNoteIndex] = useState(0);
+  const [reel, setReel] = useState({
+    mode: "quotes" as "quotes" | "notes",
+    quoteIndex: 0,
+    noteIndex: 0,
+    direction: "next",
+    turn: 0,
+  });
+  const { mode: reelMode, quoteIndex, noteIndex } = reel;
   const activeQuote = DREAM_QUOTES[quoteIndex] ?? DREAM_QUOTES[0];
   const activeNote = DREAM_CASE_NOTES[noteIndex] ?? DREAM_CASE_NOTES[0];
   const activeNoteCase = DREAM_CASES.find((episode) => episode.no === activeNote?.no);
 
   const stepReel = (delta: number) => {
-    if (reelMode === "quotes") {
-      setQuoteIndex((current) => (current + delta + DREAM_QUOTES.length) % DREAM_QUOTES.length);
-    } else {
-      setNoteIndex(
-        (current) => (current + delta + DREAM_CASE_NOTES.length) % DREAM_CASE_NOTES.length,
-      );
-    }
+    setReel((current) => ({
+      ...current,
+      quoteIndex:
+        current.mode === "quotes"
+          ? (current.quoteIndex + delta + DREAM_QUOTES.length) % DREAM_QUOTES.length
+          : current.quoteIndex,
+      noteIndex:
+        current.mode === "notes"
+          ? (current.noteIndex + delta + DREAM_CASE_NOTES.length) % DREAM_CASE_NOTES.length
+          : current.noteIndex,
+      direction: delta < 0 ? "previous" : "next",
+      turn: current.turn + 1,
+    }));
+  };
+
+  const setReelMode = (mode: "quotes" | "notes") => {
+    setReel((current) =>
+      current.mode === mode
+        ? current
+        : { ...current, mode, direction: "next", turn: current.turn + 1 },
+    );
   };
 
   const reelIndex = reelMode === "quotes" ? quoteIndex : noteIndex;
   const reelTotal = reelMode === "quotes" ? DREAM_QUOTES.length : DREAM_CASE_NOTES.length;
+  const reelLabel = reelMode === "quotes" ? "名台詞" : "章の言葉";
 
   return (
     <section className="dream-programme-desk" aria-labelledby="dream-programme-title">
@@ -181,7 +201,9 @@ export function DreamProgrammeDesk() {
 
       <div className="dream-programme-dossiers" aria-label="主要人物・機密ファイル直通">
         <div className="dream-programme-ledger-head">
-          <span lang="en">DOSSIER QUICK LAUNCH / 07 CLASSIFIED FILES</span>
+          <span lang="en">
+            DOSSIER QUICK LAUNCH / {String(dossierQuickLinks.length).padStart(2, "0")} FILES
+          </span>
           <small>選択すると詳細資料モーダルを直接開きます</small>
         </div>
         <ul className="dream-programme-dossier-strip">
@@ -203,7 +225,7 @@ export function DreamProgrammeDesk() {
 
       <div className="dream-programme-ledger" aria-label="収録アーカイブ総覧">
         <div className="dream-programme-ledger-head">
-          <span lang="en">ARCHIVE TELEMETRY / DIRECT INDEX</span>
+          <span lang="en">ARCHIVE CATALOGUE / DIRECT INDEX</span>
           <small>各記録コーナーへ直接移動できます</small>
         </div>
         <ul className="dream-programme-ledger-grid">
@@ -224,7 +246,17 @@ export function DreamProgrammeDesk() {
         </ul>
       </div>
 
-      <aside className="dream-programme-spotlight" aria-label="幕間の言葉">
+      <aside
+        className="dream-programme-spotlight dream-programme-reel"
+        aria-labelledby="dream-programme-reel-title"
+      >
+        <header className="dream-programme-reel-heading">
+          <div>
+            <span className="dream-programme-reel-label">幕間の小道具</span>
+            <h3 id="dream-programme-reel-title">ことばの巻取箱</h3>
+          </div>
+          <p id="dream-programme-reel-help">引き手を押すと、次の一葉が現れます。</p>
+        </header>
         <div className="dream-programme-spotlight-meta">
           <span className="dream-programme-spotlight-kicker" lang="en">
             {reelMode === "quotes" ? "STAGE VOICE REEL" : "CASE MOTTO REEL"} ·{" "}
@@ -234,6 +266,7 @@ export function DreamProgrammeDesk() {
             <button
               type="button"
               aria-pressed={reelMode === "quotes"}
+              aria-controls="dream-programme-reel-paper"
               onClick={() => setReelMode("quotes")}
             >
               名台詞 ({DREAM_QUOTES.length})
@@ -241,45 +274,95 @@ export function DreamProgrammeDesk() {
             <button
               type="button"
               aria-pressed={reelMode === "notes"}
+              aria-controls="dream-programme-reel-paper"
               onClick={() => setReelMode("notes")}
             >
               章の言葉 ({DREAM_CASE_NOTES.length})
             </button>
           </div>
-          <div className="dream-programme-spotlight-controls">
-            <button type="button" onClick={() => stepReel(-1)} aria-label="前の台詞を表示">
-              ← 前へ
+        </div>
+        <div className="dream-programme-reel-frame" data-reel-direction={reel.direction}>
+          <span className="dream-programme-reel-spine" aria-hidden="true">
+            幕間言葉
+          </span>
+          <div className="dream-programme-reel-window" id="dream-programme-reel-paper">
+            <div
+              key={reel.turn}
+              className="dream-programme-reel-sheet"
+              data-reel-operated={reel.turn > 0 ? "true" : "false"}
+            >
+              <span className="dream-programme-reel-folio" aria-hidden="true">
+                {reelLabel} / 第{String(reelIndex + 1).padStart(2, "0")}葉
+              </span>
+              {reelMode === "quotes" && activeQuote ? (
+                <blockquote className="dream-programme-spotlight-quote">
+                  <p>「{activeQuote.text}」</p>
+                  <footer>
+                    <strong>{activeQuote.by}</strong>
+                    <a href={resolveSpeakerHref(activeQuote.by)}>関連記録へ ↗</a>
+                  </footer>
+                </blockquote>
+              ) : activeNote ? (
+                <blockquote className="dream-programme-spotlight-quote">
+                  {activeNote.motto ? (
+                    <small className="dream-programme-spotlight-motto" lang="en">
+                      CASE {activeNote.no} {activeNoteCase?.reading} — {activeNote.motto}
+                    </small>
+                  ) : null}
+                  <p>「{activeNote.line}」</p>
+                  <footer>
+                    <strong>{activeNote.by}</strong>
+                    <span>
+                      CASE {activeNote.no}「{activeNoteCase?.title}」
+                    </span>
+                    <a href={`#dream-case-${activeNote.no}`}>この章を読む ↗</a>
+                  </footer>
+                </blockquote>
+              ) : null}
+            </div>
+          </div>
+          <span className="dream-programme-reel-seal" aria-hidden="true">
+            夢
+          </span>
+        </div>
+        <div className="dream-programme-reel-bottom">
+          <p
+            className="dream-programme-reel-position"
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            {reelLabel} {reelIndex + 1} / {reelTotal}
+            <span>
+              {" "}
+              —{" "}
+              {reelMode === "quotes"
+                ? activeQuote?.by
+                : `CASE ${activeNote?.no}「${activeNoteCase?.title}」`}
+            </span>
+          </p>
+          <div
+            className="dream-programme-spotlight-controls"
+            aria-describedby="dream-programme-reel-help"
+          >
+            <button
+              type="button"
+              onClick={() => stepReel(-1)}
+              aria-label={`前の${reelLabel}を表示`}
+              aria-controls="dream-programme-reel-paper"
+            >
+              <span aria-hidden="true">←</span> 前へ
             </button>
-            <button type="button" onClick={() => stepReel(1)} aria-label="次の台詞を表示">
-              次へ →
+            <button
+              type="button"
+              onClick={() => stepReel(1)}
+              aria-label={`次の${reelLabel}を表示`}
+              aria-controls="dream-programme-reel-paper"
+            >
+              次へ <span aria-hidden="true">→</span>
             </button>
           </div>
         </div>
-        {reelMode === "quotes" && activeQuote ? (
-          <blockquote className="dream-programme-spotlight-quote">
-            <p>「{activeQuote.text}」</p>
-            <footer>
-              <strong>{activeQuote.by}</strong>
-              <a href={resolveSpeakerHref(activeQuote.by)}>関連記録へ ↗</a>
-            </footer>
-          </blockquote>
-        ) : activeNote ? (
-          <blockquote className="dream-programme-spotlight-quote">
-            {activeNote.motto ? (
-              <small className="dream-programme-spotlight-motto" lang="en">
-                CASE {activeNote.no} {activeNoteCase?.reading} — {activeNote.motto}
-              </small>
-            ) : null}
-            <p>「{activeNote.line}」</p>
-            <footer>
-              <strong>{activeNote.by}</strong>
-              <span>
-                CASE {activeNote.no}「{activeNoteCase?.title}」
-              </span>
-              <a href={`#dream-case-${activeNote.no}`}>この章を読む ↗</a>
-            </footer>
-          </blockquote>
-        ) : null}
       </aside>
     </section>
   );

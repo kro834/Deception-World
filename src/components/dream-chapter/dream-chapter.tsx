@@ -64,6 +64,8 @@ import {
 import { DreamScreeningLauncher } from "./dream-screening-launcher";
 import { DreamReadingLauncher } from "./dream-reading-launcher";
 import { DreamProgrammeDesk } from "./dream-programme-desk";
+import { DreamKarakuriCabinet } from "./dream-karakuri-cabinet";
+import { DreamStageLantern } from "./dream-stage-lantern";
 import {
   DreamChapterCompanion,
   DreamStoryBacklinks,
@@ -1479,6 +1481,7 @@ export function DreamChapter() {
           />
         </div>
         <span className="dream-hero-vignette" aria-hidden="true" />
+        <span className="dream-hero-lamplight" aria-hidden="true" />
         <div className="dream-hero-title" aria-hidden="true">
           <span className="dream-hero-title-label">映画第一作</span>
           <span className="dream-hero-title-name">
@@ -1516,6 +1519,7 @@ export function DreamChapter() {
               <b>CAST</b>
             </a>
           </nav>
+          <DreamStageLantern />
         </div>
         <div className="dream-hero-obi">
           <span>仮面ライダーサーガ × 東方Project</span>
@@ -1537,6 +1541,7 @@ export function DreamChapter() {
         </div>
       </section>
 
+      <DreamKarakuriCabinet />
       <DreamProgrammeDesk />
       <nav className="dream-contents" aria-labelledby="dream-contents-title" data-dream-reveal>
         <h2 id="dream-contents-title">目次</h2>

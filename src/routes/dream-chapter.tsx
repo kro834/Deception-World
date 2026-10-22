@@ -21,6 +21,7 @@ import dreamRecordExplorerCssUrl from "@/styles-dream-record-explorer.css?url";
 import dreamProgrammeCssUrl from "@/styles-dream-programme.css?url";
 import stageDreamCssUrl from "@/styles-stage-dream.css?url";
 import dreamLamplightCssUrl from "@/styles-dream-lamplight.css?url";
+import dreamKarakuriCssUrl from "@/styles-dream-karakuri.css?url";
 import dreamZenithCssUrl from "@/styles-dream-zenith.css?url";
 
 // Shippori Mincho carries the Taisho letterpress voice of the film site.
@@ -69,6 +70,8 @@ export const Route = createFileRoute("/dream-chapter")({
       // Zenith: the programme read as one desk — corrections, the reading
       // desk, the explorer and the rooms in one idiom.
       { rel: "stylesheet", href: dreamZenithCssUrl },
+      // Craft objects refine the programme after its shared reading surfaces.
+      { rel: "stylesheet", href: dreamKarakuriCssUrl },
       CINEMATIC_STYLESHEET_LINK,
       // The same files the dive warms and the hero shows.
       { rel: "preload", as: "image", href: DREAM_CHAPTER_HERO_ART },
