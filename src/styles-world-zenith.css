@@ -1274,6 +1274,249 @@ html[data-family="world"]:root
   }
 }
 
+/* 06.2 as a register: fifteen terms ran as one even wall of text (two
+   dense columns on wide screens, four screens on a phone) with nothing to
+   find a term by. The terms open as an index of numbered keys (a sideways
+   rail on phones, wrapped keys from 700px), each a jump to its entry, and
+   every entry carries the same number as a kicker over its term, so the
+   eye can go from the register to the entry and back. The numbers are
+   generated (hidden from assistive technology: the term is the label). */
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #glossary
+  .wa-term-index {
+  margin: 0 0 clamp(20px, 3vw, 32px);
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #glossary
+  .wa-term-index
+  > ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: zn-term-key;
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #glossary
+  .wa-term-index
+  li {
+  counter-increment: zn-term-key;
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #glossary
+  .wa-term-index
+  a {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  box-sizing: border-box;
+  min-height: 44px;
+  padding: 0 14px 0 12px;
+  border: 1px solid rgb(var(--sw-light-rgb) / 22%);
+  border-radius: 2px;
+  background: rgb(4 12 10 / 72%);
+  color: var(--sw-text);
+  font: 700 14px / 1.3 var(--sw-display);
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #glossary
+  .wa-term-index
+  a::before {
+  content: counter(zn-term-key, decimal-leading-zero);
+  content: counter(zn-term-key, decimal-leading-zero) / "";
+  color: rgb(var(--sw-light-rgb) / 80%);
+  font: 400 12px / 1 var(--sw-hud);
+  letter-spacing: 0.12em;
+}
+
+@media (hover: hover) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #glossary
+    .wa-term-index
+    a:hover {
+    border-color: rgb(var(--sw-light-rgb) / 64%);
+    background: rgb(var(--sw-light-rgb) / 10%);
+  }
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #glossary
+  .wa-term-index
+  a:focus-visible {
+  outline: 2px solid var(--dx-focus, #fff0b5);
+  outline-offset: 2px;
+}
+
+/* Phones: one sideways rail of keys (a vertical swipe still scrolls the
+   page), its last key cut at the edge so the rail reads as more. */
+@media (max-width: 699px) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #glossary
+    .wa-term-index {
+    margin-inline: calc(var(--sw-gutter) * -1);
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #glossary
+    .wa-term-index
+    > ol {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-padding-inline: var(--sw-gutter);
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+    padding: 2px var(--sw-gutter) 6px;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #glossary
+    .wa-term-index
+    > ol::-webkit-scrollbar {
+    display: none;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #glossary
+    .wa-term-index
+    li {
+    flex: none;
+    scroll-snap-align: start;
+  }
+}
+
+/* The entry's kicker: its number and a short prism rule over the term. */
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #glossary
+  .wa-glossary {
+  counter-reset: zn-term;
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #glossary
+  .wa-glossary
+  > div {
+  counter-increment: zn-term;
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #glossary
+  .wa-glossary
+  > div::before {
+  content: counter(zn-term, decimal-leading-zero);
+  content: counter(zn-term, decimal-leading-zero) / "";
+  justify-self: start;
+  padding-right: 34px;
+  color: rgb(var(--sw-light-rgb) / 78%);
+  font: 400 12px / 1.4 var(--sw-hud);
+  letter-spacing: 0.2em;
+}
+
+@media (forced-colors: none) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #glossary
+    .wa-glossary
+    > div::before {
+    background: linear-gradient(90deg, var(--sw-light), #ff4fc3) right 50% / 22px 1px no-repeat;
+  }
+}
+
+/* Tablets set the term beside its definition: the kicker sits over the
+   term in the term column, and the definition stays level with the term. */
+@media (min-width: 700px) and (max-width: 1099px) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #glossary
+    .wa-glossary
+    > div {
+    row-gap: 6px;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #glossary
+    .wa-glossary
+    > div::before {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #glossary
+    .wa-glossary
+    > div
+    > dt {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #glossary
+    .wa-glossary
+    > div
+    > dd {
+    grid-column: 2;
+    grid-row: 2;
+  }
+}
+
+/* Wide screens: a little more air between entries in the two columns. */
+@media (min-width: 1100px) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #glossary
+    .wa-glossary
+    > div {
+    padding-block: 22px;
+  }
+}
+
 /* ----------------------------------------------------------------
    6. Polish: the WORLD COLUMN plate's top rule runs gold → pink, and a
       pink bloom sits in its far corner, so the reading plate under the
