@@ -1054,3 +1054,52 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer > a.r
     border: 1px solid CanvasText;
   }
 }
+
+/* ================================================================
+   FAR FROM SAGA's own site (provisional, 2026-10-22): a door out of
+   the record to /far-from-saga, drawn as the cast console's doors.
+   ================================================================ */
+html[data-family="special"] body .rxs-page.rxs-page.fst-page .fst-site-door {
+  display: flex;
+  justify-content: center;
+  max-width: 900px;
+  margin: clamp(28px, 4vw, 44px) auto 0;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.fst-page .fst-site-door > a {
+  --fsc-door: var(--fst-accent, var(--fst-ice));
+  display: inline-flex;
+  gap: 16px;
+  align-items: center;
+  min-height: 48px;
+  padding: 9px 10px 9px 18px;
+  border: 1px solid color-mix(in srgb, var(--fsc-door) 50%, transparent);
+  border-radius: 4px;
+  color: var(--fst-text);
+  background:
+    linear-gradient(var(--fsc-door) 0 0) 0 0 / 28px 2px no-repeat,
+    linear-gradient(var(--fst-gold) 0 0) 0 100% / 10px 2px no-repeat,
+    linear-gradient(var(--fst-gold) 0 0) 100% 100% / 10px 2px no-repeat,
+    color-mix(in srgb, var(--fsc-door) 8%, var(--fst-ink));
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.fst-page .fst-site-door > a i {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid color-mix(in srgb, var(--fst-gold) 60%, transparent);
+  color: var(--fsc-door);
+  font-style: normal;
+  line-height: 1;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.fst-page .fst-site-door > a:focus-visible {
+  outline: 2px solid var(--fst-focus);
+  outline-offset: 3px;
+}

@@ -174,6 +174,7 @@ test("every destination is an existing public route with its actual heading anch
     "/dream-chapter": dreamPage,
     "/extreme-saga": read("src/components/extreme-saga/extreme-saga.tsx"),
     "/rexonance-saga": read("src/components/rexonance-saga/rexonance-saga.tsx"),
+    "/far-from-saga": read("src/components/far-from-saga/far-from-saga.tsx"),
     "/final-stage": read("src/components/final-stage/final-stage.tsx"),
     "/form-archive": read("src/routes/form-archive.tsx"),
     "/gallery": read("src/components/gallery/gallery-page.tsx"),

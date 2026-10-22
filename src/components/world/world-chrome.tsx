@@ -16,6 +16,7 @@ import { isCastRosterOrigin } from "@/lib/dossier-origin";
 import {
   DREAM_CHAPTER_ENTER_ASSETS,
   EXTREME_SAGA_ENTER_ASSETS,
+  FAR_FROM_SAGA_ENTER_ASSETS,
   FINAL_STAGE_ENTER_ASSETS,
   REXONANCE_SAGA_ENTER_ASSETS,
   WORLD_ENTER_ASSETS,
@@ -29,7 +30,11 @@ import { LiquidPointerGlow } from "./liquid-rail";
 import { UiVectorIcon } from "./ui-vector-icon";
 import { worldChapterLine } from "./world-chapter-marker";
 import { LibraryCurrentButton } from "@/components/library/library-controls";
-import { SPECIAL_SITE_SECTIONS } from "@/lib/special-site-sections";
+import {
+  SPECIAL_SITE_PATHS,
+  SPECIAL_SITE_SECTIONS,
+  type SpecialSiteId,
+} from "@/lib/special-site-sections";
 import { openQuickSearch, prefetchQuickSearch } from "@/components/search/quick-search-events";
 import { IpadMenuToggle } from "@/components/ipad-menu-mode";
 import { CinemaLink } from "./external-cinema-link";
@@ -327,8 +332,7 @@ export function SideMenuLayer({
   open,
   onOpenChange,
 }: {
-  context?:
-    "world" | "archive" | "movie" | "cinema" | "rexonance" | "extreme" | "final-stage" | "gallery";
+  context?: "world" | "archive" | "movie" | "cinema" | "gallery" | SpecialSiteId;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 } = {}) {
@@ -360,7 +364,10 @@ export function SideMenuLayer({
   const controlled = typeof open === "boolean" && Boolean(onOpenChange);
   const isOpen = controlled ? open : false;
   const isSpecialSite =
-    context === "rexonance" || context === "extreme" || context === "final-stage";
+    context === "rexonance" ||
+    context === "extreme" ||
+    context === "far-from" ||
+    context === "final-stage";
   const router = useRouter();
   // The dossier the reader is on is marked in the menu (aria-current).
   const pathname = useRouterState({ select: (state) => state.location.pathname });
@@ -913,9 +920,11 @@ export function SideMenuLayer({
                       ? "REXONANCE SAGA"
                       : context === "extreme"
                         ? "EXTREME SAGA"
-                        : context === "final-stage"
-                          ? "FINAL STAGE"
-                          : "DECEPTION WORLD"}
+                        : context === "far-from"
+                          ? "FAR FROM SAGA"
+                          : context === "final-stage"
+                            ? "FINAL STAGE"
+                            : "DECEPTION WORLD"}
             </b>
           </div>
           <button
@@ -1009,16 +1018,22 @@ export function SideMenuLayer({
                     ? "rexonance"
                     : context === "extreme"
                       ? "extreme"
-                      : "final-stage"
+                      : context === "far-from"
+                        ? "far-from"
+                        : "final-stage"
                 ].map(([hash, label, code]) => (
                   <GuardedLink
                     key={hash}
                     to={
-                      context === "rexonance"
-                        ? "/rexonance-saga"
-                        : context === "extreme"
-                          ? "/extreme-saga"
-                          : "/final-stage"
+                      SPECIAL_SITE_PATHS[
+                        context === "rexonance"
+                          ? "rexonance"
+                          : context === "extreme"
+                            ? "extreme"
+                            : context === "far-from"
+                              ? "far-from"
+                              : "final-stage"
+                      ]
                     }
                     hash={hash}
                     assets={[]}
@@ -1182,6 +1197,19 @@ export function SideMenuLayer({
                 <DisplayName value="レクソナンスサーガ" />
               </span>
               <i>PERFORMANCE SITE</i>
+            </GuardedLink>
+            {/* Provisional (2026-10-22): the FAR FROM SAGA site's scaffold. */}
+            <GuardedLink
+              to="/far-from-saga"
+              hash="top"
+              assets={context === "far-from" ? [] : FAR_FROM_SAGA_ENTER_ASSETS}
+              beforeNavigate={close}
+              aria-current={context === "far-from" ? "page" : undefined}
+            >
+              <span>
+                <DisplayName value="ファーフロムサーガ" />
+              </span>
+              <i>FINAL FORM SITE</i>
             </GuardedLink>
           </div>
         </div>

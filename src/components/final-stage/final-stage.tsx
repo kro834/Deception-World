@@ -6,7 +6,7 @@ import { SlideOpenControl } from "@/components/world/slide-open-control";
 import { UiVectorIcon } from "@/components/world/ui-vector-icon";
 import { SideMenuLayer, SideMenuTrigger } from "@/components/world/world-chrome";
 import { useWorldMode } from "@/components/world/use-world-mode";
-import { WORLD_ENTER_ASSETS } from "@/lib/asset-loader";
+import { FAR_FROM_SAGA_ENTER_ASSETS, WORLD_ENTER_ASSETS } from "@/lib/asset-loader";
 import { initRail } from "@/lib/liquid/boot.js";
 import { dossierImage } from "@/lib/dossier-images";
 import { DisplayName } from "@/components/name-text";
@@ -744,6 +744,18 @@ export function FinalStage() {
 
           <SubHeading kicker="OVERVIEW" title="概要" />
           <Prose paragraphs={FAR_FROM_SAGA.overview} className="fst-plain" />
+          {/* The form's own special site (provisional, 2026-10-22). */}
+          <p className="fst-site-door">
+            <GuardedLink
+              to="/far-from-saga"
+              hash="top"
+              assets={FAR_FROM_SAGA_ENTER_ASSETS}
+              aria-label="ファーフロムサーガの特設サイトを開く"
+            >
+              <span>特設サイトを開く</span>
+              <i aria-hidden="true">↗</i>
+            </GuardedLink>
+          </p>
 
           <SubHeading kicker="FIVE STAGES" title="形態段階" />
           <div className="rxs-stage-switcher">

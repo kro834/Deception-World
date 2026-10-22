@@ -163,6 +163,13 @@ const PAGES: Record<string, Picture & { edition: RecordEdition; code: string }> 
     code: "REXONANCE",
   },
   "/extreme-saga": { ...formThumb("saga", "extreme-ultra"), edition: "extreme", code: "EXTREME" },
+  // FAR FROM SAGA's own site (provisional) shares Final Stage's edition light.
+  "/far-from-saga": {
+    src: "/far-from-saga-20261022/middle-640.webp",
+    pos: "50% 14%",
+    edition: "final",
+    code: "FAR FROM",
+  },
   "/final-stage": {
     src: "/rider-far-from-saga-max-delivery-640.webp",
     pos: "50% 18%",
@@ -175,7 +182,7 @@ export function editionOf(path: string): RecordEdition {
   if (path === "/dream-chapter") return "dream";
   if (path === "/rexonance-saga") return "rexonance";
   if (path === "/extreme-saga") return "extreme";
-  if (path === "/final-stage") return "final";
+  if (path === "/final-stage" || path === "/far-from-saga") return "final";
   if (path === "/gallery") return "gallery";
   if (path === "/form-archive") return "archive";
   return "world";
@@ -264,6 +271,11 @@ const SITE_ART: Record<string, readonly Picture[]> = {
     formThumb("saga", "rexonance"),
   ],
   "/extreme-saga": [formThumb("saga", "extreme-ultra"), formThumb("saga", "extreme")],
+  "/far-from-saga": [
+    PAGES["/far-from-saga"],
+    { src: "/far-from-saga-20261022/ultra-640.webp", pos: "50% 14%" },
+    { src: "/far-from-saga-20261022/max-640.webp", pos: "50% 14%" },
+  ],
   "/final-stage": [PAGES["/final-stage"], formThumb("realm", "royal")],
 };
 

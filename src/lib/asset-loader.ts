@@ -1,5 +1,6 @@
 import { rexonanceImage } from "./rexonance-images.ts";
 import { REXONANCE_SITE_ARTWORK } from "./rexonance-site-artwork.ts";
+import { FAR_FROM_SAGA_KEY_VISUAL, farFromImage } from "./far-from-saga-artwork.ts";
 import { dossierImage } from "./dossier-images.ts";
 
 const KNOWN_BYTES: Record<string, number> = {
@@ -30,6 +31,7 @@ const KNOWN_BYTES: Record<string, number> = {
   [REXONANCE_SITE_ARTWORK.standard]: 440678,
   "/saga-extreme-middle-20261006.webp": 332708,
   "/final-stage-logo.webp": 106600,
+  [FAR_FROM_SAGA_KEY_VISUAL.src]: 475884,
 };
 
 export const WORLD_ENTER_ASSETS = ["/deception-world-poster-delivery.webp"] as const;
@@ -49,6 +51,8 @@ export const EXTREME_SAGA_ENTER_ASSETS = ["/saga-extreme-middle-20261006.webp"] 
 
 export const FINAL_STAGE_ENTER_ASSETS = ["/final-stage-logo.webp"] as const;
 
+export const FAR_FROM_SAGA_ENTER_ASSETS = [FAR_FROM_SAGA_KEY_VISUAL.src] as const;
+
 export const MANAGER_ASSETS = {
   zeus: ["/manager-zeus-detail.jpeg?v=20260823-2"],
   lejas: ["/manager-lejas.jpeg"],
@@ -57,6 +61,12 @@ export const MANAGER_ASSETS = {
   shuza: ["/manager-shuza.jpeg"],
   reemu: ["/manager-reemu.jpeg"],
 } as const;
+
+// Every width set the site publishes, keyed by its canonical file.
+function responsiveImage(url: string) {
+  if (url === FAR_FROM_SAGA_KEY_VISUAL.src) return farFromImage("middle");
+  return { ...dossierImage(url), ...rexonanceImage(url) };
+}
 
 const warmed = new Set<string>();
 const inFlight = new Map<string, Promise<boolean>>();
@@ -72,7 +82,7 @@ const choosing = new Map<string, HTMLImageElement>();
 export function warmedSource(url: string) {
   const known = picked.get(url) || choosing.get(url)?.currentSrc;
   if (known) return known;
-  const { srcSet, sizes } = { ...dossierImage(url), ...rexonanceImage(url) };
+  const { srcSet, sizes } = responsiveImage(url);
   const only = srcSet?.trim();
   if (only && !sizes && !/[\s,]/.test(only)) return only;
   return url;
@@ -133,7 +143,7 @@ async function decodeImageAsset(url: string, signal: AbortSignal, priority: Asse
     signal.addEventListener("abort", abort, { once: true });
     image.onerror = () => finish(false);
     if (typeof image.decode !== "function") image.onload = () => finish(image.naturalWidth > 0);
-    const responsive = { ...dossierImage(url), ...rexonanceImage(url) };
+    const responsive = responsiveImage(url);
     if (responsive.srcSet) {
       if (responsive.sizes) image.sizes = responsive.sizes;
       image.srcset = responsive.srcSet;

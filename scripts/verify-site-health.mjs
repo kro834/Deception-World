@@ -31,6 +31,7 @@ const routes = [
   "/dream-chapter",
   "/rexonance-saga",
   "/extreme-saga",
+  "/far-from-saga",
   "/final-stage",
   "/download",
   "/no-such-record",

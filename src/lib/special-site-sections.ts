@@ -1,17 +1,19 @@
 /** The special sites' chapters as the side menu lists them: [hash, label, code].
  * Shared with the site search so both name the same anchors. */
-export type SpecialSiteId = "rexonance" | "extreme" | "final-stage";
+export type SpecialSiteId = "rexonance" | "extreme" | "far-from" | "final-stage";
 export type SpecialSiteSection = readonly [hash: string, label: string, code: string];
 
 export const SPECIAL_SITE_PATHS: Record<SpecialSiteId, string> = {
   rexonance: "/rexonance-saga",
   extreme: "/extreme-saga",
+  "far-from": "/far-from-saga",
   "final-stage": "/final-stage",
 };
 
 export const SPECIAL_SITE_TITLES: Record<SpecialSiteId, string> = {
   rexonance: "レクソナンスサーガ",
   extreme: "エクスプリームサーガ",
+  "far-from": "ファーフロムサーガ",
   "final-stage": "ファイナルステージ",
 };
 
@@ -29,6 +31,13 @@ export const SPECIAL_SITE_SECTIONS: Record<SpecialSiteId, readonly SpecialSiteSe
     ["p14", "P14", "PROCESSOR"],
     ["stages", "二つの運用段階", "STAGES"],
     ["system", "中核システム", "SYSTEM"],
+  ],
+  // Provisional (2026-10-22): the scaffold's chapters, to grow with the site.
+  "far-from": [
+    ["top", "トップ", "TOP"],
+    ["overview", "概要", "OVERVIEW"],
+    ["specs", "スペック", "SPECS"],
+    ["stages", "五つの形態段階", "STAGES"],
   ],
   "final-stage": [
     ["top", "トップ", "TOP"],
