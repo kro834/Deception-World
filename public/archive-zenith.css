@@ -55,7 +55,7 @@
   @media (min-width: 768px) {
     html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="form-selector"] .progression {
       --zn-card-h: 160px;
-      --zn-card-min: 118px;
+      --zn-card-min: 106px;
     }
   }
 
@@ -93,7 +93,11 @@
   html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) [id$="form-selector"] .progression .stage .stage-forms {
     display: grid !important;
     grid-column: 2 !important;
-    grid-template-columns: repeat(auto-fill, minmax(var(--zn-card-min), 1fr)) !important;
+    /* At most five slots a row, and five as soon as a fifth of the bay
+       holds a card (from about 720px): a five-form tier (Saga's TIER 05,
+       Realm's TIER 04) no longer leaves its fifth card alone on a second
+       row at 768px. (2026-10-22, round 2) */
+    grid-template-columns: repeat(auto-fill, minmax(max(var(--zn-card-min), calc((100% - 32px) / 5 - 0.5px)), 1fr)) !important;
     grid-auto-rows: var(--zn-card-h) !important;
     gap: 8px !important;
     width: auto !important;
@@ -484,9 +488,16 @@ html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm
   }
 }
 
+/* (2026-10-22, round 2) The phrase list grows to every short Japanese
+   line (list items, notes, the narrow comparison cards), and a phrase too
+   long for its column may still break inside: auto-phrase alone let
+   ステラモディフィカーレ run out of a 150px comparison card and be clipped
+   (390px). Long dossier paragraphs keep the normal breaking.
+   archive-zenith.js names the same list for engines without auto-phrase. */
 html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)
-  :is(.hero-lead, .selector-footnote, .detail-lead, .compare-description, .ability-cards li, .fact-list li, .finisher-list li) {
+  :is(.hero-lead, .selector-footnote, .detail-lead, .compare-description, .compare-same-note, .selector-empty p, .detail-head .text-muted, .ability-list li, .ability-cards li, .fact-list li, .finisher-list li, .operation-panel p, .compare-form-card .ability-layout p, .compare-form-card .rexonance-compare-revision p, .table td .text-small) {
   word-break: auto-phrase;
+  overflow-wrap: anywhere;
   text-wrap: pretty;
 }
 
@@ -497,6 +508,7 @@ html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm
    its opening bracket. */
 html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .section h2 {
   word-break: auto-phrase;
+  overflow-wrap: anywhere;
   text-wrap: balance;
 }
 
@@ -517,6 +529,29 @@ html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm
   html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .form-detail .viz-grid > .spec-item:first-child:nth-last-child(6),
   html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .form-detail .viz-grid > .spec-item:nth-child(6):last-child {
     grid-column: 1 / -1 !important;
+  }
+}
+
+/* (2026-10-22, round 2) In those six, the compute figure is the long one
+   (150TOPS / 50Core（Spark G2）, KHAOS 10,000YOPS / ∞Core + KOSMOS …) and
+   EMP the short one (300E, 無制限): the pair shares the row two to one, so
+   the compute figure stops breaking into three lines beside an empty EMP
+   tile. Same order, same rows. */
+@media (min-width: 1181px) {
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .form-detail .viz-grid:has(> .spec-item:first-child:nth-last-child(6)) {
+    grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .form-detail .viz-grid:has(> .spec-item:first-child:nth-last-child(6)) > .spec-item:is(:nth-child(2), :nth-child(3)) {
+    grid-column: span 3 !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .form-detail .viz-grid:has(> .spec-item:first-child:nth-last-child(6)) > .spec-item:nth-child(4) {
+    grid-column: span 4 !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .form-detail .viz-grid:has(> .spec-item:first-child:nth-last-child(6)) > .spec-item:nth-child(5) {
+    grid-column: span 2 !important;
   }
 }
 
@@ -680,6 +715,86 @@ html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm
     background: linear-gradient(180deg, #16304a, #0c1a2c) !important;
     box-shadow: inset 0 -2px 0 var(--ar-ice, #7ae8ff), inset 0 0 0 1px rgb(122 232 255 / 34%) !important;
     color: #ffffff !important;
+  }
+}
+
+/* ================================================================
+   13. Line breaks archive-zenith.js marks (2026-10-22, round 2). A glued
+   run (1.00× /, 速 / 演, （Spark G2）) keeps together unless it alone is
+   wider than its line; a form name (a table's row head, a card's name)
+   breaks only at its word seams; engines without auto-phrase honour the
+   script's phrase seams.
+   ================================================================ */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .zn-glue {
+  display: inline-block;
+  max-width: 100%;
+  text-indent: 0;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .zn-join {
+  white-space: nowrap;
+}
+
+html[data-embedded-archive][data-zn-breaks] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) :is(.table tbody th[scope="row"], .form-chip .chip-name) {
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+html[data-embedded-archive][data-zn-phrases] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)
+  :is(.hero-lead, .selector-footnote, .detail-lead, .compare-description, .compare-same-note, .selector-empty p, .detail-head .text-muted, .ability-list li, .ability-cards li, .fact-list li, .finisher-list li, .operation-panel p, .compare-form-card .ability-layout p, .compare-form-card .rexonance-compare-revision p, .table td .text-small, .section h2) {
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+/* ================================================================
+   14. The footer (621px and up): the mark and PAGE TOP never break
+   (SAGA FORM | ARCHIVE, PAGE | TOP, ページ上部へ戻 | る at 744-834px). On
+   tablets the plate takes two rows, the mark and the key above the
+   readout; from 1024px the three share one row as before.
+   ================================================================ */
+@media (min-width: 621px) {
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-footer :is(.footer-mark, a) {
+    flex: none !important;
+    white-space: nowrap !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-footer p {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+    text-wrap: balance;
+  }
+}
+
+/* One row: the readout stands centred between the mark and the key, as
+   space-between set it before it could shrink. */
+@media (min-width: 1024px) {
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-footer p {
+    text-align: center !important;
+  }
+}
+
+@media (min-width: 621px) and (max-width: 1023px) {
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-footer {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    grid-template-areas: "mark top" "meta meta" !important;
+    align-items: center !important;
+    gap: 12px 16px !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-footer .footer-mark {
+    grid-area: mark !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-footer a {
+    grid-area: top !important;
+    justify-self: end !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .archive-footer p {
+    grid-area: meta !important;
+    margin: 0 !important;
+    text-align: left !important;
   }
 }
 
