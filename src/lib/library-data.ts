@@ -73,6 +73,14 @@ export const LIBRARY_ENTRIES: readonly LibraryEntry[] = [
     aliases: ["extreme saga", "エクスプリーム・サーガ", "エクストリームサーガ"],
   },
   {
+    id: "far-from",
+    title: "ファーフロムサーガ",
+    path: "/far-from-saga",
+    kind: "page",
+    description: "形態、性能の資料（準備中）。",
+    aliases: ["far from saga", "ファーフロム・サーガ", "ファーフロム"],
+  },
+  {
     id: "final",
     title: "ファイナルステージ",
     path: "/final-stage",

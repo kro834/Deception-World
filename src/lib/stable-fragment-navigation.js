@@ -91,6 +91,13 @@ export function holdFragmentPath(root, target, environment = window) {
 export function mountStableFragmentNavigation(root, environment = window) {
   if (!root) return () => {};
   let release = () => {};
+  let revisitFrame = null;
+  let revisitGeneration = 0;
+  const cancelRevisit = () => {
+    revisitGeneration++;
+    if (revisitFrame !== null) environment.cancelAnimationFrame?.(revisitFrame);
+    revisitFrame = null;
+  };
   const prepare = (event) => {
     if (
       event.defaultPrevented ||
@@ -111,6 +118,7 @@ export function mountStableFragmentNavigation(root, environment = window) {
     }
     const target = root.ownerDocument.getElementById(id);
     if (!target || !root.contains(target)) return;
+    cancelRevisit();
     release();
     release = holdFragmentPath(root, target, environment);
     // WebKit's default action on the current fragment can cancel an in-flight
@@ -118,12 +126,25 @@ export function mountStableFragmentNavigation(root, environment = window) {
     // new fragments retain native navigation and the router's hash handling.
     if (environment.location?.hash === link.getAttribute("href")) {
       event.preventDefault();
-      target.scrollIntoView({ block: "start", behavior: "auto" });
+      const href = link.getAttribute("href");
+      const generation = revisitGeneration;
+      const revisit = () => {
+        if (generation !== revisitGeneration) return;
+        revisitFrame = null;
+        if (environment.location?.hash !== href || !root.contains(target)) return;
+        target.scrollIntoView({ block: "start", behavior: "auto" });
+      };
+      // WebKit needs a rendering opportunity after materializing the rotated
+      // path before it resolves the smooth scroll's destination geometry.
+      if (typeof environment.requestAnimationFrame === "function")
+        revisitFrame = environment.requestAnimationFrame(revisit);
+      else revisit();
     }
   };
   root.addEventListener("click", prepare);
   return () => {
     root.removeEventListener("click", prepare);
+    cancelRevisit();
     release();
   };
 }

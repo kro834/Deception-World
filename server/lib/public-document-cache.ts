@@ -11,6 +11,7 @@ export const PUBLIC_DOCUMENT_PATHS = new Set([
   "/final-stage",
   "/rexonance-saga",
   "/extreme-saga",
+  "/far-from-saga",
 ]);
 
 export const PUBLIC_DOCUMENT_CDN_CONTROL = "max-age=60, stale-while-revalidate=300";

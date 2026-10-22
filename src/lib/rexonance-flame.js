@@ -2,8 +2,9 @@
 // emissive medium conforming to the undersuit. It kindles at the soles,
 // climbs the figure as an irregular engulf front until the whole undersuit
 // is covered, turns from sooty forest green to complete combustion as it
-// nears its end, detonates (爆散) into incandescent fragments that cool into
-// the nanites, and is gone before the suit-up proceeds. Fire on a body is
+// nears its end, detonates (爆散): the burning shell tears open along
+// continuous incandescent seams, and the fragments fly out of them and cool
+// into the nanites; it is gone before the suit-up proceeds. Fire on a body is
 // mostly what rises off it: tongues lick up off the shoulders, head, arms
 // and feet, their tips detaching and vanishing as they rise; the sheet is
 // brightest where it is seen edge-on along the silhouette, and flows as a
@@ -48,6 +49,7 @@ import {
   drawFireSparks,
   fireRendererReady,
   releaseFireRenderer,
+  sparkEmerge,
   sparkStretch,
   uploadFireField,
   uploadFireNoise,
@@ -500,6 +502,8 @@ const HEAT_CSS = [
 function paintRasterSparks(context, W, H, strength) {
   const step = coarse ? 2 : 1;
   const grow = sparkStretch(POSE[POSE_BURST]);
+  const emerge = sparkEmerge(POSE[POSE_BURST]) * strength;
+  if (emerge <= 0) return;
   for (let i = 0; i < NANITE_FIRE_FRAGMENTS; i += step) {
     const k = i * FRAGMENT_STRIDE;
     const heat = FRAGMENTS[k + 2];
@@ -513,7 +517,7 @@ function paintRasterSparks(context, W, H, strength) {
     const stretch = 1 + Math.min(FIRE_TUNING.rasterSparkStretch, speed * grow);
     const across = size * FIRE_TUNING.rasterSparkWidth;
     context.fillStyle = HEAT_CSS[Math.min(5, Math.floor(heat * 6))];
-    context.globalAlpha = Math.pow(heat, 0.6) * strength;
+    context.globalAlpha = Math.pow(heat, 0.6) * emerge;
     context.fillRect(x - across / 2, y - (size * stretch) / 2, across, size * stretch);
   }
 }

@@ -60,6 +60,7 @@ import { REXONANCE_SITE_ARTWORK } from "@/lib/rexonance-site-artwork";
 import { supportsIOS27Enhancements } from "@/lib/rendering-profile";
 import { warmRexonanceStages } from "@/lib/warm-rexonance-stages";
 import { mountLocalNavCurrent } from "@/lib/local-nav-current";
+import { mountRexonanceAnchorNavigation } from "@/lib/rexonance-anchor-navigation.js";
 import { syncRexonanceRouteCover } from "@/lib/rexonance-route-cover";
 import { mountRexonanceReadingPosition } from "@/lib/rexonance-reading-position";
 import { releasePendingImage, releasePendingImages } from "@/lib/release-pending-images";
@@ -1744,6 +1745,7 @@ export function RexonanceSaga() {
   // and the reading rail (src/lib/rexonance-choreography.js). Once the whole
   // page is rendered; it arms only what is still unseen.
   useEffect(() => (lower ? mountRexonanceChoreography(pageRef.current) : undefined), [lower]);
+  useEffect(() => (lower ? mountRexonanceAnchorNavigation(pageRef.current) : undefined), [lower]);
   useEffect(
     () =>
       lower

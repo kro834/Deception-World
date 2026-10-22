@@ -10,6 +10,7 @@ import {
   FIELD_IN,
   FIELD_W,
   FIRE_RECT,
+  TEAR_LINES,
   sampleFireField,
 } from "./fire-field.js";
 import { NOISE_SIZE, sampleNoise } from "./fire-noise.js";
@@ -30,6 +31,8 @@ import {
   POSE_RING_RADIUS,
   POSE_RING_STRENGTH,
   POSE_STRENGTH,
+  POSE_TEAR_GLOW,
+  POSE_TEAR_OPEN,
   POSE_VIEW_X0,
   POSE_VIEW_X1,
   POSE_VIEW_Y0,
@@ -55,11 +58,13 @@ const flatten = (stops) => {
 const SOOTY = flatten(RAMP_SOOTY);
 const CLEAN = flatten(RAMP_CLEAN);
 const FS = new Float64Array(4);
-// Eight noise reads of a pixel, four channels each, in the shader's order:
+// Eight noise reads of a pixel, four channels each, by slot:
 // reach (0), flutter (4), tongues (8), turbulence (12), edge (16),
 // flicker (20), sheet streaks (24), patch (28).
 const NS = new Float64Array(32);
 const C = new Float64Array(6);
+// The tears' static noise read.
+const NT = new Float64Array(4);
 
 const clamp = (x) => (x < 0 ? 0 : x > 1 ? 1 : x);
 const smoothstep = (a, b, x) => {
@@ -80,6 +85,27 @@ const ramp = (stops, t, out, at) => {
   out[at + 1] = g;
   out[at + 2] = b;
 };
+
+/** The distance (figure widths) from (px, py) to the nearest tear, its
+ * line moved across by `jag`, each tear tapering to nothing over its ends:
+ * the shader's tearGap, path by path. */
+export function tearGap(px, py, jag) {
+  let best = 1e9;
+  for (let k = 0; k < TEAR_LINES.length; k += 4) {
+    const qx = px - TEAR_LINES[k];
+    const qy = py - TEAR_LINES[k + 1];
+    const rx = TEAR_LINES[k + 2];
+    const ry = TEAR_LINES[k + 3];
+    const length2 = rx * rx + ry * ry;
+    const along = (qx * rx + qy * ry) / length2;
+    const across = (qx * ry - qy * rx) / Math.sqrt(length2);
+    const ends =
+      smoothstep(-0.02, T.tearEnds, along) * (1 - smoothstep(1 - T.tearEnds, 1.02, along));
+    const gap = Math.abs(across + jag) / Math.max(ends, 0.001);
+    if (gap < best) best = gap;
+  }
+  return best;
+}
 
 /**
  * Evaluates the fire at rect coordinates (u, v in 0..1, v down) for the
@@ -105,9 +131,16 @@ export function fireKernel(u0, v0, pose, field, noise, out) {
   const cover = pose[POSE_COVER];
   const m = pose[POSE_MIX];
   const b = pose[POSE_BURST];
-  // Height above the burning surface and the plume's drifting reach.
-  const height =
-    (Math.min(lift, d * T.sideWeight) + Math.max(0, pwy - BODY_ASPECT) * T.floorWeight) * air;
+  // The rising turbulence that rags the envelope and carries the tips.
+  sampleNoise(
+    noise,
+    NOISE_SIZE,
+    pwx * T.warpScale,
+    pwy * T.warpScale * 0.5 + pose[POSE_WARP],
+    NS,
+    4,
+  );
+  // The plume's drifting reach.
   sampleNoise(
     noise,
     NOISE_SIZE,
@@ -119,18 +152,23 @@ export function fireKernel(u0, v0, pose, field, noise, out) {
   const column = (pwx - 0.5) * (1 / T.columnWidth);
   const reach =
     (T.reachBase + T.reachVar * NS[0]) * (1 + T.columnBoost * Math.exp(-column * column));
-  const fall = clamp(height / reach);
+  // Height above the burning surface, its envelope ragged by that rising
+  // turbulence: nothing at the skin, and less toward the tips, so a tip
+  // never breaks off as a round bead far above the fire.
+  const depth = pwy - BODY_ASPECT;
+  const surface = Math.min(lift, d * T.sideWeight);
+  const rag =
+    (NS[6] * 0.55 + NS[5] * 0.3 + NS[7] * 0.15 - 0.5) *
+    T.ragAmp *
+    smoothstep(0, T.ragRoot, surface) *
+    (1 - smoothstep(T.ragTop, 1, surface / reach));
+  const height = Math.max(0, surface + rag) * air;
+  // Under the soles the floor only thins the plume (its threshold); it
+  // never enters the rise, so it never squeezes the turbulence into bands.
+  const fall = clamp((height + Math.max(0, depth) * T.floorWeight * air) / reach);
   // The rise: two layers flowing up at different speeds, accelerating
   // through a static remapping of height, with a flutter toward the tips.
-  sampleNoise(
-    noise,
-    NOISE_SIZE,
-    pwx * T.warpScale,
-    pwy * T.warpScale * 0.5 + pose[POSE_WARP],
-    NS,
-    4,
-  );
-  const flutter = (NS[4] - 0.5) * T.warpAmp * (T.warpBase + fall);
+  const flutter = (NS[4] - 0.5 + (NS[6] - 0.5) * T.warpFine) * T.warpAmp * (T.warpBase + fall);
   const rise =
     pwy + height - Math.log(1 + T.accel * height) * (1 / T.accel) + (NS[5] - 0.5) * T.warpLift;
   sampleNoise(
@@ -151,37 +189,7 @@ export function fireKernel(u0, v0, pose, field, noise, out) {
   );
   const nB = pose[POSE_DETAIL] > 0.5 ? NS[13] * 0.55 + NS[14] * 0.45 : NS[13];
   const n = ((NS[8] * 0.62 + NS[9] * 0.38) * 0.68 + nB * 0.32 - 0.5) * T.gain + 0.5;
-  // The engulf front, its branching edge and the tongues licking past it.
-  sampleNoise(noise, NOISE_SIZE, pwx * T.edgeScale, pwy * T.edgeScale + pose[POSE_EDGE], NS, 16);
-  const edge = NS[16] * 0.6 + NS[17] * 0.4 - 0.5;
-  const aEff = arrival + edge * T.edgeAmp - Math.max(0, n - 0.5) * T.tongueRise + height * T.climb;
-  const fresh = clamp((cover - aEff) / T.frontWidth);
-  const lit = fresh * fresh * (3 - 2 * fresh);
-  const age = clamp((cover - aEff) / T.ageSpan);
-  const mLocal = m * (age + (1 - age) * m * m);
-  const flare = 1 + T.flareGain * lit * (1 - lit) * (1 - mLocal);
-  // Flicker.
-  sampleNoise(noise, NOISE_SIZE, pwx * T.localScale, pwy * T.localScale + pose[POSE_LOCAL], NS, 20);
-  const calm = 1 - 0.6 * mLocal;
-  const flick =
-    (1 + calm * pose[POSE_FLICKER]) *
-    (1 - T.flickerLocal * 0.5 * calm + T.flickerLocal * calm * NS[21]);
-  // Plume, rim and sheet.
-  const thr = T.thrBase + (T.thrTop - T.thrBase) * Math.pow(fall, T.thrCurve);
-  const core = smoothstep(thr, thr + T.coreSoft, n);
-  const halo = smoothstep(thr - T.haloSoft, thr + T.coreSoft, n);
-  // The blast tears the tongues' roots off the skin, ragged and soft.
-  const tear = smoothstep(0, T.burstTear, b);
-  const torn = smoothstep(0, T.burstTearDepth, d - din + (n - 0.5) * T.burstTearJag);
-  const rooted = air * (1 + (torn - 1) * tear);
-  const plume =
-    (core * T.coreWeight + halo * (1 - T.coreWeight)) *
-    rooted *
-    (1 - smoothstep(T.tipFade, 1, fall));
-  const plumeHeat = (0.4 + 0.6 * clamp((n - thr) / T.hotSpan)) * (1 - T.tipCool * fall);
-  // The sheet on the skin is torn off first; the tongues fly on.
-  const bare = 1 - smoothstep(0, T.burstSkin, b);
-  const rim = Math.exp(-din / T.rimWidth) * skin * (0.3 + 0.7 * smoothstep(0.3, 0.75, n)) * bare;
+  // The sheet's own streaks: the flames racing up the skin.
   sampleNoise(
     noise,
     NOISE_SIZE,
@@ -196,8 +204,60 @@ export function fireKernel(u0, v0, pose, field, noise, out) {
       0.5) *
       T.gain +
     0.5;
+  // The engulf front: its branching edge, the tongues of the fire below
+  // licking up past it and the streaks racing ahead of it up the skin.
+  sampleNoise(
+    noise,
+    NOISE_SIZE,
+    pwx * T.edgeScale,
+    pwy * T.edgeScale * T.edgeStretch + pose[POSE_EDGE],
+    NS,
+    16,
+  );
+  const edge = NS[16] * 0.5 + NS[17] * 0.3 + NS[18] * 0.2 - 0.5;
+  const aEff =
+    arrival +
+    edge * T.edgeAmp -
+    Math.max(0, n - 0.5) * T.tongueRise -
+    Math.max(0, nS - 0.5) * T.frontLick +
+    height * T.climb;
+  const fresh = clamp((cover - aEff) / T.frontWidth);
+  const lit = fresh * fresh * (3 - 2 * fresh);
+  const age = clamp((cover - aEff) / T.ageSpan);
+  const mLocal = m * (age + (1 - age) * m * m);
+  const flare = 1 + T.flareGain * lit * (1 - lit) * (1 - mLocal);
+  // Where the front is still kindling only the turbulence's peaks burn.
+  const kindling = (1 - fresh) * (1 - fresh) * T.frontThr;
+  // Flicker.
+  sampleNoise(noise, NOISE_SIZE, pwx * T.localScale, pwy * T.localScale + pose[POSE_LOCAL], NS, 20);
+  const calm = 1 - 0.6 * mLocal;
+  const flick =
+    (1 + calm * pose[POSE_FLICKER]) *
+    (1 - T.flickerLocal * 0.5 * calm + T.flickerLocal * calm * NS[21]);
+  // Plume, rim and sheet.
+  const thr = T.thrBase + (T.thrTop - T.thrBase) * Math.pow(fall, T.thrCurve) + kindling;
+  const core = smoothstep(thr, thr + T.coreSoft, n);
+  const halo = smoothstep(thr - T.haloSoft, thr + T.coreSoft, n);
+  // The blast tears the tongues' roots off the skin, ragged and soft.
+  const tear = smoothstep(0, T.burstTear, b);
+  const torn = smoothstep(0, T.burstTearDepth, d - din + (n - 0.5) * T.burstTearJag);
+  const rooted = air * (1 + (torn - 1) * tear);
+  // Nothing hangs under the soles: the floor fades the plume out, soft
+  // and a little ragged, over a few pixels of any backing.
+  const ground = 1 - smoothstep(T.floorFrom, T.floorTo, depth + (NS[18] - 0.5) * T.floorJag);
+  const plume =
+    (core * T.coreWeight + halo * (1 - T.coreWeight)) *
+    rooted *
+    ground *
+    (1 - smoothstep(T.tipFade, 1, fall));
+  const plumeHeat = (0.4 + 0.6 * clamp((n - thr) / T.hotSpan)) * (1 - T.tipCool * fall);
+  // The sheet on the skin is torn off first; the tongues fly on.
+  const bare = 1 - smoothstep(0, T.burstSkin, b);
+  const rim = Math.exp(-din / T.rimWidth) * skin * (0.3 + 0.7 * smoothstep(0.3, 0.75, n)) * bare;
   const sheet =
-    (T.sheetHaze + (1 - T.sheetHaze) * smoothstep(T.sheetThr, T.sheetThr + T.sheetSoft, nS)) *
+    (T.sheetHaze +
+      (1 - T.sheetHaze) *
+        smoothstep(T.sheetThr + kindling, T.sheetThr + T.sheetSoft + kindling, nS)) *
     skin *
     bare;
   // The thrown fire fades before whichever edge of the drawing clips first.
@@ -247,6 +307,30 @@ export function fireKernel(u0, v0, pose, field, noise, out) {
       er += (0.6 + 0.3 * ring) * ring * T.ringGain;
       eg += (0.85 + 0.12 * ring) * ring * T.ringGain;
       eb += ring * T.ringGain;
+    } else if (pose[POSE_TEAR_GLOW] > 0) {
+      // The tears of the 爆散, on the body itself (never thrown outward):
+      // white-hot ragged lines along the fragments' birth paths, their
+      // shape fixed on the body (noise at its own coordinates, no drift),
+      // so a tear never writhes as it opens.
+      sampleFireField(field, FIELD_W, FIELD_H, u0, v0, FS, 0);
+      const body = 1 - smoothstep(-T.edgeSoft, T.edgeSoft, FS[0] * FIELD_D - FS[3] * FIELD_IN);
+      const bx = RX + u0 * RW;
+      const by = RY + v0 * RH;
+      sampleNoise(noise, NOISE_SIZE, bx * T.tearScale, by * T.tearScale * T.tearStretch, NT, 0);
+      const jag =
+        (NT[0] - 0.5) * T.tearMeander + (NT[2] - 0.5) * T.tearJag + (NT[3] - 0.5) * T.tearJag * 0.5;
+      const gap = tearGap(bx, by, jag);
+      const width =
+        (T.tearHair + (T.tearWidth - T.tearHair) * pose[POSE_TEAR_OPEN]) *
+        (1 - T.tearPinch * 0.5 + T.tearPinch * NT[1]);
+      const r = gap / width;
+      const h = gap / T.tearHalo;
+      const glow = pose[POSE_TEAR_GLOW] * body;
+      const white = Math.exp(-r * r) * glow * T.tearGain;
+      const cyan = Math.exp(-h * h) * glow * T.tearHaloGain;
+      er += 0.92 * white + 0.42 * cyan;
+      eg += 0.98 * white + 0.8 * cyan;
+      eb += white + cyan;
     }
     er = Math.min(1, er * strength);
     eg = Math.min(1, eg * strength);

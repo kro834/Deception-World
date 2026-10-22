@@ -42,7 +42,15 @@ import {
 import { GalleryCurtain } from "@/components/gallery/gallery-curtain";
 
 type RiderDiveVariant =
-  "saga" | "realm" | "lore" | "vandal" | "dream" | "rexonance" | "extreme" | "final-stage";
+  | "saga"
+  | "realm"
+  | "lore"
+  | "vandal"
+  | "dream"
+  | "rexonance"
+  | "extreme"
+  | "far-from"
+  | "final-stage";
 type RiderCutInVariant = "leddic" | "argenome" | "over-zeztz" | "cipher" | "ciel";
 type RiderTransitionVariant = RiderDiveVariant | RiderCutInVariant;
 
@@ -115,6 +123,7 @@ const RIDER_DIVE_ROUTES = {
   "/riders/vandal": "vandal",
   "/rexonance-saga": "rexonance",
   "/extreme-saga": "extreme",
+  "/far-from-saga": "far-from",
   "/final-stage": "final-stage",
 } as const satisfies Record<string, RiderDiveVariant>;
 
@@ -146,6 +155,7 @@ const RIDER_DIVE_TIMINGS: Record<RiderDiveVariant, { cover: number; reveal: numb
   dream: { cover: 450, reveal: 540 },
   rexonance: REXONANCE_ENTRY_TIMINGS,
   extreme: { cover: 380, reveal: 480 },
+  "far-from": { cover: 380, reveal: 480 },
   "final-stage": { cover: 380, reveal: 480 },
 };
 
@@ -163,6 +173,7 @@ const RIDER_DIVE_META: Record<RiderDiveVariant, { no: string; name: string; labe
   dream: { no: "I", name: "DREAM CHAPTER", label: "ドリームチャプター" },
   rexonance: { no: "P14", name: "REXONANCE", label: "レクソナンスサーガ" },
   extreme: { no: "EX", name: "EXTREME", label: "エクスプリームサーガ" },
+  "far-from": { no: "FF", name: "FAR FROM", label: "ファーフロムサーガ" },
   "final-stage": { no: "FS", name: "FINAL STAGE", label: "ファイナルステージ" },
 };
 
@@ -1801,6 +1812,7 @@ function LoadOverlay({
     variant === "dream" ||
     variant === "rexonance" ||
     variant === "extreme" ||
+    variant === "far-from" ||
     variant === "final-stage";
   if (isRiderDive) {
     return (
@@ -1944,7 +1956,9 @@ function RiderRouteDive({
             ? "REXONANCE // PERFORMANCE SITE"
             : variant === "extreme"
               ? "EXTREME // SUPREME SITE"
-              : variant === "final-stage"
+              : variant === "far-from"
+                ? "FAR FROM // FINAL FORM SITE"
+                : variant === "final-stage"
                 ? "FINAL STAGE // STORY SITE"
                 : variant === "dream"
                   ? "DREAM CHAPTER // LIQUID ABYSS"
@@ -1959,10 +1973,14 @@ function RiderRouteDive({
               ? revealing
                 ? "至高位相へ到着"
                 : "P14至高位相へダイブ中"
-              : variant === "final-stage"
+              : variant === "far-from"
                 ? revealing
-                  ? "最終位相へ到着"
-                  : "最終位相へダイブ中"
+                  ? "超究極位相へ到着"
+                  : "超究極位相へダイブ中"
+                : variant === "final-stage"
+                  ? revealing
+                    ? "最終位相へ到着"
+                    : "最終位相へダイブ中"
                 : variant === "dream"
                   ? revealing
                     ? "深層夢界へ沈降完了"

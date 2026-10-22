@@ -160,7 +160,7 @@ test("wayfinding: the special sites show their way home", () => {
   );
   assert.match(
     chrome,
-    /const isSpecialSite =\s*context === "rexonance" \|\| context === "extreme" \|\| context === "final-stage";/,
+    /const isSpecialSite =\s*context === "rexonance" \|\|\s*context === "extreme" \|\|\s*context === "far-from" \|\|\s*context === "final-stage";/,
   );
   // Every closing row ends on the same return, arrow first.
   for (const [name, source] of [

@@ -1,5 +1,10 @@
 /* ================================================================
-   TYPE — Rexonance, set in Mincho (rx21, 2026-10-21)
+   TYPE — Rexonance (rx21, futuristic revision 2026-10-22)
+
+   Owner revision: a more futuristic voice. The display/lede tokens now
+   use angular Japanese gothic with the self-hosted Saira instrument face
+   for Latin. Existing Mincho faces remain dormant for compatibility;
+   nothing selects or preloads them. No extra font request is introduced.
 
    The owner asked for the Rexonance site's fonts, motion and everything
    else to be brushed up a great deal. This sheet is the page's type
@@ -146,8 +151,9 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt)
 /* ---------- Tokens ---------- */
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) {
   /* Faces. */
-  --rxt-mincho: "Rexonance Mincho", "Rexonance Mincho Fallback", "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif JP", "Noto Sans JP", "Zen Kaku Gothic New", serif;
-  --rxt-mincho-text: "Rexonance Mincho Text", "Rexonance Mincho Fallback", "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif JP", "Noto Sans JP", serif;
+  /* Legacy token names retained for the title/lede roles across the page. */
+  --rxt-mincho: "Rexonance Forge", "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", "Noto Sans JP", system-ui, sans-serif;
+  --rxt-mincho-text: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", "Noto Sans JP", system-ui, sans-serif;
   --rxt-sans: "Noto Sans JP", "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", system-ui, sans-serif;
   --rxt-gothic: "Zen Kaku Gothic New", "Noto Sans JP", "Hiragino Sans", "Yu Gothic", system-ui, sans-serif;
   --rxt-forge: var(--rxf-forge, "Rexonance Forge", sans-serif);
@@ -182,7 +188,7 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt)
   --rxt-lead-title: 1.24;
   --rxt-lead-lede: 1.95;
   --rxt-lead-body: 1.9;
-  --rxt-track-display: 0.02em;
+  --rxt-track-display: 0.045em;
   --rxt-track-lede: 0.05em;
   --rxt-track-kicker: 0.3em;
   --rxt-track-label: 0.12em;

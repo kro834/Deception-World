@@ -20,10 +20,27 @@ export const FIRE_TUNING = Object.freeze({
   // field texel): the skin/air split is smooth however far it is magnified.
   edgeSoft: 0.005,
   // Height above the burning surface, in figure widths: straight up off
-  // the body below, sideWeight times the sideways distance off a limb (so
-  // licks hug the sides), and floorWeight times the depth under the soles.
+  // the body below and sideWeight times the sideways distance off a limb
+  // (so licks hug the sides). Under the soles the plume thins as if
+  // floorWeight times the depth were height, and fades out on an analytic
+  // floor line (floorFrom..floorTo widths below it, ragged by floorJag):
+  // the floor never squeezes the turbulence into one-pixel bands, which
+  // the field's texel rows cut into a staircase under the soles.
   sideWeight: 3.5,
-  floorWeight: 14,
+  floorWeight: 10,
+  floorFrom: -0.008,
+  floorTo: 0.035,
+  floorJag: 0.012,
+  // The envelope's rag: the rising turbulence moves the plume's outline in
+  // and out by up to ragAmp/2 of height (ragAmp/2/sideWeight widths beside
+  // a limb), nothing at the skin (ragRoot of height), so no envelope
+  // stands as a straight wall beside the shins or on the vertical lines
+  // through the hands, and the tall tongues over the crown have ragged
+  // edges.
+  ragAmp: 0.65,
+  ragRoot: 0.06,
+  // ...fading out from ragTop of the plume's reach to its tips.
+  ragTop: 0.45,
   // The plume's reach drifts with a large, slow noise, so tall licks come
   // and go above the crown and shoulders.
   reachBase: 0.28,
@@ -37,7 +54,8 @@ export const FIRE_TUNING = Object.freeze({
   // The rise: noise flowing up at flowA (tongues) and flowB (their inner
   // turbulence, faster, so a tongue's shape keeps changing as it climbs),
   // accelerating with height (speed × (1 + accel·height)), stretched along
-  // the flow; a lateral flutter that grows toward the tips.
+  // the flow; a lateral flutter that grows toward the tips, with a finer
+  // flutter (warpFine of it) that bends a tongue's edge along its length.
   scaleA: 1.25,
   stretchA: 2.4,
   flowA: 1.25,
@@ -49,15 +67,24 @@ export const FIRE_TUNING = Object.freeze({
   warpSpeed: 0.55,
   warpAmp: 0.16,
   warpBase: 0.25,
+  warpFine: 0.7,
   warpLift: 0.05,
   gain: 2.4,
-  // The engulf front's irregular, branching edge, the tongues of the fire
-  // below it licking up past it (in arrival units), and how the plume
-  // above the front has not climbed yet (arrival per width of height).
+  // The engulf front's irregular, branching edge (drawn out along the rise
+  // by edgeStretch), the tongues of the fire below it licking up past it
+  // and the sheet's streaks racing ahead of it (frontLick, in arrival
+  // units), and how the plume above the front has not climbed yet
+  // (arrival per width of height). Where the front is still kindling
+  // (fresh below 1) the plume's and the sheet's thresholds are raised by
+  // up to frontThr, so the front advances as ragged tongues, never as a
+  // soft rounded blot.
   edgeScale: 1.3,
   edgeAmp: 0.2,
+  edgeStretch: 0.45,
   edgeSpeed: 0.25,
   tongueRise: 0.2,
+  frontLick: 0.12,
+  frontThr: 0.6,
   climb: 0.15,
   frontWidth: 0.08,
   ageSpan: 0.35,
@@ -132,6 +159,30 @@ export const FIRE_TUNING = Object.freeze({
   throwFadeSide: 0.12,
   throwFadeTop: 0.2,
   throwFadeBottom: 0.08,
+  // The tears of the 爆散: the burning shell splits open along the paths
+  // the fragments are born on (TEAR_PATHS), so they fly out of continuous
+  // incandescent tears, never dotted seams. A hairline at the detonation,
+  // a tear opens to tearWidth (half-width, figure widths) by tearOpen of
+  // the burst, white at its core inside a cyan halo. Its line is ragged by
+  // a noise fixed on the body (tearScale per width, tearStretch along the
+  // height): a coarse meander and a fine jag across it (widths), a width
+  // that pinches and swells (tearPinch), tapering over tearEnds of its
+  // length at both ends. It burns bright until tearHold of the burst and
+  // is gone by tearFade, as the fragments leave it.
+  tearHair: 0.0028,
+  tearWidth: 0.011,
+  tearOpen: 0.07,
+  tearHalo: 0.03,
+  tearScale: 2,
+  tearStretch: 0.55,
+  tearMeander: 0.05,
+  tearJag: 0.016,
+  tearPinch: 0.7,
+  tearEnds: 0.1,
+  tearHold: 0.06,
+  tearFade: 0.32,
+  tearGain: 1.15,
+  tearHaloGain: 0.55,
   // The shock ring is a quick pulse: it sweeps off the figure while it is
   // bright and is gone before the fragments scatter, so it never lingers
   // round the bare undersuit as a ghost outline.
@@ -157,9 +208,28 @@ export const FIRE_TUNING = Object.freeze({
   sparkMaxStretch: 2.5,
   sparkWidth: 0.5,
   sparkGrow: 0.25,
+  // The fragments come out of the tears: unseen inside them at the
+  // detonation, they show between sparkEmergeFrom and sparkEmergeTo of
+  // the burst, as they fly clear.
+  sparkEmergeFrom: 0.015,
+  sparkEmergeTo: 0.1,
   rasterSparkStretch: 0.6,
   rasterSparkWidth: 0.75,
 });
+
+// The paths the fragments are born on (rexonance-ignition.js
+// sampleFlameBirth, mirrored here and held to it by the unit tests), in
+// normalized body units [x0, y0, x1, y1, half-width]: head, torso, arms,
+// legs. A fragment is born within half-width · TEAR_SPREAD of its path.
+export const TEAR_PATHS = Object.freeze([
+  Object.freeze([0.5, 0.09, 0.5, 0.2, 0.024]),
+  Object.freeze([0.5, 0.215, 0.5, 0.43, 0.082]),
+  Object.freeze([0.307, 0.265, 0.172, 0.55, 0.024]),
+  Object.freeze([0.69, 0.265, 0.825, 0.55, 0.024]),
+  Object.freeze([0.397, 0.48, 0.267, 0.96, 0.032]),
+  Object.freeze([0.6, 0.48, 0.73, 0.96, 0.032]),
+]);
+export const TEAR_SPREAD = 0.72;
 
 // Colour stops [t, r, g, b] (0..1), piecewise smooth, over one temperature
 // axis. Every stop is a visible flame colour: a tongue's cool fringe is a

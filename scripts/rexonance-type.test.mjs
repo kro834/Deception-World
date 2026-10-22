@@ -4,7 +4,11 @@ import test from "node:test";
 import { brotliDecompressSync } from "node:zlib";
 import { rexonanceTypeCopy, rexonanceTypeGlyphs } from "./rexonance-type-copy.mjs";
 
-/* 2026-10-21 rx21: Rexonance, TYPE — the special site's type system
+/* 2026-10-22 revision: futuristic gothic display/lede roles; Mincho assets
+   remain dormant and their asset integrity tests stay intact, but they are
+   neither selected nor preloaded. Browser QA pins the zero-download contract.
+
+   Original 2026-10-21 rx21: Rexonance, TYPE — the special site's type system
    (src/styles-rexonance-type-20261021.css, public/fonts/rexonance-mincho-*).
    The owner asked for the Rexonance site's fonts, motion and everything else
    to be brushed up a great deal. The Japanese titles and ledes are set in a
@@ -272,7 +276,7 @@ const remoteFaces = sheet.faces.filter((face) => /url\(/.test(face));
 const faceFor = (name) => remoteFaces.find((face) => face.includes(`url("${FILES[name]}")`));
 
 /* ---------------- part 1: route and files ---------------- */
-test("the TYPE sheet loads last (before only the motion sheet) on the Rexonance route only, and only the first-screen subsets are preloaded", () => {
+test("the TYPE sheet loads last before motion, only on Rexonance, without unused Mincho preloads", () => {
   // owner request 2026-10-21: TYPE (rx21)
   assert.match(
     route,
@@ -305,7 +309,11 @@ test("the TYPE sheet loads last (before only the motion sheet) on the Rexonance 
       String.raw`\{\s*rel: "preload",\s*as: "font",\s*type: "font/woff2",\s*href: "${FILES[name].replace(/[./]/g, "\\$&")}",\s*crossOrigin: "anonymous",\s*\}`,
       "g",
     );
-    assert.equal(route.match(preload)?.length, 1, name);
+    assert.equal(
+      route.match(preload)?.length ?? 0,
+      0,
+      `${name}: futuristic edition no longer uses Mincho`,
+    );
   }
   // The lower chapters' subsets load when a chapter needs them, never preloaded.
   assert.doesNotMatch(route, /rexonance-mincho-(?:display|text)-2026/);
@@ -535,11 +543,11 @@ test("tokens carry the owner's palette and the scale; titles are Mincho 800, led
   assert.equal(declaration(tokens.body, "--rxt-ink"), "#02050a");
   assert.match(
     declaration(tokens.body, "--rxt-mincho"),
-    /^"Rexonance Mincho", "Rexonance Mincho Fallback"/,
+    /^"Rexonance Forge", "Hiragino Kaku Gothic ProN", "Hiragino Sans"/,
   );
   assert.match(
     declaration(tokens.body, "--rxt-mincho-text"),
-    /^"Rexonance Mincho Text", "Rexonance Mincho Fallback"/,
+    /^"Hiragino Kaku Gothic ProN", "Hiragino Sans"/,
   );
   for (const step of [
     "--rxt-step--1",

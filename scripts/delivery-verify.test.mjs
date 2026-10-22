@@ -294,7 +294,7 @@ test("each hero and its navigation warm-ups ask with one srcset and sizes", () =
   // The warm-up takes both attributes, sizes first.
   assert.match(
     read("src/lib/asset-loader.ts"),
-    /const responsive = \{ \.\.\.dossierImage\(url\), \.\.\.rexonanceImage\(url\) \};\s*if \(responsive\.srcSet\) \{\s*if \(responsive\.sizes\) image\.sizes = responsive\.sizes;\s*image\.srcset = responsive\.srcSet;/,
+    /const responsive = responsiveImage\(url\);\s*if \(responsive\.srcSet\) \{\s*if \(responsive\.sizes\) image\.sizes = responsive\.sizes;\s*image\.srcset = responsive\.srcSet;/,
   );
 });
 

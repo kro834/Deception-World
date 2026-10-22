@@ -134,24 +134,7 @@ export const Route = createFileRoute("/rexonance-saga")({
         href: "/fonts/rexonance-forge-outline-20261016.woff2",
         crossOrigin: "anonymous",
       },
-      // TYPE (rx21): the Mincho's first-screen subsets — the hero's line and
-      // the bar's name (4.6 KB, ExtraBold), the hero's lede and scroll cue
-      // (5.7 KB, Medium) — so the first screen never draws in a fallback
-      // and then swaps; the lower chapters' Mincho loads when they need it.
-      {
-        rel: "preload",
-        as: "font",
-        type: "font/woff2",
-        href: "/fonts/rexonance-mincho-display-first-20261021.woff2",
-        crossOrigin: "anonymous",
-      },
-      {
-        rel: "preload",
-        as: "font",
-        type: "font/woff2",
-        href: "/fonts/rexonance-mincho-text-first-20261021.woff2",
-        crossOrigin: "anonymous",
-      },
+      // The futuristic Japanese display uses local gothic; no unused Mincho preload.
     ],
   }),
 });

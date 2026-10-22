@@ -40,9 +40,14 @@ export const POSE_LOCAL = 19;
 export const POSE_PATCH = 20;
 export const POSE_FLICKER = 21;
 export const POSE_FLOW_S = 22;
-export const POSE_SLOTS = 23;
+// The tears of the 爆散: how far open (0 a hairline, 1 tearWidth) and how
+// bright (0 none) they are.
+export const POSE_TEAR_OPEN = 23;
+export const POSE_TEAR_GLOW = 24;
+export const POSE_SLOTS = 25;
 
 const clamp = (x) => Math.max(0, Math.min(1, x));
+const smooth = (x) => x * x * (3 - 2 * x);
 const wrap = (x) => x - Math.floor(x);
 
 /** Fills `out` (POSE_SLOTS doubles) for a frame of the fire. */
@@ -75,6 +80,10 @@ export function poseFire(phase, strength, clock, detail, out) {
   out[POSE_PATCH] = wrap(t * T.patchSpeed);
   out[POSE_FLOW_S] = wrap((t * T.flowS * T.scaleS) / T.stretchS);
   out[POSE_FLICKER] = T.flickerGlobal * (Math.sin(t * 60.9) + 0.6 * Math.sin(t * 83.6 + 1.7));
+  out[POSE_TEAR_OPEN] = bursting ? smooth(clamp(burst / T.tearOpen)) : 0;
+  out[POSE_TEAR_GLOW] = bursting
+    ? 1 - smooth(clamp((burst - T.tearHold) / (T.tearFade - T.tearHold)))
+    : 0;
   return out;
 }
 

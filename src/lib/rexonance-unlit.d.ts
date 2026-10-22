@@ -5,7 +5,14 @@ export type SplitLightsResult = {
   motes?: HTMLCanvasElement;
 };
 
-export type SplitLightsOptions = { motes?: boolean };
+export type SplitLightsOptions = {
+  motes?: boolean;
+  /** Keep the intermediate unlit canvas on CPU for subsequent preparation reads. */
+  cpuUnlit?: boolean;
+};
+
+/** True only when this document's CPU/default alpha-compositing probe has identical RGBA bytes. */
+export function supportsCpuPreparation(document?: Document): boolean;
 
 export type SplitLightsJob = {
   /** Cooperatively advance one phase (the snapshot and its one whole

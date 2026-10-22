@@ -1138,6 +1138,29 @@ html[data-route-scroll-settling="true"] {
   letter-spacing: -0.03em;
 }
 
+/* FAR FROM SAGA (provisional, 2026-10-22): Final Stage's shutter in the
+   ミドル stage's crystal blue and gold. */
+.load-gate.rider-route-dive.is-far-from-dive {
+  --rider-dive-primary: 127 230 255;
+  --rider-dive-secondary: 255 215 122;
+  --rider-dive-shadow: 2 4 12;
+  background:
+    radial-gradient(circle at 50% 50%, rgb(255 255 255 / 0.1), transparent 10%),
+    radial-gradient(circle at 39% 48%, rgb(var(--rider-dive-primary) / 0.32), transparent 27%),
+    radial-gradient(circle at 64% 54%, rgb(var(--rider-dive-secondary) / 0.24), transparent 30%),
+    linear-gradient(145deg, rgb(var(--rider-dive-shadow) / 0.99), #010308 70%);
+}
+
+.rider-route-dive.is-far-from-dive .rider-dive-mark {
+  border-radius: 28%;
+  transform: translate3d(-50%, -50%, 0) rotate(45deg) scale(0.58);
+}
+
+.rider-route-dive.is-far-from-dive .rider-dive-mark > i {
+  font-size: clamp(0.78rem, 2vw, 1.02rem);
+  letter-spacing: -0.03em;
+}
+
 .rider-route-dive.is-rexonance-dive .rider-dive-mark {
   border-radius: 34%;
   transform: translate3d(-50%, -50%, 0) rotate(45deg) scale(0.58);
