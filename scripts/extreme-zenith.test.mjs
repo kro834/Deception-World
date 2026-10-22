@@ -155,3 +155,40 @@ test("motion here is hover and focus only, and stands still under reduced motion
     assert.ok(media.type === "atrule" && /prefers-reduced-motion: no-preference/.test(media.params), item.parent.selector);
   });
 });
+
+// Round 2 (2026-10-22).
+test("round 2: forced-colour figures and plates, the phone eyebrow, the door ring tied to the door", () => {
+  const forced = "(forced-colors: active)";
+  // Chrome's text backplate: the big figures draw in CanvasText without one,
+  // so their tall runs no longer cover the labels beside them.
+  const figure = find(".exi-figure > .exi-real", forced);
+  assert.equal(declaration(figure, "forced-color-adjust"), "none");
+  assert.equal(declaration(figure, "color"), "CanvasText");
+  assert.equal(declaration(figure, "-webkit-text-fill-color"), "CanvasText");
+  // Selected plates keep HighlightText on Highlight, without the backplate.
+  const adjusted = (suffix) =>
+    rules.some(
+      (rule) =>
+        mediaOf(rule) === forced &&
+        rule.selectors.some((selector) => normal(selector).endsWith(suffix)) &&
+        declaration(rule, "forced-color-adjust") === "none",
+    );
+  assert.ok(adjusted('a[aria-current="location"] > span'), "the chapter in view");
+  assert.ok(adjusted(".rxs-brand > span"), "the pill");
+  const pressed = find('.exs-opponent-options button[aria-pressed="true"]', forced);
+  assert.equal(declaration(pressed, "forced-color-adjust"), "none");
+  assert.equal(declaration(pressed, "background"), "Highlight");
+  assert.equal(declaration(find("> #system .rxs-specs > .exo-joint", forced), "border-color"), "CanvasText");
+  // The two-line phone eyebrow has room between its lines.
+  assert.equal(declaration(find(".exs-hero .rxs-hero-copy > p:first-child", "(max-width: 760px)"), "line-height"), "1.45");
+  // The painted ring's slant offsets are measured for a 56px door cut 14px
+  // (every door is 56px tall at 320-1920 in Chrome and WebKit). If the door
+  // changes, recompute the ring's points with it.
+  const editorial = read("src/styles-extreme-editorial.css");
+  const door = editorial.slice(editorial.indexOf("> .rxs-footer > a.rxs-footer-return {"));
+  assert.match(door.slice(0, 400), /min-height: 56px;/);
+  assert.match(door.slice(0, 400), /clip-path: polygon\(0 0, 100% 0, calc\(100% - 14px\) 100%, 0 100%\);/);
+  const ring = declaration(find("> .rxs-footer > a:focus-visible::after"), "clip-path");
+  for (const point of ["calc(100% - 15.6px) calc(100% - 2px)", "calc(100% - 17.1px) calc(100% - 4px)"])
+    assert.ok(ring.includes(point), point);
+});

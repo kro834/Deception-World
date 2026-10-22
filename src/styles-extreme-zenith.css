@@ -143,6 +143,20 @@ html[data-family="special"]
   }
 }
 
+/* Round 2: on a phone the eyebrow takes two lines (THE SUPREME / ARRIVAL OF
+   SA-GA); at the inherited 1.2 leading they touched. */
+@media (max-width: 760px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    .exs-hero
+    .rxs-hero-copy
+    > p:first-child {
+    line-height: 1.45;
+    text-wrap: balance;
+  }
+}
+
 @media (min-width: 761px) and (max-width: 1366px) {
   html[data-family="special"]
     body
@@ -1435,5 +1449,72 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer > a:f
     .exs-opponent-options
     button[aria-pressed="true"]::before {
     background: HighlightText;
+  }
+
+  /* Round 2: Chrome lays a Canvas backplate under every run of text. A big
+     figure's run stands taller than its line (the display face's ascent and
+     descent), so its plate covered the words around it: PUNCH POWER /
+     EXTREME and 100M TIME (9px at 1440), パンチ力 and its row labels, 基準比
+     and the 倍 / 差分 line, the tops of the CORE boxes. The figures draw in
+     the text colour themselves, with no plate. */
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page .exi-figure,
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page .exi-figure > .exi-real {
+    forced-color-adjust: none;
+    color: CanvasText;
+    -webkit-text-fill-color: CanvasText;
+    background: none;
+    text-shadow: none;
+    -webkit-text-stroke: 0;
+    filter: none;
+  }
+
+  /* The specs' joint keeps the overdrive sheet's forced line (CanvasText,
+     no adjust): the editorial gold burst, its gold border and its glow
+     outranked it. */
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page > #system .rxs-specs > .exo-joint {
+    border-color: CanvasText;
+    background: CanvasText;
+    box-shadow: none;
+  }
+
+  /* The selected plates (the pill, the chapter in view, the pressed
+     opponent) keep their system colours and drop the backplate: on the plate
+     it drew HighlightText on Canvas, the number 01-04 and the opponent's name
+     as nothing at all. */
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page .rxs-brand > span,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    .rxs-local-nav
+    nav
+    a[aria-current="location"]
+    > span {
+    forced-color-adjust: none;
+    box-shadow: none;
+    text-shadow: none;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    .exs-opponent-options
+    button[aria-pressed="true"] {
+    forced-color-adjust: none;
+    color: HighlightText;
+    background: Highlight;
+    border-color: Highlight;
+    box-shadow: none;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    .exs-opponent-options
+    button[aria-pressed="true"]
+    :is(span, small) {
+    color: HighlightText;
+    -webkit-text-fill-color: HighlightText;
+    background: none;
+    text-shadow: none;
   }
 }
