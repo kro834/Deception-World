@@ -479,8 +479,10 @@
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
   }
-  .dream-screening-message:has(.dream-screening-status:empty) {
-    display: none;
+  /* Keep the live region in the accessibility tree before its next update. */
+  .dream-screening-message:has(.dream-screening-status:empty),
+  .dream-screening-status:empty {
+    min-height: 0;
   }
 }
 
