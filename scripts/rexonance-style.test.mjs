@@ -84,12 +84,18 @@ const declarations = (body) =>
 const sheet = parse(couture);
 
 test("the couture sheet loads after the premiere sheet, before the cinematic sheet, on its route only", () => {
-  assert.match(route, /import rexonanceCoutureCssUrl from "@\/styles-rexonance-couture\.css\?url"/);
+  // The route's edition sheets are one stylesheet of ordered imports
+  // (src/styles-rexonance-route.css, 2026-10-22 F06), linked before the
+  // cinematic sheet: the import order is their cascade order.
+  const sheets = [
+    ...read("src/styles-rexonance-route.css").matchAll(/^@import "\.\/([\w-]+)\.css";$/gm),
+  ].map((match) => match[1]);
   const links = route.slice(route.search(/links:\s*\[/));
-  const premiere = links.indexOf("href: rexonancePremiereCssUrl");
-  const couture = links.indexOf("href: rexonanceCoutureCssUrl");
-  const cinematic = links.indexOf("CINEMATIC_STYLESHEET_LINK");
-  assert.ok(premiere > 0 && premiere < couture && couture < cinematic);
+  const own = links.indexOf("href: rexonanceRouteCssUrl");
+  assert.ok(own > 0 && own < links.indexOf("CINEMATIC_STYLESHEET_LINK"));
+  const premiere = sheets.indexOf("styles-rexonance-premiere");
+  const couture = sheets.indexOf("styles-rexonance-couture");
+  assert.ok(premiere >= 0 && premiere < couture);
   for (const path of [
     "src/lib/world-head.ts",
     "src/routes/__root.tsx",

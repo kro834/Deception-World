@@ -43,12 +43,18 @@ const selectors = (css) =>
   );
 
 test("the sheets load last on their own routes, before the cinematic sheet, and nowhere else", () => {
+  // Rexonance's edition sheets are one stylesheet of ordered imports
+  // (src/styles-rexonance-route.css, 2026-10-22 F06), linked before the
+  // cinematic sheet: the import order is their cascade order.
   const rx = rexonanceRoute.slice(rexonanceRoute.search(/links:\s*\[/));
-  const instrument = rx.indexOf("href: rexonanceInstrumentCssUrl");
-  const finish = rx.indexOf("href: rexonanceFinishCssUrl");
-  assert.ok(
-    instrument > 0 && instrument < finish && finish < rx.indexOf("CINEMATIC_STYLESHEET_LINK"),
-  );
+  const own = rx.indexOf("href: rexonanceRouteCssUrl");
+  assert.ok(own > 0 && own < rx.indexOf("CINEMATIC_STYLESHEET_LINK"));
+  const sheets = [
+    ...read("src/styles-rexonance-route.css").matchAll(/^@import "\.\/([\w-]+)\.css";$/gm),
+  ].map((match) => match[1]);
+  const instrument = sheets.indexOf("styles-rexonance-instrument");
+  const finish = sheets.indexOf("styles-rexonance-finish");
+  assert.ok(instrument >= 0 && instrument < finish);
   const ex = extremeRoute.slice(extremeRoute.search(/links:\s*\[/));
   const motion = ex.indexOf("href: motionEditionCssUrl");
   const edition = ex.indexOf("href: extremeEditionCssUrl");

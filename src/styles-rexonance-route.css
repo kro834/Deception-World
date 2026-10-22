@@ -1,0 +1,54 @@
+/* Rexonance Saga — the route's own edition sheets, in one render-blocking
+   file (2026-10-22 sweep F06). Vite inlines these imports at build time, as
+   it does for src/styles-world.css, so /rexonance-saga links one stylesheet
+   here instead of twenty-three. The order below IS the cascade: it is the
+   exact order the route linked these sheets in before, so every rule keeps
+   its place. Add no @layer and no rule here; a new edition sheet goes in
+   this list at the place its order requires (scripts/
+   rexonance-stylesheet-budget.test.mjs pins the list and the budget).
+
+   The World core sheets come before this file and the cinematic skin after
+   it, both still linked from src/routes/rexonance-saga.tsx. */
+
+@import "./styles-rexonance-saga.css";
+@import "./styles-rexonance-motion.css";
+@import "./styles-saga-showcase.css";
+@import "./styles-showcase-elevation.css";
+@import "./styles-showcase-cinema.css";
+@import "./styles-motion-edition.css";
+@import "./styles-rexonance-polish.css";
+@import "./styles-rexonance-edition.css";
+@import "./styles-rexonance-instrument.css";
+@import "./styles-rexonance-finish.css";
+@import "./styles-rexonance-premiere.css";
+@import "./styles-rexonance-couture.css";
+/* The Armour edition: the page drawn as the suit-up renders its armour,
+   paint only, after Couture. */
+@import "./styles-rexonance-armour.css";
+/* STAGE (rx10): the trailer, over the Armour materials (the shared
+   special-site grammar, then this page's scenes). */
+@import "./styles-stage-special.css";
+@import "./styles-stage-rexonance.css";
+/* RESONANCE (rx11): the trailer in motion — depth, pinned cuts, the hits,
+   over the STAGE scenes. */
+@import "./styles-rexonance-resonance.css";
+/* ZENITH (rx15): the suit-up on the page — the call played with the scroll,
+   the armour assembled from nanites. */
+@import "./styles-rexonance-zenith.css";
+/* FORGE (rx18): the page's type in four materials and its chrome in the
+   engines' grammar — chips, guideways, molten gold. */
+@import "./styles-rexonance-forge.css";
+@import "./styles-rexonance-editorial.css";
+@import "./styles-p14-calibration.css";
+/* LAYOUT (2026-10-21): the page's composition — grid, spacing, frames,
+   plates, imagery treatment — decided once, after every edition sheet.
+   Type and motion editions follow in their own sheets. */
+@import "./styles-rexonance-layout-20261021.css";
+/* TYPE (rx21): the page's type system — the Mincho titles and ledes, the
+   tokens, the kickers' one voice — after the layout sheet; only the motion
+   sheet follows it (the cinematic skin follows every feature's sheet). */
+@import "./styles-rexonance-type-20261021.css";
+/* KINETIC (rxk, 2026-10-21): the chapters' entrances, the reading rail,
+   hover and press, the end card (src/lib/rexonance-choreography.js arms and
+   plays them). Last of the page's sheets, after the layout. */
+@import "./styles-rexonance-motion-20261021.css";

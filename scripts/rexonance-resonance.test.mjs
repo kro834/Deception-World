@@ -698,15 +698,19 @@ const timed = (body) => {
 };
 
 test("the resonance sheet loads after the STAGE scenes, before the cinematic sheet, on its route only", () => {
-  assert.match(
-    route,
-    /import rexonanceResonanceCssUrl from "@\/styles-rexonance-resonance\.css\?url"/,
-  );
+  // The route's edition sheets are one stylesheet of ordered imports
+  // (src/styles-rexonance-route.css, 2026-10-22 F06), linked before the
+  // cinematic sheet: the import order is their cascade order.
+  const sheets = [
+    ...read("src/styles-rexonance-route.css").matchAll(/^@import "\.\/([\w-]+)\.css";$/gm),
+  ].map((match) => match[1]);
   const links = route.slice(route.search(/links:\s*\[/));
-  const stage = links.indexOf("href: stageRexonanceCssUrl");
-  const resonance = links.indexOf("href: rexonanceResonanceCssUrl");
+  const own = links.indexOf("href: rexonanceRouteCssUrl");
   const cinematic = links.indexOf("CINEMATIC_STYLESHEET_LINK");
-  assert.ok(stage > 0 && stage < resonance && resonance < cinematic);
+  assert.ok(own > 0 && own < cinematic);
+  const stage = sheets.indexOf("styles-stage-rexonance");
+  const resonance = sheets.indexOf("styles-rexonance-resonance");
+  assert.ok(stage >= 0 && stage < resonance);
   assert.ok(links.lastIndexOf('rel: "stylesheet"') < cinematic);
   for (const path of [
     "src/lib/world-head.ts",

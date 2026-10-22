@@ -5,29 +5,7 @@ import {
   CINEMATIC_STYLESHEET_LINK,
   DOSSIER_HUD_FONTS_URL,
 } from "@/lib/world-head";
-import rexonanceSagaCssUrl from "@/styles-rexonance-saga.css?url";
-import resonanceMotionCssUrl from "@/styles-rexonance-motion.css?url";
-import sagaShowcaseCssUrl from "@/styles-saga-showcase.css?url";
-import showcaseElevationCssUrl from "@/styles-showcase-elevation.css?url";
-import showcaseCinemaCssUrl from "@/styles-showcase-cinema.css?url";
-import motionEditionCssUrl from "@/styles-motion-edition.css?url";
-import rexonancePolishCssUrl from "@/styles-rexonance-polish.css?url";
-import rexonanceEditionCssUrl from "@/styles-rexonance-edition.css?url";
-import rexonanceInstrumentCssUrl from "@/styles-rexonance-instrument.css?url";
-import rexonanceFinishCssUrl from "@/styles-rexonance-finish.css?url";
-import rexonancePremiereCssUrl from "@/styles-rexonance-premiere.css?url";
-import rexonanceCoutureCssUrl from "@/styles-rexonance-couture.css?url";
-import rexonanceArmourCssUrl from "@/styles-rexonance-armour.css?url";
-import stageSpecialCssUrl from "@/styles-stage-special.css?url";
-import stageRexonanceCssUrl from "@/styles-stage-rexonance.css?url";
-import rexonanceResonanceCssUrl from "@/styles-rexonance-resonance.css?url";
-import rexonanceZenithCssUrl from "@/styles-rexonance-zenith.css?url";
-import rexonanceForgeCssUrl from "@/styles-rexonance-forge.css?url";
-import rexonanceEditorialCssUrl from "@/styles-rexonance-editorial.css?url";
-import p14CalibrationCssUrl from "@/styles-p14-calibration.css?url";
-import rexonanceLayoutCssUrl from "@/styles-rexonance-layout-20261021.css?url";
-import rexonanceTypeCssUrl from "@/styles-rexonance-type-20261021.css?url";
-import rexonanceKineticCssUrl from "@/styles-rexonance-motion-20261021.css?url";
+import rexonanceRouteCssUrl from "@/styles-rexonance-route.css?url";
 import { rexonanceImage } from "@/lib/rexonance-images";
 import { REXONANCE_SITE_ARTWORK } from "@/lib/rexonance-site-artwork";
 import { syncRexonanceLayoutGate } from "@/lib/rexonance-layout-gate.js";
@@ -51,56 +29,25 @@ export const Route = createFileRoute("/rexonance-saga")({
         content:
           "覚醒する、全てが最高峰で。レクソナンスサーガの性能、P14、三つの形態、悠真自身の終焉を制御する自己共鳴構造。",
       },
-      { property: "og:image", content: REXONANCE_SITE_ARTWORK.standard },
+      // The share card (2026-10-22 sweep F07): 1200x630, set from the hero's
+      // key visual (REXONANCE_SITE_ARTWORK.standard) and its first screen by
+      // scripts/build-og-rexonance-saga.mjs. A root-relative JPEG declared
+      // with its size, so the head injector (scripts/grok-pwa-shared.mjs)
+      // publishes it as this route's og:image and twitter:image in place of
+      // the site card.
+      { property: "og:image", content: "/og-rexonance-saga-20261022.jpg" },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
     ],
     links: [
       ...WORLD_STYLESHEET_LINKS,
-      { rel: "stylesheet", href: rexonanceSagaCssUrl },
-      { rel: "stylesheet", href: resonanceMotionCssUrl },
-      { rel: "stylesheet", href: sagaShowcaseCssUrl },
+      // The page's own edition sheets — saga through KINETIC, in their
+      // cascade order — as one render-blocking file whose @imports Vite
+      // inlines (src/styles-rexonance-route.css; 2026-10-22 sweep F06). The
+      // order there is the order these links had; the World core sheets
+      // stay before it and the cinematic skin follows every feature's sheet.
+      { rel: "stylesheet", href: rexonanceRouteCssUrl },
       { rel: "stylesheet", href: DOSSIER_HUD_FONTS_URL },
-      { rel: "stylesheet", href: showcaseElevationCssUrl },
-      { rel: "stylesheet", href: showcaseCinemaCssUrl },
-      { rel: "stylesheet", href: motionEditionCssUrl },
-      { rel: "stylesheet", href: rexonancePolishCssUrl },
-      { rel: "stylesheet", href: rexonanceEditionCssUrl },
-      { rel: "stylesheet", href: rexonanceInstrumentCssUrl },
-      { rel: "stylesheet", href: rexonanceFinishCssUrl },
-      { rel: "stylesheet", href: rexonancePremiereCssUrl },
-      { rel: "stylesheet", href: rexonanceCoutureCssUrl },
-      // The Armour edition: the page drawn as the suit-up renders its armour
-      // (styles-rexonance-armour.css), paint only, after Couture.
-      { rel: "stylesheet", href: rexonanceArmourCssUrl },
-      // STAGE (rx10): the trailer, over the Armour materials (the shared
-      // special-site grammar, then this page's scenes).
-      { rel: "stylesheet", href: stageSpecialCssUrl },
-      { rel: "stylesheet", href: stageRexonanceCssUrl },
-      // RESONANCE (rx11): the trailer in motion — depth, pinned cuts, the
-      // hits (styles-rexonance-resonance.css), over the STAGE scenes.
-      { rel: "stylesheet", href: rexonanceResonanceCssUrl },
-      // ZENITH (rx15): the suit-up on the page — the call played with the
-      // scroll, the armour assembled from nanites (styles-rexonance-zenith.css).
-      { rel: "stylesheet", href: rexonanceZenithCssUrl },
-      // FORGE (rx18): the page's type in four materials and its chrome in the
-      // engines' grammar — chips, guideways, molten gold (styles-rexonance-forge.css).
-      { rel: "stylesheet", href: rexonanceForgeCssUrl },
-      { rel: "stylesheet", href: rexonanceEditorialCssUrl },
-      { rel: "stylesheet", href: p14CalibrationCssUrl },
-      // LAYOUT (2026-10-21): the page's composition — grid, spacing, frames,
-      // plates, imagery treatment — decided once, after every edition sheet
-      // (styles-rexonance-layout-20261021.css). Type and motion editions
-      // follow in their own sheets.
-      { rel: "stylesheet", href: rexonanceLayoutCssUrl },
-      // TYPE (rx21): the page's type system — the Mincho titles and ledes,
-      // the tokens, the kickers' one voice — after the layout sheet; only
-      // the motion sheet follows it (the cinematic skin follows every
-      // feature's sheet).
-      { rel: "stylesheet", href: rexonanceTypeCssUrl },
-      // KINETIC (rxk, 2026-10-21): the chapters' entrances, the reading rail,
-      // hover and press, the end card (styles-rexonance-motion-20261021.css;
-      // src/lib/rexonance-choreography.js arms and plays them). Last of the
-      // page's sheets, after the layout.
-      { rel: "stylesheet", href: rexonanceKineticCssUrl },
       CINEMATIC_STYLESHEET_LINK,
       {
         rel: "preload",

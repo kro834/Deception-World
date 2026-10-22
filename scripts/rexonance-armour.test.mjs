@@ -62,12 +62,18 @@ const splitTopLevel = (text) => {
 };
 
 test("the armour sheet loads after the couture sheet, before the cinematic sheet, on its route only", () => {
-  assert.match(route, /import rexonanceArmourCssUrl from "@\/styles-rexonance-armour\.css\?url"/);
+  // The route's edition sheets are one stylesheet of ordered imports
+  // (src/styles-rexonance-route.css, 2026-10-22 F06), linked before the
+  // cinematic sheet: the import order is their cascade order.
+  const sheets = [
+    ...read("src/styles-rexonance-route.css").matchAll(/^@import "\.\/([\w-]+)\.css";$/gm),
+  ].map((match) => match[1]);
   const links = route.slice(route.search(/links:\s*\[/));
-  const couture = links.indexOf("href: rexonanceCoutureCssUrl");
-  const armour = links.indexOf("href: rexonanceArmourCssUrl");
-  const cinematic = links.indexOf("CINEMATIC_STYLESHEET_LINK");
-  assert.ok(couture > 0 && couture < armour && armour < cinematic);
+  const own = links.indexOf("href: rexonanceRouteCssUrl");
+  assert.ok(own > 0 && own < links.indexOf("CINEMATIC_STYLESHEET_LINK"));
+  const couture = sheets.indexOf("styles-rexonance-couture");
+  const armour = sheets.indexOf("styles-rexonance-armour");
+  assert.ok(couture >= 0 && couture < armour);
   for (const path of [
     "src/lib/world-head.ts",
     "src/routes/__root.tsx",

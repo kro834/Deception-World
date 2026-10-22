@@ -378,6 +378,10 @@ export function grokOgHeadTags({
     tags.push(`<meta property="og:image" content="${escapeHtml(image)}">`);
     tags.push(`<meta property="og:image:width" content="${own?.width ?? 1200}">`);
     tags.push(`<meta property="og:image:height" content="${own?.height ?? 630}">`);
+    // A route's own card is named for X as well (twitter:image), so the
+    // large-image card there shows it too; the site card leaves X to read
+    // og:image, as before.
+    if (own) tags.push(`<meta name="twitter:image" content="${escapeHtml(image)}">`);
     const banner = String(site.banner ?? "").trim();
     if (banner) {
       const bannerUrl = `https://${publicHost}${banner.startsWith("/") ? banner : `/${banner}`}`;

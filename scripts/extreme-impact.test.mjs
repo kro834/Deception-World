@@ -114,6 +114,7 @@ test("the sheet loads on /extreme-saga only, after the STAGE scenes and before t
     "src/routes/__root.tsx",
     "src/routes/world.tsx",
     "src/routes/rexonance-saga.tsx",
+    "src/styles-rexonance-route.css",
     "src/routes/final-stage.tsx",
     "src/routes/dream-chapter.tsx",
   ]) {

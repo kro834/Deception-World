@@ -88,7 +88,24 @@ const GATE_RULE =
   /^html body \.load-gate\.has-cine\.is-cine-full\.rider-route-dive(?::is\([^)]*\)|\.is-final-stage-dive)\.is-revealing$/;
 
 test("the cinema sheets load on their own routes, after the elevation and before motion", async () => {
-  for (const route of ["rexonance-saga", "extreme-saga"]) {
+  // Rexonance's edition sheets are one stylesheet of ordered imports
+  // (src/styles-rexonance-route.css, 2026-10-22 F06), linked before the
+  // cinematic sheet: the import order is their cascade order.
+  {
+    const source = await read("src/routes/rexonance-saga.tsx");
+    assert.doesNotMatch(source, /styles-final-stage-cinema/);
+    const links = source.slice(source.search(/links:\s*\[/));
+    const one = links.indexOf("href: rexonanceRouteCssUrl");
+    assert.ok(one > 0 && one < links.indexOf("CINEMATIC_STYLESHEET_LINK"));
+    const sheets = [
+      ...(await read("src/styles-rexonance-route.css")).matchAll(/^@import "\.\/([\w-]+)\.css";$/gm),
+    ].map((match) => match[1]);
+    const elevation = sheets.indexOf("styles-showcase-elevation");
+    const cinema = sheets.indexOf("styles-showcase-cinema");
+    const motion = sheets.indexOf("styles-motion-edition");
+    assert.ok(elevation >= 0 && elevation < cinema && cinema < motion);
+  }
+  for (const route of ["extreme-saga"]) {
     const source = await read(`src/routes/${route}.tsx`);
     assert.match(source, /styles-showcase-cinema\.css\?url/, route);
     assert.doesNotMatch(source, /styles-final-stage-cinema/, route);

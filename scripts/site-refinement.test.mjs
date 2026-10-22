@@ -26,11 +26,16 @@ test("refinement assets are delivered by their own routes", () => {
     ["index", "opening-refinement"],
     ["world", "world-exhibition"],
     ["dream-chapter", "dream-refinement"],
-    ["rexonance-saga", "rexonance-edition"],
   ]) {
     assert.ok(read(`src/routes/${route}.tsx`).includes(`styles-${sheet}.css?url`));
     assert.ok(!read("src/lib/world-head.ts").includes(`styles-${sheet}.css?url`));
   }
+  // Rexonance's edition sheets reach its route through its one stylesheet
+  // of ordered imports (src/styles-rexonance-route.css, 2026-10-22 F06).
+  assert.ok(read("src/routes/rexonance-saga.tsx").includes("styles-rexonance-route.css?url"));
+  assert.match(read("src/styles-rexonance-route.css"), /^@import "\.\/styles-rexonance-edition\.css";$/m);
+  assert.ok(!read("src/lib/world-head.ts").includes("styles-rexonance-route"));
+  assert.ok(!read("src/lib/world-head.ts").includes("styles-rexonance-edition.css?url"));
 });
 
 test("Rexonance chapter shortcuts use native anchors with real section targets", () => {
@@ -96,7 +101,9 @@ test("P14 calibration rail keeps two discrete baselines and an iOS native picker
   assert.match(comparator, /rxs-p14-core-anchor-p1/);
   assert.match(comparator, /rxs-p14-core-anchor-p2/);
   assert.match(comparator, /rxs-p14-native-rail" data-value=\{p14Baseline\} aria-hidden="true"/);
-  assert.match(route, /p14CalibrationCssUrl/);
+  // Through the route's one stylesheet of ordered imports (2026-10-22 F06).
+  assert.match(route, /href: rexonanceRouteCssUrl/);
+  assert.match(read("src/styles-rexonance-route.css"), /^@import "\.\/styles-p14-calibration\.css";$/m);
   assert.match(css, /html body \.rxs-page\.rxs-page\.rxs-rexonance-page \.rxs-p14-ios-slider[\s\S]*?background:[\s\S]*?!important/);
   assert.match(css, /html body \.rxs-page\.rxs-page\.rxs-rexonance-page \.rxs-p14-ios-thumb[\s\S]*?background:[\s\S]*?!important/);
   assert.doesNotMatch(css, /html body \.rxs-p14-ios-slider\s*\{/);

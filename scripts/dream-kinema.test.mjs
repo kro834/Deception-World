@@ -100,6 +100,7 @@ test("the Kinema sheet loads after the extra sheet and before the cinematic skin
     "src/routes/__root.tsx",
     "src/routes/world.tsx",
     "src/routes/rexonance-saga.tsx",
+    "src/styles-rexonance-route.css",
     "src/routes/extreme-saga.tsx",
     "src/routes/final-stage.tsx",
   ]) {

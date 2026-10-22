@@ -274,32 +274,33 @@ const faceFor = (name) => remoteFaces.find((face) => face.includes(`url("${FILES
 /* ---------------- part 1: route and files ---------------- */
 test("the TYPE sheet loads last (before only the motion sheet) on the Rexonance route only, and only the first-screen subsets are preloaded", () => {
   // owner request 2026-10-21: TYPE (rx21)
-  assert.match(
-    route,
-    /import rexonanceTypeCssUrl from "@\/styles-rexonance-type-20261021\.css\?url"/,
-  );
+  // The route's edition sheets are one stylesheet of ordered imports
+  // (src/styles-rexonance-route.css, 2026-10-22 F06), linked before the
+  // cinematic sheet: the import order is their cascade order.
+  const names = [
+    ...read("src/styles-rexonance-route.css").matchAll(/^@import "\.\/([\w-]+)\.css";$/gm),
+  ].map((match) => match[1]);
   const links = route.slice(route.search(/links:\s*\[/));
   // The last of the page's own sheets; the cinematic skin follows every
   // feature's sheet (scripts/cinematic-edition.test.mjs), and the type rules
   // outrank its .rxs-page rules by specificity, not order.
-  const stylesheets = [...links.matchAll(/\{ rel: "stylesheet", href: (\w+) \}/g)];
+  assert.ok(
+    links.indexOf("href: rexonanceRouteCssUrl") > 0 &&
+      links.indexOf("href: rexonanceRouteCssUrl") < links.indexOf("CINEMATIC_STYLESHEET_LINK"),
+  );
   // Only the KINETIC motion sheet (no type rules of its own) may follow it.
-  const names = stylesheets.map((match) => match[1]);
+  const TYPE = "styles-rexonance-type-20261021";
+  const KINETIC = "styles-rexonance-motion-20261021";
+  assert.ok(names.includes(TYPE));
   assert.deepEqual(
-    names.slice(names.indexOf("rexonanceTypeCssUrl") + 1),
-    names.includes("rexonanceKineticCssUrl") ? ["rexonanceKineticCssUrl"] : [],
-    "the last stylesheet link but the motion sheet",
+    names.slice(names.indexOf(TYPE) + 1),
+    names.includes(KINETIC) ? [KINETIC] : [],
+    "the last stylesheet but the motion sheet",
   );
-  assert.ok(
-    links.indexOf("href: rexonanceTypeCssUrl") < links.indexOf("CINEMATIC_STYLESHEET_LINK"),
-  );
-  assert.ok(
-    links.indexOf("href: p14CalibrationCssUrl") < links.indexOf("href: rexonanceTypeCssUrl"),
-  );
+  assert.ok(names.indexOf("styles-p14-calibration") < names.indexOf(TYPE));
   // After the layout edition's sheet: type dresses the marks layout places.
-  assert.ok(
-    links.indexOf("href: rexonanceLayoutCssUrl") < links.indexOf("href: rexonanceTypeCssUrl"),
-  );
+  assert.ok(names.indexOf("styles-rexonance-layout-20261021") >= 0);
+  assert.ok(names.indexOf("styles-rexonance-layout-20261021") < names.indexOf(TYPE));
   for (const name of ["display-first", "text-first"]) {
     const preload = new RegExp(
       String.raw`\{\s*rel: "preload",\s*as: "font",\s*type: "font/woff2",\s*href: "${FILES[name].replace(/[./]/g, "\\$&")}",\s*crossOrigin: "anonymous",\s*\}`,

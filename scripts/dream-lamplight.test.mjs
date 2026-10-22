@@ -39,6 +39,7 @@ test("lamplight loads after the stage sheet and before the cinematic skin, on Dr
     "src/routes/__root.tsx",
     "src/routes/world.tsx",
     "src/routes/rexonance-saga.tsx",
+    "src/styles-rexonance-route.css",
     "src/routes/extreme-saga.tsx",
     "src/routes/final-stage.tsx",
   ]) {

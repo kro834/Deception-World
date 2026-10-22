@@ -4,12 +4,26 @@ import test from "node:test";
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 const readCss = async (path) => (await read(path)).replace(/\/\*[\s\S]*?\*\//g, "");
+// Rexonance's edition sheets, in their cascade order (2026-10-22 F06).
+const rexonanceSheets = async () =>
+  [...(await read("src/styles-rexonance-route.css")).matchAll(/^@import "\.\/([\w-]+)\.css";$/gm)].map(
+    (match) => match[1],
+  );
 
 test("showcase layer is linked by both saga routes after their own skin and before the cinematic sheet", async () => {
-  for (const [route, own] of [
-    ["rexonance-saga", "resonanceMotionCssUrl"],
-    ["extreme-saga", "extremeSagaCssUrl"],
-  ]) {
+  // Rexonance's edition sheets are one stylesheet of ordered imports
+  // (src/styles-rexonance-route.css, 2026-10-22 F06), linked before the
+  // cinematic sheet: the import order is their cascade order.
+  {
+    const source = await read("src/routes/rexonance-saga.tsx");
+    const links = source.slice(source.search(/links:\s*\[/));
+    const one = links.indexOf("href: rexonanceRouteCssUrl");
+    assert.ok(one > 0 && one < links.indexOf("CINEMATIC_STYLESHEET_LINK"));
+    const sheets = await rexonanceSheets();
+    const own = sheets.indexOf("styles-rexonance-motion");
+    assert.ok(own >= 0 && own < sheets.indexOf("styles-saga-showcase"));
+  }
+  for (const [route, own] of [["extreme-saga", "extremeSagaCssUrl"]]) {
     const source = await read(`src/routes/${route}.tsx`);
     assert.match(source, /styles-saga-showcase\.css\?url/);
     const links = source.slice(source.search(/links:\s*\[/));
@@ -153,7 +167,21 @@ const declarations = (body, property) =>
 test("showcase elevation keeps the discipline", async () => {
   // Linked by both saga routes after the showcase and the Michroma subset,
   // before the motion sheet; Final Stage and the root never load it.
-  for (const route of ["rexonance-saga", "extreme-saga"]) {
+  // Rexonance (2026-10-22 F06): through its one stylesheet of ordered
+  // imports; the Michroma subset is the root's link (React hoists a sheet
+  // once per href, at its first place), so it stands before every route
+  // sheet, and the route still names it.
+  {
+    const source = await read("src/routes/rexonance-saga.tsx");
+    assert.match(source, /\{ rel: "stylesheet", href: DOSSIER_HUD_FONTS_URL \}/);
+    assert.match(await read("src/routes/__root.tsx"), /\{ rel: "stylesheet", href: DOSSIER_HUD_FONTS_URL \}/);
+    const sheets = await rexonanceSheets();
+    const showcase = sheets.indexOf("styles-saga-showcase");
+    const elevation = sheets.indexOf("styles-showcase-elevation");
+    const motion = sheets.indexOf("styles-motion-edition");
+    assert.ok(showcase >= 0 && showcase < elevation && elevation < motion);
+  }
+  for (const route of ["extreme-saga"]) {
     const source = await read(`src/routes/${route}.tsx`);
     assert.match(source, /styles-showcase-elevation\.css\?url/, route);
     const links = source.slice(source.search(/links:\s*\[/));

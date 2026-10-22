@@ -28,7 +28,12 @@ test("the special site maps the three supplied artworks to separately versioned 
 test("hero, share image, preload and navigation warmup use the same new standard artwork", () => {
   assert.match(component, /src=\{REXONANCE_SITE_ARTWORK\.standard\}/);
   assert.match(component, /rexonanceImage\(REXONANCE_SITE_ARTWORK\.standard\)/);
-  assert.match(route, /"og:image", content: REXONANCE_SITE_ARTWORK\.standard/);
+  // The share image (2026-10-22 F07) is the 1200x630 card set from this same
+  // standard artwork by its build script, not the portrait WebP itself.
+  assert.match(route, /"og:image", content: "\/og-rexonance-saga-20261022\.jpg"/);
+  const card = read("scripts/build-og-rexonance-saga.mjs");
+  assert.match(card, /import \{ REXONANCE_SITE_ARTWORK \} from "\.\.\/src\/lib\/rexonance-site-artwork\.ts"/);
+  assert.match(card, /const ART = REXONANCE_SITE_ARTWORK\.standard\.slice\(1\)/);
   assert.match(route, /href: REXONANCE_SITE_ARTWORK\.standard/);
   assert.match(route, /imageSrcSet: rexonanceImage\(REXONANCE_SITE_ARTWORK\.standard\)\.srcSet/);
   assert.match(

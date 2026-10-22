@@ -277,3 +277,5 @@ export function titleFromDocument(html) {
 }
 
 /** The document head's <meta> tags as { key, content }, keyed by property or name. */
+function documentMetaTags(html) {
+  const head = String(html ?? "").split(/<\/head>/i)[0];

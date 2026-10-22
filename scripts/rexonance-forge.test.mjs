@@ -166,12 +166,18 @@ const scrollLinked = ({ body }) => {
 /* ---------------- part 1: route and files ---------------- */
 test("the FORGE sheet loads after ZENITH, before the cinematic sheet, on its route only", () => {
   // owner request 2026-10-16: FORGE (rx18)
-  assert.match(route, /import rexonanceForgeCssUrl from "@\/styles-rexonance-forge\.css\?url"/);
+  // The route's edition sheets are one stylesheet of ordered imports
+  // (src/styles-rexonance-route.css, 2026-10-22 F06), linked before the
+  // cinematic sheet: the import order is their cascade order.
+  const sheets = [
+    ...read("src/styles-rexonance-route.css").matchAll(/^@import "\.\/([\w-]+)\.css";$/gm),
+  ].map((match) => match[1]);
   const links = route.slice(route.search(/links:\s*\[/));
-  const zenith = links.indexOf("href: rexonanceZenithCssUrl");
-  const forge = links.indexOf("href: rexonanceForgeCssUrl");
-  const cinematic = links.indexOf("CINEMATIC_STYLESHEET_LINK");
-  assert.ok(zenith > 0 && zenith < forge && forge < cinematic);
+  const own = links.indexOf("href: rexonanceRouteCssUrl");
+  assert.ok(own > 0 && own < links.indexOf("CINEMATIC_STYLESHEET_LINK"));
+  const zenith = sheets.indexOf("styles-rexonance-zenith");
+  const forge = sheets.indexOf("styles-rexonance-forge");
+  assert.ok(zenith >= 0 && zenith < forge);
   for (const path of [
     "src/lib/world-head.ts",
     "src/routes/__root.tsx",

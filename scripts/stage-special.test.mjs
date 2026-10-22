@@ -34,7 +34,6 @@ const SHEETS = {
 };
 
 const ROUTES = [
-  ["src/routes/rexonance-saga.tsx", "rexonanceArmourCssUrl", "stageRexonanceCssUrl"],
   ["src/routes/extreme-saga.tsx", "extremeOverdriveCssUrl", "stageExtremeCssUrl"],
   ["src/routes/final-stage.tsx", "finalStageLamplightCssUrl", "stageFinalStageCssUrl"],
 ];
@@ -49,6 +48,24 @@ test("each special route links the shared grammar, then its scenes, after its ow
     const cinematic = links.indexOf("CINEMATIC_STYLESHEET_LINK");
     assert.ok(skin > 0 && skin < shared && shared < own && own < cinematic, path);
     assert.equal(links.lastIndexOf('rel: "stylesheet"') < cinematic, true, path);
+  }
+  // Rexonance's edition sheets are one stylesheet of ordered imports
+  // (src/styles-rexonance-route.css, 2026-10-22 F06), linked before the
+  // cinematic sheet: the import order is their cascade order.
+  {
+    const route = await read("src/routes/rexonance-saga.tsx");
+    const links = route.slice(route.search(/links:\s*\[/));
+    const one = links.indexOf("href: rexonanceRouteCssUrl");
+    const cinematic = links.indexOf("CINEMATIC_STYLESHEET_LINK");
+    assert.ok(one > 0 && one < cinematic);
+    assert.equal(links.lastIndexOf('rel: "stylesheet"') < cinematic, true);
+    const sheets = [
+      ...(await read("src/styles-rexonance-route.css")).matchAll(/^@import "\.\/([\w-]+)\.css";$/gm),
+    ].map((match) => match[1]);
+    const skin = sheets.indexOf("styles-rexonance-armour");
+    const shared = sheets.indexOf("styles-stage-special");
+    const own = sheets.indexOf("styles-stage-rexonance");
+    assert.ok(skin >= 0 && skin < shared && shared < own);
   }
   for (const path of ["src/lib/world-head.ts", "src/routes/__root.tsx", "src/routes/world.tsx"]) {
     assert.doesNotMatch(

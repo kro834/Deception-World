@@ -104,6 +104,7 @@ test("the edition loads on Final Stage only, after the motion sheet and before t
     "src/routes/world.tsx",
     "src/routes/dream-chapter.tsx",
     "src/routes/rexonance-saga.tsx",
+    "src/styles-rexonance-route.css",
     "src/routes/extreme-saga.tsx",
   ]) {
     assert.doesNotMatch(await read(path), /final-stage-lamplight|finalStageLamplight/, path);

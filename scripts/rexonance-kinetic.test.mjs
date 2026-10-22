@@ -10,10 +10,24 @@ const script = read("src/lib/rexonance-choreography.js");
 test("the kinetic sheet is the last of the page's sheets and the hook mounts once", () => {
   const route = read("src/routes/rexonance-saga.tsx");
   const links = route.slice(route.indexOf("links: ["));
-  const kinetic = links.indexOf("rexonanceKineticCssUrl");
-  assert.ok(kinetic > links.indexOf("p14CalibrationCssUrl"));
-  assert.ok(kinetic < links.indexOf("CINEMATIC_STYLESHEET_LINK"));
-  assert.ok(kinetic > links.lastIndexOf('rel: "stylesheet"', links.indexOf("CINEMATIC_STYLESHEET_LINK")) - 80);
+  // The route's edition sheets are one stylesheet of ordered imports
+  // (src/styles-rexonance-route.css, 2026-10-22 F06), linked before the
+  // cinematic sheet: the import order is their cascade order, and the
+  // kinetic sheet is the last import.
+  const sheets = [
+    ...read("src/styles-rexonance-route.css").matchAll(/^@import "\.\/([\w-]+)\.css";$/gm),
+  ].map((match) => match[1]);
+  const own = links.indexOf("href: rexonanceRouteCssUrl");
+  assert.ok(own > 0 && own < links.indexOf("CINEMATIC_STYLESHEET_LINK"));
+  assert.equal(sheets.at(-1), "styles-rexonance-motion-20261021");
+  assert.ok(sheets.indexOf("styles-rexonance-motion-20261021") > sheets.indexOf("styles-p14-calibration"));
+  // ...and the one sheet is the route's last own stylesheet link: only the
+  // HUD subset (fonts) and the cinematic skin follow it.
+  const before = links.slice(0, links.indexOf("CINEMATIC_STYLESHEET_LINK"));
+  assert.deepEqual(
+    [...before.matchAll(/\{ rel: "stylesheet", href: (\w+) \}/g)].map((match) => match[1]),
+    ["rexonanceRouteCssUrl", "DOSSIER_HUD_FONTS_URL"],
+  );
   const page = read("src/components/rexonance-saga/rexonance-saga.tsx");
   assert.match(page, /import \{ mountRexonanceChoreography \} from "@\/lib\/rexonance-choreography\.js"/);
   assert.equal(page.match(/mountRexonanceChoreography\(/g).length, 1);

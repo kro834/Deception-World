@@ -365,10 +365,18 @@ test("a route's own 1200x630 JPEG card replaces the site card, absolute and size
   assert.equal(share["og:image"], "https://deception-world.grok.me/og-rexonance-saga.jpg");
   assert.equal(share["og:image:width"], "1200");
   assert.equal(share["og:image:height"], "630");
+  // 2026-10-22 F07: the route's own card is X's large image too.
+  assert.equal(share["twitter:image"], share["og:image"]);
   // Without a custom site card the placeholder service still draws the card.
-  assert.match(
-    SHARE(injectGrokPwaHead(html, { host: "a.grok.me", site: {} }))["og:image"],
-    /\/v1\/card\.png\?host=a\.grok\.me/,
+  const placeholder = SHARE(injectGrokPwaHead(html, { host: "a.grok.me", site: {} }));
+  assert.match(placeholder["og:image"], /\/v1\/card\.png\?host=a\.grok\.me/);
+  assert.equal(placeholder["twitter:image"], undefined);
+  // The site card names no twitter:image (X reads og:image), as before.
+  assert.equal(
+    SHARE(injectGrokPwaHead(ROUTE_HEAD(), { host: "a.grok.me", site: { card: "custom" } }))[
+      "twitter:image"
+    ],
+    undefined,
   );
   // Not a card: a WebP, a card without its size, a remote or parent path.
   for (const image of [
@@ -391,4 +399,52 @@ test("the shipped /rexonance-saga head describes itself for its share card", () 
   const route = readFileSync(join(TEMPLATE_ROOT, "src/routes/rexonance-saga.tsx"), "utf8");
   assert.match(route, /\{\s*property: "og:description",\s*content:/);
   assert.match(route, /\{\s*name: "description",\s*content:/);
+});
+
+/* 2026-10-22 F07 remainder: the route's links were shared with the generic
+   site card. It now names its own card: a versioned 1200x630 JPEG under
+   public/, declared with its size, which the injector publishes absolute as
+   og:image (with its size) and twitter:image. */
+const jpegSize = (bytes) => {
+  assert.equal(bytes.readUInt16BE(0), 0xffd8, "a JPEG");
+  for (let i = 2; i < bytes.length;) {
+    const marker = bytes.readUInt16BE(i);
+    const length = bytes.readUInt16BE(i + 2);
+    // SOF0..SOF15 except DHT (C4), JPG (C8) and DAC (CC).
+    if (marker >= 0xffc0 && marker <= 0xffcf && ![0xffc4, 0xffc8, 0xffcc].includes(marker)) {
+      return [bytes.readUInt16BE(i + 7), bytes.readUInt16BE(i + 5)];
+    }
+    i += 2 + length;
+  }
+  return null;
+};
+
+test("the shipped /rexonance-saga head names its own 1200x630 card, and the injector publishes it", () => {
+  const route = readFileSync(join(TEMPLATE_ROOT, "src/routes/rexonance-saga.tsx"), "utf8");
+  const meta = (key) =>
+    route.match(new RegExp(`\\{ property: "${key}", content: "([^"]+)" \\}`))?.[1];
+  assert.equal(meta("og:image"), "/og-rexonance-saga-20261022.jpg");
+  assert.equal(meta("og:image:width"), "1200");
+  assert.equal(meta("og:image:height"), "630");
+  const card = readFileSync(join(TEMPLATE_ROOT, "public/og-rexonance-saga-20261022.jpg"));
+  assert.deepEqual(jpegSize(card), [1200, 630]);
+  assert.ok(card.length < 200 * 1024, `${card.length} bytes`);
+  // The SSR head as the router emits it (the route's meta win over the root's).
+  const html =
+    "<html><head><title>レクソナンスサーガ｜Deception World</title>" +
+    `<meta property="og:image" content="${meta("og:image")}">` +
+    `<meta property="og:image:width" content="${meta("og:image:width")}">` +
+    `<meta property="og:image:height" content="${meta("og:image:height")}">` +
+    "</head><body></body></html>";
+  const out = injectGrokPwaHead(html, {
+    host: "deception-world.grok.me",
+    site: { card: "custom", image: "/og.jpg" },
+  });
+  const share = SHARE(out);
+  assert.equal(share["og:image"], "https://deception-world.grok.me/og-rexonance-saga-20261022.jpg");
+  assert.equal(share["og:image:width"], "1200");
+  assert.equal(share["og:image:height"], "630");
+  assert.equal(share["twitter:image"], share["og:image"]);
+  assert.equal(out.split('property="og:image"').length - 1, 1);
+  assert.equal(out.split('name="twitter:image"').length - 1, 1);
 });

@@ -97,6 +97,7 @@ test("the edition loads on the Final Stage route only, between the cinema and th
     "src/routes/world.tsx",
     "src/routes/dream-chapter.tsx",
     "src/routes/rexonance-saga.tsx",
+    "src/styles-rexonance-route.css",
     "src/routes/extreme-saga.tsx",
   ]) {
     assert.doesNotMatch(await read(path), /final-stage-kiro/, path);

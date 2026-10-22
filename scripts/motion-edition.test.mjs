@@ -7,7 +7,20 @@ const readCss = async () =>
   (await read("src/styles-motion-edition.css")).replace(/\/\*[\s\S]*?\*\//g, "");
 
 test("motion layer is linked by the four story routes, before the cinematic sheet", async () => {
-  for (const route of ["rexonance-saga", "extreme-saga", "final-stage", "world"]) {
+  // Rexonance's edition sheets are one stylesheet of ordered imports
+  // (src/styles-rexonance-route.css, 2026-10-22 F06), linked before the
+  // cinematic sheet.
+  {
+    const source = await read("src/routes/rexonance-saga.tsx");
+    const links = source.slice(source.search(/links:\s*\[/));
+    const one = links.indexOf("href: rexonanceRouteCssUrl");
+    assert.ok(one > 0 && one < links.indexOf("CINEMATIC_STYLESHEET_LINK"));
+    assert.match(
+      await read("src/styles-rexonance-route.css"),
+      /^@import "\.\/styles-motion-edition\.css";$/m,
+    );
+  }
+  for (const route of ["extreme-saga", "final-stage", "world"]) {
     const source = await read(`src/routes/${route}.tsx`);
     assert.match(source, /styles-motion-edition\.css\?url/, route);
     const links = source.slice(source.search(/(?:stylesheetLinks|links):\s*\[/));

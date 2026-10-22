@@ -108,15 +108,18 @@ const ms = (token) => {
 };
 
 test("the premiere sheet loads last on its route, before the cinematic sheet, and nowhere else", () => {
+  // The route's edition sheets are one stylesheet of ordered imports
+  // (src/styles-rexonance-route.css, 2026-10-22 F06), linked before the
+  // cinematic sheet: the import order is their cascade order.
+  const sheets = [
+    ...read("src/styles-rexonance-route.css").matchAll(/^@import "\.\/([\w-]+)\.css";$/gm),
+  ].map((match) => match[1]);
   const links = route.slice(route.search(/links:\s*\[/));
-  const finish = links.indexOf("href: rexonanceFinishCssUrl");
-  const premiereLink = links.indexOf("href: rexonancePremiereCssUrl");
-  const cinematic = links.indexOf("CINEMATIC_STYLESHEET_LINK");
-  assert.ok(finish > 0 && finish < premiereLink && premiereLink < cinematic);
-  assert.match(
-    route,
-    /import rexonancePremiereCssUrl from "@\/styles-rexonance-premiere\.css\?url"/,
-  );
+  const own = links.indexOf("href: rexonanceRouteCssUrl");
+  assert.ok(own > 0 && own < links.indexOf("CINEMATIC_STYLESHEET_LINK"));
+  const finish = sheets.indexOf("styles-rexonance-finish");
+  const premiere = sheets.indexOf("styles-rexonance-premiere");
+  assert.ok(finish >= 0 && finish < premiere);
   for (const path of [
     "src/lib/world-head.ts",
     "src/routes/__root.tsx",

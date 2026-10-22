@@ -27,6 +27,9 @@ test("Motion preferences and page visibility have symmetric cleanup", () => {
 });
 
 test("Rexonance motion is only linked from its own route", () => {
-  assert.ok(read("routes/rexonance-saga.tsx").includes("styles-rexonance-motion.css?url"));
+  // Through the route's one stylesheet of ordered imports (2026-10-22 F06).
+  assert.ok(read("routes/rexonance-saga.tsx").includes("styles-rexonance-route.css?url"));
+  assert.match(read("styles-rexonance-route.css"), /^@import "\.\/styles-rexonance-motion\.css";$/m);
   assert.ok(!read("routes/extreme-saga.tsx").includes("styles-rexonance-motion.css?url"));
+  assert.ok(!read("routes/extreme-saga.tsx").includes("styles-rexonance-route"));
 });

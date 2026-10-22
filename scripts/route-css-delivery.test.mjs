@@ -21,6 +21,7 @@ async function collectSourceFiles(directory) {
 }
 
 const worldHead = await read("src/lib/world-head.ts");
+const rexonanceSheets = await read("src/styles-rexonance-route.css");
 const routeSources = Object.fromEntries(
   await Promise.all(
     [
@@ -93,9 +94,15 @@ test("special routes append their CSS after world base and addon styles", () => 
     dream.indexOf("...WORLD_STYLESHEET_LINKS") <
       dream.indexOf('{ rel: "stylesheet", href: dreamChapterCssUrl }'),
   );
+  // Rexonance's own sheets are one stylesheet of ordered imports, its saga
+  // skin first (src/styles-rexonance-route.css, 2026-10-22 F06).
   assert.ok(
     rexonance.indexOf("...WORLD_STYLESHEET_LINKS") <
-      rexonance.indexOf('{ rel: "stylesheet", href: rexonanceSagaCssUrl }'),
+      rexonance.indexOf('{ rel: "stylesheet", href: rexonanceRouteCssUrl }'),
+  );
+  assert.match(
+    rexonanceSheets.replace(/\/\*[\s\S]*?\*\//g, "").trim(),
+    /^@import "\.\/styles-rexonance-saga\.css";\n/,
   );
   const rexonanceLink = extreme.indexOf('{ rel: "stylesheet", href: rexonanceSagaCssUrl }');
   const extremeLink = extreme.indexOf('{ rel: "stylesheet", href: extremeSagaCssUrl }');

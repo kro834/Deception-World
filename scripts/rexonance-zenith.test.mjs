@@ -129,12 +129,18 @@ const timed = (body) => {
 };
 
 test("the ZENITH sheet loads after RESONANCE, before the cinematic sheet, on its route only", () => {
-  assert.match(route, /import rexonanceZenithCssUrl from "@\/styles-rexonance-zenith\.css\?url"/);
+  // The route's edition sheets are one stylesheet of ordered imports
+  // (src/styles-rexonance-route.css, 2026-10-22 F06), linked before the
+  // cinematic sheet: the import order is their cascade order.
+  const sheets = [
+    ...read("src/styles-rexonance-route.css").matchAll(/^@import "\.\/([\w-]+)\.css";$/gm),
+  ].map((match) => match[1]);
   const links = route.slice(route.search(/links:\s*\[/));
-  const resonance = links.indexOf("href: rexonanceResonanceCssUrl");
-  const zenith = links.indexOf("href: rexonanceZenithCssUrl");
-  const cinematic = links.indexOf("CINEMATIC_STYLESHEET_LINK");
-  assert.ok(resonance > 0 && resonance < zenith && zenith < cinematic);
+  const own = links.indexOf("href: rexonanceRouteCssUrl");
+  assert.ok(own > 0 && own < links.indexOf("CINEMATIC_STYLESHEET_LINK"));
+  const resonance = sheets.indexOf("styles-rexonance-resonance");
+  const zenith = sheets.indexOf("styles-rexonance-zenith");
+  assert.ok(resonance >= 0 && resonance < zenith);
   for (const path of [
     "src/lib/world-head.ts",
     "src/routes/__root.tsx",
