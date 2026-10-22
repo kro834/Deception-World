@@ -322,6 +322,16 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-se
   }
 }
 
+/* Round 2 (2026-10-22): the guide's status speaks the suit's loading
+   (waiting, loading, preparing, ready), and on a narrow phone "ready"
+   takes a second line: the head grew 25px under a reader already below
+   it, and scroll anchoring moved the page (a stage swipe at 320px read as
+   a vertical scroll). The status holds two lines from the start. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-assembly-heading .rxs-assembly-status {
+  min-height: 3.6em;
+  min-height: 2lh;
+}
+
 /* Phones: the forged numeral beside the kicker already names the chapter;
    the index would crowd the kicker's one line. */
 @media (max-width: 760px) {
@@ -532,6 +542,20 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-
 
 /* (The two reading columns: LAYOUT's fixed value columns line every row
    up, and its P14 column holds the widest figure.) */
+
+/* Round 2 (2026-10-22): the comparator's counter is a <b> inside its P14
+   figure, so the base column's <b> rules (STAGE's mono at 16–19px and its
+   dim ink, FORGE's text face) dressed it too: the figure counted small,
+   grey and light in the corner of a 26–36px reading, then jumped to size
+   at the lock. It wears its own figure's type again, as every other
+   counter does (the lock's molten paint still outranks this). */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #p14 .rxs-p14-values strong > .rsn-count {
+  color: var(--dx-text, #f2f7fb);
+  font: inherit;
+  letter-spacing: inherit;
+  font-variant-numeric: inherit;
+  font-feature-settings: inherit;
+}
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-method-note,
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-comparison-note {
   padding-left: 14px;
