@@ -1,0 +1,331 @@
+/* ================================================================
+   FAR FROM SAGA — the entry transformation's own sheet (owner's record,
+   2026-10-22). The overlay rides the global call sheet
+   (styles-rexonance-calls.css: .rx-call-sequence, .rx-suit-*) with this
+   suit's data; this sheet adds the overlay itself, its skip control, the
+   cover before the sequence is there, the still, and the Far From
+   differences: a gold accent, the undersuit registered inside the wider
+   figure and burnt away to nanites, the reactor's ignition on the last
+   call, the opening calls' longer lines, the reticle's longer run.
+   Paint, opacity and transform only; the motion is the call sheet's, gated
+   there by prefers-reduced-motion and economy.
+   ================================================================ */
+
+.ffe-overlay {
+  position: fixed;
+  z-index: 1200;
+  inset: 0;
+  isolation: isolate;
+  pointer-events: auto;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.ffe-overlay > .rx-call-sequence {
+  position: absolute;
+  inset: 0;
+}
+
+/* The floating control sits above every layer: hidden for the entry only. */
+html body:has(.ffe-overlay) .zeus-button {
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transition: none !important;
+}
+
+/* The cover before the sequence is there, and the still's ground. */
+.ffe-cover {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 10% 50%, rgb(50 142 184 / 16%), transparent 48%),
+    radial-gradient(ellipse at 90% 50%, rgb(171 49 123 / 13%), transparent 48%), #02050b;
+  color: #effbff;
+  font-family: "Michroma", "Oxanium", "Helvetica Neue", sans-serif;
+}
+
+.ffe-cover > .rx-call-caption {
+  color: #b0c9d6;
+}
+
+/* The still (reduced motion, economy, Save-Data): the finished figure and
+   the last call, no motion. The sequence is positioned by the call sheet. */
+.ffe-cover > .ffe-still {
+  position: absolute;
+  inset: 0;
+}
+
+.ffe-cover > .ffe-still .rx-call-ground {
+  background: transparent;
+}
+
+.ffe-cover > .ffe-still .rx-suit {
+  display: block;
+}
+
+.ffe-cover > .ffe-still .rx-suit-whole {
+  display: block;
+}
+
+/* The overlay leaves: the sequence's own reveal, or (still) the cover. */
+.ffe-overlay[data-ffe="revealing"] > .ffe-cover {
+  animation: rxCallGroundOut 240ms ease-out both;
+}
+
+/* The skip control: a real button, reachable, above the words. */
+.ffe-skip {
+  position: absolute;
+  z-index: 60;
+  right: max(20px, calc(env(safe-area-inset-right) + 12px));
+  bottom: max(18px, calc(env(safe-area-inset-bottom) + 10px));
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 112px;
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1px solid rgb(255 215 122 / 46%);
+  border-radius: 999px;
+  background: rgb(2 5 11 / 62%);
+  color: #ffe9b0;
+  font-family: "Zen Kaku Gothic New", "Noto Sans JP", "Helvetica Neue", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  line-height: 1;
+  cursor: pointer;
+  pointer-events: auto;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    transform 160ms ease;
+}
+
+.ffe-skip:hover {
+  border-color: rgb(255 215 122 / 80%);
+  background: rgb(10 14 24 / 80%);
+}
+
+.ffe-skip:active {
+  transform: scale(0.97);
+}
+
+.ffe-skip:focus-visible {
+  outline: 2px solid #ffd77a;
+  outline-offset: 3px;
+}
+
+/* ---- The Far From differences ----------------------------------- */
+/* The gold accent: the last call's DEUS！, the lock, the brackets. */
+.ffe-sequence {
+  --rx-call-accent: #ffd77a;
+}
+
+.ffe-sequence .rx-call-chant .rx-call-answer {
+  color: #ffd77a;
+}
+
+/* The opening calls are longer lines than Rexonance's: a size that keeps
+   them in the calls' zone (measured: Ultra SUPERIOR DEUS！ ≈ 13.6 em). */
+.ffe-sequence[data-mode="entry"] .rx-call-opening:first-child {
+  font-size: max(22px, min(6.2vw, 84px, 11vh));
+}
+
+.ffe-sequence[data-mode="entry"] .rx-call-opening:nth-child(2) {
+  font-size: max(24px, min(9vw, 132px, 18vh));
+}
+
+.ffe-sequence[data-mode="entry"] :is(.rx-call-chant, .rx-call-repetition) {
+  font-size: max(22px, min(5.4vw, 92px, 9.5vh));
+}
+
+@media (orientation: landscape) and (min-aspect-ratio: 13 / 10) {
+  .ffe-sequence[data-mode="entry"] .rx-call-opening:first-child {
+    font-size: max(22px, min(6.2vw, 84px, 11vh, var(--rx-call-zone) / 14.2));
+  }
+
+  .ffe-sequence[data-mode="entry"] .rx-call-opening:nth-child(2) {
+    font-size: max(24px, min(9vw, 132px, 18vh, var(--rx-call-zone) / 9.6));
+  }
+
+  .ffe-sequence[data-mode="entry"] :is(.rx-call-chant, .rx-call-repetition) {
+    font-size: max(18px, min(5.4vw, 92px, 9.5vh, var(--rx-call-zone) / 11.4));
+  }
+}
+
+@media (orientation: portrait) and (max-width: 900px) {
+  .ffe-sequence[data-mode="entry"] :is(.rx-call-chant, .rx-call-repetition) {
+    font-size: min(7vw, 4.6vh);
+  }
+}
+
+/* The undersuit stands inside the wider figure (its size and place are
+   the component's inline style); the finished figure fills the box. */
+.ffe-sequence .rx-suit-scan > .rx-suit-under {
+  background-repeat: no-repeat;
+}
+
+/* The reactor's ignition on FAR FROM DEUS！: a gold bloom from the chest. */
+.ffe-sequence .ffe-reactor-halo {
+  position: absolute;
+  display: block;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  opacity: 0;
+  background: radial-gradient(
+    circle,
+    rgb(255 250 230 / 80%) 0 5%,
+    rgb(255 215 122 / 42%) 16%,
+    rgb(121 232 255 / 16%) 36%,
+    transparent 66%
+  );
+  translate: -50% -50%;
+}
+
+/* The pixel squares on the reactor: gold burns white in the crystal. */
+.ffe-sequence .rx-suit-pixels.is-reactor path.is-pink {
+  fill: #ffd77a;
+}
+
+@media (prefers-reduced-motion: no-preference) and (forced-colors: none) {
+  /* The undersuit is burnt to nanites: it dims at the 爆散 and is gone as
+     the helmet seats (over the call sheet's scan and brightening). */
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence.ffe-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
+    .rx-suit[data-suit="build"]
+    .rx-suit-scan
+    > .rx-suit-under {
+    animation:
+      rxSuitScanHold var(--rx-suit-scan-duration, 250ms) cubic-bezier(0.45, 0, 0.55, 1) 70ms both,
+      rxSuitUndersuit var(--rx-suit-under-duration, 60ms) steps(2, jump-end)
+        var(--rx-call-rider-start) both,
+      ffeUnderDim var(--ffe-under-dim-ms, 180ms) linear var(--ffe-under-dim-at, 840ms) forwards,
+      ffeUnderOut var(--ffe-under-out-ms, 230ms) linear var(--ffe-under-out-at, 2100ms) forwards;
+  }
+
+  /* The reticle runs the length of this longer call. */
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence.ffe-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
+    .rx-suit-lock::before {
+    animation-duration: var(--ffe-reticle-duration, 2480ms);
+    animation-delay: var(--ffe-reticle-delay, 60ms);
+  }
+
+  /* The fallback motes' life (the engine's swarm replaces them). */
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence.ffe-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
+    .rx-suit-motes {
+    animation-duration: var(--ffe-motes-duration, 970ms);
+  }
+
+  /* The reactor ignites with the last call and settles with the light. */
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence.ffe-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
+    .ffe-reactor-halo {
+    animation: ffeReactorIgnite 560ms cubic-bezier(0.16, 1, 0.3, 1) var(--rx-call-final-start) both;
+  }
+
+  /* The whole figure (the images late) still lights its eyes and reactor
+     with the squares; its own crystals are already lit, so no halo bloom. */
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence.ffe-sequence[data-mode="entry"][data-tier="full"]
+    .rx-suit[data-suit="whole"]
+    .ffe-reactor-halo {
+    display: none;
+  }
+}
+
+@keyframes ffeUnderDim {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: var(--ffe-under-dim, 0.55);
+  }
+}
+@keyframes ffeUnderOut {
+  from {
+    opacity: var(--ffe-under-dim, 0.55);
+  }
+  to {
+    opacity: 0;
+  }
+}
+@keyframes ffeReactorIgnite {
+  0% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  30% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+  100% {
+    opacity: 0.55;
+    transform: none;
+  }
+}
+
+/* Short landscapes keep the skip clear of the meter. */
+@media (orientation: landscape) and (max-height: 560px) {
+  .ffe-skip {
+    bottom: max(10px, calc(env(safe-area-inset-bottom) + 6px));
+    min-height: 40px;
+  }
+}
+
+@media (forced-colors: active) {
+  .ffe-cover {
+    background: Canvas;
+    color: CanvasText;
+  }
+
+  .ffe-skip {
+    border-color: ButtonText;
+    background: ButtonFace;
+    color: ButtonText;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ffe-overlay[data-ffe="revealing"] > .ffe-cover {
+    animation: none;
+    opacity: 0;
+  }
+
+  .ffe-skip {
+    transition: none;
+  }
+}
+
+/* The part callouts' anchors sit outside this wider figure (the cape, the
+   tail and the bits reach the frame's edges), so no leader crosses the art. */
+.ffe-sequence .rx-suit-callout.is-head {
+  --rx-suit-x: 0.3;
+  --rx-suit-y: 0.1;
+}
+
+.ffe-sequence .rx-suit-callout.is-arms {
+  --rx-suit-x: 0.35;
+  --rx-suit-y: 0.46;
+}
+
+.ffe-sequence .rx-suit-callout.is-chest {
+  --rx-suit-x: 0.35;
+  --rx-suit-y: 0.3;
+}
+
+.ffe-sequence .rx-suit-callout.is-lock {
+  right: calc(100% - var(--rx-suit-cx) + 0.28 * var(--rx-suit-h));
+}
+
+@media (orientation: landscape) and (min-aspect-ratio: 13 / 10) {
+  .ffe-sequence .rx-suit-callout.is-legs {
+    --rx-suit-x: 0.3;
+    --rx-suit-y: 0.93;
+  }
+}
