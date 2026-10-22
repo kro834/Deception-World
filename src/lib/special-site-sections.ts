@@ -33,20 +33,22 @@ export const SPECIAL_SITE_SECTIONS: Record<SpecialSiteId, readonly SpecialSiteSe
     ["stages", "二つの運用段階", "STAGES"],
     ["system", "中核システム", "SYSTEM"],
   ],
-  // 2026-10-22: the owner's record in full. performance, the two comparison
-  // documents (report-*) and p16 come from the owner's comparison text;
-  // suitup is a prepared chapter (準備中) on the page.
+  // 2026-10-22: the owner's record in full, in the page's chapter order
+  // (the Rexonance order — performance, processor, suit-up, stages, system
+  // — with the record's own chapters around it; far-from-saga.tsx numbers
+  // them 01–12, the two comparison documents inside 03). performance, the
+  // documents (report-*) and p16 come from the owner's comparison text.
   "far-from": [
     ["top", "トップ", "TOP"],
     ["overview", "概要", "OVERVIEW"],
     ["specs", "スペック", "SPECS"],
-    ["performance", "性能比較", "COMPARISON"],
+    ["performance", "性能比較", "PERFORMANCE"],
     ["report-rexonance", "対レクソナンス比較資料", "REPORT 01"],
     ["report-saga", "究極形態の比較資料", "REPORT 02"],
     ["p16", "P16", "PROCESSOR"],
     ["suitup", "変身シークエンス", "SUIT-UP"],
     ["ultra", "ウルトラ", "ULTRA"],
-    ["stages", "形態", "STAGES"],
+    ["stages", "形態", "5 STAGES"],
     ["theories", "中核機構", "MECHANISM"],
     ["system", "装甲・OS", "ARMOR & OS"],
     ["authority", "神属権限", "AUTHORITY"],

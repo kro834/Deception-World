@@ -20,31 +20,61 @@ import { FarFromP16 } from "./far-from-p16";
 import { FarFromUltra } from "./far-from-ultra";
 import { FarFromReport } from "./far-from-report";
 import { FarFromSuitUp } from "./far-from-suitup";
+import { FarFromFormComparison } from "./far-from-form-comparison";
+import {
+  FarFromAperture,
+  FarFromCallouts,
+  FarFromChapterMap,
+  FarFromFormStatus,
+  FarFromHeroRail,
+  FarFromStageSlate,
+} from "./far-from-editorial";
 
-/* FAR FROM SAGA special site (owner's record of 2026-10-22).
+/* FAR FROM SAGA special site (owner's record of 2026-10-22; redesigned on
+   the Rexonance / Extreme structure, 2026-10-22).
 
-   The third special site beside /extreme-saga and /rexonance-saga. Every word
-   of record is the Final Stage's own (final-stage-data.ts, verbatim from the
-   owner); the stage pictures are this site's (far-from-saga-artwork.ts). The
-   shared special-site grammar (styles-rexonance-saga.css and the showcase
-   sheets) draws the chrome; styles-far-from-saga.css adds what this page
-   alone needs.
+   The third special site beside /extreme-saga and /rexonance-saga, built
+   on their composition: the local bar with numbered chapters, a split hero
+   (the key visual in its stage with a slate and read-outs, the copy and its
+   two doors beside it), the CONTENTS map, then numbered chapters whose
+   heads carry a forged numeral, an etched kicker, the title and its lede
+   over a hairline, and the end card with the figure standing behind the
+   last line. Every word of record is the Final Stage's own
+   (final-stage-data.ts, verbatim from the owner); the stage pictures are
+   this site's (far-from-saga-artwork.ts). The shared special-site grammar
+   (styles-rexonance-saga.css and the showcase sheets) draws the chrome;
+   styles-far-from-saga.css is the page's own composition, type and motion.
 
-   #performance (far-from-comparison.tsx), #report (far-from-report.tsx) and
-   #p16 (far-from-p16.tsx) are built from the owner's comparison text
+   Chapters, as the Rexonance order goes (performance → processor →
+   suit-up → stages → system) with the record's own chapters around them:
+   01 overview (+ the calls), 02 specs, 03 performance (the console, then
+   #report, the owner's two documents, as its second half), 04 P16,
+   05 suit-up, 06 ultra, 07 stages, 08 mechanism, 09 armour and OS,
+   10 authority, 11 weapons, 12 finishers. The numbers are CSS counters
+   over the page's direct sections (#report is a sub-chapter and does not
+   count), so the mounted chapters' own kickers (05 / SUIT-UP, 06 / ULTRA)
+   stay as they are.
+
+   #performance (far-from-comparison.tsx), #report (far-from-report.tsx)
+   and #p16 (far-from-p16.tsx) are built from the owner's comparison text
    (far-from-report-text.ts, verbatim). #suitup is the scroll suit-up
    (far-from-suitup.tsx: the Rexonance runway playing FAR FROM's suit
    through src/lib/far-from-assembly.ts, ending on マックス). #ultra
    (far-from-ultra.tsx) is the ウルトラ sequence, the continuation after
    マックス as its own scroll segment. The page-entry transformation is
    far-from-entry-transition.tsx. Every engine is a lazy chunk mounted after
-   paint, only where motion is allowed; nothing here delays first paint. */
+   paint, only where motion is allowed; nothing here delays first paint:
+   the chapter reveals are one IntersectionObserver armed after mount, and
+   only where motion is allowed. */
 
 const releaseControlFocus = (control: HTMLElement) => {
   window.requestAnimationFrame(() => {
     if (document.activeElement === control) control.blur();
   });
 };
+
+/** Values that run long (the processors, the recognisers) read a size down. */
+const LONG_SPEC = 12;
 
 function CallOuts({ calls, label }: { calls: readonly string[]; label: string }) {
   return (
@@ -58,7 +88,7 @@ function CallOuts({ calls, label }: { calls: readonly string[]; label: string })
   );
 }
 
-/** The record's articles (theories, armour and OS, authority). */
+/** The record's articles (theories, armour and OS, authority): plates. */
 function Articles({
   items,
   columns,
@@ -74,7 +104,7 @@ function Articles({
         <article key={item.title} className="rxs-reveal" role="listitem">
           <header>
             <span>{String(index + 1).padStart(2, "0")}</span>
-            {item.code ? <small>{item.code}</small> : null}
+            {item.code ? <small lang="en">{item.code}</small> : null}
           </header>
           <h3>{item.title}</h3>
           {item.body.map((paragraph, paragraphIndex) => (
@@ -90,6 +120,7 @@ export function FarFromSaga() {
   useWorldMode();
   const [menuOpen, setMenuOpen] = useState(false);
   const [stage, setStage] = useState<FarFromStageKey>("middle");
+  const [motionReady, setMotionReady] = useState(false);
   const pageRef = useRef<HTMLElement | null>(null);
   const stageTabsRef = useRef<HTMLDivElement | null>(null);
 
@@ -117,8 +148,58 @@ export function FarFromSaga() {
     };
   }, []);
 
+  // The chapter reveals (as on the Extreme site): armed after paint, only
+  // where motion is allowed; otherwise everything rests fully drawn. The
+  // page grants motion (data-motion-ready) only on the same terms, so the
+  // shared scroll choreography never runs under reduced motion, economy
+  // rendering or a saving connection.
+  useEffect(() => {
+    const page = pageRef.current;
+    if (!page) return;
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const forced = window.matchMedia("(forced-colors: active)");
+    const connection = (
+      navigator as Navigator & {
+        connection?: { saveData?: boolean; effectiveType?: string };
+      }
+    ).connection;
+    const constrained =
+      connection?.saveData === true ||
+      connection?.effectiveType === "slow-2g" ||
+      connection?.effectiveType === "2g";
+    const allowMotion =
+      !media.matches &&
+      !forced.matches &&
+      !constrained &&
+      document.documentElement.dataset.worldEffects !== "economy";
+
+    const reveals = [...page.querySelectorAll<HTMLElement>(".rxs-reveal")];
+    if (!allowMotion || !("IntersectionObserver" in window)) {
+      reveals.forEach((element) => element.classList.add("is-visible"));
+      return;
+    }
+    setMotionReady(true);
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          (entry.target as HTMLElement).classList.add("is-visible");
+          observer.unobserve(entry.target);
+        });
+      },
+      { rootMargin: "0px 0px -8%", threshold: 0 },
+    );
+    reveals.forEach((element) => observer.observe(element));
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <main ref={pageRef} id="top" className="rxs-page ffs-page">
+    <main
+      ref={pageRef}
+      id="top"
+      className="rxs-page ffs-page"
+      data-motion-ready={motionReady ? "true" : "false"}
+    >
       {/* Entry transition: prepared, renders nothing, never blocks paint. */}
       <FarFromEntryTransition stage={stage} />
 
@@ -131,26 +212,28 @@ export function FarFromSaga() {
             assets={WORLD_ENTER_ASSETS}
             aria-label="ディセプションワールドへ戻る"
           >
-            <span>FAR FROM</span>
+            <span lang="en">FAR FROM</span>
             <b>
               <DisplayName value={FAR_FROM_SAGA.name} />
             </b>
           </GuardedLink>
+          {/* The bar lists the five landmark chapters, numbered as CONTENTS
+              numbers them; the side menu lists every chapter. */}
           <nav aria-label="ファーフロムサーガ ページ内ナビゲーション">
             <a href="#overview">
               <span aria-hidden="true">01</span> 概要
             </a>
-            <a href="#specs">
-              <span aria-hidden="true">02</span> スペック
+            <a href="#performance">
+              <span aria-hidden="true">03</span> 性能
+            </a>
+            <a href="#p16">
+              <span aria-hidden="true">04</span> P16
+            </a>
+            <a href="#suitup" data-local-nav-through="far-from-assembly-runway">
+              <span aria-hidden="true">05</span> 変身
             </a>
             <a href="#stages">
               <span aria-hidden="true">07</span> 形態
-            </a>
-            <a href="#theories">
-              <span aria-hidden="true">08</span> 中核機構
-            </a>
-            <a href="#finishers">
-              <span aria-hidden="true">12</span> 必殺技
             </a>
           </nav>
           <SideMenuTrigger
@@ -170,9 +253,11 @@ export function FarFromSaga() {
           <i />
         </div>
         <div className="rxs-hero-copy">
-          <p>FINAL STAGE / SPECIAL SITE</p>
+          <p lang="en">
+            FINAL STAGE <span className="rxs-hero-kicker-tail">/ SPECIAL SITE</span>
+          </p>
           <h1 id="ffs-title">
-            <span>{FAR_FROM_SAGA.en}</span>
+            <span lang="en">{FAR_FROM_SAGA.en}</span>
             <DisplayName value={FAR_FROM_SAGA.name} />
           </h1>
           <p className="rxs-hero-lede">
@@ -181,13 +266,22 @@ export function FarFromSaga() {
               <span>ファイナルステージ限定の超究極フォーム、仮面ライダーファーフロムサーガ。</span>
             </span>
           </p>
-          <p className="ffs-stages-line">{FAR_FROM_SAGA.stagesLine}</p>
-          <p className="ffs-provisional" role="note">
-            <span aria-hidden="true">NOW UPDATING</span>
-            特設サイトは順次更新します。
+          <p className="ffs-stages-line">
+            <span lang="en">5 STAGES</span>
+            {FAR_FROM_SAGA.stagesLine}
           </p>
+          <FarFromHeroRail />
+          {/* The name's ghost behind the copy (decorative). */}
+          <span className="ffs-mark" aria-hidden="true">
+            FAR FROM
+          </span>
         </div>
         <div className="rxs-hero-visual" aria-hidden="true">
+          <FarFromStageSlate />
+          <FarFromAperture />
+          <i className="ffs-ring is-ice" />
+          <i className="ffs-ring is-gold" />
+          <i className="ffs-ring is-violet" />
           <span className="rxs-orbit rxs-orbit-a" />
           <span className="rxs-orbit rxs-orbit-b" />
           <img
@@ -199,13 +293,17 @@ export function FarFromSaga() {
             decoding="async"
             fetchPriority="high"
           />
+          <FarFromCallouts />
         </div>
         <a className="rxs-scroll-cue" href="#overview">
-          <span>SCROLL</span>
+          <span>まず、概要から。</span>
           <i aria-hidden="true" />
         </a>
       </section>
 
+      <FarFromChapterMap />
+
+      {/* 01 — the calls and the record's overview. */}
       <section
         id="overview"
         className="rxs-section ffs-overview"
@@ -214,15 +312,19 @@ export function FarFromSaga() {
         <header className="rxs-section-heading rxs-reveal">
           <p>01 / OVERVIEW</p>
           <h2 id="ffs-overview-title">概要</h2>
+          <span>
+            ファイナルステージ限定の超究極フォーム。変身音声と、記録の概要を掲載します。
+          </span>
         </header>
         <CallOuts calls={FAR_FROM_SAGA.calls} label="ファーフロムサーガ 変身音声" />
-        <div className="ffs-copy">
+        <div className="ffs-copy rxs-reveal">
           {FAR_FROM_SAGA.overview.map((paragraph, index) => (
             <p key={index}>{paragraph}</p>
           ))}
         </div>
       </section>
 
+      {/* 02 — the spec table, as plates. */}
       <section
         id="specs"
         className="rxs-section ffs-specs-section"
@@ -233,9 +335,9 @@ export function FarFromSaga() {
           <h2 id="ffs-specs-title">スペック</h2>
           <span>標準稼働時の数値です。</span>
         </header>
-        <dl className="ffs-specs" aria-label="ファーフロムサーガ スペック">
+        <dl className="ffs-specs rxs-reveal" aria-label="ファーフロムサーガ スペック">
           {FAR_FROM_SAGA.specs.map((row) => (
-            <div key={row.dt}>
+            <div key={row.dt} data-long={row.dd.length > LONG_SPEC || undefined}>
               <dt>{row.dt}</dt>
               <dd>{row.dd}</dd>
             </div>
@@ -243,14 +345,14 @@ export function FarFromSaga() {
         </dl>
       </section>
 
-      {/* #performance: the comparison console (far-from-comparison.tsx). */}
+      {/* 03 — #performance: the comparison console (far-from-comparison.tsx). */}
       <section
         id="performance"
         className="rxs-section ffs-performance"
         aria-labelledby="ffs-performance-title"
       >
         <header className="rxs-section-heading rxs-reveal">
-          <p>03 / COMPARISON</p>
+          <p>03 / PERFORMANCE</p>
           <h2 id="ffs-performance-title">性能比較</h2>
           <span>
             ファーフロムサーガを、ヴィンクルムサーガ、エクスプリームサーガ、レクソナンスサーガと比較します。
@@ -259,10 +361,11 @@ export function FarFromSaga() {
         <FarFromComparison />
       </section>
 
-      {/* #report: the owner's comparison text in full (far-from-report.tsx). */}
+      {/* 03, continued — #report: the owner's comparison text in full
+          (far-from-report.tsx). A sub-chapter: it keeps 03's number. */}
       <section
         id="report"
-        className="rxs-section ffs-report-section"
+        className="rxs-section ffs-report-section ffs-subchapter"
         aria-labelledby="ffs-report-title"
       >
         <header className="rxs-section-heading rxs-reveal">
@@ -273,7 +376,7 @@ export function FarFromSaga() {
         <FarFromReport />
       </section>
 
-      {/* #p16: the owner's two P16 chapters (far-from-p16.tsx). */}
+      {/* 04 — #p16: the owner's two P16 chapters (far-from-p16.tsx). */}
       <section id="p16" className="rxs-section ffs-p16" aria-labelledby="ffs-p16-title">
         <header className="rxs-section-heading rxs-reveal">
           <p>04 / PROCESSOR</p>
@@ -283,13 +386,14 @@ export function FarFromSaga() {
         <FarFromP16 />
       </section>
 
-      {/* #suitup: the scroll suit-up (far-from-suitup.tsx). */}
+      {/* 05 — #suitup: the scroll suit-up (far-from-suitup.tsx). */}
       <FarFromSuitUp />
 
-      {/* #ultra: the ウルトラ sequence, the continuation after マックス
+      {/* 06 — #ultra: the ウルトラ sequence, the continuation after マックス
           (far-from-ultra.tsx; its engine is a lazy chunk under the motion gate). */}
       <FarFromUltra />
 
+      {/* 07 — the five forms. */}
       <section id="stages" className="rxs-stages rxs-section" aria-labelledby="ffs-stages-title">
         <header className="rxs-section-heading rxs-reveal">
           <p>07 / STAGES</p>
@@ -297,7 +401,7 @@ export function FarFromSaga() {
           <span>{FAR_FROM_SAGA.stagesLine}</span>
         </header>
 
-        <div className="rxs-stage-switcher">
+        <div className="rxs-stage-switcher rxs-reveal">
           <div
             ref={stageTabsRef}
             className="rxs-stage-tabs liquid-swipe-tabs ffs-stage-tabs"
@@ -323,13 +427,14 @@ export function FarFromSaga() {
                 onPointerUp={(event) => releaseControlFocus(event.currentTarget)}
               >
                 <span>{FAR_FROM_SAGA.stages[key].label}</span>
-                <small>{FAR_FROM_SAGA.stages[key].code}</small>
+                <small lang="en">{FAR_FROM_SAGA.stages[key].code}</small>
               </button>
             ))}
           </div>
           <p id="ffs-stage-hint" className="rxs-stage-hint">
             タップ・長押し・左右スライド・矢印キーで切り替え
           </p>
+          <FarFromFormStatus stage={stage} />
 
           <div
             id="ffs-stage-panel"
@@ -341,6 +446,7 @@ export function FarFromSaga() {
           >
             <figure key={stage}>
               <span aria-hidden="true" />
+              <i className="ffs-stage-scan" aria-hidden="true" />
               <img
                 src={activeArt.src}
                 {...farFromImage(stage, stage !== "middle")}
@@ -353,16 +459,22 @@ export function FarFromSaga() {
               />
             </figure>
             <div key={`${stage}-copy`}>
-              <small>{activeStage.code}</small>
+              <small lang="en">{activeStage.code}</small>
               <h3>{activeStage.label}</h3>
               {activeStage.body.map((paragraph, index) => (
                 <p key={index}>{paragraph}</p>
               ))}
+              {/* The form's code, outlined and huge (decorative). */}
+              <i className="ffs-form-code" aria-hidden="true">
+                {activeStage.code}
+              </i>
             </div>
           </div>
         </div>
+        <FarFromFormComparison selected={stage} onChoose={setStage} />
       </section>
 
+      {/* 08 — the four theories. */}
       <section
         id="theories"
         className="rxs-section ffs-theories"
@@ -376,6 +488,7 @@ export function FarFromSaga() {
         <Articles items={FAR_FROM_SAGA.theories} columns={2} label="新規理論・中核機構" />
       </section>
 
+      {/* 09 — the floating unit and the OS. */}
       <section id="system" className="rxs-section ffs-system" aria-labelledby="ffs-system-title">
         <header className="rxs-section-heading rxs-reveal">
           <p>09 / ARMOR & OS</p>
@@ -389,6 +502,7 @@ export function FarFromSaga() {
         />
       </section>
 
+      {/* 10 — the authorities. */}
       <section
         id="authority"
         className="rxs-section ffs-authority"
@@ -402,13 +516,14 @@ export function FarFromSaga() {
         <Articles items={FAR_FROM_SAGA.powers} columns={2} label="神属権限・継承能力" />
       </section>
 
+      {/* 11 — the weapons, numbered. */}
       <section id="arsenal" className="rxs-section ffs-arsenal" aria-labelledby="ffs-arsenal-title">
         <header className="rxs-section-heading rxs-reveal">
           <p>11 / WEAPONS</p>
           <h2 id="ffs-arsenal-title">武装</h2>
           <span>追加武装は全10種。</span>
         </header>
-        <ul className="ffs-weapons" aria-label="ファーフロムサーガ 追加武装">
+        <ul className="ffs-weapons rxs-reveal" aria-label="ファーフロムサーガ 追加武装">
           {FAR_FROM_SAGA.arsenal.map((weapon, index) => (
             <li key={weapon}>
               <span aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
@@ -419,6 +534,7 @@ export function FarFromSaga() {
         <p className="ffs-note ffs-arsenal-note">{FAR_FROM_SAGA.arsenalNote}</p>
       </section>
 
+      {/* 12 — the finishers. */}
       <section
         id="finishers"
         className="rxs-section ffs-finishers"
@@ -427,11 +543,12 @@ export function FarFromSaga() {
         <header className="rxs-section-heading rxs-reveal">
           <p>12 / FINISHER</p>
           <h2 id="ffs-finishers-title">必殺技</h2>
+          <span>最高位必殺技は2種。発動音声とともに掲載します。</span>
         </header>
         <div className="ffs-finisher-list">
           {FAR_FROM_SAGA.finishers.map((finisher) => (
             <article key={finisher.name} className="ffs-finisher rxs-reveal">
-              <small>{finisher.code}</small>
+              <small lang="en">{finisher.code}</small>
               <h3>{finisher.name}</h3>
               <CallOuts calls={finisher.calls} label={`${finisher.name} 発動音声`} />
               <div className="ffs-copy">
@@ -444,9 +561,30 @@ export function FarFromSaga() {
         </div>
       </section>
 
-      <footer className="rxs-footer ffs-footer">
+      <footer className="rxs-footer ffs-footer" role="contentinfo">
+        {/* The end card: ウルトラ stands behind the last line (lazy; decorative). */}
+        <img
+          className="ffs-end-figure"
+          src={FAR_FROM_SAGA_ARTWORK.ultra.src}
+          srcSet={farFromImage("ultra").srcSet}
+          sizes="(max-width: 760px) 70vw, 36vw"
+          alt=""
+          aria-hidden="true"
+          width={FAR_FROM_SAGA_ARTWORK.ultra.width}
+          height={FAR_FROM_SAGA_ARTWORK.ultra.height}
+          loading="lazy"
+          decoding="async"
+        />
+        {/* Back to this page's own top: first in the end card, so its closing
+            row still ends on the way home. */}
+        <p className="ffs-footer-top">
+          <a href="#top">
+            <span>ページの先頭へ</span>
+            <i aria-hidden="true">↑</i>
+          </a>
+        </p>
         <div>
-          <p>FAR FROM SAGA / SPECIAL SITE</p>
+          <p lang="en">FAR FROM SAGA / FINAL STAGE</p>
           <h2>
             ファーフロムサーガの活躍は、
             <br />

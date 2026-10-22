@@ -276,9 +276,172 @@ test("#suitup is built on the Rexonance runway; no chapter wears a 準備中 mar
   // canvas is the suit-up component's, drawn only by the lazy engine chunk.
   assert.doesNotMatch(component, /<canvas|WebGL|\.getContext\(/);
   assert.doesNotMatch(suitup, /WebGL|\.getContext\(/);
-  assert.match(styles, /\.ffs-pending b \{/);
+  // The provisional marks are gone from the page and its sheet.
+  assert.doesNotMatch(component, /NOW UPDATING|順次更新|ffs-provisional"/);
+  assert.doesNotMatch(styles, /\.ffs-pending|\.ffs-prepared/);
   assert.match(styles, /@import "\.\/styles-far-from-compare\.css";/);
   assert.match(read("src/styles-far-from-suitup.css"), /\.ffs-page \.rzn-suitup \{/);
+});
+
+/* ---------------------------------------------------------------------------
+   The redesign (2026-10-22): the Rexonance / Extreme structure and design
+   language, in FAR FROM's palette. 「サイトの構成もエクスプリームやレクソナンスに
+   似た様なデザインや構成にして。」
+   --------------------------------------------------------------------------- */
+
+const editorial = read("src/components/far-from-saga/far-from-editorial.tsx");
+const formComparison = read("src/components/far-from-saga/far-from-form-comparison.tsx");
+
+test("the page follows the Rexonance structure: numbered bar, split hero, CONTENTS, numbered chapters, end card", () => {
+  // The bar: five landmark chapters, numbered as CONTENTS numbers them; the
+  // suit-up's entry stays lit through its runway (as Rexonance's does).
+  const bar = component.slice(
+    component.indexOf('<nav aria-label="ファーフロムサーガ ページ内ナビゲーション">'),
+    component.indexOf("</nav>"),
+  );
+  assert.deepEqual(
+    [...bar.matchAll(/<a href="#([a-z0-9]+)"[^>]*>\s*<span aria-hidden="true">(\d\d)<\/span>/g)].map(
+      (m) => [m[1], m[2]],
+    ),
+    [
+      ["overview", "01"],
+      ["performance", "03"],
+      ["p16", "04"],
+      ["suitup", "05"],
+      ["stages", "07"],
+    ],
+  );
+  assert.match(bar, /data-local-nav-through="far-from-assembly-runway"/);
+  // The hero: the key visual in its stage (slate, aperture, read-outs from
+  // the spec table), the copy with its two doors, the name's ghost, the cue.
+  const hero = component.slice(
+    component.indexOf('<section className="rxs-hero ffs-hero"'),
+    component.indexOf("<FarFromChapterMap />"),
+  );
+  for (const piece of [
+    "<FarFromStageSlate />",
+    "<FarFromAperture />",
+    "<FarFromCallouts />",
+    "<FarFromHeroRail />",
+    'className="ffs-mark" aria-hidden="true"',
+    '<a className="rxs-scroll-cue" href="#overview">',
+    "{FAR_FROM_SAGA.stagesLine}",
+  ])
+    assert.ok(hero.includes(piece), piece);
+  assert.match(editorial, /<a className="ffs-hero-primary" href="#suitup">/);
+  assert.match(editorial, /<a className="ffs-hero-secondary" href="#stages">/);
+  // The read-outs are the owner's spec values, never typed in.
+  assert.match(editorial, /spec\("パンチ力"\)/);
+  assert.match(editorial, /spec\("ジャンプ力"\)/);
+  assert.doesNotMatch(editorial, /405\.5|8000m/);
+  // CONTENTS: twelve chapters, numbered 01–12, each a real anchor on the
+  // page (or in its mounted components), in the registry's order.
+  const chapters = [...editorial.matchAll(/href: "#([a-z0-9]+)",\s*number: "(\d\d)"/g)].map(
+    (m) => [m[1], m[2]],
+  );
+  assert.equal(chapters.length, 12);
+  assert.deepEqual(
+    chapters.map(([, number]) => number),
+    Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, "0")),
+  );
+  const mounted =
+    component +
+    read("src/components/far-from-saga/far-from-suitup.tsx") +
+    read("src/components/far-from-saga/far-from-ultra.tsx");
+  const registry = sections
+    .slice(sections.indexOf('"far-from": ['), sections.indexOf('"final-stage": ['))
+    .match(/\["([a-z0-9-]+)"/g)
+    .map((m) => m.slice(2, -1))
+    .filter((hash) => hash !== "top" && !hash.startsWith("report-"));
+  assert.deepEqual(
+    chapters.map(([hash]) => hash),
+    registry,
+  );
+  for (const [hash] of chapters) assert.match(mounted, new RegExp(`id="${hash}"`), hash);
+  assert.match(editorial, /<nav className="rxs-chapter-index ffs-chapter-map"/);
+  assert.match(editorial, /<span lang="en">CONTENTS<\/span>\s*<small>01 — 12<\/small>/);
+  // The chapters count themselves (a CSS counter over the page's direct
+  // sections), so the mounted chapters' own kickers stay as they are; the
+  // report is 03's second half and does not count.
+  assert.match(styles, /counter-reset: ffs-chapter;/);
+  assert.match(
+    styles,
+    /\.rxs-page\.rxs-page\.ffs-page > \.rxs-section:not\(\.ffs-subchapter\) \{\s*counter-increment: ffs-chapter;/,
+  );
+  assert.match(styles, /content: counter\(ffs-chapter, decimal-leading-zero\) \/ "";/);
+  assert.match(component, /id="report"\s+className="rxs-section ffs-report-section ffs-subchapter"/);
+  const order = [
+    "overview",
+    "specs",
+    "performance",
+    "report",
+    "p16",
+    "<FarFromSuitUp />",
+    "<FarFromUltra />",
+    "stages",
+    "theories",
+    "system",
+    "authority",
+    "arsenal",
+    "finishers",
+    "<footer",
+  ].map((mark) => component.indexOf(mark.startsWith("<") ? mark : `id="${mark}"`));
+  assert.ok(order.every((at, i) => at > 0 && (i === 0 || at > order[i - 1])), "chapter order");
+  for (const mark of ["01 / OVERVIEW", "02 / SPECS", "03 / PERFORMANCE", "03 / REPORT", "04 / PROCESSOR"])
+    assert.ok(component.includes(`<p>${mark}</p>`), mark);
+  // The stage chapter: the form-sequence status and the five-form drawer
+  // beside the liquid rail, the outlined form code behind the copy.
+  assert.match(component, /<FarFromFormStatus stage=\{stage\} \/>/);
+  assert.match(component, /<FarFromFormComparison selected=\{stage\} onChoose=\{setStage\} \/>/);
+  assert.match(component, /<i className="ffs-form-code" aria-hidden="true">/);
+  assert.match(editorial, /FAR_FROM_SAGA_STAGE_ORDER\.indexOf\(stage\) \+ 1/);
+  assert.match(formComparison, /<details className="ffs-form-comparison"/);
+  assert.match(formComparison, /\{open \? \(/, "closed, the drawer creates no image request");
+  assert.match(formComparison, /aria-controls="ffs-stage-panel"/);
+  assert.match(formComparison, /aria-pressed=\{selected === key\}/);
+  // The end card: the figure behind the last line, the way to the top first,
+  // then the title and the three doors (the return last).
+  const footer = component.slice(component.lastIndexOf("<footer"));
+  assert.match(footer, /className="ffs-end-figure"[^]*?loading="lazy"/);
+  assert.ok(footer.indexOf('className="ffs-footer-top"') < footer.indexOf("<div>"));
+  assert.match(footer, /<p lang="en">FAR FROM SAGA \/ FINAL STAGE<\/p>/);
+  assert.equal((footer.match(/<GuardedLink/g) || []).length, 3);
+});
+
+test("the redesign's type, motion and calm tiers", () => {
+  // Type: the Rexonance type edition's scale and faces, in FAR FROM's palette.
+  for (const token of [
+    "--fft-step-6:",
+    "--fft-forge:",
+    "--fft-etch:",
+    "--fft-gold:",
+    "--fft-ice:",
+    "--fft-violet:",
+    "--fft-rainbow:",
+  ])
+    assert.ok(styles.includes(token), token);
+  assert.match(styles, /font-family: "Rexonance Forge";[^}]*rexonance-forge-20261016\.woff2/);
+  assert.match(styles, /font-family: "Rexonance Etch";[^}]*rexonance-etch-20261016\.woff2/);
+  // The chapter heads: numeral, kicker, title, lede over a hairline.
+  assert.match(styles, /> \.rxs-section > \.rxs-section-heading::before \{[^}]*-webkit-text-stroke: 1\.5px var\(--fft-gold\)/);
+  assert.match(styles, /> \.rxs-section > \.rxs-section-heading::after \{[^}]*background: var\(--fft-rainbow-fade\)/);
+  // Motion: the reveals are one IntersectionObserver armed after mount, only
+  // where motion is allowed; the page grants motion on the same terms.
+  assert.match(component, /data-motion-ready=\{motionReady \? "true" : "false"\}/);
+  assert.match(component, /new IntersectionObserver\(/);
+  assert.match(component, /prefers-reduced-motion: reduce/);
+  assert.match(component, /forced-colors: active/);
+  assert.match(component, /worldEffects !== "economy"/);
+  assert.match(component, /saveData === true/);
+  assert.match(styles, /@media screen and \(prefers-reduced-motion: no-preference\)/);
+  assert.match(styles, /@media \(prefers-reduced-motion: reduce\)/);
+  assert.match(styles, /@media \(forced-colors: active\)/);
+  // The page's own chunk carries no engine and no scroll listener.
+  assert.doesNotMatch(component, /addEventListener\("scroll"/);
+  assert.doesNotMatch(editorial, /useEffect|addEventListener/);
+  // House copy rules: plain official-site Japanese, no poetic motifs.
+  for (const source of [component, editorial, formComparison])
+    assert.doesNotMatch(source, /静かに|眠る|記録が|物語|祈り/);
 });
 
 /* ---------------------------------------------------------------------------

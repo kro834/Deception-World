@@ -1,62 +1,162 @@
 /* ================================================================
    FAR FROM SAGA — the special site's own sheet (owner's record,
-   2026-10-22)
+   2026-10-22; redesigned on the Rexonance / Extreme structure the same
+   day: 「サイトの構成もエクスプリームやレクソナンスに似た様なデザインや構成にして」)
 
    /far-from-saga stands beside /extreme-saga and /rexonance-saga on the
    shared special-site grammar (styles-rexonance-saga.css, the showcase
    sheets): local nav, hero, section heads, the liquid stage rail, the
-   footer. This sheet adds what the page needs of its own: the ミドル key
-   visual's crop, the calls, the spec grid, the prose, the record's article
-   grids, the weapons list, the finishers, a five-column rail, and the
-   prepared (準備中) mark and the still suit-up runway. The #performance
-   console and the #p16 frame are drawn by styles-far-from-compare.css.
-   Every rule is scoped to .ffs-page. Paint and layout only; the only
-   motion is the shared grammar's, gated there by prefers-reduced-motion.
+   footer. This sheet is the page's composition, type and motion, in the
+   Rexonance site's language and FAR FROM's palette — 黒銀 (the page's
+   black and its silver text), 黄金 (the forged numerals and the end
+   card), 水色の結晶 (the kickers, the ミドル accent), 虹色 (the hairlines
+   and seams), violet (マックス, the second accent):
+
+   - TYPE: tokens (--fft-*) on the Rexonance type edition's scale; the
+     display face for every Japanese title, "Rexonance Forge" (local
+     woff2, shared with Extreme) for the Latin name and every figure,
+     "Rexonance Etch" / Michroma for every kicker and instrument label.
+   - HERO: the key visual in its stage (a slate, the aperture, three
+     read-outs from the spec table) beside the copy and its two doors;
+     the name's ghost behind the copy.
+   - CONTENTS: the chapter map under the hero (number, code, name, line).
+   - CHAPTER HEADS: a forged outlined numeral (a CSS counter over the
+     page's direct sections; #report is a sub-chapter and does not count),
+     the etched kicker, the title and its lede over a hairline.
+   - STAGES: the form-sequence status, the outlined form code behind the
+     copy, the scan line, the five-form comparison drawer.
+   - END CARD: ウルトラ standing behind the last line, the way to the top.
+   - MOTION: the chapter heads' staggered entrances on the shared reveal
+     (an IntersectionObserver the page arms after paint, only where
+     motion is allowed); prefers-reduced-motion, forced colours and
+     economy rendering rest fully drawn.
+
+   The #performance console, #report documents and the #p16 frame are
+   drawn by styles-far-from-compare.css; the suit-up runway by
+   styles-far-from-suitup.css; the ウルトラ segment by
+   styles-far-from-ultra.css. Every rule is scoped to .ffs-page.
    ================================================================ */
 
 @import "./styles-far-from-compare.css";
 @import "./styles-far-from-ultra.css";
 
-.ffs-page {
+/* ---------- Faces (local; the same files the Extreme site declares) ---------- */
+@font-face {
+  font-family: "Rexonance Forge";
+  font-style: normal;
+  font-weight: 300 800;
+  font-stretch: 125%;
+  font-display: swap;
+  src: url("/fonts/rexonance-forge-20261016.woff2") format("woff2");
+  unicode-range:
+    U+0020-007E, U+00A0-00FF, U+2010-2027, U+2030-205E, U+2190-21FF, U+2200-22FF, U+2500-257F;
+}
+
+@font-face {
+  font-family: "Rexonance Etch";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/rexonance-etch-20261016.woff2") format("woff2");
+  unicode-range: U+0020-007E, U+00A0-00FF, U+2010-2027, U+2190-21FF, U+2200-22FF;
+}
+
+/* ---------- Tokens ---------- */
+.rxs-page.rxs-page.ffs-page {
   --rxs-cyan: #7fe6ff;
   --rxs-pink: #c99bff;
   --rxs-gold: #ffd77a;
+  --sc-accent: #7fe6ff;
+  --sc-headline-gradient: linear-gradient(95deg, #f3fbff, #8deaff 38%, #ffe3a6 72%, #d8b7ff);
   --ffs-accent: #7fe6ff;
-  --ffs-text: #e9edf3;
-  --ffs-muted: #8b95a4;
-  background: radial-gradient(circle at 50% 12%, rgb(42 96 196 / 24%), transparent 31rem), #010308;
+  --ffs-text: #f4f7fb;
+  --ffs-muted: #a2afbe;
+
+  /* The palette. */
+  --fft-ink: #000207;
+  --fft-ink-2: #04070d;
+  --fft-silver: #e9edf3;
+  --fft-gold: #ffd77a;
+  --fft-gold-deep: #c98a2e;
+  --fft-ice: #7fe6ff;
+  --fft-violet: #c99bff;
+  --fft-rose: #ff8fd8;
+  --fft-rainbow: linear-gradient(90deg, #7fe6ff, #c99bff 38%, #ffd77a 70%, #ff8fd8);
+  --fft-rainbow-fade: linear-gradient(90deg, #7fe6ff, #c99bff 32%, #ffd77a 60%, transparent 96%);
+  --fft-line: rgb(127 230 255 / 18%);
+  --fft-line-soft: rgb(255 255 255 / 9%);
+  --fft-surface: rgb(255 255 255 / 3.5%);
+
+  /* Text tiers on the page's black: 19.7:1, 15.5:1, 9.5:1; the kicker ice 15.6:1. */
+  --fft-text-1: #f7f9fc;
+  --fft-text-2: #d6e0ea;
+  --fft-text-3: #a2b1c0;
+  --fft-text-kicker: #96ecff;
+
+  /* Faces. */
+  --fft-display:
+    "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", "Noto Sans JP",
+    "Zen Kaku Gothic New", system-ui, sans-serif;
+  --fft-forge: "Rexonance Forge", "Zen Kaku Gothic New", "Noto Sans JP", sans-serif;
+  --fft-etch: "Rexonance Etch", "Michroma", "Oxanium", "Noto Sans JP", sans-serif;
+
+  /* Scale: 12 · 14 · 16 · 18 fixed, then fluid titles to 112px. */
+  --fft-step--1: 12px;
+  --fft-step-0: 14px;
+  --fft-step-1: 16px;
+  --fft-step-2: clamp(17px, 0.3vw + 14px, 18px);
+  --fft-step-3: clamp(20px, 0.6vw + 15px, 24px);
+  --fft-step-4: clamp(24px, 1.1vw + 16px, 34px);
+  --fft-step-5: clamp(40px, 2.8vw + 24px, 68px);
+  --fft-step-6: clamp(52px, 6.4vw + 16px, 112px);
+  --fft-track-kicker: 0.3em;
+  --fft-track-label: 0.12em;
+  --fft-wrap: 1180px;
+  --fft-gutter: max(24px, calc((100vw - var(--fft-wrap)) / 2));
+
+  counter-reset: ffs-chapter;
+  color: var(--fft-text-1);
+  background: radial-gradient(circle at 50% 12%, rgb(42 96 196 / 20%), transparent 31rem), var(--fft-ink);
+  font-feature-settings: "palt" 1, "kern" 1;
+  line-break: strict;
 }
 
-.ffs-page .rxs-local-nav {
+/* The reading progress line under the bar: ice to gold. */
+html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion-ready="true"] {
+  --mx-progress-from: #7fe6ff;
+  --mx-progress-to: #ffd77a;
+}
+
+/* ---------- Local bar ---------- */
+.rxs-page.rxs-page.ffs-page .rxs-local-nav {
   border-bottom-color: rgb(127 230 255 / 14%);
-  background: rgb(2 5 12 / 78%);
+  background: rgb(2 5 12 / 80%);
 }
 
-.ffs-page .rxs-brand span {
+.rxs-page.rxs-page.ffs-page .rxs-brand span {
   background: linear-gradient(90deg, #7fe6ff, #fff0c6);
   background-clip: text;
+  -webkit-background-clip: text;
   color: transparent;
+  -webkit-text-fill-color: transparent;
+  font-family: var(--fft-etch);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.22em;
 }
 
-/* Hero */
-.ffs-hero {
-  overflow: hidden;
-  background:
-    radial-gradient(circle at 50% 32%, rgb(66 110 220 / 16%), transparent 28rem),
-    linear-gradient(180deg, #01040a, #02040a 72%, #010308);
+.rxs-page.rxs-page.ffs-page .rxs-local-nav nav a > span {
+  margin-inline-end: 6px;
+  color: var(--fft-gold);
+  font-family: var(--fft-forge);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  font-variant-numeric: tabular-nums lining-nums;
 }
 
-.ffs-page .rxs-hero-copy::before {
-  background: radial-gradient(
-    ellipse at center,
-    rgb(1 3 8 / 94%) 0 36%,
-    rgb(1 3 8 / 78%) 56%,
-    transparent 80%
-  );
-}
-
-.ffs-page .rxs-hero h1 span {
-  background-image: linear-gradient(95deg, #8deaff, #ffffff 45%, #ffd37d);
+.rxs-page.rxs-page.ffs-page .rxs-local-nav nav a[aria-current="location"] > span {
+  text-shadow: 0 0 10px rgb(255 215 122 / 45%);
 }
 
 /* Large headings release vertical scrolling on iPhone and never catch a
@@ -74,64 +174,1074 @@
   user-select: none;
 }
 
-.ffs-page .rxs-hero-visual {
-  top: clamp(126px, 17vh, 188px);
-  bottom: auto;
-  width: min(78vw, 900px);
-}
-
-.ffs-page .rxs-hero-visual::after {
+/* ================================================================
+   Hero: the stage and the title card
+   ================================================================ */
+.rxs-page.rxs-page.ffs-page .ffs-hero {
+  position: relative;
+  overflow: clip;
   background:
-    linear-gradient(180deg, transparent 45%, rgb(1 3 8 / 24%) 68%, #010308 96%),
-    radial-gradient(circle at 50% 34%, transparent 35%, rgb(0 0 0 / 18%) 82%);
+    linear-gradient(
+      rgb(127 230 255 / 4%) 1px,
+      transparent 1px
+    ) 0 0 / 100% 48px,
+    linear-gradient(90deg, rgb(127 230 255 / 4%) 1px, transparent 1px) 0 0 / 48px 100%,
+    radial-gradient(circle at 30% 40%, rgb(66 110 220 / 16%), transparent 32rem),
+    linear-gradient(180deg, #01040a, #02040a 72%, var(--fft-ink));
 }
 
-.ffs-page .rxs-hero-visual img {
-  object-position: 50% 0;
-  filter: saturate(1.06) contrast(1.05) brightness(0.94);
-  mask-image: linear-gradient(to bottom, #000 0 80%, transparent 99%);
+.rxs-page.rxs-page.ffs-page .rxs-hero-copy {
+  position: relative;
+  z-index: 3;
+  isolation: isolate;
 }
 
-.ffs-page .rxs-orbit {
-  border-color: rgb(127 230 255 / 28%);
+/* The kicker: etched, ice, one tracking; a gold lead before it. */
+.rxs-page.rxs-page.ffs-page .rxs-hero-copy > p:first-child {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  justify-content: center;
+  margin: 0 0 18px;
+  color: var(--fft-text-kicker);
+  font-family: var(--fft-etch);
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: var(--fft-track-kicker);
+  line-height: 1.5;
 }
 
-.ffs-page .rxs-orbit-b {
-  border-color: rgb(255 215 122 / 26%);
+.rxs-page.rxs-page.ffs-page .rxs-hero-copy > p:first-child::before {
+  flex: none;
+  width: 44px;
+  height: 1px;
+  content: "";
+  background: var(--fft-gold);
 }
 
-.ffs-stages-line {
-  margin: 22px 0 0;
-  color: var(--ffs-muted);
-  font-family: var(--rxs-font-display);
-  font-size: 12px;
+/* The Latin name, forged in gold; the Japanese title under it. */
+.rxs-page.rxs-page.ffs-page .rxs-hero h1 {
+  color: var(--fft-text-1);
+  background: none;
+  -webkit-text-fill-color: var(--fft-text-1);
+  font-family: var(--fft-display);
+  font-size: var(--fft-step-6);
+  font-weight: 800;
+  line-height: 1.04;
+  letter-spacing: 0.02em;
+  word-break: keep-all;
+  line-break: strict;
+  text-shadow:
+    0 2px 0 rgb(0 2 7 / 55%),
+    0 18px 48px rgb(0 0 0 / 45%);
+}
+
+.rxs-page.rxs-page.ffs-page .rxs-hero h1 > span {
+  display: block;
+  margin-bottom: 0.3em;
+  background: linear-gradient(180deg, #fff3cf, #ffd77a 48%, #c98a2e);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  font-family: var(--fft-forge);
+  font-size: clamp(22px, 0.36em, 42px);
   font-weight: 700;
+  font-stretch: 125%;
+  letter-spacing: 0.06em;
+  text-shadow: none;
+  filter: drop-shadow(0 2px 0 rgb(72 46 12 / 70%));
+}
+
+.rxs-page.rxs-page.ffs-page .rxs-hero-lede {
+  max-width: 34em;
+  margin: 26px auto 0;
+  color: var(--fft-text-1);
+  font-size: clamp(17px, 0.9vw + 12px, 24px);
+  font-weight: 500;
+  line-height: 1.75;
+  letter-spacing: 0.06em;
+  text-wrap: pretty;
+}
+
+.rxs-page.rxs-page.ffs-page .rxs-hero-lede-text > span {
+  display: block;
+}
+
+.rxs-page.rxs-page.ffs-page .rxs-hero-lede-text > span:first-child {
+  font-weight: 700;
+}
+
+/* The five stages, on one etched line. */
+.rxs-page.rxs-page.ffs-page .ffs-stages-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  align-items: baseline;
+  justify-content: center;
+  margin: 22px 0 0;
+  color: var(--fft-text-3);
+  font-family: var(--fft-display);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-stages-line > span {
+  padding: 4px 9px 3px;
+  border: 1px solid rgb(255 215 122 / 40%);
+  color: var(--fft-gold);
+  font-family: var(--fft-etch);
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.2em;
+  clip-path: polygon(0 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
+}
+
+/* The two doors. */
+.rxs-page.rxs-page.ffs-page .ffs-hero-rail {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 30px;
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-hero-rail a {
+  display: inline-flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 164px;
+  min-height: 48px;
+  padding: 12px 20px;
+  border: 1px solid var(--fft-line);
+  color: var(--fft-text-1);
+  background: rgb(7 11 20 / 80%);
+  font-family: var(--fft-display);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  clip-path: polygon(0 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+  transition:
+    background 180ms ease,
+    border-color 180ms ease,
+    transform 180ms ease;
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-hero-rail a.ffs-hero-primary {
+  border-color: var(--fft-ice);
+  color: #04131a;
+  background: linear-gradient(100deg, #a9f1ff, #7fe6ff);
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-hero-rail a i {
+  color: inherit;
+  font-style: normal;
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-hero-rail a:focus-visible {
+  outline: 2px solid #a5edff;
+  outline-offset: 3px;
+}
+
+/* The name's ghost behind the copy. */
+.rxs-page.rxs-page.ffs-page .ffs-mark {
+  position: absolute;
+  z-index: -1;
+  top: -0.3em;
+  left: 50%;
+  display: block;
+  color: transparent;
+  font-family: var(--fft-forge);
+  font-size: clamp(64px, 7.4vw, 108px);
+  font-weight: 800;
+  font-stretch: 125%;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  white-space: nowrap;
+  translate: -50% 0;
+  -webkit-text-stroke: 1px rgb(127 230 255 / 22%);
+  pointer-events: none;
+}
+
+/* ---------- The stage ---------- */
+.rxs-page.rxs-page.ffs-page .rxs-hero-visual {
+  isolation: isolate;
+  border: 1px solid var(--fft-line-soft);
+  background:
+    linear-gradient(rgb(127 230 255 / 5%) 1px, transparent 1px) 0 0 / 100% 40px,
+    linear-gradient(90deg, rgb(127 230 255 / 5%) 1px, transparent 1px) 0 0 / 40px 100%,
+    radial-gradient(circle at 50% 60%, rgb(42 96 196 / 22%), transparent 60%),
+    #02050b;
+}
+
+/* The frame's corners. */
+.rxs-page.rxs-page.ffs-page .rxs-hero-visual::before {
+  position: absolute;
+  z-index: 4;
+  inset: 10px;
+  content: "";
+  border: 1px solid transparent;
+  background:
+    linear-gradient(var(--fft-gold), var(--fft-gold)) 0 0 / 18px 1px no-repeat,
+    linear-gradient(var(--fft-gold), var(--fft-gold)) 0 0 / 1px 18px no-repeat,
+    linear-gradient(var(--fft-gold), var(--fft-gold)) 100% 0 / 18px 1px no-repeat,
+    linear-gradient(var(--fft-gold), var(--fft-gold)) 100% 0 / 1px 18px no-repeat,
+    linear-gradient(var(--fft-gold), var(--fft-gold)) 0 100% / 18px 1px no-repeat,
+    linear-gradient(var(--fft-gold), var(--fft-gold)) 0 100% / 1px 18px no-repeat,
+    linear-gradient(var(--fft-gold), var(--fft-gold)) 100% 100% / 18px 1px no-repeat,
+    linear-gradient(var(--fft-gold), var(--fft-gold)) 100% 100% / 1px 18px no-repeat;
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+.rxs-page.rxs-page.ffs-page .rxs-hero-visual::after {
+  background:
+    linear-gradient(180deg, transparent 56%, rgb(2 5 11 / 40%) 78%, #02050b 98%),
+    radial-gradient(circle at 50% 34%, transparent 35%, rgb(0 0 0 / 14%) 82%);
+}
+
+.rxs-page.rxs-page.ffs-page .rxs-hero-visual img {
+  z-index: 2;
+  object-position: 50% 0;
+  filter: saturate(1.06) contrast(1.05) brightness(0.96);
+  mask-image: linear-gradient(to bottom, #000 0 82%, transparent 99%);
+}
+
+/* The slate: a forged take number, the etched form line, the gold role
+   (desktop only: on a phone it would stand over the figure's head). */
+.rxs-page.rxs-page.ffs-page .ffs-stage-slate {
+  display: none;
+  position: absolute;
+  z-index: 5;
+  top: clamp(18px, 2.4vw, 28px);
+  left: clamp(18px, 2.4vw, 28px);
+  grid-template-columns: auto auto;
+  align-items: center;
+  column-gap: 12px;
+  padding-inline-start: 14px;
+  border-inline-start: 2px solid var(--fft-gold);
+  color: var(--fft-text-kicker);
+  font-family: var(--fft-etch);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.3;
+  letter-spacing: var(--fft-track-kicker);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-stage-slate > b {
+  color: var(--fft-text-1);
+  font-family: var(--fft-forge);
+  font-size: var(--fft-step-4);
+  font-weight: 300;
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-stage-slate > small {
+  grid-column: 1 / -1;
+  color: var(--fft-gold);
+  font-size: 12px;
+}
+
+/* The aperture and its three rings (static; the rings settle once on arrival). */
+.rxs-page.rxs-page.ffs-page .ffs-aperture {
+  position: absolute;
+  z-index: 1;
+  inset: 4% 6% auto;
+  width: 88%;
+  height: auto;
+  aspect-ratio: 720 / 800;
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-aperture-grid {
+  stroke: rgb(127 230 255 / 14%);
+  stroke-width: 1;
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-aperture-phase {
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-aperture-phase.is-ice {
+  stroke: rgb(127 230 255 / 55%);
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-aperture-phase.is-gold {
+  stroke: rgb(255 215 122 / 55%);
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-aperture-phase.is-violet {
+  stroke: rgb(201 155 255 / 55%);
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-aperture-graduations {
+  stroke: rgb(255 215 122 / 40%);
+  stroke-width: 1;
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-ring {
+  position: absolute;
+  z-index: 1;
+  top: 44%;
+  left: 50%;
+  display: block;
+  border-radius: 50%;
+  border: 1px solid;
+  translate: -50% -50%;
+  pointer-events: none;
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-ring.is-ice {
+  width: 78%;
+  aspect-ratio: 1;
+  border-color: rgb(127 230 255 / 24%);
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-ring.is-gold {
+  width: 60%;
+  aspect-ratio: 1;
+  border-color: rgb(255 215 122 / 22%);
+  border-style: dashed;
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-ring.is-violet {
+  width: 94%;
+  aspect-ratio: 1;
+  border-color: rgb(201 155 255 / 16%);
+}
+
+/* The three read-outs beside the figure (desktop only). */
+.rxs-page.rxs-page.ffs-page .ffs-callouts {
+  display: none;
+}
+
+/* The scroll cue. */
+.rxs-page.rxs-page.ffs-page .rxs-scroll-cue {
+  color: var(--fft-text-2);
+  font-family: var(--fft-display);
+  font-size: 13px;
+  font-weight: 600;
   letter-spacing: 0.16em;
 }
 
-.ffs-provisional {
-  display: inline-flex;
-  flex-wrap: wrap;
-  gap: 4px 12px;
-  align-items: baseline;
-  margin: 18px 0 0;
-  padding: 7px 14px;
-  border: 1px solid rgb(255 215 122 / 40%);
-  border-radius: 999px;
-  color: #ffe2a1;
+/* Column hero (phones, portrait tablets): the stage first, then the copy. */
+@media (max-width: 1099px) {
+  .rxs-page.rxs-page.ffs-page .ffs-hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: clamp(28px, 4vw, 44px);
+    min-height: 0;
+    padding: clamp(28px, 4vw, 48px) 20px 0;
+  }
+
+  .rxs-page.rxs-page.ffs-page .rxs-hero-visual {
+    order: -1;
+    position: relative;
+    inset: auto;
+    width: min(100%, 560px);
+    aspect-ratio: 3 / 4;
+    margin: 0 auto;
+    translate: none;
+    scale: none;
+    opacity: 1;
+  }
+
+  .rxs-page.rxs-page.ffs-page .rxs-hero-copy {
+    width: min(100%, 720px);
+    padding-top: 12px;
+    text-align: center;
+  }
+
+  .rxs-page.rxs-page.ffs-page .ffs-mark {
+    top: -0.9em;
+    font-size: clamp(54px, 15vw, 120px);
+  }
+
+  .rxs-page.rxs-page.ffs-page .rxs-scroll-cue {
+    position: static;
+    margin: 0 0 40px;
+  }
+}
+
+/* Split hero (desktop): the stage at the left, the copy beside it. */
+@media (min-width: 1100px) {
+  .rxs-page.rxs-page.ffs-page .ffs-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 46%) minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) auto;
+    column-gap: clamp(40px, 5vw, 96px);
+    align-items: stretch;
+    min-height: max(720px, calc(100svh - var(--rxs-local-nav-reserve, 62px)));
+    padding: 0 var(--fft-gutter) 0 0;
+  }
+
+  .rxs-page.rxs-page.ffs-page .rxs-hero-visual {
+    position: relative;
+    grid-column: 1;
+    grid-row: 1 / -1;
+    inset: auto;
+    width: 100%;
+    height: 100%;
+    min-height: 100%;
+    aspect-ratio: auto;
+    margin: 0;
+    border-width: 0 1px 0 0;
+    translate: none;
+    scale: none;
+    opacity: 1;
+  }
+
+  .rxs-page.rxs-page.ffs-page .rxs-hero-visual img {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: auto;
+    max-width: 84%;
+    height: 92%;
+    translate: -56% 0;
+    object-fit: contain;
+    object-position: 50% 100%;
+  }
+
+  .rxs-page.rxs-page.ffs-page .rxs-hero-visual::after {
+    background: linear-gradient(180deg, transparent 70%, rgb(2 5 11 / 55%) 90%, #02050b 100%);
+  }
+
+  .rxs-page.rxs-page.ffs-page .rxs-hero-copy {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: center;
+    width: 100%;
+    max-width: 680px;
+    padding-block: clamp(96px, 12svh, 150px) 40px;
+    text-align: start;
+  }
+
+  .rxs-page.rxs-page.ffs-page .rxs-hero-copy > p:first-child,
+  .rxs-page.rxs-page.ffs-page .ffs-stages-line,
+  .rxs-page.rxs-page.ffs-page .ffs-hero-rail {
+    justify-content: flex-start;
+  }
+
+  .rxs-page.rxs-page.ffs-page .rxs-hero-lede {
+    margin-inline: 0;
+  }
+
+  /* The name on one line beside the stage (eight characters in 680px). */
+  .rxs-page.rxs-page.ffs-page .rxs-hero h1 {
+    font-size: clamp(44px, 4.9vw, 74px);
+  }
+
+  .rxs-page.rxs-page.ffs-page .ffs-mark {
+    top: 0;
+    left: 0;
+    translate: 0 0;
+  }
+
+  .rxs-page.rxs-page.ffs-page .rxs-scroll-cue {
+    position: static;
+    grid-column: 2;
+    grid-row: 2;
+    justify-self: start;
+    margin: 0 0 36px;
+    text-align: start;
+  }
+
+  .rxs-page.rxs-page.ffs-page .ffs-stage-slate {
+    display: grid;
+  }
+
+  /* The read-outs: a lead and the figure on a dark plate, at the stage's
+     right edge; the figure leaves them the room. */
+  .rxs-page.rxs-page.ffs-page .ffs-callouts {
+    position: absolute;
+    z-index: 5;
+    inset: 0;
+    display: block;
+    pointer-events: none;
+  }
+
+  .rxs-page.rxs-page.ffs-page .ffs-callout {
+    position: absolute;
+    right: clamp(16px, 2.2vw, 28px);
+    display: block;
+  }
+
+  .rxs-page.rxs-page.ffs-page .ffs-callout.is-punch {
+    top: 23%;
+  }
+
+  .rxs-page.rxs-page.ffs-page .ffs-callout.is-jump {
+    top: 44%;
+  }
+
+  .rxs-page.rxs-page.ffs-page .ffs-callout.is-core {
+    top: 66%;
+  }
+
+  .rxs-page.rxs-page.ffs-page .ffs-callout > span {
+    display: grid;
+    grid-template-columns: auto;
+    justify-items: end;
+    padding: 10px 14px 10px 18px;
+    border-inline-end: 2px solid rgb(255 215 122 / 70%);
+    background: linear-gradient(90deg, transparent, rgb(2 5 11 / 78%) 40%);
+    text-align: end;
+  }
+
+  .rxs-page.rxs-page.ffs-page .ffs-callout i {
+    display: block;
+    width: 48px;
+    height: 1px;
+    margin-bottom: 8px;
+    background: linear-gradient(90deg, transparent, var(--fft-ice));
+  }
+
+  .rxs-page.rxs-page.ffs-page .ffs-callout b {
+    color: var(--fft-text-1);
+    font-family: var(--fft-forge);
+    font-size: clamp(26px, 2.2vw, 34px);
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: 0.01em;
+    font-variant-numeric: tabular-nums lining-nums;
+    text-shadow: 0 2px 12px rgb(0 0 0 / 70%);
+  }
+
+  .rxs-page.rxs-page.ffs-page .ffs-callout em {
+    margin-top: 6px;
+    color: var(--fft-text-kicker);
+    font-family: var(--fft-etch);
+    font-size: 11px;
+    font-style: normal;
+    letter-spacing: 0.22em;
+  }
+}
+
+@media (min-width: 1300px) {
+  .rxs-page.rxs-page.ffs-page .ffs-hero {
+    grid-template-columns: minmax(0, 50%) minmax(0, 1fr);
+  }
+}
+
+/* ================================================================
+   CONTENTS: the chapter map under the hero
+   ================================================================ */
+.rxs-page.rxs-page.ffs-page .ffs-chapter-map {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0;
+  max-width: none;
+  margin: 0;
+  padding: 0 var(--fft-gutter);
+  border-block: 1px solid var(--fft-line);
+  background: rgb(3 9 16 / 76%);
+  contain: layout style;
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-chapter-map-heading {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0;
+  padding: 13px 20px;
+  border-bottom: 1px solid var(--fft-line);
+  color: var(--fft-text-1);
+  font-family: var(--fft-etch);
   font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
+  font-weight: 400;
+  line-height: 1.4;
+  letter-spacing: var(--fft-track-kicker);
 }
 
-.ffs-provisional span {
-  color: rgb(255 226 161 / 62%);
-  font-family: var(--rxs-font-display);
+.rxs-page.rxs-page.ffs-page .ffs-chapter-map-heading small {
+  color: var(--fft-text-3);
+  font: inherit;
+  letter-spacing: var(--fft-track-label);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-chapter-map a {
+  position: relative;
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) 16px;
+  grid-template-rows: auto auto auto;
+  align-content: center;
+  gap: 3px 12px;
+  min-height: 108px;
+  min-width: 0;
+  padding: 18px 20px;
+  border: 0;
+  background: transparent;
+  transition: background 180ms ease;
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-chapter-map a:nth-of-type(even) {
+  border-left: 1px solid var(--fft-line-soft);
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-chapter-map a:nth-of-type(n + 3) {
+  border-top: 1px solid var(--fft-line-soft);
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-chapter-map a b {
+  grid-column: 1;
+  grid-row: 1 / -1;
+  align-self: start;
+  color: var(--fft-gold);
+  font-family: var(--fft-forge);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-chapter-map a small {
+  grid-column: 2;
+  grid-row: 1;
+  color: var(--fft-text-kicker);
+  font-family: var(--fft-etch);
   font-size: 10px;
-  letter-spacing: 0.22em;
+  letter-spacing: var(--fft-track-label);
+  overflow-wrap: anywhere;
 }
 
-/* Calls */
+.rxs-page.rxs-page.ffs-page .ffs-chapter-map a span {
+  grid-column: 2;
+  grid-row: 2;
+  color: var(--fft-text-1);
+  font-family: var(--fft-display);
+  font-size: clamp(17px, 1.6vw, 21px);
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 0.03em;
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-chapter-map a em {
+  grid-column: 2;
+  grid-row: 3;
+  min-width: 0;
+  color: var(--fft-text-3);
+  font-size: 12px;
+  font-style: normal;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-chapter-map a i {
+  grid-column: 3;
+  grid-row: 1 / -1;
+  align-self: center;
+  color: var(--fft-gold);
+  font-size: 15px;
+  font-style: normal;
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-chapter-map a:focus-visible {
+  outline: 2px solid #a5edff;
+  outline-offset: -3px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .rxs-page.rxs-page.ffs-page .ffs-chapter-map a:hover {
+    background: rgb(127 230 255 / 7%);
+  }
+}
+
+/* The tracklist (desktop): two columns of six rows — number, code, name, line. */
+@media (min-width: 1100px) {
+  .rxs-page.rxs-page.ffs-page .ffs-chapter-map a {
+    grid-template-columns: 40px 132px minmax(0, auto) minmax(0, 1fr) 20px;
+    grid-template-rows: auto;
+    align-items: baseline;
+    gap: 0 16px;
+    min-height: 60px;
+    padding: 14px 20px;
+  }
+
+  .rxs-page.rxs-page.ffs-page .ffs-chapter-map a:nth-of-type(n + 3) {
+    border-top: 1px solid var(--fft-line-soft);
+  }
+
+  .rxs-page.rxs-page.ffs-page .ffs-chapter-map a b {
+    grid-row: 1;
+    align-self: baseline;
+  }
+
+  .rxs-page.rxs-page.ffs-page .ffs-chapter-map a small {
+    grid-column: 2;
+    grid-row: 1;
+    white-space: nowrap;
+  }
+
+  .rxs-page.rxs-page.ffs-page .ffs-chapter-map a span {
+    grid-column: 3;
+    grid-row: 1;
+    white-space: nowrap;
+  }
+
+  .rxs-page.rxs-page.ffs-page .ffs-chapter-map a em {
+    grid-column: 4;
+    grid-row: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .rxs-page.rxs-page.ffs-page .ffs-chapter-map a i {
+    grid-column: 5;
+    grid-row: 1;
+    align-self: center;
+    justify-self: end;
+  }
+}
+
+@media (max-width: 680px) {
+  .rxs-page.rxs-page.ffs-page .ffs-chapter-map {
+    grid-template-columns: minmax(0, 1fr);
+    padding-inline: 0;
+  }
+
+  .rxs-page.rxs-page.ffs-page .ffs-chapter-map a {
+    grid-template-columns: 30px minmax(0, 1fr) 16px;
+    min-height: 76px;
+    padding: 12px 16px;
+  }
+
+  .rxs-page.rxs-page.ffs-page .ffs-chapter-map a:nth-of-type(even) {
+    border-left: 0;
+  }
+
+  .rxs-page.rxs-page.ffs-page .ffs-chapter-map a + a {
+    border-top: 1px solid var(--fft-line-soft);
+  }
+
+  .rxs-page.rxs-page.ffs-page .ffs-chapter-map a em {
+    font-size: 11px;
+  }
+}
+
+/* ================================================================
+   Chapters: the sections and their heads
+   ================================================================ */
+.rxs-page.rxs-page.ffs-page > .rxs-section {
+  position: relative;
+  --ffs-tint: var(--ffs-accent);
+}
+
+/* Each chapter counts itself; a sub-chapter (#report) keeps its chapter's number. */
+.rxs-page.rxs-page.ffs-page > .rxs-section:not(.ffs-subchapter) {
+  counter-increment: ffs-chapter;
+}
+
+/* The seam between chapters: a hairline in the chapter's light. */
+.rxs-page.rxs-page.ffs-page > .rxs-section::before {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 1px;
+  content: "";
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--ffs-tint) 70%, transparent),
+    rgb(255 215 122 / 45%) 40%,
+    transparent 92%
+  );
+  pointer-events: none;
+}
+
+.rxs-page.rxs-page.ffs-page > .rxs-section.ffs-subchapter::before {
+  content: none;
+}
+
+/* The chapters' lights. */
+.rxs-page.rxs-page.ffs-page > .ffs-overview {
+  --ffs-accent: #7fe6ff;
+  background: radial-gradient(circle at 18% 10%, rgb(66 110 220 / 14%), transparent 34rem), var(--fft-ink);
+}
+
+.rxs-page.rxs-page.ffs-page > .ffs-specs-section {
+  --ffs-accent: #ffd77a;
+  background:
+    radial-gradient(circle at 16% 18%, rgb(66 110 220 / 12%), transparent 32rem),
+    radial-gradient(circle at 82% 80%, rgb(255 199 97 / 8%), transparent 28rem),
+    var(--fft-ink-2);
+}
+
+.rxs-page.rxs-page.ffs-page > .ffs-performance {
+  --ffs-accent: #c99bff;
+}
+
+.rxs-page.rxs-page.ffs-page > .ffs-report-section {
+  --ffs-accent: #c99bff;
+}
+
+.rxs-page.rxs-page.ffs-page > .ffs-p16 {
+  --ffs-accent: #ffd77a;
+}
+
+.rxs-page.rxs-page.ffs-page > .ffs-suitup {
+  --ffs-accent: #7fe6ff;
+}
+
+.rxs-page.rxs-page.ffs-page > .ffs-ultra {
+  --ffs-accent: #9cf1ff;
+}
+
+.rxs-page.rxs-page.ffs-page > .rxs-stages {
+  background: radial-gradient(circle at 50% 0%, rgb(66 110 220 / 12%), transparent 30rem), var(--fft-ink);
+}
+
+.rxs-page.rxs-page.ffs-page > .ffs-theories {
+  --ffs-accent: #7fe6ff;
+  background: var(--fft-ink-2);
+}
+
+.rxs-page.rxs-page.ffs-page > .ffs-system {
+  --ffs-accent: #c99bff;
+}
+
+.rxs-page.rxs-page.ffs-page > .ffs-authority {
+  --ffs-accent: #ffd77a;
+  background: var(--fft-ink-2);
+}
+
+.rxs-page.rxs-page.ffs-page > .ffs-arsenal {
+  --ffs-accent: #e9edf3;
+}
+
+.rxs-page.rxs-page.ffs-page > .ffs-finishers {
+  --ffs-accent: #ff8fd8;
+  background: radial-gradient(circle at 50% 0%, rgb(201 155 255 / 10%), transparent 30rem), var(--fft-ink-2);
+}
+
+/* ---------- The head: numeral, kicker, title, lede, hairline ---------- */
+.rxs-page.rxs-page.ffs-page > .rxs-section > .rxs-section-heading {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-rows: auto auto auto;
+  column-gap: clamp(20px, 3vw, 44px);
+  row-gap: 0;
+  align-items: start;
+  max-width: var(--fft-wrap);
+  margin: 0 auto clamp(44px, 6vw, 72px);
+  padding-bottom: clamp(24px, 3vw, 36px);
+  text-align: start;
+}
+
+/* The hairline under the head. */
+.rxs-page.rxs-page.ffs-page > .rxs-section > .rxs-section-heading::after {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 1px;
+  content: "";
+  background: var(--fft-rainbow-fade);
+  transform-origin: 0 50%;
+}
+
+/* The forged numeral: the chapter's count, outlined in gold. Generated
+   with empty alternative text, so assistive technology reads the kicker. */
+.rxs-page.rxs-page.ffs-page > .rxs-section > .rxs-section-heading::before {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  align-self: start;
+  margin-top: -0.08em;
+  content: counter(ffs-chapter, decimal-leading-zero) / "";
+  color: transparent;
+  font-family: var(--fft-forge);
+  font-size: clamp(64px, 7.4vw, 128px);
+  font-weight: 300;
+  font-stretch: 125%;
+  line-height: 0.9;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums lining-nums;
+  -webkit-text-stroke: 1.5px var(--fft-gold);
+  text-shadow: 0 0 24px rgb(255 215 122 / 18%);
+}
+
+.rxs-page.rxs-page.ffs-page > .rxs-section > .rxs-section-heading > p {
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  justify-content: flex-start;
+  margin: 0 0 14px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  color: var(--fft-text-kicker);
+  background: none;
+  font-family: var(--fft-etch);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: var(--fft-track-kicker);
+  text-shadow: none;
+  text-wrap: balance;
+}
+
+.rxs-page.rxs-page.ffs-page > .rxs-section > .rxs-section-heading > p::before {
+  flex: none;
+  width: 28px;
+  height: 1px;
+  margin: 0;
+  content: "";
+  background: var(--fft-gold);
+}
+
+.rxs-page.rxs-page.ffs-page > .rxs-section > .rxs-section-heading > p::after {
+  content: none;
+}
+
+.rxs-page.rxs-page.ffs-page > .rxs-section > .rxs-section-heading > h2 {
+  grid-column: 2;
+  grid-row: 2;
+  margin: 0;
+  color: var(--fft-text-1);
+  background: none;
+  -webkit-text-fill-color: var(--fft-text-1);
+  font-family: var(--fft-display);
+  font-size: var(--fft-step-5);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: 0.045em;
+  text-wrap: balance;
+  word-break: auto-phrase;
+}
+
+.rxs-page.rxs-page.ffs-page > .rxs-section > .rxs-section-heading > span {
+  grid-column: 2;
+  grid-row: 3;
+  max-width: 44em;
+  margin: 18px 0 0;
+  color: var(--fft-text-2);
+  font-size: var(--fft-step-2);
+  font-weight: 500;
+  line-height: 1.9;
+  letter-spacing: 0.05em;
+  word-break: auto-phrase;
+  text-wrap: pretty;
+}
+
+/* A sub-chapter's head: no numeral, the title a step down. */
+.rxs-page.rxs-page.ffs-page > .ffs-subchapter > .rxs-section-heading {
+  grid-template-columns: minmax(0, 1fr);
+  margin-bottom: clamp(32px, 4vw, 48px);
+}
+
+.rxs-page.rxs-page.ffs-page > .ffs-subchapter > .rxs-section-heading::before {
+  content: none;
+}
+
+.rxs-page.rxs-page.ffs-page > .ffs-subchapter > .rxs-section-heading > p,
+.rxs-page.rxs-page.ffs-page > .ffs-subchapter > .rxs-section-heading > h2,
+.rxs-page.rxs-page.ffs-page > .ffs-subchapter > .rxs-section-heading > span {
+  grid-column: 1;
+}
+
+.rxs-page.rxs-page.ffs-page > .ffs-subchapter > .rxs-section-heading > h2 {
+  font-size: var(--fft-step-4);
+}
+
+/* The sub-chapter runs on from its chapter: a shorter gap, no seam. */
+.rxs-page.rxs-page.ffs-page > .ffs-report-section {
+  padding-top: 0;
+}
+
+/* #ultra pads its head instead of itself (its runway is full-bleed): the
+   head takes the page's measure, so its numeral stands with the others'. */
+.rxs-page.rxs-page.ffs-page > .ffs-ultra > .rxs-section-heading {
+  width: min(var(--fft-wrap), calc(100% - 48px));
+  padding-inline: 0;
+}
+
+@media (max-width: 760px) {
+  .rxs-page.rxs-page.ffs-page > .rxs-section > .rxs-section-heading {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto auto auto;
+  }
+
+  .rxs-page.rxs-page.ffs-page > .rxs-section > .rxs-section-heading::before {
+    grid-column: 1;
+    grid-row: 1;
+    margin: 0 0 6px;
+    font-size: clamp(48px, 14vw, 64px);
+  }
+
+  .rxs-page.rxs-page.ffs-page > .rxs-section > .rxs-section-heading > p {
+    grid-column: 1;
+    grid-row: 2;
+    gap: 10px;
+    margin-bottom: 10px;
+    letter-spacing: 0.18em;
+  }
+
+  .rxs-page.rxs-page.ffs-page > .rxs-section > .rxs-section-heading > p::before {
+    width: 18px;
+  }
+
+  .rxs-page.rxs-page.ffs-page > .rxs-section > .rxs-section-heading > h2 {
+    grid-column: 1;
+    grid-row: 3;
+    font-size: clamp(34px, 9vw, 44px);
+  }
+
+  .rxs-page.rxs-page.ffs-page > .rxs-section > .rxs-section-heading > span {
+    grid-column: 1;
+    grid-row: 4;
+    margin-top: 14px;
+    font-size: 15px;
+    line-height: 1.85;
+  }
+}
+
+/* ---------- Plate titles, kickers and figures across the chapters ---------- */
+.rxs-page.rxs-page.ffs-page .ffs-articles article h3,
+.rxs-page.rxs-page.ffs-page .ffs-finisher > h3,
+.rxs-page.rxs-page.ffs-page .rxs-stage-panel > div > h3,
+.rxs-page.rxs-page.ffs-page .ffs-form-status strong,
+.rxs-page.rxs-page.ffs-page .ffs-form-comparison > summary > strong,
+.rxs-page.rxs-page.ffs-page .ffs-comparison-card h3 {
+  color: var(--fft-text-1);
+  font-family: var(--fft-display);
+  font-weight: 800;
+  font-synthesis: none;
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-articles article header,
+.rxs-page.rxs-page.ffs-page .ffs-articles article header small,
+.rxs-page.rxs-page.ffs-page .ffs-finisher > small,
+.rxs-page.rxs-page.ffs-page .ffs-specs dt,
+.rxs-page.rxs-page.ffs-page .rxs-stage-panel > div > small,
+.rxs-page.rxs-page.ffs-page .ffs-form-status-heading span,
+.rxs-page.rxs-page.ffs-page .ffs-form-comparison > summary > span:not(.ffs-comparison-codes),
+.rxs-page.rxs-page.ffs-page .ffs-weapons li span,
+.rxs-page.rxs-page.ffs-page .ffs-footer > div > p {
+  font-family: var(--fft-etch);
+  font-weight: 400;
+  letter-spacing: var(--fft-track-kicker);
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+/* ---------- Calls ---------- */
 .ffs-calls {
   display: flex;
   flex-wrap: wrap;
@@ -142,19 +1252,24 @@
 }
 
 .ffs-calls b {
-  padding: 9px 14px;
+  padding: 10px 16px;
   border: 1px solid color-mix(in srgb, var(--ffs-accent) 34%, transparent);
-  border-radius: 999px;
-  color: var(--ffs-text);
+  color: var(--fft-text-1);
   background: color-mix(in srgb, var(--ffs-accent) 8%, rgb(7 11 20 / 90%));
-  font-family: var(--rxs-font-display);
+  font-family: var(--fft-etch);
   font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  line-height: 1.4;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  line-height: 1.5;
+  clip-path: polygon(0 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
 }
 
-/* Prose */
+.ffs-finisher .ffs-calls {
+  justify-content: flex-start;
+  margin: 0 0 24px;
+}
+
+/* ---------- Prose ---------- */
 .ffs-copy {
   max-width: 900px;
   margin: auto;
@@ -162,9 +1277,10 @@
 
 .ffs-copy p {
   margin: 0 0 1.4em;
-  color: #d3dbe5;
+  color: var(--fft-text-2);
   font-size: 15px;
   line-height: 2;
+  word-break: auto-phrase;
   text-wrap: pretty;
 }
 
@@ -172,57 +1288,54 @@
   margin-bottom: 0;
 }
 
-/* Specs */
-.ffs-specs-section {
-  background:
-    radial-gradient(circle at 16% 18%, rgb(66 110 220 / 13%), transparent 32rem),
-    radial-gradient(circle at 82% 80%, rgb(255 199 97 / 8%), transparent 28rem), #04070d;
-}
-
+/* ---------- 02 Specs: plates over a hairline ---------- */
 .ffs-specs {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-  max-width: 1180px;
+  gap: 0 clamp(16px, 2.6vw, 36px);
+  max-width: var(--fft-wrap);
   margin: 0 auto;
 }
 
 .ffs-specs div {
   min-width: 0;
-  padding: 16px 16px 15px;
-  border: 1px solid rgb(255 255 255 / 9%);
-  border-radius: var(--sc-radius-small, 16px);
-  background:
-    linear-gradient(150deg, color-mix(in srgb, var(--ffs-accent) 7%, transparent), transparent 55%),
-    rgb(255 255 255 / 4%);
+  padding: 18px 0 20px;
+  border-top: 1px solid var(--fft-line-soft);
 }
 
 .ffs-specs dt {
-  color: var(--ffs-muted);
-  font-size: 10px;
-  letter-spacing: 0.16em;
+  color: var(--fft-text-kicker);
+  font-size: 11px;
+  letter-spacing: var(--fft-track-label);
 }
 
 .ffs-specs dd {
-  margin: 8px 0 0;
-  color: var(--ffs-text);
-  font-family: var(--rxs-font-display);
-  font-size: clamp(16px, 1.5vw, 22px);
-  font-weight: 720;
-  letter-spacing: -0.02em;
-  line-height: 1.35;
+  margin: 10px 0 0;
+  color: var(--fft-text-1);
+  font-family: var(--fft-forge), var(--fft-display);
+  font-size: clamp(22px, 2vw, 30px);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1.25;
+  font-variant-numeric: tabular-nums lining-nums;
   overflow-wrap: anywhere;
+}
+
+.ffs-specs div[data-long] dd {
+  font-size: clamp(15px, 1.2vw, 18px);
+  font-weight: 700;
+  line-height: 1.5;
 }
 
 .ffs-note {
   max-width: 980px;
   margin: 18px auto 0;
-  color: var(--ffs-muted);
+  color: var(--fft-text-3);
   font-size: 12px;
   line-height: 1.8;
 }
 
-/* Stage switcher: five tabs, each on the 44px floor. */
+/* ---------- 07 Stages: the rail, the status, the panel, the drawer ---------- */
 .ffs-stage-tabs.rxs-stage-tabs.liquid-swipe-tabs {
   grid-template-columns: repeat(5, minmax(0, 1fr));
   width: min(780px, 100%);
@@ -232,23 +1345,325 @@
   min-width: 44px;
 }
 
-.ffs-page .rxs-stage-panel figure > span {
-  border-color: color-mix(in srgb, var(--ffs-accent) 22%, transparent);
+.ffs-stage-tabs.rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"] small {
+  font-family: var(--fft-etch);
+  font-size: 10px;
+  letter-spacing: 0.16em;
 }
 
-.ffs-page .rxs-stage-panel > div > small {
+/* The form-sequence status beside the rail (read-only; the rail owns input). */
+.rxs-page.rxs-page.ffs-page .ffs-form-status {
+  box-sizing: border-box;
+  width: min(780px, 100%);
+  margin: 18px auto 0;
+  padding: 16px 18px;
+  border: 1px solid color-mix(in srgb, var(--ffs-accent) 30%, transparent);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--ffs-accent) 7%, transparent), transparent 60%), rgb(5 9 16 / 80%);
+  clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-form-status-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--fft-text-kicker);
+  font-size: 11px;
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-form-status-heading span:last-child {
+  color: var(--fft-text-3);
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-form-status-track {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+  margin: 12px 0 14px;
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-form-status-track i {
+  display: block;
+  height: 3px;
+  background: var(--fft-line-soft);
+  transition: background 320ms ease;
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-form-status-track i.is-reached {
+  background: var(--ffs-accent);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--ffs-accent) 50%, transparent);
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-form-status p {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  align-items: baseline;
+  margin: 0;
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-form-status p > span {
+  color: var(--fft-text-3);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-form-status strong {
+  font-size: var(--fft-step-3);
+  line-height: 1.3;
+  letter-spacing: 0.02em;
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-form-status small {
+  padding: 3px 8px;
+  border: 1px solid color-mix(in srgb, var(--ffs-accent) 50%, transparent);
   color: var(--ffs-accent);
+  font-family: var(--fft-etch);
+  font-size: 11px;
+  letter-spacing: var(--fft-track-label);
 }
 
-.ffs-page .rxs-stage-panel > div > p + p {
+/* The panel. */
+.rxs-page.rxs-page.ffs-page .rxs-stage-panel {
+  margin-top: clamp(28px, 4vw, 44px);
+}
+
+.rxs-page.rxs-page.ffs-page .rxs-stage-panel figure > span {
+  border-color: color-mix(in srgb, var(--ffs-accent) 26%, transparent);
+}
+
+.rxs-page.rxs-page.ffs-page .rxs-stage-panel > div {
+  position: relative;
+  isolation: isolate;
+}
+
+.rxs-page.rxs-page.ffs-page .rxs-stage-panel > div > small {
+  display: inline-block;
+  padding: 4px 10px;
+  color: #04131a;
+  background: var(--ffs-accent);
+  font-size: 11px;
+  letter-spacing: var(--fft-track-label);
+  clip-path: polygon(0 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
+}
+
+.rxs-page.rxs-page.ffs-page .rxs-stage-panel > div > h3 {
+  font-size: clamp(30px, 2.6vw + 14px, 54px);
+  line-height: 1.14;
+  letter-spacing: 0.02em;
+}
+
+.rxs-page.rxs-page.ffs-page .rxs-stage-panel > div > p {
+  color: var(--fft-text-2);
+  font-size: var(--fft-step-2);
+  line-height: 1.9;
+  word-break: auto-phrase;
+  text-wrap: pretty;
+}
+
+.rxs-page.rxs-page.ffs-page .rxs-stage-panel > div > p + p {
   margin-top: 1em;
 }
 
-/* The record's articles: theories, armour and OS, authority. */
+/* The form's code, outlined and huge, behind the copy. */
+.rxs-page.rxs-page.ffs-page .ffs-form-code {
+  position: absolute;
+  top: -0.2em;
+  right: 0;
+  z-index: -1;
+  display: block;
+  max-width: 100%;
+  overflow: clip;
+  color: transparent;
+  font-family: var(--fft-forge);
+  font-size: clamp(48px, 12vw, 96px);
+  font-weight: 300;
+  font-style: normal;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  -webkit-text-stroke: 1px color-mix(in srgb, var(--ffs-accent) 55%, transparent);
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+/* The scan line across the figure (one pass on each new form). */
+.rxs-page.rxs-page.ffs-page .ffs-stage-scan {
+  position: absolute;
+  z-index: 3;
+  right: 0;
+  left: 0;
+  top: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--ffs-accent), transparent);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* The comparison drawer. */
+.rxs-page.rxs-page.ffs-page .ffs-form-comparison {
+  max-width: var(--fft-wrap);
+  margin: clamp(32px, 4vw, 48px) auto 0;
+  border: 1px solid var(--fft-line);
+  background: rgb(3 9 16 / 76%);
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-form-comparison > summary {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-rows: auto auto;
+  gap: 4px 18px;
+  align-items: center;
+  min-height: 64px;
+  padding: 16px 20px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-form-comparison > summary::-webkit-details-marker {
+  display: none;
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-form-comparison > summary > span:not(.ffs-comparison-codes) {
+  grid-column: 1;
+  grid-row: 1;
+  color: var(--fft-text-kicker);
+  font-size: 11px;
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-form-comparison > summary > strong {
+  grid-column: 1;
+  grid-row: 2;
+  font-size: var(--fft-step-3);
+  line-height: 1.3;
+  letter-spacing: 0.02em;
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-comparison-codes {
+  grid-column: 2;
+  grid-row: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-comparison-codes > b {
+  padding: 4px 8px;
+  border: 1px solid color-mix(in srgb, var(--ffs-code-accent, var(--fft-ice)) 45%, transparent);
+  color: var(--ffs-code-accent, var(--fft-ice));
+  font-family: var(--fft-etch);
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: var(--fft-track-label);
+  white-space: nowrap;
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-form-comparison > summary > i {
+  grid-column: 3;
+  grid-row: 1 / -1;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--fft-line);
+  color: var(--fft-gold);
+  font-size: 18px;
+  font-style: normal;
+  transition: transform 240ms ease;
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-form-comparison[open] > summary > i {
+  transform: rotate(45deg);
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-form-comparison > summary:focus-visible {
+  outline: 2px solid #a5edff;
+  outline-offset: -3px;
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-comparison-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 14px;
+  padding: 0 20px 20px;
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-comparison-card {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid var(--fft-line-soft);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--ffs-accent) 8%, transparent), transparent 50%), var(--fft-surface);
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-comparison-card[data-selected="true"] {
+  border-color: color-mix(in srgb, var(--ffs-accent) 60%, transparent);
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-comparison-card > p {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0;
+  font-family: var(--fft-etch);
+  font-size: 11px;
+  letter-spacing: var(--fft-track-label);
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-comparison-card > p > span {
+  color: var(--fft-gold);
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-comparison-card > p > b {
+  color: var(--ffs-accent);
+  font-weight: 400;
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-comparison-card img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  object-position: 50% 0;
+  background: #02050b;
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-comparison-card h3 {
+  margin: 0;
+  font-size: var(--fft-step-2);
+  line-height: 1.3;
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-comparison-card button {
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid var(--fft-line);
+  color: var(--fft-text-1);
+  background: transparent;
+  font: 700 12px / 1.4 var(--fft-display);
+  letter-spacing: 0.06em;
+  cursor: pointer;
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-comparison-card button[aria-pressed="true"] {
+  border-color: var(--ffs-accent);
+  color: #04131a;
+  background: var(--ffs-accent);
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-comparison-card button:focus-visible {
+  outline: 2px solid #a5edff;
+  outline-offset: 3px;
+}
+
+/* ---------- The record's articles (theories, armour and OS, authority) ---------- */
 .ffs-articles {
   display: grid;
   gap: 14px;
-  max-width: 1180px;
+  max-width: var(--fft-wrap);
   margin: 0 auto;
 }
 
@@ -261,13 +1676,25 @@
 }
 
 .ffs-articles article {
+  position: relative;
   min-width: 0;
-  padding: 26px 24px 24px;
-  border: 1px solid rgb(255 255 255 / 9%);
-  border-radius: var(--sc-radius, 22px);
+  padding: 28px 26px 26px;
+  border: 1px solid var(--fft-line-soft);
   background:
     linear-gradient(160deg, color-mix(in srgb, var(--ffs-accent) 8%, transparent), transparent 52%),
-    rgb(255 255 255 / 3.5%);
+    var(--fft-surface);
+  clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%);
+}
+
+/* The plate's lit edge. */
+.ffs-articles article::before {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 56px;
+  height: 2px;
+  content: "";
+  background: linear-gradient(90deg, var(--ffs-accent), transparent);
 }
 
 .ffs-articles article header {
@@ -275,36 +1702,40 @@
   align-items: baseline;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 14px;
-  color: var(--ffs-accent);
-  font-family: var(--rxs-font-display);
+  margin-bottom: 16px;
+  color: var(--fft-gold);
   font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.2em;
+}
+
+.ffs-articles article header > span {
+  font-family: var(--fft-forge);
+  font-size: 22px;
+  font-weight: 300;
+  line-height: 1;
+  letter-spacing: 0.02em;
 }
 
 .ffs-articles article header small {
-  color: var(--ffs-muted);
+  color: var(--fft-text-kicker);
   font-size: 10px;
-  letter-spacing: 0.18em;
+  letter-spacing: var(--fft-track-label);
+  text-align: end;
 }
 
 .ffs-articles article h3 {
   margin: 0 0 14px;
-  color: var(--ffs-text);
-  font-family: var(--rxs-font-display);
-  font-size: clamp(19px, 1.7vw, 24px);
-  font-weight: 720;
-  letter-spacing: -0.01em;
-  line-height: 1.35;
+  font-size: var(--fft-step-4);
+  letter-spacing: 0.01em;
+  line-height: 1.3;
   text-wrap: balance;
 }
 
 .ffs-articles article p {
   margin: 0 0 1.2em;
-  color: #cfd7e2;
+  color: var(--fft-text-2);
   font-size: 14px;
   line-height: 1.95;
+  word-break: auto-phrase;
   text-wrap: pretty;
 }
 
@@ -312,48 +1743,12 @@
   margin-bottom: 0;
 }
 
-/* Prepared chapters (準備中): the same section grammar, a hairline frame,
-   and one quiet note stating the state. */
-.ffs-prepared {
-  background: radial-gradient(circle at 50% 0%, rgb(66 110 220 / 10%), transparent 30rem), #02050b;
-}
-
-.ffs-pending {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 16px;
-  align-items: center;
-  justify-content: center;
-  max-width: 980px;
-  margin: 0 auto clamp(28px, 4vw, 44px);
-  color: var(--ffs-muted);
-  font-size: 13px;
-  letter-spacing: 0.04em;
-  line-height: 1.8;
-  text-align: center;
-}
-
-.ffs-pending b {
-  padding: 5px 12px;
-  border: 1px solid rgb(255 215 122 / 40%);
-  border-radius: 999px;
-  color: #ffe2a1;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.18em;
-}
-
-/* #performance and #p16 live in styles-far-from-compare.css (imported above). */
-
-/* #suitup — the scroll suit-up's runway (.ffs-runway.rzn-suitup) is drawn
-   by styles-far-from-suitup.css. */
-
-/* #arsenal — the weapons, numbered. */
+/* ---------- 11 Weapons, numbered ---------- */
 .ffs-weapons {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-  max-width: 1180px;
+  gap: 0 clamp(16px, 2.6vw, 36px);
+  max-width: var(--fft-wrap);
   margin: 0 auto;
   padding: 0;
   list-style: none;
@@ -361,35 +1756,35 @@
 
 .ffs-weapons li {
   display: flex;
-  gap: 14px;
+  gap: 16px;
   align-items: baseline;
   min-width: 0;
-  padding: 14px 18px;
-  border: 1px solid rgb(255 255 255 / 9%);
-  border-radius: var(--sc-radius-small, 16px);
-  background: rgb(255 255 255 / 3.5%);
-  color: var(--ffs-text);
-  font-family: var(--rxs-font-display);
-  font-size: 15px;
+  padding: 16px 0;
+  border-top: 1px solid var(--fft-line-soft);
+  color: var(--fft-text-1);
+  font-family: var(--fft-display);
+  font-size: 16px;
   font-weight: 700;
-  letter-spacing: 0.01em;
+  letter-spacing: 0.02em;
   line-height: 1.5;
   overflow-wrap: anywhere;
 }
 
 .ffs-weapons li span {
   flex: none;
-  color: var(--ffs-accent);
-  font-size: 11px;
-  letter-spacing: 0.2em;
+  color: var(--fft-gold);
+  font-family: var(--fft-forge);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
 }
 
 .ffs-arsenal-note {
-  color: #b9c3d1;
+  color: var(--fft-text-2);
   font-size: 13px;
 }
 
-/* #finishers */
+/* ---------- 12 Finishers ---------- */
 .ffs-finisher-list {
   display: grid;
   gap: 18px;
@@ -398,46 +1793,147 @@
 }
 
 .ffs-finisher {
+  position: relative;
   padding: clamp(26px, 3.6vw, 44px) clamp(20px, 3.4vw, 40px);
-  border: 1px solid rgb(255 255 255 / 9%);
-  border-radius: var(--sc-radius, 22px);
+  border: 1px solid var(--fft-line-soft);
   background:
     radial-gradient(
       circle at 12% 0%,
       color-mix(in srgb, var(--ffs-accent) 12%, transparent),
       transparent 36rem
     ),
-    rgb(255 255 255 / 3%);
+    var(--fft-surface);
+  clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 0 100%);
+}
+
+.ffs-finisher::before {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 72px;
+  height: 2px;
+  content: "";
+  background: var(--fft-rainbow);
 }
 
 .ffs-finisher > small {
   display: block;
-  color: var(--ffs-accent);
-  font-family: var(--rxs-font-display);
+  color: var(--fft-text-kicker);
   font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.22em;
 }
 
 .ffs-finisher > h3 {
-  margin: 10px 0 20px;
-  color: var(--ffs-text);
-  font-family: var(--rxs-font-display);
-  font-size: clamp(22px, 2.4vw, 32px);
-  font-weight: 720;
-  letter-spacing: -0.015em;
+  margin: 12px 0 20px;
+  font-size: clamp(24px, 2.4vw, 36px);
+  letter-spacing: 0.01em;
   line-height: 1.3;
   text-wrap: balance;
 }
 
-.ffs-finisher .ffs-calls {
-  justify-content: flex-start;
-  margin: 0 0 24px;
+/* ================================================================
+   The end card
+   ================================================================ */
+.rxs-page.rxs-page.ffs-page .ffs-footer {
+  position: relative;
+  overflow: clip;
+  isolation: isolate;
+  border-top: 1px solid var(--fft-line);
+  background:
+    radial-gradient(circle at 80% 100%, rgb(66 110 220 / 18%), transparent 40rem),
+    linear-gradient(180deg, var(--fft-ink), #02050b);
 }
 
-/* Footer: the title on its own row, the three doors in one row under it
-   (the showcase's side-by-side grid leaves a long Japanese title one
-   character wide beside three doors). */
+.rxs-page.rxs-page.ffs-page .ffs-footer > .ffs-end-figure {
+  position: absolute;
+  right: clamp(12px, 8vw, 150px);
+  bottom: 0;
+  z-index: -1;
+  width: auto;
+  max-width: none;
+  height: 90%;
+  margin: 0;
+  object-fit: contain;
+  object-position: 50% 100%;
+  opacity: 0.78;
+  pointer-events: none;
+  -webkit-mask-image:
+    linear-gradient(180deg, #000 70%, transparent 100%),
+    linear-gradient(90deg, transparent, #000 42%);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(180deg, #000 70%, transparent 100%),
+    linear-gradient(90deg, transparent, #000 42%);
+  mask-composite: intersect;
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-footer > .ffs-footer-top {
+  grid-column: 1 / -1;
+  margin: 0 0 clamp(40px, 6vw, 96px);
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-footer > .ffs-footer-top a {
+  display: inline-flex;
+  gap: 10px;
+  align-items: center;
+  min-height: 44px;
+  color: var(--fft-text-3);
+  font-family: var(--fft-display);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-footer > .ffs-footer-top a i {
+  color: var(--fft-gold);
+  font-style: normal;
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-footer > .ffs-footer-top a:focus-visible {
+  outline: 2px solid #a5edff;
+  outline-offset: 3px;
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-footer > div > p {
+  margin: 0 0 16px;
+  color: var(--fft-gold);
+  font-size: 12px;
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-footer h2 {
+  max-width: 13em;
+  color: var(--fft-text-1);
+  font-family: var(--fft-display);
+  font-size: clamp(34px, 3vw + 16px, 62px);
+  font-weight: 800;
+  line-height: 1.12;
+  letter-spacing: 0.04em;
+  text-shadow:
+    0 2px 0 rgb(0 2 7 / 55%),
+    0 18px 48px rgb(0 0 0 / 55%);
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-footer > a {
+  border-radius: 0;
+  font-family: var(--fft-display);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  clip-path: polygon(0 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-footer > a:first-of-type {
+  border-color: var(--fft-ice);
+  color: #04131a;
+  background: linear-gradient(100deg, #a9f1ff, #7fe6ff);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .rxs-page.rxs-page.ffs-page .ffs-footer > a:first-of-type:hover {
+    background: #d7f8ff;
+  }
+}
+
+/* The title on its own row, the three doors in one row under it. */
 @media (min-width: 901px) {
   html[data-family="special"] body .rxs-page.rxs-page.ffs-page .rxs-footer.ffs-footer {
     grid-template-columns: repeat(3, max-content);
@@ -450,6 +1946,15 @@
   }
 }
 
+/* ================================================================
+   Breakpoints
+   ================================================================ */
+@media (max-width: 1099px) {
+  .rxs-page.rxs-page.ffs-page .ffs-comparison-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 900px) {
   .ffs-specs {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -459,26 +1964,91 @@
   .ffs-articles-3 {
     grid-template-columns: 1fr;
   }
+
+  .rxs-page.rxs-page.ffs-page .ffs-footer > .ffs-end-figure {
+    right: -12%;
+    height: 72%;
+    opacity: 0.55;
+  }
+}
+
+@media (max-width: 700px) {
+  .rxs-page.rxs-page.ffs-page .ffs-form-comparison > summary {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: auto auto auto;
+  }
+
+  .rxs-page.rxs-page.ffs-page .ffs-comparison-codes {
+    grid-column: 1;
+    grid-row: 3;
+    justify-content: flex-start;
+    margin-top: 8px;
+  }
+
+  .rxs-page.rxs-page.ffs-page .ffs-form-comparison > summary > i {
+    grid-column: 2;
+  }
+
+  .rxs-page.rxs-page.ffs-page .ffs-comparison-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    padding-inline: 12px;
+  }
+
+  .rxs-page.rxs-page.ffs-page .ffs-comparison-card {
+    padding: 10px;
+  }
 }
 
 @media (max-width: 680px) {
-  .ffs-page .rxs-hero {
-    min-height: max(820px, calc(100svh - 58px));
-    padding-top: 74px;
+  .rxs-page.rxs-page.ffs-page .rxs-hero-copy {
+    text-align: start;
   }
 
-  .ffs-page .rxs-hero-copy {
-    width: min(100%, 430px);
+  .rxs-page.rxs-page.ffs-page .rxs-hero-copy > p:first-child,
+  .rxs-page.rxs-page.ffs-page .ffs-stages-line,
+  .rxs-page.rxs-page.ffs-page .ffs-hero-rail {
+    justify-content: flex-start;
   }
 
-  .ffs-page .rxs-hero h1 {
-    font-size: clamp(42px, 12.6vw, 56px);
+  .rxs-page.rxs-page.ffs-page .rxs-hero-copy > p:first-child {
+    flex-wrap: wrap;
+    gap: 8px 10px;
+    padding-inline-end: 72px;
+    font-size: 11px;
+    letter-spacing: 0.18em;
   }
 
-  .ffs-page .rxs-hero-visual {
-    top: 205px;
-    bottom: auto;
-    width: min(124vw, 650px);
+  .rxs-page.rxs-page.ffs-page .rxs-hero-lede {
+    margin-inline: 0;
+  }
+
+  .rxs-page.rxs-page.ffs-page .ffs-mark {
+    left: 0;
+    translate: 0 0;
+  }
+
+  .rxs-page.rxs-page.ffs-page .rxs-scroll-cue {
+    align-self: flex-start;
+    text-align: start;
+  }
+
+  .rxs-page.rxs-page.ffs-page .rxs-hero-copy > p:first-child::before {
+    width: 20px;
+  }
+
+  .rxs-page.rxs-page.ffs-page .rxs-hero-kicker-tail {
+    white-space: normal;
+  }
+
+  .rxs-page.rxs-page.ffs-page .rxs-hero h1 {
+    font-size: clamp(40px, 11.6vw, 54px);
+  }
+
+  .rxs-page.rxs-page.ffs-page .rxs-hero-lede {
+    font-size: 16px;
+    line-height: 1.8;
+    letter-spacing: 0.04em;
   }
 
   .ffs-specs {
@@ -501,11 +2071,216 @@
     line-break: strict;
     text-wrap: balance;
   }
+
+  .ffs-stage-tabs.rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"] small {
+    font-size: 8px;
+    letter-spacing: 0.08em;
+  }
+
+  .rxs-page.rxs-page.ffs-page .ffs-form-code {
+    font-size: clamp(36px, 10vw, 60px);
+  }
+
+  .rxs-page.rxs-page.ffs-page .ffs-footer h2 {
+    max-width: none;
+  }
+
+  .rxs-page.rxs-page.ffs-page .ffs-footer > .ffs-end-figure {
+    right: -22%;
+    height: 60%;
+    opacity: 0.4;
+  }
 }
 
+/* ================================================================
+   Motion: the chapter heads' entrances, the scan, the end card
+   ================================================================ */
+@media screen and (prefers-reduced-motion: no-preference) {
+  /* The head arrives in order: numeral, kicker, title, lede, then the
+     hairline draws across (on the shared reveal's own entrance). */
+  .rxs-page.rxs-page.ffs-page[data-motion-ready="true"] > .rxs-section > .rxs-section-heading.rxs-reveal::before,
+  .rxs-page.rxs-page.ffs-page[data-motion-ready="true"] > .rxs-section > .rxs-section-heading.rxs-reveal > p,
+  .rxs-page.rxs-page.ffs-page[data-motion-ready="true"] > .rxs-section > .rxs-section-heading.rxs-reveal > h2,
+  .rxs-page.rxs-page.ffs-page[data-motion-ready="true"] > .rxs-section > .rxs-section-heading.rxs-reveal > span {
+    opacity: 0;
+    translate: 0 18px;
+    transition:
+      opacity 720ms cubic-bezier(0.16, 1, 0.3, 1),
+      translate 720ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .rxs-page.rxs-page.ffs-page[data-motion-ready="true"] > .rxs-section > .rxs-section-heading.rxs-reveal::before {
+    translate: -12px 0;
+  }
+
+  .rxs-page.rxs-page.ffs-page[data-motion-ready="true"] > .rxs-section > .rxs-section-heading.rxs-reveal::after {
+    transform: scaleX(0);
+    transition: transform 960ms cubic-bezier(0.65, 0, 0.35, 1) 320ms;
+  }
+
+  .rxs-page.rxs-page.ffs-page[data-motion-ready="true"] > .rxs-section > .rxs-section-heading.rxs-reveal > p {
+    transition-delay: 80ms;
+  }
+
+  .rxs-page.rxs-page.ffs-page[data-motion-ready="true"] > .rxs-section > .rxs-section-heading.rxs-reveal > h2 {
+    transition-delay: 160ms;
+  }
+
+  .rxs-page.rxs-page.ffs-page[data-motion-ready="true"] > .rxs-section > .rxs-section-heading.rxs-reveal > span {
+    transition-delay: 260ms;
+  }
+
+  .rxs-page.rxs-page.ffs-page[data-motion-ready="true"] > .rxs-section > .rxs-section-heading.rxs-reveal.is-visible::before,
+  .rxs-page.rxs-page.ffs-page[data-motion-ready="true"] > .rxs-section > .rxs-section-heading.rxs-reveal.is-visible > p,
+  .rxs-page.rxs-page.ffs-page[data-motion-ready="true"] > .rxs-section > .rxs-section-heading.rxs-reveal.is-visible > h2,
+  .rxs-page.rxs-page.ffs-page[data-motion-ready="true"] > .rxs-section > .rxs-section-heading.rxs-reveal.is-visible > span {
+    opacity: 1;
+    translate: 0 0;
+  }
+
+  .rxs-page.rxs-page.ffs-page[data-motion-ready="true"] > .rxs-section > .rxs-section-heading.rxs-reveal.is-visible::after {
+    transform: scaleX(1);
+  }
+
+  /* The plates and the chapter map's rows follow one another. */
+  .rxs-page.rxs-page.ffs-page[data-motion-ready="true"] .ffs-articles article:nth-child(2) {
+    transition-delay: 100ms;
+  }
+
+  .rxs-page.rxs-page.ffs-page[data-motion-ready="true"] .ffs-articles article:nth-child(3) {
+    transition-delay: 200ms;
+  }
+
+  .rxs-page.rxs-page.ffs-page[data-motion-ready="true"] .ffs-articles article:nth-child(4) {
+    transition-delay: 300ms;
+  }
+
+  /* The stage: one scan down the new figure; the rings settle once on arrival. */
+  .rxs-page.rxs-page.ffs-page[data-motion-ready="true"] .ffs-stage-scan {
+    animation: ffs-scan 1100ms cubic-bezier(0.4, 0, 0.2, 1) 120ms both;
+  }
+
+  html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion-ready="true"] .ffs-ring {
+    animation: ffs-ring-settle 1400ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion-ready="true"] .ffs-ring.is-gold {
+    animation-delay: 120ms;
+  }
+
+  html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion-ready="true"] .ffs-ring.is-violet {
+    animation-delay: 240ms;
+  }
+
+  .rxs-page.rxs-page.ffs-page .ffs-hero-rail a,
+  .rxs-page.rxs-page.ffs-page .ffs-footer > a {
+    transition:
+      background 180ms ease,
+      border-color 180ms ease,
+      transform 180ms ease;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .rxs-page.rxs-page.ffs-page .ffs-hero-rail a:hover,
+    .rxs-page.rxs-page.ffs-page .ffs-footer > a:hover {
+      transform: translateY(-2px);
+    }
+
+    .rxs-page.rxs-page.ffs-page .ffs-chapter-map a i,
+    .rxs-page.rxs-page.ffs-page .ffs-hero-rail a i {
+      transition: translate 180ms ease;
+    }
+
+    .rxs-page.rxs-page.ffs-page .ffs-chapter-map a:hover i,
+    .rxs-page.rxs-page.ffs-page .ffs-hero-rail a:hover i {
+      translate: 3px -3px;
+    }
+  }
+}
+
+@keyframes ffs-scan {
+  0% {
+    top: 0;
+    opacity: 0;
+  }
+
+  10% {
+    opacity: 1;
+  }
+
+  90% {
+    opacity: 1;
+  }
+
+  100% {
+    top: 100%;
+    opacity: 0;
+  }
+}
+
+@keyframes ffs-ring-settle {
+  from {
+    opacity: 0;
+    scale: 1.12;
+  }
+
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+/* The calm tiers: reduced motion, forced colours. Everything rests drawn. */
 @media (prefers-reduced-motion: reduce) {
   .ffs-page .rxs-hero-visual {
-    translate: 50% 18px;
+    translate: none;
     scale: 1;
+  }
+
+  .ffs-page .rxs-reveal,
+  .ffs-page .rxs-section-heading::before,
+  .ffs-page .rxs-section-heading::after,
+  .ffs-page .rxs-section-heading > * {
+    opacity: 1;
+    translate: none;
+    transform: none;
+    transition: none;
+  }
+
+  .ffs-page .ffs-stage-scan,
+  .ffs-page .ffs-ring {
+    animation: none;
+  }
+
+  .ffs-page .ffs-form-comparison > summary > i,
+  .ffs-page .ffs-form-status-track i {
+    transition: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .ffs-page .rxs-section-heading::before {
+    color: CanvasText;
+    -webkit-text-stroke: 0;
+  }
+
+  .ffs-page .ffs-chapter-map a,
+  .ffs-page .ffs-form-status,
+  .ffs-page .ffs-articles article,
+  .ffs-page .ffs-finisher,
+  .ffs-page .ffs-hero-rail a,
+  .ffs-page .ffs-comparison-card {
+    border: 1px solid CanvasText;
+    background: Canvas;
+    clip-path: none;
+  }
+
+  .ffs-page .ffs-form-status-track i.is-reached {
+    background: CanvasText;
+  }
+
+  .ffs-page .ffs-mark,
+  .ffs-page .ffs-form-code {
+    display: none;
   }
 }
