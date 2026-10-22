@@ -38,6 +38,7 @@ import {
 import {
   NANITE_FIRE_PHASES,
   entryCanonicalTime,
+  entryFlamePhase,
   naniteFlameEnvelope,
   naniteMaterialLanding,
 } from "@/lib/rexonance-ignition.js";
@@ -144,6 +145,9 @@ const RING_ARCS = 48;
 type FieldLib = typeof import("@/lib/rexonance-field/index.js");
 /** The camera's inline writes are quantized so a settled frame writes nothing. */
 const CAMERA_STEP = 0.0005;
+/** The field's density steps between the governor's half and whole (one a
+ * frame: a change takes ten frames, never one). */
+const FIELD_LEVELS = 10;
 
 export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
   const host = useRef<HTMLDivElement>(null);
@@ -280,6 +284,18 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
           }
         }
         const keepOut = fence[7] > fence[5];
+        // The same box for the field's canvases (sweep 2, F25: their WebGL
+        // trails crossed the glyphs the 2D clip kept clear), in CSS px of
+        // the bled box they share: the fence is device px from the figure's
+        // origin, which sits (left, top) into that box.
+        const fieldKeep = keepOut
+          ? Float32Array.of(
+              fence[5] / scale + left,
+              fence[6] / scale + top,
+              fence[7] / scale + left,
+              fence[8] / scale + top,
+            )
+          : null;
         const settled = settledCanvas.getContext("2d");
         const flight = flightCanvas.getContext("2d");
         // The field (its chunk arrives in a frame or two; the call goes on
@@ -297,6 +313,7 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
         let cameraX = 0;
         let cameraY = 0;
         let fieldDone = false;
+        let fieldLevel = FIELD_LEVELS;
         const fieldWidth = box.clientWidth + left + right;
         const fieldHeight = box.clientHeight + top + bottom;
         const fieldScale = s / scale;
@@ -437,6 +454,7 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
           forming(atlas, raw);
           work.dirty = true;
           lit = !held;
+          fieldLevel = FIELD_LEVELS;
         };
         const glow = (
           list: Int32Array,
@@ -508,8 +526,11 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
           // built on the body ahead of each plate, the lifted plates' shadows.
           extras?.before(t);
           // The nanites' source (owner, 2026-10-18): the forest-green flame
-          // at the reactor, burning as the first plates stream in.
-          const flamePhase = t / CALL_FLAME_MS;
+          // at the reactor, burning as the first plates stream in. It lights
+          // once the scan has drawn the undersuit's soles and covers it
+          // before the burst (entryFlamePhase: t / 2400 from the burst on,
+          // so every fragment and the field's wake keep their handoff).
+          const flamePhase = entryFlamePhase(t);
           const flame = naniteFlameEnvelope(flamePhase);
           const material = t >= MATERIAL_FROM;
           if (flame > 0) {
@@ -802,13 +823,19 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
               );
               flight.restore();
             }
+            // The governor's half density, eased a twentieth a frame (sweep
+            // 2, F26: it halved the additive field in one frame).
+            if (extras?.governed()) {
+              if (fieldLevel > 0) fieldLevel -= 1;
+            } else if (fieldLevel < FIELD_LEVELS) fieldLevel += 1;
             field.render(
               fieldState,
               fieldScale,
               left,
               top,
               FIG.height,
-              extras?.governed() ? 0.5 : 1,
+              0.5 + (0.5 * fieldLevel) / FIELD_LEVELS,
+              fieldKeep,
             );
           }
           if (flame > 0) drawBodyFlame(flight, FIG, flame, elapsed / 1000, s, "front", flamePhase);

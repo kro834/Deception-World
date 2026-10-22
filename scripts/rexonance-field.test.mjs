@@ -11,6 +11,9 @@ import {
   FIELD_SHAPE,
   FIELD_STATE,
   FIELD_VERTEX_SHADER,
+  FIELD_WAKE,
+  FIELD_WAKE_BIRTHS,
+  FIELD_WAKE_RISE,
   REXONANCE_SCROLL_FLAME,
   createFieldLayer,
   drawFieldImpact,
@@ -19,6 +22,7 @@ import {
   fieldCameraView,
   fieldContext,
   fieldFragment,
+  fieldFragmentSeed,
   fieldHash,
   fieldIndices,
   fieldPose,
@@ -41,7 +45,8 @@ import {
   REXONANCE_SUIT_SNAP,
 } from "../src/lib/rexonance-calls.ts";
 import { REXONANCE_SUIT_MARKS, REXONANCE_SUIT_SIZE } from "../src/lib/rexonance-suit.ts";
-import { NANITE_FIRE_PHASES } from "../src/lib/rexonance-ignition.js";
+import { NANITE_FIRE_PHASES, fireFragmentPose } from "../src/lib/rexonance-ignition.js";
+import { ASSEMBLY_BEATS } from "../src/lib/rexonance-resonance.js";
 
 /* RESONANCE FIELD (owner, 2026-10-21: 「装着方式はダイナミックでありつつ、何度
    見ても飽きない様な革新性や素晴らしさを追求して」; docs/rexonance-suitup-
@@ -132,10 +137,19 @@ test("a score is validated and frozen; the entry's follows the pinned call table
   const entry = entryFieldScore();
   assert.equal(entryFieldScore(), entry, "built once");
   // The wake is the burst (owner, 2026-10-21: the fire engulfs the undersuit
-  // and bursts; its fragments are the nanites): from the detonation to the
-  // chant, where the first plates print.
-  assert.deepEqual([...entry.wake], [NANITE_FIRE_PHASES.burstStart * 2400, REXONANCE_CALL_BEATS[2].start]);
+  // and bursts; its fragments are the nanites): the field's one window of
+  // the fire's phase, from the detonation through every fragment's cooling
+  // (materialStart → flameEnd, the births' share of it) to the last chip's
+  // sweep onto its line; the charge is whole by the first cooling. On the
+  // entry's canonical clock (t / 2400), before the chant's first accent.
+  const P = NANITE_FIRE_PHASES;
+  assert.deepEqual([...FIELD_WAKE], [P.burstStart, P.burstStart + (P.flameEnd - P.burstStart) / FIELD_WAKE_BIRTHS]);
+  assert.equal(FIELD_WAKE_BIRTHS, FIELD_BIRTH.stagger);
+  assert.ok(Math.abs(FIELD_WAKE[0] + FIELD_WAKE_RISE * (FIELD_WAKE[1] - FIELD_WAKE[0]) - P.materialStart) < 1e-12);
+  assert.deepEqual([...entry.wake], [FIELD_WAKE[0] * 2400, FIELD_WAKE[1] * 2400]);
   assert.equal(entry.wake[0], 420);
+  assert.equal(entry.wake[1], 780);
+  assert.ok(entry.wake[1] > REXONANCE_CALL_BEATS[2].start && entry.wake[1] < REXONANCE_SUIT_SNAP.legs);
   // Legs, waist, arms, chest lock on the four DEUS！ accents, in the fixed
   // order; the shoulders, the tail (with its ribbons) and the helmet follow.
   const locks = [...entry.glock];
@@ -163,16 +177,108 @@ test("a score is validated and frozen; the entry's follows the pinned call table
   assert.deepEqual([...entry.origin], [...REXONANCE_SUIT_MARKS.core]);
 });
 
+test("a lock's impulse strikes the plate that locks it, never the gap on the body's midline (sweep 2, F30)", async () => {
+  // The two-sided groups' centres (legs, arms, shoulders) are the body's
+  // midline: the lock's 22-ray starburst sat between the shins.
+  const { REXONANCE_SUIT_PIECES, REXONANCE_SUIT_TILE } = await import("../src/lib/rexonance-suit.ts");
+  const { REXONANCE_SUIT_CASCADE, REXONANCE_SUIT_FIT, REXONANCE_SUIT_DRIVER } =
+    await import("../src/lib/rexonance-calls.ts");
+  const { planAssembly } = await import("../src/lib/rexonance-resonance.js");
+  const byId = new Map(REXONANCE_SUIT_PIECES.map((piece) => [piece.id, piece]));
+  const inside = (piece, x, y) =>
+    x >= piece.x && x <= piece.x + piece.w && y >= piece.y && y <= piece.y + piece.h;
+  // The entry: at each lock, the freshest impulse is on the group's last
+  // plate to fit (its accent), and off the midline for the two-sided groups.
+  const entry = entryFieldScore();
+  const out = fieldStateBuffer();
+  const groupOrder = ["legs", "waist", "arms", "chest", "shoulders", "tail", "helm"];
+  groupOrder.forEach((group, k) => {
+    const ids = REXONANCE_SUIT_CASCADE.filter(
+      (cascade) => cascade.group === group || (group === "tail" && cascade.group === "ribbon"),
+    ).flatMap((cascade) => cascade.order);
+    const lock = Math.max(...ids.map((id) => REXONANCE_SUIT_FIT[id]));
+    assert.equal(entry.glock[k], lock, group);
+    fieldState(entry, lock + 1, out);
+    assert.ok(out[F.IMPULSES] >= 1, `${group}: its impulse is live`);
+    const x = out[F.IMPULSE];
+    const y = out[F.IMPULSE + 1];
+    const accent = byId.get(ids.filter((id) => REXONANCE_SUIT_FIT[id] === lock).at(-1));
+    assert.ok(inside(accent, x, y), `${group}: on ${accent.id} (${x}, ${y})`);
+    if (["legs", "arms", "shoulders"].includes(group))
+      assert.ok(Math.abs(x - W / 2) >= 60, `${group}: off the midline (${x})`);
+    // The attractor and the lock box keep the group's centre.
+    assert.equal(out[F.LOCK + k * F.LOCK_STRIDE], entry.gx[k]);
+  });
+  // The scroll: each beat's lock strikes the seat of its last tile's plate.
+  const pieces = REXONANCE_SUIT_PIECES.map((piece) => ({
+    ...piece,
+    preset: REXONANCE_SUIT_DRIVER.includes(piece.id),
+  }));
+  const plan = planAssembly({
+    size: REXONANCE_SUIT_SIZE,
+    pieces,
+    core: REXONANCE_SUIT_MARKS.core,
+    visor: REXONANCE_SUIT_MARKS.visor,
+    maskTile: REXONANCE_SUIT_TILE,
+    tile: 12,
+  });
+  assert.equal(plan.anchors.length, plan.partDone.length);
+  for (const beat of [0, 1]) {
+    const last = plan.tiles.filter((tile) => tile.beat === beat).at(-1);
+    assert.equal(last.t1, plan.partDone[beat], `beat ${beat}: the lock is its last tile`);
+    const plate = byId.get(last.pieceId);
+    assert.deepEqual(plan.anchors[beat], [...plate.seat], `beat ${beat}: ${plate.id}'s seat`);
+    assert.ok(inside(plate, ...plan.anchors[beat]));
+    assert.ok(Math.abs(plan.anchors[beat][0] - W / 2) >= 60, `beat ${beat}: off the midline`);
+    assert.ok(
+      Math.abs(plan.centroids[beat][0] - W / 2) < 30,
+      `beat ${beat}: (the centroid is the midline, ${plan.centroids[beat][0]})`,
+    );
+  }
+  // And the scene hands the anchors to its score.
+  const scroll = read("src/lib/rexonance-resonance.js");
+  assert.match(scroll, /const \[ix, iy\] = plan\.anchors\?\.\[beat\] \?\? \[x, y\];/);
+  // A score without anchors strikes the centre, as before.
+  const plain = sampleScore();
+  fieldState(plain, 401, out);
+  assert.deepEqual([out[F.IMPULSE], out[F.IMPULSE + 1]], [280, 800]);
+  const anchored = fieldScore({
+    wake: [100, 200],
+    groups: [{ x: 280, y: 800, from: 250, lock: 400, ix: 350, iy: 820 }],
+    collapse: [700, 800],
+    end: 900,
+    impulse: 100,
+    origin: [284.2, 275.3],
+  });
+  fieldState(anchored, 401, out);
+  assert.deepEqual([out[F.IMPULSE], out[F.IMPULSE + 1]], [350, 820]);
+  assert.deepEqual([out[F.AX], out[F.AY]].map(Math.round), [280, 800], "the attractor stays");
+  assert.throws(() =>
+    fieldScore({
+      wake: [100, 200],
+      groups: [{ x: 280, y: 800, from: 250, lock: 400, ix: NaN }],
+      collapse: [700, 800],
+      end: 900,
+      impulse: 100,
+      origin: [0, 0],
+    }),
+  );
+});
+
 test("the state is a pure function of the clock: charge, attractor, tightness, impulses, flash", () => {
   const score = sampleScore();
   const out = fieldStateBuffer();
   const at = (t) => Float32Array.from(fieldState(score, t, out));
-  // Before the wake: nothing. The burst (the wake's first share) brings the
-  // charge up whole; the wake itself runs 0..1 over its window.
+  // Before the wake: nothing. The burst (the wake's first share, to the
+  // first fragment's cooling) brings the charge up whole; the wake itself
+  // runs 0..1 over its window.
   assert.equal(at(50)[F.CHARGE], 0);
   assert.equal(at(100)[F.CHARGE], 0);
   assert.equal(at(100)[F.WAKE], 0);
-  assert.ok(at(112)[F.CHARGE] > 0.3 && at(112)[F.CHARGE] < 0.7);
+  const rise = 100 + 100 * FIELD_WAKE_RISE;
+  assert.ok(at(100 + 50 * FIELD_WAKE_RISE)[F.CHARGE] > 0.3 && at(100 + 50 * FIELD_WAKE_RISE)[F.CHARGE] < 0.7);
+  assert.ok(at(rise - 0.5)[F.CHARGE] < 1);
+  assert.equal(at(rise)[F.CHARGE], 1);
   assert.equal(at(125)[F.CHARGE], 1);
   assert.equal(at(150)[F.WAKE], 0.5);
   assert.equal(at(300)[F.CHARGE], 1);
@@ -354,25 +460,76 @@ test("the impact grammar draws on a lock only, about the lock, with no box", () 
   assert.equal(touch.calls.length, 0);
 });
 
-test("a particle is born as a burst fragment: its handoff pose and velocity, hot, swept onto its line", () => {
+test("a particle is born as the fire's burst fragment cools: at its position, with its velocity, the frame after its heat is gone", () => {
   const score = sampleScore();
   const take = fieldTake(5);
   const state = fieldStateBuffer();
   const seeds = new Float64Array(FIELD_SEEDS.LENGTH);
   const out = new Float64Array(6);
   const S = FIELD_SEEDS;
-  // The model fragment: on the burning body, thrown outward along its normal.
-  const birth = new Float64Array(4);
-  for (let i = 0; i < 200; i += 1) {
+  const B = FIELD_BIRTH;
+  const P = NANITE_FIRE_PHASES;
+  const aspect = REXONANCE_SUIT_SIZE.width / REXONANCE_SUIT_SIZE.height;
+  const wakeSpan = FIELD_WAKE[1] - FIELD_WAKE[0];
+  const step = (B.stagger * wakeSpan) / 255;
+  // The fragment source is the fire's own fireFragmentPose: the particle's
+  // fragment (its periodic seed), sampled at the particle's birth — the
+  // first byte of the births' share of the wake at which the fragment has
+  // cooled (heat 0: the fire no longer draws it); a byte earlier it is still
+  // hot. Position (figure heights) and velocity (the pose's flight units)
+  // are the fragment's own, so the streak leaves where and as the spark
+  // faded; the whole set lies in the vertex words' range.
+  const birth = new Float64Array(5);
+  const fragment = new Float64Array(6);
+  let earliest = 1;
+  let latest = 0;
+  let still = 0;
+  for (let i = 0; i < 2000; i += 1) {
     fieldFragment(i, birth);
-    assert.ok(birth[0] >= 0 && birth[0] <= 0.6 && birth[1] >= 0 && birth[1] <= 1, `${i}: on the body`);
-    assert.ok(Math.hypot(birth[2], birth[3]) > 0.3, `${i}: thrown`);
-    assert.deepEqual([...fieldFragment(i, new Float64Array(4))], [...birth], "pure");
+    const share = birth[4];
+    assert.ok(share > 0 && share <= 1, `${i}: a share of the births`);
+    const stagger = share * B.stagger;
+    const phase = FIELD_WAKE[0] + stagger * wakeSpan;
+    assert.ok(phase >= P.materialStart - 1e-12 && phase <= P.flameEnd + 1e-12, `${i}: born as the chips form`);
+    const seed = fieldFragmentSeed(i);
+    fireFragmentPose(seed, phase, fragment);
+    assert.equal(fragment[4], 0, `${i}: its fragment has cooled`);
+    assert.ok(Math.abs(birth[0] - fragment[0] * aspect) < 1e-12 && birth[1] === fragment[1], `${i}: at its fragment`);
+    const flight = (wakeSpan * (1 - stagger)) / B.drift;
+    assert.ok(
+      Math.abs(birth[2] - fragment[2] * aspect * flight) < 1e-12 && Math.abs(birth[3] - fragment[3] * flight) < 1e-12,
+      `${i}: with its velocity`,
+    );
+    if (share < 1) {
+      fireFragmentPose(seed, phase - step, fragment);
+      assert.ok(fragment[4] > 0, `${i}: still hot a byte earlier`);
+      assert.ok(Math.hypot(birth[2], birth[3]) > 0, `${i}: flying`);
+    } else still += 1;
+    assert.ok(birth[0] > -0.5 && birth[0] < 1.5 && birth[1] > -0.5 && birth[1] < 1.5, `${i}: in range`);
+    assert.ok(Math.abs(birth[2]) < 2 && Math.abs(birth[3]) < 2, `${i}: velocity in range`);
+    assert.deepEqual([...fieldFragment(i, new Float64Array(5))], [...birth], "pure");
+    earliest = Math.min(earliest, share);
+    latest = Math.max(latest, share);
   }
-  // The seeds carry the birth; a caller's fragment source replaces the model.
+  const first = (P.materialStart - FIELD_WAKE[0]) / wakeSpan / B.stagger;
+  assert.ok(earliest < first + 0.01 && latest === 1, "births from the first chips to the fire's end");
+  assert.ok(still < 40, `${still} born at rest at the fire's very end`);
+  // The seeds carry the birth and its stagger (a byte); a caller's fragment
+  // source takes the fire's place, with or without a share of its own.
   fieldSeeds(3, take.arms, seeds);
   fieldFragment(3, birth);
-  assert.deepEqual([seeds[S.BX], seeds[S.BY], seeds[S.BVX], seeds[S.BVY]], [...birth]);
+  assert.deepEqual([seeds[S.BX], seeds[S.BY], seeds[S.BVX], seeds[S.BVY]], [...birth.subarray(0, 4)]);
+  assert.equal(seeds[S.STAGGER], Math.round(birth[4] * 255) / 255);
+  fieldSeeds(3, take.arms, seeds, (index, o) => {
+    o[0] = 0.25 * index;
+    o[1] = 0.25;
+    o[2] = 0.5;
+    o[3] = -0.5;
+    o[4] = 0.6;
+    return o;
+  });
+  assert.deepEqual([seeds[S.BX], seeds[S.BY], seeds[S.BVX], seeds[S.BVY]], [0.75, 0.25, 0.5, -0.5]);
+  assert.equal(seeds[S.STAGGER], Math.round(0.6 * 255) / 255);
   fieldSeeds(3, take.arms, seeds, (index, o) => {
     o[0] = 0.25 * index;
     o[1] = 0.25;
@@ -380,8 +537,7 @@ test("a particle is born as a burst fragment: its handoff pose and velocity, hot
     o[3] = -0.5;
     return o;
   });
-  assert.deepEqual([seeds[S.BX], seeds[S.BY], seeds[S.BVX], seeds[S.BVY]], [0.75, 0.25, 0.5, -0.5]);
-  assert.ok(seeds[S.STAGGER] >= 0 && seeds[S.STAGGER] < 1);
+  assert.ok(seeds[S.STAGGER] >= 0 && seeds[S.STAGGER] < 1 && seeds[S.STAGGER] * 255 === Math.round(seeds[S.STAGGER] * 255));
   const pose = (i, t, wake) => {
     fieldSeeds(i, take.arms, seeds);
     fieldState(score, t, state);
@@ -395,20 +551,23 @@ test("a particle is born as a burst fragment: its handoff pose and velocity, hot
     const stagger = seeds[S.STAGGER] * FIELD_BIRTH.stagger;
     const t0 = 100 + 100 * stagger;
     // Before its birth: nothing (no light); at it: its fragment's handoff
-    // position, hot; then flying along its velocity, cooling; swept onto
-    // its line by the wake's end, where the pose is the helix's exactly.
+    // position, hot, its light rising from nothing as the spark has faded;
+    // then flying along its velocity, cooling; swept onto its line by the
+    // wake's end, where the pose is the helix's exactly.
     assert.equal(pose(i, t0 - 0.5)[4], 0, `${i}: unborn`);
     const born = pose(i, t0 + 0.01);
     assert.ok(
       Math.hypot(born[0] - seeds[S.BX], born[1] - seeds[S.BY]) < 0.01,
       `${i}: born at the handoff`,
     );
-    assert.ok(born[5] > 0.95 && born[4] > 0, `${i}: hot and lit`);
+    assert.ok(born[5] > 0.95 && born[4] > 0 && born[4] < 0.05, `${i}: hot, its light just kindling`);
     const later = pose(i, t0 + 0.01 + (100 - 100 * stagger) * 0.12);
     const dx = later[0] - born[0];
     const dy = later[1] - born[1];
-    assert.ok(dx * seeds[S.BVX] + dy * seeds[S.BVY] > 0, `${i}: flies along its velocity`);
+    if (Math.hypot(seeds[S.BVX], seeds[S.BVY]) > 0)
+      assert.ok(dx * seeds[S.BVX] + dy * seeds[S.BVY] > 0, `${i}: flies along its velocity`);
     assert.ok(later[5] < born[5], `${i}: cooling`);
+    assert.ok(later[4] > born[4] && later[4] > 0.5, `${i}: lit`);
     const swept = pose(i, 200);
     const helix = pose(i, 200, 1);
     assert.deepEqual([...swept], [...helix], `${i}: on its line by the wake's end`);
@@ -416,6 +575,41 @@ test("a particle is born as a burst fragment: its handoff pose and velocity, hot
     checked += 1;
   }
   assert.ok(checked === 300);
+  // The velocity is continuous through the handoff: the streak's speed just
+  // after its birth is the fragment's just before its cooling, on the
+  // wake's own clock (the fire's phase).
+  const fire = fieldScore({
+    wake: [...FIELD_WAKE],
+    groups: [{ x: 280, y: 800, sx: 100, sy: 200, from: 0.4, lock: 0.5 }],
+    collapse: [0.6, 0.7],
+    end: 0.7,
+    impulse: 0.05,
+    origin: [284.2, 275.3],
+  });
+  const dt = 1e-4;
+  let worst = 0;
+  let compared = 0;
+  for (let i = 0; i < 400; i += 1) {
+    fieldSeeds(i, take.arms, seeds);
+    if (seeds[S.STAGGER] === 1) continue;
+    const t0 = FIELD_WAKE[0] + seeds[S.STAGGER] * B.stagger * wakeSpan;
+    fieldState(fire, t0 + dt, state);
+    const a = Float64Array.from(fieldPose(seeds, state[F.S], state, take, H, out));
+    fieldState(fire, t0 + 2 * dt, state);
+    const b = Float64Array.from(fieldPose(seeds, state[F.S], state, take, H, out));
+    const seed = fieldFragmentSeed(i);
+    fireFragmentPose(seed, t0 - 2 * dt, fragment);
+    const fx = fragment[0] * aspect;
+    const fy = fragment[1];
+    fireFragmentPose(seed, t0 - dt, fragment);
+    const vx = (fragment[0] * aspect - fx) / dt;
+    const vy = (fragment[1] - fy) / dt;
+    const speed = Math.hypot(vx, vy);
+    if (speed < 0.05) continue;
+    worst = Math.max(worst, Math.hypot((b[0] - a[0]) / dt - vx, (b[1] - a[1]) / dt - vy) / speed);
+    compared += 1;
+  }
+  assert.ok(compared > 300 && worst < 0.08, `velocity through the handoff: worst ${worst} over ${compared}`);
 });
 
 test("a particle's pose is closed-form: depth both sides, tightening, impulses outward, collapse inward", () => {
@@ -598,16 +792,41 @@ function mockDocument(options = {}) {
 }
 
 test("the scroll's fire mapping is one place both the scene and the swarm read", () => {
-  assert.deepEqual(REXONANCE_SCROLL_FLAME, { start: 0.015, span: 0.285 });
-  assert.ok(Math.abs(scrollFlameAt(NANITE_FIRE_PHASES.burstStart) - 0.064875) < 1e-9);
+  // The runway (owner, 2026-10-21: the fire covers the undersuit gradually,
+  // then bursts into the nanites): the first licks at q .02, the engulf
+  // climbing over the scan and the motes' beat, the detonation at ≈ .104–
+  // .132, the first chips at ≈ .114, nothing of the fire by .14 — before
+  // the first group lands (deus, .16); the beats themselves are unchanged.
+  assert.deepEqual(REXONANCE_SCROLL_FLAME, { start: 0.02, span: 0.48 });
+  const P = NANITE_FIRE_PHASES;
+  assert.ok(Math.abs(scrollFlameAt(P.burstStart) - 0.104) < 1e-9);
+  assert.ok(Math.abs(scrollFlameAt(P.burstEnd) - 0.132) < 1e-9);
+  assert.ok(Math.abs(scrollFlameAt(P.materialStart) - 0.1136) < 1e-9);
+  assert.ok(Math.abs(scrollFlameAt(P.flameEnd) - 0.14) < 1e-9);
+  assert.ok(scrollFlameAt(0) > 0 && scrollFlameAt(P.kindle) < ASSEMBLY_BEATS.scan[1]);
+  assert.ok(scrollFlameAt(P.cover) > ASSEMBLY_BEATS.scan[1] && scrollFlameAt(P.cover) < scrollFlameAt(P.burstStart));
+  assert.ok(scrollFlameAt(P.flameEnd) < ASSEMBLY_BEATS.deus[0]);
+  assert.deepEqual(ASSEMBLY_BEATS.scan, [0, 0.07]);
+  assert.deepEqual(ASSEMBLY_BEATS.motes, [0.07, 0.16]);
+  assert.equal(ASSEMBLY_BEATS.deus[0], 0.16);
+  // The field's wake on the runway: the detonation to the last chip's
+  // sweep, over the motes' beat and into the legs' convergence.
+  assert.ok(Math.abs(scrollFlameAt(FIELD_WAKE[0]) - 0.104) < 1e-9);
+  assert.ok(scrollFlameAt(FIELD_WAKE[1]) > ASSEMBLY_BEATS.motes[1] && scrollFlameAt(FIELD_WAKE[1]) < 0.2);
   assert.ok(Math.abs(scrollFlamePhase(scrollFlameAt(0.3)) - 0.3) < 1e-12);
   const scroll = read("src/lib/rexonance-resonance.js");
   const swarm = read("src/lib/rexonance-assembly-nanites.js");
   assert.match(scroll, /const NANITE_FLAME_START = REXONANCE_SCROLL_FLAME\.start;/);
   assert.match(scroll, /const NANITE_FLAME_SPAN = REXONANCE_SCROLL_FLAME\.span;/);
-  assert.match(scroll, /wake: \[scrollFlameAt\(NANITE_FIRE_PHASES\.burstStart\), B\.motes\[1\]\],/);
+  assert.match(scroll, /wake: \[scrollFlameAt\(FIELD_WAKE\[0\]\), scrollFlameAt\(FIELD_WAKE\[1\]\)\],/);
   assert.match(swarm, /const FIRE_START = scrollFlameAt\(NANITE_FIRE_PHASES\.burstStart\);/);
-  assert.doesNotMatch(swarm, /0\.015 \+ 0\.285/);
+  assert.match(swarm, /const MATERIAL_START = scrollFlameAt\(NANITE_FIRE_PHASES\.materialStart\);/);
+  for (const text of [scroll, swarm]) {
+    assert.doesNotMatch(text, /0\.015 \+ 0\.285/);
+    assert.doesNotMatch(text, /0\.02 \+ 0\.48/);
+  }
+  const entry = read("src/lib/rexonance-field/field-entry.ts");
+  assert.match(entry, /wake: \[FIELD_WAKE\[0\] \* ENTRY_FLAME_MS, FIELD_WAKE\[1\] \* ENTRY_FLAME_MS\],/);
 });
 
 test("the shaders carry the pose's constants and share no uniform between stages", () => {
@@ -617,13 +836,19 @@ test("the shaders carry the pose's constants and share no uniform between stages
     assert.ok(FIELD_VERTEX_SHADER.includes(text), `${name} = ${text}`);
   }
   for (const [name, value] of Object.entries(FIELD_BIRTH)) {
-    if (!Number.isFinite(value) || name === "rise" || name === "fringeShare") continue;
+    if (!Number.isFinite(value) || name === "fringeShare") continue;
     const text = Number.isInteger(value) ? `${value}.0` : String(value);
     assert.ok(FIELD_VERTEX_SHADER.includes(text), `birth ${name} = ${text}`);
   }
   assert.match(FIELD_VERTEX_SHADER, /attribute vec4 aSeed;/);
   assert.match(FIELD_VERTEX_SHADER, /attribute vec4 aKind;/);
   assert.match(FIELD_VERTEX_SHADER, /attribute vec4 aBirth;/);
+  // The birth's stagger is the particle's own byte (its fragment's cooling),
+  // not derived from its helix seeds; its light kindles over IGNITE.
+  assert.match(FIELD_VERTEX_SHADER, /float stagger = aKind\.y \* STAGGER;/);
+  assert.doesNotMatch(FIELD_VERTEX_SHADER, /fract\(a0 \* 13\.0/);
+  assert.match(FIELD_VERTEX_SHADER, /lit = smoothstep\(0\.0, IGNITE, tau\);/);
+  assert.match(FIELD_VERTEX_SHADER, /light = born \* lit \* uCharge/);
   assert.match(FIELD_VERTEX_SHADER, /uniform float uWake;/);
   assert.match(FIELD_VERTEX_SHADER, /uniform float uWakeRate;/);
   assert.match(FIELD_VERTEX_SHADER, /uniform vec4 uLock\[8\];/);
@@ -633,6 +858,13 @@ test("the shaders carry the pose's constants and share no uniform between stages
   // shared uniform fails the link on real drivers (uSize did).
   assert.doesNotMatch(FIELD_FRAGMENT_SHADER, /uniform/);
   assert.match(FIELD_FRAGMENT_SHADER, /gl_FragColor = vColor \* /, "premultiplied, additive");
+  // The keep-out: a vertex-stage uniform, its box's own units handed on as
+  // a varying; the fragment adds nothing inside it (no discard).
+  assert.match(FIELD_VERTEX_SHADER, /uniform vec4 uKeep;/);
+  assert.match(FIELD_VERTEX_SHADER, /vKeep = uKeep\.z > uKeep\.x && uKeep\.w > uKeep\.y \? \(pos - uKeep\.xy\) \/ \(uKeep\.zw - uKeep\.xy\) : vec2\(-1\.0\);/);
+  assert.match(FIELD_FRAGMENT_SHADER, /varying vec2 vKeep;/);
+  assert.match(FIELD_FRAGMENT_SHADER, /float taper = open \* /);
+  assert.doesNotMatch(FIELD_FRAGMENT_SHADER, /\bdiscard\b/);
   assert.doesNotMatch(FIELD_VERTEX_SHADER, /\bsign\b\s*=/, "no shadowed built-in names");
 });
 
@@ -646,8 +878,11 @@ test("the buffers are bounded: 16 bytes a vertex, four a particle, a prefix any 
     fieldSeeds(i, 4, seeds);
     for (let c = 0; c < 4; c += 1) {
       const o = (i * 4 + c) * 16;
-      assert.equal(bytes[o + 5], i % 4, "arm");
-      assert.ok(bytes[o + 6] === c || bytes[o + 6] === c + 4, "corner, a marker in bit 2");
+      assert.equal(bytes[o + 5], Math.round(seeds[FIELD_SEEDS.STAGGER] * 255), "the birth's stagger");
+      assert.ok(
+        bytes[o + 6] === (i % 4) * 8 + c || bytes[o + 6] === (i % 4) * 8 + c + 4,
+        "8 × arm + corner, a marker in bit 2",
+      );
       assert.deepEqual([...bytes.slice(o, o + 6)], [...bytes.slice(i * 64, i * 64 + 6)]);
       // Its birth, as four 16-bit words the shader decodes back.
       const w = (i * 4 + c) * 8 + 4;
@@ -657,18 +892,20 @@ test("the buffers are bounded: 16 bytes a vertex, four a particle, a prefix any 
       assert.ok(Math.abs((words[w + 3] / 65535) * 4 - 2 - seeds[FIELD_SEEDS.BVY]) < 1e-4);
     }
   }
-  // A caller's fragment source (the fire's handoff) takes the model's place.
+  // A caller's fragment source takes the fire's place, its share the birth byte.
   const given = fieldVertexBytes(3, 3, (index, out) => {
     out[0] = 0.25 * index;
     out[1] = 0.5;
     out[2] = -1;
     out[3] = 1.5;
+    out[4] = 0.4;
     return out;
   });
   const givenWords = new Uint16Array(given.buffer);
-  // (Particle 1, its first vertex: word 4 × 8 + 4.)
+  // (Particle 1, its first vertex: word 4 × 8 + 4; byte 4 × 16 + 5.)
   assert.ok(Math.abs((givenWords[36] / 65535) * 2 - 0.5 - 0.25) < 1e-4);
   assert.ok(Math.abs((givenWords[38] / 65535) * 4 - 2 + 1) < 1e-4);
+  assert.equal(given[69], Math.round(0.4 * 255));
   const indices = fieldIndices(50);
   assert.equal(indices.length, 300);
   assert.equal(Math.max(...indices), 199);
@@ -748,6 +985,19 @@ test("the layer draws a quality prefix through both surfaces, clears when unchar
   const view = back.gl.calls.find(([name]) => name === "uniform3f");
   const ratio = 2 * FIELD_GL.resolution.fine;
   assert.deepEqual(view.slice(2), [0.5 * H * ratio, 100 * ratio, 20 * ratio]);
+  // The keep-out (sweep 2, F25): off by default, a box in surface px when
+  // given (the entry's caption), on every surface.
+  const keepOf = (gl) =>
+    gl.calls.filter(([name, uniform]) => name === "uniform4f" && uniform === "uKeep").map((call) => call.slice(2));
+  assert.deepEqual(keepOf(back.gl), [[0, 0, 0, 0]]);
+  back.gl.calls.length = 0;
+  fine.canvases[1].gl.calls.length = 0;
+  layer.render(state, 0.5, 100, 20, H, 1, [10, 20, 110, 60]);
+  for (const canvas of fine.canvases)
+    assert.deepEqual(keepOf(canvas.gl), [[10 * ratio, 20 * ratio, 110 * ratio, 60 * ratio]]);
+  back.gl.calls.length = 0;
+  layer.render(state, 0.5, 100, 20, H, 1, [10, 20, 10, 60]);
+  assert.deepEqual(keepOf(back.gl), [[0, 0, 0, 0]], "an empty box is no keep-out");
   // The governor's prefix.
   back.gl.calls.length = 0;
   layer.render(state, 0.5, 100, 20, H, 0.5);
@@ -826,7 +1076,8 @@ test("both scenes compose the field lazily, through their own clocks, and releas
   // pushes the 2D band into its rect fallback.
   assert.ok(scroll.indexOf("lastDrawMs = (environment.performance") < scroll.indexOf("field.render("));
   // The entry's engine: the chunk imported lazily, the camera on the figure's
-  // box through scale/translate (never transform: the jolt animates it),
+  // box through scale/translate (never transform, the figure's own, kept at
+  // identity: the body never moves),
   // identity restored at the end, the layer released at finish and stop.
   assert.match(entry, /void import\("@\/lib\/rexonance-field\/index\.js"\)/);
   assert.match(entry, /figure\.style\.scale = /);
@@ -834,7 +1085,25 @@ test("both scenes compose the field lazily, through their own clocks, and releas
   assert.doesNotMatch(entry, /figure\.style\.transform =/);
   assert.match(entry, /box\.insertBefore\(canvas, settledCanvas\);/);
   assert.equal(entry.match(/releaseField\(\);/g).length, 2, "finish and stop");
-  assert.match(entry, /extras\?\.governed\(\) \? 0\.5 : 1/);
+  // The governor's half density, eased a step a frame in both scenes, never
+  // in one frame (sweep 2, F26); whole on the scroll's calm frame.
+  assert.match(entry, /if \(extras\?\.governed\(\)\) \{\s*if \(fieldLevel > 0\) fieldLevel -= 1;\s*\} else if \(fieldLevel < FIELD_LEVELS\) fieldLevel \+= 1;/);
+  assert.match(entry, /0\.5 \+ \(0\.5 \* fieldLevel\) \/ FIELD_LEVELS,\s*fieldKeep,/);
+  assert.doesNotMatch(entry, /governed\(\) \? 0\.5 : 1/);
+  assert.match(scroll, /if \(calm\) fieldLevel = FIELD_LEVELS;\s*else if \(backRects && fieldLevel > 0\) fieldLevel -= 1;\s*else if \(!backRects && fieldLevel < FIELD_LEVELS\) fieldLevel \+= 1;/);
+  assert.match(scroll, /fieldProgress !== progress \|\| fieldDrawnLevel !== fieldLevel/);
+  assert.doesNotMatch(scroll, /backRects && !calm \? 0\.5 : 1/);
+  // The entry's caption keep-out reaches the field's canvases (sweep 2, F25).
+  assert.match(entry, /const fieldKeep = keepOut\s*\? Float32Array\.of\(\s*fence\[5\] \/ scale \+ left,\s*fence\[6\] \/ scale \+ top,\s*fence\[7\] \/ scale \+ left,\s*fence\[8\] \/ scale \+ top,\s*\)\s*: null;/);
+  // The layer is made outside the frame's measure, and in idle time once the
+  // preparation is done or a hidden tab is back (sweep 2, F27).
+  assert.ok(
+    scroll.indexOf("makeField();", scroll.indexOf("const draw = (progress")) <
+      scroll.indexOf("const started = environment.performance", scroll.indexOf("const draw = (progress")),
+    "the layer's creation is outside lastDrawMs",
+  );
+  assert.match(scroll, /if \(token === generation\) return fieldIdle\(token\);/);
+  assert.match(scroll, /if \(live\) void fieldIdle\(generation\);/);
   assert.match(entry, /if \(!coarse && fieldState\[fieldLib\.FIELD_STATE\.IMPULSES\] > 0\)/);
   assert.match(entry, /fieldLib\.fieldHash,\s*true,\s*false,/, "rays, no composite operation");
   // The stylesheets: light only, never input; the front canvas over the engine's.

@@ -18,6 +18,9 @@ export type FieldGroup = {
   from: number;
   lock: number;
   strength?: number;
+  /** Where the lock's impulse strikes (its last plate's seat); x, y by default. */
+  ix?: number;
+  iy?: number;
 };
 
 export type FieldScore = {
@@ -37,10 +40,14 @@ export type FieldScore = {
   readonly gfrom: Float64Array;
   readonly glock: Float64Array;
   readonly gstrength: Float32Array;
+  readonly gix: Float32Array;
+  readonly giy: Float32Array;
 };
 
 /** A particle's birth: the burst fragment's handoff, x and y in figure
- * heights, its velocity in figure heights per wake. */
+ * heights, its velocity in figure heights per wake, and (out[4]) its
+ * stagger share of FIELD_BIRTH.stagger of the wake (left non-finite, the
+ * birth's byte seeds decide). */
 export type FieldFragment = (
   index: number,
   out: Float64Array | Float32Array,
@@ -59,6 +66,8 @@ export type FieldLayer = {
     y: number,
     height: number,
     quality?: number,
+    /** Left clear: [x0, y0, x1, y1] CSS px in the canvases' box. */
+    keep?: ArrayLike<number> | null,
   ): number;
   clear(): void;
   release(): void;
@@ -119,14 +128,13 @@ export const FIELD_BIRTH: {
   readonly sweep: readonly number[];
   readonly heat: number;
   readonly glow: number;
-  readonly rise: number;
-  readonly speed: readonly number[];
-  readonly swirl: number;
-  readonly lift: number;
+  readonly ignite: number;
   readonly hot: readonly number[];
   readonly fringe: readonly number[];
   readonly fringeShare: number;
 };
+export const FIELD_WAKE: readonly [number, number];
+export const FIELD_WAKE_BIRTHS: number;
 export const FIELD_FIGURE_ASPECT: number;
 export const FIELD_SEEDS: {
   readonly A0: 0;
@@ -211,10 +219,10 @@ export function drawFieldImpact(
   pop?: boolean,
 ): boolean;
 export function fieldFling(age: number): number;
+export function fieldFragmentSeed(index: number): number;
 export function fieldFragment(
   index: number,
   out: Float64Array | Float32Array,
-  aspect?: number,
 ): Float64Array | Float32Array;
 export function fieldSeeds(
   index: number,

@@ -1731,12 +1731,44 @@ html body .zeus-button[data-dragging="true"][data-move-tag="below"] .zeus-button
       opacity 0.08s linear;
   }
 
-  /* A step off a control glides (FLIP on the individual translate, set by
-     zeus-button.tsx) instead of jumping as the reader's eyes settle. Only
-     placements glide; the drag, drop and cancel never do. */
+  /* A dock onto the edge after a drop glides (FLIP on the individual
+     translate, set by zeus-button.tsx). The drag, drop and cancel never do,
+     and a relocation the reader did not ask for hands off in place (below). */
   html:not([data-world-effects="economy"]) body .zeus-button[data-relocating="true"] {
     transition: translate 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
   }
+
+  /* 2026-10-21 sweep F32: a step off words or controls fades out where the
+     button is (0.12s), instead of gliding across the page. */
+  html:not([data-world-effects="economy"]) body .zeus-button[data-relocating="fade-out"] {
+    transition: opacity 0.12s ease-out;
+  }
+}
+
+/* The hand-off: transparent while it fades, then hidden at once (no
+   visibility transition) for the move itself, so the move is never drawn
+   and never counted as a layout shift. Clearing the state fades it back in
+   through the button's own opacity transition; reduced motion and economy
+   cut straight to the hidden move (zeus-button.tsx). */
+html body .zeus-button[data-relocating="fade-out"] {
+  opacity: 0;
+}
+
+html body .zeus-button[data-relocating="moving"] {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition: none;
+}
+
+/* Stepped aside (sweep F05): on the Rexonance page, where no spot is clear
+   of its words, the button fades out in place and fades back in at the next
+   settle that finds one (zeus-button.tsx, which also clears the state when
+   the route changes). Keyboard focus and its own return keep it in view. */
+html body .zeus-button[data-parked="true"]:not([data-navigating="true"]):not(:focus-visible) {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
 }
 
 /* A mouse can drag it straight away, so the grab cursor now tells the

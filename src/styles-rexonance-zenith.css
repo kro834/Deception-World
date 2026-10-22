@@ -298,6 +298,9 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-su
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-line {
   display: flex;
   flex-wrap: wrap;
+  /* Rows packed at the top: where the lines share one cell (phones), a
+     shorter line never spreads its rows to the cell's height. */
+  align-content: flex-start;
   gap: 0 0.5em;
   margin: 0;
   padding: 0;
@@ -321,6 +324,30 @@ html[data-family="special"]
   > .rzn-suitup
   .rzn-line:nth-child(4) {
   font-size: clamp(14px, 1.2vw, 20px);
+}
+
+/* Two beats to a line, never three and one (sweep 2, F81: the full-width
+   call at iPad portrait wrapped SA-GA！DEUS！ ×3, then one alone): a
+   full-width break after the second beat holds the pairs together; where
+   two do not fit, the beats still wrap one to a line. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup
+  .rzn-line:is(:nth-child(3), :nth-child(4))::after {
+  content: "";
+  flex: 0 0 100%;
+  order: 1;
+  height: 0;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup
+  .rzn-line:is(:nth-child(3), :nth-child(4))
+  > .rzn-chip:nth-child(n + 3) {
+  order: 2;
 }
 
 html[data-family="special"]
@@ -531,12 +558,19 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-su
 }
 
 /* ---------------- The live state: unlit until the call reaches it ---------------- */
+/* Unlit is dimmed, never unreadable: the call is the script and the parts
+   are the checklist (sweep 2, F22: 0.2 measured 1.7:1, the parts at 0.32
+   2.0-2.6:1). On the runway's #03070d the white call reaches 5:1 at 0.52,
+   the chant's 14-20 px included (4.5:1); a passed line (0.62 on the line
+   × 0.9 on its chips, 0.56) keeps the floor, and the 12 px part names hold
+   4.5:1 at 0.66 over the plinth's glow too. The lit line keeps its full
+   white and ice glow, the lit part its filled cell. */
 html[data-family="special"]
   body
   .rxs-page.rxs-page.rxs-rexonance-page
   > .rzn-suitup[data-rzn-state]
   .rzn-chip:not([data-on]) {
-  opacity: 0.2;
+  opacity: 0.52;
   translate: 0 0.14em;
 }
 
@@ -558,7 +592,7 @@ html[data-family="special"]
   > .rzn-suitup[data-rzn-state]
   .rzn-line[data-done]
   .rzn-chip {
-  opacity: 0.5;
+  opacity: 0.9;
 }
 
 html[data-family="special"]
@@ -566,7 +600,7 @@ html[data-family="special"]
   .rxs-page.rxs-page.rxs-rexonance-page
   > .rzn-suitup[data-rzn-state]
   .rzn-part:not([data-on]) {
-  opacity: 0.32;
+  opacity: 0.66;
 }
 
 html[data-family="special"]
@@ -593,6 +627,22 @@ html[data-family="special"]
   > .rzn-suitup[data-rzn-state]:is([data-rzn-line="0"], [data-rzn-line="1"])
   .rzn-hint {
   display: flex;
+}
+
+/* While the scene prepares, scrolling does nothing yet: the hint says the
+   suit is being readied, and becomes the scroll's cue once the scene is
+   live (sweep 2, F21). */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup:not([data-rzn-state="loading"])
+  .rzn-hint-wait,
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup[data-rzn-state="loading"]
+  .rzn-hint-live {
+  display: none;
 }
 
 /* ---------------- Tablets and phones ---------------- */
@@ -909,6 +959,22 @@ html[data-family="special"]
     > .rzn-suitup[data-rzn-state]
     .rzn-line:not([data-on]) {
     visibility: hidden;
+  }
+}
+
+/* Under 420 px the opening call breaks where its words do (Ultra DEUS！ /
+   REXONANCE！): on one line at the phone size it ran 379 px wide, past the
+   frame's edge, which clips it (sweep 2, F04: 390 lost the last ！, 320
+   read "Ultra DEUS! REXONA"). Its size stays the call's; the shared cell
+   grows by the one line. */
+@media (prefers-reduced-motion: no-preference) and (forced-colors: none) and (max-width: 419.98px) {
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rzn-suitup[data-rzn-state]
+    .rzn-line:first-child
+    .rzn-chip {
+    white-space: pre-line;
   }
 }
 
@@ -1557,6 +1623,67 @@ html[data-family="special"]
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-footer h2 {
   font-size: clamp(36px, 5vw, 84px);
   line-height: 1.12;
+}
+
+/* The way back to this page's own top (sweep 2, F92: the floating button's
+   top is the World's). A quiet label hung under the end card's top edge,
+   on the line's left; first in the card's reading order, so the closing
+   row still ends on the way home. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-footer > .rxs-footer-top {
+  position: absolute;
+  top: clamp(12px, 2vw, 28px);
+  left: max(var(--rxl-gutter, 20px), calc((100% - var(--rxl-wrap, 1240px)) / 2));
+  z-index: 2;
+  margin: 0;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rxs-footer
+  > .rxs-footer-top
+  > a {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-block-size: 44px;
+  min-inline-size: 44px;
+  padding: 0 2px;
+  color: var(--rxt-text-2, #d6e0ea);
+  font: 700 13px / 1.4 var(--rxt-gothic, var(--dx-body));
+  font-feature-settings: "palt" 1, "kern" 1;
+  letter-spacing: var(--rxt-track-button, 0.1em);
+  text-decoration: none;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rxs-footer
+  > .rxs-footer-top
+  > a
+  > i {
+  color: var(--rxt-ice, rgb(var(--rzn-ice)));
+  font-style: normal;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rxs-footer
+  > .rxs-footer-top
+  > a:is(:hover, :focus-visible) {
+  color: var(--rxt-text-1, #f7f9fc);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rxs-footer
+  > .rxs-footer-top
+  > a:focus-visible {
+  outline: 2px solid var(--rxt-ice, rgb(var(--rzn-ice)));
+  outline-offset: 3px;
 }
 
 @media (max-width: 900px) {
@@ -2765,13 +2892,16 @@ html[data-family="special"]
 }
 
 /* Once the selected form has formed, the side information yields to its
-   silhouette. The call remains readable and the final form code stays lit. */
+   silhouette. The call remains readable and the final form code stays lit:
+   the yield keeps the 12 px parts and count at 4.5:1 or more over the lit
+   frame, and a passed line at 0.5 in all (sweep 2, F22: 0.46 read 3.6:1 on
+   the parts, 0.65 on the call 2.7:1 on its passed lines). */
 html[data-family="special"]
   body
   .rxs-page.rxs-page.rxs-rexonance-page
   > .rzn-suitup[data-rzn-form-complete]
   :is(.rzn-readout, .rzn-nanites, .rzn-parts) {
-  opacity: 0.46;
+  opacity: 0.62;
 }
 
 html[data-family="special"]
@@ -2779,7 +2909,7 @@ html[data-family="special"]
   .rxs-page.rxs-page.rxs-rexonance-page
   > .rzn-suitup[data-rzn-form-complete]
   .rzn-lines {
-  opacity: 0.65;
+  opacity: 0.9;
 }
 
 html[data-family="special"]

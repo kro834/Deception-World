@@ -30,6 +30,7 @@ import {
 import { SuitNanites } from "./rexonance-suit-nanites";
 import {
   NANITE_FIRE_PHASES,
+  REXONANCE_ENTRY_SCAN,
   entryElapsedTime,
   naniteMaterialLanding,
 } from "@/lib/rexonance-ignition.js";
@@ -287,7 +288,8 @@ function SuitBadge() {
 // from one atlas, each assembled from micro-tiles of the art that stream in
 // and lock (the nanite engine, rexonance-suit-nanites.tsx) or, without it,
 // growing from its seam through its gathered nanite mosaic (the DOM plates
-// below). The DEUS！ accents clank hardest with a spark and a jolt; the tail
+// below). The DEUS！ accents clank hardest with a spark (the body itself
+// never moves: owner, 「全身が上下するのも治して」); the tail
 // grows midway, the helmet seats last, and the face's lights fill with
 // pixel squares that hold, then scatter. Every DOM layer is a small box that
 // moves by transform and opacity on the call clock.
@@ -506,7 +508,8 @@ function Suit({ suit, animate }: { suit: "build" | "whole"; animate: boolean }) 
         {
           "--rx-suit-material-start": `${entryElapsedTime(NANITE_FIRE_PHASES.materialStart * 2400)}ms`,
           "--rx-suit-heading-duration": `${entrySpan(60, 300)}ms`,
-          "--rx-suit-scan-duration": `${entrySpan(70, 250)}ms`,
+          // The fire lights at this scan's end (entryFlamePhase).
+          "--rx-suit-scan-duration": `${entrySpan(REXONANCE_ENTRY_SCAN.from, REXONANCE_ENTRY_SCAN.span)}ms`,
           "--rx-suit-sweep-duration": `${entrySpan(70, 330)}ms`,
           "--rx-suit-under-duration": `${entrySpan(330, 60)}ms`,
           "--rx-suit-core-start": `${entryElapsedTime(370)}ms`,

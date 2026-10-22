@@ -47,6 +47,10 @@ export declare function snapshotOgIdentity(cwd?: string): { site: OgSite };
 export declare function customOgAssetPath(cwd?: string): string;
 export declare function ogServiceUrl(): string;
 export declare function titleFromDocument(html: string): string;
+export declare function descriptionFromDocument(html: string): string;
+export declare function imageFromDocument(
+  html: string,
+): { path: string; width: number; height: number } | null;
 export declare function resolveOgTitle(
   site?: OgSite,
   appName?: string,
@@ -59,6 +63,8 @@ export declare function grokOgHeadTags(ctx?: {
   appName?: string;
   site?: OgSite;
   documentTitle?: string;
+  documentDescription?: string;
+  documentImage?: { path: string; width: number; height: number } | null;
 }): string[];
 export declare function stripShareMetaTags(html: string): string;
 export declare function normalizeHeadContext(ctx?: GrokHeadContext): {

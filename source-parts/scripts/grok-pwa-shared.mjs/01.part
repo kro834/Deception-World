@@ -245,3 +245,35 @@ function detectCustomOgCard(cwd = process.cwd(), site = {}) {
   if (siteHasCustomCard(site)) return true;
   return existsSync(join(cwd, "public/og.jpg")) || existsSync(join(cwd, "public/og.png"));
 }
+
+/** Snapshot for Vite/Nitro to bake into the server bundle (Vercel has no workspace FS). */
+export function snapshotOgIdentity(cwd = process.cwd()) {
+  const site = { ...readOgSite(cwd) };
+  if (detectCustomOgCard(cwd, site)) {
+    site.card = "custom";
+    site.image = site.image || customOgAssetPath(cwd);
+  }
+  if (existsSync(join(cwd, "public/x-banner.jpg"))) {
+    site.banner = site.banner || "/x-banner.jpg";
+  }
+  return { site };
+}
+
+export function customOgAssetPath(cwd = process.cwd()) {
+  if (existsSync(join(cwd, "public/og.png")) && !existsSync(join(cwd, "public/og.jpg"))) {
+    return "/og.png";
+  }
+  return "/og.jpg";
+}
+
+export function ogServiceUrl() {
+  const fromEnv = String(process.env?.VITE_OG_SERVICE_URL ?? "").trim();
+  return (fromEnv || OG_SERVICE_URL_DEFAULT).replace(/\/+$/, "");
+}
+
+export function titleFromDocument(html) {
+  const match = String(html ?? "").match(/<title\b[^>]*>([^<]*)<\/title>/i);
+  return match ? unescapeHtml(match[1]).trim() : "";
+}
+
+/** The document head's <meta> tags as { key, content }, keyed by property or name. */

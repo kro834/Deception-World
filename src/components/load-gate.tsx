@@ -11,7 +11,12 @@ import {
   type MouseEvent,
   type ReactNode,
 } from "react";
-import { useNavigate, useRouter, useRouterState } from "@tanstack/react-router";
+import {
+  useElementScrollRestoration,
+  useNavigate,
+  useRouter,
+  useRouterState,
+} from "@tanstack/react-router";
 import {
   OpeningHandoffLayer,
   type OpeningHandoffDestination,
@@ -2184,8 +2189,83 @@ export function GuardedLink({
   );
 }
 
+/* 2026-10-21 sweep F34: a reload (or a return to this entry from another
+   site) is not a fresh entry. The router restores the reader's position once,
+   when it first renders, but a long page is still short then (the gate holds
+   the body, the lower chapters mount on idle), so the restore landed at the
+   top and stayed there. Where the router kept a position for this entry, and
+   the URL names no section, it is applied again once the page is tall enough
+   to hold it, at most once and within RELOAD_RESTORE_MS; any scroll, key,
+   wheel or touch of the reader's own ends the wait. */
+const RELOAD_RESTORE_MS = 4000;
+
+function reloadPosition(saved: { scrollX: number; scrollY: number } | undefined) {
+  if (typeof window === "undefined" || !saved || !(saved.scrollY > 0)) return null;
+  if (window.location.hash.length > 1) return null;
+  const [navigation] = (window.performance?.getEntriesByType?.("navigation") ??
+    []) as PerformanceNavigationTiming[];
+  if (navigation?.type !== "reload" && navigation?.type !== "back_forward") return null;
+  return { x: Number.isFinite(saved.scrollX) ? saved.scrollX : 0, y: saved.scrollY };
+}
+
+function restoreReloadPosition(target: { x: number; y: number }, dossier: boolean) {
+  const root = document.documentElement;
+  const path = window.location.pathname;
+  const started = performance.now();
+  let frame = 0;
+  let done = false;
+  const stop = () => {
+    if (done) return;
+    done = true;
+    if (frame) window.cancelAnimationFrame(frame);
+    frame = 0;
+    document.removeEventListener("pointerdown", readerTookOver, true);
+    document.removeEventListener("touchmove", readerTookOver, true);
+    document.removeEventListener("wheel", readerTookOver, true);
+    document.removeEventListener("keydown", readerTookOver, true);
+  };
+  function readerTookOver(event: Event) {
+    if (event instanceof KeyboardEvent && !SCROLL_KEYS.has(event.key)) return;
+    stop();
+  }
+  const tick = () => {
+    frame = 0;
+    if (done) return;
+    if (window.location.pathname !== path || performance.now() - started > RELOAD_RESTORE_MS) {
+      stop();
+      return;
+    }
+    if (root.scrollHeight - window.innerHeight >= target.y - 1) {
+      if (Math.abs(window.scrollY - target.y) > 2) {
+        // A dossier lays its long records out in full while the offset lands,
+        // as a Back/Forward arrival does (25.css), so it lands on the words
+        // it was measured on; `auto` then keeps their real sizes.
+        const hold = dossier && root.dataset.routeRestoring !== "true";
+        if (hold) root.dataset.routeRestoring = "true";
+        window.scrollTo({ top: target.y, left: target.x, behavior: "instant" });
+        if (hold) window.requestAnimationFrame(() => delete root.dataset.routeRestoring);
+      }
+      stop();
+      return;
+    }
+    frame = window.requestAnimationFrame(tick);
+  };
+  document.addEventListener("pointerdown", readerTookOver, true);
+  document.addEventListener("touchmove", readerTookOver, { capture: true, passive: true });
+  document.addEventListener("wheel", readerTookOver, { capture: true, passive: true });
+  document.addEventListener("keydown", readerTookOver, true);
+  frame = window.requestAnimationFrame(tick);
+  return stop;
+}
+
 export function AppGuards() {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
+  const savedWindow = useElementScrollRestoration({
+    getElement: () => (typeof window === "undefined" ? undefined : window),
+  });
+  // Read once, on the first render of this document.
+  const [reloadTarget] = useState(() => reloadPosition(savedWindow));
+  const reloadArrival = useRef(reloadTarget !== null);
   const locationHash = useRouterState({ select: (state) => state.location.hash });
   const previousPathname = useRef<string | null>(null);
   const router = useRouter();
@@ -2251,12 +2331,22 @@ export function AppGuards() {
     });
   }, [router]);
 
+  useEffect(() => {
+    if (!reloadTarget) return;
+    return restoreReloadPosition(reloadTarget, DETAIL_ROUTE.test(window.location.pathname));
+  }, [reloadTarget]);
+
   useLayoutEffect(() => {
+    // A reloaded document's first route keeps the reader's place: it is not a
+    // fresh entry, so it is restored like a history arrival
+    // (restoreReloadPosition), not sent to the top.
+    const reloaded = previousPathname.current === null && reloadArrival.current;
     const pathnameChanged = previousPathname.current !== pathname;
     previousPathname.current = pathname;
     // Back/Forward into the world returns the reader to where they were, and
     // into a dossier to where they left it: the router restores that
     // position, so only fresh entries start at the top.
+    if (reloaded) historyTraversal.current = true;
     const fromHistory = historyTraversal.current;
     historyTraversal.current = false;
     const root = document.documentElement;

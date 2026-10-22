@@ -276,6 +276,50 @@ export function titleFromDocument(html) {
   return match ? unescapeHtml(match[1]).trim() : "";
 }
 
+/** The document head's <meta> tags as { key, content }, keyed by property or name. */
+function documentMetaTags(html) {
+  const head = String(html ?? "").split(/<\/head>/i)[0];
+  const tags = [];
+  for (const [tag] of head.matchAll(/<meta\b[^>]*>/gi)) {
+    const key = tag.match(/\b(?:property|name)\s*=\s*(["'])(.*?)\1/i)?.[2];
+    const content = tag.match(/\bcontent\s*=\s*(["'])(.*?)\1/is)?.[2];
+    if (key && content != null) {
+      tags.push({ key: key.toLowerCase(), content: unescapeHtml(content).trim() });
+    }
+  }
+  return tags;
+}
+
+/**
+ * The page's own share description: its og:description, else its meta
+ * description. Read before the share tags are stripped, so a route that
+ * describes itself keeps that description on its card.
+ */
+export function descriptionFromDocument(html) {
+  const tags = documentMetaTags(html);
+  return (
+    tags.find(({ key, content }) => key === "og:description" && content)?.content ??
+    tags.find(({ key, content }) => key === "description" && content)?.content ??
+    ""
+  );
+}
+
+/**
+ * A route's own share card: a root-relative JPEG or PNG declared with its
+ * og:image:width and og:image:height. Anything else (a relative or remote
+ * URL, a WebP, a card without its size) leaves the site card in place.
+ */
+export function imageFromDocument(html) {
+  const tags = documentMetaTags(html);
+  const read = (key) => tags.find((tag) => tag.key === key)?.content ?? "";
+  const path = read("og:image");
+  const width = Number.parseInt(read("og:image:width"), 10);
+  const height = Number.parseInt(read("og:image:height"), 10);
+  if (!/^\/(?!\/)[\w./-]+\.(?:jpe?g|png)$/i.test(path) || path.includes("..")) return null;
+  if (!(width > 0 && height > 0)) return null;
+  return { path, width, height };
+}
+
 export function resolveOgTitle(
   site = {},
   appName = DEFAULT_APP_NAME,
@@ -301,31 +345,39 @@ export function grokOgHeadTags({
   appName = DEFAULT_APP_NAME,
   site = {},
   documentTitle = "",
+  documentDescription = "",
+  documentImage = null,
 } = {}) {
   const title = resolveOgTitle(site, appName, host, documentTitle);
   const publicHost = resolvePublicHost(host);
   const tags = [
     `<meta name="twitter:card" content="summary_large_image">`,
     `<meta property="og:title" content="${escapeHtml(title)}">`,
+    `<meta name="twitter:title" content="${escapeHtml(title)}">`,
   ];
-  const description = String(site.description ?? "").trim();
+  // The site's description wins; otherwise the page's own (its route head).
+  const description =
+    String(site.description ?? "").trim() || String(documentDescription ?? "").trim();
   if (description) {
     tags.push(`<meta property="og:description" content="${escapeHtml(description)}">`);
+    tags.push(`<meta name="twitter:description" content="${escapeHtml(description)}">`);
   }
-  if (String(site.type ?? "").toLowerCase() === "x:game") {
-    tags.push(`<meta property="og:type" content="x:game">`);
-  }
+  const type = String(site.type ?? "").toLowerCase() === "x:game" ? "x:game" : "website";
+  tags.push(`<meta property="og:type" content="${type}">`);
   if (publicHost) {
     const custom = siteHasCustomCard(site);
-    const asset = String(site.image ?? "").trim() || "/og.jpg";
+    // A route's own card (a root-relative JPEG/PNG declared with its size)
+    // stands in for the site card; the placeholder service never does.
+    const own = custom && documentImage ? documentImage : null;
+    const asset = own?.path ?? (String(site.image ?? "").trim() || "/og.jpg");
     let image = custom
       ? `https://${publicHost}${asset.startsWith("/") ? asset : `/${asset}`}`
       : `${ogServiceUrl()}/v1/card.png?host=${encodeURIComponent(publicHost)}&title=${encodeURIComponent(title)}`;
     const color = !custom ? placeholderCardColor(site) : "";
     if (color) image += `&color=${encodeURIComponent(color)}`;
     tags.push(`<meta property="og:image" content="${escapeHtml(image)}">`);
-    tags.push(`<meta property="og:image:width" content="1200">`);
-    tags.push(`<meta property="og:image:height" content="630">`);
+    tags.push(`<meta property="og:image:width" content="${own?.width ?? 1200}">`);
+    tags.push(`<meta property="og:image:height" content="${own?.height ?? 630}">`);
     const banner = String(site.banner ?? "").trim();
     if (banner) {
       const bannerUrl = `https://${publicHost}${banner.startsWith("/") ? banner : `/${banner}`}`;
@@ -391,6 +443,9 @@ export function injectGrokPwaHead(html, ctx = {}, legacyProjectId, legacyCreator
       : ctx;
   const { site, projectId, creator, creatorId, host } = normalizeHeadContext(context);
   const documentTitle = titleFromDocument(html);
+  // Read the page's own description and card before its share tags go.
+  const documentDescription = descriptionFromDocument(html);
+  const documentImage = imageFromDocument(html);
   const appName = resolveOgTitle(site, context.appName ?? DEFAULT_APP_NAME, host, documentTitle);
   // A production caller opts into canonical share metadata by supplying its
   // request host or a baked site identity. Legacy positional calls only ask
@@ -411,7 +466,14 @@ export function injectGrokPwaHead(html, ctx = {}, legacyProjectId, legacyCreator
   if (hasExplicitShareIdentity) {
     next = insertAfterHeadOpen(
       next,
-      grokOgHeadTags({ host, appName, site, documentTitle }).join(""),
+      grokOgHeadTags({
+        host,
+        appName,
+        site,
+        documentTitle,
+        documentDescription,
+        documentImage,
+      }).join(""),
     );
   } else if (!next.includes('name="twitter:card"') && !next.includes("name='twitter:card'")) {
     next = insertAfterHeadOpen(next, '<meta name="twitter:card" content="summary_large_image">');

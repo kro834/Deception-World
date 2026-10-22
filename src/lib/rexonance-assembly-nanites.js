@@ -1996,15 +1996,21 @@ export function createAssemblyConduitJob({
 /* ---------------- figure-space layers in bands (idle slices ≤ 6 ms) ----------------
    The raw nanite metal (armour A3) and the molten gold (G6/G7), with the
    formulas of createNaniteMetalJob and createNaniteMoltenJob
-   (rexonance-unlit.js) and the same bytes, made a band of rows at a time:
-   the source (and the mask) are first copied to the CPU, each in a slice
-   of its own, then read a band at a time (a whole-figure read and its
-   canvases in one slice cost 7–12 ms on a phone), so no slice of the
-   preparation runs long. */
-// Keep the indivisible read + shading + upload small even under CPU throttle.
-// Two halo rows retain the exact rim at band boundaries.
+   (rexonance-unlit.js) and the same bytes, made a band of rows at a time
+   (a whole figure's shading and its canvases in one slice cost 7–12 ms on
+   a phone), so no slice of the preparation runs long.
+
+   Every readback is a native round trip to the GPU (sweep 2, F02): with a
+   GPU canvas each read waits for the GPU to drain, 14–100 ms a read while
+   the reader scrolls, whatever its size, and the copies of a GPU source
+   on a CPU canvas keep that wait on every later read. One read a band
+   (2,080 for the scene) had stalled the scroll above the runway for 50 s.
+   So each source (the art, and the mask) is read back once, whole, in a
+   slice of its own, and shaded from that memory; the outputs are uploaded
+   a strip at a time, never a band. */
+// Keep each slice's shading small even under CPU throttle.
 const LAYER_BAND = 2;
-// The CPU copies are made a strip of rows a slice.
+// The outputs are uploaded a strip of rows at a time.
 const LAYER_STRIP = 104;
 const MOLTEN_RAMP = [0, 120, 52, 10, 0.4, 236, 140, 40, 0.7, 255, 210, 120, 1, 255, 250, 236];
 
@@ -2038,43 +2044,59 @@ export function createAssemblyLayerJob({
     const names = metal ? (silhouette ? ["metal", "silhouette"] : ["metal"]) : ["molten"];
     const outputs = names.map(() => make(W, H));
     const contexts = outputs.map((canvas) => canvas.getContext("2d"));
-    // The CPU copies of the source and the mask, made by the first steps.
-    const copies = (mask ? [source, mask] : [source]).map(() => make(W, H));
-    const copyContexts = copies.map((canvas) =>
-      canvas.getContext("2d", { willReadFrequently: true }),
-    );
-    if (copyContexts.some((context) => !context) || contexts.some((context) => !context))
+    // The sources (the art, and the mask), each copied to the CPU and read
+    // back once by the first steps, then kept in memory (the rim's halo
+    // rows are plain memory reads).
+    const sources = mask ? [source, mask] : [source];
+    const copy = make(W, H);
+    const copyContext = copy.getContext("2d", { willReadFrequently: true });
+    if (!copyContext || contexts.some((context) => !context))
       throw new Error("unavailable layer context");
-    let images = names.map(() => copyContexts[0].createImageData(W, LAYER_BAND));
-    if (images.some((image) => !image?.data)) throw new Error("invalid layer pixels");
-    let copied = 0;
-    let copyTop = 0;
+    const stride = W * 4;
+    let bytes = [];
+    // The outputs' current strip, uploaded once it is whole (or the last).
+    const stripHeight = Math.min(LAYER_STRIP, H);
+    let images = names.map(() => copyContext.createImageData(W, stripHeight));
+    if (images.some((image) => !image?.data || image.data.length < stride * stripHeight))
+      throw new Error("invalid layer pixels");
+    const out = images.map((image) => image.data);
     let top = 0;
+    let stripTop = 0;
     let cancelled = false;
     let result = null;
     const release = () => {
-      images = null;
+      images = bytes = null;
+      out.length = 0;
       for (const canvas of owned) canvas.width = canvas.height = 0;
     };
-    // Rows [y0, y0 + rows) of copy `index`, as RGBA bytes.
-    const read = (index, y0, rows) => {
-      const data = copyContexts[index].getImageData(0, y0, W, rows)?.data;
-      if (!data || data.length < W * rows * 4) throw new Error("invalid layer pixels");
-      return data;
+    const copySource = () => {
+      const index = bytes.length;
+      if (index) copyContext.clearRect(0, 0, W, H);
+      copyContext.drawImage(sources[index], 0, 0, W, H, 0, 0, W, H);
+      const data = copyContext.getImageData(0, 0, W, H)?.data;
+      if (!data || data.length < stride * H) throw new Error("invalid layer pixels");
+      bytes.push(data);
+      // (Its canvas is not needed once every source is in memory.)
+      if (bytes.length === sources.length) copy.width = copy.height = 0;
+    };
+    // The outputs' rows [stripTop, top), one upload each.
+    const upload = () => {
+      const rows = top - stripTop;
+      if (rows > 0)
+        images.forEach((image, index) =>
+          contexts[index].putImageData(image, 0, stripTop, 0, 0, W, rows),
+        );
+      stripTop = top;
     };
     const band = () => {
       const rows = Math.min(LAYER_BAND, H - top);
-      // (One row of context either side for the metal's rim.)
-      const above = metal && top > 0 ? 1 : 0;
-      const below = metal && top + rows < H ? 1 : 0;
-      const a = read(0, top - above, rows + above + below);
-      const m = mask ? read(1, top, rows) : null;
-      const out = images.map((image) => image.data);
-      for (const data of out) data.fill(0);
-      const stride = W * 4;
+      const a = bytes[0];
+      const m = mask ? bytes[1] : null;
+      const base = (top - stripTop) * stride;
+      for (const data of out) data.fill(0, base, base + rows * stride);
       for (let y = 0; y < rows; y += 1) {
         const Y = top + y;
-        for (let x = 0, o = y * stride, i = (y + above) * stride; x < W; x += 1, o += 4, i += 4) {
+        for (let x = 0, o = base + y * stride, i = Y * stride; x < W; x += 1, o += 4, i += 4) {
           const alpha = a[i + 3];
           if (!alpha) continue;
           const L = (0.2126 * a[i] + 0.7152 * a[i + 1] + 0.0722 * a[i + 2]) / 255;
@@ -2109,36 +2131,20 @@ export function createAssemblyLayerJob({
               mo[o + c - 1] = conduitByte(
                 MOLTEN_RAMP[k - 4 + c] + (MOLTEN_RAMP[k + c] - MOLTEN_RAMP[k - 4 + c]) * u,
               );
-            mo[o + 3] = m ? conduitByte((alpha * m[o + 3]) / 255) : alpha;
+            mo[o + 3] = m ? conduitByte((alpha * m[i + 3]) / 255) : alpha;
           }
         }
       }
-      images.forEach((image, index) => contexts[index].putImageData(image, 0, top, 0, 0, W, rows));
       top += rows;
+      if (top >= H || top - stripTop >= stripHeight) upload();
     };
     return {
       step(until, idleDeadline) {
         if (cancelled || result || top >= H) return true;
         try {
-          if (copied < copies.length) {
-            // The copies, a strip a slice.
-            const rows = Math.min(LAYER_STRIP, H - copyTop);
-            copyContexts[copied].drawImage(
-              copied ? mask : source,
-              0,
-              copyTop,
-              W,
-              rows,
-              0,
-              copyTop,
-              W,
-              rows,
-            );
-            copyTop += rows;
-            if (copyTop >= H) {
-              copied += 1;
-              copyTop = 0;
-            }
+          if (bytes.length < sources.length) {
+            // The copies, a source a slice.
+            copySource();
             return false;
           }
           do band();
@@ -2157,8 +2163,9 @@ export function createAssemblyLayerJob({
       commit() {
         if (result) return result;
         if (cancelled || top < H) return null;
-        for (const canvas of copies) canvas.width = canvas.height = 0;
-        images = null;
+        copy.width = copy.height = 0;
+        images = bytes = null;
+        out.length = 0;
         result = {};
         names.forEach((name, index) => (result[name] = outputs[index]));
         return result;
@@ -4966,7 +4973,9 @@ export function createAssemblyNanites({
       // seat, a short weld-bright star over it, gone by the lock — a part
       // locking in, not a chip fading out. (Within the glints' budget; its
       // alpha is 0 at u = 1, so the finished suit's pixels are untouched.)
-      for (let c = 0; c < nFlight && glints < GLINT_MAX; c += 1) {
+      // A transient like the sintering: a resting (calm) frame shows the
+      // plate's materialising metal, never a frozen flash (sweep 2, F85).
+      for (let c = 0; !CALM && c < nFlight && glints < GLINT_MAX; c += 1) {
         const i = flightList[c];
         const u = U[i];
         if (u < 0.86 || A[i] < 0) continue;

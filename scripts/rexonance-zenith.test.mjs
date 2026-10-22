@@ -20,6 +20,10 @@ import {
   REXONANCE_LAYOUT_BOOT_SCRIPT,
   syncRexonanceLayoutGate,
 } from "../src/lib/rexonance-layout-gate.js";
+import { NANITE_FIRE_PHASES } from "../src/lib/rexonance-ignition.js";
+import { inspectBodyFlame } from "../src/lib/rexonance-flame.js";
+import { POSE_TIME } from "../src/lib/rexonance-fire/fire-pose.js";
+import { scrollFlameAt } from "../src/lib/rexonance-field/field-clock.js";
 import { runInNewContext } from "node:vm";
 
 /* 2026-10-11 rx15: Rexonance, ZENITH — the suit-up on the page
@@ -550,8 +554,41 @@ function environment({
   chants = false,
   // The page has finished loading (the early warm-up waits for it).
   loaded = false,
+  // Canvases give a (recording) WebGL context too, and the scene canvas a
+  // parent, so the field's layer can be made.
+  webgl = false,
 } = {}) {
   const listeners = new Map();
+  // Every WebGL call of every canvas, in order: [canvas id, name, ...args].
+  const glCalls = [];
+  const fieldCanvases = [];
+  const webglContext = (id) =>
+    new Proxy(
+      {
+        VERSION: 1,
+        COMPILE_STATUS: 2,
+        LINK_STATUS: 3,
+        getParameter: () => "WebGL 1.0 (test)",
+        getShaderParameter: () => true,
+        getProgramParameter: () => true,
+        getUniformLocation: (program, name) => ({ name }),
+        getExtension: () => ({ loseContext: () => glCalls.push([id, "loseContext"]) }),
+        createShader: () => ({}),
+        createProgram: () => ({}),
+        createBuffer: () => ({}),
+      },
+      {
+        get: (gl, key) =>
+          key in gl
+            ? typeof gl[key] === "function"
+              ? (...args) => {
+                  glCalls.push([id, key, ...args]);
+                  return gl[key](...args);
+                }
+              : gl[key]
+            : (...args) => glCalls.push([id, key, ...args]),
+      },
+    );
   const target = (name) => ({
     addEventListener(type, callback) {
       listeners.set(`${name}:${type}`, callback);
@@ -620,26 +657,37 @@ function environment({
       height: 0,
       clientWidth: 1440,
       clientHeight: 837,
-      getContext: () =>
-        new Proxy(context2d, {
-          get: (ctx, key) => {
-            if (key === "setTransform")
-              return (...args) => {
-                calls.push([key, args.length]);
-                transforms.push({ target: id, args });
-              };
-            if (key === "drawImage")
-              return (...args) => {
-                calls.push([key, args.length, id]);
-                drawCalls.push({
-                  target: id,
-                  source: args[0]?._src ?? args[0]?.testCanvasId,
-                  rect: args.slice(1),
-                });
-              };
-            return ctx[key];
-          },
-        }),
+      ...(webgl
+        ? {
+            dataset: {},
+            removed: false,
+            remove() {
+              this.removed = true;
+            },
+          }
+        : {}),
+      getContext: (type) =>
+        webgl && (type === "webgl2" || type === "webgl")
+          ? webglContext(id)
+          : new Proxy(context2d, {
+              get: (ctx, key) => {
+                if (key === "setTransform")
+                  return (...args) => {
+                    calls.push([key, args.length]);
+                    transforms.push({ target: id, args });
+                  };
+                if (key === "drawImage")
+                  return (...args) => {
+                    calls.push([key, args.length, id]);
+                    drawCalls.push({
+                      target: id,
+                      source: args[0]?._src ?? args[0]?.testCanvasId,
+                      rect: args.slice(1),
+                    });
+                  };
+                return ctx[key];
+              },
+            }),
     };
     canvases.push(canvas);
     return canvas;
@@ -652,6 +700,7 @@ function environment({
     ...target("document"),
   };
   const canvas = makeCanvas();
+  if (webgl) canvas.parentNode = { insertBefore: (node) => fieldCanvases.push(node) };
   const frameBox = element({ offsetHeight: 837 });
   const lines = [0, 1, 2, 3, 4].map((index) => {
     const count = chants && (index === 2 || index === 3) ? 4 : 1;
@@ -821,6 +870,8 @@ function environment({
     prepared: () => preparationPhases.includes("ready"),
     readyCount: () => preparationPhases.filter((phase) => phase === "ready").length,
     canvasCount: () => canvasId,
+    glCalls,
+    fieldCanvases,
   };
 }
 
@@ -905,9 +956,13 @@ test("near the view it goes live, scrubs with the scroll, writes the HUD on chan
   // Back to the start: the welds come off again.
   t.scrollTo(0.1);
   assert.match(t.counter.textContent, /^0 \/ /);
-  // An unchanged position draws nothing.
+  // An unchanged position draws nothing (past the fire, which keeps
+  // flowing at rest: see "at rest the fire keeps flowing").
+  t.scrollTo(0.3);
+  for (let k = 0; k < 120 && t.frames.size; k += 1) t.flush();
+  assert.equal(t.frames.size, 0, "settled past the fire");
   const before = t.calls.length;
-  t.scrollTo(0.1);
+  t.scrollTo(0.3);
   assert.equal(t.calls.length, before);
   // Hidden: no frame is queued.
   t.env.document = undefined;
@@ -1098,6 +1153,228 @@ test("a mid-runway arrival resumes at its progress: the first live frame needs n
   dispose();
 });
 
+test("at rest the fire keeps flowing on the wall clock, the calm frame included, until the fire is spent or the scene is hidden (review of 2ce6712)", async () => {
+  // A fire that sits still is the 固体 look the owner rejected. The scene
+  // once drew only on scroll, then 260 ms into each rest re-posed the
+  // whole flame on a clock of its own (progress × 60) and froze it there.
+  const t = environment();
+  let now = 5000;
+  t.env.performance = { now: () => now };
+  const drawn = [];
+  t.env.__rexonanceDrawMs = (ms, progress, calm) => drawn.push({ progress, calm });
+  const dispose = mountRexonanceAssembly(t.runway, engineConfig, t.env);
+  t.observers[1].callback([{ isIntersecting: true }]);
+  await until(t.prepared, "warm preparation completed");
+  t.observers[0].callback([{ isIntersecting: true }]);
+  await until(() => t.runway.dataset.rznState === "live" && t.frames.size > 0, "scene live");
+  // The layout's first notice (a task, as in the browser) re-measures.
+  await new Promise((resolve) => setTimeout(resolve, 10));
+  t.flush();
+  let stamp = 0;
+  const tick = (count) => {
+    for (let k = 0; k < count; k += 1) {
+      stamp += 1000 / 60;
+      now += 1000 / 60;
+      for (const [id, callback] of [...t.frames]) {
+        t.frames.delete(id);
+        callback(stamp);
+      }
+    }
+  };
+  const flameClock = () => inspectBodyFlame().pose[POSE_TIME];
+  // Mid-engulf: the scroll comes to rest there.
+  const burning = scrollFlameAt((NANITE_FIRE_PHASES.kindle + NANITE_FIRE_PHASES.cover) / 2);
+  t.scrollTo(burning);
+  tick(12);
+  const shown = drawn.at(-1).progress;
+  assert.ok(Math.abs(shown - burning) < 0.001, `settled at the fire (${shown})`);
+  drawn.length = 0;
+  const before = t.percent.textContent;
+  tick(6);
+  assert.equal(drawn.length, 6, "every frame at rest redraws the burning moment");
+  assert.ok(
+    drawn.every((d) => d.progress === shown && !d.calm),
+    JSON.stringify(drawn),
+  );
+  assert.equal(flameClock(), now / 1000, "on the wall clock");
+  assert.equal(t.percent.textContent, before, "the HUD is untouched by the fire's frames");
+  assert.equal(t.frames.size, 1, "and the next is queued");
+  // The calm frame continues the same clock (no re-pose), and the fire
+  // flows on from it with the transient effects still off.
+  await new Promise((resolve) => setTimeout(resolve, 320));
+  const calm = drawn.findIndex((d) => d.calm);
+  assert.ok(calm >= 0, "the calm frame was drawn");
+  assert.equal(flameClock(), now / 1000, "the calm frame keeps the wall clock");
+  drawn.length = 0;
+  const calmClock = flameClock();
+  tick(4);
+  assert.equal(drawn.length, 4);
+  assert.ok(
+    drawn.every((d) => d.progress === shown && d.calm),
+    JSON.stringify(drawn),
+  );
+  assert.ok(flameClock() > calmClock, "and keeps flowing after it");
+  // Past the fire (the assembly proper): an unchanged position draws
+  // nothing and nothing stays queued.
+  t.scrollTo(0.3);
+  tick(30);
+  drawn.length = 0;
+  tick(6);
+  assert.equal(drawn.length, 0, "no fire, no redraw at rest");
+  assert.equal(t.frames.size, 0);
+  // Back in the fire, then out of view: the loop stops with the scene.
+  t.scrollTo(burning);
+  tick(12);
+  assert.equal(t.frames.size, 1);
+  t.observers[0].callback([{ isIntersecting: false }]);
+  assert.equal(t.frames.size, 0, "offscreen, nothing is queued");
+  drawn.length = 0;
+  tick(6);
+  assert.equal(drawn.length, 0);
+  dispose();
+  assert.equal(t.frames.size, 0);
+});
+
+test("a rest's catch-up frames never alternate with the calm frame, however slow the frames (sweep 2, F86)", async () => {
+  // The welds and the gold catch up a budget a frame. The calm frame was
+  // armed beside each catch-up frame, so where frames came more than 260 ms
+  // apart it landed between them: calm, moving, calm… at one progress, the
+  // impact's rays coming and going at rest.
+  const t = environment();
+  let now = 5000;
+  t.env.performance = { now: () => now };
+  const drawn = [];
+  t.env.__rexonanceDrawMs = (ms, progress, calm) => drawn.push({ progress, calm });
+  const dispose = mountRexonanceAssembly(t.runway, engineConfig, t.env);
+  t.observers[1].callback([{ isIntersecting: true }]);
+  await until(t.prepared, "warm preparation completed");
+  t.observers[0].callback([{ isIntersecting: true }]);
+  await until(() => t.runway.dataset.rznState === "live" && t.frames.size > 0, "scene live");
+  await new Promise((resolve) => setTimeout(resolve, 10));
+  t.flush();
+  let stamp = 0;
+  const tick = () => {
+    stamp += 1000 / 60;
+    now += 1000 / 60;
+    for (const [id, callback] of [...t.frames]) {
+      t.frames.delete(id);
+      callback(stamp);
+    }
+  };
+  t.scrollTo(0.3);
+  for (let k = 0; k < 30; k += 1) tick();
+  await new Promise((resolve) => setTimeout(resolve, 300));
+  // A jump (snapped, no follow-through) far enough that the welds take
+  // several frames to catch up; each frame then comes after the calm delay.
+  drawn.length = 0;
+  t.scrollTo(0.52);
+  for (let k = 0; k < 40 && (t.frames.size || !drawn.some((d) => d.calm)); k += 1) {
+    await new Promise((resolve) => setTimeout(resolve, 290));
+    tick();
+  }
+  const here = drawn.filter((d) => d.progress === drawn[0].progress);
+  assert.equal(here.length, drawn.length, "one progress throughout");
+  const moving = here.filter((d) => !d.calm).length;
+  assert.ok(moving >= 3, `the jump caught up over several frames (${moving})`);
+  const firstCalm = here.findIndex((d) => d.calm);
+  assert.ok(firstCalm > 0, "the calm frame came once caught up");
+  assert.ok(
+    here.slice(firstCalm).every((d) => d.calm),
+    `no moving frame after the calm one: ${here.map((d) => (d.calm ? "C" : "m")).join("")}`,
+  );
+  assert.equal(t.frames.size, 0, "settled");
+  dispose();
+});
+
+test("the field's layer is made in idle time once the preparation is done, never inside a live frame, and remade in idle time after a hidden tab (sweep 2, F27)", async () => {
+  // Inside the first live frame its programs, link and buffers cost 84–260
+  // ms on a throttled phone, and tripped the 2D governor.
+  const t = environment({ webgl: true });
+  const drawn = [];
+  t.env.__rexonanceDrawMs = (ms, progress) => drawn.push(progress);
+  const dispose = mountRexonanceAssembly(t.runway, engineConfig, t.env);
+  const links = () => t.glCalls.filter(([, name]) => name === "linkProgram").length;
+  t.observers[1].callback([{ isIntersecting: true }]);
+  await until(() => t.fieldCanvases.length === 2, "the layer, made after the preparation");
+  assert.equal(t.runway.dataset.rznLoad, "ready");
+  assert.notEqual(t.runway.dataset.rznState, "live", "far from the scene");
+  assert.equal(drawn.length, 0, "before any frame");
+  assert.equal(links(), 2, "back and front");
+  // Near: live, and its frames build nothing.
+  t.observers[0].callback([{ isIntersecting: true }]);
+  await until(() => t.runway.dataset.rznState === "live" && t.frames.size > 0, "scene live");
+  await new Promise((resolve) => setTimeout(resolve, 10));
+  t.flush();
+  t.scrollTo(0.3);
+  t.scrollTo(0.45);
+  assert.ok(drawn.length >= 2, "frames drawn");
+  assert.equal(links(), 2, "no program built inside a frame");
+  assert.ok(
+    t.glCalls.some(([, name]) => name === "drawElements"),
+    "and the layer draws",
+  );
+  // Hidden: released. Back, away from the scene: remade in idle time.
+  t.runway.ownerDocument.hidden = true;
+  t.listeners.get("document:visibilitychange")();
+  assert.ok(
+    t.fieldCanvases.every((canvas) => canvas.removed),
+    "released while hidden",
+  );
+  t.observers[0].callback([{ isIntersecting: false }]);
+  t.runway.ownerDocument.hidden = false;
+  drawn.length = 0;
+  t.listeners.get("document:visibilitychange")();
+  await until(() => links() === 4, "remade in idle time");
+  assert.equal(drawn.length, 0, "with no frame drawn");
+  assert.equal(t.fieldCanvases.length, 4);
+  dispose();
+  assert.ok(
+    t.fieldCanvases.every((canvas) => canvas.removed),
+    "released on dispose",
+  );
+});
+
+test("the field's density follows the governor a step a frame, and a calm frame draws it whole (sweep 2, F26)", async () => {
+  // It switched between 12,000 and 6,000 particles in one frame (the field
+  // is additive: its brightness halved), and a resting frame kept whatever
+  // the last moving frame drew, so it depended on the direction of approach.
+  const t = environment({ webgl: true });
+  const dispose = mountRexonanceAssembly(t.runway, engineConfig, t.env);
+  t.observers[1].callback([{ isIntersecting: true }]);
+  await until(() => t.fieldCanvases.length === 2, "the layer");
+  t.observers[0].callback([{ isIntersecting: true }]);
+  await until(() => t.runway.dataset.rznState === "live" && t.frames.size > 0, "scene live");
+  await new Promise((resolve) => setTimeout(resolve, 10));
+  t.flush();
+  const back = t.fieldCanvases[0].testCanvasId;
+  const drawsOf = () =>
+    t.glCalls.filter(([id, name]) => id === back && name === "drawElements").map((call) => call[3]);
+  t.scrollTo(0.4);
+  await new Promise((resolve) => setTimeout(resolve, 300));
+  const whole = drawsOf().at(-1);
+  assert.ok(whole > 0, "the field draws");
+  // Slow frames from here on (each clock read 10 ms on): the governor trips.
+  let now = 1000;
+  t.env.performance = { now: () => (now += 10) };
+  t.glCalls.length = 0;
+  for (let k = 1; k <= 16; k += 1) t.scrollTo(0.4 + k * 0.004);
+  const counts = drawsOf();
+  assert.ok(counts.length >= 12, `frames drawn (${counts.length})`);
+  assert.equal(Math.min(...counts), whole / 2, "down to half the field");
+  for (let k = 1; k < counts.length; k += 1)
+    assert.ok(
+      Math.abs(counts[k] - counts[k - 1]) <= Math.ceil(whole / 20 / 6) * 6,
+      `a step a frame, never a jump: ${counts.join(",")}`,
+    );
+  // At rest the calm frame draws it whole, however it was reached.
+  for (let k = 0; k < 200 && t.frames.size; k += 1) t.flush();
+  assert.equal(drawsOf().at(-1), whole / 2, "settled at half while moving");
+  t.glCalls.length = 0;
+  await new Promise((resolve) => setTimeout(resolve, 320));
+  assert.equal(drawsOf().at(-1), whole, "the calm frame is whole");
+  dispose();
+});
+
 test("3.5 screens ahead preparation is idle-only, does not activate layout, and cancels on exit", async () => {
   const t = environment({ idleHeld: true });
   const dispose = mountRexonanceAssembly(t.runway, engineConfig, t.env);
@@ -1228,7 +1505,10 @@ test("a far jump never paints the finished still first: the stand-in is the moti
   t.observers[0].callback([far]);
   assert.equal(t.runway.dataset.rznState, "loading");
   assert.equal(t.percent.textContent, "000");
-  assert.equal(t.counter.textContent, "ONLINE", "the count is the live frame's to write");
+  // The count is the live frame's to write; until then the nanites stand by
+  // (sweep 2, F21: never '000 % NANITES ONLINE' beside 01 構成情報を読み込み).
+  assert.equal(t.counter.textContent, "STANDBY", "the count is the live frame's to write");
+  assert.equal(t.counter.replaced, 0, "the read-out rewrites its text node");
   // The warm preparation far away changes nothing more.
   const warm = t.observers.find((o) => o.options.rootMargin === "3203px 0px");
   warm.callback([{ isIntersecting: true }]);
@@ -1265,6 +1545,117 @@ test("a far jump never paints the finished still first: the stand-in is the moti
     assert.equal(q.percent.textContent, "100", JSON.stringify(options));
     disposeQ();
   }
+});
+
+// A media query list as Chromium keeps it: reading `.matches` refreshes its
+// cached result, so a change read before the next style recalc never fires
+// the list's change event (sweep 2, F24).
+function chromiumMedia(t, query, initial = false) {
+  let value = initial;
+  let pending = false;
+  const key = `media ${query}:change`;
+  return {
+    list: {
+      get matches() {
+        pending = false;
+        return value;
+      },
+      addEventListener(type, callback) {
+        t.listeners.set(`media ${query}:${type}`, callback);
+      },
+      removeEventListener(type, callback) {
+        if (t.listeners.get(`media ${query}:${type}`) === callback)
+          t.listeners.delete(`media ${query}:${type}`);
+      },
+    },
+    set(next) {
+      value = next;
+      pending = true;
+    },
+    // The style recalc's notice: only for a change nobody has read yet.
+    notify() {
+      if (!pending) return;
+      pending = false;
+      t.listeners.get(key)?.({ matches: value });
+    },
+  };
+}
+
+test("Reduce Motion or forced colours turned on while the scene prepares bring the still back (sweep 2, F24)", async () => {
+  for (const which of ["reduce", "forced-colors"]) {
+    const t = environment({ idleHeld: true });
+    const reduce = chromiumMedia(t, "(prefers-reduced-motion: reduce)");
+    const forced = chromiumMedia(t, "(forced-colors: active)");
+    const base = t.env.matchMedia;
+    t.env.matchMedia = (query) =>
+      query.includes("reduce")
+        ? reduce.list
+        : query.includes("forced-colors")
+          ? forced.list
+          : base(query);
+    const dispose = mountRexonanceAssembly(t.runway, engineConfig, t.env);
+    t.observers[0].callback([{ isIntersecting: true }]);
+    assert.equal(t.runway.dataset.rznState, "loading");
+    assert.equal(t.runway.dataset.rznLoad, "loading", which);
+    // The preference changes mid-preparation; the scene's idle slices (and
+    // their watchdog) keep running before the browser's notice.
+    (which === "reduce" ? reduce : forced).set(true);
+    const runIdle = () => {
+      for (const [id, callback] of [...t.idle]) {
+        t.idle.delete(id);
+        callback({ timeRemaining: () => 40, didTimeout: false });
+      }
+    };
+    for (let k = 0; k < 20; k += 1) {
+      runIdle();
+      await new Promise((resolve) => setTimeout(resolve, 15));
+    }
+    (which === "reduce" ? reduce : forced).notify();
+    await new Promise((resolve) => setTimeout(resolve, 5));
+    assert.equal(t.runway.dataset.rznLoad, "static", `${which}: the still tier's status`);
+    assert.equal(t.runway.dataset.rznState, undefined, `${which}: the finished still`);
+    assert.equal(t.percent.textContent, "100", which);
+    assert.equal(t.counter.textContent, "ONLINE", which);
+    // Turned off again: the stand-in and its status come back.
+    (which === "reduce" ? reduce : forced).set(false);
+    (which === "reduce" ? reduce : forced).notify();
+    assert.equal(t.runway.dataset.rznState, "loading", which);
+    assert.notEqual(t.runway.dataset.rznLoad, "static", which);
+    dispose();
+    assert.equal([...t.listeners.keys()].length, 0, [...t.listeners.keys()].join());
+  }
+  // The engine never polls the lists it listens to.
+  const engine = read("src/lib/rexonance-resonance.js");
+  assert.doesNotMatch(engine, /\b(?:reduced|forcedColors|finePointer)\.matches\b(?!\))/);
+});
+
+test("after Reduce Motion or economy is turned off above the runway, the status is the waiting one, not the still's (sweep 2, F82)", () => {
+  const far = { isIntersecting: false, boundingClientRect: { top: 5200, bottom: 7900 } };
+  const t = environment({ idleHeld: true });
+  const reduce = chromiumMedia(t, "(prefers-reduced-motion: reduce)");
+  const base = t.env.matchMedia;
+  t.env.matchMedia = (query) => (query.includes("reduce") ? reduce.list : base(query));
+  const dispose = mountRexonanceAssembly(t.runway, engineConfig, t.env);
+  t.observers[0].callback([far]);
+  assert.equal(t.runway.dataset.rznLoad, "waiting");
+  assert.equal(t.runway.dataset.rznState, "loading");
+  reduce.set(true);
+  reduce.notify();
+  assert.equal(t.runway.dataset.rznLoad, "static");
+  assert.equal(t.runway.dataset.rznState, undefined);
+  reduce.set(false);
+  reduce.notify();
+  assert.equal(t.runway.dataset.rznState, "loading", "the stand-in is back");
+  assert.equal(t.runway.dataset.rznLoad, "waiting", "and so is the waiting status");
+  assert.equal(t.counter.textContent, "STANDBY");
+  t.html.setAttribute("data-world-effects", "economy");
+  t.listeners.get("document:visibilitychange")();
+  assert.equal(t.runway.dataset.rznLoad, "static");
+  t.html.removeAttribute("data-world-effects");
+  t.listeners.get("document:visibilitychange")();
+  assert.equal(t.runway.dataset.rznLoad, "waiting", "economy off: waiting");
+  assert.equal(t.runway.dataset.rznState, "loading");
+  dispose();
 });
 
 test("pagehide cancels queued preparation and pageshow safely resumes it", async () => {
@@ -2164,7 +2555,8 @@ test("the nanite stage plan: paint order, the shared cells, and timings before .
       assert.equal(nano.pieceOf[parent], nano.pieceOf[i]);
     }
     assert.ok(
-      nano.birth[i] <= plan.tiles[i].t0 + 1e-9 && nano.birth[i] >= 0.070575 - 1e-9,
+      nano.birth[i] <= plan.tiles[i].t0 + 1e-9 &&
+        nano.birth[i] >= scrollFlameAt(NANITE_FIRE_PHASES.materialStart) - 1e-9,
       "metal enters the trailing burst before its unchanged flight/landing window",
     );
   }
@@ -2869,17 +3261,44 @@ test("a resting frame is a function of the progress alone: the same moment draws
     const liveB = frameAt(q, [[q + 0.02, true]], false);
     assert.deepEqual(liveB, liveA, `${q}: live frames after different scrubs`);
   }
+  // The lock flash is a transient (sweep 2, F85): a resting frame never
+  // holds its weld-bright star, moving frames draw it. (The spark's dimmer
+  // frames, 32 and 64 px along its row, are the flash's alone.)
+  const flashes = (log) =>
+    log.filter((call) => /^drawImage\(cells,(320|352),192,32,32,/.test(call)).length;
+  const every = (q, calm) => {
+    const { log, context } = record();
+    swarm.frame(q, calm ? 0 : 0.004, calm, 2, false);
+    swarm.view(2, 0, 0);
+    for (const pass of ["backPass", "midPass", "flightPass", "goldPass", "frontPass", "freePass"])
+      swarm[pass](context);
+    swarm.endFrame();
+    return log;
+  };
+  let moving = 0;
+  for (let k = 20; k <= 86; k += 1) {
+    const q = k / 100;
+    moving += flashes(every(q, false));
+    assert.equal(flashes(every(q, true)), 0, `${q}: a resting frame holds no lock flash`);
+  }
+  assert.ok(moving > 0, "moving frames draw the lock flash");
 });
 
 test("the raw metal and the molten gold are made in bands of rows, byte for byte the kit's pixel jobs, however sliced (review 2026-10-16: idle slices ≤ 6 ms)", async () => {
   // A whole-figure read and its canvases in one idle slice cost 7–12 ms on a
-  // phone; the scene now reads a band of rows a slice. The bytes are the
+  // phone; the scene now shades a band of rows a slice. The bytes are the
   // kit's own (createNaniteMetalJob / createNaniteMoltenJob).
+  // Sweep 2 (F02): each readback is a native round trip (a GPU sync, 14–100
+  // ms each while the reader scrolled, whatever its size): one read per
+  // source and an upload per strip of rows, never one a band (2,080 reads
+  // had stalled the scroll above the runway for 50 s).
   const { createAssemblyLayerJob } = await import("../src/lib/rexonance-assembly-nanites.js");
   const { createNaniteMetalJob, createNaniteMoltenJob } =
     await import("../src/lib/rexonance-unlit.js");
+  const STRIP = 104;
   // A pixel-exact fake canvas (unscaled copies only).
   const reads = [];
+  const puts = [];
   const document = {
     createElement() {
       const canvas = { width: 0, height: 0, data: null };
@@ -2919,6 +3338,7 @@ test("the raw metal and the molten gold are made in bands of rows, byte for byte
           return { width: w, height: h, data: new Uint8ClampedArray(w * h * 4) };
         },
         putImageData(image, dx, dy, x0 = 0, y0 = 0, w = image.width, h = image.height) {
+          puts.push(h);
           copy(
             image.data,
             image.width,
@@ -2963,8 +3383,22 @@ test("the raw metal and the molten gold are made in bands of rows, byte for byte
   const bytes = (canvas) => Array.from(canvas.getContext("2d").pixels());
   const kitMetal = run(createNaniteMetalJob(source, 0, 0, W, H, document, { silhouette: true }), 1);
   const kitMolten = run(createNaniteMoltenJob(source, 0, 0, W, H, document, { mask }), 1);
+  const strips = Math.ceil(H / STRIP);
+  // The native round trips: a read per source, an upload per strip.
+  const roundTrips = (label, copies, outputs) => {
+    assert.equal(reads.length, copies, `${label}: one readback per source (${reads})`);
+    assert.ok(
+      puts.every((rows) => rows <= STRIP),
+      `${label}: each upload is a strip at most (${puts})`,
+    );
+    assert.ok(
+      puts.length <= outputs * strips + outputs,
+      `${label}: ${puts.length} uploads for ${outputs} outputs of ${strips} strips`,
+    );
+    reads.length = puts.length = 0;
+  };
   for (const slice of [0.5, 3, 100]) {
-    reads.length = 0;
+    reads.length = puts.length = 0;
     const metal = run(
       createAssemblyLayerJob({
         source,
@@ -2976,10 +3410,7 @@ test("the raw metal and the molten gold are made in bands of rows, byte for byte
       }),
       slice,
     );
-    assert.ok(
-      reads.length > 0 && reads.every((rows) => rows <= 4),
-      "native readbacks: two rows plus rim halo only",
-    );
+    roundTrips(`metal, slice ${slice}`, 1, 2);
     assert.deepEqual(bytes(metal.metal), bytes(kitMetal.metal), `metal, slice ${slice}`);
     assert.deepEqual(
       bytes(metal.silhouette),
@@ -2990,7 +3421,46 @@ test("the raw metal and the molten gold are made in bands of rows, byte for byte
       createAssemblyLayerJob({ source, width: W, height: H, kind: "molten", mask, document }),
       slice,
     );
+    roundTrips(`molten, slice ${slice}`, 2, 1);
     assert.deepEqual(bytes(molten.molten), bytes(kitMolten.molten), `molten, slice ${slice}`);
+    const plain = run(
+      createAssemblyLayerJob({ source, width: W, height: H, kind: "metal", document }),
+      slice,
+    );
+    roundTrips(`metal alone, slice ${slice}`, 1, 1);
+    assert.deepEqual(bytes(plain.metal), bytes(kitMetal.metal), `metal alone, slice ${slice}`);
+  }
+  // A figure several strips tall keeps the same bounds (the real figure is
+  // 1040 rows: one read, not 520), with the rim exact across the strips.
+  {
+    const tallH = STRIP * 3 + 7;
+    const tall = { width: W, height: tallH, data: new Uint8ClampedArray(W * tallH * 4) };
+    for (let i = 0; i < tall.data.length; i += 1) tall.data[i] = data[i % data.length];
+    const kitTall = run(
+      createNaniteMetalJob(tall, 0, 0, W, tallH, document, { silhouette: true }),
+      1,
+    );
+    reads.length = puts.length = 0;
+    const job = run(
+      createAssemblyLayerJob({
+        source: tall,
+        width: W,
+        height: tallH,
+        kind: "metal",
+        silhouette: true,
+        document,
+      }),
+      0.5,
+    );
+    assert.equal(reads.length, 1, "one read of the source");
+    // (Metal and silhouette, a strip each: three whole strips and the rest.)
+    assert.deepEqual(
+      puts,
+      [STRIP, STRIP, STRIP, STRIP, STRIP, STRIP, 7, 7],
+      "an upload per strip of each output",
+    );
+    assert.deepEqual(bytes(job.metal), bytes(kitTall.metal), "tall metal");
+    assert.deepEqual(bytes(job.silhouette), bytes(kitTall.silhouette), "tall silhouette");
   }
   // And the scene uses them, not the whole-figure jobs.
   const engine = read("src/lib/rexonance-resonance.js");

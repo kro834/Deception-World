@@ -14,9 +14,9 @@ import {
   prepareBodyFlame,
   warmNaniteFlame,
 } from "./rexonance-flame.js";
-import { NANITE_FIRE_PHASES, naniteFlameEnvelope } from "./rexonance-ignition.js";
+import { naniteFlameEnvelope } from "./rexonance-ignition.js";
 import { releasePendingImage } from "./release-pending-images.js";
-import { REXONANCE_SCROLL_FLAME, scrollFlameAt } from "./rexonance-field/field-clock.js";
+import { FIELD_WAKE, REXONANCE_SCROLL_FLAME, scrollFlameAt } from "./rexonance-field/field-clock.js";
 import {
   createReactorLayers,
   deferReactorPieces,
@@ -110,11 +110,20 @@ export function mountRexonanceResonance(page, environment = window) {
   );
   const clock = () => environment.performance.now();
   let disposed = false;
+  // The preferences as their change events last reported them (sweep 2,
+  // F24): reading a listened list's `.matches` refreshes Chromium's cached
+  // result, and a change read that way before the next style recalc never
+  // fires its event. Only the listeners read the lists after this.
+  const mediaNow = (list, event) =>
+    typeof event?.matches === "boolean" ? event.matches : Boolean(list.matches);
+  let reducedNow = mediaNow(reduced);
+  let fineNow = mediaNow(finePointer);
+  let forcedNow = mediaNow(forcedColors);
 
   const motionAllowed = () => {
     const constrained =
       Boolean(connection?.saveData) || /^(slow-)?2g$/.test(connection?.effectiveType || "");
-    return !reduced.matches && !constrained && html.dataset.worldEffects !== "economy";
+    return !reducedNow && !constrained && html.dataset.worldEffects !== "economy";
   };
 
   /* ---------------- transient attributes ---------------- */
@@ -274,7 +283,7 @@ export function mountRexonanceResonance(page, environment = window) {
   };
   const arm = () => {
     // Forced colours paint the figures' own text; the counters never show.
-    if (forcedColors.matches) return;
+    if (forcedNow) return;
     armedMode = true;
     for (const figure of figures) armFigure(figure);
   };
@@ -454,12 +463,21 @@ export function mountRexonanceResonance(page, environment = window) {
       arrive();
       [...queued].forEach(begin);
     }
-    if (finePointer.matches) pointerStart();
+    if (fineNow) pointerStart();
     else pointerStop();
   };
+  const onReduced = (event) => {
+    reducedNow = mediaNow(reduced, event);
+    sync();
+  };
+  const onFinePointer = (event) => {
+    fineNow = mediaNow(finePointer, event);
+    sync();
+  };
   // Forced colours switched on: hand the figures back, as for reduced motion.
-  const onForcedColors = () => {
-    if (forcedColors.matches) disarm();
+  const onForcedColors = (event) => {
+    forcedNow = mediaNow(forcedColors, event);
+    if (forcedNow) disarm();
     sync();
   };
   const onPageHide = () => {
@@ -471,8 +489,8 @@ export function mountRexonanceResonance(page, environment = window) {
     attributes: true,
     attributeFilter: ["data-world-effects", "data-loading"],
   });
-  reduced.addEventListener?.("change", sync);
-  finePointer.addEventListener?.("change", sync);
+  reduced.addEventListener?.("change", onReduced);
+  finePointer.addEventListener?.("change", onFinePointer);
   forcedColors.addEventListener?.("change", onForcedColors);
   connection?.addEventListener?.("change", sync);
   document.addEventListener("visibilitychange", sync);
@@ -496,8 +514,8 @@ export function mountRexonanceResonance(page, environment = window) {
     figureObserver?.disconnect();
     formObserver?.disconnect();
     sceneObserver?.disconnect();
-    reduced.removeEventListener?.("change", sync);
-    finePointer.removeEventListener?.("change", sync);
+    reduced.removeEventListener?.("change", onReduced);
+    finePointer.removeEventListener?.("change", onFinePointer);
     forcedColors.removeEventListener?.("change", onForcedColors);
     connection?.removeEventListener?.("change", sync);
     document.removeEventListener("visibilitychange", sync);
@@ -527,8 +545,12 @@ export function mountRexonanceResonance(page, environment = window) {
    follows the module's piece list whatever its granularity (only each
    piece's id, group, box and seat are read). Over the bare undersuit:
 
-   - FAR UP！ a scan wakes the undersuit, top to bottom;
-   - RIDER！ every tile hangs in the air round the body as a nanite mote;
+   - FAR UP！ a scan wakes the undersuit, top to bottom, as the fire
+     kindles at its soles and climbs it (REXONANCE_SCROLL_FLAME,
+     rexonance-field/field-clock.js);
+   - RIDER！ the fire covers the undersuit whole, bursts, and its
+     fragments cool into the nanites (the field's particles and every
+     tile, hanging in the air round the body) before the first DEUS！;
    - SA-GA！DEUS！ ×4: on each DEUS！ one group lands (legs, arms, chest
      and shoulders, waist, as the call snaps them), piece after piece,
      each piece growing out of its seam: a mote flies in, swells into a
@@ -586,6 +608,12 @@ const WELDS_PER_FRAME = 160;
 const GOLD_PER_FRAME = 900;
 // The scroll has rested this long: the transient squares are cleared.
 const CALM_MS = 260;
+// The nanite count's word while the scene prepares (the stand-in's HUD).
+export const ASSEMBLY_LOADING_COUNT = "STANDBY";
+const LOADING_COUNT = ASSEMBLY_LOADING_COUNT;
+// The field's density steps between the governor's half and whole: one a
+// frame, so a change takes ten frames, never one.
+const FIELD_LEVELS = 10;
 // The gold's heat: incoming motes, then a locked cell cooling, then the glint.
 const GOLD_HEAT = [
   ["rgb(255 246 216)", 0.9],
@@ -914,6 +942,10 @@ function* assemblyPlanSteps({
       helmReach = Math.max(helmReach, Math.hypot(item.cx - eyeX, item.cy - eyeY));
   const partDone = ASSEMBLY_PARTS.map(() => 0);
   const centroids = ASSEMBLY_PARTS.map(() => [0, 0, 0]);
+  // Each beat's last tile to land: its lock strikes where that tile's plate
+  // seats (sweep 2, F30: a two-sided group's centroid is the gap on the
+  // body's midline, between the shins, on no plate).
+  const lastTile = ASSEMBLY_PARTS.map(() => null);
   for (const [index, item] of tiles.entries()) {
     if (index && index % 128 === 0) yield;
     const beat = item.owner
@@ -976,7 +1008,10 @@ function* assemblyPlanSteps({
     item.depth = 0.35 + plane * 0.65;
     item.curveX = (item.cx < width / 2 ? -1 : 1) * height * (0.025 + plane * 0.035);
     item.curveY = -height * (0.018 + plane * 0.018);
-    partDone[beat] = Math.max(partDone[beat], item.t1);
+    if (item.t1 >= partDone[beat]) {
+      partDone[beat] = item.t1;
+      lastTile[beat] = item;
+    }
     centroids[beat][0] += item.cx;
     centroids[beat][1] += item.cy;
     centroids[beat][2] += 1;
@@ -1002,13 +1037,19 @@ function* assemblyPlanSteps({
     .filter((piece) => windows.has(piece.id) && !piece.preset)
     .map((piece) => ({ x: piece.x, y: piece.y, w: piece.w, h: piece.h, ...windows.get(piece.id) }))
     .sort((a, b) => a.from - b.from);
+  const means = centroids.map(([x, y, n]) => (n ? [x / n, y / n] : [coreX, coreY]));
+  const seats = new Map(pieces.map((piece) => [piece.id, piece.seat]));
   return {
     tiles,
     cols,
     rows,
     tile,
     partDone,
-    centroids: centroids.map(([x, y, n]) => (n ? [x / n, y / n] : [coreX, coreY])),
+    centroids: means,
+    anchors: lastTile.map((item, beat) => {
+      const seat = item && seats.get(item.pieceId);
+      return seat ? [seat[0], seat[1]] : item ? [item.cx, item.cy] : means[beat];
+    }),
     frames,
   };
 }
@@ -1472,6 +1513,13 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   let fieldView = null;
   let fieldCss = null;
   let fieldProgress = -1;
+  // The field's density (sweep 2, F26): eased a twentieth a frame toward the
+  // governor's (half its particles while the far band draws as rects), so
+  // the additive field never halves or doubles in one frame; whole on a
+  // calm frame, so a resting frame never depends on how it was reached.
+  // `fieldLevel` 0..FIELD_LEVELS, the density 0.5 + 0.5 × level / levels.
+  let fieldLevel = FIELD_LEVELS;
+  let fieldDrawnLevel = -1;
   // The swarm's module and kit, loaded with the pictures (round 3: the still
   // tiers — reduced motion, economy, Save-Data — never mount the scene, so
   // they never download them). `config.nanites` is the kit or its loader.
@@ -1502,15 +1550,20 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     formComplete: null,
   };
 
+  // The preferences as their change events last reported them, never polled
+  // (sweep 2, F24): motionAllowed() runs on every idle slice, and a read of
+  // a listened list's `.matches` refreshes Chromium's cached result, so a
+  // change landing before the next style recalc was consumed by the poll,
+  // its event never fired, and the runway kept the loading stand-in for
+  // good under Reduce Motion or forced colours.
+  const mediaNow = (list, event) =>
+    typeof event?.matches === "boolean" ? event.matches : Boolean(list.matches);
+  let reducedNow = mediaNow(reduced);
+  let forcedNow = mediaNow(forcedColors);
   const motionAllowed = () => {
     const constrained =
       Boolean(connection?.saveData) || /^(slow-)?2g$/.test(connection?.effectiveType || "");
-    return (
-      !reduced.matches &&
-      !forcedColors.matches &&
-      !constrained &&
-      html.dataset.worldEffects !== "economy"
-    );
+    return !reducedNow && !forcedNow && !constrained && html.dataset.worldEffects !== "economy";
   };
   runway.dataset.rznLoad = motionAllowed() ? "waiting" : "static";
 
@@ -2921,17 +2974,24 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   };
 
   // `calm`: the scroll has rested: the frame is a pure function of the
-  // progress, without the transient effects (comets, sparks, links, recoil,
-  // seams, shock rings, spall, pulses, lacquer, droplets, beams, the glint,
-  // the scan sweep and the shake).
+  // progress (the fire's texture aside, which keeps the wall clock),
+  // without the transient effects (comets, sparks, links, recoil, seams,
+  // shock rings, spall, pulses, lacquer, droplets, beams, the glint, the
+  // scan sweep and the shake).
   let backRects = false;
   let lastDrawMs = 0;
   let quickFrames = 0;
   const draw = (progress, calm = false, dq = 0) => {
+    const B = ASSEMBLY_BEATS;
+    // The field's layer, when a frame needs it before the preparation (or
+    // the idle time after a hidden tab) has made it: outside the frame's
+    // measure, so its programs and buffers never trip the governor (sweep
+    // 2, F27).
+    if (fieldLib && fieldScore && fieldTake && !field && !fieldFailed && progress < B.complete)
+      makeField();
     const started = environment.performance?.now?.() ?? 0;
     const context = canvas.getContext("2d");
     const { figure, undersuit } = images;
-    const B = ASSEMBLY_BEATS;
     behind = false;
     context.setTransform(1, 0, 0, 1, 0, 0);
     context.globalAlpha = 1;
@@ -2950,8 +3010,6 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     let vs = view.scale;
     let vx = view.x;
     let vy = view.y;
-    if (fieldLib && fieldScore && fieldTake && !field && !fieldFailed && progress < B.complete)
-      makeField();
     const fielding = Boolean(field && fieldScore && fieldTake && progress < B.complete);
     if (fielding) {
       fieldLib.fieldState(fieldScore, progress, fieldState);
@@ -2973,7 +3031,10 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
 
     const flamePhase = (progress - NANITE_FLAME_START) / NANITE_FLAME_SPAN;
     const flame = naniteFlameEnvelope(flamePhase);
-    const flameClock = calm ? progress * 60 : (environment.performance?.now?.() ?? 0) / 1000;
+    // The fire's texture runs on the wall clock in every frame, the calm
+    // one included: a clock of its own (once progress × 60) re-posed the
+    // whole flame 260 ms into each rest and again when the scroll resumed.
+    const flameClock = (environment.performance?.now?.() ?? 0) / 1000;
 
     // The cocoon's far side, behind the body.
     if (nanites) nanites.backPass(context);
@@ -3476,15 +3537,19 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     // (After the governor's measure: the layer's GPU submit must not push
     // the 2D band into its rect fallback.)
     if (fielding) {
-      if (fieldProgress !== progress) {
+      if (calm) fieldLevel = FIELD_LEVELS;
+      else if (backRects && fieldLevel > 0) fieldLevel -= 1;
+      else if (!backRects && fieldLevel < FIELD_LEVELS) fieldLevel += 1;
+      if (fieldProgress !== progress || fieldDrawnLevel !== fieldLevel) {
         fieldProgress = progress;
+        fieldDrawnLevel = fieldLevel;
         field.render(
           fieldState,
           vs / view.ratio,
           vx / view.ratio,
           vy / view.ratio,
           H,
-          backRects && !calm ? 0.5 : 1,
+          0.5 + (0.5 * fieldLevel) / FIELD_LEVELS,
         );
       }
     } else if (field && fieldProgress >= 0) {
@@ -3707,6 +3772,19 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   let lastTarget = -1;
   let lastStamp = 0;
   let force = false;
+  // The fire at rest (review of 2ce6712): a fire that sits still is the
+  // 固体 look the owner rejected, so while it burns at the resting progress
+  // the moment is redrawn every frame on the wall clock, with the arguments
+  // it was last drawn with — the same suit-up moment, only the flame (and
+  // the reactor's light) flowing — until the scroll moves on, the fire is
+  // spent, or the scene stops being shown. Touch screens redraw it at
+  // about 30 fps.
+  let restCalm = false;
+  let restStep = 0;
+  let restStamp = -Infinity;
+  const burningAt = (q) => naniteFlameEnvelope((q - NANITE_FLAME_START) / NANITE_FLAME_SPAN) > 0;
+  const REST_FRAME_MS = 1000 / 60;
+  const REST_TOUCH_FRAME_MS = 1000 / 31;
   const render = (stamp) => {
     frame = 0;
     if (disposed || !live || document.hidden) return;
@@ -3729,7 +3807,18 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     let shown = progress;
     if (lastProgress >= 0) {
       const settledHere = lastProgress === lastTarget;
-      if (!force && settledHere && Math.abs(progress - lastProgress) < 0.0005) return;
+      if (!force && settledHere && Math.abs(progress - lastProgress) < 0.0005) {
+        if (!burningAt(lastProgress)) return;
+        // At rest the fire keeps flowing (the HUD, the governor and the
+        // calm timer stay as the last moving frame left them).
+        const at = typeof stamp === "number" ? stamp : NaN;
+        if (!(at - restStamp < (coarse.matches ? REST_TOUCH_FRAME_MS : REST_FRAME_MS) - 2)) {
+          restStamp = Number.isFinite(at) ? at : -Infinity;
+          draw(lastProgress, restCalm, restStep);
+        }
+        schedule();
+        return;
+      }
       const gap = progress - lastProgress;
       if (
         Math.abs(gap) <= 0.06 &&
@@ -3760,6 +3849,9 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       if (quickFrames >= 30) backRects = false;
     } else quickFrames = 0;
     draw(shown, false, step);
+    restCalm = false;
+    restStep = step;
+    restStamp = typeof stamp === "number" && Number.isFinite(stamp) ? stamp : -Infinity;
     updateHud(progress);
     // The first live frame is on the canvas: the still under it goes.
     if (runway.dataset.rznArming) delete runway.dataset.rznArming;
@@ -3769,6 +3861,18 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       schedule();
       return;
     }
+    // The welds or the gold still catching up at the resting progress: the
+    // next frame follows on, and the calm frame waits until they have
+    // converged (sweep 2, F86: armed beside the catch-up, a calm frame that
+    // landed between two slow frames alternated with them, the impact's
+    // rays coming and going at rest).
+    if (behind) {
+      force = true;
+      schedule();
+      return;
+    }
+    // Resting with the fire alive: keep it flowing.
+    if (burningAt(shown)) schedule();
     // Once the scroll rests, redraw the moment without its transient effects.
     calmTimer = environment.setTimeout(() => {
       calmTimer = 0;
@@ -3788,12 +3892,13 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         backRects = false;
         quickFrames = 0;
         draw(lastProgress, true);
+        restCalm = true;
+        restStep = 0;
+        // The calm frame continues the fire's wall clock (never a pose of
+        // its own), and the fire flows on from it.
+        if (burningAt(lastProgress)) schedule();
       }
     }, CALM_MS);
-    if (behind) {
-      force = true;
-      schedule();
-    }
   };
   const schedule = () => {
     if (!frame && live && near && pageActive && !document.hidden)
@@ -3879,6 +3984,12 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       if (index === 0 && chips.length === 1) setFlag(chips[0], "data-on", true);
     });
     if (percent) writeText(percent, "000");
+    // The count is the live frame's to write (its first writes 0 / N); until
+    // then the nanites stand by, never the finished suit's ONLINE beside
+    // 000 % (sweep 2, F21). restHud() gives the markup's word back.
+    if (counter) writeText(counter, LOADING_COUNT);
+    hud.count = "";
+    hud.landedCount = -1;
   };
   // Round 4 (patch B): under the motion gate the undersuit stand-in is the
   // scene's default picture, set from the near observer's first notice (the
@@ -3909,6 +4020,8 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       if (!lock) continue;
       const [from] = beatWindow(beat);
       const [x, y] = plan.centroids[beat];
+      // (Its impulse on the plate that locks it, not on the group's mean.)
+      const [ix, iy] = plan.anchors?.[beat] ?? [x, y];
       let x0 = Infinity;
       let y0 = Infinity;
       let x1 = -Infinity;
@@ -3922,16 +4035,27 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       }
       const sx = x1 > x0 ? Math.max(0, (x1 - x0) / 2 - 40) : 0;
       const sy = y1 > y0 ? Math.max(0, (y1 - y0) / 2 - 30) : 0;
-      groups.push({ x, y, sx, sy, from: Math.min(from, lock - 0.01), lock, strength: FIELD_STRENGTH[beat] ?? 0.7 });
+      groups.push({
+        x,
+        y,
+        sx,
+        sy,
+        from: Math.min(from, lock - 0.01),
+        lock,
+        strength: FIELD_STRENGTH[beat] ?? 0.7,
+        ix,
+        iy,
+      });
       last = Math.max(last, lock);
     }
     if (!groups.length) return null;
     groups.sort((a, b) => a.lock - b.lock);
     try {
       return fieldLib.fieldScore({
-        // The wake is the burst (owner, 2026-10-21): from the detonation
-        // to the first plates, the fragments cool and take their lines.
-        wake: [scrollFlameAt(NANITE_FIRE_PHASES.burstStart), B.motes[1]],
+        // The wake is the burst (owner, 2026-10-21): the field's one window
+        // of the fire's phase (the detonation, every fragment's cooling into
+        // a chip, the last chip's sweep onto its line) on the runway.
+        wake: [scrollFlameAt(FIELD_WAKE[0]), scrollFlameAt(FIELD_WAKE[1])],
         groups,
         collapse: [Math.min(last, B.seal[0] - 0.006), B.seal[0]],
         detonate: [B.light[0], B.complete],
@@ -3947,9 +4071,10 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       return null;
     }
   };
-  // The field's layer, made on the first live frame that wants it: its
-  // canvases on the scene canvas's box, the back one under it and the front
-  // one over it. Null where WebGL is not to be had (the scene is unchanged).
+  // The field's layer, made in idle time (fieldIdle) or by the first live
+  // frame that wants it: its canvases on the scene canvas's box, the back
+  // one under it and the front one over it. Null where WebGL is not to be
+  // had (the scene is unchanged).
   const makeField = () => {
     if (field || fieldFailed || !fieldLib || !fieldTake) return;
     const parent = canvas.parentNode;
@@ -3957,6 +4082,15 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       fieldFailed = true;
       return;
     }
+    // Made ahead of the scene's first measure, its backing is sized from
+    // the frame its canvases fill (read before they join it), so the first
+    // live frame does not reallocate it (a WebGL resize cost a throttled
+    // phone 650 ms there).
+    const box =
+      fieldCss ??
+      (frameBox.clientWidth > 0 && frameBox.clientHeight > 0
+        ? [frameBox.clientWidth, frameBox.clientHeight]
+        : null);
     const layer = fieldLib.createFieldLayer({
       document,
       coarse: coarse.matches,
@@ -3971,25 +4105,41 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       if (sheet.dataset?.side === "front") parent.insertBefore(sheet, canvas.nextSibling);
       else parent.insertBefore(sheet, canvas);
     }
-    if (fieldCss) layer.resize(fieldCss[0], fieldCss[1], environment.devicePixelRatio);
+    if (box) layer.resize(box[0], box[1], environment.devicePixelRatio);
     field = layer;
     fieldProgress = -1;
+    fieldLevel = FIELD_LEVELS;
+    fieldDrawnLevel = -1;
   };
   const releaseField = () => {
     field?.release();
     field = null;
     fieldProgress = -1;
   };
+  // The layer made in idle time (sweep 2, F27: inside the first live frame
+  // its programs, link and buffers cost 84–260 ms on a throttled phone):
+  // once the preparation is done (the visit's take rolled with it), and
+  // again in idle time after a hidden tab released it. A frame that needs
+  // the field first makes it itself, outside its measure.
+  const fieldIdle = (token) => {
+    if (!fieldLib || field || fieldFailed) return null;
+    return idleTask(() => {
+      if (token !== generation || disposed || field || fieldFailed || !fieldLib) return;
+      if (!live && !(plan && settled && buffers)) return;
+      if (!fieldTake) fieldTake = fieldLib.fieldTake(fieldLib.fieldVisitSeed(environment));
+      makeField();
+    });
+  };
   const goLive = () => {
     if (disposed || !pageActive || live || !near || document.hidden || !images || !motionAllowed())
       return;
     if (!plan || !settled || !buffers) return;
     live = true;
-    // A visit's take: rolled here, kept for as long as the scene is live.
+    // A visit's take: rolled here (or with the layer the preparation made,
+    // fieldIdle), kept for as long as the scene is live.
     if (fieldLib) {
-      fieldTake = fieldLib.fieldTake(fieldLib.fieldVisitSeed(environment));
+      if (!fieldTake) fieldTake = fieldLib.fieldTake(fieldLib.fieldVisitSeed(environment));
       fieldScore = buildFieldScore();
-      fieldFailed = false;
     }
     runway.dataset.rznLoad = "ready";
     // The still that was showing stays up under the (transparent) canvas
@@ -4019,6 +4169,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     releaseField();
     fieldScore = null;
     fieldTake = null;
+    fieldFailed = false;
     canvas.width = canvas.height = 0;
     if (settled) settled.width = settled.height = 0;
     settled = null;
@@ -4123,6 +4274,9 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
           !(plan && settled && buffers)
         )
           throw new Error("assembly preparation did not complete");
+        if (token === generation) return fieldIdle(token);
+      })
+      .then(() => {
         if (token === generation && near) return prime(token);
       })
       .then(() => {
@@ -4290,9 +4444,15 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       releaseField();
       return;
     }
+    // Motion allowed again (Reduce Motion or economy turned off): the
+    // assembly's status follows, never the still's copy beside the stand-in
+    // (sweep 2, F82).
+    if (!live && runway.dataset.rznLoad === "static") runway.dataset.rznLoad = "waiting";
     standIn();
     if (warm || near || eager) wake();
     else if (!earlyId && !earlyListening && document.readyState === "complete") startEarly();
+    // Back from a hidden tab: the released layer is remade in idle time.
+    if (live) void fieldIdle(generation);
     lastProgress = -1;
     schedule();
   };
@@ -4308,10 +4468,18 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     pageActive = true;
     sync();
   };
+  const onReduced = (event) => {
+    reducedNow = mediaNow(reduced, event);
+    sync();
+  };
+  const onForcedColors = (event) => {
+    forcedNow = mediaNow(forcedColors, event);
+    sync();
+  };
   const htmlObserver = new environment.MutationObserver(sync);
   htmlObserver.observe(html, { attributes: true, attributeFilter: ["data-world-effects"] });
-  reduced.addEventListener?.("change", sync);
-  forcedColors.addEventListener?.("change", sync);
+  reduced.addEventListener?.("change", onReduced);
+  forcedColors.addEventListener?.("change", onForcedColors);
   connection?.addEventListener?.("change", sync);
   document.addEventListener("visibilitychange", sync);
   runway.addEventListener?.("rexonance:assembly-retry", retryAssembly);
@@ -4345,8 +4513,8 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     nearObserver?.disconnect();
     warmObserver?.disconnect();
     htmlObserver.disconnect();
-    reduced.removeEventListener?.("change", sync);
-    forcedColors.removeEventListener?.("change", sync);
+    reduced.removeEventListener?.("change", onReduced);
+    forcedColors.removeEventListener?.("change", onForcedColors);
     connection?.removeEventListener?.("change", sync);
     document.removeEventListener("visibilitychange", sync);
     runway.removeEventListener?.("rexonance:assembly-retry", retryAssembly);

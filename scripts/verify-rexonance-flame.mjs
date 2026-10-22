@@ -13,9 +13,10 @@ import sharp from "sharp";
 import { connectedFireEvidence } from "./rexonance-fire-evidence.mjs";
 import { assertSpreadSequence, flameSpreadEvidence } from "./rexonance-spread-evidence.mjs";
 import { entryCanonicalTime, NANITE_FIRE_PHASES } from "../src/lib/rexonance-ignition.js";
+import { scrollFlameAt } from "../src/lib/rexonance-field/field-clock.js";
 
 const materialEntry = NANITE_FIRE_PHASES.materialStart * 2400;
-const materialScroll = 0.015 + 0.285 * NANITE_FIRE_PHASES.materialStart;
+const materialScroll = scrollFlameAt(NANITE_FIRE_PHASES.materialStart);
 
 const base = process.env.BASE_URL || "http://127.0.0.1:8197";
 const out = process.env.OUT_DIR || "output/playwright/rexonance-flame";
@@ -225,18 +226,19 @@ async function installProbe(context) {
           if (frame) frame.nanites++;
         }
       }
-      const isAtlas = typeof source?.src === "string" && source.src.includes(path);
+      // The rebuilt fire (2026-10-21): "atlas" counts the WebGL body canvas
+      // (data-rexonance-fire="body"), "fallback" the CPU kernel's back/front
+      // canvases; the Blender atlas (path) is no longer sampled.
+      const isAtlas =
+        (typeof source?.src === "string" && source.src.includes(path)) ||
+        (source instanceof HTMLCanvasElement && source.dataset?.rexonanceFire === "body");
       const isFallback =
-        source instanceof HTMLCanvasElement && source.width === 96 && source.height === 192;
+        source instanceof HTMLCanvasElement &&
+        (source.dataset?.rexonanceFire === "back" || source.dataset?.rexonanceFire === "front");
       if ((isAtlas || isFallback || flameSources.has(source)) && this.globalAlpha > 0) {
         flameSources.add(this.canvas);
         if (frame) frame.flames++;
-        if (
-          kind !== "other" &&
-          source instanceof HTMLCanvasElement &&
-          source.width === 384 &&
-          source.height === 624
-        )
+        if (kind !== "other" && source instanceof HTMLCanvasElement && source.dataset?.rexonanceFire)
           state.latestField = source;
       }
       if (isFallback) state.fallback[kind]++;
@@ -575,7 +577,10 @@ async function inspectSpread(shot) {
     .ensureAlpha()
     .raw()
     .toBuffer({ resolveWithObject: true });
-  shot.spread = flameSpreadEvidence(data, info.width, info.height);
+  // The spread analyser is registered to the previous 384x624 field; the
+  // rebuilt fire's surface is saved for inspection until re-registered.
+  if (info.width === 384 && info.height === 624)
+    shot.spread = flameSpreadEvidence(data, info.width, info.height);
 }
 
 function assertCombustionPeak(shots, isPeak, label) {

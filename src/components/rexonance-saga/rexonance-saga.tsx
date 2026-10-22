@@ -1,7 +1,11 @@
 import { Fragment, memo, useCallback, useEffect, useRef, useState } from "react";
 import { RexonanceCallSequence } from "./rexonance-call-sequence";
 import { RexonanceAperture } from "./rexonance-aperture";
-import { RexonanceAssemblyGuide, RexonanceAssemblyReplay } from "./rexonance-assembly-guide";
+import {
+  REXONANCE_ASSEMBLY_PHASES,
+  RexonanceAssemblyGuide,
+  RexonanceAssemblyReplay,
+} from "./rexonance-assembly-guide";
 import { RexonanceHeroRail, RexonanceChapterMap, RexonanceFormStatus } from "./rexonance-editorial";
 import { scheduleRexonancePageStep } from "@/lib/rexonance-page-step";
 import { RexonanceFormComparison } from "./rexonance-form-comparison";
@@ -482,7 +486,7 @@ const RexonanceSuitUp = memo(function RexonanceSuitUp({ stage }: { stage: Rexona
   useEffect(() => mountRexonanceAssembly(runwayRef.current, SUIT_UP), []);
   return (
     <>
-      <RexonanceAssemblyGuide runwayRef={runwayRef} />
+      <RexonanceAssemblyGuide runwayRef={runwayRef} calls={REXONANCE_ENTRY_CALLS} />
       <div
         ref={runwayRef}
         className="rzn-suitup"
@@ -536,24 +540,12 @@ const RexonanceSuitUp = memo(function RexonanceSuitUp({ stage }: { stage: Rexona
               <span>NANITE ASSEMBLY</span>
             </p>
             <p className="rzn-phase">
-              <span data-phase="prepare">
-                <b>01</b>構成情報を読み込み
-              </span>
-              <span data-phase="assemble">
-                <b>02</b>装甲を装着
-              </span>
-              <span data-phase="seal">
-                <b>03</b>構造を固定
-              </span>
-              <span data-phase="ignite">
-                <b>04</b>出力を起動
-              </span>
-              <span data-phase="evolve">
-                <b>05</b>選択フォームへ進化
-              </span>
-              <span data-phase="complete">
-                <b>06</b>装着完了
-              </span>
+              {REXONANCE_ASSEMBLY_PHASES.map(({ phase, step, label }) => (
+                <span key={phase} data-phase={phase}>
+                  <b>{step}</b>
+                  {label}
+                </span>
+              ))}
             </p>
             <ol className="rzn-lines">
               {SUIT_UP_LINES.map((units, index) => (
@@ -566,7 +558,12 @@ const RexonanceSuitUp = memo(function RexonanceSuitUp({ stage }: { stage: Rexona
                 </li>
               ))}
             </ol>
-            <p className="rzn-hint">スクロールで装着</p>
+            {/* While the scene prepares, the scroll does nothing yet: the
+                hint says so until the scene is live (sweep 2, F21). */}
+            <p className="rzn-hint">
+              <span className="rzn-hint-live">スクロールで装着</span>
+              <span className="rzn-hint-wait">装着準備中</span>
+            </p>
           </div>
           <div className="rzn-hud">
             <p className="rzn-readout">
@@ -2255,6 +2252,15 @@ export function RexonanceSaga() {
               <i />
               <i />
             </span>
+            {/* Back to this page's own top (the floating button's top is the
+                World's; sweep 2, F92): first in the end card, so its closing
+                row still ends on the way home. */}
+            <p className="rxs-footer-top">
+              <a href="#top">
+                <span>ページの先頭へ</span>
+                <i aria-hidden="true">↑</i>
+              </a>
+            </p>
             <div>
               <p>REXONANCE SAGA / FINAL ARRIVAL</p>
               <h2>
