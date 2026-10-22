@@ -100,6 +100,9 @@ html[data-family="dream"] main.dream-page.dream-page .dream-stage-lantern-label 
 }
 
 html[data-family="dream"] main.dream-page.dream-page .dream-prologue-card {
+  /* This is lacquer, not the earlier refinement layer's ivory paper.
+     Pair the ink with the surface so the two cannot drift independently. */
+  color: #f4ecdc;
   border-block: 1px solid rgb(214 180 123 / 50%);
   background:
     repeating-linear-gradient(90deg, transparent 0 39px, rgb(214 180 123 / 5%) 39px 40px),
@@ -107,6 +110,30 @@ html[data-family="dream"] main.dream-page.dream-page .dream-prologue-card {
   box-shadow:
     inset 0 5px 0 #39292b,
     inset 0 -5px 0 #39292b;
+}
+
+html[data-family="dream"]
+  main.dream-page.dream-page
+  .dream-prologue-card
+  > p:not(.dream-prologue-sign) {
+  color: #f4ecdc;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-prologue-card h2 {
+  color: #edcb96;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-prologue-card > p.dream-prologue-sign {
+  color: #d7c7b2;
+  font-size: 13px;
+  letter-spacing: 0.16em;
+  line-height: 1.8;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-prologue-card::before,
+html[data-family="dream"] main.dream-page.dream-page .dream-prologue-card::after {
+  color: #edcb96;
+  background: #241a24;
 }
 
 html[data-family="dream"] main.dream-page.dream-page .dream-story-case {
@@ -123,6 +150,34 @@ html[data-family="dream"] main.dream-page.dream-page .dream-story-case > summary
 
 html[data-family="dream"] main.dream-page.dream-page .dream-story-case[open] > summary {
   background: linear-gradient(90deg, rgb(214 180 123 / 14%), transparent 70%), #2b1c29;
+}
+
+/* Opening a file no longer changes its summary to paper. Keep the title,
+   chapter caption and close glyph legible in both states. */
+html[data-family="dream"]
+  main.dream-page.dream-page
+  .dream-story-case[open]
+  .dream-story-case-heading
+  > span {
+  color: #f4ecdc;
+}
+
+html[data-family="dream"]
+  main.dream-page.dream-page
+  .dream-story-case[open]
+  :is(.dream-story-case-number, .dream-story-case-heading > small) {
+  color: #dfcaae;
+}
+
+html[data-family="dream"]
+  main.dream-page.dream-page
+  .dream-story-case[open]
+  .dream-story-case-toggle,
+html[data-family="dream"]
+  main.dream-page.dream-page
+  .dream-story-case[open]
+  .dream-story-case-number::before {
+  color: #edcb96;
 }
 
 html[data-family="dream"] main.dream-page.dream-page .dream-story-case-body {
