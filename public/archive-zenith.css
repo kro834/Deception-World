@@ -933,3 +933,19 @@ html[data-embedded-archive][data-zn-breaks] :is(#saga-forms-performance-v5, #edi
     display: none;
   }
 }
+
+/* ================================================================
+   16. Owner (2026-10-23): the compare pickers read at 16px on touch
+   phones (≤620px). The master pins their text at max(.66rem, 11px)
+   !important, under the 12px floor, and iOS zooms the page on focus
+   under 16px. Only the font size moves: the 52px height (section 10)
+   and the analyzer row are left as they are. The ids are doubled so
+   this outranks the master's own doubled-id !important rule.
+   ================================================================ */
+@media (any-pointer: coarse) and (max-width: 620px) {
+  html[data-embedded-archive] #edition-panel-realm#edition-panel-realm #realm--saga-form-compare-ios#realm--saga-form-compare-ios .compare-native-select,
+  html[data-embedded-archive] #edition-panel-saga#edition-panel-saga #saga--saga-form-compare-ios#saga--saga-form-compare-ios .compare-native-select,
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .compare-native-select {
+    font-size: 16px !important;
+  }
+}
