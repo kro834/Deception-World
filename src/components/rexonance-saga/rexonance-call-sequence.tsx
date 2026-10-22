@@ -288,7 +288,8 @@ function SuitBadge() {
 // from one atlas, each assembled from micro-tiles of the art that stream in
 // and lock (the nanite engine, rexonance-suit-nanites.tsx) or, without it,
 // growing from its seam through its gathered nanite mosaic (the DOM plates
-// below). The DEUS！ accents clank hardest with a spark and a jolt; the tail
+// below). The DEUS！ accents clank hardest with a spark (the body itself
+// never moves: owner, 「全身が上下するのも治して」); the tail
 // grows midway, the helmet seats last, and the face's lights fill with
 // pixel squares that hold, then scatter. Every DOM layer is a small box that
 // moves by transform and opacity on the call clock.

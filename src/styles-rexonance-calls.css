@@ -1101,7 +1101,8 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
    the bare undersuit, RIDER！ seeds the P14 core and gathers nanite
    motes, each SA-GA！ forms a group of armour pieces out of nanites
    floating a little off the body and each DEUS！ snaps it on with a
-   clank, a spark and a jolt; REXONANCE！ grows the tail, streams the
+   clank and a spark (the body itself never moves: owner, 「全身が上下するのも
+   治して」); REXONANCE！ grows the tail, streams the
    ribbons and clamps the helmet down; REXONANCE DEUS！ fills the face's
    lights with pixel squares that scatter. Textless <i>/<svg> layers
    (the artwork's pieces are backgrounds from scripts/build-rexonance-
@@ -1940,7 +1941,8 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
      seam side, 2 % of the figure away, and settles in its place — then the
      plate grows from its seam through them (the window slides off its art
      while the art holds still) and seats with a short clank (--rx-suit-k;
-     the DEUS！ accents hardest, with a spark and a jolt). */
+     the DEUS！ accents hardest, with a spark; the figure itself stays
+     still, sweep 2 F84). */
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
     .rx-suit-mote {
@@ -1987,12 +1989,6 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
     .rx-suit-spark {
     animation: rxSuitSpark 170ms cubic-bezier(0.2, 0.7, 0.2, 1) var(--rx-suit-s) both;
-  }
-
-  html:not([data-world-effects="economy"])
-    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
-    .rx-suit-figure {
-    animation: rxSuitJolt 1110ms linear calc(var(--rx-call-chant-start) + 230ms) both;
   }
 
   /* Each label lands on its group's DEUS！ (the helmet's on the last call). */
@@ -2324,31 +2320,6 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   100% {
     opacity: 0;
     transform: scale(1.5) rotate(30deg);
-  }
-}
-/* The jolt: the figure dips 2 px on each snap's impact (legs 880, arms
-   1000, chest 1120 and waist 1240 ms, +40) and on the helmet's (1890). */
-@keyframes rxSuitJolt {
-  0%,
-  1.802%,
-  7.207%,
-  12.613%,
-  18.018%,
-  23.423%,
-  28.829%,
-  34.234%,
-  39.64%,
-  92.793%,
-  98.198%,
-  100% {
-    transform: none;
-  }
-  3.604%,
-  14.414%,
-  25.225%,
-  36.036%,
-  94.595% {
-    transform: translate3d(0, 2px, 0);
   }
 }
 /* A group of pixel squares lands on the face's lights (fast), holds, then

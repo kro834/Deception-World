@@ -1076,7 +1076,8 @@ test("both scenes compose the field lazily, through their own clocks, and releas
   // pushes the 2D band into its rect fallback.
   assert.ok(scroll.indexOf("lastDrawMs = (environment.performance") < scroll.indexOf("field.render("));
   // The entry's engine: the chunk imported lazily, the camera on the figure's
-  // box through scale/translate (never transform: the jolt animates it),
+  // box through scale/translate (never transform, the figure's own, kept at
+  // identity: the body never moves),
   // identity restored at the end, the layer released at finish and stop.
   assert.match(entry, /void import\("@\/lib\/rexonance-field\/index\.js"\)/);
   assert.match(entry, /figure\.style\.scale = /);
