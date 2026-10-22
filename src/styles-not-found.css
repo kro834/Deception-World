@@ -826,6 +826,101 @@
   }
 }
 
+/* Phones held sideways, and any screen under 500px tall (round 2,
+   2026-10-22): the whole case file in one screen, its foot clear of the
+   Zeus button. The wide layout's 280px slot (from 760px) scrolled the card
+   at 844 x 390 with the recovery files under the fold, and at 667 x 375 the
+   button stood on the SEARCH file. Now the slot is a slim column beside
+   the words (the sigil at its head, the number at its foot; it steps aside
+   under 640px), the heading and the line close up, the files are low
+   plates, and the page keeps the button's reach (18vh) free at its foot,
+   as on upright phones, so the card is centred above it. Every label keeps
+   its size. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .app-not-found.app-not-found {
+    --lr-pad-x: 20px;
+    --lr-pad-y: 14px;
+    grid-template-columns:
+      minmax(12px, 1fr) [plate-start] var(--lr-pad-x) [slot-start] clamp(104px, 17vw, 148px)
+      [slot-end] 22px [copy-start] minmax(0, 540px) [copy-end] var(--lr-pad-x) [plate-end]
+      minmax(12px, 1fr);
+    padding-bottom: max(env(safe-area-inset-bottom), calc(18vh + 16px));
+  }
+
+  .app-not-found.app-not-found.app-not-found:has(> .recovery-tiles) {
+    grid-template-rows:
+      minmax(12px, 1fr) [plate-start] var(--lr-pad-y) [slot-start] auto [slot-end head-start] auto
+      auto [head-end] auto auto auto auto var(--lr-pad-y) [plate-end] auto [recovery-end]
+      minmax(12px, 1fr);
+  }
+
+  /* The outlined number over the sky would peek above the card's top
+     edge here: the slot carries the number. */
+  .app-not-found.app-not-found::after {
+    -webkit-text-stroke-color: transparent;
+  }
+
+  .app-not-found.app-not-found > .app-not-found-sigil {
+    display: flex;
+    grid-row: head-start / 10;
+    flex-direction: column;
+    justify-content: flex-start;
+    min-height: 0;
+    margin-bottom: 0;
+    padding: 12px 10px;
+  }
+
+  .app-not-found.app-not-found > .app-not-found-sigil > i {
+    width: 56px;
+    height: 56px;
+    font-size: 16px;
+  }
+
+  .app-not-found.app-not-found > .app-not-found-sigil::after {
+    right: auto;
+    left: 50%;
+    translate: -50% 0;
+    font-size: 44px;
+  }
+
+  .app-not-found.app-not-found > span:not(.app-not-found-sigil) {
+    padding-bottom: 10px;
+  }
+
+  .app-not-found.app-not-found > h1 {
+    padding-top: 12px;
+    font-size: clamp(22px, 3.4vw + 4px, 30px);
+  }
+
+  .app-not-found.app-not-found > p:last-of-type {
+    margin-top: 6px;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .app-not-found.app-not-found > nav.recovery-tiles {
+    gap: 10px;
+    padding: 10px var(--lr-pad-x) 12px;
+  }
+
+  .app-not-found.app-not-found > nav.recovery-tiles > a {
+    min-height: 64px;
+    padding: 8px 10px;
+  }
+}
+
+/* Under 640px wide (a 568 x 320 phone) the slot steps aside and the words
+   take its width. */
+@media (orientation: landscape) and (max-height: 500px) and (max-width: 639px) {
+  .app-not-found.app-not-found > .app-not-found-sigil {
+    display: none;
+  }
+
+  .app-not-found.app-not-found > :where(:not(.app-not-found-plate)) {
+    grid-column: slot-start / copy-end;
+  }
+}
+
 @media (prefers-reduced-motion: no-preference) {
   html:not([data-world-effects="economy"]) .app-not-found.app-not-found > .app-not-found-plate {
     animation: lr-lock 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
