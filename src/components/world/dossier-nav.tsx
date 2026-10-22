@@ -194,32 +194,6 @@ export function NameText({ value, seams = false }: { value: string; seams?: bool
   );
 }
 
-/* A Japanese heading's phrase seams: after a particle or an ending (の, を,
-   に, より ...) where the next word starts in kanji or katakana (not on a
-   small kana or ー), so 変身後の / 能力を / 活かした / 遠距離戦。 */
-const PHRASE_SEAM =
-  /(より|から|まで|ので|[のをにへとがはでもやてたずなく])(?=(?![\u30a1\u30a3\u30a5\u30a7\u30a9\u30c3\u30e3\u30e5\u30e7\u30ee\u30f5\u30f6])[\u30a1-\u30fa\u4e00-\u9fff])/gu;
-const PHRASE_MARK = "\ue000";
-
-/** A dossier heading that wraps between its phrases (2026-10-22). WebKit
- * has no word-break: auto-phrase; its keep-all found no break in a line
- * such as 変身後の能力を活かした遠距離戦。 and split the last character off
- * (。 alone on a line). <wbr> at the seams gives it the phrase breaks
- * Chrome finds; the text is as written. */
-export function PhrasedText({ text }: { text: string }) {
-  const phrases = text.replace(PHRASE_SEAM, `$1${PHRASE_MARK}`).split(PHRASE_MARK);
-  return (
-    <>
-      {phrases.map((phrase, index) => (
-        <Fragment key={`${index}-${phrase}`}>
-          {index > 0 ? <wbr /> : null}
-          {phrase}
-        </Fragment>
-      ))}
-    </>
-  );
-}
-
 /* The end card's art box (styles-stage-dossier.css): the card's width on
    phones, its right part on tablets, the stage's width on wide screens. */
 const NAV_PORTRAIT_SIZES = "(max-width: 560px) 100vw, (max-width: 1099px) 58vw, min(46vw, 820px)";

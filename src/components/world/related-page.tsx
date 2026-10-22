@@ -1,7 +1,7 @@
 import { useWorldMode } from "./use-world-mode";
-import { DossierNav, RELATED_NAV, NameText, PhrasedText } from "./dossier-nav";
+import { DossierNav, RELATED_NAV, NameText } from "./dossier-nav";
 import { FormPickup, type RiderForm } from "./manager-stub";
-import { DossierContents, DossierReader } from "./dossier-reader";
+import { DossierContents, DossierReader, PhrasedText } from "./dossier-reader";
 import { DossierTopbar } from "./world-chrome";
 import { dossierImage } from "@/lib/dossier-images";
 import { RELATED_SECTIONS } from "./related-data";

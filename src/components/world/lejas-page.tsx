@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { useWorldMode } from "./use-world-mode";
-import { DossierNav, PhrasedText, RIKUEI_NAV } from "./dossier-nav";
+import { DossierNav, RIKUEI_NAV } from "./dossier-nav";
 import { FormPickup } from "./manager-stub";
 import { DossierTopbar } from "./world-chrome";
-import { DossierContents, DossierReader } from "./dossier-reader";
+import { DossierContents, DossierReader, PhrasedText } from "./dossier-reader";
 
 // The close-up is a straight cut between two stacked layers. The layer at
 // rest under opacity 0 is never painted, so it is not decoded: cutting to it

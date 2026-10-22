@@ -3,9 +3,9 @@ import { dossierImage } from "@/lib/dossier-images";
 import { DisplayName } from "@/components/name-text";
 import { CIEL_PORTRAIT, cielPortrait } from "@/lib/thumbnail-images";
 import { useWorldMode } from "./use-world-mode";
-import { NameText, PhrasedText, RE_DIVE_RIKUEI_NAV } from "./dossier-nav";
+import { NameText, RE_DIVE_RIKUEI_NAV } from "./dossier-nav";
 import { FormPickup } from "./manager-stub";
-import { DossierContents, DossierReader } from "./dossier-reader";
+import { DossierContents, DossierReader, PhrasedText } from "./dossier-reader";
 import { RIDER_DOSSIERS } from "./rider-page";
 import { DossierTopbar } from "./world-chrome";
 

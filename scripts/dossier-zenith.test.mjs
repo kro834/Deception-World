@@ -308,8 +308,11 @@ test("Japanese headings and names break between phrases and words, never before 
   // Owner (2026-10-22): WebKit set 。 alone on a line (変身後の能力を活かした遠距離戦 / 。) and
   // Chrome started a line on ・ (秩序／破壊 / ・固定管轄なし); the text stays as written.
   const nav = await read("src/components/world/dossier-nav.tsx");
-  assert.match(nav, /export function PhrasedText\(\{ text \}: \{ text: string \}\)/);
-  assert.match(nav, /\(より\|から\|まで\|ので\|\[のをにへとがはでもやてたずなく\]\)/);
+  // In the reader module, which the reader tests mount with React alone.
+  const reader = await read("src/components/world/dossier-reader.tsx");
+  assert.match(reader, /export function PhrasedText\(\{ text \}: \{ text: string \}\)/);
+  assert.match(reader, /\(より\|から\|まで\|ので\|\[のをにへとがはでもやてたずなく\]\)/);
+  assert.match(reader, /^import \{ useEffect, useState \} from "react";$/m);
   for (const file of [
     "rider-page",
     "manager-stub",
@@ -329,5 +332,20 @@ test("Japanese headings and names break between phrases and words, never before 
   assert.match(
     css,
     /\.form-pickup-copy\s*> h2\s*> b \{\s*font-size: min\(\s*52px,\s*calc\(\(100vw - var\(--sd-stage-w\) - var\(--sd-pad\) - var\(--sd-pad-end\)\) \/ 8\.6\)\s*\);/,
+  );
+});
+
+test("the contents' chapter names hold their phrases in WebKit; narrow fact cells keep their labels whole", async () => {
+  // Owner (2026-10-22): WebKit broke 委ねられた瞬 / 間 in the contents (no auto-phrase there), and
+  // OCCUPATION ran 14px past its cell in the partner card at 1366-1440px.
+  const reader = await read("src/components/world/dossier-reader.tsx");
+  assert.match(reader, /<b>\s*<PhrasedText text=\{section\.title\} \/>\s*<\/b>/);
+  assert.match(
+    css,
+    /@supports not \(word-break: auto-phrase\)\s*\{[^}]*\.dossier-contents-copy\s*b\s*\{\s*word-break: keep-all;/,
+  );
+  assert.match(
+    css,
+    /@container identity-records \(min-width: 541px\) and \(max-width: 640px\)\s*\{[^}]*figcaption\s*dl\s*dt\s*\{\s*font-family: var\(--sd-mono\);/,
   );
 });

@@ -332,6 +332,21 @@ html[data-family="dossier"]
   }
 }
 
+/* The contents' chapter names (2026-10-22): WebKit has no word-break:
+   auto-phrase and broke them inside a word (委ねられた瞬 / 間); with keep-all
+   they break only at their phrase seams (<wbr>, PhrasedText). */
+@supports not (word-break: auto-phrase) {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    #dossier-index
+    .dossier-contents
+    a
+    .dossier-contents-copy
+    b {
+    word-break: keep-all;
+  }
+}
+
 /* The premium (Rexonance) pickup keeps its own light in the chips. */
 html[data-family="dossier"]
   main.manager-page.manager-page.manager-page
@@ -650,6 +665,9 @@ html[data-family="dossier"]
   font-style: normal;
   letter-spacing: 0.1em;
   font-variant-numeric: tabular-nums;
+  /* An inherited text indent set the numeral 5px in from the name it
+     heads. */
+  text-indent: 0;
 }
 
 html[data-family="dossier"]
@@ -1577,6 +1595,24 @@ html[data-family="dossier"]
       #identity-records
       .rider-archive-civilian-visual {
       aspect-ratio: 1;
+    }
+  }
+
+  /* Just over that (a 1366-1440px split stage, about 300px of words
+     beside the art): a fact cell is narrower than OCCUPATION set in
+     Michroma, so the partner's labels take the figures' Oxanium and keep
+     every word whole. */
+  @container identity-records (min-width: 541px) and (max-width: 640px) {
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      #identity-records
+      .rider-archive-civilian
+      figcaption
+      dl
+      dt {
+      font-family: var(--sd-mono);
+      font-weight: 500;
+      letter-spacing: 0.1em;
     }
   }
 }

@@ -1,7 +1,7 @@
 import { useWorldMode } from "./use-world-mode";
-import { DossierNav, PhrasedText } from "./dossier-nav";
+import { DossierNav } from "./dossier-nav";
 import { DossierTopbar } from "./world-chrome";
-import { DossierContents, DossierReader } from "./dossier-reader";
+import { DossierContents, DossierReader, PhrasedText } from "./dossier-reader";
 import { FormPickup } from "./manager-stub";
 import { VARG_FACTS } from "./varg-data";
 import {

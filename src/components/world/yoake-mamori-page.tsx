@@ -1,6 +1,5 @@
 import { useWorldMode } from "./use-world-mode";
-import { DossierContents, DossierReader } from "./dossier-reader";
-import { PhrasedText } from "./dossier-nav";
+import { DossierContents, DossierReader, PhrasedText } from "./dossier-reader";
 import { DossierTopbar } from "./world-chrome";
 import { YOAKE_MAMORI_SECTIONS } from "./yoake-mamori-data";
 import { dossierImage } from "@/lib/dossier-images";
