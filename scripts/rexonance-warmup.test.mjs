@@ -200,6 +200,7 @@ for (const outcome of [
   "load",
   "load-without-decode",
   "decode-error",
+  "decode-throw",
   "error",
   "timeout",
   "dispose",
@@ -217,10 +218,14 @@ for (const outcome of [
       assert.ok(image.sizes);
       const selected = image.currentSrc;
       const loaded = outcome.startsWith("load");
-      if (loaded || outcome === "decode-error") {
+      if (loaded || outcome === "decode-error" || outcome === "decode-throw") {
         if (outcome === "load-without-decode") image.decode = undefined;
         if (outcome === "decode-error")
           image.decode = () => Promise.reject(new Error("decode failed"));
+        if (outcome === "decode-throw")
+          image.decode = () => {
+            throw new Error("decode failed synchronously");
+          };
         image.onload();
         await Promise.resolve();
       } else if (outcome === "error") image.onerror();

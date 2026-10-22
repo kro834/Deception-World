@@ -216,7 +216,7 @@ test("every rule is scoped to the Rexonance page and leaves the bar, the menu an
 });
 
 test("keyframes are this sheet's own, move only opacity and transforms, and never loop", () => {
-  assert.doesNotMatch(css, /\binfinite\b|animation-iteration-count|!important/);
+  assert.doesNotMatch(css, /\binfinite\b|animation-iteration-count/);
   assert.ok(sheet.keyframes.size >= 6, String(sheet.keyframes.size));
   for (const [name, body] of sheet.keyframes) {
     assert.match(name, /^rzn-/, name);
@@ -229,6 +229,22 @@ test("keyframes are this sheet's own, move only opacity and transforms, and neve
   }
   assert.doesNotMatch(css, /mix-blend-mode|backdrop-filter|blur\(/);
   assert.doesNotMatch(css, /(?<![\w-])filter\s*:/);
+});
+
+test("only the forced-color stage image may override inline canvas ownership visibility", () => {
+  const overrides = sheet.rules.filter((rule) => /!important/.test(rule.body));
+  assert.equal(
+    (css.match(/!important/g) || []).length,
+    1,
+    "every other important remains forbidden, including keyframes",
+  );
+  assert.equal(overrides.length, 1);
+  assert.deepEqual(overrides[0], {
+    selector:
+      'html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-stage-panel figure > img',
+    body: "visibility: visible !important;",
+    context: ["@media (forced-colors: active)"],
+  });
 });
 
 const scrollLinked = ({ body, context }) =>

@@ -62,12 +62,16 @@ export function warmRexonanceStages(
       schedule();
     };
     next.onload = () => {
-      if (typeof next.decode === "function")
-        void next.decode().then(
-          () => finish(true),
-          () => finish(),
-        );
-      else finish(true);
+      try {
+        if (typeof next.decode === "function")
+          void next.decode().then(
+            () => finish(true),
+            () => finish(),
+          );
+        else finish(true);
+      } catch {
+        finish();
+      }
     };
     next.onerror = () => finish();
     timeout = window.setTimeout(finish, 6000);

@@ -1,4 +1,4 @@
-import { Fragment, memo, useCallback, useEffect, useRef, useState } from "react";
+import { Fragment, memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { RexonanceCallSequence } from "./rexonance-call-sequence";
 import { RexonanceAperture } from "./rexonance-aperture";
 import {
@@ -621,40 +621,100 @@ function FormMorph({
   delay: number;
 }) {
   const ref = useRef<HTMLCanvasElement | null>(null);
-  useEffect(() => {
+  useLayoutEffect(() => {
     const canvas = ref.current;
     const img = canvas?.parentElement?.querySelector("img");
-    if (!canvas || !img || to === "standard" || from === to) return;
+    if (!canvas || !img) return;
+    // The panel survives its keyed figure. Remember the last fully shown
+    // stage, so a rapid retarget during decoding starts from readable art.
+    const panelElement = img.closest<HTMLElement>(".rxs-stage-panel");
+    const held = panelElement?.dataset.morphStage;
+    const origin = held && held in STAGES ? (held as RexonanceStage) : from;
+    if (panelElement) panelElement.dataset.morphStage = origin;
     const connection = (navigator as Navigator & { connection?: { saveData?: boolean } })
       .connection;
     if (
+      to === "standard" ||
+      origin === to ||
       window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+      window.matchMedia("(forced-colors: active)").matches ||
       document.documentElement.dataset.worldEffects === "economy" ||
       connection?.saveData
-    )
+    ) {
+      if (panelElement) panelElement.dataset.morphStage = to;
       return;
+    }
     let cancelled = false;
     let frame = 0;
+    const targetSource = img.getAttribute("src")!;
+    const targetAlt = img.alt;
+    const targetVisibility = img.style.visibility;
+    const targetCandidates = {
+      srcSet: img.getAttribute("srcset"),
+      sizes: img.getAttribute("sizes"),
+    };
+    const show = (src: string, responsive: { srcSet?: string | null; sizes?: string | null }) => {
+      if (responsive.sizes) img.sizes = responsive.sizes;
+      else img.removeAttribute("sizes");
+      if (responsive.srcSet) img.srcset = responsive.srcSet;
+      else img.removeAttribute("srcset");
+      img.src = src;
+    };
+    const restoreTarget = () => {
+      show(targetSource, targetCandidates);
+      img.alt = targetAlt;
+    };
+    // Hold the cached old image before the browser can paint the newly
+    // keyed figure. An empty transparent canvas cannot cover the new art.
+    show(STAGES[origin].image, rexonanceImage(STAGES[origin].image));
+    img.alt = STAGES[origin].alt;
     // Owned until the effect ends (audit #31): a load still in flight would
     // hold this canvas, and through it the page; the sheets are freed at once.
     const loaders = new Set<HTMLImageElement>();
     const sheets: HTMLCanvasElement[] = [];
+    const pending = new Set<() => void>();
     const load = (src: string) =>
       new Promise<HTMLImageElement>((resolve, reject) => {
         const image = new Image();
         loaders.add(image);
         image.decoding = "async";
+        let settled = false;
+        const cancel = () => finish(false);
+        const finish = (loaded: boolean) => {
+          if (settled) return;
+          settled = true;
+          window.clearTimeout(timeout);
+          pending.delete(cancel);
+          loaders.delete(image);
+          image.onload = null;
+          image.onerror = null;
+          if (loaded && !cancelled && image.naturalWidth > 0) {
+            // Keep only the selected candidate, releasing its viewport listener.
+            if (image.currentSrc) image.src = image.currentSrc;
+            image.removeAttribute("srcset");
+            image.removeAttribute("sizes");
+            resolve(image);
+          } else {
+            releasePendingImage(image);
+            image.removeAttribute("src");
+            image.removeAttribute("srcset");
+            image.removeAttribute("sizes");
+            reject(new Error("Form image unavailable"));
+          }
+        };
+        pending.add(cancel);
+        const timeout = window.setTimeout(cancel, 6000);
         image.onload = () => {
-          loaders.delete(image);
-          void image.decode().then(
-            () => resolve(image),
-            () => resolve(image),
-          );
+          // A loaded image can still be drawn when decode rejects or a
+          // browser throws synchronously; neither may escape the load event.
+          void Promise.resolve()
+            .then(() => image.decode?.())
+            .then(
+              () => finish(true),
+              () => finish(true),
+            );
         };
-        image.onerror = (error) => {
-          loaders.delete(image);
-          reject(error);
-        };
+        image.onerror = () => finish(false);
         // The canvas must decode the same delivery file as the stage and
         // warmup, not a second, full-resolution original (audit F19).
         const responsive = rexonanceImage(src);
@@ -677,10 +737,10 @@ function FormMorph({
     const panel = (stage: RexonanceStage) => `panel:${stage}` as Source;
     const steps: Step[] =
       to === "max"
-        ? [{ a: panel(from), b: "panel:max", ms: FORM_CHANGE_MS.max, tone: FORM_TONES.max }]
+        ? [{ a: panel(origin), b: "panel:max", ms: FORM_CHANGE_MS.max, tone: FORM_TONES.max }]
         : to === "ultra"
           ? [
-              ...(from === "standard"
+              ...(origin === "standard"
                 ? [
                     {
                       a: "panel:standard",
@@ -691,7 +751,7 @@ function FormMorph({
                   ]
                 : []),
               {
-                a: from === "standard" ? "panel:max" : panel(from),
+                a: origin === "standard" ? "panel:max" : panel(origin),
                 b: "panel:ultra",
                 ms: FORM_CHANGE_MS.ultra,
                 extra: "emerald",
@@ -701,12 +761,12 @@ function FormMorph({
           : [
               // EXCELSIOR: from MAX to ULTRA, then its own nanites (prism
               // shards, coming down from the crown) add its decoration.
-              ...(from === "standard"
+              ...(origin === "standard"
                 ? ([
                     { a: "panel:standard", b: "panel:max", ms: 360, tone: FORM_TONES.max },
                     { a: "panel:max", b: "panel:ultra", ms: 460, tone: FORM_TONES.ultra },
                   ] as Step[])
-                : from === "max"
+                : origin === "max"
                   ? ([
                       { a: "panel:max", b: "panel:ultra", ms: 460, tone: FORM_TONES.ultra },
                     ] as Step[])
@@ -726,8 +786,7 @@ function FormMorph({
       source.startsWith("panel:")
         ? STAGES[source.slice(6) as RexonanceStage].image
         : REXONANCE_FORM_FIGURES[source.slice(5) as "max" | "ultra"];
-    // The old form shows at once (it is cached), so the new picture never flashes first.
-    canvas.style.opacity = "1";
+    canvas.style.opacity = "0";
     Promise.all(
       sources.map((source) => load(url(source)).then((image) => [source, image] as const)),
     )
@@ -747,7 +806,11 @@ function FormMorph({
         canvas.width = W;
         canvas.height = H;
         const context = canvas.getContext("2d");
-        if (!context) return;
+        if (!context) {
+          restoreTarget();
+          if (panelElement) panelElement.dataset.morphStage = to;
+          return;
+        }
         // Each source drawn once, as it will stand: the panel art with the
         // picture's own fit and position; a figure whole, on the stage's dark.
         const style = getComputedStyle(img);
@@ -788,6 +851,16 @@ function FormMorph({
           }
           prepared.set(source, prepare);
         }
+        // Paint before releasing the held image; every intermediate frame
+        // has either old decoded pixels or the prepared transition.
+        context.drawImage(prepared.get(steps[0].a)!, 0, 0, W, H);
+        canvas.style.transform = style.transform;
+        canvas.style.scale = style.scale;
+        canvas.style.translate = style.translate;
+        canvas.style.transformOrigin = style.transformOrigin;
+        img.style.visibility = "hidden";
+        canvas.style.opacity = "1";
+        restoreTarget();
         const cell = Math.max(8, Math.round(Math.min(W, H) / 34));
         const plans = steps.map((step, index) => {
           const base = {
@@ -873,7 +946,9 @@ function FormMorph({
             step.style ?? "square",
           );
           if (now - start >= total) {
+            img.style.visibility = targetVisibility;
             canvas.style.opacity = "0";
+            if (panelElement) panelElement.dataset.morphStage = to;
             for (const done of [...prepared.values(), warpA, warpB])
               if (done) done.width = done.height = 0;
             return;
@@ -883,7 +958,15 @@ function FormMorph({
         frame = requestAnimationFrame(tick);
       })
       .catch(() => {
+        if (cancelled) return;
+        // A failed next image must leave the last readable form standing.
+        show(STAGES[origin].image, rexonanceImage(STAGES[origin].image));
+        img.alt = STAGES[origin].alt;
+        img.style.visibility = targetVisibility;
         canvas.style.opacity = "0";
+        for (const cancel of pending) cancel();
+        pending.clear();
+        for (const done of sheets) done.width = done.height = 0;
       });
     return () => {
       cancelled = true;
@@ -892,6 +975,10 @@ function FormMorph({
       loaders.clear();
       for (const done of sheets) done.width = done.height = 0;
       sheets.length = 0;
+      for (const cancel of pending) cancel();
+      pending.clear();
+      restoreTarget();
+      img.style.visibility = targetVisibility;
     };
   }, [from, to, delay]);
   return <canvas ref={ref} className="rxs-form-morph" aria-hidden="true" />;
@@ -916,7 +1003,7 @@ const renderStageTitle = (title: string) =>
 // Units that never split across lines: the OS keeps its version (narrow
 // phones split 「SA-GA OS / 5.5」) and 必要部位 stays one noun (844×390 split
 // 「必要部 / 位」). The lede's visible text is unchanged (rx2/COPY2.md L3, L6).
-const STAGE_LEDE_UNITS = /(SA-GA OS 5\.5|必要部位)/;
+const STAGE_LEDE_UNITS = /(SA-GA OS 5\.5|必要部位|犬として|『終焉』へ)/;
 const renderStageLede = (lede: string) =>
   lede.split(STAGE_LEDE_UNITS).map((part, index) =>
     index % 2 === 1 ? (
@@ -1121,7 +1208,7 @@ const RexonancePerformance = memo(function RexonancePerformance() {
           <b>01</b>
           {"/ 05"}
         </small>
-        <p>PERFORMANCE</p>
+        <p lang="en">PERFORMANCE</p>
         <h2>
           これで、
           <br />
@@ -1146,7 +1233,7 @@ const RexonancePerformance = memo(function RexonancePerformance() {
           over it once, and the field rings out from it on the lock. */}
       <div className="rxs-headline-metrics">
         <article className="rxs-reveal">
-          <small>
+          <small lang="en">
             REACTION / <span className="rxp-nowrap">VS VINCULUM</span>
           </small>
           <strong data-rsn-count="">
@@ -1165,7 +1252,7 @@ const RexonancePerformance = memo(function RexonancePerformance() {
           </span>
         </article>
         <article className="rxs-reveal">
-          <small>
+          <small lang="en">
             MOBILITY / <span className="rxp-nowrap">VS EXTREME</span>
           </small>
           <strong data-rsn-count="">
@@ -1613,7 +1700,8 @@ export function RexonanceSaga() {
         const width = parseFloat(getComputedStyle(heading, "::before").width);
         if (Number.isFinite(width) && width > 0) {
           const center = `${width / 2}px`;
-          if (heading.style.getPropertyValue("--rsn-emitter-x") !== center) heading.style.setProperty("--rsn-emitter-x", center);
+          if (heading.style.getPropertyValue("--rsn-emitter-x") !== center)
+            heading.style.setProperty("--rsn-emitter-x", center);
         }
       }
     };
@@ -1640,7 +1728,8 @@ export function RexonanceSaga() {
       document.fonts?.removeEventListener("loadingdone", queueNavReserve);
       if (frame) window.cancelAnimationFrame(frame);
       page.style.removeProperty("--rxs-local-nav-reserve");
-      for (const heading of page.querySelectorAll<HTMLElement>(".rxs-section-heading")) heading.style.removeProperty("--rsn-emitter-x");
+      for (const heading of page.querySelectorAll<HTMLElement>(".rxs-section-heading"))
+        heading.style.removeProperty("--rsn-emitter-x");
     };
   }, []);
 
@@ -1999,7 +2088,9 @@ export function RexonanceSaga() {
               <b>02</b>
               {"/ 05"}
             </small>
-            <p>PROCESSING CORE / P14</p>
+            <p>
+              <span lang="en">PROCESSING CORE</span> / P14
+            </p>
             <h2 id="rxs-p14-title">
               同じエーテルで、
               <br />
@@ -2029,7 +2120,9 @@ export function RexonanceSaga() {
               <i className="rsn-glint" aria-hidden="true" />
             </figure>
             <div className="rxs-p14-copy">
-              <small>P14 / FOURTEENTH GENERATION</small>
+              <small>
+                P14 / <span lang="en">FOURTEENTH GENERATION</span>
+              </small>
               <h3>最大出力を支える、安定性。</h3>
               <p>
                 入力されたエーテルを攻撃・機動・防御へ変換する際の損失を局所ごとに抑え、必要な部位へ出力を再配分します。急激な負荷変動にも99.4%で追従し、連続最大出力でも96%の安定率を維持します。マックスでは、このP14を完全加速して全神飾の連続実装を支えます。
@@ -2080,7 +2173,7 @@ export function RexonanceSaga() {
                 <b>04</b>
                 {"/ 05"}
               </small>
-              <p>THREE OPERATING STAGES</p>
+              <p lang="en">THREE OPERATING STAGES</p>
               <h2>まだ、次元は変わる。</h2>
             </header>
 
@@ -2173,7 +2266,7 @@ export function RexonanceSaga() {
                   </i>
                 </figure>
                 <div key={`${stage}-copy`}>
-                  <small>{activeStage.code}</small>
+                  <small lang="en">{activeStage.code}</small>
                   <h3>{renderStageTitle(activeStage.title)}</h3>
                   {(typeof activeStage.lede === "string"
                     ? [activeStage.lede]
@@ -2206,7 +2299,7 @@ export function RexonanceSaga() {
                 <b>05</b>
                 {"/ 05"}
               </small>
-              <p>SELF-RESONANCE</p>
+              <p lang="en">SELF-RESONANCE</p>
               <h2>
                 悠真自身が、
                 <br />
@@ -2233,10 +2326,10 @@ export function RexonanceSaga() {
                 <article key={system.number} className="rxs-reveal">
                   <header>
                     <span>{system.number}</span>
-                    <small>{renderPlateCode(system.code)}</small>
+                    <small lang="en">{renderPlateCode(system.code)}</small>
                   </header>
                   <h3>{renderPlateTitle(system.title)}</h3>
-                  <p>{system.body}</p>
+                  <p>{renderStageLede(system.body)}</p>
                 </article>
               ))}
             </div>
@@ -2248,7 +2341,7 @@ export function RexonanceSaga() {
                 glyph at the digits' size (the text is unchanged). */}
                 <strong data-rsn-count="">
                   50,000<i className="rxf-wave">〜</i>
-                  <span>YOPS</span>
+                  <span lang="en">YOPS</span>
                   <b className="rsn-count" aria-hidden="true">
                     50,000<i className="rxf-wave">〜</i>
                     <span>YOPS</span>
@@ -2256,7 +2349,7 @@ export function RexonanceSaga() {
                 </strong>
                 {/* FORGE (rx18): the Japanese word is printed, not etched. */}
                 <p>
-                  ∞ CORE / <span>基準値</span>
+                  ∞ <span lang="en">CORE</span> / <span>基準値</span>
                 </p>
               </div>
               {/* A drawn hairline, not a multiplication sign: the two units stand
@@ -2265,12 +2358,14 @@ export function RexonanceSaga() {
               <div>
                 <small>KOSMOS DeuX</small>
                 <strong data-rsn-count="">
-                  9,000<span>TOPS</span>
+                  9,000<span lang="en">TOPS</span>
                   <b className="rsn-count" aria-hidden="true">
                     9,000<span>TOPS</span>
                   </b>
                 </strong>
-                <p>300 CORE</p>
+                <p>
+                  300 <span lang="en">CORE</span>
+                </p>
               </div>
             </div>
           </section>

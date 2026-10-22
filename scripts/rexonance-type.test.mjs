@@ -529,6 +529,24 @@ test("every rule is scoped to the Rexonance page above the id-scoped sheets, and
 });
 
 /* ---------------- part 4: the roles ---------------- */
+test("late font width reservation belongs only to the Latin brand, never DisplayName words", () => {
+  const reserved = sheet.rules.filter(({ body }) => declaration(body, "min-inline-size"));
+  assert.equal(reserved.length, 1);
+  assert.match(reserved[0].selector, /\.rxs-brand > span$/);
+  assert.equal(declaration(reserved[0].body, "min-inline-size"), "11.237em");
+  // DisplayName's short Japanese words are inline blocks. A descendant
+  // selector would widen each word and overflow the unchanged header.
+  assert.doesNotMatch(reserved[0].selector, /\.rxs-brand\s+span$/);
+});
+
+test("hero font swap reserves two rows only below its measured loaded one-line boundary", () => {
+  const reserved = sheet.rules.filter(({ body }) => declaration(body, "min-block-size"));
+  assert.equal(reserved.length, 1);
+  assert.match(reserved[0].selector, /\.rxs-hero-copy > p:first-child$/);
+  assert.deepEqual(reserved[0].context, ["@media (max-width: 467px)"]);
+  assert.equal(declaration(reserved[0].body, "min-block-size"), "calc(2lh + 6px)");
+});
+
 test("tokens carry the owner's palette and the scale; titles are Mincho 800, ledes Mincho 500, kickers one tracking, figures tabular", () => {
   // owner request 2026-10-21: TYPE (rx21)
   const tokens = sheet.rules.find(
