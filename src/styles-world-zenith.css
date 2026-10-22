@@ -1632,8 +1632,9 @@ html[data-family="world"]:root
    (its title read DECEPTION WORL at 1440). The edge now fades out over
    72px while frames remain beyond it, and the fade closes as the strip
    reaches its last frame (a scroll timeline on the strip itself: still
-   paint, no motion of its own). Keyboard focus drops the mask, which would
-   otherwise clip the strip's outer focus ring. Without scroll timelines
+   paint, no motion of its own). Keyboard focus on the strip or on a card's
+   control drops the mask, which would otherwise clip the strip's outer
+   focus ring or fade a focused card at the edge. Without scroll timelines
    the strip keeps its plain edge. */
 @property --zn-strip-fade {
   syntax: "<length>";
@@ -1673,7 +1674,7 @@ html[data-family="world"]:root
       body
       main.site-shell.film-edition.mirage-edition
       > #records
-      .episode-grid:focus-visible {
+      .episode-grid:is(:focus-visible, :has(:focus-visible)) {
       -webkit-mask-image: none;
       mask-image: none;
     }
