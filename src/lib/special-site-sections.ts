@@ -33,12 +33,21 @@ export const SPECIAL_SITE_SECTIONS: Record<SpecialSiteId, readonly SpecialSiteSe
     ["stages", "二つの運用段階", "STAGES"],
     ["system", "中核システム", "SYSTEM"],
   ],
-  // Provisional (2026-10-22): the scaffold's chapters, to grow with the site.
+  // 2026-10-22: the owner's record in full; performance, p16 and suitup are
+  // prepared chapters (準備中) on the page.
   "far-from": [
     ["top", "トップ", "TOP"],
     ["overview", "概要", "OVERVIEW"],
     ["specs", "スペック", "SPECS"],
+    ["performance", "性能比較", "COMPARISON"],
+    ["p16", "P16", "PROCESSOR"],
+    ["suitup", "スーツアップ", "SUIT-UP"],
     ["stages", "五つの形態段階", "STAGES"],
+    ["theories", "新規理論・中核機構", "CORE"],
+    ["system", "装甲・浮遊ユニットと統合OS", "SYSTEM"],
+    ["authority", "神属権限・継承能力", "AUTHORITY"],
+    ["arsenal", "追加武装", "ARSENAL"],
+    ["finishers", "必殺技", "FINISHER"],
   ],
   "final-stage": [
     ["top", "トップ", "TOP"],

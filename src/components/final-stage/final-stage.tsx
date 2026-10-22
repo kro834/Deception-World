@@ -733,13 +733,12 @@ export function FinalStage() {
           eyebrow={`RIDER RECORD 01 / ${FAR_FROM_SAGA.en}`}
           name={FAR_FROM_SAGA.name}
           sub={FAR_FROM_SAGA.stagesLine}
-          quote="レクソナンスの超共鳴と、ヴィンクルムの接続を一つの戦闘体系へ。ファイナルステージ限定の超究極フォーム。"
+          quote="遠く離れた機構までが、一つの拳になる。超共鳴と接続が出会う、ファイナルステージ限定の超究極フォーム。"
         >
           <CallOuts calls={FAR_FROM_SAGA.calls} label="ファーフロムサーガ 変身音声" />
 
           <div className="fst-spec-block">
             <SpecList rows={FAR_FROM_SAGA.specs} label="ファーフロムサーガ スペック" />
-            <p className="fst-note">{FAR_FROM_SAGA.specNote}</p>
           </div>
 
           <SubHeading kicker="OVERVIEW" title="概要" />
@@ -835,7 +834,7 @@ export function FinalStage() {
           />
 
           <SubHeading kicker="DIVINE AUTHORITY" title="神属権限・継承能力" />
-          <ArticleGrid items={FAR_FROM_SAGA.powers} columns={3} label="神属権限・継承能力" />
+          <ArticleGrid items={FAR_FROM_SAGA.powers} columns={2} label="神属権限・継承能力" />
 
           <SubHeading kicker="ARSENAL" title="追加武装" />
           <div className="fst-arsenal">
