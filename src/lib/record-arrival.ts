@@ -194,6 +194,28 @@ function textUnder(box: Box, anchor: HTMLElement, own = false) {
     return 0;
   const range = document.createRange();
   const counted = new Set<Node>();
+  const painted = new Map<Element, boolean>();
+  // Words the page does not paint (a stack of column titles where only the
+  // current one shows: /world's コラム) are no words under the tag.
+  const isPainted = (element: Element | null) => {
+    if (!element) return false;
+    const known = painted.get(element);
+    if (known !== undefined) return known;
+    let shown = true;
+    if (typeof element.checkVisibility === "function") {
+      shown = element.checkVisibility({ opacityProperty: true, visibilityProperty: true });
+    } else {
+      for (let at: Element | null = element; at && at !== document.body; at = at.parentElement) {
+        const style = getComputedStyle(at);
+        if (style.visibility === "hidden" || style.opacity === "0") {
+          shown = false;
+          break;
+        }
+      }
+    }
+    painted.set(element, shown);
+    return shown;
+  };
   let area = 0;
   const measure = (root: Element) => {
     const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
@@ -202,6 +224,7 @@ function textUnder(box: Box, anchor: HTMLElement, own = false) {
       if (counted.has(node) || !node.textContent?.trim() || (!own && anchor.contains(node)))
         continue;
       counted.add(node);
+      if (!isPainted(node.parentElement)) continue;
       budget -= 1;
       range.selectNodeContents(node);
       for (const line of range.getClientRects()) {

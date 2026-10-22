@@ -317,6 +317,10 @@ test("the reticle's tag never covers the page's words: the code alone, inside th
   assert.match(source, /textUnder\(at, anchor, name === "inside"\) === 0/);
   assert.match(source, /return \{ name: "none", compact: true \} as const;/);
   assert.doesNotMatch(source, /covered < least/);
+  // Owner (2026-10-22): words the page does not paint (the hidden titles of
+  // /world's column stack) do not keep the tag out.
+  assert.match(source, /checkVisibility\(\{ opacityProperty: true, visibilityProperty: true \}\)/);
+  assert.match(source, /if \(!isPainted\(node\.parentElement\)\) continue;/);
   // Chosen again while the route settles, and a tag left out while it shows.
   assert.match(source, /\(side === "none" && since < TAG_HOLD_MS\) \|\| \(since < SETTLE_MS && next !== chosenFor\)/);
   assert.match(css, /\.record-landing-tag\[data-compact\] > span \{\s*display: none;/);
