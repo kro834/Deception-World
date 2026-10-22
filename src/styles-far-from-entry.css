@@ -320,7 +320,7 @@ html body:has(.ffe-overlay) .zeus-button {
 }
 
 .ffe-sequence .rx-suit-callout.is-lock {
-  right: calc(100% - var(--rx-suit-cx) + 0.1 * var(--rx-suit-h));
+  right: calc(100% - var(--rx-suit-cx) + 0.28 * var(--rx-suit-h));
 }
 
 @media (orientation: landscape) and (min-aspect-ratio: 13 / 10) {
