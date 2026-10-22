@@ -473,7 +473,11 @@ export function scheduleRexonancePagePreload(preload: () => Promise<unknown>, de
     pagePreloaded = true;
     void preload()
       .then((matches) => {
-        // The route's head links (its stylesheets and fonts), once each.
+        // The route's head links (its stylesheets and fonts), once each. Not on
+        // /extreme-saga: Chrome logged ~20 "preloaded but not used" warnings
+        // there for Rexonance-only sheets, so the route chunk stays warm and
+        // its stylesheets/fonts are left to load on arrival.
+        if (window.location.pathname.startsWith("/extreme-saga")) return;
         const list = Array.isArray(matches) ? matches : [];
         for (const match of list as {
           links?: {
