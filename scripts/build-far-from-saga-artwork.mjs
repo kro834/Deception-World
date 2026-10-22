@@ -60,11 +60,11 @@ for (const [index, stage] of FAR_FROM_SAGA_STAGE_ORDER.entries()) {
     console.log(
       `  ${width}w: ${result.width}x${result.height}, ${result.size} bytes (q${quality})${over}`,
     );
-    if (width === FAR_FROM_SAGA_ARTWORK[stage].width) {
+    if (width === FAR_FROM_SAGA_ARTWORK_WIDTHS.at(-1)) {
       const expected = FAR_FROM_SAGA_ARTWORK[stage];
-      if (expected.height !== result.height)
+      if (expected.width !== result.width || expected.height !== result.height)
         console.warn(
-          `  !! FAR_FROM_SAGA_ARTWORK.${stage}.height is ${expected.height}; file is ${result.height}`,
+          `  !! FAR_FROM_SAGA_ARTWORK.${stage} is ${expected.width}x${expected.height}; file is ${result.width}x${result.height}`,
         );
     }
   }
