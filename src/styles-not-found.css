@@ -797,8 +797,13 @@
       [copy-start] minmax(0, 520px) [copy-end] var(--lr-pad-x) [plate-end] minmax(48px, 1.5fr);
   }
 
+  /* Round 2 (2026-10-22): the poster (112vh tall, so 74.7vh wide, on the
+     right) ended in a hard vertical edge mid-screen (x 768 at 1440 x 900,
+     1114 at 1920 x 1080); the first layer is solid ink up to that edge and
+     fades over 24vh into the picture. */
   .app-not-found.app-not-found::before {
     background:
+      linear-gradient(90deg, var(--lr-ink) calc(100% - 74.7vh), transparent calc(100% - 50.7vh)),
       linear-gradient(
         90deg,
         var(--lr-ink) 0 30%,
@@ -810,11 +815,13 @@
       url("/deception-world-poster-delivery.webp") right 12% / auto 112% no-repeat;
   }
 
+  /* The outlined number stood over the poster's own title (仮面ライダーサーガ)
+     at the foot; the slot carries the number, the frame keeps its marks. */
   .app-not-found.app-not-found::after {
     align-content: end;
     padding: 0 max(28px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom)) 0;
     font-size: clamp(160px, 22vw, 300px);
-    -webkit-text-stroke-color: rgb(122 232 255 / 16%);
+    -webkit-text-stroke-color: transparent;
   }
 
   .app-not-found.app-not-found > .app-not-found-sigil::after {
@@ -823,6 +830,45 @@
 
   .app-not-found.app-not-found > h1 {
     font-size: 42px;
+  }
+}
+
+/* Full HD and up (round 2, 2026-10-22): the case file at the screen's
+   scale (an 880px card with 12-13px labels on a 1920px screen). */
+@media (min-width: 1600px) and (min-height: 1000px) {
+  .app-not-found.app-not-found {
+    grid-template-columns:
+      minmax(48px, 0.9fr) [plate-start] var(--lr-pad-x) [slot-start] 264px [slot-end] 44px
+      [copy-start] minmax(0, 600px) [copy-end] var(--lr-pad-x) [plate-end] minmax(48px, 1.5fr);
+  }
+
+  .app-not-found.app-not-found > .app-not-found-sigil {
+    min-height: 320px;
+  }
+
+  .app-not-found.app-not-found > :is(span:not(.app-not-found-sigil), p:first-of-type) {
+    font-size: 13px;
+  }
+
+  .app-not-found.app-not-found > h1 {
+    font-size: 48px;
+  }
+
+  .app-not-found.app-not-found > p:last-of-type {
+    font-size: 17px;
+  }
+
+  .app-not-found.app-not-found > nav.recovery-tiles > a {
+    min-height: 150px;
+    padding: 16px;
+  }
+
+  .app-not-found.app-not-found > nav.recovery-tiles > a > small {
+    font-size: 13px;
+  }
+
+  .app-not-found.app-not-found > nav.recovery-tiles > a > b {
+    font-size: 15px;
   }
 }
 
