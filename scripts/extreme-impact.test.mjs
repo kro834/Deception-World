@@ -1,7 +1,13 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
-import { BEATS, formatTally, mountExtremeImpact, parseTally } from "../src/lib/extreme-impact.js";
+import {
+  BEATS,
+  DWELL_MS,
+  formatTally,
+  mountExtremeImpact,
+  parseTally,
+} from "../src/lib/extreme-impact.js";
 
 /* IMPACT (rx11) on /extreme-saga: src/styles-extreme-impact.css, the hit
    engine src/lib/extreme-impact.js and the hidden drawings and tallies in
@@ -844,6 +850,53 @@ test("a chained hit follows the one before it once, by its own delay, and never 
   assert.equal(v.timers.size, 0);
 });
 
+// Owner (2026-10-22): on a tall screen a ROUND head resting in the bottom
+// fifth showed its plate and kicker over an empty title for as long as the
+// reader paused. A default-line hit that stands on screen short of its line
+// now lands after the dwell; the trigger lines themselves are unchanged.
+test("a hit at rest short of its line lands after the dwell, once; leaving first cancels it", () => {
+  const t = setup();
+  const cleanup = t.mount();
+  const dwell = t.live((o) => o.options?.rootMargin === "0px 0px -64px 0px")[0];
+  assert.ok(dwell?.targets.has(t.heading));
+  assert.equal(dwell.targets.has(t.punch), false, "the mid line's hits keep to their line");
+  const rest = (visible) => dwell.callback([{ target: t.heading, isIntersecting: visible }], dwell);
+  rest(true);
+  rest(true);
+  t.tick(DWELL_MS - 1);
+  assert.equal(t.heading.getAttribute("data-exi-hit"), "");
+  // Scrolled back out before the dwell: nothing lands.
+  rest(false);
+  t.tick(DWELL_MS);
+  assert.equal(t.heading.getAttribute("data-exi-hit"), "");
+  rest(true);
+  t.tick(DWELL_MS);
+  assert.equal(t.heading.getAttribute("data-exi-hit"), "true");
+  assert.equal(t.live((o) => o.targets.has(t.heading)).length, 0);
+  t.tick(BEATS.hit);
+  assert.equal(t.heading.getAttribute("data-exi-hit"), "done");
+  cleanup();
+
+  // Its own line first: the pending dwell is dropped, the hit keys once.
+  const u = setup();
+  const cleanupU = u.mount();
+  u.tick(BEATS.arrival);
+  const dwellU = u.live((o) => o.options?.rootMargin === "0px 0px -64px 0px")[0];
+  dwellU.callback([{ target: u.heading, isIntersecting: true }], dwellU);
+  const base = u.live((o) => o.options?.rootMargin === "0px 0px -20% 0px")[0];
+  base.callback([{ target: u.heading, isIntersecting: true }], base);
+  assert.equal(u.heading.getAttribute("data-exi-hit"), "true");
+  u.tick(BEATS.hit);
+  assert.equal(u.heading.getAttribute("data-exi-hit"), "done");
+  assert.equal(u.timers.size, 0);
+  // A hidden page drops a pending dwell with every other beat.
+  dwellU.callback([{ target: u.stages, isIntersecting: true }], dwellU);
+  u.document.hidden = true;
+  u.document.emit("visibilitychange");
+  assert.equal(u.timers.size, 0);
+  cleanupU();
+});
+
 test("a tally counts up from zero over the owner's figure, lands on it and never runs twice", () => {
   const t = setup();
   const cleanup = t.mount();
@@ -915,7 +968,9 @@ test("sub-tenth 3-decimal sprint times sweep down like a chronograph and clash r
   const rowFigure = clashRow.querySelector(".exi-figure");
   const rowCopy = clashRow.querySelector(".exi-tally");
   clashRow.setAttribute("data-exf-clash", "true");
-  t.mutate(t.comparison, [{ type: "attributes", attributeName: "data-exf-clash", target: clashRow }]);
+  t.mutate(t.comparison, [
+    { type: "attributes", attributeName: "data-exf-clash", target: clashRow },
+  ]);
   assert.equal(rowFigure.getAttribute("data-exi-counting"), "true");
   t.tick(300);
   t.flush();

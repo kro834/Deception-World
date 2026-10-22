@@ -143,6 +143,20 @@ html[data-family="special"]
   }
 }
 
+/* Round 2: on a phone the eyebrow takes two lines (THE SUPREME / ARRIVAL OF
+   SA-GA); at the inherited 1.2 leading they touched. */
+@media (max-width: 760px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    .exs-hero
+    .rxs-hero-copy
+    > p:first-child {
+    line-height: 1.45;
+    text-wrap: balance;
+  }
+}
+
 @media (min-width: 761px) and (max-width: 1366px) {
   html[data-family="special"]
     body
@@ -710,7 +724,6 @@ html[data-family="special"]
     max-width: none;
     margin-top: 20px;
   }
-
 }
 
 /* Phones: one list a row (the FIGHT CARD's two columns, held by its ID
@@ -933,7 +946,11 @@ html[data-family="special"]
     column-gap: 0;
   }
 
-  html[data-family="special"] body .rxs-page.rxs-page.exs-page > #stages .rxs-stage-switcher::before {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #stages
+    .rxs-stage-switcher::before {
     content: "";
     grid-column: 2;
     grid-row: 1 / span 2;
@@ -989,7 +1006,13 @@ html[data-family="special"]
 /* ================================================================
    9. ROUND 4: the moves lift, their codes at the floor
    ================================================================ */
-html[data-family="special"] body .rxs-page.rxs-page.exs-page > #system .rxs-system-grid header small {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #system
+  .rxs-system-grid
+  header
+  small {
   max-width: 14em;
   font-size: 12px;
   letter-spacing: 0.1em;
@@ -1025,7 +1048,14 @@ html[data-family="special"]
   body
   .rxs-page.rxs-page.exs-page
   > :is(#performance, #p14, #stages, #system, .exs-hero, .rxs-local-nav, .rxs-footer)
-  :is(nav a, .exs-opponent-options button, .rxs-scroll-cue, a.exo-door, a.rxs-footer-return, .rxs-brand):focus-visible {
+  :is(
+    nav a,
+    .exs-opponent-options button,
+    .rxs-scroll-cue,
+    a.exo-door,
+    a.rxs-footer-return,
+    .rxs-brand
+  ):focus-visible {
   outline: 2px solid var(--exz-outline, #ffe1a1);
   outline-offset: -4px;
 }
@@ -1043,7 +1073,11 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer > a:f
   --exz-ring: #080807;
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer > a:focus-visible::after {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > .rxs-footer
+  > a:focus-visible::after {
   content: "";
   position: absolute;
   z-index: 2;
@@ -1115,7 +1149,11 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer > a:f
       inset 0 0 0 1px rgb(114 228 255 / 52%);
   }
 
-  html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-catalog-details > summary:hover {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    .exs-catalog-details
+    > summary:hover {
     color: #ffffff;
   }
 
@@ -1342,6 +1380,90 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer > a:f
 }
 
 /* ================================================================
+   13b. Round 2: words that stay whole
+   ================================================================ */
+/* The challenger's figure keeps its （est.）, and the note after it moves
+   to the next line whole: 5000.0m / （est.）, 0.4秒 / （est.） broke inside
+   the figure at 834 and 320, / ヴィンク / ルムが約4.84倍 inside the name at
+   1194. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #performance
+  .rxs-comparison-metrics
+  article
+  > p
+  > b {
+  white-space: nowrap;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #performance
+  .rxs-comparison-metrics
+  article
+  > p
+  > span {
+  display: inline-block;
+}
+
+/* A narrow copy column beside the art (681-899: iPad Mini, iPad Pro 11
+   portrait): the two fact cards were 83-109px wide and broke 一つの結|果へ
+   固定 and 勝利経路|を増殖 inside their words. Each fact reads across one
+   row, label then value (the values share one column), at the cards' old
+   height; the points close up so
+   LEARNING and DARK MATTER CHARGING share a row from 768px (three rows
+   there grew the panel 71px past ULTRA's on every change of form). */
+@media (min-width: 681px) and (max-width: 899px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #stages
+    #exs-stage-panel
+    .exs-form-facts {
+    grid-template-columns: max-content minmax(0, 1fr);
+    gap: 8px 0;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #stages
+    #exs-stage-panel
+    .exs-form-facts
+    > div {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
+    align-items: baseline;
+    column-gap: 14px;
+    padding: 12px 16px;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #stages
+    #exs-stage-panel
+    .exs-form-facts
+    dt {
+    margin: 0;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #stages
+    #exs-stage-panel
+    > div
+    > ul
+    > li {
+    padding-inline: 11px 12px;
+  }
+}
+
+/* ================================================================
    14. Calm tiers and forced colours
    ================================================================ */
 @media (prefers-reduced-motion: reduce) {
@@ -1415,7 +1537,11 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer > a:f
     background: CanvasText;
   }
 
-  html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-opponent-options button::before {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    .exs-opponent-options
+    button::before {
     background: ButtonText;
   }
 
@@ -1425,7 +1551,11 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer > a:f
     --exz-outline: Highlight;
   }
 
-  html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer > a:focus-visible::after {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > .rxs-footer
+    > a:focus-visible::after {
     content: none;
   }
 
@@ -1435,5 +1565,72 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer > a:f
     .exs-opponent-options
     button[aria-pressed="true"]::before {
     background: HighlightText;
+  }
+
+  /* Round 2: Chrome lays a Canvas backplate under every run of text. A big
+     figure's run stands taller than its line (the display face's ascent and
+     descent), so its plate covered the words around it: PUNCH POWER /
+     EXTREME and 100M TIME (9px at 1440), パンチ力 and its row labels, 基準比
+     and the 倍 / 差分 line, the tops of the CORE boxes. The figures draw in
+     the text colour themselves, with no plate. */
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page .exi-figure,
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page .exi-figure > .exi-real {
+    forced-color-adjust: none;
+    color: CanvasText;
+    -webkit-text-fill-color: CanvasText;
+    background: none;
+    text-shadow: none;
+    -webkit-text-stroke: 0;
+    filter: none;
+  }
+
+  /* The specs' joint keeps the overdrive sheet's forced line (CanvasText,
+     no adjust): the editorial gold burst, its gold border and its glow
+     outranked it. */
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page > #system .rxs-specs > .exo-joint {
+    border-color: CanvasText;
+    background: CanvasText;
+    box-shadow: none;
+  }
+
+  /* The selected plates (the pill, the chapter in view, the pressed
+     opponent) keep their system colours and drop the backplate: on the plate
+     it drew HighlightText on Canvas, the number 01-04 and the opponent's name
+     as nothing at all. */
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page .rxs-brand > span,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    .rxs-local-nav
+    nav
+    a[aria-current="location"]
+    > span {
+    forced-color-adjust: none;
+    box-shadow: none;
+    text-shadow: none;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    .exs-opponent-options
+    button[aria-pressed="true"] {
+    forced-color-adjust: none;
+    color: HighlightText;
+    background: Highlight;
+    border-color: Highlight;
+    box-shadow: none;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    .exs-opponent-options
+    button[aria-pressed="true"]
+    :is(span, small) {
+    color: HighlightText;
+    -webkit-text-fill-color: HighlightText;
+    background: none;
+    text-shadow: none;
   }
 }
