@@ -1411,6 +1411,27 @@ const facePixels = (glow, visor) => {
   }
   return squares;
 };
+// The reactor's light is generated the same way as the compound eyes
+// (owner, 2026-10-23: it popped in whole): pixel squares fill the disc in
+// burst groups, hold over the ignition, then scatter to show it lit.
+const REACTOR_PIXELS = [0.872, 0.935];
+const reactorPixels = (core) => {
+  if (!core) return [];
+  const random = seededRandom(2023);
+  const [cx, cy] = core;
+  const radius = REACTOR_RADIUS * 0.82;
+  const squares = [];
+  for (let tries = 0; squares.length < 96 && tries < 2000; tries += 1) {
+    const x = cx + (random() * 2 - 1) * radius;
+    const y = cy + (random() * 2 - 1) * radius;
+    const r = Math.hypot(x - cx, y - cy);
+    if (r > radius) continue;
+    const size = [4, 5, 6, 8][squares.length % 4];
+    const tone = squares.length % 7 === 0 ? 2 : r < radius * 0.45 ? 1 : 0;
+    squares.push({ x: x - size / 2, y: y - size / 2, size, tone, group: squares.length % 6 });
+  }
+  return squares;
+};
 const BURSTS = [
   [3.4, -14],
   [4.6, 10],
@@ -1531,6 +1552,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   let settled = null;
   let settledCount = 0;
   let pixels = null;
+  let reactorSquares = null;
   let view = null;
   let lastProgress = -1;
   let calmTimer = 0;
@@ -2229,6 +2251,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
           : null;
         if (!active()) return;
         const nextPixels = facePixels(config.glow, config.visor);
+        const nextReactorPixels = reactorPixels(config.core);
         mark("cpu-preparation-probe");
         cpuPreparation = await idleTask(() => active() && supportsCpuPreparation(document));
         if (!active()) return;
@@ -2602,6 +2625,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         plan = nextPlan;
         goldPlan = nextGold;
         pixels = nextPixels;
+        reactorSquares = nextReactorPixels;
         settled = nextSettled;
         settledCount = 0;
         lights = nextLights;
@@ -3520,6 +3544,36 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         }
         context.restore();
       }
+    }
+
+    // The reactor's light forms from pixel squares like the eyes: they
+    // fill the disc, hold while it ignites under them, then scatter.
+    if (reactorSquares?.length && progress >= REACTOR_PIXELS[0] && progress < REACTOR_PIXELS[1]) {
+      const [rx, ry] = config.core;
+      const [from, to] = REACTOR_PIXELS;
+      const fill = clamp01((progress - from) / 0.02);
+      const burst = smooth(clamp01((progress - (to - 0.025)) / 0.025));
+      for (let group = 0; group < 6; group += 1) {
+        if (fill * 6 < group + 0.5) continue;
+        const [scale, turn] = BURSTS[group];
+        const k = 1 + (scale - 1) * burst;
+        context.save();
+        context.translate(rx, ry);
+        context.rotate((turn * Math.PI * burst) / 180);
+        context.scale(k, k);
+        context.translate(-rx, -ry);
+        context.globalAlpha = 0.95 * (1 - burst);
+        for (let tone = 0; tone < 3; tone += 1) {
+          context.fillStyle = TONE_CSS[tone];
+          context.beginPath();
+          for (const square of reactorSquares)
+            if (square.group === group && square.tone === tone)
+              context.rect(square.x, square.y, square.size, square.size);
+          context.fill();
+        }
+        context.restore();
+      }
+      context.globalAlpha = 1;
     }
 
     // The core ignites and rings out.
