@@ -950,8 +950,8 @@ html[data-family="library"] .search-page .search-more-option > b {
    count at the bar's lower right. A tall tile (closing a row of cards) sets
    the name down its column like the cards' spines, under the kind's
    outlined mark and above the tile's fade, sized from the name's run
-   (record-art.tsx --dxl-plate-em / -n), wrapping to a second line when the
-   run is long. Decorative (aria-hidden): the label and the count carry it. */
+   (record-art.tsx --dxl-plate-em / -n), wrapping to a second line between
+   words when the run is long. Decorative (aria-hidden): the label and the count carry it. */
 html[data-family="library"] .search-page .search-more-peek > .dxl-art[data-plate="type"] > b {
   --dxl-plate-ls: 0.08;
   top: calc(18px + 22cqh);
@@ -992,9 +992,9 @@ html[data-family="library"]
   --dxl-plate-ls: 0.16;
 }
 
-/* The name's words (record-art.tsx peekWords): a second line starts at a
+/* A plate's words (record-art.tsx plateRun): a second line starts at a
    word, never inside one that fits its line. */
-html[data-family="library"] .search-page .search-more-peek > .dxl-art[data-plate="type"] > b > span {
+html[data-family="library"] .dxl-art[data-plate="type"] > b > span {
   display: inline-block;
 }
 
@@ -1086,15 +1086,27 @@ html[data-family="library"]
   > .dxl-art[data-plate="type"]
   > b {
   --dxl-plate-ls: 0.08;
+  --dxl-plate-run: calc(var(--dxl-plate-em, 4) + var(--dxl-plate-n, 4) * var(--dxl-plate-ls));
+  /* One line when the run fits at 18px or more; a longer run (a world
+     term's マキャベルゴアナイトメア, “犬”と“イサク”の謎, which lost its last
+     four letters at 18px) is set in two balanced lines, up to 26px. */
   font-size: clamp(
     18px,
-    min(
-      24cqw,
-      (100cqh - 46px) * 0.9 /
-        (var(--dxl-plate-em, 4) + var(--dxl-plate-n, 4) * var(--dxl-plate-ls))
+    max(
+      min(
+        24cqw,
+        (100cqh - 46px) * 0.9 /
+          (var(--dxl-plate-em, 4) + var(--dxl-plate-n, 4) * var(--dxl-plate-ls))
+      ),
+      min(13cqw, 26px, (100cqh - 46px) * 1.8 / var(--dxl-plate-run))
     ),
     48px
   );
+  /* The foot's fade holds no letter: the lines end above it. */
+  padding-bottom: 14px;
+  white-space: normal;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
 }
 
 html[data-family="library"]
@@ -1104,13 +1116,16 @@ html[data-family="library"]
   --dxl-plate-ls: 0.16;
 }
 
-/* Phones' row cards keep their 18px spine (their names fit it). */
+/* Phones' row cards keep their 18px spine (a long name takes two lines),
+   set in from the spine's right edge: the STAGE half-width shift put the
+   first of two lines past the window. */
 @media (max-width: 439px) {
   html[data-family="library"]
     :is(.library-card, .search-result-card)
     > .dxl-art[data-plate="type"]
     > b {
     font-size: 18px;
+    translate: none;
   }
 }
 

@@ -42,8 +42,11 @@ test("a card's plate fits its name to the window's height from the name's run", 
   );
   assert.match(zenith, /\(100cqh - 46px\) \* 0\.9 \/\s*\(var\(--dxl-plate-em, 4\) \+ var\(--dxl-plate-n, 4\) \* var\(--dxl-plate-ls\)\)/);
   const frame = readFileSync(new URL("../src/components/library/record-art.tsx", import.meta.url), "utf8");
-  // Owner (2026-10-22): the see-all strip's plates carry word seams (peekWords); cards keep the plain run.
-  assert.match(frame, /<b style=\{plateRunStyle\(plateWords\(title\)\)\}>\s*\{slot === "peek" \? peekWords\(plateWords\(title\)\) : plateWords\(title\)\}\s*<\/b>/);
+  // Owner (2026-10-22): a plate's name is set as its words (plateRun), so a long run wraps between them.
+  assert.match(frame, /<b style=\{plateRunStyle\(plateWords\(title\)\)\}>\{plateRun\(plateWords\(title\)\)\}<\/b>/);
+  // A run too long for one line at 18px takes two balanced lines, clear of the foot's fade.
+  assert.match(zenith, /min\(13cqw, 26px, \(100cqh - 46px\) \* 1\.8 \/ var\(--dxl-plate-run\)\)/);
+  assert.match(zenith, /padding-bottom: 14px;\s*white-space: normal;\s*text-wrap: balance;/);
 
   const source = ts.transpileModule(
     readFileSync(new URL("../src/lib/record-art.ts", import.meta.url), "utf8"),
@@ -76,7 +79,7 @@ test("the see-all strip shows a picture-less record's whole name, never a faded 
   assert.match(block, /mask-image: none;/);
   assert.match(block, /@container \(max-height: 180px\) \{[\s\S]*max-block-size: 2\.9em;[\s\S]*writing-mode: horizontal-tb;/);
   assert.match(block, /@container \(max-height: 180px\) and \(max-width: 559px\) \{[\s\S]*:nth-child\(n \+ 2\) \{\s*display: none;/);
-  assert.match(block, /> b > span \{\s*display: inline-block;/);
+  assert.match(zenith, /\.dxl-art\[data-plate="type"\] > b > span \{\s*display: inline-block;/);
   const frame = readFileSync(new URL("../src/components/library/record-art.tsx", import.meta.url), "utf8");
   assert.match(frame, /withWordBreaks\(words\)\s*\.replace\(\/\(\[”」』\]\[とのや\]\)\(\?=\[“「『\]\)\/gu, "\$1\\u200b"\)\s*\.split\("\\u200b"\)/);
 });
