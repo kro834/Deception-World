@@ -238,3 +238,54 @@ test("the calls are a labelled list and the Royal visual shares the record-art c
     }
   }
 });
+
+// Owner (2026-10-22): round 2 — calls break only between shouts, the end card keeps the
+// Zeus button's corner free on phones, the phone strip's ring stays inside its link.
+test("a call breaks only between its shouts, with the data's characters unchanged", async () => {
+  const page = await read("src/components/final-stage/final-stage.tsx");
+  const shouts = page.match(
+    /const callShouts = \(call: string\) => call\.match\((\/[^/]+\/g)\) \?\? \[call\];/,
+  );
+  assert.ok(shouts, "callShouts");
+  const pattern = new RegExp(shouts[1].slice(1, -2), "g");
+  const data = await read("src/components/final-stage/final-stage-data.ts");
+  const calls = [...data.matchAll(/calls: \[([^\]]*)\]/g)].flatMap(([, list]) =>
+    [...list.matchAll(/"([^"]+)"/g)].map(([, call]) => call),
+  );
+  assert.ok(calls.length > 20, String(calls.length));
+  for (const call of calls) {
+    const parts = call.match(pattern) ?? [call];
+    assert.equal(parts.join(""), call);
+  }
+  assert.deepEqual("SA-GA！SA-GA！SA-GA！DEUS！！！".match(pattern), [
+    "SA-GA！",
+    "SA-GA！",
+    "SA-GA！",
+    "DEUS！！！",
+  ]);
+  assert.match(
+    page,
+    /\{callShouts\(call\)\.map\(\(shout, part\) => \(\s*<span key=\{part\}>\{shout\}<\/span>/,
+  );
+  const { rules } = parse(await read(SHEET));
+  const nowrap = rules.find(({ selector }) => /\.fst-calls b > span > span$/.test(selector));
+  assert.ok(nowrap && declarations(nowrap.body, "white-space").includes("nowrap"));
+});
+
+test("on phones the end card keeps the Zeus corner clear and the strip's ring inside its link", async () => {
+  const { rules } = parse(await read(SHEET));
+  const footer = rules.find(
+    ({ selector, context }) =>
+      /> \.fst-footer$/.test(selector) && context.includes("@media (max-width: 480px)"),
+  );
+  assert.ok(footer);
+  const [padding] = declarations(footer.body, "padding-bottom");
+  // 60px button + 12px edge + 10px control gap, with the safe area on top.
+  const floor = Number(padding.match(/calc\((\d+)px \+ env\(safe-area-inset-bottom/)?.[1] ?? 0);
+  assert.ok(floor >= 82, padding);
+  const ring = rules.find(({ selector }) =>
+    /> \.rxs-local-nav nav a:focus-visible$/.test(selector),
+  );
+  assert.ok(ring && ring.context.includes("@media (max-width: 599.98px)"));
+  assert.equal(declarations(ring.body, "outline-offset").at(-1), "-3px");
+});

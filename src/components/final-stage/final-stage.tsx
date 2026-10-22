@@ -55,6 +55,11 @@ function bindRail<K extends string>(
   };
 }
 
+/* A call's shouts: each run up to and with its ！ ("SA-GA！", "DEUS！！！").
+   The zenith sheet keeps each whole, so a call wraps only between them,
+   never at a shout's hyphen or space. The characters are the data's. */
+const callShouts = (call: string) => call.match(/[^！]+！*|！+/g) ?? [call];
+
 /* The calls are an ordered sequence; as a list the label is announced
    (a name on a plain div is ignored) with the count of calls. */
 function CallOuts({ calls, label }: { calls: readonly string[]; label: string }) {
@@ -62,7 +67,11 @@ function CallOuts({ calls, label }: { calls: readonly string[]; label: string })
     <div className="fst-calls" role="list" aria-label={label}>
       {calls.map((call, index) => (
         <b key={`${call}-${index}`} role="listitem">
-          {call}
+          <span>
+            {callShouts(call).map((shout, part) => (
+              <span key={part}>{shout}</span>
+            ))}
+          </span>
         </b>
       ))}
     </div>

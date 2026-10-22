@@ -29,9 +29,10 @@
    gated by reduced motion, economy rendering, the open menu, the load
    gate and open dialogs; nothing loops. Labels hold the 12px floor and
    hit targets 44px. Markup (src/components/final-stage/final-stage.tsx):
-   CallOuts is a labelled list (role=list / listitem), and the Realm Royal
-   visuals list the record-art candidates (srcset/sizes) on both the card
-   and the record's figure.
+   CallOuts is a labelled list (role=list / listitem) whose calls set each
+   shout (a run up to its ！) in its own span, and the Realm Royal visuals
+   list the record-art candidates (srcset/sizes) on both the card and the
+   record's figure.
    ================================================================ */
 
 html[data-family="special"] body .rxs-page.rxs-page.fst-page {
@@ -377,6 +378,20 @@ html[data-family="special"]
   color: rgb(5 6 26 / 70%);
 }
 
+/* A call breaks between its shouts, never inside one (the markup sets
+   each run up to its ！ apart): "SA-GA！" no longer broke at its hyphen
+   on a 320px phone, nor "FAR FROM！" at its space. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.fst-page
+  .fst-pickup-dialog
+  .fst-calls
+  b
+  > span
+  > span {
+  white-space: nowrap;
+}
+
 /* One call alone (a finisher with a single line) needs no number. */
 html[data-family="special"]
   body
@@ -571,6 +586,21 @@ html[data-family="special"]
   }
 }
 
+/* 320px: five stages want 285px and the rail had 260px, so MIDDLE kept
+   1px each side and エックスハイ touched its tab's edges. The rail gives
+   its 4px seams and half its inner margin to the tabs (the lens and the
+   tabs' own frames still part them). */
+@media (max-width: 340px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.fst-page
+    .fst-pickup-dialog
+    :is(.fst-ffs-stage-tabs, .fst-rr-form-tabs).rxs-stage-tabs.liquid-swipe-tabs {
+    gap: 0;
+    padding-inline: 3px;
+  }
+}
+
 /* The arsenal's names break at their own seams (・／), never inside a
    word (レルムスレイ／ヤー); a phone gives each name its own row. */
 html[data-family="special"] body .rxs-page.rxs-page.fst-page .fst-pickup-dialog .fst-arsenal li {
@@ -657,15 +687,16 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer {
   border-top: 0;
 }
 
-/* Portrait tablets watch the last frame as a widescreen picture: the
-   bars take what the portrait screen has beyond a 1.6:1 picture (300px
-   each on an 11-inch iPad), so the end card is a frame in the middle of
-   the glass, not a short title in a tall empty house. */
+/* Portrait tablets watch the last frame as a square picture: the bars
+   take what the portrait screen has beyond a picture as tall as the
+   glass is wide (140px each on an 11-inch iPad, 100px on an iPad mini),
+   so the end card is a framed shot, not a short title in a tall empty
+   house. (A 1.6:1 picture left 300px bars that read as a blank screen.) */
 @media (orientation: portrait) and (min-width: 600px) and (max-width: 1099.98px) {
   html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer {
     --fsz-bar: max(
       clamp(28px, 6.4svh, 72px),
-      calc((100svh - var(--rxs-local-nav-reserve, var(--dxs-nav, 77px)) - 62vw) / 2)
+      calc((100svh - var(--rxs-local-nav-reserve, var(--dxs-nav, 77px)) - 100vw) / 2)
     );
     padding-top: calc(var(--fsz-bar) + clamp(56px, 6svh, 96px));
     padding-bottom: calc(var(--fsz-bar) + 32px);
@@ -761,6 +792,20 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer > a.r
   background: none;
 }
 
+/* Phones: the Zeus button's home (the screen's bottom-right corner, 60px
+   and 12px or the safe area off the edge, 10px clear of any control) is
+   kept free under the way home at the page's end. With the last link
+   81px off the bottom at 320x640, the corner was 2px short, so the button
+   took the next spot up on the end card's right: the title. */
+@media (max-width: 480px) {
+  html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer {
+    padding-bottom: max(
+      calc(var(--fsz-bar) + clamp(40px, 6svh, 72px)),
+      calc(92px + env(safe-area-inset-bottom, 0px))
+    );
+  }
+}
+
 @media (max-width: 680px) {
   /* The slate holds one centred line at 390px (tighter tracking, less
      plate), two balanced lines under 360px. */
@@ -842,6 +887,18 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer > a.r
     font-size: 12px;
     letter-spacing: 0.06em;
     white-space: nowrap;
+  }
+
+  /* The strip's links start at the DW mark's foot: a ring 3px outside
+     the link crossed the mark (4px at 390 and 320) and ran past the bar's
+     lower edge. Drawn inside the link, it frames the chapter in the strip. */
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.fst-page
+    > .rxs-local-nav
+    nav
+    a:focus-visible {
+    outline-offset: -3px;
   }
 
   /* The strip is a chapter index: each link carries its number (silent
