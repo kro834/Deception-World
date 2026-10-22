@@ -1,65 +1,110 @@
 /* ================================================================
-   FAR FROM SAGA — #performance console and #p16 frame
-   (far-from-comparison.tsx, far-from-p16.tsx)
+   FAR FROM SAGA — #performance console, #report documents and #p16
+   (far-from-comparison.tsx, far-from-report.tsx, far-from-p16.tsx)
 
    Imported by styles-far-from-saga.css. Every rule is scoped to
-   .ffs-page. The only motion is the bars easing to a new length when the
-   view changes; prefers-reduced-motion removes it.
+   .ffs-page. Type follows the Rexonance chapters: Mincho for chapter,
+   document and plate titles (and the documents' opening paragraphs), the
+   page's gothic for reading text, tabular figures for every number.
+   The chart's four form hues were checked as a set against the console's
+   surface (lightness band, colour-blind separation, contrast); identity is
+   never colour alone (every bar is named and its value printed).
+   Motion: bars ease to a new length when the view changes, a panel's
+   chevron turns, the P16 core's ring turns slowly; prefers-reduced-motion
+   removes all three.
    ================================================================ */
 
+.ffs-page {
+  /* Latin and figures come from a sans face with no Japanese glyphs (the
+     Rexonance titles forge theirs the same way), so a P16 or a 6.1 never
+     reads as serif; the Japanese falls through to the Mincho faces. */
+  --ffs-mincho:
+    "Helvetica Neue", "Segoe UI", Roboto, Arial, "Shippori Mincho B1", "Shippori Mincho",
+    "Hiragino Mincho ProN", "Hiragino Mincho Pro", "Yu Mincho", "YuMincho", "Noto Serif JP",
+    "Noto Serif CJK JP", "Source Han Serif JP", "BIZ UDPMincho", serif;
+  --ffs-text-2: #d3dbe5;
+  --ffs-text-3: #a7b2c0;
+  --ffs-line: rgb(255 255 255 / 9%);
+  --ffs-surface: rgb(255 255 255 / 3%);
+  --ffs-gold: #ffd77a;
+}
+
+.ffs-page .ffs-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
 .ffs-page .ffs-console,
-.ffs-page .ffs-text-compare,
-.ffs-page .ffs-citations-block,
+.ffs-page .ffs-reports,
 .ffs-page .ffs-p16-overview,
-.ffs-page .ffs-p16-lineup,
-.ffs-page .ffs-p16-flow {
+.ffs-page .ffs-p16-comparator,
+.ffs-page .ffs-p16-lineage,
+.ffs-page .ffs-p16-topics,
+.ffs-page .ffs-p16-note {
   box-sizing: border-box;
   max-width: 1180px;
-  margin-inline: auto;
   min-width: 0;
+  margin-inline: auto;
 }
 
-/* Sub-chapter heads (h3) shared by both sections. */
-.ffs-page .ffs-text-compare > header,
-.ffs-page .ffs-citations-block > header,
-.ffs-page .ffs-p16-lineup > header,
-.ffs-page .ffs-p16-flow > header {
-  margin-bottom: 18px;
+/* Mincho titles, cut close (palt), as on the Rexonance chapters. */
+.ffs-page .ffs-panel-head h3,
+.ffs-page .ffs-report-head h3,
+.ffs-page .ffs-report summary h4,
+.ffs-page .ffs-p16-copy > h3,
+.ffs-page .ffs-p16-comparator > header h3,
+.ffs-page .ffs-p16-lineage h3,
+.ffs-page .ffs-p16-topics h3,
+.ffs-page .ffs-p16-note h3 {
+  margin: 0;
+  color: var(--ffs-text);
+  font-family: var(--ffs-mincho);
+  font-weight: 700;
+  font-feature-settings: "palt" 1;
+  letter-spacing: 0.04em;
+  line-break: strict;
+  /* The shared sheets keep headings keep-all; a long Japanese title must
+     still wrap on a phone. */
+  word-break: normal;
+  overflow-wrap: anywhere;
 }
 
-.ffs-page .ffs-text-compare > header small,
-.ffs-page .ffs-citations-block > header small,
-.ffs-page .ffs-p16-lineup > header small,
-.ffs-page .ffs-p16-flow > header small,
-.ffs-page .ffs-p16-copy > small {
+/* Kickers: one size, one tracking. */
+.ffs-page .ffs-panel-head small,
+.ffs-page .ffs-report-head > small,
+.ffs-page .ffs-p16-copy > small,
+.ffs-page .ffs-p16-comparator > header small,
+.ffs-page .ffs-p16-lineage small,
+.ffs-page .ffs-p16-topics header small {
   display: block;
-  margin-bottom: 6px;
   color: var(--ffs-accent);
+  font-family: var(--rxs-font-display);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.22em;
 }
 
-.ffs-page .ffs-text-compare > header h3,
-.ffs-page .ffs-citations-block > header h3,
-.ffs-page .ffs-p16-lineup > header h3,
-.ffs-page .ffs-p16-flow > header h3,
-.ffs-page .ffs-p16-copy > h3 {
-  margin: 0;
-  color: var(--ffs-text);
-  font-family: var(--rxs-font-display);
-  font-size: clamp(20px, 2.4vw, 26px);
-  font-weight: 760;
-  letter-spacing: 0.02em;
-  line-height: 1.35;
-}
-
-.ffs-page .ffs-p16-lineup > header p,
-.ffs-page .ffs-p16-flow > header p {
-  margin: 8px 0 0;
-  color: var(--ffs-muted);
-  font-size: 13px;
-  line-height: 1.8;
+/* The 暫定 mark: wherever a provisional figure is printed. */
+.ffs-page .ffs-provisional-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border: 1px solid rgb(255 215 122 / 45%);
+  border-radius: 999px;
+  color: #ffe2a1;
+  background: rgb(255 215 122 / 8%);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  line-height: 1.5;
+  white-space: nowrap;
 }
 
 /* ---------------------------------------------------------------
@@ -67,7 +112,7 @@
    --------------------------------------------------------------- */
 
 .ffs-page .ffs-console {
-  padding: clamp(18px, 3vw, 32px);
+  padding: clamp(18px, 3vw, 36px);
   border: 1px solid rgb(127 230 255 / 16%);
   border-radius: var(--sc-radius, 22px);
   background:
@@ -79,7 +124,7 @@
 .ffs-page .ffs-console-head {
   display: grid;
   gap: 14px;
-  margin-bottom: clamp(18px, 3vw, 28px);
+  margin-bottom: clamp(22px, 3vw, 32px);
 }
 
 .ffs-page .ffs-views {
@@ -100,12 +145,16 @@
 
 .ffs-page .ffs-views > div {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 4px;
   padding: 4px;
   border: 1px solid rgb(255 255 255 / 10%);
   border-radius: 999px;
   background: rgb(0 0 0 / 34%);
+}
+
+.ffs-page .ffs-p16-switch > div {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .ffs-page .ffs-views label {
@@ -180,6 +229,11 @@
   display: inline-flex;
   gap: 8px;
   align-items: center;
+  transition: opacity 180ms ease;
+}
+
+.ffs-page .ffs-console-key li[data-dim] {
+  opacity: 0.4;
 }
 
 .ffs-page .ffs-console-key i {
@@ -189,6 +243,63 @@
   background: var(--ffs-col-accent);
 }
 
+/* The two panels: 基本性能比較 and 同条件ベンチマーク・暫定評価. */
+.ffs-page .ffs-panel + .ffs-panel {
+  margin-top: clamp(32px, 5vw, 48px);
+  padding-top: clamp(28px, 4vw, 40px);
+  border-top: 1px solid var(--ffs-line);
+}
+
+.ffs-page .ffs-panel-head {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.ffs-page .ffs-panel-head h3 {
+  font-size: clamp(21px, 2.3vw, 28px);
+  line-height: 1.35;
+}
+
+.ffs-page .ffs-panel-lede {
+  max-width: 46em;
+  margin: 2px 0 0;
+  color: var(--ffs-text-3);
+  font-size: 13px;
+  line-height: 1.85;
+}
+
+.ffs-page .ffs-bench-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  align-items: center;
+  margin: 4px 0 0;
+  color: #c3ccd7;
+  font-size: 12px;
+}
+
+.ffs-page .ffs-bench-badges > span:not(.ffs-provisional-tag) {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.ffs-page .ffs-bench-ref-key {
+  display: inline-block;
+  width: 0;
+  height: 14px;
+  border-left: 1px dashed rgb(255 255 255 / 55%);
+}
+
+.ffs-page .ffs-bench-badges i:not(.ffs-bench-ref-key),
+.ffs-page .ffs-bench-flag i {
+  color: var(--ffs-gold);
+  font-style: normal;
+  font-weight: 700;
+}
+
+/* Metric cards. */
 .ffs-page .ffs-metric-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -203,7 +314,7 @@
   padding: 18px;
   border: 1px solid rgb(255 255 255 / 8%);
   border-radius: 16px;
-  background: rgb(255 255 255 / 3%);
+  background: var(--ffs-surface);
 }
 
 .ffs-page .ffs-metric > header {
@@ -234,10 +345,10 @@
   overflow-wrap: anywhere;
 }
 
-.ffs-page .ffs-metric-trio > header strong {
+.ffs-page .ffs-metric-all > header strong {
+  color: #c3ccd7;
   font-size: 13px;
   font-weight: 600;
-  color: #c3ccd7;
 }
 
 .ffs-page .ffs-metric-result {
@@ -275,7 +386,8 @@
 }
 
 .ffs-page .ffs-bars span,
-.ffs-page .ffs-trio-bar {
+.ffs-page .ffs-all-bar,
+.ffs-page .ffs-p16-bars span {
   display: block;
   height: 8px;
   overflow: hidden;
@@ -284,15 +396,14 @@
 }
 
 .ffs-page .ffs-bars i,
-.ffs-page .ffs-trio-bar i {
+.ffs-page .ffs-all-bar i,
+.ffs-page .ffs-bench-track i,
+.ffs-page .ffs-p16-bars i {
   display: block;
+  min-width: 3px;
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(
-    90deg,
-    color-mix(in srgb, var(--ffs-col-accent) 55%, transparent),
-    var(--ffs-col-accent)
-  );
+  background: var(--ffs-col-accent);
   transform: scaleX(var(--ffs-bar, 0));
   transform-origin: left center;
   transition: transform 520ms cubic-bezier(0.22, 1, 0.36, 1);
@@ -310,14 +421,29 @@
 }
 
 .ffs-page .ffs-metric-base span:nth-child(2) {
-  color: #d3dbe5;
+  color: var(--ffs-text-2);
 }
 
 .ffs-page .ffs-metric-base span:nth-child(3) {
   flex-basis: 100%;
 }
 
-.ffs-page .ffs-trio {
+.ffs-page .ffs-cell-mark {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 0 6px;
+  border: 1px solid rgb(255 215 122 / 38%);
+  border-radius: 4px;
+  color: #ffe2a1;
+  font-family: var(--rxs-font-text);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  line-height: 1.6;
+  vertical-align: 0.15em;
+}
+
+.ffs-page .ffs-all {
   display: grid;
   gap: 10px;
   margin: 0;
@@ -325,7 +451,7 @@
   list-style: none;
 }
 
-.ffs-page .ffs-trio li {
+.ffs-page .ffs-all li {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 4px 10px;
@@ -333,12 +459,12 @@
   font-size: 12px;
 }
 
-.ffs-page .ffs-trio li > span:first-child {
-  color: var(--ffs-col-accent);
+.ffs-page .ffs-all li > span:first-child {
+  color: var(--ffs-text-2);
   font-weight: 600;
 }
 
-.ffs-page .ffs-trio b {
+.ffs-page .ffs-all b {
   color: var(--ffs-text);
   font-family: var(--rxs-font-display);
   font-size: 14px;
@@ -347,45 +473,17 @@
   text-align: right;
 }
 
-.ffs-page .ffs-trio-bar {
+.ffs-page .ffs-all-bar {
   grid-column: 1 / -1;
   height: 6px;
 }
 
-.ffs-page .ffs-floor {
-  margin-left: 2px;
-  color: #ffd77a;
-  font-size: 0.6em;
-  vertical-align: super;
-}
-
-.ffs-page .ffs-console-notes {
-  display: grid;
-  gap: 4px;
-  margin: clamp(18px, 3vw, 24px) 0 0;
-  padding: 16px 0 0;
-  border-top: 1px solid rgb(255 255 255 / 8%);
-  color: var(--ffs-muted);
-  font-size: 12px;
-  line-height: 1.75;
-  list-style: none;
-}
-
-.ffs-page .ffs-console-notes .ffs-floor {
-  margin: 0 2px 0 0;
-  font-size: 1em;
-  vertical-align: baseline;
-}
-
-/* Rows without a shared number. */
-.ffs-page .ffs-text-compare {
-  margin-top: clamp(40px, 6vw, 64px);
-}
-
+/* 加速機構 / 戦闘OS: names, not figures. */
 .ffs-page .ffs-text-rows {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 12px;
 }
 
 .ffs-page .ffs-text-row {
@@ -412,74 +510,537 @@
 
 .ffs-page .ffs-text-row dl > div {
   display: grid;
-  grid-template-columns: 6.5em minmax(0, 1fr);
+  grid-template-columns: 7.5em minmax(0, 1fr);
   gap: 10px;
   align-items: baseline;
 }
 
 .ffs-page .ffs-text-row dt {
-  color: var(--ffs-col-accent);
-  font-size: 11px;
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  color: var(--ffs-text-3);
+  font-size: 12px;
   font-weight: 600;
+}
+
+.ffs-page .ffs-text-row dt::before {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: var(--ffs-col-accent);
+  content: "";
 }
 
 .ffs-page .ffs-text-row dd {
   margin: 0;
-  color: #d3dbe5;
-  font-size: 13px;
-  line-height: 1.55;
+  color: var(--ffs-text);
+  font-family: var(--rxs-font-display);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.5;
   overflow-wrap: anywhere;
 }
 
-.ffs-page .ffs-text-row dd[data-kind="special"] {
-  color: #fff;
-  font-weight: 700;
+.ffs-page .ffs-text-row dd[data-pending] {
+  color: var(--ffs-text-3);
+  font-weight: 500;
 }
 
-.ffs-page .ffs-text-row dd[data-kind="none"] {
-  color: #6f7988;
+/* A table's ※ note, verbatim. */
+.ffs-page .ffs-table-note {
+  max-width: 60em;
+  margin: 16px 0 0;
+  color: var(--ffs-text-3);
+  font-size: 12px;
+  line-height: 1.85;
 }
 
-/* The owner's own comparison sentences. */
-.ffs-page .ffs-citations-block {
-  margin-top: clamp(40px, 6vw, 64px);
-}
-
-.ffs-page .ffs-citations {
+/* The provisional index chart. Columns: form | track | value; the axis and
+   every bar row share them, so the 100 line and the ticks line up. */
+.ffs-page .ffs-bench {
+  --ffs-bench-head: 0px;
+  --ffs-bench-cols: 6.4em minmax(0, 1fr) 3em;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.ffs-page .ffs-bench-axis {
+  display: grid;
+  grid-template-columns: var(--ffs-bench-head) minmax(0, 1fr);
+  gap: 0 24px;
+}
+
+.ffs-page .ffs-bench-axis-pad {
+  min-width: 0;
+}
+
+.ffs-page .ffs-bench-scale {
+  display: grid;
+  grid-template-columns: var(--ffs-bench-cols);
   gap: 10px;
+}
+
+.ffs-page .ffs-bench-ticks {
+  position: relative;
+  height: 18px;
+  color: var(--ffs-muted);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+.ffs-page .ffs-bench-ticks i {
+  position: absolute;
+  bottom: 0;
+  left: calc(var(--ffs-tick) * 100%);
+  font-style: normal;
+  translate: -50% 0;
+}
+
+.ffs-page .ffs-bench-ticks i:first-child {
+  translate: 0 0;
+}
+
+.ffs-page .ffs-bench-ticks i:last-child {
+  translate: -100% 0;
+}
+
+.ffs-page .ffs-bench-rows {
+  display: grid;
+  gap: 0;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.ffs-page .ffs-citations li {
+.ffs-page .ffs-bench-rows > li {
   display: grid;
-  align-content: start;
-  gap: 8px;
-  padding: 16px 18px;
-  border-left: 2px solid color-mix(in srgb, var(--ffs-accent) 55%, transparent);
-  background: rgb(255 255 255 / 2.5%);
-  color: #cfd7e2;
+  grid-template-columns: var(--ffs-bench-head) minmax(0, 1fr);
+  gap: 10px 24px;
+  align-items: center;
+  padding: 16px 0;
+  border-top: 1px solid var(--ffs-line);
+}
+
+.ffs-page .ffs-bench-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  align-items: baseline;
+  min-width: 0;
+}
+
+.ffs-page .ffs-bench-head h4 {
+  margin: 0;
+  color: var(--ffs-text);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.ffs-page .ffs-bench-flag {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+  padding: 1px 8px;
+  border: 1px solid rgb(255 215 122 / 40%);
+  border-radius: 999px;
+  color: #ffe2a1;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.ffs-page .ffs-bench-delta {
+  display: flex;
+  flex-basis: 100%;
+  gap: 10px;
+  align-items: baseline;
+  margin: 0;
+}
+
+.ffs-page .ffs-bench-delta b {
+  color: var(--ffs-accent);
+  font-family: var(--rxs-font-display);
+  font-size: 18px;
+  font-weight: 760;
+  font-variant-numeric: tabular-nums;
+}
+
+.ffs-page .ffs-bench-delta em {
+  color: var(--ffs-text-3);
+  font-size: 12px;
+  font-style: normal;
+  font-variant-numeric: tabular-nums;
+}
+
+.ffs-page .ffs-bench-rows ul {
+  display: grid;
+  gap: 5px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ffs-page .ffs-bench-rows ul li {
+  display: grid;
+  grid-template-columns: var(--ffs-bench-cols);
+  gap: 10px;
+  align-items: center;
+  transition: opacity 200ms ease;
+}
+
+.ffs-page .ffs-bench-rows ul li[data-dim] {
+  opacity: 0.34;
+}
+
+.ffs-page .ffs-bench-rows ul li > span:first-child {
+  color: var(--ffs-text-2);
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.ffs-page .ffs-bench-rows ul li > b {
+  color: var(--ffs-text);
+  font-family: var(--rxs-font-display);
   font-size: 13px;
-  line-height: 1.9;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
 }
 
-.ffs-page .ffs-citations small {
+.ffs-page .ffs-bench-track {
+  position: relative;
+  display: block;
+  height: 10px;
+  border-radius: 0 4px 4px 0;
+  background: rgb(255 255 255 / 4%);
+}
+
+.ffs-page .ffs-bench-track i {
+  border-radius: 0 4px 4px 0;
+}
+
+/* The 100 line: レクソナンス・ハイ. */
+.ffs-page .ffs-bench-track::after {
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  left: calc(var(--ffs-ref) * 100%);
+  border-left: 1px dashed rgb(255 255 255 / 50%);
+  content: "";
+}
+
+/* Heat load reads the other way: hatched, so it never passes for a gain. */
+.ffs-page .ffs-bench-rows > li[data-reading="load"] .ffs-bench-track i {
+  background:
+    repeating-linear-gradient(135deg, rgb(1 3 8 / 55%) 0 2px, transparent 2px 6px),
+    var(--ffs-col-accent);
+}
+
+.ffs-page .ffs-bench-rows > li[data-reading="load"] {
+  border-bottom: 1px solid var(--ffs-line);
+}
+
+.ffs-page .ffs-console-notes {
+  display: grid;
+  gap: 4px;
+  margin: clamp(22px, 3vw, 30px) 0 0;
+  padding: 16px 0 0;
+  border-top: 1px solid rgb(255 255 255 / 8%);
   color: var(--ffs-muted);
-  font-size: 10px;
-  letter-spacing: 0.14em;
-}
-
-.ffs-page .ffs-citations q,
-.ffs-page .ffs-p16-record q,
-.ffs-page .ffs-p16-flow q {
-  quotes: "「" "」";
+  font-size: 12px;
+  line-height: 1.75;
+  list-style: none;
 }
 
 /* ---------------------------------------------------------------
-   #p16 — the chapter's frame
+   #report — the owner's text, two documents
+   --------------------------------------------------------------- */
+
+.ffs-page .ffs-reports {
+  display: grid;
+  gap: clamp(28px, 4vw, 44px);
+  max-width: 1040px;
+}
+
+.ffs-page .ffs-report {
+  min-width: 0;
+  padding: clamp(22px, 4vw, 52px) clamp(18px, 4.4vw, 60px);
+  border: 1px solid var(--ffs-line);
+  border-radius: var(--sc-radius, 22px);
+  background:
+    radial-gradient(ellipse at 0% 0%, rgb(46 128 196 / 12%), transparent 55%),
+    linear-gradient(170deg, rgb(9 15 26 / 92%), rgb(3 6 13 / 90%));
+  scroll-margin-top: 84px;
+}
+
+.ffs-page .ffs-report-head {
+  display: grid;
+  gap: 12px;
+  padding-bottom: clamp(20px, 3vw, 28px);
+  border-bottom: 1px solid var(--ffs-line);
+}
+
+.ffs-page .ffs-report-head h3 {
+  font-size: clamp(24px, 3.1vw, 40px);
+  font-weight: 800;
+  line-height: 1.3;
+  /* Break at the title's <wbr> (after 「・」); anywhere only if a part
+     cannot fit alone. */
+  word-break: keep-all;
+}
+
+.ffs-page .ffs-report-sub {
+  margin: 0;
+  color: var(--ffs-text-3);
+  font-family: var(--rxs-font-display);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  line-height: 1.7;
+}
+
+.ffs-page .ffs-report-count {
+  margin: 0;
+  color: var(--ffs-muted);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+}
+
+/* The opening paragraphs: the document's lede, in Mincho text. */
+.ffs-page .ffs-report-intro {
+  max-width: 44em;
+  padding-top: clamp(20px, 3vw, 28px);
+}
+
+.ffs-page .ffs-report-intro p {
+  margin: 0 0 1.2em;
+  color: var(--ffs-text);
+  font-family: var(--ffs-mincho);
+  font-size: clamp(15px, 1.2vw + 10px, 17px);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  line-height: 2.05;
+  line-break: strict;
+  text-wrap: pretty;
+}
+
+.ffs-page .ffs-report-intro p:last-child {
+  margin-bottom: 0;
+}
+
+.ffs-page .ffs-report-tools {
+  display: flex;
+  justify-content: flex-end;
+  margin: clamp(20px, 3vw, 28px) 0 10px;
+}
+
+.ffs-page .ffs-report-tools button {
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1px solid rgb(127 230 255 / 30%);
+  border-radius: 999px;
+  color: var(--ffs-text);
+  background: rgb(127 230 255 / 6%);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease;
+}
+
+.ffs-page .ffs-report-tools button:hover {
+  border-color: rgb(127 230 255 / 55%);
+  background: rgb(127 230 255 / 12%);
+}
+
+.ffs-page .ffs-report-tools button:focus-visible,
+.ffs-page .ffs-report summary:focus-visible,
+.ffs-page .ffs-table-scroll:focus-visible {
+  outline: 2px solid var(--ffs-accent);
+  outline-offset: 2px;
+}
+
+.ffs-page .ffs-report-chapters {
+  margin: 0;
+  padding: 0;
+  border-bottom: 1px solid var(--ffs-line);
+  list-style: none;
+}
+
+.ffs-page .ffs-report-chapters > li {
+  border-top: 1px solid var(--ffs-line);
+}
+
+.ffs-page .ffs-report summary {
+  display: grid;
+  grid-template-columns: 2.6em minmax(0, 1fr) 28px;
+  gap: 12px;
+  align-items: center;
+  min-height: 60px;
+  padding: 10px 4px;
+  border-radius: 10px;
+  cursor: pointer;
+  list-style: none;
+  transition: background-color 180ms ease;
+}
+
+.ffs-page .ffs-report summary::-webkit-details-marker {
+  display: none;
+}
+
+.ffs-page .ffs-report summary:hover {
+  background: rgb(255 255 255 / 3%);
+}
+
+.ffs-page .ffs-report summary > span {
+  color: var(--ffs-accent);
+  font-family: var(--rxs-font-display);
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.16em;
+}
+
+.ffs-page .ffs-report summary h4 {
+  font-size: clamp(16px, 0.6vw + 13px, 20px);
+  line-height: 1.45;
+}
+
+/* The chevron: a plus that turns into a minus. */
+.ffs-page .ffs-report summary > i {
+  position: relative;
+  width: 28px;
+  height: 28px;
+  border: 1px solid rgb(255 255 255 / 16%);
+  border-radius: 50%;
+}
+
+.ffs-page .ffs-report summary > i::before,
+.ffs-page .ffs-report summary > i::after {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 10px;
+  height: 1.5px;
+  border-radius: 1px;
+  background: var(--ffs-text-2);
+  content: "";
+  translate: -50% -50%;
+  transition: rotate 220ms ease;
+}
+
+.ffs-page .ffs-report summary > i::after {
+  rotate: 90deg;
+}
+
+.ffs-page .ffs-report details[open] > summary > i::after {
+  rotate: 0deg;
+}
+
+.ffs-page .ffs-report details[open] > summary > i {
+  border-color: rgb(127 230 255 / 45%);
+}
+
+.ffs-page .ffs-report-body {
+  padding: 4px 0 clamp(22px, 3vw, 30px) calc(2.6em + 16px);
+}
+
+.ffs-page .ffs-report-body > p {
+  max-width: 42em;
+  margin: 0 0 1.25em;
+  color: var(--ffs-text-2);
+  font-size: 15px;
+  line-height: 2;
+  text-wrap: pretty;
+}
+
+.ffs-page .ffs-report-body > p:last-child {
+  margin-bottom: 0;
+}
+
+/* The owner's tables, as tables. */
+.ffs-page .ffs-report-table {
+  margin: 4px 0 1.6em;
+}
+
+.ffs-page .ffs-table-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--ffs-line);
+  border-radius: 14px;
+  background: rgb(0 0 0 / 22%);
+}
+
+.ffs-page .ffs-report-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.ffs-page .ffs-report-table th,
+.ffs-page .ffs-report-table td {
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--ffs-line);
+  font-size: 13px;
+  line-height: 1.45;
+  text-align: right;
+  vertical-align: middle;
+}
+
+.ffs-page .ffs-report-table tbody tr:last-child > * {
+  border-bottom: 0;
+}
+
+.ffs-page .ffs-report-table thead th {
+  color: var(--ffs-muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+.ffs-page .ffs-report-table th:first-child {
+  color: var(--ffs-text-3);
+  font-weight: 600;
+  text-align: left;
+}
+
+.ffs-page .ffs-report-table tbody th {
+  color: var(--ffs-text-2);
+  font-size: 12px;
+}
+
+.ffs-page .ffs-report-table td {
+  color: var(--ffs-text-2);
+  font-family: var(--rxs-font-display);
+  font-weight: 600;
+}
+
+.ffs-page .ffs-report-table [data-current] {
+  color: #fff;
+  background: rgb(127 230 255 / 7%);
+}
+
+.ffs-page .ffs-report-table thead [data-current] {
+  color: var(--ffs-accent);
+}
+
+.ffs-page .ffs-report-table figcaption {
+  margin-top: 12px;
+  color: var(--ffs-text-3);
+  font-size: 12px;
+  line-height: 1.85;
+}
+
+/* ---------------------------------------------------------------
+   #p16
    --------------------------------------------------------------- */
 
 .ffs-page .ffs-p16-overview {
@@ -487,99 +1048,106 @@
   grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
   gap: clamp(24px, 4vw, 56px);
   align-items: center;
-  padding: clamp(18px, 3vw, 32px);
+  padding: clamp(20px, 3.4vw, 44px);
   border: 1px solid rgb(127 230 255 / 14%);
   border-radius: var(--sc-radius, 22px);
-  background: linear-gradient(160deg, rgb(8 16 30 / 90%), rgb(3 7 15 / 88%));
+  background:
+    radial-gradient(circle at 22% 40%, rgb(46 128 196 / 16%), transparent 50%),
+    linear-gradient(160deg, rgb(8 16 30 / 90%), rgb(3 7 15 / 88%));
 }
 
-.ffs-page .ffs-p16-chip {
+/* The drawn core (no P16 artwork has been supplied). */
+.ffs-page .ffs-p16-core {
   display: grid;
   justify-items: center;
   gap: 12px;
   margin: 0;
 }
 
-/* A drawn placeholder package: no artwork for P16 has been supplied. */
-.ffs-page .ffs-p16-chip-frame {
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: min(100%, 300px);
-  aspect-ratio: 1;
-  border: 1px dashed rgb(127 230 255 / 32%);
-  border-radius: 18px;
-  background:
-    linear-gradient(rgb(127 230 255 / 6%) 1px, transparent 1px) 0 0 / 20px 20px,
-    linear-gradient(90deg, rgb(127 230 255 / 6%) 1px, transparent 1px) 0 0 / 20px 20px,
-    radial-gradient(circle at 50% 50%, rgb(46 128 196 / 22%), transparent 62%);
+.ffs-page .ffs-p16-core svg {
+  display: block;
+  width: min(100%, 320px);
+  height: auto;
 }
 
-.ffs-page .ffs-p16-chip-frame i {
-  position: absolute;
-  width: 18px;
-  height: 18px;
-  border-color: var(--ffs-accent);
-  border-style: solid;
-  border-width: 0;
+.ffs-page .ffs-p16-pins rect {
+  fill: rgb(127 230 255 / 38%);
 }
 
-.ffs-page .ffs-p16-chip-frame i:nth-child(1) {
-  top: 12px;
-  left: 12px;
-  border-top-width: 2px;
-  border-left-width: 2px;
+.ffs-page .ffs-p16-package {
+  fill: #07121f;
+  stroke: rgb(127 230 255 / 45%);
+  stroke-width: 1.5;
 }
 
-.ffs-page .ffs-p16-chip-frame i:nth-child(2) {
-  top: 12px;
-  right: 12px;
-  border-top-width: 2px;
-  border-right-width: 2px;
+.ffs-page .ffs-p16-die {
+  fill: url(#ffs-p16-die);
+  stroke: rgb(127 230 255 / 70%);
+  stroke-width: 1;
 }
 
-.ffs-page .ffs-p16-chip-frame i:nth-child(3) {
-  bottom: 12px;
-  left: 12px;
-  border-bottom-width: 2px;
-  border-left-width: 2px;
+.ffs-page .ffs-p16-trace {
+  fill: none;
+  stroke: rgb(127 230 255 / 40%);
+  stroke-width: 1.5;
+  stroke-linecap: round;
 }
 
-.ffs-page .ffs-p16-chip-frame i:nth-child(4) {
-  right: 12px;
-  bottom: 12px;
-  border-right-width: 2px;
-  border-bottom-width: 2px;
+.ffs-page .ffs-p16-ring {
+  fill: none;
+  stroke: rgb(255 215 122 / 70%);
+  stroke-width: 1.5;
+  stroke-dasharray: 6 7;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: ffs-p16-ring 24s linear infinite;
 }
 
-.ffs-page .ffs-p16-chip-frame b {
-  color: var(--ffs-text);
+.ffs-page .ffs-p16-label {
+  fill: #f2f8ff;
   font-family: var(--rxs-font-display);
-  font-size: clamp(54px, 7vw, 84px);
+  font-size: 30px;
   font-weight: 780;
   letter-spacing: 0.04em;
 }
 
-.ffs-page .ffs-p16-chip figcaption {
-  color: var(--ffs-muted);
-  font-size: 12px;
-  letter-spacing: 0.08em;
+@keyframes ffs-p16-ring {
+  to {
+    rotate: 360deg;
+  }
+}
+
+.ffs-page .ffs-p16-core figcaption {
+  padding: 3px 12px;
+  border: 1px dashed rgb(255 255 255 / 22%);
+  border-radius: 999px;
+  color: var(--ffs-text-3);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-align: center;
 }
 
 .ffs-page .ffs-p16-copy {
+  display: grid;
+  gap: 14px;
   min-width: 0;
 }
 
-.ffs-page .ffs-p16-copy > p {
-  margin: 12px 0 16px;
-  color: #cfd7e2;
-  font-size: 14px;
-  line-height: 1.9;
+.ffs-page .ffs-p16-copy > h3 {
+  font-size: clamp(24px, 2.6vw, 34px);
+  font-weight: 800;
+  line-height: 1.3;
 }
 
-.ffs-page .ffs-p16-units,
-.ffs-page .ffs-p16-lineup ol > li > ul,
-.ffs-page .ffs-p16-flow ol ul {
+.ffs-page .ffs-p16-copy > p {
+  margin: 0;
+  color: var(--ffs-text-2);
+  font-size: 15px;
+  line-height: 1.95;
+  text-wrap: pretty;
+}
+
+.ffs-page .ffs-p16-functions {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
@@ -588,225 +1156,638 @@
   list-style: none;
 }
 
-.ffs-page .ffs-p16-units li,
-.ffs-page .ffs-p16-lineup ol > li > ul li,
-.ffs-page .ffs-p16-flow ol ul li {
+.ffs-page .ffs-p16-functions li {
   padding: 6px 12px;
-  border: 1px solid rgb(255 255 255 / 12%);
+  border: 1px solid rgb(127 230 255 / 26%);
   border-radius: 999px;
-  color: #d3dbe5;
+  color: var(--ffs-text);
+  background: rgb(127 230 255 / 5%);
   font-size: 12px;
+  font-weight: 600;
   line-height: 1.4;
-  overflow-wrap: anywhere;
 }
 
-.ffs-page [data-processor] {
-  border-color: color-mix(in srgb, var(--ffs-col-accent, var(--ffs-accent)) 60%, transparent);
-  color: #fff;
-  font-weight: 700;
+.ffs-page .ffs-p16-figures {
+  margin-top: 4px;
+  padding-top: 16px;
+  border-top: 1px solid var(--ffs-line);
 }
 
-.ffs-page .ffs-p16-slots {
-  display: grid;
-  gap: 0;
-  margin: 20px 0 0;
-  border-top: 1px solid rgb(255 255 255 / 8%);
-}
-
-.ffs-page .ffs-p16-slots > div {
+.ffs-page .ffs-p16-figures > p {
   display: flex;
-  gap: 12px;
-  align-items: baseline;
-  justify-content: space-between;
-  padding: 10px 0;
-  border-bottom: 1px solid rgb(255 255 255 / 8%);
-}
-
-.ffs-page .ffs-p16-slots dt {
-  color: #c3ccd7;
-  font-size: 13px;
-}
-
-.ffs-page .ffs-p16-slots dd {
-  margin: 0;
-  color: var(--ffs-muted);
+  gap: 10px;
+  align-items: center;
+  margin: 0 0 12px;
+  color: var(--ffs-text-3);
   font-size: 12px;
   letter-spacing: 0.08em;
-  white-space: nowrap;
 }
 
-.ffs-page .ffs-p16-lineup {
-  margin-top: clamp(40px, 6vw, 64px);
-}
-
-.ffs-page .ffs-p16-lineup > ol {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  counter-reset: none;
-}
-
-.ffs-page .ffs-p16-lineup > ol > li {
-  display: grid;
-  align-content: start;
-  gap: 12px;
-  min-width: 0;
-  padding: 18px;
-  border: 1px solid rgb(255 255 255 / 8%);
-  border-top: 2px solid var(--ffs-col-accent);
-  border-radius: 16px;
-  background: rgb(255 255 255 / 2.5%);
-}
-
-.ffs-page .ffs-p16-lineup > ol > li[data-current] {
-  background: linear-gradient(180deg, rgb(127 230 255 / 8%), rgb(255 255 255 / 2.5%));
-}
-
-.ffs-page .ffs-p16-lineup > ol > li > p:first-child {
-  display: grid;
-  gap: 2px;
-  margin: 0;
-}
-
-.ffs-page .ffs-p16-lineup > ol > li > p:first-child b {
-  color: var(--ffs-text);
-  font-size: 15px;
-}
-
-.ffs-page .ffs-p16-lineup > ol > li > p:first-child small {
-  color: var(--ffs-muted);
-  font-size: 11px;
-}
-
-.ffs-page .ffs-p16-record {
-  display: grid;
-  gap: 4px;
-  margin: 0;
-  padding-top: 10px;
-  border-top: 1px solid rgb(255 255 255 / 8%);
-  color: #cfd7e2;
-  font-size: 13px;
-  line-height: 1.7;
-}
-
-.ffs-page .ffs-p16-record small {
-  color: var(--ffs-muted);
-  font-size: 10px;
-  letter-spacing: 0.12em;
-}
-
-.ffs-page .ffs-p16-flow {
-  margin-top: clamp(40px, 6vw, 64px);
-}
-
-.ffs-page .ffs-p16-flow > ol {
+.ffs-page .ffs-p16-figures dl {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 10px;
   margin: 0;
-  padding: 0;
-  list-style: none;
 }
 
-.ffs-page .ffs-p16-flow > ol > li {
-  position: relative;
+.ffs-page .ffs-p16-figures dl > div {
   display: grid;
-  align-content: start;
-  gap: 10px;
+  align-content: space-between;
+  gap: 8px;
+  min-width: 0;
+  padding-left: 12px;
+  border-left: 1px solid rgb(127 230 255 / 30%);
+}
+
+.ffs-page .ffs-p16-figures dt {
+  color: var(--ffs-text-3);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.ffs-page .ffs-p16-figures dd {
+  display: flex;
+  gap: 6px;
+  align-items: baseline;
+  margin: 0;
+  color: var(--ffs-text);
+  font-family: var(--rxs-font-display);
+  font-size: clamp(22px, 2.1vw, 28px);
+  font-weight: 760;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.ffs-page .ffs-p16-figures dd small {
+  color: var(--ffs-text-3);
+  font-family: var(--rxs-font-text);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* The generation comparator (Rexonance's P1 → P14, here P14 → P16). */
+.ffs-page .ffs-p16-comparator {
+  margin-top: clamp(28px, 4vw, 44px);
+  padding: clamp(20px, 3.4vw, 40px);
+  border: 1px solid rgb(127 202 233 / 18%);
+  border-radius: var(--sc-radius, 22px);
+  background:
+    radial-gradient(ellipse at 50% 0%, rgb(46 128 164 / 12%), transparent 68%),
+    linear-gradient(145deg, rgb(7 17 27 / 94%), rgb(4 9 17 / 88%));
+}
+
+.ffs-page .ffs-p16-comparator > header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.ffs-page .ffs-p16-comparator > header h3 {
+  margin-top: 6px;
+  font-size: clamp(22px, 2.4vw, 30px);
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.ffs-page .ffs-p16-switch {
+  max-width: 560px;
+  margin-bottom: 22px;
+}
+
+.ffs-page .ffs-p16-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.ffs-page .ffs-p16-metrics-single {
+  grid-template-columns: minmax(0, 560px);
+}
+
+.ffs-page .ffs-p16-metric {
+  display: grid;
+  gap: 12px;
   min-width: 0;
   padding: 18px;
   border: 1px solid rgb(255 255 255 / 8%);
   border-radius: 16px;
+  background: var(--ffs-surface);
+}
+
+.ffs-page .ffs-p16-metric > small {
+  color: var(--ffs-text);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.ffs-page .ffs-p16-values {
+  display: flex;
+  gap: 18px;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.ffs-page .ffs-p16-values span {
+  display: grid;
+  gap: 2px;
+}
+
+.ffs-page .ffs-p16-values span:last-child {
+  text-align: right;
+}
+
+.ffs-page .ffs-p16-values i {
+  color: var(--ffs-muted);
+  font-size: 10px;
+  font-style: normal;
+  letter-spacing: 0.1em;
+}
+
+.ffs-page .ffs-p16-values b {
+  color: var(--ffs-text-3);
+  font-family: var(--rxs-font-display);
+  font-size: 16px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.ffs-page .ffs-p16-values strong {
+  color: var(--ffs-text);
+  font-family: var(--rxs-font-display);
+  font-size: clamp(26px, 2.6vw, 34px);
+  font-weight: 760;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.05;
+}
+
+.ffs-page .ffs-p16-bars {
+  display: grid;
+  gap: 5px;
+}
+
+.ffs-page .ffs-p16-bars span {
+  height: 7px;
+}
+
+.ffs-page .ffs-p16-bars [data-unit="p14"],
+.ffs-page .ffs-p16-bars [data-unit="p2"] {
+  --ffs-col-accent: #7d8a9c;
+}
+
+.ffs-page .ffs-p16-bars [data-unit="p16"] {
+  --ffs-col-accent: #2a9fe0;
+}
+
+.ffs-page .ffs-p16-metric > p {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  justify-content: space-between;
+  margin: 0;
+  color: var(--ffs-muted);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+}
+
+.ffs-page .ffs-p16-metric > p b {
+  color: var(--ffs-accent);
+  font-family: var(--rxs-font-display);
+  font-size: 15px;
+  font-weight: 760;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+
+.ffs-page .ffs-p16-source {
+  margin: 18px 0 0;
+  padding: 14px 18px;
+  border-left: 2px solid rgb(255 215 122 / 55%);
   background: rgb(255 255 255 / 2.5%);
 }
 
-.ffs-page .ffs-p16-flow > ol > li > span {
-  color: var(--ffs-accent);
-  font-family: var(--rxs-font-display);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-}
-
-.ffs-page .ffs-p16-flow h4 {
+.ffs-page .ffs-p16-source p {
   margin: 0;
-  color: var(--ffs-text);
-  font-size: 17px;
-  font-weight: 720;
+  color: var(--ffs-text-2);
+  font-size: 14px;
+  line-height: 1.9;
 }
 
-.ffs-page .ffs-p16-flow q {
-  color: #cfd7e2;
+.ffs-page .ffs-p16-caveats {
+  display: grid;
+  gap: 6px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ffs-page .ffs-p16-caveats li {
+  position: relative;
+  padding-left: 1.4em;
+  color: var(--ffs-text-3);
   font-size: 13px;
   line-height: 1.85;
 }
 
-.ffs-page .ffs-p16-flow > ol > li > small {
+.ffs-page .ffs-p16-caveats li::before {
+  position: absolute;
+  left: 0;
+  color: var(--ffs-gold);
+  content: "※";
+}
+
+.ffs-page .ffs-p16-withheld {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  align-items: center;
+  margin: 0;
+  padding: 18px;
+  border: 1px dashed rgb(255 255 255 / 18%);
+  border-radius: 16px;
+  color: var(--ffs-text-3);
+  font-size: 13px;
+}
+
+.ffs-page .ffs-p16-withheld b {
+  color: var(--ffs-text);
+  font-family: var(--ffs-mincho);
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+}
+
+/* P2 → P14 → P16. */
+.ffs-page .ffs-p16-lineage {
+  margin-top: clamp(40px, 6vw, 64px);
+}
+
+.ffs-page .ffs-p16-lineage > header {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 18px;
+}
+
+.ffs-page .ffs-p16-lineage h3 {
+  font-size: clamp(21px, 2.3vw, 28px);
+  line-height: 1.35;
+}
+
+.ffs-page .ffs-p16-lineage ol {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+  margin: 0 0 18px;
+  padding: 0;
+  list-style: none;
+}
+
+.ffs-page .ffs-p16-lineage ol li {
+  position: relative;
+  display: grid;
+  gap: 2px;
+  padding: 16px 0 0;
+  border-top: 2px solid rgb(255 255 255 / 14%);
+}
+
+.ffs-page .ffs-p16-lineage ol li::before {
+  position: absolute;
+  top: -7px;
+  left: 0;
+  width: 12px;
+  height: 12px;
+  border: 2px solid #7d8a9c;
+  border-radius: 50%;
+  background: #02050b;
+  content: "";
+}
+
+.ffs-page .ffs-p16-lineage ol li[data-current] {
+  border-top-color: rgb(127 230 255 / 55%);
+}
+
+.ffs-page .ffs-p16-lineage ol li[data-current]::before {
+  border-color: var(--ffs-accent);
+  background: var(--ffs-accent);
+}
+
+.ffs-page .ffs-p16-lineage ol b {
+  color: var(--ffs-text);
+  font-family: var(--rxs-font-display);
+  font-size: clamp(22px, 2.4vw, 30px);
+  font-weight: 780;
+}
+
+.ffs-page .ffs-p16-lineage ol span {
+  color: var(--ffs-text-3);
+  font-size: 12px;
+}
+
+.ffs-page .ffs-p16-lineage > p {
+  max-width: 50em;
+  margin: 0;
+  color: var(--ffs-text-2);
+  font-size: 15px;
+  line-height: 1.95;
+}
+
+/* The chapter's other paragraphs, by topic. */
+.ffs-page .ffs-p16-topics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: clamp(32px, 5vw, 48px);
+}
+
+.ffs-page .ffs-p16-topics article {
+  min-width: 0;
+  padding: 24px;
+  border: 1px solid var(--ffs-line);
+  border-radius: var(--sc-radius, 22px);
+  background:
+    linear-gradient(160deg, color-mix(in srgb, var(--ffs-accent) 7%, transparent), transparent 52%),
+    var(--ffs-surface);
+}
+
+.ffs-page .ffs-p16-topics header {
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.ffs-page .ffs-p16-topics header span {
+  color: var(--ffs-accent);
+  font-family: var(--rxs-font-display);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+}
+
+.ffs-page .ffs-p16-topics header small {
   color: var(--ffs-muted);
-  font-size: 10px;
-  letter-spacing: 0.12em;
+}
+
+.ffs-page .ffs-p16-topics h3 {
+  margin-bottom: 12px;
+  font-size: clamp(18px, 1.7vw, 22px);
+  line-height: 1.4;
+}
+
+.ffs-page .ffs-p16-topics p {
+  margin: 0 0 1em;
+  color: var(--ffs-text-2);
+  font-size: 14px;
+  line-height: 1.95;
+  text-wrap: pretty;
+}
+
+.ffs-page .ffs-p16-topics p:last-child {
+  margin-bottom: 0;
+}
+
+.ffs-page .ffs-p16-note {
+  margin-top: 14px;
+  padding: 22px 24px;
+  border: 1px solid rgb(255 215 122 / 30%);
+  border-radius: var(--sc-radius, 22px);
+  background: rgb(255 215 122 / 4%);
+}
+
+.ffs-page .ffs-p16-note h3 {
+  margin-bottom: 10px;
+  color: #ffe9b8;
+  font-size: clamp(17px, 1.6vw, 20px);
+  line-height: 1.45;
+}
+
+.ffs-page .ffs-p16-note p {
+  max-width: 56em;
+  margin: 0;
+  color: var(--ffs-text-2);
+  font-size: 14px;
+  line-height: 1.95;
 }
 
 /* ---------------------------------------------------------------
-   Narrow screens
+   Widths
    --------------------------------------------------------------- */
 
+@media (min-width: 900px) {
+  /* The chart's row heads sit to the left of their bars. */
+  .ffs-page .ffs-bench {
+    --ffs-bench-head: 15.5em;
+  }
+
+  .ffs-page .ffs-bench-head {
+    align-self: center;
+  }
+}
+
+@media (max-width: 899px) {
+  .ffs-page .ffs-bench-axis {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ffs-page .ffs-bench-axis-pad {
+    display: none;
+  }
+
+  .ffs-page .ffs-bench-rows > li {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 @media (max-width: 1000px) {
-  .ffs-page .ffs-metric-grid,
-  .ffs-page .ffs-text-rows {
+  .ffs-page .ffs-metric-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .ffs-page .ffs-p16-flow > ol {
+  .ffs-page .ffs-p16-figures dl {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    row-gap: 16px;
   }
 }
 
 @media (max-width: 760px) {
-  .ffs-page .ffs-citations,
-  .ffs-page .ffs-p16-lineup > ol,
-  .ffs-page .ffs-p16-overview {
-    grid-template-columns: 1fr;
+  .ffs-page .ffs-p16-overview,
+  .ffs-page .ffs-p16-topics,
+  .ffs-page .ffs-p16-metrics,
+  .ffs-page .ffs-text-rows {
+    grid-template-columns: minmax(0, 1fr);
   }
 
-  .ffs-page .ffs-p16-chip-frame {
+  .ffs-page .ffs-p16-core svg {
     width: min(100%, 220px);
+  }
+
+  .ffs-page .ffs-views > div {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    border-radius: 18px;
+  }
+
+  .ffs-page .ffs-p16-switch > div {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .ffs-page .ffs-views label {
+    border-radius: 14px;
+  }
+
+  .ffs-page .ffs-report-body {
+    padding-left: 0;
   }
 }
 
 @media (max-width: 600px) {
-  .ffs-page .ffs-metric-grid,
-  .ffs-page .ffs-text-rows,
-  .ffs-page .ffs-p16-flow > ol {
-    grid-template-columns: 1fr;
+  .ffs-page .ffs-metric-grid {
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .ffs-page .ffs-console {
     padding: 14px;
   }
 
-  .ffs-page .ffs-views > div {
-    border-radius: 18px;
-  }
-
   .ffs-page .ffs-views label {
     padding: 6px 4px;
-    border-radius: 14px;
     font-size: 12px;
   }
 
-  .ffs-page .ffs-metric {
+  .ffs-page .ffs-metric,
+  .ffs-page .ffs-p16-metric {
     padding: 16px;
+  }
+
+  .ffs-page .ffs-report {
+    padding: 22px 16px;
+  }
+
+  .ffs-page .ffs-report summary {
+    grid-template-columns: 2.2em minmax(0, 1fr) 28px;
+    gap: 8px;
+  }
+
+  .ffs-page .ffs-report-body > p {
+    font-size: 14.5px;
+  }
+
+  /* 「究極形態性能比較及び技術進化」 (14 characters) holds one line at 360px. */
+  .ffs-page .ffs-report-head h3 {
+    font-size: 20px;
+  }
+
+  /* Phones: each row of the owner's table becomes a card, the four forms
+     two by two, each value under its form's name. */
+  .ffs-page .ffs-table-scroll {
+    overflow: visible;
+    border: 0;
+    background: none;
+  }
+
+  .ffs-page .ffs-report-table table,
+  .ffs-page .ffs-report-table tbody {
+    display: block;
+  }
+
+  .ffs-page .ffs-report-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  .ffs-page .ffs-report-table tbody tr {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-bottom: 8px;
+    overflow: hidden;
+    border: 1px solid var(--ffs-line);
+    border-radius: 12px;
+    background: rgb(0 0 0 / 22%);
+  }
+
+  .ffs-page .ffs-report-table tbody th {
+    grid-column: 1 / -1;
+    padding: 9px 12px;
+    border-bottom: 1px solid var(--ffs-line);
+    font-size: 12px;
+  }
+
+  .ffs-page .ffs-report-table tbody td {
+    display: grid;
+    gap: 2px;
+    padding: 8px 12px;
+    border-bottom: 0;
+    font-size: 13px;
+    text-align: left;
+    overflow-wrap: anywhere;
+  }
+
+  .ffs-page .ffs-report-table tbody td::before {
+    color: var(--ffs-muted);
+    font-family: var(--rxs-font-text);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    content: attr(data-label);
+  }
+
+  .ffs-page .ffs-report-table tbody td[data-current]::before {
+    color: var(--ffs-accent);
+  }
+
+  .ffs-page .ffs-bench {
+    --ffs-bench-cols: 5.6em minmax(0, 1fr) 2.4em;
+  }
+
+  .ffs-page .ffs-p16-topics article,
+  .ffs-page .ffs-p16-note {
+    padding: 20px 18px;
+  }
+
+  .ffs-page .ffs-p16-lineage ol li {
+    padding-right: 8px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .ffs-page .ffs-bars i,
-  .ffs-page .ffs-trio-bar i,
-  .ffs-page .ffs-views label {
+  .ffs-page .ffs-all-bar i,
+  .ffs-page .ffs-bench-track i,
+  .ffs-page .ffs-p16-bars i,
+  .ffs-page .ffs-views label,
+  .ffs-page .ffs-console-key li,
+  .ffs-page .ffs-bench-rows ul li,
+  .ffs-page .ffs-report summary,
+  .ffs-page .ffs-report summary > i::before,
+  .ffs-page .ffs-report summary > i::after,
+  .ffs-page .ffs-report-tools button {
     transition: none;
+  }
+
+  .ffs-page .ffs-p16-ring {
+    animation: none;
+  }
+}
+
+html[data-world-effects="economy"] .ffs-page .ffs-p16-ring {
+  animation: none;
+}
+
+@media (forced-colors: active) {
+  .ffs-page .ffs-bars i,
+  .ffs-page .ffs-all-bar i,
+  .ffs-page .ffs-bench-track i,
+  .ffs-page .ffs-p16-bars i {
+    background: CanvasText;
+  }
+
+  .ffs-page .ffs-views label.is-active {
+    outline: 2px solid Highlight;
   }
 }

@@ -728,7 +728,7 @@ test("the owner's copy renders unchanged: the cut kickers and every processing l
 test("the plates break between phrases, and the KHAOS wave is the figure's mark", () => {
   // owner request 2026-10-16: FORGE (rx18) — the plate title and code helpers
   // only add <wbr> and units: the text stays the owner's.
-  assert.match(page, /<small>\{renderPlateCode\(system\.code\)\}<\/small>/);
+  assert.match(page, /<small lang="en">\{renderPlateCode\(system\.code\)\}<\/small>/);
   assert.match(page, /<h3>\{renderPlateTitle\(system\.title\)\}<\/h3>/);
   assert.match(page, /const PLATE_TITLE_PHRASE_ENDS = \/\(第二世代\|無限縮小\)\/;/);
   assert.match(page, /const PLATE_CODE_UNITS = \/\(\[\^\\s-\]\+ \\\/\|FINAL JUDGMENT\)\/;/);
@@ -736,7 +736,11 @@ test("the plates break between phrases, and the KHAOS wave is the figure's mark"
   assert.match(page, /<b key=\{`\$\{index\}-\$\{part\}`\} className="rxp-nowrap">/);
   // owner request 2026-10-16: FORGE (rx18) — the wave is wrapped, never changed.
   const figure = page.match(/<small>KHAOS DeuX<\/small>[\s\S]*?<\/strong>/)?.[0] ?? "";
-  assert.equal((figure.match(/50,000<i className="rxf-wave">〜<\/i>\s*<span>YOPS<\/span>/g) || []).length, 2);
+  assert.match(
+    figure,
+    /50,000<i className="rxf-wave">〜<\/i>\s*<span lang="en">YOPS<\/span>\s*<b className="rsn-count" aria-hidden="true">\s*50,000<i className="rxf-wave">〜<\/i>\s*<span>YOPS<\/span>/,
+  );
+  assert.equal((figure.match(/50,000<i className="rxf-wave">〜<\/i>\s*<span(?: lang="en")?>YOPS<\/span>/g) || []).length, 2);
   assert.match(css, /\.rxs-specs strong \.rxf-wave \{[^}]*font: 400 max\(12px, 0\.62em\) \/ 1 var\(--dx-body\);/);
   // It paints with the figure (counts, locks and cools with it): no own fill.
   assert.doesNotMatch(css.match(/\.rxs-specs strong \.rxf-wave \{[^}]*\}/)[0], /background|color|fill/);

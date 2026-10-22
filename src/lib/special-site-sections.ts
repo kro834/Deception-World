@@ -33,13 +33,16 @@ export const SPECIAL_SITE_SECTIONS: Record<SpecialSiteId, readonly SpecialSiteSe
     ["stages", "二つの運用段階", "STAGES"],
     ["system", "中核システム", "SYSTEM"],
   ],
-  // 2026-10-22: the owner's record in full; performance, p16 and suitup are
-  // prepared chapters (準備中) on the page.
+  // 2026-10-22: the owner's record in full. performance, the two comparison
+  // documents (report-*) and p16 come from the owner's comparison text;
+  // suitup is a prepared chapter (準備中) on the page.
   "far-from": [
     ["top", "トップ", "TOP"],
     ["overview", "概要", "OVERVIEW"],
     ["specs", "スペック", "SPECS"],
     ["performance", "性能比較", "COMPARISON"],
+    ["report-rexonance", "対レクソナンス比較資料", "REPORT 01"],
+    ["report-saga", "究極形態の比較資料", "REPORT 02"],
     ["p16", "P16", "PROCESSOR"],
     ["suitup", "変身シークエンス", "SUIT-UP"],
     ["ultra", "ウルトラ", "ULTRA"],

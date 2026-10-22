@@ -195,7 +195,7 @@ test("the components carry the vetted copy shape: lede sentences, keyboard hint,
   // rx2/COPY2.md L2–L4: units that never split, and the P14 paragraph's phrases.
   assert.match(rexonance, /<span className="rxp-nowrap">第14世代<\/span>/);
   // rx2 fix (COPY2.md L6): 必要部位 joins SA-GA OS 5.5 as a nowrap unit.
-  assert.match(rexonance, /const STAGE_LEDE_UNITS = \/\(SA-GA OS 5\\\.5\|必要部位\)\/;/);
+  assert.match(rexonance, /const STAGE_LEDE_UNITS = \/\(SA-GA OS 5\\\.5\|必要部位\|犬として\|『終焉』へ\)\/;/);
   assert.match(rexonance, /className="rxp-nowrap"/);
   assert.match(rexonance, /<p key=\{paragraph\}>\{renderStageLede\(paragraph\)\}<\/p>/);
   assert.match(rexonanceCss, /\.rxp-nowrap \{\s*white-space: nowrap;/);

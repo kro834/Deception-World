@@ -664,6 +664,23 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt)
   letter-spacing: 0.22em;
 }
 
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-brand > span {
+  /* REXONANCE in Michroma: 9.256em of glyphs + nine 0.22em spaces.
+     Reserve its final width while the narrower Oxanium fallback draws,
+     so a late successful font download never pushes the Japanese name. */
+  min-inline-size: 11.237em;
+}
+
+/* With Michroma, the hero kicker occupies two 18px lines and a 6px row
+   gap through 467px. Oxanium can fit one line while it waits; reserve the
+   final height so the h1 and lede stay seated through a successful swap.
+   At 468px the loaded kicker fits one line and needs no reservation. */
+@media (max-width: 467px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-hero-copy > p:first-child {
+    min-block-size: calc(2lh + 6px);
+  }
+}
+
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-local-nav nav a {
   color: var(--rxt-text-2);
   font-family: var(--rxt-sans);
