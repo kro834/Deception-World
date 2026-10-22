@@ -574,3 +574,22 @@ dialog.quick-search :is(button, a):focus-visible {
     forced-color-adjust: none;
   }
 }
+/* The Zeus button's band (2026-10-22). On a phone the sheet spans the
+   screen and its results scroll under every other spot, so the button
+   rests at the far end of the foot (zeus-button.tsx, ZEUS_DOCK_SELECTOR):
+   the foot grows to hold it and its ring with 12px of air, and the count
+   and the history link keep clear of it. */
+@media (max-width: 640px) {
+  dialog.quick-search:has(> .zeus-button) {
+    --qs-zeus: 60px;
+  }
+  dialog.quick-search:has(> .zeus-button) .quick-search-foot {
+    min-height: calc(var(--qs-zeus) + 24px);
+    padding-right: calc(var(--qs-zeus) + 36px);
+  }
+}
+@media (min-width: 561px) and (max-width: 640px) {
+  dialog.quick-search:has(> .zeus-button) {
+    --qs-zeus: 72px;
+  }
+}

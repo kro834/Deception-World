@@ -137,6 +137,12 @@ const ZEUS_AVOID_SELECTOR = [
   // rx10 review 2: the library's own search field (the button settled on its
   // right end at 390 and 1024, over the placeholder and the help line).
   ".library-search",
+  // 2026-10-22: the quick search's field and close plate (with every row of
+  // results under words, a phone's far row put the button on the field), and
+  // the 404's recovery tiles (it rested on SEARCH's edge on a sideways phone).
+  ".quick-search-field",
+  ".quick-search-close",
+  ".recovery-tiles > a",
 ].join(",");
 // A control taller than this share of the screen would block every spot and
 // pin the button home over it; its words still count through the glyphs.
@@ -175,6 +181,17 @@ const ZEUS_DISPLAY_TEXT_MIN_PX = 24;
 // any text there counts.
 const ZEUS_END_TEXT_SELECTOR = "p, li, dt, dd, small, span, em, q, blockquote, figcaption, time";
 const ZEUS_TEXT_GAP = 6;
+/* A sheet's own band for the button (2026-10-22): on a phone the quick search
+   spans the screen and its results scroll under every other spot, so the
+   button rests at the far end of the sheet's foot, which the sheet keeps free
+   for it (styles-quick-search.css). Only while the reader has not moved it
+   since it arrived in the sheet, and only where the band is on screen (an
+   open keyboard covers it); elsewhere the steps below apply as before. */
+const ZEUS_DOCK_SELECTOR = "dialog.quick-search .quick-search-foot";
+// The band spans the screen (a phone), not a floating sheet's width.
+const ZEUS_DOCK_MIN_SHARE = 0.85;
+// From the band's far end: the button's ring (7px) and its air.
+const ZEUS_DOCK_INSET = 16;
 const ZeusButtonContext = createContext<ZeusButtonSettings | null>(null);
 
 type ZeusRect = { left: number; right: number; top: number; bottom: number };
@@ -327,6 +344,27 @@ function readTopBar(button: HTMLElement, x: number, y: number): ZeusRect | null 
     return rect.height > 0 && rect.height < window.innerHeight * 0.4 ? rect : null;
   }
   return null;
+}
+
+/* The centre of the dock in the button's sheet (ZEUS_DOCK_SELECTOR), or null:
+   no band, a band narrower than the screen, too short to hold the button, or
+   one the clamp would pull up (under a keyboard). One box read. */
+function readDock(
+  button: HTMLElement,
+  viewport: { width: number },
+  size: { width: number; height: number },
+  bounds: ZeusBounds,
+): ZeusButtonPosition | null {
+  const band = button.closest("dialog")?.querySelector<HTMLElement>(ZEUS_DOCK_SELECTOR);
+  if (!band || !drawn(band)) return null;
+  const rect = band.getBoundingClientRect();
+  if (rect.width < viewport.width * ZEUS_DOCK_MIN_SHARE || rect.height < size.height) return null;
+  const dock = {
+    x: rect.right - ZEUS_DOCK_INSET - size.width / 2,
+    y: rect.top + rect.height / 2,
+  };
+  const placed = clampZeusCenter(dock.x, dock.y, bounds);
+  return Math.abs(placed.y - dock.y) > 2 ? null : placed;
 }
 
 // The stylesheet has no glide under reduced motion or economy; skip the writes.
@@ -733,6 +771,9 @@ function ZeusButton({
   // stepped to around a control. Scroll re-placement starts from the chosen
   // home instead, so the button returns once that control has passed.
   const preferredPosition = useRef(position);
+  // The position it arrived with on this surface: a sheet's dock holds it
+  // only until the reader drops it somewhere (a new saved position).
+  const arrivedAt = useRef(position);
   const placementFrame = useRef<number | null>(null);
   const placementTimer = useRef<number | null>(null);
   const dragFrame = useRef<number | null>(null);
@@ -892,9 +933,10 @@ function ZeusButton({
   }, [getViewport, readBounds, restingSize]);
 
   const avoidCriticalControls = useCallback(
-    (preferred: { x: number; y: number }) => {
+    (preferred: { x: number; y: number }, docked = false) => {
       const button = buttonRef.current;
-      if (!button) return preferred;
+      // A sheet's dock (readDock) is kept free for the button.
+      if (!button || docked) return preferred;
       const viewport = getViewport();
       const drawnRect = button.getBoundingClientRect();
       const size = restingSize(button);
@@ -1122,12 +1164,19 @@ function ZeusButton({
       const drawn = button.getBoundingClientRect();
       endGlide();
       const viewport = getViewport();
+      const size = restingSize(button);
+      const bounds = readBounds(viewport, size);
       const { x: centerX, y: centerY } = clampZeusCenter(
         viewport.offsetLeft + next.x * viewport.width,
         viewport.offsetTop + next.y * viewport.height,
-        readBounds(viewport, restingSize(button)),
+        bounds,
       );
-      const safeCenter = avoidCriticalControls({ x: centerX, y: centerY });
+      // A sheet's dock, until the reader moves the button there (a drop
+      // saves a new position object; the portal remounts it per surface).
+      // The band is kept free for it, so it is not searched: the rows that
+      // scroll out under the band are clipped there, not covered.
+      const dock = next === arrivedAt.current ? readDock(button, viewport, size, bounds) : null;
+      const safeCenter = avoidCriticalControls(dock ?? { x: centerX, y: centerY }, dock !== null);
       const shownBefore = pendingPosition.current;
       const actual = setVisualCenter(safeCenter.x, safeCenter.y);
       if (Math.hypot(safeCenter.x - centerX, safeCenter.y - centerY) <= 1) {
@@ -1329,6 +1378,25 @@ function ZeusButton({
       revealAfterScroll();
       cancelPlacement();
     };
+    /* A sheet with a dock (the quick search) grows and shrinks with its
+       results as the reader types, without a scroll: its band moves, so the
+       button follows it once the sheet settles (its rise is 0.24s). */
+    const dockSheet = buttonRef.current?.closest("dialog");
+    let dockTimer: number | null = null;
+    const followDock = () => {
+      if (dockTimer != null) window.clearTimeout(dockTimer);
+      dockTimer = window.setTimeout(() => {
+        dockTimer = null;
+        if (activePointer.current != null) return;
+        glideNext.current = true;
+        schedulePlacement();
+      }, 280);
+    };
+    const dockObserver =
+      dockSheet?.querySelector(ZEUS_DOCK_SELECTOR) && typeof ResizeObserver === "function"
+        ? new ResizeObserver(followDock)
+        : null;
+    if (dockSheet) dockObserver?.observe(dockSheet);
     // The optional iPad launcher moves immediately when its root flags change.
     // Waiting for scroll-settle and then gliding would leave this higher-z
     // button over the new menu target. Reconcile only that footprint change,
@@ -1369,6 +1437,8 @@ function ZeusButton({
     document.addEventListener("scroll", onInnerScroll, { capture: true, passive: true });
     return () => {
       compactMenuObserver.disconnect();
+      dockObserver?.disconnect();
+      if (dockTimer != null) window.clearTimeout(dockTimer);
       revealAfterScroll();
       document.removeEventListener("toggle", onLayoutChange, { capture: true });
       document.removeEventListener("scroll", onInnerScroll, { capture: true });
