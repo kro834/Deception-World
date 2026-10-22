@@ -692,6 +692,21 @@ html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm
   html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .detail-nav button {
     min-width: 44px !important;
   }
+
+  /* The compare pickers keep appearance: auto (the iOS crash guard), and
+     WebKit's native menulist then resets their min-height and padding, so
+     they measured 23–27px. An explicit height is the one size WebKit keeps
+     for that native control: the select itself grows to the plate the other
+     engines already draw from min-height, and its whole box opens the picker. */
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .compare-native-select {
+    height: 52px !important;
+  }
+}
+
+@media (any-pointer: coarse) and (min-width: 1181px) {
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .compare-native-select {
+    height: 64px !important;
+  }
 }
 
 /* ================================================================
