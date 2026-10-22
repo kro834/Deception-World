@@ -1022,3 +1022,163 @@ html[data-family="dream"] main.dream-page.dream-page .dream-record-card nav a:fi
     letter-spacing: 0.08em;
   }
 }
+
+/* ----------------------------------------------------------------
+   19. 用語集 on its ink plate. The refinement sheet gave the dictionary
+       paper ink (kinari #302133, a maroon "gold") for an ivory slab; the
+       stage sheet then laid the slab on a night plate but re-inked only
+       the terms, so the index chips (1.2:1), the gilt heading (2.2:1),
+       the INDEX leaf and the passages' rules kept paper ink on the night
+       ground, and an open fold closed on a paper-coloured line. The
+       section takes the programme's night tokens back; the leaf wears the
+       same velvet face as every other fold on the page.
+   ---------------------------------------------------------------- */
+html[data-family="dream"] main.dream-page.dream-page > #glossary {
+  --ts-kin: #c8a45c;
+  --ts-kin-light: #e6c28e;
+  --ts-kin-deep: #8a6a2f;
+  --ts-kinari: #f4ecdc;
+  --ts-zoge: #e3d6bd;
+  --ts-ginnezu: #b3adb8;
+  --ts-shu: #cc493b;
+  --ts-shu-text: #e0664f;
+  --ts-hair-soft: rgb(200 164 92 / 26%);
+  box-shadow: none;
+}
+
+@media (forced-colors: none) {
+  html[data-family="dream"] main.dream-page.dream-page > #glossary > .dream-annex-heading h2 {
+    color: var(--ts-kin-light);
+    background: var(--ts-gilt);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+}
+
+html[data-family="dream"] main.dream-page.dream-page #glossary .dream-archive-fold {
+  border-color: var(--ts-hair);
+  background: var(--ts-night);
+}
+
+html[data-family="dream"] main.dream-page.dream-page #glossary .dream-archive-fold > summary {
+  background:
+    linear-gradient(var(--ts-kin) 0 0) top / 100% 2px no-repeat,
+    linear-gradient(var(--ts-kin) 0 0) 0 3px / 100% 1px no-repeat,
+    var(--kn-sheen, none),
+    var(--ts-velvet);
+}
+
+html[data-family="dream"] main.dream-page.dream-page #glossary .dream-archive-fold[open] > summary {
+  background:
+    linear-gradient(var(--ts-kin) 0 0) top / 100% 2px no-repeat,
+    linear-gradient(var(--ts-kin) 0 0) 0 3px / 100% 1px no-repeat,
+    var(--kn-sheen, none),
+    #2a1830;
+  box-shadow:
+    inset 0 -1px 0 var(--ts-kin),
+    inset 0 -3px 0 var(--ts-velvet),
+    inset 0 -5px 0 var(--ts-kin);
+}
+
+/* The index chips (shown from 1300px) read as the explorer's quick tags:
+   kinari words on lacquer, the number in gold; a touch screen of that
+   width (a 12.9-inch tablet held sideways) gets the 44px floor. */
+@media (forced-colors: none) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-glossary-jump a {
+    border-color: var(--zn-hair);
+    color: var(--zn-kinari);
+    background:
+      linear-gradient(var(--zn-kin) 0 0) 0 0 / 14px 1px no-repeat,
+      linear-gradient(180deg, rgb(243 224 176 / 5%), transparent 60%),
+      var(--zn-lacquer);
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-glossary-jump a small {
+    color: var(--zn-kin-light);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) and (forced-colors: none) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-glossary-jump a:hover {
+    border-color: var(--zn-kin-hi);
+    background-color: #3d2738;
+  }
+}
+
+@media (hover: none), (pointer: coarse) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-glossary-jump a {
+    min-height: 44px;
+  }
+}
+
+/* ----------------------------------------------------------------
+   20. 出来事 keeps the column's frame. From 981px the six case folds were
+       a 1000px column centred inside the 1240px desk, so their frames
+       stood 120px inside the record search above them and the 繋がり and
+       武装 folds below. The folds take the column's full width again; the
+       timeline inside an open fold keeps its 1000px book measure, centred.
+   ---------------------------------------------------------------- */
+@media (min-width: 981px) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-chronicle-cases {
+    max-width: none;
+  }
+
+  html[data-family="dream"]
+    main.dream-page.dream-page
+    .dream-chronicle-cases
+    .dream-chronicle-list {
+    max-width: 1000px;
+    margin-inline: auto;
+  }
+}
+
+/* ----------------------------------------------------------------
+   21. The dossier quick launch: a chip whose English name takes a second
+       line (KAMEN RIDER DREAD) stood taller than its neighbours; every
+       chip fills its cell so the seven stand as one row of equal plates.
+   ---------------------------------------------------------------- */
+html[data-family="dream"] main.dream-page.dream-page .dream-programme-dossier-strip > li {
+  display: grid;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-programme-dossier-chip {
+  align-content: start;
+}
+
+/* ----------------------------------------------------------------
+   22. 舞台 in columns on Safari. From 761px the fifteen places stand in
+       balanced CSS columns, and each place name was brushed in on its own
+       scroll-linked view timeline. On an iPad (portrait, mini) WebKit then
+       left the second column unpainted while the first column scrolled by:
+       places 12–15 were blank boards until something forced a repaint. In
+       columns the names stand drawn; the phone rail keeps the brush.
+   ---------------------------------------------------------------- */
+@media (min-width: 761px) {
+  html[data-family="dream"] main.dream-page.dream-page #atlas .dream-atlas-grid h3 {
+    animation: none;
+  }
+}
+
+/* ----------------------------------------------------------------
+   23. The dossier quick launch on an upright tablet (761–980px): seven
+       chips in four columns left an empty cell after AGENT 04. The three
+       cast files take the first row (a third each), the four agents the
+       second (a quarter each), so each row is one company.
+   ---------------------------------------------------------------- */
+@media (min-width: 761px) and (max-width: 980px) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-programme-dossier-strip {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-programme-dossier-strip > li {
+    grid-column: span 3;
+  }
+
+  html[data-family="dream"]
+    main.dream-page.dream-page
+    .dream-programme-dossier-strip
+    > li[data-kind="cast"] {
+    grid-column: span 4;
+  }
+}

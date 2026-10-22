@@ -110,6 +110,7 @@ const ledgerItems = [
 const dossierQuickLinks = [
   ...DREAM_CHARACTERS.map((item) => ({
     id: `dream-character-${item.id}`,
+    kind: "cast",
     badge: `CAST ${item.order}`,
     name: item.name,
     roman: item.roman,
@@ -117,6 +118,7 @@ const dossierQuickLinks = [
   })),
   ...DREAM_DOLMINENCE.map((record) => ({
     id: `dream-dolminence-${record.id}`,
+    kind: "agent",
     badge: `AGENT ${record.order}`,
     name: record.name,
     roman: record.roman,
@@ -186,7 +188,7 @@ export function DreamProgrammeDesk() {
         </div>
         <ul className="dream-programme-dossier-strip">
           {dossierQuickLinks.map((entry) => (
-            <li key={entry.id}>
+            <li key={entry.id} data-kind={entry.kind}>
               <a
                 href={`#${entry.id}`}
                 className="dream-programme-dossier-chip"
