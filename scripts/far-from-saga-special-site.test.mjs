@@ -540,14 +540,15 @@ test("#ultra follows #suitup as its own segment, registered as ウルトラ, in 
     sections,
     /\["suitup", "変身シークエンス", "SUIT-UP"\],\s*\["ultra", "ウルトラ", "ULTRA"\],\s*\["stages"/,
   );
-  const suitup = component.indexOf('id="suitup"');
+  // #suitup is mounted from far-from-suitup.tsx.
+  const suitup = component.indexOf("<FarFromSuitUp />");
   const ultra = component.indexOf("<FarFromUltra />");
   const stages = component.indexOf('id="stages"');
   assert.ok(suitup > 0 && ultra > suitup && stages > ultra, "suitup, then ultra, then stages");
   assert.match(ultraComponent, /<section id="ultra" className="rxs-section ffs-ultra"/);
   assert.match(ultraComponent, /<h2 id="ffs-ultra-title">ウルトラ<\/h2>/);
   // The chapter numbers after it move on by one; #suitup keeps its own.
-  assert.match(component, /<p>05 \/ SUIT-UP<\/p>/);
+  assert.match(read("src/components/far-from-saga/far-from-suitup.tsx"), /<p>05 \/ SUIT-UP<\/p>/);
   assert.match(ultraComponent, /<p>06 \/ ULTRA<\/p>/);
   for (const mark of [
     "07 / STAGES",
@@ -571,9 +572,8 @@ test("#ultra follows #suitup as its own segment, registered as ウルトラ, in 
   for (const source of [ultraComponent, ultraArt])
     assert.doesNotMatch(source, /静かに|眠る|記録が|物語|祈り/);
   assert.match(ultraComponent, /補助インターフェースの表示内容はイメージです。/);
-  // #suitup is untouched: still the prepared runway with its seam.
-  assert.match(component, /id="suitup"\s+className="rxs-section ffs-[a-z0-9]+ ffs-prepared"/);
-  assert.match(component, /mountFarFromAssembly\(runwayRef\.current/);
+  // #suitup is the built runway, mounted from its own component.
+  assert.match(component, /<FarFromSuitUp \/>/);
   assert.match(styles, /@import "\.\/styles-far-from-ultra\.css";/);
 });
 
@@ -1427,7 +1427,10 @@ test("the console's own formatting reproduces the owner's figures", () => {
 
 test("#p16 prints the owner's P16 chapters, with 暫定ベンチマーク on every figure", () => {
   // (#suitup's id lives in far-from-suitup.tsx: the slice ends at its mount.)
-  const block = component.slice(component.indexOf('id="p16"'), component.indexOf("<FarFromSuitUp />"));
+  const block = component.slice(
+    component.indexOf('id="p16"'),
+    component.indexOf("<FarFromSuitUp />"),
+  );
   assert.match(block, /<FarFromP16 \/>/);
   assert.doesNotMatch(block, /<Pending/);
   assert.doesNotMatch(p16View, /<dd>準備中<\/dd>/);
