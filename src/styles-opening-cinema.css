@@ -634,83 +634,11 @@ html[data-world-effects="economy"] .cine-stage.is-playing .cine-editorial-frame:
   }
 }
 
-/* The trace's light on the title (2026-10-21) ---------------------------------
-   The title logo is one picture now (logo-title-saga-20261016), so the burn
-   became the key visual's streamline light scanning it. The WebGL tier is
-   the shader (opening-burn.frag.glsl); these rules repaint the layers that
-   styles.css still owns for both tiers: the pool of light behind the trace
-   (ice, pink and gold instead of the old fire), and the CSS tier's band
-   (the streamline riding the wipe's edge), its charged copy and its sparks.
-   Paint only: the clocks, masks' geometry and the wipe/reveal travel stay
-   in styles.css. */
-.cine-stage .cine-burn-light {
-  background:
-    radial-gradient(ellipse 44% 40% at 34% 70%, rgb(122 232 255 / 0.3), transparent 72%),
-    radial-gradient(ellipse 56% 48% at 56% 58%, rgb(255 79 195 / 0.22), transparent 74%),
-    radial-gradient(ellipse 40% 34% at 72% 44%, rgb(240 207 134 / 0.14), transparent 70%);
-}
-
-/* The charged copy: the logo brighter and more saturated where the band has
-   just passed, cooling on the sheet's own clock. */
-.cine-stage .cine-burn-hot {
-  filter: brightness(1.32) saturate(1.28) contrast(1.04);
-}
-
-/* The band: a thin streamline on the edge (88% down the element, where the
-   wipe's edge runs), ice to blue to pink to gold across the lockup, with a
-   bright core line. The second layer is its softer wash. */
-.cine-stage .cine-burn-flame {
-  -webkit-mask-image: linear-gradient(180deg, transparent 64%, #000 84%, #000 91%, transparent);
-  mask-image: linear-gradient(180deg, transparent 64%, #000 84%, #000 91%, transparent);
-}
-
-.cine-stage .cine-burn-flame > i {
-  background:
-    linear-gradient(
-        180deg,
-        transparent 86.6%,
-        rgb(240 250 255 / 0.9) 88%,
-        rgb(240 250 255 / 0.9) 88.7%,
-        transparent 90.4%
-      )
-      0 0 / 100% 100% no-repeat,
-    linear-gradient(
-      90deg,
-      transparent,
-      rgb(122 232 255 / 0.82) 12%,
-      rgb(79 123 255 / 0.86) 32%,
-      rgb(255 79 195 / 0.92) 58%,
-      rgb(240 207 134 / 0.86) 84%,
-      transparent
-    );
-}
-
-.cine-stage .cine-burn-flame > i:nth-child(2) {
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgb(122 232 255 / 0.5) 16%,
-    rgb(255 79 195 / 0.6) 52%,
-    rgb(240 207 134 / 0.5) 86%,
-    transparent
-  );
-}
-
-/* The sparks: ice, pink and gold in turn. */
-.cine-stage .cine-burn-embers > i {
-  background: #9ff0ff;
-  box-shadow: 0 0 6px rgb(122 232 255 / 0.85);
-}
-
-.cine-stage .cine-burn-embers > i:nth-child(3n + 2) {
-  background: #ff8ad8;
-  box-shadow: 0 0 6px rgb(255 79 195 / 0.85);
-}
-
-.cine-stage .cine-burn-embers > i:nth-child(3n) {
-  background: #ffe2a6;
-  box-shadow: 0 0 6px rgb(240 207 134 / 0.85);
-}
+/* The trace's fire on the title stays the owner's forest green
+   (docs/forest-green-fire-20261019.md) in both tiers: the WebGL tier is the
+   shader (opening-burn.frag.glsl, fireRamp); the CSS tier's flame band,
+   embers, hot copy and light pool are styles.css's own green rules, which
+   this sheet does not repaint (scripts/forest-green-fire.test.mjs). */
 
 /* Forced colours: the ornament goes; the title keeps its Canvas field. */
 @media (forced-colors: active) {

@@ -34,7 +34,7 @@ export function DreamReadingLauncher() {
     }
   };
   return (
-    <div className="dream-reading-entry" id="dream-reading-room-entry">
+    <div className="dream-reading-entry" id="dream-reading-room-entry" data-dream-reveal>
       <div>
         <p lang="en">PRIVATE READING ROOM</p>
         <h3>物語だけに、灯りを。</h3>

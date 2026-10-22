@@ -148,7 +148,16 @@ export default function QuickSearchDialog({
       return;
     }
     if (trimmed) rememberSearch(trimmed);
-    if (option.kind === "result") closeThen(() => openResult(option.result, fromKeyboard));
+    if (option.kind === "result")
+      closeThen(
+        () =>
+          void openResult(
+            option.result,
+            fromKeyboard,
+            undefined,
+            trimmed ? `「${trimmed}」` : undefined,
+          ),
+      );
     else if (option.kind === "all")
       closeThen(() => void router.navigate({ to: "/search", search: { q: trimmed } }));
     else closeThen(() => void go({ to: option.to, focusDestination: fromKeyboard }));

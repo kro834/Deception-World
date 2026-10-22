@@ -198,7 +198,11 @@ test("the shared STORIES cinema link enters through the route gate", () => {
   );
   assert.match(component, /const CINEMA_PATH = "\/saga-cinema"/);
   assert.doesNotMatch(component, /window\.location|https:\/\//);
-  assert.match(component, /映画四部作「仮面ライダーサーガ」/);
+  // Owner (2026-10-21): the name is marked up in its phrases (映画四部作 / 「仮面ライダーサーガ」,
+  // WebKit has no auto-phrase); the text the markup joins to is unchanged.
+  const name = component.slice(component.indexOf("<span>"), component.indexOf("<i>本編リメイク"));
+  assert.equal(name.replace(/<[^>]*>/g, "").replace(/\s+/g, ""), "映画四部作「仮面ライダーサーガ」");
+  assert.match(name, /<span className="side-panel-phrase">映画四部作<\/span>\s*<wbr \/>/);
   assert.match(component, /<i>本編リメイク<\/i>/);
   assert.match(component, /href=\{`\$\{CINEMA_PATH\}#top`\}/);
   // The shared load gate owns the destination curtain; CinemaLink must not add a pre-navigation overlay.

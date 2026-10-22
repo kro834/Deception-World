@@ -47,6 +47,33 @@
       0 0 20px color-mix(in srgb, var(--inquiry-accent) 22%, transparent);
   }
 }
+/* The plate carries the guide's tone down its leading edge, and the route's
+   stops as a track: passed, here (lit), ahead. */
+.inquiry-navigation > summary {
+  box-shadow:
+    inset 3px 0 0 var(--inquiry-accent),
+    inset 0 1px 0 rgb(255 255 255 / 14%),
+    0 10px 28px rgb(0 0 0 / 64%);
+}
+.inquiry-navigation-track {
+  display: inline-flex;
+  gap: 3px;
+  align-items: center;
+}
+.inquiry-navigation-track > i {
+  width: 14px;
+  height: 3px;
+  border-radius: 1px;
+  background: color-mix(in srgb, var(--inquiry-accent) 22%, transparent);
+}
+.inquiry-navigation-track > i[data-step="past"] {
+  background: color-mix(in srgb, var(--inquiry-accent) 58%, transparent);
+}
+.inquiry-navigation-track > i[data-step="here"] {
+  width: 20px;
+  background: var(--inquiry-accent);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--inquiry-accent) 70%, transparent);
+}
 .inquiry-navigation small {
   padding: 2px 7px;
   border: 1px solid color-mix(in srgb, var(--inquiry-accent) 36%, transparent);
@@ -72,7 +99,11 @@
   border-top: 2px solid var(--inquiry-accent);
   border-radius: 4px;
   background:
-    radial-gradient(ellipse 90% 40% at 50% 0%, color-mix(in srgb, var(--inquiry-accent) 10%, transparent), transparent 72%),
+    radial-gradient(
+      ellipse 90% 40% at 50% 0%,
+      color-mix(in srgb, var(--inquiry-accent) 10%, transparent),
+      transparent 72%
+    ),
     linear-gradient(180deg, var(--inquiry-surface-top), var(--inquiry-surface-bottom));
   box-shadow:
     inset 0 1px 0 rgb(255 255 255 / 12%),
@@ -87,6 +118,20 @@
 .inquiry-navigation-panel p {
   margin: 8px 0 14px;
 }
+/* What to look for at this stop: the panel's one instruction, set as a
+   callout in the guide's tone. */
+.inquiry-navigation-panel > p:not([class]) {
+  padding: 10px 12px;
+  border-left: 2px solid var(--inquiry-accent);
+  border-radius: 0 3px 3px 0;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--inquiry-accent) 12%, transparent),
+    transparent 85%
+  );
+  font-size: 13px;
+  line-height: 1.85;
+}
 .inquiry-navigation-panel .inquiry-navigation-label {
   color: var(--inquiry-accent);
   font-size: 12px;
@@ -96,6 +141,37 @@
 .inquiry-navigation-panel nav {
   display: grid;
   gap: 8px;
+}
+/* Back and on, their direction drawn at the side they lead to. */
+.inquiry-navigation-panel a[data-step] {
+  position: relative;
+  align-content: center;
+}
+.inquiry-navigation-panel a[data-step="previous"] {
+  padding-left: 30px;
+}
+.inquiry-navigation-panel a[data-step="next"] {
+  padding-right: 30px;
+}
+.inquiry-navigation-panel a[data-step]::after {
+  position: absolute;
+  top: 50%;
+  color: var(--inquiry-accent);
+  font-family: "Oxanium", "Noto Sans JP", sans-serif;
+  font-size: 14px;
+  line-height: 1;
+  transform: translateY(-50%);
+}
+.inquiry-navigation-panel a[data-step="previous"]::after {
+  left: 11px;
+  content: "←" / "";
+}
+.inquiry-navigation-panel a[data-step="next"]::after {
+  right: 11px;
+  content: "→" / "";
+}
+.inquiry-navigation-panel a[data-step="next"] {
+  text-align: right;
 }
 .inquiry-navigation-panel a {
   display: grid;
@@ -118,7 +194,11 @@
 }
 .inquiry-navigation-panel a:hover {
   border-color: color-mix(in srgb, var(--inquiry-accent) 62%, transparent);
-  background: linear-gradient(90deg, color-mix(in srgb, var(--inquiry-accent) 12%, transparent), rgb(255 255 255 / 4%) 82%);
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--inquiry-accent) 12%, transparent),
+    rgb(255 255 255 / 4%) 82%
+  );
   box-shadow:
     inset 2px 0 0 var(--inquiry-accent),
     inset 0 1px 0 rgb(255 255 255 / 12%);
@@ -153,6 +233,28 @@
   outline: 2px solid var(--inquiry-accent);
   outline-offset: 3px;
 }
+/* Phones: the open panel stops short of the Zeus control's resting lane at
+   the right, so its note and its closing button are never under it. */
+@media (max-width: 599px) {
+  .inquiry-navigation-panel {
+    width: min(
+      350px,
+      calc(100vw - 32px - 72px - env(safe-area-inset-left) - env(safe-area-inset-right))
+    );
+    padding: 16px;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]) .inquiry-navigation[open] .inquiry-navigation-panel {
+    animation: inquiry-navigation-open 240ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+}
+@keyframes inquiry-navigation-open {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
 html[data-loading="true"] .inquiry-navigation,
 html[data-dialog-open] .inquiry-navigation,
 body:has(.side-panel[data-open="true"]) .inquiry-navigation {
@@ -173,5 +275,11 @@ body:has(.side-panel[data-open="true"]) .inquiry-navigation {
     color: LinkText;
     box-shadow: none;
   }
+  .inquiry-navigation-track > i {
+    background: CanvasText;
+    box-shadow: none;
+  }
+  .inquiry-navigation-track > i[data-step="ahead"] {
+    background: GrayText;
+  }
 }
-

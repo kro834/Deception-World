@@ -96,6 +96,7 @@ export function DreamRecordExplorer() {
       className="dream-record-explorer"
       aria-labelledby="dream-record-explorer-title"
       tabIndex={-1}
+      data-dream-reveal
     >
       <header className="dream-record-explorer-heading">
         <p lang="en">FIELD INDEX / CHRONICLE</p>

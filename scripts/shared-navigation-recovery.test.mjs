@@ -179,7 +179,16 @@ test("a current dossier file keeps priority over a section marker", () => {
 
 test("a group that fits still opens with its heading below the sticky panel head", () => {
   const menu = mountMenu({ locationTop: 320, groupHeight: 180 });
-  assert.equal(menu.panel.scrollTop, 108);
+  // Owner (2026-10-21): the kicker now clears the head's 32px ink fade (36px under its
+  // rule, 84 + 36 = 120), where 8px left RIDERS / SPECIAL hidden inside the fade.
+  assert.equal(menu.panel.scrollTop, 80);
+  assert.equal(menu.locationRow.getBoundingClientRect().top, 240);
+  menu.unmount();
+});
+
+test("a group taller than the screen keeps its current row in view, the kicker under the head", () => {
+  const menu = mountMenu({ locationTop: 640, groupHeight: 900 });
+  assert.equal(menu.panel.scrollTop, 392);
   menu.unmount();
 });
 

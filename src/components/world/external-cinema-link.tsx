@@ -40,7 +40,11 @@ export function CinemaLink({
         onClick={onClick}
         aria-current={active ? "page" : undefined}
       >
-        <span>映画四部作「仮面ライダーサーガ」</span>
+        <span>
+          <span className="side-panel-phrase">映画四部作</span>
+          <wbr />
+          <span className="side-panel-phrase">「仮面ライダーサーガ」</span>
+        </span>
         <i>本編リメイク</i>
       </a>
     </>

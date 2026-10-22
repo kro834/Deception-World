@@ -47,6 +47,15 @@ export function InquiryGuideNavigation() {
         <small>
           {index + 1} / {guide.stops.length}
         </small>
+        {/* The route's stops as a track: those passed, this one lit, those ahead. */}
+        <span className="inquiry-navigation-track" aria-hidden="true">
+          {guide.stops.map((item, position) => (
+            <i
+              key={item.id}
+              data-step={position < index ? "past" : position === index ? "here" : "ahead"}
+            />
+          ))}
+        </span>
       </summary>
       <div className="inquiry-navigation-panel">
         <p className="inquiry-navigation-label">問いから辿る · {index + 1}番目の資料</p>
@@ -54,13 +63,18 @@ export function InquiryGuideNavigation() {
         <p>{stop.lookFor}</p>
         <nav aria-label="探索する資料を移動">
           {previous ? (
-            <Link to={previous.to} search={{ guide: guide.id }} hash={previous.hash}>
+            <Link
+              to={previous.to}
+              search={{ guide: guide.id }}
+              hash={previous.hash}
+              data-step="previous"
+            >
               <span>前の資料</span>
               <strong>{previous.sourceLabel}</strong>
             </Link>
           ) : null}
           {next ? (
-            <Link to={next.to} search={{ guide: guide.id }} hash={next.hash}>
+            <Link to={next.to} search={{ guide: guide.id }} hash={next.hash} data-step="next">
               <span>次の資料</span>
               <strong>{next.sourceLabel}</strong>
             </Link>

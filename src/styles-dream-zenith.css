@@ -16,8 +16,8 @@
       - The case fold's CASE caption sat on its numeral's outline. */
 
 html[data-family="dream"] main.dream-page.dream-page {
-  --zn-latin: "Cinzel", "Shippori Mincho", "Yu Mincho", "Hiragino Mincho ProN", "Noto Serif JP",
-    serif;
+  --zn-latin:
+    "Cinzel", "Shippori Mincho", "Yu Mincho", "Hiragino Mincho ProN", "Noto Serif JP", serif;
   --zn-ink: #2d2230;
   --zn-kin: #c8a45c;
   --zn-kin-light: #e6c28e;
@@ -34,7 +34,10 @@ html[data-family="dream"] main.dream-page.dream-page {
 /* ----------------------------------------------------------------
    1. 口上 keeps its ink on the paper
    ---------------------------------------------------------------- */
-html[data-family="dream"] main.dream-page.dream-page .dream-prologue-card > p:not(.dream-prologue-sign) {
+html[data-family="dream"]
+  main.dream-page.dream-page
+  .dream-prologue-card
+  > p:not(.dream-prologue-sign) {
   color: var(--zn-ink);
 }
 
@@ -101,4 +104,921 @@ html[data-family="dream"] main.dream-page.dream-page .dream-record-meta span + s
    ---------------------------------------------------------------- */
 html[data-family="dream"] main.dream-page.dream-page .dream-reader .dream-story-case-number {
   row-gap: 7px;
+}
+
+/* ----------------------------------------------------------------
+   4. The reading desk: the room's door, the reader's tray and the
+      six-chapter index were three boxes in three idioms. One piece of
+      furniture now: a gilt frame whose top corners open the desk and whose
+      bottom corners close it, the tray as a ruled band between them.
+   ---------------------------------------------------------------- */
+html[data-family="dream"] main.dream-page.dream-page .dream-reading-entry {
+  margin: 0;
+  padding: clamp(22px, 3.4vw, 36px) clamp(18px, 3.4vw, 40px);
+  border: 1px solid var(--zn-hair);
+  border-bottom: 0;
+  background:
+    linear-gradient(var(--zn-kin-light) 0 0) 0 0 / 44px 2px no-repeat,
+    linear-gradient(var(--zn-kin-light) 0 0) 0 0 / 2px 44px no-repeat,
+    linear-gradient(var(--zn-kin-light) 0 0) 100% 0 / 44px 2px no-repeat,
+    linear-gradient(var(--zn-kin-light) 0 0) 100% 0 / 2px 44px no-repeat,
+    radial-gradient(70% 90% at 12% 0%, rgb(230 194 142 / 14%), transparent 70%),
+    radial-gradient(40% 70% at 92% 100%, rgb(204 73 59 / 10%), transparent 70%),
+    linear-gradient(125deg, #2b1c33 0%, #1d1426 58%, #16101d 100%);
+  box-shadow: inset 0 1px 0 rgb(243 224 176 / 16%);
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-reading-entry p {
+  margin: 0;
+  color: var(--zn-kin-light);
+  font: 600 12px/1.8 var(--zn-latin);
+  letter-spacing: 0.26em;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-reading-entry h3 {
+  margin: 8px 0 6px;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-reading-entry > div > span {
+  color: #d9cdbf;
+  font-size: 14px;
+  line-height: 1.9;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-reading-entry > p[role="status"] {
+  flex-basis: 100%;
+  color: var(--zn-kinari);
+  font: 14px/1.8 var(--ts-text);
+  letter-spacing: 0.02em;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-reader-support {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  gap: 12px clamp(20px, 3vw, 40px);
+  margin: 0;
+  padding: clamp(16px, 2.4vw, 24px) clamp(18px, 3.4vw, 40px);
+  border: 1px solid var(--zn-hair);
+  border-top: 1px solid var(--zn-hair-soft);
+  border-bottom: 0;
+  background: linear-gradient(180deg, rgb(243 224 176 / 4%), transparent 60%), #17101e;
+  box-shadow: none;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-reader-support-heading {
+  grid-column: 1 / -1;
+  margin-bottom: 4px;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-reader-support-heading p {
+  font-size: 16px;
+  letter-spacing: 0.12em;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-reader-support-heading > span {
+  font-family: var(--zn-latin), var(--ts-text);
+  letter-spacing: 0.08em;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-reader-settings {
+  grid-column: 1;
+  align-self: start;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-reader-settings legend {
+  margin-bottom: 8px;
+  color: var(--zn-kin-light);
+  font-size: 13px;
+  letter-spacing: 0.1em;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-reader-bookmark {
+  grid-column: 2;
+  grid-row: 2;
+  align-self: stretch;
+  margin: 0;
+  padding: 2px 0 0 clamp(16px, 2.4vw, 28px);
+  border-top: 0;
+  border-left: 1px solid var(--zn-hair-soft);
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-reader-bookmark p {
+  font-size: 15px;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-reader-bookmark small {
+  color: var(--zn-kin-light);
+  font-family: var(--zn-latin), var(--ts-text);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-reader-storage-note {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-reader-index {
+  margin: 0 0 32px;
+  padding: clamp(16px, 2.4vw, 24px) clamp(18px, 3.4vw, 40px) clamp(20px, 3vw, 32px);
+  border: 1px solid var(--zn-hair);
+  border-top: 1px solid var(--zn-hair-soft);
+  background:
+    linear-gradient(var(--zn-kin-light) 0 0) 0 100% / 44px 2px no-repeat,
+    linear-gradient(var(--zn-kin-light) 0 0) 0 100% / 2px 44px no-repeat,
+    linear-gradient(var(--zn-kin-light) 0 0) 100% 100% / 44px 2px no-repeat,
+    linear-gradient(var(--zn-kin-light) 0 0) 100% 100% / 2px 44px no-repeat,
+    linear-gradient(180deg, #1b1222 0%, #140d1a 100%);
+  box-shadow:
+    inset 0 -1px 0 rgb(200 164 92 / 14%),
+    0 24px 56px rgb(0 0 0 / 40%);
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-reader-index-head p {
+  font-size: 16px;
+  letter-spacing: 0.12em;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-reader-index-head > span {
+  font-family: var(--zn-latin);
+  letter-spacing: 0.18em;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-reader-index-actions button {
+  min-height: 40px;
+  padding-inline: 14px;
+}
+
+@media (hover: none), (pointer: coarse) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-reader-index-actions button {
+    min-height: 44px;
+  }
+}
+
+/* A tablet held upright: the tray's two button pairs take the full width
+   and the bookmark sits under them (side by side, 「ゆったり」 broke over two
+   lines on an iPad mini). */
+@media (max-width: 1000px) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-reader-support {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-reader-bookmark {
+    grid-column: 1;
+    grid-row: auto;
+    padding: 14px 0 0;
+    border-left: 0;
+    border-top: 1px solid var(--zn-hair-soft);
+  }
+}
+
+@media (max-width: 760px) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-reader-index {
+    padding: 16px 14px 20px;
+    background:
+      linear-gradient(var(--zn-kin-light) 0 0) 0 100% / 36px 2px no-repeat,
+      linear-gradient(var(--zn-kin-light) 0 0) 0 100% / 2px 36px no-repeat,
+      linear-gradient(var(--zn-kin-light) 0 0) 100% 100% / 36px 2px no-repeat,
+      linear-gradient(var(--zn-kin-light) 0 0) 100% 100% / 2px 36px no-repeat,
+      linear-gradient(180deg, #1b1222 0%, #140d1a 100%);
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-reading-entry {
+    padding: 22px 16px;
+    background:
+      linear-gradient(var(--zn-kin-light) 0 0) 0 0 / 36px 2px no-repeat,
+      linear-gradient(var(--zn-kin-light) 0 0) 0 0 / 2px 36px no-repeat,
+      linear-gradient(var(--zn-kin-light) 0 0) 100% 0 / 36px 2px no-repeat,
+      linear-gradient(var(--zn-kin-light) 0 0) 100% 0 / 2px 36px no-repeat,
+      radial-gradient(70% 90% at 12% 0%, rgb(230 194 142 / 14%), transparent 70%),
+      linear-gradient(125deg, #2b1c33 0%, #1d1426 58%, #16101d 100%);
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-reader-support {
+    padding: 16px;
+  }
+}
+
+/* ----------------------------------------------------------------
+   5. The record explorer sits on the same lacquer as the desk
+   ---------------------------------------------------------------- */
+html[data-family="dream"] main.dream-page.dream-page .dream-record-explorer {
+  border-color: var(--zn-hair);
+  background:
+    linear-gradient(var(--zn-kin-light) 0 0) 0 0 / 44px 2px no-repeat,
+    linear-gradient(var(--zn-kin-light) 0 0) 0 0 / 2px 44px no-repeat,
+    linear-gradient(var(--zn-kin-light) 0 0) 100% 0 / 44px 2px no-repeat,
+    linear-gradient(var(--zn-kin-light) 0 0) 100% 0 / 2px 44px no-repeat,
+    linear-gradient(var(--zn-kin-light) 0 0) 0 100% / 44px 2px no-repeat,
+    linear-gradient(var(--zn-kin-light) 0 0) 0 100% / 2px 44px no-repeat,
+    linear-gradient(var(--zn-kin-light) 0 0) 100% 100% / 44px 2px no-repeat,
+    linear-gradient(var(--zn-kin-light) 0 0) 100% 100% / 2px 44px no-repeat,
+    radial-gradient(64% 52% at 50% 0%, rgb(230 194 142 / 10%), transparent 72%),
+    radial-gradient(40% 44% at 90% 100%, rgb(204 73 59 / 9%), transparent 70%),
+    linear-gradient(180deg, #1c1424 0%, #130d19 56%, #0f0a14 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(243 224 176 / 16%),
+    0 24px 56px rgb(0 0 0 / 40%);
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-record-explorer-heading h3 {
+  font-family: var(--ts-display);
+  letter-spacing: 0.14em;
+  text-shadow: 0 2px 14px rgb(0 0 0 / 50%);
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-record-explorer-heading > span {
+  font-size: 13px;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-record-search > label,
+html[data-family="dream"] main.dream-page.dream-page .dream-record-filters label,
+html[data-family="dream"] main.dream-page.dream-page .dream-record-quick-label {
+  color: var(--zn-kin-light);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-record-quick-tags button {
+  min-height: 40px;
+  font-size: 13px;
+}
+
+/* On a touch screen the 注目語句 tags take the 44px floor (this follows the
+   40px rule above: an earlier touch rule of the same weight lost to it). */
+@media (hover: none), (pointer: coarse) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-record-quick-tags button {
+    min-height: 44px;
+  }
+}
+
+/* The three filters (章 / 人物 / 舞台) draw their own face and chevron:
+   WebKit's native menu list ignored the 48px floor and stood 24px tall,
+   lower than 条件をクリア beside it. */
+html[data-family="dream"] main.dream-page.dream-page .dream-record-filters select {
+  -webkit-appearance: none;
+  appearance: none;
+  min-height: 48px;
+  padding-inline: 14px 40px;
+  line-height: 1.4;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%23e6c28e' stroke-width='1.6'/%3E%3C/svg%3E")
+      right 16px center / 12px 8px no-repeat,
+    linear-gradient(#c8a45c 0 0) 0 0 / 16px 2px no-repeat,
+    linear-gradient(180deg, #271f2e 0%, #19141f 100%);
+  cursor: pointer;
+}
+
+@media (forced-colors: active) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-record-filters select {
+    -webkit-appearance: auto;
+    appearance: auto;
+    padding-inline-end: 14px;
+    background: Canvas;
+  }
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-record-count {
+  font-family: var(--ts-text);
+  font-size: 14px;
+}
+
+/* ----------------------------------------------------------------
+   6. The programme tickets keep their small print legible (12px floor)
+   ---------------------------------------------------------------- */
+html[data-family="dream"] main.dream-page.dream-page .dream-programme-ticket-head small,
+html[data-family="dream"] main.dream-page.dream-page .dream-programme-ticket-foot small {
+  font-size: 12px;
+}
+
+/* ----------------------------------------------------------------
+   7. The programme desk on a phone: three tickets as one ticket book
+      (a row each), the dossier rail snaps and shows its next edge, the
+      ledger cells sit two to a row at reading height.
+   ---------------------------------------------------------------- */
+@media (max-width: 760px) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-programme-routes {
+    gap: 0;
+    border: 1px solid var(--zn-hair);
+    background: #170f1e;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-programme-ticket {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-rows: auto;
+    grid-template-areas: "head main foot";
+    align-items: center;
+    column-gap: 12px;
+    min-height: 68px;
+    padding: 10px 14px;
+    border: 0;
+    border-top: 1px solid var(--zn-hair-soft);
+    background:
+      linear-gradient(var(--ticket-accent) 0 0) 0 0 / 3px 100% no-repeat,
+      linear-gradient(90deg, rgb(243 224 176 / 5%), transparent 60%);
+    box-shadow: none;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-programme-ticket:first-child {
+    border-top: 0;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-programme-ticket-head {
+    grid-area: head;
+    flex-direction: column;
+    align-items: start;
+    gap: 2px;
+    min-width: 2.2em;
+  }
+
+  html[data-family="dream"]
+    main.dream-page.dream-page
+    .dream-programme-ticket-head
+    small:last-child {
+    display: none;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-programme-ticket-main {
+    grid-area: main;
+    margin: 0;
+    gap: 10px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-programme-ticket-main > span {
+    width: 34px;
+    height: 34px;
+    font-size: 13px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-programme-ticket strong {
+    font-size: 18px;
+    letter-spacing: 0.08em;
+    line-height: 1.3;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-programme-ticket-foot {
+    grid-area: foot;
+    flex-direction: column;
+    align-items: end;
+    gap: 2px;
+    padding: 0;
+    border: 0;
+    text-align: right;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-programme-ticket-foot small {
+    white-space: nowrap;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-programme-ticket-foot > span {
+    font-size: 16px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-programme-dossier-strip {
+    margin-inline: -16px;
+    padding: 2px 16px 8px;
+    scroll-padding-inline: 16px;
+    scroll-snap-type: x proximity;
+    overscroll-behavior-x: contain;
+    /* The rail fades at its trailing edge: the next chip shows its own edge. */
+    mask-image: linear-gradient(90deg, #000 0, #000 calc(100% - 36px), transparent);
+    -webkit-mask-image: linear-gradient(90deg, #000 0, #000 calc(100% - 36px), transparent);
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-programme-dossier-strip > li {
+    flex-basis: 164px;
+    scroll-snap-align: start;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-programme-ledger-grid {
+    gap: 8px;
+  }
+
+  /* The code and the figure share the first line (the code on the unit
+     word's line); the label takes the cell's full width under them, so
+     「ドルミネンス機密」「武装・能力・術式」 keep one line beside their
+     neighbours. */
+  html[data-family="dream"] main.dream-page.dream-page .dream-programme-ledger-cell {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "code value"
+      "label label";
+    align-items: end;
+    column-gap: 10px;
+    row-gap: 4px;
+    min-height: 64px;
+    padding: 10px 12px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-programme-ledger-code {
+    grid-area: code;
+    /* the unit word's line height, so the two small-caps lines share a foot */
+    line-height: 1.1;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-programme-ledger-value {
+    grid-area: value;
+    flex-direction: column;
+    align-items: end;
+    gap: 0;
+    font-size: 22px;
+    line-height: 1.1;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-programme-ledger-label {
+    grid-area: label;
+    align-self: start;
+    word-break: keep-all;
+    overflow-wrap: anywhere;
+  }
+}
+
+/* ----------------------------------------------------------------
+   8. The credits in the end card: the site's footer pill rule reached the
+      names (an inline anchor with 15px of padding drew overlapping ovals).
+      They are the programme's seals now: hairline pills on one baseline.
+   ---------------------------------------------------------------- */
+html[data-family="dream"] main.dream-page.dream-page .dream-credits dd a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 3px 12px;
+  border: 1px solid var(--zn-hair-soft);
+  border-radius: 999px;
+  color: var(--zn-kinari);
+  text-decoration: none;
+  letter-spacing: 0.1em;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-credits dd {
+  gap: 6px 8px;
+  font-size: 15px;
+}
+
+@media (hover: none), (pointer: coarse) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-credits dd a {
+    min-height: 44px;
+    padding-inline: 14px;
+  }
+}
+
+@media (max-width: 760px) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-credits > div {
+    gap: 8px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-credits dd {
+    justify-content: center;
+  }
+
+  /* The act buttons stand inside the end card's frame, 14px in from its
+     gilt rules (at full width their borders lay on the frame's lines), and
+     close up under the credits. */
+  html[data-family="dream"] main.dream-page.dream-page .dream-footer-nav {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    /* the end card is a flex column: stretch across it, less the inset */
+    align-self: stretch;
+    width: auto;
+    margin: 4px 14px 8px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-footer-nav a {
+    justify-content: center;
+    min-height: 44px;
+    text-align: center;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-footer-nav a:first-child {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Phones up to 400px: the act names keep their line in the inset grid
+   (「第三幕・ドルミネンス」 needs 134px at the 0.12em tracking). */
+@media (max-width: 400px) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-footer-nav a {
+    padding-inline: 8px;
+    letter-spacing: 0.06em;
+  }
+}
+
+/* On any touch screen, tablets included, the act links take the 44px
+   floor (they stood 38px above the phone width). */
+@media (hover: none), (pointer: coarse) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-footer-nav a {
+    min-height: 44px;
+  }
+}
+
+/* ----------------------------------------------------------------
+   9. Rails: the phone rails (case notes, atlas, agents, quotes) show the
+      next plate's edge through a trailing fade, the same hint as the
+      dossier rail. A paint only; the rails keep their snap and scrolling.
+   ---------------------------------------------------------------- */
+@media (max-width: 760px) {
+  html[data-family="dream"]
+    main.dream-page.dream-page
+    :is(.dream-case-notes, .dream-atlas-grid, .dream-quote-band) {
+    mask-image: linear-gradient(90deg, #000 0, #000 calc(100% - 28px), rgb(0 0 0 / 15%));
+    -webkit-mask-image: linear-gradient(90deg, #000 0, #000 calc(100% - 28px), rgb(0 0 0 / 15%));
+  }
+}
+
+/* ----------------------------------------------------------------
+   10. Motion: the desk, the index and the explorer rise once with the
+       page's own reveal (the page sets data-dream-visible when a block
+       crosses the line 12% above the foot of the screen). Full motion only
+       with no reduced-motion preference and outside the economy tier;
+       otherwise every block stands still and visible.
+   ---------------------------------------------------------------- */
+@media (prefers-reduced-motion: no-preference) {
+  html[data-family="dream"]:not([data-world-effects="economy"])
+    main.dream-page.dream-page
+    :is(
+      .dream-reading-entry,
+      .dream-reader-support,
+      .dream-reader-index,
+      .dream-record-explorer
+    )[data-dream-reveal] {
+    transition:
+      opacity 640ms cubic-bezier(0.2, 0.7, 0.1, 1),
+      transform 760ms cubic-bezier(0.2, 0.7, 0.1, 1),
+      clip-path 760ms cubic-bezier(0.2, 0.7, 0.1, 1);
+  }
+
+  html[data-family="dream"]:not([data-world-effects="economy"])
+    main.dream-page.dream-page
+    .dream-reader-support[data-dream-reveal] {
+    transition-delay: 90ms;
+  }
+
+  html[data-family="dream"]:not([data-world-effects="economy"])
+    main.dream-page.dream-page
+    .dream-reader-index[data-dream-reveal] {
+    transition-delay: 160ms;
+  }
+}
+
+/* ----------------------------------------------------------------
+   11. The poster console's door to the screening room reads as the
+       desk's buttons do: gold hairline, kinari face, 44px.
+   ---------------------------------------------------------------- */
+html[data-family="dream"] main.dream-page.dream-page .dream-screening-trigger {
+  font-family: var(--ts-display);
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+/* The same footer rule gave each name a 50px top margin; the seals sit on
+   their row. */
+html[data-family="dream"] main.dream-page.dream-page .dream-credits dd a {
+  margin: 0;
+}
+
+/* ----------------------------------------------------------------
+   12. An open chapter's numeral: the fold's head turns to paper when it
+       opens, and the numeral's digit had turned to dark lacquer red on a
+       dark lacquer box (invisible). On paper the numeral is a shu seal with
+       a kinari digit.
+   ---------------------------------------------------------------- */
+html[data-family="dream"]
+  main.dream-page.dream-page
+  .dream-story-case[open]
+  .dream-story-case-number
+  b {
+  color: var(--zn-kinari);
+  border-color: #a8352c;
+  outline-color: rgb(168 53 44 / 42%);
+  background:
+    radial-gradient(70% 60% at 50% 25%, rgb(243 224 176 / 22%), transparent 75%),
+    linear-gradient(180deg, #b83a30 0%, #a8352c 100%);
+  box-shadow: inset 0 1px 0 rgb(243 224 176 / 30%);
+  opacity: 1;
+}
+
+/* The footer pill rule reached the act links too (50px above each). */
+html[data-family="dream"] main.dream-page.dream-page .dream-footer-nav a {
+  margin: 0;
+}
+
+/* The index's bulk toggles follow the six links in the DOM (Tab from the
+   index reaches CASE 0 first), and the sheet seats them where the DOM has
+   them: a foot under the list, set off by a hairline, so the eye, the
+   keyboard and a screen reader meet them in the same order. */
+html[data-family="dream"] main.dream-page.dream-page .dream-reader-index {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    "head"
+    "list"
+    "actions";
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-reader-index-head {
+  grid-area: head;
+  margin-bottom: 14px;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-reader-index > ol {
+  grid-area: list;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-reader-index-actions {
+  grid-area: actions;
+  justify-content: flex-end;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--zn-hair-soft);
+}
+
+@media (max-width: 520px) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-reader-index-head {
+    margin-bottom: 10px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-reader-index-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-top: 14px;
+    padding-top: 12px;
+  }
+}
+
+/* ----------------------------------------------------------------
+   13. The record search: the focus ring draws round the whole field, the
+       lens included. It was drawn round the input alone, 3px out, and cut
+       across the ⌕ glyph.
+   ---------------------------------------------------------------- */
+html[data-family="dream"] main.dream-page.dream-page .dream-record-search-field:focus-within {
+  border-color: #f0d594;
+  outline: 2px solid #f0d594;
+  outline-offset: 3px;
+}
+
+html[data-family="dream"]
+  main.dream-page.dream-page
+  .dream-record-search-field
+  input:focus-visible {
+  outline: 0;
+}
+
+@media (forced-colors: active) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-record-search-field:focus-within {
+    outline-color: Highlight;
+  }
+}
+
+/* ----------------------------------------------------------------
+   14. An open chapter's foot: the lamplight sheet turned the chapter body
+       to lacquer, but its foot kept the paper's ink — lacquer-red links,
+       a grey-white "next chapter" plate with red type, both unreadable on
+       the dark body. The foot now reads as the desk does: gilt on lacquer.
+   ---------------------------------------------------------------- */
+html[data-family="dream"] main.dream-page.dream-page .dream-story-case-body .dream-reader-footer {
+  border-top-color: var(--zn-hair-soft);
+  color: var(--zn-kin-light);
+}
+
+html[data-family="dream"]
+  main.dream-page.dream-page
+  .dream-story-case-body
+  .dream-reader-related
+  > span {
+  color: var(--zn-ginnezu);
+  letter-spacing: 0.12em;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-story-case-body .dream-reader-related a,
+html[data-family="dream"]
+  main.dream-page.dream-page
+  .dream-story-case-body
+  .dream-reader-pagination
+  .dream-reader-return {
+  color: var(--zn-kin-light);
+  text-decoration-color: rgb(230 194 142 / 46%);
+  letter-spacing: 0.08em;
+}
+
+html[data-family="dream"]
+  main.dream-page.dream-page
+  .dream-story-case-body
+  .dream-reader-pagination
+  a:not(.dream-reader-return) {
+  border-color: var(--zn-hair);
+  background:
+    linear-gradient(var(--zn-kin-light) 0 0) 0 0 / 18px 2px no-repeat,
+    linear-gradient(var(--zn-kin-light) 0 0) 100% 100% / 18px 2px no-repeat,
+    linear-gradient(180deg, #2a1c30 0%, #1c1323 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(243 224 176 / 14%),
+    0 10px 24px rgb(0 0 0 / 30%);
+  color: var(--zn-kinari);
+  letter-spacing: 0.08em;
+}
+
+html[data-family="dream"]
+  main.dream-page.dream-page
+  .dream-story-case-body
+  .dream-reader-pagination
+  a
+  small {
+  color: var(--zn-kin-light);
+  letter-spacing: 0.14em;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-story-case-body .dream-reader-end {
+  color: var(--zn-ginnezu);
+  font-family: var(--zn-latin);
+  letter-spacing: 0.18em;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="dream"]
+    main.dream-page.dream-page
+    .dream-story-case-body
+    .dream-reader-pagination
+    a:not(.dream-reader-return):hover {
+    border-color: var(--zn-kin-hi);
+    background:
+      linear-gradient(var(--zn-kin-hi) 0 0) 0 0 / 24px 2px no-repeat,
+      linear-gradient(var(--zn-kin-hi) 0 0) 100% 100% / 24px 2px no-repeat,
+      linear-gradient(180deg, #382540 0%, #251829 100%);
+  }
+
+  html[data-family="dream"]
+    main.dream-page.dream-page
+    .dream-story-case-body
+    .dream-reader-related
+    a:hover,
+  html[data-family="dream"]
+    main.dream-page.dream-page
+    .dream-story-case-body
+    .dream-reader-pagination
+    .dream-reader-return:hover {
+    color: var(--zn-kin-hi);
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-family="dream"]
+    main.dream-page.dream-page
+    .dream-story-case-body
+    .dream-reader-footer
+    :is(a, span, small) {
+    color: CanvasText;
+  }
+}
+
+/* ----------------------------------------------------------------
+   15. 繋がり on Safari: the knot's two gilt threads are empty flex items
+       (flex: 1 0 20px). WebKit sized the knot's grid column without their
+       20px, then laid them out at 20px each and squeezed the label plate:
+       「お前は独りじゃない」 broke over three lines and 「主人公」 stood
+       one character a line on an iPad. A minimum width makes both engines
+       count the threads.
+   ---------------------------------------------------------------- */
+@media (min-width: 761px) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-relations-knot > i {
+    min-width: 20px;
+  }
+}
+
+/* ----------------------------------------------------------------
+   16. The ticket book on the narrowest phones (320–374px): the count
+       moves under the title, so 「絵看板を見る」「六章を読む」「記録を探す」
+       keep one line instead of breaking after their third character.
+   ---------------------------------------------------------------- */
+@media (max-width: 374px) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-programme-ticket {
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas:
+      "head main"
+      "head foot";
+    row-gap: 4px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-programme-ticket strong {
+    white-space: nowrap;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-programme-ticket-foot {
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+    padding-inline-start: 44px;
+    text-align: start;
+  }
+}
+
+/* ----------------------------------------------------------------
+   17. A record's way onward: its links are framed chips, so the underline
+       inside each frame goes; the first (出来事を読む) is the kinari plate
+       the desk's own primary buttons wear. On a phone the chips wrap two
+       or three to a row instead of standing one per row — a card's five
+       links had made eight results nearly three screens tall.
+   ---------------------------------------------------------------- */
+html[data-family="dream"] main.dream-page.dream-page .dream-record-card nav a {
+  text-decoration: none;
+  letter-spacing: 0.04em;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-record-card nav a:first-child {
+  color: #241821;
+  border-color: var(--zn-kin-hi);
+  background:
+    linear-gradient(#79353c 0 0) 0 0 / 12px 2px no-repeat,
+    linear-gradient(180deg, #f5e6c5 0%, #e2cda4 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 60%),
+    0 6px 16px rgb(0 0 0 / 28%);
+  font-weight: 600;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-record-card nav a:first-child:hover {
+    border-color: #fff3d2;
+    background:
+      linear-gradient(#79353c 0 0) 0 0 / 16px 2px no-repeat,
+      linear-gradient(180deg, #fbefd4 0%, #ead7b1 100%);
+  }
+}
+
+@media (hover: none), (pointer: coarse) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-record-card nav a {
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 760px) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-record-card nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-record-card nav a {
+    flex: 1 1 auto;
+    justify-content: center;
+    padding-inline: 12px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-record-card nav a:first-child {
+    flex-basis: 100%;
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-record-card nav a:first-child {
+    color: LinkText;
+    background: Canvas;
+    border-color: LinkText;
+  }
+}
+
+/* ----------------------------------------------------------------
+   18. The touch floor: on a touch screen every control the Dream page
+       draws reaches 44px — the chapter companion's cast chips (36px),
+       the stage voice reel's modes and steps (34px), its 関連記録へ link
+       (an 18px line of text) and the poster HUD's PREV / NEXT (34 × 32).
+   ---------------------------------------------------------------- */
+@media (hover: none), (pointer: coarse) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-chapter-companion-cast a {
+    align-items: center;
+    min-height: 44px;
+  }
+
+  html[data-family="dream"]
+    main.dream-page.dream-page
+    :is(.dream-programme-spotlight-modes, .dream-programme-spotlight-controls)
+    button {
+    min-height: 44px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-programme-spotlight-quote footer {
+    align-items: center;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-programme-spotlight-quote footer a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-poster-hud-step button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
+
+/* The three tickets side by side on an upright tablet (761–900px): the
+   titles step down to 18px, so 「絵看板を見る」 keeps one line on an iPad
+   mini as its two neighbours do. */
+@media (min-width: 761px) and (max-width: 900px) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-programme-ticket strong {
+    font-size: 18px;
+    letter-spacing: 0.08em;
+  }
 }

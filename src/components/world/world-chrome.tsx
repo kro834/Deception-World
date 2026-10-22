@@ -1,8 +1,10 @@
 import {
+  Fragment,
   useEffect,
   useLayoutEffect,
   useRef,
   useState,
+  type CSSProperties,
   type KeyboardEvent,
   type MouseEvent,
   type PointerEvent,
@@ -52,6 +54,11 @@ type SiteAnnouncement = {
   imageAlt: string;
   width: number;
   height: number;
+  /** Where the poster frames crop the key visual (object-position y):
+      `tall` for the board's 4:5 frame, `square` for its 1:1 frame on short
+      screens, `thumb` for the phones' 3:4 thumbnail. A poster's wordmark is
+      either whole in the frame or out. */
+  posterY?: { tall?: string; square?: string; thumb?: string };
   eyebrow?: string;
   lede?: string;
   comparisonTitle?: string;
@@ -91,6 +98,9 @@ const SITE_ANNOUNCEMENTS = [
     imageAlt: "金色と青紫色に発光する仮面とDeus. A NEW ERA BEGINS.の文字",
     width: 900,
     height: 1125,
+    // Square: Deus. and A NEW ERA BEGINS whole (71-88% of the art), the
+    // flare and COMING SOON (92-96%) out.
+    posterY: { square: "50%" },
   },
   {
     id: "who-supreme",
@@ -101,10 +111,44 @@ const SITE_ANNOUNCEMENTS = [
     imageAlt: "青白く発光する仮面とEX. Beyond imagination.の文字",
     width: 960,
     height: 1441,
+    // 4:5: the whole mask (to 81% of the art), the EX. mark (85-95%) out.
+    // Square: the mask's chin whole at the foot (the horns run off the
+    // top), the EX. mark out; at 18% the frame cut through the chin.
+    // Thumb (3:4 keeps 89%): the mark cannot leave, so it stands whole
+    // with its line under it; centred, its foot touched the frame.
+    posterY: { tall: "0%", square: "48%", thumb: "100%" },
   },
 ] as const satisfies readonly SiteAnnouncement[];
 
 type AnnouncementId = (typeof SITE_ANNOUNCEMENTS)[number]["id"];
+
+function announcementPosterStyle({ posterY }: SiteAnnouncement): CSSProperties | undefined {
+  if (!posterY) return undefined;
+  return {
+    ...(posterY.tall ? { "--poster-y-tall": posterY.tall } : {}),
+    ...(posterY.square ? { "--poster-y-square": posterY.square } : {}),
+    ...(posterY.thumb ? { "--poster-y-thumb": posterY.thumb } : {}),
+  } as CSSProperties;
+}
+
+// A Japanese title wraps between its phrases: a break opportunity where a
+// particle (hiragana) meets the next word (kanji or katakana), so
+// レクソナンスサーガの / 性能と / 三つの / 形態を / 紹介。 The copy is
+// unchanged; keep-all (chrome-elevation) holds each phrase whole. WebKit
+// split 性 / 能 under balance (2026-10-22). Latin titles keep their spaces.
+// The next word never starts on a small kana, ・ or ー (no line starts there).
+const TITLE_PHRASE_SEAM =
+  /([\u3041-\u309f])(?=(?![\u30a1\u30a3\u30a5\u30a7\u30a9\u30c3\u30e3\u30e5\u30e7\u30ee\u30f5\u30f6])[\u30a1-\u30fa\u4e00-\u9fff])/gu;
+
+function PhrasedTitle({ text }: { text: string }) {
+  const phrases = text.replace(TITLE_PHRASE_SEAM, "$1\u200b").split("\u200b");
+  return phrases.map((phrase, index) => (
+    <Fragment key={`${index}-${phrase}`}>
+      {index > 0 ? <wbr /> : null}
+      {phrase}
+    </Fragment>
+  ));
+}
 
 const FILE_CHAPTER_CODES: Record<string, string> = {
   "dossier-profile": "PROFILE",
@@ -132,6 +176,9 @@ const SIDE_MENU_SWIPE_CLOSE_PX = 72;
 const SIDE_MENU_SWIPE_FLICK_MIN_PX = 24;
 const SIDE_MENU_SWIPE_CLOSE_PX_PER_MS = 0.5;
 const SIDE_MENU_SWIPE_SAMPLE_MS = 100;
+// The menu opens scrolled to the current group's kicker: this far under the
+// sticky head's rule, clear of the 32px ink fade below it (chrome-elevation).
+const SIDE_MENU_GROUP_CLEARANCE_PX = 36;
 
 type SideMenuCloseWatcher = { onclose: (() => void) | null; destroy(): void };
 
@@ -446,15 +493,20 @@ export function SideMenuLayer({
         current.getBoundingClientRect().bottom + clearance - panel.getBoundingClientRect().bottom;
       if (overflow > 0) panel.scrollTop += overflow;
     }
-    // Show the group heading, not just the current tile, when that group
-    // fits under the sticky head. Taller groups keep the row-in-view rule.
+    // Then the menu opens on the group the reader is in, its kicker (RIDERS,
+    // SPECIAL, STORIES) in full under the sticky head: the head's ink runs on
+    // 32px below its rule (the fade a row passes under), so the kicker lands
+    // below that fade, never half inside it. Scrolling further only ever
+    // moves the current row up, so it stays in view; a group taller than the
+    // screen from its kicker to that row keeps the row where it is and lets
+    // the kicker pass under the head instead (the kicker is never pulled
+    // back down).
     const group = current?.closest<HTMLElement>(".side-panel-group");
     const head = panel.querySelector(".side-panel-head");
     if (group && head) {
-      const bounds = group.getBoundingClientRect();
-      const top = head.getBoundingClientRect().bottom + 8;
-      const bottom = panel.getBoundingClientRect().bottom - 24;
-      if (bounds.height <= bottom - top) panel.scrollTop += bounds.top - top;
+      const top = head.getBoundingClientRect().bottom + SIDE_MENU_GROUP_CLEARANCE_PX;
+      const below = group.getBoundingClientRect().top - top;
+      if (below > 0) panel.scrollTop += below;
     }
     // Android's back gesture (and Esc from outside the menu) asks the
     // browser's CloseWatcher to close the menu instead of leaving the page.
@@ -1133,6 +1185,10 @@ export function SideMenuLayer({
             </GuardedLink>
           </div>
         </div>
+        {/* The films' and the site's names wrap between their phrases in
+            every engine (WebKit has no auto-phrase): 映画第一作 /
+            「ドリームチャプター」, ディセプション / ワールド. The names are
+            unchanged, and so are the links' accessible names. */}
         <div className="side-panel-group">
           <p>STORIES</p>
           <div className="side-panel-links">
@@ -1146,7 +1202,11 @@ export function SideMenuLayer({
                   beforeNavigate={close}
                   aria-current="page"
                 >
-                  <span>映画第一作「ドリームチャプター」</span>
+                  <span>
+                    <span className="side-panel-phrase">映画第一作</span>
+                    <wbr />
+                    <span className="side-panel-phrase">「ドリームチャプター」</span>
+                  </span>
                   <i>MOVIE 01</i>
                 </GuardedLink>
                 <GuardedLink
@@ -1156,7 +1216,11 @@ export function SideMenuLayer({
                   transition="dream"
                   beforeNavigate={close}
                 >
-                  <span>ディセプションワールド</span>
+                  <span>
+                    <span className="side-panel-phrase">ディセプション</span>
+                    <wbr />
+                    <span className="side-panel-phrase">ワールド</span>
+                  </span>
                   <i>MAIN SITE</i>
                 </GuardedLink>
               </>
@@ -1167,7 +1231,11 @@ export function SideMenuLayer({
                   assets={DREAM_CHAPTER_ENTER_ASSETS}
                   beforeNavigate={close}
                 >
-                  <span>映画第一作「ドリームチャプター」</span>
+                  <span>
+                    <span className="side-panel-phrase">映画第一作</span>
+                    <wbr />
+                    <span className="side-panel-phrase">「ドリームチャプター」</span>
+                  </span>
                   <i>MOVIE 01</i>
                 </GuardedLink>
                 {/* The special sites stand apart from the World: its way home
@@ -1179,7 +1247,11 @@ export function SideMenuLayer({
                     assets={WORLD_ENTER_ASSETS}
                     beforeNavigate={close}
                   >
-                    <span>ディセプションワールド</span>
+                    <span>
+                      <span className="side-panel-phrase">ディセプション</span>
+                      <wbr />
+                      <span className="side-panel-phrase">ワールド</span>
+                    </span>
                     <i>MAIN SITE</i>
                   </GuardedLink>
                 ) : null}
@@ -1372,7 +1444,10 @@ export function SideMenuLayer({
           <span className="site-announcement-aura" aria-hidden="true" />
           <header className="site-announcement-header">
             <div>
-              <p>INFORMATION / ARCHIVE</p>
+              <p>
+                INFORMATION
+                <span className="site-announcement-kicker-tail">{" / ARCHIVE"}</span>
+              </p>
               <h2 id="site-announcement-hub-title">お知らせ</h2>
             </div>
             <span
@@ -1494,7 +1569,11 @@ export function SideMenuLayer({
                         onClick={(event) => openAnnouncementDetail(event, notice.id)}
                         aria-label={`${notice.title}を開く`}
                       >
-                        <span className="site-announcement-list-visual" aria-hidden="true">
+                        <span
+                          className="site-announcement-list-visual"
+                          aria-hidden="true"
+                          style={announcementPosterStyle(notice)}
+                        >
                           {announcementOpen ? (
                             <img
                               src={notice.image}
@@ -1512,7 +1591,9 @@ export function SideMenuLayer({
                             <small>{notice.sequence}</small>
                             <time dateTime={notice.date.replaceAll(".", "-")}>{notice.date}</time>
                           </span>
-                          <b>{notice.title}</b>
+                          <b>
+                            <PhrasedTitle text={notice.title} />
+                          </b>
                           <i>OPEN RECORD</i>
                         </span>
                         <span className="site-announcement-list-arrow" aria-hidden="true">

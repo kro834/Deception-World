@@ -249,10 +249,14 @@ function mount(initial = {}, savedState = {}) {
       if (name === "@/lib/library-data") return { LIBRARY_ENTRIES, LIBRARY_KINDS, searchLibrary };
       if (name === "@/lib/record-art")
         return { pathArt: () => ({}), RIDER_ART: [], titleRunStyle: () => ({}) };
+      // Owner (2026-10-21): the hero rail's files are served as right-sized candidates (recordImage).
+      if (name === "@/lib/record-images") return { recordImage: (src) => ({ src }) };
       if (name === "@/lib/library-browse-state") return browse;
       if (name === "@/lib/library-browse-filter") return { filterLibraryBrowse };
       if (name === "@/lib/record-arrival")
         return { watchRecordArrival: (...args) => arrivals.push(args) };
+      // Owner (2026-10-21): the opener hands the landing ring's sheet to the arrival watcher.
+      if (name === "@/styles-record-landing.css?url") return { default: "/record-landing.css" };
       if (name === "@/lib/record-return-state")
         return { captureRecordReturn: (value) => captures.push(value), recordReturnCardId: cardId };
       if (name === "./library-store")

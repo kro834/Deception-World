@@ -19,6 +19,7 @@ import stageExtremeCssUrl from "@/styles-stage-extreme.css?url";
 import extremeImpactCssUrl from "@/styles-extreme-impact.css?url";
 import extremeFightCardCssUrl from "@/styles-extreme-fightcard.css?url";
 import extremeEditorialCssUrl from "@/styles-extreme-editorial.css?url";
+import extremeZenithCssUrl from "@/styles-extreme-zenith.css?url";
 
 export const Route = createFileRoute("/extreme-saga")({
   validateSearch: validateInquirySearch,
@@ -58,6 +59,8 @@ export const Route = createFileRoute("/extreme-saga")({
       // FIGHT CARD (rx15): the bout plates, the tale of the tape, the duel.
       { rel: "stylesheet", href: extremeFightCardCssUrl },
       { rel: "stylesheet", href: extremeEditorialCssUrl },
+      // ZENITH (2026-10-21): repairs and the brush-up on top of the editorial pass.
+      { rel: "stylesheet", href: extremeZenithCssUrl },
       CINEMATIC_STYLESHEET_LINK,
       {
         rel: "preload",
