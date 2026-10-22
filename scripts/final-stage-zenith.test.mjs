@@ -289,3 +289,25 @@ test("on phones the end card keeps the Zeus corner clear and the strip's ring in
   assert.ok(ring && ring.context.includes("@media (max-width: 599.98px)"));
   assert.equal(declarations(ring.body, "outline-offset").at(-1), "-3px");
 });
+
+test("the records' eyebrows wrap at their seam and the cast still fills its pass", async () => {
+  const page = await read("src/components/final-stage/final-stage.tsx");
+  assert.match(page, /const \[head, \.\.\.rest\] = value\.split\(" \/ "\);/);
+  assert.match(page, /<span>\{head\}<\/span> <span>\/ \{rest\.join\(" \/ "\)\}<\/span>/);
+  assert.equal((page.match(/<EyebrowParts value=\{eyebrow\} \/>/g) ?? []).length, 2);
+  const { rules } = parse(await read(SHEET));
+  const seam = rules.find(({ selector }) => /\.fst-pickup-heading small\) > span$/.test(selector));
+  assert.ok(seam && declarations(seam.body, "white-space").includes("nowrap"));
+  // Stacked, the still is as wide as the pass (its 4:5 under a 420px cap
+  // had sized it 336px wide), and the tear sits on the seam it marks.
+  const still = rules.find(
+    ({ selector, context }) =>
+      /\.fst-cast-detail > figure$/.test(selector) &&
+      context.includes("@media (max-width: 480px), (max-width: 760px) and (orientation: portrait)"),
+  );
+  assert.ok(still && declarations(still.body, "width").includes("100%"));
+  const tears = rules.filter(({ selector }) => /#characters \.fsl-tear$/.test(selector));
+  assert.equal(tears.length, 2);
+  for (const { body } of tears)
+    assert.match(declarations(body, "inset")[0], /^(?:0 auto 0 -1px|-1px 0 auto)$/);
+});
