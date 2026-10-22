@@ -1489,7 +1489,12 @@ html body .load-gate.rider-route-dive .rider-dive-mark > i {
 
 html
   body
-  .load-gate.rider-route-dive:is(.is-rexonance-dive, .is-extreme-dive, .is-final-stage-dive)
+  .load-gate.rider-route-dive:is(
+      .is-rexonance-dive,
+      .is-extreme-dive,
+      .is-far-from-dive,
+      .is-final-stage-dive
+    )
   .rider-dive-mark
   > i {
   font-size: clamp(12px, 2vw, 16px);

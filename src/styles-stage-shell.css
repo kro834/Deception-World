@@ -1966,6 +1966,21 @@ html[data-family]
   --sh-art-pos: 50% 24%;
 }
 
+/* FAR FROM SAGA (provisional, 2026-10-22): the ミドル key visual's tile
+   (scripts/build-far-from-saga-artwork.mjs). */
+html[data-family]
+  body
+  #site-side-panel.side-panel[data-open="true"]
+  > .side-panel-head
+  + .side-panel-group
+  + .side-panel-group
+  + .side-panel-group
+  > .side-panel-links
+  > a[href^="/far-from-saga"] {
+  --sh-art: url("/far-from-saga-20261022/middle-tile-400.webp");
+  --sh-art-pos: 50% 18%;
+}
+
 html[data-family]
   body
   #site-side-panel.side-panel[data-open="true"]

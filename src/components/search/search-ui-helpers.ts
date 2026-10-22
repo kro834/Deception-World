@@ -12,6 +12,7 @@ export function placeLabel(document: SearchDocument): string {
   if (to === "/form-archive")
     return document.search?.archive === "realm" ? "アーカイブ / レルム" : "アーカイブ / サーガ";
   if (to === "/extreme-saga") return "EXTREME SAGA";
+  if (to === "/far-from-saga") return "FAR FROM SAGA";
   if (to === "/rexonance-saga") return "REXONANCE SAGA";
   if (to === "/gallery") return "GALLERY";
   return "";
