@@ -360,7 +360,10 @@ test("world-annex.tsx keeps its labels and accessibility with the approved episo
   for (const attr of voiceControls) assert.equal(count(attr), 1, attr);
   assert.equal(count('aria-controls="world-quotes-rail"'), 3);
   // rx14 F6 adds only lang=en on the decorative NO FILE tab.
-  assert.equal(attrs.filter((attr) => !searchAnchors.includes(attr)).length, 72);
+  // Owner (2026-10-21): 06.2 opens on a term index (its nav's aria-label and one href per term).
+  assert.equal(attrs.filter((attr) => !searchAnchors.includes(attr)).length, 74);
+  assert.equal(count('aria-label="用語の索引"'), 1);
+  assert.equal(count("href={`#wa-term-${entry.term}`}"), 1);
   assert.equal(count('aria-hidden="true"'), 12);
   assert.equal(count('alt=""'), 5);
   assert.equal(count('lang="en"'), 6);

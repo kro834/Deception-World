@@ -83,7 +83,13 @@
           rgb(3 6 12 / 72%) 82%,
           #03060c 100%
         ),
-        linear-gradient(90deg, rgb(3 6 12 / 40%), transparent 40%, transparent 60%, rgb(3 6 12 / 40%));
+        linear-gradient(
+          90deg,
+          rgb(3 6 12 / 40%),
+          transparent 40%,
+          transparent 60%,
+          rgb(3 6 12 / 40%)
+        );
     }
   }
 }
@@ -264,6 +270,120 @@
   }
 }
 
+/* Ultra-wide screens (2560 × 1440, 2560 × 1080, 3440 × 1440): the stage's
+   type stopped at 112px / 54px while its columns kept widening, so the
+   wordmark ran onto one line and the left column became a short block
+   over a screen of empty ink, with the print a long way off at the right.
+   Here the title card keeps a 19:10 frame centred in the stage (the key
+   art still runs edge to edge behind it); the wordmark keeps its two lines
+   and grows with the frame in a wider left column, the headline, the
+   credits and their labels grow with it, and the print takes the height. */
+@media (min-width: 2200px) and (orientation: landscape) {
+  html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > .hero {
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+    row-gap: clamp(32px, 3.4svh, 64px);
+    padding-top: calc(var(--film-topbar-height, 76px) + clamp(24px, 4.4svh, 72px));
+    padding-inline: max(var(--sw-gutter), calc((100% - 190svh) / 2 + var(--sw-gutter)));
+  }
+
+  /* DECEPTION is about 7.7em and the pair 10.8em, so 8.6em keeps two
+     lines; 6.4vw / 12svh keep DECEPTION inside the column beside the 02
+     tag (1,261px of 1,345px at 2560 × 1440). */
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero
+    > .film-hero-identity
+    .anime-work-title
+    b {
+    max-inline-size: 8.6em;
+    font-size: clamp(112px, min(6.4vw, 12svh), 176px);
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero
+    > .film-hero-identity
+    > .anime-work-title
+    > span {
+    font-size: 14px;
+  }
+
+  /* The programme sheet sets the headline's size on its two lines (52px
+     at most); the h1's own size never reached them. */
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero
+    > .hero-copy
+    h1
+    :is(span, strong) {
+    font-size: clamp(52px, min(3.3vw, 6.2svh), 80px);
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero
+    > .hero-copy
+    > .hero-actions
+    > :is(.primary-action, .text-action) {
+    font-size: 15px;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero
+    > .hero-copy
+    > .hero-actions
+    > .primary-action {
+    min-height: 62px;
+    padding-inline: 30px;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero
+    > .hero-context
+    > .hero-lead {
+    font-size: clamp(15px, 1.25svh, 18px);
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero
+    > .hero-context
+    > .hero-metadata {
+    max-width: 760px;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero
+    > .hero-context
+    > .hero-metadata
+    :is(small, b) {
+    font-size: 14px;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero
+    > .poster-stage {
+    --poster-width: min(
+      26vw,
+      680px,
+      max(256px, calc((100svh - var(--film-topbar-height, 76px) - 230px) * 2 / 3))
+    );
+  }
+}
+
 /* iPad Pro 12.9" portrait (1024 × 1366) and its kin: the larger print the
    stage sheet asked for (the hero keeps rx14's min-height: 0, no
    artificial floor: the larger print fills it instead). */
@@ -349,7 +469,12 @@ html[data-family="world"]:root
       rgb(240 207 134 / 72%) 82%,
       transparent 100%
     );
-    -webkit-mask: radial-gradient(50% 50% at 50% 50%, #000 0, rgb(0 0 0 / 60%) 34%, transparent 70%);
+    -webkit-mask: radial-gradient(
+      50% 50% at 50% 50%,
+      #000 0,
+      rgb(0 0 0 / 60%) 34%,
+      transparent 70%
+    );
     mask: radial-gradient(50% 50% at 50% 50%, #000 0, rgb(0 0 0 / 60%) 34%, transparent 70%);
     opacity: var(--zn-o);
     translate: -50% -50%;
@@ -776,8 +901,7 @@ html[data-family="world"]:root
     z-index: 2;
   }
 
-  /* The NO FILE chip stays on top of the name, as before the lift (on the
-     smallest plates the name's foot reaches it). */
+  /* The NO FILE chip stays on top of the name, as before the lift. */
   html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
@@ -786,6 +910,36 @@ html[data-family="world"]:root
     > .wa-portrait.is-vacant
     > small {
     z-index: 3;
+  }
+}
+
+/* The smallest plates (104px on an iPhone SE, 120px beside an open
+   profile on a phone): rx14's 30px floor made the vertical name 108px
+   tall, and its foot ran under the NO FILE chip. The plate is a width
+   container (its width comes from the wall's track, never its content);
+   under 150px the name is sized from it, a little tighter, and set a
+   touch above centre, so it ends clear of the chip. Physical units: the
+   name is vertical, so its own inline axis is the plate's height. */
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #cast-roster
+  .wa-person.is-none
+  > .wa-portrait.is-vacant {
+  container: zn-vacant / inline-size;
+}
+
+@container zn-vacant (max-width: 150px) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #cast-roster
+    .wa-person.is-none
+    > .wa-portrait.is-vacant
+    > b {
+    font-size: max(18px, 19cqw);
+    letter-spacing: 0.12em;
+    translate: 0 -4cqw;
   }
 }
 
@@ -1008,9 +1162,17 @@ html[data-family="world"]:root
     > #episode-notes
     .wa-episode-art::after {
     background:
-      linear-gradient(90deg, var(--sw-light), #4f7bff 30%, #ff4fc3 62%, var(--sw-gold) 86%, transparent)
+      linear-gradient(
+          90deg,
+          var(--sw-light),
+          #4f7bff 30%,
+          #ff4fc3 62%,
+          var(--sw-gold) 86%,
+          transparent
+        )
         0 100% / 72% 1px no-repeat,
-      radial-gradient(50% 40% at 30% 100%, rgb(255 79 195 / 18%), transparent 100%) 0 100% / 100% 60px no-repeat,
+      radial-gradient(50% 40% at 30% 100%, rgb(255 79 195 / 18%), transparent 100%) 0 100% / 100%
+        60px no-repeat,
       linear-gradient(0deg, var(--sw-deck), transparent 55%);
   }
 
@@ -1044,7 +1206,14 @@ html[data-family="world"]:root
     > #episode-notes
     .wa-episode-art::after {
     background:
-      linear-gradient(90deg, var(--sw-light), #4f7bff 30%, #ff4fc3 62%, var(--sw-gold) 86%, transparent)
+      linear-gradient(
+          90deg,
+          var(--sw-light),
+          #4f7bff 30%,
+          #ff4fc3 62%,
+          var(--sw-gold) 86%,
+          transparent
+        )
         0 100% / 100% 1px no-repeat,
       radial-gradient(60% 34% at 50% 100%, rgb(255 79 195 / 16%), transparent 100%),
       linear-gradient(0deg, rgb(3 8 7 / 56%), transparent 34%);
@@ -1059,8 +1228,15 @@ html[data-family="world"]:root
     .wa-episode-head {
     box-shadow: none;
     background:
-      linear-gradient(90deg, var(--sw-light), #4f7bff 22%, #ff4fc3 48%, var(--sw-gold) 72%, transparent) 0 100% /
-        min(420px, 70%) 1px no-repeat,
+      linear-gradient(
+          90deg,
+          var(--sw-light),
+          #4f7bff 22%,
+          #ff4fc3 48%,
+          var(--sw-gold) 72%,
+          transparent
+        )
+        0 100% / min(420px, 70%) 1px no-repeat,
       linear-gradient(var(--sw-line) 0 0) 0 100% / 100% 1px no-repeat;
   }
 
@@ -1074,7 +1250,12 @@ html[data-family="world"]:root
     flex: 1;
     height: 1px;
     max-width: 120px;
-    background: linear-gradient(90deg, rgb(var(--sw-light-rgb) / 60%), rgb(255 79 195 / 40%), transparent);
+    background: linear-gradient(
+      90deg,
+      rgb(var(--sw-light-rgb) / 60%),
+      rgb(255 79 195 / 40%),
+      transparent
+    );
   }
 
   html[data-family="world"]:root
@@ -1098,8 +1279,7 @@ html[data-family="world"]:root
     > #glossary
     .wa-glossary {
     background:
-      var(--sw-ticks),
-      radial-gradient(42% 26% at 100% 0%, rgb(255 79 195 / 11%), transparent 100%),
+      var(--sw-ticks), radial-gradient(42% 26% at 100% 0%, rgb(255 79 195 / 11%), transparent 100%),
       radial-gradient(36% 22% at 0% 100%, rgb(var(--sw-light-rgb) / 9%), transparent 100%),
       linear-gradient(180deg, var(--sw-deck), var(--sw-deck-2));
   }
@@ -1131,16 +1311,395 @@ html[data-family="world"]:root
   }
 }
 
+/* 06.2 as a register: fifteen terms ran as one even wall of text (two
+   dense columns on wide screens, four screens on a phone) with nothing to
+   find a term by. The terms open as an index of numbered keys (a sideways
+   rail on phones, wrapped keys from 700px), each a jump to its entry, and
+   every entry carries the same number as a kicker over its term, so the
+   eye can go from the register to the entry and back. The numbers are
+   generated (hidden from assistive technology: the term is the label). */
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #glossary
+  .wa-term-index {
+  margin: 0 0 clamp(20px, 3vw, 32px);
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #glossary
+  .wa-term-index
+  > ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: zn-term-key;
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #glossary
+  .wa-term-index
+  li {
+  counter-increment: zn-term-key;
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #glossary
+  .wa-term-index
+  a {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  box-sizing: border-box;
+  min-height: 44px;
+  padding: 0 14px 0 12px;
+  border: 1px solid rgb(var(--sw-light-rgb) / 22%);
+  border-radius: 2px;
+  background: rgb(4 12 10 / 72%);
+  color: var(--sw-text);
+  font: 700 14px / 1.3 var(--sw-display);
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #glossary
+  .wa-term-index
+  a::before {
+  content: counter(zn-term-key, decimal-leading-zero);
+  content: counter(zn-term-key, decimal-leading-zero) / "";
+  color: rgb(var(--sw-light-rgb) / 80%);
+  font: 400 12px / 1 var(--sw-hud);
+  letter-spacing: 0.12em;
+}
+
+@media (hover: hover) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #glossary
+    .wa-term-index
+    a:hover {
+    border-color: rgb(var(--sw-light-rgb) / 64%);
+    background: rgb(var(--sw-light-rgb) / 10%);
+  }
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #glossary
+  .wa-term-index
+  a:focus-visible {
+  outline: 2px solid var(--dx-focus, #fff0b5);
+  outline-offset: 2px;
+}
+
+/* Phones: one sideways rail of keys (a vertical swipe still scrolls the
+   page), its last key cut at the edge so the rail reads as more. */
+@media (max-width: 699px) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #glossary
+    .wa-term-index {
+    margin-inline: calc(var(--sw-gutter) * -1);
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #glossary
+    .wa-term-index
+    > ol {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-padding-inline: var(--sw-gutter);
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+    padding: 2px var(--sw-gutter) 6px;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #glossary
+    .wa-term-index
+    > ol::-webkit-scrollbar {
+    display: none;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #glossary
+    .wa-term-index
+    li {
+    flex: none;
+    scroll-snap-align: start;
+  }
+}
+
+/* The entry's kicker: its number and a short prism rule over the term. */
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #glossary
+  .wa-glossary {
+  counter-reset: zn-term;
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #glossary
+  .wa-glossary
+  > div {
+  counter-increment: zn-term;
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #glossary
+  .wa-glossary
+  > div::before {
+  content: counter(zn-term, decimal-leading-zero);
+  content: counter(zn-term, decimal-leading-zero) / "";
+  justify-self: start;
+  padding-right: 34px;
+  color: rgb(var(--sw-light-rgb) / 78%);
+  font: 400 12px / 1.4 var(--sw-hud);
+  letter-spacing: 0.2em;
+}
+
+@media (forced-colors: none) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #glossary
+    .wa-glossary
+    > div::before {
+    background: linear-gradient(90deg, var(--sw-light), #ff4fc3) right 50% / 22px 1px no-repeat;
+  }
+}
+
+/* Tablets set the term beside its definition: the kicker sits over the
+   term in the term column, and the definition stays level with the term. */
+@media (min-width: 700px) and (max-width: 1099px) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #glossary
+    .wa-glossary
+    > div {
+    row-gap: 6px;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #glossary
+    .wa-glossary
+    > div::before {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #glossary
+    .wa-glossary
+    > div
+    > dt {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #glossary
+    .wa-glossary
+    > div
+    > dd {
+    grid-column: 2;
+    grid-row: 2;
+  }
+}
+
+/* Wide screens: a little more air between entries in the two columns. */
+@media (min-width: 1100px) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #glossary
+    .wa-glossary
+    > div {
+    padding-block: 22px;
+  }
+}
+
+/* The 六詠 archive's rail since the owner's fourth tab (DOGS / 04): four
+   tabs in the stage sheet's 460px left 86px for each code, so REVERSE / 02
+   and RELATED / 03 broke as "REVERSE" / "/ 02" beside one-line FRONT and
+   DOGS; and up to 1359px the rail beside the heading squeezed the archive's
+   note into a column one to five characters wide (1024 × 768, 1194 × 834).
+   Desktop rails are 488px with every code on one line; up to 1359px the
+   rail takes its own row under the heading and its note. */
+@media (min-width: 861px) and (max-width: 1359px) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #story
+    > #manager-archive {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "copy"
+      "rail"
+      "panel";
+  }
+}
+
+@media (min-width: 861px) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #story
+    > #manager-archive
+    > .signal-column
+    > .manager-archive-tabs {
+    width: 488px;
+    max-width: 100%;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #story
+    > #manager-archive
+    .manager-archive-tabs
+    > button[role="tab"]
+    > small {
+    letter-spacing: 0.1em;
+    white-space: nowrap;
+  }
+}
+
+/* 02 RIDERS: switching riders moved the page. Where the rider stage takes
+   its height from its copy (phones, portrait tablets, 1024px), a one-line
+   description and a two-line one differ by a line, so the chapter below
+   jumped 29–30px at some taps (1024 × 768, iPad Pro 11 and mini portrait:
+   989 ↔ 1019px). The description keeps room for two lines (three on
+   phones), so the stage holds one height through all eight riders there;
+   on phones only the two long name lines (07, 08) still add a line. */
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #riders
+  .rider-copy-block
+  > .rider-description {
+  min-height: 2lh;
+}
+
+@media (max-width: 699px) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #riders
+    .rider-copy-block
+    > .rider-description {
+    min-height: 3lh;
+  }
+}
+
+/* 03 RECORDS: the film strip's open edge. From 700px the strip shows a
+   frame and a half to two and a half frames, and the last was cut by a hard edge
+   (its title read DECEPTION WORL at 1440). The edge now fades out over
+   72px while frames remain beyond it, and the fade closes as the strip
+   reaches its last frame (a scroll timeline on the strip itself: still
+   paint, no motion of its own). Keyboard focus drops the mask, which would
+   otherwise clip the strip's outer focus ring. Without scroll timelines
+   the strip keeps its plain edge. */
+@property --zn-strip-fade {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+@keyframes zn-strip-fade {
+  0%,
+  94% {
+    --zn-strip-fade: 72px;
+  }
+
+  100% {
+    --zn-strip-fade: 0px;
+  }
+}
+
+@supports (animation-timeline: scroll(self inline)) {
+  @media (min-width: 700px) {
+    html[data-family="world"]:root
+      body
+      main.site-shell.film-edition.mirage-edition
+      > #records
+      .episode-grid {
+      animation: zn-strip-fade linear both;
+      animation-timeline: scroll(self inline);
+      -webkit-mask-image: linear-gradient(
+        90deg,
+        #000 calc(100% - var(--zn-strip-fade)),
+        transparent
+      );
+      mask-image: linear-gradient(90deg, #000 calc(100% - var(--zn-strip-fade)), transparent);
+    }
+
+    html[data-family="world"]:root
+      body
+      main.site-shell.film-edition.mirage-edition
+      > #records
+      .episode-grid:focus-visible {
+      -webkit-mask-image: none;
+      mask-image: none;
+    }
+  }
+}
+
 /* ----------------------------------------------------------------
    6. Polish: the WORLD COLUMN plate's top rule runs gold → pink, and a
       pink bloom sits in its far corner, so the reading plate under the
       六詠 line-up carries the same light as the title stage.
    ---------------------------------------------------------------- */
 @media (forced-colors: none) {
-  html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > #story > .world-column {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #story
+    > .world-column {
     background:
       var(--sw-ticks),
-      linear-gradient(90deg, var(--sw-gold), #ff4fc3 34%, rgb(var(--sw-light-rgb) / 40%) 62%, transparent 86%)
+      linear-gradient(
+          90deg,
+          var(--sw-gold),
+          #ff4fc3 34%,
+          rgb(var(--sw-light-rgb) / 40%) 62%,
+          transparent 86%
+        )
         0 0 / 100% 1px no-repeat,
       radial-gradient(40% 50% at 100% 0%, rgb(255 79 195 / 10%), transparent 100%),
       linear-gradient(180deg, var(--sw-deck), var(--sw-deck-2));
