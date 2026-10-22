@@ -83,7 +83,7 @@ function Articles({
   );
 }
 
-/** The 準備中 mark every prepared chapter wears: a quiet line, then the state. */
+/** The 準備中 mark every prepared chapter wears: a short note, then the state. */
 function Pending({ line }: { line: string }) {
   return (
     <p className="ffs-pending" role="note">
@@ -158,7 +158,7 @@ export function FarFromSaga() {
               <span aria-hidden="true">06</span> 形態
             </a>
             <a href="#theories">
-              <span aria-hidden="true">07</span> 機構
+              <span aria-hidden="true">07</span> 中核機構
             </a>
             <a href="#finishers">
               <span aria-hidden="true">11</span> 必殺技
@@ -181,21 +181,21 @@ export function FarFromSaga() {
           <i />
         </div>
         <div className="rxs-hero-copy">
-          <p>FINAL STAGE / RIDER RECORD 01</p>
+          <p>FINAL STAGE / SPECIAL SITE</p>
           <h1 id="ffs-title">
             <span>{FAR_FROM_SAGA.en}</span>
             <DisplayName value={FAR_FROM_SAGA.name} />
           </h1>
           <p className="rxs-hero-lede">
             <span className="rxs-hero-lede-text">
-              <span>遠く離れた機構までが、一つの拳になる。</span>
-              <span>超共鳴と接続の、さらに先へ。</span>
+              <span>どこまで離れても、この拳の一部だ。</span>
+              <span>ファイナルステージ限定の超究極フォーム、仮面ライダーファーフロムサーガ。</span>
             </span>
           </p>
           <p className="ffs-stages-line">{FAR_FROM_SAGA.stagesLine}</p>
           <p className="ffs-provisional" role="note">
-            <span aria-hidden="true">SITE IN CONNECTION</span>
-            特設サイト、接続中。
+            <span aria-hidden="true">NOW UPDATING</span>
+            特設サイトは順次更新します。
           </p>
         </div>
         <div className="rxs-hero-visual" aria-hidden="true">
@@ -212,7 +212,7 @@ export function FarFromSaga() {
           />
         </div>
         <a className="rxs-scroll-cue" href="#overview">
-          <span>記録をひらく</span>
+          <span>SCROLL</span>
           <i aria-hidden="true" />
         </a>
       </section>
@@ -225,7 +225,6 @@ export function FarFromSaga() {
         <header className="rxs-section-heading rxs-reveal">
           <p>01 / OVERVIEW</p>
           <h2 id="ffs-overview-title">概要</h2>
-          <span>身体ひとつの枠を、静かに超えていく。</span>
         </header>
         <CallOuts calls={FAR_FROM_SAGA.calls} label="ファーフロムサーガ 変身音声" />
         <div className="ffs-copy">
@@ -243,7 +242,7 @@ export function FarFromSaga() {
         <header className="rxs-section-heading rxs-reveal">
           <p>02 / SPECS</p>
           <h2 id="ffs-specs-title">スペック</h2>
-          <span>標準稼働時の、記録。</span>
+          <span>標準稼働時の数値です。</span>
         </header>
         <dl className="ffs-specs" aria-label="ファーフロムサーガ スペック">
           {FAR_FROM_SAGA.specs.map((row) => (
@@ -263,14 +262,10 @@ export function FarFromSaga() {
       >
         <header className="rxs-section-heading rxs-reveal">
           <p>03 / COMPARISON</p>
-          <h2 id="ffs-performance-title">
-            三つの記録を、
-            <br />
-            同じ光の下に。
-          </h2>
-          <span>ファーフロム、レクソナンス、エクスプリーム。公開値をそのまま並べる。</span>
+          <h2 id="ffs-performance-title">性能比較</h2>
+          <span>ファーフロム、レクソナンス、エクスプリームの公開スペックを並べています。</span>
         </header>
-        <Pending line="比較コンソールは、まだ数値を眠らせている。" />
+        <Pending line="性能比較は現在準備中です。" />
         <div className="ffs-compare-scroll">
           <table
             className="ffs-compare"
@@ -307,7 +302,7 @@ export function FarFromSaga() {
             </tbody>
           </table>
         </div>
-        <ul className="ffs-citations" aria-label="記録に記された比較">
+        <ul className="ffs-citations" aria-label="設定資料中の比較">
           {COMPARISON_CITATIONS.map((citation) => (
             <li key={citation.text}>
               <small>{citation.source}</small>
@@ -324,11 +319,11 @@ export function FarFromSaga() {
         aria-labelledby="ffs-p16-title"
       >
         <header className="rxs-section-heading rxs-reveal">
-          <p>04 / PROCESSING CORE</p>
+          <p>04 / PROCESSOR</p>
           <h2 id="ffs-p16-title">『P16』</h2>
-          <span>認識と制御の、十六世代目。その記録は、まだ封を切られていない。</span>
+          <span>認識・制御を担う『P16』の解説です。</span>
         </header>
-        <Pending line="演算基盤の章は、記録の到着を待っている。" />
+        <Pending line="P16の解説は現在準備中です。" />
       </section>
 
       {/* 準備中 — #suitup: the scroll runway, still; far-from-assembly.ts is its seam. */}
@@ -339,27 +334,21 @@ export function FarFromSaga() {
       >
         <header className="rxs-section-heading rxs-reveal">
           <p>05 / SUIT-UP</p>
-          <h2 id="ffs-suitup-title">
-            光が、
-            <br />
-            装甲になるまで。
-          </h2>
-          <span>
-            ナノマシンが集い、黒銀と黄金、そして水色の結晶へ。スクロールで辿る変身の走路。
-          </span>
+          <h2 id="ffs-suitup-title">変身シークエンス</h2>
+          <span>スクロールに合わせて、ナノマシンが装甲を形成するまでを見せるコーナーです。</span>
         </header>
         <div ref={runwayRef} className="ffs-runway" aria-hidden="true">
           <i />
           <i />
           <i />
         </div>
-        <Pending line="この走路は、いまも静かに眠っている。" />
+        <Pending line="変身シークエンスは現在準備中です。" />
       </section>
 
       <section id="stages" className="rxs-stages rxs-section" aria-labelledby="ffs-stages-title">
         <header className="rxs-section-heading rxs-reveal">
-          <p>06 / FIVE STAGES</p>
-          <h2 id="ffs-stages-title">五つの形態段階</h2>
+          <p>06 / STAGES</p>
+          <h2 id="ffs-stages-title">形態</h2>
           <span>{FAR_FROM_SAGA.stagesLine}</span>
         </header>
 
@@ -435,9 +424,9 @@ export function FarFromSaga() {
         aria-labelledby="ffs-theories-title"
       >
         <header className="rxs-section-heading rxs-reveal">
-          <p>07 / CORE MECHANISM</p>
-          <h2 id="ffs-theories-title">新規理論・中核機構</h2>
-          <span>供給を解き放ち、共鳴を束ね、境界を読み、進化を止めない。</span>
+          <p>07 / MECHANISM</p>
+          <h2 id="ffs-theories-title">中核機構</h2>
+          <span>FARFROM DRIVEをはじめとする、4つの新規理論・中核機構。</span>
         </header>
         <Articles items={FAR_FROM_SAGA.theories} columns={2} label="新規理論・中核機構" />
       </section>
@@ -445,12 +434,8 @@ export function FarFromSaga() {
       <section id="system" className="rxs-section ffs-system" aria-labelledby="ffs-system-title">
         <header className="rxs-section-heading rxs-reveal">
           <p>08 / ARMOR & OS</p>
-          <h2 id="ffs-system-title">
-            装甲・浮遊ユニットと
-            <br />
-            統合OS
-          </h2>
-          <span>ビットは盾になり、足場になり、刃の続きになる。</span>
+          <h2 id="ffs-system-title">装甲・OS</h2>
+          <span>浮遊ユニット『ファーフロムビット』と、統合OS『SA-GA OS 6.1』。</span>
         </header>
         <Articles
           items={[FAR_FROM_SAGA.bits, FAR_FROM_SAGA.os]}
@@ -465,18 +450,18 @@ export function FarFromSaga() {
         aria-labelledby="ffs-authority-title"
       >
         <header className="rxs-section-heading rxs-reveal">
-          <p>09 / DIVINE AUTHORITY</p>
-          <h2 id="ffs-authority-title">神属権限・継承能力</h2>
-          <span>拒まれるほど、深くつながる。</span>
+          <p>09 / AUTHORITY</p>
+          <h2 id="ffs-authority-title">神属権限</h2>
+          <span>FAR FROM DEUSと、Exception World。</span>
         </header>
         <Articles items={FAR_FROM_SAGA.powers} columns={2} label="神属権限・継承能力" />
       </section>
 
       <section id="arsenal" className="rxs-section ffs-arsenal" aria-labelledby="ffs-arsenal-title">
         <header className="rxs-section-heading rxs-reveal">
-          <p>10 / ARSENAL</p>
-          <h2 id="ffs-arsenal-title">追加武装</h2>
-          <span>すべての刃が、FARFROM DRIVEにつながっている。</span>
+          <p>10 / WEAPONS</p>
+          <h2 id="ffs-arsenal-title">武装</h2>
+          <span>追加武装は全10種。</span>
         </header>
         <ul className="ffs-weapons" aria-label="ファーフロムサーガ 追加武装">
           {FAR_FROM_SAGA.arsenal.map((weapon, index) => (
@@ -497,7 +482,6 @@ export function FarFromSaga() {
         <header className="rxs-section-heading rxs-reveal">
           <p>11 / FINISHER</p>
           <h2 id="ffs-finishers-title">必殺技</h2>
-          <span>竜巻のすべては、最後の一蹴のために。</span>
         </header>
         <div className="ffs-finisher-list">
           {FAR_FROM_SAGA.finishers.map((finisher) => (
@@ -517,19 +501,19 @@ export function FarFromSaga() {
 
       <footer className="rxs-footer ffs-footer">
         <div>
-          <p>FAR FROM SAGA / FINAL FORM SITE</p>
+          <p>FAR FROM SAGA / SPECIAL SITE</p>
           <h2>
-            光輪が消えたあとも、
+            ファーフロムサーガの活躍は、
             <br />
-            記録は残る。
+            ファイナルステージで。
           </h2>
         </div>
         <GuardedLink to="/final-stage" hash="far-from-saga" assets={FINAL_STAGE_ENTER_ASSETS}>
-          <span>ファイナルステージの記録へ</span>
+          <span>ファイナルステージへ</span>
           <i aria-hidden="true">↗</i>
         </GuardedLink>
         <GuardedLink to="/riders/saga" assets={[]}>
-          <span>サーガの人物と能力へ</span>
+          <span>仮面ライダーサーガのページへ</span>
           <i aria-hidden="true">↗</i>
         </GuardedLink>
         <GuardedLink
