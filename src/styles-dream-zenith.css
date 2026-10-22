@@ -1011,6 +1011,13 @@ html[data-family="dream"] main.dream-page.dream-page .dream-record-card nav a:fi
     min-width: 44px;
     min-height: 44px;
   }
+
+  /* 人物一覧's filters show from 1101px — an iPad on its side (36px). */
+  html[data-family="dream"]
+    main.dream-page.dream-page
+    :is(.dream-roster-filters button, .dream-roster-bulk) {
+    min-height: 44px;
+  }
 }
 
 /* The three tickets side by side on an upright tablet (761–900px): the
@@ -1181,4 +1188,110 @@ html[data-family="dream"] main.dream-page.dream-page .dream-programme-dossier-ch
     > li[data-kind="cast"] {
     grid-column: span 4;
   }
+}
+
+/* ----------------------------------------------------------------
+   24. ドルミネンス cards in four columns (1101px and up, and an iPad on
+       its side): the spec badge sat at the top right at its full length
+       and ran over the file's number seal at the top left (by 11–43px on
+       the three PUNCH · KICK cards). The badge keeps clear of the seal and
+       wraps after the dot (or the colon) when the card is too narrow.
+   ---------------------------------------------------------------- */
+html[data-family="dream"] main.dream-page.dream-page .dream-dolminence-spec-badge {
+  max-width: calc(100% - 84px);
+  line-height: 1.45;
+  text-align: end;
+  /* 「DEVICE: ルパンガンナー」 breaks after the colon, never inside the name. */
+  word-break: keep-all;
+}
+
+/* ----------------------------------------------------------------
+   25. A glossary term beside a longer neighbour: its dd (a grid) was
+       stretched to the row and shared the spare height between its
+       passages, so カオスカプセム's two lines stood 60px apart. The
+       passages keep their own rhythm at the top of the row.
+   ---------------------------------------------------------------- */
+html[data-family="dream"] main.dream-page.dream-page .dream-glossary dd {
+  align-content: start;
+}
+
+/* ----------------------------------------------------------------
+   26. 人物一覧's two art plates on an upright tablet (761–1100px). In the
+       two-column board ベル and マキャベル gave a third of a 350px plate
+       to their art, so the record ran six characters a line and each
+       plate stood 1,000–1,280px against its neighbours' 550px. They are
+       the board's last pair: each takes the board's full width, the art
+       a broad column at the far side, the record a reading measure.
+   ---------------------------------------------------------------- */
+@media (min-width: 761px) and (max-width: 1100px) and (min-height: 521px) {
+  html[data-family="dream"]
+    main.dream-page.dream-page
+    .dream-roster
+    > li:has(
+      > article:is(
+          [aria-labelledby="dream-roster-bell"],
+          [aria-labelledby="dream-roster-machiavel"]
+        )
+    ) {
+    grid-column: 1 / -1;
+  }
+
+  html[data-family="dream"]
+    main.dream-page.dream-page
+    .dream-roster
+    article:is([aria-labelledby="dream-roster-bell"], [aria-labelledby="dream-roster-machiavel"]) {
+    grid-template-columns: auto minmax(0, 1fr) clamp(180px, 26vw, 260px);
+  }
+
+  html[data-family="dream"]
+    main.dream-page.dream-page
+    .dream-roster
+    article:is([aria-labelledby="dream-roster-bell"], [aria-labelledby="dream-roster-machiavel"])
+    .dream-roster-seal {
+    /* inside the record's column, clear of the art's edge */
+    right: calc(clamp(180px, 26vw, 260px) + clamp(16px, 1.8vw, 22px) + 10px);
+  }
+
+  html[data-family="dream"]
+    main.dream-page.dream-page
+    .dream-roster
+    article:is([aria-labelledby="dream-roster-bell"], [aria-labelledby="dream-roster-machiavel"])
+    > :is(.dream-roster-body, .dream-annex-quote) {
+    max-width: 36em;
+  }
+}
+
+/* ----------------------------------------------------------------
+   27. The end card's five act links on an upright tablet (761–900px):
+       the row needs 740px and an iPad mini's card gives 707, so
+       「第四幕・物語の記録」 dropped alone to a second line. The links
+       close up (8px apart, 11px inside, the phones' 0.06em tracking) and
+       keep one row, 14px in from the card's gilt rules.
+   ---------------------------------------------------------------- */
+@media (min-width: 761px) and (max-width: 900px) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-footer-nav {
+    column-gap: 8px;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-footer-nav a {
+    padding-inline: 11px;
+    letter-spacing: 0.06em;
+  }
+}
+
+/* ----------------------------------------------------------------
+   28. An agent's RIDER and DEVICE names in a narrow file (the three-up
+       roster on an iPad on its side or a laptop): beside its label a
+       name of ten kana was cut inside the word (「サウザンドジャッカ / ー」,
+       Safari has no auto-phrase). The name stays beside its label when
+       it fits and otherwise takes the line under it, and it carries the
+       site's name seams (DisplayName: after 仮面ライダー, ・ and ／).
+   ---------------------------------------------------------------- */
+html[data-family="dream"] main.dream-page.dream-page .dream-agent-rider > span {
+  flex-wrap: wrap;
+  row-gap: 0;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-agent-rider > span > span {
+  min-width: 0;
 }
