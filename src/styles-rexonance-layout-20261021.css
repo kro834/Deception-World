@@ -1218,6 +1218,32 @@ html[data-family="special"]
     > .rxs-footer {
     min-height: 0;
   }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > .rxs-footer
+    > .rzn-end-figure {
+    /* Round 2 (2026-10-22): the figure stood centred behind the last line
+       at 0.9 (0.55 once the rise had played), and 「見せろ。」 sat on its
+       lit core. It now stands from the band's top at the right edge, its
+       helmet over the kicker, and fades to the left and down under the
+       copy, one opacity with or without motion. */
+    top: clamp(12px, 3svh, 32px);
+    right: -8%;
+    translate: 0 0;
+    height: min(64%, 540px);
+    --rzn-end-o: 0.7;
+    opacity: var(--rzn-end-o);
+    -webkit-mask-image:
+      linear-gradient(180deg, #000 0 34%, rgb(0 0 0 / 32%) 58%, transparent 82%),
+      linear-gradient(90deg, rgb(0 0 0 / 25%), #000 55%);
+    mask-image:
+      linear-gradient(180deg, #000 0 34%, rgb(0 0 0 / 32%) 58%, transparent 82%),
+      linear-gradient(90deg, rgb(0 0 0 / 25%), #000 55%);
+    -webkit-mask-composite: source-in;
+    mask-composite: intersect;
+  }
 }
 
 /* Round 2 (2026-10-22): under 375px the P14 figures are 21px, so their
