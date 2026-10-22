@@ -692,6 +692,21 @@ html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm
   html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .detail-nav button {
     min-width: 44px !important;
   }
+
+  /* The compare pickers keep appearance: auto (the iOS crash guard), and
+     WebKit's native menulist then resets their min-height and padding, so
+     they measured 23–27px. An explicit height is the one size WebKit keeps
+     for that native control: the select itself grows to the plate the other
+     engines already draw from min-height, and its whole box opens the picker. */
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .compare-native-select {
+    height: 52px !important;
+  }
+}
+
+@media (any-pointer: coarse) and (min-width: 1181px) {
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .compare-native-select {
+    height: 64px !important;
+  }
 }
 
 /* ================================================================
@@ -916,5 +931,21 @@ html[data-embedded-archive][data-zn-breaks] :is(#saga-forms-performance-v5, #edi
   html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .lightbox-close::before,
   html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .lightbox-close::after {
     display: none;
+  }
+}
+
+/* ================================================================
+   16. Owner (2026-10-23): the compare pickers read at 16px on touch
+   phones (≤620px). The master pins their text at max(.66rem, 11px)
+   !important, under the 12px floor, and iOS zooms the page on focus
+   under 16px. Only the font size moves: the 52px height (section 10)
+   and the analyzer row are left as they are. The ids are doubled so
+   this outranks the master's own doubled-id !important rule.
+   ================================================================ */
+@media (any-pointer: coarse) and (max-width: 620px) {
+  html[data-embedded-archive] #edition-panel-realm#edition-panel-realm #realm--saga-form-compare-ios#realm--saga-form-compare-ios .compare-native-select,
+  html[data-embedded-archive] #edition-panel-saga#edition-panel-saga #saga--saga-form-compare-ios#saga--saga-form-compare-ios .compare-native-select,
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .compare-native-select {
+    font-size: 16px !important;
   }
 }

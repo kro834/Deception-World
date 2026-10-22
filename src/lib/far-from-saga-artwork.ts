@@ -29,13 +29,15 @@ export type FarFromStageArtwork = {
   height: number;
 };
 
-// Intrinsic sizes of the largest delivery file (the originals are 1491–1536 x
-// 2048, resized to 1280 wide; height is recorded by the build script).
+// Intrinsic sizes of the largest delivery file, as the build script reports
+// them. Originals narrower than 1280 px are never enlarged, so their "-1280"
+// file keeps the original's width (ミドル, ハイ and マックス since the owner's
+// corrected visuals of 2026-10-22).
 export const FAR_FROM_SAGA_ARTWORK: Record<FarFromStageKey, FarFromStageArtwork> = {
-  middle: { src: `${FOLDER}/middle-1280.webp`, width: 1280, height: 1758 },
-  high: { src: `${FOLDER}/high-1280.webp`, width: 1280, height: 1716 },
+  middle: { src: `${FOLDER}/middle-1280.webp`, width: 1092, height: 1500 },
+  high: { src: `${FOLDER}/high-1280.webp`, width: 1086, height: 1448 },
   xhigh: { src: `${FOLDER}/xhigh-1280.webp`, width: 1280, height: 1716 },
-  max: { src: `${FOLDER}/max-1280.webp`, width: 1280, height: 1707 },
+  max: { src: `${FOLDER}/max-1280.webp`, width: 1125, height: 1500 },
   ultra: { src: `${FOLDER}/ultra-1280.webp`, width: 1280, height: 1716 },
 };
 
@@ -49,12 +51,14 @@ export const FAR_FROM_SAGA_MENU_TILE = `${FOLDER}/middle-tile-400.webp`;
 /** srcset / sizes for one stage's picture (shared by the HTML preload, the
  * hero and the stage panel so they all fetch the same candidate). */
 export function farFromImage(stage: FarFromStageKey, lazyLayout = false) {
-  const { src } = FAR_FROM_SAGA_ARTWORK[stage];
+  const { src, width: intrinsic } = FAR_FROM_SAGA_ARTWORK[stage];
   const stem = src.replace(/-1280\.webp$/, "");
   return {
-    srcSet: FAR_FROM_SAGA_ARTWORK_WIDTHS.map((width) => `${stem}-${width}.webp ${width}w`).join(
-      ", ",
-    ),
+    // Each candidate is described by its real width (a file is never wider
+    // than its original).
+    srcSet: FAR_FROM_SAGA_ARTWORK_WIDTHS.map(
+      (width) => `${stem}-${width}.webp ${Math.min(width, intrinsic)}w`,
+    ).join(", "),
     sizes: (lazyLayout ? "auto, " : "") + "(max-width: 767px) 100vw, 64vw",
   };
 }
