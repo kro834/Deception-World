@@ -1251,19 +1251,19 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   opacity: 0;
 }
 
-.rx-call-sequence :is(.rx-suit-motes, .rx-suit-pixels) path {
+.rx-call-sequence :is(.rx-suit-motes, .rx-suit-pixels, .rx-suit-reactor-pixels) path {
   stroke: none;
 }
 
-.rx-call-sequence :is(.rx-suit-motes, .rx-suit-pixels) path.is-cyan {
+.rx-call-sequence :is(.rx-suit-motes, .rx-suit-pixels, .rx-suit-reactor-pixels) path.is-cyan {
   fill: #8cefff;
 }
 
-.rx-call-sequence :is(.rx-suit-motes, .rx-suit-pixels) path.is-pink {
+.rx-call-sequence :is(.rx-suit-motes, .rx-suit-pixels, .rx-suit-reactor-pixels) path.is-pink {
   fill: #ff8fd8;
 }
 
-.rx-call-sequence :is(.rx-suit-motes, .rx-suit-pixels) path.is-white {
+.rx-call-sequence :is(.rx-suit-motes, .rx-suit-pixels, .rx-suit-reactor-pixels) path.is-white {
   fill: #f2fbff;
 }
 
@@ -1382,6 +1382,30 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
 
 .rx-call-sequence .rx-suit-build > .rx-suit-spark.is-accent {
   width: 11%;
+}
+
+/* The reactor's light forms from pixel squares like the eyes (full tier;
+   owner 2026-10-23: it popped in whole). */
+.rx-call-sequence .rx-suit-figure > .rx-suit-reactor-pixels {
+  display: none;
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) and (forced-colors: none) {
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"]
+    .rx-suit-figure
+    > .rx-suit-reactor-pixels {
+    display: block;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
+    .rx-suit-reactor-pixels {
+    animation: rxSuitPixels calc(var(--rx-suit-core-duration, 420ms) + 360ms) linear
+      calc(var(--rx-suit-core-start, 0ms) - 40ms + var(--rx-suit-i) * 14ms) both;
+  }
 }
 
 /* REXONANCE DEUS！'s pixel squares (full tier). */

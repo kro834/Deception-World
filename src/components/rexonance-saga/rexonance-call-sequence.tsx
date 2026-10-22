@@ -440,9 +440,39 @@ const suitPixels = (): Squares[] => {
   }
   return groups;
 };
+// The reactor's light forms the same way as the eyes (owner, 2026-10-23:
+// it popped in whole): squares fill the disc, hold, then scatter.
+const REACTOR_REACH = 34;
+const suitReactorPixels = (): Squares[] => {
+  const random = seeded(2023);
+  const [cx, cy] = REXONANCE_SUIT_MARKS.core;
+  const groups: Squares[] = Array.from({ length: REXONANCE_SUIT_PIXELS.groups }, () => ({
+    cyan: "",
+    pink: "",
+    white: "",
+  }));
+  for (let found = 0, tries = 0; found < 96 && tries < 2000; tries += 1) {
+    const x = cx + (random() * 2 - 1) * REACTOR_REACH;
+    const y = cy + (random() * 2 - 1) * REACTOR_REACH;
+    const r = Math.hypot(x - cx, y - cy);
+    if (Math.max(r, REACTOR_REACH) !== REACTOR_REACH) continue;
+    const size = [4, 5, 6, 8][found % 4];
+    const inner = Math.min(r, REACTOR_REACH * 0.45) === r;
+    const tone = found % 7 === 0 ? "white" : inner ? "pink" : "cyan";
+    groups[found % groups.length][tone] += square(x - size / 2, y - size / 2, size);
+    found += 1;
+  }
+  return groups;
+};
+const REACTOR_BOX = (() => {
+  const [cx, cy] = REXONANCE_SUIT_MARKS.core;
+  const r = REACTOR_REACH + 6;
+  return { x: cx - r, y: cy - r, w: r * 2, h: r * 2 };
+})();
 // Drawn once, on the first entry, then reused.
-let SUIT_SQUARES: { motes: Squares; pixels: Squares[] } | undefined;
-const suitSquares = () => (SUIT_SQUARES ??= { motes: suitMotes(), pixels: suitPixels() });
+let SUIT_SQUARES: { motes: Squares; pixels: Squares[]; reactor: Squares[] } | undefined;
+const suitSquares = () =>
+  (SUIT_SQUARES ??= { motes: suitMotes(), pixels: suitPixels(), reactor: suitReactorPixels() });
 // The face's box, a little wider than its lights, that the squares burst from.
 const FACE_BOX = (() => {
   const { x, y, w, h } = REXONANCE_SUIT_FACE;
@@ -483,7 +513,7 @@ const SUIT_PHASES = ["ice", "violet", "gold"] as const;
 const SUIT_RINGS = [...SUIT_PHASES, "ice"] as const;
 
 function Suit({ suit, animate }: { suit: "build" | "whole"; animate: boolean }) {
-  const { motes, pixels } = suitSquares();
+  const { motes, pixels, reactor } = suitSquares();
   const visor = REXONANCE_SUIT_MARKS.visor;
   // rx13: the nanite engine (micro-tiles on a canvas) takes over the plates
   // once it is ready in time; until then, or without it, the DOM plates play.
@@ -655,6 +685,34 @@ function Suit({ suit, animate }: { suit: "build" | "whole"; animate: boolean }) 
                 {
                   ...place(box.x, box.y, box.w, box.h),
                   transformOrigin: `${pct(visor[0] - box.x, box.w)} ${pct(visor[1] - box.y, box.h)}`,
+                  "--rx-suit-i": index,
+                  "--rx-suit-burst": burst,
+                  "--rx-suit-r": `${turn}deg`,
+                } as CSSProperties
+              }
+            >
+              <SquarePaths squares={group} />
+            </svg>
+          );
+        })}
+        {reactor.map((group, index) => {
+          const [burst, turn] = SUIT_BURST[index];
+          const [cx, cy] = REXONANCE_SUIT_MARKS.core;
+          const box = {
+            x: cx - (cx - REACTOR_BOX.x) * burst,
+            y: cy - (cy - REACTOR_BOX.y) * burst,
+            w: REACTOR_BOX.w * burst,
+            h: REACTOR_BOX.h * burst,
+          };
+          return (
+            <svg
+              key={`reactor-${SUIT_BURST[index].join()}`}
+              className="rx-suit-reactor-pixels"
+              viewBox={`${REACTOR_BOX.x} ${REACTOR_BOX.y} ${REACTOR_BOX.w} ${REACTOR_BOX.h}`}
+              style={
+                {
+                  ...place(box.x, box.y, box.w, box.h),
+                  transformOrigin: "50% 50%",
                   "--rx-suit-i": index,
                   "--rx-suit-burst": burst,
                   "--rx-suit-r": `${turn}deg`,
