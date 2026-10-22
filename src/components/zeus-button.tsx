@@ -219,6 +219,13 @@ const ZEUS_AVOID_PAGE_TEXT_SELECTOR = [
   ".rxs-assembly-status",
   ".rxe-form-status-heading",
   ".rzn-form-code",
+  // 2026-10-23: the World annex's section counts (「15 TERMS」, 「17 LINES」)
+  // and the Extreme form panel's ability chips (DARK MATTER CHARGING), which
+  // the button settled on mid-scroll at 390.
+  ".wa-count",
+  ".rxs-stage-panel ul > li",
+  // Extreme's architecture cards' codes (the same chip words, iPad portrait).
+  ".rxs-system-grid article > header > small",
 ].join(",");
 /* Where no spot is clear of words on the Rexonance page (a full-width
    instrument table, the chapter map's rows), the button steps aside in place
@@ -232,6 +239,12 @@ const ZEUS_PARK_PAGE_SELECTOR = ".rxs-rexonance-page";
    not land on the figure while a clear spot remains, and a fallback weighs
    the figure like the words it would hide. */
 const ZEUS_AVOID_ART_SELECTOR = ".rxs-hero-visual img";
+/* 2026-10-23: a dossier's roster tiles (portrait, numeral and name; the
+   current file too), which the button settled on mid-scroll at 390 on the
+   rider files. Weighed as art, not stepped off as controls: on a phone the
+   grid fills the screen's foot, and as controls they would block every spot
+   and pin the button home on a tile; as art the least-covering spot wins. */
+const ZEUS_AVOID_TILE_SELECTOR = ".dossier-roster > li";
 const ZEUS_DISPLAY_TEXT_SELECTOR = "strong, b";
 const ZEUS_DISPLAY_TEXT_MIN_PX = 24;
 // At the end of the page nothing more scrolls out from under the button, so
@@ -421,7 +434,9 @@ function readAvoidText(button: HTMLElement, zones: ZeusRect[], pageEnd: boolean)
     for (const word of readFrameAvoid((entry) => entry.words)) {
       if (meetsAny(word, zones)) glyphs.push(word);
     }
-    for (const art of root.querySelectorAll<HTMLElement>(ZEUS_AVOID_ART_SELECTOR)) {
+    for (const art of root.querySelectorAll<HTMLElement>(
+      `${ZEUS_AVOID_ART_SELECTOR},${ZEUS_AVOID_TILE_SELECTOR}`,
+    )) {
       if (!drawn(art)) continue;
       const box = art.getBoundingClientRect();
       const shown = {
