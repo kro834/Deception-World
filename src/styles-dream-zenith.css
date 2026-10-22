@@ -692,8 +692,8 @@ html[data-family="dream"]
   border-color: #a8352c;
   outline-color: rgb(168 53 44 / 42%);
   background:
-    radial-gradient(70% 60% at 50% 25%, rgb(243 224 176 / 22%), transparent 75%),
-    linear-gradient(180deg, #b83a30 0%, #a8352c 100%);
+    radial-gradient(70% 60% at 50% 25%, rgb(243 224 176 / 12%), transparent 75%),
+    linear-gradient(180deg, #96322b 0%, #822c26 100%);
   box-shadow: inset 0 1px 0 rgb(243 224 176 / 30%);
   opacity: 1;
 }

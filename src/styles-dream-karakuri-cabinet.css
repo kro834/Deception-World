@@ -22,7 +22,7 @@ html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-heading {
 html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-heading h2 {
   margin: 8px 0 0;
   color: #eadcc1;
-  font-family: "Yu Mincho", "Hiragino Mincho ProN", serif;
+  font-family: var(--ts-display);
   font-size: clamp(25px, 3vw, 38px);
   font-weight: 600;
   letter-spacing: 0.13em;
@@ -63,7 +63,7 @@ html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-drawer-labe
   justify-content: space-between;
   padding: 0 5px 14px;
   color: #cfb68a;
-  font-family: "Yu Mincho", "Hiragino Mincho ProN", serif;
+  font-family: var(--ts-display);
   font-size: 12px;
   letter-spacing: 0.24em;
 }
@@ -114,7 +114,7 @@ html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-tab-number 
 }
 
 html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-tab strong {
-  font-family: "Yu Mincho", "Hiragino Mincho ProN", serif;
+  font-family: var(--ts-display);
   font-size: clamp(16px, 1.8vw, 23px);
   font-weight: 600;
   letter-spacing: 0.1em;
@@ -215,15 +215,15 @@ html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-seal {
   outline: 1px solid #8c3f3180;
   outline-offset: -5px;
   color: #8c3f31;
-  font-family: "Yu Mincho", "Hiragino Mincho ProN", serif;
+  font-family: var(--ts-display);
   font-size: 25px;
   transform: rotate(-3deg);
 }
 
 html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-chapter-heading p {
   margin: 0 0 5px;
-  color: #796342;
-  font-size: 12px;
+  color: #604b30;
+  font-size: 13px;
   letter-spacing: 0.16em;
   line-height: 1.6;
 }
@@ -231,7 +231,7 @@ html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-chapter-hea
 html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-chapter-heading h3 {
   margin: 0;
   color: var(--karakuri-ink);
-  font-family: "Yu Mincho", "Hiragino Mincho ProN", serif;
+  font-family: var(--ts-display);
   font-size: clamp(27px, 3.6vw, 42px);
   font-weight: 600;
   letter-spacing: 0.16em;
@@ -242,19 +242,23 @@ html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-lead {
   max-width: 54em;
   margin: 0 0 12px;
   color: #3a2d21;
-  font-family: "Yu Mincho", "Hiragino Mincho ProN", serif;
-  font-size: clamp(15px, 1.7vw, 19px);
+  font-family: var(--ts-text);
+  font-size: clamp(16px, 1.7vw, 19px);
   font-weight: 600;
   line-height: 1.9;
 }
 
 html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-excerpt {
-  max-width: 68em;
+  max-width: 43em;
   min-height: 6.6em;
   margin: 0;
   color: #5d4c39;
-  font-size: 14px;
-  line-height: 2.2;
+  font-family: var(--ts-text);
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 2.05;
+  letter-spacing: 0.03em;
+  line-break: strict;
   overflow-wrap: anywhere;
 }
 
@@ -470,7 +474,7 @@ html[data-family="dream"]
     padding: 9px;
   }
   html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-heading > p {
-    font-size: 12px;
+    font-size: 13px;
   }
   html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-paper-topline {
     font-size: 12px;

@@ -200,7 +200,7 @@ test("scroll-linked motion runs on named timelines under the full gate", () => {
   }
   assert.deepEqual(
     [...names].sort(),
-    ["kn-brush", "kn-drawer", "kn-hang", "kn-lock", "kn-press", "kn-stamp", "kn-tie", "kn-unfurl"],
+    ["kn-brush", "kn-case-press", "kn-drawer", "kn-hang", "kn-lock", "kn-press", "kn-stamp", "kn-tie", "kn-unfurl"],
   );
   // Every view timeline this sheet declares is named, block-axis and fully gated.
   const declared = rules.filter(({ body }) => declaration(body, "view-timeline"));
@@ -210,6 +210,17 @@ test("scroll-linked motion runs on named timelines under the full gate", () => {
     assert.match(declaration(body, "view-timeline"), /^--kn-[\w-]+ block$/, selector);
   }
   assert.doesNotMatch(css, /animation-timeline:\s*(?:view|scroll)\(/);
+});
+
+test("a long open chapter keeps its numeral visible throughout its stamp", () => {
+  const stamp = keyframes.find(({ name }) => name === "kn-case-press");
+  assert.ok(stamp);
+  assert.doesNotMatch(stamp.body, /opacity|visibility|filter/);
+  assert.match(stamp.body, /scale: 1\.15/);
+  const numeral = rules.find(({ selector, body }) =>
+    selector.includes(".dream-story-case-number b") && body.includes("animation:"),
+  );
+  assert.match(numeral.body, /animation: kn-case-press linear both/);
 });
 
 test("the file's 襖 panels are inert ornaments under the CLOSE plate and leave the screen", () => {

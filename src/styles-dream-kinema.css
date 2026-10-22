@@ -1084,6 +1084,18 @@
       animation-range: entry 30% entry 85%;
     }
 
+    /* An opened chapter can be many screens tall. Its entry progress
+       must not keep the whole reading sheet dim until its top scrolls away.
+       Retain the named view timeline for the child's scale-only seal. */
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )
+      .dream-page.dream-page
+      .dream-story-cases
+      > li:has(> .dream-story-case[open]) {
+      animation-name: none;
+    }
+
     /* 第四幕: each CASE numeral is pressed as its slip rises. */
     html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
         [data-dialog-open]
@@ -1093,7 +1105,7 @@
       > li
       .dream-story-case-number
       b {
-      animation: kn-press linear both;
+      animation: kn-case-press linear both;
       animation-timeline: --ts-rise;
       animation-range: entry 40% entry 100%;
     }
@@ -1253,6 +1265,17 @@
   }
   to {
     opacity: 1;
+    scale: 1;
+  }
+}
+
+/* A chapter may be several screens tall after expansion. Its scroll-linked
+   stamp must not fade its identifying number while the reader is at the top. */
+@keyframes kn-case-press {
+  from {
+    scale: 1.15;
+  }
+  to {
     scale: 1;
   }
 }

@@ -117,6 +117,15 @@ html[data-family="dream"] main.dream-page.dream-page .dream-programme-dossier-ch
     0 4px 0 #130f16;
 }
 
+/* The original agent accent stays on the rule; its text tint needs enough
+   light to read on the lacquer, particularly red and violet agents. */
+html[data-family="dream"] main.dream-page.dream-page .dream-programme-dossier-chip small {
+  color: color-mix(in srgb, var(--dossier-chip-accent, #e6c28e) 40%, #f4ecdc);
+  font-size: 13px;
+  line-height: 1.6;
+  letter-spacing: 0.08em;
+}
+
 html[data-family="dream"] main.dream-page.dream-page .dream-programme-ledger-grid {
   gap: 1px;
   border: 1px solid #ab8b5f5e;
@@ -175,7 +184,7 @@ html[data-family="dream"] main.dream-page.dream-page .dream-programme-reel-headi
   max-width: 30em;
   margin: 0 0 2px;
   color: #dfcaae;
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.8;
 }
 
