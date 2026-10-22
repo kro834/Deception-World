@@ -6,7 +6,7 @@ import {
   sampleCells,
   warpPicture,
 } from "./rexonance-overwrite.js";
-import { createSplitLightsJob } from "./rexonance-unlit.js";
+import { createSplitLightsJob, supportsCpuPreparation } from "./rexonance-unlit.js";
 import {
   drawBodyFlame,
   drawFlameHeat,
@@ -2000,7 +2000,25 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         // Test-only instrumentation must never affect preparation.
       }
     };
-    const makeSheet = async (phase) => {
+    let cpuPreparation = false;
+    const stepPixels = (job, deadline, phase) => {
+      const start = environment.performance?.now?.() ?? Date.now();
+      // CPU-backed preparation can use more of the existing idle slice,
+      // avoiding a fresh task for each tiny row group. Keep native-operation
+      // headroom below the 6 ms target, and leave the fallback budget alone.
+      const done = job.step(start + (cpuPreparation ? 2.5 : 1.5), deadline);
+      try {
+        if (environment.__rexonancePreparationSlice)
+          environment.__rexonancePreparationSlice(
+            phase,
+            (environment.performance?.now?.() ?? Date.now()) - start,
+          );
+      } catch {
+        // Test-only instrumentation must never affect preparation.
+      }
+      return done;
+    };
+    const makeSheet = async (phase, cpu = false) => {
       mark(phase);
       return idleTask(() => {
         if (!active()) return null;
@@ -2008,6 +2026,9 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         resources.add(sheet);
         sheet.width = W;
         sheet.height = H;
+        // Read-back inputs must be CPU-backed from their FIRST context.
+        // A CPU scratch copy cannot undo a GPU source's synchronisation.
+        if (cpu && cpuPreparation) sheet.getContext("2d", { willReadFrequently: true });
         return sheet;
       });
     };
@@ -2087,7 +2108,10 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       mark(`${phase}-setup`);
       const job = await idleTask(() => {
         if (!active()) return null;
-        const result = createSplitLightsJob(source, 0, 0, W, H, document, options);
+        const result = createSplitLightsJob(source, 0, 0, W, H, document, {
+          ...options,
+          cpuUnlit: cpuPreparation,
+        });
         if (result) splitJobs.add(result);
         return result;
       });
@@ -2097,9 +2121,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         mark(`${phase}-pixels`);
         const ran = await idleTask((deadline) => {
           if (!active()) return;
-          // Leave headroom for the final indivisible native operation.
-          const until = (environment.performance?.now?.() ?? Date.now()) + 1.5;
-          done = job.step(until, deadline);
+          done = stepPixels(job, deadline, `${phase}-pixels`);
         });
         if (ran === null || !active()) return null;
       }
@@ -2134,9 +2156,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         mark(`${phase}-rows`);
         const ran = await idleTask((deadline) => {
           if (!active()) return;
-          // Leave headroom for the final indivisible native operation.
-          const until = (environment.performance?.now?.() ?? Date.now()) + 1.5;
-          done = job.step(until, deadline);
+          done = stepPixels(job, deadline, `${phase}-rows`);
         });
         if (ran === null || !active()) return null;
       }
@@ -2209,6 +2229,9 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
           : null;
         if (!active()) return;
         const nextPixels = facePixels(config.glow, config.visor);
+        mark("cpu-preparation-probe");
+        cpuPreparation = await idleTask(() => active() && supportsCpuPreparation(document));
+        if (!active()) return;
         const nextSettled = await makeSheet("settled-sheet");
         if (!nextSettled || !active()) return;
         // (No mote layers: the scene no longer reads them — round 3, memory.)
@@ -2239,7 +2262,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         const preset = config.pieces.filter((piece) => piece.preset).reverse();
         let nextDriver = null;
         if (preset.length && images.atlas) {
-          nextDriver = await makeSheet("driver-sheet");
+          nextDriver = await makeSheet("driver-sheet", true);
           if (!nextDriver || !active()) return;
           const dc = nextDriver.getContext("2d");
           if (
@@ -2281,9 +2304,9 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         let nextGoldArt = null;
         let nextGoldLayer = null;
         if (nextGold?.count) {
-          nextRaw = await makeSheet("gold-raw-sheet");
+          nextRaw = await makeSheet("gold-raw-sheet", true);
           if (!nextRaw || !active()) return;
-          nextGoldArt = await makeSheet("gold-art-sheet");
+          nextGoldArt = await makeSheet("gold-art-sheet", true);
           if (!nextGoldArt || !active()) return;
           nextGoldLayer = await makeSheet("gold-layer-sheet");
           if (!nextGoldLayer || !active()) return;
@@ -2335,7 +2358,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
           // The armour's raw-gold sheet: the base figure with the armour
           // plates' trims unformed (the ornaments' gold is the full figure's).
           if (baseSample && images.base && active()) {
-            nextBaseRaw = await makeSheet("base-raw-sheet");
+            nextBaseRaw = await makeSheet("base-raw-sheet", true);
             if (!nextBaseRaw || !active()) return;
             const bc = nextBaseRaw.getContext("2d");
             mark("base-raw-copy");

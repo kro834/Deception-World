@@ -17,6 +17,49 @@ export function splitLights(source, sx, sy, w, h, document = globalThis.document
   return job.commit();
 }
 
+const cpuPreparationSupport = new WeakMap();
+/** Some canvas backends round translucent CPU composites differently from
+ * their default store. Probe that contract, not a browser name, before opting
+ * in. The 16px buffers are temporary; a document retains only the boolean. */
+export function supportsCpuPreparation(document = globalThis.document) {
+  if (!document || typeof document.createElement !== "function") return false;
+  if (cpuPreparationSupport.has(document)) return cpuPreparationSupport.get(document);
+  const canvases = [];
+  let supported = false;
+  try {
+    const make = (cpu) => {
+      const canvas = Object.assign(document.createElement("canvas"), { width: 16, height: 16 });
+      canvases.push(canvas);
+      return canvas.getContext("2d", cpu ? { willReadFrequently: true } : undefined);
+    };
+    const seed = make(true);
+    const pixels = seed.createImageData(16, 16);
+    for (let i = 0; i < 256; i++) {
+      pixels.data.set([(i * 37) % 256, (i * 71) % 256, (i * 113) % 256, i], i * 4);
+    }
+    seed.putImageData(pixels, 0, 0);
+    const read = (cpu) => {
+      const context = make(cpu);
+      context.drawImage(seed.canvas, 0, 0);
+      context.drawImage(seed.canvas, -3, 2);
+      context.globalCompositeOperation = "source-in";
+      context.drawImage(seed.canvas, 0, 0);
+      const snapshot = make(true);
+      snapshot.drawImage(context.canvas, 0, 0);
+      return snapshot.getImageData(0, 0, 16, 16).data;
+    };
+    const reference = read(false);
+    const candidate = read(true);
+    supported = reference.every((value, index) => value === candidate[index]);
+  } catch {
+    // Unavailable pixel reads keep the established path and its fallbacks.
+  } finally {
+    for (const canvas of canvases) canvas.width = canvas.height = 0;
+  }
+  cpuPreparationSupport.set(document, supported);
+  return supported;
+}
+
 // Rows shaded and uploaded a strip at a time (round 4: the nanite kit's
 // phased jobs' READ_STRIP, rexonance-suit-extras): the light and mote bytes
 // are one strip of this many rows, reused strip to strip, and every upload
@@ -147,7 +190,12 @@ export function createSplitLightsJob(
       // lights, motes.
       let output = contexts[uploaded];
       if (!output) {
-        output = contexts[uploaded] = targets[uploaded].getContext("2d");
+        // Preparation reuses unlit pixels for CPU composites. Draw-only
+        // overlays keep their default backing store.
+        output = contexts[uploaded] = targets[uploaded].getContext(
+          "2d",
+          uploaded === 0 && options.cpuUnlit ? { willReadFrequently: true } : undefined,
+        );
         if (!output)
           throw new Error(
             uploaded === 0
@@ -545,7 +593,12 @@ export function createNaniteMoltenJob(
   document = globalThis.document,
   options = {},
 ) {
-  const reads = options.mask ? [[source, sx, sy], [options.mask, sx, sy]] : [[source, sx, sy]];
+  const reads = options.mask
+    ? [
+        [source, sx, sy],
+        [options.mask, sx, sy],
+      ]
+    : [[source, sx, sy]];
   return createNanitePixelJob(document, w, h, reads, ["molten"], (y, [a, mask], [o]) =>
     naniteMoltenRow(y, w, a, mask ?? null, o, 0),
   );

@@ -2046,7 +2046,9 @@ export function createAssemblyLayerJob({
     const contexts = outputs.map((canvas) => canvas.getContext("2d"));
     // The sources (the art, and the mask), each copied to the CPU and read
     // back once by the first steps, then kept in memory (the rim's halo
-    // rows are plain memory reads).
+    // rows are plain memory reads). On byte-compatible backends RESONANCE
+    // builds these composites on CPU from decoded artwork, avoiding a GPU
+    // source drain. Keep the snapshot for fallback callers and alpha rounding.
     const sources = mask ? [source, mask] : [source];
     const copy = make(W, H);
     const copyContext = copy.getContext("2d", { willReadFrequently: true });

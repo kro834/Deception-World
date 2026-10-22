@@ -198,10 +198,9 @@ test("the forged face is preloaded on this route only; the files are small woff2
     "g",
   );
   assert.equal(route.match(outlinePreload)?.length, 1);
-  // owner request 2026-10-21: TYPE (rx21) — the Mincho's two first-screen
-  // subsets are the third and fourth preloads (scripts/rexonance-type.test.mjs
-  // pins them); still no other.
-  assert.equal(route.match(/as: "font"/g)?.length, 4, "four font preloads on the route");
+  // The futuristic revision uses local Japanese gothic. Only the two
+  // small Latin display faces remain preloaded; dormant Mincho is not fetched.
+  assert.equal(route.match(/as: "font"/g)?.length, 2, "only the used display faces preload");
   for (const path of [
     "src/routes/world.tsx",
     "src/routes/extreme-saga.tsx",

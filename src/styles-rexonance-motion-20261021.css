@@ -871,6 +871,54 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page {
   }
 }
 
+/* Futuristic controls (owner, 2026-10-22): immediate press feedback on
+   touch too, without a sticky hover, added RAF loop or layout animation. */
+@media (prefers-reduced-motion: no-preference) and (forced-colors: none) {
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    :is(.rxs-stage-tabs button, .rxs-assembly-controls a, .rxs-assembly-controls button) {
+    transition:
+      scale 140ms var(--rxk-out),
+      border-color 140ms ease,
+      background-color 140ms ease;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    :is(.rxs-stage-tabs button, .rxs-assembly-controls a, .rxs-assembly-controls button):is(:active, [data-liquid-contact="true"]) {
+    /* WebKit releases :active when the rail captures the pointer. The
+       existing contact state is also cleared on cancel/up/scroll. */
+    scale: 0.98;
+  }
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  :is(
+    .rxs-stage-tabs button,
+    .rxs-assembly-controls a,
+    .rxs-assembly-controls button
+  ):focus-visible {
+  outline: 2px solid var(--rxt-ice, #96ecff);
+  outline-offset: 4px;
+}
+
+@media (forced-colors: active) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    :is(
+      .rxs-stage-tabs button,
+      .rxs-assembly-controls a,
+      .rxs-assembly-controls button
+    ):focus-visible {
+    outline-color: Highlight;
+  }
+}
+
 /* ---------------- Calm tiers ---------------- */
 /* Reduced motion, economy rendering and forced colours: every armed state
    above is inside the motion gate, so nothing here is hidden; the rail
