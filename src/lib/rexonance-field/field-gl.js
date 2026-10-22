@@ -63,7 +63,11 @@ const B = FIELD_BIRTH;
 const f = (value) => (Number.isInteger(value) ? `${value}.0` : String(value));
 const vec3 = (values) => values.map(f).join(", ");
 
-export const FIELD_VERTEX_SHADER = `
+/** The vertex shader for a palette (`tones`: ice, pink, white as sRGB
+ * triples, as FIELD_TONES). The fire's layer keeps FIELD_TONES; FAR FROM's
+ * passes its own (ice, gold, white). The arithmetic is one and the same:
+ * only the three tone constants differ. */
+export const fieldVertexShader = (tones = FIELD_TONES) => `
 precision highp float;
 attribute vec4 aSeed;
 attribute vec4 aKind;
@@ -230,7 +234,7 @@ void main() {
   float edge = clamp(min(e.x, e.y) / uEdge, 0.0, 1.0);
   edge *= edge * (3.0 - 2.0 * edge);
   float a = light * uAlpha * vis * edge;
-  vec3 tone = pick < uTone.x ? vec3(${vec3(FIELD_TONES.ice)}) : (pick < uTone.y ? vec3(${vec3(FIELD_TONES.pink)}) : vec3(${vec3(FIELD_TONES.white)}));
+  vec3 tone = pick < uTone.x ? vec3(${vec3(tones.ice)}) : (pick < uTone.y ? vec3(${vec3(tones.pink)}) : vec3(${vec3(tones.white)}));
   // Hot, it is the combustion's pale cyan (a pink-violet fringe on a few).
   vec3 hot = pick > FRINGE ? vec3(${vec3(B.fringe)}) : vec3(${vec3(B.hot)});
   tone = mix(tone, hot, heat);
@@ -244,6 +248,8 @@ void main() {
   gl_Position = vis > 0.5 ? vec4(clip.x, -clip.y, 0.0, 1.0) : vec4(-4.0, -4.0, 0.0, 1.0);
 }
 `;
+
+export const FIELD_VERTEX_SHADER = fieldVertexShader(FIELD_TONES);
 
 export const FIELD_FRAGMENT_SHADER = `
 precision mediump float;
@@ -392,7 +398,7 @@ const UNIFORMS = [
 
 // One canvas: its context, program and buffers (`vertexBytes()` the
 // particles' bytes, built once for every surface). Rebuilt after a restore.
-function createSurface(canvas, side, count, vertexBytes) {
+function createSurface(canvas, side, count, vertexBytes, vertexSource = FIELD_VERTEX_SHADER) {
   const gl = fieldContext(canvas);
   if (!gl) return null;
   const surface = {
@@ -423,7 +429,7 @@ function createSurface(canvas, side, count, vertexBytes) {
   };
   const build = () => {
     surface.ready = false;
-    const vertex = compile(gl.VERTEX_SHADER, FIELD_VERTEX_SHADER);
+    const vertex = compile(gl.VERTEX_SHADER, vertexSource);
     const fragmentShader = compile(gl.FRAGMENT_SHADER, FIELD_FRAGMENT_SHADER);
     const program = gl.createProgram();
     if (!program) throw new Error("field: program unavailable");
@@ -516,7 +522,9 @@ function releaseSurface(surface) {
  * its own context. `document.createElement` makes the canvases; the caller
  * places them. `fragment(index, out)` gives each particle's birth (the
  * burst fragment's handoff: x, y figure heights; vx, vy per wake; its
- * stagger share); the fire's own fragments by default. Null when WebGL is
+ * stagger share); the fire's own fragments by default. `tones` is the
+ * layer's palette (FIELD_TONES by default; another scene passes its own
+ * ice, pink and white triples and lead thresholds). Null when WebGL is
  * unavailable.
  */
 export function createFieldLayer({
@@ -527,8 +535,10 @@ export function createFieldLayer({
   front = !coarse,
   className = "",
   fragment = fieldFragment,
+  tones = FIELD_TONES,
 } = {}) {
   if (!doc || typeof doc.createElement !== "function" || !take) return null;
+  const vertexSource = tones === FIELD_TONES ? FIELD_VERTEX_SHADER : fieldVertexShader(tones);
   const G = FIELD_GL;
   const n = Math.max(64, Math.min(G.maxCount, count ?? (coarse ? G.count.coarse : G.count.fine)));
   // The particles' bytes: one build (the fire's fragments, sampled at their
@@ -546,7 +556,7 @@ export function createFieldLayer({
     if (!canvas) return null;
     if (className) canvas.className = `${className} is-${side > 0 ? "front" : "back"}`;
     if (canvas.dataset) canvas.dataset.side = side > 0 ? "front" : "back";
-    const surface = createSurface(canvas, side, n, bytesOf);
+    const surface = createSurface(canvas, side, n, bytesOf, vertexSource);
     if (!surface) {
       canvas.width = canvas.height = 0;
       return null;
@@ -562,7 +572,7 @@ export function createFieldLayer({
   }
   // One canvas alone draws every side.
   if (surfaces.length === 1) back.side = 0;
-  const tone = FIELD_TONES.leads[Math.min(2, Math.max(0, take.palette | 0))];
+  const tone = (tones.leads ?? FIELD_TONES.leads)[Math.min(2, Math.max(0, take.palette | 0))];
   const alpha = coarse ? G.alpha.coarse : G.alpha.fine;
   const resolution = coarse ? G.resolution.coarse : G.resolution.fine;
   let ratio = 1;

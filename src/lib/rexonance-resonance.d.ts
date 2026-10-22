@@ -92,17 +92,22 @@ export function rewindAssemblyGold(
   budget: number,
 ): number;
 
+/** A kit's chip sheet geometry (REXONANCE_NANITE_CELLS's layout). */
+export interface RexonanceAssemblyCells {
+  readonly src: string;
+  readonly cell: number;
+  readonly mip: { readonly x: readonly number[]; readonly y: readonly number[] };
+  readonly unfold: { readonly y: number; readonly x: readonly number[] };
+  readonly bokeh: { readonly x: readonly number[]; readonly y: readonly number[] };
+  readonly bead: { readonly x: number; readonly y: number };
+  readonly spark: { readonly x: number; readonly y: number };
+}
+
 /** The nanite kit's sheet geometry (REXONANCE_NANITES, generated). */
 export interface RexonanceAssemblyNanites {
-  readonly cells: {
-    readonly src: string;
-    readonly cell: number;
-    readonly mip: { readonly x: readonly number[]; readonly y: readonly number[] };
-    readonly unfold: { readonly y: number; readonly x: readonly number[] };
-    readonly bokeh: { readonly x: readonly number[]; readonly y: readonly number[] };
-    readonly bead: { readonly x: number; readonly y: number };
-    readonly spark: { readonly x: number; readonly y: number };
-  };
+  readonly cells: RexonanceAssemblyCells;
+  /** A second kind of chip (FAR FROM): the chips split between the kits. */
+  readonly cellsB?: RexonanceAssemblyCells;
   readonly comets: {
     readonly src: string;
     readonly rows: { readonly ice: number; readonly pink: number; readonly gold: number };
@@ -143,6 +148,78 @@ export interface RexonanceAssemblyNanites {
 
 // (The swarm's timings and budgets: rexonance-assembly-nanites.js.)
 
+/** A page's palette for the scene (FAR FROM: ice, gold, white); every
+ * field optional, Rexonance's by default (assemblyPalette). */
+export interface RexonanceAssemblyPalette {
+  /** The three chip, mosaic and pixel-square tones (sRGB triples). */
+  tones?: readonly (readonly [number, number, number])[];
+  /** The core's three rings (CSS colours). */
+  rings?: readonly string[];
+  /** The reactor's spiralling motes (three CSS colours). */
+  reactorMotes?: readonly string[];
+  /** The light's arms at the ignition (two CSS colours). */
+  lightArms?: readonly string[];
+  /** The core's glow (three gradient stops, CSS colours with alpha). */
+  coreGlow?: readonly string[];
+  /** The field layer's tones (rexonance-field: FieldTones). */
+  field?: {
+    readonly ice: readonly number[];
+    readonly pink: readonly number[];
+    readonly white: readonly number[];
+    readonly leads?: readonly (readonly number[])[];
+  };
+  /** The swarm's (rexonance-assembly-nanites.js createAssemblyNanites). */
+  nanites?: {
+    readonly tone?: readonly string[];
+    readonly shade?: readonly string[];
+    readonly touchTone?: readonly string[];
+    readonly touchShade?: readonly string[];
+    /** The kit's sprite row for each chip tone. */
+    readonly toneRows?: readonly number[];
+  };
+}
+
+export function assemblyPalette(palette?: RexonanceAssemblyPalette | null): {
+  tones: readonly (readonly [number, number, number])[];
+  toneCss: string[];
+  rings: readonly string[];
+  reactorMotes: readonly string[];
+  lightArms: readonly string[];
+  coreGlow: readonly string[];
+  field: RexonanceAssemblyPalette["field"] | null;
+  nanites: RexonanceAssemblyPalette["nanites"] | null;
+};
+
+/** Pixel squares inside an outline, in six burst groups (the eyes'; the
+ * reactor's). */
+export function glowPixels(
+  glow: readonly (readonly [number, number])[] | undefined,
+  centre: readonly [number, number],
+  seed?: number,
+  count?: number,
+): { x: number; y: number; size: number; tone: number; group: number }[];
+
+/** A page's own draws, called by the scene each frame with the context
+ * transformed to figure px: behind the figure (after the swarm's far
+ * side) and over it (after the core's rings). Allocation-free, closed-form
+ * in the progress. */
+export interface RexonanceAssemblyAccents {
+  back?(
+    context: CanvasRenderingContext2D,
+    progress: number,
+    calm: boolean,
+    width: number,
+    height: number,
+  ): void;
+  front?(
+    context: CanvasRenderingContext2D,
+    progress: number,
+    calm: boolean,
+    width: number,
+    height: number,
+  ): void;
+}
+
 export interface RexonanceAssemblyConfig {
   figure: string;
   undersuit: string;
@@ -152,6 +229,13 @@ export interface RexonanceAssemblyConfig {
   core: readonly [number, number];
   visor: readonly [number, number];
   glow: readonly (readonly [number, number])[];
+  /** The reactor's outline (FAR FROM): it fills with pixel squares that
+   * scatter, like the compound eyes, on the final call. */
+  reactorGlow?: readonly (readonly [number, number])[];
+  /** The reactor's radius in figure px (40 by default). */
+  reactorRadius?: number;
+  palette?: RexonanceAssemblyPalette;
+  accents?: RexonanceAssemblyAccents;
   gold?: RexonanceAssemblyGold;
   /** The plates' atlas (art | mosaic), for the driver's cut-outs. */
   atlas?: string;
@@ -167,14 +251,23 @@ export interface RexonanceAssemblyConfig {
    * still tiers never download it). */
   nanites?: RexonanceAssemblyNanites | (() => Promise<RexonanceAssemblyNanites | null>);
   /** The MAX and ULTRA figures (same frame): the suit-up ends on the form
-   * named by the runway's data-form. */
-  forms?: {
-    readonly max: string;
-    readonly ultra: string;
-    readonly excelsior?: string;
-    /** How much wider either side the EXCELSIOR picture is than the frame. */
-    readonly pad?: number;
-  };
+   * named by the runway's data-form. Or a page's own chain (FAR FROM:
+   * `chain: ["high", "xhigh", "max"]`, each key's picture in the same
+   * frame): the suit-up runs through them in order to the named form. */
+  forms?:
+    | {
+        readonly max: string;
+        readonly ultra: string;
+        readonly excelsior?: string;
+        /** How much wider either side the EXCELSIOR picture is than the frame. */
+        readonly pad?: number;
+        readonly chain?: undefined;
+      }
+    | ({
+        readonly chain: readonly string[];
+        /** Each form's light (CSS colour) as its cells overwrite the last. */
+        readonly tones?: Readonly<Record<string, string>>;
+      } & Readonly<Record<string, unknown>>);
 }
 
 export interface RexonanceAssemblyTile {

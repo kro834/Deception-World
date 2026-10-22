@@ -2248,6 +2248,11 @@ export function createAssemblyNanites({
   gold = null,
   goldCell = 4,
   touchArtBudget = 64,
+  // The page's swarm palette (assemblyPalette's `nanites`): the chips'
+  // tones and shades (desktop and touch) for the batched rects, and
+  // `toneRows`: the kit's sprite row for each of the three chip tones
+  // (FAR FROM: ice, gold, white → rows 0, 3, 2).
+  palette = null,
   document: doc = globalThis.document,
 }) {
   const N = ASSEMBLY_NANITES;
@@ -2262,6 +2267,12 @@ export function createAssemblyNanites({
   const [coreX, coreY] = core;
   const [visorX, visorY] = visor ?? [W / 2, H * 0.14];
   const cells = sprites?.cells ?? null;
+  // The second kit's chips (FAR FROM, owner 2026-10-22: two kinds of
+  // nanite, mixed): its sheet and geometry, the same layout contract as the
+  // first's. Each chip is one kit's for good, by its hash; both draw
+  // through the one sprite path below (spriteChip).
+  const cellsB = sprites?.cellsB ?? null;
+  const kB = cellsB && kit?.cellsB ? kit.cellsB : null;
   const cometSheet = coarse ? null : (sprites?.comets ?? null);
   const fxSheet = sprites?.fx ?? null;
   const k = {
@@ -2269,20 +2280,34 @@ export function createAssemblyNanites({
     comets: kit?.comets ?? KIT.comets,
     fx: kit?.fx ?? KIT.fx,
   };
+  const PT = palette?.tone ?? TONE_CSS;
+  const PS = palette?.shade ?? SHADE_CSS;
+  const PTT = palette?.touchTone ?? TOUCH_TONE_CSS;
+  const PTS = palette?.touchShade ?? TOUCH_SHADE_CSS;
+  // The sprite row of each chip tone (0 ice, 1 pink, 2 white by default).
+  const ROW = Uint8Array.from(palette?.toneRows ?? [0, 1, 2]);
   const MIPX = Float64Array.from(k.cells.mip.x);
   const MIPY = Float64Array.from(k.cells.mip.y);
   const UNX = Float64Array.from(k.cells.unfold.x);
   const UNY = k.cells.unfold.y;
   const BKX = Float64Array.from(k.cells.bokeh.x);
   const BKY = Float64Array.from(k.cells.bokeh.y);
+  const MIPXB = Float64Array.from((kB ?? k.cells).mip.x);
+  const MIPYB = Float64Array.from((kB ?? k.cells).mip.y);
+  const UNXB = Float64Array.from((kB ?? k.cells).unfold.x);
+  const UNYB = (kB ?? k.cells).unfold.y;
+  const BKXB = Float64Array.from((kB ?? k.cells).bokeh.x);
+  const BKYB = Float64Array.from((kB ?? k.cells).bokeh.y);
   const BEADX = k.cells.bead.x;
   const BEADY = k.cells.bead.y;
   const SPX = k.cells.spark.x;
   const SPY = k.cells.spark.y;
+  const cometRowOf = (row) =>
+    row === 3 ? k.comets.rows.gold : row === 1 ? k.comets.rows.pink : k.comets.rows.ice;
   const COMET_ROW = Float64Array.from([
-    k.comets.rows.ice,
-    k.comets.rows.pink,
-    k.comets.rows.ice,
+    cometRowOf(ROW[0]),
+    cometRowOf(ROW[1]),
+    cometRowOf(ROW[2]),
     k.comets.rows.gold,
   ]);
   const TAIL0 = k.comets.tail[0];
@@ -2447,6 +2472,13 @@ export function createAssemblyNanites({
   const SZF = new Float32Array(F);
   for (let i = 0; i < n; i += 1) SZT[i] = naniteSizeScale(HSH[i]);
   for (let j = 0; j < F; j += 1) SZF[j] = naniteSizeScale(free.hsh[j]);
+  // Each chip's kit (0: the first; 1: the second, where one is given): by
+  // its hash, so a tile is the same chip at every progress.
+  const KITOF = new Uint8Array(total + 1);
+  if (cellsB) {
+    for (let i = 0; i < n; i += 1) KITOF[i] = naniteHash(i, 77) < 0.5 ? 1 : 0;
+    for (let j = 0; j < F; j += 1) KITOF[n + j] = naniteHash(j + 100003, 78) < 0.5 ? 1 : 0;
+  }
   // Each socket is keyed to an already-formed neighbour. Keep the approach
   // on the outward side of that edge rather than diving every cell along
   // the same plate normal. Two floats per cell, prepared outside the frame.
@@ -3286,11 +3318,11 @@ export function createAssemblyNanites({
       const base = b * RECT_CAP * 4;
       const t = b >> 1;
       ctx.globalAlpha = b & 1 ? 0.75 : 0.42;
-      ctx.fillStyle = coarse ? TOUCH_SHADE_CSS[t] : SHADE_CSS[t];
+      ctx.fillStyle = coarse ? PTS[t] : PS[t];
       chipPath(ctx, base, count, 0.9);
       ctx.fill();
       if (coarse) ctx.globalAlpha = b & 1 ? 0.66 : 0.36;
-      ctx.fillStyle = coarse ? TOUCH_TONE_CSS[t] : TONE_CSS[t];
+      ctx.fillStyle = coarse ? PTT[t] : PT[t];
       chipPath(ctx, base, count, 0);
       ctx.fill();
       if (coarse && b & 1) {
@@ -3312,7 +3344,17 @@ export function createAssemblyNanites({
   const spriteChip = (ctx, slot, alphaCap, bokeh) => {
     const size = S[slot];
     if (size <= 0.3 || A[slot] <= 0.01) return;
-    const t = TN[slot];
+    // The chip's tone's sprite row in its kit (the second kit's sheet and
+    // geometry for its chips; the first's otherwise).
+    const t = ROW[TN[slot]];
+    const second = KITOF[slot] === 1;
+    const sheet = second ? cellsB : cells;
+    const mipX = second ? MIPXB : MIPX;
+    const mipY = second ? MIPYB : MIPY;
+    const unX = second ? UNXB : UNX;
+    const unY = second ? UNYB : UNY;
+    const bkX = second ? BKXB : BKX;
+    const bkY = second ? BKYB : BKY;
     let f = FR[slot] % 24;
     if (f < 0) f += 24;
     f = Math.floor(f) % 24;
@@ -3323,23 +3365,23 @@ export function createAssemblyNanites({
     let draw = size;
     let alpha = A[slot] < alphaCap ? A[slot] : alphaCap;
     if (bokeh && Z[slot] > BOKEH_Z && bokehAt(X[slot], Y[slot])) {
-      sx = BKX[t];
-      sy = BKY[t];
+      sx = bkX[t];
+      sy = bkY[t];
       draw = size * 1.3;
       alpha = 0.22;
-    } else if (uf >= 0 && t < 3) {
-      sx = UNX[t] + 32 * uf;
-      sy = UNY;
+    } else if (uf >= 0 && t < unX.length) {
+      sx = unX[t] + 32 * uf;
+      sy = unY;
     } else if (size * SCALE <= 12) {
-      sx = MIPX[t] + 16 * f;
-      sy = MIPY[t];
+      sx = mipX[t] + 16 * f;
+      sy = mipY[t];
       cs = 16;
     } else {
       sx = 32 * f;
       sy = 32 * t;
     }
     ctx.globalAlpha = alpha;
-    ctx.drawImage(cells, sx, sy, cs, cs, X[slot] - draw / 2, Y[slot] - draw / 2, draw, draw);
+    ctx.drawImage(sheet, sx, sy, cs, cs, X[slot] - draw / 2, Y[slot] - draw / 2, draw, draw);
     sprites_ += 1;
   };
   // A comet (N7): the pose 3 steps back gives the streak, pre-rotated.
@@ -4121,7 +4163,7 @@ export function createAssemblyNanites({
     if (held) heldFrames(ctx, held, false, covered ? 0.8 : 1);
     if (beamN) {
       ctx.globalAlpha = 0.3;
-      ctx.strokeStyle = TONE_CSS[0];
+      ctx.strokeStyle = PT[0];
       ctx.lineWidth = 0.7;
       ctx.beginPath();
       for (let at = 0; at < beamN; at += 4) {
@@ -4831,7 +4873,7 @@ export function createAssemblyNanites({
         }
       if (any) {
         ctx.globalAlpha = 0.35;
-        ctx.strokeStyle = TONE_CSS[0];
+        ctx.strokeStyle = PT[0];
         ctx.lineWidth = 0.8;
         ctx.stroke();
       }
@@ -5096,7 +5138,7 @@ export function createAssemblyNanites({
         linkCounts[bucket] += 4;
       }
     }
-    ctx.strokeStyle = TONE_CSS[0];
+    ctx.strokeStyle = PT[0];
     ctx.lineWidth = 0.8;
     for (let bucket = 0; bucket < 3; bucket += 1) {
       const count = linkCounts[bucket];
@@ -5206,7 +5248,7 @@ export function createAssemblyNanites({
       if (!any) continue;
       if (pass === 0) {
         ctx.globalAlpha = 0.55;
-        ctx.strokeStyle = TONE_CSS[0];
+        ctx.strokeStyle = PT[0];
         ctx.lineWidth = 1.2;
       } else if (pass === 1) {
         ctx.globalAlpha = 0.95;
@@ -5214,7 +5256,7 @@ export function createAssemblyNanites({
         ctx.lineWidth = 2.6;
       } else {
         ctx.globalAlpha = 0.3;
-        ctx.strokeStyle = TONE_CSS[0];
+        ctx.strokeStyle = PT[0];
         ctx.lineWidth = 1;
       }
       ctx.stroke();
@@ -5471,7 +5513,7 @@ export function createAssemblyNanites({
       ctx.globalCompositeOperation = "lighter";
       for (let c = 0; c < nImplode; c += 1) {
         const slot = implodeList[c];
-        const t = TN[slot] > 2 ? 2 : TN[slot];
+        const t = ROW[TN[slot] > 2 ? 2 : TN[slot]];
         const g = S[slot] * 1.5;
         ctx.globalAlpha = 0.28 * A[slot];
         ctx.drawImage(cells, BKX[t], BKY[t], 32, 32, X[slot] - g / 2, Y[slot] - g / 2, g, g);

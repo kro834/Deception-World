@@ -7,7 +7,6 @@ import { useWorldMode } from "@/components/world/use-world-mode";
 import { FINAL_STAGE_ENTER_ASSETS, WORLD_ENTER_ASSETS } from "@/lib/asset-loader";
 import { initRail } from "@/lib/liquid/boot.js";
 import { mountLocalNavCurrent } from "@/lib/local-nav-current";
-import { FAR_FROM_ASSEMBLY_BEATS, mountFarFromAssembly } from "@/lib/far-from-assembly";
 import { FAR_FROM_SAGA, type Article } from "@/components/final-stage/final-stage-data";
 import {
   FAR_FROM_SAGA_ARTWORK,
@@ -18,6 +17,7 @@ import {
 import { FarFromEntryTransition } from "./far-from-entry-transition";
 import { FarFromComparison } from "./far-from-comparison";
 import { FarFromP16 } from "./far-from-p16";
+import { FarFromSuitUp } from "./far-from-suitup";
 
 /* FAR FROM SAGA special site (owner's record of 2026-10-22).
 
@@ -30,11 +30,12 @@ import { FarFromP16 } from "./far-from-p16";
 
    #performance is the comparison console (far-from-comparison.tsx) and #p16
    the P16 chapter's frame (far-from-p16.tsx; P16's own specs are 準備中),
-   both drawing on far-from-comparison-data.ts. Still prepared, not built
+   both drawing on far-from-comparison-data.ts. #suitup is the scroll
+   suit-up (far-from-suitup.tsx: the Rexonance runway playing FAR FROM's
+   suit through src/lib/far-from-assembly.ts, its engine chunk imported
+   under the motion gate once the page is idle). Still prepared, not built
    (準備中): the nanite entry transition (far-from-entry-transition.tsx,
-   renders nothing) and #suitup (a still runway; src/lib/far-from-assembly.ts
-   is its seam). None of them loads a canvas or an engine, and none delays
-   first paint. */
+   renders nothing). Nothing here delays first paint. */
 
 const releaseControlFocus = (control: HTMLElement) => {
   window.requestAnimationFrame(() => {
@@ -98,16 +99,12 @@ export function FarFromSaga() {
   const [stage, setStage] = useState<FarFromStageKey>("middle");
   const pageRef = useRef<HTMLElement | null>(null);
   const stageTabsRef = useRef<HTMLDivElement | null>(null);
-  const runwayRef = useRef<HTMLDivElement | null>(null);
 
   const activeStage = FAR_FROM_SAGA.stages[stage];
   const activeArt = FAR_FROM_SAGA_ARTWORK[stage];
   const keyVisual = FAR_FROM_SAGA_ARTWORK.middle;
 
   useEffect(() => mountLocalNavCurrent(pageRef.current?.querySelector(".rxs-local-nav nav")), []);
-
-  // The suit-up runway's seam: a no-op today (準備中), the port's mount later.
-  useEffect(() => mountFarFromAssembly(runwayRef.current, { beats: FAR_FROM_ASSEMBLY_BEATS }), []);
 
   // The liquid rail owns tap, long-press, drag and keyboard selection; React
   // only mirrors the chosen index back into state.
@@ -285,24 +282,8 @@ export function FarFromSaga() {
         <FarFromP16 />
       </section>
 
-      {/* 準備中 — #suitup: the scroll runway, still; far-from-assembly.ts is its seam. */}
-      <section
-        id="suitup"
-        className="rxs-section ffs-suitup ffs-prepared"
-        aria-labelledby="ffs-suitup-title"
-      >
-        <header className="rxs-section-heading rxs-reveal">
-          <p>05 / SUIT-UP</p>
-          <h2 id="ffs-suitup-title">変身シークエンス</h2>
-          <span>スクロールに合わせて、ナノマシンが装甲を形成するまでを見せるコーナーです。</span>
-        </header>
-        <div ref={runwayRef} className="ffs-runway" aria-hidden="true">
-          <i />
-          <i />
-          <i />
-        </div>
-        <Pending line="変身シークエンスは現在準備中です。" />
-      </section>
+      {/* #suitup: the scroll suit-up (far-from-suitup.tsx). */}
+      <FarFromSuitUp />
 
       <section id="stages" className="rxs-stages rxs-section" aria-labelledby="ffs-stages-title">
         <header className="rxs-section-heading rxs-reveal">

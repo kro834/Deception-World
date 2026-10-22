@@ -50,6 +50,8 @@ test("the side menu lists FAR FROM under SPECIAL after Rexonance, and its chapte
   assert.ok(rexonance >= 0 && farFrom > rexonance);
   assert.match(sections, /"far-from": "\/far-from-saga"/);
   assert.match(sections, /"far-from": "ファーフロムサーガ"/);
+  // The chapters' sections: on the page, or in its suit-up component.
+  const chapters = component + read("src/components/far-from-saga/far-from-suitup.tsx");
   for (const hash of [
     "overview",
     "specs",
@@ -64,7 +66,7 @@ test("the side menu lists FAR FROM under SPECIAL after Rexonance, and its chapte
     "finishers",
   ]) {
     assert.match(sections, new RegExp(`\\["${hash}", `), hash);
-    assert.match(component, new RegExp(`id="${hash}"`), hash);
+    assert.match(chapters, new RegExp(`id="${hash}"`), hash);
   }
   assert.match(menu, /SPECIAL_SITE_PATHS\[/);
   assert.match(read("src/styles-stage-shell.css"), /a\[href\^="\/far-from-saga"\]/);
@@ -214,18 +216,21 @@ test("the record carries the owner's 2026-10-22 values, verbatim, and none of th
   assert.match(read("src/components/search/search-data.ts"), /description: "SA-GA OS 6\.1"/);
 });
 
-test("the four prepared chapters are visibly 準備中, typed, and weightless", () => {
-  // (a) #suitup: a still runway whose seam is a typed no-op hook.
+test("#suitup is built on the Rexonance runway; the other prepared chapters stay 準備中, typed, and weightless", () => {
+  // (a) #suitup: the scroll suit-up (far-from-suitup.tsx), its seam the
+  // lazy mount of the Rexonance engine (scripts/far-from-suitup.test.mjs
+  // pins the scene itself).
   const assembly = read("src/lib/far-from-assembly.ts");
+  const suitup = read("src/components/far-from-saga/far-from-suitup.tsx");
   assert.match(assembly, /export function mountFarFromAssembly\(/);
-  assert.match(
-    assembly,
-    /export const FAR_FROM_ASSEMBLY_BEATS: readonly FarFromAssemblyBeat\[\] = \[\]/,
-  );
+  assert.match(assembly, /export const FAR_FROM_ASSEMBLY_BEATS: readonly FarFromAssemblyBeat\[\]/);
   assert.match(assembly, /rexonance-resonance\.js/);
-  assert.match(assembly, /rexonance-assembly-nanites\.js/);
-  assert.match(component, /mountFarFromAssembly\(runwayRef\.current/);
-  assert.match(component, /<div ref=\{runwayRef\} className="ffs-runway" aria-hidden="true">/);
+  assert.match(assembly, /import\("\.\/far-from-assembly-engine"\)/);
+  assert.match(component, /<FarFromSuitUp \/>/);
+  assert.match(suitup, /mountFarFromAssembly\(runwayRef\.current\)/);
+  assert.match(suitup, /id="suitup" className="rxs-section ffs-suitup"/);
+  assert.match(suitup, /className="ffs-runway rzn-suitup"/);
+  assert.doesNotMatch(suitup, /<Pending|<b>準備中<\/b>/);
   // (b) the entry transition renders nothing and is mounted first.
   const entry = read("src/components/far-from-saga/far-from-entry-transition.tsx");
   assert.match(entry, /export function FarFromEntryTransition\(/);
@@ -244,11 +249,13 @@ test("the four prepared chapters are visibly 準備中, typed, and weightless", 
   );
   assert.match(component, /id="p16"\s+className="rxs-section ffs-p16 ffs-prepared"/);
   assert.match(component, /<b>準備中<\/b>/);
-  assert.match(component, /id="suitup"\s+className="rxs-section ffs-[a-z0-9]+ ffs-prepared"/);
+  // The page's own chunk never carries a canvas or an engine: the runway's
+  // canvas is the suit-up component's, drawn only by the lazy engine chunk.
   assert.doesNotMatch(component, /<canvas|WebGL|\.getContext\(/);
+  assert.doesNotMatch(suitup, /WebGL|\.getContext\(/);
   assert.match(styles, /\.ffs-pending b \{/);
   assert.match(styles, /@import "\.\/styles-far-from-compare\.css";/);
-  assert.match(styles, /\.ffs-runway \{/);
+  assert.match(read("src/styles-far-from-suitup.css"), /\.ffs-page \.rzn-suitup \{/);
 });
 
 const comparisonData = read("src/components/far-from-saga/far-from-comparison-data.ts");
@@ -328,7 +335,7 @@ test("#performance is an interactive console built only from published values", 
 });
 
 test("#p16 shows only the record's facts and keeps every P16 slot 準備中", () => {
-  const p16 = section("p16", "suitup");
+  const p16 = component.slice(component.indexOf('id="p16"'), component.indexOf("<FarFromSuitUp />"));
   assert.match(p16, /<FarFromP16 \/>/);
   assert.match(p16, /<Pending line="P16の詳細な仕様は現在準備中です。" \/>/);
   // No invented figures anywhere in the chapter.

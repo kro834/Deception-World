@@ -10,6 +10,7 @@ import sagaShowcaseCssUrl from "@/styles-saga-showcase.css?url";
 import showcaseElevationCssUrl from "@/styles-showcase-elevation.css?url";
 import motionEditionCssUrl from "@/styles-motion-edition.css?url";
 import farFromSagaCssUrl from "@/styles-far-from-saga.css?url";
+import farFromSuitupCssUrl from "@/styles-far-from-suitup.css?url";
 import { FAR_FROM_SAGA_KEY_VISUAL, farFromImage } from "@/lib/far-from-saga-artwork";
 
 // Provisional (2026-10-22): the FAR FROM SAGA special site's scaffold. The
@@ -40,6 +41,9 @@ export const Route = createFileRoute("/far-from-saga")({
       { rel: "stylesheet", href: showcaseElevationCssUrl },
       { rel: "stylesheet", href: motionEditionCssUrl },
       { rel: "stylesheet", href: farFromSagaCssUrl },
+      // The scroll suit-up's runway (styles-far-from-suitup.css): the
+      // Rexonance runway's sheet, ported, after the page's own.
+      { rel: "stylesheet", href: farFromSuitupCssUrl },
       CINEMATIC_STYLESHEET_LINK,
       {
         rel: "preload",
