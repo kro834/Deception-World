@@ -68,8 +68,17 @@ function mount({ observerSupport = true, viewportSupport = true, height = 62.2 }
       return { height: navHeight };
     },
   };
+  let numeralWidth = 120;
+  const headingValues = new Map();
+  const heading = { style: {
+    getPropertyValue: (name) => headingValues.get(name) || "",
+    setProperty: (name, value) => headingValues.set(name, value),
+    removeProperty: (name) => headingValues.delete(name),
+  } };
+  const document = { fonts: target("fonts") };
   const page = {
     querySelector: () => nav,
+    querySelectorAll: () => [heading],
     style: {
       getPropertyValue: (name) => values.get(name) || "",
       setProperty(name, value) {
@@ -93,6 +102,8 @@ function mount({ observerSupport = true, viewportSupport = true, height = 62.2 }
     }
   }
   const cleanup = runInNewContext(code, {
+    document,
+    getComputedStyle: () => ({ width: `${numeralWidth}px` }),
     pageRef: { current: page },
     window,
     ResizeObserver: observerSupport ? ResizeObserver : undefined,
@@ -108,6 +119,8 @@ function mount({ observerSupport = true, viewportSupport = true, height = 62.2 }
     writes,
     values,
     listeners,
+    headingValues,
+    fontChange(width) { numeralWidth = width; document.fonts.dispatchEvent(new Event("loadingdone")); },
     cleanup,
     get reads() {
       return reads;
@@ -137,6 +150,18 @@ test("nav reserve is measured immediately and includes a fractional border heigh
   assert.equal(ui.frames.size, 0, "initial layout does not wait for animation frames");
   assert.equal(ui.observer.target, ui.nav);
   ui.cleanup();
+});
+
+test("chapter emitters follow their actual numeral width on a font change and release their values", () => {
+  const ui = mount();
+  assert.equal(ui.headingValues.get("--rsn-emitter-x"), "60px");
+  for (let i = 0; i < 4; i++) ui.fontChange(144);
+  assert.equal(ui.frames.size, 1);
+  ui.flush();
+  assert.equal(ui.headingValues.get("--rsn-emitter-x"), "72px");
+  ui.cleanup();
+  assert.equal(ui.headingValues.size, 0);
+  assert.equal(ui.listeners.size, 0);
 });
 
 test("same-frame window, viewport and observer resize bursts share one measurement", () => {

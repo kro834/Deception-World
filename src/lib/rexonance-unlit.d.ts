@@ -5,12 +5,20 @@ export type SplitLightsResult = {
   motes?: HTMLCanvasElement;
 };
 
-export type SplitLightsOptions = { motes?: boolean };
+export type SplitLightsOptions = {
+  motes?: boolean;
+  /** Keep the intermediate unlit canvas on CPU for subsequent preparation reads. */
+  cpuUnlit?: boolean;
+};
+
+/** True only when this document's CPU/default alpha-compositing probe has identical RGBA bytes. */
+export function supportsCpuPreparation(document?: Document): boolean;
 
 export type SplitLightsJob = {
-  /** Cooperatively advance one phase (the snapshot, a strip's read-back, one
-   * canvas's upload) or rows to the deadline; Infinity without an expired idle
-   * deadline runs the whole pass. True is terminal (completed or cancelled). */
+  /** Cooperatively advance one phase (the snapshot and its one whole
+   * read-back, one strip of one canvas's upload) or a strip's rows to the
+   * deadline; Infinity without an expired idle deadline runs the whole pass.
+   * True is terminal (completed or cancelled). */
   step(until: number, idleDeadline?: Pick<IdleDeadline, "timeRemaining">): boolean;
   /** Publish only a completed pass (no pixel work). Repeated successful commits are idempotent. */
   commit(): SplitLightsResult | null;

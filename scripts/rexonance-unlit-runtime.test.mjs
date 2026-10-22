@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
 import test from "node:test";
@@ -89,11 +90,20 @@ function fixture(pixels, width, height, failures = {}) {
           const [w, h] = args;
           return { width: w, height: h, data: new Uint8ClampedArray(w * h * 4) };
         },
-        putImageData(data, ...args) {
-          calls.put.push({ index, args });
+        // Only the dirty rectangle's rows land, as with the native put (the
+        // job puts whole rows; sweep 2: the unlit canvas's strips come from
+        // the one whole read, the lights' from a strip buffer).
+        putImageData(data, dx, dy, dirtyX = 0, dirtyY = 0, dirtyW = width, dirtyH = undefined) {
+          const rowBytes = width * 4;
+          const rows = dirtyH ?? data.data.length / rowBytes;
+          calls.put.push({ index, args: [dx, dy, dirtyX, dirtyY, dirtyW, rows] });
           if (failures.put === index) throw new Error("lost drawing context");
+          assert.deepEqual([dx, dirtyX, dirtyW], [0, 0, width], "whole rows");
           canvas.pixels ??= new Uint8ClampedArray(pixels.length);
-          canvas.pixels.set(data.data, args[1] * width * 4);
+          canvas.pixels.set(
+            data.data.subarray(dirtyY * rowBytes, (dirtyY + rows) * rowBytes),
+            (dy + dirtyY) * rowBytes,
+          );
         },
       };
       canvas.getContext = (kind, options) => {
@@ -126,8 +136,9 @@ function fixture(pixels, width, height, failures = {}) {
 }
 
 // Round 4 (phased split): besides one step per row, a job of one strip takes
-// a snapshot step, a read-back step and one upload step per canvas.
-const PHASES = 4;
+// one upload step per canvas, and (sweep 2) one step for the snapshot and its
+// one whole read-back.
+const PHASES = 3;
 
 function assertBytes(result, expected) {
   assert.ok(result);
@@ -143,10 +154,16 @@ test("synchronous compatibility preserves every original byte across seeded RGBA
   const ui = fixture(pixels, width, height);
   assertBytes(ui.api.splitLights(ui.image, 11, 13, width, height), expected);
   assert.deepEqual(ui.calls.draw[0], [ui.image, 11, 13, width, height, 0, 0, width, height]);
-  assert.equal(ui.calls.draw.length, 3, "one snapshot, two GPU-friendly output copies");
+  // Sweep 2: the snapshot is the one draw; the outputs are put, never copied.
+  assert.equal(ui.calls.draw.length, 1, "one snapshot, no output copies");
   assert.deepEqual(ui.calls.read, [[0, 0, width, height]]);
   assert.deepEqual(ui.calls.create, [[width, height]]);
   assert.equal(ui.calls.put.length, 2);
+  assert.deepEqual(
+    ui.calls.put.map(({ index }) => index),
+    [1, 2],
+    "straight into the unlit and light canvases",
+  );
   assert.equal(ui.calls.clock, 0, "the synchronous API requires no scheduler or clock");
   assert.equal(ui.calls.close, 0);
 });
@@ -186,9 +203,10 @@ test("the real 1024 by 866 preparation region stays byte-identical across bounde
   while (!job.step(ui.now() + 6)) assert.ok(++slices < height);
   assert.ok(slices > 1, "the full-size pixel pass genuinely yields");
   assertBytes(job.commit(), expected);
-  // Round 4: read back in four 248-row strips, each uploaded per canvas.
-  assert.equal(ui.calls.read.length, 4);
+  // Sweep 2: read back once, whole; four 248-row strips, each uploaded per canvas.
+  assert.deepEqual(ui.calls.read, [[0, 0, width, height]]);
   assert.equal(ui.calls.put.length, 8);
+  assert.ok(ui.calls.put.every(({ args }) => args[5] <= 248));
 });
 
 test("known cyan, blue and pink pixels become cold monochrome and restore their original light bytes", () => {
@@ -257,7 +275,7 @@ for (const slicing of ["one-row", "six-ms", "idle-expired", "infinite"]) {
     if (slicing === "one-row" || slicing === "idle-expired") assert.equal(slices, height + PHASES);
     if (slicing === "infinite") assert.equal(slices, 1);
     assertBytes(job.commit(), originalBytes(pixels));
-    assert.equal(ui.calls.draw.length, 3);
+    assert.equal(ui.calls.draw.length, 1);
     assert.equal(ui.calls.read.length, 1);
     assert.equal(ui.calls.create.length, 1);
     assert.equal(ui.calls.put.length, 2);
@@ -333,7 +351,8 @@ for (const failures of [
   { create: true },
   { context: 1 },
   { context: 2 },
-  { put: 0 },
+  { put: 1 },
+  { put: 2 },
 ]) {
   test(`an unavailable phase commits null with no partial result and remains terminal: ${JSON.stringify(failures)}`, () => {
     const ui = fixture(randomPixels(3, 4), 3, 4, failures);
@@ -374,8 +393,256 @@ test("a broken deadline settles safely instead of stranding private image buffer
 });
 
 test("absent documents and synchronous setup or commit failure preserve null fallback", () => {
-  const ui = fixture(randomPixels(3, 4), 3, 4, { put: 0 });
+  const ui = fixture(randomPixels(3, 4), 3, 4, { put: 1 });
   assert.equal(ui.api.createSplitLightsJob(ui.image, 0, 0, 3, 4, null), null);
   assert.equal(ui.api.splitLights(ui.image, 0, 0, 3, 4), null);
   assert.equal(ui.calls.close, 0);
+});
+
+/* ---------- Sweep 2 leftover (F02's treatment for the light split) ----------
+   Every readback is a native round trip to the GPU: with a GPU-backed source
+   (the scene's driver sheet) each strip read waited for the GPU to drain, and
+   the driver's split became the preparation's longest phase while the reader
+   scrolled (0.9 s, up to 260 ms a read). The source is now read back once,
+   whole, in a step of its own; the strips are shaded from that memory and
+   uploaded a strip of one canvas a step. The bytes are 4cd89e2's. */
+
+// A pixel-exact fake canvas: unscaled copies, region reads, dirty-rect puts,
+// each native call counted per canvas.
+function exactCanvases() {
+  const counts = { draw: [], read: [], put: [], create: 0 };
+  const canvases = [];
+  const document = {
+    createElement() {
+      const index = canvases.length;
+      let width = 0;
+      let height = 0;
+      const canvas = {
+        index,
+        data: new Uint8ClampedArray(0),
+        get width() {
+          return width;
+        },
+        set width(value) {
+          width = value;
+          canvas.data = new Uint8ClampedArray(width * height * 4);
+        },
+        get height() {
+          return height;
+        },
+        set height(value) {
+          height = value;
+          canvas.data = new Uint8ClampedArray(width * height * 4);
+        },
+      };
+      const context = {
+        drawImage(image, sx, sy, sw, sh, dx, dy) {
+          counts.draw.push({ index, from: image.index ?? "source" });
+          for (let y = 0; y < sh; y += 1)
+            canvas.data.set(
+              image.data.subarray(
+                ((sy + y) * image.width + sx) * 4,
+                ((sy + y) * image.width + sx + sw) * 4,
+              ),
+              ((dy + y) * width + dx) * 4,
+            );
+        },
+        getImageData(x, y, w, h) {
+          counts.read.push({ index, rect: [x, y, w, h] });
+          const data = new Uint8ClampedArray(w * h * 4);
+          for (let row = 0; row < h; row += 1)
+            data.set(
+              canvas.data.subarray(((y + row) * width + x) * 4, ((y + row) * width + x + w) * 4),
+              row * w * 4,
+            );
+          return { width: w, height: h, data };
+        },
+        createImageData(w, h) {
+          counts.create += 1;
+          return { width: w, height: h, data: new Uint8ClampedArray(w * h * 4) };
+        },
+        putImageData(image, dx, dy, x0, y0, w, h) {
+          counts.put.push({ index, top: dy + y0, rows: h, bytes: image.data.length });
+          assert.deepEqual([dx, x0, w], [0, 0, width], "whole rows");
+          for (let row = 0; row < h; row += 1)
+            canvas.data.set(
+              image.data.subarray((y0 + row) * image.width * 4, (y0 + row + 1) * image.width * 4),
+              (dy + y0 + row) * width * 4,
+            );
+        },
+      };
+      canvas.getContext = (_kind, options) => {
+        if (!("cpu" in canvas)) canvas.cpu = options?.willReadFrequently === true;
+        return context;
+      };
+      canvases.push(canvas);
+      return canvas;
+    },
+  };
+  return { document, counts, canvases };
+}
+
+function seededPicture(width, height, seed) {
+  let state = seed;
+  const data = Uint8ClampedArray.from({ length: width * height * 4 }, (_, i) => {
+    state = (Math.imul(state, 1664525) + 1013904223) >>> 0;
+    const v = state >>> 24;
+    // Alpha: a third transparent, some partial, the rest opaque.
+    if (i % 4 === 3) return v < 85 ? 0 : v < 140 ? v : 255;
+    return v;
+  });
+  return { width, height, data };
+}
+
+function exactApi(clock) {
+  const runtime = { performance: { now: clock } };
+  runInNewContext(
+    source.replaceAll("export function ", "function ") +
+      "\nglobalThis.api = { splitLights, createSplitLightsJob };",
+    runtime,
+  );
+  return runtime.api;
+}
+
+// The scene's region (REXONANCE_SUIT_SIZE), cut from a larger picture.
+const SUIT_W = 571;
+const SUIT_H = 1040;
+const STRIP = 248;
+// 4cd89e2's splitLights on this picture (one read a strip, each canvas
+// copied through the snapshot's canvas), on the same exact fake: sha-256.
+const SPLIT_GOLDEN = {
+  unlit: "5ecc1455482f6b45bd3ffbf5",
+  lights: "6a1b4d19ac8e1c897c760cce",
+  motes: "36d2e572481c0b62f8bd9793",
+};
+
+for (const cpuUnlit of [false, true])
+  for (const motes of [false, true])
+    for (const slicing of ["one-row", "idle-expired", "six-ms", "idle-period", "infinite"]) {
+      test(`the light split reads its source back once, whole, and uploads a strip a step (cpu=${cpuUnlit}, ${motes ? "with motes, " : ""}${slicing})`, () => {
+        let now = 0;
+        const api = exactApi(() => (now += 0.5));
+        const fake = exactCanvases();
+        const picture = seededPicture(600, 1100, 0x5eed1234);
+        const job = api.createSplitLightsJob(picture, 11, 13, SUIT_W, SUIT_H, fake.document, {
+          motes,
+          cpuUnlit,
+        });
+        const layers = motes ? 3 : 2;
+        const strips = Math.ceil(SUIT_H / STRIP);
+        // Setup only makes the canvases.
+        assert.equal(fake.counts.draw.length + fake.counts.read.length + fake.counts.put.length, 0);
+        let steps = 0;
+        let done = false;
+        while (!done) {
+          steps += 1;
+          assert.ok(steps <= 1 + SUIT_H + strips * layers, "an expired budget still advances");
+          const reads = fake.counts.read.length;
+          const puts = fake.counts.put.length;
+          const before = now;
+          if (slicing === "one-row") done = job.step(-1);
+          else if (slicing === "idle-expired")
+            done = job.step(Infinity, { timeRemaining: () => 0 });
+          else if (slicing === "six-ms") {
+            done = job.step(now + 6);
+            assert.ok(now - before <= 6, `${now - before} ms`);
+          } else if (slicing === "idle-period") {
+            // A 12 ms idle period: the deadline's granularity (the rows stop
+            // once less than 2 ms remain; each look at the deadline takes time).
+            const end = now + 12;
+            done = job.step(Infinity, {
+              timeRemaining: () => Math.max(0, end - (now += 0.5)),
+            });
+            assert.ok(now - before <= 12, `${now - before} ms`);
+          } else done = job.step(Infinity);
+          if (steps === 1) {
+            // The first step: the snapshot and its one whole read.
+            assert.deepEqual(fake.counts.read, [{ index: 0, rect: [0, 0, SUIT_W, SUIT_H] }]);
+            assert.deepEqual(fake.counts.draw, [{ index: 0, from: "source" }]);
+            if (slicing === "one-row" || slicing === "idle-expired" || slicing === "six-ms")
+              assert.equal(fake.counts.put.length, 0, "the read is a step of its own");
+          } else {
+            assert.equal(fake.counts.read.length, reads, "no later step reads back");
+            // (A live idle period runs phases on while it lasts.)
+            if (slicing === "one-row" || slicing === "idle-expired" || slicing === "six-ms")
+              assert.ok(fake.counts.put.length - puts <= 1, "one strip of one canvas a step");
+          }
+          if (!done) assert.equal(job.commit(), null, "an unfinished pass publishes nothing");
+        }
+        const result = job.commit();
+        assert.ok(result);
+        assert.equal(result.unlit.cpu, cpuUnlit, "only the intermediate opts into CPU backing");
+        assert.equal(result.lights.cpu, false, "draw-only overlay keeps default backing");
+        if (motes) assert.equal(result.motes.cpu, false);
+        // One read for the one source, one draw (the snapshot, never a copy of
+        // an output), and a put per strip and canvas, each a strip of rows.
+        assert.equal(fake.counts.read.length, 1);
+        assert.equal(fake.counts.draw.length, 1);
+        assert.equal(fake.counts.create, layers - 1, "one strip buffer per derived layer");
+        assert.equal(fake.counts.put.length, strips * layers);
+        const targets = motes ? ["unlit", "lights", "motes"] : ["unlit", "lights"];
+        for (const [k, name] of targets.entries()) {
+          const puts = fake.counts.put.filter((put) => put.index === result[name].index);
+          assert.equal(puts.length, strips, `${name}: one put a strip`);
+          let top = 0;
+          for (const put of puts) {
+            assert.equal(put.top, top, `${name}: the strips in order, none twice`);
+            assert.ok(put.rows > 0 && put.rows <= STRIP, `${name}: ${put.rows} rows`);
+            top += put.rows;
+            // The lights' and motes' buffers are a strip, never a whole layer.
+            if (k) assert.ok(put.bytes <= STRIP * SUIT_W * 4);
+          }
+          assert.equal(top, SUIT_H, `${name}: every row`);
+        }
+        assert.ok(
+          fake.counts.put.every((put) => put.index !== 0),
+          "nothing goes through the snapshot's canvas",
+        );
+        // The slices genuinely yield (except the whole pass at once).
+        if (slicing === "infinite") assert.equal(steps, 1);
+        else assert.ok(steps > strips * layers + 1, `${steps} steps`);
+        if (slicing === "one-row" || slicing === "idle-expired")
+          assert.equal(steps, 1 + SUIT_H + strips * layers);
+        // 4cd89e2's bytes, whatever the slices.
+        for (const name of targets)
+          assert.equal(
+            createHash("sha256").update(result[name].data).digest("hex").slice(0, 24),
+            SPLIT_GOLDEN[name],
+            name,
+          );
+        // The snapshot's canvas is released once the region is in memory.
+        assert.equal(fake.canvases[0].width, 0);
+        assert.equal(job.commit(), result);
+      });
+    }
+
+test("the light split's whole read is checked before any row is shaded", () => {
+  // A read (or a strip buffer) shorter than the region fails the job at once:
+  // null, no canvas published, nothing put.
+  for (const short of ["read", "create"]) {
+    const fake = exactCanvases();
+    const createElement = fake.document.createElement;
+    fake.document.createElement = (tag) => {
+      const canvas = createElement(tag);
+      const context = canvas.getContext("2d");
+      const read = context.getImageData;
+      const create = context.createImageData;
+      const wrapped = {
+        ...context,
+        getImageData: (x, y, w, h) => (short === "read" ? read(x, y, w, h - 1) : read(x, y, w, h)),
+        createImageData: (w, h) => (short === "create" ? create(w, h - 1) : create(w, h)),
+      };
+      canvas.getContext = () => wrapped;
+      return canvas;
+    };
+    const api = exactApi(() => 0);
+    const job = api.createSplitLightsJob(seededPicture(8, 9, 7), 0, 0, 8, 9, fake.document);
+    assert.equal(job.step(-1), true, short);
+    assert.equal(job.commit(), null, short);
+    assert.equal(fake.counts.put.length, 0, short);
+    assert.ok(
+      fake.canvases.every((canvas) => canvas.width === 0),
+      short,
+    );
+  }
 });

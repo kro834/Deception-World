@@ -10,7 +10,19 @@ const output = process.env.AUDIT_OUT || `/tmp/dream-reader-navigation-${engine}`
 const browser = await (engine === "webkit" ? webkit : chromium).launch(
   engine === "webkit" ? {} : { channel: process.env.PW_BROWSER_CHANNEL || "chrome" },
 );
+const isolateExternals = process.env.PW_OFFLINE_EXTERNALS === "1";
 await mkdir(output, { recursive: true });
+
+async function isolateExternalRequests(context) {
+  if (!isolateExternals) return;
+  await context.route(/^https:\/\/fonts\.(?:googleapis|gstatic)\.com\//, (route) => route.abort());
+  await context.route(/^https:\/\/grok\.com\/grok-app-builder\/extensions\.js(?:\?.*)?$/, (route) =>
+    route.abort(),
+  );
+  console.log(
+    "PW_OFFLINE_EXTERNALS=1: Google Fonts and the exact Grok editor extension are blocked",
+  );
+}
 
 async function landed(page, id) {
   await page.waitForFunction((targetId) => {
@@ -37,6 +49,7 @@ try {
     { width: 667, height: 375 },
   ]) {
     const context = await browser.newContext({ viewport, reducedMotion: "reduce", hasTouch: true });
+    await isolateExternalRequests(context);
     const page = await context.newPage();
     if (process.env.NAV_CPU_RATE && engine === "chromium") {
       const cdp = await context.newCDPSession(page);

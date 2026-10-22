@@ -211,6 +211,9 @@ const frameDistance = (a, b) => Math.abs(((((a - b + 12) % 24) + 24) % 24) - 12)
 test("every scroll machine uses the shared burning surface and one unquantized birth interval", () => {
   const { nano } = fixture();
   const out = new Float64Array(4);
+  // The births: from the first chips (materialStart on the runway) over
+  // .027 of progress, before the earliest flight.
+  const m0 = scrollFlameAt(NANITE_FIRE_PHASES.materialStart);
   for (const [count, emission, births, offset] of [
     [nano.count, nano.emission, nano.birth, 0],
     [nano.free.birth.length, nano.free.emission, nano.free.birth, 100003],
@@ -222,8 +225,8 @@ test("every scroll machine uses the shared burning surface and one unquantized b
       const expected = [out[0] * 571, out[1] * 1040, out[2], out[3]];
       for (let k = 0; k < 4; k++)
         close(emission[i * 4 + k], expected[k], 0.0001, `${i}/${k}: same burning source`);
-      assert.ok(births[i] >= 0.070575 - 1e-7 && births[i] <= 0.097575 + 1e-7);
-      bands.add(Math.floor((births[i] - 0.070575) * 1000));
+      assert.ok(births[i] >= m0 - 1e-7 && births[i] <= m0 + 0.027 + 1e-7);
+      bands.add(Math.floor((births[i] - m0) * 1000));
     }
     assert.ok(bands.size >= 20, `${bands.size} continuous release times, not six pumps`);
   }
@@ -429,8 +432,8 @@ test("scroll fire leaves the surface first, forms metal at its airborne point, a
   for (const i of samples) {
     const born = nano.birth[i];
     if (nano.T0[i] <= born + 1e-7) continue;
-    const fireStart = 0.015 + 0.285 * NANITE_FIRE_PHASES.burstStart;
-    const fireEnd = Math.min(born, 0.015 + 0.285 * NANITE_FIRE_PHASES.burstEnd);
+    const fireStart = scrollFlameAt(NANITE_FIRE_PHASES.burstStart);
+    const fireEnd = Math.min(born, scrollFlameAt(NANITE_FIRE_PHASES.burstEnd));
     swarm.frame(fireStart, 0, true, 1, false);
     const origin = swarm.__testPose(i, fireStart);
     close(origin.x, nano.emission[i * 4], 0.0001, `${i}: prelude start x`);
@@ -502,9 +505,24 @@ test("all real scroll metal passes stay empty before the global material floor, 
     },
     { get: (target, key) => (key in target ? target[key] : noop), set: () => true },
   );
-  for (const q of [0.2, 0.06, 0.065, 0.075, 0.0815, 0.084, 0.08625 - 1e-7, 0.01, 0.0855]) {
+  // The floor is the first chips (materialStart on the runway); the fire is
+  // gone by flameEnd. Forward past both, back before the floor, into the
+  // flame's tail, to the start, and to the tail's very end.
+  const floor = scrollFlameAt(NANITE_FIRE_PHASES.materialStart);
+  const end = scrollFlameAt(NANITE_FIRE_PHASES.flameEnd);
+  for (const q of [
+    0.2,
+    floor - 0.0106,
+    floor - 0.0056,
+    floor + 0.0044,
+    floor + 0.011,
+    floor + 0.0134,
+    end - 1e-7,
+    0.01,
+    end - 0.00075,
+  ]) {
     swarm.frame(q, 0, false, 1, false);
-    if (q >= 0.070575) continue;
+    if (q >= floor) continue;
     assert.equal(swarm.__testMaterials().metal, 0, `${q}: no positive-alpha metal cell`);
     operations = 0;
     swarm.backPass(context);
@@ -516,7 +534,7 @@ test("all real scroll metal passes stay empty before the global material floor, 
     swarm.freePass(context);
     assert.equal(operations, 0, `${q}: no actual metal image, facet rectangle or fill`);
   }
-  swarm.frame(0.1, 0, false, 1, false);
+  swarm.frame(floor + 0.03, 0, false, 1, false);
   assert.ok(
     swarm.__testMaterials().metal > 0,
     "material actually appears after clearing, rather than being disabled permanently",
@@ -543,9 +561,13 @@ test("fine and touch metal draw during the fading fire, including reversed progr
       },
       { get: (target, key) => (key in target ? target[key] : noop), set: () => true },
     );
-    for (const q of [0.0815, 0.084, 0.2, 0.0815]) {
+    // In the flame's tail (after the first chips, before flameEnd on the
+    // runway), forward past it, and back into it.
+    const floor = scrollFlameAt(NANITE_FIRE_PHASES.materialStart);
+    const end = scrollFlameAt(NANITE_FIRE_PHASES.flameEnd);
+    for (const q of [floor + 0.011, floor + 0.0134, 0.2, floor + 0.011]) {
       swarm.frame(q, 0, false, 1, false);
-      if (q >= 0.08625) continue;
+      if (q >= end) continue;
       assert.ok(swarm.__testMaterials().metal > 0, `${coarse}/${q}: material in flame tail`);
       draws = 0;
       swarm.backPass(context);

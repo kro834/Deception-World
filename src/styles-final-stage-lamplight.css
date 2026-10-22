@@ -919,7 +919,9 @@ html .fst-page.fst-page .fst-cast-copy > a:focus-visible::after {
      keeps these over the 帰路 sheet's own staggers; a crown's calls, which
      re-mount on each change, keep that sheet's quicker timing.) */
   html:not([data-world-effects="economy"]) .fst-page.fst-page .fst-pickup-dialog[open] .fst-pickup-heading > p:nth-child(1) {
-    animation: fsl-sign 320ms steps(4, jump-end) 180ms both;
+    /* Stepped runs with a delay fill backwards only: they end on the
+       element's own style, never on a step WebKit's rounding stops short of. */
+    animation: fsl-sign 320ms steps(4, jump-end) 180ms backwards;
   }
 
   html:not([data-world-effects="economy"]) .fst-page.fst-page .fst-pickup-dialog[open] .fst-pickup-heading > small:nth-child(2) {
@@ -980,7 +982,7 @@ html .fst-page.fst-page .fst-cast-copy > a:focus-visible::after {
   }
 
   html:not([data-world-effects="economy"]) .fst-page.fst-page .fst-cast-copy h3 {
-    animation: fsl-flip 300ms steps(3, jump-end) 90ms both;
+    animation: fsl-flip 300ms steps(3, jump-end) 90ms backwards;
   }
 
   /* A stage or a crown: the code flips on the board; the new art arrives
@@ -992,7 +994,7 @@ html .fst-page.fst-page .fst-cast-copy > a:focus-visible::after {
 
   html:not([data-world-effects="economy"]) .fst-page.fst-page .fst-pickup-record .rxs-stage-panel > div > small,
   html:not([data-world-effects="economy"]) .fst-page.fst-page .fst-pickup-record .fst-form-copy > small {
-    animation: fsl-flip 300ms steps(3, jump-end) 60ms both;
+    animation: fsl-flip 300ms steps(3, jump-end) 60ms backwards;
   }
 }
 

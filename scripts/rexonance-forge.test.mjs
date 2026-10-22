@@ -198,10 +198,9 @@ test("the forged face is preloaded on this route only; the files are small woff2
     "g",
   );
   assert.equal(route.match(outlinePreload)?.length, 1);
-  // owner request 2026-10-21: TYPE (rx21) — the Mincho's two first-screen
-  // subsets are the third and fourth preloads (scripts/rexonance-type.test.mjs
-  // pins them); still no other.
-  assert.equal(route.match(/as: "font"/g)?.length, 4, "four font preloads on the route");
+  // The futuristic revision uses local Japanese gothic. Only the two
+  // small Latin display faces remain preloaded; dormant Mincho is not fetched.
+  assert.equal(route.match(/as: "font"/g)?.length, 2, "only the used display faces preload");
   for (const path of [
     "src/routes/world.tsx",
     "src/routes/extreme-saga.tsx",
@@ -344,7 +343,7 @@ test("text keeps its 12px floor and generated text is silent or the wordmark's o
       assert.match(value, new RegExp(`max\\(12px, ${match.replace(".", "\\.")}\\)`), value);
     }
   }
-  const title = page.match(/<h1 id="rxs-title">\s*<span>([^<]+)<\/span>/)?.[1];
+  const title = page.match(/<h1 id="rxs-title">\s*<span(?:\s[^>]*)?>([^<]+)<\/span>/)?.[1];
   assert.equal(title, "REXONANCE SAGA");
   for (const [, value] of css.matchAll(/(?<![\w-])content:\s*([^;]+);/g)) {
     assert.ok(
@@ -599,7 +598,7 @@ test("the ghost is silent, last in the hero copy, and nine letters of the name",
     /<span className="rxf-mark" aria-hidden="true">\s*\{FORGE_MARK\.map\(\(letter, index\) => \(\s*<i key=\{index\}>\{letter\}<\/i>\s*\)\)\}\s*<\/span>\s*<\/div>\s*<div className="rxs-hero-visual" aria-hidden="true">/,
   );
   const copy = page.slice(page.indexOf('<div className="rxs-hero-copy">'));
-  assert.match(copy, /^<div className="rxs-hero-copy">\s*<p>\s*THE NEXT GENERATION/);
+  assert.match(copy, /^<div className="rxs-hero-copy">\s*<p lang="en">\s*THE NEXT GENERATION/);
   for (const name of [
     "rzn-readout",
     "rzn-percent",

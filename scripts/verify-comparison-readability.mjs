@@ -28,8 +28,10 @@ async function checkNotices(page, width) {
         .querySelector(".site-announcement-list-visual")
         .getBoundingClientRect();
       const copy = node.getBoundingClientRect();
+      // The phone keeps the visual beside the copy; from 761px the notices are
+      // a board of posters with the visual above it (chrome, 2026-10-21).
       return {
-        clearOfImage: visual.right <= copy.left - 1,
+        clearOfImage: visual.right <= copy.left - 1 || visual.bottom <= copy.top - 1,
         titleClipped:
           title.scrollWidth > title.clientWidth + 1 || title.scrollHeight > title.clientHeight + 1,
         wraps: getComputedStyle(title).whiteSpace === "normal",
@@ -89,13 +91,17 @@ async function checkSpecialComparison(page, route, width) {
     await group.evaluate((node) => node.scrollIntoView({ block: "center", behavior: "instant" }));
     assert.equal(await group.getAttribute("role"), "group");
     assert.equal(await group.getAttribute("aria-labelledby"), "exs-opponent-label");
-    const choices = await buttons.evaluateAll((nodes) => nodes.map((node) => ({
-      name: node.querySelector("span")?.textContent.trim(),
-      code: node.querySelector("small")?.textContent.trim(),
-      unclipped: [node, ...node.querySelectorAll("span, small")].every((part) =>
-        part.scrollWidth <= part.clientWidth + 1 && part.scrollHeight <= part.clientHeight + 1),
-      pressed: node.getAttribute("aria-pressed"),
-    })));
+    const choices = await buttons.evaluateAll((nodes) =>
+      nodes.map((node) => ({
+        name: node.querySelector("span")?.textContent.trim(),
+        code: node.querySelector("small")?.textContent.trim(),
+        unclipped: [node, ...node.querySelectorAll("span, small")].every(
+          (part) =>
+            part.scrollWidth <= part.clientWidth + 1 && part.scrollHeight <= part.clientHeight + 1,
+        ),
+        pressed: node.getAttribute("aria-pressed"),
+      })),
+    );
     assert.ok(choices.length >= 2, "all comparison opponents remain available");
     assert.equal(choices.filter((choice) => choice.pressed === "true").length, 1);
     for (const choice of choices)
@@ -103,7 +109,9 @@ async function checkSpecialComparison(page, route, width) {
     options = choices.map((_, index) => index);
   } else {
     await select.evaluate((node) => node.scrollIntoView({ block: "center", behavior: "instant" }));
-    options = await select.locator("option").evaluateAll((nodes) => nodes.map((node) => node.value));
+    options = await select
+      .locator("option")
+      .evaluateAll((nodes) => nodes.map((node) => node.value));
     assert.ok(
       await select.evaluate((node) => {
         const style = getComputedStyle(node);
@@ -122,9 +130,13 @@ async function checkSpecialComparison(page, route, width) {
     if (usesButtons) {
       await buttons.nth(baseline).click();
       await page.waitForFunction((index) => {
-        const choices = [...document.querySelectorAll(".exs-opponent-options button[aria-pressed]")];
-        return choices[index]?.getAttribute("aria-pressed") === "true" &&
-          choices.filter((choice) => choice.getAttribute("aria-pressed") === "true").length === 1;
+        const choices = [
+          ...document.querySelectorAll(".exs-opponent-options button[aria-pressed]"),
+        ];
+        return (
+          choices[index]?.getAttribute("aria-pressed") === "true" &&
+          choices.filter((choice) => choice.getAttribute("aria-pressed") === "true").length === 1
+        );
       }, baseline);
     } else await select.selectOption(baseline);
     await page.waitForTimeout(550);
@@ -233,6 +245,19 @@ async function checkArchive(page, kind, width) {
   console.log(`PASS ${width}px ${kind}: labels, accessible results refresh, matched row heights`);
 }
 
+// Each area's check reports on its own, so one failing surface (the notices,
+// a special site, an archive) does not hide the others at the same width;
+// the run still fails if any of them did.
+const failures = [];
+async function check(label, run) {
+  try {
+    await run();
+  } catch (error) {
+    failures.push(`${label}: ${error.message}`);
+    console.log(`FAIL ${label}: ${error.message}`);
+  }
+}
+
 try {
   for (const width of [320, 390, 1024, 1280]) {
     const page = await browser.newPage({
@@ -241,13 +266,15 @@ try {
     });
     const errors = [];
     page.on("pageerror", (error) => errors.push(error.message));
-    await checkNotices(page, width);
+    await check(`${width}px notices`, () => checkNotices(page, width));
     for (const route of ["/rexonance-saga", "/extreme-saga"])
-      await checkSpecialComparison(page, route, width);
-    for (const kind of ["saga", "realm"]) await checkArchive(page, kind, width);
-    assert.deepEqual(errors, []);
+      await check(`${width}px ${route}`, () => checkSpecialComparison(page, route, width));
+    for (const kind of ["saga", "realm"])
+      await check(`${width}px ${kind}`, () => checkArchive(page, kind, width));
+    await check(`${width}px page errors`, () => assert.deepEqual(errors, []));
     await page.close();
   }
 } finally {
   await browser.close();
 }
+assert.deepEqual(failures, [], `${failures.length} comparison readability check(s) failed`);

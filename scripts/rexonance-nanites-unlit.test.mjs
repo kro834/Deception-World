@@ -94,12 +94,18 @@ function run(job, slicing, ui) {
   return steps;
 }
 
-test("the original light split is byte-for-byte HEAD's (the nanite jobs only follow it)", () => {
+test("the light split source contract and original pixel goldens stay pinned", () => {
   const original = source.slice(0, source.indexOf("\n// --- The nanite kit"));
   assert.equal(
     createHash("sha256").update(original).digest("hex"),
-    // Round 4: the split's job phased (strips, one upload a step); its bytes are pinned below.
-    "cd5fbc2800eb3ed00c4b3a935adb8efd4cdb0e3cad1e26763fa6fd39f5562f2f",
+    // Round 4: the split's job phased (strips, one upload a step); sweep 2:
+    // its source read back once, whole, and its strips put straight into the
+    // outputs. Its bytes are pinned below (SPLIT_DIGEST unchanged; the
+    // real-size digests: rexonance-unlit-runtime).
+    // CPU preparation: a backend parity probe gates the optional unlit
+    // context hint; the shading arithmetic is unchanged.
+    // Pixel golden digests below and in unlit-runtime stay unchanged.
+    "65b6195132b7a4f51c7887d236ccb982278eb4e0caff408cd4c36b327677740e",
   );
   // And it still splits a seeded picture exactly as before (frozen digest).
   const ui = load();

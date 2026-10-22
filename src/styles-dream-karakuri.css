@@ -1,0 +1,161 @@
+@import "./styles-dream-karakuri-cabinet.css";
+@import "./styles-dream-karakuri-programme.css";
+
+/* Craft lives in the objects readers actually use, not in an animated
+   background. The original art, text, shell geometry and link targets stay. */
+html[data-family="dream"] main.dream-page.dream-page {
+  --dk-paper: #efe1c5;
+  --dk-wood: #573529;
+  --dk-brass: #d6b47b;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-hero-field {
+  border-inline: 5px solid #34232a;
+  box-shadow:
+    inset 0 0 0 1px #d6b47b,
+    0 0 0 1px rgb(214 180 123 / 40%),
+    0 18px 44px rgb(0 0 0 / 35%);
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-hero-lamplight {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 70% 12%, rgb(255 199 111 / 20%), transparent 62%);
+  opacity: 1;
+  transition: opacity 650ms ease;
+}
+
+html[data-family="dream"]
+  main.dream-page.dream-page
+  .dream-hero[data-dream-lantern="dim"]
+  .dream-hero-lamplight {
+  opacity: 0;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-stage-lantern {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 60px;
+  max-width: 100%;
+  margin-top: 20px;
+  padding: 8px 14px 12px;
+  border: 1px solid rgb(214 180 123 / 40%);
+  border-radius: 2px;
+  background: #1b1120;
+  color: #f4ecdc;
+  cursor: pointer;
+  text-align: start;
+  touch-action: manipulation;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-stage-lantern-shade {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: 0 0 30px;
+  width: 30px;
+  height: 40px;
+  border-block: 3px solid #5e3b29;
+  border-radius: 38% / 18%;
+  color: #6a3226;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 5px, rgb(100 57 31 / 35%) 5px 6px),
+    radial-gradient(ellipse, #fff3c8, #d4a76c);
+  box-shadow: 0 0 18px rgb(244 193 103 / 24%);
+  font: 700 17px / 1 var(--dr-serif, serif);
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-stage-lantern-shade::after {
+  content: "";
+  position: absolute;
+  bottom: -9px;
+  width: 1px;
+  height: 7px;
+  background: #d4a76c;
+}
+
+html[data-family="dream"]
+  main.dream-page.dream-page
+  .dream-stage-lantern[aria-pressed="false"]
+  .dream-stage-lantern-shade {
+  background:
+    repeating-linear-gradient(0deg, transparent 0 5px, rgb(100 57 31 / 35%) 5px 6px), #ad9e88;
+  box-shadow: none;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-stage-lantern-label {
+  display: grid;
+  gap: 4px;
+  font: 12px / 1.5 var(--dr-serif, serif);
+  letter-spacing: 0.08em;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-stage-lantern-label strong {
+  color: #edcb96;
+  font-size: 15px;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-prologue-card {
+  border-block: 1px solid rgb(214 180 123 / 50%);
+  background:
+    repeating-linear-gradient(90deg, transparent 0 39px, rgb(214 180 123 / 5%) 39px 40px),
+    linear-gradient(130deg, #241a24, #17111a);
+  box-shadow:
+    inset 0 5px 0 #39292b,
+    inset 0 -5px 0 #39292b;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-story-case {
+  border-inline: 2px solid #64473e;
+  box-shadow:
+    0 4px 0 #0a080e,
+    inset 0 0 0 1px rgb(214 180 123 / 20%);
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-story-case > summary {
+  background: linear-gradient(90deg, rgb(214 180 123 / 8%), transparent 35%), #201725;
+  transition: background-color 180ms ease;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-story-case[open] > summary {
+  background: linear-gradient(90deg, rgb(214 180 123 / 14%), transparent 70%), #2b1c29;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-story-case-body {
+  border-inline-start: 1px solid rgb(214 180 123 / 40%);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-stage-lantern:hover {
+    border-color: #edcb96;
+    background: #2a1b29;
+  }
+}
+
+@media (max-width: 760px) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-stage-lantern {
+    margin-top: 12px;
+    min-height: 52px;
+    padding: 7px 12px 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-hero-lamplight,
+  html[data-family="dream"] main.dream-page.dream-page .dream-story-case > summary {
+    transition: none;
+  }
+}
+
+html[data-family="dream"][data-world-effects="economy"]
+  main.dream-page.dream-page
+  .dream-hero-lamplight,
+html[data-family="dream"][data-motion-enabled="false"]
+  main.dream-page.dream-page
+  .dream-hero-lamplight {
+  transition: none;
+}

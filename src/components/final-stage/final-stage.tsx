@@ -6,7 +6,7 @@ import { SlideOpenControl } from "@/components/world/slide-open-control";
 import { UiVectorIcon } from "@/components/world/ui-vector-icon";
 import { SideMenuLayer, SideMenuTrigger } from "@/components/world/world-chrome";
 import { useWorldMode } from "@/components/world/use-world-mode";
-import { WORLD_ENTER_ASSETS } from "@/lib/asset-loader";
+import { FAR_FROM_SAGA_ENTER_ASSETS, WORLD_ENTER_ASSETS } from "@/lib/asset-loader";
 import { initRail } from "@/lib/liquid/boot.js";
 import { dossierImage } from "@/lib/dossier-images";
 import { DisplayName } from "@/components/name-text";
@@ -55,6 +55,24 @@ function bindRail<K extends string>(
   };
 }
 
+/* A call's shouts: each run up to and with its ！ ("SA-GA！", "DEUS！！！").
+   The zenith sheet keeps each whole, so a call wraps only between them,
+   never at a shout's hyphen or space. The characters are the data's. */
+const callShouts = (call: string) => call.match(/[^！]+！*|！+/g) ?? [call];
+
+/* A record's eyebrow wraps only at its " / " seam ("RIDER RECORD 01" over
+   "/ FAR FROM SAGA"), never inside the form's name; the zenith sheet keeps
+   each part whole. The text is the eyebrow's own. */
+function EyebrowParts({ value }: { value: string }) {
+  const [head, ...rest] = value.split(" / ");
+  if (!rest.length) return <>{value}</>;
+  return (
+    <>
+      <span>{head}</span> <span>/ {rest.join(" / ")}</span>
+    </>
+  );
+}
+
 /* The calls are an ordered sequence; as a list the label is announced
    (a name on a plain div is ignored) with the count of calls. */
 function CallOuts({ calls, label }: { calls: readonly string[]; label: string }) {
@@ -62,7 +80,11 @@ function CallOuts({ calls, label }: { calls: readonly string[]; label: string })
     <div className="fst-calls" role="list" aria-label={label}>
       {calls.map((call, index) => (
         <b key={`${call}-${index}`} role="listitem">
-          {call}
+          <span>
+            {callShouts(call).map((shout, part) => (
+              <span key={part}>{shout}</span>
+            ))}
+          </span>
         </b>
       ))}
     </div>
@@ -234,7 +256,9 @@ function RiderPickup({
           />
         </div>
         <div className="fst-pickup-copy">
-          <p>{eyebrow}</p>
+          <p>
+            <EyebrowParts value={eyebrow} />
+          </p>
           <small>PICKUP</small>
           <h3>
             <span>仮面ライダー</span>
@@ -284,7 +308,9 @@ function RiderPickup({
             <p>
               <span>RIDER PICKUP</span>
             </p>
-            <small>{eyebrow}</small>
+            <small>
+              <EyebrowParts value={eyebrow} />
+            </small>
             <h2>
               <span>仮面ライダー</span>
               <b>
@@ -733,17 +759,28 @@ export function FinalStage() {
           eyebrow={`RIDER RECORD 01 / ${FAR_FROM_SAGA.en}`}
           name={FAR_FROM_SAGA.name}
           sub={FAR_FROM_SAGA.stagesLine}
-          quote="レクソナンスの超共鳴と、ヴィンクルムの接続を一つの戦闘体系へ。ファイナルステージ限定の超究極フォーム。"
+          quote="レクソナンスの超共鳴と、ヴィンクルムの接続能力を一つにした、ファイナルステージ限定の超究極フォーム。"
         >
           <CallOuts calls={FAR_FROM_SAGA.calls} label="ファーフロムサーガ 変身音声" />
 
           <div className="fst-spec-block">
             <SpecList rows={FAR_FROM_SAGA.specs} label="ファーフロムサーガ スペック" />
-            <p className="fst-note">{FAR_FROM_SAGA.specNote}</p>
           </div>
 
           <SubHeading kicker="OVERVIEW" title="概要" />
           <Prose paragraphs={FAR_FROM_SAGA.overview} className="fst-plain" />
+          {/* The form's own special site (provisional, 2026-10-22). */}
+          <p className="fst-site-door">
+            <GuardedLink
+              to="/far-from-saga"
+              hash="top"
+              assets={FAR_FROM_SAGA_ENTER_ASSETS}
+              aria-label="ファーフロムサーガの特設サイトを開く"
+            >
+              <span>特設サイトを開く</span>
+              <i aria-hidden="true">↗</i>
+            </GuardedLink>
+          </p>
 
           <SubHeading kicker="FIVE STAGES" title="形態段階" />
           <div className="rxs-stage-switcher">
@@ -823,7 +860,7 @@ export function FinalStage() {
           />
 
           <SubHeading kicker="DIVINE AUTHORITY" title="神属権限・継承能力" />
-          <ArticleGrid items={FAR_FROM_SAGA.powers} columns={3} label="神属権限・継承能力" />
+          <ArticleGrid items={FAR_FROM_SAGA.powers} columns={2} label="神属権限・継承能力" />
 
           <SubHeading kicker="ARSENAL" title="追加武装" />
           <div className="fst-arsenal">

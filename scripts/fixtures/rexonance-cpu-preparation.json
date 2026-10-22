@@ -1,0 +1,25 @@
+{
+  "baseline": "2ed3fa1161a848fa41622f8640cae34b84417b8a",
+  "viewport": { "width": 390, "height": 844, "deviceScaleFactor": 3, "hasTouch": true },
+  "description": "SHA-256 of every full-size preparation read and upload, in phase order. Engine-specific canvas rounding is preserved. The tiny compatibility probe is not artwork.",
+  "chrome": {
+    "reads": {
+      "count": 166,
+      "sha256": "ebd2e333354b54c5ddf09cfa4c464a48bc0d4e582c9942a9963127679d4e8fed"
+    },
+    "puts": {
+      "count": 136,
+      "sha256": "b7a4deeae9ae0d9234a3721403abd43dd2e130976a729a817de2db81b9d80fb4"
+    }
+  },
+  "webkit": {
+    "reads": {
+      "count": 166,
+      "sha256": "ad9ca10cca9e295d9498776394cf5e0c6b095b0291a0b31da2bf3b8a80eff871"
+    },
+    "puts": {
+      "count": 136,
+      "sha256": "97cc3be43169c990900ff94715b939695972a8507d193c9862a79ce2e0fd6a9c"
+    }
+  }
+}

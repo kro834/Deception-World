@@ -1,0 +1,653 @@
+/* ================================================================
+   FAR FROM SAGA — the special site's own sheet (owner's record,
+   2026-10-22)
+
+   /far-from-saga stands beside /extreme-saga and /rexonance-saga on the
+   shared special-site grammar (styles-rexonance-saga.css, the showcase
+   sheets): local nav, hero, section heads, the liquid stage rail, the
+   footer. This sheet adds what the page needs of its own: the ミドル key
+   visual's crop, the calls, the spec grid, the prose, the record's article
+   grids, the weapons list, the finishers, a five-column rail, and the
+   prepared (準備中) chapters: the comparison grid, the P16 note and the
+   still suit-up runway. Every rule is scoped to .ffs-page. Paint and
+   layout only; the only motion is the shared grammar's, gated there by
+   prefers-reduced-motion.
+   ================================================================ */
+
+.ffs-page {
+  --rxs-cyan: #7fe6ff;
+  --rxs-pink: #c99bff;
+  --rxs-gold: #ffd77a;
+  --ffs-accent: #7fe6ff;
+  --ffs-text: #e9edf3;
+  --ffs-muted: #8b95a4;
+  background: radial-gradient(circle at 50% 12%, rgb(42 96 196 / 24%), transparent 31rem), #010308;
+}
+
+.ffs-page .rxs-local-nav {
+  border-bottom-color: rgb(127 230 255 / 14%);
+  background: rgb(2 5 12 / 78%);
+}
+
+.ffs-page .rxs-brand span {
+  background: linear-gradient(90deg, #7fe6ff, #fff0c6);
+  background-clip: text;
+  color: transparent;
+}
+
+/* Hero */
+.ffs-hero {
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 32%, rgb(66 110 220 / 16%), transparent 28rem),
+    linear-gradient(180deg, #01040a, #02040a 72%, #010308);
+}
+
+.ffs-page .rxs-hero-copy::before {
+  background: radial-gradient(
+    ellipse at center,
+    rgb(1 3 8 / 94%) 0 36%,
+    rgb(1 3 8 / 78%) 56%,
+    transparent 80%
+  );
+}
+
+.ffs-page .rxs-hero h1 span {
+  background-image: linear-gradient(95deg, #8deaff, #ffffff 45%, #ffd37d);
+}
+
+/* Large headings release vertical scrolling on iPhone and never catch a
+   long-press copy menu (the same rule as the other special sites). */
+.ffs-page .rxs-hero-copy,
+.ffs-page .rxs-section-heading {
+  touch-action: pan-y;
+}
+
+.ffs-page .rxs-hero h1,
+.ffs-page .rxs-section-heading h2 {
+  pointer-events: none;
+  touch-action: pan-y;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.ffs-page .rxs-hero-visual {
+  top: clamp(126px, 17vh, 188px);
+  bottom: auto;
+  width: min(78vw, 900px);
+}
+
+.ffs-page .rxs-hero-visual::after {
+  background:
+    linear-gradient(180deg, transparent 45%, rgb(1 3 8 / 24%) 68%, #010308 96%),
+    radial-gradient(circle at 50% 34%, transparent 35%, rgb(0 0 0 / 18%) 82%);
+}
+
+.ffs-page .rxs-hero-visual img {
+  object-position: 50% 0;
+  filter: saturate(1.06) contrast(1.05) brightness(0.94);
+  mask-image: linear-gradient(to bottom, #000 0 80%, transparent 99%);
+}
+
+.ffs-page .rxs-orbit {
+  border-color: rgb(127 230 255 / 28%);
+}
+
+.ffs-page .rxs-orbit-b {
+  border-color: rgb(255 215 122 / 26%);
+}
+
+.ffs-stages-line {
+  margin: 22px 0 0;
+  color: var(--ffs-muted);
+  font-family: var(--rxs-font-display);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+}
+
+.ffs-provisional {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  align-items: baseline;
+  margin: 18px 0 0;
+  padding: 7px 14px;
+  border: 1px solid rgb(255 215 122 / 40%);
+  border-radius: 999px;
+  color: #ffe2a1;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.ffs-provisional span {
+  color: rgb(255 226 161 / 62%);
+  font-family: var(--rxs-font-display);
+  font-size: 10px;
+  letter-spacing: 0.22em;
+}
+
+/* Calls */
+.ffs-calls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  max-width: 980px;
+  margin: 0 auto clamp(40px, 5vw, 64px);
+}
+
+.ffs-calls b {
+  padding: 9px 14px;
+  border: 1px solid color-mix(in srgb, var(--ffs-accent) 34%, transparent);
+  border-radius: 999px;
+  color: var(--ffs-text);
+  background: color-mix(in srgb, var(--ffs-accent) 8%, rgb(7 11 20 / 90%));
+  font-family: var(--rxs-font-display);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1.4;
+}
+
+/* Prose */
+.ffs-copy {
+  max-width: 900px;
+  margin: auto;
+}
+
+.ffs-copy p {
+  margin: 0 0 1.4em;
+  color: #d3dbe5;
+  font-size: 15px;
+  line-height: 2;
+  text-wrap: pretty;
+}
+
+.ffs-copy p:last-child {
+  margin-bottom: 0;
+}
+
+/* Specs */
+.ffs-specs-section {
+  background:
+    radial-gradient(circle at 16% 18%, rgb(66 110 220 / 13%), transparent 32rem),
+    radial-gradient(circle at 82% 80%, rgb(255 199 97 / 8%), transparent 28rem), #04070d;
+}
+
+.ffs-specs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+.ffs-specs div {
+  min-width: 0;
+  padding: 16px 16px 15px;
+  border: 1px solid rgb(255 255 255 / 9%);
+  border-radius: var(--sc-radius-small, 16px);
+  background:
+    linear-gradient(150deg, color-mix(in srgb, var(--ffs-accent) 7%, transparent), transparent 55%),
+    rgb(255 255 255 / 4%);
+}
+
+.ffs-specs dt {
+  color: var(--ffs-muted);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+}
+
+.ffs-specs dd {
+  margin: 8px 0 0;
+  color: var(--ffs-text);
+  font-family: var(--rxs-font-display);
+  font-size: clamp(16px, 1.5vw, 22px);
+  font-weight: 720;
+  letter-spacing: -0.02em;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.ffs-note {
+  max-width: 980px;
+  margin: 18px auto 0;
+  color: var(--ffs-muted);
+  font-size: 12px;
+  line-height: 1.8;
+}
+
+/* Stage switcher: five tabs, each on the 44px floor. */
+.ffs-stage-tabs.rxs-stage-tabs.liquid-swipe-tabs {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  width: min(780px, 100%);
+}
+
+.ffs-stage-tabs.rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"] {
+  min-width: 44px;
+}
+
+.ffs-page .rxs-stage-panel figure > span {
+  border-color: color-mix(in srgb, var(--ffs-accent) 22%, transparent);
+}
+
+.ffs-page .rxs-stage-panel > div > small {
+  color: var(--ffs-accent);
+}
+
+.ffs-page .rxs-stage-panel > div > p + p {
+  margin-top: 1em;
+}
+
+/* The record's articles: theories, armour and OS, authority. */
+.ffs-articles {
+  display: grid;
+  gap: 14px;
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+.ffs-articles-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.ffs-articles-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.ffs-articles article {
+  min-width: 0;
+  padding: 26px 24px 24px;
+  border: 1px solid rgb(255 255 255 / 9%);
+  border-radius: var(--sc-radius, 22px);
+  background:
+    linear-gradient(160deg, color-mix(in srgb, var(--ffs-accent) 8%, transparent), transparent 52%),
+    rgb(255 255 255 / 3.5%);
+}
+
+.ffs-articles article header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+  color: var(--ffs-accent);
+  font-family: var(--rxs-font-display);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+}
+
+.ffs-articles article header small {
+  color: var(--ffs-muted);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+}
+
+.ffs-articles article h3 {
+  margin: 0 0 14px;
+  color: var(--ffs-text);
+  font-family: var(--rxs-font-display);
+  font-size: clamp(19px, 1.7vw, 24px);
+  font-weight: 720;
+  letter-spacing: -0.01em;
+  line-height: 1.35;
+  text-wrap: balance;
+}
+
+.ffs-articles article p {
+  margin: 0 0 1.2em;
+  color: #cfd7e2;
+  font-size: 14px;
+  line-height: 1.95;
+  text-wrap: pretty;
+}
+
+.ffs-articles article p:last-child {
+  margin-bottom: 0;
+}
+
+/* Prepared chapters (準備中): the same section grammar, a hairline frame,
+   and one quiet note stating the state. */
+.ffs-prepared {
+  background: radial-gradient(circle at 50% 0%, rgb(66 110 220 / 10%), transparent 30rem), #02050b;
+}
+
+.ffs-pending {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  align-items: center;
+  justify-content: center;
+  max-width: 980px;
+  margin: 0 auto clamp(28px, 4vw, 44px);
+  color: var(--ffs-muted);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  line-height: 1.8;
+  text-align: center;
+}
+
+.ffs-pending b {
+  padding: 5px 12px;
+  border: 1px solid rgb(255 215 122 / 40%);
+  border-radius: 999px;
+  color: #ffe2a1;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+}
+
+/* #performance — a still grid of the three published records. */
+.ffs-compare-scroll {
+  max-width: 1180px;
+  margin: 0 auto;
+  overflow-x: auto;
+  border: 1px solid rgb(255 255 255 / 9%);
+  border-radius: var(--sc-radius, 22px);
+  background: rgb(255 255 255 / 3%);
+  -webkit-overflow-scrolling: touch;
+}
+
+.ffs-compare {
+  width: 100%;
+  min-width: 640px;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.ffs-compare th,
+.ffs-compare td {
+  padding: 13px 16px;
+  border-bottom: 1px solid rgb(255 255 255 / 7%);
+  text-align: left;
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+
+.ffs-compare tbody tr:last-child th,
+.ffs-compare tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.ffs-compare thead th {
+  padding-top: 18px;
+  padding-bottom: 14px;
+  border-bottom-color: color-mix(in srgb, var(--ffs-col-accent, #8b95a4) 45%, transparent);
+  color: var(--ffs-text);
+  font-family: var(--rxs-font-display);
+  font-weight: 720;
+  letter-spacing: 0.02em;
+}
+
+.ffs-compare thead th small {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--ffs-col-accent, var(--ffs-muted));
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+}
+
+.ffs-compare thead th:first-child span {
+  color: var(--ffs-muted);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+}
+
+.ffs-compare tbody th {
+  width: 9em;
+  white-space: nowrap;
+  color: var(--ffs-muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+}
+
+.ffs-compare td {
+  color: #d3dbe5;
+  font-family: var(--rxs-font-display);
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.ffs-compare td[data-column="farFrom"] {
+  color: var(--ffs-text);
+}
+
+.ffs-citations {
+  display: grid;
+  gap: 10px;
+  max-width: 1180px;
+  margin: 18px auto 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ffs-citations li {
+  display: grid;
+  gap: 6px;
+  padding: 14px 18px;
+  border-left: 2px solid color-mix(in srgb, var(--ffs-accent) 55%, transparent);
+  color: #cfd7e2;
+  font-size: 13px;
+  line-height: 1.9;
+}
+
+.ffs-citations small {
+  color: var(--ffs-muted);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+}
+
+.ffs-citations q {
+  quotes: "「" "」";
+}
+
+/* #suitup — the runway, still: three faint rings where the port will draw. */
+.ffs-runway {
+  position: relative;
+  display: grid;
+  place-items: center;
+  max-width: 980px;
+  height: clamp(220px, 32vw, 360px);
+  margin: 0 auto clamp(28px, 4vw, 44px);
+  overflow: hidden;
+  border: 1px solid rgb(127 230 255 / 14%);
+  border-radius: var(--sc-radius, 22px);
+  background:
+    radial-gradient(circle at 50% 50%, rgb(127 230 255 / 10%), transparent 42%),
+    linear-gradient(180deg, #03060d, #010308);
+}
+
+.ffs-runway i {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  aspect-ratio: 1;
+  border: 1px solid rgb(127 230 255 / 22%);
+  border-radius: 50%;
+  translate: -50% -50%;
+}
+
+.ffs-runway i:nth-child(1) {
+  width: 28%;
+}
+
+.ffs-runway i:nth-child(2) {
+  width: 52%;
+  border-color: rgb(201 155 255 / 16%);
+}
+
+.ffs-runway i:nth-child(3) {
+  width: 78%;
+  border-color: rgb(255 215 122 / 12%);
+}
+
+/* #arsenal — the weapons, numbered. */
+.ffs-weapons {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0;
+  list-style: none;
+}
+
+.ffs-weapons li {
+  display: flex;
+  gap: 14px;
+  align-items: baseline;
+  min-width: 0;
+  padding: 14px 18px;
+  border: 1px solid rgb(255 255 255 / 9%);
+  border-radius: var(--sc-radius-small, 16px);
+  background: rgb(255 255 255 / 3.5%);
+  color: var(--ffs-text);
+  font-family: var(--rxs-font-display);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.ffs-weapons li span {
+  flex: none;
+  color: var(--ffs-accent);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+}
+
+.ffs-arsenal-note {
+  color: #b9c3d1;
+  font-size: 13px;
+}
+
+/* #finishers */
+.ffs-finisher-list {
+  display: grid;
+  gap: 18px;
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+.ffs-finisher {
+  padding: clamp(26px, 3.6vw, 44px) clamp(20px, 3.4vw, 40px);
+  border: 1px solid rgb(255 255 255 / 9%);
+  border-radius: var(--sc-radius, 22px);
+  background:
+    radial-gradient(
+      circle at 12% 0%,
+      color-mix(in srgb, var(--ffs-accent) 12%, transparent),
+      transparent 36rem
+    ),
+    rgb(255 255 255 / 3%);
+}
+
+.ffs-finisher > small {
+  display: block;
+  color: var(--ffs-accent);
+  font-family: var(--rxs-font-display);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+}
+
+.ffs-finisher > h3 {
+  margin: 10px 0 20px;
+  color: var(--ffs-text);
+  font-family: var(--rxs-font-display);
+  font-size: clamp(22px, 2.4vw, 32px);
+  font-weight: 720;
+  letter-spacing: -0.015em;
+  line-height: 1.3;
+  text-wrap: balance;
+}
+
+.ffs-finisher .ffs-calls {
+  justify-content: flex-start;
+  margin: 0 0 24px;
+}
+
+/* Footer: the title on its own row, the three doors in one row under it
+   (the showcase's side-by-side grid leaves a long Japanese title one
+   character wide beside three doors). */
+@media (min-width: 901px) {
+  html[data-family="special"] body .rxs-page.rxs-page.ffs-page .rxs-footer.ffs-footer {
+    grid-template-columns: repeat(3, max-content);
+    grid-auto-flow: row;
+    justify-content: start;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.ffs-page .rxs-footer.ffs-footer > div {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 900px) {
+  .ffs-specs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ffs-articles-2,
+  .ffs-articles-3 {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 680px) {
+  .ffs-page .rxs-hero {
+    min-height: max(820px, calc(100svh - 58px));
+    padding-top: 74px;
+  }
+
+  .ffs-page .rxs-hero-copy {
+    width: min(100%, 430px);
+  }
+
+  .ffs-page .rxs-hero h1 {
+    font-size: clamp(42px, 12.6vw, 56px);
+  }
+
+  .ffs-page .rxs-hero-visual {
+    top: 205px;
+    bottom: auto;
+    width: min(124vw, 650px);
+  }
+
+  .ffs-specs {
+    grid-template-columns: 1fr;
+  }
+
+  .ffs-weapons {
+    grid-template-columns: 1fr;
+  }
+
+  .ffs-compare th,
+  .ffs-compare td {
+    padding: 11px 12px;
+  }
+
+  .ffs-stage-tabs.rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"] {
+    min-height: 68px;
+    padding-inline: 2px;
+  }
+
+  .ffs-stage-tabs.rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"] span {
+    font-size: 12px;
+    letter-spacing: 0.02em;
+    font-feature-settings: "palt";
+    line-break: strict;
+    text-wrap: balance;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ffs-page .rxs-hero-visual {
+    translate: 50% 18px;
+    scale: 1;
+  }
+}

@@ -153,7 +153,9 @@ test("the end of a file reads down the screen in the source's (and the Tab) orde
   // Owner (2026-10-22): the index and rail sat in row 3 under the next card; on phones
   // they shared row 3 with it (hidden, untappable) and on wider screens Tab skipped the card.
   const nav = await read("src/components/world/dossier-nav.tsx");
-  const render = nav.slice(nav.indexOf('<nav className="manager-pagination"'));
+  // Owner (2026-10-22): the <nav> now also carries data-numerals, so its tag spans lines.
+  const render = nav.slice(nav.indexOf('<nav\n      className="manager-pagination"'));
+  assert.ok(render.length < nav.length, "the nav element");
   const prev = render.indexOf("to={prev.href}");
   const index = render.indexOf('<div className="manager-pagination-index">');
   const next = render.indexOf("to={next.href}");
@@ -222,5 +224,128 @@ test("related records stack their art over their words in a narrow reading colum
   assert.match(
     css,
     /@container identity-records \(max-width: 540px\)\s*\{[^}]*> :is\(\.rider-archive-civilian, \.rider-nightmare-card\)\s*\{\s*grid-template-columns: minmax\(0, 1fr\);/,
+  );
+});
+
+test("the index reads as a way back: an arrow ring, and on the split stage a plate with the file's place", async () => {
+  // Owner (2026-10-22): the stage side of the index row stood empty under two small lines.
+  const nav = await read("src/components/world/dossier-nav.tsx");
+  const index = nav.slice(nav.indexOf('className="dossier-index-return"'));
+  const link = index.slice(0, index.indexOf("</GuardedLink>"));
+  // Decorative: the link keeps its name (人物一覧へ戻る) and its text.
+  assert.match(link, /<em className="dossier-index-arrow" aria-hidden="true">/);
+  assert.match(link, /<b>一覧へ戻る<\/b>/);
+  assert.match(link, /\{items\.length > 1 \? <IndexMeter items=\{items\} idx=\{idx\} \/> : null\}/);
+  assert.match(nav, /<em className="dossier-index-meter" aria-hidden="true">/);
+  // The ring is a 44px target at the least; the plate puts the way back at the foot.
+  const ring = css.match(/> \.dossier-index-return\s*> \.dossier-index-arrow \{([^}]*)\}/)?.[1];
+  assert.ok(ring, "arrow ring rule");
+  assert.match(ring, /width: 44px;\s*height: 44px;/);
+  assert.match(css, /grid-template-rows: auto auto minmax\(28px, 1fr\) auto;/);
+  // Phones keep the count as the only place marker.
+  assert.match(css, /> \.dossier-index-meter \{\s*display: none;/);
+});
+
+test("roster faces: the launcher tile's widths with a phone-sized slot, set back in the ink but the file at hand", async () => {
+  const nav = await read("src/components/world/dossier-nav.tsx");
+  assert.match(nav, /const ROSTER_PORTRAIT_SIZES = \[\s*"\(max-width: 560px\) 40vw",/);
+  assert.match(nav, /tile\.variants\.map\(\(cut\) => `\$\{cut\.path\} \$\{cut\.width\}w`\)/);
+  // Every tile keeps a face box (欠番 an empty frame), so the rail's columns line up.
+  assert.match(
+    nav,
+    /if \(!src\) return <span className="dossier-roster-portrait" aria-hidden="true" \/>;/,
+  );
+  // The face is at least 64px each way: the file flip lifts only a picture that large (load-gate pressedArt).
+  const face = css.match(/\.dossier-roster\s*\.dossier-roster-portrait \{([^}]*)\}/)?.[1];
+  assert.ok(face, "face rule");
+  assert.ok(Number(face.match(/width: (\d+)px/)[1]) >= 64);
+  assert.ok(Number(face.match(/height: (\d+)px/)[1]) >= 64);
+  assert.match(
+    css,
+    /> li:is\(\.is-current, :has\(> a:focus-visible\)\)\s*\.dossier-roster-portrait\s*> img \{\s*opacity: 1;/,
+  );
+});
+
+test("六詠's Roman numerals take the site's Roman face (Cinzel) on the end card and the rail", async () => {
+  // Owner (2026-10-22): in Michroma, II and III on the end card read as two and three bars.
+  const nav = await read("src/components/world/dossier-nav.tsx");
+  assert.match(nav, /data-numerals=\{romanList\(items\) \? "roman" : undefined\}/);
+  assert.match(nav, /\/\^\[IVX\]\+\$\/\.test\(fileNumeral\(item, index\)\)/);
+  const roman = [...css.matchAll(/\[data-numerals="roman"\][^{]*\{([^}]*)\}/g)].map(
+    ([, body]) => body,
+  );
+  assert.equal(roman.length, 2);
+  for (const body of roman) assert.match(body, /font-family: "Cinzel", "Times New Roman", serif;/);
+  // The site already loads Cinzel with its core fonts: no new font request.
+  assert.match(await read("src/lib/site-fonts.ts"), /family=Cinzel:wght@400\.\.700/);
+});
+
+test("the rail never leaves a lone tile: the long lists run two rows of cards or two tiles a row", () => {
+  // Owner (2026-10-22): eight riders ran 3+3+2 at 1920px and one tile a row (8 rows) on an iPad in landscape.
+  assert.match(css, /grid-template-columns: repeat\(auto-fit, minmax\(192px, 1fr\)\);/);
+  assert.doesNotMatch(css, /repeat\(auto-fill, minmax\(2\d\dpx, 1fr\)\)/);
+  const tablet = css.slice(css.lastIndexOf("@media (min-width: 561px) {"));
+  assert.match(
+    tablet.slice(0, tablet.indexOf("\n}\n")),
+    /:has\(> li:nth-child\(8\):last-child\)\s*\)\s*\{\s*grid-template-columns: repeat\(2, minmax\(0, 1fr\)\);/,
+  );
+  assert.match(
+    css,
+    /\.dossier-roster:has\(> li:nth-child\(6\):last-child\) \{\s*grid-template-columns: repeat\(3, minmax\(0, 1fr\)\);/,
+  );
+  assert.match(
+    css,
+    /\.dossier-roster:has\(> li:nth-child\(8\):last-child\) \{\s*grid-template-columns: repeat\(4, minmax\(0, 1fr\)\);/,
+  );
+  // The split stage keeps them two a row below 1600px.
+  assert.match(css, /\(min-width: 1100px\) and \(max-width: 1599px\) and \(min-height: 540px\)/);
+  // Narrow cards set the numeral over the name, so no name is cut.
+  assert.match(css, /container: roster-tile \/ inline-size;/);
+  assert.match(css, /@container roster-tile \(max-width: 169px\)/);
+});
+
+test("Japanese headings and names break between phrases and words, never before 。 or ・", async () => {
+  // Owner (2026-10-22): WebKit set 。 alone on a line (変身後の能力を活かした遠距離戦 / 。) and
+  // Chrome started a line on ・ (秩序／破壊 / ・固定管轄なし); the text stays as written.
+  const nav = await read("src/components/world/dossier-nav.tsx");
+  // In the reader module, which the reader tests mount with React alone.
+  const reader = await read("src/components/world/dossier-reader.tsx");
+  assert.match(reader, /export function PhrasedText\(\{ text \}: \{ text: string \}\)/);
+  assert.match(reader, /\(より\|から\|まで\|ので\|\[のをにへとがはでもやてたずなく\]\)/);
+  assert.match(reader, /^import \{ useEffect, useState \} from "react";$/m);
+  for (const file of [
+    "rider-page",
+    "manager-stub",
+    "related-page",
+    "dante-page",
+    "ciel-page",
+    "yoake-mamori-page",
+  ]) {
+    const page = await read(`src/components/world/${file}.tsx`);
+    assert.match(page, /<h2>\s*<PhrasedText text=\{(s|section)\.title\} \/>\s*<\/h2>/, file);
+  }
+  const lejas = await read("src/components/world/lejas-page.tsx");
+  assert.equal(lejas.match(/<PhrasedText text="/g)?.length, 3);
+  // A separator closes the word before it, inside a protected word's box.
+  assert.match(nav, /chunks\.push\(parts\[i\] \+ mark\)/);
+  // The split stage: the form's name never outgrows the reading column.
+  assert.match(
+    css,
+    /\.form-pickup-copy\s*> h2\s*> b \{\s*font-size: min\(\s*52px,\s*calc\(\(100vw - var\(--sd-stage-w\) - var\(--sd-pad\) - var\(--sd-pad-end\)\) \/ 8\.6\)\s*\);/,
+  );
+});
+
+test("the contents' chapter names hold their phrases in WebKit; narrow fact cells keep their labels whole", async () => {
+  // Owner (2026-10-22): WebKit broke 委ねられた瞬 / 間 in the contents (no auto-phrase there), and
+  // OCCUPATION ran 14px past its cell in the partner card at 1366-1440px.
+  const reader = await read("src/components/world/dossier-reader.tsx");
+  assert.match(reader, /<b>\s*<PhrasedText text=\{section\.title\} \/>\s*<\/b>/);
+  assert.match(
+    css,
+    /@supports not \(word-break: auto-phrase\)\s*\{[^}]*\.dossier-contents-copy\s*b\s*\{\s*word-break: keep-all;/,
+  );
+  assert.match(
+    css,
+    /@container identity-records \(min-width: 541px\) and \(max-width: 640px\)\s*\{[^}]*figcaption\s*dl\s*dt\s*\{\s*font-family: var\(--sd-mono\);/,
   );
 });

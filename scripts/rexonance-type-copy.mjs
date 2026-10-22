@@ -89,7 +89,7 @@ export function rexonanceTypeCopy() {
   const headings = (source, levels) =>
     [...source.matchAll(new RegExp(`<h([${levels}])[^>]*>([\\s\\S]*?)</h\\1>`, "g"))].map(([, , inner]) =>
       // The hero's Latin name (its <span>) is forged, not Mincho.
-      jsxText(inner.replace(/<span>[^<]*<\/span>/g, "")),
+      jsxText(inner.replace(/<span(?:\s[^>]*)?>[^<]*<\/span>/g, "")),
     );
   const hero = between(page, '<section className="rxs-hero"', "</section>");
   const heroTitle = headings(hero, "1");

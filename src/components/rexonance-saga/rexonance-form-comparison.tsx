@@ -30,7 +30,7 @@ export const RexonanceFormComparison = memo(function RexonanceFormComparison({
       onToggle={(event) => setOpen(event.currentTarget.open)}
     >
       <summary>
-        <span>FORM COMPARISON</span>
+        <span lang="en">FORM COMPARISON</span>
         <strong>三つの形態を並べて比較</strong>
         {/* LAYOUT (2026-10-21): the drawer's bar lists what it holds. */}
         <span className="rxe-comparison-codes" aria-hidden="true">
@@ -43,7 +43,7 @@ export const RexonanceFormComparison = memo(function RexonanceFormComparison({
         <i aria-hidden="true">＋</i>
       </summary>
       {open ? (
-        <div className="rxe-comparison-grid">
+        <div className="rxe-comparison-grid" role="group" aria-label="表示する形態">
           {forms.map((form, index) => (
             <article
               className="rxe-comparison-card"
@@ -53,7 +53,7 @@ export const RexonanceFormComparison = memo(function RexonanceFormComparison({
             >
               <p>
                 <span>{String(index + 1).padStart(2, "0")}</span>
-                <b>{form.code}</b>
+                <b lang="en">{form.code}</b>
               </p>
               <img
                 src={form.image}
@@ -76,9 +76,30 @@ export const RexonanceFormComparison = memo(function RexonanceFormComparison({
                 type="button"
                 aria-controls="rxs-stage-panel"
                 aria-pressed={selected === form.key}
-                onClick={() => onChoose(form.key)}
+                onClick={(event) => {
+                  onChoose(form.key);
+                  const keyboard = event.detail === 0;
+                  // The selected panel precedes this drawer. Show the result
+                  // without sweeping through the intervening scroll scenes.
+                  requestAnimationFrame(() => {
+                    const rail = document.querySelector(".rxs-stage-tabs");
+                    const header = document.querySelector(".rxs-local-nav");
+                    if (rail)
+                      scrollBy({
+                        top:
+                          rail.getBoundingClientRect().top -
+                          (header?.getBoundingClientRect().height ?? 0) -
+                          24,
+                        behavior: "instant",
+                      });
+                    if (keyboard)
+                      document
+                        .getElementById(`rxs-stage-tab-${form.key}`)
+                        ?.focus({ preventScroll: true });
+                  });
+                }}
               >
-                {selected === form.key ? "表示中の形態" : `${form.label}を表示`}
+                {selected === form.key ? `${form.label}を表示中` : `${form.label}を表示`}
               </button>
             </article>
           ))}

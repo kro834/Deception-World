@@ -7,6 +7,18 @@ const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf
 const sheet = postcss.parse(read("src/styles-rexonance-motion-20261021.css"));
 const script = read("src/lib/rexonance-choreography.js");
 
+test("control feedback uses the existing pointer-capture state and respects calm tiers", () => {
+  const rules = [];
+  sheet.walkRules(/data-liquid-contact/, rule => rules.push(rule));
+  assert.equal(rules.length, 1);
+  const rule = rules[0];
+  assert.match(rule.selector, /:active/);
+  assert.match(rule.selector, /:not\(\[data-world-effects="economy"\]\)/);
+  assert.match(rule.parent.params, /prefers-reduced-motion: no-preference/);
+  assert.match(rule.parent.params, /forced-colors: none/);
+  assert.ok(rule.nodes.some(node => node.prop === "scale" && node.value === "0.98"));
+});
+
 test("the kinetic sheet is the last of the page's sheets and the hook mounts once", () => {
   const route = read("src/routes/rexonance-saga.tsx");
   const links = route.slice(route.indexOf("links: ["));

@@ -175,18 +175,18 @@ try {
     await page.locator(".rxs-p14-native-select select").waitFor();
     assert.equal(await page.locator("main select").count(), 2, "expected both native selectors");
 
-    const comparisonValues = await verifySelect(page, "レクソナンスの比較対象");
+    const comparisonValues = await verifySelect(page, "比較する相手：レクソナンスの比較対象");
     assert.deepEqual(comparisonValues, ["vertex", "vinculum", "extreme"]);
-    const p14Values = await verifySelect(page, "P14の比較基準");
+    const p14Values = await verifySelect(page, "基準にする世代：P14の比較基準");
     assert.deepEqual(p14Values, ["p1", "p2"]);
 
     let measuredRanges = 0;
     let measuredCommaRanges = 0;
     for (const comparison of comparisonValues) {
-      await page.getByLabel("レクソナンスの比較対象", { exact: true }).selectOption(comparison);
+      await page.getByLabel("比較する相手：レクソナンスの比較対象", { exact: true }).selectOption(comparison);
       await page.locator(`.rxs-comparison-metrics[data-baseline="${comparison}"]`).waitFor();
       for (const p14 of p14Values) {
-        await page.getByLabel("P14の比較基準", { exact: true }).selectOption(p14);
+        await page.getByLabel("基準にする世代：P14の比較基準", { exact: true }).selectOption(p14);
         await page.locator(`.rxs-p14-metrics[data-baseline="${p14}"]`).waitFor();
         const clipping = await numericClipReport(page);
         measuredRanges += clipping.ranges;

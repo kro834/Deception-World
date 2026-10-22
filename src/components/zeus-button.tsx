@@ -56,9 +56,15 @@ const HOLD_CUE_MS = 160;
 const TAP_MAX_MS = 380;
 const MOVE_TOLERANCE = 9;
 const RETURN_IMAGE_MIN_MS = 360;
-// Relocations glide; the timer cleans up after the 220ms transition, or at
-// once where reduced motion or economy leave no transition.
+// A dock glides; the timer cleans up after the 220ms transition, or at once
+// where reduced motion or economy leave no transition.
 const GLIDE_MS = 260;
+// 2026-10-21 sweep F32: a relocation the reader did not ask for (a settle, a
+// disclosure) never glides across the page. The button fades out where it
+// is, moves while hidden (so the move is never drawn, and never a layout
+// shift), and fades back in at the new spot. Reduced motion and economy cut
+// straight to the hidden move.
+const FADE_OUT_MS = 120;
 const SCROLL_REVEAL_MS = 180;
 // A drop this close to a side edge docks on it.
 const EDGE_SNAP_PX = 48;
@@ -143,6 +149,9 @@ const ZEUS_AVOID_SELECTOR = [
   ".quick-search-field",
   ".quick-search-close",
   ".recovery-tiles > a",
+  // The load-error page's ways out (reload, home): on short phones the
+  // panel fills the screen and its words left no clear spot but the buttons.
+  ".app-load-error-actions :is(button, a)",
 ].join(",");
 // A control taller than this share of the screen would block every spot and
 // pin the button home over it; its words still count through the glyphs.
@@ -175,6 +184,53 @@ const ZEUS_AVOID_TEXT_SELECTOR = [
   ".rxs-p14-values strong",
   ".rxs-p14-values b",
 ].join(",");
+/* 2026-10-21 sweep F05: the Rexonance page's other read-outs and labels,
+   which the button rested on at every width (p, span, small and dd, under
+   the display-figure floor or outside the list above): the P14 overview
+   figures (the 96 percent) and their labels, the metric rows' titles and
+   deltas, the comparison's formula, legend and footnote, the headline
+   metrics' labels, the stage slates, the chapter kickers, the CONTENTS
+   counter, and the suit-up's call chips and HUD (parts, readout, nanite
+   count). Page words only: the archive bridge mirrors the list above, and
+   its frame never shows these. */
+const ZEUS_AVOID_PAGE_TEXT_SELECTOR = [
+  ".rxs-p14-overview :is(dt, dd)",
+  ".rxs-p14-metrics article > :not(.rxs-p14-values)",
+  ".rxs-comparison-formula",
+  ".rxs-comparison-key",
+  ".rxs-comparison-note",
+  ".rxs-headline-metrics :is(small, p)",
+  ".rxl-stage-slate",
+  ".rxs-section-heading > p",
+  ".rxe-chapter-map-heading small",
+  ".rzn-call .rzn-chip",
+  ".rzn-parts .rzn-part",
+  ".rzn-readout",
+  ".rzn-nanites",
+  // The read-outs' column labels (P1 / P14), the comparator's help line and
+  // method note, the form sequence's count and the form's huge outlined code
+  // on the stage panel.
+  ".rxs-p14-values i",
+  "#rxs-p14-baseline-help",
+  ".rxs-p14-method-note",
+  // The P14 overview's kicker and the suit-up's live status line.
+  ".rxs-p14-copy > small",
+  ".rxs-assembly-status",
+  ".rxe-form-status-heading",
+  ".rzn-form-code",
+].join(",");
+/* Where no spot is clear of words on the Rexonance page (a full-width
+   instrument table, the chapter map's rows), the button steps aside in place
+   (fades out) instead of resting on them, and comes back at the next settle
+   that finds a clear spot (2026-10-21 sweep F05). Elsewhere it keeps the
+   least-covering spot, as before. */
+const ZEUS_PARK_PAGE_SELECTOR = ".rxs-rexonance-page";
+/* Art the button keeps off as it keeps off words (2026-10-21 sweep F05): the
+   key visual pinned beside Rexonance's chapters. Its drawn box, cut to the
+   screen, counts as covered words, so a step (the far side's above all) does
+   not land on the figure while a clear spot remains, and a fallback weighs
+   the figure like the words it would hide. */
+const ZEUS_AVOID_ART_SELECTOR = ".rxs-hero-visual img";
 const ZEUS_DISPLAY_TEXT_SELECTOR = "strong, b";
 const ZEUS_DISPLAY_TEXT_MIN_PX = 24;
 // At the end of the page nothing more scrolls out from under the button, so
@@ -274,6 +330,46 @@ function readFrameAvoid(pick: (entry: FrameAvoid) => ZeusRect[]) {
 const drawn = (element: Element) =>
   typeof element.checkVisibility !== "function" || element.checkVisibility();
 
+/* A timed entrance still running under a spot (a chapter's title sliding out
+   of its mask, rows cascading in): its words are not yet where they will
+   rest, or not yet drawn, when scrolling settles. Returns how long until the
+   last one ends, so the spot is looked at again then (2026-10-21 sweep F05).
+   Scroll-driven and endless animations are left out: they rest when the
+   page does, or never end. */
+const ZEUS_ENTRANCE_MAX_MS = 1600;
+// Only what moves, reveals or resizes words; a colour change leaves them be.
+const ZEUS_ENTRANCE_PROPERTY =
+  /^(?:transform|translate|scale|rotate|opacity|clip|visibility|inset|left|top|right|bottom|width|height|margin)/i;
+const movesWords = (animation: Animation, effect: KeyframeEffect) => {
+  if (typeof CSSTransition !== "undefined" && animation instanceof CSSTransition) {
+    return ZEUS_ENTRANCE_PROPERTY.test(animation.transitionProperty);
+  }
+  return effect
+    .getKeyframes()
+    .some((frame) => Object.keys(frame).some((key) => ZEUS_ENTRANCE_PROPERTY.test(key)));
+};
+function readEntrance(button: HTMLElement, zones: ZeusRect[]) {
+  if (typeof document.getAnimations !== "function") return 0;
+  let remaining = 0;
+  for (const animation of document.getAnimations()) {
+    if (animation.playState !== "running" || animation.timeline !== document.timeline) continue;
+    const effect = animation.effect as KeyframeEffect | null;
+    const target = effect?.target;
+    if (!effect || !(target instanceof Element)) continue;
+    if (target === button || button.contains(target)) continue;
+    const { endTime } = effect.getComputedTiming();
+    const now = Number(animation.currentTime ?? 0);
+    const rate = Math.abs(animation.playbackRate) || 1;
+    if (typeof endTime !== "number" || !Number.isFinite(endTime) || !Number.isFinite(now)) continue;
+    const left = (endTime - now) / rate;
+    if (left <= remaining || left > ZEUS_ENTRANCE_MAX_MS) continue;
+    if (!movesWords(animation, effect)) continue;
+    if (!meetsAny(target.getBoundingClientRect(), zones)) continue;
+    remaining = left;
+  }
+  return remaining;
+}
+
 /* The glyph boxes of the words inside the candidate spots. Only elements whose
    box meets a spot are walked, so this is a handful of ranges, read once when
    scrolling settles. Inside a dialog only its own words count: the page
@@ -312,6 +408,7 @@ function readAvoidText(button: HTMLElement, zones: ZeusRect[], pageEnd: boolean)
     }
   };
   collect(ZEUS_AVOID_TEXT_SELECTOR);
+  collect(ZEUS_AVOID_PAGE_TEXT_SELECTOR);
   collect(
     ZEUS_DISPLAY_TEXT_SELECTOR,
     (element) =>
@@ -322,6 +419,21 @@ function readAvoidText(button: HTMLElement, zones: ZeusRect[], pageEnd: boolean)
   if (root === document) {
     for (const word of readFrameAvoid((entry) => entry.words)) {
       if (meetsAny(word, zones)) glyphs.push(word);
+    }
+    for (const art of root.querySelectorAll<HTMLElement>(ZEUS_AVOID_ART_SELECTOR)) {
+      if (!drawn(art)) continue;
+      const box = art.getBoundingClientRect();
+      const shown = {
+        left: Math.max(0, box.left),
+        top: Math.max(0, box.top),
+        right: Math.min(window.innerWidth, box.right),
+        bottom: Math.min(window.innerHeight, box.bottom),
+      };
+      if (shown.right <= shown.left || shown.bottom <= shown.top) continue;
+      if (!meetsAny(shown, zones)) continue;
+      const style = window.getComputedStyle(art);
+      if (style.visibility === "hidden" || style.opacity === "0") continue;
+      glyphs.push(shown);
     }
   }
   return glyphs;
@@ -694,6 +806,7 @@ export function ZeusButtonProvider({ children }: { children: ReactNode }) {
               onSecretClose={closeSecret}
               secretArmed={secretArmed}
               secretAwakening={Boolean(secretOrigin)}
+              routeKey={pathname}
             />,
             portalTarget,
           )
@@ -745,6 +858,7 @@ function ZeusButton({
   onSecretClose,
   secretArmed = false,
   secretAwakening = false,
+  routeKey = "",
 }: {
   position: ZeusButtonPosition;
   sideMenuOpen: boolean;
@@ -757,6 +871,7 @@ function ZeusButton({
   onSecretClose?: () => void;
   secretArmed?: boolean;
   secretAwakening?: boolean;
+  routeKey?: string;
 }) {
   const buttonRef = useRef<HTMLButtonElement>(null);
   const activePointer = useRef<number | null>(null);
@@ -786,8 +901,17 @@ function ZeusButton({
   // The pending press's hold activation, so a mouse drag can start it early.
   const holdActivate = useRef<(() => void) | null>(null);
   const glideTimer = useRef<number | null>(null);
-  // Set by the settle, toggle and dock paths: the next placement glides.
+  // Set by the settle, toggle and dock paths: the next placement is a
+  // relocation. Only a dock (the reader's own drop) glides; the others hand
+  // off in place (fadeTimer, fadeFrame).
   const glideNext = useRef(false);
+  const dockNext = useRef(false);
+  const fadeTimer = useRef<number | null>(null);
+  const fadeFrame = useRef<number | null>(null);
+  // A settle's placement again, once the entrances under its spots have run,
+  // and when that settle first waited for them.
+  const lookAgain = useRef<() => void>(() => {});
+  const entranceSince = useRef<number | null>(null);
   // A safe temporary spot stays put until the reader moves on or that spot
   // becomes obstructed. Passive layout/frame reports must not send it home.
   const stepAway = useRef<{ scrollTop: number } | null>(null);
@@ -796,6 +920,13 @@ function ZeusButton({
   useEffect(() => {
     preferredPosition.current = position;
   }, [position]);
+
+  // A step aside belongs to the page it was taken on: a new route shows the
+  // button again (its next settle looks afresh).
+  useEffect(() => {
+    const button = buttonRef.current;
+    if (button?.dataset.parked) delete button.dataset.parked;
+  }, [routeKey]);
 
   const cancelDragFrame = useCallback(() => {
     if (dragFrame.current != null) window.cancelAnimationFrame(dragFrame.current);
@@ -845,6 +976,46 @@ function ZeusButton({
     if (!button || button.dataset.relocating !== "true") return;
     delete button.dataset.relocating;
     button.style.removeProperty("translate");
+  }, []);
+
+  /* A hand-off still fading out keeps its spot and lights up again; one that
+     has already moved (hidden) is shown where it now is. */
+  const endFade = useCallback(() => {
+    if (fadeTimer.current != null) window.clearTimeout(fadeTimer.current);
+    if (fadeFrame.current != null) window.cancelAnimationFrame(fadeFrame.current);
+    fadeTimer.current = null;
+    fadeFrame.current = null;
+    const button = buttonRef.current;
+    const state = button?.dataset.relocating;
+    if (button && (state === "fade-out" || state === "moving")) delete button.dataset.relocating;
+  }, []);
+
+  /* The hand-off: fade out in place (pointer events stay on, so a press in
+     the meantime still lands on the button and cancels it), then move while
+     hidden, and show it again two frames on, after the hidden frame has been
+     painted. A placement that arrives mid-fade replaces the pending move. */
+  const startFade = useCallback((button: HTMLElement, move: () => void, cut = false) => {
+    if (fadeTimer.current != null) window.clearTimeout(fadeTimer.current);
+    if (fadeFrame.current != null) window.cancelAnimationFrame(fadeFrame.current);
+    fadeTimer.current = null;
+    fadeFrame.current = null;
+    const run = () => {
+      fadeTimer.current = null;
+      button.dataset.relocating = "moving";
+      move();
+      fadeFrame.current = window.requestAnimationFrame(() => {
+        fadeFrame.current = window.requestAnimationFrame(() => {
+          fadeFrame.current = null;
+          if (button.dataset.relocating === "moving") delete button.dataset.relocating;
+        });
+      });
+    };
+    if (cut || reducedGlide()) {
+      run();
+      return;
+    }
+    button.dataset.relocating = "fade-out";
+    fadeTimer.current = window.setTimeout(run, FADE_OUT_MS);
   }, []);
 
   const startGlide = useCallback(
@@ -933,7 +1104,11 @@ function ZeusButton({
   }, [getViewport, readBounds, restingSize]);
 
   const avoidCriticalControls = useCallback(
-    (preferred: { x: number; y: number }, docked = false) => {
+    (
+      preferred: { x: number; y: number },
+      report?: { entrance: number; crowded: boolean },
+      docked = false,
+    ) => {
       const button = buttonRef.current;
       // A sheet's dock (readDock) is kept free for the button.
       if (!button || docked) return preferred;
@@ -1049,26 +1224,27 @@ function ZeusButton({
       const pageEnd = scroller.scrollTop + window.innerHeight >= scroller.scrollHeight - 2;
       // A spot the reader has just dropped the button on is theirs: only the
       // controls move it off. Words count again once the page scrolls.
-      const words = droppedHere.current
-        ? []
-        : readAvoidText(
-            button,
-            [...candidateRects, ...(shownRect ? [shownRect] : [])].map((candidateRect) => ({
-              left: candidateRect.left - ZEUS_TEXT_GAP,
-              right: candidateRect.right + ZEUS_TEXT_GAP,
-              top: candidateRect.top - ZEUS_TEXT_GAP,
-              bottom: candidateRect.bottom + ZEUS_TEXT_GAP,
-            })),
-            pageEnd,
-          );
-      const coveredWords = (candidateRect: ZeusRect) =>
+      const wordZones = [...candidateRects, ...(shownRect ? [shownRect] : [])].map(
+        (candidateRect) => ({
+          left: candidateRect.left - ZEUS_TEXT_GAP,
+          right: candidateRect.right + ZEUS_TEXT_GAP,
+          top: candidateRect.top - ZEUS_TEXT_GAP,
+          bottom: candidateRect.bottom + ZEUS_TEXT_GAP,
+        }),
+      );
+      const words = droppedHere.current ? [] : readAvoidText(button, wordZones, pageEnd);
+      // Words still arriving under these spots: look again once they rest.
+      if (report && !droppedHere.current && !button.closest("dialog")) {
+        report.entrance = readEntrance(button, wordZones);
+      }
+      const coveredWords = (candidateRect: ZeusRect, room = ZEUS_TEXT_GAP) =>
         words.reduce((covered, word) => {
           const width =
-            Math.min(candidateRect.right + ZEUS_TEXT_GAP, word.right) -
-            Math.max(candidateRect.left - ZEUS_TEXT_GAP, word.left);
+            Math.min(candidateRect.right + room, word.right) -
+            Math.max(candidateRect.left - room, word.left);
           const height =
-            Math.min(candidateRect.bottom + ZEUS_TEXT_GAP, word.bottom) -
-            Math.max(candidateRect.top - ZEUS_TEXT_GAP, word.top);
+            Math.min(candidateRect.bottom + room, word.bottom) -
+            Math.max(candidateRect.top - room, word.top);
           return width > 0 && height > 0 ? covered + width * height : covered;
         }, 0);
 
@@ -1088,15 +1264,28 @@ function ZeusButton({
       // everywhere (a column of titles): the nearby spot clear of the
       // controls that covers the least of them, weighed by how far it goes.
       // Controls everywhere: stay home, as before.
+      // 2026-10-21 sweep F05/F32: a page-wide flip (a tablet or desktop)
+      // gives way to a spot on the button's own side that rests on no word
+      // and only comes within its breathing room of one.
+      const pageWide = Math.abs(mirrorX - preferred.x) > ZEUS_FLIP_MAX_PX;
+      let nearMiss: ZeusButtonPosition | null = null;
       let fallback: { candidate: ZeusButtonPosition; score: number } | null = null;
       for (const [index, candidate] of candidates.entries()) {
         const candidateRect = candidateRects[index];
+        const farSide = pageWide && Math.abs(candidate.x - preferred.x) > ZEUS_FLIP_MAX_PX;
+        // Once an own-side spot rests on no word, the page-wide flip and the
+        // far rows give way to it.
+        const givesWay = nearMiss !== null && (farSide || index >= ZEUS_NEAR_CANDIDATES);
         const obstructed =
+          givesWay ||
           blocked(candidateRect) ||
           (index > 0 && topBar !== null && meetsAny(candidateRect, [topBar]));
         if (obstructed) continue;
         const covered = coveredWords(candidateRect);
         if (covered === 0) return candidate;
+        if (pageWide && !farSide && !nearMiss && coveredWords(candidateRect, 0) === 0) {
+          nearMiss = candidate;
+        }
         if (index >= ZEUS_NEAR_CANDIDATES) continue;
         const score =
           covered +
@@ -1104,6 +1293,10 @@ function ZeusButton({
             Math.hypot(candidate.x - preferred.x, candidate.y - preferred.y);
         if (!fallback || score < fallback.score) fallback = { candidate, score };
       }
+      if (nearMiss) return nearMiss;
+      // No spot clear of the words and controls (a spot the reader dropped it
+      // on is theirs, and never counts as crowded).
+      if (report && !droppedHere.current) report.crowded = true;
       return fallback?.candidate ?? candidates[0] ?? preferred;
     },
     [readBounds, getViewport, restingSize],
@@ -1156,12 +1349,17 @@ function ZeusButton({
   const placeButton = useCallback(
     (next: ZeusButtonPosition) => {
       const button = buttonRef.current;
-      if (!button) return next;
-      const glide = glideNext.current;
+      if (!button) return;
+      const relocate = glideNext.current;
+      const dock = dockNext.current;
       glideNext.current = false;
+      dockNext.current = false;
       // Where it is drawn now, mid-glide included; then settle any glide so
-      // the placement below measures the real spot.
+      // the placement below measures the real spot. A hand-off still fading
+      // out keeps fading: this placement replaces its pending move.
       const drawn = button.getBoundingClientRect();
+      const fading = button.dataset.relocating === "fade-out";
+      if (!fading) endFade();
       endGlide();
       const viewport = getViewport();
       const size = restingSize(button);
@@ -1171,26 +1369,95 @@ function ZeusButton({
         viewport.offsetTop + next.y * viewport.height,
         bounds,
       );
+      const report = { entrance: 0, crowded: false };
       // A sheet's dock, until the reader moves the button there (a drop
       // saves a new position object; the portal remounts it per surface).
       // The band is kept free for it, so it is not searched: the rows that
       // scroll out under the band are clipped there, not covered.
-      const dock = next === arrivedAt.current ? readDock(button, viewport, size, bounds) : null;
-      const safeCenter = avoidCriticalControls(dock ?? { x: centerX, y: centerY }, dock !== null);
-      const shownBefore = pendingPosition.current;
-      const actual = setVisualCenter(safeCenter.x, safeCenter.y);
-      if (Math.hypot(safeCenter.x - centerX, safeCenter.y - centerY) <= 1) {
-        stepAway.current = null;
-      } else if (
-        !stepAway.current ||
-        Math.abs(shownBefore.x * viewport.width + viewport.offsetLeft - actual.x) > 1 ||
-        Math.abs(shownBefore.y * viewport.height + viewport.offsetTop - actual.y) > 1
+      const sheetDock =
+        next === arrivedAt.current ? readDock(button, viewport, size, bounds) : null;
+      const safeCenter = avoidCriticalControls(
+        sheetDock ?? { x: centerX, y: centerY },
+        report,
+        sheetDock !== null,
+      );
+      // Words still arriving under these spots (a title running out of its
+      // mask, rows cascading in) are not where they will rest: decide once,
+      // when they have landed, rather than now and again after.
+      // The wait is bounded: entrances chained one after another still get
+      // one decision within ZEUS_ENTRANCE_MAX_MS of the settle.
+      const now = Date.now();
+      const waitingSince = entranceSince.current ?? now;
+      if (
+        report.entrance > 0 &&
+        relocate &&
+        !dock &&
+        now - waitingSince + report.entrance <= ZEUS_ENTRANCE_MAX_MS
       ) {
-        // A new step: count from here.
-        const scroller = document.scrollingElement ?? document.documentElement;
-        stepAway.current = { scrollTop: scroller.scrollTop };
+        entranceSince.current = waitingSince;
+        if (placementTimer.current != null) window.clearTimeout(placementTimer.current);
+        placementTimer.current = window.setTimeout(() => {
+          placementTimer.current = null;
+          lookAgain.current();
+        }, report.entrance + 48);
+        return;
       }
-      if (glide && !reducedGlide()) {
+      entranceSince.current = null;
+      // Crowded on the Rexonance page: step aside in place rather than rest
+      // on its words (ZEUS_PARK_PAGE_SELECTOR). Keyboard focus, its own
+      // return, a dock and a dialog keep it in view.
+      if (
+        report.crowded &&
+        !dock &&
+        document.querySelector?.(ZEUS_PARK_PAGE_SELECTOR) &&
+        document.activeElement !== button &&
+        button.dataset.navigating !== "true" &&
+        !button.closest("dialog")
+      ) {
+        if (fading) endFade();
+        button.dataset.parked = "true";
+        return;
+      }
+      // Back from the side: it is hidden, so any move lands unseen.
+      const parked = button.dataset.parked === "true";
+      if (parked) delete button.dataset.parked;
+      const move = () => {
+        const shownBefore = pendingPosition.current;
+        const actual = setVisualCenter(safeCenter.x, safeCenter.y);
+        if (Math.hypot(safeCenter.x - centerX, safeCenter.y - centerY) <= 1) {
+          stepAway.current = null;
+        } else if (
+          !stepAway.current ||
+          Math.abs(shownBefore.x * viewport.width + viewport.offsetLeft - actual.x) > 1 ||
+          Math.abs(shownBefore.y * viewport.height + viewport.offsetTop - actual.y) > 1
+        ) {
+          // A new step: count from here.
+          const scroller = document.scrollingElement ?? document.documentElement;
+          stepAway.current = { scrollTop: scroller.scrollTop };
+        }
+        pendingPosition.current = {
+          x: (actual.x - viewport.offsetLeft) / viewport.width,
+          y: (actual.y - viewport.offsetTop) / viewport.height,
+        };
+        return actual;
+      };
+      const travel = Math.hypot(
+        safeCenter.x - (drawn.left + drawn.width / 2),
+        safeCenter.y - (drawn.top + drawn.height / 2),
+      );
+      if (relocate && !dock && travel >= 2) {
+        startFade(button, move, parked);
+        return;
+      }
+      if (fading) endFade();
+      if (!relocate && travel >= 2) {
+        // A jump with no hand-off (arriving, a resize, a resume): hidden for
+        // the frame it lands in, then lit where it rests, never drawn moving.
+        startFade(button, move, true);
+        return;
+      }
+      const actual = move();
+      if (relocate && dock && !reducedGlide()) {
         startGlide(
           button,
           drawn.left + drawn.width / 2,
@@ -1199,12 +1466,6 @@ function ZeusButton({
           actual.y,
         );
       }
-      const normalized = {
-        x: (actual.x - viewport.offsetLeft) / viewport.width,
-        y: (actual.y - viewport.offsetTop) / viewport.height,
-      };
-      pendingPosition.current = normalized;
-      return normalized;
     },
     [
       avoidCriticalControls,
@@ -1212,7 +1473,9 @@ function ZeusButton({
       getViewport,
       setVisualCenter,
       endGlide,
+      endFade,
       startGlide,
+      startFade,
       restingSize,
     ],
   );
@@ -1256,6 +1519,10 @@ function ZeusButton({
         placeButton(preferredPosition.current);
       });
     };
+    lookAgain.current = () => {
+      glideNext.current = true;
+      schedulePlacement();
+    };
     const onScroll = () => {
       if ((activePointer.current != null && !held.current) || secretPress.current)
         cancelPointer.current();
@@ -1264,6 +1531,7 @@ function ZeusButton({
         return;
       }
       droppedHere.current = false;
+      entranceSince.current = null;
       if (phone?.matches ?? window.innerWidth <= 760) {
         const button = buttonRef.current;
         if (button) button.dataset.scrolling = "true";
@@ -1440,6 +1708,7 @@ function ZeusButton({
       dockObserver?.disconnect();
       if (dockTimer != null) window.clearTimeout(dockTimer);
       revealAfterScroll();
+      lookAgain.current = () => {};
       document.removeEventListener("toggle", onLayoutChange, { capture: true });
       document.removeEventListener("scroll", onInnerScroll, { capture: true });
       window.removeEventListener("resize", onResize);
@@ -1504,8 +1773,9 @@ function ZeusButton({
       cancelPlacement();
       disarmTouchGuard();
       endGlide();
+      endFade();
     },
-    [clearHoldTimer, cancelDragFrame, cancelPlacement, disarmTouchGuard, endGlide],
+    [clearHoldTimer, cancelDragFrame, cancelPlacement, disarmTouchGuard, endGlide, endFade],
   );
 
   /* Pointer capture is not guaranteed in Samsung Internet or embedded
@@ -1629,6 +1899,7 @@ function ZeusButton({
       if (docked) {
         // The saved spot is the edge; the placement that follows glides there.
         glideNext.current = true;
+        dockNext.current = true;
         pendingPosition.current = docked;
       }
       onPositionChange(pendingPosition.current);
@@ -1759,6 +2030,8 @@ function ZeusButton({
         const glidingRect =
           target.dataset.relocating === "true" ? target.getBoundingClientRect() : null;
         endGlide();
+        // A hand-off still fading out stays where it is (its move is dropped).
+        endFade();
         if (glidingRect) {
           const frozen = setVisualCenter(
             glidingRect.left + glidingRect.width / 2,

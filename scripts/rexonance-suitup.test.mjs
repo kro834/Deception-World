@@ -41,7 +41,7 @@ import {
    stream in along the body and lock, seam outward, in a cascade up the body
    (legs, waist, arms, chest and core, shoulders, the tail midway, the
    ribbons, the helmet last); each DEUS！ seats a group's last plate with the
-   strongest clank and a jolt. The canvas engine
+   strongest clank (sweep 2, F84: no jolt, the body never moves). The canvas engine
    (rexonance-suit-nanites.tsx) draws the tiles; the DOM plates (each grows
    from its seam through its gathered nanite mosaic) are its fallback and
    the clock these pins check.
@@ -432,21 +432,21 @@ test("the suit keeps the call clock and is finished before the hand-over", () =>
   assert.match(keyframes.get("rxSuitGather"), /var\(--rx-suit-h\) \* -0\.02/);
   const spark = layerTimes(declaration(covering(".rx-suit-spark").body, "animation"), piece);
   assert.equal(spark.delay, 1100, "the spark bites on the fit");
-  // The jolt: 2 px on each group's impact (snap + 40 ms) and the helmet's.
-  const jolt = layerTimes(declaration(covering(".rx-suit-figure").body, "animation"), {});
-  const impacts = [];
-  for (const [, offsets, body] of keyframes
-    .get("rxSuitJolt")
-    .matchAll(/([\d.%,\s]+)\{([^}]*)\}/g)) {
-    if (!/2px/.test(body)) continue;
-    for (const offset of offsets.split(","))
-      impacts.push(Math.round(jolt.delay + (parseFloat(offset) / 100) * jolt.duration));
-  }
-  assert.deepEqual(
-    impacts,
-    ["legs", "waist", "arms", "chest", "helm"].map((group) => REXONANCE_SUIT_SNAP[group] + 40),
+  // The body never moves (owner: 「全身が上下するのも治して」; sweep 2, F84):
+  // the impact is the plates' clank and the spark. No rule in any tier or
+  // phase animates or transitions the figure; its one translate is the
+  // static centring on its seat, and no keyframes dip it.
+  const figureRules = rules.filter(({ selector }) =>
+    splitTopLevel(selector).some((part) => /\.rx-suit-figure$/.test(part)),
   );
-  assert.doesNotMatch(keyframes.get("rxSuitJolt"), /[3-9]px|\d{2,}px/, "a micro-jolt, 1-2 px");
+  assert.ok(figureRules.length > 0, "the figure's own rules are read");
+  for (const { selector, body } of figureRules) {
+    for (const property of ["animation", "animation-name", "transition", "transform", "scale", "rotate"])
+      assert.equal(declaration(body, property), undefined, `${selector}: ${property}`);
+    const translate = declaration(body, "translate");
+    if (translate !== undefined) assert.equal(translate, "-50% -50%", `${selector}: seated, not moved`);
+  }
+  assert.equal(keyframes.has("rxSuitJolt"), false, "no jolt keyframes");
   // REXONANCE DEUS！: the squares fill the face's lights from the last call,
   // each group bursting on its own step, all gone before the cover ends; the
   // lit face and the bodysuit between the plates come on after the helmet.

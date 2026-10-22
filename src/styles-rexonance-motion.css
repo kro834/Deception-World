@@ -136,3 +136,24 @@
     animation: none !important;
   }
 }
+/* Audit F78: an opt-in disclosure should reveal its reading area rather
+   than displacing a screenful in one frame. This finite, user-triggered
+   intrinsic-size transition is confined to engines that support it.
+   Native details, initial image laziness and immediate close are retained. */
+@supports (interpolate-size: allow-keywords) {
+  @media (prefers-reduced-motion: no-preference) and (forced-colors: none) {
+    html:not([data-world-effects="economy"]) body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-comparison {
+      interpolate-size: allow-keywords;
+    }
+
+    html:not([data-world-effects="economy"]) body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-comparison::details-content {
+      block-size: 0;
+      overflow: clip;
+      transition: block-size 280ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    html:not([data-world-effects="economy"]) body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-comparison[open]::details-content {
+      block-size: auto;
+    }
+  }
+}

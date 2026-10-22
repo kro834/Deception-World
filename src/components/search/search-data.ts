@@ -449,7 +449,7 @@ const DOSSIER_DOCUMENTS: readonly SearchCatalogueDocument[] = [
     title: "i-2 第二世代無限縮小製造プロセス",
     category: "systems",
     description:
-      "無限縮小を可能にする第二世代の製造プロセスです。第五の犬としての悠真自身が持つ性質に合わせ、レクソナンスコア、ドライバー、全身の戦闘機構を同一の『終焉』へ同期させます。",
+      "REALMS所属のフェイブルが開発した、第二世代無限縮小製造プロセス。『i』はInfinityに由来し、『2』は第二世代を表すため、2nmなどの回路寸法を意味する名称ではない。",
     keywords: ["i-2", "第二世代無限縮小製造プロセス", "レクソナンスサーガ"],
     to: "/rexonance-saga",
     hash: "system",
@@ -795,7 +795,7 @@ export const SEARCH_DOCUMENTS: readonly SearchCatalogueDocument[] = [
     id: "far-from-saga",
     title: "仮面ライダーファーフロムサーガ",
     category: "riders",
-    description: "SA-GA OS 6.0",
+    description: "SA-GA OS 6.1",
     body: proseOf([FAR_FROM_SAGA.overview, FAR_FROM_SAGA.theories, FAR_FROM_SAGA.stages]).join(
       "\n",
     ),

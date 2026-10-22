@@ -5,6 +5,19 @@ const base = process.env.BASE_URL || "http://127.0.0.1:8082";
 const engine = process.env.PW_ENGINE === "webkit" ? webkit : chromium;
 const browser = await engine.launch(engine === chromium ? { channel: "chrome" } : {});
 const ids = ["posters", "characters", "dolminence", "cases"];
+const isolateExternals = process.env.PW_OFFLINE_EXTERNALS === "1";
+
+async function isolateExternalRequests(page) {
+  if (!isolateExternals) return;
+  await page.route(/^https:\/\/fonts\.(?:googleapis|gstatic)\.com\//, (route) => route.abort());
+  await page.route(/^https:\/\/grok\.com\/grok-app-builder\/extensions\.js(?:\?.*)?$/, (route) =>
+    route.abort(),
+  );
+  console.log(
+    "PW_OFFLINE_EXTERNALS=1: Google Fonts and the exact Grok editor extension are blocked",
+  );
+}
+
 try {
   for (const viewport of [
     { width: 390, height: 844 },
@@ -12,6 +25,7 @@ try {
     { width: 1440, height: 900 },
   ]) {
     const page = await browser.newPage({ viewport });
+    await isolateExternalRequests(page);
     await page.addInitScript(() => {
       window.__dreamNavigationEvents = [];
       const record = (detail) => {

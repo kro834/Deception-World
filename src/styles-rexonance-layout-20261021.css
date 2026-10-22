@@ -39,10 +39,8 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-page.rxs-rexonance-page 
     linear-gradient(var(--rxl-tick), var(--rxl-tick)) 100% 0 / 1px var(--rxl-tick-size) no-repeat,
     linear-gradient(var(--rxl-tick), var(--rxl-tick)) 0 100% / var(--rxl-tick-size) 1px no-repeat,
     linear-gradient(var(--rxl-tick), var(--rxl-tick)) 0 100% / 1px var(--rxl-tick-size) no-repeat,
-    linear-gradient(var(--rxl-tick), var(--rxl-tick)) 100% 100% / var(--rxl-tick-size) 1px
-      no-repeat,
-    linear-gradient(var(--rxl-tick), var(--rxl-tick)) 100% 100% / 1px var(--rxl-tick-size)
-      no-repeat;
+    linear-gradient(var(--rxl-tick), var(--rxl-tick)) 100% 100% / var(--rxl-tick-size) 1px no-repeat,
+    linear-gradient(var(--rxl-tick), var(--rxl-tick)) 100% 100% / 1px var(--rxl-tick-size) no-repeat;
   /* The inner hairline of a plate: a lit top edge and a dark base. */
   --rxl-plate-shadow:
     inset 0 1px 0 rgb(255 255 255 / 12%), inset 0 0 0 1px var(--rxl-plate-edge),
@@ -59,9 +57,14 @@ html[data-family="special"]
   .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
   > .rxs-section
   > .rxs-section-heading {
-  background:
-    linear-gradient(90deg, var(--rxt-ice, #79e8ff), rgb(255 143 216 / 60%) 36%, var(--rxl-line) 70%, transparent)
-      no-repeat 0 100% / 100% 1px;
+  background: linear-gradient(
+      90deg,
+      var(--rxt-ice, #79e8ff),
+      rgb(255 143 216 / 60%) 36%,
+      var(--rxl-line) 70%,
+      transparent
+    )
+    no-repeat 0 100% / 100% 1px;
   padding-block-end: clamp(18px, 2.4vw, 28px);
   margin-block-end: clamp(36px, 4.6vw, 56px);
 }
@@ -91,6 +94,7 @@ html[data-family="special"]
   article {
   border: 0;
   border-block: 1px solid var(--rxl-line-soft);
+  padding-inline: clamp(16px, 2vw, 28px);
 }
 
 /* The comparison legend and formula read as one header line. */
@@ -338,7 +342,12 @@ html[data-family="special"]
   position: absolute;
   inset: auto 0 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent, var(--rxs-stage-accent, #63e2ff) 50%, transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--rxs-stage-accent, #63e2ff) 50%,
+    transparent
+  );
   opacity: 0.9;
 }
 
@@ -477,7 +486,11 @@ html[data-family="special"]
   object-position: 50% 100%;
   margin: 0;
   background:
-    radial-gradient(56% 20% at 50% 100%, color-mix(in srgb, var(--rxs-stage-accent, #63e2ff) 34%, transparent), transparent 72%),
+    radial-gradient(
+      56% 20% at 50% 100%,
+      color-mix(in srgb, var(--rxs-stage-accent, #63e2ff) 34%, transparent),
+      transparent 72%
+    ),
     linear-gradient(180deg, rgb(8 15 26 / 40%), rgb(2 6 12 / 80%));
   border: 1px solid var(--rxl-line-soft);
 }
@@ -548,7 +561,12 @@ html[data-family="special"]
   > #system
   > .rxs-system-grid
   > article:nth-child(3) {
-  background: linear-gradient(180deg, rgb(242 216 150 / 9%), rgb(242 216 150 / 2%) 60%, transparent);
+  background: linear-gradient(
+    180deg,
+    rgb(242 216 150 / 9%),
+    rgb(242 216 150 / 2%) 60%,
+    transparent
+  );
   box-shadow: inset 0 2px 0 var(--rxt-gold, #f2d896);
 }
 
@@ -612,11 +630,7 @@ html[data-family="special"]
   margin: 0;
 }
 
-html[data-family="special"]
-  body
-  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
-  > .rxs-footer
-  > a {
+html[data-family="special"] body .rxs-page.rxs-page.rxs-page.rxs-rexonance-page > .rxs-footer > a {
   grid-column: 1;
   grid-row: 2;
   justify-self: start;
@@ -816,10 +830,7 @@ html[data-family="special"]
   }
 
   /* The footer links stand side by side. */
-  html[data-family="special"]
-    body
-    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
-    > .rxs-footer {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-page.rxs-rexonance-page > .rxs-footer {
     grid-template-columns: auto auto auto minmax(0, 1fr);
   }
 
@@ -934,6 +945,34 @@ html[data-family="special"]
 }
 
 @media (min-width: 701px) and (max-width: 1099px) {
+  /* The three systems remain one plate, but not three 238px reading columns. */
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > #system
+    > .rxs-system-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > #system
+    > .rxs-system-grid
+    > article {
+    border-inline-start: 0;
+    border-block-start: 1px solid var(--rxl-line-soft);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > #system
+    > .rxs-system-grid
+    > article:first-child {
+    border-block-start: 0;
+  }
+
   html[data-family="special"]
     body
     .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
@@ -958,6 +997,19 @@ html[data-family="special"]
     > #stages
     .rxe-comparison-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 701px) and (max-width: 1099px) and (orientation: landscape) {
+  /* Keep the title in the first landscape screen; no change to desktop's
+     approved persistent split stage or the portrait/phone composition. */
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > .rxs-hero
+    .rxs-hero-visual {
+    height: min(40svh, 320px);
+    min-height: 0;
   }
 }
 
@@ -1120,16 +1172,135 @@ html[data-family="special"]
     border-block-start: 0;
   }
 
-  html[data-family="special"]
-    body
-    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
-    > .rxs-footer {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-page.rxs-rexonance-page > .rxs-footer {
     min-height: 0;
   }
 }
 
+/* F124: a chapter jump is navigation, not an 8,000px scrub through the
+   transformation. Native anchors/history/focus still do the navigation. */
+html[data-family="special"]:has(.rxs-rexonance-page) {
+  scroll-behavior: auto;
+}
+
+/* F67: reserve the existing chrome before its observer hydrates. The
+   observer still measures unusual text zoom/safe-area configurations. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-page.rxs-rexonance-page {
+  --rxs-local-nav-reserve: calc(77px + env(safe-area-inset-top, 0px));
+}
+
+@media (max-width: 700px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-page.rxs-rexonance-page {
+    --rxs-local-nav-reserve: calc(65px + env(safe-area-inset-top, 0px));
+  }
+}
+
+@media (max-width: 400px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-page.rxs-rexonance-page .rxe-hero-rail {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    width: min(100%, 320px);
+    gap: 12px;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-page.rxs-rexonance-page .rxe-hero-rail > a {
+    width: 100%;
+  }
+}
+
+/* F99: shared rows align the three reading starts without imposing a
+   guessed fixed title height or changing any of the owner's wording. */
+@supports (grid-template-rows: subgrid) {
+  @media (min-width: 1100px) {
+    html[data-family="special"] body .rxs-page.rxs-page.rxs-page.rxs-rexonance-page > #system > .rxs-system-grid {
+      grid-template-rows: auto auto auto;
+    }
+
+    html[data-family="special"] body .rxs-page.rxs-page.rxs-page.rxs-rexonance-page > #system > .rxs-system-grid > article {
+      display: grid;
+      grid-template-rows: subgrid;
+      grid-row: span 3;
+      row-gap: 16px;
+    }
+
+    html[data-family="special"] body .rxs-page.rxs-page.rxs-page.rxs-rexonance-page > #system > .rxs-system-grid > article > :is(h3, p) {
+      margin-block: 0;
+    }
+  }
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-page.rxs-rexonance-page > #assembly {
+  scroll-margin-block-start: calc(var(--rxs-local-nav-reserve, 77px) + 24px);
+}
+
+/* F70: the shared layout measurement supplies the actual numeral width;
+   left:50% used the whole heading and put the emitter over its title. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > .rxs-section > .rxs-section-heading::after {
+  left: var(--rsn-emitter-x, 48px);
+  right: auto;
+  justify-self: auto;
+  translate: -50% 50%;
+}
+
 /* Forced colours: frames become real borders; the painted corners vanish. */
+/* Audit F16/F108: an outside outline is clipped by the plates/slider.
+   Keep keyboard feedback inside the approved silhouettes, in every palette. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page:not(#rxa):not(#rxa)
+  :is(.rxs-footer > a, .rxs-p14-range-labels button):focus-visible {
+  outline: 2px solid var(--rxl-ice, #79e8ff);
+  outline-offset: -4px;
+}
+
 @media (forced-colors: active) {
+  html[data-family="special"] body:has(.rxs-rexonance-page)::before {
+    display: none;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-page.rxs-rexonance-page {
+    /* SVG background images, unlike CSS gradients, survive forced colours. */
+    --saga-trail-ne: none;
+    --saga-trail-sw: none;
+    --saga-trail-ne-soft: none;
+    --saga-trail-sw-soft: none;
+  }
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page:not(#rxa):not(#rxa)
+    :is(.rxs-footer > a, .rxs-p14-range-labels button):focus-visible {
+    outline-color: Highlight;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page:not(#rxa):not(#rxa)
+    .rxs-stage-tabs
+    [aria-selected="true"] {
+    color: HighlightText;
+    background: Highlight;
+    forced-color-adjust: none;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page:not(#rxa):not(#rxa)
+    .rxs-stage-tabs
+    button {
+    -webkit-text-fill-color: currentColor;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page:not(#rxa):not(#rxa)
+    .rxs-stage-tabs
+    button
+    :is(b, small, span) {
+    color: inherit;
+    -webkit-text-fill-color: currentColor;
+  }
+
   html[data-family="special"]
     body
     .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
@@ -1145,5 +1316,51 @@ html[data-family="special"]
     border: 1px solid CanvasText;
     background: Canvas;
     box-shadow: none;
+  }
+}
+
+/* Round 2 (2026-10-22): P14's three readings stand side by side only where
+   each cell holds its figure: 約0.06ms (5.1em) ran 27px past its cell into
+   96% beside a chip on an iPad (the copy column is 346–376px there). Below
+   470px of their own width they read as rows, label left, figure right, as
+   on a phone — whatever the screen, the readings' width decides. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > #p14
+  .rxs-p14-copy
+  > dl {
+  container: rxs-p14-readings / inline-size;
+}
+
+@container rxs-p14-readings (max-width: 469.98px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > #p14
+    .rxs-p14-copy
+    > dl
+    > div {
+    /* A container query cannot restyle the dl itself: each reading spans
+       its three columns instead, one row apiece. */
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 0;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > #p14
+    .rxs-p14-copy
+    > dl
+    > div
+    + div {
+    padding-inline-start: 0;
+    border-inline-start: 0;
+    border-block-start: 1px solid var(--rxl-line-soft);
   }
 }

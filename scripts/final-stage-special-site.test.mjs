@@ -26,7 +26,7 @@ test("Final Stage special site has a route, menu entry, warmup asset, and dedica
   assert.match(menu, /FINAL_STAGE_ENTER_ASSETS/);
   assert.match(
     menu,
-    /context\?:\s*"world" \| "archive" \| "movie" \| "cinema" \| "rexonance" \| "extreme" \| "final-stage" \| "gallery";/,
+    /context\?:\s*"world" \| "archive" \| "movie" \| "cinema" \| "gallery" \| SpecialSiteId;/,
   );
   assert.match(loader, /export const FINAL_STAGE_ENTER_ASSETS/);
   assert.match(loadGate, /"\/final-stage": "final-stage"/);

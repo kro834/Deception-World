@@ -1,0 +1,93 @@
+{
+  "scope": "Rexonance assembly preparation, futuristic typography and control feedback",
+  "baselineMainCommit": "2ed3fa1161a848fa41622f8640cae34b84417b8a",
+  "integratedMainCommit": "1933c70dd061f5eb2cd19f0ba98fec3ea960eb08",
+  "implementation": [
+    "Driver, raw-gold and unlit intermediate canvases select willReadFrequently on their first context, before drawing decoded artwork.",
+    "A temporary alpha-compositing parity probe enables CPU preparation only on byte-compatible backends; its five small stores are released and only a boolean is cached per document.",
+    "Compatible CPU row work uses a 2.5 ms cooperative budget instead of 1.5 ms; legacy fallback remains at 1.5 ms. Idle deadline checks, cancellation and live rendering are unchanged.",
+    "Japanese display type uses local gothic and Latin display type uses the existing self-hosted Forge face. Two unused Mincho preloads totalling 10300 bytes are removed; original artwork and copy are preserved.",
+    "Controls have 140 ms press feedback and a visible keyboard focus outline. Motion stays disabled in reduced-motion, economy and forced-colors modes. Existing pointer contact state is reused without adding gesture handlers.",
+    "Native chapter-link clicks re-resolve their target once on the next frame to avoid stale post-rotation WebKit geometry. Hash/history/focus remain native; fresh input or page disposal cancels pending work, with no scroll listener or continuous animation loop."
+  ],
+  "timing": {
+    "browser": "Chrome 155.0.8059.40, headed",
+    "viewport": { "width": 390, "height": 844, "deviceScaleFactor": 3, "hasTouch": true },
+    "cpuThrottle": 4,
+    "network": "Loopback production builds, browser cache disabled, no bandwidth throttle",
+    "thirdPartyIsolation": ["fonts.googleapis.com CSS", "grok.com/grok-app-builder/extensions.js"],
+    "measurement": "After hydration, load and scroll restoration settle, scroll to 423 px (half-viewport preparation threshold); stop at data-rzn-load=ready.",
+    "method": "Five fresh contexts per build, alternating AB/BA. Byte hashing runs separately from timing.",
+    "pairedSamplesMs": [
+      { "main": 3855.4, "candidate": 3159.1 },
+      { "main": 3722.3, "candidate": 3203.5 },
+      { "main": 3904.0, "candidate": 3131.5 },
+      { "main": 3625.1, "candidate": 3073.9 },
+      { "main": 3791.2, "candidate": 3229.3 }
+    ],
+    "medianMs": { "main": 3791.2, "candidate": 3159.1 },
+    "medianReductionMs": 632.1,
+    "medianReductionPercent": 16.67,
+    "candidatePixelSlices": { "count": 1001, "maxMs": 4.2, "over6Ms": 0 },
+    "candidateSliceMaxMs": {
+      "figure-lights-pixels": 4.0,
+      "base-lights-pixels": 4.0,
+      "driver-lights-pixels": 3.9,
+      "nanite-metal-rows": 4.2,
+      "nanite-conduit-rows": 3.3,
+      "nanite-molten-rows": 3.8
+    },
+    "qualification": "CPU backing alone did not reduce ready time in this environment; the reported improvement is the combined CPU-backed and bounded-batching implementation. The reported 7 s preparation and 1.2 s GPU stalls were not reproduced locally."
+  },
+  "byteParity": {
+    "fixture": "scripts/fixtures/rexonance-cpu-preparation.json",
+    "sourceSize": [571, 1040],
+    "readsPerEngine": 166,
+    "uploadsPerEngine": 136,
+    "chrome": "All ordered SHA-256 byte digests exactly equal main; all five instrumented readback sources CPU-backed.",
+    "webkit": "WebKit 26.5 detects different alpha rounding and retains legacy stores. All ordered SHA-256 byte digests exactly equal main."
+  },
+  "verification": {
+    "unitTests": { "total": 2810, "passed": 2805, "skipped": 5, "failed": 0 },
+    "lint": "passed",
+    "types": "passed",
+    "productionBuild": "passed",
+    "sourceParts": "15 groups verified",
+    "zenith": "Passed 43 observations: phone390 forward/reverse, reduced motion, Save-Data, 2G, WebKit native and no-scroll-timeline fallback.",
+    "renderContracts": "Touch art <=64 draws, <=16 nanite sprites, allocation-free draw passes and distant prefetch presentation pins passed.",
+    "typography": "Chrome and WebKit at 320/390/1024/1440: no horizontal overflow or dormant Mincho requests; keyboard navigation/focus and normal/reduced/economy press states passed.",
+    "operability": "Chrome passed all eight profiles. WebKit passed seven of eight; tablet-portrait retains the baseline Option-Tab landing failure recorded below. Native visible links and real narrow-screen drawer links are exercised, with unchanged arrival and focus tolerances.",
+    "interactionEdges": "All five profiles passed, including 320 px, touch cancellation, menu scrolling/swiping, dialogs, delayed artwork, Back and Zeus return cleanup.",
+    "release": "Five SPA departures after adding the anchor correction, including stalled image requests and Back under the entry cover: zero retained page nodes and zero detached main nodes.",
+    "performance": "Existing performance verifier passed; repeated selected-tab presses and 60 hero scroll changes cause zero Rexonance React commits."
+  },
+  "evidence": {
+    "timing": "output/playwright/cpu-preparation/batched-headed-ab.json",
+    "chromePixels": "output/playwright/cpu-preparation/release-chrome-pixels.json",
+    "webkitPixels": "output/playwright/cpu-preparation/release-webkit-pixels.json",
+    "zenith": "output/playwright/cpu-preparation/zenith-final/report.json",
+    "chromeType": "output/playwright/cpu-preparation/type-chrome/report.json",
+    "webkitType": "output/playwright/cpu-preparation/type-webkit/report.json",
+    "release": "output/playwright/cpu-preparation/release-final-anchor.json"
+  },
+  "knownIssues": [
+    {
+      "scope": "WebKit 26.5 automated keyboard navigation, 1024x1366 touch profile",
+      "symptom": "Option-Tab from the P14 range focuses the correct #stages assembly-guide link but does not bring it into the viewport.",
+      "baseline": "main 2ed3fa1: link top -4645.671875 px",
+      "candidate": "integrated candidate: link top -4645.703125 px",
+      "status": "Reproduced on both builds; not introduced or repaired by this preparation/typography change. Physical-device behavior remains unverified."
+    },
+    {
+      "scope": "WebKit programmatic fragment assignment after rotation",
+      "symptom": "Directly assigning location.hash can retain an incorrect native destination after rotation. The operability verifier now exercises the actual drawer links at narrow widths, including their existing router and scroll-lock release behavior.",
+      "status": "The new one-frame correction covers native chapter-link clicks, not unrelated programmatic hash assignments or history restoration."
+    }
+  ],
+  "limitations": [
+    "These are local production-build measurements, not public-network or physical-device measurements.",
+    "Physical iPhone/iPad and iPadOS 27.2 home-screen mode were not tested.",
+    "WebKit preserves the exact existing output through fallback; this report does not claim a WebKit preparation speedup.",
+    "The measured 6 ms slice target is not a hard wall-clock guarantee on arbitrary hardware."
+  ]
+}

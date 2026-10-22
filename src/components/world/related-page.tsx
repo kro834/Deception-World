@@ -1,7 +1,7 @@
 import { useWorldMode } from "./use-world-mode";
 import { DossierNav, RELATED_NAV, NameText } from "./dossier-nav";
 import { FormPickup, type RiderForm } from "./manager-stub";
-import { DossierContents, DossierReader } from "./dossier-reader";
+import { DossierContents, DossierReader, PhrasedText } from "./dossier-reader";
 import { DossierTopbar } from "./world-chrome";
 import { dossierImage } from "@/lib/dossier-images";
 import { RELATED_SECTIONS } from "./related-data";
@@ -244,7 +244,9 @@ export function RelatedPage({ id }: { id: "terra" | "luna" }) {
               <div className="manager-copy-heading">
                 <span>{s.no}</span>
                 <p>{s.kicker}</p>
-                <h2>{s.title}</h2>
+                <h2>
+                  <PhrasedText text={s.title} />
+                </h2>
               </div>
               <div className="manager-copy-body">
                 {s.body.map((p) => (

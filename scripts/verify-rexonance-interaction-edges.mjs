@@ -157,7 +157,7 @@ async function verifyKeyboardMenu(page) {
 }
 
 async function verifyComparisons(page) {
-  const comparison = page.getByLabel("レクソナンスの比較対象", { exact: true });
+  const comparison = page.getByLabel("比較する相手：レクソナンスの比較対象", { exact: true });
   await comparison.selectOption("extreme");
   await page.locator('.rxs-comparison-metrics[data-baseline="extreme"]').waitFor();
   const p14Select = page.locator('.rxs-p14-native-select select');
@@ -528,6 +528,7 @@ async function verifyDelayedArtworkImage() {
   const requested = new Promise((resolve) => { requestedResolve = resolve; });
   const handlerFinished = new Promise((resolve) => { handlerFinishedResolve = resolve; });
   await page.route("**/*", async (route) => {
+    if (process.env.AUDIT_OFFLINE_FONTS === "1" && /https:\/\/(fonts\.googleapis\.com|fonts\.gstatic\.com|grok\.com)\//.test(route.request().url())) return route.abort("internetdisconnected");
     if (new URL(route.request().url()).pathname.endsWith("/character-fable-20261017.webp")) {
       requestedResolve();
       await new Promise((resolve) => setTimeout(resolve, 1800));
@@ -567,6 +568,7 @@ async function verifyFailedArtworkImage() {
   page.on("pageerror", (error) => errors.push(error.message));
   await readyWorldArtworkPage(page);
   await page.route("**/*", async (route) => {
+    if (process.env.AUDIT_OFFLINE_FONTS === "1" && /https:\/\/(fonts\.googleapis\.com|fonts\.gstatic\.com|grok\.com)\//.test(route.request().url())) return route.abort("internetdisconnected");
     if (new URL(route.request().url()).pathname.endsWith("/character-fable-20261017.webp")) {
       await route.abort("failed");
     } else {
@@ -600,6 +602,7 @@ async function verifySlowStageSelection() {
   const firstDelayedRequest = new Promise((resolve) => { delayedResolve = resolve; });
   page.on("pageerror", (error) => pageErrors.push(error.message));
   await page.route("**/*", async (route) => {
+    if (process.env.AUDIT_OFFLINE_FONTS === "1" && /https:\/\/(fonts\.googleapis\.com|fonts\.gstatic\.com|grok\.com)\//.test(route.request().url())) return route.abort("internetdisconnected");
     const url = new URL(route.request().url());
     if (url.pathname.includes("rider-rexonance-max-20260923")) {
       delayedRequests.push(url.pathname);

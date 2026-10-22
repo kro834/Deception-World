@@ -23,9 +23,14 @@ async function waitForPage(page) {
   await page.waitForFunction(
     () =>
       document.querySelector(".rxs-stage-tabs")?.dataset.liquidInitialized === "true" &&
+      (document.querySelector('main[data-motion-ready="true"]') ||
+        matchMedia("(prefers-reduced-motion: reduce)").matches) &&
+      !document.documentElement.hasAttribute("data-loading") &&
       !document.documentElement.hasAttribute("data-route-cover") &&
       !document.querySelector(".load-gate"),
   );
+  await page.evaluate(() => document.fonts.ready);
+  assert.ok(await waitForStableScroll(page), "initial restoration must settle");
 }
 
 async function verifyStage(page, stage) {
@@ -52,7 +57,25 @@ async function verifyStage(page, stage) {
     await page.locator("#rxs-stage-panel").getAttribute("aria-labelledby"),
     `rxs-stage-tab-${stage}`,
   );
-  await page.waitForTimeout(650);
+  // The spring is frame-driven; a wall-clock sleep does not guarantee it
+  // has settled in WebKit. Keep the exact geometric tolerance and a bounded
+  // deadline, rather than sampling an intermediate animation frame.
+  await page.waitForFunction(
+    () => {
+      const rail = document.querySelector(".rxs-stage-tabs");
+      const selected = rail?.querySelector('[aria-selected="true"]')?.getBoundingClientRect();
+      const lens = rail?.querySelector(".liquid-selection-lens")?.getBoundingClientRect();
+      return (
+        selected &&
+        lens &&
+        ["left", "top", "width", "height"].every(
+          (edge) => Math.abs(selected[edge] - lens[edge]) <= 1.5,
+        )
+      );
+    },
+    null,
+    { timeout: 3000 },
+  );
   const lens = await rail.evaluate((root) => {
     const selectedBox = root.querySelector('[aria-selected="true"]').getBoundingClientRect();
     const lensBox = root.querySelector(".liquid-selection-lens").getBoundingClientRect();
@@ -66,6 +89,21 @@ async function verifyStage(page, stage) {
   for (const [edge, delta] of Object.entries(lens)) {
     assert.ok(delta <= 1.5, `${stage}: lens ${edge} must match selected tab (${delta}px)`);
   }
+  // The static selection lens may settle before the form's one-shot copy
+  // entrance. Measure its final layout, not the changing transform mid-flight.
+  await page.waitForFunction(
+    () =>
+      document
+        .querySelector("#rxs-stage-panel")
+        .getAnimations({ subtree: true })
+        .every(
+          (animation) =>
+            animation.playState !== "running" ||
+            !Number.isFinite(animation.effect?.getComputedTiming().endTime),
+        ),
+    null,
+    { timeout: 5000 },
+  );
 }
 
 async function verifyStageCopy(page) {
@@ -105,13 +143,18 @@ async function waitForStableScroll(page) {
 }
 
 async function verifyAnchor(page, id) {
+  // Keyboard focus can still be scrolling after a rotated form selection.
+  // Isolate the following anchor action from that earlier native animation.
+  assert.ok(await waitForStableScroll(page), `${id}: preceding focus scroll must settle`);
   const desktopLink = page.locator(`.rxs-local-nav nav a[href="#${id}"]`);
   if (await desktopLink.isVisible()) {
     await desktopLink.click();
   } else {
-    await page.evaluate((target) => {
-      location.hash = target;
-    }, id);
+    // At narrow widths readers use the actual drawer. Assigning location.hash
+    // bypasses its scroll-lock release and the router's navigation handling.
+    await page.locator(".rxs-menu-trigger").click();
+    await page.locator(`#site-side-panel a[href="/rexonance-saga#${id}"]`).click();
+    await page.waitForFunction(() => !document.documentElement.hasAttribute("data-side-menu-open"));
   }
   // Long upward jumps from P14 can animate for more than 800ms. Sample the
   // settled destination, not a point along the browser's smooth scroll.
@@ -129,6 +172,9 @@ async function verifyAnchor(page, id) {
       ),
       rootPadding: Number.parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop),
       margin: Number.parseFloat(getComputedStyle(document.getElementById(target)).scrollMarginTop),
+      hash: location.hash,
+      sectionHeight: section.height,
+      documentHeight: document.documentElement.scrollHeight,
       scrollY,
       active: document.activeElement?.tagName,
     };
@@ -184,7 +230,7 @@ try {
         );
       }
 
-      const comparison = page.getByLabel("レクソナンスの比較対象", { exact: true });
+      const comparison = page.getByLabel("比較する相手：レクソナンスの比較対象", { exact: true });
       await comparison.focus();
       // macOS headless native select menus do not consume synthetic keyboard
       // selection (even a standalone HTML select behaves that way). Exercise
@@ -202,7 +248,7 @@ try {
         true,
       );
 
-      const slider = page.getByLabel("P14の比較対象", { exact: true });
+      const slider = page.getByLabel("P14の比較基準", { exact: true });
       await slider.focus();
       await page.keyboard.press("End");
       assert.equal(await slider.inputValue(), "2");
@@ -211,12 +257,18 @@ try {
       await page.keyboard.press("Home");
       assert.equal(await slider.inputValue(), "1");
       assert.equal(await page.locator(".rxs-p14-metrics").getAttribute("data-baseline"), "p1");
+      assert.ok(await waitForStableScroll(page), "slider focus scroll must settle before Tab");
 
       // Focus the controls with actual Tab navigation from the slider and
       // confirm that browser scrolling leaves them clear of the fixed bar.
       // The new assembly guide is the next Tab stop, and normal motion uses
       // smooth focus scrolling; sample its settled position as for anchors.
-      await page.keyboard.press("Tab");
+      // macOS WebKit's default Tab traversal skips anchors (also on main).
+      // Option-Tab includes them; retain the exact next-link/visibility checks
+      // below rather than replacing real keyboard navigation with focus().
+      await page.keyboard.press(
+        engine === "webkit" && process.platform === "darwin" ? "Alt+Tab" : "Tab",
+      );
       assert.ok(await waitForStableScroll(page), "Tab focus scroll must settle");
       const focusPosition = await page.evaluate(() => {
         const active = document.activeElement;

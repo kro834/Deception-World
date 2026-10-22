@@ -40,9 +40,12 @@ function DownloadPage() {
       <a className="export-page-alt" href="/api/export">
         ダウンロードを再試行
       </a>
+      {/* One line per sentence (the sheet sets each on its own line), so
+          Chromium's phrase breaks and Safari's punctuation breaks agree. */}
       <small>
-        GitHub上のソースコードです。公開サイトの配信版とは異なる場合があります。
-        ギャラリーに投稿した画像・しおり・個人設定・node_modules は含みません。
+        <span>GitHub上のソースコードです。</span>
+        <span>公開サイトの配信版とは異なる場合があります。</span>
+        <span>ギャラリーに投稿した画像・しおり・個人設定・node_modules は含みません。</span>
       </small>
       <Link to="/world" className="export-page-back">
         メインサイトへ戻る

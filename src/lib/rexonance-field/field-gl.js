@@ -90,10 +90,12 @@ uniform vec2 uTone;
 uniform float uPixel;
 uniform float uAlpha;
 uniform float uEdge;
+uniform vec4 uKeep;
 varying vec2 vLocal;
 varying float vLen;
 varying float vW;
 varying vec4 vColor;
+varying vec2 vKeep;
 const float TAU = 6.283185307179586;
 const float RW = ${f(P.radiusWide)};
 const float RT = ${f(P.radiusTight)};
@@ -117,10 +119,11 @@ const float SWEEP0 = ${f(B.sweep[0])};
 const float SWEEP1 = ${f(B.sweep[1])};
 const float HEAT = ${f(B.heat)};
 const float GLOW = ${f(B.glow)};
+const float IGNITE = ${f(B.ignite)};
 const float FRINGE = ${f(1 - B.fringeShare)};
 const float LOCKMARGIN = ${f(P.lockMargin)};
 const float LOCKSHADE = ${f(P.lockShade)};
-vec3 pose(float s, float wk, float a0, float r0, float yp, float spd, float pick, float arm, vec4 birth, out float light, out float flash, out float heat) {
+vec3 pose(float s, float wk, float a0, float r0, float yp, float spd, float pick, float arm, float stagger, vec4 birth, out float light, out float flash, out float heat) {
   float theta = a0 * TAU + uPhase + uTake.y * TAU * ORBITS * spd * s + arm * TAU / uTake.x + uTake.z * (yp - 0.5) * 2.0;
   float rho = r0 * (RW + (RT - RW) * uTight);
   rho *= 1.0 - uCollapse * 0.96;
@@ -131,12 +134,13 @@ vec3 pose(float s, float wk, float a0, float r0, float yp, float spd, float pick
   float spreadY = SPREAD + uAttract.w;
   float x = uAttract.x + rho * cs * ASPECT + (pick - 0.5) * uAttract.z * 2.0 * (1.0 - uTight * 0.6) * (1.0 - uCollapse);
   float y = uAttract.y + (yp - 0.5) * spreadY * (1.0 - uCollapse) + WOBBLE * sin(theta * 0.5 + yp * TAU) + uTake.w * z * (1.0 - uCollapse);
-  // Its birth: a burst fragment flying out under drag, cooling, swept
-  // onto its line by the wake's end; before its birth, nothing.
-  float stagger = fract(a0 * 13.0 + yp * 7.0) * STAGGER;
+  // Its birth (its fragment cooled): a chip flying on under drag, its light
+  // rising as the fire's spark has faded, cooling, swept onto its line by
+  // the wake's end; before its birth, nothing.
   float born = wk >= 1.0 ? 1.0 : step(stagger, wk);
   float tau = wk >= 1.0 ? 1.0 : born * clamp((wk - stagger) / (1.0 - stagger), 0.0, 1.0);
   heat = 0.0;
+  float lit = 1.0;
   if (tau < 1.0) {
     float flight = (1.0 - exp(-DRAG * tau)) / DRAG * DRIFT;
     vec2 b = birth.xy + birth.zw * flight;
@@ -145,6 +149,7 @@ vec3 pose(float s, float wk, float a0, float r0, float yp, float spd, float pick
     y = mix(b.y, y, sweep);
     z = mix(0.02, z, sweep);
     heat = 1.0 - smoothstep(0.0, HEAT, tau);
+    lit = smoothstep(0.0, IGNITE, tau);
   }
   flash = 0.0;
   for (int k = 0; k < 4; k++) {
@@ -174,7 +179,7 @@ vec3 pose(float s, float wk, float a0, float r0, float yp, float spd, float pick
     }
   }
   float depth = max(0.0, -z);
-  light = born * uCharge * (0.55 + 0.45 * spd) * (1.0 - BOKEHDIM * depth) * (1.0 - PACK * uTight) * (1.0 + FLASHGAIN * flash) * (1.0 + GLOW * heat) * shade * uSettle;
+  light = born * lit * uCharge * (0.55 + 0.45 * spd) * (1.0 - BOKEHDIM * depth) * (1.0 - PACK * uTight) * (1.0 + FLASHGAIN * flash) * (1.0 + GLOW * heat) * shade * uSettle;
   return vec3(x, y, z);
 }
 void main() {
@@ -183,21 +188,25 @@ void main() {
   float yp = aSeed.z;
   float spd = 0.55 + 0.9 * aSeed.w;
   float pick = aKind.x;
-  float arm = floor(aKind.y * 255.0 + 0.5);
+  // Its birth's share of the wake (a byte of STAGGER), then its arm and
+  // corner (a marker in bit 2) packed in one byte.
+  float stagger = aKind.y * STAGGER;
   float kind = floor(aKind.z * 255.0 + 0.5);
-  float corner = mod(kind, 4.0);
-  float marker = step(4.0, kind);
+  float arm = floor(kind / 8.0);
+  float sub = kind - arm * 8.0;
+  float corner = mod(sub, 4.0);
+  float marker = step(4.0, sub);
   float size = 0.6 + aKind.w;
   vec4 birth = vec4(aBirth.xy * 2.0 - 0.5, aBirth.zw * 4.0 - 2.0);
   float light;
   float flash;
   float heat;
-  vec3 p1 = pose(uS, uWake, a0, r0, yp, spd, pick, arm, birth, light, flash, heat);
+  vec3 p1 = pose(uS, uWake, a0, r0, yp, spd, pick, arm, stagger, birth, light, flash, heat);
   float light0;
   float flash0;
   float heat0;
   float streak = STREAK * mix(1.0, MARKER, marker);
-  vec3 p0 = pose(uS - streak, uWake - streak * uWakeRate, a0, r0, yp, spd, pick, arm, birth, light0, flash0, heat0);
+  vec3 p0 = pose(uS - streak, uWake - streak * uWakeRate, a0, r0, yp, spd, pick, arm, stagger, birth, light0, flash0, heat0);
   float vis = uSide == 0.0 ? 1.0 : (uSide > 0.0 ? step(0.0, p1.z) : step(p1.z, -0.000001));
   vis *= step(0.0001, light);
   vec2 s1 = uView.yz + p1.xy * uView.x;
@@ -226,6 +235,11 @@ void main() {
   vec3 hot = pick > FRINGE ? vec3(${vec3(B.fringe)}) : vec3(${vec3(B.hot)});
   tone = mix(tone, hot, heat);
   vColor = vec4(tone * a, a);
+  // The keep-out (a caption's glyphs; sweep 2, F25): the position in its
+  // box's own units, (0, 1) on both axes inside it — affine in pos, so it
+  // interpolates exactly, and a few units of mediump in the fragment stage
+  // are exact to a fraction of a pixel. No box: never inside.
+  vKeep = uKeep.z > uKeep.x && uKeep.w > uKeep.y ? (pos - uKeep.xy) / (uKeep.zw - uKeep.xy) : vec2(-1.0);
   vec2 clip = (pos / uSize) * 2.0 - 1.0;
   gl_Position = vis > 0.5 ? vec4(clip.x, -clip.y, 0.0, 1.0) : vec4(-4.0, -4.0, 0.0, 1.0);
 }
@@ -237,7 +251,12 @@ varying vec2 vLocal;
 varying float vLen;
 varying float vW;
 varying vec4 vColor;
+varying vec2 vKeep;
 void main() {
+  // Nothing over the keep-out box, a hard cut as the 2D scene's clip: its
+  // fragments add nothing (additive blending), and every fragment still
+  // writes, so a tiled GPU keeps its fast path.
+  float open = 1.0 - step(0.0, vKeep.x) * step(vKeep.x, 1.0) * step(0.0, vKeep.y) * step(vKeep.y, 1.0);
   float x = clamp(vLocal.x, 0.0, vLen);
   float d = length(vec2(vLocal.x - x, vLocal.y)) / max(vW, 0.001);
   float core = 1.0 - clamp(d, 0.0, 1.0);
@@ -246,7 +265,7 @@ void main() {
   // (2026-10-21): a lit metal particle, not a soft tinted smear.
   float hot = max(0.0, 1.0 - d * 2.4);
   hot *= hot;
-  float taper = vLen > 0.001 ? mix(0.2, 1.0, clamp(x / vLen, 0.0, 1.0)) : 1.0;
+  float taper = open * (vLen > 0.001 ? mix(0.2, 1.0, clamp(x / vLen, 0.0, 1.0)) : 1.0);
   gl_FragColor = vColor * (core * taper) + vec4(vColor.a) * (0.45 * hot * taper);
 }
 `;
@@ -254,9 +273,9 @@ void main() {
 const u16 = (value) => Math.max(0, Math.min(65535, Math.round(value * 65535)));
 
 /** The vertex bytes of `count` particles (4 vertices each, 16 bytes a
- * vertex: a0, r0, yp, spd; pick, arm, corner + 4 × marker, size; then the
- * birth as four 16-bit words — x, y over [-0.5, 1.5), vx, vy over [-2, 2)),
- * each birth from `fragment(index, out)`. */
+ * vertex: a0, r0, yp, spd; pick, the birth's stagger, 8 × arm + corner +
+ * 4 × marker, size; then the birth as four 16-bit words — x, y over
+ * [-0.5, 1.5), vx, vy over [-2, 2)), each birth from `fragment(index, out)`. */
 export function fieldVertexBytes(count, arms, fragment = fieldFragment) {
   const G = FIELD_GL;
   const S = FIELD_SEEDS;
@@ -270,7 +289,8 @@ export function fieldVertexBytes(count, arms, fragment = fieldFragment) {
     const yp = Math.round(seeds[S.YP] * 255);
     const spd = Math.round(((seeds[S.SPD] - 0.55) / 0.9) * 255);
     const pick = Math.round(seeds[S.PICK] * 255);
-    const arm = seeds[S.ARM];
+    const stagger = Math.round(seeds[S.STAGGER] * 255);
+    const arm = seeds[S.ARM] * 8;
     const size = Math.round((seeds[S.SIZE] - 0.6) * 255);
     const marker = seeds[S.MARKER] ? 4 : 0;
     const bx = u16((seeds[S.BX] + 0.5) / 2);
@@ -285,8 +305,8 @@ export function fieldVertexBytes(count, arms, fragment = fieldFragment) {
       bytes[o + 2] = yp;
       bytes[o + 3] = spd;
       bytes[o + 4] = pick;
-      bytes[o + 5] = arm;
-      bytes[o + 6] = c + marker;
+      bytes[o + 5] = stagger;
+      bytes[o + 6] = arm + c + marker;
       bytes[o + 7] = size;
       const w = v * (G.bytesPerVertex / 2) + 4;
       words[w] = bx;
@@ -367,10 +387,12 @@ const UNIFORMS = [
   "uPixel",
   "uAlpha",
   "uEdge",
+  "uKeep",
 ];
 
-// One canvas: its context, program and buffers. Rebuilt after a restore.
-function createSurface(canvas, side, count, arms, fragment) {
+// One canvas: its context, program and buffers (`vertexBytes()` the
+// particles' bytes, built once for every surface). Rebuilt after a restore.
+function createSurface(canvas, side, count, vertexBytes) {
   const gl = fieldContext(canvas);
   if (!gl) return null;
   const surface = {
@@ -424,7 +446,7 @@ function createSurface(canvas, side, count, arms, fragment) {
     if (!vertices || !indices) throw new Error("field: buffer unavailable");
     const stride = FIELD_GL.bytesPerVertex;
     gl.bindBuffer(gl.ARRAY_BUFFER, vertices);
-    gl.bufferData(gl.ARRAY_BUFFER, fieldVertexBytes(count, arms, fragment), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, vertexBytes(), gl.STATIC_DRAW);
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indices);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, fieldIndices(count), gl.STATIC_DRAW);
     surface.vertices = vertices;
@@ -493,8 +515,9 @@ function releaseSurface(surface) {
  * The layer: a back canvas (and, on fine pointers, a front one), each with
  * its own context. `document.createElement` makes the canvases; the caller
  * places them. `fragment(index, out)` gives each particle's birth (the
- * burst fragment's handoff: x, y figure heights; vx, vy per wake); the
- * model fragment by default. Null when WebGL is unavailable.
+ * burst fragment's handoff: x, y figure heights; vx, vy per wake; its
+ * stagger share); the fire's own fragments by default. Null when WebGL is
+ * unavailable.
  */
 export function createFieldLayer({
   document: doc = globalThis.document,
@@ -508,6 +531,10 @@ export function createFieldLayer({
   if (!doc || typeof doc.createElement !== "function" || !take) return null;
   const G = FIELD_GL;
   const n = Math.max(64, Math.min(G.maxCount, count ?? (coarse ? G.count.coarse : G.count.fine)));
+  // The particles' bytes: one build (the fire's fragments, sampled at their
+  // cooling) shared by every surface and by a restore.
+  let vertexBytes = null;
+  const bytesOf = () => (vertexBytes ??= fieldVertexBytes(n, take.arms, fragment));
   const surfaces = [];
   const make = (side) => {
     let canvas;
@@ -519,7 +546,7 @@ export function createFieldLayer({
     if (!canvas) return null;
     if (className) canvas.className = `${className} is-${side > 0 ? "front" : "back"}`;
     if (canvas.dataset) canvas.dataset.side = side > 0 ? "front" : "back";
-    const surface = createSurface(canvas, side, n, take.arms, fragment);
+    const surface = createSurface(canvas, side, n, bytesOf);
     if (!surface) {
       canvas.width = canvas.height = 0;
       return null;
@@ -572,9 +599,10 @@ export function createFieldLayer({
     /**
      * Draws the field at `state` for the figure drawn at `scale` CSS px per
      * figure px from (`x`, `y`) CSS px in the canvases' box; `height` is the
-     * figure's height in figure px; `quality` (0..1) draws a prefix.
+     * figure's height in figure px; `quality` (0..1) draws a prefix; `keep`
+     * ([x0, y0, x1, y1] CSS px in the box, or null) is left clear.
      */
-    render(state, scale, x, y, height, quality = 1) {
+    render(state, scale, x, y, height, quality = 1, keep = null) {
       if (released || !cssWidth || !cssHeight) return 0;
       const visible = Math.max(0, Math.min(n, Math.floor(n * (quality > 0 ? quality : 0))));
       const charge = state[F.CHARGE];
@@ -631,6 +659,9 @@ export function createFieldLayer({
         gl.uniform1f(L.uPixel, unit * G.width);
         gl.uniform1f(L.uAlpha, alpha);
         gl.uniform1f(L.uEdge, G.edgeFade * ratio);
+        if (keep && keep[2] > keep[0] && keep[3] > keep[1])
+          gl.uniform4f(L.uKeep, keep[0] * ratio, keep[1] * ratio, keep[2] * ratio, keep[3] * ratio);
+        else gl.uniform4f(L.uKeep, 0, 0, 0, 0);
         gl.drawElements(gl.TRIANGLES, visible * G.indicesPerParticle, gl.UNSIGNED_SHORT, 0);
         drawn += visible;
       }
@@ -650,6 +681,7 @@ export function createFieldLayer({
       released = true;
       for (const surface of surfaces) releaseSurface(surface);
       surfaces.length = 0;
+      vertexBytes = null;
     },
   };
   return layer;

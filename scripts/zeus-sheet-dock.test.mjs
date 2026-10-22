@@ -18,6 +18,7 @@ test("the quick search's field, close plate and the 404 tiles are controls", () 
     '".quick-search-field"',
     '".quick-search-close"',
     '".recovery-tiles > a"',
+    '".app-load-error-actions :is(button, a)"',
   ])
     assert.ok(avoid.includes(selector), selector);
 });
@@ -32,13 +33,14 @@ test("the dock holds the button only on a screen-wide band, until the reader mov
   );
   assert.match(zeus, /return Math\.abs\(placed\.y - dock\.y\) > 2 \? null : placed;/);
   // Only the position it arrived with: a drop saves a new one and the dock lets go.
+  // Owner (2026-10-22): main's Zeus rewrite owns `dock` (an edge drop) and the placement report; the sheet dock is renamed and passed third.
   assert.match(
     zeus,
-    /const dock = next === arrivedAt\.current \? readDock\(button, viewport, size, bounds\) : null;/,
+    /const sheetDock =\s*next === arrivedAt\.current \? readDock\(button, viewport, size, bounds\) : null;/,
   );
   assert.match(
     zeus,
-    /const safeCenter = avoidCriticalControls\(dock \?\? \{ x: centerX, y: centerY \}, dock !== null\);/,
+    /const safeCenter = avoidCriticalControls\(\s*sheetDock \?\? \{ x: centerX, y: centerY \},\s*report,\s*sheetDock !== null,\s*\);/,
   );
   assert.match(zeus, /if \(!button \|\| docked\) return preferred;/);
   // The band moves as the results grow while typing (no scroll): it is followed.

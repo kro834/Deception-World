@@ -215,7 +215,10 @@ html body .load-gate.has-cine.is-cine-full.rider-route-dive.is-final-stage-dive.
     .fst-page.fst-page
     .fst-hero
     .rxs-hero-visual::after {
-    animation: fsc-lock 240ms steps(4, jump-end) var(--fsc-delay) both;
+    /* Backwards fill: the lock ends on the frame's own style (its only
+       keyframe is the start), not on a step WebKit's rounding can stop
+       short of after a delay (75% opacity, 1.01x). */
+    animation: fsc-lock 240ms steps(4, jump-end) var(--fsc-delay) backwards;
   }
 
   /* The logo opens from its centre, the bloom and the floor come up under
@@ -318,7 +321,7 @@ html body .load-gate.has-cine.is-cine-full.rider-route-dive.is-final-stage-dive.
   /* A record locks on as it opens: the sheet's bracket frame (a pseudo, so
      nothing the pickup's scroll and focus handling measures moves). */
   html:not([data-world-effects="economy"]) .fst-page.fst-page .fst-pickup-dialog[open]::after {
-    animation: fsc-lock 240ms steps(4, jump-end) 60ms both;
+    animation: fsc-lock 240ms steps(4, jump-end) 60ms backwards;
   }
 
   html:not([data-world-effects="economy"]):not([data-loading])

@@ -1,4 +1,3 @@
-    no: "02",
     name: "REALM",
     ja: "レルム",
     person: "ベル・アレイン",
@@ -350,3 +349,4 @@
           { dt: "HEIGHT", dd: "230cm" },
           { dt: "WEIGHT", dd: "308kg" },
           { dt: "PUNCH", dd: "10.6t" },
+          { dt: "KICK", dd: "30.4t" },

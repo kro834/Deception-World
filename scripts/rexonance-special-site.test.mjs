@@ -41,7 +41,7 @@ test("Rexonance special site is reachable from every shared side menu", () => {
   assert.match(route, /createFileRoute\("\/rexonance-saga"\)/);
   assert.match(menu, /<span>\s*<DisplayName value="レクソナンスサーガ" \/>\s*<\/span>/);
   assert.match(menu, /REXONANCE_SAGA_ENTER_ASSETS/);
-  assert.match(menu, /context\?:\s*"world" \| "archive" \| "movie" \| "cinema" \| "rexonance"/);
+  assert.match(menu, /context\?:\s*"world" \| "archive" \| "movie" \| "cinema" \| "gallery" \| SpecialSiteId;/);
   assert.match(component, /<SideMenuLayer context="rexonance"/);
   assert.match(loader, /export const REXONANCE_SAGA_ENTER_ASSETS/);
 });
@@ -82,7 +82,7 @@ test("Rexonance hero presents the reviewed resonance copy with the existing type
 
 test("Rexonance performance comparison uses a native iOS selector for three prior forms", () => {
   assert.match(component, /type PerformanceBaseline = "vertex" \| "vinculum" \| "extreme"/);
-  assert.match(component, /aria-label="レクソナンスの比較対象"/);
+  assert.match(component, /aria-label="比較する相手：レクソナンスの比較対象"/);
   assert.match(component, /<option value="vertex">ヴァーテックスサーガ<\/option>/);
   assert.match(component, /<option value="vinculum">ヴィンクルムサーガ<\/option>/);
   assert.match(component, /<option value="extreme">エクスプリームサーガ<\/option>/);
@@ -117,7 +117,7 @@ test("Vertex and Vinculum comparisons keep supplied processors and compare only 
     "URANUS X",
     "TAMAYURA X（アクセラレータ）",
     "P1",
-    "10,000YOPS / 500Core · KHAOS",
+    "10,000YOPS / ∞Core · KHAOS",
     "300TOPS / 300Core · KOSMOS",
     "P2",
     "Paranormal Realizer Pro",
@@ -289,9 +289,9 @@ test("P14 comparison preserves every value and uses native iOS selection with a 
   assert.match(component, /setP14Baseline/);
   assert.match(component, /<b>100%<\/b>/);
   assert.match(component, /metric\.relative\[p14Baseline\]/);
-  assert.match(component, /6\.5倍 \/ \+550%/);
+  assert.match(component, /5\.0倍 \/ \+400%/);
   for (const normalizedP2Value of [
-    "650%",
+    "500%",
     "12.0%",
     "11.1%",
     "14.3%",
