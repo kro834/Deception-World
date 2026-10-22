@@ -107,7 +107,7 @@ export function RexonanceFormStatus({
       <p>
         <span>選択中の形態</span>
         <strong>{label}</strong>
-        <small>{code}</small>
+        <small lang="en">{code}</small>
         <em>{purpose}</em>
       </p>
     </div>

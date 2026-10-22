@@ -916,17 +916,17 @@ test("text keeps its 12px floor; generated text is silent; forced colours drop e
 });
 
 test("each figure keeps the owner's value as its own text; its counter is a hidden mirror", () => {
-  for (const [value, suffix] of [
+  for (const [value, visibleSuffix, mirrorSuffix = visibleSuffix] of [
     ["650", "<span>%\\+</span>"],
     ["900", "<span>%</span>"],
     // owner request 2026-10-16: FORGE (rx18) sets the wave as its own mark; the text is unchanged
-    ['50,000<i className="rxf-wave">〜</i>', "\\s*<span>YOPS</span>"],
-    ["9,000", "<span>TOPS</span>"],
+    ['50,000<i className="rxf-wave">〜</i>', '\\s*<span lang="en">YOPS</span>', '\\s*<span>YOPS</span>'],
+    ["9,000", '<span lang="en">TOPS</span>', "<span>TOPS</span>"],
   ]) {
     assert.match(
       page,
       new RegExp(
-        `<strong data-rsn-count="">\\s*${value}${suffix}\\s*<b className="rsn-count" aria-hidden="true">\\s*${value}${suffix}\\s*</b>\\s*</strong>`,
+        `<strong data-rsn-count="">\\s*${value}${visibleSuffix}\\s*<b className="rsn-count" aria-hidden="true">\\s*${value}${mirrorSuffix}\\s*</b>\\s*</strong>`,
       ),
       value,
     );
