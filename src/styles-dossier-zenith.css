@@ -527,8 +527,10 @@ html[data-family="dossier"]
   > .manager-pagination-index
   > .dossier-roster {
   display: grid;
-  /* Wide enough for the longest name beside its face (オーバーゼッツ). */
-  grid-template-columns: repeat(auto-fill, minmax(252px, 1fr));
+  /* A tile is its face beside the numeral over the name: 192px holds the
+     longest name (オーバーゼッツ) whole. auto-fit, so a short list (テラ,
+     ルナ) shares the row instead of leaving empty slots. */
+  grid-template-columns: repeat(auto-fit, minmax(192px, 1fr));
   gap: 6px;
   margin: 0 var(--sd-pad) clamp(24px, 6vw, 40px);
   padding: 0;
@@ -546,6 +548,9 @@ html[data-family="dossier"]
   min-width: 0;
   margin: 0;
   padding: 0;
+  /* A card narrower than the numeral and the longest name side by side
+     sets the numeral over the name (section's end). */
+  container: roster-tile / inline-size;
   border: 1px solid var(--sd-line);
   border-radius: 3px;
   background: var(--sd-plate);
@@ -579,11 +584,12 @@ html[data-family="dossier"]
   > :is(a, span) {
   position: relative;
   display: grid;
-  grid-template-columns: auto auto minmax(0, 1fr);
-  align-items: center;
-  gap: 10px;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  align-content: center;
+  gap: 4px 10px;
   min-height: 88px;
-  padding: 10px 14px 10px 12px;
+  padding: 10px 8px 10px 10px;
   color: var(--sd-text-2);
   background: none;
   text-decoration: none;
@@ -615,6 +621,9 @@ html[data-family="dossier"]
   > li
   > :is(a, span)
   > i {
+  grid-column: 2;
+  grid-row: 1;
+  align-self: end;
   color: var(--sd-text-3);
   font: 500 12px/1 var(--sd-hud);
   font-style: normal;
@@ -629,6 +638,9 @@ html[data-family="dossier"]
   > li
   > :is(a, span)
   > b {
+  grid-column: 2;
+  grid-row: 2;
+  align-self: start;
   min-width: 0;
   font: 600 14px/1.4 var(--sd-display);
   letter-spacing: 0.02em;
@@ -766,8 +778,7 @@ html[data-family="dossier"]
       > .manager-pagination
       > .manager-pagination-index
       > .dossier-roster {
-      /* Each tile carries its face now: wide enough for the longest name. */
-      grid-template-columns: repeat(auto-fill, minmax(236px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(192px, 1fr));
       max-width: calc(var(--sd-read) + 120px);
       margin: 32px var(--sd-pad-end) 32px var(--sd-pad);
     }
@@ -1557,6 +1568,8 @@ html[data-family="dossier"]
   .dossier-roster
   .dossier-roster-portrait {
   display: block;
+  grid-column: 1;
+  grid-row: 1 / span 2;
   width: 64px;
   height: 72px;
   overflow: hidden;
@@ -1629,8 +1642,11 @@ html[data-family="dossier"]
   outline-offset: -1px;
 }
 
-/* Phones: each tile stands as a small card — the face above, the numeral and
-   the name below on their own line, so no name is cut. */
+/* The tile as a small card: the face across the top, the numeral and the
+   name under it on one line. Phones (two a row), and the long lists (六詠's
+   six, the eight riders) where the rail has room for half the list a row:
+   two rows, never a lone tile, from 700px and on a split stage from 1600px;
+   otherwise those lists keep two tiles a row. */
 @media (max-width: 560px) {
   html[data-family="dossier"]
     main.manager-page.manager-page.manager-page
@@ -1640,7 +1656,7 @@ html[data-family="dossier"]
     > :is(a, span) {
     grid-template-columns: auto minmax(0, 1fr);
     grid-template-rows: auto auto;
-    row-gap: 8px;
+    gap: 8px 10px;
     min-height: 0;
     padding: 10px;
   }
@@ -1651,7 +1667,313 @@ html[data-family="dossier"]
     .dossier-roster
     .dossier-roster-portrait {
     grid-column: 1 / -1;
+    grid-row: 1;
     width: 100%;
-    height: 96px;
+    height: auto;
+    aspect-ratio: 16 / 10;
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    > .manager-pagination
+    .dossier-roster
+    > li
+    > :is(a, span)
+    > :is(i, b) {
+    grid-row: 2;
+    align-self: center;
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    > .manager-pagination
+    .dossier-roster
+    > li
+    > :is(a, span)
+    > i {
+    grid-column: 1;
+  }
+
+  @container roster-tile (max-width: 169px) {
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      > .manager-pagination
+      .dossier-roster
+      > li
+      > :is(a, span)
+      > i {
+      grid-column: 1 / -1;
+      grid-row: 2;
+    }
+
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      > .manager-pagination
+      .dossier-roster
+      > li
+      > :is(a, span)
+      > b {
+      grid-column: 1 / -1;
+      grid-row: 3;
+      margin-top: -4px;
+    }
+  }
+}
+
+@media (min-width: 561px) {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    > .manager-pagination
+    > .manager-pagination-index
+    > .dossier-roster:is(:has(> li:nth-child(6):last-child), :has(> li:nth-child(8):last-child)) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 700px) {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    > .manager-pagination
+    > .manager-pagination-index
+    > .dossier-roster:has(> li:nth-child(6):last-child) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    > .manager-pagination
+    > .manager-pagination-index
+    > .dossier-roster:has(> li:nth-child(8):last-child) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    > .manager-pagination
+    .dossier-roster:is(:has(> li:nth-child(6):last-child), :has(> li:nth-child(8):last-child))
+    > li
+    > :is(a, span) {
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    align-content: start;
+    gap: 10px;
+    min-height: 0;
+    padding: 10px 10px 12px;
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    > .manager-pagination
+    .dossier-roster:is(:has(> li:nth-child(6):last-child), :has(> li:nth-child(8):last-child))
+    .dossier-roster-portrait {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 10;
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    > .manager-pagination
+    .dossier-roster:is(:has(> li:nth-child(6):last-child), :has(> li:nth-child(8):last-child))
+    > li
+    > :is(a, span)
+    > :is(i, b) {
+    grid-row: 2;
+    align-self: center;
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    > .manager-pagination
+    .dossier-roster:is(:has(> li:nth-child(6):last-child), :has(> li:nth-child(8):last-child))
+    > li
+    > :is(a, span)
+    > i {
+    grid-column: 1;
+  }
+
+  @container roster-tile (max-width: 169px) {
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      > .manager-pagination
+      .dossier-roster:is(:has(> li:nth-child(6):last-child), :has(> li:nth-child(8):last-child))
+      > li
+      > :is(a, span)
+      > i {
+      grid-column: 1 / -1;
+      grid-row: 2;
+    }
+
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      > .manager-pagination
+      .dossier-roster:is(:has(> li:nth-child(6):last-child), :has(> li:nth-child(8):last-child))
+      > li
+      > :is(a, span)
+      > b {
+      grid-column: 1 / -1;
+      grid-row: 3;
+      margin-top: -4px;
+    }
+  }
+}
+
+/* The split stage's reading column is narrower than the page: the long
+   lists go back to two tiles a row (face beside the words) until 1600px. */
+@supports (grid-template-rows: subgrid) {
+  @media (min-width: 1100px) and (max-width: 1599px) and (min-height: 540px),
+    (min-width: 900px) and (max-width: 1599px) and (min-height: 600px) and (orientation: landscape) {
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      > .manager-pagination
+      > .manager-pagination-index
+      > .dossier-roster:is(:has(> li:nth-child(6):last-child), :has(> li:nth-child(8):last-child)) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      > .manager-pagination
+      .dossier-roster:is(:has(> li:nth-child(6):last-child), :has(> li:nth-child(8):last-child))
+      > li
+      > :is(a, span) {
+      align-content: center;
+      gap: 4px 10px;
+      min-height: 88px;
+      padding: 10px 8px 10px 10px;
+    }
+
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      > .manager-pagination
+      .dossier-roster:is(:has(> li:nth-child(6):last-child), :has(> li:nth-child(8):last-child))
+      .dossier-roster-portrait {
+      grid-column: 1;
+      grid-row: 1 / span 2;
+      width: 64px;
+      height: 72px;
+      aspect-ratio: auto;
+    }
+
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      > .manager-pagination
+      .dossier-roster:is(:has(> li:nth-child(6):last-child), :has(> li:nth-child(8):last-child))
+      > li
+      > :is(a, span)
+      > i {
+      grid-column: 2;
+      grid-row: 1;
+      align-self: end;
+    }
+
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      > .manager-pagination
+      .dossier-roster:is(:has(> li:nth-child(6):last-child), :has(> li:nth-child(8):last-child))
+      > li
+      > :is(a, span)
+      > b {
+      grid-column: 2;
+      grid-row: 2;
+      align-self: start;
+    }
+
+    /* The narrowest columns (a 900-1023px landscape screen, about 184px a
+       tile): the words take a step down so オーバーゼッツ stays whole
+       beside its face. */
+    @container roster-tile (max-width: 193px) {
+      html[data-family="dossier"]
+        main.manager-page.manager-page.manager-page
+        > .manager-pagination
+        .dossier-roster:is(:has(> li:nth-child(6):last-child), :has(> li:nth-child(8):last-child))
+        > li
+        > :is(a, span) {
+        column-gap: 8px;
+        padding-right: 6px;
+      }
+
+      html[data-family="dossier"]
+        main.manager-page.manager-page.manager-page
+        > .manager-pagination
+        .dossier-roster:is(:has(> li:nth-child(6):last-child), :has(> li:nth-child(8):last-child))
+        > li
+        > :is(a, span)
+        > b {
+        font-size: 13px;
+        letter-spacing: 0;
+      }
+    }
+
+    /* Narrower still (a 900px landscape screen, about 170px a tile): the
+       tile turns to the card, the face across its top. */
+    @container roster-tile (max-width: 179px) {
+      html[data-family="dossier"]
+        main.manager-page.manager-page.manager-page
+        > .manager-pagination
+        .dossier-roster:is(:has(> li:nth-child(6):last-child), :has(> li:nth-child(8):last-child))
+        > li
+        > :is(a, span) {
+        align-content: start;
+        gap: 8px 10px;
+        min-height: 0;
+        padding: 10px;
+      }
+
+      html[data-family="dossier"]
+        main.manager-page.manager-page.manager-page
+        > .manager-pagination
+        .dossier-roster:is(:has(> li:nth-child(6):last-child), :has(> li:nth-child(8):last-child))
+        .dossier-roster-portrait {
+        grid-column: 1 / -1;
+        grid-row: 1;
+        width: 100%;
+        height: auto;
+        aspect-ratio: 16 / 10;
+      }
+
+      html[data-family="dossier"]
+        main.manager-page.manager-page.manager-page
+        > .manager-pagination
+        .dossier-roster:is(:has(> li:nth-child(6):last-child), :has(> li:nth-child(8):last-child))
+        > li
+        > :is(a, span)
+        > i {
+        grid-column: 1;
+        grid-row: 2;
+        align-self: center;
+      }
+
+      html[data-family="dossier"]
+        main.manager-page.manager-page.manager-page
+        > .manager-pagination
+        .dossier-roster:is(:has(> li:nth-child(6):last-child), :has(> li:nth-child(8):last-child))
+        > li
+        > :is(a, span)
+        > b {
+        grid-column: 2;
+        grid-row: 2;
+        align-self: center;
+        font-size: 14px;
+        letter-spacing: 0.02em;
+      }
+    }
+  }
+}
+
+/* The narrowest phones (320px): a third-of-two cell is narrower than
+   CALCULATION in Michroma, so the spec labels take the figures' Oxanium
+   and keep every word whole, as on the landscape tablets. */
+@media (max-width: 359px) {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    .form-pickup-record
+    .form-pickup-spec
+    dt {
+    font-family: var(--sd-mono);
+    font-weight: 500;
+    letter-spacing: 0.1em;
   }
 }

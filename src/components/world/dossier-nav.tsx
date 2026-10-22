@@ -210,10 +210,19 @@ function NavPortrait({ item }: { item: DossierLink }) {
   );
 }
 
-/* A roster tile's face box (styles-dossier-zenith.css): about two fifths
-   of a phone (two tiles a row, the face over the name), 64px beside the
-   name from 561px. */
-const ROSTER_PORTRAIT_SIZES = "(max-width: 560px) 40vw, 64px";
+/* A roster tile's face box (styles-dossier-zenith.css): across a card's
+   top on phones (two a row, about two fifths of the width) and for the
+   eight riders from 700px (four a row) and on a split stage from 1600px
+   (about 200px); 64px beside the words on the split stage below that and
+   from 561px to 699px. */
+const ROSTER_PORTRAIT_SIZES = [
+  "(max-width: 560px) 40vw",
+  "(max-width: 699px) 64px",
+  "(min-width: 900px) and (max-width: 1099px) and (orientation: landscape) 64px",
+  "(max-width: 1099px) 22vw",
+  "(max-width: 1599px) 64px",
+  "200px",
+].join(", ");
 
 /** A roster tile's face (2026-10-22): the file's own portrait, so a press
  * lifts a picture into the file flip as the PREV/NEXT cards do — an

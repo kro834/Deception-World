@@ -248,7 +248,7 @@ test("the index reads as a way back: an arrow ring, and on the split stage a pla
 
 test("roster faces: the launcher tile's widths with a phone-sized slot, set back in the ink but the file at hand", async () => {
   const nav = await read("src/components/world/dossier-nav.tsx");
-  assert.match(nav, /const ROSTER_PORTRAIT_SIZES = "\(max-width: 560px\) 40vw, 64px";/);
+  assert.match(nav, /const ROSTER_PORTRAIT_SIZES = \[\s*"\(max-width: 560px\) 40vw",/);
   assert.match(nav, /tile\.variants\.map\(\(cut\) => `\$\{cut\.path\} \$\{cut\.width\}w`\)/);
   // Every tile keeps a face box (欠番 an empty frame), so the rail's columns line up.
   assert.match(
@@ -278,4 +278,28 @@ test("六詠's Roman numerals take the site's Roman face (Cinzel) on the end car
   for (const body of roman) assert.match(body, /font-family: "Cinzel", "Times New Roman", serif;/);
   // The site already loads Cinzel with its core fonts: no new font request.
   assert.match(await read("src/lib/site-fonts.ts"), /family=Cinzel:wght@400\.\.700/);
+});
+
+test("the rail never leaves a lone tile: the long lists run two rows of cards or two tiles a row", () => {
+  // Owner (2026-10-22): eight riders ran 3+3+2 at 1920px and one tile a row (8 rows) on an iPad in landscape.
+  assert.match(css, /grid-template-columns: repeat\(auto-fit, minmax\(192px, 1fr\)\);/);
+  assert.doesNotMatch(css, /repeat\(auto-fill, minmax\(2\d\dpx, 1fr\)\)/);
+  const tablet = css.slice(css.lastIndexOf("@media (min-width: 561px) {"));
+  assert.match(
+    tablet.slice(0, tablet.indexOf("\n}\n")),
+    /:has\(> li:nth-child\(8\):last-child\)\s*\)\s*\{\s*grid-template-columns: repeat\(2, minmax\(0, 1fr\)\);/,
+  );
+  assert.match(
+    css,
+    /\.dossier-roster:has\(> li:nth-child\(6\):last-child\) \{\s*grid-template-columns: repeat\(3, minmax\(0, 1fr\)\);/,
+  );
+  assert.match(
+    css,
+    /\.dossier-roster:has\(> li:nth-child\(8\):last-child\) \{\s*grid-template-columns: repeat\(4, minmax\(0, 1fr\)\);/,
+  );
+  // The split stage keeps them two a row below 1600px.
+  assert.match(css, /\(min-width: 1100px\) and \(max-width: 1599px\) and \(min-height: 540px\)/);
+  // Narrow cards set the numeral over the name, so no name is cut.
+  assert.match(css, /container: roster-tile \/ inline-size;/);
+  assert.match(css, /@container roster-tile \(max-width: 169px\)/);
 });
