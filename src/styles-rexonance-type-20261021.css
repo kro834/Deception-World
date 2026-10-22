@@ -49,6 +49,16 @@
    Guard: scripts/rexonance-type.test.mjs.
    ================================================================ */
 
+/* F74: the animated copy is the very same figure, not the generic <b>
+   baseline label. Later instrument rules must not shrink it to 19px. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt)
+  [data-rsn-count] > .rsn-count {
+  font: inherit;
+  letter-spacing: inherit;
+  color: var(--rxt-text-1, #f4fbff);
+  -webkit-text-fill-color: currentColor;
+}
+
 /* ---------- Faces ---------- */
 /* The page's titles below the hero (ExtraBold): the lower chapters' kana
    and kanji, the CJK punctuation, the digits and the Latin they print. */

@@ -82,7 +82,7 @@ test("Rexonance hero presents the reviewed resonance copy with the existing type
 
 test("Rexonance performance comparison uses a native iOS selector for three prior forms", () => {
   assert.match(component, /type PerformanceBaseline = "vertex" \| "vinculum" \| "extreme"/);
-  assert.match(component, /aria-label="レクソナンスの比較対象"/);
+  assert.match(component, /aria-label="比較する相手：レクソナンスの比較対象"/);
   assert.match(component, /<option value="vertex">ヴァーテックスサーガ<\/option>/);
   assert.match(component, /<option value="vinculum">ヴィンクルムサーガ<\/option>/);
   assert.match(component, /<option value="extreme">エクスプリームサーガ<\/option>/);
@@ -289,9 +289,9 @@ test("P14 comparison preserves every value and uses native iOS selection with a 
   assert.match(component, /setP14Baseline/);
   assert.match(component, /<b>100%<\/b>/);
   assert.match(component, /metric\.relative\[p14Baseline\]/);
-  assert.match(component, /6\.5倍 \/ \+550%/);
+  assert.match(component, /5\.0倍 \/ \+400%/);
   for (const normalizedP2Value of [
-    "650%",
+    "500%",
     "12.0%",
     "11.1%",
     "14.3%",

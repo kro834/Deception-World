@@ -485,6 +485,11 @@ export function SideMenuLayer({
     // World chapters have a current location, not a current file. Keep that
     // row visible even when its whole SECTIONS group cannot fit in landscape.
     const current =
+      // The special site's own chapters take precedence over its duplicate
+      // SPECIAL launcher row. Preserve the dossier/current-file rule elsewhere.
+      (context === "rexonance"
+        ? panel.querySelector<HTMLElement>('[data-side-menu-sections] .side-panel-links > a')
+        : null) ??
       panel.querySelector<HTMLElement>('.side-panel-links > [aria-current="page"]') ??
       panel.querySelector<HTMLElement>('.side-panel-links > [aria-current="location"]');
     if (current) {
@@ -615,7 +620,7 @@ export function SideMenuLayer({
       sideMenuRestoreFocusRef.current = false;
       sideMenuOpenerRef.current = null;
     };
-  }, [controlled, isOpen, onOpenChange]);
+  }, [controlled, isOpen, onOpenChange, context]);
 
   useEffect(() => {
     const dialog = announcementRef.current;
@@ -986,7 +991,7 @@ export function SideMenuLayer({
             <LibraryCurrentButton pathname={pathname} hash={locationHash} />
           </div>
         </div>
-        <div className="side-panel-group">
+        <div className="side-panel-group" data-side-menu-sections>
           <p>SECTIONS</p>
           <div className="side-panel-links">
             {context === "world" && fileChapters.length > 0 ? (

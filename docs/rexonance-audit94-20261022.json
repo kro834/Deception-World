@@ -1,0 +1,696 @@
+{
+  "title": "Rexonance 94件 再検証（作業中・全件合格ではない）",
+  "baseline": "ac87c4b9636d88bf3db5641adad52287b8b06bb1",
+  "candidate": "baseline + isolated working-tree patch; not integrated or published",
+  "gates": {
+    "tests": "2772 total, 2767 passed, 0 failed, 5 skipped",
+    "typecheck": "passed",
+    "lint": "0 errors / 12 warnings",
+    "productionBuild": "npm run prebuild + vite build; database migration intentionally not invoked",
+    "sourceGroups": "15 verified",
+    "operability": "8 Chromium profiles passed under explicitly labelled external-font outage",
+    "callReturn": "desktop + phone, 3 real SPA entries each passed",
+    "interactionEdges": "5 profiles + slow image/artwork checks passed under explicitly labelled external-font outage"
+  },
+  "profiles": [
+    "Chromium 1440×900",
+    "Chromium 1024×768 touch",
+    "Chromium 390×844 touch",
+    "supplemental 768×1024 / 320×740 / 1920×1080"
+  ],
+  "limitations": [
+    "Google fonts/grok extension unavailable; controlled outage runs are explicitly labelled, not normal-online certification",
+    "No physical iPhone/iPad verification",
+    "Some older finding descriptions supplied by the user end mid-sentence; original wording retained",
+    "No publication or main integration yet"
+  ],
+  "evidenceRoot": "/Users/hosicommon/.codex/.chatgpt-projects/g-p-6a5ab42df960819195f67565fcb59822/audit-artifacts/rexonance94-20261022/evidence",
+  "counts": {
+    "not-reproduced-current": 27,
+    "owner-retained": 25,
+    "fixed-verified": 34,
+    "partial": 2,
+    "unverified": 5,
+    "needs-owner-decision": 1
+  },
+  "findings": [
+    {
+      "id": "F08",
+      "category": "typography/high",
+      "claim": "Every Japanese display line asks for palt, but the font has none, so headings set fixed-width kana with full-em gaps after 、 and 。 — src/styles-stage-special.css, src/styles-rexonance-forge.css, src/styles-rexonance-saga.css",
+      "status": "not-reproduced-current",
+      "note": "ローカルMinchoを実描画し、同一文字列64pxの幅がpalt OFF 768px→ON 618.625px。『フォントにpaltがない』は現行に該当しない。"
+    },
+    {
+      "id": "F09",
+      "category": "typography/high",
+      "claim": "The chapter 03 (suit-up) heading is outside the type system: the eyebrow is 14px Noto body text, the H2 is 48px/26px without palt or keep-all, and a g — src/styles-rexonance-editorial.css, src/components/rexonance-saga/rexonance-assembly-guide.tsx, src/styles-rexonance-type-20261021.css",
+      "status": "not-reproduced-current",
+      "note": "装着章H2は他章と同じMincho・palt、1440で64.32px／1024で52.672px／390で40px。旧48/26px規則の単独支配ではない。"
+    },
+    {
+      "id": "F10",
+      "category": "typography/high",
+      "claim": "No type scale: 39 computed sizes, 19 Michroma size/weight/tracking combinations and 13 tracking values, defined in five font-token namespaces across a — src/styles-stage.css, src/styles-rexonance-saga.css, src/styles-showcase-elevation.css",
+      "status": "owner-retained",
+      "note": "現行TYPE版が6書体の役割・scale/tokenを明記。computed sizeの数だけを理由に、オーナー承認の役割分担を単一書式へ潰さない。"
+    },
+    {
+      "id": "F11",
+      "category": "layout/high",
+      "claim": "The chapter 03 opener breaks the chapter layout: no 03 numeral although the map lists one, its own gutter (x=56 vs 488/940), the 形態を見る button 1,300 px — src/components/rexonance-saga/rexonance-assembly-guide.tsx, src/styles-rexonance-editorial.css, src/styles-rexonance-layout-20261021.css",
+      "status": "owner-retained",
+      "note": "03の大きな数字を省く旨がeditorialに明記され、最新layoutも承認済み。章番号はmap/ナビで維持。別の章配置案は提案事項。"
+    },
+    {
+      "id": "F12",
+      "category": "layout/high",
+      "claim": "The hero's first screen is a split HUD dashboard, not a film key visual: the name appears three times and the art fills about 35% of the screen — src/components/rexonance-saga/rexonance-saga.tsx, src/styles-stage-rexonance.css, src/styles-rexonance-layout-20261021.css",
+      "status": "owner-retained",
+      "note": "DESIGN_AUDIT.mdが1300px以上46:54の持続split stageを明記。『映画キービジュアルでない』という評価だけで承認構図を撤去しない。"
+    },
+    {
+      "id": "F13",
+      "category": "layout/high",
+      "claim": "One identical frame is pinned for about 8,400px, and the same artwork returns twice more — src/styles-stage-rexonance.css, src/components/rexonance-saga/rexonance-saga.tsx",
+      "status": "owner-retained",
+      "note": "同じ舞台を性能・P14の読み物と並べて保持することが最新layoutの決定。長さ・再利用の美的提案として残す。"
+    },
+    {
+      "id": "F14",
+      "category": "layout/high",
+      "claim": "iPad landscape hero: stacking the stage first pushes the H1 「究極が始まる。」 below the fold — src/styles-stage-rexonance.css, src/styles-saga-showcase.css, docs/cinematic-design-20260921.md",
+      "status": "fixed-verified",
+      "note": "1024×768のH1下端が875pxから721pxへ。横向きタブレットの舞台だけを縮め、最初の画面へ収めた。"
+    },
+    {
+      "id": "F15",
+      "category": "layout/high",
+      "claim": "iPad portrait system grid renders three 238px columns with lines of about 13 Japanese characters — src/styles-stage-rexonance.css, src/styles-rexonance-saga.css",
+      "status": "fixed-verified",
+      "note": "旧768幅は237.922px×3列。701–1099pxのSystemを一枚の板の縦組みへ変更し、最終768幅で713.781pxの1列を実測。"
+    },
+    {
+      "id": "F16",
+      "category": "layout/high",
+      "claim": "The footer CTAs show no focus indicator: the plates' clip-path cuts away the outline drawn 3px outside them, in forced colours too — src/styles-stage-rexonance.css, src/styles-showcase-elevation.css, src/styles-saga-showcase.css",
+      "status": "fixed-verified",
+      "note": "通常・強制配色の各CTAで実際にキーボードフォーカス。2pxの輪郭をoffset -4pxへ移し、切り欠きの内側に保持。"
+    },
+    {
+      "id": "F17",
+      "category": "layout/high",
+      "claim": "Label in Name failures (WCAG 2.5.3, Level A): the accessible names of the header brand link and the comparison select leave out their visible labels — src/components/rexonance-saga/rexonance-saga.tsx",
+      "status": "fixed-verified",
+      "note": "ブランド名REXONANCEとセレクトの可視ラベル『比較する相手』をaccessible nameへ含めた。"
+    },
+    {
+      "id": "F18",
+      "category": "motion/high",
+      "claim": "Entry handover: after the tap on the Rexonance card, the /world page shows uncovered for seconds before the call begins — src/components/load-gate.tsx, src/styles-transition-cinema.css, src/components/rexonance-saga/rexonance-call-sequence.tsx",
+      "status": "not-reproduced-current",
+      "note": "Worldからの本物の遷移を毎フレーム採取。3幅で40.5–52.6ms時点にload gateとcoverを伴うcallが現れた。『数秒間の無防備なWorld』は再現しない。"
+    },
+    {
+      "id": "F19",
+      "category": "motion/high",
+      "claim": "The MAX/ULTRA form change loads different image files from the ones on screen, so the morph starts late and the old form flashes back over the new one — src/components/rexonance-saga/rexonance-saga.tsx, src/lib/rexonance-overwrite.js, src/lib/warm-rexonance-stages.ts",
+      "status": "partial",
+      "note": "FormMorphだけ原本URLを別読みしていた。表示・先読みと同じsrcset/sizesでdecodeするよう修正。低速画像8秒の切替回帰は完走したが、旧→新の全フレームでフラッシュがないという判定は未完。"
+    },
+    {
+      "id": "F20",
+      "category": "art/high",
+      "claim": "The P14 artwork is far brighter than the rest of the page and shows garbled AI pseudo-text — public/rexonance-p14-core.jpg, public/rexonance-p14-core-delivery-640.webp, public/rexonance-p14-core-delivery-960.webp",
+      "status": "owner-retained",
+      "note": "支給P14画像を明るい/疑似文字という理由だけで別のAI画像へ置換しない。画像原本への変更は別途オーナー判断。"
+    },
+    {
+      "id": "F31",
+      "category": "fire/med",
+      "claim": "When scrolling stops, the calm frame redraws all 220 fire-heat tongues in a new, unrelated pattern, so the flame jumps on every stop in the fire windo — src/lib/rexonance-resonance.js, src/lib/rexonance-flame.js",
+      "status": "not-reproduced-current",
+      "note": "指摘された220 tonguesのdrawFlameHeatは現行では明示的no-op。オーナー2026-10-21のbody fireへ置換済みであり、その旧パスによる停止時再抽選は成立しない。炎全体の新しい見栄えの監査とは区別。"
+    },
+    {
+      "id": "F35",
+      "category": "typography/med",
+      "claim": "Chapter H2s don't lead their chapters: they cap at 62px while stage H3s, figures and the footer H2 outgrow them, and on tablets they are smaller than — src/styles-stage-special.css, src/styles-rexonance-couture.css, src/styles-rexonance-forge.css",
+      "status": "not-reproduced-current",
+      "note": "章H2は1440で64.32px、1920で68px。stage H3は1440で51.44px、章見出しより小さい。終幕H2の拡大は意図した最終タイトル階層。"
+    },
+    {
+      "id": "F36",
+      "category": "typography/med",
+      "claim": "10-11px tracked Michroma and Japanese micro-labels at every width (chapter map, CONTENTS counter, FORM SEQUENCE/COMPARISON, form status, brand), under — src/styles-rexonance-editorial.css, src/styles-rexonance-saga.css, DESIGN.md",
+      "status": "not-reproduced-current",
+      "note": "採取した可視UIは全幅で12px以上。旧10–11pxの章/状態ラベルはTYPE版の役割指定へ置換されている。"
+    },
+    {
+      "id": "F37",
+      "category": "typography/med",
+      "claim": "Reading text stays the same size while display type scales 3x: 14px body and 13px notes, CTAs and nav at 1920 (display to body 18:1) — src/styles-rexonance-editorial.css, src/styles-rexonance-saga.css",
+      "status": "owner-retained",
+      "note": "本文とdisplayが異なるscaleであることは現行TYPEの役割分担。1920専用の本文再設計は提案に留める。"
+    },
+    {
+      "id": "F38",
+      "category": "typography/med",
+      "claim": "Section kickers use wider Michroma tracking (0.20-0.22em) than DESIGN.md specifies for phones, so 11 kickers wrap at 320 and one splits at a hyphen (' — src/styles-rexonance-editorial.css, src/styles-stage-rexonance.css, src/styles-rexonance-forge.css",
+      "status": "not-reproduced-current",
+      "note": "320pxでもサブコードは保持され、11個のkickerがハイフン分断する状態は観測しない。外部Michroma成功時の再組版は通信制約により別途必要。"
+    },
+    {
+      "id": "F39",
+      "category": "typography/med",
+      "claim": "Comparison and P14 footnotes run 49-73 characters per line at 13px (923 px wide at 1920), in low-contrast ink — src/styles-stage-rexonance.css, src/styles-rexonance-saga.css, src/styles-rexonance-couture.css",
+      "status": "owner-retained",
+      "note": "説明の原文と比較plate幅は現行設計を維持。現行文字色はTYPEの高コントラストtierへ変更済みだが、行長の読み心地の再設計は承認待ち。"
+    },
+    {
+      "id": "F40",
+      "category": "typography/med",
+      "claim": "Weights the loaded faces don't have: Zen Kaku 600 renders as 700, Michroma 500 as 400, and the hero h1's 680 as 700 — src/lib/site-fonts.ts, src/styles-rexonance-editorial.css, src/styles-rexonance-saga.css",
+      "status": "unverified",
+      "note": "ローカルMincho800/500とForgeは確認できたが、Google提供Zen/Michromaの成功ダウンロード時の実フォント照合はネットワーク障害で未完。"
+    },
+    {
+      "id": "F41",
+      "category": "typography/med",
+      "claim": "Phrase breaking in multi-line body text causes bad breaks (犬と／して, 『終焉』／へ) and a ragged edge that varies by 23-35% — src/styles-future-interface.css, src/styles-rexonance-finish.css, src/styles-rexonance-couture.css",
+      "status": "unverified",
+      "note": "特定の『犬と／して』『終焉／へ』の全幅・全フォントでの行分割をRange単位で確認できていない。原文は未変更。"
+    },
+    {
+      "id": "F42",
+      "category": "typography/med",
+      "claim": "Latin instrument labels are set in four faces, and the same product names appear in two different faces — src/styles-rexonance-forge.css, src/styles-rexonance-editorial.css",
+      "status": "owner-retained",
+      "note": "英字4書体の混在という集計ではなく、Forge=数値/名称、Etch=計器、他=操作/本文という明示役割を優先。"
+    },
+    {
+      "id": "F43",
+      "category": "typography/med",
+      "claim": "Two similar gothics (Zen Kaku and Noto Sans JP) alternate at 12-14px inside the same components, and neither gives the page a distinct display voice — src/styles-stage.css, src/lib/site-fonts.ts, src/styles-rexonance-forge.css",
+      "status": "owner-retained",
+      "note": "Mincho displayが加わった現行で『distinct display voiceがない』は旧前提。Noto/Zenの用途を保ち、全サイト共有フォントをここだけ削らない。"
+    },
+    {
+      "id": "F44",
+      "category": "typography/med",
+      "claim": "Font payload: about 95 font files and 1.3 MB on first load, for two overlapping Japanese gothics (Noto Sans JP 38 files / 805-825 KB, Zen Kaku 52 file — src/styles-rexonance-type-20261021.css, scripts/rexonance-type-copy.mjs, src/lib/site-fonts.ts",
+      "status": "unverified",
+      "note": "Google FontsのCSS自体が12秒curl/30秒browserで応答しない。観測7local files/109,708 bytesを全オンラインpayloadとは扱わない。95files/1.3MBの真偽は未確定。"
+    },
+    {
+      "id": "F45",
+      "category": "typography/med",
+      "claim": "Font swaps reflow the header and hero copy during the arrival (Michroma loaded with display=swap) — src/lib/world-head.ts, src/routes/rexonance-saga.tsx, src/styles-rexonance-saga.css",
+      "status": "unverified",
+      "note": "Google fonts遅延成功→swapという条件を作れていない。abortでfallbackは確認できるが成功時reflowの代用にはならない。"
+    },
+    {
+      "id": "F46",
+      "category": "layout/med",
+      "claim": "In forced colours the active stage tab paints a dark fill with near-black text, so the selected form is unreadable — src/styles-showcase-elevation.css, src/styles-rexonance-saga.css, src/styles-stage-rexonance.css",
+      "status": "not-reproduced-current",
+      "note": "現行の選択タブは近黒文字ではなく白系のfill。追加でsystem Highlight/HighlightTextと子のcurrentColorを明示し、非選択タブの固定fillも解除。"
+    },
+    {
+      "id": "F47",
+      "category": "layout/med",
+      "claim": "The CUT 01/02 headline plates have 0 px inline padding, so labels, figures and captions sit on the plate edge and its chamfer — src/styles-stage-rexonance.css, src/styles-rexonance-armour.css",
+      "status": "fixed-verified",
+      "note": "CUT 01/02のラベルが板の左端と同じ位置で、inline paddingが0なのを確認。16–28pxの内側余白を追加。 最終候補の3幅ブラウザーassertionに記録。"
+    },
+    {
+      "id": "F48",
+      "category": "layout/med",
+      "claim": "P14 generation table: each row sizes its own 'auto auto' value columns, so the P1（基準）100% column shifts by up to ~70 px (desktop) and 47 px (phone) fr — src/styles-stage-rexonance.css, src/styles-rexonance-layout-20261021.css",
+      "status": "not-reproduced-current",
+      "note": "現行レイアウトは96px/132pxの固定値列、電話では2行。採取した行で旧auto-auto配置ではない。"
+    },
+    {
+      "id": "F49",
+      "category": "layout/med",
+      "claim": "In forced colours the 'P14（換算）' labels in the generation table are cut off below their top half — src/styles-p14-calibration.css, src/styles-rexonance-armour.css, src/styles-stage-rexonance.css",
+      "status": "not-reproduced-current",
+      "note": "強制配色のP14ラベルは12px・15.59px高のボックスで、半分の高さへクリップされる規則は再現しない。外部書体成功時の字面差は未確認。"
+    },
+    {
+      "id": "F50",
+      "category": "layout/med",
+      "claim": "Three unrelated CTA button styles on one page (hero, assembly/coda, footer) — src/components/rexonance-saga/rexonance-saga.tsx, src/components/rexonance-saga/rexonance-assembly-guide.tsx, src/styles-rexonance-instrument.css",
+      "status": "owner-retained",
+      "note": "主CTA・補助操作・終幕plateの階層差は最新layoutで承認済み。インタラクションの共通transitionは既に実測できる。"
+    },
+    {
+      "id": "F51",
+      "category": "layout/med",
+      "claim": "The P14 comparator shows 'P1比' twice: a bordered <output> in the card header next to the real P1比/P2比 tab buttons — src/components/rexonance-saga/rexonance-saga.tsx, src/styles-rexonance-finish.css, src/styles-p14-calibration.css",
+      "status": "fixed-verified",
+      "note": "h3と選択操作のほかに重複していた枠付きoutputを除去。P14/P1比という見出しと実際の選択操作・読み上げは維持。 最終候補の3幅ブラウザーassertionに記録。"
+    },
+    {
+      "id": "F52",
+      "category": "layout/med",
+      "claim": "On iPad landscape the form stage centres 369px of art between ~290px empty flanks and pushes the copy to a second screen — src/styles-stage-rexonance.css, src/styles-rexonance-zenith.css",
+      "status": "owner-retained",
+      "note": "最新layoutが04を画像比率の560px枠として積むと明記。portraitとlandscapeを同じ一列で保つ設計は維持し、heroの見出し欠落F14とは分ける。"
+    },
+    {
+      "id": "F53",
+      "category": "layout/med",
+      "claim": "On tablets the P14 core image is a 21:8 letterbox upscaled from a 1000px source, and its sizes hint claims a 40vw slot — src/styles-stage-rexonance.css, src/lib/rexonance-images.ts, src/components/rexonance-saga/rexonance-saga.tsx",
+      "status": "not-reproduced-current",
+      "note": "縦タブレットは最新layout版で4:5。lazy sizes=autoも現行で有効。旧21:8の全面letterbox説明はそのまま当てはまらない。"
+    },
+    {
+      "id": "F54",
+      "category": "layout/med",
+      "claim": "On iPad portrait, FORM COMPARISON stacks the three forms vertically, so a 'side-by-side' comparison takes about 1.9 screens — src/styles-rexonance-editorial.css, src/components/rexonance-saga/rexonance-form-comparison.tsx",
+      "status": "not-reproduced-current",
+      "note": "768幅のFORM COMPARISONは3列。実スクリーンショットでも横並びであり、旧縦積みは再現しない。電話の縦積みとは区別。"
+    },
+    {
+      "id": "F55",
+      "category": "layout/med",
+      "claim": "English labels have no lang='en' under html lang=ja (no [lang] attributes on the page, 44-75 Latin runs), so Japanese screen-reader voices read about — src/components/rexonance-saga/rexonance-saga.tsx, src/components/rexonance-saga/rexonance-editorial.tsx, src/components/rexonance-saga/rexonance-assembly-guide.tsx",
+      "status": "partial",
+      "note": "主要な英語見出し、ブランド、形態コード、章コードへlang=enを追加。音声読み上げ実機と全Latin runの網羅検査は未完。"
+    },
+    {
+      "id": "F56",
+      "category": "layout/med",
+      "claim": "Both comparison read-outs put key={baseline} on the aria-live element itself, so each change replaces the live region and the result is not reliably a — src/components/rexonance-saga/rexonance-saga.tsx",
+      "status": "fixed-verified",
+      "note": "P14・性能比較の実操作前後でlive regionのDOM同一性がfalse→true。行の再演出キーは子に残した。"
+    },
+    {
+      "id": "F57",
+      "category": "layout/med",
+      "claim": "Choosing a form from the comparison drawer leaves the glass lens on the previously selected tab — src/components/rexonance-saga/rexonance-saga.tsx, src/components/rexonance-saga/rexonance-form-comparison.tsx",
+      "status": "fixed-verified",
+      "note": "比較カードでMAXを選択。選択タブとレンズのx・幅差が1px未満へ復旧。共通railの既存liquidrelayout APIを利用。"
+    },
+    {
+      "id": "F58",
+      "category": "layout/med",
+      "claim": "Rotating the phone keeps the raw scrollY, so the reader lands in a different chapter, and a pinned suit-up is thrown out into 04 STAGES — src/components/rexonance-saga/rexonance-saga.tsx, src/styles-rexonance-zenith.css, src/lib/local-nav-current.ts",
+      "status": "fixed-verified",
+      "note": "390×844→844×390で、以前は変身45%からcompleteへ飛んだ。章・runwayの相対位置を保存し、再測定は44.9907%。"
+    },
+    {
+      "id": "F59",
+      "category": "layout/med",
+      "claim": "On phones the side menu opens scrolled past the page's own chapter list (SECTIONS is hidden above SPECIAL) — src/components/world/world-chrome.tsx, src/lib/special-site-sections.ts",
+      "status": "fixed-verified",
+      "note": "390幅のSECTIONS見出しが画面外-210pxから118pxへ。Rexonanceだけ章グループをSPECIAL重複行より優先し、他の人物一覧規約を保持。"
+    },
+    {
+      "id": "F60",
+      "category": "layout/med",
+      "claim": "On touch, a vertical swipe that starts on the stage tab rail does not scroll the page: the rail is a 72px dead band 90% of the screen wide — src/styles-frosted-controls.css, src/components/rexonance-saga/rexonance-saga.tsx",
+      "status": "owner-retained",
+      "note": "DESIGN.mdのライダーレール以外は接触直後からレールがgestureを所有する規約を保持。全レールpan-yへ戻す修正はしない。"
+    },
+    {
+      "id": "F61",
+      "category": "layout/med",
+      "claim": "Three chapter navigations disagree: suit-up is missing from the local nav, side menu and search, the menu numbers chapters 03/04 where the page says 0 — src/lib/special-site-sections.ts, src/components/rexonance-saga/rexonance-editorial.tsx, src/components/search/search-data.ts",
+      "status": "fixed-verified",
+      "note": "共有SPECIAL_SITE_SECTIONSへassemblyを追加。メニューの5章を実際のリンクで確認し、検索のアンカー検査も実コンポーネントへ拡張。"
+    },
+    {
+      "id": "F62",
+      "category": "layout/med",
+      "claim": "P14 comparison on the P2 baseline: the 'same ether' row reads 650% / 6.5倍 / +550%, but its own data gives 500% / 5.0倍 / +400% — src/components/rexonance-saga/rexonance-saga.tsx",
+      "status": "fixed-verified",
+      "note": "P14=900・P2=180から900÷180×100=500%。650%／6.5倍／+550%を500%／5.0倍／+400%へ訂正。"
+    },
+    {
+      "id": "F63",
+      "category": "layout/med",
+      "claim": "The Extreme comparison leaves out Extreme's own P14, which makes P14 look like a Rexonance-only advantage, contrary to the repo's data — src/components/rexonance-saga/rexonance-saga.tsx, src/components/extreme-saga/extreme-saga.tsx",
+      "status": "fixed-verified",
+      "note": "Extreme側にもP14が存在するため比較の構成一覧にP14（Extreme tuning）を追加。レンダーを検査。"
+    },
+    {
+      "id": "F64",
+      "category": "layout/med",
+      "claim": "The i-2 plate gives the manufacturing process the self-resonance system's job, and repeats plate 03 — src/components/rexonance-saga/rexonance-saga.tsx, src/lib/rexonance-profile.ts",
+      "status": "fixed-verified",
+      "note": "i-2の本文がplate03の同期・共鳴の仕事を重ねていた。既存のオーナー原稿rexonance-profile.tsの製造定義をそのまま引用し、検索抜粋も同期。 最終候補の3幅ブラウザーassertionに記録。"
+    },
+    {
+      "id": "F65",
+      "category": "layout/med",
+      "claim": "The Vinculum comparison figures contradict the Form Archive that the footer links to — src/components/rexonance-saga/rexonance-saga.tsx, public/saga-form-archive-embedded.html, src/components/extreme-saga/extreme-saga.tsx",
+      "status": "needs-owner-decision",
+      "note": "実際に矛盾を確認。特設2ページはヴィンクルム5000.0m（est.）/500Core、公開Form Archiveとrider資料は188.8m/∞Core。どちらも現行なので、質問を送り正しい設定値を確認中。"
+    },
+    {
+      "id": "F66",
+      "category": "layout/med",
+      "claim": "The hero's ghost 'REXONANCE' watermark collides with the scroll cue (8 px overlap at 1440x900), and on phones with the image seam and the figure's leg — src/styles-rexonance-forge.css, src/components/rexonance-saga/rexonance-saga.tsx",
+      "status": "not-reproduced-current",
+      "note": "1440のghostは上側、scroll cueは下側で離れている。320も画像下の別行。旧8pxのcue接触は観測しない。"
+    },
+    {
+      "id": "F67",
+      "category": "layout/med",
+      "claim": "The desktop hero jumps 15 px after hydration, just as its entrance animation starts — src/styles-rexonance-saga.css, src/components/rexonance-saga/rexonance-saga.tsx",
+      "status": "fixed-verified",
+      "note": "初期フレームの舞台topが62→77px（電話58→65px）と変わる問題をCSSの初期reserveで修正。最終3幅はCSS適用後のtopが77/77/65pxで一定。文字拡大・safe-area用の実測補正は保持。"
+    },
+    {
+      "id": "F68",
+      "category": "layout/med",
+      "claim": "Load is dominated by rendering: TBT 1.7 s on desktop and 1.25 s on phone, with each full relayout costing 104-145 ms — src/lib/local-nav-current.ts, src/components/rexonance-saga/rexonance-saga.tsx",
+      "status": "not-reproduced-current",
+      "note": "同条件を完全に再現した性能認定ではないが、初期1440サンプルのlong taskは164ms×1（50ms超過分114ms）、LCPはIMG 740ms。旧1.7sのTBTはこの試行では再現しない。"
+    },
+    {
+      "id": "F69",
+      "category": "layout/med",
+      "claim": "The hero image's sizes='64vw' makes desktops download the 960/1086 file for a 310-677 px box (114 KB extra, about 45%, on the LCP image) — src/lib/rexonance-images.ts, src/routes/rexonance-saga.tsx",
+      "status": "fixed-verified",
+      "note": "1440で実表示574pxなのに960wを選択。現行3形態だけのsizesを実測に寄せ、preload・warmup・visible imageが同じ関数を使う関係は維持。 最終候補の3幅ブラウザーassertionに記録。"
+    },
+    {
+      "id": "F70",
+      "category": "layout/med",
+      "claim": "The chapter emitter rings sit on the titles instead of the numerals — src/styles-rexonance-resonance.css",
+      "status": "fixed-verified",
+      "note": "CDPで疑似要素の四隅を取得。1440で番号中心160.508px、旧リング719.984px。実際の数字幅を既存のレイアウト計測に統合し、新リング160.500px（差0.008px）へ。scrollごとの計測は追加しない。"
+    },
+    {
+      "id": "F71",
+      "category": "layout/med",
+      "claim": "The stage callouts are printed over the busiest parts of the artwork — src/components/rexonance-saga/rexonance-saga.tsx, src/styles-rexonance-zenith.css",
+      "status": "not-reproduced-current",
+      "note": "現行stage panelは写真・装飾・別カラムの説明であり、旧callout本文を写真の繁雑部へ重ねるDOMは存在しない。"
+    },
+    {
+      "id": "F72",
+      "category": "layout/med",
+      "claim": "Pacing: the transformation starts 8,745px down the page, after about 7,200px of tables — src/components/rexonance-saga/rexonance-saga.tsx",
+      "status": "owner-retained",
+      "note": "長いカタログの後に変身を置く現行chapter順序とpersistent舞台を維持。削る/並べ替えると承認済み構成を変えるため提案事項。"
+    },
+    {
+      "id": "F73",
+      "category": "layout/med",
+      "claim": "The end card does not echo the hero: the title lockup never returns and the figure is reused — src/components/rexonance-saga/rexonance-saga.tsx, src/styles-rexonance-layout-20261021.css",
+      "status": "owner-retained",
+      "note": "終幕は3CTA一列＋右端立像という最新承認構図を保持。hero lockupの再掲や新絵の追加は別案。"
+    },
+    {
+      "id": "F74",
+      "category": "motion/med",
+      "claim": "P14 figures print twice while they lock: a small gold copy overlaps the 26px white figure — src/styles-rexonance-forge.css, src/styles-rexonance-resonance.css, src/lib/rexonance-resonance.js",
+      "status": "fixed-verified",
+      "note": "実フレームで19/16/16pxの重ね字を確認。本体36/26.624/26pxへfont:inheritで統一し、count/lock中のhost backgroundはnone。最終3幅のフレームで確認。"
+    },
+    {
+      "id": "F75",
+      "category": "motion/med",
+      "claim": "Count-up figures show zero-padded '000%' or '000.0%' while already on screen — src/lib/rexonance-resonance.js, src/styles-rexonance-resonance.css",
+      "status": "fixed-verified",
+      "note": "ゼロ埋めを廃止し0／0.0%から表示。最終3幅のフレームとformatCount全ケースで確認。レイアウト幅は元の最終文字列を保持するhostが確保。"
+    },
+    {
+      "id": "F76",
+      "category": "motion/med",
+      "claim": "The side-panel card art unmounts at the tap, so the open panel flashes empty cards and slides out blank — src/components/world/world-chrome.tsx",
+      "status": "not-reproduced-current",
+      "note": "Rexonanceのside panelで開閉中ともimg要素は0。旧ライダーカード画像を消して空カードが滑る状態はこのルートには再現しない。他ルート全般の修正とはしない。"
+    },
+    {
+      "id": "F77",
+      "category": "motion/med",
+      "claim": "The hero CTAs '変身を体験' and '三つの形態を見る', '形態を見る' and the FORM COMPARISON bar have no hover, press or transition — src/styles-rexonance-editorial.css, src/components/rexonance-saga/rexonance-editorial.tsx, src/components/rexonance-saga/rexonance-assembly-guide.tsx",
+      "status": "not-reproduced-current",
+      "note": "hero/assembly/coda/比較barにscale160ms・translate220ms等の共通transitionを実測。『hover/press/transitionがない』は現行に該当しない。"
+    },
+    {
+      "id": "F78",
+      "category": "motion/med",
+      "claim": "The FORM COMPARISON drawer snaps open with no motion, pushing the page down 745 px in one frame — src/components/rexonance-saga/rexonance-form-comparison.tsx, src/styles-rexonance-editorial.css",
+      "status": "fixed-verified",
+      "note": "native detailsと初回画像遅延・即時closeを維持。Chromiumのintrinsic-size対応時だけ有限280msで開く。3幅で23フレームを採取し、2→233→399→506→711pxなどの段階的な展開を確認。reduced/economy/forced coloursでは適用しない。非対応engineはnative動作。"
+    },
+    {
+      "id": "F79",
+      "category": "motion/med",
+      "claim": "LCP is the animated hero lede text (2.4-6.5 s on localhost); the 256 KB high-priority hero image never counts as LCP — src/styles-rexonance-premiere.css, src/styles-rexonance-resonance.css, src/routes/rexonance-saga.tsx",
+      "status": "not-reproduced-current",
+      "note": "初回1440のLCPはIMG 740msで採取、旧lede text 2.4–6.5sという固定的な説明は再現しない。ただし外部フォント成功時・低速回線のLCP保証ではない。"
+    },
+    {
+      "id": "F80",
+      "category": "motion/med",
+      "claim": "The hero title sequence is rushed and unstaged: every beat finishes within about 1.4 s — src/styles-rexonance-premiere.css, src/lib/rexonance-choreography.js",
+      "status": "owner-retained",
+      "note": "タイトルの高速な整列と長い変身を分ける現行choreography。『rushed』という好みだけで所有者の演出全体を遅らせない。"
+    },
+    {
+      "id": "F94",
+      "category": "typography/low",
+      "claim": "The hero kicker breaks as 'THE NEXT GENERATION / OF SA-GA', and the second line hangs back under the gold rule at the left margin — src/styles-saga-showcase.css, src/styles-rexonance-forge.css, src/components/rexonance-saga/rexonance-saga.tsx",
+      "status": "not-reproduced-current",
+      "note": "320スクリーンショットでOF SA-GAは語内分断なしの2行目。現在はkicker-tailのまとまりを保持。"
+    },
+    {
+      "id": "F95",
+      "category": "typography/low",
+      "claim": "At 320 the stage tab 'ULTRA 60s' wraps to two lines while the other two tabs stay on one — src/styles-rexonance-editorial.css, src/styles-stage-rexonance.css",
+      "status": "not-reproduced-current",
+      "note": "320のULTRA 60sコードの実ボックスは一行。タブ全体の日本語/英語二段組をコードの不規則折り返しとは扱わない。"
+    },
+    {
+      "id": "F96",
+      "category": "typography/low",
+      "claim": "Counters and step numbers use five faces (Forge, Michroma, Oxanium, Zen, Noto), and figures inside headlines use the display font's digits — src/styles-rexonance-forge.css, src/styles-rexonance-editorial.css",
+      "status": "owner-retained",
+      "note": "数値Forge、計器Etch、操作Zen、HUDの機能別役割を維持。全カウンターを同じfaceにするという美的統一は提案事項。"
+    },
+    {
+      "id": "F97",
+      "category": "typography/low",
+      "claim": "Symbols fall back out of their font stacks: arrows, the em dash, fullwidth ！, ∞ and 〜 render in Noto, Oxanium or Zen — src/lib/world-head.ts, src/styles-rexonance-forge.css",
+      "status": "unverified",
+      "note": "external face成功時のglyph fallbackの特定が未完。Computed font-familyの文字列だけで実使用glyph faceを断定しない。"
+    },
+    {
+      "id": "F98",
+      "category": "typography/low",
+      "claim": "The 'DW' monogram fills its frame edge to edge — src/styles-rexonance-saga.css, src/styles-rexonance-type-20261021.css",
+      "status": "owner-retained",
+      "note": "共通DWモノグラムの変更はブランドと他ルートにも関係。ページ固有の不具合と断定せず提案に残す。"
+    },
+    {
+      "id": "F99",
+      "category": "layout/low",
+      "claim": "System cards 01/02/03 wrap their kickers and titles unevenly, so the body copy starts at three different heights — src/components/rexonance-saga/rexonance-saga.tsx, src/styles-rexonance-instrument.css, src/styles-rexonance-forge.css",
+      "status": "fixed-verified",
+      "note": "Systemの見出し折り返しで読み始めがずれる。1100px以上をsubgridの共有3行へ変更。原文とカードの順序は無変更、 最終候補の3幅ブラウザーassertionに記録。"
+    },
+    {
+      "id": "F100",
+      "category": "layout/low",
+      "claim": "Chapter index: the fifth entry, 05, stretches across both columns, leaving its arrow about 1,000 px from the label — src/styles-rexonance-editorial.css",
+      "status": "not-reproduced-current",
+      "note": "1100px以上の章mapは承認済みの1列5行。05だけ二列跨ぎで矢印が約1000px離れる旧配置ではない。"
+    },
+    {
+      "id": "F101",
+      "category": "layout/low",
+      "claim": "Stages section: the right column ends 125 px above the left, and the FORM COMPARISON bar floats in an empty band of about 450 px — src/components/rexonance-saga/rexonance-saga.tsx, src/components/rexonance-saga/rexonance-form-comparison.tsx, src/styles-rexonance-editorial.css",
+      "status": "not-reproduced-current",
+      "note": "現行の形態比較は閉じたnative disclosure barとして段落の後に置かれる。旧450px固定余白の規則は最新layoutで置換。個々の絵/説明の高さが異なること自体は残る。"
+    },
+    {
+      "id": "F102",
+      "category": "layout/low",
+      "claim": "The footer figure stands on the very last pixel row of the page, with no floor beneath it — src/styles-rexonance-instrument.css, src/components/rexonance-saga/rexonance-saga.tsx",
+      "status": "not-reproduced-current",
+      "note": "終幕の立像はfooter内のtop50%/translate -50%、最大720pxへ最新layoutで置換。旧bottom0貼り付けではない。"
+    },
+    {
+      "id": "F103",
+      "category": "layout/low",
+      "claim": "Decorative pink streaks still show in forced-colours mode, where ornaments should be removed — src/styles-rexonance-armour.css, src/styles-rexonance-couture.css, src/styles-rexonance-resonance.css",
+      "status": "fixed-verified",
+      "note": "原因はRexonance用CSSではなく共通body::beforeのSVG背景。ルートを限定して強制配色時に消し、通常のピンク装飾は維持。"
+    },
+    {
+      "id": "F104",
+      "category": "layout/low",
+      "claim": "Touch targets under the page's own minimum: P1比/P2比 at 42-44 px, the assembly and coda links and the scroll cue at 44 px — src/styles-p14-calibration.css, src/styles-rexonance-editorial.css, DESIGN.md",
+      "status": "owner-retained",
+      "note": "最新DESIGN_AUDIT.mdは44pxの操作面を明示的に保持。3幅で実高44pxであり、旧一般文書の48pxへ一律拡大しない。"
+    },
+    {
+      "id": "F105",
+      "category": "layout/low",
+      "claim": "At 320 the two hero CTAs stack at different widths (139px and 181px) — src/styles-rexonance-editorial.css, src/styles-saga-showcase.css",
+      "status": "fixed-verified",
+      "note": "320pxのCTA幅差を確認。400px以下だけ同じ幅の縦組みへ変更。 最終候補の3幅ブラウザーassertionに記録。"
+    },
+    {
+      "id": "F106",
+      "category": "layout/low",
+      "claim": "Phone hints tell touch users to use 矢印キー (arrow keys) — src/components/rexonance-saga/rexonance-saga.tsx, src/components/rexonance-saga/rexonance-editorial.tsx",
+      "status": "not-reproduced-current",
+      "note": "現在の電話の説明は『スライダー、両端のタップ、矢印キー』という複数の操作方法。タッチを使えないと案内しているものではなく、キーボード代替も残す。"
+    },
+    {
+      "id": "F107",
+      "category": "layout/low",
+      "claim": "The stage tabpanel is itself aria-live while its children re-key, so every tab change re-reads the whole panel after the tab announcement — src/components/rexonance-saga/rexonance-saga.tsx",
+      "status": "fixed-verified",
+      "note": "stage tabpanelから重複したaria-liveを除去。選択tabのaria-selectedとpanelのaria-labelledbyは保持。"
+    },
+    {
+      "id": "F108",
+      "category": "layout/low",
+      "claim": "The P1比 / P2比 focus ring is cut off on two sides by overflow:hidden on the range control — src/styles-p14-calibration.css",
+      "status": "fixed-verified",
+      "note": "P1/P2ボタンを実フォーカスし、輪郭をoverflow:hiddenの内側へ。通常・強制配色とも2px／-4px。"
+    },
+    {
+      "id": "F109",
+      "category": "layout/low",
+      "claim": "aria-label on elements without a role is ignored, so the bar-chart summaries and group names never reach assistive technology — src/components/rexonance-saga/rexonance-saga.tsx",
+      "status": "fixed-verified",
+      "note": "棒グラフのaria-labelにrole=img、比較コンソールと形態ボタン集合にはgroupを付け、名前を持てる要素へ。"
+    },
+    {
+      "id": "F110",
+      "category": "layout/low",
+      "claim": "Form-comparison buttons lose the form name when selected (「表示中の形態」) and use aria-pressed for a single-choice set — src/components/rexonance-saga/rexonance-form-comparison.tsx",
+      "status": "fixed-verified",
+      "note": "選択後も『マックスを表示中』として形態名を保持。単一選択のgroup内toggle buttonという既存操作は維持。aria-pressed自体を誤りとはしない。"
+    },
+    {
+      "id": "F111",
+      "category": "layout/low",
+      "claim": "Page chrome (brand, in-page nav, menu button) and the closing CTAs sit inside <main>, and the page has no banner or contentinfo landmark — src/components/rexonance-saga/rexonance-saga.tsx",
+      "status": "fixed-verified",
+      "note": "既存の配置を壊さず明示的banner/contentinfoを付与。実ブラウザーで各1ランドマークを確認。"
+    },
+    {
+      "id": "F112",
+      "category": "layout/low",
+      "claim": "Choosing a form in the FORM COMPARISON drawer changes a stage panel that is fully above the viewport, so the call, the panel change and the morph all — src/components/rexonance-saga/rexonance-form-comparison.tsx, src/components/rexonance-saga/rexonance-saga.tsx",
+      "status": "fixed-verified",
+      "note": "カードで選択した後に、選択レールと結果パネルの先頭を固定ヘッダー下へ即時表示。キーボード操作では選択タブへフォーカスを戻す。"
+    },
+    {
+      "id": "F113",
+      "category": "layout/low",
+      "claim": "#assembly lands 7px below the sticky nav, against 24px for every other chapter — src/styles-rexonance-editorial.css, src/styles-rexonance-polish.css",
+      "status": "fixed-verified",
+      "note": "assemblyのscroll-marginだけreserve+12px。他章と同じreserve+24pxへ統一。 最終候補の3幅ブラウザーassertionに記録。"
+    },
+    {
+      "id": "F114",
+      "category": "layout/low",
+      "claim": "The System plates mix plain form (常体, plate 02) and polite form (敬体, plates 01 and 03) — src/components/rexonance-saga/rexonance-saga.tsx",
+      "status": "owner-retained",
+      "note": "常体/敬体の統一は原文の書き換えになるため行わない。F64は役割の誤りの訂正として既存原稿を引用する。"
+    },
+    {
+      "id": "F115",
+      "category": "layout/low",
+      "claim": "In reduced-motion or economy mode, the replay bar still offers to replay by scrolling an animation the page has just said it skips — src/components/rexonance-saga/rexonance-assembly-guide.tsx",
+      "status": "fixed-verified",
+      "note": "動き削減・省エネでは『変身の資料を見る』へ変更し、再演出を案内する段落を隠す。メディア設定変更・root属性監視は解除処理を対にした。"
+    },
+    {
+      "id": "F116",
+      "category": "layout/low",
+      "claim": "The P14 baseline control is labelled 比較対象 on the range input but 比較基準 on the iOS select, and what it actually sets is the 100% baseline — src/components/rexonance-saga/rexonance-saga.tsx",
+      "status": "fixed-verified",
+      "note": "rangeとiOS selectを『比較基準』へ統一。可視『基準にする世代』をselect名にも含め、100%基準というvalue textを保持。"
+    },
+    {
+      "id": "F117",
+      "category": "layout/low",
+      "claim": "Digit grouping is inconsistent within the same comparison rows — src/components/rexonance-saga/rexonance-saga.tsx",
+      "status": "owner-retained",
+      "note": "6000m等は支給スペックの表記。誤値ではないため数値の桁区切りを理由に原文を変更しない。"
+    },
+    {
+      "id": "F118",
+      "category": "layout/low",
+      "claim": "The new hero slate names the base form 'STANDARD / HIGH', an internal key, while the page calls it レクソナンス / HIGH — src/components/rexonance-saga/rexonance-saga.tsx",
+      "status": "owner-retained",
+      "note": "最新DESIGN_AUDIT.mdがスレート『01 STANDARD / HIGH · KEY VISUAL』を明記。監査を理由に勝手に別名へしない。"
+    },
+    {
+      "id": "F119",
+      "category": "layout/low",
+      "claim": "Hard seams between chapters: the stage ends in a flat cut straight into a solid band — src/styles-rexonance-layout-20261021.css, src/styles-stage-rexonance.css",
+      "status": "owner-retained",
+      "note": "最新layoutのstage/section seamを保持。溶け合う境界への改変は別の見た目案として残す。"
+    },
+    {
+      "id": "F120",
+      "category": "layout/low",
+      "claim": "The form panel's art ends in a hard edge across the shins — src/components/rexonance-saga/rexonance-saga.tsx, src/styles-rexonance-layout-20261021.css",
+      "status": "owner-retained",
+      "note": "現在のstageはobject-fit:containで支給画を表示。元絵の端を生成拡張せず、枠・portraitのowner artを保持。"
+    },
+    {
+      "id": "F121",
+      "category": "art/low",
+      "claim": "The stage artwork is cropped at the crest tips, so the framed figure's helmet touches the frame edge — public/rider-rexonance-saga-pickup-20260923-delivery-1086.webp, src/lib/rexonance-images.ts",
+      "status": "owner-retained",
+      "note": "containで元画像を全体表示しているため、crestに新しい画素を足す/絵を描き直す判断はしない。画像差し替え案として残す。"
+    },
+    {
+      "id": "F122",
+      "category": "motion/low",
+      "claim": "Pressing the already-active P14 pill flips it to solid white for the duration of the press (leftover :active rule from an earlier sheet) — src/styles-rexonance-finish.css, src/styles-p14-calibration.css",
+      "status": "not-reproduced-current",
+      "note": "P1選択中に実pointer downを採取。背景は押下前後とも同じ135deg gradientで、旧solid whiteへの反転は再現しない。"
+    },
+    {
+      "id": "F123",
+      "category": "motion/low",
+      "claim": "The footer CTA's hover lift, border fade and press scale snap instantly, because one sheet's transition list replaces the others — src/styles-rexonance-armour.css, src/styles-rexonance-saga.css, src/styles-rexonance-finish.css",
+      "status": "not-reproduced-current",
+      "note": "終幕3CTAともscale160ms/translate220ms/background/border/shadow/color220msを実測。古いtransition上書きの説明は現行に該当しない。"
+    },
+    {
+      "id": "F124",
+      "category": "motion/low",
+      "claim": "In-page jumps smooth-scroll about 8,400 px through every scroll-driven scene — src/styles-world/01.css, src/components/rexonance-saga/rexonance-editorial.tsx, src/styles-rexonance-saga.css",
+      "status": "fixed-verified",
+      "note": "共通htmlのsmooth-scrollで長距離も連続スクラブされる。Rexonance滞在中だけnative anchorを即時にし、hash/historyは維持。 最終候補の3幅ブラウザーassertionに記録。"
+    },
+    {
+      "id": "F125",
+      "category": "motion/low",
+      "claim": "The handover from the call to the page has no matching cut, and the hero then waits about 0.4-1.3 s for its own title — src/styles-rexonance-forge.css, src/components/rexonance-saga/rexonance-call-sequence.tsx, src/components/load-gate.tsx",
+      "status": "not-reproduced-current",
+      "note": "World→Rexonanceの毎フレーム記録ではcallがなくなった時点でH1 opacity=1。3幅で旧handover後0.4–1.3sの無表示は観測しない。"
+    },
+    {
+      "id": "F126",
+      "category": "motion/low",
+      "claim": "Motion timing and easing are not systematised: 54 duration values, 16 curves, and different hover and press behaviour on sibling controls — src/styles-rexonance-saga.css, src/styles-rexonance-finish.css, src/styles-rexonance-premiere.css",
+      "status": "owner-retained",
+      "note": "装着・カウント・hover・場面転換は異なる目的。duration/curve数の集計だけでownerの場面ごとの時計を一律化しない。"
+    },
+    {
+      "id": "F127",
+      "category": "motion/low",
+      "claim": "The P14 slider animates layout properties: the thumb's left and the fill's width — src/styles-p14-calibration.css, src/styles-rexonance-saga.css",
+      "status": "fixed-verified",
+      "note": "P14つまみのleftアニメーションをtranslateへ。端点のleftは23pxのまま、実際のxだけが移動することを確認。軌道のfillは現行では既に静的。"
+    }
+  ]
+}

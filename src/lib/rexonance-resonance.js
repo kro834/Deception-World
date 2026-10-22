@@ -84,11 +84,11 @@ export function countTemplate(text) {
   };
 }
 
-/** The figure at `current`, padded to the final width so nothing reflows. */
+/** The host's final text reserves the width; don't print fake leading zeroes. */
 export function formatCount(template, current) {
   const value = Math.min(template.value, Math.max(0, current));
   const [whole, fraction] = value.toFixed(template.decimals).split(".");
-  let printed = whole.padStart(template.width, "0");
+  let printed = whole;
   if (template.grouped) printed = printed.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   return `${template.prefix}${printed}${fraction ? `.${fraction}` : ""}${template.suffix}`;
 }

@@ -1529,7 +1529,7 @@ html[data-family="special"]
      colours and print keep the figures' own text. */
   html[data-family="special"]:not([data-world-effects="economy"])
     body
-    .rxs-page.rxs-page.rxs-rexonance-page
+    .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt)
     > :is(#performance, #p14, #system)
     [data-rsn-count]:is([data-rsn-state="armed"], [data-rsn-state="count"], [data-rsn-state="lock"]) {
     color: transparent;

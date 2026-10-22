@@ -43,13 +43,13 @@ export function RexonanceChapterMap() {
   return (
     <nav className="rxs-chapter-index rxe-chapter-map" aria-label="レクソナンスの見どころ">
       <p className="rxe-chapter-map-heading">
-        <span>CONTENTS</span>
+        <span lang="en">CONTENTS</span>
         <small>01 — 05</small>
       </p>
       {CHAPTERS.map((chapter) => (
         <a key={chapter.href} href={chapter.href}>
           <b aria-hidden="true">{chapter.number}</b>
-          <small>{chapter.code}</small>
+          <small lang="en">{chapter.code}</small>
           <span>{chapter.label}</span>
           <em>{chapter.detail}</em>
           <i aria-hidden="true">↗</i>
@@ -96,7 +96,7 @@ export function RexonanceFormStatus({
       style={{ ["--rxs-stage-accent" as string]: accent }}
     >
       <div className="rxe-form-status-heading">
-        <span>FORM SEQUENCE</span>
+        <span lang="en">FORM SEQUENCE</span>
         <span>{String(index).padStart(2, "0")} / 03</span>
       </div>
       <div className="rxe-form-status-track" aria-hidden="true">

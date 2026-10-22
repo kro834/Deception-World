@@ -173,7 +173,7 @@ test("every destination is an existing public route with its actual heading anch
     "/world": worldPage,
     "/dream-chapter": dreamPage,
     "/extreme-saga": read("src/components/extreme-saga/extreme-saga.tsx"),
-    "/rexonance-saga": read("src/components/rexonance-saga/rexonance-saga.tsx"),
+    "/rexonance-saga": read("src/components/rexonance-saga/rexonance-saga.tsx") + read("src/components/rexonance-saga/rexonance-assembly-guide.tsx"),
     "/final-stage": read("src/components/final-stage/final-stage.tsx"),
     "/form-archive": read("src/routes/form-archive.tsx"),
     "/gallery": read("src/components/gallery/gallery-page.tsx"),
