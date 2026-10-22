@@ -245,6 +245,31 @@
 .dream-reading-options button[aria-pressed="true"] {
   box-shadow: inset 0 -3px #c89b54;
 }
+/* The tone button names the room you are in; before its word a small
+   night | paper track shows it is a switch between the two rooms, its knob
+   on the side you are reading in (no words of its own). */
+.dream-reading-options > div > button:first-child {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.dream-reading-options > div > button:first-child::before {
+  content: "";
+  flex: none;
+  width: 30px;
+  height: 16px;
+  border: 1px solid var(--room-rule);
+  border-radius: 8px;
+  background:
+    radial-gradient(circle at 7px 50%, #e6c28e 0 4px, transparent 4.5px),
+    linear-gradient(90deg, #1b1423 0 50%, #efe3c8 50% 100%);
+}
+.dream-reading-options > div > button[aria-pressed="true"]:first-child::before {
+  background:
+    radial-gradient(circle at calc(100% - 7px) 50%, #6e5022 0 4px, transparent 4.5px),
+    linear-gradient(90deg, #1b1423 0 50%, #efe3c8 50% 100%);
+}
 .dream-reading-disclaimer {
   font-size: 12px;
   line-height: 1.9;
@@ -534,5 +559,8 @@
   .dream-reading-paragraph-pills button[aria-current="location"],
   .dream-reading-options button[aria-pressed="true"] {
     outline: 2px solid Highlight;
+  }
+  .dream-reading-options > div > button:first-child::before {
+    display: none;
   }
 }
