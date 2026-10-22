@@ -81,7 +81,15 @@ export function parseTally(text) {
     else distance += 1;
   }
   const sweepFrom = fraction.length >= 3 && value > 0 && value < 0.1 ? 0.999 : 0;
-  return { prefix, suffix, value, decimals: fraction.length, width: digits.length, marks, sweepFrom };
+  return {
+    prefix,
+    suffix,
+    value,
+    decimals: fraction.length,
+    width: digits.length,
+    marks,
+    sweepFrom,
+  };
 }
 
 /** Draw a value in the figure's own shape: zero-padded, grouped, same decimals. */

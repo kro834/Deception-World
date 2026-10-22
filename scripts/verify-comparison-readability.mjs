@@ -91,13 +91,17 @@ async function checkSpecialComparison(page, route, width) {
     await group.evaluate((node) => node.scrollIntoView({ block: "center", behavior: "instant" }));
     assert.equal(await group.getAttribute("role"), "group");
     assert.equal(await group.getAttribute("aria-labelledby"), "exs-opponent-label");
-    const choices = await buttons.evaluateAll((nodes) => nodes.map((node) => ({
-      name: node.querySelector("span")?.textContent.trim(),
-      code: node.querySelector("small")?.textContent.trim(),
-      unclipped: [node, ...node.querySelectorAll("span, small")].every((part) =>
-        part.scrollWidth <= part.clientWidth + 1 && part.scrollHeight <= part.clientHeight + 1),
-      pressed: node.getAttribute("aria-pressed"),
-    })));
+    const choices = await buttons.evaluateAll((nodes) =>
+      nodes.map((node) => ({
+        name: node.querySelector("span")?.textContent.trim(),
+        code: node.querySelector("small")?.textContent.trim(),
+        unclipped: [node, ...node.querySelectorAll("span, small")].every(
+          (part) =>
+            part.scrollWidth <= part.clientWidth + 1 && part.scrollHeight <= part.clientHeight + 1,
+        ),
+        pressed: node.getAttribute("aria-pressed"),
+      })),
+    );
     assert.ok(choices.length >= 2, "all comparison opponents remain available");
     assert.equal(choices.filter((choice) => choice.pressed === "true").length, 1);
     for (const choice of choices)
@@ -105,7 +109,9 @@ async function checkSpecialComparison(page, route, width) {
     options = choices.map((_, index) => index);
   } else {
     await select.evaluate((node) => node.scrollIntoView({ block: "center", behavior: "instant" }));
-    options = await select.locator("option").evaluateAll((nodes) => nodes.map((node) => node.value));
+    options = await select
+      .locator("option")
+      .evaluateAll((nodes) => nodes.map((node) => node.value));
     assert.ok(
       await select.evaluate((node) => {
         const style = getComputedStyle(node);
@@ -124,9 +130,13 @@ async function checkSpecialComparison(page, route, width) {
     if (usesButtons) {
       await buttons.nth(baseline).click();
       await page.waitForFunction((index) => {
-        const choices = [...document.querySelectorAll(".exs-opponent-options button[aria-pressed]")];
-        return choices[index]?.getAttribute("aria-pressed") === "true" &&
-          choices.filter((choice) => choice.getAttribute("aria-pressed") === "true").length === 1;
+        const choices = [
+          ...document.querySelectorAll(".exs-opponent-options button[aria-pressed]"),
+        ];
+        return (
+          choices[index]?.getAttribute("aria-pressed") === "true" &&
+          choices.filter((choice) => choice.getAttribute("aria-pressed") === "true").length === 1
+        );
       }, baseline);
     } else await select.selectOption(baseline);
     await page.waitForTimeout(550);

@@ -724,7 +724,6 @@ html[data-family="special"]
     max-width: none;
     margin-top: 20px;
   }
-
 }
 
 /* Phones: one list a row (the FIGHT CARD's two columns, held by its ID
@@ -947,7 +946,11 @@ html[data-family="special"]
     column-gap: 0;
   }
 
-  html[data-family="special"] body .rxs-page.rxs-page.exs-page > #stages .rxs-stage-switcher::before {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #stages
+    .rxs-stage-switcher::before {
     content: "";
     grid-column: 2;
     grid-row: 1 / span 2;
@@ -1003,7 +1006,13 @@ html[data-family="special"]
 /* ================================================================
    9. ROUND 4: the moves lift, their codes at the floor
    ================================================================ */
-html[data-family="special"] body .rxs-page.rxs-page.exs-page > #system .rxs-system-grid header small {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #system
+  .rxs-system-grid
+  header
+  small {
   max-width: 14em;
   font-size: 12px;
   letter-spacing: 0.1em;
@@ -1039,7 +1048,14 @@ html[data-family="special"]
   body
   .rxs-page.rxs-page.exs-page
   > :is(#performance, #p14, #stages, #system, .exs-hero, .rxs-local-nav, .rxs-footer)
-  :is(nav a, .exs-opponent-options button, .rxs-scroll-cue, a.exo-door, a.rxs-footer-return, .rxs-brand):focus-visible {
+  :is(
+    nav a,
+    .exs-opponent-options button,
+    .rxs-scroll-cue,
+    a.exo-door,
+    a.rxs-footer-return,
+    .rxs-brand
+  ):focus-visible {
   outline: 2px solid var(--exz-outline, #ffe1a1);
   outline-offset: -4px;
 }
@@ -1057,7 +1073,11 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer > a:f
   --exz-ring: #080807;
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer > a:focus-visible::after {
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > .rxs-footer
+  > a:focus-visible::after {
   content: "";
   position: absolute;
   z-index: 2;
@@ -1129,7 +1149,11 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer > a:f
       inset 0 0 0 1px rgb(114 228 255 / 52%);
   }
 
-  html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-catalog-details > summary:hover {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    .exs-catalog-details
+    > summary:hover {
     color: #ffffff;
   }
 
@@ -1429,7 +1453,11 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer > a:f
     background: CanvasText;
   }
 
-  html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-opponent-options button::before {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    .exs-opponent-options
+    button::before {
     background: ButtonText;
   }
 
@@ -1439,7 +1467,11 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer > a:f
     --exz-outline: Highlight;
   }
 
-  html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer > a:focus-visible::after {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > .rxs-footer
+    > a:focus-visible::after {
     content: none;
   }
 

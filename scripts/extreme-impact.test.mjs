@@ -860,8 +860,7 @@ test("a hit at rest short of its line lands after the dwell, once; leaving first
   const dwell = t.live((o) => o.options?.rootMargin === "0px 0px -120px 0px")[0];
   assert.ok(dwell?.targets.has(t.heading));
   assert.equal(dwell.targets.has(t.punch), false, "the mid line's hits keep to their line");
-  const rest = (visible) =>
-    dwell.callback([{ target: t.heading, isIntersecting: visible }], dwell);
+  const rest = (visible) => dwell.callback([{ target: t.heading, isIntersecting: visible }], dwell);
   rest(true);
   rest(true);
   t.tick(DWELL_MS - 1);
@@ -969,7 +968,9 @@ test("sub-tenth 3-decimal sprint times sweep down like a chronograph and clash r
   const rowFigure = clashRow.querySelector(".exi-figure");
   const rowCopy = clashRow.querySelector(".exi-tally");
   clashRow.setAttribute("data-exf-clash", "true");
-  t.mutate(t.comparison, [{ type: "attributes", attributeName: "data-exf-clash", target: clashRow }]);
+  t.mutate(t.comparison, [
+    { type: "attributes", attributeName: "data-exf-clash", target: clashRow },
+  ]);
   assert.equal(rowFigure.getAttribute("data-exi-counting"), "true");
   t.tick(300);
   t.flush();
