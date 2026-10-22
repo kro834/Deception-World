@@ -16,11 +16,8 @@ import {
   type FarFromStageKey,
 } from "@/lib/far-from-saga-artwork";
 import { FarFromEntryTransition } from "./far-from-entry-transition";
-import {
-  COMPARISON_CITATIONS,
-  COMPARISON_COLUMNS,
-  COMPARISON_ROWS,
-} from "./far-from-comparison-data";
+import { FarFromComparison } from "./far-from-comparison";
+import { FarFromP16 } from "./far-from-p16";
 
 /* FAR FROM SAGA special site (owner's record of 2026-10-22).
 
@@ -31,11 +28,13 @@ import {
    sheets) draws the chrome; styles-far-from-saga.css adds what this page
    alone needs.
 
-   Four chapters are prepared, not built (準備中): the nanite entry transition
-   (far-from-entry-transition.tsx, renders nothing), #performance (a static
-   grid from far-from-comparison-data.ts), #p16 (a heading and a note) and
-   #suitup (a still runway; src/lib/far-from-assembly.ts is its seam). None of
-   them loads a canvas or an engine, and none delays first paint. */
+   #performance is the comparison console (far-from-comparison.tsx) and #p16
+   the P16 chapter's frame (far-from-p16.tsx; P16's own specs are 準備中),
+   both drawing on far-from-comparison-data.ts. Still prepared, not built
+   (準備中): the nanite entry transition (far-from-entry-transition.tsx,
+   renders nothing) and #suitup (a still runway; src/lib/far-from-assembly.ts
+   is its seam). None of them loads a canvas or an engine, and none delays
+   first paint. */
 
 const releaseControlFocus = (control: HTMLElement) => {
   window.requestAnimationFrame(() => {
@@ -254,76 +253,36 @@ export function FarFromSaga() {
         </dl>
       </section>
 
-      {/* 準備中 — #performance: a still grid of the three published records. */}
+      {/* #performance: the comparison console (far-from-comparison.tsx). */}
       <section
         id="performance"
-        className="rxs-section ffs-performance ffs-prepared"
+        className="rxs-section ffs-performance"
         aria-labelledby="ffs-performance-title"
       >
         <header className="rxs-section-heading rxs-reveal">
           <p>03 / COMPARISON</p>
           <h2 id="ffs-performance-title">性能比較</h2>
-          <span>ファーフロム、レクソナンス、エクスプリームの公開スペックを並べています。</span>
+          <span>
+            ファーフロムサーガの標準値を、レクソナンスサーガ、エクスプリームサーガの標準値と比較します。
+          </span>
         </header>
-        <Pending line="性能比較は現在準備中です。" />
-        <div className="ffs-compare-scroll">
-          <table
-            className="ffs-compare"
-            aria-label="ファーフロム・レクソナンス・エクスプリームの公開スペック"
-          >
-            <thead>
-              <tr>
-                <th scope="col">
-                  <span>ITEM</span>
-                </th>
-                {COMPARISON_COLUMNS.map((column) => (
-                  <th
-                    key={column.key}
-                    scope="col"
-                    style={{ ["--ffs-col-accent" as string]: column.accent }}
-                  >
-                    <small>{column.code}</small>
-                    <span>{column.label}</span>
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {COMPARISON_ROWS.map((row) => (
-                <tr key={row.label}>
-                  <th scope="row">{row.label}</th>
-                  {COMPARISON_COLUMNS.map((column) => (
-                    <td key={column.key} data-column={column.key}>
-                      {row.values[column.key]}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <ul className="ffs-citations" aria-label="設定資料中の比較">
-          {COMPARISON_CITATIONS.map((citation) => (
-            <li key={citation.text}>
-              <small>{citation.source}</small>
-              <q>{citation.text}</q>
-            </li>
-          ))}
-        </ul>
+        <FarFromComparison />
       </section>
 
-      {/* 準備中 — #p16: the processor's chapter, heading and note only. */}
+      {/* 準備中 — #p16: the chapter's frame from the record; P16's own specs
+          are not published yet (far-from-p16.tsx). */}
       <section
         id="p16"
         className="rxs-section ffs-p16 ffs-prepared"
         aria-labelledby="ffs-p16-title"
       >
         <header className="rxs-section-heading rxs-reveal">
-          <p>04 / PROCESSOR</p>
+          <p>04 / RECOGNITION</p>
           <h2 id="ffs-p16-title">『P16』</h2>
-          <span>認識・制御を担う『P16』の解説です。</span>
+          <span>認識・制御の欄に記載された機構です。</span>
         </header>
-        <Pending line="P16の解説は現在準備中です。" />
+        <Pending line="P16の詳細な仕様は現在準備中です。" />
+        <FarFromP16 />
       </section>
 
       {/* #suitup: the scroll runway (src/lib/far-from-assembly.ts mounts the

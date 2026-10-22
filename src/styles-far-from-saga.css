@@ -8,11 +8,13 @@
    footer. This sheet adds what the page needs of its own: the ミドル key
    visual's crop, the calls, the spec grid, the prose, the record's article
    grids, the weapons list, the finishers, a five-column rail, and the
-   prepared (準備中) chapters: the comparison grid, the P16 note and the
-   still suit-up runway. Every rule is scoped to .ffs-page. Paint and
-   layout only; the only motion is the shared grammar's, gated there by
-   prefers-reduced-motion.
+   prepared (準備中) mark and the still suit-up runway. The #performance
+   console and the #p16 frame are drawn by styles-far-from-compare.css.
+   Every rule is scoped to .ffs-page. Paint and layout only; the only
+   motion is the shared grammar's, gated there by prefers-reduced-motion.
    ================================================================ */
+
+@import "./styles-far-from-compare.css";
 
 .ffs-page {
   --rxs-cyan: #7fe6ff;
@@ -340,111 +342,7 @@
   letter-spacing: 0.18em;
 }
 
-/* #performance — a still grid of the three published records. */
-.ffs-compare-scroll {
-  max-width: 1180px;
-  margin: 0 auto;
-  overflow-x: auto;
-  border: 1px solid rgb(255 255 255 / 9%);
-  border-radius: var(--sc-radius, 22px);
-  background: rgb(255 255 255 / 3%);
-  -webkit-overflow-scrolling: touch;
-}
-
-.ffs-compare {
-  width: 100%;
-  min-width: 640px;
-  border-collapse: collapse;
-  font-size: 13px;
-}
-
-.ffs-compare th,
-.ffs-compare td {
-  padding: 13px 16px;
-  border-bottom: 1px solid rgb(255 255 255 / 7%);
-  text-align: left;
-  vertical-align: top;
-  overflow-wrap: anywhere;
-}
-
-.ffs-compare tbody tr:last-child th,
-.ffs-compare tbody tr:last-child td {
-  border-bottom: 0;
-}
-
-.ffs-compare thead th {
-  padding-top: 18px;
-  padding-bottom: 14px;
-  border-bottom-color: color-mix(in srgb, var(--ffs-col-accent, #8b95a4) 45%, transparent);
-  color: var(--ffs-text);
-  font-family: var(--rxs-font-display);
-  font-weight: 720;
-  letter-spacing: 0.02em;
-}
-
-.ffs-compare thead th small {
-  display: block;
-  margin-bottom: 4px;
-  color: var(--ffs-col-accent, var(--ffs-muted));
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-}
-
-.ffs-compare thead th:first-child span {
-  color: var(--ffs-muted);
-  font-size: 10px;
-  letter-spacing: 0.2em;
-}
-
-.ffs-compare tbody th {
-  width: 9em;
-  white-space: nowrap;
-  color: var(--ffs-muted);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-}
-
-.ffs-compare td {
-  color: #d3dbe5;
-  font-family: var(--rxs-font-display);
-  font-weight: 600;
-  line-height: 1.5;
-}
-
-.ffs-compare td[data-column="farFrom"] {
-  color: var(--ffs-text);
-}
-
-.ffs-citations {
-  display: grid;
-  gap: 10px;
-  max-width: 1180px;
-  margin: 18px auto 0;
-  padding: 0;
-  list-style: none;
-}
-
-.ffs-citations li {
-  display: grid;
-  gap: 6px;
-  padding: 14px 18px;
-  border-left: 2px solid color-mix(in srgb, var(--ffs-accent) 55%, transparent);
-  color: #cfd7e2;
-  font-size: 13px;
-  line-height: 1.9;
-}
-
-.ffs-citations small {
-  color: var(--ffs-muted);
-  font-size: 10px;
-  letter-spacing: 0.18em;
-}
-
-.ffs-citations q {
-  quotes: "「" "」";
-}
+/* #performance and #p16 live in styles-far-from-compare.css (imported above). */
 
 /* #suitup — the runway, still: three faint rings where the port will draw. */
 .ffs-runway {
@@ -624,11 +522,6 @@
 
   .ffs-weapons {
     grid-template-columns: 1fr;
-  }
-
-  .ffs-compare th,
-  .ffs-compare td {
-    padding: 11px 12px;
   }
 
   .ffs-stage-tabs.rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"] {
