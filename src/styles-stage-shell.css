@@ -1083,8 +1083,18 @@ html[data-family]
 }
 
 /* ---------- FIND A RECORD: a search field and three short ways in ---------- */
+/* Its kicker sits 36px under the head's rule, as every kicker the menu
+   opens to does (world-chrome SIDE_MENU_GROUP_CLEARANCE_PX): the gap alone
+   (22px, 16px from 1180px) left it inside the head's 32px ink fade. */
 html[data-family] body #site-side-panel.side-panel > .side-panel-head + .side-panel-group {
   grid-area: find;
+  margin-top: 14px;
+}
+
+@media (min-width: 1180px) {
+  html[data-family] body #site-side-panel.side-panel > .side-panel-head + .side-panel-group {
+    margin-top: 20px;
+  }
 }
 
 html[data-family]
@@ -3684,6 +3694,71 @@ html[data-family="special"]:not([data-ipad-menu-scrolled="true"]):not([data-ipad
     .site-header
     > .side-panel-trigger.side-panel-trigger.menu-button {
     border: 1px solid ButtonText !important;
+  }
+}
+
+/* Saga Cinema's bar type at the site's 12px floor (round 2, 2026-10-22):
+   its brand pair, desktop anchors and way back were drawn at 5-11px. The
+   pair reads as the World's does, two 12px Michroma lines, the name lit
+   and the subtitle in the cinema's muted ink. Where the bar cannot hold
+   the subtitle at 12px it steps out: phones under 540px, and 1101-1279px
+   (an iPad held sideways), where the anchors take the room. A narrow
+   phone wraps the name between its words. */
+html[data-family="special"] body .saga-cinema .site-header > .site-brand {
+  min-width: 0;
+}
+
+html[data-family="special"] body .saga-cinema .site-header :is(.brand-name, .brand-sub) {
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+html[data-family="special"] body .saga-cinema .site-header .brand-name {
+  letter-spacing: 0.16em;
+}
+
+html[data-family="special"] body .saga-cinema .site-header .brand-sub {
+  margin-top: 2px;
+  letter-spacing: 0.1em;
+}
+
+html[data-family="special"] body .saga-cinema .site-header .desktop-nav a {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+}
+
+html[data-family="special"] body .saga-cinema .site-header .world-return-link {
+  gap: 10px;
+}
+
+html[data-family="special"] body .saga-cinema .site-header .world-return-link > span:first-child {
+  font-size: 12px;
+}
+
+html[data-family="special"] body .saga-cinema .site-header .world-return-link > span:last-child {
+  font-size: 13px;
+}
+
+@media (min-width: 1101px) and (max-width: 1279px) {
+  html[data-family="special"] body .saga-cinema .site-header .brand-sub {
+    display: none;
+  }
+
+  html[data-family="special"] body .saga-cinema .site-header .desktop-nav a {
+    padding-inline: 12px;
+    letter-spacing: 0.04em;
+  }
+}
+
+@media (max-width: 539px) {
+  html[data-family="special"] body .saga-cinema .site-header .brand-sub {
+    display: none;
+  }
+}
+
+@media (max-width: 389px) {
+  html[data-family="special"] body .saga-cinema .site-header .brand-name {
+    letter-spacing: 0.08em;
   }
 }
 

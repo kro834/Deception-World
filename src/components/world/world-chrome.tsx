@@ -186,6 +186,55 @@ const SIDE_MENU_SWIPE_SAMPLE_MS = 100;
 // The menu opens scrolled to the current group's kicker: this far under the
 // sticky head's rule, clear of the 32px ink fade below it (chrome-elevation).
 const SIDE_MENU_GROUP_CLEARANCE_PX = 36;
+// The head's ink fade (chrome-elevation / stage-shell): solid ink for its
+// first 12px, then a 20px fall to clear. Words seen through that fall read as
+// cut, not as passing under the head; its last 3px are as good as clear.
+const SIDE_MENU_HEAD_INK_PX = 12;
+const SIDE_MENU_HEAD_FADE_PX = 29;
+
+/* An opening never leaves a line of words in the head's fade. On a menu
+   barely taller than the screen (an iPad, a laptop) the kicker step stops at
+   the end of the scroll, mid-row: SECTIONS or a row's labels half under the
+   head. It steps back up to the nearest spot where no line shows through the
+   fall, as long as the reader's own row stays in view; failing that it stays.
+   One text pass per opening, no layout writes but the scroll. */
+function settleClearOfHeadFade(panel: HTMLElement, keep: HTMLElement | null, clearance: number) {
+  const doc = panel.ownerDocument;
+  const head = panel.querySelector(".side-panel-head");
+  if (!head || typeof doc?.createTreeWalker !== "function" || typeof doc.createRange !== "function")
+    return;
+  const edge = head.getBoundingClientRect().bottom;
+  const lines: { top: number; bottom: number }[] = [];
+  const walker = doc.createTreeWalker(panel, NodeFilter.SHOW_TEXT);
+  const range = doc.createRange();
+  for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+    if (!node.nodeValue?.trim() || head.contains(node)) continue;
+    range.selectNodeContents(node);
+    for (const rect of Array.from(range.getClientRects())) {
+      if (rect.width > 0 && rect.height > 0) lines.push({ top: rect.top, bottom: rect.bottom });
+    }
+  }
+  // Scrolling up by `shift` moves every line down by it.
+  const sliced = (shift: number) =>
+    lines.some(
+      (line) =>
+        line.bottom + shift > edge + SIDE_MENU_HEAD_INK_PX &&
+        line.top + shift < edge + SIDE_MENU_HEAD_FADE_PX,
+    );
+  if (!sliced(0)) return;
+  const room = keep
+    ? panel.getBoundingClientRect().bottom - clearance - keep.getBoundingClientRect().bottom
+    : Infinity;
+  const shifts = lines
+    .flatMap((line) => [
+      edge + SIDE_MENU_HEAD_FADE_PX - line.top,
+      edge + SIDE_MENU_HEAD_INK_PX - line.bottom,
+    ])
+    .filter((shift) => shift > 0 && shift <= panel.scrollTop && shift <= room)
+    .sort((a, b) => a - b);
+  const clear = shifts.find((shift) => !sliced(shift));
+  if (clear !== undefined) panel.scrollTop -= clear;
+}
 
 type SideMenuCloseWatcher = { onclose: (() => void) | null; destroy(): void };
 
@@ -514,6 +563,13 @@ export function SideMenuLayer({
       const top = head.getBoundingClientRect().bottom + SIDE_MENU_GROUP_CLEARANCE_PX;
       const below = group.getBoundingClientRect().top - top;
       if (below > 0) panel.scrollTop += below;
+    }
+    if (current) {
+      settleClearOfHeadFade(
+        panel,
+        current,
+        parseFloat(window.getComputedStyle(panel).paddingBottom) || 24,
+      );
     }
     // Android's back gesture (and Esc from outside the menu) asks the
     // browser's CloseWatcher to close the menu instead of leaving the page.

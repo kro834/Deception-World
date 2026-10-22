@@ -133,3 +133,26 @@ test("the detail headline breaks at the poster's phrases; a short tail rides alo
     /> span\s*> \.name-word--protected \{\s*display: inline !important;\s*white-space: nowrap;\s*\}/,
   );
 });
+
+test("the launcher opens with no words seen through the head's fade; the first kicker clears it", () => {
+  assert.match(
+    chrome,
+    /function settleClearOfHeadFade\(panel: HTMLElement, keep: HTMLElement \| null, clearance: number\)/,
+  );
+  assert.match(chrome, /const SIDE_MENU_HEAD_INK_PX = 12;/);
+  assert.match(chrome, /const SIDE_MENU_HEAD_FADE_PX = 29;/);
+  // Only ever back up, and never past the reader's own row.
+  assert.match(chrome, /shift > 0 && shift <= panel\.scrollTop && shift <= room/);
+  assert.match(
+    shell,
+    /> \.side-panel-head \+ \.side-panel-group \{\s*grid-area: find;\s*margin-top: 14px;\s*\}/,
+  );
+});
+
+test("Saga Cinema's bar type keeps the 12px floor", () => {
+  const bar = shell.slice(shell.indexOf("/* Saga Cinema's bar type at the site's 12px floor"));
+  assert.match(bar, /:is\(\.brand-name, \.brand-sub\) \{\s*font-size: 12px;/);
+  assert.match(bar, /\.desktop-nav a \{\s*font-size: 12px;/);
+  assert.match(bar, /\.world-return-link > span:first-child \{\s*font-size: 12px;/);
+  assert.match(bar, /@media \(max-width: 539px\) \{[\s\S]*?\.brand-sub \{\s*display: none;/);
+});
