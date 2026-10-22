@@ -303,3 +303,31 @@ test("the rail never leaves a lone tile: the long lists run two rows of cards or
   assert.match(css, /container: roster-tile \/ inline-size;/);
   assert.match(css, /@container roster-tile \(max-width: 169px\)/);
 });
+
+test("Japanese headings and names break between phrases and words, never before 。 or ・", async () => {
+  // Owner (2026-10-22): WebKit set 。 alone on a line (変身後の能力を活かした遠距離戦 / 。) and
+  // Chrome started a line on ・ (秩序／破壊 / ・固定管轄なし); the text stays as written.
+  const nav = await read("src/components/world/dossier-nav.tsx");
+  assert.match(nav, /export function PhrasedText\(\{ text \}: \{ text: string \}\)/);
+  assert.match(nav, /\(より\|から\|まで\|ので\|\[のをにへとがはでもやてたずなく\]\)/);
+  for (const file of [
+    "rider-page",
+    "manager-stub",
+    "related-page",
+    "dante-page",
+    "ciel-page",
+    "yoake-mamori-page",
+  ]) {
+    const page = await read(`src/components/world/${file}.tsx`);
+    assert.match(page, /<h2>\s*<PhrasedText text=\{(s|section)\.title\} \/>\s*<\/h2>/, file);
+  }
+  const lejas = await read("src/components/world/lejas-page.tsx");
+  assert.equal(lejas.match(/<PhrasedText text="/g)?.length, 3);
+  // A separator closes the word before it, inside a protected word's box.
+  assert.match(nav, /chunks\.push\(parts\[i\] \+ mark\)/);
+  // The split stage: the form's name never outgrows the reading column.
+  assert.match(
+    css,
+    /\.form-pickup-copy\s*> h2\s*> b \{\s*font-size: min\(\s*52px,\s*calc\(\(100vw - var\(--sd-stage-w\) - var\(--sd-pad\) - var\(--sd-pad-end\)\) \/ 8\.6\)\s*\);/,
+  );
+});

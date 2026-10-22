@@ -311,6 +311,27 @@ html[data-family="dossier"]
   }
 }
 
+/* The split stage: the form's name keeps its longest word on one line in
+   the reading column (at 1024px レルムレジェンズ ran past it and split ズ
+   off): the size follows the column, 52px where it has room. (The scrollbar
+   is inside 100vw, so the divisor leaves a margin.) */
+@supports (grid-template-rows: subgrid) {
+  @media (min-width: 1100px) and (min-height: 540px),
+    (min-width: 900px) and (min-height: 600px) and (orientation: landscape) {
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      .form-pickup-card
+      > .form-pickup-copy
+      > h2
+      > b {
+      font-size: min(
+        52px,
+        calc((100vw - var(--sd-stage-w) - var(--sd-pad) - var(--sd-pad-end)) / 8.6)
+      );
+    }
+  }
+}
+
 /* The premium (Rexonance) pickup keeps its own light in the chips. */
 html[data-family="dossier"]
   main.manager-page.manager-page.manager-page

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "@tanstack/react-router";
 import { useWorldMode } from "./use-world-mode";
-import { DossierNav, RIKUEI_NAV, NameText } from "./dossier-nav";
+import { DossierNav, RIKUEI_NAV, NameText, PhrasedText } from "./dossier-nav";
 import { SlideOpenControl } from "./slide-open-control";
 import { UiVectorIcon } from "./ui-vector-icon";
 import { LiquidPointerGlow } from "./liquid-rail";
@@ -733,7 +733,9 @@ function ManagerDossier({ profile }: { profile: Profile }) {
               <div className="manager-copy-heading">
                 <span>{s.no}</span>
                 <p>{s.kicker}</p>
-                <h2>{s.title}</h2>
+                <h2>
+                  <PhrasedText text={s.title} />
+                </h2>
               </div>
               <div className="manager-copy-body">
                 {s.body.map((p) => (

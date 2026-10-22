@@ -1,5 +1,6 @@
 import { useWorldMode } from "./use-world-mode";
 import { DossierContents, DossierReader } from "./dossier-reader";
+import { PhrasedText } from "./dossier-nav";
 import { DossierTopbar } from "./world-chrome";
 import { YOAKE_MAMORI_SECTIONS } from "./yoake-mamori-data";
 import { dossierImage } from "@/lib/dossier-images";
@@ -94,7 +95,9 @@ export function YoakeMamoriPage() {
               <div className="manager-copy-heading">
                 <span>{section.no}</span>
                 <p>{section.kicker}</p>
-                <h2>{section.title}</h2>
+                <h2>
+                  <PhrasedText text={section.title} />
+                </h2>
               </div>
               <div className="manager-copy-body">
                 {section.body.map((paragraph) => (

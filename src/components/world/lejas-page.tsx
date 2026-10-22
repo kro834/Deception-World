@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useWorldMode } from "./use-world-mode";
-import { DossierNav, RIKUEI_NAV } from "./dossier-nav";
+import { DossierNav, PhrasedText, RIKUEI_NAV } from "./dossier-nav";
 import { FormPickup } from "./manager-stub";
 import { DossierTopbar } from "./world-chrome";
 import { DossierContents, DossierReader } from "./dossier-reader";
@@ -208,7 +208,9 @@ export function LejasPage() {
             <div className="manager-copy-heading">
               <span>01</span>
               <p>盤面と勝敗の管轄</p>
-              <h2>世界を、勝負の盤面へ。</h2>
+              <h2>
+                <PhrasedText text="世界を、勝負の盤面へ。" />
+              </h2>
             </div>
             <div className="manager-copy-body">
               <p>
@@ -223,7 +225,9 @@ export function LejasPage() {
             <div className="manager-copy-heading">
               <span>02</span>
               <p>人物と情報の提示</p>
-              <h2>正しい情報だけで、相手自身に間違わせる。</h2>
+              <h2>
+                <PhrasedText text="正しい情報だけで、相手自身に間違わせる。" />
+              </h2>
             </div>
             <div className="manager-copy-body">
               <p>
@@ -235,7 +239,9 @@ export function LejasPage() {
             <div className="manager-copy-heading">
               <span>03</span>
               <p>戦い方</p>
-              <h2>逃走も必殺技も、使い切らせる。</h2>
+              <h2>
+                <PhrasedText text="逃走も必殺技も、使い切らせる。" />
+              </h2>
             </div>
             <div className="manager-copy-body">
               <p>

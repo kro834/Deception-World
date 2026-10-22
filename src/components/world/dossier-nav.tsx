@@ -2,6 +2,7 @@ import { Fragment } from "react";
 import { useRouterState } from "@tanstack/react-router";
 import { GuardedLink } from "@/components/load-gate";
 import { DisplayName } from "@/components/name-text";
+import { nameWords } from "@/lib/name-breaks";
 import { UiVectorIcon } from "./ui-vector-icon";
 import { dossierImage } from "@/lib/dossier-images";
 import { LAUNCHER_TILE_IMAGES } from "@/lib/thumbnail-images";
@@ -166,26 +167,55 @@ export const RELATED_NAV: DossierLink[] = [
 /** `seams`: a value too wide for its column (the spec sheet's 仮面ライダー
  * ヴァンダール at 375px) also breaks at name-breaks.ts's seams, drawn as
  * <wbr>, so it breaks between its words (仮面ライダー／ヴァンダール), never
- * inside one; the text stays as written. */
+ * inside one; the text stays as written. A separator (・, ／) closes the
+ * word before it, so no line starts on one (2026-10-22: 秩序／破壊 /
+ * ・固定管轄なし at 360px). */
 export function NameText({ value, seams = false }: { value: string; seams?: boolean }) {
-  const chunks = value.split(/([・／/])/);
+  const parts = value.split(/([・／/])/);
+  // Each chunk carries its closing separator (破壊・), inside a protected
+  // word's box too, so the break comes after it — unless the name rules
+  // would set the separator apart as a word of its own (仮面ライダー／).
+  const chunks: string[] = [];
+  for (let i = 0; i < parts.length; i += 2) {
+    const mark = parts[i + 1] ?? "";
+    if (mark && seams && nameWords(parts[i] + mark).at(-1)?.text === mark) {
+      chunks.push(parts[i], mark);
+    } else chunks.push(parts[i] + mark);
+  }
   return (
     <>
-      {chunks.map((chunk, i) => {
-        if (chunk === "・" || chunk === "／" || chunk === "/") {
-          return (
-            <Fragment key={`${chunk}-${i}`}>
-              {chunk}
-              <wbr />
-            </Fragment>
-          );
-        }
-        return (
-          <span key={`${chunk}-${i}`} className="jp-atom">
-            {seams ? <DisplayName value={chunk} /> : chunk}
-          </span>
-        );
-      })}
+      {chunks.map((chunk, i) => (
+        <Fragment key={`${chunk}-${i}`}>
+          <span className="jp-atom">{seams ? <DisplayName value={chunk} /> : chunk}</span>
+          {i < chunks.length - 1 && /[・／/]$/.test(chunk) ? <wbr /> : null}
+        </Fragment>
+      ))}
+    </>
+  );
+}
+
+/* A Japanese heading's phrase seams: after a particle or an ending (の, を,
+   に, より ...) where the next word starts in kanji or katakana (not on a
+   small kana or ー), so 変身後の / 能力を / 活かした / 遠距離戦。 */
+const PHRASE_SEAM =
+  /(より|から|まで|ので|[のをにへとがはでもやてたずなく])(?=(?![\u30a1\u30a3\u30a5\u30a7\u30a9\u30c3\u30e3\u30e5\u30e7\u30ee\u30f5\u30f6])[\u30a1-\u30fa\u4e00-\u9fff])/gu;
+const PHRASE_MARK = "\ue000";
+
+/** A dossier heading that wraps between its phrases (2026-10-22). WebKit
+ * has no word-break: auto-phrase; its keep-all found no break in a line
+ * such as 変身後の能力を活かした遠距離戦。 and split the last character off
+ * (。 alone on a line). <wbr> at the seams gives it the phrase breaks
+ * Chrome finds; the text is as written. */
+export function PhrasedText({ text }: { text: string }) {
+  const phrases = text.replace(PHRASE_SEAM, `$1${PHRASE_MARK}`).split(PHRASE_MARK);
+  return (
+    <>
+      {phrases.map((phrase, index) => (
+        <Fragment key={`${index}-${phrase}`}>
+          {index > 0 ? <wbr /> : null}
+          {phrase}
+        </Fragment>
+      ))}
     </>
   );
 }
