@@ -95,8 +95,9 @@ test("the swarm rides the pinned call: its timeline, and the pinned clocks uncha
   );
   assert.ok(release <= calls.REXONANCE_SUIT_PIXELS.scatter, String(release));
   assert.ok(swarm.implode[1] < calls.REXONANCE_SUIT_PIXELS.scatter);
-  // Authored armour clocks remain canonical; the real entry adds 1 s of flame.
-  assert.equal(calls.REXONANCE_ENTRY_TIMINGS.cover, 3730);
+  // Authored armour clocks remain canonical; the real entry adds 360 ms of flame.
+  // Owner (2026-10-22): the fire's hold is 360 ms (cover 2730 + 360) to fit the hand-over budget.
+  assert.equal(calls.REXONANCE_ENTRY_TIMINGS.cover, 3090);
   assert.equal(calls.REXONANCE_SUIT_REVEAL_MS, 100);
   assert.equal(calls.REXONANCE_SUIT_CLANK_MS, 40);
   assert.equal(calls.REXONANCE_SUIT_PIXELS.fill, 1990);

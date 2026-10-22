@@ -32,6 +32,7 @@ export type FieldScore = {
   readonly origin: readonly [number, number];
   readonly spread: readonly [number, number];
   readonly settle: number;
+  readonly gather: number;
   readonly count: number;
   readonly gx: Float32Array;
   readonly gy: Float32Array;
@@ -99,6 +100,7 @@ export const FIELD_STATE: {
   readonly LENGTH: 64;
 };
 export const FIELD_FLASH_SHARE: number;
+export const FIELD_GATHER: Readonly<{ from: number; full: number; back: number }>;
 export const FIELD_WAKE_RISE: number;
 export const FIELD_CAMERA: {
   readonly push: readonly number[];
@@ -188,6 +190,7 @@ export function fieldScore(options: {
   origin: readonly number[];
   spread?: readonly number[];
   settle?: number;
+  gather?: number;
 }): FieldScore;
 export function fieldStateBuffer(): Float32Array;
 export function fieldState(score: FieldScore, clock: number, out: Float32Array): Float32Array;

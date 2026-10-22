@@ -10,14 +10,17 @@ const BODY = new Float32Array([
 const clamp = (x) => Math.max(0, Math.min(1, x));
 const smooth = (x) => x * x * (3 - 2 * x);
 
-// The entry stretches its opening (canonical 0–420 ms, up to the 爆散)
-// uniformly over one extra second, so the engulf climbs the body at one
-// steady pace (owner, 2026-10-21: 「炎がアンダースーツを段々と覆っていき、
-// 爆散」). Every authored materialization, docking and final-light clock
-// after it keeps its canonical value; wall time continues driving the
-// flame's texture. The fire itself waits for the undersuit (entryFlamePhase).
-export const REXONANCE_ENTRY_VORTEX_HOLD_MS = 1000;
-const VORTEX_LINGER_FROM = 0;
+// The entry holds its fire (canonical 320–420 ms, from the scan's end up
+// to the 爆散) for 360 ms more, so the engulf climbs the body at one
+// steady pace over ≈460 ms (owner, 2026-10-21: 「炎がアンダースーツを段々と
+// 覆っていき、爆散」). The scan and the opening call before it keep their
+// authored canonical clocks, and so does every materialization, docking and
+// final-light clock after it: the hold is spent on the fire alone, which
+// keeps the whole entry inside its hand-over budget (cover 2730 + 360).
+// Wall time continues driving the flame's texture. The fire itself waits for
+// the undersuit (entryFlamePhase).
+export const REXONANCE_ENTRY_VORTEX_HOLD_MS = 360;
+const VORTEX_LINGER_FROM = 320;
 const VORTEX_LINGER_TO = 420;
 const VORTEX_LINGER_SPAN = VORTEX_LINGER_TO - VORTEX_LINGER_FROM;
 export function entryCanonicalTime(elapsedMs) {
@@ -69,9 +72,9 @@ export const NANITE_FIRE_PHASES = Object.freeze({
 
 // The entry's undersuit scan (FAR UP！, rexonance-call-sequence.tsx and the
 // stylesheet's rxSuitScanWindow): authored over canonical 70 → 320 ms, its
-// window starts at the stylesheet's own 70 ms delay and runs the stretched
-// span, so the bare undersuit is whole, soles last, at elapsed
-// 70 + entrySpan(70, 250) ≈ 915 ms (canonical ≈ 270.7).
+// window starts at the stylesheet's own 70 ms delay and runs its span, which
+// ends exactly where the fire's hold begins, so the bare undersuit is whole,
+// soles last, at elapsed (and canonical) 320 ms.
 export const REXONANCE_ENTRY_SCAN = Object.freeze({ delay: 70, from: 70, span: 250 });
 export const REXONANCE_ENTRY_SCAN_END = entryCanonicalTime(
   REXONANCE_ENTRY_SCAN.delay +

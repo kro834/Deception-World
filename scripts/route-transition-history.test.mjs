@@ -1028,7 +1028,8 @@ test("rx17: cold decoding and high-priority plan finish before the full-timing c
   assert.equal(ui.gates.at(-1).rexonanceSuit, "build");
   assert.equal(
     REXONANCE_ENTRY_TIMINGS.cover,
-    3730,
+    // Owner (2026-10-22): the fire's hold is 360 ms (cover 2730 + 360).
+    3090,
     "preparation cannot shorten or extend the call beats",
   );
   await settleGo(ui, pending);

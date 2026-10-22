@@ -125,6 +125,9 @@ export function entryFieldScore() {
     // soles, a little past the shoulders.
     spread: [REXONANCE_SUIT_SIZE.width * 0.2, REXONANCE_SUIT_SIZE.height * 0.36],
     settle: 0.55,
+    // The sweep's gather dims, so the burst stays the one big pulse
+    // (FIELD_GATHER; at most one large-area flash a second).
+    gather: 0.45,
   });
   return SCORE;
 }

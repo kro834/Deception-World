@@ -2036,12 +2036,12 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
 
   /* The reticle acquires on FAR UP！, dims as the helmet forms above it
      through REXONANCE！, and on REXONANCE DEUS！ hands over to the gold
-     lock. Its canonical 1300/1980 ms events now land at elapsed 2300/2980
-     ms after the entry-only vortex hold. */
+     lock. Its canonical 1300/1980 ms events now land at elapsed 1660/2340
+     ms after the entry-only fire hold (360 ms, canonical 320-420). */
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
     .rx-suit-lock::before {
-    animation: rxSuitReticle 3020ms linear 60ms both;
+    animation: rxSuitReticle 2380ms linear 60ms both;
   }
 
   /* REXONANCE DEUS！: the lock settles on the visor; the bodysuit between
@@ -2210,7 +2210,7 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
     transform: none;
   }
 }
-/* Material enters the explosion (1468ms), before fire clears at 1600ms.
+/* Material enters the explosion (828ms), before fire clears at 960ms.
    This also applies when only the DOM/SVG fallback is available. */
 @keyframes rxSuitMotes {
   0% {
@@ -2392,19 +2392,19 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
     opacity: 0;
     transform: scale(1.5) rotate(-30deg);
   }
-  2.6755% {
+  3.395% {
     opacity: 0.8;
   }
-  6.6887% {
+  8.4874% {
     transform: scale(1.06) rotate(0deg);
   }
-  74.1722% {
+  67.2269% {
     opacity: 0.8;
   }
-  76.1589% {
+  69.7479% {
     opacity: 0.32;
   }
-  96.6887% {
+  95.7983% {
     opacity: 0.32;
     transform: scale(1.06);
   }

@@ -25,16 +25,21 @@ import { scrollFlameAt } from "../src/lib/rexonance-field/field-clock.js";
 
 const ASPECT = 1040 / 571;
 
-test("the entry stretches the fire's whole run uniformly over one extra second before preserving every material clock", () => {
-  assert.equal(REXONANCE_ENTRY_VORTEX_HOLD_MS, 1000);
+// Owner (2026-10-22): the hold is spent on the fire alone (canonical 320–420,
+// from the scan's end to the 爆散) and shortened to 360 ms, so the entry hands
+// over within its budget (verify-rexonance-calls, verify-route-transitions).
+test("the entry holds the fire alone, from the scan's end to the burst, before preserving every material clock", () => {
+  assert.equal(REXONANCE_ENTRY_VORTEX_HOLD_MS, 360);
   for (const [canonical, elapsed] of [
     [0, 0],
-    [210, 710],
-    [420, 1420],
-    [468, 1468],
-    [560, 1560],
-    [600, 1600],
-    [2730, 3730],
+    [210, 210],
+    [320, 320],
+    [370, 550],
+    [420, 780],
+    [468, 828],
+    [560, 920],
+    [600, 960],
+    [2730, 3090],
   ]) {
     assert.ok(Math.abs(entryElapsedTime(canonical) - elapsed) < 1e-9);
     assert.ok(Math.abs(entryCanonicalTime(elapsed) - canonical) < 1e-9);
@@ -44,16 +49,17 @@ test("the entry stretches the fire's whole run uniformly over one extra second b
     const canonical = entryCanonicalTime(elapsed);
     assert.ok(canonical >= previous, "the real entry clock never runs its painter backwards");
     assert.ok(Math.abs(entryElapsedTime(canonical) - elapsed) < 1e-9, "exact inverses");
-    if (elapsed < 1600)
+    if (elapsed < 960)
       assert.ok(canonical < 600, "the extra flame interval cannot release material early");
     previous = canonical;
   }
-  // One pace: the engulf's phase advances linearly in elapsed time.
+  // The scan keeps its authored pace; the fire's window runs at one slower pace.
   const rate = (a, b) => (entryCanonicalTime(b) - entryCanonicalTime(a)) / (b - a);
-  assert.ok(Math.abs(rate(100, 200) - rate(1200, 1300)) < 1e-9, "uniform stretch");
-  assert.ok(Math.abs(rate(100, 200) - 420 / 1420) < 1e-9);
-  assert.equal(naniteFlameEnvelope(entryFlamePhase(entryCanonicalTime(1300))), 1);
-  assert.equal(naniteFlameEnvelope(entryFlamePhase(entryCanonicalTime(1600))), 0);
+  assert.ok(Math.abs(rate(100, 200) - 1) < 1e-9, "the scan is not stretched");
+  assert.ok(Math.abs(rate(400, 500) - rate(600, 700)) < 1e-9, "uniform stretch of the fire");
+  assert.ok(Math.abs(rate(400, 500) - 100 / 460) < 1e-9);
+  assert.equal(naniteFlameEnvelope(entryFlamePhase(entryCanonicalTime(700))), 1);
+  assert.equal(naniteFlameEnvelope(entryFlamePhase(entryCanonicalTime(960))), 0);
 });
 
 test("the entry's fire lights only once the scan has drawn the undersuit, then engulfs it before the unchanged burst", () => {
@@ -72,9 +78,9 @@ test("the entry's fire lights only once the scan has drawn the undersuit, then e
     /"--rx-suit-scan-duration": `\$\{entrySpan\(REXONANCE_ENTRY_SCAN\.from, REXONANCE_ENTRY_SCAN\.span\)\}ms`/,
   );
   const scanEnd = 70 + entryElapsedTime(320) - entryElapsedTime(70);
-  assert.ok(Math.abs(scanEnd - (70 + (250 * 1420) / 420)) < 1e-9);
+  assert.ok(Math.abs(scanEnd - 320) < 1e-9);
   assert.ok(Math.abs(entryElapsedTime(REXONANCE_ENTRY_SCAN_END) - scanEnd) < 1e-9);
-  assert.ok(Math.abs(REXONANCE_ENTRY_SCAN_END - (scanEnd * 420) / 1420) < 1e-9);
+  assert.ok(Math.abs(REXONANCE_ENTRY_SCAN_END - 320) < 1e-9);
   // Nothing burns before the scan's end (or on an invalid clock).
   for (const t of [NaN, -Infinity, -5, 0, 70, 200, 270, REXONANCE_ENTRY_SCAN_END])
     assert.equal(entryFlamePhase(t), 0);
@@ -89,12 +95,13 @@ test("the entry's fire lights only once the scan has drawn the undersuit, then e
   for (const phase of ["burstStart", "burstEnd", "materialStart", "flameEnd"])
     assert.ok(Math.abs(entryFlameTime(P[phase]) - P[phase] * 2400) < 1e-9, phase);
   // The whole engulf (kindle → cover → torch) plays between the scan's end
-  // and the burst, in the time the hold leaves (≈505 ms elapsed).
+  // and the burst, in the time the hold leaves (460 ms elapsed).
   const at = (phase) => entryElapsedTime(entryFlameTime(phase));
   assert.ok(Math.abs(at(0) - scanEnd) < 1e-9);
   assert.ok(at(P.kindle) > scanEnd && at(P.kindle) < at(P.cover));
-  assert.ok(at(P.cover) < 1420 && Math.abs(at(P.burstStart) - 1420) < 1e-9);
-  assert.ok(1420 - scanEnd > 500, "a visible engulf, feet to head");
+  assert.ok(at(P.cover) < 780 && Math.abs(at(P.burstStart) - 780) < 1e-9);
+  // Owner (2026-10-22): 460 ms (was ≈505) so the entry fits its hand-over budget.
+  assert.ok(780 - scanEnd >= 460, "a visible engulf, feet to head");
   // Monotone and continuous on the real (elapsed) clock.
   let previous = 0;
   for (let elapsed = 0; elapsed <= 4000; elapsed += 0.25) {
