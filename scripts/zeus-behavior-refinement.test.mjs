@@ -162,6 +162,13 @@ function mount(scale = 1) {
     }
   };
   flush(frames);
+  // The arrival is a hidden move (2026-10-21 sweep F32): it is shown again two
+  // frames after the placement frame, once the hidden frame has been painted.
+  assert.equal(button.dataset.relocating, "moving", "the arrival is never drawn moving");
+  flush(frames);
+  flush(frames);
+  assert.equal(button.dataset.relocating, undefined, "the arrival is shown again");
+  assert.equal(frames.size, 0);
   const center = () => {
     const rect = button.getBoundingClientRect();
     return { x: (rect.left + rect.right) / 2, y: (rect.top + rect.bottom) / 2 };
