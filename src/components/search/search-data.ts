@@ -795,7 +795,7 @@ export const SEARCH_DOCUMENTS: readonly SearchCatalogueDocument[] = [
     id: "far-from-saga",
     title: "仮面ライダーファーフロムサーガ",
     category: "riders",
-    description: "SA-GA OS 6.0",
+    description: "SA-GA OS 6.1",
     body: proseOf([FAR_FROM_SAGA.overview, FAR_FROM_SAGA.theories, FAR_FROM_SAGA.stages]).join(
       "\n",
     ),

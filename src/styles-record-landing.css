@@ -241,6 +241,32 @@ html [data-skip-mark][data-record-reticle][data-record-reticle] {
   left: calc(100% + 12px);
 }
 
+/* With words on every side of the frame (a phone's heading between its
+   eyebrow and its first line), the tag is the code alone (HIT, GUIDE, FILE),
+   beside the frame or just inside its top right bracket where a shorter
+   first line leaves it empty; with no free place it stays out and the
+   brackets keep the place (record-arrival.ts chooseTag). */
+.record-landing-tag[data-compact] {
+  gap: 0;
+  padding-right: 2px;
+}
+
+.record-landing-tag[data-compact] > span {
+  display: none;
+}
+
+.record-landing-reticle[data-tag="inside"] > .record-landing-tag {
+  --rl-tag-y: 0%;
+  top: 6px;
+  right: 10px;
+  left: auto;
+}
+
+/* Hidden but measured: the next frame shape may find it a place. */
+.record-landing-reticle[data-tag="none"] > .record-landing-tag {
+  visibility: hidden;
+}
+
 /* The still tier's tag leaves with a plain fade: no movement. */
 .record-landing-layer[data-mode="still"] .record-landing-tag[data-faded] {
   opacity: 0;

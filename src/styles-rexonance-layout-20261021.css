@@ -1318,3 +1318,49 @@ html[data-family="special"]
     box-shadow: none;
   }
 }
+
+/* Round 2 (2026-10-22): P14's three readings stand side by side only where
+   each cell holds its figure: 約0.06ms (5.1em) ran 27px past its cell into
+   96% beside a chip on an iPad (the copy column is 346–376px there). Below
+   470px of their own width they read as rows, label left, figure right, as
+   on a phone — whatever the screen, the readings' width decides. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > #p14
+  .rxs-p14-copy
+  > dl {
+  container: rxs-p14-readings / inline-size;
+}
+
+@container rxs-p14-readings (max-width: 469.98px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > #p14
+    .rxs-p14-copy
+    > dl
+    > div {
+    /* A container query cannot restyle the dl itself: each reading spans
+       its three columns instead, one row apiece. */
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 0;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > #p14
+    .rxs-p14-copy
+    > dl
+    > div
+    + div {
+    padding-inline-start: 0;
+    border-inline-start: 0;
+    border-block-start: 1px solid var(--rxl-line-soft);
+  }
+}

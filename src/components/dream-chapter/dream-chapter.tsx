@@ -302,7 +302,8 @@ function resolveCharacterCardSpec(item: DreamCharacter): string {
 function resolveDolminenceCardSpec(record: DreamDolminence): string {
   const punch = record.profile.find((row) => row.label === "PUNCH")?.value.replace(/（.*?）/g, "");
   const kick = record.profile.find((row) => row.label === "KICK")?.value.replace(/（.*?）/g, "");
-  if (punch && kick) return `PUNCH ${punch} · KICK ${kick}`;
+  // The no-break space keeps the dot on the PUNCH line when a narrow card wraps the badge.
+  if (punch && kick) return `PUNCH ${punch}\u00a0· KICK ${kick}`;
   const device = record.profile.find((row) => row.label === "DEVICE")?.value;
   return device ? `DEVICE: ${device}` : `${record.items.length}CLASSIFIED SPECS`;
 }

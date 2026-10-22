@@ -19,17 +19,16 @@ export const Route = createFileRoute("/far-from-saga")({
   component: FarFromSaga,
   head: () => ({
     meta: [
-      { title: "ファーフロムサーガ｜Deception World" },
+      { title: "ファーフロムサーガ｜FAR FROM SAGA — Deception World" },
       {
         name: "description",
         content:
-          "ファイナルステージ限定の超究極フォーム、仮面ライダーファーフロムサーガの公式特設サイト（準備中）。変身音声、暫定標準値、ミドルからウルトラまでの五つの形態段階。",
+          "ファイナルステージ限定の超究極フォーム、仮面ライダーファーフロムサーガの特設サイト。変身音声、スペック、5つの形態、中核機構、神属権限、武装、必殺技を掲載。",
       },
-      { property: "og:title", content: "ファーフロムサーガ｜Deception World" },
+      { property: "og:title", content: "ファーフロムサーガ｜FAR FROM SAGA — Deception World" },
       {
         property: "og:description",
-        content:
-          "レクソナンスの超共鳴と、ヴィンクルムの接続を一つの戦闘体系へ。ファーフロムサーガ公式特設サイト。",
+        content: "どこまで離れても、この拳の一部だ。ファイナルステージ限定の超究極フォーム、仮面ライダーファーフロムサーガ。",
       },
       { property: "og:image", content: FAR_FROM_SAGA_KEY_VISUAL.src },
     ],

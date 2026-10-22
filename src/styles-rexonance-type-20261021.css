@@ -766,6 +766,18 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt)
 /* ================================================================
    The iPad column and phones
    ================================================================ */
+/* Round 2 (2026-10-22): the script column beside the stage at 1100–1299
+   (an iPad in landscape, a 1280 laptop) is 344–424px wide, and the longest
+   first line, 「同じエーテルで、」, is 7.44em: at step-5 (55–60px) its
+   comma fell to a line of its own (「同じエーテル／で、」). Every chapter
+   title follows the column there, so the one size still holds for all. */
+@media (min-width: 1100px) and (max-width: 1299.98px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-section-heading h2,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) #rxs-assembly-title {
+    font-size: min(var(--rxt-step-5), calc(5.3vw - 13px));
+  }
+}
+
 @media (max-width: 1099px) {
   /* The plates stand three across at 1024: their codes close up so each
      holds two lines, not three. */

@@ -1,7 +1,7 @@
 import { useWorldMode } from "./use-world-mode";
 import { DossierNav } from "./dossier-nav";
 import { DossierTopbar } from "./world-chrome";
-import { DossierContents, DossierReader } from "./dossier-reader";
+import { DossierContents, DossierReader, PhrasedText } from "./dossier-reader";
 import { FormPickup } from "./manager-stub";
 import { VARG_FACTS } from "./varg-data";
 import {
@@ -98,7 +98,9 @@ export function DantePage() {
               <div className="manager-copy-heading">
                 <span>{section.no}</span>
                 <p>{section.kicker}</p>
-                <h2>{section.title}</h2>
+                <h2>
+                  <PhrasedText text={section.title} />
+                </h2>
               </div>
               <div className="manager-copy-body">
                 {section.no === "04" ? (

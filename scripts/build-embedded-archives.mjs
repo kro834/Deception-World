@@ -15,7 +15,7 @@ const stabilityScript = '<script src="/archive-scroll-stability.js?v=20260930-r4
 const zeusBridgeScript = '<script src="/archive-zeus-bridge.js?v=20261011-z2" defer></script>';
 // Carries the reader's form and compared pair between the page URL and this
 // sandboxed frame (the page passes them in the frame's #fragment).
-const stateBridgeScript = '<script src="/archive-state-bridge.js?v=20261009-s1" defer></script>';
+const stateBridgeScript = '<script src="/archive-state-bridge.js?v=20261022-s2" defer></script>';
 const nameWordAssets = '<link rel="stylesheet" href="/name-words.css?v=20261006-names">\n<script src="/archive-name-words.generated.js?v=20261006-names" defer></script>';
 // The frame intentionally has an opaque sandbox origin. Classic scripts
 // preserve that boundary; ES module fetches would require CORS permission.

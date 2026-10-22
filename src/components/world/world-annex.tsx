@@ -759,6 +759,17 @@ function ArchiveLog() {
             title="用語集"
             count={`${pad(WORLD_GLOSSARY.length)} TERMS`}
           />
+          {/* The terms as a register (numbered from styles-world-zenith.css),
+              each a jump to its entry below. */}
+          <nav className="wa-term-index" aria-label="用語の索引">
+            <ol>
+              {WORLD_GLOSSARY.map((entry) => (
+                <li key={entry.term}>
+                  <a href={`#wa-term-${entry.term}`}>{entry.term}</a>
+                </li>
+              ))}
+            </ol>
+          </nav>
           <dl className="wa-glossary">
             {WORLD_GLOSSARY.map((entry) => (
               <div key={entry.term} id={`wa-term-${entry.term}`}>

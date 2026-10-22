@@ -1151,8 +1151,39 @@
     left: 2%;
   }
 
+  /* Round 2 (2026-10-22): the caption hangs under the logo's marks. The
+     marks' foot stands 8% above the lockup's foot and the caption stood
+     2.5% above it, so on a lockup this short (265 px at 667 x 375) the gold
+     arms ran into THE SECOND SAGA and DECEPTION WORLD reached SKIP's plate.
+     The lockup gives back 18 px (the styles.css formula less 18 px), and the
+     caption hangs 6 px under the marks at a closer tracking and gap,
+     centred, clear of SKIP from 640 px up. */
+  .cine-title-lockup {
+    width: min(92vw, calc((100dvh - 128px - env(safe-area-inset-bottom, 0px)) * 1.5));
+  }
+
+  .cine-title-caption {
+    --op-caption-track: 0.12em;
+    top: calc(92% + 6px);
+    bottom: auto;
+    gap: 10px;
+  }
+
+  .cine-title-caption i {
+    width: 28px;
+  }
+
   .cine-btn {
     min-height: 46px;
+  }
+
+  /* A phone held sideways has no Esc key: SKIP drops the key cap (as under
+     700 px), so its plate (178 px with the cap) stays clear of DECEPTION
+     WORLD at 740 x 360 and 750 x 342. */
+  @media (pointer: coarse) {
+    .cine-skip kbd {
+      display: none;
+    }
   }
 
   .cine-skip {
