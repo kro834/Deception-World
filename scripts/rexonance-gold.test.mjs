@@ -89,7 +89,8 @@ test("rx17: each plate's gold forms right after it seats, quickly, and is done i
   assert.equal(Math.max(...Object.values(REXONANCE_SUIT_GOLD_AT).map(([, to]) => to)), 1986);
   assert.equal(REXONANCE_SUIT_PIXELS.fill, 1990);
   assert.equal(REXONANCE_SUIT_PIXELS.scatter, 2520);
-  assert.equal(REXONANCE_ENTRY_TIMINGS.cover, 3730);
+  // Owner (2026-10-22): the fire's hold is 360 ms (cover 2730 + 360) to fit the hand-over budget.
+  assert.equal(REXONANCE_ENTRY_TIMINGS.cover, 3090);
 });
 
 test("rx17: the gold atlas and the gold cells, generated with the plates", async () => {

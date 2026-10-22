@@ -5,6 +5,7 @@
 export { fieldHash, fieldTake, fieldVisitSeed } from "./field-seed.js";
 export {
   FIELD_FLASH_SHARE,
+  FIELD_GATHER,
   FIELD_STATE,
   FIELD_WAKE_RISE,
   fieldScore,

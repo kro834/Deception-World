@@ -6,6 +6,7 @@ import {
   FIELD_CAMERA,
   FIELD_FLASH_SHARE,
   FIELD_FRAGMENT_SHADER,
+  FIELD_GATHER,
   FIELD_GL,
   FIELD_SEEDS,
   FIELD_SHAPE,
@@ -173,7 +174,8 @@ test("a score is validated and frozen; the entry's follows the pinned call table
   assert.deepEqual([...entry.collapse], [REXONANCE_SUIT_SNAP.helm, REXONANCE_SUIT_LIGHT.from]);
   assert.deepEqual([...entry.detonate], [...REXONANCE_FIELD_ENTRY.detonate]);
   assert.ok(entry.end <= REXONANCE_SUIT_LIGHT.from + REXONANCE_SUIT_LIGHT.bloom);
-  assert.ok(entry.end < REXONANCE_ENTRY_TIMINGS.cover - 1000);
+  // Owner (2026-10-22): the cover is 3090 now (the fire's hold is 360 ms).
+  assert.ok(entry.end < REXONANCE_ENTRY_TIMINGS.cover - 600);
   assert.deepEqual([...entry.origin], [...REXONANCE_SUIT_MARKS.core]);
 });
 
@@ -365,6 +367,42 @@ test("the state is a pure function of the clock: charge, attractor, tightness, i
   assert.ok(Math.abs(fieldState(thinned, 550, thin)[F.SETTLE] - 0.65) < 1e-6);
   assert.ok(Math.abs(fieldState(thinned, 700, thin)[F.SETTLE] - 0.3) < 1e-6);
   assert.throws(() => fieldScore({ ...thinned, settle: 2 }), RangeError);
+});
+
+// Photosensitivity (2026-10-22): the wake's sweep packs every chip on the body
+// a few frames before the legs draw it down, a second large-area pulse less
+// than a second after the burst (verify-route-transitions menu-rexonance). The
+// entry's gather dims the field's light over that sweep and restores it after.
+test("the entry's field gives way over the wake's gather, then comes back whole", () => {
+  const F = FIELD_STATE;
+  const entry = entryFieldScore();
+  const out = fieldStateBuffer();
+  const [from, to] = entry.wake;
+  const length = to - from;
+  const settle = (t) => fieldState(entry, t, out)[F.SETTLE];
+  assert.equal(entry.gather, 0.45);
+  assert.deepEqual({ ...FIELD_GATHER }, { from: 0.4, full: 0.7, back: 0.6 });
+  assert.equal(settle(from + length * FIELD_GATHER.from), 1, "the burst itself is untouched");
+  assert.ok(Math.abs(settle(from + length * FIELD_GATHER.full) - 0.55) < 1e-6);
+  assert.ok(Math.abs(settle(to) - 0.55) < 1e-6);
+  // Back to the score's own thinning (from the first lock to the last).
+  const first = entry.glock[0];
+  const last = entry.glock[entry.count - 1];
+  const u = Math.min(1, Math.max(0, (to + length * FIELD_GATHER.back - first) / (last - first)));
+  const thinning = 1 - (1 - entry.settle) * u * u * (3 - 2 * u);
+  assert.ok(Math.abs(settle(to + length * FIELD_GATHER.back) - thinning) < 1e-6);
+  assert.ok(to + length * FIELD_GATHER.back < entry.glock[1], "whole again before the waist locks");
+  let previous = 1;
+  for (let t = from; t <= to + length; t += 0.5) {
+    const value = settle(t);
+    assert.ok(Math.abs(value - previous) < 0.01, "no step");
+    previous = value;
+  }
+  // A score without a gather keeps its light (the scroll scene's).
+  const plain = fieldScore({ ...entry, gather: undefined, groups: [{ x: 0, y: 0, from: 900, lock: 1000 }] });
+  assert.equal(plain.gather, 0);
+  assert.equal(fieldState(plain, to, out)[F.SETTLE], 1);
+  assert.throws(() => fieldScore({ ...entry, groups: [{ x: 0, y: 0, from: 900, lock: 1000 }], gather: 1 }), RangeError);
 });
 
 test("the camera is exact identity throughout: the body never moves (owner, 2026-10-21)", () => {

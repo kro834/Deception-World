@@ -71,8 +71,9 @@ test("canonical calls stay exact and entry calls retain the five-beat order", ()
 });
 
 test("entry and stage timings stay bounded and stage labels are not new calls", () => {
-  // Preserve the authored face hold while the preceding flame gains 1 s.
-  assert.equal(REXONANCE_ENTRY_TIMINGS.cover, 3730);
+  // Preserve the authored face hold while the preceding flame gains 360 ms.
+  // Owner (2026-10-22): the fire's hold is 360 ms (cover 2730 + 360) to fit the hand-over budget.
+  assert.equal(REXONANCE_ENTRY_TIMINGS.cover, 3090);
   assert.equal(REXONANCE_ENTRY_TIMINGS.reveal, 480);
   assert.equal(REXONANCE_STAGE_DURATION_MS, 650);
   assert.deepEqual(REXONANCE_STAGE_LABELS, {

@@ -65,6 +65,15 @@ export const FIELD_STATE = Object.freeze({
 export const FIELD_WAKE_RISE =
   (NANITE_FIRE_PHASES.materialStart - FIELD_WAKE[0]) / (FIELD_WAKE[1] - FIELD_WAKE[0]);
 
+/** The gather (photosensitivity, 2026-10-22): the wake's sweep brings every
+ * chip in at once from the burst's throw onto its line, and the cloud packs
+ * on the body for a few frames before the first group draws it down — one
+ * more large-area pulse less than a second after the burst's. The score's
+ * `gather` share of the light gives way over that sweep (wake shares
+ * [dim from, dim full]) and comes back over `back` of the wake after it, so
+ * the field never swings a whole cell's luminance on its own. */
+export const FIELD_GATHER = Object.freeze({ from: 0.4, full: 0.7, back: 0.6 });
+
 /** How far into an impulse the impact frame lasts (share of its span). */
 export const FIELD_FLASH_SHARE = 0.18;
 
@@ -93,6 +102,9 @@ export function fieldScore({
   spread = [0, 0],
   // The field left by the time the last group locks (1: none of it goes).
   settle = 1,
+  // How much of the field's light gives way while the wake sweeps its chips
+  // in onto their lines (0: none). See FIELD_GATHER.
+  gather = 0,
 }) {
   const pair = (value, name) => {
     if (!Array.isArray(value) || value.length !== 2 || !(value[0] < value[1]))
@@ -110,6 +122,8 @@ export function fieldScore({
     throw new RangeError("field score: spread");
   if (!Number.isFinite(settle) || settle < 0 || settle > 1)
     throw new RangeError("field score: settle");
+  if (!Number.isFinite(gather) || gather < 0 || gather >= 1)
+    throw new RangeError("field score: gather");
   const n = groups.length;
   const gx = new Float32Array(n);
   const gy = new Float32Array(n);
@@ -146,6 +160,7 @@ export function fieldScore({
     origin: Object.freeze([origin[0], origin[1]]),
     spread: Object.freeze([spread[0], spread[1]]),
     settle,
+    gather,
     count: n,
     gx,
     gy,
@@ -266,6 +281,14 @@ export function fieldState(score, clock, out) {
   const first = score.glock[0];
   const last = score.glock[score.count - 1];
   out[F.SETTLE] = 1 - (1 - score.settle) * smooth(span(t, first, last));
+  if (score.gather > 0) {
+    const G = FIELD_GATHER;
+    const length = wakeTo - wakeFrom;
+    const dim =
+      smooth(span(t, wakeFrom + length * G.from, wakeFrom + length * G.full)) *
+      (1 - smooth(span(t, wakeTo, wakeTo + length * G.back)));
+    out[F.SETTLE] *= 1 - score.gather * dim;
+  }
   out[F.FLASH] = Math.min(1, flash);
   return out;
 }
