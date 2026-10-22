@@ -12,7 +12,7 @@ import { chromium, webkit } from "playwright";
 import sharp from "sharp";
 import { connectedFireEvidence } from "./rexonance-fire-evidence.mjs";
 import { assertSpreadSequence, flameSpreadEvidence } from "./rexonance-spread-evidence.mjs";
-import { entryCanonicalTime, NANITE_FIRE_PHASES } from "../src/lib/rexonance-ignition.js";
+import { entryCanonicalTime, entryElapsedTime, NANITE_FIRE_PHASES } from "../src/lib/rexonance-ignition.js";
 import { scrollFlameAt } from "../src/lib/rexonance-field/field-clock.js";
 
 const materialEntry = NANITE_FIRE_PHASES.materialStart * 2400;
@@ -25,10 +25,44 @@ const naturalClock = process.env.FLAME_NATURAL === "1";
 // Extra ignition/firebrand shots are diagnostic, not another four waits
 // inside WebKit's non-pausable route-coordinator wall-clock deadline.
 const detailedEntry = process.env.FLAME_ENTRY_DETAIL === "1";
-const entrySamples = detailedEntry
-  ? [60, 180, 280, 420, 900, 1250, 1360, 1400, 1420, 1460, 1520, 1560, 1590, 1600, 1620, 1850, 3600]
-  : [60, 180, 280, 420, 900, 1250, 1420, 1460, 1560, 1590, 1600, 1620, 1850, 3600];
-const entryPeak = (shot) => [1250, 1420, 1460].includes(shot.target);
+// Capture times are authored as CANONICAL entry times (what the flame engine
+// and its phases are keyed to) and converted to the real call clock with
+// entryElapsedTime, so they follow REXONANCE_ENTRY_VORTEX_HOLD_MS instead of a
+// hard-coded hold. Each canonical value is the one the old 1000 ms hold
+// sampled (e.g. 1420 ms elapsed = 420 canonical).
+const elapsedAt = (canonicalMs) => Math.round(entryElapsedTime(canonicalMs));
+const canonicalSamples = {
+  kindle: 60,
+  quietA: 180,
+  quietB: 280,
+  scanEnd: 329,
+  sustainedA: 373,
+  sustainedB: 405,
+  vortexA: 414,
+  vortexB: 418,
+  peak: 420,
+  peakLate: 460,
+  clearA: 520,
+  explosionEnd: 560,
+  clearGap: 590,
+  materialA: 600,
+  materialB: 620,
+  materialC: 850,
+  extinction: 2600,
+};
+const sampleAt = Object.fromEntries(
+  Object.entries(canonicalSamples).map(([key, value]) => [key, elapsedAt(value)]),
+);
+const entrySamples = (
+  detailedEntry
+    ? Object.values(canonicalSamples)
+    : Object.entries(canonicalSamples)
+        .filter(([key]) => !["vortexA", "vortexB", "clearA"].includes(key))
+        .map(([, value]) => value)
+).map(elapsedAt);
+const extinctionTarget = sampleAt.extinction;
+const entryPeak = (shot) =>
+  [sampleAt.sustainedB, sampleAt.peak, sampleAt.peakLate].includes(shot.target);
 const coverageMinimum = process.env.FLAME_COVERAGE_MIN
   ? Number(process.env.FLAME_COVERAGE_MIN)
   : null;
@@ -588,7 +622,7 @@ function assertCombustionPeak(shots, isPeak, label) {
   assert.ok(peaks.length >= 2, `${label}: multiple actual full-body combustion samples`);
   assertSpreadSequence(assert, shots, {
     peak: isPeak,
-    kindle: (shot) => shot.target === 60 || shot.progress === 0.025,
+    kindle: (shot) => shot.target === sampleAt.kindle || shot.progress === 0.025,
     minimum: coverageMinimum ?? 0.05,
     label,
   });
@@ -756,7 +790,7 @@ try {
             nativeFallbackDraws: nativeWindow.fallback,
             file,
           });
-          if (target === 3600) {
+          if (target === extinctionTarget) {
             const before = await page.evaluate(
               () => window.__flameQA.atlas.entry + window.__flameQA.fallback.entry,
             );
@@ -791,7 +825,7 @@ try {
           );
           assert.equal(
             record.entryExtinguished?.target,
-            3600,
+            extinctionTarget,
             "the entry extinction sample cannot be silently skipped",
           );
           if (!baseline) {
@@ -838,7 +872,7 @@ try {
               .every((shot) => shot.atlasDraws > 0 && shot.pixels?.green > 0),
             `${name}: initial flame frames must be drawn, not only a later return call`,
           );
-          const sustained = record.entry.filter((shot) => [900, 1250].includes(shot.target));
+          const sustained = record.entry.filter((shot) => [sampleAt.sustainedA, sampleAt.sustainedB].includes(shot.target));
           assert.equal(sustained.length, 2, "both added-duration flame samples must be captured");
           assert.ok(
             sustained.every((shot) => shot.nativeAtlasDraws > 0 && shot.pixels?.green > 0),
@@ -1036,7 +1070,7 @@ try {
               `${name}/reverse`,
             );
             if (!naturalClock) {
-              const quiet = record.entry.filter((shot) => shot.target <= 280);
+              const quiet = record.entry.filter((shot) => shot.target <= sampleAt.quietB);
               const flare = record.entry.filter(entryPeak);
               const energy = (shot) => shot.fireEvidence?.meanGreenExcess ?? 0;
               record.ignitionEnergy = {
@@ -1048,7 +1082,7 @@ try {
                 "the real field grows from quiet ignition into a rapid flare, not a constant bright overlay",
               );
               const clearing = record.entry.filter(
-                (shot) => shot.target === 1560 || shot.target === 1590,
+                (shot) => shot.target === sampleAt.explosionEnd || shot.target === sampleAt.clearGap,
               );
               assert.equal(clearing.length, 2, "both explosion end and clear gap are captured");
               assert.ok(
