@@ -1,8 +1,9 @@
 // FAR FROM SAGA's entry transformation (owner, 2026-10-22: 「遷移画面の変身
 // アニメーション」, modelled on Rexonance's entry call): its calls, clock and
 // cascade, the closed-form swarm of both nanite kits, the engine's draw
-// passes (no per-frame allocation), the gold fire, the still tiers, the
-// skip, the once-per-visit mark, and the delivered suit data.
+// passes (no per-frame allocation), the gold fire, the route transition
+// screen that plays it (as Rexonance's: its loader, warm-up, tiers and
+// skip), and the delivered suit data.
 import assert from "node:assert/strict";
 import { readFileSync, statSync } from "node:fs";
 import test from "node:test";
@@ -19,6 +20,7 @@ import { FIRE_TONES } from "../src/lib/rexonance-fire/fire-tuning.js";
 import { REXONANCE_NANITE_CELLS } from "../src/lib/rexonance-nanites.ts";
 import { FAR_FROM_NANITE_CELLS } from "../src/lib/far-from-nanites.ts";
 import { REXONANCE_SUIT_SIZE } from "../src/lib/rexonance-suit.ts";
+import { createFarFromTransitionLoader } from "../src/lib/far-from-entry-gate.ts";
 
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 const transition = read("src/components/far-from-saga/far-from-entry-transition.tsx");
@@ -28,6 +30,9 @@ const plan = read("src/components/far-from-saga/far-from-entry-plan.ts");
 const warmup = read("src/lib/far-from-entry-warmup.ts");
 const page = read("src/components/far-from-saga/far-from-saga.tsx");
 const sheet = read("src/styles-far-from-entry.css");
+const gate = read("src/components/load-gate.tsx");
+const gateModule = read("src/lib/far-from-entry-gate.ts");
+const root = read("src/routes/__root.tsx");
 
 test("the seven calls are the record's own, verbatim, on six contiguous beats inside the cover", () => {
   assert.equal(calls.FAR_FROM_CALLS, FAR_FROM_SAGA.calls);
@@ -396,29 +401,99 @@ test("the fire burns on the registered undersuit in its gold end tone, and the t
     statSync(new URL(`../public${src}`, import.meta.url));
 });
 
-test("the transition never gates first paint, plays once per visit, shows a still for reduced motion / economy / Save-Data, is skippable, and lazy-loads everything heavy", () => {
-  assert.match(page, /<FarFromEntryTransition stage=\{stage\} \/>/);
-  assert.match(transition, /useState<State>\(\{ kind: "idle" \}\)/);
+test("the entry plays in the route transition screen as Rexonance's does: prepared before the cover with a deadline, warmed beside it, retained through the reveal, timed by its own light module", () => {
+  // The gate imports one light module; the sequence, the engine, the fire
+  // and the atlas data are its dynamic imports.
+  assert.match(gate, /from "@\/lib\/far-from-entry-gate"/);
+  assert.match(gate, /from "@\/lib\/far-from-entry-timings"/);
+  assert.doesNotMatch(gate, /^import .*far-from-entry-(sequence|engine|warmup|suit|calls|kits|swarm)/m);
   assert.match(
-    transition,
-    /if \(state\.kind === "idle" \|\| state\.kind === "done"\) return null;/,
+    gateModule,
+    /\(\) => import\("\.\.\/components\/far-from-saga\/far-from-entry-sequence"\)/,
   );
-  // No heavy import in the page's chunk: the sequence and the warm-up are dynamic.
+  assert.match(gateModule, /import\("\.\/far-from-entry-warmup\.ts"\)/);
   assert.doesNotMatch(
-    transition,
-    /^import .*far-from-entry-(sequence|engine|suit|swarm|warmup|calls)/m,
+    gateModule,
+    /^import (?!type ).*far-from-entry-(sequence|engine|warmup|suit|calls|kits|swarm)/m,
   );
-  assert.match(transition, /import\("\.\/far-from-entry-sequence"\)/);
-  assert.match(transition, /import\("@\/lib\/far-from-entry-warmup"\)/);
-  assert.equal(transition.includes("rexonance-flame"), false);
-  // Once per visit.
-  assert.match(transition, /sessionStorage\.getItem\(FAR_FROM_ENTRY_PLAYED_KEY\)/);
-  assert.match(transition, /sessionStorage\.setItem\(FAR_FROM_ENTRY_PLAYED_KEY, "1"\)/);
+  assert.doesNotMatch(read("src/lib/far-from-entry-timings.ts"), /^import /m);
+  // The dive's cover is the call's; the last beat ends inside it.
+  assert.match(gate, /"far-from": FAR_FROM_ENTRY_TIMINGS,/);
+  assert.deepEqual(calls.FAR_FROM_ENTRY_TIMINGS, { cover: 3240, reveal: 480 });
+  const last = calls.FAR_FROM_ENTRY_BEATS.at(-1);
+  assert.ok(last.start + last.duration <= calls.FAR_FROM_ENTRY_TIMINGS.cover);
+  assert.match(sequence, /"--rx-call-cover": `\$\{FAR_FROM_ENTRY_TIMINGS\.cover\}ms`/);
+  // The same shape as Rexonance's branch (rexonance-lazy-loading,
+  // rexonance-call-scene): prepared before the cover, the call yields a
+  // frame before mounting, the decoded images get one bounded window.
+  const branch = gate.slice(gate.indexOf('if (diveVariant === "far-from") {'));
   assert.match(
-    transition,
-    /if \(played\(\)\) \{\s*revealed\.current\?\.\(\);\s*return;\s*\}\s*markPlayed\(\);/,
+    branch,
+    /farFromCall = await preparation\.promise;[\s\S]*?if \(!isCurrent\(\)\) return;[\s\S]*?setGate\(\{[\s\S]*?phase: "covering",[\s\S]*?farFromCall,\s*farFromSuit,/,
   );
-  // The still tiers.
+  assert.match(
+    branch,
+    /phase: "revealing",\s*scene: landed,\s*rexonanceCall,\s*rexonanceSuit,\s*farFromCall,\s*farFromSuit,/,
+  );
+  assert.match(gate, /diveVariant === "far-from" && !farFromCall\s*\? CALM_TIMINGS/);
+  assert.match(gate, /callOnly: Boolean\(rexonanceCall\) \|\| Boolean\(farFromCall\)/);
+  assert.match(
+    branch,
+    /if \(farFromCall && tier === "full"\) setSignal\("running"\);\s*await nextFrame\(\);\s*await nextFrame\(\);\s*if \(!isCurrent\(\)\) return;/,
+  );
+  assert.match(
+    branch,
+    /prepareRexonanceEntry\(\{\s*decoded: farFromWarm,[\s\S]*?deadlineMs: 1800,/,
+  );
+  assert.match(
+    branch,
+    /rexonanceCoverCancel\.current = entry\.cancel;\s*const ready = await entry\.promise;[\s\S]*?if \(!isCurrent\(\)\) return;\s*if \(ready\) farFromSuit = "build";/,
+  );
+  assert.ok(
+    branch.indexOf("await entry.promise;") < branch.indexOf("startedAt = performance.now();"),
+  );
+  // The warm-up only on the full tier; pieces decoded while the scan still
+  // runs switch the call to the build; the call runs from its first
+  // painted frame.
+  assert.match(
+    gate,
+    /diveVariant === "far-from" && tier === "full" \? warmFarFromEntry\("high"\) : null/,
+  );
+  assert.match(branch, /performance\.now\(\) - startedAt > FAR_FROM_ENTRY_LATE_MS/);
+  assert.match(
+    branch,
+    /current\.active && current\.phase === "covering" && current\.farFromCall\s*\? \{ \.\.\.current, farFromSuit \}/,
+  );
+  assert.match(branch, /if \(diveVariant === "far-from"\) startedAt = performance\.now\(\);/);
+  // The cover's hold is the shared one (a live preference ends it).
+  assert.match(
+    branch,
+    /else if \(diveVariant === "far-from" && farFromCall\) \{[\s\S]*?const hold = waitForRexonanceCover\(coverTimeLeft\);/,
+  );
+  // Intent warms it; a hidden page cancels it; the settled gate releases it.
+  assert.match(gate, /if \(to === "\/far-from-saga"\) prefetchFarFromEntry\(\);/);
+  assert.match(
+    gate,
+    /rexonanceTransition\.current !== null \|\| farFromTransition\.current !== null/,
+  );
+  assert.match(gate, /if \(farFromTransition\.current === null\) releaseFarFromEntry\(\);/);
+  assert.equal((gate.match(/farFromTransition\.current = null;/g) ?? []).length, 3);
+  // The renderer in the dive, with the gate's tier and suit.
+  assert.match(
+    gate,
+    /<FarFromCallSequence\s*phase=\{phase\}\s*tier=\{scene\?\.tier \?\? "reduced"\}\s*suit=\{farFromSuit \?\? "whole"\}\s*\/>/,
+  );
+  assert.match(gate, /farFrom \? " is-far-from-calls" : ""/);
+  assert.match(gate, /const farFrom = variant === "far-from" && Boolean\(FarFromCallSequence\);/);
+  // Rexonance's own lines stay (its tests pin them).
+  assert.match(gate, /const callOnly = Boolean\(rexonanceCall\);/);
+  assert.match(gate, /rexonance: REXONANCE_ENTRY_TIMINGS,/);
+  assert.match(gate, /if \(diveVariant === "rexonance"\) startedAt = performance\.now\(\);/);
+});
+
+test("the still tiers, the skip, and the page: reduced motion and economy rest the call on the figure, the button or Escape shortens the cover, and the page plays nothing of its own", () => {
+  // Tiers: nothing heavy is fetched on a still tier, and the gate's tier
+  // reaches the sequence, whose suit then stands whole without the engine.
   for (const condition of [
     /prefers-reduced-motion: reduce/,
     /forced-colors: active/,
@@ -426,32 +501,102 @@ test("the transition never gates first paint, plays once per visit, shows a stil
     /connection\?\.saveData/,
     /\["slow-2g", "2g"\]/,
   ])
-    assert.match(transition, condition);
-  assert.match(transition, /if \(stillTier\(\)\) \{\s*setState\(\{ kind: "still" \}\);/);
-  assert.match(transition, /data-tier="reduced"/);
-  assert.match(sheet, /\.ffe-cover > \.ffe-still \.rx-suit-whole \{\s*display: block;/);
-  // Skippable: a real button and Escape, then the reveal.
+    assert.match(gateModule, condition);
+  assert.match(gateModule, /if \(isFarFromEntryStill\(\)\) return Promise\.resolve\(false\);/);
+  assert.match(sequence, /data-tier=\{tier\}/);
+  assert.match(sequence, /<Suit suit=\{suit\} animate=\{tier === "full"\} \/>/);
+  assert.match(sequence, /const shown = fallback \|\| !animate \? "whole" : suit;/);
   assert.match(
-    transition,
-    /<button type="button" className="ffe-skip" onClick=\{skip\} aria-label="変身演出をスキップ">\s*スキップ/,
+    sequence,
+    /\{shown === "build" \? <FarFromEntryNanites onEngine=\{onEngine\} \/> : null\}/,
   );
-  assert.match(transition, /if \(event\.key === "Escape"\) skip\(\);/);
-  assert.match(transition, /const skip = useCallback\(\(\) => \{\s*markPlayed\(\);\s*reveal\(\);/);
+  // (The call sheet's still rules show the whole figure: no rule of this
+  // sheet hides it on a still tier.)
+  assert.doesNotMatch(sheet, /data-tier="(calm|reduced)"/);
+  // The skip: a real button while the full tier covers, and Escape; it
+  // marks the cover spent before the hold and ends the hold during it.
+  assert.match(
+    gate,
+    /<button\s*type="button"\s*className="ffe-skip"\s*onClick=\{onSkip\}\s*aria-label="変身演出をスキップ"\s*>\s*スキップ/,
+  );
+  assert.match(gate, /if \(event\.key === "Escape"\) onSkip\?\.\(\);/);
+  assert.match(
+    gate,
+    /const farFromSkippable = farFrom && !revealing && scene\?\.tier === "full" && Boolean\(onSkip\);/,
+  );
+  assert.match(gate, /farFromSkip\.current = \(\) => \{\s*farFromSkipped = true;\s*\};/);
+  assert.match(gate, /if \(!farFromSkipped\) \{/);
+  assert.match(gate, /farFromSkip\.current = hold\.cancel;/);
+  assert.match(gate, /const skipFarFrom = useCallback\(\(\) => farFromSkip\.current\?\.\(\), \[\]\);/);
   assert.match(sheet, /\.ffe-skip \{[\s\S]*?min-height: 44px;/);
-  // The scroll is held while it covers; the deadline gives up quietly.
-  assert.match(transition, /acquireViewportScrollLock\(\)/);
-  assert.match(transition, /if \(sequence\) begin\("whole"\);\s*else finish\(\);/);
-  // Its pinned timings match the calls'.
-  assert.match(transition, new RegExp(`const COVER_MS = ${calls.FAR_FROM_ENTRY_TIMINGS.cover};`));
-  assert.match(transition, new RegExp(`const REVEAL_MS = ${calls.FAR_FROM_ENTRY_TIMINGS.reveal};`));
-  assert.match(transition, new RegExp(`const STILL_FIGURE = "${suit.FAR_FROM_ENTRY_FIGURE}";`));
-  const ratio = (suit.FAR_FROM_ENTRY_SIZE.width / suit.FAR_FROM_ENTRY_SIZE.height).toFixed(4);
-  assert.match(transition, new RegExp(`const STILL_RATIO = "${ratio}";`));
-  // The sequence rides the global call sheet with this suit's data and its own sheet.
-  assert.match(sequence, /className="rx-call-sequence ffe-sequence"/);
-  assert.match(read("src/styles-far-from-saga.css"), /@import "\.\/styles-far-from-entry\.css";/);
-  assert.match(sheet, /html body:has\(\.ffe-overlay\) \.zeus-button/);
-  assert.match(sheet, /@media \(prefers-reduced-motion: reduce\)/);
+  assert.match(sheet, /\.ffe-skip \{[\s\S]*?pointer-events: auto;/);
+  // The gate's ground and status give way to the sequence, as Rexonance's.
+  assert.match(
+    sheet,
+    /html body \.load-gate\.is-far-from-dive\.is-far-from-calls \{\s*background: transparent !important;/,
+  );
+  assert.match(
+    sheet,
+    /html body \.load-gate\.is-far-from-dive\.is-far-from-calls > \.rider-dive-status \{/,
+  );
+  // Global, as the call sheet is: the departure page carries the first beat.
+  assert.match(root, /import farFromEntryCss from "\.\.\/styles-far-from-entry\.css\?url";/);
+  assert.match(root, /href: farFromEntryCss/);
+  assert.doesNotMatch(read("src/styles-far-from-saga.css"), /styles-far-from-entry\.css/);
+  // The page: its seam renders nothing (a direct load shows the page at
+  // once, as /rexonance-saga does); no overlay, no second play, no import.
+  assert.match(page, /<FarFromEntryTransition stage=\{stage\} \/>/);
+  assert.match(transition, /return null;/);
+  assert.doesNotMatch(transition, /^import /m);
+  assert.doesNotMatch(transition, /sessionStorage|setTimeout|useEffect/);
+  assert.doesNotMatch(sheet, /ffe-overlay|ffe-cover|ffe-still/);
+});
+
+test("the sequence's chunk loads once on demand, a failure can be retried, and a deadline or cancellation never revives a late import", async (t) => {
+  let imports = 0;
+  const renderer = () => null;
+  const prepare = createFarFromTransitionLoader(async () => {
+    imports++;
+    return { FarFromEntrySequence: renderer };
+  });
+  assert.equal(imports, 0);
+  const first = prepare();
+  const second = prepare();
+  assert.deepEqual(await Promise.all([first.promise, second.promise]), [renderer, renderer]);
+  assert.equal(await prepare().promise, renderer);
+  assert.equal(imports, 1);
+  for (const failure of ["throw", "reject"]) {
+    let tries = 0;
+    const retrying = createFarFromTransitionLoader(() => {
+      tries++;
+      if (tries === 1) {
+        if (failure === "throw") throw new Error("offline");
+        return Promise.reject(new Error("offline"));
+      }
+      return Promise.resolve({ FarFromEntrySequence: renderer });
+    });
+    assert.equal(await retrying().promise, null);
+    assert.equal(await retrying().promise, renderer);
+    assert.equal(tries, 2);
+  }
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  for (const reason of ["deadline", "cancel"]) {
+    let release;
+    const late = createFarFromTransitionLoader(
+      () =>
+        new Promise((resolve) => {
+          release = resolve;
+        }),
+    );
+    const request = late(50);
+    await Promise.resolve();
+    if (reason === "cancel") request.cancel();
+    else t.mock.timers.tick(50);
+    assert.equal(await request.promise, null);
+    release({ FarFromEntrySequence: renderer });
+    assert.equal(await request.promise, null);
+    assert.equal(await late().promise, renderer);
+  }
 });
 
 test("the delivered suit data is current: 36 plates partition the figure, the files weigh what the module says, and the registration contract holds", async () => {

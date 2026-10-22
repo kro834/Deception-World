@@ -1,5 +1,6 @@
 import { FAR_FROM_SAGA } from "../components/final-stage/final-stage-data.ts";
 import { FAR_FROM_ENTRY_FIRE, FAR_FROM_ENTRY_MATERIAL } from "./far-from-entry-ignition.js";
+import { FAR_FROM_ENTRY_LATE_MS, FAR_FROM_ENTRY_TIMINGS } from "./far-from-entry-timings.ts";
 
 /* FAR FROM SAGA's entry transformation: the calls and their clock (owner,
    2026-10-22: 「ファーフロムの変身はレクソナンスとほぼ同じ」). Modelled on
@@ -36,8 +37,10 @@ export const FAR_FROM_ENTRY_BEATS: readonly FarFromEntryBeat[] = [
 /** The verbatim call(s) of a beat (its data attribute). */
 export const beatCall = (beat: FarFromEntryBeat) =>
   beat.calls.map((index) => FAR_FROM_CALLS[index]).join("\n");
-/** The overlay covers the page this long, then reveals it over `reveal`. */
-export const FAR_FROM_ENTRY_TIMINGS = { cover: 3240, reveal: 480 } as const;
+/** The gate covers the page this long, then reveals it over `reveal`
+ * (far-from-entry-timings.ts: the route transition screen's own light
+ * module, re-exported here with the clock it times). */
+export { FAR_FROM_ENTRY_TIMINGS, FAR_FROM_ENTRY_LATE_MS };
 /** The undersuit scan: from the stylesheet's 70 ms delay over its span, to
  * the fire's ignition (FAR_FROM_ENTRY_FIRE.ignite). */
 export const FAR_FROM_ENTRY_SCAN = {
@@ -47,10 +50,6 @@ export const FAR_FROM_ENTRY_SCAN = {
 } as const;
 /** The last call's hand-over budget: the first call's frame locks in. */
 export const FAR_FROM_ENTRY_FRAME_MS = 560;
-/** The entry plays with the finished figure if its pieces are not decoded
- * when it starts; it switches to the build only while the scan runs. */
-export const FAR_FROM_ENTRY_LATE_MS = 300;
-
 const beat = (role: FarFromEntryRole) => FAR_FROM_ENTRY_BEATS.find((b) => b.role === role)!;
 const CHANT = beat("chant").start;
 const RESPONSE = beat("repetition").start;

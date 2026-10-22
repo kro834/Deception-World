@@ -53,12 +53,18 @@ import {
    on FAR FROM DEUS！ the eyes and the reactor fill with pixel squares that
    scatter: ミドル, complete.
 
-   Decorative: aria-hidden; the transition (far-from-entry-transition) owns
-   the skip control, the phase, the still tiers and the overlay's life. No
-   browser reads or timers in render: server and client render alike. */
+   Decorative: aria-hidden; the route transition screen (load-gate.tsx,
+   through far-from-entry-gate.ts) owns navigation, the phase, the tier,
+   the skip control, cancellation and the cover's timing, as it does for
+   Rexonance's call. No browser reads or timers in render: server and
+   client render alike. */
 
 type FarFromEntrySequenceProps = {
   phase: "covering" | "revealing";
+  /** The gate's tier: "full" plays the call; "calm" (economy) and
+   * "reduced" (prefers-reduced-motion) rest it on the finished figure and
+   * the last call, still (the shared call sheet's still rules). */
+  tier?: "full" | "calm" | "reduced";
   /** "build" when the suit's images are decoded; otherwise the finished
    * figure stands whole and the calls play over it. */
   suit: "build" | "whole";
@@ -345,7 +351,7 @@ function FarFromEntryNanites({
   return <div ref={host} className="rx-suit-nanites" />;
 }
 
-function Suit({ suit }: { suit: "build" | "whole" }) {
+function Suit({ suit, animate }: { suit: "build" | "whole"; animate: boolean }) {
   const { motes, pixels } = suitSquares();
   const [fallback, setFallback] = useState(false);
   const [engine, setEngine] = useState<"dom" | "canvas" | "finished">("dom");
@@ -353,7 +359,8 @@ function Suit({ suit }: { suit: "build" | "whole" }) {
     if (state === "whole") setFallback(true);
     else setEngine(state);
   }, []);
-  const shown = fallback ? "whole" : suit;
+  // A still tier stands the finished figure: no engine, no build.
+  const shown = fallback || !animate ? "whole" : suit;
   return (
     <div
       className="rx-suit"
@@ -506,7 +513,7 @@ function Suit({ suit }: { suit: "build" | "whole" }) {
   );
 }
 
-export function FarFromEntrySequence({ phase, suit }: FarFromEntrySequenceProps) {
+export function FarFromEntrySequence({ phase, tier = "full", suit }: FarFromEntrySequenceProps) {
   const chant = beatOf("chant");
   const response = beatOf("repetition");
   return (
@@ -514,7 +521,7 @@ export function FarFromEntrySequence({ phase, suit }: FarFromEntrySequenceProps)
       className="rx-call-sequence ffe-sequence"
       data-mode="entry"
       data-phase={phase}
-      data-tier="full"
+      data-tier={tier}
       data-stage="middle"
       data-saga="far-from"
       aria-hidden="true"
@@ -549,7 +556,7 @@ export function FarFromEntrySequence({ phase, suit }: FarFromEntrySequenceProps)
         <i />
         <i />
       </div>
-      <Suit suit={suit} />
+      <Suit suit={suit} animate={tier === "full"} />
       <div className="rx-call-caption">
         <span>{FAR_FROM_ENTRY_CAPTION[0]}</span>
         <span>{FAR_FROM_ENTRY_CAPTION[1]}</span>

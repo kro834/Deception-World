@@ -1,81 +1,45 @@
 /* ================================================================
    FAR FROM SAGA — the entry transformation's own sheet (owner's record,
-   2026-10-22). The overlay rides the global call sheet
+   2026-10-22). The call plays in the route transition screen
+   (load-gate.tsx) and rides the global call sheet
    (styles-rexonance-calls.css: .rx-call-sequence, .rx-suit-*) with this
-   suit's data; this sheet adds the overlay itself, its skip control, the
-   cover before the sequence is there, the still, and the Far From
-   differences: a gold accent, the undersuit registered inside the wider
-   figure and burnt away to nanites, the reactor's ignition on the last
-   call, the opening calls' longer lines, the reticle's longer run.
-   Paint, opacity and transform only; the motion is the call sheet's, gated
-   there by prefers-reduced-motion and economy.
+   suit's data; this sheet, global too (the first beat belongs to the
+   departure page), adds the gate's hand-over to the sequence, the skip
+   control, the still tiers' figure, and the Far From differences: a gold
+   accent, the undersuit registered inside the wider figure and burnt away
+   to nanites, the reactor's ignition on the last call, the opening calls'
+   longer lines, the reticle's longer run. Paint, opacity and transform
+   only; the motion is the call sheet's, gated there by
+   prefers-reduced-motion and economy.
    ================================================================ */
 
-.ffe-overlay {
-  position: fixed;
-  z-index: 1200;
-  inset: 0;
-  isolation: isolate;
-  pointer-events: auto;
-  touch-action: none;
-  -webkit-user-select: none;
-  user-select: none;
+/* The route transition screen plays this call as it plays Rexonance's
+   (styles-rexonance-calls.css, its first rules): the gate's own ground and
+   release give way to the sequence's, and its status line is for assistive
+   technology only. */
+html body .load-gate.is-far-from-dive.is-far-from-calls {
+  background: transparent !important;
+  animation: none !important;
+  transform: none !important;
+  opacity: 1 !important;
 }
 
-.ffe-overlay > .rx-call-sequence {
+html body .load-gate.is-far-from-dive.is-far-from-calls > .rider-dive-status {
   position: absolute;
-  inset: 0;
-}
-
-/* The floating control sits above every layer: hidden for the entry only. */
-html body:has(.ffe-overlay) .zeus-button {
-  visibility: hidden !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-  transition: none !important;
-}
-
-/* The cover before the sequence is there, and the still's ground. */
-.ffe-cover {
-  position: absolute;
-  inset: 0;
+  inset: auto;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
   overflow: hidden;
-  background:
-    radial-gradient(ellipse at 10% 50%, rgb(50 142 184 / 16%), transparent 48%),
-    radial-gradient(ellipse at 90% 50%, rgb(171 49 123 / 13%), transparent 48%), #02050b;
-  color: #effbff;
-  font-family: "Michroma", "Oxanium", "Helvetica Neue", sans-serif;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  animation: none !important;
+  transform: none !important;
 }
 
-.ffe-cover > .rx-call-caption {
-  color: #b0c9d6;
-}
-
-/* The still (reduced motion, economy, Save-Data): the finished figure and
-   the last call, no motion. The sequence is positioned by the call sheet. */
-.ffe-cover > .ffe-still {
-  position: absolute;
-  inset: 0;
-}
-
-.ffe-cover > .ffe-still .rx-call-ground {
-  background: transparent;
-}
-
-.ffe-cover > .ffe-still .rx-suit {
-  display: block;
-}
-
-.ffe-cover > .ffe-still .rx-suit-whole {
-  display: block;
-}
-
-/* The overlay leaves: the sequence's own reveal, or (still) the cover. */
-.ffe-overlay[data-ffe="revealing"] > .ffe-cover {
-  animation: rxCallGroundOut 240ms ease-out both;
-}
-
-/* The skip control: a real button, reachable, above the words. */
+/* The skip control: a real button, reachable, above the words and the
+   gate's own layers (the gate lets no pointer through; this does). */
 .ffe-skip {
   position: absolute;
   z-index: 60;
@@ -279,11 +243,6 @@ html body:has(.ffe-overlay) .zeus-button {
 }
 
 @media (forced-colors: active) {
-  .ffe-cover {
-    background: Canvas;
-    color: CanvasText;
-  }
-
   .ffe-skip {
     border-color: ButtonText;
     background: ButtonFace;
@@ -292,11 +251,6 @@ html body:has(.ffe-overlay) .zeus-button {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ffe-overlay[data-ffe="revealing"] > .ffe-cover {
-    animation: none;
-    opacity: 0;
-  }
-
   .ffe-skip {
     transition: none;
   }

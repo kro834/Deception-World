@@ -40,6 +40,17 @@ import {
   warmRexonanceSuit,
 } from "@/lib/rexonance-suit-warmup";
 import { GalleryCurtain } from "@/components/gallery/gallery-curtain";
+// FAR FROM SAGA's entry (owner, 2026-10-22): the gate plays its call the
+// way it plays Rexonance's, through one light module (the sequence's chunk
+// and the warm-up are its dynamic imports).
+import { FAR_FROM_ENTRY_LATE_MS, FAR_FROM_ENTRY_TIMINGS } from "@/lib/far-from-entry-timings";
+import {
+  prefetchFarFromEntry,
+  prepareFarFromTransition,
+  releaseFarFromEntry,
+  warmFarFromEntry,
+  type FarFromTransitionRenderer,
+} from "@/lib/far-from-entry-gate";
 
 type RiderDiveVariant =
   | "saga"
@@ -63,6 +74,9 @@ type GateState = {
   rexonanceCall?: RexonanceTransitionRenderer | null;
   // rx12: the suit-up builds from its decoded pieces, or stands whole.
   rexonanceSuit?: "build" | "whole";
+  // FAR FROM's call (far-from-entry-sequence) and its suit, the same way.
+  farFromCall?: FarFromTransitionRenderer | null;
+  farFromSuit?: "build" | "whole";
 };
 
 type CineRect = { x: number; y: number; w: number; h: number };
@@ -155,7 +169,7 @@ const RIDER_DIVE_TIMINGS: Record<RiderDiveVariant, { cover: number; reveal: numb
   dream: { cover: 450, reveal: 540 },
   rexonance: REXONANCE_ENTRY_TIMINGS,
   extreme: { cover: 380, reveal: 480 },
-  "far-from": { cover: 380, reveal: 480 },
+  "far-from": FAR_FROM_ENTRY_TIMINGS,
   "final-stage": { cover: 380, reveal: 480 },
 };
 
@@ -903,6 +917,11 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
   const busy = useRef(false);
   const transitionId = useRef(0);
   const rexonanceTransition = useRef<number | null>(null);
+  // FAR FROM's call in flight (cancelled when the page hides, as
+  // Rexonance's is), and its skip: the button or Escape shortens the cover.
+  const farFromTransition = useRef<number | null>(null);
+  const farFromSkip = useRef<(() => void) | null>(null);
+  const skipFarFrom = useCallback(() => farFromSkip.current?.(), []);
 
   // Keep the suit ready on the public pages, but never compete with the
   // opening's title/video/World handoff. Leaving the opening schedules it
@@ -1103,6 +1122,8 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
     const cancelTransition = () => {
       transitionId.current += 1;
       rexonanceTransition.current = null;
+      farFromTransition.current = null;
+      farFromSkip.current = null;
       rexonanceCoverCancel.current?.();
       rexonanceCoverCancel.current = null;
       routeHashSettle += 1;
@@ -1137,7 +1158,10 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
     const cancelHiddenRexonance = () => {
       // The operation begins before React paints its cover. A DOM query here
       // misses backgrounding between the click and that first committed frame.
-      if (document.hidden && rexonanceTransition.current !== null) {
+      if (
+        document.hidden &&
+        (rexonanceTransition.current !== null || farFromTransition.current !== null)
+      ) {
         cancelTransition();
       }
     };
@@ -1154,6 +1178,8 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
       // Invalidate it before releasing the cover so it cannot navigate later.
       transitionId.current += 1;
       rexonanceTransition.current = null;
+      farFromTransition.current = null;
+      farFromSkip.current = null;
       rexonanceCoverCancel.current?.();
       rexonanceCoverCancel.current = null;
       routeHashSettle += 1;
@@ -1467,6 +1493,48 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
             startedAt = performance.now();
             if (isRexonanceSuitReady()) rexonanceSuit = "build";
           }
+          // FAR FROM SAGA's entry (owner, 2026-10-22): the same shape as
+          // Rexonance's. The sequence's chunk is prepared with a deadline,
+          // the suit's images, the kits and the fire's tables decode beside
+          // it (a bounded, cancellable window), and the call then runs from
+          // its first painted frame; a still tier rests on the figure.
+          let farFromCall: FarFromTransitionRenderer | null = null;
+          const farFromWarm =
+            diveVariant === "far-from" && tier === "full" ? warmFarFromEntry("high") : null;
+          let farFromSuit: "build" | "whole" = "whole";
+          let farFromSkipped = false;
+          if (diveVariant === "far-from") {
+            farFromTransition.current = requestId;
+            if (document.documentElement.dataset.sideMenuOpen === "true") {
+              markRouteCover("covering");
+            }
+            const preparation = prepareFarFromTransition();
+            rexonanceCoverCancel.current = preparation.cancel;
+            farFromCall = await preparation.promise;
+            if (rexonanceCoverCancel.current === preparation.cancel)
+              rexonanceCoverCancel.current = null;
+            if (!isCurrent()) return;
+            if (farFromCall && tier === "full") setSignal("running");
+            await nextFrame();
+            await nextFrame();
+            if (!isCurrent()) return;
+            if (farFromCall && tier === "full" && farFromWarm) {
+              const entry = prepareRexonanceEntry({
+                decoded: farFromWarm,
+                // The warm-up makes the plan itself (far-from-entry-warmup).
+                prepare: () => Promise.resolve(true),
+                deadlineMs: 1800,
+              });
+              rexonanceCoverCancel.current = entry.cancel;
+              const ready = await entry.promise;
+              if (rexonanceCoverCancel.current === entry.cancel)
+                rexonanceCoverCancel.current = null;
+              if (!isCurrent()) return;
+              if (ready) farFromSuit = "build";
+            }
+            setSignal("idle");
+            startedAt = performance.now();
+          }
           // PREV / NEXT between dossiers flips the file; entry from anywhere
           // else keeps the rider's own dive or cut-in.
           const flip =
@@ -1482,7 +1550,9 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
                 : diveVariant
                   ? diveVariant === "rexonance" && !rexonanceCall
                     ? CALM_TIMINGS
-                    : RIDER_DIVE_TIMINGS[diveVariant]
+                    : diveVariant === "far-from" && !farFromCall
+                      ? CALM_TIMINGS
+                      : RIDER_DIVE_TIMINGS[diveVariant]
                   : cutInVariant
                     ? RIDER_CUT_IN_TIMINGS[cutInVariant]
                     : CALM_TIMINGS;
@@ -1496,7 +1566,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
                   timings,
                   assets,
                   to,
-                  callOnly: Boolean(rexonanceCall),
+                  callOnly: Boolean(rexonanceCall) || Boolean(farFromCall),
                 });
           setDocumentLoading(true);
           markRouteCover("covering");
@@ -1511,7 +1581,16 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
             scene,
             rexonanceCall,
             rexonanceSuit,
+            farFromCall,
+            farFromSuit,
           });
+          // The skip, from the first painted frame: before the hold it marks
+          // the cover spent; during the hold it ends it (below).
+          if (farFromCall) {
+            farFromSkip.current = () => {
+              farFromSkipped = true;
+            };
+          }
           try {
             if (assets.length) {
               void preloadAssets(assets, () => undefined).catch(() => undefined);
@@ -1535,15 +1614,34 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
                 );
               });
             }
+            // FAR FROM's pieces decoded while the scan still runs switch the
+            // call to the build the same way.
+            if (farFromCall && farFromSuit === "whole" && farFromWarm) {
+              void farFromWarm.then((decoded) => {
+                if (
+                  !decoded ||
+                  !isCurrent() ||
+                  performance.now() - startedAt > FAR_FROM_ENTRY_LATE_MS
+                )
+                  return;
+                farFromSuit = "build";
+                setGate((current) =>
+                  current.active && current.phase === "covering" && current.farFromCall
+                    ? { ...current, farFromSuit }
+                    : current,
+                );
+              });
+            }
             // Mobile Safari may coalesce the state update with route/module work.
             // Paint both cinematic entries before loading their route chunk.
-            if (diveVariant === "dream" || diveVariant === "rexonance") {
+            if (diveVariant === "dream" || diveVariant === "rexonance" || diveVariant === "far-from") {
               await nextFrame();
               await nextFrame();
               if (!isCurrent()) return;
               // Rexonance's five calls run from the first painted frame, not
               // from the click (which may have included a long layout task).
               if (diveVariant === "rexonance") startedAt = performance.now();
+              if (diveVariant === "far-from") startedAt = performance.now();
             }
             // Images warm independently of the route chunk. A stalled chunk
             // releases the cover before navigation, rather than locking the page.
@@ -1556,6 +1654,18 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
                 await hold.promise;
                 if (rexonanceCoverCancel.current === hold.cancel)
                   rexonanceCoverCancel.current = null;
+              } else if (diveVariant === "far-from" && farFromCall) {
+                // The same hold (a live reduced-motion or economy preference
+                // ends it), and the skip ends it too.
+                if (!farFromSkipped) {
+                  const hold = waitForRexonanceCover(coverTimeLeft);
+                  rexonanceCoverCancel.current = hold.cancel;
+                  farFromSkip.current = hold.cancel;
+                  await hold.promise;
+                  if (farFromSkip.current === hold.cancel) farFromSkip.current = null;
+                  if (rexonanceCoverCancel.current === hold.cancel)
+                    rexonanceCoverCancel.current = null;
+                }
               } else await wait(coverTimeLeft);
             }
             if (!isCurrent()) return;
@@ -1590,6 +1700,8 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
               scene: landed,
               rexonanceCall,
               rexonanceSuit,
+              farFromCall,
+              farFromSuit,
             });
             await revealRan(
               timings.reveal,
@@ -1606,10 +1718,19 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
             }
             if (isCurrent()) {
               if (rexonanceTransition.current === requestId) rexonanceTransition.current = null;
+              if (farFromTransition.current === requestId) farFromTransition.current = null;
+              farFromSkip.current = null;
               setDocumentLoading(false);
               markRouteCover("settling");
               setGate({ active: false, percent: 0, variant: "archive", phase: "covering" });
               busy.current = false;
+              // FAR FROM's decoded images are let go once the call has left
+              // the document (its engine stops with the gate's unmount).
+              if (diveVariant === "far-from") {
+                window.setTimeout(() => {
+                  if (farFromTransition.current === null) releaseFarFromEntry();
+                }, 1000);
+              }
             }
           }
           return;
@@ -1749,6 +1870,9 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
         scene={gate.scene}
         rexonanceCall={gate.rexonanceCall}
         rexonanceSuit={gate.rexonanceSuit}
+        farFromCall={gate.farFromCall}
+        farFromSuit={gate.farFromSuit}
+        onSkip={skipFarFrom}
       />
       <RouteSignal state={signal} />
       {delayedRoute && (
@@ -1784,6 +1908,9 @@ function LoadOverlay({
   scene,
   rexonanceCall,
   rexonanceSuit,
+  farFromCall,
+  farFromSuit,
+  onSkip,
 }: {
   active: boolean;
   variant: GateState["variant"];
@@ -1791,6 +1918,9 @@ function LoadOverlay({
   scene?: CineScene | null;
   rexonanceCall?: RexonanceTransitionRenderer | null;
   rexonanceSuit?: GateState["rexonanceSuit"];
+  farFromCall?: FarFromTransitionRenderer | null;
+  farFromSuit?: GateState["farFromSuit"];
+  onSkip?: () => void;
 }) {
   if (!active) return null;
   if (variant === "gallery") return <GalleryCurtain phase={phase} />;
@@ -1831,6 +1961,9 @@ function LoadOverlay({
         scene={scene}
         rexonanceCall={rexonanceCall}
         rexonanceSuit={rexonanceSuit}
+        farFromCall={farFromCall}
+        farFromSuit={farFromSuit}
+        onSkip={onSkip}
       />
     );
   }
@@ -1916,19 +2049,37 @@ function RiderRouteDive({
   scene,
   rexonanceCall: RexonanceCallSequence,
   rexonanceSuit,
+  farFromCall: FarFromCallSequence,
+  farFromSuit,
+  onSkip,
 }: {
   variant: RiderDiveVariant;
   phase: GateState["phase"];
   scene?: CineScene | null;
   rexonanceCall?: RexonanceTransitionRenderer | null;
   rexonanceSuit?: GateState["rexonanceSuit"];
+  farFromCall?: FarFromTransitionRenderer | null;
+  farFromSuit?: GateState["farFromSuit"];
+  onSkip?: () => void;
 }) {
   const meta = RIDER_DIVE_META[variant];
   const revealing = phase === "revealing";
   const rexonance = variant === "rexonance" && Boolean(RexonanceCallSequence);
+  const farFrom = variant === "far-from" && Boolean(FarFromCallSequence);
+  // FAR FROM's call is skippable (owner, 2026-10-22): the button, or Escape
+  // while it covers.
+  const farFromSkippable = farFrom && !revealing && scene?.tier === "full" && Boolean(onSkip);
+  useEffect(() => {
+    if (!farFromSkippable) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onSkip?.();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [farFromSkippable, onSkip]);
   return (
     <div
-      className={`load-gate archive-route-dive rider-route-dive is-${variant}-dive is-diving${revealing ? " is-arriving" : ""} is-${phase}${cineClass(scene)}${rexonance ? " is-rexonance-calls" : ""}`}
+      className={`load-gate archive-route-dive rider-route-dive is-${variant}-dive is-diving${revealing ? " is-arriving" : ""} is-${phase}${cineClass(scene)}${rexonance ? " is-rexonance-calls" : ""}${farFrom ? " is-far-from-calls" : ""}`}
       style={sceneStyle(scene)}
       role="status"
       aria-live="polite"
@@ -1944,6 +2095,24 @@ function RiderRouteDive({
           tier={scene?.tier ?? "reduced"}
           suit={rexonanceSuit}
         />
+      ) : farFrom && FarFromCallSequence ? (
+        <>
+          <FarFromCallSequence
+            phase={phase}
+            tier={scene?.tier ?? "reduced"}
+            suit={farFromSuit ?? "whole"}
+          />
+          {farFromSkippable ? (
+            <button
+              type="button"
+              className="ffe-skip"
+              onClick={onSkip}
+              aria-label="変身演出をスキップ"
+            >
+              スキップ
+            </button>
+          ) : null}
+        </>
       ) : (
         <>
           <CineLayers scene={scene} />
@@ -2174,6 +2343,8 @@ export function GuardedLink({
     // Actual hover/focus/touch owns this warm-up. go() may suspend
     // speculative work, but must not abort the visitor's intended call.
     if (to === "/rexonance-saga") void warmRexonanceSuit("high");
+    // FAR FROM's call chunk and images, the same way (never on a still tier).
+    if (to === "/far-from-saga") prefetchFarFromEntry();
     if (preloadedRoute.current !== to) {
       preloadedRoute.current = to;
       void router.preloadRoute({ to }).catch(() => {
