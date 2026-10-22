@@ -345,44 +345,8 @@
 
 /* #performance and #p16 live in styles-far-from-compare.css (imported above). */
 
-/* #suitup — the runway, still: three faint rings where the port will draw. */
-.ffs-runway {
-  position: relative;
-  display: grid;
-  place-items: center;
-  max-width: 980px;
-  height: clamp(220px, 32vw, 360px);
-  margin: 0 auto clamp(28px, 4vw, 44px);
-  overflow: hidden;
-  border: 1px solid rgb(127 230 255 / 14%);
-  border-radius: var(--sc-radius, 22px);
-  background:
-    radial-gradient(circle at 50% 50%, rgb(127 230 255 / 10%), transparent 42%),
-    linear-gradient(180deg, #03060d, #010308);
-}
-
-.ffs-runway i {
-  position: absolute;
-  inset: 50% auto auto 50%;
-  aspect-ratio: 1;
-  border: 1px solid rgb(127 230 255 / 22%);
-  border-radius: 50%;
-  translate: -50% -50%;
-}
-
-.ffs-runway i:nth-child(1) {
-  width: 28%;
-}
-
-.ffs-runway i:nth-child(2) {
-  width: 52%;
-  border-color: rgb(201 155 255 / 16%);
-}
-
-.ffs-runway i:nth-child(3) {
-  width: 78%;
-  border-color: rgb(255 215 122 / 12%);
-}
+/* #suitup — the scroll suit-up's runway (.ffs-runway.rzn-suitup) is drawn
+   by styles-far-from-suitup.css. */
 
 /* #arsenal — the weapons, numbered. */
 .ffs-weapons {

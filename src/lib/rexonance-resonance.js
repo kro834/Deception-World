@@ -602,6 +602,8 @@ const BEAT_OF_GROUP = {
   waist: 3,
   tail: 4,
   ribbon: 4,
+  // FAR FROM's floating units (ファーフロムビット) form with the ornaments.
+  bits: 4,
   helm: 5,
 };
 const WELDS_PER_FRAME = 160;
@@ -633,13 +635,36 @@ const TONES = [
   [244, 251, 255],
 ];
 const RING_TONES = ["rgb(121 232 255)", "rgb(182 163 255)", "rgb(242 216 150)"];
-const TONE_CSS = TONES.map(([r, g, b]) => `rgb(${r} ${g} ${b})`);
+
 
 const grouped = (value) => String(value).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 const REACTOR_RADIUS = 40;
 const REACTOR_SWIRL = [0.74, 0.82];
 const REACTOR_SOCKET_FADE = [0.16, 0.24];
 const REACTOR_MOTES = ["rgb(240 207 134)", "rgb(150 236 255)", "rgb(255 143 216)"];
+const LIGHT_ARMS = ["rgb(150 236 255)", "rgb(255 143 216)"];
+const CORE_GLOW = ["rgb(244 251 255 / 0.9)", "rgb(121 232 255 / 0.45)", "rgb(255 143 216 / 0)"];
+/**
+ * The scene's palette (FAR FROM, 2026-10-22: the same engine plays its
+ * suit-up in ice, gold and white): the three tones the chips, the mosaic
+ * and the pixel squares take, the core's rings, the reactor's motes, the
+ * light's arms and the core's glow, the field's tones (its layer's) and the
+ * swarm's (rexonance-assembly-nanites.js). Rexonance's by default; a page
+ * passes `config.palette` with any of them.
+ */
+export function assemblyPalette(palette = null) {
+  const tones = palette?.tones ?? TONES;
+  return {
+    tones,
+    toneCss: tones.map(([r, g, b]) => `rgb(${r} ${g} ${b})`),
+    rings: palette?.rings ?? RING_TONES,
+    reactorMotes: palette?.reactorMotes ?? REACTOR_MOTES,
+    lightArms: palette?.lightArms ?? LIGHT_ARMS,
+    coreGlow: palette?.coreGlow ?? CORE_GLOW,
+    field: palette?.field ?? null,
+    nanites: palette?.nanites ?? null,
+  };
+}
 const PRIMER_LEAD = 0.035;
 const clamp01 = (value) => (value < 0 ? 0 : value > 1 ? 1 : value);
 const span = (progress, [from, to]) => clamp01((progress - from) / (to - from));
@@ -671,7 +696,9 @@ export function assemblyCacheStep(current, target, budget) {
 /** Pure scrub state. Base assembly keeps its published .93 readout; a
  * selected advanced form is finished only when its prepared art is ready. */
 export function assemblyPhase(progress, form = "standard", ready = true) {
-  const advanced = form === "max" || form === "ultra" || form === "excelsior";
+  // MAX, ULTRA, EXCELSIOR — or the keys of a page's own chain of forms
+  // (FAR FROM: ハイ, エックスハイ, マックス).
+  const advanced = Boolean(form) && form !== "standard";
   const complete =
     ready && progress >= (advanced ? ASSEMBLY_BEATS.form[1] : ASSEMBLY_BEATS.complete);
   const phase = complete
@@ -757,6 +784,8 @@ function* assemblyPlanSteps({
   // groups' tiles form over them from the full figure.
   baseSample = null,
   ornaments = null,
+  // The chips' tones (assemblyPalette): the mosaic is lit toward them.
+  tones = TONES,
 }) {
   const { width, height } = size;
   const cols = Math.ceil(width / tile);
@@ -902,7 +931,7 @@ function* assemblyPlanSteps({
           under = true;
         }
       }
-      let rgb = TONES[0];
+      let rgb = tones[0];
       if (sample) {
         if (sample.data[offset + 3] < 40) continue;
         rgb = [sample.data[offset], sample.data[offset + 1], sample.data[offset + 2]];
@@ -995,7 +1024,7 @@ function* assemblyPlanSteps({
     item.oy = item.cy + ((vx * sin + vy * cos) / length) * distance * 0.8;
     item.tone = index % 9 === 0 ? 2 : item.cx < width / 2 ? 0 : 1;
     // The mosaic: the plate's own colour, lit toward the call's ice/pink.
-    const tint = TONES[item.tone];
+    const tint = tones[item.tone];
     const mix = (channel) => Math.round(item.rgb[channel] * 0.55 + tint[channel] * 0.45);
     item.fill = `rgb(${mix(0)} ${mix(1)} ${mix(2)})`;
     item.spin = (random() - 0.5) * 1.2;
@@ -1383,10 +1412,13 @@ export function planAssemblyGold(options) {
   return result.value;
 }
 
-// Pixel squares inside the face's lights (figure px), in burst groups.
-const facePixels = (glow, visor) => {
+// Pixel squares inside an outline (figure px), in burst groups: the face's
+// lights about the visor and (FAR FROM, owner 2026-10-22: the reactor
+// completes like the compound eyes, filling with pixels that scatter) the
+// reactor about the core.
+export const glowPixels = (glow, centre, seed = 2010, count = 120) => {
   if (!glow?.length) return [];
-  const random = seededRandom(2010);
+  const random = seededRandom(seed);
   const xs = glow.map(([x]) => x);
   const ys = glow.map(([, y]) => y);
   const [x0, x1, y0, y1] = [Math.min(...xs), Math.max(...xs), Math.min(...ys), Math.max(...ys)];
@@ -1400,13 +1432,13 @@ const facePixels = (glow, visor) => {
     return hit;
   };
   const squares = [];
-  for (let tries = 0; squares.length < 120 && tries < 4000; tries += 1) {
+  for (let tries = 0; squares.length < count && tries < 4000; tries += 1) {
     const x = x0 + random() * (x1 - x0);
     const y = y0 + random() * (y1 - y0);
     if (!inside(x, y)) continue;
     const size = [4, 5, 6, 8][squares.length % 4];
-    const centre = Math.abs(x - visor[0]) < 14 + (y - y0) * 0.12;
-    const tone = squares.length % 7 === 0 ? 2 : centre ? 1 : 0;
+    const middle = Math.abs(x - centre[0]) < 14 + (y - y0) * 0.12;
+    const tone = squares.length % 7 === 0 ? 2 : middle ? 1 : 0;
     squares.push({ x, y, size, tone, group: squares.length % 6 });
   }
   return squares;
@@ -1432,6 +1464,7 @@ const reactorPixels = (core) => {
   }
   return squares;
 };
+const facePixels = (glow, visor) => glowPixels(glow, visor);
 const BURSTS = [
   [3.4, -14],
   [4.6, 10],
@@ -1449,7 +1482,13 @@ const NANITE_FLAME_SPAN = REXONANCE_SCROLL_FLAME.span;
 /**
  * Mounts the suit-up scene on its runway. `config`: { figure, undersuit,
  * size: { width, height }, pieces: [{ id, group, x, y, w, h, seat }],
- * core, visor, glow }.
+ * core, visor, glow }, and for another page's suit (FAR FROM, 2026-10-22)
+ * `palette` (assemblyPalette), `reactorGlow` (the reactor's outline: it
+ * fills with pixel squares that scatter, like the eyes), `reactorRadius`,
+ * `forms.chain` (the forms the suit-up runs through after the seal, in
+ * order, to the runway's data-form), `accents` ({ back, front }: the
+ * page's own allocation-free draws behind and over the figure) and a
+ * second nanite kit (`nanites.cellsB`: the chips split between the two).
  */
 export function mountRexonanceAssembly(runway, config, environment = window) {
   if (!runway || !config) return () => {};
@@ -1460,6 +1499,13 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   const under = runway.querySelector(".rzn-under");
   const driverStandin = runway.querySelector(".rzn-driver-standin");
   if (!canvas || !frameBox || typeof canvas.getContext !== "function") return () => {};
+  const palette = assemblyPalette(config.palette);
+  const accents = config.accents ?? null;
+  const formChain = Array.isArray(config.forms?.chain) ? config.forms.chain : null;
+  const REACTOR_R = config.reactorRadius ?? REACTOR_RADIUS;
+  // The fire's end tone (rexonance-fire/fire-tuning.js FIRE_TONES): the
+  // clean combustion Rexonance ends in by default, gold for FAR FROM.
+  const FIRE_TONE = config.fireTone ?? 0;
   const reduced = environment.matchMedia("(prefers-reduced-motion: reduce)");
   const forcedColors = environment.matchMedia("(forced-colors: active)");
   const coarse = environment.matchMedia("(pointer: coarse)");
@@ -1683,6 +1729,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       config.atlas,
       config.base,
       nanites?.cells?.src,
+      nanites?.cellsB?.src,
       coarse.matches ? null : nanites?.comets?.src,
       nanites?.fx?.src,
       nanites?.guide?.src,
@@ -1781,14 +1828,27 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       coarse.matches ? null : optional(kit?.comets?.src),
       optional(kit?.fx?.src),
       optional(kit?.guide?.src),
+      // The second kit's chips (FAR FROM): optional like the first's.
+      optional(kit?.cellsB?.src),
     ])
-      .then(([figure, undersuit, gold, atlas, base, cells, comets, fx, guide]) => {
+      .then(([figure, undersuit, gold, atlas, base, cells, comets, fx, guide, cellsB]) => {
         if (disposed) {
-          for (const image of [figure, undersuit, gold, atlas, base, cells, comets, fx, guide])
+          for (const image of [
+            figure,
+            undersuit,
+            gold,
+            atlas,
+            base,
+            cells,
+            comets,
+            fx,
+            guide,
+            cellsB,
+          ])
             image?.close?.();
           return null;
         }
-        images = { figure, undersuit, gold, atlas, base, cells, comets, fx, guide };
+        images = { figure, undersuit, gold, atlas, base, cells, comets, fx, guide, cellsB };
         prepareBodyFlame(undersuit, config.size, environment);
         return images;
       })
@@ -2235,6 +2295,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
             sample,
             baseSample,
             ornaments: config.ornaments,
+            tones: palette.tones,
           }),
         );
         if (!active() || !nextPlan) return;
@@ -2251,7 +2312,11 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
           : null;
         if (!active()) return;
         const nextPixels = facePixels(config.glow, config.visor);
-        const nextReactorPixels = reactorPixels(config.core);
+        // The reactor's pixel squares: Rexonance's own disc (owner,
+        // 2026-10-23), or a page's reactor glow outline (FAR FROM).
+        const nextReactorPixels = config.reactorGlow
+          ? glowPixels(config.reactorGlow, config.core, 2011, 96)
+          : reactorPixels(config.core);
         mark("cpu-preparation-probe");
         cpuPreparation = await idleTask(() => active() && supportsCpuPreparation(document));
         if (!active()) return;
@@ -2573,8 +2638,14 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
                 core: config.core,
                 visor: config.visor,
                 coarse: coarse.matches,
-                sprites: { cells: images.cells, comets: images.comets, fx: images.fx },
+                sprites: {
+                  cells: images.cells,
+                  cellsB: images.cellsB,
+                  comets: images.comets,
+                  fx: images.fx,
+                },
                 kit,
+                palette: palette.nanites,
                 layers: {
                   metal: [metalBase?.metal ?? null, metalFigure?.metal ?? null],
                   silhouette: [metalBase?.silhouette ?? null, metalFigure?.silhouette ?? null],
@@ -2610,7 +2681,14 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
           moltenLayer?.molten,
           nextLattice,
         ].filter(Boolean);
-        const nextBuffers = await allocateIdle(nextPlan, nextGold, nextPixels, active, mark);
+        const nextBuffers = await allocateIdle(
+          nextPlan,
+          nextGold,
+          nextPixels,
+          active,
+          mark,
+          config.reactorGlow ? nextReactorPixels : [],
+        );
         if (!active() || !nextBuffers) return;
         mark("ready");
         try {
@@ -2798,7 +2876,9 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   // Per-frame buffers, allocated once per plan: a scrub draws thousands
   // of squares a frame and must not leave garbage behind it.
   let buffers = null;
-  const allocateIdle = async (nextPlan, nextGold, nextPixels, active, mark) => {
+  // The pixel squares of one outline, bucketed by burst group and tone into
+  // rect buffers (the eyes'; FAR FROM's reactor's too), in idle slices.
+  const allocateFaces = async (nextPixels, active, mark) => {
     const buckets = Array.from({ length: 18 }, () => []);
     let cursor = 0;
     while (active() && cursor < nextPixels.length) {
@@ -2855,11 +2935,28 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       }
       faces[Math.floor(index / 3)][index % 3] = rects;
     }
+    return faces;
+  };
+  const allocateIdle = async (
+    nextPlan,
+    nextGold,
+    nextPixels,
+    active,
+    mark,
+    nextReactorPixels = [],
+  ) => {
+    const faces = await allocateFaces(nextPixels, active, mark);
+    if (!faces || !active()) return null;
+    const reactorFaces = nextReactorPixels.length
+      ? await allocateFaces(nextReactorPixels, active, mark)
+      : null;
+    if (!active() || (nextReactorPixels.length && !reactorFaces)) return null;
     const goldCells = nextGold?.count ?? 0;
     const result = {
       heat: [],
       heatCounts: null,
       faces,
+      reactorFaces,
       glow: null,
     };
     const allocate = async (phase, Type, length) => {
@@ -2884,6 +2981,25 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     for (let i = 0; i < count; i += 4)
       context.rect(rects[i], rects[i + 1], rects[i + 2], rects[i + 3]);
     context.fill();
+  };
+  // The pixel squares of one outline (`faces`: by burst group and tone)
+  // about (cx, cy): filled group by group, then scattered in their bursts.
+  const drawPixelBurst = (context, faces, cx, cy, fill, burst) => {
+    for (let group = 0; group < 6; group += 1) {
+      if (fill * 6 < group + 0.5) continue;
+      const [scale, turn] = BURSTS[group];
+      const k = 1 + (scale - 1) * burst;
+      context.save();
+      context.translate(cx, cy);
+      context.rotate((turn * Math.PI * burst) / 180);
+      context.scale(k, k);
+      context.translate(-cx, -cy);
+      for (let tone = 0; tone < 3; tone += 1) {
+        const rects = faces[group][tone];
+        fillRects(context, rects, rects.length, palette.toneCss[tone], 0.95 * (1 - burst));
+      }
+      context.restore();
+    }
   };
 
   // The gold formed by `progress` (cells are sorted by when they lock),
@@ -3083,10 +3199,12 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     // whole flame 260 ms into each rest and again when the scroll resumed.
     const flameClock = (environment.performance?.now?.() ?? 0) / 1000;
 
-    // The cocoon's far side, behind the body.
+    // The cocoon's far side, behind the body; a page's own accents behind
+    // the figure (FAR FROM's halo rings), allocation-free by contract.
     if (nanites) nanites.backPass(context);
+    if (accents?.back) accents.back(context, progress, calm, W, H);
     if (flame > 0) {
-      drawBodyFlame(context, config.size, flame, flameClock, 1, "back", flamePhase);
+      drawBodyFlame(context, config.size, flame, flameClock, 1, "back", flamePhase, FIRE_TONE);
       drawFlameHeat(context, config.size, Math.min(1, Math.sqrt(flame) * 1.4), flameClock);
     }
     // FAR UP！: the scan wakes the undersuit, top to bottom.
@@ -3102,7 +3220,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       }
       if (scan > 0 && scan < 1) {
         context.globalAlpha = 0.85;
-        context.fillStyle = TONE_CSS[0];
+        context.fillStyle = palette.toneCss[0];
         context.fillRect(-W * 0.08, scanned - 1.5, W * 1.16, 3);
         context.globalAlpha = 0.18;
         context.fillRect(-W * 0.08, scanned - 26, W * 1.16, 24);
@@ -3116,7 +3234,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     if (nanites) nanites.midPass(context);
     // The nanites' source (owner, 2026-10-18): a forest-green flame at the
     // reactor, burning while the swarm is born from it and spirals out.
-    if (flame > 0) drawNaniteFlame(context, config.core, flame, flameClock);
+    if (flame > 0) drawNaniteFlame(context, config.core, flame, flameClock, 1, FIRE_TONE);
 
     // The painted plates (welded in paint order), then the seal into the
     // finished figure.
@@ -3239,7 +3357,42 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     // finished Rexonance with cells; ULTRA runs to MAX briefly, overwrites
     // it again and generates its additional parts.
     const form = runway.dataset.form;
-    if ((form === "max" || form === "ultra" || form === "excelsior") && progress > B.form[0]) {
+    if (formChain && formChain.includes(form) && progress > B.form[0]) {
+      // A page's own chain of forms (FAR FROM: ミドル → ハイ → エックスハイ →
+      // マックス), each overwriting the last with cells from the core out
+      // over an equal share of the form window; the runway ends on the
+      // chain's named form, its exact prepared artwork.
+      const forms = formFigures();
+      if (forms) {
+        const [a, b] = B.form;
+        const steps = formChain.indexOf(form) + 1;
+        if (progress >= b) {
+          context.clearRect(0, 0, W, H);
+          context.globalAlpha = 1;
+          context.drawImage(forms.sheets[form], 0, 0, W, H);
+        } else {
+          const seg = (b - a) / steps;
+          const k = Math.min(steps - 1, Math.floor((progress - a) / seg));
+          const key = formChain[k];
+          const from = k === 0 ? forms.fig : forms.sheets[formChain[k - 1]];
+          const start = a + k * seg;
+          drawOverwrite(
+            context,
+            forms.plans[key],
+            from,
+            forms.sheets[key],
+            span(progress, [start, start + seg - 0.004]),
+            span(progress, [start + seg * 0.45, start + seg]),
+            forms.tones[key],
+            calm,
+          );
+        }
+      }
+    } else if (
+      !formChain &&
+      (form === "max" || form === "ultra" || form === "excelsior") &&
+      progress > B.form[0]
+    ) {
       const forms = formFigures();
       // The forms live on sheets PAD px wider either side than the figure
       // (EXCELSIOR is broader; it is never shrunk — owner, 2026-10-12).
@@ -3368,7 +3521,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     // Both form together, before the existing B.light ignition.
     {
       const [rx, ry] = config.core;
-      const R = REACTOR_RADIUS;
+      const R = REACTOR_R;
       const [swirlFrom, swirlTo] = REACTOR_SWIRL;
       if (reactor && progress >= B.deus[0] && progress < B.light[0]) {
         // Separate masks share one clock but never share the coil transform.
@@ -3444,7 +3597,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
             // All the trails arrive together with the coil, never a few early.
             context.globalAlpha =
               Math.sin(Math.PI * phase) * (1 - u * 0.6) * smooth(Math.min(1, u * 4));
-            context.strokeStyle = REACTOR_MOTES[i % 3];
+            context.strokeStyle = palette.reactorMotes[i % 3];
             context.lineWidth = 1.2 + (i % 3) * 0.6;
             context.beginPath();
             context.arc(rx, ry, r, a - 0.5, a);
@@ -3473,7 +3626,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
               else context.lineTo(x, y);
             }
             context.globalAlpha = 0.85 * glowAlpha;
-            context.strokeStyle = arm === 1 ? "rgb(255 143 216)" : "rgb(150 236 255)";
+            context.strokeStyle = arm === 1 ? palette.lightArms[1] : palette.lightArms[0];
             context.lineWidth = 3.2 * (1 - g) + 1;
             context.stroke();
           }
@@ -3489,7 +3642,8 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     if (fielding && !calm && fieldState[fieldLib.FIELD_STATE.IMPULSES] > 0)
       fieldLib.drawFieldImpact(context, fieldState, W, H, fieldLib.fieldHash, !coarse.matches);
     // Sparse near-side fire crosses the outer armour, not the core/face.
-    if (flame > 0) drawBodyFlame(context, config.size, flame, flameClock, 1, "front", flamePhase);
+    if (flame > 0)
+      drawBodyFlame(context, config.size, flame, flameClock, 1, "front", flamePhase, FIRE_TONE);
     // The fire carries these fragments out first; their metal handoff is
     // on the near side so it cannot disappear under the broad plume.
     if (nanites) {
@@ -3526,29 +3680,24 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       context.drawImage(undersuit, x0 * ux, y0 * uy, w * ux, h * uy, x0, y0, w, h);
       context.restore();
     }
-    if (pixels.length && progress >= fillFrom && progress < burstTo) {
+    if (progress >= fillFrom && progress < burstTo) {
       const fill = clamp01((progress - fillFrom) / 0.03);
       const burst = smooth(clamp01((progress - (burstTo - 0.04)) / 0.04));
-      for (let group = 0; group < 6; group += 1) {
-        if (fill * 6 < group + 0.5) continue;
-        const [scale, turn] = BURSTS[group];
-        const k = 1 + (scale - 1) * burst;
-        context.save();
-        context.translate(visorX, visorY);
-        context.rotate((turn * Math.PI * burst) / 180);
-        context.scale(k, k);
-        context.translate(-visorX, -visorY);
-        for (let tone = 0; tone < 3; tone += 1) {
-          const rects = buffers.faces[group][tone];
-          fillRects(context, rects, rects.length, TONE_CSS[tone], 0.95 * (1 - burst));
-        }
-        context.restore();
-      }
+      if (pixels.length) drawPixelBurst(context, buffers.faces, visorX, visorY, fill, burst);
+      // The reactor completes the same way (FAR FROM): its squares fill it
+      // over the ignition and scatter from the core.
+      if (buffers.reactorFaces)
+        drawPixelBurst(context, buffers.reactorFaces, config.core[0], config.core[1], fill, burst);
     }
 
     // The reactor's light forms from pixel squares like the eyes: they
     // fill the disc, hold while it ignites under them, then scatter.
-    if (reactorSquares?.length && progress >= REACTOR_PIXELS[0] && progress < REACTOR_PIXELS[1]) {
+    if (
+      !buffers.reactorFaces &&
+      reactorSquares?.length &&
+      progress >= REACTOR_PIXELS[0] &&
+      progress < REACTOR_PIXELS[1]
+    ) {
       const [rx, ry] = config.core;
       const [from, to] = REACTOR_PIXELS;
       const fill = clamp01((progress - from) / 0.02);
@@ -3585,9 +3734,9 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       const glow = Math.sin(Math.PI * span(progress, [ringFrom, ringEnd]));
       if (!buffers.glow) {
         buffers.glow = context.createRadialGradient(coreX, coreY, 0, coreX, coreY, 150);
-        buffers.glow.addColorStop(0, "rgb(244 251 255 / 0.9)");
-        buffers.glow.addColorStop(0.3, "rgb(121 232 255 / 0.45)");
-        buffers.glow.addColorStop(1, "rgb(255 143 216 / 0)");
+        buffers.glow.addColorStop(0, palette.coreGlow[0]);
+        buffers.glow.addColorStop(0.3, palette.coreGlow[1]);
+        buffers.glow.addColorStop(1, palette.coreGlow[2]);
       }
       context.globalCompositeOperation = "lighter";
       context.globalAlpha = glow;
@@ -3599,7 +3748,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         const u = clamp01((progress - from) / (ringEnd - from));
         if (u <= 0 || u >= 1) continue;
         context.globalAlpha = (1 - u) * 0.9;
-        context.strokeStyle = RING_TONES[ring];
+        context.strokeStyle = palette.rings[ring];
         context.lineWidth = 5 * (1 - u) + 1;
         context.beginPath();
         context.arc(coreX, coreY, 24 + 560 * easeOut(u), 0, Math.PI * 2);
@@ -3607,6 +3756,12 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       }
     }
     context.globalAlpha = 1;
+    // A page's own accents over the figure (allocation-free by contract).
+    if (accents?.front) {
+      accents.front(context, progress, calm, W, H);
+      context.globalAlpha = 1;
+      context.globalCompositeOperation = "source-over";
+    }
     lastDrawMs = (environment.performance?.now?.() ?? 0) - started;
     // The field's lines on their own canvases, behind and in front of this
     // one, through the same zoomed view (CSS px: the layer has its own
@@ -3754,6 +3909,57 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     if (formsState || formsLoading || !config.forms || !images || clock() < formsRetryAt)
       return formsState;
     formsLoading = true;
+    if (formChain) {
+      // A page's chain of forms, each on a sheet of the figure's frame; the
+      // overwrite plan of each from the one before it (its extras: what the
+      // next form adds or changes most), its light from the page's tones.
+      Promise.all(formChain.map((key) => picture(config.forms[key])))
+        .then((loaded) => {
+          if (disposed) return;
+          const sheet = (image) => {
+            const canvas = Object.assign(document.createElement("canvas"), {
+              width: W,
+              height: H,
+            });
+            if (image) canvas.getContext("2d").drawImage(image, 0, 0, W, H);
+            return canvas;
+          };
+          const base = { width: W, height: H, cell: 8, origin: config.core, seed: 77 };
+          const grid = planOverwrite(base);
+          const fig = sheet(images.figure);
+          const sheets = {};
+          const plans = {};
+          const tones = {};
+          let previous = sampleCells(fig, grid, document);
+          formChain.forEach((key, k) => {
+            sheets[key] = sheet(loaded[k]);
+            const cellsOf = sampleCells(sheets[key], grid, document);
+            plans[key] =
+              previous && cellsOf
+                ? planOverwrite({
+                    ...base,
+                    seed: 78 + k,
+                    extraBy: "difference",
+                    samples: { from: previous, to: cellsOf },
+                  })
+                : grid;
+            tones[key] = config.forms.tones?.[key] ?? FORM_TONES[key] ?? FORM_TONES.standard;
+            previous = cellsOf;
+          });
+          formsState = { pad: 0, width: W, fig, chain: formChain, sheets, plans, tones, warp: [] };
+          // (formsState[key]: the form is ready, for the HUD.)
+          for (const key of formChain) formsState[key] = sheets[key];
+          lastProgress = -1;
+          schedule();
+        })
+        .catch(() => {
+          formsRetryAt = clock() + 1000;
+        })
+        .finally(() => {
+          formsLoading = false;
+        });
+      return null;
+    }
     Promise.all([
       picture(config.forms.max),
       picture(config.forms.ultra),
@@ -4173,6 +4379,9 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       coarse: coarse.matches,
       take: fieldTake,
       className: "rzn-field",
+      // The page's field tones (FAR FROM: ice, gold, white); the fire's own
+      // (FIELD_TONES) when the config names none.
+      ...(palette.field ? { tones: palette.field } : {}),
     });
     if (!layer) {
       fieldFailed = true;
@@ -4610,12 +4819,15 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     images?.comets?.close?.();
     images?.fx?.close?.();
     images?.guide?.close?.();
+    images?.cellsB?.close?.();
     formObserver?.disconnect();
     environment.clearTimeout(calmTimer);
     for (const image of loaders) releasePendingImage(image);
     loaders.clear();
     for (const cancel of decodeWaiters) cancel();
     decodeWaiters.clear();
+    // A form chain's sheets (one per form, figure-sized) are freed first.
+    for (const sheet of Object.values(formsState?.sheets ?? {})) sheet.width = sheet.height = 0;
     if (formsState)
       for (const sheet of [
         formsState.fig,

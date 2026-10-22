@@ -321,8 +321,19 @@ export function createAssemblyNanites(options: {
   core: readonly [number, number];
   visor?: readonly [number, number] | null;
   coarse?: boolean;
-  sprites?: { cells?: Sheet; comets?: Sheet; fx?: Sheet } | null;
+  /** `cellsB`: the second kit's chip sheet (FAR FROM), with `kit.cellsB`. */
+  sprites?: { cells?: Sheet; cellsB?: Sheet; comets?: Sheet; fx?: Sheet } | null;
   kit?: RexonanceAssemblyNanites | null;
+  /** The page's swarm palette (rexonance-resonance.js assemblyPalette's
+   * `nanites`): the batched rects' tones and shades, and the kit's sprite
+   * row for each of the three chip tones. */
+  palette?: {
+    readonly tone?: readonly string[];
+    readonly shade?: readonly string[];
+    readonly touchTone?: readonly string[];
+    readonly touchShade?: readonly string[];
+    readonly toneRows?: readonly number[];
+  } | null;
   layers?: {
     metal?: [Sheet, Sheet];
     silhouette?: [Sheet, Sheet];

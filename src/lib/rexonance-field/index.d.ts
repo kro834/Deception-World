@@ -173,7 +173,14 @@ export const FIELD_TONES: {
   readonly white: readonly number[];
   readonly leads: readonly (readonly number[])[];
 };
+export type FieldTones = {
+  readonly ice: readonly number[];
+  readonly pink: readonly number[];
+  readonly white: readonly number[];
+  readonly leads?: readonly (readonly number[])[];
+};
 export const FIELD_VERTEX_SHADER: string;
+export function fieldVertexShader(tones?: FieldTones): string;
 export const FIELD_FRAGMENT_SHADER: string;
 export const REXONANCE_SCROLL_FLAME: { readonly start: number; readonly span: number };
 
@@ -257,4 +264,5 @@ export function createFieldLayer(options: {
   front?: boolean;
   className?: string;
   fragment?: FieldFragment;
+  tones?: FieldTones;
 }): FieldLayer | null;

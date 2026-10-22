@@ -7,7 +7,6 @@ import { useWorldMode } from "@/components/world/use-world-mode";
 import { FINAL_STAGE_ENTER_ASSETS, WORLD_ENTER_ASSETS } from "@/lib/asset-loader";
 import { initRail } from "@/lib/liquid/boot.js";
 import { mountLocalNavCurrent } from "@/lib/local-nav-current";
-import { FAR_FROM_ASSEMBLY_BEATS, mountFarFromAssembly } from "@/lib/far-from-assembly";
 import { FAR_FROM_SAGA, type Article } from "@/components/final-stage/final-stage-data";
 import {
   FAR_FROM_SAGA_ARTWORK,
@@ -19,6 +18,7 @@ import { FarFromEntryTransition } from "./far-from-entry-transition";
 import { FarFromComparison } from "./far-from-comparison";
 import { FarFromP16 } from "./far-from-p16";
 import { FarFromReport } from "./far-from-report";
+import { FarFromSuitUp } from "./far-from-suitup";
 
 /* FAR FROM SAGA special site (owner's record of 2026-10-22).
 
@@ -31,11 +31,12 @@ import { FarFromReport } from "./far-from-report";
 
    #performance (far-from-comparison.tsx), #report (far-from-report.tsx) and
    #p16 (far-from-p16.tsx) are built from the owner's comparison text
-   (far-from-report-text.ts, verbatim). Still prepared, not built
-   (準備中): the nanite entry transition (far-from-entry-transition.tsx,
-   renders nothing) and #suitup (a still runway; src/lib/far-from-assembly.ts
-   is its seam). None of them loads a canvas or an engine, and none delays
-   first paint. */
+   (far-from-report-text.ts, verbatim). #suitup is the scroll suit-up
+   (far-from-suitup.tsx: the Rexonance runway playing FAR FROM's suit
+   through src/lib/far-from-assembly.ts, its engine chunk imported under
+   the motion gate once the page is idle). Still prepared, not built: the
+   nanite entry transition (far-from-entry-transition.tsx, renders
+   nothing). Nothing here delays first paint. */
 
 const releaseControlFocus = (control: HTMLElement) => {
   window.requestAnimationFrame(() => {
@@ -83,32 +84,18 @@ function Articles({
   );
 }
 
-/** The 準備中 mark every prepared chapter wears: a short note, then the state. */
-function Pending({ line }: { line: string }) {
-  return (
-    <p className="ffs-pending" role="note">
-      <span>{line}</span>
-      <b>準備中</b>
-    </p>
-  );
-}
-
 export function FarFromSaga() {
   useWorldMode();
   const [menuOpen, setMenuOpen] = useState(false);
   const [stage, setStage] = useState<FarFromStageKey>("middle");
   const pageRef = useRef<HTMLElement | null>(null);
   const stageTabsRef = useRef<HTMLDivElement | null>(null);
-  const runwayRef = useRef<HTMLDivElement | null>(null);
 
   const activeStage = FAR_FROM_SAGA.stages[stage];
   const activeArt = FAR_FROM_SAGA_ARTWORK[stage];
   const keyVisual = FAR_FROM_SAGA_ARTWORK.middle;
 
   useEffect(() => mountLocalNavCurrent(pageRef.current?.querySelector(".rxs-local-nav nav")), []);
-
-  // The suit-up runway's seam: a no-op today (準備中), the port's mount later.
-  useEffect(() => mountFarFromAssembly(runwayRef.current, { beats: FAR_FROM_ASSEMBLY_BEATS }), []);
 
   // The liquid rail owns tap, long-press, drag and keyboard selection; React
   // only mirrors the chosen index back into state.
@@ -294,24 +281,8 @@ export function FarFromSaga() {
         <FarFromP16 />
       </section>
 
-      {/* 準備中 — #suitup: the scroll runway, still; far-from-assembly.ts is its seam. */}
-      <section
-        id="suitup"
-        className="rxs-section ffs-suitup ffs-prepared"
-        aria-labelledby="ffs-suitup-title"
-      >
-        <header className="rxs-section-heading rxs-reveal">
-          <p>05 / SUIT-UP</p>
-          <h2 id="ffs-suitup-title">変身シークエンス</h2>
-          <span>スクロールに合わせて、ナノマシンが装甲を形成するまでを見せるコーナーです。</span>
-        </header>
-        <div ref={runwayRef} className="ffs-runway" aria-hidden="true">
-          <i />
-          <i />
-          <i />
-        </div>
-        <Pending line="変身シークエンスは現在準備中です。" />
-      </section>
+      {/* #suitup: the scroll suit-up (far-from-suitup.tsx). */}
+      <FarFromSuitUp />
 
       <section id="stages" className="rxs-stages rxs-section" aria-labelledby="ffs-stages-title">
         <header className="rxs-section-heading rxs-reveal">

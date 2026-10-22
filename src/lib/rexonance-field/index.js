@@ -48,4 +48,5 @@ export {
   fieldContext,
   fieldIndices,
   fieldVertexBytes,
+  fieldVertexShader,
 } from "./field-gl.js";
