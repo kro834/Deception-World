@@ -1675,8 +1675,9 @@
     font-size: 14.5px;
   }
 
+  /* 「究極形態性能比較及び技術進化」 (14 characters) holds one line at 360px. */
   .ffs-page .ffs-report-head h3 {
-    font-size: 22px;
+    font-size: 20px;
   }
 
   /* Phones: each row of the owner's table becomes a card, the four forms

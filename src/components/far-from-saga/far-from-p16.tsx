@@ -197,7 +197,7 @@ function P16Comparator() {
                 </div>
                 <p>
                   <span>ヴィンクルムのP2と比較</span>
-                  <b>{P16_VS_P2.value}</b>
+                  <b>暫定値</b>
                 </p>
               </article>
             </div>
