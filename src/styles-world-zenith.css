@@ -1563,6 +1563,55 @@ html[data-family="world"]:root
   }
 }
 
+/* 03 RECORDS: the film strip's open edge. From 700px the strip shows a
+   frame and a half to two and a half frames, and the last was cut by a hard edge
+   (its title read DECEPTION WORL at 1440). The edge now fades out over
+   72px while frames remain beyond it, and the fade closes as the strip
+   reaches its last frame (a scroll timeline on the strip itself: still
+   paint, no motion of its own). Keyboard focus drops the mask, which would
+   otherwise clip the strip's outer focus ring. Without scroll timelines
+   the strip keeps its plain edge. */
+@property --zn-strip-fade {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+@keyframes zn-strip-fade {
+  0%,
+  94% {
+    --zn-strip-fade: 72px;
+  }
+
+  100% {
+    --zn-strip-fade: 0px;
+  }
+}
+
+@supports (animation-timeline: scroll(self inline)) {
+  @media (min-width: 700px) {
+    html[data-family="world"]:root
+      body
+      main.site-shell.film-edition.mirage-edition
+      > #records
+      .episode-grid {
+      animation: zn-strip-fade linear both;
+      animation-timeline: scroll(self inline);
+      -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - var(--zn-strip-fade)), transparent);
+      mask-image: linear-gradient(90deg, #000 calc(100% - var(--zn-strip-fade)), transparent);
+    }
+
+    html[data-family="world"]:root
+      body
+      main.site-shell.film-edition.mirage-edition
+      > #records
+      .episode-grid:focus-visible {
+      -webkit-mask-image: none;
+      mask-image: none;
+    }
+  }
+}
+
 /* ----------------------------------------------------------------
    6. Polish: the WORLD COLUMN plate's top rule runs gold → pink, and a
       pink bloom sits in its far corner, so the reading plate under the
