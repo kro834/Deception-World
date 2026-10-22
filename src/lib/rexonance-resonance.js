@@ -1482,6 +1482,9 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   const accents = config.accents ?? null;
   const formChain = Array.isArray(config.forms?.chain) ? config.forms.chain : null;
   const REACTOR_R = config.reactorRadius ?? REACTOR_RADIUS;
+  // The fire's end tone (rexonance-fire/fire-tuning.js FIRE_TONES): the
+  // clean combustion Rexonance ends in by default, gold for FAR FROM.
+  const FIRE_TONE = config.fireTone ?? 0;
   const reduced = environment.matchMedia("(prefers-reduced-motion: reduce)");
   const forcedColors = environment.matchMedia("(forced-colors: active)");
   const coarse = environment.matchMedia("(pointer: coarse)");
@@ -3177,7 +3180,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     if (nanites) nanites.backPass(context);
     if (accents?.back) accents.back(context, progress, calm, W, H);
     if (flame > 0) {
-      drawBodyFlame(context, config.size, flame, flameClock, 1, "back", flamePhase);
+      drawBodyFlame(context, config.size, flame, flameClock, 1, "back", flamePhase, FIRE_TONE);
       drawFlameHeat(context, config.size, Math.min(1, Math.sqrt(flame) * 1.4), flameClock);
     }
     // FAR UP！: the scan wakes the undersuit, top to bottom.
@@ -3207,7 +3210,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     if (nanites) nanites.midPass(context);
     // The nanites' source (owner, 2026-10-18): a forest-green flame at the
     // reactor, burning while the swarm is born from it and spirals out.
-    if (flame > 0) drawNaniteFlame(context, config.core, flame, flameClock);
+    if (flame > 0) drawNaniteFlame(context, config.core, flame, flameClock, 1, FIRE_TONE);
 
     // The painted plates (welded in paint order), then the seal into the
     // finished figure.
@@ -3615,7 +3618,8 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     if (fielding && !calm && fieldState[fieldLib.FIELD_STATE.IMPULSES] > 0)
       fieldLib.drawFieldImpact(context, fieldState, W, H, fieldLib.fieldHash, !coarse.matches);
     // Sparse near-side fire crosses the outer armour, not the core/face.
-    if (flame > 0) drawBodyFlame(context, config.size, flame, flameClock, 1, "front", flamePhase);
+    if (flame > 0)
+      drawBodyFlame(context, config.size, flame, flameClock, 1, "front", flamePhase, FIRE_TONE);
     // The fire carries these fragments out first; their metal handoff is
     // on the near side so it cannot disappear under the broad plume.
     if (nanites) {

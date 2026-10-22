@@ -234,6 +234,9 @@ export interface RexonanceAssemblyConfig {
   reactorGlow?: readonly (readonly [number, number])[];
   /** The reactor's radius in figure px (40 by default). */
   reactorRadius?: number;
+  /** The fire's end tone (rexonance-fire/fire-tuning.js FIRE_TONES): 0 the
+   * clean combustion (the default), 1 gold. */
+  fireTone?: number;
   palette?: RexonanceAssemblyPalette;
   accents?: RexonanceAssemblyAccents;
   gold?: RexonanceAssemblyGold;

@@ -62,6 +62,7 @@ import {
   farFromAssemblyConfig,
 } from "../src/lib/far-from-assembly-engine.ts";
 import { REXONANCE_SUIT_MARKS, REXONANCE_SUIT_UNDERSUIT } from "../src/lib/rexonance-suit.ts";
+import { FIRE_TONES } from "../src/lib/rexonance-fire/fire-tuning.js";
 import { FAR_FROM_SAGA } from "../src/components/final-stage/final-stage-data.ts";
 
 /* FAR FROM SAGA — the scroll suit-up (2026-10-22). The Rexonance scroll
@@ -372,6 +373,10 @@ test("the config is the engine's: FAR FROM's palette, reactor, chain, kits and a
   assert.equal(config.pieces.length, FAR_FROM_SUIT_PIECES.length);
   assert.equal(config.reactorGlow, FAR_FROM_SUIT_REACTOR_GLOW);
   assert.equal(config.reactorRadius, 30);
+  // The fire ends gold: the shared fire's end tone, passed to every draw.
+  assert.equal(config.fireTone, FIRE_TONES.gold);
+  assert.match(resonance, /const FIRE_TONE = config\.fireTone \?\? 0;/);
+  assert.equal((resonance.match(/, FIRE_TONE\)/g) || []).length, 3);
   assert.equal(config.palette, FAR_FROM_PALETTE);
   assert.equal(config.accents, farFromAccents);
   assert.deepEqual(config.forms.chain, FAR_FROM_FORM_CHAIN);

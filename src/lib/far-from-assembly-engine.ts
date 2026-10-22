@@ -25,9 +25,8 @@
  *
  * The same wearer: the undersuit, the bare head and the uninstalled reactor
  * are Rexonance's, composited into this frame by the build
- * (scripts/build-far-from-suit.mjs). The fire is the shared body fire; its
- * gold end tone is the entry transition's parameter (far-from-transform-
- * entry) and is passed through here once that lands.
+ * (scripts/build-far-from-suit.mjs). The fire is the shared body fire with
+ * its end tone gold (`fireTone`, rexonance-fire/fire-tuning.js FIRE_TONES).
  */
 
 import { mountRexonanceAssembly, type RexonanceAssemblyConfig } from "./rexonance-resonance.js";
@@ -99,6 +98,10 @@ export const FAR_FROM_PALETTE = Object.freeze({
 /** The reactor's radius in figure px (the chest core's disc). */
 export const FAR_FROM_REACTOR_RADIUS = 30;
 
+/** The fire ends gold (owner: 「炎は最終的に金色になります」): the shared
+ * fire's end tone, rexonance-fire/fire-tuning.js FIRE_TONES.gold. */
+export const FAR_FROM_FIRE_TONE = 1;
+
 /** The nanite kits, loaded with the scene's pictures: kit A's chips, comets
  * and effects, kit B's chips (kit A until src/lib/far-from-nanites.ts lands),
  * and FAR FROM's own guide, seams and gold boxes. */
@@ -141,6 +144,7 @@ export function farFromAssemblyConfig(): RexonanceAssemblyConfig {
     glow: FAR_FROM_SUIT_FACE_GLOW,
     reactorGlow: FAR_FROM_SUIT_REACTOR_GLOW,
     reactorRadius: FAR_FROM_REACTOR_RADIUS,
+    fireTone: FAR_FROM_FIRE_TONE,
     atlas: FAR_FROM_SUIT_ATLAS.src,
     gold: {
       atlas: FAR_FROM_SUIT_GOLD_ATLAS.src,
