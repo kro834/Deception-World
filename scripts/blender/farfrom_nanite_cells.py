@@ -600,12 +600,12 @@ for obj, slots in ((body, 2), (collar, 1), (core, 1), (glow, 1), (ring, 1), (sea
         obj.data.materials.append(None)
 
 metals = {
-    "gold": principled("gold", GOLD, 1.0, 0.22),
+    "gold": principled("gold", GOLD, 1.0, 0.30),
     "silver": principled("black-silver", BLACK_SILVER, 1.0, 0.22),
 }
 for tone, spec in TONES.items():
     body.data.materials[0] = crystal(f"{tone}-crystal", spec["tint"], spec["film"], spec["facets"], spec["rainbow"])
-    body.data.materials[1] = two_sided(f"{tone}-pavilion", inside=(spec["inside"], 0.45), outside=(BLACK_SILVER, 0.24))
+    body.data.materials[1] = two_sided(f"{tone}-pavilion", inside=(spec["inside"], 0.45), outside=((0.09, 0.10, 0.12), 0.34))
     collar.data.materials[0] = metals[spec["collar"]]
     ring.data.materials[0] = metals[spec["ring"]]
     core_material = emitter(f"{tone}-core", spec["glow"], spec["peak"], radius=CORE_R)
