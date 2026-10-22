@@ -340,6 +340,8 @@ html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm
     #070d16 !important;
 }
 
+/* (2026-10-22, round 2) Where the plate is narrow (a phone, the rail) the
+   line breaks at its slashes, not before a lone FILTER or THE FILTER. */
 html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .selector-empty::before {
   content: "NO RECORD // CLEAR THE FILTER";
   color: var(--ar-ice, #7ae8ff);
@@ -350,6 +352,13 @@ html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm
   line-height: 1.3;
   letter-spacing: 0.14em;
   text-align: center;
+}
+
+@media (max-width: 620px), (min-width: 901px) {
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .selector-empty::before {
+    content: "NO RECORD //\A CLEAR THE FILTER";
+    white-space: pre-line;
+  }
 }
 
 html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .selector-empty-reset {
@@ -493,7 +502,8 @@ html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm
    long for its column may still break inside: auto-phrase alone let
    ステラモディフィカーレ run out of a 150px comparison card and be clipped
    (390px). Long dossier paragraphs keep the normal breaking.
-   archive-zenith.js names the same list for engines without auto-phrase. */
+   archive-zenith.js marks finer seams in the same list for every engine
+   (section 13); this rule stays as the no-script fallback. */
 html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)
   :is(.hero-lead, .selector-footnote, .detail-lead, .compare-description, .compare-same-note, .selector-empty p, .detail-head .text-muted, .ability-list li, .ability-cards li, .fact-list li, .finisher-list li, .operation-panel p, .compare-form-card .ability-layout p, .compare-form-card .rexonance-compare-revision p, .table td .text-small) {
   word-break: auto-phrase;
@@ -552,6 +562,27 @@ html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm
 
   html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .form-detail .viz-grid:has(> .spec-item:first-child:nth-last-child(6)) > .spec-item:nth-child(5) {
     grid-column: span 2 !important;
+  }
+}
+
+/* Realm's nine figures carry the same pair: flight (—, マッハ80, 測定不能)
+   beside compute (20000YOPS / 200Core「Spark XR」…), one to two; the first
+   six stay in pairs and EMP keeps its whole row. */
+@media (min-width: 1181px) {
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .form-detail .viz-grid:has(> .spec-item:first-child:nth-last-child(9)) {
+    grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .form-detail .viz-grid:has(> .spec-item:first-child:nth-last-child(9)) > .spec-item:nth-child(-n + 6) {
+    grid-column: span 3 !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .form-detail .viz-grid:has(> .spec-item:first-child:nth-last-child(9)) > .spec-item:nth-child(7) {
+    grid-column: span 2 !important;
+  }
+
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .form-detail .viz-grid:has(> .spec-item:first-child:nth-last-child(9)) > .spec-item:nth-child(8) {
+    grid-column: span 4 !important;
   }
 }
 
@@ -722,8 +753,8 @@ html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm
    13. Line breaks archive-zenith.js marks (2026-10-22, round 2). A glued
    run (1.00× /, 速 / 演, （Spark G2）) keeps together unless it alone is
    wider than its line; a form name (a table's row head, a card's name)
-   breaks only at its word seams; engines without auto-phrase honour the
-   script's phrase seams.
+   breaks only at its word seams; short Japanese lines honour the script's
+   phrase seams (keep-all), in Chrome as in Safari.
    ================================================================ */
 html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .zn-glue {
   display: inline-block;
@@ -744,6 +775,35 @@ html[data-embedded-archive][data-zn-phrases] :is(#saga-forms-performance-v5, #ed
   :is(.hero-lead, .selector-footnote, .detail-lead, .compare-description, .compare-same-note, .selector-empty p, .detail-head .text-muted, .ability-list li, .ability-cards li, .fact-list li, .finisher-list li, .operation-panel p, .compare-form-card .ability-layout p, .compare-form-card .rexonance-compare-revision p, .table td .text-small, .section h2) {
   word-break: keep-all;
   overflow-wrap: anywhere;
+}
+
+/* Phones: the comparison cards are two columns of 120-150px, narrower than
+   many of their phrases (メビウスネイバー：, ステラモディフィカーレ). Kept whole,
+   those phrases left ragged lines and still broke inside a word; there the
+   lines fill as Japanese text usually sets (strict: no line opens on ー or
+   a small kana), and the seams are only extra places to break. */
+@media (max-width: 620px) {
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) .compare-form-card :is(.detail-head .text-muted, .detail-lead, .ability-list li, .ability-cards li, .fact-list li, .finisher-list li, .ability-layout p, .rexonance-compare-revision p) {
+    word-break: normal !important;
+    line-break: strict;
+  }
+}
+
+/* Phones: Saga's ratio table keeps its narrow tier/role column (the first
+   ratio shows beside the names, rx6), but its one-line roles ran up to 44px
+   out of that column and across the next (超究極・攻撃限界拡張 at 390px).
+   The role now breaks after its ・ and the column's inner margin is 8px, so
+   a seven-letter role (究極・限界解放) and 単一実在収束 / keep one line. */
+@media (max-width: 620px) {
+  html[data-embedded-archive] #saga-forms-performance-v5 .table:has(> tbody#saga-ratio-body-v5) :is(th, td):nth-child(2) {
+    padding-inline: 8px !important;
+  }
+
+  html[data-embedded-archive] #saga-forms-performance-v5 #saga-ratio-body-v5 td:nth-child(2) .text-nowrap {
+    white-space: normal !important;
+    word-break: keep-all;
+    overflow-wrap: anywhere;
+  }
 }
 
 /* ================================================================

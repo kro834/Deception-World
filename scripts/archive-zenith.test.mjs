@@ -4,9 +4,9 @@ import test from "node:test";
 import vm from "node:vm";
 
 /* The archive's line breaks (public/archive-zenith.js): figures break after
-   their separators, form names between their words, and engines without
-   word-break: auto-phrase get phrase seams. Only <span> and <wbr> are added;
-   the owner's text never changes. */
+   their separators, form names between their words, and short Japanese
+   lines by phrase in every engine. Only <span> and <wbr> are added; the
+   owner's text never changes. */
 
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 const source = read("public/archive-zenith.js");
@@ -76,6 +76,11 @@ test("figures break after their separators and never change", () => {
     { glue: "150TOPS /" },
     " 50Core",
     { glue: "（Spark G2）" },
+  ]);
+  // Two short last Latin words keep together (no lone Max on its line).
+  assert.deepEqual(glueParts("Neural Resonancer Pro Max"), [
+    "Neural Resonancer ",
+    { glue: "Pro Max" },
   ]);
   assert.equal(glueParts("300E"), null);
   assert.equal(glueParts("207.8cm（est.）"), null);

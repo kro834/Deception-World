@@ -18,10 +18,13 @@
    2. Form names in the tables' row heads and on the index cards break
       between their words (ラスト | ヴィンクルム, エクスプリーム・ |
       ウルトラ), never inside one (ラストヴィンクル | ム).
-   3. Engines without word-break: auto-phrase (Safari) get the phrase
-      seams Chrome finds itself: after a particle or an inflection, before
-      the next word, so 統合アーカ | イブ or 万 | 能基盤 no longer happen.
-      html[data-zn-phrases] turns on the keep-all that honours them.
+   3. Short Japanese lines break by phrase: after a particle or an
+      inflection, before the next word, so 統合アーカ | イブ or 万 | 能基盤
+      no longer happen. Safari has no word-break: auto-phrase, and Chrome's
+      phrases, longer than these, broke a narrow comparison card before a
+      particle (200% | へ, レルムスレイヤー | を): every engine takes these
+      seams. html[data-zn-phrases] turns on the keep-all that honours them
+      (without the script, Chrome keeps auto-phrase).
    ================================================================ */
 (() => {
   "use strict";
@@ -33,10 +36,13 @@
     ".spec-item > .spec-value",
     ".table td .text-small",
     ".archive-footer p",
+    ".compare-diff-value",
   ].join(", ");
 
-  // Form names: the tables' row heads and the index cards' names.
-  const NAMES = ".table tbody th[scope='row'], .form-chip .chip-name";
+  // Form names: the tables' row heads and the index cards' names; and the
+  // ratio table's tier/role line (超究極・攻撃限界拡張), which a phone's
+  // narrow column lets break after its ・.
+  const NAMES = ".table tbody th[scope='row'], .form-chip .chip-name, .table td .text-nowrap";
 
   // Short Japanese text that reads by phrase: leads, list items, notes and
   // the narrow comparison cards. Long dossier paragraphs keep the normal
@@ -62,11 +68,12 @@
 
   // A bracketed note of up to 18 characters that holds a space stays
   // whole; a very short last term keeps its slash (速 / 演) or its plus
-  // (33.3× + YOPS); any other term keeps the separator after it (1.00× /).
+  // (33.3× + YOPS), two short last Latin words keep together (Pro Max);
+  // any other term keeps the separator after it (1.00× /).
   // A glued run is an inline block no wider than its line, so in a column
   // too narrow for it, it still wraps inside rather than overflow.
   const GLUE =
-    /[（(][^（）()\n]{1,18}[）)]|[「『][^「」『』\n]{1,18}[」』]|\S{1,3} \/ \S{1,2}$|\S+ \+ \S{1,4}$|\S+ [/+⇄](?= )/gu;
+    /[（(][^（）()\n]{1,18}[）)]|[「『][^「」『』\n]{1,18}[」』]|\S{1,3} \/ \S{1,2}$|\S+ \+ \S{1,4}$|\b[A-Za-z0-9.]{1,4} [A-Za-z0-9.]{1,4}$|\S+ [/+⇄](?= )/gu;
   const BRACKET = /^[（(「『]/u;
 
   // Japanese seams: after a run of hiragana (two or more, or a one-letter
@@ -199,16 +206,32 @@
     }
   }
 
+  // The analyzer rebuilds its difference rows on every choice: their
+  // values are marked again in the next frame (a pass over marked text
+  // changes nothing, so the watch settles at once).
+  function watchDifference(root) {
+    const section = root.querySelector('[id$="saga-form-compare-ios"]');
+    if (!section || typeof MutationObserver !== "function") return;
+    let frame = 0;
+    new MutationObserver(() => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(() => {
+        frame = 0;
+        each(section, ".compare-diff-value", glueParts);
+      });
+    }).observe(section, { childList: true, subtree: true });
+  }
+
   function run() {
     const roots = document.querySelectorAll(ROOT);
     if (!roots.length) return;
-    const phrases = !(window.CSS?.supports?.("word-break", "auto-phrase") ?? false);
     for (const root of roots) {
       each(root, FIGURE_TEXT, glueParts);
       each(root, NAMES, nameParts);
-      if (phrases) each(root, PHRASE_TEXT, phraseParts);
+      each(root, PHRASE_TEXT, phraseParts);
+      watchDifference(root);
     }
-    if (phrases) document.documentElement.dataset.znPhrases = "true";
+    document.documentElement.dataset.znPhrases = "true";
     document.documentElement.dataset.znBreaks = "true";
     // The analyzer's rows measure their labels; let them settle again.
     window.ArchiveComparisonUI?.refresh?.();
