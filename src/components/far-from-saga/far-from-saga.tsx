@@ -326,23 +326,64 @@ export function FarFromSaga() {
         <Pending line="P16の解説は現在準備中です。" />
       </section>
 
-      {/* 準備中 — #suitup: the scroll runway, still; far-from-assembly.ts is its seam. */}
-      <section
-        id="suitup"
-        className="rxs-section ffs-suitup ffs-prepared"
-        aria-labelledby="ffs-suitup-title"
-      >
+      {/* #suitup: the scroll runway (src/lib/far-from-assembly.ts mounts the
+          scene on .ffs-runway; the still picture and the HUD stand without it). */}
+      <section id="suitup" className="rxs-section ffs-suitup" aria-labelledby="ffs-suitup-title">
         <header className="rxs-section-heading rxs-reveal">
           <p>05 / SUIT-UP</p>
           <h2 id="ffs-suitup-title">変身シークエンス</h2>
           <span>スクロールに合わせて、ナノマシンが装甲を形成するまでを見せるコーナーです。</span>
         </header>
-        <div ref={runwayRef} className="ffs-runway" aria-hidden="true">
-          <i />
-          <i />
-          <i />
+        <div
+          ref={runwayRef}
+          className="ffs-runway"
+          aria-hidden="true"
+          style={{ ["--ffs-aspect" as string]: `${keyVisual.width} / ${keyVisual.height}` }}
+        >
+          <div className="ffs-stage">
+            <i className="ffs-stage-light" />
+            <i className="ffs-stage-floor" />
+            <img
+              className="ffs-still"
+              src={keyVisual.src}
+              {...farFromImage("middle", true)}
+              alt=""
+              width={keyVisual.width}
+              height={keyVisual.height}
+              loading="lazy"
+              decoding="async"
+            />
+            <canvas className="ffs-canvas" width={0} height={0} />
+            <div className="ffs-hud">
+              <p className="ffs-kicker">
+                <span>SUIT-UP</span>
+                <span>NANITE ASSEMBLY</span>
+              </p>
+              <ol className="ffs-parts">
+                {FAR_FROM_ASSEMBLY_BEATS.map((beat) => (
+                  <li key={beat.part} className="ffs-part" data-part={beat.part}>
+                    {beat.label}
+                  </li>
+                ))}
+              </ol>
+              <p className="ffs-readout">
+                <b className="ffs-percent">100</b>
+                <span>%</span>
+              </p>
+              <p className="ffs-hint">
+                <span className="ffs-hint-live">スクロールで装着</span>
+                <span className="ffs-hint-wait">装着準備中</span>
+              </p>
+              <p className="ffs-stamp">
+                <span>FAR FROM SAGA</span>
+                <b>{FAR_FROM_SAGA.stages.middle.code}</b>
+              </p>
+            </div>
+            <i className="ffs-rail">
+              <i />
+            </i>
+          </div>
         </div>
-        <Pending line="変身シークエンスは現在準備中です。" />
       </section>
 
       <section id="stages" className="rxs-stages rxs-section" aria-labelledby="ffs-stages-title">
