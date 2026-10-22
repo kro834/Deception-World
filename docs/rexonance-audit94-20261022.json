@@ -28,10 +28,10 @@
   "counts": {
     "not-reproduced-current": 27,
     "owner-retained": 25,
-    "fixed-verified": 34,
+    "fixed-verified": 35,
     "partial": 2,
     "unverified": 5,
-    "needs-owner-decision": 1
+    "needs-owner-decision": 0
   },
   "findings": [
     {
@@ -346,8 +346,8 @@
       "id": "F65",
       "category": "layout/med",
       "claim": "The Vinculum comparison figures contradict the Form Archive that the footer links to — src/components/rexonance-saga/rexonance-saga.tsx, public/saga-form-archive-embedded.html, src/components/extreme-saga/extreme-saga.tsx",
-      "status": "needs-owner-decision",
-      "note": "2026-10-22にオーナーがKHAOSのCore数は∞Coreと確定。レクソナンス・エクスプリーム両特設の比較と回帰テストを訂正。ジャンプ力は特設2ページの5000.0m（est.）とForm Archive・rider資料の188.8mが競合したままなので、推測せず変更を保留。"
+      "status": "fixed-verified",
+      "note": "2026-10-22にオーナーがヴィンクルムのKHAOSは∞Core、ジャンプ力は5000.0m（est.）と確定。両特設のCore数、Form Archiveの原本・配信用HTMLにある3カードのジャンプ力を訂正し、回帰テストで一致を検査。レクソナンスは提示された別スペックを維持。rider-page.tsxにある188.8mはレルムレジェンズとサイファー・ブラックサイトの値なので変更しない。"
     },
     {
       "id": "F66",

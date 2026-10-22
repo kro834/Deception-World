@@ -8,10 +8,10 @@
 
 - not-reproduced-current: 27
 - owner-retained: 25
-- fixed-verified: 34
+- fixed-verified: 35
 - partial: 2
 - unverified: 5
-- needs-owner-decision: 1
+- needs-owner-decision: 0
 
 ## ID別の判定
 
@@ -61,7 +61,7 @@
 | F62 | fixed-verified | P14=900・P2=180から900÷180×100=500%。650%／6.5倍／+550%を500%／5.0倍／+400%へ訂正。 |
 | F63 | fixed-verified | Extreme側にもP14が存在するため比較の構成一覧にP14（Extreme tuning）を追加。レンダーを検査。 |
 | F64 | fixed-verified | i-2の本文がplate03の同期・共鳴の仕事を重ねていた。既存のオーナー原稿rexonance-profile.tsの製造定義をそのまま引用し、検索抜粋も同期。 最終候補の3幅ブラウザーassertionに記録。 |
-| F65 | needs-owner-decision | 2026-10-22にオーナーがKHAOSのCore数は∞Coreと確定。レクソナンス・エクスプリーム両特設の比較と回帰テストを訂正。ジャンプ力は特設2ページの5000.0m（est.）とForm Archive・rider資料の188.8mが競合したままなので、推測せず変更を保留。 |
+| F65 | fixed-verified | 2026-10-22にオーナーがヴィンクルムのKHAOSは∞Core、ジャンプ力は5000.0m（est.）と確定。両特設のCore数、Form Archiveの原本・配信用HTMLにある3カードのジャンプ力を訂正し、回帰テストで一致を検査。レクソナンスは提示された別スペックを維持。rider-page.tsxにある188.8mはレルムレジェンズとサイファー・ブラックサイトの値なので変更しない。 |
 | F66 | not-reproduced-current | 1440のghostは上側、scroll cueは下側で離れている。320も画像下の別行。旧8pxのcue接触は観測しない。 |
 | F67 | fixed-verified | 初期フレームの舞台topが62→77px（電話58→65px）と変わる問題をCSSの初期reserveで修正。最終3幅はCSS適用後のtopが77/77/65pxで一定。文字拡大・safe-area用の実測補正は保持。 |
 | F68 | not-reproduced-current | 同条件を完全に再現した性能認定ではないが、初期1440サンプルのlong taskは164ms×1（50ms超過分114ms）、LCPはIMG 740ms。旧1.7sのTBTはこの試行では再現しない。 |
