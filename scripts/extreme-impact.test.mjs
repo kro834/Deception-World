@@ -857,7 +857,7 @@ test("a chained hit follows the one before it once, by its own delay, and never 
 test("a hit at rest short of its line lands after the dwell, once; leaving first cancels it", () => {
   const t = setup();
   const cleanup = t.mount();
-  const dwell = t.live((o) => o.options?.rootMargin === "0px 0px -120px 0px")[0];
+  const dwell = t.live((o) => o.options?.rootMargin === "0px 0px -64px 0px")[0];
   assert.ok(dwell?.targets.has(t.heading));
   assert.equal(dwell.targets.has(t.punch), false, "the mid line's hits keep to their line");
   const rest = (visible) => dwell.callback([{ target: t.heading, isIntersecting: visible }], dwell);
@@ -881,7 +881,7 @@ test("a hit at rest short of its line lands after the dwell, once; leaving first
   const u = setup();
   const cleanupU = u.mount();
   u.tick(BEATS.arrival);
-  const dwellU = u.live((o) => o.options?.rootMargin === "0px 0px -120px 0px")[0];
+  const dwellU = u.live((o) => o.options?.rootMargin === "0px 0px -64px 0px")[0];
   dwellU.callback([{ target: u.heading, isIntersecting: true }], dwellU);
   const base = u.live((o) => o.options?.rootMargin === "0px 0px -20% 0px")[0];
   base.callback([{ target: u.heading, isIntersecting: true }], base);

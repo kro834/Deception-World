@@ -49,9 +49,10 @@
 // inset makes the first hit arrive as its panel enters on every aspect ratio.
 const LINES = { base: "0px 0px -20% 0px", mid: "0px 0px -96px 0px" };
 // Round 2 (2026-10-22): the dwell. A default-line hit at least this far onto
-// the screen (its first line in view, past a phone's own fifth) that stays
-// short of the line for DWELL_MS lands where it rests. Leaving first cancels.
-const DWELL_LINE = "0px 0px -120px 0px";
+// the screen (a ROUND head's kicker row and the top of its title, which
+// stands beside the plate) that stays short of the line for DWELL_MS lands
+// where it rests. Leaving first cancels.
+const DWELL_LINE = "0px 0px -64px 0px";
 export const DWELL_MS = 600;
 const DWELL_KEY = "data-exi-dwell";
 // Scenes keyed by the engine itself (their opening tags stay as they are).
