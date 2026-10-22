@@ -83,7 +83,13 @@
           rgb(3 6 12 / 72%) 82%,
           #03060c 100%
         ),
-        linear-gradient(90deg, rgb(3 6 12 / 40%), transparent 40%, transparent 60%, rgb(3 6 12 / 40%));
+        linear-gradient(
+          90deg,
+          rgb(3 6 12 / 40%),
+          transparent 40%,
+          transparent 60%,
+          rgb(3 6 12 / 40%)
+        );
     }
   }
 }
@@ -463,7 +469,12 @@ html[data-family="world"]:root
       rgb(240 207 134 / 72%) 82%,
       transparent 100%
     );
-    -webkit-mask: radial-gradient(50% 50% at 50% 50%, #000 0, rgb(0 0 0 / 60%) 34%, transparent 70%);
+    -webkit-mask: radial-gradient(
+      50% 50% at 50% 50%,
+      #000 0,
+      rgb(0 0 0 / 60%) 34%,
+      transparent 70%
+    );
     mask: radial-gradient(50% 50% at 50% 50%, #000 0, rgb(0 0 0 / 60%) 34%, transparent 70%);
     opacity: var(--zn-o);
     translate: -50% -50%;
@@ -1151,9 +1162,17 @@ html[data-family="world"]:root
     > #episode-notes
     .wa-episode-art::after {
     background:
-      linear-gradient(90deg, var(--sw-light), #4f7bff 30%, #ff4fc3 62%, var(--sw-gold) 86%, transparent)
+      linear-gradient(
+          90deg,
+          var(--sw-light),
+          #4f7bff 30%,
+          #ff4fc3 62%,
+          var(--sw-gold) 86%,
+          transparent
+        )
         0 100% / 72% 1px no-repeat,
-      radial-gradient(50% 40% at 30% 100%, rgb(255 79 195 / 18%), transparent 100%) 0 100% / 100% 60px no-repeat,
+      radial-gradient(50% 40% at 30% 100%, rgb(255 79 195 / 18%), transparent 100%) 0 100% / 100%
+        60px no-repeat,
       linear-gradient(0deg, var(--sw-deck), transparent 55%);
   }
 
@@ -1187,7 +1206,14 @@ html[data-family="world"]:root
     > #episode-notes
     .wa-episode-art::after {
     background:
-      linear-gradient(90deg, var(--sw-light), #4f7bff 30%, #ff4fc3 62%, var(--sw-gold) 86%, transparent)
+      linear-gradient(
+          90deg,
+          var(--sw-light),
+          #4f7bff 30%,
+          #ff4fc3 62%,
+          var(--sw-gold) 86%,
+          transparent
+        )
         0 100% / 100% 1px no-repeat,
       radial-gradient(60% 34% at 50% 100%, rgb(255 79 195 / 16%), transparent 100%),
       linear-gradient(0deg, rgb(3 8 7 / 56%), transparent 34%);
@@ -1202,8 +1228,15 @@ html[data-family="world"]:root
     .wa-episode-head {
     box-shadow: none;
     background:
-      linear-gradient(90deg, var(--sw-light), #4f7bff 22%, #ff4fc3 48%, var(--sw-gold) 72%, transparent) 0 100% /
-        min(420px, 70%) 1px no-repeat,
+      linear-gradient(
+          90deg,
+          var(--sw-light),
+          #4f7bff 22%,
+          #ff4fc3 48%,
+          var(--sw-gold) 72%,
+          transparent
+        )
+        0 100% / min(420px, 70%) 1px no-repeat,
       linear-gradient(var(--sw-line) 0 0) 0 100% / 100% 1px no-repeat;
   }
 
@@ -1217,7 +1250,12 @@ html[data-family="world"]:root
     flex: 1;
     height: 1px;
     max-width: 120px;
-    background: linear-gradient(90deg, rgb(var(--sw-light-rgb) / 60%), rgb(255 79 195 / 40%), transparent);
+    background: linear-gradient(
+      90deg,
+      rgb(var(--sw-light-rgb) / 60%),
+      rgb(255 79 195 / 40%),
+      transparent
+    );
   }
 
   html[data-family="world"]:root
@@ -1241,8 +1279,7 @@ html[data-family="world"]:root
     > #glossary
     .wa-glossary {
     background:
-      var(--sw-ticks),
-      radial-gradient(42% 26% at 100% 0%, rgb(255 79 195 / 11%), transparent 100%),
+      var(--sw-ticks), radial-gradient(42% 26% at 100% 0%, rgb(255 79 195 / 11%), transparent 100%),
       radial-gradient(36% 22% at 0% 100%, rgb(var(--sw-light-rgb) / 9%), transparent 100%),
       linear-gradient(180deg, var(--sw-deck), var(--sw-deck-2));
   }
@@ -1624,7 +1661,11 @@ html[data-family="world"]:root
       .episode-grid {
       animation: zn-strip-fade linear both;
       animation-timeline: scroll(self inline);
-      -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - var(--zn-strip-fade)), transparent);
+      -webkit-mask-image: linear-gradient(
+        90deg,
+        #000 calc(100% - var(--zn-strip-fade)),
+        transparent
+      );
       mask-image: linear-gradient(90deg, #000 calc(100% - var(--zn-strip-fade)), transparent);
     }
 
@@ -1645,10 +1686,20 @@ html[data-family="world"]:root
       六詠 line-up carries the same light as the title stage.
    ---------------------------------------------------------------- */
 @media (forced-colors: none) {
-  html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > #story > .world-column {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #story
+    > .world-column {
     background:
       var(--sw-ticks),
-      linear-gradient(90deg, var(--sw-gold), #ff4fc3 34%, rgb(var(--sw-light-rgb) / 40%) 62%, transparent 86%)
+      linear-gradient(
+          90deg,
+          var(--sw-gold),
+          #ff4fc3 34%,
+          rgb(var(--sw-light-rgb) / 40%) 62%,
+          transparent 86%
+        )
         0 0 / 100% 1px no-repeat,
       radial-gradient(40% 50% at 100% 0%, rgb(255 79 195 / 10%), transparent 100%),
       linear-gradient(180deg, var(--sw-deck), var(--sw-deck-2));
