@@ -1563,6 +1563,33 @@ html[data-family="world"]:root
   }
 }
 
+/* 02 RIDERS: switching riders moved the page. Where the rider stage takes
+   its height from its copy (phones, portrait tablets, 1024px), a one-line
+   description and a two-line one differ by a line, so the chapter below
+   jumped 29–30px at some taps (1024 × 768, iPad Pro 11 and mini portrait:
+   989 ↔ 1019px). The description keeps room for two lines (three on
+   phones), so the stage holds one height through all eight riders there;
+   on phones only the two long name lines (07, 08) still add a line. */
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #riders
+  .rider-copy-block
+  > .rider-description {
+  min-height: 2lh;
+}
+
+@media (max-width: 699px) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #riders
+    .rider-copy-block
+    > .rider-description {
+    min-height: 3lh;
+  }
+}
+
 /* 03 RECORDS: the film strip's open edge. From 700px the strip shows a
    frame and a half to two and a half frames, and the last was cut by a hard edge
    (its title read DECEPTION WORL at 1440). The edge now fades out over
