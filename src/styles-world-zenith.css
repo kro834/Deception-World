@@ -890,8 +890,7 @@ html[data-family="world"]:root
     z-index: 2;
   }
 
-  /* The NO FILE chip stays on top of the name, as before the lift (on the
-     smallest plates the name's foot reaches it). */
+  /* The NO FILE chip stays on top of the name, as before the lift. */
   html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
@@ -900,6 +899,36 @@ html[data-family="world"]:root
     > .wa-portrait.is-vacant
     > small {
     z-index: 3;
+  }
+}
+
+/* The smallest plates (104px on an iPhone SE, 120px beside an open
+   profile on a phone): rx14's 30px floor made the vertical name 108px
+   tall, and its foot ran under the NO FILE chip. The plate is a width
+   container (its width comes from the wall's track, never its content);
+   under 150px the name is sized from it, a little tighter, and set a
+   touch above centre, so it ends clear of the chip. Physical units: the
+   name is vertical, so its own inline axis is the plate's height. */
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #cast-roster
+  .wa-person.is-none
+  > .wa-portrait.is-vacant {
+  container: zn-vacant / inline-size;
+}
+
+@container zn-vacant (max-width: 150px) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #cast-roster
+    .wa-person.is-none
+    > .wa-portrait.is-vacant
+    > b {
+    font-size: max(18px, 19cqw);
+    letter-spacing: 0.12em;
+    translate: 0 -4cqw;
   }
 }
 
