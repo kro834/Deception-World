@@ -42,7 +42,11 @@ test("a card's plate fits its name to the window's height from the name's run", 
   );
   assert.match(zenith, /\(100cqh - 46px\) \* 0\.9 \/\s*\(var\(--dxl-plate-em, 4\) \+ var\(--dxl-plate-n, 4\) \* var\(--dxl-plate-ls\)\)/);
   const frame = readFileSync(new URL("../src/components/library/record-art.tsx", import.meta.url), "utf8");
-  assert.match(frame, /<b style=\{plateRunStyle\(plateWords\(title\)\)\}>\{plateWords\(title\)\}<\/b>/);
+  // Owner (2026-10-22): a plate's name is set as its words (plateRun), so a long run wraps between them.
+  assert.match(frame, /<b style=\{plateRunStyle\(plateWords\(title\)\)\}>\{plateRun\(plateWords\(title\)\)\}<\/b>/);
+  // A run too long for one line at 18px takes two balanced lines, clear of the foot's fade.
+  assert.match(zenith, /min\(13cqw, 26px, \(100cqh - 46px\) \* 1\.8 \/ var\(--dxl-plate-run\)\)/);
+  assert.match(zenith, /padding-bottom: 14px;\s*white-space: normal;\s*text-wrap: balance;/);
 
   const source = ts.transpileModule(
     readFileSync(new URL("../src/lib/record-art.ts", import.meta.url), "utf8"),
@@ -62,4 +66,20 @@ test("a card's plate fits its name to the window's height from the name's run", 
   // Latin letters run sideways, narrower than a full-width letter.
   assert.deepEqual({ ...plateRunStyle("CODE") }, { "--dxl-plate-em": 2.48, "--dxl-plate-n": 4 });
   assert.deepEqual({ ...plateRunStyle("A B") }, { "--dxl-plate-em": 1.54, "--dxl-plate-n": 3 });
+});
+
+test("the see-all strip shows a picture-less record's whole name, never a faded slice", () => {
+  // Bars caption the plate across its column (two lines at most); tall tiles
+  // set it down the column from the name's run; phones' bars hold one column.
+  const at = zenith.indexOf("/* The see-all tile's peek:");
+  assert.ok(at > 0);
+  const block = zenith.slice(at, zenith.indexOf(".search-page .search-more {", at));
+  assert.match(block, /\.search-more-peek > \.dxl-art\[data-plate="type"\] > b \{[^}]*display: block;/);
+  assert.match(block, /\(36cqh - 18px\) \* 0\.92 \/\s*\(var\(--dxl-plate-em, 4\) \+ var\(--dxl-plate-n, 4\) \* var\(--dxl-plate-ls\)\)/);
+  assert.match(block, /mask-image: none;/);
+  assert.match(block, /@container \(max-height: 180px\) \{[\s\S]*max-block-size: 2\.9em;[\s\S]*writing-mode: horizontal-tb;/);
+  assert.match(block, /@container \(max-height: 180px\) and \(max-width: 559px\) \{[\s\S]*:nth-child\(n \+ 2\) \{\s*display: none;/);
+  assert.match(zenith, /\.dxl-art\[data-plate="type"\] > b > span \{\s*display: inline-block;/);
+  const frame = readFileSync(new URL("../src/components/library/record-art.tsx", import.meta.url), "utf8");
+  assert.match(frame, /withWordBreaks\(words\)\s*\.replace\(\/\(\[”」』\]\[とのや\]\)\(\?=\[“「『\]\)\/gu, "\$1\\u200b"\)\s*\.split\("\\u200b"\)/);
 });
