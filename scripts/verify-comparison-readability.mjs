@@ -29,7 +29,9 @@ async function checkNotices(page, width) {
         .getBoundingClientRect();
       const copy = node.getBoundingClientRect();
       return {
-        clearOfImage: visual.right <= copy.left - 1,
+        // Owner (2026-10-21): the notices are posters from tablet width up
+        // (picture above the copy), rows on phones (picture beside it).
+        clearOfImage: visual.right <= copy.left - 1 || visual.bottom <= copy.top - 1,
         titleClipped:
           title.scrollWidth > title.clientWidth + 1 || title.scrollHeight > title.clientHeight + 1,
         wraps: getComputedStyle(title).whiteSpace === "normal",

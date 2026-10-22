@@ -965,7 +965,7 @@ html[data-press-ready] body #site-announcement-dialog .site-announcement-list-it
   }
 
   html body #site-announcement-dialog .site-announcement-list-copy b {
-    font-size: clamp(15px, 1.3vw, 19px);
+    font-size: clamp(16px, 1.3vw, 19px);
     line-height: 1.45;
     text-wrap: balance;
   }
@@ -1111,7 +1111,7 @@ html[data-press-ready] body #site-announcement-dialog .site-announcement-list-it
   }
 
   html body #site-announcement-dialog .site-announcement-list-copy b {
-    font-size: 14px;
+    font-size: 16px; /* the notices' 16px title floor (verify-comparison-readability) */
   }
 }
 
