@@ -166,7 +166,10 @@ html[data-family="special"]
   .rxs-p14-values {
   grid-area: values;
   display: grid;
-  grid-template-columns: 96px 132px;
+  /* Round 2 (2026-10-22): the P14 column holds the widest figure, 約11.4%
+     (4.55em of a figure set at 2.6vw, 26–36px): at 132px it ran 32px into
+     the base column on the desktop (100% / 約11.4% touched at 1440). */
+  grid-template-columns: 96px clamp(132px, 12vw, 168px);
   align-items: start;
   justify-items: end;
   column-gap: clamp(14px, 2vw, 28px);
@@ -733,7 +736,9 @@ html[data-family="special"]
     .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
     > .rxe-chapter-map
     a {
-    grid-template-columns: 44px 150px minmax(0, auto) minmax(0, 1fr) 20px;
+    /* Round 2 (2026-10-22): 184px holds the longest code, SELF-RESONANCE
+       (180px at the codes' 0.12em); at 150px it ran into 共鳴構造. */
+    grid-template-columns: 44px 184px minmax(0, auto) minmax(0, 1fr) 20px;
     grid-template-rows: auto;
     align-items: baseline;
     gap: 0 18px;
@@ -866,6 +871,41 @@ html[data-family="special"]
     > a:nth-of-type(3) {
     grid-column: 3;
     margin-inline-start: 10px;
+  }
+}
+
+/* Round 2 (2026-10-22): the script column at 1100–1299 (an iPad in
+   landscape, a 1280 laptop) cannot hold a code, a name and its line on one
+   row (04's line was cut to an ellipsis at 1100): each chapter's line
+   stands under its name, so no word of it is ever cut. */
+@media (min-width: 1100px) and (max-width: 1299.98px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > .rxe-chapter-map
+    a {
+    grid-template-rows: auto auto;
+    row-gap: 6px;
+    padding-block: 14px;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > .rxe-chapter-map
+    a
+    > em {
+    grid-column: 3 / 5;
+    grid-row: 2;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > .rxe-chapter-map
+    a
+    > i {
+    grid-row: 1 / 3;
   }
 }
 
@@ -1044,6 +1084,7 @@ html[data-family="special"]
     grid-template-areas:
       "label label"
       "delta values";
+    column-gap: 12px;
     row-gap: 10px;
     padding: 16px 0;
   }
@@ -1054,8 +1095,13 @@ html[data-family="special"]
     > #p14
     .rxs-p14-metrics
     .rxs-p14-values {
-    grid-template-columns: minmax(72px, auto) minmax(92px, auto);
-    column-gap: 16px;
+    /* Round 2 (2026-10-22): fixed value columns, so the nine rows' readings
+       stand in two straight columns on a phone too (auto columns moved the
+       base column with each P14 figure: 900% / 約11.4% / 160.3%). The P14
+       column holds 約11.4% at the phone's figure size (26px; 21px under
+       375px). */
+    grid-template-columns: 72px 120px;
+    column-gap: 12px;
   }
 
   html[data-family="special"]
@@ -1174,6 +1220,60 @@ html[data-family="special"]
 
   html[data-family="special"] body .rxs-page.rxs-page.rxs-page.rxs-rexonance-page > .rxs-footer {
     min-height: 0;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > .rxs-footer
+    > .rzn-end-figure {
+    /* Round 2 (2026-10-22): the figure stood centred behind the last line
+       at 0.9 (0.55 once the rise had played), and 「見せろ。」 sat on its
+       lit core. It now stands from the band's top at the right edge, its
+       helmet over the kicker, and fades to the left and down under the
+       copy, one opacity with or without motion. */
+    top: clamp(12px, 3svh, 32px);
+    right: -8%;
+    translate: 0 0;
+    height: min(64%, 540px);
+    --rzn-end-o: 0.7;
+    opacity: var(--rzn-end-o);
+    -webkit-mask-image:
+      linear-gradient(180deg, #000 0 34%, rgb(0 0 0 / 32%) 58%, transparent 82%),
+      linear-gradient(90deg, rgb(0 0 0 / 25%), #000 55%);
+    mask-image:
+      linear-gradient(180deg, #000 0 34%, rgb(0 0 0 / 32%) 58%, transparent 82%),
+      linear-gradient(90deg, rgb(0 0 0 / 25%), #000 55%);
+    -webkit-mask-composite: source-in;
+    mask-composite: intersect;
+  }
+}
+
+/* Round 2 (2026-10-22): under 375px the P14 figures are 21px, so their
+   column closes to 約11.4%'s 96px, and the delta takes its own line over
+   the readings (beside them it had 60px, and 低下率削減 broke inside the
+   word). */
+@media (max-width: 374.98px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > #p14
+    .rxs-p14-metrics
+    article {
+    grid-template-areas:
+      "label label"
+      "delta delta"
+      ". values";
+    row-gap: 8px;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > #p14
+    .rxs-p14-metrics
+    .rxs-p14-values {
+    grid-template-columns: 72px 98px;
   }
 }
 
