@@ -17,6 +17,7 @@ import {
 import { FarFromEntryTransition } from "./far-from-entry-transition";
 import { FarFromComparison } from "./far-from-comparison";
 import { FarFromP16 } from "./far-from-p16";
+import { FarFromUltra } from "./far-from-ultra";
 import { FarFromReport } from "./far-from-report";
 import { FarFromSuitUp } from "./far-from-suitup";
 
@@ -33,10 +34,11 @@ import { FarFromSuitUp } from "./far-from-suitup";
    #p16 (far-from-p16.tsx) are built from the owner's comparison text
    (far-from-report-text.ts, verbatim). #suitup is the scroll suit-up
    (far-from-suitup.tsx: the Rexonance runway playing FAR FROM's suit
-   through src/lib/far-from-assembly.ts, its engine chunk imported under
-   the motion gate once the page is idle). Still prepared, not built: the
-   nanite entry transition (far-from-entry-transition.tsx, renders
-   nothing). Nothing here delays first paint. */
+   through src/lib/far-from-assembly.ts, ending on マックス). #ultra
+   (far-from-ultra.tsx) is the ウルトラ sequence, the continuation after
+   マックス as its own scroll segment. The page-entry transformation is
+   far-from-entry-transition.tsx. Every engine is a lazy chunk mounted after
+   paint, only where motion is allowed; nothing here delays first paint. */
 
 const releaseControlFocus = (control: HTMLElement) => {
   window.requestAnimationFrame(() => {
@@ -142,13 +144,13 @@ export function FarFromSaga() {
               <span aria-hidden="true">02</span> スペック
             </a>
             <a href="#stages">
-              <span aria-hidden="true">06</span> 形態
+              <span aria-hidden="true">07</span> 形態
             </a>
             <a href="#theories">
-              <span aria-hidden="true">07</span> 中核機構
+              <span aria-hidden="true">08</span> 中核機構
             </a>
             <a href="#finishers">
-              <span aria-hidden="true">11</span> 必殺技
+              <span aria-hidden="true">12</span> 必殺技
             </a>
           </nav>
           <SideMenuTrigger
@@ -284,9 +286,13 @@ export function FarFromSaga() {
       {/* #suitup: the scroll suit-up (far-from-suitup.tsx). */}
       <FarFromSuitUp />
 
+      {/* #ultra: the ウルトラ sequence, the continuation after マックス
+          (far-from-ultra.tsx; its engine is a lazy chunk under the motion gate). */}
+      <FarFromUltra />
+
       <section id="stages" className="rxs-stages rxs-section" aria-labelledby="ffs-stages-title">
         <header className="rxs-section-heading rxs-reveal">
-          <p>06 / STAGES</p>
+          <p>07 / STAGES</p>
           <h2 id="ffs-stages-title">形態</h2>
           <span>{FAR_FROM_SAGA.stagesLine}</span>
         </header>
@@ -363,7 +369,7 @@ export function FarFromSaga() {
         aria-labelledby="ffs-theories-title"
       >
         <header className="rxs-section-heading rxs-reveal">
-          <p>07 / MECHANISM</p>
+          <p>08 / MECHANISM</p>
           <h2 id="ffs-theories-title">中核機構</h2>
           <span>FARFROM DRIVEをはじめとする、4つの新規理論・中核機構。</span>
         </header>
@@ -372,7 +378,7 @@ export function FarFromSaga() {
 
       <section id="system" className="rxs-section ffs-system" aria-labelledby="ffs-system-title">
         <header className="rxs-section-heading rxs-reveal">
-          <p>08 / ARMOR & OS</p>
+          <p>09 / ARMOR & OS</p>
           <h2 id="ffs-system-title">装甲・OS</h2>
           <span>浮遊ユニット『ファーフロムビット』と、統合OS『SA-GA OS 6.1』。</span>
         </header>
@@ -389,7 +395,7 @@ export function FarFromSaga() {
         aria-labelledby="ffs-authority-title"
       >
         <header className="rxs-section-heading rxs-reveal">
-          <p>09 / AUTHORITY</p>
+          <p>10 / AUTHORITY</p>
           <h2 id="ffs-authority-title">神属権限</h2>
           <span>FAR FROM DEUSと、Exception World。</span>
         </header>
@@ -398,7 +404,7 @@ export function FarFromSaga() {
 
       <section id="arsenal" className="rxs-section ffs-arsenal" aria-labelledby="ffs-arsenal-title">
         <header className="rxs-section-heading rxs-reveal">
-          <p>10 / WEAPONS</p>
+          <p>11 / WEAPONS</p>
           <h2 id="ffs-arsenal-title">武装</h2>
           <span>追加武装は全10種。</span>
         </header>
@@ -419,7 +425,7 @@ export function FarFromSaga() {
         aria-labelledby="ffs-finishers-title"
       >
         <header className="rxs-section-heading rxs-reveal">
-          <p>11 / FINISHER</p>
+          <p>12 / FINISHER</p>
           <h2 id="ffs-finishers-title">必殺技</h2>
         </header>
         <div className="ffs-finisher-list">
