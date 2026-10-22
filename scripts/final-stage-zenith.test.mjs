@@ -311,3 +311,24 @@ test("the records' eyebrows wrap at their seam and the cast still fills its pass
   for (const { body } of tears)
     assert.match(declarations(body, "inset")[0], /^(?:0 auto 0 -1px|-1px 0 auto)$/);
 });
+
+test("delayed stepped runs end on the element's own style (WebKit stops them a step short)", async () => {
+  // WebKit ends a delayed steps(jump-end) run at a progress of 0.9999999999999999:
+  // a forwards fill left the cast stub at half opacity and some calls tilted.
+  for (const [path, names] of [
+    ["src/styles-final-stage-kiro.css", ["fsk-stamp", "fsk-flap-in"]],
+    ["src/styles-final-stage-lamplight.css", ["fsl-sign", "fsl-flip"]],
+    ["src/styles-final-stage-cinema.css", ["fsc-lock"]],
+  ]) {
+    const css = strip(await read(path));
+    for (const name of names) {
+      const uses = [...css.matchAll(new RegExp(`animation:\\s*${name} ([^;]+);`, "g"))].map(
+        ([, value]) => value.trim(),
+      );
+      assert.ok(uses.length > 0, name);
+      for (const value of uses) {
+        assert.match(value, /steps\(\d+, jump-end\) \S+ backwards$/, `${name}: ${value}`);
+      }
+    }
+  }
+});
