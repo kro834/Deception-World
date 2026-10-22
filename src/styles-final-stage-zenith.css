@@ -692,13 +692,6 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page .fst-pickup-dialog 
   }
 }
 
-/* A spec value that opens on 『 or 「 (『KHAOS DeuX』, 『SA-GA OS 6.0』)
-   stood half an em in from its key and from the values beside it: an
-   opening bracket at a line's start sets flush. */
-html[data-family="special"] body .rxs-page.rxs-page.fst-page .fst-pickup-dialog .fst-specs dd {
-  text-spacing-trim: trim-start;
-}
-
 /* Realm Royal: the form's name and its calls as one band, the spec grid
    under them in three columns (two at the record's narrower widths, one
    row per key on phones, as the FAR FROM SAGA grid). */
