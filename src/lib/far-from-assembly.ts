@@ -201,6 +201,7 @@ export function mountFarFromAssembly(
     if (pct !== lastPercent) {
       lastPercent = pct;
       writeText(percent, pct);
+      host.style.setProperty("--ffs-progress", p.toFixed(2));
     }
     for (const part of parts) {
       const state = farFromBeatState(part.beat, p);

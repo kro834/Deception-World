@@ -30,11 +30,13 @@ import { FarFromP16 } from "./far-from-p16";
 
    #performance is the comparison console (far-from-comparison.tsx) and #p16
    the P16 chapter's frame (far-from-p16.tsx; P16's own specs are 準備中),
-   both drawing on far-from-comparison-data.ts. Still prepared, not built
-   (準備中): the nanite entry transition (far-from-entry-transition.tsx,
-   renders nothing) and #suitup (a still runway; src/lib/far-from-assembly.ts
-   is its seam). None of them loads a canvas or an engine, and none delays
-   first paint. */
+   both drawing on far-from-comparison-data.ts. #suitup is the scroll
+   suit-up runway (src/lib/far-from-assembly.ts mounts the scene of
+   src/lib/far-from-assembly-scene.ts on .ffs-runway) and the nanite entry
+   transition (far-from-entry-transition.tsx) plays the same scene once per
+   session on the calls' clock; both load their chunk lazily and never delay
+   first paint. The still tiers (reduced motion, economy, Save-Data) keep
+   the finished figure. */
 
 const releaseControlFocus = (control: HTMLElement) => {
   window.requestAnimationFrame(() => {

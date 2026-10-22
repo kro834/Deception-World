@@ -8,10 +8,12 @@
    footer. This sheet adds what the page needs of its own: the ミドル key
    visual's crop, the calls, the spec grid, the prose, the record's article
    grids, the weapons list, the finishers, a five-column rail, and the
-   prepared (準備中) mark and the still suit-up runway. The #performance
-   console and the #p16 frame are drawn by styles-far-from-compare.css.
-   Every rule is scoped to .ffs-page. Paint and layout only; the only
-   motion is the shared grammar's, gated there by prefers-reduced-motion.
+   prepared (準備中) mark, the suit-up runway's stage and HUD and the entry
+   overlay. The #performance console and the #p16 frame are drawn by
+   styles-far-from-compare.css. Every rule is scoped to .ffs-page or the
+   entry overlay. Paint and layout only; the motion is opacity and
+   transforms answering the engines' flags, the pinned runway behind
+   prefers-reduced-motion, forced colours and the economy flag.
    ================================================================ */
 
 @import "./styles-far-from-compare.css";
@@ -344,43 +346,562 @@
 
 /* #performance and #p16 live in styles-far-from-compare.css (imported above). */
 
-/* #suitup — the runway, still: three faint rings where the port will draw. */
+/* ----------------------------------------------------------------
+   #suitup — the scroll runway (src/lib/far-from-assembly.ts).
+
+   One screen, the figure in the middle: the still picture and the HUD at
+   100 % stand on their own (no JS, the still tiers). Under the motion
+   gate the runway grows tall and the stage pins while the scene plays;
+   data-ffs-load (waiting / ready / live / static) and data-ffs-state
+   (idle / forming / complete) are the engine's flags. Opacity and
+   transforms only; the canvas is the engine's.
+   ---------------------------------------------------------------- */
 .ffs-runway {
+  --ffs-ice: 143 240 255;
+  --ffs-gold: 255 217 138;
+  --ffs-violet: 201 155 255;
+  --ffs-progress: 1;
   position: relative;
-  display: grid;
-  place-items: center;
-  max-width: 980px;
-  height: clamp(220px, 32vw, 360px);
-  margin: 0 auto clamp(28px, 4vw, 44px);
-  overflow: hidden;
-  border: 1px solid rgb(127 230 255 / 14%);
+  z-index: 1;
+  isolation: isolate;
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+.ffs-stage {
+  position: relative;
+  height: max(560px, calc(100svh - var(--dxs-nav, 62px) - 28px));
+  max-height: 1000px;
+  overflow: clip;
+  border: 1px solid rgb(var(--ffs-ice) / 14%);
   border-radius: var(--sc-radius, 22px);
   background:
-    radial-gradient(circle at 50% 50%, rgb(127 230 255 / 10%), transparent 42%),
-    linear-gradient(180deg, #03060d, #010308);
+    radial-gradient(60% 46% at 50% 44%, rgb(var(--ffs-violet) / 12%), transparent 70%),
+    radial-gradient(38% 30% at 50% 94%, rgb(var(--ffs-ice) / 16%), transparent 72%),
+    linear-gradient(180deg, #03060d, #050914 46%, #03060c);
+  container-type: size;
+  contain: layout paint;
 }
 
-.ffs-runway i {
+.ffs-stage-light,
+.ffs-stage-floor {
   position: absolute;
-  inset: 50% auto auto 50%;
-  aspect-ratio: 1;
-  border: 1px solid rgb(127 230 255 / 22%);
+  display: block;
+  pointer-events: none;
+}
+
+.ffs-stage-light {
+  inset: 0;
+  z-index: 0;
+  background:
+    linear-gradient(101deg, transparent 0 41%, rgb(var(--ffs-ice) / 7%) 41% 44%, transparent 44%),
+    linear-gradient(79deg, transparent 0 55%, rgb(var(--ffs-gold) / 6%) 55% 58%, transparent 58%),
+    repeating-linear-gradient(90deg, rgb(var(--ffs-ice) / 4%) 0 1px, transparent 1px 64px),
+    repeating-linear-gradient(0deg, rgb(var(--ffs-ice) / 3%) 0 1px, transparent 1px 64px);
+  -webkit-mask-image: radial-gradient(70% 80% at 50% 46%, #000 30%, transparent 86%);
+  mask-image: radial-gradient(70% 80% at 50% 46%, #000 30%, transparent 86%);
+}
+
+.ffs-stage-floor {
+  left: 50%;
+  bottom: calc(3.5% - 18px);
+  z-index: 0;
+  width: min(72cqw, 560px);
+  height: 44px;
   border-radius: 50%;
-  translate: -50% -50%;
+  translate: -50% 0;
+  background: radial-gradient(50% 50% at 50% 50%, rgb(var(--ffs-ice) / 34%), transparent 72%);
+  opacity: 0.8;
 }
 
-.ffs-runway i:nth-child(1) {
-  width: 28%;
+/* The figure: 86 % of the stage's height, never wider than 92 % of it,
+   its soles 3.5 % up — the scene's own placement (FAR_FROM_STAGE). */
+.ffs-still {
+  position: absolute;
+  left: 50%;
+  bottom: 3.5%;
+  z-index: 1;
+  width: auto;
+  height: min(86cqh, calc(92cqw / (1280 / 1758)));
+  translate: -50% 0;
+  object-fit: cover;
+  -webkit-mask-image:
+    linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent),
+    linear-gradient(180deg, transparent, #000 7%, #000 90%, transparent);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent),
+    linear-gradient(180deg, transparent, #000 7%, #000 90%, transparent);
+  mask-composite: intersect;
+  transition: opacity 320ms ease, filter 320ms ease;
 }
 
-.ffs-runway i:nth-child(2) {
-  width: 52%;
-  border-color: rgb(201 155 255 / 16%);
+/* Preparing: the figure stands as a dim guide, never finished before the
+   scroll. Live: the canvas owns it. */
+.ffs-runway[data-ffs-load="waiting"] .ffs-still {
+  opacity: 0.3;
+  filter: brightness(0.5) saturate(0.4) sepia(0.3) hue-rotate(160deg);
 }
 
-.ffs-runway i:nth-child(3) {
-  width: 78%;
-  border-color: rgb(255 215 122 / 12%);
+.ffs-runway[data-ffs-load="ready"] .ffs-still,
+.ffs-runway[data-ffs-load="live"] .ffs-still {
+  opacity: 0;
+}
+
+.ffs-canvas,
+.ffs-field {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.ffs-field.is-back {
+  z-index: 1;
+}
+
+.ffs-canvas {
+  z-index: 2;
+}
+
+.ffs-field.is-front {
+  z-index: 3;
+}
+
+/* The HUD: the kicker and the parts up the left, the stamp top right, the
+   read-out bottom right, the hint along the bottom. */
+.ffs-hud {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  padding: clamp(16px, 2.6vw, 28px);
+  color: #e9edf3;
+  font-family: var(--rxs-font-display);
+  pointer-events: none;
+}
+
+.ffs-hud > * {
+  position: absolute;
+  margin: 0;
+}
+
+.ffs-kicker {
+  top: clamp(16px, 2.6vw, 28px);
+  left: clamp(16px, 2.6vw, 28px);
+  display: grid;
+  gap: 4px;
+  color: rgb(var(--ffs-ice));
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.26em;
+}
+
+.ffs-kicker span + span {
+  color: var(--ffs-muted);
+  letter-spacing: 0.2em;
+}
+
+.ffs-parts {
+  top: clamp(58px, 7vw, 86px);
+  left: clamp(16px, 2.6vw, 28px);
+  display: grid;
+  gap: 6px;
+  padding: 0;
+  list-style: none;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.ffs-part {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  color: #e9edf3;
+  transition: color 240ms ease, opacity 240ms ease;
+}
+
+.ffs-part::before {
+  content: "";
+  width: 14px;
+  height: 1px;
+  background: rgb(var(--ffs-gold));
+  transition: background 240ms ease, width 240ms ease;
+}
+
+.ffs-runway[data-ffs-load="live"] .ffs-part[data-state="pending"],
+.ffs-runway[data-ffs-load="ready"] .ffs-part[data-state="pending"],
+.ffs-runway[data-ffs-load="waiting"] .ffs-part {
+  color: var(--ffs-muted);
+  opacity: 0.7;
+}
+
+.ffs-runway[data-ffs-load="live"] .ffs-part[data-state="pending"]::before,
+.ffs-runway[data-ffs-load="waiting"] .ffs-part::before {
+  width: 8px;
+  background: rgb(var(--ffs-ice) / 35%);
+}
+
+.ffs-runway[data-ffs-load="live"] .ffs-part[data-state="forming"] {
+  color: rgb(var(--ffs-ice));
+}
+
+.ffs-runway[data-ffs-load="live"] .ffs-part[data-state="forming"]::before {
+  width: 22px;
+  background: rgb(var(--ffs-ice));
+}
+
+.ffs-stamp {
+  top: clamp(16px, 2.6vw, 28px);
+  right: clamp(16px, 2.6vw, 28px);
+  display: grid;
+  gap: 4px;
+  justify-items: end;
+  font-size: 10px;
+  letter-spacing: 0.24em;
+  text-align: right;
+}
+
+.ffs-stamp span {
+  color: var(--ffs-muted);
+}
+
+.ffs-stamp b {
+  color: rgb(var(--ffs-gold));
+  font-size: 13px;
+  letter-spacing: 0.3em;
+}
+
+.ffs-readout {
+  right: clamp(16px, 2.6vw, 28px);
+  bottom: clamp(16px, 2.6vw, 28px);
+  display: flex;
+  gap: 4px;
+  align-items: baseline;
+  line-height: 1;
+}
+
+.ffs-readout b {
+  min-width: 2.2ch;
+  font-size: clamp(34px, 5vw, 56px);
+  font-weight: 720;
+  letter-spacing: -0.03em;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.ffs-readout span {
+  color: var(--ffs-muted);
+  font-size: 12px;
+  letter-spacing: 0.2em;
+}
+
+.ffs-hint {
+  left: 50%;
+  bottom: clamp(18px, 2.8vw, 30px);
+  display: grid;
+  translate: -50% 0;
+  color: var(--ffs-muted);
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  white-space: nowrap;
+}
+
+.ffs-hint span {
+  grid-area: 1 / 1;
+  transition: opacity 240ms ease;
+}
+
+.ffs-hint-wait,
+.ffs-runway[data-ffs-load="waiting"] .ffs-hint-live,
+.ffs-runway[data-ffs-load="static"] .ffs-hint-live,
+.ffs-runway:not([data-ffs-load]) .ffs-hint-live,
+.ffs-runway[data-ffs-state="complete"] .ffs-hint-live {
+  opacity: 0;
+}
+
+.ffs-runway[data-ffs-load="waiting"] .ffs-hint-wait {
+  opacity: 1;
+}
+
+/* The rail: the scroll's position down the right edge. */
+.ffs-rail {
+  position: absolute;
+  top: 18%;
+  right: 10px;
+  bottom: 18%;
+  z-index: 4;
+  width: 2px;
+  border-radius: 1px;
+  background: rgb(var(--ffs-ice) / 14%);
+  opacity: 0;
+  transition: opacity 240ms ease;
+}
+
+.ffs-rail > i {
+  position: absolute;
+  inset: 0;
+  display: block;
+  border-radius: 1px;
+  background: linear-gradient(180deg, rgb(var(--ffs-ice)), rgb(var(--ffs-gold)));
+  transform-origin: 50% 0;
+  transform: scaleY(var(--ffs-progress));
+}
+
+.ffs-runway[data-ffs-load="live"] .ffs-rail {
+  opacity: 1;
+}
+
+/* The pinned runway: persistent preferences only. */
+@media (prefers-reduced-motion: no-preference) and (forced-colors: none) {
+  html:not([data-world-effects="economy"]) .ffs-runway:not([data-ffs-load="static"]) {
+    height: max(2400px, 400svh);
+  }
+
+  html:not([data-world-effects="economy"]) .ffs-runway:not([data-ffs-load="static"]) .ffs-stage {
+    position: sticky;
+    top: calc(var(--dxs-nav, 62px) + 14px);
+  }
+}
+
+@media (max-width: 760px) {
+  .ffs-stage {
+    height: max(560px, calc(100svh - var(--dxs-nav, 62px) - 16px));
+  }
+
+  .ffs-parts {
+    gap: 4px;
+    font-size: 10px;
+  }
+
+  .ffs-hint {
+    font-size: 10px;
+  }
+}
+
+/* ----------------------------------------------------------------
+   The entry transition (far-from-entry-transition.tsx): a fixed overlay
+   over the page while the scene plays on the calls' clock. Pointer events
+   pass through; only the skip button takes them.
+   ---------------------------------------------------------------- */
+.ffs-entry {
+  --ffs-ice: 143 240 255;
+  --ffs-gold: 255 217 138;
+  --ffs-violet: 201 155 255;
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  color: #effbff;
+  font-family: var(--rxs-font-display);
+  text-align: center;
+}
+
+.ffs-entry-scene {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(60% 46% at 50% 44%, rgb(var(--ffs-violet) / 12%), transparent 70%),
+    rgb(1 3 8 / 94%);
+  animation: ffs-entry-in var(--ffs-entry-cover, 360ms) ease-out both;
+}
+
+.ffs-entry[data-phase="revealing"] .ffs-entry-scene,
+.ffs-entry[data-phase="revealing"] .ffs-entry-skip {
+  animation: ffs-entry-out var(--ffs-entry-reveal, 720ms) ease-in both;
+}
+
+@keyframes ffs-entry-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes ffs-entry-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.ffs-entry-ground {
+  position: absolute;
+  inset: 0;
+  display: block;
+  background: linear-gradient(180deg, transparent 60%, rgb(var(--ffs-ice) / 8%));
+}
+
+.ffs-entry-stage {
+  position: absolute;
+  inset: max(44px, env(safe-area-inset-top)) 0 max(128px, calc(env(safe-area-inset-bottom) + 112px));
+  contain: layout paint;
+}
+
+.ffs-entry-caption {
+  position: absolute;
+  top: max(18px, env(safe-area-inset-top));
+  left: 50%;
+  display: flex;
+  gap: 14px;
+  margin: 0;
+  translate: -50% 0;
+  color: rgb(var(--ffs-ice));
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  white-space: nowrap;
+}
+
+.ffs-entry-caption span + span {
+  color: var(--ffs-muted, #8b95a4);
+}
+
+.ffs-entry-calls {
+  position: absolute;
+  right: 16px;
+  bottom: max(52px, calc(env(safe-area-inset-bottom) + 40px));
+  left: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ffs-entry-call {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.1em 0.4em;
+  justify-content: center;
+  opacity: 0;
+  font-size: clamp(22px, 4.6vw, 54px);
+  font-weight: 720;
+  letter-spacing: 0.02em;
+  line-height: 1.15;
+  text-wrap: balance;
+  transform: translateY(12px);
+}
+
+.ffs-entry-call.is-live {
+  opacity: 1;
+  transform: none;
+  transition: opacity 180ms ease-out, transform 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ffs-entry[data-beat="0"] .ffs-entry-call:nth-child(1),
+.ffs-entry[data-beat="1"] .ffs-entry-call:nth-child(2),
+.ffs-entry[data-beat="2"] .ffs-entry-call:nth-child(3),
+.ffs-entry[data-beat="3"] .ffs-entry-call:nth-child(4),
+.ffs-entry[data-beat="4"] .ffs-entry-call:nth-child(5),
+.ffs-entry[data-beat="5"] .ffs-entry-call:nth-child(6),
+.ffs-entry[data-beat="6"] .ffs-entry-call:nth-child(7) {
+  opacity: 1;
+  transform: none;
+  transition: opacity 180ms ease-out, transform 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ffs-entry-unit {
+  color: rgb(var(--ffs-ice) / 30%);
+  transition: color 120ms ease-out;
+}
+
+.ffs-entry-unit:first-child,
+.ffs-entry[data-unit="1"] .ffs-entry-unit:nth-child(-n + 2),
+.ffs-entry[data-unit="2"] .ffs-entry-unit:nth-child(-n + 3),
+.ffs-entry[data-unit="3"] .ffs-entry-unit:nth-child(-n + 4) {
+  color: #effbff;
+  text-shadow: 0 0 18px rgb(var(--ffs-ice) / 45%);
+}
+
+.ffs-entry-call:nth-child(7) .ffs-entry-unit {
+  background: linear-gradient(95deg, #8deaff, #ffffff 45%, #ffd37d);
+  background-clip: text;
+  color: transparent;
+  text-shadow: none;
+}
+
+.ffs-entry-meter {
+  position: absolute;
+  right: 16px;
+  bottom: max(26px, calc(env(safe-area-inset-bottom) + 14px));
+  left: 16px;
+  height: 2px;
+  margin: 0;
+  background: rgb(var(--ffs-ice) / 14%);
+  overflow: hidden;
+}
+
+.ffs-entry-meter i {
+  position: absolute;
+  inset: 0;
+  display: block;
+  background: linear-gradient(90deg, rgb(var(--ffs-ice)), rgb(var(--ffs-gold)));
+  transform-origin: 0 50%;
+  animation: ffs-entry-meter var(--ffs-entry-total, 7300ms) linear both;
+}
+
+@keyframes ffs-entry-meter {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.ffs-entry-skip {
+  position: absolute;
+  right: max(16px, env(safe-area-inset-right));
+  bottom: max(40px, calc(env(safe-area-inset-bottom) + 28px));
+  min-width: 44px;
+  min-height: 44px;
+  padding: 10px 18px;
+  border: 1px solid rgb(var(--ffs-ice) / 40%);
+  border-radius: 999px;
+  background: rgb(2 5 12 / 72%);
+  color: #effbff;
+  font-family: var(--rxs-font-display);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  pointer-events: auto;
+  cursor: pointer;
+  animation: ffs-entry-in var(--ffs-entry-cover, 360ms) ease-out both;
+}
+
+.ffs-entry-skip:focus-visible {
+  outline: 2px solid rgb(var(--ffs-ice));
+  outline-offset: 2px;
+}
+
+@media (max-width: 760px) {
+  .ffs-entry-skip {
+    bottom: max(44px, calc(env(safe-area-inset-bottom) + 32px));
+  }
+
+  .ffs-entry-calls {
+    bottom: max(96px, calc(env(safe-area-inset-bottom) + 84px));
+  }
+
+  .ffs-entry-stage {
+    inset: max(40px, env(safe-area-inset-top)) 0 max(160px, calc(env(safe-area-inset-bottom) + 148px));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ffs-entry {
+    display: none;
+  }
 }
 
 /* #arsenal — the weapons, numbered. */

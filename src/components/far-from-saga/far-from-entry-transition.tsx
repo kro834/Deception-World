@@ -254,6 +254,7 @@ export function FarFromEntryTransition({ stage = "middle", onRevealed }: FarFrom
           "--ffs-entry-accent": accent,
           "--ffs-entry-cover": `${FAR_FROM_ENTRY_TIMINGS.cover}ms`,
           "--ffs-entry-reveal": `${FAR_FROM_ENTRY_TIMINGS.reveal}ms`,
+          "--ffs-entry-total": `${FAR_FROM_ENTRY_TIMINGS.total + FAR_FROM_ENTRY_TIMINGS.hold}ms`,
         } as CSSProperties
       }
     >

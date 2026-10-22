@@ -31,9 +31,15 @@
 import { FAR_FROM_SAGA_ARTWORK } from "./far-from-saga-artwork";
 import { fieldHash, fieldTake } from "./rexonance-field/field-seed.js";
 import { FIELD_STATE, fieldScore, fieldState, fieldStateBuffer } from "./rexonance-field/field-score.js";
-import { FIELD_SEEDS, FIELD_SHAPE, fieldPose, fieldSeeds } from "./rexonance-field/field-pose.js";
-import { createFieldLayer } from "./rexonance-field/field-gl.js";
+import { FIELD_SEEDS, FIELD_SHAPE, fieldPose, fieldSeeds as seedsOf } from "./rexonance-field/field-pose.js";
+import { createFieldLayer as layerOf } from "./rexonance-field/field-gl.js";
 import type { FieldLayer, FieldScore, FieldTake } from "./rexonance-field/index.js";
+
+// The field's own modules, never the barrel, typed by the barrel's
+// declarations (as field-entry.ts does): a lazy chunk of its own.
+type Field = typeof import("./rexonance-field/index.js");
+const createFieldLayer = layerOf as unknown as Field["createFieldLayer"];
+const fieldSeeds = seedsOf as unknown as Field["fieldSeeds"];
 
 const TAU = Math.PI * 2;
 const clamp01 = (value: number) => (value < 0 ? 0 : value > 1 ? 1 : value);
