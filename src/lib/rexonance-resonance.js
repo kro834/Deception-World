@@ -3713,7 +3713,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         context.translate(-rx, -ry);
         context.globalAlpha = 0.95 * (1 - burst);
         for (let tone = 0; tone < 3; tone += 1) {
-          context.fillStyle = TONE_CSS[tone];
+          context.fillStyle = palette.toneCss[tone];
           context.beginPath();
           for (const square of reactorSquares)
             if (square.group === group && square.tone === tone)
