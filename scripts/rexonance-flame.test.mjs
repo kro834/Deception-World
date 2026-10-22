@@ -23,12 +23,15 @@ import {
 } from "../src/lib/rexonance-fire/fire-field.js";
 import { buildNoiseTable } from "../src/lib/rexonance-fire/fire-noise.js";
 import {
+  POSE_COVER,
   POSE_FLASH,
   POSE_FLICKER,
   POSE_FLOW_A,
   POSE_RING_RADIUS,
   POSE_RING_STRENGTH,
   POSE_SLOTS,
+  POSE_TEAR_GLOW,
+  POSE_TEAR_OPEN,
   POSE_TIME,
   POSE_VIEW_X0,
   POSE_VIEW_X1,
@@ -38,7 +41,15 @@ import {
   poseView,
 } from "../src/lib/rexonance-fire/fire-pose.js";
 import { fireKernel, rasterFire } from "../src/lib/rexonance-fire/fire-raster.js";
-import { FIRE_TUNING, RAMP_CLEAN, RAMP_SOOTY } from "../src/lib/rexonance-fire/fire-tuning.js";
+import { sparkEmerge } from "../src/lib/rexonance-fire/fire-renderer.js";
+import {
+  FIRE_TUNING,
+  RAMP_CLEAN,
+  RAMP_SOOTY,
+  TEAR_PATHS,
+  TEAR_SPREAD,
+} from "../src/lib/rexonance-fire/fire-tuning.js";
+import { NANITE_FIRE_BACKING } from "../src/lib/rexonance-flame.js";
 import { REXONANCE_SUIT_UNDERSUIT } from "../src/lib/rexonance-suit.ts";
 
 let serial = 0;
@@ -479,7 +490,8 @@ test("the 爆散 throws the torch's own fire outward: it never lights air the to
   // The blast only carries the torch's fire outward from the body's middle
   // (an ease-out over the dissolve) and thins it: wherever it shows in the
   // air, the torch burnt at the point it was thrown from. Light only (the
-  // flash and the ring have their own test), back and front layers.
+  // flash, the ring and the tears on the body have their own tests), back
+  // and front layers.
   const torch = new Float64Array(POSE_SLOTS);
   const blast = new Float64Array(POSE_SLOTS);
   const back = new Float64Array(8);
@@ -489,10 +501,12 @@ test("the 爆散 throws the torch's own fire outward: it never lights air the to
       poseFire(P.burstStart, 1, clock, 1, torch);
       torch[POSE_FLASH] = 0;
       torch[POSE_RING_STRENGTH] = 0;
+      torch[POSE_TEAR_GLOW] = 0;
       const phase = P.burstStart + share * span;
       poseFire(phase, naniteFlameEnvelope(phase), clock, 1, blast);
       blast[POSE_FLASH] = 0;
       blast[POSE_RING_STRENGTH] = 0;
+      blast[POSE_TEAR_GLOW] = 0;
       const t = Math.min(1, share / T.burstDissolve);
       const thrown = 1 - (1 - t) * (1 - t);
       let worst = 0;
@@ -733,6 +747,325 @@ test("the fire is mostly what rises off the body: licks above the crown and shou
       }
     }
   assert.ok(jump <= 0.12 * 255, `the air's arrival has no cut (max step ${jump / 255})`);
+});
+
+// The outermost lit point of the back layer (the plume's outline) per row
+// of body height, scanning in from `from` toward `to` (body widths).
+function outline(y0, y1, from, to) {
+  const xs = [];
+  const step = from > to ? -0.002 : 0.002;
+  for (let yy = y0; yy < y1; yy += 0.003)
+    for (let xx = from; step < 0 ? xx > to : xx < to; xx += step) {
+      fireKernel(
+        (xx - FIRE_RECT.x) / FIRE_RECT.width,
+        (yy - FIRE_RECT.y) / FIRE_RECT.height,
+        pose,
+        undersuitField,
+        noise,
+        pixel,
+      );
+      if (pixel[3] > 0.15) {
+        xs.push(xx);
+        break;
+      }
+    }
+  return xs;
+}
+// Mean |second difference| of a profile at `gap` samples: a straight (or
+// gently curved) outline scores nothing, a ragged one with bulges, licks
+// and notches scores high.
+function ragged(profile, gap) {
+  let sum = 0;
+  let count = 0;
+  for (let i = gap; i < profile.length - gap; i += 1)
+    if (profile[i - gap] !== null && profile[i] !== null && profile[i + gap] !== null) {
+      sum += Math.abs(profile[i + gap] - 2 * profile[i] + profile[i - gap]);
+      count += 1;
+    }
+  return count ? sum / count : 0;
+}
+
+test("the envelope beside the shins, the arms and over the crown is ragged by the rising turbulence, never a straight wall (review: straight side envelopes and tongue edges)", () => {
+  // The plume's outline follows the field's lift and side distance, whose
+  // contours beside a straight limb (and on the vertical lines through
+  // the body's outermost points) are straight: the rising turbulence now
+  // moves the outline in and out, and the tongues flutter at two scales.
+  // Measured at the full torch over eight clocks; the old outlines scored
+  // 0.0105 on average, the arms and one side of the crown under 0.01.
+  const torch = NANITE_FIRE_PHASES.cover + 0.005;
+  const sides = {
+    rightShin: [0.62, 0.95, 1.25, 0.6],
+    leftShin: [0.62, 0.95, -0.25, 0.4],
+    rightArm: [0.15, 0.5, 1.3, 0.75],
+    leftArm: [0.15, 0.5, -0.3, 0.25],
+    crownRight: [-0.3, 0.05, 1, 0.5],
+    crownLeft: [-0.3, 0.05, 0, 0.5],
+  };
+  const scores = Object.fromEntries(Object.keys(sides).map((name) => [name, 0]));
+  const clocks = [0.5, 1.9, 3.1, 5.3, 7.7, 12.3, 20.9, 40.7];
+  for (const clock of clocks) {
+    poseFire(torch, naniteFlameEnvelope(torch), clock, 1, pose);
+    for (const [name, [y0, y1, from, to]] of Object.entries(sides))
+      scores[name] += ragged(outline(y0, y1, from, to), 3) / clocks.length;
+  }
+  const mean = Object.values(scores).reduce((a, b) => a + b, 0) / 6;
+  assert.ok(mean > 0.014, `the outlines are ragged (${mean.toFixed(4)}) ${JSON.stringify(scores)}`);
+  for (const [name, score] of Object.entries(scores))
+    assert.ok(score > 0.01, `${name} is no straight wall (${score.toFixed(4)})`);
+});
+
+test("the engulf front advances as ragged tongues, never as soft rounded blots (review: blobby shoulder front)", () => {
+  // The leading edge (the topmost lit point per column) while the front
+  // climbs the torso and the shoulders: tongues licking ahead of it make it
+  // rough and give it many tips. Over these phases and clocks the old
+  // front's broad rounded blots scored 0.0725 with 6.75 tips a frame.
+  let roughness = 0;
+  let tips = 0;
+  let frames = 0;
+  for (const phase of [0.11, 0.12, 0.13])
+    for (const clock of [0.5, 1.9, 3.1, 5.3, 7.3, 12.3, 20.9, 40.7]) {
+      poseFire(phase, naniteFlameEnvelope(phase), clock, 1, pose);
+      const tops = [];
+      for (let xx = -0.15; xx < 1.15; xx += 0.008) {
+        let top = null;
+        for (let yy = -0.3; yy < 1 && top === null; yy += 0.003) {
+          fireKernel(
+            (xx - FIRE_RECT.x) / FIRE_RECT.width,
+            (yy - FIRE_RECT.y) / FIRE_RECT.height,
+            pose,
+            undersuitField,
+            noise,
+            pixel,
+          );
+          if (pixel[3] + pixel[7] > 0.3) top = yy;
+        }
+        tops.push(top);
+      }
+      roughness += ragged(tops, 2);
+      // A tip stands at least 0.012 heights above everything within four
+      // columns of it on both sides.
+      for (let i = 4; i < tops.length - 4; i += 1) {
+        if (tops[i] === null) continue;
+        let left = 0;
+        let right = 0;
+        let tip = true;
+        for (let j = 1; j <= 4 && tip; j += 1) {
+          if (tops[i - j] === null || tops[i + j] === null) tip = false;
+          else if (tops[i - j] < tops[i] || tops[i + j] < tops[i]) tip = false;
+          else {
+            left = Math.max(left, tops[i - j]);
+            right = Math.max(right, tops[i + j]);
+          }
+        }
+        if (tip && left - tops[i] > 0.012 && right - tops[i] > 0.012) tips += 1;
+      }
+      frames += 1;
+    }
+  assert.ok(roughness / frames > 0.08, `a ragged front (${(roughness / frames).toFixed(4)})`);
+  assert.ok(tips / frames > 8.25, `tongues lick ahead of it (${(tips / frames).toFixed(2)} tips)`);
+});
+
+test("under the soles the fire fades on an analytic floor line, never in the field's texel rows (review: stair-step band under the soles)", () => {
+  // The height under the soles once climbed 14 widths per width: the
+  // turbulence was squeezed into one-pixel bands that the field's texel
+  // rows cut into a staircase. Now the plume fades over a few pixels of
+  // any backing below the floor line: no column under the soles crosses
+  // separate lit slivers (12–20% of them did), and nothing hangs below.
+  const backingPixel = FIRE_RECT.height / NANITE_FIRE_BACKING.touchHeight;
+  const sole = Math.round(FIELD_BODY.y + 0.99 * FIELD_BODY.height) * FIELD_W;
+  for (const phase of [0.06, 0.1, 0.13, NANITE_FIRE_PHASES.cover + 0.005]) {
+    let columns = 0;
+    let slivered = 0;
+    for (const clock of [0.5, 3.1, 7.3, 12.3]) {
+      poseFire(phase, naniteFlameEnvelope(phase), clock, 1, pose);
+      for (let xx = 0.15; xx < 0.85; xx += 0.004) {
+        if (undersuitAlpha[sole + Math.round(FIELD_BODY.x + xx * FIELD_BODY.width)] <= 96) continue;
+        let bands = 0;
+        let inside = false;
+        let last = 1;
+        for (let yy = 1.004; yy < 1.06; yy += backingPixel / 4) {
+          fireKernel(
+            (xx - FIRE_RECT.x) / FIRE_RECT.width,
+            (yy - FIRE_RECT.y) / FIRE_RECT.height,
+            pose,
+            undersuitField,
+            noise,
+            pixel,
+          );
+          if (!inside && pixel[3] > 0.2) {
+            bands += 1;
+            inside = true;
+          } else if (inside && pixel[3] < 0.08) inside = false;
+          last = pixel[3];
+        }
+        columns += 1;
+        if (bands > 1) slivered += 1;
+        assert.ok(last < 0.01, `nothing under the floor at ${xx.toFixed(3)} (${last})`);
+      }
+    }
+    assert.ok(columns > 40, "both soles are measured");
+    assert.ok(slivered / columns < 0.03, `no texel slivers at ${phase} (${slivered}/${columns})`);
+  }
+});
+
+test("the 爆散 opens one continuous, ragged, incandescent tear along each path the fragments fly from, never a dotted seam (review: dotted seams)", () => {
+  const P = NANITE_FIRE_PHASES;
+  const T = FIRE_TUNING;
+  const span = P.burstEnd - P.burstStart;
+  // The tears are the paths the fragments are born on (rexonance-
+  // ignition.js): every fragment starts on its own path's tear, within the
+  // swing of its birth, and flies out of it.
+  const out = new Float64Array(6);
+  for (let i = 0; i < NANITE_FIRE_FRAGMENTS; i += 1) {
+    const seed = (i + 0.5) / NANITE_FIRE_FRAGMENTS;
+    fireFragmentPose(seed, P.burstStart, out);
+    const [x0, y0, x1, y1, half] = TEAR_PATHS[Math.floor(seed * TEAR_PATHS.length)];
+    const t = (out[1] - y0) / (y1 - y0);
+    assert.ok(t > -1e-6 && t < 1 + 1e-6, `fragment ${i} is born along its tear (${t})`);
+    assert.ok(
+      Math.abs(out[0] - (x0 + (x1 - x0) * t)) <= half * TEAR_SPREAD + 1e-6,
+      `fragment ${i} is born on its tear's swing`,
+    );
+  }
+  // No tear before the detonation; a hairline at it that opens, burns,
+  // fades and is gone as the fragments leave it.
+  poseFire(P.burstStart - 1e-4, 1, 0.5, 1, pose);
+  assert.equal(pose[POSE_TEAR_GLOW], 0, "no tear before the 爆散");
+  let open = -1;
+  let glow = 2;
+  for (let share = 0; share <= 1.0001; share += 0.01) {
+    poseFire(P.burstStart + share * span, 1, 0.5, 1, pose);
+    assert.ok(pose[POSE_TEAR_OPEN] >= open && pose[POSE_TEAR_GLOW] <= glow, `monotone at ${share}`);
+    open = pose[POSE_TEAR_OPEN];
+    glow = pose[POSE_TEAR_GLOW];
+    if (share === 0)
+      assert.deepEqual([open, glow], [0, 1], "a white-hot hairline at the detonation");
+    if (share > T.tearOpen + 0.005) assert.ok(open > 0.999, "fully open");
+    if (share > T.tearFade + 0.005) assert.equal(glow, 0, "gone as the fragments leave");
+  }
+  // Along each tear, on the real undersuit, the light it adds to the
+  // front layer never drops between samples 0.006 widths apart (a dotted
+  // seam would, between its dots), it is white-hot at its core, its line
+  // wanders (ragged, not a ruled stroke) but stays where it is on the body
+  // as it opens and as the clock runs (it never writhes), it opens wider,
+  // and it is only ever on the body.
+  const on = new Float64Array(8);
+  const off = new Float64Array(8);
+  const gain = (xx, yy) => {
+    const u = (xx - FIRE_RECT.x) / FIRE_RECT.width;
+    const v = (yy - FIRE_RECT.y) / FIRE_RECT.height;
+    fireKernel(u, v, pose, undersuitField, noise, on);
+    const lit = pose[POSE_TEAR_GLOW];
+    pose[POSE_TEAR_GLOW] = 0;
+    fireKernel(u, v, pose, undersuitField, noise, off);
+    pose[POSE_TEAR_GLOW] = lit;
+    return Math.max(on[4], on[5], on[6]) - Math.max(off[4], off[5], off[6]);
+  };
+  const aspect = FIELD_BODY.height / FIELD_BODY.width;
+  const ridges = (share, clock) => {
+    const phase = P.burstStart + share * span;
+    poseFire(phase, naniteFlameEnvelope(phase), clock, 1, pose);
+    pose[POSE_FLASH] = 0;
+    pose[POSE_RING_STRENGTH] = 0;
+    // The tears' own light: the shell's fire unlit, so nothing saturates
+    // under them.
+    pose[POSE_COVER] = -1;
+    return TEAR_PATHS.map(([x0, y0, x1, y1]) => {
+      const rx = x1 - x0;
+      const ry = (y1 - y0) * aspect;
+      const length = Math.hypot(rx, ry);
+      const samples = [];
+      for (let t = 0.15; t <= 0.85; t += 0.006 / length) {
+        let best = -1;
+        let peak = 0;
+        let wide = 0;
+        let white = 0;
+        const across = [];
+        for (let o = -0.07; o <= 0.07; o += 0.0015) {
+          const xx = x0 + rx * t + (o * ry) / length;
+          const yy = y0 + (y1 - y0) * t - (o * rx) / length / aspect;
+          const g = gain(xx, yy);
+          across.push([o, g]);
+          if (g > best) {
+            best = g;
+            peak = o;
+          }
+          const core = Math.min(on[4], on[5], on[6]);
+          white = Math.max(white, core);
+          if (core > 0.6) wide += 0.0015;
+        }
+        // The tear's line: the centroid of its light about the peak (the
+        // white core saturates, so the peak alone wanders over it).
+        let weight = 0;
+        let at = 0;
+        for (const [o, g] of across)
+          if (Math.abs(o - peak) < 0.02 && g > best * 0.8) {
+            weight += g;
+            at += o * g;
+          }
+        samples.push({ best, at: at / weight, wide, white });
+      }
+      return samples;
+    });
+  };
+  const mean = (values) => values.reduce((a, b) => a + b, 0) / values.length;
+  const median = (values) => [...values].sort((a, b) => a - b)[values.length >> 1];
+  const early = ridges(0.005, 0.5);
+  const opened = ridges(0.08, 0.5);
+  const later = ridges(0.08, 12.3);
+  TEAR_PATHS.forEach((_, k) => {
+    for (const [name, frame] of [
+      ["at the detonation", early],
+      ["opened", opened],
+    ]) {
+      const weakest = Math.min(...frame[k].map((s) => s.best));
+      assert.ok(weakest > 0.45, `tear ${k} is continuous ${name} (weakest ${weakest.toFixed(3)})`);
+    }
+    const white = Math.min(...opened[k].map((s) => s.white));
+    assert.ok(white > 0.9, `tear ${k} is white-hot along its core (${white.toFixed(3)})`);
+    const offsets = opened[k].map((s) => s.at);
+    const centre = mean(offsets);
+    const wander = Math.sqrt(mean(offsets.map((o) => (o - centre) ** 2)));
+    let jag = 0;
+    for (let i = 1; i < offsets.length - 1; i += 1)
+      jag += Math.abs(offsets[i + 1] - 2 * offsets[i] + offsets[i - 1]) / (offsets.length - 2);
+    assert.ok(
+      wander > 0.004 && jag > 0.0004,
+      `tear ${k} is ragged, not ruled (${wander.toFixed(4)}, ${jag.toFixed(4)})`,
+    );
+    const drift = median(opened[k].map((s, i) => Math.abs(s.at - early[k][i].at)));
+    const writhe = median(opened[k].map((s, i) => Math.abs(s.at - later[k][i].at)));
+    // It opens about the hairline's own line (within its half-width) and
+    // never moves with the clock.
+    assert.ok(
+      drift < T.tearWidth / 2 && writhe < 1e-3,
+      `tear ${k} stays put (${drift}, ${writhe})`,
+    );
+    assert.ok(
+      mean(opened[k].map((s) => s.wide)) > mean(early[k].map((s) => s.wide)) * 1.5,
+      `tear ${k} opens`,
+    );
+  });
+  poseFire(P.burstStart + 0.04 * span, 1, 0.5, 1, pose);
+  for (let y = 0; y < FIELD_H; y += 3)
+    for (let x = 0; x < FIELD_W; x += 3) {
+      const i = (y * FIELD_W + x) * 4;
+      if (undersuitField[i] / 255 < 1.5 / FIELD_TEXELS_PER_WIDTH / FIELD_D) continue;
+      assert.equal(
+        gain(
+          FIRE_RECT.x + ((x + 0.5) / FIELD_W) * FIRE_RECT.width,
+          FIRE_RECT.y + ((y + 0.5) / FIELD_H) * FIRE_RECT.height,
+        ),
+        0,
+        "the tears are on the body only",
+      );
+    }
+  // The fragments come out of the tears: unseen inside them at the
+  // detonation's first instant, shown as they fly clear.
+  assert.equal(sparkEmerge(0), 0);
+  assert.equal(sparkEmerge(T.sparkEmergeFrom), 0);
+  assert.equal(sparkEmerge(T.sparkEmergeTo), 1);
+  for (let b = 0; b < 0.2; b += 0.002) assert.ok(sparkEmerge(b + 0.002) >= sparkEmerge(b));
 });
 
 // Roughness of the back layer's emission (mean absolute step between
@@ -1174,6 +1507,8 @@ test("the warmed drawing call graph, across the fire modules, constructs no per-
     "sampleNoise",
     "sampleFireField",
     "paintRasterSparks",
+    "tearGap",
+    "sparkEmerge",
   ])
     assert.ok(visited.has(name), `${name} is on the audited draw path`);
   assert.deepEqual(forbidden, [], "retain prepared numeric tables and scalar frame math");

@@ -11,7 +11,7 @@
 // R and A are the two halves of one smoothed signed distance, so the skin
 // can be anti-aliased at sub-texel precision.
 // Both the WebGL fire and the CPU fallback sample exactly this texture.
-import { FIRE_TUNING } from "./fire-tuning.js";
+import { FIRE_TUNING, TEAR_PATHS } from "./fire-tuning.js";
 
 /** The fire's drawing rectangle in normalized body units (x over the
  * figure's width, y over its height): air for plumes above the crown,
@@ -35,6 +35,17 @@ export const FIELD_BODY = Object.freeze({
   width: FIELD_W / FIRE_RECT.width,
   height: FIELD_H / FIRE_RECT.height,
 });
+
+/** The tears' centre lines (the fragments' birth paths) in figure widths,
+ * y over the width too: start x, y and run x, y per path. */
+export const TEAR_LINES = Object.freeze(
+  TEAR_PATHS.flatMap(([x0, y0, x1, y1]) => [
+    x0,
+    y0 * BODY_ASPECT,
+    x1 - x0,
+    (y1 - y0) * BODY_ASPECT,
+  ]),
+);
 
 const INSIDE_ALPHA = 96;
 const LIFT_BLUR = 4;
