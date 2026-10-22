@@ -527,7 +527,8 @@ html[data-family="dossier"]
   > .manager-pagination-index
   > .dossier-roster {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(172px, 1fr));
+  /* Wide enough for the longest name beside its face (オーバーゼッツ). */
+  grid-template-columns: repeat(auto-fill, minmax(252px, 1fr));
   gap: 6px;
   margin: 0 var(--sd-pad) clamp(24px, 6vw, 40px);
   padding: 0;
@@ -578,10 +579,10 @@ html[data-family="dossier"]
   > :is(a, span) {
   position: relative;
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-columns: auto auto minmax(0, 1fr);
   align-items: center;
   gap: 10px;
-  min-height: 56px;
+  min-height: 88px;
   padding: 10px 14px 10px 12px;
   color: var(--sd-text-2);
   background: none;
@@ -765,7 +766,8 @@ html[data-family="dossier"]
       > .manager-pagination
       > .manager-pagination-index
       > .dossier-roster {
-      grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
+      /* Each tile carries its face now: wide enough for the longest name. */
+      grid-template-columns: repeat(auto-fill, minmax(236px, 1fr));
       max-width: calc(var(--sd-read) + 120px);
       margin: 32px var(--sd-pad-end) 32px var(--sd-pad);
     }
@@ -1234,5 +1236,68 @@ html[data-family="dossier"]
       .rider-archive-civilian-visual {
       aspect-ratio: 1;
     }
+  }
+}
+
+/* A roster tile's face (2026-10-22): the file's portrait, so a press lifts
+   a picture into the file flip (an art-less flip flashed on phones). */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .manager-pagination
+  .dossier-roster
+  .dossier-roster-portrait {
+  display: block;
+  width: 64px;
+  height: 72px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: var(--sd-plate);
+  box-shadow: inset 0 0 0 1px var(--sd-line);
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .manager-pagination
+  .dossier-roster
+  .dossier-roster-portrait
+  > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 18%;
+}
+
+/* Phones: each tile stands as a small card — the face above, the numeral and
+   the name below on their own line, so no name is cut. */
+@media (max-width: 560px) {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    > .manager-pagination
+    > .dossier-roster {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    > .manager-pagination
+    .dossier-roster
+    > li
+    > :is(a, span) {
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    row-gap: 8px;
+    min-height: 0;
+    padding: 10px;
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    > .manager-pagination
+    .dossier-roster
+    .dossier-roster-portrait {
+    grid-column: 1 / -1;
+    width: 100%;
+    height: 96px;
   }
 }

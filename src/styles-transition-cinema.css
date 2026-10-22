@@ -3743,9 +3743,8 @@ html[data-route-cover="covering"] .zeus-button:not([data-navigating="true"]) {
     transform: translate(-50%, -50%) rotate(-16deg) translateX(-16%)
       scaleX(0.42);
   }
-  38% {
-    opacity: 0.95;
-  }
+  /* Rises to its resting light, never above it: an overshoot read as a
+     flash on phones (verify-route-transitions, page-saga-realm). */
   to {
     opacity: 0.5;
     transform: translate(-50%, -50%) rotate(-16deg) translateX(0) scaleX(1);
@@ -3757,9 +3756,6 @@ html[data-route-cover="covering"] .zeus-button:not([data-navigating="true"]) {
     opacity: 0;
     transform: scaleX(0.3);
   }
-  40% {
-    opacity: 1;
-  }
   to {
     opacity: 0.7;
     transform: scaleX(1);
@@ -3770,9 +3766,6 @@ html[data-route-cover="covering"] .zeus-button:not([data-navigating="true"]) {
   from {
     opacity: 0;
     transform: translateX(-26%) scaleX(0.5);
-  }
-  34% {
-    opacity: 1;
   }
   to {
     opacity: 0.55;

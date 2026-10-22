@@ -4,6 +4,7 @@ import { GuardedLink } from "@/components/load-gate";
 import { DisplayName } from "@/components/name-text";
 import { UiVectorIcon } from "./ui-vector-icon";
 import { dossierImage } from "@/lib/dossier-images";
+import { launcherTile } from "@/lib/thumbnail-images";
 import { CAST_ROSTER_SEARCH, isCastRosterOrigin } from "@/lib/dossier-origin";
 
 export type DossierLink = {
@@ -197,6 +198,8 @@ const NAV_PORTRAIT_SIZES = "(max-width: 560px) 100vw, (max-width: 1099px) 58vw, 
  * asset, with the same delivery candidates the next page asks for, so the
  * card's picture is the one the page then shows (sized for the card's own
  * box). Decorative (the link is named by its label). */
+const ROSTER_PORTRAIT_SIZES = "72px";
+
 function NavPortrait({ item }: { item: DossierLink }) {
   const src = item.assets[0];
   if (!src) return null;
@@ -204,6 +207,25 @@ function NavPortrait({ item }: { item: DossierLink }) {
   if (image.sizes) image.sizes = NAV_PORTRAIT_SIZES;
   return (
     <span className="dossier-nav-portrait" aria-hidden="true">
+      <img src={src} {...image} alt="" loading="lazy" decoding="async" />
+    </span>
+  );
+}
+
+/** A roster tile's face (2026-10-22): the file's own portrait, so a press
+ * lifts a picture into the file flip as the PREV/NEXT cards do — an
+ * art-less flip drops the whole page to ink at once (2 flashes/s on phones,
+ * verify-route-transitions page-saga-realm). */
+function RosterPortrait({ item }: { item: DossierLink }) {
+  // The launcher's 240w tile (the menu's own picture) when the file has one;
+  // else the file's warm-up asset at its smallest delivery.
+  const tile = launcherTile(item.href);
+  const src = tile ?? item.assets[0];
+  if (!src) return null;
+  const image = tile ? {} : dossierImage(src);
+  if ("sizes" in image && image.sizes) image.sizes = ROSTER_PORTRAIT_SIZES;
+  return (
+    <span className="dossier-roster-portrait" aria-hidden="true">
       <img src={src} {...image} alt="" loading="lazy" decoding="async" />
     </span>
   );
@@ -243,6 +265,7 @@ function DossierRoster({
         const numeral = fileNumeral(item, index);
         const body = (
           <>
+            <RosterPortrait item={item} />
             <i aria-hidden="true">{numeral}</i>
             <b>
               <NameText value={item.name} />
