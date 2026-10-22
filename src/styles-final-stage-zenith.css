@@ -28,7 +28,10 @@
    STAGE sheets. Motion is finite or scroll-linked on a named timeline,
    gated by reduced motion, economy rendering, the open menu, the load
    gate and open dialogs; nothing loops. Labels hold the 12px floor and
-   hit targets 44px. No markup changes.
+   hit targets 44px. Markup (src/components/final-stage/final-stage.tsx):
+   CallOuts is a labelled list (role=list / listitem), and the Realm Royal
+   visuals list the record-art candidates (srcset/sizes) on both the card
+   and the record's figure.
    ================================================================ */
 
 html[data-family="special"] body .rxs-page.rxs-page.fst-page {
@@ -49,30 +52,49 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .rxs-section::bef
   width: min(640px, 76%);
   height: 11px;
   /* The elevation's draw (fst-draw-x) grows the rule from its left end;
-     from its centre, the lamp stays put and the hairline opens both ways. */
+     from its centre, the hairline opens both ways from the lamp. */
   transform-origin: 50% 50%;
+  background: linear-gradient(
+      90deg,
+      transparent,
+      var(--fsx-line-2) 26%,
+      var(--fsx-line-2) calc(50% - 12px),
+      transparent calc(50% - 12px),
+      transparent calc(50% + 12px),
+      var(--fsx-line-2) calc(50% + 12px),
+      var(--fsx-line-2) 74%,
+      transparent
+    )
+    0 5px / 100% 1px no-repeat;
+}
+
+/* The lamp is its own box (STAGE retired the section's ::after, kiro's
+   route drop): drawn inside the hairline's box, the draw's scale across
+   squeezed it into a sliver while the join drew, and it rested so at the
+   foot of a phone's cold open. Here it only ever scales evenly. */
+html[data-family="special"] body .rxs-page.rxs-page.fst-page > .rxs-section::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  z-index: 1;
+  display: block;
+  width: 11px;
+  height: 11px;
+  margin: 0;
   background:
-    radial-gradient(circle at 50% 5.5px, var(--fsz-lamp) 0 1.7px, transparent 2.4px) 0 0 / 100% 11px
-      no-repeat,
+    radial-gradient(circle, var(--fsz-lamp) 0 1.7px, transparent 2.4px),
     radial-gradient(
-        circle at 50% 5.5px,
-        transparent 3.6px,
-        rgb(var(--fsx-violet-rgb) / 70%) 4.2px 5px,
-        transparent 5.7px
-      )
-      0 0 / 100% 11px no-repeat,
-    linear-gradient(
-        90deg,
-        transparent,
-        var(--fsx-line-2) 26%,
-        var(--fsx-line-2) calc(50% - 12px),
-        transparent calc(50% - 12px),
-        transparent calc(50% + 12px),
-        var(--fsx-line-2) calc(50% + 12px),
-        var(--fsx-line-2) 74%,
-        transparent
-      )
-      0 5px / 100% 1px no-repeat;
+      circle,
+      transparent 3.6px,
+      rgb(var(--fsx-violet-rgb) / 70%) 4.2px 5px,
+      transparent 5.7px
+    );
+  -webkit-mask: none;
+  mask: none;
+  translate: -50% 0;
+  transform-origin: 50% 50%;
+  pointer-events: none;
 }
 
 /* ================================================================
@@ -130,6 +152,18 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .rxs-section::bef
 }
 
 /* ================================================================
+   01 STORY: room between the reel mark and the first lamp
+   ================================================================ */
+/* 761–1099px: the gap (clamp(24px, 4vw, 64px), 33px on an iPad) left the
+   first paragraph's lamp 8px from the mark's last letter, so it read
+   "FINAL○". A wider gap gives the lamp its own air; the measure gives way. */
+@media (min-width: 761px) and (max-width: 1099.98px) {
+  html[data-family="special"] body .rxs-page.rxs-page.fst-page > #story .fst-story-layout {
+    column-gap: clamp(48px, 6.4vw, 64px);
+  }
+}
+
+/* ================================================================
    02 CHARACTERS: the billing slots and the still
    ================================================================ */
 /* Every slot shows its frame and the role's colour as a tick at its head
@@ -141,7 +175,8 @@ html[data-family="special"]
   .fst-cast-tabs.rxs-stage-tabs.liquid-swipe-tabs
   > button[role="tab"] {
   border-radius: 4px;
-  background: linear-gradient(var(--liquid-accent, var(--fsx-violet)) 0 0) 50% 0 / 22px 2px no-repeat;
+  background: linear-gradient(var(--liquid-accent, var(--fsx-violet)) 0 0) 50% 0 / 22px 2px
+    no-repeat;
   box-shadow: inset 0 0 0 1px rgb(var(--fsx-violet-rgb) / 11%);
 }
 
@@ -229,6 +264,64 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > #characters .fst-
 /* ================================================================
    The records: calls as a sequence, the Royal forms as one band
    ================================================================ */
+/* WebKit clips a background-clip: text fill to the element's own inline
+   boxes only, never through an inline-block's: the protected word of the
+   record's gradient name (サーガ) painted nothing on iPad, and the title read
+   "ファーフロム". Inside the gradient name the word stays inline; nowrap
+   still holds it whole. (The shared name sheet sets the inline-block with
+   !important, so the override must carry it too: display only.) */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.fst-page
+  .fst-pickup-dialog
+  .fst-pickup-heading
+  h2
+  b
+  .name-word--protected {
+  display: inline !important;
+}
+
+/* The record's sign (RIDER PICKUP) is one line. WebKit sizes a
+   fit-content flex plate from its items' content, not their flex-basis:
+   the empty dash (flex: 0 0 36px) counted as 0px, the plate came out 36px
+   short and broke its label in two. The dash carries its width. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.fst-page
+  .fst-pickup-dialog
+  .fst-pickup-heading
+  > p::after {
+  width: 36px;
+  min-width: 36px;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.fst-page
+  .fst-pickup-dialog
+  .fst-pickup-heading
+  > p
+  > span {
+  white-space: nowrap;
+}
+
+/* The record's eyebrow (RIDER RECORD 01 / FAR FROM SAGA) holds one line
+   on a 390px phone: at 0.06em the longer one sets 334px in its 344px
+   column (0.12em set 356px and broke "/ FAR FROM SAGA" to a second line).
+   Narrower phones break it, balanced. */
+@media (max-width: 480px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.fst-page
+    .fst-pickup-dialog
+    .fst-pickup-heading
+    small {
+    display: block;
+    letter-spacing: 0.06em;
+    text-wrap: balance;
+  }
+}
+
 /* 変身音声: each call carries its place in the sequence (silent for
    assistive tech: the list is already labelled), and the call that
    completes the change is lit in the form's colour. */
@@ -294,6 +387,114 @@ html[data-family="special"]
   content: none;
 }
 
+/* The calls run as one line of track. From 601px they flow, each cell
+   coupled to the one before by a short rail across the gap (a row that
+   wraps opens on the same coupling, a carry mark at the column's edge). */
+html[data-family="special"] body .rxs-page.rxs-page.fst-page .fst-pickup-dialog .fst-calls b {
+  position: relative;
+}
+
+@media (min-width: 601px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.fst-page
+    .fst-pickup-dialog
+    .fst-calls
+    b
+    + b::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: 100%;
+    width: 9px;
+    height: 1px;
+    margin-right: 1px;
+    background: color-mix(in srgb, var(--fst-accent, var(--fsx-violet)) 58%, transparent);
+    pointer-events: none;
+  }
+}
+
+/* Phones: the calls stand as a timetable down a line of stations, one
+   call a row at the column's full width, so the sequence reads in order
+   instead of as a ragged heap of chips. Each cell's station hangs at its
+   first line with the rail down to the next; the completing call is the
+   terminus, the lamp lit at the end of the line. */
+@media (max-width: 600px) {
+  html[data-family="special"] body .rxs-page.rxs-page.fst-page .fst-pickup-dialog .fst-calls {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: stretch;
+    gap: 8px;
+    padding-left: 24px;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.fst-page .fst-pickup-dialog .fst-calls b {
+    display: flex;
+    width: auto;
+    min-width: 0;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.fst-page
+    .fst-pickup-dialog
+    .fst-calls
+    b::after {
+    content: "";
+    position: absolute;
+    top: 12px;
+    left: -24px;
+    width: 12px;
+    height: calc(100% + 8px);
+    background:
+      radial-gradient(
+          circle at 6px 6px,
+          var(--fsx-house) 0 3.1px,
+          var(--fst-accent, var(--fsx-violet)) 3.6px 5.1px,
+          transparent 5.6px
+        )
+        0 0 / 12px 12px no-repeat,
+      repeating-linear-gradient(180deg, rgb(var(--fsx-violet-rgb) / 52%) 0 4px, transparent 4px 8px)
+        5px 13px / 2px calc(100% - 13px) no-repeat;
+    pointer-events: none;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.fst-page
+    .fst-pickup-dialog
+    .fst-calls
+    b:last-child::after {
+    height: 12px;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle at 6px 6px,
+      #fff8e8 0 1.4px,
+      var(--fsz-lamp) 2px 3.6px,
+      rgb(var(--fsz-lamp-rgb) / 34%) 4.2px 6px
+    );
+    box-shadow: 0 0 16px 3px rgb(var(--fsz-lamp-rgb) / 32%);
+  }
+
+  /* A call alone is not a line: no station, no indent. */
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.fst-page
+    .fst-pickup-dialog
+    .fst-calls:has(> b:only-child) {
+    padding-left: 0;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.fst-page
+    .fst-pickup-dialog
+    .fst-calls
+    b:only-child::after {
+    content: none;
+  }
+}
+
 /* Realm Royal: the form's name and its calls as one band, the spec grid
    under them in three columns (two at the record's narrower widths, one
    row per key on phones, as the FAR FROM SAGA grid). */
@@ -339,6 +540,65 @@ html[data-family="special"]
   }
 }
 
+/* Phones: the stage and form rails size each tab to its words. Five
+   equal fifths gave エックスハイ 49–63px for its 65px, so it broke as
+   エック／スハイ over three lines; the lens measures each tab, so tabs of
+   their own widths keep one line for every label down to 320px. */
+@media (max-width: 480px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.fst-page
+    .fst-pickup-dialog
+    :is(.fst-ffs-stage-tabs, .fst-rr-form-tabs).rxs-stage-tabs.liquid-swipe-tabs
+    > button[role="tab"] {
+    flex: 1 1 auto;
+    /* Content-sized, but never under the 44px touch floor: ハイ would be
+       41px at 360px and 34px at 320px; the wider tabs give up the rest. */
+    min-width: 44px;
+    padding-inline: 4px;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.fst-page
+    .fst-pickup-dialog
+    :is(.fst-ffs-stage-tabs, .fst-rr-form-tabs).rxs-stage-tabs.liquid-swipe-tabs
+    > button[role="tab"]
+    small {
+    white-space: nowrap;
+    letter-spacing: 0;
+    font-feature-settings: "palt" 1;
+  }
+}
+
+/* The arsenal's names break at their own seams (・／), never inside a
+   word (レルムスレイ／ヤー); a phone gives each name its own row. */
+html[data-family="special"] body .rxs-page.rxs-page.fst-page .fst-pickup-dialog .fst-arsenal li {
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 480px) {
+  html[data-family="special"] body .rxs-page.rxs-page.fst-page .fst-pickup-dialog .fst-arsenal ul {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
+  }
+}
+
+/* Portrait tablets set the three-up grids in two columns; a third card
+   alone in its row took half the width and left a hole beside it. The
+   odd last card takes the whole row. */
+@media (min-width: 681px) and (max-width: 1024px) and (orientation: portrait) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.fst-page
+    .fst-pickup-dialog
+    .fst-articles-3
+    > article:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+}
+
 /* FAR FROM SAGA's stages: on a tablet the record is wide enough for the
    stage art beside its text (the base stacks them under 900px, which put
    a 700px-tall still over every line). */
@@ -373,17 +633,68 @@ html[data-family="special"]
 /* ================================================================
    The end card: the final title, the route home, the last credits
    ================================================================ */
+/* The film's last frame. At the end of the page the end card is the whole
+   screen under the bar (the page's last box, so the last scroll lands on
+   it exactly): letterbox bars at its top and bottom edges, the route home
+   coming down from under the top bar to the lamp, the closing title at the
+   centre of the frame and the ways out under it as the last credits. */
 html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer {
+  --fsz-bar: clamp(28px, 6.4svh, 72px);
   position: relative;
-  padding-top: clamp(150px, 22svh, 240px);
+  min-height: calc(100svh - var(--rxs-local-nav-reserve, var(--dxs-nav, 77px)));
+  align-content: center;
+  padding-top: calc(var(--fsz-bar) + clamp(96px, 14svh, 168px));
+  padding-bottom: calc(var(--fsz-bar) + clamp(40px, 6svh, 72px));
   overflow: clip;
   background:
-    linear-gradient(90deg, transparent, var(--fsx-line-2) 30%, var(--fsx-line-2) 70%, transparent)
-      50% 0 / 100% 1px no-repeat,
-    radial-gradient(50% 44% at 50% 62%, rgb(var(--fsx-violet-rgb) / 11%), transparent 72%),
-    radial-gradient(36% 30% at 50% 100%, rgb(var(--fsx-lilac-rgb) / 8%), transparent 72%),
+    radial-gradient(46% 34% at 50% 50%, rgb(var(--fsx-violet-rgb) / 12%), transparent 72%),
+    radial-gradient(
+      36% 24% at 50% calc(100% - var(--fsz-bar)),
+      rgb(var(--fsx-lilac-rgb) / 8%),
+      transparent 72%
+    ),
     var(--fsx-house);
   border-top: 0;
+}
+
+/* Portrait tablets watch the last frame as a widescreen picture: the
+   bars take what the portrait screen has beyond a 1.6:1 picture (300px
+   each on an 11-inch iPad), so the end card is a frame in the middle of
+   the glass, not a short title in a tall empty house. */
+@media (orientation: portrait) and (min-width: 600px) and (max-width: 1099.98px) {
+  html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer {
+    --fsz-bar: max(
+      clamp(28px, 6.4svh, 72px),
+      calc((100svh - var(--rxs-local-nav-reserve, var(--dxs-nav, 77px)) - 62vw) / 2)
+    );
+    padding-top: calc(var(--fsz-bar) + clamp(56px, 6svh, 96px));
+    padding-bottom: calc(var(--fsz-bar) + 32px);
+  }
+}
+
+/* The letterbox: true black, a hairline on the picture's edge. */
+html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer::before,
+html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer::after {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  left: 0;
+  right: 0;
+  height: var(--fsz-bar);
+  background: #000;
+  pointer-events: none;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer::before {
+  top: 0;
+  box-shadow: 0 1px 0 rgb(var(--fsx-violet-rgb) / 24%);
+  transform-origin: 50% 0;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer::after {
+  bottom: 0;
+  box-shadow: 0 -1px 0 rgb(var(--fsx-violet-rgb) / 18%);
+  transform-origin: 50% 100%;
 }
 
 /* The route home: a dashed line from the records down to the last board,
@@ -418,9 +729,7 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer > div
   height: 14px;
   margin: 0;
   border-radius: 50%;
-  background:
-    radial-gradient(circle, var(--fsz-lamp) 0 2.2px, transparent 3px),
-    var(--fsx-house);
+  background: radial-gradient(circle, var(--fsz-lamp) 0 2.2px, transparent 3px), var(--fsx-house);
   box-shadow:
     0 0 0 1px rgb(var(--fsx-violet-rgb) / 70%),
     0 0 18px 3px rgb(var(--fsz-lamp-rgb) / 28%);
@@ -463,10 +772,6 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer > a.r
     text-align: center;
     text-wrap: balance;
   }
-
-  html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer {
-    padding-top: clamp(120px, 16svh, 160px);
-  }
 }
 
 /* ================================================================
@@ -475,7 +780,11 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer > a.r
 /* 600–900px (iPad mini and iPad Pro portrait among them): the links stay
    in the bar between the brand and the menu. */
 @media (min-width: 600px) and (max-width: 900px) {
-  html[data-family="special"] body .rxs-page.rxs-page.fst-page > .rxs-local-nav .rxs-local-nav-inner {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.fst-page
+    > .rxs-local-nav
+    .rxs-local-nav-inner {
     grid-template-columns: auto minmax(0, 1fr) 48px;
     gap: 16px;
   }
@@ -496,10 +805,18 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer > a.r
 /* Phones: a chapter strip under the brand, each chapter a 44px target,
    the one in view lit by the lamp line (styles-final-stage-lamplight.css). */
 @media (max-width: 599.98px) {
-  html[data-family="special"] body .rxs-page.rxs-page.fst-page > .rxs-local-nav .rxs-local-nav-inner {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.fst-page
+    > .rxs-local-nav
+    .rxs-local-nav-inner {
     grid-template-columns: minmax(0, 1fr) 48px;
     grid-template-rows: auto auto;
     row-gap: 0;
+    /* The two rows outgrow the bar's 64px floor, so its centring no longer
+       spaces the brand row: the menu button sat flush on the glass's top
+       edge. The brand row keeps the 8px the one-row bar gave it. */
+    padding-top: 8px;
   }
 
   html[data-family="special"] body .rxs-page.rxs-page.fst-page > .rxs-local-nav nav {
@@ -510,13 +827,11 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer > a.r
     justify-content: stretch;
     margin: -8px 0 0;
     padding: 0 0 2px;
-    overflow-x: auto;
-    scrollbar-width: none;
+    /* No scroller: the three links fit down to 320px (nav 16–304), and an
+       overflow box would clip each link's focus ring (2px, 3px outside the
+       link) to a thin line at its right edge. */
+    overflow: visible;
     border-top: 1px solid rgb(var(--fsx-violet-rgb) / 12%);
-  }
-
-  html[data-family="special"] body .rxs-page.rxs-page.fst-page > .rxs-local-nav nav::-webkit-scrollbar {
-    display: none;
   }
 
   html[data-family="special"] body .rxs-page.rxs-page.fst-page > .rxs-local-nav nav a {
@@ -580,7 +895,14 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer > a.r
   html[data-family="special"]:not([data-world-effects="economy"])
     body
     .rxs-page.rxs-page.fst-page
-    > :is(.fst-footer > a, #characters .fst-cast-copy a) {
+    > .fst-footer
+    > a,
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.fst-page
+    > #characters
+    .fst-cast-copy
+    a {
     transition:
       scale 160ms var(--fsz-ease),
       border-color 220ms ease,
@@ -590,7 +912,14 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer > a.r
   html[data-family="special"]:not([data-world-effects="economy"])
     body
     .rxs-page.rxs-page.fst-page
-    > :is(.fst-footer > a, #characters .fst-cast-copy a):active {
+    > .fst-footer
+    > a:active,
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.fst-page
+    > #characters
+    .fst-cast-copy
+    a:active {
     scale: 0.97;
   }
 
@@ -620,6 +949,53 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer > a.r
       animation-timeline: --fsk-end;
       animation-range: entry 60% entry 100%;
     }
+
+    /* The join's lamp comes on as the hairline opens, on the section's
+       own timeline (it replaces kiro's route drop on this box). */
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.fst-page[data-motion-ready="true"]
+      > .rxs-section::after {
+      animation: fsz-lamp-light linear both;
+      animation-timeline: --fst-section;
+      animation-range: entry 0% entry 40%;
+    }
+
+    /* The letterbox closes in over the last half-screen of the walk, on
+       the end card's own timeline: open picture while the records leave,
+       the bars home as the last scroll lands on the end card. */
+    html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer {
+      view-timeline: --fsz-card block;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.fst-page[data-motion-ready="true"]
+      > .fst-footer::before,
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-loading]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.fst-page[data-motion-ready="true"]
+      > .fst-footer::after {
+      animation: fsz-bar-close cubic-bezier(0.45, 0, 0.2, 1) both;
+      animation-timeline: --fsz-card;
+      animation-range: entry 40% entry 100%;
+    }
+  }
+}
+
+@keyframes fsz-bar-close {
+  from {
+    scale: 1 0;
+  }
+
+  to {
+    scale: 1 1;
   }
 }
 
@@ -649,6 +1025,9 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer > a.r
    Forced colours
    ================================================================ */
 @media (forced-colors: active) {
+  html[data-family="special"] body .rxs-page.rxs-page.fst-page > .rxs-section::after,
+  html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer::before,
+  html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer::after,
   html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer > div::before,
   html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer > div::after {
     content: none;

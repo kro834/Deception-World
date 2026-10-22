@@ -4,6 +4,7 @@ import { GuardedLink } from "@/components/load-gate";
 import { DisplayName } from "@/components/name-text";
 import { UiVectorIcon } from "./ui-vector-icon";
 import { dossierImage } from "@/lib/dossier-images";
+import { launcherTile } from "@/lib/thumbnail-images";
 import { CAST_ROSTER_SEARCH, isCastRosterOrigin } from "@/lib/dossier-origin";
 
 export type DossierLink = {
@@ -197,6 +198,8 @@ const NAV_PORTRAIT_SIZES = "(max-width: 560px) 100vw, (max-width: 1099px) 58vw, 
  * asset, with the same delivery candidates the next page asks for, so the
  * card's picture is the one the page then shows (sized for the card's own
  * box). Decorative (the link is named by its label). */
+const ROSTER_PORTRAIT_SIZES = "72px";
+
 function NavPortrait({ item }: { item: DossierLink }) {
   const src = item.assets[0];
   if (!src) return null;
@@ -204,6 +207,25 @@ function NavPortrait({ item }: { item: DossierLink }) {
   if (image.sizes) image.sizes = NAV_PORTRAIT_SIZES;
   return (
     <span className="dossier-nav-portrait" aria-hidden="true">
+      <img src={src} {...image} alt="" loading="lazy" decoding="async" />
+    </span>
+  );
+}
+
+/** A roster tile's face (2026-10-22): the file's own portrait, so a press
+ * lifts a picture into the file flip as the PREV/NEXT cards do — an
+ * art-less flip drops the whole page to ink at once (2 flashes/s on phones,
+ * verify-route-transitions page-saga-realm). */
+function RosterPortrait({ item }: { item: DossierLink }) {
+  // The launcher's 240w tile (the menu's own picture) when the file has one;
+  // else the file's warm-up asset at its smallest delivery.
+  const tile = launcherTile(item.href);
+  const src = tile ?? item.assets[0];
+  if (!src) return null;
+  const image = tile ? {} : dossierImage(src);
+  if ("sizes" in image && image.sizes) image.sizes = ROSTER_PORTRAIT_SIZES;
+  return (
+    <span className="dossier-roster-portrait" aria-hidden="true">
       <img src={src} {...image} alt="" loading="lazy" decoding="async" />
     </span>
   );
@@ -218,6 +240,67 @@ function neighbors(items: DossierLink[], currentHref: string) {
     .find((item) => item.href);
   const next = items.slice(idx + 1).find((item) => item.href);
   return { idx, prev, next };
+}
+
+/** A file's numeral: its kicker's last word (01, II), else its place. */
+function fileNumeral(item: DossierLink, index: number) {
+  return item.kicker?.split(" ").at(-1) ?? String(index + 1).padStart(2, "0");
+}
+
+/** The roster rail (2026-10-21): every file of the list at the end of
+ * each file, the current one marked, 欠番 inert. Inside .manager-pagination,
+ * so a press keeps the file flip (load-gate.tsx). */
+function DossierRoster({
+  items,
+  idx,
+  originSearch,
+}: {
+  items: DossierLink[];
+  idx: number;
+  originSearch?: Record<string, string>;
+}) {
+  return (
+    <ol className="dossier-roster" aria-label="この一覧の資料">
+      {items.map((item, index) => {
+        const numeral = fileNumeral(item, index);
+        const body = (
+          <>
+            <RosterPortrait item={item} />
+            <i aria-hidden="true">{numeral}</i>
+            <b>
+              <NameText value={item.name} />
+            </b>
+          </>
+        );
+        if (index === idx) {
+          return (
+            <li key={item.id} className="is-current">
+              <span aria-current="page">{body}</span>
+            </li>
+          );
+        }
+        if (!item.href) {
+          return (
+            <li key={item.id} className="is-void">
+              <span>{body}</span>
+            </li>
+          );
+        }
+        return (
+          <li key={item.id}>
+            <GuardedLink
+              to={item.href}
+              search={originSearch}
+              assets={item.assets}
+              aria-label={`${item.name}の資料へ`}
+            >
+              {body}
+            </GuardedLink>
+          </li>
+        );
+      })}
+    </ol>
+  );
 }
 
 export function DossierNav({
@@ -277,10 +360,18 @@ export function DossierNav({
             {String(idx + 1).padStart(2, "0")} / {String(items.length).padStart(2, "0")}
           </i>
         </GuardedLink>
+        {items.length > 1 ? (
+          <DossierRoster items={items} idx={idx} originSearch={originSearch} />
+        ) : null}
       </div>
       {next?.href ? (
         <GuardedLink to={next.href} search={originSearch} assets={next.assets} aria-label={`${next.name}の資料へ`}>
           <NavPortrait item={next} />
+          {/* The next file's numeral, large and drawn in outline on the
+              card's open side (decorative; the link is named by its label). */}
+          <i className="dossier-nav-numeral" aria-hidden="true">
+            {fileNumeral(next, items.indexOf(next))}
+          </i>
           <small>NEXT / {next.kicker}</small>
           <b>
             <NameText value={next.name} />

@@ -1493,6 +1493,87 @@ test("never the finished suit before the scroll: near and not yet live, the unde
   assert.match(shown[0].selector, /\[data-rzn-state="loading"\]/);
   assert.match(shown[0].selector, /\[data-rzn-arming="under"\]/);
   for (const { context } of [...hidden, ...under]) assert.equal(context.length, 0);
+  // Visible only while loading or held: wherever else a stand-in is laid out
+  // (the handover, below), it is at 0 once its transition ends.
+  for (const { selector, body } of sheet.rules.filter(
+    ({ selector, body }) =>
+      /> \.rzn-(?:under|driver-standin)$/.test(selector) && /display: block/.test(body),
+  )) {
+    assert.equal(declaration(body, "opacity"), "0", selector);
+    assert.match(selector, /\[data-rzn-state="live"\]:not\(\[data-rzn-arming\]\)/);
+  }
+});
+
+test("the handover: the live canvas fades in over the stand-in from its first frame, opacity only, done before the calm frame (sweep 2, F01)", () => {
+  // When the scene went live over the undersuit stand-in, the first live
+  // frame replaced it in one frame (2.7 % of the figure's pixels changed by
+  // more than 24 levels at once at 1440).
+  const gated = (rule) =>
+    rule.context.some((at) => REDUCED.test(at)) &&
+    splitTopLevel(rule.selector).every((part) => FULL_GATE.test(part));
+  const find = (pattern, extra = () => true) => {
+    const rules = sheet.rules.filter(
+      ({ selector, ...rest }) => pattern.test(selector) && extra({ selector, ...rest }),
+    );
+    assert.equal(rules.length, 1, String(pattern));
+    assert.ok(
+      gated(rules[0]),
+      `${rules[0].selector}: behind reduced motion, economy, the menu, dialogs and the route cover`,
+    );
+    return rules[0];
+  };
+  const FADE = "opacity 240ms cubic-bezier(0.2, 0.7, 0.2, 1)";
+  // Held at 0 while armed over the stand-in (the engine's
+  // data-rzn-arming="under", until its first live frame is drawn)...
+  const armed = find(
+    /> \.rzn-suitup\[data-rzn-state="live"\]\[data-rzn-arming="under"\] > \.rzn-frame > :is\(\.rzn-canvas, \.rzn-field\)$/,
+  );
+  assert.equal(armed.body, "opacity: 0;");
+  // ...then in over 240 ms with the field's canvases, never on arming (an
+  // instant 0), and never under reduced motion or economy (no other rule
+  // gives the canvas an opacity or a transition).
+  const fade = find(
+    /> \.rzn-suitup\[data-rzn-state="live"\]:not\(\[data-rzn-arming\]\) > \.rzn-frame > :is\(\.rzn-canvas, \.rzn-field\)$/,
+  );
+  assert.equal(declaration(fade.body, "transition"), FADE);
+  for (const rule of sheet.rules.filter(({ selector }) => /\.rzn-canvas/.test(selector)))
+    if (/opacity|transition/.test(rule.body))
+      assert.ok(rule === armed || rule === fade, rule.selector);
+  // A field canvas made with the first frame starts from 0 too.
+  const starting = find(
+    /> \.rzn-suitup\[data-rzn-state="live"\] > \.rzn-frame > \.rzn-field$/,
+    ({ context }) => context.includes("@starting-style"),
+  );
+  assert.equal(starting.body, "opacity: 0;");
+  // The stand-in stays under it: the undersuit's faint copy crosses out on
+  // the same curve (two 24 % copies would read brighter, then drop); the
+  // driver's opaque copy holds and goes in the last 80 ms, under a canvas
+  // already at 97 %.
+  const under = find(
+    /> \.rzn-suitup\[data-rzn-state="live"\]:not\(\[data-rzn-arming\]\) > \.rzn-frame > \.rzn-under$/,
+  );
+  assert.equal(declaration(under.body, "transition"), FADE);
+  const driver = find(
+    /> \.rzn-suitup\[data-rzn-state="live"\]:not\(\[data-rzn-arming\]\) > \.rzn-frame > \.rzn-driver-standin$/,
+  );
+  const [duration, delay] = [...declaration(driver.body, "transition").matchAll(/(\d+)ms/g)].map(
+    (m) => Number(m[1]),
+  );
+  assert.ok(
+    delay >= 160 && duration > 0 && delay + duration === 240,
+    `${duration} ms after ${delay} ms`,
+  );
+  for (const rule of [under, driver]) {
+    assert.equal(declaration(rule.body, "opacity"), "0");
+    assert.equal(declaration(rule.body, "display"), "block", "laid out until it has faded");
+  }
+  // Every part of it ends before the first calm frame.
+  const calm = Number(read("src/lib/rexonance-resonance.js").match(/const CALM_MS = (\d+);/)[1]);
+  for (const rule of [fade, under, driver])
+    for (const layer of splitTopLevel(declaration(rule.body, "transition"))) {
+      const [d, w = 0] = [...layer.matchAll(/(\d+)ms/g)].map((m) => Number(m[1]));
+      assert.ok(d + w <= 240 && 240 < calm, `${layer} ends by 240 ms, before CALM_MS ${calm}`);
+    }
 });
 
 // Round 4 (patch B): under the motion gate the stand-in is the default picture from the near observer's first notice.

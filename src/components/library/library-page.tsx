@@ -21,7 +21,9 @@ import {
   type LibraryKind,
 } from "@/lib/library-data";
 import { pathArt, RIDER_ART, titleRunStyle } from "@/lib/record-art";
+import { recordImage } from "@/lib/record-images";
 import { watchRecordArrival } from "@/lib/record-arrival";
+import landingCssUrl from "@/styles-record-landing.css?url";
 import {
   captureRecordReturn,
   finishRecordReturnOpening,
@@ -42,6 +44,10 @@ import { LibraryHub } from "./library-hub";
 import { RecordArtFrame } from "./record-art";
 
 const byPath = new Map(LIBRARY_ENTRIES.map((entry) => [entry.path, entry]));
+// The hero's index read-out: how the entrances divide by kind.
+const KIND_COUNTS = (Object.keys(LIBRARY_KINDS) as LibraryKind[]).map(
+  (id) => [id, LIBRARY_ENTRIES.filter((entry) => entry.kind === id).length] as const,
+);
 // The hero's visual index: the eight riders' files, in the World's order.
 const CAST = RIDER_ART.flatMap((rider) => {
   const entry = byPath.get(`/riders/${rider.id}`);
@@ -50,12 +56,15 @@ const CAST = RIDER_ART.flatMap((rider) => {
 
 function EntryCard({
   entry,
+  query,
   bookmarked,
   ready,
   beforeOpen,
   onBookmark,
 }: {
   entry: LibraryEntry;
+  /** The field's words, for the landing reticle's tag. */
+  query: string;
   bookmarked: boolean;
   ready: boolean;
   beforeOpen: (entry: LibraryEntry) => Promise<(() => RecordReturnContext | null) | undefined>;
@@ -90,7 +99,11 @@ function EntryCard({
             const captured = commit?.();
             if (!captured) return;
             try {
-              watchRecordArrival(entry.path, entry.hash);
+              watchRecordArrival(entry.path, entry.hash, {
+                stylesheet: landingCssUrl,
+                code: "FILE",
+                label: query ? `「${query}」` : entry.title,
+              });
               await go({
                 to: entry.path,
                 hash: entry.hash,
@@ -303,6 +316,13 @@ export function LibraryPage({
   const savedCount = filterLibraryBrowse({ q: draft, kind, scope: "saved" }, saved.bookmarks)
     .entries.length;
   const allCount = searchLibrary(draft, kind).length;
+  // A kind with nothing: the other kinds that do hold the query (in scope).
+  const otherKinds =
+    kind === "all"
+      ? []
+      : (Object.keys(LIBRARY_KINDS) as LibraryKind[])
+          .filter((id) => id !== kind && counts[id] > 0)
+          .map((id) => [id, counts[id]] as const);
   const savedKnown = ready && (!error || saved.bookmarks.length > 0);
   const savedUnavailable = scope === "saved" && !savedKnown;
   const filtersActive = Boolean(draft.trim()) || kind !== "all" || scope !== "all";
@@ -377,6 +397,16 @@ export function LibraryPage({
   const changeKind = (next: LibraryKind | "all") => {
     openSequenceRef.current += 1;
     void writeBrowse({ ...selection(), kind: next }, false).catch(() => undefined);
+  };
+  // The hero's kinds: the shelf takes that kind, and the reader is taken to
+  // its read-out (focus there too, as after a submitted search).
+  const openKind = (next: LibraryKind) => {
+    changeKind(next);
+    window.requestAnimationFrame(() => {
+      const motion = window.matchMedia("(prefers-reduced-motion: no-preference)").matches;
+      resultsRef.current?.scrollIntoView({ block: "start", behavior: motion ? "smooth" : "auto" });
+      resultsRef.current?.focus({ preventScroll: true });
+    });
   };
   const changeScope = (next: LibraryBrowseScope) => {
     openSequenceRef.current += 1;
@@ -453,8 +483,23 @@ export function LibraryPage({
                 人物の名前から、物語の章へ。公開された資料を横断して探し、気になるページにしおりを残せます。
               </p>
               <div className="library-index-summary">
-                <span>{LIBRARY_ENTRIES.length} 資料への入口</span>
+                <span>
+                  <b>{LIBRARY_ENTRIES.length}</b> 資料への入口
+                </span>
                 <span>人物 / 章 / 展示</span>
+              </div>
+              <div className="library-index-meter" role="group" aria-label="種類から探す">
+                <span className="library-index-bar" aria-hidden="true">
+                  {KIND_COUNTS.map(([id, count]) => (
+                    <i key={id} data-kind={id} style={{ flexGrow: count }} />
+                  ))}
+                </span>
+                {KIND_COUNTS.map(([id, count]) => (
+                  <button key={id} type="button" data-kind={id} onClick={() => openKind(id)}>
+                    <b>{count}</b>
+                    <span>{LIBRARY_KINDS[id]}</span>
+                  </button>
+                ))}
               </div>
               <GuardedLink to="/search" assets={[]} className="library-fulltext-link">
                 本文から検索 <span aria-hidden="true">↗</span>
@@ -496,7 +541,7 @@ export function LibraryPage({
                         rest of the rail loads as it comes near (not
                         preloaded with the page). */}
                     <img
-                      src={src}
+                      {...recordImage(src, "cast")}
                       alt=""
                       loading={index < 2 ? undefined : "lazy"}
                       decoding="async"
@@ -581,13 +626,18 @@ export function LibraryPage({
                       setQuery(event.currentTarget.value);
                     }}
                     onKeyDown={(event) => {
-                      if (
-                        event.key === "Enter" &&
-                        (composingRef.current ||
-                          event.nativeEvent.isComposing ||
-                          event.nativeEvent.keyCode === 229)
-                      )
+                      const composingKey =
+                        composingRef.current ||
+                        event.nativeEvent.isComposing ||
+                        event.nativeEvent.keyCode === 229;
+                      if (event.key === "Enter" && composingKey) event.preventDefault();
+                      // Escape clears the words (as on /search); an empty field
+                      // leaves Escape to the page.
+                      if (event.key === "Escape" && !composingKey && draft) {
                         event.preventDefault();
+                        setQuery("");
+                        void writeBrowse({ ...selection(), q: "" }).catch(() => undefined);
+                      }
                     }}
                   />
                   {draft ? (
@@ -694,13 +744,19 @@ export function LibraryPage({
               aria-busy={savedUnavailable && !ready}
             >
               <p ref={resultsRef} tabIndex={-1} role="status" aria-live="polite" aria-atomic="true">
-                {savedUnavailable
-                  ? !ready
-                    ? "しおりを確認しています…"
-                    : "しおりを確認できません"
-                  : `${visible.length}件の資料`}
+                {savedUnavailable ? (
+                  !ready ? (
+                    "しおりを確認しています…"
+                  ) : (
+                    "しおりを確認できません"
+                  )
+                ) : (
+                  <>
+                    <strong>{visible.length}</strong>件の資料
+                  </>
+                )}
               </p>
-              {draft.trim() ? (
+              {draft.trim() && visible.length ? (
                 <Link
                   to="/search"
                   search={{ q: draft.trim() }}
@@ -742,6 +798,7 @@ export function LibraryPage({
                         <EntryCard
                           key={entry.id}
                           entry={entry}
+                          query={draft.trim()}
                           bookmarked={saved.bookmarks.includes(entry.id)}
                           ready={ready}
                           beforeOpen={beforeOpen}
@@ -754,15 +811,48 @@ export function LibraryPage({
               )
             ) : (
               <div className="library-empty">
+                <p className="library-empty-code" aria-hidden="true">
+                  NO MATCH
+                </p>
                 <h3>条件に合う資料が見つかりません</h3>
                 <p>
                   {scope === "saved" && !saved.bookmarks.length
                     ? "「すべての資料」に切り替え、資料カードや人物資料のメニューからしおりを保存してください。"
                     : "短い名前や別の表記で検索するか、資料の種類・範囲を戻してください。"}
                 </p>
-                <button type="button" onClick={clearFilters}>
-                  検索条件をクリア
-                </button>
+                {otherKinds.length ? (
+                  <div
+                    className="library-empty-kinds"
+                    role="group"
+                    aria-label="ほかの種類にある資料"
+                  >
+                    {otherKinds.map(([id, count]) => (
+                      <button key={id} type="button" onClick={() => changeKind(id)}>
+                        {LIBRARY_KINDS[id]} <span>{count}</span>
+                      </button>
+                    ))}
+                  </div>
+                ) : null}
+                <div className="library-empty-actions">
+                  {scope === "saved" && allCount ? (
+                    <button type="button" onClick={() => changeScope("all")}>
+                      すべての資料から探す <span>{allCount}</span>
+                    </button>
+                  ) : null}
+                  <button type="button" onClick={clearFilters}>
+                    検索条件をクリア
+                  </button>
+                  {draft.trim() ? (
+                    <Link
+                      to="/search"
+                      search={{ q: draft.trim() }}
+                      className="library-fulltext-inline"
+                      onClick={quietFlush}
+                    >
+                      「{draft.trim()}」を本文から検索 <span aria-hidden="true">↗</span>
+                    </Link>
+                  ) : null}
+                </div>
               </div>
             )}
           </section>

@@ -119,7 +119,7 @@ export function RexonanceAssemblyGuide({
 
 export function RexonanceAssemblyReplay() {
   return (
-    <div className="rxs-assembly-footer">
+    <div id="assembly-replay" className="rxs-assembly-footer">
       <p>装甲の接近、固定、起動。気になる瞬間は、スクロールを戻してもう一度。</p>
       <div className="rxs-assembly-controls">
         <a href="#assembly">もう一度、装着を体験</a>

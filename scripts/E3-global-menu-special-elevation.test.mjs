@@ -137,13 +137,26 @@ test("wayfinding: the special sites show their way home", () => {
   );
   // The menu's STORIES: Dream Chapter, the World, Final Stage.
   const stories = chrome.slice(chrome.indexOf("<p>STORIES</p>"), chrome.indexOf("<p>RIDERS</p>"));
-  const dream = stories.lastIndexOf("<span>映画第一作「ドリームチャプター」</span>");
-  const home = stories.lastIndexOf("<span>ディセプションワールド</span>");
+  // Owner (2026-10-21): the names are marked up in their phrases (WebKit has no auto-phrase,
+  // and split 「ドリー / ムチャプター」); the text the phrases join to is unchanged.
+  const phrase = (text) => `<span className="side-panel-phrase">${text}</span>`;
+  const dream = stories.lastIndexOf(phrase("映画第一作"));
+  const home = stories.lastIndexOf(phrase("ディセプション"));
   const finale = stories.indexOf("<span>ファイナルステージ</span>");
   assert.ok(dream >= 0 && home > dream && finale > home, "Dream → MAIN SITE → Final Stage");
+  const joined = (from) => {
+    const start = stories.indexOf("<span>", from - 30);
+    const end = stories.indexOf("<i>", start);
+    return stories
+      .slice(start, end)
+      .replace(/<[^>]*>/g, "")
+      .replace(/\s+/g, "");
+  };
+  assert.equal(joined(dream), "映画第一作「ドリームチャプター」");
+  assert.equal(joined(home), "ディセプションワールド");
   assert.match(
     stories,
-    /\{isSpecialSite \|\| context === "cinema" \? \(\s*<GuardedLink\s+to="\/world"\s+hash="top"\s+assets=\{WORLD_ENTER_ASSETS\}\s+beforeNavigate=\{close\}\s*>\s*<span>ディセプションワールド<\/span>\s*<i>MAIN SITE<\/i>/,
+    /\{isSpecialSite \|\| context === "cinema" \? \(\s*<GuardedLink\s+to="\/world"\s+hash="top"\s+assets=\{WORLD_ENTER_ASSETS\}\s+beforeNavigate=\{close\}\s*>\s*<span>\s*<span className="side-panel-phrase">ディセプション<\/span>\s*<wbr \/>\s*<span className="side-panel-phrase">ワールド<\/span>\s*<\/span>\s*<i>MAIN SITE<\/i>/,
   );
   assert.match(
     chrome,

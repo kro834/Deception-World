@@ -1,22 +1,38 @@
 /* Quick search (/ or Ctrl/⌘+K): a light overlay loaded with its chunk on
-   first use. Ice on ink, prism hairline, gold brackets; labels 12px or more. */
+   first use, drawn in the launcher's own HUD grammar (styles-stage-shell):
+   ink under a faint lattice, the key visual's light trail at one corner,
+   kickers with a prism tick, rows lit from the left, the prism along the
+   top edge and gold brackets at the foot. Labels 12px or more. */
 dialog.quick-search {
-  --qs-ink: #e6f1f8;
-  --qs-muted: #a9bccb;
-  --qs-faint: #8196a8;
+  --qs-ink: #04080f;
+  --qs-ink-rgb: 4 8 15;
+  --qs-ink-2: #08101b;
+  --qs-text: #f2f7fb;
+  --qs-muted: #bccbd8;
+  --qs-faint: #8fa3b5;
   --qs-ice: #7ae8ff;
+  --qs-ice-rgb: 122 232 255;
+  --qs-pink: #ff4fc3;
+  --qs-pink-rgb: 255 79 195;
   --qs-gold: #f0cf86;
-  --qs-prism: linear-gradient(90deg, #7ae8ff 0%, #ff5fc8 34%, #ff5cc8 66%, #f0cf86 100%);
-  --qs-hud: "Michroma", "Oxanium", "Helvetica Neue", sans-serif;
+  --qs-focus: #fff0b5;
+  --qs-prism: linear-gradient(90deg, #7ae8ff 0%, #4f7bff 32%, #ff4fc3 66%, #f0cf86 100%);
+  --qs-hud: "Michroma", "Oxanium", "Noto Sans JP", sans-serif;
+  --qs-mono: "Oxanium", "Noto Sans JP", sans-serif;
+  --qs-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  /* The key visual's upper trail, kept to the head band (150px tall, so
+     its lowest point runs 60px down, above the field): it streams in from
+     the corner behind the close plate and never under a result. */
+  --qs-trail: var(--saga-trail-ne-soft, none);
   box-sizing: border-box;
-  width: min(680px, calc(100vw - 32px));
+  width: min(720px, calc(100vw - 32px));
   max-width: none;
-  max-height: min(640px, calc(100dvh - 48px));
-  margin: max(48px, 10vh) auto auto;
+  max-height: min(680px, calc(100dvh - 48px));
+  margin: max(48px, 9vh) auto auto;
   padding: 0;
   overflow: visible;
   border: 0;
-  color: var(--qs-ink);
+  color: var(--qs-text);
   background: transparent;
   font-family: "Zen Kaku Gothic New", "Noto Sans JP", system-ui, sans-serif;
   font-size: 14px;
@@ -24,8 +40,26 @@ dialog.quick-search {
   letter-spacing: 0;
   text-align: left;
 }
+/* The Dream Chapter's search takes the chapter's own lights, as its
+   launcher does: vermilion and gold on night plum, no key-visual trail. */
+html[data-family="dream"] dialog.quick-search {
+  --qs-ink: var(--sh-ink, #130c17);
+  --qs-ink-rgb: var(--sh-ink-rgb, 19 12 23);
+  --qs-ink-2: var(--sh-ink-2, #1c1120);
+  --qs-text: var(--sh-text, #f6ecdf);
+  --qs-muted: var(--sh-text-2, #dccbb6);
+  --qs-faint: var(--sh-text-3, #b7a18c);
+  --qs-ice: var(--sh-l1, #e0614f);
+  --qs-ice-rgb: var(--sh-l1-rgb, 224 97 79);
+  --qs-pink: var(--sh-l2, #c9a15a);
+  --qs-pink-rgb: var(--sh-l2-rgb, 201 161 90);
+  --qs-prism: linear-gradient(90deg, var(--qs-ice), var(--qs-pink) 70%, #f0cf86);
+  --qs-trail: none;
+}
 dialog.quick-search::backdrop {
-  background: rgb(2 5 10 / 0.72);
+  background:
+    radial-gradient(ellipse 60% 40% at 50% 0%, rgb(122 232 255 / 7%), transparent 70%),
+    rgb(2 4 10 / 0.78);
 }
 dialog.quick-search *,
 dialog.quick-search *::before,
@@ -36,12 +70,21 @@ dialog.quick-search *::after {
   position: relative;
   display: flex;
   flex-direction: column;
-  max-height: min(640px, calc(100dvh - 48px));
-  border: 1px solid rgb(122 232 255 / 0.28);
+  max-height: min(680px, calc(100dvh - 48px));
+  border: 1px solid rgb(var(--qs-ice-rgb) / 0.3);
   border-radius: 6px;
-  background: linear-gradient(180deg, rgb(122 232 255 / 0.05), transparent 30%), #070d15;
-  box-shadow: 0 24px 80px rgb(0 0 0 / 0.55);
+  background:
+    var(--qs-trail, none) right top / min(60%, 420px) 150px no-repeat,
+    radial-gradient(ellipse 60% 36% at 0% 100%, rgb(var(--qs-pink-rgb) / 0.07), transparent 70%),
+    repeating-linear-gradient(90deg, rgb(var(--qs-ice-rgb) / 0.03) 0 1px, transparent 1px 32px),
+    repeating-linear-gradient(0deg, rgb(var(--qs-ice-rgb) / 0.03) 0 1px, transparent 1px 32px),
+    var(--qs-ink);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.08),
+    0 30px 90px rgb(0 0 0 / 0.62),
+    0 0 0 1px rgb(var(--qs-pink-rgb) / 0.12);
 }
+/* The prism along the top edge; gold brackets at the foot. */
 .quick-search-panel::before {
   content: "";
   position: absolute;
@@ -63,26 +106,57 @@ dialog.quick-search *::after {
   mask: linear-gradient(90deg, #000 26px, transparent 26px calc(100% - 26px), #000 0);
   pointer-events: none;
 }
+/* ---------- The head: a kicker and the close plate ---------- */
 .quick-search-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 10px 10px 0 18px;
+  padding: 12px 12px 0 18px;
 }
+/* The head every chrome sheet shares (the launcher's, the notices'): the
+   DW plate with its cut corner, the kicker over the title. The plate is
+   text that is not read out; the title stays the dialog's label. */
 .quick-search-head > p {
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  column-gap: 12px;
+  align-items: center;
+  min-width: 0;
   margin: 0;
-  color: var(--qs-muted);
-  font-size: 13px;
+  color: var(--qs-text);
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: 0.06em;
+}
+.quick-search-head > p::before {
+  content: "DW";
+  content: "DW" / "";
+  grid-row: 1 / 3;
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border: 1px solid rgb(var(--qs-ice-rgb) / 0.62);
+  background:
+    linear-gradient(225deg, var(--qs-ice) 0 6px, transparent 6px),
+    linear-gradient(145deg, rgb(var(--qs-ice-rgb) / 0.2), transparent 62%), var(--qs-ink-2);
+  clip-path: polygon(0 0, calc(100% - 9px) 0, 100% 9px, 100% 100%, 0 100%);
+  color: var(--qs-ice);
+  font-family: var(--qs-hud);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.04em;
 }
 .quick-search-head > p > span {
   color: var(--qs-ice);
   font-family: var(--qs-hud);
   font-size: 12px;
-  letter-spacing: 0.16em;
+  font-weight: 400;
+  line-height: 1.4;
+  letter-spacing: 0.24em;
 }
 dialog.quick-search button {
   font: inherit;
@@ -94,34 +168,57 @@ dialog.quick-search button {
   gap: 8px;
   min-width: 44px;
   min-height: 44px;
-  padding: 0 12px;
-  border: 0;
-  border-radius: 4px;
-  color: var(--qs-muted);
-  background: transparent;
+  padding: 0 10px 0 14px;
+  border: 1px solid rgb(var(--qs-ice-rgb) / 0.36);
+  border-radius: 3px;
+  color: var(--qs-text);
+  background: var(--qs-ink-2);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.08);
   font-size: 13px;
 }
 dialog.quick-search kbd {
-  padding: 1px 6px;
-  border: 1px solid rgb(167 200 214 / 0.35);
+  display: inline-grid;
+  min-width: 26px;
+  height: 24px;
+  place-items: center;
+  padding: 0 6px;
+  border: 1px solid rgb(var(--qs-ice-rgb) / 0.4);
   border-radius: 3px;
-  color: var(--qs-faint);
-  font-family: "Oxanium", ui-monospace, monospace;
+  color: var(--qs-ice);
+  background: var(--qs-ink);
+  font-family: var(--qs-mono);
   font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
 }
+/* ---------- The field: the launcher's optical well ---------- */
 .quick-search-field {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin: 8px 14px 10px;
-  padding: 2px 14px;
-  border: 1px solid rgb(122 232 255 / 0.5);
-  border-radius: 4px;
+  gap: 12px;
+  margin: 12px 14px;
+  padding: 2px 14px 2px 16px;
+  border: 1px solid rgb(var(--qs-ice-rgb) / 0.5);
+  border-radius: 3px;
   color: var(--qs-ice);
-  background: #03070c;
+  background:
+    linear-gradient(
+      90deg,
+      rgb(var(--qs-ice-rgb) / 0.12) 0%,
+      rgb(var(--qs-pink-rgb) / 0.07) 46%,
+      transparent 78%
+    ),
+    var(--qs-ink-2);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.1),
+    0 10px 26px -14px rgb(0 0 0 / 0.7);
 }
 .quick-search-field:focus-within {
-  box-shadow: 0 0 0 3px rgb(122 232 255 / 0.16);
+  border-color: rgb(var(--qs-pink-rgb) / 0.66);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.14),
+    0 0 0 3px rgb(var(--qs-pink-rgb) / 0.14),
+    0 12px 28px -12px rgb(var(--qs-pink-rgb) / 0.32);
 }
 .quick-search-field svg {
   flex-shrink: 0;
@@ -129,39 +226,64 @@ dialog.quick-search kbd {
 .quick-search-field input {
   flex: 1;
   min-width: 0;
-  min-height: 48px;
+  min-height: 52px;
   margin: 0;
   padding: 0;
   border: 0;
   outline: 0;
-  color: var(--qs-ink);
+  color: var(--qs-text);
   background: transparent;
   font: inherit;
   font-size: 17px;
+  font-weight: 500;
   appearance: none;
 }
 .quick-search-field input::-webkit-search-cancel-button {
   display: none;
 }
 .quick-search-field input::placeholder {
-  color: #7f93a3;
+  color: var(--qs-faint);
+  font-weight: 400;
 }
+/* ---------- The list: kickers and lit rows ---------- */
 .quick-search-list {
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: 0 8px 8px;
-  border-top: 1px solid rgb(122 232 255 / 0.12);
+  padding: 0 10px 10px;
+  border-top: 1px solid rgb(var(--qs-ice-rgb) / 0.14);
 }
 .quick-search-list[hidden] {
   display: none;
 }
 .quick-search-group-label {
-  padding: 12px 10px 4px;
-  color: var(--qs-faint);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 6px 6px;
+  color: var(--qs-ice);
   font-size: 12px;
-  letter-spacing: 0.1em;
+  line-height: 17px;
+  letter-spacing: 0.18em;
+}
+.quick-search-group-label::before {
+  content: "";
+  width: 10px;
+  height: 2px;
+  flex: 0 0 10px;
+  background: linear-gradient(90deg, var(--qs-ice), var(--qs-pink));
+}
+.quick-search-group-label::after {
+  content: "";
+  flex: 1 1 auto;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    rgb(var(--qs-ice-rgb) / 0.32) 0%,
+    rgb(var(--qs-pink-rgb) / 0.2) 42%,
+    transparent 94%
+  );
 }
 .quick-search-option {
   position: relative;
@@ -169,18 +291,27 @@ dialog.quick-search kbd {
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 2px 14px;
   min-height: 48px;
-  padding: 10px 12px;
-  border-radius: 4px;
-  color: var(--qs-ink);
+  padding: 10px 12px 10px 14px;
+  border-radius: 3px;
+  color: var(--qs-text);
+  box-shadow: inset 3px 0 0 transparent;
   text-decoration: none;
 }
 .quick-search-option:hover {
-  background: rgb(122 232 255 / 0.07);
+  background: rgb(var(--qs-ice-rgb) / 0.07);
+  box-shadow: inset 3px 0 0 rgb(var(--qs-ice-rgb) / 0.55);
 }
 .quick-search-option[data-active="true"] {
-  background: rgb(122 232 255 / 0.13);
-  box-shadow: inset 2px 0 0 var(--qs-ice);
-  outline: 1px solid rgb(122 232 255 / 0.5);
+  background: linear-gradient(
+    90deg,
+    rgb(var(--qs-ice-rgb) / 0.16) 0%,
+    rgb(var(--qs-pink-rgb) / 0.07) 48%,
+    rgb(var(--qs-ice-rgb) / 0.03) 100%
+  );
+  box-shadow:
+    inset 3px 0 0 var(--qs-ice),
+    inset 0 0 0 1px rgb(var(--qs-ice-rgb) / 0.3);
+  outline: 0;
 }
 .quick-search-option-title {
   min-width: 0;
@@ -192,6 +323,7 @@ dialog.quick-search kbd {
   align-self: baseline;
   color: var(--qs-faint);
   font-size: 12px;
+  letter-spacing: 0.04em;
   text-align: right;
   overflow-wrap: anywhere;
 }
@@ -206,25 +338,71 @@ dialog.quick-search kbd {
   -webkit-line-clamp: 2;
   line-clamp: 2;
 }
+/* "Every result": a lit plate under the groups. */
 .quick-search-option.is-all {
-  margin-top: 6px;
-  border: 1px dashed rgb(122 232 255 / 0.35);
+  margin-top: 8px;
+  border: 1px solid rgb(var(--qs-ice-rgb) / 0.46);
+  background:
+    linear-gradient(
+      90deg,
+      rgb(var(--qs-ice-rgb) / 0.1),
+      rgb(var(--qs-pink-rgb) / 0.05) 60%,
+      transparent
+    ),
+    var(--qs-ink-2);
   color: var(--qs-ice);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.08);
+}
+.quick-search-option.is-all .quick-search-option-place {
+  color: var(--qs-ice);
+  font-family: var(--qs-mono);
+  font-weight: 600;
+}
+.quick-search-option.is-all[data-active="true"] {
+  border-color: var(--qs-ice);
 }
 .quick-search-option.is-link .quick-search-option-place {
   font-family: var(--qs-hud);
+  font-size: 12px;
   letter-spacing: 0.1em;
+}
+.quick-search-option.is-recent .quick-search-option-title::before {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 10px;
+  border: 1px solid rgb(var(--qs-ice-rgb) / 0.6);
+  vertical-align: 1px;
 }
 dialog.quick-search mark {
   padding: 0 1px;
   border-radius: 2px;
-  color: #effcff;
-  background: rgb(122 232 255 / 0.22);
-  box-shadow: inset 0 -1px 0 var(--qs-ice);
+  color: #fff;
+  background: rgb(var(--qs-ice-rgb) / 0.2);
+  box-shadow: inset 0 -1px 0 var(--qs-pink);
 }
+/* ---------- Nothing found: a gold note and a few leads ---------- */
 .quick-search-empty {
-  padding: 18px 18px 8px;
-  border-top: 1px solid rgb(122 232 255 / 0.12);
+  padding: 16px 18px 10px;
+  border-top: 1px solid rgb(var(--qs-ice-rgb) / 0.14);
+  background: linear-gradient(180deg, rgb(240 207 134 / 0.05), transparent 70%);
+}
+/* A HUD kicker over the note, in gold: the search answered, with nothing.
+   Text that is not read out (the note itself is the status). */
+.quick-search-empty::before {
+  content: "NO MATCH";
+  content: "NO MATCH" / "";
+  display: block;
+  margin-bottom: 8px;
+  padding-left: 22px;
+  background: linear-gradient(90deg, var(--qs-gold), rgb(240 207 134 / 0.2)) 0 50% / 12px 2px
+    no-repeat;
+  color: var(--qs-gold);
+  font-family: var(--qs-hud);
+  font-size: 12px;
+  line-height: 17px;
+  letter-spacing: 0.22em;
 }
 .quick-search-empty > p {
   margin: 0 0 10px;
@@ -239,6 +417,7 @@ dialog.quick-search mark {
 .quick-search-empty span {
   color: var(--qs-gold);
   font-size: 12px;
+  letter-spacing: 0.08em;
 }
 .quick-search-empty button {
   min-height: 44px;
@@ -246,23 +425,40 @@ dialog.quick-search mark {
   border: 1px solid rgb(240 207 134 / 0.55);
   border-radius: 3px;
   color: #fbe8bf;
-  background: rgb(240 207 134 / 0.08);
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.05), transparent 60%), rgb(240 207 134 / 0.08);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.08);
 }
+@media (hover: hover) and (pointer: fine) {
+  .quick-search-empty button:hover {
+    border-color: rgb(240 207 134 / 0.85);
+    background: rgb(240 207 134 / 0.16);
+  }
+}
+/* ---------- The foot: keys and the count ---------- */
 .quick-search-foot {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
   min-height: 44px;
-  padding: 4px 10px 6px 18px;
-  border-top: 1px solid rgb(122 232 255 / 0.12);
+  padding: 4px 10px 8px 18px;
+  border-top: 1px solid rgb(var(--qs-ice-rgb) / 0.14);
 }
 .quick-search-foot > p {
   display: flex;
+  align-items: center;
   gap: 14px;
   margin: 0;
   color: var(--qs-faint);
   font-size: 12px;
+}
+.quick-search-count {
+  color: var(--qs-ice);
+  font-family: var(--qs-mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
 }
 .quick-search-foot button {
   min-height: 44px;
@@ -275,17 +471,40 @@ dialog.quick-search mark {
   text-underline-offset: 4px;
 }
 dialog.quick-search :is(button, a):focus-visible {
-  outline: 2px solid var(--qs-ice);
+  outline: 2px solid var(--qs-focus);
   outline-offset: 2px;
+}
+.quick-search-option:focus-visible {
+  outline-offset: -2px;
 }
 @media (pointer: coarse), (max-width: 640px) {
   .quick-search-keys {
     display: none;
   }
 }
-@media (max-width: 400px) {
+/* Touch screens have no Esc key (the launcher drops its / the same way):
+   the close plate keeps its word, and QUICK SEARCH keeps its one line. */
+@media (hover: none) and (pointer: coarse) {
+  dialog.quick-search .quick-search-close > kbd {
+    display: none;
+  }
+  dialog.quick-search .quick-search-close {
+    padding: 0 14px;
+  }
+}
+@media (max-width: 480px) {
+  .quick-search-head > p > span {
+    letter-spacing: 0.16em;
+  }
+}
+/* The kicker sits over the title now, so it keeps its line down to 360px;
+   below that the title stands beside the plate alone. */
+@media (max-width: 359px) {
   .quick-search-head > p > span {
     display: none;
+  }
+  .quick-search-head > p::before {
+    grid-row: 1;
   }
 }
 @media (max-width: 640px) {
@@ -297,10 +516,25 @@ dialog.quick-search :is(button, a):focus-visible {
   .quick-search-panel {
     max-height: calc(100dvh - 24px);
   }
+  .quick-search-field {
+    margin: 10px 12px;
+  }
 }
+/* The sheet arrives once: a short rise, under no-preference and outside
+   economy rendering. */
 @media (prefers-reduced-motion: no-preference) {
   html:not([data-world-effects="economy"]) dialog.quick-search[open] .quick-search-panel {
-    animation: quick-search-in 0.18s ease-out;
+    animation: quick-search-in 0.24s var(--qs-ease);
+  }
+  html:not([data-world-effects="economy"]) dialog.quick-search .quick-search-option {
+    transition:
+      background-color 0.14s ease,
+      box-shadow 0.14s ease;
+  }
+  html:not([data-world-effects="economy"]) dialog.quick-search .quick-search-field {
+    transition:
+      border-color 0.18s ease,
+      box-shadow 0.18s ease;
   }
 }
 @keyframes quick-search-in {
@@ -312,13 +546,26 @@ dialog.quick-search :is(button, a):focus-visible {
 @media (forced-colors: active) {
   .quick-search-panel {
     border: 1px solid CanvasText;
+    background: Canvas;
   }
   .quick-search-panel::before,
-  .quick-search-panel::after {
+  .quick-search-panel::after,
+  .quick-search-empty::before,
+  .quick-search-head > p::before,
+  .quick-search-group-label::before,
+  .quick-search-group-label::after {
     display: none;
+  }
+  /* The plate is gone here: the kicker and the title take the head's
+     one column. */
+  .quick-search-head > p {
+    grid-template-columns: minmax(0, 1fr);
   }
   .quick-search-option[data-active="true"] {
     outline: 3px solid Highlight;
+  }
+  .quick-search-option.is-all {
+    border-color: CanvasText;
   }
   dialog.quick-search mark {
     color: HighlightText;

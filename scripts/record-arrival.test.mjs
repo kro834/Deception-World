@@ -148,12 +148,14 @@ test("search/library arrival waits for the route cover and focuses without scrol
   assert.equal(h.focused(), 1);
   assert.equal(h.dataset.routeFocus, "true");
   assert.equal(h.dataset.skipMark, "true");
+  // Owner (2026-10-21): the landing ring (data-record-landing, styles-record-landing.css) holds 6s beside the 2.4s cue.
+  assert.equal(h.dataset.recordLanding, "live");
   assert.equal(h.active(), false);
   assert.equal(h.frames.size, 0);
   assert.equal(h.listeners.size, 0);
   assert.deepEqual(
     [...h.timers.values()].map((timer) => timer.delay),
-    [2400],
+    [2400, 6000],
   );
   h.blur();
   assert.equal(h.timers.size, 0);
@@ -169,6 +171,11 @@ test("arrival cue expires while keyboard destination remains until blur", () => 
   h.expire(2400);
   assert.equal(h.dataset.skipMark, undefined);
   assert.equal(h.dataset.routeFocus, "true");
+  // Owner (2026-10-21): the landing ring outlasts the brief cue, then goes on its own.
+  assert.equal(h.dataset.recordLanding, "live");
+  h.expire(6000);
+  assert.equal(h.dataset.recordLanding, undefined);
+  assert.equal(h.dataset.routeFocus, "true");
   h.blur();
   assert.equal(h.dataset.routeFocus, undefined);
 });
@@ -182,8 +189,11 @@ test("interactive targets keep their existing tabindex, and reduced/economy mode
     h.flush();
     assert.equal(h.focused(), 1);
     assert.equal(h.dataset.skipMark, undefined);
+    // Owner (2026-10-21): reduced motion and economy keep a still landing ring (no lock-on animation).
+    assert.equal(h.dataset.recordLanding, "still");
     assert.equal(h.dataset.routeFocus, undefined);
     h.blur();
+    assert.equal(h.dataset.recordLanding, undefined);
     assert.equal(h.attributes.has("tabindex"), true);
   }
 });
@@ -229,4 +239,71 @@ test("a hidden destination stays pending only until the bounded deadline", () =>
   h.expire(15000);
   assert.equal(h.active(), false);
   assert.equal(h.listeners.size, 0);
+});
+
+test("the landing reticle is decorative, follows its anchor and leaves with the ring", () => {
+  const source = readFileSync(new URL("../src/lib/record-arrival.ts", import.meta.url), "utf8");
+  // Its own fixed layer: hidden from assistive tech, never in the way of a pointer.
+  assert.match(source, /layer\.setAttribute\("aria-hidden", "true"\)/);
+  assert.match(source, /pointer-events:none/);
+  // Unstyled until the sheet applies: invisible rather than raw text.
+  assert.match(source, /opacity:var\(--record-landing-visible,0\)/);
+  // Forced colours keep the element's own Highlight ring instead.
+  assert.match(source, /matchMedia\("\(forced-colors: active\)"\)\.matches/);
+  // A tall destination is marked at its first heading on screen.
+  // Owner (2026-10-22): "on screen" is the band between the top chrome and the foot plates.
+  assert.match(source, /function anchorOf\(target: HTMLElement, top = 0, foot = 0\)/);
+  // Hold and blur both release it; a newer arrival releases the old one.
+  assert.match(source, /target\.removeAttribute\("data-record-landing"\);\s*release\?\.\(\);/);
+  assert.match(source, /window\.clearTimeout\(hold\);\s*release\?\.\(\);/);
+  assert.match(source, /cancelPending\?\.\(\);\s*releaseReticle\?\.\(\);/);
+});
+
+test("the landing sheet keeps the 12px floor, gated finite motion and forced colours", () => {
+  const css = readFileSync(new URL("../src/styles-record-landing.css", import.meta.url), "utf8");
+  for (const [, size] of css.matchAll(/font:\s*(?:\d+\s+)?([\d.]+)px/g))
+    assert.ok(Number(size) >= 12, `font ${size}px`);
+  let outside = css;
+  for (let at = outside.indexOf("@media (prefers-reduced-motion: no-preference)"); at >= 0; ) {
+    let depth = 0;
+    let end = outside.indexOf("{", at);
+    for (; end < outside.length; end += 1) {
+      if (outside[end] === "{") depth += 1;
+      else if (outside[end] === "}" && --depth === 0) break;
+    }
+    const block = outside.slice(at, end + 1);
+    assert.match(block, /html:not\(\[data-world-effects="economy"\]\)/);
+    assert.doesNotMatch(block, /infinite/);
+    outside = outside.slice(0, at) + outside.slice(end + 1);
+    at = outside.indexOf("@media (prefers-reduced-motion: no-preference)");
+  }
+  assert.doesNotMatch(outside, /\banimation\s*:\s*record-/, "ungated motion");
+  assert.match(css, /@media \(forced-colors: active\)[\s\S]*\.record-landing-layer\s*\{\s*display: none;/);
+});
+
+test("the reticle keeps clear of the plates docked at the foot and of the words around it", () => {
+  const source = readFileSync(new URL("../src/lib/record-arrival.ts", import.meta.url), "utf8");
+  const css = readFileSync(new URL("../src/styles-record-landing.css", import.meta.url), "utf8");
+  // A heading behind the way-back or guide plate is no landing: the band
+  // ends at the plates, and the layer is clipped above them.
+  assert.match(source, /function chromeFoot\(\)/);
+  assert.match(source, /box\.bottom <= window\.innerHeight - foot/);
+  assert.match(source, /clipPath = clip \|\| foot \? `inset\(\$\{clip\}px 0 \$\{foot\}px 0\)`/);
+  // The on-screen frame stops above the plates too.
+  assert.match(source, /Math\.min\(box\.bottom, window\.innerHeight - foot - 14\)/);
+  // The tag takes the first free place: on the top line, beside, below.
+  assert.match(source, /\["above", at\(left \+ 20, top - half\)\]/);
+  assert.match(source, /\["side", at\(right \+ 12, top\)\]/);
+  assert.match(source, /\["below", at\(left \+ 20, bottom - half\)\]/);
+  assert.match(css, /\[data-tag="side"\] > \.record-landing-tag \{[^}]*left: calc\(100% \+ 12px\)/);
+  // The still tier's tag also leaves after three seconds, by opacity alone.
+  assert.match(source, /const TAG_HOLD_MS = 3200;/);
+  assert.match(source, /tag\.dataset\.faded = "true"/);
+  assert.match(source, /window\.clearTimeout\(fadeTag\)/);
+  const still = /\.record-landing-layer\[data-mode="still"\] \.record-landing-tag\[data-faded\] \{([^}]*)\}/.exec(css);
+  assert.ok(still, "still tag fade");
+  assert.match(still[1], /opacity: 0;/);
+  assert.doesNotMatch(still[1], /transform|translate|animation/);
+  // A frame round a whole screenful draws no floor and no sweep.
+  assert.match(css, /\.record-landing-reticle\[data-whole\] > \.record-landing-scan \{\s*display: none;/);
 });

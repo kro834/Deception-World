@@ -242,6 +242,76 @@ html[data-family="special"]
   display: block;
 }
 
+/* The handover (sweep 2, F01): when the scene goes live over the undersuit
+   stand-in, the live canvas fades in over it instead of replacing it in one
+   frame. While armed over the stand-in the canvas is held at 0 (it is empty
+   then, or still holds an earlier visit's last frame); once its first frame
+   is drawn it fades in over 240 ms, and the field's canvases with it (made
+   with that frame, they start from 0 too). The stand-in stays under the
+   canvas until the canvas is whole. The undersuit's faint copy fades out as
+   the canvas's comes in: two 24 % copies one over the other would read
+   brighter, then drop. The driver's opaque copy holds under the canvas's
+   and goes once it is covered, over the last 80 ms (the canvas is at 97 %
+   from 160 ms), so the bake's 1 px edge never snaps. Both then stay laid out
+   at 0 while live; they are absolute, so nothing moves. Opacity only, on the
+   compositor. The frame drawn is the reader's (the progress is never
+   tweened), and the fade ends before the first calm frame (CALM_MS, 260 ms
+   after the first). Like every transition of this sheet it sits behind
+   reduced motion, economy (the scene never goes live there either), the
+   menu, dialogs and the route cover; there the switch stays one frame. */
+@media (prefers-reduced-motion: no-preference) {
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])
+    > .rzn-suitup[data-rzn-state="live"][data-rzn-arming="under"]
+    > .rzn-frame
+    > :is(.rzn-canvas, .rzn-field) {
+    opacity: 0;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])
+    > .rzn-suitup[data-rzn-state="live"]:not([data-rzn-arming])
+    > .rzn-frame
+    > :is(.rzn-canvas, .rzn-field) {
+    transition: opacity 240ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  @starting-style {
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])
+      > .rzn-suitup[data-rzn-state="live"]
+      > .rzn-frame
+      > .rzn-field {
+      opacity: 0;
+    }
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])
+    > .rzn-suitup[data-rzn-state="live"]:not([data-rzn-arming])
+    > .rzn-frame
+    > .rzn-under {
+    display: block;
+    opacity: 0;
+    transition: opacity 240ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])
+    > .rzn-suitup[data-rzn-state="live"]:not([data-rzn-arming])
+    > .rzn-frame
+    > .rzn-driver-standin {
+    display: block;
+    opacity: 0;
+    transition: opacity 80ms linear 160ms;
+  }
+}
+
 /* ---------------- The call (left) ---------------- */
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-call {
   position: absolute;

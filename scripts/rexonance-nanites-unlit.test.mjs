@@ -98,8 +98,11 @@ test("the original light split is byte-for-byte HEAD's (the nanite jobs only fol
   const original = source.slice(0, source.indexOf("\n// --- The nanite kit"));
   assert.equal(
     createHash("sha256").update(original).digest("hex"),
-    // Round 4: the split's job phased (strips, one upload a step); its bytes are pinned below.
-    "cd5fbc2800eb3ed00c4b3a935adb8efd4cdb0e3cad1e26763fa6fd39f5562f2f",
+    // Round 4: the split's job phased (strips, one upload a step); sweep 2:
+    // its source read back once, whole, and its strips put straight into the
+    // outputs. Its bytes are pinned below (SPLIT_DIGEST unchanged; the
+    // real-size digests: rexonance-unlit-runtime).
+    "8484b85f54570718db8c3c975aa200145f6b3e2575830f99e98281b1b1ad0128",
   );
   // And it still splits a seeded picture exactly as before (frozen digest).
   const ui = load();

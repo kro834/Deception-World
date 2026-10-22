@@ -31,7 +31,11 @@ test("the stage sheet is the last dossier sheet, and the first-rank file links i
   assert.match(head, /import stageDossierCssUrl from "@\/styles-stage-dossier\.css\?url";/);
   const dossier = head.slice(head.indexOf("export const DOSSIER_STYLESHEET_LINKS"));
   const list = dossier.slice(0, dossier.indexOf("];"));
-  assert.match(list, /href: dossierReadingCssUrl \},\s*STAGE_DOSSIER_STYLESHEET_LINK,\s*$/);
+  // Owner (2026-10-21): the ZENITH brush-up sheet follows the stage sheet as the last dossier sheet.
+  assert.match(
+    list,
+    /href: dossierReadingCssUrl \},\s*STAGE_DOSSIER_STYLESHEET_LINK,\s*DOSSIER_ZENITH_STYLESHEET_LINK,\s*$/,
+  );
   // Not in the World links: every other family stays as it was.
   const world = head.slice(head.indexOf("export const WORLD_STYLESHEET_LINKS"));
   assert.doesNotMatch(world.slice(0, world.indexOf("];")), /STAGE_DOSSIER/);

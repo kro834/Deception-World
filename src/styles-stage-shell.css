@@ -801,6 +801,25 @@ html[data-family] body #site-side-panel.side-panel[data-liquid-pointer] {
   color: var(--sh-text);
 }
 
+/* The key visual's two light trails at the sheet's corners (the
+   streamline sheet's images, loaded on every route but the title): the
+   launcher opens onto the same light as the page behind it. Dream and the
+   gallery keep their own editions. The sheet's background is attached to
+   its box, so the trails stay at the corners while the list scrolls. */
+html[data-family]:not([data-family="dream"]):not([data-family="gallery"])
+  body
+  #site-side-panel.side-panel[data-liquid-pointer] {
+  background:
+    var(--saga-trail-ne-soft, none) right top max(96px, 12vh) / min(50vw, 720px) min(30vh, 300px)
+      no-repeat,
+    var(--saga-trail-sw-soft, none) left bottom / min(50vw, 700px) min(34vh, 340px) no-repeat,
+    radial-gradient(ellipse 55% 42% at 100% 0%, rgb(var(--sh-l1-rgb) / 11%), transparent 70%),
+    radial-gradient(ellipse 50% 40% at 0% 100%, rgb(var(--sh-l2-rgb) / 9%), transparent 70%),
+    repeating-linear-gradient(90deg, rgb(var(--sh-l1-rgb) / 3%) 0 1px, transparent 1px 32px),
+    repeating-linear-gradient(0deg, rgb(var(--sh-l1-rgb) / 3%) 0 1px, transparent 1px 32px),
+    var(--sh-ink) !important;
+}
+
 /* The launcher sets its own face, so a route sheet that persists from an
    earlier page (the special sites' .rxs-page face) cannot restyle it. The
    Dream Chapter's launcher keeps the chapter's Mincho, as before. */
@@ -825,8 +844,19 @@ html[data-family] body #site-side-panel.side-panel > .side-panel-head {
     var(--sh-ink);
 }
 
+/* The head locks on as the notices and the quick search do: four
+   bracket arms around the plate, the name and the close plate, the
+   first light at the top corners and gold at the foot (the brackets'
+   paint is chrome-elevation's; their lights follow the family here). */
 html[data-family] body #site-side-panel.side-panel > .side-panel-head::after {
-  content: none;
+  --dwc-arm: 16px;
+  --dwc-lock: var(--sh-l1);
+  inset: calc(var(--sp-pad-top) - 10px) calc(var(--sp-pad-inline) - 10px) 8px;
+  z-index: 0;
+}
+
+html[data-family="dream"] body #site-side-panel.side-panel > .side-panel-head::after {
+  --dwc-gold: var(--sh-l2);
 }
 
 html[data-family] body #site-side-panel.side-panel > .side-panel-head::before {
@@ -931,13 +961,16 @@ html[data-family] body #site-side-panel.side-panel > .side-panel-group > p {
   letter-spacing: 0.22em;
 }
 
+/* The kicker every chrome sheet shares (the notices' and the quick
+   search's too): a tick from the first light into the second, the label,
+   and a rule that fades the same way. */
 html[data-family] body #site-side-panel.side-panel > .side-panel-group > p::before {
   content: "";
   width: 12px;
   height: 2px;
   flex: 0 0 12px;
   border: 0;
-  background: var(--sh-l1);
+  background: linear-gradient(90deg, var(--sh-l1), var(--sh-l2));
   transform: none;
 }
 
@@ -945,7 +978,12 @@ html[data-family] body #site-side-panel.side-panel > .side-panel-group > p::afte
   content: "";
   flex: 1 1 auto;
   height: 1px;
-  background: linear-gradient(90deg, rgb(var(--sh-l1-rgb) / 34%), rgb(var(--sh-l1-rgb) / 0%));
+  background: linear-gradient(
+    90deg,
+    rgb(var(--sh-l1-rgb) / 34%) 0%,
+    rgb(var(--sh-l2-rgb) / 18%) 42%,
+    rgb(var(--sh-l2-rgb) / 0%) 94%
+  );
 }
 
 html[data-family] body #site-side-panel.side-panel > .side-panel-group > .side-panel-links {
@@ -1175,23 +1213,101 @@ html[data-family]
   font-size: 14px;
 }
 
+/* From tablets up FIND A RECORD is one flexible row: the search field
+   takes 2.4 parts and each short way in one, so a page without the
+   bookmark (the library, the search) closes the row instead of leaving
+   an empty cell at its end. */
+@media (min-width: 761px) {
+  html[data-family]
+    body
+    #site-side-panel.side-panel[data-liquid-pointer]
+    > .side-panel-head
+    + .side-panel-group
+    > .side-panel-links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+  }
+
+  html[data-family]
+    body
+    #site-side-panel.side-panel[data-liquid-pointer]
+    > .side-panel-head
+    + .side-panel-group
+    > .side-panel-links
+    > * {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  html[data-family]
+    body
+    #site-side-panel.side-panel[data-liquid-pointer]
+    > .side-panel-head
+    + .side-panel-group
+    > .side-panel-links
+    > button.side-panel-quick-search {
+    flex-grow: 2.4;
+  }
+}
+
+/* An iPad mini or a 768 iPad held upright: the search field takes the
+   row's full width and the short ways in share the next, so
+   資料室・しおり keeps one line. */
+@media (min-width: 761px) and (max-width: 899px) {
+  html[data-family]
+    body
+    #site-side-panel.side-panel[data-liquid-pointer]
+    > .side-panel-head
+    + .side-panel-group
+    > .side-panel-links
+    > button.side-panel-quick-search {
+    flex-basis: 100%;
+  }
+}
+
+/* Where the two short ways in are narrow (tablets, small laptops), each
+   code drops under its name, so 資料を探す and 資料室・しおり keep one
+   rhythm instead of one code beside its name and the other below. */
+@media (min-width: 761px) and (max-width: 1439px) {
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-head
+    + .side-panel-group
+    > .side-panel-links
+    > a {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 2px;
+  }
+}
+
 html[data-family] body #site-side-panel.side-panel .side-panel-links > .library-current-control {
   display: grid;
   min-width: 0;
   margin: 0;
 }
 
+/* The bookmark (資料を保存 / しおりを解除): a plate like its neighbours,
+   with a drawn bookmark that fills in gold once the record is kept. */
 html[data-family]
   body
   #site-side-panel.side-panel
   .side-panel-links
   > .library-current-control
   > button {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
   min-height: 48px;
   padding: 10px 14px;
-  border: 1px dashed rgb(var(--sh-l1-rgb) / 42%);
+  border: 1px solid rgb(var(--sh-l1-rgb) / 30%);
   border-radius: 3px;
-  background: transparent;
+  background: linear-gradient(180deg, rgb(255 255 255 / 4%), transparent 55%), var(--sh-ink-2);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 6%);
   color: var(--sh-text-2);
   font-family: var(--sh-display);
   font-size: 14px;
@@ -1204,10 +1320,77 @@ html[data-family]
   #site-side-panel.side-panel
   .side-panel-links
   > .library-current-control
+  > button::before {
+  content: "";
+  width: 10px;
+  height: 14px;
+  flex: 0 0 10px;
+  background: rgb(var(--sh-l1-rgb) / 72%);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 72%, 0 100%);
+}
+
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  .side-panel-links
+  > .library-current-control
+  > button:disabled {
+  color: var(--sh-text-3);
+  cursor: default;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    .side-panel-links
+    > .library-current-control
+    > button:not(:disabled):hover {
+    border-color: rgb(var(--sh-l1-rgb) / 58%);
+    background: rgb(var(--sh-l1-rgb) / 8%);
+    color: var(--sh-text);
+  }
+}
+
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  .side-panel-links
+  > .library-current-control
   > button[aria-pressed="true"] {
-  border-style: solid;
-  border-color: var(--sh-l1);
+  border-color: rgb(240 207 134 / 70%);
+  background: linear-gradient(90deg, rgb(240 207 134 / 10%), transparent 70%), var(--sh-ink-2);
   color: var(--sh-text);
+}
+
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  .side-panel-links
+  > .library-current-control
+  > button[aria-pressed="true"]::before {
+  background: #f0cf86;
+}
+
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  .side-panel-links
+  > .library-current-control
+  > button:focus-visible {
+  outline: 2px solid var(--sh-focus);
+  outline-offset: 2px;
+}
+
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  .side-panel-links
+  > .library-current-control
+  > span[role="status"] {
+  color: var(--sh-text-2);
+  font-size: 12px;
+  line-height: 1.6;
 }
 
 /* ---------- SECTIONS: the page's chapters, numbered ---------- */
@@ -1689,6 +1872,10 @@ html[data-family]
   line-height: 1.2;
   letter-spacing: 0.08em;
   white-space: normal;
+  /* A chip that must wrap breaks between its words (FINAL / STAGE), never
+     inside one: 本編リメイク once lost its ク to a second line. */
+  word-break: keep-all;
+  text-wrap: balance;
 }
 
 /* The films' and sites' names are long: their size follows the tile's
@@ -1721,8 +1908,34 @@ html[data-family]
     > .side-panel-links
     > a
     > span {
-    font-size: clamp(12px, calc((100cqi - 26px) / 11.6), 17px);
+    /* 映画四部作「仮面ライダーサーガ」 is 16 characters: one line where the
+       tile is widest, two where it is not, broken between its phrases. */
+    font-size: clamp(12px, calc((100cqi - 26px) / 15.2), 17px);
+    /* A name breaks only where its markup allows (the phrases below, the
+       DisplayName words): WebKit has no auto-phrase, and its normal
+       breaking split 「ドリー / ムチャプター」 (2026-10-22). */
+    word-break: keep-all;
+    line-break: strict;
+    overflow-wrap: anywhere;
   }
+}
+
+/* The films' and the site's phrases (映画第一作 / 「ドリームチャプター」,
+   ディセプション / ワールド): each stays whole on its line and the name
+   wraps between them (<wbr>) in every engine. Nowrap, because WebKit's
+   keep-all still breaks after an opening bracket (映画四部作「 / 仮面…);
+   inline, not inline-block, so the links' accessible names gain no space
+   between the phrases. The narrowest STORIES tile (169px, a 768 iPad's)
+   holds 「仮面ライダーサーガ」 on its line at the 12px floor. */
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  .side-panel-links
+  > :is(a, button)
+  > span
+  > .side-panel-phrase {
+  display: inline;
+  white-space: nowrap;
 }
 
 /* Which art each destination shows (delivery files the site already
@@ -1963,6 +2176,100 @@ html[data-family]:not([data-world-effects="economy"])
   > .side-panel-links
   > a[href="/riders/cipher"] {
   --sh-art: url("/rider-cipher-thumbnail-20260825-400.webp");
+}
+
+/* The riders' tiles are 150-200px wide from tablets up: a 1x screen takes
+   the 240w delivery and only a 2x screen the 400w one (phones keep 240w
+   below). Engines without image-set() keep the 400w file above. */
+@media (min-width: 761px) {
+  @supports (background-image: image-set(url("/rider-realm-240.webp") 1x)) {
+    html[data-family]:not([data-world-effects="economy"])
+      body
+      #site-side-panel.side-panel[data-open="true"]
+      > .side-panel-riders
+      > .side-panel-links
+      > a[href="/riders/saga"] {
+      --sh-art: image-set(
+        url("/rider-saga-rexonance-thumbnail-20260827-240.webp") 1x,
+        url("/rider-saga-rexonance-thumbnail-20260827-400.webp") 2x
+      );
+    }
+
+    html[data-family]:not([data-world-effects="economy"])
+      body
+      #site-side-panel.side-panel[data-open="true"]
+      > .side-panel-riders
+      > .side-panel-links
+      > a[href="/riders/realm"] {
+      --sh-art: image-set(url("/rider-realm-240.webp") 1x, url("/rider-realm-400.webp") 2x);
+    }
+
+    html[data-family]:not([data-world-effects="economy"])
+      body
+      #site-side-panel.side-panel[data-open="true"]
+      > .side-panel-riders
+      > .side-panel-links
+      > a[href="/riders/lore"] {
+      --sh-art: image-set(url("/rider-loa-240.webp") 1x, url("/rider-loa-400.webp") 2x);
+    }
+
+    html[data-family]:not([data-world-effects="economy"])
+      body
+      #site-side-panel.side-panel[data-open="true"]
+      > .side-panel-riders
+      > .side-panel-links
+      > a[href="/riders/vandal"] {
+      --sh-art: image-set(
+        url("/rider-vandal-thumbnail-20260827-240.webp") 1x,
+        url("/rider-vandal-thumbnail-20260827-400.webp") 2x
+      );
+    }
+
+    html[data-family]:not([data-world-effects="economy"])
+      body
+      #site-side-panel.side-panel[data-open="true"]
+      > .side-panel-riders
+      > .side-panel-links
+      > a[href="/riders/leddic"] {
+      --sh-art: image-set(
+        url("/rider-leddic-home-240.webp") 1x,
+        url("/rider-leddic-home-400.webp") 2x
+      );
+    }
+
+    html[data-family]:not([data-world-effects="economy"])
+      body
+      #site-side-panel.side-panel[data-open="true"]
+      > .side-panel-riders
+      > .side-panel-links
+      > a[href="/riders/argenome"] {
+      --sh-art: image-set(url("/rider-algenome-240.webp") 1x, url("/rider-algenome-400.webp") 2x);
+    }
+
+    html[data-family]:not([data-world-effects="economy"])
+      body
+      #site-side-panel.side-panel[data-open="true"]
+      > .side-panel-riders
+      > .side-panel-links
+      > a[href="/riders/over-zeztz"] {
+      --sh-art: image-set(
+        url("/rider-over-zeztz-thumbnail-20260829-240.webp") 1x,
+        url("/rider-over-zeztz-thumbnail-20260829-400.webp") 2x
+      );
+    }
+
+    html[data-family]:not([data-world-effects="economy"])
+      body
+      #site-side-panel.side-panel[data-open="true"]
+      > .side-panel-riders
+      > .side-panel-links
+      > a[href="/riders/cipher"] {
+      --sh-art: image-set(
+        url("/rider-cipher-thumbnail-20260825-240.webp") 1x,
+        url("/rider-cipher-thumbnail-20260825-400.webp") 2x
+      );
+    }
+  }
 }
 
 /* The page the reader is on, among the tiles. */
@@ -2411,7 +2718,10 @@ html[data-family]
   }
 }
 
-/* Tablets: the chapters in two columns, the tiles in wider rows. */
+/* Tablets: the chapters in two columns, the tiles in wider rows. SPECIAL
+   and STORIES take a row each: sharing one, six tiles of 110-120px on an
+   iPad held upright clipped PERFORMANCE SITE and broke 本編リメイク and
+   the films' names mid-word (2026-10-22). */
 @media (min-width: 761px) {
   html[data-family] body #site-side-panel.side-panel[data-liquid-pointer] {
     grid-template-columns: repeat(6, minmax(0, 1fr));
@@ -2419,7 +2729,8 @@ html[data-family]
       "head head head head head head"
       "find find find find find find"
       "sec  sec  sec  sec  sec  sec"
-      "spe  spe  sto  sto  sto  sto"
+      "spe  spe  spe  spe  spe  spe"
+      "sto  sto  sto  sto  sto  sto"
       "rid  rid  rid  rid  rid  rid"
       "unm  unm  inf  inf  inf  inf"
       "sys  sys  sys  sys  sys  sys";
@@ -2522,7 +2833,8 @@ html[data-family]
     grid-template-areas:
       "head head head head head head"
       "find find find find find find"
-      "sec  spe  spe  sto  sto  sto"
+      "sec  spe  spe  spe  spe  spe"
+      "sec  sto  sto  sto  sto  sto"
       "sec  rid  rid  rid  rid  rid"
       "sec  unm  inf  inf  inf  inf"
       "sys  sys  sys  sys  sys  sys";
@@ -2662,6 +2974,124 @@ html[data-family]
   }
 }
 
+/* Phones on their side (761px and wider, 600px tall or less): SPECIAL
+   and STORIES stand in a row each, so the tiles are shorter and the two
+   rows close well inside two screens of a 390px-tall phone. */
+@media (orientation: landscape) and (max-height: 600px) and (min-width: 761px) {
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > :is(
+      .side-panel-head + .side-panel-group + .side-panel-group + .side-panel-group,
+      .side-panel-head
+        + .side-panel-group
+        + .side-panel-group
+        + .side-panel-group
+        + .side-panel-group
+    )
+    > .side-panel-links {
+    --sh-tile-h: 132px;
+  }
+
+  html[data-family] body #site-side-panel.side-panel > .side-panel-riders > .side-panel-links {
+    --sh-tile-h: 150px;
+  }
+
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-group:nth-last-child(3)
+    > .side-panel-links,
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-group:nth-last-child(2)
+    > .side-panel-links {
+    --sh-tile-h: 96px;
+  }
+}
+
+/* Up to 1799px SPECIAL and STORIES stand in two rows beside the chapters
+   (four STORIES tiles in three columns were 87px wide at 1180, an iPad
+   on its side), a little shorter so the pair still closes the first
+   screen. Sharing one row at 1440, the Dream Chapter's and the Cinema's
+   four STORIES tiles were 149px: their names fell to 12px and three lines
+   (「仮面ライダーサー / ガ」), and the World's three dropped from 345px to
+   202px across one pixel (2026-10-22). Four STORIES tiles keep their own
+   row at every width. */
+@media (min-width: 1180px) and (max-width: 1799px) {
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > :is(
+      .side-panel-head + .side-panel-group + .side-panel-group + .side-panel-group,
+      .side-panel-head
+        + .side-panel-group
+        + .side-panel-group
+        + .side-panel-group
+        + .side-panel-group
+    )
+    > .side-panel-links {
+    --sh-tile-h: clamp(150px, 19vh, 210px);
+  }
+}
+
+@media (min-width: 1800px) {
+  html[data-family]
+    body
+    #site-side-panel.side-panel:where(
+      :has(
+        > .side-panel-head
+          + .side-panel-group
+          + .side-panel-group
+          + .side-panel-group
+          + .side-panel-group
+          > .side-panel-links
+          > a:nth-of-type(4)
+      )
+    )
+    > :is(
+      .side-panel-head + .side-panel-group + .side-panel-group + .side-panel-group,
+      .side-panel-head
+        + .side-panel-group
+        + .side-panel-group
+        + .side-panel-group
+        + .side-panel-group
+    )
+    > .side-panel-links {
+    --sh-tile-h: clamp(150px, 19vh, 210px);
+  }
+
+  /* From 1800 three STORIES tiles (the World's) share the row with the
+     two SPECIAL tiles: each is 250px or wider, its name 13px or more on
+     one line (at 1600 they were 232px and 12px).
+     :where() keeps this rule's weight, so the World/dossier file menu's
+     own areas (below) still win. */
+  html[data-family]
+    body
+    #site-side-panel.side-panel[data-liquid-pointer]:where(
+      :not(
+        :has(
+          > .side-panel-head
+            + .side-panel-group
+            + .side-panel-group
+            + .side-panel-group
+            + .side-panel-group
+            > .side-panel-links
+            > a:nth-of-type(4)
+        )
+      )
+    ) {
+    grid-template-areas:
+      "head head head head head head"
+      "find find find find find find"
+      "sec  spe  spe  sto  sto  sto"
+      "sec  rid  rid  rid  rid  rid"
+      "sec  unm  inf  inf  inf  inf"
+      "sys  sys  sys  sys  sys  sys";
+  }
+}
+
 /* ================================================================
    6. Motion (opening the launcher, hovering a tile)
    ================================================================ */
@@ -2736,6 +3166,78 @@ html[data-family]
     > .side-panel-links
     > :is(a, button.side-panel-link-button)::before {
     transform: none;
+  }
+}
+
+/* The groups arrive in order as the sheet opens: each is drawn in from
+   its kicker down (a clip, no layout change, so the scroll to the
+   current group measures true boxes) and lights up, 45ms after the one
+   before. Once: the animation runs backwards-fill only, so the group
+   returns to its plain style and nothing stays clipped (focus rings at
+   a group's edge are drawn whole). Closing shows the groups still, the
+   sheet carries them out. */
+@media (prefers-reduced-motion: no-preference) {
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    #site-side-panel.side-panel[data-open="true"]
+    > .side-panel-group {
+    animation: sh-group-arrive 0.56s var(--sh-ease) var(--sp-arrive, 0.04s) backwards;
+  }
+
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    #site-side-panel.side-panel[data-open="true"]
+    > .side-panel-group:nth-child(3) {
+    --sp-arrive: 0.09s;
+  }
+
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    #site-side-panel.side-panel[data-open="true"]
+    > .side-panel-group:nth-child(4) {
+    --sp-arrive: 0.14s;
+  }
+
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    #site-side-panel.side-panel[data-open="true"]
+    > .side-panel-group:nth-child(5) {
+    --sp-arrive: 0.19s;
+  }
+
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    #site-side-panel.side-panel[data-open="true"]
+    > .side-panel-group:nth-child(6) {
+    --sp-arrive: 0.24s;
+  }
+
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    #site-side-panel.side-panel[data-open="true"]
+    > .side-panel-group:nth-child(7) {
+    --sp-arrive: 0.29s;
+  }
+
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    #site-side-panel.side-panel[data-open="true"]
+    > .side-panel-group:nth-child(n + 8) {
+    --sp-arrive: 0.34s;
+  }
+}
+
+@keyframes sh-group-arrive {
+  from {
+    opacity: 0;
+    clip-path: inset(0 0 100% 0);
+  }
+  60% {
+    opacity: 1;
+  }
+  to {
+    opacity: 1;
+    clip-path: inset(0 0 0 0);
   }
 }
 
@@ -2878,6 +3380,18 @@ html[data-family] body #site-side-panel.side-panel > .side-panel-files > .side-p
   isolation: isolate;
   border: 1px solid rgb(var(--sh-l1-rgb) / 28%);
   background: var(--sh-ink-2);
+  /* The number stands beside the name where the tile is wide and under
+     it where it is narrow, alike in every tile of the row: beside it in a
+     130px tile, レックス・ロワ broke before its ・ (1180-1194, 2026-10-22). */
+  container: dw-file-tile / inline-size;
+  flex-wrap: wrap;
+  align-content: end;
+  gap: 4px 12px;
+}
+@container dw-file-tile (max-width: 139px) {
+  html[data-family] body #site-side-panel.side-panel > .side-panel-files > .side-panel-links > a > span {
+    flex-basis: 100%;
+  }
 }
 html[data-family] body #site-side-panel.side-panel > .side-panel-files a > img {
   position: absolute;
@@ -2896,6 +3410,16 @@ html[data-family] body #site-side-panel.side-panel > .side-panel-files a::before
      the link rules; this scrim is not that tick, and without it the names
      stood straight on the light portraits (テラ unreadable; 2026-10-15). */
   display: block;
+  /* None of the rows' tick geometry reaches the scrim (its 18px height,
+     pill radius, 0.35 scale, lift and glow): with them it covered only
+     the tile's top edge, and the names stood on the portraits again. */
+  width: auto;
+  height: auto;
+  border-radius: 0;
+  scale: none;
+  translate: none;
+  box-shadow: none;
+  transition: none;
   opacity: 1;
   background: linear-gradient(transparent, rgb(var(--sh-ink-rgb) / 96%));
   z-index: -1;
@@ -2926,7 +3450,7 @@ html[data-family] body #site-side-panel.side-panel > .side-panel-files a:focus-v
   html[data-family] body #site-side-panel.side-panel[data-file-menu="true"][data-liquid-pointer] {
     grid-template-areas:
       "head head head head head head" "find find find find find find"
-      "sec sec sec sec sec sec" "spe spe sto sto sto sto"
+      "sec sec sec sec sec sec" "spe spe spe spe spe spe" "sto sto sto sto sto sto"
       "rid rid rid rid rid rid" "rik rik rik rik rik rik"
       "rel rel rel rel rel rel" "unm unm inf inf inf inf" "sys sys sys sys sys sys";
   }
@@ -2937,13 +3461,33 @@ html[data-family] body #site-side-panel.side-panel > .side-panel-files a:focus-v
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
+/* Phones on their side: three RIKUEI tiles to a row. Six were 121px at
+   844x390 and broke their names inside words (レック / ス・ / ロワ). */
+@media (orientation: landscape) and (max-height: 600px) and (min-width: 761px) {
+  html[data-family] body #site-side-panel.side-panel > .side-panel-rikuei > .side-panel-links {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  html[data-family] body #site-side-panel.side-panel > .side-panel-rikuei > .side-panel-links > a {
+    min-height: 100px;
+    padding-top: 50px;
+  }
+}
 @media (min-width: 1180px) {
+  html[data-family] body #site-side-panel.side-panel[data-file-menu="true"][data-liquid-pointer] {
+    grid-template-areas:
+      "head head head head head head" "find find find find find find"
+      "sec spe spe spe spe spe" "sec sto sto sto sto sto" "sec rid rid rid rid rid"
+      "sec rik rik rik rik rik" "sec rel rel rel rel rel"
+      "sec unm inf inf inf inf" "sys sys sys sys sys sys";
+  }
+}
+@media (min-width: 1800px) {
   html[data-family] body #site-side-panel.side-panel[data-file-menu="true"][data-liquid-pointer] {
     grid-template-areas:
       "head head head head head head" "find find find find find find"
       "sec spe spe sto sto sto" "sec rid rid rid rid rid"
       "sec rik rik rik rik rik" "sec rel rel rel rel rel"
-      "sec unm inf inf inf inf" "sys sys sys sys sys sys sys";
+      "sec unm inf inf inf inf" "sys sys sys sys sys sys";
   }
 }
 @media (max-width: 760px) {
@@ -3060,5 +3604,123 @@ html[data-family="special"]
 @media (max-width: 360px) {
   html[data-family="library"] body .search-page > header.search-topbar > a.search-brand > span {
     display: none;
+  }
+}
+
+/* ================================================================
+   8. One trigger geometry on every bar (2026-10-21)
+   The lit launcher square is 48px, 3px corners, one gutter in from the
+   right edge and centred in the bar on every family. Measured before:
+   the World's phone trigger was 48x44, Saga Cinema's 44x44 / 48x46 with
+   4px corners at 4-5% of the width, the form archive's 10-16px in and
+   3px low on phones.
+   ================================================================ */
+/* The World bar: the cinematic sheet shrinks its trigger to 44px on
+   phones; the files beside it keep 48. */
+@media (max-width: 760px) {
+  html[data-family="world"]
+    body
+    main.site-shell.film-edition
+    > header.topbar
+    .topbar-actions
+    > .side-panel-trigger.side-panel-trigger {
+    width: 48px;
+    height: 48px;
+    min-height: 48px;
+  }
+}
+
+/* Saga Cinema: its header keeps its own height and its brand; the
+   trigger takes the lane's geometry and the lit square. */
+html[data-family="special"] body .saga-cinema .site-header {
+  padding-inline: max(var(--sh-gutter), env(safe-area-inset-left, 0px))
+    max(var(--sh-gutter), env(safe-area-inset-right, 0px));
+}
+
+html[data-family="special"] body .saga-cinema .site-header > .side-panel-trigger.menu-button {
+  width: 48px;
+  min-width: 48px;
+  height: 48px;
+  min-height: 48px;
+  gap: 0;
+}
+
+html[data-family="special"]:not([data-ipad-menu-scrolled="true"]):not([data-ipad-menu-motion])
+  body
+  .saga-cinema
+  .site-header
+  > .side-panel-trigger.side-panel-trigger.menu-button {
+  border: 0 !important;
+  border-radius: 3px !important;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 26%), transparent 46%), var(--sh-l1) !important;
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 22%),
+    0 0 0 1px rgb(var(--sh-l1-rgb) / 30%) !important;
+  clip-path: none !important;
+  color: var(--sh-on-l1) !important;
+}
+
+@media (forced-colors: active) {
+  html[data-family="special"]
+    body
+    .saga-cinema
+    .site-header
+    > .side-panel-trigger.side-panel-trigger.menu-button {
+    border: 1px solid ButtonText !important;
+  }
+}
+
+/* The form archive: the bar takes the lane's height, the trigger its
+   place; the switcher and the embedded document follow the bar's own
+   variable. */
+html[data-family="archive"] body .form-archive-page {
+  --archive-toolbar-height: calc(env(safe-area-inset-top, 0px) + var(--sh-bar-h));
+}
+
+html[data-family="archive"]
+  body
+  .form-archive-page
+  > header.form-archive-toolbar
+  > .side-panel-trigger.form-archive-menu-trigger {
+  top: calc(env(safe-area-inset-top, 0px) + (var(--sh-bar-h) - 48px) / 2);
+  right: max(var(--sh-gutter), env(safe-area-inset-right, 0px));
+  bottom: auto;
+}
+
+/* The SAGA / REALM switcher stood 68px tall in a 68-72px bar, its top
+   edge above the bar. It now fills the bar's lane 4px in from both
+   edges (its two tabs stay 46px and more, the 44px floor and over). */
+html[data-family="archive"]
+  body
+  .form-archive-page
+  > header.form-archive-toolbar
+  > #archive-switcher.form-archive-switcher.liquid-swipe-tabs {
+  top: calc(env(safe-area-inset-top, 0px) + 4px);
+  bottom: 4px;
+  height: auto;
+  min-height: 0;
+}
+
+html[data-family="archive"]
+  body
+  .form-archive-page
+  > header.form-archive-toolbar
+  > #archive-switcher.form-archive-switcher.liquid-swipe-tabs
+  > button[role="tab"] {
+  min-height: 44px;
+}
+
+@media (min-width: 700px) {
+  html[data-family="archive"] body .form-archive-page > header.form-archive-toolbar::before {
+    top: calc(env(safe-area-inset-top, 0px) + var(--sh-bar-h) / 2);
+    left: max(var(--sh-gutter), env(safe-area-inset-left, 0px));
+  }
+}
+
+/* Landscape phones keep the archive's shorter bar (62px). */
+@media (max-height: 500px) and (orientation: landscape) {
+  html[data-family="archive"] body .form-archive-page {
+    --sh-bar-h: 62px;
   }
 }

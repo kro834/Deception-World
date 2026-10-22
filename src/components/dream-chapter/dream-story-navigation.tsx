@@ -30,7 +30,12 @@ export function DreamReaderSupport() {
   }, []);
   const savedCase = DREAM_CASES.find((episode) => episode.no === reader.bookmark?.caseNo);
   return (
-    <div ref={supportRef} className="dream-reader-support" aria-label="読書の支度">
+    <div
+      ref={supportRef}
+      className="dream-reader-support"
+      aria-label="読書の支度"
+      data-dream-reveal
+    >
       <div className="dream-reader-support-heading">
         <p>読書の支度</p>
         <span>このブラウザーに保存</span>
@@ -217,18 +222,11 @@ export function DreamStoryIndex() {
         className="dream-reader-index"
         aria-label="六章の目次"
         tabIndex={-1}
+        data-dream-reveal
       >
         <div className="dream-reader-index-head">
           <p>六章を辿る</p>
           <span>CASE 0–5</span>
-          <div className="dream-reader-index-actions" role="group" aria-label="全章の開閉">
-            <button type="button" onClick={() => toggleAllCases(true)} aria-pressed={allOpen}>
-              全章を開く
-            </button>
-            <button type="button" onClick={() => toggleAllCases(false)} disabled={!anyOpen}>
-              全章を閉じる
-            </button>
-          </div>
         </div>
         <ol>
           {DREAM_CASES.map((episode) => {
@@ -257,6 +255,17 @@ export function DreamStoryIndex() {
             );
           })}
         </ol>
+        {/* The bulk toggles follow the six links in the focus order (the keyboard
+            reaches the chapters first); the sheet sets them as the index's foot,
+            so what the eye sees follows the same order. */}
+        <div className="dream-reader-index-actions" role="group" aria-label="全章の開閉">
+          <button type="button" onClick={() => toggleAllCases(true)} aria-pressed={allOpen}>
+            全章を開く
+          </button>
+          <button type="button" onClick={() => toggleAllCases(false)} disabled={!anyOpen}>
+            全章を閉じる
+          </button>
+        </div>
       </nav>
     </>
   );

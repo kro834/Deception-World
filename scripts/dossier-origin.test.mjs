@@ -61,7 +61,8 @@ test("header and footer returns use reactive URL state, with the original defaul
   assert.match(header, /targetAriaLabel = fromCastRoster \? "人物一覧へ戻る" : returnAriaLabel/);
   assert.equal((header.match(/hash=\{targetHash\}/g) ?? []).length, 2);
   assert.match(nav, /returnHash = fromCastRoster \? "cast-roster" : \(listHash \?\? pathHash\)/);
-  assert.equal((nav.match(/search=\{originSearch\}/g) ?? []).length, 2);
+  // Owner (2026-10-21): the roster rail's links carry the origin as PREV / NEXT do (three GuardedLinks).
+  assert.equal((nav.match(/search=\{originSearch\}/g) ?? []).length, 3);
 });
 
 test("guarded navigation keeps the origin in native links, retry links and every route branch", () => {

@@ -25,6 +25,7 @@ import rexonanceZenithCssUrl from "@/styles-rexonance-zenith.css?url";
 import rexonanceForgeCssUrl from "@/styles-rexonance-forge.css?url";
 import rexonanceEditorialCssUrl from "@/styles-rexonance-editorial.css?url";
 import p14CalibrationCssUrl from "@/styles-p14-calibration.css?url";
+import rexonanceApexCssUrl from "@/styles-rexonance-apex.css?url";
 import rexonanceLayoutCssUrl from "@/styles-rexonance-layout-20261021.css?url";
 import rexonanceTypeCssUrl from "@/styles-rexonance-type-20261021.css?url";
 import rexonanceKineticCssUrl from "@/styles-rexonance-motion-20261021.css?url";
@@ -86,6 +87,11 @@ export const Route = createFileRoute("/rexonance-saga")({
       { rel: "stylesheet", href: rexonanceForgeCssUrl },
       { rel: "stylesheet", href: rexonanceEditorialCssUrl },
       { rel: "stylesheet", href: p14CalibrationCssUrl },
+      // APEX (rx19): the page interface around the suit-up as one HUD
+      // instrument — chapter index, numbered bar, plates, rows, floors
+      // (styles-rexonance-apex.css); the 2026-10-21 layout, type and kinetic
+      // sheets follow it and win where they overlap.
+      { rel: "stylesheet", href: rexonanceApexCssUrl },
       // LAYOUT (2026-10-21): the page's composition — grid, spacing, frames,
       // plates, imagery treatment — decided once, after every edition sheet
       // (styles-rexonance-layout-20261021.css). Type and motion editions
