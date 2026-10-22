@@ -3,9 +3,20 @@ import notFoundCss from "@/styles-not-found.css?url";
 import loadErrorCss from "@/styles-load-error.css?url";
 import { RecoveryTiles } from "@/components/library/recovery-tiles";
 
+/* The error page can land after the route's last scroll or toggle: the Zeus
+   button would rest where it was placed for the page that failed (on its
+   ways out, on short phones). The page's ref tells it to look again once attached; the
+   name is ZEUS_SURFACE_EVENT (src/lib/zeus-surface.ts), written out here so
+   these pages keep their imports. */
+// A module-level ref callback: it runs once when the page is attached.
+const cueZeus = (node: HTMLElement | null) => {
+  if (node) document.dispatchEvent(new Event("deception-world:zeus-surface"));
+};
+
 export function AppErrorComponent() {
   return (
     <main
+      ref={cueZeus}
       className="app-load-error flex min-h-dvh items-center justify-center bg-void px-6 text-center text-fg"
       aria-labelledby="load-error-heading"
     >
@@ -36,7 +47,7 @@ export function AppErrorComponent() {
 
 export function NotFoundComponent() {
   return (
-    <main className="app-not-found">
+    <main ref={cueZeus} className="app-not-found">
       {/* Hoisted by React into <head>, and only where a 404 renders. */}
       <link rel="stylesheet" href={notFoundCss} precedence="default" />
       <i className="app-not-found-plate" aria-hidden="true" />

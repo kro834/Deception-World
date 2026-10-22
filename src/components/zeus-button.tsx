@@ -13,6 +13,7 @@ import {
 import { createPortal } from "react-dom";
 import { useRouterState } from "@tanstack/react-router";
 import { useLoadGate } from "@/components/load-gate";
+import { ZEUS_SURFACE_EVENT } from "@/lib/zeus-surface";
 import { guardTapThrough } from "@/lib/tap-through-guard";
 import { createViewportResizeFilter } from "@/lib/viewport-resize";
 import { isAndroidRenderer } from "@/lib/rendering-profile.js";
@@ -1702,6 +1703,7 @@ function ZeusButton({
     window.visualViewport?.addEventListener("resize", onResize, { passive: true });
     window.visualViewport?.addEventListener("scroll", onScroll, { passive: true });
     document.addEventListener("toggle", onLayoutChange, { capture: true, passive: true });
+    document.addEventListener(ZEUS_SURFACE_EVENT, onLayoutChange);
     document.addEventListener("scroll", onInnerScroll, { capture: true, passive: true });
     return () => {
       compactMenuObserver.disconnect();
@@ -1710,6 +1712,7 @@ function ZeusButton({
       revealAfterScroll();
       lookAgain.current = () => {};
       document.removeEventListener("toggle", onLayoutChange, { capture: true });
+      document.removeEventListener(ZEUS_SURFACE_EVENT, onLayoutChange);
       document.removeEventListener("scroll", onInnerScroll, { capture: true });
       window.removeEventListener("resize", onResize);
       window.removeEventListener("scroll", onScroll);

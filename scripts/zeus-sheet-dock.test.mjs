@@ -60,3 +60,13 @@ test("the sheet keeps its foot free for the button on phones only", () => {
     /@media \(min-width: 561px\) and \(max-width: 640px\) \{[\s\S]*?--qs-zeus: 72px;/,
   );
 });
+
+test("the load-error and 404 pages tell the button to look again when they land", () => {
+  const surface = read("src/lib/zeus-surface.ts");
+  const pages = read("src/lib/error-component.tsx");
+  assert.match(surface, /export const ZEUS_SURFACE_EVENT = "deception-world:zeus-surface";/);
+  assert.match(zeus, /document\.addEventListener\(ZEUS_SURFACE_EVENT, onLayoutChange\);/);
+  assert.match(zeus, /document\.removeEventListener\(ZEUS_SURFACE_EVENT, onLayoutChange\);/);
+  assert.ok(pages.includes('document.dispatchEvent(new Event("deception-world:zeus-surface"));'));
+  assert.equal(pages.match(/<main\s+ref=\{cueZeus\}/g)?.length, 2);
+});
