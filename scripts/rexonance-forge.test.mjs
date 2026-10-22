@@ -343,7 +343,7 @@ test("text keeps its 12px floor and generated text is silent or the wordmark's o
       assert.match(value, new RegExp(`max\\(12px, ${match.replace(".", "\\.")}\\)`), value);
     }
   }
-  const title = page.match(/<h1 id="rxs-title">\s*<span>([^<]+)<\/span>/)?.[1];
+  const title = page.match(/<h1 id="rxs-title">\s*<span(?:\s[^>]*)?>([^<]+)<\/span>/)?.[1];
   assert.equal(title, "REXONANCE SAGA");
   for (const [, value] of css.matchAll(/(?<![\w-])content:\s*([^;]+);/g)) {
     assert.ok(
@@ -598,7 +598,7 @@ test("the ghost is silent, last in the hero copy, and nine letters of the name",
     /<span className="rxf-mark" aria-hidden="true">\s*\{FORGE_MARK\.map\(\(letter, index\) => \(\s*<i key=\{index\}>\{letter\}<\/i>\s*\)\)\}\s*<\/span>\s*<\/div>\s*<div className="rxs-hero-visual" aria-hidden="true">/,
   );
   const copy = page.slice(page.indexOf('<div className="rxs-hero-copy">'));
-  assert.match(copy, /^<div className="rxs-hero-copy">\s*<p>\s*THE NEXT GENERATION/);
+  assert.match(copy, /^<div className="rxs-hero-copy">\s*<p lang="en">\s*THE NEXT GENERATION/);
   for (const name of [
     "rzn-readout",
     "rzn-percent",

@@ -230,7 +230,7 @@ try {
         );
       }
 
-      const comparison = page.getByLabel("レクソナンスの比較対象", { exact: true });
+      const comparison = page.getByLabel("比較する相手：レクソナンスの比較対象", { exact: true });
       await comparison.focus();
       // macOS headless native select menus do not consume synthetic keyboard
       // selection (even a standalone HTML select behaves that way). Exercise
@@ -248,7 +248,7 @@ try {
         true,
       );
 
-      const slider = page.getByLabel("P14の比較対象", { exact: true });
+      const slider = page.getByLabel("P14の比較基準", { exact: true });
       await slider.focus();
       await page.keyboard.press("End");
       assert.equal(await slider.inputValue(), "2");
