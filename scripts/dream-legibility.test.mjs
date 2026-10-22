@@ -51,5 +51,6 @@ test("chapter cabinet uses the programme faces and a 16px reading measure", () =
     cabinet,
     /\.dream-karakuri-excerpt \{[^}]*max-width: 43em;[^}]*font-size: 16px;[^}]*font-weight: 500;/,
   );
-  assert.match(cabinet, /\.dream-karakuri-chapter-heading p \{[^}]*color: #604b30;/);
+  // Owner (2026-10-21): kicker darkened from #604b30 to clear 4.5:1 on the aged paper.
+  assert.match(cabinet, /\.dream-karakuri-chapter-heading p \{[^}]*color: #574329;/);
 });
