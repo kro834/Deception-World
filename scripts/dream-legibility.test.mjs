@@ -31,6 +31,10 @@ test("the dark glossary restores the local palette for headings, citations and i
     assert.ok(tokens.includes(`${token}:`), token);
   }
   assert.match(zenith, /> #glossary > \.dream-annex-heading h2 \{ color: var\(--ts-kin-light\);/);
+  assert.match(
+    zenith,
+    /@media \(forced-colors: active\) \{[^}]*> #glossary > \.dream-annex-heading h2 \{ color: CanvasText; -webkit-text-fill-color: currentColor;/,
+  );
 });
 
 test("open reading sheets stay fully opaque while the chapter seal retains its own timeline", () => {

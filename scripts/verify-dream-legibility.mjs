@@ -8,13 +8,21 @@ import { checkedUrl } from "./browser-guard.mjs";
 
 const base = checkedUrl(process.env.BASE_URL || "http://127.0.0.1:4262");
 const engine = process.env.BROWSER || "chrome";
+const forcedColors = process.env.FORCED_COLORS === "1";
 assert.ok(["chrome", "webkit"].includes(engine));
 const output = resolve(process.env.AUDIT_OUT || `output/playwright/dream-legibility/${engine}`);
 await mkdir(output, { recursive: true });
 const browser = await (engine === "webkit" ? webkit : chromium).launch(
   engine === "webkit" ? {} : { channel: "chrome" },
 );
-const report = { base, engine, browserVersion: browser.version(), samples: [], errors: [] };
+const report = {
+  base,
+  engine,
+  forcedColors,
+  browserVersion: browser.version(),
+  samples: [],
+  errors: [],
+};
 let currentPage;
 
 async function contrast(page, foreground, surface, minimum = 4.5, minimumSize = 12) {
@@ -82,25 +90,43 @@ async function contrast(page, foreground, surface, minimum = 4.5, minimumSize = 
             const linear = v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
             return sum + linear * [0.2126, 0.7152, 0.0722][i];
           }, 0);
-        const ink = rgba(style.webkitTextFillColor || style.color);
+        // Chromium can expose the pre-forcing color-mix via text-fill even
+        // while painting a link with the system LinkText color. Respect the
+        // UA's used palette unless the element explicitly opts out of it.
+        const systemInk =
+          matchMedia("(forced-colors: active)").matches && style.forcedColorAdjust !== "none";
+        const solidInk = rgba(systemInk ? style.color : style.webkitTextFillColor || style.color);
+        // The glossary keeps main's metallic heading. Its transparent text
+        // fill reveals a clipped gradient, not invisible lettering. Check
+        // every stop against the same conservative surface samples.
+        const clippedInk = style.backgroundClip.split(",").some((clip) => clip.trim() === "text");
+        const gradientInk =
+          solidInk[3] === 0 && clippedInk
+            ? (style.backgroundImage.match(/rgba?\([^)]*\)|color\(srgb[^)]*\)/g) || []).map(rgba)
+            : [];
+        const inks = gradientInk.length ? gradientInk : [solidInk];
         let opacity = 1;
         for (let p = node; p; p = p.parentElement) opacity *= Number(getComputedStyle(p).opacity);
-        ink[3] *= opacity;
-        const ratios = backgrounds.map((bg) => {
-          const a = luminance(over(ink, bg));
-          const b = luminance(bg);
-          return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+        const ratios = inks.flatMap((ink) => {
+          ink[3] *= opacity;
+          return backgrounds.map((bg) => {
+            const a = luminance(over(ink, bg));
+            const b = luminance(bg);
+            return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+          });
         });
         return {
           text: node.textContent.trim().slice(0, 90),
           color: style.color,
           fill: style.webkitTextFillColor,
+          systemInk,
           font: style.fontFamily,
           size: parseFloat(style.fontSize),
           minimumSize,
           opacity,
           contrast: Math.min(...ratios),
           backgroundSamples: backgrounds.length,
+          inkSamples: inks.length,
         };
       },
       { surface, minimumSize },
@@ -136,6 +162,7 @@ try {
       viewport: { width, height: width === 320 ? 640 : width === 1024 ? 768 : 900 },
       hasTouch: width <= 1024,
       reducedMotion: "reduce",
+      forcedColors: forcedColors ? "active" : "none",
     });
     if (process.env.OFFLINE_FONTS === "1") {
       await context.route(/^https:\/\/fonts\.(?:googleapis|gstatic)\.com\//, (route) =>
@@ -153,6 +180,7 @@ try {
     });
     await page.evaluate(() => document.fonts.ready);
     const checks = [];
+    report.current = { width, checks };
     await view(page, ".dream-prologue-card");
     for (const selector of ["h2", "> p:not(.dream-prologue-sign)", ".dream-prologue-sign"]) {
       checks.push(await contrast(page, `.dream-prologue-card ${selector}`, ".dream-prologue-card"));
@@ -213,17 +241,27 @@ try {
         };
       });
     assert.ok(numeralMotion.opacity >= 0.99, `chapter number opacity: ${numeralMotion.opacity}`);
-    assert.equal(numeralMotion.gated, false, "normal-motion check must not silently use a static gate");
-    if (numeralMotion.supported) {
+    assert.equal(
+      numeralMotion.gated,
+      false,
+      "normal-motion check must not silently use a static gate",
+    );
+    if (numeralMotion.supported && !forcedColors) {
       assert.equal(numeralMotion.name, "kn-case-press");
       assert.equal(numeralMotion.timeline, "--ts-rise");
-    } else {
-      assert.equal(numeralMotion.name, "none", "unsupported timelines retain a readable static seal");
+    } else if (!numeralMotion.supported) {
+      assert.equal(
+        numeralMotion.name,
+        "none",
+        "unsupported timelines retain a readable static seal",
+      );
     }
     await page.emulateMedia({ reducedMotion: "reduce" });
 
     await view(page, "#glossary .dream-annex-heading");
-    checks.push(await contrast(page, "#glossary .dream-annex-heading h2", "#glossary"));
+    // Main's large gilt title keeps its metallic stops: enforce the 3:1
+    // large-text floor AND >=24px. Normal-sized labels still require 4.5:1.
+    checks.push(await contrast(page, "#glossary .dream-annex-heading h2", "#glossary", 3, 24));
     await page.screenshot({ path: `${output}/${width}-glossary.png` });
     await view(page, "#glossary .dream-glossary-index");
     checks.push(
@@ -265,6 +303,7 @@ try {
     });
     await context.close();
     currentPage = null;
+    delete report.current;
     console.log(`${engine} ${width}: ${checks.length} contrast / type checks passed`);
   }
   assert.deepEqual(report.errors, []);

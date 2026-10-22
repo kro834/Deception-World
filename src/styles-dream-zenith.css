@@ -1063,6 +1063,14 @@ html[data-family="dream"] main.dream-page.dream-page > #glossary {
   }
 }
 
+@media (forced-colors: active) {
+  html[data-family="dream"] main.dream-page.dream-page > #glossary > .dream-annex-heading h2 {
+    color: CanvasText;
+    -webkit-text-fill-color: currentColor;
+    background: none;
+  }
+}
+
 html[data-family="dream"] main.dream-page.dream-page #glossary .dream-archive-fold {
   border-color: var(--ts-hair);
   background: var(--ts-night);
