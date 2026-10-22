@@ -43,10 +43,30 @@ try {
             document.body.append(obstacle);
             window.dispatchEvent(new Event("scroll"));
           }, point);
+        // Avoidance hands off with a fade (fade out, move hidden, fade in)
+        // and may first wait out words still arriving under the spots
+        // (ZEUS_ENTRANCE_MAX_MS), so wait for the step to land rather than a
+        // fixed beat. The step itself is still required below.
+        const settledAwayFrom = async (from) => {
+          await page
+            .waitForFunction(
+              (from) => {
+                const node = document.querySelector(".zeus-button");
+                if (!node || node.dataset.relocating || node.dataset.scrolling) return false;
+                const rect = node.getBoundingClientRect();
+                const x = rect.left + rect.width / 2;
+                const y = rect.top + rect.height / 2;
+                return Math.hypot(x - from.x, y - from.y) > 20;
+              },
+              from,
+              { timeout: 4000, polling: 50 },
+            )
+            .catch(() => {});
+          return center();
+        };
         const home = await center();
         await obstacleAt(home);
-        await page.waitForTimeout(500);
-        const avoided = await center();
+        const avoided = await settledAwayFrom(home);
         assert.ok(
           Math.hypot(avoided.x - home.x, avoided.y - home.y) > 20,
           "a real overlapping control must still be avoided",
@@ -73,8 +93,7 @@ try {
           );
         }
         await obstacleAt(late);
-        await page.waitForTimeout(500);
-        const moved = await center();
+        const moved = await settledAwayFrom(late);
         assert.ok(
           Math.hypot(moved.x - late.x, moved.y - late.y) > 20,
           "stability must not pin the button over a new control",

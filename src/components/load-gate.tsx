@@ -976,6 +976,15 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
       root,
     );
     window.clearTimeout(arrivalTimer.current);
+    // A menu that unmounts under the cover leaves html[data-side-menu-open]
+    // (and its overflow lock) for the shutter. Every cover path releases it
+    // once the shutter ends, unless a side menu on the new page is open.
+    if (
+      (state === null || state === "settling") &&
+      !document.querySelector?.('.side-panel[data-open="true"]')
+    ) {
+      delete root.dataset.sideMenuOpen;
+    }
     if (state === null) {
       delete root.dataset.routeCover;
       return;
