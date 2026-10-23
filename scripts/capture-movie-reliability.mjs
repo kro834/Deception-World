@@ -529,7 +529,23 @@ async function arriveFromHome(page, path) {
     await link.waitFor({ state: "visible", timeout: 20000 }).catch(() => {});
   }
   must(await link.isVisible().catch(() => false), "the menu did not open on /world");
-  await sleep(600);
+  // (The panel slides in: wait until the link stands inside the window.)
+  await link
+    .evaluate(
+      (element) =>
+        new Promise((resolve) => {
+          const started = performance.now();
+          const check = () => {
+            const box = element.getBoundingClientRect();
+            const inside = box.left >= 0 && box.right <= innerWidth && box.top >= 0 && box.bottom <= innerHeight;
+            if (inside || performance.now() - started > 20000) resolve(inside);
+            else setTimeout(check, 100);
+          };
+          check();
+        }),
+    )
+    .catch(() => false);
+  await sleep(400);
   await link.click({ force: true, timeout: 45000 });
   await page.waitForURL(`**/${path}**`, { timeout: 120000, waitUntil: "commit" });
   await settled(page);
