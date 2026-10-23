@@ -180,7 +180,8 @@ test("Dream Chapter data contains fifteen posters and three mapped characters", 
   assert.match(characters, /アルフィクトのなり損ない/);
   assert.match(characters, /portrait:\s*["']\/dream-chapter-kaisaku\.jpeg["']/);
   assert.match(pageSource, /DREAM_CHARACTERS\.map/);
-  assert.match(pageSource, />03 FILES</);
+  // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）
+  assert.doesNotMatch(pageSource, />03 FILES</);
 });
 
 test("Dolminence contains exactly the four requested agents and identities", () => {
@@ -359,7 +360,8 @@ test("seven added shuffle images preserve their composition and declared dimensi
     assert.ok(Math.max(thumbnail.width, thumbnail.height) <= 320);
     assert.ok(Math.abs(thumbnail.width / thumbnail.height - poster.width / poster.height) < 0.01);
   }
-  assert.match(pageSource, /01 — \{String\(DREAM_POSTERS\.length\)/);
+  // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）
+  assert.doesNotMatch(pageSource, /01 — \{String\(DREAM_POSTERS\.length\)/);
 });
 
 test("Dream Chapter styles cover phone, tablet, safe-area, and reduced motion", () => {
@@ -502,22 +504,17 @@ test("mobile poster controls give full-size labels room beside their icons", () 
   );
 });
 
-test("landscape iPad hero CTAs retain Japanese labels and modal file metadata", () => {
-  assert.match(
-    filmStyleSource,
-    /@media\s*\(min-width:\s*981px\)\s*and\s*\(max-width:\s*1280px\)[\s\S]*?\.dream-page \.dream-hero-actions a\s*\{[\s\S]*?grid-template-columns:\s*auto minmax\(0, 1fr\);[\s\S]*?grid-template-rows:\s*auto auto;/,
-    "1024px and 1280px landscape CTAs must place the English label below the Japanese destination",
-  );
+test("landscape iPad hero CTAs keep their Japanese destination whole", () => {
   assert.match(
     filmStyleSource,
     /\.dream-page \.dream-hero-actions span\s*\{\s*white-space:\s*nowrap;/,
     "the Japanese CTA destination must not break inside its label",
   );
-  assert.match(
-    filmStyleSource,
-    /\.dream-dossier-title > p,\s*\.dream-dossier-sections > section > header span\s*\{[\s\S]*?font-size:\s*12px;[\s\S]*?line-height:\s*1\.5;[\s\S]*?letter-spacing:\s*0\.14em;[\s\S]*?overflow-wrap:\s*anywhere;/,
-    "modal file identifiers and section ordinals need a readable size and safe wrapping",
-  );
+  // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）
+  // The English record label under the destination, the file identifiers and the section
+  // ordinals are gone, and their rules with them.
+  assert.doesNotMatch(filmStyleSource, /\.dream-hero-actions (?:small|b)\b/);
+  assert.doesNotMatch(filmStyleSource, /\.dream-dossier-title > p|section > header span/);
 });
 
 test("Dream Chapter navigation has a dedicated loading transition", () => {

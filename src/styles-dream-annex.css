@@ -208,13 +208,11 @@
   }
 }
 
-/* ---------- Heading: a kicker, a gilt title and a count on one rule ---------- */
+/* ---------- Heading: a 栞 and a gilt title on one rule ---------- */
 .dream-page.dream-page .dream-annex-heading {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  grid-template-areas:
-    "mark kicker count"
-    "mark title title";
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-areas: "mark title";
   align-items: end;
   column-gap: clamp(12px, 1.4vw, 18px);
   margin: 0 0 clamp(28px, 4vw, 44px);
@@ -248,16 +246,6 @@
   pointer-events: none;
 }
 
-.dream-page.dream-page .dream-annex-heading > p {
-  grid-area: kicker;
-  margin: 0 0 8px;
-  color: var(--ts-kin-light);
-  font-family: var(--ts-latin);
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.34em;
-}
-
 .dream-page.dream-page .dream-annex-heading h2 {
   grid-area: title;
   margin: 0;
@@ -271,17 +259,6 @@
   font-weight: 800;
   line-height: 1.2;
   letter-spacing: 0.14em;
-}
-
-.dream-page.dream-page .dream-annex-heading > span {
-  grid-area: count;
-  margin: 0 0 8px;
-  padding-left: 14px;
-  border-left: 1px solid var(--ts-hair);
-  color: var(--ts-ginnezu);
-  font-family: var(--ts-latin);
-  font-size: 12px;
-  letter-spacing: 0.24em;
 }
 
 /* ---------- Shared: a spoken line with its speaker ---------- */
@@ -509,29 +486,6 @@
     var(--ts-night);
 }
 
-/* The seal: the card's number in kanji, set vertical in a vermilion
-   hanko. Ornament only; the list order carries the same information. */
-.dream-page.dream-page .dream-roster-seal {
-  position: absolute;
-  top: 18px;
-  right: 18px;
-  display: grid;
-  place-items: center;
-  min-width: 34px;
-  min-height: 34px;
-  padding: 4px;
-  border: 1px solid var(--ts-shu);
-  outline: 1px solid rgb(204 73 59 / 45%);
-  outline-offset: 2px;
-  color: var(--ts-kinari);
-  background: var(--ts-shu-deep);
-  font-family: var(--ts-display);
-  font-size: 13px;
-  font-weight: 800;
-  line-height: 1.1;
-  writing-mode: vertical-rl;
-}
-
 .dream-page.dream-page .dream-roster-affiliation {
   display: flex;
   align-items: center;
@@ -627,18 +581,6 @@
     align-content: start;
     gap: 0 8px;
     padding: 14px 12px 12px;
-  }
-
-  .dream-page.dream-page .dream-roster-seal {
-    position: static;
-    grid-column: 1;
-    grid-row: 1;
-    align-self: center;
-    min-width: 24px;
-    min-height: 24px;
-    padding: 2px;
-    outline-offset: 1px;
-    font-size: 12px;
   }
 
   .dream-page.dream-page .dream-roster-affiliation {
@@ -840,15 +782,6 @@
   letter-spacing: 0.14em;
 }
 
-.dream-page.dream-page .dream-faction h3 small {
-  order: -1;
-  width: 100%;
-  color: var(--ts-shu-text);
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.3em;
-}
-
 .dream-page.dream-page .dream-record-sheet {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -939,12 +872,6 @@
   color: var(--ts-kin-hi);
   font-family: var(--ts-latin);
   text-align: center;
-}
-
-.dream-page.dream-page .dream-agent-code small {
-  color: var(--ts-ginnezu);
-  font-size: 12px;
-  letter-spacing: 0.16em;
 }
 
 .dream-page.dream-page .dream-agent-code b {
@@ -1143,10 +1070,6 @@
     padding: 6px 0 7px;
   }
 
-  .dream-page.dream-page .dream-agent-code small {
-    letter-spacing: 0.1em;
-  }
-
   .dream-page.dream-page .dream-agent-code b {
     font-size: 19px;
   }
@@ -1236,14 +1159,6 @@
   font-family: var(--ts-display);
   font-size: 24px;
   font-weight: 800;
-  letter-spacing: 0.3em;
-}
-
-.dream-page.dream-page .dream-case-note-head small {
-  grid-area: reading;
-  color: var(--ts-ginnezu);
-  font-family: var(--ts-latin);
-  font-size: 12px;
   letter-spacing: 0.3em;
 }
 
@@ -1532,7 +1447,7 @@ html[data-world-effects="economy"]
     display: none;
   }
 
-  .dream-page.dream-page :is(.dream-roster-seal, .dream-faction-pact b, .dream-contents h2) {
+  .dream-page.dream-page :is(.dream-faction-pact b, .dream-contents h2) {
     border: 1px solid CanvasText;
     clip-path: none;
   }

@@ -49,13 +49,6 @@
   overflow-wrap: anywhere;
 }
 
-.dream-story-crossings .dream-story-eyebrow {
-  margin: 0 0 14px;
-  color: #e6c28e;
-  font-size: 0.75rem;
-  letter-spacing: 0.12em;
-  line-height: 1.7;
-}
 .dream-story-crossings > h3 {
   margin: 0;
   font-size: 1.4rem;
@@ -85,11 +78,7 @@
   font-weight: 600;
   line-height: 1.6;
 }
-.dream-story-crossings dt > span {
-  color: #dbac7d;
-  font-size: 0.75rem;
-  font-variant-numeric: tabular-nums;
-}
+
 .dream-story-crossings dd {
   margin: 10px 0 0;
 }
@@ -176,12 +165,7 @@
   line-height: 1.5;
   letter-spacing: 0.07em;
 }
-.dream-story-case-heading > small {
-  color: #c7b4c4;
-  font-size: 0.6875rem;
-  letter-spacing: 0.13em;
-  line-height: 1.6;
-}
+
 .dream-story-case-status {
   font-size: 0.75rem;
   line-height: 1.6;

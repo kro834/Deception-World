@@ -107,7 +107,6 @@ export function ReDiveFileDialog({
     >
       <header className="rd-file-header">
         <div>
-          <p className="rd-file-label">CLASSIFIED FILE</p>
           <h2 id="rd-file-title">機密ファイル</h2>
           <p id="rd-file-caption">{RE_DIVE_CLASSIFIED_REPORT.title}</p>
         </div>

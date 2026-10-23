@@ -131,12 +131,6 @@
   font-size: 12px;
 }
 
-.dream-page.dream-page .dream-back-link small {
-  color: var(--ts-ginnezu);
-  font-size: 12px;
-  line-height: 1.2;
-}
-
 .dream-page.dream-page .dream-site-header .side-panel-trigger.ios26-glass {
   border: 1px solid var(--ts-hair);
   background: var(--ts-velvet) !important;
@@ -177,14 +171,6 @@
   border-inline-end: 1px solid var(--ts-hair-soft);
 }
 
-.dream-page.dream-page .dream-chapter-nav a small {
-  color: var(--ts-kin);
-  font-family: var(--ts-display);
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.3em;
-}
-
 .dream-page.dream-page .dream-chapter-nav a > span {
   font-family: var(--ts-display);
   font-size: 15px;
@@ -200,10 +186,6 @@
     linear-gradient(var(--ts-shu) 0 0) 50% calc(100% - 3px) / calc(100% - 28px) 2px no-repeat,
     linear-gradient(180deg, rgb(110 44 53 / 22%), transparent 70%);
   box-shadow: none;
-}
-
-.dream-page.dream-page .dream-chapter-nav a[aria-current="location"] small {
-  color: var(--ts-kin-light);
 }
 
 .dream-page.dream-page .dream-chapter-nav a:focus-visible,
@@ -414,14 +396,15 @@
   margin: 0;
 }
 
-/* Gilt frames instead of a bevel: an inner line at -5px, light-gold feet
-   on the fill, and the 壱/弐 set in a seal. */
+/* Gilt frames instead of a bevel: an inner line at -5px and light-gold feet
+   on the fill. The destination is the plate's only words; the vermilion
+   fill marks the first stop (Owner, 2026-10-23: no 壱/弐, no English twin). */
 .dream-page.dream-page .dream-hero-actions a {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  grid-template-rows: auto auto;
+  grid-template-columns: minmax(0, 1fr);
+  place-items: center;
   align-content: center;
-  column-gap: 10px;
+  text-align: center;
   min-height: 56px;
   padding: 8px 14px;
   border: 1px solid var(--ts-hair);
@@ -446,39 +429,12 @@
     var(--ts-shu-deep);
 }
 
-.dream-page.dream-page .dream-hero-actions small {
-  grid-row: 1 / 3;
-  align-self: center;
-  display: grid;
-  place-items: center;
-  width: 28px;
-  height: 28px;
-  border: 1px solid currentColor;
-  color: var(--ts-kin-light);
-  font-family: var(--ts-display);
-  font-size: 18px;
-  font-weight: 800;
-  line-height: 1;
-}
-
-.dream-page.dream-page .dream-hero-actions a:first-child :is(small, b) {
-  color: var(--ts-kinari);
-}
-
 .dream-page.dream-page .dream-hero-actions span {
   font-family: var(--ts-display);
   font-size: 15px;
   font-weight: 800;
   letter-spacing: 0.1em;
   white-space: nowrap;
-}
-
-.dream-page.dream-page .dream-hero-actions b {
-  color: rgb(244 236 220 / 78%);
-  font-family: var(--ts-latin);
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.24em;
 }
 
 .dream-page.dream-page .dream-hero-actions a:focus-visible {
@@ -508,7 +464,9 @@
   justify-content: safe center;
 }
 
-.dream-page.dream-page .dream-hero-obi > span:nth-child(3) {
+/* The band carries one line now — the sequel — between two gilt lozenges
+   (the collaboration and 映画第一作 are already the hero's own words). */
+.dream-page.dream-page .dream-hero-obi > span {
   color: var(--ts-kin-light);
   font-family: var(--ts-display);
   font-weight: 800;
@@ -602,17 +560,6 @@
   word-break: auto-phrase;
 }
 
-.dream-page.dream-page .dream-prologue-card > p.dream-prologue-sign {
-  height: auto;
-  display: flex;
-  flex-direction: row-reverse;
-  gap: 0.6em;
-  align-self: flex-end;
-  color: var(--ts-ginnezu);
-  font-size: 12px;
-  letter-spacing: 0.3em;
-}
-
 /* ---------- Acts: shared section rhythm and headings ---------- */
 .dream-page.dream-page .dream-section {
   background: transparent;
@@ -669,23 +616,6 @@
   letter-spacing: 0.4em;
 }
 
-.dream-page.dream-page .dream-section-heading > p {
-  grid-area: kicker;
-  margin: 0 0 10px;
-  color: var(--ts-kin-light);
-  font-family: var(--ts-latin);
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.34em;
-  text-shadow: none;
-  padding-left: 0;
-  border-left: 0;
-}
-
-.dream-page.dream-page .dream-section-heading > p::before {
-  display: none;
-}
-
 .dream-page.dream-page .dream-section-heading h2 {
   grid-area: title;
   margin: 0;
@@ -701,19 +631,6 @@
   letter-spacing: 0.12em;
   text-shadow: none;
   word-break: auto-phrase;
-}
-
-/* The count reads on the kicker's line, set off by a hairline. */
-.dream-page.dream-page .dream-section-heading > span:not(.film-text-scan) {
-  grid-area: count;
-  align-self: start;
-  margin: 0 0 10px;
-  padding-left: 14px;
-  border-left: 1px solid var(--ts-hair);
-  color: var(--ts-ginnezu);
-  font-family: var(--ts-latin);
-  font-size: 12px;
-  letter-spacing: 0.24em;
 }
 
 .dream-page.dream-page .dream-section-heading > .film-boundary-line {
@@ -820,16 +737,6 @@
   box-shadow:
     inset 0 0 0 1px var(--ts-kin),
     inset 0 0 0 3px rgb(204 73 59 / 70%) !important;
-}
-
-.dream-page.dream-page .dream-poster-thumbnails span {
-  border-radius: 2px;
-  color: var(--ts-kinari);
-  background: rgb(13 9 18 / 82%);
-  box-shadow: inset 0 0 0 1px rgb(200 164 92 / 60%);
-  font-family: var(--ts-latin);
-  font-size: 12px;
-  letter-spacing: 0.08em;
 }
 
 /* The label and its glyph read as a pair, centred, with gilt ticks at two
@@ -949,32 +856,6 @@
   display: none;
 }
 
-.dream-page.dream-page .dream-character-number {
-  position: relative;
-  inset: auto;
-  z-index: 1;
-  grid-column: 1;
-  grid-row: 1;
-  align-self: end;
-  justify-self: start;
-  margin: 0 0 14px 14px;
-  display: grid;
-  place-items: center;
-  width: 38px;
-  height: 38px;
-  padding: 0;
-  border: 0;
-  border-radius: 3px;
-  color: var(--ts-kinari);
-  background: var(--ts-shu-deep);
-  box-shadow:
-    inset 0 0 0 2px var(--ts-shu-deep),
-    inset 0 0 0 3px rgb(244 236 220 / 70%);
-  font-family: var(--ts-display);
-  font-size: 13px;
-  font-weight: 800;
-}
-
 .dream-page.dream-page .dream-character-copy {
   display: contents;
 }
@@ -1041,47 +922,6 @@
   word-break: auto-phrase;
 }
 
-.dream-page.dream-page .dream-character-copy i {
-  grid-column: 1 / -1;
-  grid-row: 3;
-  margin: 4px 0 0;
-  color: var(--ts-ginnezu);
-  font-family: var(--ts-latin);
-  font-size: 12px;
-  font-style: normal;
-  letter-spacing: 0.24em;
-}
-
-.dream-page.dream-page .dream-character-copy em {
-  grid-column: 1 / -1;
-  grid-row: 4;
-  justify-self: start;
-  margin: 14px 0 0;
-  padding: 6px 0 4px;
-  border-bottom: 1px solid var(--ts-kin);
-  color: var(--ts-kin-light);
-  font-family: var(--ts-text);
-  font-size: 13px;
-  font-style: normal;
-  letter-spacing: 0.2em;
-}
-
-.dream-page.dream-page .dream-character-copy em::before {
-  content: "";
-  display: inline-block;
-  width: 6px;
-  height: 6px;
-  margin-right: 8px;
-  background: var(--ts-shu);
-  rotate: 45deg;
-  vertical-align: 1px;
-}
-
-.dream-page.dream-page .dream-character-copy em::after {
-  content: " ›";
-  color: var(--ts-kin);
-}
-
 /* The ring is drawn inside the arch: the grid touches the section edges, and
    the section's content-visibility clips anything painted outside it. */
 .dream-page.dream-page .dream-character-grid button:focus-visible {
@@ -1091,11 +931,6 @@
 .dream-page.dream-page .dream-character-grid button:focus-visible img {
   outline: 3px solid var(--ts-fuji);
   outline-offset: -5px;
-}
-
-.dream-page.dream-page .dream-character-grid button:focus-visible .dream-character-copy em {
-  border-bottom-color: var(--ts-fuji);
-  color: var(--ts-kinari);
 }
 
 .dream-page.dream-page [data-dream-reveal][data-dream-visible="true"] {
@@ -1208,24 +1043,6 @@
   transform: none;
 }
 
-/* The file number is an 海老茶 seal, like the cast numbers. */
-.dream-page.dream-page .dream-dolminence-number {
-  position: absolute;
-  top: 18px;
-  left: 18px;
-  display: grid;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  border: 1px solid var(--ts-kin);
-  border-radius: 2px;
-  color: var(--ts-kin-hi);
-  background: var(--ts-ebicha-deep);
-  box-shadow: inset 0 0 0 1px rgb(244 236 220 / 30%);
-  font-family: var(--ts-latin);
-  font-size: 12px;
-}
-
 .dream-page.dream-page .dream-dolminence-copy {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -1255,33 +1072,6 @@
   letter-spacing: 0.08em;
   word-break: auto-phrase;
   overflow-wrap: anywhere;
-}
-
-.dream-page.dream-page .dream-dolminence-copy i {
-  color: var(--ts-ginnezu);
-  font-family: var(--ts-latin);
-  font-size: 12px;
-  font-style: normal;
-  letter-spacing: 0.18em;
-  overflow-wrap: anywhere;
-}
-
-.dream-page.dream-page .dream-dolminence-copy em {
-  justify-self: start;
-  margin-top: 8px;
-  padding-bottom: 3px;
-  border-bottom: 1px solid var(--ts-hair);
-  color: var(--ts-zoge);
-  font-family: var(--ts-text);
-  font-size: 13px;
-  font-style: normal;
-  letter-spacing: 0.16em;
-  white-space: nowrap;
-}
-
-.dream-page.dream-page .dream-dolminence-copy em::after {
-  content: " ›";
-  color: var(--ts-kin);
 }
 
 .dream-page.dream-page .dream-dolminence-grid button:focus-visible {
@@ -1359,13 +1149,6 @@
   box-shadow: none;
 }
 
-.dream-page.dream-page .dream-story-crossings .dream-story-eyebrow {
-  color: var(--ts-kin-light);
-  font-family: var(--ts-latin);
-  font-size: 12px;
-  letter-spacing: 0.3em;
-}
-
 .dream-page.dream-page .dream-story-crossings h3 {
   color: var(--ts-kinari);
   font-family: var(--ts-display);
@@ -1395,12 +1178,6 @@
   font-size: 18px;
   font-weight: 800;
   letter-spacing: 0.16em;
-}
-
-.dream-page.dream-page .dream-story-crossings dt span {
-  color: var(--ts-shu-text);
-  font-family: var(--ts-latin);
-  font-size: 12px;
 }
 
 .dream-page.dream-page .dream-story-crossings dd strong {
@@ -1467,21 +1244,6 @@
   letter-spacing: 0.24em;
 }
 
-.dream-page.dream-page .dream-story-case-number::before {
-  content: "其ノ" counter(ts-case, cjk-decimal);
-  grid-column: 1 / -1;
-  justify-self: center;
-  color: var(--ts-kin-light);
-  font-family: var(--ts-display);
-  font-size: 13px;
-  font-weight: 800;
-  letter-spacing: 0.2em;
-}
-
-.dream-page.dream-page .dream-story-cases > li:first-child .dream-story-case-number::before {
-  content: "序";
-}
-
 .dream-page.dream-page .dream-story-case-number b {
   color: var(--ts-kin-light);
   font-size: 22px;
@@ -1494,13 +1256,6 @@
   font-size: clamp(24px, 2.6vw, 34px);
   font-weight: 800;
   letter-spacing: 0.24em;
-}
-
-.dream-page.dream-page .dream-story-case-heading > small {
-  color: var(--ts-ginnezu);
-  font-family: var(--ts-latin);
-  font-size: 12px;
-  letter-spacing: 0.3em;
 }
 
 .dream-page.dream-page .dream-story-case-status {
@@ -1603,18 +1358,6 @@
   pointer-events: none;
 }
 
-.dream-page.dream-page .dream-footer > p {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 6px 18px;
-  margin: 0;
-  color: var(--ts-zoge);
-  font-family: var(--ts-text);
-  font-size: 13px;
-  letter-spacing: 0.24em;
-}
-
 .dream-page.dream-page .dream-footer > h2 {
   display: grid;
   gap: 10px;
@@ -1633,14 +1376,6 @@
   letter-spacing: 0.16em;
   white-space: nowrap;
   line-height: 1.2;
-}
-
-.dream-page.dream-page .dream-footer > h2 > small {
-  color: var(--ts-ginnezu);
-  font-family: var(--ts-latin);
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.5em;
 }
 
 .dream-page.dream-page .dream-credits {
@@ -1702,7 +1437,7 @@
 
 .dream-page.dream-page .dream-footer > a {
   display: grid;
-  justify-items: center;
+  place-items: center;
   gap: 2px;
   min-height: 56px;
   padding: 10px 30px;
@@ -1724,13 +1459,6 @@
   font-size: 15px;
   font-weight: 800;
   letter-spacing: 0.16em;
-}
-
-.dream-page.dream-page .dream-footer > a small {
-  color: var(--ts-ginnezu);
-  font-family: var(--ts-latin);
-  font-size: 12px;
-  letter-spacing: 0.3em;
 }
 
 .dream-page.dream-page .dream-footer > a:focus-visible {
@@ -1782,9 +1510,7 @@
   color: var(--ts-kinari);
 }
 
-.dream-page.dream-page
-  .dream-dossier-copy
-  :is(.dream-dossier-title > p, .dream-profile-grid dt, .dream-ability-list h4) {
+.dream-page.dream-page .dream-dossier-copy :is(.dream-profile-grid dt, .dream-ability-list h4) {
   color: var(--ts-kin-light);
   font-family: var(--ts-latin);
 }
@@ -1803,17 +1529,6 @@
 
 .dream-page.dream-page .dream-dossier-copy :is(.dream-ability-list p, .dream-dossier-title small) {
   color: var(--ts-zoge);
-}
-
-.dream-page.dream-page .dream-dossier-sections section > header span {
-  color: var(--ts-kin-light);
-}
-
-.dream-page.dream-page .dream-dossier-title b {
-  color: var(--ts-ginnezu);
-  font-size: 12px;
-  font-family: var(--ts-latin);
-  letter-spacing: 0.24em;
 }
 
 .dream-page.dream-page .dream-dossier-sections h3 {
@@ -2176,18 +1891,6 @@
     max-width: 38em;
     line-height: 2;
   }
-
-  .dream-page.dream-page .dream-prologue-card > p.dream-prologue-sign {
-    flex-direction: row;
-    align-self: flex-end;
-  }
-
-  .dream-page.dream-page .dream-dossier-visuals figcaption {
-    overflow: hidden;
-    letter-spacing: 0.08em;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
 }
 
 @media (max-width: 800px) {
@@ -2246,19 +1949,9 @@
     padding-bottom: 9px;
   }
 
-  /* The film name alone where the centre column is short; the kicker line
-     returns from 761px. */
-  .dream-page.dream-page .dream-site-header > p > span {
-    display: none;
-  }
-
   .dream-page.dream-page .dream-site-header > p b {
     font-size: 14px;
     letter-spacing: 0.18em;
-  }
-
-  .dream-page.dream-page .dream-dolminence-copy em {
-    white-space: normal;
   }
 
   .dream-page.dream-page .dream-chapter-nav {
@@ -2268,11 +1961,6 @@
   .dream-page.dream-page .dream-chapter-nav a > span {
     font-size: 13px;
     letter-spacing: 0.04em;
-  }
-
-  .dream-page.dream-page .dream-chapter-nav a small {
-    font-size: 12px;
-    letter-spacing: 0.12em;
   }
 
   .dream-page.dream-page .dream-chapter-nav a[aria-current="location"] {
@@ -2288,10 +1976,6 @@
       "act title"
       "act count"
       "rule rule";
-  }
-
-  .dream-page.dream-page .dream-section-heading > span:not(.film-text-scan) {
-    margin: 8px 0 0;
   }
 
   /* ドルミネンス must hold one line inside the framed playbill. */
@@ -2347,11 +2031,6 @@
     letter-spacing: 0.14em;
   }
 
-  .dream-page.dream-page .dream-story-case-number::before {
-    font-size: 12px;
-    letter-spacing: 0.16em;
-  }
-
   .dream-page.dream-page .dream-story-case-number b {
     font-size: 20px;
   }
@@ -2367,10 +2046,6 @@
     font-size: 20px;
     line-height: 1.45;
     letter-spacing: 0.18em;
-  }
-
-  .dream-page.dream-page .dream-story-case-heading > small {
-    letter-spacing: 0.22em;
   }
 }
 
@@ -2420,14 +2095,6 @@
     padding: 4px 4px 4px 0;
   }
 
-  /* The seal stays inside the portrait's inner frame on the narrow slip. */
-  .dream-page.dream-page .dream-dolminence-number {
-    top: 16px;
-    left: 16px;
-    width: 30px;
-    height: 30px;
-  }
-
   .dream-page.dream-page .dream-dolminence-grid button img {
     outline-offset: -4px;
   }
@@ -2446,10 +2113,6 @@
     gap: 4px;
   }
 
-  .dream-page.dream-page .dream-dolminence-copy i {
-    letter-spacing: 0.1em;
-  }
-
   .dream-page.dream-page .dream-dolminence-copy small {
     letter-spacing: 0.06em;
     line-height: 1.6;
@@ -2457,21 +2120,8 @@
 }
 
 @media (max-width: 640px) {
-  .dream-page.dream-page .dream-hero-actions b {
-    display: none;
-  }
-
   .dream-page.dream-page .dream-hero-actions a {
-    grid-template-rows: auto;
-    column-gap: 8px;
     padding: 8px 10px;
-  }
-
-  .dream-page.dream-page .dream-hero-actions small {
-    grid-row: 1;
-    width: 24px;
-    height: 24px;
-    font-size: 16px;
   }
 
   .dream-page.dream-page .dream-hero-actions span {
@@ -2640,14 +2290,7 @@
     text-underline-offset: 3px;
   }
 
-  .dream-page.dream-page
-    :is(
-      .dream-story-case-status,
-      .dream-character-number,
-      .dream-dolminence-number,
-      .dream-character-copy b,
-      .dream-act-mark
-    ) {
+  .dream-page.dream-page :is(.dream-story-case-status, .dream-character-copy b, .dream-act-mark) {
     border: 1px solid CanvasText;
   }
 

@@ -36,11 +36,9 @@ export const ReDiveSection = memo(
         </div>
         <div className="threat-panel re-dive-archive">
           <div className="threat-copy">
-            <span className="system-label">CLASSIFIED ARCHIVE</span>
             <h3 id="re-dive-title">機密ファイル</h3>
           </div>
           <p className="re-dive-tab">
-            <small>RE DIVE / FILE</small>
             <b>未提出原稿</b>
           </p>
           <div className="manager-slot-grid signal-array re-dive-file-grid">

@@ -54,9 +54,7 @@ export function DreamReadingLauncher() {
   return (
     <div className="dream-reading-entry" id="dream-reading-room-entry" data-dream-reveal>
       <div>
-        <p lang="en">PRIVATE READING ROOM</p>
         <h3>物語だけに、灯りを。</h3>
-        <span>六章のあらすじを、紙色と夜色の読書室で。いつでも元の場所へ戻れます。</span>
       </div>
       <button
         ref={trigger}

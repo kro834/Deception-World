@@ -130,11 +130,6 @@ html[data-page-scrolled] .dream-site-header {
     box-shadow 0.24s ease;
 }
 
-.dream-chapter-nav a small {
-  color: rgba(255, 177, 59, 0.64);
-  font-size: 7px;
-}
-
 .dream-chapter-nav a[aria-current="location"] {
   background: linear-gradient(135deg, rgba(120, 169, 255, 0.14), rgba(255, 177, 59, 0.08));
   box-shadow: inset 0 0 0 1px rgba(167, 198, 255, 0.15);
@@ -202,14 +197,6 @@ html[data-page-scrolled] .dream-site-header {
   background: rgba(105, 145, 231, 0.08);
 }
 
-.dream-back-link small {
-  display: block;
-  margin-bottom: 3px;
-  color: rgba(218, 228, 255, 0.42);
-  font-size: 7px;
-  letter-spacing: 0.3em;
-}
-
 .dream-back-link:focus-visible,
 .dream-scroll-cue:focus-visible,
 .dream-poster-thumbnails button:focus-visible,
@@ -264,22 +251,9 @@ html[data-page-scrolled] .dream-site-header {
   backdrop-filter: blur(14px) saturate(145%);
 }
 
-.dream-hero-actions small {
-  color: var(--dream-gold);
-  font-family: "Cinzel", serif;
-  font-size: 9px;
-}
-
 .dream-hero-actions span {
   font-size: 12px;
   font-weight: 600;
-}
-
-.dream-hero-actions b {
-  color: rgba(219, 230, 255, 0.52);
-  font-family: "Cinzel", serif;
-  font-size: 7px;
-  letter-spacing: 0.12em;
 }
 
 .dream-section {
@@ -655,15 +629,6 @@ html[data-dream-reveal-ready="true"] [data-dream-reveal]:not([data-dream-visible
   border-bottom: 1px solid rgba(130, 164, 229, 0.18);
 }
 
-.dream-section-heading p {
-  grid-column: 1 / -1;
-  margin: 0;
-  color: var(--dream-gold);
-  font-family: "Cinzel", serif;
-  font-size: 10px;
-  letter-spacing: 0.38em;
-}
-
 .dream-section-heading h2 {
   margin: 0;
   font-family: "Cinzel", serif;
@@ -671,13 +636,6 @@ html[data-dream-reveal-ready="true"] [data-dream-reveal]:not([data-dream-visible
   font-weight: 400;
   letter-spacing: -0.045em;
   line-height: 0.9;
-}
-
-.dream-section-heading > span {
-  color: rgba(218, 229, 255, 0.42);
-  font-family: "Cinzel", serif;
-  font-size: 10px;
-  letter-spacing: 0.3em;
 }
 
 .dream-poster-stage {
@@ -971,22 +929,6 @@ html[data-dream-reveal-ready="true"] [data-dream-reveal]:not([data-dream-visible
   object-fit: cover;
 }
 
-.dream-poster-thumbnails span {
-  position: absolute;
-  right: 8px;
-  bottom: 7px;
-  display: grid;
-  place-items: center;
-  width: 25px;
-  height: 25px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 50%;
-  background: rgba(2, 4, 10, 0.7);
-  font-family: "Cinzel", serif;
-  font-size: 8px;
-  backdrop-filter: blur(9px);
-}
-
 .dream-character-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1110,16 +1052,6 @@ html[data-dream-reveal-ready="true"] [data-dream-reveal]:not([data-dream-visible
     );
 }
 
-.dream-character-number {
-  position: absolute;
-  top: 28px;
-  right: 30px;
-  color: color-mix(in srgb, var(--dream-accent) 72%, white);
-  font-family: "Cinzel", serif;
-  font-size: 46px;
-  font-weight: 400;
-}
-
 .dream-character-copy {
   position: absolute;
   right: clamp(22px, 4vw, 54px);
@@ -1142,26 +1074,6 @@ html[data-dream-reveal-ready="true"] [data-dream-reveal]:not([data-dream-visible
   font-size: clamp(32px, 5vw, 72px);
   font-weight: 400;
   letter-spacing: 0.05em;
-}
-
-.dream-character-copy i {
-  margin-top: 6px;
-  color: rgba(228, 235, 255, 0.55);
-  font-family: "Cinzel", serif;
-  font-size: 11px;
-  font-style: normal;
-  letter-spacing: 0.28em;
-}
-
-.dream-character-copy em {
-  margin-top: 26px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid color-mix(in srgb, var(--dream-accent) 55%, transparent);
-  color: #f4f7ff;
-  font-family: "Cinzel", serif;
-  font-size: 9px;
-  font-style: normal;
-  letter-spacing: 0.24em;
 }
 
 .dream-dolminence-section {
@@ -1266,17 +1178,6 @@ html[data-dream-reveal-ready="true"] [data-dream-reveal]:not([data-dream-visible
     transform 680ms cubic-bezier(0.2, 0.72, 0.18, 1);
 }
 
-.dream-dolminence-number {
-  position: absolute;
-  z-index: 4;
-  top: 22px;
-  right: 22px;
-  color: color-mix(in srgb, var(--dream-accent) 76%, white);
-  font-family: "Cinzel", serif;
-  font-size: 30px;
-  font-weight: 400;
-}
-
 .dream-dolminence-copy {
   position: absolute;
   z-index: 4;
@@ -1300,27 +1201,6 @@ html[data-dream-reveal-ready="true"] [data-dream-reveal]:not([data-dream-visible
   font-weight: 450;
   letter-spacing: 0.04em;
   line-height: 1.24;
-}
-
-.dream-dolminence-copy i,
-.dream-dolminence-copy em {
-  font-family: "Cinzel", serif;
-  font-style: normal;
-}
-
-.dream-dolminence-copy i {
-  margin-top: 6px;
-  color: rgba(227, 235, 255, 0.52);
-  font-size: 8px;
-  letter-spacing: 0.18em;
-}
-
-.dream-dolminence-copy em {
-  margin-top: 22px;
-  padding-bottom: 7px;
-  border-bottom: 1px solid color-mix(in srgb, var(--dream-accent) 52%, transparent);
-  font-size: 7px;
-  letter-spacing: 0.15em;
 }
 
 .dream-case-list {
@@ -1524,12 +1404,6 @@ html[data-dream-reveal-ready="true"] [data-dream-reveal]:not([data-dream-visible
   -webkit-backdrop-filter: blur(20px) saturate(140%);
 }
 
-.dream-dossier-close span {
-  font-family: "Cinzel", serif;
-  font-size: 8px;
-  letter-spacing: 0.24em;
-}
-
 .dream-dossier-close svg {
   width: 34px;
   height: 34px;
@@ -1602,29 +1476,9 @@ html[data-dream-reveal-ready="true"] [data-dream-reveal]:not([data-dream-visible
   pointer-events: none;
 }
 
-.dream-dossier-visuals figcaption {
-  position: absolute;
-  z-index: 2;
-  right: 18px;
-  bottom: 20px;
-  left: 18px;
-  color: rgba(229, 236, 255, 0.68);
-  font-family: "Cinzel", serif;
-  font-size: 7px;
-  letter-spacing: 0.2em;
-}
-
 .dream-dossier-copy {
   min-width: 0;
   padding: clamp(92px, 8vw, 130px) clamp(28px, 6vw, 92px) 120px;
-}
-
-.dream-dossier-title > p {
-  margin: 0 0 18px;
-  color: color-mix(in srgb, var(--dream-accent) 78%, white);
-  font-family: "Cinzel", serif;
-  font-size: 9px;
-  letter-spacing: 0.34em;
 }
 
 .dream-dossier-title > span {
@@ -1644,16 +1498,6 @@ html[data-dream-reveal-ready="true"] [data-dream-reveal]:not([data-dream-visible
   font-weight: 400;
   letter-spacing: 0.04em;
   line-height: 0.98;
-}
-
-.dream-dossier-title > b {
-  display: block;
-  margin-top: 14px;
-  color: rgba(224, 234, 255, 0.46);
-  font-family: "Cinzel", serif;
-  font-size: 11px;
-  font-weight: 400;
-  letter-spacing: 0.36em;
 }
 
 .dream-dossier-title > small {
@@ -1716,13 +1560,6 @@ html[data-dream-reveal-ready="true"] [data-dream-reveal]:not([data-dream-visible
   margin-bottom: 26px;
   padding-bottom: 16px;
   border-bottom: 1px solid rgba(139, 170, 229, 0.17);
-}
-
-.dream-dossier-sections > section > header span {
-  color: var(--dream-accent);
-  font-family: "Cinzel", serif;
-  font-size: 9px;
-  letter-spacing: 0.2em;
 }
 
 .dream-dossier-sections h3 {
@@ -2150,10 +1987,6 @@ html[data-dream-reveal-ready="true"] [data-dream-reveal]:not([data-dream-visible
     letter-spacing: 0.04em;
   }
 
-  .dream-chapter-nav a small {
-    font-size: 7px;
-  }
-
   .dream-aurora {
     width: 142vw;
     filter: blur(54px);
@@ -2242,10 +2075,6 @@ html[data-dream-reveal-ready="true"] [data-dream-reveal]:not([data-dream-visible
     border-radius: 15px;
   }
 
-  .dream-hero-actions a b {
-    display: none;
-  }
-
   .dream-hero-actions span {
     font-size: 11px;
   }
@@ -2268,17 +2097,8 @@ html[data-dream-reveal-ready="true"] [data-dream-reveal]:not([data-dream-visible
     padding-bottom: 18px;
   }
 
-  .dream-section-heading p {
-    font-size: 8px;
-    letter-spacing: 0.28em;
-  }
-
   .dream-section-heading h2 {
     font-size: 42px;
-  }
-
-  .dream-section-heading > span {
-    font-size: 10px;
   }
 
   .dream-poster-stage > figure {
@@ -2388,10 +2208,6 @@ html[data-dream-reveal-ready="true"] [data-dream-reveal]:not([data-dream-visible
     top: max(10px, env(safe-area-inset-top));
     right: max(12px, env(safe-area-inset-right));
     margin: 0;
-  }
-
-  .dream-dossier-close span {
-    display: none;
   }
 
   .dream-dossier-visuals {
@@ -2670,9 +2486,6 @@ html[data-world-effects="economy"] [data-dream-reveal] {
   letter-spacing: 0.04em;
 }
 
-.dream-chapter-nav a small,
-.dream-back-link small,
-.dream-section-heading p,
 .dream-character-copy small {
   font-size: 11px;
   line-height: 1.6;
@@ -2702,11 +2515,6 @@ html[data-world-effects="economy"] [data-dream-reveal] {
 .dream-page .dream-section-heading {
   border-bottom-color: rgb(131 180 255 / 38%);
   background: linear-gradient(90deg, rgb(57 102 155 / 13%), transparent 70%);
-}
-
-.dream-page .dream-section-heading p {
-  padding-left: 12px;
-  border-left: 2px solid #e6c78c;
 }
 
 .dream-page :is(.dream-character-grid, .dream-dolminence-grid) button {

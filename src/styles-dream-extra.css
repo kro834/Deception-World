@@ -21,35 +21,6 @@
   color: var(--ts-zoge);
 }
 
-.dream-page.dream-page .dream-archive-eyebrow {
-  margin: 0 0 6px;
-  color: var(--ts-kin-light);
-  font-family: var(--ts-latin);
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.24em;
-}
-
-/* A leaf's label: the HUD word, a count and a rule to the edge. */
-.dream-page.dream-page .dream-archive-leaf-label {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin: 0 0 16px;
-  color: var(--ts-kin-light);
-  font-family: var(--ts-latin);
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.3em;
-}
-
-.dream-page.dream-page .dream-archive-leaf-label::after {
-  content: "";
-  flex: 1;
-  height: 1px;
-  background: var(--ts-hair-soft);
-}
-
 /* Speech in a narrative run: the speaker in gilt before the words. */
 .dream-page.dream-page .dream-archive-said {
   white-space: pre-line;
@@ -100,10 +71,13 @@
   background: var(--ts-night);
 }
 
+/* A fold's row is its title and its state cell; the chronicle's folds lead
+   with their chapter numeral, a leaf with its name (Owner, 2026-10-23: no
+   HUD marks or tallies). */
 .dream-page.dream-page .dream-archive-fold > summary {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto 24px;
-  grid-template-areas: "mark title count cell";
+  grid-template-columns: minmax(0, 1fr) 24px;
+  grid-template-areas: "title cell";
   align-items: center;
   gap: 2px 14px;
   min-height: 48px;
@@ -154,25 +128,6 @@
   overflow-wrap: anywhere;
 }
 
-.dream-page.dream-page .dream-archive-fold-title small {
-  margin-left: 10px;
-  color: var(--ts-ginnezu);
-  font-family: var(--ts-latin);
-  font-size: 12px;
-  font-weight: 400;
-  letter-spacing: 0.2em;
-  white-space: nowrap;
-}
-
-.dream-page.dream-page .dream-archive-fold-count {
-  grid-area: count;
-  color: var(--ts-ginnezu);
-  font-family: var(--ts-latin);
-  font-size: 12px;
-  letter-spacing: 0.2em;
-  white-space: nowrap;
-}
-
 /* The state cell: a gilt square with a cross drawn in borders (kept by
    forced colours); open, it turns into the vermilion diamond of the
    roster's PROFILE switch. */
@@ -217,23 +172,19 @@
   outline-offset: -3px;
 }
 
-/* Narrow phones: the count takes a second line under the title. */
+.dream-page.dream-page #chronicle .dream-archive-fold > summary {
+  grid-template-columns: auto minmax(0, 1fr) 24px;
+  grid-template-areas: "mark title cell";
+}
+
 @media (max-width: 640px) {
   .dream-page.dream-page .dream-archive-fold > summary {
-    grid-template-columns: auto minmax(0, 1fr) 24px;
-    grid-template-areas:
-      "mark title cell"
-      "count count cell";
     padding-inline: 10px 10px;
     column-gap: 10px;
   }
 
   .dream-page.dream-page .dream-archive-fold-title {
     font-size: 16px;
-  }
-
-  .dream-page.dream-page .dream-archive-fold-count {
-    justify-self: start;
   }
 }
 
@@ -300,13 +251,6 @@
   font-size: 12px;
   font-weight: 500;
   letter-spacing: 0.12em;
-}
-
-.dream-page.dream-page .dream-chronicle-meta > span[lang="en"] {
-  color: var(--ts-ginnezu);
-  font-family: var(--ts-latin);
-  font-size: 12px;
-  letter-spacing: 0.2em;
 }
 
 .dream-page.dream-page .dream-chronicle-cast {
@@ -800,9 +744,14 @@
   }
 }
 
-/* ---------- VOICES leaf (inside 名台詞) ---------- */
+/* ---------- VOICES leaf (inside 名台詞) ----------
+   The speakers' folds follow the tanzaku band across a hairline: the band
+   is the owner's selection, the folds the source's (Owner, 2026-10-23: no
+   VOICES — 16 SPEAKERS label). */
 .dream-page.dream-page .dream-voices {
   margin-top: clamp(28px, 4vw, 44px);
+  padding-top: clamp(20px, 2.6vw, 28px);
+  border-top: 1px solid var(--ts-hair-soft);
 }
 
 /* Open folds do not shift their neighbours' summaries (align start). */
@@ -886,18 +835,14 @@
   margin-top: 18px;
 }
 
-/* A leaf fold (ADDITIONAL AGENTS, INDEX): its label is the row's mark. */
+/* A leaf fold (ADDITIONAL AGENTS, INDEX): its name is the row. */
 .dream-page.dream-page .dream-archive-fold.is-leaf > summary {
-  grid-template-columns: auto minmax(0, 1fr) 24px;
-  grid-template-areas: "mark count cell";
+  grid-template-columns: minmax(0, 1fr) 24px;
+  grid-template-areas: "mark cell";
 }
 
 .dream-page.dream-page .dream-archive-fold.is-leaf .dream-archive-fold-mark {
   letter-spacing: 0.3em;
-}
-
-.dream-page.dream-page .dream-archive-fold.is-leaf .dream-archive-fold-count {
-  justify-self: start;
 }
 
 .dream-page.dream-page .dream-archive-additions .dream-agent-roster {
@@ -905,12 +850,6 @@
 }
 
 @media (max-width: 640px) {
-  .dream-page.dream-page .dream-archive-fold.is-leaf > summary {
-    grid-template-areas:
-      "mark mark cell"
-      "count count cell";
-  }
-
   .dream-page.dream-page .dream-archive-additions .dream-agent-roster {
     padding: 4px 8px 8px;
   }
@@ -1477,17 +1416,7 @@ html[data-world-effects="economy"] .dream-page.dream-page .dream-archive-fold > 
     outline: 2px solid Highlight;
   }
 
-  .dream-page.dream-page
-    :is(
-      .dream-archive-add,
-      .dream-archive-leaf-label::after,
-      .dream-arsenal-list > div,
-      .dream-atlas-wave
-    ) {
+  .dream-page.dream-page :is(.dream-archive-add, .dream-arsenal-list > div, .dream-atlas-wave) {
     border-color: CanvasText;
-  }
-
-  .dream-page.dream-page .dream-archive-leaf-label::after {
-    background: CanvasText;
   }
 }

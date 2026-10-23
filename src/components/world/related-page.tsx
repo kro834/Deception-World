@@ -172,8 +172,10 @@ export function RelatedPage({ id }: { id: "terra" | "luna" }) {
         <div className="manager-grid" />
         <div className="manager-glow" />
       </div>
+      {/* A file shows no file line in its top bar (2026-10-23, the dossier
+          sheets); the label names the brand link's way back. */}
       <DossierTopbar
-        fileLabel={`RELATED / ${person.code}`}
+        fileLabel={`${person.name}の資料`}
         returnHash="manager-archive-other"
         returnLabel="その他の人物一覧へ戻る"
       />
@@ -192,24 +194,20 @@ export function RelatedPage({ id }: { id: "terra" | "luna" }) {
               fetchPriority="high"
             />
             <i className="dossier-arrive-scan" aria-hidden="true" />
-            <span className="manager-numeral">{person.code}</span>
           </div>
         </div>
         <div className="manager-introduction">
           <header className="dossier-identity">
-            <p className="manager-file-number">CHARACTER FILE // {person.code}</p>
+            {/* The file's numeral in outline over the name (decorative). */}
+            <span className="dossier-file-numeral" aria-hidden="true">
+              {person.code}
+            </span>
             <h1>
-              <small>
-                {person.en} / {person.form}
-              </small>
               <span className="manager-display-name">
                 <NameText value={person.name} />
               </span>
             </h1>
             <p className="manager-title"># {person.title}</p>
-            <a className="dossier-read-link" href="#dossier-index">
-              人物資料を読む <span aria-hidden="true">↓</span>
-            </a>
           </header>
           <div className="manager-quotes">
             {person.quotes.map((q) => (
@@ -234,10 +232,6 @@ export function RelatedPage({ id }: { id: "terra" | "luna" }) {
         id="dossier-index"
         aria-label={`${person.name}の人物資料`}
       >
-        <div className="manager-section-index">
-          <span>{person.code}</span>
-          <small>CHARACTER DOSSIER</small>
-        </div>
         <DossierContents sections={person.sections} />
         <div className="manager-sections">
           {person.sections.map((s) => (
@@ -277,11 +271,7 @@ export function RelatedPage({ id }: { id: "terra" | "luna" }) {
       <div id="form-records">
         <FormPickup rider={person.rider} />
       </div>
-      <DossierNav
-        items={RELATED_NAV}
-        currentHref={`/characters/${person.id}`}
-        indexLabel="RELATED"
-      />
+      <DossierNav items={RELATED_NAV} currentHref={`/characters/${person.id}`} />
     </main>
   );
 }
