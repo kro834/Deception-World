@@ -212,6 +212,16 @@ const playSelector = async (page) =>
  * nothing shows as a failure. */
 async function press(page, selector) {
   const locator = page.locator(selector).first();
+  // A control another layer covers is a dead one: the press must land on it.
+  const covered = await locator
+    .evaluate((element) => {
+      const box = element.getBoundingClientRect();
+      if (!box.width || !box.height) return null;
+      const top = document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2);
+      return !top || top === element || element.contains(top) ? null : `${top.tagName}.${String(top.className).slice(0, 48)}`;
+    })
+    .catch(() => null);
+  must(!covered, `${selector} is covered by ${covered}`);
   if (page.__touch) await locator.tap(CLICK);
   else await locator.click(CLICK);
 }
