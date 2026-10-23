@@ -756,8 +756,17 @@ test("the sheet closes on the reader's own scroll, wheel, a touch or press outsi
     if (!t.isOpen()) t.toggle.fire("click");
     assert.equal(t.isOpen(), true);
   };
-  // The reader scrolls the page themselves.
+  // The page above settles and the browser keeps the content in place
+  // (scroll anchoring): the runway stands where it stood — not the reader.
   open();
+  const rect = t.runway.getBoundingClientRect;
+  const standing = rect().top;
+  const y0 = t.scrollY();
+  t.runway.getBoundingClientRect = () => ({ top: standing });
+  t.user.scroll(y0 + 300);
+  assert.equal(t.isOpen(), true, "a scroll that leaves the content where it was is the layout's");
+  t.runway.getBoundingClientRect = () => ({ top: standing + y0 + 300 - t.scrollY() });
+  // The reader scrolls the page themselves.
   t.user.scroll(1234);
   assert.equal(t.isOpen(), false, "a scroll of the reader's own");
   // The movie's own scrolling (and the seek's) does not close it.

@@ -463,6 +463,17 @@ function measureWindow(scrolls, speed) {
   };
 }
 
+/** Paused by the reader: the movie scrolls the page no more (the reader's
+ * own scroll — a smooth wheel, a fling — may still be finishing). */
+async function heldStill(page, label) {
+  const from = await pageNow(page);
+  await sleep(2500);
+  const s = await state(page);
+  must(s.state === "paused", `${label} the state turned ${s.state}`);
+  const scrolls = await scrollsSince(page, from);
+  must(scrolls.length === 0, `${label} the movie kept scrolling the page (${scrolls.length} frames)`);
+}
+
 async function arriveDirect(page, path, waitUntil = "load") {
   await page.goto(`${base}/${path}`, { waitUntil, timeout: 180000 });
   await settled(page);
@@ -821,6 +832,7 @@ const SCENARIOS = {
     await arriveDirect(page, path);
     await toRunway(page);
     await controlShown(page);
+    await hookFrames(page);
     await chooseSpeed(page, 2);
     await pressPlay(page);
     await playing(page, PLAY_WAIT);
@@ -829,13 +841,8 @@ const SCENARIOS = {
     await page.mouse.move(200, 300);
     await page.mouse.wheel(0, 240);
     await stateIs(page, "paused", "a wheel mid-play did not pause the movie");
-    await sleep(600);
+    await heldStill(page, "after the wheel");
     let s = await state(page);
-    let held = s.q;
-    await sleep(1200);
-    s = await state(page);
-    must(s.state === "paused", `after the wheel the state turned ${s.state}`);
-    must(Math.abs(s.q - held) < 0.005, "after the wheel the movie kept scrolling the page");
     await pressPlay(page);
     await playing(page, REACT_MS, "再生 after a wheel pause did not resume");
     if (page.__touch) {
@@ -850,13 +857,8 @@ const SCENARIOS = {
       }
       await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
       await stateIs(page, "paused", "a touch drag mid-play did not pause the movie");
-      await sleep(600);
+      await heldStill(page, "after the drag");
       s = await state(page);
-      held = s.q;
-      await sleep(1200);
-      s = await state(page);
-      must(s.state === "paused", `after the drag the state turned ${s.state}`);
-      must(Math.abs(s.q - held) < 0.005, "after the drag the movie kept scrolling the page");
       await pressPlay(page);
       await playing(page, REACT_MS, "再生 after a drag pause did not resume");
     }

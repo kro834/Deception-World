@@ -146,6 +146,7 @@ export function mountAssemblyMovie(
   if (!control || !runway) return () => {};
   // (function declarations below do not keep the guard's narrowing)
   const host: HTMLElement = control;
+  const strip: HTMLElement = runway;
   const { document } = environment;
   const frame = runway.querySelector<HTMLElement>(".rzn-frame");
   const play = control.querySelector<HTMLButtonElement>(".rzn-movie-play");
@@ -190,6 +191,8 @@ export function mountAssemblyMovie(
   // in a row are the reader's (a scrollbar drag); one alone may be a stray
   // (a smooth scroll ending, a layout settling).
   let strays = 0;
+  // Where the runway stood in the window at the last scroll event.
+  let viewTop = Number.NaN;
   // Scrolls landing before this time are the layout settling (a resize).
   let graceUntil = 0;
   // A 再生 waiting for the scene: where it starts ("here": wherever the page
@@ -460,6 +463,7 @@ export function mountAssemblyMovie(
     toggle?.setAttribute("aria-expanded", next ? "true" : "false");
     if (next) {
       host.dataset.open = "true";
+      viewTop = strip.getBoundingClientRect().top;
       place();
       bump();
     } else {
@@ -617,12 +621,19 @@ export function mountAssemblyMovie(
   };
   const onScroll = () => {
     const y = environment.scrollY;
+    // A scroll the browser makes to keep the content in place (scroll
+    // anchoring, as the page above settles) leaves the runway where it
+    // stood in the window; the reader's own moves it.
+    const at = runway.getBoundingClientRect().top;
+    const moved = !(Math.abs(at - viewTop) <= MOVIE_SCROLL_TOLERANCE);
+    viewTop = at;
     const ours =
       Math.abs(y - expectedY) <= MOVIE_SCROLL_TOLERANCE ||
       Math.abs(y - previousY) <= MOVIE_SCROLL_TOLERANCE ||
-      now() < graceUntil;
+      now() < graceUntil ||
+      !moved;
     // A scroll that is the reader's own closes the open sheet (the movie's
-    // own scrolling, and the seek's, do not).
+    // own scrolling, the seek's and the layout's do not).
     if (!ours && open) collapse(false);
     if (state === "playing") {
       if (ours) strays = 0;
