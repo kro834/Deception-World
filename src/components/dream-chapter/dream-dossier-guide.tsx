@@ -55,7 +55,7 @@ export function DreamDossierGuide({
         >
           {stops.map((stop, index) => (
             <option key={index} value={String(index)}>
-              {String(index + 1).padStart(2, "0")} / {stop.label}
+              {stop.label}
             </option>
           ))}
         </select>

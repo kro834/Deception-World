@@ -149,7 +149,9 @@ try {
     await page.goto(`${base}/dream-chapter#dream-character-ciel`);
     ({ dialog, guide } = await openedGuide(page));
     await jump(page, guide, (await guide.locator("option").count()) - 1);
-    await dialog.getByRole("button", { name: "CAST 02 東風谷 慶弥", exact: true }).click();
+    // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明） — the switcher's
+    // buttons are the files' names (no CAST 0N / AGENT 0N codes).
+    await dialog.getByRole("button", { name: "東風谷 慶弥", exact: true }).click();
     ({ dialog, guide } = await openedGuide(page));
     assert.equal(
       await guide.locator("select").inputValue(),
@@ -157,7 +159,7 @@ try {
       "switching resets the previous file's destination",
     );
     await jump(page, guide, (await guide.locator("option").count()) - 1);
-    await dialog.getByRole("button", { name: "AGENT 02 ロードケイオス", exact: true }).click();
+    await dialog.getByRole("button", { name: "ロードケイオス", exact: true }).click();
     ({ dialog, guide } = await openedGuide(page));
     assert.equal(await guide.locator("select").inputValue(), "0");
     await jump(page, guide, (await guide.locator("option").count()) - 1);
