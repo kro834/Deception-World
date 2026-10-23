@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
+import { createPortal, flushSync } from "react-dom";
 import { useRouter } from "@tanstack/react-router";
 import { useWorldMode } from "./use-world-mode";
 import { DossierNav, RIKUEI_NAV, NameText } from "./dossier-nav";
@@ -13,7 +13,15 @@ import { DisplayName } from "@/components/name-text";
 import { dossierImage, formPickupImage } from "@/lib/dossier-images";
 import { useDialogHistoryDismiss } from "./use-dialog-history-dismiss";
 import { FormSignature } from "./form-signature";
-import { useFormSignatureArrival, type FormTheme } from "./form-signature-state";
+import { FormArrival, FormGate } from "./form-signature-gate";
+import {
+  formGate,
+  measureGateScene,
+  placeArrival,
+  useFormSignatureArrival,
+  type FormTheme,
+  type GateScene,
+} from "./form-signature-state";
 
 type Section = { no: string; kicker: string; title: string; body: string[] };
 
@@ -63,10 +71,12 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
   const pointerOpened = useRef(false);
   const cancelScrollReset = useRef<(() => void) | null>(null);
   const gateTimer = useRef<number | null>(null);
-  const gateFrame = useRef<number | null>(null);
   const gatePending = useRef(false);
   const gateSource = useRef<"keyboard" | "pointer">("pointer");
   const gateImage = useRef<HTMLImageElement | null>(null);
+  const gateScene = useRef<GateScene | null>(null);
+  const gateLifeEnded = useRef(false);
+  const gateDecoded = useRef(false);
   const [gateActive, setGateActive] = useState(false);
   const riderPrefix = rider.prefix ?? "仮面ライダー";
   const formName = rider.nameParts ? (
@@ -79,6 +89,8 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
     <DisplayName value={record.name} />
   );
   const isRexonance = rider.theme === "rexonance";
+  // The gated themes (Rexonance, Explom, 犭) open through their cover.
+  const gate = formGate(rider.theme);
   const resetScroll = () => {
     const dialog = dlg.current;
     if (!dialog) return;
@@ -102,6 +114,8 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
     } catch {
       /* already open */
     }
+    // The cover's light comes to rest in the record's own frame (laid out now).
+    placeArrival(dialog, rider.theme, gate ? gateScene.current : null);
     cancelScrollReset.current = settlePickupScroll(dialog, [".form-pickup-panel"], () => {
       dialog.focus({ preventScroll: true });
       clearPointerFocus();
@@ -114,14 +128,19 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
       window.clearTimeout(gateTimer.current);
       gateTimer.current = null;
     }
-    setGateActive(false);
-    gateFrame.current = window.requestAnimationFrame(() => {
-      gateFrame.current = null;
-      showDialog(gateSource.current);
-    });
+    gateImage.current = null;
+    // One task: the cover leaves and the record opens under its last frame,
+    // so no frame of the page shows between them.
+    flushSync(() => setGateActive(false));
+    showDialog(gateSource.current);
+  };
+  const endGateLife = () => {
+    gateLifeEnded.current = true;
+    // A cover that ends covering waits there for the record's art (up to its cap).
+    if (!gate?.holdsForArt || gateDecoded.current) finishGate();
   };
   const open = (source: "keyboard" | "pointer") => {
-    if (!isRexonance) {
+    if (!gate) {
       showDialog(source);
       return;
     }
@@ -130,6 +149,9 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
     if (gatePending.current) return;
     gatePending.current = true;
     gateSource.current = source;
+    gateLifeEnded.current = false;
+    gateDecoded.current = false;
+    gateScene.current = measureGateScene(rider.theme as FormTheme, opener.current, signatureRef.current);
     setGateActive(true);
     const preload = new window.Image();
     preload.decoding = "async";
@@ -140,9 +162,19 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
     if (srcSet) preload.srcset = srcSet;
     preload.src = rider.img;
     gateImage.current = preload;
-    void preload.decode?.().catch(() => undefined);
+    const decoded = () => {
+      if (gateImage.current !== preload) return;
+      gateDecoded.current = true;
+      if (gateLifeEnded.current) finishGate();
+    };
+    // A failed decode never holds the cover: the record opens as it ends.
+    void preload.decode?.().then(decoded, decoded);
     const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
-    gateTimer.current = window.setTimeout(finishGate, reducedMotion ? 180 : 1400);
+    const economy = document.documentElement?.dataset.worldEffects === "economy";
+    gateTimer.current = window.setTimeout(
+      finishGate,
+      reducedMotion ? 180 : economy ? gate.calmCap : gate.cap,
+    );
   };
   const close = () => {
     cancelScrollReset.current?.();
@@ -167,19 +199,19 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
   const overview = rider.overview ?? [];
   const weaponGallery = rider.weaponGallery ?? [];
   useEffect(() => {
-    if (!isRexonance) return;
+    if (!gate) return;
     const cancelPendingGate = () => {
-      if (!gatePending.current && gateFrame.current === null) return;
+      if (!gatePending.current) return false;
       gatePending.current = false;
       if (gateTimer.current !== null) window.clearTimeout(gateTimer.current);
       gateTimer.current = null;
-      if (gateFrame.current !== null) window.cancelAnimationFrame(gateFrame.current);
-      gateFrame.current = null;
       gateImage.current = null;
       setGateActive(false);
+      return true;
     };
     // A hash Back keeps the dossier mounted, so its pending form cover must
-    // be cancelled explicitly. The frame after the cover belongs to it too.
+    // be cancelled explicitly (once the record is open, the record's own
+    // history dismissal closes it).
     const stopHistory = router.history.subscribe(({ action }) => {
       if (action.type === "BACK" || action.type === "FORWARD" || action.type === "GO") {
         cancelPendingGate();
@@ -188,21 +220,28 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
     const cancelWhenHidden = () => {
       if (document.hidden) cancelPendingGate();
     };
+    // Escape stops the cover; a keyboard reader keeps the control it pressed.
+    const cancelOnEscape = (event: KeyboardEvent) => {
+      if (event.key !== "Escape" || !cancelPendingGate()) return;
+      event.preventDefault();
+      if (gateSource.current === "keyboard") opener.current?.focus({ preventScroll: true });
+    };
     window.addEventListener("blur", cancelPendingGate);
     window.addEventListener("pagehide", cancelPendingGate);
+    window.addEventListener("keydown", cancelOnEscape);
     document.addEventListener("visibilitychange", cancelWhenHidden);
     return () => {
       stopHistory();
       window.removeEventListener("blur", cancelPendingGate);
       window.removeEventListener("pagehide", cancelPendingGate);
+      window.removeEventListener("keydown", cancelOnEscape);
       document.removeEventListener("visibilitychange", cancelWhenHidden);
     };
-  }, [isRexonance, router]);
+  }, [gate, router]);
   useEffect(
     () => () => {
       gatePending.current = false;
       if (gateTimer.current !== null) window.clearTimeout(gateTimer.current);
-      if (gateFrame.current !== null) window.cancelAnimationFrame(gateFrame.current);
       gateImage.current = null;
       cancelScrollReset.current?.();
     },
@@ -321,6 +360,7 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
             <UiVectorIcon kind="close" size={16} />
           </i>
         </button>
+        <FormArrival theme={rider.theme} />
         <div className="form-pickup-panel">
           <FormSignature theme={rider.theme} />
           {isRexonance ? (
@@ -394,45 +434,3 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
                 <dl className="form-pickup-stats">
                   {stats.map((s) => (
                     <div key={s.dt}>
-                      <dt>{s.dt}</dt>
-                      <dd>{s.dd}</dd>
-                    </div>
-                  ))}
-                </dl>
-              ) : null}
-              <div className="form-pickup-sections">
-                {abilities.length ? (
-                  <section className="is-ability">
-                    <header>
-                      <span>01</span>
-                      <p>ABILITY</p>
-                    </header>
-                    {abilities.map((a) => (
-                      <div key={a.name}>
-                        <h3>
-                          <DisplayName value={a.name} />
-                        </h3>
-                        <p>{a.body}</p>
-                      </div>
-                    ))}
-                  </section>
-                ) : null}
-                {arsenal.length ? (
-                  <section className="is-arsenal">
-                    <header>
-                      <span>02</span>
-                      <p>ARSENAL</p>
-                    </header>
-                    {arsenal.map((a) => (
-                      <div key={a.name}>
-                        <h3>
-                          <DisplayName value={a.name} />
-                        </h3>
-                        <p>{a.body}</p>
-                      </div>
-                    ))}
-                  </section>
-                ) : null}
-                {finishers.length ? (
-                  <section className="is-finisher">
-                    <header>

@@ -20,24 +20,33 @@ const compiledSignature = ts.transpileModule(
   { compilerOptions: { module: ts.ModuleKind.CommonJS } },
 ).outputText;
 
-function mount() {
+// Owner (2026-10-23): every gated theme (Rexonance, Explom, 犭) shares one cover lifecycle.
+const THEMES = [
+  { theme: "rexonance", name: "レクソナンスサーガ", cap: 1400, calmCap: 1400 },
+  { theme: "explom", name: "オーバーゼッツ", cap: 2000, calmCap: 1300 },
+];
+
+function mount(theme = "rexonance", { reducedMotion = false, economy = false } = {}) {
   const effects = [],
     timers = new Map(),
     frames = new Map(),
     subscribers = new Set();
   const gateStates = [];
+  const delays = [];
   let serial = 0;
   const win = new EventTarget(),
     doc = new EventTarget();
+  doc.documentElement = { dataset: economy ? { worldEffects: "economy" } : {} };
   Object.assign(win, {
     Image: class Image {
       decode() {
         return Promise.resolve();
       }
     },
-    matchMedia: () => ({ matches: false }),
-    setTimeout: (callback) => {
+    matchMedia: () => ({ matches: reducedMotion }),
+    setTimeout: (callback, delay) => {
       timers.set(++serial, callback);
+      delays.push(delay);
       return serial;
     },
     clearTimeout: (id) => timers.delete(id),
@@ -72,6 +81,9 @@ function mount() {
         runInNewContext(compiledHistory, { ...scope, exports: historyExports });
         return historyExports;
       }
+      if (name === "./form-signature-gate")
+        return { FormGate: "form-gate", FormArrival: "form-arrival" };
+      if (name === "react-dom") return { createPortal: (node) => node, flushSync: (run) => run() };
       if (name === "react")
         return {
           useRef: (current) => ({ current }),
@@ -98,7 +110,7 @@ function mount() {
   };
   runInNewContext(compiled, scope);
   const tree = exports.FormPickup({
-    rider: { theme: "rexonance", name: "レクソナンスサーガ", img: "/rider.webp", calls: [] },
+    rider: { theme, name: THEMES.find((t) => t.theme === theme)?.name ?? "", img: "/rider.webp", calls: [] },
   });
   const find = (node, type) => {
     if (!node || typeof node !== "object") return null;
@@ -110,8 +122,10 @@ function mount() {
   };
   const dialog = {
     open: false,
+    opens: 0,
     showModal() {
       this.open = true;
+      this.opens += 1;
     },
     close() {
       this.open = false;
@@ -119,7 +133,17 @@ function mount() {
     focus() {},
   };
   find(tree, "dialog").props.ref.current = dialog;
-  const open = find(tree, "slide-control").props.onOpen;
+  const control = find(tree, "slide-control");
+  const opener = {
+    dataset: {},
+    focused: 0,
+    blur() {},
+    focus() {
+      this.focused += 1;
+    },
+  };
+  control.props.buttonRef.current = opener;
+  const open = control.props.onOpen;
   const cleanups = effects.map((callback) => callback()).filter(Boolean);
   const flush = (queue) => {
     const pending = [...queue.values()];
@@ -127,12 +151,15 @@ function mount() {
     pending.forEach((callback) => callback());
   };
   return {
-    open: () => open("keyboard"),
+    open: (source = "keyboard") => open(source),
     dialog,
+    opener,
     win,
     doc,
     gateStates,
+    delays,
     frames,
+    timers,
     flushTimers: () => flush(timers),
     flushFrames: () => flush(frames),
     history: (type) => subscribers.forEach((callback) => callback({ action: { type } })),
@@ -140,56 +167,113 @@ function mount() {
   };
 }
 
-for (const action of ["BACK", "FORWARD", "GO"]) {
-  test(`${action} during the form cover never opens its stale dialog`, () => {
-    const ui = mount();
+for (const { theme, cap, calmCap } of THEMES) {
+  for (const action of ["BACK", "FORWARD", "GO"]) {
+    test(`${theme}: ${action} during the form cover never opens its stale dialog`, () => {
+      const ui = mount(theme);
+      ui.open();
+      assert.equal(ui.gateStates.at(-1), true);
+      ui.history(action);
+      ui.flushTimers();
+      ui.flushFrames();
+      assert.equal(ui.gateStates.at(-1), false);
+      assert.equal(ui.dialog.open, false);
+      ui.open();
+      ui.flushTimers();
+      ui.flushFrames();
+      assert.equal(ui.dialog.open, true, "the next deliberate opening should recover");
+      ui.unmount();
+    });
+  }
+
+  test(`${theme}: the cover hands over in one task: the record opens as the cover leaves`, () => {
+    // Owner (2026-10-23): no frame between the cover and showModal, so no frame of the page
+    // shows between them; a history step after the hand-over closes the record itself.
+    const ui = mount(theme);
     ui.open();
-    assert.equal(ui.gateStates.at(-1), true);
-    ui.history(action);
     ui.flushTimers();
-    ui.flushFrames();
     assert.equal(ui.gateStates.at(-1), false);
+    assert.equal(ui.dialog.open, true);
+    assert.equal(ui.frames.size, 0);
+    ui.history("BACK");
     assert.equal(ui.dialog.open, false);
+    ui.unmount();
+  });
+
+  for (const event of ["blur", "pagehide", "visibilitychange"]) {
+    test(`${theme}: ${event} cancels a pending form cover`, () => {
+      const ui = mount(theme);
+      ui.open();
+      if (event === "visibilitychange") {
+        ui.doc.hidden = true;
+        ui.doc.dispatchEvent(new Event(event));
+      } else ui.win.dispatchEvent(new Event(event));
+      ui.flushTimers();
+      ui.flushFrames();
+      assert.equal(ui.dialog.open, false);
+      assert.equal(ui.gateStates.at(-1), false);
+      ui.unmount();
+    });
+  }
+
+  test(`${theme}: Escape stops the cover and a keyboard reader keeps the control`, () => {
+    const ui = mount(theme);
+    ui.open("keyboard");
+    const escape = new Event("keydown", { cancelable: true });
+    Object.defineProperty(escape, "key", { value: "Escape" });
+    ui.win.dispatchEvent(escape);
+    assert.equal(escape.defaultPrevented, true);
+    assert.equal(ui.gateStates.at(-1), false);
+    assert.equal(ui.opener.focused, 1);
+    ui.flushTimers();
+    assert.equal(ui.dialog.open, false);
+    // Escape with nothing pending is left alone.
+    const idle = new Event("keydown", { cancelable: true });
+    Object.defineProperty(idle, "key", { value: "Escape" });
+    ui.win.dispatchEvent(idle);
+    assert.equal(idle.defaultPrevented, false);
+    ui.unmount();
+  });
+
+  test(`${theme}: a second press during the cover is ignored (one record, one cover)`, () => {
+    const ui = mount(theme);
     ui.open();
+    ui.open();
+    ui.open("pointer");
+    assert.equal(ui.gateStates.filter((value) => value === true).length, 1);
+    ui.flushTimers();
+    assert.equal(ui.dialog.opens, 1);
+    ui.unmount();
+  });
+
+  test(`${theme}: the record opens by the cover's cap at every tier`, () => {
+    for (const [options, expected] of [
+      [{}, cap],
+      [{ economy: true }, calmCap],
+      [{ reducedMotion: true }, 180],
+      [{ reducedMotion: true, economy: true }, 180],
+    ]) {
+      const ui = mount(theme, options);
+      ui.open();
+      assert.equal(ui.delays.at(-1), expected, JSON.stringify(options));
+      ui.unmount();
+    }
+  });
+
+  test(`${theme}: unmount during the cover never opens the record later`, () => {
+    const ui = mount(theme);
+    ui.open();
+    ui.unmount();
     ui.flushTimers();
     ui.flushFrames();
-    assert.equal(ui.dialog.open, true, "the next deliberate opening should recover");
-    ui.unmount();
+    assert.equal(ui.dialog.open, false);
   });
 }
 
-test("history cancels the frame between a completed cover and dialog.showModal", () => {
-  const ui = mount();
+test("forms without a cover open their record at once", () => {
+  const ui = mount("none");
   ui.open();
-  ui.flushTimers();
-  assert.equal(ui.frames.size, 1);
-  ui.history("BACK");
-  ui.flushFrames();
-  assert.equal(ui.dialog.open, false);
+  assert.equal(ui.dialog.open, true);
+  assert.equal(ui.gateStates.length, 0);
   ui.unmount();
-});
-
-for (const event of ["blur", "pagehide", "visibilitychange"]) {
-  test(`${event} cancels a pending form cover`, () => {
-    const ui = mount();
-    ui.open();
-    if (event === "visibilitychange") {
-      ui.doc.hidden = true;
-      ui.doc.dispatchEvent(new Event(event));
-    } else ui.win.dispatchEvent(new Event(event));
-    ui.flushTimers();
-    ui.flushFrames();
-    assert.equal(ui.dialog.open, false);
-    assert.equal(ui.gateStates.at(-1), false);
-    ui.unmount();
-  });
-}
-
-test("unmount releases the completed cover's pending opening frame", () => {
-  const ui = mount();
-  ui.open();
-  ui.flushTimers();
-  ui.unmount();
-  ui.flushFrames();
-  assert.equal(ui.dialog.open, false);
 });

@@ -278,6 +278,330 @@ html[data-family="dossier"]
   letter-spacing: 0;
 }
 
+/* ================================================================
+   The covers (FormPickup's gate) and the record's side of the hand-over.
+   Portalled to the body, above the page; drawn in transforms and opacity
+   only (no filters, no size animation), finite, and silent but for one
+   polite status line. Each ends where its record begins: the record opens
+   under the cover's last frame (one task), and .form-arrival inside the
+   dialog continues it.
+   ================================================================ */
+.form-gate {
+  position: fixed;
+  z-index: 2147483000;
+  inset: 0;
+  overflow: hidden;
+  contain: strict;
+  isolation: isolate;
+  pointer-events: all;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.form-gate i,
+.form-gate svg,
+.form-arrival i,
+.form-seam i {
+  position: absolute;
+  display: block;
+  pointer-events: none;
+}
+
+.form-gate :is(.explom-gate-field, .explom-gate-cracks, .explom-gate-shards, .explom-gate-dust) {
+  position: absolute;
+  inset: 0;
+}
+
+.explom-gate-defs {
+  width: 0;
+  height: 0;
+}
+
+/* ── Explom: 炸ける. Impact at the control the reader pressed; fracture
+   lines race out (cyan rims, a crimson hot core); one burst; the surface
+   breaks into ink shards that blow out, then fall, spin and shed debris
+   and dust; the void holds for the record. ── */
+.explom-gate {
+  animation: explomGateLife 1150ms linear both;
+}
+
+.explom-gate-veil {
+  inset: 0;
+  background: #021013;
+  opacity: 0;
+}
+
+.explom-gate-void,
+.explom-arrival-void {
+  inset: 0;
+  background: radial-gradient(
+    circle at var(--x, 50%) var(--y, 50%),
+    #0d2b30 0,
+    #071a1e 18%,
+    #030c0e 52%,
+    #010506 100%
+  );
+  opacity: 0;
+}
+
+.explom-arrival-void {
+  background: radial-gradient(
+    circle at var(--gate-x, 50%) var(--gate-y, 50%),
+    #0d2b30 0,
+    #071a1e 18%,
+    #030c0e 52%,
+    #010506 100%
+  );
+  opacity: 1;
+}
+
+.explom-gate-cracks > i {
+  height: 4px;
+  margin-top: -2px;
+  border-radius: 2px;
+  background: linear-gradient(
+    180deg,
+    rgb(214 255 252 / 95%) 0 26%,
+    #ff5a6e 26% 74%,
+    rgb(214 255 252 / 95%) 74%
+  );
+  box-shadow:
+    0 0 3px rgb(214 255 252 / 70%),
+    0 0 12px 1px rgb(114 242 236 / 45%);
+  transform-origin: 0 50%;
+  scale: 0 1;
+}
+
+.explom-gate-cracks > i.is-far {
+  height: 3px;
+  margin-top: -1.5px;
+  box-shadow: 0 0 8px rgb(114 242 236 / 40%);
+}
+
+.explom-gate-cracks > i.is-ring {
+  height: 2px;
+  margin-top: -1px;
+  background: rgb(190 252 248 / 80%);
+  box-shadow: 0 0 6px rgb(114 242 236 / 38%);
+}
+
+.explom-gate-core {
+  left: calc(var(--x) - 90px);
+  top: calc(var(--y) - 90px);
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    #ffe9ec 0 3%,
+    rgb(255 74 96 / 78%) 9%,
+    rgb(219 38 62 / 30%) 21%,
+    rgb(114 242 236 / 8%) 40%,
+    transparent 62%
+  );
+  opacity: 0;
+}
+
+.explom-gate-burst {
+  left: calc(var(--x) - 210px);
+  top: calc(var(--y) - 210px);
+  width: 420px;
+  height: 420px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgb(242 255 254 / 92%) 0 4%,
+    rgb(160 250 244 / 56%) 11%,
+    rgb(114 242 236 / 20%) 26%,
+    transparent 41%,
+    rgb(184 252 247 / 26%) 46%,
+    transparent 52%
+  );
+  opacity: 0;
+  scale: 0.15;
+}
+
+.explom-gate-spark {
+  left: calc(var(--x) - 48px);
+  top: calc(var(--y) - 48px);
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    #fff 0 5%,
+    rgb(170 252 247 / 80%) 13%,
+    rgb(255 74 96 / 28%) 26%,
+    transparent 56%
+  );
+  opacity: 0;
+}
+
+.explom-gate-shards {
+  perspective: 1100px;
+}
+
+.explom-gate-shards > svg {
+  overflow: visible;
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+.explom-gate-shards polygon {
+  fill: url(#explom-shard-face);
+  stroke: rgb(114 242 236 / 80%);
+  stroke-width: 1.4;
+  stroke-linejoin: round;
+}
+
+.explom-gate-shards svg.is-lit polygon {
+  fill: url(#explom-shard-lit);
+  stroke: rgb(220 255 252 / 95%);
+  stroke-width: 1.8;
+}
+
+.explom-gate-shards svg.is-dim polygon {
+  fill: #030b0d;
+  stroke: rgb(114 242 236 / 46%);
+}
+
+.explom-gate-shards polyline {
+  fill: none;
+  stroke: #ff4a60;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  opacity: 0.8;
+}
+
+.explom-gate-debris {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: 0;
+  height: 0;
+}
+
+.explom-gate-debris > i {
+  left: 0;
+  top: 0;
+  background: linear-gradient(135deg, #aef8f3, #0d3237 70%);
+  clip-path: polygon(50% 0, 100% 72%, 18% 100%);
+  opacity: 0;
+}
+
+.explom-gate-debris > i.is-hot {
+  background: linear-gradient(135deg, #ffd3d9, #ff4a60);
+}
+
+.explom-gate-streaks {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: 0;
+  height: 0;
+}
+
+.explom-gate-streaks > i {
+  left: 0;
+  top: -1px;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, rgb(214 255 252 / 90%) 70%, #fff);
+  transform-origin: 0 50%;
+  opacity: 0;
+}
+
+.explom-gate-streaks > i.is-hot {
+  background: linear-gradient(90deg, transparent, rgb(255 120 136 / 80%) 70%, #ffe1e5);
+}
+
+.explom-gate-dust > i {
+  bottom: -64px;
+  width: 280px;
+  height: 160px;
+  margin-left: -140px;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse,
+    rgb(168 214 210 / 17%) 0,
+    rgb(114 242 236 / 6%) 44%,
+    transparent 70%
+  );
+  opacity: 0;
+}
+
+/* The record's side: its frame is the fracture the shards settle into
+   (fourteen slivers on the dialog's edges and two corner spurs), and the
+   cover's void clears off it. */
+.form-pickup-dialog > .form-arrival {
+  position: fixed;
+  z-index: 9;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.form-pickup-dialog > .form-seam {
+  position: absolute;
+  z-index: 7;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.explom-frame > i {
+  --r: 0deg;
+  --rest: 0.7;
+  height: 3px;
+  border-radius: 2px;
+  background: linear-gradient(
+    180deg,
+    rgb(170 248 243 / 85%) 0 30%,
+    rgb(255 74 96 / 90%) 30% 70%,
+    rgb(170 248 243 / 85%) 70%
+  );
+  box-shadow: 0 0 5px rgb(114 242 236 / 38%);
+  opacity: var(--rest);
+  rotate: var(--r);
+}
+
+/* Top edge: four slivers with breaks between. */
+.explom-frame > i:nth-child(1) { top: 0; left: 0; width: 29%; --r: 0.4deg; --fx: -40px; --fy: -70px; --fr: -18deg; transform-origin: 0 50%; }
+.explom-frame > i:nth-child(2) { top: 1px; left: calc(29% + 7px); width: 22%; --r: -0.5deg; --fx: -10px; --fy: -90px; --fr: 14deg; }
+.explom-frame > i:nth-child(3) { top: 0; left: calc(51% + 14px); width: 27%; --r: 0.3deg; --fx: 20px; --fy: -80px; --fr: -10deg; }
+.explom-frame > i:nth-child(4) { top: 1px; right: 0; width: calc(22% - 26px); --r: -0.6deg; --fx: 50px; --fy: -60px; --fr: 22deg; transform-origin: 100% 50%; }
+/* Right edge (rotated slivers, measured along the edge). */
+.explom-frame > i:nth-child(5),
+.explom-frame > i:nth-child(6),
+.explom-frame > i:nth-child(7),
+.explom-frame > i:nth-child(12),
+.explom-frame > i:nth-child(13),
+.explom-frame > i:nth-child(14) {
+  width: 3px;
+  height: auto;
+  background: linear-gradient(
+    90deg,
+    rgb(170 248 243 / 85%) 0 30%,
+    rgb(255 74 96 / 90%) 30% 70%,
+    rgb(170 248 243 / 85%) 70%
+  );
+}
+.explom-frame > i:nth-child(5) { right: 0; top: 0; bottom: 66%; --r: -0.4deg; --fx: 80px; --fy: -30px; --fr: 16deg; }
+.explom-frame > i:nth-child(6) { right: 1px; top: calc(34% + 8px); bottom: calc(33% + 4px); --r: 0.5deg; --fx: 90px; --fy: 0px; --fr: -20deg; }
+.explom-frame > i:nth-child(7) { right: 0; top: calc(67% + 4px); bottom: 0; --r: -0.3deg; --fx: 70px; --fy: 40px; --fr: 12deg; }
+/* Bottom edge. */
+.explom-frame > i:nth-child(8) { bottom: 0; right: 0; width: 24%; --r: -0.4deg; --fx: 40px; --fy: 80px; --fr: 18deg; transform-origin: 100% 50%; }
+.explom-frame > i:nth-child(9) { bottom: 1px; right: calc(24% + 6px); width: 28%; --r: 0.5deg; --fx: 10px; --fy: 90px; --fr: -16deg; }
+.explom-frame > i:nth-child(10) { bottom: 0; right: calc(52% + 12px); width: 21%; --r: -0.3deg; --fx: -20px; --fy: 80px; --fr: 10deg; }
+.explom-frame > i:nth-child(11) { bottom: 1px; left: 0; width: calc(27% - 18px); --r: 0.6deg; --fx: -50px; --fy: 70px; --fr: -22deg; transform-origin: 0 50%; }
+/* Left edge. */
+.explom-frame > i:nth-child(12) { left: 0; bottom: 0; top: 63%; --r: 0.4deg; --fx: -80px; --fy: 30px; --fr: -14deg; }
+.explom-frame > i:nth-child(13) { left: 1px; top: calc(31% + 6px); bottom: calc(37% + 6px); --r: -0.5deg; --fx: -90px; --fy: 0px; --fr: 18deg; }
+.explom-frame > i:nth-child(14) { left: 0; top: 0; bottom: 69%; --r: 0.3deg; --fx: -70px; --fy: -40px; --fr: -12deg; }
+
 /* Finite arrival only. No flashing, perpetual particles, filters or rAF loop.
    Opening is immediate: these run inside the already-interactive dialog. */
 @media (prefers-reduced-motion: no-preference) {
@@ -350,16 +674,399 @@ html[data-family="dossier"]
   }
 }
 
+/* The covers in motion: full motion plays the whole cover; the economy
+   tier a short, calm one (the cracks and the void, no particles, no
+   burst); reduced motion a still 180 ms cross-fade (below). */
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]) .explom-gate-veil {
+    animation: explomVeil 440ms ease-out both;
+  }
+
+  html:not([data-world-effects="economy"]) .explom-gate-void {
+    animation: explomVoid 140ms 336ms ease-out both;
+  }
+
+  html:not([data-world-effects="economy"]) .explom-gate-core {
+    animation: explomCore 620ms 320ms ease-out both;
+  }
+
+  html:not([data-world-effects="economy"]) .explom-gate-cracks > i,
+  html[data-world-effects="economy"] .explom-gate-cracks > i {
+    animation: explomCrack 100ms cubic-bezier(0.2, 0.7, 0.3, 1) both;
+  }
+
+  html:not([data-world-effects="economy"]) .explom-gate-cracks {
+    animation: explomCracksOut 130ms 345ms ease-in both;
+  }
+
+  html:not([data-world-effects="economy"]) .explom-gate-burst {
+    animation: explomBurst 340ms 318ms cubic-bezier(0.1, 0.6, 0.3, 1) both;
+  }
+
+  html:not([data-world-effects="economy"]) .explom-gate-spark {
+    animation: explomSpark 440ms ease-out both;
+  }
+
+  html:not([data-world-effects="economy"]) .explom-gate-shards > svg {
+    animation: explomShard 700ms linear both;
+  }
+
+  html:not([data-world-effects="economy"]) .explom-gate-debris > i {
+    animation: explomDebris 700ms linear both;
+  }
+
+  html:not([data-world-effects="economy"]) .explom-gate-dust > i {
+    animation: explomDust 460ms ease-out both;
+  }
+
+  html:not([data-world-effects="economy"]) .explom-gate-streaks > i {
+    animation: explomStreak 380ms cubic-bezier(0.1, 0.7, 0.3, 1) both;
+  }
+
+  /* The record opens under the cover's last frame: it has no fade of its
+     own (the shared sheet's opening fade would show the page through it). */
+  html:not([data-world-effects="economy"])[data-mode="world"]
+    .form-pickup-dialog.form-pickup-dialog:is([data-form-theme="explom"], [data-form-theme="kemonohen"])[open],
+  html:not([data-world-effects="economy"])[data-mode="world"]
+    .form-pickup-dialog.form-pickup-dialog:is(
+      [data-form-theme="explom"],
+      [data-form-theme="kemonohen"]
+    )[open]::backdrop {
+    animation: none;
+  }
+
+  html:not([data-world-effects="economy"])
+    .form-pickup-dialog[data-form-theme="explom"][open]
+    > .explom-arrival {
+    animation: arrivalClear 460ms cubic-bezier(0.2, 0.6, 0.3, 1) both;
+  }
+
+  html:not([data-world-effects="economy"])
+    .form-pickup-dialog[data-form-theme="explom"][open]
+    > .explom-frame
+    > i {
+    animation: explomSettle 480ms cubic-bezier(0.2, 0.9, 0.25, 1.06) both;
+  }
+
+  .explom-frame > i:nth-child(1) { animation-delay: 70ms; }
+  .explom-frame > i:nth-child(2) { animation-delay: 110ms; }
+  .explom-frame > i:nth-child(3) { animation-delay: 150ms; }
+  .explom-frame > i:nth-child(4) { animation-delay: 190ms; }
+  .explom-frame > i:nth-child(5) { animation-delay: 130ms; }
+  .explom-frame > i:nth-child(6) { animation-delay: 170ms; }
+  .explom-frame > i:nth-child(7) { animation-delay: 210ms; }
+  .explom-frame > i:nth-child(8) { animation-delay: 90ms; }
+  .explom-frame > i:nth-child(9) { animation-delay: 140ms; }
+  .explom-frame > i:nth-child(10) { animation-delay: 180ms; }
+  .explom-frame > i:nth-child(11) { animation-delay: 230ms; }
+  .explom-frame > i:nth-child(12) { animation-delay: 120ms; }
+  .explom-frame > i:nth-child(13) { animation-delay: 160ms; }
+  .explom-frame > i:nth-child(14) { animation-delay: 200ms; }
+
+  /* The economy tier: the cracks run over a veil that becomes the void. */
+  html[data-world-effects="economy"] .explom-gate {
+    animation-duration: 700ms;
+  }
+
+  html[data-world-effects="economy"] .explom-gate-veil {
+    animation: explomVeilCalm 380ms ease-out both;
+  }
+
+  html[data-world-effects="economy"] .explom-gate-void {
+    animation: explomVoid 240ms 380ms ease-out both;
+  }
+
+  html[data-world-effects="economy"]
+    .form-pickup-dialog[data-form-theme="explom"][open]
+    > .explom-arrival {
+    animation: arrivalClear 360ms ease-out both;
+  }
+}
+
+html[data-world-effects="economy"]
+  :is(
+    .explom-gate-shards,
+    .explom-gate-debris,
+    .explom-gate-dust,
+    .explom-gate-streaks,
+    .explom-gate-burst,
+    .explom-gate-spark,
+    .explom-gate-core
+  ) {
+  display: none;
+}
+
+@keyframes explomGateLife {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes explomVeil {
+  0% {
+    opacity: 0;
+  }
+  75% {
+    opacity: 0.18;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes explomVeilCalm {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.4;
+  }
+}
+
+@keyframes explomVoid {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes explomCore {
+  0% {
+    opacity: 0;
+    scale: 0.4;
+  }
+  14% {
+    opacity: 0.9;
+    scale: 1;
+  }
+  100% {
+    opacity: 0;
+    scale: 1.5;
+  }
+}
+
+@keyframes explomCrack {
+  from {
+    scale: 0 1;
+  }
+  to {
+    scale: 1 1;
+  }
+}
+
+@keyframes explomCracksOut {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes explomBurst {
+  0% {
+    opacity: 0;
+    scale: 0.15;
+  }
+  18% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    scale: 5.2;
+  }
+}
+
+@keyframes explomSpark {
+  0% {
+    opacity: 0;
+    scale: 0.3;
+  }
+  12% {
+    opacity: 1;
+    scale: 1.15;
+  }
+  70% {
+    opacity: 0.5;
+    scale: 0.9;
+  }
+  100% {
+    opacity: 0;
+    scale: 0.7;
+  }
+}
+
+/* Out with the blast (ease-out), then down under gravity (ease-in),
+   tumbling about its own axis in the container's perspective. */
+@keyframes explomShard {
+  0% {
+    opacity: 0;
+    translate: 0 0;
+    rotate: var(--ax) var(--ay) 1 0deg;
+    scale: 1;
+    animation-timing-function: linear;
+  }
+  3% {
+    opacity: 1;
+    translate: calc(var(--bx) * 0.08) calc(var(--by) * 0.08);
+    animation-timing-function: cubic-bezier(0.12, 0.7, 0.3, 1);
+  }
+  32% {
+    translate: var(--bx) var(--by);
+    rotate: var(--ax) var(--ay) 1 calc(var(--spin) * 0.35);
+    animation-timing-function: cubic-bezier(0.55, 0, 0.95, 0.5);
+  }
+  94% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    translate: calc(var(--bx) * 1.28) calc(var(--by) * 1.28 + var(--fall));
+    rotate: var(--ax) var(--ay) 1 var(--spin);
+    scale: 0.82;
+  }
+}
+
+@keyframes explomDebris {
+  0% {
+    opacity: 0;
+    translate: 0 0;
+    rotate: 0deg;
+    animation-timing-function: cubic-bezier(0.2, 0.7, 0.4, 1);
+  }
+  6% {
+    opacity: 1;
+  }
+  34% {
+    translate: calc(var(--dx) * 0.72) calc(var(--dy) * 0.72 - var(--lift));
+    animation-timing-function: cubic-bezier(0.5, 0, 0.9, 0.6);
+  }
+  86% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    translate: var(--dx) calc(var(--dy) + var(--fall));
+    rotate: var(--spin);
+  }
+}
+
+@keyframes explomDust {
+  0% {
+    opacity: 0;
+    scale: 0.5 0.4;
+    translate: 0 12px;
+  }
+  35% {
+    opacity: 0.75;
+  }
+  100% {
+    opacity: 0;
+    scale: 1.7 1.1;
+    translate: 0 -26px;
+  }
+}
+
+@keyframes explomStreak {
+  0% {
+    opacity: 0;
+    translate: 0 0;
+    scale: 0.2 1;
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    translate: var(--tx) var(--ty);
+    scale: 1.1 1;
+  }
+}
+
+/* The cover's last frame clears off the record. */
+@keyframes arrivalClear {
+  0% {
+    visibility: visible;
+    opacity: 1;
+  }
+  100% {
+    visibility: hidden;
+    opacity: 0;
+  }
+}
+
+/* Each sliver lands from where the blast threw it and cools into the frame. */
+@keyframes explomSettle {
+  0% {
+    opacity: 0;
+    translate: var(--fx) var(--fy);
+    rotate: var(--fr);
+  }
+  25% {
+    opacity: 1;
+  }
+  100% {
+    opacity: var(--rest);
+    translate: 0 0;
+    rotate: var(--r);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .form-signature,
   .form-signature * {
     animation: none !important;
   }
+
+  /* A still cross-fade through the cover's ground and its marks, no
+     movement. The site's reduced-motion reset (styles-world/11.css) cuts
+     every animation to 0.001ms; these few keep their calm length, as the
+     Rexonance cover's do. */
+  .explom-gate {
+    animation-duration: 150ms !important;
+  }
+
+  .explom-gate-void {
+    animation: explomVoid 150ms ease both;
+    animation-duration: 150ms !important;
+  }
+
+  .explom-gate-cracks > i {
+    scale: 1 1;
+    opacity: 0.34;
+  }
+
+  :is(
+    .explom-gate-veil,
+    .explom-gate-shards,
+    .explom-gate-debris,
+    .explom-gate-dust,
+    .explom-gate-streaks,
+    .explom-gate-burst,
+    .explom-gate-spark,
+    .explom-gate-core
+  ) {
+    display: none;
+  }
+
+  .form-pickup-dialog[data-form-theme="explom"][open] > .explom-arrival {
+    animation: arrivalClear 150ms ease both;
+    animation-duration: 150ms !important;
+  }
 }
 
 @media (forced-colors: active) {
-  .form-signature {
+  .form-signature,
+  .form-arrival,
+  .form-seam,
+  .form-gate > :not([role="status"]) {
     display: none;
+  }
+
+  .form-gate {
+    background: Canvas;
   }
   html[data-family="dossier"]
     main.manager-page.manager-page.manager-page

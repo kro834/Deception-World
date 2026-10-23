@@ -1,3 +1,45 @@
+                      <dt>{s.dt}</dt>
+                      <dd>{s.dd}</dd>
+                    </div>
+                  ))}
+                </dl>
+              ) : null}
+              <div className="form-pickup-sections">
+                {abilities.length ? (
+                  <section className="is-ability">
+                    <header>
+                      <span>01</span>
+                      <p>ABILITY</p>
+                    </header>
+                    {abilities.map((a) => (
+                      <div key={a.name}>
+                        <h3>
+                          <DisplayName value={a.name} />
+                        </h3>
+                        <p>{a.body}</p>
+                      </div>
+                    ))}
+                  </section>
+                ) : null}
+                {arsenal.length ? (
+                  <section className="is-arsenal">
+                    <header>
+                      <span>02</span>
+                      <p>ARSENAL</p>
+                    </header>
+                    {arsenal.map((a) => (
+                      <div key={a.name}>
+                        <h3>
+                          <DisplayName value={a.name} />
+                        </h3>
+                        <p>{a.body}</p>
+                      </div>
+                    ))}
+                  </section>
+                ) : null}
+                {finishers.length ? (
+                  <section className="is-finisher">
+                    <header>
                       <span>03</span>
                       <p>FINISHER</p>
                     </header>
@@ -85,59 +127,15 @@
           </button>
         </div>
       </dialog>
-      {gateActive && typeof document !== "undefined"
+      {gateActive && gate && gateScene.current && typeof document !== "undefined"
         ? createPortal(
-            <div
-              className="rexonance-gate"
-              role="status"
-              aria-live="polite"
-              aria-label="レクソナンスサーガの記録を展開中"
-              onAnimationEnd={(event) => {
-                if (
-                  event.currentTarget !== event.target ||
-                  event.animationName !== "rexonanceGateLife"
-                )
-                  return;
-                finishGate();
-              }}
-            >
-              <div className="rexonance-gate-field" aria-hidden="true">
-                <i className="rexonance-gate-spiral is-cyan" />
-                <i className="rexonance-gate-spiral is-pink" />
-                <i className="rexonance-gate-orbit is-outer" />
-                <i className="rexonance-gate-orbit is-inner" />
-                <div className="rexonance-gate-stars">
-                  <i />
-                  <i />
-                  <i />
-                  <i />
-                  <i />
-                  <i />
-                  <i />
-                  <i />
-                </div>
-                <div className="rexonance-gate-prism">
-                  <i className="is-one" />
-                  <i className="is-two" />
-                  <i className="is-three" />
-                </div>
-                <div className="rexonance-gate-horizon">
-                  <span className="is-cyan" />
-                  <span className="is-pink" />
-                </div>
-                <span className="rexonance-gate-rush is-left" />
-                <span className="rexonance-gate-rush is-right" />
-                <div className="rexonance-gate-sigil">
-                  <i />
-                  <b>R</b>
-                </div>
-              </div>
-              <div className="rexonance-gate-copy">
-                <small>ORDER × DIVINITY × WILL</small>
-                <strong>REXONANCE</strong>
-                <span>TRINITY SOVEREIGN LINK ESTABLISHED</span>
-              </div>
-            </div>,
+            <FormGate
+              theme={rider.theme as FormTheme}
+              scene={gateScene.current}
+              life={gate.life}
+              status={gate.status}
+              onLifeEnd={endGateLife}
+            />,
             document.body,
           )
         : null}
@@ -436,3 +434,4 @@ export const REX_LOI: Profile = {
       { dt: "100m", dd: "0.01sec" },
     ],
     abilities: [
+      {
