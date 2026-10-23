@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { GuardedLink } from "@/components/load-gate";
 import { DisplayName } from "@/components/name-text";
 import { LiquidLens } from "@/components/world/liquid-rail";
@@ -17,7 +17,6 @@ import {
 import { FarFromEntryTransition } from "./far-from-entry-transition";
 import { FarFromComparison } from "./far-from-comparison";
 import { FarFromP16 } from "./far-from-p16";
-import { FarFromUltra } from "./far-from-ultra";
 import { FarFromReport } from "./far-from-report";
 import { FarFromSuitUp } from "./far-from-suitup";
 import { FarFromFormComparison } from "./far-from-form-comparison";
@@ -49,19 +48,18 @@ import {
    suit-up → stages → system) with the record's own chapters around them:
    01 overview (+ the calls), 02 specs, 03 performance (the console, then
    #report, the owner's two documents, as its second half), 04 P16,
-   05 suit-up, 06 ultra, 07 stages, 08 mechanism, 09 armour and OS,
-   10 authority, 11 weapons, 12 finishers. The numbers are CSS counters
-   over the page's direct sections (#report is a sub-chapter and does not
-   count), so the mounted chapters' own kickers (05 / SUIT-UP, 06 / ULTRA)
-   stay as they are.
+   05 suit-up (ending on the form chosen right after its runway, ウルトラ
+   included), 06 stages, 07 mechanism, 08 armour and OS, 09 authority,
+   10 weapons, 11 finishers. The numbers are CSS counters over the page's
+   direct sections (#report is a sub-chapter and does not count).
 
    #performance (far-from-comparison.tsx), #report (far-from-report.tsx)
    and #p16 (far-from-p16.tsx) are built from the owner's comparison text
    (far-from-report-text.ts, verbatim). #suitup is the scroll suit-up
    (far-from-suitup.tsx: the Rexonance runway playing FAR FROM's suit
-   through src/lib/far-from-assembly.ts, ending on マックス). #ultra
-   (far-from-ultra.tsx) is the ウルトラ sequence, the continuation after
-   マックス as its own scroll segment. The page-entry transformation is
+   through src/lib/far-from-assembly.ts, ending on the form chosen in its
+   selector — the page's stage, as on the Rexonance page; owner,
+   2026-10-23). The page-entry transformation is
    far-from-entry-transition.tsx. Every engine is a lazy chunk mounted after
    paint, only where motion is allowed; nothing here delays first paint:
    the chapter reveals are one IntersectionObserver armed after mount, and
@@ -119,7 +117,11 @@ function Articles({
 export function FarFromSaga() {
   useWorldMode();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [stage, setStage] = useState<FarFromStageKey>("middle");
+  // The page's one form state (owner, 2026-10-23): the selector after the
+  // suit-up's runway, #stages' rail and the comparison all choose it, and
+  // the runway ends on it (as the Rexonance page's stage does).
+  const [stage, setStageState] = useState<FarFromStageKey>("middle");
+  const setStage = useCallback((next: FarFromStageKey) => setStageState(next), []);
   const [motionReady, setMotionReady] = useState(false);
   const pageRef = useRef<HTMLElement | null>(null);
   const stageTabsRef = useRef<HTMLDivElement | null>(null);
@@ -146,7 +148,13 @@ export function FarFromSaga() {
       rail.removeEventListener("railselect", onSelect);
       dispose?.();
     };
-  }, []);
+  }, [setStage]);
+
+  // A choice made by another control (the suit-up's selector, the
+  // comparison) moves this rail's lens too (the Rexonance page's F57).
+  useEffect(() => {
+    stageTabsRef.current?.dispatchEvent(new Event("liquidrelayout"));
+  }, [stage]);
 
   // The chapter reveals (as on the Extreme site): armed after paint, only
   // where motion is allowed; otherwise everything rests fully drawn. The
@@ -233,7 +241,7 @@ export function FarFromSaga() {
               <span aria-hidden="true">05</span> 変身
             </a>
             <a href="#stages">
-              <span aria-hidden="true">07</span> 形態
+              <span aria-hidden="true">06</span> 形態
             </a>
           </nav>
           <SideMenuTrigger
@@ -386,17 +394,14 @@ export function FarFromSaga() {
         <FarFromP16 />
       </section>
 
-      {/* 05 — #suitup: the scroll suit-up (far-from-suitup.tsx). */}
-      <FarFromSuitUp />
+      {/* 05 — #suitup: the scroll suit-up (far-from-suitup.tsx), ending on
+          the form chosen in the selector right after its runway. */}
+      <FarFromSuitUp stage={stage} onChoose={setStage} />
 
-      {/* 06 — #ultra: the ウルトラ sequence, the continuation after マックス
-          (far-from-ultra.tsx; its engine is a lazy chunk under the motion gate). */}
-      <FarFromUltra />
-
-      {/* 07 — the five forms. */}
+      {/* 06 — the five forms. */}
       <section id="stages" className="rxs-stages rxs-section" aria-labelledby="ffs-stages-title">
         <header className="rxs-section-heading rxs-reveal">
-          <p>07 / STAGES</p>
+          <p>06 / STAGES</p>
           <h2 id="ffs-stages-title">形態</h2>
           <span>{FAR_FROM_SAGA.stagesLine}</span>
         </header>
@@ -474,24 +479,24 @@ export function FarFromSaga() {
         <FarFromFormComparison selected={stage} onChoose={setStage} />
       </section>
 
-      {/* 08 — the four theories. */}
+      {/* 07 — the four theories. */}
       <section
         id="theories"
         className="rxs-section ffs-theories"
         aria-labelledby="ffs-theories-title"
       >
         <header className="rxs-section-heading rxs-reveal">
-          <p>08 / MECHANISM</p>
+          <p>07 / MECHANISM</p>
           <h2 id="ffs-theories-title">中核機構</h2>
           <span>FARFROM DRIVEをはじめとする、4つの新規理論・中核機構。</span>
         </header>
         <Articles items={FAR_FROM_SAGA.theories} columns={2} label="新規理論・中核機構" />
       </section>
 
-      {/* 09 — the floating unit and the OS. */}
+      {/* 08 — the floating unit and the OS. */}
       <section id="system" className="rxs-section ffs-system" aria-labelledby="ffs-system-title">
         <header className="rxs-section-heading rxs-reveal">
-          <p>09 / ARMOR & OS</p>
+          <p>08 / ARMOR & OS</p>
           <h2 id="ffs-system-title">装甲・OS</h2>
           <span>浮遊ユニット『ファーフロムビット』と、統合OS『SA-GA OS 6.1』。</span>
         </header>
@@ -502,24 +507,24 @@ export function FarFromSaga() {
         />
       </section>
 
-      {/* 10 — the authorities. */}
+      {/* 09 — the authorities. */}
       <section
         id="authority"
         className="rxs-section ffs-authority"
         aria-labelledby="ffs-authority-title"
       >
         <header className="rxs-section-heading rxs-reveal">
-          <p>10 / AUTHORITY</p>
+          <p>09 / AUTHORITY</p>
           <h2 id="ffs-authority-title">神属権限</h2>
           <span>FAR FROM DEUSと、Exception World。</span>
         </header>
         <Articles items={FAR_FROM_SAGA.powers} columns={2} label="神属権限・継承能力" />
       </section>
 
-      {/* 11 — the weapons, numbered. */}
+      {/* 10 — the weapons, numbered. */}
       <section id="arsenal" className="rxs-section ffs-arsenal" aria-labelledby="ffs-arsenal-title">
         <header className="rxs-section-heading rxs-reveal">
-          <p>11 / WEAPONS</p>
+          <p>10 / WEAPONS</p>
           <h2 id="ffs-arsenal-title">武装</h2>
           <span>追加武装は全10種。</span>
         </header>
@@ -534,14 +539,14 @@ export function FarFromSaga() {
         <p className="ffs-note ffs-arsenal-note">{FAR_FROM_SAGA.arsenalNote}</p>
       </section>
 
-      {/* 12 — the finishers. */}
+      {/* 11 — the finishers. */}
       <section
         id="finishers"
         className="rxs-section ffs-finishers"
         aria-labelledby="ffs-finishers-title"
       >
         <header className="rxs-section-heading rxs-reveal">
-          <p>12 / FINISHER</p>
+          <p>11 / FINISHER</p>
           <h2 id="ffs-finishers-title">必殺技</h2>
           <span>最高位必殺技は2種。発動音声とともに掲載します。</span>
         </header>

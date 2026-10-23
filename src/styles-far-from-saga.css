@@ -33,12 +33,11 @@
 
    The #performance console, #report documents and the #p16 frame are
    drawn by styles-far-from-compare.css; the suit-up runway by
-   styles-far-from-suitup.css; the ウルトラ segment by
-   styles-far-from-ultra.css. Every rule is scoped to .ffs-page.
+   styles-far-from-suitup.css (ウルトラ is one of its forms since
+   2026-10-23). Every rule is scoped to .ffs-page.
    ================================================================ */
 
 @import "./styles-far-from-compare.css";
-@import "./styles-far-from-ultra.css";
 
 /* ---------- Faces (local; the same files the Extreme site declares) ---------- */
 @font-face {
@@ -998,10 +997,6 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
   --ffs-accent: #7fe6ff;
 }
 
-.rxs-page.rxs-page.ffs-page > .ffs-ultra {
-  --ffs-accent: #9cf1ff;
-}
-
 .rxs-page.rxs-page.ffs-page > .rxs-stages {
   background: radial-gradient(circle at 50% 0%, rgb(66 110 220 / 12%), transparent 30rem), var(--fft-ink);
 }
@@ -1164,13 +1159,6 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
 /* The sub-chapter runs on from its chapter: a shorter gap, no seam. */
 .rxs-page.rxs-page.ffs-page > .ffs-report-section {
   padding-top: 0;
-}
-
-/* #ultra pads its head instead of itself (its runway is full-bleed): the
-   head takes the page's measure, so its numeral stands with the others'. */
-.rxs-page.rxs-page.ffs-page > .ffs-ultra > .rxs-section-heading {
-  width: min(var(--fft-wrap), calc(100% - 48px));
-  padding-inline: 0;
 }
 
 @media (max-width: 760px) {

@@ -244,7 +244,8 @@ test("#suitup is built on the Rexonance runway; no chapter wears a 準備中 mar
   assert.match(assembly, /export const FAR_FROM_ASSEMBLY_BEATS: readonly FarFromAssemblyBeat\[\]/);
   assert.match(assembly, /rexonance-resonance\.js/);
   assert.match(assembly, /import\("\.\/far-from-assembly-engine"\)/);
-  assert.match(component, /<FarFromSuitUp \/>/);
+  // Owner (2026-10-23): the runway ends on the page's chosen form.
+  assert.match(component, /<FarFromSuitUp stage=\{stage\} onChoose=\{setStage\} \/>/);
   assert.match(suitup, /mountFarFromAssembly\(runwayRef\.current\)/);
   assert.match(suitup, /id="suitup" className="rxs-section ffs-suitup"/);
   assert.match(suitup, /className="ffs-runway rzn-suitup"/);
@@ -308,7 +309,8 @@ test("the page follows the Rexonance structure: numbered bar, split hero, CONTEN
       ["performance", "03"],
       ["p16", "04"],
       ["suitup", "05"],
-      ["stages", "07"],
+      // Owner (2026-10-23): #ultra folded into #suitup; 形態 is 06.
+      ["stages", "06"],
     ],
   );
   assert.match(bar, /data-local-nav-through="far-from-assembly-runway"/);
@@ -334,20 +336,17 @@ test("the page follows the Rexonance structure: numbered bar, split hero, CONTEN
   assert.match(editorial, /spec\("パンチ力"\)/);
   assert.match(editorial, /spec\("ジャンプ力"\)/);
   assert.doesNotMatch(editorial, /405\.5|8000m/);
-  // CONTENTS: twelve chapters, numbered 01–12, each a real anchor on the
+  // CONTENTS: eleven chapters, numbered 01–11 (Owner (2026-10-23): #ultra folded into #suitup), each a real anchor on the
   // page (or in its mounted components), in the registry's order.
   const chapters = [...editorial.matchAll(/href: "#([a-z0-9]+)",\s*number: "(\d\d)"/g)].map(
     (m) => [m[1], m[2]],
   );
-  assert.equal(chapters.length, 12);
+  assert.equal(chapters.length, 11);
   assert.deepEqual(
     chapters.map(([, number]) => number),
-    Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, "0")),
+    Array.from({ length: 11 }, (_, i) => String(i + 1).padStart(2, "0")),
   );
-  const mounted =
-    component +
-    read("src/components/far-from-saga/far-from-suitup.tsx") +
-    read("src/components/far-from-saga/far-from-ultra.tsx");
+  const mounted = component + read("src/components/far-from-saga/far-from-suitup.tsx");
   const registry = sections
     .slice(sections.indexOf('"far-from": ['), sections.indexOf('"final-stage": ['))
     .match(/\["([a-z0-9-]+)"/g)
@@ -359,7 +358,7 @@ test("the page follows the Rexonance structure: numbered bar, split hero, CONTEN
   );
   for (const [hash] of chapters) assert.match(mounted, new RegExp(`id="${hash}"`), hash);
   assert.match(editorial, /<nav className="rxs-chapter-index ffs-chapter-map"/);
-  assert.match(editorial, /<span lang="en">CONTENTS<\/span>\s*<small>01 — 12<\/small>/);
+  assert.match(editorial, /<span lang="en">CONTENTS<\/span>\s*<small>01 — 11<\/small>/);
   // The chapters count themselves (a CSS counter over the page's direct
   // sections), so the mounted chapters' own kickers stay as they are; the
   // report is 03's second half and does not count.
@@ -376,8 +375,8 @@ test("the page follows the Rexonance structure: numbered bar, split hero, CONTEN
     "performance",
     "report",
     "p16",
-    "<FarFromSuitUp />",
-    "<FarFromUltra />",
+    // Owner (2026-10-23): #ultra folded into #suitup.
+    "<FarFromSuitUp ",
     "stages",
     "theories",
     "system",
@@ -690,118 +689,58 @@ test("the console compares FAR FROM with each form or all four, and labels the c
 // Owner: 「ファーフロム・ウルトラだけ体全身が白に染まった後、さらにナノマシンにより
 // 追加部分が生成された後、…コンピュータの様な補助インターフェースが腕の外などに
 // 展開されます。ウルトラだけ未来的で特殊なシークエンスで、更に別のナノマシンも使う」
-const ultraComponent = read("src/components/far-from-saga/far-from-ultra.tsx");
 const ultraMount = read("src/lib/far-from-ultra.ts");
 const ultraScene = read("src/lib/far-from-ultra-scene.ts");
 const ultraArt = read("src/lib/far-from-ultra-art.ts");
 const ultraKit = read("src/lib/far-from-ultra-kit.ts");
-const ultraStyles = read("src/styles-far-from-ultra.css");
 const ULTRA_REVISION = "20261022";
 
-test("#ultra follows #suitup as its own segment, registered as ウルトラ, in the record's words", () => {
-  assert.match(
-    sections,
-    /\["suitup", "変身シークエンス", "SUIT-UP"\],\s*\["ultra", "ウルトラ", "ULTRA"\],\s*\["stages"/,
-  );
-  // #suitup is mounted from far-from-suitup.tsx.
-  const suitup = component.indexOf("<FarFromSuitUp />");
-  const ultra = component.indexOf("<FarFromUltra />");
+test("ウルトラ is one of #suitup's forms: the selector after the runway picks ミドル … ウルトラ", () => {
+  // Owner (2026-10-23): 「変身スクロールの後にミドルからウルトラまでのセレクターを置いて、
+  // 一気にマックスまで変身したりウルトラが別枠なのを修正し、レクソナンスの特設ページと同様の仕組み」.
+  assert.doesNotMatch(sections, /\["ultra", "ウルトラ", "ULTRA"\]/);
+  assert.match(sections, /\["suitup", "変身シークエンス", "SUIT-UP"\],\s*\["stages"/);
+  assert.doesNotMatch(component, /FarFromUltra|id="ultra"/);
+  assert.doesNotMatch(styles, /styles-far-from-ultra\.css/);
+  const suitupSource = read("src/components/far-from-saga/far-from-suitup.tsx");
+  const suitup = component.indexOf("<FarFromSuitUp stage={stage} onChoose={setStage} />");
   const stages = component.indexOf('id="stages"');
-  assert.ok(suitup > 0 && ultra > suitup && stages > ultra, "suitup, then ultra, then stages");
-  assert.match(ultraComponent, /<section id="ultra" className="rxs-section ffs-ultra"/);
-  assert.match(ultraComponent, /<h2 id="ffs-ultra-title">ウルトラ<\/h2>/);
-  // The chapter numbers after it move on by one; #suitup keeps its own.
-  assert.match(read("src/components/far-from-saga/far-from-suitup.tsx"), /<p>05 \/ SUIT-UP<\/p>/);
-  assert.match(ultraComponent, /<p>06 \/ ULTRA<\/p>/);
+  assert.ok(suitup > 0 && stages > suitup, "suitup, then stages");
+  assert.match(suitupSource, /<p>05 \/ SUIT-UP<\/p>/);
   for (const mark of [
-    "07 / STAGES",
-    "08 / MECHANISM",
-    "09 / ARMOR & OS",
-    "10 / AUTHORITY",
-    "11 / WEAPONS",
-    "12 / FINISHER",
+    "06 / STAGES",
+    "07 / MECHANISM",
+    "08 / ARMOR & OS",
+    "09 / AUTHORITY",
+    "10 / WEAPONS",
+    "11 / FINISHER",
   ])
     assert.ok(component.includes(`<p>${mark}</p>`), mark);
-  // The caption is the record's own sentence, imported, never retyped.
-  assert.match(ultraComponent, /const ultra = FAR_FROM_SAGA\.stages\.ultra;/);
-  assert.match(ultraComponent, /<p>\{ultra\.body\[0\]\}<\/p>/);
+  // The selector comes right after the runway, as a tablist over the five forms.
+  const runwayAt = suitupSource.indexOf('id="far-from-assembly-runway"');
+  const selectorAt = suitupSource.indexOf('role="tablist"');
+  assert.ok(runwayAt > 0 && selectorAt > runwayAt, "the selector follows the runway");
+  assert.match(suitupSource, /FAR_FROM_ASSEMBLY_FORMS\.map\(\(key\) => \(/);
+  assert.match(suitupSource, /aria-selected=\{stage === key\}/);
+  assert.match(suitupSource, /tabIndex=\{stage === key \? 0 : -1\}/);
+  assert.match(suitupSource, /data-form=\{farFromRunwayForm\(stage\)\}/);
+  // The old segment's words, moved verbatim into ウルトラ's ending.
+  assert.ok(
+    suitupSource.includes(
+      "マックスから移行する、60秒間の最上位形態。全身が白に染まった後、ウルトラ専用のナノマシンが追加機構を生成し、腕の外側などに補助インターフェースが展開します。",
+    ),
+  );
+  assert.match(suitupSource, /補助インターフェースの表示内容はイメージです。/);
   const record = read("src/components/final-stage/final-stage-data.ts");
   assert.ok(
     record.includes(
       "水色の結晶装甲が全身に大きく展開し、鋭く拡張された頭部、肩部の追加機構、幾重もの光輪と電子表示が出現する。",
     ),
   );
-  // House copy rules: plain official-site Japanese, no poetic motifs.
-  for (const source of [ultraComponent, ultraArt])
+  for (const source of [suitupSource, ultraArt])
     assert.doesNotMatch(source, /静かに|眠る|記録が|物語|祈り/);
-  assert.match(ultraComponent, /補助インターフェースの表示内容はイメージです。/);
-  // #suitup is the built runway, mounted from its own component.
-  assert.match(component, /<FarFromSuitUp \/>/);
-  assert.match(styles, /@import "\.\/styles-far-from-ultra\.css";/);
-});
-
-test("#ultra never loads its engine on the startup path, and the quiet tiers keep the still", () => {
-  // The component holds pictures and a dead canvas; the engine is the mount's lazy chunk.
-  const ultraImports = ultraComponent.split("\n").filter((line) => line.startsWith("import "));
-  assert.ok(ultraImports.length >= 4);
-  for (const line of ultraImports)
-    assert.doesNotMatch(
-      line,
-      /far-from-ultra-scene|far-from-ultra-kit|rexonance-assembly-nanites|rexonance-nanites/,
-    );
-  assert.doesNotMatch(ultraComponent, /getContext|createImageBitmap/);
-  assert.match(ultraComponent, /<canvas className="ffu-canvas" width=\{0\} height=\{0\} \/>/);
-  assert.match(ultraComponent, /className="ffu-still"[^]*?loading="lazy"/);
-  assert.match(ultraComponent, /className="ffu-start"[^]*?loading="lazy"/);
-  assert.match(
-    ultraComponent,
-    /useEffect\(\(\) => mountFarFromUltra\(runwayRef\.current\), \[\]\)/,
-  );
-  assert.match(ultraMount, /import\("\.\/far-from-ultra-scene\.ts"\)/);
-  assert.match(ultraMount, /import\("\.\/far-from-ultra-kit\.ts"\)/);
-  assert.match(
-    ultraMount,
-    /^import type \{ FarFromUltraScene \} from "\.\/far-from-ultra-scene\.ts";/m,
-  );
-  assert.doesNotMatch(ultraMount, /^import \{[^}]*\} from "\.\/far-from-ultra-scene\.ts"/m);
-  // The motion gate: reduced motion, forced colours, economy, Save-Data and 2G.
-  assert.match(ultraMount, /matchMedia\("\(prefers-reduced-motion: reduce\)"\)/);
-  assert.match(ultraMount, /matchMedia\("\(forced-colors: active\)"\)/);
-  assert.match(ultraMount, /html\.dataset\.worldEffects !== "economy"/);
-  assert.match(ultraMount, /connection\?\.saveData/);
-  assert.match(ultraMount, /setState\(motionAllowed\(\) \? "waiting" : "static"\);/);
-  assert.match(
-    ultraMount,
-    /if \(disposed \|\| live \|\| loading \|\| !near \|\| !motionAllowed\(\) \|\| document\.hidden\) return;/,
-  );
-  // A change of preference flips the frame to the still, or back.
-  assert.match(ultraMount, /reduced\.addEventListener\("change", onReduced\)/);
-  assert.match(
-    ultraMount,
-    /if \(!motionAllowed\(\)\) \{[^]*?live = false;\s*setState\("static"\);/,
-  );
-  // Only the two cutouts the sequence draws are fetched (never the painted interfaces).
-  assert.match(ultraMount, /fetchBitmap\(farFromUltraSrc\("max", artWidth\)/);
-  assert.match(ultraMount, /fetchBitmap\(farFromUltraSrc\("body", artWidth\)/);
-  assert.doesNotMatch(ultraMount, /farFromUltraSrc\("interface"/);
-  // The sheet: the still unless live/waiting; the canvas only live; travel and
-  // the sticky frame only under no-preference, no forced colours, not economy.
-  assert.match(
-    ultraStyles,
-    /\.ffu-runway\[data-ffu-state="live"\] \.ffu-canvas \{\s*display: block;/,
-  );
-  assert.match(ultraStyles, /\.ffu-runway\[data-ffu-state="live"\] \.ffu-still,/);
-  assert.match(
-    ultraStyles,
-    /@media \(prefers-reduced-motion: no-preference\) and \(forced-colors: none\) \{/,
-  );
-  assert.match(
-    ultraStyles,
-    /html:not\(\[data-world-effects="economy"\]\)\s+\.ffs-page\s+\.ffu-runway:not\(\[data-ffu-state="static"\]\)\s*>\s*\.ffu-frame\s*\{\s*position: sticky;/,
-  );
-  assert.match(ultraStyles, /\.ffs-page \.ffu-runway \{[^}]*height: var\(--ffu-frame-h\);/);
-  // The read-outs are rewritten as text data, never replaced nodes.
-  assert.match(ultraMount, /if \(\(node as Text\)\.data !== text\) \(node as Text\)\.data = text;/);
+  // No canvas engine of the old segment on the page's path.
+  assert.doesNotMatch(suitupSource, /far-from-ultra-scene|far-from-ultra-kit|mountFarFromUltra/);
 });
 
 test("the ウルトラ cutouts are one versioned set on the マックス grid, within budget", () => {
@@ -835,18 +774,6 @@ test("the figure stands on the #suitup runway's placement (far-from-stage.ts), n
     /frame\.style\.setProperty\(FAR_FROM_STAGE_VARS\.height, String\(place\.height\)\)/,
   );
   assert.doesNotMatch(ultraArt, /height: 0\.86|bottom: 0\.035/);
-  assert.match(ultraComponent, /\[FAR_FROM_STAGE_VARS\.height as string\]: FAR_FROM_STAGE\.height/);
-  // The sheet's travel and frame agree with the stage module.
-  assert.ok(ultraStyles.includes(stage.FAR_FROM_RUNWAY_TRAVEL.desktop), "desktop travel");
-  assert.ok(ultraStyles.includes(stage.FAR_FROM_RUNWAY_TRAVEL.phone), "phone travel");
-  assert.ok(
-    ultraStyles.includes(
-      `min(${stage.FAR_FROM_STAGE_FRAME.desktop.max}px, max(${stage.FAR_FROM_STAGE_FRAME.desktop.min}px`,
-    ),
-  );
-  assert.ok(ultraStyles.includes(`max(${stage.FAR_FROM_STAGE_FRAME.phone.min}px`));
-  for (const name of Object.values(stage.FAR_FROM_STAGE_VARS))
-    assert.ok(ultraStyles.includes(`var(${name}`), name);
 });
 
 // A document and contexts for the scene under Node: canvases whose contexts

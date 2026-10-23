@@ -7,7 +7,8 @@
  * src/lib/far-from-assembly-engine.ts: the undersuit scanned, the fire
  * engulfing it and bursting into the nanites, the armour landing group by
  * group on each call, the seal, the ignition, the reactor and the eyes
- * filling with pixels that scatter, then ハイ → エックスハイ → マックス.
+ * filling with pixels that scatter, then the chain of forms up to the one
+ * chosen after the runway (ミドル stops there; ハイ … ウルトラ overwrite in turn).
  *
  * This module stays light: it holds the beats, the HUD's words and the
  * mount, and imports the engine chunk only under the motion gate, after the
@@ -48,7 +49,7 @@ export const FAR_FROM_ASSEMBLY_BEATS: readonly FarFromAssemblyBeat[] = Object.fr
   { at: 0.86, until: 0.9, part: "seal", label: "構造を固定" },
   { at: 0.855, until: 0.95, part: "pixels", label: "複眼とリアクターの完成" },
   { at: 0.9, until: 0.915, part: "light", label: "出力を起動" },
-  { at: 0.915, until: 0.975, part: "forms", label: "ハイ、エックスハイ、マックスへ移行" },
+  { at: 0.915, until: 0.975, part: "forms", label: "選んだ形態へ移行" },
 ]);
 
 /** The HUD's parts, one per beat, in the order they land. */
@@ -68,7 +69,8 @@ export const FAR_FROM_ASSEMBLY_PHASES = Object.freeze([
   { phase: "assemble", step: "02", label: "装甲を装着" },
   { phase: "seal", step: "03", label: "構造を固定" },
   { phase: "ignite", step: "04", label: "出力を起動" },
-  { phase: "evolve", step: "05", label: "マックスへ移行" },
+  // The chosen form's name replaces this on the runway (farFromEvolveLabel).
+  { phase: "evolve", step: "05", label: "形態を移行" },
   { phase: "complete", step: "06", label: "装着完了" },
 ] as const);
 
@@ -87,8 +89,32 @@ export function farFromCallUnits(call: string): readonly string[] {
   return units && units.length > 1 && units.join("") === call ? units : [call];
 }
 
-/** The runway's final form (the engine's data-form): the chain's last. */
-export const FAR_FROM_ASSEMBLY_FORM = "max";
+/** The forms the runway can end on, in the selector's order (ミドル first):
+ * the page's stage keys (far-from-saga-artwork.ts FAR_FROM_SAGA_STAGE_ORDER). */
+export const FAR_FROM_ASSEMBLY_FORMS = Object.freeze([
+  "middle",
+  "high",
+  "xhigh",
+  "max",
+  "ultra",
+] as const);
+export type FarFromAssemblyForm = (typeof FAR_FROM_ASSEMBLY_FORMS)[number];
+
+/** The runway's form when nothing is chosen yet: ミドル, the base figure the
+ * scroll builds (owner, 2026-10-23: never straight to マックス). */
+export const FAR_FROM_ASSEMBLY_FORM: FarFromAssemblyForm = "middle";
+
+/** The engine's data-form for a chosen form (as on the Rexonance page,
+ * runway.dataset.form): ミドル is the engine's "standard" (the base figure,
+ * complete at the published .93), every other form a key of the chain. */
+export function farFromRunwayForm(form: FarFromAssemblyForm): string {
+  return form === "middle" ? "standard" : form;
+}
+
+/** The HUD's step for the chain, naming the chosen form. */
+export function farFromEvolveLabel(label: string): string {
+  return `${label}へ移行`;
+}
 
 export type FarFromAssemblyOptions = {
   /** Force the viewer's prefers-reduced-motion (tests). */

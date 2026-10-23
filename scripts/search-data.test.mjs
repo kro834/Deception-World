@@ -176,8 +176,8 @@ test("every destination is an existing public route with its actual heading anch
     "/rexonance-saga": read("src/components/rexonance-saga/rexonance-saga.tsx") + read("src/components/rexonance-saga/rexonance-assembly-guide.tsx"),
     "/far-from-saga":
       read("src/components/far-from-saga/far-from-saga.tsx") +
-      read("src/components/far-from-saga/far-from-suitup.tsx") +
-      read("src/components/far-from-saga/far-from-ultra.tsx"),
+      // Owner (2026-10-23): ウルトラ is one of #suitup's forms; far-from-ultra.tsx is gone.
+      read("src/components/far-from-saga/far-from-suitup.tsx"),
     "/final-stage": read("src/components/final-stage/final-stage.tsx"),
     "/form-archive": read("src/routes/form-archive.tsx"),
     "/gallery": read("src/components/gallery/gallery-page.tsx"),

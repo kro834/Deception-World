@@ -1553,3 +1553,176 @@ html[data-family="special"]
   white-space: nowrap;
   border: 0;
 }
+
+/* ---------- The form the scroll ends on (owner, 2026-10-23) ----------
+   Right after the runway: ミドル … ウルトラ as the #stages rail draws them
+   (the same liquid rail), then the ending — the order the end of the scroll
+   overwrites the figure in, its sentence and the way back to watch it. */
+html[data-family="special"] body .rxs-page.ffs-page .ffs-ending {
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  box-sizing: border-box;
+  width: min(780px, 100%);
+  margin: clamp(30px, 4.4vw, 56px) auto 0;
+}
+
+html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-head {
+  display: grid;
+  gap: 6px;
+  justify-items: center;
+  text-align: center;
+}
+
+html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-head > p {
+  margin: 0;
+  color: var(--ffs-accent);
+  font: 400 12px / 1.2 var(--dx-hud);
+  letter-spacing: 0.28em;
+}
+
+html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-head > h3 {
+  margin: 0;
+  color: var(--dx-text);
+  font: 700 clamp(20px, 2.3vw, 26px) / 1.35 var(--dx-display);
+  letter-spacing: 0.04em;
+}
+
+html[data-family="special"] body .rxs-page.ffs-page .ffs-ending > .ffs-ending-tabs {
+  margin: 0 auto;
+}
+
+html[data-family="special"] body .rxs-page.ffs-page .ffs-ending > .rxs-stage-hint {
+  margin: -4px auto 0;
+}
+
+html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-panel {
+  display: grid;
+  gap: 14px;
+  box-sizing: border-box;
+  width: 100%;
+  padding: clamp(16px, 2.4vw, 22px) clamp(16px, 2.6vw, 26px);
+  border: 1px solid color-mix(in srgb, var(--ffs-accent) 32%, transparent);
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--ffs-accent) 9%, transparent), transparent 62%),
+    rgb(5 9 16 / 82%);
+  clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
+}
+
+/* The order of the overwrites: each form's bar lights up to the chosen one. */
+html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-route {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-route > li {
+  display: grid;
+  gap: 4px;
+  align-content: start;
+  min-width: 0;
+  padding-top: 10px;
+  border-top: 3px solid rgb(255 255 255 / 10%);
+  color: #8b9aa8;
+}
+
+html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-route > li[data-reached] {
+  border-top-color: var(--ffs-node);
+  color: #dfeaf0;
+}
+
+html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-route > li[data-current] {
+  box-shadow: 0 -6px 14px -8px var(--ffs-node);
+}
+
+html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-route b {
+  font: 400 12px / 1.2 var(--dx-hud);
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+}
+
+html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-route > li[data-current] b {
+  color: var(--ffs-node);
+}
+
+html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-route span {
+  font: 500 12px / 1.45 var(--dx-body);
+  letter-spacing: 0.02em;
+}
+
+html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-line {
+  margin: 0;
+  color: #e6f1f5;
+  font: 500 15px / 1.8 var(--dx-body);
+  text-wrap: pretty;
+}
+
+html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-ultra {
+  display: grid;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid color-mix(in srgb, var(--ffs-accent) 24%, transparent);
+}
+
+html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-ultra > p {
+  margin: 0;
+  color: #bccbd8;
+  font: 400 14px / 1.8 var(--dx-body);
+  text-wrap: pretty;
+}
+
+html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-ultra > .ffs-note {
+  max-width: none;
+  color: #a2b1c0;
+  font-size: 12px;
+}
+
+html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-panel > .ffs-assembly-controls {
+  justify-content: flex-start;
+}
+
+html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-panel > .ffs-assembly-controls > button {
+  border-color: color-mix(in srgb, var(--ffs-accent) 60%, transparent);
+  background: color-mix(in srgb, var(--ffs-accent) 16%, transparent);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.ffs-page
+    .ffs-ending-route
+    > li {
+    transition:
+      border-color 320ms ease,
+      color 320ms ease,
+      box-shadow 320ms ease;
+  }
+}
+
+/* Phones: the forms' codes give way to their names in the order. */
+@media (max-width: 560px) {
+  html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-route {
+    gap: 4px;
+  }
+
+  html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-route b {
+    display: none;
+  }
+
+  html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-route span {
+    word-break: normal;
+    overflow-wrap: anywhere;
+  }
+
+  html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-panel > .ffs-assembly-controls {
+    display: grid;
+    justify-content: stretch;
+  }
+
+  html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-panel > .ffs-assembly-controls > :is(a, button) {
+    justify-content: center;
+  }
+}

@@ -17,9 +17,14 @@
  *   (src/lib/far-from-nanites.ts, FAR_FROM_NANITE_CELLS, the same layout
  *   contract); each chip is one kit's by its hash and both draw through the
  *   same sprite path;
- * - after the seal the suit-up runs ハイ → エックスハイ → マックス
- *   (`forms.chain`), each form overwriting the last with cells from the core
- *   out, and the runway ends on マックス;
+ * - after the seal the suit-up runs the chain of forms up to the one chosen
+ *   in the selector after the runway (the runway's data-form, as on the
+ *   Rexonance page; owner, 2026-10-23): ハイ → エックスハイ → マックス →
+ *   ウルトラ, each form overwriting the last with cells from the core out.
+ *   ウルトラ goes through マックス and overwrites it twice — the owner's body
+ *   (white, its added parts generated as the overwrite's extras), then the
+ *   owner's figure with its auxiliary interfaces. ミドル ("standard") stops
+ *   on the base figure;
  * - the 光輪 open behind the figure as the output ignites
  *   (src/lib/far-from-assembly-accents.ts).
  *
@@ -52,17 +57,36 @@ import {
   FAR_FROM_SUIT_SEAMS,
 } from "./far-from-suit-nanites.ts";
 import { farFromAccents } from "./far-from-assembly-accents.ts";
+import { farFromUltraSrc } from "./far-from-ultra-art.ts";
 
 /** The stages' lights, as the record's accents (final-stage-data.ts). */
 export const FAR_FROM_FORM_TONES = Object.freeze({
   high: "#ffd77a",
   xhigh: "#ff6f8d",
   max: "#c99bff",
+  "ultra-body": "#f4fbff",
+  ultra: "#9cf1ff",
 });
 
-/** The forms the suit-up runs through after the seal, in order; the runway
- * ends on the last (its data-form). */
-export const FAR_FROM_FORM_CHAIN = Object.freeze(["high", "xhigh", "max"] as const);
+/** The forms the suit-up runs through after the seal, in order, up to the
+ * runway's data-form (the selector's choice). "ultra-body" is ウルトラ's
+ * first overwrite (never chosen by itself): the white body and its added
+ * parts, before the interfaces of "ultra". */
+export const FAR_FROM_FORM_CHAIN = Object.freeze([
+  "high",
+  "xhigh",
+  "max",
+  "ultra-body",
+  "ultra",
+] as const);
+
+/** ウルトラ's two sheets, the owner's cutouts on the same 1024 × 1536 grid as
+ * the suit's forms (far-from-ultra-art.ts). The 768 delivery is enough: the
+ * scene's sheets are figure-sized (693 × 1040). */
+export const FAR_FROM_ULTRA_FORMS = Object.freeze({
+  "ultra-body": farFromUltraSrc("body", 768),
+  ultra: farFromUltraSrc("interface", 768),
+});
 
 /** FAR FROM's palette for the scene: 水色 (ice), 黄金 (gold), white. */
 export const FAR_FROM_PALETTE = Object.freeze({
@@ -162,6 +186,7 @@ export function farFromAssemblyConfig(): RexonanceAssemblyConfig {
       chain: FAR_FROM_FORM_CHAIN,
       tones: FAR_FROM_FORM_TONES,
       ...FAR_FROM_SUIT_FORMS,
+      ...FAR_FROM_ULTRA_FORMS,
     },
   };
 }

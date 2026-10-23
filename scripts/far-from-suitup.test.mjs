@@ -35,6 +35,8 @@ import {
 import {
   FAR_FROM_ASSEMBLY_BEATS,
   FAR_FROM_ASSEMBLY_FORM,
+  FAR_FROM_ASSEMBLY_FORMS,
+  farFromRunwayForm,
   FAR_FROM_ASSEMBLY_PARTS,
   FAR_FROM_ASSEMBLY_PHASES,
   FAR_FROM_SUIT_CALLS,
@@ -315,9 +317,15 @@ test("the beats are the engine's, the HUD has one part per beat, the call is the
   ]);
   assert.deepEqual(farFromCallUnits(FAR_FROM_SUIT_CALLS[4]), ["FAR FROM DEUS！"]);
   assert.deepEqual(farFromCallUnits(FAR_FROM_SUIT_CALLS[0]), [FAR_FROM_SUIT_CALLS[0]]);
-  // The runway ends on マックス, the chain's last form; the HUD knows the chain's forms.
-  assert.equal(FAR_FROM_ASSEMBLY_FORM, "max");
-  assert.deepEqual([...FAR_FROM_FORM_CHAIN], ["high", "xhigh", "max"]);
+  // Owner (2026-10-23): the runway ends on the form chosen after it (ミドル until
+  // then, the engine's "standard"); the chain runs on through ウルトラ's two sheets.
+  assert.equal(FAR_FROM_ASSEMBLY_FORM, "middle");
+  assert.deepEqual([...FAR_FROM_ASSEMBLY_FORMS], ["middle", "high", "xhigh", "max", "ultra"]);
+  assert.equal(farFromRunwayForm("middle"), "standard");
+  for (const key of ["high", "xhigh", "max", "ultra"]) assert.equal(farFromRunwayForm(key), key);
+  assert.deepEqual([...FAR_FROM_FORM_CHAIN], ["high", "xhigh", "max", "ultra-body", "ultra"]);
+  assert.equal(assemblyPhase(ASSEMBLY_BEATS.complete, "standard", true).phase, "complete");
+  assert.equal(assemblyPhase(0.95, "ultra", true).phase, "evolve");
   assert.equal(assemblyPhase(0.5, "max", true).phase, "assemble");
   assert.equal(assemblyPhase(0.95, "max", true).phase, "evolve");
   assert.deepEqual(assemblyPhase(ASSEMBLY_BEATS.form[1], "max", true), {
@@ -396,8 +404,17 @@ test("the config is the engine's: FAR FROM's palette, reactor, chain, kits and a
   assert.equal(config.palette, FAR_FROM_PALETTE);
   assert.equal(config.accents, farFromAccents);
   assert.deepEqual(config.forms.chain, FAR_FROM_FORM_CHAIN);
+  // Owner (2026-10-23): ウルトラ's sheets are its own cutouts (far-from-ultra-art.ts).
   for (const key of FAR_FROM_FORM_CHAIN) {
-    assert.equal(config.forms[key], FAR_FROM_SUIT_FORMS[key], key);
+    assert.equal(
+      config.forms[key],
+      key === "ultra-body"
+        ? "/far-from-ultra-20261022/ultra-768.webp"
+        : key === "ultra"
+          ? "/far-from-ultra-20261022/ultra-interface-768.webp"
+          : FAR_FROM_SUIT_FORMS[key],
+      key,
+    );
     assert.match(config.forms.tones[key], /^#[0-9a-f]{6}$/, key);
   }
   assert.equal(config.forms.tones.max, FAR_FROM_SAGA.stages.max.accent);
@@ -610,7 +627,8 @@ test("budgets and the touch tier are the engine's; the markup is the Rexonance r
   // parts, the read-outs, the stamp; the form the runway ends on.
   for (const needle of [
     'className="ffs-runway rzn-suitup"',
-    'data-form={FAR_FROM_ASSEMBLY_FORM}',
+    // Owner (2026-10-23): the runway ends on the selector's form.
+    "data-form={farFromRunwayForm(stage)}",
     'className="rzn-frame"',
     'className="rzn-still"',
     'className="rzn-under"',
@@ -622,10 +640,14 @@ test("budgets and the touch tier are the engine's; the markup is the Rexonance r
     'className="rzn-percent"',
     'className="rzn-count"',
     'className="rzn-stamp"',
-    'src={FAR_FROM_SUIT_FORMS.max}',
+    "src={STILLS[stage]}",
     'src={FAR_FROM_SUIT_UNDERSUIT}',
     'src={FAR_FROM_SUIT_DRIVER_STANDIN}',
-    "{FAR_FROM_SAGA.stages.max.code}",
+    "<b>{form.code}</b>",
+    'role="tablist"',
+    "aria-selected={stage === key}",
+    'role="tabpanel"',
+    "initRail(rail)",
     "FAR_FROM_ASSEMBLY_PARTS.map((part)",
     "FAR_FROM_ASSEMBLY_PHASES.map(",
     'role="status" aria-live="polite"',

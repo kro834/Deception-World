@@ -36,7 +36,7 @@ export const SPECIAL_SITE_SECTIONS: Record<SpecialSiteId, readonly SpecialSiteSe
   // 2026-10-22: the owner's record in full, in the page's chapter order
   // (the Rexonance order — performance, processor, suit-up, stages, system
   // — with the record's own chapters around it; far-from-saga.tsx numbers
-  // them 01–12, the two comparison documents inside 03). performance, the
+  // them 01–11, the two comparison documents inside 03). performance, the
   // documents (report-*) and p16 come from the owner's comparison text.
   "far-from": [
     ["top", "トップ", "TOP"],
@@ -47,7 +47,6 @@ export const SPECIAL_SITE_SECTIONS: Record<SpecialSiteId, readonly SpecialSiteSe
     ["report-saga", "究極形態の比較資料", "REPORT 02"],
     ["p16", "P16", "PROCESSOR"],
     ["suitup", "変身シークエンス", "SUIT-UP"],
-    ["ultra", "ウルトラ", "ULTRA"],
     ["stages", "形態", "5 STAGES"],
     ["theories", "中核機構", "MECHANISM"],
     ["system", "装甲・OS", "ARMOR & OS"],
