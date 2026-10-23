@@ -1510,9 +1510,7 @@
   color: var(--ts-kinari);
 }
 
-.dream-page.dream-page
-  .dream-dossier-copy
-  :is( .dream-profile-grid dt, .dream-ability-list h4) {
+.dream-page.dream-page .dream-dossier-copy :is(.dream-profile-grid dt, .dream-ability-list h4) {
   color: var(--ts-kin-light);
   font-family: var(--ts-latin);
 }
@@ -2292,12 +2290,7 @@
     text-underline-offset: 3px;
   }
 
-  .dream-page.dream-page
-    :is(
-      .dream-story-case-status,
-      .dream-character-copy b,
-      .dream-act-mark
-    ) {
+  .dream-page.dream-page :is(.dream-story-case-status, .dream-character-copy b, .dream-act-mark) {
     border: 1px solid CanvasText;
   }
 

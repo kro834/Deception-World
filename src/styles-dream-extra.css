@@ -1416,12 +1416,7 @@ html[data-world-effects="economy"] .dream-page.dream-page .dream-archive-fold > 
     outline: 2px solid Highlight;
   }
 
-  .dream-page.dream-page
-    :is(
-      .dream-archive-add,
-      .dream-arsenal-list > div,
-      .dream-atlas-wave
-    ) {
+  .dream-page.dream-page :is(.dream-archive-add, .dream-arsenal-list > div, .dream-atlas-wave) {
     border-color: CanvasText;
   }
 }

@@ -1447,7 +1447,7 @@ html[data-world-effects="economy"]
     display: none;
   }
 
-  .dream-page.dream-page :is( .dream-faction-pact b, .dream-contents h2) {
+  .dream-page.dream-page :is(.dream-faction-pact b, .dream-contents h2) {
     border: 1px solid CanvasText;
     clip-path: none;
   }

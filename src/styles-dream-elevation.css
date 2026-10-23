@@ -272,10 +272,7 @@
    press-feedback timing rules stay heavier than anything here: only the
    non-pressable parts inside them gain a list of their own. */
 @media (hover: hover) and (pointer: fine) {
-  .dream-page.dream-page
-    :is(
-      .dream-character-copy b,
-      .dream-dolminence-grid button img) {
+  .dream-page.dream-page :is(.dream-character-copy b, .dream-dolminence-grid button img) {
     transition:
       outline-color 220ms ease,
       border-color 220ms ease,
@@ -365,11 +362,7 @@
 
 html[data-world-effects="economy"]
   .dream-page.dream-page
-  :is(
-    .dream-character-copy b,
-    .dream-dolminence-grid button img,
-    .dream-poster-controls button b
-  ) {
+  :is(.dream-character-copy b, .dream-dolminence-grid button img, .dream-poster-controls button b) {
   transition: none;
 }
 

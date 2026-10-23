@@ -156,7 +156,10 @@ html[data-family="dream"]
   color: #f4ecdc;
 }
 
-html[data-family="dream"] main.dream-page.dream-page .dream-story-case[open] .dream-story-case-number {
+html[data-family="dream"]
+  main.dream-page.dream-page
+  .dream-story-case[open]
+  .dream-story-case-number {
   color: #dfcaae;
 }
 

@@ -142,9 +142,7 @@
   text-shadow: none;
 }
 
-.dream-page.dream-page
-  .dream-story-case[open]
-  :is(.dream-story-case-number) {
+.dream-page.dream-page .dream-story-case[open] :is(.dream-story-case-number) {
   color: #6e5d6b;
 }
 

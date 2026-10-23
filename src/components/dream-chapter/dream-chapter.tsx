@@ -1844,6 +1844,21 @@ export function DreamChapter() {
               </button>
             ))}
           </div>
+          <button
+            type="button"
+            className="dream-roster-bulk"
+            onClick={() =>
+              setOpenProfiles((current) =>
+                current.size === DREAM_CAST_ROSTER.length
+                  ? new Set()
+                  : new Set(DREAM_CAST_ROSTER.map((entry) => entry.id)),
+              )
+            }
+          >
+            {openProfiles.size === DREAM_CAST_ROSTER.length
+              ? "全プロフィールを閉じる"
+              : "全プロフィールを展開"}
+          </button>
         </div>
         <ol className="dream-roster" data-dream-reveal>
           {DREAM_CAST_ROSTER.map((entry) => (

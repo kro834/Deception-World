@@ -897,7 +897,7 @@ html[data-family="dream"] main.dream-page.dream-page .dream-record-card nav a:fi
   /* 人物一覧's filters show from 1101px — an iPad on its side (36px). */
   html[data-family="dream"]
     main.dream-page.dream-page
-    :is(.dream-roster-filters button) {
+    :is(.dream-roster-filters button, .dream-roster-bulk) {
     min-height: 44px;
   }
 }
