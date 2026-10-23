@@ -309,7 +309,10 @@ export function mountAssemblyMovie(
       onScroll();
     } else {
       delete control.dataset.shown;
+      // The frame unpinned: the movie's turn is over (on phones the control
+      // returns to the page; 再生 then plays from wherever the page stands).
       if (state === "playing") pause();
+      setState("idle");
     }
   };
   const showObserver =

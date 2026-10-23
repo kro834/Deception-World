@@ -1092,3 +1092,29 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rzn-movi
     display: none;
   }
 }
+
+/* Phones: the frame's foot is the HUD's (the parts, the read-out), so the
+   control stands in the page before the runway and takes the viewport's
+   foot only while a movie is on (playing, paused or ended) and the frame
+   is pinned; when the frame unpins, the controller returns it to the page. */
+@media (max-width: 639.98px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rzn-movie {
+    position: static;
+    width: auto;
+    margin: 0 20px 18px;
+    visibility: visible;
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    .rzn-movie[data-shown]:is([data-state="playing"], [data-state="paused"], [data-state="ended"]) {
+    position: fixed;
+    width: calc(100vw - 16px);
+    margin: 0;
+    transform: translate(-50%, 0);
+  }
+}

@@ -411,6 +411,17 @@ test("the control shows while the frame is pinned, is disabled until the scene i
   observer.callback([{ isIntersecting: false }]);
   assert.equal(t.control.dataset.shown, undefined);
   observer.callback([{ isIntersecting: true }]);
+  // The frame unpinned mid-movie: the movie's turn is over (the control
+  // reads idle; on phones it returns to the page).
+  t.setLoad("ready");
+  t.play.fire("click");
+  assert.equal(t.control.dataset.state, "playing");
+  observer.callback([{ isIntersecting: false }]);
+  assert.equal(t.control.dataset.state, "idle");
+  assert.equal(t.play.textContent, MOVIE_PLAY_LABELS.play);
+  assert.equal(t.frames.size, 0);
+  observer.callback([{ isIntersecting: true }]);
+  t.setLoad("waiting");
   // Ready: the control is live.
   t.setLoad("ready");
   assert.equal(t.play.disabled, false);
@@ -435,6 +446,19 @@ test("the control shows while the frame is pinned, is disabled until the scene i
     assert.match(css, /\.rzn-movie\[data-shown\],[\s\S]*?\.rzn-movie:focus-within \{\s*visibility: visible;/, sheet);
     assert.match(css, /\.rzn-movie :is\(button, input\):focus-visible \{\s*outline: 2px solid/, sheet);
     assert.match(css, /\.rzn-movie \{[^}]*position: fixed;/, sheet);
+    // Phones: in the page while idle, at the viewport's foot only while a
+    // movie is on and the frame is pinned (the HUD's parts and read-out
+    // stand at the frame's foot there).
+    assert.match(
+      css,
+      /@media \(max-width: 639\.98px\) \{\s*html\[data-family="special"\] body \.rxs-page[^{]*\.rzn-movie \{\s*position: static;/,
+      sheet,
+    );
+    assert.match(
+      css,
+      /\.rzn-movie\[data-shown\]:is\(\[data-state="playing"\], \[data-state="paused"\], \[data-state="ended"\]\) \{\s*position: fixed;/,
+      sheet,
+    );
   }
   dispose();
 });
