@@ -2361,3 +2361,80 @@
     scale: 0.1 1;
   }
 }
+
+/* ================================================================
+   End card brush-up (2026-10-24, after Rexonance's and Extreme's): the
+   way back to the top anchored at the card's corner, two gold orbits
+   centred on the last name (the art's sigil, echoed), the name set at the
+   hero's scale, and the exits as the hero's cut-corner plates.
+   ================================================================ */
+.rxs-page.rxs-page.ics-page .ics-footer > p.ics-footer-top {
+  position: absolute;
+  top: clamp(28px, 5vw, 56px);
+  left: var(--ics-gutter);
+  margin: 0;
+}
+
+.rxs-page.rxs-page.ics-page .ics-footer > div::before,
+.rxs-page.rxs-page.ics-page .ics-footer > div::after {
+  position: absolute;
+  top: 50%;
+  left: clamp(-120px, -8vw, -40px);
+  z-index: -1;
+  width: clamp(420px, 52vw, 760px);
+  aspect-ratio: 1;
+  translate: 0 -50%;
+  border: 1px solid rgb(233 184 102 / 22%);
+  border-radius: 50%;
+  content: "";
+  pointer-events: none;
+}
+
+.rxs-page.rxs-page.ics-page .ics-footer > div::after {
+  left: clamp(-40px, -2vw, -8px);
+  width: clamp(300px, 36vw, 520px);
+  border-color: rgb(166 230 255 / 16%);
+  border-style: dashed;
+}
+
+.rxs-page.rxs-page.ics-page .ics-footer h2 {
+  max-width: 760px;
+  font-size: clamp(30px, 4.4vw, 64px);
+  line-height: 1.18;
+}
+
+.rxs-page.rxs-page.ics-page .ics-footer > a {
+  gap: 18px;
+  padding-inline: 20px;
+  border: 1px solid rgb(233 184 102 / 40%);
+  border-radius: 0;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+}
+
+.rxs-page.rxs-page.ics-page .ics-footer > a:not(.rxs-footer-return) {
+  border-color: transparent;
+  background: linear-gradient(90deg, var(--ics-ice), #d9f4ff);
+  color: #050816;
+}
+
+.rxs-page.rxs-page.ics-page .ics-footer > a:not(.rxs-footer-return) i {
+  color: #050816;
+}
+
+.rxs-page.rxs-page.ics-page .ics-footer > a:hover {
+  border-color: var(--ics-ice);
+}
+
+@media (max-width: 900px) {
+  .rxs-page.rxs-page.ics-page .ics-footer > div::before {
+    left: -30vw;
+    width: 120vw;
+  }
+
+  .rxs-page.rxs-page.ics-page .ics-footer > div::after {
+    left: -8vw;
+    width: 84vw;
+  }
+}
