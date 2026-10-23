@@ -392,102 +392,75 @@
   }
 }
 
-/* ---------- The plates forming, group by group ---------- */
-.ice-entry-band {
+/* ---------- The plates forming, plate by plate (SAM outlines) ---------- */
+.ice-entry-plate {
   position: absolute;
-  inset: 0;
-  clip-path: inset(var(--top) -10% var(--bottom) -10%);
+  transform: translateY(-5%) scale(1.04);
+  transform-origin: 50% 0;
+  animation: ice-plate-seat 420ms cubic-bezier(0.5, 0, 0.2, 1) calc(var(--start) + 620ms) both;
 }
 
-.ice-entry-band-cells,
-.ice-entry-band > img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+.ice-entry-plate {
+  overflow: hidden;
 }
 
-/* The cells: dark chips with lit edges inside the plates' silhouette,
-   built up from the band's bottom, held forward of the body. */
-.ice-entry-band-cells {
-  display: block;
+/* Each layer is the whole atlas at the plate's scale, moved so the plate's
+   cell sits in the box; its alpha (the SAM outline) masks it. */
+.ice-entry-plate > i {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--aw);
+  height: var(--ah);
+  translate: var(--ax) var(--ay);
+  mask: var(--atlas) 0 0 / 100% 100% no-repeat;
+  -webkit-mask: var(--atlas) 0 0 / 100% 100% no-repeat;
+}
+
+/* Its cells: dark chips with lit edges, built from its seat outward. */
+.ice-entry-plate-cells {
   background:
-    repeating-linear-gradient(90deg, transparent 0 4px, rgb(2 3 10) 4px 6px),
-    repeating-linear-gradient(0deg, transparent 0 4px, rgb(2 3 10) 4px 6px),
-    repeating-linear-gradient(90deg, rgb(166 230 255 / 70%) 0 1px, transparent 1px 6px),
-    repeating-linear-gradient(0deg, rgb(233 184 102 / 60%) 0 1px, transparent 1px 6px),
-    linear-gradient(180deg, #1b2236, #2a2418 50%, #2b1a2a);
-  mask: var(--ice-cutout) 50% 0 / contain no-repeat;
-  -webkit-mask: var(--ice-cutout) 50% 0 / contain no-repeat;
+    repeating-linear-gradient(90deg, transparent 0 3px, rgb(2 3 10) 3px 5px),
+    repeating-linear-gradient(0deg, transparent 0 3px, rgb(2 3 10) 3px 5px),
+    repeating-linear-gradient(90deg, rgb(166 230 255 / 75%) 0 1px, transparent 1px 5px),
+    repeating-linear-gradient(0deg, rgb(233 184 102 / 65%) 0 1px, transparent 1px 5px), #1c2134;
   opacity: 0;
-  animation: ice-band-cells 900ms cubic-bezier(0.3, 0.6, 0.2, 1) var(--start) both;
+  animation: ice-plate-cells 760ms cubic-bezier(0.3, 0.6, 0.2, 1) var(--start) both;
 }
 
-.ice-entry-band > img {
-  object-fit: contain;
-  object-position: 50% 0;
+.ice-entry-plate-art {
+  background: var(--atlas) 0 0 / 100% 100% no-repeat;
   opacity: 0;
-  animation: ice-band-plate 520ms cubic-bezier(0.5, 0, 0.2, 1) calc(var(--start) + 620ms) both;
+  animation: ice-plate-art 360ms ease calc(var(--start) + 520ms) both;
 }
 
-.ice-entry-band-lock {
-  position: absolute;
-  left: 18%;
-  right: 18%;
-  top: calc(100% - var(--bottom));
-  height: 2px;
-  background: linear-gradient(90deg, transparent, rgb(166 230 255 / 85%), rgb(233 184 102 / 85%), transparent);
-  opacity: 0;
-  animation: ice-band-lock 420ms ease-out calc(var(--start) + 1040ms) both;
-}
-
-@keyframes ice-band-cells {
+@keyframes ice-plate-cells {
   0% {
-    opacity: 0.85;
-    clip-path: inset(100% 0 0 0);
-    transform: translateY(-5%) scale(1.06);
+    opacity: 0.9;
+    clip-path: var(--clip0, inset(100% 0 0 0));
   }
-  55% {
+  60% {
     opacity: 0.95;
     clip-path: inset(0 0 0 0);
-    transform: translateY(-5%) scale(1.06);
-  }
-  85% {
-    opacity: 0.6;
-    transform: none;
   }
   100% {
     opacity: 0;
     clip-path: inset(0 0 0 0);
-    transform: none;
   }
 }
 
-@keyframes ice-band-plate {
+@keyframes ice-plate-art {
   from {
     opacity: 0;
-    transform: translateY(-5%) scale(1.06);
-  }
-  45% {
-    opacity: 1;
   }
   to {
     opacity: 1;
-    transform: none;
   }
 }
 
-@keyframes ice-band-lock {
-  0% {
-    opacity: 0;
-    scale: 0.4 1;
-  }
-  40% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-    scale: 1.1 1;
+@keyframes ice-plate-seat {
+  to {
+    transform: none;
   }
 }
 
@@ -501,14 +474,23 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ice-entry-band {
+  .ice-entry-plate {
     display: none;
   }
 }
 
 @media (forced-colors: active) {
-  .ice-entry-band-cells,
-  .ice-entry-band-lock {
+  .ice-entry-plate-cells {
     display: none;
   }
+}
+
+.ice-entry-plate[style*="--from: top"] {
+  --clip0: inset(0 0 100% 0);
+}
+.ice-entry-plate[style*="--from: left"] {
+  --clip0: inset(0 100% 0 0);
+}
+.ice-entry-plate[style*="--from: right"] {
+  --clip0: inset(0 0 0 100%);
 }

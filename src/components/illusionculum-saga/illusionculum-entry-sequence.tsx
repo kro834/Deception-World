@@ -1,6 +1,12 @@
 import { ILLUSIONCULUM_ENTRY_CALLS, ILLUSIONCULUM_ENTRY_FIGURE } from "@/lib/illusionculum-entry";
 import { ILLUSIONCULUM_ORBS, illusionculumOrb } from "@/lib/illusionculum-saga-artwork";
 import { ILLUSIONCULUM_ENTRY_UNDERSUIT as REXONANCE_SUIT_UNDERSUIT } from "@/lib/illusionculum-entry";
+import {
+  ILLUSIONCULUM_SUIT_ATLAS,
+  ILLUSIONCULUM_SUIT_DRIVER,
+  ILLUSIONCULUM_SUIT_PIECES,
+  ILLUSIONCULUM_SUIT_SIZE,
+} from "@/lib/illusionculum-suit";
 
 /* ILLUSIONCULUM SAGA's entry transformation: the route transition screen of
    an in-site navigation to /illusionculum-saga (load-gate.tsx, the
@@ -42,15 +48,29 @@ const CHIPS = Array.from({ length: 36 }, (_, i) => {
   ] as const;
 });
 
-/** The plate groups as bands of the figure (top %, bottom %, start ms):
- * legs, waist, chest and arms, shoulders, head and halo — bottom first. */
-const BANDS = [
-  [62, 100, 150],
-  [41, 63, 520],
-  [24, 42, 860],
-  [14, 25, 1160],
-  [0, 15, 1420],
-] as const;
+const SIZE = ILLUSIONCULUM_SUIT_SIZE;
+const ATLAS = ILLUSIONCULUM_SUIT_ATLAS;
+/** The groups' start (ms) in the calls' order, and each plate's stagger. */
+const GROUP_START: Record<string, number> = {
+  legs: 150,
+  waist: 480,
+  arms: 760,
+  chest: 820,
+  shoulders: 1080,
+  tail: 1220,
+  helm: 1380,
+  bits: 1460,
+};
+const PLATES = (() => {
+  const seen: Record<string, number> = {};
+  return ILLUSIONCULUM_SUIT_PIECES.filter(
+    (piece) => !ILLUSIONCULUM_SUIT_DRIVER.includes(piece.id),
+  ).map((piece) => {
+    const k = (seen[piece.group] = (seen[piece.group] ?? -1) + 1);
+    const from = { up: "bottom", down: "top", left: "right", right: "left" }[piece.dir];
+    return { ...piece, start: (GROUP_START[piece.group] ?? 900) + k * 60, from };
+  });
+})();
 
 const seat = (side: "left" | "right") => {
   const orb = ILLUSIONCULUM_ORBS[side];
@@ -73,12 +93,7 @@ export function IllusionculumEntrySequence({ phase }: { phase: "covering" | "rev
       </svg>
       <div className="ice-entry-stage">
         <div className="ice-entry-figure">
-          <img
-            className="ice-entry-under"
-            src={REXONANCE_SUIT_UNDERSUIT}
-            alt=""
-            decoding="async"
-          />
+          <img className="ice-entry-under" src={REXONANCE_SUIT_UNDERSUIT} alt="" decoding="async" />
           {/* The armour generated from nanite cells away from the body
               (forward and above), then flown in and locked on. */}
           <span className="ice-entry-chips">
@@ -96,24 +111,32 @@ export function IllusionculumEntrySequence({ phase }: { phase: "covering" | "rev
               />
             ))}
           </span>
-          {/* The plates, group by group from the legs up (the calls' order):
-              each band's nanite cells build up from its bottom off the body,
-              the formed plate drops onto the undersuit and locks with a line
-              of light. */}
-          {BANDS.map(([top, bottom, start], index) => (
+          {/* The plates, group by group in the calls' order, each cut by its
+              SAM outline (the suit's plate atlas): its nanite cells build up
+              from its seat off the body, the formed plate drops on and locks,
+              each plate a beat after the last within its group. */}
+          {PLATES.map((plate) => (
             <span
-              key={index}
-              className="ice-entry-band"
+              key={plate.id}
+              className="ice-entry-plate"
               style={{
-                ["--top" as string]: `${top}%`,
-                ["--bottom" as string]: `${100 - bottom}%`,
-                ["--start" as string]: `${start}ms`,
-                ["--ice-cutout" as string]: `url("${ILLUSIONCULUM_ENTRY_FIGURE}")`,
+                left: `${(plate.x / SIZE.width) * 100}%`,
+                top: `${(plate.y / SIZE.height) * 100}%`,
+                width: `${(plate.w / SIZE.width) * 100}%`,
+                height: `${(plate.h / SIZE.height) * 100}%`,
+                ["--atlas" as string]: `url("${ATLAS.src}")`,
+                ["--ax" as string]: `${(-plate.ax / ATLAS.width) * 100}%`,
+                ["--ay" as string]: `${(-plate.ay / ATLAS.height) * 100}%`,
+                ["--aw" as string]: `${(ATLAS.width / plate.w) * 100}%`,
+                ["--ah" as string]: `${(ATLAS.height / plate.h) * 100}%`,
+                ["--start" as string]: `${plate.start}ms`,
+                ["--from" as string]: plate.from,
               }}
             >
-              <span className="ice-entry-band-cells" />
-              <img src={ILLUSIONCULUM_ENTRY_FIGURE} alt="" width={960} height={1440} decoding="async" />
-              <i className="ice-entry-band-lock" />
+              {/* The atlas at the plate's own scale, shifted so its cell
+                  fills the box (overflow clips the neighbours). */}
+              <i className="ice-entry-plate-cells" />
+              <i className="ice-entry-plate-art" />
             </span>
           ))}
           <span className="ice-entry-core" />
