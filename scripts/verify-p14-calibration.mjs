@@ -14,7 +14,9 @@ async function ready(page) {
 }
 
 async function settleP14Metrics(page, label, { allowStatic = false } = {}) {
-  const expectedP2 = ["650%", "500%", "12.0%", "11.1%", "14.3%", "約22.2%", "約13.3%", "122.7%", "121.5%"];
+  // The data's first P2 figure is 500% since ebba2629 (2026-10-22: 同じエーテル量で
+  // 発揮する性能, p2 "500%"); this list follows P14_METRICS in rexonance-saga.tsx.
+  const expectedP2 = ["500%", "500%", "12.0%", "11.1%", "14.3%", "約22.2%", "約13.3%", "122.7%", "121.5%"];
   await page.waitForFunction(() => document.querySelectorAll(".rxs-p14-values strong[data-rsn-count]").length === 9);
   const initialFigures = await page.locator(".rxs-p14-values strong[data-rsn-count]").evaluateAll((figures) =>
     figures.map((figure) => ({
@@ -96,7 +98,9 @@ async function settleP14Metrics(page, label, { allowStatic = false } = {}) {
 }
 
 async function inspectRange(page, suffix) {
-  const slider = page.getByLabel("P14の比較対象", { exact: true });
+  // The range's accessible name has been P14の比較基準 since ebba2629 (2026-10-22),
+  // which updated the other verifies but not this one.
+  const slider = page.getByLabel("P14の比較基準", { exact: true });
   assert.equal(await slider.count(), 1, `${suffix}: custom range should be present`);
   await slider.focus();
   await page.keyboard.press("End");
@@ -239,7 +243,8 @@ try {
   });
   const page = await context.newPage();
   await ready(page);
-  const select = page.getByLabel("P14の比較基準", { exact: true });
+  // The native select is named 基準にする世代：P14の比較基準 since ebba2629 (2026-10-22).
+  const select = page.getByLabel("基準にする世代：P14の比較基準", { exact: true });
   assert.equal(await select.count(), 1, "WebKit iPad UA should render the native select");
   assert.equal(await page.locator(".rxs-p14-native-rail").getAttribute("data-value"), "p1");
   await select.focus();
