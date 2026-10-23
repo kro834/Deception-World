@@ -36,9 +36,14 @@ await mkdir(publicDir, { recursive: true });
 const CAPS = { 640: 200_000, 960: 350_000, 1280: 480_000 };
 const QUALITIES = [84, 80, 76, 72, 68];
 
+// The tile frames the head and torso as the other special sites' tiles do
+// (owner, 2026-10-23: 「サムネだけ写っている位置がおかしい」): the figure's
+// upper body, centred, out of the halo's open space.
+const TILE_CROP = { left: 233, top: 150, width: 867, height: 1150 };
 const tile = async (input, output) => {
   const result = await sharp(input)
     .rotate()
+    .extract(TILE_CROP)
     .resize({ width: 400, withoutEnlargement: true })
     .webp({ quality: 74, effort: 6 })
     .toFile(output);

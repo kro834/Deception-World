@@ -173,8 +173,9 @@ const PAGES: Record<string, Picture & { edition: RecordEdition; code: string }> 
   // ILLUSIONCULUM SAGA's own site (2026-10-23): its key visual, in the
   // Rexonance edition's light (the site follows that site's structure).
   "/illusionculum-saga": {
-    src: "/illusionculum-saga-20261023/standard-640.webp",
-    pos: "50% 14%",
+    // The head-and-torso tile, framed as the other special sites' figures.
+    src: "/illusionculum-saga-20261023/standard-tile-400.webp",
+    pos: "50% 18%",
     edition: "rexonance",
     code: "ILLUSIONCULUM",
   },
@@ -294,8 +295,8 @@ const SITE_ART: Record<string, readonly Picture[]> = {
   ],
   "/illusionculum-saga": [
     PAGES["/illusionculum-saga"],
-    { src: "/illusionculum-saga-20261023/ultra-640.webp", pos: "50% 14%" },
-    { src: "/illusionculum-saga-20261023/more-640.webp", pos: "50% 14%" },
+    { src: "/illusionculum-saga-20261023/ultra-640.webp", pos: "50% 30%" },
+    { src: "/illusionculum-saga-20261023/more-640.webp", pos: "50% 30%" },
   ],
   "/final-stage": [PAGES["/final-stage"], formThumb("realm", "royal")],
   "/meta-unitas-saga": [

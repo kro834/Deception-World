@@ -50,7 +50,7 @@ export const ILLUSIONCULUM_KEY_VISUAL = ILLUSIONCULUM_ARTWORK.standard;
 
 /** The side menu's SPECIAL tile and the World's door (400 px, same script). */
 export const ILLUSIONCULUM_MENU_TILE = `${ILLUSIONCULUM_ARTWORK_FOLDER}/standard-tile-400.webp`;
-export const ILLUSIONCULUM_MENU_TILE_SIZE = [400, 601] as const;
+export const ILLUSIONCULUM_MENU_TILE_SIZE = [400, 531] as const;
 
 /** The transparent cutouts' delivery widths (1024 x 1536 frame, 2:3). */
 export const ILLUSIONCULUM_CUTOUT_WIDTHS = [480, 960] as const;
