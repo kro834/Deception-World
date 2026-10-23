@@ -61,7 +61,10 @@ const BLENDER = arg("blender");
 const HARDWARE = process.argv.includes("--hardware");
 // --only=cells,fx,guide: with --blender, re-render only these scenes (the
 // others are packed from the work folder's earlier renders).
+// --only=bead: render just the 8 bead frames (NANITE_BEAD_ONLY) and patch
+// them into the committed cells.webp; every other cell is carried over.
 const ONLY = (arg("only") || "cells,fx,guide").split(",");
+const BEAD_ONLY = ONLY.length === 1 && ONLY[0] === "bead";
 const WORK = arg("work") || join(tmpdir(), "rexonance-nanites-work");
 // --debug=<dir>: also writes each sheet, lossless, as <dir>/<name>.png.
 const DEBUG = arg("debug");
@@ -642,6 +645,19 @@ async function packCells(frameAt, sparks) {
   return sheet;
 }
 
+/** The committed cells.webp with only the bead cells replaced by new renders. */
+async function patchBead(frameAt) {
+  const [width, height] = SIZE.cells;
+  const { data, info } = await sharp(filePath("cells")).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  if (info.width !== width || info.height !== height) throw new Error("cells.webp has the wrong size");
+  const sheet = Buffer.from(data);
+  for (let k = 0; k < BEAD.frames; k += 1) {
+    const { raw, size } = await frameAt(`bead-${k}`);
+    blit(sheet, width, await downsample(raw, size, size, CELL, CELL), CELL, CELL, BEAD.x + k * CELL, BEAD.y);
+  }
+  return sheet;
+}
+
 // Alpha feathered to 0 over the last `feather` px of a cell: a swing-in that
 // leaves its cell fades instead of ending on a hard line.
 function featherCell(cell, w, h, feather) {
@@ -864,10 +880,25 @@ async function guidePrep(alpha) {
 }
 
 // --- Blender ---------------------------------------------------------------------------
+// BLENDER is a Blender binary or a Python with the bpy module (the bpy wheel:
+// `python -I <scene> -- <args>`), as in build-far-from-nanites.mjs.
+function blenderCommand(binary, script, args) {
+  const probe = spawnSync(binary, ["--version"], { encoding: "utf8" });
+  const text = `${probe.stdout ?? ""}${probe.stderr ?? ""}`;
+  if (/^Blender \d/m.test(text)) return [binary, ["-b", "--factory-startup", "-P", script, "--", ...args]];
+  if (/^Python 3/m.test(text)) {
+    const bpy = spawnSync(binary, ["-I", "-c", "import bpy"], { encoding: "utf8" });
+    if (bpy.status !== 0) throw new Error(`${binary} is a Python without Blender's bpy module`);
+    return [binary, ["-I", script, "--", ...args]];
+  }
+  throw new Error(`${binary} is neither Blender nor a Python with bpy (${text.trim().split("\n")[0] || probe.error})`);
+}
+
 function runBlender(script, ...args) {
   const started = Date.now();
-  const result = spawnSync(BLENDER, ["-b", "--factory-startup", "-P", join(BLENDER_DIR, script), "--", ...args], {
-    env: { ...process.env, ...(HARDWARE ? { NANITE_HARDWARE_ONLY: "1" } : {}) },
+  const [command, argv] = blenderCommand(BLENDER, join(BLENDER_DIR, script), args);
+  const result = spawnSync(command, argv, {
+    env: { ...process.env, ...(BEAD_ONLY ? { NANITE_BEAD_ONLY: "1" } : {}), ...(HARDWARE ? { NANITE_HARDWARE_ONLY: "1" } : {}) },
     stdio: ["ignore", "pipe", "pipe"],
     encoding: "utf8",
     maxBuffer: 256 * 1024 * 1024,
@@ -1267,7 +1298,7 @@ if (PLACEHOLDER) {
   if (BLENDER) {
     if (!existsSync(BLENDER)) throw new Error(`no Blender at ${BLENDER}`);
     for (const dir of ["cells", "fx", "guide"]) mkdirSync(join(WORK, dir), { recursive: true });
-    if (!HARDWARE && ONLY.includes("cells")) runBlender("nanite_cells.py", join(WORK, "cells"));
+    if (!HARDWARE && (BEAD_ONLY || ONLY.includes("cells"))) runBlender("nanite_cells.py", join(WORK, "cells"));
     if (HARDWARE || ONLY.includes("fx")) runBlender("nanite_fx.py", join(WORK, "fx"));
     if (!HARDWARE && ONLY.includes("guide")) {
       const prep = join(WORK, "guide-prep.json");
@@ -1296,7 +1327,7 @@ if (PLACEHOLDER) {
 if (frames) {
   // Over budget at the contract's settings, the alpha's quality steps down
   // first (85 → 65), then the colour's: each sheet reports what it used.
-  const sheets = { cells: await packCells(frames, sparks) };
+  const sheets = { cells: BEAD_ONLY ? await patchBead(frames) : await packCells(frames, sparks) };
   if (PLACEHOLDER || frames.fx) sheets.fx = await packFx(frames, !PLACEHOLDER);
   for (const name of Object.keys(sheets)) {
     const ladder = [];

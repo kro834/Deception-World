@@ -373,3 +373,50 @@ test("the guideway conduit stays on each plate's own gold, covers it, and is lit
   assert.ok(ulN > 300 && lrN > 300, `rails on every side (${ulN}, ${lrN})`);
   assert.ok(ul / ulN > 1.3 * (lr / lrN), `upper-left flanks ${(ul / ulN).toFixed(3)} vs lower-right ${(lr / lrN).toFixed(3)}`);
 });
+
+// The molten bead frames hold the bead alone (2026-10-23): the chip's curve
+// rings once stayed in the Blender scene and left a dark hex bezel ring around
+// the bead. The opaque pixels in the annulus outside the bead stay bright
+// (bead glints and its soft edge) or are absent altogether.
+const beadRing = (data, width, cellInfo, k) => {
+  const C = cellInfo.cell;
+  const x0 = cellInfo.bead.x + k * C;
+  const y0 = cellInfo.bead.y;
+  const at = (x, y) => ((y0 + y) * width + x0 + x) * 4;
+  // The bead: everything connected to the cell's centre through well-covered pixels (alpha 128+);
+  // its one-pixel soft edge is excluded from the annulus.
+  const inBead = new Uint8Array(C * C);
+  const stack = [[C / 2, C / 2]];
+  let bead = 0;
+  while (stack.length) {
+    const [x, y] = stack.pop();
+    if (x < 0 || y < 0 || x >= C || y >= C || inBead[y * C + x] || data[at(x, y) + 3] < 128) continue;
+    inBead[y * C + x] = 1;
+    bead += 1;
+    stack.push([x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1], [x + 1, y + 1], [x - 1, y - 1], [x + 1, y - 1], [x - 1, y + 1]);
+  }
+  const nearBead = (x, y) => {
+    for (let dy = -1; dy <= 1; dy += 1)
+      for (let dx = -1; dx <= 1; dx += 1) if (inBead[Math.min(C - 1, Math.max(0, y + dy)) * C + Math.min(C - 1, Math.max(0, x + dx))]) return true;
+    return false;
+  };
+  // The annulus outside it: opaque pixels not part of the bead.
+  let sum = 0;
+  let count = 0;
+  for (let y = 0; y < C; y += 1)
+    for (let x = 0; x < C; x += 1)
+      if (!nearBead(x, y) && data[at(x, y) + 3] >= 64) {
+        sum += luminance(data, at(x, y));
+        count += 1;
+      }
+  return { count, mean: count ? sum / count : 1, bead };
+};
+
+test("the bead frames have no opaque dark ring around the bead", async () => {
+  const { data, width } = await decode(REXONANCE_NANITE_CELLS.src);
+  for (let k = 0; k < REXONANCE_NANITE_CELLS.bead.frames; k += 1) {
+    const { count, mean, bead } = beadRing(data, width, REXONANCE_NANITE_CELLS, k);
+    assert.ok(bead > 100,`bead ${k} has a bead (${bead} px)`);
+    assert.ok(count === 0 || mean > 0.6, `bead ${k}: ${count} opaque px outside the bead, mean luminance ${mean.toFixed(3)}`);
+  }
+});
