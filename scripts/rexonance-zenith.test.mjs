@@ -2485,9 +2485,10 @@ test("the gold forms by nanites right after each plate lands; the driver is on f
   // (owner 2026-10-16 超大幅な改善 — the gold waits for the plate to clamp
   // (ASSEMBLY_GOLD.delay .003 → .008); each cell names its plate (`piece`).)
   // (Round 3: the helmet's gold from .005 after its last tile, over .010.)
+  // Owner (2026-10-23): each plate's tiles land along their path through the plate from its seat (one connected front, no lone early cells), so the locks moved.
   assert.equal(
     createHash("sha256").update(JSON.stringify(gold)).digest("hex"),
-    "df2e5fe2e2b904a95e042bb8bafadb21d95da18a49f6e9bf7823689c9dea5730",
+    "72907efe79ede3319e5f7bb25cb7a8af00072583f8178dd3008a5699ff6056ee",
   );
   const steps = assemblyGoldPlanSteps({
     pieces,

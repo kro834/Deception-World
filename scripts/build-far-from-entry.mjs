@@ -18,7 +18,10 @@
 // (FAR_FROM_ENTRY_UNDER). The plates are authored zones over the figure
 // (polygons in the cutout's pixels below): every opaque pixel goes to the
 // first zone that claims it, and what no zone claims to the nearest zone,
-// so the plates partition the figure exactly. Each plate ships its own cell
+// so the plates partition the figure exactly. The belt (the driver) is the
+// exception to "authored zones" being boxes: it is cut by its traced outline
+// (scripts/far-from-belt-outline.mjs, shared with the scroll suit-up) and
+// claims first. Each plate ships its own cell
 // in one atlas (plates.webp, its art with the crystals' light held back) and
 // its micro-tile bitmask (9 px squares that carry art); lights.webp is that
 // light alone, in the frame, for the final call's light-up from the
@@ -26,6 +29,7 @@
 import { mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
+import { BELT_OUTLINE } from "./far-from-belt-outline.mjs";
 
 const require = createRequire(import.meta.url);
 const sharp = require(process.env.SHARP_MODULE || "sharp");
@@ -123,7 +127,12 @@ const ZONES = [
       [382, 470],
     ],
   ],
-  ["belt", "waist", "up", [512, 640], rect(352, 548, 672, 640)],
+  // The driver, by its real outline (scripts/far-from-belt-outline.mjs, the
+  // scroll suit-up's too; owner, 2026-10-23: 「腰回りのドライバーの切り抜きが
+  // 甘い」): a plate of the belt alone, not the 320 x 92 box that carried scale
+  // chunks above it and the ribbons' ends under it. It claims first
+  // (CLAIM_FIRST), so the chest's and the thighs' polygons never cut it.
+  ["belt", "waist", "up", [512, 640], BELT_OUTLINE],
   [
     "tasset",
     "waist",
@@ -389,15 +398,24 @@ const N = FIG_W * FIG_H;
 
 // The label map: the first zone that claims a pixel, then the nearest.
 const label = new Int16Array(N).fill(-1);
-const zonesF = ZONES.map(([, , , , polygon]) => polygon.map(([x, y]) => [x * F, y * F]));
+// A zone is one polygon or, for the driver, several (a union of shapes).
+const asShapes = (polygon) => (typeof polygon[0][0] === "number" ? [polygon] : polygon);
+const zonesF = ZONES.map(([, , , , polygon]) =>
+  asShapes(polygon).map((shape) => shape.map(([x, y]) => [x * F, y * F])),
+);
+const CLAIM_FIRST = ["belt"];
+const CLAIM_ORDER = [
+  ...ZONES.flatMap(([id], z) => (CLAIM_FIRST.includes(id) ? [z] : [])),
+  ...ZONES.flatMap(([id], z) => (CLAIM_FIRST.includes(id) ? [] : [z])),
+];
 let opaque = 0;
 for (let y = 0; y < FIG_H; y += 1)
   for (let x = 0; x < FIG_W; x += 1) {
     const i = y * FIG_W + x;
     if (fig[i * 4 + 3] <= OPAQUE) continue;
     opaque += 1;
-    for (let z = 0; z < ZONES.length; z += 1)
-      if (inside(zonesF[z], x + 0.5, y + 0.5)) {
+    for (const z of CLAIM_ORDER)
+      if (zonesF[z].some((shape) => inside(shape, x + 0.5, y + 0.5))) {
         label[i] = z;
         break;
       }
@@ -406,24 +424,30 @@ for (let y = 0; y < FIG_H; y += 1)
 let unclaimed = 0;
 for (let i = 0; i < N; i += 1) if (fig[i * 4 + 3] > OPAQUE && label[i] < 0) unclaimed += 1;
 if (unclaimed) {
-  const queue = [];
-  for (let i = 0; i < N; i += 1) if (label[i] >= 0) queue.push(i);
-  let head = 0;
-  while (head < queue.length) {
-    const i = queue[head++];
-    const x = i % FIG_W;
-    const y = (i - x) / FIG_W;
-    for (let dy = -1; dy <= 1; dy += 1)
-      for (let dx = -1; dx <= 1; dx += 1) {
-        const nx = x + dx;
-        const ny = y + dy;
-        if (nx < 0 || ny < 0 || nx >= FIG_W || ny >= FIG_H) continue;
-        const j = ny * FIG_W + nx;
-        if (label[j] >= 0 || fig[j * 4 + 3] <= OPAQUE) continue;
-        label[j] = label[i];
-        queue.push(j);
-      }
-  }
+  // The driver keeps to its outline: a stray pixel goes to another plate if
+  // any reaches it, and to the driver only if none does.
+  const flood = (seeds) => {
+    const queue = [];
+    for (let i = 0; i < N; i += 1) if (label[i] >= 0 && seeds(label[i])) queue.push(i);
+    let head = 0;
+    while (head < queue.length) {
+      const i = queue[head++];
+      const x = i % FIG_W;
+      const y = (i - x) / FIG_W;
+      for (let dy = -1; dy <= 1; dy += 1)
+        for (let dx = -1; dx <= 1; dx += 1) {
+          const nx = x + dx;
+          const ny = y + dy;
+          if (nx < 0 || ny < 0 || nx >= FIG_W || ny >= FIG_H) continue;
+          const j = ny * FIG_W + nx;
+          if (label[j] >= 0 || fig[j * 4 + 3] <= OPAQUE) continue;
+          label[j] = label[i];
+          queue.push(j);
+        }
+    }
+  };
+  flood((z) => !CLAIM_FIRST.includes(ZONES[z][0]));
+  flood(() => true);
 }
 
 // The light split: the crystals' light, and the figure with it held back.

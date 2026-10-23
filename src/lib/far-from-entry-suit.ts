@@ -3,7 +3,7 @@
 // FAR FROM SAGA's entry transformation: the owner's ミドル cutout (1024 x
 // 1536) at the Rexonance delivery height, cut into plates along authored
 // zones. Figure coordinates are delivery pixels of the 693 x 1040 figure.
-// 3 files, 729302 bytes.
+// 3 files, 730392 bytes.
 
 export const FAR_FROM_ENTRY_SIZE = { width: 693, height: 1040 } as const;
 
@@ -37,13 +37,13 @@ export type FarFromEntryPiece = {
   readonly ax: number;
   readonly ay: number;
 };
-/** The nanite micro-tile, in delivery px (5745 tiles in all). */
+/** The nanite micro-tile, in delivery px (5777 tiles in all). */
 export const FAR_FROM_ENTRY_TILE = 9;
 /** The plates' atlas: each plate's cell, with the crystals' light held back. */
 export const FAR_FROM_ENTRY_ATLAS = {
   src: "/far-from-entry-20261022/plates.webp",
   width: 1024,
-  height: 1141,
+  height: 1148,
 } as const;
 /** The plates, front first; they partition the figure. */
 export const FAR_FROM_ENTRY_PIECES: readonly FarFromEntryPiece[] = [
@@ -70,7 +70,7 @@ export const FAR_FROM_ENTRY_PIECES: readonly FarFromEntryPiece[] = [
     h: 52,
     seat: [255.9, 88],
     tiles: "//3vMQ==",
-    ax: 329,
+    ax: 309,
     ay: 1078,
   },
   {
@@ -83,8 +83,8 @@ export const FAR_FROM_ENTRY_PIECES: readonly FarFromEntryPiece[] = [
     h: 68,
     seat: [589.1, 94.8],
     tiles: "54zznsc=",
-    ax: 773,
-    ay: 969,
+    ax: 151,
+    ay: 1078,
   },
   {
     id: "bit-ml",
@@ -148,7 +148,7 @@ export const FAR_FROM_ENTRY_PIECES: readonly FarFromEntryPiece[] = [
     h: 101,
     seat: [346.7, 115.1],
     tiles: "AkSADbADdubu3f/zf/////+//wc=",
-    ax: 142,
+    ax: 297,
     ay: 969,
   },
   {
@@ -161,8 +161,8 @@ export const FAR_FROM_ENTRY_PIECES: readonly FarFromEntryPiece[] = [
     h: 70,
     seat: [346.7, 172.7],
     tiles: "AID5f/P/9v////////////8=",
-    ax: 622,
-    ay: 969,
+    ax: 0,
+    ay: 1078,
   },
   {
     id: "scarf",
@@ -174,7 +174,7 @@ export const FAR_FROM_ENTRY_PIECES: readonly FarFromEntryPiece[] = [
     h: 75,
     seat: [346.7, 237],
     tiles: "AwD+/////////////////////////w8=",
-    ax: 448,
+    ax: 817,
     ay: 969,
   },
   {
@@ -187,7 +187,7 @@ export const FAR_FROM_ENTRY_PIECES: readonly FarFromEntryPiece[] = [
     h: 61,
     seat: [265.4, 249.2],
     tiles: "hsPhcPj7AA==",
-    ax: 272,
+    ax: 252,
     ay: 1078,
   },
   {
@@ -200,7 +200,7 @@ export const FAR_FROM_ENTRY_PIECES: readonly FarFromEntryPiece[] = [
     h: 62,
     seat: [438.1, 249.2],
     tiles: "HB6fz/t9AA==",
-    ax: 215,
+    ax: 195,
     ay: 1078,
   },
   {
@@ -210,9 +210,9 @@ export const FAR_FROM_ENTRY_PIECES: readonly FarFromEntryPiece[] = [
     x: 259,
     y: 237,
     w: 176,
-    h: 142,
+    h: 146,
     seat: [346.7, 376.5],
-    tiles: "/P/3/3////f/f///////////////////////9/9//v/D/z/8/8P/Hw==",
+    tiles: "/P/3/3////f/f///////////////////////9/9//v/D/z/8/8PfH9iQAA==",
     ax: 266,
     ay: 668,
   },
@@ -221,25 +221,25 @@ export const FAR_FROM_ENTRY_PIECES: readonly FarFromEntryPiece[] = [
     group: "waist",
     dir: "up",
     x: 240,
-    y: 371,
-    w: 213,
-    h: 63,
+    y: 362,
+    w: 212,
+    h: 80,
     seat: [346.7, 433.3],
-    tiles: "/P8f/v9//v9///9/////////////",
-    ax: 0,
-    ay: 1078,
+    tiles: "ABgA/P8f/v9//v9///9/////////H374AxjA",
+    ax: 603,
+    ay: 969,
   },
   {
     id: "tasset",
     group: "waist",
     dir: "down",
-    x: 298,
-    y: 433,
-    w: 98,
-    h: 326,
+    x: 295,
+    y: 420,
+    w: 104,
+    h: 339,
     seat: [346.7, 433.3],
-    tiles: "/////////////////5///Oc///nPf/7zn//8xx9+8AMf+MAHHOAABzjAAR/4gAMcYAAC",
-    ax: 574,
+    tiles: "n/////9///d///d//ud//ud//ud//uM//uM//sM//MM/+IMf+IEP+AAPcAAHcAAH8IAP8AAHYAAC",
+    ax: 593,
     ay: 0,
   },
   {
@@ -252,7 +252,7 @@ export const FAR_FROM_ENTRY_PIECES: readonly FarFromEntryPiece[] = [
     h: 277,
     seat: [264.1, 514.6],
     tiles: "AAAcAAAfAMAfAOAPAPgDAP4AgH8AwB8A8AcA/AEAfwCAHwDgBwD4AwB8AAA/AMALAPAAADwAAB8AwAcA4AMA+AAAPAAAHwCABwDAAwDgAABwAAAYAAAEAAAA",
-    ax: 674,
+    ax: 699,
     ay: 0,
   },
   {
@@ -278,7 +278,7 @@ export const FAR_FROM_ENTRY_PIECES: readonly FarFromEntryPiece[] = [
     h: 90,
     seat: [177.4, 474],
     tiles: "//z3v////////3//4Q8=",
-    ax: 255,
+    ax: 410,
     ay: 969,
   },
   {
@@ -291,7 +291,7 @@ export const FAR_FROM_ENTRY_PIECES: readonly FarFromEntryPiece[] = [
     h: 90,
     seat: [515.9, 474],
     tiles: "/e9////////973/+4w8=",
-    ax: 352,
+    ax: 507,
     ay: 969,
   },
   {
@@ -326,24 +326,24 @@ export const FAR_FROM_ENTRY_PIECES: readonly FarFromEntryPiece[] = [
     dir: "down",
     x: 128,
     y: 291,
-    w: 140,
+    w: 146,
     h: 107,
     seat: [203.1, 291.1],
-    tiles: "/D/+f/d/93////+f/w//D/8P/x8AGAAY",
-    ax: 878,
-    ay: 843,
+    tiles: "/D/8/9z/uf/z/+//0/+D/wf/D/4/A2ADwAE=",
+    ax: 0,
+    ay: 969,
   },
   {
     id: "arm-upper-r",
     group: "arms",
     dir: "down",
-    x: 426,
+    x: 419,
     y: 291,
-    w: 140,
+    w: 147,
     h: 107,
     seat: [490.2, 291.1],
-    tiles: "/j//f//v/+/9f/1/+P/4//h/+H8YABgA",
-    ax: 0,
+    tiles: "/H/8//k/93++/y//H/w/+H/w/+L/SQCAAAA=",
+    ax: 148,
     ay: 969,
   },
   {
@@ -377,11 +377,11 @@ export const FAR_FROM_ENTRY_PIECES: readonly FarFromEntryPiece[] = [
     group: "legs",
     dir: "up",
     x: 218,
-    y: 434,
+    y: 431,
     w: 97,
-    h: 175,
+    h: 178,
     seat: [260.7, 609.4],
-    tiles: "+OEf//znP//5z3/2M5/wwAd//OOf//7/////Dw==",
+    tiles: "8MEf//jnP//5z3/+s5/wwAd++OOf//73////Dw==",
     ax: 724,
     ay: 389,
   },
@@ -390,11 +390,11 @@ export const FAR_FROM_ENTRY_PIECES: readonly FarFromEntryPiece[] = [
     group: "legs",
     dir: "up",
     x: 379,
-    y: 434,
+    y: 432,
     w: 96,
-    h: 175,
+    h: 177,
     seat: [432.7, 609.4],
-    tiles: "/vCHf/zjP//5z3/++9mHfvCDP/zjP//73///Dw==",
+    tiles: "/vCHf/zjP//5z3/++9mHPvCDP/zjP//53///Dw==",
     ax: 823,
     ay: 389,
   },
@@ -495,10 +495,10 @@ export const FAR_FROM_ENTRY_PIECES: readonly FarFromEntryPiece[] = [
     dir: "down",
     x: 6,
     y: 130,
-    w: 285,
+    w: 296,
     h: 387,
     seat: [203.1, 162.5],
-    tiles: "AAAAOAAAADgAMAA4AD4AIIA/AADAPwAA4D8AAPAfAAD4HwAA/B8AAPwfAAD8HgAAfhgAAD4AAAAeAAAAHgAAAB4AAAAcAAcAPAAIHjgAAADAIAAA4DEAAPA7AAD4HwAA/C8AAP4vAED+fwBA/3cAAP8XAAD/BwAD/w8AA/8PAAP/DwAA5x8A/McfADwHHwAABhwAAAQAAABgAAAA4AAAAEAgAAAAAAAAADAAAA==",
+    tiles: "AAAAOAAAAHAAwADgAPABAAH4AwAA+AcAAPgPAAD4DwAA+B8AAPg/AADwfwAA4PcAAOCHAQDABwAAgAcAAAAPAAAAHgAAADgADgDwACB4wAEAAAAMAgAAPAYAAPwOAAD8DwAA/C8AAPxfAID4/wGA+b8DAPd/AQDo/wBgwP8DwID/B4AB/w8AwM8/APAffwDwOPgAAGDAAQCAAAAAABgAAABwAAAAQCAAAAAAAAAAwAAAAA==",
     ax: 0,
     ay: 0,
   },
@@ -506,13 +506,13 @@ export const FAR_FROM_ENTRY_PIECES: readonly FarFromEntryPiece[] = [
     id: "cape-r",
     group: "ribbon",
     dir: "down",
-    x: 402,
+    x: 394,
     y: 143,
-    w: 285,
+    w: 293,
     h: 375,
     seat: [490.2, 162.5],
-    tiles: "DAAAAAwAAAAEAAAAAAAAAAAAAAAAAAAAAADAAQAAwAMAAMAPAADAHwAAwB8AAIA/AAAAPwAAAD4AAAA8AAAAMBgAADh4AAA8AAAAHAAADA8AANwHAAD4DwAA+B8AAPY/AgD+PwMA/n8AAP5/AADw/0AA8P9AAPD/AADw/wAA+O8/APjjMAD44QAAeGAAABhwAAAAEgAAAAMAAAYDAAACAAAABAAAAAYA",
-    ax: 287,
+    tiles: "HAAAADgAAAAQAAAAAAAAAAAAAAAAAAAAAAAA4AAAAMADAACADwAAAD8AAAD+AAAA+AMAAOAHAACADwAAAB4AAAA4MAAAcOABAPAAAADgAABA+AAAgPsAAAD+AwAA/A8AAPI/BAD8fwwA+P8NAPD/AwAA/w8IAP4fEAD8/wAA+P8vAPjvfwDwx0EA4IcDAMADAwCAAQMAAEACAADAAAAAgQEAAAIAAAAIAAAAGAAA",
+    ax: 298,
     ay: 0,
   },
 ];
@@ -593,7 +593,7 @@ export const FAR_FROM_ENTRY_ASSETS = [
 /** The files' bytes. */
 export const FAR_FROM_ENTRY_BYTES = {
   figure: 271058,
-  plates: 244282,
+  plates: 245372,
   lights: 213962,
-  total: 729302,
+  total: 730392,
 } as const;
