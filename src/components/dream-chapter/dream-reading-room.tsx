@@ -30,6 +30,40 @@ function visibleParagraph(scroller: HTMLDivElement | null) {
 }
 
 type Pin = { no: number; top: number } | null;
+type ReadingAnchor = { text: Text; offset: number; top: number } | { end: true } | null;
+
+// Keep the actual line being read when type size or leading changes. A raw
+// scrollTop (or even a paragraph number) loses the reader inside long paragraphs.
+function captureReadingAnchor(scroller: HTMLDivElement | null): ReadingAnchor {
+  if (!scroller || scroller.scrollTop < 1) return null;
+  if (scroller.scrollTop + scroller.clientHeight >= scroller.scrollHeight - 2) {
+    return { end: true };
+  }
+  const top = scroller.getBoundingClientRect().top;
+  const line = top + Math.min(80, scroller.clientHeight * 0.2);
+  const paragraph = [...scroller.querySelectorAll<HTMLElement>("[data-room-paragraph]")].find(
+    (node) => node.getBoundingClientRect().bottom > line,
+  );
+  const text =
+    paragraph &&
+    [...paragraph.childNodes].find(
+      (node): node is Text => node.nodeType === Node.TEXT_NODE && Boolean(node.textContent?.trim()),
+    );
+  if (!text) return null;
+  const range = document.createRange();
+  let low = 0;
+  let high = text.length - 1;
+  while (low < high) {
+    const middle = Math.floor((low + high) / 2);
+    range.setStart(text, middle);
+    range.setEnd(text, middle + 1);
+    if (range.getBoundingClientRect().bottom <= line) low = middle + 1;
+    else high = middle;
+  }
+  range.setStart(text, low);
+  range.setEnd(text, low + 1);
+  return { text, offset: low, top: range.getBoundingClientRect().top - top };
+}
 
 /** An explicit landing (a paragraph pill, the saved bookmark) holds until the
     reader scrolls on: a sheet clamped at its foot could not bring the chosen
@@ -66,6 +100,7 @@ export function DreamReadingRoom({ trigger, onClose }: Props) {
   const onCloseRef = useRef(onClose);
   const firstLanding = useRef(initial.bookmark?.paragraph ?? 1);
   const pinned = useRef<Pin>(null);
+  const readingAnchor = useRef<ReadingAnchor>(null);
   const closing = useRef(false);
   onCloseRef.current = onClose;
   const episode = DREAM_CASES.find((item) => item.no === chapter) ?? DREAM_CASES[0];
@@ -121,6 +156,23 @@ export function DreamReadingRoom({ trigger, onClose }: Props) {
     pinned.current = landing > 1 && target ? { no: landing, top: scroller.scrollTop } : null;
     setParagraph(landing);
   }, [chapter]);
+
+  useLayoutEffect(() => {
+    const scroller = viewport.current;
+    const anchor = readingAnchor.current;
+    readingAnchor.current = null;
+    if (!scroller || !anchor) return;
+    if ("end" in anchor) scroller.scrollTop = scroller.scrollHeight;
+    else {
+      if (!anchor.text.isConnected) return;
+      const range = document.createRange();
+      range.setStart(anchor.text, anchor.offset);
+      range.setEnd(anchor.text, anchor.offset + 1);
+      scroller.scrollTop +=
+        range.getBoundingClientRect().top - scroller.getBoundingClientRect().top - anchor.top;
+    }
+    if (pinned.current) pinned.current.top = scroller.scrollTop;
+  }, [size, spacing]);
 
   useEffect(() => {
     const scroller = viewport.current;
@@ -275,14 +327,20 @@ export function DreamReadingRoom({ trigger, onClose }: Props) {
                 <button
                   type="button"
                   aria-pressed={size === "large"}
-                  onClick={() => setSize(size === "large" ? "standard" : "large")}
+                  onClick={() => {
+                    readingAnchor.current = captureReadingAnchor(viewport.current);
+                    setSize(size === "large" ? "standard" : "large");
+                  }}
                 >
                   文字を大きく
                 </button>
                 <button
                   type="button"
                   aria-pressed={spacing === "comfortable"}
-                  onClick={() => setSpacing(spacing === "comfortable" ? "standard" : "comfortable")}
+                  onClick={() => {
+                    readingAnchor.current = captureReadingAnchor(viewport.current);
+                    setSpacing(spacing === "comfortable" ? "standard" : "comfortable");
+                  }}
                 >
                   行間を広く
                 </button>
@@ -346,9 +404,23 @@ export function DreamReadingRoom({ trigger, onClose }: Props) {
         </div>
         <footer className="dream-reading-bottom">
           <div>
-            <span>
+            <span className="dream-reading-position-text">
               CASE {chapter} · {paragraph} / {episode.paragraphs.length} 段落
             </span>
+            <label className="dream-reading-position-select">
+              <span>CASE {chapter}</span>
+              <select
+                aria-label="今読んでいる段落・段落へ移動"
+                value={paragraph}
+                onChange={(event) => jumpToParagraph(Number(event.target.value))}
+              >
+                {episode.paragraphs.map((_, i) => (
+                  <option key={i + 1} value={i + 1}>
+                    {i + 1} / {episode.paragraphs.length} 段落
+                  </option>
+                ))}
+              </select>
+            </label>
             <progress
               max={episode.paragraphs.length}
               value={paragraph}
