@@ -141,7 +141,8 @@ test("the five stage illustrations are one versioned, budgeted WebP set in the d
   // The hero, its preload and the stage panel share one srcset helper.
   assert.match(route, /imageSrcSet: farFromImage\("middle"\)\.srcSet/);
   assert.match(component, /\{\.\.\.farFromImage\("middle"\)\}/);
-  assert.match(component, /\{\.\.\.farFromImage\(stage, stage !== "middle"\)\}/);
+  // ウルトラ's base (FAR_FROM_SAGA_ULTRA_BASE) through the same helper.
+  assert.match(component, /\{\.\.\.farFromImage\(artKey, stage !== "middle"\)\}/);
 });
 
 test("the stage rail is the liquid rail with five 44px tabs, and the page keeps the owner's rules", () => {
@@ -245,7 +246,7 @@ test("#suitup is built on the Rexonance runway; no chapter wears a 準備中 mar
   assert.match(assembly, /rexonance-resonance\.js/);
   assert.match(assembly, /import\("\.\/far-from-assembly-engine"\)/);
   // Owner (2026-10-23): the runway ends on the page's chosen form.
-  assert.match(component, /<FarFromSuitUp stage=\{stage\} onChoose=\{setStage\} \/>/);
+  assert.match(component, /<FarFromSuitUp stage=\{stage\} onChoose=\{chooseQuietly\} \/>/);
   assert.match(suitup, /mountFarFromAssembly\(runwayRef\.current\)/);
   assert.match(suitup, /id="suitup" className="rxs-section ffs-suitup"/);
   assert.match(suitup, /className="ffs-runway rzn-suitup"/);
@@ -399,7 +400,7 @@ test("the page follows the Rexonance structure: numbered bar, split hero, CONTEN
   // The stage chapter: the form-sequence status and the five-form drawer
   // beside the liquid rail, the outlined form code behind the copy.
   assert.match(component, /<FarFromFormStatus stage=\{stage\} \/>/);
-  assert.match(component, /<FarFromFormComparison selected=\{stage\} onChoose=\{setStage\} \/>/);
+  assert.match(component, /<FarFromFormComparison selected=\{stage\} onChoose=\{selectStage\} \/>/);
   assert.match(component, /<i className="ffs-form-code" aria-hidden="true">/);
   assert.match(editorial, /FAR_FROM_SAGA_STAGE_ORDER\.indexOf\(stage\) \+ 1/);
   assert.match(formComparison, /<details className="ffs-form-comparison"/);
@@ -712,7 +713,7 @@ test("ウルトラ is one of #suitup's forms: the selector after the runway pick
   assert.doesNotMatch(component, /FarFromUltra|id="ultra"/);
   assert.doesNotMatch(styles, /styles-far-from-ultra\.css/);
   const suitupSource = read("src/components/far-from-saga/far-from-suitup.tsx");
-  const suitup = component.indexOf("<FarFromSuitUp stage={stage} onChoose={setStage} />");
+  const suitup = component.indexOf("<FarFromSuitUp stage={stage} onChoose={chooseQuietly} />");
   const stages = component.indexOf('id="stages"');
   assert.ok(suitup > 0 && stages > suitup, "suitup, then stages");
   // Owner (2026-10-23): numbered as the Rexonance site's five chapters.
@@ -1678,6 +1679,9 @@ test("the five forms are named in katakana only wherever the page's own labels n
     "src/components/far-from-saga/far-from-saga.tsx",
     "src/components/far-from-saga/far-from-editorial.tsx",
     "src/components/far-from-saga/far-from-form-comparison.tsx",
+    "src/components/far-from-saga/far-from-stage-switch.tsx",
+    "src/components/far-from-saga/far-from-ultra-deploy.tsx",
+    "src/lib/far-from-ultra-deploy.ts",
     "src/components/far-from-saga/far-from-suitup.tsx",
     "src/components/far-from-saga/far-from-p16.tsx",
     "src/components/far-from-saga/far-from-comparison.tsx",

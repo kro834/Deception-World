@@ -41,6 +41,23 @@ export const FAR_FROM_SAGA_ARTWORK: Record<FarFromStageKey, FarFromStageArtwork>
   ultra: { src: `${FOLDER}/ultra-1280.webp`, width: 1280, height: 1716 },
 };
 
+/** ウルトラ before its interfaces (the owner's render, 2026-10-22): the stage
+ * panel shows it first and deploys the auxiliary interfaces over it as
+ * vector panels (far-from-ultra-deploy.tsx); the calm tiers keep the
+ * painted ウルトラ above. Same widths and caps, one more file stem. */
+export const FAR_FROM_SAGA_ULTRA_BASE: FarFromStageArtwork = {
+  src: `${FOLDER}/ultra-base-1280.webp`,
+  width: 1083,
+  height: 1452,
+};
+
+/** Every delivered stage picture: the five forms and ウルトラ's base. */
+export type FarFromArtworkKey = FarFromStageKey | "ultraBase";
+const STAGE_ASSETS: Record<FarFromArtworkKey, FarFromStageArtwork> = {
+  ...FAR_FROM_SAGA_ARTWORK,
+  ultraBase: FAR_FROM_SAGA_ULTRA_BASE,
+};
+
 /** The hero, preload, share image and the entry warm-up all take ミドル. */
 export const FAR_FROM_SAGA_KEY_VISUAL = FAR_FROM_SAGA_ARTWORK.middle;
 
@@ -50,8 +67,8 @@ export const FAR_FROM_SAGA_MENU_TILE = `${FOLDER}/middle-tile-400.webp`;
 
 /** srcset / sizes for one stage's picture (shared by the HTML preload, the
  * hero and the stage panel so they all fetch the same candidate). */
-export function farFromImage(stage: FarFromStageKey, lazyLayout = false) {
-  const { src, width: intrinsic } = FAR_FROM_SAGA_ARTWORK[stage];
+export function farFromImage(stage: FarFromArtworkKey, lazyLayout = false) {
+  const { src, width: intrinsic } = STAGE_ASSETS[stage];
   const stem = src.replace(/-1280\.webp$/, "");
   return {
     // Each candidate is described by its real width (a file is never wider

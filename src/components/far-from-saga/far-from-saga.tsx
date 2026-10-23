@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { GuardedLink } from "@/components/load-gate";
 import { DisplayName } from "@/components/name-text";
 import { LiquidLens } from "@/components/world/liquid-rail";
@@ -12,15 +12,19 @@ import { FAR_FROM_SAGA, type Article } from "@/components/final-stage/final-stag
 import {
   FAR_FROM_SAGA_ARTWORK,
   FAR_FROM_SAGA_STAGE_ORDER,
+  FAR_FROM_SAGA_ULTRA_BASE,
   farFromImage,
   type FarFromStageKey,
 } from "@/lib/far-from-saga-artwork";
+import { planStageCall, type RexonanceStageEntrance } from "@/lib/rexonance-stage-call";
 import { FarFromEntryTransition } from "./far-from-entry-transition";
 import { FarFromComparison } from "./far-from-comparison";
 import { FarFromP16 } from "./far-from-p16";
 import { FarFromReport } from "./far-from-report";
 import { FarFromSuitUp } from "./far-from-suitup";
 import { FarFromFormComparison } from "./far-from-form-comparison";
+import { FAR_FROM_STAGE_CALL_MS, FarFromFormCall, FarFromSwitchFx } from "./far-from-stage-switch";
+import { FarFromInterfaceDeploy } from "./far-from-ultra-deploy";
 import {
   FarFromAperture,
   FarFromCallouts,
@@ -77,6 +81,26 @@ const releaseControlFocus = (control: HTMLElement) => {
   });
 };
 
+/** Whether a form switch may move (the Rexonance page's terms): not hidden,
+ * no reduced motion, no forced colours, no economy, no Save-Data, no 2G. */
+function stageMotionAllowed() {
+  if (typeof window === "undefined") return false;
+  const connection = (
+    navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }
+  ).connection;
+  return !(
+    document.hidden ||
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+    window.matchMedia("(forced-colors: active)").matches ||
+    document.documentElement.dataset.worldEffects === "economy" ||
+    connection?.saveData ||
+    /^(slow-)?2g$/.test(connection?.effectiveType ?? "")
+  );
+}
+
+/** A deep link to one form: /far-from-saga#stages-ultra (and the others). */
+const STAGE_LINK = /^#stages-(middle|high|xhigh|max|ultra)$/;
+
 /** Values that run long (the processors, the recognisers) read a size down. */
 const LONG_SPEC = 12;
 
@@ -127,13 +151,156 @@ export function FarFromSaga() {
   // suit-up's runway, #stages' rail and the comparison all choose it, and
   // the runway ends on it (as the Rexonance page's stage does).
   const [stage, setStageState] = useState<FarFromStageKey>("middle");
-  const setStage = useCallback((next: FarFromStageKey) => setStageState(next), []);
   const [motionReady, setMotionReady] = useState(false);
   const pageRef = useRef<HTMLElement | null>(null);
   const stageTabsRef = useRef<HTMLDivElement | null>(null);
+  const stagePanelRef = useRef<HTMLDivElement | null>(null);
+
+  // The form switch (owner, 2026-10-23: 「これらの切り替えもレクソナンスの様な
+  // 切り替え効果が出る様にして。スクロールも同様に。」): the Rexonance page's
+  // card and entrance (far-from-stage-switch.tsx), on its rest guard.
+  const [stageCall, setStageCall] = useState<{ id: number; stage: FarFromStageKey } | null>(null);
+  const [stageEntrance, setStageEntrance] = useState<RexonanceStageEntrance | null>(null);
+  const latestStageRef = useRef<FarFromStageKey>("middle");
+  const stageCallId = useRef(0);
+  const stageCallTimer = useRef(0);
+  const stageCallStartedAt = useRef(0);
+  const stageCallExitedAt = useRef(Number.NEGATIVE_INFINITY);
+  // The panel's place on screen before a switch (null when it is off screen).
+  const panelAnchor = useRef<number | null>(null);
+
+  const cancelStageCall = useCallback(() => {
+    stageCallId.current += 1;
+    window.clearTimeout(stageCallTimer.current);
+    stageCallTimer.current = 0;
+    setStageCall(null);
+  }, []);
+
+  /** Every form change goes through here. `card` is the rail's and the
+   * comparison drawer's (the Rexonance card and entrance); the selector
+   * after the runway and a deep link change the form quietly. */
+  const selectStage = useCallback(
+    (next: FarFromStageKey, card = true) => {
+      // initRail emits railselect from a native click before React's onClick;
+      // this synchronous ref also makes rapid swipes last-request-wins.
+      if (latestStageRef.current === next) return;
+      latestStageRef.current = next;
+      // No switch moves the page (owner, 2026-10-23: 「『03 形態』でウルトラ
+      // 切り替え時のみ勝手に画面が上下するのも修正して。」): note where the
+      // panel stands; the layout effect below keeps it there.
+      const panel = stagePanelRef.current?.getBoundingClientRect();
+      panelAnchor.current =
+        panel && panel.bottom > 0 && panel.top < window.innerHeight ? panel.top : null;
+      const motionAllowed = stageMotionAllowed();
+      if (!card) {
+        cancelStageCall();
+        setStageState(next);
+        setStageEntrance(motionAllowed ? { kind: "quiet", delayMs: 0 } : null);
+        return;
+      }
+      const now = performance.now();
+      const plan = planStageCall({
+        motionAllowed,
+        cardMounted: stageCallTimer.current !== 0,
+        cardElapsedMs: now - stageCallStartedAt.current,
+        sinceNaturalExitMs: now - stageCallExitedAt.current,
+      });
+      setStageState(next);
+      setStageEntrance(motionAllowed ? plan.entrance : null);
+      if (plan.action === "retarget") {
+        setStageCall((call) => call && { id: call.id, stage: next });
+        return;
+      }
+      if (plan.action === "skip") {
+        if (!motionAllowed) {
+          cancelStageCall();
+          stageCallExitedAt.current = Number.NEGATIVE_INFINITY;
+        }
+        return;
+      }
+      cancelStageCall();
+      const id = stageCallId.current;
+      stageCallStartedAt.current = now;
+      setStageCall({ id, stage: next });
+      stageCallTimer.current = window.setTimeout(() => {
+        if (stageCallId.current === id) {
+          stageCallTimer.current = 0;
+          stageCallExitedAt.current = performance.now();
+          setStageCall(null);
+        }
+      }, FAR_FROM_STAGE_CALL_MS);
+    },
+    [cancelStageCall],
+  );
+  const chooseQuietly = useCallback(
+    (next: FarFromStageKey) => selectStage(next, false),
+    [selectStage],
+  );
+
+  // The panel keeps its place through a switch. Its own height is reserved
+  // (every form's copy sizes its cell, below), but the selector after the
+  // runway, above it, grows for ウルトラ's note; where the browser has no
+  // scroll anchoring (Safari) that pushed the page down and back. Measured
+  // after the commit and before paint, so nothing is ever seen to move.
+  useLayoutEffect(() => {
+    const before = panelAnchor.current;
+    panelAnchor.current = null;
+    const panel = stagePanelRef.current;
+    if (before === null || !panel) return;
+    const delta = panel.getBoundingClientRect().top - before;
+    if (Math.abs(delta) >= 1) window.scrollBy({ top: delta, left: 0, behavior: "instant" });
+  }, [stage]);
+
+  // A card never outlives the terms it was shown on (as on the Rexonance page).
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const cancelOnPreference = () => {
+      if (media.matches || document.documentElement.dataset.worldEffects === "economy")
+        cancelStageCall();
+    };
+    const cancelWhenHidden = () => {
+      if (document.hidden) cancelStageCall();
+    };
+    const observer = new MutationObserver(cancelOnPreference);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-world-effects"],
+    });
+    media.addEventListener("change", cancelOnPreference);
+    document.addEventListener("visibilitychange", cancelWhenHidden);
+    window.addEventListener("pagehide", cancelStageCall);
+    return () => {
+      observer.disconnect();
+      media.removeEventListener("change", cancelOnPreference);
+      document.removeEventListener("visibilitychange", cancelWhenHidden);
+      window.removeEventListener("pagehide", cancelStageCall);
+      stageCallId.current += 1;
+      window.clearTimeout(stageCallTimer.current);
+    };
+  }, [cancelStageCall]);
+
+  // A deep link to one form (#stages-ultra …) selects it and opens #stages;
+  // ウルトラ's interfaces then deploy as the panel comes on screen.
+  useEffect(() => {
+    const follow = () => {
+      const match = STAGE_LINK.exec(window.location.hash);
+      if (!match) return;
+      selectStage(match[1] as FarFromStageKey, false);
+      window.requestAnimationFrame(() =>
+        document.getElementById("stages")?.scrollIntoView({ block: "start" }),
+      );
+    };
+    follow();
+    window.addEventListener("hashchange", follow);
+    return () => window.removeEventListener("hashchange", follow);
+  }, [selectStage]);
 
   const activeStage = FAR_FROM_SAGA.stages[stage];
-  const activeArt = FAR_FROM_SAGA_ARTWORK[stage];
+  // ウルトラ shows its base first and deploys its interfaces where motion is
+  // allowed; the calm tiers keep the painted ウルトラ (interfaces drawn).
+  const ultraDeploys = stage === "ultra" && motionReady && stageMotionAllowed();
+  const artKey = ultraDeploys ? "ultraBase" : stage;
+  const activeArt = ultraDeploys ? FAR_FROM_SAGA_ULTRA_BASE : FAR_FROM_SAGA_ARTWORK[stage];
   const keyVisual = FAR_FROM_SAGA_ARTWORK.middle;
 
   useEffect(() => mountLocalNavCurrent(pageRef.current?.querySelector(".rxs-local-nav nav")), []);
@@ -149,7 +316,7 @@ export function FarFromSaga() {
     const onSelect = (event: Event) => {
       const index = (event as CustomEvent<{ index?: number }>).detail?.index;
       const next = typeof index === "number" ? FAR_FROM_SAGA_STAGE_ORDER[index] : undefined;
-      if (next) setStage(next);
+      if (next) selectStage(next);
     };
     rail.addEventListener("railselect", onSelect);
     const dispose = initRail(rail);
@@ -157,7 +324,55 @@ export function FarFromSaga() {
       rail.removeEventListener("railselect", onSelect);
       dispose?.();
     };
-  }, [setStage]);
+  }, [selectStage]);
+
+  // In step with a swipe (「スクロールも同様に」): while the lens is dragged,
+  // the figure shows the form under it — a band in that form's light that
+  // follows the lens along the rail, and its name. The rail's own state
+  // drives it (data-liquid-dragging, the lens's place, data-liquid-contact);
+  // the release selects, and the card plays as for a tap.
+  useEffect(() => {
+    const rail = stageTabsRef.current;
+    const panel = stagePanelRef.current;
+    if (!rail || !panel) return;
+    const lens = rail.querySelector<HTMLElement>(":scope > .liquid-selection-lens");
+    let shown: string | null = null;
+    const sync = () => {
+      const tabs = [...rail.querySelectorAll<HTMLElement>(':scope > button[role="tab"]')];
+      const contact = tabs.findIndex((tab) => tab.hasAttribute("data-liquid-contact"));
+      const key = FAR_FROM_SAGA_STAGE_ORDER[contact];
+      if (
+        rail.dataset.liquidDragging !== "true" ||
+        !key ||
+        key === latestStageRef.current ||
+        !stageMotionAllowed()
+      ) {
+        if (shown !== null) delete panel.dataset.tune;
+        shown = null;
+        return;
+      }
+      const travel = rail.clientWidth - (lens?.offsetWidth ?? 0);
+      const lensX = lens ? new DOMMatrixReadOnly(getComputedStyle(lens).transform).m41 : 0;
+      const along = travel > 0 ? lensX / travel : contact / (tabs.length - 1);
+      panel.style.setProperty("--ffs-tune-x", Math.min(1, Math.max(0, along)).toFixed(3));
+      if (shown === key) return;
+      shown = key;
+      panel.dataset.tune = key;
+      panel.style.setProperty("--ffs-tune-accent", FAR_FROM_SAGA.stages[key].accent);
+      const label = panel.querySelector(".ffs-stage-tune > b");
+      if (label) label.textContent = FAR_FROM_SAGA.stages[key].label;
+    };
+    const observer = new MutationObserver(sync);
+    observer.observe(rail, {
+      attributes: true,
+      subtree: true,
+      attributeFilter: ["data-liquid-dragging", "data-liquid-contact", "style"],
+    });
+    return () => {
+      observer.disconnect();
+      delete panel.dataset.tune;
+    };
+  }, []);
 
   // A choice made by another control (the suit-up's selector, the
   // comparison) moves this rail's lens too (the Rexonance page's F57).
@@ -219,6 +434,8 @@ export function FarFromSaga() {
     >
       {/* Entry transition: prepared, renders nothing, never blocks paint. */}
       <FarFromEntryTransition stage={stage} />
+      {/* The form switch's card (far-from-stage-switch.tsx; decorative). */}
+      {stageCall ? <FarFromFormCall key={stageCall.id} stage={stageCall.stage} /> : null}
 
       <header className="rxs-local-nav">
         <div className="rxs-local-nav-inner">
@@ -415,7 +632,7 @@ export function FarFromSaga() {
 
       {/* 03 — #suitup: the scroll suit-up (far-from-suitup.tsx), ending on
           the form chosen in the selector right after its runway. */}
-      <FarFromSuitUp stage={stage} onChoose={setStage} />
+      <FarFromSuitUp stage={stage} onChoose={chooseQuietly} />
 
       {/* 04 — the five forms. */}
       <section id="stages" className="rxs-stages rxs-section" aria-labelledby="ffs-stages-title">
@@ -451,7 +668,7 @@ export function FarFromSaga() {
                 tabIndex={stage === key ? 0 : -1}
                 className={stage === key ? "is-active" : ""}
                 style={{ ["--liquid-accent" as string]: FAR_FROM_SAGA.stages[key].accent }}
-                onClick={() => setStage(key)}
+                onClick={() => selectStage(key)}
                 onPointerUp={(event) => releaseControlFocus(event.currentTarget)}
               >
                 <span>{FAR_FROM_SAGA.stages[key].label}</span>
@@ -464,28 +681,45 @@ export function FarFromSaga() {
           <FarFromFormStatus stage={stage} />
 
           <div
+            ref={stagePanelRef}
             id="ffs-stage-panel"
             className="rxs-stage-panel ffs-stage-panel"
             role="tabpanel"
             aria-labelledby={`ffs-stage-tab-${stage}`}
             aria-live="polite"
-            style={{ ["--ffs-accent" as string]: activeStage.accent }}
+            data-entrance={stageEntrance?.kind}
+            style={{
+              ["--ffs-accent" as string]: activeStage.accent,
+              ["--ffs-entrance-delay" as string]: `${stageEntrance?.delayMs ?? 0}ms`,
+            }}
           >
-            <figure key={stage}>
+            {/* Keyed by form: every switch mounts a fresh figure, so its
+                arrival (and ウルトラ's deploy) plays again each time. */}
+            <figure key={stage} data-art={artKey}>
               <span aria-hidden="true" />
               <i className="ffs-stage-scan" aria-hidden="true" />
-              <img
-                src={activeArt.src}
-                {...farFromImage(stage, stage !== "middle")}
-                alt={activeStage.alt}
-                width={activeArt.width}
-                height={activeArt.height}
-                // ミドル is the hero's own file, already decoded by now.
-                loading={stage === "middle" ? "eager" : "lazy"}
-                decoding="async"
-              />
+              {/* The picture and ウルトラ's interfaces share one box (and its
+                  scroll settle), so the panels stay on the arms. */}
+              <div className="ffs-stage-art">
+                <img
+                  src={activeArt.src}
+                  {...farFromImage(artKey, stage !== "middle")}
+                  alt={activeStage.alt}
+                  width={activeArt.width}
+                  height={activeArt.height}
+                  // ミドル is the hero's own file, already decoded by now.
+                  loading={stage === "middle" ? "eager" : "lazy"}
+                  decoding="async"
+                />
+                {ultraDeploys ? (
+                  <FarFromInterfaceDeploy
+                    delayMs={stageEntrance?.kind === "card" ? stageEntrance.delayMs + 260 : 160}
+                  />
+                ) : null}
+              </div>
+              <FarFromSwitchFx />
             </figure>
-            <div key={`${stage}-copy`}>
+            <div key={`${stage}-copy`} className="ffs-stage-copy">
               <h3>{activeStage.label}</h3>
               {activeStage.body.map((paragraph, index) => (
                 <p key={index}>{paragraph}</p>
@@ -496,9 +730,20 @@ export function FarFromSaga() {
                 {activeStage.label}
               </i>
             </div>
+            {/* The copy's cell is as tall as the longest form's, at every
+                width (hidden copies, stacked in the same cell), so no switch
+                changes the panel's height. */}
+            {FAR_FROM_SAGA_STAGE_ORDER.map((key) => (
+              <div key={`sizer-${key}`} className="ffs-stage-sizer" aria-hidden="true" inert>
+                <h3>{FAR_FROM_SAGA.stages[key].label}</h3>
+                {FAR_FROM_SAGA.stages[key].body.map((paragraph, index) => (
+                  <p key={index}>{paragraph}</p>
+                ))}
+              </div>
+            ))}
           </div>
         </div>
-        <FarFromFormComparison selected={stage} onChoose={setStage} />
+        <FarFromFormComparison selected={stage} onChoose={selectStage} />
       </section>
 
       {/* 05 — the system: the four theories, then the armour and OS, the
