@@ -200,12 +200,13 @@ test("the calm tiers: the painted ウルトラ at once, no card, no entrance, no
   assert.match(styles, /html\[data-world-effects="economy"\] \.ffs-page > \.ffs-form-call,/);
 });
 
-test("no switch moves the page or changes the panel's height", () => {
-  // The copy's cell is sized by every form's copy (hidden, inert, stacked).
-  assert.match(page, /className="ffs-stage-sizer" aria-hidden="true" inert>/);
-  assert.match(page, /FAR_FROM_SAGA_STAGE_ORDER\.map\(\(key\) => \(\s*<div key=\{`sizer-\$\{key\}`\}/);
+test("no switch moves the page: the panel keeps its place, and is as tall as its form's copy", () => {
+  // The copy is the form's own (polish sweep, 2026-10-23): no hidden copies
+  // pad the cell to the longest form's, which left a blank screen under
+  // ミドル's two paragraphs on phones. The panel's top edge is held instead.
+  assert.doesNotMatch(page, /ffs-stage-sizer/);
+  assert.doesNotMatch(styles, /ffs-stage-sizer/);
   assert.match(styles, /\.ffs-stage-panel > div \{\s*grid-area: copy;/);
-  assert.match(styles, /\.ffs-stage-panel > \.ffs-stage-sizer \{\s*z-index: -1;\s*visibility: hidden;/);
   assert.match(styles, /grid-template-areas:\s*"figure"\s*"copy";/);
   // The figure keeps the shared sheet's fixed box; the picture covers it,
   // whatever its intrinsic size (1092×1500 … 1280×1716).
@@ -216,6 +217,14 @@ test("no switch moves the page or changes the panel's height", () => {
   // the panel's place is noted before the switch and restored before paint.
   assert.match(page, /panelAnchor\.current =\s*panel && panel\.bottom > 0 && panel\.top < window\.innerHeight \? panel\.top : null;/);
   assert.match(page, /useLayoutEffect\(\(\) => \{\s*const before = panelAnchor\.current;[\s\S]*?const delta = panel\.getBoundingClientRect\(\)\.top - before;\s*if \(Math\.abs\(delta\) >= 1\) window\.scrollBy\(\{ top: delta, left: 0, behavior: "instant" \}\);\s*\}, \[stage\]\);/);
+  // The browser's scroll anchoring stays on (it compensates what settles
+  // late above the reader: the page's compensation and it were measured
+  // exact together, +211px at 390, +107px at 1024, in every run); and the
+  // runway's status keeps two lines (one while loading, two once ready),
+  // as the Rexonance page reserves them, so nothing above #stages changes
+  // with the suit's load.
+  assert.doesNotMatch(styles, /overflow-anchor/);
+  assert.match(read("src/styles-far-from-suitup.css"), /\.ffs-assembly-status \{\s*min-height: 3\.2em;\s*min-height: 2lh;/);
   // No switch path scrolls or focuses with a scroll of its own.
   const select = page.slice(page.indexOf("const selectStage = useCallback("), page.indexOf("const chooseQuietly"));
   assert.doesNotMatch(select, /scrollIntoView|scrollTo|\.focus\(/);

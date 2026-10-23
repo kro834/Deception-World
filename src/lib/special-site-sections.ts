@@ -34,10 +34,13 @@ export const SPECIAL_SITE_SECTIONS: Record<SpecialSiteId, readonly SpecialSiteSe
     ["system", "中核システム", "SYSTEM"],
   ],
   // 2026-10-22: the owner's record in full, in the page's chapter order
-  // (the Rexonance order — performance, processor, suit-up, stages, system
-  // — with the record's own chapters around it; far-from-saga.tsx numbers
-  // them 01–11, the two comparison documents inside 03). performance, the
-  // documents (report-*) and p16 come from the owner's comparison text.
+  // (the Rexonance site's five chapters since 2026-10-23 — overview, P16,
+  // suit-up, stages, system — with the record's own sections as their
+  // sub-chapters; the two comparison documents inside #report). The codes
+  // are the page's own: a chapter's code is its CONTENTS code (OVERVIEW,
+  // PROCESSOR for P16, SUIT-UP, 5 STAGES, SYSTEM), a sub-chapter's its
+  // head's. performance, the documents (report-*) and p16 come from the
+  // owner's comparison text.
   "far-from": [
     ["top", "トップ", "TOP"],
     ["overview", "概要", "OVERVIEW"],
@@ -46,9 +49,9 @@ export const SPECIAL_SITE_SECTIONS: Record<SpecialSiteId, readonly SpecialSiteSe
     ["report-rexonance", "対レクソナンス比較資料", "REPORT 01"],
     ["report-saga", "究極形態の比較資料", "REPORT 02"],
     ["p16", "P16", "PROCESSOR"],
-    ["suitup", "変身シークエンス", "SUIT-UP"],
+    ["suitup", "変身", "SUIT-UP"],
     ["stages", "形態", "5 STAGES"],
-    ["theories", "中核機構", "MECHANISM"],
+    ["theories", "中核機構", "SYSTEM"],
     ["system", "装甲・OS", "ARMOR & OS"],
     ["authority", "能力", "ABILITY"],
     ["arsenal", "武装", "WEAPONS"],

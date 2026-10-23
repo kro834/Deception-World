@@ -794,17 +794,28 @@ test("the call stays clear of the figure's box on the smallest phones: one tight
   assert.equal(FAR_FROM_SUIT_CALLS[0], "FAR FROM DEUS！\nREXONANCE！\nSUPERIOR！");
 });
 
-test("the ウルトラ note keeps its space for every form: #suitup's height never changes with the selected form (Safari has no scroll anchoring)", () => {
+test("the ウルトラ note stands with ウルトラ alone, and no space is reserved for it under the other forms", () => {
+  // Polish sweep (2026-10-23): the note's reserved space (visibility: hidden)
+  // was a blank panel under every other form's one line. The page holds
+  // #stages' panel in place across a switch instead (far-from-saga.tsx),
+  // so the selector growing above it never moves the reader, in Safari too.
   const suitup = readFileSync(
     new URL("../src/components/far-from-saga/far-from-suitup.tsx", import.meta.url),
     "utf8",
   );
-  assert.doesNotMatch(suitup, /stage === "ultra" \? \(\s*<div className="ffs-ending-ultra"/);
-  assert.match(
-    suitup,
-    /<div\s+className="ffs-ending-ultra"\s+data-hidden=\{stage !== "ultra" \|\| undefined\}\s+aria-hidden=\{stage !== "ultra" \|\| undefined\}\s*>/,
-  );
+  assert.match(suitup, /\{stage === "ultra" \? \(\s*<div className="ffs-ending-ultra">/);
+  assert.doesNotMatch(suitup, /data-hidden=/);
   const sheet = readFileSync(new URL("../src/styles-far-from-suitup.css", import.meta.url), "utf8");
-  assert.match(sheet, /\.ffs-ending-ultra\[data-hidden\] \{\s*visibility: hidden;\s*\}/);
-  assert.doesNotMatch(sheet, /\.ffs-ending-ultra[^{]*\{[^}]*display: none/);
+  assert.doesNotMatch(sheet, /ffs-ending-ultra\[data-hidden\]|min-height: 5\.4em/);
+  // The order's names on narrow phones: the chosen one under its bar, the
+  // others kept for assistive technology (five columns under 68px broke
+  // エックスハイ in two).
+  assert.match(sheet, /@media \(max-width: 440px\) \{[\s\S]*?\.ffs-ending-route > li:not\(\[data-current\]\) span \{\s*position: absolute;\s*width: 1px;/);
+  assert.doesNotMatch(sheet, /\.ffs-ending-route b\b/);
+  // The page's anchor: the #stages panel's place, restored before paint.
+  const page = readFileSync(
+    new URL("../src/components/far-from-saga/far-from-saga.tsx", import.meta.url),
+    "utf8",
+  );
+  assert.match(page, /if \(Math\.abs\(delta\) >= 1\) window\.scrollBy\(\{ top: delta, left: 0, behavior: "instant" \}\);/);
 });

@@ -1,5 +1,6 @@
 import { FAR_FROM_SAGA } from "@/components/final-stage/final-stage-data";
 import { FAR_FROM_SAGA_STAGE_ORDER, type FarFromStageKey } from "@/lib/far-from-saga-artwork";
+import { withSlashBreaks } from "./far-from-phrase";
 
 /* FAR FROM SAGA — the page's editorial furniture (2026-10-22 redesign).
 
@@ -46,7 +47,7 @@ export function FarFromChapterMap() {
           <b aria-hidden="true">{chapter.number}</b>
           <small lang="en">{chapter.code}</small>
           <span>{chapter.label}</span>
-          <em>{chapter.detail}</em>
+          <em>{withSlashBreaks(chapter.detail)}</em>
           <i aria-hidden="true">↗</i>
         </a>
       ))}
