@@ -109,11 +109,6 @@
     var(--ts-velvet);
 }
 
-.dream-page.dream-page .dream-archive-fold-count {
-  font-family: var(--kn-num);
-  letter-spacing: 0.18em;
-}
-
 /* Open, the summary keeps its 子持ち罫 close and the plate warms a step. */
 .dream-page.dream-page .dream-archive-fold[open] > summary {
   background:
@@ -201,28 +196,7 @@
   }
 }
 
-/* ---------- 4. 舞台: numbered location boards in a masonry ---------- */
-.dream-page.dream-page .dream-atlas-grid {
-  counter-reset: kn-place;
-}
-
-.dream-page.dream-page .dream-atlas-grid > li {
-  counter-increment: kn-place;
-}
-
-.dream-page.dream-page .dream-atlas-kicker::before {
-  content: counter(kn-place, decimal-leading-zero) / "";
-  display: inline-block;
-  margin-right: 12px;
-  padding-right: 12px;
-  border-right: 1px solid var(--ts-hair);
-  color: var(--ts-kin-hi);
-  font-family: var(--kn-num);
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-}
-
+/* ---------- 4. 舞台: location boards in a masonry ---------- */
 .dream-page.dream-page .dream-atlas-grid article {
   border-color: rgb(200 164 92 / 42%);
   background:
@@ -279,18 +253,13 @@
   font-size: 13px;
 }
 
-/* ---------- 6. 武装: numbered entries that hold together ---------- */
+/* ---------- 6. 武装: entries that hold together ---------- */
 /* In two and three columns a short entry's row stretched to its tallest
    neighbour, and the stretch fell between the name and its words. The
-   entries now keep their own height in balanced columns (the numerals
-   give the order), each opening on its own hairline. */
-.dream-page.dream-page .dream-arsenal-list {
-  counter-reset: kn-arms;
-}
-
+   entries now keep their own height in balanced columns, each opening on
+   its own hairline (Owner, 2026-10-23: no 01–NN counters). */
 .dream-page.dream-page .dream-arsenal-list > div {
   align-content: start;
-  counter-increment: kn-arms;
 }
 
 @media (min-width: 761px) {
@@ -315,40 +284,6 @@
   .dream-page.dream-page .dream-arsenal-list {
     columns: 3;
   }
-}
-
-/* The group marks share one column, so the titles start on one line. On
-   phones the mark stands over the title instead: beside it, KEIYA KOCHIYA
-   left 90px at 320, and 東風谷慶弥 broke before its last character. */
-@media (min-width: 641px) {
-  .dream-page.dream-page .dream-arsenal .dream-archive-fold > summary {
-    grid-template-columns: 11.5em minmax(0, 1fr) auto 24px;
-  }
-}
-
-@media (max-width: 640px) {
-  .dream-page.dream-page .dream-arsenal .dream-archive-fold > summary {
-    grid-template-columns: minmax(0, 1fr) 24px;
-    grid-template-areas:
-      "mark cell"
-      "title cell"
-      "count cell";
-    row-gap: 3px;
-  }
-}
-
-.dream-page.dream-page .dream-arsenal-list dt::before {
-  content: counter(kn-arms, decimal-leading-zero) / "";
-  display: inline-block;
-  min-width: 2.2em;
-  margin-right: 8px;
-  color: var(--ts-shu-text);
-  -webkit-text-fill-color: var(--ts-shu-text);
-  font-family: var(--kn-num);
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  vertical-align: 2px;
 }
 
 .dream-page.dream-page .dream-arsenal-list dt small {
@@ -1247,17 +1182,6 @@
   .dream-page.dream-page .dream-dossier-dialog::after,
   .dream-page.dream-page .dream-dossier-dialog .dream-dossier-close::before {
     display: none;
-  }
-
-  .dream-page.dream-page
-    :is(#chronicle, #atlas, #relations, #arsenal)
-    .dream-annex-heading
-    > p::before,
-  .dream-page.dream-page .dream-atlas-kicker::before,
-  .dream-page.dream-page .dream-arsenal-list dt::before {
-    border-color: CanvasText;
-    color: CanvasText;
-    -webkit-text-fill-color: CanvasText;
   }
 
   .dream-page.dream-page .dream-chapter-nav a::after,

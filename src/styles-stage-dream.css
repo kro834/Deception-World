@@ -1567,7 +1567,7 @@ html[data-family="dream"] main.dream-page.dream-page .dream-case-note-head > spa
   place-items: center;
   min-width: 1.6em;
   min-height: 1.6em;
-  margin-left: 4px;
+  margin-left: 0;
   border: 1px solid var(--dr-shu);
   color: var(--dr-text);
   background:
@@ -1581,6 +1581,23 @@ html[data-family="dream"] main.dream-page.dream-page .dream-case-note-head > spa
    ---------------------------------------------------------------- */
 html[data-family="dream"] main.dream-page.dream-page .dream-archive-fold > summary {
   border-color: var(--dr-rule-2);
+}
+
+/* The chronicle's folds lead with the chapter's numeral in the same 朱 box
+   as the story's folds and 章の言葉. */
+html[data-family="dream"] main.dream-page.dream-page #chronicle .dream-archive-fold-mark {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.7em;
+  min-height: 1.7em;
+  border: 1px solid var(--dr-shu);
+  color: var(--dr-text);
+  background:
+    radial-gradient(70% 60% at 50% 25%, rgb(224 102 79 / 24%), transparent 75%), rgb(74 29 39 / 82%);
+  box-shadow: inset 0 1px 0 rgb(243 224 176 / 16%);
+  font-family: var(--dr-num);
+  font-size: 14px;
+  letter-spacing: 0;
 }
 
 html[data-family="dream"] main.dream-page.dream-page .dream-chronicle-cases {

@@ -236,7 +236,6 @@ export function DreamChronicle({ id }: { id: "chronicle" }) {
                       </span>
                       <p className="dream-chronicle-meta">
                         <span className="dream-chronicle-place">{event.place}</span>
-                        <span lang="en">CAST</span>
                         <span className="dream-chronicle-cast">{event.cast.join("・")}</span>
                       </p>
                       <h3>{event.title.text}</h3>

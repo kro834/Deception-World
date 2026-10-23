@@ -206,9 +206,10 @@ try {
       await page.locator(`.dream-reader-index a[href="${selector}"]`).click();
       await page.waitForFunction((selector) => document.querySelector(selector)?.open, selector);
       await view(page, `${selector} > summary`);
+      // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明） — the English reading
+      // under the title is gone.
       for (const child of [
         ".dream-story-case-heading > span",
-        ".dream-story-case-heading > small",
         ".dream-story-case-number",
         ".dream-story-case-toggle",
       ]) {

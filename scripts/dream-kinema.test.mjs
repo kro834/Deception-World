@@ -254,8 +254,9 @@ test("forced colours drop the band, the panels and the ornaments and keep the nu
   ]) {
     assert.ok(text.includes(selector), selector);
   }
-  assert.match(text, /\.dream-atlas-kicker::before[\s\S]*?-webkit-text-fill-color: CanvasText;/);
-  assert.match(text, /\.dream-arsenal-list dt::before/);
+  // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）
+  // The atlas and arsenal counters are gone, and their system-colour rules with them.
+  assert.doesNotMatch(text, /\.dream-atlas-kicker::before|\.dream-arsenal-list dt::before/);
   assert.match(text, /\.dream-chronicle-list::before \{ background: CanvasText; \}/);
 });
 

@@ -48,17 +48,9 @@ html[data-family="dream"] main.dream-page.dream-page .dream-prologue-card h2 {
 /* ----------------------------------------------------------------
    2. The record explorer speaks the programme's Latin face
    ---------------------------------------------------------------- */
-html[data-family="dream"] main.dream-page.dream-page .dream-record-explorer-heading > p,
 html[data-family="dream"] main.dream-page.dream-page .dream-record-telemetry-head small,
 html[data-family="dream"] main.dream-page.dream-page .dream-record-meta {
   font-family: var(--zn-latin);
-}
-
-html[data-family="dream"] main.dream-page.dream-page .dream-record-explorer-heading > p {
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.24em;
-  text-shadow: none;
 }
 
 html[data-family="dream"] main.dream-page.dream-page .dream-record-telemetry-head {
@@ -316,13 +308,8 @@ html[data-family="dream"] main.dream-page.dream-page .dream-record-explorer-head
   text-shadow: 0 2px 14px rgb(0 0 0 / 50%);
 }
 
-html[data-family="dream"] main.dream-page.dream-page .dream-record-explorer-heading > span {
-  font-size: 13px;
-}
-
 html[data-family="dream"] main.dream-page.dream-page .dream-record-search > label,
-html[data-family="dream"] main.dream-page.dream-page .dream-record-filters label,
-html[data-family="dream"] main.dream-page.dream-page .dream-record-quick-label {
+html[data-family="dream"] main.dream-page.dream-page .dream-record-filters label {
   color: var(--zn-kin-light);
   font-size: 13px;
   letter-spacing: 0.08em;
