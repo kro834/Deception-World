@@ -75,7 +75,9 @@ export function FarFromStageSlate() {
   return (
     <span className="ffs-stage-slate">
       <b>01</b>
-      <span lang="en">MIDDLE / STANDARD</span>
+      <span>
+        ミドル <span lang="en">/ STANDARD</span>
+      </span>
       <small lang="en">KEY VISUAL</small>
     </span>
   );
@@ -172,7 +174,6 @@ export function FarFromFormStatus({ stage }: { stage: FarFromStageKey }) {
       <p>
         <span>選択中の形態</span>
         <strong>{form.label}</strong>
-        <small lang="en">{form.code}</small>
       </p>
     </div>
   );

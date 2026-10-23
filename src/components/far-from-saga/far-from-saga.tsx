@@ -7,6 +7,7 @@ import { useWorldMode } from "@/components/world/use-world-mode";
 import { FINAL_STAGE_ENTER_ASSETS, WORLD_ENTER_ASSETS } from "@/lib/asset-loader";
 import { initRail } from "@/lib/liquid/boot.js";
 import { mountLocalNavCurrent } from "@/lib/local-nav-current";
+import { mountFarFromFonts } from "@/lib/far-from-fonts";
 import { FAR_FROM_SAGA, type Article } from "@/components/final-stage/final-stage-data";
 import {
   FAR_FROM_SAGA_ARTWORK,
@@ -136,6 +137,9 @@ export function FarFromSaga() {
   const keyVisual = FAR_FROM_SAGA_ARTWORK.middle;
 
   useEffect(() => mountLocalNavCurrent(pageRef.current?.querySelector(".rxs-local-nav nav")), []);
+
+  // The Japanese display face, applied after paint (src/lib/far-from-fonts.ts).
+  useEffect(() => mountFarFromFonts(pageRef.current), []);
 
   // The liquid rail owns tap, long-press, drag and keyboard selection; React
   // only mirrors the chosen index back into state.
@@ -451,7 +455,6 @@ export function FarFromSaga() {
                 onPointerUp={(event) => releaseControlFocus(event.currentTarget)}
               >
                 <span>{FAR_FROM_SAGA.stages[key].label}</span>
-                <small lang="en">{FAR_FROM_SAGA.stages[key].code}</small>
               </button>
             ))}
           </div>
@@ -483,14 +486,14 @@ export function FarFromSaga() {
               />
             </figure>
             <div key={`${stage}-copy`}>
-              <small lang="en">{activeStage.code}</small>
               <h3>{activeStage.label}</h3>
               {activeStage.body.map((paragraph, index) => (
                 <p key={index}>{paragraph}</p>
               ))}
-              {/* The form's code, outlined and huge (decorative). */}
+              {/* The form's name, outlined and huge (decorative; katakana
+                  only, as every label naming a form). */}
               <i className="ffs-form-code" aria-hidden="true">
-                {activeStage.code}
+                {activeStage.label}
               </i>
             </div>
           </div>

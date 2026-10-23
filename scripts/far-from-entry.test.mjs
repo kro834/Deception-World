@@ -79,7 +79,8 @@ test("the seven calls are the record's own, verbatim, on six contiguous beats in
   // Plain HUD copy from the page's own facts.
   assert.deepEqual(calls.FAR_FROM_SUIT_SYSTEMS[2], ["KHAOS DeuX", "60000YOPS / ∞Core"]);
   assert.match(FAR_FROM_SAGA.specs.find((row) => row.dt === "主演算").dd, /60000YOPS／∞Core/);
-  assert.deepEqual([...calls.FAR_FROM_ENTRY_CAPTION], ["FARFROM DRIVE", "SA-GA OS 6.1 / MIDDLE"]);
+  // A form is named in katakana only (owner, 2026-10-23).
+  assert.deepEqual([...calls.FAR_FROM_ENTRY_CAPTION], ["FARFROM DRIVE", "SA-GA OS 6.1 / ミドル"]);
 });
 
 test("the fire clock: the scan ends at the ignition, the 爆散 is under RIDER！FAR FROM！, the material is there before the chant, and the phase is monotone", () => {

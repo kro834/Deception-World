@@ -93,6 +93,14 @@ html body .load-gate.is-far-from-dive.is-far-from-calls > .rider-dive-status {
   color: #ffd77a;
 }
 
+/* The HUD read-outs in the page's cyber faces (owner, 2026-10-23), from the
+   fonts every page already loads: Oxanium for the data, its digits all one
+   width; the form's katakana (SA-GA OS 6.1 / ミドル) in Zen Kaku Gothic New. */
+.ffe-sequence :is(.rx-call-caption, .rx-suit-callout, .rx-suit-boot) {
+  font-family: "Oxanium", "Zen Kaku Gothic New", "Hiragino Sans", "Noto Sans JP", sans-serif;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
 /* The opening calls are longer lines than Rexonance's: a size that keeps
    them in the calls' zone (measured: Ultra SUPERIOR DEUS！ ≈ 13.6 em). */
 .ffe-sequence[data-mode="entry"] .rx-call-opening:first-child {

@@ -578,9 +578,10 @@ test("#report shows both documents as accessible disclosure panels", () => {
   assert.match(reportView, /<table role="table">/);
   assert.match(reportView, /scope="row" role="rowheader"/);
   assert.match(reportView, /data-label=\{table\.columns\[index\]\}/);
-  // Mincho titles, as on the Rexonance chapters.
-  assert.match(compareStyles, /--ffs-mincho:/);
+  // Titles in the page's cyber display face (owner, 2026-10-23); no Mincho.
+  assert.doesNotMatch(compareStyles, /--ffs-mincho|"[^"\n]*Mincho[^"\n]*"/);
   assert.match(compareStyles, /\.ffs-page \.ffs-report summary h4,/);
+  assert.match(compareStyles, /\.ffs-page \.ffs-p16-note h3 \{[^}]*font-family: var\(--fft-display\);/);
   assert.match(compareStyles, /summary::-webkit-details-marker/);
   // The site search reads the whole text.
   const search = read("src/components/search/search-data.ts");
@@ -1044,9 +1045,12 @@ test("the HUD rebuilds the owner's interfaces as vector panels placed by the ref
   const texts = [
     ...Object.values(art.FAR_FROM_ULTRA_READOUTS).flat(),
     ...hud.panels.map((panel) => panel.title),
-    hud.crown.label,
   ];
   for (const text of texts) assert.match(text, subset, text);
+  // The crown names the form in katakana only (owner, 2026-10-23), drawn in
+  // the page's Japanese display face behind the HUD face.
+  assert.equal(hud.crown.label, "ウルトラ 60S");
+  assert.match(art.FAR_FROM_ULTRA_HUD_FONT, /^"Michroma", "Oxanium", "M PLUS 1",/);
   // Terms from the record only.
   const record = read("src/components/final-stage/final-stage-data.ts");
   for (const term of [
@@ -1617,4 +1621,95 @@ test("#p16 prints the owner's P16 chapters, with 暫定ベンチマーク on eve
   assert.doesNotMatch(p16View, /<img/);
   assert.match(compareStyles, /\.ffs-p16-ring \{[^}]*animation: ffs-p16-ring/);
   assert.match(compareStyles, /\.ffs-page \.ffs-p16-ring \{\s*animation: none;/);
+});
+
+// Owner (2026-10-23): 「ファーフロムのページのフォントは未来風なサイバー風なものにして。」
+test("the cyber type: no Mincho, one route-only display face as text= subsets after paint", () => {
+  for (const sheet of [
+    "src/styles-far-from-saga.css",
+    "src/styles-far-from-compare.css",
+    // (styles-far-from-ultra.css is gone: ウルトラ is one of #suitup's forms, owner 2026-10-23.)
+    "src/styles-far-from-suitup.css",
+    "src/styles-far-from-entry.css",
+  ])
+    assert.doesNotMatch(read(sheet), /--ffs-mincho|"[^"\n]*Mincho[^"\n]*"|[\s,]serif;/, sheet);
+  // Faces: Saira ("Rexonance Forge") for Latin and figures, M PLUS 1 for the
+  // Japanese, Michroma for kickers, Oxanium for data, the system gothic to read.
+  assert.match(styles, /--fft-jp-display:\s*"M PLUS 1", "Hiragino Sans"/);
+  assert.match(styles, /--fft-display: "Rexonance Forge", var\(--fft-jp-display\);/);
+  assert.match(
+    styles,
+    /--fft-etch: "Michroma", "Rexonance Etch", "Oxanium", var\(--fft-jp-display\);/,
+  );
+  assert.match(styles, /--fft-mono: "Oxanium", var\(--fft-jp-display\);/);
+  assert.match(styles, /--fft-text:\s*-apple-system, BlinkMacSystemFont, "Hiragino Sans"/);
+  // The shared chrome and the runways read the same tokens.
+  for (const token of [
+    "--rxs-font-display: var(--fft-display);",
+    "--rxs-font-text: var(--fft-text);",
+    "--dx-hud: var(--fft-etch);",
+    "--dx-mono: var(--fft-mono);",
+  ])
+    assert.ok(styles.includes(token), token);
+  // The runway keeps its HUD metrics (the call is sized to Michroma + Oxanium).
+  assert.match(read("src/styles-far-from-suitup.css"), /--dx-hud: "Michroma", "Oxanium", var\(--fft-jp-display\);/);
+  // Figures are tabular; the spec plates forge theirs.
+  assert.match(
+    styles,
+    /\.ffs-specs dd \{[^}]*font-family: var\(--fft-forge\)[^}]*font-variant-numeric: tabular-nums/,
+  );
+  // Delivery: route-only, never render-blocking, text= subsets, display=swap.
+  const fonts = read("src/lib/far-from-fonts.ts");
+  assert.match(fonts, /family=M\+PLUS\+1:wght@\$\{weight\}&display=swap/);
+  assert.match(fonts, /&text=\$\{encodeURIComponent\(text\)\}/);
+  assert.match(fonts, /requestIdleCallback/);
+  assert.match(fonts, /saveData === true/);
+  assert.match(component, /useEffect\(\(\) => mountFarFromFonts\(pageRef\.current\), \[\]\)/);
+  assert.doesNotMatch(route, /M\+PLUS|far-from-fonts/, "no head link: nothing blocks first paint");
+  assert.doesNotMatch(read("src/lib/site-fonts.ts"), /M\+PLUS/, "never site-wide");
+});
+
+// Owner (2026-10-23): 「『MIDDLE』と『ハイ』など英語とカタカナが混在しているので、
+// ミドルからウルトラまでのみカタカナ表記に統一して」
+test("the five forms are named in katakana only wherever the page's own labels name them", () => {
+  const strip = (source) =>
+    source.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^:])\/\/.*$/gm, "$1");
+  for (const file of [
+    "src/components/far-from-saga/far-from-saga.tsx",
+    "src/components/far-from-saga/far-from-editorial.tsx",
+    "src/components/far-from-saga/far-from-form-comparison.tsx",
+    "src/components/far-from-saga/far-from-suitup.tsx",
+    "src/components/far-from-saga/far-from-p16.tsx",
+    "src/components/far-from-saga/far-from-comparison.tsx",
+    "src/components/far-from-saga/far-from-report.tsx",
+    "src/components/far-from-saga/far-from-entry-sequence.tsx",
+    "src/lib/far-from-ultra-art.ts",
+    "src/lib/far-from-entry-calls.ts",
+    "src/lib/far-from-assembly.ts",
+    "src/lib/special-site-sections.ts",
+  ])
+    assert.doesNotMatch(strip(read(file)), /\b(MIDDLE|XHIGH|HIGH|MAX|ULTRA)\b/, file);
+  // The record's English codes stay in the record and are never printed here.
+  // Owner (2026-10-23): the selector after the runway names them in katakana too.
+  const suitupSource = read("src/components/far-from-saga/far-from-suitup.tsx");
+  for (const source of [component, editorial, formComparison, suitupSource])
+    assert.doesNotMatch(
+      source,
+      /stages\[key\]\.code|activeStage\.code|form\.code|ultra\.code|max\.code/,
+    );
+  assert.match(component, /<span>\{FAR_FROM_SAGA\.stages\[key\]\.label\}<\/span>\n\s*<\/button>/);
+  assert.match(
+    component,
+    /<i className="ffs-form-code" aria-hidden="true">\s*\{activeStage\.label\}/,
+  );
+  assert.match(editorial, /ミドル <span lang="en">\/ STANDARD<\/span>/);
+  assert.match(suitupSource, /<span>\{FAR_FROM_SAGA\.stages\[key\]\.label\}<\/span>\n\s*<\/button>/);
+  assert.match(ultraArt, /\{ phase: "max", step: "01", label: "マックス" \}/);
+  // The owner's own words keep their English: the calls and the report text.
+  assert.match(
+    read("src/components/final-stage/final-stage-data.ts"),
+    /"MIDDLE！HIGH！XHIGH！MAX！ULTRA！"/,
+  );
+  assert.match(TEXT, /MIDDLEの時点で/);
+  assert.match(TEXT, /ULTRAの60秒制限/);
 });

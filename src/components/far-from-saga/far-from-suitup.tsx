@@ -313,7 +313,7 @@ export const FarFromSuitUp = memo(function FarFromSuitUp({
             </ol>
             <p className="rzn-stamp">
               <span>FAR FROM SAGA</span>
-              <b>{form.code}</b>
+              <b>{form.label}</b>
             </p>
           </div>
           <i className="rzn-rail">
@@ -355,7 +355,6 @@ export const FarFromSuitUp = memo(function FarFromSuitUp({
               onClick={() => onChoose(key)}
             >
               <span>{FAR_FROM_SAGA.stages[key].label}</span>
-              <small lang="en">{FAR_FROM_SAGA.stages[key].code}</small>
             </button>
           ))}
         </div>
@@ -368,6 +367,7 @@ export const FarFromSuitUp = memo(function FarFromSuitUp({
           role="tabpanel"
           aria-labelledby={`ffs-ending-tab-${stage}`}
         >
+          {/* Forms are named in katakana only (owner, 2026-10-23). */}
           <ol className="ffs-ending-route" aria-label="移行の順序">
             {FAR_FROM_ASSEMBLY_FORMS.map((key, index) => (
               <li
@@ -376,7 +376,6 @@ export const FarFromSuitUp = memo(function FarFromSuitUp({
                 data-current={index === reached || undefined}
                 style={{ ["--ffs-node" as string]: FAR_FROM_SAGA.stages[key].accent }}
               >
-                <b lang="en">{FAR_FROM_SAGA.stages[key].code}</b>
                 <span>{FAR_FROM_SAGA.stages[key].label}</span>
               </li>
             ))}

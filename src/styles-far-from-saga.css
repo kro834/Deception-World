@@ -92,12 +92,42 @@
   --fft-text-3: #a2b1c0;
   --fft-text-kicker: #96ecff;
 
-  /* Faces. */
-  --fft-display:
-    "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", "Noto Sans JP",
-    "Zen Kaku Gothic New", system-ui, sans-serif;
-  --fft-forge: "Rexonance Forge", "Zen Kaku Gothic New", "Noto Sans JP", sans-serif;
-  --fft-etch: "Rexonance Etch", "Michroma", "Oxanium", "Noto Sans JP", sans-serif;
+  /* Faces: the CYBER type system (owner, 2026-10-23: 「ファーフロムのページの
+     フォントは未来風なサイバー風なものにして」). No Mincho anywhere on the
+     page. One face is added, route-only and after paint: M PLUS 1, the
+     geometric gothic, as text= subsets of the glyphs this page sets in it
+     (src/lib/far-from-fonts.ts); the rest are faces the site already
+     loads (Michroma, Oxanium) or this page's local woff2.
+     - DISPLAY: Latin and digits forged in Saira Expanded ("Rexonance
+       Forge"), Japanese in M PLUS 1 ExtraBold, set wide (the Rexonance
+       futuristic revision's gothic + Saira, as precedent).
+     - FORGE: every figure, tabular, in Saira Expanded; Oxanium behind it.
+     - ETCH: kickers and instrument labels in Michroma's wide capitals
+       (lower case from "Rexonance Etch"), the Japanese in M PLUS 1.
+     - MONO: data read-outs in Oxanium, whose digits are all one width.
+     - TEXT: reading text in the system gothic (Hiragino, then Noto Sans
+       JP): the owner's long verbatim texts stay at their most legible.
+     Until M PLUS 1 arrives (or on Save-Data / 2G) the Japanese draws in
+     the system gothic behind it. */
+  --fft-jp-display:
+    "M PLUS 1", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic",
+    system-ui, sans-serif;
+  --fft-display: "Rexonance Forge", var(--fft-jp-display);
+  --fft-forge: "Rexonance Forge", "Oxanium", var(--fft-jp-display);
+  --fft-etch: "Michroma", "Rexonance Etch", "Oxanium", var(--fft-jp-display);
+  --fft-mono: "Oxanium", var(--fft-jp-display);
+  --fft-text:
+    -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP",
+    "Yu Gothic", system-ui, sans-serif;
+  --fft-glow-ice: 0 0 14px rgb(127 230 255 / 32%);
+  --fft-glow-gold: 0 0 16px rgb(255 215 122 / 30%);
+  /* The shared special-site sheets (chrome, rail, footer) read these. */
+  --rxs-font-display: var(--fft-display);
+  --rxs-font-text: var(--fft-text);
+  --dx-display: var(--fft-display);
+  --dx-body: var(--fft-text);
+  --dx-hud: var(--fft-etch);
+  --dx-mono: var(--fft-mono);
 
   /* Scale: 12 · 14 · 16 · 18 fixed, then fluid titles to 112px. */
   --fft-step--1: 12px;
@@ -2216,6 +2246,112 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
     opacity: 1;
     scale: 1;
   }
+}
+
+/* ================================================================
+   CYBER TYPE (owner, 2026-10-23: 「ファーフロムのページのフォントは
+   未来風なサイバー風なものにして」): the finish on the faces above.
+   Japanese titles in M PLUS 1 ExtraBold, set wide; Latin capitals
+   and every kicker tracked in Michroma; figures forged in Saira Expanded
+   with tabular digits and a faint light; data in Oxanium. Reading text
+   keeps the system gothic. Paint only (text-shadow), no motion; forced
+   colours drop the light.
+   ================================================================ */
+.rxs-page.rxs-page.ffs-page .rxs-hero h1 {
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-shadow:
+    0 2px 0 rgb(0 2 7 / 55%),
+    0 0 34px rgb(127 230 255 / 20%),
+    0 18px 48px rgb(0 0 0 / 45%);
+}
+
+.rxs-page.rxs-page.ffs-page > .rxs-section > .rxs-section-heading > h2,
+.rxs-page.rxs-page.ffs-page .ffs-footer h2 {
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-shadow: 0 0 28px rgb(127 230 255 / 16%);
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-articles article h3,
+.rxs-page.rxs-page.ffs-page .ffs-finisher > h3,
+.rxs-page.rxs-page.ffs-page .rxs-stage-panel > div > h3,
+.rxs-page.rxs-page.ffs-page .ffs-form-status strong,
+.rxs-page.rxs-page.ffs-page .ffs-form-comparison > summary > strong,
+.rxs-page.rxs-page.ffs-page .ffs-comparison-card h3,
+.rxs-page.rxs-page.ffs-page .ffs-chapter-map a span {
+  font-weight: 800;
+  letter-spacing: 0.05em;
+}
+
+/* Kickers: capitals, one tracking, a breath of ice light. */
+.rxs-page.rxs-page.ffs-page .rxs-hero-copy > p:first-child,
+.rxs-page.rxs-page.ffs-page > .rxs-section > .rxs-section-heading > p,
+.rxs-page.rxs-page.ffs-page .ffs-chapter-map-heading,
+.rxs-page.rxs-page.ffs-page .ffs-footer > div > p {
+  text-transform: uppercase;
+  text-shadow: var(--fft-glow-ice);
+}
+
+/* Figures: forged, tabular, lit. */
+.rxs-page.rxs-page.ffs-page .ffs-specs dd,
+.rxs-page.rxs-page.ffs-page .ffs-callout b,
+.rxs-page.rxs-page.ffs-page .ffs-stage-slate > b,
+.rxs-page.rxs-page.ffs-page .ffs-metric > header strong,
+.rxs-page.rxs-page.ffs-page .ffs-metric-result b,
+.rxs-page.rxs-page.ffs-page .ffs-bench-delta b,
+.rxs-page.rxs-page.ffs-page .ffs-p16-figures dd,
+.rxs-page.rxs-page.ffs-page .ffs-p16-values strong,
+.rxs-page.rxs-page.ffs-page .ffs-p16-lineage ol b,
+.rxs-page.rxs-page.ffs-page .ffs-p16-label,
+.rxs-page.rxs-page.ffs-page .ffu-percent {
+  font-variant-numeric: tabular-nums lining-nums;
+  text-shadow: var(--fft-glow-ice);
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-chapter-map a b,
+.rxs-page.rxs-page.ffs-page .ffs-weapons li span,
+.rxs-page.rxs-page.ffs-page .ffs-articles article header > span {
+  text-shadow: var(--fft-glow-gold);
+}
+
+/* Data read-outs: Oxanium, every digit one width. */
+.rxs-page.rxs-page.ffs-page :is(.ffs-form-status-heading span:last-child, .ffs-comparison-card > p > span, .ffs-chapter-map-heading small) {
+  font-family: var(--fft-mono);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+/* The forms' names, katakana only (owner, 2026-10-23): the rail's tabs,
+   the drawer's codes and the outlined name behind the panel's copy. A tab
+   holds the name alone, centred. */
+.ffs-stage-tabs.rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"] {
+  justify-content: center;
+}
+
+.ffs-stage-tabs.rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"] > span {
+  font-family: var(--fft-display);
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+@media (max-width: 680px) {
+  .ffs-stage-tabs.rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"] > span {
+    letter-spacing: 0;
+  }
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-comparison-codes > b {
+  font-family: var(--fft-display);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-form-code {
+  font-family: var(--fft-display);
+  font-size: clamp(40px, 7.2vw, 88px);
+  font-weight: 800;
+  letter-spacing: 0.04em;
 }
 
 /* The calm tiers: reduced motion, forced colours. Everything rests drawn. */

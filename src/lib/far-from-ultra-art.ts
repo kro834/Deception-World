@@ -72,7 +72,7 @@ export const FAR_FROM_ULTRA_WINDOWS = {
 
 /** The phases the runway's read-out names, each lit from its window's start. */
 export const FAR_FROM_ULTRA_PHASES = [
-  { phase: "max", step: "01", label: "MAX" },
+  { phase: "max", step: "01", label: "マックス" },
   { phase: "white", step: "02", label: "WHITE" },
   { phase: "armour", step: "03", label: "NANITES" },
   { phase: "halo", step: "04", label: "HALO" },
@@ -199,7 +199,7 @@ export const FAR_FROM_ULTRA_HUD = {
     { cx: 778, cy: 690, rx: 62, ry: 20, at: 0.4, span: 0.34 },
   ],
   /** The crown gauge starts after the system sync (FAR_FROM_ULTRA_SYNC). */
-  crown: { cx: 512, cy: 54, rx: 176, ry: 30, at: 0.86, span: 0.14, label: "ULTRA 60S" },
+  crown: { cx: 512, cy: 54, rx: 176, ry: 30, at: 0.86, span: 0.14, label: "ウルトラ 60S" },
 } as const;
 
 /** The system sync (progress): one pulse through every panel, tether and
@@ -223,9 +223,12 @@ export const FAR_FROM_ULTRA_EMERGE = {
   settle: [0.72, 1],
 } as const satisfies Record<string, readonly [number, number]>;
 
-/** The HUD's face (the stage sheets' --dx-hud; Michroma's subset is A–Z,
- * digits and / - . : + # % & · | < >, so the read-outs use only those). */
-export const FAR_FROM_ULTRA_HUD_FONT = '"Michroma", "Oxanium", "Noto Sans JP", sans-serif';
+/** The HUD's face (the page's --fft-etch; Michroma's subset is A–Z,
+ * digits and / - . : + # % & · | < >, so the read-outs use only those).
+ * A form's name is katakana only (the crown's ウルトラ), drawn in the
+ * page's Japanese display gothic (src/lib/far-from-fonts.ts). */
+export const FAR_FROM_ULTRA_HUD_FONT =
+  '"Michroma", "Oxanium", "M PLUS 1", "Hiragino Sans", "Noto Sans JP", sans-serif';
 
 /** The read-outs the panels type on (ten characters or fewer, the face is
  * wide): terms from the record only. */

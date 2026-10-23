@@ -11,8 +11,8 @@ import {
 
    The Rexonance stage's comparison drawer (rexonance-form-comparison.tsx)
    for five forms: a native <details> under the stage panel whose cards
-   show each form's picture, name and code, and a button that selects it
-   on the rail above. Opt-in: closed, the drawer creates no image request. */
+   show each form's number, picture and name (katakana only: ミドル to
+   ウルトラ), and a button that selects it on the rail above. Opt-in: closed, the drawer creates no image request. */
 
 export const FarFromFormComparison = memo(function FarFromFormComparison({
   selected,
@@ -30,7 +30,7 @@ export const FarFromFormComparison = memo(function FarFromFormComparison({
         <span className="ffs-comparison-codes" aria-hidden="true">
           {FAR_FROM_SAGA_STAGE_ORDER.map((key) => (
             <b key={key} style={{ ["--ffs-code-accent" as string]: FAR_FROM_SAGA.stages[key].accent }}>
-              {FAR_FROM_SAGA.stages[key].code}
+              {FAR_FROM_SAGA.stages[key].label}
             </b>
           ))}
         </span>
@@ -50,7 +50,6 @@ export const FarFromFormComparison = memo(function FarFromFormComparison({
               >
                 <p>
                   <span>{String(index + 1).padStart(2, "0")}</span>
-                  <b lang="en">{form.code}</b>
                 </p>
                 <img
                   src={art.src}

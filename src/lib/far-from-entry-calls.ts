@@ -203,7 +203,7 @@ export const FAR_FROM_SUIT_SYSTEMS = [
   ["Neural Resonancer Ultra", "ONLINE"],
 ] as const;
 /** The caption's two corners. */
-export const FAR_FROM_ENTRY_CAPTION = ["FARFROM DRIVE", "SA-GA OS 6.1 / MIDDLE"] as const;
+export const FAR_FROM_ENTRY_CAPTION = ["FARFROM DRIVE", "SA-GA OS 6.1 / ミドル"] as const;
 
 /** The chips (both kits mixed) born from the fire's fragments: counts by
  * tier, the orbital cocoon they gather into round the body (rings at
