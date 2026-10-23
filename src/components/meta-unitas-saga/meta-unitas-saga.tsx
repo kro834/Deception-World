@@ -595,6 +595,10 @@ export function MetaUnitasSaga() {
       </section>
 
       <footer className="mus-footer" role="contentinfo">
+        {/* The name as the end card's watermark (the Extreme site's; decorative). */}
+        <span className="mus-end-mark" aria-hidden="true">
+          META UNITAS
+        </span>
         <img
           className="mus-end-figure"
           src={META_UNITAS_ARTWORK.ultra.src}

@@ -84,8 +84,11 @@ export function Articles({
 }) {
   return (
     <div className={`mus-articles is-${variant}`} role="list" aria-label={label}>
-      {items.map((item) => (
+      {items.map((item, index) => (
         <article key={item.title} className="mus-article rxs-reveal" role="listitem">
+          <span className="mus-article-no" aria-hidden="true">
+            {String(index + 1).padStart(2, "0")}
+          </span>
           <h3>
             <span className="mus-article-name" lang="en">
               <span className="mus-bracket">『 </span>
