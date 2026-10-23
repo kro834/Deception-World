@@ -135,19 +135,6 @@
   transform: scale(1.015);
 }
 
-.is-rexonance-pickup .form-pickup-visual > span {
-  top: 22px;
-  left: 22px;
-  padding: 7px 10px;
-  border: 1px solid rgba(114, 231, 255, 0.3);
-  border-radius: 999px;
-  color: rgba(233, 246, 255, 0.9);
-  background: rgba(4, 8, 16, 0.54);
-  letter-spacing: 0.34em;
-  -webkit-backdrop-filter: blur(9px);
-  backdrop-filter: blur(9px);
-}
-
 .is-rexonance-pickup .form-pickup-copy {
   justify-content: center;
   gap: 12px;
@@ -155,27 +142,6 @@
   background:
     radial-gradient(circle at 100% 0, rgba(255, 115, 216, 0.12), transparent 34%),
     radial-gradient(circle at 0 100%, rgba(114, 231, 255, 0.09), transparent 39%);
-}
-
-.is-rexonance-pickup .form-pickup-copy > p {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  color: var(--rex-gold);
-  font-size: 9px;
-}
-
-.is-rexonance-pickup .form-pickup-copy > p::before {
-  width: 42px;
-  height: 1px;
-  background: linear-gradient(90deg, var(--rex-cyan), var(--rex-pink));
-  box-shadow: 0 0 8px rgba(114, 231, 255, 0.6);
-  content: "";
-}
-
-.is-rexonance-pickup .form-pickup-copy > small {
-  color: rgba(114, 231, 255, 0.8);
-  letter-spacing: 0.34em;
 }
 
 .is-rexonance-pickup .form-pickup-copy h2 {
@@ -444,25 +410,6 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.09);
 }
 
-.is-rexonance-dialog .form-pickup-heading > p {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin: 0 0 15px;
-  color: var(--rex-gold);
-  font-size: 9px;
-  font-weight: 800;
-  letter-spacing: 0.34em;
-}
-
-.is-rexonance-dialog .form-pickup-heading > p::before {
-  width: 52px;
-  height: 1px;
-  background: linear-gradient(90deg, var(--rex-cyan), var(--rex-pink));
-  box-shadow: 0 0 10px var(--rex-cyan);
-  content: "";
-}
-
 .is-rexonance-dialog .form-pickup-heading > small {
   display: block;
   max-width: 72ch;
@@ -572,50 +519,12 @@
   filter: saturate(1.08) contrast(1.035);
 }
 
-.is-rexonance-dialog .form-pickup-layout > figure figcaption {
-  position: relative;
-  z-index: 3;
-  align-items: center;
-  min-height: 58px;
-  border-top: 1px solid rgba(114, 231, 255, 0.15);
-  background: linear-gradient(90deg, rgba(114, 231, 255, 0.08), rgba(255, 115, 216, 0.08));
-}
-
-.is-rexonance-dialog .form-pickup-layout > figure figcaption span {
-  color: var(--rex-cyan);
-  font-size: 7px;
-  font-weight: 800;
-  letter-spacing: 0.25em;
-}
-
-.is-rexonance-dialog .form-pickup-layout > figure figcaption b {
-  max-width: 68%;
-  text-align: right;
-  font-size: 11px;
-}
-
 .form-pickup-overview {
   margin: 0 0 22px;
   padding: 20px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 14px 30px 14px 14px;
   background: linear-gradient(135deg, rgba(114, 231, 255, 0.045), rgba(255, 115, 216, 0.035));
-}
-
-.form-pickup-overview header {
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
-  margin-bottom: 15px;
-}
-
-.form-pickup-overview header span,
-.form-pickup-overview header p {
-  margin: 0;
-  color: var(--rex-cyan, #72e7ff);
-  font-size: 8px;
-  font-weight: 800;
-  letter-spacing: 0.22em;
 }
 
 .form-pickup-overview > div {
@@ -681,19 +590,6 @@
   background: linear-gradient(145deg, rgba(114, 231, 255, 0.03), rgba(255, 115, 216, 0.022));
 }
 
-.is-rexonance-dialog .form-pickup-sections > section > header {
-  grid-column: 1 / -1;
-  margin-bottom: 4px;
-  padding-bottom: 11px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-}
-
-.is-rexonance-dialog .form-pickup-sections > section > header span,
-.is-rexonance-dialog .form-pickup-sections > section > header p {
-  color: var(--rex-cyan);
-  font-weight: 800;
-}
-
 .is-rexonance-dialog .form-pickup-sections > section > div {
   min-width: 0;
   padding: 12px;
@@ -731,15 +627,8 @@
   margin-bottom: 20px;
 }
 
-.rexonance-weapon-gallery > header small {
-  color: var(--rex-cyan);
-  font-size: 8px;
-  font-weight: 800;
-  letter-spacing: 0.26em;
-}
-
 .rexonance-weapon-gallery > header h3 {
-  margin: 6px 0 0;
+  margin: 0;
   color: transparent;
   background: linear-gradient(105deg, #fff, var(--rex-cyan), var(--rex-pink));
   -webkit-background-clip: text;
@@ -747,16 +636,6 @@
   font-size: clamp(28px, 4vw, 48px);
   font-weight: 520;
   letter-spacing: -0.045em;
-}
-
-.rexonance-weapon-gallery > header > span {
-  padding: 8px 12px;
-  border: 1px solid rgba(233, 196, 123, 0.2);
-  border-radius: 999px;
-  color: var(--rex-gold);
-  font-size: 8px;
-  font-weight: 800;
-  letter-spacing: 0.2em;
 }
 
 .rexonance-weapon-grid {
@@ -1152,15 +1031,8 @@
   animation: rexonanceCopyArrival 0.92s ease both;
 }
 
-.rexonance-gate-copy small {
-  color: #e9c47b;
-  font-size: 8px;
-  font-weight: 800;
-  letter-spacing: 0.42em;
-}
-
 .rexonance-gate-copy strong {
-  margin: 7px 0 4px;
+  margin: 0;
   color: transparent;
   background: linear-gradient(90deg, #fff, #72e7ff 35%, #ff73d8 70%, #fff);
   -webkit-background-clip: text;
@@ -1170,13 +1042,6 @@
   font-weight: 360;
   letter-spacing: 0.15em;
   line-height: 1;
-}
-
-.rexonance-gate-copy span {
-  color: rgba(225, 235, 250, 0.56);
-  font-size: 7px;
-  font-weight: 700;
-  letter-spacing: 0.28em;
 }
 
 @keyframes rexonanceCardOrbit {
@@ -1481,18 +1346,8 @@
     bottom: max(6vh, calc(env(safe-area-inset-bottom) + 18px));
   }
 
-  .rexonance-gate-copy small {
-    font-size: 6.5px;
-    letter-spacing: 0.3em;
-  }
-
   .rexonance-gate-copy strong {
     font-size: clamp(26px, 10vw, 42px);
-  }
-
-  .rexonance-gate-copy span {
-    font-size: 6px;
-    letter-spacing: 0.18em;
   }
 }
 
@@ -1576,7 +1431,6 @@ html[data-world-effects="economy"] .rexonance-weapon-grid figure > div::after {
 }
 
 @media (prefers-contrast: more), (prefers-reduced-transparency: reduce) {
-  .is-rexonance-pickup .form-pickup-visual > span,
   .is-rexonance-dialog .form-pickup-close {
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
