@@ -22,9 +22,19 @@ export function rexonanceReadingOffset(
   return segment ? segment.top + segment.span * anchor.fraction : null;
 }
 
+/** The auto transformation movie, playing, places the page itself on every
+ * frame, measured in the new layout (src/lib/assembly-movie.ts): a restore
+ * would put the page back where the movie stood when the window changed —
+ * a jump backwards mid-movie, and a scroll the movie reads as the reader's
+ * (owner, 2026-10-23: 「自動変身再生が必ず読み込まれ、正常に動作する様にして。」). */
+export function rexonanceMoviePlaying(page: ParentNode) {
+  return Boolean(page.querySelector('.rzn-movie[data-state="playing"]'));
+}
+
 /** Width-changing reflow only. Toolbar height changes and pinch zoom never
  * move the reader. The scroll handler only records a number; layout is read
- * after resize/ResizeObserver, not on each scrolling animation frame. */
+ * after resize/ResizeObserver, not on each scrolling animation frame. While
+ * the auto transformation movie plays, the movie keeps the place. */
 export function mountRexonanceReadingPosition(page: HTMLElement) {
   let width = innerWidth;
   let y = scrollY;
@@ -78,7 +88,8 @@ export function mountRexonanceReadingPosition(page: HTMLElement) {
         if (disposed) return;
         const next = measure();
         const top = anchor && rexonanceReadingOffset(next, anchor);
-        if (typeof top === "number") scrollTo({ top, behavior: "instant" });
+        if (typeof top === "number" && !rexonanceMoviePlaying(page))
+          scrollTo({ top, behavior: "instant" });
         y = scrollY;
         segments = next;
         restoring = false;
