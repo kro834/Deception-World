@@ -1454,6 +1454,11 @@
   gap: 2px;
 }
 
+/* The unit's name inside the base label stays inline text. */
+.ffs-page .ffs-p16-values i .ffs-unit-tuning {
+  display: inline;
+}
+
 .ffs-page .ffs-p16-values span:last-child {
   text-align: right;
 }
@@ -2135,6 +2140,25 @@
   .ffs-page .ffs-p16-switch label > span > span {
     font-size: 11.5px;
     line-height: 1.25;
+  }
+
+  /* A pill is too narrow for 「Extreme Tuning比」 on one line: it breaks
+     between the words, inside the pill. */
+  .ffs-page .ffs-p16-switch .ffs-unit-tuning {
+    white-space: normal;
+  }
+
+  /* 「P16 / SIXTEENTH GENERATION」 holds one line at 360px. */
+  .ffs-page .ffs-p16-copy > small {
+    letter-spacing: 0.12em;
+  }
+
+  /* The documents' reading text: phrase-unit breaking left long gaps at the
+     line ends of a 360px column; plain strict breaking reads evenly. */
+  .ffs-page .ffs-report-intro p,
+  .ffs-page .ffs-report-body > p {
+    word-break: normal;
+    letter-spacing: 0.02em;
   }
 
   .ffs-page .ffs-p16-table {
