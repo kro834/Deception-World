@@ -98,6 +98,7 @@ export const ASSEMBLY_NANITES = Object.freeze({
   seamGlow: 0.006,
   shock: 0.008,
   paint: 0.01,
+  ribbonPaint: 0.032,
   lacquer: 0.0015,
   print: 0.004,
   recoil: 0.006,
@@ -750,10 +751,14 @@ export function* assemblyNanitePlanSteps({
     gateJ[i] = (naniteHash(i, 21) - 0.5) * 0.024 * H;
     hsh[i] = naniteHash(i, 22);
     if (piece?.helm) helmD[i] = Math.hypot(CX[i] - eyeX, CY[i] - eyeY) / helmReach;
-    // Paint develops from the seat outward after contact.
+    // Paint develops from the seat outward after contact; a ribbon's flows
+    // from its root down to its tip over a longer stretch of the scroll
+    // (owner, 2026-10-23: the muffler went from lattice to painted at one
+    // notch).
     if (piece) {
       const d = Math.hypot(CX[i] - piece.seatX, CY[i] - piece.seatY) / piece.reach;
-      tp[i] = Math.max(piece.contact + 0.001 + (piece.helm ? 0.004 : N.paint) * d, T1[i] + 0.0005);
+      const sweep = piece.helm ? 0.004 : piece.kind === 2 ? N.ribbonPaint : N.paint;
+      tp[i] = Math.max(piece.contact + 0.001 + sweep * d, T1[i] + 0.0005);
     } else tp[i] = T1[i] + 0.0005;
     if (tick()) yield;
   }
