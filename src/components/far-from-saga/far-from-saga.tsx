@@ -33,7 +33,7 @@ import {
   FarFromHeroRail,
   FarFromStageSlate,
 } from "./far-from-editorial";
-import { withSlashBreaks } from "./far-from-phrase";
+import { withCallBreaks, withSlashBreaks } from "./far-from-phrase";
 import { warmRexonanceStages } from "@/lib/warm-rexonance-stages";
 
 /* FAR FROM SAGA special site (owner's record of 2026-10-22; redesigned on
@@ -112,12 +112,14 @@ const LONG_SPEC = 12;
 const STAGE_WARM_ORDER = ["high", "xhigh", "max", "ultraBase", "ultra"] as const;
 const STAGE_WARM_ART = { ...FAR_FROM_SAGA_ARTWORK, ultraBase: FAR_FROM_SAGA_ULTRA_BASE };
 
+/** The record's calls as chips; a chip's line breaks after a 「！」 alone,
+ * so FAR FROM！ never splits at its space on a phone. */
 function CallOuts({ calls, label }: { calls: readonly string[]; label: string }) {
   return (
     <div className="ffs-calls" role="list" aria-label={label}>
       {calls.map((call, index) => (
         <b key={`${call}-${index}`} role="listitem">
-          {call}
+          {withCallBreaks(call)}
         </b>
       ))}
     </div>

@@ -322,7 +322,8 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
   letter-spacing: 0.1em;
 }
 
-.rxs-page.rxs-page.ffs-page .ffs-stages-line > span {
+/* The 5 STAGES tag alone is a chip; the names after it are plain text. */
+.rxs-page.rxs-page.ffs-page .ffs-stages-line > span[lang="en"] {
   padding: 4px 9px 3px;
   border: 1px solid rgb(255 215 122 / 40%);
   color: var(--fft-gold);
@@ -1295,14 +1296,13 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
 }
 
 /* ---------- Phrases of the record ---------- */
-/* A phrase with 「／」 (ミドル／ハイ／…, FARFROM DRIVE／多重供給接続) breaks
-   only after a slash (the <wbr> withSlashBreaks puts there), at spaces and
-   after punctuation; never before a 「／」, never inside a name. A phrase
-   wider than its line still breaks rather than overflow. */
-.ffs-page .ffs-phrase,
-.rxs-page.rxs-page.ffs-page .ffs-chapter-map a em {
-  word-break: keep-all;
-  overflow-wrap: anywhere;
+/* A phrase with 「／」 (ミドル／ハイ／…, FARFROM DRIVE／多重供給接続) and a
+   call (FAR FROM！FAR FROM！…) break only between their units — after a
+   slash, after a 「！」 — never before a 「／」 and never inside a name or
+   a unit with a space in it (far-from-phrase.tsx sets each unit as one run;
+   word-break: keep-all alone still let a line open with 「／」). */
+.ffs-page .ffs-phrase-unit {
+  white-space: nowrap;
 }
 
 /* A number and its counter stay on one line (第16世代). */

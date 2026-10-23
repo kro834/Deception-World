@@ -331,17 +331,26 @@ test("the page follows the Rexonance structure: numbered bar, split hero, CONTEN
     "<FarFromHeroRail />",
     'className="ffs-mark" aria-hidden="true"',
     '<a className="rxs-scroll-cue" href="#overview">',
-    // The stage line breaks only after its 「／」 (withSlashBreaks + keep-all).
+    // The stage line breaks only after its 「／」 (withSlashBreaks: each unit
+    // up to its slash is one unbreakable run; keep-all alone let a line
+    // open with 「／」).
     '<span className="ffs-phrase">{withSlashBreaks(FAR_FROM_SAGA.stagesLine)}</span>',
   ])
     assert.ok(hero.includes(piece), piece);
-  assert.match(
-    read("src/components/far-from-saga/far-from-phrase.tsx"),
-    /export function withSlashBreaks\(text: string\): ReactNode\[\]/,
-  );
+  const phrase = read("src/components/far-from-saga/far-from-phrase.tsx");
+  assert.match(phrase, /export function withSlashBreaks\(text: string\): ReactNode\[\]/);
+  assert.match(phrase, /className="ffs-phrase-unit"/);
+  assert.doesNotMatch(phrase, /<wbr/);
+  // The calls' chips break after a 「！」 alone (FAR FROM！ never splits at its space).
+  assert.match(phrase, /export function withCallBreaks\(call: string\): ReactNode\[\]/);
+  assert.match(component, /<b key=\{`\$\{call\}-\$\{index\}`\} role="listitem">\s*\{withCallBreaks\(call\)\}/);
   assert.match(editorial, /<em>\{withSlashBreaks\(chapter\.detail\)\}<\/em>/);
   assert.match(component, /<h3 className="ffs-phrase">\{withSlashBreaks\(item\.title\)\}<\/h3>/);
-  assert.match(styles, /\.ffs-page \.ffs-phrase,\s*\.rxs-page\.rxs-page\.ffs-page \.ffs-chapter-map a em \{\s*word-break: keep-all;\s*overflow-wrap: anywhere;/);
+  assert.match(styles, /\.ffs-page \.ffs-phrase-unit \{\s*white-space: nowrap;\s*\}/);
+  assert.doesNotMatch(styles, /word-break: keep-all;\s*overflow-wrap: anywhere;/);
+  // The 5 STAGES tag alone is a chip; the names after it stay plain text.
+  assert.match(styles, /\.ffs-stages-line > span\[lang="en"\] \{/);
+  assert.doesNotMatch(styles, /\.ffs-stages-line > span \{/);
   assert.match(editorial, /<a className="ffs-hero-primary" href="#suitup">/);
   assert.match(editorial, /<a className="ffs-hero-secondary" href="#stages">/);
   // The read-outs are the owner's spec values, never typed in.
