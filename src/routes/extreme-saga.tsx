@@ -6,6 +6,7 @@ import {
   CINEMATIC_STYLESHEET_LINK,
   DOSSIER_HUD_FONTS_URL,
 } from "@/lib/world-head";
+import formSliderCssUrl from "@/styles-form-slider.css?url";
 import extremeSagaCssUrl from "@/styles-extreme-saga.css?url";
 import rexonanceSagaCssUrl from "@/styles-rexonance-saga.css?url";
 import sagaShowcaseCssUrl from "@/styles-saga-showcase.css?url";
@@ -61,6 +62,8 @@ export const Route = createFileRoute("/extreme-saga")({
       { rel: "stylesheet", href: extremeEditorialCssUrl },
       // ZENITH (2026-10-21): repairs and the brush-up on top of the editorial pass.
       { rel: "stylesheet", href: extremeZenithCssUrl },
+      // The special sites' one form-slider shape (owner, 2026-10-24).
+      { rel: "stylesheet", href: formSliderCssUrl },
       CINEMATIC_STYLESHEET_LINK,
       {
         rel: "preload",

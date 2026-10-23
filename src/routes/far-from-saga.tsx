@@ -5,6 +5,7 @@ import {
   CINEMATIC_STYLESHEET_LINK,
   DOSSIER_HUD_FONTS_URL,
 } from "@/lib/world-head";
+import formSliderCssUrl from "@/styles-form-slider.css?url";
 import rexonanceSagaCssUrl from "@/styles-rexonance-saga.css?url";
 import sagaShowcaseCssUrl from "@/styles-saga-showcase.css?url";
 import showcaseElevationCssUrl from "@/styles-showcase-elevation.css?url";
@@ -61,6 +62,8 @@ export const Route = createFileRoute("/far-from-saga")({
       // The page brought up to the Extreme and Rexonance sites (owner,
       // 2026-10-24): plates and heads, page-scoped, after the page's sheets.
       { rel: "stylesheet", href: farFromZenithCssUrl },
+      // The special sites' one form-slider shape (owner, 2026-10-24).
+      { rel: "stylesheet", href: formSliderCssUrl },
       CINEMATIC_STYLESHEET_LINK,
       {
         rel: "preload",

@@ -48,7 +48,7 @@ function FormSliderInner<K extends string>(
   return (
     <div
       ref={ref}
-      className={`rxs-stage-tabs liquid-swipe-tabs${className ? ` ${className}` : ""}`}
+      className={`form-slider rxs-stage-tabs liquid-swipe-tabs${className ? ` ${className}` : ""}`}
       role="tablist"
       aria-label={ariaLabel}
       aria-labelledby={ariaLabelledBy}
