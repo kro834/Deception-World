@@ -265,6 +265,18 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
     0 18px 48px rgb(0 0 0 / 45%);
 }
 
+/* The name's two words on rows of their own at every width (the grid
+   blockifies the shared name-word spans), in the fallback gothic as in
+   M PLUS 1: the fallback set the nine characters on one line on a desktop,
+   and the face arriving after paint wrapped them, a shift of a line. */
+.rxs-page.rxs-page.ffs-page .rxs-hero h1 {
+  display: grid;
+}
+
+.rxs-page.rxs-page.ffs-page .rxs-hero h1 > wbr {
+  display: none;
+}
+
 .rxs-page.rxs-page.ffs-page .rxs-hero h1 > span {
   display: block;
   margin-bottom: 0.3em;
@@ -301,7 +313,13 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
   font-weight: 700;
 }
 
-/* The five stages, on one etched line. */
+/* The five stages, on one etched line. The showcase sheet's prism lead
+   (drawn before every hero paragraph but the lede) stays off it: the
+   kicker above carries this page's gold lead. */
+.rxs-page.rxs-page.ffs-page .rxs-hero-copy > p.ffs-stages-line::before {
+  content: none;
+}
+
 .rxs-page.rxs-page.ffs-page .ffs-stages-line {
   display: flex;
   flex-wrap: wrap;
@@ -316,7 +334,8 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
   letter-spacing: 0.1em;
 }
 
-.rxs-page.rxs-page.ffs-page .ffs-stages-line > span {
+/* The 5 STAGES tag alone is a chip; the names after it are plain text. */
+.rxs-page.rxs-page.ffs-page .ffs-stages-line > span[lang="en"] {
   padding: 4px 9px 3px;
   border: 1px solid rgb(255 215 122 / 40%);
   color: var(--fft-gold);
@@ -1216,10 +1235,11 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
     width: 18px;
   }
 
+  /* 9vw: a nine-character line (届く場所すべてが、) fits a 360px phone. */
   .rxs-page.rxs-page.ffs-page > .rxs-section > .rxs-section-heading > h2 {
     grid-column: 1;
     grid-row: 3;
-    font-size: clamp(34px, 9vw, 44px);
+    font-size: clamp(30px, 9vw, 44px);
   }
 
   .rxs-page.rxs-page.ffs-page > .rxs-section > .rxs-section-heading > span {
@@ -1287,6 +1307,21 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
   margin: 0 0 24px;
 }
 
+/* ---------- Phrases of the record ---------- */
+/* A phrase with 「／」 (ミドル／ハイ／…, FARFROM DRIVE／多重供給接続) and a
+   call (FAR FROM！FAR FROM！…) break only between their units — after a
+   slash, after a 「！」 — never before a 「／」 and never inside a name or
+   a unit with a space in it (far-from-phrase.tsx sets each unit as one run;
+   word-break: keep-all alone still let a line open with 「／」). */
+.ffs-page .ffs-phrase-unit {
+  white-space: nowrap;
+}
+
+/* A number and its counter stay on one line (第16世代). */
+.ffs-page .ffs-nowrap {
+  white-space: nowrap;
+}
+
 /* ---------- Prose ---------- */
 .ffs-copy {
   max-width: 900px;
@@ -1321,7 +1356,10 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
   border-top: 1px solid var(--fft-line-soft);
 }
 
-.ffs-specs dt {
+/* The labels at the label tracking (the group rule above sets the kicker's
+   wider one on every etched label; this one, as specific and later, wins):
+   Japanese set 0.3em apart read as spaced letters. */
+.rxs-page.rxs-page.ffs-page .ffs-specs dt {
   color: var(--fft-text-kicker);
   font-size: 11px;
   letter-spacing: var(--fft-track-label);
@@ -1962,6 +2000,13 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
   html[data-family="special"] body .rxs-page.rxs-page.ffs-page .rxs-footer.ffs-footer > div {
     grid-column: 1 / -1;
   }
+
+  /* The doors flow into the three columns in turn (the shared sheet seats
+     the first beside the title, which left the first column empty here). */
+  html[data-family="special"] body .rxs-page.rxs-page.ffs-page .rxs-footer.ffs-footer > a {
+    grid-column: auto;
+    grid-row: auto;
+  }
 }
 
 /* ================================================================
@@ -2013,8 +2058,19 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
     padding-inline: 12px;
   }
 
+  /* Two cards a row: the buttons of a row share one height (エックスハイを
+     表示中 runs to two lines on a 360px phone where ミドルを表示 keeps one),
+     and the label reads a size down so it keeps one line from 390px. */
   .rxs-page.rxs-page.ffs-page .ffs-comparison-card {
+    grid-template-rows: auto auto auto 1fr;
     padding: 10px;
+  }
+
+  .rxs-page.rxs-page.ffs-page .ffs-comparison-card button {
+    align-self: stretch;
+    padding: 10px 8px;
+    font-size: 11px;
+    letter-spacing: 0.02em;
   }
 }
 
@@ -2057,6 +2113,16 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
 
   .rxs-page.rxs-page.ffs-page .rxs-hero-kicker-tail {
     white-space: normal;
+  }
+
+  /* Narrow phones: the kicker's tail (/ SPECIAL SITE) on a line of its own
+     from the first paint. Michroma, arriving after it, is the wider face:
+     the tail wrapped as it landed, and the title and everything under it
+     moved down a line (a shift of 0.05). */
+  @media (max-width: 459.98px) {
+    .rxs-page.rxs-page.ffs-page .rxs-hero-kicker-tail {
+      flex-basis: 100%;
+    }
   }
 
   .rxs-page.rxs-page.ffs-page .rxs-hero h1 {
@@ -2216,9 +2282,12 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
   }
 }
 
+/* The scan line travels on the compositor (a translate down the figure,
+   its size container, not an animated top, which laid the panel out again
+   every frame and registered as layout shifts). */
 @keyframes ffs-scan {
   0% {
-    top: 0;
+    translate: 0 0;
     opacity: 0;
   }
 
@@ -2231,7 +2300,7 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
   }
 
   100% {
-    top: 100%;
+    translate: 0 100cqh;
     opacity: 0;
   }
 }
@@ -2338,6 +2407,26 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
 @media (max-width: 680px) {
   .ffs-stage-tabs.rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"] > span {
     letter-spacing: 0;
+  }
+
+  /* The end card on a phone: the title's cell may shrink below its longest
+     phrase (the grid's auto minimum held it at the phrase's width and the
+     line ran off the screen), its size fits ファイナルステージで。 on one
+     360px line, and the kicker wraps rather than run under the edge. */
+  .rxs-page.rxs-page.ffs-page .ffs-footer > div {
+    min-width: 0;
+  }
+
+  .rxs-page.rxs-page.ffs-page .ffs-footer h2 {
+    font-size: clamp(24px, 7.6vw, 34px);
+    letter-spacing: 0.03em;
+    overflow-wrap: anywhere;
+  }
+
+  .rxs-page.rxs-page.ffs-page .ffs-footer > div > p {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-wrap: balance;
   }
 }
 
@@ -2482,9 +2571,10 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
    修正して。」「これらの切り替えもレクソナンスの様な切り替え効果が出る様にして。
    スクロールも同様に。」
 
-   - THE PANEL NEVER CHANGES SIZE: the copy's cell holds every form's copy
-     (hidden, stacked), so the cell is the longest form's at every width;
-     the figure keeps its fixed box and the picture covers it.
+   - THE PANEL KEEPS ITS PLACE: the figure keeps its fixed box and the
+     picture covers it; the copy is as long as the form's, and the page
+     holds the panel's top edge still across a switch (far-from-saga.tsx),
+     so nothing above the reader moves, with or without scroll anchoring.
    - THE CARD (far-from-stage-switch.tsx): the Rexonance stage card in
      FAR FROM's palette: three opaque blades, the call and the form's
      name, the blades opening as an aperture onto the new form.
@@ -2499,7 +2589,7 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
    entrance, ウルトラ painted with its interfaces.
    ================================================================ */
 
-/* The panel's cells: the figure, and the copy with its sizers stacked. */
+/* The panel's cells: the figure, and the copy. */
 .rxs-page.rxs-page.ffs-page .ffs-stage-panel {
   grid-template-areas: "figure copy";
 }
@@ -2514,13 +2604,6 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
   grid-area: copy;
 }
 
-.rxs-page.rxs-page.ffs-page .ffs-stage-panel > .ffs-stage-sizer {
-  z-index: -1;
-  visibility: hidden;
-  animation: none;
-  pointer-events: none;
-}
-
 @media (max-width: 900px) {
   .rxs-page.rxs-page.ffs-page .ffs-stage-panel {
     grid-template-areas:
@@ -2528,8 +2611,7 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
       "copy";
   }
 
-  /* One column: the copy starts under the figure, the cell below it holds
-     the longest form's copy. */
+  /* One column: the copy starts under the figure. */
   .rxs-page.rxs-page.ffs-page .ffs-stage-panel > div {
     align-self: start;
   }
@@ -2627,8 +2709,10 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
   stroke-width: 2.4;
 }
 
+/* The titles and the crown's label are sized by the layer itself (an
+   inline font-size in picture units that comes to 9 px and 12 px on screen
+   at least: far-from-ultra-deploy.tsx); these are their faces. */
 .ffs-ultra-deploy .ffd-title,
-.ffs-ultra-deploy .ffd-line,
 .ffs-ultra-deploy .ffd-crown-label {
   fill: var(--ffd-white);
   stroke: none;
@@ -2639,10 +2723,13 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
   letter-spacing: 0.02em;
 }
 
-.ffs-ultra-deploy .ffd-line {
+/* The read-out rows: data strips, one per line of the record. */
+.ffs-ultra-deploy .ffd-strip {
   fill: var(--ffd-ice);
-  font-size: 10px;
-  letter-spacing: 0;
+  fill-opacity: 0.72;
+  stroke: none;
+  transform-box: fill-box;
+  transform-origin: 0 50%;
 }
 
 .ffs-ultra-deploy .ffd-crown-label {
@@ -3303,8 +3390,13 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
     animation: ffd-bar 360ms cubic-bezier(0.16, 1, 0.3, 1) calc(var(--ffd-t) + var(--ffd-c) * 1ms) both;
   }
 
-  .ffs-ultra-deploy[data-run] :is(.ffd-title, .ffd-line, .ffd-crown-label) > tspan {
+  .ffs-ultra-deploy[data-run] :is(.ffd-title, .ffd-crown-label) > tspan {
     animation: ffd-type 120ms linear calc(var(--ffd-t) + var(--ffd-c) * 1ms) both;
+  }
+
+  /* A read-out strip writes on from its left, as a line would type. */
+  .ffs-ultra-deploy[data-run] .ffd-strip {
+    animation: ffd-strip 260ms cubic-bezier(0.16, 1, 0.3, 1) calc(var(--ffd-t) + var(--ffd-c) * 1ms) both;
   }
 
   .ffs-ultra-deploy[data-run] .ffd-settle {
@@ -3766,6 +3858,25 @@ html[data-world-effects="economy"] .ffs-page :is(.ffs-switch-rings, .ffs-switch-
 
   100% {
     fill-opacity: 1;
+  }
+}
+
+/* A read-out strip writes on: a white strike, then its own light. */
+@keyframes ffd-strip {
+  0% {
+    fill: var(--ffd-white);
+    fill-opacity: 0;
+    transform: scaleX(0);
+  }
+
+  30% {
+    fill: var(--ffd-white);
+    fill-opacity: 1;
+  }
+
+  100% {
+    fill-opacity: 0.72;
+    transform: none;
   }
 }
 
