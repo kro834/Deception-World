@@ -88,7 +88,7 @@ export function prefetchMetaUnitasEntry() {
 
 /** After a page's load, in idle time: the code only (the chunk and the
  * engine, small), never the pictures. Returns the canceller. */
-export function scheduleMetaUnitasEntryPrefetch(): () => void {
+export function scheduleMetaUnitasEntryWarmup(): () => void {
   if (typeof window === "undefined") return () => {};
   let id = 0;
   let timer = 0;

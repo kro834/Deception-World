@@ -46,7 +46,7 @@ test("the route is registered wherever the other special sites are", () => {
   assert.match(read("scripts/verify-site-health.mjs"), /"\/meta-unitas-saga"/);
   // The entry transition: its own dive, its call prepared with a deadline.
   assert.match(gate, /"\/meta-unitas-saga": "meta-unitas"/);
-  assert.match(gate, /prepareMetaUnitasTransition\(\)/);
+  assert.match(gate, /prepareMetaUnitasTransition\(4000\)/);
   assert.match(gate, /META_UNITAS_ENTRY_TIMINGS/);
 });
 

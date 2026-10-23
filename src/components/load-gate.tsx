@@ -59,7 +59,7 @@ import {
   META_UNITAS_ENTRY_TIMINGS,
   prefetchMetaUnitasEntry,
   prepareMetaUnitasTransition,
-  scheduleMetaUnitasEntryPrefetch,
+  scheduleMetaUnitasEntryWarmup,
   warmMetaUnitasEntry,
   type MetaUnitasTransitionRenderer,
 } from "@/lib/meta-unitas-entry-gate";
@@ -953,7 +953,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
   useEffect(() => scheduleRexonanceSuitWarm(), [pathname]);
   // META UNITAS's call chunk and engine, after each page's load (code only).
   useEffect(
-    () => (pathname === "/meta-unitas-saga" ? undefined : scheduleMetaUnitasEntryPrefetch()),
+    () => (pathname === "/meta-unitas-saga" ? undefined : scheduleMetaUnitasEntryWarmup?.()),
     [pathname],
   );
   // Owner (2026-10-11): the Rexonance page itself (chunk, styles, hero) too.
@@ -2495,7 +2495,7 @@ export function GuardedLink({
     if (to === "/rexonance-saga") void warmRexonanceSuit("high");
     // FAR FROM's call chunk and images, the same way (never on a still tier).
     if (to === "/far-from-saga") prefetchFarFromEntry();
-    if (to === "/meta-unitas-saga") prefetchMetaUnitasEntry();
+    if (to === "/meta-unitas-saga") prefetchMetaUnitasEntry?.();
     if (preloadedRoute.current !== to) {
       preloadedRoute.current = to;
       void router.preloadRoute({ to }).catch(() => {
