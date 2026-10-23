@@ -41,6 +41,9 @@
 .ffs-page .ffs-p16-overview,
 .ffs-page .ffs-p16-comparator,
 .ffs-page .ffs-p16-lineage,
+.ffs-page .ffs-p16-generations,
+.ffs-page .ffs-p16-main,
+.ffs-page .ffs-p16-summary,
 .ffs-page .ffs-p16-topics,
 .ffs-page .ffs-p16-note {
   box-sizing: border-box;
@@ -56,6 +59,10 @@
 .ffs-page .ffs-p16-copy > h3,
 .ffs-page .ffs-p16-comparator > header h3,
 .ffs-page .ffs-p16-lineage h3,
+.ffs-page .ffs-p16-generations h3,
+.ffs-page .ffs-p16-generations h4,
+.ffs-page .ffs-p16-main h3,
+.ffs-page .ffs-p16-summary h3,
 .ffs-page .ffs-p16-topics h3,
 .ffs-page .ffs-p16-note h3 {
   margin: 0;
@@ -76,7 +83,10 @@
 .ffs-page .ffs-report-head > small,
 .ffs-page .ffs-p16-copy > small,
 .ffs-page .ffs-p16-comparator > header small,
-.ffs-page .ffs-p16-lineage small,
+.ffs-page .ffs-p16-lineage > header small,
+.ffs-page .ffs-p16-generations > header small,
+.ffs-page .ffs-p16-main > header small,
+.ffs-page .ffs-p16-summary > header small,
 .ffs-page .ffs-p16-topics header small {
   display: block;
   color: var(--ffs-accent);
@@ -217,15 +227,14 @@
   color: #cfeffa;
 }
 
-/* 「P14（Extreme tuning）」: the parenthetical holds together; a narrow line
-   breaks before its 「（」, never inside it. */
+/* 「P14 Extreme Tuning」: the words after 「P14」 hold together; a narrow
+   line breaks after 「P14」, never inside 「Extreme Tuning」. */
 .ffs-page .ffs-unit-tuning {
   white-space: nowrap;
 }
 
-/* In the console's name rows the tuning reads as P14's qualifier, a step
-   smaller and set close (palt), so 「P14（Extreme tuning）」 holds one line
-   in a phone's row and in a two-column tablet card. */
+/* In the console's name rows the qualifier reads a step smaller, set close
+   (palt), so 「P14 Extreme Tuning」 holds one line where it can. */
 .ffs-page .ffs-text-row dd .ffs-unit-tuning {
   font-size: 0.86em;
   font-feature-settings: "palt" 1;
@@ -572,7 +581,7 @@
   overflow-wrap: anywhere;
 }
 
-/* The エクスプリーム view's 加速機構の性能差 (the 設定案): a text row's frame
+/* The エクスプリーム / レクソナンス views' 加速機構の性能差 (公式設定): a text row's frame
    and label, the pair in the rows' display face, the 暫定 mark at the right. */
 .ffs-page .ffs-accel-compare {
   grid-column: 1 / -1;
@@ -611,7 +620,7 @@
 
 .ffs-page .ffs-accel-compare dl {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 12px;
   margin: 0;
 }
@@ -1333,7 +1342,7 @@
 
 .ffs-page .ffs-p16-figures dl {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 10px;
   margin: 0;
 }
@@ -1373,7 +1382,8 @@
   font-weight: 600;
 }
 
-/* The generation comparator (Rexonance's P1 → P14, here P14 → P16). */
+/* The generation comparator (Rexonance's P1 → P14, here P14 Standard /
+   P14 Extreme Tuning / P2 → P16). */
 .ffs-page .ffs-p16-comparator {
   margin-top: clamp(28px, 4vw, 44px);
   padding: clamp(20px, 3.4vw, 40px);
@@ -1488,10 +1498,8 @@
   height: 7px;
 }
 
-/* Every base is drawn alike (P14, P2, P14（Extreme tuning）); P16 in FAR FROM's hue. */
-.ffs-page .ffs-p16-bars [data-unit="p14"],
-.ffs-page .ffs-p16-bars [data-unit="p2"],
-.ffs-page .ffs-p16-bars [data-unit="extreme"] {
+/* P2's bar in gray; P16 in FAR FROM's hue. */
+.ffs-page .ffs-p16-bars [data-unit="p2"] {
   --ffs-col-accent: #7d8a9c;
 }
 
@@ -1510,7 +1518,7 @@
   letter-spacing: 0.06em;
 }
 
-/* The reading, and under it (the Extreme option) the two indices. */
+/* The reading, and under it the index scale. */
 .ffs-page .ffs-p16-metric > p > span {
   display: grid;
   gap: 3px;
@@ -1570,81 +1578,7 @@
   content: "※";
 }
 
-/* The Extreme option: where Extreme tuning leads Rexonance's P14, so the
-   comparison is not one-sided. Dashed, as a figure on another base. */
-.ffs-page .ffs-p16-strength {
-  display: grid;
-  gap: 6px;
-  margin-top: 12px;
-  padding: 14px 18px;
-  border: 1px dashed rgb(255 215 122 / 32%);
-  border-radius: 16px;
-  background: rgb(255 215 122 / 3%);
-}
-
-.ffs-page .ffs-p16-strength > small {
-  color: #ffe2a1;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-}
-
-.ffs-page .ffs-p16-strength p {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2px 14px;
-  align-items: baseline;
-  margin: 0;
-}
-
-.ffs-page .ffs-p16-strength p span {
-  color: var(--ffs-text);
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.ffs-page .ffs-p16-strength p b {
-  color: var(--ffs-accent);
-  font-family: var(--fft-forge);
-  font-size: 22px;
-  font-weight: 760;
-  font-variant-numeric: tabular-nums;
-  line-height: 1.2;
-}
-
-.ffs-page .ffs-p16-strength p b small {
-  margin-right: 0.4em;
-  color: var(--ffs-muted);
-  font-family: var(--rxs-font-text);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-}
-
-.ffs-page .ffs-p16-strength p i {
-  color: var(--ffs-muted);
-  font-size: 11px;
-  font-style: normal;
-  letter-spacing: 0.04em;
-}
-
-/* The 設定案's reading (two short paragraphs; the cards carry the figures). */
-.ffs-page .ffs-p16-reading {
-  display: grid;
-  gap: 10px;
-  margin-top: 16px;
-}
-
-.ffs-page .ffs-p16-reading p {
-  max-width: 46em;
-  margin: 0;
-  color: var(--ffs-text-2);
-  font-size: 14px;
-  line-height: 1.95;
-  text-wrap: pretty;
-}
-
-/* P2 → P14 → P16. */
+/* P2 → P14 Standard → P14 Extreme Tuning → P16. */
 .ffs-page .ffs-p16-lineage {
   margin-top: clamp(40px, 6vw, 64px);
 }
@@ -1662,7 +1596,7 @@
 
 .ffs-page .ffs-p16-lineage ol {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0;
   margin: 0 0 18px;
   padding: 0;
@@ -1701,31 +1635,25 @@
 .ffs-page .ffs-p16-lineage ol b {
   color: var(--ffs-text);
   font-family: var(--fft-forge);
-  font-size: clamp(22px, 2.4vw, 30px);
+  font-size: clamp(19px, 2vw, 26px);
   font-weight: 780;
+  line-height: 1.25;
 }
 
-.ffs-page .ffs-p16-lineage ol span {
+.ffs-page .ffs-p16-lineage ol b .ffs-unit-tuning {
+  font-size: 0.82em;
+}
+
+.ffs-page .ffs-p16-lineage ol span:not(.ffs-unit-tuning) {
   color: var(--ffs-text-3);
   font-size: 12px;
 }
 
-/* P14's two forms in order: Extreme's earlier generation → Rexonance's. A
-   narrow column breaks after the arrow, never inside a name. */
-.ffs-page .ffs-p16-lineage-forms {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0 0.5em;
-}
-
-.ffs-page .ffs-p16-lineage-forms > span {
-  white-space: nowrap;
-}
-
-.ffs-page .ffs-p16-lineage-forms i {
-  margin-left: 0.5em;
-  color: var(--ffs-muted);
-  font-style: normal;
+.ffs-page .ffs-p16-lineage ol small {
+  max-width: 18em;
+  color: var(--ffs-text-2);
+  font-size: 12px;
+  line-height: 1.7;
 }
 
 .ffs-page .ffs-p16-lineage > p {
@@ -1734,6 +1662,286 @@
   color: var(--ffs-text-2);
   font-size: 15px;
   line-height: 1.95;
+}
+
+/* The 公式設定's cards: the three units' indices (P14 Standard = 100),
+   each named over its bar; the chosen base marked, P16 in FAR FROM's hue. */
+.ffs-page .ffs-p16-trio {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ffs-page .ffs-p16-trio li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 3px 10px;
+  align-items: baseline;
+  --ffs-col-accent: #56606e;
+}
+
+.ffs-page .ffs-p16-trio li > span:first-child {
+  min-width: 0;
+  color: var(--ffs-text-3);
+  font-family: var(--fft-mono);
+  font-size: 11px;
+  letter-spacing: 0.02em;
+}
+
+.ffs-page .ffs-p16-trio li > b {
+  color: var(--ffs-text-3);
+  font-family: var(--fft-mono);
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.ffs-page .ffs-p16-trio-track {
+  grid-column: 1 / -1;
+  display: block;
+  height: 7px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 6%);
+}
+
+.ffs-page .ffs-p16-trio-track i {
+  display: block;
+  min-width: 3px;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--ffs-col-accent);
+  transform: scaleX(var(--ffs-bar, 0));
+  transform-origin: left center;
+  transition: transform 520ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.ffs-page .ffs-p16-trio li[data-base] {
+  --ffs-col-accent: #9aa7b8;
+}
+
+.ffs-page .ffs-p16-trio li[data-base] > span:first-child,
+.ffs-page .ffs-p16-trio li[data-base] > b {
+  color: var(--ffs-text);
+}
+
+.ffs-page .ffs-p16-trio li[data-unit="p16"] {
+  --ffs-col-accent: #2a9fe0;
+}
+
+.ffs-page .ffs-p16-trio li[data-unit="p16"] > span:first-child,
+.ffs-page .ffs-p16-trio li[data-unit="p16"] > b {
+  color: var(--ffs-accent);
+}
+
+/* The owner's table, P14 Standard = 100; the base's column marked. */
+.ffs-page .ffs-p16-table {
+  margin: 18px 0 0;
+  padding: 16px 18px;
+  border: 1px solid rgb(255 255 255 / 8%);
+  border-radius: 16px;
+  background: rgb(0 0 0 / 22%);
+}
+
+.ffs-page .ffs-p16-table figcaption {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  color: var(--ffs-text);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.ffs-page .ffs-p16-table table,
+.ffs-page .ffs-p16-main table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-variant-numeric: tabular-nums;
+}
+
+.ffs-page .ffs-p16-table th,
+.ffs-page .ffs-p16-table td,
+.ffs-page .ffs-p16-main th,
+.ffs-page .ffs-p16-main td {
+  padding: 8px 6px;
+  border-bottom: 1px solid var(--ffs-line);
+  color: var(--ffs-text-2);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.45;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.ffs-page .ffs-p16-table thead th,
+.ffs-page .ffs-p16-main thead th {
+  color: var(--ffs-muted);
+  font-family: var(--fft-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  overflow-wrap: normal;
+  vertical-align: bottom;
+}
+
+.ffs-page .ffs-p16-table th[scope="row"],
+.ffs-page .ffs-p16-table thead th:first-child,
+.ffs-page .ffs-p16-main th[scope="row"],
+.ffs-page .ffs-p16-main thead th {
+  text-align: left;
+}
+
+.ffs-page .ffs-p16-table table {
+  min-width: 0;
+}
+
+.ffs-page .ffs-p16-table col,
+.ffs-page .ffs-p16-table thead th:first-child {
+  width: 34%;
+}
+
+.ffs-page .ffs-p16-table td {
+  font-family: var(--fft-mono);
+}
+
+.ffs-page .ffs-p16-table [data-base] {
+  color: var(--ffs-text);
+  background: rgb(255 255 255 / 3%);
+}
+
+.ffs-page .ffs-p16-table td:last-child,
+.ffs-page .ffs-p16-table thead th:last-child {
+  color: var(--ffs-accent);
+}
+
+.ffs-page .ffs-p16-table > p {
+  margin: 10px 0 0;
+  color: var(--ffs-text-3);
+  font-size: 12px;
+  line-height: 1.85;
+}
+
+.ffs-page .ffs-p16-source p + p {
+  margin-top: 0.6em;
+}
+
+/* 各世代の技術的な違い / 主演算性能との関係 / 総合評価: the owner's words. */
+.ffs-page .ffs-p16-generations,
+.ffs-page .ffs-p16-main,
+.ffs-page .ffs-p16-summary {
+  margin-top: clamp(40px, 6vw, 64px);
+}
+
+.ffs-page .ffs-p16-generations > header,
+.ffs-page .ffs-p16-main > header,
+.ffs-page .ffs-p16-summary > header {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 18px;
+}
+
+.ffs-page .ffs-p16-generations h3,
+.ffs-page .ffs-p16-main h3,
+.ffs-page .ffs-p16-summary h3 {
+  font-size: clamp(21px, 2.3vw, 28px);
+  line-height: 1.35;
+}
+
+.ffs-page .ffs-p16-generations > div {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.ffs-page .ffs-p16-generations article {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  min-width: 0;
+  padding: 22px;
+  border: 1px solid var(--ffs-line);
+  border-radius: var(--sc-radius, 22px);
+  background: var(--ffs-surface);
+}
+
+.ffs-page .ffs-p16-generations article[data-unit="p16"] {
+  border-color: rgb(127 230 255 / 30%);
+  background:
+    linear-gradient(160deg, color-mix(in srgb, var(--ffs-accent) 8%, transparent), transparent 55%),
+    var(--ffs-surface);
+}
+
+.ffs-page .ffs-p16-generations article > small {
+  color: var(--ffs-muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+}
+
+.ffs-page .ffs-p16-generations h4 {
+  font-size: clamp(17px, 1.6vw, 20px);
+  line-height: 1.45;
+}
+
+.ffs-page .ffs-p16-generations p,
+.ffs-page .ffs-p16-main > p,
+.ffs-page .ffs-p16-summary > p {
+  max-width: 50em;
+  margin: 0;
+  color: var(--ffs-text-2);
+  font-size: 14px;
+  line-height: 1.95;
+  text-wrap: pretty;
+}
+
+.ffs-page .ffs-p16-main > p + p,
+.ffs-page .ffs-p16-summary > p + p {
+  margin-top: 0.9em;
+}
+
+.ffs-page .ffs-p16-main table {
+  max-width: 640px;
+  margin: 18px 0;
+}
+
+.ffs-page .ffs-p16-main td {
+  font-family: var(--fft-mono);
+}
+
+.ffs-page .ffs-p16-main tbody tr:last-child th,
+.ffs-page .ffs-p16-main tbody tr:last-child td {
+  color: var(--ffs-accent);
+}
+
+.ffs-page .ffs-p16-main > p.ffs-p16-main-caution {
+  position: relative;
+  margin-top: 14px;
+  padding: 14px 18px 14px 2.6em;
+  border: 1px solid rgb(255 215 122 / 30%);
+  border-radius: 16px;
+  background: rgb(255 215 122 / 4%);
+}
+
+.ffs-page .ffs-p16-main-caution::before {
+  position: absolute;
+  top: 14px;
+  left: 1.1em;
+  color: var(--ffs-gold);
+  content: "※";
+}
+
+.ffs-page .ffs-p16-summary {
+  padding: clamp(20px, 3.4vw, 36px);
+  border: 1px solid rgb(127 230 255 / 18%);
+  border-radius: var(--sc-radius, 22px);
+  background: linear-gradient(160deg, rgb(8 16 30 / 90%), rgb(3 7 15 / 88%));
 }
 
 /* The chapter's other paragraphs, by topic. */
@@ -1851,12 +2059,21 @@
 
   .ffs-page .ffs-p16-figures dl,
   .ffs-page .ffs-accel-compare dl {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     row-gap: 16px;
+  }
+
+  .ffs-page .ffs-p16-generations > div {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
 @media (max-width: 760px) {
+  .ffs-page .ffs-p16-lineage ol {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    row-gap: 22px;
+  }
+
   .ffs-page .ffs-p16-overview,
   .ffs-page .ffs-p16-topics,
   .ffs-page .ffs-p16-metrics,
@@ -1905,13 +2122,38 @@
   .ffs-page .ffs-metric,
   .ffs-page .ffs-p16-metric,
   .ffs-page .ffs-text-row,
-  .ffs-page .ffs-accel-compare,
-  .ffs-page .ffs-p16-strength {
+  .ffs-page .ffs-accel-compare {
     padding: 16px;
   }
 
-  .ffs-page .ffs-accel-compare dl {
+  .ffs-page .ffs-accel-compare dl,
+  .ffs-page .ffs-p16-figures dl {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     column-gap: 10px;
+  }
+
+  .ffs-page .ffs-p16-switch label > span > span {
+    font-size: 11.5px;
+    line-height: 1.25;
+  }
+
+  .ffs-page .ffs-p16-table {
+    padding: 14px 12px;
+  }
+
+  .ffs-page .ffs-p16-table th,
+  .ffs-page .ffs-p16-table td {
+    padding: 7px 4px;
+    font-size: 12px;
+  }
+
+  .ffs-page .ffs-p16-table thead th {
+    font-size: 10px;
+  }
+
+  .ffs-page .ffs-p16-generations article,
+  .ffs-page .ffs-p16-summary {
+    padding: 20px 18px;
   }
 
   .ffs-page .ffs-accel-compare dl > div {
@@ -2020,6 +2262,7 @@
   .ffs-page .ffs-all-bar i,
   .ffs-page .ffs-bench-track i,
   .ffs-page .ffs-p16-bars i,
+  .ffs-page .ffs-p16-trio-track i,
   .ffs-page .ffs-views label,
   .ffs-page .ffs-console-key li,
   .ffs-page .ffs-bench-rows ul li,
@@ -2043,7 +2286,8 @@ html[data-world-effects="economy"] .ffs-page .ffs-p16-ring {
   .ffs-page .ffs-bars i,
   .ffs-page .ffs-all-bar i,
   .ffs-page .ffs-bench-track i,
-  .ffs-page .ffs-p16-bars i {
+  .ffs-page .ffs-p16-bars i,
+  .ffs-page .ffs-p16-trio-track i {
     background: CanvasText;
   }
 

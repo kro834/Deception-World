@@ -8,11 +8,10 @@
 //     indices, レクソナンス・ハイ = 100 (熱負荷 alone reads lower = better).
 // Each table keeps its ※ note verbatim. Nothing here is a new value: the
 // numbers are parsed back out of the owner's cells, and the only figures this
-// module adds are ratios of two cells in the same row. (The P16 / P14（Extreme
-// tuning）設定案 the console shows under 加速機構 lives in far-from-p16-data.ts.)
+// module adds are ratios of two cells in the same row. (The P16 figures the
+// console shows under 加速機構 are the owner's 公式設定, far-from-p16-official.ts.)
 //
 // Relative imports only (the test loads this file with the transpiler).
-import { EXTREME_P14_NAME } from "./far-from-p16-data";
 import { REPORT_TABLES, type ReportTable } from "./far-from-report-data";
 
 export type FormKey = "vinculum" | "extreme" | "rexonance" | "farFrom";
@@ -131,24 +130,14 @@ export const BASIC_METRICS: readonly BasicMetric[] = BASIC_TABLE.rows
 
 export const ACCEL_LABEL = "加速機構";
 
-/** Rows that are names, not figures (加速機構, 戦闘OS). `values` are the
- * owner's cells; `shown` is what the console prints, where there is room for
- * the Extreme site's full name: エクスプリームの「P14」 reads
- * 「P14（Extreme tuning）」 (owner, 2026-10-23). */
+/** Rows that are names, not figures (加速機構, 戦闘OS): the owner's cells.
+ * 加速機構 reads P2 / P14 Standard / P14 Extreme Tuning / P16 (公式設定). */
 export const BASIC_TEXT_ROWS: readonly {
   label: string;
   values: Record<FormKey, string>;
-  shown: Record<FormKey, string>;
 }[] = BASIC_TABLE.rows
   .filter((row) => !(row.label in BASIC_KEYS))
-  .map((row) => {
-    const values = byForm(row.values);
-    const shown =
-      row.label === ACCEL_LABEL && values.extreme === "P14"
-        ? { ...values, extreme: EXTREME_P14_NAME }
-        : values;
-    return { label: row.label, values, shown };
-  });
+  .map((row) => ({ label: row.label, values: byForm(row.values) }));
 
 /* ---------------------------------------------------------------------------
    【同条件ベンチマーク・暫定評価】 — レクソナンス・ハイ = 100

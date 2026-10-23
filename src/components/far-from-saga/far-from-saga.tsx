@@ -625,7 +625,7 @@ export function FarFromSaga() {
           </small>
           <p>02 / PROCESSOR</p>
           <h2 id="ffs-p16-title">韋駄天？遅過ぎる</h2>
-          <span>レクソナンスサーガの『P14』を基礎とした、第16世代演算加速機構です。</span>
+          <span>レクソナンスサーガの『P14 Extreme Tuning』を基礎とした、第16世代演算加速機構です。</span>
         </header>
         <FarFromP16 />
       </section>
