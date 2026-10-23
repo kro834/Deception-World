@@ -495,9 +495,10 @@ const section = (id, next) =>
 
 test("the owner's comparison text is kept verbatim and read whole into the two documents", () => {
   // sha256 of the owner's text as supplied (2026-10-22). Any edit fails here.
+  // Owner (2026-10-23): the two sentences naming レックス・ロワ and ゼウス are removed.
   assert.equal(
     createHash("sha256").update(TEXT).digest("hex"),
-    "ee654c3e1208cd781de55a13c8c5fd3bcf40a099bf0b393d620abc584c21f1e7",
+    "6ab2aaa989fcb13f567b142a9873f33dc6442a23cd6764fcddb3dddb534f678c",
   );
   const [first, second] = report.REPORT_PARTS;
   assert.equal(first.title, "対レクソナンスサーガ・性能比較及び効率改善");
