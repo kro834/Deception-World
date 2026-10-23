@@ -147,13 +147,31 @@ export function IllusionculumEntrySequence({ phase }: { phase: "covering" | "rev
           ))}
         </div>
       </div>
+      {/* The calls, one at a time, large and centred under the figure (as
+          Rexonance's entry stages them); a chant's units light in turn. */}
       <ol className="ice-entry-calls">
-        {ILLUSIONCULUM_ENTRY_CALLS.map((call, index) => (
-          <li key={call} style={{ ["--ice-call" as string]: index }}>
-            {call}
-          </li>
-        ))}
+        {ILLUSIONCULUM_ENTRY_CALLS.map((call, index) => {
+          const units = call.match(/[^！]+！/g) ?? [call];
+          return (
+            <li
+              key={call}
+              style={{ ["--ice-call" as string]: index }}
+              data-last={index === ILLUSIONCULUM_ENTRY_CALLS.length - 1 || undefined}
+            >
+              {units.map((unit, k) => (
+                <span key={k} style={{ ["--ice-unit" as string]: k }}>
+                  {unit}
+                </span>
+              ))}
+            </li>
+          );
+        })}
       </ol>
+      {/* The frame: corner ticks, the scan line down the undersuit, and the
+          lock's ring at the reactor once the suit is whole. */}
+      <span className="ice-entry-frame" />
+      <span className="ice-entry-scan" />
+      <span className="ice-entry-lock" />
     </div>
   );
 }
