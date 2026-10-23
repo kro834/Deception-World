@@ -1708,6 +1708,10 @@ test("the five forms are named in katakana only wherever the page's own labels n
   assert.match(editorial, /ミドル <span lang="en">\/ STANDARD<\/span>/);
   assert.match(suitupSource, /<span>\{FAR_FROM_SAGA\.stages\[key\]\.label\}<\/span>\n\s*<\/button>/);
   assert.match(ultraArt, /\{ phase: "max", step: "01", label: "マックス" \}/);
+  // /final-stage's Far From selector (its tabs and the panel) prints the katakana only.
+  const finalStage = read("src/components/final-stage/final-stage.tsx");
+  assert.doesNotMatch(finalStage, /stages\[key\]\.code|activeStage\.code/);
+  assert.match(finalStage, /<span>\{FAR_FROM_SAGA\.stages\[key\]\.label\}<\/span>\n\s*<\/button>/);
   // The owner's own words keep their English: the calls and the report text.
   assert.match(
     read("src/components/final-stage/final-stage-data.ts"),
