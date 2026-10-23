@@ -21,15 +21,19 @@ test("Extreme special site has a route, menu entry, warmup asset, and dedicated 
   assert.match(transitions, /\.is-extreme-dive/);
 });
 
-test("shared special navigation keeps Rexonance directly below Extreme", () => {
+// Owner (2026-10-23): ファーフロム first, イリュージョンクルム and メタ・ウニタス
+// between it and レクソナンス, the rest as before: Extreme now follows Rexonance.
+test("shared special navigation keeps Extreme directly below Rexonance", () => {
   const specialNavigation = menu.slice(
     menu.indexOf("<p>SPECIAL</p>"),
     menu.indexOf("<p>STORIES</p>"),
   );
   const extremePosition = specialNavigation.indexOf('<DisplayName value="エクスプリームサーガ" />');
   const rexonancePosition = specialNavigation.indexOf('<DisplayName value="レクソナンスサーガ" />');
-  assert.ok(extremePosition >= 0);
-  assert.ok(rexonancePosition > extremePosition);
+  assert.ok(rexonancePosition >= 0);
+  assert.ok(extremePosition > rexonancePosition);
+  const between = specialNavigation.slice(rexonancePosition, extremePosition);
+  assert.equal((between.match(/<DisplayName value=/g) || []).length, 1);
 });
 
 test("Extreme hero presents the reviewed combat copy with the existing type treatment", () => {

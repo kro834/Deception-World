@@ -18,6 +18,7 @@ import {
   EXTREME_SAGA_ENTER_ASSETS,
   FAR_FROM_SAGA_ENTER_ASSETS,
   FINAL_STAGE_ENTER_ASSETS,
+  ILLUSIONCULUM_SAGA_ENTER_ASSETS,
   REXONANCE_SAGA_ENTER_ASSETS,
   WORLD_ENTER_ASSETS,
 } from "@/lib/asset-loader";
@@ -423,6 +424,7 @@ export function SideMenuLayer({
     context === "rexonance" ||
     context === "extreme" ||
     context === "far-from" ||
+    context === "illusionculum" ||
     context === "final-stage";
   const router = useRouter();
   // The dossier the reader is on is marked in the menu (aria-current).
@@ -551,7 +553,7 @@ export function SideMenuLayer({
       // The special site's own chapters take precedence over its duplicate
       // SPECIAL launcher row. Preserve the dossier/current-file rule elsewhere.
       (context === "rexonance"
-        ? panel.querySelector<HTMLElement>('[data-side-menu-sections] .side-panel-links > a')
+        ? panel.querySelector<HTMLElement>("[data-side-menu-sections] .side-panel-links > a")
         : null) ??
       panel.querySelector<HTMLElement>('.side-panel-links > [aria-current="page"]') ??
       panel.querySelector<HTMLElement>('.side-panel-links > [aria-current="location"]');
@@ -996,9 +998,11 @@ export function SideMenuLayer({
                         ? "EXTREME SAGA"
                         : context === "far-from"
                           ? "FAR FROM SAGA"
-                          : context === "final-stage"
-                            ? "FINAL STAGE"
-                            : "DECEPTION WORLD"}
+                          : context === "illusionculum"
+                            ? "ILLUSIONCULUM SAGA"
+                            : context === "final-stage"
+                              ? "FINAL STAGE"
+                              : "DECEPTION WORLD"}
             </b>
           </div>
           <button
@@ -1094,7 +1098,9 @@ export function SideMenuLayer({
                       ? "extreme"
                       : context === "far-from"
                         ? "far-from"
-                        : "final-stage"
+                        : context === "illusionculum"
+                          ? "illusionculum"
+                          : "final-stage"
                 ].map(([hash, label, code]) => (
                   <GuardedLink
                     key={hash}
@@ -1106,7 +1112,9 @@ export function SideMenuLayer({
                             ? "extreme"
                             : context === "far-from"
                               ? "far-from"
-                              : "final-stage"
+                              : context === "illusionculum"
+                                ? "illusionculum"
+                                : "final-stage"
                       ]
                     }
                     hash={hash}
@@ -1247,18 +1255,43 @@ export function SideMenuLayer({
         </div>
         <div className="side-panel-group">
           <p>SPECIAL</p>
-          <div className="side-panel-links">
+          {/* The order (owner, 2026-10-23): ファーフロムサーガ first and a
+              little larger (styles-stage-shell.css), then イリュージョンクルム
+              サーガ and メタ・ウニタスサーガ, then レクソナンスサーガ and
+              エクスプリームサーガ. Each tile is its form's art and its name. */}
+          <div className="side-panel-links" data-special-tiles="">
             <GuardedLink
-              to="/extreme-saga"
+              to="/far-from-saga"
               hash="top"
-              assets={context === "extreme" ? [] : EXTREME_SAGA_ENTER_ASSETS}
+              assets={context === "far-from" ? [] : FAR_FROM_SAGA_ENTER_ASSETS}
               beforeNavigate={close}
-              aria-current={context === "extreme" ? "page" : undefined}
+              aria-current={context === "far-from" ? "page" : undefined}
             >
               <span>
-                <DisplayName value="エクスプリームサーガ" />
+                <DisplayName value="ファーフロムサーガ" />
               </span>
-              <i>SUPREME SITE</i>
+            </GuardedLink>
+            <GuardedLink
+              to="/illusionculum-saga"
+              hash="top"
+              assets={context === "illusionculum" ? [] : ILLUSIONCULUM_SAGA_ENTER_ASSETS}
+              beforeNavigate={close}
+              aria-current={context === "illusionculum" ? "page" : undefined}
+            >
+              <span>
+                <DisplayName value="イリュージョンクルムサーガ" />
+              </span>
+            </GuardedLink>
+            <GuardedLink
+              to="/meta-unitas-saga"
+              hash="top"
+              assets={[]}
+              beforeNavigate={close}
+              aria-current={pathname === "/meta-unitas-saga" ? "page" : undefined}
+            >
+              <span>
+                <DisplayName value="メタ・ウニタスサーガ" />
+              </span>
             </GuardedLink>
             <GuardedLink
               to="/rexonance-saga"
@@ -1270,20 +1303,17 @@ export function SideMenuLayer({
               <span>
                 <DisplayName value="レクソナンスサーガ" />
               </span>
-              <i>PERFORMANCE SITE</i>
             </GuardedLink>
-            {/* Provisional (2026-10-22): the FAR FROM SAGA site's scaffold. */}
             <GuardedLink
-              to="/far-from-saga"
+              to="/extreme-saga"
               hash="top"
-              assets={context === "far-from" ? [] : FAR_FROM_SAGA_ENTER_ASSETS}
+              assets={context === "extreme" ? [] : EXTREME_SAGA_ENTER_ASSETS}
               beforeNavigate={close}
-              aria-current={context === "far-from" ? "page" : undefined}
+              aria-current={context === "extreme" ? "page" : undefined}
             >
               <span>
-                <DisplayName value="ファーフロムサーガ" />
+                <DisplayName value="エクスプリームサーガ" />
               </span>
-              <i>FINAL FORM SITE</i>
             </GuardedLink>
           </div>
         </div>

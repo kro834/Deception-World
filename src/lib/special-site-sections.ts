@@ -1,12 +1,13 @@
 /** The special sites' chapters as the side menu lists them: [hash, label, code].
  * Shared with the site search so both name the same anchors. */
-export type SpecialSiteId = "rexonance" | "extreme" | "far-from" | "final-stage";
+export type SpecialSiteId = "rexonance" | "extreme" | "far-from" | "illusionculum" | "final-stage";
 export type SpecialSiteSection = readonly [hash: string, label: string, code: string];
 
 export const SPECIAL_SITE_PATHS: Record<SpecialSiteId, string> = {
   rexonance: "/rexonance-saga",
   extreme: "/extreme-saga",
   "far-from": "/far-from-saga",
+  illusionculum: "/illusionculum-saga",
   "final-stage": "/final-stage",
 };
 
@@ -14,6 +15,7 @@ export const SPECIAL_SITE_TITLES: Record<SpecialSiteId, string> = {
   rexonance: "レクソナンスサーガ",
   extreme: "エクスプリームサーガ",
   "far-from": "ファーフロムサーガ",
+  illusionculum: "イリュージョンクルムサーガ",
   "final-stage": "ファイナルステージ",
 };
 
@@ -63,5 +65,21 @@ export const SPECIAL_SITE_SECTIONS: Record<SpecialSiteId, readonly SpecialSiteSe
     ["characters", "登場人物", "CHARACTERS"],
     ["far-from-saga", "ファーフロムサーガ", "RIDER 01"],
     ["realm-royal", "レルムロイヤル", "RIDER 02"],
+  ],
+  // 2026-10-23: the owner's record (design/illusionculum-saga-20261023/owner-text.md), in the page's
+  // chapter order — the Rexonance site's grammar: overview (specs and the
+  // comparison as its sub-chapters), suit-up, forms, then the record's own
+  // sections (装甲・外観, 専用武装, 能力 with 必殺技).
+  illusionculum: [
+    ["top", "トップ", "TOP"],
+    ["overview", "概要", "OVERVIEW"],
+    ["specs", "スペック", "SPECS"],
+    ["comparison", "性能比較", "COMPARISON"],
+    ["suitup", "変身", "SUIT-UP"],
+    ["forms", "形態", "FORMS"],
+    ["armour", "装甲・外観", "ARMOR"],
+    ["arsenal", "専用武装", "WEAPONS"],
+    ["abilities", "能力", "ABILITY"],
+    ["finishers", "必殺技", "FINISHER"],
   ],
 };

@@ -48,11 +48,15 @@ test("FAR FROM special site has a route, menu entry, warmup asset, and dedicated
   );
 });
 
-test("the side menu lists FAR FROM under SPECIAL after Rexonance, and its chapters by the shared registry", () => {
+// Owner (2026-10-23): 「イリュージョンクルムとこれ（メタ・ウニタス）はファーフロムと
+// レクソナンスの間で、ファーフロムはサイドメニューの中でもやや大きく表示」 —
+// FAR FROM leads SPECIAL now, a little larger (styles-stage-shell.css).
+test("the side menu lists FAR FROM first under SPECIAL, and its chapters by the shared registry", () => {
   const special = menu.slice(menu.indexOf("<p>SPECIAL</p>"), menu.indexOf("<p>STORIES</p>"));
   const rexonance = special.indexOf('<DisplayName value="レクソナンスサーガ" />');
   const farFrom = special.indexOf('<DisplayName value="ファーフロムサーガ" />');
-  assert.ok(rexonance >= 0 && farFrom > rexonance);
+  assert.ok(farFrom >= 0 && rexonance > farFrom);
+  assert.equal(special.indexOf("<DisplayName value="), farFrom);
   assert.match(sections, /"far-from": "\/far-from-saga"/);
   assert.match(sections, /"far-from": "ファーフロムサーガ"/);
   // The chapters' sections: on the page, or in its suit-up component.

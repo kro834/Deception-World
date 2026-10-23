@@ -20,6 +20,7 @@ import { Route as FinalStageRouteImport } from './routes/final-stage'
 import { Route as FormArchiveRouteImport } from './routes/form-archive'
 import { Route as GalleryRouteImport } from './routes/gallery'
 import { Route as GalleryToursRouteImport } from './routes/gallery-tours'
+import { Route as IllusionculumSagaRouteImport } from './routes/illusionculum-saga'
 import { Route as LibraryRouteImport } from './routes/library'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ManagersRouteImport } from './routes/managers'
@@ -106,6 +107,11 @@ const GalleryRoute = GalleryRouteImport.update({
 const GalleryToursRoute = GalleryToursRouteImport.update({
   id: '/gallery-tours',
   path: '/gallery-tours',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IllusionculumSagaRoute = IllusionculumSagaRouteImport.update({
+  id: '/illusionculum-saga',
+  path: '/illusionculum-saga',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LibraryRoute = LibraryRouteImport.update({
@@ -282,6 +288,7 @@ export interface FileRoutesByFullPath {
   '/form-archive': typeof FormArchiveRoute
   '/gallery': typeof GalleryRoute
   '/gallery-tours': typeof GalleryToursRoute
+  '/illusionculum-saga': typeof IllusionculumSagaRoute
   '/library': typeof LibraryRoute
   '/login': typeof LoginRoute
   '/managers': typeof ManagersRouteWithChildren
@@ -326,6 +333,7 @@ export interface FileRoutesByTo {
   '/form-archive': typeof FormArchiveRoute
   '/gallery': typeof GalleryRoute
   '/gallery-tours': typeof GalleryToursRoute
+  '/illusionculum-saga': typeof IllusionculumSagaRoute
   '/library': typeof LibraryRoute
   '/login': typeof LoginRoute
   '/rexonance-saga': typeof RexonanceSagaRoute
@@ -370,6 +378,7 @@ export interface FileRoutesById {
   '/form-archive': typeof FormArchiveRoute
   '/gallery': typeof GalleryRoute
   '/gallery-tours': typeof GalleryToursRoute
+  '/illusionculum-saga': typeof IllusionculumSagaRoute
   '/library': typeof LibraryRoute
   '/login': typeof LoginRoute
   '/managers': typeof ManagersRouteWithChildren
@@ -417,6 +426,7 @@ export interface FileRouteTypes {
     | '/form-archive'
     | '/gallery'
     | '/gallery-tours'
+    | '/illusionculum-saga'
     | '/library'
     | '/login'
     | '/managers'
@@ -461,6 +471,7 @@ export interface FileRouteTypes {
     | '/form-archive'
     | '/gallery'
     | '/gallery-tours'
+    | '/illusionculum-saga'
     | '/library'
     | '/login'
     | '/rexonance-saga'
@@ -504,6 +515,7 @@ export interface FileRouteTypes {
     | '/form-archive'
     | '/gallery'
     | '/gallery-tours'
+    | '/illusionculum-saga'
     | '/library'
     | '/login'
     | '/managers'
@@ -550,6 +562,7 @@ export interface RootRouteChildren {
   FormArchiveRoute: typeof FormArchiveRoute
   GalleryRoute: typeof GalleryRoute
   GalleryToursRoute: typeof GalleryToursRoute
+  IllusionculumSagaRoute: typeof IllusionculumSagaRoute
   LibraryRoute: typeof LibraryRoute
   LoginRoute: typeof LoginRoute
   ManagersRoute: typeof ManagersRouteWithChildren
@@ -644,6 +657,13 @@ declare module '@tanstack/react-router' {
       path: '/gallery-tours'
       fullPath: '/gallery-tours'
       preLoaderRoute: typeof GalleryToursRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/illusionculum-saga': {
+      id: '/illusionculum-saga'
+      path: '/illusionculum-saga'
+      fullPath: '/illusionculum-saga'
+      preLoaderRoute: typeof IllusionculumSagaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/library': {
@@ -967,6 +987,7 @@ const rootRouteChildren: RootRouteChildren = {
   FormArchiveRoute: FormArchiveRoute,
   GalleryRoute: GalleryRoute,
   GalleryToursRoute: GalleryToursRoute,
+  IllusionculumSagaRoute: IllusionculumSagaRoute,
   LibraryRoute: LibraryRoute,
   LoginRoute: LoginRoute,
   ManagersRoute: ManagersRouteWithChildren,

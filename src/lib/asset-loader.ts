@@ -1,6 +1,7 @@
 import { rexonanceImage } from "./rexonance-images.ts";
 import { REXONANCE_SITE_ARTWORK } from "./rexonance-site-artwork.ts";
 import { FAR_FROM_SAGA_KEY_VISUAL, farFromImage } from "./far-from-saga-artwork.ts";
+import { ILLUSIONCULUM_HERO, illusionculumCutoutImage } from "./illusionculum-saga-artwork.ts";
 import { dossierImage } from "./dossier-images.ts";
 
 const KNOWN_BYTES: Record<string, number> = {
@@ -32,6 +33,7 @@ const KNOWN_BYTES: Record<string, number> = {
   "/saga-extreme-middle-20261006.webp": 332708,
   "/final-stage-logo.webp": 106600,
   [FAR_FROM_SAGA_KEY_VISUAL.src]: 475884,
+  [ILLUSIONCULUM_HERO.src]: 315494,
 };
 
 export const WORLD_ENTER_ASSETS = ["/deception-world-poster-delivery.webp"] as const;
@@ -53,6 +55,8 @@ export const FINAL_STAGE_ENTER_ASSETS = ["/final-stage-logo.webp"] as const;
 
 export const FAR_FROM_SAGA_ENTER_ASSETS = [FAR_FROM_SAGA_KEY_VISUAL.src] as const;
 
+export const ILLUSIONCULUM_SAGA_ENTER_ASSETS = [ILLUSIONCULUM_HERO.src] as const;
+
 export const MANAGER_ASSETS = {
   zeus: ["/manager-zeus-detail.jpeg?v=20260823-2"],
   lejas: ["/manager-lejas.jpeg"],
@@ -65,6 +69,7 @@ export const MANAGER_ASSETS = {
 // Every width set the site publishes, keyed by its canonical file.
 function responsiveImage(url: string) {
   if (url === FAR_FROM_SAGA_KEY_VISUAL.src) return farFromImage("middle");
+  if (url === ILLUSIONCULUM_HERO.src) return illusionculumCutoutImage("standard");
   return { ...dossierImage(url), ...rexonanceImage(url) };
 }
 
