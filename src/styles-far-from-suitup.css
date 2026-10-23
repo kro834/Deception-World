@@ -1726,11 +1726,27 @@ html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-line {
   text-wrap: pretty;
 }
 
+/* Narrow layouts: the sentence wraps to one, two or three lines by form;
+   its space is the longest's, so #suitup's height never changes with the
+   selected form (Safari has no scroll anchoring). */
+@media (max-width: 1099.98px) {
+  html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-line {
+    min-height: 5.4em;
+  }
+}
+
 html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-ultra {
   display: grid;
   gap: 8px;
   padding-top: 12px;
   border-top: 1px solid color-mix(in srgb, var(--ffs-accent) 24%, transparent);
+}
+
+/* Any other form: the note keeps its space, unseen (never display: none —
+   the section's height would change with the form, and Safari, with no
+   scroll anchoring, would jump on a switch). */
+html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-ultra[data-hidden] {
+  visibility: hidden;
 }
 
 html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-ultra > p {

@@ -778,3 +778,18 @@ test("the call stays clear of the figure's box at every tier that stands it besi
   // The owner's calls stay verbatim: the first three are one line's three calls.
   assert.equal(FAR_FROM_SUIT_CALLS[0], "Ultra SUPERIOR DEUS！\nREXONANCE！\nSUPER SPECIAL！");
 });
+
+test("the ウルトラ note keeps its space for every form: #suitup's height never changes with the selected form (Safari has no scroll anchoring)", () => {
+  const suitup = readFileSync(
+    new URL("../src/components/far-from-saga/far-from-suitup.tsx", import.meta.url),
+    "utf8",
+  );
+  assert.doesNotMatch(suitup, /stage === "ultra" \? \(\s*<div className="ffs-ending-ultra"/);
+  assert.match(
+    suitup,
+    /<div\s+className="ffs-ending-ultra"\s+data-hidden=\{stage !== "ultra" \|\| undefined\}\s+aria-hidden=\{stage !== "ultra" \|\| undefined\}\s*>/,
+  );
+  const sheet = readFileSync(new URL("../src/styles-far-from-suitup.css", import.meta.url), "utf8");
+  assert.match(sheet, /\.ffs-ending-ultra\[data-hidden\] \{\s*visibility: hidden;\s*\}/);
+  assert.doesNotMatch(sheet, /\.ffs-ending-ultra[^{]*\{[^}]*display: none/);
+});

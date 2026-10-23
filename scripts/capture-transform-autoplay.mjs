@@ -47,6 +47,10 @@ const browser = await chromium.launch({
 });
 const report = [];
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+/** Activates a control as a tap would (on phones the idle control stands in
+ * the page above the runway, outside the pinned frame). */
+const press = (page, selector) =>
+  page.evaluate((at) => document.querySelector(at)?.click(), selector);
 
 async function open(profile, path, reducedMotion = "no-preference") {
   const context = await browser.newContext({ ...profile, reducedMotion });
@@ -175,10 +179,10 @@ for (const name of chosen) {
         for (const speed of ["2", "1.5", "1", "0.5"]) {
           await page.evaluate((y) => scrollTo(0, y), geometry.top);
           await sleep(400);
-          await page.click(`.rzn-movie [role="radio"][data-speed="${speed}"]`);
+          await press(page, `.rzn-movie [role="radio"][data-speed="${speed}"]`);
           await armRecorder(page);
           const started = Date.now();
-          await page.click(".rzn-movie-play");
+          await press(page, ".rzn-movie-play");
           const state0 = await page.evaluate(() => document.querySelector(".rzn-movie").dataset.state);
           // Let it run two seconds, snapshot, then let it finish (fast speeds) or stop.
           await sleep(2000);
@@ -193,7 +197,7 @@ for (const name of chosen) {
               .then(() => true)
               .catch(() => false);
           } else {
-            await page.click(".rzn-movie-play");
+            await press(page, ".rzn-movie-play");
           }
           const elapsed = Date.now() - started;
           const frames = await takeFrames(page);
@@ -219,8 +223,8 @@ for (const name of chosen) {
       if (movie && modes.includes("pause")) {
         await page.evaluate((y) => scrollTo(0, y), geometry.top);
         await sleep(400);
-        await page.click('.rzn-movie [role="radio"][data-speed="1"]');
-        await page.click(".rzn-movie-play");
+        await press(page, '.rzn-movie [role="radio"][data-speed="1"]');
+        await press(page, ".rzn-movie-play");
         await sleep(1500);
         const before = await page.evaluate(() => document.querySelector(".rzn-movie").dataset.state);
         await page.mouse.move(profile.viewport.width / 2, profile.viewport.height / 2);
@@ -279,6 +283,7 @@ for (const name of chosen) {
       await page.screenshot({ path: join(out, `${label}-${name}-${path}-reduced.png`) });
       await context.close();
     }
+    await writeFile(join(out, `${label}-report.json`), JSON.stringify(report, null, 2));
   }
 }
 await browser.close();

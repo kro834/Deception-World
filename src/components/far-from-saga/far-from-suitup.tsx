@@ -385,14 +385,19 @@ export const FarFromSuitUp = memo(function FarFromSuitUp({
             ))}
           </ol>
           <p className="ffs-ending-line">{endingLine(stage)}</p>
-          {stage === "ultra" ? (
-            <div className="ffs-ending-ultra">
-              <p>
-                マックスから移行する、60秒間の最上位形態。全身が白に染まった後、ウルトラ専用のナノマシンが追加機構を生成し、腕の外側などに補助インターフェースが展開します。
-              </p>
-              <p className="ffs-note">補助インターフェースの表示内容はイメージです。</p>
-            </div>
-          ) : null}
+          {/* The ウルトラ note keeps its place for every form (hidden, not
+              removed): #suitup's height never changes with the selected
+              form, so Safari (no scroll anchoring) never jumps on a switch. */}
+          <div
+            className="ffs-ending-ultra"
+            data-hidden={stage !== "ultra" || undefined}
+            aria-hidden={stage !== "ultra" || undefined}
+          >
+            <p>
+              マックスから移行する、60秒間の最上位形態。全身が白に染まった後、ウルトラ専用のナノマシンが追加機構を生成し、腕の外側などに補助インターフェースが展開します。
+            </p>
+            <p className="ffs-note">補助インターフェースの表示内容はイメージです。</p>
+          </div>
           <div className="ffs-assembly-controls">
             <button type="button" onClick={() => watchEnding(runwayRef.current)}>
               {form.label}への変身を見る
