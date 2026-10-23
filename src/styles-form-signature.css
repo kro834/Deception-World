@@ -532,6 +532,273 @@ html[data-family="dossier"]
   opacity: 0;
 }
 
+/* ── 犭: 暗闇でブラーする赤い光. The screen sinks into darkness from its
+   edges; the beast's eyes in the card's own art open red; the light smears
+   as it lunges and rakes three claw strokes (the radical's three); one roar
+   ripple (猛, the sonar); one breath. Red rises and falls over 400 ms or
+   more; the light itself is salmon and white-hot, the saturated red only a
+   thin, dim fringe. Blur is drawn, not filtered: layered radial falloffs,
+   stretched gradients and screen blending. ── */
+.kemonohen-gate {
+  animation: kemonohenGateLife 1350ms linear both;
+}
+
+.kemonohen-gate-field,
+.kemonohen-gate-eyes,
+.kemonohen-arrival-eyes {
+  position: absolute;
+  inset: 0;
+}
+
+.kemonohen-gate-vignette {
+  inset: 0;
+  background: radial-gradient(
+    ellipse 72% 64% at var(--x) var(--y),
+    transparent 0 16%,
+    rgb(3 0 1 / 70%) 58%,
+    rgb(1 0 0 / 94%) 100%
+  );
+  opacity: 0;
+}
+
+.kemonohen-gate-dark,
+.kemonohen-arrival-dark {
+  inset: 0;
+  background: radial-gradient(
+    circle at var(--x, 50%) var(--y, 42%),
+    #1b0709 0,
+    #0b0304 22%,
+    #040102 56%,
+    #010000 100%
+  );
+  opacity: 0;
+}
+
+.kemonohen-arrival-dark {
+  background: radial-gradient(
+    circle at var(--gate-x, 50%) var(--gate-y, 42%),
+    #1b0709 0,
+    #0b0304 22%,
+    #040102 56%,
+    #010000 100%
+  );
+  opacity: 0.97;
+}
+
+/* The eyes: a white-hot slit, then salmon, then a thin red fringe; the
+   halo is screen-blended light round it. Sized by the art's own eye
+   spacing (--gap), never below a readable size. */
+.kemonohen-eye {
+  --eye: max(var(--gap, 26px), 26px);
+  position: absolute;
+  left: var(--lx);
+  top: var(--ly);
+  width: 0;
+  height: 0;
+  opacity: 0;
+}
+
+.kemonohen-eye.is-right {
+  left: var(--rx);
+  top: var(--ry);
+}
+
+.kemonohen-eye > i {
+  border-radius: 50%;
+}
+
+.kemonohen-eye > .is-core {
+  left: calc(var(--eye) * -0.62);
+  top: calc(var(--eye) * -0.17);
+  width: calc(var(--eye) * 1.24);
+  height: calc(var(--eye) * 0.34);
+  background: radial-gradient(
+    ellipse,
+    #fff8f4 0 18%,
+    #ffd0c4 32%,
+    rgb(255 140 140 / 82%) 48%,
+    rgb(219 38 62 / 34%) 64%,
+    transparent 74%
+  );
+  rotate: 17deg;
+}
+
+.kemonohen-eye.is-right > .is-core {
+  rotate: -17deg;
+}
+
+.kemonohen-eye > .is-halo {
+  left: calc(var(--eye) * -2.4);
+  top: calc(var(--eye) * -1.2);
+  width: calc(var(--eye) * 4.8);
+  height: calc(var(--eye) * 2.4);
+  background: radial-gradient(
+    ellipse,
+    rgb(255 186 176 / 52%) 0,
+    rgb(255 155 148 / 24%) 24%,
+    rgb(255 140 132 / 8%) 46%,
+    transparent 68%
+  );
+  mix-blend-mode: screen;
+}
+
+/* The ember's bloom in the dark: a wide, faint falloff. */
+.kemonohen-eye > .is-bloom {
+  left: calc(var(--eye) * -5);
+  top: calc(var(--eye) * -3);
+  width: calc(var(--eye) * 10);
+  height: calc(var(--eye) * 6);
+  background: radial-gradient(
+    ellipse,
+    rgb(255 165 156 / 15%) 0,
+    rgb(255 155 148 / 6%) 34%,
+    transparent 66%
+  );
+  mix-blend-mode: screen;
+}
+
+/* The lunge's motion blur: each eye's light trails behind it. */
+.kemonohen-eye > .is-trail {
+  left: 0;
+  top: calc(var(--eye) * -0.32);
+  width: calc(var(--eye) * 11);
+  height: calc(var(--eye) * 0.64);
+  background: linear-gradient(
+    90deg,
+    rgb(255 205 196 / 50%),
+    rgb(255 160 152 / 20%) 30%,
+    rgb(255 150 140 / 5%) 64%,
+    transparent
+  );
+  border-radius: 50%;
+  mix-blend-mode: screen;
+  transform-origin: 0 50%;
+  scale: 0 1;
+  opacity: 0;
+}
+
+.kemonohen-eye.is-left > .is-trail {
+  rotate: 8deg;
+}
+
+.kemonohen-eye.is-right > .is-trail {
+  rotate: -4deg;
+}
+
+/* The lunge: the eyes' light stretched into a motion-blurred smear. */
+.kemonohen-gate-smear {
+  left: calc(var(--x) - 300px);
+  top: calc(var(--y) - 20px);
+  width: 600px;
+  height: 40px;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse,
+    rgb(255 214 205 / 42%) 0,
+    rgb(255 160 152 / 18%) 30%,
+    rgb(255 150 140 / 6%) 52%,
+    transparent 70%
+  );
+  mix-blend-mode: screen;
+  opacity: 0;
+  scale: 0.15 1;
+}
+
+/* 猛: one roar echo, a sonar ring off the eyes. */
+.kemonohen-gate-roar {
+  left: calc(var(--x) - 120px);
+  top: calc(var(--y) - 120px);
+  width: 240px;
+  height: 240px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    transparent 0 55%,
+    rgb(255 165 156 / 22%) 61%,
+    rgb(255 140 132 / 8%) 66%,
+    transparent 71%
+  );
+  opacity: 0;
+  scale: 0.25;
+}
+
+/* The three strokes, raked from the upper right through the eyes. */
+.kemonohen-claws {
+  --len: max(96vmax, 820px);
+  --claw-gap: clamp(22px, 4vmin, 40px);
+  position: absolute;
+  left: var(--x, 50%);
+  top: var(--y, 42%);
+  width: 0;
+  height: 0;
+  rotate: -33deg;
+}
+
+.kemonohen-arrival .kemonohen-claws {
+  left: var(--gate-x, 50%);
+  top: var(--gate-y, 42%);
+}
+
+/* Each stroke: tapered to points, its hottest light a little ahead of
+   centre, a soft smear on the side it was raked from. */
+.kemonohen-claw {
+  position: absolute;
+  left: calc(var(--len) * -0.5);
+  width: var(--len);
+  height: 14px;
+  margin-top: -7px;
+  transform-origin: 100% 50%;
+  opacity: 0;
+}
+
+.kemonohen-claw.is-1 {
+  top: calc(var(--claw-gap) * -1.05);
+  left: calc(var(--len) * -0.4);
+  width: calc(var(--len) * 0.86);
+  rotate: 2.5deg;
+}
+
+.kemonohen-claw.is-2 {
+  top: 0;
+}
+
+.kemonohen-claw.is-3 {
+  top: calc(var(--claw-gap) * 1.1);
+  left: calc(var(--len) * -0.6);
+  width: calc(var(--len) * 0.8);
+  rotate: -2.5deg;
+}
+
+.kemonohen-claw > .is-stroke {
+  inset: 1px 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0,
+    rgb(219 38 62 / 24%) 12%,
+    rgb(255 150 140 / 72%) 34%,
+    #ffe2d9 50%,
+    #fff3ee 56%,
+    rgb(255 170 160 / 62%) 74%,
+    rgb(219 38 62 / 18%) 90%,
+    transparent 100%
+  );
+  clip-path: polygon(0 50%, 14% 30%, 55% 0, 100% 46%, 100% 54%, 55% 100%, 14% 70%);
+}
+
+.kemonohen-claw > .is-blur {
+  inset: -14px -4% -4px;
+  border-radius: 50%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(255 155 148 / 14%) 32%,
+    rgb(255 205 196 / 20%) 56%,
+    rgb(255 155 148 / 8%) 80%,
+    transparent
+  );
+  mix-blend-mode: screen;
+}
+
 /* The record's side: its frame is the fracture the shards settle into
    (fourteen slivers on the dialog's edges and two corner spurs), and the
    cover's void clears off it. */
@@ -763,6 +1030,111 @@ html[data-family="dossier"]
   .explom-frame > i:nth-child(13) { animation-delay: 160ms; }
   .explom-frame > i:nth-child(14) { animation-delay: 200ms; }
 
+  /* 犭 at full motion. */
+  html:not([data-world-effects="economy"]) .kemonohen-gate-vignette {
+    animation: kemonohenVignette 420ms cubic-bezier(0.4, 0, 0.2, 1) both;
+  }
+
+  html:not([data-world-effects="economy"]) .kemonohen-gate-dark {
+    animation: kemonohenDark 460ms 160ms cubic-bezier(0.45, 0, 0.3, 1) both;
+  }
+
+  html:not([data-world-effects="economy"]) .kemonohen-gate .kemonohen-eye {
+    animation: kemonohenEyes 1090ms 260ms cubic-bezier(0.3, 0, 0.3, 1) both;
+  }
+
+  html:not([data-world-effects="economy"]) .kemonohen-gate-smear {
+    animation: kemonohenSmear 520ms 660ms cubic-bezier(0.2, 0.6, 0.3, 1) both;
+  }
+
+  html:not([data-world-effects="economy"]) .kemonohen-gate .kemonohen-eye > .is-trail {
+    animation: kemonohenTrail 460ms 680ms cubic-bezier(0.2, 0.7, 0.3, 1) both;
+  }
+
+  html:not([data-world-effects="economy"]) .kemonohen-gate-roar {
+    animation: kemonohenRoar 500ms 840ms cubic-bezier(0.15, 0.6, 0.3, 1) both;
+  }
+
+  html:not([data-world-effects="economy"]) .kemonohen-gate .kemonohen-claw {
+    animation: kemonohenClaw 590ms 760ms linear both;
+  }
+
+  html:not([data-world-effects="economy"]) .kemonohen-gate .kemonohen-claw.is-2 {
+    animation-delay: 815ms;
+    animation-duration: 535ms;
+  }
+
+  html:not([data-world-effects="economy"]) .kemonohen-gate .kemonohen-claw.is-3 {
+    animation-delay: 870ms;
+    animation-duration: 480ms;
+  }
+
+  /* The record's side: the dark lifts slowly, the claws' afterglow goes,
+     the eyes come to rest in the record's own eyes. */
+  html:not([data-world-effects="economy"])
+    .form-pickup-dialog[data-form-theme="kemonohen"][open]
+    > .kemonohen-arrival {
+    animation: arrivalClear 700ms linear both;
+  }
+
+  html:not([data-world-effects="economy"])
+    .form-pickup-dialog[data-form-theme="kemonohen"][open]
+    .kemonohen-arrival-dark {
+    animation: kemonohenLift 620ms cubic-bezier(0.45, 0, 0.35, 1) both;
+  }
+
+  html:not([data-world-effects="economy"])
+    .form-pickup-dialog[data-form-theme="kemonohen"][open]
+    .kemonohen-arrival
+    .kemonohen-claw {
+    animation: kemonohenAfterglow 440ms ease-out both;
+  }
+
+  html:not([data-world-effects="economy"])
+    .form-pickup-dialog[data-form-theme="kemonohen"][open]
+    .kemonohen-arrival-eyes {
+    animation: kemonohenSettle 600ms cubic-bezier(0.5, 0, 0.25, 1) both;
+  }
+
+  html:not([data-world-effects="economy"])
+    .form-pickup-dialog[data-form-theme="kemonohen"][open]
+    .kemonohen-arrival
+    .kemonohen-eye {
+    animation: kemonohenSettleLight 640ms ease-in both;
+  }
+
+  /* 犭 on the economy tier: the dark and the eyes' one breath. */
+  html[data-world-effects="economy"] .kemonohen-gate {
+    animation-duration: 760ms;
+  }
+
+  html[data-world-effects="economy"] .kemonohen-gate-dark {
+    animation: kemonohenDark 420ms cubic-bezier(0.45, 0, 0.3, 1) both;
+  }
+
+  html[data-world-effects="economy"] .kemonohen-gate .kemonohen-eye {
+    animation: kemonohenEyesCalm 520ms 240ms ease-out both;
+  }
+
+  html[data-world-effects="economy"]
+    .form-pickup-dialog[data-form-theme="kemonohen"][open]
+    > .kemonohen-arrival {
+    animation: arrivalClear 440ms ease-out both;
+  }
+
+  html[data-world-effects="economy"]
+    .form-pickup-dialog[data-form-theme="kemonohen"][open]
+    .kemonohen-arrival
+    .kemonohen-eye {
+    animation: kemonohenSettleLight 440ms ease-in both;
+  }
+
+  html[data-world-effects="economy"]
+    .form-pickup-dialog[data-form-theme="kemonohen"][open]
+    .kemonohen-arrival-eyes {
+    animation: kemonohenSettle 420ms cubic-bezier(0.5, 0, 0.25, 1) both;
+  }
+
   /* The economy tier: the cracks run over a veil that becomes the void. */
   html[data-world-effects="economy"] .explom-gate {
     animation-duration: 700ms;
@@ -785,6 +1157,11 @@ html[data-family="dossier"]
 
 html[data-world-effects="economy"]
   :is(
+    .kemonohen-eye > .is-trail,
+    .kemonohen-gate-vignette,
+    .kemonohen-gate-smear,
+    .kemonohen-gate-roar,
+    .kemonohen-claws,
     .explom-gate-shards,
     .explom-gate-debris,
     .explom-gate-dust,
@@ -985,6 +1362,169 @@ html[data-world-effects="economy"]
   }
 }
 
+@keyframes kemonohenGateLife {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes kemonohenVignette {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes kemonohenDark {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.97;
+  }
+}
+
+/* Open (a 460 ms rise), one breath, at rest for the hand-over. */
+@keyframes kemonohenEyes {
+  0% {
+    opacity: 0;
+    scale: 0.5;
+  }
+  42% {
+    opacity: 1;
+    scale: 1.7;
+  }
+  74% {
+    opacity: 1;
+    scale: 2.1;
+  }
+  100% {
+    opacity: 0.92;
+    scale: 1.6;
+  }
+}
+
+@keyframes kemonohenTrail {
+  0% {
+    opacity: 0;
+    scale: 0 1;
+  }
+  35% {
+    opacity: 1;
+    scale: 1 1;
+  }
+  100% {
+    opacity: 0;
+    scale: 1.3 0.7;
+  }
+}
+
+@keyframes kemonohenEyesCalm {
+  from {
+    opacity: 0;
+    scale: 1.6;
+  }
+  to {
+    opacity: 0.92;
+    scale: 1.6;
+  }
+}
+
+@keyframes kemonohenSmear {
+  0% {
+    opacity: 0;
+    scale: 0.15 1;
+  }
+  30% {
+    opacity: 0.85;
+  }
+  100% {
+    opacity: 0;
+    scale: 1.45 1.1;
+  }
+}
+
+@keyframes kemonohenRoar {
+  0% {
+    opacity: 0;
+    scale: 0.25;
+  }
+  14% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0;
+    scale: 6.4;
+  }
+}
+
+/* Raked in (130 ms), then the afterglow cools toward the hand-over. */
+@keyframes kemonohenClaw {
+  0% {
+    opacity: 1;
+    scale: 0 1;
+    animation-timing-function: cubic-bezier(0.2, 0.8, 0.3, 1);
+  }
+  24% {
+    opacity: 1;
+    scale: 1 1;
+    animation-timing-function: ease-in-out;
+  }
+  100% {
+    opacity: 0.42;
+    scale: 1 1;
+  }
+}
+
+@keyframes kemonohenAfterglow {
+  from {
+    opacity: 0.42;
+    scale: 1 1;
+  }
+  to {
+    opacity: 0;
+    scale: 1 1;
+  }
+}
+
+@keyframes kemonohenLift {
+  from {
+    opacity: 0.97;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* From where the cover's eyes burned to the record's own eyes. */
+@keyframes kemonohenSettle {
+  from {
+    translate: var(--eye-dx, 0) var(--eye-dy, 0);
+  }
+  to {
+    translate: 0 0;
+  }
+}
+
+@keyframes kemonohenSettleLight {
+  0% {
+    opacity: 0.92;
+    scale: 1.6;
+  }
+  70% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 0;
+    scale: var(--eye-scale, 1);
+  }
+}
+
 /* The cover's last frame clears off the record. */
 @keyframes arrivalClear {
   0% {
@@ -1054,6 +1594,44 @@ html[data-world-effects="economy"]
   .form-pickup-dialog[data-form-theme="explom"][open] > .explom-arrival {
     animation: arrivalClear 150ms ease both;
     animation-duration: 150ms !important;
+  }
+
+  .kemonohen-gate {
+    animation-duration: 150ms !important;
+  }
+
+  .kemonohen-gate-dark {
+    animation: kemonohenDark 150ms ease both;
+    animation-duration: 150ms !important;
+  }
+
+  .kemonohen-gate .kemonohen-eye {
+    opacity: 0.7;
+    scale: 1.6;
+  }
+
+  :is(
+    .kemonohen-gate-vignette,
+    .kemonohen-gate-smear,
+    .kemonohen-gate-roar,
+    .kemonohen-claws,
+    .kemonohen-eye > .is-trail
+  ) {
+    display: none;
+  }
+
+  .form-pickup-dialog[data-form-theme="kemonohen"][open] > .kemonohen-arrival {
+    animation: arrivalClear 150ms ease both;
+    animation-duration: 150ms !important;
+  }
+
+  .kemonohen-arrival .kemonohen-eye {
+    opacity: 0.5;
+    scale: 1.6;
+  }
+
+  .kemonohen-arrival-eyes {
+    translate: var(--eye-dx, 0) var(--eye-dy, 0);
   }
 }
 

@@ -24,6 +24,7 @@ const compiledSignature = ts.transpileModule(
 const THEMES = [
   { theme: "rexonance", name: "レクソナンスサーガ", cap: 1400, calmCap: 1400 },
   { theme: "explom", name: "オーバーゼッツ", cap: 2000, calmCap: 1300 },
+  { theme: "kemonohen", name: "レディック", cap: 2100, calmCap: 1400 },
 ];
 
 function mount(theme = "rexonance", { reducedMotion = false, economy = false } = {}) {

@@ -59,6 +59,13 @@ export const FORM_GATES: Partial<Record<FormTheme, FormGateSpec>> = {
     holdsForArt: true,
     status: "エクスプロムの記録を展開中",
   },
+  kemonohen: {
+    life: "kemonohenGateLife",
+    cap: 2100,
+    calmCap: 1400,
+    holdsForArt: true,
+    status: "犭フォームの記録を展開中",
+  },
 };
 
 export const formGate = (theme?: FormTheme) => (theme ? FORM_GATES[theme] : undefined);
@@ -156,37 +163,42 @@ export function measureGateScene(
   return { w, h, x, y, eyes, seed: (Math.round(x) * 73856093) ^ (Math.round(y) * 19349663) ^ (w * 83492791) };
 }
 
-/** The record's own eyes (犭): where the cover's light comes to rest, as
- * offsets the arrival reads. Without a measurable figure the light stays put
- * and fades where it is. */
-export function placeArrival(dialog: HTMLDialogElement | null, theme: FormTheme | undefined, scene: GateScene | null) {
+/** The record's own eyes (犭): where the cover's light comes to rest. The
+ * arrival's eyes stand there and travel in from where the cover's burned;
+ * without a measurable figure they stay where the cover had them and fade. */
+export function placeArrival(
+  dialog: HTMLDialogElement | null,
+  theme: FormTheme | undefined,
+  scene: GateScene | null,
+) {
   const arrival = dialog?.querySelector?.<HTMLElement>(".form-arrival");
   if (!arrival || !scene) return;
-  arrival.style.setProperty("--gate-x", `${scene.x}px`);
-  arrival.style.setProperty("--gate-y", `${scene.y}px`);
+  const set = (name: string, value: string) => arrival.style.setProperty(name, value);
+  set("--gate-x", `${scene.x}px`);
+  set("--gate-y", `${scene.y}px`);
   if (theme !== "kemonohen") return;
-  const spacing = scene.eyes ? Math.hypot(scene.eyes[2] - scene.eyes[0], scene.eyes[3] - scene.eyes[1]) : 0;
-  arrival.style.setProperty("--gate-eye-gap", `${Math.max(18, spacing)}px`);
-  let tx = scene.x;
-  let ty = scene.y;
-  let gap = Math.max(18, spacing);
+  const from = scene.eyes ?? [scene.x - 16, scene.y, scene.x + 16, scene.y];
+  const gap = Math.max(18, Math.hypot(from[2] - from[0], from[3] - from[1]));
+  let to: [number, number, number, number] = from;
   try {
     const img = dialog?.querySelector?.<HTMLImageElement>(".form-pickup-layout > figure > img");
-    const src = img?.getAttribute("src") ?? "";
-    const map = KEMONOHEN_EYES[src];
+    const map = KEMONOHEN_EYES[img?.getAttribute("src") ?? ""];
     const left = map && artPoint(img, map[0], map[1]);
     const right = map && artPoint(img, map[2], map[3]);
-    if (left && right && onScreen(left.x, left.y, scene.w, scene.h)) {
-      tx = (left.x + right.x) / 2;
-      ty = (left.y + right.y) / 2;
-      gap = Math.max(4, Math.hypot(right.x - left.x, right.y - left.y));
-    }
+    if (left && right && onScreen(left.x, left.y, scene.w, scene.h) && onScreen(right.x, right.y, scene.w, scene.h))
+      to = [left.x, left.y, right.x, right.y];
   } catch {
     /* The light fades where it is. */
   }
-  arrival.style.setProperty("--eye-x", `${tx}px`);
-  arrival.style.setProperty("--eye-y", `${ty}px`);
-  arrival.style.setProperty("--eye-dx", `${scene.x - tx}px`);
-  arrival.style.setProperty("--eye-dy", `${scene.y - ty}px`);
-  arrival.style.setProperty("--eye-scale", String(Math.min(1, gap / Math.max(18, spacing || 18))));
+  const [lx, ly, rx, ry] = to;
+  set("--lx", `${lx}px`);
+  set("--ly", `${ly}px`);
+  set("--rx", `${rx}px`);
+  set("--ry", `${ry}px`);
+  // The eyes keep the cover's size as they leave it and take the art's.
+  set("--gap", `${gap}px`);
+  set("--eye-dx", `${scene.x - (lx + rx) / 2}px`);
+  set("--eye-dy", `${scene.y - (ly + ry) / 2}px`);
+  const landed = Math.max(4, Math.hypot(rx - lx, ry - ly));
+  set("--eye-scale", (Math.min(1.6, (1.6 * landed) / Math.max(26, gap)) || 1).toFixed(3));
 }

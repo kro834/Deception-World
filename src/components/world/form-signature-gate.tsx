@@ -372,6 +372,59 @@ function ExplomGateArt({ scene }: { scene: GateScene }) {
   );
 }
 
+/* 犭: the screen sinks into darkness from its edges; the beast's eyes in
+   the card's own art open red; the light smears as it lunges and rakes
+   three claw strokes (the radical's three); one roar ripple (猛, the
+   sonar); one breath. Red rises and falls over 400 ms or more, and the
+   saturated red stays in thin, dim edges: the light itself is salmon and
+   white-hot. */
+function KemonohenEyes() {
+  return (
+    <>
+      <span className="kemonohen-eye is-left">
+        <i className="is-bloom" />
+        <i className="is-trail" />
+        <i className="is-halo" />
+        <i className="is-core" />
+      </span>
+      <span className="kemonohen-eye is-right">
+        <i className="is-bloom" />
+        <i className="is-trail" />
+        <i className="is-halo" />
+        <i className="is-core" />
+      </span>
+    </>
+  );
+}
+
+function KemonohenClaws() {
+  return (
+    <div className="kemonohen-claws">
+      {[0, 1, 2].map((index) => (
+        <span key={index} className={`kemonohen-claw is-${index + 1}`}>
+          <i className="is-blur" />
+          <i className="is-stroke" />
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function KemonohenGateArt() {
+  return (
+    <div className="kemonohen-gate-field" aria-hidden="true">
+      <i className="kemonohen-gate-vignette" />
+      <i className="kemonohen-gate-dark" />
+      <i className="kemonohen-gate-smear" />
+      <i className="kemonohen-gate-roar" />
+      <KemonohenClaws />
+      <div className="kemonohen-gate-eyes">
+        <KemonohenEyes />
+      </div>
+    </div>
+  );
+}
+
 function RexonanceGateArt() {
   return (
     <>
@@ -433,11 +486,22 @@ export function FormGate({ theme, scene, life, status, onLifeEnd }: GateProps) {
   let art: ReactNode = null;
   if (theme === "rexonance") art = <RexonanceGateArt />;
   else if (theme === "explom") art = <ExplomGateArt scene={scene} />;
+  else if (theme === "kemonohen") art = <KemonohenGateArt />;
+  // 犭's eyes open where the card's art has them (or at the frame's centre).
+  const [lx, ly, rx, ry] = scene.eyes ?? [scene.x - 16, scene.y, scene.x + 16, scene.y];
   return (
     <div
       className={ROOT[theme]}
       data-form-theme={theme}
-      style={vars({ "--x": px(scene.x), "--y": px(scene.y) })}
+      style={vars({
+        "--x": px(scene.x),
+        "--y": px(scene.y),
+        "--lx": px(lx),
+        "--ly": px(ly),
+        "--rx": px(rx),
+        "--ry": px(ry),
+        "--gap": px(Math.max(18, Math.hypot(rx - lx, ry - ly))),
+      })}
       onAnimationEnd={(event: AnimationEvent<HTMLDivElement>) => {
         if (event.currentTarget !== event.target || event.animationName !== life) return;
         onLifeEnd();
@@ -466,6 +530,16 @@ export function FormArrival({ theme }: { theme?: FormTheme }) {
           <i className="explom-arrival-void" />
         </div>
       </>
+    );
+  if (theme === "kemonohen")
+    return (
+      <div className="form-arrival kemonohen-arrival" aria-hidden="true">
+        <i className="kemonohen-arrival-dark" />
+        <KemonohenClaws />
+        <div className="kemonohen-arrival-eyes">
+          <KemonohenEyes />
+        </div>
+      </div>
     );
   return null;
 }
