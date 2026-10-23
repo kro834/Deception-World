@@ -478,7 +478,7 @@ export function scheduleRexonancePagePreload(preload: () => Promise<unknown>, de
         // not used" warnings there for Rexonance-only sheets, so the route
         // chunk stays warm and its stylesheets/fonts are left to load on
         // arrival.
-        if (/^\/(extreme-saga|far-from-saga)/.test(window.location.pathname)) return;
+        if (/^\/(extreme-saga|far-from-saga|illusionculum-saga)/.test(window.location.pathname)) return;
         const list = Array.isArray(matches) ? matches : [];
         for (const match of list as {
           links?: {

@@ -60,19 +60,6 @@ function bindRail<K extends string>(
    never at a shout's hyphen or space. The characters are the data's. */
 const callShouts = (call: string) => call.match(/[^！]+！*|！+/g) ?? [call];
 
-/* A record's eyebrow wraps only at its " / " seam ("RIDER RECORD 01" over
-   "/ FAR FROM SAGA"), never inside the form's name; the zenith sheet keeps
-   each part whole. The text is the eyebrow's own. */
-function EyebrowParts({ value }: { value: string }) {
-  const [head, ...rest] = value.split(" / ");
-  if (!rest.length) return <>{value}</>;
-  return (
-    <>
-      <span>{head}</span> <span>/ {rest.join(" / ")}</span>
-    </>
-  );
-}
-
 /* The calls are an ordered sequence; as a list the label is announced
    (a name on a plain div is ignored) with the count of calls. */
 function CallOuts({ calls, label }: { calls: readonly string[]; label: string }) {
@@ -127,9 +114,10 @@ function ArticleGrid({
     <div className={`fst-articles fst-articles-${columns}`} role="list" aria-label={label}>
       {items.map((item, index) => (
         <article key={item.title} className="rxs-reveal" role="listitem">
-          <header>
+          {/* The plate's numeral alone (owner, 2026-10-23: the English code
+              that restated it went). */}
+          <header aria-hidden="true">
             <span>{String(index + 1).padStart(2, "0")}</span>
-            {item.code ? <small>{item.code}</small> : null}
           </header>
           <h3>{item.title}</h3>
           {item.body.map((paragraph, paragraphIndex) => (
@@ -141,10 +129,11 @@ function ArticleGrid({
   );
 }
 
-function SubHeading({ kicker, title }: { kicker: string; title: string }) {
+/* A record section's title (owner, 2026-10-23: no English kicker over the
+   Japanese title — the hairline and the title's scale open each section). */
+function SubHeading({ title }: { title: string }) {
   return (
     <header className="fst-subheading rxs-reveal">
-      <p>{kicker}</p>
       <h3>{title}</h3>
     </header>
   );
@@ -160,7 +149,6 @@ function RiderPickup({
   imageHeight,
   imagePos,
   imageSet,
-  eyebrow,
   name,
   sub,
   quote,
@@ -174,7 +162,6 @@ function RiderPickup({
   imagePos: string;
   /* The picture's candidates when they are not the Rexonance cuts. */
   imageSet?: { srcSet?: string; sizes?: string };
-  eyebrow: string;
   name: string;
   sub: string;
   quote: string;
@@ -245,7 +232,6 @@ function RiderPickup({
             loading="lazy"
             decoding="async"
           />
-          <span>RIDER</span>
           <SlideOpenControl
             buttonRef={opener}
             className="form-pickup-plus fst-pickup-plus"
@@ -255,11 +241,10 @@ function RiderPickup({
             onOpen={open}
           />
         </div>
+        {/* Owner (2026-10-23): no secondary labels — the card is the art,
+            the rider's name and the record's quote (the RIDER, PICKUP and
+            RIDER RECORD 0N codes went). */}
         <div className="fst-pickup-copy">
-          <p>
-            <EyebrowParts value={eyebrow} />
-          </p>
-          <small>PICKUP</small>
           <h3>
             <span>仮面ライダー</span>
             <b>
@@ -305,12 +290,6 @@ function RiderPickup({
         </button>
         <div className="form-pickup-panel fst-pickup-panel">
           <div className="fst-pickup-heading">
-            <p>
-              <span>RIDER PICKUP</span>
-            </p>
-            <small>
-              <EyebrowParts value={eyebrow} />
-            </small>
             <h2>
               <span>仮面ライダー</span>
               <b>
@@ -615,25 +594,27 @@ export function FinalStage() {
             fetchPriority="high"
           />
         </div>
+        {/* Owner (2026-10-23): 「不要なセカンダリラベルや説明を避ける。」 The
+            supplied logo is the Latin mark; the title and the lead are the
+            copy (no eyebrow, no Latin duplicate in the title). */}
         <div className="rxs-hero-copy">
-          <p>KAMEN RIDER SAGA / FINAL STAGE</p>
           <h1 id="fst-title">
-            <span>FINAL STAGE</span>
             ファイナル
             <br />
             ステージ
           </h1>
           <p className="rxs-hero-lede">{STORY.lead}</p>
         </div>
+        {/* The cue is its line: the way down; its words name it for
+            assistive tech only. */}
         <a className="rxs-scroll-cue" href="#story">
-          <span>あらすじを読む</span>
+          <span className="visually-hidden">あらすじを読む</span>
           <i aria-hidden="true" />
         </a>
       </section>
 
       <section id="story" className="rxs-section fst-story">
         <header className="rxs-section-heading rxs-reveal">
-          <p>01 / STORY</p>
           <h2>
             仲間と共に、
             <br />
@@ -660,7 +641,6 @@ export function FinalStage() {
 
       <section id="characters" className="rxs-section fst-cast-section">
         <header className="rxs-section-heading rxs-reveal">
-          <p>02 / CHARACTERS</p>
           <h2>
             悠真の帰還を巡る、
             <br />
@@ -698,7 +678,7 @@ export function FinalStage() {
               </button>
             ))}
           </div>
-          <p id="fst-cast-hint" className="rxs-stage-hint">
+          <p id="fst-cast-hint" className="rxs-stage-hint visually-hidden">
             タップ、長押し、またはスライドで切り替え
           </p>
           <div
@@ -711,9 +691,6 @@ export function FinalStage() {
           >
             <figure key={`${activeCast.id}-visual`}>
               <CastVisual person={activeCast} />
-              <figcaption>
-                <span>CHARACTER {activeCast.no}</span>
-              </figcaption>
             </figure>
             {/* The pass's tear line and its punched ends, between the photo
                 and the record (styles-final-stage-lamplight.css). Ornament
@@ -722,7 +699,6 @@ export function FinalStage() {
             <div key={`${activeCast.id}-copy`} className="fst-cast-copy">
               <small>{activeCast.kicker}</small>
               <h3>{activeCast.name}</h3>
-              <em>{activeCast.en}</em>
               <strong>{activeCast.role}</strong>
               {activeCast.body.map((paragraph, index) => (
                 <p key={index}>{paragraph}</p>
@@ -744,9 +720,7 @@ export function FinalStage() {
 
       <section id="riders" className="rxs-section fst-riders-section" aria-label="ライダー記録">
         <header className="rxs-section-heading rxs-reveal">
-          <p>03 / RIDERS</p>
           <h2>二つの究極形態。</h2>
-          <span>ピックアップを開いて、各形態の記録を閲覧できます。</span>
         </header>
 
         <RiderPickup
@@ -756,7 +730,6 @@ export function FinalStage() {
           imageWidth={FAR_FROM_SAGA.stages.middle.width}
           imageHeight={FAR_FROM_SAGA.stages.middle.height}
           imagePos="50% 8%"
-          eyebrow={`RIDER RECORD 01 / ${FAR_FROM_SAGA.en}`}
           name={FAR_FROM_SAGA.name}
           sub={FAR_FROM_SAGA.stagesLine}
           quote="レクソナンスの超共鳴と、ヴィンクルムの接続能力を一つにした、ファイナルステージ限定の超究極フォーム。"
@@ -767,7 +740,7 @@ export function FinalStage() {
             <SpecList rows={FAR_FROM_SAGA.specs} label="ファーフロムサーガ スペック" />
           </div>
 
-          <SubHeading kicker="OVERVIEW" title="概要" />
+          <SubHeading title="概要" />
           <Prose paragraphs={FAR_FROM_SAGA.overview} className="fst-plain" />
           {/* The form's own special site (provisional, 2026-10-22). */}
           <p className="fst-site-door">
@@ -782,7 +755,7 @@ export function FinalStage() {
             </GuardedLink>
           </p>
 
-          <SubHeading kicker="FIVE STAGES" title="形態段階" />
+          <SubHeading title="形態段階" />
           <div className="rxs-stage-switcher">
             <div
               ref={stageTabsRef}
@@ -812,7 +785,7 @@ export function FinalStage() {
                 </button>
               ))}
             </div>
-            <p id="fst-ffs-stage-hint" className="rxs-stage-hint">
+            <p id="fst-ffs-stage-hint" className="rxs-stage-hint visually-hidden">
               タップ、長押し、または左右へのスライドで切り替え
             </p>
 
@@ -847,20 +820,20 @@ export function FinalStage() {
             </div>
           </div>
 
-          <SubHeading kicker="CORE MECHANISM" title="新規理論・中核機構" />
+          <SubHeading title="新規理論・中核機構" />
           <ArticleGrid items={FAR_FROM_SAGA.theories} columns={2} label="新規理論・中核機構" />
 
-          <SubHeading kicker="ARMOR / OS" title="装甲・浮遊ユニットと統合OS" />
+          <SubHeading title="装甲・浮遊ユニットと統合OS" />
           <ArticleGrid
             items={[FAR_FROM_SAGA.bits, FAR_FROM_SAGA.os]}
             columns={2}
             label="装甲とOS"
           />
 
-          <SubHeading kicker="DIVINE AUTHORITY" title="神属権限・継承能力" />
+          <SubHeading title="神属権限・継承能力" />
           <ArticleGrid items={FAR_FROM_SAGA.powers} columns={2} label="神属権限・継承能力" />
 
-          <SubHeading kicker="ARSENAL" title="追加武装" />
+          <SubHeading title="追加武装" />
           <div className="fst-arsenal">
             <ul aria-label="ファーフロムサーガ 追加武装">
               {FAR_FROM_SAGA.arsenal.map((weapon) => (
@@ -870,11 +843,10 @@ export function FinalStage() {
             <p>{FAR_FROM_SAGA.arsenalNote}</p>
           </div>
 
-          <SubHeading kicker="FINISHER" title="必殺技" />
+          <SubHeading title="必殺技" />
           <div className="fst-finishers">
             {FAR_FROM_SAGA.finishers.map((finisher) => (
               <article key={finisher.name} className="fst-plain">
-                <small>{finisher.code}</small>
                 <h4>{finisher.name}</h4>
                 <CallOuts calls={finisher.calls} label={`${finisher.name} 発動音声`} />
                 {finisher.body.map((paragraph, index) => (
@@ -893,12 +865,11 @@ export function FinalStage() {
           imageHeight={activeVisual.height}
           imagePos="50% 10%"
           imageSet={royalVisualImage(activeVisual.image, activeVisual.width)}
-          eyebrow={`RIDER RECORD 02 / ${REALM_ROYAL.en}`}
           name={REALM_ROYAL.name}
           sub={REALM_ROYAL.formsLine}
           quote="戦場を王国として宣言し、味方全員に勝利譚の加護を分配する。仮面ライダーレルムの究極形態。"
         >
-          <SubHeading kicker="FIVE CROWNS" title="形態とスペック" />
+          <SubHeading title="形態とスペック" />
           <div className="rxs-stage-switcher">
             <div
               ref={formTabsRef}
@@ -924,12 +895,11 @@ export function FinalStage() {
                   onClick={() => setForm(key)}
                   onPointerUp={(event) => releaseControlFocus(event.currentTarget)}
                 >
-                  <span>{REALM_ROYAL.forms[key].code}</span>
-                  <small>{REALM_ROYAL.forms[key].label}</small>
+                  <span>{REALM_ROYAL.forms[key].label}</span>
                 </button>
               ))}
             </div>
-            <p id="fst-rr-form-hint" className="rxs-stage-hint">
+            <p id="fst-rr-form-hint" className="rxs-stage-hint visually-hidden">
               タップ、長押し、または左右へのスライドで切り替え
             </p>
 
@@ -942,7 +912,6 @@ export function FinalStage() {
               style={{ ["--fst-accent" as string]: activeForm.accent }}
             >
               <div key={`${form}-copy`} className="fst-form-copy">
-                <small>{activeForm.code}</small>
                 <h3>{activeForm.name}</h3>
                 <CallOuts calls={activeForm.calls} label={`${activeForm.name} 変身音声`} />
               </div>
@@ -952,7 +921,7 @@ export function FinalStage() {
             </div>
           </div>
 
-          <SubHeading kicker="VISUAL" title="ビジュアル" />
+          <SubHeading title="ビジュアル" />
           <div
             className="fst-gallery fst-royal-selected-visual"
             role="list"
@@ -969,30 +938,28 @@ export function FinalStage() {
                 decoding="async"
                 fetchPriority="auto"
               />
-              <figcaption>{activeVisual.label}</figcaption>
             </figure>
           </div>
 
-          <SubHeading kicker="OVERVIEW" title="概要" />
+          <SubHeading title="概要" />
           <Prose paragraphs={REALM_ROYAL.overview} className="fst-plain" />
 
-          <SubHeading kicker="ARMOR / APPEARANCE" title="装甲・外観" />
+          <SubHeading title="装甲・外観" />
           <Prose paragraphs={REALM_ROYAL.armor} className="fst-plain" />
 
-          <SubHeading kicker="ABILITY" title="能力" />
+          <SubHeading title="能力" />
           <ArticleGrid items={REALM_ROYAL.abilities} columns={3} label="レルムロイヤルの能力" />
 
-          <SubHeading kicker="MULTI TYPE" title={REALM_ROYAL.multiType.title} />
+          <SubHeading title={REALM_ROYAL.multiType.title} />
           <Prose paragraphs={REALM_ROYAL.multiType.body} className="fst-plain" />
 
-          <SubHeading kicker="ARSENAL" title="追加武装" />
+          <SubHeading title="追加武装" />
           <ArticleGrid items={REALM_ROYAL.arsenal} columns={3} label="レルムロイヤル 追加武装" />
 
-          <SubHeading kicker="FINISHER" title="必殺技" />
+          <SubHeading title="必殺技" />
           <div className="fst-finishers">
             {REALM_ROYAL.finishers.map((finisher) => (
               <article key={finisher.name} className="fst-plain">
-                <small>{finisher.code}</small>
                 <h4>{finisher.name}</h4>
                 <CallOuts calls={finisher.calls} label={`${finisher.name} 発動音声`} />
                 {finisher.body.map((paragraph, index) => (
@@ -1006,7 +973,6 @@ export function FinalStage() {
 
       <footer className="rxs-footer fst-footer">
         <div>
-          <p>FINAL STAGE / STORY &amp; RECORDS</p>
           <h2>ファイナルステージ、開幕。</h2>
         </div>
         <GuardedLink to="/riders/saga" assets={[]}>

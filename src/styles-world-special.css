@@ -1,0 +1,1372 @@
+/* ================================================================
+   SPECIAL — /world in the special sites' grammar (owner, 2026-10-23)
+   「ディセプションのトップページの全体をよりエクスプリームやレクソナンスや、
+   ファーフロムに近い様な雰囲気にして。」
+   「不要なセカンダリラベルや説明を避ける。レイアウトに説明させるようにUI
+   リライトして。」
+   The three special sites (/extreme-saga, /rexonance-saga, /far-from-saga)
+   share one trailer grammar: a chapter map under the title stage, numbered
+   chapter slates, HUD plates with corner ticks and lit hairlines, a rail on
+   the right edge, and an end card with doors. This sheet brings that
+   material to /world and lets the layout carry the meaning: outlined
+   numerals as marks, the chapters' own colours, scale and grouping, the
+   forms' own art on the doors; no captions that restate a heading. The page
+   keeps its key visual, the pink and ice streamline light and its chapter
+   colour phases (every accent reads the phase token --sw-light).
+   Linked on /world only, after the zenith sheet and before the HUD face and
+   the Mirage sheet (last). Every rule carries the stage scope. Decoration
+   sits under forced-colors: none; motion is scroll-driven or one-shot, gated
+   by prefers-reduced-motion: no-preference and html:not([data-world-effects=
+   "economy"]); the calm tiers show the same plates at rest. No Japanese
+   face changes; every label is 12px or more.
+   ================================================================ */
+
+html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition {
+  --ws-pink: #ff4fc3;
+  --ws-pink-rgb: 255 79 195;
+  --ws-blue: #4f7bff;
+}
+
+/* Declared on every chapter as well, so the prism and the ticks resolve
+   against that chapter's own light (the phase tokens live there). */
+html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition,
+html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > * {
+  --ws-prism: linear-gradient(
+    90deg,
+    var(--sw-light) 0%,
+    var(--ws-blue) 26%,
+    var(--ws-pink) 56%,
+    var(--sw-gold) 80%,
+    transparent 100%
+  );
+  /* Corner ticks: the chapter's light at the top, the streamline pink at
+     the foot. */
+  --ws-ticks:
+    linear-gradient(var(--sw-light) 0 0) 0 0 / 16px 1px no-repeat,
+    linear-gradient(var(--sw-light) 0 0) 0 0 / 1px 16px no-repeat,
+    linear-gradient(var(--sw-light) 0 0) 100% 0 / 16px 1px no-repeat,
+    linear-gradient(var(--sw-light) 0 0) 100% 0 / 1px 16px no-repeat,
+    linear-gradient(var(--ws-pink) 0 0) 0 100% / 16px 1px no-repeat,
+    linear-gradient(var(--ws-pink) 0 0) 0 100% / 1px 16px no-repeat,
+    linear-gradient(var(--ws-pink) 0 0) 100% 100% / 16px 1px no-repeat,
+    linear-gradient(var(--ws-pink) 0 0) 100% 100% / 1px 16px no-repeat;
+}
+
+/* ----------------------------------------------------------------
+   1. The chapter map: six plates, each the chapter's own heading beside
+      its outlined numeral, in the chapter's colour (the order, the
+      numerals and the colours say what it is)
+   ---------------------------------------------------------------- */
+html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > .ws-contents {
+  position: relative;
+  z-index: 1;
+  padding: clamp(40px, 5.6vw, 88px) var(--sw-gutter) clamp(48px, 6.4vw, 104px);
+  background: var(--sw-base);
+  color: var(--sw-text);
+  font-family: var(--sw-body);
+}
+
+@media (forced-colors: none) {
+  html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > .ws-contents {
+    background:
+      linear-gradient(rgb(var(--sw-light-rgb) / 5%) 1px, transparent 1px) 0 0 / 100% 48px,
+      linear-gradient(90deg, rgb(var(--sw-light-rgb) / 5%) 1px, transparent 1px) 0 0 / 48px 100%,
+      radial-gradient(60% 70% at 88% 18%, rgb(var(--ws-pink-rgb) / 9%), transparent 70%),
+      radial-gradient(50% 60% at 6% 90%, rgb(var(--sw-light-rgb) / 7%), transparent 72%),
+      linear-gradient(180deg, #03060c, #050a14 60%, #080d1b);
+  }
+
+  /* The streamline seam the map closes on. */
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .ws-contents::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--sw-light) 22%,
+      var(--ws-pink) 58%,
+      var(--sw-gold) 82%,
+      transparent
+    );
+    opacity: 0.7;
+    pointer-events: none;
+  }
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > .ws-contents
+  > .ws-map {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  box-sizing: border-box;
+  width: min(100%, var(--sw-wrap));
+  margin: 0 auto;
+  padding: 0;
+  list-style: none;
+  counter-reset: none;
+}
+
+/* Each plate reads its chapter's light (the phase tokens of
+   styles-stage-world.css, restated: the map sits before the chapters). */
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > .ws-contents
+  > .ws-map
+  > li {
+  --ws-accent: #a9c4ff;
+  --ws-accent-rgb: 169 196 255;
+  margin: 0;
+  min-width: 0;
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > .ws-contents
+  > .ws-map
+  > li[data-phase="riders"] {
+  --ws-accent: #cfd8e3;
+  --ws-accent-rgb: 207 216 227;
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > .ws-contents
+  > .ws-map
+  > li[data-phase="records"] {
+  --ws-accent: #efb96f;
+  --ws-accent-rgb: 239 185 111;
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > .ws-contents
+  > .ws-map
+  > li[data-phase="annex"] {
+  --ws-accent: #6ddfba;
+  --ws-accent-rgb: 109 223 186;
+}
+
+/* Phones: one row per chapter, numeral | heading | arrow. */
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > .ws-contents
+  > .ws-map
+  a {
+  position: relative;
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr) 24px;
+  align-items: center;
+  gap: 0 14px;
+  min-height: 76px;
+  box-sizing: border-box;
+  padding: 14px 6px 14px 2px;
+  border-bottom: 1px solid rgb(var(--ws-accent-rgb) / 18%);
+  color: var(--sw-text);
+  text-decoration: none;
+  transition:
+    background-color 220ms ease,
+    border-color 220ms ease;
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > .ws-contents
+  > .ws-map
+  > li:first-child
+  a {
+  border-top: 1px solid rgb(var(--ws-accent-rgb) / 18%);
+}
+
+/* The numeral: an outlined mark in the chapter's light, the wordmark's
+   pink channel a hair off it. */
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > .ws-contents
+  > .ws-map
+  a
+  > b {
+  color: transparent;
+  font: 600 44px / 0.8 var(--sw-mono);
+  letter-spacing: -0.03em;
+  -webkit-text-stroke: 1px rgb(var(--ws-accent-rgb) / 78%);
+  transition: color 240ms ease;
+}
+
+@media (forced-colors: none) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .ws-contents
+    > .ws-map
+    a
+    > b {
+    text-shadow:
+      0.05em 0.03em 0 rgb(var(--ws-pink-rgb) / 24%),
+      -0.03em 0 0 rgb(var(--ws-accent-rgb) / 16%);
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .ws-contents
+    > .ws-map
+    a
+    > b {
+    color: CanvasText;
+    -webkit-text-stroke: 0;
+  }
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > .ws-contents
+  > .ws-map
+  a
+  > span {
+  min-width: 0;
+  font: 700 clamp(18px, 4.8vw, 22px) / 1.4 var(--sw-display);
+  font-feature-settings: "palt" 1;
+  letter-spacing: 0.03em;
+  word-break: keep-all;
+  line-break: strict;
+  overflow-wrap: anywhere;
+}
+
+/* The arrow, drawn: a corner and its shaft in the chapter's light. */
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > .ws-contents
+  > .ws-map
+  a
+  > i {
+  position: relative;
+  justify-self: end;
+  width: 14px;
+  height: 14px;
+  border-top: 1.5px solid var(--ws-accent);
+  border-right: 1.5px solid var(--ws-accent);
+  transition: translate 220ms ease;
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > .ws-contents
+  > .ws-map
+  a
+  > i::after {
+  content: "";
+  position: absolute;
+  top: -1px;
+  right: -1px;
+  width: 18px;
+  height: 1.5px;
+  background: var(--ws-accent);
+  transform: rotate(-45deg);
+  transform-origin: 100% 50%;
+}
+
+@media (forced-colors: none) {
+  /* A light runs in from the numeral on hover and focus. */
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .ws-contents
+    > .ws-map
+    a::before {
+    content: "";
+    position: absolute;
+    inset: -1px 0;
+    background:
+      linear-gradient(90deg, var(--ws-accent), var(--ws-pink) 46%, transparent 80%) 0 100% / 100%
+        1px no-repeat,
+      linear-gradient(
+        90deg,
+        rgb(var(--ws-accent-rgb) / 14%),
+        rgb(var(--ws-pink-rgb) / 6%) 40%,
+        transparent 78%
+      );
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 220ms ease;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .ws-contents
+    > .ws-map
+    a:is(:hover, :focus-visible)::before {
+    opacity: 1;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .ws-contents
+    > .ws-map
+    a:is(:hover, :focus-visible)
+    > b {
+    color: rgb(var(--ws-accent-rgb) / 22%);
+  }
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > .ws-contents
+  > .ws-map
+  a:is(:hover, :focus-visible)
+  > i {
+  translate: 3px -3px;
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > .ws-contents
+  > .ws-map
+  a:focus-visible {
+  outline: 2px solid var(--ws-accent);
+  outline-offset: 2px;
+}
+
+/* Tablets and up: the chapters stand as plates, two then three a row,
+   the numeral at the head and the heading at the foot. */
+@media (min-width: 700px) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .ws-contents
+    > .ws-map {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(12px, 1.4vw, 20px);
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .ws-contents
+    > .ws-map
+    a,
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .ws-contents
+    > .ws-map
+    > li:first-child
+    a {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: auto minmax(0, 1fr);
+    align-items: start;
+    gap: 18px 16px;
+    height: 100%;
+    min-height: clamp(150px, 15vw, 196px);
+    padding: clamp(18px, 1.8vw, 26px) clamp(18px, 1.8vw, 26px) clamp(18px, 1.8vw, 24px);
+    border: 1px solid rgb(var(--ws-accent-rgb) / 20%);
+    background: rgb(8 13 24 / 82%);
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .ws-contents
+    > .ws-map
+    a
+    > b {
+    grid-column: 1;
+    grid-row: 1;
+    font-size: clamp(56px, 5.4vw, 80px);
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .ws-contents
+    > .ws-map
+    a
+    > i {
+    grid-column: 2;
+    grid-row: 1;
+    margin-top: 6px;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .ws-contents
+    > .ws-map
+    a
+    > span {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    align-self: end;
+    font-size: clamp(19px, 1.8vw, 25px);
+  }
+
+  @media (forced-colors: none) {
+    /* The plate: the chapter's light at the top edge, its tint in the
+       corner, the corner ticks; the pink at the foot. */
+    html[data-family="world"]:root
+      body
+      main.site-shell.film-edition.mirage-edition
+      > .ws-contents
+      > .ws-map
+      a,
+    html[data-family="world"]:root
+      body
+      main.site-shell.film-edition.mirage-edition
+      > .ws-contents
+      > .ws-map
+      > li:first-child
+      a {
+      background:
+        linear-gradient(var(--ws-accent) 0 0) 0 0 / 16px 1px no-repeat,
+        linear-gradient(var(--ws-accent) 0 0) 0 0 / 1px 16px no-repeat,
+        linear-gradient(var(--ws-accent) 0 0) 100% 0 / 16px 1px no-repeat,
+        linear-gradient(var(--ws-accent) 0 0) 100% 0 / 1px 16px no-repeat,
+        linear-gradient(var(--ws-pink) 0 0) 0 100% / 16px 1px no-repeat,
+        linear-gradient(var(--ws-pink) 0 0) 0 100% / 1px 16px no-repeat,
+        linear-gradient(var(--ws-pink) 0 0) 100% 100% / 16px 1px no-repeat,
+        linear-gradient(var(--ws-pink) 0 0) 100% 100% / 1px 16px no-repeat,
+        linear-gradient(90deg, var(--ws-accent), var(--ws-pink) 58%, transparent) 0 0 / 62% 1px
+          no-repeat,
+        radial-gradient(
+          90% 120% at 0 0,
+          rgb(var(--ws-accent-rgb) / 13%),
+          rgb(var(--ws-accent-rgb) / 3%) 46%,
+          transparent 72%
+        ),
+        linear-gradient(180deg, rgb(12 19 33 / 90%), rgb(5 9 17 / 94%));
+    }
+
+    html[data-family="world"]:root
+      body
+      main.site-shell.film-edition.mirage-edition
+      > .ws-contents
+      > .ws-map
+      a:is(:hover, :focus-visible) {
+      border-color: rgb(var(--ws-accent-rgb) / 52%);
+    }
+
+    html[data-family="world"]:root
+      body
+      main.site-shell.film-edition.mirage-edition
+      > .ws-contents
+      > .ws-map
+      a::before {
+      inset: 0;
+      background: radial-gradient(
+        100% 90% at 0 100%,
+        rgb(var(--ws-pink-rgb) / 12%),
+        rgb(var(--ws-accent-rgb) / 6%) 48%,
+        transparent 76%
+      );
+    }
+  }
+}
+
+@media (min-width: 1100px) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .ws-contents
+    > .ws-map {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* The plates rise once as they enter (scroll-driven, never looping).
+   Full motion only; the calm tiers show them at rest. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) and (forced-colors: none) {
+    html[data-family="world"]:not([data-world-effects="economy"]):root
+      body
+      main.site-shell.film-edition.mirage-edition
+      > .ws-contents
+      > .ws-map
+      > li {
+      animation: ws-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 80%;
+    }
+  }
+}
+
+@keyframes ws-rise {
+  from {
+    opacity: 0;
+    translate: 0 18px;
+  }
+
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+/* ----------------------------------------------------------------
+   2. The chapter slates: the zenith prism seam, a pink bloom and a scale
+      of ticks under the right end (01-03 .section-index, 04-06
+      .wa-chapter). The stage-streamline sheet sets the 01-03 seam with an
+      ID-weighted :not(); the slate answers with one of its own.
+   ---------------------------------------------------------------- */
+@media (forced-colors: none) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > section
+    > .section-index:not(#ws-none),
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .world-annex
+    .wa-chapter {
+    background:
+      var(--ws-prism) 0 100% / min(440px, 62%) 1px no-repeat,
+      repeating-linear-gradient(90deg, rgb(var(--sw-light-rgb) / 46%) 0 1px, transparent 1px 12px)
+        100% 100% / min(240px, 30%) 5px no-repeat,
+      radial-gradient(
+          60% 100% at 22% 100%,
+          rgb(var(--ws-pink-rgb) / 16%),
+          rgb(var(--sw-light-rgb) / 7%) 50%,
+          transparent 100%
+        )
+        0 100% / min(560px, 76%) 22px no-repeat;
+  }
+}
+
+/* 04-06: the numeral alone opens the chapter; the heading under it names
+   it. */
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > .world-annex
+  .wa-chapter {
+  grid-template-columns: auto;
+}
+
+/* ----------------------------------------------------------------
+   3. The annex headings without kickers or counts: 06.x carries its
+      sub-number and a prism line on the title's shoulder; 04 and 05 are
+      the title alone under the chapter numeral
+   ---------------------------------------------------------------- */
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > .world-annex
+  .wa-heading {
+  grid-template-columns: auto minmax(24px, 1fr);
+  align-items: center;
+  gap: 12px 16px;
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > .world-annex
+  .wa-heading:not(.has-no)::before {
+  content: none;
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > .world-annex
+  .wa-heading.has-no::before {
+  grid-row: 1;
+  grid-column: 2;
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > .world-annex
+  .wa-heading.has-no
+  > .wa-no {
+  grid-row: 1;
+  grid-column: 1;
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > .world-annex
+  .wa-heading
+  > h2 {
+  grid-row: 2;
+  grid-column: 1 / -1;
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > .world-annex
+  .wa-heading:not(.has-no)
+  > h2 {
+  grid-row: 1;
+}
+
+@media (forced-colors: none) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .world-annex
+    .wa-heading.has-no::before {
+    background: var(--ws-prism);
+    opacity: 0.7;
+  }
+}
+
+/* 舞台: the locations' title takes the kicker's prism line on its foot. */
+@media (forced-colors: none) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #world-brief
+    .wa-locations
+    > h3 {
+    padding-bottom: 12px;
+    background: var(--ws-prism) 0 100% / min(220px, 60%) 1px no-repeat;
+  }
+}
+
+/* ----------------------------------------------------------------
+   4. The dot rail on the right edge (wide screens only, where the
+      page's margin holds it clear of the text)
+   ---------------------------------------------------------------- */
+html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > .ws-rail {
+  display: none;
+}
+
+@media (min-width: 1360px) and (min-height: 640px) and (forced-colors: none) {
+  html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > .ws-rail {
+    position: fixed;
+    top: 50%;
+    right: clamp(20px, 1.8vw, 36px);
+    z-index: 30;
+    display: block;
+    translate: 0 -50%;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition:
+      opacity 320ms ease,
+      visibility 0s linear 320ms;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .ws-rail[data-current] {
+    opacity: 1;
+    visibility: visible;
+    transition:
+      opacity 320ms ease,
+      visibility 0s;
+  }
+
+  /* While the menu is open, the rail steps away. */
+  html[data-family="world"][data-side-menu-open]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .ws-rail {
+    opacity: 0;
+  }
+
+  html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > .ws-rail > ol {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    gap: 18px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* The track, and its lit run up to the chapter in view. */
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .ws-rail
+    > ol::before,
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .ws-rail
+    > ol::after {
+    content: "";
+    position: absolute;
+    top: 4px;
+    left: 50%;
+    width: 1px;
+    height: calc(100% - 8px);
+    background: rgb(122 232 255 / 20%);
+    translate: -50% 0;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .ws-rail
+    > ol::after {
+    background: linear-gradient(180deg, #7ae8ff, var(--ws-pink));
+    transform-origin: top;
+    scale: 1 calc((var(--ws-rail-at, 1) - 1) / 5);
+  }
+
+  html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > .ws-rail li {
+    --ws-dot: #a9c4ff;
+    position: relative;
+    z-index: 1;
+    width: 7px;
+    height: 7px;
+    box-sizing: border-box;
+    border: 1px solid rgb(122 232 255 / 52%);
+    border-radius: 50%;
+    background: #03060c;
+    transition:
+      background-color 240ms ease,
+      border-color 240ms ease,
+      box-shadow 240ms ease,
+      scale 240ms ease;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .ws-rail
+    li[data-phase="riders"] {
+    --ws-dot: #cfd8e3;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .ws-rail
+    li[data-phase="records"] {
+    --ws-dot: #efb96f;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .ws-rail
+    li[data-phase="annex"] {
+    --ws-dot: #6ddfba;
+  }
+
+  /* The chapter in view: its own light, ringed in the streamline pink. */
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .ws-rail
+    li[data-on] {
+    border-color: #fff;
+    background: var(--ws-dot);
+    box-shadow:
+      0 0 0 3px rgb(var(--ws-pink-rgb) / 26%),
+      0 0 14px rgb(var(--ws-pink-rgb) / 56%);
+    scale: 1.45;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html[data-family="world"]:not([data-world-effects="economy"]):root
+      body
+      main.site-shell.film-edition.mirage-edition
+      > .ws-rail
+      > ol::after {
+      transition: scale 420ms cubic-bezier(0.2, 0.7, 0.2, 1);
+    }
+  }
+}
+
+/* ----------------------------------------------------------------
+   5. The end of the record: the doors to the three special sites, each
+      shown by its form (the side menu's own tiles) in its site's light
+   ---------------------------------------------------------------- */
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > footer
+  > .ws-doors {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  box-sizing: border-box;
+  width: min(100%, 520px);
+  margin: 14px 0 8px;
+}
+
+@media (min-width: 1000px) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > footer
+    > .ws-doors {
+    grid-template-columns: minmax(0, 1.25fr) repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    width: min(100%, 1120px);
+  }
+
+  /* ファーフロム leads, a little larger: a wider door beside the four. */
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > footer
+    > .ws-doors
+    > a.is-far-from {
+    grid-row: span 2;
+  }
+}
+
+/* ファーフロム leads, a little larger, at every width. */
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > footer
+  > .ws-doors
+  > a.is-far-from {
+  min-height: 136px;
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > footer
+  > .ws-doors
+  > a {
+  --ws-door: #ffd57a;
+  --ws-door-rgb: 255 213 122;
+  --ws-door-2: #ff9d4a;
+  position: relative;
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr) 22px;
+  align-items: center;
+  justify-self: stretch;
+  gap: 0 16px;
+  min-height: 112px;
+  box-sizing: border-box;
+  padding: 8px 18px 8px 8px;
+  border: 1px solid rgb(var(--ws-door-rgb) / 30%);
+  border-radius: 0;
+  background: rgb(10 8 8 / 82%);
+  color: var(--sw-text);
+  text-align: start;
+  text-decoration: none;
+  white-space: normal;
+  clip-path: polygon(
+    0 0,
+    calc(100% - 14px) 0,
+    100% 14px,
+    100% 100%,
+    14px 100%,
+    0 calc(100% - 14px)
+  );
+  transition:
+    border-color 220ms ease,
+    background-color 220ms ease;
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > footer
+  > .ws-doors
+  > a.is-rexonance {
+  --ws-door: #79e8ff;
+  --ws-door-rgb: 121 232 255;
+  --ws-door-2: #ff8fd8;
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > footer
+  > .ws-doors
+  > a.is-far-from {
+  --ws-door: #c99bff;
+  --ws-door-rgb: 201 155 255;
+  --ws-door-2: #7fe6ff;
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > footer
+  > .ws-doors
+  > a.is-illusionculum {
+  --ws-door: #a6e6ff;
+  --ws-door-rgb: 166 230 255;
+  --ws-door-2: #e9b866;
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > footer
+  > .ws-doors
+  > a.is-meta-unitas {
+  --ws-door: #ffb44a;
+  --ws-door-rgb: 255 180 74;
+  --ws-door-2: #7fe6ff;
+}
+
+@media (forced-colors: none) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > footer
+    > .ws-doors
+    > a {
+    background:
+      linear-gradient(90deg, var(--ws-door), var(--ws-door-2) 58%, transparent) 0 0 / 70% 1px
+        no-repeat,
+      radial-gradient(80% 120% at 0 50%, rgb(var(--ws-door-rgb) / 14%), transparent 70%),
+      rgb(10 8 8 / 86%);
+  }
+}
+
+/* The form: a cropped print with the site's light at its edge. */
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > footer
+  > .ws-doors
+  > a
+  > img {
+  display: block;
+  width: 76px;
+  height: 96px;
+  object-fit: cover;
+  object-position: 50% 18%;
+  border: 1px solid rgb(var(--ws-door-rgb) / 34%);
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
+  transition: filter 240ms ease;
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > footer
+  > .ws-doors
+  > a
+  > span {
+  min-width: 0;
+  font: 700 clamp(16px, 1.5vw, 19px) / 1.4 var(--sw-display);
+  letter-spacing: 0.04em;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+/* The arrow, drawn in the site's light. */
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > footer
+  > .ws-doors
+  > a
+  > i {
+  position: relative;
+  justify-self: end;
+  width: 12px;
+  height: 12px;
+  border-top: 1.5px solid var(--ws-door);
+  border-right: 1.5px solid var(--ws-door);
+  transition: translate 220ms ease;
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > footer
+  > .ws-doors
+  > a
+  > i::after {
+  content: "";
+  position: absolute;
+  top: -1px;
+  right: -1px;
+  width: 15px;
+  height: 1.5px;
+  background: var(--ws-door);
+  transform: rotate(-45deg);
+  transform-origin: 100% 50%;
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > footer
+  > .ws-doors
+  > a:is(:hover, :focus-visible) {
+  border-color: var(--ws-door);
+  background-color: rgb(var(--ws-door-rgb) / 12%);
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > footer
+  > .ws-doors
+  > a:is(:hover, :focus-visible)
+  > i {
+  translate: 3px -3px;
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > footer
+  > .ws-doors
+  > a:is(:hover, :focus-visible)
+  > img {
+  filter: brightness(1.12) saturate(1.08);
+}
+
+/* The cut corners would clip an outline: the ring goes inside. */
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > footer
+  > .ws-doors
+  > a:focus-visible {
+  outline: 2px solid var(--ws-door);
+  outline-offset: -4px;
+}
+
+/* The billing: the title outlined behind the end card, cropped by the
+   foot (the special sites' poster billing), a quiet graphic. The footer
+   clips rather than scrolls, so its view timelines keep the document
+   scroller as their source. */
+html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > footer {
+  overflow: clip;
+  isolation: isolate;
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > footer
+  > .ws-billing {
+  display: none;
+}
+
+@media (forced-colors: none) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > footer
+    > .ws-billing {
+    position: absolute;
+    right: 0;
+    bottom: -0.26em;
+    left: 0;
+    z-index: -1;
+    display: block;
+    color: transparent;
+    font: 700 clamp(72px, 15vw, 260px) / 1 var(--sw-mono);
+    letter-spacing: -0.02em;
+    text-align: center;
+    white-space: nowrap;
+    -webkit-text-stroke: 1px rgb(var(--sw-light-rgb) / 15%);
+    background: linear-gradient(
+      90deg,
+      rgb(var(--sw-light-rgb) / 6%),
+      rgb(var(--ws-pink-rgb) / 8%) 50%,
+      rgb(var(--sw-gold-rgb) / 6%)
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    pointer-events: none;
+    user-select: none;
+  }
+}
+
+/* ----------------------------------------------------------------
+   6. The title stage: the special sites' HUD (scan grid, brackets,
+      scale bar), under the copy and the print, over the key art
+   ---------------------------------------------------------------- */
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > .hero
+  > .ws-hero-hud {
+  display: none;
+}
+
+@media (forced-colors: none) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero
+    > .ws-hero-hud {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    display: block;
+    pointer-events: none;
+    background:
+      linear-gradient(rgb(122 232 255 / 6%) 1px, transparent 1px) 0 0 / 100% 56px,
+      linear-gradient(90deg, rgb(122 232 255 / 6%) 1px, transparent 1px) 0 0 / 56px 100%;
+    -webkit-mask-image: radial-gradient(120% 90% at 60% 40%, #000 30%, transparent 86%);
+    mask-image: radial-gradient(120% 90% at 60% 40%, #000 30%, transparent 86%);
+  }
+
+  /* Brackets on the stage's corners, inside the bar and the gutters. */
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero
+    > .ws-hero-hud
+    > .ws-hero-bracket {
+    position: absolute;
+    top: calc(var(--film-topbar-height, 76px) + 18px);
+    right: clamp(12px, 1.6vw, 28px);
+    bottom: 18px;
+    left: clamp(12px, 1.6vw, 28px);
+    background:
+      linear-gradient(#7ae8ff 0 0) 0 0 / 22px 1px no-repeat,
+      linear-gradient(#7ae8ff 0 0) 0 0 / 1px 22px no-repeat,
+      linear-gradient(#7ae8ff 0 0) 100% 0 / 22px 1px no-repeat,
+      linear-gradient(#7ae8ff 0 0) 100% 0 / 1px 22px no-repeat,
+      linear-gradient(var(--ws-pink) 0 0) 0 100% / 22px 1px no-repeat,
+      linear-gradient(var(--ws-pink) 0 0) 0 100% / 1px 22px no-repeat,
+      linear-gradient(var(--ws-pink) 0 0) 100% 100% / 22px 1px no-repeat,
+      linear-gradient(var(--ws-pink) 0 0) 100% 100% / 1px 22px no-repeat;
+    opacity: 0.7;
+  }
+
+  /* The scale bar along the foot: ticks every 12px, a lit run at its start. */
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero
+    > .ws-hero-hud
+    > .ws-hero-scale {
+    position: absolute;
+    right: clamp(44px, 5vw, 96px);
+    bottom: 18px;
+    left: clamp(44px, 5vw, 96px);
+    height: 6px;
+    background:
+      linear-gradient(90deg, #7ae8ff, var(--ws-pink) 30%, transparent 60%) 0 100% / 100% 1px
+        no-repeat,
+      repeating-linear-gradient(90deg, rgb(122 232 255 / 34%) 0 1px, transparent 1px 12px) 0 100% /
+        100% 4px no-repeat;
+    opacity: 0.8;
+  }
+}
+
+/* Phones and portrait tablets: only the brackets stay (the scale bar
+   would run under the controls). */
+@media (max-width: 1023px), (orientation: portrait) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero
+    > .ws-hero-hud
+    > .ws-hero-scale {
+    display: none;
+  }
+}
+
+/* ----------------------------------------------------------------
+   7. HUD plates: corner ticks and a lit hairline on the consoles that
+      had none (the rider console and the end card; the world column's
+      plate already carries its own)
+   ---------------------------------------------------------------- */
+@media (forced-colors: none) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #riders
+    > .rider-console::after,
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .finale-section
+    .finale-content::after {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    z-index: 3;
+    display: block;
+    background: var(--ws-ticks);
+    pointer-events: none;
+    /* The Mirage sheet's lock-on (mr-lock) rides these pseudo-elements;
+       the ticks stay still on every tier. */
+    animation: none;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #riders
+    > .rider-console::before {
+    content: "";
+    position: absolute;
+    top: -1px;
+    left: 22px;
+    z-index: 3;
+    display: block;
+    width: min(420px, 46%);
+    height: 1px;
+    background: var(--ws-prism);
+    pointer-events: none;
+    animation: none;
+  }
+
+  /* The end card's frame stands a little off its words. */
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .finale-section
+    .finale-content::after {
+    inset: clamp(-36px, -3vw, -18px) clamp(-56px, -4vw, -20px);
+  }
+}
+
+/* ----------------------------------------------------------------
+   8. The rider rail's gesture note: at rest it is read to assistive
+      technology only (the tabs read as tabs; tapping one is plain); while a
+      finger holds the rail, the live status rises under it as the hold's
+      own feedback, then goes again.
+   ---------------------------------------------------------------- */
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #riders
+  .rider-selector {
+  position: relative;
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #riders
+  .rider-selection-guide:not(#ws-none),
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #riders
+  .rider-selection-guide:not(#ws-none)
+  > p:first-child {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  min-height: 0;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #riders
+  .rider-selector:has([data-liquid-held="true"])
+  .rider-selection-guide:not(#ws-none) {
+  top: calc(100% + 8px);
+  right: var(--rider-liquid-safe-inline, 18px);
+  left: var(--rider-liquid-safe-inline, 18px);
+  z-index: 6;
+  width: auto;
+  height: auto;
+  margin: 0;
+  padding: 10px 14px;
+  overflow: visible;
+  border: 1px solid #b9eaff;
+  background: rgb(12 22 30 / 94%);
+  clip-path: none;
+  white-space: normal;
+  pointer-events: none;
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #riders
+  .rider-selector:has([data-liquid-held="true"])
+  .rider-selection-guide
+  > [data-rider-selection-status] {
+  min-height: 0;
+  margin: 0;
+  color: #fff;
+  font: 600 13px / 1.6 var(--sw-body);
+}
+
+/* ----------------------------------------------------------------
+   9. The cast wall's exit: the file's chevron cell alone at the foot (the
+      face opens the file too)
+   ---------------------------------------------------------------- */
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #cast-roster
+  .wa-person
+  .wa-open
+  > span {
+  justify-content: flex-end;
+}
+
+/* ----------------------------------------------------------------
+   10. The episode pickup: each file is its art, its name and an arrow
+       cell on the name's line (the caption row it replaced read OPEN
+       DOSSIER; the link keeps its aria-label)
+   ---------------------------------------------------------------- */
+html[data-family="world"]:root body #episode-pickup-dialog .episode-pickup-item > div {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 14px;
+}
+
+html[data-family="world"]:root body #episode-pickup-dialog .episode-pickup-item > div > h3 {
+  grid-column: 1;
+}
+
+html[data-family="world"]:root body #episode-pickup-dialog .episode-pickup-open {
+  grid-column: 2;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ----------------------------------------------------------------
+   11. The episode cards: the title alone under the frame (its number
+       rides the frame's EP chip), held in the middle of the card's foot
+   ---------------------------------------------------------------- */
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #records
+  .episode-card
+  .episode-card-copy {
+  justify-content: center;
+}

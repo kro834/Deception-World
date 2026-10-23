@@ -25,7 +25,10 @@ export function WorldCastDirectory({
 }) {
   return (
     <div className="wa-directory">
-      <div className="wa-directory-heading">
+      {/* Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明） — the
+          pressed button and its count say the choice; the prompt and the
+          running total are read to assistive technology only. */}
+      <div className="wa-directory-heading visually-hidden">
         <p className="wa-directory-label">資料の種類から選ぶ</p>
         <p className="wa-directory-count" role="status" aria-live="polite" aria-atomic="true">
           <span>{LABELS[filter]}</span>

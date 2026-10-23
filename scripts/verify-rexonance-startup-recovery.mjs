@@ -91,7 +91,8 @@ const openPage = async ({
   });
   await addFaults(page, faults);
   if (failFigureUntilManualRetry) {
-    await page.route("**/rexonance-suit-20261016/figure.webp", async (route) => {
+    // Owner (2026-10-23): SAMで切り抜きを改善 (the suit's new folder).
+    await page.route("**/rexonance-suit-20261023/figure.webp", async (route) => {
       requests.figure++;
       if (!allowFigure) {
         requests.figureFailures++;

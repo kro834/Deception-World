@@ -45,6 +45,7 @@ export const PUBLIC_SMOKE_ROUTES = [
   "/rexonance-saga",
   "/extreme-saga",
   "/far-from-saga",
+  "/illusionculum-saga",
   "/gallery",
   "/gallery-tours",
   "/exhibition",

@@ -598,7 +598,11 @@ test("the ghost is silent, last in the hero copy, and nine letters of the name",
     /<span className="rxf-mark" aria-hidden="true">\s*\{FORGE_MARK\.map\(\(letter, index\) => \(\s*<i key=\{index\}>\{letter\}<\/i>\s*\)\)\}\s*<\/span>\s*<\/div>\s*<div className="rxs-hero-visual" aria-hidden="true">/,
   );
   const copy = page.slice(page.indexOf('<div className="rxs-hero-copy">'));
-  assert.match(copy, /^<div className="rxs-hero-copy">\s*<p lang="en">\s*THE NEXT GENERATION/);
+  // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）: the hero's
+  // eyebrow went; the title leads the copy.
+  assert.match(copy, /^<div className="rxs-hero-copy">\s*<h1 id="rxs-title">/);
+  // (PHASE LOCK, the trinity's caption, went too: the rings and their numerals say it.)
+  assert.doesNotMatch(page, /rzn-tri-lock|PHASE LOCK/);
   for (const name of [
     "rzn-readout",
     "rzn-percent",
@@ -606,7 +610,6 @@ test("the ghost is silent, last in the hero copy, and nine letters of the name",
     "rzn-line",
     "rzn-form-code",
     "rsn-count",
-    "rzn-tri-lock",
   ])
     assert.match(page, new RegExp(`className=(?:"|\\{\`)[^"\`]*\\b${name}\\b`), name);
 });
@@ -672,11 +675,12 @@ test("the owner's copy renders unchanged: the cut kickers and every processing l
   for (const value of Object.keys(context.catalog)) {
     set(value);
     const root = context.control();
-    const kickers = nodes(
-      root,
-      (node) => node.type === "small" && node.props.className == null,
-    ).map(text);
-    assert.deepEqual(kickers.slice(0, 2), ["REACTION / VS VINCULUM", "MOBILITY / VS EXTREME"]);
+    // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）: the cuts'
+    // English kickers went; each cut is its figure and its Japanese line.
+    const cuts = nodes(root, (node) => node.props.className === "rxs-headline-metrics")[0];
+    const lines = nodes(cuts, (node) => node.type === "p").map(text);
+    assert.deepEqual(lines, ["ヴィンクルムサーガと比較した反応速度", "エクスプリームサーガと比較した最大機動力"]);
+    assert.equal(nodes(cuts, (node) => node.type === "small").length, 0);
     const comparison = nodes(
       root,
       (node) => node.props.className === "rxs-processing-comparison",
@@ -726,14 +730,14 @@ test("the owner's copy renders unchanged: the cut kickers and every processing l
 });
 
 test("the plates break between phrases, and the KHAOS wave is the figure's mark", () => {
-  // owner request 2026-10-16: FORGE (rx18) — the plate title and code helpers
-  // only add <wbr> and units: the text stays the owner's.
-  assert.match(page, /<small lang="en">\{renderPlateCode\(system\.code\)\}<\/small>/);
+  // owner request 2026-10-16: FORGE (rx18) — the plate title helper only adds
+  // <wbr>: the text stays the owner's.
   assert.match(page, /<h3>\{renderPlateTitle\(system\.title\)\}<\/h3>/);
   assert.match(page, /const PLATE_TITLE_PHRASE_ENDS = \/\(第二世代\|無限縮小\)\/;/);
-  assert.match(page, /const PLATE_CODE_UNITS = \/\(\[\^\\s-\]\+ \\\/\|FINAL JUDGMENT\)\/;/);
-  // The plate's numeral rules style every span in its header: units are <b>.
-  assert.match(page, /<b key=\{`\$\{index\}-\$\{part\}`\} className="rxp-nowrap">/);
+  // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）: the plates'
+  // English codes (which restated their titles) went; the numeral heads each plate.
+  assert.doesNotMatch(page, /renderPlateCode|PLATE_CODE_UNITS/);
+  assert.match(page, /<header aria-hidden="true">\s*<span>\{system\.number\}<\/span>\s*<\/header>/);
   // owner request 2026-10-16: FORGE (rx18) — the wave is wrapped, never changed.
   const figure = page.match(/<small>KHAOS DeuX<\/small>[\s\S]*?<\/strong>/)?.[0] ?? "";
   assert.match(

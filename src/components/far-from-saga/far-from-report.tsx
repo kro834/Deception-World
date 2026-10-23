@@ -18,11 +18,6 @@ import {
    the browser's find-in-page opens a closed panel that holds a match. The
    first chapter of each document starts open. */
 
-const PART_CODES: Record<ReportPart["id"], string> = {
-  "report-rexonance": "REPORT 01 / VS REXONANCE",
-  "report-saga": "REPORT 02 / ULTIMATE FORMS",
-};
-
 function ReportTableView({ tableKey }: { tableKey: ReportTableKey }) {
   const table = REPORT_TABLES[tableKey];
   return (
@@ -90,7 +85,7 @@ function Blocks({ blocks }: { blocks: readonly ReportBlock[] }) {
   );
 }
 
-function ReportDocument({ part, number }: { part: ReportPart; number: number }) {
+function ReportDocument({ part }: { part: ReportPart }) {
   const [open, setOpen] = useState<ReadonlySet<string>>(
     () => new Set(part.chapters.slice(0, 1).map((chapter) => chapter.id)),
   );
@@ -99,8 +94,10 @@ function ReportDocument({ part, number }: { part: ReportPart; number: number }) 
 
   return (
     <article id={part.id} className="ffs-report rxs-reveal" aria-labelledby={titleId}>
+      {/* The document's title and its own subtitle (owner, 2026-10-23: no
+          secondary labels — the report code and the chapter count went; the
+          numbered chapters below say how many there are). */}
       <header className="ffs-report-head">
-        <small lang="en">{PART_CODES[part.id]}</small>
         {/* A narrow screen breaks the title after its 「・」 (the text is unchanged). */}
         <h3 id={titleId}>
           {part.title.split("・").map((segment, index) => (
@@ -119,9 +116,6 @@ function ReportDocument({ part, number }: { part: ReportPart; number: number }) 
             {part.subtitle}
           </p>
         ) : null}
-        <p className="ffs-report-count">
-          資料{number}・全{part.chapters.length}章
-        </p>
       </header>
 
       {part.intro.length ? (
@@ -178,8 +172,8 @@ function ReportDocument({ part, number }: { part: ReportPart; number: number }) 
 export function FarFromReport() {
   return (
     <div className="ffs-reports">
-      {REPORT_PARTS.map((part, index) => (
-        <ReportDocument key={part.id} part={part} number={index + 1} />
+      {REPORT_PARTS.map((part) => (
+        <ReportDocument key={part.id} part={part} />
       ))}
     </div>
   );

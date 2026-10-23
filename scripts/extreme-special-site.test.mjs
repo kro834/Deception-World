@@ -21,15 +21,19 @@ test("Extreme special site has a route, menu entry, warmup asset, and dedicated 
   assert.match(transitions, /\.is-extreme-dive/);
 });
 
-test("shared special navigation keeps Rexonance directly below Extreme", () => {
+// Owner (2026-10-23): ファーフロム first, イリュージョンクルム and メタ・ウニタス
+// between it and レクソナンス, the rest as before: Extreme now follows Rexonance.
+test("shared special navigation keeps Extreme directly below Rexonance", () => {
   const specialNavigation = menu.slice(
     menu.indexOf("<p>SPECIAL</p>"),
     menu.indexOf("<p>STORIES</p>"),
   );
   const extremePosition = specialNavigation.indexOf('<DisplayName value="エクスプリームサーガ" />');
   const rexonancePosition = specialNavigation.indexOf('<DisplayName value="レクソナンスサーガ" />');
-  assert.ok(extremePosition >= 0);
-  assert.ok(rexonancePosition > extremePosition);
+  assert.ok(rexonancePosition >= 0);
+  assert.ok(extremePosition > rexonancePosition);
+  const between = specialNavigation.slice(rexonancePosition, extremePosition);
+  assert.equal((between.match(/<DisplayName value=/g) || []).length, 1);
 });
 
 test("Extreme hero presents the reviewed combat copy with the existing type treatment", () => {
@@ -113,8 +117,11 @@ test("Extreme P14 stays focused on its own expansion and fixation architecture",
   assert.match(component, /可能性は増やす。/);
   assert.match(component, /答えは一つ。/);
   assert.doesNotMatch(component, /同じP14。|到達点は、異なる。/);
-  assert.match(component, /P14 \/ EXPANSION/);
-  assert.match(component, /P14 \/ FIXATION/);
+  // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）: the pair reads
+  // by its arrow and its two titles (the P14 / EXPANSION, P14 / FIXATION chips went).
+  assert.doesNotMatch(component, /P14 \/ EXPANSION|P14 \/ FIXATION/);
+  assert.match(component, /勝ち筋を、実行できる形へ。/);
+  assert.match(component, /<span className="exo-arrow" aria-hidden="true">/);
   assert.match(component, /変換効率・応答・安定率の個別数値は未公表/);
   assert.match(component, /変換効率・応答・安定率の個別数値は未公表です/);
   assert.match(component, /20,000YOPS/);

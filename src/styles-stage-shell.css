@@ -2007,6 +2007,69 @@ html[data-family]
   --sh-art-pos: 50% 18%;
 }
 
+/* ILLUSIONCULUM SAGA (2026-10-23): the standard form's tile
+   (scripts/build-illusionculum-saga.mjs). META UNITAS SAGA: its ミドル tile
+   (src/lib/meta-unitas-saga-artwork.ts META_UNITAS_MENU_TILE). */
+html[data-family]
+  body
+  #site-side-panel.side-panel[data-open="true"]
+  > .side-panel-head
+  + .side-panel-group
+  + .side-panel-group
+  + .side-panel-group
+  > .side-panel-links
+  > a[href^="/illusionculum-saga"] {
+  --sh-art: url("/illusionculum-saga-20261023/standard-tile-400.webp");
+  --sh-art-pos: 50% 16%;
+}
+
+html[data-family]
+  body
+  #site-side-panel.side-panel[data-open="true"]
+  > .side-panel-head
+  + .side-panel-group
+  + .side-panel-group
+  + .side-panel-group
+  > .side-panel-links
+  > a[href^="/meta-unitas-saga"] {
+  --sh-art: url("/meta-unitas-saga-20261023/middle-tile-400.webp");
+  --sh-art-pos: 50% 18%;
+}
+
+/* The SPECIAL tiles' order and weight (owner, 2026-10-23: ファーフロムは
+   サイドメニューの中でもやや大きく): Far From leads, a little larger than the
+   four after it — on phones it spans the two columns, from tablets up its
+   column is wider than the others' in the one row. */
+@media (max-width: 760px) {
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-head
+    + .side-panel-group
+    + .side-panel-group
+    + .side-panel-group
+    > .side-panel-links[data-special-tiles]
+    > a[href^="/far-from-saga"] {
+    grid-column: 1 / -1;
+    min-height: calc(var(--sh-tile-h) + 28px);
+    --sh-art-pos: 50% 22%;
+  }
+}
+
+@media (min-width: 761px) {
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    > .side-panel-head
+    + .side-panel-group
+    + .side-panel-group
+    + .side-panel-group
+    > .side-panel-links.side-panel-links[data-special-tiles] {
+    grid-template-columns: minmax(0, 1.4fr);
+    grid-auto-columns: minmax(0, 1fr);
+  }
+}
+
 html[data-family]
   body
   #site-side-panel.side-panel[data-open="true"]

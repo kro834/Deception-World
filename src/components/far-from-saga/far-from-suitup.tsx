@@ -130,9 +130,18 @@ function FarFromAssemblyGuide({ runwayRef }: { runwayRef: RefObject<HTMLDivEleme
     return () => observer.disconnect();
   }, [runwayRef]);
   const status = assemblyStatus(load, scene.motion);
+  // Owner (2026-10-23): no secondary labels. The runway shows its own state
+  // (the undersuit while it prepares, the scroll's armour after); the status
+  // stays a live region for assistive tech and is seen only when the
+  // material fails, beside its retry.
   return (
     <div className="ffs-assembly-guide">
-      <p className="ffs-assembly-status" role="status" aria-live="polite" aria-atomic="true">
+      <p
+        className={`ffs-assembly-status${load === "error" ? "" : " visually-hidden"}`}
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
         {status}
       </p>
       <div className="rxk-sr">
@@ -204,15 +213,7 @@ export const FarFromSuitUp = memo(function FarFromSuitUp({
   return (
     <section id="suitup" className="rxs-section ffs-suitup" aria-labelledby="ffs-suitup-title">
       <header className="rxs-section-heading rxs-reveal">
-        <small className="ffs-index" aria-hidden="true">
-          <b>03</b>
-          {" / 05"}
-        </small>
-        <p lang="en">SUIT-UP</p>
-        <h2 id="ffs-suitup-title">一瞬で、果てまで纏う。</h2>
-        <span>
-          スクロールの速さに合わせて装着が進みます。炎の到達から爆散、ナノマシンの集結、装甲の固定、出力の起動、選んだ形態への移行までを、自分のペースで確認できます。
-        </span>
+        <h2 id="ffs-suitup-title">一瞬で、<wbr />果てまで<wbr />纏う。</h2>
       </header>
       <FarFromAssemblyGuide runwayRef={runwayRef} />
       {/* The auto transformation movie's control (owner, 2026-10-23), the
@@ -274,7 +275,6 @@ export const FarFromSuitUp = memo(function FarFromSuitUp({
           <div className="rzn-call">
             <p className="rzn-kicker">
               <span>SUIT-UP</span>
-              <span>NANITE ASSEMBLY</span>
             </p>
             <p className="rzn-phase">
               {FAR_FROM_ASSEMBLY_PHASES.map(({ phase, step, label }) => (
@@ -305,10 +305,6 @@ export const FarFromSuitUp = memo(function FarFromSuitUp({
               <b className="rzn-percent">100</b>
               <span>%</span>
             </p>
-            <p className="rzn-nanites">
-              <small>NANITES</small>
-              <span className="rzn-count">ONLINE</span>
-            </p>
             <ol className="rzn-parts">
               {FAR_FROM_ASSEMBLY_PARTS.map((part) => (
                 <li key={part} className="rzn-part">
@@ -332,10 +328,14 @@ export const FarFromSuitUp = memo(function FarFromSuitUp({
         data-stage={stage}
         style={{ ["--ffs-accent" as string]: form.accent }}
       >
-        <header className="ffs-ending-head">
-          <p lang="en">FINAL FORM</p>
-          <h3 id="ffs-ending-title">変身後の形態</h3>
-        </header>
+        {/* The rail right under the figure is the choice of its ending
+            (owner, 2026-10-23: no secondary labels — the eyebrow went; the
+            rail's name, its hint and the route's sentence speak to
+            assistive tech only, while the route of nodes below shows on
+            screen the forms the ending runs through). */}
+        <h3 id="ffs-ending-title" className="visually-hidden">
+          変身後の形態
+        </h3>
         <div
           ref={tabsRef}
           className="rxs-stage-tabs liquid-swipe-tabs ffs-stage-tabs ffs-ending-tabs"
@@ -363,7 +363,7 @@ export const FarFromSuitUp = memo(function FarFromSuitUp({
             </button>
           ))}
         </div>
-        <p id="ffs-ending-hint" className="rxs-stage-hint">
+        <p id="ffs-ending-hint" className="rxs-stage-hint visually-hidden">
           タップ・長押し・左右スライド・矢印キーで切り替え
         </p>
         <div
@@ -385,7 +385,8 @@ export const FarFromSuitUp = memo(function FarFromSuitUp({
               </li>
             ))}
           </ol>
-          <p className="ffs-ending-line">{endingLine(stage)}</p>
+          {/* The route says it on screen; the sentence says it to assistive tech. */}
+          <p className="ffs-ending-line visually-hidden">{endingLine(stage)}</p>
           {/* ウルトラ's note, only with ウルトラ: the panel is as tall as its
               form's words (a blank reserved for the note stood under every
               other form's one line). A switch made from #stages, below, keeps

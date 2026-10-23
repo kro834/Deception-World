@@ -78,6 +78,8 @@
   overflow-wrap: anywhere;
 }
 
+/* (No kickers over these titles: owner, 2026-10-23 — 「不要なセカンダリラベルや
+   説明を避ける」. Each title heads its panel alone.) */
 /* Kickers: one size, one tracking. */
 .ffs-page .ffs-panel-head small,
 .ffs-page .ffs-report-head > small,
@@ -948,13 +950,6 @@
   font-weight: 400;
   letter-spacing: 0.2em;
   line-height: 1.7;
-}
-
-.ffs-page .ffs-report-count {
-  margin: 0;
-  color: var(--ffs-muted);
-  font-size: 12px;
-  letter-spacing: 0.08em;
 }
 
 /* The opening paragraphs: the document's lede, in the reading gothic. */
@@ -1981,10 +1976,6 @@
   font-size: 11px;
   font-weight: 400;
   letter-spacing: 0.2em;
-}
-
-.ffs-page .ffs-p16-topics header small {
-  color: var(--ffs-muted);
 }
 
 .ffs-page .ffs-p16-topics h3 {

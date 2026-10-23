@@ -913,27 +913,20 @@ html .fst-page.fst-page .fst-cast-copy > a:focus-visible::after {
     animation: fsl-fade 320ms ease-out both;
   }
 
-  /* The board, as the doors clear it: the sign drops on its hinge, the
-     line under it rises, the name is struck from the left, the chalk rule
-     draws, and the record's opening calls flap in after it. (nth-child
-     keeps these over the 帰路 sheet's own staggers; a crown's calls, which
-     re-mount on each change, keep that sheet's quicker timing.) */
-  html:not([data-world-effects="economy"]) .fst-page.fst-page .fst-pickup-dialog[open] .fst-pickup-heading > p:nth-child(1) {
-    /* Stepped runs with a delay fill backwards only: they end on the
-       element's own style, never on a step WebKit's rounding stops short of. */
-    animation: fsl-sign 320ms steps(4, jump-end) 180ms backwards;
+  /* The board, as the doors clear it: the name is struck from the left,
+     the line under it rises, the chalk rule draws, and the record's opening
+     calls flap in after it. (nth-child keeps these over the 帰路 sheet's own
+     staggers; a crown's calls, which re-mount on each change, keep that
+     sheet's quicker timing. The sign and the code over the name went:
+     owner, 2026-10-23 — 不要なセカンダリラベルを削除.) */
+  html:not([data-world-effects="economy"]) .fst-page.fst-page .fst-pickup-dialog[open] .fst-pickup-heading > h2:nth-child(1) {
+    /* Delayed runs fill backwards only: they end on the element's own
+       style, never on a step WebKit's rounding stops short of. */
+    animation: fsl-strike 520ms var(--fsl-project) 200ms backwards;
   }
 
-  html:not([data-world-effects="economy"]) .fst-page.fst-page .fst-pickup-dialog[open] .fst-pickup-heading > small:nth-child(2) {
-    animation: fsl-rise 420ms var(--fsl-ease) 220ms both;
-  }
-
-  html:not([data-world-effects="economy"]) .fst-page.fst-page .fst-pickup-dialog[open] .fst-pickup-heading > h2:nth-child(3) {
-    animation: fsl-strike 520ms var(--fsl-project) 240ms backwards;
-  }
-
-  html:not([data-world-effects="economy"]) .fst-page.fst-page .fst-pickup-dialog[open] .fst-pickup-heading > em:nth-child(4) {
-    animation: fsl-rise 420ms var(--fsl-ease) 360ms both;
+  html:not([data-world-effects="economy"]) .fst-page.fst-page .fst-pickup-dialog[open] .fst-pickup-heading > em:nth-child(2) {
+    animation: fsl-rise 420ms var(--fsl-ease) 320ms both;
   }
 
   html:not([data-world-effects="economy"]) .fst-page.fst-page .fst-pickup-dialog[open] .fst-pickup-heading::after {
@@ -1204,17 +1197,6 @@ html .fst-page.fst-page .fst-cast-copy > a:focus-visible::after {
   }
   to {
     opacity: 1;
-  }
-}
-
-@keyframes fsl-sign {
-  from {
-    opacity: 0;
-    transform: perspective(600px) rotateX(-80deg);
-  }
-  to {
-    opacity: 1;
-    transform: none;
   }
 }
 

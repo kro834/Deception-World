@@ -126,7 +126,7 @@ try {
       userAgent:
         "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 Version/26.0 Mobile/15E148 Safari/604.1",
     });
-    for (const route of ["/rexonance-saga", "/extreme-saga", "/final-stage"]) {
+    for (const route of ["/rexonance-saga", "/extreme-saga", "/illusionculum-saga", "/final-stage"]) {
       // Wait for hydration: the select handlers are attached by React.
       await page.goto(base + route, { waitUntil: "networkidle" });
       await page.waitForFunction(
@@ -181,7 +181,7 @@ try {
       );
     }
     if (width === 320 || width === 390) {
-      for (const route of ["/rexonance-saga", "/extreme-saga", "/final-stage"]) {
+      for (const route of ["/rexonance-saga", "/extreme-saga", "/illusionculum-saga", "/final-stage"]) {
         await checkTextEnlargement(route, width);
       }
     }

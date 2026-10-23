@@ -1,38 +1,43 @@
-type RexonanceForm = "standard" | "max" | "ultra";
+/* The page's editorial furniture: the chapter map under the hero and the
+   hero's two doors. Static markup only: real anchors, no listeners.
+
+   Owner (2026-10-23): 「不要なセカンダリラベルや説明を避ける。レイアウトに
+   説明させるようにUIリライトして。」 The map is five numbered doors — the
+   numeral and the chapter's name, as the bar numbers them. Its CONTENTS
+   heading, count and codes went; each door's line on the chapter is read
+   to assistive tech only (it names where the link leads). The form status
+   beside the stage rail went too (the tabs and the panel carry the choice).
+   The labels and lines keep this four-space form: the Mincho subsets are
+   cut from them (scripts/rexonance-type-copy.mjs). */
 
 const CHAPTERS = [
   {
     href: "#performance",
     number: "01",
-    code: "PERFORMANCE",
     label: "性能",
     detail: "標準カタログ値の比較",
   },
   {
     href: "#p14",
     number: "02",
-    code: "P14",
     label: "演算基盤",
     detail: "第14世代の演算基盤",
   },
   {
     href: "#assembly",
     number: "03",
-    code: "SUIT-UP",
     label: "変身",
     detail: "スクロールで装甲が形成される",
   },
   {
     href: "#stages",
     number: "04",
-    code: "3 STAGES",
     label: "三つの形態",
     detail: "レクソナンス／マックス／ウルトラ",
   },
   {
     href: "#system",
     number: "05",
-    code: "SELF-RESONANCE",
     label: "共鳴構造",
     detail: "悠真自身の自己共鳴構造",
   },
@@ -42,16 +47,11 @@ const CHAPTERS = [
 export function RexonanceChapterMap() {
   return (
     <nav className="rxs-chapter-index rxe-chapter-map" aria-label="レクソナンスの見どころ">
-      <p className="rxe-chapter-map-heading">
-        <span lang="en">CONTENTS</span>
-        <small>01 — 05</small>
-      </p>
       {CHAPTERS.map((chapter) => (
         <a key={chapter.href} href={chapter.href}>
           <b aria-hidden="true">{chapter.number}</b>
-          <small lang="en">{chapter.code}</small>
           <span>{chapter.label}</span>
-          <em>{chapter.detail}</em>
+          <em className="visually-hidden">{chapter.detail}</em>
           <i aria-hidden="true">↗</i>
         </a>
       ))}
@@ -70,46 +70,6 @@ export function RexonanceHeroRail() {
         <span>三つの形態を見る</span>
         <i aria-hidden="true">↗</i>
       </a>
-    </div>
-  );
-}
-
-/** Read-only context beside the existing form tabs; the tablist owns input. */
-export function RexonanceFormStatus({
-  stage,
-  label,
-  code,
-  purpose,
-  accent,
-}: {
-  stage: RexonanceForm;
-  label: string;
-  code: string;
-  purpose: string;
-  accent: string;
-}) {
-  const index = stage === "standard" ? 1 : stage === "max" ? 2 : 3;
-  return (
-    <div
-      className="rxe-form-status"
-      data-stage={stage}
-      style={{ ["--rxs-stage-accent" as string]: accent }}
-    >
-      <div className="rxe-form-status-heading">
-        <span lang="en">FORM SEQUENCE</span>
-        <span>{String(index).padStart(2, "0")} / 03</span>
-      </div>
-      <div className="rxe-form-status-track" aria-hidden="true">
-        <i className={index >= 1 ? "is-reached" : ""} />
-        <i className={index >= 2 ? "is-reached" : ""} />
-        <i className={index >= 3 ? "is-reached" : ""} />
-      </div>
-      <p>
-        <span>選択中の形態</span>
-        <strong>{label}</strong>
-        <small lang="en">{code}</small>
-        <em>{purpose}</em>
-      </p>
     </div>
   );
 }

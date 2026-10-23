@@ -48,11 +48,15 @@ test("FAR FROM special site has a route, menu entry, warmup asset, and dedicated
   );
 });
 
-test("the side menu lists FAR FROM under SPECIAL after Rexonance, and its chapters by the shared registry", () => {
+// Owner (2026-10-23): 「イリュージョンクルムとこれ（メタ・ウニタス）はファーフロムと
+// レクソナンスの間で、ファーフロムはサイドメニューの中でもやや大きく表示」 —
+// FAR FROM leads SPECIAL now, a little larger (styles-stage-shell.css).
+test("the side menu lists FAR FROM first under SPECIAL, and its chapters by the shared registry", () => {
   const special = menu.slice(menu.indexOf("<p>SPECIAL</p>"), menu.indexOf("<p>STORIES</p>"));
   const rexonance = special.indexOf('<DisplayName value="レクソナンスサーガ" />');
   const farFrom = special.indexOf('<DisplayName value="ファーフロムサーガ" />');
-  assert.ok(rexonance >= 0 && farFrom > rexonance);
+  assert.ok(farFrom >= 0 && rexonance > farFrom);
+  assert.equal(special.indexOf("<DisplayName value="), farFrom);
   assert.match(sections, /"far-from": "\/far-from-saga"/);
   assert.match(sections, /"far-from": "ファーフロムサーガ"/);
   // The chapters' sections: on the page, or in its suit-up component.
@@ -318,25 +322,24 @@ test("the page follows the Rexonance structure: numbered bar, split hero, CONTEN
   assert.match(bar, /href="#overview" data-local-nav-through="specs performance report"/);
   assert.match(bar, /href="#theories" data-local-nav-through="system authority arsenal finishers"/);
   assert.match(bar, /data-local-nav-through="far-from-assembly-runway"/);
-  // The hero: the key visual in its stage (slate, aperture, read-outs from
-  // the spec table), the copy with its two doors, the name's ghost, the cue.
+  // The hero: the key visual in its stage (the aperture and the figure), the
+  // copy with its two doors, the name's ghost, the cue.
+  // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）: the key visual's slate and read-outs, the hero's eyebrow and the
+  // Latin duplicate of the name went; the cue is its line (its words read to assistive tech only).
   const hero = component.slice(
     component.indexOf('<section className="rxs-hero ffs-hero"'),
     component.indexOf("<FarFromChapterMap />"),
   );
   for (const piece of [
-    "<FarFromStageSlate />",
     "<FarFromAperture />",
-    "<FarFromCallouts />",
     "<FarFromHeroRail />",
     'className="ffs-mark" aria-hidden="true"',
-    '<a className="rxs-scroll-cue" href="#overview">',
-    // The stage line breaks only after its 「／」 (withSlashBreaks: each unit
-    // up to its slash is one unbreakable run; keep-all alone let a line
-    // open with 「／」).
+    '<a className="rxs-scroll-cue" href="#overview">\n          <span className="visually-hidden">まず、概要から。</span>',
     '<span className="ffs-phrase">{withSlashBreaks(FAR_FROM_SAGA.stagesLine)}</span>',
   ])
     assert.ok(hero.includes(piece), piece);
+  for (const gone of ["<FarFromStageSlate", "<FarFromCallouts", "SPECIAL SITE", "5 STAGES", "FAR_FROM_SAGA.en"])
+    assert.ok(!hero.includes(gone), gone);
   const phrase = read("src/components/far-from-saga/far-from-phrase.tsx");
   assert.match(phrase, /export function withSlashBreaks\(text: string\): ReactNode\[\]/);
   assert.match(phrase, /className="ffs-phrase-unit"/);
@@ -344,18 +347,12 @@ test("the page follows the Rexonance structure: numbered bar, split hero, CONTEN
   // The calls' chips break after a 「！」 alone (FAR FROM！ never splits at its space).
   assert.match(phrase, /export function withCallBreaks\(call: string\): ReactNode\[\]/);
   assert.match(component, /<b key=\{`\$\{call\}-\$\{index\}`\} role="listitem">\s*\{withCallBreaks\(call\)\}/);
-  assert.match(editorial, /<em>\{withSlashBreaks\(chapter\.detail\)\}<\/em>/);
+  // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）: the map's doors carry no detail line.
   assert.match(component, /<h3 className="ffs-phrase">\{withSlashBreaks\(item\.title\)\}<\/h3>/);
   assert.match(styles, /\.ffs-page \.ffs-phrase-unit \{\s*white-space: nowrap;\s*\}/);
-  assert.doesNotMatch(styles, /word-break: keep-all;\s*overflow-wrap: anywhere;/);
-  // The 5 STAGES tag alone is a chip; the names after it stay plain text.
-  assert.match(styles, /\.ffs-stages-line > span\[lang="en"\] \{/);
-  assert.doesNotMatch(styles, /\.ffs-stages-line > span \{/);
   assert.match(editorial, /<a className="ffs-hero-primary" href="#suitup">/);
   assert.match(editorial, /<a className="ffs-hero-secondary" href="#stages">/);
-  // The read-outs are the owner's spec values, never typed in.
-  assert.match(editorial, /spec\("パンチ力"\)/);
-  assert.match(editorial, /spec\("ジャンプ力"\)/);
+  // No figure is typed into the furniture: the record holds them.
   assert.doesNotMatch(editorial, /405\.5|8000m/);
   // CONTENTS: five chapters, numbered 01–05 (Owner (2026-10-23): the Rexonance
   // structure), each a real anchor on the page, in the registry's order; the
@@ -382,7 +379,9 @@ test("the page follows the Rexonance structure: numbered bar, split hero, CONTEN
   for (const hash of ["specs", "performance", "report", "system", "authority", "arsenal", "finishers"])
     assert.match(component, new RegExp(`id="${hash}"\\s+className="[^"]*ffs-subchapter`), hash);
   assert.match(editorial, /<nav className="rxs-chapter-index ffs-chapter-map"/);
-  assert.match(editorial, /<span lang="en">CONTENTS<\/span>\s*<small>01 — 05<\/small>/);
+  // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）: the map is five numbered doors (no CONTENTS heading or count, no codes or descriptions).
+  assert.doesNotMatch(editorial.replace(/\/\*[\s\S]*?\*\//g, ""), /CONTENTS|01 — 05|code:|detail:/);
+  assert.match(editorial, /<b aria-hidden="true">\{chapter\.number\}<\/b>\s*<span>\{chapter\.label\}<\/span>/);
   // The chapters count themselves (a CSS counter over the page's direct
   // sections), so the mounted chapters' own kickers stay as they are; the
   // report is 03's second half and does not count.
@@ -410,21 +409,16 @@ test("the page follows the Rexonance structure: numbered bar, split hero, CONTEN
     "<footer",
   ].map((mark) => component.indexOf(mark.startsWith("<") ? mark : `id="${mark}"`));
   assert.ok(order.every((at, i) => at > 0 && (i === 0 || at > order[i - 1])), "chapter order");
-  // Owner (2026-10-23): the Rexonance site's five chapters; the chapter heads
-  // carry its index. The kickers name the chapter (its CONTENTS code) and,
-  // for a sub-chapter, its section after a slash: the number stands in the
-  // forged numeral and the index alone (polish sweep, 2026-10-23: it stood
-  // three times in a head).
-  for (const mark of ["OVERVIEW", "OVERVIEW / SPECS", "OVERVIEW / PERFORMANCE", "OVERVIEW / REPORT", "PROCESSING CORE / P16"])
-    assert.ok(component.includes(`<p lang="en">${mark}</p>`), mark);
-  assert.doesNotMatch(component, /<p(?: lang="en")?>\d\d \/ [A-Z]/);
-  assert.equal((component.match(/className="ffs-index" aria-hidden="true"/g) || []).length, 4);
-  // The stage chapter: the form-sequence status and the five-form drawer
-  // beside the liquid rail, the outlined form code behind the copy.
-  assert.match(component, /<FarFromFormStatus stage=\{stage\} \/>/);
+  // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）: the heads are the numeral and the catchphrase —
+  // no "0N / CODE" kicker, no "0N / 05" index.
+  assert.doesNotMatch(component, /<p>0\d \/ [A-Z]/);
+  assert.doesNotMatch(component, /ffs-index/);
+  // The stage chapter: the five-form drawer beside the liquid rail, the
+  // outlined form code behind the copy (the form status went: the rail and
+  // the panel carry the choice).
+  assert.doesNotMatch(component, /FarFromFormStatus|FORM SEQUENCE|選択中の形態/);
   assert.match(component, /<FarFromFormComparison selected=\{stage\} onChoose=\{selectStage\} \/>/);
   assert.match(component, /<i className="ffs-form-code" aria-hidden="true">/);
-  assert.match(editorial, /FAR_FROM_SAGA_STAGE_ORDER\.indexOf\(stage\) \+ 1/);
   assert.match(formComparison, /<details className="ffs-form-comparison"/);
   assert.match(formComparison, /\{open \? \(/, "closed, the drawer creates no image request");
   assert.match(formComparison, /aria-controls="ffs-stage-panel"/);
@@ -434,7 +428,8 @@ test("the page follows the Rexonance structure: numbered bar, split hero, CONTEN
   const footer = component.slice(component.lastIndexOf("<footer"));
   assert.match(footer, /className="ffs-end-figure"[^]*?loading="lazy"/);
   assert.ok(footer.indexOf('className="ffs-footer-top"') < footer.indexOf("<div>"));
-  assert.match(footer, /<p lang="en">FAR FROM SAGA \/ FINAL STAGE<\/p>/);
+  // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）: the end card's eyebrow went; the last line leads it.
+  assert.doesNotMatch(footer, /FAR FROM SAGA \/ FINAL STAGE/);
   assert.equal((footer.match(/<GuardedLink/g) || []).length, 3);
 });
 
@@ -604,7 +599,11 @@ test("#report shows both documents as accessible disclosure panels", () => {
   const block = section("report", "p16");
   assert.match(block, /<FarFromReport \/>/);
   // Owner (2026-10-23): chapter headings are catchphrases (「韋駄天？遅過ぎる」 and the like).
-  assert.match(block, /<h2 id="ffs-report-title">差は、桁で見せる。<\/h2>/);
+  // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）: the catchphrase now
+  // carries break marks between its phrases (<wbr>); its text is unchanged.
+  const title = block.match(/<h2 id="ffs-report-title">([^]*?)<\/h2>/);
+  assert.ok(title, "the report's catchphrase heads it");
+  assert.equal(title[1].replace(/<wbr \/>/g, ""), "差は、桁で見せる。");
   // Native <details>/<summary>: keyboard, screen readers and find-in-page.
   assert.match(reportView, /<details\s+id=\{chapter\.id\}/);
   assert.match(reportView, /<summary>/);
@@ -754,24 +753,11 @@ test("ウルトラ is one of #suitup's forms: the selector after the runway pick
   const suitup = component.indexOf("<FarFromSuitUp stage={stage} onChoose={chooseQuietly} />");
   const stages = component.indexOf('id="stages"');
   assert.ok(suitup > 0 && stages > suitup, "suitup, then stages");
-  // Owner (2026-10-23): the Rexonance site's five chapters. Each head's
-  // kicker is its chapter's CONTENTS code (a sub-chapter's: the chapter's,
-  // a slash, its own); the chapter's number is the numeral's and the index's.
-  assert.match(suitupSource, /<p lang="en">SUIT-UP<\/p>/);
-  for (const mark of [
-    "OVERVIEW",
-    "OVERVIEW / SPECS",
-    "OVERVIEW / PERFORMANCE",
-    "OVERVIEW / REPORT",
-    "PROCESSING CORE / P16",
-    "FIVE STAGES",
-    "SYSTEM",
-    "SYSTEM / ARMOR & OS",
-    "SYSTEM / ABILITY", // Owner (2026-10-23): 神属権限 → 能力
-    "SYSTEM / WEAPONS",
-    "SYSTEM / FINISHER",
-  ])
-    assert.ok(component.includes(`<p lang="en">${mark}</p>`), mark);
+  // Owner (2026-10-23): numbered as the Rexonance site's five chapters (the
+  // bar's numbers and the heads' outlined numerals).
+  // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）: no "0N / CODE" kickers on the heads.
+  for (const source of [component, suitupSource])
+    assert.doesNotMatch(source, /<p>0\d \/ [A-Z]/);
   // The selector comes right after the runway, as a tablist over the five forms.
   const runwayAt = suitupSource.indexOf('id="far-from-assembly-runway"');
   const selectorAt = suitupSource.indexOf('role="tablist"');
@@ -1775,7 +1761,8 @@ test("the five forms are named in katakana only wherever the page's own labels n
     component,
     /<i className="ffs-form-code" aria-hidden="true">\s*\{activeStage\.label\}/,
   );
-  assert.match(editorial, /ミドル <span lang="en">\/ STANDARD<\/span>/);
+  // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）: the key visual's slate (ミドル / STANDARD) went.
+  assert.doesNotMatch(editorial, /STANDARD/);
   assert.match(suitupSource, /<span>\{FAR_FROM_SAGA\.stages\[key\]\.label\}<\/span>\n\s*<\/button>/);
   assert.match(ultraArt, /\{ phase: "max", step: "01", label: "マックス" \}/);
   // /final-stage's Far From selector (its tabs and the panel) prints the katakana only.
@@ -1965,7 +1952,8 @@ test("加速機構 reads the canon everywhere: P2 / P14 Standard / P14 Extreme T
   ])
     assert.doesNotMatch(source, /Extreme tuning|設定案|P16_VS_EXTREME|EXTREME_P14_NAME|先行世代/);
   assert.doesNotMatch(compareStyles, /ffs-p16-strength|ffs-p16-reading|data-unit="extreme"/);
-  assert.match(component, /レクソナンスサーガの『P14 Extreme Tuning』を基礎とした、\s*<span className="ffs-nowrap">第16世代<\/span>演算加速機構です。/);
+  // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）: the P16 head has no lede; the canon reads in P16_INTRO (above).
+  assert.doesNotMatch(component, /『P14』を基礎とした/);
   // The Extreme and Rexonance sites name their units the same way.
   const extremeSite = read("src/components/extreme-saga/extreme-saga.tsx");
   assert.match(extremeSite, /"P14 Standard"/);
@@ -1976,4 +1964,46 @@ test("加速機構 reads the canon everywhere: P2 / P14 Standard / P14 Extreme T
   assert.match(rexonanceSite, /"P14 Standard",/);
   assert.doesNotMatch(rexonanceSite, /Extreme tuning/);
   assert.match(read("src/lib/rexonance-profile.ts"), /『P14 Extreme Tuning』/);
+});
+
+// Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）. The chapter heads are
+// the numeral and the owner's catchphrase alone; the phrase marks (<wbr>) only choose
+// where a line may break, so every catchphrase reads verbatim.
+test("the chapter heads print the owner's catchphrases verbatim, broken only between phrases", () => {
+  const sources =
+    read("src/components/far-from-saga/far-from-saga.tsx") +
+    read("src/components/far-from-saga/far-from-suitup.tsx");
+  const expected = {
+    "ffs-overview-title": "届かない距離は、もう無い。",
+    "ffs-specs-title": "数字が、追いつかない。",
+    "ffs-performance-title": "レクソナンス？通過点だ。",
+    "ffs-report-title": "差は、桁で見せる。",
+    "ffs-p16-title": "韋駄天？遅過ぎる",
+    "ffs-suitup-title": "一瞬で、果てまで纏う。",
+    "ffs-stages-title": "選べ。どこまで遠くへ行くか。",
+    "ffs-theories-title": "離れた力を、一つの拳に。",
+    "ffs-system-title": "鎧も頭脳も、最終版。",
+    "ffs-authority-title": "究極が極まる",
+    "ffs-arsenal-title": "届く場所すべてが、射程。",
+    "ffs-finishers-title": "終幕は、彼方から。",
+  };
+  for (const [id, text] of Object.entries(expected)) {
+    const match = sources.match(new RegExp(`<h2 id="${id}">([^]*?)</h2>`));
+    assert.ok(match, id);
+    assert.equal(match[1].replace(/<wbr \/>/g, ""), text, id);
+  }
+  // Each head holds the title alone (no kicker, no index, no explanatory lede but the
+  // specs' data note).
+  const heads = [...sources.matchAll(/<header className="rxs-section-heading rxs-reveal">([^]*?)<\/header>/g)];
+  assert.equal(heads.length, 12);
+  for (const [, head] of heads) {
+    assert.doesNotMatch(head, /<p>|ffs-index|<small/);
+    const ledes = head.match(/<span>[^]*?<\/span>/g) || [];
+    assert.ok(ledes.length === 0 || /標準稼働時の数値です。/.test(ledes[0]), head);
+  }
+  const sheet = read("src/styles-far-from-saga.css");
+  assert.match(
+    sheet,
+    /> \.rxs-section > \.rxs-section-heading > h2 \{[^}]*word-break: keep-all;[^}]*overflow-wrap: anywhere;/,
+  );
 });

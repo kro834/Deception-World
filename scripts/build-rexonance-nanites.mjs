@@ -41,14 +41,23 @@ const require = createRequire(import.meta.url);
 const sharp = require(process.env.SHARP_MODULE || "sharp");
 
 const ROOT = fileURLToPath(new URL("..", import.meta.url));
-const VERSION = "20261021";
+// 2026-10-23: the suit re-cut by SAM's masks (scripts/build-rexonance-suit.mjs)
+// packs its plates into a new atlas; the guide, in atlas space, is re-packed to
+// it (from GUIDE_FIGURE, below) and the kit gets a new folder, so a cached
+// guide never meets the new atlas. Cells, comets and fx are unchanged.
+const VERSION = "20261023";
 // The kit this one re-renders from: its untouched sheets carry over.
-const PREVIOUS = "20261018";
+const PREVIOUS = "20261021";
 const DIR = `/rexonance-nanites-${VERSION}`;
 const OUT_DIR = join(ROOT, "public", DIR.slice(1));
 const MODULE = join(ROOT, "src/lib/rexonance-nanites.ts");
-const SUIT_DIR = join(ROOT, "public/rexonance-suit-20261016");
 const BLENDER_DIR = join(ROOT, "scripts/blender");
+// The Blender guide of the 2026-10-21 kit laid back onto the figure (figure
+// px, RGBA, lossless): a re-cut suit re-packs it into its own atlas without
+// rendering again (written once by --figure-guide from that kit and the suit
+// it was rendered for).
+const GUIDE_FIGURE = join(ROOT, "design/rexonance-suit/nanite-guide-figure-20261021.webp");
+const FIGURE_GUIDE = process.argv.includes("--figure-guide");
 
 const arg = (name) => {
   const hit = process.argv.find((value) => value.startsWith(`--${name}=`));
@@ -128,6 +137,10 @@ const PIECES = suit.REXONANCE_SUIT_PIECES.filter(
 const ATLAS_W = suit.REXONANCE_SUIT_GOLD_ATLAS.width;
 const ATLAS_H = suit.REXONANCE_SUIT_GOLD_ATLAS.height;
 const GOLD_CELL = suitGold.REXONANCE_SUIT_GOLD_CELL;
+// The suit's folder (its atlases) and the guide's size: the atlas's (the guide
+// is in atlas space).
+const SUIT_DIR = join(ROOT, "public", dirname(suit.REXONANCE_SUIT_GOLD_ATLAS.src));
+SIZE.guide = [ATLAS_W, ATLAS_H];
 
 const hash16 = (path) => createHash("sha256").update(readFileSync(path)).digest("hex").slice(0, 16);
 const SOURCE = {
@@ -283,6 +296,7 @@ const rotateToNearest = (loop, [sx, sy]) => {
 const SEAM_ALPHA = 96;
 const SEAM_EPSILON = 0.9;
 const SEAM_POINTS = 128;
+const SEAM_MIN = 8;
 const SEAM_ISLAND = 40;
 async function buildSeams() {
   const { data, info } = await sharp(join(SUIT_DIR, "plates.webp"))
@@ -313,6 +327,13 @@ async function buildSeams() {
       const total = loops.reduce((sum, loop) => sum + loop.length, 0);
       if (total <= SEAM_POINTS) break;
       epsilon *= 1.1;
+    }
+    // A small, simple plate (a knee's point, 2026-10-23) still gets an outline
+    // of SEAM_MIN points: its first loop is simplified less (the engine runs
+    // its clamps and welds along it).
+    for (let e = epsilon; loops[0].length < SEAM_MIN && e > 0.05; ) {
+      e /= 2;
+      loops[0] = simplifyLoop(anchored[0], e);
     }
     const words = [loops.length];
     for (const loop of loops) {
@@ -945,6 +966,149 @@ async function renderedGuide(mask) {
   return applyMask(flattenGlass(raw), mask);
 }
 
+// --- The guide, re-packed (2026-10-23) ----------------------------------------------------
+// The figure, the suit's frame.
+const FIG_W = suit.REXONANCE_SUIT_SIZE.width;
+const FIG_H = suit.REXONANCE_SUIT_SIZE.height;
+/** A kit's guide (atlas space) laid back onto the figure: each non-driver
+ * plate's conduit cell at its box (the more opaque pixel where boxes overlap). */
+async function figureGuideOf(guidePath) {
+  const { data, info } = await sharp(guidePath).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  if (info.width !== ATLAS_W || info.height !== ATLAS_H) throw new Error(`${guidePath}: not this suit's atlas size`);
+  const fig = Buffer.alloc(FIG_W * FIG_H * 4);
+  for (const { ax, ay, x, y, w, h } of PIECES)
+    for (let j = 0; j < h; j += 1)
+      for (let i = 0; i < w; i += 1) {
+        const s = ((ay + j) * ATLAS_W + ax + i) * 4;
+        const d = ((y + j) * FIG_W + x + i) * 4;
+        if (data[s + 3] > fig[d + 3]) data.copy(fig, d, s, s + 4);
+      }
+  return fig;
+}
+/** The figure-space guide packed into this suit's atlas. A rail the old cut
+ * drew across a trim (its cells were cut there; a rail runs round each cell's
+ * gold) lies deep inside the trim, where a real rail never does: it takes the
+ * channel beside it, as does the new plates' gold the old cells never held
+ * (within a few px); then each cell is clipped to its own gold (the mask). */
+async function repackedGuide(mask, goldAlphaAtlas) {
+  const { data, info } = await sharp(GUIDE_FIGURE).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  if (info.width !== FIG_W || info.height !== FIG_H) throw new Error(`${GUIDE_FIGURE}: not the figure's size`);
+  const fig = Buffer.from(data);
+  const n = FIG_W * FIG_H;
+  // The trims, in figure space, from this suit's gold atlas.
+  const gold = new Uint8Array(n);
+  for (const { ax, ay, x, y, w, h } of PIECES)
+    for (let j = 0; j < h; j += 1)
+      for (let i = 0; i < w; i += 1) {
+        const a = goldAlphaAtlas[(ay + j) * ATLAS_W + ax + i];
+        const d = (y + j) * FIG_W + x + i;
+        if (a > gold[d]) gold[d] = a;
+      }
+  // Depth inside the trims (a two-pass chamfer distance, px).
+  const depth = new Float32Array(n);
+  for (let i = 0; i < n; i += 1) depth[i] = gold[i] > 32 ? 1e6 : 0;
+  const pass = (y0, y1, dy, x0, x1, dx) => {
+    for (let y = y0; y !== y1; y += dy)
+      for (let x = x0; x !== x1; x += dx) {
+        const i = y * FIG_W + x;
+        if (!depth[i]) continue;
+        let best = depth[i];
+        for (const [ox, oy, c] of [[-dx, 0, 1], [0, -dy, 1], [-dx, -dy, 1.414], [dx, -dy, 1.414]]) {
+          const nx = x + ox;
+          const ny = y + oy;
+          const v = nx < 0 || ny < 0 || nx >= FIG_W || ny >= FIG_H ? 0 : depth[ny * FIG_W + nx];
+          if (v + c < best) best = v + c;
+        }
+        depth[i] = best;
+      }
+  };
+  pass(0, FIG_H, 1, 0, FIG_W, 1);
+  pass(FIG_H - 1, -1, -1, FIG_W - 1, -1, -1);
+  const rail = (i) => fig[i * 4 + 3] > 0 && fig[i * 4] > fig[i * 4 + 2] + 25;
+  // A breadth-first fill from the good conduit into the cut rails and the
+  // trims without conduit, at most REACH px.
+  const REACH = 6;
+  const want = new Uint8Array(n);
+  const queue = new Int32Array(n);
+  const steps = new Uint8Array(n);
+  let head = 0;
+  let tail = 0;
+  let cut = 0;
+  let bare = 0;
+  for (let i = 0; i < n; i += 1) {
+    if (fig[i * 4 + 3] && !rail(i) && depth[i] >= 2) {
+      queue[tail++] = i;
+      continue;
+    }
+    if (rail(i) && depth[i] >= 2.5) {
+      want[i] = 1;
+      cut += 1;
+    } else if (!fig[i * 4 + 3] && gold[i] > 32) {
+      want[i] = 1;
+      bare += 1;
+    }
+  }
+  while (head < tail) {
+    const i = queue[head++];
+    if (steps[i] >= REACH) continue;
+    const x = i % FIG_W;
+    for (const j of [x > 0 ? i - 1 : -1, x < FIG_W - 1 ? i + 1 : -1, i - FIG_W, i + FIG_W]) {
+      if (j < 0 || j >= n || !want[j]) continue;
+      want[j] = 0;
+      fig.copy(fig, j * 4, i * 4, i * 4 + 4);
+      steps[j] = steps[i] + 1;
+      queue[tail++] = j;
+    }
+  }
+  let left = 0;
+  for (let i = 0; i < n; i += 1) if (want[i]) left += 1;
+  console.log(`guide re-packed: ${cut} cut-rail px healed, ${bare} bare gold px filled (${left} beyond reach)`);
+  const raw = Buffer.alloc(ATLAS_W * ATLAS_H * 4);
+  for (const { ax, ay, x, y, w, h } of PIECES)
+    for (let j = 0; j < h; j += 1)
+      fig.copy(raw, ((ay + j) * ATLAS_W + ax) * 4, ((y + j) * FIG_W + x) * 4, ((y + j) * FIG_W + x + w) * 4);
+  applyMask(raw, mask);
+  // Where this suit's cells end the conduit somewhere the render's did not (a
+  // cut across a trim, a clip of the new cell), it ends in a rail, as the
+  // render ends each cell's: lit where it faces the upper left, dark where it
+  // faces away, in the render's own mean rail colours.
+  const openFig = (x, y) => x < 0 || y < 0 || x >= FIG_W || y >= FIG_H || fig[(y * FIG_W + x) * 4 + 3] < 32;
+  const railColour = (facing) => {
+    const sum = [0, 0, 0, 0];
+    let count = 0;
+    for (let y = 0; y < FIG_H; y += 1)
+      for (let x = 0; x < FIG_W; x += 1) {
+        const i = (y * FIG_W + x) * 4;
+        if (fig[i + 3] < 100 || fig[i] <= fig[i + 2]) continue;
+        const ok = facing === "lit" ? openFig(x - 1, y) && openFig(x, y - 1) : openFig(x + 1, y) && openFig(x, y + 1);
+        if (!ok) continue;
+        for (let c = 0; c < 4; c += 1) sum[c] += fig[i + c];
+        count += 1;
+      }
+    return sum.map((v) => Math.round(v / Math.max(1, count)));
+  };
+  const lit = railColour("lit");
+  const dark = railColour("dark");
+  let rails = 0;
+  for (const { ax, ay, x, y, w, h } of PIECES) {
+    const openCell = (i, j) =>
+      i < 0 || j < 0 || i >= w || j >= h || raw[((ay + j) * ATLAS_W + ax + i) * 4 + 3] < 32;
+    const edits = [];
+    for (let j = 0; j < h; j += 1)
+      for (let i = 0; i < w; i += 1) {
+        const a = (ay + j) * ATLAS_W + ax + i;
+        if (raw[a * 4 + 3] < 32) continue;
+        const towardLight = (openCell(i - 1, j) && !openFig(x + i - 1, y + j)) || (openCell(i, j - 1) && !openFig(x + i, y + j - 1));
+        const away = (openCell(i + 1, j) && !openFig(x + i + 1, y + j)) || (openCell(i, j + 1) && !openFig(x + i, y + j + 1));
+        if (towardLight || away) edits.push([a, towardLight ? lit : dark]);
+      }
+    for (const [a, colour] of edits) raw.set(colour, a * 4);
+    rails += edits.length;
+  }
+  console.log(`guide: ${rails} rail px drawn where this suit's cells end the conduit`);
+  return raw;
+}
+
 // --- Placeholders (phase 0) ---------------------------------------------------------------
 // Flat script renders of the exact sizes: hex silhouettes, L shapes and
 // ellipses, the guide traced from the gold alpha.
@@ -1288,6 +1452,16 @@ mkdirSync(WORK, { recursive: true });
 const sparks = await sparkCells();
 const alpha = await goldAlpha();
 const mask = guideMask(alpha);
+if (FIGURE_GUIDE) {
+  // Only from the kit and the suit it was rendered for.
+  const kit = await importTs("src/lib/rexonance-nanites.ts");
+  if (JSON.stringify(kit.REXONANCE_NANITE_SOURCE) !== JSON.stringify(SOURCE))
+    throw new Error("the committed kit was not built from this suit: --figure-guide needs both as they were");
+  const fig = await figureGuideOf(join(ROOT, "public", kit.REXONANCE_NANITE_GUIDE.src.slice(1)));
+  await sharp(fig, { raw: { width: FIG_W, height: FIG_H, channels: 4 } }).webp({ lossless: true, effort: 6 }).toFile(GUIDE_FIGURE);
+  console.log(`wrote ${GUIDE_FIGURE} from ${kit.REXONANCE_NANITE_GUIDE.src}`);
+  process.exit(0);
+}
 const encoded = { comets };
 let frames = null;
 let guideRaw = null;
@@ -1322,7 +1496,9 @@ if (PLACEHOLDER) {
     frames = async (name) => ((/^(tumble|unfold|bead)-/.test(name) ? atCells : atFx)(name));
     frames.fx = Boolean(atFx);
     guideRaw = have("guide") ? await renderedGuide(mask) : null;
-  } else if (!HARDWARE) console.log("no renders in the work folder: cells, fx and guide stay as committed");
+  } else if (!HARDWARE) console.log("no renders in the work folder: cells and fx stay as committed");
+  // No guide render: the figure-space guide, packed into this suit's atlas.
+  if (!guideRaw && !HARDWARE && existsSync(GUIDE_FIGURE)) guideRaw = await repackedGuide(mask, alpha);
 }
 if (frames) {
   // Over budget at the contract's settings, the alpha's quality steps down
@@ -1341,8 +1517,10 @@ if (frames) {
       }
     }
   }
-  // The thin machined track adds detail to the guide. Keep its silhouette and
-  // alpha first; trade a little colour precision if the new render is larger.
+}
+// The thin machined track adds detail to the guide. Keep its silhouette and
+// alpha first; trade a little colour precision if the new render is larger.
+{
   const guideLadder = [];
   for (let quality = WEBP.guide.quality; quality >= 48; quality -= 2) guideLadder.push({ ...WEBP.guide, quality, alphaQuality: 65 });
   for (let quality = 62; quality >= 48; quality -= 2) guideLadder.push({ ...WEBP.guide, quality, alphaQuality: 55 });

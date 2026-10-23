@@ -382,9 +382,11 @@ test("on wide screens the form switch stands inside the duel, in markup order, o
   // Geometry only: no motion rides the corners.
   for (const { body } of corner) assert.doesNotMatch(body, /animation|transition/);
   // The markup order the rail, the panel and the tests read is unchanged.
+  // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）: the hint is read
+  // to assistive tech only (visually-hidden); its place in the order stays.
   const order = [
     "ref={stageTabsRef}",
-    'id="exs-stage-hint" className="rxs-stage-hint"',
+    'id="exs-stage-hint" className="rxs-stage-hint visually-hidden"',
     'id="exs-stage-panel"',
   ].map((needle) => component.indexOf(needle));
   assert.ok(order[0] > 0 && order[0] < order[1] && order[1] < order[2], String(order));
@@ -521,7 +523,10 @@ test("both stage-tab names and codes fit on one line at 320px", () => {
   // The same pin covers all phone widths; 390px exposed the identical wrap.
   const narrow = css.slice(css.indexOf("@media (max-width: 560px)"));
   assert.match(narrow, /\.exs-stage-tabs\s*>\s*button\[role="tab"\]\s*>\s*small\s*\{[^}]*white-space:\s*nowrap;/);
-  assert.match(component, /<span>\{EXTREME_STAGES\[key\]\.label\}<\/span>[\s\S]*?<small>\{EXTREME_STAGES\[key\]\.code\}<\/small>/);
+  // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）: a tab holds its
+  // form's name alone (the English code under it went).
+  assert.match(component, /<span>\{EXTREME_STAGES\[key\]\.label\}<\/span>\s*<\/button>/);
+  assert.doesNotMatch(component, /<small>\{EXTREME_STAGES\[key\]\.code\}<\/small>/);
 });
 
 // The later editorial reset must not undo the already pinned wide composition.

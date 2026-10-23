@@ -1,0 +1,1821 @@
+/* ================================================================
+   ILLUSIONCULUM SAGA — the special site's own sheet (2026-10-23)
+
+   /illusionculum-saga stands beside /far-from-saga and /rexonance-saga on
+   the shared special-site grammar (styles-rexonance-saga.css and the
+   showcase sheets: the local bar, the hero frame, the stage rail, the
+   footer). This sheet is the page's composition, palette and motion, from
+   the owner's art: 漆黒の金属 (the page's black and its metal), 黄金の骨格
+   (the numerals, the hairlines' joints, the sigil), 青白い結晶 (the ice
+   light), 群青 (the ground's depth), 桃色と紫色の虹彩状光路 (the projections),
+   and 深紅 for ウルトラ, reached slowly.
+
+   The page's one idea is ILLUSIONCULUM: what is seen and what is real stand
+   apart, then meet. The figures carry it — the hero's two projections
+   resolve into the figure once, the chapter titles arrive as two displaced
+   images that close into one, the forms panel's picture lands the same
+   way, and the two リアクター・モア deploy from above the shoulders. No
+   label explains it; the layout does (owner, 2026-10-23).
+
+   Motion: every entrance plays once, gated by prefers-reduced-motion:
+   no-preference, html:not([data-world-effects="economy"]) and the page's
+   data-motion-ready (armed after paint, never on a saving connection or
+   forced colours); the calm tiers rest fully drawn. No loop, no flash:
+   the largest change of light is the ウルトラ crimson, a 1.6 s ramp.
+   Every rule is scoped to .ics-page.
+   ================================================================ */
+
+@font-face {
+  font-family: "Rexonance Forge";
+  font-style: normal;
+  font-weight: 300 800;
+  font-stretch: 125%;
+  font-display: swap;
+  src: url("/fonts/rexonance-forge-20261016.woff2") format("woff2");
+  unicode-range:
+    U+0020-007E, U+00A0-00FF, U+2010-2027, U+2030-205E, U+2190-21FF, U+2200-22FF, U+2500-257F;
+}
+
+@property --ics-split {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+
+/* ---------- Tokens ---------- */
+.rxs-page.rxs-page.ics-page {
+  --ics-ink: #02030a;
+  --ics-ink-2: #060812;
+  --ics-metal: #12141e;
+  --ics-metal-2: #1b1e2b;
+  --ics-gold: #e9b866;
+  --ics-gold-hi: #ffe1a3;
+  --ics-gold-deep: #a8742c;
+  --ics-ice: #a6e6ff;
+  --ics-ice-hi: #e6f8ff;
+  --ics-ultramarine: #2f4fd8;
+  --ics-ultramarine-deep: #101c5c;
+  --ics-pink: #ff8fd2;
+  --ics-violet: #a983ff;
+  --ics-crimson: #b81f3a;
+  --ics-crimson-hi: #ff6b80;
+  --ics-iris: linear-gradient(
+    90deg,
+    var(--ics-ice),
+    var(--ics-violet) 42%,
+    var(--ics-pink) 74%,
+    var(--ics-gold-hi)
+  );
+  --ics-line: rgb(233 184 102 / 22%);
+  --ics-line-ice: rgb(166 230 255 / 16%);
+  --ics-line-soft: rgb(255 255 255 / 8%);
+  /* Text on the page's black: 18.9:1, 13.4:1, 8.1:1. */
+  --ics-text-1: #f5f7fc;
+  --ics-text-2: #d3daea;
+  --ics-text-3: #a4adc4;
+  --ics-accent: var(--ics-ice);
+  --ics-wrap: 1180px;
+  --ics-gutter: max(20px, calc((100vw - var(--ics-wrap)) / 2));
+  --ics-display:
+    "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic", system-ui, sans-serif;
+  --ics-forge: "Rexonance Forge", "Oxanium", var(--ics-display);
+  --ics-hud: "Oxanium", "Rexonance Forge", var(--ics-display);
+  --ics-text:
+    -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP",
+    "Yu Gothic", system-ui, sans-serif;
+  --rxs-cyan: var(--ics-ice);
+  --rxs-pink: var(--ics-pink);
+  --rxs-gold: var(--ics-gold);
+  --sc-accent: var(--ics-ice);
+  --rxs-font-text: var(--ics-text);
+  --rxs-font-display: var(--ics-display);
+  --mx-progress-from: var(--ics-ice);
+  --mx-progress-to: var(--ics-pink);
+
+  color: var(--ics-text-1);
+  background:
+    radial-gradient(120% 60rem at 50% -10rem, rgb(47 79 216 / 20%), transparent 70%), var(--ics-ink);
+  font-feature-settings:
+    "palt" 1,
+    "kern" 1;
+  line-break: strict;
+}
+
+/* The ウルトラ crimson: the page's ground warms slowly when ウルトラ is
+   chosen (never a flash — a 1.6 s ramp of a dim tint). */
+.rxs-page.rxs-page.ics-page::before {
+  position: fixed;
+  z-index: -1;
+  inset: 0;
+  content: "";
+  background: radial-gradient(90% 70% at 50% 40%, rgb(184 31 58 / 14%), transparent 72%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 1600ms cubic-bezier(0.3, 0, 0.2, 1);
+}
+
+.rxs-page.rxs-page.ics-page[data-ultra="true"]::before {
+  opacity: 1;
+}
+
+.ics-page .ics-sr {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+  clip: rect(0 0 0 0) !important;
+  clip-path: inset(50%) !important;
+  white-space: nowrap !important;
+  margin: -1px !important;
+  padding: 0 !important;
+  border: 0 !important;
+}
+
+/* ---------- Local bar ---------- */
+.rxs-page.rxs-page.ics-page .rxs-local-nav {
+  border-bottom-color: rgb(233 184 102 / 16%);
+  background: rgb(3 4 12 / 82%);
+}
+
+.rxs-page.rxs-page.ics-page .rxs-brand span {
+  background: var(--ics-iris);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  font-family: var(--ics-forge);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+}
+
+.rxs-page.rxs-page.ics-page .rxs-local-nav nav a > span {
+  margin-inline-end: 6px;
+  color: var(--ics-gold);
+  font-family: var(--ics-forge);
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.rxs-page.rxs-page.ics-page .rxs-local-nav nav a[aria-current="location"] {
+  color: var(--ics-text-1);
+}
+
+.rxs-page.rxs-page.ics-page .rxs-local-nav nav a[aria-current="location"] > span {
+  text-shadow: 0 0 10px rgb(233 184 102 / 50%);
+}
+
+.ics-page .rxs-hero-copy,
+.ics-page .rxs-section-heading {
+  touch-action: pan-y;
+}
+
+.ics-page .rxs-hero h1,
+.ics-page .rxs-section-heading h2 {
+  touch-action: pan-y;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* ================================================================
+   Hero
+   ================================================================ */
+.rxs-page.rxs-page.ics-page .ics-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+  grid-template-areas: "copy visual";
+  gap: clamp(16px, 3vw, 48px);
+  align-items: center;
+  place-items: center stretch;
+  min-height: max(720px, calc(100svh - 62px));
+  padding: clamp(40px, 6vw, 84px) var(--ics-gutter) clamp(48px, 6vw, 80px);
+  overflow: clip;
+  background:
+    radial-gradient(60rem 38rem at 72% 34%, rgb(47 79 216 / 26%), transparent 70%),
+    radial-gradient(30rem 22rem at 64% 22%, rgb(233 184 102 / 10%), transparent 70%),
+    radial-gradient(40rem 30rem at 12% 80%, rgb(169 131 255 / 10%), transparent 70%),
+    linear-gradient(180deg, #03040c, #04061a 52%, var(--ics-ink));
+}
+
+/* A field of stars: two fixed layers of points (no motion). */
+.rxs-page.rxs-page.ics-page .ics-hero .rxs-hero-ambient {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.rxs-page.rxs-page.ics-page .ics-hero .rxs-hero-ambient i {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: auto;
+  height: auto;
+  border-radius: 0;
+  filter: none;
+  opacity: 0.7;
+  animation: none;
+  background-image:
+    radial-gradient(1px 1px at 12% 18%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 28% 64%, #cfe6ff 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 46% 12%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 62% 82%, #ffd9f1 50%, transparent 51%),
+    radial-gradient(1px 1px at 78% 30%, #fff 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 90% 58%, #cfe6ff 50%, transparent 51%),
+    radial-gradient(1px 1px at 6% 88%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 38% 40%, #e8dcff 50%, transparent 51%);
+  background-size: 420px 360px;
+}
+
+.rxs-page.rxs-page.ics-page .ics-hero .rxs-hero-ambient i:nth-child(2) {
+  opacity: 0.45;
+  background-size: 290px 250px;
+  background-position: 130px 70px;
+}
+
+.rxs-page.rxs-page.ics-page .ics-hero .rxs-hero-ambient i:nth-child(3) {
+  opacity: 0.25;
+  background-size: 610px 520px;
+  background-position: 40px 210px;
+}
+
+.rxs-page.rxs-page.ics-page .ics-hero .rxs-hero-copy {
+  grid-area: copy;
+  z-index: 3;
+  width: 100%;
+  max-width: 560px;
+  justify-self: end;
+  text-align: start;
+}
+
+.rxs-page.rxs-page.ics-page .ics-hero .rxs-hero-copy::before {
+  inset: -40px -60px -40px -40px;
+  opacity: 0.6;
+}
+
+.rxs-page.rxs-page.ics-page .ics-hero h1 {
+  display: grid;
+  gap: 18px;
+  margin: 0;
+  color: var(--ics-text-1);
+  background: none;
+  -webkit-text-fill-color: currentColor;
+  font-family: var(--ics-display);
+  font-size: inherit;
+  font-weight: 800;
+  letter-spacing: 0;
+  line-height: 1.1;
+  text-shadow: 0 2px 24px #000;
+}
+
+.rxs-page.rxs-page.ics-page .ics-hero h1 > span {
+  display: block;
+  margin: 0;
+  background: none;
+  filter: none;
+  -webkit-text-fill-color: currentColor;
+  letter-spacing: 0.02em;
+  word-break: keep-all;
+}
+
+.rxs-page.rxs-page.ics-page .ics-hero .ics-title-name {
+  color: var(--ics-text-1);
+  font-weight: 800;
+  font-size: clamp(34px, 4.2vw, 62px);
+  line-height: 1.12;
+}
+
+.rxs-page.rxs-page.ics-page .ics-hero .ics-title-prefix {
+  display: block;
+  margin: 0 0 0.5em;
+  background: none;
+  filter: none;
+  color: var(--ics-gold-hi);
+  -webkit-text-fill-color: currentColor;
+  font-size: 0.42em;
+  letter-spacing: 0.32em;
+}
+
+.rxs-page.rxs-page.ics-page .ics-hero .ics-title-ultra {
+  padding-top: 16px;
+  border-top: 1px solid var(--ics-line);
+  color: var(--ics-text-2);
+  font-size: clamp(16px, 1.5vw, 21px);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  line-height: 1.5;
+}
+
+.rxs-page.rxs-page.ics-page :is(.ics-hero, .ics-footer) .ics-ultra-word {
+  display: inline;
+  margin: 0;
+  background: none;
+  filter: none;
+  color: var(--ics-crimson-hi);
+  -webkit-text-fill-color: currentColor;
+  font-size: inherit;
+  letter-spacing: inherit;
+}
+
+/* The calls: a numbered sequence of chips (order is the call's own). */
+.rxs-page.rxs-page.ics-page .ics-calls {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: ics-call;
+}
+
+.rxs-page.rxs-page.ics-page .ics-calls > li {
+  position: relative;
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  align-items: center;
+  min-height: 44px;
+  counter-increment: ics-call;
+}
+
+.rxs-page.rxs-page.ics-page .ics-calls > li::before {
+  content: counter(ics-call, decimal-leading-zero);
+  color: var(--ics-gold);
+  font-family: var(--ics-forge);
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.rxs-page.rxs-page.ics-page .ics-calls b {
+  justify-self: start;
+  padding: 9px 14px 8px;
+  border: 1px solid var(--ics-line-ice);
+  border-radius: 2px;
+  background:
+    linear-gradient(90deg, rgb(166 230 255 / 10%), rgb(169 131 255 / 6%) 60%, transparent),
+    rgb(6 8 20 / 72%);
+  color: var(--ics-ice-hi);
+  font-family: var(--ics-forge);
+  font-size: clamp(13px, 1.05vw, 15px);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+  box-shadow: inset 2px 0 0 var(--ics-ice);
+}
+
+.rxs-page.rxs-page.ics-page .ics-hero-calls {
+  margin-top: clamp(28px, 4vw, 44px);
+}
+
+/* The name's ghost (decorative): outlined, behind the copy. */
+.rxs-page.rxs-page.ics-page .ics-mark {
+  position: absolute;
+  z-index: -1;
+  top: -0.6em;
+  left: -0.08em;
+  color: transparent;
+  font-family: var(--ics-forge);
+  font-size: clamp(56px, 9vw, 150px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  white-space: nowrap;
+  -webkit-text-stroke: 1px rgb(166 230 255 / 14%);
+  pointer-events: none;
+}
+
+/* The stage: the sigil (the art's gold circle), the real figure and its
+   projections, the orbs. */
+.rxs-page.rxs-page.ics-page .ics-hero-visual {
+  position: relative;
+  grid-area: visual;
+  right: auto;
+  bottom: auto;
+  z-index: 2;
+  width: min(100%, 640px);
+  aspect-ratio: 2 / 3;
+  max-height: calc(100svh - 120px);
+  min-height: 560px;
+  justify-self: center;
+  translate: none;
+  scale: none;
+  pointer-events: none;
+}
+
+.rxs-page.rxs-page.ics-page .ics-hero-visual::after {
+  display: none;
+}
+
+.rxs-page.rxs-page.ics-page .ics-sigil {
+  position: absolute;
+  top: -4%;
+  left: 50%;
+  width: 92%;
+  translate: -50% 0;
+  fill: none;
+  stroke: rgb(233 184 102 / 32%);
+  stroke-width: 0.8;
+  filter: drop-shadow(0 0 10px rgb(233 184 102 / 30%));
+}
+
+.rxs-page.rxs-page.ics-page .ics-hero-frame {
+  position: absolute;
+  inset: 0;
+  margin-inline: auto;
+  aspect-ratio: 2 / 3;
+  height: 100%;
+  max-width: 100%;
+}
+
+.rxs-page.rxs-page.ics-page .ics-hero-figure {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: 50% 0;
+  filter: drop-shadow(0 30px 60px rgb(0 0 0 / 70%));
+  mask-image: none;
+}
+
+/* A projection: the figure's own silhouette as flat, scanned light. */
+.rxs-page.rxs-page.ics-page :is(.ics-hero-ghost, .ics-projection-ghost) {
+  position: absolute;
+  inset: 0;
+  display: block;
+  background:
+    repeating-linear-gradient(0deg, rgb(255 255 255 / 24%) 0 1px, transparent 1px 4px),
+    linear-gradient(
+      180deg,
+      var(--ics-ghost-a, var(--ics-pink)),
+      var(--ics-ghost-b, var(--ics-violet))
+    );
+  opacity: 0;
+  mask: var(--ics-cutout) 50% 0 / contain no-repeat;
+  -webkit-mask: var(--ics-cutout) 50% 0 / contain no-repeat;
+  mix-blend-mode: screen;
+}
+
+.rxs-page.rxs-page.ics-page .ics-hero-ghost.is-b {
+  --ics-ghost-a: var(--ics-ice);
+  --ics-ghost-b: var(--ics-ultramarine);
+}
+
+/* The two リアクター・モア, seated where the owner's art holds them. */
+.rxs-page.rxs-page.ics-page .ics-orbs {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.rxs-page.rxs-page.ics-page .ics-orb {
+  position: absolute;
+  left: var(--ics-orb-x);
+  top: var(--ics-orb-y);
+  width: var(--ics-orb-d);
+  aspect-ratio: 1;
+  translate: -50% -50%;
+}
+
+.rxs-page.rxs-page.ics-page .ics-orb img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.rxs-page.rxs-page.ics-page .ics-orb-core {
+  position: absolute;
+  inset: 32%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgb(230 248 255 / 70%), rgb(166 230 255 / 0) 70%);
+  opacity: 0;
+}
+
+.rxs-page.rxs-page.ics-page .ics-orb-trail {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  opacity: 0;
+}
+
+.rxs-page.rxs-page.ics-page .ics-scroll-cue {
+  position: absolute;
+  bottom: 22px;
+  left: 50%;
+  z-index: 4;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  translate: -50% 0;
+  contain: layout;
+  border: 1px solid var(--ics-line);
+  border-radius: 50%;
+  background: rgb(3 4 12 / 60%);
+}
+
+.rxs-page.rxs-page.ics-page .ics-scroll-cue > span {
+  display: none;
+}
+
+.rxs-page.rxs-page.ics-page .ics-scroll-cue i {
+  display: block;
+  width: 10px;
+  height: 10px;
+  margin-top: -4px;
+  border-right: 1.5px solid var(--ics-gold);
+  border-bottom: 1.5px solid var(--ics-gold);
+  rotate: 45deg;
+  background: none;
+  animation: none;
+}
+
+.rxs-page.rxs-page.ics-page .ics-scroll-cue:focus-visible,
+.rxs-page.rxs-page.ics-page a:focus-visible,
+.rxs-page.rxs-page.ics-page button:focus-visible {
+  outline: 2px solid var(--ics-ice);
+  outline-offset: 3px;
+}
+
+/* ================================================================
+   Chapters
+   ================================================================ */
+.rxs-page.rxs-page.ics-page .ics-chapter {
+  padding: clamp(84px, 10vw, 150px) var(--ics-gutter);
+}
+
+.rxs-page.rxs-page.ics-page .ics-subchapter {
+  padding-top: clamp(28px, 4vw, 60px);
+}
+
+.rxs-page.rxs-page.ics-page .ics-chapter + .ics-chapter:not(.ics-subchapter)::before {
+  position: absolute;
+  top: 0;
+  left: var(--ics-gutter);
+  right: var(--ics-gutter);
+  height: 1px;
+  content: "";
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--ics-line) 12%,
+    rgb(166 230 255 / 22%) 50%,
+    var(--ics-line) 88%,
+    transparent
+  );
+}
+
+/* The head: the outlined numeral, the owner's title beside it. */
+.rxs-page.rxs-page.ics-page .ics-heading {
+  display: flex;
+  gap: clamp(14px, 2.4vw, 28px);
+  align-items: flex-end;
+  max-width: none;
+  margin: 0 0 clamp(36px, 5vw, 64px);
+  text-align: start;
+}
+
+.rxs-page.rxs-page.ics-page .ics-numeral {
+  flex: none;
+  color: transparent;
+  font-family: var(--ics-forge);
+  font-size: clamp(64px, 9vw, 132px);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums lining-nums;
+  letter-spacing: -0.04em;
+  line-height: 0.78;
+  -webkit-text-stroke: 1.2px var(--ics-gold);
+  text-shadow: 0 0 30px rgb(233 184 102 / 18%);
+}
+
+.rxs-page.rxs-page.ics-page .ics-heading h2 {
+  --ics-split: 0;
+  margin: 0;
+  padding-bottom: 0.08em;
+  color: var(--ics-text-1);
+  font-family: var(--ics-display);
+  font-size: clamp(30px, 4.6vw, 64px);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 1.12;
+  text-shadow:
+    calc(var(--ics-split) * 0.18em) 0 0 rgb(255 143 210 / calc(var(--ics-split) * 0.6)),
+    calc(var(--ics-split) * -0.14em) 0 0 rgb(47 79 216 / calc(var(--ics-split) * 0.8)),
+    0 2px 20px rgb(0 0 0 / 60%);
+  word-break: keep-all;
+}
+
+.rxs-page.rxs-page.ics-page .ics-subchapter .ics-heading h2 {
+  font-size: clamp(24px, 3vw, 40px);
+}
+
+/* ---------- 01 概要 ---------- */
+.rxs-page.rxs-page.ics-page .ics-prose p {
+  max-width: 40em;
+  margin: 0 0 1.4em;
+  color: var(--ics-text-2);
+  font-size: clamp(15px, 1.05vw, 16.5px);
+  line-height: 2.05;
+  letter-spacing: 0.02em;
+  text-wrap: pretty;
+}
+
+.rxs-page.rxs-page.ics-page .ics-prose p:last-child {
+  margin-bottom: 0;
+}
+
+.rxs-page.rxs-page.ics-page .ics-overview-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-areas:
+    "lead figure"
+    "rest figure";
+  gap: clamp(28px, 4vw, 64px) clamp(32px, 5vw, 80px);
+  align-items: start;
+}
+
+.rxs-page.rxs-page.ics-page .ics-overview-body > .ics-lead {
+  grid-area: lead;
+}
+
+.rxs-page.rxs-page.ics-page .ics-overview-body > .ics-projection {
+  grid-area: figure;
+  position: sticky;
+  top: 96px;
+}
+
+.rxs-page.rxs-page.ics-page .ics-overview-body > .ics-prose:not(.ics-lead) {
+  grid-area: rest;
+}
+
+.rxs-page.rxs-page.ics-page .ics-lead p:first-child {
+  color: var(--ics-text-1);
+  font-size: clamp(17px, 1.35vw, 20px);
+  font-weight: 600;
+  line-height: 1.95;
+}
+
+/* The projection figure: three projections where they are seen, the real
+   figure apart, and the two orbs holding the connection. */
+.rxs-page.rxs-page.ics-page .ics-projection {
+  position: relative;
+  margin: 0;
+  aspect-ratio: 1000 / 760;
+  border: 1px solid var(--ics-line-soft);
+  background:
+    radial-gradient(70% 70% at 72% 52%, rgb(47 79 216 / 24%), transparent 72%),
+    linear-gradient(rgb(166 230 255 / 5%) 1px, transparent 1px) 0 0 / 100% 40px,
+    linear-gradient(90deg, rgb(166 230 255 / 5%) 1px, transparent 1px) 0 0 / 40px 100%,
+    var(--ics-ink-2);
+  overflow: hidden;
+}
+
+.rxs-page.rxs-page.ics-page .ics-projection::before,
+.rxs-page.rxs-page.ics-page .ics-projection::after {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  content: "";
+  border-color: var(--ics-gold);
+  border-style: solid;
+}
+
+.rxs-page.rxs-page.ics-page .ics-projection::before {
+  top: 8px;
+  left: 8px;
+  border-width: 1px 0 0 1px;
+}
+
+.rxs-page.rxs-page.ics-page .ics-projection::after {
+  right: 8px;
+  bottom: 8px;
+  border-width: 0 1px 1px 0;
+}
+
+.rxs-page.rxs-page.ics-page .ics-projection-paths {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: rgb(166 230 255 / 40%);
+  stroke-width: 1.2;
+  stroke-dasharray: 5 7;
+}
+
+.rxs-page.rxs-page.ics-page .ics-projection-ghost {
+  inset: 8% auto 0 auto;
+  width: 30%;
+  opacity: 0.62;
+}
+
+.rxs-page.rxs-page.ics-page .ics-projection-ghost.is-a {
+  left: 2%;
+}
+
+.rxs-page.rxs-page.ics-page .ics-projection-ghost.is-b {
+  left: 18%;
+  --ics-ghost-a: var(--ics-violet);
+  --ics-ghost-b: var(--ics-ultramarine);
+  opacity: 0.46;
+}
+
+.rxs-page.rxs-page.ics-page .ics-projection-ghost.is-c {
+  left: 34%;
+  --ics-ghost-a: var(--ics-ice);
+  --ics-ghost-b: var(--ics-violet);
+  opacity: 0.32;
+}
+
+.rxs-page.rxs-page.ics-page .ics-projection-real {
+  position: absolute;
+  top: 6%;
+  right: 4%;
+  width: 34%;
+  height: auto;
+  filter: drop-shadow(0 18px 30px rgb(0 0 0 / 70%));
+}
+
+.rxs-page.rxs-page.ics-page .ics-projection-orb {
+  position: absolute;
+  width: 10%;
+  height: auto;
+}
+
+.rxs-page.rxs-page.ics-page .ics-projection-orb.is-left {
+  top: 22%;
+  left: 85%;
+}
+
+.rxs-page.rxs-page.ics-page .ics-projection-orb.is-right {
+  top: 56%;
+  left: 86%;
+}
+
+/* ---------- 01 スペック ---------- */
+.rxs-page.rxs-page.ics-page .ics-specs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-auto-flow: row dense;
+  gap: 1px;
+  margin: 0;
+  border: 1px solid var(--ics-line);
+  background: var(--ics-line);
+}
+
+.rxs-page.rxs-page.ics-page .ics-specs > div {
+  position: relative;
+  display: grid;
+  align-content: space-between;
+  gap: 18px;
+  min-height: 132px;
+  padding: 20px 22px;
+  background: linear-gradient(160deg, var(--ics-metal), var(--ics-ink-2) 70%);
+}
+
+.rxs-page.rxs-page.ics-page .ics-specs > div[data-wide] {
+  grid-column: span 2;
+}
+
+.rxs-page.rxs-page.ics-page .ics-specs > div::after {
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  width: 10px;
+  height: 10px;
+  content: "";
+  border-top: 1px solid var(--ics-gold);
+  border-left: 1px solid var(--ics-gold);
+}
+
+.rxs-page.rxs-page.ics-page .ics-specs dt {
+  color: var(--ics-text-3);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+}
+
+.rxs-page.rxs-page.ics-page .ics-specs dd {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+}
+
+.rxs-page.rxs-page.ics-page .ics-specs dd > b {
+  color: var(--ics-text-1);
+  font-family: var(--ics-forge);
+  font-size: clamp(20px, 2.1vw, 30px);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums lining-nums;
+  overflow-wrap: anywhere;
+}
+
+.rxs-page.rxs-page.ics-page .ics-spec-sub {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.rxs-page.rxs-page.ics-page .ics-spec-sub > span {
+  padding: 4px 8px;
+  border: 1px solid var(--ics-line-ice);
+  color: var(--ics-ice);
+  font-family: var(--ics-hud);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+}
+
+/* ---------- 01 性能比較 ---------- */
+.rxs-page.rxs-page.ics-page .ics-comparison .ics-heading {
+  display: grid;
+  gap: 12px;
+  justify-items: start;
+}
+
+.rxs-page.rxs-page.ics-page .ics-partners {
+  margin: 0;
+  color: var(--ics-text-3);
+  font-family: var(--ics-hud);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-shadow: none;
+}
+
+.rxs-page.rxs-page.ics-page .ics-tables {
+  display: grid;
+  gap: clamp(36px, 5vw, 56px);
+}
+
+.rxs-page.rxs-page.ics-page .ics-table-block h3,
+.rxs-page.rxs-page.ics-page .ics-evaluation h3 {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin: 0 0 16px;
+  color: var(--ics-text-1);
+  font-size: clamp(17px, 1.5vw, 21px);
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.rxs-page.rxs-page.ics-page .ics-table-block h3::before,
+.rxs-page.rxs-page.ics-page .ics-evaluation h3::before {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  content: "";
+  border: 1px solid var(--ics-gold);
+  rotate: 45deg;
+}
+
+.rxs-page.rxs-page.ics-page .ics-table-scroll {
+  overflow-x: auto;
+  border: 1px solid var(--ics-line);
+  background: rgb(6 8 18 / 70%);
+  overscroll-behavior-x: contain;
+}
+
+.rxs-page.rxs-page.ics-page .ics-table {
+  width: 100%;
+  min-width: 560px;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.rxs-page.rxs-page.ics-page .ics-table th,
+.rxs-page.rxs-page.ics-page .ics-table td {
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--ics-line-soft);
+  text-align: start;
+  vertical-align: middle;
+}
+
+.rxs-page.rxs-page.ics-page .ics-table thead th {
+  color: var(--ics-text-3);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+  background: rgb(255 255 255 / 3%);
+}
+
+.rxs-page.rxs-page.ics-page .ics-table :is(thead th:first-child, tbody th) {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background-color: #070914;
+}
+
+.rxs-page.rxs-page.ics-page .ics-table tbody th {
+  color: var(--ics-text-2);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.rxs-page.rxs-page.ics-page .ics-table td {
+  min-width: 108px;
+  color: var(--ics-text-2);
+  font-family: var(--ics-forge);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.rxs-page.rxs-page.ics-page .ics-table td > i {
+  display: block;
+  height: 2px;
+  margin-top: 8px;
+  background: linear-gradient(
+    90deg,
+    var(--ics-bar-a, rgb(166 230 255 / 50%)),
+    var(--ics-bar-b, rgb(169 131 255 / 30%))
+  );
+  transform: scaleX(var(--ics-bar));
+  transform-origin: 0 50%;
+}
+
+.rxs-page.rxs-page.ics-page .ics-table tr[data-self] th,
+.rxs-page.rxs-page.ics-page .ics-table tr[data-self] td {
+  color: var(--ics-text-1);
+  background: linear-gradient(90deg, rgb(47 79 216 / 22%), rgb(47 79 216 / 6%)), #070914;
+}
+
+.rxs-page.rxs-page.ics-page .ics-table tr[data-self] th {
+  box-shadow: inset 3px 0 0 var(--ics-ice);
+}
+
+.rxs-page.rxs-page.ics-page .ics-table tr[data-self] td > i {
+  --ics-bar-a: var(--ics-ice);
+  --ics-bar-b: var(--ics-pink);
+  height: 3px;
+}
+
+.rxs-page.rxs-page.ics-page .ics-table tr[data-ultra] th,
+.rxs-page.rxs-page.ics-page .ics-table tr[data-ultra] td {
+  background: linear-gradient(90deg, rgb(184 31 58 / 22%), rgb(184 31 58 / 6%)), #070914;
+}
+
+.rxs-page.rxs-page.ics-page .ics-table tr[data-ultra] th {
+  box-shadow: inset 3px 0 0 var(--ics-crimson-hi);
+}
+
+.rxs-page.rxs-page.ics-page .ics-table tr[data-ultra] td > i {
+  --ics-bar-a: var(--ics-crimson-hi);
+  --ics-bar-b: var(--ics-gold);
+}
+
+.rxs-page.rxs-page.ics-page .ics-note {
+  max-width: 56em;
+  margin: 12px 0 0;
+  color: var(--ics-text-3);
+  font-size: 13px;
+  line-height: 1.85;
+}
+
+.rxs-page.rxs-page.ics-page .ics-evaluations {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(28px, 4vw, 56px) clamp(28px, 5vw, 72px);
+  margin-top: clamp(48px, 6vw, 80px);
+}
+
+.rxs-page.rxs-page.ics-page .ics-evaluation {
+  padding-top: 22px;
+  border-top: 1px solid var(--ics-line);
+}
+
+.rxs-page.rxs-page.ics-page .ics-evaluation p {
+  margin: 0 0 1.2em;
+  color: var(--ics-text-2);
+  font-size: 15px;
+  line-height: 2;
+  letter-spacing: 0.02em;
+  text-wrap: pretty;
+}
+
+/* ---------- 03 形態 ---------- */
+.rxs-page.rxs-page.ics-page .ics-form-switcher {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: clamp(24px, 3vw, 40px) clamp(18px, 3vw, 40px);
+  align-items: center;
+}
+
+.rxs-page.rxs-page.ics-page .ics-form-switcher > .ics-heading {
+  margin: 0;
+}
+
+.rxs-page.rxs-page.ics-page .ics-form-switcher > .ics-form-panel {
+  grid-column: 1 / -1;
+}
+
+.rxs-page.rxs-page.ics-page .ics-form-tabs {
+  --liquid-accent: var(--ics-ice);
+  width: min(100%, 860px);
+  margin: 0;
+}
+
+.rxs-page.rxs-page.ics-page .ics-form-tabs > button {
+  min-height: 52px;
+  padding-inline: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1.3;
+  word-break: keep-all;
+}
+
+.rxs-page.rxs-page.ics-page .ics-form-tabs > button > span {
+  text-wrap: balance;
+}
+
+.rxs-page.rxs-page.ics-page .ics-form-panel {
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  gap: clamp(28px, 5vw, 80px);
+  align-items: center;
+}
+
+.rxs-page.rxs-page.ics-page .ics-form-panel > figure {
+  position: relative;
+  margin: 0;
+  aspect-ratio: 2 / 3;
+  justify-self: center;
+  width: min(100%, 580px, calc((100svh - 140px) * 2 / 3));
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--ics-accent) 30%, transparent);
+  background: var(--ics-ink-2);
+  transition: border-color 1600ms ease;
+}
+
+.rxs-page.rxs-page.ics-page .ics-form-panel > figure img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.rxs-page.rxs-page.ics-page .ics-form-ghost {
+  opacity: 0;
+  mix-blend-mode: screen;
+  filter: hue-rotate(40deg) saturate(1.4);
+}
+
+.rxs-page.rxs-page.ics-page .ics-form-scan {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    transparent 0 48%,
+    rgb(230 248 255 / 0%) 50%,
+    transparent 52%
+  );
+  opacity: 0;
+}
+
+.rxs-page.rxs-page.ics-page .ics-form-panel > figure::after {
+  position: absolute;
+  inset: 10px;
+  content: "";
+  border: 1px solid rgb(255 255 255 / 10%);
+  pointer-events: none;
+  clip-path: polygon(
+    0 0,
+    18px 0,
+    18px 1px,
+    1px 1px,
+    1px 18px,
+    0 18px,
+    0 100%,
+    18px 100%,
+    18px calc(100% - 1px),
+    1px calc(100% - 1px),
+    1px calc(100% - 18px),
+    0 calc(100% - 18px),
+    0 0,
+    100% 0,
+    calc(100% - 18px) 0,
+    calc(100% - 18px) 1px,
+    calc(100% - 1px) 1px,
+    calc(100% - 1px) 18px,
+    100% 18px,
+    100% 100%,
+    calc(100% - 18px) 100%,
+    calc(100% - 18px) calc(100% - 1px),
+    calc(100% - 1px) calc(100% - 1px),
+    calc(100% - 1px) calc(100% - 18px),
+    100% calc(100% - 18px)
+  );
+}
+
+.rxs-page.rxs-page.ics-page .ics-form-copy {
+  display: grid;
+  gap: 18px;
+  align-content: center;
+}
+
+.rxs-page.rxs-page.ics-page .ics-form-copy h3 {
+  margin: 0;
+  padding-bottom: 18px;
+  border-bottom: 1px solid color-mix(in srgb, var(--ics-accent) 40%, transparent);
+  color: var(--ics-text-1);
+  font-size: clamp(24px, 2.6vw, 38px);
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  line-height: 1.3;
+  word-break: keep-all;
+  transition: border-color 1600ms ease;
+}
+
+.rxs-page.rxs-page.ics-page .ics-form-with {
+  margin: -6px 0 0;
+  color: var(--ics-accent);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  transition: color 1600ms ease;
+}
+
+.rxs-page.rxs-page.ics-page .ics-form-copy p:not(.ics-form-with) {
+  margin: 0;
+  color: var(--ics-text-2);
+  font-size: 15.5px;
+  line-height: 2;
+  text-wrap: pretty;
+}
+
+/* ---------- 04–06 the record's articles ---------- */
+.rxs-page.rxs-page.ics-page .ics-articles {
+  display: grid;
+  gap: clamp(28px, 4vw, 48px);
+}
+
+.rxs-page.rxs-page.ics-page .ics-article {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(24px, 4vw, 56px);
+  padding: clamp(24px, 3.4vw, 44px);
+  border: 1px solid var(--ics-line-soft);
+  background:
+    linear-gradient(160deg, rgb(255 255 255 / 3%), transparent 40%),
+    linear-gradient(180deg, var(--ics-metal), var(--ics-ink-2));
+}
+
+.rxs-page.rxs-page.ics-page .ics-article.has-detail {
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  align-items: start;
+}
+
+.rxs-page.rxs-page.ics-page .ics-article.has-detail:nth-child(even) {
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+}
+
+.rxs-page.rxs-page.ics-page .ics-article.has-detail:nth-child(even) .ics-detail {
+  order: 2;
+}
+
+.rxs-page.rxs-page.ics-page .ics-detail {
+  position: sticky;
+  top: 96px;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid var(--ics-line);
+}
+
+.rxs-page.rxs-page.ics-page .ics-detail img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.rxs-page.rxs-page.ics-page .ics-detail > i {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 60%, rgb(2 3 10 / 60%));
+}
+
+.rxs-page.rxs-page.ics-page .ics-article-copy h3 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  margin: 0 0 22px;
+  color: var(--ics-text-1);
+  font-size: clamp(21px, 2.2vw, 30px);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 1.35;
+}
+
+.rxs-page.rxs-page.ics-page .ics-article-copy h3[lang="en"] {
+  font-family: var(--ics-forge);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+
+.rxs-page.rxs-page.ics-page .ics-article-copy h3 > i {
+  color: var(--ics-gold);
+  font-family: var(--ics-display);
+  font-style: normal;
+  font-weight: 400;
+}
+
+.rxs-page.rxs-page.ics-page .ics-article-copy p {
+  max-width: 42em;
+  margin: 0 0 1.25em;
+  color: var(--ics-text-2);
+  font-size: clamp(15px, 1.02vw, 16px);
+  line-height: 2.05;
+  letter-spacing: 0.02em;
+  text-wrap: pretty;
+}
+
+.rxs-page.rxs-page.ics-page .ics-article-copy p:last-child {
+  margin-bottom: 0;
+}
+
+/* 能力: the two abilities side by side on wide screens. */
+@media (min-width: 1100px) {
+  .rxs-page.rxs-page.ics-page .ics-abilities .ics-articles {
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr);
+    align-items: start;
+  }
+
+  .rxs-page.rxs-page.ics-page .ics-abilities .ics-article:last-child {
+    position: sticky;
+    top: 96px;
+  }
+}
+
+.rxs-page.rxs-page.ics-page .ics-abilities .ics-article:first-child {
+  border-color: rgb(255 143 210 / 18%);
+  background:
+    radial-gradient(60% 40% at 0% 0%, rgb(169 131 255 / 14%), transparent 70%),
+    linear-gradient(180deg, var(--ics-metal), var(--ics-ink-2));
+}
+
+/* ---------- 06 必殺技 ---------- */
+.rxs-page.rxs-page.ics-page .ics-finisher-list {
+  display: grid;
+  gap: clamp(28px, 4vw, 48px);
+}
+
+.rxs-page.rxs-page.ics-page .ics-finisher {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  grid-template-rows: auto 1fr;
+  grid-template-areas:
+    "name prose"
+    "calls prose";
+  gap: 20px clamp(28px, 5vw, 72px);
+  align-content: start;
+  padding: clamp(24px, 3.4vw, 44px);
+  border: 1px solid var(--ics-line-soft);
+  border-left: 2px solid var(--ics-gold);
+  background: linear-gradient(90deg, rgb(233 184 102 / 6%), transparent 40%), var(--ics-ink-2);
+}
+
+.rxs-page.rxs-page.ics-page .ics-finisher[data-rank="3"] {
+  border-left-color: var(--ics-pink);
+  background:
+    radial-gradient(50% 80% at 0% 50%, rgb(255 143 210 / 10%), transparent 70%),
+    linear-gradient(90deg, rgb(169 131 255 / 8%), transparent 40%), var(--ics-ink-2);
+}
+
+.rxs-page.rxs-page.ics-page .ics-finisher h3 {
+  grid-area: name;
+  margin: 0;
+  color: var(--ics-text-1);
+  font-size: clamp(22px, 2.4vw, 32px);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 1.35;
+  word-break: keep-all;
+}
+
+.rxs-page.rxs-page.ics-page .ics-finisher .ics-calls {
+  grid-area: calls;
+  align-self: start;
+}
+
+.rxs-page.rxs-page.ics-page .ics-finisher .ics-prose {
+  grid-area: prose;
+}
+
+.rxs-page.rxs-page.ics-page .ics-finisher .ics-prose p {
+  font-size: 15px;
+}
+
+/* ---------- End card ---------- */
+.rxs-page.rxs-page.ics-page .ics-footer {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-content: flex-end;
+  align-items: center;
+  min-height: clamp(560px, 78vh, 820px);
+  padding: clamp(72px, 8vw, 120px) calc(var(--ics-gutter) + min(40vw, 500px)) clamp(56px, 6vw, 88px)
+    var(--ics-gutter);
+  overflow: hidden;
+  border-top-color: var(--ics-line);
+  background:
+    radial-gradient(46% 70% at 82% 46%, rgb(184 31 58 / 18%), transparent 70%),
+    radial-gradient(50% 60% at 10% 100%, rgb(47 79 216 / 16%), transparent 70%), var(--ics-ink);
+}
+
+.rxs-page.rxs-page.ics-page .ics-end-figure {
+  position: absolute;
+  z-index: 0;
+  top: 40px;
+  right: var(--ics-gutter);
+  bottom: 0;
+  width: min(40vw, 500px);
+  height: calc(100% - 40px);
+  object-fit: contain;
+  object-position: 50% 100%;
+  pointer-events: none;
+  mask-image: linear-gradient(180deg, #000 70%, transparent 100%);
+}
+
+.rxs-page.rxs-page.ics-page .ics-footer > :not(img) {
+  position: relative;
+  z-index: 1;
+}
+
+.rxs-page.rxs-page.ics-page .ics-footer > div {
+  flex: 1 0 100%;
+  margin-bottom: 18px;
+}
+
+.rxs-page.rxs-page.ics-page .ics-footer h2 {
+  max-width: 620px;
+  margin: 0;
+  color: var(--ics-text-1);
+  font-size: clamp(26px, 3.4vw, 46px);
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  line-height: 1.3;
+  word-break: keep-all;
+  text-shadow: 0 2px 24px #000;
+}
+
+.rxs-page.rxs-page.ics-page .ics-footer > a {
+  min-width: 0;
+  min-height: 48px;
+  border-color: rgb(233 184 102 / 30%);
+  background: rgb(3 4 12 / 78%);
+  color: var(--ics-text-1);
+  font-size: 13px;
+}
+
+.rxs-page.rxs-page.ics-page .ics-footer > a.rxs-footer-return {
+  color: var(--ics-text-2);
+}
+
+.rxs-page.rxs-page.ics-page .ics-footer > a i {
+  color: var(--ics-gold);
+}
+
+.rxs-page.rxs-page.ics-page .ics-footer-top {
+  flex: 1 0 100%;
+  margin: 0 0 clamp(28px, 6vh, 64px);
+}
+
+.rxs-page.rxs-page.ics-page .ics-footer-top a {
+  display: inline-flex;
+  gap: 10px;
+  align-items: center;
+  min-height: 44px;
+  color: var(--ics-text-3);
+  font-size: 13px;
+}
+
+/* ================================================================
+   Narrow screens
+   ================================================================ */
+@media (max-width: 1099px) {
+  .rxs-page.rxs-page.ics-page .ics-specs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .rxs-page.rxs-page.ics-page .ics-evaluations {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .rxs-page.rxs-page.ics-page .ics-finisher {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: none;
+    grid-template-areas:
+      "name"
+      "calls"
+      "prose";
+  }
+}
+
+@media (max-width: 900px) {
+  .rxs-page.rxs-page.ics-page .ics-hero {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "visual"
+      "copy";
+    gap: 8px;
+    min-height: 0;
+    padding-top: 12px;
+    padding-bottom: 104px;
+  }
+
+  .rxs-page.rxs-page.ics-page .ics-hero-visual {
+    width: min(100%, 520px);
+    min-height: 0;
+    max-height: none;
+  }
+
+  .rxs-page.rxs-page.ics-page .ics-hero .rxs-hero-copy {
+    justify-self: stretch;
+    max-width: 620px;
+    margin-inline: auto;
+    margin-top: -36px;
+  }
+
+  .rxs-page.rxs-page.ics-page .ics-hero-figure {
+    mask-image: linear-gradient(180deg, #000 82%, transparent 99%);
+  }
+
+  .rxs-page.rxs-page.ics-page .ics-overview-body {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "lead"
+      "figure"
+      "rest";
+  }
+
+  .rxs-page.rxs-page.ics-page .ics-overview-body > .ics-projection {
+    position: relative;
+    top: auto;
+  }
+
+  .rxs-page.rxs-page.ics-page .ics-form-panel {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .rxs-page.rxs-page.ics-page .ics-form-panel > figure {
+    width: min(100%, 520px);
+  }
+
+  .rxs-page.rxs-page.ics-page .ics-form-switcher {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .rxs-page.rxs-page.ics-page .ics-article.has-detail,
+  .rxs-page.rxs-page.ics-page .ics-article.has-detail:nth-child(even) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .rxs-page.rxs-page.ics-page .ics-article.has-detail:nth-child(even) .ics-detail {
+    order: 0;
+  }
+
+  .rxs-page.rxs-page.ics-page .ics-detail {
+    position: relative;
+    top: auto;
+    max-width: 480px;
+  }
+
+  .rxs-page.rxs-page.ics-page .ics-footer {
+    padding-inline: var(--ics-gutter);
+  }
+
+  .rxs-page.rxs-page.ics-page .ics-footer > a {
+    flex: 1 1 100%;
+  }
+
+  .rxs-page.rxs-page.ics-page .ics-end-figure {
+    right: -10vw;
+    width: min(88vw, 520px);
+    opacity: 0.42;
+  }
+}
+
+@media (max-width: 560px) {
+  .rxs-page.rxs-page.ics-page .ics-specs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .rxs-page.rxs-page.ics-page .ics-specs > div {
+    min-height: 104px;
+    padding: 16px;
+  }
+
+  .rxs-page.rxs-page.ics-page .ics-specs > div[data-wide] {
+    grid-column: 1 / -1;
+  }
+
+  .rxs-page.rxs-page.ics-page .ics-heading {
+    gap: 12px;
+  }
+
+  .rxs-page.rxs-page.ics-page .ics-article {
+    padding: 22px 18px;
+  }
+
+  .rxs-page.rxs-page.ics-page .ics-form-tabs > button {
+    padding-inline: 4px;
+    font-size: 12px;
+    letter-spacing: 0;
+  }
+
+  .rxs-page.rxs-page.ics-page .ics-table th,
+  .rxs-page.rxs-page.ics-page .ics-table td {
+    padding: 11px 12px;
+  }
+
+  .rxs-page.rxs-page.ics-page .ics-mark {
+    display: none;
+  }
+}
+
+/* ================================================================
+   Motion — once, and only where it is allowed
+   ================================================================ */
+@media (prefers-reduced-motion: no-preference) {
+  /* Until the page has decided (a moment after mount), the orbs and the
+     projections that will deploy stay hidden, so nothing pops back. The
+     figure itself is never hidden. */
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.ics-page:not([data-motion-ready])
+    :is(.ics-orb, .ics-hero-ghost) {
+    opacity: 0;
+  }
+
+  /* The hero's projections resolve into the figure once. */
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.ics-page[data-motion-ready="true"]
+    .ics-hero-ghost {
+    animation: ics-ghost-resolve 1800ms cubic-bezier(0.2, 0.7, 0.1, 1) 240ms both;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.ics-page[data-motion-ready="true"]
+    .ics-hero-ghost.is-b {
+    animation-name: ics-ghost-resolve-b;
+    animation-delay: 360ms;
+  }
+
+  /* The orbs deploy from above the shoulders: up out of the shoulder
+     line, then out along an arc to their seats; the reactor lights last. */
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.ics-page[data-motion-ready="true"]
+    .ics-orb {
+    animation: ics-orb-deploy-l 1500ms cubic-bezier(0.25, 0.8, 0.2, 1) 1200ms both;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.ics-page[data-motion-ready="true"]
+    .ics-orb.is-right {
+    animation-name: ics-orb-deploy-r;
+    animation-delay: 1320ms;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.ics-page[data-motion-ready="true"]
+    .ics-orb-core {
+    animation: ics-orb-core 900ms ease-out 2500ms both;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.ics-page[data-motion-ready="true"]
+    .ics-sigil {
+    animation: ics-sigil 2400ms cubic-bezier(0.2, 0.7, 0.1, 1) both;
+  }
+
+  /* The chapter titles: two displaced images that close into one. */
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.ics-page[data-motion-ready="true"]
+    .ics-heading.rxs-reveal {
+    opacity: 1;
+    translate: none;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.ics-page[data-motion-ready="true"]
+    .ics-heading.rxs-reveal
+    h2 {
+    --ics-split: 1;
+    opacity: 0;
+    transition:
+      --ics-split 1100ms cubic-bezier(0.2, 0.7, 0.1, 1) 120ms,
+      opacity 600ms ease 60ms;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.ics-page[data-motion-ready="true"]
+    .ics-heading.rxs-reveal.is-visible
+    h2 {
+    --ics-split: 0;
+    opacity: 1;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.ics-page[data-motion-ready="true"]
+    .ics-heading.rxs-reveal
+    .ics-numeral {
+    opacity: 0;
+    translate: -0.12em 0;
+    transition:
+      opacity 700ms ease,
+      translate 900ms cubic-bezier(0.2, 0.7, 0.1, 1);
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.ics-page[data-motion-ready="true"]
+    .ics-heading.rxs-reveal.is-visible
+    .ics-numeral {
+    opacity: 1;
+    translate: 0 0;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.ics-page[data-motion-ready="true"]
+    .ics-projection.is-visible
+    .ics-projection-ghost {
+    animation: ics-projection-in 1400ms cubic-bezier(0.2, 0.7, 0.1, 1) both;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.ics-page[data-motion-ready="true"]
+    .ics-projection.is-visible
+    .ics-projection-ghost.is-b {
+    animation-delay: 140ms;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.ics-page[data-motion-ready="true"]
+    .ics-projection.is-visible
+    .ics-projection-ghost.is-c {
+    animation-delay: 280ms;
+  }
+
+  /* The forms panel: a switch lands the picture as its projection
+     closes into it; the crimson arrives by colour, slowly. */
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.ics-page[data-motion-ready="true"]
+    .ics-form-panel
+    > figure[data-entrance]
+    .ics-form-ghost {
+    animation: ics-form-ghost 900ms cubic-bezier(0.2, 0.7, 0.1, 1) both;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.ics-page[data-motion-ready="true"]
+    .ics-form-panel
+    > figure[data-entrance]
+    .ics-form-art {
+    animation: ics-form-art 700ms cubic-bezier(0.2, 0.7, 0.1, 1) both;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.ics-page[data-motion-ready="true"]
+    .ics-form-copy {
+    animation: ics-copy-in 600ms ease both;
+  }
+}
+
+@keyframes ics-ghost-resolve {
+  0% {
+    opacity: 0;
+    translate: -9% 1.5%;
+  }
+  30% {
+    opacity: 0.55;
+  }
+  100% {
+    opacity: 0;
+    translate: 0 0;
+  }
+}
+
+@keyframes ics-ghost-resolve-b {
+  0% {
+    opacity: 0;
+    translate: 8% -1%;
+  }
+  30% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 0;
+    translate: 0 0;
+  }
+}
+
+@keyframes ics-orb-deploy-l {
+  0% {
+    opacity: 0;
+    translate: calc(-50% + 140%) calc(-50% + 150%);
+    scale: 0.4;
+  }
+  40% {
+    opacity: 1;
+    translate: calc(-50% + 90%) calc(-50% - 20%);
+    scale: 0.8;
+  }
+  100% {
+    opacity: 1;
+    translate: -50% -50%;
+    scale: 1;
+  }
+}
+
+@keyframes ics-orb-deploy-r {
+  0% {
+    opacity: 0;
+    translate: calc(-50% - 140%) calc(-50% + 150%);
+    scale: 0.4;
+  }
+  40% {
+    opacity: 1;
+    translate: calc(-50% - 90%) calc(-50% - 20%);
+    scale: 0.8;
+  }
+  100% {
+    opacity: 1;
+    translate: -50% -50%;
+    scale: 1;
+  }
+}
+
+@keyframes ics-orb-core {
+  0% {
+    opacity: 0;
+    scale: 0.6;
+  }
+  50% {
+    opacity: 0.85;
+  }
+  100% {
+    opacity: 0;
+    scale: 1.3;
+  }
+}
+
+@keyframes ics-sigil {
+  from {
+    opacity: 0;
+    rotate: -12deg;
+    scale: 0.94;
+  }
+  to {
+    opacity: 1;
+    rotate: 0deg;
+    scale: 1;
+  }
+}
+
+@keyframes ics-projection-in {
+  from {
+    opacity: 0;
+    translate: 24% 0;
+  }
+}
+
+@keyframes ics-form-ghost {
+  0% {
+    opacity: 0.5;
+    translate: 6% 0;
+  }
+  100% {
+    opacity: 0;
+    translate: 0 0;
+  }
+}
+
+@keyframes ics-form-art {
+  from {
+    opacity: 0.2;
+  }
+}
+
+@keyframes ics-copy-in {
+  from {
+    opacity: 0;
+    translate: 0 10px;
+  }
+}
+
+@media (forced-colors: active) {
+  .rxs-page.rxs-page.ics-page :is(.ics-hero-ghost, .ics-projection-ghost, .ics-form-ghost) {
+    display: none;
+  }
+
+  .rxs-page.rxs-page.ics-page .ics-numeral {
+    color: CanvasText;
+    -webkit-text-stroke: 0;
+  }
+}

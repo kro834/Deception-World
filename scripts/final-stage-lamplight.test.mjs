@@ -183,7 +183,10 @@ test("motion is gated, finite or scroll-linked on named timelines, and never loo
         );
     }
   }
-  assert.ok(finite >= 12, String(finite));
+  // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）: the record's sign and
+  // the code under it (two beats) went with their labels; every remaining beat is
+  // still gated and finite (above).
+  assert.ok(finite >= 11, String(finite));
   assert.ok(linked >= 3, String(linked));
 });
 

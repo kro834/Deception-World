@@ -7,7 +7,7 @@ import {
   RexonanceAssemblyGuide,
   RexonanceAssemblyReplay,
 } from "./rexonance-assembly-guide";
-import { RexonanceHeroRail, RexonanceChapterMap, RexonanceFormStatus } from "./rexonance-editorial";
+import { RexonanceHeroRail, RexonanceChapterMap } from "./rexonance-editorial";
 import { scheduleRexonancePageStep } from "@/lib/rexonance-page-step";
 import { RexonanceFormComparison } from "./rexonance-form-comparison";
 import {
@@ -546,7 +546,7 @@ const RexonanceSuitUp = memo(function RexonanceSuitUp({ stage }: { stage: Rexona
           />
           <img
             className="rzn-driver-standin"
-            src="/rexonance-zenith-20261017/driver-standin.webp"
+            src="/rexonance-zenith-20261023/driver-standin.webp"
             alt=""
             width={REXONANCE_SUIT_SIZE.width}
             height={REXONANCE_SUIT_SIZE.height}
@@ -1040,21 +1040,6 @@ const renderPlateTitle = (title: string) =>
     </Fragment>
   ));
 
-// FORGE (rx18): a plate code never starts a line with its slash, and FINAL
-// JUDGMENT stays one phrase. <b>, not <span>: the plate's numeral rules
-// style every span in its header. The text is unchanged.
-const PLATE_CODE_UNITS = /([^\s-]+ \/|FINAL JUDGMENT)/;
-const renderPlateCode = (code: string) =>
-  code.split(PLATE_CODE_UNITS).map((part, index) =>
-    index % 2 === 1 ? (
-      <b key={`${index}-${part}`} className="rxp-nowrap">
-        {part}
-      </b>
-    ) : (
-      <Fragment key={`${index}-${part}`}>{part}</Fragment>
-    ),
-  );
-
 // Keep frequent comparison input updates out of the hero, stage art and effects.
 const P14Comparator = memo(function P14Comparator({
   nativeIOSSelection,
@@ -1067,7 +1052,6 @@ const P14Comparator = memo(function P14Comparator({
     <div className="rxs-p14-comparator rxs-reveal">
       <header>
         <div>
-          <small lang="en">GENERATION COMPARISON</small>
           <h3>P14 / {p14Baseline.toUpperCase()}比</h3>
         </div>
       </header>
@@ -1161,7 +1145,9 @@ const P14Comparator = memo(function P14Comparator({
             />
           </div>
         )}
-        <p id="rxs-p14-baseline-help">
+        {/* The slider's two ends say what it switches; how to move it is
+            for assistive tech (owner, 2026-10-23: no instruction microcopy). */}
+        <p id="rxs-p14-baseline-help" className="visually-hidden">
           {nativeIOSSelection
             ? "100%にする世代を、P1かP2から選べます。"
             : "100%にする世代を、P1かP2へ。スライダー、両端のタップ、矢印キーで切り替えられます。"}
@@ -1214,14 +1200,10 @@ const RexonancePerformance = memo(function RexonancePerformance() {
   const activePerformanceBaseline = PERFORMANCE_BASELINES[performanceBaseline];
   return (
     <section id="performance" className="rxs-performance rxs-section">
+      {/* Owner (2026-10-23): 「不要なセカンダリラベルや説明を避ける。」 The head is
+          the forged numeral and the catchphrase (no kicker, no "0N / 05"
+          index: the bar numbers the chapter); the lede keeps the facts. */}
       <header className="rxs-section-heading rxs-reveal">
-        {/* APEX (rx19): the chapter's index at the head's right (decorative;
-            the forged numeral and the bar carry the chapter). */}
-        <small className="rxa-index" aria-hidden="true">
-          <b>01</b>
-          {"/ 05"}
-        </small>
-        <p lang="en">PERFORMANCE</p>
         <h2>
           これで、
           <br />
@@ -1246,9 +1228,6 @@ const RexonancePerformance = memo(function RexonancePerformance() {
           over it once, and the field rings out from it on the lock. */}
       <div className="rxs-headline-metrics">
         <article className="rxs-reveal">
-          <small lang="en">
-            REACTION / <span className="rxp-nowrap">VS VINCULUM</span>
-          </small>
           <strong data-rsn-count="">
             650<span>%+</span>
             <b className="rsn-count" aria-hidden="true">
@@ -1265,9 +1244,6 @@ const RexonancePerformance = memo(function RexonancePerformance() {
           </span>
         </article>
         <article className="rxs-reveal">
-          <small lang="en">
-            MOBILITY / <span className="rxp-nowrap">VS EXTREME</span>
-          </small>
           <strong data-rsn-count="">
             900<span>%</span>
             <b className="rsn-count" aria-hidden="true">
@@ -1383,7 +1359,6 @@ const RexonancePerformance = memo(function RexonancePerformance() {
           aria-label={`${activePerformanceBaseline.label}とレクソナンスの演算構成比較`}
         >
           <header>
-            <small lang="en">PROCESSING ARCHITECTURE</small>
             <h3>演算は、系統ごとに。</h3>
           </header>
           <div>
@@ -1988,9 +1963,6 @@ export function RexonanceSaga() {
           <i />
         </div>
         <div className="rxs-hero-copy">
-          <p lang="en">
-            THE NEXT GENERATION <span className="rxs-hero-kicker-tail">OF SA-GA</span>
-          </p>
           <h1 id="rxs-title">
             <span lang="en">REXONANCE SAGA</span>
             究極が
@@ -2012,13 +1984,6 @@ export function RexonanceSaga() {
           </span>
         </div>
         <div className="rxs-hero-visual" aria-hidden="true">
-          {/* LAYOUT (2026-10-21): the stage's slate — what the frame holds
-              while the script runs beside it (desktop only; decorative). */}
-          <span className="rxl-stage-slate">
-            <b>01</b>
-            <span lang="en">STANDARD / HIGH</span>
-            <small lang="en">KEY VISUAL</small>
-          </span>
           <RexonanceAperture />
           {/* Three rings settle once onto the aperture's circles (rx2 arrival). */}
           <i className="rxp-ring is-ice" />
@@ -2054,8 +2019,9 @@ export function RexonanceSaga() {
             <i className="rsn-shard" />
             <i className="rsn-shard" />
           </span>
-          {/* ZENITH (rx15): while the stage holds beside 01 and 02, it reads
-              out what the script is saying — a lock-on per beat. */}
+          {/* ZENITH (rx15): while the stage holds beside 01 and 02, it locks
+              onto what the script is saying — the figure alone, a lock-on per
+              beat (owner, 2026-10-23: no captions; the script names them). */}
           <span className="rzn-callouts">
             <span className="rzn-callout is-reaction">
               <span>
@@ -2063,7 +2029,6 @@ export function RexonanceSaga() {
                 <b>
                   650<small>%+</small>
                 </b>
-                <em>REACTION</em>
               </span>
             </span>
             <span className="rzn-callout is-mobility">
@@ -2072,20 +2037,20 @@ export function RexonanceSaga() {
                 <b>
                   900<small>%</small>
                 </b>
-                <em>MOBILITY</em>
               </span>
             </span>
             <span className="rzn-callout is-core">
               <span>
                 <i />
                 <b>P14</b>
-                <em>PROCESSING CORE</em>
               </span>
             </span>
           </span>
         </div>
+        {/* The cue is its line: the way down; its words name it for
+            assistive tech only (owner, 2026-10-23: no instruction on screen). */}
         <a className="rxs-scroll-cue" href="#performance">
-          <span>まず、数字から。</span>
+          <span className="visually-hidden">まず、数字から。</span>
           <i aria-hidden="true" />
         </a>
       </section>
@@ -2097,14 +2062,6 @@ export function RexonanceSaga() {
       {step >= 2 ? (
         <section id="p14" className="rxs-p14 rxs-section" aria-labelledby="rxs-p14-title">
           <header className="rxs-section-heading rxs-reveal">
-            <small className="rxa-index" aria-hidden="true">
-              <b>02</b>
-              {"/ 05"}
-            </small>
-            <p>
-              <span lang="en">PROCESSING CORE</span> / P14{" "}
-              <span lang="en">EXTREME TUNING</span>
-            </p>
             <h2 id="rxs-p14-title">
               同じエーテルで、
               <br />
@@ -2134,9 +2091,6 @@ export function RexonanceSaga() {
               <i className="rsn-glint" aria-hidden="true" />
             </figure>
             <div className="rxs-p14-copy">
-              <small>
-                P14 / <span lang="en">FOURTEENTH GENERATION</span>
-              </small>
               <h3>最大出力を支える、安定性。</h3>
               <p>
                 P14の基本設計を維持しながら、神性、終焉、超自己進化、自己共鳴へ特化した調整を施したレクソナンス専用仕様です。演算資源を終焉の適用判断、超自己進化の構造生成、共鳴機構の同期へ最適化し、神性出力と演算加速の同期を優先します。
@@ -2186,11 +2140,6 @@ export function RexonanceSaga() {
 
           <section id="stages" className="rxs-stages rxs-section">
             <header className="rxs-section-heading rxs-reveal">
-              <small className="rxa-index" aria-hidden="true">
-                <b>04</b>
-                {"/ 05"}
-              </small>
-              <p lang="en">THREE OPERATING STAGES</p>
               <h2>まだ、次元は変わる。</h2>
             </header>
 
@@ -2220,20 +2169,15 @@ export function RexonanceSaga() {
                     onPointerUp={(event) => releaseControlFocus(event.currentTarget)}
                   >
                     <span>{STAGES[key].label}</span>
-                    <small lang="en">{STAGES[key].code}</small>
                   </button>
                 ))}
               </div>
-              <p id="rxs-stage-hint" className="rxs-stage-hint">
+              {/* Owner (2026-10-23): no secondary labels. The tabs name the
+                  forms; the outlined code behind the copy marks the one shown;
+                  the rail's gestures stay named for assistive tech. */}
+              <p id="rxs-stage-hint" className="rxs-stage-hint visually-hidden">
                 タップ・長押し・左右スライド・矢印キーで切り替え
               </p>
-              <RexonanceFormStatus
-                stage={stage === "max" || stage === "ultra" ? stage : "standard"}
-                label={activeStage.label}
-                code={activeStage.code}
-                purpose={activeStage.points[0]}
-                accent={activeStage.accent}
-              />
 
               <div
                 id="rxs-stage-panel"
@@ -2283,7 +2227,6 @@ export function RexonanceSaga() {
                   </i>
                 </figure>
                 <div key={`${stage}-copy`}>
-                  <small lang="en">{activeStage.code}</small>
                   <h3>{renderStageTitle(activeStage.title)}</h3>
                   {(typeof activeStage.lede === "string"
                     ? [activeStage.lede]
@@ -2312,11 +2255,6 @@ export function RexonanceSaga() {
 
           <section id="system" className="rxs-system rxs-section">
             <header className="rxs-section-heading rxs-reveal">
-              <small className="rxa-index" aria-hidden="true">
-                <b>05</b>
-                {"/ 05"}
-              </small>
-              <p lang="en">SELF-RESONANCE</p>
               <h2>
                 悠真自身が、
                 <br />
@@ -2335,15 +2273,15 @@ export function RexonanceSaga() {
               ))}
               <i className="rzn-tri-wave" />
               <i className="rzn-tri-core" />
-              <small className="rzn-tri-lock">PHASE LOCK</small>
             </div>
 
             <div className="rxs-system-grid">
               {CORE_SYSTEMS.map((system) => (
                 <article key={system.number} className="rxs-reveal">
-                  <header>
+                  {/* The plate's numeral, the rings' own (owner, 2026-10-23:
+                      the English code that restated the title went). */}
+                  <header aria-hidden="true">
                     <span>{system.number}</span>
-                    <small lang="en">{renderPlateCode(system.code)}</small>
                   </header>
                   <h3>{renderPlateTitle(system.title)}</h3>
                   <p>{renderStageLede(system.body)}</p>
@@ -2415,7 +2353,6 @@ export function RexonanceSaga() {
               </a>
             </p>
             <div>
-              <p lang="en">REXONANCE SAGA / FINAL ARRIVAL</p>
               <h2>
                 理不尽すら
                 <wbr />

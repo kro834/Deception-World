@@ -60,6 +60,16 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie[data-sit
   --mc-lit: #ffd77a;
 }
 
+html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie[data-site="illusionculum"] {
+  --mc-ink: #f4f7fc;
+  --mc-bg: rgb(3 4 12 / 86%);
+  --mc-line: rgb(233 184 102 / 36%);
+  --mc-accent: #a6e6ff;
+  --mc-track: rgb(255 143 210 / 24%);
+  --mc-disc: #070a1c;
+  --mc-lit: #e9b866;
+}
+
 html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie[data-site="rexonance"] {
   --mc-ink: #f2f7fb;
   --mc-bg: rgb(3 7 13 / 86%);

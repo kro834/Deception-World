@@ -10,6 +10,7 @@ try {
       "/world",
       "/riders/saga",
       "/rexonance-saga",
+      "/illusionculum-saga",
       "/dream-chapter",
       "/final-stage",
     ]) {

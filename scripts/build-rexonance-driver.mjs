@@ -20,6 +20,8 @@ const layers = await Promise.all(REXONANCE_SUIT_PIECES
 const data = await sharp({ create: { width, height, channels: 4, background: "#00000000" } })
   .composite(layers).raw().toBuffer();
 separateDriverPixels(data);
-await mkdir(root("public/rexonance-zenith-20261017"), { recursive: true });
+// 2026-10-23: the driver re-cut by SAM's masks: a new folder, so a cached
+// stand-in never meets the new atlas.
+await mkdir(root("public/rexonance-zenith-20261023"), { recursive: true });
 await sharp(data, { raw: { width, height, channels: 4 } }).webp({ lossless: true })
-  .toFile(root("public/rexonance-zenith-20261017/driver-standin.webp"));
+  .toFile(root("public/rexonance-zenith-20261023/driver-standin.webp"));

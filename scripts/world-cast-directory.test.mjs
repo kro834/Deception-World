@@ -60,12 +60,15 @@ test("changing facets keeps the canonical numbers and the complete cards mounted
     annex.indexOf("function CastFiles()"),
     annex.indexOf("function WorldFiles()"),
   );
-  assert.match(cast, /WORLD_CAST_ROSTER\.map\(\(entry, index\) =>/);
+  // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明） — the wall shows
+  // no card numbers any more, so there is no number a facet could renumber; every
+  // card stays mounted and a facet only hides the others.
+  assert.match(cast, /WORLD_CAST_ROSTER\.map\(\(entry\) =>/);
   assert.match(
     cast,
     /<li key=\{entry\.id\} hidden=\{!matchesCastDirectoryFilter\(entry, filter\)\}>/,
   );
-  assert.match(cast, /\{pad\(index \+ 1\)\}/);
+  assert.doesNotMatch(cast, /className="wa-index"/);
   assert.match(cast, /search=\{CAST_ROSTER_SEARCH\}/);
   assert.doesNotMatch(cast, /WORLD_CAST_ROSTER\.filter/);
 });

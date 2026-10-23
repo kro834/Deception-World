@@ -1,3 +1,19 @@
+
+  useLayoutEffect(() => {
+    if (locationHash !== "manager-archive-other") return;
+    setManagerTab(2);
+    syncRail(managerRail.current, 2);
+  }, [locationHash]);
+
+  useLayoutEffect(() => {
+    if (locationHash !== "manager-archive-unmanaged") return;
+    setManagerTab(1);
+    syncRail(managerRail.current, 1);
+  }, [locationHash]);
+
+  useLayoutEffect(() => {
+    if (locationHash !== "manager-archive-dogs") return;
+    setManagerTab(3);
     syncRail(managerRail.current, 3);
   }, [locationHash]);
 
@@ -489,29 +505,3 @@
       const n = typeof next === "function" ? next(p) : next;
       const wrapped = ((n % POSTERS.length) + POSTERS.length) % POSTERS.length;
       if (wrapped !== p) setPrevPoster(p);
-      return wrapped;
-    });
-  };
-
-  const shufflePoster = () => {
-    if (ambientPaused || shuffleActive.current) return;
-    shuffleActive.current = true;
-    setShuffling(true);
-    setLocked(true);
-    const runId = ++shuffleRunId.current;
-    shuffleTimers.current.forEach((timer) => window.clearTimeout(timer));
-    shuffleTimers.current = [];
-
-    const randomBelow = (upperBound: number) => {
-      if (typeof window.crypto?.getRandomValues !== "function") {
-        return Math.floor(Math.random() * upperBound);
-      }
-      const values = new Uint32Array(1);
-      const rejectionLimit = Math.floor(0x1_0000_0000 / upperBound) * upperBound;
-      do {
-        window.crypto.getRandomValues(values);
-      } while (values[0] >= rejectionLimit);
-      return values[0] % upperBound;
-    };
-    const posterSequence = POSTERS.map((_, index) => index).filter((index) => index !== poster);
-    for (let index = posterSequence.length - 1; index > 0; index -= 1) {

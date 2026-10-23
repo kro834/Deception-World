@@ -178,7 +178,21 @@ test("every destination is an existing public route with its actual heading anch
       read("src/components/far-from-saga/far-from-saga.tsx") +
       // Owner (2026-10-23): ウルトラ is one of #suitup's forms; far-from-ultra.tsx is gone.
       read("src/components/far-from-saga/far-from-suitup.tsx"),
+    // Owner (2026-10-23): イリュージョンクルムサーガ's site (its runway in its suit-up).
+    "/illusionculum-saga":
+      read("src/components/illusionculum-saga/illusionculum-saga.tsx") +
+      read("src/components/illusionculum-saga/illusionculum-suitup.tsx") +
+      read("src/components/illusionculum-saga/illusionculum-comparison.tsx"),
     "/final-stage": read("src/components/final-stage/final-stage.tsx"),
+    // Owner (2026-10-23): the META UNITAS SAGA special site (its suit-up and
+    // its comparison, where #suitup and #p16 stand).
+    "/meta-unitas-saga":
+      read("src/components/meta-unitas-saga/meta-unitas-saga.tsx") +
+      read("src/components/meta-unitas-saga/meta-unitas-suitup.tsx") +
+      read("src/components/meta-unitas-saga/meta-unitas-performance.tsx").replace(
+        'id={isP16 ? "p16" : undefined}',
+        'id="p16"',
+      ),
     "/form-archive": read("src/routes/form-archive.tsx"),
     "/gallery": read("src/components/gallery/gallery-page.tsx"),
   };

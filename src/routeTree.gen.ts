@@ -20,9 +20,11 @@ import { Route as FinalStageRouteImport } from './routes/final-stage'
 import { Route as FormArchiveRouteImport } from './routes/form-archive'
 import { Route as GalleryRouteImport } from './routes/gallery'
 import { Route as GalleryToursRouteImport } from './routes/gallery-tours'
+import { Route as IllusionculumSagaRouteImport } from './routes/illusionculum-saga'
 import { Route as LibraryRouteImport } from './routes/library'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ManagersRouteImport } from './routes/managers'
+import { Route as MetaUnitasSagaRouteImport } from './routes/meta-unitas-saga'
 import { Route as RexonanceSagaRouteImport } from './routes/rexonance-saga'
 import { Route as RidersRouteImport } from './routes/riders'
 import { Route as SagaCinemaRouteImport } from './routes/saga-cinema'
@@ -108,6 +110,11 @@ const GalleryToursRoute = GalleryToursRouteImport.update({
   path: '/gallery-tours',
   getParentRoute: () => rootRouteImport,
 } as any)
+const IllusionculumSagaRoute = IllusionculumSagaRouteImport.update({
+  id: '/illusionculum-saga',
+  path: '/illusionculum-saga',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LibraryRoute = LibraryRouteImport.update({
   id: '/library',
   path: '/library',
@@ -121,6 +128,11 @@ const LoginRoute = LoginRouteImport.update({
 const ManagersRoute = ManagersRouteImport.update({
   id: '/managers',
   path: '/managers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MetaUnitasSagaRoute = MetaUnitasSagaRouteImport.update({
+  id: '/meta-unitas-saga',
+  path: '/meta-unitas-saga',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RexonanceSagaRoute = RexonanceSagaRouteImport.update({
@@ -282,9 +294,11 @@ export interface FileRoutesByFullPath {
   '/form-archive': typeof FormArchiveRoute
   '/gallery': typeof GalleryRoute
   '/gallery-tours': typeof GalleryToursRoute
+  '/illusionculum-saga': typeof IllusionculumSagaRoute
   '/library': typeof LibraryRoute
   '/login': typeof LoginRoute
   '/managers': typeof ManagersRouteWithChildren
+  '/meta-unitas-saga': typeof MetaUnitasSagaRoute
   '/rexonance-saga': typeof RexonanceSagaRoute
   '/riders': typeof RidersRouteWithChildren
   '/saga-cinema': typeof SagaCinemaRoute
@@ -326,8 +340,10 @@ export interface FileRoutesByTo {
   '/form-archive': typeof FormArchiveRoute
   '/gallery': typeof GalleryRoute
   '/gallery-tours': typeof GalleryToursRoute
+  '/illusionculum-saga': typeof IllusionculumSagaRoute
   '/library': typeof LibraryRoute
   '/login': typeof LoginRoute
+  '/meta-unitas-saga': typeof MetaUnitasSagaRoute
   '/rexonance-saga': typeof RexonanceSagaRoute
   '/saga-cinema': typeof SagaCinemaRoute
   '/search': typeof SearchRoute
@@ -370,9 +386,11 @@ export interface FileRoutesById {
   '/form-archive': typeof FormArchiveRoute
   '/gallery': typeof GalleryRoute
   '/gallery-tours': typeof GalleryToursRoute
+  '/illusionculum-saga': typeof IllusionculumSagaRoute
   '/library': typeof LibraryRoute
   '/login': typeof LoginRoute
   '/managers': typeof ManagersRouteWithChildren
+  '/meta-unitas-saga': typeof MetaUnitasSagaRoute
   '/rexonance-saga': typeof RexonanceSagaRoute
   '/riders': typeof RidersRouteWithChildren
   '/saga-cinema': typeof SagaCinemaRoute
@@ -417,9 +435,11 @@ export interface FileRouteTypes {
     | '/form-archive'
     | '/gallery'
     | '/gallery-tours'
+    | '/illusionculum-saga'
     | '/library'
     | '/login'
     | '/managers'
+    | '/meta-unitas-saga'
     | '/rexonance-saga'
     | '/riders'
     | '/saga-cinema'
@@ -461,8 +481,10 @@ export interface FileRouteTypes {
     | '/form-archive'
     | '/gallery'
     | '/gallery-tours'
+    | '/illusionculum-saga'
     | '/library'
     | '/login'
+    | '/meta-unitas-saga'
     | '/rexonance-saga'
     | '/saga-cinema'
     | '/search'
@@ -504,9 +526,11 @@ export interface FileRouteTypes {
     | '/form-archive'
     | '/gallery'
     | '/gallery-tours'
+    | '/illusionculum-saga'
     | '/library'
     | '/login'
     | '/managers'
+    | '/meta-unitas-saga'
     | '/rexonance-saga'
     | '/riders'
     | '/saga-cinema'
@@ -550,9 +574,11 @@ export interface RootRouteChildren {
   FormArchiveRoute: typeof FormArchiveRoute
   GalleryRoute: typeof GalleryRoute
   GalleryToursRoute: typeof GalleryToursRoute
+  IllusionculumSagaRoute: typeof IllusionculumSagaRoute
   LibraryRoute: typeof LibraryRoute
   LoginRoute: typeof LoginRoute
   ManagersRoute: typeof ManagersRouteWithChildren
+  MetaUnitasSagaRoute: typeof MetaUnitasSagaRoute
   RexonanceSagaRoute: typeof RexonanceSagaRoute
   RidersRoute: typeof RidersRouteWithChildren
   SagaCinemaRoute: typeof SagaCinemaRoute
@@ -646,6 +672,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GalleryToursRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/illusionculum-saga': {
+      id: '/illusionculum-saga'
+      path: '/illusionculum-saga'
+      fullPath: '/illusionculum-saga'
+      preLoaderRoute: typeof IllusionculumSagaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/library': {
       id: '/library'
       path: '/library'
@@ -665,6 +698,13 @@ declare module '@tanstack/react-router' {
       path: '/managers'
       fullPath: '/managers'
       preLoaderRoute: typeof ManagersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/meta-unitas-saga': {
+      id: '/meta-unitas-saga'
+      path: '/meta-unitas-saga'
+      fullPath: '/meta-unitas-saga'
+      preLoaderRoute: typeof MetaUnitasSagaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/rexonance-saga': {
@@ -967,9 +1007,11 @@ const rootRouteChildren: RootRouteChildren = {
   FormArchiveRoute: FormArchiveRoute,
   GalleryRoute: GalleryRoute,
   GalleryToursRoute: GalleryToursRoute,
+  IllusionculumSagaRoute: IllusionculumSagaRoute,
   LibraryRoute: LibraryRoute,
   LoginRoute: LoginRoute,
   ManagersRoute: ManagersRouteWithChildren,
+  MetaUnitasSagaRoute: MetaUnitasSagaRoute,
   RexonanceSagaRoute: RexonanceSagaRoute,
   RidersRoute: RidersRouteWithChildren,
   SagaCinemaRoute: SagaCinemaRoute,

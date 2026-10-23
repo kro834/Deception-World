@@ -37,7 +37,10 @@ function scan(slack) {
     const element = text.parentElement;
     // Ornaments, the counters' mirrors, the suit-up scene, the calls, native
     // controls and the local nav (a scroller by design) are out of scope.
-    if (element.closest("[aria-hidden='true'], .rsn-count, .rzn-suitup, .rx-call, select, option, .rxs-local-nav")) continue;
+    // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）: so is the text read to
+    // assistive tech only (.visually-hidden, the runway's .rxk-sr script),
+    // which is clipped to one pixel by design and never seen.
+    if (element.closest("[aria-hidden='true'], .rsn-count, .rzn-suitup, .rx-call, select, option, .rxs-local-nav, .visually-hidden, .rxk-sr")) continue;
     const style = getComputedStyle(element);
     if (style.visibility === "hidden" || style.display === "none") continue;
     const box = clipper(element);
