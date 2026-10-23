@@ -1723,3 +1723,19 @@ html[data-family="special"]
     --rsn-figure-size: calc(15.5vw - 14px);
   }
 }
+
+/* 02's native baseline select on a finger (iOS): APEX draws it 48px tall at
+   16px (styles-rexonance-apex.css, any-pointer: coarse), which undid the
+   calibration's own type for it — P1比 / P2比 at 20px, 700 (the size of the
+   plate's range labels; verify-reading-polish pins it). The P14 select keeps
+   its 20px inside the same 48px plate (10 + 28 + 10); the comparison select
+   keeps APEX's 16px. */
+@media (any-pointer: coarse) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    .rxs-p14-native-select
+    > select {
+    font-size: 20px;
+  }
+}
