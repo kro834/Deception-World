@@ -1464,3 +1464,262 @@ html[data-family="special"]
     border-block-start: 1px solid var(--rxl-line-soft);
   }
 }
+
+/* ======================================================================
+   LABELS (owner, 2026-10-23: 「不要なセカンダリラベルや説明を避ける。
+   レイアウトに説明させるようにUIリライトして。」) — the composition once the
+   kickers, codes, indexes, captions and instructions are gone.
+   ====================================================================== */
+
+/* The chapter map: five doors, each its number, its name and the arrow on
+   one row, at every width (the code and the line went; the line is read to
+   assistive tech only). */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > .rxe-chapter-map
+  a {
+  grid-template-columns: 44px minmax(0, 1fr) 20px;
+  grid-template-rows: auto;
+  align-items: center;
+  gap: 0 16px;
+  min-height: 64px;
+  padding-block: 14px;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > .rxe-chapter-map
+  a:last-child {
+  min-height: 64px;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > .rxe-chapter-map
+  a
+  > b {
+  grid-column: 1;
+  grid-row: 1;
+  align-self: center;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > .rxe-chapter-map
+  a
+  > span {
+  grid-column: 2;
+  grid-row: 1;
+  min-width: 0;
+  white-space: normal;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > .rxe-chapter-map
+  a
+  > i {
+  grid-column: 3;
+  grid-row: 1;
+  align-self: center;
+  justify-self: end;
+}
+
+/* 04: a tab holds its form's name alone, centred in its cell. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > #stages
+  .rxs-stage-tabs
+  > button[role="tab"] {
+  justify-content: center;
+}
+
+/* The scroll cue is its line, falling to a gold point (its words are read
+   to assistive tech only); a 44px target around it. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > .rxs-hero
+  .rxs-scroll-cue {
+  flex-direction: column;
+  justify-content: flex-end;
+  min-width: 44px;
+  min-height: 56px;
+  padding: 0;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > .rxs-hero
+  .rxs-scroll-cue
+  i {
+  width: 1px;
+  height: 44px;
+  background: linear-gradient(rgb(150 236 255 / 0%), var(--rxt-ice, #96ecff));
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > .rxs-hero
+  .rxs-scroll-cue
+  i::after {
+  position: absolute;
+  bottom: -3px;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  content: "";
+  border-radius: 50%;
+  background: var(--rxt-gold, #f2d896);
+  box-shadow: 0 0 10px rgb(242 216 150 / 60%);
+  translate: -50% 0;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > .rxs-hero
+  .rxs-scroll-cue:focus-visible {
+  outline: 2px solid #a5edff;
+  outline-offset: 4px;
+}
+
+@media (forced-colors: active) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > .rxs-hero
+    .rxs-scroll-cue
+    i {
+    background: CanvasText;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > .rxs-hero
+    .rxs-scroll-cue
+    i::after {
+    background: CanvasText;
+    box-shadow: none;
+  }
+}
+
+/* 03: the suit-up's head carries the chapter's numeral too, as 01, 02, 04
+   and 05 do (its "03 / 05" index went with its eyebrow): the outlined
+   numeral and the catchphrase on one line, the band's controls beside
+   them. Generated with empty alternative text (the bar numbers it). */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > .rxs-assembly-heading
+  > div:first-child {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: clamp(14px, 1.9vw, 26px);
+  align-items: end;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > .rxs-assembly-heading
+  > div:first-child
+  > * {
+  grid-column: 2;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > .rxs-assembly-heading
+  > div:first-child::before {
+  content: "03" / "";
+  grid-column: 1;
+  grid-row: 1;
+  align-self: end;
+  margin: 0 0 0.04em;
+  color: transparent;
+  font: 300 clamp(46px, 6vw, 80px) / 0.78 var(--rxf-forge, var(--dx-mono));
+  font-variant-numeric: proportional-nums lining-nums;
+  letter-spacing: -0.01em;
+  -webkit-text-stroke: 1px rgb(242 216 150 / 78%);
+  pointer-events: none;
+}
+
+@supports ((background-clip: text) or (-webkit-background-clip: text)) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > .rxs-assembly-heading
+    > div:first-child::before {
+    background: linear-gradient(180deg, rgb(242 216 150 / 24%), transparent 62%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+}
+
+/* Phones: the numeral over the title, as on the other heads. */
+@media (max-width: 560px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > .rxs-assembly-heading
+    > div:first-child {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > .rxs-assembly-heading
+    > div:first-child
+    > * {
+    grid-column: 1;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > .rxs-assembly-heading
+    > div:first-child::before {
+    align-self: start;
+    margin: 0 0 14px;
+    font-size: 46px;
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > .rxs-assembly-heading
+    > div:first-child::before {
+    -webkit-text-fill-color: transparent;
+    -webkit-text-stroke: 1px CanvasText;
+    background: none;
+  }
+}
+
+/* 01's first cut at 1100–1159 (an iPad in landscape, a small laptop): the
+   figure at FORGE's calc(15.5vw - 6px) ran 4px past its card, which clips
+   it (「%+」 was cut at 1100). A touch smaller there, so 650%+ stays whole;
+   the rings follow the same size. */
+@media (min-width: 1100px) and (max-width: 1159.98px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > #performance
+    .rxs-headline-metrics {
+    --rsn-figure-size: calc(15.5vw - 14px);
+  }
+}

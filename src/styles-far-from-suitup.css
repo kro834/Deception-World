@@ -1819,9 +1819,9 @@ html[data-family="special"] body .rxs-page.ffs-page .rzn-movie-kicker {
   text-transform: uppercase;
 }
 
-html[data-family="special"] body .rxs-page.ffs-page .rzn-movie-kicker > span + span {
+html[data-family="special"] body .rxs-page.ffs-page .rzn-movie-kicker > span {
   color: #b6c6ce;
-  font: 500 11px / 1.3 var(--dx-body);
+  font: 500 12px / 1.3 var(--dx-body);
   letter-spacing: 0.1em;
   text-transform: none;
 }
