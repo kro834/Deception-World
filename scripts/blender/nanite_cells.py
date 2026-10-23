@@ -21,8 +21,8 @@ import math
 import os
 import sys
 
-import bmesh
 import bpy
+import bmesh  # after bpy: the bpy module registers it
 from mathutils import Quaternion, Vector
 
 ARGS = sys.argv[sys.argv.index("--") + 1:]
@@ -351,7 +351,9 @@ root, body, core, pin, bezel, optic, back_socket, side_cuts, hardware, notch_cut
 for obj, slots in ((body, 4), (core, 1), (pin, 1), (bezel, 1), (optic, 1), (back_socket, 1)):
     for _ in range(slots):
         obj.data.materials.append(None)
-for tone, (base, roughness, glow) in TONES.items():
+# NANITE_BEAD_ONLY=1 skips the chips and renders only the bead frames.
+BEAD_ONLY = os.environ.get("NANITE_BEAD_ONLY") == "1"
+for tone, (base, roughness, glow) in ({} if BEAD_ONLY else TONES).items():
     body.data.materials[0] = principled(f"{tone}-body", base, 1.0, roughness)
     body.data.materials[1] = emitter(f"{tone}-seam", glow, 0.8)
     # The back plate: dark anodised gunmetal for every tone, duller, so a
@@ -416,8 +418,12 @@ for tone, (base, roughness, glow) in TONES.items():
     print("NANITE rendered", tone, flush=True)
 
 # The molten gold bead: a metaball pair, wobbling.
-for obj in list(sc.collection.objects):
-    if obj.type in {"MESH", "EMPTY"}:
+# Keep only the lights and the camera: the chip's curve rings (the hex
+# bezel) are neither meshes nor empties and would otherwise stay in the
+# scene as a dark ring around the bead (farfrom_nanite_cells.py clears the
+# same way).
+for obj in list(bpy.data.objects):
+    if obj.type not in {"LIGHT", "CAMERA"}:
         bpy.data.objects.remove(obj)
 ball = bpy.data.metaballs.new("bead")
 ball.resolution = 0.02

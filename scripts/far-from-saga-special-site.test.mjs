@@ -572,7 +572,8 @@ test("the owner's comparison text is kept verbatim and read whole into the two d
 test("#report shows both documents as accessible disclosure panels", () => {
   const block = section("report", "p16");
   assert.match(block, /<FarFromReport \/>/);
-  assert.match(block, /<h2 id="ffs-report-title">比較資料<\/h2>/);
+  // Owner (2026-10-23): chapter headings are catchphrases (「韋駄天？遅過ぎる」 and the like).
+  assert.match(block, /<h2 id="ffs-report-title">差は、桁で見せる。<\/h2>/);
   // Native <details>/<summary>: keyboard, screen readers and find-in-page.
   assert.match(reportView, /<details\s+id=\{chapter\.id\}/);
   assert.match(reportView, /<summary>/);
