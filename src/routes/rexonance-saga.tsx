@@ -45,13 +45,13 @@ export const Route = createFileRoute("/rexonance-saga")({
       {
         name: "description",
         content:
-          "究極が始まる。レクソナンスサーガの標準性能を、公開済みのカタログ値で。P14演算基盤、三つの形態、第五の犬として覚醒した悠真の自己共鳴構造まで。",
+          "究極が始まる。レクソナンスサーガの標準性能を、公開済みのカタログ値で。P14 Extreme Tuning、三つの形態、第五の犬として覚醒した悠真の自己共鳴構造まで。",
       },
       { property: "og:title", content: "レクソナンスサーガ｜Deception World" },
       {
         property: "og:description",
         content:
-          "覚醒する、全てが最高峰で。レクソナンスサーガの性能、P14、三つの形態、悠真自身の終焉を制御する自己共鳴構造。",
+          "覚醒する、全てが最高峰で。レクソナンスサーガの性能、P14 Extreme Tuning、三つの形態、悠真自身の終焉を制御する自己共鳴構造。",
       },
       { property: "og:image", content: REXONANCE_SITE_ARTWORK.standard },
     ],
