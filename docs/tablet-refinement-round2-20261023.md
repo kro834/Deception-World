@@ -25,6 +25,17 @@ Evidence paths are relative to `output/playwright/` in this dedicated worktree.
 Incremental CSS injection was used only for the first two iterations; acceptance
 uses the actual production build. The permanent navigation probe supports
 `PW_VERIFY_ZOOM=1` to assert initial centre and arrow-key isolation.
+`scripts/verify-tablet-reading-options.mjs` retains strict same-glyph rotation,
+reading options and chapter-navigation acceptance checks in both motion modes.
+
+After integrating main `49f91098`, the production build passed 3,203 tests
+(zero failures, five existing skips), typecheck and source-parts synchronization
+(15 groups). Lint has zero errors and 15 existing warnings. The integrated build
+also passed Chrome/WebKit navigation in normal/reduced motion, all four flows
+through five successive viewport sizes with real zoom assertions. Seven
+phone/tablet/short-landscape sizes passed final gallery/reader geometry guards
+without stylesheet injection. Focus, zoom pan/rotation and strict reading-line
+restoration passed their separate interaction probes.
 
 Browser/touch emulation is not physical-device verification. Final repository
 gates, latest-main integration and exact public release identity are checked

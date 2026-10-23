@@ -241,6 +241,10 @@ try {
       if (scene === "reading") {
         const label = first(".dream-reading-position-select > span");
         if (label?.width) assert.ok(parseFloat(label.fontSize) >= 12, "readable position label");
+        for (const node of metrics.elements[".dream-reading-room select"] || []) {
+          if (node.width > 0 && node.height > 0)
+            assert.ok(node.height >= 44, "native reader select hit box");
+        }
       }
       if (width >= 560 && width <= 1366 && height >= 501) {
         const controls =
@@ -266,7 +270,7 @@ try {
         scene === "gallery" &&
         width >= 560 &&
         width <= 1100 &&
-        height >= 501 &&
+        height >= 320 &&
         height <= 650 &&
         width > height &&
         width / height <= 2
@@ -274,6 +278,11 @@ try {
         if (process.env.AUDIT_LONG_TITLE !== "1") {
           assert.ok(first(".gallery-viewer-header").height <= 62, "compact closed header");
         }
+        if (height >= 375)
+          assert.ok(
+            first(".gallery-image-viewport").height >= 120,
+            "short landscape artwork remains viewable",
+          );
         assert.ok(
           metrics.expanded.y >= metrics.expanded.headerTop - 1 &&
             metrics.expanded.bottom <= metrics.expanded.headerBottom + 1,

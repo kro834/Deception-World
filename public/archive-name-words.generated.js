@@ -13,6 +13,9 @@ function withWordBreaks(name) {
     .replace(LEADING_WORD, `$1${SEAM}`)
     .replace(SAGA_WORD, `$1${SEAM}$2`)
     .replace(/([・／/])(?=.)/gu, `$1${SEAM}`)
+    // イリュージョン / クルム (2026-10-23): the one long compound that has to
+    // break inside itself in a narrow tile, at its own joint.
+    .replace(/(イリュージョン)(?=クルム)/gu, `$1${SEAM}`)
     .replace(/(サーガ)(\s+)(?=\S)/gu, `$1$2${SEAM}`);
 }
 
