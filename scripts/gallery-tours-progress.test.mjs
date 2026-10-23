@@ -4,6 +4,7 @@ import { GALLERY_TOURS } from "../src/components/gallery-tours/tour-data.ts";
 import {
   TOUR_PROGRESS_KEY,
   readTourProgress,
+  readTourProgressState,
   saveTourProgress,
   clearTourProgress,
 } from "../src/components/gallery-tours/tour-progress.ts";
@@ -13,6 +14,18 @@ const second = GALLERY_TOURS[1];
 const entry = (tour, stop = 0, updatedAt = 1_000) => ({
   workId: tour.stops[stop].artworkId,
   updatedAt,
+});
+
+test("read state distinguishes an empty browser from blocked storage", () => {
+  assert.deepEqual(readTourProgressState({ getItem: () => null }), {
+    progress: {}, available: true,
+  });
+  assert.deepEqual(readTourProgressState({ getItem() { throw new Error("Denied"); } }), {
+    progress: {}, available: false,
+  });
+  assert.deepEqual(readTourProgressState({ getItem: () => "broken" }), {
+    progress: {}, available: true,
+  });
 });
 
 function storageHarness(raw = null) {
