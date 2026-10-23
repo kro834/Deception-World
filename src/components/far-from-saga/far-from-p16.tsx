@@ -12,6 +12,7 @@ import {
   EXTREME_P14_NAME,
   p16AgainstExtreme,
   p16AgainstExtremeText,
+  p16ChangeAgainstExtremeSpoken,
   p16ChangeAgainstExtremeText,
   type ExtremeP14Metric,
   type P16Metric,
@@ -25,32 +26,56 @@ import {
    P14 (+50% / −35% / −40% / −27%) and Vinculum's P2 (約3倍, 暫定). Wherever
    they appear the chapter says 暫定ベンチマーク. The one set of figures that
    is not the owner's is P16 / P14（Extreme tuning）(owner, 2026-10-23:
-   「P14との性能差は想像して生成してみて」), labelled 暫定ベンチマーク／設定案
-   with its note, beside the owner's sentence naming Extreme's P14. */
+   「P14との性能差は想像して生成してみて」): the comparator's third option
+   draws it with the same cards as the other two, says 暫定ベンチマーク／設定案
+   where they say 暫定ベンチマーク, and closes on its ※ notes, after the
+   owner's sentence naming Extreme's P14. */
 
 type Baseline = "p14" | "p2" | "extreme";
 
-const BASELINES: readonly { key: Baseline; label: string }[] = [
-  { key: "p14", label: "P14比" },
-  { key: "p2", label: "P2比" },
-  { key: "extreme", label: "エクスプリーム" },
+/** The three bases: the owner's 「P14比」「P2比」 over the form that carries
+ * the unit, so Rexonance's P14 and Extreme's read apart. */
+const BASELINES: readonly { key: Baseline; label: string; form: string }[] = [
+  { key: "p14", label: "P14比", form: "レクソナンス" },
+  { key: "p2", label: "P2比", form: "ヴィンクルム" },
+  { key: "extreme", label: "P14比", form: "エクスプリーム" },
 ];
 
-/** The header's name for each comparison. */
+/** The header's name for each comparison; Extreme's P14 by its full name. */
 const TITLES: Record<Baseline, string> = {
   p14: "P14比",
   p2: "P2比",
-  extreme: `エクスプリーム ${EXTREME_P14_NAME}`,
+  extreme: `${EXTREME_P14_NAME}比`,
 };
 
 /** +50% / −35%: the owner's figure with its sign. */
 const signed = (change: number) => `${change > 0 ? "+" : "−"}${Math.abs(change)}%`;
 
+const reading = (lowerIsBetter: boolean) => (lowerIsBetter ? "低いほど優秀" : "高いほど優秀");
+
 const barStyle = (fraction: number) =>
   ({ ["--ffs-bar" as string]: Math.max(0, Math.min(1, fraction)) }) as CSSProperties;
 
-function ProvisionalTag() {
-  return <span className="ffs-provisional-tag">暫定ベンチマーク</span>;
+/** The 暫定 mark; over the Extreme option it also says 設定案. */
+function ProvisionalTag({ proposal = false }: { proposal?: boolean }) {
+  return (
+    <span className="ffs-provisional-tag">
+      {proposal ? "暫定ベンチマーク／設定案" : "暫定ベンチマーク"}
+    </span>
+  );
+}
+
+/** A unit's name with its tuning, 「P14（Extreme tuning）」: the parenthetical
+ * never breaks inside, so a narrow line breaks before 「（」 if at all. */
+export function UnitName({ value }: { value: string }) {
+  const at = value.indexOf("（");
+  if (at <= 0) return <>{value}</>;
+  return (
+    <>
+      {value.slice(0, at)}
+      <span className="ffs-unit-tuning">{value.slice(at)}</span>
+    </>
+  );
 }
 
 /** The drawn stand-in for P16's artwork: a package, its pins and a die. */
@@ -72,6 +97,19 @@ function P16Core() {
   );
 }
 
+/** The base at 100%: the form that carries the unit, then the unit. Every
+ * option's cards open the same way, so a phone that shows one card at a time
+ * still says whose P14 it is. */
+function BaseValue({ form, unit }: { form: string; unit: string }) {
+  return (
+    <span>
+      <i>{form}</i>
+      <i>{unit}（基準）</i>
+      <b>100%</b>
+    </span>
+  );
+}
+
 function MetricRow({ metric }: { metric: P16Metric }) {
   const p16 = 100 + metric.change;
   const longer = Math.max(p16, 100);
@@ -79,10 +117,7 @@ function MetricRow({ metric }: { metric: P16Metric }) {
     <article className="ffs-p16-metric">
       <small>{metric.label}</small>
       <div className="ffs-p16-values">
-        <span>
-          <i>P14（基準）</i>
-          <b>100%</b>
-        </span>
+        <BaseValue form="レクソナンス" unit="P14" />
         <span>
           <i>P16（換算）</i>
           <strong>{p16}%</strong>
@@ -101,7 +136,7 @@ function MetricRow({ metric }: { metric: P16Metric }) {
         </span>
       </div>
       <p>
-        <span>{metric.lowerIsBetter ? "低いほど優秀" : "高いほど優秀"}</span>
+        <span>{reading(metric.lowerIsBetter)}</span>
         <b>
           {signed(metric.change)} {metric.verb}
         </b>
@@ -110,37 +145,30 @@ function MetricRow({ metric }: { metric: P16Metric }) {
   );
 }
 
-/** P16 with Extreme's P14 (Extreme tuning) at 100%: the 設定案. */
+/** P16 with P14（Extreme tuning）at 100%: the 設定案, drawn as the P14 cards
+ * are, with the two indices (Rexonance's P14 = 100) under the reading. */
 function ExtremeMetricRow({ metric }: { metric: ExtremeP14Metric }) {
   const p16 = p16AgainstExtreme(metric);
-  const approxText = p16AgainstExtremeText(metric);
+  const text = p16AgainstExtremeText(metric);
+  const approx = text.startsWith("約");
   const longer = Math.max(p16, 100);
   return (
     <article className="ffs-p16-metric">
       <small>{metric.label}</small>
       <div className="ffs-p16-values">
-        <span>
-          <i>エクスプリーム（基準）</i>
-          <b>100%</b>
-        </span>
+        <BaseValue form="エクスプリーム" unit="P14" />
         <span>
           <i>P16（換算）</i>
           <strong>
-            {approxText.startsWith("約") ? (
-              <>
-                <small>約</small>
-                {approxText.slice(1)}
-              </>
-            ) : (
-              approxText
-            )}
+            {approx ? <small>約</small> : null}
+            {approx ? text.slice(1) : text}
           </strong>
         </span>
       </div>
       <div
         className="ffs-p16-bars"
         role="img"
-        aria-label={`${metric.label}、${EXTREME_P14_NAME}を100%としたP16は${p16AgainstExtremeText(metric)}、${p16ChangeAgainstExtremeText(metric)}（暫定ベンチマーク／設定案）`}
+        aria-label={`${metric.label}、${EXTREME_P14_NAME}を100%としたP16は${text}、${p16ChangeAgainstExtremeSpoken(metric)}（暫定ベンチマーク／設定案）`}
       >
         <span data-unit="extreme">
           <i style={barStyle(100 / longer)} />
@@ -151,11 +179,35 @@ function ExtremeMetricRow({ metric }: { metric: ExtremeP14Metric }) {
       </div>
       <p>
         <span>
-          指数 {metric.extreme} → {metric.p16}
+          {reading(metric.lowerIsBetter)}
+          <small>
+            指数 {metric.extreme} → {metric.p16}
+          </small>
         </span>
         <b>{p16ChangeAgainstExtremeText(metric)}</b>
       </p>
     </article>
+  );
+}
+
+/** Where P14（Extreme tuning）leads Rexonance's P14: the short peak. */
+function ExtremeStrength() {
+  const { burst } = P16_VS_EXTREME;
+  return (
+    <div className="ffs-p16-strength">
+      <small>
+        <UnitName value={EXTREME_P14_NAME} />
+        の強み
+      </small>
+      <p>
+        <span>{burst.label}</span>
+        <b>
+          <small>指数</small>
+          {burst.extreme}
+        </b>
+        <i>レクソナンスのP14＝100</i>
+      </p>
+    </div>
   );
 }
 
@@ -167,9 +219,11 @@ function P16Comparator() {
       <header>
         <div>
           <small lang="en">GENERATION COMPARISON</small>
-          <h3>P16 / {TITLES[baseline]}</h3>
+          <h3>
+            P16 / <UnitName value={TITLES[baseline]} />
+          </h3>
         </div>
-        <ProvisionalTag />
+        <ProvisionalTag proposal={baseline === "extreme"} />
       </header>
 
       <fieldset className="ffs-views ffs-p16-switch">
@@ -184,7 +238,9 @@ function P16Comparator() {
                 checked={baseline === item.key}
                 onChange={() => setBaseline(item.key)}
               />
-              <span>{item.label}</span>
+              <span>
+                {item.label} <small>{item.form}</small>
+              </span>
             </label>
           ))}
         </div>
@@ -213,10 +269,7 @@ function P16Comparator() {
               <article className="ffs-p16-metric">
                 <small>{P16_VS_P2.label}</small>
                 <div className="ffs-p16-values">
-                  <span>
-                    <i>P2（基準）</i>
-                    <b>100%</b>
-                  </span>
+                  <BaseValue form="ヴィンクルム" unit="P2" />
                   <span>
                     <i>P16（暫定）</i>
                     <strong>{P16_VS_P2.value}</strong>
@@ -235,7 +288,7 @@ function P16Comparator() {
                   </span>
                 </div>
                 <p>
-                  <span>ヴィンクルムのP2と比較</span>
+                  <span>{reading(false)}</span>
                   <b>暫定値</b>
                 </p>
               </article>
@@ -246,30 +299,25 @@ function P16Comparator() {
           </>
         ) : (
           <>
-            <p className="ffs-p16-proposal">
-              <span className="ffs-provisional-tag">暫定ベンチマーク／設定案</span>
-              <span>指数はレクソナンスのP14＝100。{P16_VS_EXTREME.note}</span>
-            </p>
             <div className="ffs-p16-metrics">
               {P16_VS_EXTREME.metrics.map((metric) => (
                 <ExtremeMetricRow key={metric.key} metric={metric} />
               ))}
             </div>
-            <p className="ffs-p16-burst">
-              <span>{P16_VS_EXTREME.burst.label}</span>
-              <b>
-                {P16_VS_EXTREME.name} {P16_VS_EXTREME.burst.extreme}%
-              </b>
-              <small>レクソナンスのP14＝100%</small>
-            </p>
+            <ExtremeStrength />
             <blockquote className="ffs-p16-source">
               <p>{P16_VS_EXTREME.source}</p>
             </blockquote>
-            <div className="ffs-p16-proposal-text">
+            <div className="ffs-p16-reading">
               {P16_VS_EXTREME.text.map((paragraph) => (
                 <p key={paragraph}>{paragraph}</p>
               ))}
             </div>
+            <ul className="ffs-p16-caveats" aria-label="設定案の注意">
+              {P16_VS_EXTREME.notes.map((note) => (
+                <li key={note}>{note}</li>
+              ))}
+            </ul>
           </>
         )}
       </div>
@@ -323,7 +371,20 @@ export function FarFromP16() {
           {P16_LINEAGE.steps.map((step) => (
             <li key={step.unit} data-current={step.unit === "P16" || undefined}>
               <b>{step.unit}</b>
-              <span>{step.form}</span>
+              {/* P14: Extreme's earlier generation, then Rexonance's. */}
+              <span className="ffs-p16-lineage-forms">
+                {step.forms.map((form, index) =>
+                  index < step.forms.length - 1 ? (
+                    <span key={form}>
+                      {form}
+                      <i aria-hidden="true">→</i>
+                      <span className="ffs-visually-hidden">、のちに</span>
+                    </span>
+                  ) : (
+                    <span key={form}>{form}</span>
+                  ),
+                )}
+              </span>
             </li>
           ))}
         </ol>
