@@ -47,8 +47,10 @@ export function CielPage() {
         <div className="manager-grid" />
         <div className="manager-glow" />
       </div>
+      {/* A file shows no file line in its top bar (2026-10-23, the dossier
+          sheets); the label names the brand link's way back. */}
       <DossierTopbar
-        fileLabel={`CHARACTER FILE // ${CIEL.kicker}`}
+        fileLabel={`${CIEL.name}の資料`}
         returnHash={RE_DIVE_HASH}
         returnLabel="六詠一覧へ戻る"
       />
@@ -67,22 +69,21 @@ export function CielPage() {
               fetchPriority="high"
             />
             <i className="dossier-arrive-scan" aria-hidden="true" />
-            <span className="manager-numeral">{CIEL.id}</span>
           </div>
         </div>
         <div className="manager-introduction">
           <header className="dossier-identity">
-            <p className="manager-file-number">CHARACTER FILE // {CIEL.kicker}</p>
+            {/* RE DIVE's 六詠 I: the numeral in outline over the name, as on
+                every file (decorative). */}
+            <span className="dossier-file-numeral" data-numerals="roman" aria-hidden="true">
+              {CIEL.id}
+            </span>
             <h1>
-              <small>CIEL</small>
               <span className="manager-display-name">
                 <NameText value={CIEL.name} />
               </span>
             </h1>
             <p className="manager-title"># {SAGA.epithet}</p>
-            <a className="dossier-read-link" href="#dossier-index">
-              人物資料を読む <span aria-hidden="true">↓</span>
-            </a>
           </header>
           <div className="manager-quotes">
             {SAGA.quotes.map((quote) => (
@@ -119,7 +120,6 @@ export function CielPage() {
               decoding="async"
               fetchPriority="low"
             />
-            <span>BEFORE</span>
             <i className="rider-archive-civilian-shade" />
           </div>
           <figcaption>
@@ -132,10 +132,6 @@ export function CielPage() {
         </figure>
       </section>
       <section className="manager-dossier" id="dossier-index" aria-label="シエルの人物資料">
-        <div className="manager-section-index">
-          <span>{CIEL.id}</span>
-          <small>CHARACTER DOSSIER</small>
-        </div>
         <DossierContents sections={SAGA.sections} />
         <div className="manager-sections">
           {SAGA.sections.map((section) => (
@@ -210,11 +206,9 @@ export function CielPage() {
                 decoding="async"
                 fetchPriority="low"
               />
-              <span>SPECIAL SITE</span>
             </div>
             <div className="rider-special-site-copy">
               <p>{SAGA.special.kicker}</p>
-              <small>{SAGA.special.en}</small>
               <h2 id="rider-special-site-title">
                 <span>仮面ライダー</span>
                 <b><DisplayName value={SAGA.special.name} /></b>

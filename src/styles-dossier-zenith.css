@@ -2257,13 +2257,18 @@ html[data-family="dossier"]
 
 /* Wide screens: the file slip's prism rule (edition sheet) runs over that
    whole line, and over the nightmare's name, which now opens her card;
-   her words sit level with the middle of her art. */
+   a card's words sit level with the middle of its art. */
 @media (min-width: 761px) {
   html[data-family="dossier"]
     main.manager-page.manager-page.manager-page
     #identity-records
     > .rider-nightmare-card
-    > .rider-nightmare-card-copy {
+    > .rider-nightmare-card-copy,
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    #identity-records
+    > .rider-archive-civilian
+    > figcaption {
     align-content: center;
   }
 }

@@ -87,9 +87,10 @@ export function OtherArtworkCard({ artwork }: { artwork: (typeof OTHER_ARTWORK)[
           decoding="async"
         />
         <span className="other-card-shade" aria-hidden="true" />
+        {/* The archive's running number (01-06 with the World page's own
+            cards): kept while the set keeps it. */}
         <span className="other-card-code">RELATED / {artwork.code}</span>
         <span className="other-card-copy">
-          <small>CHARACTER VISUAL</small>
           <b>{artwork.name}</b>
           <i>画像を拡大</i>
         </span>

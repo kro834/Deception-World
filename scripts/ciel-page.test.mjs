@@ -30,7 +30,13 @@ test("his page keeps 月城悠真's record from the eight riders, without マキ
   }
   assert.doesNotMatch(page, /nightmare|マキャベル|MACHIAVEL/i);
   // Headed by his name and his illustration.
-  assert.match(page, /<small>CIEL<\/small>/);
+  // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）
+  // No CIEL subtitle or CHARACTER FILE strip: his numeral (I) over his name.
+  assert.doesNotMatch(page, /<small>CIEL<\/small>|CHARACTER FILE/);
+  assert.match(
+    page,
+    /className="dossier-file-numeral" data-numerals="roman" aria-hidden="true">\s*\{CIEL\.id\}\s*<\/span>\s*<h1>\s*<span className="manager-display-name">\s*<NameText value=\{CIEL\.name\} \/>/,
+  );
   assert.match(page, /alt="シエルのキャラクタービジュアル"/);
   assert.match(page, /\{\.\.\.cielPortrait\(\)\}/);
   // It returns to RE DIVE. Owner (2026-10-16): the 六詠 strip with シエル as I is gone from his page.
