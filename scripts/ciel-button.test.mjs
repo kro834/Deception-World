@@ -1,3 +1,4 @@
+import { fileURLToPath } from "node:url";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
@@ -26,7 +27,7 @@ test("the published source has no private metadata and JPEG scan bytes are untou
     Buffer.concat([Buffer.from([255, 216]), icc, scan]),
   );
   const metadata = await sharp(
-    new URL("../public/ciel-button-20261018.jpeg", import.meta.url).pathname,
+    fileURLToPath(new URL("../public/ciel-button-20261018.jpeg", import.meta.url)),
   ).metadata();
   for (const key of ["exif", "xmp", "iptc"]) assert.equal(metadata[key], undefined, key);
 });
