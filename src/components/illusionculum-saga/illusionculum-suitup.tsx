@@ -164,9 +164,14 @@ export const IllusionculumSuitUp = memo(function IllusionculumSuitUp({
       className="rxs-section ics-chapter ics-suitup"
       aria-labelledby="ics-suitup-title"
     >
-      <h2 id="ics-suitup-title" className="ics-sr">
-        変身
-      </h2>
+      {/* The chapter's head over the runway, as the Rexonance page's. */}
+      <header className="rxs-section-heading ics-heading rxs-reveal">
+        <b className="ics-numeral" aria-hidden="true">
+          02
+        </b>
+        <h2 id="ics-suitup-title">変身</h2>
+        <span className="ics-heading-plate" data-plate="figure" aria-hidden="true" />
+      </header>
       <Guide runwayRef={runwayRef} />
       <AssemblyMovie runwayRef={runwayRef} site="illusionculum" />
       <div
@@ -184,7 +189,6 @@ export const IllusionculumSuitUp = memo(function IllusionculumSuitUp({
           <i className="rzn-light" />
           <i className="rzn-floor" />
           {/* The chapter's numeral, a graphic mark in the frame's corner. */}
-          <b className="ics-numeral ics-runway-numeral">02</b>
           <img
             className="rzn-still"
             src={STILLS[form]}

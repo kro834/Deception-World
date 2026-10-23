@@ -541,7 +541,7 @@ export function IllusionculumSaga() {
             <b className="ics-numeral" aria-hidden="true">
               03
             </b>
-            <h2 id="ics-forms-title" className="ics-sr">
+            <h2 id="ics-forms-title">
               形態
             </h2>
           </header>
