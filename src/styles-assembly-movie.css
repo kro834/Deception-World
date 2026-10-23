@@ -70,6 +70,17 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie[data-sit
   --mc-lit: #e9b866;
 }
 
+/* META UNITAS SAGA (2026-10-24): its teal and orange light. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie[data-site="meta-unitas"] {
+  --mc-ink: #eef6f7;
+  --mc-bg: rgb(2 7 10 / 86%);
+  --mc-line: rgb(255 154 74 / 36%);
+  --mc-accent: #ffc98f;
+  --mc-track: rgb(55 198 192 / 26%);
+  --mc-disc: #05121a;
+  --mc-lit: #ff9a4a;
+}
+
 html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie[data-site="rexonance"] {
   --mc-ink: #f2f7fb;
   --mc-bg: rgb(3 7 13 / 86%);

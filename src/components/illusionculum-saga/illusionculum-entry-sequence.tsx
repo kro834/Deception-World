@@ -4,6 +4,7 @@ import { ILLUSIONCULUM_ENTRY_UNDERSUIT as REXONANCE_SUIT_UNDERSUIT } from "@/lib
 import {
   ILLUSIONCULUM_SUIT_ATLAS,
   ILLUSIONCULUM_SUIT_DRIVER,
+  ILLUSIONCULUM_SUIT_DRIVER_STANDIN,
   ILLUSIONCULUM_SUIT_PIECES,
   ILLUSIONCULUM_SUIT_SIZE,
 } from "@/lib/illusionculum-suit";
@@ -104,6 +105,8 @@ export function IllusionculumEntrySequence({ phase }: { phase: "covering" | "rev
       <div className="ice-entry-stage">
         <div className="ice-entry-figure">
           <img className="ice-entry-under" src={REXONANCE_SUIT_UNDERSUIT} alt="" decoding="async" />
+          {/* The driver, on the undersuit from the first frame (owner). */}
+          <img className="ice-entry-driver" src={ILLUSIONCULUM_SUIT_DRIVER_STANDIN} alt="" decoding="async" />
           {/* The armour generated from nanite cells away from the body
               (forward and above), then flown in and locked on. */}
           {/* The nanites' source: an ice surge out of the reactor up and down
@@ -132,6 +135,7 @@ export function IllusionculumEntrySequence({ phase }: { phase: "covering" | "rev
             <span
               key={plate.id}
               className="ice-entry-plate"
+              data-driver={plate.start < 0 || undefined}
               style={{
                 left: `${(plate.x / SIZE.width) * 100}%`,
                 top: `${(plate.y / SIZE.height) * 100}%`,

@@ -8,6 +8,7 @@ import {
 import rexonanceSagaCssUrl from "@/styles-rexonance-saga.css?url";
 import metaUnitasSagaCssUrl from "@/styles-meta-unitas-saga.css?url";
 import metaUnitasSuitupCssUrl from "@/styles-meta-unitas-suitup.css?url";
+import assemblyMovieCssUrl from "@/styles-assembly-movie.css?url";
 import { META_UNITAS_KEY_VISUAL, metaUnitasImage } from "@/lib/meta-unitas-saga-artwork";
 
 // The META UNITAS SAGA special site (owner's record, 2026-10-23). The shared
@@ -39,6 +40,8 @@ export const Route = createFileRoute("/meta-unitas-saga")({
       // draws it, scoped to this page; the page's own sheet after it.
       { rel: "stylesheet", href: metaUnitasSuitupCssUrl },
       { rel: "stylesheet", href: metaUnitasSagaCssUrl },
+      // The auto transformation movie's control (styles-assembly-movie.css).
+      { rel: "stylesheet", href: assemblyMovieCssUrl },
       CINEMATIC_STYLESHEET_LINK,
       {
         rel: "preload",
