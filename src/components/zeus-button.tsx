@@ -124,6 +124,10 @@ const ZEUS_AVOID_SELECTOR = [
   ".rxs-comparison-selector select",
   ".rxs-p14-range-labels button",
   "#rxs-p14-baseline",
+  // 2026-10-23: Far From #p16's base pills (the rightmost sat under the
+  // button at 360px) and the console's view pills.
+  ".ffs-p16-switch label",
+  ".ffs-console .ffs-views label",
   ".rider-special-site-link",
   ".dream-agent-open",
   ".dream-chapter-nav a",

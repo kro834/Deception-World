@@ -248,7 +248,8 @@ test("the P14 intro keeps its exact text; only phrase units were wrapped", () =>
   const text = intro.replace(/<[^>]+>/g, "").replace(/\s*\n\s*/g, "");
   assert.equal(
     text,
-    "P14は、出力変換・位相制御・能力間調停を一体化した第14世代演算基盤です。同じエーテル量からP1の9倍に相当する性能を引き出し、熱・位相ノイズ・能力間干渉による損失を合計7%まで抑えます。",
+    // Owner (2026-10-23, 公式設定): Rexonance's unit is 『P14 Extreme Tuning』.
+    "『P14 Extreme Tuning』は、出力変換・位相制御・能力間調停を一体化した第14世代演算基盤を、第五の犬の能力へ特化させた専用仕様です。同じエーテル量からP1の9倍に相当する性能を引き出し、熱・位相ノイズ・能力間干渉による損失を合計7%まで抑えます。",
   );
   assert.match(intro, /<span className="rxp-nowrap">一体化した<\/span>/);
   assert.match(intro, /<span className="rxp-nowrap">第14世代<\/span>/);
