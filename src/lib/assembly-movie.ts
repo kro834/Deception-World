@@ -695,6 +695,7 @@ export function mountAssemblyMovie(
     // The toggle needs only this controller.
     if (toggle) toggle.disabled = false;
     if (restart) restart.disabled = !enabled;
+    for (const radio of radios) radio.disabled = !enabled;
     if (seek) seek.disabled = !enabled;
     if (!enabled) {
       // No sequence to play (reduced motion, economy… turned on mid-visit).
@@ -870,7 +871,7 @@ export function mountAssemblyMovie(
     control.dataset.state = "idle";
     play.textContent = MOVIE_PLAY_LABELS.play;
     mini?.setAttribute("aria-label", MOVIE_PLAY_LABELS.play);
-    for (const button of [play, mini, toggle, restart]) if (button) button.disabled = true;
+    for (const button of [play, mini, toggle, restart, ...radios]) if (button) button.disabled = true;
     if (seek) seek.disabled = true;
   };
   mounted.set(control, dispose);

@@ -237,6 +237,9 @@ export function AssemblyMovie({
                 aria-label={`${speed}倍速`}
                 tabIndex={speed === ASSEMBLY_MOVIE_DEFAULT_SPEED ? 0 : -1}
                 data-speed={speed}
+                // Live with the controller, as the rest (a focused radio
+                // shows the control: never one that does nothing).
+                disabled
               >
                 {speed}×
               </button>

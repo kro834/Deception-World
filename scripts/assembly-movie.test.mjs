@@ -474,10 +474,13 @@ test("input on the control itself is not a scroll: keys and touches inside it, a
 
 test("the control shows while the frame is pinned, is live before the scene is ready (a 再生 waits for it), and the still tiers hide it", () => {
   const t = environment({ load: "waiting" });
+  // (The markup's buttons are disabled until the controller is here.)
+  for (const radio of t.radios) radio.disabled = true;
   const dispose = mountAssemblyMovie(t.control, t.runway, t.env);
   assert.equal(t.play.disabled, false, "never a dead button: live once the controller is here");
   assert.equal(t.restart.disabled, false);
   assert.equal(t.seek.disabled, false);
+  assert.ok(t.radios.every((radio) => !radio.disabled), "the speeds too");
   assert.equal(t.control.dataset.load, "waiting");
   assert.equal(t.control.dataset.tier, "motion");
   // Mounted at idle, far from the runway: no speculative preparation…
@@ -521,6 +524,7 @@ test("the control shows while the frame is pinned, is live before the scene is r
   assert.equal(t.control.dataset.load, "static");
   assert.equal(t.control.dataset.tier, "still");
   assert.equal(t.play.disabled, true);
+  assert.ok(t.radios.every((radio) => radio.disabled));
   dispose();
 });
 
@@ -545,6 +549,9 @@ test("the control's markup: a named group, 再生／一時停止 and 最初か�
   assert.match(source, /role="radio"/);
   assert.match(source, /aria-checked=\{speed === ASSEMBLY_MOVIE_DEFAULT_SPEED\}/);
   assert.match(source, /tabIndex=\{speed === ASSEMBLY_MOVIE_DEFAULT_SPEED \? 0 : -1\}/);
+  // Every button waits for the controller: a radio focused before it (the
+  // control shows on focus) is never one that does nothing.
+  assert.match(source, /data-speed=\{speed\}[\s\S]{0,200}?\n\s*disabled\n\s*>/);
   assert.match(source, /aria-label=\{`\$\{speed\}倍速`\}/);
   assert.match(source, /ASSEMBLY_MOVIE_SPEEDS = Object\.freeze\(\[0\.5, 1, 1\.5, 2\] as const\)/);
   assert.match(source, /<span className="rzn-movie-sr">位置<\/span>/);
@@ -1160,6 +1167,7 @@ test("lifecycle: dispose removes every listener, observer and timer, returns the
     assert.equal(t.play.textContent, MOVIE_PLAY_LABELS.play);
     assert.equal(t.play.disabled, true, "no live button without its controller");
     assert.equal(t.mini.disabled, true);
+    assert.ok(t.radios.every((radio) => radio.disabled), "the speeds neither");
     // The scene coming up after the controller went plays nothing.
     t.runway.dataset.rznLoad = "ready";
     t.sent.length = 0;
