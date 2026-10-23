@@ -546,8 +546,23 @@ async function arriveFromHome(page, path) {
     )
     .catch(() => false);
   await sleep(400);
-  await link.click({ force: true, timeout: 45000 });
-  await page.waitForURL(`**/${path}**`, { timeout: 120000, waitUntil: "commit" });
+  // The load gate drops a press while it is still busy with the entry to
+  // /world (load-gate.tsx go(): `if (busy.current) return`): a reader would
+  // press again, and so does this, up to three times.
+  for (let attempt = 1; ; attempt += 1) {
+    if (!(await link.isVisible().catch(() => false))) {
+      await trigger.click({ force: true, timeout: 45000 }).catch(() => {});
+      await link.waitFor({ state: "visible", timeout: 20000 }).catch(() => {});
+      await sleep(1500);
+    }
+    await link.click({ force: true, timeout: 45000 });
+    try {
+      await page.waitForURL(`**/${path}**`, { timeout: 40000, waitUntil: "commit" });
+      break;
+    } catch (error) {
+      if (attempt >= 3) throw error;
+    }
+  }
   await settled(page);
 }
 
