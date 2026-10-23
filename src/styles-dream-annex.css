@@ -1162,14 +1162,6 @@
   letter-spacing: 0.3em;
 }
 
-.dream-page.dream-page .dream-case-note-head small {
-  grid-area: reading;
-  color: var(--ts-ginnezu);
-  font-family: var(--ts-latin);
-  font-size: 12px;
-  letter-spacing: 0.3em;
-}
-
 .dream-page.dream-page .dream-case-note-motto {
   margin: 0;
   color: var(--ts-kin-light);

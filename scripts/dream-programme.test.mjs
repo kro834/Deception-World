@@ -42,7 +42,9 @@ test("each chapter companion can link only to its own canonical chronicle events
   assert.match(navigation, /DREAM_CHRONICLE\.filter\(\(event\) => event\.case === no\)/);
   assert.match(navigation, /#dream-chronicle-event-\$\{event\.no\}/);
   assert.match(chronicle, /id=\{`dream-chronicle-event-\$\{event\.no\}`\}/);
-  assert.match(navigation, /episode\.paragraphs\.length\}段落/);
+  // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）
+  // The index and the paragraph guide no longer print paragraph tallies.
+  assert.doesNotMatch(navigation, /episode\.paragraphs\.length\}段落/);
   assert.match(navigation, /aria-current=\{location\.current === episode\.no \? "location"/);
 });
 

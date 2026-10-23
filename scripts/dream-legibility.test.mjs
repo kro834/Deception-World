@@ -26,8 +26,10 @@ test("open chapter titles and affordances no longer inherit paper-edition ink", 
     craft,
     /\.dream-story-case\[open\] \.dream-story-case-heading > span \{ color: #f4ecdc;/,
   );
-  assert.match(craft, /\.dream-story-case-heading > small\) \{ color: #dfcaae;/);
-  assert.match(craft, /\.dream-story-case-number::before \{ color: #edcb96;/);
+  // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）
+  // The reading line and the 其ノ一 / CASE ordinal are gone; the numeral keeps its ink.
+  assert.match(craft, /\.dream-story-case\[open\] \.dream-story-case-number \{ color: #dfcaae;/);
+  assert.doesNotMatch(craft, /\.dream-story-case-heading > small|\.dream-story-case-number::before/);
 });
 
 test("the dark glossary restores the local palette for headings, citations and index folds", () => {

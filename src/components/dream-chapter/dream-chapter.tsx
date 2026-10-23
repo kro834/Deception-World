@@ -2094,18 +2094,14 @@ export function DreamChapter() {
         <DreamStoryIndex />
         <div className="dream-story-layout">
           <aside className="dream-story-crossings" aria-labelledby="dream-crossings-title">
-            <p className="dream-story-eyebrow">SAGA × TOUHOU PROJECT</p>
             <h3 id="dream-crossings-title">幻想郷との交差</h3>
             <p className="dream-story-crossings-lead">
               怪作を狙う追撃は人里を襲い、神社と竹林を戦場に変える。迎え撃つ霊夢たちとの共闘は、シエルと慶弥にも、守られる側になる戸惑いをもたらす。
             </p>
             <dl>
-              {DREAM_STORY_CROSSINGS.map((place, index) => (
+              {DREAM_STORY_CROSSINGS.map((place) => (
                 <div key={place.name}>
-                  <dt>
-                    <span aria-hidden="true">0{index + 1}</span>
-                    {place.name}
-                  </dt>
+                  <dt>{place.name}</dt>
                   <dd>
                     <strong>{place.role}</strong>
                     <p>{place.body}</p>
@@ -2128,11 +2124,10 @@ export function DreamChapter() {
                 >
                   <summary>
                     <span className="dream-story-case-number">
-                      CASE <b>{episode.no}</b>
+                      <b>{episode.no}</b>
                     </span>
                     <span className="dream-story-case-heading">
                       <span>{episode.title}</span>
-                      <small>{episode.reading}</small>
                     </span>
                     <span className="dream-story-case-toggle" aria-hidden="true">
                       ＋
@@ -2174,10 +2169,9 @@ export function DreamChapter() {
               <li key={note.no} id={`dream-case-note-${note.no}`} tabIndex={-1}>
                 <p className="dream-case-note-head">
                   <span>
-                    CASE <b>{note.no}</b>
+                    <b>{note.no}</b>
                   </span>
                   <strong>{episode?.title}</strong>
-                  <small>{episode?.reading}</small>
                 </p>
                 {note.motto ? (
                   <p className="dream-case-note-motto" lang="en">

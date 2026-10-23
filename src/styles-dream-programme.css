@@ -391,12 +391,15 @@
   gap: 10px;
 }
 
+/* A chapter plate: its numeral and its title on one line; the bookmark tag
+   joins under the title when the reader left one there. */
 .dream-page.dream-page .dream-reader-index a {
   display: grid;
   grid-template-columns: 35px minmax(0, 1fr);
-  grid-template-rows: 1fr auto;
+  align-content: center;
+  align-items: center;
   gap: 8px 12px;
-  min-height: 116px;
+  min-height: 72px;
   padding: 15px;
   border: 1px solid rgb(200 164 92 / 34%);
   background:
@@ -442,14 +445,6 @@
   line-height: 1.35;
 }
 
-.dream-page.dream-page .dream-reader-index-title > span {
-  color: var(--ts-ginnezu);
-  font-family: var(--ts-latin);
-  font-size: 12px;
-  letter-spacing: 0.13em;
-  overflow-wrap: anywhere;
-}
-
 .dream-page.dream-page .dream-reader-index-meta {
   grid-column: 2;
   display: flex;
@@ -477,6 +472,14 @@
     inset 0 1px 0 rgb(243 224 176 / 22%),
     inset 0 -3px var(--ts-kin-light),
     0 12px 28px rgb(0 0 0 / 38%);
+}
+
+/* An open fold lights its chapter numeral's edge (the index's only state cue). */
+.dream-page.dream-page .dream-reader-index a[data-open="true"] .dream-reader-index-number {
+  border-color: var(--ts-shu-text);
+  box-shadow:
+    inset 0 0 0 1px rgb(204 73 59 / 55%),
+    0 0 10px rgb(204 73 59 / 28%);
 }
 
 .dream-page.dream-page .dream-reader-index a[aria-current="location"] .dream-reader-index-number {
@@ -544,13 +547,6 @@
   margin-right: auto;
 }
 
-.dream-page.dream-page .dream-chapter-companion summary small {
-  color: #594753;
-  font-family: var(--ts-text);
-  font-size: 12px;
-  font-weight: 500;
-}
-
 .dream-page.dream-page .dream-chapter-companion-body {
   padding: 0 15px 16px;
   border-top: 1px solid rgb(110 44 53 / 24%);
@@ -576,15 +572,6 @@
   background: rgb(255 255 255 / 42%);
 }
 
-.dream-page.dream-page .dream-chapter-companion-cast > span {
-  display: block;
-  margin-bottom: 8px;
-  color: #79353c;
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-}
-
 .dream-page.dream-page .dream-chapter-companion-cast > div {
   display: flex;
   flex-wrap: wrap;
@@ -603,14 +590,6 @@
   color: #3d2430;
   font-size: 13px;
   text-decoration: none;
-}
-
-.dream-page.dream-page .dream-chapter-companion-cast a small {
-  color: #79353c;
-  font-family: var(--ts-latin);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
 }
 
 .dream-page.dream-page .dream-chapter-companion-cast a b {
@@ -632,13 +611,15 @@
   min-width: 0;
 }
 
+/* An event slip: its title over its place, read in the list's order
+   (Owner, 2026-10-23: no event numbers). */
 .dream-page.dream-page .dream-chapter-companion li a {
   display: grid;
-  grid-template-columns: 28px minmax(0, 1fr);
-  align-items: center;
-  gap: 2px 8px;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: center;
+  gap: 2px;
   min-height: 52px;
-  padding: 6px 9px;
+  padding: 6px 9px 6px 14px;
   border: 1px solid rgb(110 44 53 / 28%);
   background:
     linear-gradient(180deg, #8e3d46, #682830) 0 0 / 3px 100% no-repeat,
@@ -650,14 +631,6 @@
     border-color 180ms ease,
     background-color 180ms ease,
     box-shadow 180ms ease;
-}
-
-.dream-page.dream-page .dream-chapter-companion li a span {
-  grid-row: 1 / 3;
-  color: #79353c;
-  font-family: var(--ts-latin);
-  font-size: 12px;
-  font-weight: 700;
 }
 
 .dream-page.dream-page .dream-chapter-companion li a strong {
@@ -947,7 +920,7 @@ html[data-family="dream"] main.dream-page.dream-page > :is(#cast-roster, #glossa
   }
 
   .dream-page.dream-page .dream-reader-index a {
-    min-height: 112px;
+    min-height: 64px;
     padding: 12px;
   }
 

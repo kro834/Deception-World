@@ -16,7 +16,6 @@ const routes = [
   { title: "記録を探す", href: "#dream-record-explorer", mark: "探す" },
 ] as const;
 
-
 // The three cast files, then the four agents: two companies, set apart by a gap
 // and each file's own light on its top edge.
 const dossierQuickLinks = [

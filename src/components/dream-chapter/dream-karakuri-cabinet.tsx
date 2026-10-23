@@ -167,7 +167,6 @@ export function DreamKarakuriCabinet() {
             <span className="dream-karakuri-shoji-leaf dream-karakuri-shoji-right" />
           </div>
         </div>
-
       </div>
     </section>
   );

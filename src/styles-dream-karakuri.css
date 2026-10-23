@@ -147,7 +147,7 @@ html[data-family="dream"] main.dream-page.dream-page .dream-story-case[open] > s
 }
 
 /* Opening a file no longer changes its summary to paper. Keep the title,
-   chapter caption and close glyph legible in both states. */
+   the chapter numeral and the close glyph legible in both states. */
 html[data-family="dream"]
   main.dream-page.dream-page
   .dream-story-case[open]
@@ -156,21 +156,14 @@ html[data-family="dream"]
   color: #f4ecdc;
 }
 
-html[data-family="dream"]
-  main.dream-page.dream-page
-  .dream-story-case[open]
-  :is(.dream-story-case-number, .dream-story-case-heading > small) {
+html[data-family="dream"] main.dream-page.dream-page .dream-story-case[open] .dream-story-case-number {
   color: #dfcaae;
 }
 
 html[data-family="dream"]
   main.dream-page.dream-page
   .dream-story-case[open]
-  .dream-story-case-toggle,
-html[data-family="dream"]
-  main.dream-page.dream-page
-  .dream-story-case[open]
-  .dream-story-case-number::before {
+  .dream-story-case-toggle {
   color: #edcb96;
 }
 

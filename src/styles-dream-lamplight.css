@@ -98,11 +98,6 @@ html[data-family="dream"] main.dream-page.dream-page .dream-story-case > summary
   align-items: center;
 }
 
-html[data-family="dream"] main.dream-page.dream-page .dream-story-case-heading > small {
-  color: #e6c28e;
-  letter-spacing: 0.22em;
-}
-
 html[data-family="dream"] main.dream-page.dream-page .dream-story-case-body {
   margin-top: 4px;
   padding: clamp(22px, 3vw, 36px) clamp(18px, 3vw, 40px) clamp(28px, 4vw, 44px);

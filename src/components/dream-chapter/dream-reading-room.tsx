@@ -224,7 +224,6 @@ export function DreamReadingRoom({ trigger, onClose }: Props) {
       setStatus("このブラウザーでは保存できません。読書室はこのまま利用できます。");
     }
   };
-  const totalChars = episode.paragraphs.join("").length;
 
   return (
     <dialog
@@ -261,7 +260,6 @@ export function DreamReadingRoom({ trigger, onClose }: Props) {
       <div className="dream-reading-shell">
         <header className="dream-reading-topbar">
           <div>
-            <small lang="en">DREAM CHAPTER</small>
             <h2>読書室</h2>
           </div>
           <button ref={closeButton} type="button" onClick={close} aria-label="読書室を閉じる">
@@ -291,7 +289,6 @@ export function DreamReadingRoom({ trigger, onClose }: Props) {
                 >
                   <span>0{item.no}</span>
                   {item.title}
-                  <small>{item.reading}</small>
                 </button>
               ))}
             </nav>
@@ -358,12 +355,7 @@ export function DreamReadingRoom({ trigger, onClose }: Props) {
           >
             <article className="dream-reading-paper" key={chapter}>
               <header>
-                <p lang="en">
-                  CASE 0{chapter} / {episode.reading}
-                </p>
-                <small className="dream-reading-char-count">
-                  全{episode.paragraphs.length}段落 · {totalChars}字
-                </small>
+                <p lang="en">CASE 0{chapter}</p>
                 <h3>{episode.title}</h3>
                 <span>{episode.lead}</span>
               </header>
@@ -377,11 +369,9 @@ export function DreamReadingRoom({ trigger, onClose }: Props) {
               ))}
               <footer>
                 <span aria-hidden="true">◇</span>
-                <p>
-                  {index === DREAM_CASES.length - 1
-                    ? "公開されているあらすじはここまでです。"
-                    : "次の章へ、物語を辿る。"}
-                </p>
+                {index === DREAM_CASES.length - 1 ? (
+                  <p>公開されているあらすじはここまでです。</p>
+                ) : null}
                 <div>
                   <button
                     type="button"
@@ -430,9 +420,7 @@ export function DreamReadingRoom({ trigger, onClose }: Props) {
           <button type="button" onClick={save}>
             しおりを保存
           </button>
-          <p role="status">
-            {status || "保存したしおりは、通常表示の「続きから読む」にも反映されます。"}
-          </p>
+          <p role="status">{status}</p>
         </footer>
       </div>
     </dialog>

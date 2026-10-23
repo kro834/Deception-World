@@ -139,12 +139,6 @@ html[data-family="dream"] main.dream-page.dream-page .dream-reading-entry h3 {
   margin: 8px 0 6px;
 }
 
-html[data-family="dream"] main.dream-page.dream-page .dream-reading-entry > div > span {
-  color: #d9cdbf;
-  font-size: 14px;
-  line-height: 1.9;
-}
-
 html[data-family="dream"] main.dream-page.dream-page .dream-reading-entry > p[role="status"] {
   flex-basis: 100%;
   color: var(--zn-kinari);
@@ -173,11 +167,6 @@ html[data-family="dream"] main.dream-page.dream-page .dream-reader-support-headi
 html[data-family="dream"] main.dream-page.dream-page .dream-reader-support-heading p {
   font-size: 16px;
   letter-spacing: 0.12em;
-}
-
-html[data-family="dream"] main.dream-page.dream-page .dream-reader-support-heading > span {
-  font-family: var(--zn-latin), var(--ts-text);
-  letter-spacing: 0.08em;
 }
 
 html[data-family="dream"] main.dream-page.dream-page .dream-reader-settings {
@@ -712,15 +701,6 @@ html[data-family="dream"] main.dream-page.dream-page .dream-story-case-body .dre
   color: var(--zn-kin-light);
 }
 
-html[data-family="dream"]
-  main.dream-page.dream-page
-  .dream-story-case-body
-  .dream-reader-related
-  > span {
-  color: var(--zn-ginnezu);
-  letter-spacing: 0.12em;
-}
-
 html[data-family="dream"] main.dream-page.dream-page .dream-story-case-body .dream-reader-related a,
 html[data-family="dream"]
   main.dream-page.dream-page
@@ -747,22 +727,6 @@ html[data-family="dream"]
     0 10px 24px rgb(0 0 0 / 30%);
   color: var(--zn-kinari);
   letter-spacing: 0.08em;
-}
-
-html[data-family="dream"]
-  main.dream-page.dream-page
-  .dream-story-case-body
-  .dream-reader-pagination
-  a
-  small {
-  color: var(--zn-kin-light);
-  letter-spacing: 0.14em;
-}
-
-html[data-family="dream"] main.dream-page.dream-page .dream-story-case-body .dream-reader-end {
-  color: var(--zn-ginnezu);
-  font-family: var(--zn-latin);
-  letter-spacing: 0.18em;
 }
 
 @media (hover: hover) and (pointer: fine) {
