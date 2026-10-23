@@ -106,7 +106,12 @@ export function IllusionculumEntrySequence({ phase }: { phase: "covering" | "rev
         <div className="ice-entry-figure">
           <img className="ice-entry-under" src={REXONANCE_SUIT_UNDERSUIT} alt="" decoding="async" />
           {/* The driver, on the undersuit from the first frame (owner). */}
-          <img className="ice-entry-driver" src={ILLUSIONCULUM_SUIT_DRIVER_STANDIN} alt="" decoding="async" />
+          <img
+            className="ice-entry-driver"
+            src={ILLUSIONCULUM_SUIT_DRIVER_STANDIN}
+            alt=""
+            decoding="async"
+          />
           {/* The armour generated from nanite cells away from the body
               (forward and above), then flown in and locked on. */}
           {/* The nanites' source: an ice surge out of the reactor up and down

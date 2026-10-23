@@ -1,7 +1,7 @@
 import { Fragment, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { GuardedLink } from "@/components/load-gate";
 import { DisplayName } from "@/components/name-text";
-import { LiquidLens } from "@/components/world/liquid-rail";
+import { FormSlider } from "@/components/special/form-slider";
 import { SideMenuLayer, SideMenuTrigger } from "@/components/world/world-chrome";
 import { useWorldMode } from "@/components/world/use-world-mode";
 import { WORLD_ENTER_ASSETS } from "@/lib/asset-loader";
@@ -177,6 +177,13 @@ function Calls({
     </ol>
   );
 }
+
+/** The four forms as the shared slider's items (each its own light). */
+const FORM_ITEMS = ILLUSIONCULUM_FORM_ORDER.map((key) => ({
+  key,
+  label: ILLUSIONCULUM_FORMS[key].label,
+  accent: ILLUSIONCULUM_FORMS[key].accent,
+}));
 
 export function IllusionculumSaga() {
   useWorldMode();
@@ -541,40 +548,19 @@ export function IllusionculumSaga() {
             <b className="ics-numeral" aria-hidden="true">
               03
             </b>
-            <h2 id="ics-forms-title">
-              形態
-            </h2>
+            <h2 id="ics-forms-title">形態</h2>
           </header>
-          <div
+          <FormSlider
             ref={formTabsRef}
-            className="rxs-stage-tabs liquid-swipe-tabs ics-form-tabs"
-            role="tablist"
-            aria-label="イリュージョンクルムサーガの形態"
-            data-liquid-glass="true"
-            data-stage={form}
-          >
-            <LiquidLens />
-            {ILLUSIONCULUM_FORM_ORDER.map((key) => (
-              <button
-                key={key}
-                id={`ics-form-tab-${key}`}
-                type="button"
-                role="tab"
-                aria-selected={form === key}
-                aria-controls="ics-form-panel"
-                tabIndex={form === key ? 0 : -1}
-                className={form === key ? "is-active" : ""}
-                data-form={key}
-                style={{ ["--liquid-accent" as string]: ILLUSIONCULUM_FORMS[key].accent }}
-                onClick={() => selectForm(key)}
-                onPointerUp={(event) => releaseControlFocus(event.currentTarget)}
-              >
-                <span>
-                  <DisplayName value={ILLUSIONCULUM_FORMS[key].label} />
-                </span>
-              </button>
-            ))}
-          </div>
+            className="ics-form-tabs"
+            items={FORM_ITEMS}
+            value={form}
+            onSelect={selectForm}
+            idPrefix="ics-form-tab"
+            panelId="ics-form-panel"
+            ariaLabel="イリュージョンクルムサーガの形態"
+            onTabPointerUp={(event) => releaseControlFocus(event.currentTarget)}
+          />
 
           <div
             ref={formPanelRef}
