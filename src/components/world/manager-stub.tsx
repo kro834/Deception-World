@@ -651,7 +651,10 @@ function ManagerDossier({ profile }: { profile: Profile }) {
             <p className="manager-file-number">ARCHIVE ACCESS // {profile.numeral}</p>
             <h1>
               <small>RIKUEI {profile.numeral}</small>
-              <span className="manager-display-name">
+              <span
+                className="manager-display-name"
+                style={{ ["--name-len" as string]: [...profile.name].length }}
+              >
                 <NameText value={profile.name} />
               </span>
             </h1>

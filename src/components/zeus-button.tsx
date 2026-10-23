@@ -195,6 +195,8 @@ const ZEUS_AVOID_TEXT_SELECTOR = [
    count). Page words only: the archive bridge mirrors the list above, and
    its frame never shows these. */
 const ZEUS_AVOID_PAGE_TEXT_SELECTOR = [
+  // 2026-10-23: the 六詠 dossiers' fact values (RIDER, AUTHORITY…) on phones.
+  ".manager-facts dd",
   ".rxs-p14-overview :is(dt, dd)",
   ".rxs-p14-metrics article > :not(.rxs-p14-values)",
   ".rxs-comparison-formula",
@@ -244,7 +246,7 @@ const ZEUS_AVOID_ART_SELECTOR = ".rxs-hero-visual img";
    rider files. Weighed as art, not stepped off as controls: on a phone the
    grid fills the screen's foot, and as controls they would block every spot
    and pin the button home on a tile; as art the least-covering spot wins. */
-const ZEUS_AVOID_TILE_SELECTOR = ".dossier-roster > li";
+const ZEUS_AVOID_TILE_SELECTOR = ".dossier-roster > li, #manager-archive .manager-slot-grid > .signal";
 const ZEUS_DISPLAY_TEXT_SELECTOR = "strong, b";
 const ZEUS_DISPLAY_TEXT_MIN_PX = 24;
 // At the end of the page nothing more scrolls out from under the button, so
