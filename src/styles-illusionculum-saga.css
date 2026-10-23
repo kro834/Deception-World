@@ -2058,3 +2058,75 @@
     white-space: nowrap;
   }
 }
+
+/* ================================================================
+   The narrow bar names the chapter in view (Rexonance's bar,
+   styles-rexonance-apex.css): from 360 to 1099px the inner grid gives the
+   bar's name the free column, the chapter a fitted auto column and the
+   menu its fixed 48px, so the button never leaves the first row; the other
+   links stay in the tree (their numbers, aria) but take no room. Under
+   360px only the chapter's number shows.
+   ================================================================ */
+@media (max-width: 1099.98px) {
+  html[data-family="special"] body .rxs-page.rxs-page.ics-page > header.rxs-local-nav .rxs-local-nav-inner {
+    grid-template-columns: minmax(0, 1fr) auto 48px;
+    gap: 8px;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.ics-page > header.rxs-local-nav .rxs-brand {
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.ics-page > header.rxs-local-nav .rxs-brand > b {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.ics-page > header.rxs-local-nav nav {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0;
+    min-width: 0;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.ics-page > header.rxs-local-nav nav a:not([aria-current="location"]):not(:focus-visible) {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1px;
+    min-width: 0;
+    height: 1px;
+    min-height: 0;
+    overflow: hidden;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.ics-page > header.rxs-local-nav nav a:is([aria-current="location"], :focus-visible) {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding-inline: 6px 2px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.ics-page > header.rxs-local-nav nav:not(:has(a:is([aria-current="location"], :focus-visible))) {
+    visibility: hidden;
+  }
+}
+
+/* The very narrowest: the chapter's number alone (its name stays for AT). */
+@media (max-width: 359.98px) {
+  html[data-family="special"] body .rxs-page.rxs-page.ics-page > header.rxs-local-nav nav a[aria-current="location"] {
+    font-size: 0;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.ics-page > header.rxs-local-nav nav a[aria-current="location"] > span {
+    margin: 0;
+    font-size: 12px;
+  }
+}
