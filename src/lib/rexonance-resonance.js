@@ -1465,6 +1465,47 @@ const reactorPixels = (core) => {
   return squares;
 };
 const facePixels = (glow, visor) => glowPixels(glow, visor);
+// The body's held-back lights are generated like the eyes and the reactor
+// (owner, 2026-10-23: 「他も修正」 — they popped in whole at B.light): pixel
+// squares sampled from the lights' own art fill each light in burst groups
+// a moment before the light runs out from the core, hold while it lights
+// under them, then scatter outward (the BURSTS' scales and turns) behind
+// the wipe, so the whole body reads as one wave out from the reactor.
+const LIGHT_PIXELS = { lead: 0.014, fill: 0.006, hold: 0.004, burst: 0.014, drift: 9 };
+const lightPixels = (lights, core, W, H, document) => {
+  if (!lights?.width || !core) return [];
+  const cell = 6;
+  const cw = Math.max(1, Math.round(W / cell));
+  const ch = Math.max(1, Math.round(H / cell));
+  const probe = document.createElement("canvas");
+  probe.width = cw;
+  probe.height = ch;
+  const pc = probe.getContext("2d", { willReadFrequently: true });
+  if (!pc) return [];
+  pc.drawImage(lights, 0, 0, cw, ch);
+  const data = pc.getImageData(0, 0, cw, ch).data;
+  probe.width = probe.height = 0;
+  const random = seededRandom(2031);
+  const [cx, cy] = core;
+  const reach = Math.hypot(Math.max(cx, W - cx), Math.max(cy, H - cy));
+  const squares = [];
+  for (let y = 0; y < ch; y += 1)
+    for (let x = 0; x < cw; x += 1) {
+      const i = (y * cw + x) * 4;
+      if (data[i + 3] < 70) continue;
+      // Keep the squares sparse (the eyes' density), never every cell.
+      if (random() > 0.42) continue;
+      const px = (x + random()) * (W / cw);
+      const py = (y + random()) * (H / ch);
+      if (Math.hypot(px - cx, py - cy) < REACTOR_RADIUS) continue;
+      const size = [4, 5, 6, 8][squares.length % 4];
+      const tone = squares.length % 7 === 0 ? 2 : data[i] > data[i + 2] ? 1 : 0;
+      const d = Math.hypot(px - cx, py - cy) / reach;
+      squares.push({ x: px - size / 2, y: py - size / 2, size, tone, group: squares.length % 6, d });
+      if (squares.length >= 900) return squares;
+    }
+  return squares;
+};
 const BURSTS = [
   [3.4, -14],
   [4.6, 10],
@@ -1599,6 +1640,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   let settledCount = 0;
   let pixels = null;
   let reactorSquares = null;
+  let lightSquares = null;
   let view = null;
   let lastProgress = -1;
   let calmTimer = 0;
@@ -2325,6 +2367,10 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         // (No mote layers: the scene no longer reads them — round 3, memory.)
         const nextLights = await splitLightsIdle(images.figure, "figure-lights");
         if (!active()) return;
+        const nextLightPixels = await idleTask(() =>
+          active() ? lightPixels(nextLights?.lights, config.core, W, H, document) : [],
+        );
+        if (!active()) return;
         if (nextReactor && nextLights?.unlit) {
           mark("reactor-unlit");
           await idleTask(() => {
@@ -2704,6 +2750,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         goldPlan = nextGold;
         pixels = nextPixels;
         reactorSquares = nextReactorPixels;
+        lightSquares = nextLightPixels;
         settled = nextSettled;
         settledCount = 0;
         lights = nextLights;
@@ -3351,6 +3398,41 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         context.globalCompositeOperation = "source-over";
       }
       context.restore();
+    }
+    // ... formed first by pixel squares, which scatter behind the wipe.
+    if (lightSquares?.length) {
+      const { lead, fill, hold, burst: out, drift } = LIGHT_PIXELS;
+      const [from, to] = B.light;
+      const [coreX, coreY] = config.core;
+      if (progress >= from - lead && progress < to + hold + out) {
+        // Where the wipe (easeOut of the cube) passes each square's distance.
+        const passAt = (d) => from + (to - from) * (1 - Math.cbrt(1 - Math.min(1, d)));
+        for (let tone = 0; tone < 3; tone += 1) {
+          context.fillStyle = palette.toneCss[tone];
+          for (const square of lightSquares) {
+            if (square.tone !== tone) continue;
+            const pass = passAt(square.d);
+            const start = pass - lead + square.group * (fill / 6);
+            if (progress < start) continue;
+            const burst = smooth(clamp01((progress - pass - hold) / out));
+            if (burst >= 1) continue;
+            const [scale, turn] = BURSTS[square.group];
+            const dx = square.x - coreX;
+            const dy = square.y - coreY;
+            const length = Math.hypot(dx, dy) || 1;
+            const a = (turn * Math.PI * burst) / 180;
+            const push = drift * (scale - 1) * burst;
+            const ox = (dx / length) * push;
+            const oy = (dy / length) * push;
+            const x = square.x + ox * Math.cos(a) - oy * Math.sin(a);
+            const y = square.y + ox * Math.sin(a) + oy * Math.cos(a);
+            context.globalAlpha = 0.95 * (1 - burst) * clamp01((progress - start) / (fill / 3));
+            const k = 1 + 0.25 * burst;
+            context.fillRect(x, y, square.size * k, square.size * k);
+          }
+        }
+        context.globalAlpha = 1;
+      }
     }
 
     // The form chosen in 03 (owner, 2026-10-11): MAX overwrites the
