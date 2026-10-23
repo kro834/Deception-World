@@ -188,18 +188,21 @@ for (const name of chosen) {
           await sleep(2000);
           await page.screenshot({ path: join(out, `${label}-${name}-${path}-movie-${speed}x.png`) });
           const progressAt2s = await page.evaluate(() => Number(document.querySelector(".rzn-movie-seek input").value));
+          // 2× runs to its end (a software-rendered frame is slow, so up to a
+          // minute); the other speeds are paused after their two seconds.
           let ended = false;
-          if (Number(speed) >= 1.5) {
+          if (Number(speed) === 2) {
             ended = await page
               .waitForFunction(() => document.querySelector(".rzn-movie").dataset.state === "ended", null, {
-                timeout: 30000,
+                timeout: 60000,
               })
               .then(() => true)
               .catch(() => false);
-          } else {
-            await press(page, ".rzn-movie-play");
           }
           const elapsed = Date.now() - started;
+          // Whatever is still playing is paused before the next speed.
+          if (await page.evaluate(() => document.querySelector(".rzn-movie").dataset.state === "playing"))
+            await press(page, ".rzn-movie-play");
           const frames = await takeFrames(page);
           const summary = summarize(frames);
           const final = await page.evaluate(() => {
