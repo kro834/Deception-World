@@ -306,18 +306,27 @@ async function chooseSpeed(page, speed) {
 /** 最初から: the movie plays again from the runway's start. */
 async function restart(page) {
   await openSheet(page);
+  // The movie's own frames are recorded: on a starved main thread it may be
+  // well under way again before a poll looks, so the restart is read from
+  // the frame that put the page back at the start.
+  await hookFrames(page);
+  const from = await pageNow(page);
   await press(page, ".rzn-movie-restart");
   await waitFor(
     page,
-    () => {
+    (since) => {
       const control = document.querySelector(".rzn-movie");
       const runway = document.querySelector(".rzn-suitup");
       const frame = runway.querySelector(".rzn-frame");
       const pin = parseFloat(getComputedStyle(frame).top) || 0;
       const q = (pin - runway.getBoundingClientRect().top) / (runway.offsetHeight - frame.offsetHeight);
-      return (control.dataset.state === "playing" || control.dataset.state === "loading") && q < 0.03;
+      const live = control.dataset.state === "playing" || control.dataset.state === "loading";
+      return (
+        (live && q < 0.03) ||
+        (live && (window.__movieScrolls || []).some(([t, , , at]) => t >= since && at < 0.02))
+      );
     },
-    null,
+    from,
     REACT_MS,
     "最初から did not restart the movie",
   );
@@ -460,7 +469,11 @@ async function hookFrames(page) {
         const top = args.length === 1 && typeof args[0] === "object" ? args[0]?.top : args[1];
         const runway = document.querySelector(".rzn-suitup");
         const frame = runway?.querySelector(".rzn-frame");
-        scrolls.push([frameTime, top, runway ? runway.offsetHeight - frame.offsetHeight : 0]);
+        const travel = runway ? runway.offsetHeight - frame.offsetHeight : 0;
+        const pin = frame ? parseFloat(getComputedStyle(frame).top) || 0 : 0;
+        // (Where the scroll puts the runway's progress.)
+        const q = runway && travel > 0 ? (top - (runway.getBoundingClientRect().top + scrollY - pin)) / travel : NaN;
+        scrolls.push([frameTime, top, travel, q]);
         if (scrolls.length > 20000) scrolls.splice(0, 10000);
       }
       return scrollTo.apply(this, args);
