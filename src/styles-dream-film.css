@@ -72,9 +72,6 @@ html[data-dream-chapter="true"] {
   background: rgb(204 73 59 / 24%);
   box-shadow: inset 0 -2px var(--dream-scarlet);
 }
-.dream-chapter-nav a small {
-  color: #e9baad;
-}
 
 .dream-hero {
   min-height: max(820px, 100svh);
@@ -193,10 +190,7 @@ html[data-dream-chapter="true"] .dream-hero-copy {
 .dream-hero-actions span {
   font-size: 14px;
 }
-.dream-hero-actions b {
-  font-size: 12px;
-  color: #f3d4c9;
-}
+
 .dream-scroll-cue {
   left: clamp(24px, 6vw, 90px);
   right: auto;
@@ -216,21 +210,10 @@ html[data-dream-chapter="true"] .dream-hero-copy {
   border-bottom: 1px solid rgb(217 186 154 / 34%);
   background: none;
 }
-.dream-page .dream-section-heading p {
-  border-left-color: var(--dream-scarlet);
-  color: #efb2a1;
-  max-inline-size: 100%;
-  min-width: 0;
-  overflow-wrap: anywhere;
-  letter-spacing: clamp(0.08em, 1.6vw, 0.28em);
-}
+
 .dream-section-heading h2 {
   font-size: clamp(42px, 5.1vw, 76px);
   letter-spacing: 0.01em;
-}
-.dream-section-heading > span {
-  font-size: 12px;
-  color: #d4bfd4;
 }
 
 .dream-poster-stage {
@@ -349,25 +332,7 @@ html[data-dream-chapter="true"] .dream-hero-copy {
   font-size: 12px;
   line-height: 1.7;
 }
-.dream-character-copy i,
-.dream-dolminence-copy i {
-  font-size: 12px;
-  line-height: 1.7;
-  color: #dac9dc;
-  letter-spacing: 0.1em;
-}
-.dream-character-copy em,
-.dream-dolminence-copy em {
-  margin-top: 22px;
-  font-size: 12px;
-}
-.dream-character-number,
-.dream-dolminence-number {
-  top: 16px;
-  right: 18px;
-  font-size: 30px;
-  text-shadow: 0 2px 8px #100b16;
-}
+
 .dream-dolminence-intro {
   max-width: 44em;
   font-size: 16px;
@@ -477,8 +442,7 @@ html[data-dream-chapter="true"] .dream-hero-copy {
   font-size: 16px;
   line-height: 2;
 }
-.dream-profile-grid dt,
-.dream-dossier-visuals figcaption {
+.dream-profile-grid dt {
   font-size: 12px;
 }
 .dream-dossier-visuals img {
@@ -530,9 +494,7 @@ html[data-dream-chapter="true"] .dream-hero-copy {
     padding-inline: 3px;
     font-size: 12px;
   }
-  .dream-chapter-nav a small {
-    font-size: 12px;
-  }
+
   .dream-hero {
     min-height: max(820px, 100svh);
     padding: 138px 20px max(52px, env(safe-area-inset-bottom));
@@ -610,9 +572,7 @@ html[data-dream-chapter="true"] .dream-hero-copy {
   .dream-section-heading h2 {
     font-size: clamp(30px, 9vw, 38px);
   }
-  .dream-section-heading > span {
-    font-size: 12px;
-  }
+
   .dream-poster-stage {
     gap: 18px;
   }
@@ -664,20 +624,7 @@ html[data-dream-chapter="true"] .dream-hero-copy {
     font-size: 12px;
     letter-spacing: 0;
   }
-  .dream-dolminence-copy i {
-    font-size: 12px;
-    overflow-wrap: anywhere;
-  }
-  .dream-dolminence-copy em {
-    font-size: 12px;
-    line-height: 1.6;
-    letter-spacing: 0;
-  }
-  .dream-dolminence-number {
-    top: 10px;
-    right: 12px;
-    font-size: 24px;
-  }
+
   .dream-dolminence-intro {
     margin-top: 0;
     font-size: 16px;
@@ -769,34 +716,11 @@ html[data-dream-chapter="true"] .dream-hero-copy {
 }
 
 /* The film hero is intentionally compact on landscape tablets. Keep each
-   Japanese destination whole while retaining its English record label below. */
+   Japanese destination whole on its plate. */
 @media (min-width: 981px) and (max-width: 1280px) {
-  .dream-page .dream-hero-actions a {
-    grid-template-columns: auto minmax(0, 1fr);
-    grid-template-rows: auto auto;
-  }
-
-  .dream-page .dream-hero-actions small {
-    grid-row: 1 / -1;
-  }
-
   .dream-page .dream-hero-actions span {
     white-space: nowrap;
   }
-
-  .dream-page .dream-hero-actions b {
-    grid-column: 2;
-  }
-}
-
-/* File IDs and section ordinals remain part of the dossier's reading order,
-   rather than decorative microtype, at every modal width. */
-.dream-dossier-title > p,
-.dream-dossier-sections > section > header span {
-  font-size: 12px;
-  line-height: 1.5;
-  letter-spacing: 0.14em;
-  overflow-wrap: anywhere;
 }
 
 /* Keep each classified portrait and its 20px name readable on narrow phones. */

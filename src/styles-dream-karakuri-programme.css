@@ -49,7 +49,6 @@ html[data-family="dream"] main.dream-page.dream-page .dream-programme-ticket::af
   border-top: 1px dashed #977e5659;
 }
 
-html[data-family="dream"] main.dream-page.dream-page .dream-programme-ticket-head,
 html[data-family="dream"] main.dream-page.dream-page .dream-programme-ticket-foot {
   color: #655047;
 }
@@ -57,32 +56,9 @@ html[data-family="dream"] main.dream-page.dream-page .dream-programme-ticket-foo
 html[data-family="dream"]
   main.dream-page.dream-page
   .dream-programme-ticket
-  .dream-programme-ticket-head
-  small,
-html[data-family="dream"]
-  main.dream-page.dream-page
-  .dream-programme-ticket
-  .dream-programme-ticket-foot
-  small {
-  color: #655047;
-  font-size: 12px;
-}
-
-html[data-family="dream"]
-  main.dream-page.dream-page
-  .dream-programme-ticket
-  .dream-programme-ticket-head
-  small:first-child,
-html[data-family="dream"]
-  main.dream-page.dream-page
-  .dream-programme-ticket
   .dream-programme-ticket-foot
   > span {
   color: var(--ticket-accent);
-}
-
-html[data-family="dream"] main.dream-page.dream-page .dream-programme-ticket-head {
-  padding-top: 6px;
 }
 
 html[data-family="dream"]
@@ -115,27 +91,6 @@ html[data-family="dream"] main.dream-page.dream-page .dream-programme-dossier-ch
   box-shadow:
     inset 0 0 0 3px #ffffff04,
     0 4px 0 #130f16;
-}
-
-/* The original agent accent stays on the rule; its text tint needs enough
-   light to read on the lacquer, particularly red and violet agents. */
-html[data-family="dream"] main.dream-page.dream-page .dream-programme-dossier-chip small {
-  color: color-mix(in srgb, var(--dossier-chip-accent, #e6c28e) 40%, #f4ecdc);
-  font-size: 13px;
-  line-height: 1.6;
-  letter-spacing: 0.08em;
-}
-
-html[data-family="dream"] main.dream-page.dream-page .dream-programme-ledger-grid {
-  gap: 1px;
-  border: 1px solid #ab8b5f5e;
-  background: #ab8b5f5e;
-}
-
-html[data-family="dream"] main.dream-page.dream-page .dream-programme-ledger-cell {
-  border: 0;
-  box-shadow: none;
-  background: #251d28;
 }
 
 html[data-family="dream"] main.dream-page.dream-page .dream-programme-reel {
@@ -178,30 +133,6 @@ html[data-family="dream"] main.dream-page.dream-page .dream-programme-reel-headi
   font-size: clamp(20px, 2.6vw, 28px);
   font-weight: 700;
   letter-spacing: 0.14em;
-}
-
-html[data-family="dream"] main.dream-page.dream-page .dream-programme-reel-heading p {
-  max-width: 30em;
-  margin: 0 0 2px;
-  color: #dfcaae;
-  font-size: 14px;
-  line-height: 1.8;
-}
-
-html[data-family="dream"]
-  main.dream-page.dream-page
-  .dream-programme-reel
-  .dream-programme-spotlight-meta {
-  gap: 12px 20px;
-  margin-bottom: 18px;
-}
-
-html[data-family="dream"]
-  main.dream-page.dream-page
-  .dream-programme-reel
-  .dream-programme-spotlight-kicker {
-  font-size: 12px;
-  letter-spacing: 0.12em;
 }
 
 html[data-family="dream"]
@@ -314,15 +245,6 @@ html[data-family="dream"] main.dream-page.dream-page .dream-programme-reel-sheet
     linear-gradient(0deg, #89663726, transparent 12% 88%, #89663726),
     repeating-linear-gradient(0deg, #8b603305 0 1px, transparent 1px 4px),
     radial-gradient(ellipse at 0 50%, #fff8e5, transparent 75%), var(--programme-paper);
-}
-
-html[data-family="dream"] main.dream-page.dream-page .dream-programme-reel-folio {
-  display: block;
-  margin-bottom: 18px;
-  color: #786147;
-  font-family: var(--ts-text);
-  font-size: 12px;
-  letter-spacing: 0.18em;
 }
 
 html[data-family="dream"]
@@ -496,9 +418,7 @@ html[data-family="dream"]
   html[data-family="dream"] main.dream-page.dream-page .dream-programme-reel-heading {
     gap: 10px;
   }
-  html[data-family="dream"] main.dream-page.dream-page .dream-programme-reel-heading p {
-    flex-basis: 100%;
-  }
+
   html[data-family="dream"] main.dream-page.dream-page .dream-programme-reel-frame {
     grid-template-columns: 24px minmax(0, 1fr) 16px;
   }
@@ -591,5 +511,64 @@ html[data-family="dream"]
     .dream-programme-spotlight-modes
     button[aria-pressed="true"] {
     outline: 2px solid Highlight;
+  }
+}
+
+/* ----------------------------------------------------------------
+   Owner (2026-10-23): the desk reads without its label layer.
+   A ticket is its seal, its title and a stub whose arrow sits at the
+   torn end; the seven files are two companies of name plates, each
+   lit by its own colour on the top edge, set apart by a wider gap.
+   ---------------------------------------------------------------- */
+@media (min-width: 761px) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-programme-ticket {
+    grid-template-rows: minmax(0, 1fr) auto;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-programme-ticket-foot {
+    justify-content: flex-end;
+  }
+}
+
+/* Phones: one row per ticket — seal and title, the arrow at the end. */
+@media (max-width: 760px) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-programme-ticket {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "main foot";
+  }
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-programme-dossier-chip {
+  align-content: center;
+  min-height: 56px;
+  padding: 12px 12px 11px;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-programme-dossier-chip strong {
+  font-size: 14px;
+  letter-spacing: 0.06em;
+}
+
+@media (min-width: 981px) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-programme-dossier-strip {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) 10px repeat(4, minmax(0, 1fr));
+  }
+
+  html[data-family="dream"]
+    main.dream-page.dream-page
+    .dream-programme-dossier-strip
+    > li[data-kind="cast"]
+    + li[data-kind="agent"] {
+    grid-column: 5;
+  }
+}
+
+@media (max-width: 760px) {
+  html[data-family="dream"]
+    main.dream-page.dream-page
+    .dream-programme-dossier-strip
+    > li[data-kind="cast"]
+    + li[data-kind="agent"] {
+    margin-inline-start: 10px;
   }
 }

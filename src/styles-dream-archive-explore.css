@@ -7,7 +7,6 @@
   background: var(--dr-plate-fill, var(--ts-night));
 }
 
-.dream-page.dream-page .dream-archive-index > p,
 .dream-page.dream-page .dream-archive-explore > label {
   display: block;
   margin: 0 0 12px;
@@ -106,6 +105,12 @@
   white-space: nowrap;
 }
 
+/* The status speaks only while the corner is narrowed (Owner, 2026-10-23);
+   idle, it stays in the tree as an empty live region and takes no room. */
+.dream-page.dream-page .dream-archive-explore > p:empty {
+  margin: 0;
+}
+
 .dream-page.dream-page .dream-archive-related {
   display: flex;
   flex-wrap: wrap;
@@ -200,6 +205,10 @@
   .dream-page.dream-page .dream-archive-explore > p {
     margin: 10px 0 0;
     white-space: normal;
+  }
+
+  .dream-page.dream-page .dream-archive-explore > p:empty {
+    margin: 0;
   }
 }
 

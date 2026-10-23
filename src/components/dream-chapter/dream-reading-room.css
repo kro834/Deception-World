@@ -108,7 +108,6 @@
   align-items: baseline;
   gap: 16px;
 }
-.dream-reading-topbar small,
 .dream-reading-kicker {
   font: 600 12px/1.6 var(--room-latin);
   letter-spacing: 0.22em;
@@ -317,15 +316,7 @@
   letter-spacing: 0.22em;
   color: var(--room-muted);
 }
-.dream-reading-char-count {
-  display: inline-block;
-  margin-top: 6px;
-  padding: 3px 9px;
-  border: 1px solid var(--room-rule);
-  color: var(--room-muted);
-  font-size: 12px;
-  letter-spacing: 0.08em;
-}
+
 .dream-reading-paper h3 {
   font-family: var(--room-display);
   font-size: clamp(38px, 5vw, 64px);
@@ -449,9 +440,7 @@
   .dream-reading-topbar {
     padding: 8px 14px;
   }
-  .dream-reading-topbar small {
-    display: none;
-  }
+
   .dream-reading-workspace {
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: auto minmax(0, 1fr);
