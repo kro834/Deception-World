@@ -72,17 +72,31 @@ export const BENCHMARK_TABLE = REPORT_TABLES.benchmark;
 export type CellValue = {
   /** The owner's cell, as written. */
   text: string;
+  /** The cell without its 「（est.）」, for a view that prints 推定値 beside it. */
+  figure: string;
   value: number;
   unit: string;
-  /** The cell ends in 「〜」 (エクスプリームの打撃力: 通常出力における下限値). */
+  /** The cell carries 「〜」, a lower bound (エクスプリームの打撃力 205.6t〜,
+   * レクソナンス / ファーフロムの主演算 50000〜YOPS / 60000〜YOPS). Ratios use
+   * the number as written. */
   floor: boolean;
+  /** The cell ends in 「（est.）」 (ヴィンクルムの推定値). */
+  estimate: boolean;
 };
 
-/** "205.6t〜" → 205.6, "t", floor. Throws on a cell that is not a figure. */
+/** "205.6t〜" → 205.6, "t", floor; "60000〜YOPS" → 60000, "YOPS", floor;
+ * "98.8t（est.）" → 98.8, "t", estimate. Throws on a cell that is not a figure. */
 export function parseCell(text: string): CellValue {
-  const match = text.match(/^([\d.]+)(t|m|秒|YOPS|TOPS)(〜)?$/);
+  const match = text.match(/^([\d.]+)(〜)?(t|m|秒|YOPS|TOPS)(〜)?(（est\.）)?$/);
   if (!match) throw new Error(`Not a figure: ${text}`);
-  return { text, value: Number(match[1]), unit: match[2], floor: Boolean(match[3]) };
+  return {
+    text,
+    figure: match[5] ? text.slice(0, -match[5].length) : text,
+    value: Number(match[1]),
+    unit: match[3],
+    floor: Boolean(match[2] || match[4]),
+    estimate: Boolean(match[5]),
+  };
 }
 
 /** How a row reads: more is better, a time (less is faster), or a load (less is better). */

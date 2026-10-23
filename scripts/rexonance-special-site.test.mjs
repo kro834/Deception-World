@@ -117,7 +117,7 @@ test("Vertex and Vinculum comparisons keep supplied processors and compare only 
     "URANUS X",
     "TAMAYURA X（アクセラレータ）",
     "P1",
-    "10,000YOPS / ∞Core · KHAOS",
+    "10,000YOPS / 500Core · KHAOS",
     "300TOPS / 300Core · KOSMOS",
     "P2",
     "Paranormal Realizer Pro",

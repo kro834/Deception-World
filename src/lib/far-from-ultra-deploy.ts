@@ -61,7 +61,7 @@ export const FAR_FROM_ULTRA_DEPLOY_PANELS: readonly FarFromDeployPanel[] = [
     ],
     at: 90,
     title: "KHAOS DEUX",
-    lines: ["60000 YOPS", "INF CORE"],
+    lines: ["60000+ YOPS", "INF CORE"],
   },
   {
     id: "l2",
