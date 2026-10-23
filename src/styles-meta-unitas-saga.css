@@ -1,0 +1,1644 @@
+/* ================================================================
+   META UNITAS SAGA — the special site's own sheet (2026-10-23).
+   Scoped to .mus-page. The shared special-site sheet
+   (styles-rexonance-saga.css) draws the local bar, the menu trigger and
+   the liquid rails; this sheet draws everything else.
+
+   Palette from the owner's art: teal scale armour, white-silver, gold,
+   orange light paths and the helix; iridescent crystal for ウルトラ.
+   Motif: separation without destruction — hairline boundaries, halos, one
+   whole standing as independent parts (the hero's key visual in bands,
+   the articles as cells of one grid with orange seams between them).
+   Motion runs once, only under (prefers-reduced-motion: no-preference) and
+   html:not([data-world-effects="economy"]) with the page's own grant
+   (data-motion-ready); every still tier rests drawn.
+   ================================================================ */
+
+@font-face {
+  font-family: "Rexonance Forge";
+  font-style: normal;
+  font-weight: 300 800;
+  font-stretch: 125%;
+  font-display: swap;
+  src: url("/fonts/rexonance-forge-20261016.woff2") format("woff2");
+  unicode-range:
+    U+0020-007E, U+00A0-00FF, U+2010-2027, U+2030-205E, U+2190-21FF, U+2200-22FF, U+2500-257F;
+}
+
+/* The document scrolls on <html> (the special sites' rule,
+   styles-showcase-elevation.css): <body>'s World overflow-x: hidden would
+   make it a scroller that never scrolls, and the runway's sticky frame
+   would scroll away with it. `clip` keeps the clipping without a scroller;
+   a rail drag's lock clips the same way. */
+html[data-mode="world"]:not([data-rail-lock]):not([data-loading]):not([data-dialog-open])
+  body:has(> main.mus-page) {
+  overflow: visible;
+  overflow-x: clip;
+}
+
+html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-open]):not(
+    [data-dialog-open]
+  )
+  body:has(> main.mus-page) {
+  overflow: clip !important;
+}
+
+.mus-page {
+  --mus-ink: #02060a;
+  --mus-deep: #062028;
+  --mus-teal: #37c6c0;
+  --mus-teal-soft: rgb(55 198 192 / 22%);
+  --mus-silver: #e9eff2;
+  --mus-muted: #a4b1b6;
+  --mus-gold: #e0b96e;
+  --mus-orange: #ff9a4a;
+  --mus-orange-hot: #ffc98f;
+  --mus-line: rgb(255 154 74 / 34%);
+  --mus-hair: rgb(233 239 242 / 12%);
+  --mus-iris: linear-gradient(
+    105deg,
+    #ffe7f4 0%,
+    #d8ecff 28%,
+    #fff3da 52%,
+    #e2ffef 74%,
+    #f0deff 100%
+  );
+  --mus-latin: "Rexonance Forge", "Helvetica Neue", Arial, sans-serif;
+  --mus-hud: Michroma, "Helvetica Neue", Arial, sans-serif;
+  --mus-gutter: clamp(16px, 5vw, 72px);
+  color: var(--mus-silver);
+  background:
+    radial-gradient(70rem 40rem at 72% -6rem, rgb(55 198 192 / 16%), transparent 70%),
+    radial-gradient(48rem 34rem at 8% 38rem, rgb(255 154 74 / 7%), transparent 70%),
+    linear-gradient(180deg, #03090d 0%, var(--mus-ink) 46rem);
+  counter-reset: mus-chapter;
+}
+
+.mus-page :focus-visible {
+  outline: 2px solid var(--mus-orange-hot);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+.mus-page .visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.mus-bracket {
+  color: var(--mus-orange);
+  font-weight: 400;
+  opacity: 0.72;
+}
+
+/* ---------- The local bar's brand: the name alone ---------- */
+.mus-page .rxs-brand b {
+  letter-spacing: 0.04em;
+}
+
+.mus-page .rxs-local-nav nav a > span {
+  font-family: var(--mus-hud);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--mus-orange);
+}
+
+/* ================================================================
+   HERO — the key visual in bands, the names and the calls beside it
+   ================================================================ */
+.mus-hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  gap: clamp(28px, 5vw, 80px);
+  align-items: center;
+  min-height: calc(100svh - var(--rxs-local-nav-reserve, 62px));
+  padding: clamp(28px, 4vw, 56px) var(--mus-gutter) clamp(40px, 6vw, 80px);
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+.mus-hero-visual {
+  position: relative;
+  justify-self: center;
+  width: min(100%, calc((100svh - var(--rxs-local-nav-reserve, 62px) - 96px) * 0.75));
+  aspect-ratio: 1280 / 1707;
+}
+
+/* The halo: two thin orbits behind the frame (the art's own rings, echoed). */
+.mus-hero-halo,
+.mus-hero-halo::after {
+  position: absolute;
+  inset: -6% -14%;
+  border: 1px solid rgb(255 154 74 / 30%);
+  border-radius: 50%;
+  transform: rotate(-9deg) scaleY(0.62);
+  pointer-events: none;
+}
+
+.mus-hero-halo::after {
+  content: "";
+  inset: 9% 6%;
+  border-color: rgb(55 198 192 / 26%);
+  transform: rotate(22deg) scaleY(0.8);
+}
+
+.mus-hero-bands {
+  position: absolute;
+  inset: 0;
+  border-radius: 4px;
+  box-shadow:
+    0 0 0 1px var(--mus-hair),
+    0 40px 120px -40px rgb(55 198 192 / 40%);
+  background: #0c1013;
+}
+
+/* Four columns of the one picture, each its own plate: at rest a few px
+   apart in height (independent), the seams between them lit orange. */
+.mus-hero-band {
+  --shift: 0px;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  clip-path: inset(0 calc((3 - var(--band)) * 25%) 0 calc(var(--band) * 25%));
+  transform: translateY(var(--shift));
+}
+
+.mus-hero-band:nth-child(1) {
+  --shift: -6px;
+}
+.mus-hero-band:nth-child(2) {
+  --shift: 5px;
+}
+.mus-hero-band:nth-child(3) {
+  --shift: -3px;
+}
+.mus-hero-band:nth-child(4) {
+  --shift: 8px;
+}
+
+.mus-hero-band img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.mus-hero-seam {
+  position: absolute;
+  top: -3%;
+  bottom: -3%;
+  left: calc(var(--seam) * 25%);
+  width: 1px;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    var(--mus-orange) 14%,
+    var(--mus-orange-hot) 50%,
+    var(--mus-orange) 86%,
+    transparent
+  );
+  box-shadow: 0 0 8px rgb(255 154 74 / 70%);
+  transform: translateX(-0.5px);
+}
+
+.mus-hero-copy {
+  position: relative;
+  display: grid;
+  gap: clamp(18px, 2.4vw, 30px);
+  align-content: center;
+  max-width: 620px;
+}
+
+.mus-hero-copy h1 {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  font-weight: 800;
+  line-height: 1.05;
+}
+
+.mus-hero-rider {
+  color: var(--mus-muted);
+  font-size: clamp(13px, 1.2vw, 16px);
+  font-weight: 600;
+  letter-spacing: 0.32em;
+}
+
+.mus-hero-name {
+  font-size: clamp(2.3rem, 5.4vw, 4.9rem);
+  letter-spacing: 0.01em;
+  background: linear-gradient(180deg, #ffffff 0%, #dfe9ec 58%, #8fd6d2 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-wrap: balance;
+}
+
+.mus-hero-ultra {
+  margin: 0;
+  width: fit-content;
+  max-width: 100%;
+  text-wrap: balance;
+  font-size: clamp(14px, 1.45vw, 19px);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  background: var(--mus-iris);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* The five calls: a numbered sequence (outlined numerals as marks). */
+.mus-calls,
+.mus-call-lines,
+.mus-finisher-calls {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mus-calls {
+  counter-reset: mus-call;
+  display: grid;
+  border-top: 1px solid var(--mus-hair);
+}
+
+.mus-calls li {
+  counter-increment: mus-call;
+  display: grid;
+  grid-template-columns: 2.2em minmax(0, 1fr);
+  align-items: baseline;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--mus-hair);
+  font-family: var(--mus-latin);
+  font-size: clamp(14px, 1.25vw, 17px);
+  font-weight: 640;
+  letter-spacing: 0.05em;
+  overflow-wrap: anywhere;
+}
+
+.mus-calls li::before {
+  content: counter(mus-call, decimal-leading-zero);
+  color: transparent;
+  -webkit-text-stroke: 1px rgb(255 154 74 / 70%);
+  font-family: var(--mus-latin);
+  font-size: 0.86em;
+}
+
+.mus-calls li[data-chant] {
+  font-size: clamp(12.5px, 1.05vw, 15px);
+}
+
+.mus-call-chip {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.mus-call-text {
+  min-width: 0;
+}
+
+.mus-hero-doors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.mus-hero-doors a {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 48px;
+  padding: 0 22px;
+  border: 1px solid rgb(233 239 242 / 22%);
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.mus-hero-doors a.is-primary {
+  border-color: rgb(255 154 74 / 62%);
+  background: linear-gradient(120deg, rgb(255 154 74 / 22%), rgb(55 198 192 / 14%));
+}
+
+.mus-hero-doors a i {
+  color: var(--mus-orange);
+  font-style: normal;
+}
+
+@media (hover: hover) {
+  .mus-hero-doors a:hover {
+    border-color: var(--mus-orange-hot);
+    background-color: rgb(255 154 74 / 12%);
+  }
+}
+
+/* The hero's one-shot: one picture, then the seams draw and the plates
+   step apart. */
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]) .mus-page[data-motion-ready="true"] .mus-hero-band {
+    animation: mus-band-part 1.4s cubic-bezier(0.2, 0.7, 0.1, 1) 0.35s both;
+  }
+  html:not([data-world-effects="economy"]) .mus-page[data-motion-ready="true"] .mus-hero-seam {
+    animation: mus-seam-draw 0.9s cubic-bezier(0.3, 0.6, 0.1, 1) calc(0.2s + var(--seam) * 0.08s)
+      both;
+  }
+  html:not([data-world-effects="economy"]) .mus-page[data-motion-ready="true"] .mus-hero-halo {
+    animation: mus-halo-open 1.6s cubic-bezier(0.2, 0.7, 0.1, 1) 0.2s both;
+  }
+}
+
+@keyframes mus-band-part {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(var(--shift));
+  }
+}
+
+@keyframes mus-seam-draw {
+  from {
+    transform: translateX(-0.5px) scaleY(0);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(-0.5px) scaleY(1);
+    opacity: 1;
+  }
+}
+
+@keyframes mus-halo-open {
+  from {
+    opacity: 0;
+    transform: rotate(-9deg) scaleY(0.62) scale(0.86);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(-9deg) scaleY(0.62);
+  }
+}
+
+/* ================================================================
+   CHAPTERS — numerals as marks, the owner's headings
+   ================================================================ */
+.mus-chapter {
+  position: relative;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: clamp(72px, 9vw, 132px) var(--mus-gutter) 0;
+  scroll-margin-top: var(--rxs-local-nav-reserve, 62px);
+}
+
+.mus-chapter.mus-sub {
+  padding-top: clamp(48px, 6vw, 88px);
+}
+
+.mus-chapter:not(.mus-sub) {
+  counter-increment: mus-chapter;
+}
+
+.mus-head {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  gap: clamp(14px, 2vw, 26px);
+  margin-bottom: clamp(26px, 3.4vw, 44px);
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--mus-hair);
+}
+
+/* A seam of light along the chapter's hairline, from the numeral out. */
+.mus-head::after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: min(220px, 34%);
+  height: 1px;
+  background: linear-gradient(90deg, var(--mus-orange), transparent);
+}
+
+.mus-chapter:not(.mus-sub) > .mus-head::before {
+  content: counter(mus-chapter, decimal-leading-zero);
+  color: transparent;
+  -webkit-text-stroke: 1px rgb(255 154 74 / 72%);
+  font-family: var(--mus-latin);
+  font-size: clamp(44px, 6vw, 84px);
+  font-weight: 300;
+  line-height: 0.8;
+}
+
+.mus-head h2 {
+  margin: 0;
+  font-size: clamp(1.75rem, 3.6vw, 2.9rem);
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  line-height: 1.15;
+}
+
+.mus-sub > .mus-head h2 {
+  font-size: clamp(1.3rem, 2.4vw, 1.9rem);
+  letter-spacing: 0.05em;
+}
+
+.mus-sub > .mus-head {
+  padding-left: 18px;
+}
+
+.mus-sub > .mus-head::before {
+  content: "";
+  position: absolute;
+  top: 0.15em;
+  bottom: 16px;
+  left: 0;
+  width: 2px;
+  background: linear-gradient(180deg, var(--mus-orange), rgb(255 154 74 / 0%));
+}
+
+.mus-copy p {
+  margin: 0 0 1.05em;
+  color: rgb(233 239 242 / 88%);
+  font-size: clamp(15px, 1.12vw, 16.5px);
+  line-height: 2;
+  letter-spacing: 0.02em;
+}
+
+.mus-copy p:last-child {
+  margin-bottom: 0;
+}
+
+/* 01 — the overview: two columns of the record at desktop width. */
+.mus-overview-copy {
+  max-width: 76ch;
+}
+
+.mus-overview-copy p:first-child {
+  color: var(--mus-silver);
+  font-size: clamp(16px, 1.3vw, 18.5px);
+}
+
+@media (min-width: 1100px) {
+  .mus-overview-copy {
+    max-width: none;
+    column-count: 2;
+    column-gap: 64px;
+    column-rule: 1px solid var(--mus-hair);
+  }
+  .mus-overview-copy p {
+    break-inside: avoid-column;
+  }
+}
+
+/* The specs: ミドル and ウルトラ side by side; one value spans both. */
+.mus-specs-wrap {
+  position: relative;
+  border: 1px solid var(--mus-hair);
+  border-radius: 6px;
+  background:
+    linear-gradient(90deg, rgb(55 198 192 / 6%), transparent 40%, rgb(240 222 255 / 5%)),
+    rgb(4 12 16 / 72%);
+  overflow: hidden;
+}
+
+.mus-specs {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: clamp(14px, 1.15vw, 16px);
+}
+
+.mus-specs thead th {
+  padding: 16px clamp(12px, 2vw, 24px) 12px;
+  text-align: left;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  border-bottom: 1px solid var(--mus-hair);
+}
+
+.mus-specs thead th:nth-child(2) {
+  color: var(--mus-orange-hot);
+  box-shadow: inset 0 -2px 0 var(--mus-teal);
+}
+
+.mus-specs thead th:nth-child(3) {
+  box-shadow: inset 0 -2px 0 #e9d8ff;
+}
+
+.mus-specs thead th:nth-child(3),
+.mus-specs tbody td:nth-child(3) {
+  background-image: none;
+}
+
+.mus-specs thead th:nth-child(3) {
+  color: #f3e7ff;
+}
+
+.mus-specs tbody th,
+.mus-specs tbody td {
+  padding: 13px clamp(12px, 2vw, 24px);
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--mus-hair);
+}
+
+.mus-specs tbody tr:last-child > * {
+  border-bottom: 0;
+}
+
+.mus-specs tbody th {
+  width: 22%;
+  color: var(--mus-muted);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+.mus-specs tbody td {
+  font-variant-numeric: tabular-nums;
+  font-weight: 650;
+  overflow-wrap: anywhere;
+}
+
+.mus-specs tbody tr[data-dual] td:nth-child(2) {
+  color: #e6fbf9;
+}
+
+.mus-specs tbody tr[data-dual] td:nth-child(3) {
+  color: #f6eeff;
+  border-left: 1px solid var(--mus-hair);
+}
+
+.mus-specs td > span {
+  display: block;
+}
+
+.mus-specs .mus-spec-more {
+  color: rgb(233 239 242 / 76%);
+  font-weight: 600;
+}
+
+/* ---------- The comparison ---------- */
+.mus-lineup {
+  margin: 0 0 clamp(28px, 3vw, 40px);
+  color: var(--mus-muted);
+  font-family: var(--mus-latin);
+  font-size: clamp(12px, 1vw, 14px);
+  letter-spacing: 0.12em;
+  overflow-wrap: anywhere;
+}
+
+.mus-performance {
+  display: grid;
+  gap: clamp(44px, 5vw, 72px);
+}
+
+.mus-compare {
+  display: grid;
+  gap: 20px;
+  scroll-margin-top: calc(var(--rxs-local-nav-reserve, 62px) + 16px);
+}
+
+.mus-compare > h3 {
+  margin: 0;
+  font-size: clamp(1.1rem, 1.7vw, 1.4rem);
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.mus-compare > .mus-copy {
+  max-width: 78ch;
+}
+
+.mus-table-wrap {
+  border: 1px solid var(--mus-hair);
+  border-radius: 6px;
+  overflow-x: auto;
+  background: rgb(4 12 16 / 72%);
+}
+
+.mus-table {
+  width: 100%;
+  min-width: 540px;
+  border-collapse: collapse;
+  font-size: clamp(13px, 1.05vw, 15px);
+  font-variant-numeric: tabular-nums;
+}
+
+.mus-table th,
+.mus-table td {
+  position: relative;
+  padding: 12px clamp(10px, 1.6vw, 20px);
+  text-align: left;
+  border-bottom: 1px solid var(--mus-hair);
+  white-space: nowrap;
+}
+
+.mus-table thead th {
+  color: var(--mus-muted);
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.mus-table tbody tr:last-child > * {
+  border-bottom: 0;
+}
+
+.mus-table tbody th {
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.mus-table td > span {
+  position: relative;
+  z-index: 1;
+}
+
+/* Each value's share of the column's best, as a bar under it. */
+.mus-table td[data-bar]::after {
+  content: "";
+  position: absolute;
+  left: clamp(10px, 1.6vw, 20px);
+  right: clamp(10px, 1.6vw, 20px);
+  bottom: 6px;
+  height: 3px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, rgb(233 239 242 / 46%), rgb(233 239 242 / 22%));
+  transform: scaleX(var(--mus-bar, 0));
+  transform-origin: 0 50%;
+}
+
+.mus-table tbody tr[data-self] th,
+.mus-table tbody tr[data-self] td {
+  background: linear-gradient(90deg, rgb(255 154 74 / 10%), rgb(55 198 192 / 6%));
+}
+
+.mus-table tbody tr[data-self] th {
+  color: var(--mus-orange-hot);
+  box-shadow: inset 2px 0 0 var(--mus-orange);
+}
+
+.mus-table tbody tr[data-self] td[data-bar]::after {
+  background: linear-gradient(90deg, var(--mus-orange), var(--mus-teal));
+}
+
+.mus-table tbody tr[data-ultra] th {
+  color: #f3e7ff;
+  box-shadow: inset 2px 0 0 #e9d8ff;
+}
+
+.mus-table tbody tr[data-ultra] td[data-bar]::after {
+  background: var(--mus-iris);
+}
+
+.mus-figure {
+  color: var(--mus-orange-hot);
+  font-family: var(--mus-latin);
+  font-size: 1.28em;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+#p16 {
+  padding-top: clamp(18px, 2vw, 28px);
+  border-top: 1px solid var(--mus-hair);
+}
+
+/* ================================================================
+   02 — THE SCROLL SUIT-UP
+   ================================================================ */
+.mus-suitup {
+  max-width: none;
+  padding-right: 0;
+  padding-left: 0;
+}
+
+.mus-suitup > .mus-head {
+  max-width: 1240px;
+  margin-right: auto;
+  margin-left: auto;
+  margin-inline: max(var(--mus-gutter), calc((100% - 1240px) / 2 + var(--mus-gutter)));
+}
+
+.mus-runway {
+  --mus-fig-h: 0.88;
+  --mus-fig-w: 0.94;
+  --mus-fig-x: 0.5;
+  --mus-fig-b: 0.03;
+  position: relative;
+  height: 640svh;
+}
+
+.mus-frame {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  overflow: hidden;
+  contain: layout paint;
+  background:
+    radial-gradient(44% 56% at 50% 56%, rgb(55 198 192 / 12%), transparent 70%),
+    radial-gradient(30% 40% at 50% 36%, rgb(255 154 74 / 7%), transparent 70%),
+    linear-gradient(180deg, #02070a, #03080c 70%, #020507);
+}
+
+.mus-frame-ground {
+  position: absolute;
+  right: 12%;
+  bottom: 2.5%;
+  left: 12%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgb(255 154 74 / 44%), transparent);
+}
+
+.mus-frame-orbit {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(118vh, 96vw);
+  aspect-ratio: 1;
+  border: 1px solid rgb(255 154 74 / 12%);
+  border-radius: 50%;
+  transform: translate(-50%, -50%) rotate(-12deg) scaleY(0.36);
+  pointer-events: none;
+}
+
+.mus-frame-orbit.is-b {
+  width: min(84vh, 76vw);
+  border-color: rgb(55 198 192 / 12%);
+  transform: translate(-50%, -54%) rotate(16deg) scaleY(0.5);
+}
+
+/* The figure's box (the engine reads the same custom properties). */
+.mus-still,
+.mus-under {
+  position: absolute;
+  bottom: calc(var(--mus-fig-b) * 100%);
+  left: calc((var(--mus-fig-x) - var(--mus-fig-w) / 2) * 100%);
+  width: calc(var(--mus-fig-w) * 100%);
+  height: calc(var(--mus-fig-h) * 100%);
+  object-fit: contain;
+  object-position: 50% 100%;
+  pointer-events: none;
+}
+
+.mus-still {
+  display: none;
+}
+
+.mus-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.mus-runway[data-mus-load="ready"] .mus-under {
+  visibility: hidden;
+}
+
+/* The still tiers: one screen, the chosen form finished, every call lit. */
+.mus-runway[data-mus-load="static"] {
+  height: auto;
+}
+
+.mus-runway[data-mus-load="static"] .mus-frame {
+  position: relative;
+  height: min(100svh, 980px);
+}
+
+.mus-runway[data-mus-load="static"] .mus-still {
+  display: block;
+}
+
+.mus-runway[data-mus-load="static"] .mus-under,
+.mus-runway[data-mus-load="static"] .mus-canvas,
+.mus-runway[data-mus-load="static"] .mus-rail {
+  display: none;
+}
+
+/* The calls: dim until their beat, the current one brightest. */
+.mus-call-lines {
+  position: absolute;
+  z-index: 2;
+  top: clamp(84px, 14vh, 140px);
+  left: max(var(--mus-gutter), calc((100% - 1240px) / 2 + var(--mus-gutter)));
+  display: grid;
+  gap: 10px;
+  width: min(30%, 360px);
+  font-family: var(--mus-latin);
+  font-size: clamp(14px, 1.2vw, 17px);
+  font-weight: 650;
+  letter-spacing: 0.05em;
+  pointer-events: none;
+}
+
+.mus-call-line {
+  padding: 6px 0 6px 14px;
+  border-left: 1px solid var(--mus-hair);
+  color: rgb(233 239 242 / 30%);
+  transition:
+    color 0.3s ease,
+    border-color 0.3s ease;
+  overflow-wrap: anywhere;
+}
+
+.mus-call-line .mus-bracket {
+  opacity: 0.4;
+}
+
+.mus-call-line[data-lit="true"] {
+  color: rgb(233 239 242 / 74%);
+}
+
+.mus-call-line[data-current="true"] {
+  color: #fff;
+  border-left-color: var(--mus-orange);
+  text-shadow: 0 0 18px rgb(255 154 74 / 46%);
+}
+
+.mus-call-line[data-current="true"] .mus-bracket,
+.mus-call-line[data-lit="true"] .mus-bracket {
+  opacity: 0.85;
+}
+
+.mus-call-line[data-chant] {
+  font-size: 0.88em;
+}
+
+.mus-call-line[data-chant] .mus-call-chip {
+  color: rgb(233 239 242 / 30%);
+  transition: color 0.25s ease;
+}
+
+.mus-call-line[data-chant] .mus-call-chip[data-lit="true"] {
+  color: inherit;
+}
+
+.mus-runway[data-mus-load="static"] .mus-call-line,
+.mus-runway[data-mus-load="static"] .mus-call-chip {
+  color: rgb(233 239 242 / 82%);
+}
+
+/* The form's name, outlined, large, lower right. */
+.mus-stamp {
+  position: absolute;
+  z-index: 2;
+  right: max(var(--mus-gutter), calc((100% - 1240px) / 2 + var(--mus-gutter)));
+  bottom: clamp(28px, 7vh, 72px);
+  margin: 0;
+  font-size: clamp(30px, 4.6vw, 68px);
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  pointer-events: none;
+}
+
+.mus-stamp b {
+  display: none;
+  color: transparent;
+  -webkit-text-stroke: 1px rgb(255 154 74 / 70%);
+}
+
+.mus-stamp b.is-ultra {
+  -webkit-text-stroke-color: rgb(233 216 255 / 80%);
+}
+
+.mus-runway:not([data-mus-shown="ultra"]) .mus-stamp b.is-middle,
+.mus-runway[data-mus-shown="ultra"] .mus-stamp b.is-ultra {
+  display: block;
+}
+
+.mus-runway[data-mus-load="static"][data-form="ultra"] .mus-stamp b.is-middle {
+  display: none;
+}
+
+.mus-runway[data-mus-load="static"][data-form="ultra"] .mus-stamp b.is-ultra {
+  display: block;
+}
+
+/* The runway's progress: a thin rail at the right edge (a mark, no number). */
+.mus-rail {
+  position: absolute;
+  z-index: 2;
+  top: 18%;
+  right: 14px;
+  bottom: 18%;
+  width: 1px;
+  background: var(--mus-hair);
+}
+
+.mus-rail > i {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, var(--mus-teal), var(--mus-orange));
+  transform: scaleY(0);
+  transform-origin: 50% 0;
+}
+
+.mus-suitup-error {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin: 0 var(--mus-gutter) 20px;
+  color: var(--mus-orange-hot);
+  font-size: 14px;
+}
+
+.mus-suitup-error p {
+  margin: 0;
+}
+
+.mus-suitup-error button,
+.mus-watch {
+  min-height: 46px;
+  padding: 0 22px;
+  border: 1px solid rgb(255 154 74 / 56%);
+  border-radius: 999px;
+  color: var(--mus-silver);
+  background: rgb(255 154 74 / 12%);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .mus-watch:hover,
+  .mus-suitup-error button:hover {
+    border-color: var(--mus-orange-hot);
+    background: rgb(255 154 74 / 22%);
+  }
+}
+
+/* The selector after the runway. */
+.mus-ending {
+  display: grid;
+  justify-items: center;
+  gap: 18px;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: clamp(36px, 5vw, 64px) var(--mus-gutter) 0;
+}
+
+.mus-page .mus-tabs.rxs-stage-tabs {
+  width: min(100%, 420px);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.mus-page .mus-tabs.rxs-stage-tabs > button[role="tab"] {
+  min-height: 48px;
+}
+
+.mus-page .mus-tabs.rxs-stage-tabs > button[role="tab"] span {
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.mus-ending-panel {
+  display: grid;
+  justify-items: center;
+  gap: 16px;
+}
+
+/* ミドル → ウルトラ: two nodes on one line, the reached ones lit. */
+.mus-route {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+.mus-route li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: rgb(233 239 242 / 40%);
+}
+
+.mus-route li::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+}
+
+.mus-route li + li::after {
+  order: -1;
+  content: "";
+  width: 54px;
+  height: 1px;
+  margin-right: 4px;
+  background: currentColor;
+}
+
+.mus-route li[data-reached] {
+  color: var(--mus-orange-hot);
+}
+
+.mus-route li[data-reached]::before {
+  background: currentColor;
+  box-shadow: 0 0 10px rgb(255 154 74 / 60%);
+}
+
+.mus-ending[data-stage="ultra"] .mus-route li[data-reached]:last-child {
+  color: #f3e7ff;
+}
+
+/* ================================================================
+   03 — THE ARTICLES: cells of one grid, the seams between them lit
+   ================================================================ */
+.mus-articles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+  gap: 1px;
+  border: 1px solid var(--mus-line);
+  border-radius: 6px;
+  overflow: hidden;
+  background: linear-gradient(
+    135deg,
+    rgb(255 154 74 / 46%),
+    rgb(55 198 192 / 30%) 50%,
+    rgb(255 154 74 / 36%)
+  );
+}
+
+.mus-articles.is-system {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr));
+}
+
+.mus-article {
+  display: grid;
+  align-content: start;
+  gap: 18px;
+  padding: clamp(22px, 2.6vw, 36px);
+  background: radial-gradient(120% 60% at 0% 0%, rgb(55 198 192 / 7%), transparent 60%), #040b0f;
+}
+
+.mus-article h3 {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.mus-article-name {
+  font-family: var(--mus-latin);
+  font-size: clamp(17px, 1.6vw, 22px);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  line-height: 1.3;
+  color: #fff;
+}
+
+.mus-article-reading {
+  color: var(--mus-orange-hot);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.mus-article .mus-copy p {
+  font-size: 15px;
+  line-height: 1.95;
+}
+
+/* ================================================================
+   04 — THE FORMS
+   ================================================================ */
+.mus-stage-switcher {
+  display: grid;
+  gap: clamp(22px, 3vw, 36px);
+}
+
+.mus-stage-switcher > .mus-tabs {
+  justify-self: start;
+}
+
+.mus-stage-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: clamp(24px, 4vw, 64px);
+  align-items: start;
+}
+
+.mus-stage-panel figure {
+  position: relative;
+  margin: 0;
+  aspect-ratio: 3 / 4;
+  border-radius: 4px;
+  overflow: hidden;
+  background: #070b0e;
+  box-shadow:
+    0 0 0 1px var(--mus-hair),
+    0 30px 90px -40px color-mix(in srgb, var(--mus-accent, #ff9a4a) 50%, transparent);
+}
+
+.mus-stage-backdrop {
+  position: absolute;
+  inset: -8%;
+  width: 116%;
+  height: 116%;
+  object-fit: cover;
+  filter: blur(26px) brightness(0.42) saturate(1.2);
+}
+
+.mus-stage-band {
+  position: absolute;
+  inset: 0;
+  clip-path: inset(0 calc((3 - var(--band)) * 25%) 0 calc(var(--band) * 25%));
+}
+
+.mus-stage-band img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.mus-stage-copy {
+  display: grid;
+  gap: 20px;
+}
+
+.mus-stage-copy h3 {
+  margin: 0;
+  font-size: clamp(1.4rem, 2.6vw, 2.1rem);
+  font-weight: 800;
+  letter-spacing: 0.05em;
+}
+
+.mus-stage-panel[data-stage="ultra"] .mus-stage-copy h3 {
+  background: var(--mus-iris);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.mus-stage-panel[data-stage="ultra"] .mus-stage-copy h3 .mus-bracket {
+  color: #e9d8ff;
+  -webkit-text-fill-color: #e9d8ff;
+}
+
+/* A switch: the new form arrives as four plates, settling into one. */
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"])
+    .mus-page[data-motion-ready="true"]
+    .mus-stage-panel
+    figure[data-entrance]
+    .mus-stage-band {
+    animation: mus-stage-band 0.7s cubic-bezier(0.2, 0.7, 0.1, 1) calc(var(--band) * 0.06s) both;
+  }
+  html:not([data-world-effects="economy"])
+    .mus-page[data-motion-ready="true"]
+    .mus-stage-panel
+    figure[data-entrance]::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      transparent calc(25% - 1px),
+      var(--mus-orange) 25%,
+      transparent calc(25% + 1px),
+      transparent calc(50% - 1px),
+      var(--mus-orange) 50%,
+      transparent calc(50% + 1px),
+      transparent calc(75% - 1px),
+      var(--mus-orange) 75%,
+      transparent calc(75% + 1px)
+    );
+    animation: mus-stage-seams 0.9s ease-out both;
+    pointer-events: none;
+  }
+}
+
+@keyframes mus-stage-band {
+  from {
+    opacity: 0;
+    transform: translateY(calc((var(--band) - 1.5) * 18px));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes mus-stage-seams {
+  0% {
+    opacity: 0;
+  }
+  30% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* ================================================================
+   05 — ARMAMENTS AND FINISHERS
+   ================================================================ */
+.mus-weapons {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  margin: 0 0 28px;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--mus-hair);
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--mus-hair);
+}
+
+.mus-weapons li {
+  display: flex;
+  align-items: center;
+  min-height: 64px;
+  padding: 14px 20px;
+  background: #040b0f;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  box-shadow: inset 2px 0 0 rgb(255 154 74 / 55%);
+}
+
+.mus-arsenal-note {
+  max-width: 78ch;
+}
+
+.mus-finisher-list {
+  display: grid;
+  gap: clamp(20px, 2.6vw, 32px);
+}
+
+.mus-finisher {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.3fr);
+  gap: 16px clamp(24px, 4vw, 56px);
+  padding: clamp(24px, 3vw, 40px);
+  border: 1px solid var(--mus-hair);
+  border-radius: 6px;
+  background: radial-gradient(60% 90% at 0% 50%, rgb(255 154 74 / 8%), transparent 70%), #040b0f;
+  overflow: hidden;
+}
+
+/* Halos, one more per finisher (marks, not words). */
+.mus-finisher::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: -60px;
+  width: 280px;
+  aspect-ratio: 1;
+  border: 1px solid rgb(255 154 74 / 20%);
+  border-radius: 50%;
+  transform: translateY(-50%) scaleY(0.4);
+  box-shadow:
+    0 0 0 0 transparent,
+    0 0 0 0 transparent;
+  pointer-events: none;
+}
+
+.mus-finisher[data-tier="1"]::before {
+  box-shadow:
+    0 0 0 26px rgb(255 154 74 / 0%),
+    0 0 0 27px rgb(255 154 74 / 14%);
+}
+
+.mus-finisher[data-tier="2"]::before {
+  border-color: rgb(233 216 255 / 30%);
+  box-shadow:
+    0 0 0 26px transparent,
+    0 0 0 27px rgb(233 216 255 / 18%),
+    0 0 0 54px transparent,
+    0 0 0 55px rgb(255 154 74 / 12%);
+}
+
+.mus-finisher h3 {
+  position: relative;
+  margin: 0;
+  font-size: clamp(1.2rem, 2vw, 1.6rem);
+  font-weight: 800;
+  letter-spacing: 0.05em;
+}
+
+.mus-finisher-calls {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  grid-column: 1;
+  align-content: start;
+}
+
+.mus-finisher-calls li {
+  padding: 8px 14px;
+  border: 1px solid rgb(255 154 74 / 36%);
+  border-radius: 999px;
+  background: rgb(255 154 74 / 8%);
+  font-family: var(--mus-latin);
+  font-size: clamp(12.5px, 1.05vw, 14.5px);
+  font-weight: 650;
+  letter-spacing: 0.05em;
+  overflow-wrap: anywhere;
+}
+
+.mus-finisher > .mus-copy {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+}
+
+/* ================================================================
+   THE END CARD
+   ================================================================ */
+.mus-footer {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.8fr);
+  gap: 32px;
+  align-items: end;
+  max-width: 1240px;
+  min-height: min(92svh, 860px);
+  margin: clamp(80px, 10vw, 140px) auto 0;
+  padding: 0 var(--mus-gutter) clamp(48px, 6vw, 80px);
+  overflow: hidden;
+}
+
+.mus-end-figure {
+  position: absolute;
+  z-index: 0;
+  right: 0;
+  bottom: 0;
+  width: min(48%, 560px);
+  height: auto;
+  opacity: 0.72;
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 22%, #000 70%, transparent 100%);
+  mask-image: linear-gradient(180deg, transparent 0%, #000 22%, #000 70%, transparent 100%);
+  pointer-events: none;
+}
+
+.mus-end-names {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 8px;
+}
+
+.mus-end-names p {
+  margin: 0;
+  font-size: clamp(1.4rem, 3.4vw, 2.6rem);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 1.25;
+}
+
+.mus-end-names p + p {
+  width: fit-content;
+  font-size: clamp(1rem, 2vw, 1.5rem);
+  background: var(--mus-iris);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.mus-end-doors {
+  position: relative;
+  z-index: 1;
+  grid-column: 1;
+  display: grid;
+  gap: 1px;
+  max-width: 520px;
+  border: 1px solid var(--mus-hair);
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--mus-hair);
+}
+
+.mus-end-doors a {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 52px;
+  padding: 0 20px;
+  background: rgb(4 11 15 / 92%);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  transition: background-color 0.2s ease;
+}
+
+.mus-end-doors a i {
+  color: var(--mus-orange);
+  font-style: normal;
+}
+
+.mus-end-doors a.is-return {
+  background: rgb(255 154 74 / 12%);
+}
+
+@media (hover: hover) {
+  .mus-end-doors a:hover {
+    background: rgb(255 154 74 / 16%);
+  }
+}
+
+/* ================================================================
+   REVEALS (granted motion only)
+   ================================================================ */
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]) .mus-page[data-motion-ready="true"] .rxs-reveal {
+    opacity: 0;
+    transform: translateY(18px);
+    transition:
+      opacity 0.7s ease,
+      transform 0.8s cubic-bezier(0.2, 0.7, 0.1, 1);
+  }
+  html:not([data-world-effects="economy"])
+    .mus-page[data-motion-ready="true"]
+    .rxs-reveal.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mus-page *,
+  .mus-page *::before,
+  .mus-page *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+html[data-world-effects="economy"] .mus-page *,
+html[data-world-effects="economy"] .mus-page *::before,
+html[data-world-effects="economy"] .mus-page *::after {
+  animation: none !important;
+}
+
+/* ================================================================
+   LAYOUT TIERS
+   ================================================================ */
+@media (max-width: 1099.98px) {
+  .mus-runway {
+    --mus-fig-h: 0.72;
+    --mus-fig-b: 0.06;
+  }
+  .mus-call-lines {
+    width: min(36%, 320px);
+  }
+}
+
+@media (max-width: 1099.98px) and (orientation: portrait) {
+  .mus-runway {
+    --mus-fig-h: 0.66;
+    --mus-fig-b: 0.07;
+  }
+  .mus-call-lines {
+    top: calc(var(--rxs-local-nav-reserve, 62px) + 20px);
+    right: var(--mus-gutter);
+    width: auto;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px 18px;
+  }
+  .mus-call-line[data-chant] {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 860px) {
+  .mus-hero {
+    grid-template-columns: 1fr;
+    min-height: 0;
+    padding-top: 20px;
+  }
+  .mus-hero-visual {
+    width: min(100%, 520px);
+  }
+  .mus-stage-panel {
+    grid-template-columns: 1fr;
+  }
+  .mus-stage-panel figure {
+    width: min(100%, 520px);
+    justify-self: center;
+  }
+  .mus-finisher {
+    grid-template-columns: 1fr;
+  }
+  .mus-finisher > .mus-copy {
+    grid-column: 1;
+    grid-row: auto;
+  }
+  .mus-footer {
+    grid-template-columns: 1fr;
+    min-height: 0;
+    padding-top: 42vw;
+  }
+  .mus-end-figure {
+    top: 0;
+    bottom: auto;
+    width: 80%;
+    right: -6%;
+    opacity: 0.5;
+  }
+}
+
+@media (max-width: 560px) {
+  .mus-weapons {
+    grid-template-columns: 1fr;
+  }
+  .mus-hero-copy {
+    min-width: 0;
+  }
+  /* The comparison fits the phone: names wrap, the values stay whole. */
+  .mus-table {
+    min-width: 0;
+    font-size: 12.5px;
+  }
+  .mus-table th,
+  .mus-table td {
+    padding: 10px 6px;
+  }
+  .mus-table tbody th {
+    white-space: normal;
+    min-width: 6.4em;
+  }
+  .mus-table thead th {
+    font-size: 12px;
+    white-space: normal;
+    letter-spacing: 0.02em;
+  }
+  .mus-table td[data-bar]::after {
+    left: 6px;
+    right: 6px;
+    bottom: 4px;
+  }
+}
+
+@media (max-width: 760px) {
+  .mus-runway {
+    --mus-fig-h: 0.6;
+    --mus-fig-w: 0.98;
+    --mus-fig-b: 0.09;
+    height: 560svh;
+  }
+  .mus-call-lines {
+    left: var(--mus-gutter);
+    right: var(--mus-gutter);
+    font-size: 13px;
+    gap: 4px 14px;
+  }
+  .mus-call-line {
+    padding: 4px 0 4px 10px;
+  }
+  .mus-stamp {
+    bottom: 18px;
+    font-size: 30px;
+  }
+  .mus-rail {
+    right: 8px;
+  }
+  .mus-specs tbody th {
+    width: auto;
+    white-space: nowrap;
+    font-size: 13px;
+  }
+  .mus-specs tbody th,
+  .mus-specs tbody td,
+  .mus-specs thead th {
+    padding-right: 10px;
+    padding-left: 12px;
+  }
+  .mus-head {
+    align-items: center;
+  }
+}
+
+@media (max-width: 349.98px) {
+  .mus-runway {
+    --mus-fig-h: 0.56;
+    --mus-fig-b: 0.1;
+  }
+}

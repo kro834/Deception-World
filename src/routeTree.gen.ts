@@ -23,6 +23,7 @@ import { Route as GalleryToursRouteImport } from './routes/gallery-tours'
 import { Route as LibraryRouteImport } from './routes/library'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ManagersRouteImport } from './routes/managers'
+import { Route as MetaUnitasSagaRouteImport } from './routes/meta-unitas-saga'
 import { Route as RexonanceSagaRouteImport } from './routes/rexonance-saga'
 import { Route as RidersRouteImport } from './routes/riders'
 import { Route as SagaCinemaRouteImport } from './routes/saga-cinema'
@@ -121,6 +122,11 @@ const LoginRoute = LoginRouteImport.update({
 const ManagersRoute = ManagersRouteImport.update({
   id: '/managers',
   path: '/managers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MetaUnitasSagaRoute = MetaUnitasSagaRouteImport.update({
+  id: '/meta-unitas-saga',
+  path: '/meta-unitas-saga',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RexonanceSagaRoute = RexonanceSagaRouteImport.update({
@@ -285,6 +291,7 @@ export interface FileRoutesByFullPath {
   '/library': typeof LibraryRoute
   '/login': typeof LoginRoute
   '/managers': typeof ManagersRouteWithChildren
+  '/meta-unitas-saga': typeof MetaUnitasSagaRoute
   '/rexonance-saga': typeof RexonanceSagaRoute
   '/riders': typeof RidersRouteWithChildren
   '/saga-cinema': typeof SagaCinemaRoute
@@ -328,6 +335,7 @@ export interface FileRoutesByTo {
   '/gallery-tours': typeof GalleryToursRoute
   '/library': typeof LibraryRoute
   '/login': typeof LoginRoute
+  '/meta-unitas-saga': typeof MetaUnitasSagaRoute
   '/rexonance-saga': typeof RexonanceSagaRoute
   '/saga-cinema': typeof SagaCinemaRoute
   '/search': typeof SearchRoute
@@ -373,6 +381,7 @@ export interface FileRoutesById {
   '/library': typeof LibraryRoute
   '/login': typeof LoginRoute
   '/managers': typeof ManagersRouteWithChildren
+  '/meta-unitas-saga': typeof MetaUnitasSagaRoute
   '/rexonance-saga': typeof RexonanceSagaRoute
   '/riders': typeof RidersRouteWithChildren
   '/saga-cinema': typeof SagaCinemaRoute
@@ -420,6 +429,7 @@ export interface FileRouteTypes {
     | '/library'
     | '/login'
     | '/managers'
+    | '/meta-unitas-saga'
     | '/rexonance-saga'
     | '/riders'
     | '/saga-cinema'
@@ -463,6 +473,7 @@ export interface FileRouteTypes {
     | '/gallery-tours'
     | '/library'
     | '/login'
+    | '/meta-unitas-saga'
     | '/rexonance-saga'
     | '/saga-cinema'
     | '/search'
@@ -507,6 +518,7 @@ export interface FileRouteTypes {
     | '/library'
     | '/login'
     | '/managers'
+    | '/meta-unitas-saga'
     | '/rexonance-saga'
     | '/riders'
     | '/saga-cinema'
@@ -553,6 +565,7 @@ export interface RootRouteChildren {
   LibraryRoute: typeof LibraryRoute
   LoginRoute: typeof LoginRoute
   ManagersRoute: typeof ManagersRouteWithChildren
+  MetaUnitasSagaRoute: typeof MetaUnitasSagaRoute
   RexonanceSagaRoute: typeof RexonanceSagaRoute
   RidersRoute: typeof RidersRouteWithChildren
   SagaCinemaRoute: typeof SagaCinemaRoute
@@ -665,6 +678,13 @@ declare module '@tanstack/react-router' {
       path: '/managers'
       fullPath: '/managers'
       preLoaderRoute: typeof ManagersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/meta-unitas-saga': {
+      id: '/meta-unitas-saga'
+      path: '/meta-unitas-saga'
+      fullPath: '/meta-unitas-saga'
+      preLoaderRoute: typeof MetaUnitasSagaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/rexonance-saga': {
@@ -970,6 +990,7 @@ const rootRouteChildren: RootRouteChildren = {
   LibraryRoute: LibraryRoute,
   LoginRoute: LoginRoute,
   ManagersRoute: ManagersRouteWithChildren,
+  MetaUnitasSagaRoute: MetaUnitasSagaRoute,
   RexonanceSagaRoute: RexonanceSagaRoute,
   RidersRoute: RidersRouteWithChildren,
   SagaCinemaRoute: SagaCinemaRoute,

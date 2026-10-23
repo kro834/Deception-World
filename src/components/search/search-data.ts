@@ -23,6 +23,7 @@ import {
 import { CAST, FAR_FROM_SAGA, REALM_ROYAL, STORY } from "../final-stage/final-stage-data";
 import { FAR_FROM_REPORT_TEXT } from "../far-from-saga/far-from-report-text";
 import { REPORT_PART_TITLES } from "../far-from-saga/far-from-report-data";
+import { META_UNITAS_PERFORMANCE, META_UNITAS_SAGA } from "../meta-unitas-saga/meta-unitas-data";
 import { LIBRARY_ENTRIES } from "../../lib/library-data";
 import {
   SPECIAL_SITE_PATHS,
@@ -821,6 +822,45 @@ export const SEARCH_DOCUMENTS: readonly SearchCatalogueDocument[] = [
     keywords: ["性能比較", "暫定指数", "暫定ベンチマーク", "P16", "SA-GA OS 6.1"],
     to: "/far-from-saga",
     hash: "report-rexonance",
+  },
+  {
+    // META UNITAS SAGA (owner's record, 2026-10-23): its special site.
+    id: "meta-unitas-saga",
+    title: META_UNITAS_SAGA.names[0],
+    category: "riders",
+    description: META_UNITAS_SAGA.names[1],
+    body: proseOf([
+      META_UNITAS_SAGA.overview,
+      META_UNITAS_SAGA.systems,
+      META_UNITAS_SAGA.abilities,
+      META_UNITAS_SAGA.armor,
+      META_UNITAS_SAGA.stages,
+      META_UNITAS_SAGA.finishers,
+    ]).join("\n"),
+    keywords: [
+      "META UNITAS",
+      "SA-GA OS 6.1",
+      "P16",
+      ...META_UNITAS_SAGA.systems.map((item) => item.name),
+      ...META_UNITAS_SAGA.abilities.map((item) => item.name),
+      ...META_UNITAS_SAGA.armor.map((item) => item.name),
+      ...META_UNITAS_SAGA.arsenal,
+      ...META_UNITAS_SAGA.finishers.map((item) => item.name),
+    ],
+    aliases: ["meta unitas saga"],
+    to: "/meta-unitas-saga",
+    hash: "top",
+  },
+  {
+    // Its comparison (the owner's text, its Meta Unitas parts).
+    id: "meta-unitas-comparison",
+    title: `${META_UNITAS_SAGA.names[0].replace(/^仮面ライダー/, "")}／${META_UNITAS_PERFORMANCE.title}`,
+    category: "pages",
+    description: META_UNITAS_PERFORMANCE.chapters.map((chapter) => chapter.title).join("／"),
+    body: META_UNITAS_PERFORMANCE.chapters.flatMap((chapter) => chapter.body).join("\n"),
+    keywords: ["性能比較", "P14", "P16", "SA-GA OS 6.1"],
+    to: "/meta-unitas-saga",
+    hash: "performance",
   },
   {
     id: "realm-royal",

@@ -51,6 +51,14 @@ import {
   warmFarFromEntry,
   type FarFromTransitionRenderer,
 } from "@/lib/far-from-entry-gate";
+// META UNITAS SAGA's entry (2026-10-23): its partition scene on a clock,
+// under the same cover (src/lib/meta-unitas-entry-gate.ts).
+import {
+  META_UNITAS_ENTRY_TIMINGS,
+  prepareMetaUnitasTransition,
+  warmMetaUnitasEntry,
+  type MetaUnitasTransitionRenderer,
+} from "@/lib/meta-unitas-entry-gate";
 
 type RiderDiveVariant =
   | "saga"
@@ -61,6 +69,7 @@ type RiderDiveVariant =
   | "rexonance"
   | "extreme"
   | "far-from"
+  | "meta-unitas"
   | "final-stage";
 type RiderCutInVariant = "leddic" | "argenome" | "over-zeztz" | "cipher" | "ciel";
 type RiderTransitionVariant = RiderDiveVariant | RiderCutInVariant;
@@ -77,6 +86,8 @@ type GateState = {
   // FAR FROM's call (far-from-entry-sequence) and its suit, the same way.
   farFromCall?: FarFromTransitionRenderer | null;
   farFromSuit?: "build" | "whole";
+  // META UNITAS's call (meta-unitas-entry-sequence).
+  metaUnitasCall?: MetaUnitasTransitionRenderer | null;
 };
 
 type CineRect = { x: number; y: number; w: number; h: number };
@@ -138,6 +149,7 @@ const RIDER_DIVE_ROUTES = {
   "/rexonance-saga": "rexonance",
   "/extreme-saga": "extreme",
   "/far-from-saga": "far-from",
+  "/meta-unitas-saga": "meta-unitas",
   "/final-stage": "final-stage",
 } as const satisfies Record<string, RiderDiveVariant>;
 
@@ -170,6 +182,8 @@ const RIDER_DIVE_TIMINGS: Record<RiderDiveVariant, { cover: number; reveal: numb
   rexonance: REXONANCE_ENTRY_TIMINGS,
   extreme: { cover: 380, reveal: 480 },
   "far-from": FAR_FROM_ENTRY_TIMINGS,
+  // Without its call (the call's chunk or pictures late): the plain dive.
+  "meta-unitas": { cover: 380, reveal: 480 },
   "final-stage": { cover: 380, reveal: 480 },
 };
 
@@ -188,6 +202,7 @@ const RIDER_DIVE_META: Record<RiderDiveVariant, { no: string; name: string; labe
   rexonance: { no: "P14", name: "REXONANCE", label: "レクソナンスサーガ" },
   extreme: { no: "EX", name: "EXTREME", label: "エクスプリームサーガ" },
   "far-from": { no: "FF", name: "FAR FROM", label: "ファーフロムサーガ" },
+  "meta-unitas": { no: "MU", name: "META UNITAS", label: "メタ・ウニタスサーガ" },
   "final-stage": { no: "FS", name: "FINAL STAGE", label: "ファイナルステージ" },
 };
 
@@ -1535,6 +1550,38 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
             setSignal("idle");
             startedAt = performance.now();
           }
+          // META UNITAS SAGA's entry: the sequence's chunk and ミドル's pictures,
+          // each within a bounded window; if either is late, the plain dive.
+          let metaUnitasCall: MetaUnitasTransitionRenderer | null = null;
+          let metaUnitasSkipped = false;
+          if (diveVariant === "meta-unitas" && tier === "full") {
+            if (document.documentElement.dataset.sideMenuOpen === "true") {
+              markRouteCover("covering");
+            }
+            const warm = warmMetaUnitasEntry();
+            const preparation = prepareMetaUnitasTransition();
+            rexonanceCoverCancel.current = preparation.cancel;
+            metaUnitasCall = await preparation.promise;
+            if (rexonanceCoverCancel.current === preparation.cancel)
+              rexonanceCoverCancel.current = null;
+            if (!isCurrent()) return;
+            if (metaUnitasCall) {
+              setSignal("running");
+              const entry = prepareRexonanceEntry({
+                decoded: warm,
+                prepare: () => Promise.resolve(true),
+                deadlineMs: 1800,
+              });
+              rexonanceCoverCancel.current = entry.cancel;
+              const ready = await entry.promise;
+              if (rexonanceCoverCancel.current === entry.cancel)
+                rexonanceCoverCancel.current = null;
+              if (!isCurrent()) return;
+              if (!ready) metaUnitasCall = null;
+              setSignal("idle");
+            }
+            startedAt = performance.now();
+          }
           // PREV / NEXT between dossiers flips the file; entry from anywhere
           // else keeps the rider's own dive or cut-in.
           const flip =
@@ -1552,7 +1599,9 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
                     ? CALM_TIMINGS
                     : diveVariant === "far-from" && !farFromCall
                       ? CALM_TIMINGS
-                      : RIDER_DIVE_TIMINGS[diveVariant]
+                      : diveVariant === "meta-unitas" && metaUnitasCall
+                        ? META_UNITAS_ENTRY_TIMINGS
+                        : RIDER_DIVE_TIMINGS[diveVariant]
                   : cutInVariant
                     ? RIDER_CUT_IN_TIMINGS[cutInVariant]
                     : CALM_TIMINGS;
@@ -1566,7 +1615,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
                   timings,
                   assets,
                   to,
-                  callOnly: Boolean(rexonanceCall) || Boolean(farFromCall),
+                  callOnly: Boolean(rexonanceCall) || Boolean(farFromCall) || Boolean(metaUnitasCall),
                 });
           setDocumentLoading(true);
           markRouteCover("covering");
@@ -1583,12 +1632,18 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
             rexonanceSuit,
             farFromCall,
             farFromSuit,
+            metaUnitasCall,
           });
           // The skip, from the first painted frame: before the hold it marks
           // the cover spent; during the hold it ends it (below).
           if (farFromCall) {
             farFromSkip.current = () => {
               farFromSkipped = true;
+            };
+          }
+          if (metaUnitasCall) {
+            farFromSkip.current = () => {
+              metaUnitasSkipped = true;
             };
           }
           try {
@@ -1634,7 +1689,12 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
             }
             // Mobile Safari may coalesce the state update with route/module work.
             // Paint both cinematic entries before loading their route chunk.
-            if (diveVariant === "dream" || diveVariant === "rexonance" || diveVariant === "far-from") {
+            if (
+              diveVariant === "dream" ||
+              diveVariant === "rexonance" ||
+              diveVariant === "far-from" ||
+              (diveVariant === "meta-unitas" && metaUnitasCall)
+            ) {
               await nextFrame();
               await nextFrame();
               if (!isCurrent()) return;
@@ -1642,6 +1702,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
               // from the click (which may have included a long layout task).
               if (diveVariant === "rexonance") startedAt = performance.now();
               if (diveVariant === "far-from") startedAt = performance.now();
+              if (diveVariant === "meta-unitas") startedAt = performance.now();
             }
             // Images warm independently of the route chunk. A stalled chunk
             // releases the cover before navigation, rather than locking the page.
@@ -1658,6 +1719,16 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
                 // The same hold (a live reduced-motion or economy preference
                 // ends it), and the skip ends it too.
                 if (!farFromSkipped) {
+                  const hold = waitForRexonanceCover(coverTimeLeft);
+                  rexonanceCoverCancel.current = hold.cancel;
+                  farFromSkip.current = hold.cancel;
+                  await hold.promise;
+                  if (farFromSkip.current === hold.cancel) farFromSkip.current = null;
+                  if (rexonanceCoverCancel.current === hold.cancel)
+                    rexonanceCoverCancel.current = null;
+                }
+              } else if (diveVariant === "meta-unitas" && metaUnitasCall) {
+                if (!metaUnitasSkipped) {
                   const hold = waitForRexonanceCover(coverTimeLeft);
                   rexonanceCoverCancel.current = hold.cancel;
                   farFromSkip.current = hold.cancel;
@@ -1702,6 +1773,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
               rexonanceSuit,
               farFromCall,
               farFromSuit,
+              metaUnitasCall,
             });
             await revealRan(
               timings.reveal,
@@ -1872,6 +1944,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
         rexonanceSuit={gate.rexonanceSuit}
         farFromCall={gate.farFromCall}
         farFromSuit={gate.farFromSuit}
+        metaUnitasCall={gate.metaUnitasCall}
         onSkip={skipFarFrom}
       />
       <RouteSignal state={signal} />
@@ -1910,6 +1983,7 @@ function LoadOverlay({
   rexonanceSuit,
   farFromCall,
   farFromSuit,
+  metaUnitasCall,
   onSkip,
 }: {
   active: boolean;
@@ -1920,6 +1994,7 @@ function LoadOverlay({
   rexonanceSuit?: GateState["rexonanceSuit"];
   farFromCall?: FarFromTransitionRenderer | null;
   farFromSuit?: GateState["farFromSuit"];
+  metaUnitasCall?: MetaUnitasTransitionRenderer | null;
   onSkip?: () => void;
 }) {
   if (!active) return null;
@@ -1952,6 +2027,7 @@ function LoadOverlay({
     variant === "rexonance" ||
     variant === "extreme" ||
     variant === "far-from" ||
+    variant === "meta-unitas" ||
     variant === "final-stage";
   if (isRiderDive) {
     return (
@@ -1963,6 +2039,7 @@ function LoadOverlay({
         rexonanceSuit={rexonanceSuit}
         farFromCall={farFromCall}
         farFromSuit={farFromSuit}
+        metaUnitasCall={metaUnitasCall}
         onSkip={onSkip}
       />
     );
@@ -2043,6 +2120,18 @@ function LoadOverlay({
   );
 }
 
+const DIVE_STATUS_HIDDEN: CSSProperties = {
+  position: "absolute",
+  width: 1,
+  height: 1,
+  margin: -1,
+  padding: 0,
+  overflow: "hidden",
+  clip: "rect(0 0 0 0)",
+  whiteSpace: "nowrap",
+  animation: "none",
+};
+
 function RiderRouteDive({
   variant,
   phase,
@@ -2051,6 +2140,7 @@ function RiderRouteDive({
   rexonanceSuit,
   farFromCall: FarFromCallSequence,
   farFromSuit,
+  metaUnitasCall: MetaUnitasCallSequence,
   onSkip,
 }: {
   variant: RiderDiveVariant;
@@ -2060,23 +2150,28 @@ function RiderRouteDive({
   rexonanceSuit?: GateState["rexonanceSuit"];
   farFromCall?: FarFromTransitionRenderer | null;
   farFromSuit?: GateState["farFromSuit"];
+  metaUnitasCall?: MetaUnitasTransitionRenderer | null;
   onSkip?: () => void;
 }) {
   const meta = RIDER_DIVE_META[variant];
   const revealing = phase === "revealing";
   const rexonance = variant === "rexonance" && Boolean(RexonanceCallSequence);
   const farFrom = variant === "far-from" && Boolean(FarFromCallSequence);
+  const metaUnitas = variant === "meta-unitas" && Boolean(MetaUnitasCallSequence);
   // FAR FROM's call is skippable (owner, 2026-10-22): the button, or Escape
-  // while it covers.
+  // while it covers. META UNITAS's the same way.
   const farFromSkippable = farFrom && !revealing && scene?.tier === "full" && Boolean(onSkip);
+  const metaUnitasSkippable =
+    metaUnitas && !revealing && scene?.tier === "full" && Boolean(onSkip);
+  const skippable = farFromSkippable || metaUnitasSkippable;
   useEffect(() => {
-    if (!farFromSkippable) return;
+    if (!skippable) return;
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") onSkip?.();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [farFromSkippable, onSkip]);
+  }, [skippable, onSkip]);
   return (
     <div
       className={`load-gate archive-route-dive rider-route-dive is-${variant}-dive is-diving${revealing ? " is-arriving" : ""} is-${phase}${cineClass(scene)}${rexonance ? " is-rexonance-calls" : ""}${farFrom ? " is-far-from-calls" : ""}`}
@@ -2095,6 +2190,20 @@ function RiderRouteDive({
           tier={scene?.tier ?? "reduced"}
           suit={rexonanceSuit}
         />
+      ) : metaUnitas && MetaUnitasCallSequence ? (
+        <>
+          <MetaUnitasCallSequence phase={phase} tier={scene?.tier ?? "reduced"} />
+          {metaUnitasSkippable ? (
+            <button
+              type="button"
+              className="ffe-skip"
+              onClick={onSkip}
+              aria-label="変身演出をスキップ"
+            >
+              スキップ
+            </button>
+          ) : null}
+        </>
       ) : farFrom && FarFromCallSequence ? (
         <>
           <FarFromCallSequence
@@ -2128,7 +2237,12 @@ function RiderRouteDive({
           <span className="cine-dive-flash" aria-hidden="true" />
         </>
       )}
-      <span className="cine-dive-status rider-dive-status">
+      <span
+        className="cine-dive-status rider-dive-status"
+        // META UNITAS's call carries the screen: its status is for assistive
+        // technology only (no caption over the scene).
+        style={metaUnitas ? DIVE_STATUS_HIDDEN : undefined}
+      >
         <small>
           {variant === "rexonance"
             ? "REXONANCE // PERFORMANCE SITE"
@@ -2136,6 +2250,8 @@ function RiderRouteDive({
               ? "EXTREME // SUPREME SITE"
               : variant === "far-from"
                 ? "FAR FROM // FINAL FORM SITE"
+                : variant === "meta-unitas"
+                ? "META UNITAS"
                 : variant === "final-stage"
                 ? "FINAL STAGE // STORY SITE"
                 : variant === "dream"
@@ -2155,6 +2271,10 @@ function RiderRouteDive({
                 ? revealing
                   ? "超究極位相へ到着"
                   : "超究極位相へダイブ中"
+                : variant === "meta-unitas"
+                ? revealing
+                  ? "メタ・ウニタスサーガへ到着"
+                  : "メタ・ウニタスサーガへ移動中"
                 : variant === "final-stage"
                   ? revealing
                     ? "最終位相へ到着"
