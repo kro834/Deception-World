@@ -59,20 +59,15 @@ function WorldReturn({
   );
 }
 
-function SectionLabel({
-  number,
-  title,
-  children,
-}: {
-  number: string;
-  title: string;
-  children: ReactNode;
-}) {
+/* A section's label: its number (the header's order) as a mark, and its
+   Japanese name as the section's heading (owner, 2026-10-23: 「不要なセカンダリ
+   ラベルや説明を避ける」 — the English title that repeated the header's
+   navigation went). */
+function SectionLabel({ number, children }: { number: string; children: ReactNode }) {
   return (
     <div className="section-label">
-      <span>{number}</span>
-      <h2>{title}</h2>
-      <span>{children}</span>
+      <span aria-hidden="true">{number}</span>
+      <h2>{children}</h2>
     </div>
   );
 }
@@ -307,7 +302,6 @@ export function SagaCinema() {
               </span>
               <span>
                 <span className="brand-name">KAMEN RIDER SAGA</span>
-                <span className="brand-sub">THE CINEMATIC TETRALOGY</span>
               </span>
             </a>
             <nav className="desktop-nav" aria-label="メインナビゲーション">
@@ -347,9 +341,6 @@ export function SagaCinema() {
               <div className="hero-rings" aria-hidden="true" />
               <div className="hero-layout">
                 <div className="hero-copy">
-                  <p className="eyebrow">
-                    KAMEN RIDER SAGA <span>—</span> MOVIE PROJECT
-                  </p>
                   <p className="hero-project">本編リメイク 映画4部作</p>
                   <h1 className="logo-crop">
                     <img
@@ -398,12 +389,6 @@ export function SagaCinema() {
                   </div>
                 </div>
                 <div className="hero-poster-area">
-                  <div className="poster-heading">
-                    <span>KEY VISUAL</span>
-                    <span id="hero-counter">
-                      {cinemaNumber(heroIndex)} <i>/</i> 04
-                    </span>
-                  </div>
                   <button
                     className="hero-poster frame"
                     id="hero-poster"
@@ -426,7 +411,6 @@ export function SagaCinema() {
                   <div className="poster-caption" aria-live="polite" aria-atomic="true">
                     <span id="hero-chapter">{hero.part}</span>
                     <span id="hero-title">{hero.title}</span>
-                    <span id="hero-roman">{hero.roman}</span>
                   </div>
                   <div className="poster-controls" onKeyDown={chapterKeyboard}>
                     <button
@@ -490,15 +474,13 @@ export function SagaCinema() {
                       void selectHero(index, true);
                     }}
                   >
-                    <small>CHAPTER {cinemaNumber(index)}</small>
                     <strong>{film.title}</strong>
-                    <span>{film.roman}</span>
                   </button>
                 ))}
               </div>
               <div className="hero-floor">
-                <a href="#introduction">
-                  SCROLL TO EXPLORE <span>↓</span>
+                <a href="#introduction" aria-label="作品について">
+                  <span aria-hidden="true">↓</span>
                 </a>
                 <span>
                   邂逅 <i>/</i> 覚醒 <i>/</i> 激情 <i>/</i> 終末
@@ -506,7 +488,7 @@ export function SagaCinema() {
               </div>
             </section>
             <section className="intro section" id="introduction">
-              <SectionLabel number="01" title="INTRODUCTION">
+              <SectionLabel number="01">
                 作品について
               </SectionLabel>
               <div className="intro-layout" data-reveal>
@@ -520,13 +502,11 @@ export function SagaCinema() {
                       loading="lazy"
                     />
                   </div>
-                  <span className="image-caption">CHAPTER I / KAIKŌ</span>
                   <span className="intro-numeral" aria-hidden="true">
                     I—IV
                   </span>
                 </div>
                 <div className="intro-copy">
-                  <p className="eyebrow">A SAGA, REIMAGINED.</p>
                   <h3>
                     あの物語を、
                     <br />
@@ -560,12 +540,11 @@ export function SagaCinema() {
               </div>
             </section>
             <section className="films section" id="films">
-              <SectionLabel number="02" title="THE FOUR FILMS">
+              <SectionLabel number="02">
                 映画4部作
               </SectionLabel>
               <div className="section-heading" data-reveal>
                 <h3>邂逅から、終末へ。</h3>
-                <p>各作品のビジュアルと作品情報をご覧いただけます。</p>
               </div>
               <div className="film-grid">
                 {SAGA_CINEMA_FILMS.map((film, index) => (
@@ -574,10 +553,10 @@ export function SagaCinema() {
                     className="film-card"
                     data-detail={index}
                     data-reveal
+                    aria-haspopup="dialog"
                     onClick={() => openDetail(index)}
                   >
                     <div className="film-card-top">
-                      <span>CHAPTER {cinemaNumber(index)}</span>
                       <span>{film.part}</span>
                     </div>
                     <div className="film-poster">
@@ -594,23 +573,18 @@ export function SagaCinema() {
                     </div>
                     <div className="film-name">
                       <h4>{film.title}</h4>
-                      <span>{film.roman}</span>
-                    </div>
-                    <div className="film-bottom">
-                      <span>作品情報</span>
-                      <span>＋</span>
+                      <span aria-hidden="true">＋</span>
                     </div>
                   </button>
                 ))}
               </div>
             </section>
             <section className="visuals section" id="visuals">
-              <SectionLabel number="03" title="VISUAL ARCHIVE">
+              <SectionLabel number="03">
                 ビジュアル
               </SectionLabel>
               <div className="visual-layout" data-reveal>
                 <div className="visual-copy">
-                  <p className="eyebrow">THE WORLD OF SAGA</p>
                   <h3>
                     一枚から、
                     <br />
@@ -624,10 +598,6 @@ export function SagaCinema() {
                   <button className="frame-button" id="open-gallery" onClick={() => openGallery(0)}>
                     ギャラリーを開く <span>↗</span>
                   </button>
-                  <div className="visual-index">
-                    <span>KEY VISUALS</span>
-                    <span>01 — 04</span>
-                  </div>
                 </div>
                 <button
                   className="visual-feature"
@@ -644,13 +614,13 @@ export function SagaCinema() {
                   />
                   <div className="visual-feature-caption">
                     <span>II / 覚醒</span>
-                    <span>VIEW VISUAL ＋</span>
+                    <span aria-hidden="true">＋</span>
                   </div>
                 </button>
               </div>
             </section>
             <section className="information section" id="information">
-              <SectionLabel number="04" title="INFORMATION">
+              <SectionLabel number="04">
                 公開情報
               </SectionLabel>
               <div className="information-content" data-reveal>
@@ -675,7 +645,7 @@ export function SagaCinema() {
           <footer className="site-footer">
             <div className="footer-top">
               <a href="#top" className="footer-brand">
-                KAMEN RIDER SAGA<span>THE CINEMATIC TETRALOGY</span>
+                KAMEN RIDER SAGA
               </a>
               <div className="footer-actions">
                 <WorldReturn className="text-button" beforeNavigate={closeAll}>
@@ -751,16 +721,10 @@ export function SagaCinema() {
               <span>ポスターを拡大 ＋</span>
             </button>
             <div className="dialog-copy">
-              <p className="eyebrow" id="dialog-chapter">
-                CHAPTER {cinemaNumber(detailIndex)} / THE FOUR FILMS
-              </p>
               <p id="dialog-part" className="dialog-part">
                 {detail.part}
               </p>
               <h2 id="dialog-title">{detail.title}</h2>
-              <p className="dialog-roman" id="dialog-roman">
-                {detail.roman}
-              </p>
               <p className="dialog-project">
                 仮面ライダーサーガ
                 <br />
@@ -790,7 +754,7 @@ export function SagaCinema() {
                   aria-label="前の作品"
                   onClick={() => changeDetail(detailIndex - 1)}
                 >
-                  ← PREV
+                  ←
                 </button>
                 <span
                   id="detail-counter"
@@ -805,7 +769,7 @@ export function SagaCinema() {
                   aria-label="次の作品"
                   onClick={() => changeDetail(detailIndex + 1)}
                 >
-                  NEXT →
+                  →
                 </button>
               </div>
             </div>
@@ -826,9 +790,6 @@ export function SagaCinema() {
           }}
         >
           <div className="gallery-top">
-            <p>
-              VISUAL ARCHIVE <span id="gallery-counter">{cinemaNumber(galleryIndex)} / 04</span>
-            </p>
             <button
               className="close-button"
               data-close
