@@ -569,7 +569,8 @@ test("the owner's comparison text is kept verbatim and read whole into the two d
 test("#report shows both documents as accessible disclosure panels", () => {
   const block = section("report", "p16");
   assert.match(block, /<FarFromReport \/>/);
-  assert.match(block, /<h2 id="ffs-report-title">比較資料<\/h2>/);
+  // Owner (2026-10-23): chapter headings are catchphrases (「韋駄天？遅過ぎる」 and the like).
+  assert.match(block, /<h2 id="ffs-report-title">差は、桁で見せる。<\/h2>/);
   // Native <details>/<summary>: keyboard, screen readers and find-in-page.
   assert.match(reportView, /<details\s+id=\{chapter\.id\}/);
   assert.match(reportView, /<summary>/);
@@ -1708,6 +1709,10 @@ test("the five forms are named in katakana only wherever the page's own labels n
   assert.match(editorial, /ミドル <span lang="en">\/ STANDARD<\/span>/);
   assert.match(suitupSource, /<span>\{FAR_FROM_SAGA\.stages\[key\]\.label\}<\/span>\n\s*<\/button>/);
   assert.match(ultraArt, /\{ phase: "max", step: "01", label: "マックス" \}/);
+  // /final-stage's Far From selector (its tabs and the panel) prints the katakana only.
+  const finalStage = read("src/components/final-stage/final-stage.tsx");
+  assert.doesNotMatch(finalStage, /stages\[key\]\.code|activeStage\.code/);
+  assert.match(finalStage, /<span>\{FAR_FROM_SAGA\.stages\[key\]\.label\}<\/span>\n\s*<\/button>/);
   // The owner's own words keep their English: the calls and the report text.
   assert.match(
     read("src/components/final-stage/final-stage-data.ts"),
