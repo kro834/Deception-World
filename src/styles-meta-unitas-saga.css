@@ -1655,3 +1655,46 @@ html[data-family="special"]
     border-color: rgb(255 154 74 / 50%);
   }
 }
+
+/* The cards' outlined numbers (the Extreme site's; marks). */
+.mus-article {
+  position: relative;
+}
+
+.mus-article-no {
+  position: absolute;
+  top: clamp(14px, 1.6vw, 22px);
+  right: clamp(16px, 2vw, 26px);
+  color: transparent;
+  -webkit-text-stroke: 1px rgb(255 154 74 / 55%);
+  font-family: var(--mus-latin);
+  font-size: clamp(28px, 3vw, 44px);
+  font-weight: 300;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.mus-article h3 {
+  padding-right: clamp(44px, 4.4vw, 64px);
+}
+
+/* The end card's watermark: the name, huge, under everything (Extreme's). */
+.mus-end-mark {
+  position: absolute;
+  z-index: 0;
+  left: 50%;
+  bottom: -0.12em;
+  transform: translateX(-50%);
+  color: transparent;
+  -webkit-text-stroke: 1px rgb(255 154 74 / 22%);
+  background: linear-gradient(180deg, rgb(255 154 74 / 16%), transparent 80%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  font-family: var(--mus-latin);
+  font-size: clamp(40px, 12.5vw, 210px);
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  white-space: nowrap;
+  pointer-events: none;
+}
