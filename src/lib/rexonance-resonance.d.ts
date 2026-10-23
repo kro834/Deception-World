@@ -256,6 +256,9 @@ export interface RexonanceAssemblyGenerationLayer {
  * slices), its layer draws the armour in place of the nanite swarm, the
  * plates' paint, the gold's pour and the field. */
 export interface RexonanceAssemblyGeneration {
+  /** True: the nanite scene builds the armour and the layer draws over it
+   * (its wire); otherwise the layer replaces the armour's build. */
+  overlay?: boolean;
   prepare(input: {
     document: Document;
     size: { readonly width: number; readonly height: number };
@@ -276,6 +279,7 @@ export interface RexonanceAssemblyGeneration {
     gold?: CanvasImageSource | null;
     /** The chain's form keys to prepare ("standard" first). */
     forms: readonly string[];
+    overlay?: boolean;
   }): Generator<undefined, RexonanceAssemblyGenerationLayer | null, unknown>;
 }
 
