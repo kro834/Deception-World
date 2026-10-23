@@ -402,6 +402,11 @@ html[data-world-effects="economy"] .export-page h1 {
   display: block;
 }
 
+.export-page #export-retry-note {
+  margin-top: 8px;
+  color: var(--dl-text-2);
+}
+
 /* The way back: the poster's foot, the full width of the card. */
 .export-page .export-page-back {
   justify-self: stretch;
@@ -671,10 +676,8 @@ html[data-world-effects="economy"] .export-page h1 {
         var(--dl-magenta) 66%,
         var(--dl-gold)
       ),
-      linear-gradient(var(--dl-lock) 0 0),
-      linear-gradient(var(--dl-lock) 0 0),
-      linear-gradient(var(--dl-gold) 0 0),
-      linear-gradient(var(--dl-gold) 0 0),
+      linear-gradient(var(--dl-lock) 0 0), linear-gradient(var(--dl-lock) 0 0),
+      linear-gradient(var(--dl-gold) 0 0), linear-gradient(var(--dl-gold) 0 0),
       linear-gradient(
         90deg,
         rgb(4 8 15 / 10%) 0,
@@ -682,7 +685,13 @@ html[data-world-effects="economy"] .export-page h1 {
         rgb(4 8 15 / 58%) 86%,
         #070d16 100%
       ),
-      linear-gradient(180deg, rgb(4 8 15 / 36%), transparent 28%, transparent 62%, rgb(4 8 15 / 72%)),
+      linear-gradient(
+        180deg,
+        rgb(4 8 15 / 36%),
+        transparent 28%,
+        transparent 62%,
+        rgb(4 8 15 / 72%)
+      ),
       var(--dl-art-image, url("/deception-world-poster-delivery-720.webp"));
     background-position:
       100% 0,
@@ -1012,5 +1021,83 @@ html[data-world-effects="economy"] .export-page h1 {
     color: CanvasText;
     background: Canvas;
     box-shadow: none;
+  }
+}
+
+/* The eighth grid item remains the poster's foot in both orientations. */
+.export-page > .export-page-navigation {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  justify-self: stretch;
+  margin: 0;
+  min-width: 0;
+}
+
+.export-page-navigation > :is(.export-page-back, .export-page-context) {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 48px;
+  padding: 12px;
+  margin: 0;
+  border-top: 1px solid rgb(122 232 255 / 18%);
+  border-radius: 0;
+  color: #dff9ff;
+  background: rgb(122 232 255 / 5%);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.6;
+  letter-spacing: 0.02em;
+  overflow-wrap: anywhere;
+  text-decoration: none;
+}
+
+.export-page-navigation > :is(.export-page-back, .export-page-context):focus-visible {
+  z-index: 2;
+  outline: 3px solid var(--dl-focus);
+  outline-offset: -4px;
+}
+
+.export-page-navigation > .export-page-context:hover {
+  background: rgb(122 232 255 / 14%);
+}
+
+@media (max-width: 559px) {
+  .export-page > .export-page-navigation {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .export-page-navigation > :last-child {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 500px) and (min-width: 560px) {
+  .export-page > .export-page-navigation {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .export-page-navigation > :is(.export-page-back, .export-page-context) {
+    min-height: 44px;
+    padding: 10px 8px;
+    font-size: 12px;
+  }
+}
+
+@media (forced-colors: active) {
+  .export-page #export-retry-note {
+    color: CanvasText;
+  }
+
+  .export-page-navigation > :is(.export-page-back, .export-page-context) {
+    border: 1px solid LinkText;
+    color: LinkText;
+    background: Canvas;
+  }
+
+  .export-page-navigation > :is(.export-page-back, .export-page-context):focus-visible {
+    outline-color: Highlight;
   }
 }

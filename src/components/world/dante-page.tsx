@@ -1,9 +1,10 @@
 import { useWorldMode } from "./use-world-mode";
-import { DossierNav } from "./dossier-nav";
+import { DossierNav, NameText } from "./dossier-nav";
 import { DossierTopbar } from "./world-chrome";
 import { DossierContents, DossierReader, PhrasedText } from "./dossier-reader";
 import { FormPickup } from "./manager-stub";
-import { VARG_FACTS } from "./varg-data";
+import { VARG_FACTS, VARG_SECTIONS } from "./varg-data";
+import { CharacterChapterTools, CharacterRelatedRecords } from "./character-reading-tools";
 import {
   DANTE_FACTS,
   DANTE_FORMS,
@@ -32,8 +33,10 @@ export function DantePage() {
         <div className="manager-grid" />
         <div className="manager-glow" />
       </div>
+      {/* A file shows no file line in its top bar (2026-10-23, the dossier
+          sheets); the label names the brand link's way back. */}
       <DossierTopbar
-        fileLabel="SECOND DOG / DANTE / VARG"
+        fileLabel="ダンテ／ヴァルグの資料"
         returnHash="manager-archive-dogs"
         returnLabel="犬の一覧へ戻る"
       />
@@ -51,20 +54,25 @@ export function DantePage() {
               style={{ objectFit: "contain", objectPosition: "50% 0%" }}
             />
             <i className="dossier-arrive-scan" aria-hidden="true" />
-            <span className="manager-numeral">01</span>
           </div>
         </div>
         <div className="manager-introduction">
           <header className="dossier-identity">
-            <p className="manager-file-number">SCARS // No.1</p>
+            {/* The file's numeral in outline over the name (decorative). */}
+            <span className="dossier-file-numeral" aria-hidden="true">
+              01
+            </span>
+            {/* Sized to its line (the dossier's --name-len rule): set whole,
+                it ran past the column's edge at 1440px. */}
             <h1>
-              <small>DANTE / VARG</small>
-              <span className="manager-display-name">ダンテ／ヴァルグ</span>
+              <span
+                className="manager-display-name"
+                style={{ ["--name-len" as string]: [..."ダンテ／ヴァルグ"].length }}
+              >
+                <NameText value="ダンテ／ヴァルグ" />
+              </span>
             </h1>
             <p className="manager-title"># 管理人殺し ／ 第二の犬</p>
-            <a className="dossier-read-link" href="#dossier-index">
-              人物資料を読む <span aria-hidden="true">↓</span>
-            </a>
           </header>
           <div className="manager-quotes">
             {DANTE_QUOTES.map((quote) => (
@@ -82,11 +90,11 @@ export function DantePage() {
         </div>
       </section>
       <DossierReader name="ダンテ／ヴァルグ" forms />
-      <section className="manager-dossier" id="dossier-index" aria-label="ダンテ／ヴァルグの人物資料">
-        <div className="manager-section-index">
-          <span>01</span>
-          <small>CHARACTER DOSSIER</small>
-        </div>
+      <section
+        className="manager-dossier"
+        id="dossier-index"
+        aria-label="ダンテ／ヴァルグの人物資料"
+      >
         <DossierContents sections={DANTE_SECTIONS} />
         <div className="manager-sections">
           {DANTE_SECTIONS.map((section) => (
@@ -115,13 +123,20 @@ export function DantePage() {
                       loading="lazy"
                       decoding="async"
                     />
-                    <figcaption>第二の犬・ヴァルグ ／ 本来形態<br /><a href="/character-varg-20261021-original.webp">原寸画像を見る</a></figcaption>
+                    <figcaption>
+                      第二の犬・ヴァルグ ／ 本来形態
+                      <br />
+                      <a href="/character-varg-20261021-original.webp">原寸画像を見る</a>
+                    </figcaption>
                   </figure>
                 ) : null}
                 {section.no === "04" ? (
                   <dl className="manager-facts" aria-label="ヴァルグの人物録">
                     {VARG_FACTS.map((fact) => (
-                      <div key={fact.dt}><dt>{fact.dt}</dt><dd>{fact.dd}</dd></div>
+                      <div key={fact.dt}>
+                        <dt>{fact.dt}</dt>
+                        <dd>{fact.dd}</dd>
+                      </div>
                     ))}
                   </dl>
                 ) : null}
@@ -129,18 +144,39 @@ export function DantePage() {
                   <p key={body}>{body}</p>
                 ))}
               </div>
+              <CharacterChapterTools
+                sections={DANTE_SECTIONS}
+                currentNo={section.no}
+                continuation={{ href: "#form-records", title: "ルーラーの変身記録" }}
+              />
             </article>
           ))}
         </div>
+        <CharacterRelatedRecords
+          records={[
+            {
+              href: `#character-section-${VARG_SECTIONS[0].no}`,
+              title: VARG_SECTIONS[0].title,
+            },
+            ...DANTE_FORMS.map((form) => ({
+              href: `#${form.id}`,
+              title: form.name,
+            })),
+          ]}
+        />
       </section>
       <div id="form-records">
         {DANTE_FORMS.map((rider) => (
-          <div id={rider.id} key={rider.id}>
+          <div id={rider.id} key={rider.id} className="character-reading-target">
             <FormPickup rider={rider} />
           </div>
         ))}
       </div>
-      <DossierNav items={UNMANAGED_NAV} currentHref="/characters/dante" indexLabel="犬" returnHash="manager-archive-dogs" />
+      <DossierNav
+        items={UNMANAGED_NAV}
+        currentHref="/characters/dante"
+        returnHash="manager-archive-dogs"
+      />
     </main>
   );
 }

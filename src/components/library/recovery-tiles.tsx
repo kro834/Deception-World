@@ -17,6 +17,7 @@ export function RecoveryTiles() {
       hash: recent?.hash,
       title: recent?.title ?? "資料室・しおり",
       code: recent ? "CONTINUE" : "LIBRARY",
+      context: recent ? "最近読んだ資料" : undefined,
       art: recent
         ? pathArt(recent.path, recent.hash).src
         : "/rider-saga-rexonance-thumbnail-20260827-400.webp",
@@ -32,7 +33,12 @@ export function RecoveryTiles() {
     <nav className="recovery-tiles" aria-label="次に開く資料">
       <link rel="stylesheet" href={recoveryCss} precedence="default" />
       {tiles.map((tile) => (
-        <Link key={tile.code} to={tile.to} hash={tile.hash}>
+        <Link
+          key={tile.code}
+          to={tile.to}
+          hash={tile.hash}
+          aria-label={tile.context ? `${tile.context}：${tile.title}` : undefined}
+        >
           {tile.art ? (
             <img
               {...recordImage(tile.art)}
@@ -42,7 +48,7 @@ export function RecoveryTiles() {
               alt=""
             />
           ) : null}
-          <small>{tile.code}</small>
+          <small>{tile.context ?? tile.code}</small>
           <b>{tile.title}</b>
         </Link>
       ))}

@@ -19,7 +19,9 @@ const cases = [
     path: "/riders/saga",
     from: "dossier-profile",
     to: "dossier-index",
-    link: ".dossier-read-link",
+    // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）
+    // No 人物資料を読む link: the ruler's 人物資料 is the same jump.
+    link: '.dossier-reader a[href="#dossier-index"]',
     trigger: ".rider-nightmare-pickup-button",
   },
   ...["far-from-saga", "realm-royal"].map((id) => ({

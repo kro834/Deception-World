@@ -15,7 +15,7 @@ test("/characters/ciel is a World route with its own sheet after the dossier she
   assert.match(route, /import cielCssUrl from "@\/styles-ciel\.css\?url";/);
   assert.match(
     route,
-    /stylesheetLinks: \[\.\.\.DOSSIER_STYLESHEET_LINKS, \{ rel: "stylesheet", href: cielCssUrl \}\]/,
+    /stylesheetLinks: \[\s*\.\.\.DOSSIER_STYLESHEET_LINKS,\s*\{ rel: "stylesheet", href: cielCssUrl \},\s*\{ rel: "stylesheet", href: characterReadingCssUrl \},?\s*\]/,
   );
   assert.match(route, /title: "シエル｜人物資料｜Deception World"/);
   const tree = await read("src/routeTree.gen.ts");
@@ -30,7 +30,13 @@ test("his page keeps 月城悠真's record from the eight riders, without マキ
   }
   assert.doesNotMatch(page, /nightmare|マキャベル|MACHIAVEL/i);
   // Headed by his name and his illustration.
-  assert.match(page, /<small>CIEL<\/small>/);
+  // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）
+  // No CIEL subtitle or CHARACTER FILE strip: his numeral (I) over his name.
+  assert.doesNotMatch(page, /<small>CIEL<\/small>|CHARACTER FILE/);
+  assert.match(
+    page,
+    /className="dossier-file-numeral" data-numerals="roman" aria-hidden="true">\s*\{CIEL\.id\}\s*<\/span>\s*<h1>\s*<span className="manager-display-name">\s*<NameText value=\{CIEL\.name\} \/>/,
+  );
   assert.match(page, /alt="シエルのキャラクタービジュアル"/);
   assert.match(page, /\{\.\.\.cielPortrait\(\)\}/);
   // It returns to RE DIVE. Owner (2026-10-16): the 六詠 strip with シエル as I is gone from his page.
@@ -44,7 +50,10 @@ test("his page keeps 月城悠真's record from the eight riders, without マキ
   ].map(([, id, index]) => id ?? ["I", "II", "III", "IV", "V", "VI"][Number(index)]);
   assert.deepEqual(order, ["I", "II", "III", "IV", "V", "VI"]);
   assert.match(list, /href: "\/characters\/ciel"/);
-  assert.match(nav, /const returnHash = fromCastRoster \? "cast-roster" : \(listHash \?\? pathHash\);/);
+  assert.match(
+    nav,
+    /const returnHash = fromCastRoster \? "cast-roster" : \(listHash \?\? pathHash\);/,
+  );
 });
 
 test("his colours are emerald green and light blue", async () => {

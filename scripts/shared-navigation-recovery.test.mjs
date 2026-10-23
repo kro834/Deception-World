@@ -231,7 +231,7 @@ for (const [name, recent, expected] of [
     assert.equal((html.match(/href="\/world"/g) ?? []).length, 1);
     assert.equal((html.match(/href="\/search"/g) ?? []).length, 1);
     assert.ok(html.includes(`href="${expected}"`));
-    assert.match(html, /<h1>記録が見つかりません。<\/h1>/);
+    assert.match(html, /<h1 id="not-found-heading">記録が見つかりません。<\/h1>/);
     assert.match(html, /<nav class="recovery-tiles" aria-label="次に開く資料">/);
   });
 }

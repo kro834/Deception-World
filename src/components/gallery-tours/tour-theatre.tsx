@@ -177,6 +177,7 @@ export function GalleryTourTheatre({
     if (
       !imageReady ||
       !pageVisible ||
+      suspended ||
       !nextSource ||
       (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData
     )
@@ -187,7 +188,7 @@ export function GalleryTourTheatre({
     next.fetchPriority = "low";
     next.src = nextSource;
     return () => next.removeAttribute("src");
-  }, [imageReady, nextSource, pageVisible]);
+  }, [imageReady, nextSource, pageVisible, suspended]);
 
   useEffect(() => {
     const strip = filmstripRef.current;
@@ -272,7 +273,7 @@ export function GalleryTourTheatre({
             className="gallery-tour-stage"
             tabIndex={0}
             role="group"
-            aria-label={`作品 ${index + 1}。左右の矢印キーで作品を移動`}
+            aria-label={`作品 ${index + 1}。左右の矢印キーで作品を移動、Homeで最初、Endで最後の作品`}
             onKeyDown={(event) => {
               if (
                 event.target !== event.currentTarget ||
@@ -285,6 +286,9 @@ export function GalleryTourTheatre({
               if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
                 event.preventDefault();
                 selectStop(index + (event.key === "ArrowRight" ? 1 : -1));
+              } else if (event.key === "Home" || event.key === "End") {
+                event.preventDefault();
+                selectStop(event.key === "Home" ? 0 : tour.stops.length - 1);
               }
             }}
           >
@@ -334,9 +338,29 @@ export function GalleryTourTheatre({
                   ref={itemIndex === index ? activeThumbnailRef : undefined}
                   className="gallery-tour-thumbnail"
                   type="button"
+                  tabIndex={itemIndex === index ? 0 : -1}
                   aria-label={`${itemIndex + 1}点目、${thumbnail.alt}`}
                   aria-current={itemIndex === index ? "step" : undefined}
                   onClick={() => selectStop(itemIndex)}
+                  onKeyDown={(event) => {
+                    if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+                    const nextIndex =
+                      event.key === "Home"
+                        ? 0
+                        : event.key === "End"
+                          ? tour.stops.length - 1
+                          : event.key === "ArrowLeft"
+                            ? Math.max(0, itemIndex - 1)
+                            : event.key === "ArrowRight"
+                              ? Math.min(tour.stops.length - 1, itemIndex + 1)
+                              : undefined;
+                    if (nextIndex === undefined) return;
+                    event.preventDefault();
+                    selectStop(nextIndex);
+                    filmstripRef.current
+                      ?.querySelectorAll<HTMLButtonElement>("button")
+                      [nextIndex]?.focus({ preventScroll: true });
+                  }}
                 >
                   <img
                     src={thumbnail.thumb}

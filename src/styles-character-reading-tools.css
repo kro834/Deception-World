@@ -1,0 +1,156 @@
+/* Character routes only: quiet reading controls inside the existing column. */
+.manager-page .character-chapter-tools {
+  display: grid;
+  gap: 4px;
+  margin: 24px 0 0;
+  padding: 8px 0 0;
+  border-top: 1px solid var(--sd-line, #354451);
+}
+
+.character-chapter-shortcuts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 20px;
+}
+
+main.manager-page:not(.is-sovereign) .manager-copy-section .character-chapter-tools a,
+.character-related-records a {
+  min-width: 0;
+  min-height: 48px;
+  color: var(--sd-text, #eef4fa);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+  transition:
+    color 160ms ease,
+    background-color 160ms ease;
+}
+
+main.manager-page:not(.is-sovereign)
+  .manager-copy-section
+  .character-chapter-tools
+  .character-chapter-shortcuts
+  a {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 4px;
+  color: var(--sd-text-2, #bac8d6);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.character-chapter-tools .character-chapter-next,
+.character-related-records li > a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 4px;
+}
+
+.character-chapter-next-copy,
+.character-related-copy {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.character-chapter-next-copy b,
+.character-related-copy b {
+  color: var(--sd-text, #eef4fa);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.7;
+  text-wrap: pretty;
+  line-break: strict;
+}
+
+.character-chapter-next-arrow,
+.character-related-arrow {
+  flex: 0 0 20px;
+  color: var(--sd-accent, var(--manager-accent, #86d9ff));
+  font-size: 18px;
+  text-align: center;
+}
+
+.manager-page .character-related-records {
+  margin: 32px 0 0;
+  padding: 24px 0 0;
+  border-top: 1px solid var(--sd-line, #354451);
+}
+
+.manager-page .character-reading-target,
+.manager-page .character-related-records {
+  scroll-margin-top: 52px;
+}
+
+.character-related-records h2 {
+  margin: 0 0 12px;
+  color: var(--sd-text, #eef4fa);
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.7;
+}
+
+.character-related-records ul {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.character-related-records li {
+  min-width: 0;
+  border-top: 1px solid var(--sd-line, #354451);
+}
+
+.character-related-copy > span {
+  color: var(--sd-text-2, #bac8d6);
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+main.manager-page:not(.is-sovereign) .manager-copy-section .character-chapter-tools a:focus-visible,
+.character-related-records a:focus-visible {
+  outline: 2px solid var(--sd-accent, var(--manager-accent, #86d9ff));
+  outline-offset: 2px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  main.manager-page:not(.is-sovereign) .manager-copy-section .character-chapter-tools a:hover,
+  .character-related-records a:hover {
+    color: var(--sd-accent, var(--manager-accent, #86d9ff));
+    background-color: #ffffff08;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  main.manager-page:not(.is-sovereign) .manager-copy-section .character-chapter-tools a,
+  .character-related-records a {
+    transition: none;
+  }
+}
+
+@media (forced-colors: active) {
+  main.manager-page:not(.is-sovereign) .manager-copy-section .character-chapter-tools a,
+  main.manager-page:not(.is-sovereign)
+    .manager-copy-section
+    .character-chapter-tools
+    .character-chapter-shortcuts
+    a,
+  main.manager-page:not(.is-sovereign) .manager-copy-section .character-chapter-tools a:hover,
+  main.manager-page:not(.is-sovereign)
+    .manager-copy-section
+    .character-chapter-tools
+    a:focus-visible,
+  .character-related-records a {
+    color: LinkText;
+  }
+
+  main.manager-page:not(.is-sovereign)
+    .manager-copy-section
+    .character-chapter-tools
+    a:focus-visible,
+  .character-related-records a:focus-visible {
+    outline-color: Highlight;
+  }
+}

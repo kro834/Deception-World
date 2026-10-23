@@ -1,0 +1,269 @@
+/* A readable index above the unchanged canonical glossary and archive fold. */
+.dream-page.dream-page .dream-glossary-search {
+  margin: -12px 0 28px;
+  padding: clamp(16px, 3vw, 28px);
+  border: 1px solid #8a714a;
+  border-radius: 4px;
+  background: linear-gradient(135deg, #201c28, #17131d);
+  color: #f5ecd9;
+  font-family: var(--ts-text, serif);
+  text-align: left;
+  box-shadow:
+    inset 0 0 0 4px #211b27,
+    inset 0 0 0 5px #594a38;
+  scroll-margin-top: 164px;
+}
+
+.dream-page.dream-page .dream-glossary-search-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 16px;
+  margin-bottom: 18px;
+}
+
+.dream-page.dream-page .dream-glossary-search-heading p {
+  margin: 0;
+  color: #f5ecd9;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.dream-page.dream-page .dream-glossary-search-heading > span {
+  color: #d6bf95;
+  font-size: 14px;
+}
+
+.dream-page.dream-page .dream-glossary-search label {
+  display: block;
+  margin-bottom: 8px;
+  color: #f5ecd9;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.dream-page.dream-page .dream-glossary-search-field {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.dream-page.dream-page .dream-glossary-search-field input {
+  flex: 1 1 240px;
+  min-width: 0;
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 12px;
+  border: 1px solid #b3a080;
+  border-radius: 3px;
+  background: #fbf4e5;
+  color: #281e2b;
+  font: inherit;
+  font-size: 16px;
+  line-height: 1.5;
+  letter-spacing: normal;
+  color-scheme: light;
+}
+
+.dream-page.dream-page .dream-glossary-search-field input::placeholder {
+  color: #6a5b64;
+  opacity: 1;
+}
+
+.dream-page.dream-page .dream-glossary-search button {
+  min-height: 48px;
+  padding: 10px 14px;
+  border: 1px solid #ad9465;
+  border-radius: 3px;
+  background: #322837;
+  color: #f5ecd9;
+  font: inherit;
+  font-size: 15px;
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+.dream-page.dream-page .dream-glossary-search button:disabled {
+  border-color: #736575;
+  background: #211b27;
+  color: #b9aebb;
+  cursor: default;
+}
+
+.dream-page.dream-page .dream-glossary-search-help {
+  margin: 10px 0 0;
+  color: #d9cddc;
+  font-size: 14px;
+  line-height: 1.9;
+  letter-spacing: 0.02em;
+}
+
+.dream-page.dream-page .dream-glossary-search-count {
+  margin: 18px 0 10px;
+  color: #ead2a2;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.7;
+}
+
+.dream-page.dream-page .dream-glossary-search > .dream-glossary-jump {
+  display: block;
+  margin: 0;
+}
+
+.dream-page.dream-page .dream-glossary-search-results {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dream-page.dream-page .dream-glossary-search-results li {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.dream-page.dream-page
+  .dream-glossary-search
+  .dream-glossary-jump
+  .dream-glossary-search-results
+  a {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  height: 100%;
+  min-height: 52px;
+  padding: 12px;
+  border: 1px solid #746047;
+  border-radius: 3px;
+  background: #2b2230;
+  color: #f5ecd9;
+  font-size: 16px;
+  line-height: 1.7;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.dream-page.dream-page .dream-glossary-search-number {
+  flex-shrink: 0;
+  color: #dbc18b;
+  font-family: var(--ts-latin, sans-serif);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.dream-page.dream-page .dream-glossary-search-word {
+  flex: 1;
+  min-width: 0;
+}
+
+.dream-page.dream-page .dream-glossary-search-word strong {
+  color: inherit;
+  font-size: inherit;
+  font-weight: 700;
+}
+
+.dream-page.dream-page
+  .dream-glossary-search
+  .dream-glossary-jump
+  .dream-glossary-search-word
+  small {
+  display: block;
+  margin-top: 2px;
+  color: #d9cddc;
+  font-size: 14px;
+}
+
+.dream-page.dream-page .dream-glossary-search-excerpt {
+  display: block;
+  margin-top: 7px;
+  color: #e7dce6;
+  font-size: 15px;
+  line-height: 1.9;
+}
+
+.dream-page.dream-page .dream-glossary-search-open {
+  flex-shrink: 0;
+  align-self: flex-end;
+  color: #e6cd9e;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.dream-page.dream-page .dream-glossary-search mark {
+  padding: 0 1px;
+  background: #e5c98c;
+  color: #241729;
+}
+
+.dream-page.dream-page .dream-glossary-search-empty {
+  padding: 18px;
+  border: 1px dashed #a78d66;
+  border-radius: 3px;
+  background: #2b2230;
+}
+
+.dream-page.dream-page .dream-glossary-search-empty p {
+  margin: 0 0 14px;
+  color: #f5ecd9;
+  font-size: 16px;
+  line-height: 1.9;
+}
+
+.dream-page.dream-page .dream-glossary-search :is(input, button, a):focus-visible,
+.dream-page.dream-page .dream-glossary > [data-dream-glossary-focused] {
+  outline: 3px solid #dcc2fc;
+  outline-offset: 3px;
+}
+
+@media (hover: hover) {
+  .dream-page.dream-page
+    .dream-glossary-search
+    .dream-glossary-jump
+    .dream-glossary-search-results
+    a:hover,
+  .dream-page.dream-page .dream-glossary-search button:not(:disabled):hover {
+    border-color: #e4c389;
+    background: #3d2e40;
+  }
+}
+
+@media (max-width: 640px) {
+  .dream-page.dream-page .dream-glossary-search-results {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .dream-page.dream-page .dream-glossary-search-open {
+    font-size: 12px;
+  }
+}
+
+@media (forced-colors: active) {
+  .dream-page.dream-page .dream-glossary-search,
+  .dream-page.dream-page
+    .dream-glossary-search
+    .dream-glossary-jump
+    .dream-glossary-search-results
+    a,
+  .dream-page.dream-page .dream-glossary-search button {
+    border-color: CanvasText;
+    background: Canvas;
+    color: CanvasText;
+    box-shadow: none;
+  }
+
+  .dream-page.dream-page .dream-glossary-search mark {
+    background: Highlight;
+    color: HighlightText;
+  }
+
+  .dream-page.dream-page .dream-glossary-search :is(input, button, a):focus-visible,
+  .dream-page.dream-page .dream-glossary > [data-dream-glossary-focused] {
+    outline-color: Highlight;
+  }
+}

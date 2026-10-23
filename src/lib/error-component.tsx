@@ -19,6 +19,7 @@ export function AppErrorComponent() {
       ref={cueZeus}
       className="app-load-error flex min-h-dvh items-center justify-center bg-void px-6 text-center text-fg"
       aria-labelledby="load-error-heading"
+      aria-describedby="load-error-description"
     >
       <link rel="stylesheet" href={loadErrorCss} precedence="default" />
       <div className="app-load-error-panel">
@@ -28,8 +29,8 @@ export function AppErrorComponent() {
         <h1 id="load-error-heading" className="font-display text-lg tracking-wide">
           ページを読み込めませんでした。
         </h1>
-        <p className="text-sm text-muted">
-          通信状態を確認して、もう一度読み込んでください。アーカイブへ戻ることもできます。
+        <p id="load-error-description" className="text-sm text-muted">
+          通信状態を確認して、もう一度読み込んでください。再読み込みでは現在のページのURLを保ったまま読み直します。資料室・検索から別の資料を開くこともできます。
         </p>
         <div className="app-load-error-actions">
           {/* A failed dynamic import stays cached for this document. Resetting
@@ -39,6 +40,8 @@ export function AppErrorComponent() {
             ページを再読み込み
           </button>
           <a href="/world">WORLD ARCHIVEへ戻る</a>
+          <a href="/library">資料室・しおりを開く</a>
+          <a href="/search">資料を検索する</a>
         </div>
       </div>
     </main>
@@ -47,7 +50,12 @@ export function AppErrorComponent() {
 
 export function NotFoundComponent() {
   return (
-    <main ref={cueZeus} className="app-not-found">
+    <main
+      ref={cueZeus}
+      className="app-not-found"
+      aria-labelledby="not-found-heading"
+      aria-describedby="not-found-description"
+    >
       {/* Hoisted by React into <head>, and only where a 404 renders. */}
       <link rel="stylesheet" href={notFoundCss} precedence="default" />
       <i className="app-not-found-plate" aria-hidden="true" />
@@ -56,8 +64,10 @@ export function NotFoundComponent() {
       </span>
       <span aria-hidden="true">404 / LOST RECORD</span>
       <p>DECEPTION WORLD</p>
-      <h1>記録が見つかりません。</h1>
-      <p>指定された資料は存在しないか、まだ公開されていません。</p>
+      <h1 id="not-found-heading">記録が見つかりません。</h1>
+      <p id="not-found-description">
+        指定された資料は存在しないか、まだ公開されていません。URLを確認するか、下の「資料を探す」から検索してください。
+      </p>
       <RecoveryTiles />
     </main>
   );

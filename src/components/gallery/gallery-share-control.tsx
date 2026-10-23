@@ -59,9 +59,9 @@ export function GalleryShareControl({ id, disabled }: { id: string; disabled: bo
           <label className="gallery-share-url">
             この作品のリンク
             <input
-              type="text"
-              readOnly
+              type="url"
               value={fallbackUrl}
+              onChange={(event) => setFallbackUrl(event.currentTarget.value)}
               onFocus={(event) => event.currentTarget.select()}
               onClick={(event) => event.currentTarget.select()}
             />

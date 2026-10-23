@@ -259,7 +259,7 @@ function RosterPortrait({ item }: { item: DossierLink }) {
 }
 
 /** Where the file stands in its list: one segment a file, this one lit,
- * 欠番 hollow (decorative; the count beside it is the text). */
+ * 欠番 hollow (decorative; the roster under it names the files). */
 function IndexMeter({ items, idx }: { items: DossierLink[]; idx: number }) {
   return (
     <em className="dossier-index-meter" aria-hidden="true">
@@ -351,15 +351,18 @@ function DossierRoster({
   );
 }
 
+/** The end of a file (2026-10-23: no PREV / NEXT / list-name / count
+ * captions): the previous file's row with its arrow, the way back with the
+ * file's place lit in the list and the roster under it, then the next
+ * file's card (its numeral, name and arrow). Each link is named by its
+ * aria-label. */
 export function DossierNav({
   items,
   currentHref,
-  indexLabel,
   returnHash: listHash,
 }: {
   items: DossierLink[];
   currentHref: string;
-  indexLabel: string;
   /** The list on the World page to return to, when the path does not say. */
   returnHash?: string;
 }) {
@@ -392,7 +395,6 @@ export function DossierNav({
           aria-label={`${prev.name}の資料へ`}
         >
           <NavPortrait item={prev} />
-          <small>PREV / {prev.kicker}</small>
           <b>
             <NameText value={prev.name} />
           </b>
@@ -415,11 +417,7 @@ export function DossierNav({
           <em className="dossier-index-arrow" aria-hidden="true">
             <UiVectorIcon kind="arrow-left" size={18} />
           </em>
-          <span>{fromCastRoster ? "CAST FILES" : indexLabel}</span>
           <b>一覧へ戻る</b>
-          <i>
-            {String(idx + 1).padStart(2, "0")} / {String(items.length).padStart(2, "0")}
-          </i>
           {items.length > 1 ? <IndexMeter items={items} idx={idx} /> : null}
         </GuardedLink>
         {items.length > 1 ? (
@@ -439,7 +437,6 @@ export function DossierNav({
           <i className="dossier-nav-numeral" aria-hidden="true">
             {fileNumeral(next, items.indexOf(next))}
           </i>
-          <small>NEXT / {next.kicker}</small>
           <b>
             <NameText value={next.name} />
           </b>
