@@ -364,10 +364,22 @@ export function pauseRexonanceSuitWarmup(preserveIntent = false) {
  * requests so they do not compete with another route. The call's warm on
  * intent and bounded entry preparation cover earlier taps. Returns
  * its cancel. */
+/** Phones on /illusionculum-saga skip the speculative Rexonance warm-up:
+ * that page's own suit engine already holds the memory (2026-10-24, a
+ * phone crash's margin). A tap on a Rexonance link still warms on intent. */
+function heldBySuitPage() {
+  return (
+    window.location.pathname.startsWith("/illusionculum-saga") &&
+    typeof window.matchMedia === "function" &&
+    window.matchMedia("(max-width: 767px)").matches
+  );
+}
+
 export function scheduleRexonanceSuitWarm(delayMs = 1000) {
   if (typeof window === "undefined") return () => {};
   if (window.location.pathname === "/" || window.location.pathname.startsWith("/rexonance-saga"))
     return () => {};
+  if (heldBySuitPage()) return () => {};
   // Review (2026-10-16, cold tap): the nanite kit's preparation waits on
   // /rexonance-saga (where a cold tap's call lands); the next route resumes
   // it, in idle time, under the same skips.
@@ -464,6 +476,7 @@ export function scheduleRexonancePagePreload(preload: () => Promise<unknown>, de
   if (typeof window === "undefined" || pagePreloaded) return () => {};
   if (window.location.pathname === "/" || window.location.pathname.startsWith("/rexonance-saga"))
     return () => {};
+  if (heldBySuitPage()) return () => {};
   let timer = 0;
   let idleId = 0;
   let cancelled = false;

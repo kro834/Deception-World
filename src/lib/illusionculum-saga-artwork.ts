@@ -113,12 +113,16 @@ export function illusionculumDetail(name: (typeof ILLUSIONCULUM_DETAIL_CROPS)[nu
 
 /** srcset / sizes for one form's key visual (shared by the preload, the
  * hero and the forms panel, so they all fetch the same candidate). */
-export function illusionculumImage(key: IllusionculumFormKey, lazyLayout = false) {
+export function illusionculumImage(key: IllusionculumFormKey, _lazyLayout = false) {
   const stem = `${ILLUSIONCULUM_ARTWORK_FOLDER}/${ILLUSIONCULUM_FORM_STEMS[key]}`;
   return {
     srcSet: ILLUSIONCULUM_ARTWORK_WIDTHS.map((width) => `${stem}-${width}.webp ${width}w`).join(
       ", ",
     ),
-    sizes: (lazyLayout ? "auto, " : "") + "(max-width: 767px) 100vw, 56vw",
+    // Phones take the 640 candidate (memory: four key visuals at 1280 px
+    // decoded ~40 MB on their own; 2026-10-24 crash margin).
+    // ("auto" would take the laid-out width and override that, so it is
+    // left out; lazyLayout stays for callers.)
+    sizes: "(max-width: 767px) 213px, 56vw",
   };
 }
