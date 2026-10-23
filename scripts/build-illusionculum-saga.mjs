@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Encodes the ILLUSIONCULUM SAGA special site's four key visuals (2026-10-23).
 //
-//   node scripts/build-illusionculum-saga.mjs [--meta-unitas-tile=<middle.jpg>]
+//   node scripts/build-illusionculum-saga.mjs
 //
 // Reads the owner's originals from design/illusionculum-saga-20261023/
 // (key-<stem>.jpg, copied there unchanged) and encodes each straight from the
@@ -9,10 +9,6 @@
 // <stem>-<width>.webp at every delivery width, plus the side menu's 400 px
 // tile of the standard form. The scroll suit-up's cutouts are built by
 // scripts/build-illusionculum-suit.mjs.
-//
-// --meta-unitas-tile: the provisional side-menu tile of メタ・ウニタスサーガ
-// (public/meta-unitas-saga-menu-20261023.webp, 400 px, the same encode as
-// this site's tile) until that site's own tile lands.
 import { createRequire } from "node:module";
 import { mkdir } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
@@ -159,13 +155,4 @@ for (const [name, source, box, width] of ILLUSIONCULUM_DETAIL_CROPS) {
       console.log(`orb-${side}-${form}: ${result.width}x${result.height}, ${result.size} bytes`);
     }
   }
-}
-
-const metaArg = process.argv.find((arg) => arg.startsWith("--meta-unitas-tile="));
-if (metaArg) {
-  console.log("meta-unitas (provisional menu tile)");
-  await tile(
-    metaArg.slice("--meta-unitas-tile=".length),
-    fileURLToPath(new URL("public/meta-unitas-saga-menu-20261023.webp", root)),
-  );
 }

@@ -2008,8 +2008,8 @@ html[data-family]
 }
 
 /* ILLUSIONCULUM SAGA (2026-10-23): the standard form's tile
-   (scripts/build-illusionculum-saga.mjs). META UNITAS SAGA: a provisional
-   tile of its key visual until that site's own lands. */
+   (scripts/build-illusionculum-saga.mjs). META UNITAS SAGA: its ミドル tile
+   (src/lib/meta-unitas-saga-artwork.ts META_UNITAS_MENU_TILE). */
 html[data-family]
   body
   #site-side-panel.side-panel[data-open="true"]
@@ -2032,7 +2032,7 @@ html[data-family]
   + .side-panel-group
   > .side-panel-links
   > a[href^="/meta-unitas-saga"] {
-  --sh-art: url("/meta-unitas-saga-menu-20261023.webp");
+  --sh-art: url("/meta-unitas-saga-20261023/middle-tile-400.webp");
   --sh-art-pos: 50% 18%;
 }
 

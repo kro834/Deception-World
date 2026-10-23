@@ -19,6 +19,7 @@ import {
   FAR_FROM_SAGA_ENTER_ASSETS,
   FINAL_STAGE_ENTER_ASSETS,
   ILLUSIONCULUM_SAGA_ENTER_ASSETS,
+  META_UNITAS_SAGA_ENTER_ASSETS,
   REXONANCE_SAGA_ENTER_ASSETS,
   WORLD_ENTER_ASSETS,
 } from "@/lib/asset-loader";
@@ -425,6 +426,7 @@ export function SideMenuLayer({
     context === "extreme" ||
     context === "far-from" ||
     context === "illusionculum" ||
+    context === "meta-unitas" ||
     context === "final-stage";
   const router = useRouter();
   // The dossier the reader is on is marked in the menu (aria-current).
@@ -1000,6 +1002,8 @@ export function SideMenuLayer({
                           ? "FAR FROM SAGA"
                           : context === "illusionculum"
                             ? "ILLUSIONCULUM SAGA"
+                            : context === "meta-unitas"
+                              ? "META UNITAS SAGA"
                             : context === "final-stage"
                               ? "FINAL STAGE"
                               : "DECEPTION WORLD"}
@@ -1100,7 +1104,9 @@ export function SideMenuLayer({
                         ? "far-from"
                         : context === "illusionculum"
                           ? "illusionculum"
-                          : "final-stage"
+                          : context === "meta-unitas"
+                            ? "meta-unitas"
+                            : "final-stage"
                 ].map(([hash, label, code]) => (
                   <GuardedLink
                     key={hash}
@@ -1114,7 +1120,9 @@ export function SideMenuLayer({
                               ? "far-from"
                               : context === "illusionculum"
                                 ? "illusionculum"
-                                : "final-stage"
+                                : context === "meta-unitas"
+                                  ? "meta-unitas"
+                                  : "final-stage"
                       ]
                     }
                     hash={hash}
@@ -1285,9 +1293,9 @@ export function SideMenuLayer({
             <GuardedLink
               to="/meta-unitas-saga"
               hash="top"
-              assets={[]}
+              assets={context === "meta-unitas" ? [] : META_UNITAS_SAGA_ENTER_ASSETS}
               beforeNavigate={close}
-              aria-current={pathname === "/meta-unitas-saga" ? "page" : undefined}
+              aria-current={context === "meta-unitas" ? "page" : undefined}
             >
               <span>
                 <DisplayName value="メタ・ウニタスサーガ" />

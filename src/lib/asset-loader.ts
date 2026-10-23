@@ -2,6 +2,7 @@ import { rexonanceImage } from "./rexonance-images.ts";
 import { REXONANCE_SITE_ARTWORK } from "./rexonance-site-artwork.ts";
 import { FAR_FROM_SAGA_KEY_VISUAL, farFromImage } from "./far-from-saga-artwork.ts";
 import { ILLUSIONCULUM_HERO, illusionculumCutoutImage } from "./illusionculum-saga-artwork.ts";
+import { META_UNITAS_KEY_VISUAL, metaUnitasImage } from "./meta-unitas-saga-artwork.ts";
 import { dossierImage } from "./dossier-images.ts";
 
 const KNOWN_BYTES: Record<string, number> = {
@@ -34,6 +35,7 @@ const KNOWN_BYTES: Record<string, number> = {
   "/final-stage-logo.webp": 106600,
   [FAR_FROM_SAGA_KEY_VISUAL.src]: 475884,
   [ILLUSIONCULUM_HERO.src]: 315494,
+  [META_UNITAS_KEY_VISUAL.src]: 323252,
 };
 
 export const WORLD_ENTER_ASSETS = ["/deception-world-poster-delivery.webp"] as const;
@@ -56,6 +58,8 @@ export const FINAL_STAGE_ENTER_ASSETS = ["/final-stage-logo.webp"] as const;
 export const FAR_FROM_SAGA_ENTER_ASSETS = [FAR_FROM_SAGA_KEY_VISUAL.src] as const;
 
 export const ILLUSIONCULUM_SAGA_ENTER_ASSETS = [ILLUSIONCULUM_HERO.src] as const;
+// META UNITAS SAGA (2026-10-23): its key visual, ミドル (meta-unitas-saga-artwork.ts).
+export const META_UNITAS_SAGA_ENTER_ASSETS = [META_UNITAS_KEY_VISUAL.src] as const;
 
 export const MANAGER_ASSETS = {
   zeus: ["/manager-zeus-detail.jpeg?v=20260823-2"],
@@ -70,6 +74,7 @@ export const MANAGER_ASSETS = {
 function responsiveImage(url: string) {
   if (url === FAR_FROM_SAGA_KEY_VISUAL.src) return farFromImage("middle");
   if (url === ILLUSIONCULUM_HERO.src) return illusionculumCutoutImage("standard");
+  if (url === META_UNITAS_KEY_VISUAL.src) return metaUnitasImage("middle");
   return { ...dossierImage(url), ...rexonanceImage(url) };
 }
 

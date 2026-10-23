@@ -184,6 +184,13 @@ const PAGES: Record<string, Picture & { edition: RecordEdition; code: string }> 
     edition: "final",
     code: "FINAL",
   },
+  // META UNITAS SAGA's own site (2026-10-23): its key visual, ミドル.
+  "/meta-unitas-saga": {
+    src: "/meta-unitas-saga-20261023/middle-640.webp",
+    pos: "50% 12%",
+    edition: "world",
+    code: "META UNITAS",
+  },
 };
 
 export function editionOf(path: string): RecordEdition {
@@ -269,6 +276,7 @@ const RIDER_RECORD_ART: Record<string, Picture> = {
   "extreme-saga": formThumb("saga", "extreme-ultra"),
   "rexonance-saga": formThumb("saga", "rexonance-ultra"),
   "far-from-saga": { src: "/rider-far-from-saga-max-delivery-640.webp", pos: "50% 18%" },
+  "meta-unitas-saga": { src: "/meta-unitas-saga-20261023/middle-640.webp", pos: "50% 12%" },
   "realm-royal": formThumb("realm", "royal"),
 };
 
@@ -290,6 +298,10 @@ const SITE_ART: Record<string, readonly Picture[]> = {
     { src: "/illusionculum-saga-20261023/more-640.webp", pos: "50% 14%" },
   ],
   "/final-stage": [PAGES["/final-stage"], formThumb("realm", "royal")],
+  "/meta-unitas-saga": [
+    PAGES["/meta-unitas-saga"],
+    { src: "/meta-unitas-saga-20261023/ultra-640.webp", pos: "50% 10%" },
+  ],
 };
 
 /** A search record's picture (src may be empty: a typographic plate).

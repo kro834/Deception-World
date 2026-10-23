@@ -192,7 +192,7 @@ export const ILLUSIONCULUM_COMPARISON = {
     rows: [
       { cells: ["ヴィンクルム", "10000YOPS", "300TOPS", "P2"] },
       { cells: ["エクスプリーム", "20000YOPS", "5000TOPS", "P14 Standard"] },
-      { cells: ["イリュージョンクルム", "50000〜YOPS", "9000TOPS", "P14 Extreme Tuning"] },
+      { cells: ["イリュージョンクルム", "50000〜YOPS", "9000TOPS", "P14"] },
       { cells: ["メタ・ウニタス", "50000〜YOPS", "9000TOPS", "P16"] },
       { cells: ["ファーフロム", "60000〜YOPS", "9000TOPS", "P16"] },
     ],

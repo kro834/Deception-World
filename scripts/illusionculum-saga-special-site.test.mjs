@@ -58,8 +58,9 @@ test("the SPECIAL tiles: ファーフロム first and larger, then イリュー�
   const shell = read("src/styles-stage-shell.css");
   assert.match(shell, /\[data-special-tiles\]\s*> a\[href\^="\/far-from-saga"\] \{\s*grid-column: 1 \/ -1;/);
   assert.match(shell, /\.side-panel-links\.side-panel-links\[data-special-tiles\] \{\s*grid-template-columns: minmax\(0, 1\.4fr\);\s*grid-auto-columns: minmax\(0, 1fr\);/);
-  assert.match(shell, /url\("\/meta-unitas-saga-menu-20261023\.webp"\)/);
-  assert.ok(existsSync(new URL("../public/meta-unitas-saga-menu-20261023.webp", import.meta.url)));
+  assert.match(shell, /url\("\/meta-unitas-saga-20261023\/middle-tile-400\.webp"\)/);
+  assert.match(menu, /META_UNITAS_SAGA_ENTER_ASSETS/);
+  assert.match(menu, /context === "meta-unitas" \|\|/);
 });
 
 test("every word of record is the owner's, verbatim (design/illusionculum-saga-20261023/owner-text.md)", () => {

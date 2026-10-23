@@ -160,8 +160,8 @@ test("wayfinding: the special sites show their way home", () => {
   );
   assert.match(
     chrome,
-    // Owner (2026-10-23): イリュージョンクルムサーガ's site joins the special sites.
-    /const isSpecialSite =\s*context === "rexonance" \|\|\s*context === "extreme" \|\|\s*context === "far-from" \|\|\s*context === "illusionculum" \|\|\s*context === "final-stage";/,
+    // Owner (2026-10-23): イリュージョンクルムサーガ's and メタ・ウニタスサーガ's sites join the special sites.
+    /const isSpecialSite =\s*context === "rexonance" \|\|\s*context === "extreme" \|\|\s*context === "far-from" \|\|\s*context === "illusionculum" \|\|\s*context === "meta-unitas" \|\|\s*context === "final-stage";/,
   );
   // Every closing row ends on the same return, arrow first.
   for (const [name, source] of [

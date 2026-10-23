@@ -14,6 +14,7 @@ export function placeLabel(document: SearchDocument): string {
   if (to === "/extreme-saga") return "EXTREME SAGA";
   if (to === "/far-from-saga") return "FAR FROM SAGA";
   if (to === "/illusionculum-saga") return "ILLUSIONCULUM SAGA";
+  if (to === "/meta-unitas-saga") return "META UNITAS SAGA";
   if (to === "/rexonance-saga") return "REXONANCE SAGA";
   if (to === "/gallery") return "GALLERY";
   return "";
