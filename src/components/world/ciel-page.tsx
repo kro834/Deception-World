@@ -8,6 +8,7 @@ import { FormPickup } from "./manager-stub";
 import { DossierContents, DossierReader, PhrasedText } from "./dossier-reader";
 import { RIDER_DOSSIERS } from "./rider-page";
 import { DossierTopbar } from "./world-chrome";
+import { CharacterChapterTools, CharacterRelatedRecords } from "./character-reading-tools";
 
 /* シエル (月城悠真), RE DIVE's 六詠 I: his own page (/characters/ciel).
 
@@ -152,9 +153,37 @@ export function CielPage() {
                   <p key={paragraph.slice(0, 24)}>{paragraph}</p>
                 ))}
               </div>
+              <CharacterChapterTools
+                sections={SAGA.sections}
+                currentNo={section.no}
+                continuation={
+                  pickupForms.length ? { href: "#form-records", title: "変身記録" } : undefined
+                }
+              />
             </article>
           ))}
         </div>
+        <CharacterRelatedRecords
+          records={[
+            {
+              to: "/riders/saga",
+              assets: [SAGA.civilianImg],
+              title: "仮面ライダーサーガ",
+              context: `${SAGA.civilian.name}の人物資料と変身記録`,
+            },
+            ...(SAGA.special
+              ? [
+                  {
+                    to: SAGA.special.to,
+                    hash: SAGA.special.hash,
+                    assets: SAGA.special.assets,
+                    title: `仮面ライダー${SAGA.special.name}`,
+                    context: SAGA.special.label,
+                  },
+                ]
+              : []),
+          ]}
+        />
       </section>
       {pickupForms.length ? (
         <div className="rider-form-pickup-stack" id="form-records">
@@ -211,7 +240,9 @@ export function CielPage() {
               <p>{SAGA.special.kicker}</p>
               <h2 id="rider-special-site-title">
                 <span>仮面ライダー</span>
-                <b><DisplayName value={SAGA.special.name} /></b>
+                <b>
+                  <DisplayName value={SAGA.special.name} />
+                </b>
               </h2>
               {SAGA.special.sub ? <em>{SAGA.special.sub}</em> : null}
               <q>{SAGA.special.quote}</q>

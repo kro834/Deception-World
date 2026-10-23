@@ -3,6 +3,7 @@ import { DossierContents, DossierReader, PhrasedText } from "./dossier-reader";
 import { DossierTopbar } from "./world-chrome";
 import { YOAKE_MAMORI_SECTIONS } from "./yoake-mamori-data";
 import { dossierImage } from "@/lib/dossier-images";
+import { CharacterChapterTools, CharacterRelatedRecords } from "./character-reading-tools";
 
 const facts = [
   ["名前", "▢▢▢　▢▢"],
@@ -100,9 +101,24 @@ export function YoakeMamoriPage() {
                   <p key={paragraph}>{paragraph}</p>
                 ))}
               </div>
+              <CharacterChapterTools
+                sections={sections}
+                currentNo={section.no}
+                continuation={{ href: "#character-related-records", title: "関連する記録" }}
+              />
             </article>
           ))}
         </div>
+        <CharacterRelatedRecords
+          records={[
+            {
+              to: "/managers/shuza",
+              assets: ["/manager-shuza.jpeg"],
+              title: "シュザ",
+              context: "性格と闘い方の章に登場する人物の資料",
+            },
+          ]}
+        />
       </section>
     </main>
   );

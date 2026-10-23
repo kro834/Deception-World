@@ -5,6 +5,7 @@ import { DossierContents, DossierReader, PhrasedText } from "./dossier-reader";
 import { DossierTopbar } from "./world-chrome";
 import { dossierImage } from "@/lib/dossier-images";
 import { RELATED_SECTIONS } from "./related-data";
+import { CharacterChapterTools, CharacterRelatedRecords } from "./character-reading-tools";
 
 type Related = {
   id: string;
@@ -247,9 +248,25 @@ export function RelatedPage({ id }: { id: "terra" | "luna" }) {
                   <p key={p.slice(0, 24)}>{p}</p>
                 ))}
               </div>
+              <CharacterChapterTools
+                sections={person.sections}
+                currentNo={s.no}
+                continuation={{
+                  href: "#form-records",
+                  title: `${person.rider.name} ${person.rider.sub}`,
+                }}
+              />
             </article>
           ))}
         </div>
+        <CharacterRelatedRecords
+          records={RELATED.filter((related) => related.id !== person.id).map((related) => ({
+            to: `/characters/${related.id}`,
+            assets: [related.image],
+            title: related.name,
+            context: related.title,
+          }))}
+        />
       </section>
       <div id="form-records">
         <FormPickup rider={person.rider} />

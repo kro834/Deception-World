@@ -100,10 +100,11 @@ test("gallery discovery combines search, categories, and local favorites without
   assert.match(component, /aria-pressed=\{favoritesOnly\}/);
   assert.match(component, /gallery-favorite-toggle/);
   assert.match(component, /aria-pressed=\{favorites\.includes\(selected\.id\)\}/);
-  assert.match(component, /条件に合う作品はありません。/);
+  assert.match(component, /galleryEmptyMessage\(discoverySummary\)/);
+  assert.match(component, /<GalleryFilterSummary \{\.\.\.discoverySummary\} \/>/);
   assert.match(component, /絞り込みを解除/);
-  assert.match(component, /GALLERY_FAVORITES_KEY/);
-  assert.match(component, /setFavorites\(\s*readGalleryFavorites/);
+  assert.match(component, /useGalleryPersonalPreferences\(allArtworkIds\)/);
+  assert.match(component, /onClick=\{\(\) => changeFavorite\(selected\.id\)\}/);
   assert.match(component, /aria-label=.*work\.alt/);
   assert.match(discovery, /normalize\("NFKC"\)/);
   assert.match(discovery, /publicTitle, artwork\.alt/);
