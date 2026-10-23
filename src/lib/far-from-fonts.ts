@@ -84,9 +84,12 @@ function apply(doc: Document, weight: Weight, glyphs: Set<string>): boolean {
 }
 
 /** Collects the page's display glyphs after paint and applies their
- * subsets; follows view changes. Returns the disposer (the applied faces
- * stay, so a return visit reuses them). */
-export function mountFarFromFonts(root: HTMLElement | null): () => void {
+ * subsets; follows view changes. `seed` is text the page will set in the
+ * face later (the forms' names a switch writes into labels): its glyphs
+ * ride along in both weights' first subsets, so a switch never fetches a
+ * refreshed subset that re-sets every label once it arrives. Returns the
+ * disposer (the applied faces stay, so a return visit reuses them). */
+export function mountFarFromFonts(root: HTMLElement | null, seed = ""): () => void {
   const view = root?.ownerDocument.defaultView;
   if (!root || !view) return () => {};
   const connection = (view.navigator as Navigator & { connection?: SavingConnection }).connection;
@@ -113,6 +116,10 @@ export function mountFarFromFonts(root: HTMLElement | null): () => void {
       for (const weight of FAR_FROM_DISPLAY_WEIGHTS)
         for (const char of found[weight]) glyphs[weight].add(char);
     }
+    if (scopes.has(root))
+      for (const char of seed)
+        if (char > "\u007f" && char.trim())
+          for (const weight of FAR_FROM_DISPLAY_WEIGHTS) glyphs[weight].add(char);
     for (const weight of FAR_FROM_DISPLAY_WEIGHTS) {
       if (!glyphs[weight].size || refreshes >= MAX_REFRESHES) continue;
       // A refresh that finds new glyphs counts against the cap; the first pass does not.

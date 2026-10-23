@@ -77,7 +77,7 @@ export const LIBRARY_ENTRIES: readonly LibraryEntry[] = [
     title: "ファーフロムサーガ",
     path: "/far-from-saga",
     kind: "page",
-    description: "形態、性能の資料（準備中）。",
+    description: "変身、形態、性能、中核機構の資料。",
     aliases: ["far from saga", "ファーフロム・サーガ", "ファーフロム"],
   },
   {

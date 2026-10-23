@@ -200,12 +200,13 @@ test("the calm tiers: the painted ウルトラ at once, no card, no entrance, no
   assert.match(styles, /html\[data-world-effects="economy"\] \.ffs-page > \.ffs-form-call,/);
 });
 
-test("no switch moves the page or changes the panel's height", () => {
-  // The copy's cell is sized by every form's copy (hidden, inert, stacked).
-  assert.match(page, /className="ffs-stage-sizer" aria-hidden="true" inert>/);
-  assert.match(page, /FAR_FROM_SAGA_STAGE_ORDER\.map\(\(key\) => \(\s*<div key=\{`sizer-\$\{key\}`\}/);
+test("no switch moves the page: the panel keeps its place, and is as tall as its form's copy", () => {
+  // The copy is the form's own (polish sweep, 2026-10-23): no hidden copies
+  // pad the cell to the longest form's, which left a blank screen under
+  // ミドル's two paragraphs on phones. The panel's top edge is held instead.
+  assert.doesNotMatch(page, /ffs-stage-sizer/);
+  assert.doesNotMatch(styles, /ffs-stage-sizer/);
   assert.match(styles, /\.ffs-stage-panel > div \{\s*grid-area: copy;/);
-  assert.match(styles, /\.ffs-stage-panel > \.ffs-stage-sizer \{\s*z-index: -1;\s*visibility: hidden;/);
   assert.match(styles, /grid-template-areas:\s*"figure"\s*"copy";/);
   // The figure keeps the shared sheet's fixed box; the picture covers it,
   // whatever its intrinsic size (1092×1500 … 1280×1716).
