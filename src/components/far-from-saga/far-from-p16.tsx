@@ -103,7 +103,7 @@ function BaseValue({ form, unit }: { form: string; unit: string }) {
       <i>{form}</i>
       <i>
         <UnitName value={unit} />
-        （基準）
+        <span className="ffs-nowrap">（基準）</span>
       </i>
       <b>100%</b>
     </span>

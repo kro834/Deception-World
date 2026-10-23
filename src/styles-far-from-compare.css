@@ -1455,7 +1455,7 @@
 }
 
 /* The unit's name inside the base label stays inline text. */
-.ffs-page .ffs-p16-values i .ffs-unit-tuning {
+.ffs-page .ffs-p16-values i span {
   display: inline;
 }
 

@@ -7,7 +7,6 @@
 // figure.
 //
 // Relative imports only (the test loads this file with the transpiler).
-/* eslint-disable no-irregular-whitespace -- Preserve the owner's typography verbatim. */
 export const P16_OFFICIAL_TEXT = `この3種類なら、P14 Standard → P14 Extreme Tuning → P16という順に、演算加速機構の発展をかなり明確に表現できます。
 
 単純な処理速度だけでなく、レクソナンス用のExtreme Tuningは「第五の犬の能力を極限まで引き出す専用調整」、ファーフロムのP16は「身体の外側へ分散した機構まで高速制御する新世代設計」と区別するのが適切です。
