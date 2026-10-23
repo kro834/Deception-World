@@ -196,12 +196,14 @@ try {
     for (let i = 0; i < (await chips.count()); i += 1) {
       const selector = `.dream-programme-dossier-strip > li:nth-child(${i + 1}) > .dream-programme-dossier-chip`;
       await view(page, selector);
-      checks.push(await contrast(page, `${selector} small`, selector));
+      // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明） — the chip is its name.
+      checks.push(await contrast(page, `${selector} strong`, selector));
     }
 
     for (let i = 0; i < 6; i += 1) {
       const selector = `#dream-case-${i}`;
-      await page.locator(`.dream-karakuri-footer a[href="${selector}"]`).click();
+      // The cabinet's direct row is gone; the chapter index opens each fold the same way.
+      await page.locator(`.dream-reader-index a[href="${selector}"]`).click();
       await page.waitForFunction((selector) => document.querySelector(selector)?.open, selector);
       await view(page, `${selector} > summary`);
       for (const child of [

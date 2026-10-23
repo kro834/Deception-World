@@ -188,12 +188,6 @@ html[data-family="dream"] main.dream-page.dream-page .dream-programme-heading h2
   letter-spacing: 0.28em;
 }
 
-html[data-family="dream"] main.dream-page.dream-page .dream-programme-heading > span {
-  color: #f4ecdc;
-  font-size: 15px;
-  letter-spacing: 0.12em;
-}
-
 html[data-family="dream"] main.dream-page.dream-page .dream-programme-ticket {
   min-height: 128px;
   border-color: rgb(230 194 142 / 42%);
@@ -208,18 +202,10 @@ html[data-family="dream"] main.dream-page.dream-page .dream-programme-ticket str
   letter-spacing: 0.12em;
 }
 
-html[data-family="dream"] main.dream-page.dream-page .dream-programme-ticket-foot small,
-html[data-family="dream"] main.dream-page.dream-page .dream-programme-ledger-head small,
-html[data-family="dream"] main.dream-page.dream-page .dream-programme-dossier-chip span {
-  color: #e6d7c4;
-}
-
-html[data-family="dream"] main.dream-page.dream-page .dream-programme-dossier-chip strong,
-html[data-family="dream"] main.dream-page.dream-page .dream-programme-ledger-value {
+html[data-family="dream"] main.dream-page.dream-page .dream-programme-dossier-chip strong {
   color: #f8f1e4;
 }
 
-html[data-family="dream"] main.dream-page.dream-page .dream-programme-ledger-cell,
 html[data-family="dream"] main.dream-page.dream-page .dream-programme-dossier-chip {
   border-color: rgb(200 164 92 / 32%);
   background: #160f1c;
@@ -259,7 +245,6 @@ html[data-family="dream"] main.dream-page.dream-page .dream-section-heading h2 {
 /* Fine pointers: a ticket lifts its gilt edge. No loop. */
 @media (hover: hover) and (pointer: fine) {
   html[data-family="dream"] main.dream-page.dream-page .dream-programme-ticket,
-  html[data-family="dream"] main.dream-page.dream-page .dream-programme-ledger-cell,
   html[data-family="dream"] main.dream-page.dream-page .dream-programme-dossier-chip,
   html[data-family="dream"] main.dream-page.dream-page .dream-quote-band > li {
     transition:
@@ -268,7 +253,6 @@ html[data-family="dream"] main.dream-page.dream-page .dream-section-heading h2 {
   }
 
   html[data-family="dream"] main.dream-page.dream-page .dream-programme-ticket:hover,
-  html[data-family="dream"] main.dream-page.dream-page .dream-programme-ledger-cell:hover,
   html[data-family="dream"] main.dream-page.dream-page .dream-programme-dossier-chip:hover {
     border-color: #e6c28e;
     background-color: #24182c;
@@ -282,7 +266,6 @@ html[data-family="dream"] main.dream-page.dream-page .dream-section-heading h2 {
   html[data-family="dream"] main.dream-page.dream-page,
   html[data-family="dream"] main.dream-page.dream-page .dream-programme-desk,
   html[data-family="dream"] main.dream-page.dream-page .dream-programme-ticket,
-  html[data-family="dream"] main.dream-page.dream-page .dream-programme-ledger-cell,
   html[data-family="dream"] main.dream-page.dream-page .dream-programme-dossier-chip,
   html[data-family="dream"] main.dream-page.dream-page .dream-story-case-body,
   html[data-family="dream"] main.dream-page.dream-page .dream-quote-band > li,
