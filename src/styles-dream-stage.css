@@ -123,24 +123,6 @@ html[data-dream-chapter="true"]:not([data-loading]):not([data-side-menu-open]):n
     letter-spacing: 0.02em;
     pointer-events: none;
   }
-
-  .dream-page.dream-page .dream-dossier-visuals[data-ts-roman]::after {
-    content: attr(data-ts-roman) / "";
-    position: absolute;
-    top: calc(100% + 36px);
-    right: 14px;
-    z-index: 0;
-    padding-top: 52px;
-    writing-mode: vertical-rl;
-    color: rgb(179 173 184 / 72%);
-    background: linear-gradient(var(--ts-kin) 0 0) top center / 1px 36px no-repeat;
-    font-family: var(--ts-latin);
-    font-size: 12px;
-    font-weight: 500;
-    letter-spacing: 0.42em;
-    white-space: nowrap;
-    pointer-events: none;
-  }
 }
 
 /* Phones: an ink band above the plates rail, so the CLOSE plate sits on
@@ -606,7 +588,6 @@ html[data-world-effects="economy"] .dream-page.dream-page .dream-dossier-rail-ma
 @media (forced-colors: active) {
   .dream-page.dream-page .dream-section-heading[data-ts-numeral]::after,
   .dream-page.dream-page .dream-dossier-visuals[data-ts-order]::before,
-  .dream-page.dream-page .dream-dossier-visuals[data-ts-roman]::after,
   .dream-page.dream-page .dream-dossier-rail-mark {
     display: none;
   }

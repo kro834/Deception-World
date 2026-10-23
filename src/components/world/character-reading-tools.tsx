@@ -7,11 +7,15 @@ type ReadingChapter = { no: string; title: string };
 type ReadingDestination = { href: string; title: string };
 export type CharacterRelatedRecord = {
   title: string;
-  context: string;
+  /** A line of the owner's own words under the title (an epithet); no
+   * line that only says where the link goes (2026-10-23). */
+  context?: string;
 } & ({ to: string; hash?: string; assets: readonly string[] } | { href: string });
 
 /** Small chapter-end controls complement the existing contents and sticky reader.
- * Native fragments preserve direct links, browser history and pre-hydration use. */
+ * Native fragments preserve direct links, browser history and pre-hydration use.
+ * The way on is the next title with its arrow at the chapter's foot (2026-10-23:
+ * no 次の章 / 02 or 続けて読む caption); the nav's label names it for assistive tech. */
 export function CharacterChapterTools({
   sections,
   currentNo,
@@ -38,7 +42,6 @@ export function CharacterChapterTools({
       {destination ? (
         <a className="character-chapter-next" href={destination.href}>
           <span className="character-chapter-next-copy">
-            <small>{next ? `次の章 / ${next.no}` : "続けて読む"}</small>
             <b>
               <PhrasedText text={destination.title} />
             </b>
@@ -78,7 +81,7 @@ export function CharacterRelatedRecords({
                 <b>
                   <PhrasedText text={record.title} />
                 </b>
-                <span>{record.context}</span>
+                {record.context ? <span>{record.context}</span> : null}
               </span>
               <span className="character-related-arrow" aria-hidden="true">
                 ↗

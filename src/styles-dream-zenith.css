@@ -48,17 +48,9 @@ html[data-family="dream"] main.dream-page.dream-page .dream-prologue-card h2 {
 /* ----------------------------------------------------------------
    2. The record explorer speaks the programme's Latin face
    ---------------------------------------------------------------- */
-html[data-family="dream"] main.dream-page.dream-page .dream-record-explorer-heading > p,
 html[data-family="dream"] main.dream-page.dream-page .dream-record-telemetry-head small,
 html[data-family="dream"] main.dream-page.dream-page .dream-record-meta {
   font-family: var(--zn-latin);
-}
-
-html[data-family="dream"] main.dream-page.dream-page .dream-record-explorer-heading > p {
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.24em;
-  text-shadow: none;
 }
 
 html[data-family="dream"] main.dream-page.dream-page .dream-record-telemetry-head {
@@ -139,12 +131,6 @@ html[data-family="dream"] main.dream-page.dream-page .dream-reading-entry h3 {
   margin: 8px 0 6px;
 }
 
-html[data-family="dream"] main.dream-page.dream-page .dream-reading-entry > div > span {
-  color: #d9cdbf;
-  font-size: 14px;
-  line-height: 1.9;
-}
-
 html[data-family="dream"] main.dream-page.dream-page .dream-reading-entry > p[role="status"] {
   flex-basis: 100%;
   color: var(--zn-kinari);
@@ -173,11 +159,6 @@ html[data-family="dream"] main.dream-page.dream-page .dream-reader-support-headi
 html[data-family="dream"] main.dream-page.dream-page .dream-reader-support-heading p {
   font-size: 16px;
   letter-spacing: 0.12em;
-}
-
-html[data-family="dream"] main.dream-page.dream-page .dream-reader-support-heading > span {
-  font-family: var(--zn-latin), var(--ts-text);
-  letter-spacing: 0.08em;
 }
 
 html[data-family="dream"] main.dream-page.dream-page .dream-reader-settings {
@@ -327,13 +308,8 @@ html[data-family="dream"] main.dream-page.dream-page .dream-record-explorer-head
   text-shadow: 0 2px 14px rgb(0 0 0 / 50%);
 }
 
-html[data-family="dream"] main.dream-page.dream-page .dream-record-explorer-heading > span {
-  font-size: 13px;
-}
-
 html[data-family="dream"] main.dream-page.dream-page .dream-record-search > label,
-html[data-family="dream"] main.dream-page.dream-page .dream-record-filters label,
-html[data-family="dream"] main.dream-page.dream-page .dream-record-quick-label {
+html[data-family="dream"] main.dream-page.dream-page .dream-record-filters label {
   color: var(--zn-kin-light);
   font-size: 13px;
   letter-spacing: 0.08em;
@@ -384,14 +360,6 @@ html[data-family="dream"] main.dream-page.dream-page .dream-record-count {
 }
 
 /* ----------------------------------------------------------------
-   6. The programme tickets keep their small print legible (12px floor)
-   ---------------------------------------------------------------- */
-html[data-family="dream"] main.dream-page.dream-page .dream-programme-ticket-head small,
-html[data-family="dream"] main.dream-page.dream-page .dream-programme-ticket-foot small {
-  font-size: 12px;
-}
-
-/* ----------------------------------------------------------------
    7. The programme desk on a phone: three tickets as one ticket book
       (a row each), the dossier rail snaps and shows its next edge, the
       ledger cells sit two to a row at reading height.
@@ -423,21 +391,6 @@ html[data-family="dream"] main.dream-page.dream-page .dream-programme-ticket-foo
     border-top: 0;
   }
 
-  html[data-family="dream"] main.dream-page.dream-page .dream-programme-ticket-head {
-    grid-area: head;
-    flex-direction: column;
-    align-items: start;
-    gap: 2px;
-    min-width: 2.2em;
-  }
-
-  html[data-family="dream"]
-    main.dream-page.dream-page
-    .dream-programme-ticket-head
-    small:last-child {
-    display: none;
-  }
-
   html[data-family="dream"] main.dream-page.dream-page .dream-programme-ticket-main {
     grid-area: main;
     margin: 0;
@@ -466,10 +419,6 @@ html[data-family="dream"] main.dream-page.dream-page .dream-programme-ticket-foo
     text-align: right;
   }
 
-  html[data-family="dream"] main.dream-page.dream-page .dream-programme-ticket-foot small {
-    white-space: nowrap;
-  }
-
   html[data-family="dream"] main.dream-page.dream-page .dream-programme-ticket-foot > span {
     font-size: 16px;
   }
@@ -488,48 +437,6 @@ html[data-family="dream"] main.dream-page.dream-page .dream-programme-ticket-foo
   html[data-family="dream"] main.dream-page.dream-page .dream-programme-dossier-strip > li {
     flex-basis: 164px;
     scroll-snap-align: start;
-  }
-
-  html[data-family="dream"] main.dream-page.dream-page .dream-programme-ledger-grid {
-    gap: 8px;
-  }
-
-  /* The code and the figure share the first line (the code on the unit
-     word's line); the label takes the cell's full width under them, so
-     「ドルミネンス機密」「武装・能力・術式」 keep one line beside their
-     neighbours. */
-  html[data-family="dream"] main.dream-page.dream-page .dream-programme-ledger-cell {
-    grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-areas:
-      "code value"
-      "label label";
-    align-items: end;
-    column-gap: 10px;
-    row-gap: 4px;
-    min-height: 64px;
-    padding: 10px 12px;
-  }
-
-  html[data-family="dream"] main.dream-page.dream-page .dream-programme-ledger-code {
-    grid-area: code;
-    /* the unit word's line height, so the two small-caps lines share a foot */
-    line-height: 1.1;
-  }
-
-  html[data-family="dream"] main.dream-page.dream-page .dream-programme-ledger-value {
-    grid-area: value;
-    flex-direction: column;
-    align-items: end;
-    gap: 0;
-    font-size: 22px;
-    line-height: 1.1;
-  }
-
-  html[data-family="dream"] main.dream-page.dream-page .dream-programme-ledger-label {
-    grid-area: label;
-    align-self: start;
-    word-break: keep-all;
-    overflow-wrap: anywhere;
   }
 }
 
@@ -781,15 +688,6 @@ html[data-family="dream"] main.dream-page.dream-page .dream-story-case-body .dre
   color: var(--zn-kin-light);
 }
 
-html[data-family="dream"]
-  main.dream-page.dream-page
-  .dream-story-case-body
-  .dream-reader-related
-  > span {
-  color: var(--zn-ginnezu);
-  letter-spacing: 0.12em;
-}
-
 html[data-family="dream"] main.dream-page.dream-page .dream-story-case-body .dream-reader-related a,
 html[data-family="dream"]
   main.dream-page.dream-page
@@ -816,22 +714,6 @@ html[data-family="dream"]
     0 10px 24px rgb(0 0 0 / 30%);
   color: var(--zn-kinari);
   letter-spacing: 0.08em;
-}
-
-html[data-family="dream"]
-  main.dream-page.dream-page
-  .dream-story-case-body
-  .dream-reader-pagination
-  a
-  small {
-  color: var(--zn-kin-light);
-  letter-spacing: 0.14em;
-}
-
-html[data-family="dream"] main.dream-page.dream-page .dream-story-case-body .dream-reader-end {
-  color: var(--zn-ginnezu);
-  font-family: var(--zn-latin);
-  letter-spacing: 0.18em;
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -1202,21 +1084,6 @@ html[data-family="dream"] main.dream-page.dream-page .dream-programme-dossier-ch
 }
 
 /* ----------------------------------------------------------------
-   24. ドルミネンス cards in four columns (1101px and up, and an iPad on
-       its side): the spec badge sat at the top right at its full length
-       and ran over the file's number seal at the top left (by 11–43px on
-       the three PUNCH · KICK cards). The badge keeps clear of the seal and
-       wraps after the dot (or the colon) when the card is too narrow.
-   ---------------------------------------------------------------- */
-html[data-family="dream"] main.dream-page.dream-page .dream-dolminence-spec-badge {
-  max-width: calc(100% - 84px);
-  line-height: 1.45;
-  text-align: end;
-  /* 「DEVICE: ルパンガンナー」 breaks after the colon, never inside the name. */
-  word-break: keep-all;
-}
-
-/* ----------------------------------------------------------------
    25. A glossary term beside a longer neighbour: its dd (a grid) was
        stretched to the row and shared the spare height between its
        passages, so カオスカプセム's two lines stood 60px apart. The
@@ -1252,15 +1119,6 @@ html[data-family="dream"] main.dream-page.dream-page .dream-glossary dd {
     .dream-roster
     article:is([aria-labelledby="dream-roster-bell"], [aria-labelledby="dream-roster-machiavel"]) {
     grid-template-columns: auto minmax(0, 1fr) clamp(180px, 26vw, 260px);
-  }
-
-  html[data-family="dream"]
-    main.dream-page.dream-page
-    .dream-roster
-    article:is([aria-labelledby="dream-roster-bell"], [aria-labelledby="dream-roster-machiavel"])
-    .dream-roster-seal {
-    /* inside the record's column, clear of the art's edge */
-    right: calc(clamp(180px, 26vw, 260px) + clamp(16px, 1.8vw, 22px) + 10px);
   }
 
   html[data-family="dream"]

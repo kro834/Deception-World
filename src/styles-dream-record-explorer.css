@@ -44,15 +44,6 @@
   border-bottom: 3px double rgb(219 186 117 / 36%);
 }
 
-.dream-page.dream-page .dream-record-explorer-heading > p {
-  grid-column: 1 / -1;
-  margin: 0;
-  color: #e6c28e;
-  font: 600 12px/1.4 var(--font-mono, monospace);
-  letter-spacing: 0.16em;
-  text-shadow: 0 1px 10px rgb(200 164 92 / 24%);
-}
-
 .dream-page.dream-page .dream-record-explorer-heading h3 {
   margin: 0;
   color: #f7ecd6;
@@ -61,12 +52,6 @@
   text-shadow:
     0 2px 18px rgb(200 164 92 / 24%),
     0 2px 14px rgb(0 0 0 / 50%);
-}
-
-.dream-page.dream-page .dream-record-explorer-heading > span {
-  color: #d4cbbd;
-  font-size: 13px;
-  line-height: 1.6;
 }
 
 .dream-page.dream-page .dream-record-search {
@@ -137,13 +122,6 @@
   align-items: center;
   gap: 8px;
   margin-top: 4px;
-}
-
-.dream-page.dream-page .dream-record-quick-label {
-  color: #e6c28e;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
 }
 
 .dream-page.dream-page .dream-record-quick-tags button {
@@ -891,13 +869,6 @@
   margin-top: 22px;
   padding-top: 16px;
   border-top: 1px solid #b29c7e;
-}
-
-.dream-page.dream-page #dream-record-explorer .dream-record-context > p {
-  margin: 0;
-  color: #5b4657;
-  font-size: 13px;
-  line-height: 1.8;
 }
 
 .dream-page.dream-page #dream-record-explorer .dream-record-context a {

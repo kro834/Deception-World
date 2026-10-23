@@ -125,7 +125,9 @@ try {
     await dolminence.getByRole("button", { name: "検索を解除して全件を見る" }).click();
     assert.equal(await search.inputValue(), "");
     assert.equal(await page.evaluate(() => document.activeElement?.id), "dream-arsenal-search");
-    assert.match(await arsenal.getByRole("status").textContent(), /全75件/);
+    // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）
+    // Cleared, the status is silent again.
+    assert.equal((await arsenal.getByRole("status").textContent()).trim(), "");
 
     await search.fill("存在しない武装XXXX");
     assert.match(await arsenal.getByRole("status").textContent(), /0件/);

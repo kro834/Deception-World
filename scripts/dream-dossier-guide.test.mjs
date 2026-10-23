@@ -109,8 +109,10 @@ test("contents materializes every rendered section, including supplements and li
   assert.equal(tree.props["aria-label"], "シエルの資料内目次");
   const { select } = controls(tree);
   assert.equal(select.props.disabled, false);
+  // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）
+  // The options are the destinations' names, without 01 / 02 ordinals.
   assert.deepEqual(
-    Array.from(select.props.children, (option) => option.props.children[2]),
+    Array.from(select.props.children, (option) => option.props.children),
     ["基本資料・プロフィール", "人物記録", "追補資料", "因縁・関係性の記録（2件）"],
   );
   for (const target of [title, body, supplement, relations]) {
