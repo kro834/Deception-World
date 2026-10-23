@@ -859,57 +859,6 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
   justify-items: center;
   gap: 16px;
 }
-
-/* ミドル → ウルトラ: two nodes on one line, the reached ones lit. */
-.mus-route {
-  display: flex;
-  align-items: center;
-  gap: 0;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-}
-
-.mus-route li {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: rgb(233 239 242 / 40%);
-}
-
-.mus-route li::before {
-  content: "";
-  width: 9px;
-  height: 9px;
-  border: 1px solid currentColor;
-  border-radius: 50%;
-}
-
-.mus-route li + li::after {
-  order: -1;
-  content: "";
-  width: 54px;
-  height: 1px;
-  margin-right: 4px;
-  background: currentColor;
-}
-
-.mus-route li[data-reached] {
-  color: var(--mus-orange-hot);
-}
-
-.mus-route li[data-reached]::before {
-  background: currentColor;
-  box-shadow: 0 0 10px rgb(255 154 74 / 60%);
-}
-
-.mus-ending[data-stage="ultra"] .mus-route li[data-reached]:last-child {
-  color: #f3e7ff;
-}
-
 /* ================================================================
    03 — THE ARTICLES: cells of one grid, the seams between them lit
    ================================================================ */
@@ -1488,91 +1437,32 @@ html[data-family="special"]
   min-height: 44px;
 }
 
-/* ---------- 01: the read-out cards (the Extreme site's large figures) ---------- */
-.mus-readouts {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: clamp(10px, 1.4vw, 18px);
-  margin-bottom: clamp(18px, 2.4vw, 28px);
-}
-
-.mus-readout {
+/* ---------- 01: the strength rows read as measures (the figures large,
+   ミドル's share of ウルトラ drawn under them; the table carries the names) ---------- */
+.mus-specs tbody tr[data-bar] td {
   position: relative;
-  display: grid;
-  gap: 10px;
-  padding: clamp(16px, 2vw, 26px);
-  border: 1px solid var(--mus-hair);
-  border-radius: 6px;
-  overflow: hidden;
-  background:
-    linear-gradient(115deg, transparent 52%, rgb(255 154 74 / 9%) 52.2%, transparent 64%),
-    radial-gradient(120% 90% at 0% 0%, rgb(55 198 192 / 12%), transparent 60%), #040b0f;
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 6%);
+  padding-bottom: 20px;
+  font-size: clamp(20px, 2.4vw, 34px);
 }
 
-.mus-readout-key {
-  margin: 0;
-  color: var(--mus-muted);
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-}
-
-.mus-readout-values {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 4px 18px;
-  margin: 0;
-}
-
-.mus-readout-values b {
-  color: #e6fbf9;
-  font-family: var(--mus-latin);
-  font-size: clamp(24px, 2.5vw, 40px);
-  font-weight: 700;
-  line-height: 1;
-  letter-spacing: 0.01em;
-  text-shadow: 0 0 28px rgb(55 198 192 / 32%);
-}
-
-.mus-readout-values b.is-ultra {
-  background: var(--mus-iris);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  text-shadow: none;
-}
-
-.mus-readout-values small {
-  margin-left: 3px;
-  font-size: 0.42em;
-  letter-spacing: 0.04em;
-}
-
-/* Two bars on one scale: ミドル's share of ウルトラ, and ウルトラ whole. */
-.mus-readout-bar {
-  position: relative;
-  height: 6px;
-  border-radius: 3px;
-  background: var(--mus-iris);
-  opacity: 0.85;
-}
-
-.mus-readout-bar::before {
+.mus-specs tbody tr[data-bar] td::after {
   content: "";
   position: absolute;
-  inset: 0 auto 0 0;
-  width: calc(var(--share) * 100%);
-  border-radius: 3px;
+  left: clamp(12px, 2vw, 24px);
+  right: clamp(12px, 2vw, 24px);
+  bottom: 8px;
+  height: 4px;
+  border-radius: 2px;
   background: linear-gradient(90deg, var(--mus-teal), var(--mus-orange));
-  box-shadow: 0 0 12px rgb(255 154 74 / 50%);
+  transform: scaleX(var(--share));
+  transform-origin: 0 50%;
+  box-shadow: 0 0 10px rgb(255 154 74 / 45%);
 }
 
-@media (max-width: 560px) {
-  .mus-readouts {
-    grid-template-columns: 1fr;
-  }
+.mus-specs tbody tr[data-bar] td:nth-child(3)::after {
+  background: var(--mus-iris);
+  transform: none;
+  box-shadow: none;
 }
 
 /* ---------- Chapter openings (the Extreme site's lit band) ---------- */
@@ -1697,4 +1587,10 @@ html[data-family="special"]
   line-height: 1;
   white-space: nowrap;
   pointer-events: none;
+}
+
+/* The auto movie's sheet carries no title of its own here (its group keeps
+   its name for assistive technology). */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-page.mus-page .rzn-movie .rzn-movie-kicker {
+  display: none;
 }
