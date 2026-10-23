@@ -1493,8 +1493,22 @@ const lightPixels = (lights, core, W, H, document) => {
     for (let x = 0; x < cw; x += 1) {
       const i = (y * cw + x) * 4;
       if (data[i + 3] < 70) continue;
-      // Keep the squares sparse (the eyes' density), never every cell.
-      if (random() > 0.42) continue;
+      // Keep the squares sparse (the eyes' density), never every cell, and
+      // trace the lights' lines rather than flooding their broad fields
+      // (owner, 2026-10-23: at .89–.91 the squares massed over the
+      // muffler's lit cloth): a cell's chance falls with how much of the
+      // 5 × 5 cells round it is lit, so a thin line keeps the eyes' density
+      // and a wide lit field only a scatter.
+      const keep = random();
+      let around = 0;
+      for (let dy = -2; dy <= 2; dy += 1)
+        for (let dx = -2; dx <= 2; dx += 1) {
+          const nx = x + dx;
+          const ny = y + dy;
+          if (nx >= 0 && ny >= 0 && nx < cw && ny < ch && data[(ny * cw + nx) * 4 + 3] >= 24)
+            around += 1;
+        }
+      if (keep > 0.42 * Math.min(1, 5 / around)) continue;
       const px = (x + random()) * (W / cw);
       const py = (y + random()) * (H / ch);
       if (Math.hypot(px - cx, py - cy) < REACTOR_RADIUS) continue;
