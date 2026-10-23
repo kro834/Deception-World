@@ -215,28 +215,69 @@ async function pressPlay(page) {
   await press(page, await playSelector(page));
 }
 
+/* Software WebGL holds the main thread for whole seconds a frame here, so
+   an input's effect is waited for (up to REACT_MS), never assumed after a
+   fixed pause. */
+const REACT_MS = 20000;
+
 async function openSheet(page) {
   const s = await state(page);
   if (!s.pill) return;
-  const open = await page.evaluate(() => document.querySelector(".rzn-movie").dataset.open === "true");
-  if (!open) await press(page, ".rzn-movie-toggle");
-  await sleep(250);
+  const isOpen = () =>
+    page.evaluate(() => {
+      const control = document.querySelector(".rzn-movie");
+      const sheet = control.querySelector(".rzn-movie-sheet");
+      return control.dataset.open === "true" && getComputedStyle(sheet).display !== "none";
+    });
+  if (await isOpen()) return;
+  await press(page, ".rzn-movie-toggle");
+  await waitFor(
+    page,
+    () => {
+      const control = document.querySelector(".rzn-movie");
+      return control.dataset.open === "true" && getComputedStyle(control.querySelector(".rzn-movie-sheet")).display !== "none";
+    },
+    null,
+    REACT_MS,
+    "the speed button did not open the sheet",
+  );
 }
 
 async function chooseSpeed(page, speed) {
   await openSheet(page);
   await press(page, `.rzn-movie [role="radio"][data-speed="${speed}"]`);
-  await sleep(150);
-  const checked = await page.evaluate(
-    (v) => document.querySelector(`.rzn-movie [role="radio"][data-speed="${v}"]`)?.getAttribute("aria-checked"),
+  await waitFor(
+    page,
+    (v) => document.querySelector(`.rzn-movie [role="radio"][data-speed="${v}"]`)?.getAttribute("aria-checked") === "true",
     speed,
+    REACT_MS,
+    `the ${speed}× radio did not take`,
   );
-  must(checked === "true", `the ${speed}× radio did not take (aria-checked ${checked})`);
 }
 
+/** 最初から: the movie plays again from the runway's start. */
 async function restart(page) {
   await openSheet(page);
   await press(page, ".rzn-movie-restart");
+  await waitFor(
+    page,
+    () => {
+      const control = document.querySelector(".rzn-movie");
+      const runway = document.querySelector(".rzn-suitup");
+      const frame = runway.querySelector(".rzn-frame");
+      const pin = parseFloat(getComputedStyle(frame).top) || 0;
+      const q = (pin - runway.getBoundingClientRect().top) / (runway.offsetHeight - frame.offsetHeight);
+      return (control.dataset.state === "playing" || control.dataset.state === "loading") && q < 0.03;
+    },
+    null,
+    REACT_MS,
+    "最初から did not restart the movie",
+  );
+}
+
+/** The state reads `want` (after an input the main thread may take a while). */
+async function stateIs(page, want, message) {
+  await waitFor(page, (w) => document.querySelector(".rzn-movie")?.dataset.state === w, want, REACT_MS, message);
 }
 
 /** Waits until the movie plays (a queued 再生 included). */
@@ -246,15 +287,22 @@ async function playing(page, timeout, message = "再生 never started the movie"
 
 /** Samples the movie while it plays, until it ends (or `until` of progress):
  * the frame stays pinned, the state never leaves playing by itself, the
- * progress only moves forward. */
+ * progress only moves forward. (A layout change — a resize, a section
+ * above settling — moves the runway under the page until the movie's next
+ * frame puts the page back: one frame on a phone, seconds of software
+ * WebGL here. A sample between the two is skipped; an unpinned frame that
+ * lasts is a failure.) */
+const UNPINNED_MS = 10000;
 async function watch(page, { until = 1, timeout, label = "the movie" }) {
   const start = Date.now();
   let last = -1;
   let unpinned = 0;
+  let unpinnedSince = 0;
   for (;;) {
     const s = await state(page);
     must(s, "the control or runway vanished");
-    if (s.state === "ended" || s.q >= until - 0.002) {
+    const pinned = Math.abs(s.frameTop - s.pin) <= 2;
+    if (pinned && (s.state === "ended" || s.q >= until - 0.002)) {
       if (until >= 1) {
         must(s.state === "ended", `${label}: progress ${s.q.toFixed(3)} but state ${s.state}`);
         must(s.q >= 0.985, `${label} ended at ${s.q.toFixed(3)}, not the runway's end`);
@@ -262,13 +310,37 @@ async function watch(page, { until = 1, timeout, label = "the movie" }) {
       return { ms: Date.now() - start, unpinned };
     }
     must(s.state === "playing", `${label} left playing by itself (${s.state}) at ${s.q.toFixed(3)}`);
-    if (Math.abs(s.frameTop - s.pin) > 2) unpinned += 1;
-    must(unpinned < 3, `${label}: the sticky frame came unpinned (top ${s.frameTop} vs ${s.pin})`);
-    must(s.q >= last - 0.01, `${label} ran backwards ${last.toFixed(3)} → ${s.q.toFixed(3)}`);
-    last = s.q;
+    if (!pinned) {
+      unpinned += 1;
+      unpinnedSince ||= Date.now();
+      must(
+        Date.now() - unpinnedSince < UNPINNED_MS,
+        `${label}: the sticky frame stayed unpinned (top ${s.frameTop} vs ${s.pin}, q ${s.q.toFixed(3)})`,
+      );
+    } else {
+      unpinnedSince = 0;
+      must(s.q >= last - 0.01, `${label} ran backwards ${last.toFixed(3)} → ${s.q.toFixed(3)}`);
+      last = s.q;
+    }
     must(Date.now() - start < timeout, `${label} did not reach ${until} within ${timeout} ms (at ${s.q.toFixed(3)})`);
     await sleep(200);
   }
+}
+
+/** The movie plays on, pinned, after a layout change. */
+async function pinnedAgain(page, label) {
+  await waitFor(
+    page,
+    () => {
+      const runway = document.querySelector(".rzn-suitup");
+      const frame = runway.querySelector(".rzn-frame");
+      const pin = parseFloat(getComputedStyle(frame).top) || 0;
+      return Math.abs(frame.getBoundingClientRect().top - pin) <= 2;
+    },
+    null,
+    REACT_MS,
+    `${label}: the frame did not pin again`,
+  );
 }
 
 /** The movie plays on and the page moves with it: the suit-up's progress
@@ -290,49 +362,66 @@ async function advances(page, label, by = 0.06, timeout = 60000) {
   }
 }
 
-/* The playhead's own clock: a frame sampler in the page records each
-   frame's time and the runway's progress, so a speed's rate is checked
-   against the frames actually drawn (the movie advances min(dt, 1 s) × speed
-   a frame), not against a software renderer's frame rate. */
-async function startSampler(page) {
+/* The playhead's own clock: the movie scrolls the page once a frame, from
+   its animation frame. The page's requestAnimationFrame and scrollTo are
+   wrapped to record each of those scrolls with its frame's time, so a
+   speed's rate is checked against the frames actually drawn (the movie
+   advances min(dt, 1 s) × speed a frame), never against a software
+   renderer's frame rate; the wall-clock rate is reported beside it. */
+async function hookFrames(page) {
   await page.evaluate(() => {
-    const runway = document.querySelector(".rzn-suitup");
-    const frame = runway.querySelector(".rzn-frame");
-    const samples = [];
-    window.__movieSamples = samples;
-    const tick = (t) => {
-      if (window.__movieSamples !== samples) return;
-      const pin = parseFloat(getComputedStyle(frame).top) || 0;
-      const travel = runway.offsetHeight - frame.offsetHeight;
-      samples.push([t, (pin - runway.getBoundingClientRect().top) / travel, document.querySelector(".rzn-movie").dataset.state]);
-      if (samples.length > 20000) samples.splice(0, 10000);
-      requestAnimationFrame(tick);
+    if (window.__movieScrolls) return;
+    const scrolls = [];
+    window.__movieScrolls = scrolls;
+    let frameTime = null;
+    const raf = window.requestAnimationFrame;
+    window.requestAnimationFrame = function (callback) {
+      return raf.call(window, (t) => {
+        frameTime = t;
+        try {
+          callback(t);
+        } finally {
+          frameTime = null;
+        }
+      });
     };
-    requestAnimationFrame(tick);
+    const scrollTo = window.scrollTo;
+    window.scrollTo = function (...args) {
+      if (frameTime !== null) {
+        const top = args.length === 1 && typeof args[0] === "object" ? args[0]?.top : args[1];
+        const runway = document.querySelector(".rzn-suitup");
+        const frame = runway?.querySelector(".rzn-frame");
+        scrolls.push([frameTime, top, runway ? runway.offsetHeight - frame.offsetHeight : 0]);
+        if (scrolls.length > 20000) scrolls.splice(0, 10000);
+      }
+      return scrollTo.apply(this, args);
+    };
   });
 }
-const samplesSince = (page, since) =>
-  page.evaluate((from) => (window.__movieSamples || []).filter(([t]) => t >= from), since);
 const pageNow = (page) => page.evaluate(() => performance.now());
+const scrollsSince = (page, since) => page.evaluate((from) => (window.__movieScrolls || []).filter(([t]) => t >= from), since);
 
-/** Over a window of frames at `speed`: the progress the frames drew against
- * the progress the speed asks for those frames, and the wall-clock rate. */
-function measureWindow(samples, speed) {
-  const playingFrames = samples.filter(([, , s]) => s === "playing");
-  if (playingFrames.length < 3) return { frames: playingFrames.length };
+/** Over a window of the movie's frames at `speed`: how far the page moved
+ * against how far the speed asks for those frames, and the wall-clock rate
+ * (1 = real time at 1×). */
+function measureWindow(scrolls, speed) {
+  if (scrolls.length < 3) return { frames: scrolls.length };
+  let moved = 0;
   let expected = 0;
-  for (let k = 1; k < playingFrames.length; k += 1)
-    expected += (Math.min(MAX_STEP_MS, playingFrames[k][0] - playingFrames[k - 1][0]) * speed) / MOVIE_MS;
-  const first = playingFrames[0];
-  const last = playingFrames[playingFrames.length - 1];
-  const moved = last[1] - first[1];
+  for (let k = 1; k < scrolls.length; k += 1) {
+    const [t, y, travel] = scrolls[k];
+    const [t0, y0] = scrolls[k - 1];
+    if (!(travel > 0) || t <= t0) continue;
+    moved += (y - y0) / travel;
+    expected += (Math.min(MAX_STEP_MS, t - t0) * speed) / MOVIE_MS;
+  }
+  const span = scrolls[scrolls.length - 1][0] - scrolls[0][0];
   return {
-    frames: playingFrames.length,
+    frames: scrolls.length,
     moved: Number(moved.toFixed(4)),
     expected: Number(expected.toFixed(4)),
     ratio: expected > 0 ? Number((moved / expected).toFixed(3)) : null,
-    // The share of 1×'s wall-clock rate (1 = real time at 1×).
-    wall: Number(((moved * MOVIE_MS) / (last[0] - first[0])).toFixed(3)),
+    wall: span > 0 ? Number(((moved * MOVIE_MS) / span).toFixed(3)) : null,
   };
 }
 
@@ -488,12 +577,14 @@ const SCENARIOS = {
     await controlShown(page, 60000);
     const before = await state(page);
     await pressPlay(page);
-    await sleep(300);
-    const s = await state(page);
-    must(
-      s.state === "playing" || s.state === "loading",
-      `a throttled 再生 did nothing (state ${s.state}, scene ${before.runwayLoad})`,
+    await waitFor(
+      page,
+      () => ["playing", "loading"].includes(document.querySelector(".rzn-movie")?.dataset.state),
+      null,
+      REACT_MS,
+      `a throttled 再生 did nothing (scene ${before.runwayLoad})`,
     );
+    const s = await state(page);
     if (s.state === "loading") must(s.busy === "true" && /読み込み中/.test(s.label ?? ""), `loading but labelled ${s.label}`);
     await playing(page, 240000, "a throttled 再生 never started");
     await advances(page, `throttled:`);
@@ -525,12 +616,14 @@ const SCENARIOS = {
     await controlShown(page);
     const before = await state(page);
     await pressPlay(page);
-    await sleep(200);
-    const after = await state(page);
-    must(
-      after.state === "playing" || after.state === "loading",
-      `an early 再生 was ignored (scene ${before.runwayLoad}, disabled ${before.disabled}, state ${after.state})`,
+    await waitFor(
+      page,
+      () => ["playing", "loading"].includes(document.querySelector(".rzn-movie")?.dataset.state),
+      null,
+      REACT_MS,
+      `an early 再生 was ignored (scene ${before.runwayLoad}, disabled ${before.disabled})`,
     );
+    const after = await state(page);
     if (after.state === "loading")
       must(after.busy === "true" && /読み込み中/.test(after.label ?? ""), `loading but labelled ${after.label}`);
     await playing(page, PLAY_WAIT + 30000, "an early 再生 never started once ready");
@@ -541,7 +634,7 @@ const SCENARIOS = {
     await arriveDirect(page, path);
     await toRunway(page);
     await controlShown(page);
-    await startSampler(page);
+    await hookFrames(page);
     const windows = {};
     for (const speed of [1, 0.5, 1.5, 2]) {
       await chooseSpeed(page, speed);
@@ -550,24 +643,36 @@ const SCENARIOS = {
       // (The first frames after 最初から redraw the start: not measured.)
       await sleep(800);
       const from = await pageNow(page);
-      await sleep(3500);
-      const w = measureWindow(await samplesSince(page, from), speed);
+      // At least 8 of the movie's frames (and 3.5 s of them).
+      const start = Date.now();
+      let scrolls = [];
+      for (;;) {
+        await sleep(500);
+        scrolls = await scrollsSince(page, from);
+        if (scrolls.length >= 8 && Date.now() - start >= 3500) break;
+        must(Date.now() - start < 60000, `${speed}×: only ${scrolls.length} frames of the movie in 60 s`);
+      }
+      const w = measureWindow(scrolls, speed);
       windows[speed] = w;
-      must(w.frames >= 3, `${speed}×: only ${w.frames} frames in 3.5 s`);
       must(w.moved > 0.004, `${speed}×: the movie does not advance (${JSON.stringify(w)})`);
-      must(Math.abs(w.ratio - 1) < 0.15, `${speed}×: moved ${w.ratio}× what the speed asks (${JSON.stringify(w)})`);
+      must(Math.abs(w.ratio - 1) < 0.05, `${speed}×: moved ${w.ratio}× what the speed asks (${JSON.stringify(w)})`);
+      const s = await state(page);
+      must(s.state === "playing" || s.state === "ended", `${speed}×: the movie left playing by itself (${s.state})`);
     }
+    // The wall-clock rates against 1×'s (the frame rate varies here; reported).
+    for (const speed of [0.5, 1.5, 2])
+      if (windows[speed].wall && windows[1].wall)
+        windows[speed].ofOne = Number((windows[speed].wall / windows[1].wall).toFixed(2));
     // Pause and resume.
     await pressPlay(page);
-    await sleep(300);
+    await stateIs(page, "paused", "一時停止 did not pause");
     let s = await state(page);
-    must(s.state === "paused", `一時停止 left the state ${s.state}`);
     const held = s.q;
     await sleep(800);
     s = await state(page);
     must(Math.abs(s.q - held) < 0.002, "a paused movie still moved");
     await pressPlay(page);
-    await playing(page, 10000);
+    await playing(page, REACT_MS);
     await advances(page, "resumed", 0.03);
     return { windows };
   },
@@ -580,13 +685,25 @@ const SCENARIOS = {
     await sleep(500);
     await openSheet(page);
     await page.locator(".rzn-movie-seek input").fill("100");
-    await sleep(300);
+    // (Playing on from 50 %: at most a frame's step past it, 1 s at 1×.)
+    await waitFor(
+      page,
+      () => {
+        const r = document.querySelector(".rzn-suitup");
+        const f = r.querySelector(".rzn-frame");
+        const pin = parseFloat(getComputedStyle(f).top) || 0;
+        return (pin - r.getBoundingClientRect().top) / (r.offsetHeight - f.offsetHeight) >= 0.49;
+      },
+      null,
+      REACT_MS,
+      "the seek did not move the page",
+    );
     let s = await state(page);
-    must(Math.abs(s.q - 0.5) < 0.02, `seek to 50 % put the page at ${s.q.toFixed(3)}`);
+    must(s.q >= 0.49 && s.q < 0.56, `seek to 50 % put the page at ${s.q.toFixed(3)}`);
     must(s.state === "playing" || s.state === "paused", `seek left the state ${s.state}`);
     if (s.state !== "playing") {
       await pressPlay(page);
-      await playing(page, 10000);
+      await playing(page, REACT_MS);
     }
     await waitFor(page, () => {
       const r = document.querySelector(".rzn-suitup");
@@ -597,21 +714,14 @@ const SCENARIOS = {
     s = await state(page);
     must(s.q > 0.5 && s.q < 0.65 && s.state === "playing", `after the seek the movie stands at ${s.q.toFixed(3)} (${s.state})`);
     await restart(page);
-    await sleep(300);
-    s = await state(page);
-    must(s.state === "playing" && s.q < 0.03, `最初から: ${s.state} at ${s.q.toFixed(3)}`);
     // The end: seek to the end, the control reads ended; 再生 replays from 0.
     await openSheet(page);
     await page.locator(".rzn-movie-seek input").fill("200");
-    await sleep(500);
+    await stateIs(page, "ended", "a seek to the end did not end the movie");
     s = await state(page);
     must(s.q > 0.98, `seek to the end: ${s.q.toFixed(3)}`);
-    await waitFor(page, () => document.querySelector(".rzn-movie").dataset.state !== "playing", null, 15000, "at the end the movie still reads playing");
-    s = await state(page);
-    must(s.state === "ended", `at the end the state is ${s.state}`);
     await pressPlay(page);
-    await playing(page, 10000);
-    await sleep(400);
+    await playing(page, REACT_MS);
     s = await state(page);
     must(s.q < 0.2, `再生 at the end did not replay from the start (${s.q.toFixed(3)})`);
   },
@@ -626,15 +736,16 @@ const SCENARIOS = {
     await watch(page, { until: 0.25, timeout: 60000, label: "before the wheel" });
     await page.mouse.move(200, 300);
     await page.mouse.wheel(0, 240);
-    await sleep(500);
+    await stateIs(page, "paused", "a wheel mid-play did not pause the movie");
+    await sleep(600);
     let s = await state(page);
-    must(s.state === "paused", `a wheel mid-play left the state ${s.state}`);
     let held = s.q;
-    await sleep(800);
+    await sleep(1200);
     s = await state(page);
-    must(Math.abs(s.q - held) < 0.02, "after the wheel the movie kept scrolling the page");
+    must(s.state === "paused", `after the wheel the state turned ${s.state}`);
+    must(Math.abs(s.q - held) < 0.005, "after the wheel the movie kept scrolling the page");
     await pressPlay(page);
-    await playing(page, 10000, "再生 after a wheel pause did not resume");
+    await playing(page, REACT_MS, "再生 after a wheel pause did not resume");
     if (page.__touch) {
       // A phone's own scroll: a touch drag outside the control pauses it too.
       await watch(page, { until: Math.min(0.6, s.q + 0.1), timeout: 60000, label: "before the drag" });
@@ -646,15 +757,16 @@ const SCENARIOS = {
         await sleep(30);
       }
       await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
-      await sleep(500);
+      await stateIs(page, "paused", "a touch drag mid-play did not pause the movie");
+      await sleep(600);
       s = await state(page);
-      must(s.state === "paused", `a touch drag mid-play left the state ${s.state}`);
       held = s.q;
-      await sleep(800);
+      await sleep(1200);
       s = await state(page);
-      must(Math.abs(s.q - held) < 0.02, "after the drag the movie kept scrolling the page");
+      must(s.state === "paused", `after the drag the state turned ${s.state}`);
+      must(Math.abs(s.q - held) < 0.005, "after the drag the movie kept scrolling the page");
       await pressPlay(page);
-      await playing(page, 10000, "再生 after a drag pause did not resume");
+      await playing(page, REACT_MS, "再生 after a drag pause did not resume");
     }
     await watch(page, { timeout: endWithin(2), label: "after the pause" });
   },
@@ -669,11 +781,12 @@ const SCENARIOS = {
     const [w, h] = size;
     // Phone: rotate; desktop: a smaller window.
     await page.setViewportSize(w < 700 ? { width: h, height: w } : { width: 1280, height: 760 });
-    await sleep(900);
-    await watch(page, { until: 0.45, timeout: 60000, label: "after the resize" });
+    await pinnedAgain(page, "after the resize");
+    const turned = await watch(page, { until: 0.45, timeout: 60000, label: "after the resize" });
     await page.setViewportSize({ width: w, height: h });
-    await sleep(900);
-    await watch(page, { timeout: endWithin(2), label: "after resizing back" });
+    await pinnedAgain(page, "after resizing back");
+    const back = await watch(page, { timeout: endWithin(2), label: "after resizing back" });
+    return { unpinnedSamples: [turned.unpinned, back.unpinned] };
   },
   async hidden(page, { path, context }) {
     await arriveDirect(page, path);
