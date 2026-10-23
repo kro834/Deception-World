@@ -521,8 +521,10 @@ export function FarFromSaga() {
             fetchPriority="high"
           />
         </div>
-        {/* The cue is its line: the way down, named for assistive tech. */}
-        <a className="rxs-scroll-cue" href="#overview" aria-label="概要へ">
+        {/* The cue is its line: the way down; its words name it for
+            assistive tech only (as on the Rexonance page). */}
+        <a className="rxs-scroll-cue" href="#overview">
+          <span className="visually-hidden">まず、概要から。</span>
           <i aria-hidden="true" />
         </a>
       </section>

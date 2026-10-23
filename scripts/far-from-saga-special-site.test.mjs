@@ -321,7 +321,7 @@ test("the page follows the Rexonance structure: numbered bar, split hero, CONTEN
   // The hero: the key visual in its stage (the aperture and the figure), the
   // copy with its two doors, the name's ghost, the cue.
   // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）: the key visual's slate and read-outs, the hero's eyebrow and the
-  // Latin duplicate of the name went; the cue is its line, named for assistive tech.
+  // Latin duplicate of the name went; the cue is its line (its words read to assistive tech only).
   const hero = component.slice(
     component.indexOf('<section className="rxs-hero ffs-hero"'),
     component.indexOf("<FarFromChapterMap />"),
@@ -330,7 +330,7 @@ test("the page follows the Rexonance structure: numbered bar, split hero, CONTEN
     "<FarFromAperture />",
     "<FarFromHeroRail />",
     'className="ffs-mark" aria-hidden="true"',
-    '<a className="rxs-scroll-cue" href="#overview" aria-label="概要へ">',
+    '<a className="rxs-scroll-cue" href="#overview">\n          <span className="visually-hidden">まず、概要から。</span>',
     "{FAR_FROM_SAGA.stagesLine}",
   ])
     assert.ok(hero.includes(piece), piece);
