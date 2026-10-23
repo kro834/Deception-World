@@ -428,4 +428,3 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
                       <p key={paragraph.slice(0, 32)}>{paragraph}</p>
                     ))}
                   </div>
-                </section>
