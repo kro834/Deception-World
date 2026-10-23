@@ -787,16 +787,6 @@
     inset 0 0 0 3px rgb(204 73 59 / 70%) !important;
 }
 
-.dream-page.dream-page .dream-poster-thumbnails span {
-  border-radius: 2px;
-  color: var(--ts-kinari);
-  background: rgb(13 9 18 / 82%);
-  box-shadow: inset 0 0 0 1px rgb(200 164 92 / 60%);
-  font-family: var(--ts-latin);
-  font-size: 12px;
-  letter-spacing: 0.08em;
-}
-
 /* The label and its glyph read as a pair, centred, with gilt ticks at two
    corners in place of the inset bevel. */
 .dream-page.dream-page .dream-poster-controls button.ios26-glass {

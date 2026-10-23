@@ -1007,13 +1007,6 @@ html[data-family="dream"] main.dream-page.dream-page .dream-poster-current > fig
     #140d18;
 }
 
-html[data-family="dream"] main.dream-page.dream-page .dream-poster-current > figcaption > span {
-  color: var(--dr-shu-text);
-  font-family: var(--dr-display);
-  font-weight: 800;
-  letter-spacing: 0.2em;
-}
-
 html[data-family="dream"] main.dream-page.dream-page .dream-poster-current > figcaption > b {
   color: var(--dr-text);
   font-family: var(--dr-serif);

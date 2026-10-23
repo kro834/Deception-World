@@ -1656,7 +1656,6 @@ export function DreamChapter() {
                 aria-hidden="true"
                 style={{ width: `${((posterIndex + 1) / DREAM_POSTERS.length) * 100}%` }}
               />
-              <span>其ノ{toKanjiNumber(posterIndex + 1)}</span>
               <b>{activePoster.alt}</b>
               <DreamScreeningLauncher
                 index={posterIndex}
@@ -1676,21 +1675,6 @@ export function DreamChapter() {
                   : ""}
             </p>
             <div className="dream-poster-hud">
-              <div className="dream-poster-hud-status" aria-hidden="true">
-                <i
-                  className={
-                    posterShuffling ? "is-shuffling" : posterLocked ? "is-locked" : "is-live"
-                  }
-                />
-                <b>
-                  REEL {String(posterIndex + 1).padStart(2, "0")} /{" "}
-                  {String(DREAM_POSTERS.length).padStart(2, "0")}
-                </b>
-                <span>{posterShuffling ? "SHUFFLING" : posterLocked ? "LOCKED" : "AUTO CYCLE"}</span>
-                <small>
-                  {activePoster.width}×{activePoster.height}PX · {activePoster.fit.toUpperCase()}
-                </small>
-              </div>
               <div className="dream-poster-hud-step" role="group" aria-label="ポスター送り">
                 <button
                   type="button"
@@ -1702,7 +1686,6 @@ export function DreamChapter() {
                   }}
                 >
                   <span aria-hidden="true">◀</span>
-                  <small lang="en">PREV</small>
                 </button>
                 <button
                   type="button"
@@ -1713,7 +1696,6 @@ export function DreamChapter() {
                     if (event.detail !== 0) event.currentTarget.blur();
                   }}
                 >
-                  <small lang="en">NEXT</small>
                   <span aria-hidden="true">▶</span>
                 </button>
               </div>
@@ -1726,6 +1708,7 @@ export function DreamChapter() {
                 type="button"
                 role="tab"
                 id={`dream-poster-tab-${index}`}
+                aria-label={`${index + 1}番: ${poster.alt}`}
                 aria-controls="dream-poster-panel"
                 aria-selected={posterIndex === index}
                 tabIndex={posterIndex === index ? 0 : -1}
@@ -1768,7 +1751,6 @@ export function DreamChapter() {
                   loading="lazy"
                   decoding="async"
                 />
-                <span>{String(index + 1).padStart(2, "0")}</span>
               </button>
             ))}
           </div>

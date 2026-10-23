@@ -971,22 +971,6 @@ html[data-dream-reveal-ready="true"] [data-dream-reveal]:not([data-dream-visible
   object-fit: cover;
 }
 
-.dream-poster-thumbnails span {
-  position: absolute;
-  right: 8px;
-  bottom: 7px;
-  display: grid;
-  place-items: center;
-  width: 25px;
-  height: 25px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 50%;
-  background: rgba(2, 4, 10, 0.7);
-  font-family: "Cinzel", serif;
-  font-size: 8px;
-  backdrop-filter: blur(9px);
-}
-
 .dream-character-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
