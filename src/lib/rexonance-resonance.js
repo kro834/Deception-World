@@ -969,6 +969,61 @@ function* assemblyPlanSteps({
   for (const item of tiles)
     if (item.owner?.beat === 5)
       helmReach = Math.max(helmReach, Math.hypot(item.cx - eyeX, item.cy - eyeY));
+  // Each plate grows as one connected front from its seat (owner,
+  // 2026-10-23: 「ナノマシンや装着をブラッシュアップ」 — no lone cell locking
+  // ahead of its neighbours): a tile's reach is its path through the
+  // plate's own cells from the seat (8-neighbours), not the straight line
+  // across a gap; a detached island starts at its own straight-line reach.
+  {
+    const byOwner = new Map();
+    for (const item of tiles) {
+      if (!item.owner) continue;
+      let cells = byOwner.get(item.owner);
+      if (!cells) byOwner.set(item.owner, (cells = new Map()));
+      cells.set(Math.round(item.sy / tile) * cols + Math.round(item.sx / tile), item);
+    }
+    let work = 0;
+    for (const [owner, cells] of byOwner) {
+      const list = [...cells.values()].sort((a, b) => a.reach - b.reach);
+      const geo = new Map();
+      let queue = [];
+      let reach = 1;
+      for (const start of list) {
+        if (geo.has(start)) continue;
+        geo.set(start, start.reach);
+        queue.push(start);
+        // Dijkstra over the grid (steps 1 and √2 tiles): small plates, a
+        // sorted frontier is plenty.
+        while (queue.length) {
+          let best = 0;
+          for (let k = 1; k < queue.length; k += 1)
+            if (geo.get(queue[k]) < geo.get(queue[best])) best = k;
+          const item = queue[best];
+          queue[best] = queue[queue.length - 1];
+          queue.pop();
+          const d = geo.get(item);
+          if (d > reach) reach = d;
+          const col = Math.round(item.sx / tile);
+          const row = Math.round(item.sy / tile);
+          for (let dy = -1; dy <= 1; dy += 1)
+            for (let dx = -1; dx <= 1; dx += 1) {
+              if (!dx && !dy) continue;
+              const next = cells.get((row + dy) * cols + col + dx);
+              if (!next) continue;
+              const nd = d + tile * (dx && dy ? Math.SQRT2 : 1);
+              if (nd < (geo.get(next) ?? Infinity)) {
+                if (!geo.has(next)) queue.push(next);
+                geo.set(next, nd);
+              }
+            }
+          if (++work % 2048 === 0) yield;
+        }
+        queue = [];
+      }
+      for (const [item, d] of geo) item.reach = d;
+      owner.reach = reach;
+    }
+  }
   const partDone = ASSEMBLY_PARTS.map(() => 0);
   const centroids = ASSEMBLY_PARTS.map(() => [0, 0, 0]);
   // Each beat's last tile to land: its lock strikes where that tile's plate
@@ -994,8 +1049,8 @@ function* assemblyPlanSteps({
       beat === 5
         ? (1 - Math.hypot(item.cx - eyeX, item.cy - eyeY) / helmReach) * 0.9 + random() * 0.1
         : (item.owner?.rank ?? 0) * 0.36 +
-            (item.reach / (item.owner?.reach ?? 1)) * 0.54 +
-            random() * 0.1,
+            (item.reach / (item.owner?.reach ?? 1)) * 0.62 +
+            random() * 0.02,
     );
     item.beat = beat;
     item.t0 = from + key * (to - from - flight);
@@ -1520,6 +1575,10 @@ const lightPixels = (lights, core, W, H, document) => {
     }
   return squares;
 };
+// Each burst group's scatter: how far it opens (scale about its centre) and
+// its turn (degrees). Owner (2026-10-23): the eyes' squares flew out up to
+// 5.2× — far past the face; they now open just beyond the outline they
+// formed, a crisp release rather than an explosion.
 const BURSTS = [
   [1.42, -6],
   [1.68, 4],
@@ -1575,10 +1634,6 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   const restPercent = percent?.textContent ?? "";
   const restCount = counter?.textContent ?? "";
   // The read-outs change every frame of a scrub: rewrite their text node's
-// Each burst group's scatter: how far it opens (scale about its centre) and
-// its turn (degrees). Owner (2026-10-23): the eyes' squares flew out up to
-// 5.2× — far past the face; they now open just beyond the outline they
-// formed, a crisp release rather than an explosion.
   // data (as RESONANCE's count-ups do) rather than the element's content.
   // A replaced node is a tree change, and the shell's :has() rules then
   // restyle <html> and <body> on every frame.
