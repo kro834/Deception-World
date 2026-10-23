@@ -9,6 +9,11 @@ import {
   P16_TOPICS,
   P16_VS_EXTREME,
   P16_VS_P2,
+  EXTREME_P14_NAME,
+  p16AgainstExtreme,
+  p16AgainstExtremeText,
+  p16ChangeAgainstExtremeText,
+  type ExtremeP14Metric,
   type P16Metric,
 } from "./far-from-p16-data";
 
@@ -17,9 +22,11 @@ import {
    Every sentence here is the owner's, quoted whole from the two
    【P16・第16世代演算加速機構】 chapters (far-from-p16-data.ts). The figures
    are only the ones those sentences state: the provisional benchmark against
-   P14 (+50% / −35% / −40% / −27%), Vinculum's P2 (約3倍, 暫定) and Extreme
-   (保留). Wherever they appear the chapter says 暫定ベンチマーク. No P16
-   artwork exists yet, so the core is a drawn placeholder, labelled as such. */
+   P14 (+50% / −35% / −40% / −27%) and Vinculum's P2 (約3倍, 暫定). Wherever
+   they appear the chapter says 暫定ベンチマーク. The one set of figures that
+   is not the owner's is P16 / P14（Extreme tuning）(owner, 2026-10-23:
+   「P14との性能差は想像して生成してみて」), labelled 暫定ベンチマーク／設定案
+   with its note, beside the owner's sentence naming Extreme's P14. */
 
 type Baseline = "p14" | "p2" | "extreme";
 
@@ -28,6 +35,13 @@ const BASELINES: readonly { key: Baseline; label: string }[] = [
   { key: "p2", label: "P2比" },
   { key: "extreme", label: "エクスプリーム" },
 ];
+
+/** The header's name for each comparison. */
+const TITLES: Record<Baseline, string> = {
+  p14: "P14比",
+  p2: "P2比",
+  extreme: `エクスプリーム ${EXTREME_P14_NAME}`,
+};
 
 /** +50% / −35%: the owner's figure with its sign. */
 const signed = (change: number) => `${change > 0 ? "+" : "−"}${Math.abs(change)}%`;
@@ -96,6 +110,55 @@ function MetricRow({ metric }: { metric: P16Metric }) {
   );
 }
 
+/** P16 with Extreme's P14 (Extreme tuning) at 100%: the 設定案. */
+function ExtremeMetricRow({ metric }: { metric: ExtremeP14Metric }) {
+  const p16 = p16AgainstExtreme(metric);
+  const approxText = p16AgainstExtremeText(metric);
+  const longer = Math.max(p16, 100);
+  return (
+    <article className="ffs-p16-metric">
+      <small>{metric.label}</small>
+      <div className="ffs-p16-values">
+        <span>
+          <i>エクスプリーム（基準）</i>
+          <b>100%</b>
+        </span>
+        <span>
+          <i>P16（換算）</i>
+          <strong>
+            {approxText.startsWith("約") ? (
+              <>
+                <small>約</small>
+                {approxText.slice(1)}
+              </>
+            ) : (
+              approxText
+            )}
+          </strong>
+        </span>
+      </div>
+      <div
+        className="ffs-p16-bars"
+        role="img"
+        aria-label={`${metric.label}、${EXTREME_P14_NAME}を100%としたP16は${p16AgainstExtremeText(metric)}、${p16ChangeAgainstExtremeText(metric)}（暫定ベンチマーク／設定案）`}
+      >
+        <span data-unit="extreme">
+          <i style={barStyle(100 / longer)} />
+        </span>
+        <span data-unit="p16">
+          <i style={barStyle(p16 / longer)} />
+        </span>
+      </div>
+      <p>
+        <span>
+          指数 {metric.extreme} → {metric.p16}
+        </span>
+        <b>{p16ChangeAgainstExtremeText(metric)}</b>
+      </p>
+    </article>
+  );
+}
+
 function P16Comparator() {
   const [baseline, setBaseline] = useState<Baseline>("p14");
   const groupName = useId();
@@ -104,7 +167,7 @@ function P16Comparator() {
       <header>
         <div>
           <small lang="en">GENERATION COMPARISON</small>
-          <h3>P16 / {BASELINES.find((item) => item.key === baseline)?.label}</h3>
+          <h3>P16 / {TITLES[baseline]}</h3>
         </div>
         <ProvisionalTag />
       </header>
@@ -183,13 +246,30 @@ function P16Comparator() {
           </>
         ) : (
           <>
-            <p className="ffs-p16-withheld">
-              <b>{P16_VS_EXTREME.value}</b>
-              <span>エクスプリームとの機構単体の比較値</span>
+            <p className="ffs-p16-proposal">
+              <span className="ffs-provisional-tag">暫定ベンチマーク／設定案</span>
+              <span>指数はレクソナンスのP14＝100。{P16_VS_EXTREME.note}</span>
+            </p>
+            <div className="ffs-p16-metrics">
+              {P16_VS_EXTREME.metrics.map((metric) => (
+                <ExtremeMetricRow key={metric.key} metric={metric} />
+              ))}
+            </div>
+            <p className="ffs-p16-burst">
+              <span>{P16_VS_EXTREME.burst.label}</span>
+              <b>
+                {P16_VS_EXTREME.name} {P16_VS_EXTREME.burst.extreme}%
+              </b>
+              <small>レクソナンスのP14＝100%</small>
             </p>
             <blockquote className="ffs-p16-source">
               <p>{P16_VS_EXTREME.source}</p>
             </blockquote>
+            <div className="ffs-p16-proposal-text">
+              {P16_VS_EXTREME.text.map((paragraph) => (
+                <p key={paragraph}>{paragraph}</p>
+              ))}
+            </div>
           </>
         )}
       </div>
