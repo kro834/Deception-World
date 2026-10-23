@@ -73,6 +73,8 @@ const SCENARIOS = {
   "menu-rexonance": menuDive("/world", "/rexonance-saga#top", "/rexonance-saga"),
   "menu-extreme": menuDive("/world", "/extreme-saga#top", "/extreme-saga"),
   "menu-illusionculum": menuDive("/world", "/illusionculum-saga#top", "/illusionculum-saga"),
+  // META UNITAS SAGA (2026-10-24): its entry call under the cover.
+  "menu-meta-unitas": menuDive("/world", "/meta-unitas-saga#top", "/meta-unitas-saga"),
   "menu-final": menuDive("/world", "/final-stage#top", "/final-stage"),
   "menu-cinema": menuDive("/world", "/saga-cinema#top", "/saga-cinema"),
   // The dream dive back to the World (the Dream Chapter's return link): its
@@ -414,13 +416,13 @@ async function audit(browser, analyser, profileName, name) {
   assert.ok(
     doneAt &&
       doneAt <=
-        (scenario.dest === "/rexonance-saga" ? 3580 : scenario.dest === "/illusionculum-saga" ? 3580 : GONE_BUDGET_MS),
+        (scenario.dest === "/rexonance-saga" ? 3580 : scenario.dest === "/illusionculum-saga" ? 3580 : scenario.dest === "/meta-unitas-saga" ? 3580 : GONE_BUDGET_MS),
     `${profileName} ${name}: the shutter is gone by ${doneAt} ms`,
   );
   assert.ok(
     releasedAt &&
       releasedAt <=
-        (scenario.dest === "/rexonance-saga" ? 3780 : scenario.dest === "/illusionculum-saga" ? 3780 : RELEASE_BUDGET_MS),
+        (scenario.dest === "/rexonance-saga" ? 3780 : scenario.dest === "/illusionculum-saga" ? 3780 : scenario.dest === "/meta-unitas-saga" ? 3780 : RELEASE_BUDGET_MS),
     `${profileName} ${name}: the gate is released by ${releasedAt} ms`,
   );
   assert.deepEqual(errors, [], `${profileName} ${name}: page errors`);
