@@ -28,20 +28,17 @@ import {
   type CommunityGalleryTitles,
   type GalleryCollectionArtwork,
 } from "./gallery-community-client";
-import {
-  filterGalleryArtworks,
-  GALLERY_FAVORITES_KEY,
-  readGalleryFavorites,
-  toggleGalleryFavorite,
-  type GalleryFavorites,
-} from "./gallery-discovery";
+import { filterGalleryArtworks } from "./gallery-discovery";
 import { GalleryCurtain } from "./gallery-curtain";
 import { GalleryViewerImage } from "./gallery-viewer-image";
 import { availableGalleryDeck, shuffleGalleryDeck } from "./gallery-shuffle";
 import { GalleryShareControl } from "./gallery-share-control";
 import { GallerySearchControls } from "./gallery-search-controls";
+import { GalleryFilterSummary } from "./gallery-filter-summary";
+import { galleryEmptyMessage } from "./gallery-filter-summary-state";
 import { GalleryBackgroundControl, GalleryDisplaySettings } from "./gallery-display-settings";
 import { useGalleryDisplayPreferences } from "./use-gallery-display-preferences";
+import { useGalleryPersonalPreferences } from "./use-gallery-personal-preferences";
 import {
   galleryArtworkHref,
   galleryWithoutArtwork,
@@ -57,7 +54,6 @@ import {
   settleGalleryViewerReturn,
   type GalleryViewerMode,
 } from "./gallery-viewer-state";
-import { GALLERY_FEATURE_KEY, readGalleryFeature, saveGalleryFeature } from "./gallery-feature";
 import { GALLERY_TITLES_KEY, readGalleryTitles, type GalleryTitles } from "./gallery-titles";
 import { galleryGridImage } from "./gallery-grid-image";
 
@@ -91,10 +87,6 @@ export function GalleryPage() {
   const [query, setQuery] = useState("");
   const [order, setOrder] = useState<"number" | "newest">("number");
   const [favoritesOnly, setFavoritesOnly] = useState(false);
-  const [favorites, setFavorites] = useState<GalleryFavorites>([]);
-  const [featuredId, setFeaturedId] = useState<string | null>(null);
-  const [featureMessage, setFeatureMessage] = useState("");
-  const [featureError, setFeatureError] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [sharedTitles, setSharedTitles] = useState<CommunityGalleryTitles>({});
   const [legacyTitles, setLegacyTitles] = useState<GalleryTitles>({});
@@ -131,6 +123,8 @@ export function GalleryPage() {
   const restoreEditFocusRef = useRef(false);
   const gridRef = useRef<HTMLDivElement>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const favoriteFeedbackRef = useRef<HTMLParagraphElement>(null);
+  const featureFeedbackRef = useRef<HTMLParagraphElement>(null);
   const openerRef = useRef<HTMLElement | null>(null);
   const restoreFocusRef = useRef(false);
   const viewerWorksRef = useRef<GalleryCollectionArtwork[]>([]);
@@ -146,6 +140,16 @@ export function GalleryPage() {
     [sharedTitles],
   );
   const allArtworkIds = useMemo(() => allArtworks.map((work) => work.id), [allArtworks]);
+  const {
+    favorites,
+    featuredId,
+    favoriteStatus,
+    favoriteError,
+    featureStatus: featureMessage,
+    featureError,
+    changeFavorite: updateFavorite,
+    changeFeature: updateFeature,
+  } = useGalleryPersonalPreferences(allArtworkIds);
   const works = useMemo(() => {
     const filtered = filterGalleryArtworks(allArtworks, {
       category,
@@ -156,6 +160,18 @@ export function GalleryPage() {
     });
     return order === "newest" ? filtered.reverse() : filtered;
   }, [allArtworks, category, query, favoritesOnly, favorites, titles, order]);
+  const discoverySummary = {
+    query,
+    categoryLabel:
+      category === "all"
+        ? undefined
+        : category === "community"
+          ? "みんなの投稿"
+          : GALLERY_CATEGORIES.find((item) => item.id === category)?.label,
+    favoritesOnly,
+    resultCount: works.length,
+    totalCount: allArtworks.length,
+  };
   const selected =
     GALLERY_ARTWORKS.find((work) => work.id === selectedId) ??
     communityWorks.find((work) => work.id === selectedId) ??
@@ -207,39 +223,10 @@ export function GalleryPage() {
         setSaveError("このブラウザーでは保存領域を利用できません。");
       }
     };
-    const loadFavorites = () => {
-      try {
-        setFavorites(
-          readGalleryFavorites(
-            window.localStorage,
-            GALLERY_ARTWORKS.map((work) => work.id),
-            true,
-          ),
-        );
-      } catch {
-        setSaveError("このブラウザーでは保存領域を利用できません。");
-      }
-    };
     load();
-    loadFavorites();
-    const loadFeature = () => {
-      try {
-        setFeaturedId(
-          readGalleryFeature(
-            window.localStorage,
-            GALLERY_ARTWORKS.map((work) => work.id),
-          ),
-        );
-      } catch {
-        setFeatureError("このブラウザーではトップ作品の保存領域を利用できません。");
-      }
-    };
-    loadFeature();
     if (document.documentElement.dataset.routeCover) setArriving(false);
     const onStorage = (event: StorageEvent) => {
       if (event.key === GALLERY_TITLES_KEY || event.key === null) load();
-      if (event.key === GALLERY_FAVORITES_KEY || event.key === null) loadFavorites();
-      if (event.key === GALLERY_FEATURE_KEY || event.key === null) loadFeature();
     };
     window.addEventListener("storage", onStorage);
     // A direct visit opens the cloth too; a managed route entry already owns its curtain.
@@ -779,36 +766,26 @@ export function GalleryPage() {
         },
       });
   };
+  const revealPersonalFeedback = (ref: { current: HTMLElement | null }) => {
+    if (!dialogRef.current?.open) return;
+    // Wait for the action result to render. Scroll only the compact viewer
+    // header; keep keyboard focus and the underlying collection position intact.
+    window.requestAnimationFrame(() => {
+      if (dialogRef.current?.open) revealGalleryControl(ref.current);
+    });
+  };
   const changeFavorite = (id: string) => {
-    try {
-      setFavorites(toggleGalleryFavorite(window.localStorage, id, allArtworkIds));
-      setSaveError("");
-    } catch {
-      setSaveError(
-        "お気に入りを保存できませんでした。ブラウザーの保存設定や空き容量をご確認ください。",
-      );
-    }
+    updateFavorite(id);
+    revealPersonalFeedback(favoriteFeedbackRef);
+  };
+  const changeFeature = (id: string | null) => {
+    updateFeature(id);
+    revealPersonalFeedback(featureFeedbackRef);
   };
   const resetDiscovery = () => {
     setQuery("");
     setCategory("all");
     setFavoritesOnly(false);
-  };
-  const changeFeature = (id: string | null) => {
-    try {
-      saveGalleryFeature(window.localStorage, id, allArtworkIds);
-      setFeaturedId(id);
-      setFeatureError("");
-      setFeatureMessage(
-        id
-          ? "トップ作品を保存しました。自分の表示だけに反映されます。"
-          : "トップ作品を初期設定に戻しました。",
-      );
-    } catch {
-      setFeatureError(
-        "トップ作品を保存できませんでした。ブラウザーの保存設定や空き容量をご確認ください。",
-      );
-    }
   };
 
   const accessToken = async () => {
@@ -1128,7 +1105,7 @@ export function GalleryPage() {
               <p className="gallery-eyebrow">THE COLLECTION</p>
               <h2 id="gallery-collection-title">作品を巡る</h2>
             </div>
-            <p className="gallery-count" aria-live="polite">
+            <p className="gallery-count">
               {works.length} / {allArtworks.length}点を表示
             </p>
           </div>
@@ -1332,6 +1309,25 @@ export function GalleryPage() {
                 みんなの投稿<span>{communityWorks.length}</span>
               </button>
             </nav>
+            <GalleryFilterSummary {...discoverySummary} />
+            {favoriteStatus && (
+              <p
+                className="gallery-save-message gallery-personal-feedback"
+                role="status"
+                data-gallery-favorite-feedback
+              >
+                {favoriteStatus}
+              </p>
+            )}
+            {favoriteError && (
+              <p
+                className="gallery-save-message gallery-personal-feedback is-error"
+                role="alert"
+                data-gallery-favorite-feedback
+              >
+                {favoriteError}
+              </p>
+            )}
             <div className="gallery-shuffle-entry">
               <button
                 type="button"
@@ -1411,8 +1407,8 @@ export function GalleryPage() {
             ))}
           </div>
           {works.length === 0 && (
-            <div className="gallery-empty" role="status">
-              <p>条件に合う作品はありません。</p>
+            <div className="gallery-empty">
+              <p>{galleryEmptyMessage(discoverySummary)}</p>
               <button type="button" onClick={resetDiscovery}>
                 絞り込みを解除
               </button>
@@ -1595,13 +1591,33 @@ export function GalleryPage() {
                   error={display.error}
                 />
               </details>
+              {favoriteStatus && (
+                <p
+                  className="gallery-storage-note"
+                  role="status"
+                  data-gallery-favorite-feedback
+                  ref={favoriteFeedbackRef}
+                >
+                  {favoriteStatus}
+                </p>
+              )}
+              {favoriteError && (
+                <p
+                  className="gallery-storage-note"
+                  role="alert"
+                  data-gallery-favorite-feedback
+                  ref={favoriteFeedbackRef}
+                >
+                  {favoriteError}
+                </p>
+              )}
               {featureMessage && (
-                <p className="gallery-storage-note" role="status">
+                <p className="gallery-storage-note" role="status" ref={featureFeedbackRef}>
                   {featureMessage}
                 </p>
               )}
               {featureError && (
-                <p className="gallery-storage-note" role="alert">
+                <p className="gallery-storage-note" role="alert" ref={featureFeedbackRef}>
                   {featureError}
                 </p>
               )}

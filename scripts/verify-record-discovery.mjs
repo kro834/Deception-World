@@ -7,12 +7,34 @@ import { chromium, webkit } from "playwright";
 const base = process.env.BASE_URL || "http://127.0.0.1:8195";
 const engine = process.env.QA_ENGINE === "webkit" ? "webkit" : "chromium";
 const out = process.env.AUDIT_OUT || `output/playwright/record-discovery-${engine}`;
+const selectedWidth = Number(process.env.QA_WIDTH) || 0;
 await mkdir(out, { recursive: true });
 const browser = await (engine === "webkit"
   ? webkit.launch()
   : chromium.launch({ channel: "chrome" }));
 const report = [];
+const diagnostics = [];
 let activePage;
+const watchPage = (page) => {
+  page.on("pageerror", (error) =>
+    diagnostics.push({
+      kind: "pageerror",
+      route: page.url(),
+      at: new Date().toISOString(),
+      message: error.message,
+      stack: error.stack,
+    }),
+  );
+  page.on("requestfailed", (request) =>
+    diagnostics.push({
+      kind: "requestfailed",
+      route: page.url(),
+      at: new Date().toISOString(),
+      url: request.url(),
+      errorText: request.failure()?.errorText,
+    }),
+  );
+};
 const prepareContext = (context) => {
   context.setDefaultTimeout(20_000);
   context.setDefaultNavigationTimeout(45_000);
@@ -69,11 +91,12 @@ try {
   for (const viewport of [
     { width: 390, height: 844 },
     { width: 1024, height: 1366 },
-  ]) {
+  ].filter((viewport) => !selectedWidth || viewport.width === selectedWidth)) {
     const context = await browser.newContext({ viewport, hasTouch: true });
     prepareContext(context);
     const page = await context.newPage();
     activePage = page;
+    watchPage(page);
     console.log(`CHECK ${engine}/${viewport.width}: library journey`);
     const errors = [];
     page.on("pageerror", (error) => errors.push(error.message));
@@ -164,13 +187,24 @@ try {
     await page.goto(`${base}/search?category=people`);
     await settled(page);
     const categories = page.getByRole("group", { name: "資料の分類" }).getByRole("button");
+    // macOS WebKit's default Tab skips buttons; Option+Tab includes all controls.
+    const nextControl = engine === "webkit" ? "Alt+Tab" : "Tab";
     await categories.last().focus();
-    await page.keyboard.press("Tab");
+    await page.keyboard.press(nextControl);
+    const clearCategory = page.getByRole("button", { name: "人物の絞り込みを解除", exact: true });
+    assert.equal(
+      await clearCategory.evaluate((node) => node === document.activeElement),
+      true,
+      "Tab from category controls reaches the named active-category clear button",
+    );
+    const clearBounds = await clearCategory.boundingBox();
+    assert.ok(clearBounds && clearBounds.width >= 44 && clearBounds.height >= 44);
+    await page.keyboard.press(nextControl);
     assert.ok(
       await page.evaluate(() =>
         document.activeElement?.matches(".search-result-card, .search-more-option"),
       ),
-      "Tab from category controls reaches a result link",
+      "Tab from the active-category clear button reaches a result link",
     );
     const searchInput = page.locator("#record-query");
     await searchInput.fill("ゼウス");
@@ -257,6 +291,50 @@ try {
       Math.abs(closedOffset - before) < 2,
       `closing the menu keeps the page position (${before} → ${openedOffset} → ${closedOffset})`,
     );
+    await page.goto(`${base}/library`);
+    await settled(page);
+    await page.keyboard.press("Control+k");
+    const quickDialog = page.locator("dialog.quick-search[open]");
+    await quickDialog.waitFor();
+    const quickInput = quickDialog.getByRole("combobox");
+    await quickInput.fill("ゼウス");
+    await quickDialog.getByRole("button", { name: "検索語を消す", exact: true }).focus();
+    await page.keyboard.press("Escape");
+    assert.equal(await quickInput.inputValue(), "");
+    assert.equal(await quickDialog.count(), 1, "Escape from clear keeps the dialog open");
+    assert.equal(
+      await quickInput.evaluate((node) => node === document.activeElement),
+      true,
+      "Escape restores input focus before the clear button disappears",
+    );
+    await page.keyboard.type("Dream");
+    assert.equal(
+      await quickInput.inputValue(),
+      "Dream",
+      "typing continues after Escape from clear",
+    );
+    await quickDialog.getByRole("button", { name: /閉じる/ }).click();
+    await page.goto(`${base}/search`);
+    await settled(page);
+    const submittedQuery = page.locator("#record-query");
+    await submittedQuery.fill("月城悠真");
+    await page.locator(".search-submit").click();
+    await page.locator(".search-brand").click();
+    await page.waitForURL("**/world");
+    await settled(page);
+    // Pass the search debounce boundary after arriving on another route.
+    await page.waitForTimeout(350);
+    assert.equal(
+      new URL(page.url()).pathname,
+      "/world",
+      "a submitted query cannot reopen search after leaving",
+    );
+    await page.keyboard.press("Control+k");
+    await page.locator("dialog.quick-search[open]").waitFor();
+    await page
+      .locator("dialog.quick-search[open]")
+      .getByRole("button", { name: /閉じる/ })
+      .click();
     assert.deepEqual(errors, [], "no browser JS error in the complete reading journey");
     report.push({
       engine,
@@ -280,11 +358,12 @@ try {
     { width: 320, height: 640 },
     { width: 568, height: 320 },
     { width: 1440, height: 900 },
-  ]) {
+  ].filter((viewport) => !selectedWidth || viewport.width === selectedWidth)) {
     const context = await browser.newContext({ viewport });
     prepareContext(context);
     const page = await context.newPage();
     activePage = page;
+    watchPage(page);
     for (const path of [
       "/library?q=ゼウス&kind=person#library-browser",
       "/search?q=ゼウス",
@@ -363,5 +442,9 @@ try {
   }
   throw error;
 } finally {
+  await writeFile(
+    `${out}/diagnostics.json`,
+    JSON.stringify({ base, engine, diagnostics }, null, 2) + "\n",
+  );
   await browser.close();
 }

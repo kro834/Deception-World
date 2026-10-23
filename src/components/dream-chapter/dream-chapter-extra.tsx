@@ -1,15 +1,17 @@
 // Dream Chapter archive: the four new corners (出来事, 舞台, 繋がり, 武装), the VOICES leaf
 // inside 名台詞 and the supplements that make the owner's existing parts richer (dossier
 // RECORD sections, 人物一覧 profiles, the agent roster, the record sheet, 縫妖師 / 永守組 and
-// 用語集 with its INDEX leaf). Pure render over dream-chapter-extra-data.ts: no effects, no
-// images, no dialogs. The record explorer adds local filters over the same data.
+// 用語集 with its INDEX leaf). The archive corners render over
+// dream-chapter-extra-data.ts; the record explorer and two indexes add local filters.
 // Mounted from dream-chapter.tsx; drawn by
-// styles-dream-extra.css. The owner's own text stays where it is; every Japanese string here
-// comes from the data file (the source's wording), the rest are English HUD labels.
+// styles-dream-extra.css. The owner's original text and every archive passage
+// stay in the data file; local navigation controls have their own UI labels.
+import { useState, type MouseEvent } from "react";
 import { DisplayName } from "@/components/name-text";
 import { DREAM_CASES } from "./dream-chapter-data";
 import { DreamStoryBacklinks } from "./dream-story-navigation";
 import { DreamRecordExplorer } from "./dream-record-explorer";
+import { atlasChronicleCases, relatedArsenalGroups } from "./dream-archive-navigation";
 import {
   DREAM_AGENT_ADDITIONS,
   DREAM_AGENT_SUPPLEMENT,
@@ -202,6 +204,26 @@ function FoldSummary({
 
 /* ---------- Corners ---------- */
 
+/** Open a named fold synchronously; the browser retains native hash scrolling/focus. */
+function openArchiveFold(id: string, event: MouseEvent<HTMLAnchorElement>) {
+  const sameFragment =
+    event.currentTarget.getAttribute("href") ===
+    event.currentTarget.ownerDocument.defaultView?.location.hash;
+  if (
+    (event.defaultPrevented && !sameFragment) ||
+    event.button !== 0 ||
+    event.metaKey ||
+    event.ctrlKey ||
+    event.shiftKey ||
+    event.altKey
+  )
+    return;
+  const fold = document.getElementById(id);
+  if (fold instanceof HTMLDetailsElement) fold.open = true;
+}
+
+const relationPeople = [...new Set(DREAM_RELATIONS.flatMap((tie) => [tie.a, tie.b]))];
+
 export function DreamChronicle({ id }: { id: "chronicle" }) {
   return (
     <section
@@ -262,18 +284,46 @@ export function DreamAtlas({ id }: { id: "atlas" }) {
       aria-labelledby="atlas-title"
     >
       <CornerHeading id={id} />
+      {/* The index is its row of place names (the nav keeps its name). */}
+      <nav className="dream-archive-index" aria-label="舞台の索引">
+        <ol>
+          {DREAM_ATLAS.map((place, index) => (
+            <li key={place.name}>
+              <a href={`#dream-atlas-${index + 1}`}>{place.name}</a>
+            </li>
+          ))}
+        </ol>
+      </nav>
       <ol className="dream-atlas-grid" data-dream-reveal>
         {DREAM_ATLAS.map((place, index) => (
           <li key={place.name}>
-            <article aria-labelledby={`dream-atlas-${index + 1}`}>
+            <article
+              id={`dream-atlas-${index + 1}`}
+              aria-labelledby={`dream-atlas-name-${index + 1}`}
+              tabIndex={-1}
+            >
               <p className="dream-atlas-kicker" lang="en">
                 {place.kicker}
               </p>
-              <h3 id={`dream-atlas-${index + 1}`}>{place.name}</h3>
+              <h3 id={`dream-atlas-name-${index + 1}`}>{place.name}</h3>
               <div className="dream-atlas-body">
                 {place.passages.map((passage) => (
                   <ArchivePassage key={passage.lines} passage={passage} />
                 ))}
+                {atlasChronicleCases(DREAM_CHRONICLE, place.name).length ? (
+                  <div
+                    className="dream-archive-related"
+                    role="group"
+                    aria-label={`${place.name}が登場する出来事`}
+                  >
+                    <span>この舞台の出来事</span>
+                    {atlasChronicleCases(DREAM_CHRONICLE, place.name).map((caseNo) => (
+                      <a key={caseNo} href={`#dream-chronicle-case-${caseNo}`}>
+                        CASE {caseNo}
+                      </a>
+                    ))}
+                  </div>
+                ) : null}
               </div>
               <i className="dream-atlas-wave" aria-hidden="true" />
             </article>
@@ -285,6 +335,10 @@ export function DreamAtlas({ id }: { id: "atlas" }) {
 }
 
 export function DreamRelations({ id }: { id: "relations" }) {
+  const [person, setPerson] = useState("");
+  const count = person
+    ? DREAM_RELATIONS.filter((tie) => tie.a === person || tie.b === person).length
+    : DREAM_RELATIONS.length;
   return (
     <section
       id={id}
@@ -292,12 +346,52 @@ export function DreamRelations({ id }: { id: "relations" }) {
       aria-labelledby="relations-title"
     >
       <CornerHeading id={id} />
+      <div className="dream-archive-explore">
+        <label htmlFor="dream-relations-person">人物から繋がりを辿る</label>
+        <select
+          id="dream-relations-person"
+          value={person}
+          onChange={(event) => setPerson(event.target.value)}
+        >
+          <option value="">すべての人物</option>
+          {relationPeople.map((name) => (
+            <option key={name} value={name}>
+              {name}
+            </option>
+          ))}
+        </select>
+        {/* The status speaks only while a person narrows the circles. */}
+        <p role="status" aria-live="polite">
+          {person ? `${person}を含む繋がり ${count}件` : ""}
+        </p>
+      </div>
+      <nav className="dream-archive-index" aria-label="繋がりの索引">
+        <ol>
+          {DREAM_RELATION_CIRCLES.map((circle, index) => (
+            <li key={circle}>
+              <a
+                href={`#dream-relations-circle-${index + 1}`}
+                onClick={(event) => openArchiveFold(`dream-relations-circle-${index + 1}`, event)}
+              >
+                {circle}
+              </a>
+            </li>
+          ))}
+        </ol>
+      </nav>
       <div className="dream-relations-circles" data-dream-reveal>
         {DREAM_RELATION_CIRCLES.map((circle, index) => {
-          const ties = DREAM_RELATIONS.filter((tie) => tie.circle === circle);
+          const ties = DREAM_RELATIONS.filter(
+            (tie) => tie.circle === circle && (!person || tie.a === person || tie.b === person),
+          );
           const titleId = `dream-relations-c${index + 1}`;
           return (
-            <details key={circle} className="dream-archive-fold" open={index === 0}>
+            <details
+              key={`${circle}-${person}`}
+              id={`dream-relations-circle-${index + 1}`}
+              className="dream-archive-fold"
+              open={person ? ties.length > 0 : index === 0}
+            >
               <FoldSummary title={circle} titleId={titleId} />
               <ol className="dream-relations-list" aria-labelledby={titleId}>
                 {ties.map((tie) => (
@@ -310,9 +404,34 @@ export function DreamRelations({ id }: { id: "relations" }) {
                     </span>
                     <span className="dream-relations-name">{tie.b}</span>
                     <ArchiveQuote passage={tie.quote} />
+                    {relatedArsenalGroups(DREAM_ARSENAL, [tie.a, tie.b]).length ? (
+                      <div
+                        className="dream-archive-related"
+                        role="group"
+                        aria-label="関連する武装資料"
+                      >
+                        <span>関連する武装</span>
+                        {relatedArsenalGroups(DREAM_ARSENAL, [tie.a, tie.b]).map(
+                          ({ group, index: groupIndex }) => (
+                            <a
+                              key={group}
+                              href={`#dream-arsenal-group-${groupIndex}`}
+                              onClick={(event) =>
+                                openArchiveFold(`dream-arsenal-group-${groupIndex}`, event)
+                              }
+                            >
+                              {group}
+                            </a>
+                          ),
+                        )}
+                      </div>
+                    ) : null}
                   </li>
                 ))}
               </ol>
+              {!ties.length ? (
+                <p className="dream-archive-empty">この輪には該当する繋がりがありません。</p>
+              ) : null}
             </details>
           );
         })}
@@ -322,6 +441,24 @@ export function DreamRelations({ id }: { id: "relations" }) {
 }
 
 export function DreamArsenal({ id }: { id: "arsenal" }) {
+  const [query, setQuery] = useState("");
+  const clearSearch = () => {
+    document.getElementById("dream-arsenal-search")?.focus();
+    setQuery("");
+  };
+  const normalizedQuery = query.trim().normalize("NFKC").toLocaleLowerCase("ja");
+  const groupEntries = DREAM_ARSENAL.map((group) =>
+    normalizedQuery
+      ? group.entries.filter((entry) =>
+          [entry.name, entry.owner ?? "", passageText(entry)]
+            .join(" ")
+            .normalize("NFKC")
+            .toLocaleLowerCase("ja")
+            .includes(normalizedQuery),
+        )
+      : group.entries,
+  );
+  const resultCount = groupEntries.reduce((sum, entries) => sum + entries.length, 0);
   return (
     <section
       id={id}
@@ -329,12 +466,53 @@ export function DreamArsenal({ id }: { id: "arsenal" }) {
       aria-labelledby="arsenal-title"
     >
       <CornerHeading id={id} />
+      <div className="dream-archive-explore">
+        <label htmlFor="dream-arsenal-search">武装・使い手・記録の言葉から探す</label>
+        <input
+          id="dream-arsenal-search"
+          type="search"
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+          placeholder="例：アクシスレイカー"
+        />
+        {/* The status speaks only while a word narrows the groups. */}
+        <p role="status" aria-live="polite">
+          {query.trim() ? `${resultCount}件が見つかりました` : ""}
+        </p>
+      </div>
+      {normalizedQuery && resultCount === 0 ? (
+        <p className="dream-archive-empty dream-archive-no-results">
+          該当する武装資料はありません。
+          <button type="button" onClick={clearSearch}>
+            検索を解除して全件を見る
+          </button>
+        </p>
+      ) : null}
+      <nav className="dream-archive-index" aria-label="武装の索引">
+        <ol>
+          {DREAM_ARSENAL.map((group, index) => (
+            <li key={group.group}>
+              <a
+                href={`#dream-arsenal-group-${index + 1}`}
+                onClick={(event) => openArchiveFold(`dream-arsenal-group-${index + 1}`, event)}
+              >
+                {group.group}
+              </a>
+            </li>
+          ))}
+        </ol>
+      </nav>
       <div className="dream-arsenal-groups" data-dream-reveal>
-        {DREAM_ARSENAL.map((group) => (
-          <details key={group.group} className="dream-archive-fold">
+        {DREAM_ARSENAL.map((group, groupIndex) => (
+          <details
+            key={`${group.group}-${normalizedQuery}`}
+            id={`dream-arsenal-group-${groupIndex + 1}`}
+            className="dream-archive-fold"
+            open={Boolean(normalizedQuery && groupEntries[groupIndex].length)}
+          >
             <FoldSummary title={group.group} />
             <dl className="dream-arsenal-list">
-              {group.entries.map((entry) => (
+              {groupEntries[groupIndex].map((entry) => (
                 <div key={entry.name}>
                   <dt>
                     {entry.name}
@@ -346,6 +524,14 @@ export function DreamArsenal({ id }: { id: "arsenal" }) {
                 </div>
               ))}
             </dl>
+            {!groupEntries[groupIndex].length ? (
+              <p className="dream-archive-empty">
+                該当する武装資料はありません。
+                <button type="button" onClick={clearSearch}>
+                  検索を解除して全件を見る
+                </button>
+              </p>
+            ) : null}
           </details>
         ))}
       </div>

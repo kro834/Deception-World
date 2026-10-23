@@ -9,6 +9,10 @@
 .gallery-tours-main h1 {
   outline: none;
 }
+.gallery-tours-page :is(a, button, input):focus-visible {
+  outline: 2px solid var(--gallery-tour-accent);
+  outline-offset: 4px;
+}
 .gallery-tours-main :is(button, input, select) {
   font: inherit;
 }
@@ -42,12 +46,13 @@
   border-color: var(--gallery-brass);
 }
 .gallery-tour-sharing :is(span, input) {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--gallery-muted);
   line-height: 1.7;
 }
 .gallery-tour-sharing input {
   width: 100%;
+  min-width: 0;
   min-height: 44px;
   background: #171614;
   border: 1px solid var(--gallery-rule);
@@ -104,5 +109,18 @@
   }
   .gallery-tours-page .gallery-brand span {
     font-size: 8px;
+  }
+}
+@media (max-width: 360px) {
+  .gallery-tours-page .gallery-topbar {
+    flex-wrap: wrap;
+  }
+  .gallery-tours-page .gallery-topbar-actions {
+    margin-left: auto;
+  }
+  .gallery-tour-sharing button {
+    width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
   }
 }

@@ -62,16 +62,25 @@ test("every dossier route but the sovereign file loads the dossier sheets", asyn
   }
   for (const name of ["luna", "terra"]) {
     const route = await read(`src/routes/characters/${name}.tsx`);
-    assert.match(route, /stylesheetLinks: DOSSIER_STYLESHEET_LINKS,/, name);
+    assert.match(
+      route,
+      /import characterReadingCssUrl from "@\/styles-character-reading-tools\.css\?url";/,
+      name,
+    );
+    assert.match(
+      route,
+      /stylesheetLinks: \[\s*\.\.\.DOSSIER_STYLESHEET_LINKS,\s*\{ rel: "stylesheet", href: characterReadingCssUrl \},?\s*\],/,
+      name,
+    );
   }
   // Page sheets keep their colours by loading after the dossier sheets.
   assert.match(
     await read("src/routes/characters/ciel.tsx"),
-    /\[\.\.\.DOSSIER_STYLESHEET_LINKS, \{ rel: "stylesheet", href: cielCssUrl \}\]/,
+    /\[\s*\.\.\.DOSSIER_STYLESHEET_LINKS,\s*\{ rel: "stylesheet", href: cielCssUrl \},\s*\{ rel: "stylesheet", href: characterReadingCssUrl \},?\s*\]/,
   );
   assert.match(
     await read("src/routes/characters/dante.tsx"),
-    /\[\.\.\.DOSSIER_STYLESHEET_LINKS, \{ rel: "stylesheet", href: danteCss \}\]/,
+    /\[\s*\.\.\.DOSSIER_STYLESHEET_LINKS,\s*\{ rel: "stylesheet", href: danteCss \},\s*\{ rel: "stylesheet", href: characterReadingCssUrl \},?\s*\]/,
   );
   assert.doesNotMatch(await read("src/routes/managers/zeus.tsx"), /DOSSIER_STYLESHEET_LINKS/);
 });

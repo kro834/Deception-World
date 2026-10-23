@@ -559,7 +559,18 @@ export function LibraryPage({
               ))}
             </nav>
           </section>
-          <LibraryHub saved={saved} ready={ready} />
+          <LibraryHub
+            saved={saved}
+            ready={ready}
+            error={error}
+            onBrowseSaved={() => {
+              changeScope("saved");
+              window.requestAnimationFrame(() => {
+                resultsRef.current?.scrollIntoView({ block: "start" });
+                resultsRef.current?.focus({ preventScroll: true });
+              });
+            }}
+          />
           <LibraryInquiry
             guide={guide}
             onGuideChange={(id) => {

@@ -2209,10 +2209,8 @@ html[data-family="dream"]
    the skipped scenes hold their drawn heights. These are this sheet's
    layouts measured at the ten viewports of verify-dream-estimates.mjs
    (1920, 1440, 1194, 1024, 768, 412, 390, 320, 844 x 390, 667 x 375),
-   rounded up to 5px, in cascade order. Re-measured 2026-10-22, after the
-   zenith sheet (styles-dream-zenith.css) re-laid the desk and the records,
-   and again after its round-2 sections (the tablet art plates, the agents'
-   RIDER / DEVICE lines).
+   rounded up to 5px, in cascade order. Re-measured 2026-10-23 after the
+   archive and glossary indexes changed the records' drawn heights.
    ---------------------------------------------------------------- */
 html[data-family="dream"] main.dream-page.dream-page #posters {
   contain-intrinsic-size: auto 1255px;
@@ -2239,23 +2237,23 @@ html[data-family="dream"] main.dream-page.dream-page #case-notes {
 }
 
 html[data-family="dream"] main.dream-page.dream-page #chronicle {
-  contain-intrinsic-size: auto 4300px;
+  contain-intrinsic-size: auto 5575px;
 }
 
 html[data-family="dream"] main.dream-page.dream-page #atlas {
-  contain-intrinsic-size: auto 2860px;
+  contain-intrinsic-size: auto 3620px;
 }
 
 html[data-family="dream"] main.dream-page.dream-page #relations {
-  contain-intrinsic-size: auto 1090px;
+  contain-intrinsic-size: auto 1775px;
 }
 
 html[data-family="dream"] main.dream-page.dream-page #arsenal {
-  contain-intrinsic-size: auto 545px;
+  contain-intrinsic-size: auto 835px;
 }
 
 html[data-family="dream"] main.dream-page.dream-page #glossary {
-  contain-intrinsic-size: auto 3075px;
+  contain-intrinsic-size: auto 3720px;
 }
 
 html[data-family="dream"] main.dream-page.dream-page #quotes {
@@ -2288,23 +2286,23 @@ html[data-family="dream"] main.dream-page.dream-page #quotes {
   }
 
   html[data-family="dream"] main.dream-page.dream-page #chronicle {
-    contain-intrinsic-size: auto 4295px;
+    contain-intrinsic-size: auto 5760px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #atlas {
-    contain-intrinsic-size: auto 3240px;
+    contain-intrinsic-size: auto 3975px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #relations {
-    contain-intrinsic-size: auto 1110px;
+    contain-intrinsic-size: auto 1795px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #arsenal {
-    contain-intrinsic-size: auto 535px;
+    contain-intrinsic-size: auto 830px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #glossary {
-    contain-intrinsic-size: auto 3240px;
+    contain-intrinsic-size: auto 3950px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #quotes {
@@ -2338,23 +2336,23 @@ html[data-family="dream"] main.dream-page.dream-page #quotes {
   }
 
   html[data-family="dream"] main.dream-page.dream-page #chronicle {
-    contain-intrinsic-size: auto 4600px;
+    contain-intrinsic-size: auto 6010px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #atlas {
-    contain-intrinsic-size: auto 2730px;
+    contain-intrinsic-size: auto 3530px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #relations {
-    contain-intrinsic-size: auto 1645px;
+    contain-intrinsic-size: auto 2710px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #arsenal {
-    contain-intrinsic-size: auto 525px;
+    contain-intrinsic-size: auto 810px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #glossary {
-    contain-intrinsic-size: auto 3780px;
+    contain-intrinsic-size: auto 4490px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #quotes {
@@ -2388,23 +2386,23 @@ html[data-family="dream"] main.dream-page.dream-page #quotes {
   }
 
   html[data-family="dream"] main.dream-page.dream-page #chronicle {
-    contain-intrinsic-size: auto 4745px;
+    contain-intrinsic-size: auto 6885px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #atlas {
-    contain-intrinsic-size: auto 3400px;
+    contain-intrinsic-size: auto 4145px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #relations {
-    contain-intrinsic-size: auto 1685px;
+    contain-intrinsic-size: auto 2725px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #arsenal {
-    contain-intrinsic-size: auto 510px;
+    contain-intrinsic-size: auto 825px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #glossary {
-    contain-intrinsic-size: auto 4140px;
+    contain-intrinsic-size: auto 4870px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #quotes {
@@ -2438,23 +2436,23 @@ html[data-family="dream"] main.dream-page.dream-page #quotes {
   }
 
   html[data-family="dream"] main.dream-page.dream-page #chronicle {
-    contain-intrinsic-size: auto 7215px;
+    contain-intrinsic-size: auto 10660px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #atlas {
-    contain-intrinsic-size: auto 815px;
+    contain-intrinsic-size: auto 1410px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #relations {
-    contain-intrinsic-size: auto 2155px;
+    contain-intrinsic-size: auto 3220px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #arsenal {
-    contain-intrinsic-size: auto 750px;
+    contain-intrinsic-size: auto 1205px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #glossary {
-    contain-intrinsic-size: auto 5145px;
+    contain-intrinsic-size: auto 6310px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #quotes {
@@ -2488,23 +2486,23 @@ html[data-family="dream"] main.dream-page.dream-page #quotes {
   }
 
   html[data-family="dream"] main.dream-page.dream-page #chronicle {
-    contain-intrinsic-size: auto 7495px;
+    contain-intrinsic-size: auto 11020px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #atlas {
-    contain-intrinsic-size: auto 815px;
+    contain-intrinsic-size: auto 1410px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #relations {
-    contain-intrinsic-size: auto 2175px;
+    contain-intrinsic-size: auto 3295px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #arsenal {
-    contain-intrinsic-size: auto 745px;
+    contain-intrinsic-size: auto 1200px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #glossary {
-    contain-intrinsic-size: auto 5235px;
+    contain-intrinsic-size: auto 6400px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #quotes {
@@ -2538,23 +2536,23 @@ html[data-family="dream"] main.dream-page.dream-page #quotes {
   }
 
   html[data-family="dream"] main.dream-page.dream-page #chronicle {
-    contain-intrinsic-size: auto 8590px;
+    contain-intrinsic-size: auto 12480px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #atlas {
-    contain-intrinsic-size: auto 1025px;
+    contain-intrinsic-size: auto 1715px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #relations {
-    contain-intrinsic-size: auto 2570px;
+    contain-intrinsic-size: auto 3690px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #arsenal {
-    contain-intrinsic-size: auto 780px;
+    contain-intrinsic-size: auto 1280px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #glossary {
-    contain-intrinsic-size: auto 5995px;
+    contain-intrinsic-size: auto 7210px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #quotes {
@@ -2588,23 +2586,23 @@ html[data-family="dream"] main.dream-page.dream-page #quotes {
   }
 
   html[data-family="dream"] main.dream-page.dream-page #chronicle {
-    contain-intrinsic-size: auto 4630px;
+    contain-intrinsic-size: auto 6275px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #atlas {
-    contain-intrinsic-size: auto 3140px;
+    contain-intrinsic-size: auto 3845px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #relations {
-    contain-intrinsic-size: auto 1660px;
+    contain-intrinsic-size: auto 2710px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #arsenal {
-    contain-intrinsic-size: auto 510px;
+    contain-intrinsic-size: auto 835px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #glossary {
-    contain-intrinsic-size: auto 3805px;
+    contain-intrinsic-size: auto 4510px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #quotes {
@@ -2638,23 +2636,23 @@ html[data-family="dream"] main.dream-page.dream-page #quotes {
   }
 
   html[data-family="dream"] main.dream-page.dream-page #chronicle {
-    contain-intrinsic-size: auto 5375px;
+    contain-intrinsic-size: auto 7415px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #atlas {
-    contain-intrinsic-size: auto 1015px;
+    contain-intrinsic-size: auto 1400px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #relations {
-    contain-intrinsic-size: auto 1875px;
+    contain-intrinsic-size: auto 2860px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #arsenal {
-    contain-intrinsic-size: auto 525px;
+    contain-intrinsic-size: auto 830px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #glossary {
-    contain-intrinsic-size: auto 4555px;
+    contain-intrinsic-size: auto 5280px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #quotes {
@@ -2688,23 +2686,23 @@ html[data-family="dream"] main.dream-page.dream-page #quotes {
   }
 
   html[data-family="dream"] main.dream-page.dream-page #chronicle {
-    contain-intrinsic-size: auto 4300px;
+    contain-intrinsic-size: auto 5575px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #atlas {
-    contain-intrinsic-size: auto 2860px;
+    contain-intrinsic-size: auto 3620px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #relations {
-    contain-intrinsic-size: auto 1090px;
+    contain-intrinsic-size: auto 1775px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #arsenal {
-    contain-intrinsic-size: auto 545px;
+    contain-intrinsic-size: auto 835px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #glossary {
-    contain-intrinsic-size: auto 3080px;
+    contain-intrinsic-size: auto 3720px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page #quotes {
