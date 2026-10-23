@@ -435,12 +435,13 @@ async function arriveDirect(page, path, waitUntil = "load") {
 }
 
 async function followLink(page, path) {
-  // A reader's press on the link (the router's in-site navigation).
+  // A reader's press on the link (the router's in-site navigation, through
+  // the load gate).
   const link = page.locator(`a[href^="/${path}"]`).first();
   const visible = await link.isVisible().catch(() => false);
-  if (visible) await link.click({ force: true, timeout: 20000 });
+  if (visible) await link.click({ force: true, timeout: 45000 });
   else await page.evaluate((p) => document.querySelector(`a[href^="/${p}"]`).click(), path);
-  await page.waitForURL(`**/${path}**`, { timeout: 90000 });
+  await page.waitForURL(`**/${path}**`, { timeout: 120000, waitUntil: "commit" });
   await settled(page);
 }
 
@@ -475,10 +476,18 @@ async function arriveFromHome(page, path) {
   }
   await page.waitForFunction(() => !document.documentElement.hasAttribute("data-loading"), null, { timeout: 150000 });
   await sleep(800);
+  // The menu open (a busy main thread may take its time), its link on screen.
   const trigger = page.locator(".side-panel-trigger").first();
-  await trigger.click({ force: true, timeout: 20000 });
-  await sleep(700);
-  await followLink(page, path);
+  const link = page.locator(`.side-panel-links a[href^="/${path}"]`).first();
+  for (let k = 0; k < 3 && !(await link.isVisible().catch(() => false)); k += 1) {
+    await trigger.click({ force: true, timeout: 45000 }).catch(() => {});
+    await link.waitFor({ state: "visible", timeout: 20000 }).catch(() => {});
+  }
+  must(await link.isVisible().catch(() => false), "the menu did not open on /world");
+  await sleep(600);
+  await link.click({ force: true, timeout: 45000 });
+  await page.waitForURL(`**/${path}**`, { timeout: 120000, waitUntil: "commit" });
+  await settled(page);
 }
 
 /* ---------------- the scenarios ---------------- */
