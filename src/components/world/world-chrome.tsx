@@ -1263,20 +1263,31 @@ export function SideMenuLayer({
         </div>
         <div className="side-panel-group">
           <p>SPECIAL</p>
-          {/* The order (owner, 2026-10-23): ファーフロムサーガ first and a
-              little larger (styles-stage-shell.css), then イリュージョンクルム
-              サーガ and メタ・ウニタスサーガ, then レクソナンスサーガ and
-              エクスプリームサーガ. Each tile is its form's art and its name. */}
+          {/* The order (owner, 2026-10-23: 「ファーフロムは一番最後です。」):
+              エクスプリーム, レクソナンス, イリュージョンクルム, メタ・ウニタス,
+              then ファーフロム, a little larger (styles-stage-shell.css). Each
+              tile is its form's art and its name. */}
           <div className="side-panel-links" data-special-tiles="">
             <GuardedLink
-              to="/far-from-saga"
+              to="/extreme-saga"
               hash="top"
-              assets={context === "far-from" ? [] : FAR_FROM_SAGA_ENTER_ASSETS}
+              assets={context === "extreme" ? [] : EXTREME_SAGA_ENTER_ASSETS}
               beforeNavigate={close}
-              aria-current={context === "far-from" ? "page" : undefined}
+              aria-current={context === "extreme" ? "page" : undefined}
             >
               <span>
-                <DisplayName value="ファーフロムサーガ" />
+                <DisplayName value="エクスプリームサーガ" />
+              </span>
+            </GuardedLink>
+            <GuardedLink
+              to="/rexonance-saga"
+              hash="top"
+              assets={context === "rexonance" ? [] : REXONANCE_SAGA_ENTER_ASSETS}
+              beforeNavigate={close}
+              aria-current={context === "rexonance" ? "page" : undefined}
+            >
+              <span>
+                <DisplayName value="レクソナンスサーガ" />
               </span>
             </GuardedLink>
             <GuardedLink
@@ -1302,25 +1313,14 @@ export function SideMenuLayer({
               </span>
             </GuardedLink>
             <GuardedLink
-              to="/rexonance-saga"
+              to="/far-from-saga"
               hash="top"
-              assets={context === "rexonance" ? [] : REXONANCE_SAGA_ENTER_ASSETS}
+              assets={context === "far-from" ? [] : FAR_FROM_SAGA_ENTER_ASSETS}
               beforeNavigate={close}
-              aria-current={context === "rexonance" ? "page" : undefined}
+              aria-current={context === "far-from" ? "page" : undefined}
             >
               <span>
-                <DisplayName value="レクソナンスサーガ" />
-              </span>
-            </GuardedLink>
-            <GuardedLink
-              to="/extreme-saga"
-              hash="top"
-              assets={context === "extreme" ? [] : EXTREME_SAGA_ENTER_ASSETS}
-              beforeNavigate={close}
-              aria-current={context === "extreme" ? "page" : undefined}
-            >
-              <span>
-                <DisplayName value="エクスプリームサーガ" />
+                <DisplayName value="ファーフロムサーガ" />
               </span>
             </GuardedLink>
           </div>

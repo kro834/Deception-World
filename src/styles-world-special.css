@@ -824,23 +824,24 @@ html[data-family="world"]:root
     main.site-shell.film-edition.mirage-edition
     > footer
     > .ws-doors {
-    grid-template-columns: minmax(0, 1.25fr) repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr)) minmax(0, 1.25fr);
     gap: 16px;
     width: min(100%, 1120px);
   }
 
-  /* ファーフロム leads, a little larger: a wider door beside the four. */
+  /* ファーフロム ends, a little larger: a wider door after the four. */
   html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
     > footer
     > .ws-doors
     > a.is-far-from {
-    grid-row: span 2;
+    grid-row: 1 / span 2;
+    grid-column: 3;
   }
 }
 
-/* ファーフロム leads, a little larger, at every width. */
+/* ファーフロム, a little larger, at every width. */
 html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition

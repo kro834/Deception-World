@@ -123,17 +123,25 @@ export const WorldChapterRail = memo(function WorldChapterRail() {
 
 /* The side menu's own tiles of the three forms (styles-stage-shell.css), so
    a reader who has opened the menu already holds them. */
-// The order (owner, 2026-10-23), as the side menu's SPECIAL tiles: ファーフロム
-// first and a little larger, then イリュージョンクルム and メタ・ウニタス, then
-// レクソナンス and エクスプリーム.
+// The order (owner, 2026-10-23: 「ファーフロムは一番最後です。」), as the side
+// menu's SPECIAL tiles: エクスプリーム, レクソナンス, イリュージョンクルム,
+// メタ・ウニタス, then ファーフロム, a little larger.
 const DOORS = [
   {
-    to: "/far-from-saga",
-    edition: "far-from",
-    name: "ファーフロムサーガ",
-    art: FAR_FROM_SAGA_MENU_TILE,
-    size: [400, 549],
-    assets: FAR_FROM_SAGA_ENTER_ASSETS,
+    to: "/extreme-saga",
+    edition: "extreme",
+    name: "エクスプリームサーガ",
+    art: "/archive-media/thumbs/saga-extreme.webp",
+    size: [240, 320],
+    assets: EXTREME_SAGA_ENTER_ASSETS,
+  },
+  {
+    to: "/rexonance-saga",
+    edition: "rexonance",
+    name: "レクソナンスサーガ",
+    art: "/archive-media/thumbs/saga-rexonance.webp",
+    size: [240, 320],
+    assets: REXONANCE_SAGA_ENTER_ASSETS,
   },
   {
     to: "/illusionculum-saga",
@@ -152,20 +160,12 @@ const DOORS = [
     assets: META_UNITAS_SAGA_ENTER_ASSETS,
   },
   {
-    to: "/rexonance-saga",
-    edition: "rexonance",
-    name: "レクソナンスサーガ",
-    art: "/archive-media/thumbs/saga-rexonance.webp",
-    size: [240, 320],
-    assets: REXONANCE_SAGA_ENTER_ASSETS,
-  },
-  {
-    to: "/extreme-saga",
-    edition: "extreme",
-    name: "エクスプリームサーガ",
-    art: "/archive-media/thumbs/saga-extreme.webp",
-    size: [240, 320],
-    assets: EXTREME_SAGA_ENTER_ASSETS,
+    to: "/far-from-saga",
+    edition: "far-from",
+    name: "ファーフロムサーガ",
+    art: FAR_FROM_SAGA_MENU_TILE,
+    size: [400, 549],
+    assets: FAR_FROM_SAGA_ENTER_ASSETS,
   },
 ] as const;
 

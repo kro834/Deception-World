@@ -44,20 +44,18 @@ test("the site has a route, its sheets in order, a menu tile, a route family and
   assert.match(read("src/styles-stage-shell.css"), /a\[href\^="\/illusionculum-saga"\]/);
 });
 
-test("the SPECIAL tiles: ファーフロム first and larger, then イリュージョンクルム, メタ・ウニタス, レクソナンス, エクスプリーム", () => {
+// Owner (2026-10-23): 「ファーフロムは一番最後です。」
+test("the SPECIAL tiles: エクスプリーム, レクソナンス, イリュージョンクルム, メタ・ウニタス, then ファーフロム, larger", () => {
   const special = menu.slice(menu.indexOf("<p>SPECIAL</p>"), menu.indexOf("<p>STORIES</p>"));
   const names = [...special.matchAll(/<DisplayName value="([^"]+)" \/>/g)].map((m) => m[1]);
-  assert.deepEqual(names, [
-    "ファーフロムサーガ",
-    "イリュージョンクルムサーガ",
-    "メタ・ウニタスサーガ",
-    "レクソナンスサーガ",
-    "エクスプリームサーガ",
-  ]);
+  const order = ["エクスプリームサーガ", "レクソナンスサーガ", "イリュージョンクルムサーガ", "メタ・ウニタスサーガ", "ファーフロムサーガ"];
+  assert.deepEqual(names, order);
+  const doors = read("src/components/world/world-special.tsx");
+  assert.deepEqual([...doors.matchAll(/name: "([^"]+)"/g)].map((m) => m[1]), order);
   assert.match(special, /to="\/meta-unitas-saga"/);
   const shell = read("src/styles-stage-shell.css");
   assert.match(shell, /\[data-special-tiles\]\s*> a\[href\^="\/far-from-saga"\] \{\s*grid-column: 1 \/ -1;/);
-  assert.match(shell, /\.side-panel-links\.side-panel-links\[data-special-tiles\] \{\s*grid-template-columns: minmax\(0, 1\.4fr\);\s*grid-auto-columns: minmax\(0, 1fr\);/);
+  assert.match(shell, /\.side-panel-links\.side-panel-links\[data-special-tiles\] \{\s*grid-template-columns: repeat\(4, minmax\(0, 1fr\)\) minmax\(0, 1\.4fr\);/);
   assert.match(shell, /url\("\/meta-unitas-saga-20261023\/middle-tile-400\.webp"\)/);
   assert.match(menu, /META_UNITAS_SAGA_ENTER_ASSETS/);
   assert.match(menu, /context === "meta-unitas" \|\|/);

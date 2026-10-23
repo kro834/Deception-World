@@ -3,7 +3,7 @@
 // (design/illusionculum-saga-20261023/sam-masks/) — do not edit by hand.
 // Figure coordinates are delivery px of the 693 x 1040 figure (the owner's
 // whole 1024 x 1536 cutout frame).
-// 7 files, 1106160 bytes (standard.webp 189526, more.webp 205410, ultra.webp 168344, ultra-more.webp 180062, undersuit.webp 45110, plates.webp 290670, driver-standin.webp 27038).
+// 7 files, 1065920 bytes (standard.webp 189526, more.webp 165170, ultra.webp 168344, ultra-more.webp 180062, undersuit.webp 45110, plates.webp 290670, driver-standin.webp 27038).
 
 export const ILLUSIONCULUM_SUIT_SIZE = { width: 693, height: 1040 } as const;
 
@@ -92,11 +92,7 @@ export type IllusionculumSuitPiece = {
 /** The scene's micro-tile, in delivery px (6430 tiles in all). */
 export const ILLUSIONCULUM_SUIT_TILE = 9;
 /** The plates' atlas (each plate's art, its alpha the plate's share). */
-export const ILLUSIONCULUM_SUIT_ATLAS = {
-  src: "/illusionculum-suit-20261023/plates.webp",
-  width: 1024,
-  height: 1237,
-} as const;
+export const ILLUSIONCULUM_SUIT_ATLAS = { src: "/illusionculum-suit-20261023/plates.webp", width: 1024, height: 1237 } as const;
 /** The plates, front first; they tile the figure (SAM's masks). */
 export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
   {
@@ -107,10 +103,13 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 422,
     w: 217,
     h: 69,
-    seat: [346.5, 491],
+    seat: [
+      346.5,
+      491
+    ],
     tiles: "AH4A/v///f//+///9///7///3+9/PwAeAA==",
     ax: 622,
-    ay: 1076,
+    ay: 1076
   },
   {
     id: "reactor-disc",
@@ -120,10 +119,13 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 256,
     w: 89,
     h: 95,
-    seat: [346.5, 351],
+    seat: [
+      346.5,
+      351
+    ],
     tiles: "ePDj3/////////7xgQM=",
     ax: 914,
-    ay: 925,
+    ay: 925
   },
   {
     id: "reactor-frame",
@@ -133,10 +135,13 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 241,
     w: 141,
     h: 156,
-    seat: [347.5, 397],
+    seat: [
+      347.5,
+      397
+    ],
     tiles: "4Af+P/5/Pn4feA/4D/AP8A94Hnw+fv5//j/8H/AP4APAAYAA",
     ax: 738,
-    ay: 726,
+    ay: 726
   },
   {
     id: "helmet-crest",
@@ -146,10 +151,13 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 41,
     w: 133,
     h: 106,
-    seat: [346.5, 147],
+    seat: [
+      346.5,
+      147
+    ],
     tiles: "BBADmAHMAGYAc8A94J/z/7////9f7A0=",
     ax: 650,
-    ay: 925,
+    ay: 925
   },
   {
     id: "helmet-visor",
@@ -159,10 +167,13 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 134,
     w: 127,
     h: 106,
-    seat: [346.5, 240],
+    seat: [
+      346.5,
+      240
+    ],
     tiles: "/7//3//P/8P/4f/wf/gf+A/8A/wAGAA=",
     ax: 785,
-    ay: 925,
+    ay: 925
   },
   {
     id: "collar",
@@ -172,10 +183,13 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 192,
     w: 125,
     h: 68,
-    seat: [346.5, 192],
+    seat: [
+      346.5,
+      192
+    ],
     tiles: "BpgD58D//P//////G2A=",
     ax: 841,
-    ay: 1076,
+    ay: 1076
   },
   {
     id: "medallion-l",
@@ -185,10 +199,13 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 249,
     w: 51,
     h: 66,
-    seat: [226.5, 315],
+    seat: [
+      226.5,
+      315
+    ],
     tiles: "/v///+8B",
     ax: 0,
-    ay: 1171,
+    ay: 1171
   },
   {
     id: "shoulder-l",
@@ -198,10 +215,13 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 185,
     w: 150,
     h: 185,
-    seat: [108, 277.5],
+    seat: [
+      108,
+      277.5
+    ],
     tiles: "DAB4AOCBw/+/////v/9////8n/gf4B+AfwD/CP4f/h/8P/h/+A/wD3AIIAAA",
     ax: 252,
-    ay: 726,
+    ay: 726
   },
   {
     id: "medallion-r",
@@ -211,10 +231,13 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 247,
     w: 51,
     h: 68,
-    seat: [467.5, 315],
+    seat: [
+      467.5,
+      315
+    ],
     tiles: "z/f///cx",
     ax: 968,
-    ay: 1076,
+    ay: 1076
   },
   {
     id: "shoulder-r",
@@ -224,10 +247,13 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 173,
     w: 159,
     h: 197,
-    seat: [586, 271.5],
+    seat: [
+      586,
+      271.5
+    ],
     tiles: "BgA4APEAxwceP378/+z/v/9//v+R/wP8D/AfwD8Af8D+A/8P+H/g/wH/B+A/ANAAAAY=",
     ax: 792,
-    ay: 491,
+    ay: 491
   },
   {
     id: "fist-l",
@@ -237,10 +263,13 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 532,
     w: 85,
     h: 89,
-    seat: [155.5, 532],
+    seat: [
+      155.5,
+      532
+    ],
     tiles: "fvzz33///f//f//xAQ==",
     ax: 127,
-    ay: 1076,
+    ay: 1076
   },
   {
     id: "fist-r",
@@ -250,10 +279,13 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 533,
     w: 85,
     h: 88,
-    seat: [538.5, 533],
+    seat: [
+      538.5,
+      533
+    ],
     tiles: "/Pj333////fff/7xAQ==",
     ax: 214,
-    ay: 1076,
+    ay: 1076
   },
   {
     id: "cuff-l",
@@ -263,10 +295,13 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 509,
     w: 79,
     h: 40,
-    seat: [153.5, 509],
+    seat: [
+      153.5,
+      509
+    ],
     tiles: "vv/9vxcA",
     ax: 148,
-    ay: 1171,
+    ay: 1171
   },
   {
     id: "cuff-r",
@@ -276,10 +311,13 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 500,
     w: 93,
     h: 53,
-    seat: [532.5, 500],
+    seat: [
+      532.5,
+      500
+    ],
     tiles: "Bvjf//73PwcB",
     ax: 53,
-    ay: 1171,
+    ay: 1171
   },
   {
     id: "forearm-l",
@@ -289,10 +327,13 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 387,
     w: 147,
     h: 136,
-    seat: [181.5, 387],
+    seat: [
+      181.5,
+      387
+    ],
     tiles: "WAD8D/j/+//3/+//3/+f/z//f/5/+D/wf+B/wH+AfwAAAA==",
     ax: 239,
-    ay: 925,
+    ay: 925
   },
   {
     id: "forearm-r",
@@ -302,10 +343,13 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 390,
     w: 146,
     h: 128,
-    seat: [513, 390],
+    seat: [
+      513,
+      390
+    ],
     tiles: "ADj+//z/+//3/+//n/8//3/8//D/wf8B/wP8B/APAAA=",
     ax: 502,
-    ay: 925,
+    ay: 925
   },
   {
     id: "arm-l",
@@ -315,10 +359,13 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 322,
     w: 125,
     h: 93,
-    seat: [188.5, 322],
+    seat: [
+      188.5,
+      322
+    ],
     tiles: "AA7AB/v5f/+f/+f/+f/8P8APAAA=",
     ax: 0,
-    ay: 1076,
+    ay: 1076
   },
   {
     id: "arm-r",
@@ -328,10 +375,13 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 335,
     w: 117,
     h: 72,
-    seat: [510.5, 335],
+    seat: [
+      510.5,
+      335
+    ],
     tiles: "Hsj/////+//+3//7Pw==",
     ax: 503,
-    ay: 1076,
+    ay: 1076
   },
   {
     id: "chest-l",
@@ -341,10 +391,13 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 195,
     w: 98,
     h: 223,
-    seat: [281, 418],
+    seat: [
+      281,
+      418
+    ],
     tiles: "wAAHHvjABz74wx9+8IMPfOCDP/zhD3/4x//+/3//+99/BgA=",
     ax: 446,
-    ay: 491,
+    ay: 491
   },
   {
     id: "chest-r",
@@ -354,10 +407,13 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 195,
     w: 107,
     h: 223,
-    seat: [417.5, 418],
+    seat: [
+      417.5,
+      418
+    ],
     tiles: "GIAP+AEf8AEf+AM/8AM/4AM+4AN/8A//8I///vd///d//+c/AAM=",
     ax: 546,
-    ay: 491,
+    ay: 491
   },
   {
     id: "abdomen",
@@ -367,10 +423,13 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 365,
     w: 200,
     h: 76,
-    seat: [347, 441],
+    seat: [
+      347,
+      441
+    ],
     tiles: "AGEAgBkAwA8A4A/g///5///9///+539xgCM=",
     ax: 301,
-    ay: 1076,
+    ay: 1076
   },
   {
     id: "tasset-front",
@@ -380,10 +439,13 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 471,
     w: 114,
     h: 187,
-    seat: [348, 471],
+    seat: [
+      348,
+      471
+    ],
     tiles: "Buz//b//9/////////////0//+f//J//43/8B//gD6ABMAA=",
     ax: 136,
-    ay: 726,
+    ay: 726
   },
   {
     id: "tasset-l",
@@ -393,10 +455,13 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 455,
     w: 109,
     h: 149,
-    seat: [253.5, 455],
+    seat: [
+      253.5,
+      455
+    ],
     tiles: "GIAD+L//93/+z//5P//n//gf/sf/8B/8A34ABw==",
     ax: 0,
-    ay: 925,
+    ay: 925
   },
   {
     id: "tasset-r",
@@ -406,10 +471,13 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 452,
     w: 106,
     h: 156,
-    seat: [441, 452],
+    seat: [
+      441,
+      452
+    ],
     tiles: "gAA4x/d//+///u///ud//vc///Ef//AHDwAA",
     ax: 881,
-    ay: 726,
+    ay: 726
   },
   {
     id: "thigh-l",
@@ -419,10 +487,13 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 561,
     w: 126,
     h: 149,
-    seat: [271, 710],
+    seat: [
+      271,
+      710
+    ],
     tiles: "BoQD88H8M//P//f//f/////v//v//p//5//5PwAO",
     ax: 111,
-    ay: 925,
+    ay: 925
   },
   {
     id: "thigh-r",
@@ -432,10 +503,13 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 579,
     w: 112,
     h: 130,
-    seat: [424, 709],
+    seat: [
+      424,
+      709
+    ],
     tiles: "AAf48T/+5//83//7///v//2//+f//B8jAw==",
     ax: 388,
-    ay: 925,
+    ay: 925
   },
   {
     id: "shin-l",
@@ -445,10 +519,13 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 689,
     w: 135,
     h: 214,
-    seat: [249.5, 903],
+    seat: [
+      249.5,
+      903
+    ],
     tiles: "QAD4P/4f/8f/8//7//3//j//n//v//f/8//4f/w//4//w//h//B/4D8AB4AA",
     ax: 655,
-    ay: 491,
+    ay: 491
   },
   {
     id: "shin-r",
@@ -458,10 +535,13 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 689,
     w: 134,
     h: 197,
-    seat: [445, 886],
+    seat: [
+      445,
+      886
+    ],
     tiles: "oIH/w//B/+H/+f/9//5//j//n//P/+f/8//x//h/+H/4P/wf/g//A/gA",
     ax: 0,
-    ay: 726,
+    ay: 726
   },
   {
     id: "boot-l",
@@ -471,10 +551,13 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 866,
     w: 165,
     h: 174,
-    seat: [205.5, 1040],
+    seat: [
+      205.5,
+      1040
+    ],
     tiles: "wAEA/h3wf4D/B/w/4P+B/w/8H/D/gP8H/j/w/4H/D/5/+P/n/z////j/gP8DAAAA",
     ax: 571,
-    ay: 726,
+    ay: 726
   },
   {
     id: "boot-r",
@@ -484,10 +567,13 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 863,
     w: 165,
     h: 177,
-    seat: [488.5, 1040],
+    seat: [
+      488.5,
+      1040
+    ],
     tiles: "AAzwc8D/A/4f8P+A/w/8f8D/A/w/4P8B/x/4/8D/B/5/8P/H/z/8/4P/H/D/APgB",
     ax: 404,
-    ay: 726,
+    ay: 726
   },
   {
     id: "halo",
@@ -497,11 +583,13 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 0,
     w: 444,
     h: 233,
-    seat: [347, 233],
-    tiles:
-      "AAAAAQAAAAAABAAAAAAAEAAAAAAAwAAAAAAAgAMAAAAAwP8AAAAw4LsPGACA4f3/cAAAzP//7wAA8N1//wEAgH///wMAAP795w8AAPzzn38AAPCfIX8DAOB/APwPAID/AeBrAAD7B4D/AQD8HwD/BwD+/wD+/8D//wf4/3+A/x/g/wMA/H+A3wcAsP8AfB8AgP4B4GgAAOIBAIAAAAABAAAAAA==",
+    seat: [
+      347,
+      233
+    ],
+    tiles: "AAAAAQAAAAAABAAAAAAAEAAAAAAAwAAAAAAAgAMAAAAAwP8AAAAw4LsPGACA4f3/cAAAzP//7wAA8N1//wEAgH///wMAAP795w8AAPzzn38AAPCfIX8DAOB/APwPAID/AeBrAAD7B4D/AQD8HwD/BwD+/wD+/8D//wf4/3+A/x/g/wMA/H+A3wcAsP8AfB8AgP4B4GgAAOIBAIAAAAABAAAAAA==",
     ax: 0,
-    ay: 491,
+    ay: 491
   },
   {
     id: "cape-l",
@@ -511,11 +599,13 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 492,
     w: 222,
     h: 473,
-    seat: [118, 492],
-    tiles:
-      "AAAwAABwAADgAADAAwCABwAADwAAPgAA+AAA8AEA4AEAwAMAgAMAgw8A/h8A/D8A/H8A+P8A+P8B8P8D8P8H4P8f4P8/wP9/gP//gP//Af//Af//Af7/Af7/A/z/B/z/D/j/D/j/H/D/P/D/f+D//8D//8H//4P//wf//w/+/w/8/x/4/z+4/38w//8gfv8Bfv4DfPwHePgBcHgAcHAAYCAAQAAAAA==",
+    seat: [
+      118,
+      492
+    ],
+    tiles: "AAAwAABwAADgAADAAwCABwAADwAAPgAA+AAA8AEA4AEAwAMAgAMAgw8A/h8A/D8A/H8A+P8A+P8B8P8D8P8H4P8f4P8/wP9/gP//gP//Af//Af//Af7/Af7/A/z/B/z/D/j/D/j/H/D/P/D/f+D//8D//8H//4P//wf//w/+/w/8/x/4/z+4/38w//8gfv8Bfv4DfPwHePgBcHgAcHAAYCAAQAAAAA==",
     ax: 233,
-    ay: 0,
+    ay: 0
   },
   {
     id: "cape-r",
@@ -525,11 +615,13 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 476,
     w: 231,
     h: 489,
-    seat: [570.5, 476],
-    tiles:
-      "DAAAYAAAgAMAAA4AABgAACAAAMABAAAPAAA+AAD4AADwAwDADwAAPwAA+AAAwAcBAP8PAPw/APD/AcD/BwD/PwD8/wDw/wPg/x+A/38A/v8D+P8P4P9/AP//Afj/D8D/PwD//wH8/wfw/z/A//8A/v8H+P8f4P9/gP//A/7/D/j/P+D//4D//wf+/x/4/3/g//+B//8G/P8z8N+PwH8+AP7xAcCHBwAcHADgYAAAAgMAAAA=",
+    seat: [
+      570.5,
+      476
+    ],
+    tiles: "DAAAYAAAgAMAAA4AABgAACAAAMABAAAPAAA+AAD4AADwAwDADwAAPwAA+AAAwAcBAP8PAPw/APD/AcD/BwD/PwD8/wDw/wPg/x+A/38A/v8D+P8P4P9/AP//Afj/D8D/PwD//wH8/wfw/z/A//8A/v8H+P8f4P9/gP//A/7/D/j/P+D//4D//wf+/x/4/3/g//+B//8G/P8z8N+PwH8+AP7xAcCHBwAcHADgYAAAAgMAAAA=",
     ax: 0,
-    ay: 0,
+    ay: 0
   },
   {
     id: "cape-centre",
@@ -539,12 +631,14 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 623,
     w: 153,
     h: 342,
-    seat: [347.5, 623],
-    tiles:
-      "wAaADwAfAH4A/AD8AfgH+A/wH/A/4P/A/4H/A/8H/Af8H/g/8H/g/8D/wf+H/4//P/9//v////////////////9f+A/gB4APAA4AHAA4ACAA",
+    seat: [
+      347.5,
+      623
+    ],
+    tiles: "wAaADwAfAH4A/AD8AfgH+A/wH/A/4P/A/4H/A/8H/Af8H/g/8H/g/8D/wf+H/4//P/9//v////////////////9f+A/gB4APAA4AHAA4ACAA",
     ax: 457,
-    ay: 0,
-  },
+    ay: 0
+  }
 ];
 /** The driver's plates: on the body from the start. */
 export const ILLUSIONCULUM_SUIT_DRIVER: readonly string[] = ["belt"];
@@ -562,5 +656,5 @@ export const ILLUSIONCULUM_SUIT_ASSETS = [
   "/illusionculum-suit-20261023/ultra-more.webp",
   "/illusionculum-suit-20261023/undersuit.webp",
   "/illusionculum-suit-20261023/plates.webp",
-  "/illusionculum-suit-20261023/driver-standin.webp",
+  "/illusionculum-suit-20261023/driver-standin.webp"
 ] as const;

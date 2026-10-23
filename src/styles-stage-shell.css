@@ -2037,9 +2037,9 @@ html[data-family]
 }
 
 /* The SPECIAL tiles' order and weight (owner, 2026-10-23: ファーフロムは
-   サイドメニューの中でもやや大きく): Far From leads, a little larger than the
-   four after it — on phones it spans the two columns, from tablets up its
-   column is wider than the others' in the one row. */
+   サイドメニューの中でもやや大きく; 「一番最後です」): Far From ends, a little larger than the
+   four before it — on phones it spans the two columns, from tablets up its
+   column (the last) is wider than the others' in the one row. */
 @media (max-width: 760px) {
   html[data-family]
     body
@@ -2065,8 +2065,7 @@ html[data-family]
     + .side-panel-group
     + .side-panel-group
     > .side-panel-links.side-panel-links[data-special-tiles] {
-    grid-template-columns: minmax(0, 1.4fr);
-    grid-auto-columns: minmax(0, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr)) minmax(0, 1.4fr);
   }
 }
 
