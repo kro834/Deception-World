@@ -258,7 +258,6 @@ const DOSSIER_DOCUMENTS: readonly SearchCatalogueDocument[] = [
       "秩序の神",
       "秩序／破壊・固定管轄なし",
       "仮面ライダーヴァンダール",
-      "ACCESS GRANTED",
       "ヴァンダール",
       "ヴァンダール",
       "ヴァンダールドライバー × スペシャルコア",
