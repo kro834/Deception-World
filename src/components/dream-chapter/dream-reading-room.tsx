@@ -31,6 +31,24 @@ function visibleParagraph(scroller: HTMLDivElement | null) {
 
 type Pin = { no: number; top: number } | null;
 type ReadingAnchor = { text: Text; offset: number; top: number } | { end: true } | null;
+type ReadingOrigin = { top: number; width: number; height: number; pathname: string } | null;
+
+// Releasing the body lock restores its old scrollY. If the page reflowed
+// behind the room, return its opener to the saved screen position instead.
+function restoreReadingOrigin(trigger: HTMLButtonElement | null, origin: ReadingOrigin) {
+  if (!trigger?.isConnected || !origin || window.location.pathname !== origin.pathname) return;
+  if (window.innerWidth === origin.width && window.innerHeight === origin.height) return;
+  const rect = trigger.getBoundingClientRect();
+  const top = Math.max(16, Math.min(origin.top, window.innerHeight - rect.height - 16));
+  const delta = rect.top - top;
+  if (Math.abs(delta) > 1) {
+    window.scrollTo({
+      top: Math.max(0, window.scrollY + delta),
+      left: window.scrollX,
+      behavior: "instant",
+    });
+  }
+}
 
 // Keep the actual line being read when type size or leading changes. A raw
 // scrollTop (or even a paragraph number) loses the reader inside long paragraphs.
@@ -178,6 +196,14 @@ export function DreamReadingRoom({ trigger, onClose }: Props) {
     if (!modal) return;
     const html = document.documentElement;
     const previousFlag = html.dataset.dreamDialogOpen;
+    const origin: ReadingOrigin = trigger?.isConnected
+      ? {
+          top: trigger.getBoundingClientRect().top,
+          width: window.innerWidth,
+          height: window.innerHeight,
+          pathname: window.location.pathname,
+        }
+      : null;
     const releaseScroll = acquireViewportScrollLock({ freezeBody: true });
     html.dataset.dreamDialogOpen = "true";
     modal.showModal();
@@ -191,6 +217,7 @@ export function DreamReadingRoom({ trigger, onClose }: Props) {
       releaseScroll();
       if (previousFlag === undefined) delete html.dataset.dreamDialogOpen;
       else html.dataset.dreamDialogOpen = previousFlag;
+      if (closing.current && !historyDismissed) restoreReadingOrigin(trigger, origin);
     };
     const stopHistory = router.history.subscribe(({ action }) => {
       if (!["BACK", "FORWARD", "GO"].includes(action.type)) return;
@@ -201,7 +228,9 @@ export function DreamReadingRoom({ trigger, onClose }: Props) {
     return () => {
       stopHistory();
       release();
-      if (!historyDismissed && trigger?.isConnected) trigger.focus({ preventScroll: true });
+      if (window.location.pathname === origin?.pathname) {
+        if (!historyDismissed && trigger?.isConnected) trigger.focus({ preventScroll: true });
+      }
     };
   }, [close, router, trigger]);
 

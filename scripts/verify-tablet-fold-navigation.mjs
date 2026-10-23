@@ -199,7 +199,8 @@ async function snapshot(page) {
       ".side-panel-trigger",
       ".side-panel",
       ".side-panel-close",
-      ".dossier-read-link",
+      '.dossier-reader a[href="#dossier-index"]',
+      ".dossier-contents",
       ".dossier-reader",
       ".manager-copy-section:target",
       ".dream-reading-entry button",
@@ -285,10 +286,13 @@ async function menu(page, add) {
 }
 
 async function ciel(page, add) {
-  await ready(page, "/characters/ciel", ".dossier-read-link");
-  const read = page.locator(".dossier-read-link");
-  await read.scrollIntoViewIfNeeded();
-  await read.click();
+  // The 2026-10-23 label cleanup removed the hero's reading CTA. The
+  // persistent dossier navigation and native chapter anchors remain the
+  // supported reading path; hydrate via the actual menu event control.
+  await ready(page, "/characters/ciel", ".manager-topbar .side-panel-trigger");
+  const indexLink = page.locator('.dossier-reader a[href="#dossier-index"]');
+  await indexLink.scrollIntoViewIfNeeded();
+  await indexLink.click();
   await page.waitForFunction(() => location.hash === "#dossier-index");
   await settle(page);
   const chapters = page.locator(".dossier-contents a");

@@ -374,3 +374,88 @@ test("typography and viewport changes share the same glyph restoration", () => {
   assert.ok(Math.abs(f.glyphTop(anchor) - anchor.top) < 1);
   assert.match(source, /restoreReadingAnchor\(scroller, anchor\);[\s\S]*?\[size, spacing\]/);
 });
+
+const originFunction = ast.statements.find(
+  (node) => ts.isFunctionDeclaration(node) && node.name?.text === "restoreReadingOrigin",
+);
+assert.ok(originFunction);
+const originCode = ts.transpileModule(originFunction.getText(ast), {
+  compilerOptions: { target: ts.ScriptTarget.ES2022 },
+}).outputText;
+
+function originFixture() {
+  const calls = [];
+  const origin = { top: 320, width: 390, height: 844, pathname: "/dream-chapter" };
+  const window = {
+    innerWidth: 1024,
+    innerHeight: 1366,
+    location: { pathname: "/dream-chapter" },
+    scrollX: 12,
+    scrollY: 9000,
+    scrollTo(position) {
+      calls.push(position);
+      this.scrollY = position.top;
+      this.scrollX = position.left;
+    },
+  };
+  const trigger = {
+    isConnected: true,
+    getBoundingClientRect: () => ({ top: 12000 - window.scrollY, height: 52 }),
+  };
+  const restore = runInNewContext(`${originCode}\nrestoreReadingOrigin`, { window });
+  return { restore, window, trigger, origin, calls };
+}
+
+test("resized room close brings the opener back to its saved screen position synchronously", () => {
+  const f = originFixture();
+  f.restore(f.trigger, f.origin);
+  assert.equal(f.trigger.getBoundingClientRect().top, 320);
+  assert.equal(f.calls.length, 1);
+  assert.equal(f.calls[0].behavior, "instant");
+  assert.equal(f.window.scrollX, 12);
+  f.restore(f.trigger, f.origin);
+  assert.equal(f.calls.length, 1, "a second release cannot add another scroll correction");
+});
+
+test("opener return clamps the old screen position inside a shorter viewport", () => {
+  const f = originFixture();
+  f.origin.top = 720;
+  f.window.innerHeight = 540;
+  f.restore(f.trigger, f.origin);
+  assert.equal(f.trigger.getBoundingClientRect().top, 540 - 52 - 16);
+  f.origin.top = -100;
+  f.restore(f.trigger, f.origin);
+  assert.equal(f.trigger.getBoundingClientRect().top, 16);
+});
+
+test("unchanged size, a new route or a detached opener preserves the released scroll", () => {
+  for (const reason of ["same-size", "new-route", "detached", "no-origin"]) {
+    const f = originFixture();
+    if (reason === "same-size") {
+      f.window.innerWidth = f.origin.width;
+      f.window.innerHeight = f.origin.height;
+    }
+    if (reason === "new-route") f.window.location.pathname = "/world";
+    if (reason === "detached") f.trigger.isConnected = false;
+    f.restore(f.trigger, reason === "no-origin" ? null : f.origin);
+    assert.equal(f.calls.length, 0, reason);
+    assert.equal(f.window.scrollY, 9000, reason);
+  }
+});
+
+test("opener snapshot precedes freezing and correction runs once only for an explicit close", () => {
+  const captureAt = source.indexOf("const origin: ReadingOrigin");
+  const lockAt = source.indexOf("acquireViewportScrollLock({ freezeBody: true })");
+  assert.ok(captureAt > 0 && captureAt < lockAt);
+  const releaseAt = source.indexOf("const release = () =>");
+  const restoreAt = source.indexOf("restoreReadingOrigin(trigger, origin)");
+  assert.ok(source.indexOf("releaseScroll();", releaseAt) < restoreAt);
+  assert.match(source, /if \(released\) return;\s*released = true;/);
+  assert.match(
+    source,
+    /if \(closing\.current && !historyDismissed\) restoreReadingOrigin\(trigger, origin\);/,
+  );
+  assert.match(source, /historyDismissed = true;\s*release\(\);\s*close\(\);/);
+  assert.match(source, /if \(window\.location\.pathname === origin\?\.pathname\)/);
+  assert.doesNotMatch(originCode, /requestAnimationFrame|setTimeout|queueMicrotask|Promise/);
+});
