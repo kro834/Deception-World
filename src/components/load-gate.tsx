@@ -58,11 +58,14 @@ import {
 import {
   META_UNITAS_ENTRY_TIMINGS,
   prefetchMetaUnitasEntry,
-  prepareMetaUnitasTransition,
   scheduleMetaUnitasEntryWarmup,
   warmMetaUnitasEntry,
   type MetaUnitasTransitionRenderer,
 } from "@/lib/meta-unitas-entry-gate";
+import {
+  createMetaUnitasEntryPlayback,
+  type MetaUnitasEntryPlayback,
+} from "@/lib/meta-unitas-entry-playback";
 // Owner (2026-10-24): 「遷移アニメーションの始まりが遅すぎる」 — the sequence is
 // in the gate's own chunk (as ILLUSIONCULUM's), so its first frame paints
 // with the cover; only the engine (and the pictures) load behind it.
@@ -97,6 +100,7 @@ type GateState = {
   farFromSuit?: "build" | "whole";
   // META UNITAS's call (meta-unitas-entry-sequence).
   metaUnitasCall?: MetaUnitasTransitionRenderer | null;
+  metaUnitasPlayback?: MetaUnitasEntryPlayback;
 };
 
 type CineRect = { x: number; y: number; w: number; h: number };
@@ -947,6 +951,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
   // FAR FROM's call in flight (cancelled when the page hides, as
   // Rexonance's is), and its skip: the button or Escape shortens the cover.
   const farFromTransition = useRef<number | null>(null);
+  const metaUnitasTransition = useRef<number | null>(null);
   const farFromSkip = useRef<(() => void) | null>(null);
   const skipFarFrom = useCallback(() => farFromSkip.current?.(), []);
 
@@ -1155,6 +1160,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
       transitionId.current += 1;
       rexonanceTransition.current = null;
       farFromTransition.current = null;
+      metaUnitasTransition.current = null;
       farFromSkip.current = null;
       rexonanceCoverCancel.current?.();
       rexonanceCoverCancel.current = null;
@@ -1192,7 +1198,9 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
       // misses backgrounding between the click and that first committed frame.
       if (
         document.hidden &&
-        (rexonanceTransition.current !== null || farFromTransition.current !== null)
+        (rexonanceTransition.current !== null ||
+          farFromTransition.current !== null ||
+          metaUnitasTransition.current !== null)
       ) {
         cancelTransition();
       }
@@ -1211,6 +1219,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
       transitionId.current += 1;
       rexonanceTransition.current = null;
       farFromTransition.current = null;
+      metaUnitasTransition.current = null;
       farFromSkip.current = null;
       rexonanceCoverCancel.current?.();
       rexonanceCoverCancel.current = null;
@@ -1567,26 +1576,20 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
             setSignal("idle");
             startedAt = performance.now();
           }
-          // META UNITAS SAGA's entry: the sequence's chunk and ミドル's pictures,
-          // each within a bounded window; if either is late, the plain dive.
+          // Show the wearer immediately, but let the prepared scene own the
+          // cover's lifetime. Downloads/CPU preparation never spend its clock.
           let metaUnitasCall: MetaUnitasTransitionRenderer | null = null;
-          let metaUnitasSkipped = false;
+          let metaUnitasPlayback: MetaUnitasEntryPlayback | undefined;
           if (diveVariant === "meta-unitas" && tier === "full") {
+            metaUnitasTransition.current = requestId;
             if (document.documentElement.dataset.sideMenuOpen === "true") {
               markRouteCover("covering");
             }
-            const warm = warmMetaUnitasEntry();
-            // A cold chunk gets a longer window: the call is the page's
-            // entry, never skipped for a slow first load.
-            // prepareMetaUnitasTransition(4000) is no longer awaited: the
-            // sequence ships with the gate.
+            void warmMetaUnitasEntry();
             metaUnitasCall = MetaUnitasEntrySequence;
             if (!isCurrent()) return;
-            // Nothing more blocks the cover (owner, 2026-10-24: 「遷移開始が遅すぎる」):
-            // the pictures keep decoding under it (the scene holds the wearer,
-            // driver on, until the engine is ready).
-            void warm;
-            startedAt = performance.now();
+            metaUnitasPlayback = createMetaUnitasEntryPlayback();
+            rexonanceCoverCancel.current = metaUnitasPlayback.cancel;
           }
           // PREV / NEXT between dossiers flips the file; entry from anywhere
           // else keeps the rider's own dive or cut-in.
@@ -1639,6 +1642,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
             farFromCall,
             farFromSuit,
             metaUnitasCall,
+            metaUnitasPlayback,
           });
           // The skip, from the first painted frame: before the hold it marks
           // the cover spent; during the hold it ends it (below).
@@ -1647,11 +1651,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
               farFromSkipped = true;
             };
           }
-          if (metaUnitasCall) {
-            farFromSkip.current = () => {
-              metaUnitasSkipped = true;
-            };
-          }
+          if (metaUnitasPlayback) farFromSkip.current = metaUnitasPlayback.skip;
           try {
             if (assets.length) {
               void preloadAssets(assets, () => undefined).catch(() => undefined);
@@ -1715,8 +1715,21 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
             // Images warm independently of the route chunk. A stalled chunk
             // releases the cover before navigation, rather than locking the page.
             if (!(await warmCoveredDestination())) return;
+            if (metaUnitasPlayback) {
+              const result = await metaUnitasPlayback.promise;
+              if (!isCurrent() || result === "cancelled") return;
+              if (result === "unavailable") {
+                // A genuine failure is visible and retryable, never a silent
+                // automatic skip. The existing link permits a direct visit.
+                setDelayedRoute({
+                  href: guardedHref(to, hash, search),
+                  focus: Boolean(focusDestination),
+                });
+                return;
+              }
+            }
             const coverTimeLeft = Math.max(0, timings.cover - (performance.now() - startedAt));
-            if (coverTimeLeft > 0) {
+            if (!metaUnitasPlayback && coverTimeLeft > 0) {
               if (diveVariant === "rexonance" && rexonanceCall) {
                 const hold = waitForRexonanceCover(coverTimeLeft);
                 rexonanceCoverCancel.current = hold.cancel;
@@ -1727,16 +1740,6 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
                 // The same hold (a live reduced-motion or economy preference
                 // ends it), and the skip ends it too.
                 if (!farFromSkipped) {
-                  const hold = waitForRexonanceCover(coverTimeLeft);
-                  rexonanceCoverCancel.current = hold.cancel;
-                  farFromSkip.current = hold.cancel;
-                  await hold.promise;
-                  if (farFromSkip.current === hold.cancel) farFromSkip.current = null;
-                  if (rexonanceCoverCancel.current === hold.cancel)
-                    rexonanceCoverCancel.current = null;
-                }
-              } else if (diveVariant === "meta-unitas" && metaUnitasCall) {
-                if (!metaUnitasSkipped) {
                   const hold = waitForRexonanceCover(coverTimeLeft);
                   rexonanceCoverCancel.current = hold.cancel;
                   farFromSkip.current = hold.cancel;
@@ -1782,6 +1785,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
               farFromCall,
               farFromSuit,
               metaUnitasCall,
+              metaUnitasPlayback,
             });
             await revealRan(
               timings.reveal,
@@ -1792,6 +1796,9 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
                   },
             );
           } finally {
+            metaUnitasPlayback?.cancel();
+            if (metaUnitasPlayback && rexonanceCoverCancel.current === metaUnitasPlayback.cancel)
+              rexonanceCoverCancel.current = null;
             window.setTimeout(releaseScrollMotion, 360);
             if (!document.querySelector?.('.side-panel[data-open="true"]')) {
               delete document.documentElement.dataset.sideMenuOpen;
@@ -1799,6 +1806,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
             if (isCurrent()) {
               if (rexonanceTransition.current === requestId) rexonanceTransition.current = null;
               if (farFromTransition.current === requestId) farFromTransition.current = null;
+              if (metaUnitasTransition.current === requestId) metaUnitasTransition.current = null;
               farFromSkip.current = null;
               setDocumentLoading(false);
               markRouteCover("settling");
@@ -1953,6 +1961,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
         farFromCall={gate.farFromCall}
         farFromSuit={gate.farFromSuit}
         metaUnitasCall={gate.metaUnitasCall}
+        metaUnitasPlayback={gate.metaUnitasPlayback}
         onSkip={skipFarFrom}
       />
       <RouteSignal state={signal} />
@@ -1992,6 +2001,7 @@ function LoadOverlay({
   farFromCall,
   farFromSuit,
   metaUnitasCall,
+  metaUnitasPlayback,
   onSkip,
 }: {
   active: boolean;
@@ -2003,6 +2013,7 @@ function LoadOverlay({
   farFromCall?: FarFromTransitionRenderer | null;
   farFromSuit?: GateState["farFromSuit"];
   metaUnitasCall?: MetaUnitasTransitionRenderer | null;
+  metaUnitasPlayback?: MetaUnitasEntryPlayback;
   onSkip?: () => void;
 }) {
   if (!active) return null;
@@ -2049,6 +2060,7 @@ function LoadOverlay({
         farFromCall={farFromCall}
         farFromSuit={farFromSuit}
         metaUnitasCall={metaUnitasCall}
+        metaUnitasPlayback={metaUnitasPlayback}
         onSkip={onSkip}
       />
     );
@@ -2150,6 +2162,7 @@ function RiderRouteDive({
   farFromCall: FarFromCallSequence,
   farFromSuit,
   metaUnitasCall: MetaUnitasCallSequence,
+  metaUnitasPlayback,
   onSkip,
 }: {
   variant: RiderDiveVariant;
@@ -2160,6 +2173,7 @@ function RiderRouteDive({
   farFromCall?: FarFromTransitionRenderer | null;
   farFromSuit?: GateState["farFromSuit"];
   metaUnitasCall?: MetaUnitasTransitionRenderer | null;
+  metaUnitasPlayback?: MetaUnitasEntryPlayback;
   onSkip?: () => void;
 }) {
   const meta = RIDER_DIVE_META[variant];
@@ -2202,9 +2216,13 @@ function RiderRouteDive({
           tier={scene?.tier ?? "reduced"}
           suit={rexonanceSuit}
         />
-      ) : metaUnitas && MetaUnitasCallSequence ? (
+      ) : metaUnitas && MetaUnitasCallSequence && metaUnitasPlayback ? (
         <>
-          <MetaUnitasCallSequence phase={phase} tier={scene?.tier ?? "reduced"} />
+          <MetaUnitasCallSequence
+            phase={phase}
+            tier={scene?.tier ?? "reduced"}
+            playback={metaUnitasPlayback}
+          />
           {metaUnitasSkippable ? (
             <button
               type="button"

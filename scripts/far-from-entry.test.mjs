@@ -475,7 +475,7 @@ test("the entry plays in the route transition screen as Rexonance's does: prepar
   assert.match(gate, /if \(to === "\/far-from-saga"\) prefetchFarFromEntry\(\);/);
   assert.match(
     gate,
-    /rexonanceTransition\.current !== null \|\| farFromTransition\.current !== null/,
+    /rexonanceTransition\.current !== null \|\|\s*farFromTransition\.current !== null/,
   );
   assert.match(gate, /if \(farFromTransition\.current === null\) releaseFarFromEntry\(\);/);
   assert.equal((gate.match(/farFromTransition\.current = null;/g) ?? []).length, 3);
