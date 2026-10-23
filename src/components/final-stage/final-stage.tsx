@@ -808,8 +808,7 @@ export function FinalStage() {
                   onClick={() => setStage(key)}
                   onPointerUp={(event) => releaseControlFocus(event.currentTarget)}
                 >
-                  <span>{FAR_FROM_SAGA.stages[key].code}</span>
-                  <small>{FAR_FROM_SAGA.stages[key].label}</small>
+                  <span>{FAR_FROM_SAGA.stages[key].label}</span>
                 </button>
               ))}
             </div>
@@ -840,7 +839,6 @@ export function FinalStage() {
                 />
               </figure>
               <div key={`${stage}-copy`}>
-                <small>{activeStage.code}</small>
                 <h3>{activeStage.label}</h3>
                 {activeStage.body.map((paragraph, index) => (
                   <p key={index}>{paragraph}</p>
