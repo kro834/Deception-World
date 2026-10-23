@@ -58,6 +58,85 @@ html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-woodwork {
     inset 0 0 0 7px #d3ac641f;
 }
 
+/* A bookmark slip belongs to the reader; selecting a drawer never moves it. */
+html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-resume {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 18px;
+  margin: 1px 1px 23px;
+  padding: 17px 20px;
+  border: 1px solid #ba9b6f70;
+  border-left: 4px solid #b58c54;
+  background: linear-gradient(105deg, #241c18, #37261f);
+  box-shadow:
+    0 4px 12px #130d0a33,
+    inset 0 0 0 4px #cbb17b08;
+}
+
+html[data-family="dream"]
+  main.dream-page.dream-page
+  .dream-karakuri-resume[data-has-bookmark="true"] {
+  border-left-color: #daa574;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-resume-mark {
+  display: grid;
+  place-items: center;
+  align-self: stretch;
+  min-width: 35px;
+  min-height: 48px;
+  padding: 5px;
+  border: 1px solid #bd9e6b;
+  color: #ecd6ae;
+  font-family: var(--ts-display);
+  font-size: 23px;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-resume-copy {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-resume-copy p {
+  margin: 0 0 4px;
+  color: #f3e5c9;
+  font-family: var(--ts-display);
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.6;
+  letter-spacing: 0.09em;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-resume-copy > span {
+  display: block;
+  color: #d8c6a7;
+  font-size: 13px;
+  line-height: 1.9;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-resume-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  min-height: 46px;
+  padding: 10px 16px;
+  border: 1px solid #c8ab75;
+  background: #eadbb9;
+  color: #3c2b20;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.8;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-resume-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
 html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-drawer-label {
   display: flex;
   justify-content: space-between;
@@ -78,7 +157,7 @@ html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-tabs {
 html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-tab {
   display: flex;
   min-width: 0;
-  min-height: 114px;
+  min-height: 132px;
   align-items: center;
   flex-direction: column;
   justify-content: center;
@@ -111,6 +190,16 @@ html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-tab-number 
   font-size: 12px;
   letter-spacing: 0.13em;
   line-height: 1.5;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-tab-position {
+  font-variant-numeric: tabular-nums;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-tab-count {
+  font-size: 12px;
+  line-height: 1.5;
+  letter-spacing: 0.04em;
 }
 
 html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-tab strong {
@@ -173,7 +262,7 @@ html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-paper {
   grid-area: 1 / 1;
   position: relative;
   min-height: 365px;
-  padding: 23px clamp(22px, 4vw, 60px) 28px;
+  padding: 23px clamp(22px, 3.5vw, 52px) 28px;
   background:
     radial-gradient(ellipse at 8% 0%, #fffaf145, transparent 70%),
     repeating-linear-gradient(93deg, #6e543208 0 1px, transparent 1px 7px), var(--karakuri-paper);
@@ -238,6 +327,78 @@ html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-chapter-hea
   line-height: 1.4;
 }
 
+html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-reading-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 196px;
+  align-items: start;
+  gap: clamp(24px, 3.5vw, 48px);
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-opening {
+  min-width: 0;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-guide {
+  min-width: 0;
+  padding: 4px 0 5px 22px;
+  border-left: 1px solid #88724e66;
+  color: #513f2e;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-guide h4 {
+  margin: 0 0 14px;
+  color: #513f2e;
+  font-family: var(--ts-display);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  line-height: 1.8;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-guide dl {
+  margin: 0;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-guide dl > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 9px 0;
+  border-top: 1px solid #88724e33;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-guide dt,
+html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-guide dd {
+  margin: 0;
+  color: #513f2e;
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-guide dd b {
+  margin-right: 4px;
+  color: #392c21;
+  font-family: var(--ts-display);
+  font-size: 24px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-guide > a {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  gap: 7px;
+  margin-top: 10px;
+  color: #6e3528;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.8;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
 html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-lead {
   max-width: 54em;
   margin: 0 0 12px;
@@ -266,7 +427,9 @@ html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 12px 22px;
-  margin-top: 20px;
+  margin-top: 24px;
+  padding-top: 18px;
+  border-top: 1px solid #6d593430;
 }
 
 html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-actions a {
@@ -278,15 +441,25 @@ html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-actions a {
   padding: 9px 0;
   border-bottom: 1px solid #6a513e;
   color: #473523;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   line-height: 1.8;
   text-decoration: none;
 }
 
 html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-actions a:first-child {
-  color: #883c2a;
-  border-color: #9e5946;
+  padding: 10px 19px;
+  border: 1px solid #743a2e;
+  background: #7b3d30;
+  color: #fff1d7;
+  box-shadow: inset 0 0 0 3px #f9dfbb12;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-scope {
+  margin: 14px 0 0;
+  color: #62513c;
+  font-size: 12px;
+  line-height: 1.8;
 }
 
 html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-actions a:hover {
@@ -418,6 +591,41 @@ html[data-family="dream"]
   outline-offset: -3px;
 }
 
+html[data-family="dream"]
+  main.dream-page.dream-page
+  .dream-karakuri-actions
+  a:first-child:focus-visible {
+  outline-color: #87412c;
+  outline-offset: 3px;
+}
+
+@media (max-width: 1000px) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-reading-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 22px;
+  }
+  html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-guide {
+    padding: 16px 0 0;
+    border-left: 0;
+    border-top: 1px solid #88724e66;
+  }
+  html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-guide h4 {
+    margin-bottom: 9px;
+  }
+  html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-guide dl {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+  }
+  html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-guide dl > div {
+    display: block;
+    padding: 8px 0 0;
+  }
+  html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-guide dd {
+    margin-top: 3px;
+  }
+}
+
 @media (max-width: 700px) {
   html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-cabinet {
     width: calc(100% - 32px);
@@ -430,13 +638,29 @@ html[data-family="dream"]
   html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-woodwork {
     padding: 12px;
   }
+  html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-resume {
+    grid-template-columns: 32px minmax(0, 1fr);
+    gap: 12px;
+    margin-bottom: 19px;
+    padding: 14px 12px;
+  }
+  html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-resume-mark {
+    min-width: 0;
+    align-self: start;
+  }
+  html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-resume-link {
+    grid-column: 1 / -1;
+  }
   html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-tabs {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 7px;
   }
   html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-tab {
-    min-height: 96px;
+    min-height: 116px;
     gap: 6px;
+  }
+  html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-tab-position {
+    display: none;
   }
   html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-paper {
     padding: 18px 17px 22px;
@@ -486,6 +710,14 @@ html[data-family="dream"]
   }
   html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-actions a {
     width: fit-content;
+    max-width: 100%;
+  }
+  html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-guide dl {
+    gap: 7px;
+  }
+  html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-guide dd b {
+    margin-right: 2px;
+    font-size: 21px;
   }
 }
 
@@ -538,6 +770,21 @@ html[data-family="dream"]
 }
 
 @media (forced-colors: active) {
+  html[data-family="dream"]
+    main.dream-page.dream-page
+    .dream-karakuri-cabinet
+    :is(a, button, [role="tabpanel"]):focus-visible {
+    outline-color: Highlight;
+  }
+  html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-resume,
+  html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-guide {
+    border-color: CanvasText;
+  }
+  html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-resume-link,
+  html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-actions a:first-child {
+    border-color: LinkText;
+    color: LinkText;
+  }
   html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-tab[aria-selected="true"] {
     outline: 2px solid Highlight;
   }

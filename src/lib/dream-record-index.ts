@@ -94,6 +94,40 @@ export function buildDreamRecordOptions(records: readonly DreamChronicleEvent[])
   };
 }
 
+/** Each facet keeps the other conditions, so its counts describe the next selection. */
+export function buildDreamRecordFacets(
+  records: readonly DreamChronicleEvent[],
+  filters: DreamRecordFilters = {},
+) {
+  const countValues = (values: readonly string[]) => {
+    const counts: Record<string, number> = Object.create(null);
+    for (const value of values) counts[value] = (counts[value] ?? 0) + 1;
+    return counts;
+  };
+  return {
+    cases: countValues(
+      filterDreamRecords(records, { ...filters, case: "" }).map((record) => record.case),
+    ),
+    people: countValues(
+      filterDreamRecords(records, { ...filters, person: "" }).flatMap((record) => [
+        ...new Set(record.cast),
+      ]),
+    ),
+    places: countValues(
+      filterDreamRecords(records, { ...filters, place: "" }).map((record) => record.place),
+    ),
+  };
+}
+
+/** Neighbours belong to the full source chronology, regardless of active search filters. */
+export function dreamRecordNeighbours(records: readonly DreamChronicleEvent[], no: number) {
+  const index = records.findIndex((record) => record.no === no);
+  return {
+    previous: index > 0 ? records[index - 1] : null,
+    next: index >= 0 ? (records[index + 1] ?? null) : null,
+  };
+}
+
 export function filterDreamRecords(
   records: readonly DreamChronicleEvent[],
   filters: DreamRecordFilters = {},

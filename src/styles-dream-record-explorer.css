@@ -304,6 +304,128 @@
   color: #e0c387;
   font-size: 13px;
   font-variant-numeric: tabular-nums;
+  scroll-margin-top: calc(var(--dream-nav-offset, 160px) + 20px);
+}
+
+.dream-page.dream-page .dream-record-collection {
+  min-width: 0;
+  margin-top: 22px;
+  padding: 16px;
+  color: #eee3cf;
+  border: 1px solid rgb(230 194 142 / 48%);
+  border-left: 3px solid #e6c28e;
+  background: linear-gradient(110deg, rgb(230 194 142 / 10%), transparent 80%), #17101e;
+}
+
+.dream-page.dream-page .dream-record-collection-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 16px;
+}
+
+.dream-page.dream-page .dream-record-collection-heading h4 {
+  margin: 0;
+  color: #f7ecd6;
+  font-size: 18px;
+}
+
+.dream-page.dream-page .dream-record-collection-heading > span {
+  color: #f0dba9;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+
+.dream-page.dream-page .dream-record-collection > p {
+  margin: 10px 0 0;
+  color: #d9d0c0;
+  font-size: 14px;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+}
+
+.dream-page.dream-page .dream-record-collection-views,
+.dream-page.dream-page .dream-record-clues > div {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.dream-page.dream-page
+  :is(.dream-record-collection-views button, .dream-record-save, .dream-record-clues button) {
+  max-width: 100%;
+  min-height: 44px;
+  padding: 9px 12px;
+  color: #f1ddaf;
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.6;
+  text-align: left;
+  overflow-wrap: anywhere;
+  white-space: normal;
+  background: #271c2d;
+  border: 1px solid rgb(230 194 142 / 50%);
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.dream-page.dream-page
+  :is(.dream-record-collection-views button, .dream-record-save)[aria-pressed="true"] {
+  color: #fff1c7;
+  border-color: #e6c28e;
+  background: #423040;
+  box-shadow: inset 0 -3px 0 #e6c28e;
+}
+
+.dream-page.dream-page :is(.dream-record-collection-views button, .dream-record-save):disabled {
+  color: #bfb6aa;
+  cursor: wait;
+}
+
+.dream-page.dream-page .dream-record-collection > .dream-record-collection-warning {
+  color: #ffdaaf;
+}
+
+.dream-page.dream-page .dream-record-collection > .dream-record-collection-status {
+  min-height: 1.8em;
+  color: #f0dba9;
+}
+
+.dream-page.dream-page .dream-record-save {
+  align-self: flex-start;
+  margin-bottom: 14px;
+}
+
+.dream-page.dream-page .dream-record-save,
+.dream-page.dream-page .dream-record-collection-views button {
+  scroll-margin-block: calc(var(--dream-nav-offset, 160px) + 20px) 20px;
+}
+
+.dream-page.dream-page .dream-record-save > span {
+  margin-right: 6px;
+}
+
+.dream-page.dream-page .dream-record-clues {
+  min-width: 0;
+  margin-top: 14px;
+  color: #dfc9a4;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.dream-page.dream-page .dream-record-clues > summary {
+  min-height: 44px;
+  padding-block: 10px;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+
+.dream-page.dream-page .dream-record-count:focus,
+.dream-page.dream-page .dream-record-clues > summary:focus-visible {
+  outline: 2px solid #f0d594;
+  outline-offset: 3px;
 }
 
 .dream-page.dream-page .dream-record-active-filters {
@@ -547,6 +669,15 @@
 }
 
 @media (max-width: 520px) {
+  .dream-page.dream-page .dream-record-collection-views {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .dream-page.dream-page .dream-record-collection {
+    padding: 14px 12px;
+  }
+
   .dream-page.dream-page .dream-record-results {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -591,6 +722,10 @@
 }
 
 @media (forced-colors: active) {
+  .dream-page.dream-page .dream-record-collection,
+  .dream-page.dream-page .dream-record-collection-views button,
+  .dream-page.dream-page .dream-record-save,
+  .dream-page.dream-page .dream-record-clues button,
   .dream-page.dream-page .dream-record-explorer,
   .dream-page.dream-page .dream-record-search-field,
   .dream-page.dream-page .dream-record-search input,
@@ -614,6 +749,24 @@
     background: Highlight;
   }
 
+  .dream-page.dream-page
+    :is(.dream-record-collection-views button, .dream-record-save)[aria-pressed="true"] {
+    color: HighlightText;
+    background: Highlight;
+    border-color: Highlight;
+    box-shadow: none;
+  }
+
+  .dream-page.dream-page .dream-record-collection :is(h4, p, span),
+  .dream-page.dream-page .dream-record-clues > summary {
+    color: CanvasText;
+  }
+
+  .dream-page.dream-page .dream-record-count:focus,
+  .dream-page.dream-page .dream-record-clues > summary:focus-visible {
+    outline-color: Highlight;
+  }
+
   .dream-page.dream-page .dream-record-explorer :is(a, button, input, select):focus-visible {
     outline-color: Highlight;
   }
@@ -625,4 +778,184 @@
 .dream-page .dream-chronicle-item[id]:focus-visible {
   outline: 2px solid #e8c58d;
   outline-offset: 4px;
+}
+
+/* Keep the search desk readable above the later programme skin's compact controls. */
+.dream-page.dream-page #dream-record-explorer .dream-record-facet-help {
+  margin: 24px 0 0;
+  color: #d4cbbd;
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.dream-page.dream-page #dream-record-explorer .dream-record-filters {
+  padding-top: 12px;
+}
+
+.dream-page.dream-page #dream-record-explorer .dream-record-filters select {
+  font-size: 16px;
+}
+
+.dream-page.dream-page #dream-record-explorer .dream-record-quick-tags button,
+.dream-page.dream-page #dream-record-explorer .dream-record-active-filters button,
+.dream-page.dream-page #dream-record-explorer .dream-record-card nav a {
+  min-height: 48px;
+}
+
+.dream-page.dream-page #dream-record-explorer .dream-record-excerpt {
+  display: block;
+  overflow: visible;
+  font-size: 16px;
+  line-height: 1.9;
+  -webkit-line-clamp: unset;
+}
+
+.dream-page.dream-page #dream-record-explorer .dream-record-reading {
+  margin-top: 12px;
+  border-block: 1px solid rgb(219 186 117 / 40%);
+}
+
+.dream-page.dream-page #dream-record-explorer .dream-record-reading > summary {
+  display: flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 2px;
+  color: #f3e0b0;
+  font-size: 14px;
+  line-height: 1.6;
+  list-style: none;
+  cursor: pointer;
+}
+
+.dream-page.dream-page
+  #dream-record-explorer
+  .dream-record-reading
+  > summary::-webkit-details-marker {
+  display: none;
+}
+
+.dream-page.dream-page #dream-record-explorer .dream-record-reading > summary > span::before {
+  content: "+";
+  font-size: 22px;
+}
+
+.dream-page.dream-page #dream-record-explorer .dream-record-reading[open] > summary > span::before {
+  content: "−";
+}
+
+.dream-page.dream-page #dream-record-explorer .dream-record-reading-body {
+  min-width: 0;
+  margin-bottom: 14px;
+  padding: clamp(14px, 2vw, 22px);
+  color: #312333;
+  background: #f1e6cf;
+  border: 1px solid #d8bd88;
+  overflow-wrap: anywhere;
+}
+
+.dream-page.dream-page #dream-record-explorer .dream-record-reading-body > p {
+  margin: 0;
+  color: #312333;
+  font-size: 16px;
+  line-height: 2;
+  white-space: pre-wrap;
+}
+
+.dream-page.dream-page #dream-record-explorer .dream-record-reading-body > p + p {
+  margin-top: 1em;
+}
+
+.dream-page.dream-page #dream-record-explorer .dream-record-speaker {
+  display: block;
+  color: #79353c;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.8;
+}
+
+.dream-page.dream-page #dream-record-explorer .dream-record-reading-body mark {
+  color: #4b2330;
+  background: #e4c58d;
+  box-shadow: inset 0 -1px 0 #79353c;
+}
+
+.dream-page.dream-page #dream-record-explorer .dream-record-context {
+  display: grid;
+  gap: 10px;
+  margin-top: 22px;
+  padding-top: 16px;
+  border-top: 1px solid #b29c7e;
+}
+
+.dream-page.dream-page #dream-record-explorer .dream-record-context > p {
+  margin: 0;
+  color: #5b4657;
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.dream-page.dream-page #dream-record-explorer .dream-record-context a {
+  display: grid;
+  min-width: 0;
+  min-height: 48px;
+  gap: 3px;
+  padding: 10px 12px;
+  color: #402a3d;
+  background: rgb(255 255 255 / 34%);
+  border: 1px solid #a88f75;
+  font-size: 14px;
+  line-height: 1.7;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.dream-page.dream-page #dream-record-explorer .dream-record-context small {
+  color: #79353c;
+  font-size: 12px;
+}
+
+.dream-page.dream-page #dream-record-explorer .dream-record-reading > summary:focus-visible,
+.dream-page.dream-page #dream-record-explorer .dream-record-context a:focus-visible {
+  outline: 2px solid #cc493b;
+  outline-offset: 3px;
+}
+
+.dream-page.dream-page
+  #dream-record-explorer
+  :is(
+    .dream-record-quick-tags button,
+    .dream-record-active-filters button,
+    .dream-record-card nav a,
+    .dream-record-save,
+    .dream-record-collection-views button,
+    .dream-record-clues button,
+    .dream-record-reading > summary,
+    .dream-record-clues > summary,
+    .dream-record-filters > button,
+    .dream-record-empty button,
+    .dream-record-more,
+    .dream-record-context a
+  ) {
+  min-height: 48px;
+  font-size: 16px;
+}
+
+.dream-page.dream-page #dream-record-explorer .dream-record-clues {
+  margin-top: 4px;
+}
+
+@media (forced-colors: active) {
+  .dream-page.dream-page #dream-record-explorer .dream-record-reading-body,
+  .dream-page.dream-page #dream-record-explorer .dream-record-context a {
+    color: CanvasText;
+    background: Canvas;
+    border-color: CanvasText;
+  }
+
+  .dream-page.dream-page #dream-record-explorer .dream-record-reading-body mark {
+    color: HighlightText;
+    background: Highlight;
+  }
 }
