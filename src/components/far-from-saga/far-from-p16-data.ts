@@ -240,31 +240,26 @@ export function p16ChangeAgainstExtremeSpoken(metric: ExtremeP14Metric): string 
 export const P16_TOPICS: readonly {
   key: string;
   title: string;
-  code: string;
   body: readonly string[];
 }[] = [
   {
     key: "priority",
     title: "処理の優先制御",
-    code: "PRIORITY",
     body: [paragraphsOf(PART1)[1], paragraphsOf(PART2)[2]],
   },
   {
     key: "sync",
     title: "神経同期と攻撃制御",
-    code: "SYNC",
     body: [paragraphsOf(PART1)[3]],
   },
   {
     key: "bit",
     title: "FARFROM BITとの分散処理",
-    code: "DISTRIBUTED",
     body: [paragraphsOf(PART1)[4]],
   },
   {
     key: "heat",
     title: "熱管理",
-    code: "THERMAL",
     body: [paragraphsOf(PART1)[5]],
   },
 ];

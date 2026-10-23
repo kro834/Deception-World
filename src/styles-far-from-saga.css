@@ -225,30 +225,8 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
   isolation: isolate;
 }
 
-/* The kicker: etched, ice, one tracking; a gold lead before it. */
-.rxs-page.rxs-page.ffs-page .rxs-hero-copy > p:first-child {
-  display: flex;
-  gap: 14px;
-  align-items: center;
-  justify-content: center;
-  margin: 0 0 18px;
-  color: var(--fft-text-kicker);
-  font-family: var(--fft-etch);
-  font-size: 13px;
-  font-weight: 400;
-  letter-spacing: var(--fft-track-kicker);
-  line-height: 1.5;
-}
-
-.rxs-page.rxs-page.ffs-page .rxs-hero-copy > p:first-child::before {
-  flex: none;
-  width: 44px;
-  height: 1px;
-  content: "";
-  background: var(--fft-gold);
-}
-
-/* The Latin name, forged in gold; the Japanese title under it. */
+/* The name leads the copy (owner, 2026-10-23: no eyebrow, no Latin
+   duplicate — the FAR FROM ghost behind it is the Latin mark). */
 .rxs-page.rxs-page.ffs-page .rxs-hero h1 {
   color: var(--fft-text-1);
   background: none;
@@ -263,23 +241,6 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
   text-shadow:
     0 2px 0 rgb(0 2 7 / 55%),
     0 18px 48px rgb(0 0 0 / 45%);
-}
-
-.rxs-page.rxs-page.ffs-page .rxs-hero h1 > span {
-  display: block;
-  margin-bottom: 0.3em;
-  background: linear-gradient(180deg, #fff3cf, #ffd77a 48%, #c98a2e);
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
-  -webkit-text-fill-color: transparent;
-  font-family: var(--fft-forge);
-  font-size: clamp(22px, 0.36em, 42px);
-  font-weight: 700;
-  font-stretch: 125%;
-  letter-spacing: 0.06em;
-  text-shadow: none;
-  filter: drop-shadow(0 2px 0 rgb(72 46 12 / 70%));
 }
 
 .rxs-page.rxs-page.ffs-page .rxs-hero-lede {
@@ -301,30 +262,28 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
   font-weight: 700;
 }
 
-/* The five stages, on one etched line. */
+/* The five forms, on one etched line, led by a hairline in their lights
+   (the count is the line itself: no "5 STAGES" chip). */
 .rxs-page.rxs-page.ffs-page .ffs-stages-line {
   display: flex;
   flex-wrap: wrap;
   gap: 6px 14px;
-  align-items: baseline;
+  align-items: center;
   justify-content: center;
-  margin: 22px 0 0;
-  color: var(--fft-text-3);
+  margin: 24px 0 0;
+  color: var(--fft-text-2);
   font-family: var(--fft-display);
   font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.1em;
 }
 
-.rxs-page.rxs-page.ffs-page .ffs-stages-line > span {
-  padding: 4px 9px 3px;
-  border: 1px solid rgb(255 215 122 / 40%);
-  color: var(--fft-gold);
-  font-family: var(--fft-etch);
-  font-size: 10px;
-  font-weight: 400;
-  letter-spacing: 0.2em;
-  clip-path: polygon(0 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
+.rxs-page.rxs-page.ffs-page .ffs-stages-line::before {
+  flex: none;
+  width: 44px;
+  height: 1px;
+  content: "";
+  background: var(--fft-rainbow);
 }
 
 /* The two doors. */
@@ -438,44 +397,6 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
   mask-image: linear-gradient(to bottom, #000 0 82%, transparent 99%);
 }
 
-/* The slate: a forged take number, the etched form line, the gold role
-   (desktop only: on a phone it would stand over the figure's head). */
-.rxs-page.rxs-page.ffs-page .ffs-stage-slate {
-  display: none;
-  position: absolute;
-  z-index: 5;
-  top: clamp(18px, 2.4vw, 28px);
-  left: clamp(18px, 2.4vw, 28px);
-  grid-template-columns: auto auto;
-  align-items: center;
-  column-gap: 12px;
-  padding-inline-start: 14px;
-  border-inline-start: 2px solid var(--fft-gold);
-  color: var(--fft-text-kicker);
-  font-family: var(--fft-etch);
-  font-size: 12px;
-  font-weight: 400;
-  line-height: 1.3;
-  letter-spacing: var(--fft-track-kicker);
-  white-space: nowrap;
-  pointer-events: none;
-}
-
-.rxs-page.rxs-page.ffs-page .ffs-stage-slate > b {
-  color: var(--fft-text-1);
-  font-family: var(--fft-forge);
-  font-size: var(--fft-step-4);
-  font-weight: 300;
-  line-height: 1;
-  letter-spacing: -0.01em;
-}
-
-.rxs-page.rxs-page.ffs-page .ffs-stage-slate > small {
-  grid-column: 1 / -1;
-  color: var(--fft-gold);
-  font-size: 12px;
-}
-
 /* The aperture and its three rings (static; the rings settle once on arrival). */
 .rxs-page.rxs-page.ffs-page .ffs-aperture {
   position: absolute;
@@ -547,18 +468,38 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
   border-color: rgb(201 155 255 / 16%);
 }
 
-/* The three read-outs beside the figure (desktop only). */
-.rxs-page.rxs-page.ffs-page .ffs-callouts {
-  display: none;
+/* The scroll cue: its line alone, falling to a gold point (no words: the
+   form says it; the link is named 概要へ for assistive tech). A 44px
+   target around the line. */
+.rxs-page.rxs-page.ffs-page .rxs-scroll-cue {
+  justify-content: flex-end;
+  min-width: 44px;
+  min-height: 56px;
+  color: var(--fft-text-2);
 }
 
-/* The scroll cue. */
-.rxs-page.rxs-page.ffs-page .rxs-scroll-cue {
-  color: var(--fft-text-2);
-  font-family: var(--fft-display);
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.16em;
+.rxs-page.rxs-page.ffs-page .rxs-scroll-cue i {
+  position: relative;
+  height: 44px;
+  background: linear-gradient(rgb(127 230 255 / 0%), var(--fft-ice));
+}
+
+.rxs-page.rxs-page.ffs-page .rxs-scroll-cue i::after {
+  position: absolute;
+  bottom: -3px;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  content: "";
+  border-radius: 50%;
+  background: var(--fft-gold);
+  box-shadow: 0 0 10px rgb(255 215 122 / 60%);
+  translate: -50% 0;
+}
+
+.rxs-page.rxs-page.ffs-page .rxs-scroll-cue:focus-visible {
+  outline: 2px solid #a5edff;
+  outline-offset: 4px;
 }
 
 /* Column hero (phones, portrait tablets): the stage first, then the copy. */
@@ -656,7 +597,6 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
     text-align: start;
   }
 
-  .rxs-page.rxs-page.ffs-page .rxs-hero-copy > p:first-child,
   .rxs-page.rxs-page.ffs-page .ffs-stages-line,
   .rxs-page.rxs-page.ffs-page .ffs-hero-rail {
     justify-content: flex-start;
@@ -685,76 +625,6 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
     margin: 0 0 36px;
     text-align: start;
   }
-
-  .rxs-page.rxs-page.ffs-page .ffs-stage-slate {
-    display: grid;
-  }
-
-  /* The read-outs: a lead and the figure on a dark plate, at the stage's
-     right edge; the figure leaves them the room. */
-  .rxs-page.rxs-page.ffs-page .ffs-callouts {
-    position: absolute;
-    z-index: 5;
-    inset: 0;
-    display: block;
-    pointer-events: none;
-  }
-
-  .rxs-page.rxs-page.ffs-page .ffs-callout {
-    position: absolute;
-    right: clamp(16px, 2.2vw, 28px);
-    display: block;
-  }
-
-  .rxs-page.rxs-page.ffs-page .ffs-callout.is-punch {
-    top: 23%;
-  }
-
-  .rxs-page.rxs-page.ffs-page .ffs-callout.is-jump {
-    top: 44%;
-  }
-
-  .rxs-page.rxs-page.ffs-page .ffs-callout.is-core {
-    top: 66%;
-  }
-
-  .rxs-page.rxs-page.ffs-page .ffs-callout > span {
-    display: grid;
-    grid-template-columns: auto;
-    justify-items: end;
-    padding: 10px 14px 10px 18px;
-    border-inline-end: 2px solid rgb(255 215 122 / 70%);
-    background: linear-gradient(90deg, transparent, rgb(2 5 11 / 78%) 40%);
-    text-align: end;
-  }
-
-  .rxs-page.rxs-page.ffs-page .ffs-callout i {
-    display: block;
-    width: 48px;
-    height: 1px;
-    margin-bottom: 8px;
-    background: linear-gradient(90deg, transparent, var(--fft-ice));
-  }
-
-  .rxs-page.rxs-page.ffs-page .ffs-callout b {
-    color: var(--fft-text-1);
-    font-family: var(--fft-forge);
-    font-size: clamp(26px, 2.2vw, 34px);
-    font-weight: 600;
-    line-height: 1;
-    letter-spacing: 0.01em;
-    font-variant-numeric: tabular-nums lining-nums;
-    text-shadow: 0 2px 12px rgb(0 0 0 / 70%);
-  }
-
-  .rxs-page.rxs-page.ffs-page .ffs-callout em {
-    margin-top: 6px;
-    color: var(--fft-text-kicker);
-    font-family: var(--fft-etch);
-    font-size: 11px;
-    font-style: normal;
-    letter-spacing: 0.22em;
-  }
 }
 
 @media (min-width: 1300px) {
@@ -764,11 +634,14 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
 }
 
 /* ================================================================
-   CONTENTS: the chapter map under the hero
+   The chapter map under the hero: five numbered doors
+   (owner, 2026-10-23: 「不要なセカンダリラベルや説明を避ける。」 — no
+   CONTENTS heading, count, codes or descriptions: the outlined numeral is
+   the bar's, the name is the chapter's, the arrow is the door).
    ================================================================ */
 .rxs-page.rxs-page.ffs-page .ffs-chapter-map {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 0;
   max-width: none;
   margin: 0;
@@ -778,101 +651,58 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
   contain: layout style;
 }
 
-.rxs-page.rxs-page.ffs-page .ffs-chapter-map-heading {
-  grid-column: 1 / -1;
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  margin: 0;
-  padding: 13px 20px;
-  border-bottom: 1px solid var(--fft-line);
-  color: var(--fft-text-1);
-  font-family: var(--fft-etch);
-  font-size: 12px;
-  font-weight: 400;
-  line-height: 1.4;
-  letter-spacing: var(--fft-track-kicker);
-}
-
-.rxs-page.rxs-page.ffs-page .ffs-chapter-map-heading small {
-  color: var(--fft-text-3);
-  font: inherit;
-  letter-spacing: var(--fft-track-label);
-  white-space: nowrap;
-  font-variant-numeric: tabular-nums lining-nums;
-}
-
 .rxs-page.rxs-page.ffs-page .ffs-chapter-map a {
   position: relative;
   display: grid;
-  grid-template-columns: 34px minmax(0, 1fr) 16px;
-  grid-template-rows: auto auto auto;
-  align-content: center;
-  gap: 3px 12px;
-  min-height: 108px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto auto;
+  align-content: space-between;
+  gap: 14px 12px;
   min-width: 0;
-  padding: 18px 20px;
+  min-height: 132px;
+  padding: 22px clamp(14px, 1.8vw, 24px) 20px;
   border: 0;
   background: transparent;
   transition: background 180ms ease;
 }
 
-.rxs-page.rxs-page.ffs-page .ffs-chapter-map a:nth-of-type(even) {
+.rxs-page.rxs-page.ffs-page .ffs-chapter-map a + a {
   border-left: 1px solid var(--fft-line-soft);
 }
 
-.rxs-page.rxs-page.ffs-page .ffs-chapter-map a:nth-of-type(n + 3) {
-  border-top: 1px solid var(--fft-line-soft);
-}
-
+/* The door's lit edge: the chapter's own number, outlined as the heads draw it. */
 .rxs-page.rxs-page.ffs-page .ffs-chapter-map a b {
   grid-column: 1;
-  grid-row: 1 / -1;
-  align-self: start;
-  color: var(--fft-gold);
-  font-family: var(--fft-forge);
-  font-size: 16px;
-  font-weight: 600;
-  line-height: 1.1;
-  font-variant-numeric: tabular-nums lining-nums;
-}
-
-.rxs-page.rxs-page.ffs-page .ffs-chapter-map a small {
-  grid-column: 2;
   grid-row: 1;
-  color: var(--fft-text-kicker);
-  font-family: var(--fft-etch);
-  font-size: 10px;
-  letter-spacing: var(--fft-track-label);
-  overflow-wrap: anywhere;
+  align-self: start;
+  color: transparent;
+  font-family: var(--fft-forge);
+  font-size: clamp(34px, 3vw, 46px);
+  font-weight: 300;
+  font-stretch: 125%;
+  line-height: 0.9;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums lining-nums;
+  -webkit-text-stroke: 1px var(--fft-gold);
 }
 
 .rxs-page.rxs-page.ffs-page .ffs-chapter-map a span {
-  grid-column: 2;
+  grid-column: 1 / -1;
   grid-row: 2;
+  min-width: 0;
   color: var(--fft-text-1);
   font-family: var(--fft-display);
-  font-size: clamp(17px, 1.6vw, 21px);
+  font-size: clamp(16px, 1.4vw, 20px);
   font-weight: 700;
   line-height: 1.3;
   letter-spacing: 0.03em;
-}
-
-.rxs-page.rxs-page.ffs-page .ffs-chapter-map a em {
-  grid-column: 2;
-  grid-row: 3;
-  min-width: 0;
-  color: var(--fft-text-3);
-  font-size: 12px;
-  font-style: normal;
-  line-height: 1.6;
   overflow-wrap: anywhere;
 }
 
 .rxs-page.rxs-page.ffs-page .ffs-chapter-map a i {
-  grid-column: 3;
-  grid-row: 1 / -1;
-  align-self: center;
+  grid-column: 2;
+  grid-row: 1;
+  align-self: start;
   color: var(--fft-gold);
   font-size: 15px;
   font-style: normal;
@@ -889,76 +719,45 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
   }
 }
 
-/* The tracklist (desktop): two columns of six rows — number, code, name, line. */
-@media (min-width: 1100px) {
-  .rxs-page.rxs-page.ffs-page .ffs-chapter-map a {
-    grid-template-columns: 40px 132px minmax(0, auto) minmax(0, 1fr) 20px;
-    grid-template-rows: auto;
-    align-items: baseline;
-    gap: 0 16px;
-    min-height: 60px;
-    padding: 14px 20px;
-  }
-
-  .rxs-page.rxs-page.ffs-page .ffs-chapter-map a:nth-of-type(n + 3) {
-    border-top: 1px solid var(--fft-line-soft);
-  }
-
-  .rxs-page.rxs-page.ffs-page .ffs-chapter-map a b {
-    grid-row: 1;
-    align-self: baseline;
-  }
-
-  .rxs-page.rxs-page.ffs-page .ffs-chapter-map a small {
-    grid-column: 2;
-    grid-row: 1;
-    white-space: nowrap;
-  }
-
-  .rxs-page.rxs-page.ffs-page .ffs-chapter-map a span {
-    grid-column: 3;
-    grid-row: 1;
-    white-space: nowrap;
-  }
-
-  .rxs-page.rxs-page.ffs-page .ffs-chapter-map a em {
-    grid-column: 4;
-    grid-row: 1;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .rxs-page.rxs-page.ffs-page .ffs-chapter-map a i {
-    grid-column: 5;
-    grid-row: 1;
-    align-self: center;
-    justify-self: end;
-  }
-}
-
-@media (max-width: 680px) {
+/* Phones: the doors as a list, numeral, name and arrow on one row. */
+@media (max-width: 760px) {
   .rxs-page.rxs-page.ffs-page .ffs-chapter-map {
     grid-template-columns: minmax(0, 1fr);
     padding-inline: 0;
   }
 
   .rxs-page.rxs-page.ffs-page .ffs-chapter-map a {
-    grid-template-columns: 30px minmax(0, 1fr) 16px;
-    min-height: 76px;
-    padding: 12px 16px;
-  }
-
-  .rxs-page.rxs-page.ffs-page .ffs-chapter-map a:nth-of-type(even) {
-    border-left: 0;
+    grid-template-columns: 52px minmax(0, 1fr) 16px;
+    grid-template-rows: auto;
+    align-items: center;
+    gap: 0 12px;
+    min-height: 60px;
+    padding: 10px 20px;
   }
 
   .rxs-page.rxs-page.ffs-page .ffs-chapter-map a + a {
     border-top: 1px solid var(--fft-line-soft);
+    border-left: 0;
   }
 
-  .rxs-page.rxs-page.ffs-page .ffs-chapter-map a em {
-    font-size: 11px;
+  .rxs-page.rxs-page.ffs-page .ffs-chapter-map a b {
+    grid-column: 1;
+    grid-row: 1;
+    align-self: center;
+    font-size: 28px;
+  }
+
+  .rxs-page.rxs-page.ffs-page .ffs-chapter-map a span {
+    grid-column: 2;
+    grid-row: 1;
+    font-size: 16px;
+  }
+
+  .rxs-page.rxs-page.ffs-page .ffs-chapter-map a i {
+    grid-column: 3;
+    grid-row: 1;
+    align-self: center;
+    justify-self: end;
   }
 }
 
@@ -1054,15 +853,18 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
   background: radial-gradient(circle at 50% 0%, rgb(201 155 255 / 10%), transparent 30rem), var(--fft-ink-2);
 }
 
-/* ---------- The head: numeral, kicker, title, lede, hairline ---------- */
+/* ---------- The head: numeral, title, (lede), hairline ----------
+   Owner (2026-10-23): no secondary labels — the "0N / CODE" kicker and the
+   "0N / 05" index went. The outlined numeral (the bar's number) and the
+   catchphrase share one line; the hairline closes the head. */
 .rxs-page.rxs-page.ffs-page > .rxs-section > .rxs-section-heading {
   position: relative;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
-  grid-template-rows: auto auto auto;
-  column-gap: clamp(20px, 3vw, 44px);
+  grid-template-rows: auto auto;
+  column-gap: clamp(22px, 3.2vw, 48px);
   row-gap: 0;
-  align-items: start;
+  align-items: center;
   max-width: var(--fft-wrap);
   margin: 0 auto clamp(44px, 6vw, 72px);
   padding-bottom: clamp(24px, 3vw, 36px);
@@ -1081,13 +883,14 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
   transform-origin: 0 50%;
 }
 
-/* The forged numeral: the chapter's count, outlined in gold. Generated
-   with empty alternative text, so assistive technology reads the kicker. */
+/* The forged numeral: the chapter's count, outlined in gold, the title's
+   mark (generated with empty alternative text: the title names the chapter
+   and the bar numbers it). */
 .rxs-page.rxs-page.ffs-page > .rxs-section > .rxs-section-heading::before {
   grid-column: 1;
-  grid-row: 1 / span 2;
-  align-self: start;
-  margin-top: -0.08em;
+  grid-row: 1;
+  align-self: center;
+  margin-top: -0.04em;
   content: counter(ffs-chapter, decimal-leading-zero) / "";
   color: transparent;
   font-family: var(--fft-forge);
@@ -1101,44 +904,10 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
   text-shadow: 0 0 24px rgb(255 215 122 / 18%);
 }
 
-.rxs-page.rxs-page.ffs-page > .rxs-section > .rxs-section-heading > p {
-  grid-column: 2;
-  grid-row: 1;
-  display: flex;
-  gap: 14px;
-  align-items: center;
-  justify-content: flex-start;
-  margin: 0 0 14px;
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-  color: var(--fft-text-kicker);
-  background: none;
-  font-family: var(--fft-etch);
-  font-size: 12px;
-  font-weight: 400;
-  line-height: 1.5;
-  letter-spacing: var(--fft-track-kicker);
-  text-shadow: none;
-  text-wrap: balance;
-}
-
-.rxs-page.rxs-page.ffs-page > .rxs-section > .rxs-section-heading > p::before {
-  flex: none;
-  width: 28px;
-  height: 1px;
-  margin: 0;
-  content: "";
-  background: var(--fft-gold);
-}
-
-.rxs-page.rxs-page.ffs-page > .rxs-section > .rxs-section-heading > p::after {
-  content: none;
-}
-
 .rxs-page.rxs-page.ffs-page > .rxs-section > .rxs-section-heading > h2 {
   grid-column: 2;
-  grid-row: 2;
+  grid-row: 1;
+  align-self: center;
   margin: 0;
   color: var(--fft-text-1);
   background: none;
@@ -1149,12 +918,18 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
   line-height: 1.1;
   letter-spacing: 0.045em;
   text-wrap: balance;
-  word-break: auto-phrase;
+  /* The catchphrase breaks only between its phrases (the <wbr>s the page
+     sets between them, the text unchanged), in every engine — WebKit has
+     no auto-phrase and split 「距離｜は、」 — and anywhere only if a phrase
+     alone outruns the line. */
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+  line-break: strict;
 }
 
 .rxs-page.rxs-page.ffs-page > .rxs-section > .rxs-section-heading > span {
   grid-column: 2;
-  grid-row: 3;
+  grid-row: 2;
   max-width: 44em;
   margin: 18px 0 0;
   color: var(--fft-text-2);
@@ -1166,7 +941,8 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
   text-wrap: pretty;
 }
 
-/* A sub-chapter's head: no numeral, the title a step down. */
+/* A sub-chapter's head: no numeral, the title a step down, so it reads as
+   its chapter's continuation by scale alone. */
 .rxs-page.rxs-page.ffs-page > .ffs-subchapter > .rxs-section-heading {
   grid-template-columns: minmax(0, 1fr);
   margin-bottom: clamp(32px, 4vw, 48px);
@@ -1176,7 +952,6 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
   content: none;
 }
 
-.rxs-page.rxs-page.ffs-page > .ffs-subchapter > .rxs-section-heading > p,
 .rxs-page.rxs-page.ffs-page > .ffs-subchapter > .rxs-section-heading > h2,
 .rxs-page.rxs-page.ffs-page > .ffs-subchapter > .rxs-section-heading > span {
   grid-column: 1;
@@ -1191,43 +966,42 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
   padding-top: 0;
 }
 
+/* Phones: the numeral over the title, the lede under it. */
 @media (max-width: 760px) {
   .rxs-page.rxs-page.ffs-page > .rxs-section > .rxs-section-heading {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: auto auto auto auto;
+    grid-template-rows: auto auto auto;
+    align-items: start;
   }
 
   .rxs-page.rxs-page.ffs-page > .rxs-section > .rxs-section-heading::before {
     grid-column: 1;
     grid-row: 1;
-    margin: 0 0 6px;
+    align-self: start;
+    margin: 0 0 12px;
     font-size: clamp(48px, 14vw, 64px);
-  }
-
-  .rxs-page.rxs-page.ffs-page > .rxs-section > .rxs-section-heading > p {
-    grid-column: 1;
-    grid-row: 2;
-    gap: 10px;
-    margin-bottom: 10px;
-    letter-spacing: 0.18em;
-  }
-
-  .rxs-page.rxs-page.ffs-page > .rxs-section > .rxs-section-heading > p::before {
-    width: 18px;
   }
 
   .rxs-page.rxs-page.ffs-page > .rxs-section > .rxs-section-heading > h2 {
     grid-column: 1;
-    grid-row: 3;
+    grid-row: 2;
     font-size: clamp(34px, 9vw, 44px);
   }
 
   .rxs-page.rxs-page.ffs-page > .rxs-section > .rxs-section-heading > span {
     grid-column: 1;
-    grid-row: 4;
+    grid-row: 3;
     margin-top: 14px;
     font-size: 15px;
     line-height: 1.85;
+  }
+
+  .rxs-page.rxs-page.ffs-page > .ffs-subchapter > .rxs-section-heading > h2 {
+    grid-row: 1;
+  }
+
+  .rxs-page.rxs-page.ffs-page > .ffs-subchapter > .rxs-section-heading > span {
+    grid-row: 2;
   }
 }
 
@@ -1235,7 +1009,6 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
 .rxs-page.rxs-page.ffs-page .ffs-articles article h3,
 .rxs-page.rxs-page.ffs-page .ffs-finisher > h3,
 .rxs-page.rxs-page.ffs-page .rxs-stage-panel > div > h3,
-.rxs-page.rxs-page.ffs-page .ffs-form-status strong,
 .rxs-page.rxs-page.ffs-page .ffs-form-comparison > summary > strong,
 .rxs-page.rxs-page.ffs-page .ffs-comparison-card h3 {
   color: var(--fft-text-1);
@@ -1245,14 +1018,9 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
 }
 
 .rxs-page.rxs-page.ffs-page .ffs-articles article header,
-.rxs-page.rxs-page.ffs-page .ffs-articles article header small,
-.rxs-page.rxs-page.ffs-page .ffs-finisher > small,
 .rxs-page.rxs-page.ffs-page .ffs-specs dt,
-.rxs-page.rxs-page.ffs-page .rxs-stage-panel > div > small,
-.rxs-page.rxs-page.ffs-page .ffs-form-status-heading span,
 .rxs-page.rxs-page.ffs-page .ffs-form-comparison > summary > span:not(.ffs-comparison-codes),
-.rxs-page.rxs-page.ffs-page .ffs-weapons li span,
-.rxs-page.rxs-page.ffs-page .ffs-footer > div > p {
+.rxs-page.rxs-page.ffs-page .ffs-weapons li span {
   font-family: var(--fft-etch);
   font-weight: 400;
   letter-spacing: var(--fft-track-kicker);
@@ -1367,77 +1135,6 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
   font-family: var(--fft-etch);
   font-size: 10px;
   letter-spacing: 0.16em;
-}
-
-/* The form-sequence status beside the rail (read-only; the rail owns input). */
-.rxs-page.rxs-page.ffs-page .ffs-form-status {
-  box-sizing: border-box;
-  width: min(780px, 100%);
-  margin: 18px auto 0;
-  padding: 16px 18px;
-  border: 1px solid color-mix(in srgb, var(--ffs-accent) 30%, transparent);
-  background: linear-gradient(135deg, color-mix(in srgb, var(--ffs-accent) 7%, transparent), transparent 60%), rgb(5 9 16 / 80%);
-  clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
-}
-
-.rxs-page.rxs-page.ffs-page .ffs-form-status-heading {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  color: var(--fft-text-kicker);
-  font-size: 11px;
-}
-
-.rxs-page.rxs-page.ffs-page .ffs-form-status-heading span:last-child {
-  color: var(--fft-text-3);
-}
-
-.rxs-page.rxs-page.ffs-page .ffs-form-status-track {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 6px;
-  margin: 12px 0 14px;
-}
-
-.rxs-page.rxs-page.ffs-page .ffs-form-status-track i {
-  display: block;
-  height: 3px;
-  background: var(--fft-line-soft);
-  transition: background 320ms ease;
-}
-
-.rxs-page.rxs-page.ffs-page .ffs-form-status-track i.is-reached {
-  background: var(--ffs-accent);
-  box-shadow: 0 0 10px color-mix(in srgb, var(--ffs-accent) 50%, transparent);
-}
-
-.rxs-page.rxs-page.ffs-page .ffs-form-status p {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px 14px;
-  align-items: baseline;
-  margin: 0;
-}
-
-.rxs-page.rxs-page.ffs-page .ffs-form-status p > span {
-  color: var(--fft-text-3);
-  font-size: 12px;
-  letter-spacing: 0.06em;
-}
-
-.rxs-page.rxs-page.ffs-page .ffs-form-status strong {
-  font-size: var(--fft-step-3);
-  line-height: 1.3;
-  letter-spacing: 0.02em;
-}
-
-.rxs-page.rxs-page.ffs-page .ffs-form-status small {
-  padding: 3px 8px;
-  border: 1px solid color-mix(in srgb, var(--ffs-accent) 50%, transparent);
-  color: var(--ffs-accent);
-  font-family: var(--fft-etch);
-  font-size: 11px;
-  letter-spacing: var(--fft-track-label);
 }
 
 /* The panel. */
@@ -1718,9 +1415,8 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
 .ffs-articles article header {
   display: flex;
   align-items: baseline;
-  justify-content: space-between;
   gap: 12px;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
   color: var(--fft-gold);
   font-size: 11px;
 }
@@ -1731,13 +1427,6 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
   font-weight: 300;
   line-height: 1;
   letter-spacing: 0.02em;
-}
-
-.ffs-articles article header small {
-  color: var(--fft-text-kicker);
-  font-size: 10px;
-  letter-spacing: var(--fft-track-label);
-  text-align: end;
 }
 
 .ffs-articles article h3 {
@@ -1834,14 +1523,8 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
   background: var(--fft-rainbow);
 }
 
-.ffs-finisher > small {
-  display: block;
-  color: var(--fft-text-kicker);
-  font-size: 11px;
-}
-
 .ffs-finisher > h3 {
-  margin: 12px 0 20px;
+  margin: 4px 0 20px;
   font-size: clamp(24px, 2.4vw, 36px);
   letter-spacing: 0.01em;
   line-height: 1.3;
@@ -1909,12 +1592,6 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
 .rxs-page.rxs-page.ffs-page .ffs-footer > .ffs-footer-top a:focus-visible {
   outline: 2px solid #a5edff;
   outline-offset: 3px;
-}
-
-.rxs-page.rxs-page.ffs-page .ffs-footer > div > p {
-  margin: 0 0 16px;
-  color: var(--fft-gold);
-  font-size: 12px;
 }
 
 .rxs-page.rxs-page.ffs-page .ffs-footer h2 {
@@ -2023,18 +1700,9 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
     text-align: start;
   }
 
-  .rxs-page.rxs-page.ffs-page .rxs-hero-copy > p:first-child,
   .rxs-page.rxs-page.ffs-page .ffs-stages-line,
   .rxs-page.rxs-page.ffs-page .ffs-hero-rail {
     justify-content: flex-start;
-  }
-
-  .rxs-page.rxs-page.ffs-page .rxs-hero-copy > p:first-child {
-    flex-wrap: wrap;
-    gap: 8px 10px;
-    padding-inline-end: 72px;
-    font-size: 11px;
-    letter-spacing: 0.18em;
   }
 
   .rxs-page.rxs-page.ffs-page .rxs-hero-lede {
@@ -2049,14 +1717,6 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
   .rxs-page.rxs-page.ffs-page .rxs-scroll-cue {
     align-self: flex-start;
     text-align: start;
-  }
-
-  .rxs-page.rxs-page.ffs-page .rxs-hero-copy > p:first-child::before {
-    width: 20px;
-  }
-
-  .rxs-page.rxs-page.ffs-page .rxs-hero-kicker-tail {
-    white-space: normal;
   }
 
   .rxs-page.rxs-page.ffs-page .rxs-hero h1 {
@@ -2099,8 +1759,17 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
     font-size: clamp(36px, 10vw, 60px);
   }
 
+  /* The end card's column is the screen's, never the title's widest phrase
+     (「ファイナルステージで。」 does not break): the title sets a size whose
+     phrase fits the column, so neither it nor the doors run off the edge. */
+  html[data-family="special"] body .rxs-page.rxs-page.ffs-page .rxs-footer.ffs-footer {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .rxs-page.rxs-page.ffs-page .ffs-footer h2 {
     max-width: none;
+    font-size: min(34px, 7.4vw);
+    letter-spacing: 0.04em;
   }
 
   .rxs-page.rxs-page.ffs-page .ffs-footer > .ffs-end-figure {
@@ -2114,10 +1783,9 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
    Motion: the chapter heads' entrances, the scan, the end card
    ================================================================ */
 @media screen and (prefers-reduced-motion: no-preference) {
-  /* The head arrives in order: numeral, kicker, title, lede, then the
-     hairline draws across (on the shared reveal's own entrance). */
+  /* The head arrives in order: numeral, title, lede, then the hairline
+     draws across (on the shared reveal's own entrance). */
   .rxs-page.rxs-page.ffs-page[data-motion-ready="true"] > .rxs-section > .rxs-section-heading.rxs-reveal::before,
-  .rxs-page.rxs-page.ffs-page[data-motion-ready="true"] > .rxs-section > .rxs-section-heading.rxs-reveal > p,
   .rxs-page.rxs-page.ffs-page[data-motion-ready="true"] > .rxs-section > .rxs-section-heading.rxs-reveal > h2,
   .rxs-page.rxs-page.ffs-page[data-motion-ready="true"] > .rxs-section > .rxs-section-heading.rxs-reveal > span {
     opacity: 0;
@@ -2136,12 +1804,8 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
     transition: transform 960ms cubic-bezier(0.65, 0, 0.35, 1) 320ms;
   }
 
-  .rxs-page.rxs-page.ffs-page[data-motion-ready="true"] > .rxs-section > .rxs-section-heading.rxs-reveal > p {
-    transition-delay: 80ms;
-  }
-
   .rxs-page.rxs-page.ffs-page[data-motion-ready="true"] > .rxs-section > .rxs-section-heading.rxs-reveal > h2 {
-    transition-delay: 160ms;
+    transition-delay: 120ms;
   }
 
   .rxs-page.rxs-page.ffs-page[data-motion-ready="true"] > .rxs-section > .rxs-section-heading.rxs-reveal > span {
@@ -2149,7 +1813,6 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
   }
 
   .rxs-page.rxs-page.ffs-page[data-motion-ready="true"] > .rxs-section > .rxs-section-heading.rxs-reveal.is-visible::before,
-  .rxs-page.rxs-page.ffs-page[data-motion-ready="true"] > .rxs-section > .rxs-section-heading.rxs-reveal.is-visible > p,
   .rxs-page.rxs-page.ffs-page[data-motion-ready="true"] > .rxs-section > .rxs-section-heading.rxs-reveal.is-visible > h2,
   .rxs-page.rxs-page.ffs-page[data-motion-ready="true"] > .rxs-section > .rxs-section-heading.rxs-reveal.is-visible > span {
     opacity: 1;
@@ -2276,7 +1939,6 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
 .rxs-page.rxs-page.ffs-page .ffs-articles article h3,
 .rxs-page.rxs-page.ffs-page .ffs-finisher > h3,
 .rxs-page.rxs-page.ffs-page .rxs-stage-panel > div > h3,
-.rxs-page.rxs-page.ffs-page .ffs-form-status strong,
 .rxs-page.rxs-page.ffs-page .ffs-form-comparison > summary > strong,
 .rxs-page.rxs-page.ffs-page .ffs-comparison-card h3,
 .rxs-page.rxs-page.ffs-page .ffs-chapter-map a span {
@@ -2284,19 +1946,8 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
   letter-spacing: 0.05em;
 }
 
-/* Kickers: capitals, one tracking, a breath of ice light. */
-.rxs-page.rxs-page.ffs-page .rxs-hero-copy > p:first-child,
-.rxs-page.rxs-page.ffs-page > .rxs-section > .rxs-section-heading > p,
-.rxs-page.rxs-page.ffs-page .ffs-chapter-map-heading,
-.rxs-page.rxs-page.ffs-page .ffs-footer > div > p {
-  text-transform: uppercase;
-  text-shadow: var(--fft-glow-ice);
-}
-
 /* Figures: forged, tabular, lit. */
 .rxs-page.rxs-page.ffs-page .ffs-specs dd,
-.rxs-page.rxs-page.ffs-page .ffs-callout b,
-.rxs-page.rxs-page.ffs-page .ffs-stage-slate > b,
 .rxs-page.rxs-page.ffs-page .ffs-metric > header strong,
 .rxs-page.rxs-page.ffs-page .ffs-metric-result b,
 .rxs-page.rxs-page.ffs-page .ffs-bench-delta b,
@@ -2309,14 +1960,13 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
   text-shadow: var(--fft-glow-ice);
 }
 
-.rxs-page.rxs-page.ffs-page .ffs-chapter-map a b,
 .rxs-page.rxs-page.ffs-page .ffs-weapons li span,
 .rxs-page.rxs-page.ffs-page .ffs-articles article header > span {
   text-shadow: var(--fft-glow-gold);
 }
 
 /* Data read-outs: Oxanium, every digit one width. */
-.rxs-page.rxs-page.ffs-page :is(.ffs-form-status-heading span:last-child, .ffs-comparison-card > p > span, .ffs-chapter-map-heading small) {
+.rxs-page.rxs-page.ffs-page .ffs-comparison-card > p > span {
   font-family: var(--fft-mono);
   font-weight: 500;
   font-variant-numeric: tabular-nums lining-nums;
@@ -2376,8 +2026,7 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
     animation: none;
   }
 
-  .ffs-page .ffs-form-comparison > summary > i,
-  .ffs-page .ffs-form-status-track i {
+  .ffs-page .ffs-form-comparison > summary > i {
     transition: none;
   }
 }
@@ -2389,7 +2038,6 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
   }
 
   .ffs-page .ffs-chapter-map a,
-  .ffs-page .ffs-form-status,
   .ffs-page .ffs-articles article,
   .ffs-page .ffs-finisher,
   .ffs-page .ffs-hero-rail a,
@@ -2397,10 +2045,6 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
     border: 1px solid CanvasText;
     background: Canvas;
     clip-path: none;
-  }
-
-  .ffs-page .ffs-form-status-track i.is-reached {
-    background: CanvasText;
   }
 
   .ffs-page .ffs-mark,
@@ -2411,68 +2055,10 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
 
 /* ================================================================
    The Rexonance site's five chapters (owner, 2026-10-23: 「サイトの構造も
-   レクソナンス準拠にして」): the chapter index at the head's right, as the
-   Rexonance heads carry it (rxa-index), and CONTENTS as five doors.
+   レクソナンス準拠にして」): five numbered heads, the map's five doors.
    ================================================================ */
-.rxs-page.rxs-page.ffs-page > .rxs-section > .rxs-section-heading > .ffs-index {
-  position: absolute;
-  z-index: 1;
-  grid-area: 1 / 1 / -1 / -1;
-  top: 1px;
-  right: 0;
-  display: inline-flex;
-  align-items: baseline;
-  gap: 6px;
-  margin: 0;
-  color: var(--fft-text-3);
-  font-family: var(--fft-etch);
-  font-size: 12px;
-  letter-spacing: var(--fft-track-label);
-  font-variant-numeric: tabular-nums lining-nums;
-  pointer-events: none;
-}
-
-.rxs-page.rxs-page.ffs-page > .rxs-section > .rxs-section-heading > .ffs-index > b {
-  color: var(--fft-gold);
-  font: 600 15px / 1 var(--fft-forge);
-  letter-spacing: 0.02em;
-}
-
 .rxs-page.rxs-page.ffs-page > .rxs-section > .rxs-section-heading {
   position: relative;
-}
-
-/* The suit-up's head sits inside its section's own padding. */
-.rxs-page.rxs-page.ffs-page > .ffs-suitup > .rxs-section-heading > .ffs-index {
-  right: 0;
-}
-
-/* Desktop: the tracklist, one row per chapter (five rows, full width). */
-@media (min-width: 1100px) {
-  .rxs-page.rxs-page.ffs-page .ffs-chapter-map {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .rxs-page.rxs-page.ffs-page .ffs-chapter-map a:nth-of-type(n) {
-    border-left: 0;
-  }
-
-  .rxs-page.rxs-page.ffs-page .ffs-chapter-map a:nth-of-type(n + 2) {
-    border-top: 1px solid var(--fft-line-soft);
-  }
-}
-
-@media (min-width: 761px) and (max-width: 1099.98px) {
-  /* Two columns: the fifth door takes the whole row. */
-  .rxs-page.rxs-page.ffs-page .ffs-chapter-map a:last-of-type:nth-of-type(odd) {
-    grid-column: 1 / -1;
-  }
-}
-
-@media (max-width: 760px) {
-  .rxs-page.rxs-page.ffs-page > .rxs-section > .rxs-section-heading > .ffs-index {
-    display: none;
-  }
 }
 
 /* ================================================================

@@ -238,3 +238,144 @@ html[data-world-effects="economy"] .saga-cinema.saga-cinema [data-reveal] {
   .saga-cinema.saga-cinema [data-reveal] { opacity: 1 !important; transform: none !important; }
 }
 
+
+/* ================================================================
+   LABELS (owner, 2026-10-23: 「不要なセカンダリラベルや説明を避ける。
+   レイアウトに説明させるようにUIリライトして。」) — the page once its English
+   eyebrows, CHAPTER numbers, romanised titles, captions and instructions
+   are gone: each section is its number and its Japanese name over the
+   hairline, each film its part, its poster and its title. What remains
+   reads at 12px or more (it ran down to 5px).
+   ================================================================ */
+.saga-cinema.saga-cinema .section-label > span:first-child {
+  font: 12px/1 var(--saga-tech);
+  letter-spacing: 0.12em;
+  color: var(--saga-accent);
+}
+
+.saga-cinema.saga-cinema .section-label h2 {
+  font: 13px/1.6 var(--saga-sans);
+  letter-spacing: 0.28em;
+  color: var(--saga-text);
+}
+
+.saga-cinema.saga-cinema .project-data span {
+  font: 12px/1.4 var(--saga-tech);
+  letter-spacing: 0.12em;
+}
+
+.saga-cinema.saga-cinema .project-data p {
+  font-size: 13px;
+  letter-spacing: 0.12em;
+}
+
+.saga-cinema.saga-cinema .poster-caption {
+  font-size: 12px;
+}
+
+.saga-cinema.saga-cinema .text-button,
+.saga-cinema.saga-cinema .hero-actions > .text-button,
+.saga-cinema.saga-cinema .footer-actions .text-button,
+.saga-cinema.saga-cinema .gallery-bottom > .text-button,
+.saga-cinema.saga-cinema .visual-copy > .frame-button,
+.saga-cinema.saga-cinema .hero-actions > .frame-button {
+  font-size: 12px;
+}
+
+.saga-cinema.saga-cinema .auto-play #auto-label,
+.saga-cinema.saga-cinema .world-return-link span:first-child,
+.saga-cinema.saga-cinema .desktop-nav a,
+.saga-cinema.saga-cinema .gallery-dots button {
+  font-size: 12px;
+}
+
+/* The hero's foot: the way down is its arrow (named for assistive tech). */
+.saga-cinema.saga-cinema .hero-floor > a {
+  justify-content: center;
+  min-width: 44px;
+}
+
+.saga-cinema.saga-cinema .hero-floor > a > span {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.saga-cinema.saga-cinema .hero-floor > span {
+  font-size: 12px;
+}
+
+/* The reel under the hero: each film by its title alone. */
+.saga-cinema.saga-cinema .chapter-reel button {
+  min-height: 84px;
+}
+
+/* A film's card: its part, its poster, its title and the ＋ that opens it. */
+.saga-cinema.saga-cinema .film-card-top > span,
+.saga-cinema.saga-cinema .film-card-top > span:first-child {
+  font: 12px/1.5 var(--saga-sans);
+  letter-spacing: 0.24em;
+}
+
+.saga-cinema.saga-cinema .film-name {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 0;
+}
+
+.saga-cinema.saga-cinema .film-name > span {
+  display: block;
+  margin: 0;
+  font: 20px/1 var(--saga-sans);
+  letter-spacing: 0;
+  color: var(--saga-accent);
+}
+
+.saga-cinema.saga-cinema .visual-feature-caption span:last-child {
+  font: 20px/1 var(--saga-sans);
+  letter-spacing: 0;
+}
+
+.saga-cinema.saga-cinema .information-rows > div {
+  font-size: 13px;
+}
+
+.saga-cinema.saga-cinema .information-rows > div > span,
+.saga-cinema.saga-cinema .detail-data > div,
+.saga-cinema.saga-cinema .dialog-part {
+  font-size: 12px;
+}
+
+/* The film dialog steps through the films by its arrows. */
+.saga-cinema.saga-cinema .detail-navigation button {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  font: 20px/1 var(--saga-sans);
+}
+
+.saga-cinema.saga-cinema .detail-navigation > span {
+  font: 12px/1 var(--saga-tech);
+  letter-spacing: 0.12em;
+}
+
+/* The gallery: the close button alone at its top; the dots show the place. */
+.saga-cinema.saga-cinema .gallery-top {
+  justify-content: flex-end;
+}
+
+.saga-cinema.saga-cinema .footer-bottom,
+.saga-cinema.saga-cinema .footer-bottom > span {
+  font-size: 12px;
+}
+
+/* Phones: the footer's three ways out keep one line each at 12px (their
+   inner gap and tracking close up; 「ディセプションへ戻る」 broke in two). */
+@media (max-width: 760px) {
+  .saga-cinema.saga-cinema .footer-actions .text-button {
+    gap: 8px;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
+}

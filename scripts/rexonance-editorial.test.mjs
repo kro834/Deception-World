@@ -213,36 +213,15 @@ test("the five chapter links remain native anchors with one real destination eac
 });
 
 test("Rexonance marks English labels and units without extending English to Japanese copy", () => {
-  const { RexonanceChapterMap, RexonanceFormStatus } = component("rexonance-editorial");
+  // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）. The map is five
+  // numbered doors (no English codes), and the form status beside the rail is gone.
+  const { RexonanceChapterMap } = component("rexonance-editorial");
+  assert.equal(component("rexonance-editorial").RexonanceFormStatus, undefined);
   const chapters = elements(RexonanceChapterMap());
-  const englishCodes = chapters.filter((node) => node.type === "small" && node.props.lang === "en");
-  assert.equal(englishCodes.length, 5);
-  assert.ok(englishCodes.every((node) => node.props.lang === "en"));
+  assert.equal(chapters.filter((node) => node.type === "small").length, 0);
+  assert.equal(chapters.filter((node) => node.type === "a").length, 5);
   assert.ok(
     chapters.some((node) => node.type === "span" && node.props.children === "性能" && !node.props.lang),
-  );
-
-  const status = elements(
-    RexonanceFormStatus({
-      stage: "ultra",
-      label: "ウルトラ",
-      code: "ULTRA 60s",
-      purpose: "60秒間の最上位状態",
-      accent: "#ff72da",
-    }),
-  );
-  assert.ok(
-    status.some(
-      (node) => node.type === "small" && node.props.lang === "en" && node.props.children === "ULTRA 60s",
-    ),
-  );
-  assert.ok(
-    status.some((node) => node.type === "strong" && node.props.children === "ウルトラ" && !node.props.lang),
-  );
-  assert.ok(
-    status.some(
-      (node) => node.type === "em" && node.props.children === "60秒間の最上位状態" && !node.props.lang,
-    ),
   );
 
   const englishMarkup = nodes(
@@ -264,7 +243,16 @@ test("Rexonance marks English labels and units without extending English to Japa
       .replace(/\s+/g, " ")
       .trim();
   const taggedText = englishMarkup.map(textContent);
-  for (const label of [
+  // The English that stays is the name and the units of the owner's figures.
+  for (const label of ["REXONANCE", "REXONANCE SAGA", "YOPS", "TOPS", "CORE"])
+    assert.ok(taggedText.includes(label), `${label} is explicitly marked as English`);
+  // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）: the English kickers
+  // and captions are gone from the page's printed text.
+  const printed = nodes(pageSource, (node) => ts.isJsxText(node))
+    .map((node) => node.text)
+    .join(" ")
+    .replace(/\s+/g, " ");
+  for (const gone of [
     "PERFORMANCE",
     "REACTION / VS VINCULUM",
     "MOBILITY / VS EXTREME",
@@ -272,23 +260,13 @@ test("Rexonance marks English labels and units without extending English to Japa
     "FOURTEENTH GENERATION",
     "THREE OPERATING STAGES",
     "SELF-RESONANCE",
-    "YOPS",
-    "TOPS",
-    "CORE",
+    "PROCESSING ARCHITECTURE",
+    "GENERATION COMPARISON",
+    "FINAL ARRIVAL",
   ])
-    assert.ok(taggedText.includes(label), `${label} is explicitly marked as English`);
+    assert.ok(!printed.includes(gone), `${gone} is no longer printed`);
   assert.ok(
     taggedText.every((text) => !/[ぁ-んァ-ン一-龯]/u.test(text)),
     "English language spans do not contain Japanese copy",
-  );
-  assert.match(
-    pageSource.getText(),
-    /<span lang="en">PROCESSING CORE<\/span> \/ P14/,
-    "the English fragment is tagged while the adjacent product code stays outside it",
-  );
-  assert.match(
-    pageSource.getText(),
-    /P14 \/ <span lang="en">FOURTEENTH GENERATION<\/span>/,
-    "the English phrase is tagged while the P14 code stays outside it",
   );
 });

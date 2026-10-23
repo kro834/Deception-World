@@ -100,8 +100,9 @@ export function AssemblyMovie({
         </button>
       </div>
       <div className="rzn-movie-sheet" id={sheetId}>
+        {/* The sheet's title (the group's own name is its aria-label); no
+            English duplicate over it (owner, 2026-10-23). */}
         <p className="rzn-movie-kicker" aria-hidden="true">
-          <span lang="en">AUTO SUIT-UP</span>
           <span>自動変身ムービー</span>
         </p>
         <div className="rzn-movie-row">
