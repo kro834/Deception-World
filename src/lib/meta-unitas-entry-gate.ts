@@ -97,6 +97,13 @@ export function scheduleMetaUnitasEntryWarmup(): () => void {
     timer = 0;
     void fetchModule();
     void import("./meta-unitas-rx-engine.ts").catch(() => {});
+    // The wearer and the driver warm site-wide at idle, as Rexonance's suit.
+    void import("./meta-unitas-rx-suit.ts").then((suit) => {
+      for (const src of [suit.META_UNITAS_RX_UNDERSUIT, suit.META_UNITAS_RX_DRIVER_STANDIN]) {
+        const image = new Image();
+        image.src = src;
+      }
+    });
   };
   const start = () => {
     if (typeof window.requestIdleCallback === "function")

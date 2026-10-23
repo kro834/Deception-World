@@ -1,6 +1,10 @@
 import { useEffect, useRef, type CSSProperties } from "react";
 import { META_UNITAS_CALL_LINES } from "@/lib/meta-unitas-assembly";
 import {
+  META_UNITAS_RX_DRIVER_TINY,
+  META_UNITAS_RX_UNDERSUIT_TINY,
+} from "@/lib/meta-unitas-rx-suit-tiny";
+import {
   META_UNITAS_RX_DRIVER_STANDIN,
   META_UNITAS_RX_SIZE,
   META_UNITAS_RX_UNDERSUIT,
@@ -172,6 +176,9 @@ export function MetaUnitasEntrySequence({
         <div className="rzn-frame" style={FRAME}>
           <img
             className="rzn-under mus-entry-fig"
+            style={{
+              background: `url(${META_UNITAS_RX_UNDERSUIT_TINY}) 50% 100% / contain no-repeat`,
+            }}
             src={META_UNITAS_RX_UNDERSUIT}
             alt=""
             width={META_UNITAS_RX_SIZE.width}
@@ -179,6 +186,9 @@ export function MetaUnitasEntrySequence({
           />
           <img
             className="rzn-driver-standin mus-entry-fig"
+            style={{
+              background: `url(${META_UNITAS_RX_DRIVER_TINY}) 50% 100% / contain no-repeat`,
+            }}
             src={META_UNITAS_RX_DRIVER_STANDIN}
             alt=""
             width={META_UNITAS_RX_SIZE.width}
