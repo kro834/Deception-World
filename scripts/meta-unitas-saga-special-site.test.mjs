@@ -44,9 +44,10 @@ test("the route is registered wherever the other special sites are", () => {
   assert.match(read("src/components/search/search-data.ts"), /id: "meta-unitas-saga"/);
   assert.match(read("src/components/search/search-ui-helpers.ts"), /"\/meta-unitas-saga"/);
   assert.match(read("scripts/verify-site-health.mjs"), /"\/meta-unitas-saga"/);
-  // The entry transition: its own dive, its call prepared with a deadline.
+  // Preparation does not consume playback; the live renderer releases its cover.
   assert.match(gate, /"\/meta-unitas-saga": "meta-unitas"/);
-  assert.match(gate, /prepareMetaUnitasTransition\(4000\)/);
+  assert.match(gate, /createMetaUnitasEntryPlayback\(\)/);
+  assert.match(gate, /await metaUnitasPlayback\.promise/);
   assert.match(gate, /META_UNITAS_ENTRY_TIMINGS/);
 });
 

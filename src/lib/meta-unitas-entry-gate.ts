@@ -1,4 +1,5 @@
 import type { MetaUnitasEntrySequence } from "../components/meta-unitas-saga/meta-unitas-entry-sequence";
+import { META_UNITAS_ENTRY_DURATION_MS } from "./meta-unitas-entry-playback";
 
 /* META UNITAS SAGA's entry transformation, as the route transition screen
    sees it (2026-10-23). The shared gate (load-gate.tsx) plays it under its
@@ -9,9 +10,12 @@ import type { MetaUnitasEntrySequence } from "../components/meta-unitas-saga/met
    carries none of the scene), and the gate's two numbers. A direct load, a
    reload and Back/Forward show the page at once, with no call. */
 
-/** The gate covers the page this long (the five calls, ミドル complete),
- * then reveals it over `reveal`. */
-export const META_UNITAS_ENTRY_TIMINGS = { cover: 3090, reveal: 520 } as const;
+/** Playback lasts this long after the first prepared frame (five calls,
+ * ミドル complete); preparation is separate. Then reveal over `reveal`. */
+export const META_UNITAS_ENTRY_TIMINGS = {
+  cover: META_UNITAS_ENTRY_DURATION_MS,
+  reveal: 520,
+} as const;
 
 export type MetaUnitasTransitionRenderer = typeof MetaUnitasEntrySequence;
 type CallModule = { MetaUnitasEntrySequence: MetaUnitasTransitionRenderer };

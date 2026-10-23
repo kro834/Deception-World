@@ -1,6 +1,10 @@
 import { useEffect, useRef, type CSSProperties } from "react";
 import { META_UNITAS_CALL_LINES } from "@/lib/meta-unitas-assembly";
 import {
+  META_UNITAS_ENTRY_DURATION_MS,
+  type MetaUnitasEntryPlayback,
+} from "@/lib/meta-unitas-entry-playback";
+import {
   META_UNITAS_RX_DRIVER_TINY,
   META_UNITAS_RX_UNDERSUIT_TINY,
 } from "@/lib/meta-unitas-rx-suit-tiny";
@@ -47,6 +51,9 @@ const FILL: CSSProperties = { position: "absolute", inset: 0, width: "100%", hei
    next; the chant's four SA-GA！DEUS！ light one by one. Phones stack the
    call over the figure. Opacity and transforms only. */
 const STAGING = `.mus-entry::-webkit-scrollbar{display:none}
+.mus-entry[data-playback="preparing"] .mus-entry-scan{animation-play-state:paused}
+.mus-entry .mus-entry-loading{position:absolute;left:20px;right:20px;bottom:9%;margin:0;text-align:center;font:14px/1.6 sans-serif;color:#c3dedc}
+.mus-entry:not([data-playback="preparing"]) .mus-entry-loading{display:none}
 .mus-entry .mus-entry-scan{position:absolute;left:calc((var(--rzn-fig-x) - .2) * 100%);width:40%;height:2px;top:8%;background:linear-gradient(90deg,transparent,rgb(70 206 200 / .9),transparent);box-shadow:0 0 14px rgb(70 206 200 / .7);animation:mus-entry-scan 1s cubic-bezier(.4,0,.2,1) both}
 @keyframes mus-entry-scan{from{transform:translateY(0);opacity:0}15%{opacity:1}to{transform:translateY(78vh);opacity:0}}
 .mus-entry .mus-entry-line:first-child{animation:mus-entry-first .35s ease-out backwards}
@@ -76,9 +83,6 @@ const STAGING = `.mus-entry::-webkit-scrollbar{display:none}
 .mus-entry .rzn-line[data-cue="on"],.mus-entry .rzn-line:last-child[data-cue="on"]{transform:translateY(-50%)}
 .mus-entry .rzn-line[data-chant]{align-items:center;font-size:clamp(22px,6vw,52px)}
 .mus-entry .rzn-line:not([data-chant]) .rzn-chip{align-items:center}}`;
-
-/** How long the build waits for the scene to be ready before its clock runs. */
-const READY_WAIT_MS = 0;
 
 /** The entry's clock (owner, 2026-10-24: 「装着が駆け足すぎる」), set to the
  * Rexonance entry's pacing: the scan, the fire, each part's landing a call's
@@ -110,8 +114,10 @@ const progressAt = (ms: number) => {
 
 export function MetaUnitasEntrySequence({
   phase,
+  playback,
 }: {
   phase: "covering" | "revealing";
+  playback: MetaUnitasEntryPlayback;
   tier?: "full" | "calm" | "reduced";
 }) {
   const layerRef = useRef<HTMLDivElement | null>(null);
@@ -123,51 +129,86 @@ export function MetaUnitasEntrySequence({
     let disposed = false;
     let dispose: (() => void) | null = null;
     let raf = 0;
-    const mounted = performance.now();
+    layer.dataset.playback = "preparing";
+    const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const preference = () => {
+      if (motion.matches || document.documentElement.dataset.worldEffects === "economy")
+        playback.skip();
+    };
+    const preferences = new MutationObserver(preference);
+    preferences.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-world-effects"],
+    });
+    motion.addEventListener("change", preference);
+    preference();
     const lines = [...layer.querySelectorAll<HTMLElement>(".mus-entry-calls > li")];
     const chips = [
       ...layer.querySelectorAll<HTMLElement>(".mus-entry-calls > li[data-chant] .rzn-chip"),
     ];
-    void import("@/lib/meta-unitas-rx-engine").then((module) => {
-      if (disposed) return;
-      dispose = module.mountMetaUnitasAssemblyEngine(runway, window);
-      let started = 0;
-      const frame = (now: number) => {
-        raf = 0;
-        if (disposed) return;
-        const ready = runway.dataset.rznLoad === "ready";
-        if (!started && (ready || now - mounted > READY_WAIT_MS)) started = now;
-        const elapsed = started ? now - started : 0;
-        let line = 0;
-        CALL_AT.forEach((at, index) => {
-          if (elapsed >= at) line = index;
-        });
-        lines.forEach((element, index) => {
-          element.dataset.cue = index === line ? "on" : index < line ? "done" : "";
-        });
-        chips.forEach((chip, index) => {
-          if (elapsed >= CALL_AT[3] + index * CHANT_STEP) chip.dataset.cue = "on";
-          else delete chip.dataset.cue;
-        });
-        const p = progressAt(elapsed);
-        const t = elapsed >= CLOCK[CLOCK.length - 1][0] ? 1 : 0;
-        const travel = runway.offsetHeight - layer.clientHeight;
-        layer.scrollTop = Math.round(travel * p);
-        window.dispatchEvent(new Event("scroll"));
-        if (t < 1) raf = window.requestAnimationFrame(frame);
-      };
-      raf = window.requestAnimationFrame(frame);
-    });
+    void import("@/lib/meta-unitas-rx-engine")
+      .then((module) => {
+        if (disposed || playback.state !== "preparing") return;
+        dispose = module.mountMetaUnitasAssemblyEngine(runway, window);
+        const frame = (now: number) => {
+          raf = 0;
+          if (disposed) return;
+          if (runway.dataset.rznLoad === "error") playback.fail();
+          if (runway.dataset.rznLoad === "static") playback.skip();
+          // `ready` can precede the canvas's first paint. Wait for the live
+          // engine to remove its stand-in before advancing even the first call.
+          const ready = runway.dataset.rznState === "live" && !runway.dataset.rznArming;
+          const elapsed = playback.frame(now, ready);
+          if (elapsed === null) {
+            if (playback.state === "preparing") raf = window.requestAnimationFrame(frame);
+            return;
+          }
+          if (layer.dataset.playback !== "playing") layer.dataset.playback = "playing";
+          let line = 0;
+          CALL_AT.forEach((at, index) => {
+            if (elapsed >= at) line = index;
+          });
+          lines.forEach((element, index) => {
+            element.dataset.cue = index === line ? "on" : index < line ? "done" : "";
+          });
+          chips.forEach((chip, index) => {
+            if (elapsed >= CALL_AT[3] + index * CHANT_STEP) chip.dataset.cue = "on";
+            else delete chip.dataset.cue;
+          });
+          const p = progressAt(elapsed);
+          const travel = runway.offsetHeight - layer.clientHeight;
+          layer.scrollTop = Math.round(travel * p);
+          window.dispatchEvent(new Event("scroll"));
+          if (elapsed < META_UNITAS_ENTRY_DURATION_MS) raf = window.requestAnimationFrame(frame);
+          else {
+            // Give the engine the scroll frame and a paint before uncovering.
+            raf = window.requestAnimationFrame(() => {
+              raf = window.requestAnimationFrame(() => {
+                if (disposed) return;
+                layer.dataset.playback = "complete";
+                playback.complete();
+              });
+            });
+          }
+        };
+        raf = window.requestAnimationFrame(frame);
+      })
+      .catch(() => {
+        if (!disposed) playback.fail();
+      });
     return () => {
       disposed = true;
       if (raf) window.cancelAnimationFrame(raf);
+      preferences.disconnect();
+      motion.removeEventListener("change", preference);
       dispose?.();
     };
-  }, []);
+  }, [playback]);
   return (
     <div
       ref={layerRef}
       className="mus-entry"
+      data-playback="preparing"
       aria-hidden="true"
       style={{ ...LAYER, opacity: phase === "revealing" ? 0 : 1 }}
     >
@@ -198,6 +239,7 @@ export function MetaUnitasEntrySequence({
           <canvas className="rzn-canvas" width={0} height={0} style={FILL} />
           <i className="mus-entry-orbit" />
           <i className="mus-entry-orbit is-b" />
+          <p className="mus-entry-loading">変身演出を準備しています</p>
           <ol className="rzn-lines mus-entry-calls">
             {META_UNITAS_CALL_LINES.map((units, index) => (
               <li
