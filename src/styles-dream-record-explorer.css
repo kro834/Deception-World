@@ -751,9 +751,13 @@
 
   .dream-page.dream-page
     :is(.dream-record-collection-views button, .dream-record-save)[aria-pressed="true"] {
-    color: HighlightText;
-    background: Highlight;
-    border-color: Highlight;
+    color: CanvasText;
+    background: Canvas;
+    border-color: CanvasText;
+    border-bottom-width: 4px;
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.2em;
     box-shadow: none;
   }
 
