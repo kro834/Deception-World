@@ -62,53 +62,58 @@ export function AssemblyMovie({
     };
   }, [runwayRef]);
   return (
-    <div
-      ref={ref}
-      className="rzn-movie"
-      data-site={site}
-      data-state="idle"
-      role="group"
-      aria-label="自動変身ムービー"
-    >
-      <p className="rzn-movie-kicker" aria-hidden="true">
-        <span lang="en">AUTO SUIT-UP</span>
-        <span>自動変身ムービー</span>
-      </p>
-      <div className="rzn-movie-row">
-        <button type="button" className="rzn-movie-play" disabled>
-          再生
-        </button>
-        <button type="button" className="rzn-movie-restart" disabled>
-          最初から
-        </button>
-        <div className="rzn-movie-speeds" role="radiogroup" aria-label="速度">
-          {ASSEMBLY_MOVIE_SPEEDS.map((speed) => (
-            <button
-              key={speed}
-              type="button"
-              role="radio"
-              aria-checked={speed === ASSEMBLY_MOVIE_DEFAULT_SPEED}
-              aria-label={`${speed}倍速`}
-              tabIndex={speed === ASSEMBLY_MOVIE_DEFAULT_SPEED ? 0 : -1}
-              data-speed={speed}
-            >
-              {speed}×
-            </button>
-          ))}
+    // The dock: on phones the control stands in the page while idle and the
+    // dock keeps its height while the control is at the viewport's foot
+    // (assembly-movie.ts measures it), so nothing moves when a movie starts.
+    <div className="rzn-movie-dock">
+      <div
+        ref={ref}
+        className="rzn-movie"
+        data-site={site}
+        data-state="idle"
+        role="group"
+        aria-label="自動変身ムービー"
+      >
+        <p className="rzn-movie-kicker" aria-hidden="true">
+          <span lang="en">AUTO SUIT-UP</span>
+          <span>自動変身ムービー</span>
+        </p>
+        <div className="rzn-movie-row">
+          <button type="button" className="rzn-movie-play" disabled>
+            再生
+          </button>
+          <button type="button" className="rzn-movie-restart" disabled>
+            最初から
+          </button>
+          <div className="rzn-movie-speeds" role="radiogroup" aria-label="速度">
+            {ASSEMBLY_MOVIE_SPEEDS.map((speed) => (
+              <button
+                key={speed}
+                type="button"
+                role="radio"
+                aria-checked={speed === ASSEMBLY_MOVIE_DEFAULT_SPEED}
+                aria-label={`${speed}倍速`}
+                tabIndex={speed === ASSEMBLY_MOVIE_DEFAULT_SPEED ? 0 : -1}
+                data-speed={speed}
+              >
+                {speed}×
+              </button>
+            ))}
+          </div>
         </div>
+        <label className="rzn-movie-seek">
+          <span className="rzn-movie-sr">位置</span>
+          <input
+            type="range"
+            min={0}
+            max={ASSEMBLY_MOVIE_SEEK_STEPS}
+            step={1}
+            defaultValue={0}
+            aria-valuetext="0%"
+            disabled
+          />
+        </label>
       </div>
-      <label className="rzn-movie-seek">
-        <span className="rzn-movie-sr">位置</span>
-        <input
-          type="range"
-          min={0}
-          max={ASSEMBLY_MOVIE_SEEK_STEPS}
-          step={1}
-          defaultValue={0}
-          aria-valuetext="0%"
-          disabled
-        />
-      </label>
     </div>
   );
 }

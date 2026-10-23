@@ -2027,22 +2027,26 @@ html[data-family="special"] body .rxs-page.ffs-page .rzn-movie :is(button, input
     padding: 8px 12px 10px;
   }
 
-  html[data-family="special"] body .rxs-page.ffs-page .rzn-movie-kicker > span:first-child {
+  html[data-family="special"] body .rxs-page.ffs-page .rzn-movie-kicker {
     display: none;
   }
 
+  html[data-family="special"] body .rxs-page.ffs-page .rzn-movie-row {
+    gap: 6px;
+  }
+
   html[data-family="special"] body .rxs-page.ffs-page .rzn-movie-row > button {
-    padding: 0 12px;
+    padding: 0 10px;
     font-size: 12px;
   }
 
   html[data-family="special"] body .rxs-page.ffs-page .rzn-movie-play {
-    min-width: 92px;
+    min-width: 80px;
   }
 
   html[data-family="special"] body .rxs-page.ffs-page .rzn-movie-speeds > button {
-    min-width: 42px;
-    padding: 0 6px;
+    min-width: 38px;
+    padding: 0 4px;
     font-size: 11px;
   }
 }
@@ -2082,5 +2086,18 @@ html[data-family="special"] body .rxs-page.ffs-page .rzn-movie :is(button, input
     width: calc(100vw - 16px);
     margin: 0;
     transform: translate(-50%, 0);
+  }
+}
+
+/* The dock: nothing on wide layouts (the control is fixed); on phones the
+   control's place in the page, whose height the controller keeps while the
+   control is at the viewport's foot. */
+html[data-family="special"] body .rxs-page .rzn-movie-dock {
+  display: contents;
+}
+
+@media (max-width: 639.98px) {
+  html[data-family="special"] body .rxs-page .rzn-movie-dock {
+    display: block;
   }
 }

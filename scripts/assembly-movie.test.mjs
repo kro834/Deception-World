@@ -38,16 +38,21 @@ function element(tag, attrs = {}) {
     dataset: new Proxy(
       {},
       {
-        get: (_, key) => attributes.get(`data-${String(key).replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`)}`),
+        get: (_, key) =>
+          attributes.get(`data-${String(key).replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`)}`),
         set: (_, key, value) => {
-          attributes.set(`data-${String(key).replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`)}`, String(value));
+          attributes.set(
+            `data-${String(key).replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`)}`,
+            String(value),
+          );
           return true;
         },
         deleteProperty: (_, key) => {
           attributes.delete(`data-${String(key).replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`)}`);
           return true;
         },
-        has: (_, key) => attributes.has(`data-${String(key).replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`)}`),
+        has: (_, key) =>
+          attributes.has(`data-${String(key).replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`)}`),
       },
     ),
     getAttribute: (name) => attributes.get(name) ?? null,
@@ -201,10 +206,13 @@ function environment({ load = "ready", travel = 2400, pinTop = 62, top = 5000 } 
   const user = {
     wheel: () => windowListeners.get("wheel")?.({ type: "wheel", target: runway }),
     touch: (target = runway) => windowListeners.get("touchstart")?.({ type: "touchstart", target }),
-    key: (key, target = runway) => windowListeners.get("keydown")?.({ type: "keydown", key, target }),
+    key: (key, target = runway) =>
+      windowListeners.get("keydown")?.({ type: "keydown", key, target }),
     // The reader scrolls the page themselves (a scrollbar drag): the scroll
     // lands somewhere the movie did not put it.
     scroll: (y) => {
+      // One scroll event for the position now (a browser coalesces).
+      pendingScroll = false;
       scrollY = y;
       windowListeners.get("scroll")?.({ type: "scroll" });
     },
@@ -337,7 +345,7 @@ test("the reader's own input pauses the movie and hands the scroll back: wheel, 
     ["PageDown", (t) => t.user.key("PageDown")],
     ["Space", (t) => t.user.key(" ")],
     ["End", (t) => t.user.key("End")],
-    ["scrollbar", (t) => t.user.scroll(t.scrollY() + 300)],
+    ["scrollbar", (t) => (t.user.scroll(t.scrollY() + 300), t.user.scroll(t.scrollY() + 300))],
   ]) {
     const t = environment();
     const dispose = mountAssemblyMovie(t.control, t.runway, t.env);
@@ -370,8 +378,12 @@ test("input on the control itself is not a scroll: keys and touches inside it, a
   t.user.key("ArrowRight", t.radios[1]);
   t.user.touch(t.seek);
   assert.equal(t.control.dataset.state, "playing");
-  // The movie's own scroll events (each frame's) are not the reader's.
+  // The movie's own scroll events (each frame's) are not the reader's, and
+  // one stray scroll (a smooth scroll ending, a layout settling) is not either.
   for (let k = 0; k < 30; k += 1) t.tick();
+  t.user.scroll(t.scrollY() + 40);
+  t.tick();
+  t.tick();
   assert.equal(t.control.dataset.state, "playing");
   // A seek mid-movie jumps the page and plays on from there.
   t.seek.value = String(MOVIE_SEEK_STEPS / 2);
@@ -441,10 +453,26 @@ test("the control shows while the frame is pinned, is disabled until the scene i
       /@media \(prefers-reduced-motion: reduce\) \{\s*html\[data-family="special"\] body \.rxs-page[^{]*\.rzn-movie \{\s*display: none;/,
       sheet,
     );
-    assert.match(css, /@media \(forced-colors: active\) \{\s*html\[data-family="special"\] body \.rxs-page[^{]*\.rzn-movie \{\s*display: none;/, sheet);
-    assert.match(css, /\[data-world-effects="economy"\][^{]*\.rzn-movie \{\s*display: none;/, sheet);
-    assert.match(css, /\.rzn-movie\[data-shown\],[\s\S]*?\.rzn-movie:focus-within \{\s*visibility: visible;/, sheet);
-    assert.match(css, /\.rzn-movie :is\(button, input\):focus-visible \{\s*outline: 2px solid/, sheet);
+    assert.match(
+      css,
+      /@media \(forced-colors: active\) \{\s*html\[data-family="special"\] body \.rxs-page[^{]*\.rzn-movie \{\s*display: none;/,
+      sheet,
+    );
+    assert.match(
+      css,
+      /\[data-world-effects="economy"\][^{]*\.rzn-movie \{\s*display: none;/,
+      sheet,
+    );
+    assert.match(
+      css,
+      /\.rzn-movie\[data-shown\],[\s\S]*?\.rzn-movie:focus-within \{\s*visibility: visible;/,
+      sheet,
+    );
+    assert.match(
+      css,
+      /\.rzn-movie :is\(button, input\):focus-visible \{\s*outline: 2px solid/,
+      sheet,
+    );
     assert.match(css, /\.rzn-movie \{[^}]*position: fixed;/, sheet);
     // Phones: in the page while idle, at the viewport's foot only while a
     // movie is on and the frame is pinned (the HUD's parts and read-out
@@ -466,6 +494,10 @@ test("the control shows while the frame is pinned, is disabled until the scene i
 /* ---------------- the markup and the pages ---------------- */
 test("the control's markup: a named group, 再生／一時停止 and 最初から, the speed as a radio group, the seek with a name", () => {
   const source = read("src/components/rexonance-saga/rexonance-assembly-movie.tsx");
+  assert.match(
+    source,
+    /<div className="rzn-movie-dock">\s*<div\s+ref=\{ref\}\s+className="rzn-movie"/,
+  );
   assert.match(source, /role="group"\s+aria-label="自動変身ムービー"/);
   assert.match(source, /className="rzn-movie-play" disabled>\s*再生\s*</);
   assert.match(source, /className="rzn-movie-restart" disabled>\s*最初から\s*</);
@@ -486,7 +518,11 @@ test("the control's markup: a named group, 再生／一時停止 and 最初か�
   // Lazy: the controller's chunk is imported once the page is idle.
   assert.match(source, /import\("@\/lib\/assembly-movie"\)/);
   assert.match(source, /requestIdleCallback\(start, \{ timeout: 2500 \}\)/);
-  assert.doesNotMatch(source, /^import .*assembly-movie"/m, "never a static import of the controller");
+  assert.doesNotMatch(
+    source,
+    /^import .*assembly-movie"/m,
+    "never a static import of the controller",
+  );
 });
 
 test("both runways carry the control, between the guide and the hidden runway", () => {
@@ -497,7 +533,10 @@ test("both runways carry the control, between the guide and the hidden runway", 
     /<RexonanceAssemblyGuide runwayRef=\{runwayRef\} calls=\{REXONANCE_ENTRY_CALLS\} \/>[\s\S]*?<AssemblyMovie runwayRef=\{runwayRef\} site="rexonance" \/>\s*<div\s+ref=\{runwayRef\}\s+className="rzn-suitup"\s+aria-hidden="true"/,
   );
   const farFrom = read("src/components/far-from-saga/far-from-suitup.tsx");
-  assert.match(farFrom, /import \{ AssemblyMovie \} from "@\/components\/rexonance-saga\/rexonance-assembly-movie";/);
+  assert.match(
+    farFrom,
+    /import \{ AssemblyMovie \} from "@\/components\/rexonance-saga\/rexonance-assembly-movie";/,
+  );
   assert.match(
     farFrom,
     /<FarFromAssemblyGuide runwayRef=\{runwayRef\} \/>[\s\S]*?<AssemblyMovie runwayRef=\{runwayRef\} site="far-from" \/>\s*<div\s+ref=\{runwayRef\}\s+className="ffs-runway rzn-suitup"\s+aria-hidden="true"/,
@@ -506,7 +545,16 @@ test("both runways carry the control, between the guide and the hidden runway", 
   assert.equal(MOVIE_DURATION_MS, 24000);
   const controller = read("src/lib/assembly-movie.ts");
   assert.match(controller, /behavior: "instant"/);
-  assert.match(controller, /environment\.addEventListener\("wheel", onWheel, \{ passive: true \}\)/);
-  assert.match(controller, /environment\.addEventListener\("touchstart", onTouch, \{ passive: true \}\)/);
-  assert.match(controller, /environment\.addEventListener\("scroll", onScroll, \{ passive: true \}\)/);
+  assert.match(
+    controller,
+    /environment\.addEventListener\("wheel", onWheel, \{ passive: true \}\)/,
+  );
+  assert.match(
+    controller,
+    /environment\.addEventListener\("touchstart", onTouch, \{ passive: true \}\)/,
+  );
+  assert.match(
+    controller,
+    /environment\.addEventListener\("scroll", onScroll, \{ passive: true \}\)/,
+  );
 });

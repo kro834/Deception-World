@@ -106,12 +106,25 @@ export function mountAssemblyMovie(
   let previousY = NaN;
   let scrubbing = false;
   let shown = false;
+  // Scroll events that landed away from where the movie put the page: two
+  // in a row are the reader's (a scrollbar drag); one alone may be a stray
+  // (a smooth scroll ending, a layout settling).
+  let strays = 0;
+  let remeasure = false;
   let pinTop = 0;
   let travel = 0;
   let top = 0;
 
+  const dock = control.parentElement;
   const setState = (next: MovieState) => {
     if (state === next) return;
+    // On phones the control leaves the page for the viewport's foot while a
+    // movie is on: its dock keeps its height, so the page never moves.
+    if (dock) {
+      if (next === "idle") dock.style.removeProperty("height");
+      else if (state === "idle" && environment.getComputedStyle(control).position === "static")
+        dock.style.height = `${control.offsetHeight}px`;
+    }
     state = next;
     control.dataset.state = next;
     const label = next === "playing" ? MOVIE_PLAY_LABELS.pause : MOVIE_PLAY_LABELS.play;
@@ -168,6 +181,10 @@ export function mountAssemblyMovie(
       progress = clamp01(progress + (dt * speed) / MOVIE_DURATION_MS);
     }
     lastStamp = stamp;
+    if (remeasure) {
+      remeasure = false;
+      measure();
+    }
     scrollTo(progress);
     syncSeek(progress);
     if (progress >= 1) {
@@ -185,6 +202,10 @@ export function mountAssemblyMovie(
     scrollTo(progress);
     syncSeek(progress);
     setState("playing");
+    // The control may have left the page (phones): the runway is measured
+    // again on the first frame.
+    remeasure = true;
+    strays = 0;
     stop();
     rafId = environment.requestAnimationFrame(tick);
   };
@@ -225,7 +246,8 @@ export function mountAssemblyMovie(
     if (index < 0) return;
     const last = radios.length - 1;
     let next = -1;
-    if (event.key === "ArrowRight" || event.key === "ArrowDown") next = index === last ? 0 : index + 1;
+    if (event.key === "ArrowRight" || event.key === "ArrowDown")
+      next = index === last ? 0 : index + 1;
     else if (event.key === "ArrowLeft" || event.key === "ArrowUp")
       next = index === 0 ? last : index - 1;
     else if (event.key === "Home") next = 0;
@@ -267,7 +289,8 @@ export function mountAssemblyMovie(
       const ours =
         Math.abs(y - expectedY) <= MOVIE_SCROLL_TOLERANCE ||
         Math.abs(y - previousY) <= MOVIE_SCROLL_TOLERANCE;
-      if (!ours) {
+      if (ours) strays = 0;
+      else if ((strays += 1) >= 2) {
         pause();
         if (shown) syncSeek(readProgress());
       }
