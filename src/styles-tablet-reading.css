@@ -134,7 +134,7 @@
   }
 
   html[data-family="dream"] .dream-reading-room .dream-reading-paper {
-    padding: 24px 32px;
+    padding: 24px clamp(20px, 3vw, 32px);
   }
 }
 
@@ -151,5 +151,33 @@
   html[data-family="library"] .search-page .search-categories button {
     justify-content: space-between;
     min-width: 0;
+  }
+}
+
+/* The compact selectors and the full chapter rail share the same touch
+   target size. any-pointer retains it when an iPad also has a trackpad. */
+@media (min-width: 560px) and (max-width: 1366px) and (min-height: 501px) and (any-pointer: coarse) {
+  html[data-family="dream"] .dream-reading-room :is(button, select, summary) {
+    min-height: 48px;
+  }
+
+  /* Native WebKit menulists ignore min-height. Keep native selection,
+     but paint the surface ourselves so the actual hit box stays 48px. */
+  html[data-family="dream"] .dream-reading-room select {
+    -webkit-appearance: none;
+    appearance: none;
+    padding-inline: 12px 32px;
+    background-image:
+      linear-gradient(45deg, transparent 50%, currentColor 50%),
+      linear-gradient(135deg, currentColor 50%, transparent 50%);
+    background-position:
+      right 18px center,
+      right 12px center;
+    background-size: 6px 6px;
+    background-repeat: no-repeat;
+  }
+
+  html[data-family="library"] .search-page .search-categories button {
+    min-height: 48px;
   }
 }

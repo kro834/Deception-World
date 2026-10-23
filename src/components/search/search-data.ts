@@ -23,6 +23,7 @@ import {
 import { CAST, FAR_FROM_SAGA, REALM_ROYAL, STORY } from "../final-stage/final-stage-data";
 import { FAR_FROM_REPORT_TEXT } from "../far-from-saga/far-from-report-text";
 import { REPORT_PART_TITLES } from "../far-from-saga/far-from-report-data";
+import { P16_DESCRIPTIONS, P16_MAIN, P16_SUMMARY } from "../far-from-saga/far-from-p16-official";
 import { META_UNITAS_PERFORMANCE, META_UNITAS_SAGA } from "../meta-unitas-saga/meta-unitas-data";
 import { LIBRARY_ENTRIES } from "../../lib/library-data";
 import {
@@ -760,7 +761,7 @@ export const SEARCH_DOCUMENTS: readonly SearchCatalogueDocument[] = [
     title: "仮面ライダーエクスプリームサーガ",
     category: "riders",
     description: "殴り合い、歓迎。長引くほど、こっちのもの。",
-    keywords: ["エクスプリームサーガ・ウルトラ", "EXTREME", "P14", "性能比較"],
+    keywords: ["エクスプリームサーガ・ウルトラ", "EXTREME", "P14", "P14 Standard", "性能比較"],
     aliases: ["extreme saga"],
     to: "/extreme-saga",
     hash: "top",
@@ -777,6 +778,7 @@ export const SEARCH_DOCUMENTS: readonly SearchCatalogueDocument[] = [
       "ULTRA",
       "SA-GA OS 5.5",
       "P14",
+      "P14 Extreme Tuning",
       "第五の犬",
       "終焉",
       "自己共鳴",
@@ -861,6 +863,23 @@ export const SEARCH_DOCUMENTS: readonly SearchCatalogueDocument[] = [
     keywords: ["性能比較", "P14", "P16", "SA-GA OS 6.1"],
     to: "/meta-unitas-saga",
     hash: "performance",
+  },
+  {
+    // The owner's OFFICIAL P14 / P16 setting (2026-10-23): the three units'
+    // descriptions, 主演算性能との関係 and 総合評価, as #p16 prints them.
+    id: "far-from-p16-official",
+    title: "P14 Standard／P14 Extreme Tuning／P16",
+    category: "pages",
+    description: "演算加速機構の性能比較（暫定ベンチマーク）",
+    body: [
+      ...P16_DESCRIPTIONS.flatMap((item) => [item.heading, ...item.paragraphs]),
+      ...P16_MAIN.lead,
+      ...P16_MAIN.after,
+      ...P16_SUMMARY,
+    ].join("\n"),
+    keywords: ["P14 Standard", "P14 Extreme Tuning", "P16", "演算加速機構", "暫定ベンチマーク"],
+    to: "/far-from-saga",
+    hash: "p16",
   },
   {
     id: "realm-royal",

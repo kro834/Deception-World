@@ -108,6 +108,8 @@ test("both compact landscape windows reach the World title reflow", () => {
   for (const [width, height] of [
     [720, 540],
     [900, 600],
+    [900, 651],
+    [900, 720],
   ]) {
     assert.ok(applies(hero, { width, height, pointer: "coarse" }));
   }
@@ -124,6 +126,8 @@ test("the split dossier rebalances iPad landscape and the wide fold only", () =>
   const split = sheets[1].media[0];
   for (const [width, height] of [
     [900, 600],
+    [1024, 600],
+    [1100, 650],
     [1024, 768],
     [1180, 820],
     [1366, 1024],
