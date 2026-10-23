@@ -791,7 +791,7 @@ html[data-family="dossier"]
    breaks into ink shards that blow out, then fall, spin and shed debris
    and dust; the void holds for the record. ── */
 .explom-gate {
-  animation: explomGateLife 1150ms linear both;
+  animation: explomGateLife 1080ms linear both;
 }
 
 .explom-gate-veil {
@@ -852,6 +852,14 @@ html[data-family="dossier"]
   margin-top: -1px;
   background: rgb(190 252 248 / 80%);
   box-shadow: 0 0 6px rgb(114 242 236 / 38%);
+}
+
+/* A phone draws its far cracks without a blurred glow (the impact frame
+   rasterises every crack at once). */
+@media (max-width: 599px) {
+  .explom-gate-cracks > i:is(.is-far, .is-ring) {
+    box-shadow: none;
+  }
 }
 
 .explom-gate-core {
@@ -1501,7 +1509,7 @@ html[data-family="dossier"]
   }
 
   html:not([data-world-effects="economy"]) .explom-gate-dust > i {
-    animation: explomDust 460ms ease-out both;
+    animation: explomDust 420ms ease-out both;
   }
 
   html:not([data-world-effects="economy"]) .explom-gate-streaks > i {
@@ -2100,78 +2108,29 @@ html[data-world-effects="economy"]
     animation: none !important;
   }
 
-  /* A still cross-fade through the cover's ground and its marks, no
-     movement. The site's reduced-motion reset (styles-world/11.css) cuts
-     every animation to 0.001ms; these few keep their calm length, as the
-     Rexonance cover's do. */
-  .explom-gate {
-    animation-duration: 150ms !important;
+  /* A calm, still cross-fade: the cover draws nothing and only holds the
+     reader's press (90 ms, as the Rexonance cover's reduced form does);
+     the record and its backdrop then fade in over the page (180 ms). The
+     site's reduced-motion reset (styles-world/11.css) cuts every animation
+     to 0.001ms; these keep their calm length, as the Rexonance cover's do. */
+  :is(.explom-gate, .kemonohen-gate) {
+    animation-duration: 90ms !important;
   }
 
-  .explom-gate-void {
-    animation: explomVoid 150ms ease both;
-    animation-duration: 150ms !important;
-  }
-
-  .explom-gate-cracks > i {
-    scale: 1 1;
-    opacity: 0.34;
-  }
-
-  :is(
-    .explom-gate-veil,
-    .explom-gate-shards,
-    .explom-gate-debris,
-    .explom-gate-dust,
-    .explom-gate-streaks,
-    .explom-gate-burst,
-    .explom-gate-spark,
-    .explom-gate-core
-  ) {
+  .form-gate > :not([role="status"]),
+  .form-pickup-dialog:is([data-form-theme="explom"], [data-form-theme="kemonohen"]) > .form-arrival {
     display: none;
   }
 
-  .form-pickup-dialog[data-form-theme="explom"][open] > .explom-arrival {
-    animation: arrivalClear 150ms ease both;
-    animation-duration: 150ms !important;
-  }
-
-  .kemonohen-gate {
-    animation-duration: 150ms !important;
-  }
-
-  .kemonohen-gate-dark {
-    animation: kemonohenDark 150ms ease both;
-    animation-duration: 150ms !important;
-  }
-
-  .kemonohen-gate .kemonohen-eye {
-    opacity: 0.7;
-    scale: 1.6;
-  }
-
-  :is(
-    .kemonohen-gate-vignette,
-    .kemonohen-gate-smear,
-    .kemonohen-gate-roar,
-    .kemonohen-claws,
-    .kemonohen-eye > .is-trail
-  ) {
-    display: none;
-  }
-
-  .form-pickup-dialog[data-form-theme="kemonohen"][open] > .kemonohen-arrival {
-    animation: arrivalClear 150ms ease both;
-    animation-duration: 150ms !important;
-  }
-
-  .kemonohen-arrival .kemonohen-eye {
-    opacity: 0.5;
-    scale: 1.6;
-  }
-
-  .kemonohen-arrival-eyes {
-    translate: var(--eye-dx, 0) var(--eye-dy, 0);
+  html[data-mode="world"]
+    .form-pickup-dialog.form-pickup-dialog:is([data-form-theme="explom"], [data-form-theme="kemonohen"])[open],
+  html[data-mode="world"]
+    .form-pickup-dialog.form-pickup-dialog:is(
+      [data-form-theme="explom"],
+      [data-form-theme="kemonohen"]
+    )[open]::backdrop {
+    animation: signature-art 180ms ease-out both;
+    animation-duration: 180ms !important;
   }
 }
 

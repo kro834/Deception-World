@@ -111,7 +111,12 @@ function mount(theme = "rexonance", { reducedMotion = false, economy = false } =
   };
   runInNewContext(compiled, scope);
   const tree = exports.FormPickup({
-    rider: { theme, name: THEMES.find((t) => t.theme === theme)?.name ?? "", img: "/rider.webp", calls: [] },
+    rider: {
+      theme,
+      name: THEMES.find((t) => t.theme === theme)?.name ?? "",
+      img: "/rider.webp",
+      calls: [],
+    },
   });
   const find = (node, type) => {
     if (!node || typeof node !== "object") return null;

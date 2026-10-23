@@ -105,7 +105,8 @@ export function artPoint(img: HTMLImageElement | null | undefined, fx: number, f
   const [px, py] = (style?.objectPosition || "50% 50%").split(/\s+/);
   const nw = img.naturalWidth;
   const nh = img.naturalHeight;
-  if (fit === "fill") return { x: box.left + fx * box.width, y: box.top + fy * box.height, scale: 1 };
+  if (fit === "fill")
+    return { x: box.left + fx * box.width, y: box.top + fy * box.height, scale: 1 };
   const scale =
     fit === "cover"
       ? Math.max(box.width / nw, box.height / nh)
@@ -138,7 +139,11 @@ export function measureGateScene(
       // The thumb has travelled to the control's far end when it opens.
       const box = opener?.getBoundingClientRect?.();
       const visual = card?.querySelector?.(".form-pickup-visual")?.getBoundingClientRect?.();
-      if (box && box.width > 0 && onScreen(box.right - box.height / 2, box.top + box.height / 2, w, h)) {
+      if (
+        box &&
+        box.width > 0 &&
+        onScreen(box.right - box.height / 2, box.top + box.height / 2, w, h)
+      ) {
         x = box.right - box.height / 2;
         y = box.top + box.height / 2;
       } else if (visual && visual.width > 0) {
@@ -160,7 +165,14 @@ export function measureGateScene(
   } catch {
     /* A detached or unmeasurable card keeps the frame's centre. */
   }
-  return { w, h, x, y, eyes, seed: (Math.round(x) * 73856093) ^ (Math.round(y) * 19349663) ^ (w * 83492791) };
+  return {
+    w,
+    h,
+    x,
+    y,
+    eyes,
+    seed: (Math.round(x) * 73856093) ^ (Math.round(y) * 19349663) ^ (w * 83492791),
+  };
 }
 
 /** The record's own eyes (犭): where the cover's light comes to rest. The
@@ -185,7 +197,12 @@ export function placeArrival(
     const map = KEMONOHEN_EYES[img?.getAttribute("src") ?? ""];
     const left = map && artPoint(img, map[0], map[1]);
     const right = map && artPoint(img, map[2], map[3]);
-    if (left && right && onScreen(left.x, left.y, scene.w, scene.h) && onScreen(right.x, right.y, scene.w, scene.h))
+    if (
+      left &&
+      right &&
+      onScreen(left.x, left.y, scene.w, scene.h) &&
+      onScreen(right.x, right.y, scene.w, scene.h)
+    )
       to = [left.x, left.y, right.x, right.y];
   } catch {
     /* The light fades where it is. */

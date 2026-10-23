@@ -1,4 +1,11 @@
-import { useEffect, useState, type AnimationEvent, type CSSProperties, type ReactNode } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+  type AnimationEvent,
+  type CSSProperties,
+  type ReactNode,
+} from "react";
 import type { FormTheme, GateScene } from "./form-signature-state";
 
 /* The record covers (form-signature-state.ts holds their timing and the
@@ -73,10 +80,10 @@ type Debris = {
 /* The Explom cover's clock (ms from its start): the crack front reaches
    the far corner at FRONT, the surface bursts at BURST, every shard has
    fallen out of the frame by DOWN, and the record takes over at its
-   life's end (1150 ms). */
+   life's end (1080 ms), while the last of them are still leaving. */
 const FRONT = 320;
 const BURST = 330;
-const DOWN = 1140;
+const DOWN = 1075;
 
 /** A spider-web fracture round the impact: kinked rays out past the
  * farthest corner, rings closer together near the impact. Rays and rings
@@ -135,6 +142,12 @@ function explomFracture(scene: GateScene) {
       // Rays reach the screen's edge; past it nothing is drawn.
       if (a.r > far * 1.02) continue;
       const weight = ring <= 2 ? "is-main" : "is-far";
+      // Far spans of a phone's fracture stay straight: fewer layers to draw
+      // on the impact frame of a mid-range phone.
+      if (compact && ring > 2) {
+        segment(a, b, at(a.r), at(b.r) - at(a.r), weight);
+        continue;
+      }
       // A crack never runs straight: one kink per span.
       const length = Math.hypot(b.x - a.x, b.y - a.y);
       const kink = (random() - 0.5) * 0.16 * length;
@@ -149,7 +162,7 @@ function explomFracture(scene: GateScene) {
       segment(a, mid, at(a.r), at(mid.r) - at(a.r), weight);
       segment(mid, b, at(mid.r), at(b.r) - at(mid.r), weight);
     }
-    for (let ring = 1; ring < rings.length; ring += 1) {
+    for (let ring = 1; ring < (compact ? 4 : rings.length); ring += 1) {
       const a = grid[ray][ring];
       const b = grid[(ray + 1) % rays][ring];
       if (Math.min(a.r, b.r) > far) continue;
@@ -253,13 +266,14 @@ function explomFracture(scene: GateScene) {
   const puffs = compact ? 4 : 6;
   const dust = Array.from({ length: puffs }, (_, index) => ({
     left: ((index + 0.5) / puffs) * w + (random() - 0.5) * (w / puffs) * 0.6,
-    delay: 620 + random() * 80,
+    delay: 600 + random() * 60,
   }));
   return { cracks, shards, debris, dust, streaks };
 }
 
 function ExplomGateArt({ scene }: { scene: GateScene }) {
-  const { cracks, shards, debris, dust, streaks } = explomFracture(scene);
+  // Measured once per press: the status line's re-render keeps the same break.
+  const { cracks, shards, debris, dust, streaks } = useMemo(() => explomFracture(scene), [scene]);
   return (
     <div className="explom-gate-field" aria-hidden="true">
       <svg className="explom-gate-defs" width="0" height="0" focusable="false">
