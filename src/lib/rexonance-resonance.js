@@ -16,6 +16,7 @@ import {
 } from "./rexonance-flame.js";
 import { naniteFlameEnvelope } from "./rexonance-ignition.js";
 import { releasePendingImage } from "./release-pending-images.js";
+import { importWithRetry } from "./chunk-retry.js";
 import { FIELD_WAKE, REXONANCE_SCROLL_FLAME, scrollFlameAt } from "./rexonance-field/field-clock.js";
 import { PLAYHEAD, ScrollPlayhead } from "./scroll-playhead.js";
 import {
@@ -1777,33 +1778,80 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       timer = environment.setTimeout(cancel, wait);
       Promise.resolve(pending).then(finish, cancel);
     });
+  // A request that outlives its wait is not thrown away (owner, 2026-10-23:
+  // 「自動変身再生が必ず読み込まれ、正常に動作する様にして。」): on a slow
+  // network a sheet can take longer than the wait, and cancelling it made
+  // every retry start the download over, so the scene never got ready. The
+  // wait gives up; the request keeps loading, and the next try (the engine's
+  // retry, the guide's 素材を再読み込み, a queued 再生) takes it where it is.
+  // src → { image, done } while it loads.
+  const inflight = new Map();
+  const request = (src, priority) => {
+    const held = inflight.get(src);
+    if (held) {
+      if (priority === "high" && held.image.fetchPriority !== "high") held.image.fetchPriority = "high";
+      return held;
+    }
+    const image = new environment.Image();
+    const entry = { image, done: null, abandon: null };
+    entry.done = new Promise((resolve, reject) => {
+      entry.abandon = () => {
+        image.onload = image.onerror = null;
+        if (inflight.get(src) === entry) inflight.delete(src);
+        loaders.delete(image);
+        releasePendingImage(image);
+        reject(new Error("assembly image request abandoned"));
+      };
+      image.onload = () => {
+        image.onload = image.onerror = null;
+        if (inflight.get(src) === entry) inflight.delete(src);
+        loaders.delete(image);
+        resolve(image);
+      };
+      image.onerror = (error) => {
+        image.onload = image.onerror = null;
+        if (inflight.get(src) === entry) inflight.delete(src);
+        loaders.delete(image);
+        releasePendingImage(image);
+        reject(error);
+      };
+    });
+    // (Settled by its waiters; an unwaited failure is not unhandled.)
+    entry.done.catch(() => {});
+    inflight.set(src, entry);
+    loaders.add(image);
+    image.decoding = "async";
+    if (priority) image.fetchPriority = priority;
+    image.src = src;
+    return entry;
+  };
+  // An explicit retry (the reader's 素材を再読み込み or 再読み込み) or the
+  // network coming back starts every request over: one that hung is not
+  // waited on again. (The automatic retries keep them.)
+  const abandonRequests = () => {
+    for (const entry of [...inflight.values()]) entry.abandon();
+    inflight.clear();
+  };
   const picture = (src, priority) =>
     new Promise((resolve, reject) => {
-      const image = new environment.Image();
+      const { done } = request(src, priority);
       let complete = false;
       let timer = 0;
-      const finish = (loaded, error) => {
+      const finish = (image, error) => {
         if (complete) return;
         complete = true;
         environment.clearTimeout(timer);
-        loaders.delete(image);
         decodeWaiters.delete(cancel);
-        image.onload = image.onerror = null;
-        if (loaded) resolve(image);
-        else {
-          releasePendingImage(image);
-          reject(error);
-        }
+        if (image) resolve(image);
+        else reject(error);
       };
-      const cancel = () => finish(false, new Error("assembly image request timed out"));
-      loaders.add(image);
+      const cancel = () => finish(null, new Error("assembly image request timed out"));
       decodeWaiters.add(cancel);
-      image.decoding = "async";
-      if (priority) image.fetchPriority = priority;
-      image.onload = () => finish(true);
-      image.onerror = (error) => finish(false, error);
+      done.then(
+        (image) => finish(image),
+        (error) => finish(null, error ?? new Error("assembly image request failed")),
+      );
       timer = environment.setTimeout(cancel, 8000);
-      image.src = src;
     });
   // The network half of the preparation, fetched ahead (owner, 2026-10-17:
   // 「レクソナンスのスクロールで変身するやつが読み込まれずに過ぎてしまったりする」):
@@ -1814,7 +1862,18 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   let modulesLoading = null;
   const modules = () => {
     modulesLoading ??= Promise.all([
-      boundedImage(import("./rexonance-assembly-nanites.js"), null, 8000).then((module) => {
+      // A failed chunk is fetched again under a fresh URL (a failed module
+      // fetch stays failed in the module map; src/lib/chunk-retry.js).
+      boundedImage(
+        importWithRetry(() => import("./rexonance-assembly-nanites.js"), {
+          attempts: 3,
+          delays: [300, 1200],
+          timeoutMs: 0,
+          onError: (error) => console.warn("[suit-up] the swarm's chunk failed to load", error),
+        }),
+        null,
+        8000,
+      ).then((module) => {
         if (!module) throw new Error("assembly module request timed out");
         return module;
       }),
@@ -4731,11 +4790,30 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         if (token === generation) preparing = null;
       });
   };
-  const retryAssembly = () => {
-    if (runway.dataset.rznLoad !== "error" || !near || !pageActive || document.hidden || disposed)
-      return;
+  // The guide's 素材を再読み込み and the movie's retries (owner, 2026-10-23):
+  // a fresh start of the preparation, whether or not the runway is near (the
+  // guide's button stands above it), its failed module fetch included.
+  const retryAssembly = (event) => {
+    if (runway.dataset.rznLoad !== "error" || !pageActive || document.hidden || disposed) return;
+    // The movie's own backoff keeps a slow request (detail.keep); the
+    // reader's press starts the requests over.
+    if (!event?.detail?.keep) abandonRequests();
+    environment.clearTimeout(retryTimer);
+    retryTimer = 0;
     retryCount = 0;
     loading = null;
+    modulesLoading = null;
+    eager = true;
+    wake();
+  };
+  // The movie's 再生 (or the reader's pointer on it) before the scene is
+  // ready: prepare now, the same preparation the approach starts.
+  const wakeAssembly = () => {
+    if (disposed || !pageActive || document.hidden || !motionAllowed()) return;
+    if (runway.dataset.rznLoad === "error") return;
+    eager = true;
+    stopEarlyScroll();
+    prefetch();
     wake();
   };
   const onOnline = () => {
@@ -4750,6 +4828,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       retryCount = 0;
       loading = null;
       modulesLoading = null;
+      abandonRequests();
     }
     if (near || warm || eager) wake();
   };
@@ -4915,6 +4994,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   connection?.addEventListener?.("change", sync);
   document.addEventListener("visibilitychange", sync);
   runway.addEventListener?.("rexonance:assembly-retry", retryAssembly);
+  runway.addEventListener?.("rexonance:assembly-wake", wakeAssembly);
   environment.addEventListener("pagehide", onPageHide);
   environment.addEventListener("pageshow", onPageShow);
   environment.addEventListener("online", onOnline);
@@ -4950,6 +5030,8 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     connection?.removeEventListener?.("change", sync);
     document.removeEventListener("visibilitychange", sync);
     runway.removeEventListener?.("rexonance:assembly-retry", retryAssembly);
+    runway.removeEventListener?.("rexonance:assembly-wake", wakeAssembly);
+    inflight.clear();
     if (restLoad === undefined) delete runway.dataset.rznLoad;
     else runway.dataset.rznLoad = restLoad;
     environment.removeEventListener("pagehide", onPageHide);

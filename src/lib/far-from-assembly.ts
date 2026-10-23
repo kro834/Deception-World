@@ -18,9 +18,20 @@
  * the lifecycle: it prepares when the runway is near, scrubs with the
  * scroll (reversible, closed-form frames), budgets its draws by pointer and
  * tears everything down through the disposer returned here.
+ *
+ * The engine chunk always arrives (owner, 2026-10-23: 「自動変身再生が必ず読み
+ * 込まれ、正常に動作する様にして。」): its import is retried with a backoff
+ * under a fresh URL (src/lib/chunk-retry.js); when the retries run out the
+ * runway reads data-rzn-load="error" and the guide's 素材を再読み込み (or the
+ * movie's 再生, through the same "rexonance:assembly-retry" event the
+ * mounted engine answers) starts the import over, as does the network
+ * coming back. The movie's 再生 before the chunk is here
+ * ("rexonance:assembly-wake") starts the import at once, without waiting
+ * for idle time.
  */
 
 import { FAR_FROM_SAGA } from "../components/final-stage/final-stage-data.ts";
+import { importWithRetry } from "./chunk-retry.js";
 
 export type FarFromAssemblyBeat = {
   /** 0–1 along the runway's scroll: when the beat begins. */
@@ -121,6 +132,8 @@ export type FarFromAssemblyOptions = {
   reducedMotion?: boolean;
   /** The window (tests). */
   environment?: typeof globalThis;
+  /** The engine chunk import's backoff (ms before each retry; tests). */
+  retryDelays?: readonly number[];
   /** The engine chunk's loader (tests). */
   load?: () => Promise<{
     mountFarFromAssemblyEngine: (host: HTMLElement, environment: typeof globalThis) => () => void;
@@ -141,6 +154,8 @@ export function mountFarFromAssembly(
   options: FarFromAssemblyOptions = {},
 ): () => void {
   if (!host) return () => {};
+  // (function declarations below do not keep the guard's narrowing)
+  const runway: HTMLElement = host;
   const environment = options.environment ?? window;
   const html = host.ownerDocument.documentElement;
   const reduced = environment.matchMedia("(prefers-reduced-motion: reduce)");
@@ -161,25 +176,60 @@ export function mountFarFromAssembly(
     html.dataset.worldEffects !== "economy";
   const start = () => {
     if (disposed || dispose || loading || !motionAllowed()) return;
+    cancelIdle();
     loading = true;
-    load().then(
+    if (host.dataset.rznLoad === "error") host.dataset.rznLoad = "waiting";
+    importWithRetry(load, {
+      delays: options.retryDelays,
+      isCancelled: () => disposed,
+      onError: (error, attempt) =>
+        console.warn(`[far-from suit-up] the engine chunk failed to load (try ${attempt})`, error),
+    }).then(
       (module) => {
         loading = false;
-        if (disposed) return;
+        if (disposed || dispose) return;
+        // The engine answers the retry and wake events from here on.
+        stopListening();
         dispose = module.mountFarFromAssemblyEngine(host, environment);
+        // A 再生 already waiting: the engine prepares at once.
+        if (woken) host.dispatchEvent?.(new Event("rexonance:assembly-wake"));
       },
-      () => {
+      (error) => {
         loading = false;
-        if (!disposed) host.dataset.rznLoad = "error";
+        if (disposed) return;
+        console.error("[far-from suit-up] the engine chunk could not be loaded", error);
+        host.dataset.rznLoad = "error";
       },
     );
   };
-  const cancelIdle = () => {
+  // Before the engine is mounted these are this module's: the movie's 再生
+  // (wake: import now) and the guide's 素材を再読み込み or the network coming
+  // back (retry the import).
+  let woken = false;
+  const onWake = () => {
+    woken = true;
+    start();
+  };
+  const onRetry = () => {
+    if (host.dataset.rznLoad === "error") start();
+  };
+  let listening = true;
+  runway.addEventListener?.("rexonance:assembly-wake", onWake);
+  runway.addEventListener?.("rexonance:assembly-retry", onRetry);
+  environment.addEventListener?.("online", onRetry);
+  function stopListening() {
+    if (!listening) return;
+    listening = false;
+    runway.removeEventListener?.("rexonance:assembly-wake", onWake);
+    runway.removeEventListener?.("rexonance:assembly-retry", onRetry);
+    environment.removeEventListener?.("online", onRetry);
+  }
+  function cancelIdle() {
     if (idleId) environment.cancelIdleCallback?.(idleId);
     if (idleTimer) environment.clearTimeout(idleTimer);
     idleId = 0;
     idleTimer = 0;
-  };
+  }
   // After the page's first frames, never in them: the engine chunk's import
   // waits for idle time (or a short timer where there is none).
   const sync = () => {
@@ -189,6 +239,8 @@ export function mountFarFromAssembly(
       host.dataset.rznLoad = "static";
       return;
     }
+    // (A failed import keeps its error until it is retried.)
+    if (host.dataset.rznLoad === "error" && !loading) return;
     host.dataset.rznLoad = "waiting";
     if (idleId || idleTimer || loading) return;
     if (typeof environment.requestIdleCallback === "function")
@@ -216,6 +268,7 @@ export function mountFarFromAssembly(
   return () => {
     disposed = true;
     cancelIdle();
+    stopListening();
     observer?.disconnect();
     reduced.removeEventListener?.("change", sync);
     forced.removeEventListener?.("change", sync);

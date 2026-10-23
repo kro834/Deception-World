@@ -25,13 +25,24 @@
  * the scroll is the reader's again; nothing fights.
  *
  * The control shows while the runway's frame is pinned (MOVIE_SHOW_AT of
- * it in view), or while it holds focus; it is disabled until the scene is
- * ready, and hidden by its sheet in the still tiers (data-load="static":
- * reduced motion, forced colours, economy, Save-Data), where the runway
- * is one still and there is no sequence to play — stepping through stills
- * would need per-beat pictures the still tiers deliberately never
- * download. Nothing here runs on the startup path: the component imports
- * this chunk once the page is idle.
+ * what of it fits the window in view), or while it holds focus. It is live
+ * as soon as this controller mounts (owner, 2026-10-23: 「自動変身再生が必ず
+ * 読み込まれ、正常に動作する様にして。」): a 再生 pressed before the scene's
+ * assets are ready is queued — the control reads 読み込み中 (aria-busy), the
+ * engine is asked to prepare now (MOVIE_WAKE_EVENT), and the movie starts
+ * by itself once the runway reads ready. A failed preparation is retried
+ * through the engine's own retry (MOVIE_RETRY_EVENT, the guide's
+ * 素材を再読み込み) with a backoff; when the retries run out the control
+ * reads 再読み込み, and pressing it starts over. Nothing fails silently.
+ *
+ * The still tiers (data-tier="still": the runway reads data-rzn-load
+ * "static" — reduced motion, forced colours, economy, Save-Data, 2G — or
+ * it has no pinned travel) hide the control: the runway is one still and
+ * there is no sequence to play (stepping through stills would need
+ * per-beat pictures the still tiers deliberately never download). The
+ * sheets hide it by the same rules before this controller arrives. Nothing
+ * here runs on the startup path: the component imports this chunk once the
+ * page is idle, or sooner on the reader's approach.
  */
 
 /** The movie's length at 1× (ms): the suit-up's twelve beats at a pace
@@ -43,8 +54,14 @@ export const MOVIE_SEEK_STEPS = 200;
 /** How far (px) the page may stand from where the movie put it before the
  * difference reads as the viewer's own scroll. */
 export const MOVIE_SCROLL_TOLERANCE = 2;
-/** The share of the frame in view before the control shows. */
+/** The share of the frame in view before the control shows (of what of the
+ * frame fits the window). */
 export const MOVIE_SHOW_AT = 0.6;
+/** The observer's thresholds: every twentieth, so the share is read near
+ * MOVIE_SHOW_AT whatever the frame's height against the window's. */
+export const MOVIE_SHOW_THRESHOLDS: readonly number[] = Object.freeze(
+  Array.from({ length: 21 }, (_, k) => k / 20),
+);
 /** The keys that scroll a page: pressed outside the control, they pause. */
 export const MOVIE_SCROLL_KEYS: ReadonlySet<string> = new Set([
   "ArrowUp",
@@ -61,9 +78,38 @@ export const MOVIE_IDLE_COLLAPSE_MS = 4000;
 /** The figure's picture: height over width (the canvas and the stills). */
 export const MOVIE_FIGURE_ASPECT = 1040 / 693;
 /** The play button's label by state. */
-export const MOVIE_PLAY_LABELS = Object.freeze({ play: "再生", pause: "一時停止" });
+export const MOVIE_PLAY_LABELS = Object.freeze({
+  play: "再生",
+  pause: "一時停止",
+  loading: "読み込み中",
+  retry: "再読み込み",
+});
+/** The longest step (ms) one frame may advance the movie by: a hitch on a
+ * slow device is caught up (the movie keeps its length), a long stall (a
+ * frozen tab) is not jumped over. */
+export const MOVIE_MAX_STEP_MS = 1000;
+/** How long (ms) after a resize or a rotation a scroll the movie did not
+ * make is still the layout settling, not the reader. */
+export const MOVIE_RESIZE_GRACE_MS = 700;
+/** How far (px) a touch must move before it reads as the reader's scroll
+ * (a tap is not one). */
+export const MOVIE_TOUCH_SLOP = 10;
+/** A queued 再生's retries of a failed preparation (ms before each): when
+ * they run out the control reads 再読み込み. */
+export const MOVIE_LOAD_RETRY_DELAYS: readonly number[] = Object.freeze([
+  1000, 2500, 5000, 10000, 15000,
+]);
+/** While a 再生 waits, the engine is reminded this often (ms). */
+export const MOVIE_WAKE_INTERVAL_MS = 4000;
+/** The events the movie sends the runway's engine: prepare now (the reader
+ * asked to play, or is about to), and retry a failed preparation. */
+export const MOVIE_WAKE_EVENT = "rexonance:assembly-wake";
+export const MOVIE_RETRY_EVENT = "rexonance:assembly-retry";
 
-export type MovieState = "idle" | "playing" | "paused" | "ended";
+export type MovieState = "idle" | "loading" | "playing" | "paused" | "ended" | "error";
+
+/** One controller per control: a second mount disposes the first. */
+const mounted = new WeakMap<HTMLElement, () => void>();
 
 type MovieEnvironment = Pick<
   Window,
@@ -76,6 +122,10 @@ type MovieEnvironment = Pick<
   | "innerHeight"
   | "getComputedStyle"
 > & {
+  setTimeout?: (callback: () => void, ms: number) => unknown;
+  clearTimeout?: (id: never) => void;
+  setInterval?: (callback: () => void, ms: number) => unknown;
+  clearInterval?: (id: never) => void;
   document: Document;
   IntersectionObserver?: typeof IntersectionObserver;
   MutationObserver?: typeof MutationObserver;
@@ -103,6 +153,20 @@ export function mountAssemblyMovie(
   const radios = [...control.querySelectorAll<HTMLButtonElement>('[role="radio"]')];
   const seek = control.querySelector<HTMLInputElement>(".rzn-movie-seek input");
   if (!frame || !play) return () => {};
+  // A second mount on the same control (a remount before the first one's
+  // cleanup) takes over: never two controllers on one control.
+  mounted.get(control)?.();
+  const later = (callback: () => void, ms: number): unknown =>
+    (environment.setTimeout ?? globalThis.setTimeout)(callback, ms);
+  const cancelLater = (id: unknown) => {
+    if (id) (environment.clearTimeout ?? globalThis.clearTimeout)(id as never);
+  };
+  const every = (callback: () => void, ms: number): unknown =>
+    (environment.setInterval ?? globalThis.setInterval)(callback, ms);
+  const cancelEvery = (id: unknown) => {
+    if (id) (environment.clearInterval ?? globalThis.clearInterval)(id as never);
+  };
+  const now = () => Date.now();
 
   let disposed = false;
   let state: MovieState = "idle";
@@ -121,18 +185,38 @@ export function mountAssemblyMovie(
   // in a row are the reader's (a scrollbar drag); one alone may be a stray
   // (a smooth scroll ending, a layout settling).
   let strays = 0;
-  let remeasure = false;
+  // Scrolls landing before this time are the layout settling (a resize).
+  let graceUntil = 0;
+  // A 再生 waiting for the scene: where it starts ("here": wherever the page
+  // stands when the scene is ready), its retries, its reminder.
+  let queued: number | "here" | null = null;
+  let retries = 0;
+  let retryTimer: unknown = 0;
+  let wakeTimer: unknown = 0;
+  // Paused by a hidden page (or the page leaving): resumed when it is back.
+  let resumeOnShow = false;
+  let touchStart: { x: number; y: number } | null = null;
   let pinTop = 0;
   let travel = 0;
   let top = 0;
 
+  const labelOf = (value: MovieState) =>
+    value === "playing"
+      ? MOVIE_PLAY_LABELS.pause
+      : value === "loading"
+        ? MOVIE_PLAY_LABELS.loading
+        : value === "error"
+          ? MOVIE_PLAY_LABELS.retry
+          : MOVIE_PLAY_LABELS.play;
   const setState = (next: MovieState) => {
     if (state === next) return;
     state = next;
     control.dataset.state = next;
-    const label = next === "playing" ? MOVIE_PLAY_LABELS.pause : MOVIE_PLAY_LABELS.play;
+    const label = labelOf(next);
     if (play.textContent !== label) play.textContent = label;
     if (mini && mini.getAttribute("aria-label") !== label) mini.setAttribute("aria-label", label);
+    if (next === "loading") control.setAttribute("aria-busy", "true");
+    else control.removeAttribute("aria-busy");
   };
   control.dataset.state = state;
 
@@ -213,15 +297,17 @@ export function mountAssemblyMovie(
     rafId = 0;
     if (disposed || state !== "playing") return;
     if (lastStamp) {
-      // A hitch advances the movie by at most a tenth of a second.
-      const dt = Math.min(100, Math.max(0, stamp - lastStamp));
+      // A hitch is caught up (the movie keeps its length on a slow device);
+      // a stall is not jumped over.
+      const dt = Math.min(MOVIE_MAX_STEP_MS, Math.max(0, stamp - lastStamp));
       progress = clamp01(progress + (dt * speed) / MOVIE_DURATION_MS);
     }
     lastStamp = stamp;
-    if (remeasure) {
-      remeasure = false;
-      measure();
-    }
+    // The runway is measured each frame: the page above it may settle
+    // (images, fonts, content-visibility, scroll anchoring) or the window
+    // change, and the movie's scroll follows the runway, never a stale
+    // offset.
+    measure();
     scrollTo(progress);
     syncSeek(progress);
     if (progress >= 1) {
@@ -231,37 +317,109 @@ export function mountAssemblyMovie(
     }
     rafId = environment.requestAnimationFrame(tick);
   };
-  const ready = () => runway.dataset.rznLoad === "ready";
+  const loadOf = () => runway.dataset.rznLoad || "waiting";
+  const ready = () => loadOf() === "ready";
+  /** No sequence to play: the still tiers, or a runway with no travel. */
+  const still = () => loadOf() === "static" || runway.offsetHeight - frame.offsetHeight <= 0;
   const start = (from: number) => {
     if (!ready()) return;
+    clearQueue();
     measure();
     progress = clamp01(from);
     scrollTo(progress);
     syncSeek(progress);
     setState("playing");
-    // The page may settle its layout as the movie starts: the runway is
-    // measured again on the first frame.
-    remeasure = true;
     strays = 0;
+    resumeOnShow = false;
     stop();
     rafId = environment.requestAnimationFrame(tick);
   };
+  /** Where 再生 starts from the page as it stands: at the end, the start. */
+  const here = () => {
+    measure();
+    const at = readProgress();
+    return at >= 1 ? 0 : at;
+  };
+
+  /* ---------------- a 再生 waiting for the scene ---------------- */
+  /** An event to the engine; `keep`: the movie's own backoff, which keeps
+   * the engine's slow requests going (the reader's press starts them over). */
+  const send = (type: string, keep = false) => {
+    if (typeof runway.dispatchEvent !== "function") return;
+    if (keep && typeof CustomEvent === "function")
+      runway.dispatchEvent(new CustomEvent(type, { detail: { keep: true } }));
+    else if (typeof Event === "function") runway.dispatchEvent(new Event(type));
+  };
+  function clearQueue() {
+    queued = null;
+    cancelLater(retryTimer);
+    retryTimer = 0;
+    cancelEvery(wakeTimer);
+    wakeTimer = 0;
+  }
+  /** The engine's preparation failed while a 再生 waits: retried after a
+   * backoff; when the retries run out the control reads 再読み込み. */
+  const retryLater = () => {
+    if (retryTimer || queued === null) return;
+    if (retries >= MOVIE_LOAD_RETRY_DELAYS.length) {
+      clearQueue();
+      setState("error");
+      return;
+    }
+    const delay = MOVIE_LOAD_RETRY_DELAYS[retries];
+    retries += 1;
+    retryTimer = later(() => {
+      retryTimer = 0;
+      if (disposed || queued === null) return;
+      if (loadOf() === "error") send(MOVIE_RETRY_EVENT, true);
+      else send(MOVIE_WAKE_EVENT);
+    }, delay);
+  };
+  /** 再生 (or 最初から) asked for: played now if the scene is ready, else
+   * queued until it is, the engine asked to prepare now. */
+  const request = (from: number | "here") => {
+    if (disposed || still()) return;
+    if (ready()) {
+      start(from === "here" ? here() : from);
+      return;
+    }
+    queued = from;
+    setState("loading");
+    send(MOVIE_WAKE_EVENT);
+    // A preparation that already failed is retried at once.
+    if (loadOf() === "error") send(MOVIE_RETRY_EVENT);
+    if (!wakeTimer)
+      wakeTimer = every(() => {
+        if (disposed || queued === null) return;
+        if (loadOf() === "error") retryLater();
+        else send(MOVIE_WAKE_EVENT);
+      }, MOVIE_WAKE_INTERVAL_MS);
+  };
+  /** The reader took the scroll, or the frame unpinned: a waiting 再生 is
+   * dropped. */
+  function cancelQueue() {
+    if (queued === null && state !== "loading") return;
+    clearQueue();
+    if (state === "loading") setState("idle");
+  }
   const onPlay = () => {
     // A choice made in the sheet closes it (the pill's own 再生 has none open).
     collapse(true);
     if (state === "playing") {
+      resumeOnShow = false;
       pause();
       return;
     }
-    measure();
-    const at = readProgress();
+    // Already waiting for the scene: it starts by itself.
+    if (state === "loading") return;
+    if (state === "error") retries = 0;
     // At the end, 再生 plays again from the start.
-    start(state === "ended" || at >= 1 ? 0 : at);
+    request(state === "ended" ? 0 : "here");
   };
   const onRestart = () => {
     collapse(true);
-    if (!ready()) return;
-    start(0);
+    if (state === "error") retries = 0;
+    request(0);
   };
 
   /* ---------------- the sheet's opening (pill layouts) ---------------- */
@@ -380,8 +538,10 @@ export function mountAssemblyMovie(
     measure();
     progress = q;
     scrollTo(q);
+    control.style?.setProperty("--rzn-movie-p", String(Math.round(q * 1000) / 10));
     seek.setAttribute("aria-valuetext", `${Math.round(q * 100)}%`);
     if (state === "ended" && q < 1) setState("paused");
+    else if (state === "paused" && q >= 1) setState("ended");
   };
   const onSeekDown = () => {
     scrubbing = true;
@@ -392,23 +552,58 @@ export function mountAssemblyMovie(
 
   /* ---------------- the reader's own input ---------------- */
   const outside = (event: Event) => !control.contains(event.target as Node | null);
+  /** The reader's own scroll: the movie's turn is over. */
+  const yieldToReader = () => {
+    resumeOnShow = false;
+    cancelQueue();
+    pause();
+  };
   const onWheel = () => {
     collapse(false);
-    pause();
+    yieldToReader();
   };
+  const point = (event: Event) => {
+    const touch = (event as TouchEvent).touches?.[0];
+    return touch ? { x: touch.clientX, y: touch.clientY } : null;
+  };
+  // A touch outside the control closes the sheet; it pauses the movie once
+  // it moves (a drag scrolls the page; a tap does not).
   const onTouch = (event: Event) => {
-    if (!outside(event)) return;
+    if (!outside(event)) {
+      touchStart = null;
+      return;
+    }
     collapse(false);
-    pause();
+    touchStart = point(event) ?? { x: Number.NaN, y: Number.NaN };
+  };
+  const onTouchMove = (event: Event) => {
+    if (!touchStart || !outside(event)) return;
+    const at = point(event);
+    const moved =
+      !at ||
+      !Number.isFinite(touchStart.x) ||
+      Math.hypot(at.x - touchStart.x, at.y - touchStart.y) > MOVIE_TOUCH_SLOP;
+    if (!moved) return;
+    touchStart = null;
+    yieldToReader();
+  };
+  const onTouchEnd = () => {
+    touchStart = null;
   };
   const onKey = (event: KeyboardEvent) => {
-    if (state === "playing" && outside(event) && MOVIE_SCROLL_KEYS.has(event.key)) pause();
+    if (
+      (state === "playing" || state === "loading") &&
+      outside(event) &&
+      MOVIE_SCROLL_KEYS.has(event.key)
+    )
+      yieldToReader();
   };
   const onScroll = () => {
     const y = environment.scrollY;
     const ours =
       Math.abs(y - expectedY) <= MOVIE_SCROLL_TOLERANCE ||
-      Math.abs(y - previousY) <= MOVIE_SCROLL_TOLERANCE;
+      Math.abs(y - previousY) <= MOVIE_SCROLL_TOLERANCE ||
+      now() < graceUntil;
     // A scroll that is the reader's own closes the open sheet (the movie's
     // own scrolling, and the seek's, do not).
     if (!ours && open) collapse(false);
@@ -426,26 +621,88 @@ export function mountAssemblyMovie(
     }
   };
   const onResize = () => {
+    // The layout settles over the next frames (the runway's height follows
+    // the window): its scrolls are not the reader's.
+    graceUntil = now() + MOVIE_RESIZE_GRACE_MS;
+    strays = 0;
     if (state === "playing") measure();
     else travel = 0;
+    syncLoad();
     if (shown) place();
   };
+  /** A hidden page (another tab, the page leaving) holds the movie; it
+   * resumes where it was when the page is back. */
+  const hold = () => {
+    if (state !== "playing") return;
+    pause();
+    // (At the end there is nothing to resume.)
+    resumeOnShow = progress < 1;
+  };
+  const resume = () => {
+    if (!resumeOnShow || disposed) return;
+    resumeOnShow = false;
+    if (state === "paused" && shown) start(progress);
+  };
   const onVisibility = () => {
-    if (document.hidden) pause();
+    if (document.hidden) hold();
+    else resume();
+  };
+  const onPageHide = () => {
+    hold();
+    cancelQueue();
+    collapse(false);
+  };
+  const onPageShow = (event: Event) => {
+    // Back from the back/forward cache: the page's state is read again.
+    if ((event as PageTransitionEvent).persisted) {
+      travel = 0;
+      graceUntil = now() + MOVIE_RESIZE_GRACE_MS;
+      syncLoad();
+      if (shown) onScroll();
+    }
+    resume();
   };
 
   /* ---------------- the runway's state ---------------- */
   const syncLoad = () => {
-    const load = runway.dataset.rznLoad || "waiting";
+    if (disposed) return;
+    const load = loadOf();
     if (control.dataset.load !== load) control.dataset.load = load;
-    const enabled = load === "ready";
+    const tier = still() ? "still" : "motion";
+    if (control.dataset.tier !== tier) control.dataset.tier = tier;
+    // Live as soon as this controller is here: a 再生 before the scene is
+    // ready waits for it (読み込み中), never a dead button.
+    const enabled = tier === "motion";
     play.disabled = !enabled;
     if (mini) mini.disabled = !enabled;
     // The toggle needs only this controller.
     if (toggle) toggle.disabled = false;
     if (restart) restart.disabled = !enabled;
     if (seek) seek.disabled = !enabled;
-    if (!enabled) pause();
+    if (!enabled) {
+      // No sequence to play (reduced motion, economy… turned on mid-visit).
+      cancelQueue();
+      pause();
+      if (state === "error") setState("idle");
+      return;
+    }
+    if (load === "ready") {
+      retries = 0;
+      if (queued !== null) {
+        const from = queued;
+        start(from === "here" ? here() : from);
+      }
+      return;
+    }
+    // The scene went away mid-movie (the engine prepares it again): the
+    // movie waits for it and continues from where it was.
+    if (state === "playing") {
+      stop();
+      queued = progress;
+      setState("loading");
+      send(MOVIE_WAKE_EVENT);
+    }
+    if (load === "error" && queued !== null) retryLater();
   };
   const loadObserver =
     typeof environment.MutationObserver === "function"
@@ -453,28 +710,49 @@ export function mountAssemblyMovie(
       : null;
   loadObserver?.observe(runway, { attributes: true, attributeFilter: ["data-rzn-load"] });
   const setShown = (next: boolean) => {
+    if (disposed) return;
     shown = next;
     if (next) {
       control.dataset.shown = "true";
       travel = 0;
       place();
       onScroll();
+      // In view: the scene is asked to prepare now (the engine does once the
+      // runway is near; this covers a reader who jumped straight here).
+      if (!ready() && !still()) send(MOVIE_WAKE_EVENT);
     } else {
       delete control.dataset.shown;
       collapse(false);
       // The frame unpinned: the movie's turn is over (再生 then plays from
       // wherever the page stands).
+      resumeOnShow = false;
+      cancelQueue();
       if (state === "playing") pause();
       setState("idle");
     }
+  };
+  /** Whether the frame is in view: MOVIE_SHOW_AT of what of it fits the
+   * window (a frame taller than a short landscape window is pinned while
+   * only part of it can show). An entry crossing a threshold on its way out
+   * still intersects: the share decides, never isIntersecting alone. */
+  const inView = (entry: IntersectionObserverEntry) => {
+    if (!entry.isIntersecting) return false;
+    const box = entry.boundingClientRect;
+    const seen = entry.intersectionRect?.height;
+    if (!box || typeof seen !== "number") return true;
+    const room = Math.min(box.height, entry.rootBounds?.height ?? box.height);
+    return room <= 0 || seen / room >= MOVIE_SHOW_AT - 0.001;
   };
   const showObserver =
     typeof environment.IntersectionObserver === "function"
       ? new environment.IntersectionObserver(
           (entries) => {
-            for (const entry of entries) setShown(entry.isIntersecting);
+            for (const entry of entries) {
+              const next = inView(entry);
+              if (next !== shown) setShown(next);
+            }
           },
-          { threshold: [MOVIE_SHOW_AT] },
+          { threshold: [...MOVIE_SHOW_THRESHOLDS] },
         )
       : null;
   showObserver?.observe(frame);
@@ -505,12 +783,28 @@ export function mountAssemblyMovie(
   environment.addEventListener("resize", onResize, { passive: true });
   environment.addEventListener("wheel", onWheel, { passive: true });
   environment.addEventListener("touchstart", onTouch, { passive: true });
+  environment.addEventListener("touchmove", onTouchMove, { passive: true });
+  environment.addEventListener("touchend", onTouchEnd, { passive: true });
+  environment.addEventListener("touchcancel", onTouchEnd, { passive: true });
+  environment.addEventListener("orientationchange", onResize, { passive: true });
   environment.addEventListener("keydown", onKey);
+  environment.addEventListener("pagehide", onPageHide);
+  environment.addEventListener("pageshow", onPageShow);
   document.addEventListener("visibilitychange", onVisibility);
+  // The reader's intent (a pointer or focus on the control): the scene is
+  // asked to prepare before 再生 is pressed.
+  const onIntent = () => {
+    if (!ready() && !still()) send(MOVIE_WAKE_EVENT);
+  };
+  control.addEventListener("pointerenter", onIntent);
+  control.addEventListener("focusin", onIntent);
 
-  return () => {
+  const dispose = () => {
+    if (disposed) return;
     disposed = true;
+    if (mounted.get(control) === dispose) mounted.delete(control);
     stop();
+    clearQueue();
     loadObserver?.disconnect();
     showObserver?.disconnect();
     clearIdle();
@@ -535,12 +829,31 @@ export function mountAssemblyMovie(
     environment.removeEventListener("resize", onResize);
     environment.removeEventListener("wheel", onWheel);
     environment.removeEventListener("touchstart", onTouch);
+    environment.removeEventListener("touchmove", onTouchMove);
+    environment.removeEventListener("touchend", onTouchEnd);
+    environment.removeEventListener("touchcancel", onTouchEnd);
+    environment.removeEventListener("orientationchange", onResize);
     environment.removeEventListener("keydown", onKey);
+    environment.removeEventListener("pagehide", onPageHide);
+    environment.removeEventListener("pageshow", onPageShow);
     document.removeEventListener("visibilitychange", onVisibility);
+    control.removeEventListener("pointerenter", onIntent);
+    control.removeEventListener("focusin", onIntent);
     delete control.dataset.shown;
     delete control.dataset.load;
+    delete control.dataset.tier;
     delete control.dataset.open;
+    control.removeAttribute("aria-busy");
     toggle?.setAttribute("aria-expanded", "false");
+    // Back to the markup as rendered: nothing is left live without its
+    // controller (a disposed controller's buttons would do nothing).
+    state = "idle";
     control.dataset.state = "idle";
+    play.textContent = MOVIE_PLAY_LABELS.play;
+    mini?.setAttribute("aria-label", MOVIE_PLAY_LABELS.play);
+    for (const button of [play, mini, toggle, restart]) if (button) button.disabled = true;
+    if (seek) seek.disabled = true;
   };
+  mounted.set(control, dispose);
+  return dispose;
 }
