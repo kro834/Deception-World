@@ -1,0 +1,209 @@
+/* FAR FROM SAGA — the page brought up to the Extreme and Rexonance sites
+   (owner, 2026-10-24: 「ファーフロム…のページを、エクスプリームとレクソナンスを
+   もとにそれぞれブラッシュアップさせて。」). Linked after the page's own sheets,
+   every rule scoped to the page (.rxs-page.ffs-page). Layout and material
+   only: no copy, no labels. The chapter heads carry the Extreme site's rule
+   (a lit line under the head), the spec table, the theories, the systems,
+   the authorities, the weapons and the finishers become machined plates
+   (a cut corner, a lit top rail in ice and gold, a material gradient and
+   depth), the figures read at the Rexonance site's scale. Motion only under
+   the full gate; reduced motion, economy and forced colours keep it still. */
+
+.rxs-page.rxs-page.ffs-page {
+  --ffz-ice: 127 230 255;
+  --ffz-gold: 255 215 122;
+  --ffz-plate: linear-gradient(
+    160deg,
+    rgb(18 30 46 / 0.94) 0%,
+    rgb(9 15 26 / 0.96) 58%,
+    rgb(6 10 18 / 0.98) 100%
+  );
+  --ffz-rail: linear-gradient(
+    90deg,
+    rgb(var(--ffz-ice) / 0.95),
+    rgb(var(--ffz-ice) / 0.55) 46%,
+    rgb(var(--ffz-gold) / 0.85)
+  );
+  --ffz-cut: 18px;
+}
+
+/* -- chapter heads: the lit rule under the head ------------------------- */
+.rxs-page.rxs-page.ffs-page > .rxs-section:not(.ffs-suitup) > .rxs-section-heading {
+  position: relative;
+  padding-bottom: clamp(18px, 2.4vw, 30px);
+  margin-bottom: clamp(26px, 3.6vw, 48px);
+}
+.rxs-page.rxs-page.ffs-page > .rxs-section:not(.ffs-suitup) > .rxs-section-heading::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    rgb(var(--ffz-ice) / 0.9),
+    rgb(var(--ffz-ice) / 0.25) 55%,
+    rgb(var(--ffz-gold) / 0.6) 82%,
+    transparent
+  );
+  box-shadow: 0 0 12px rgb(var(--ffz-ice) / 0.35);
+  pointer-events: none;
+}
+.rxs-page.rxs-page.ffs-page > .rxs-section:not(.ffs-suitup) > .rxs-section-heading h2 {
+  text-shadow:
+    0 0 28px rgb(var(--ffz-ice) / 0.22),
+    0 2px 0 rgb(0 0 0 / 0.5);
+}
+
+/* -- plates: the spec table, the articles, the weapons, the finishers ---- */
+.rxs-page.rxs-page.ffs-page .ffs-specs > div,
+.rxs-page.rxs-page.ffs-page .ffs-articles > article,
+.rxs-page.rxs-page.ffs-page .ffs-weapons > li,
+.rxs-page.rxs-page.ffs-page .ffs-finisher {
+  position: relative;
+  isolation: isolate;
+  background: var(--ffz-plate);
+  border: 1px solid rgb(var(--ffz-ice) / 0.16);
+  clip-path: polygon(
+    0 0,
+    calc(100% - var(--ffz-cut)) 0,
+    100% var(--ffz-cut),
+    100% 100%,
+    var(--ffz-cut) 100%,
+    0 calc(100% - var(--ffz-cut))
+  );
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.05),
+    inset 0 -40px 60px -40px rgb(var(--ffz-ice) / 0.08);
+}
+.rxs-page.rxs-page.ffs-page .ffs-specs > div::before,
+.rxs-page.rxs-page.ffs-page .ffs-articles > article::after,
+.rxs-page.rxs-page.ffs-page .ffs-weapons > li::before,
+.rxs-page.rxs-page.ffs-page .ffs-finisher::before {
+  content: "";
+  position: absolute;
+  inset: 0 var(--ffz-cut) auto 0;
+  height: 3px;
+  background: var(--ffz-rail);
+  box-shadow: 0 0 14px rgb(var(--ffz-ice) / 0.45);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* The spec table: a grid of plates, the figures at display scale. */
+.rxs-page.rxs-page.ffs-page .ffs-specs {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+  gap: clamp(10px, 1.4vw, 16px);
+  border: 0;
+}
+.rxs-page.rxs-page.ffs-page .ffs-specs > div {
+  padding: clamp(18px, 2vw, 26px) clamp(18px, 2vw, 26px) clamp(20px, 2.2vw, 28px);
+  border-top: 1px solid rgb(var(--ffz-ice) / 0.16);
+  min-height: 118px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 10px;
+}
+.rxs-page.rxs-page.ffs-page .ffs-specs > div[data-long] {
+  grid-column: span 2;
+}
+.rxs-page.rxs-page.ffs-page .ffs-specs > div:not([data-long]) dd {
+  font-size: clamp(26px, 2.9vw, 40px);
+  line-height: 1.05;
+  letter-spacing: 0.01em;
+  text-shadow:
+    0 0 26px rgb(var(--ffz-ice) / 0.3),
+    0 2px 0 rgb(0 0 0 / 0.6);
+}
+
+/* The articles: the number as a lit badge, Extreme's cut. */
+.rxs-page.rxs-page.ffs-page .ffs-articles {
+  gap: clamp(12px, 1.6vw, 20px);
+}
+.rxs-page.rxs-page.ffs-page .ffs-articles > article {
+  padding: clamp(24px, 2.6vw, 36px);
+}
+.rxs-page.rxs-page.ffs-page .ffs-articles > article header > span {
+  display: inline-grid;
+  place-items: center;
+  min-width: 48px;
+  height: 40px;
+  padding: 0 12px;
+  color: rgb(4 12 22);
+  background: linear-gradient(135deg, rgb(var(--ffz-ice)), rgb(196 246 255));
+  clip-path: polygon(0 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+  box-shadow: 0 0 18px rgb(var(--ffz-ice) / 0.4);
+}
+
+/* The weapons: a grid of numbered plates. */
+.rxs-page.rxs-page.ffs-page .ffs-weapons {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+  gap: clamp(10px, 1.4vw, 14px);
+}
+.rxs-page.rxs-page.ffs-page .ffs-weapons > li {
+  min-height: 64px;
+  padding: 18px 22px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border-top: 1px solid rgb(var(--ffz-ice) / 0.16);
+}
+.rxs-page.rxs-page.ffs-page .ffs-weapons > li > span {
+  color: rgb(var(--ffz-gold));
+  font-size: clamp(18px, 1.6vw, 22px);
+  text-shadow: 0 0 14px rgb(var(--ffz-gold) / 0.45);
+}
+
+/* The finishers: tall plates with the gold side of the rail. */
+.rxs-page.rxs-page.ffs-page .ffs-finisher {
+  padding: clamp(26px, 3vw, 44px);
+}
+.rxs-page.rxs-page.ffs-page .ffs-finisher::before {
+  background: linear-gradient(90deg, rgb(var(--ffz-gold) / 0.95), rgb(var(--ffz-ice) / 0.6));
+}
+
+/* Phones: one column, the long specs full width, a tighter cut. */
+@media (max-width: 640px) {
+  .rxs-page.rxs-page.ffs-page {
+    --ffz-cut: 12px;
+  }
+  .rxs-page.rxs-page.ffs-page .ffs-specs {
+    grid-template-columns: 1fr 1fr;
+  }
+  .rxs-page.rxs-page.ffs-page .ffs-specs > div {
+    min-height: 96px;
+  }
+  .rxs-page.rxs-page.ffs-page .ffs-specs > div:not([data-long]) dd {
+    font-size: clamp(22px, 6.4vw, 28px);
+  }
+}
+
+/* Fine pointers, full motion: a plate lifts its rail under the pointer. */
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page .ffs-articles > article,
+  html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page .ffs-weapons > li,
+  html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page .ffs-specs > div {
+    transition:
+      transform 260ms cubic-bezier(0.2, 0.7, 0.2, 1),
+      border-color 260ms ease;
+  }
+  html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page .ffs-articles > article:hover,
+  html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page .ffs-weapons > li:hover,
+  html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page .ffs-specs > div:hover {
+    transform: translateY(-3px);
+    border-color: rgb(var(--ffz-ice) / 0.4);
+  }
+}
+
+@media (forced-colors: active) {
+  .rxs-page.rxs-page.ffs-page .ffs-specs > div,
+  .rxs-page.rxs-page.ffs-page .ffs-articles > article,
+  .rxs-page.rxs-page.ffs-page .ffs-weapons > li,
+  .rxs-page.rxs-page.ffs-page .ffs-finisher {
+    clip-path: none;
+    background: Canvas;
+    border-color: CanvasText;
+  }
+}
