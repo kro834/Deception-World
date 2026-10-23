@@ -105,15 +105,12 @@ SITES = {
     # ILLUSIONCULUM (2026-10-23, owner: 「イリュージョンとメタにも装甲切り出しは
     # SAMを用いて」): one picture, its driver by its outline, as FAR FROM.
     "illusionculum": ROOT / "design/illusionculum-saga-20261023" / "sam-masks",
-}
-# How far (frame px) a plate's boundary may leave its straight clip.
-BAND = {"rexonance": 40, "far-from": 32, "illusionculum": 32}
     # META UNITAS SAGA (2026-10-23): its two forms, one frame, cut alike.
     "meta-unitas-middle": ROOT / "design/meta-unitas-saga-20261023/sam-masks/middle",
     "meta-unitas-ultra": ROOT / "design/meta-unitas-saga-20261023/sam-masks/ultra",
 }
 # How far (frame px) a plate's boundary may leave its straight clip.
-BAND = {"rexonance": 40, "far-from": 32, "meta-unitas-middle": 32, "meta-unitas-ultra": 32}
+BAND = {"rexonance": 40, "far-from": 32, "illusionculum": 32, "meta-unitas-middle": 32, "meta-unitas-ultra": 32}
 # The polygon prior's weight against SAM's probability (0..1) in the partition.
 PRIOR = 0.3
 # The edge-aware smoothing of the partition's scores (guided filter radius, px).
@@ -132,8 +129,7 @@ EXTRA = {
 # plate of their region (FAR FROM's plume root stays behind the shoulder pad
 # with the plume's first section, as it was; a plate of its own there landed
 # last, after the wings).
-MERGE = {"rexonance": {}, "far-from": {"tail-0": "tail-1"}, "illusionculum": {}}
-MERGE = {"rexonance": {}, "far-from": {"tail-0": "tail-1"}, "meta-unitas-middle": {}, "meta-unitas-ultra": {}}
+MERGE = {"rexonance": {}, "far-from": {"tail-0": "tail-1"}, "illusionculum": {}, "meta-unitas-middle": {}, "meta-unitas-ultra": {}}
 # Below this IoU estimate SAM's best candidate for a region is not trusted.
 WEAK_IOU = 0.3
 # SAM's sub-parts (atoms) count from this IoU estimate up.
