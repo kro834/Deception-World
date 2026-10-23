@@ -29,7 +29,10 @@ import { importWithRetry } from "@/lib/chunk-retry.js";
    approach and when the network comes back (owner, 2026-10-23: 「自動変身
    再生が必ず読み込まれ、正常に動作する様にして。」); until the controller is
    here the control is not shown (the sheet shows it from data-shown, which
-   only the controller sets), so there is never a dead control on screen.
+   only the controller sets), so there is never a dead control on screen —
+   and if its retries run out, the control shows over the pinned frame
+   reading 再読み込み, whose press reloads the page (never absent, never
+   dead).
    The still tiers (reduced motion, forced colours, economy, Save-Data)
    have no sequence to play and hide the control (data-tier="still", and
    the sheet's own rules before the controller arrives). */
@@ -40,6 +43,11 @@ export const ASSEMBLY_MOVIE_PRELOAD_MARGIN = "150% 0px 150% 0px";
 /** After the import's retries run out, it is tried again this much later
  * (ms), for as long as the page is open. */
 export const ASSEMBLY_MOVIE_RETRY_LATER_MS = 20000;
+/** The controller's show rule and its 再読み込み, for the control before it
+ * arrives (assembly-movie.ts MOVIE_SHOW_AT, MOVIE_PLAY_LABELS.retry: that
+ * chunk is the one that could not be loaded). */
+export const ASSEMBLY_MOVIE_SHOW_AT = 0.6;
+export const ASSEMBLY_MOVIE_RELOAD_LABEL = "再読み込み";
 
 /** The speeds offered, in the radio group's order (1× checked at first). */
 export const ASSEMBLY_MOVIE_SPEEDS = Object.freeze([0.5, 1, 1.5, 2] as const);
@@ -70,11 +78,58 @@ export function AssemblyMovie({
       if (timer) window.clearTimeout(timer);
       idleId = timer = 0;
     };
+    // The controller could not be loaded (its retries ran out): the control
+    // is not left absent — over the pinned frame (as the controller shows
+    // it) it reads 再読み込み, and a press reloads the page (a chunk whose
+    // fetch failed stays failed for this document; the router keeps the
+    // reading position). The import is still retried; once the controller
+    // mounts it takes the control over.
+    let fallback: (() => void) | null = null;
+    const showFallback = () => {
+      const frame = runway.querySelector<HTMLElement>(".rzn-frame");
+      if (fallback || !frame || typeof IntersectionObserver !== "function") return;
+      const buttons = [...control.querySelectorAll<HTMLButtonElement>("button")];
+      const actions = buttons.filter((button) => /rzn-movie-(play|mini)/.test(button.className));
+      const seek = control.querySelector<HTMLInputElement>(".rzn-movie-seek input");
+      const reload = () => window.location.reload();
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          const box = entry.boundingClientRect;
+          const room = Math.min(box.height, entry.rootBounds?.height ?? box.height);
+          const pinned =
+            entry.isIntersecting &&
+            (room <= 0 || entry.intersectionRect.height / room >= ASSEMBLY_MOVIE_SHOW_AT);
+          if (pinned && runway.dataset.rznLoad !== "static") control.dataset.shown = "true";
+          else delete control.dataset.shown;
+        },
+        { threshold: Array.from({ length: 21 }, (_, k) => k / 20) },
+      );
+      const label = (text: string) => {
+        for (const button of actions)
+          if (button.classList.contains("rzn-movie-mini")) button.setAttribute("aria-label", text);
+          else button.textContent = text;
+      };
+      control.dataset.state = "error";
+      label(ASSEMBLY_MOVIE_RELOAD_LABEL);
+      // Only 再読み込み is live: the rest needs the controller.
+      for (const button of buttons) button.disabled = !actions.includes(button);
+      if (seek) seek.disabled = true;
+      for (const button of actions) button.addEventListener("click", reload);
+      observer.observe(frame);
+      fallback = () => {
+        fallback = null;
+        observer.disconnect();
+        for (const button of actions) button.removeEventListener("click", reload);
+        for (const button of buttons) button.disabled = true;
+        label("再生");
+        delete control.dataset.shown;
+        control.dataset.state = "idle";
+      };
+    };
     const start = () => {
       cancelIdle();
       if (disposed || dispose || loading) return;
       loading = true;
-      delete control.dataset.failed;
       importWithRetry(() => import("@/lib/assembly-movie"), {
         isCancelled: () => disposed,
         onError: (error, attempt) =>
@@ -83,16 +138,19 @@ export function AssemblyMovie({
         (module) => {
           loading = false;
           if (disposed || dispose) return;
+          fallback?.();
+          delete control.dataset.failed;
           dispose = module.mountAssemblyMovie(control, runway);
           near?.disconnect();
         },
         (error) => {
           loading = false;
           if (disposed) return;
-          // Never silent: reported, and tried again on the next approach,
-          // the network coming back, or a while later.
+          // Never silent: reported, 再読み込み on the control, and tried again
+          // on the next approach, the network coming back, or a while later.
           control.dataset.failed = "true";
           console.error("[movie] the controller could not be loaded", error);
+          showFallback();
           timer = window.setTimeout(start, ASSEMBLY_MOVIE_RETRY_LATER_MS);
         },
       );
@@ -122,6 +180,7 @@ export function AssemblyMovie({
       window.removeEventListener("online", start);
       control.removeEventListener("pointerenter", start);
       control.removeEventListener("focusin", start);
+      fallback?.();
       dispose?.();
       dispose = null;
     };

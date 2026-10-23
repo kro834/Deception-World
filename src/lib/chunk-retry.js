@@ -3,13 +3,21 @@
  *
  * `importWithRetry(load)` runs `load()` (a dynamic import), and when it
  * fails or does not settle within `timeoutMs`, tries again after a backoff
- * (`delays`), up to `attempts` times. A failed module fetch stays in the
- * browser's module map (the same URL rejects again without a request), so
- * a retry after a failure names the chunk's URL with a cache-busting query
- * when the error gives it (Chromium and Firefox name it in the message; the
- * rest retry `load()` as it is). A timed-out attempt keeps running: if it
- * lands later, its module is taken. Every failure is reported through
+ * (`delays`), up to `attempts` times. A failed module fetch stays failed in
+ * the browser's module map (the same URL rejects again without a request),
+ * so a retry after a failure imports the chunk under a fresh URL (a
+ * cache-busting query): the chunk's URL is read from the error where the
+ * browser names it (Chromium, Firefox), else from the loader's own source
+ * (a bundled loader names its chunk, `() => import("./chunk-HASH.js")`;
+ * Safari's message names none). A try that only timed out is still
+ * loading: the next one joins it (the same URL, no second download), and
+ * whichever lands first is taken. Every failure is reported through
  * `onError` (never silent); the last one rejects.
+ *
+ * A failed dependency of the chunk (another chunk it imports) stays failed
+ * under its own URL, which no query on the chunk's reaches: only a fresh
+ * document fetches it again (the movie's 再読み込み reloads the page; see
+ * src/lib/assembly-movie.ts).
  */
 
 /** The backoff before each retry (ms): the first retry quickly, then longer. */
@@ -26,6 +34,26 @@ export function failedChunkUrl(error) {
   return match ? match[1] : null;
 }
 
+/** The chunk a loader imports, read from its source text and resolved
+ * against `base` (the bundle's chunks stand side by side, so this module's
+ * own URL resolves a bundled loader's `./chunk-HASH.js`); null unless the
+ * loader names exactly one. */
+export function loaderChunkUrl(load, base = import.meta.url) {
+  let source = "";
+  try {
+    source = Function.prototype.toString.call(load);
+  } catch {
+    return null;
+  }
+  const names = [...source.matchAll(/\bimport\(\s*(["'`])([^"'`$]+)\1\s*\)/g)].map((match) => match[2]);
+  if (names.length !== 1 || !base) return null;
+  try {
+    return new URL(names[0], base).href;
+  } catch {
+    return null;
+  }
+}
+
 /**
  * @template T
  * @param {() => Promise<T>} load
@@ -36,6 +64,7 @@ export function failedChunkUrl(error) {
  *   isCancelled?: () => boolean,
  *   onError?: (error: unknown, attempt: number) => void,
  *   importUrl?: (url: string) => Promise<T>,
+ *   base?: string,
  *   setTimer?: (callback: () => void, ms: number) => unknown,
  *   clearTimer?: (id: unknown) => void,
  * }} [options]
@@ -52,7 +81,10 @@ export function importWithRetry(load, options = {}) {
   const cancelled = options.isCancelled ?? (() => false);
   return new Promise((resolve, reject) => {
     let settled = false;
-    let lastUrl = null;
+    // The chunk's own URL once known, and the URL the next try imports
+    // (null: the loader itself).
+    let chunkUrl = null;
+    let nextUrl = null;
     const succeed = (module) => {
       if (settled) return;
       settled = true;
@@ -67,11 +99,16 @@ export function importWithRetry(load, options = {}) {
       }
       let done = false;
       let timer = 0;
-      const fail = (error) => {
+      const fail = (error, timedOut = false) => {
         if (done || settled) return;
         done = true;
         clearTimer(timer);
-        lastUrl = failedChunkUrl(error) ?? lastUrl;
+        // A fetch that failed stays failed under its URL: the next try
+        // names the chunk afresh. (One that only timed out is joined.)
+        if (!timedOut) {
+          chunkUrl = failedChunkUrl(error) ?? chunkUrl ?? loaderChunkUrl(load, options.base);
+          nextUrl = chunkUrl ? `${chunkUrl}?retry=${index + 1}-${Date.now().toString(36)}` : null;
+        }
         options.onError?.(error, index + 1);
         if (index + 1 >= attempts) {
           settled = true;
@@ -82,10 +119,7 @@ export function importWithRetry(load, options = {}) {
       };
       let pending;
       try {
-        pending =
-          index > 0 && lastUrl
-            ? importUrl(`${lastUrl}?retry=${index}-${Date.now().toString(36)}`)
-            : load();
+        pending = nextUrl ? importUrl(nextUrl) : load();
       } catch (error) {
         pending = Promise.reject(error);
       }
@@ -98,7 +132,10 @@ export function importWithRetry(load, options = {}) {
         succeed(module);
       }, fail);
       if (timeoutMs > 0)
-        timer = setTimer(() => fail(new Error(`chunk import timed out after ${timeoutMs} ms`)), timeoutMs);
+        timer = setTimer(
+          () => fail(new Error(`chunk import timed out after ${timeoutMs} ms`), true),
+          timeoutMs,
+        );
     };
     attempt(0);
   });

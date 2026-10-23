@@ -999,9 +999,11 @@ test("a 再生 before the scene is ready waits for it: 読み込み中 (aria-bus
     dispose();
   }));
 
-test("a failed preparation is retried while 再生 waits, with a backoff; when the retries run out 再読み込み, and a press starts over", () =>
+test("a failed preparation is retried while 再生 waits, with a backoff; when the retries run out 再読み込み, and a press reloads the page", () =>
   withTimers(() => {
     const t = environment({ load: "error" });
+    let reloads = 0;
+    t.env.location = { reload: () => (reloads += 1) };
     const dispose = mountAssemblyMovie(t.control, t.runway, t.env);
     t.observers[0].callback([{ isIntersecting: true }]);
     t.sent.length = 0;
@@ -1037,17 +1039,46 @@ test("a failed preparation is retried while 再生 waits, with a backoff; when t
     const count = retried;
     mock.timers.tick(60000);
     assert.equal(retried, count, "no retry runs on by itself after that");
-    // 再読み込み: a fresh start; this time the scene comes up.
-    t.runway.listeners.delete(MOVIE_RETRY_EVENT);
+    // 再読み込み: a fresh document (a failed chunk, or one it imports, stays
+    // failed for this one), from the sheet's button, the pill's and 最初から.
+    t.play.fire("click");
+    assert.equal(reloads, 1);
+    t.mini.fire("click");
+    t.restart.fire("click");
+    assert.equal(reloads, 3);
+    assert.equal(retried, count, "a reload, not another round in this document");
+    dispose();
+  }));
+
+test("a scene that recovers by itself after the retries ran out (the network back) reads 再生 again, and plays", () =>
+  withTimers(() => {
+    const t = environment({ load: "error" });
+    let reloads = 0;
+    t.env.location = { reload: () => (reloads += 1) };
+    const dispose = mountAssemblyMovie(t.control, t.runway, t.env);
+    t.observers[0].callback([{ isIntersecting: true }]);
     t.runway.addEventListener(MOVIE_RETRY_EVENT, () => {
-      retried += 1;
-      t.setLoad("preparing");
+      t.setLoad("loading");
+      t.setLoad("error");
     });
     t.play.fire("click");
-    assert.equal(retried, count + 1);
-    assert.equal(t.control.dataset.state, "loading");
+    for (const delay of MOVIE_LOAD_RETRY_DELAYS) mock.timers.tick(delay);
+    assert.equal(t.control.dataset.state, "error");
+    // The engine's own online retry brings the scene up.
+    t.setLoad("preparing");
     t.setLoad("ready");
+    assert.equal(t.control.dataset.state, "idle");
+    assert.equal(t.play.textContent, MOVIE_PLAY_LABELS.play);
+    t.play.fire("click");
+    assert.equal(reloads, 0);
     assert.equal(t.control.dataset.state, "playing");
+    // A later failure starts its own full backoff (a fresh press).
+    t.user.wheel();
+    t.setLoad("error");
+    t.play.fire("click");
+    assert.equal(t.control.dataset.state, "loading");
+    for (const delay of MOVIE_LOAD_RETRY_DELAYS.slice(0, -1)) mock.timers.tick(delay);
+    assert.equal(t.control.dataset.state, "loading", "the whole backoff again");
     dispose();
   }));
 
@@ -1260,6 +1291,15 @@ test("the control's chunk: retried, imported early on approach or intent, never 
   assert.match(source, /window\.addEventListener\("online", start\)/);
   assert.match(source, /control\.addEventListener\("pointerenter", start\)/);
   assert.match(source, /console\.error\("\[movie\] the controller could not be loaded"/);
+  // Its retries run out: never an absent control — over the pinned frame (the
+  // controller's own show rule) it reads 再読み込み, and a press reloads the
+  // page; the rest of the control stays disabled; a later mount takes over.
+  assert.match(source, /showFallback\(\);\s*timer = window\.setTimeout\(start, ASSEMBLY_MOVIE_RETRY_LATER_MS\);/);
+  assert.match(source, /const reload = \(\) => window\.location\.reload\(\);/);
+  assert.match(source, /for \(const button of buttons\) button\.disabled = !actions\.includes\(button\);/);
+  assert.match(source, /fallback\?\.\(\);\s*delete control\.dataset\.failed;\s*dispose = module\.mountAssemblyMovie\(control, runway\);/);
+  assert.equal(Number(source.match(/ASSEMBLY_MOVIE_SHOW_AT = ([\d.]+);/)?.[1]), MOVIE_SHOW_AT);
+  assert.equal(source.match(/ASSEMBLY_MOVIE_RELOAD_LABEL = "([^"]+)";/)?.[1], MOVIE_PLAY_LABELS.retry);
   const engine = read("src/lib/rexonance-resonance.js");
   assert.match(engine, /runway\.addEventListener\?\.\("rexonance:assembly-wake", wakeAssembly\)/);
   assert.match(engine, /runway\.removeEventListener\?\.\("rexonance:assembly-wake", wakeAssembly\)/);

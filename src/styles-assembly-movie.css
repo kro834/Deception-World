@@ -234,6 +234,29 @@ html[data-family="special"]
   cursor: progress;
 }
 
+/* The retries ran out (再読み込み: a press reloads the page): the pill's
+   glyph turns to a reload arrow, in the lit colour. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page
+  .rzn-movie[data-state="error"]
+  .rzn-movie-mini {
+  color: var(--mc-lit);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page
+  .rzn-movie[data-state="error"]
+  .rzn-movie-mini::after {
+  content: "\21bb";
+  width: auto;
+  height: auto;
+  border: 0;
+  font: 700 19px/1 system-ui, sans-serif;
+  transform: translate(-50%, -54%);
+}
+
 @property --mc-spin {
   syntax: "<angle>";
   inherits: false;

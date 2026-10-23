@@ -302,11 +302,10 @@ async function watch(page, { until = 1, timeout, label = "the movie" }) {
     const s = await state(page);
     must(s, "the control or runway vanished");
     const pinned = Math.abs(s.frameTop - s.pin) <= 2;
-    if (pinned && (s.state === "ended" || s.q >= until - 0.002)) {
-      if (until >= 1) {
-        must(s.state === "ended", `${label}: progress ${s.q.toFixed(3)} but state ${s.state}`);
-        must(s.q >= 0.985, `${label} ended at ${s.q.toFixed(3)}, not the runway's end`);
-      }
+    // (The end is the state's: the last frames of the runway still play.)
+    const reached = s.state === "ended" || (until < 1 && s.q >= until - 0.002);
+    if (pinned && reached) {
+      if (until >= 1) must(s.q >= 0.985, `${label} ended at ${s.q.toFixed(3)}, not the runway's end`);
       return { ms: Date.now() - start, unpinned };
     }
     must(s.state === "playing", `${label} left playing by itself (${s.state}) at ${s.q.toFixed(3)}`);
@@ -485,7 +484,7 @@ const SCENARIOS = {
     await controlShown(page);
     await pressPlay(page);
     await playing(page, PLAY_WAIT);
-    await page.screenshot({ path: shot("playing") });
+    await page.screenshot({ path: shot("playing"), timeout: 15000 }).catch(() => {});
     await watch(page, { timeout: endWithin(1) });
   },
   async "nav-home"(page, { path }) {

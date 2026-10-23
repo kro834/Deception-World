@@ -5,6 +5,7 @@ import {
   CHUNK_RETRY_DELAYS,
   failedChunkUrl,
   importWithRetry,
+  loaderChunkUrl,
 } from "../src/lib/chunk-retry.js";
 import { mountFarFromAssembly } from "../src/lib/far-from-assembly.ts";
 
@@ -83,6 +84,60 @@ test("a failed import is retried after a backoff, under a fresh URL (a failed mo
   assert.deepEqual(await result, { ok: true });
   assert.deepEqual(errors, [1, 2]);
   assert.equal(time.pending(), 0, "no timer left behind");
+});
+
+test("the chunk a bundled loader imports is read from its own source (Safari's message names none), resolved beside the bundle's chunks", () => {
+  const base = "http://127.0.0.1:8591/assets/rexonance-assembly-movie-4uDA5pXC.js";
+  // (Never called: only their source is read.)
+  const preload = (load) => load;
+  const bundled = () => preload(() => import(`./assembly-movie-DowOyPFG.js`), []);
+  const quoted = () => import("./far-from-assembly-engine-BNWOKdnw.js");
+  const absolute = () => import("/src/lib/assembly-movie.ts");
+  assert.equal(loaderChunkUrl(bundled, base), URL_);
+  assert.equal(loaderChunkUrl(quoted, base), "http://127.0.0.1:8591/assets/far-from-assembly-engine-BNWOKdnw.js");
+  assert.equal(loaderChunkUrl(absolute, base), "http://127.0.0.1:8591/src/lib/assembly-movie.ts");
+  // Two chunks, or none, or a computed name: not guessed.
+  const two = () => Promise.all([import("./a.js"), import("./b.js")]);
+  const name = "x";
+  const computed = () => import(`./${name}.js`);
+  assert.equal(loaderChunkUrl(two, base), null);
+  assert.equal(loaderChunkUrl(() => Promise.reject(new Error("x")), base), null);
+  assert.equal(loaderChunkUrl(computed, base), null);
+  // By default, beside this module (as a bundle's chunks stand).
+  assert.match(loaderChunkUrl(quoted), /\/src\/lib\/far-from-assembly-engine-BNWOKdnw\.js$/);
+});
+
+test("a failure that names no URL (Safari) is retried under a fresh URL read from the loader; a try that only timed out is joined, never downloaded twice", async () => {
+  const time = clock();
+  const base = "http://127.0.0.1:8591/assets/rexonance-assembly-movie-4uDA5pXC.js";
+  const imported = [];
+  let loads = 0;
+  // (Vite's preload helper, failing as Safari does: no URL in the message.)
+  const preload = (_load) => {
+    loads += 1;
+    return Promise.reject(new TypeError("Importing a module script failed."));
+  };
+  const result = importWithRetry(() => preload(() => import(`./assembly-movie-DowOyPFG.js`)), {
+    ...time,
+    base,
+    timeoutMs: 1000,
+    delays: [10],
+    importUrl: (url) => {
+      imported.push(url);
+      // The first fresh try hangs (a slow network); the next one joins it.
+      return imported.length === 1 ? new Promise(() => {}) : Promise.resolve({ ok: imported.length });
+    },
+  });
+  await flush();
+  assert.equal(loads, 1);
+  await time.run(10);
+  assert.equal(imported.length, 1);
+  assert.match(imported[0], /^http:\/\/127\.0\.0\.1:8591\/assets\/assembly-movie-DowOyPFG\.js\?retry=1-/);
+  await time.run(1010);
+  assert.equal(imported.length, 2);
+  assert.equal(imported[1], imported[0], "a timed-out try is joined under its own URL (no second download)");
+  assert.deepEqual(await result, { ok: 2 });
+  assert.equal(loads, 1, "the failed loader is not called again");
 });
 
 test("without a URL in the message the loader itself is retried; after the last try the failure rejects", async () => {

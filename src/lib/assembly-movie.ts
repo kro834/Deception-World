@@ -33,7 +33,11 @@
  * by itself once the runway reads ready. A failed preparation is retried
  * through the engine's own retry (MOVIE_RETRY_EVENT, the guide's
  * 素材を再読み込み) with a backoff; when the retries run out the control
- * reads 再読み込み, and pressing it starts over. Nothing fails silently.
+ * reads 再読み込み, and pressing it reloads the page: a chunk whose fetch
+ * failed, or a chunk it imports, stays failed for this document (its
+ * module map), and only a fresh one fetches it again; the router's scroll
+ * restoration keeps the reading position. A scene that recovers by itself
+ * meanwhile (the network back) reads 再生 again. Nothing fails silently.
  *
  * The still tiers (data-tier="still": the runway reads data-rzn-load
  * "static" — reduced motion, forced colours, economy, Save-Data, 2G — or
@@ -127,6 +131,7 @@ type MovieEnvironment = Pick<
   setInterval?: (callback: () => void, ms: number) => unknown;
   clearInterval?: (id: never) => void;
   document: Document;
+  location?: Pick<Location, "reload">;
   IntersectionObserver?: typeof IntersectionObserver;
   MutationObserver?: typeof MutationObserver;
 };
@@ -383,6 +388,8 @@ export function mountAssemblyMovie(
       start(from === "here" ? here() : from);
       return;
     }
+    // A fresh press: the whole backoff again.
+    if (state !== "loading") retries = 0;
     queued = from;
     setState("loading");
     send(MOVIE_WAKE_EVENT);
@@ -402,6 +409,10 @@ export function mountAssemblyMovie(
     clearQueue();
     if (state === "loading") setState("idle");
   }
+  /** 再読み込み (the retries ran out): a fresh document, at the same place. */
+  const reloadPage = () => {
+    (environment.location ?? globalThis.location)?.reload();
+  };
   const onPlay = () => {
     // A choice made in the sheet closes it (the pill's own 再生 has none open).
     collapse(true);
@@ -412,13 +423,19 @@ export function mountAssemblyMovie(
     }
     // Already waiting for the scene: it starts by itself.
     if (state === "loading") return;
-    if (state === "error") retries = 0;
+    if (state === "error") {
+      reloadPage();
+      return;
+    }
     // At the end, 再生 plays again from the start.
     request(state === "ended" ? 0 : "here");
   };
   const onRestart = () => {
     collapse(true);
-    if (state === "error") retries = 0;
+    if (state === "error") {
+      reloadPage();
+      return;
+    }
     request(0);
   };
 
@@ -692,6 +709,8 @@ export function mountAssemblyMovie(
         const from = queued;
         start(from === "here" ? here() : from);
       }
+      // Recovered by itself (the network back): 再生 again, not 再読み込み.
+      else if (state === "error") setState("idle");
       return;
     }
     // The scene went away mid-movie (the engine prepares it again): the
