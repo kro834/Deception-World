@@ -217,6 +217,13 @@ test("no switch moves the page: the panel keeps its place, and is as tall as its
   // the panel's place is noted before the switch and restored before paint.
   assert.match(page, /panelAnchor\.current =\s*panel && panel\.bottom > 0 && panel\.top < window\.innerHeight \? panel\.top : null;/);
   assert.match(page, /useLayoutEffect\(\(\) => \{\s*const before = panelAnchor\.current;[\s\S]*?const delta = panel\.getBoundingClientRect\(\)\.top - before;\s*if \(Math\.abs\(delta\) >= 1\) window\.scrollBy\(\{ top: delta, left: 0, behavior: "instant" \}\);\s*\}, \[stage\]\);/);
+  // The page is the one actor: the browser's scroll anchoring (an anchor of
+  // its own choosing, compensating the same growth) made a switch land
+  // anywhere, so the page's descendants are no anchors; and the runway's
+  // status keeps two lines (one while loading, two once ready), as the
+  // Rexonance page reserves them, so nothing above #stages changes late.
+  assert.match(styles, /\.rxs-page\.rxs-page\.ffs-page \{[^}]*overflow-anchor: none;/);
+  assert.match(read("src/styles-far-from-suitup.css"), /\.ffs-assembly-status \{\s*min-height: 3\.2em;\s*min-height: 2lh;/);
   // No switch path scrolls or focuses with a scroll of its own.
   const select = page.slice(page.indexOf("const selectStage = useCallback("), page.indexOf("const chooseQuietly"));
   assert.doesNotMatch(select, /scrollIntoView|scrollTo|\.focus\(/);

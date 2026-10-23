@@ -1543,7 +1543,13 @@ html[data-family="special"] body .rxs-page.ffs-page .ffs-assembly-guide {
   text-align: center;
 }
 
+/* Two lines reserved (as the Rexonance page reserves them): the status
+   runs one line while the suit loads and two once it is ready (準備完了。
+   下へ進むと…), and the change moved every chapter below it by a line
+   while the reader was in #stages. */
 html[data-family="special"] body .rxs-page.ffs-page .ffs-assembly-status {
+  min-height: 3.2em;
+  min-height: 2lh;
   margin: 0;
   color: #d7edf2;
   font: 500 12px / 1.6 var(--dx-body);
@@ -1768,7 +1774,9 @@ html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-panel > .ffs-ass
     gap: 4px;
   }
 
+  /* 11px: エックスハイ (the widest name) fits a 70px column at 441px. */
   html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-route span {
+    font-size: 11px;
     word-break: keep-all;
   }
 
