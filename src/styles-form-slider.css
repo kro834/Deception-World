@@ -1,0 +1,70 @@
+/* The special sites' form slider (owner, 2026-10-24: 「スライダーの形も統一させて」):
+   Rexonance's #stages rail is the one shape, extracted here and linked on
+   every special site after its own sheets (src/components/special/form-slider.tsx
+   adds .form-slider). A squared, machined rail (4 px, the lens 3 px), an ice
+   inset line, a dark material with a lit top, the chosen form under a lens
+   lit from below, the labels in bold tracked caps. Each site keeps only its
+   light: --form-slider-light (an "r g b" triple; Rexonance's ice by default).
+   Fonts stay each site's own. Values are Rexonance's computed ones, so the
+   Rexonance rail renders exactly as before. */
+
+:root .form-slider.form-slider.form-slider.rxs-stage-tabs.liquid-swipe-tabs,
+:root .form-slider.form-slider.form-slider.rxs-stage-tabs.liquid-swipe-tabs > .liquid-rail-surface {
+  border-radius: 4px !important;
+  background:
+    linear-gradient(rgb(255 255 255 / 0.04), rgb(0 0 0 / 0) 40%),
+    rgb(7 13 22) !important;
+  box-shadow:
+    inset 0 0 0 1px rgb(var(--form-slider-light, 121 232 255) / 0.24),
+    inset 0 1px 0 rgb(255 255 255 / 0.1) !important;
+}
+:root .form-slider.form-slider.form-slider.rxs-stage-tabs.liquid-swipe-tabs > .liquid-rail-surface {
+  clip-path: inset(0 round 4px) !important;
+}
+:root .form-slider.form-slider.form-slider.rxs-stage-tabs.liquid-swipe-tabs {
+  min-height: 68px !important;
+  padding: 6px !important;
+}
+:root .form-slider.form-slider.form-slider.rxs-stage-tabs.liquid-swipe-tabs > .liquid-selection-lens,
+:root .form-slider.form-slider.form-slider.rxs-stage-tabs.liquid-swipe-tabs > .liquid-selection-lens > .liquid-selection-surface,
+:root .form-slider.form-slider.form-slider.rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"] {
+  border-radius: 3px !important;
+}
+:root .form-slider.form-slider.form-slider.rxs-stage-tabs.liquid-swipe-tabs > .liquid-selection-lens > .liquid-selection-surface {
+  background: linear-gradient(
+    rgb(var(--form-slider-light, 121 232 255) / 0.26),
+    rgb(var(--form-slider-light, 121 232 255) / 0.1)
+  ) !important;
+  box-shadow:
+    inset 0 -2px 0 rgb(var(--form-slider-light, 121 232 255)),
+    inset 0 0 0 1px rgb(var(--form-slider-light, 121 232 255) / 0.52),
+    inset 0 1px 0 rgb(255 255 255 / 0.22) !important;
+}
+:root .form-slider.form-slider.form-slider.rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"] {
+  min-height: 54px !important;
+  padding: 11px 8px !important;
+}
+:root .form-slider.form-slider.form-slider.rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"] span {
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.1em !important;
+}
+
+/* Five forms on a phone: the labels keep their gaps (Rexonance has three). */
+@media (max-width: 480px) {
+  :root .form-slider.form-slider.form-slider.rxs-stage-tabs.liquid-swipe-tabs:has(> button[role="tab"]:nth-of-type(5)) > button[role="tab"] {
+    padding-inline: 2px !important;
+  }
+  :root .form-slider.form-slider.form-slider.rxs-stage-tabs.liquid-swipe-tabs:has(> button[role="tab"]:nth-of-type(5)) > button[role="tab"] span {
+    font-size: 12px !important;
+    letter-spacing: 0.02em !important;
+  }
+}
+
+@media (forced-colors: active) {
+  :root .form-slider.form-slider.form-slider.rxs-stage-tabs.liquid-swipe-tabs,
+  :root .form-slider.form-slider.form-slider.rxs-stage-tabs.liquid-swipe-tabs > .liquid-rail-surface {
+    background: Canvas !important;
+    box-shadow: inset 0 0 0 1px CanvasText !important;
+  }
+}

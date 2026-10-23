@@ -5,6 +5,7 @@ import {
   CINEMATIC_STYLESHEET_LINK,
   DOSSIER_HUD_FONTS_URL,
 } from "@/lib/world-head";
+import formSliderCssUrl from "@/styles-form-slider.css?url";
 import rexonanceSagaCssUrl from "@/styles-rexonance-saga.css?url";
 import metaUnitasSagaCssUrl from "@/styles-meta-unitas-saga.css?url";
 import metaUnitasSuitupCssUrl from "@/styles-meta-unitas-suitup.css?url";
@@ -42,6 +43,8 @@ export const Route = createFileRoute("/meta-unitas-saga")({
       { rel: "stylesheet", href: metaUnitasSagaCssUrl },
       // The auto transformation movie's control (styles-assembly-movie.css).
       { rel: "stylesheet", href: assemblyMovieCssUrl },
+      // The special sites' one form-slider shape (owner, 2026-10-24).
+      { rel: "stylesheet", href: formSliderCssUrl },
       CINEMATIC_STYLESHEET_LINK,
       {
         rel: "preload",

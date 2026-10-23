@@ -5,6 +5,7 @@ import {
   CINEMATIC_STYLESHEET_LINK,
   DOSSIER_HUD_FONTS_URL,
 } from "@/lib/world-head";
+import formSliderCssUrl from "@/styles-form-slider.css?url";
 import rexonanceSagaCssUrl from "@/styles-rexonance-saga.css?url";
 import resonanceMotionCssUrl from "@/styles-rexonance-motion.css?url";
 import sagaShowcaseCssUrl from "@/styles-saga-showcase.css?url";
@@ -57,6 +58,9 @@ export const Route = createFileRoute("/rexonance-saga")({
     ],
     links: [
       ...WORLD_STYLESHEET_LINKS,
+      // The special sites' one form-slider shape (owner, 2026-10-24; its
+      // rules carry their own weight, so it need not come last here).
+      { rel: "stylesheet", href: formSliderCssUrl },
       { rel: "stylesheet", href: rexonanceSagaCssUrl },
       { rel: "stylesheet", href: resonanceMotionCssUrl },
       { rel: "stylesheet", href: sagaShowcaseCssUrl },
