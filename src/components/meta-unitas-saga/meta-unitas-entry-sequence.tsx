@@ -35,46 +35,35 @@ const FRAME: CSSProperties = {
   top: 0,
   height: "100vh",
   overflow: "hidden",
-  ["--rzn-fig-h" as string]: "0.78",
-  ["--rzn-fig-w" as string]: "0.92",
-  ["--rzn-fig-x" as string]: "0.5",
-  ["--rzn-fig-b" as string]: "0.12",
 };
 const FILL: CSSProperties = { position: "absolute", inset: 0, width: "100%", height: "100%" };
-const FIGURE: CSSProperties = {
-  position: "absolute",
-  left: "4%",
-  bottom: "12%",
-  width: "92%",
-  height: "78%",
-  objectFit: "contain",
-  objectPosition: "50% 100%",
-};
-const CALLS: CSSProperties = {
-  position: "absolute",
-  left: "50%",
-  bottom: "max(22px, env(safe-area-inset-bottom))",
-  transform: "translateX(-50%)",
-  width: "min(92vw, 760px)",
-  margin: 0,
-  padding: 0,
-  listStyle: "none",
-  display: "flex",
-  flexWrap: "wrap",
-  justifyContent: "center",
-  gap: "6px 18px",
-  color: "rgb(233 239 242 / 34%)",
-  fontFamily: '"Rexonance Forge", "Helvetica Neue", Arial, sans-serif',
-  fontSize: "clamp(12px, 1.4vw, 16px)",
-  fontWeight: 650,
-  letterSpacing: "0.05em",
-};
 
-const CALL_LIGHT = `.mus-entry::-webkit-scrollbar{display:none}
-.mus-entry .rzn-line,.mus-entry .rzn-chip{transition:color .25s ease,text-shadow .25s ease}
-.mus-entry .rzn-line[data-done]{color:rgb(233 239 242 / 74%)}
-.mus-entry .rzn-line[data-on]{color:#fff;text-shadow:0 0 18px rgb(255 154 74 / 46%)}
-.mus-entry .rzn-line[data-on] .rzn-chip:not([data-on]){color:rgb(233 239 242 / 34%)}`;
+/* The entry's staging (the Rexonance entry's grammar, in Meta Unitas'
+   light): the figure stands right of centre in a halo of thin orbits; each
+   call takes the stage alone at the left, set large, and gives way to the
+   next; the chant's four SA-GA！DEUS！ light one by one. Phones stack the
+   call over the figure. Opacity and transforms only. */
+const STAGING = `.mus-entry::-webkit-scrollbar{display:none}
+.mus-entry .rzn-frame{--rzn-fig-x:.66;--rzn-fig-h:.86;--rzn-fig-b:.05}
+.mus-entry .mus-entry-fig{position:absolute;left:calc((var(--rzn-fig-x) - .46) * 100%);bottom:5%;width:92%;height:86%;object-fit:contain;object-position:50% 100%}
+.mus-entry .mus-entry-orbit{position:absolute;left:calc(var(--rzn-fig-x) * 100%);top:50%;width:min(110vh,90vw);aspect-ratio:1;border:1px solid rgb(255 154 74 / 18%);border-radius:50%;transform:translate(-50%,-50%) rotate(-12deg) scaleY(.38)}
+.mus-entry .mus-entry-orbit.is-b{width:min(78vh,70vw);border-color:rgb(55 198 192 / 20%);transform:translate(-50%,-56%) rotate(18deg) scaleY(.52)}
+.mus-entry .mus-entry-calls{position:absolute;left:clamp(24px,6vw,96px);top:50%;width:min(52vw,760px);height:0;margin:0;padding:0;list-style:none}
+.mus-entry .rzn-line{position:absolute;left:0;top:0;transform:translateY(-40%);display:flex;flex-wrap:wrap;gap:0 .32em;font:640 clamp(34px,4.3vw,80px)/1.08 "Rexonance Forge","Helvetica Neue",Arial,sans-serif;letter-spacing:.01em;color:#f4f8fa;opacity:0;transition:opacity .28s ease,transform .5s cubic-bezier(.2,.7,.1,1)}
+.mus-entry .rzn-line[data-chant]{flex-direction:column;font-size:clamp(30px,4.2vw,72px)}
+.mus-entry .rzn-chip{white-space:nowrap}
+.mus-entry .rzn-line[data-on]{opacity:1;transform:translateY(-50%);transition-delay:.12s}
+.mus-entry .rzn-line[data-done]:not([data-on]){opacity:0;transform:translateY(-62%);transition-duration:.16s,.3s}
+.mus-entry .rzn-line:last-child[data-on],.mus-entry .rzn-line:last-child[data-done]{opacity:1;transform:translateY(-50%)}
+.mus-entry .rzn-chip{background:linear-gradient(100deg,#fff 10%,#ffc98f 55%,#ff9a4a);-webkit-background-clip:text;background-clip:text;color:transparent}
+.mus-entry .rzn-line[data-chant] .rzn-chip{opacity:.22;transition:opacity .2s ease}
+.mus-entry .rzn-line[data-chant] .rzn-chip[data-on],.mus-entry .rzn-line[data-chant] .rzn-chip[data-done]{opacity:1}
+.mus-entry .rzn-line:last-child .rzn-chip{background:linear-gradient(100deg,#fff,#9ff0ea 60%,#37c6c0);-webkit-background-clip:text;background-clip:text}
+@media (max-width:760px),(orientation:portrait){
+.mus-entry .rzn-frame{--rzn-fig-x:.5;--rzn-fig-h:.62;--rzn-fig-b:.04}
+.mus-entry .mus-entry-calls{left:20px;right:20px;top:18%;width:auto}
+.mus-entry .rzn-line{font-size:clamp(30px,9vw,56px)}
+.mus-entry .rzn-line[data-chant]{font-size:clamp(22px,6.4vw,40px)}}`;
 
 /** How long the build waits for the scene to be ready before its clock runs. */
 const READY_WAIT_MS = 1100;
@@ -124,31 +113,33 @@ export function MetaUnitasEntrySequence({
   return (
     <div
       ref={layerRef}
+      className="mus-entry"
       aria-hidden="true"
       style={{ ...LAYER, opacity: phase === "revealing" ? 0 : 1 }}
     >
+      <style>{STAGING}</style>
       <div ref={runwayRef} className="rzn-suitup" data-form="standard" style={RUNWAY}>
         <div className="rzn-frame" style={FRAME}>
           <img
-            className="rzn-under"
+            className="rzn-under mus-entry-fig"
             src={META_UNITAS_RX_UNDERSUIT}
             alt=""
-            style={FIGURE}
             width={META_UNITAS_RX_SIZE.width}
             height={META_UNITAS_RX_SIZE.height}
           />
           <img
-            className="rzn-driver-standin"
+            className="rzn-driver-standin mus-entry-fig"
             src={META_UNITAS_RX_DRIVER_STANDIN}
             alt=""
-            style={FIGURE}
             width={META_UNITAS_RX_SIZE.width}
             height={META_UNITAS_RX_SIZE.height}
           />
           <canvas className="rzn-canvas" width={0} height={0} style={FILL} />
-          <ol className="rzn-lines" style={CALLS}>
+          <i className="mus-entry-orbit" />
+          <i className="mus-entry-orbit is-b" />
+          <ol className="rzn-lines mus-entry-calls">
             {META_UNITAS_CALL_LINES.map((units, index) => (
-              <li key={index} className="rzn-line">
+              <li key={index} className="rzn-line" data-chant={units.length > 1 || undefined}>
                 {units.map((unit, unitIndex) => (
                   <span key={`${unit}-${unitIndex}`} className="rzn-chip">
                     {unitIndex === 0 ? "【" : ""}
