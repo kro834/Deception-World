@@ -36,10 +36,12 @@ await mkdir(publicDir, { recursive: true });
 const CAPS = { 640: 200_000, 960: 350_000, 1280: 480_000 };
 const QUALITIES = [84, 80, 76, 72, 68];
 
-// The tile frames the head and torso as the other special sites' tiles do
-// (owner, 2026-10-23: 「サムネだけ写っている位置がおかしい」): the figure's
-// upper body, centred, out of the halo's open space.
-const TILE_CROP = { left: 233, top: 150, width: 867, height: 1150 };
+// The tile frames the figure as the other special sites' tiles do (owner,
+// 2026-10-23: 「もっと、他と同じ位置を映すようにして」), measured on their
+// rendered tiles: a 3:4 source, the helmet's top about 4% down, the belt
+// about half way (Rexonance and Meta Unitas: 5% and 50%). The key visual's
+// marks: helmet tips y 190, reactor y 700, belt y 1080 (of 2000).
+const TILE_CROP = { left: 0, top: 119, width: 1333, height: 1777 };
 const tile = async (input, output) => {
   const result = await sharp(input)
     .rotate()

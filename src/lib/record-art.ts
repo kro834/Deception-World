@@ -175,7 +175,7 @@ const PAGES: Record<string, Picture & { edition: RecordEdition; code: string }> 
   "/illusionculum-saga": {
     // The head-and-torso tile, framed as the other special sites' figures.
     src: "/illusionculum-saga-20261023/standard-tile-400.webp",
-    pos: "50% 18%",
+    pos: "50% 24%",
     edition: "rexonance",
     code: "ILLUSIONCULUM",
   },
@@ -295,8 +295,8 @@ const SITE_ART: Record<string, readonly Picture[]> = {
   ],
   "/illusionculum-saga": [
     PAGES["/illusionculum-saga"],
-    { src: "/illusionculum-saga-20261023/ultra-640.webp", pos: "50% 30%" },
-    { src: "/illusionculum-saga-20261023/more-640.webp", pos: "50% 30%" },
+    { src: "/illusionculum-saga-20261023/ultra-640.webp", pos: "50% 16%" },
+    { src: "/illusionculum-saga-20261023/more-640.webp", pos: "50% 16%" },
   ],
   "/final-stage": [PAGES["/final-stage"], formThumb("realm", "royal")],
   "/meta-unitas-saga": [
