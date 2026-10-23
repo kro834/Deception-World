@@ -254,13 +254,6 @@ export const MetaUnitasSuitUp = memo(function MetaUnitasSuitUp({
           role="tabpanel"
           aria-labelledby={`mus-ending-tab-${stage}`}
         >
-          <ol className="mus-route" aria-hidden="true">
-            {META_UNITAS_FORMS.map((key, index) => (
-              <li key={key} data-reached={index <= META_UNITAS_FORMS.indexOf(stage) || undefined}>
-                <span>{FORM_LABELS[key]}</span>
-              </li>
-            ))}
-          </ol>
           <button
             type="button"
             className="mus-watch"
