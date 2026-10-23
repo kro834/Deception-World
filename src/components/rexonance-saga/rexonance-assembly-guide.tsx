@@ -67,19 +67,25 @@ export function RexonanceAssemblyGuide({
     return () => observer.disconnect();
   }, [runwayRef]);
   const status = assemblyStatus(load, Boolean(scene.motion));
+  // Owner (2026-10-23): 「不要なセカンダリラベルや説明を避ける。」 The head is the
+  // chapter's numeral and its catchphrase; the runway below shows its own state
+  // (the undersuit while it prepares, the scroll's armour after). The status
+  // stays a live region for assistive tech, seen only on a failure (with its
+  // retry beside it).
   return (
     <section id="assembly" className="rxs-assembly-heading" aria-labelledby="rxs-assembly-title">
       <div>
-        <p className="rxs-assembly-eyebrow" lang="en">
-          SUIT-UP / INTERACTIVE ASSEMBLY
-        </p>
         <h2 id="rxs-assembly-title">装甲が、身体になる。</h2>
-        <p>
+        {/* How the runway answers the scroll, for assistive tech (the runway
+            itself is a picture, aria-hidden); on screen the scroll says it. */}
+        <p className="visually-hidden">
           スクロールの速さで、装着の速さが変わる。装甲の接近から固定、出力の起動までを、自分のペースで。
         </p>
-        <p className="rxs-assembly-status" role="status" aria-live="polite" aria-atomic="true">
-          {status}
-        </p>
+        <div className={load === "error" ? undefined : "visually-hidden"}>
+          <p className="rxs-assembly-status" role="status" aria-live="polite" aria-atomic="true">
+            {status}
+          </p>
+        </div>
         {/* The runway's script, for assistive technology: the runway itself
             is aria-hidden (its canvas and figure layers are pictures), so
             its phases and its call are listed here (sweep 2, F23). */}
@@ -135,9 +141,6 @@ export function RexonanceAssemblyReplay() {
   }, []);
   return (
     <div id="assembly-replay" className="rxs-assembly-footer">
-      {!staticMode ? (
-        <p>装甲の接近、固定、起動。気になる瞬間は、スクロールを戻してもう一度。</p>
-      ) : null}
       <div className="rxs-assembly-controls">
         <a href="#assembly">{staticMode ? "変身の資料を見る" : "もう一度、装着を体験"}</a>
         <a href="#stages">三つの形態へ</a>

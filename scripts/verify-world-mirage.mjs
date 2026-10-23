@@ -360,7 +360,10 @@ for (const device of [
         "mx-lift",
         "mx-settle",
       ].filter((name) => names.has(name)),
-      rise: ["mr-rise-in", "mr-fade-in", "mx-lift-flat"].every((name) => names.has(name)),
+      // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明） — mr-fade-in
+      // carried only the MANAGER ARCHIVE label, which is gone; the archive title's
+      // compositor rise (mr-rise-in) and the flat lift stay required.
+      rise: ["mr-rise-in", "mx-lift-flat"].every((name) => names.has(name)),
       floor: style(".mr-hero-floor").display,
       overlay: style(".story-layout", "::after").content,
       brackets: style(".story-layout").backgroundImage.split("linear-gradient").length - 1,

@@ -52,7 +52,8 @@ function contrast(foreground, background) {
 async function inspect(control, label, pressed = false, checkLabels = true) {
   const metrics = await control.evaluate((node) => {
     const thumb = node.querySelector(".ios-slide-open-thumb");
-    const labelSmall = node.querySelector(".ios-slide-open-label small");
+    // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明） — the HOLD + SLIDE line
+    // goes (the thumb and chevrons show the slide; a tap opens it too); the detail label stays.
     const labelText = node.querySelector(".ios-slide-open-label b");
     const arrows = node.querySelector(".ios-slide-open-arrows");
     const arrow = arrows?.querySelector("i");
@@ -62,7 +63,7 @@ async function inspect(control, label, pressed = false, checkLabels = true) {
     return {
       button: rect(node),
       thumb: rect(thumb),
-      labelSmall: rect(labelSmall),
+      labelSmall: Boolean(node.querySelector(".ios-slide-open-label small")),
       labelText: rect(labelText),
       arrows: rect(arrows),
       svg: rect(svg),
@@ -70,12 +71,10 @@ async function inspect(control, label, pressed = false, checkLabels = true) {
       buttonBackground: getComputedStyle(node).backgroundColor,
       buttonRadius: parseFloat(getComputedStyle(node).borderTopLeftRadius),
       buttonBackgroundImage: getComputedStyle(node).backgroundImage,
-      labelSmallColor: getComputedStyle(labelSmall).color,
       labelTextColor: getComputedStyle(labelText).color,
       arrowColor: getComputedStyle(arrow).borderTopColor,
-      labelSmallOpacity: getComputedStyle(labelSmall).opacity,
       labelTextOpacity: getComputedStyle(labelText).opacity,
-      labelParentOpacity: getComputedStyle(labelSmall.parentElement).opacity,
+      labelParentOpacity: getComputedStyle(labelText.parentElement).opacity,
       arrowOpacity: getComputedStyle(arrow).opacity,
       arrowParentOpacity: getComputedStyle(arrows).opacity,
       color: getComputedStyle(svg).color,
@@ -127,7 +126,7 @@ async function inspect(control, label, pressed = false, checkLabels = true) {
     child.right <= button.right &&
     child.y >= button.y &&
     child.bottom <= button.bottom;
-  assert.ok(inside(metrics.labelSmall), `${label}: HOLD + SLIDE label inside rail`);
+  assert.equal(metrics.labelSmall, false, `${label}: no instruction line in the rail`);
   assert.ok(inside(metrics.labelText), `${label}: detail label inside rail`);
   assert.ok(inside(metrics.arrows), `${label}: arrows inside rail`);
   if (checkLabels && buttonBackground) {
@@ -135,12 +134,6 @@ async function inspect(control, label, pressed = false, checkLabels = true) {
     // erase contrast (use full opacity as the conservative bound).
     const textBackground = composite({ r: 111, g: 227, b: 255, a: 0.08 }, buttonBackground);
     for (const [name, color, opacity, minimumContrast] of [
-      [
-        "HOLD + SLIDE",
-        metrics.labelSmallColor,
-        Number(metrics.labelSmallOpacity) * Number(metrics.labelParentOpacity),
-        4.5,
-      ],
       [
         "detail label",
         metrics.labelTextColor,

@@ -533,32 +533,15 @@ html[data-family="special"]
   border-bottom: 1px solid rgb(121 232 255 / 30%);
 }
 
-/* The slate: CUT 01, CUT 02 at the frame's top right. */
+/* The slate (CUT 01, CUT 02) went (owner, 2026-10-23: 「不要なセカンダリ
+   ラベルや説明を避ける」): each cut is its figure and its line. */
 html[data-family="special"]
   body
   .rxs-page.rxs-page.rxs-rexonance-page
   > #performance
   .rxs-headline-metrics
   > article::after {
-  content: "CUT " counter(rxt-cut, decimal-leading-zero) / "";
-  display: block;
-  position: absolute;
-  inset: clamp(22px, 2.4vw, 32px) 0 auto auto;
-  width: auto;
-  height: auto;
-  min-height: 0;
-  aspect-ratio: auto;
-  padding: 4px 10px;
-  color: var(--dx-ink);
-  font: 400 12px / 1.3 var(--dx-hud);
-  letter-spacing: 0.18em;
-  background: var(--rxt-ice);
-  border: 0;
-  border-radius: 0;
-  box-shadow: none;
-  opacity: 1;
-  transform: none;
-  clip-path: polygon(0 0, 100% 0, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+  content: none;
 }
 
 html[data-family="special"]

@@ -129,7 +129,9 @@ test("RE DIVE is a classified archive; the public manager archive stays separate
   );
   assert.match(section, /RE_DIVE_CLASSIFIED_REPORT\.title/);
   assert.doesNotMatch(section, /GuardedLink|\/characters\/|\/managers\/|RE_DIVE_RIKUEI_NAV/);
-  for (const label of ["MANAGER ARCHIVE", "SIX SIGNALS", "ABOVE THE WORLD.", "OPEN DOSSIER"]) {
+  // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明） — MANAGER ARCHIVE and the
+  // tiles' OPEN DOSSIER captions are gone; the archive's own heading stays.
+  for (const label of ["SIX SIGNALS", "ABOVE THE WORLD."]) {
     assert.ok(home.includes(label), `public archive unchanged: ${label}`);
   }
 });

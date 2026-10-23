@@ -1,3 +1,32 @@
+                onClick={() => {
+                  cancelPosterShuffle();
+                  setLocked((v) => !v);
+                }}
+              >
+                <LiquidPointerGlow />
+                <span aria-hidden="true">
+                  {locked ? (
+                    <svg viewBox="0 0 24 24" width="14" height="14">
+                      <path
+                        d="M8 10V8a4 4 0 0 1 8 0v2"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                        strokeLinecap="round"
+                      />
+                      <rect
+                        x="6"
+                        y="10"
+                        width="12"
+                        height="10"
+                        rx="2"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                      />
+                    </svg>
+                  ) : (
+                    <svg viewBox="0 0 24 24" width="14" height="14">
                       <path
                         d="M8 10V8a4 4 0 0 1 7.5-2"
                         fill="none"
@@ -18,10 +47,7 @@
                     </svg>
                   )}
                 </span>
-                <b>
-                  <small>{locked ? "LOCKED" : "AUTO"}</small>
-                  {locked ? "固定中" : "自動切替"}
-                </b>
+                <b>{locked ? "固定中" : "自動切替"}</b>
               </button>
             </div>
             <output
@@ -40,20 +66,6 @@
             <br />
             6人の最上位管理人と8人のライダーが、現実世界を舞台に交錯する。
           </p>
-          <div className="hero-metadata" aria-label="作品情報">
-            <span>
-              <small>FORMAT</small>
-              <b>ORIGINAL MOVIE</b>
-            </span>
-            <span>
-              <small>WORLD</small>
-              <b>SAGA / REALITY</b>
-            </span>
-            <span>
-              <small>STATUS</small>
-              <b>THE STORY CONTINUES</b>
-            </span>
-          </div>
         </div>
         <a className="scroll-cue" href="#story">
           <span>SCROLL TO DESCEND</span>
@@ -63,18 +75,15 @@
 
       <MirageTicker variant="open" records={EPISODES.length} />
 
+      <WorldContents />
+
       <section className="story-section" id="story">
         <div className="section-index" data-film-reveal>
           <span>01</span>
-          <small>WORLD / STORY</small>
           <i className="film-boundary-line" aria-hidden="true" />
         </div>
         <div className="story-layout">
           <div className="story-heading">
-            <p className="eyebrow">
-              <span>THIS IS NOT A DREAM</span>
-              <i />
-            </p>
             <h2 data-film-reveal data-text-reveal="heading" aria-label={revealLabel(STORY_TITLE)}>
               <FilmTextScan />
               <RevealText>{STORY_TITLE}</RevealText>
@@ -120,7 +129,6 @@
             aria-hidden="true"
           />
           <div className="threat-copy" data-film-reveal>
-            <span className="system-label">MANAGER ARCHIVE</span>
             <h3>
               {managerTab === 0 ? (
                 <>
@@ -192,7 +200,6 @@
                     />
                     <span>I</span>
                     <i />
-                    <small>OPEN DOSSIER</small>
                     <b>ゼウス</b>
                     <em className="signal-apex" aria-hidden="true">
                       <svg viewBox="0 0 24 24" focusable="false">
@@ -219,7 +226,6 @@
                     />
                     <span>II</span>
                     <i />
-                    <small>OPEN DOSSIER</small>
                     <b>レックス・ロワ</b>
                   </GuardedLink>
                   <GuardedLink
@@ -241,7 +247,6 @@
                     />
                     <span>III</span>
                     <i />
-                    <small>OPEN DOSSIER</small>
                     <b>シュザ</b>
                   </GuardedLink>
                   <GuardedLink
@@ -263,7 +268,6 @@
                     />
                     <span>IV</span>
                     <i />
-                    <small>OPEN DOSSIER</small>
                     <b>レジャス</b>
                   </GuardedLink>
                   <GuardedLink
@@ -285,7 +289,6 @@
                     />
                     <span>V</span>
                     <i />
-                    <small>OPEN DOSSIER</small>
                     <b>オパス</b>
                   </GuardedLink>
                   <GuardedLink
@@ -307,7 +310,6 @@
                     />
                     <span>VI</span>
                     <i />
-                    <small>OPEN DOSSIER</small>
                     <b>リームー</b>
                   </GuardedLink>
                 </div>
@@ -339,10 +341,8 @@
                       />
                     </span>
                     <span className="dante-copy">
-                      <small>ANOMALOUS RECORD</small>
                       <b>ダンテ／ヴァルグ</b>
                       <em>管理人殺し ／ 第二の犬</em>
-                      <i>ACCESS //</i>
                     </span>
                   </GuardedLink>
                   {Array.from({ length: 5 }, (_, index) => (
@@ -367,10 +367,24 @@
                     assets={["/character-varg-20261021-720.webp"]}
                     aria-label="第二の犬 ダンテ／ヴァルグの人物資料を開く"
                   >
-                    <img src="/character-varg-20261021-360.webp" srcSet="/character-varg-20261021-360.webp 360w, /character-varg-20261021-720.webp 720w, /character-varg-20261021.webp 1088w" sizes="(max-width: 760px) 45vw, 360px" alt="第二の犬・ヴァルグの本来形態" width={1088} height={1445} style={{ objectFit: "contain" }} loading="lazy" decoding="async" />
+                    <img
+                      src="/character-varg-20261021-360.webp"
+                      srcSet="/character-varg-20261021-360.webp 360w, /character-varg-20261021-720.webp 720w, /character-varg-20261021.webp 1088w"
+                      sizes="(max-width: 760px) 45vw, 360px"
+                      alt="第二の犬・ヴァルグの本来形態"
+                      width={1088}
+                      height={1445}
+                      style={{ objectFit: "contain" }}
+                      loading="lazy"
+                      decoding="async"
+                    />
                     <span className="other-card-shade" aria-hidden="true" />
                     <span className="other-card-code">SECOND DOG / 02</span>
-                    <span className="other-card-copy"><small>第二の犬・ヴァルグ</small><b>ダンテ／ヴァルグ</b><i>始原的管理外存在</i></span>
+                    <span className="other-card-copy">
+                      <small>第二の犬・ヴァルグ</small>
+                      <b>ダンテ／ヴァルグ</b>
+                      <i>始原的管理外存在</i>
+                    </span>
                   </GuardedLink>
                 </div>
               </div>
@@ -408,7 +422,6 @@
                     <span className="other-card-shade" aria-hidden="true" />
                     <span className="other-card-code">RELATED / 01</span>
                     <span className="other-card-copy">
-                      <small>TERRA ALAIN</small>
                       <b>
                         <NameText value="テラ・アレイン" />
                       </b>
@@ -438,7 +451,6 @@
                     <span className="other-card-shade" aria-hidden="true" />
                     <span className="other-card-code">RELATED / 02</span>
                     <span className="other-card-copy">
-                      <small>LUNA ALAIN</small>
                       <b>
                         <NameText value="ルナ・アレイン" />
                       </b>
@@ -469,7 +481,6 @@
                     <span className="other-card-copy">
                       <small>よあけまもりのみこと</small>
                       <b>夜明護尊</b>
-                      <i>人物資料を開く</i>
                     </span>
                   </GuardedLink>
                   {Array.from({ length: 1 }, (_, index) => (
@@ -484,7 +495,6 @@
         <section className="world-column" aria-label="世界観コラム" data-performance-region>
           <div className="world-column-content">
             <div className="world-column-index">
-              <span>WORLD COLUMN</span>
               <ColumnRail ref={columnRail} />
             </div>
             <div
@@ -495,23 +505,3 @@
               aria-label={`コラム${column.no} ${column.title}`}
             >
               <div className="world-column-number-stack">
-                {COLUMNS.map((item, index) => (
-                  <p
-                    key={item.no}
-                    className={`world-column-number world-column-stack-item${index === columnTab ? " is-active" : ""}`}
-                    aria-hidden={index !== columnTab}
-                  >
-                    コラム{item.no}
-                  </p>
-                ))}
-              </div>
-              <div className="world-column-heading-stack">
-                {COLUMNS.map((item, index) => (
-                  <h3
-                    key={item.no}
-                    id={`world-column-${item.no}`}
-                    className={`world-column-stack-item${index === columnTab ? " is-active" : ""}`}
-                    aria-hidden={index !== columnTab}
-                  >
-                    {item.title}
-                  </h3>

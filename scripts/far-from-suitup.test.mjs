@@ -64,6 +64,7 @@ import {
   farFromAssemblyConfig,
 } from "../src/lib/far-from-assembly-engine.ts";
 import { REXONANCE_SUIT_MARKS, REXONANCE_SUIT_UNDERSUIT } from "../src/lib/rexonance-suit.ts";
+import { farFromWireGeneration } from "../src/lib/far-from-wireframe-layer.ts";
 import { FIRE_TONES } from "../src/lib/rexonance-fire/fire-tuning.js";
 import { FAR_FROM_SAGA } from "../src/components/final-stage/final-stage-data.ts";
 
@@ -449,16 +450,17 @@ test("the config is the engine's: FAR FROM's palette, reactor, chain, kits and a
   const own = assemblyPalette(FAR_FROM_PALETTE);
   assert.equal(own.toneCss[1], "rgb(255 215 122)");
   assert.equal(own.rings[2], "rgb(255 215 122)");
-  // Two kits through one sprite path: each chip's kit by its hash, made
-  // outside the draw passes; kit A stands in for kit B until it lands.
+  // The engine keeps its two-kit sprite path (each chip's kit by its hash).
   assert.match(swarm, /const KITOF = new Uint8Array\(total \+ 1\);/);
   assert.ok(swarm.indexOf("const KITOF") < swarm.indexOf("/* -- draw passes: allocation-free from here -- */"));
   assert.match(swarm, /const sheet = second \? cellsB : cells;/);
-  assert.match(engine, /cellsB: kitB\.FAR_FROM_NANITE_CELLS/);
-  assert.match(engine, /import\("\.\/far-from-nanites\.ts"\)/);
-  assert.match(engine, /guide: FAR_FROM_SUIT_GUIDE/);
-  assert.match(engine, /seams: FAR_FROM_SUIT_SEAMS/);
   assert.match(resonance, /optional\(kit\?\.cellsB\?\.src\)/);
+  // Owner (2026-10-23): FAR FROM's armour is generated as a wireframe
+  // (far-from-wireframe-layer.ts) — no nanite kit, no swarm, no field.
+  assert.equal(config.generation, farFromWireGeneration);
+  assert.equal(config.nanites, undefined);
+  assert.match(engine, /generation: farFromWireGeneration/);
+  assert.doesNotMatch(engine, /far-from-nanites\.ts|rexonance-nanites\.ts/);
   // The field's tones only where a palette names them.
   assert.match(resonance, /\.\.\.\(palette\.field \? \{ tones: palette\.field \} : \{\}\)/);
 });
@@ -656,7 +658,7 @@ test("budgets and the touch tier are the engine's; the markup is the Rexonance r
     'className="rzn-chip"',
     'className="rzn-part"',
     'className="rzn-percent"',
-    'className="rzn-count"',
+    // Owner (2026-10-23): ファーフロムのランウェイから NANITES / NANITE ASSEMBLY を削除（ワイヤーフレーム生成）。
     'className="rzn-stamp"',
     "src={STILLS[stage]}",
     'src={FAR_FROM_SUIT_UNDERSUIT}',

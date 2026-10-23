@@ -74,7 +74,7 @@ export const FAR_FROM_ULTRA_WINDOWS = {
 export const FAR_FROM_ULTRA_PHASES = [
   { phase: "max", step: "01", label: "マックス" },
   { phase: "white", step: "02", label: "WHITE" },
-  { phase: "armour", step: "03", label: "NANITES" },
+  { phase: "armour", step: "03", label: "ARMOUR" },
   { phase: "halo", step: "04", label: "HALO" },
   { phase: "interface", step: "05", label: "INTERFACE" },
 ] as const;

@@ -256,8 +256,10 @@ const ExtremePerformance = memo(function ExtremePerformance() {
   const activeComparison = COMPARISONS[baseline];
   return (
     <section id="performance" className="rxs-performance rxs-section">
+      {/* Owner (2026-10-23): 「不要なセカンダリラベルや説明を避ける。」 The head is
+          the bout plate (ROUND and its number) and the catchphrase; the
+          English kicker went. The introduction is the owner's copy. */}
       <header className="rxs-section-heading rxs-reveal" data-exi-hit="">
-        <p>PERFORMANCE COMPARISON</p>
         <h2>
           <span className="exo-line">肉弾戦なら、</span>
           <br />
@@ -278,7 +280,6 @@ const ExtremePerformance = memo(function ExtremePerformance() {
       <div className="rxs-headline-metrics">
         <div className="exi-stage">
           <article className="rxs-reveal" data-exi-hit="" data-exi-line="mid">
-            <small>PUNCH POWER / EXTREME</small>
             <strong>
               <b className="exi-figure">
                 <b className="exi-real">205.6</b>
@@ -311,7 +312,6 @@ const ExtremePerformance = memo(function ExtremePerformance() {
                 <use href="#exi-streaks" width="200" height="100" />
               </svg>
             </i>
-            <small>100M TIME / EXTREME</small>
             <strong>
               <b className="exi-figure">
                 <b className="exi-real">0.002</b>
@@ -345,7 +345,6 @@ const ExtremePerformance = memo(function ExtremePerformance() {
                 onClick={() => setBaseline(key)}
               >
                 <span>{COMPARISONS[key].label}サーガ</span>
-                <small>{COMPARISONS[key].code}</small>
               </button>
             ))}
           </div>
@@ -426,7 +425,6 @@ const ExtremePerformance = memo(function ExtremePerformance() {
         <details className="exs-catalog-details">
           <summary>
             <span>構成と比較条件</span>
-            <small>演算系統・推定値・未公表の項目</small>
           </summary>
           <section
             key={`${baseline}-processing`}
@@ -434,7 +432,6 @@ const ExtremePerformance = memo(function ExtremePerformance() {
             aria-label={`${activeComparison.label}とエクスプリームの構成比較`}
           >
             <header>
-              <small>CATALOG / PROCESSING ARCHITECTURE</small>
               <h3>同じ指標だけを、倍率へ。</h3>
             </header>
             <div>
@@ -695,29 +692,28 @@ export function ExtremeSaga() {
         </a>
       </section>
 
+      {/* The fight card after the hero: each bout's number plate (the bar's
+          number), its name and the way in (owner, 2026-10-23: no English
+          codes or descriptions on the card). */}
       <nav className="rxs-chapter-index exs-chapter-index" aria-label="エクスプリームの見どころ">
         <a href="#performance">
-          <small>PERFORMANCE</small>
+          <small aria-hidden="true">01</small>
           <span>性能を比べる</span>
-          <em>打撃・跳躍・走力</em>
           <i aria-hidden="true">↗</i>
         </a>
         <a href="#p14">
-          <small>P14</small>
+          <small aria-hidden="true">02</small>
           <span>演算加速機構</span>
-          <em>第14世代の標準</em>
           <i aria-hidden="true">↗</i>
         </a>
         <a href="#stages">
-          <small>2 STAGES</small>
+          <small aria-hidden="true">03</small>
           <span>二つの形態</span>
-          <em>ミドルとウルトラ</em>
           <i aria-hidden="true">↗</i>
         </a>
         <a href="#system">
-          <small>SYSTEM</small>
+          <small aria-hidden="true">04</small>
           <span>中核システム</span>
-          <em>学習・充填・結果固定</em>
           <i aria-hidden="true">↗</i>
         </a>
       </nav>
@@ -726,7 +722,6 @@ export function ExtremeSaga() {
 
       <section id="p14" className="rxs-p14 rxs-section exs-p14" aria-labelledby="exs-p14-title">
         <header className="rxs-section-heading rxs-reveal" data-exi-hit="">
-          <p>PROCESSING CORE / P14</p>
           <h2 id="exs-p14-title">
             <span className="exo-line">可能性は増やす。</span>
             <br />
@@ -760,7 +755,6 @@ export function ExtremeSaga() {
             />
           </figure>
           <div className="rxs-p14-copy">
-            <small>P14 / STANDARD</small>
             <h3>選んだ結果を、勝利に固定する。</h3>
             <p>
               戦闘状況に応じて必要な演算を選択的に加速し、全処理を一律に高速化する方式より、不要な消費EMPと発熱を抑えます。高出力攻撃、複雑な能力処理、身体駆動を並行して支える、汎用性と高負荷耐性に優れた構造です。後継世代の演算加速機構は、このP14
@@ -795,22 +789,17 @@ export function ExtremeSaga() {
           </div>
         </div>
 
+        {/* The flow reads by its arrows (the English captions over each
+            step went: owner, 2026-10-23). */}
         <div className="exs-core-flow" aria-label="P14 Standardの処理の流れ">
-          <span>
-            <small>INPUT</small>戦況を学習
-          </span>
+          <span>戦況を学習</span>
           <i aria-hidden="true">→</i>
-          <span>
-            <small>EXPANSION</small>勝利経路を生成
-          </span>
+          <span>勝利経路を生成</span>
           <i aria-hidden="true">→</i>
-          <span>
-            <small>FIXATION</small>結果へ収束
-          </span>
+          <span>結果へ収束</span>
         </div>
         <div className="exs-p14-comparison rxs-reveal">
           <article>
-            <small>P14 / EXPANSION</small>
             <h3>
               <span>戦況から、</span>
               <span>勝ち筋を</span>
@@ -822,7 +811,6 @@ export function ExtremeSaga() {
             →
           </span>
           <article>
-            <small>P14 / FIXATION</small>
             <h3>勝ち筋を、実行できる形へ。</h3>
             <p>KOSMOS Ultra 5,000TOPSが競合する経路を整理し、実行可能な勝利条件へ収束させます。</p>
             <i className="exo-lock" aria-hidden="true" />
@@ -835,7 +823,6 @@ export function ExtremeSaga() {
 
       <section id="stages" className="rxs-stages rxs-section">
         <header className="rxs-section-heading rxs-reveal" data-exi-hit="">
-          <p>TWO OPERATING STAGES</p>
           <h2>
             <span className="exo-line">ミドルで育てて、</span>
             <br />
@@ -869,14 +856,20 @@ export function ExtremeSaga() {
                 onPointerUp={(event) => releaseControlFocus(event.currentTarget)}
               >
                 <span>{EXTREME_STAGES[key].label}</span>
-                <small>{EXTREME_STAGES[key].code}</small>
               </button>
             ))}
           </div>
-          <p id="exs-stage-hint" className="rxs-stage-hint">
+          {/* The tabs name the forms and the panel shows the one chosen
+              (owner, 2026-10-23: no secondary labels): the gestures and the
+              resting status speak to assistive tech only; a form still on
+              its way, or one that failed, shows. */}
+          <p id="exs-stage-hint" className="rxs-stage-hint visually-hidden">
             タップ・長押し・左右スライド・矢印キーで切り替え
           </p>
-          <p className="exs-stage-status" role="status">
+          <p
+            className={`exs-stage-status${stageError || stagePending ? "" : " visually-hidden"}`}
+            role="status"
+          >
             {stageError ||
               (stagePending
                 ? `${EXTREME_STAGES[stage].label}を準備中…`
@@ -932,7 +925,6 @@ export function ExtremeSaga() {
               </i>
             </figure>
             <div key={`${shownStage}-copy`}>
-              <small>{activeStage.code}</small>
               {/* Two lines at every width, broken after the 、, so a change
                   of form never moves the figure under the title. */}
               <h3>
@@ -966,7 +958,6 @@ export function ExtremeSaga() {
 
       <section id="system" className="rxs-system rxs-section exs-system">
         <header className="rxs-section-heading rxs-reveal" data-exi-hit="">
-          <p>EXTREME ARCHITECTURE</p>
           <h2>
             <span className="exo-line">学習、充填、</span>
             <br />
@@ -1031,7 +1022,6 @@ export function ExtremeSaga() {
           EXTREME
         </b>
         <div>
-          <p>EXTREME SAGA / SUPREME ARRIVAL</p>
           <h2>
             <span className="exo-line">長期戦なら、</span>
             <br />

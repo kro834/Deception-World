@@ -54,6 +54,7 @@ html[data-family="dossier"]
 
 .form-signature {
   position: absolute;
+  z-index: -1;
   inset: 0;
   overflow: hidden;
   pointer-events: none;
@@ -61,27 +62,7 @@ html[data-family="dossier"]
   contain: paint;
 }
 
-.form-signature-seal {
-  position: absolute;
-  left: 3%;
-  top: 15%;
-  color: var(--signature-light);
-  font: 400 clamp(46px, 9vw, 132px) / 1 var(--signature-face);
-  letter-spacing: -0.04em;
-  writing-mode: vertical-rl;
-  opacity: 0.16;
-}
-
-[data-form-theme="kemonohen"] .form-signature-seal {
-  left: auto;
-  right: -3%;
-  top: 6%;
-  font-size: clamp(180px, 32vw, 420px);
-  writing-mode: horizontal-tb;
-  opacity: 0.2;
-  transform: rotate(-12deg);
-}
-
+.form-signature-seal,
 .form-signature-trace,
 .form-signature-flare {
   position: absolute;
@@ -89,66 +70,141 @@ html[data-family="dossier"]
   pointer-events: none;
 }
 
+/* Explom's signature: its name as an outlined wordmark on the far edge,
+   and the fracture running out of the art into the words (cyan rims, a
+   crimson hot core), from an impact ring on the seam. */
+[data-form-theme="explom"] .form-signature-seal {
+  top: 50%;
+  right: -0.08em;
+  color: transparent;
+  font: 400 min(150px, 13vw) / 0.92 var(--signature-face);
+  letter-spacing: -0.02em;
+  writing-mode: vertical-rl;
+  -webkit-text-stroke: 1px rgb(114 242 236 / 40%);
+  translate: 0 -50%;
+}
+
 [data-form-theme="explom"] .form-signature-trace {
-  inset: 14% 5%;
-  border: 1px solid var(--signature-light);
-  border-left: 4px solid var(--signature-hot);
-  border-right: 4px solid var(--signature-hot);
-  border-radius: 50%;
-  opacity: 0.38;
-  transform: scaleX(0.9) rotate(-26deg);
+  --rest: 0.55;
+  top: 46%;
+  left: -1%;
+  width: 78%;
+  height: 26px;
+  margin-top: -13px;
+  background: linear-gradient(
+    90deg,
+    rgb(214 255 252 / 0%),
+    rgb(214 255 252 / 90%) 5%,
+    var(--signature-light) 30%,
+    rgb(255 74 96 / 85%) 62%,
+    transparent 100%
+  );
+  clip-path: polygon(
+    0 44%,
+    12% 34%,
+    22% 58%,
+    35% 30%,
+    47% 62%,
+    60% 38%,
+    74% 68%,
+    87% 44%,
+    100% 50%,
+    100% 60%,
+    87% 56%,
+    74% 80%,
+    60% 50%,
+    47% 74%,
+    35% 42%,
+    22% 70%,
+    12% 46%,
+    0 56%
+  );
+  transform-origin: 0 50%;
+  rotate: -8deg;
+  opacity: var(--rest);
 }
 
 [data-form-theme="explom"] .form-signature-trace.is-second {
-  inset: 19% 1%;
-  opacity: 0.22;
-  transform: scaleX(0.9) rotate(26deg);
+  --rest: 0.38;
+  top: 60%;
+  width: 60%;
+  rotate: 15deg;
 }
 
 [data-form-theme="explom"] .form-signature-trace.is-third {
-  inset: 8% 12%;
-  border-style: dashed;
-  border-width: 1px;
-  opacity: 0.16;
+  --rest: 0.28;
+  top: 33%;
+  width: 46%;
+  rotate: -28deg;
 }
 
-[data-form-theme="kemonohen"] .form-signature-trace {
-  top: -10%;
-  left: 14%;
-  width: 7px;
-  height: 120%;
-  background: linear-gradient(
-    180deg,
-    transparent 8%,
-    #ffb3a0 30%,
-    var(--signature-hot) 55%,
-    transparent 90%
-  );
-  clip-path: polygon(70% 0, 100% 5%, 62% 48%, 90% 50%, 18% 100%, 0 94%, 28% 48%, 0 46%);
-  transform: rotate(19deg);
-  opacity: 0.65;
-}
-
-[data-form-theme="kemonohen"] .form-signature-trace.is-second {
-  left: 20%;
-  top: -18%;
-}
-[data-form-theme="kemonohen"] .form-signature-trace.is-third {
-  left: 26%;
-  top: -23%;
-}
-
-.form-signature-flare {
-  inset: 8%;
-  border: 2px solid var(--signature-light);
+[data-form-theme="explom"] .form-signature-flare {
+  top: calc(46% - 70px);
+  left: -70px;
+  width: 140px;
+  height: 140px;
+  border: 1px solid var(--signature-light);
   border-radius: 50%;
+  box-shadow:
+    inset 0 0 0 7px rgb(255 74 96 / 16%),
+    0 0 26px rgb(114 242 236 / 22%);
   opacity: 0;
 }
 
+/* 犭's signature: the radical itself, huge and dim, three claw marks
+   raked across the far corner, and an ember ring. */
+[data-form-theme="kemonohen"] .form-signature-seal {
+  top: -8%;
+  right: -4%;
+  color: var(--signature-light);
+  font: 400 clamp(200px, 30vw, 440px) / 1 var(--signature-face);
+  opacity: 0.17;
+  rotate: -12deg;
+}
+
+[data-form-theme="kemonohen"] .form-signature-trace {
+  --rest: 0.62;
+  top: -6%;
+  right: 22%;
+  width: 10px;
+  height: 72%;
+  background: linear-gradient(
+    180deg,
+    transparent 4%,
+    #ffd6cb 24%,
+    #ff9b94 44%,
+    var(--signature-hot) 70%,
+    transparent 96%
+  );
+  clip-path: polygon(46% 0, 100% 9%, 72% 52%, 46% 100%, 32% 100%, 0 54%, 20% 8%);
+  rotate: 26deg;
+  transform-origin: 50% 0;
+  opacity: var(--rest);
+}
+
+[data-form-theme="kemonohen"] .form-signature-trace.is-second {
+  --rest: 0.52;
+  top: -3%;
+  right: 15%;
+  height: 78%;
+}
+
+[data-form-theme="kemonohen"] .form-signature-trace.is-third {
+  --rest: 0.42;
+  top: 1%;
+  right: 8%;
+  height: 66%;
+}
+
 [data-form-theme="kemonohen"] .form-signature-flare {
-  inset: 4% 8%;
+  top: 6%;
+  right: 6%;
+  width: min(46%, 420px);
+  aspect-ratio: 1;
+  border: 1px solid rgb(255 155 148 / 38%);
   border-radius: 47% 53% 59% 41%;
-  border-color: var(--signature-hot);
+  box-shadow: inset 0 0 42px rgb(219 38 62 / 16%);
+  opacity: 0;
 }
 
 /* Titles, not another badge: the form's name is the dominant reading line. */
@@ -251,14 +307,6 @@ html[data-family="dossier"]
   opacity: 0.5;
 }
 
-html[data-family="dossier"]
-  main.manager-page.manager-page.manager-page
-  [data-form-theme="kemonohen"]
-  .is-ability
-  h3 {
-  font: 400 44px/1.25 var(--signature-face);
-  color: #ffd5cd;
-}
 
 html[data-family="dossier"]
   main.manager-page.manager-page.manager-page
@@ -278,8 +326,1028 @@ html[data-family="dossier"]
   letter-spacing: 0;
 }
 
+/* ================================================================
+   The two forms at their full height (2026-10-23): the card on the file
+   and the record above it, each in its own material. Explom is ink cut
+   by its fracture (cyan rims, a crimson hot core); 犭 is a darkness with
+   an ember in it and claw marks through it.
+   ================================================================ */
+
+/* ── Explom ── */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup[data-form-theme="explom"]
+  .form-pickup-card {
+  border-top: 0;
+  background:
+    linear-gradient(90deg, var(--signature-light), var(--signature-hot) 58%, transparent) top /
+      100% 2px no-repeat,
+    radial-gradient(ellipse 52% 46% at 46% 46%, rgb(114 242 236 / 9%), transparent 70%),
+    radial-gradient(ellipse 40% 34% at 100% 100%, rgb(255 74 96 / 9%), transparent 72%),
+    var(--signature-ink);
+}
+
+/* Its name, struck through by the crack it is named for. */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  [data-form-theme="explom"]
+  :is(.form-pickup-copy, .form-pickup-heading)
+  > em {
+  width: fit-content;
+  font-size: clamp(40px, 6vw, 76px);
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup-dialog[data-form-theme="explom"]
+  .form-pickup-heading
+  > em {
+  font-size: clamp(44px, 6.6vw, 96px);
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  [data-form-theme="explom"]
+  :is(.form-pickup-copy, .form-pickup-heading)
+  > em::after {
+  --rest: 0.92;
+  content: "";
+  position: absolute;
+  top: 40%;
+  left: 0;
+  width: 100%;
+  height: 20px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    #c8fffb 6%,
+    var(--signature-light) 20%,
+    var(--signature-hot) 44%,
+    var(--signature-hot) 70%,
+    var(--signature-light) 88%,
+    transparent
+  );
+  clip-path: polygon(
+    0 44%,
+    12% 34%,
+    22% 58%,
+    35% 30%,
+    47% 62%,
+    60% 38%,
+    74% 68%,
+    87% 44%,
+    100% 50%,
+    100% 60%,
+    87% 56%,
+    74% 80%,
+    60% 50%,
+    47% 74%,
+    35% 42%,
+    22% 70%,
+    12% 46%,
+    0 56%
+  );
+  rotate: -4deg;
+  transform-origin: 0 50%;
+  opacity: var(--rest);
+  pointer-events: none;
+}
+
+/* The record: ink cracked from its corner, the impact's cyan above, a
+   crimson ember below; its frame is the fracture the cover settled into. */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup-dialog[data-form-theme="explom"] {
+  border-color: rgb(255 74 96 / 24%);
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup-dialog[data-form-theme="explom"]
+  > .form-pickup-panel {
+  background:
+    repeating-conic-gradient(
+      from 92deg at 0 0,
+      transparent 0 6.5deg,
+      rgb(114 242 236 / 3.4%) 6.5deg 6.8deg,
+      transparent 6.8deg 12deg
+    ),
+    radial-gradient(ellipse 60% 50% at 0% 0%, rgb(114 242 236 / 11%), transparent 70%),
+    radial-gradient(ellipse 50% 40% at 100% 100%, rgb(255 74 96 / 8%), transparent 72%),
+    var(--signature-ink);
+}
+
+.form-pickup-dialog[data-form-theme="explom"] > .form-pickup-panel > .form-signature {
+  opacity: 0.66;
+}
+
+/* 炸ける: the overview is one word, and it is set as the form's motto. */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup-dialog[data-form-theme="explom"]
+  .form-pickup-overview.is-motto
+  > div {
+  padding: 2px 0 6px;
+  border-left: 0;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup-dialog[data-form-theme="explom"]
+  .form-pickup-overview.is-motto
+  p {
+  position: relative;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0;
+  color: #f4fffe;
+  font: 700 clamp(56px, 8.4vw, 116px) / 1.08 "Zen Kaku Gothic New", "Noto Sans JP", sans-serif;
+  letter-spacing: 0.05em;
+  text-shadow:
+    3px 4px 0 #821c35,
+    -2px -2px 0 #147b80;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup-dialog[data-form-theme="explom"]
+  .form-pickup-overview.is-motto
+  p::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -30% -18% -30% -12%;
+  background: radial-gradient(
+    ellipse 50% 46% at 30% 50%,
+    rgb(114 242 236 / 14%),
+    rgb(255 74 96 / 6%) 46%,
+    transparent 70%
+  );
+  pointer-events: none;
+}
+
+/* The anatomy as tiles: each with the hot point at its corner. */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup-dialog[data-form-theme="explom"]
+  .form-pickup-sections
+  > section.is-ability
+  > div {
+  border-left-color: var(--signature-light);
+  background:
+    linear-gradient(var(--signature-hot) 0 0) 0 0 / 16px 2px no-repeat,
+    linear-gradient(135deg, rgb(114 242 236 / 7%), transparent 46%),
+    var(--signature-ink);
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup-dialog[data-form-theme="explom"]
+  .form-pickup-sections
+  > section.is-ability
+  h3 {
+  color: #dffffc;
+}
+
+/* エクスプロムスマッシュ: the burst plate, its name in the form's own face. */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup-dialog[data-form-theme="explom"]
+  .form-pickup-sections
+  > section.is-finisher
+  > div {
+  padding: 22px 24px 24px;
+  border: 1px solid rgb(114 242 236 / 34%);
+  border-left: 3px solid var(--signature-hot);
+  background:
+    radial-gradient(ellipse 46% 80% at 100% 50%, rgb(255 74 96 / 14%), transparent 70%),
+    radial-gradient(ellipse 30% 60% at 0% 0%, rgb(114 242 236 / 10%), transparent 70%),
+    var(--signature-ink);
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup-dialog[data-form-theme="explom"]
+  .form-pickup-sections
+  > section.is-finisher
+  h3 {
+  margin: 0 0 10px;
+  color: #f4fffe;
+  font: 400 clamp(30px, 3.8vw, 52px) / 1.3 var(--signature-face);
+  letter-spacing: -0.04em;
+  text-shadow:
+    2px 3px 0 #821c35,
+    -1px -1px 0 #147b80;
+  overflow-wrap: anywhere;
+}
+
+/* A stacked card (phones, portrait tablets): the words run the full width,
+   so the wordmark stands beside the name and the cracks stay up there. */
+@media (max-width: 899px), (orientation: portrait) and (max-width: 1199px) {
+  [data-form-theme="explom"] .form-pickup-copy > .form-signature .form-signature-seal {
+    top: 20px;
+    font-size: clamp(44px, 9vw, 72px);
+    translate: none;
+  }
+
+  [data-form-theme="explom"] .form-pickup-copy > .form-signature .form-signature-trace {
+    top: 22%;
+  }
+
+  [data-form-theme="explom"] .form-pickup-copy > .form-signature .form-signature-trace.is-second {
+    top: 30%;
+  }
+
+  [data-form-theme="explom"] .form-pickup-copy > .form-signature .form-signature-trace.is-third {
+    top: 15%;
+  }
+
+  [data-form-theme="explom"] .form-pickup-copy > .form-signature .form-signature-flare {
+    top: calc(22% - 70px);
+  }
+
+  [data-form-theme="kemonohen"] .form-pickup-copy > .form-signature .form-signature-trace {
+    height: 46%;
+  }
+
+  [data-form-theme="kemonohen"] .form-pickup-copy > .form-signature .form-signature-trace.is-second {
+    height: 50%;
+  }
+
+  [data-form-theme="kemonohen"] .form-pickup-copy > .form-signature .form-signature-trace.is-third {
+    height: 42%;
+  }
+}
+
+/* ── 犭 ── */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup[data-form-theme="kemonohen"]
+  .form-pickup-card {
+  border-top: 0;
+  background:
+    linear-gradient(
+        90deg,
+        transparent,
+        var(--signature-hot) 30%,
+        #ff9b94 50%,
+        var(--signature-hot) 70%,
+        transparent
+      )
+      top / 100% 2px no-repeat,
+    radial-gradient(ellipse 50% 44% at 86% 18%, rgb(219 38 62 / 14%), transparent 72%),
+    var(--signature-ink);
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  [data-form-theme="kemonohen"]
+  .form-pickup-copy
+  > em {
+  font-size: clamp(44px, 6.8vw, 84px);
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup-dialog[data-form-theme="kemonohen"]
+  .form-pickup-heading
+  > em {
+  font-size: clamp(48px, 7vw, 96px);
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup-dialog[data-form-theme="kemonohen"] {
+  border-color: rgb(219 38 62 / 55%);
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup-dialog[data-form-theme="kemonohen"]
+  > .form-pickup-panel {
+  background:
+    radial-gradient(ellipse 50% 40% at 80% 0%, rgb(219 38 62 / 14%), transparent 70%),
+    radial-gradient(ellipse 34% 30% at 8% 100%, rgb(170 17 40 / 10%), transparent 72%),
+    var(--signature-ink);
+}
+
+/* The overview's rule is three claw marks. */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup-dialog[data-form-theme="kemonohen"]
+  .form-pickup-overview
+  > div {
+  padding-left: 28px;
+  border-left: 0;
+  background:
+    linear-gradient(
+        180deg,
+        transparent,
+        rgb(219 38 62 / 72%) 12%,
+        rgb(255 155 148 / 62%) 50%,
+        transparent 92%
+      )
+      0 0 / 2px 100% no-repeat,
+    linear-gradient(180deg, transparent 6%, rgb(219 38 62 / 52%) 22%, transparent 86%) 8px 8px /
+      2px 92% no-repeat,
+    linear-gradient(180deg, transparent 10%, rgb(219 38 62 / 34%) 30%, transparent 80%) 16px
+      16px / 1px 84% no-repeat;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup-dialog[data-form-theme="kemonohen"]
+  .form-pickup-overview
+  p {
+  color: #f1dcd8;
+  font-size: 15px;
+  line-height: 2.05;
+}
+
+/* 狂 and 猛: the powers are their glyphs, an ember behind each. */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup-dialog[data-form-theme="kemonohen"]
+  .form-pickup-sections
+  > section.is-ability
+  > div {
+  padding-top: 16px;
+  border-left-color: var(--signature-hot);
+  background:
+    radial-gradient(circle at 44px 52px, rgb(219 38 62 / 18%), transparent 96px),
+    var(--signature-ink);
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup-dialog[data-form-theme="kemonohen"]
+  .form-pickup-sections
+  > section.is-ability
+  h3,
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup:where([data-form-theme="kemonohen"])
+  .is-ability
+  h3 {
+  margin: 0 0 12px;
+  color: #ffe4dc;
+  font: 400 clamp(60px, 6.4vw, 86px) / 1 var(--signature-face);
+  text-shadow:
+    2px 3px 0 #80132b,
+    0 0 28px rgb(219 38 62 / 30%);
+}
+
+/* 万物殺し: the blade's steel along the plate's top. */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup-dialog[data-form-theme="kemonohen"]
+  .form-pickup-sections
+  > section.is-arsenal
+  > div {
+  border-top: 0;
+  background:
+    linear-gradient(90deg, #5f646c, #c9ced6 30%, #eceff2 46%, #ff9b94 88%, transparent) top left /
+      100% 3px no-repeat,
+    linear-gradient(180deg, rgb(219 38 62 / 8%), transparent 64%),
+    var(--signature-ink);
+}
+
+/* 狩: the finisher is its glyph, struck large beside what it does. */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup-dialog[data-form-theme="kemonohen"]
+  .form-pickup-sections
+  > section.is-finisher
+  > div {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 6px 24px;
+  padding: 20px 24px 22px 22px;
+  border: 1px solid rgb(219 38 62 / 40%);
+  border-left: 3px solid var(--signature-hot);
+  background:
+    radial-gradient(circle at 70px 50%, rgb(219 38 62 / 20%), transparent 130px),
+    var(--signature-ink);
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup-dialog[data-form-theme="kemonohen"]
+  .form-pickup-sections
+  > section.is-finisher
+  h3 {
+  margin: 0;
+  color: #fff1e7;
+  font: 400 clamp(72px, 7.4vw, 104px) / 1 var(--signature-face);
+  text-shadow:
+    3px 4px 0 #80132b,
+    0 0 30px rgb(219 38 62 / 26%);
+}
+
+/* ================================================================
+   The covers (FormPickup's gate) and the record's side of the hand-over.
+   Portalled to the body, above the page; drawn in transforms and opacity
+   only (no filters, no size animation), finite, and silent but for one
+   polite status line. Each ends where its record begins: the record opens
+   under the cover's last frame (one task), and .form-arrival inside the
+   dialog continues it.
+   ================================================================ */
+.form-gate {
+  position: fixed;
+  z-index: 2147483000;
+  inset: 0;
+  overflow: hidden;
+  contain: strict;
+  isolation: isolate;
+  pointer-events: all;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.form-gate i,
+.form-gate svg,
+.form-arrival i,
+.form-seam i {
+  position: absolute;
+  display: block;
+  pointer-events: none;
+}
+
+.form-gate :is(.explom-gate-field, .explom-gate-cracks, .explom-gate-shards, .explom-gate-dust) {
+  position: absolute;
+  inset: 0;
+}
+
+.explom-gate-defs {
+  width: 0;
+  height: 0;
+}
+
+/* ── Explom: 炸ける. Impact at the control the reader pressed; fracture
+   lines race out (cyan rims, a crimson hot core); one burst; the surface
+   breaks into ink shards that blow out, then fall, spin and shed debris
+   and dust; the void holds for the record. ── */
+.explom-gate {
+  animation: explomGateLife 1080ms linear both;
+}
+
+.explom-gate-veil {
+  inset: 0;
+  background: #021013;
+  opacity: 0;
+}
+
+.explom-gate-void,
+.explom-arrival-void {
+  inset: 0;
+  background: radial-gradient(
+    circle at var(--x, 50%) var(--y, 50%),
+    #0d2b30 0,
+    #071a1e 18%,
+    #030c0e 52%,
+    #010506 100%
+  );
+  opacity: 0;
+}
+
+.explom-arrival-void {
+  background: radial-gradient(
+    circle at var(--gate-x, 50%) var(--gate-y, 50%),
+    #0d2b30 0,
+    #071a1e 18%,
+    #030c0e 52%,
+    #010506 100%
+  );
+  opacity: 1;
+}
+
+.explom-gate-cracks > i {
+  height: 4px;
+  margin-top: -2px;
+  border-radius: 2px;
+  background: linear-gradient(
+    180deg,
+    rgb(214 255 252 / 95%) 0 26%,
+    #ff5a6e 26% 74%,
+    rgb(214 255 252 / 95%) 74%
+  );
+  box-shadow:
+    0 0 3px rgb(214 255 252 / 70%),
+    0 0 12px 1px rgb(114 242 236 / 45%);
+  transform-origin: 0 50%;
+  scale: 0 1;
+}
+
+.explom-gate-cracks > i.is-far {
+  height: 3px;
+  margin-top: -1.5px;
+  box-shadow: 0 0 8px rgb(114 242 236 / 40%);
+}
+
+.explom-gate-cracks > i.is-ring {
+  height: 2px;
+  margin-top: -1px;
+  background: rgb(190 252 248 / 80%);
+  box-shadow: 0 0 6px rgb(114 242 236 / 38%);
+}
+
+/* A phone draws its far cracks without a blurred glow (the impact frame
+   rasterises every crack at once). */
+@media (max-width: 599px) {
+  .explom-gate-cracks > i:is(.is-far, .is-ring) {
+    box-shadow: none;
+  }
+}
+
+.explom-gate-core {
+  left: calc(var(--x) - 90px);
+  top: calc(var(--y) - 90px);
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    #ffe9ec 0 3%,
+    rgb(255 74 96 / 78%) 9%,
+    rgb(219 38 62 / 30%) 21%,
+    rgb(114 242 236 / 8%) 40%,
+    transparent 62%
+  );
+  opacity: 0;
+}
+
+.explom-gate-burst {
+  left: calc(var(--x) - 210px);
+  top: calc(var(--y) - 210px);
+  width: 420px;
+  height: 420px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgb(242 255 254 / 92%) 0 4%,
+    rgb(160 250 244 / 56%) 11%,
+    rgb(114 242 236 / 20%) 26%,
+    transparent 41%,
+    rgb(184 252 247 / 26%) 46%,
+    transparent 52%
+  );
+  opacity: 0;
+  scale: 0.15;
+}
+
+.explom-gate-spark {
+  left: calc(var(--x) - 48px);
+  top: calc(var(--y) - 48px);
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    #fff 0 5%,
+    rgb(170 252 247 / 80%) 13%,
+    rgb(255 74 96 / 28%) 26%,
+    transparent 56%
+  );
+  opacity: 0;
+}
+
+.explom-gate-shards {
+  perspective: 1100px;
+}
+
+.explom-gate-shards > svg {
+  overflow: visible;
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+.explom-gate-shards polygon {
+  fill: url(#explom-shard-face);
+  stroke: rgb(114 242 236 / 80%);
+  stroke-width: 1.4;
+  stroke-linejoin: round;
+}
+
+.explom-gate-shards svg.is-lit polygon {
+  fill: url(#explom-shard-lit);
+  stroke: rgb(220 255 252 / 95%);
+  stroke-width: 1.8;
+}
+
+.explom-gate-shards svg.is-dim polygon {
+  fill: #030b0d;
+  stroke: rgb(114 242 236 / 46%);
+}
+
+.explom-gate-shards polyline {
+  fill: none;
+  stroke: #ff4a60;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  opacity: 0.8;
+}
+
+.explom-gate-debris {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: 0;
+  height: 0;
+}
+
+.explom-gate-debris > i {
+  left: 0;
+  top: 0;
+  background: linear-gradient(135deg, #aef8f3, #0d3237 70%);
+  clip-path: polygon(50% 0, 100% 72%, 18% 100%);
+  opacity: 0;
+}
+
+.explom-gate-debris > i.is-hot {
+  background: linear-gradient(135deg, #ffd3d9, #ff4a60);
+}
+
+.explom-gate-streaks {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: 0;
+  height: 0;
+}
+
+.explom-gate-streaks > i {
+  left: 0;
+  top: -1px;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, rgb(214 255 252 / 90%) 70%, #fff);
+  transform-origin: 0 50%;
+  opacity: 0;
+}
+
+.explom-gate-streaks > i.is-hot {
+  background: linear-gradient(90deg, transparent, rgb(255 120 136 / 80%) 70%, #ffe1e5);
+}
+
+.explom-gate-dust > i {
+  bottom: -64px;
+  width: 280px;
+  height: 160px;
+  margin-left: -140px;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse,
+    rgb(168 214 210 / 17%) 0,
+    rgb(114 242 236 / 6%) 44%,
+    transparent 70%
+  );
+  opacity: 0;
+}
+
+/* ── 犭: 暗闇でブラーする赤い光. The screen sinks into darkness from its
+   edges; the beast's eyes in the card's own art open red; the light smears
+   as it lunges and rakes three claw strokes (the radical's three); one roar
+   ripple (猛, the sonar); one breath. Red rises and falls over 400 ms or
+   more; the light itself is salmon and white-hot, the saturated red only a
+   thin, dim fringe. Blur is drawn, not filtered: layered radial falloffs,
+   stretched gradients and screen blending. ── */
+.kemonohen-gate {
+  animation: kemonohenGateLife 1350ms linear both;
+}
+
+.kemonohen-gate-field,
+.kemonohen-gate-eyes,
+.kemonohen-arrival-eyes {
+  position: absolute;
+  inset: 0;
+}
+
+.kemonohen-gate-vignette {
+  inset: 0;
+  background: radial-gradient(
+    ellipse 72% 64% at var(--x) var(--y),
+    transparent 0 16%,
+    rgb(3 0 1 / 70%) 58%,
+    rgb(1 0 0 / 94%) 100%
+  );
+  opacity: 0;
+}
+
+.kemonohen-gate-dark,
+.kemonohen-arrival-dark {
+  inset: 0;
+  background: radial-gradient(
+    circle at var(--x, 50%) var(--y, 42%),
+    #1b0709 0,
+    #0b0304 22%,
+    #040102 56%,
+    #010000 100%
+  );
+  opacity: 0;
+}
+
+.kemonohen-arrival-dark {
+  background: radial-gradient(
+    circle at var(--gate-x, 50%) var(--gate-y, 42%),
+    #1b0709 0,
+    #0b0304 22%,
+    #040102 56%,
+    #010000 100%
+  );
+  opacity: 0.97;
+}
+
+/* The eyes: a white-hot slit, then salmon, then a thin red fringe; the
+   halo is screen-blended light round it. Sized by the art's own eye
+   spacing (--gap), never below a readable size. */
+.kemonohen-eye {
+  --eye: max(var(--gap, 26px), 26px);
+  position: absolute;
+  left: var(--lx);
+  top: var(--ly);
+  width: 0;
+  height: 0;
+  opacity: 0;
+}
+
+.kemonohen-eye.is-right {
+  left: var(--rx);
+  top: var(--ry);
+}
+
+.kemonohen-eye > i {
+  border-radius: 50%;
+}
+
+.kemonohen-eye > .is-core {
+  left: calc(var(--eye) * -0.62);
+  top: calc(var(--eye) * -0.17);
+  width: calc(var(--eye) * 1.24);
+  height: calc(var(--eye) * 0.34);
+  background: radial-gradient(
+    ellipse,
+    #fff8f4 0 18%,
+    #ffd0c4 32%,
+    rgb(255 140 140 / 82%) 48%,
+    rgb(219 38 62 / 34%) 64%,
+    transparent 74%
+  );
+  rotate: 17deg;
+}
+
+.kemonohen-eye.is-right > .is-core {
+  rotate: -17deg;
+}
+
+.kemonohen-eye > .is-halo {
+  left: calc(var(--eye) * -2.4);
+  top: calc(var(--eye) * -1.2);
+  width: calc(var(--eye) * 4.8);
+  height: calc(var(--eye) * 2.4);
+  background: radial-gradient(
+    ellipse,
+    rgb(255 186 176 / 52%) 0,
+    rgb(255 155 148 / 24%) 24%,
+    rgb(255 140 132 / 8%) 46%,
+    transparent 68%
+  );
+  mix-blend-mode: screen;
+}
+
+/* The ember's bloom in the dark: a wide, faint falloff. */
+.kemonohen-eye > .is-bloom {
+  left: calc(var(--eye) * -5);
+  top: calc(var(--eye) * -3);
+  width: calc(var(--eye) * 10);
+  height: calc(var(--eye) * 6);
+  background: radial-gradient(
+    ellipse,
+    rgb(255 165 156 / 15%) 0,
+    rgb(255 155 148 / 6%) 34%,
+    transparent 66%
+  );
+  mix-blend-mode: screen;
+}
+
+/* The lunge's motion blur: each eye's light trails behind it. */
+.kemonohen-eye > .is-trail {
+  left: 0;
+  top: calc(var(--eye) * -0.32);
+  width: calc(var(--eye) * 11);
+  height: calc(var(--eye) * 0.64);
+  background: linear-gradient(
+    90deg,
+    rgb(255 205 196 / 50%),
+    rgb(255 160 152 / 20%) 30%,
+    rgb(255 150 140 / 5%) 64%,
+    transparent
+  );
+  border-radius: 50%;
+  mix-blend-mode: screen;
+  transform-origin: 0 50%;
+  scale: 0 1;
+  opacity: 0;
+}
+
+.kemonohen-eye.is-left > .is-trail {
+  rotate: 8deg;
+}
+
+.kemonohen-eye.is-right > .is-trail {
+  rotate: -4deg;
+}
+
+/* The lunge: the eyes' light stretched into a motion-blurred smear. */
+.kemonohen-gate-smear {
+  left: calc(var(--x) - 300px);
+  top: calc(var(--y) - 20px);
+  width: 600px;
+  height: 40px;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse,
+    rgb(255 214 205 / 42%) 0,
+    rgb(255 160 152 / 18%) 30%,
+    rgb(255 150 140 / 6%) 52%,
+    transparent 70%
+  );
+  mix-blend-mode: screen;
+  opacity: 0;
+  scale: 0.15 1;
+}
+
+/* 猛: one roar echo, a sonar ring off the eyes. */
+.kemonohen-gate-roar {
+  left: calc(var(--x) - 120px);
+  top: calc(var(--y) - 120px);
+  width: 240px;
+  height: 240px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    transparent 0 55%,
+    rgb(255 165 156 / 22%) 61%,
+    rgb(255 140 132 / 8%) 66%,
+    transparent 71%
+  );
+  opacity: 0;
+  scale: 0.25;
+}
+
+/* The three strokes, raked from the upper right through the eyes. */
+.kemonohen-claws {
+  --len: max(96vmax, 820px);
+  --claw-gap: clamp(22px, 4vmin, 40px);
+  position: absolute;
+  left: var(--x, 50%);
+  top: var(--y, 42%);
+  width: 0;
+  height: 0;
+  rotate: -33deg;
+}
+
+.kemonohen-arrival .kemonohen-claws {
+  left: var(--gate-x, 50%);
+  top: var(--gate-y, 42%);
+}
+
+/* Each stroke: tapered to points, its hottest light a little ahead of
+   centre, a soft smear on the side it was raked from. */
+.kemonohen-claw {
+  position: absolute;
+  left: calc(var(--len) * -0.5);
+  width: var(--len);
+  height: 14px;
+  margin-top: -7px;
+  transform-origin: 100% 50%;
+  opacity: 0;
+}
+
+.kemonohen-claw.is-1 {
+  top: calc(var(--claw-gap) * -1.05);
+  left: calc(var(--len) * -0.4);
+  width: calc(var(--len) * 0.86);
+  rotate: 2.5deg;
+}
+
+.kemonohen-claw.is-2 {
+  top: 0;
+}
+
+.kemonohen-claw.is-3 {
+  top: calc(var(--claw-gap) * 1.1);
+  left: calc(var(--len) * -0.6);
+  width: calc(var(--len) * 0.8);
+  rotate: -2.5deg;
+}
+
+.kemonohen-claw > .is-stroke {
+  inset: 1px 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0,
+    rgb(219 38 62 / 24%) 12%,
+    rgb(255 150 140 / 72%) 34%,
+    #ffe2d9 50%,
+    #fff3ee 56%,
+    rgb(255 170 160 / 62%) 74%,
+    rgb(219 38 62 / 18%) 90%,
+    transparent 100%
+  );
+  clip-path: polygon(0 50%, 14% 30%, 55% 0, 100% 46%, 100% 54%, 55% 100%, 14% 70%);
+}
+
+.kemonohen-claw > .is-blur {
+  inset: -14px -4% -4px;
+  border-radius: 50%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(255 155 148 / 14%) 32%,
+    rgb(255 205 196 / 20%) 56%,
+    rgb(255 155 148 / 8%) 80%,
+    transparent
+  );
+  mix-blend-mode: screen;
+}
+
+/* The record's side: its frame is the fracture the shards settle into
+   (fourteen slivers on the dialog's edges and two corner spurs), and the
+   cover's void clears off it. */
+.form-pickup-dialog > .form-arrival {
+  position: fixed;
+  z-index: 9;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.form-pickup-dialog > .form-seam {
+  position: absolute;
+  z-index: 7;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.explom-frame > i {
+  --r: 0deg;
+  --rest: 0.7;
+  height: 3px;
+  border-radius: 2px;
+  background: linear-gradient(
+    180deg,
+    rgb(170 248 243 / 85%) 0 30%,
+    rgb(255 74 96 / 90%) 30% 70%,
+    rgb(170 248 243 / 85%) 70%
+  );
+  box-shadow: 0 0 5px rgb(114 242 236 / 38%);
+  opacity: var(--rest);
+  rotate: var(--r);
+}
+
+/* Top edge: four slivers with breaks between. */
+.explom-frame > i:nth-child(1) { top: 0; left: 0; width: 29%; --r: 0.4deg; --fx: -40px; --fy: -70px; --fr: -18deg; transform-origin: 0 50%; }
+.explom-frame > i:nth-child(2) { top: 1px; left: calc(29% + 7px); width: 22%; --r: -0.5deg; --fx: -10px; --fy: -90px; --fr: 14deg; }
+.explom-frame > i:nth-child(3) { top: 0; left: calc(51% + 14px); width: 27%; --r: 0.3deg; --fx: 20px; --fy: -80px; --fr: -10deg; }
+.explom-frame > i:nth-child(4) { top: 1px; right: 0; width: calc(22% - 26px); --r: -0.6deg; --fx: 50px; --fy: -60px; --fr: 22deg; transform-origin: 100% 50%; }
+/* Right edge (rotated slivers, measured along the edge). */
+.explom-frame > i:nth-child(5),
+.explom-frame > i:nth-child(6),
+.explom-frame > i:nth-child(7),
+.explom-frame > i:nth-child(12),
+.explom-frame > i:nth-child(13),
+.explom-frame > i:nth-child(14) {
+  width: 3px;
+  height: auto;
+  background: linear-gradient(
+    90deg,
+    rgb(170 248 243 / 85%) 0 30%,
+    rgb(255 74 96 / 90%) 30% 70%,
+    rgb(170 248 243 / 85%) 70%
+  );
+}
+.explom-frame > i:nth-child(5) { right: 0; top: 0; bottom: 66%; --r: -0.4deg; --fx: 80px; --fy: -30px; --fr: 16deg; }
+.explom-frame > i:nth-child(6) { right: 1px; top: calc(34% + 8px); bottom: calc(33% + 4px); --r: 0.5deg; --fx: 90px; --fy: 0px; --fr: -20deg; }
+.explom-frame > i:nth-child(7) { right: 0; top: calc(67% + 4px); bottom: 0; --r: -0.3deg; --fx: 70px; --fy: 40px; --fr: 12deg; }
+/* Bottom edge. */
+.explom-frame > i:nth-child(8) { bottom: 0; right: 0; width: 24%; --r: -0.4deg; --fx: 40px; --fy: 80px; --fr: 18deg; transform-origin: 100% 50%; }
+.explom-frame > i:nth-child(9) { bottom: 1px; right: calc(24% + 6px); width: 28%; --r: 0.5deg; --fx: 10px; --fy: 90px; --fr: -16deg; }
+.explom-frame > i:nth-child(10) { bottom: 0; right: calc(52% + 12px); width: 21%; --r: -0.3deg; --fx: -20px; --fy: 80px; --fr: 10deg; }
+.explom-frame > i:nth-child(11) { bottom: 1px; left: 0; width: calc(27% - 18px); --r: 0.6deg; --fx: -50px; --fy: 70px; --fr: -22deg; transform-origin: 0 50%; }
+/* Left edge. */
+.explom-frame > i:nth-child(12) { left: 0; bottom: 0; top: 63%; --r: 0.4deg; --fx: -80px; --fy: 30px; --fr: -14deg; }
+.explom-frame > i:nth-child(13) { left: 1px; top: calc(31% + 6px); bottom: calc(37% + 6px); --r: -0.5deg; --fx: -90px; --fy: 0px; --fr: 18deg; }
+.explom-frame > i:nth-child(14) { left: 0; top: 0; bottom: 69%; --r: 0.3deg; --fx: -70px; --fy: -40px; --fr: -12deg; }
+
 /* Finite arrival only. No flashing, perpetual particles, filters or rAF loop.
-   Opening is immediate: these run inside the already-interactive dialog. */
+   Opening is immediate: these run inside the already-interactive dialog.
+   In the record they carry the cover on: Explom's cracks run out again as
+   the frame settles, 犭's claw marks light as the cover's claws fade. */
 @media (prefers-reduced-motion: no-preference) {
   html:not([data-world-effects="economy"])
     .form-pickup[data-signature-arrived="true"]
@@ -302,7 +1370,31 @@ html[data-family="dossier"]
     > .form-pickup-panel
     > .form-signature
     .form-signature-trace {
-    animation: signature-claw 650ms cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation: signature-claw 560ms 120ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  html:not([data-world-effects="economy"])
+    .form-pickup[data-form-theme="explom"][data-signature-arrived="true"]
+    > .form-pickup-card
+    .form-signature-trace,
+  html:not([data-world-effects="economy"])
+    .form-pickup-dialog[data-form-theme="explom"][open]
+    > .form-pickup-panel
+    > .form-signature
+    .form-signature-trace {
+    animation: signature-crack 380ms 160ms cubic-bezier(0.2, 0.7, 0.3, 1) both;
+  }
+
+  html:not([data-world-effects="economy"])
+    :is(.form-pickup[data-signature-arrived="true"], .form-pickup-dialog[open])
+    .form-signature-trace.is-second {
+    animation-delay: 220ms;
+  }
+
+  html:not([data-world-effects="economy"])
+    :is(.form-pickup[data-signature-arrived="true"], .form-pickup-dialog[open])
+    .form-signature-trace.is-third {
+    animation-delay: 280ms;
   }
 
   html[data-family="dossier"]:not([data-world-effects="economy"])
@@ -311,6 +1403,16 @@ html[data-family="dossier"]
     .form-pickup-heading
     > em {
     animation: signature-title 520ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  html[data-family="dossier"]:not([data-world-effects="economy"])
+    main.manager-page.manager-page.manager-page
+    :is(
+      .form-pickup[data-form-theme="explom"][data-signature-arrived="true"] .form-pickup-copy,
+      .form-pickup-dialog[data-form-theme="explom"][open] .form-pickup-heading
+    )
+    > em::after {
+    animation: signature-crack 360ms 240ms cubic-bezier(0.2, 0.7, 0.3, 1) both;
   }
 }
 
@@ -328,14 +1430,29 @@ html[data-family="dossier"]
   }
 }
 
+/* The claw marks are raked in from above and settle at their rest. */
 @keyframes signature-claw {
   from {
-    transform: translateY(-38%) rotate(19deg);
+    translate: 0 -30%;
+    scale: 1 0.35;
     opacity: 0;
   }
   to {
-    transform: translateY(0) rotate(19deg);
-    opacity: 0.65;
+    translate: 0 0;
+    scale: 1 1;
+    opacity: var(--rest, 0.6);
+  }
+}
+
+/* A crack runs out of its origin. */
+@keyframes signature-crack {
+  from {
+    scale: 0 1;
+    opacity: 1;
+  }
+  to {
+    scale: 1 1;
+    opacity: var(--rest, 0.85);
   }
 }
 
@@ -350,16 +1467,683 @@ html[data-family="dossier"]
   }
 }
 
+/* The covers in motion: full motion plays the whole cover; the economy
+   tier a short, calm one (the cracks and the void, no particles, no
+   burst); reduced motion a still 180 ms cross-fade (below). */
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]) .explom-gate-veil {
+    animation: explomVeil 440ms ease-out both;
+  }
+
+  html:not([data-world-effects="economy"]) .explom-gate-void {
+    animation: explomVoid 140ms 336ms ease-out both;
+  }
+
+  html:not([data-world-effects="economy"]) .explom-gate-core {
+    animation: explomCore 620ms 320ms ease-out both;
+  }
+
+  html:not([data-world-effects="economy"]) .explom-gate-cracks > i,
+  html[data-world-effects="economy"] .explom-gate-cracks > i {
+    animation: explomCrack 100ms cubic-bezier(0.2, 0.7, 0.3, 1) both;
+  }
+
+  html:not([data-world-effects="economy"]) .explom-gate-cracks {
+    animation: explomCracksOut 130ms 345ms ease-in both;
+  }
+
+  html:not([data-world-effects="economy"]) .explom-gate-burst {
+    animation: explomBurst 340ms 318ms cubic-bezier(0.1, 0.6, 0.3, 1) both;
+  }
+
+  html:not([data-world-effects="economy"]) .explom-gate-spark {
+    animation: explomSpark 440ms ease-out both;
+  }
+
+  html:not([data-world-effects="economy"]) .explom-gate-shards > svg {
+    animation: explomShard 700ms linear both;
+  }
+
+  html:not([data-world-effects="economy"]) .explom-gate-debris > i {
+    animation: explomDebris 700ms linear both;
+  }
+
+  html:not([data-world-effects="economy"]) .explom-gate-dust > i {
+    animation: explomDust 420ms ease-out both;
+  }
+
+  html:not([data-world-effects="economy"]) .explom-gate-streaks > i {
+    animation: explomStreak 380ms cubic-bezier(0.1, 0.7, 0.3, 1) both;
+  }
+
+  /* The record opens under the cover's last frame: it has no fade of its
+     own (the shared sheet's opening fade would show the page through it). */
+  html:not([data-world-effects="economy"])[data-mode="world"]
+    .form-pickup-dialog.form-pickup-dialog:is([data-form-theme="explom"], [data-form-theme="kemonohen"])[open],
+  html:not([data-world-effects="economy"])[data-mode="world"]
+    .form-pickup-dialog.form-pickup-dialog:is(
+      [data-form-theme="explom"],
+      [data-form-theme="kemonohen"]
+    )[open]::backdrop,
+  html:not([data-world-effects="economy"])[data-mode="world"]
+    .form-pickup-dialog.form-pickup-dialog:is([data-form-theme="explom"], [data-form-theme="kemonohen"])[open]
+    > .form-pickup-panel {
+    animation: none;
+  }
+
+  html:not([data-world-effects="economy"])
+    .form-pickup-dialog[data-form-theme="explom"][open]
+    > .explom-arrival {
+    animation: arrivalClear 460ms cubic-bezier(0.2, 0.6, 0.3, 1) both;
+  }
+
+  /* The art is there as the cover clears (the light comes to rest on it):
+     a straight fade, no push, no wait. */
+  html:not([data-world-effects="economy"])[data-mode="world"]
+    .form-pickup-dialog.form-pickup-dialog:is([data-form-theme="explom"], [data-form-theme="kemonohen"])[open]
+    .form-pickup-layout
+    > figure
+    > img {
+    animation: signature-art 360ms ease-out both;
+  }
+
+  html:not([data-world-effects="economy"])
+    .form-pickup-dialog[data-form-theme="explom"][open]
+    > .explom-frame
+    > i {
+    animation: explomSettle 480ms cubic-bezier(0.2, 0.9, 0.25, 1.06) both;
+  }
+
+  .explom-frame > i:nth-child(1) { animation-delay: 70ms; }
+  .explom-frame > i:nth-child(2) { animation-delay: 110ms; }
+  .explom-frame > i:nth-child(3) { animation-delay: 150ms; }
+  .explom-frame > i:nth-child(4) { animation-delay: 190ms; }
+  .explom-frame > i:nth-child(5) { animation-delay: 130ms; }
+  .explom-frame > i:nth-child(6) { animation-delay: 170ms; }
+  .explom-frame > i:nth-child(7) { animation-delay: 210ms; }
+  .explom-frame > i:nth-child(8) { animation-delay: 90ms; }
+  .explom-frame > i:nth-child(9) { animation-delay: 140ms; }
+  .explom-frame > i:nth-child(10) { animation-delay: 180ms; }
+  .explom-frame > i:nth-child(11) { animation-delay: 230ms; }
+  .explom-frame > i:nth-child(12) { animation-delay: 120ms; }
+  .explom-frame > i:nth-child(13) { animation-delay: 160ms; }
+  .explom-frame > i:nth-child(14) { animation-delay: 200ms; }
+
+  /* 犭 at full motion. */
+  html:not([data-world-effects="economy"]) .kemonohen-gate-vignette {
+    animation: kemonohenVignette 420ms cubic-bezier(0.4, 0, 0.2, 1) both;
+  }
+
+  html:not([data-world-effects="economy"]) .kemonohen-gate-dark {
+    animation: kemonohenDark 460ms 160ms cubic-bezier(0.45, 0, 0.3, 1) both;
+  }
+
+  html:not([data-world-effects="economy"]) .kemonohen-gate .kemonohen-eye {
+    animation: kemonohenEyes 1090ms 260ms cubic-bezier(0.3, 0, 0.3, 1) both;
+  }
+
+  html:not([data-world-effects="economy"]) .kemonohen-gate-smear {
+    animation: kemonohenSmear 520ms 660ms cubic-bezier(0.2, 0.6, 0.3, 1) both;
+  }
+
+  html:not([data-world-effects="economy"]) .kemonohen-gate .kemonohen-eye > .is-trail {
+    animation: kemonohenTrail 460ms 680ms cubic-bezier(0.2, 0.7, 0.3, 1) both;
+  }
+
+  html:not([data-world-effects="economy"]) .kemonohen-gate-roar {
+    animation: kemonohenRoar 500ms 840ms cubic-bezier(0.15, 0.6, 0.3, 1) both;
+  }
+
+  html:not([data-world-effects="economy"]) .kemonohen-gate .kemonohen-claw {
+    animation: kemonohenClaw 590ms 760ms linear both;
+  }
+
+  html:not([data-world-effects="economy"]) .kemonohen-gate .kemonohen-claw.is-2 {
+    animation-delay: 815ms;
+    animation-duration: 535ms;
+  }
+
+  html:not([data-world-effects="economy"]) .kemonohen-gate .kemonohen-claw.is-3 {
+    animation-delay: 870ms;
+    animation-duration: 480ms;
+  }
+
+  /* The record's side: the dark lifts slowly, the claws' afterglow goes,
+     the eyes come to rest in the record's own eyes. */
+  html:not([data-world-effects="economy"])
+    .form-pickup-dialog[data-form-theme="kemonohen"][open]
+    > .kemonohen-arrival {
+    animation: arrivalClear 700ms linear both;
+  }
+
+  html:not([data-world-effects="economy"])
+    .form-pickup-dialog[data-form-theme="kemonohen"][open]
+    .kemonohen-arrival-dark {
+    animation: kemonohenLift 620ms cubic-bezier(0.45, 0, 0.35, 1) both;
+  }
+
+  html:not([data-world-effects="economy"])
+    .form-pickup-dialog[data-form-theme="kemonohen"][open]
+    .kemonohen-arrival
+    .kemonohen-claw {
+    animation: kemonohenAfterglow 440ms ease-out both;
+  }
+
+  html:not([data-world-effects="economy"])
+    .form-pickup-dialog[data-form-theme="kemonohen"][open]
+    .kemonohen-arrival-eyes {
+    animation: kemonohenSettle 600ms cubic-bezier(0.5, 0, 0.25, 1) both;
+  }
+
+  html:not([data-world-effects="economy"])
+    .form-pickup-dialog[data-form-theme="kemonohen"][open]
+    .kemonohen-arrival
+    .kemonohen-eye {
+    animation: kemonohenSettleLight 640ms ease-in both;
+  }
+
+  /* 犭 on the economy tier: the dark and the eyes' one breath. */
+  html[data-world-effects="economy"] .kemonohen-gate {
+    animation-duration: 760ms;
+  }
+
+  html[data-world-effects="economy"] .kemonohen-gate-dark {
+    animation: kemonohenDark 420ms cubic-bezier(0.45, 0, 0.3, 1) both;
+  }
+
+  html[data-world-effects="economy"] .kemonohen-gate .kemonohen-eye {
+    animation: kemonohenEyesCalm 520ms 240ms ease-out both;
+  }
+
+  html[data-world-effects="economy"]
+    .form-pickup-dialog[data-form-theme="kemonohen"][open]
+    > .kemonohen-arrival {
+    animation: arrivalClear 440ms ease-out both;
+  }
+
+  html[data-world-effects="economy"]
+    .form-pickup-dialog[data-form-theme="kemonohen"][open]
+    .kemonohen-arrival
+    .kemonohen-eye {
+    animation: kemonohenSettleLight 440ms ease-in both;
+  }
+
+  html[data-world-effects="economy"]
+    .form-pickup-dialog[data-form-theme="kemonohen"][open]
+    .kemonohen-arrival-eyes {
+    animation: kemonohenSettle 420ms cubic-bezier(0.5, 0, 0.25, 1) both;
+  }
+
+  /* The economy tier: the cracks run over a veil that becomes the void. */
+  html[data-world-effects="economy"] .explom-gate {
+    animation-duration: 700ms;
+  }
+
+  html[data-world-effects="economy"] .explom-gate-veil {
+    animation: explomVeilCalm 380ms ease-out both;
+  }
+
+  html[data-world-effects="economy"] .explom-gate-void {
+    animation: explomVoid 240ms 380ms ease-out both;
+  }
+
+  html[data-world-effects="economy"]
+    .form-pickup-dialog[data-form-theme="explom"][open]
+    > .explom-arrival {
+    animation: arrivalClear 360ms ease-out both;
+  }
+}
+
+html[data-world-effects="economy"]
+  :is(
+    .kemonohen-eye > .is-trail,
+    .kemonohen-gate-vignette,
+    .kemonohen-gate-smear,
+    .kemonohen-gate-roar,
+    .kemonohen-claws,
+    .explom-gate-shards,
+    .explom-gate-debris,
+    .explom-gate-dust,
+    .explom-gate-streaks,
+    .explom-gate-burst,
+    .explom-gate-spark,
+    .explom-gate-core
+  ) {
+  display: none;
+}
+
+@keyframes explomGateLife {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes explomVeil {
+  0% {
+    opacity: 0;
+  }
+  75% {
+    opacity: 0.18;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes explomVeilCalm {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.4;
+  }
+}
+
+@keyframes explomVoid {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes explomCore {
+  0% {
+    opacity: 0;
+    scale: 0.4;
+  }
+  14% {
+    opacity: 0.9;
+    scale: 1;
+  }
+  100% {
+    opacity: 0;
+    scale: 1.5;
+  }
+}
+
+@keyframes explomCrack {
+  from {
+    scale: 0 1;
+  }
+  to {
+    scale: 1 1;
+  }
+}
+
+@keyframes explomCracksOut {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes explomBurst {
+  0% {
+    opacity: 0;
+    scale: 0.15;
+  }
+  18% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    scale: 5.2;
+  }
+}
+
+@keyframes explomSpark {
+  0% {
+    opacity: 0;
+    scale: 0.3;
+  }
+  12% {
+    opacity: 1;
+    scale: 1.15;
+  }
+  70% {
+    opacity: 0.5;
+    scale: 0.9;
+  }
+  100% {
+    opacity: 0;
+    scale: 0.7;
+  }
+}
+
+/* Out with the blast (ease-out), then down under gravity (ease-in),
+   tumbling about its own axis in the container's perspective. */
+@keyframes explomShard {
+  0% {
+    opacity: 0;
+    translate: 0 0;
+    rotate: var(--ax) var(--ay) 1 0deg;
+    scale: 1;
+    animation-timing-function: linear;
+  }
+  3% {
+    opacity: 1;
+    translate: calc(var(--bx) * 0.08) calc(var(--by) * 0.08);
+    animation-timing-function: cubic-bezier(0.12, 0.7, 0.3, 1);
+  }
+  32% {
+    translate: var(--bx) var(--by);
+    rotate: var(--ax) var(--ay) 1 calc(var(--spin) * 0.35);
+    animation-timing-function: cubic-bezier(0.55, 0, 0.95, 0.5);
+  }
+  94% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    translate: calc(var(--bx) * 1.28) calc(var(--by) * 1.28 + var(--fall));
+    rotate: var(--ax) var(--ay) 1 var(--spin);
+    scale: 0.82;
+  }
+}
+
+@keyframes explomDebris {
+  0% {
+    opacity: 0;
+    translate: 0 0;
+    rotate: 0deg;
+    animation-timing-function: cubic-bezier(0.2, 0.7, 0.4, 1);
+  }
+  6% {
+    opacity: 1;
+  }
+  34% {
+    translate: calc(var(--dx) * 0.72) calc(var(--dy) * 0.72 - var(--lift));
+    animation-timing-function: cubic-bezier(0.5, 0, 0.9, 0.6);
+  }
+  86% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    translate: var(--dx) calc(var(--dy) + var(--fall));
+    rotate: var(--spin);
+  }
+}
+
+@keyframes explomDust {
+  0% {
+    opacity: 0;
+    scale: 0.5 0.4;
+    translate: 0 12px;
+  }
+  35% {
+    opacity: 0.75;
+  }
+  100% {
+    opacity: 0;
+    scale: 1.7 1.1;
+    translate: 0 -26px;
+  }
+}
+
+@keyframes explomStreak {
+  0% {
+    opacity: 0;
+    translate: 0 0;
+    scale: 0.2 1;
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    translate: var(--tx) var(--ty);
+    scale: 1.1 1;
+  }
+}
+
+@keyframes kemonohenGateLife {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes kemonohenVignette {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes kemonohenDark {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.97;
+  }
+}
+
+/* Open (a 460 ms rise), one breath, at rest for the hand-over. */
+@keyframes kemonohenEyes {
+  0% {
+    opacity: 0;
+    scale: 0.5;
+  }
+  42% {
+    opacity: 1;
+    scale: 1.7;
+  }
+  74% {
+    opacity: 1;
+    scale: 2.1;
+  }
+  100% {
+    opacity: 0.92;
+    scale: 1.6;
+  }
+}
+
+@keyframes kemonohenTrail {
+  0% {
+    opacity: 0;
+    scale: 0 1;
+  }
+  35% {
+    opacity: 1;
+    scale: 1 1;
+  }
+  100% {
+    opacity: 0;
+    scale: 1.3 0.7;
+  }
+}
+
+@keyframes kemonohenEyesCalm {
+  from {
+    opacity: 0;
+    scale: 1.6;
+  }
+  to {
+    opacity: 0.92;
+    scale: 1.6;
+  }
+}
+
+@keyframes kemonohenSmear {
+  0% {
+    opacity: 0;
+    scale: 0.15 1;
+  }
+  30% {
+    opacity: 0.85;
+  }
+  100% {
+    opacity: 0;
+    scale: 1.45 1.1;
+  }
+}
+
+@keyframes kemonohenRoar {
+  0% {
+    opacity: 0;
+    scale: 0.25;
+  }
+  14% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0;
+    scale: 6.4;
+  }
+}
+
+/* Raked in (130 ms), then the afterglow cools toward the hand-over. */
+@keyframes kemonohenClaw {
+  0% {
+    opacity: 1;
+    scale: 0 1;
+    animation-timing-function: cubic-bezier(0.2, 0.8, 0.3, 1);
+  }
+  24% {
+    opacity: 1;
+    scale: 1 1;
+    animation-timing-function: ease-in-out;
+  }
+  100% {
+    opacity: 0.42;
+    scale: 1 1;
+  }
+}
+
+@keyframes kemonohenAfterglow {
+  from {
+    opacity: 0.42;
+    scale: 1 1;
+  }
+  to {
+    opacity: 0;
+    scale: 1 1;
+  }
+}
+
+@keyframes kemonohenLift {
+  from {
+    opacity: 0.97;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* From where the cover's eyes burned to the record's own eyes. */
+@keyframes kemonohenSettle {
+  from {
+    translate: var(--eye-dx, 0) var(--eye-dy, 0);
+  }
+  to {
+    translate: 0 0;
+  }
+}
+
+@keyframes kemonohenSettleLight {
+  0% {
+    opacity: 0.92;
+    scale: 1.6;
+  }
+  70% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 0;
+    scale: var(--eye-scale, 1);
+  }
+}
+
+@keyframes signature-art {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* The cover's last frame clears off the record. */
+@keyframes arrivalClear {
+  0% {
+    visibility: visible;
+    opacity: 1;
+  }
+  100% {
+    visibility: hidden;
+    opacity: 0;
+  }
+}
+
+/* Each sliver lands from where the blast threw it and cools into the frame. */
+@keyframes explomSettle {
+  0% {
+    opacity: 0;
+    translate: var(--fx) var(--fy);
+    rotate: var(--fr);
+  }
+  25% {
+    opacity: 1;
+  }
+  100% {
+    opacity: var(--rest);
+    translate: 0 0;
+    rotate: var(--r);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .form-signature,
   .form-signature * {
     animation: none !important;
   }
+
+  /* A calm, still cross-fade: the cover draws nothing and only holds the
+     reader's press (90 ms, as the Rexonance cover's reduced form does);
+     the record and its backdrop then fade in over the page (180 ms). The
+     site's reduced-motion reset (styles-world/11.css) cuts every animation
+     to 0.001ms; these keep their calm length, as the Rexonance cover's do. */
+  :is(.explom-gate, .kemonohen-gate) {
+    animation-duration: 90ms !important;
+  }
+
+  .form-gate > :not([role="status"]),
+  .form-pickup-dialog:is([data-form-theme="explom"], [data-form-theme="kemonohen"]) > .form-arrival {
+    display: none;
+  }
+
+  html[data-mode="world"]
+    .form-pickup-dialog.form-pickup-dialog:is([data-form-theme="explom"], [data-form-theme="kemonohen"])[open],
+  html[data-mode="world"]
+    .form-pickup-dialog.form-pickup-dialog:is(
+      [data-form-theme="explom"],
+      [data-form-theme="kemonohen"]
+    )[open]::backdrop {
+    animation: signature-art 180ms ease-out both;
+    animation-duration: 180ms !important;
+  }
 }
 
 @media (forced-colors: active) {
-  .form-signature {
+  .form-signature,
+  .form-arrival,
+  .form-seam,
+  .form-gate > :not([role="status"]) {
     display: none;
+  }
+
+  .form-gate {
+    background: Canvas;
   }
   html[data-family="dossier"]
     main.manager-page.manager-page.manager-page

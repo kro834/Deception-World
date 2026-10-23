@@ -107,17 +107,20 @@ test("the World page carries the edition hooks without new headings, paragraphs 
   assert.match(source, /<i className="mr-redact">欺瞞<\/i>でできている。/);
   assert.match(source, /<MirageTicker variant="open" records=\{EPISODES\.length\} \/>/);
   assert.match(source, /<MirageTicker variant="close" records=\{EPISODES\.length\} \/>/);
-  assert.match(source, /<div className="mr-endmark" aria-hidden="true">/);
+  // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明） — the footer's
+  // END OF RECORD / 終端 endmark is gone; the credit line closes the record.
+  assert.doesNotMatch(source, /className="mr-endmark"/);
   assert.doesNotMatch(source, /<(?:p|h[1-6]|img)\b[^>]*className="mr-/);
   const ticker = await read("src/components/world/mirage-ticker.tsx");
   assert.match(ticker, /aria-hidden="true"/);
-  for (const phrase of [
-    "THE SECOND SAGA",
-    "THIS IS NOT A DREAM",
-    "POWER BEYOND THE BORDER",
-    "THE STORY CONTINUES",
-  ]) {
+  // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明） — the visible English
+  // eyebrows (THIS IS NOT A DREAM, POWER BEYOND THE BORDER) and the hero's faux
+  // metadata (THE STORY CONTINUES) are gone; the hidden hero eyebrow stays.
+  for (const phrase of ["THE SECOND SAGA"]) {
     assert.ok(source.includes(phrase), phrase);
+  }
+  for (const phrase of ["THIS IS NOT A DREAM", "POWER BEYOND THE BORDER", "THE STORY CONTINUES"]) {
+    assert.ok(!source.includes(phrase), phrase);
   }
   const boot = await read("src/components/world/use-mirage-boot.ts");
   assert.match(boot, /MIRAGE_BOOT_SENTINEL = "mr-boot-seal"/);

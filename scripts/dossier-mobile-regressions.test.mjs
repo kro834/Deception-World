@@ -185,7 +185,11 @@ test("mobile slide controls activate quickly and open before the midpoint", () =
   assert.match(slideControl, /moveToPointer\(latestPointer\.current\.x\)/);
   assert.match(slideControl, /verticalDistance >= POINTER_INTENT_THRESHOLD/);
   assert.match(slideControl, /pointerIntent\.current = "horizontal"/);
-  assert.match(slideControl, /<small>HOLD \+ SLIDE<\/small>/);
+  // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明） — the thumb and its
+  // chevrons show the slide; the AT description keeps the instruction.
+  assert.doesNotMatch(slideControl, /<small>HOLD \+ SLIDE<\/small>/);
+  assert.match(slideControl, /<b>\{label\}<\/b>/);
+  assert.match(slideControl, /aria-description="プラスをタップ、または長押ししてから右へスライドして開きます"/);
   assert.match(styles, /\.ios-slide-open\[data-holding="true"\]/);
   assert.match(
     slideControl,

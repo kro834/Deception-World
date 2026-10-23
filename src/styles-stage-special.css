@@ -387,8 +387,9 @@ html[data-family="special"]
   color: var(--dx-text);
 }
 
-/* Phones: the scene number sits on the kicker's line, so the title has
-   the full width. */
+/* Phones: the scene number is the head's mark, on its own line over the
+   title (owner, 2026-10-23: no kicker beside it — the numeral and the
+   catchphrase are the head), so the title has the full width. */
 @media (max-width: 560px) {
   html[data-family="special"]
     body
@@ -406,8 +407,8 @@ html[data-family="special"]
     > .rxs-section-heading::before {
     grid-row: 1;
     align-self: baseline;
-    margin: 0;
-    font-size: 30px;
+    margin: 0 0 14px;
+    font-size: 46px;
   }
 
   html[data-family="special"]
