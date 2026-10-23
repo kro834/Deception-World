@@ -662,16 +662,16 @@
   border-radius: 50%;
   background: conic-gradient(
     from calc(var(--ring) * 60deg),
-    transparent 0 8%,
-    rgb(166 230 255 / 50%) 14%,
-    transparent 22% 40%,
-    rgb(255 143 210 / 42%) 48%,
-    transparent 56% 70%,
-    rgb(169 131 255 / 46%) 78%,
+    transparent 0 4%,
+    rgb(200 242 255 / 62%) 14%,
+    transparent 26% 36%,
+    rgb(255 160 220 / 55%) 48%,
+    transparent 60% 66%,
+    rgb(180 150 255 / 58%) 78%,
     transparent 86%
   );
-  mask: radial-gradient(closest-side, transparent 62%, #000 74% 90%, transparent 99%);
-  -webkit-mask: radial-gradient(closest-side, transparent 62%, #000 74% 90%, transparent 99%);
+  mask: radial-gradient(closest-side, transparent 44%, #000 60% 92%, transparent 100%);
+  -webkit-mask: radial-gradient(closest-side, transparent 44%, #000 60% 92%, transparent 100%);
   transform: rotateX(48deg);
   opacity: 0;
   animation: ice-vortex 1500ms cubic-bezier(0.55, 0, 0.35, 1) calc(var(--ring) * 40ms) both;
@@ -683,11 +683,11 @@
     scale: 1.25;
     rotate: 0deg;
   }
-  20% {
-    opacity: 1;
+  35% {
+    opacity: 0.85;
   }
   80% {
-    opacity: 0.8;
+    opacity: 0.7;
   }
   100% {
     opacity: 0;
@@ -806,4 +806,97 @@
   .ice-entry-figure {
     translate: 14vw 0;
   }
+}
+
+/* The vortex's glow core and its trails (screen-blended, cool hues only;
+   it brightens over 600 ms and fades: no flash). */
+.ice-entry-vortex > i {
+  mix-blend-mode: screen;
+  filter: blur(1px);
+}
+
+.ice-entry-vortex > i:nth-child(even) {
+  filter: blur(6px);
+  animation-delay: calc(var(--ring) * 40ms + 90ms);
+}
+
+.ice-entry-vortex::before {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: min(60vmax, 760px);
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  content: "";
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(230 248 255 / 55%), rgb(166 230 255 / 22%) 40%, rgb(169 131 255 / 10%) 65%, transparent);
+  mix-blend-mode: screen;
+  opacity: 0;
+  animation: ice-vortex-core 1500ms ease both;
+}
+
+@keyframes ice-vortex-core {
+  0% {
+    opacity: 0;
+    scale: 1.4;
+  }
+  45% {
+    opacity: 0.28;
+  }
+  100% {
+    opacity: 0;
+    scale: 0.15;
+  }
+}
+
+/* iPad portrait (761–1099px, portrait): as Rexonance's iPad, the calls
+   large and centred under the figure. */
+@media (min-width: 761px) and (max-width: 1099.98px) and (orientation: portrait) {
+  .ice-entry-calls {
+    left: 50%;
+    top: auto;
+    bottom: max(6svh, 40px);
+    width: min(90vw, 760px);
+    translate: -50% 0;
+    font-size: clamp(36px, 5.8vw, 60px);
+    text-align: center;
+  }
+
+  .ice-entry-calls > li {
+    inset: auto 0 0 0;
+    justify-content: center;
+  }
+
+  .ice-entry-figure {
+    height: min(68svh, 900px);
+    translate: 0 -9%;
+  }
+}
+
+/* The driver (owner, 2026-10-23: 「ドライバーだけは最初から表示しておく様に」):
+   on the undersuit from the first frame, above every forming plate. */
+.ice-entry-plate[data-driver] {
+  display: none;
+  z-index: 3;
+  transform: none;
+  animation: none;
+}
+
+.ice-entry-plate[data-driver] > .ice-entry-plate-cells {
+  display: none;
+}
+
+.ice-entry-plate[data-driver] > .ice-entry-plate-art {
+  opacity: 1;
+  animation: none;
+}
+
+.ice-entry-driver {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: 50% 0;
 }
