@@ -62,13 +62,6 @@
 
 /* ---------- Tokens ---------- */
 .rxs-page.rxs-page.ffs-page {
-  /* The page holds its own place through a form switch (far-from-saga.tsx
-     measures #stages' panel across the commit and scrolls by the growth of
-     the selector above it). The browser's scroll anchoring would do the
-     same from an anchor of its own choosing: with both at work a switch
-     landed anywhere (measured: exact in most runs, a 700px jump up in
-     some), so the page's descendants are no anchors. */
-  overflow-anchor: none;
   --rxs-cyan: #7fe6ff;
   --rxs-pink: #c99bff;
   --rxs-gold: #ffd77a;
