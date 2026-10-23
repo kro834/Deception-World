@@ -1,0 +1,2067 @@
+/* ================================================================
+   META UNITAS SAGA — the scroll suit-up's runway (2026-10-23).
+   The Rexonance runway as FAR FROM's sheet draws it
+   (styles-far-from-suitup.css, scoped here to .mus-page), so Meta Unitas
+   assembles the same way (owner: 「メタ・ウニタスはレクソナンスと同じ装着です」);
+   its own light and HUD follow in styles-meta-unitas-saga.css.
+   ================================================================ */
+/* ================================================================
+   FAR FROM SAGA — the suit-up on the page (2026-10-22)
+
+   The Rexonance runway (styles-rexonance-zenith.css, ZENITH) ported to
+   /far-from-saga's #suitup: the same frame, layers, call, read-out and
+   pinned layout, dressed in FAR FROM's tones (ice, gold, violet). The
+   engine (src/lib/rexonance-resonance.js through src/lib/far-from-
+   assembly.ts) reads the frame's custom properties and writes the
+   runway's flags; this sheet answers them. Every rule is scoped to the
+   FAR FROM page (.ffs-page) and to the runway inside its section.
+
+   Layout: pinned (a tall runway, a sticky frame) under the persistent
+   preferences only — motion allowed, not economy, forced colours off,
+   and the pre-layout Save-Data/2G snapshot allows a long runway —
+   so the menu or a dialog never moves the page. Everywhere else the
+   scene is one screen with the finished figure and every line lit.
+   Motion: opacity and transforms only, finite transitions answering
+   the engine's state flags, one scroll-linked rail on a named view
+   timeline; all behind reduced motion, economy and the menu, dialog and
+   load flags.
+   ================================================================ */
+
+/* The STAGE tokens the runway and its guide read (styles-stage.css, which
+   this route does not load): the bar's reserve under the sticky frame, the
+   HUD's text colours and faces (Michroma is this route's HUD font). */
+html[data-family="special"] body .rxs-page.mus-page :is(.mus-suitup, .rzn-suitup) {
+  --dxs-nav: var(--rxs-local-nav-reserve, 62px);
+  --dx-text: #f2f7fb;
+  --dx-text-2: #bccbd8;
+  --dx-display: var(--fft-display);
+  --dx-body: var(--fft-text);
+  --dx-hud: "Michroma", "Oxanium", var(--fft-jp-display);
+  --dx-mono: var(--fft-mono);
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-suitup {
+  --rzn-ice: 70 206 200;
+  --rzn-violet: 255 158 84;
+  --rzn-pink: 255 158 84;
+  --rzn-gold: 255 214 150;
+  --rzn-white: 244 251 255;
+  --rzn-gutter: clamp(20px, 3.4vw, 56px);
+  position: relative;
+  z-index: 2;
+  isolation: isolate;
+  /* Full-bleed: this page's #suitup has no gutters to cancel. */
+  margin: 0;
+  background:
+    radial-gradient(60% 46% at 50% 44%, rgb(var(--rzn-violet) / 12%), transparent 70%),
+    radial-gradient(38% 30% at 50% 92%, rgb(var(--rzn-gold) / 12%), transparent 72%),
+    linear-gradient(180deg, #03060c, #050914 46%, #03060c);
+  border-block: 1px solid rgb(var(--rzn-ice) / 16%);
+}
+
+/* The prism cut across the scene's top edge, drawn. */
+html[data-family="special"] body .rxs-page.mus-page .rzn-suitup::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: 0;
+  right: 0;
+  z-index: 3;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(var(--rzn-ice)) 18%,
+    rgb(var(--rzn-violet)) 42%,
+    rgb(var(--rzn-gold)) 66%,
+    rgb(var(--rzn-white)) 86%,
+    transparent
+  );
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-suitup > .rzn-frame {
+  /* The desktop placement (src/lib/far-from-stage.ts: FAR_FROM_STAGE_TIERS,
+     the same numbers; the tiers below switch them at the same breakpoints). */
+  --rzn-fig-h: 0.86;
+  --rzn-fig-w: 0.92;
+  --rzn-fig-x: 0.5;
+  --rzn-fig-b: 0.035;
+  position: relative;
+  height: max(620px, calc(100svh - var(--dxs-nav)));
+  max-height: 1100px;
+  overflow: clip;
+  contain: layout paint;
+  container-type: size;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.mus-page
+  .rzn-suitup
+  > .rzn-frame
+  > :is(.rzn-light, .rzn-floor) {
+  position: absolute;
+  display: block;
+  pointer-events: none;
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-suitup > .rzn-frame > .rzn-light {
+  inset: 0;
+  z-index: 0;
+  background:
+    linear-gradient(101deg, transparent 0 41%, rgb(var(--rzn-ice) / 7%) 41% 44%, transparent 44%),
+    linear-gradient(79deg, transparent 0 55%, rgb(var(--rzn-pink) / 6%) 55% 58%, transparent 58%),
+    linear-gradient(94deg, transparent 0 49%, rgb(var(--rzn-white) / 5%) 49% 50%, transparent 50%),
+    repeating-linear-gradient(90deg, rgb(var(--rzn-ice) / 4%) 0 1px, transparent 1px 64px),
+    repeating-linear-gradient(0deg, rgb(var(--rzn-ice) / 3%) 0 1px, transparent 1px 64px);
+  -webkit-mask-image: radial-gradient(70% 80% at 50% 46%, #000 30%, transparent 86%);
+  mask-image: radial-gradient(70% 80% at 50% 46%, #000 30%, transparent 86%);
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-suitup > .rzn-frame > .rzn-floor {
+  left: 50%;
+  bottom: calc(var(--rzn-fig-b) * 100% - 26px);
+  z-index: 0;
+  width: min(62%, 560px);
+  aspect-ratio: 5 / 1;
+  translate: -50% 0;
+  border: 1px solid rgb(var(--rzn-ice) / 34%);
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(var(--rzn-ice) / 22%), transparent);
+  box-shadow: 0 0 0 10px rgb(var(--rzn-ice) / 4%);
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-suitup > .rzn-frame > .rzn-still {
+  position: absolute;
+  left: calc(var(--rzn-fig-x) * 100%);
+  bottom: calc(var(--rzn-fig-b) * 100%);
+  z-index: 1;
+  width: calc(var(--rzn-fig-w) * 100%);
+  max-width: none;
+  height: calc(var(--rzn-fig-h) * 100%);
+  margin: 0;
+  translate: -50% 0;
+  object-fit: contain;
+  object-position: 50% 100%;
+  pointer-events: none;
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-suitup > .rzn-frame > .rzn-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: none;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.mus-page
+  .rzn-suitup[data-rzn-state="live"]
+  > .rzn-frame
+  > .rzn-canvas {
+  display: block;
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-suitup > .rzn-frame > .rzn-field {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.mus-page
+  .rzn-suitup[data-rzn-state]:not([data-rzn-arming="still"])
+  > .rzn-frame
+  > .rzn-still {
+  visibility: hidden;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.mus-page
+  .rzn-suitup
+  > .rzn-frame
+  > :is(.rzn-under, .rzn-driver-standin) {
+  position: absolute;
+  left: calc(var(--rzn-fig-x) * 100%);
+  bottom: calc(var(--rzn-fig-b) * 100%);
+  z-index: 1;
+  display: none;
+  width: calc(var(--rzn-fig-w) * 100%);
+  max-width: none;
+  height: calc(var(--rzn-fig-h) * 100%);
+  margin: 0;
+  translate: -50% 0;
+  object-fit: contain;
+  object-position: 50% 100%;
+  opacity: 0.24;
+  pointer-events: none;
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-suitup > .rzn-frame > .rzn-driver-standin {
+  opacity: 1;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.mus-page
+  .rzn-suitup:is([data-rzn-state="loading"], [data-rzn-arming="under"])
+  > .rzn-frame
+  > :is(.rzn-under, .rzn-driver-standin) {
+  display: block;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-dialog-open]
+    )
+    body
+    .rxs-page.mus-page:not([data-route-covered])
+    .rzn-suitup[data-rzn-state="live"][data-rzn-arming="under"]
+    > .rzn-frame
+    > :is(.rzn-canvas, .rzn-field) {
+    opacity: 0;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-dialog-open]
+    )
+    body
+    .rxs-page.mus-page:not([data-route-covered])
+    .rzn-suitup[data-rzn-state="live"]:not([data-rzn-arming])
+    > .rzn-frame
+    > :is(.rzn-canvas, .rzn-field) {
+    transition: opacity 240ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  @starting-style {
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-dialog-open]
+      )
+      body
+      .rxs-page.mus-page:not([data-route-covered])
+      .rzn-suitup[data-rzn-state="live"]
+      > .rzn-frame
+      > .rzn-field {
+      opacity: 0;
+    }
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-dialog-open]
+    )
+    body
+    .rxs-page.mus-page:not([data-route-covered])
+    .rzn-suitup[data-rzn-state="live"]:not([data-rzn-arming])
+    > .rzn-frame
+    > .rzn-under {
+    display: block;
+    opacity: 0;
+    transition: opacity 240ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-dialog-open]
+    )
+    body
+    .rxs-page.mus-page:not([data-route-covered])
+    .rzn-suitup[data-rzn-state="live"]:not([data-rzn-arming])
+    > .rzn-frame
+    > .rzn-driver-standin {
+    display: block;
+    opacity: 0;
+    transition: opacity 80ms linear 160ms;
+  }
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-call {
+  /* The call's room (the farFromFigureBox arithmetic, in the frame's own
+     units: the frame is a size container): the figure's height is the lesser
+     of its share of the frame's height and its width share's worth; its left
+     edge is its centre less half its width (src/lib/far-from-stage.ts holds
+     the same numbers for the Ultra segment). The block's width never passes
+     that edge less the gutter and a breath, at any tier whose call stands
+     beside the figure, so no line reaches the figure's box. The stacked
+     tiers (phones, portrait tablets) put the call above the figure instead
+     and take their width from the frame. */
+  --ffs-call-share: 34cqw;
+  --ffs-call-max: 460px;
+  --ffs-fig-h: min(
+    calc(100cqh * var(--rzn-fig-h)),
+    calc(100cqw * var(--rzn-fig-w) * 1040 / 693)
+  );
+  --ffs-fig-left: calc(100cqw * var(--rzn-fig-x) - var(--ffs-fig-h) * 693 / 2080);
+  --ffs-fig-top: calc(100cqh * (1 - var(--rzn-fig-b)) - var(--ffs-fig-h));
+  --ffs-call-w: max(
+    140px,
+    min(
+      var(--ffs-call-share),
+      var(--ffs-call-max),
+      calc(var(--ffs-fig-left) - var(--rzn-gutter) - clamp(14px, 1.6cqw, 28px))
+    )
+  );
+  position: absolute;
+  top: clamp(36px, 9%, 96px);
+  left: var(--rzn-gutter);
+  z-index: 2;
+  width: min(34%, 460px);
+  margin: 0;
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-kicker {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 14px;
+  margin: 0 0 clamp(18px, 2.6vh, 30px);
+  color: rgb(var(--rzn-ice));
+  font: 400 12px / 1.5 var(--dx-hud);
+  letter-spacing: 0.24em;
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-kicker > span:last-child {
+  color: var(--dx-text-2);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.mus-page
+  .rzn-suitup
+  .rzn-kicker
+  > span:first-child::before {
+  content: "";
+  display: inline-block;
+  width: 26px;
+  height: 1px;
+  margin: 0 12px 0 0;
+  vertical-align: middle;
+  background: rgb(var(--rzn-ice));
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-lines {
+  display: grid;
+  gap: clamp(8px, 1.4vh, 14px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 0 0.5em;
+  margin: 0;
+  padding: 0;
+  color: var(--dx-text);
+  /* Each size is the stylesheet's own, held to the call's width (the widest
+     unit of a line is about 17 em for the first two calls, 26 em for a
+     chant row, 14 em for the last call), never under 14 px. */
+  font: 400 max(14px, min(clamp(17px, 1.75vw, 30px), calc(var(--ffs-call-w, 9999px) / 17))) / 1.3
+    var(--dx-hud);
+  letter-spacing: 0.04em;
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-line:nth-child(3) {
+  font-size: max(14px, min(clamp(14px, 1.2vw, 20px), calc(var(--ffs-call-w, 9999px) / 26)));
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-line:nth-child(4) {
+  font-size: max(14px, min(clamp(14px, 1.2vw, 20px), calc(var(--ffs-call-w, 9999px) / 26)));
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.mus-page
+  .rzn-suitup
+  .rzn-line:is(:nth-child(3), :nth-child(4))::after {
+  content: "";
+  flex: 0 0 100%;
+  order: 1;
+  height: 0;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.mus-page
+  .rzn-suitup
+  .rzn-line:is(:nth-child(3), :nth-child(4))
+  > .rzn-chip:nth-child(n + 3) {
+  order: 2;
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-line:last-child {
+  margin-top: 0.2em;
+  font-size: max(18px, min(clamp(20px, 2.2vw, 38px), calc(var(--ffs-call-w, 9999px) / 14)));
+  line-height: 1.15;
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-chip {
+  display: inline-block;
+  /* A chip keeps its call on one line while it fits, and breaks at its
+     spaces only where the call's width leaves it no room: it never runs on
+     across the figure. The first line is three calls (the owner's line
+     breaks between them): one call to a line at every width. */
+  white-space: pre-line;
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-line:last-child .rzn-chip {
+  color: rgb(var(--rzn-white));
+  text-shadow:
+    0 0 1px rgb(var(--rzn-ice)),
+    0 0 18px rgb(var(--rzn-ice) / 45%);
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-hint {
+  display: none;
+  align-items: center;
+  gap: 12px;
+  margin: clamp(18px, 3vh, 32px) 0 0;
+  color: var(--dx-text-2);
+  font: 500 13px / 1.5 var(--dx-body);
+  letter-spacing: 0.12em;
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-hint::after {
+  content: "";
+  width: 1px;
+  height: 28px;
+  background: linear-gradient(180deg, rgb(var(--rzn-ice)), transparent);
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-hud {
+  position: absolute;
+  top: clamp(36px, 9%, 96px);
+  right: var(--rzn-gutter);
+  bottom: clamp(36px, 9%, 96px);
+  z-index: 2;
+  display: grid;
+  grid-template-rows: auto auto auto 1fr auto;
+  justify-items: end;
+  width: min(26%, 300px);
+  text-align: end;
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-readout {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin: 0;
+  color: var(--dx-text);
+  font: 600 clamp(56px, 7.4vw, 128px) / 0.9 var(--dx-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-readout > span {
+  color: rgb(var(--rzn-ice));
+  font-size: max(12px, 0.28em);
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-nanites {
+  display: grid;
+  gap: 2px;
+  margin: clamp(10px, 1.6vh, 18px) 0 0;
+  color: var(--dx-text-2);
+  font: 500 14px / 1.3 var(--dx-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.06em;
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-nanites > small {
+  color: rgb(var(--rzn-ice));
+  font: 400 12px / 1.4 var(--dx-hud);
+  letter-spacing: 0.22em;
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-parts {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  margin: clamp(22px, 4vh, 40px) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-part {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  color: var(--dx-text);
+  font: 400 12px / 1.4 var(--dx-hud);
+  letter-spacing: 0.22em;
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-part::after {
+  content: "";
+  flex: none;
+  width: 9px;
+  height: 9px;
+  background: rgb(var(--rzn-ice));
+  box-shadow: 0 0 0 3px rgb(var(--rzn-ice) / 18%);
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-part:nth-child(even)::after {
+  background: rgb(var(--rzn-pink));
+  box-shadow: 0 0 0 3px rgb(var(--rzn-pink) / 18%);
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-stamp {
+  grid-row: 4;
+  align-self: start;
+  display: grid;
+  justify-items: end;
+  gap: 4px;
+  margin: clamp(18px, 3.4vh, 34px) 0 0;
+  color: var(--dx-text-2);
+  font: 400 12px / 1.4 var(--dx-hud);
+  letter-spacing: 0.24em;
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-stamp > b {
+  padding: 4px 12px 3px;
+  color: #02050a;
+  font: 400 clamp(18px, 1.8vw, 28px) / 1.1 var(--dx-hud);
+  letter-spacing: 0.16em;
+  background: rgb(var(--rzn-ice));
+  clip-path: polygon(
+    10px 0,
+    100% 0,
+    100% calc(100% - 10px),
+    calc(100% - 10px) 100%,
+    0 100%,
+    0 10px
+  );
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-rail {
+  position: absolute;
+  top: clamp(36px, 9%, 96px);
+  bottom: clamp(36px, 9%, 96px);
+  left: calc(var(--rzn-gutter) - 14px);
+  z-index: 2;
+  display: none;
+  width: 1px;
+  background: rgb(var(--rzn-ice) / 16%);
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-rail > i {
+  position: absolute;
+  inset: 0;
+  display: block;
+  background: linear-gradient(
+    180deg,
+    rgb(var(--rzn-ice)),
+    rgb(var(--rzn-pink)) 70%,
+    rgb(var(--rzn-gold))
+  );
+  transform-origin: 50% 0;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.mus-page
+  .rzn-suitup[data-rzn-state]
+  .rzn-chip:not([data-on]) {
+  opacity: 0.52;
+  translate: 0 0.14em;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.mus-page
+  .rzn-suitup[data-rzn-state]
+  .rzn-line[data-on]
+  .rzn-chip[data-on] {
+  color: rgb(var(--rzn-white));
+  text-shadow:
+    0 0 1px rgb(var(--rzn-ice)),
+    0 0 18px rgb(var(--rzn-ice) / 50%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.mus-page
+  .rzn-suitup[data-rzn-state]
+  .rzn-line[data-done]
+  .rzn-chip {
+  opacity: 0.9;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.mus-page
+  .rzn-suitup[data-rzn-state]
+  .rzn-part:not([data-on]) {
+  opacity: 0.66;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.mus-page
+  .rzn-suitup[data-rzn-state]
+  .rzn-part:not([data-on])::after {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px rgb(var(--rzn-ice) / 60%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.mus-page
+  .rzn-suitup[data-rzn-state]:not([data-rzn-complete])
+  .rzn-stamp {
+  opacity: 0;
+  scale: 1.35;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.mus-page
+  .rzn-suitup[data-rzn-state]:is([data-rzn-line="0"], [data-rzn-line="1"])
+  .rzn-hint {
+  display: flex;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.mus-page
+  .rzn-suitup:not([data-rzn-state="loading"])
+  .rzn-hint-wait,
+html[data-family="special"]
+  body
+  .rxs-page.mus-page
+  .rzn-suitup[data-rzn-state="loading"]
+  .rzn-hint-live {
+  display: none;
+}
+
+@media (max-width: 1099.98px) {
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup > .rzn-frame {
+    --rzn-fig-h: 0.7;
+    --rzn-fig-b: 0.06;
+  }
+
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-call {
+    --ffs-call-share: 33cqw;
+    --ffs-call-max: 340px;
+    width: min(33%, 340px);
+  }
+}
+
+@media (max-width: 760px), (max-width: 1099.98px) and (orientation: portrait) {
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup > .rzn-frame {
+    --rzn-fig-h: 0.58;
+    --rzn-fig-w: 0.92;
+    --rzn-fig-b: 0.17;
+    --rzn-gutter: 18px;
+    height: max(560px, calc(100svh - var(--dxs-nav)));
+    max-height: none;
+  }
+
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-call {
+    top: 20px;
+    left: var(--rzn-gutter);
+    right: var(--rzn-gutter);
+    width: auto;
+  }
+
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-kicker {
+    margin-bottom: 10px;
+  }
+
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-lines {
+    gap: 4px;
+  }
+
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-line {
+    font-size: clamp(13px, 2vw, 20px);
+  }
+
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-line:last-child {
+    font-size: clamp(18px, 3vw, 30px);
+  }
+
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-hud {
+    top: auto;
+    left: var(--rzn-gutter);
+    right: var(--rzn-gutter);
+    bottom: 14px;
+    width: auto;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-rows: auto auto;
+    align-items: end;
+    justify-items: start;
+    gap: 10px 12px;
+    text-align: start;
+  }
+
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-parts {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    grid-template-columns: repeat(3, max-content);
+    justify-content: start;
+    width: 100%;
+    max-width: calc(100% - 84px);
+    gap: 4px clamp(10px, 3.4vw, 16px);
+    margin: 0;
+  }
+
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-part {
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+    gap: 4px;
+    letter-spacing: 0.06em;
+  }
+
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-part::after {
+    width: 7px;
+    height: 7px;
+    box-shadow: none;
+  }
+
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-readout {
+    grid-column: 1;
+    grid-row: 2;
+    font-size: clamp(50px, 8vw, 84px);
+  }
+
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-nanites {
+    grid-column: 2;
+    grid-row: 2;
+    margin: 0 0 4px;
+    font-size: 12px;
+  }
+
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-stamp {
+    grid-column: 3;
+    grid-row: 2;
+    align-self: end;
+    justify-items: end;
+    margin: 0 0 4px;
+  }
+
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-stamp > b {
+    font-size: 16px;
+  }
+
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-stamp > span {
+    display: none;
+  }
+
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-hint {
+    margin-top: 10px;
+  }
+}
+
+@media (min-width: 761px) and (max-width: 1099.98px) and (orientation: portrait) {
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup > .rzn-frame {
+    --rzn-fig-h: 0.66;
+  }
+}
+
+@media (max-width: 420px) {
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-readout {
+    font-size: clamp(40px, 12.5vw, 50px);
+  }
+
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-hud {
+    column-gap: 8px;
+  }
+
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-nanites > small {
+    letter-spacing: 0.12em;
+  }
+
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-stamp > b {
+    padding: 3px 8px 2px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 349.98px) {
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup > .rzn-frame {
+    --rzn-fig-h: 0.55;
+    --rzn-fig-b: 0.21;
+  }
+
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-parts {
+    grid-template-columns: repeat(2, max-content);
+  }
+}
+
+@media (min-width: 1100px) {
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup {
+    grid-column: 1 / -1;
+    grid-row: 5;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) and (forced-colors: none) {
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-rzn-constrained])
+    body
+    .rxs-page.mus-page
+    .rzn-suitup {
+    height: max(2400px, 420svh);
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-rzn-constrained])
+    body
+    .rxs-page.mus-page
+    .rzn-suitup
+    > .rzn-frame {
+    position: sticky;
+    top: var(--dxs-nav);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) and (forced-colors: none) and (max-width: 760px),
+  (prefers-reduced-motion: no-preference) and (forced-colors: none) and (max-width: 1099.98px) and (orientation: portrait) {
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-rzn-constrained])
+    body
+    .rxs-page.mus-page
+    .rzn-suitup {
+    height: max(1950px, 360svh);
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.mus-page
+    .rzn-suitup[data-rzn-state]
+    .rzn-lines {
+    grid-template-areas: "line";
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.mus-page
+    .rzn-suitup[data-rzn-state]
+    .rzn-line {
+    grid-area: line;
+    font-size: clamp(20px, 4vw, 36px);
+  }
+
+  /* The first call stands as three lines above the figure: its size is held
+     to the room between the kicker (about 72 px down the frame) and the
+     figure's top (--ffs-fig-top, the same arithmetic as the call's width on
+     the side-by-side tiers), so the three never reach the figure's box. */
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.mus-page
+    .rzn-suitup[data-rzn-state]
+    .rzn-line:first-child {
+    font-size: max(
+      17px,
+      min(clamp(20px, 4vw, 36px), calc((var(--ffs-fig-top, 9999px) - 76px) / 3.9))
+    );
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.mus-page
+    .rzn-suitup[data-rzn-state]
+    .rzn-line:is(:nth-child(3), :nth-child(4)) {
+    font-size: clamp(14px, 2.9vw, 26px);
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.mus-page
+    .rzn-suitup[data-rzn-state]
+    .rzn-line:last-child {
+    font-size: clamp(20px, 4vw, 36px);
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.mus-page
+    .rzn-suitup[data-rzn-state]
+    .rzn-line:not([data-on]) {
+    visibility: hidden;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) and (forced-colors: none) and (max-width: 419.98px) {
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.mus-page
+    .rzn-suitup[data-rzn-state]
+    .rzn-line:first-child
+    .rzn-chip {
+    white-space: pre-line;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-dialog-open]
+    )
+    body
+    .rxs-page.mus-page:not([data-route-covered])
+    .rzn-suitup[data-rzn-state="live"]
+    .rzn-stamp {
+    transition:
+      opacity 160ms ease-out,
+      scale 260ms cubic-bezier(0.18, 1.5, 0.32, 1);
+  }
+}
+
+@supports (animation-timeline: view()) and (animation-range: entry 0% entry 100%) {
+  @media (prefers-reduced-motion: no-preference) and (forced-colors: none) {
+    html[data-family="special"]:not([data-world-effects="economy"])
+      body
+      .rxs-page.mus-page
+      .rzn-suitup {
+      view-timeline: --rzn-run block;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-dialog-open]
+      )
+      body
+      .rxs-page.mus-page:not([data-route-covered])
+      .rzn-suitup[data-rzn-state]
+      .rzn-rail {
+      display: block;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-dialog-open]
+      )
+      body
+      .rxs-page.mus-page:not([data-route-covered])
+      .rzn-suitup[data-rzn-state]
+      .rzn-rail
+      > i {
+      animation: rzn-rail linear both;
+      animation-timeline: --rzn-run;
+      animation-range: contain 0% contain 100%;
+    }
+  }
+}
+
+@keyframes rzn-rail {
+  from {
+    transform: scaleY(0);
+  }
+
+  to {
+    transform: scaleY(1);
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-family="special"]
+    body
+    .rxs-page.mus-page
+    .rzn-suitup.rzn-suitup
+    > .rzn-frame
+    :is(.rzn-light, .rzn-floor, .rzn-canvas, .rzn-rail, .rzn-hint) {
+    display: none;
+  }
+
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup::before {
+    display: none;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.mus-page
+    .rzn-suitup
+    :is(
+      .rzn-line,
+      .rzn-chip,
+      .rzn-readout,
+      .rzn-readout > span,
+      .rzn-nanites,
+      .rzn-part,
+      .rzn-stamp > b
+    ) {
+    color: CanvasText;
+    text-shadow: none;
+    background: none;
+  }
+
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-part:nth-child(n)::after {
+    background: CanvasText;
+    box-shadow: none;
+  }
+}
+
+@media print {
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup {
+    height: auto;
+    break-inside: avoid;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.mus-page
+    .rzn-suitup
+    :is(.rzn-canvas, .rzn-rail, .rzn-hint) {
+    display: none;
+  }
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-suitup {
+  background:
+    radial-gradient(ellipse at 50% 44%, rgb(33 46 73 / 32%), transparent 68%),
+    linear-gradient(180deg, #020409, #070b16 48%, #020409);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.mus-page
+  .rzn-suitup
+  > .rzn-frame
+  > :is(.rzn-depth, .rzn-aura, .rzn-crown) {
+  position: absolute;
+  z-index: 0;
+  display: block;
+  pointer-events: none;
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-suitup > .rzn-frame > .rzn-depth {
+  inset: 0;
+  background:
+    linear-gradient(90deg, #020409 0%, transparent 28% 72%, #020409 100%),
+    radial-gradient(ellipse at 50% 105%, rgb(121 232 255 / 8%), transparent 44%),
+    linear-gradient(180deg, rgb(2 4 9 / 68%), transparent 24% 76%, rgb(2 4 9 / 72%));
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-suitup > .rzn-frame > .rzn-light {
+  opacity: 0.44;
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-suitup > .rzn-frame > .rzn-aura {
+  inset: 4% 14% 0;
+  background:
+    radial-gradient(ellipse at 32% 43%, rgb(var(--rzn-ice) / 22%), transparent 48%),
+    radial-gradient(ellipse at 68% 43%, rgb(var(--rzn-pink) / 20%), transparent 48%),
+    radial-gradient(ellipse at 50% 24%, rgb(var(--rzn-gold) / 10%), transparent 38%);
+  opacity: 0.78;
+  scale: 1;
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-suitup > .rzn-frame > .rzn-crown {
+  top: 14%;
+  left: 50%;
+  width: min(42%, 580px);
+  height: 64%;
+  border: 1px solid rgb(var(--rzn-gold) / 24%);
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 0%, rgb(var(--rzn-gold) / 9%), transparent 38%);
+  opacity: 0.7;
+  translate: -50% 0;
+  scale: 1;
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-crown::before,
+html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-crown::after {
+  content: "";
+  position: absolute;
+  inset: 8% -16%;
+  border: 1px solid rgb(var(--rzn-gold) / 16%);
+  border-radius: 50%;
+  transform: rotate(25deg);
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-crown::after {
+  inset: 20% -28%;
+  border-color: rgb(var(--rzn-ice) / 15%);
+  transform: rotate(-25deg);
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-suitup > .rzn-frame > .rzn-floor {
+  border-color: rgb(var(--rzn-ice) / 24%);
+  background: radial-gradient(closest-side, rgb(var(--rzn-ice) / 13%), transparent);
+  box-shadow:
+    0 0 0 10px rgb(var(--rzn-ice) / 3%),
+    0 0 0 30px rgb(var(--rzn-gold) / 2%);
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-kicker {
+  margin-bottom: 12px;
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-phase {
+  min-height: 22px;
+  margin: 0 0 clamp(18px, 2.6vh, 30px);
+  color: rgb(var(--rzn-white) / 76%);
+  font: 500 12px / 1.7 var(--dx-body);
+  letter-spacing: 0.12em;
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-phase > span {
+  display: none;
+  align-items: baseline;
+  gap: 12px;
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-phase b {
+  color: rgb(var(--rzn-ice));
+  font: 500 12px / 1.7 var(--dx-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.1em;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.mus-page
+  .rzn-suitup:not([data-rzn-state])
+  .rzn-phase
+  > [data-phase="complete"],
+html[data-family="special"]
+  body
+  .rxs-page.mus-page
+  .rzn-suitup[data-rzn-phase="prepare"]
+  .rzn-phase
+  > [data-phase="prepare"],
+html[data-family="special"]
+  body
+  .rxs-page.mus-page
+  .rzn-suitup[data-rzn-phase="assemble"]
+  .rzn-phase
+  > [data-phase="assemble"],
+html[data-family="special"]
+  body
+  .rxs-page.mus-page
+  .rzn-suitup[data-rzn-phase="seal"]
+  .rzn-phase
+  > [data-phase="seal"],
+html[data-family="special"]
+  body
+  .rxs-page.mus-page
+  .rzn-suitup[data-rzn-phase="ignite"]
+  .rzn-phase
+  > [data-phase="ignite"],
+html[data-family="special"]
+  body
+  .rxs-page.mus-page
+  .rzn-suitup[data-rzn-phase="evolve"]
+  .rzn-phase
+  > [data-phase="evolve"],
+html[data-family="special"]
+  body
+  .rxs-page.mus-page
+  .rzn-suitup[data-rzn-phase="complete"]
+  .rzn-phase
+  > [data-phase="complete"] {
+  display: flex;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.mus-page
+  .rzn-suitup[data-rzn-state]
+  .rzn-line[data-done] {
+  opacity: 0.62;
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-readout {
+  font-size: clamp(56px, 6.2vw, 106px);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.mus-page
+  .rzn-suitup[data-rzn-state]:not([data-rzn-form-complete])
+  > .rzn-frame
+  > .rzn-aura {
+  opacity: 0;
+  scale: 0.94;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.mus-page
+  .rzn-suitup[data-rzn-state]:not([data-rzn-form-complete])
+  > .rzn-frame
+  > .rzn-crown {
+  opacity: 0;
+  scale: 0.9;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.mus-page
+  .rzn-suitup[data-rzn-state]:is([data-rzn-phase="ignite"], [data-rzn-phase="evolve"])
+  > .rzn-frame
+  > .rzn-light {
+  opacity: 0.64;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.mus-page
+  .rzn-suitup[data-rzn-state]:not([data-rzn-form-complete])
+  .rzn-stamp {
+  opacity: 0;
+  scale: 1.12;
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-suitup[data-rzn-form-complete] .rzn-stamp {
+  opacity: 1;
+  scale: 1;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.mus-page
+  .rzn-suitup[data-rzn-form-complete]
+  :is(.rzn-readout, .rzn-nanites, .rzn-parts) {
+  opacity: 0.62;
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-suitup[data-rzn-form-complete] .rzn-lines {
+  opacity: 0.9;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.mus-page
+  .rzn-suitup[data-rzn-form-complete]
+  .rzn-stamp
+  > b {
+  color: rgb(var(--rzn-white));
+  background: rgb(var(--rzn-ice) / 9%);
+  border: 1px solid rgb(var(--rzn-ice) / 40%);
+  clip-path: none;
+}
+
+@media (max-width: 760px), (max-width: 1099.98px) and (orientation: portrait) {
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-kicker {
+    margin-bottom: 4px;
+  }
+
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-phase {
+    margin-bottom: 8px;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+  }
+
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup > .rzn-frame > .rzn-aura {
+    inset: 20% 0 15%;
+  }
+
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup > .rzn-frame > .rzn-crown {
+    top: 27%;
+    width: 54%;
+    height: 46%;
+  }
+
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-readout {
+    font-size: clamp(50px, 8vw, 84px);
+  }
+}
+
+@media (max-width: 420px) {
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-readout {
+    font-size: clamp(40px, 12.5vw, 50px);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) and (forced-colors: none) {
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-dialog-open]
+    )
+    body
+    .rxs-page.mus-page:not([data-route-covered])
+    .rzn-suitup[data-rzn-state="live"]
+    :is(.rzn-light, .rzn-aura, .rzn-crown, .rzn-lines, .rzn-readout, .rzn-nanites, .rzn-parts) {
+    transition:
+      opacity 240ms ease-out,
+      scale 420ms ease-out;
+  }
+}
+
+@media (forced-colors: active), print {
+  html[data-family="special"]
+    body
+    .rxs-page.mus-page
+    .rzn-suitup
+    > .rzn-frame
+    > :is(.rzn-depth, .rzn-aura, .rzn-crown) {
+    display: none;
+  }
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.mus-page
+  .rzn-suitup[data-form="excelsior"]
+  > .rzn-frame
+  > .rzn-still {
+  width: calc(var(--rzn-fig-w) * 100% * 811 / 571);
+  max-width: 100%;
+}
+
+@media (max-width: 760px), (max-width: 1099.98px) and (orientation: portrait) {
+  html[data-family="special"]
+    body
+    .rxs-page.mus-page
+    .rzn-suitup[data-form="excelsior"]
+    > .rzn-frame {
+    --rzn-fig-w: 0.64774; /* (Rexonance Excelsior only; inert here) */
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.mus-page
+    .rzn-suitup:not([data-rzn-state])
+    .rzn-line:not(:last-child) {
+    display: none;
+  }
+}
+
+@media (max-width: 420px) and (orientation: portrait) {
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup > .rzn-frame {
+    --rzn-fig-b: 0.18;
+  }
+
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-hud {
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-rows: auto auto auto;
+  }
+
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-stamp {
+    grid-column: 1 / -1;
+    grid-row: 3;
+    justify-self: end;
+    margin: 0;
+  }
+
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-stamp > b {
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 349.98px) and (orientation: portrait) {
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup > .rzn-frame {
+    --rzn-fig-h: 0.5;
+    --rzn-fig-b: 0.28;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.mus-page
+    .rzn-suitup[data-rzn-state]
+    .rzn-line:last-child {
+    font-size: 18px;
+  }
+
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup[data-rzn-state] .rzn-lines {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) and (max-width: 349.98px) and (max-height: 640px) and (orientation: portrait) {
+  html[data-family="special"]
+    body
+    .rxs-page.mus-page
+    .rzn-suitup:not([data-rzn-state])
+    > .rzn-frame {
+    --rzn-fig-b: 0.3;
+    height: max(460px, calc(100svh - var(--dxs-nav)));
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.mus-page
+    .rzn-suitup:not([data-rzn-state])
+    .rzn-kicker {
+    display: none;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 540px) and (max-width: 1099.98px) {
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup > .rzn-frame {
+    --rzn-fig-h: 0.88;
+    --rzn-fig-b: 0.035;
+    --rzn-gutter: 18px;
+    height: max(220px, calc(100svh - var(--dxs-nav)));
+    max-height: none;
+  }
+
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-call {
+    top: 12px;
+    left: var(--rzn-gutter);
+    right: auto;
+    --ffs-call-share: 31cqw;
+    width: 31%;
+  }
+
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-kicker {
+    gap: 4px 8px;
+    margin-bottom: 4px;
+    letter-spacing: 0.12em;
+  }
+
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-phase {
+    margin-bottom: 10px;
+    letter-spacing: 0.06em;
+  }
+
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-lines {
+    gap: 5px;
+  }
+
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-line {
+    font-size: 15px;
+  }
+
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-line:last-child {
+    font-size: 20px;
+  }
+
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup[data-rzn-state] .rzn-lines {
+    grid-template-areas: "line";
+  }
+
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup[data-rzn-state] .rzn-line {
+    grid-area: line;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.mus-page
+    .rzn-suitup[data-rzn-state]
+    .rzn-line:not([data-on]) {
+    visibility: hidden;
+  }
+
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-hud {
+    top: 14px;
+    right: var(--rzn-gutter);
+    bottom: 14px;
+    left: auto;
+    width: 24%;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto 1fr;
+    justify-items: end;
+    align-items: start;
+    gap: 0;
+    text-align: end;
+  }
+
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-readout {
+    grid-column: 1;
+    grid-row: 1;
+    font-size: 44px;
+  }
+
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-nanites {
+    grid-column: 1;
+    grid-row: 2;
+    margin: 8px 0 0;
+    font-size: 12px;
+  }
+
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-parts {
+    grid-column: 1;
+    grid-row: 3;
+    grid-template-columns: repeat(2, max-content);
+    justify-content: end;
+    width: auto;
+    max-width: none;
+    margin-top: 12px;
+    gap: 6px 14px;
+  }
+
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-part {
+    flex-direction: row;
+    justify-content: flex-end;
+    gap: 5px;
+    letter-spacing: 0.06em;
+  }
+
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-stamp {
+    grid-column: 1;
+    grid-row: 4;
+    align-self: start;
+    margin-top: 8px;
+  }
+
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-stamp > span {
+    display: none;
+  }
+
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-stamp > b {
+    padding-inline: 8px;
+    font-size: 14px;
+    white-space: nowrap;
+  }
+
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup > .rzn-frame > .rzn-aura {
+    inset: 0 24%;
+  }
+
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup > .rzn-frame > .rzn-crown {
+    top: 7%;
+    width: 25%;
+    height: 80%;
+  }
+}
+
+/* The call beside the figure (desktop, landscape tablets, short landscape
+   screens) stops short of the figure's box: its width is --ffs-call-w, set
+   on the call from the tier's share and cap and the figure's own left edge.
+   Declared after every tier above so none of their fixed widths wins; the
+   stacked tiers keep their full-width call. */
+@supports (width: 1cqw) {
+  @media (min-width: 761px) and ((min-width: 1100px) or (orientation: landscape)),
+    (orientation: landscape) and (max-height: 540px) and (max-width: 1099.98px) {
+    html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-call {
+      width: var(--ffs-call-w);
+    }
+  }
+}
+
+/* ================================================================
+   The section around the runway: the guide's status above it, the
+   footer's links below it (the heading is the page's section grammar).
+   ================================================================ */
+html[data-family="special"] body .rxs-page.mus-page .ffs-suitup {
+  padding-bottom: clamp(60px, 7vw, 100px);
+  background: #02050b;
+}
+
+html[data-family="special"] body .rxs-page.mus-page .ffs-suitup > .rxs-section-heading {
+  margin-bottom: clamp(26px, 4vw, 44px);
+}
+
+html[data-family="special"] body .rxs-page.mus-page .ffs-assembly-guide {
+  display: grid;
+  gap: 12px;
+  justify-items: center;
+  max-width: 930px;
+  margin: 0 auto clamp(22px, 3vw, 36px);
+  text-align: center;
+}
+
+/* Two lines reserved (as the Rexonance page reserves them): the status
+   runs one line while the suit loads and two once it is ready (準備完了。
+   下へ進むと…), and the change moved every chapter below it by a line
+   while the reader was in #stages. */
+html[data-family="special"] body .rxs-page.mus-page .ffs-assembly-status {
+  min-height: 3.2em;
+  min-height: 2lh;
+  margin: 0;
+  color: #d7edf2;
+  font: 500 12px / 1.6 var(--dx-body);
+  letter-spacing: 0.04em;
+}
+
+html[data-family="special"] body .rxs-page.mus-page .ffs-assembly-footer {
+  display: grid;
+  gap: 14px;
+  justify-items: center;
+  max-width: 930px;
+  margin: clamp(26px, 4vw, 44px) auto 0;
+  text-align: center;
+}
+
+html[data-family="special"] body .rxs-page.mus-page .ffs-assembly-footer > p {
+  margin: 0;
+  color: #b6c6ce;
+  font: 400 14px / 1.8 var(--dx-body);
+  text-wrap: pretty;
+}
+
+html[data-family="special"] body .rxs-page.mus-page .ffs-assembly-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  justify-content: center;
+}
+
+html[data-family="special"] body .rxs-page.mus-page .ffs-assembly-controls > :is(a, button) {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1px solid rgb(127 230 255 / 36%);
+  border-radius: 999px;
+  color: #eaf7fb;
+  font: 600 13px / 1 var(--dx-body);
+  letter-spacing: 0.08em;
+  text-decoration: none;
+  background: rgb(127 230 255 / 8%);
+  cursor: pointer;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.mus-page
+  .ffs-assembly-controls
+  > :is(a, button):focus-visible {
+  outline: 2px solid rgb(255 215 122);
+  outline-offset: 3px;
+}
+
+/* The still tiers keep every line lit and the finished figure. */
+@media (prefers-reduced-motion: reduce) {
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-hint {
+    display: none;
+  }
+}
+
+/* The runway's script for assistive technology (far-from-suitup.tsx):
+   visually hidden here too. Rexonance hides .rxk-sr in its own motion
+   sheet, which this page does not load. */
+.ffs-page .ffs-assembly-guide .rxk-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------- The form the scroll ends on (owner, 2026-10-23) ----------
+   Right after the runway: ミドル … ウルトラ as the #stages rail draws them
+   (the same liquid rail), then the ending — the order the end of the scroll
+   overwrites the figure in, and the way back to watch it, in one frame.
+   No eyebrow, title, hint or sentence on screen (owner, 2026-10-23: 「不要な
+   セカンダリラベルや説明を避ける」): the rail under the figure is the choice,
+   the route's lit bars are the answer. ウルトラ's note reads under the frame. */
+html[data-family="special"] body .rxs-page.mus-page .ffs-ending {
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  box-sizing: border-box;
+  width: min(780px, 100%);
+  margin: clamp(30px, 4.4vw, 56px) auto 0;
+}
+
+html[data-family="special"] body .rxs-page.mus-page .ffs-ending > .ffs-ending-tabs {
+  margin: 0 auto;
+}
+
+/* The rail and its frame read as one control: the frame hangs from it. */
+html[data-family="special"] body .rxs-page.mus-page .ffs-ending-panel {
+  display: grid;
+  gap: 14px;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+html[data-family="special"] body .rxs-page.mus-page .ffs-ending-frame {
+  display: grid;
+  gap: clamp(16px, 2vw, 20px);
+  box-sizing: border-box;
+  width: 100%;
+  padding: clamp(18px, 2.4vw, 24px) clamp(16px, 2.6vw, 26px) clamp(16px, 2.2vw, 22px);
+  border: 1px solid color-mix(in srgb, var(--ffs-accent) 32%, transparent);
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--ffs-accent) 9%, transparent), transparent 62%),
+    rgb(5 9 16 / 82%);
+  clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
+}
+
+/* The order of the overwrites: each form's bar lights up to the chosen one. */
+html[data-family="special"] body .rxs-page.mus-page .ffs-ending-route {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+html[data-family="special"] body .rxs-page.mus-page .ffs-ending-route > li {
+  display: grid;
+  gap: 4px;
+  align-content: start;
+  min-width: 0;
+  padding-top: 10px;
+  border-top: 3px solid rgb(255 255 255 / 10%);
+  color: #8b9aa8;
+}
+
+html[data-family="special"] body .rxs-page.mus-page .ffs-ending-route > li[data-reached] {
+  border-top-color: var(--ffs-node);
+  color: #dfeaf0;
+}
+
+html[data-family="special"] body .rxs-page.mus-page .ffs-ending-route > li[data-current] {
+  box-shadow: 0 -6px 14px -8px var(--ffs-node);
+}
+
+html[data-family="special"] body .rxs-page.mus-page .ffs-ending-route span {
+  font: 500 12px / 1.45 var(--dx-body);
+  letter-spacing: 0.02em;
+}
+
+html[data-family="special"] body .rxs-page.mus-page .ffs-ending-line {
+  margin: 0;
+  color: #e6f1f5;
+  font: 500 15px / 1.8 var(--dx-body);
+  text-wrap: pretty;
+}
+
+/* The panel is as tall as its form's words (the sentence, and ウルトラ's note
+   with ウルトラ alone): no space is reserved for the longest. A switch made
+   from #stages, below, keeps that panel where it was (far-from-saga.tsx),
+   so the page never jumps, with or without scroll anchoring. */
+html[data-family="special"] body .rxs-page.mus-page .ffs-ending-ultra {
+  display: grid;
+  gap: 6px;
+  padding: 2px clamp(16px, 2.6vw, 26px) 0;
+}
+
+html[data-family="special"] body .rxs-page.mus-page .ffs-ending-ultra > p {
+  margin: 0;
+  color: #bccbd8;
+  font: 400 14px / 1.8 var(--dx-body);
+  text-wrap: pretty;
+}
+
+html[data-family="special"] body .rxs-page.mus-page .ffs-ending-ultra > .ffs-note {
+  max-width: none;
+  color: #a2b1c0;
+  font-size: 12px;
+}
+
+html[data-family="special"] body .rxs-page.mus-page .ffs-ending-frame > .ffs-assembly-controls {
+  justify-content: flex-start;
+}
+
+html[data-family="special"] body .rxs-page.mus-page .ffs-ending-frame > .ffs-assembly-controls > button {
+  border-color: color-mix(in srgb, var(--ffs-accent) 60%, transparent);
+  background: color-mix(in srgb, var(--ffs-accent) 16%, transparent);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.mus-page
+    .ffs-ending-route
+    > li {
+    transition:
+      border-color 320ms ease,
+      color 320ms ease,
+      box-shadow 320ms ease;
+  }
+}
+
+/* Phones: the order's five names on their bars. */
+@media (max-width: 560px) {
+  html[data-family="special"] body .rxs-page.mus-page .ffs-ending-route {
+    gap: 4px;
+  }
+
+  /* 11px: エックスハイ (the widest name) fits a 70px column at 441px. */
+  html[data-family="special"] body .rxs-page.mus-page .ffs-ending-route span {
+    font-size: 11px;
+    word-break: keep-all;
+  }
+
+  html[data-family="special"] body .rxs-page.mus-page .ffs-ending-frame > .ffs-assembly-controls {
+    display: grid;
+    justify-content: stretch;
+  }
+
+  html[data-family="special"] body .rxs-page.mus-page .ffs-ending-frame > .ffs-assembly-controls > :is(a, button) {
+    justify-content: center;
+  }
+}
+
+/* Narrow phones (five columns under 68px): the names would break inside
+   (エックス／ハイ), so the bars alone keep the order — the rail above names
+   every form in the same order and light — and the chosen form's name
+   stands under its bar. The other names stay for assistive technology. */
+@media (max-width: 440px) {
+  html[data-family="special"] body .rxs-page.mus-page .ffs-ending-route > li:not([data-current]) span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  html[data-family="special"] body .rxs-page.mus-page .ffs-ending-route > li {
+    position: relative;
+  }
+
+  html[data-family="special"] body .rxs-page.mus-page .ffs-ending-route > li[data-current] span {
+    color: var(--ffs-node);
+    font-weight: 700;
+    white-space: nowrap;
+  }
+}
+
+/* ================================================================
+   The auto transformation movie's control (owner, 2026-10-23:
+   「自動変身ムービーも速度調整機能付きでつけて」; rexonance-assembly-movie.tsx,
+   src/lib/assembly-movie.ts), an instrument of this page's cyber HUD:
+   the ice and gold of #suitup's controls (.ffs-assembly-controls' pills),
+   Michroma for its kicker, the body face for its Japanese. This sheet
+   draws the control's sheet; where it stands, its pill, and the layer's
+   showing (while the runway's frame is pinned, or while it holds focus)
+   and hiding (the still tiers) are styles-assembly-movie.css's, which
+   keeps it clear of the figure's body.
+   ================================================================ */
+html[data-family="special"] body .rxs-page.mus-page .rzn-movie-sheet {
+  display: grid;
+  gap: 8px;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 10px 16px 12px;
+  color: #eaf7fb;
+  background: rgb(2 5 11 / 84%);
+  border: 1px solid rgb(127 230 255 / 32%);
+  border-radius: 18px;
+  box-shadow:
+    0 0 0 1px rgb(255 215 122 / 10%),
+    0 12px 40px rgb(0 0 0 / 45%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  backdrop-filter: blur(14px) saturate(140%);
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-movie-kicker {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 12px;
+  margin: 0;
+  color: #7fe6ff;
+  font: 400 10px / 1.3 var(--dx-hud);
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-movie-kicker > span {
+  color: #b6c6ce;
+  font: 500 12px / 1.3 var(--dx-body);
+  letter-spacing: 0.1em;
+  text-transform: none;
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-movie-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-movie-row > button,
+html[data-family="special"] body .rxs-page.mus-page .rzn-movie-speeds > button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-height: 40px;
+  margin: 0;
+  padding: 0 16px;
+  border: 1px solid rgb(127 230 255 / 36%);
+  border-radius: 999px;
+  color: #eaf7fb;
+  font: 600 13px / 1 var(--dx-body);
+  letter-spacing: 0.08em;
+  background: rgb(127 230 255 / 8%);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-movie-play {
+  min-width: 108px;
+  color: #02050b;
+  background: #7fe6ff;
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-movie[data-state="playing"] .rzn-movie-play {
+  color: #7fe6ff;
+  background: rgb(127 230 255 / 12%);
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-movie-row > button:disabled,
+html[data-family="special"] body .rxs-page.mus-page .rzn-movie-seek > input:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-movie-speeds {
+  display: inline-flex;
+  gap: 4px;
+  margin-inline-start: auto;
+  padding: 3px;
+  border: 1px solid rgb(127 230 255 / 24%);
+  border-radius: 999px;
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-movie-speeds > button {
+  min-width: 46px;
+  min-height: 32px;
+  padding: 0 10px;
+  border-color: transparent;
+  color: #c9dde6;
+  font: 600 12px / 1 var(--dx-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+  background: transparent;
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-movie-speeds > button[aria-checked="true"] {
+  color: #02050b;
+  background: #ffd77a;
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-movie-seek {
+  display: block;
+  margin: 0;
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-movie-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-movie-seek > input {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  height: 24px;
+  margin: 0;
+  background: transparent;
+  accent-color: #7fe6ff;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-movie-seek > input::-webkit-slider-runnable-track {
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #7fe6ff, #ffd77a 70%, #f4fbff);
+  opacity: 0.7;
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-movie-seek > input::-moz-range-track {
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #7fe6ff, #ffd77a 70%, #f4fbff);
+  opacity: 0.7;
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-movie-seek > input::-webkit-slider-thumb {
+  width: 14px;
+  height: 14px;
+  margin-top: -6px;
+  border: 1px solid #02050b;
+  border-radius: 999px;
+  background: #7fe6ff;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-movie-seek > input::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border: 1px solid #02050b;
+  border-radius: 999px;
+  background: #7fe6ff;
+}
+
+@media (max-width: 639.98px) {
+  html[data-family="special"] body .rxs-page.mus-page .rzn-movie-sheet {
+    gap: 6px;
+    padding: 8px 12px 10px;
+  }
+
+  html[data-family="special"] body .rxs-page.mus-page .rzn-movie-kicker {
+    display: none;
+  }
+
+  html[data-family="special"] body .rxs-page.mus-page .rzn-movie-row {
+    gap: 6px;
+  }
+
+  html[data-family="special"] body .rxs-page.mus-page .rzn-movie-row > button {
+    padding: 0 10px;
+    font-size: 12px;
+  }
+
+  html[data-family="special"] body .rxs-page.mus-page .rzn-movie-play {
+    min-width: 80px;
+  }
+
+  html[data-family="special"] body .rxs-page.mus-page .rzn-movie-speeds > button {
+    min-width: 38px;
+    padding: 0 4px;
+    font-size: 11px;
+  }
+}
+
+/* Very small phones: the call's header is one tight row and the phase a
+   single short line, so the chant rows end above the figure's box (its top
+   sits only about 100 px under the call's first row at 320 px). The owner's
+   call text is unchanged; only the header's spacing gives way. */
+@media (max-width: 419.98px) and (orientation: portrait) {
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-call {
+    top: 8px;
+  }
+
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-kicker {
+    flex-wrap: nowrap;
+    gap: 0 10px;
+    margin-bottom: 0;
+    font-size: 11px;
+    line-height: 1.4;
+    letter-spacing: 0.1em;
+    white-space: nowrap;
+  }
+
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-kicker > span:first-child::before {
+    width: 14px;
+    margin-right: 8px;
+  }
+
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-phase {
+    min-height: 0;
+    margin-bottom: 1px;
+    line-height: 1.5;
+  }
+
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-lines {
+    gap: 2px;
+  }
+  /* The scroll cue rides the phase row's right edge instead of taking a row
+     of its own under the chant (where it would stand across the figure). */
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-hint {
+    position: absolute;
+    top: 19px;
+    right: 0;
+    margin: 0;
+    font-size: 11px;
+    line-height: 1.5;
+    letter-spacing: 0.06em;
+  }
+
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-hint::after {
+    display: none;
+  }
+}

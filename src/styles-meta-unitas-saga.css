@@ -66,6 +66,11 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
   --mus-latin: "Rexonance Forge", "Helvetica Neue", Arial, sans-serif;
   --mus-hud: Michroma, "Helvetica Neue", Arial, sans-serif;
   --mus-gutter: clamp(16px, 5vw, 72px);
+  /* The faces the runway's sheet reads (styles-meta-unitas-suitup.css). */
+  --fft-jp-display: var(--rxs-font-display);
+  --fft-text: var(--rxs-font-text);
+  --fft-display: var(--mus-latin);
+  --fft-mono: var(--mus-latin);
   color: var(--mus-silver);
   background:
     radial-gradient(70rem 40rem at 72% -6rem, rgb(55 198 192 / 16%), transparent 70%),
@@ -90,6 +95,25 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
   clip-path: inset(50%);
   white-space: nowrap;
   border: 0;
+}
+
+/* Line breaks (owner, 2026-10-23: 「改行も改善して」): headings, names and
+   cells break between their phrases only (.mus-unit, from jp()); prose
+   breaks at phrase boundaries where the engine knows them and never leaves
+   one character alone on its last line. */
+.mus-unit {
+  white-space: nowrap;
+}
+
+.mus-page :is(h1, h2, h3, th, td, li, .mus-hero-ultra, .mus-end-names p) {
+  word-break: keep-all;
+  line-break: strict;
+}
+
+.mus-page .mus-copy p {
+  line-break: strict;
+  word-break: auto-phrase;
+  text-wrap: pretty;
 }
 
 .mus-bracket {
@@ -123,6 +147,24 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
   padding: clamp(28px, 4vw, 56px) var(--mus-gutter) clamp(40px, 6vw, 80px);
   max-width: 1440px;
   margin: 0 auto;
+  isolation: isolate;
+}
+
+/* Depth behind the hero: the key visual's light spread as a field, and a
+   fine grid fading out (materials, not words). */
+.mus-hero::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0 calc(50% - 50vw);
+  background:
+    radial-gradient(50% 70% at 28% 52%, rgb(255 154 74 / 12%), transparent 70%),
+    radial-gradient(40% 60% at 30% 40%, rgb(55 198 192 / 14%), transparent 72%),
+    linear-gradient(rgb(233 239 242 / 4%) 1px, transparent 1px) 0 0 / 100% 64px,
+    linear-gradient(90deg, rgb(233 239 242 / 4%) 1px, transparent 1px) 0 0 / 64px 100%;
+  -webkit-mask-image: linear-gradient(180deg, #000 60%, transparent);
+  mask-image: linear-gradient(180deg, #000 60%, transparent);
+  pointer-events: none;
 }
 
 .mus-hero-visual {
@@ -240,7 +282,6 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
 
 /* The five calls: a numbered sequence (outlined numerals as marks). */
 .mus-calls,
-.mus-call-lines,
 .mus-finisher-calls {
   margin: 0;
   padding: 0;
@@ -454,26 +495,47 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
   margin-bottom: 0;
 }
 
-/* 01 — the overview: two columns of the record at desktop width. */
+/* 01 — the overview: the record beside a pinned art column at desktop
+   width (the Rexonance site's sticky key visual). */
 .mus-overview-copy {
   max-width: 76ch;
+}
+
+.mus-overview-art {
+  display: none;
+}
+
+@media (min-width: 1100px) {
+  .mus-overview-body {
+    display: grid;
+    grid-template-columns: minmax(0, 0.72fr) minmax(0, 1fr);
+    gap: clamp(40px, 5vw, 80px);
+    align-items: start;
+  }
+  .mus-overview-art {
+    position: sticky;
+    top: calc(var(--rxs-local-nav-reserve, 62px) + 28px);
+    display: block;
+    margin: 0;
+    aspect-ratio: 2 / 3;
+    max-height: calc(100svh - var(--rxs-local-nav-reserve, 62px) - 56px);
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow:
+      0 0 0 1px var(--mus-hair),
+      0 40px 100px -40px rgb(240 222 255 / 30%);
+  }
+  .mus-overview-art img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 }
 
 .mus-overview-copy p:first-child {
   color: var(--mus-silver);
   font-size: clamp(16px, 1.3vw, 18.5px);
-}
-
-@media (min-width: 1100px) {
-  .mus-overview-copy {
-    max-width: none;
-    column-count: 2;
-    column-gap: 64px;
-    column-rule: 1px solid var(--mus-hair);
-  }
-  .mus-overview-copy p {
-    break-inside: avoid-column;
-  }
 }
 
 /* The specs: ミドル and ウルトラ side by side; one value spans both. */
@@ -546,12 +608,24 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
   overflow-wrap: anywhere;
 }
 
+/* The two forms' figures, set large in the Latin display face (the
+   Rexonance site's read-out numerals). */
+.mus-specs tbody tr[data-dual] td {
+  font-family: var(--mus-latin);
+  font-size: clamp(17px, 1.7vw, 26px);
+  font-weight: 640;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+}
+
 .mus-specs tbody tr[data-dual] td:nth-child(2) {
   color: #e6fbf9;
+  text-shadow: 0 0 24px rgb(55 198 192 / 35%);
 }
 
 .mus-specs tbody tr[data-dual] td:nth-child(3) {
   color: #f6eeff;
+  text-shadow: 0 0 24px rgb(240 222 255 / 30%);
   border-left: 1px solid var(--mus-hair);
 }
 
@@ -707,218 +781,25 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
   margin-inline: max(var(--mus-gutter), calc((100% - 1240px) / 2 + var(--mus-gutter)));
 }
 
-.mus-runway {
-  --mus-fig-h: 0.88;
-  --mus-fig-w: 0.94;
-  --mus-fig-x: 0.5;
-  --mus-fig-b: 0.03;
-  position: relative;
-  height: 640svh;
+/* The engine's read-outs stay for it and never show (no secondary labels);
+   the calls take this page's light, the stamp its outlined name. */
+.mus-page
+  .rzn-suitup
+  :is(.rzn-kicker, .rzn-phase, .rzn-hint, .rzn-readout, .rzn-nanites, .rzn-parts) {
+  display: none !important;
 }
 
-.mus-frame {
-  position: sticky;
-  top: 0;
-  height: 100svh;
-  overflow: hidden;
-  contain: layout paint;
-  background:
-    radial-gradient(44% 56% at 50% 56%, rgb(55 198 192 / 12%), transparent 70%),
-    radial-gradient(30% 40% at 50% 36%, rgb(255 154 74 / 7%), transparent 70%),
-    linear-gradient(180deg, #02070a, #03080c 70%, #020507);
+.mus-page .rzn-suitup .rzn-line .mus-bracket {
+  color: var(--mus-orange);
 }
 
-.mus-frame-ground {
-  position: absolute;
-  right: 12%;
-  bottom: 2.5%;
-  left: 12%;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgb(255 154 74 / 44%), transparent);
-}
-
-.mus-frame-orbit {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: min(118vh, 96vw);
-  aspect-ratio: 1;
-  border: 1px solid rgb(255 154 74 / 12%);
-  border-radius: 50%;
-  transform: translate(-50%, -50%) rotate(-12deg) scaleY(0.36);
-  pointer-events: none;
-}
-
-.mus-frame-orbit.is-b {
-  width: min(84vh, 76vw);
-  border-color: rgb(55 198 192 / 12%);
-  transform: translate(-50%, -54%) rotate(16deg) scaleY(0.5);
-}
-
-/* The figure's box (the engine reads the same custom properties). */
-.mus-still,
-.mus-under {
-  position: absolute;
-  bottom: calc(var(--mus-fig-b) * 100%);
-  left: calc((var(--mus-fig-x) - var(--mus-fig-w) / 2) * 100%);
-  width: calc(var(--mus-fig-w) * 100%);
-  height: calc(var(--mus-fig-h) * 100%);
-  object-fit: contain;
-  object-position: 50% 100%;
-  pointer-events: none;
-}
-
-.mus-still {
-  display: none;
-}
-
-.mus-canvas {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
-
-.mus-runway[data-mus-load="ready"] .mus-under {
-  visibility: hidden;
-}
-
-/* The still tiers: one screen, the chosen form finished, every call lit. */
-.mus-runway[data-mus-load="static"] {
-  height: auto;
-}
-
-.mus-runway[data-mus-load="static"] .mus-frame {
-  position: relative;
-  height: min(100svh, 980px);
-}
-
-.mus-runway[data-mus-load="static"] .mus-still {
-  display: block;
-}
-
-.mus-runway[data-mus-load="static"] .mus-under,
-.mus-runway[data-mus-load="static"] .mus-canvas,
-.mus-runway[data-mus-load="static"] .mus-rail {
-  display: none;
-}
-
-/* The calls: dim until their beat, the current one brightest. */
-.mus-call-lines {
-  position: absolute;
-  z-index: 2;
-  top: clamp(84px, 14vh, 140px);
-  left: max(var(--mus-gutter), calc((100% - 1240px) / 2 + var(--mus-gutter)));
-  display: grid;
-  gap: 10px;
-  width: min(30%, 360px);
-  font-family: var(--mus-latin);
-  font-size: clamp(14px, 1.2vw, 17px);
-  font-weight: 650;
-  letter-spacing: 0.05em;
-  pointer-events: none;
-}
-
-.mus-call-line {
-  padding: 6px 0 6px 14px;
-  border-left: 1px solid var(--mus-hair);
-  color: rgb(233 239 242 / 30%);
-  transition:
-    color 0.3s ease,
-    border-color 0.3s ease;
-  overflow-wrap: anywhere;
-}
-
-.mus-call-line .mus-bracket {
-  opacity: 0.4;
-}
-
-.mus-call-line[data-lit="true"] {
-  color: rgb(233 239 242 / 74%);
-}
-
-.mus-call-line[data-current="true"] {
-  color: #fff;
-  border-left-color: var(--mus-orange);
-  text-shadow: 0 0 18px rgb(255 154 74 / 46%);
-}
-
-.mus-call-line[data-current="true"] .mus-bracket,
-.mus-call-line[data-lit="true"] .mus-bracket {
-  opacity: 0.85;
-}
-
-.mus-call-line[data-chant] {
-  font-size: 0.88em;
-}
-
-.mus-call-line[data-chant] .mus-call-chip {
-  color: rgb(233 239 242 / 30%);
-  transition: color 0.25s ease;
-}
-
-.mus-call-line[data-chant] .mus-call-chip[data-lit="true"] {
-  color: inherit;
-}
-
-.mus-runway[data-mus-load="static"] .mus-call-line,
-.mus-runway[data-mus-load="static"] .mus-call-chip {
-  color: rgb(233 239 242 / 82%);
-}
-
-/* The form's name, outlined, large, lower right. */
-.mus-stamp {
-  position: absolute;
-  z-index: 2;
-  right: max(var(--mus-gutter), calc((100% - 1240px) / 2 + var(--mus-gutter)));
-  bottom: clamp(28px, 7vh, 72px);
-  margin: 0;
-  font-size: clamp(30px, 4.6vw, 68px);
-  font-weight: 900;
-  letter-spacing: 0.08em;
-  pointer-events: none;
-}
-
-.mus-stamp b {
-  display: none;
+.mus-page .rzn-suitup .rzn-stamp b {
   color: transparent;
   -webkit-text-stroke: 1px rgb(255 154 74 / 70%);
 }
 
-.mus-stamp b.is-ultra {
+.mus-page .rzn-suitup[data-form="ultra"] .rzn-stamp b {
   -webkit-text-stroke-color: rgb(233 216 255 / 80%);
-}
-
-.mus-runway:not([data-mus-shown="ultra"]) .mus-stamp b.is-middle,
-.mus-runway[data-mus-shown="ultra"] .mus-stamp b.is-ultra {
-  display: block;
-}
-
-.mus-runway[data-mus-load="static"][data-form="ultra"] .mus-stamp b.is-middle {
-  display: none;
-}
-
-.mus-runway[data-mus-load="static"][data-form="ultra"] .mus-stamp b.is-ultra {
-  display: block;
-}
-
-/* The runway's progress: a thin rail at the right edge (a mark, no number). */
-.mus-rail {
-  position: absolute;
-  z-index: 2;
-  top: 18%;
-  right: 14px;
-  bottom: 18%;
-  width: 1px;
-  background: var(--mus-hair);
-}
-
-.mus-rail > i {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, var(--mus-teal), var(--mus-orange));
-  transform: scaleY(0);
-  transform-origin: 50% 0;
 }
 
 .mus-suitup-error {
@@ -1360,6 +1241,27 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
   overflow: hidden;
 }
 
+/* The end card's halo: rings behind the figure (marks). */
+.mus-footer::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  right: max(-8%, calc((100% - 1240px) / 2 - 8%));
+  bottom: 12%;
+  width: min(62%, 720px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgb(255 154 74 / 10%), transparent 62%);
+  box-shadow:
+    inset 0 0 0 1px rgb(255 154 74 / 24%),
+    0 0 0 42px transparent,
+    0 0 0 43px rgb(55 198 192 / 16%),
+    0 0 0 96px transparent,
+    0 0 0 97px rgb(240 222 255 / 12%);
+  transform: scaleY(0.42);
+  pointer-events: none;
+}
+
 .mus-end-figure {
   position: absolute;
   z-index: 0;
@@ -1475,33 +1377,6 @@ html[data-world-effects="economy"] .mus-page *::after {
 /* ================================================================
    LAYOUT TIERS
    ================================================================ */
-@media (max-width: 1099.98px) {
-  .mus-runway {
-    --mus-fig-h: 0.72;
-    --mus-fig-b: 0.06;
-  }
-  .mus-call-lines {
-    width: min(36%, 320px);
-  }
-}
-
-@media (max-width: 1099.98px) and (orientation: portrait) {
-  .mus-runway {
-    --mus-fig-h: 0.66;
-    --mus-fig-b: 0.07;
-  }
-  .mus-call-lines {
-    top: calc(var(--rxs-local-nav-reserve, 62px) + 20px);
-    right: var(--mus-gutter);
-    width: auto;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 6px 18px;
-  }
-  .mus-call-line[data-chant] {
-    grid-column: 1 / -1;
-  }
-}
-
 @media (max-width: 860px) {
   .mus-hero {
     grid-template-columns: 1fr;
@@ -1548,20 +1423,14 @@ html[data-world-effects="economy"] .mus-page *::after {
   }
   /* The comparison fits the phone: names wrap, the values stay whole. */
   .mus-table {
-    min-width: 0;
     font-size: 12.5px;
   }
   .mus-table th,
   .mus-table td {
     padding: 10px 6px;
   }
-  .mus-table tbody th {
-    white-space: normal;
-    min-width: 6.4em;
-  }
   .mus-table thead th {
     font-size: 12px;
-    white-space: normal;
     letter-spacing: 0.02em;
   }
   .mus-table td[data-bar]::after {
@@ -1572,28 +1441,6 @@ html[data-world-effects="economy"] .mus-page *::after {
 }
 
 @media (max-width: 760px) {
-  .mus-runway {
-    --mus-fig-h: 0.6;
-    --mus-fig-w: 0.98;
-    --mus-fig-b: 0.09;
-    height: 560svh;
-  }
-  .mus-call-lines {
-    left: var(--mus-gutter);
-    right: var(--mus-gutter);
-    font-size: 13px;
-    gap: 4px 14px;
-  }
-  .mus-call-line {
-    padding: 4px 0 4px 10px;
-  }
-  .mus-stamp {
-    bottom: 18px;
-    font-size: 30px;
-  }
-  .mus-rail {
-    right: 8px;
-  }
   .mus-specs tbody th {
     width: auto;
     white-space: nowrap;
@@ -1610,9 +1457,27 @@ html[data-world-effects="economy"] .mus-page *::after {
   }
 }
 
-@media (max-width: 349.98px) {
-  .mus-runway {
-    --mus-fig-h: 0.56;
-    --mus-fig-b: 0.1;
+/* The run's distance (（100m）) reads as the figure's unit, a size down. */
+.mus-specs tbody tr[data-dual] td .mus-unit ~ .mus-unit {
+  font-size: max(12px, 0.62em);
+  letter-spacing: 0.04em;
+  opacity: 0.78;
+}
+
+@media (max-width: 560px) {
+  /* The comparison keeps every name and figure whole: the table scrolls in
+     its own frame, the forms' column pinned at its left. */
+  .mus-page .mus-table {
+    min-width: 500px;
+  }
+  .mus-page .mus-table th:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    background: #050d11;
+    box-shadow: 1px 0 0 var(--mus-hair);
+  }
+  .mus-page .mus-table tbody tr[data-self] th:first-child {
+    background: linear-gradient(90deg, #1c140d, #0b1214);
   }
 }

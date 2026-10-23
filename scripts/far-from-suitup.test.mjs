@@ -62,6 +62,7 @@ import {
   FAR_FROM_FORM_CHAIN,
   FAR_FROM_PALETTE,
   farFromAssemblyConfig,
+  loadFarFromNanites,
 } from "../src/lib/far-from-assembly-engine.ts";
 import { REXONANCE_SUIT_MARKS, REXONANCE_SUIT_UNDERSUIT } from "../src/lib/rexonance-suit.ts";
 import { farFromWireGeneration } from "../src/lib/far-from-wireframe-layer.ts";
@@ -455,12 +456,12 @@ test("the config is the engine's: FAR FROM's palette, reactor, chain, kits and a
   assert.ok(swarm.indexOf("const KITOF") < swarm.indexOf("/* -- draw passes: allocation-free from here -- */"));
   assert.match(swarm, /const sheet = second \? cellsB : cells;/);
   assert.match(resonance, /optional\(kit\?\.cellsB\?\.src\)/);
-  // Owner (2026-10-23): FAR FROM's armour is generated as a wireframe
-  // (far-from-wireframe-layer.ts) — no nanite kit, no swarm, no field.
+  // Owner (2026-10-24): both kits build the armour over the wireframe.
   assert.equal(config.generation, farFromWireGeneration);
-  assert.equal(config.nanites, undefined);
+  assert.equal(config.nanites, loadFarFromNanites);
+  assert.match(engine, /cellsB: kitB\.FAR_FROM_NANITE_CELLS/);
+  assert.match(engine, /import\("\.\/far-from-nanites\.ts"\)/);
   assert.match(engine, /generation: farFromWireGeneration/);
-  assert.doesNotMatch(engine, /far-from-nanites\.ts|rexonance-nanites\.ts/);
   // The field's tones only where a palette names them.
   assert.match(resonance, /\.\.\.\(palette\.field \? \{ tones: palette\.field \} : \{\}\)/);
 });

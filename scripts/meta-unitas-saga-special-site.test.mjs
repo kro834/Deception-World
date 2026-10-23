@@ -24,8 +24,7 @@ const { META_UNITAS_SAGA, META_UNITAS_PERFORMANCE } =
   await import("../src/components/meta-unitas-saga/meta-unitas-data.ts");
 const sections = await import("../src/lib/special-site-sections.ts");
 const artwork = await import("../src/lib/meta-unitas-saga-artwork.ts");
-const suit = await import("../src/lib/meta-unitas-suit.ts");
-const timeline = await import("../src/lib/meta-unitas-timeline.ts");
+const suit = await import("../src/lib/meta-unitas-rx-suit.ts");
 
 test("the route is registered wherever the other special sites are", () => {
   assert.match(route, /createFileRoute\("\/meta-unitas-saga"\)/);
@@ -206,77 +205,43 @@ test("no secondary labels: no kicker, caption, counter or hint on the page", () 
   ])
     assert.ok(!all.includes(label), label);
   assert.ok(!/<p lang="en">/.test(page), "no English kicker");
-  assert.ok(!/rzn-percent|rzn-readout|%<\//.test(all), "no percentage read-out");
+  // The engine's read-out element exists for it, hidden; no percentage shows.
+  assert.match(suitup, /<p className="rzn-readout" hidden>/);
+  assert.ok(!/%<\//.test(all), "no percentage read-out");
 });
 
-test("the suit-up is cut by SAM: every plate's mask is versioned, the module matches them", () => {
-  for (const form of ["middle", "ultra"]) {
-    const dir = `design/meta-unitas-saga-20261023/sam-masks/${form}`;
-    const manifest = JSON.parse(read(`${dir}/manifest.json`));
-    assert.equal(manifest.generatedBy, "scripts/sam/make_masks.py");
-    assert.equal(manifest.model.id, "facebook/sam2.1-hiera-large");
-    const masks = readdirSync(new URL(`../${dir}/plates`, import.meta.url)).map((f) =>
-      f.replace(/\.png$/, ""),
-    );
-    const plates = suit.META_UNITAS_PLATES[form]
-      .map((plate) => plate.id)
-      .filter((id) => id !== "driver");
-    assert.deepEqual([...plates].sort(), [...masks].sort());
-    for (const plate of suit.META_UNITAS_PLATES[form]) {
-      assert.ok(plate.ax + plate.w <= suit.META_UNITAS_SUIT[form].atlas.width, plate.id);
-      assert.ok(plate.ay + plate.h <= suit.META_UNITAS_SUIT[form].atlas.height, plate.id);
-    }
+test("the suit-up assembles as Rexonance's: its engine, Meta Unitas' SAM-cut suit", () => {
+  // Owner (2026-10-23): 「メタ・ウニタスはレクソナンスと同じ装着です」.
+  const engine = read("src/lib/meta-unitas-rx-engine.ts");
+  assert.match(engine, /import \{ mountRexonanceAssembly/);
+  assert.match(engine, /mountRexonanceAssembly\(runway, metaUnitasAssemblyConfig\(\), environment\)/);
+  assert.ok(!/fire: false|generation:/.test(engine), "the fire and the nanites stay Rexonance's");
+  assert.match(read("src/lib/meta-unitas-assembly.ts"), /import\("\.\/meta-unitas-rx-engine"\)/);
+  assert.match(suitup, /className="mus-runway rzn-suitup"/);
+  assert.match(suitup, /className="rzn-canvas"/);
+  // The plates are SAM's: every mask is a plate, the driver its outline.
+  const dir = "design/meta-unitas-saga-20261023/sam-masks/middle";
+  const manifest = JSON.parse(read(`${dir}/manifest.json`));
+  assert.equal(manifest.model.id, "facebook/sam2.1-hiera-large");
+  const masks = readdirSync(new URL(`../${dir}/plates`, import.meta.url)).map((f) => f.replace(/\.png$/, ""));
+  const plates = suit.META_UNITAS_RX_PIECES.map((piece) => piece.id);
+  assert.deepEqual(plates.filter((id) => id !== "belt").sort(), [...masks].sort());
+  assert.deepEqual(suit.META_UNITAS_RX_DRIVER, ["belt"]);
+  for (const piece of suit.META_UNITAS_RX_PIECES) {
+    assert.ok(piece.ax + piece.w <= suit.META_UNITAS_RX_ATLAS.width, piece.id);
+    assert.ok(piece.ay + piece.h <= suit.META_UNITAS_RX_ATLAS.height, piece.id);
   }
-  // Each ウルトラ armour plate turns over from its ミドル counterpart.
-  const middleBody = new Set(
-    suit.META_UNITAS_PLATES.middle.filter((p) => p.group === "body").map((p) => p.id),
-  );
-  for (const plate of suit.META_UNITAS_PLATES.ultra.filter((p) => p.group === "body"))
-    assert.ok(middleBody.has(plate.id), plate.id);
-  // The satellites the scene animates are all there.
-  const groups = (form, group) =>
-    suit.META_UNITAS_PLATES[form].filter((p) => p.group === group).length;
-  assert.equal(groups("middle", "bits"), 4);
-  assert.equal(groups("middle", "halo"), 1);
-  assert.equal(groups("middle", "tail"), 8);
-  assert.equal(groups("ultra", "manus"), 8);
-  assert.equal(groups("ultra", "crystal"), 8);
-  assert.equal(groups("ultra", "tail"), 3);
-  // The delivered suit stays within its budget.
-  const folder = new URL("../public/meta-unitas-suit-20261023/", import.meta.url);
-  const total = readdirSync(folder).reduce(
-    (sum, name) => sum + statSync(new URL(name, folder)).size,
-    0,
-  );
-  assert.ok(total < 1_600_000, `suit-up files ${total}`);
-  // The same wearer: Rexonance's undersuit, composited by the build.
-  assert.match(read("scripts/build-meta-unitas-suit.mjs"), /REXONANCE_SUIT_UNDERSUIT/);
-});
-
-test("the score: calls in order, the brightest change slow, ウルトラ after ミドル", () => {
-  const B = timeline.META_UNITAS_BEATS;
-  let last = -1;
-  for (let p = 0; p <= 1; p += 0.005) {
-    const { line } = timeline.callsAt(p);
-    assert.ok(line >= last);
-    last = line;
-  }
-  assert.equal(timeline.callsAt(1).line, 4);
-  assert.equal(timeline.callsAt(1).chant, 4);
-  assert.ok(B.whole[1] - B.whole[0] >= 0.1);
-  assert.ok(B.ultra[0] > timeline.META_UNITAS_MIDDLE_DONE);
-  // A plate is light, then armour, and back in place by the settle's end.
-  for (const order of [0, 0.5, 1]) {
-    const done = timeline.plateState(order, B.settle[1] + 0.05);
-    assert.equal(done.drift, 0);
-    assert.equal(done.armour, 1);
-  }
-  const engine = read("src/lib/meta-unitas-assembly-engine.ts");
-  // Through the glowing whole the drawn progress is capped (≥ 0.2 s for it).
-  const bright = Number(/const SPEED_BRIGHT = ([\d.]+);/.exec(engine)[1]);
-  assert.ok((B.whole[1] - B.whole[0]) / bright >= 0.2);
-  // The scene never loops: no setInterval, rAF only while the target moves.
-  assert.ok(!/setInterval/.test(engine + read("src/lib/meta-unitas-partition.ts")));
+  const groups = (group) => suit.META_UNITAS_RX_PIECES.filter((p) => p.group === group).length;
+  assert.equal(groups("tail"), 8);
+  assert.equal(groups("bits"), 5); // the four bits and the halo
+  // ウルトラ is the chain's one form, the owner's cutout in the same frame.
+  assert.match(suit.META_UNITAS_RX_FORMS.ultra, /^\/meta-unitas-rx-suit-20261023\/ultra\.webp$/);
+  const folder = new URL("../public/meta-unitas-rx-suit-20261023/", import.meta.url);
+  const total = readdirSync(folder).reduce((sum, name) => sum + statSync(new URL(name, folder)).size, 0);
+  assert.ok(total < 1_200_000, `suit-up files ${total}`);
+  // The entry plays the same scene on a clock.
+  const entry = read("src/components/meta-unitas-saga/meta-unitas-entry-sequence.tsx");
+  assert.match(entry, /mountMetaUnitasAssemblyEngine\(runway, window\)/);
 });
 
 test("the still tiers and the motion gate", () => {
@@ -288,8 +253,8 @@ test("the still tiers and the motion gate", () => {
     "economy",
   ])
     assert.ok(gateModule.includes(term), term);
-  assert.match(gateModule, /import\("\.\/meta-unitas-assembly-engine"\)/);
-  assert.match(styles, /\.mus-runway\[data-mus-load="static"\] \.mus-still \{\s*display: block;/);
+  assert.match(gateModule, /import\("\.\/meta-unitas-rx-engine"\)/);
+  assert.match(styles, /:is\(\.rzn-kicker, \.rzn-phase, \.rzn-hint, \.rzn-readout, \.rzn-nanites, \.rzn-parts\)/);
   // Every animation in the sheet sits under the motion terms.
   const blocks = styles.split(/@media \(prefers-reduced-motion: no-preference\)/);
   for (const block of blocks.slice(0, 1))
@@ -313,6 +278,6 @@ test("a11y floors: labels 12 px and up, 44 px targets, focus rings", () => {
   assert.match(styles, /\.mus-suitup-error button,\s*\.mus-watch \{\s*min-height: 46px;/);
   assert.match(styles, /button\[role="tab"\] \{\s*min-height: 48px;/);
   // The runway is a picture; its calls are read from a list.
-  assert.match(suitup, /aria-hidden="true"\s*data-form=\{stage\}/);
+  assert.match(suitup, /aria-hidden="true"\s*data-form=\{runwayForm\(stage\)\}/);
   assert.match(suitup, /<ol aria-label="変身音声">/);
 });

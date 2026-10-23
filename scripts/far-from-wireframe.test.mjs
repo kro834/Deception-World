@@ -258,16 +258,20 @@ test("the per-frame work is bounded (Android): batched strokes and fills, one cl
 
 test("the engine takes a page's generation; Rexonance has none and keeps its swarm and field", () => {
   assert.match(resonance, /const armourGeneration = config\.generation \?\? null;/);
-  assert.match(resonance, /armourGeneration\n\s+\? null\n\s+: boundedImage\(import\("\.\/rexonance-assembly-nanites\.js"\)/);
-  assert.match(resonance, /if \(wire && seal < 1\) \{/);
-  // Owner (2026-10-23): ILLUSIONCULUM's opt-in formChange shares the call (FAR FROM's wire first).
-  assert.match(resonance, /!\(wire \?\? formChange\)\?\.form\(/);
+  assert.match(resonance, /const replaceArmour = Boolean\(armourGeneration && !armourGeneration\.overlay\);/);
+  assert.match(resonance, /replaceArmour\n\s+\? null\n\s+: boundedImage\(import\("\.\/rexonance-assembly-nanites\.js"\)/);
+  assert.match(resonance, /if \(wire && replaceArmour && seal < 1\) \{/);
+  assert.match(resonance, /if \(wire && !replaceArmour\)\n\s+wire\.form\(/);
+  // Owner (2026-10-23): ILLUSIONCULUM's opt-in formChange shares the call.
+  assert.match(resonance, /!\(replaceArmour \? wire : formChange\)\?\.form\(/);
   const rexonance = read("src/components/rexonance-saga/rexonance-saga.tsx");
   assert.doesNotMatch(rexonance, /generation/);
-  assert.equal(farFromAssemblyConfig().nanites, undefined);
+  // Owner (2026-10-24): the nanite build stays, the wire is drawn over it.
+  assert.equal(typeof farFromAssemblyConfig().nanites, "function");
+  assert.equal(farFromAssemblyConfig().generation.overlay, true);
 });
 
-test("a live mount prepares the wireframe (no swarm module, no kit sheets) and draws it with the scroll", async () => {
+test("a live mount prepares the nanite build with the wireframe over it, drawn with the scroll", async () => {
   const listeners = new Map();
   const target = (name) => ({
     addEventListener: (type, callback) => listeners.set(`${name}:${type}`, callback),
@@ -387,25 +391,12 @@ test("a live mount prepares the wireframe (no swarm module, no kit sheets) and d
     for (let i = 0; i < 4000 && runway.dataset.rznState !== "live"; i += 1)
       await new Promise((resolve) => setTimeout(resolve, 2));
     assert.equal(runway.dataset.rznState, "live");
-    // No nanite kit sheet is ever requested.
-    assert.ok(!sources.some((src) => /nanites|guide/.test(src)), sources.join(" "));
-    // The layer's plates: drawn from its own sheets (canvases), cell by cell.
-    const plates = (list) =>
-      list.filter(
-        (call) =>
-          call.target === canvas &&
-          call.method === "drawImage" &&
-          call.args.length === 9 &&
-          pieces.some(
-            (piece) =>
-              piece.x === call.args[5] &&
-              piece.y === call.args[6] &&
-              piece.w === call.args[7] &&
-              piece.h === call.args[8],
-          ),
-      ).length;
-    assert.equal(plates(scroll(0.12)), 0, "nothing before the first call");
-    assert.ok(plates(scroll(0.3)) > 0, "the legs are drawn by .3");
+    // Owner (2026-10-24): the nanite kits build the armour, the wire over it.
+    assert.ok(sources.some((src) => /nanites/.test(src)), sources.join(" "));
+    const wires = (list) =>
+      list.filter((call) => call.target === canvas && call.method === "stroke").length;
+    const before = wires(scroll(0.12));
+    assert.ok(wires(scroll(0.3)) > before, "the legs' wire is drawn by .3");
     assert.equal(runway.dataset.rznPhase, "assemble");
     scroll(0.95);
     assert.equal(runway.dataset.rznPhase, "complete");
@@ -441,5 +432,6 @@ test("the entry transition's plates have their own conforming meshes, made from 
   // The entry engine draws the wire with the plates (no composite, batched).
   const engine = read("src/components/far-from-saga/far-from-entry-engine.ts");
   assert.match(engine, /const wire = wireOf\(p\);/);
-  assert.doesNotMatch(engine, /A nanite mote, streaming in/);
+  // Owner (2026-10-24): the nanites stream in along the wire.
+  assert.match(engine, /A nanite mote, streaming in/);
 });

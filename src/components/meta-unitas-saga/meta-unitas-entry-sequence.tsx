@@ -1,39 +1,61 @@
 import { useEffect, useRef, type CSSProperties } from "react";
 import { META_UNITAS_CALL_LINES } from "@/lib/meta-unitas-assembly";
 import { META_UNITAS_ENTRY_TIMINGS } from "@/lib/meta-unitas-entry-gate";
-import { metaUnitasPictures } from "@/lib/meta-unitas-entry-pictures";
-import { createPartitionScene } from "@/lib/meta-unitas-partition";
-import { META_UNITAS_SUIT_SIZE } from "@/lib/meta-unitas-suit";
-import { META_UNITAS_MIDDLE_DONE, callsAt, easeInOut } from "@/lib/meta-unitas-timeline";
-import { CallLine } from "./meta-unitas-parts";
+import {
+  META_UNITAS_RX_DRIVER_STANDIN,
+  META_UNITAS_RX_SIZE,
+  META_UNITAS_RX_UNDERSUIT,
+} from "@/lib/meta-unitas-rx-suit";
 
-/* META UNITAS SAGA — the entry transformation (2026-10-23), played by the
-   route transition screen (load-gate.tsx) under its cover. The page's own
-   partition scene (src/lib/meta-unitas-partition.ts) on a clock instead of
-   a scroll: the wearer, the halo and its axis, the single glowing whole,
-   the boundaries, the independent plates settling into armour, the bits on
-   their orbits, the tail, and the seal on META UNITAS！ — ミドル complete as
-   the cover lifts; the calls light in turn beneath. The full tier only (the
-   gate gives the still tiers no call). Styles are inline: the gate is
-   global and this page's sheet is not loaded on the departure page. */
+/* META UNITAS SAGA — the entry transformation (2026-10-23; owner: 「メタ・
+   ウニタスはレクソナンスと同じ装着です」), played by the route transition
+   screen (load-gate.tsx) under its cover. The same scene as #suitup: the
+   Rexonance scroll engine with Meta Unitas' suit (meta-unitas-rx-engine.ts),
+   mounted on a runway inside this layer, whose own scroll the clock drives —
+   the undersuit scanned, the fire, the nanites landing plate by plate, the
+   seal, the light, the helix and the eyes in pixel squares: ミドル complete as
+   the cover lifts. The full tier only. Styles are inline: the gate is global
+   and this page's sheets are not loaded on the departure page. */
 
 const LAYER: CSSProperties = {
   position: "fixed",
   inset: 0,
   zIndex: 2,
-  overflow: "hidden",
+  overflowX: "hidden",
+  overflowY: "scroll",
+  scrollbarWidth: "none",
   background:
     "radial-gradient(44% 56% at 50% 52%, rgb(55 198 192 / 14%), transparent 70%), linear-gradient(180deg, #02070a, #03080c 70%, #020507)",
   transition: "opacity 0.5s ease",
   pointerEvents: "none",
 };
-const CANVAS: CSSProperties = { position: "absolute", inset: 0, width: "100%", height: "100%" };
+const RUNWAY: CSSProperties = { position: "relative", height: "600vh" };
+const FRAME: CSSProperties = {
+  position: "sticky",
+  top: 0,
+  height: "100vh",
+  overflow: "hidden",
+  ["--rzn-fig-h" as string]: "0.78",
+  ["--rzn-fig-w" as string]: "0.92",
+  ["--rzn-fig-x" as string]: "0.5",
+  ["--rzn-fig-b" as string]: "0.12",
+};
+const FILL: CSSProperties = { position: "absolute", inset: 0, width: "100%", height: "100%" };
+const FIGURE: CSSProperties = {
+  position: "absolute",
+  left: "4%",
+  bottom: "12%",
+  width: "92%",
+  height: "78%",
+  objectFit: "contain",
+  objectPosition: "50% 100%",
+};
 const CALLS: CSSProperties = {
   position: "absolute",
   left: "50%",
-  bottom: "max(28px, env(safe-area-inset-bottom))",
+  bottom: "max(22px, env(safe-area-inset-bottom))",
   transform: "translateX(-50%)",
-  width: "min(92vw, 720px)",
+  width: "min(92vw, 760px)",
   margin: 0,
   padding: 0,
   listStyle: "none",
@@ -41,12 +63,21 @@ const CALLS: CSSProperties = {
   flexWrap: "wrap",
   justifyContent: "center",
   gap: "6px 18px",
-  color: "rgb(233 239 242 / 30%)",
+  color: "rgb(233 239 242 / 34%)",
   fontFamily: '"Rexonance Forge", "Helvetica Neue", Arial, sans-serif',
   fontSize: "clamp(12px, 1.4vw, 16px)",
   fontWeight: 650,
   letterSpacing: "0.05em",
 };
+
+const CALL_LIGHT = `.mus-entry::-webkit-scrollbar{display:none}
+.mus-entry .rzn-line,.mus-entry .rzn-chip{transition:color .25s ease,text-shadow .25s ease}
+.mus-entry .rzn-line[data-done]{color:rgb(233 239 242 / 74%)}
+.mus-entry .rzn-line[data-on]{color:#fff;text-shadow:0 0 18px rgb(255 154 74 / 46%)}
+.mus-entry .rzn-line[data-on] .rzn-chip:not([data-on]){color:rgb(233 239 242 / 34%)}`;
+
+/** How long the build waits for the scene to be ready before its clock runs. */
+const READY_WAIT_MS = 1100;
 
 export function MetaUnitasEntrySequence({
   phase,
@@ -55,56 +86,31 @@ export function MetaUnitasEntrySequence({
   tier?: "full" | "calm" | "reduced";
 }) {
   const layerRef = useRef<HTMLDivElement | null>(null);
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const runwayRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
-    const canvas = canvasRef.current;
     const layer = layerRef.current;
-    const context = canvas?.getContext("2d");
-    if (!canvas || !layer || !context) return;
-    let raf = 0;
+    const runway = runwayRef.current;
+    if (!layer || !runway) return;
     let disposed = false;
-    const lines = [...layer.querySelectorAll<HTMLElement>("li")];
-    const chips = [...layer.querySelectorAll<HTMLElement>(".mus-call-chip")];
-    void metaUnitasPictures().then((pictures) => {
-      if (disposed || !pictures) return;
-      const scene = createPartitionScene(context, pictures);
-      const started = performance.now();
-      // The build runs to ミドル's completion a little before the cover ends.
-      const span = META_UNITAS_ENTRY_TIMINGS.cover - 260;
+    let dispose: (() => void) | null = null;
+    let raf = 0;
+    const mounted = performance.now();
+    void import("@/lib/meta-unitas-rx-engine").then((module) => {
+      if (disposed) return;
+      dispose = module.mountMetaUnitasAssemblyEngine(runway, window);
+      let started = 0;
       const frame = (now: number) => {
         raf = 0;
         if (disposed) return;
-        const ratio = Math.min(window.devicePixelRatio || 1, 2);
-        const width = window.innerWidth;
-        const height = window.innerHeight;
-        const w = Math.round(width * ratio);
-        const h = Math.round(height * ratio);
-        if (canvas.width !== w || canvas.height !== h) {
-          canvas.width = w;
-          canvas.height = h;
-        }
-        const t = Math.min(1, (now - started) / span);
-        const p = easeInOut(t) * META_UNITAS_MIDDLE_DONE + (t >= 1 ? 0.04 : 0);
-        const figureH = Math.min(
-          height * 0.74,
-          (width * 0.92 * META_UNITAS_SUIT_SIZE.height) / META_UNITAS_SUIT_SIZE.width,
-        );
-        const scale = (figureH / META_UNITAS_SUIT_SIZE.height) * ratio;
-        const figureW = META_UNITAS_SUIT_SIZE.width * (figureH / META_UNITAS_SUIT_SIZE.height);
-        scene.draw(p, "middle", {
-          x: ((width - figureW) / 2) * ratio,
-          y: height * 0.08 * ratio,
-          scale,
-        });
-        const { line, chant } = callsAt(p);
-        lines.forEach((element, index) => {
-          element.style.color =
-            index < line ? "rgb(233 239 242 / 74%)" : index === line ? "#fff" : "";
-          element.style.textShadow = index === line ? "0 0 18px rgb(255 154 74 / 46%)" : "";
-        });
-        chips.forEach((chip, index) => {
-          chip.style.color = index < chant ? "inherit" : "rgb(233 239 242 / 30%)";
-        });
+        const ready = runway.dataset.rznLoad === "ready";
+        if (!started && (ready || now - mounted > READY_WAIT_MS)) started = now;
+        const span = Math.max(1200, META_UNITAS_ENTRY_TIMINGS.cover - (started - mounted) - 240);
+        const t = started ? Math.min(1, (now - started) / span) : 0;
+        // Eased, ending past the seal so ミドル stands finished, lit.
+        const p = (t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2) * 0.95;
+        const travel = runway.offsetHeight - layer.clientHeight;
+        layer.scrollTop = Math.round(travel * p);
+        window.dispatchEvent(new Event("scroll"));
         if (t < 1) raf = window.requestAnimationFrame(frame);
       };
       raf = window.requestAnimationFrame(frame);
@@ -112,6 +118,7 @@ export function MetaUnitasEntrySequence({
     return () => {
       disposed = true;
       if (raf) window.cancelAnimationFrame(raf);
+      dispose?.();
     };
   }, []);
   return (
@@ -120,14 +127,40 @@ export function MetaUnitasEntrySequence({
       aria-hidden="true"
       style={{ ...LAYER, opacity: phase === "revealing" ? 0 : 1 }}
     >
-      <canvas ref={canvasRef} style={CANVAS} />
-      <ol style={CALLS}>
-        {META_UNITAS_CALL_LINES.map((units, index) => (
-          <li key={index} style={{ transition: "color 0.25s ease" }}>
-            <CallLine units={units} />
-          </li>
-        ))}
-      </ol>
+      <div ref={runwayRef} className="rzn-suitup" data-form="standard" style={RUNWAY}>
+        <div className="rzn-frame" style={FRAME}>
+          <img
+            className="rzn-under"
+            src={META_UNITAS_RX_UNDERSUIT}
+            alt=""
+            style={FIGURE}
+            width={META_UNITAS_RX_SIZE.width}
+            height={META_UNITAS_RX_SIZE.height}
+          />
+          <img
+            className="rzn-driver-standin"
+            src={META_UNITAS_RX_DRIVER_STANDIN}
+            alt=""
+            style={FIGURE}
+            width={META_UNITAS_RX_SIZE.width}
+            height={META_UNITAS_RX_SIZE.height}
+          />
+          <canvas className="rzn-canvas" width={0} height={0} style={FILL} />
+          <ol className="rzn-lines" style={CALLS}>
+            {META_UNITAS_CALL_LINES.map((units, index) => (
+              <li key={index} className="rzn-line">
+                {units.map((unit, unitIndex) => (
+                  <span key={`${unit}-${unitIndex}`} className="rzn-chip">
+                    {unitIndex === 0 ? "【" : ""}
+                    {unit}
+                    {unitIndex === units.length - 1 ? "】" : ""}
+                  </span>
+                ))}
+              </li>
+            ))}
+          </ol>
+        </div>
+      </div>
     </div>
   );
 }

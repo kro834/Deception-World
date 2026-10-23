@@ -17,7 +17,9 @@
  *   scripts/build-far-from-wireframe.mjs from the suit), its facets lit and
  *   resolved into the art, then a scan over each group resolving the gold
  *   while the wire retracts into the seams — in place of Rexonance's nanite
- *   swarm (no nanite kit, no field, no gold pour here);
+ *   swarm — combined with it (owner, 2026-10-24: 「ナノマシンによる生成をワイヤー
+ *   フレームと組み合わせて」): the wire is traced first and the nanite cells
+ *   (two kits mixed, hex chips and the Blender crystal) stream in along it;
  * - the reactor completes like the compound eyes (owner): its rim forms
  *   first, a wire ring with the chest's crystal, then on FAR FROM DEUS！
  *   pixel squares fill the crystal and scatter (`reactorGlow`); the crystal
@@ -57,6 +59,11 @@ import {
   FAR_FROM_SUIT_UNDERSUIT,
 } from "./far-from-suit.ts";
 import { FAR_FROM_SUIT_GOLD_CELL, FAR_FROM_SUIT_GOLD_CELLS } from "./far-from-suit-gold.ts";
+import {
+  FAR_FROM_SUIT_GOLD_BOXES,
+  FAR_FROM_SUIT_GUIDE,
+  FAR_FROM_SUIT_SEAMS,
+} from "./far-from-suit-nanites.ts";
 import { farFromAccents } from "./far-from-assembly-accents.ts";
 import { farFromWireGeneration } from "./far-from-wireframe-layer.ts";
 import { farFromUltraSrc } from "./far-from-ultra-art.ts";
@@ -132,6 +139,25 @@ export const FAR_FROM_REACTOR_RADIUS = 0;
  * fire's end tone, rexonance-fire/fire-tuning.js FIRE_TONES.gold. */
 export const FAR_FROM_FIRE_TONE = 1;
 
+/** The nanite kits, loaded with the scene's pictures: kit A's chips, comets
+ * and effects, kit B's crystal chips, and FAR FROM's own guide, seams and
+ * gold boxes. */
+export const loadFarFromNanites = () =>
+  Promise.all([import("./rexonance-nanites.ts"), import("./far-from-nanites.ts")]).then(
+    ([kitA, kitB]) => ({
+      // Kit A: Rexonance's hex chip. Kit B: Far From's own Blender crystal
+      // (the same sheet layout, so one sprite path draws both, mixed per
+      // chip). Comets, FX and the guide come from kit A and the suit build.
+      cells: kitA.REXONANCE_NANITE_CELLS,
+      cellsB: kitB.FAR_FROM_NANITE_CELLS,
+      comets: kitA.REXONANCE_NANITE_COMETS,
+      fx: kitA.REXONANCE_NANITE_FX,
+      guide: FAR_FROM_SUIT_GUIDE,
+      seams: FAR_FROM_SUIT_SEAMS,
+      goldBoxes: FAR_FROM_SUIT_GOLD_BOXES,
+    }),
+  );
+
 /** The scene's config: FAR FROM's suit in the Rexonance engine's terms. */
 export function farFromAssemblyConfig(): RexonanceAssemblyConfig {
   return {
@@ -168,7 +194,9 @@ export function farFromAssemblyConfig(): RexonanceAssemblyConfig {
     },
     palette: FAR_FROM_PALETTE,
     accents: farFromAccents,
-    // The wireframe builds the armour (no nanite kit is loaded).
+    // Both nanite kits build the armour (owner), over the wireframe that
+    // traces each plate first (owner, 2026-10-24).
+    nanites: loadFarFromNanites,
     generation: farFromWireGeneration,
     forms: {
       chain: FAR_FROM_FORM_CHAIN,

@@ -187,7 +187,7 @@ test("the engine's new options are opt-in: Rexonance and FAR FROM pass none of t
   assert.match(own, /nanites: loadIllusionculumNanites,/);
   assert.match(own, /gold: \{/);
   assert.match(own, /formChange: createIllusionculumFormChange\(/);
-  assert.match(engine, /!\(wire \?\? formChange\)\?\.form\(/);
+  assert.match(engine, /!\(replaceArmour \? wire : formChange\)\?\.form\(/);
   assert.doesNotMatch(farFrom, /formChange/);
   assert.match(own, /paths: ILLUSIONCULUM_FORM_PATHS,/);
   assert.match(own, /reactorRadius: 0,/);
