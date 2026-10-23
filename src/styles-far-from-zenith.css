@@ -207,3 +207,27 @@
     border-color: CanvasText;
   }
 }
+
+/* -- the hero: the key visual dissolves into the stage ------------------ */
+.rxs-page.rxs-page.ffs-page .ffs-hero .rxs-hero-visual img,
+.rxs-page.rxs-page.ffs-page .ffs-hero .rxs-hero-visual > svg {
+  -webkit-mask-image: radial-gradient(64% 58% at 50% 46%, #000 62%, rgb(0 0 0 / 0.6) 82%, transparent 100%);
+  mask-image: radial-gradient(64% 58% at 50% 46%, #000 62%, rgb(0 0 0 / 0.6) 82%, transparent 100%);
+  filter: drop-shadow(0 0 42px rgb(var(--ffz-ice) / 0.18));
+}
+.rxs-page.rxs-page.ffs-page .ffs-hero .rxs-hero-visual::after {
+  content: "";
+  position: absolute;
+  inset: 8% 6% 4%;
+  z-index: -1;
+  background: radial-gradient(closest-side, rgb(var(--ffz-ice) / 0.2), rgb(88 60 200 / 0.12) 55%, transparent);
+  pointer-events: none;
+}
+.rxs-page.rxs-page.ffs-page .ffs-hero h1 {
+  text-shadow:
+    0 0 36px rgb(var(--ffz-ice) / 0.28),
+    0 3px 0 rgb(0 0 0 / 0.55);
+}
+.rxs-page.rxs-page.ffs-page .ffs-hero .ffs-mark {
+  -webkit-text-stroke-color: rgb(var(--ffz-ice) / 0.34);
+}
