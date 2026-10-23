@@ -1,5 +1,3 @@
-      const wrapped = ((n % POSTERS.length) + POSTERS.length) % POSTERS.length;
-      if (wrapped !== p) setPrevPoster(p);
       return wrapped;
     });
   };
@@ -504,3 +502,6 @@
                 }
                 data-liquid-pointer="true"
                 aria-pressed={locked}
+                aria-label={
+                  locked ? "ロックを解除して自動切替にする" : "ポスターをロックして固定する"
+                }

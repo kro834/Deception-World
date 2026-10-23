@@ -394,6 +394,7 @@ function WorldFiles() {
                   className={`wa-plate wa-brief is-${entry.id}`}
                   aria-labelledby={`wa-brief-${entry.id}`}
                 >
+                  <p className="wa-code">{entry.code}</p>
                   <h3 id={`wa-brief-${entry.id}`}>{entry.name}</h3>
                   {entry.id === "rikuei" ? (
                     <span className="wa-signals" aria-hidden="true">

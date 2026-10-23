@@ -466,6 +466,7 @@
         </button>
         <div className="world-column-dialog-card">
           <div className="world-column-dialog-heading">
+            <small>{column.kicker}</small>
             <h2 id="world-column-pickup-title">世界観コラム</h2>
           </div>
           <PickupRail ref={pickupRail} />

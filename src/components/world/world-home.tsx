@@ -565,6 +565,7 @@ function ArchivePlaceholder({ index, tone }: { index: number; tone: "unmanaged" 
       role="img"
       aria-label={`未判明の資料スロット ${index}`}
     >
+      <span>{String(index).padStart(2, "0")}</span>
       <i aria-hidden="true" />
       <b>？？？</b>
     </div>
@@ -2406,6 +2407,7 @@ export function WorldHome() {
                       decoding="async"
                     />
                     <span className="other-card-shade" aria-hidden="true" />
+                    <span className="other-card-code">SECOND DOG / 02</span>
                     <span className="other-card-copy">
                       <small>第二の犬・ヴァルグ</small>
                       <b>ダンテ／ヴァルグ</b>
@@ -2446,6 +2448,7 @@ export function WorldHome() {
                       decoding="async"
                     />
                     <span className="other-card-shade" aria-hidden="true" />
+                    <span className="other-card-code">RELATED / 01</span>
                     <span className="other-card-copy">
                       <b>
                         <NameText value="テラ・アレイン" />
@@ -2474,6 +2477,7 @@ export function WorldHome() {
                       decoding="async"
                     />
                     <span className="other-card-shade" aria-hidden="true" />
+                    <span className="other-card-code">RELATED / 02</span>
                     <span className="other-card-copy">
                       <b>
                         <NameText value="ルナ・アレイン" />
@@ -2501,6 +2505,7 @@ export function WorldHome() {
                       decoding="async"
                     />
                     <span className="other-card-shade" aria-hidden="true" />
+                    <span className="other-card-code">RELATED / 05</span>
                     <span className="other-card-copy">
                       <small>よあけまもりのみこと</small>
                       <b>夜明護尊</b>
@@ -2996,6 +3001,7 @@ export function WorldHome() {
         </button>
         <div className="world-column-dialog-card">
           <div className="world-column-dialog-heading">
+            <small>{column.kicker}</small>
             <h2 id="world-column-pickup-title">世界観コラム</h2>
           </div>
           <PickupRail ref={pickupRail} />

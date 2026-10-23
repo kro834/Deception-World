@@ -43,11 +43,11 @@ test("Dogs category has a second individual link without relabeling related peop
   assert.match(home, /<b>犬<\/b>/);
   assert.match(home, /<b>その他<\/b>/);
   // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明） — the tab reads 犬 alone
-  // (no DOGS / 04 code), the card no SECOND DOG / 02.
+  // (no DOGS / 04 code); the card keeps its SECOND DOG / 02 (the cards' numbering).
   assert.match(home, /id="manager-tab-3"[\s\S]*?<b>犬<\/b>/);
   assert.doesNotMatch(home, /DOGS \/ 04/);
   assert.match(home, /locationHash !== "manager-archive-dogs"[\s\S]*?setManagerTab\(3\)/);
-  assert.doesNotMatch(home, /SECOND DOG \/ 02/);
+  assert.match(home, /SECOND DOG \/ 02/);
   assert.match(home, /hash="character-section-04"/);
   assert.match(home, /aria-label="関連人物"/);
   const page = read("src/components/world/dante-page.tsx");

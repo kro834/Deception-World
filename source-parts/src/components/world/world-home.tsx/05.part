@@ -1,6 +1,3 @@
-                aria-label={
-                  locked ? "ロックを解除して自動切替にする" : "ポスターをロックして固定する"
-                }
                 onClick={() => {
                   cancelPosterShuffle();
                   setLocked((v) => !v);
@@ -382,6 +379,7 @@
                       decoding="async"
                     />
                     <span className="other-card-shade" aria-hidden="true" />
+                    <span className="other-card-code">SECOND DOG / 02</span>
                     <span className="other-card-copy">
                       <small>第二の犬・ヴァルグ</small>
                       <b>ダンテ／ヴァルグ</b>
@@ -422,6 +420,7 @@
                       decoding="async"
                     />
                     <span className="other-card-shade" aria-hidden="true" />
+                    <span className="other-card-code">RELATED / 01</span>
                     <span className="other-card-copy">
                       <b>
                         <NameText value="テラ・アレイン" />
@@ -450,6 +449,7 @@
                       decoding="async"
                     />
                     <span className="other-card-shade" aria-hidden="true" />
+                    <span className="other-card-code">RELATED / 02</span>
                     <span className="other-card-copy">
                       <b>
                         <NameText value="ルナ・アレイン" />
@@ -477,6 +477,7 @@
                       decoding="async"
                     />
                     <span className="other-card-shade" aria-hidden="true" />
+                    <span className="other-card-code">RELATED / 05</span>
                     <span className="other-card-copy">
                       <small>よあけまもりのみこと</small>
                       <b>夜明護尊</b>
