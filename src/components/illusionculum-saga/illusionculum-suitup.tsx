@@ -204,7 +204,7 @@ export const IllusionculumSuitUp = memo(function IllusionculumSuitUp({
             alt=""
             width={ILLUSIONCULUM_SUIT_SIZE.width}
             height={ILLUSIONCULUM_SUIT_SIZE.height}
-            loading="lazy"
+            loading="eager"
             decoding="async"
           />
           <img
@@ -213,7 +213,7 @@ export const IllusionculumSuitUp = memo(function IllusionculumSuitUp({
             alt=""
             width={ILLUSIONCULUM_SUIT_SIZE.width}
             height={ILLUSIONCULUM_SUIT_SIZE.height}
-            loading="lazy"
+            loading="eager"
             decoding="async"
           />
           <canvas className="rzn-canvas" width={0} height={0} />

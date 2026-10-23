@@ -8,7 +8,7 @@ import { ILLUSIONCULUM_HERO } from "./illusionculum-saga-artwork.ts";
 
 /** The gate covers the page this long (the four calls, the figure resolved,
  * the orbs seated, the reactor lit), then reveals it over `reveal`. */
-export const ILLUSIONCULUM_ENTRY_TIMINGS = { cover: 2700, reveal: 560 } as const;
+export const ILLUSIONCULUM_ENTRY_TIMINGS = { cover: 3090, reveal: 560 } as const;
 
 export const ILLUSIONCULUM_ENTRY_CALLS = Object.freeze([
   "ULTRA！VINCULUM！",
