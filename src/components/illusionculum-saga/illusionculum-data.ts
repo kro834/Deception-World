@@ -9,7 +9,11 @@
 // その際注釈はつけないで。」): its paragraphs are the owner's with the
 // Rexonance clauses taken out (each paragraph is its kept fragments, in
 // order), and the ウルトラ rows and the one sentence that states its gain are
-// this site's (`added`), written in the owner's own pattern.
+// this site's (`added`), written in the owner's own pattern. The main
+// compute's YOPS carries 「〜」 for イリュージョンクルム, メタ・ウニタス and
+// ファーフロム (owner's rule: 「YOPSはエクスプリームは「〜」はつかず、レクソナンス
+// とメタ・ウニタス、イリュージョンクルム、ファーフロムにのみつきます。」,
+// scripts/yops-notation.test.mjs): the only change to the owner's figures.
 
 export type IcSpec = { dt: string; dd: string; sub: readonly string[] };
 export type IcArticle = { title: string; body: readonly string[] };
@@ -35,7 +39,7 @@ export const ILLUSIONCULUM_SAGA = {
     { dt: "ジャンプ力", dd: "5000.0m", sub: [] },
     { dt: "走力", dd: "0.00024s／100m", sub: [] },
     { dt: "飛行速度", dd: "測定不能", sub: [] },
-    { dt: "演算", dd: "50000YOPS／∞Core", sub: ["『KHAOS DeuX』"] },
+    { dt: "演算", dd: "50000〜YOPS／∞Core", sub: ["『KHAOS DeuX』"] },
     {
       dt: "演算2",
       dd: "9000TOPS／300Core",
@@ -188,9 +192,9 @@ export const ILLUSIONCULUM_COMPARISON = {
     rows: [
       { cells: ["ヴィンクルム", "10000YOPS", "300TOPS", "P2"] },
       { cells: ["エクスプリーム", "20000YOPS", "5000TOPS", "P14 Standard"] },
-      { cells: ["イリュージョンクルム", "50000YOPS", "9000TOPS", "P14 Extreme Tuning"] },
+      { cells: ["イリュージョンクルム", "50000〜YOPS", "9000TOPS", "P14 Extreme Tuning"] },
       { cells: ["メタ・ウニタス", "50000〜YOPS", "9000TOPS", "P16"] },
-      { cells: ["ファーフロム", "60000YOPS", "9000TOPS", "P16"] },
+      { cells: ["ファーフロム", "60000〜YOPS", "9000TOPS", "P16"] },
     ],
     note: ["メタ・ウニタスULTRAは、基本的な演算機構を通常形態から継承している。"],
   },
@@ -275,7 +279,7 @@ export const ILLUSIONCULUM_COMPARISON = {
       body: [
         {
           fragments: [
-            "イリュージョンクルムはP14を採用し、メタ・ウニタスはP16を採用している。両者の公称主演算性能はともに50000YOPS級であるため、単純な演算回数では明確な差が生じていないものの、演算結果を戦闘や支援へ反映する機構には世代差が存在する。",
+            "イリュージョンクルムはP14を採用し、メタ・ウニタスはP16を採用している。両者の公称主演算性能はともに50000〜YOPS級であるため、単純な演算回数では明確な差が生じていないものの、演算結果を戦闘や支援へ反映する機構には世代差が存在する。",
           ],
         },
         {

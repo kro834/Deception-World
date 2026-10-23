@@ -15,8 +15,12 @@ const menu = read("src/components/world/world-chrome.tsx");
 const sections = read("src/lib/special-site-sections.ts");
 const styles = read("src/styles-illusionculum-saga.css");
 const suitStyles = read("src/styles-illusionculum-suitup.css");
-const ownerText = read("design/illusionculum-saga-20261023/owner-text.md");
-const comparisonText = read("design/illusionculum-saga-20261023/comparison-owner.md");
+// The owner's YOPS rule (scripts/yops-notation.test.mjs): the main compute of
+// イリュージョンクルム, メタ・ウニタス and ファーフロム carries 「〜」. The only
+// change the page makes to the owner's figures, so the sources are read with it.
+const yops = (text) => text.replace(/(?<![\d,])(50000|60000)YOPS/g, "$1〜YOPS");
+const ownerText = yops(read("design/illusionculum-saga-20261023/owner-text.md"));
+const comparisonText = yops(read("design/illusionculum-saga-20261023/comparison-owner.md"));
 const { ILLUSIONCULUM_SAGA, ILLUSIONCULUM_FORMS, ILLUSIONCULUM_COMPARISON } = await import(
   "../src/components/illusionculum-saga/illusionculum-data.ts"
 );

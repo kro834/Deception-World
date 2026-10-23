@@ -22,8 +22,9 @@ const value = (cell: string) => Number.parseFloat(cell.replace(/[^\d.]/g, ""));
 function bars(rows: readonly Row[], head: readonly string[]) {
   return head.map((title, column) => {
     if (column === 0) return rows.map(() => 0);
+    // A figure column only (the acceleration units' names are not figures).
+    if (rows.some((row) => !/^\d/.test(row.cells[column]))) return rows.map(() => 0);
     const values = rows.map((row) => value(row.cells[column]));
-    if (values.some((entry) => !Number.isFinite(entry))) return rows.map(() => 0);
     if (/走力/.test(title)) {
       const best = Math.min(...values);
       const worst = Math.max(...values);
