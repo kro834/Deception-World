@@ -66,6 +66,8 @@ import { DreamReadingLauncher } from "./dream-reading-launcher";
 import { DreamProgrammeDesk } from "./dream-programme-desk";
 import { DreamKarakuriCabinet } from "./dream-karakuri-cabinet";
 import { DreamStageLantern } from "./dream-stage-lantern";
+import { DreamGlossarySearch } from "./dream-glossary-search";
+import { DreamDossierGuide } from "./dream-dossier-guide";
 import {
   DreamChapterCompanion,
   DreamStoryBacklinks,
@@ -345,6 +347,7 @@ function DossierContent({
   onSelectDolminence?: (next: DreamDolminence) => void;
   onClose?: () => void;
 }) {
+  const dossierRef = useRef<HTMLDivElement>(null);
   const [plateFocus, setPlateFocus] = useState<"split" | "primary" | "secondary">("split");
   useEffect(() => {
     setPlateFocus("split");
@@ -354,6 +357,7 @@ function DossierContent({
 
   return (
     <div
+      ref={dossierRef}
       className="dream-dossier-layout"
       style={{ ["--dream-accent" as string]: character.accent }}
     >
@@ -449,6 +453,8 @@ function DossierContent({
             </button>
           </div>
         ) : null}
+
+        <DreamDossierGuide scope={dossierRef} recordId={character.id} name={character.name} />
 
         <header className="dream-dossier-title">
           <p>CHARACTER FILE / {character.order}</p>
@@ -670,6 +676,7 @@ function DolminenceContent({
   onSelectCharacter?: (next: DreamCharacter) => void;
   onClose?: () => void;
 }) {
+  const dossierRef = useRef<HTMLDivElement>(null);
   const [plateFocus, setPlateFocus] = useState<"split" | "primary" | "secondary">("split");
   useEffect(() => {
     setPlateFocus("split");
@@ -679,6 +686,7 @@ function DolminenceContent({
 
   return (
     <div
+      ref={dossierRef}
       className="dream-dossier-layout dream-dolminence-dossier"
       style={{ ["--dream-accent" as string]: record.accent }}
     >
@@ -772,6 +780,8 @@ function DolminenceContent({
             </button>
           </div>
         ) : null}
+
+        <DreamDossierGuide scope={dossierRef} recordId={record.id} name={record.name} />
 
         <header className="dream-dossier-title">
           <p>DOLMINENCE FILE / {record.order}</p>
@@ -2347,14 +2357,7 @@ export function DreamChapter() {
           <h2 id="glossary-title">用語集</h2>
           <span>{String(DREAM_GLOSSARY.length).padStart(2, "0")} TERMS</span>
         </header>
-        <nav className="dream-glossary-jump" aria-label="用語集の索引">
-          {DREAM_GLOSSARY.map((entry, index) => (
-            <a key={entry.term} href={`#dream-term-${index + 1}`}>
-              <small>{String(index + 1).padStart(2, "0")}</small>
-              <span>{entry.term}</span>
-            </a>
-          ))}
-        </nav>
+        <DreamGlossarySearch />
         <dl className="dream-glossary" data-dream-reveal>
           {DREAM_GLOSSARY.map((entry, index) => (
             <div key={entry.term} id={`dream-term-${index + 1}`}>

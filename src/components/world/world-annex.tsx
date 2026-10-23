@@ -9,6 +9,10 @@ import { UiVectorIcon } from "./ui-vector-icon";
 import { QuoteTranscript } from "./quote-transcript";
 import { mountQuoteTranscript } from "@/lib/quote-transcript.js";
 import { WorldBriefArt } from "./world-brief-art";
+import { WorldEpisodeIndex, WorldRecordContext } from "./world-record-context.tsx";
+import { WorldCastDirectory } from "./world-cast-directory";
+import { useWorldCastDirectory } from "./use-world-cast-directory";
+import { matchesCastDirectoryFilter } from "./world-cast-directory-model";
 import {
   WORLD_BRIEF,
   WORLD_CAST_ROSTER,
@@ -303,6 +307,7 @@ function keepProfileInPlace(event: SyntheticEvent<HTMLDetailsElement>) {
 
 /** 04 CAST FILES: the portrait wall. */
 function CastFiles() {
+  const { filter, setFilter } = useWorldCastDirectory();
   return (
     <section
       id="cast-roster"
@@ -312,9 +317,10 @@ function CastFiles() {
       <div className="wa-inner">
         <ChapterOpener no="04" />
         <AnnexHeading id="cast-roster-title" title="人物一覧" />
+        <WorldCastDirectory filter={filter} onChange={setFilter} />
         <ol className="wa-roster">
           {WORLD_CAST_ROSTER.map((entry) => (
-            <li key={entry.id}>
+            <li key={entry.id} hidden={!matchesCastDirectoryFilter(entry, filter)}>
               <article
                 className={`wa-plate wa-person is-${kindOf(entry)}`}
                 aria-labelledby={`wa-person-${entry.id}`}
@@ -662,6 +668,7 @@ function ArchiveLog() {
           <ChapterOpener no="06" />
           <AnnexHeading id="episode-notes-title" no="06.1" title="エピソードの記録" />
           <p className="wa-prose">EP.01〜03の展開を含みます。</p>
+          <WorldEpisodeIndex />
           <ol className="wa-episodes">
             {WORLD_EPISODE_NOTES.map((episode) => {
               const art = EPISODE_ART[episode.no];
@@ -714,6 +721,7 @@ function ArchiveLog() {
                     <div className="wa-episode-lines">
                       <Lines lines={episode.lines} />
                     </div>
+                    <WorldRecordContext episodeNo={episode.no} />
                   </div>
                 </li>
               );

@@ -28,6 +28,7 @@ export function LibraryInquiry({
             type="button"
             className={`inquiry-choice inquiry-color-${item.color}`}
             aria-pressed={selected?.id === item.id}
+            aria-expanded={selected?.id === item.id}
             aria-controls="inquiry-guide"
             onClick={() => onGuideChange(selected?.id === item.id ? "" : item.id)}
           >
@@ -59,6 +60,11 @@ export function LibraryInquiry({
           </button>
         ))}
       </div>
+      {selected ? (
+        <a className="inquiry-guide-jump" href="#inquiry-guide-title">
+          選んだ問いの案内へ <span aria-hidden="true">↓</span>
+        </a>
+      ) : null}
       <p className="sr-only" role="status" aria-live="polite" aria-atomic="true">
         {selected ? `${selected.question}の案内を表示しました。続く3つの資料から選べます。` : ""}
       </p>
@@ -67,7 +73,9 @@ export function LibraryInquiry({
           <div className={`inquiry-route inquiry-color-${selected.color}`}>
             <header className="inquiry-route-heading">
               <p className="inquiry-eyebrow">THREE ENTRANCES</p>
-              <h3 style={titleRunStyle(selected.question)}>{selected.question}</h3>
+              <h3 id="inquiry-guide-title" tabIndex={-1} style={titleRunStyle(selected.question)}>
+                {selected.question}
+              </h3>
               <p>番号は案内の順番です。物語の時系列や読了を示すものではありません。</p>
             </header>
             <ol className="inquiry-stops">

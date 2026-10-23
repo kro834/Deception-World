@@ -28,7 +28,19 @@ test("the viewer freezes the page and puts the reader back where they were", () 
     page,
     /viewerOpen,\s*router,\s*featuredId,\s*works,\s*titles,\s*display.preferences.density,\s*display.status,\s*display.error,/,
   );
-  assert.doesNotMatch(page, /requestAnimationFrame/);
+  // The only deferred scroll belongs to a personal action's result within the
+  // viewer header. Document/history restoration must remain single-shot.
+  const feedbackReveal = page.match(
+    /\x20{2}const revealPersonalFeedback = [\s\S]*?\n\x20{2}};\n/,
+  )?.[0];
+  assert.ok(feedbackReveal);
+  assert.match(feedbackReveal, /if \(!dialogRef.current\?\.open\) return/);
+  assert.match(
+    feedbackReveal,
+    /if \(dialogRef.current\?\.open\) revealGalleryControl\(ref.current\)/,
+  );
+  assert.doesNotMatch(feedbackReveal, /window\.scroll|scrollIntoView|\.focus\(/);
+  assert.doesNotMatch(page.replace(feedbackReveal, ""), /requestAnimationFrame/);
   const router = read("src/router.tsx");
   assert.match(router, /!document.body.hasAttribute\("data-gallery-viewer-lock"\)/);
 });

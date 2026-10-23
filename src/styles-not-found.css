@@ -61,11 +61,13 @@
     minmax(24px, 1fr);
   place-content: stretch;
   gap: 0;
-  min-height: 100svh;
+  height: 100dvh;
+  min-height: 0;
   box-sizing: border-box;
   padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom)
     env(safe-area-inset-left);
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   color: #f2f7fb;
   text-align: left;
   background:
@@ -472,8 +474,8 @@
   padding: 16px var(--lr-pad-x) var(--lr-pad-y);
   border-top: 1px solid rgb(122 232 255 / 16%);
   background:
-    repeating-linear-gradient(90deg, rgb(122 232 255 / 38%) 0 1px, transparent 1px 24px) 0 0 /
-      100% 5px no-repeat,
+    repeating-linear-gradient(90deg, rgb(122 232 255 / 38%) 0 1px, transparent 1px 24px) 0 0 / 100%
+      5px no-repeat,
     linear-gradient(180deg, rgb(122 232 255 / 5%), transparent 60%);
 }
 
@@ -504,9 +506,13 @@
 }
 
 .app-not-found.app-not-found > nav.recovery-tiles > a > small {
-  font: 400 12px / 1.2 var(--lr-hud);
+  font: 400 12px / 1.55 var(--lr-hud);
   letter-spacing: 0.16em;
   color: var(--lr-ice);
+}
+
+.app-not-found.app-not-found > nav.recovery-tiles > a[aria-label] > small {
+  letter-spacing: 0.02em;
 }
 
 /* A name that wraps (資料室・しおり on a phone) stays centred on its tile,

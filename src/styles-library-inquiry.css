@@ -96,6 +96,23 @@
   line-height: 1.8;
   margin: 1rem 0 0;
 }
+.library-page .inquiry-guide-jump {
+  display: inline-flex;
+  align-items: center;
+  gap: 1rem;
+  min-height: 44px;
+  margin-top: 0.75rem;
+  color: var(--inquiry-accent);
+  text-decoration: underline;
+  text-underline-offset: 5px;
+}
+#inquiry-guide-title {
+  scroll-margin-top: calc(100px + env(safe-area-inset-top));
+}
+#inquiry-guide-title:focus {
+  outline: 2px solid var(--inquiry-accent);
+  outline-offset: 5px;
+}
 .inquiry-route {
   margin-top: 2rem;
   padding: clamp(1.2rem, 3vw, 2.5rem);

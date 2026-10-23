@@ -869,6 +869,13 @@ function componentFixture({ deferAllocation = false, failAllocation = false } = 
       assert.ok(found, `button ${label}`);
       return found;
     },
+    angles() {
+      let found;
+      walk(tree, (node) => {
+        if (node.props?.["aria-label"] === "鑑賞する角度") found = node;
+      });
+      return found;
+    },
     stage() {
       let found;
       walk(tree, (node) => {
@@ -937,6 +944,96 @@ test("wrapper disposes late allocations after route unmount and retains original
     "failed context must not retry endlessly on visibility events",
   );
   failed.cleanup();
+});
+
+test("explicit retry rebuilds a failed renderer without visibility-driven retry loops", async () => {
+  const f = componentFixture({ failAllocation: true });
+  f.intersect(true);
+  await flushPromises();
+  f.render();
+  f.button("3D表示を再試行").props.onClick();
+  f.render();
+  assert.equal(f.options.signal.aborted, true);
+  assert.equal(f.stage().props["aria-busy"], true);
+  // A replacement observer must confirm visibility before another allocation.
+  f.observations[4].callback([{ isIntersecting: true }]);
+  await flushPromises();
+  assert.equal(f.calls.allocated, 2);
+  f.cleanup();
+});
+
+test("context-loss retry retains the selected camera and aborts the superseded scene", async () => {
+  const f = componentFixture();
+  f.intersect(true);
+  await flushPromises();
+  f.render();
+  f.button("斜めから").props.onClick();
+  const previousOptions = f.options;
+  previousOptions.onStatus("context-lost");
+  f.render();
+  assert.equal(f.stage().props["data-studio-ready"], "false");
+  f.button("3D表示を再試行").props.onClick();
+  f.render();
+  assert.equal(previousOptions.signal.aborted, true);
+  assert.equal(f.calls.dispose, 1);
+  f.observations[4].callback([{ isIntersecting: true }]);
+  await flushPromises();
+  f.render();
+  assert.equal(f.stage().props["data-studio-ready"], "true");
+  assert.deepEqual(f.calls.views, ["front", "oblique", "oblique"]);
+  previousOptions.onStatus("error");
+  f.render();
+  assert.equal(f.stage().props["data-studio-ready"], "true", "disposed scene status is ignored");
+  f.cleanup();
+});
+
+test("angle keyboard controls wrap, focus the selected button and ignore unrelated keys", async () => {
+  const f = componentFixture();
+  f.intersect(true);
+  await flushPromises();
+  f.render();
+  const focused = [];
+  let prevented = 0;
+  const press = (key, { focusedIndex, ...modifiers } = {}) => {
+    const buttons = [0, 1, 2].map((index) => ({
+      focus() {
+        focused.push(index);
+      },
+    }));
+    f.angles().props.onKeyDown({
+      key,
+      ...modifiers,
+      target: buttons[focusedIndex],
+      preventDefault() {
+        prevented++;
+      },
+      currentTarget: {
+        querySelectorAll: () => buttons,
+      },
+    });
+    f.render();
+  };
+  press("ArrowLeft");
+  press("Home");
+  press("ArrowRight");
+  press("End");
+  press("Tab");
+  assert.deepEqual(f.calls.views, ["front", "room", "front", "oblique", "room"]);
+  assert.deepEqual(focused, [2, 0, 1, 2]);
+  assert.equal(prevented, 4);
+  press("ArrowRight", { focusedIndex: 0 });
+  assert.equal(f.calls.views.at(-1), "oblique", "arrows start from the focused button after Tab navigation");
+  assert.equal(focused.at(-1), 1);
+  for (const modifier of ["altKey", "ctrlKey", "metaKey", "shiftKey"]) {
+    press("ArrowRight", { focusedIndex: 0, [modifier]: true });
+  }
+  assert.equal(prevented, 5, "modified keys retain browser and assistive-technology behavior");
+  assert.equal(f.calls.views.length, 6);
+  f.button("原画表示").props.onClick();
+  f.render();
+  press("ArrowRight");
+  assert.equal(prevented, 5, "original-image mode leaves keyboard navigation untouched");
+  f.cleanup();
 });
 
 test("component retains fallback and route cleanup contracts while the heavyweight module stays lazy", () => {

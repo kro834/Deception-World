@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { GuardedLink } from "@/components/load-gate";
 import { DisplayName } from "@/components/name-text";
@@ -26,6 +26,7 @@ import {
 import { RecordArtFrame } from "./record-art";
 
 const byId = new Map(LIBRARY_ENTRIES.map((entry) => [entry.id, entry]));
+const SAVED_PREVIEW_LIMIT = 6;
 
 function downloadExport(saved: LibrarySaved) {
   const data = buildLibraryExport(saved, readRecentSearches(), Date.now());
@@ -41,11 +42,28 @@ function downloadExport(saved: LibrarySaved) {
 }
 
 /** The reader's own shelf: where they left off, saved records, history, searches. */
-export function LibraryHub({ saved, ready }: { saved: LibrarySaved; ready: boolean }) {
+export function LibraryHub({
+  saved,
+  ready,
+  error = "",
+  onBrowseSaved,
+}: {
+  saved: LibrarySaved;
+  ready: boolean;
+  error?: string;
+  onBrowseSaved?: () => void;
+}) {
   const searches = useRecentSearches();
   const [now, setNow] = useState<number | null>(null);
-  const [confirming, setConfirming] = useState(false);
+  const [confirming, setConfirming] = useState<"all" | "bookmarks" | null>(null);
+  const [expanded, setExpanded] = useState(false);
+  const [clearIncomplete, setClearIncomplete] = useState(false);
   const [notice, setNotice] = useState("");
+  const shelfTitleRef = useRef<HTMLHeadingElement>(null);
+  const hubTitleRef = useRef<HTMLHeadingElement>(null);
+  const returnFocusRef = useRef<HTMLButtonElement | null>(null);
+  const removedRef = useRef<{ id: string; candidates: string[] } | null>(null);
+  const completedFocusRef = useRef<"all" | "bookmarks" | null>(null);
   useEffect(() => {
     if (ready) setNow(Date.now());
   }, [ready, saved]);
@@ -53,15 +71,87 @@ export function LibraryHub({ saved, ready }: { saved: LibrarySaved; ready: boole
   const resume = continueReading(saved);
   const groups = now === null ? [] : groupVisits(saved.recent, now);
   const bookmarks = saved.bookmarks.flatMap((id) => byId.get(id) ?? []);
+  const shownBookmarks = expanded ? bookmarks : bookmarks.slice(0, SAVED_PREVIEW_LIMIT);
   const empty = !saved.recent.length && !bookmarks.length && !searches.length;
 
+  useLayoutEffect(() => {
+    if (confirming) {
+      document
+        .getElementById(`library-confirm-clear-${confirming}`)
+        ?.focus({ preventScroll: true });
+      return;
+    }
+    if (completedFocusRef.current) {
+      (completedFocusRef.current === "bookmarks" ? shelfTitleRef : hubTitleRef).current?.focus({
+        preventScroll: true,
+      });
+      completedFocusRef.current = null;
+    } else if (returnFocusRef.current) {
+      const opener = returnFocusRef.current;
+      (opener.isConnected && !opener.disabled ? opener : hubTitleRef.current)?.focus({
+        preventScroll: true,
+      });
+    }
+    returnFocusRef.current = null;
+  }, [confirming]);
+
+  useLayoutEffect(() => {
+    const removed = removedRef.current;
+    if (!removed) return;
+    removedRef.current = null;
+    // The store keeps its old snapshot on refusal; leave focus on that button.
+    if (saved.bookmarks.includes(removed.id)) return;
+    const next = removed.candidates
+      .map((id) => document.getElementById(`library-saved-${id}`)?.querySelector("button"))
+      .find((button) => button instanceof HTMLElement);
+    (next || shelfTitleRef.current)?.focus({ preventScroll: true });
+  }, [saved.bookmarks, error]);
+
+  const beginClear = (kind: "all" | "bookmarks", button: HTMLButtonElement) => {
+    returnFocusRef.current = button;
+    setNotice("");
+    setConfirming(kind);
+  };
+  const finishClear = () => {
+    const kind = confirming;
+    if (!kind) return;
+    const libraryCleared = kind === "all" ? clearLibraryAll() : clearLibraryBookmarks();
+    if (kind === "all") {
+      const searchesCleared = clearRecentSearches();
+      setClearIncomplete(!libraryCleared || !searchesCleared);
+      setNotice(
+        libraryCleared && searchesCleared
+          ? "しおり・閲覧履歴・検索履歴をすべて消去しました。"
+          : "一部の保存データを消去できませんでした。ブラウザーの保存設定を確認して、もう一度お試しください。",
+      );
+    } else {
+      setNotice(libraryCleared ? "しおりをすべて解除しました。" : "しおりを解除できませんでした。");
+    }
+    // A successful clear removes or disables the initiating button.
+    if (libraryCleared) completedFocusRef.current = kind;
+    setConfirming(null);
+  };
+
   return (
-    <section className="library-hub" id="my-library" aria-labelledby="library-hub-title">
+    <section
+      className="library-hub"
+      id="my-library"
+      aria-labelledby="library-hub-title"
+      onKeyDown={(event) => {
+        if (event.key === "Escape" && confirming) {
+          event.preventDefault();
+          setConfirming(null);
+        }
+      }}
+    >
       <header className="library-hub-heading">
         <p className="library-eyebrow">MY LIBRARY</p>
-        <h2 id="library-hub-title">マイライブラリー</h2>
+        <h2 id="library-hub-title" ref={hubTitleRef} tabIndex={-1}>
+          マイライブラリー
+        </h2>
         <p>しおり・閲覧履歴・検索履歴は、このブラウザーにだけ保存されます。</p>
       </header>
+      {error ? <p className="library-error">{error}</p> : null}
       {!ready || now === null ? (
         <p className="library-hub-loading" role="status">
           保存データを確認しています…
@@ -104,22 +194,24 @@ export function LibraryHub({ saved, ready }: { saved: LibrarySaved; ready: boole
               </>
             ) : (
               <p className="library-hub-empty">
-                人物資料や章のページを開くと、ここから続きを読めます。
+                {error
+                  ? "保存データを確認できないため、続きから読む資料を表示できません。"
+                  : "人物資料や章のページを開くと、ここから続きを読めます。"}
               </p>
             )}
           </article>
 
           <section className="library-shelf" aria-labelledby="library-shelf-title">
             <div className="library-hub-subhead">
-              <h3 id="library-shelf-title">
+              <h3 id="library-shelf-title" ref={shelfTitleRef} tabIndex={-1}>
                 <span>SAVED</span>しおり
               </h3>
               <b>{bookmarks.length}</b>
             </div>
             {bookmarks.length ? (
-              <ul className="library-rows">
-                {bookmarks.map((entry) => (
-                  <li key={entry.id}>
+              <ul className="library-rows" id="library-saved-list">
+                {shownBookmarks.map((entry, index) => (
+                  <li key={entry.id} id={`library-saved-${entry.id}`}>
                     <GuardedLink to={entry.path} hash={entry.hash} assets={[]}>
                       <RecordArtFrame
                         art={pathArt(entry.path, entry.hash)}
@@ -134,7 +226,16 @@ export function LibraryHub({ saved, ready }: { saved: LibrarySaved; ready: boole
                     <button
                       type="button"
                       aria-label={`${entry.title}のしおりを解除`}
-                      onClick={() => toggleBookmark(entry.id)}
+                      onClick={() => {
+                        removedRef.current = {
+                          id: entry.id,
+                          candidates: [
+                            ...bookmarks.slice(index + 1),
+                            ...bookmarks.slice(0, index).reverse(),
+                          ].map((item) => item.id),
+                        };
+                        toggleBookmark(entry.id);
+                      }}
                     >
                       解除
                     </button>
@@ -143,13 +244,58 @@ export function LibraryHub({ saved, ready }: { saved: LibrarySaved; ready: boole
               </ul>
             ) : (
               <p className="library-hub-empty">
-                下の資料カードの「しおり ＋」や、メニューの「資料を保存」から追加できます。
+                {error
+                  ? "しおりを確認できません。すべての資料は引き続き探せます。"
+                  : "下の資料カードの「しおり ＋」や、メニューの「資料を保存」から追加できます。"}
               </p>
             )}
-            {bookmarks.length > 1 ? (
-              <button type="button" className="library-text-button" onClick={clearLibraryBookmarks}>
-                しおりをすべて解除
-              </button>
+            <div className="library-shelf-tools">
+              {bookmarks.length > SAVED_PREVIEW_LIMIT ? (
+                <button
+                  type="button"
+                  aria-expanded={expanded}
+                  aria-controls="library-saved-list"
+                  onClick={() => setExpanded((value) => !value)}
+                >
+                  {expanded
+                    ? "最初の6件に戻す"
+                    : `残り${bookmarks.length - SAVED_PREVIEW_LIMIT}件を表示`}
+                </button>
+              ) : null}
+              {bookmarks.length > 0 && onBrowseSaved ? (
+                <button type="button" onClick={onBrowseSaved}>
+                  しおりを絞り込む
+                </button>
+              ) : null}
+              {bookmarks.length > 1 ? (
+                <button
+                  type="button"
+                  className="library-text-button"
+                  onClick={(event) => beginClear("bookmarks", event.currentTarget)}
+                >
+                  しおりをすべて解除
+                </button>
+              ) : null}
+            </div>
+            {confirming === "bookmarks" ? (
+              <div
+                className="library-clear-confirmation"
+                role="group"
+                aria-label="しおりの一括解除"
+              >
+                <p>しおりをすべて解除します。元に戻せません。</p>
+                <button
+                  type="button"
+                  id="library-confirm-clear-bookmarks"
+                  className="library-danger"
+                  onClick={finishClear}
+                >
+                  すべて解除する
+                </button>
+                <button type="button" onClick={() => setConfirming(null)}>
+                  やめる
+                </button>
+              </div>
             ) : null}
           </section>
 
@@ -184,13 +330,25 @@ export function LibraryHub({ saved, ready }: { saved: LibrarySaved; ready: boole
                 </div>
               ))
             ) : (
-              <p className="library-hub-empty">閲覧履歴はまだありません。</p>
+              <p className="library-hub-empty">
+                {error ? "閲覧履歴を確認できません。" : "閲覧履歴はまだありません。"}
+              </p>
             )}
             <p className="library-hub-note">
               直近{RECENT_LIMIT}件まで。読了を示すものではありません。
             </p>
             {saved.recent.length ? (
-              <button type="button" className="library-text-button" onClick={clearLibraryRecent}>
+              <button
+                type="button"
+                className="library-text-button"
+                onClick={() => {
+                  const cleared = clearLibraryRecent();
+                  setNotice(
+                    cleared ? "閲覧履歴を消去しました。" : "閲覧履歴を消去できませんでした。",
+                  );
+                  if (cleared) hubTitleRef.current?.focus({ preventScroll: true });
+                }}
+              >
                 履歴を消去
               </button>
             ) : null}
@@ -219,7 +377,19 @@ export function LibraryHub({ saved, ready }: { saved: LibrarySaved; ready: boole
               </p>
             )}
             {searches.length ? (
-              <button type="button" className="library-text-button" onClick={clearRecentSearches}>
+              <button
+                type="button"
+                className="library-text-button"
+                onClick={() => {
+                  const cleared = clearRecentSearches();
+                  setNotice(
+                    cleared
+                      ? "検索履歴を消去しました。"
+                      : "検索履歴をこのページの表示から削除しましたが、ブラウザーの保存データは消去できませんでした。",
+                  );
+                  hubTitleRef.current?.focus({ preventScroll: true });
+                }}
+              >
                 検索履歴を消す
               </button>
             ) : null}
@@ -227,41 +397,47 @@ export function LibraryHub({ saved, ready }: { saved: LibrarySaved; ready: boole
 
           <div className="library-data-controls">
             <p>保存データ</p>
-            <button type="button" disabled={empty} onClick={() => downloadExport(saved)}>
+            <button
+              type="button"
+              disabled={empty}
+              onClick={() => {
+                try {
+                  downloadExport(saved);
+                  setNotice("保存データの書き出しを開始しました。");
+                } catch {
+                  setNotice("書き出しを開始できませんでした。もう一度お試しください。");
+                }
+              }}
+            >
               書き出す（JSON）
             </button>
-            {confirming ? (
+            {confirming === "all" ? (
               <>
                 <button
                   type="button"
+                  id="library-confirm-clear-all"
                   className="library-danger"
-                  onClick={() => {
-                    clearLibraryAll();
-                    clearRecentSearches();
-                    setConfirming(false);
-                    setNotice("しおり・閲覧履歴・検索履歴をすべて消去しました。");
-                  }}
+                  onClick={finishClear}
                 >
                   本当に消去する
                 </button>
-                <button type="button" onClick={() => setConfirming(false)}>
+                <button type="button" onClick={() => setConfirming(null)}>
                   やめる
                 </button>
               </>
             ) : (
               <button
                 type="button"
-                disabled={empty}
-                onClick={() => {
-                  setNotice("");
-                  setConfirming(true);
-                }}
+                disabled={empty && !clearIncomplete}
+                onClick={(event) => beginClear("all", event.currentTarget)}
               >
                 すべて消去
               </button>
             )}
             <p className="library-hub-note" role="status">
-              {confirming ? "しおり・閲覧履歴・検索履歴を消去します。元に戻せません。" : notice}
+              {confirming === "all"
+                ? "しおり・閲覧履歴・検索履歴を消去します。元に戻せません。"
+                : notice}
             </p>
           </div>
         </div>

@@ -49,6 +49,8 @@
 }
 .recovery-tiles > a > small {
   font-size: 12px;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
   color: #7ae8ff;
 }
 .recovery-tiles > a > b {
@@ -77,5 +79,9 @@
   .recovery-tiles > a > img,
   .recovery-tiles > a::before {
     display: none;
+  }
+
+  .recovery-tiles > a:focus-visible {
+    outline-color: Highlight;
   }
 }

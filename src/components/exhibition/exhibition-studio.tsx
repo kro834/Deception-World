@@ -118,6 +118,8 @@ function StudioView({
   const rendererRef = useRef<StudioRenderer | null>(null);
   const [phase, setPhase] = useState("loading");
   const [view, setView] = useState<ExhibitionStudioView>(initialView);
+  const viewRef = useRef<ExhibitionStudioView>(initialView);
+  const [attempt, setAttempt] = useState(0);
   const [original, setOriginal] = useState(false);
   const originalRef = useRef(false);
   const syncRef = useRef<(() => void) | null>(null);
@@ -166,7 +168,7 @@ function StudioView({
           }
           rendererRef.current = candidate;
           host.dataset.studioEnvironment = candidate.getDiagnostics().environment;
-          candidate.setView(initialView);
+          candidate.setView(viewRef.current);
           if (allowed()) candidate.resume();
           else candidate.pause();
         })
@@ -179,10 +181,14 @@ function StudioView({
         })
         .finally(() => {
           pending = false;
+          // Visibility can return between the import's guard and this completion.
+          if (!disposed && !failed && !rendererRef.current && allowed()) sync();
         });
     };
     syncRef.current = sync;
-    const resize = new ResizeObserver(() => rendererRef.current?.resize());
+    const resize = new ResizeObserver(() => {
+      if (allowed()) rendererRef.current?.resize();
+    });
     resize.observe(host);
     const intersection = new IntersectionObserver((entries) => {
       visible = entries.some((entry) => entry.isIntersecting);
@@ -200,9 +206,10 @@ function StudioView({
       rendererRef.current?.dispose();
       rendererRef.current = null;
     };
-  }, [artworkUrl, artworkWidth, artworkHeight, quality, initialView]);
+  }, [artworkUrl, artworkWidth, artworkHeight, quality, initialView, attempt]);
 
   const updateView = (next: ExhibitionStudioView) => {
+    viewRef.current = next;
     setView(next);
     rendererRef.current?.setView(next);
   };
@@ -213,6 +220,13 @@ function StudioView({
     syncRef.current?.();
   };
   const ready = phase === "ready" && !original;
+  const unavailable = phase === "error" || phase === "unsupported" || phase === "context-lost";
+  const retry = () => {
+    setPhase("loading");
+    originalRef.current = false;
+    setOriginal(false);
+    setAttempt((value) => value + 1);
+  };
 
   return (
     <div className="exhibition-studio" data-exhibition-active="true">
@@ -220,9 +234,15 @@ function StudioView({
         ref={hostRef}
         className="exhibition-studio-stage"
         data-studio-ready={ready ? "true" : "false"}
+        aria-busy={phase === "loading" && !original}
         data-studio-format={artworkWidth < artworkHeight ? "portrait" : "landscape"}
       >
-        <canvas ref={canvasRef} className="exhibition-studio-canvas" aria-hidden="true" />
+        <canvas
+          key={attempt}
+          ref={canvasRef}
+          className="exhibition-studio-canvas"
+          aria-hidden="true"
+        />
         <div className="exhibition-studio-original">{children}</div>
         {ready && showEnlargeHint && (
           <span className="exhibition-studio-hint">作品をタップして原画を拡大</span>
@@ -230,7 +250,37 @@ function StudioView({
       </div>
       <div className="exhibition-studio-tools" aria-label="展示空間の表示">
         <span className="exhibition-studio-label">EXHIBITION STUDIO</span>
-        <div role="group" aria-label="鑑賞する角度">
+        <div
+          role="group"
+          aria-label="鑑賞する角度"
+          onKeyDown={(event) => {
+            if (
+              !ready ||
+              event.altKey ||
+              event.ctrlKey ||
+              event.metaKey ||
+              event.shiftKey ||
+              !["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)
+            )
+              return;
+            const views: ExhibitionStudioView[] = ["front", "oblique", "room"];
+            const buttons = Array.from(
+              event.currentTarget.querySelectorAll<HTMLButtonElement>("button"),
+            );
+            const focusedIndex = buttons.findIndex((button) => button === event.target);
+            const currentIndex = focusedIndex >= 0 ? focusedIndex : views.indexOf(view);
+            const direction = event.key === "ArrowLeft" ? -1 : 1;
+            const index =
+              event.key === "Home"
+                ? 0
+                : event.key === "End"
+                  ? 2
+                  : (currentIndex + direction + views.length) % views.length;
+            event.preventDefault();
+            updateView(views[index]);
+            buttons[index]?.focus();
+          }}
+        >
           <button
             type="button"
             aria-pressed={view === "front"}
@@ -260,9 +310,16 @@ function StudioView({
           {original ? "展示空間に戻す" : "原画表示"}
         </button>
       </div>
-      {phase === "error" || phase === "unsupported" || phase === "context-lost" ? (
+      {unavailable ? (
         <p className="exhibition-studio-notice" role="status">
           3D表示を利用できないため、原画を表示しています。
+          <button type="button" onClick={retry}>
+            3D表示を再試行
+          </button>
+        </p>
+      ) : phase === "loading" && !original ? (
+        <p className="exhibition-studio-notice" role="status">
+          展示空間を準備しています。原画はそのままご覧いただけます。
         </p>
       ) : null}
     </div>

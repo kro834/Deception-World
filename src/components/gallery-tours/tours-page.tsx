@@ -7,7 +7,7 @@ import { GalleryTourTheatre } from "./tour-theatre";
 import { getGalleryTour, getTourStopIndex } from "./tour-data";
 import {
   clearTourProgress,
-  readTourProgress,
+  readTourProgressState,
   saveTourProgress,
   TOUR_PROGRESS_KEY,
   type TourProgress,
@@ -15,10 +15,12 @@ import {
 
 function TourShareLink({ tourId, workId }: { tourId: string; workId: string }) {
   const [message, setMessage] = useState("");
-  const [fallback, setFallback] = useState("");
+  const [fallback, setFallback] = useState<{ href: string; attempt: number } | null>(null);
   const [copying, setCopying] = useState(false);
   const fallbackRef = useRef<HTMLInputElement>(null);
   const mountedRef = useRef(true);
+  const copyingRef = useRef(false);
+  const fallbackAttemptRef = useRef(0);
   useEffect(() => {
     mountedRef.current = true;
     return () => {
@@ -33,36 +35,43 @@ function TourShareLink({ tourId, workId }: { tourId: string; workId: string }) {
   }, [fallback]);
 
   async function copyLink() {
-    if (copying) return;
+    if (copyingRef.current) return;
+    copyingRef.current = true;
     const link = new URL("/gallery-tours", window.location.origin);
     link.searchParams.set("tour", tourId);
     link.searchParams.set("work", workId);
     setCopying(true);
+    setMessage("");
+    setFallback(null);
     try {
       await navigator.clipboard.writeText(link.href);
       if (mountedRef.current) setMessage("この作品から始まるツアーのリンクをコピーしました。");
     } catch {
       if (mountedRef.current) {
-        setFallback(link.href);
+        setFallback({ href: link.href, attempt: ++fallbackAttemptRef.current });
         setMessage("下のリンクを選択してコピーできます。");
       }
     } finally {
+      copyingRef.current = false;
       if (mountedRef.current) setCopying(false);
     }
   }
 
   return (
     <div className="gallery-tour-sharing">
-      <button type="button" onClick={() => void copyLink()} aria-disabled={copying}>
+      <button type="button" onClick={() => void copyLink()} disabled={copying}>
         {copying ? "コピー中" : "この場面のリンクをコピー"}
       </button>
       <span role="status">{message}</span>
       {fallback && (
         <input
+          key={fallback.attempt}
           ref={fallbackRef}
-          type="text"
-          readOnly
-          value={fallback}
+          type="url"
+          defaultValue={fallback.href}
+          autoCapitalize="none"
+          autoCorrect="off"
+          spellCheck={false}
           aria-label="この場面のツアーリンク"
           onFocus={(event) => event.currentTarget.select()}
         />
@@ -91,6 +100,8 @@ export function GalleryToursPage({
   const tour = getGalleryTour(tourId);
   const index = tour ? getTourStopIndex(tour, workId) : 0;
   const activeWorkId = tour?.stops[index].artworkId;
+  const activePositionRef = useRef({ tourId: tour?.id, workId: activeWorkId });
+  activePositionRef.current = { tourId: tour?.id, workId: activeWorkId };
   const selectIndex = useCallback(
     (next: number) => {
       const stop = tour?.stops[next];
@@ -102,7 +113,10 @@ export function GalleryToursPage({
   useEffect(() => {
     const read = () => {
       try {
-        setProgress(readTourProgress(window.localStorage));
+        const result = readTourProgressState(window.localStorage);
+        if (!result.available) throw new Error("Progress storage unavailable");
+        setProgress(result.progress);
+        setStorageMessage("");
       } catch {
         setStorageMessage(
           "このブラウザーでは再開位置を保存できません。ツアーはそのまま鑑賞できます。",
@@ -111,7 +125,14 @@ export function GalleryToursPage({
     };
     read();
     const sync = (event: StorageEvent) => {
-      if (event.key === TOUR_PROGRESS_KEY || event.key === null) read();
+      if (event.key !== TOUR_PROGRESS_KEY && event.key !== null) return;
+      try {
+        if (event.storageArea === window.localStorage) read();
+      } catch {
+        setStorageMessage(
+          "このブラウザーでは再開位置を保存できません。ツアーはそのまま鑑賞できます。",
+        );
+      }
     };
     window.addEventListener("storage", sync);
     return () => window.removeEventListener("storage", sync);
@@ -125,7 +146,12 @@ export function GalleryToursPage({
 
   const remember = useCallback(
     (id: string) => {
-      if (!tourId) return;
+      if (
+        !tourId ||
+        activePositionRef.current.tourId !== tourId ||
+        activePositionRef.current.workId !== id
+      )
+        return;
       try {
         setProgress(saveTourProgress(window.localStorage, tourId, id));
         setStorageMessage("");
@@ -158,7 +184,7 @@ export function GalleryToursPage({
           <SideMenuTrigger open={menuOpen} onOpenChange={setMenuOpen} />
         </div>
       </header>
-      <main ref={mainRef} className="gallery-tours-main">
+      <main id="main" ref={mainRef} className="gallery-tours-main">
         {tour && activeWorkId ? (
           <>
             <GalleryTourTheatre

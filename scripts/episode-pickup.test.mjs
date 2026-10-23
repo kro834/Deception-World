@@ -100,12 +100,9 @@ test("EP4 opens Phalaris and each requested Ruler mode at its own existing form"
   assert.match(worldHome, /hash=\{item\.hash\}/);
   assert.match(
     readFileSync(new URL("../src/components/world/dante-page.tsx", import.meta.url), "utf8"),
-    /<div id=\{rider\.id\} key=\{rider\.id\}>\s*<FormPickup rider=\{rider\} \/>/,
+    /<div id=\{rider\.id\} key=\{rider\.id\} className="character-reading-target">\s*<FormPickup rider=\{rider\} \/>/,
   );
-  assert.match(
-    readFileSync(new URL("../src/components/world/lejas-page.tsx", import.meta.url), "utf8"),
-    /id="form-records"/,
-  );
+  assert.match(readFileSync(new URL("../src/components/world/lejas-page.tsx", import.meta.url), "utf8"), /id="form-records"/);
 });
 
 test("EP4 form hashes bypass the delayed dossier top reset after route arrival", () => {
