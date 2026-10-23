@@ -2250,3 +2250,191 @@
   padding-left: clamp(16px, 2vw, 26px);
   border-left: 2px solid var(--ics-gold);
 }
+
+/* ================================================================
+   Hero brush-up (2026-10-24, after Extreme and Rexonance): a stage under
+   the figure (a lit floor and its ring), a measured hairline field behind
+   it, the name's ghost kept on phones (under the figure, as Rexonance's
+   wordmark), and the doors given their own air under the calls.
+   ================================================================ */
+.rxs-page.rxs-page.ics-page .rxs-hero-copy > p.ics-hero-doors {
+  margin: clamp(28px, 3vw, 40px) 0 0;
+}
+
+.rxs-page.rxs-page.ics-page .rxs-hero-copy > p.ics-hero-doors::before {
+  display: none;
+}
+
+.rxs-page.rxs-page.ics-page .ics-hero .rxs-hero-ambient::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background:
+    linear-gradient(90deg, rgb(166 230 255 / 6%) 1px, transparent 1px) 0 0 / 64px 64px,
+    linear-gradient(0deg, rgb(166 230 255 / 6%) 1px, transparent 1px) 0 0 / 64px 64px;
+  mask-image: radial-gradient(70% 60% at 68% 46%, #000, transparent 78%);
+  -webkit-mask-image: radial-gradient(70% 60% at 68% 46%, #000, transparent 78%);
+}
+
+/* The floor: a lit ellipse and one gold ring where the figure stands. */
+.rxs-page.rxs-page.ics-page .ics-hero-visual::after {
+  position: absolute;
+  top: auto;
+  right: auto;
+  height: auto;
+  bottom: 1%;
+  left: 50%;
+  z-index: -1;
+  display: block;
+  width: 78%;
+  aspect-ratio: 5 / 1;
+  translate: -50% 0;
+  border: 1px solid rgb(233 184 102 / 42%);
+  border-radius: 50%;
+  content: "";
+  background: radial-gradient(closest-side, rgb(166 230 255 / 26%), rgb(47 79 216 / 14%) 55%, transparent);
+  box-shadow:
+    0 0 0 14px rgb(233 184 102 / 5%),
+    0 0 48px rgb(47 79 216 / 30%);
+}
+
+.rxs-page.rxs-page.ics-page .ics-hero-visual::before {
+  position: absolute;
+  bottom: 4.6%;
+  left: 50%;
+  z-index: -1;
+  width: 120%;
+  height: 1px;
+  translate: -50% 0;
+  content: "";
+  background: linear-gradient(90deg, transparent, rgb(233 184 102 / 50%) 30%, rgb(166 230 255 / 60%) 50%, rgb(233 184 102 / 50%) 70%, transparent);
+}
+
+.rxs-page.rxs-page.ics-page .ics-hero .ics-mark {
+  -webkit-text-stroke: 1px rgb(166 230 255 / 20%);
+}
+
+@media (max-width: 900px) {
+  .rxs-page.rxs-page.ics-page .ics-hero-visual::after {
+    bottom: 9%;
+  }
+
+  .rxs-page.rxs-page.ics-page .ics-hero-visual::before {
+    bottom: 12.4%;
+    width: 100vw;
+  }
+
+  .rxs-page.rxs-page.ics-page .ics-hero .ics-mark {
+    display: block;
+    top: -1.3em;
+    left: 50%;
+    translate: -50% 0;
+    font-size: calc((100vw - 24px) / 8.4);
+    -webkit-text-stroke: 1px rgb(166 230 255 / 24%);
+  }
+
+  .rxs-page.rxs-page.ics-page .ics-hero .ics-title-name {
+    font-size: clamp(34px, 9.6vw, 48px);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ics-page .ics-hero-visual::after {
+    animation: ics-floor-rise 1200ms cubic-bezier(0.2, 0.7, 0.2, 1) 200ms both;
+  }
+
+  html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ics-page .ics-hero-visual::before {
+    animation: ics-floor-line 1400ms cubic-bezier(0.2, 0.7, 0.2, 1) 120ms both;
+  }
+}
+
+@keyframes ics-floor-rise {
+  from {
+    opacity: 0;
+    scale: 0.6 0.4;
+  }
+}
+
+@keyframes ics-floor-line {
+  from {
+    opacity: 0;
+    scale: 0.1 1;
+  }
+}
+
+/* ================================================================
+   End card brush-up (2026-10-24, after Rexonance's and Extreme's): the
+   way back to the top anchored at the card's corner, two gold orbits
+   centred on the last name (the art's sigil, echoed), the name set at the
+   hero's scale, and the exits as the hero's cut-corner plates.
+   ================================================================ */
+.rxs-page.rxs-page.ics-page .ics-footer > p.ics-footer-top {
+  position: absolute;
+  top: clamp(28px, 5vw, 56px);
+  left: var(--ics-gutter);
+  margin: 0;
+}
+
+.rxs-page.rxs-page.ics-page .ics-footer > div::before,
+.rxs-page.rxs-page.ics-page .ics-footer > div::after {
+  position: absolute;
+  top: 50%;
+  left: clamp(-120px, -8vw, -40px);
+  z-index: -1;
+  width: clamp(420px, 52vw, 760px);
+  aspect-ratio: 1;
+  translate: 0 -50%;
+  border: 1px solid rgb(233 184 102 / 22%);
+  border-radius: 50%;
+  content: "";
+  pointer-events: none;
+}
+
+.rxs-page.rxs-page.ics-page .ics-footer > div::after {
+  left: clamp(-40px, -2vw, -8px);
+  width: clamp(300px, 36vw, 520px);
+  border-color: rgb(166 230 255 / 16%);
+  border-style: dashed;
+}
+
+.rxs-page.rxs-page.ics-page .ics-footer h2 {
+  max-width: 760px;
+  font-size: clamp(30px, 4.4vw, 64px);
+  line-height: 1.18;
+}
+
+.rxs-page.rxs-page.ics-page .ics-footer > a {
+  gap: 18px;
+  padding-inline: 20px;
+  border: 1px solid rgb(233 184 102 / 40%);
+  border-radius: 0;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+}
+
+.rxs-page.rxs-page.ics-page .ics-footer > a:not(.rxs-footer-return) {
+  border-color: transparent;
+  background: linear-gradient(90deg, var(--ics-ice), #d9f4ff);
+  color: #050816;
+}
+
+.rxs-page.rxs-page.ics-page .ics-footer > a:not(.rxs-footer-return) i {
+  color: #050816;
+}
+
+.rxs-page.rxs-page.ics-page .ics-footer > a:hover {
+  border-color: var(--ics-ice);
+}
+
+@media (max-width: 900px) {
+  .rxs-page.rxs-page.ics-page .ics-footer > div::before {
+    left: -30vw;
+    width: 120vw;
+  }
+
+  .rxs-page.rxs-page.ics-page .ics-footer > div::after {
+    left: -8vw;
+    width: 84vw;
+  }
+}
