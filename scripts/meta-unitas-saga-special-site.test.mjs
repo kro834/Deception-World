@@ -38,7 +38,7 @@ test("the route is registered wherever the other special sites are", () => {
   assert.match(read("server/lib/public-document-cache.ts"), /"\/meta-unitas-saga"/);
   assert.match(
     read("src/lib/asset-loader.ts"),
-    /export const META_UNITAS_SAGA_ENTER_ASSETS = \[META_UNITAS_KEY_VISUAL\.src\]/,
+    /export const META_UNITAS_SAGA_ENTER_ASSETS = \[\s*META_UNITAS_RX_UNDERSUIT,\s*META_UNITAS_RX_DRIVER_STANDIN,\s*META_UNITAS_KEY_VISUAL\.src,\s*\]/,
   );
   assert.match(read("src/lib/record-art.ts"), /"\/meta-unitas-saga": \{/);
   assert.match(read("src/components/search/search-data.ts"), /id: "meta-unitas-saga"/);

@@ -3,6 +3,7 @@ import { REXONANCE_SITE_ARTWORK } from "./rexonance-site-artwork.ts";
 import { FAR_FROM_SAGA_KEY_VISUAL, farFromImage } from "./far-from-saga-artwork.ts";
 import { ILLUSIONCULUM_HERO, illusionculumCutoutImage } from "./illusionculum-saga-artwork.ts";
 import { META_UNITAS_KEY_VISUAL, metaUnitasImage } from "./meta-unitas-saga-artwork.ts";
+import { META_UNITAS_RX_DRIVER_STANDIN, META_UNITAS_RX_UNDERSUIT } from "./meta-unitas-rx-suit.ts";
 import { dossierImage } from "./dossier-images.ts";
 
 const KNOWN_BYTES: Record<string, number> = {
@@ -71,7 +72,13 @@ export const ILLUSIONCULUM_SAGA_ENTER_ASSETS = [
   "/illusionculum-saga-20261023/orb-right-standard-256.webp",
 ] as const;
 // META UNITAS SAGA (2026-10-23): its key visual, ミドル (meta-unitas-saga-artwork.ts).
-export const META_UNITAS_SAGA_ENTER_ASSETS = [META_UNITAS_KEY_VISUAL.src] as const;
+// The entry's first frame (the wearer and the driver) warm with the key
+// visual, on intent, through the same preloadAssets as every site's.
+export const META_UNITAS_SAGA_ENTER_ASSETS = [
+  META_UNITAS_RX_UNDERSUIT,
+  META_UNITAS_RX_DRIVER_STANDIN,
+  META_UNITAS_KEY_VISUAL.src,
+] as const;
 
 export const MANAGER_ASSETS = {
   zeus: ["/manager-zeus-detail.jpeg?v=20260823-2"],

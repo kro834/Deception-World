@@ -63,6 +63,10 @@ import {
   warmMetaUnitasEntry,
   type MetaUnitasTransitionRenderer,
 } from "@/lib/meta-unitas-entry-gate";
+// Owner (2026-10-24): 「遷移アニメーションの始まりが遅すぎる」 — the sequence is
+// in the gate's own chunk (as ILLUSIONCULUM's), so its first frame paints
+// with the cover; only the engine (and the pictures) load behind it.
+import { MetaUnitasEntrySequence } from "@/components/meta-unitas-saga/meta-unitas-entry-sequence";
 
 type RiderDiveVariant =
   | "saga"
@@ -1574,11 +1578,9 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
             const warm = warmMetaUnitasEntry();
             // A cold chunk gets a longer window: the call is the page's
             // entry, never skipped for a slow first load.
-            const preparation = prepareMetaUnitasTransition(4000);
-            rexonanceCoverCancel.current = preparation.cancel;
-            metaUnitasCall = await preparation.promise;
-            if (rexonanceCoverCancel.current === preparation.cancel)
-              rexonanceCoverCancel.current = null;
+            // prepareMetaUnitasTransition(4000) is no longer awaited: the
+            // sequence ships with the gate.
+            metaUnitasCall = MetaUnitasEntrySequence;
             if (!isCurrent()) return;
             // Nothing more blocks the cover (owner, 2026-10-24: 「遷移開始が遅すぎる」):
             // the pictures keep decoding under it (the scene holds the wearer,

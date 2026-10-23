@@ -43,34 +43,38 @@ const FILL: CSSProperties = { position: "absolute", inset: 0, width: "100%", hei
    next; the chant's four SA-GA！DEUS！ light one by one. Phones stack the
    call over the figure. Opacity and transforms only. */
 const STAGING = `.mus-entry::-webkit-scrollbar{display:none}
-.mus-entry .rzn-frame{--rzn-fig-x:.66;--rzn-fig-h:.86;--rzn-fig-b:.05}
+.mus-entry .mus-entry-scan{position:absolute;left:calc((var(--rzn-fig-x) - .2) * 100%);width:40%;height:2px;top:8%;background:linear-gradient(90deg,transparent,rgb(70 206 200 / .9),transparent);box-shadow:0 0 14px rgb(70 206 200 / .7);animation:mus-entry-scan 1s cubic-bezier(.4,0,.2,1) both}
+@keyframes mus-entry-scan{from{transform:translateY(0);opacity:0}15%{opacity:1}to{transform:translateY(78vh);opacity:0}}
+.mus-entry .mus-entry-line:first-child{animation:mus-entry-first .35s ease-out backwards}
+@keyframes mus-entry-first{from{opacity:0;transform:translateY(-36%)}to{opacity:1;transform:translateY(-50%)}}
+@media (prefers-reduced-motion:reduce){.mus-entry *{animation:none!important}}
+.mus-entry .rzn-frame{--rzn-fig-x:.7;--rzn-fig-h:.86;--rzn-fig-b:.05}
 .mus-entry .mus-entry-fig{position:absolute;left:calc((var(--rzn-fig-x) - .46) * 100%);bottom:5%;width:92%;height:86%;object-fit:contain;object-position:50% 100%}
 .mus-entry .mus-entry-orbit{position:absolute;left:calc(var(--rzn-fig-x) * 100%);top:50%;width:min(110vh,90vw);aspect-ratio:1;border:1px solid rgb(255 154 74 / 18%);border-radius:50%;transform:translate(-50%,-50%) rotate(-12deg) scaleY(.38)}
 .mus-entry .mus-entry-orbit.is-b{width:min(78vh,70vw);border-color:rgb(55 198 192 / 20%);transform:translate(-50%,-56%) rotate(18deg) scaleY(.52)}
-.mus-entry .mus-entry-calls{position:absolute;left:clamp(24px,6vw,96px);top:50%;width:min(52vw,760px);height:0;margin:0;padding:0;list-style:none}
-.mus-entry .rzn-line{position:absolute;left:0;top:0;transform:translateY(-40%);display:flex;flex-wrap:wrap;gap:0 .32em;font:640 clamp(36px,5.6vw,104px)/1.06 "Rexonance Forge","Helvetica Neue",Arial,sans-serif;letter-spacing:.01em;color:#f4f8fa;opacity:0;transition:opacity .28s ease,transform .5s cubic-bezier(.2,.7,.1,1)}
+.mus-entry .mus-entry-calls{position:absolute;left:clamp(24px,6vw,96px);top:50%;width:min(40vw,600px);height:0;margin:0;padding:0;list-style:none}
+.mus-entry .rzn-line{position:absolute;left:0;top:0;transform:translateY(-40%);display:flex;flex-wrap:wrap;gap:0 .32em;font:640 clamp(32px,4.4vw,84px)/1.06 "Rexonance Forge","Helvetica Neue",Arial,sans-serif;letter-spacing:.01em;color:#f4f8fa;opacity:0;transition:opacity .28s ease,transform .5s cubic-bezier(.2,.7,.1,1)}
 .mus-entry .rzn-line[data-chant]{flex-direction:column;font-size:clamp(30px,4.4vw,76px)}
 .mus-entry .rzn-line:not([data-chant]) .rzn-chip{display:flex;flex-direction:column}
 .mus-entry .rzn-chip>span{white-space:nowrap}
-.mus-entry .rzn-suitup:not([data-rzn-state]) .rzn-line:first-child{opacity:1;transform:translateY(-50%)}
-.mus-entry .rzn-line[data-on]{opacity:1;transform:translateY(-50%);transition-delay:.12s}
-.mus-entry .rzn-line[data-done]:not([data-on]){opacity:0;transform:translateY(-62%);transition-duration:.16s,.3s}
-.mus-entry .rzn-line:last-child[data-on],.mus-entry .rzn-line:last-child[data-done]{opacity:1;transform:translateY(-50%)}
+.mus-entry .rzn-line[data-cue="on"]{opacity:1;transform:translateY(-50%);transition-delay:.12s}
+.mus-entry .rzn-line[data-cue="done"]{opacity:0;transform:translateY(-62%);transition-duration:.16s,.3s}
+.mus-entry .rzn-line:last-child[data-cue="on"]{opacity:1;transform:translateY(-50%)}
 .mus-entry .rzn-chip{background:linear-gradient(100deg,#fff 10%,#ffc98f 55%,#ff9a4a);-webkit-background-clip:text;background-clip:text;color:transparent}
 .mus-entry .rzn-line[data-chant] .rzn-chip{opacity:.22;transition:opacity .2s ease}
-.mus-entry .rzn-line[data-chant] .rzn-chip[data-on],.mus-entry .rzn-line[data-chant] .rzn-chip[data-done]{opacity:1}
+.mus-entry .rzn-line[data-chant] .rzn-chip[data-cue]{opacity:1}
 .mus-entry .rzn-line:last-child .rzn-chip{background:linear-gradient(100deg,#fff,#9ff0ea 60%,#37c6c0);-webkit-background-clip:text;background-clip:text}
 @media (max-width:760px),(orientation:portrait){
 .mus-entry .rzn-frame{--rzn-fig-x:.5;--rzn-fig-h:.6;--rzn-fig-b:.3}
 .mus-entry .mus-entry-fig{bottom:30%;height:60%}
 .mus-entry .mus-entry-calls{left:20px;right:20px;top:auto;bottom:16%;width:auto}
 .mus-entry .rzn-line{left:0;right:0;justify-content:center;text-align:center;transform:translateY(-20%);font-size:clamp(30px,8.4vw,72px)}
-.mus-entry .rzn-line[data-on],.mus-entry .rzn-line:last-child[data-on],.mus-entry .rzn-line:last-child[data-done]{transform:translateY(-50%)}
+.mus-entry .rzn-line[data-cue="on"],.mus-entry .rzn-line:last-child[data-cue="on"]{transform:translateY(-50%)}
 .mus-entry .rzn-line[data-chant]{align-items:center;font-size:clamp(22px,6vw,52px)}
 .mus-entry .rzn-line:not([data-chant]) .rzn-chip{align-items:center}}`;
 
 /** How long the build waits for the scene to be ready before its clock runs. */
-const READY_WAIT_MS = 1500;
+const READY_WAIT_MS = 0;
 
 /** The entry's clock (owner, 2026-10-24: 「装着が駆け足すぎる」), set to the
  * Rexonance entry's pacing: the scan, the fire, each part's landing a call's
@@ -78,15 +82,19 @@ const READY_WAIT_MS = 1500;
  * along the engine's scroll beats (ASSEMBLY_BEATS). */
 const CLOCK: readonly (readonly [number, number])[] = [
   [0, 0],
-  [420, 0.07],
-  [1020, 0.16],
-  [1600, 0.275],
-  [2180, 0.39],
-  [2760, 0.505],
-  [3340, 0.62],
-  [4060, 0.85],
-  [4700, 0.95],
+  [284, 0.07],
+  [673, 0.16],
+  [1032, 0.275],
+  [1391, 0.39],
+  [1750, 0.505],
+  [2110, 0.62],
+  [2558, 0.85],
+  [2917, 0.95],
 ];
+/** The calls on the same clock (ms), one stage each; the chant's four
+ * units light one by one (Rexonance's entry staging). */
+const CALL_AT = [0, 389, 860, 1384, 2468] as const;
+const CHANT_STEP = 250;
 const progressAt = (ms: number) => {
   for (let i = 1; i < CLOCK.length; i += 1) {
     const [t1, p1] = CLOCK[i];
@@ -112,6 +120,10 @@ export function MetaUnitasEntrySequence({
     let dispose: (() => void) | null = null;
     let raf = 0;
     const mounted = performance.now();
+    const lines = [...layer.querySelectorAll<HTMLElement>(".mus-entry-calls > li")];
+    const chips = [
+      ...layer.querySelectorAll<HTMLElement>(".mus-entry-calls > li[data-chant] .rzn-chip"),
+    ];
     void import("@/lib/meta-unitas-rx-engine").then((module) => {
       if (disposed) return;
       dispose = module.mountMetaUnitasAssemblyEngine(runway, window);
@@ -122,6 +134,17 @@ export function MetaUnitasEntrySequence({
         const ready = runway.dataset.rznLoad === "ready";
         if (!started && (ready || now - mounted > READY_WAIT_MS)) started = now;
         const elapsed = started ? now - started : 0;
+        let line = 0;
+        CALL_AT.forEach((at, index) => {
+          if (elapsed >= at) line = index;
+        });
+        lines.forEach((element, index) => {
+          element.dataset.cue = index === line ? "on" : index < line ? "done" : "";
+        });
+        chips.forEach((chip, index) => {
+          if (elapsed >= CALL_AT[3] + index * CHANT_STEP) chip.dataset.cue = "on";
+          else delete chip.dataset.cue;
+        });
         const p = progressAt(elapsed);
         const t = elapsed >= CLOCK[CLOCK.length - 1][0] ? 1 : 0;
         const travel = runway.offsetHeight - layer.clientHeight;
@@ -161,12 +184,17 @@ export function MetaUnitasEntrySequence({
             width={META_UNITAS_RX_SIZE.width}
             height={META_UNITAS_RX_SIZE.height}
           />
+          <i className="mus-entry-scan" />
           <canvas className="rzn-canvas" width={0} height={0} style={FILL} />
           <i className="mus-entry-orbit" />
           <i className="mus-entry-orbit is-b" />
           <ol className="rzn-lines mus-entry-calls">
             {META_UNITAS_CALL_LINES.map((units, index) => (
-              <li key={index} className="rzn-line" data-chant={units.length > 1 || undefined}>
+              <li
+                key={index}
+                className="rzn-line mus-entry-line"
+                data-chant={units.length > 1 || undefined}
+              >
                 {units.map((unit, unitIndex) => (
                   <span key={`${unit}-${unitIndex}`} className="rzn-chip">
                     {(units.length > 1
