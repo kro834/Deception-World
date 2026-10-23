@@ -2474,3 +2474,1349 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
     display: none;
   }
 }
+
+/* ================================================================
+   04 STAGES — the form switch (owner, 2026-10-23)
+   「スクロール後にウルトラに切り替えても、サイバーなパネルは後から出現する様に
+   して下さい。」「『03 形態』でウルトラ切り替え時のみ勝手に画面が上下するのも
+   修正して。」「これらの切り替えもレクソナンスの様な切り替え効果が出る様にして。
+   スクロールも同様に。」
+
+   - THE PANEL NEVER CHANGES SIZE: the copy's cell holds every form's copy
+     (hidden, stacked), so the cell is the longest form's at every width;
+     the figure keeps its fixed box and the picture covers it.
+   - THE CARD (far-from-stage-switch.tsx): the Rexonance stage card in
+     FAR FROM's palette: three opaque blades, the call and the form's
+     name, the blades opening as an aperture onto the new form.
+   - THE ENTRANCE: the new form rises from its floor as the aperture opens,
+     three rings leave its core, a refraction band and a hex-cell sweep
+     cross it; a quick selection without a card settles quietly.
+   - IN STEP WITH A SWIPE: the tuning band follows the lens in the
+     previewed form's light while the rail is dragged.
+   - ウルトラ'S INTERFACES (far-from-ultra-deploy.tsx): the vector panels'
+     deploy over ウルトラ's base picture.
+   Reduced motion, forced colours and economy rest still: no card, no
+   entrance, ウルトラ painted with its interfaces.
+   ================================================================ */
+
+/* The panel's cells: the figure, and the copy with its sizers stacked. */
+.rxs-page.rxs-page.ffs-page .ffs-stage-panel {
+  grid-template-areas: "figure copy";
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-stage-panel > figure {
+  grid-area: figure;
+  /* The deploy layer is sized from the figure's own box (cq units). */
+  container-type: size;
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-stage-panel > div {
+  grid-area: copy;
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-stage-panel > .ffs-stage-sizer {
+  z-index: -1;
+  visibility: hidden;
+  animation: none;
+  pointer-events: none;
+}
+
+@media (max-width: 900px) {
+  .rxs-page.rxs-page.ffs-page .ffs-stage-panel {
+    grid-template-areas:
+      "figure"
+      "copy";
+  }
+
+  /* One column: the copy starts under the figure, the cell below it holds
+     the longest form's copy. */
+  .rxs-page.rxs-page.ffs-page .ffs-stage-panel > div {
+    align-self: start;
+  }
+}
+
+/* The picture's box (and ウルトラ's interfaces, which share it). */
+.rxs-page.rxs-page.ffs-page .ffs-stage-panel figure > .ffs-stage-art {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+}
+
+/* The deploy layer is the picture's object-fit: cover box (50% 5%). */
+.rxs-page.rxs-page.ffs-page .ffs-ultra-deploy {
+  --ffd-ice: #9cf1ff;
+  --ffd-deep: #2b7fe0;
+  --ffd-white: #f6fbff;
+  --ffd-gold: #ffd77a;
+  position: absolute;
+  top: calc((100cqh - max(100cqh, 100cqw * 1452 / 1083)) * 0.05);
+  left: 50%;
+  display: block;
+  width: max(100cqw, 100cqh * 1083 / 1452);
+  height: auto;
+  aspect-ratio: 1083 / 1452;
+  overflow: visible;
+  translate: -50% 0;
+  pointer-events: none;
+  fill: none;
+  stroke-linecap: square;
+  font-family: var(--fft-etch);
+  font-size: 12.5px;
+  letter-spacing: 0.06em;
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-ultra-deploy:not([data-run]) {
+  visibility: hidden;
+}
+
+/* The settled interfaces (what stays after the deploy). */
+.ffs-ultra-deploy pattern path {
+  fill: none;
+  stroke: var(--ffd-ice);
+  stroke-width: 0.8;
+  stroke-opacity: 0.55;
+}
+
+.ffs-ultra-deploy .ffd-cone {
+  fill: var(--ffd-ice);
+  opacity: 0;
+}
+
+.ffs-ultra-deploy .ffd-beam {
+  stroke: var(--ffd-white);
+  stroke-width: 1.4;
+  stroke-dasharray: 1;
+  opacity: 0.32;
+}
+
+.ffs-ultra-deploy .ffd-tether {
+  stroke: var(--ffd-ice);
+  stroke-width: 1.4;
+  stroke-dasharray: 0.04 0.03;
+  opacity: 0.8;
+}
+
+.ffs-ultra-deploy .ffd-emitter {
+  fill: var(--ffd-white);
+  stroke: var(--ffd-ice);
+  stroke-width: 1.5;
+}
+
+.ffs-ultra-deploy .ffd-glass {
+  fill: rgb(6 30 64 / 58%);
+}
+
+.ffs-ultra-deploy .ffd-hex {
+  opacity: 0.6;
+}
+
+.ffs-ultra-deploy .ffd-head {
+  fill: var(--ffd-ice);
+  opacity: 0.22;
+}
+
+.ffs-ultra-deploy .ffd-wire {
+  stroke: var(--ffd-ice);
+  stroke-width: 1.6;
+  stroke-dasharray: 1;
+}
+
+.ffs-ultra-deploy .ffd-corners {
+  stroke: var(--ffd-white);
+  stroke-width: 2.4;
+}
+
+.ffs-ultra-deploy .ffd-title,
+.ffs-ultra-deploy .ffd-line,
+.ffs-ultra-deploy .ffd-crown-label {
+  fill: var(--ffd-white);
+  stroke: none;
+}
+
+.ffs-ultra-deploy .ffd-title {
+  font-size: 10px;
+  letter-spacing: 0.02em;
+}
+
+.ffs-ultra-deploy .ffd-line {
+  fill: var(--ffd-ice);
+  font-size: 10px;
+  letter-spacing: 0;
+}
+
+.ffs-ultra-deploy .ffd-crown-label {
+  font-family: var(--fft-display);
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.ffs-ultra-deploy .ffd-glyph {
+  stroke: var(--ffd-ice);
+  stroke-width: 1.5;
+}
+
+.ffs-ultra-deploy .ffd-glyph-dim {
+  stroke-opacity: 0.45;
+  fill: rgb(156 241 255 / 18%);
+}
+
+.ffs-ultra-deploy .ffd-glyph-arc {
+  stroke: var(--ffd-white);
+  stroke-width: 2;
+  stroke-dasharray: 1;
+}
+
+.ffs-ultra-deploy .ffd-bar {
+  fill: var(--ffd-ice);
+  fill-opacity: 0.7;
+  stroke: none;
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+}
+
+.ffs-ultra-deploy .ffd-scan {
+  fill: var(--ffd-white);
+  stroke: none;
+  opacity: 0;
+}
+
+.ffs-ultra-deploy .ffd-ring-back {
+  stroke: var(--ffd-ice);
+  stroke-width: 2;
+  stroke-dasharray: 1;
+  opacity: 0.45;
+}
+
+.ffs-ultra-deploy .ffd-ring-front {
+  stroke: var(--ffd-white);
+  stroke-width: 2.6;
+  stroke-dasharray: 1;
+}
+
+.ffs-ultra-deploy .ffd-ring-ticks,
+.ffs-ultra-deploy .ffd-crown-ticks {
+  stroke: var(--ffd-ice);
+  stroke-width: 5;
+  stroke-dasharray: 1.2 5;
+  opacity: 0.7;
+}
+
+.ffs-ultra-deploy .ffd-crown-arc {
+  stroke: var(--ffd-ice);
+  stroke-width: 3;
+  stroke-dasharray: 1;
+}
+
+.ffs-ultra-deploy .ffd-crown-lead {
+  stroke: var(--ffd-white);
+  stroke-width: 1.4;
+  stroke-dasharray: 1;
+}
+
+.ffs-ultra-deploy .ffd-settle,
+.ffs-ultra-deploy .ffd-glitch {
+  transform-box: fill-box;
+}
+
+.ffs-ultra-deploy [data-inner="right"] .ffd-settle {
+  transform-origin: 100% 50%;
+}
+
+.ffs-ultra-deploy [data-inner="left"] .ffd-settle {
+  transform-origin: 0 50%;
+}
+
+/* The switch's ornaments over the figure: rings from the core, one
+   refraction band, the hex-cell sweep, and the tuning band of a swipe. */
+.rxs-page.rxs-page.ffs-page .ffs-stage-panel figure > :is(.ffs-switch-rings, .ffs-switch-mesh) {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  display: block;
+  overflow: clip;
+  pointer-events: none;
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-switch-rings > i {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  display: block;
+  width: 32%;
+  aspect-ratio: 1;
+  border: 1.5px solid var(--ffs-accent);
+  /* A hexagon, not a circle: FAR FROM's cells. */
+  clip-path: polygon(25% 3%, 75% 3%, 100% 50%, 75% 97%, 25% 97%, 0 50%);
+  background:
+    linear-gradient(var(--ffs-accent) 0 0) 50% 3% / 50% 1.5px no-repeat,
+    linear-gradient(var(--ffs-accent) 0 0) 50% 97% / 50% 1.5px no-repeat;
+  box-shadow: inset 0 0 18px color-mix(in srgb, var(--ffs-accent) 45%, transparent);
+  opacity: 0;
+  translate: -50% -50%;
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-switch-rings > i:nth-child(4) {
+  top: -20%;
+  left: 0;
+  width: 70%;
+  height: 140%;
+  aspect-ratio: auto;
+  border: 0;
+  clip-path: none;
+  box-shadow: none;
+  background: linear-gradient(
+    100deg,
+    transparent 0 40%,
+    color-mix(in srgb, var(--ffs-accent) 24%, transparent) 46%,
+    rgb(246 251 255 / 30%) 50%,
+    rgb(201 155 255 / 18%) 53%,
+    transparent 60% 100%
+  );
+  translate: -110% 0;
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-switch-mesh > i {
+  position: absolute;
+  top: calc(var(--ffs-d) * 100% / 12);
+  right: 0;
+  left: 0;
+  display: block;
+  height: calc(100% / 12 + 1px);
+  opacity: 0;
+  background:
+    linear-gradient(90deg, transparent, color-mix(in srgb, var(--ffs-accent) 30%, transparent) 30% 70%, transparent),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='31.18' viewBox='0 0 18 31.18'%3E%3Cpath d='M9 0 18 5.2v10.4L9 20.8 0 15.6V5.2Zm0 20.8V31.18' fill='none' stroke='%239cf1ff' stroke-opacity='.7'/%3E%3C/svg%3E")
+      0 0 / 18px 31.18px;
+  transform-origin: 0 50%;
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-switch-mesh > i:nth-child(even) {
+  transform-origin: 100% 50%;
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-stage-tune {
+  position: absolute;
+  z-index: 5;
+  inset: 0;
+  display: block;
+  overflow: clip;
+  opacity: 0;
+  background:
+    repeating-linear-gradient(180deg, rgb(0 2 7 / 0%) 0 3px, rgb(0 2 7 / 34%) 3px 4px),
+    rgb(0 2 7 / 22%);
+  pointer-events: none;
+  transition: opacity 120ms linear;
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-stage-tune::before {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--ffs-tune-x, 0) * 74%);
+  width: 26%;
+  content: "";
+  border-inline: 1px solid var(--ffs-tune-accent, var(--ffs-accent));
+  background:
+    linear-gradient(90deg, transparent, color-mix(in srgb, var(--ffs-tune-accent, var(--ffs-accent)) 46%, transparent) 50%, transparent),
+    repeating-linear-gradient(180deg, color-mix(in srgb, var(--ffs-tune-accent, var(--ffs-accent)) 40%, transparent) 0 1px, transparent 1px 6px);
+  box-shadow: 0 0 24px color-mix(in srgb, var(--ffs-tune-accent, var(--ffs-accent)) 45%, transparent);
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-stage-tune > b {
+  position: absolute;
+  top: 18px;
+  left: calc(var(--ffs-tune-x, 0) * 74%);
+  display: block;
+  max-width: 100%;
+  padding: 6px 10px;
+  border: 1px solid var(--ffs-tune-accent, var(--ffs-accent));
+  color: var(--ffs-tune-accent, var(--ffs-accent));
+  background: rgb(0 2 7 / 78%);
+  font-family: var(--fft-display);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-stage-tune > b::before {
+  content: "→ ";
+}
+
+.rxs-page.rxs-page.ffs-page[data-motion-ready="true"] .ffs-stage-panel[data-tune] .ffs-stage-tune {
+  opacity: 1;
+}
+
+/* ---------- The card ---------- */
+.rxs-page.rxs-page.ffs-page > .ffs-form-call {
+  --ffs-call-ice: #7fe6ff;
+  --ffs-call-gold: #ffd77a;
+  --ffs-call-violet: #c99bff;
+  --ffs-call-ink: #000207;
+  position: fixed;
+  z-index: 140;
+  inset: 0;
+  overflow: hidden;
+  isolation: isolate;
+  contain: paint;
+  color: #eefaff;
+  font-family: var(--fft-etch);
+  text-align: center;
+  pointer-events: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.ffs-form-call :is(.ffs-call-ground, .ffs-call-frame, .ffs-call-words) {
+  position: absolute;
+  inset: 0;
+}
+
+.ffs-form-call .ffs-call-ground > i {
+  position: absolute;
+  inset: 0;
+  display: block;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='62.36' viewBox='0 0 36 62.36'%3E%3Cpath d='M18 0 36 10.4v20.8L18 41.6 0 31.2V10.4Zm0 41.6v20.76' fill='none' stroke='%237fe6ff' stroke-opacity='.07'/%3E%3C/svg%3E")
+      0 0 / 36px 62.36px,
+    radial-gradient(ellipse at 20% 50%, rgb(60 150 220 / 16%), transparent 52%),
+    radial-gradient(ellipse at 80% 50%, rgb(150 90 230 / 14%), transparent 52%),
+    var(--ffs-call-ink);
+}
+
+/* Three blades: left, right, and the middle shutter between them. */
+.ffs-form-call .ffs-call-ground > i:nth-child(1) {
+  clip-path: polygon(0 0, 42% 0, 34% 100%, 0 100%);
+}
+
+.ffs-form-call .ffs-call-ground > i:nth-child(2) {
+  clip-path: polygon(58% 0, 100% 0, 100% 100%, 66% 100%);
+}
+
+.ffs-form-call .ffs-call-ground > i:nth-child(3) {
+  clip-path: polygon(41% 0, 59% 0, 67% 100%, 33% 100%);
+}
+
+/* The blades' lit edges. */
+.ffs-form-call .ffs-call-ground > i::before {
+  position: absolute;
+  inset: 0;
+  content: "";
+  opacity: 0;
+  background: linear-gradient(
+    96deg,
+    transparent calc(42% - 2px),
+    var(--ffs-call-ice) 42%,
+    transparent calc(42% + 2px) calc(58% - 2px),
+    var(--ffs-call-gold) 58%,
+    transparent calc(58% + 2px)
+  );
+}
+
+.ffs-form-call .ffs-call-frame {
+  inset: max(22px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right))
+    max(22px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left));
+}
+
+.ffs-form-call .ffs-call-frame > i {
+  position: absolute;
+  display: block;
+}
+
+.ffs-form-call .ffs-call-frame > .is-h {
+  top: 50%;
+  right: 0;
+  left: 0;
+  height: 1px;
+  opacity: 0.4;
+  background: linear-gradient(90deg, var(--ffs-call-ice), transparent 30% 70%, var(--ffs-call-violet));
+}
+
+.ffs-form-call .ffs-call-frame > .is-v {
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  opacity: 0.4;
+  background: linear-gradient(var(--ffs-call-ice), transparent 28% 72%, var(--ffs-call-gold));
+}
+
+.ffs-form-call .ffs-call-frame > .is-brackets {
+  inset: 0;
+  background:
+    linear-gradient(var(--ffs-call-ice) 0 0) 0 0 / 26px 1px,
+    linear-gradient(var(--ffs-call-ice) 0 0) 0 0 / 1px 26px,
+    linear-gradient(var(--ffs-call-gold) 0 0) 100% 0 / 26px 1px,
+    linear-gradient(var(--ffs-call-gold) 0 0) 100% 0 / 1px 26px,
+    linear-gradient(var(--ffs-call-violet) 0 0) 0 100% / 26px 1px,
+    linear-gradient(var(--ffs-call-violet) 0 0) 0 100% / 1px 26px,
+    linear-gradient(var(--ffs-call-ice) 0 0) 100% 100% / 26px 1px,
+    linear-gradient(var(--ffs-call-ice) 0 0) 100% 100% / 1px 26px;
+  background-repeat: no-repeat;
+}
+
+/* The signature: two hexagons about the centre, in the form's light. */
+.ffs-form-call .ffs-call-signature {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(62vmin, 520px);
+  aspect-ratio: 1;
+  translate: -50% -50%;
+}
+
+.ffs-form-call .ffs-call-signature > i {
+  position: absolute;
+  inset: 0;
+  display: block;
+  clip-path: polygon(25% 6.7%, 75% 6.7%, 100% 50%, 75% 93.3%, 25% 93.3%, 0 50%, 25% 6.7%, 25.6% 8%, 1.5% 50%, 25.6% 92%, 74.4% 92%, 98.5% 50%, 74.4% 8%, 25.6% 8%);
+  background: linear-gradient(135deg, var(--ffs-call-accent), var(--ffs-call-violet) 55%, var(--ffs-call-gold));
+  opacity: 0.85;
+}
+
+.ffs-form-call .ffs-call-signature > i:nth-child(2) {
+  inset: 14%;
+  opacity: 0.4;
+  rotate: 30deg;
+}
+
+.ffs-form-call .ffs-call-caption {
+  position: absolute;
+  top: max(42px, calc(env(safe-area-inset-top) + 30px));
+  right: max(40px, calc(env(safe-area-inset-right) + 28px));
+  left: max(40px, calc(env(safe-area-inset-left) + 28px));
+  display: flex;
+  justify-content: space-between;
+  margin: 0;
+  color: color-mix(in srgb, var(--ffs-call-ice) 80%, white);
+  font-size: 11px;
+  letter-spacing: 0.24em;
+}
+
+.ffs-form-call .ffs-call-words {
+  display: grid;
+  place-content: center;
+  gap: clamp(10px, 2vmin, 18px);
+  padding: 0 24px;
+}
+
+.ffs-form-call .ffs-call-final {
+  margin: 0;
+  background: linear-gradient(95deg, #f3fbff, #8deaff 38%, #ffe3a6 72%, #d8b7ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-family: var(--fft-forge);
+  font-size: clamp(28px, 7.4vw, 104px);
+  font-stretch: 125%;
+  font-weight: 700;
+  line-height: 1.04;
+  letter-spacing: 0.02em;
+  text-wrap: balance;
+}
+
+.ffs-form-call .ffs-call-form {
+  display: inline-flex;
+  gap: 14px;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+}
+
+.ffs-form-call .ffs-call-form > small {
+  color: color-mix(in srgb, var(--ffs-call-ice) 75%, white);
+  font-size: clamp(10px, 1.2vw, 13px);
+  letter-spacing: 0.22em;
+}
+
+.ffs-form-call .ffs-call-form > b {
+  padding: 4px 14px 5px;
+  border: 1px solid var(--ffs-call-accent);
+  color: var(--ffs-call-accent);
+  background: rgb(0 2 7 / 70%);
+  font-family: var(--fft-display);
+  font-size: clamp(20px, 3.2vw, 34px);
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  box-shadow: 0 0 22px color-mix(in srgb, var(--ffs-call-accent) 40%, transparent);
+}
+
+.ffs-form-call .ffs-call-meter {
+  position: absolute;
+  bottom: max(40px, calc(env(safe-area-inset-bottom) + 28px));
+  left: 50%;
+  display: flex;
+  gap: 6px;
+  width: min(320px, 60vw);
+  translate: -50% 0;
+}
+
+.ffs-form-call .ffs-call-meter > i {
+  flex: 1;
+  height: 3px;
+  background: rgb(127 230 255 / 18%);
+}
+
+.ffs-form-call .ffs-call-meter > i[data-reached] {
+  background: var(--ffs-call-accent);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--ffs-call-accent) 60%, transparent);
+}
+
+@media (max-width: 600px) {
+  .ffs-form-call .ffs-call-caption > span:last-child {
+    display: none;
+  }
+
+  .ffs-form-call .ffs-call-caption {
+    justify-content: center;
+  }
+
+  .ffs-form-call .ffs-call-form {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+
+/* ---------- Motion: only where the page grants it ---------- */
+@media (prefers-reduced-motion: no-preference) and (forced-colors: none) {
+  /* The card cuts in opaque and holds; it leaves through the aperture. */
+  html:not([data-world-effects="economy"]) .ffs-page > .ffs-form-call .ffs-call-ground > i:nth-child(1) {
+    animation: ffs-blade-left 220ms cubic-bezier(0.7, 0, 0.2, 1) 360ms forwards;
+  }
+
+  html:not([data-world-effects="economy"]) .ffs-page > .ffs-form-call .ffs-call-ground > i:nth-child(2) {
+    animation: ffs-blade-right 220ms cubic-bezier(0.7, 0, 0.2, 1) 370ms forwards;
+  }
+
+  html:not([data-world-effects="economy"]) .ffs-page > .ffs-form-call .ffs-call-ground > i:nth-child(3) {
+    transform-origin: 50% 50%;
+    animation: ffs-blade-shutter 200ms cubic-bezier(0.7, 0, 0.2, 1) 360ms forwards;
+  }
+
+  html:not([data-world-effects="economy"]) .ffs-page > .ffs-form-call .ffs-call-ground > i::before {
+    animation: ffs-call-edge 220ms linear 360ms both;
+  }
+
+  html:not([data-world-effects="economy"])
+    .ffs-page
+    > .ffs-form-call
+    :is(.ffs-call-words, .ffs-call-caption, .ffs-call-frame, .ffs-call-meter, .ffs-call-signature) {
+    animation:
+      ffs-call-in 80ms linear backwards,
+      ffs-call-quiet 80ms linear 330ms forwards;
+  }
+
+  html:not([data-world-effects="economy"]) .ffs-page > .ffs-form-call .ffs-call-signature > i {
+    animation: ffs-call-sign 320ms cubic-bezier(0.16, 1, 0.3, 1) 40ms both;
+  }
+
+  html:not([data-world-effects="economy"]) .ffs-page > .ffs-form-call .ffs-call-signature > i:nth-child(2) {
+    animation-name: ffs-call-sign-inner;
+  }
+
+  html:not([data-world-effects="economy"]) .ffs-page > .ffs-form-call .ffs-call-final {
+    animation: ffs-call-strike 240ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  /* A retarget re-keys the form's name: only it locks in again. */
+  html:not([data-world-effects="economy"]) .ffs-page > .ffs-form-call .ffs-call-form {
+    animation: ffs-call-lock 250ms cubic-bezier(0.16, 1, 0.3, 1) 80ms both;
+  }
+
+  html:not([data-world-effects="economy"]) .ffs-page > .ffs-form-call .ffs-call-meter > i[data-reached] {
+    transform-origin: 0 50%;
+    animation: ffs-call-meter 300ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  /* The entrance under the card: the new form rises from its floor as the
+     aperture opens (clip and opacity only: the copy start never moves). */
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.ffs-page[data-motion-ready="true"]
+    #ffs-stage-panel[data-entrance="card"]
+    > figure {
+    animation: ffs-floor-rise 520ms cubic-bezier(0.16, 1, 0.3, 1) calc(var(--ffs-entrance-delay, 0ms) - 80ms)
+      backwards;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.ffs-page[data-motion-ready="true"]
+    #ffs-stage-panel[data-entrance]
+    > figure
+    > .ffs-stage-scan {
+    animation-delay: calc(var(--ffs-entrance-delay, 0ms) + 60ms);
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.ffs-page[data-motion-ready="true"]
+    #ffs-stage-panel[data-entrance]
+    > div.ffs-stage-copy {
+    animation: none;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.ffs-page[data-motion-ready="true"]
+    #ffs-stage-panel[data-entrance="card"]
+    > div.ffs-stage-copy
+    > * {
+    animation: ffs-resolve 360ms cubic-bezier(0.16, 1, 0.3, 1) calc(var(--ffs-entrance-delay, 0ms) + 40ms)
+      backwards;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.ffs-page[data-motion-ready="true"]
+    #ffs-stage-panel[data-entrance="card"]
+    > div.ffs-stage-copy
+    > h3 {
+    animation-name: ffs-slit;
+    animation-delay: calc(var(--ffs-entrance-delay, 0ms) + 90ms);
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.ffs-page[data-motion-ready="true"]
+    #ffs-stage-panel[data-entrance="card"]
+    > div.ffs-stage-copy
+    > p {
+    animation-delay: calc(var(--ffs-entrance-delay, 0ms) + 140ms);
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.ffs-page[data-motion-ready="true"]
+    #ffs-stage-panel[data-entrance="card"]
+    > div.ffs-stage-copy
+    > .ffs-form-code {
+    animation: ffs-code-slam 560ms cubic-bezier(0.2, 0.9, 0.1, 1) calc(var(--ffs-entrance-delay, 0ms) + 60ms)
+      both;
+  }
+
+  /* Rings from the core and the refraction band, on every entrance. */
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.ffs-page[data-motion-ready="true"]
+    #ffs-stage-panel[data-entrance]
+    .ffs-switch-rings
+    > i {
+    animation: ffs-switch-ring 980ms cubic-bezier(0.16, 1, 0.3, 1) var(--ffs-entrance-delay, 0ms) both;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.ffs-page[data-motion-ready="true"]
+    #ffs-stage-panel[data-entrance]
+    .ffs-switch-rings
+    > i:nth-child(2) {
+    animation-delay: calc(var(--ffs-entrance-delay, 0ms) + 110ms);
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.ffs-page[data-motion-ready="true"]
+    #ffs-stage-panel[data-entrance]
+    .ffs-switch-rings
+    > i:nth-child(3) {
+    animation-delay: calc(var(--ffs-entrance-delay, 0ms) + 220ms);
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.ffs-page[data-motion-ready="true"]
+    #ffs-stage-panel[data-entrance]
+    .ffs-switch-rings
+    > i:nth-child(4) {
+    animation: ffs-switch-band 720ms cubic-bezier(0.65, 0, 0.35, 1) calc(var(--ffs-entrance-delay, 0ms) + 60ms) both;
+  }
+
+  /* The hex-cell sweep under a card: strips woven left and right. */
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.ffs-page[data-motion-ready="true"]
+    #ffs-stage-panel[data-entrance="card"]
+    .ffs-switch-mesh
+    > i {
+    animation: ffs-switch-mesh 520ms cubic-bezier(0.16, 1, 0.3, 1)
+      calc(var(--ffs-entrance-delay, 0ms) - 40ms + var(--ffs-d) * 26ms) both;
+  }
+
+  /* A selection without a card settles quietly (the rest guard's budget). */
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.ffs-page[data-motion-ready="true"]
+    #ffs-stage-panel[data-entrance="quiet"]
+    > figure,
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.ffs-page[data-motion-ready="true"]
+    #ffs-stage-panel[data-entrance="quiet"]
+    > div.ffs-stage-copy
+    > * {
+    animation: ffs-measure 240ms linear backwards;
+  }
+
+  /* ウルトラ's interfaces: emitter → beam and cone → wireframe → hex fill →
+     glitch and scan → typed read-outs → settle, tethers, wrist rings and
+     the crown gauge. One run from data-run, offset per part (--ffd-o). */
+  /* Each part's clock: the layer's delay plus the part's own offset
+     (resolved on the part, where --ffd-o is set). */
+  .ffs-ultra-deploy[data-run] :is(.ffd-panel, .ffd-ring, .ffd-crown) {
+    --ffd-t: calc(var(--ffd-delay, 0ms) + var(--ffd-o, 0ms));
+  }
+
+  .ffs-ultra-deploy[data-run] .ffd-emitter {
+    animation: ffd-emit 420ms cubic-bezier(0.16, 1, 0.3, 1) var(--ffd-t) both;
+  }
+
+  .ffs-ultra-deploy[data-run] .ffd-beam {
+    animation: ffd-beam 620ms cubic-bezier(0.16, 1, 0.3, 1) var(--ffd-t) both;
+  }
+
+  .ffs-ultra-deploy[data-run] .ffd-cone {
+    animation: ffd-cone 380ms ease-out calc(var(--ffd-t) + 80ms) both;
+  }
+
+  .ffs-ultra-deploy[data-run] .ffd-wire {
+    animation: ffd-draw 380ms cubic-bezier(0.65, 0, 0.35, 1) calc(var(--ffd-t) + 140ms) both;
+  }
+
+  .ffs-ultra-deploy[data-run] .ffd-corners {
+    animation: ffd-pop 260ms linear calc(var(--ffd-t) + 360ms) both;
+  }
+
+  .ffs-ultra-deploy[data-run] [data-inner="right"] :is(.ffd-hex, .ffd-glass, .ffd-head) {
+    animation: ffd-sweep-left 380ms cubic-bezier(0.16, 1, 0.3, 1) calc(var(--ffd-t) + 400ms) both;
+  }
+
+  .ffs-ultra-deploy[data-run] [data-inner="left"] :is(.ffd-hex, .ffd-glass, .ffd-head) {
+    animation: ffd-sweep-right 380ms cubic-bezier(0.16, 1, 0.3, 1) calc(var(--ffd-t) + 400ms) both;
+  }
+
+  .ffs-ultra-deploy[data-run] .ffd-glitch {
+    animation: ffd-glitch 220ms linear calc(var(--ffd-t) + 700ms) both;
+  }
+
+  .ffs-ultra-deploy[data-run] .ffd-scan {
+    animation: ffd-scan 320ms linear calc(var(--ffd-t) + 760ms) both;
+  }
+
+  .ffs-ultra-deploy[data-run] .ffd-glyph {
+    animation: ffd-pop 200ms linear calc(var(--ffd-t) + 720ms) both;
+  }
+
+  .ffs-ultra-deploy[data-run] .ffd-glyph-arc {
+    animation: ffd-draw 520ms cubic-bezier(0.16, 1, 0.3, 1) calc(var(--ffd-t) + 760ms) both;
+  }
+
+  .ffs-ultra-deploy[data-run] .ffd-bar {
+    animation: ffd-bar 360ms cubic-bezier(0.16, 1, 0.3, 1) calc(var(--ffd-t) + var(--ffd-c) * 1ms) both;
+  }
+
+  .ffs-ultra-deploy[data-run] :is(.ffd-title, .ffd-line, .ffd-crown-label) > tspan {
+    animation: ffd-type 120ms linear calc(var(--ffd-t) + var(--ffd-c) * 1ms) both;
+  }
+
+  .ffs-ultra-deploy[data-run] .ffd-settle {
+    animation: ffd-settle 420ms cubic-bezier(0.16, 1, 0.3, 1) calc(var(--ffd-t) + 1000ms) both;
+  }
+
+  .ffs-ultra-deploy[data-run] .ffd-tether {
+    animation: ffd-tether 900ms cubic-bezier(0.16, 1, 0.3, 1) calc(var(--ffd-t) + 600ms) both;
+  }
+
+  .ffs-ultra-deploy[data-run] :is(.ffd-ring-back, .ffd-ring-front) {
+    animation: ffd-draw 520ms cubic-bezier(0.65, 0, 0.35, 1) var(--ffd-t) both;
+  }
+
+  .ffs-ultra-deploy[data-run] .ffd-ring-front {
+    animation-delay: calc(var(--ffd-t) + 120ms);
+  }
+
+  .ffs-ultra-deploy[data-run] :is(.ffd-ring-ticks, .ffd-crown-ticks) {
+    animation: ffd-ticks 640ms cubic-bezier(0.16, 1, 0.3, 1) calc(var(--ffd-t) + 200ms) both;
+  }
+
+  .ffs-ultra-deploy[data-run] .ffd-crown-arc {
+    animation: ffd-draw 560ms cubic-bezier(0.65, 0, 0.35, 1) var(--ffd-t) both;
+  }
+
+  .ffs-ultra-deploy[data-run] .ffd-crown-lead {
+    animation: ffd-draw 240ms linear calc(var(--ffd-t) + 160ms) both;
+  }
+
+  /* One sync pulse through every interface once all have settled. */
+  .ffs-ultra-deploy[data-run] {
+    animation: ffd-sync 260ms ease-out calc(var(--ffd-delay, 0ms) + 1760ms) both;
+  }
+}
+
+/* The picture's scroll settle moves with its box, so the interfaces scale
+   with the picture (the motion sheet's own timeline, on the shared box). */
+@supports (animation-timeline: view()) and (animation-range: entry 0% entry 100%) {
+  @media (prefers-reduced-motion: no-preference) {
+    html:not([data-world-effects="economy"])
+      .rxs-page.rxs-page.ffs-page[data-motion-ready="true"]
+      .ffs-stage-panel
+      figure
+      > .ffs-stage-art
+      > img {
+      animation: none;
+    }
+
+    html:not([data-world-effects="economy"])
+      .rxs-page.rxs-page.ffs-page[data-motion-ready="true"]
+      .ffs-stage-panel
+      figure
+      > .ffs-stage-art {
+      animation: mx-settle linear both;
+      animation-timeline: view(block);
+      animation-range: cover 0% cover 55%;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ffs-page > .ffs-form-call,
+  .ffs-page .ffs-stage-tune,
+  .ffs-page .ffs-switch-rings,
+  .ffs-page .ffs-switch-mesh {
+    display: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .ffs-page > .ffs-form-call,
+  .ffs-page .ffs-stage-tune,
+  .ffs-page .ffs-switch-rings,
+  .ffs-page .ffs-switch-mesh,
+  .ffs-page .ffs-ultra-deploy {
+    display: none;
+  }
+}
+
+html[data-world-effects="economy"] .ffs-page > .ffs-form-call,
+html[data-world-effects="economy"] .ffs-page .ffs-stage-tune,
+html[data-world-effects="economy"] .ffs-page :is(.ffs-switch-rings, .ffs-switch-mesh) {
+  display: none;
+}
+
+@keyframes ffs-blade-left {
+  to {
+    translate: -102% 0;
+  }
+}
+
+@keyframes ffs-blade-right {
+  to {
+    translate: 102% 0;
+  }
+}
+
+@keyframes ffs-blade-shutter {
+  to {
+    scale: 1 0;
+    opacity: 0;
+  }
+}
+
+@keyframes ffs-call-edge {
+  0%,
+  100% {
+    opacity: 0;
+  }
+
+  30% {
+    opacity: 1;
+  }
+}
+
+@keyframes ffs-call-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes ffs-call-quiet {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes ffs-call-sign {
+  from {
+    opacity: 0;
+    scale: 0.5;
+    rotate: -60deg;
+  }
+
+  to {
+    opacity: 0.85;
+    scale: 1;
+    rotate: 0deg;
+  }
+}
+
+@keyframes ffs-call-sign-inner {
+  from {
+    opacity: 0;
+    scale: 1.4;
+    rotate: 90deg;
+  }
+
+  to {
+    opacity: 0.4;
+    scale: 1;
+    rotate: 30deg;
+  }
+}
+
+@keyframes ffs-call-strike {
+  0% {
+    opacity: 1;
+    transform: scale(1.18) translate3d(0, 8px, 0);
+    letter-spacing: 0.14em;
+  }
+
+  100% {
+    opacity: 1;
+    transform: none;
+    letter-spacing: 0.02em;
+  }
+}
+
+@keyframes ffs-call-lock {
+  from {
+    opacity: 0.2;
+    clip-path: inset(46% -0.5em 46% -0.5em);
+  }
+
+  to {
+    opacity: 1;
+    clip-path: inset(-0.5em -0.5em -0.5em -0.5em);
+  }
+}
+
+@keyframes ffs-call-meter {
+  from {
+    scale: 0 1;
+  }
+}
+
+@keyframes ffs-floor-rise {
+  from {
+    clip-path: inset(100% 0 0 0);
+  }
+
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes ffs-resolve {
+  from {
+    opacity: 0.15;
+    clip-path: inset(-0.5em 100% -0.5em -0.5em);
+  }
+
+  to {
+    opacity: 1;
+    clip-path: inset(-0.5em -0.5em -0.5em -0.5em);
+  }
+}
+
+@keyframes ffs-slit {
+  from {
+    opacity: 0.15;
+    clip-path: inset(46% -0.5em 46% -0.5em);
+  }
+
+  to {
+    opacity: 1;
+    clip-path: inset(-0.5em -0.5em -0.5em -0.5em);
+  }
+}
+
+@keyframes ffs-code-slam {
+  0% {
+    opacity: 0;
+    scale: 1.5;
+  }
+
+  20% {
+    opacity: 0.9;
+  }
+
+  100% {
+    opacity: 0.7;
+    scale: 1;
+  }
+}
+
+@keyframes ffs-switch-ring {
+  0% {
+    opacity: 0;
+    scale: 0.18;
+  }
+
+  14% {
+    opacity: 0.95;
+  }
+
+  100% {
+    opacity: 0;
+    scale: 3.4;
+  }
+}
+
+@keyframes ffs-switch-band {
+  0% {
+    opacity: 1;
+    translate: -110% 0;
+  }
+
+  100% {
+    opacity: 1;
+    translate: 170% 0;
+  }
+}
+
+@keyframes ffs-switch-mesh {
+  0% {
+    opacity: 0;
+    transform: scaleX(0.06);
+  }
+
+  36% {
+    opacity: 0.9;
+    transform: scaleX(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scaleX(1);
+  }
+}
+
+@keyframes ffs-measure {
+  from {
+    opacity: 0.82;
+  }
+}
+
+@keyframes ffd-emit {
+  0% {
+    opacity: 0;
+    scale: 0.2;
+  }
+
+  30% {
+    opacity: 1;
+    scale: 1.8;
+  }
+
+  100% {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+@keyframes ffd-beam {
+  0% {
+    stroke-dashoffset: 1;
+    opacity: 1;
+  }
+
+  30% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0.32;
+  }
+}
+
+@keyframes ffd-cone {
+  0%,
+  100% {
+    opacity: 0;
+  }
+
+  35% {
+    opacity: 0.28;
+  }
+}
+
+@keyframes ffd-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes ffd-pop {
+  0%,
+  30% {
+    opacity: 0;
+  }
+
+  31%,
+  60% {
+    opacity: 1;
+  }
+
+  61%,
+  80% {
+    opacity: 0.3;
+  }
+
+  81%,
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes ffd-sweep-left {
+  from {
+    clip-path: inset(0 0 0 100%);
+  }
+
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes ffd-sweep-right {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+/* Hard cuts (held keyframe pairs), so the last frame is the rest. */
+@keyframes ffd-glitch {
+  0%,
+  19% {
+    opacity: 0.4;
+    transform: translate(6px, 0);
+  }
+
+  20%,
+  39% {
+    opacity: 1;
+    transform: translate(-4px, 1px);
+  }
+
+  40%,
+  59% {
+    opacity: 0.6;
+    transform: translate(3px, -1px);
+  }
+
+  60%,
+  79% {
+    opacity: 1;
+    transform: translate(-2px, 0);
+  }
+
+  80%,
+  92% {
+    opacity: 0.8;
+    transform: translate(1px, 0);
+  }
+
+  93%,
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes ffd-scan {
+  0% {
+    opacity: 0.9;
+    transform: translateY(0);
+  }
+
+  90% {
+    opacity: 0.9;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(calc(var(--ffd-h, 100px) - 3px));
+  }
+}
+
+@keyframes ffd-bar {
+  from {
+    transform: scaleY(0);
+  }
+}
+
+/* A character types on: dark, a white strike, then its own colour. */
+@keyframes ffd-type {
+  0%,
+  10% {
+    fill-opacity: 0;
+  }
+
+  11% {
+    fill-opacity: 1;
+    fill: var(--ffd-white);
+  }
+
+  100% {
+    fill-opacity: 1;
+  }
+}
+
+@keyframes ffd-settle {
+  0% {
+    transform: scale(1.06);
+  }
+
+  100% {
+    transform: none;
+  }
+}
+
+@keyframes ffd-tether {
+  0% {
+    opacity: 0;
+    stroke-dashoffset: 0.6;
+  }
+
+  25% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0.8;
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes ffd-ticks {
+  from {
+    opacity: 0;
+    stroke-dashoffset: 40;
+  }
+
+  to {
+    opacity: 0.7;
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes ffd-sync {
+  0% {
+    filter: none;
+  }
+
+  40% {
+    filter: brightness(1.7);
+  }
+
+  100% {
+    filter: none;
+  }
+}
