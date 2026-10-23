@@ -280,3 +280,57 @@ test("FAR FROM's engine chunk: retried; when the retries run out the runway read
     console.error = error;
   }
 });
+
+test("FAR FROM's engine that throws as it mounts is no silent dead end: the runway reads error and a retry mounts it again", async () => {
+  const listeners = new Map();
+  const host = {
+    dataset: {},
+    ownerDocument: { documentElement: { dataset: {} } },
+    addEventListener: (type, callback) => listeners.set(type, callback),
+    removeEventListener: (type) => listeners.delete(type),
+    dispatchEvent: (event) => listeners.get(event.type)?.(event),
+  };
+  const environment = {
+    matchMedia: () => ({ matches: false, addEventListener() {}, removeEventListener() {} }),
+    navigator: { connection: { saveData: false, effectiveType: "4g" } },
+    requestIdleCallback: () => 1,
+    cancelIdleCallback: () => {},
+    setTimeout: () => 0,
+    clearTimeout: () => {},
+    addEventListener() {},
+    removeEventListener() {},
+    MutationObserver: class {
+      observe() {}
+      disconnect() {}
+    },
+  };
+  const error = console.error;
+  const reported = [];
+  console.error = (...args) => reported.push(String(args[0]));
+  try {
+    let mounts = 0;
+    const dispose = mountFarFromAssembly(host, {
+      environment,
+      load: () =>
+        Promise.resolve({
+          mountFarFromAssemblyEngine: () => {
+            mounts += 1;
+            if (mounts === 1) throw new Error("a bug in the engine's mount");
+            return () => {};
+          },
+        }),
+    });
+    host.dispatchEvent(new Event("rexonance:assembly-wake"));
+    await flush();
+    assert.equal(mounts, 1);
+    assert.equal(host.dataset.rznLoad, "error", "the runway says so (the movie and the guide offer a retry)");
+    assert.ok(reported.some((line) => line.includes("could not be mounted")), "reported");
+    assert.ok(listeners.has("rexonance:assembly-retry"), "the retry is listened for again");
+    host.dispatchEvent(new Event("rexonance:assembly-retry"));
+    await flush();
+    assert.equal(mounts, 2, "mounted again");
+    dispose();
+  } finally {
+    console.error = error;
+  }
+});

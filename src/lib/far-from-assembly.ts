@@ -190,7 +190,15 @@ export function mountFarFromAssembly(
         if (disposed || dispose) return;
         // The engine answers the retry and wake events from here on.
         stopListening();
-        dispose = module.mountFarFromAssemblyEngine(host, environment);
+        try {
+          dispose = module.mountFarFromAssemblyEngine(host, environment);
+        } catch (error) {
+          // Never a silent dead end: reported, and retried as a failed import.
+          console.error("[far-from suit-up] the engine could not be mounted", error);
+          listen();
+          host.dataset.rznLoad = "error";
+          return;
+        }
         // A 再生 already waiting: the engine prepares at once.
         if (woken) host.dispatchEvent?.(new Event("rexonance:assembly-wake"));
       },
@@ -213,10 +221,15 @@ export function mountFarFromAssembly(
   const onRetry = () => {
     if (host.dataset.rznLoad === "error") start();
   };
-  let listening = true;
-  runway.addEventListener?.("rexonance:assembly-wake", onWake);
-  runway.addEventListener?.("rexonance:assembly-retry", onRetry);
-  environment.addEventListener?.("online", onRetry);
+  let listening = false;
+  function listen() {
+    if (listening) return;
+    listening = true;
+    runway.addEventListener?.("rexonance:assembly-wake", onWake);
+    runway.addEventListener?.("rexonance:assembly-retry", onRetry);
+    environment.addEventListener?.("online", onRetry);
+  }
+  listen();
   function stopListening() {
     if (!listening) return;
     listening = false;

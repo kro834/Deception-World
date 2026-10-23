@@ -1319,7 +1319,12 @@ test("the control's chunk: retried, imported early on approach or intent, never 
   assert.match(source, /showFallback\(\);\s*timer = window\.setTimeout\(start, ASSEMBLY_MOVIE_RETRY_LATER_MS\);/);
   assert.match(source, /const reload = \(\) => window\.location\.reload\(\);/);
   assert.match(source, /for \(const button of buttons\) button\.disabled = !actions\.includes\(button\);/);
-  assert.match(source, /fallback\?\.\(\);\s*delete control\.dataset\.failed;\s*dispose = module\.mountAssemblyMovie\(control, runway\);/);
+  assert.match(source, /fallback\?\.\(\);\s*delete control\.dataset\.failed;\s*try \{\s*dispose = module\.mountAssemblyMovie\(control, runway\);/);
+  // A controller that throws as it mounts is no controller: the same 再読み込み.
+  assert.match(
+    source,
+    /console\.error\("\[movie\] the controller could not be mounted", error\);\s*control\.dataset\.failed = "true";\s*showFallback\(\);/,
+  );
   assert.equal(Number(source.match(/ASSEMBLY_MOVIE_SHOW_AT = ([\d.]+);/)?.[1]), MOVIE_SHOW_AT);
   assert.equal(source.match(/ASSEMBLY_MOVIE_RELOAD_LABEL = "([^"]+)";/)?.[1], MOVIE_PLAY_LABELS.retry);
   const engine = read("src/lib/rexonance-resonance.js");

@@ -140,7 +140,15 @@ export function AssemblyMovie({
           if (disposed || dispose) return;
           fallback?.();
           delete control.dataset.failed;
-          dispose = module.mountAssemblyMovie(control, runway);
+          try {
+            dispose = module.mountAssemblyMovie(control, runway);
+          } catch (error) {
+            // (A controller that throws is no controller: 再読み込み, reported.)
+            console.error("[movie] the controller could not be mounted", error);
+            control.dataset.failed = "true";
+            showFallback();
+            return;
+          }
           near?.disconnect();
         },
         (error) => {
