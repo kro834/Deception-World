@@ -1,0 +1,135 @@
+/* Static reading links, confined to the World episode records. */
+.site-shell.film-edition.mirage-edition #episode-notes .wr-record-index {
+  margin: 20px 0 28px;
+}
+
+.site-shell.film-edition.mirage-edition #episode-notes .wr-record-index ol {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-shell.film-edition.mirage-edition #episode-notes .wr-record-index li,
+.site-shell.film-edition.mirage-edition #episode-notes .wr-record-group li {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.site-shell.film-edition.mirage-edition #episode-notes .wr-record-index a,
+.site-shell.film-edition.mirage-edition #episode-notes .wr-record-context a {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 48px;
+  max-width: 100%;
+  padding: 10px 12px;
+  border: 1px solid rgb(122 232 255 / 30%);
+  border-radius: 2px;
+  background: #0c1823;
+  color: #e4f6ff;
+  font-size: 14px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+  text-decoration: none;
+  text-align: start;
+}
+
+.site-shell.film-edition.mirage-edition #episode-notes .wr-record-index a {
+  align-items: start;
+  flex-direction: column;
+  gap: 4px;
+  height: 100%;
+}
+
+.site-shell.film-edition.mirage-edition #episode-notes .wr-record-number {
+  color: #f0cf86;
+  font-family: var(--mr-mono, monospace);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.site-shell.film-edition.mirage-edition #episode-notes .wr-record-context {
+  grid-column: 1 / -1;
+  min-width: 0;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid rgb(122 232 255 / 28%);
+}
+
+.site-shell.film-edition.mirage-edition #episode-notes .wr-record-context-title {
+  margin: 0 0 16px;
+  color: #e4f6ff;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.6;
+}
+
+.site-shell.film-edition.mirage-edition #episode-notes .wr-record-group + .wr-record-group {
+  margin-top: 16px;
+}
+
+.site-shell.film-edition.mirage-edition #episode-notes .wr-record-group-label {
+  margin: 0 0 8px;
+  color: #b9d9e8;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.site-shell.film-edition.mirage-edition #episode-notes .wr-record-group ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-shell.film-edition.mirage-edition #episode-notes .wr-record-index a:focus-visible,
+.site-shell.film-edition.mirage-edition #episode-notes .wr-record-context a:focus-visible {
+  outline: 2px solid #fff0b5;
+  outline-offset: -3px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .site-shell.film-edition.mirage-edition #episode-notes .wr-record-index a:hover,
+  .site-shell.film-edition.mirage-edition #episode-notes .wr-record-context a:hover {
+    border-color: #7ae8ff;
+    background: #142838;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+}
+
+@media (max-width: 600px) {
+  .site-shell.film-edition.mirage-edition #episode-notes .wr-record-index ol {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (forced-colors: active) {
+  .site-shell.film-edition.mirage-edition #episode-notes .wr-record-index a,
+  .site-shell.film-edition.mirage-edition #episode-notes .wr-record-context a {
+    border-color: LinkText;
+    background: Canvas;
+    color: LinkText;
+  }
+
+  .site-shell.film-edition.mirage-edition #episode-notes .wr-record-context {
+    border-color: CanvasText;
+  }
+
+  .site-shell.film-edition.mirage-edition #episode-notes .wr-record-number,
+  .site-shell.film-edition.mirage-edition #episode-notes .wr-record-context-title,
+  .site-shell.film-edition.mirage-edition #episode-notes .wr-record-group-label {
+    color: CanvasText;
+  }
+
+  .site-shell.film-edition.mirage-edition #episode-notes .wr-record-index a:focus-visible,
+  .site-shell.film-edition.mirage-edition #episode-notes .wr-record-context a:focus-visible {
+    outline-color: Highlight;
+  }
+}

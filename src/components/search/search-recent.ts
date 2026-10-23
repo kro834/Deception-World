@@ -39,26 +39,57 @@ export function pushRecentSearch(list: readonly string[], query: string): string
 
 const EMPTY: readonly string[] = [];
 let snapshot: readonly string[] = EMPTY;
+type SearchIntent = { kind: "add" | "remove"; query: string } | { kind: "clear" };
+// Replay unsaved actions over the latest disk list when storage recovers, so
+// this tab's session changes cannot overwrite another tab's newer searches.
+let pending: SearchIntent[] = [];
 const listeners = new Set<() => void>();
 
-function read() {
+function readDisk(): string[] | null {
   try {
-    snapshot = parseRecentSearches(window.localStorage.getItem(RECENT_SEARCH_KEY));
+    return parseRecentSearches(window.localStorage.getItem(RECENT_SEARCH_KEY));
   } catch {
-    snapshot = EMPTY;
+    return null;
   }
+}
+
+function applyIntent(list: readonly string[], intent: SearchIntent): string[] {
+  if (intent.kind === "clear") return [];
+  if (intent.kind === "add") return pushRecentSearch(list, intent.query);
+  return list.filter((item) => fold(item) !== fold(intent.query));
+}
+
+function replay(list: readonly string[], intents: readonly SearchIntent[]): string[] {
+  return intents.reduce<string[]>((current, intent) => applyIntent(current, intent), [...list]);
+}
+
+function read() {
+  const disk = readDisk();
+  if (disk !== null) snapshot = replay(disk, pending);
+  // Keep the last usable session snapshot when this browser blocks reads.
   listeners.forEach((listener) => listener());
 }
 
-function write(next: readonly string[]) {
-  try {
-    if (next.length) window.localStorage.setItem(RECENT_SEARCH_KEY, JSON.stringify(next));
-    else window.localStorage.removeItem(RECENT_SEARCH_KEY);
-  } catch {
-    // Storage may be full or blocked; the list still updates for this page.
+function write(intent: SearchIntent): boolean {
+  const disk = readDisk();
+  const intents = [...pending, intent];
+  const next = disk === null ? applyIntent(snapshot, intent) : replay(disk, intents);
+  let persisted = false;
+  // Without a current disk read, even an allowed write could erase changes
+  // made by another tab. Keep the intent until a safe merge becomes possible.
+  if (disk !== null) {
+    try {
+      if (next.length) window.localStorage.setItem(RECENT_SEARCH_KEY, JSON.stringify(next));
+      else window.localStorage.removeItem(RECENT_SEARCH_KEY);
+      persisted = true;
+    } catch {
+      // Storage may be full or blocked; keep these actions for the next retry.
+    }
   }
+  pending = persisted ? [] : intents;
   snapshot = next;
   listeners.forEach((listener) => listener());
+  return persisted;
 }
 
 function onStorage(event: StorageEvent) {
@@ -87,23 +118,22 @@ export function useRecentSearches(): readonly string[] {
 
 export function rememberSearch(query: string) {
   if (typeof window === "undefined") return;
-  if (!listeners.size) read();
-  write(pushRecentSearch(snapshot, query));
+  if (!query.trim()) return;
+  return write({ kind: "add", query });
 }
 
 export function forgetSearch(query: string) {
-  write(snapshot.filter((item) => fold(item) !== fold(query)));
+  if (typeof window === "undefined") return false;
+  return write({ kind: "remove", query });
 }
 
-export function clearRecentSearches() {
-  write([]);
+export function clearRecentSearches(): boolean {
+  if (typeof window === "undefined") return false;
+  return write({ kind: "clear" });
 }
 
 /** For export: the stored list as it is now. */
 export function readRecentSearches(): string[] {
-  try {
-    return parseRecentSearches(window.localStorage.getItem(RECENT_SEARCH_KEY));
-  } catch {
-    return [];
-  }
+  const disk = readDisk();
+  return disk === null ? [...snapshot] : replay(disk, pending);
 }

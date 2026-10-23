@@ -47,13 +47,16 @@ test("search label and description point to the rendered input; native hints sta
   const input = html.match(/<input\b[^>]*type="search"[^>]*>/)?.[0];
   const label = html.match(/<label\b[^>]*>作品を検索<\/label>/)?.[0];
   const hint = html.match(/<details\b[^>]*class="gallery-search-tips"[^>]*>/)?.[0];
+  const description = html.match(/<p\b[^>]*class="gallery-search-description"[^>]*>/)?.[0];
   assert.ok(input);
   assert.ok(label);
   assert.ok(hint);
+  assert.ok(description);
   assert.equal(attribute(label, "for"), attribute(input, "id"));
-  assert.equal(
-    attribute(input, "aria-describedby"),
-    attribute(html.match(/<p\b[^>]*class="gallery-search-help"[^>]*>/)?.[0] ?? "", "id"),
+  assert.equal(attribute(input, "aria-describedby"), attribute(description, "id"));
+  assert.ok(
+    html.indexOf(description) < html.indexOf(hint),
+    "description remains outside closed hints",
   );
   assert.match(input, /aria-label="作品を番号、画像の説明、公開タイトルで検索"/);
   assert.equal(attribute(hint, "open"), undefined);

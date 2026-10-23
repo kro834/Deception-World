@@ -504,11 +504,15 @@ test("the owner's comparison text is kept verbatim and read whole into the two d
   // ファーフロム reads 50000〜YOPS / 60000〜YOPS (lower bounds).
   // Owner (2026-10-23): エクスプリームの加速機構は P14 — the table cell reads P14
   // and the 保留 sentence names 『P14（Extreme tuning）』; nothing else changed.
+  // 2026-10-23, canon: that sentence describes Extreme's P14 in the Extreme
+  // site's own words (「勝利経路の増殖と結果固定へ最適化された先行世代の」), not
+  // as a tuning of Rexonance's P14; one phrase changed, nothing else.
   assert.equal(
     createHash("sha256").update(TEXT).digest("hex"),
-    "a13e1f56a507747e864020b30286748d64f5ddbcccdf0b36a34991ae5cb915a6",
+    "d18baff05658ed66e99a22463489c3d2fea36884299d5f493a84a6bd36657185",
   );
   assert.doesNotMatch(TEXT, /個別比較値未確定|機構単体の正確な向上率は保留する/);
+  assert.doesNotMatch(TEXT, /P14を高出力と結果固定へ最適化した/);
   const [first, second] = report.REPORT_PARTS;
   assert.equal(first.title, "対レクソナンスサーガ・性能比較及び効率改善");
   assert.equal(second.title, "仮面ライダーサーガ・究極形態性能比較及び技術進化");
@@ -1572,7 +1576,7 @@ test("#p16 prints the owner's P16 chapters, with 暫定ベンチマーク on eve
   assert.ok(p16.P16_VS_P2.source.includes("暫定的に約3倍"));
   assert.equal(
     p16.P16_VS_EXTREME.source,
-    "エクスプリームには、P14を高出力と結果固定へ最適化した『P14（Extreme tuning）』が搭載されており、P16との機構単体の比較値は暫定的な設定案として扱う。",
+    "エクスプリームには、勝利経路の増殖と結果固定へ最適化された先行世代の『P14（Extreme tuning）』が搭載されており、P16との機構単体の比較値は暫定的な設定案として扱う。",
   );
   // The caveats, verbatim: independent items, never summed, never added to the 20%.
   assert.deepEqual(
@@ -1614,19 +1618,41 @@ test("#p16 prints the owner's P16 chapters, with 暫定ベンチマーク on eve
     "暫定ベンチマークでは、演算加速対象となる処理の実効スループットはP14比150%、すなわち50%向上。",
     "優先処理の投入から実行開始までに発生する待機時間は35%短縮され、位相同期誤差は40%減少している。",
   ]);
-  // 暫定ベンチマーク wherever the figures appear: the overview, the comparator.
-  assert.equal(p16View.match(/<ProvisionalTag \/>/g)?.length, 2);
+  // 暫定ベンチマーク wherever the figures appear: the overview, and the
+  // comparator's header, which says 暫定ベンチマーク／設定案 over the Extreme option.
+  assert.equal(p16View.match(/<ProvisionalTag \/>/g)?.length, 1);
+  assert.match(p16View, /<ProvisionalTag proposal=\{baseline === "extreme"\} \/>/);
+  assert.match(p16View, /proposal \? "暫定ベンチマーク／設定案" : "暫定ベンチマーク"/);
   assert.match(p16View, /（暫定ベンチマーク）/);
   assert.match(p16View, /P16（暫定）/);
-  // The エクスプリーム option draws the 設定案 with its own label.
+  // The エクスプリーム option draws the 設定案 with the P14 option's cards
+  // (base, P16, bars, reading, change), its strength, and its ※ notes.
   assert.match(p16View, /<ExtremeMetricRow key=\{metric\.key\} metric=\{metric\} \/>/);
-  assert.match(p16View, /暫定ベンチマーク／設定案/);
-  assert.match(p16View, /\{P16_VS_EXTREME\.note\}/);
-  assert.doesNotMatch(p16View, /ffs-p16-withheld|P16_VS_EXTREME\.value/);
-  // The P14 → P16 comparator: native radios over P14比 / P2比 / エクスプリーム.
-  assert.match(p16View, /\{ key: "p14", label: "P14比" \}/);
-  assert.match(p16View, /\{ key: "p2", label: "P2比" \}/);
-  assert.match(p16View, /\{ key: "extreme", label: "エクスプリーム" \}/);
+  assert.match(p16View, /<ExtremeStrength \/>/);
+  assert.match(p16View, /P16_VS_EXTREME\.notes\.map/);
+  assert.doesNotMatch(
+    p16View,
+    /ffs-p16-withheld|P16_VS_EXTREME\.value|ffs-p16-proposal|ffs-p16-burst/,
+  );
+  for (const [base, unit] of [
+    ["レクソナンス", "P14"],
+    ["ヴィンクルム", "P2"],
+    ["エクスプリーム", "P14"],
+  ])
+    assert.match(p16View, new RegExp(`<BaseValue form="${base}" unit="${unit}" />`), base);
+  // Every option's cards say how to read them (P14, P2, Extreme); the
+  // Extreme cards add the two indices under it.
+  assert.equal(p16View.match(/\{reading\(/g)?.length, 3);
+  assert.match(
+    p16View,
+    /\{reading\(metric\.lowerIsBetter\)\}\s*<small>\s*指数 \{metric\.extreme\} → \{metric\.p16\}/,
+  );
+  // The comparator: native radios over P14比 / P2比 / P14比, each over the form
+  // that carries the unit, so Rexonance's P14 and Extreme's read apart.
+  assert.match(p16View, /\{ key: "p14", label: "P14比", form: "レクソナンス" \}/);
+  assert.match(p16View, /\{ key: "p2", label: "P2比", form: "ヴィンクルム" \}/);
+  assert.match(p16View, /\{ key: "extreme", label: "P14比", form: "エクスプリーム" \}/);
+  assert.match(p16View, /extreme: `\$\{EXTREME_P14_NAME\}比`/);
   assert.match(p16View, /type="radio"/);
   // Owner (2026-10-23): the owner's P16 artwork replaces the drawn core.
   assert.match(p16View, /src="\/far-from-p16-core-20261023-720\.webp"/);
@@ -1733,26 +1759,63 @@ test("the five forms are named in katakana only wherever the page's own labels n
 });
 
 // Owner (2026-10-23): 「ファーフロムの比較画面にて、エクスプリームはP14なので合わせて。
-// また、P14との性能差は想像して生成してみて」
+// また、P14との性能差は想像して生成してみて」. Then 「適当な部分もブラッシュアップして」:
+// the 設定案 keeps to the Extreme site's canon, reads as plain site copy, and
+// is drawn as the comparator's other options are.
 test("Extreme's 加速機構 is P14 (Extreme tuning), with an invented P16 benchmark that adds up", () => {
   const vs = p16.P16_VS_EXTREME;
+  const extremeSite = read("src/components/extreme-saga/extreme-saga.tsx");
   // The Extreme special site's name, on the console and in the comparator.
   assert.equal(p16.EXTREME_P14_NAME, "P14（Extreme tuning）");
-  assert.match(read("src/components/extreme-saga/extreme-saga.tsx"), /"P14（Extreme tuning）"/);
+  assert.match(extremeSite, /"P14（Extreme tuning）"/);
   const accel = data.BASIC_TEXT_ROWS.find((row) => row.label === "加速機構");
   assert.deepEqual(accel.values, { vinculum: "P2", extreme: "P14", rexonance: "P14", farFrom: "P16" });
   assert.equal(accel.shown.extreme, "P14（Extreme tuning）");
   assert.equal(accel.shown.rexonance, "P14");
+  // The name holds together: a narrow row breaks before 「（」, never inside it.
+  assert.match(comparison, /<UnitName value=\{row\.shown\[item\.key\]\} \/>/);
+  assert.match(p16View, /<span className="ffs-unit-tuning">\{value\.slice\(at\)\}<\/span>/);
+  assert.match(compareStyles, /\.ffs-page \.ffs-unit-tuning \{\s*white-space: nowrap;/);
+  // The console's エクスプリーム view: the same figures, labelled, with the notes.
   assert.match(comparison, /\{baseline === "extreme" \? <AccelVsExtreme \/> : null\}/);
   assert.match(comparison, /暫定ベンチマーク／設定案/);
+  assert.match(
+    comparison,
+    /\{p16ChangeAgainstExtremeFigure\(metric\)\}\s*<small>\{metric\.verb\}<\/small>/,
+  );
+  assert.match(comparison, /P16_VS_EXTREME\.notes\.map/);
   assert.doesNotMatch(comparison, /個別比較値未確定|data-pending/);
-  // The lineage: Extreme shares P14.
+
+  // Canon. The Extreme site: エクスプリーム専用のP14 is the earlier-generation
+  // core, its individual figures unpublished. Rexonance's P14 accelerates only
+  // what it needs. Our words say the same, and never make the two one generation.
+  assert.match(extremeSite, /勝利経路の増殖と結果固定へ最適化された先行世代の演算コアです/);
+  assert.match(extremeSite, /個別数値は未公表です/);
+  assert.match(read("src/lib/rexonance-profile.ts"), /必要な処理だけを選択的に加速し/);
+  for (const line of [vs.source, ...vs.text, ...vs.notes])
+    assert.doesNotMatch(line, /第14世代|同じ世代/, line);
+  assert.match(
+    vs.source,
+    /勝利経路の増殖と結果固定へ最適化された先行世代の『P14（Extreme tuning）』/,
+  );
+  const reading = vs.text.join("");
+  for (const term of [
+    "エクスプリーム専用",
+    "KHAOS Ultra",
+    "KOSMOS Ultra",
+    "勝利経路の増殖",
+    "結果固定",
+    "先行世代",
+  ])
+    assert.ok(reading.includes(term), term);
+  assert.match(reading, /レクソナンスのP14はこの方式を、必要な処理だけを選んで加速する形へ改良し/);
+  // The lineage: P14 is Extreme's earlier generation, then Rexonance's.
   assert.deepEqual(
-    p16.P16_LINEAGE.steps.map((step) => [step.unit, step.form]),
+    p16.P16_LINEAGE.steps.map((step) => [step.unit, [...step.forms]]),
     [
-      ["P2", "ヴィンクルム"],
-      ["P14", "エクスプリーム／レクソナンス"],
-      ["P16", "ファーフロム"],
+      ["P2", ["ヴィンクルム"]],
+      ["P14", ["エクスプリーム", "レクソナンス"]],
+      ["P16", ["ファーフロム"]],
     ],
   );
 
@@ -1771,37 +1834,55 @@ test("Extreme's 加速機構 is P14 (Extreme tuning), with an invented P16 bench
   assert.equal(throughput.p16, (I.accel(ff) / I.accel("rexonance")) * 100);
   assert.equal(heat.extreme, (I.heat("extreme") / I.heat("rexonance")) * 100);
   assert.equal(heat.p16, (I.heat(ff) / I.heat("rexonance")) * 100);
-  // Extreme tuning is hotter, slower to start priority work and less in phase.
+  // The wait follows the throughput: a queue drained at 80% waits 100 / 80.
+  assert.equal(wait.extreme, (100 / throughput.extreme) * 100);
+  // Extreme tuning is hotter, slower to start priority work and less in phase;
+  // it leads Rexonance's P14 in one item, its short peak.
   assert.ok(throughput.extreme < 100 && wait.extreme > 100 && phase.extreme > 100);
   assert.ok(heat.extreme > 100 && vs.burst.extreme > 100);
   // Every derived percentage.
   assert.deepEqual(vs.metrics.map(p16.p16AgainstExtreme), [187.5, 52, 50, 56.15]);
   assert.deepEqual(vs.metrics.map(p16.p16ChangeAgainstExtreme), [87.5, -48, -50, -43.85]);
   assert.deepEqual(vs.metrics.map(p16.p16AgainstExtremeText), ["187.5%", "52%", "50%", "約56.15%"]);
+  // Signed as the P14 option prints its own (「−35% 短縮」), 約 first as the console does.
+  assert.deepEqual(vs.metrics.map(p16.p16ChangeAgainstExtremeFigure), [
+    "+87.5%",
+    "−48%",
+    "−50%",
+    "約−43.85%",
+  ]);
   assert.deepEqual(vs.metrics.map(p16.p16ChangeAgainstExtremeText), [
     "+87.5% 向上",
-    "48% 短縮",
-    "50% 減少",
-    "約43.85% 削減",
+    "−48% 短縮",
+    "−50% 減少",
+    "約−43.85% 削減",
+  ]);
+  // The bars' labels, as the P14 cards' say 「35%短縮」.
+  assert.deepEqual(vs.metrics.map(p16.p16ChangeAgainstExtremeSpoken), [
+    "87.5%向上",
+    "48%短縮",
+    "50%減少",
+    "約43.85%削減",
   ]);
   // 87.5% = the 選択処理 row's FAR FROM 150 / Extreme 80; 43.85% = the owner's
   // own 「エクスプリーム比約43.85%」 heat cut.
   assert.equal(p16.p16ChangeAgainstExtreme(throughput), gain(I.accel(ff), I.accel("extreme")));
   assert.equal(-p16.p16ChangeAgainstExtreme(heat), half(cut(I.heat(ff), I.heat("extreme"))));
   assert.ok(TEXT.includes("エクスプリーム比約43.85%"));
-  // The sentences state exactly these figures, and are not passed off as the owner's.
-  const [what, why, result] = vs.text;
-  assert.equal(vs.text.length, 3);
-  assert.match(what, /『P14（Extreme tuning）』/);
-  for (const metric of vs.metrics) assert.ok(why.includes(`${metric.extreme}%`), metric.label);
-  assert.ok(why.includes(`${vs.burst.extreme}%`));
-  for (const figure of ["87.5%向上", "48%短縮", "50%減少", "約43.85%削減"])
-    assert.ok(result.includes(figure), figure);
-  for (const line of [...vs.text, vs.note]) {
+  // The reading: four sentences, two a paragraph, and no figure (the cards
+  // carry them). The notes: the scale, and what the figures are.
+  assert.equal(vs.text.length, 2);
+  for (const paragraph of vs.text) assert.equal(report.sentencesOf(paragraph).length, 2, paragraph);
+  assert.doesNotMatch(reading, /\d+(?:\.\d+)?%|指数/);
+  assert.deepEqual(vs.notes, [
+    "指数は、レクソナンスのP14を100とした値です。",
+    "P14（Extreme tuning）の個別数値は未公表です。ここに示す数値は、この比較のために作成した暫定の設定案で、確定スペックではありません。",
+  ]);
+  // Not passed off as the owner's; plain site copy.
+  for (const line of [...vs.text, ...vs.notes]) {
     assert.ok(!TEXT.includes(line), line);
     assert.doesNotMatch(line, /静かに|眠る|記録が/);
   }
-  assert.match(vs.note, /設定案であり、確定スペックではない/);
 });
 
 // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）. The chapter heads are

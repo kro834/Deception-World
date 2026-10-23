@@ -10,7 +10,10 @@
    corner marks. Still: no motion, no blur, nothing fetched. */
 .app-load-error {
   box-sizing: border-box;
-  min-height: 100svh;
+  height: 100dvh;
+  min-height: 0;
+  overflow-y: auto;
+  align-items: safe center;
   padding: max(24px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right))
     max(24px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
   background:
@@ -26,7 +29,8 @@
     radial-gradient(ellipse 70% 42% at 50% 0%, rgb(122 232 255 / 11%), transparent 70%),
     radial-gradient(ellipse 60% 34% at 50% 104%, rgb(255 79 195 / 8%), transparent 70%),
     repeating-linear-gradient(90deg, rgb(122 232 255 / 3%) 0 1px, transparent 1px 28px),
-    repeating-linear-gradient(0deg, rgb(122 232 255 / 3%) 0 1px, transparent 1px 28px), #03060c;
+    repeating-linear-gradient(0deg, rgb(122 232 255 / 3%) 0 1px, transparent 1px 28px),
+    #03060c;
 }
 
 .app-load-error-panel {
@@ -86,9 +90,7 @@
   inset: 1.5px;
   z-index: -1;
   content: "";
-  background:
-    linear-gradient(135deg, rgb(240 207 134 / 22%), rgb(240 207 134 / 4%) 60%),
-    #070d16;
+  background: linear-gradient(135deg, rgb(240 207 134 / 22%), rgb(240 207 134 / 4%) 60%), #070d16;
   clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
 }
 
@@ -331,5 +333,9 @@
 
   .app-load-error-actions button::before {
     display: none;
+  }
+
+  .app-load-error-actions :focus-visible {
+    outline-color: Highlight;
   }
 }
