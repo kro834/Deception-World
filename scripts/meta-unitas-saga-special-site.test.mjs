@@ -154,7 +154,8 @@ test("the comparison: Meta Unitas's parts, no Rexonance, no provisos, removal on
   for (const chapter of META_UNITAS_PERFORMANCE.chapters)
     for (const paragraph of chapter.body) {
       const candidates = sourceParagraphs
-        .map((source) => removedRuns(paragraph, source))
+        // The owner's YOPS rule adds 「〜」 to 50000 / 60000 (yops-notation.test.mjs).
+        .map((source) => removedRuns(paragraph.replace(/〜YOPS/g, "YOPS"), source))
         .filter(Boolean)
         .sort((a, b) => a.join("").length - b.join("").length);
       assert.ok(candidates.length, paragraph.slice(0, 24));

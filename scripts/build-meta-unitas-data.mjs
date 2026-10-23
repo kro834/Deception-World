@@ -194,6 +194,12 @@ const ADDED_ROWS = {
   },
 };
 
+/** The owner's YOPS rule (2026-10-23): 「YOPSはエクスプリームは「〜」はつかず、
+ * レクソナンスとメタ・ウニタス、イリュージョンクルム、ファーフロムにのみつきます。」
+ * — the four lower-bound forms' main compute (50000 and 60000) carries 〜,
+ * wherever the comparison prints it (scripts/yops-notation.test.mjs). */
+const notation = (text) => text.replace(/(?<![\d,])(50000|60000)YOPS/g, "$1〜YOPS");
+
 const applied = new Set();
 const cut = (text) => {
   let out = text;
@@ -212,10 +218,11 @@ function chapter(name) {
   const prose = body
     .filter((line) => !line.includes("\t"))
     .map(cut)
+    .map(notation)
     .filter(Boolean);
   let table = null;
   if (tableLines.length) {
-    const [head, ...rows] = tableLines.map((line) => line.split("\t"));
+    const [head, ...rows] = tableLines.map((line) => notation(line).split("\t"));
     let kept = rows.filter((row) => row[0] !== "レクソナンス");
     const added = ADDED_ROWS[name];
     if (added) {
