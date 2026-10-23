@@ -233,6 +233,7 @@ async function snapshot(page) {
         class: document.activeElement?.className,
         label: document.activeElement?.getAttribute("aria-label"),
       },
+      focusTrace: window.__tabletFocusTrace,
       room: {
         chapter: document.querySelector(".dream-reading-chapter-select select")?.value,
         paragraph: document.querySelector(".dream-reading-bottom progress")?.value,
@@ -264,6 +265,12 @@ async function menu(page, add) {
   await page.waitForFunction(() => document.querySelector(".side-panel")?.dataset.open === "true");
   const panel = page.locator('.side-panel[data-open="true"]');
   await finiteMotion(panel);
+  // Opening state precedes the menu effect and its first visible animation
+  // frame, especially in reduced-motion WebKit. Start resize assertions only
+  // after the real keyboard focus transfer, not merely data-open=true.
+  await page.waitForFunction(() =>
+    document.querySelector('.side-panel[data-open="true"]')?.contains(document.activeElement),
+  );
   for (const viewport of viewports) {
     await page.setViewportSize(viewport);
     await settle(page);
@@ -509,6 +516,34 @@ try {
           });
         }
         const page = await context.newPage();
+        if (process.env.PW_TRACE_FOCUS === "1") {
+          await page.addInitScript(() => {
+            window.__tabletFocusTrace = [];
+            const original = HTMLElement.prototype.focus;
+            HTMLElement.prototype.focus = function (...args) {
+              const entry = {
+                target: this.className,
+                inert: this.closest("[inert]")?.className,
+                visibility: getComputedStyle(this).visibility,
+                before: document.activeElement?.className,
+              };
+              original.apply(this, args);
+              entry.after = document.activeElement?.className;
+              window.__tabletFocusTrace.push(entry);
+              if (window.__tabletFocusTrace.length > 50) window.__tabletFocusTrace.shift();
+            };
+            document.addEventListener(
+              "focusout",
+              (event) => {
+                window.__tabletFocusTrace.push({
+                  out: event.target.className,
+                  related: event.relatedTarget?.className,
+                });
+              },
+              true,
+            );
+          });
+        }
         page.setDefaultTimeout(15000);
         const pageErrors = [];
         const mutations = [];
