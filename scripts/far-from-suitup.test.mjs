@@ -779,6 +779,21 @@ test("the call stays clear of the figure's box at every tier that stands it besi
   assert.equal(FAR_FROM_SUIT_CALLS[0], "FAR FROM DEUS！\nREXONANCE！\nSUPERIOR！");
 });
 
+test("the call stays clear of the figure's box on the smallest phones: one tight header row, the scroll cue on the phase row", () => {
+  const sheet = readFileSync(new URL("../src/styles-far-from-suitup.css", import.meta.url), "utf8");
+  const flat = sheet.replace(/\s+/g, " ");
+  const at = flat.lastIndexOf("@media (max-width: 419.98px) and (orientation: portrait) {");
+  assert.ok(at > 0, "the small-phone call block closes the sheet");
+  const block = flat.slice(at);
+  assert.match(block, /\.rzn-kicker \{[^}]*flex-wrap: nowrap;[^}]*margin-bottom: 0;/);
+  assert.match(block, /\.rzn-phase \{[^}]*min-height: 0;/);
+  assert.match(block, /\.rzn-hint \{ position: absolute;/);
+  assert.match(block, /\.rzn-hint::after \{ display: none; \}/);
+  // The owner's call text is untouched; the chant's type is not shrunk here.
+  assert.doesNotMatch(block, /\.rzn-line\b[^{]*\{[^}]*font-size/);
+  assert.equal(FAR_FROM_SUIT_CALLS[0], "FAR FROM DEUS！\nREXONANCE！\nSUPERIOR！");
+});
+
 test("the ウルトラ note keeps its space for every form: #suitup's height never changes with the selected form (Safari has no scroll anchoring)", () => {
   const suitup = readFileSync(
     new URL("../src/components/far-from-saga/far-from-suitup.tsx", import.meta.url),
