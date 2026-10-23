@@ -53,7 +53,8 @@ test("world-home preserves its layout and copy outside explicitly approved edits
     // Owner: Dogs is the fourth tab; Related remains the third tab.
     // Owner (2026-10-21): the hero gains an aria-hidden light layer (.zn-hero-light: two streamline trails and a bloom, styles-world-zenith.css); copy and records unchanged.
     // Owner (2026-10-23): the special sites' grammar on /world — the CONTENTS map (chapter headings moved, not reworded), "0N / 06" slate counts, the hero HUD layer, the footer billing and SPECIAL SITES doors, the chapter rail (world-special.tsx); copy and records unchanged.
-    markup: "76ee0d74faab722f5e642e1e1b9c79807a948b31fd78c6f73ecbffa2e5f3c8bc",
+    // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明） — the chapter map keeps only the chapters' own headings and numerals (no readouts, codes or counts), the slates lose their "0N / 06", the doors their captions, the footer its END OF RECORD endmark and the title stage its SYNC readout.
+    markup: "4d513493315f21eeaa640bad8502fa9810242ff46b156501af3421578b6e4f27",
   });
   // The WorldAnnexRiders hook stays where it was (this file is pinned), but
   // renders nothing: 02 RIDERS and 03 RECORDS sit back to back, and the

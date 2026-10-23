@@ -7,7 +7,7 @@ import { GuardedLink, useLoadGate } from "@/components/load-gate";
 import { useWorldMode } from "./use-world-mode";
 import { LiquidLens, LiquidPointerGlow } from "./liquid-rail";
 import { SideMenuLayer, SideMenuTrigger } from "./world-chrome";
-import { RELATED_NAV, RIDER_NAV, RIKUEI_NAV, NameText } from "./dossier-nav";
+import { RELATED_NAV, RIDER_NAV, NameText } from "./dossier-nav";
 import { SlideOpenControl } from "./slide-open-control";
 import { UiVectorIcon } from "./ui-vector-icon";
 import { resetPickupScroll, settlePickupScroll } from "./pickup-scroll-reset";
@@ -28,14 +28,7 @@ import { useDialogHistoryDismiss } from "./use-dialog-history-dismiss";
 import { WorldAtmosphere } from "./world-atmosphere";
 import { WORLD_COLUMNS } from "./world-columns-data";
 import { MysteryColumnProse } from "./mystery-column-prose";
-import {
-  pad2,
-  WORLD_CHAPTER_TOTAL,
-  WorldChapterRail,
-  WorldContents,
-  WorldSpecialDoors,
-} from "./world-special";
-import { WORLD_CAST_ROSTER } from "./world-annex-data";
+import { WorldChapterRail, WorldContents, WorldSpecialDoors } from "./world-special";
 
 const POSTERS = [
   {
@@ -522,3 +515,4 @@ const EPISODES: EpisodeRecord[] = [
         assets: ["/character-dante.webp", "/rider-ruler-polaris.webp"],
       },
     ],
+  },

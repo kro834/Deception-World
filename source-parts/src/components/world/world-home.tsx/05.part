@@ -1,3 +1,5 @@
+                        fill="none"
+                        stroke="currentColor"
                         strokeWidth="1.8"
                         strokeLinecap="round"
                       />
@@ -59,16 +61,13 @@
 
       <MirageTicker variant="open" records={EPISODES.length} />
 
-      <WorldContents readouts={WORLD_READOUTS} />
+      <WorldContents />
 
       <section className="story-section" id="story">
         <div className="section-index" data-film-reveal>
           <span>01</span>
           <small>WORLD / STORY</small>
           <i className="film-boundary-line" aria-hidden="true" />
-          <b className="ws-slate-count" aria-hidden="true">
-            01 / {pad2(WORLD_CHAPTER_TOTAL)}
-          </b>
         </div>
         <div className="story-layout">
           <div className="story-heading">
@@ -517,8 +516,3 @@
                     {item.title}
                   </h3>
                 ))}
-              </div>
-              <div className="world-column-summary-stack">
-                {COLUMNS.map((item, index) => (
-                  <div
-                    key={item.no}

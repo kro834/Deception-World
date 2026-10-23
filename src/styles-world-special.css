@@ -2,13 +2,17 @@
    SPECIAL — /world in the special sites' grammar (owner, 2026-10-23)
    「ディセプションのトップページの全体をよりエクスプリームやレクソナンスや、
    ファーフロムに近い様な雰囲気にして。」
+   「不要なセカンダリラベルや説明を避ける。レイアウトに説明させるようにUI
+   リライトして。」
    The three special sites (/extreme-saga, /rexonance-saga, /far-from-saga)
-   share one trailer grammar: a CONTENTS map under the title stage, numbered
-   chapter slates ("0N / 0M"), HUD plates with corner ticks and lit
-   hairlines, big stat readouts, a chapter rail on the right edge, and an
-   end card with doors. This sheet brings that grammar to /world while the
-   page keeps its own key visual, the pink and ice streamline light and the
-   chapter colour phases (every accent reads the phase token --sw-light).
+   share one trailer grammar: a chapter map under the title stage, numbered
+   chapter slates, HUD plates with corner ticks and lit hairlines, a rail on
+   the right edge, and an end card with doors. This sheet brings that
+   material to /world and lets the layout carry the meaning: outlined
+   numerals as marks, the chapters' own colours, scale and grouping, the
+   forms' own art on the doors; no captions that restate a heading. The page
+   keeps its key visual, the pink and ice streamline light and its chapter
+   colour phases (every accent reads the phase token --sw-light).
    Linked on /world only, after the zenith sheet and before the HUD face and
    the Mirage sheet (last). Every rule carries the stage scope. Decoration
    sits under forced-colors: none; motion is scroll-driven or one-shot, gated
@@ -21,6 +25,12 @@ html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition 
   --ws-pink: #ff4fc3;
   --ws-pink-rgb: 255 79 195;
   --ws-blue: #4f7bff;
+}
+
+/* Declared on every chapter as well, so the prism and the ticks resolve
+   against that chapter's own light (the phase tokens live there). */
+html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition,
+html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > * {
   --ws-prism: linear-gradient(
     90deg,
     var(--sw-light) 0%,
@@ -29,7 +39,8 @@ html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition 
     var(--sw-gold) 80%,
     transparent 100%
   );
-  /* Corner ticks: ice at the top left, the streamline pink at the foot. */
+  /* Corner ticks: the chapter's light at the top, the streamline pink at
+     the foot. */
   --ws-ticks:
     linear-gradient(var(--sw-light) 0 0) 0 0 / 16px 1px no-repeat,
     linear-gradient(var(--sw-light) 0 0) 0 0 / 1px 16px no-repeat,
@@ -42,16 +53,17 @@ html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition 
 }
 
 /* ----------------------------------------------------------------
-   1. CONTENTS: the readout plate and the numbered chapter map
+   1. The chapter map: six plates, each the chapter's own heading beside
+      its outlined numeral, in the chapter's colour (the order, the
+      numerals and the colours say what it is)
    ---------------------------------------------------------------- */
 html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > .ws-contents {
   position: relative;
   z-index: 1;
-  padding: clamp(56px, 7vw, 104px) var(--sw-gutter) clamp(64px, 8vw, 120px);
+  padding: clamp(40px, 5.6vw, 88px) var(--sw-gutter) clamp(48px, 6.4vw, 104px);
   background: var(--sw-base);
   color: var(--sw-text);
   font-family: var(--sw-body);
-  scroll-margin-top: calc(var(--film-topbar-height, 76px) + 12px);
 }
 
 @media (forced-colors: none) {
@@ -64,7 +76,7 @@ html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition 
       linear-gradient(180deg, #03060c, #050a14 60%, #080d1b);
   }
 
-  /* The streamline seam the chapter map closes on. */
+  /* The streamline seam the map closes on. */
   html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
@@ -92,506 +104,205 @@ html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .ws-contents
-  > .ws-contents-inner {
+  > .ws-map {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: clamp(22px, 3vw, 36px);
   box-sizing: border-box;
   width: min(100%, var(--sw-wrap));
   margin: 0 auto;
-}
-
-@media (min-width: 980px) {
-  html[data-family="world"]:root
-    body
-    main.site-shell.film-edition.mirage-edition
-    > .ws-contents
-    > .ws-contents-inner {
-    grid-template-columns: minmax(240px, 300px) minmax(0, 1fr);
-    column-gap: clamp(32px, 4vw, 64px);
-    align-items: start;
-  }
-
-  html[data-family="world"]:root
-    body
-    main.site-shell.film-edition.mirage-edition
-    > .ws-contents
-    .ws-contents-head {
-    grid-column: 1 / -1;
-  }
-}
-
-/* The head: "00 INDEX", the English CONTENTS title, the chapter count. */
-html[data-family="world"]:root
-  body
-  main.site-shell.film-edition.mirage-edition
-  > .ws-contents
-  .ws-contents-head {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: end;
-  gap: 10px 20px;
-  padding: 0 0 16px;
-  border-bottom: 1px solid var(--sw-line);
-}
-
-@media (forced-colors: none) {
-  html[data-family="world"]:root
-    body
-    main.site-shell.film-edition.mirage-edition
-    > .ws-contents
-    .ws-contents-head {
-    background: var(--ws-prism) 0 100% / min(440px, 62%) 1px no-repeat;
-  }
-}
-
-html[data-family="world"]:root
-  body
-  main.site-shell.film-edition.mirage-edition
-  > .ws-contents
-  :is(.ws-code, .ws-count) {
-  margin: 0;
-  color: var(--sw-light);
-  font: 400 12px / 1.4 var(--sw-hud);
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
-}
-
-html[data-family="world"]:root
-  body
-  main.site-shell.film-edition.mirage-edition
-  > .ws-contents
-  .ws-code {
-  grid-column: 1 / -1;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-html[data-family="world"]:root
-  body
-  main.site-shell.film-edition.mirage-edition
-  > .ws-contents
-  .ws-code
-  > span {
-  color: var(--sw-gold);
-  font: 600 13px / 1 var(--sw-mono);
-  letter-spacing: 0.08em;
-}
-
-html[data-family="world"]:root
-  body
-  main.site-shell.film-edition.mirage-edition
-  > .ws-contents
-  .ws-code::after {
-  content: "";
-  width: 44px;
-  height: 1px;
-  background: linear-gradient(90deg, var(--sw-light), var(--ws-pink));
-}
-
-html[data-family="world"]:root
-  body
-  main.site-shell.film-edition.mirage-edition
-  > .ws-contents
-  .ws-contents-head
-  > h2 {
-  margin: 0;
-  color: var(--sw-text);
-  font: 400 clamp(30px, 4.4vw, 60px) / 1 var(--sw-hud);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  text-shadow:
-    0.04em 0.02em 0 rgb(var(--ws-pink-rgb) / 26%),
-    -0.02em 0 0 rgb(var(--sw-light-rgb) / 22%);
-}
-
-html[data-family="world"]:root
-  body
-  main.site-shell.film-edition.mirage-edition
-  > .ws-contents
-  .ws-count {
-  color: var(--sw-text-3);
-}
-
-/* The readout plate: big Oxanium figures, read from the page's records. */
-html[data-family="world"]:root
-  body
-  main.site-shell.film-edition.mirage-edition
-  > .ws-contents
-  .ws-readouts {
-  position: relative;
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  margin: 0;
-  padding: 0;
-  border: 1px solid var(--sw-line);
-  background: rgb(10 19 32 / 72%);
-}
-
-@media (forced-colors: none) {
-  html[data-family="world"]:root
-    body
-    main.site-shell.film-edition.mirage-edition
-    > .ws-contents
-    .ws-readouts {
-    background:
-      var(--ws-ticks),
-      linear-gradient(90deg, var(--sw-light), var(--ws-pink) 60%, transparent) 0 0 / 70% 1px
-        no-repeat,
-      linear-gradient(180deg, rgb(var(--sw-light-rgb) / 7%), transparent 46%),
-      rgb(8 14 26 / 86%);
-  }
-}
-
-html[data-family="world"]:root
-  body
-  main.site-shell.film-edition.mirage-edition
-  > .ws-contents
-  .ws-readouts
-  > div {
-  display: grid;
-  align-content: end;
-  gap: 6px;
-  min-width: 0;
-  padding: 14px 10px 12px;
-}
-
-html[data-family="world"]:root
-  body
-  main.site-shell.film-edition.mirage-edition
-  > .ws-contents
-  .ws-readouts
-  > div
-  + div {
-  border-left: 1px solid var(--sw-line);
-}
-
-html[data-family="world"]:root
-  body
-  main.site-shell.film-edition.mirage-edition
-  > .ws-contents
-  .ws-readouts
-  dt {
-  order: 2;
-  overflow: hidden;
-  color: var(--sw-text-3);
-  font: 400 12px / 1.3 var(--sw-hud);
-  letter-spacing: 0.08em;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-html[data-family="world"]:root
-  body
-  main.site-shell.film-edition.mirage-edition
-  > .ws-contents
-  .ws-readouts
-  dd {
-  order: 1;
-  margin: 0;
-  color: var(--sw-text);
-  font: 600 clamp(28px, 7vw, 40px) / 0.9 var(--sw-mono);
-  font-variant-numeric: tabular-nums;
-  letter-spacing: -0.01em;
-}
-
-@media (max-width: 559px) {
-  html[data-family="world"]:root
-    body
-    main.site-shell.film-edition.mirage-edition
-    > .ws-contents
-    .ws-readouts {
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-  }
-
-  html[data-family="world"]:root
-    body
-    main.site-shell.film-edition.mirage-edition
-    > .ws-contents
-    .ws-readouts
-    > div {
-    grid-column: span 2;
-  }
-
-  /* Three cells, then two wide ones (MANAGERS, the widest label, and
-     KEY VISUALS) close the plate. */
-  html[data-family="world"]:root
-    body
-    main.site-shell.film-edition.mirage-edition
-    > .ws-contents
-    .ws-readouts
-    > div:is(:nth-child(1), :nth-child(5)) {
-    grid-column: span 3;
-    border-top: 1px solid var(--sw-line);
-  }
-
-  html[data-family="world"]:root
-    body
-    main.site-shell.film-edition.mirage-edition
-    > .ws-contents
-    .ws-readouts
-    > div:nth-child(1) {
-    order: 4;
-    border-left: 0;
-  }
-
-  html[data-family="world"]:root
-    body
-    main.site-shell.film-edition.mirage-edition
-    > .ws-contents
-    .ws-readouts
-    > div:nth-child(5) {
-    order: 5;
-  }
-
-  html[data-family="world"]:root
-    body
-    main.site-shell.film-edition.mirage-edition
-    > .ws-contents
-    .ws-readouts
-    > div:nth-child(2) {
-    border-left: 0;
-  }
-}
-
-/* Desktop: the plate stands as a column of readouts beside the map. */
-@media (min-width: 980px) {
-  html[data-family="world"]:root
-    body
-    main.site-shell.film-edition.mirage-edition
-    > .ws-contents
-    .ws-readouts {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  html[data-family="world"]:root
-    body
-    main.site-shell.film-edition.mirage-edition
-    > .ws-contents
-    .ws-readouts
-    > div {
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: end;
-    padding: 18px 22px 16px;
-  }
-
-  html[data-family="world"]:root
-    body
-    main.site-shell.film-edition.mirage-edition
-    > .ws-contents
-    .ws-readouts
-    > div
-    + div {
-    border-top: 1px solid var(--sw-line);
-    border-left: 0;
-  }
-
-  html[data-family="world"]:root
-    body
-    main.site-shell.film-edition.mirage-edition
-    > .ws-contents
-    .ws-readouts
-    dt {
-    order: 1;
-    align-self: center;
-    letter-spacing: 0.2em;
-  }
-
-  html[data-family="world"]:root
-    body
-    main.site-shell.film-edition.mirage-edition
-    > .ws-contents
-    .ws-readouts
-    dd {
-    order: 2;
-    font-size: clamp(40px, 3.6vw, 52px);
-  }
-}
-
-/* The chapter map: number, code, the chapter's own heading, kicker, arrow. */
-html[data-family="world"]:root
-  body
-  main.site-shell.film-edition.mirage-edition
-  > .ws-contents
-  .ws-map {
-  margin: 0;
   padding: 0;
   list-style: none;
-  border-top: 1px solid var(--sw-line);
+  counter-reset: none;
 }
 
+/* Each plate reads its chapter's light (the phase tokens of
+   styles-stage-world.css, restated: the map sits before the chapters). */
 html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .ws-contents
-  .ws-map
+  > .ws-map
   > li {
+  --ws-accent: #a9c4ff;
+  --ws-accent-rgb: 169 196 255;
   margin: 0;
-  border-bottom: 1px solid var(--sw-line);
+  min-width: 0;
 }
 
 html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .ws-contents
-  .ws-map
+  > .ws-map
+  > li[data-phase="riders"] {
+  --ws-accent: #cfd8e3;
+  --ws-accent-rgb: 207 216 227;
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > .ws-contents
+  > .ws-map
+  > li[data-phase="records"] {
+  --ws-accent: #efb96f;
+  --ws-accent-rgb: 239 185 111;
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > .ws-contents
+  > .ws-map
+  > li[data-phase="annex"] {
+  --ws-accent: #6ddfba;
+  --ws-accent-rgb: 109 223 186;
+}
+
+/* Phones: one row per chapter, numeral | heading | arrow. */
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > .ws-contents
+  > .ws-map
   a {
   position: relative;
   display: grid;
-  grid-template-columns: 44px minmax(0, 1fr) 20px;
-  grid-template-areas:
-    "no code arrow"
-    "no title arrow"
-    "no sub arrow";
-  align-items: baseline;
-  gap: 4px 14px;
-  min-height: 44px;
-  padding: 16px 8px 16px 4px;
+  grid-template-columns: 64px minmax(0, 1fr) 24px;
+  align-items: center;
+  gap: 0 14px;
+  min-height: 76px;
+  box-sizing: border-box;
+  padding: 14px 6px 14px 2px;
+  border-bottom: 1px solid rgb(var(--ws-accent-rgb) / 18%);
   color: var(--sw-text);
   text-decoration: none;
   transition:
     background-color 220ms ease,
-    color 220ms ease;
+    border-color 220ms ease;
 }
 
 html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .ws-contents
-  .ws-map
+  > .ws-map
+  > li:first-child
+  a {
+  border-top: 1px solid rgb(var(--ws-accent-rgb) / 18%);
+}
+
+/* The numeral: an outlined mark in the chapter's light, the wordmark's
+   pink channel a hair off it. */
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > .ws-contents
+  > .ws-map
   a
   > b {
-  grid-area: no;
-  align-self: start;
-  color: var(--sw-gold);
-  font: 600 18px / 1.2 var(--sw-mono);
-  letter-spacing: 0.04em;
+  color: transparent;
+  font: 600 44px / 0.8 var(--sw-mono);
+  letter-spacing: -0.03em;
+  -webkit-text-stroke: 1px rgb(var(--ws-accent-rgb) / 78%);
+  transition: color 240ms ease;
+}
+
+@media (forced-colors: none) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .ws-contents
+    > .ws-map
+    a
+    > b {
+    text-shadow:
+      0.05em 0.03em 0 rgb(var(--ws-pink-rgb) / 24%),
+      -0.03em 0 0 rgb(var(--ws-accent-rgb) / 16%);
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .ws-contents
+    > .ws-map
+    a
+    > b {
+    color: CanvasText;
+    -webkit-text-stroke: 0;
+  }
 }
 
 html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .ws-contents
-  .ws-map
-  a
-  > small {
-  grid-area: code;
-  color: var(--sw-light);
-  font: 400 12px / 1.4 var(--sw-hud);
-  letter-spacing: 0.14em;
-  white-space: nowrap;
-}
-
-html[data-family="world"]:root
-  body
-  main.site-shell.film-edition.mirage-edition
-  > .ws-contents
-  .ws-map
+  > .ws-map
   a
   > span {
-  grid-area: title;
   min-width: 0;
-  font: 700 clamp(18px, 4.6vw, 24px) / 1.35 var(--sw-display);
+  font: 700 clamp(18px, 4.8vw, 22px) / 1.4 var(--sw-display);
   font-feature-settings: "palt" 1;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.03em;
   word-break: keep-all;
   line-break: strict;
   overflow-wrap: anywhere;
 }
 
+/* The arrow, drawn: a corner and its shaft in the chapter's light. */
 html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .ws-contents
-  .ws-map
-  a
-  > em {
-  grid-area: sub;
-  color: var(--sw-text-3);
-  font: 400 12px / 1.4 var(--sw-hud);
-  font-style: normal;
-  letter-spacing: 0.12em;
-}
-
-html[data-family="world"]:root
-  body
-  main.site-shell.film-edition.mirage-edition
-  > .ws-contents
-  .ws-map
+  > .ws-map
   a
   > i {
-  grid-area: arrow;
-  align-self: center;
-  color: var(--sw-light);
-  font: 400 16px / 1 var(--sw-mono);
-  font-style: normal;
+  position: relative;
+  justify-self: end;
+  width: 14px;
+  height: 14px;
+  border-top: 1.5px solid var(--ws-accent);
+  border-right: 1.5px solid var(--ws-accent);
   transition: translate 220ms ease;
 }
 
-@media (min-width: 760px) {
-  html[data-family="world"]:root
-    body
-    main.site-shell.film-edition.mirage-edition
-    > .ws-contents
-    .ws-map
-    a {
-    grid-template-columns: 52px minmax(186px, 0.3fr) minmax(0, 1fr) 24px;
-    grid-template-areas:
-      "no code title arrow"
-      "no code sub arrow";
-    column-gap: clamp(14px, 2vw, 28px);
-    padding: 18px 10px 18px 6px;
-  }
-
-  html[data-family="world"]:root
-    body
-    main.site-shell.film-edition.mirage-edition
-    > .ws-contents
-    .ws-map
-    a
-    > :is(b, small) {
-    align-self: center;
-  }
-
-  html[data-family="world"]:root
-    body
-    main.site-shell.film-edition.mirage-edition
-    > .ws-contents
-    .ws-map
-    a
-    > b {
-    font-size: 20px;
-  }
-
-  html[data-family="world"]:root
-    body
-    main.site-shell.film-edition.mirage-edition
-    > .ws-contents
-    .ws-map
-    a
-    > span {
-    font-size: clamp(20px, 2vw, 26px);
-  }
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > .ws-contents
+  > .ws-map
+  a
+  > i::after {
+  content: "";
+  position: absolute;
+  top: -1px;
+  right: -1px;
+  width: 18px;
+  height: 1.5px;
+  background: var(--ws-accent);
+  transform: rotate(-45deg);
+  transform-origin: 100% 50%;
 }
 
-/* Lit row: a light runs in from the number, the arrow steps out. */
 @media (forced-colors: none) {
+  /* A light runs in from the numeral on hover and focus. */
   html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
     > .ws-contents
-    .ws-map
+    > .ws-map
     a::before {
     content: "";
     position: absolute;
-    inset: -1px 0 -1px 0;
+    inset: -1px 0;
     background:
-      linear-gradient(90deg, var(--sw-light), var(--ws-pink) 46%, transparent 80%) 0 100% / 100% 1px
-        no-repeat,
+      linear-gradient(90deg, var(--ws-accent), var(--ws-pink) 46%, transparent 80%) 0 100% / 100%
+        1px no-repeat,
       linear-gradient(
         90deg,
-        rgb(var(--sw-light-rgb) / 12%),
+        rgb(var(--ws-accent-rgb) / 14%),
         rgb(var(--ws-pink-rgb) / 6%) 40%,
         transparent 78%
       );
@@ -604,9 +315,19 @@ html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
     > .ws-contents
-    .ws-map
+    > .ws-map
     a:is(:hover, :focus-visible)::before {
     opacity: 1;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .ws-contents
+    > .ws-map
+    a:is(:hover, :focus-visible)
+    > b {
+    color: rgb(var(--ws-accent-rgb) / 22%);
   }
 }
 
@@ -614,7 +335,7 @@ html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .ws-contents
-  .ws-map
+  > .ws-map
   a:is(:hover, :focus-visible)
   > i {
   translate: 3px -3px;
@@ -624,75 +345,193 @@ html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > .ws-contents
-  .ws-map
+  > .ws-map
   a:focus-visible {
-  outline: 2px solid var(--sw-light);
+  outline: 2px solid var(--ws-accent);
   outline-offset: 2px;
 }
 
+/* Tablets and up: the chapters stand as plates, two then three a row,
+   the numeral at the head and the heading at the foot. */
+@media (min-width: 700px) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .ws-contents
+    > .ws-map {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(12px, 1.4vw, 20px);
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .ws-contents
+    > .ws-map
+    a,
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .ws-contents
+    > .ws-map
+    > li:first-child
+    a {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: auto minmax(0, 1fr);
+    align-items: start;
+    gap: 18px 16px;
+    height: 100%;
+    min-height: clamp(150px, 15vw, 196px);
+    padding: clamp(18px, 1.8vw, 26px) clamp(18px, 1.8vw, 26px) clamp(18px, 1.8vw, 24px);
+    border: 1px solid rgb(var(--ws-accent-rgb) / 20%);
+    background: rgb(8 13 24 / 82%);
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .ws-contents
+    > .ws-map
+    a
+    > b {
+    grid-column: 1;
+    grid-row: 1;
+    font-size: clamp(56px, 5.4vw, 80px);
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .ws-contents
+    > .ws-map
+    a
+    > i {
+    grid-column: 2;
+    grid-row: 1;
+    margin-top: 6px;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .ws-contents
+    > .ws-map
+    a
+    > span {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    align-self: end;
+    font-size: clamp(19px, 1.8vw, 25px);
+  }
+
+  @media (forced-colors: none) {
+    /* The plate: the chapter's light at the top edge, its tint in the
+       corner, the corner ticks; the pink at the foot. */
+    html[data-family="world"]:root
+      body
+      main.site-shell.film-edition.mirage-edition
+      > .ws-contents
+      > .ws-map
+      a,
+    html[data-family="world"]:root
+      body
+      main.site-shell.film-edition.mirage-edition
+      > .ws-contents
+      > .ws-map
+      > li:first-child
+      a {
+      background:
+        linear-gradient(var(--ws-accent) 0 0) 0 0 / 16px 1px no-repeat,
+        linear-gradient(var(--ws-accent) 0 0) 0 0 / 1px 16px no-repeat,
+        linear-gradient(var(--ws-accent) 0 0) 100% 0 / 16px 1px no-repeat,
+        linear-gradient(var(--ws-accent) 0 0) 100% 0 / 1px 16px no-repeat,
+        linear-gradient(var(--ws-pink) 0 0) 0 100% / 16px 1px no-repeat,
+        linear-gradient(var(--ws-pink) 0 0) 0 100% / 1px 16px no-repeat,
+        linear-gradient(var(--ws-pink) 0 0) 100% 100% / 16px 1px no-repeat,
+        linear-gradient(var(--ws-pink) 0 0) 100% 100% / 1px 16px no-repeat,
+        linear-gradient(90deg, var(--ws-accent), var(--ws-pink) 58%, transparent) 0 0 / 62% 1px
+          no-repeat,
+        radial-gradient(
+          90% 120% at 0 0,
+          rgb(var(--ws-accent-rgb) / 13%),
+          rgb(var(--ws-accent-rgb) / 3%) 46%,
+          transparent 72%
+        ),
+        linear-gradient(180deg, rgb(12 19 33 / 90%), rgb(5 9 17 / 94%));
+    }
+
+    html[data-family="world"]:root
+      body
+      main.site-shell.film-edition.mirage-edition
+      > .ws-contents
+      > .ws-map
+      a:is(:hover, :focus-visible) {
+      border-color: rgb(var(--ws-accent-rgb) / 52%);
+    }
+
+    html[data-family="world"]:root
+      body
+      main.site-shell.film-edition.mirage-edition
+      > .ws-contents
+      > .ws-map
+      a::before {
+      inset: 0;
+      background: radial-gradient(
+        100% 90% at 0 100%,
+        rgb(var(--ws-pink-rgb) / 12%),
+        rgb(var(--ws-accent-rgb) / 6%) 48%,
+        transparent 76%
+      );
+    }
+  }
+}
+
+@media (min-width: 1100px) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .ws-contents
+    > .ws-map {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* The plates rise once as they enter (scroll-driven, never looping).
+   Full motion only; the calm tiers show them at rest. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) and (forced-colors: none) {
+    html[data-family="world"]:not([data-world-effects="economy"]):root
+      body
+      main.site-shell.film-edition.mirage-edition
+      > .ws-contents
+      > .ws-map
+      > li {
+      animation: ws-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 80%;
+    }
+  }
+}
+
+@keyframes ws-rise {
+  from {
+    opacity: 0;
+    translate: 0 18px;
+  }
+
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
 /* ----------------------------------------------------------------
-   2. The chapter slates: "0N / 06" on every chapter head, ticks along
-      the seam (01-03 .section-index, 04-06 .wa-chapter)
+   2. The chapter slates: the zenith prism seam, a pink bloom and a scale
+      of ticks under the right end (01-03 .section-index, 04-06
+      .wa-chapter). The stage-streamline sheet sets the 01-03 seam with an
+      ID-weighted :not(); the slate answers with one of its own.
    ---------------------------------------------------------------- */
-html[data-family="world"]:root
-  body
-  main.site-shell.film-edition.mirage-edition
-  > section
-  > .section-index,
-html[data-family="world"]:root
-  body
-  main.site-shell.film-edition.mirage-edition
-  > .world-annex
-  .wa-chapter {
-  grid-template-columns: auto minmax(0, 1fr) auto;
-}
-
-html[data-family="world"]:root
-  body
-  main.site-shell.film-edition.mirage-edition
-  > section
-  > .section-index
-  > .ws-slate-count,
-html[data-family="world"]:root
-  body
-  main.site-shell.film-edition.mirage-edition
-  > .world-annex
-  .wa-chapter
-  > .ws-slate-count {
-  grid-column: 3;
-  grid-row: 1;
-  align-self: end;
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  margin: 0 0 4px;
-  color: var(--sw-light);
-  font: 600 14px / 1.2 var(--sw-mono);
-  letter-spacing: 0.16em;
-  white-space: nowrap;
-}
-
-html[data-family="world"]:root
-  body
-  main.site-shell.film-edition.mirage-edition
-  > section
-  > .section-index
-  > .ws-slate-count::before,
-html[data-family="world"]:root
-  body
-  main.site-shell.film-edition.mirage-edition
-  > .world-annex
-  .wa-chapter
-  > .ws-slate-count::before {
-  content: "";
-  width: clamp(24px, 4vw, 56px);
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--sw-light));
-}
-
 @media (forced-colors: none) {
-  /* The zenith prism seam, a pink bloom, and ticks under the right end
-     of the slate (the special sites' scale bar). */
   html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
@@ -717,77 +556,103 @@ html[data-family="world"]:root
   }
 }
 
-/* The count slides in once as the slate rises (scroll-driven, so it
-   never loops). Full motion only; the calm tiers show it at rest. */
-@supports (animation-timeline: view()) {
-  @media (prefers-reduced-motion: no-preference) and (forced-colors: none) {
-    html[data-family="world"]:not([data-world-effects="economy"]):root
-      body
-      main.site-shell.film-edition.mirage-edition
-      > section
-      > .section-index
-      > .ws-slate-count,
-    html[data-family="world"]:not([data-world-effects="economy"]):root
-      body
-      main.site-shell.film-edition.mirage-edition
-      > .world-annex
-      .wa-chapter
-      > .ws-slate-count {
-      animation: ws-slate-in linear both;
-      animation-timeline: view();
-      animation-range: entry 10% cover 34%;
-    }
-  }
+/* 04-06: the numeral alone opens the chapter; the heading under it names
+   it. */
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > .world-annex
+  .wa-chapter {
+  grid-template-columns: auto;
 }
 
-@keyframes ws-slate-in {
-  from {
-    opacity: 0;
-    translate: 18px 0;
-  }
-
-  to {
-    opacity: 1;
-    translate: 0 0;
-  }
+/* ----------------------------------------------------------------
+   3. The annex headings without kickers or counts: 06.x carries its
+      sub-number and a prism line on the title's shoulder; 04 and 05 are
+      the title alone under the chapter numeral
+   ---------------------------------------------------------------- */
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > .world-annex
+  .wa-heading {
+  grid-template-columns: auto minmax(24px, 1fr);
+  align-items: center;
+  gap: 12px 16px;
 }
 
-/* Phones: the count rides on the kicker's line. */
-@media (max-width: 559px) {
-  html[data-family="world"]:root
-    body
-    main.site-shell.film-edition.mirage-edition
-    > section
-    > .section-index
-    > .ws-slate-count,
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > .world-annex
+  .wa-heading:not(.has-no)::before {
+  content: none;
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > .world-annex
+  .wa-heading.has-no::before {
+  grid-row: 1;
+  grid-column: 2;
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > .world-annex
+  .wa-heading.has-no
+  > .wa-no {
+  grid-row: 1;
+  grid-column: 1;
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > .world-annex
+  .wa-heading
+  > h2 {
+  grid-row: 2;
+  grid-column: 1 / -1;
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > .world-annex
+  .wa-heading:not(.has-no)
+  > h2 {
+  grid-row: 1;
+}
+
+@media (forced-colors: none) {
   html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
     > .world-annex
-    .wa-chapter
-    > .ws-slate-count {
-    font-size: 12px;
-    letter-spacing: 0.12em;
+    .wa-heading.has-no::before {
+    background: var(--ws-prism);
+    opacity: 0.7;
   }
+}
 
+/* 舞台: the locations' title takes the kicker's prism line on its foot. */
+@media (forced-colors: none) {
   html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
-    > section
-    > .section-index
-    > .ws-slate-count::before,
-  html[data-family="world"]:root
-    body
-    main.site-shell.film-edition.mirage-edition
-    > .world-annex
-    .wa-chapter
-    > .ws-slate-count::before {
-    display: none;
+    > #world-brief
+    .wa-locations
+    > h3 {
+    padding-bottom: 12px;
+    background: var(--ws-prism) 0 100% / min(220px, 60%) 1px no-repeat;
   }
 }
 
 /* ----------------------------------------------------------------
-   3. The chapter rail on the right edge (wide screens only, where the
+   4. The dot rail on the right edge (wide screens only, where the
       page's margin holds it clear of the text)
    ---------------------------------------------------------------- */
 html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > .ws-rail {
@@ -798,11 +663,9 @@ html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition 
   html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > .ws-rail {
     position: fixed;
     top: 50%;
-    right: clamp(18px, 1.6vw, 34px);
+    right: clamp(20px, 1.8vw, 36px);
     z-index: 30;
-    display: grid;
-    justify-items: end;
-    gap: 14px;
+    display: block;
     translate: 0 -50%;
     opacity: 0;
     visibility: hidden;
@@ -823,7 +686,7 @@ html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition 
       visibility 0s;
   }
 
-  /* While a dialog or the menu is open, the rail steps away. */
+  /* While the menu is open, the rail steps away. */
   html[data-family="world"][data-side-menu-open]:root
     body
     main.site-shell.film-edition.mirage-edition
@@ -831,28 +694,17 @@ html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition 
     opacity: 0;
   }
 
-  html[data-family="world"]:root
-    body
-    main.site-shell.film-edition.mirage-edition
-    > .ws-rail
-    > .ws-rail-now {
-    min-height: 1.2em;
-    color: var(--sw-text);
-    font: 600 12px / 1.2 var(--sw-mono);
-    letter-spacing: 0.08em;
-    white-space: nowrap;
-  }
-
   html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > .ws-rail > ol {
     position: relative;
     display: grid;
-    gap: 14px;
+    justify-items: center;
+    gap: 18px;
     margin: 0;
     padding: 0;
     list-style: none;
   }
 
-  /* The track and its lit run up to the current chapter. */
+  /* The track, and its lit run up to the chapter in view. */
   html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
@@ -865,11 +717,12 @@ html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition 
     > ol::after {
     content: "";
     position: absolute;
-    top: 8px;
-    right: 3px;
+    top: 4px;
+    left: 50%;
     width: 1px;
-    height: calc(100% - 16px);
-    background: rgb(122 232 255 / 22%);
+    height: calc(100% - 8px);
+    background: rgb(122 232 255 / 20%);
+    translate: -50% 0;
   }
 
   html[data-family="world"]:root
@@ -883,57 +736,58 @@ html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition 
   }
 
   html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > .ws-rail li {
+    --ws-dot: #a9c4ff;
     position: relative;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding-right: 14px;
-    color: rgb(195 208 220 / 46%);
-    font: 600 12px / 16px var(--sw-mono);
-    letter-spacing: 0.1em;
-    transition: color 240ms ease;
-  }
-
-  html[data-family="world"]:root
-    body
-    main.site-shell.film-edition.mirage-edition
-    > .ws-rail
-    li::after {
-    content: "";
-    position: absolute;
-    top: 50%;
-    right: 0;
+    z-index: 1;
     width: 7px;
     height: 7px;
     box-sizing: border-box;
     border: 1px solid rgb(122 232 255 / 52%);
     border-radius: 50%;
     background: #03060c;
-    translate: 0 -50%;
     transition:
       background-color 240ms ease,
       border-color 240ms ease,
-      box-shadow 240ms ease;
+      box-shadow 240ms ease,
+      scale 240ms ease;
   }
 
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .ws-rail
+    li[data-phase="riders"] {
+    --ws-dot: #cfd8e3;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .ws-rail
+    li[data-phase="records"] {
+    --ws-dot: #efb96f;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .ws-rail
+    li[data-phase="annex"] {
+    --ws-dot: #6ddfba;
+  }
+
+  /* The chapter in view: its own light, ringed in the streamline pink. */
   html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
     > .ws-rail
     li[data-on] {
-    color: #fff;
-  }
-
-  html[data-family="world"]:root
-    body
-    main.site-shell.film-edition.mirage-edition
-    > .ws-rail
-    li[data-on]::after {
     border-color: #fff;
-    background: var(--ws-pink);
+    background: var(--ws-dot);
     box-shadow:
-      0 0 0 3px rgb(var(--ws-pink-rgb) / 18%),
-      0 0 12px rgb(var(--ws-pink-rgb) / 60%);
+      0 0 0 3px rgb(var(--ws-pink-rgb) / 26%),
+      0 0 14px rgb(var(--ws-pink-rgb) / 56%);
+    scale: 1.45;
   }
 
   @media (prefers-reduced-motion: no-preference) {
@@ -948,7 +802,8 @@ html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition 
 }
 
 /* ----------------------------------------------------------------
-   4. The end of the record: doors to the three special sites
+   5. The end of the record: the doors to the three special sites, each
+      shown by its form (the side menu's own tiles) in its site's light
    ---------------------------------------------------------------- */
 html[data-family="world"]:root
   body
@@ -957,20 +812,10 @@ html[data-family="world"]:root
   > .ws-doors {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 10px;
+  gap: 12px;
   box-sizing: border-box;
-  width: min(100%, 980px);
-  margin: 12px 0 6px;
-}
-
-@media (max-width: 999px) {
-  html[data-family="world"]:root
-    body
-    main.site-shell.film-edition.mirage-edition
-    > footer
-    > .ws-doors {
-    width: min(100%, 520px);
-  }
+  width: min(100%, 520px);
+  margin: 14px 0 8px;
 }
 
 @media (min-width: 1000px) {
@@ -980,7 +825,8 @@ html[data-family="world"]:root
     > footer
     > .ws-doors {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 14px;
+    gap: 16px;
+    width: min(100%, 1120px);
   }
 }
 
@@ -989,70 +835,26 @@ html[data-family="world"]:root
   main.site-shell.film-edition.mirage-edition
   > footer
   > .ws-doors
-  > .ws-code {
-  grid-column: 1 / -1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 14px;
-  margin: 0 0 4px;
-  color: var(--sw-light);
-  font: 400 12px / 1.4 var(--sw-hud);
-  letter-spacing: 0.24em;
-}
-
-html[data-family="world"]:root
-  body
-  main.site-shell.film-edition.mirage-edition
-  > footer
-  > .ws-doors
-  > .ws-code::before,
-html[data-family="world"]:root
-  body
-  main.site-shell.film-edition.mirage-edition
-  > footer
-  > .ws-doors
-  > .ws-code::after {
-  content: "";
-  width: 40px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--sw-light));
-}
-
-html[data-family="world"]:root
-  body
-  main.site-shell.film-edition.mirage-edition
-  > footer
-  > .ws-doors
-  > .ws-code::after {
-  background: linear-gradient(90deg, var(--ws-pink), transparent);
-}
-
-html[data-family="world"]:root
-  body
-  main.site-shell.film-edition.mirage-edition
-  > footer
-  > .ws-doors
   > a {
+  --ws-door: #ffd57a;
+  --ws-door-rgb: 255 213 122;
+  --ws-door-2: #ff9d4a;
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  grid-template-areas:
-    "code arrow"
-    "name arrow";
+  grid-template-columns: 76px minmax(0, 1fr) 22px;
   align-items: center;
-  gap: 6px 14px;
-  min-height: 72px;
+  justify-self: stretch;
+  gap: 0 16px;
+  min-height: 112px;
   box-sizing: border-box;
-  padding: 14px 18px 14px 20px;
-  border: 1px solid rgb(var(--sw-light-rgb) / 28%);
+  padding: 8px 18px 8px 8px;
+  border: 1px solid rgb(var(--ws-door-rgb) / 30%);
   border-radius: 0;
-  background: rgb(12 8 6 / 72%);
+  background: rgb(10 8 8 / 82%);
   color: var(--sw-text);
   text-align: start;
   text-decoration: none;
   white-space: normal;
-  justify-self: stretch;
   clip-path: polygon(
     0 0,
     calc(100% - 14px) 0,
@@ -1066,6 +868,28 @@ html[data-family="world"]:root
     background-color 220ms ease;
 }
 
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > footer
+  > .ws-doors
+  > a.is-rexonance {
+  --ws-door: #79e8ff;
+  --ws-door-rgb: 121 232 255;
+  --ws-door-2: #ff8fd8;
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > footer
+  > .ws-doors
+  > a.is-far-from {
+  --ws-door: #c99bff;
+  --ws-door-rgb: 201 155 255;
+  --ws-door-2: #7fe6ff;
+}
+
 @media (forced-colors: none) {
   html[data-family="world"]:root
     body
@@ -1074,24 +898,29 @@ html[data-family="world"]:root
     > .ws-doors
     > a {
     background:
-      linear-gradient(90deg, var(--sw-light), var(--ws-pink) 60%, transparent) 0 0 / 64% 1px
+      linear-gradient(90deg, var(--ws-door), var(--ws-door-2) 58%, transparent) 0 0 / 70% 1px
         no-repeat,
-      linear-gradient(135deg, rgb(var(--sw-light-rgb) / 9%), transparent 50%),
-      rgb(14 9 7 / 82%);
+      radial-gradient(80% 120% at 0 50%, rgb(var(--ws-door-rgb) / 14%), transparent 70%),
+      rgb(10 8 8 / 86%);
   }
 }
 
+/* The form: a cropped print with the site's light at its edge. */
 html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > footer
   > .ws-doors
   > a
-  > small {
-  grid-area: code;
-  color: var(--sw-light);
-  font: 400 12px / 1.3 var(--sw-hud);
-  letter-spacing: 0.18em;
+  > img {
+  display: block;
+  width: 76px;
+  height: 96px;
+  object-fit: cover;
+  object-position: 50% 18%;
+  border: 1px solid rgb(var(--ws-door-rgb) / 34%);
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
+  transition: filter 240ms ease;
 }
 
 html[data-family="world"]:root
@@ -1101,11 +930,14 @@ html[data-family="world"]:root
   > .ws-doors
   > a
   > span {
-  grid-area: name;
-  font: 700 clamp(16px, 1.6vw, 19px) / 1.35 var(--sw-display);
+  min-width: 0;
+  font: 700 clamp(16px, 1.5vw, 19px) / 1.4 var(--sw-display);
   letter-spacing: 0.04em;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
 }
 
+/* The arrow, drawn in the site's light. */
 html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
@@ -1113,10 +945,12 @@ html[data-family="world"]:root
   > .ws-doors
   > a
   > i {
-  grid-area: arrow;
-  color: var(--sw-light);
-  font: 400 16px / 1 var(--sw-mono);
-  font-style: normal;
+  position: relative;
+  justify-self: end;
+  width: 12px;
+  height: 12px;
+  border-top: 1.5px solid var(--ws-door);
+  border-right: 1.5px solid var(--ws-door);
   transition: translate 220ms ease;
 }
 
@@ -1125,9 +959,27 @@ html[data-family="world"]:root
   main.site-shell.film-edition.mirage-edition
   > footer
   > .ws-doors
+  > a
+  > i::after {
+  content: "";
+  position: absolute;
+  top: -1px;
+  right: -1px;
+  width: 15px;
+  height: 1.5px;
+  background: var(--ws-door);
+  transform: rotate(-45deg);
+  transform-origin: 100% 50%;
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > footer
+  > .ws-doors
   > a:is(:hover, :focus-visible) {
-  border-color: var(--sw-light);
-  background-color: rgb(var(--sw-light-rgb) / 12%);
+  border-color: var(--ws-door);
+  background-color: rgb(var(--ws-door-rgb) / 12%);
 }
 
 html[data-family="world"]:root
@@ -1140,6 +992,16 @@ html[data-family="world"]:root
   translate: 3px -3px;
 }
 
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > footer
+  > .ws-doors
+  > a:is(:hover, :focus-visible)
+  > img {
+  filter: brightness(1.12) saturate(1.08);
+}
+
 /* The cut corners would clip an outline: the ring goes inside. */
 html[data-family="world"]:root
   body
@@ -1147,14 +1009,16 @@ html[data-family="world"]:root
   > footer
   > .ws-doors
   > a:focus-visible {
-  outline: 2px solid var(--sw-light);
+  outline: 2px solid var(--ws-door);
   outline-offset: -4px;
 }
 
 /* The billing: the title outlined behind the end card, cropped by the
-   foot (the special sites' poster billing). */
+   foot (the special sites' poster billing), a quiet graphic. The footer
+   clips rather than scrolls, so its view timelines keep the document
+   scroller as their source. */
 html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > footer {
-  overflow: hidden;
+  overflow: clip;
   isolation: isolate;
 }
 
@@ -1198,7 +1062,7 @@ html[data-family="world"]:root
 }
 
 /* ----------------------------------------------------------------
-   5. The title stage: the special sites' HUD (scan grid, brackets,
+   6. The title stage: the special sites' HUD (scan grid, brackets,
       scale bar), under the copy and the print, over the key art
    ---------------------------------------------------------------- */
 html[data-family="world"]:root
@@ -1286,7 +1150,7 @@ html[data-family="world"]:root
 }
 
 /* ----------------------------------------------------------------
-   6. HUD plates: corner ticks and a lit hairline on the consoles that
+   7. HUD plates: corner ticks and a lit hairline on the consoles that
       had none (the rider console, the world column, the end card)
    ---------------------------------------------------------------- */
 @media (forced-colors: none) {
@@ -1343,46 +1207,5 @@ html[data-family="world"]:root
     > .finale-section
     .finale-content::after {
     inset: clamp(-36px, -3vw, -18px) clamp(-56px, -4vw, -20px);
-  }
-}
-
-/* Phones: the CONTENTS count drops under the title; the readout labels
-   tighten so MANAGERS fits a third of the plate. */
-@media (max-width: 559px) {
-  html[data-family="world"]:root
-    body
-    main.site-shell.film-edition.mirage-edition
-    > .ws-contents
-    .ws-contents-head {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  html[data-family="world"]:root
-    body
-    main.site-shell.film-edition.mirage-edition
-    > .ws-contents
-    .ws-contents-head
-    > h2 {
-    font-size: clamp(26px, 8.4vw, 40px);
-    letter-spacing: 0.1em;
-  }
-
-  html[data-family="world"]:root
-    body
-    main.site-shell.film-edition.mirage-edition
-    > .ws-contents
-    .ws-readouts
-    > div {
-    padding: 12px 8px 10px;
-  }
-
-  html[data-family="world"]:root
-    body
-    main.site-shell.film-edition.mirage-edition
-    > .ws-contents
-    .ws-readouts
-    dt {
-    letter-spacing: 0;
-    text-overflow: clip;
   }
 }

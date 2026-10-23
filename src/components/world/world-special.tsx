@@ -1,5 +1,4 @@
 import { memo, useEffect, useState } from "react";
-import type { ReactNode } from "react";
 import { GuardedLink } from "@/components/load-gate";
 import { DisplayName } from "@/components/name-text";
 import {
@@ -7,108 +6,52 @@ import {
   FAR_FROM_SAGA_ENTER_ASSETS,
   REXONANCE_SAGA_ENTER_ASSETS,
 } from "@/lib/asset-loader";
+import { FAR_FROM_SAGA_MENU_TILE } from "@/lib/far-from-saga-artwork";
 
-/* SPECIAL (owner, 2026-10-23): the special sites' grammar on /world —
-   the CONTENTS map after the title stage (a readout plate and the numbered
-   chapter list), the right-edge chapter rail, and the doors to the three
-   special sites at the end of the record. The chapter names in the map are
-   the owner's own chapter headings (moved here, never reworded); every new
-   line is an English HUD label or a number read from the page's data.
-   Styles: styles-world-special.css. */
-
-export const WORLD_CHAPTER_TOTAL = 6;
-
-export const pad2 = (value: number) => String(value).padStart(2, "0");
+/* SPECIAL (owner, 2026-10-23): the special sites' grammar on /world, told by
+   the layout rather than by labels (owner, 2026-10-23: 不要なセカンダリラベル
+   や説明を避ける). After the title stage, the chapter map: each chapter's own
+   heading (moved here, never reworded) beside its outlined numeral, in the
+   chapter's colour. On the right edge, a dot rail that lights the chapter in
+   view. At the end of the record, the three special sites' doors, each shown
+   by its own form. Styles: styles-world-special.css. */
 
 type Chapter = {
   href: string;
   no: string;
-  code: string;
-  title: ReactNode;
-  sub: string;
+  phase: "story" | "riders" | "records" | "annex";
+  title: string;
 };
 
+/* The page's chapter headings, in order (01-03 world-home.tsx, 04-06
+   world-annex.tsx). */
 const CHAPTERS: readonly Chapter[] = [
-  {
-    href: "#story",
-    no: "01",
-    code: "WORLD / STORY",
-    title: "救うべき世界は、現実にある。",
-    sub: "THIS IS NOT A DREAM",
-  },
-  {
-    href: "#riders",
-    no: "02",
-    code: "EIGHT RIDERS",
-    title: "八人の戦いが交わる。",
-    sub: "EIGHT RIDERS / ONE WORLD",
-  },
-  {
-    href: "#records",
-    no: "03",
-    code: "NEW RECORDS",
-    title: "戦いの記録を辿る。",
-    sub: "POWER BEYOND THE BORDER",
-  },
-  { href: "#cast-roster", no: "04", code: "CAST FILES", title: "人物一覧", sub: "CHARACTERS" },
-  { href: "#world-brief", no: "05", code: "WORLD FILES", title: "世界と組織", sub: "WORLD BRIEF" },
-  {
-    href: "#episode-notes",
-    no: "06",
-    code: "ARCHIVE LOG",
-    title: "エピソードの記録",
-    sub: "EPISODES / KEYWORDS / QUOTES",
-  },
+  { href: "#story", no: "01", phase: "story", title: "救うべき世界は、現実にある。" },
+  { href: "#riders", no: "02", phase: "riders", title: "八人の戦いが交わる。" },
+  { href: "#records", no: "03", phase: "records", title: "戦いの記録を辿る。" },
+  { href: "#cast-roster", no: "04", phase: "annex", title: "人物一覧" },
+  { href: "#world-brief", no: "05", phase: "annex", title: "世界と組織" },
+  { href: "#episode-notes", no: "06", phase: "annex", title: "エピソードの記録" },
 ];
 
-export type WorldReadout = { value: number; label: string };
-
-/** After the opening ticker: the numbers, then the chapter map. */
-export const WorldContents = memo(function WorldContents({
-  readouts,
-}: {
-  readouts: readonly WorldReadout[];
-}) {
+/** After the opening ticker: the chapter map. */
+export const WorldContents = memo(function WorldContents() {
   return (
     <nav className="ws-contents" aria-labelledby="ws-contents-title">
-      <div className="ws-contents-inner">
-        <header className="ws-contents-head">
-          <p className="ws-code" aria-hidden="true">
-            <span>00</span> INDEX
-          </p>
-          <h2 id="ws-contents-title" lang="en">
-            CONTENTS
-          </h2>
-          <p className="ws-count" aria-hidden="true">
-            {pad2(CHAPTERS.length)} CHAPTERS
-          </p>
-        </header>
-        <dl className="ws-readouts" aria-label="記録の数">
-          {readouts.map(({ value, label }) => (
-            <div key={label}>
-              <dt lang="en">{label}</dt>
-              <dd>{pad2(value)}</dd>
-            </div>
-          ))}
-        </dl>
-        <ol className="ws-map">
-          {CHAPTERS.map(({ href, no, code, title, sub }) => (
-            <li key={href}>
-              <a href={href}>
-                <b aria-hidden="true">{no}</b>
-                <small lang="en" aria-hidden="true">
-                  {code}
-                </small>
-                <span>{title}</span>
-                <em lang="en" aria-hidden="true">
-                  {sub}
-                </em>
-                <i aria-hidden="true">↗</i>
-              </a>
-            </li>
-          ))}
-        </ol>
-      </div>
+      <h2 id="ws-contents-title" className="visually-hidden">
+        目次
+      </h2>
+      <ol className="ws-map">
+        {CHAPTERS.map(({ href, no, phase, title }) => (
+          <li key={href} data-phase={phase}>
+            <a href={href}>
+              <b aria-hidden="true">{no}</b>
+              <span>{title}</span>
+              <i aria-hidden="true" />
+            </a>
+          </li>
+        ))}
+      </ol>
     </nav>
   );
 });
@@ -126,8 +69,8 @@ const RAIL_TARGETS: readonly [string, number][] = [
   ["quotes", 6],
 ];
 
-/** The right-edge chapter rail (wide screens; decorative, the header nav
-    and the CONTENTS map carry the navigation). */
+/** The right-edge dot rail (wide screens; decorative, the header nav and
+    the chapter map carry the navigation). */
 export const WorldChapterRail = memo(function WorldChapterRail() {
   const [current, setCurrent] = useState(0);
 
@@ -165,54 +108,66 @@ export const WorldChapterRail = memo(function WorldChapterRail() {
       data-current={current || undefined}
       style={{ ["--ws-rail-at" as string]: current }}
     >
-      <span className="ws-rail-now">
-        {current ? `${pad2(current)} / ${pad2(WORLD_CHAPTER_TOTAL)}` : ""}
-      </span>
       <ol>
-        {CHAPTERS.map(({ no }, index) => (
-          <li key={no} data-on={index + 1 === current ? "" : undefined}>
-            <b>{no}</b>
-          </li>
+        {CHAPTERS.map(({ no, phase }, index) => (
+          <li key={no} data-phase={phase} data-on={index + 1 === current ? "" : undefined} />
         ))}
       </ol>
     </div>
   );
 });
 
+/* The side menu's own tiles of the three forms (styles-stage-shell.css), so
+   a reader who has opened the menu already holds them. */
+const DOORS = [
+  {
+    to: "/extreme-saga",
+    edition: "extreme",
+    name: "エクスプリームサーガ",
+    art: "/archive-media/thumbs/saga-extreme.webp",
+    size: [240, 320],
+    assets: EXTREME_SAGA_ENTER_ASSETS,
+  },
+  {
+    to: "/rexonance-saga",
+    edition: "rexonance",
+    name: "レクソナンスサーガ",
+    art: "/archive-media/thumbs/saga-rexonance.webp",
+    size: [240, 320],
+    assets: REXONANCE_SAGA_ENTER_ASSETS,
+  },
+  {
+    to: "/far-from-saga",
+    edition: "far-from",
+    name: "ファーフロムサーガ",
+    art: FAR_FROM_SAGA_MENU_TILE,
+    size: [400, 549],
+    assets: FAR_FROM_SAGA_ENTER_ASSETS,
+  },
+] as const;
+
 /** The end of the record: the doors to the three special sites. */
 export function WorldSpecialDoors() {
   return (
-    <nav className="ws-doors" aria-labelledby="ws-doors-title">
-      <p id="ws-doors-title" className="ws-code" lang="en">
-        SPECIAL SITES
-      </p>
-      <GuardedLink to="/extreme-saga" hash="top" assets={EXTREME_SAGA_ENTER_ASSETS}>
-        <small lang="en" aria-hidden="true">
-          SUPREME SITE
-        </small>
-        <span>
-          <DisplayName value="エクスプリームサーガ" />
-        </span>
-        <i aria-hidden="true">↗</i>
-      </GuardedLink>
-      <GuardedLink to="/rexonance-saga" hash="top" assets={REXONANCE_SAGA_ENTER_ASSETS}>
-        <small lang="en" aria-hidden="true">
-          PERFORMANCE SITE
-        </small>
-        <span>
-          <DisplayName value="レクソナンスサーガ" />
-        </span>
-        <i aria-hidden="true">↗</i>
-      </GuardedLink>
-      <GuardedLink to="/far-from-saga" hash="top" assets={FAR_FROM_SAGA_ENTER_ASSETS}>
-        <small lang="en" aria-hidden="true">
-          FINAL FORM SITE
-        </small>
-        <span>
-          <DisplayName value="ファーフロムサーガ" />
-        </span>
-        <i aria-hidden="true">↗</i>
-      </GuardedLink>
+    <nav className="ws-doors" aria-label="特設サイト">
+      {DOORS.map(({ to, edition, name, art, size, assets }) => (
+        <GuardedLink key={to} to={to} hash="top" assets={assets} className={`is-${edition}`}>
+          <img
+            src={art}
+            alt=""
+            width={size[0]}
+            height={size[1]}
+            loading="lazy"
+            decoding="async"
+            fetchPriority="low"
+            draggable={false}
+          />
+          <span>
+            <DisplayName value={name} />
+          </span>
+          <i aria-hidden="true" />
+        </GuardedLink>
+      ))}
     </nav>
   );
 }
