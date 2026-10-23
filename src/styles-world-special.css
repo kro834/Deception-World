@@ -824,10 +824,30 @@ html[data-family="world"]:root
     main.site-shell.film-edition.mirage-edition
     > footer
     > .ws-doors {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1.25fr) repeat(2, minmax(0, 1fr));
     gap: 16px;
     width: min(100%, 1120px);
   }
+
+  /* ファーフロム leads, a little larger: a wider door beside the four. */
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > footer
+    > .ws-doors
+    > a.is-far-from {
+    grid-row: span 2;
+  }
+}
+
+/* ファーフロム leads, a little larger, at every width. */
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > footer
+  > .ws-doors
+  > a.is-far-from {
+  min-height: 136px;
 }
 
 html[data-family="world"]:root
@@ -887,6 +907,28 @@ html[data-family="world"]:root
   > a.is-far-from {
   --ws-door: #c99bff;
   --ws-door-rgb: 201 155 255;
+  --ws-door-2: #7fe6ff;
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > footer
+  > .ws-doors
+  > a.is-illusionculum {
+  --ws-door: #a6e6ff;
+  --ws-door-rgb: 166 230 255;
+  --ws-door-2: #e9b866;
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > footer
+  > .ws-doors
+  > a.is-meta-unitas {
+  --ws-door: #ffb44a;
+  --ws-door-rgb: 255 180 74;
   --ws-door-2: #7fe6ff;
 }
 

@@ -4,9 +4,13 @@ import { DisplayName } from "@/components/name-text";
 import {
   EXTREME_SAGA_ENTER_ASSETS,
   FAR_FROM_SAGA_ENTER_ASSETS,
+  ILLUSIONCULUM_SAGA_ENTER_ASSETS,
+  META_UNITAS_SAGA_ENTER_ASSETS,
   REXONANCE_SAGA_ENTER_ASSETS,
 } from "@/lib/asset-loader";
 import { FAR_FROM_SAGA_MENU_TILE } from "@/lib/far-from-saga-artwork";
+import { ILLUSIONCULUM_MENU_TILE, ILLUSIONCULUM_MENU_TILE_SIZE } from "@/lib/illusionculum-saga-artwork";
+import { META_UNITAS_MENU_TILE } from "@/lib/meta-unitas-saga-artwork";
 
 /* SPECIAL (owner, 2026-10-23): the special sites' grammar on /world, told by
    the layout rather than by labels (owner, 2026-10-23: 不要なセカンダリラベル
@@ -119,14 +123,33 @@ export const WorldChapterRail = memo(function WorldChapterRail() {
 
 /* The side menu's own tiles of the three forms (styles-stage-shell.css), so
    a reader who has opened the menu already holds them. */
+// The order (owner, 2026-10-23), as the side menu's SPECIAL tiles: ファーフロム
+// first and a little larger, then イリュージョンクルム and メタ・ウニタス, then
+// レクソナンス and エクスプリーム.
 const DOORS = [
   {
-    to: "/extreme-saga",
-    edition: "extreme",
-    name: "エクスプリームサーガ",
-    art: "/archive-media/thumbs/saga-extreme.webp",
-    size: [240, 320],
-    assets: EXTREME_SAGA_ENTER_ASSETS,
+    to: "/far-from-saga",
+    edition: "far-from",
+    name: "ファーフロムサーガ",
+    art: FAR_FROM_SAGA_MENU_TILE,
+    size: [400, 549],
+    assets: FAR_FROM_SAGA_ENTER_ASSETS,
+  },
+  {
+    to: "/illusionculum-saga",
+    edition: "illusionculum",
+    name: "イリュージョンクルムサーガ",
+    art: ILLUSIONCULUM_MENU_TILE,
+    size: ILLUSIONCULUM_MENU_TILE_SIZE,
+    assets: ILLUSIONCULUM_SAGA_ENTER_ASSETS,
+  },
+  {
+    to: "/meta-unitas-saga",
+    edition: "meta-unitas",
+    name: "メタ・ウニタスサーガ",
+    art: META_UNITAS_MENU_TILE,
+    size: [400, 533],
+    assets: META_UNITAS_SAGA_ENTER_ASSETS,
   },
   {
     to: "/rexonance-saga",
@@ -137,12 +160,12 @@ const DOORS = [
     assets: REXONANCE_SAGA_ENTER_ASSETS,
   },
   {
-    to: "/far-from-saga",
-    edition: "far-from",
-    name: "ファーフロムサーガ",
-    art: FAR_FROM_SAGA_MENU_TILE,
-    size: [400, 549],
-    assets: FAR_FROM_SAGA_ENTER_ASSETS,
+    to: "/extreme-saga",
+    edition: "extreme",
+    name: "エクスプリームサーガ",
+    art: "/archive-media/thumbs/saga-extreme.webp",
+    size: [240, 320],
+    assets: EXTREME_SAGA_ENTER_ASSETS,
   },
 ] as const;
 
