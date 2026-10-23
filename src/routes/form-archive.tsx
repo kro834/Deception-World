@@ -106,7 +106,7 @@ function FormArchive() {
   >(() => {});
   const isSaga = archive === "saga";
   const archiveDocument = isSaga
-    ? "/saga-form-archive-embedded.html?v=20261023-zenith6"
+    ? "/saga-form-archive-embedded.html?v=20261023-zenith7"
     : "/realm-form-archive-embedded.html?v=20261023-zenith6";
 
   // An SSR iframe can finish before hydration and lose its one-shot load
