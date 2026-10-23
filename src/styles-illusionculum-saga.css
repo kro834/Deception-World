@@ -2170,3 +2170,51 @@
   background: repeating-linear-gradient(90deg, var(--ics-ice) 0 6px, transparent 6px 9px);
   opacity: 0.7;
 }
+
+/* Finishers and articles (as Extreme's numbered system plates): an outlined
+   numeral in the plate's corner, a gold rule under the title. */
+.rxs-page.rxs-page.ics-page .ics-finisher-list,
+.rxs-page.rxs-page.ics-page .ics-articles {
+  counter-reset: ics-plate;
+}
+
+.rxs-page.rxs-page.ics-page :is(.ics-finisher, .ics-article) {
+  position: relative;
+  counter-increment: ics-plate;
+}
+
+.rxs-page.rxs-page.ics-page :is(.ics-finisher, .ics-article)::after {
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  content: counter(ics-plate, decimal-leading-zero);
+  color: transparent;
+  font: 700 clamp(36px, 4vw, 64px) / 1 var(--ics-forge);
+  -webkit-text-stroke: 1px rgb(233 184 102 / 38%);
+  pointer-events: none;
+}
+
+.rxs-page.rxs-page.ics-page .ics-finisher h3,
+.rxs-page.rxs-page.ics-page .ics-article-copy h3 {
+  padding-right: 2.6em;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--ics-line);
+}
+
+/* A finisher's numeral sits under its name and calls (the prose column
+   stays clear). */
+.rxs-page.rxs-page.ics-page .ics-finisher::after {
+  top: auto;
+  right: auto;
+  bottom: 18px;
+  left: clamp(24px, 3.4vw, 44px);
+}
+
+@media (max-width: 1099.98px) {
+  .rxs-page.rxs-page.ics-page .ics-finisher::after {
+    top: 14px;
+    right: 18px;
+    bottom: auto;
+    left: auto;
+  }
+}
