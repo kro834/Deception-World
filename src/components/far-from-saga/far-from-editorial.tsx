@@ -10,26 +10,27 @@ import { FAR_FROM_SAGA_STAGE_ORDER, type FarFromStageKey } from "@/lib/far-from-
    Every line of copy here is the site's own plain Japanese; the record's
    figures (the read-outs) come from the owner's spec table. */
 
-/** The eleven chapters as the page numbers them (#report is 03's second
- * half and shares its number). The codes match the side menu's. */
+/** The five chapters as the page numbers them (the Rexonance site's five,
+ * owner 2026-10-23), each with the sections it holds. The codes match the
+ * side menu's. */
 export const FAR_FROM_CHAPTERS = [
-  { href: "#overview", number: "01", code: "OVERVIEW", label: "概要", detail: "変身音声と概要" },
-  { href: "#specs", number: "02", code: "SPECS", label: "スペック", detail: "標準稼働時の数値" },
   {
-    href: "#performance",
-    number: "03",
-    code: "PERFORMANCE",
-    label: "性能比較",
-    detail: "比較コンソールと設定資料の全文",
+    href: "#overview",
+    number: "01",
+    code: "OVERVIEW",
+    label: "概要・性能",
+    detail: "変身音声と概要、スペック、比較コンソールと設定資料の全文",
   },
-  { href: "#p16", number: "04", code: "P16", label: "演算加速機構", detail: "第16世代演算加速機構" },
-  { href: "#suitup", number: "05", code: "SUIT-UP", label: "変身", detail: "スクロールで装着、ミドルからウルトラまで" },
-  { href: "#stages", number: "06", code: "5 STAGES", label: "形態", detail: FAR_FROM_SAGA.stagesLine },
-  { href: "#theories", number: "07", code: "MECHANISM", label: "中核機構", detail: "4つの新規理論・中核機構" },
-  { href: "#system", number: "08", code: "ARMOR & OS", label: "装甲・OS", detail: "ファーフロムビットとSA-GA OS 6.1" },
-  { href: "#authority", number: "09", code: "AUTHORITY", label: "神属権限", detail: "FAR FROM DEUSとException World" },
-  { href: "#arsenal", number: "10", code: "WEAPONS", label: "武装", detail: "追加武装 全10種" },
-  { href: "#finishers", number: "11", code: "FINISHER", label: "必殺技", detail: "最高位必殺技 2種" },
+  { href: "#p16", number: "02", code: "P16", label: "演算加速機構", detail: "第16世代演算加速機構" },
+  { href: "#suitup", number: "03", code: "SUIT-UP", label: "変身", detail: "スクロールで装着、ミドルからウルトラまで" },
+  { href: "#stages", number: "04", code: "5 STAGES", label: "形態", detail: FAR_FROM_SAGA.stagesLine },
+  {
+    href: "#theories",
+    number: "05",
+    code: "SYSTEM",
+    label: "中核機構",
+    detail: "4つの新規理論・中核機構、装甲・OS、神属権限、武装、必殺技",
+  },
 ] as const;
 
 /** Static page map under the hero: real anchors, no scroll listeners. */
@@ -38,7 +39,7 @@ export function FarFromChapterMap() {
     <nav className="rxs-chapter-index ffs-chapter-map" aria-label="ファーフロムサーガの見どころ">
       <p className="ffs-chapter-map-heading">
         <span lang="en">CONTENTS</span>
-        <small>01 — 11</small>
+        <small>01 — 05</small>
       </p>
       {FAR_FROM_CHAPTERS.map((chapter) => (
         <a key={chapter.href} href={chapter.href}>

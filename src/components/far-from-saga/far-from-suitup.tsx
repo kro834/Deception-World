@@ -202,7 +202,11 @@ export const FarFromSuitUp = memo(function FarFromSuitUp({
   return (
     <section id="suitup" className="rxs-section ffs-suitup" aria-labelledby="ffs-suitup-title">
       <header className="rxs-section-heading rxs-reveal">
-        <p>05 / SUIT-UP</p>
+        <small className="ffs-index" aria-hidden="true">
+          <b>03</b>
+          {" / 05"}
+        </small>
+        <p>03 / SUIT-UP</p>
         <h2 id="ffs-suitup-title">変身シークエンス</h2>
         <span>
           スクロールの速さに合わせて装着が進みます。炎の到達から爆散、ナノマシンの集結、装甲の固定、出力の起動、選んだ形態への移行までを、自分のペースで確認できます。

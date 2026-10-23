@@ -50,8 +50,13 @@ import {
    #report, the owner's two documents, as its second half), 04 P16,
    05 suit-up (ending on the form chosen right after its runway, ウルトラ
    included), 06 stages, 07 mechanism, 08 armour and OS, 09 authority,
-   10 weapons, 11 finishers. The numbers are CSS counters over the page's
-   direct sections (#report is a sub-chapter and does not count).
+   10 weapons, 11 finishers — and since 2026-10-23 (owner: 「サイトの構造も
+   レクソナンス準拠にして」) grouped as the Rexonance site's five chapters:
+   01 overview (specs, performance, #report as its sub-chapters), 02 P16,
+   03 suit-up with the form selector, 04 stages, 05 system (the mechanism,
+   then armour and OS, authority, weapons and finishers as sub-chapters).
+   The numerals are CSS counters over the page's direct sections; a
+   sub-chapter (.ffs-subchapter) keeps its chapter's number.
 
    #performance (far-from-comparison.tsx), #report (far-from-report.tsx)
    and #p16 (far-from-p16.tsx) are built from the owner's comparison text
@@ -225,23 +230,25 @@ export function FarFromSaga() {
               <DisplayName value={FAR_FROM_SAGA.name} />
             </b>
           </GuardedLink>
-          {/* The bar lists the five landmark chapters, numbered as CONTENTS
-              numbers them; the side menu lists every chapter. */}
+          {/* The bar lists the five chapters, numbered as CONTENTS numbers
+              them (the Rexonance site's bar, owner 2026-10-23); a chapter
+              stays lit through its sub-chapters. The side menu lists every
+              section. */}
           <nav aria-label="ファーフロムサーガ ページ内ナビゲーション">
-            <a href="#overview">
+            <a href="#overview" data-local-nav-through="specs performance report">
               <span aria-hidden="true">01</span> 概要
             </a>
-            <a href="#performance">
-              <span aria-hidden="true">03</span> 性能
-            </a>
             <a href="#p16">
-              <span aria-hidden="true">04</span> P16
+              <span aria-hidden="true">02</span> P16
             </a>
             <a href="#suitup" data-local-nav-through="far-from-assembly-runway">
-              <span aria-hidden="true">05</span> 変身
+              <span aria-hidden="true">03</span> 変身
             </a>
             <a href="#stages">
-              <span aria-hidden="true">06</span> 形態
+              <span aria-hidden="true">04</span> 形態
+            </a>
+            <a href="#theories" data-local-nav-through="system authority arsenal finishers">
+              <span aria-hidden="true">05</span> 機構
             </a>
           </nav>
           <SideMenuTrigger
@@ -318,6 +325,10 @@ export function FarFromSaga() {
         aria-labelledby="ffs-overview-title"
       >
         <header className="rxs-section-heading rxs-reveal">
+          <small className="ffs-index" aria-hidden="true">
+            <b>01</b>
+            {" / 05"}
+          </small>
           <p>01 / OVERVIEW</p>
           <h2 id="ffs-overview-title">概要</h2>
           <span>
@@ -332,14 +343,14 @@ export function FarFromSaga() {
         </div>
       </section>
 
-      {/* 02 — the spec table, as plates. */}
+      {/* 01, continued — the spec table, as plates. */}
       <section
         id="specs"
-        className="rxs-section ffs-specs-section"
+        className="rxs-section ffs-specs-section ffs-subchapter"
         aria-labelledby="ffs-specs-title"
       >
         <header className="rxs-section-heading rxs-reveal">
-          <p>02 / SPECS</p>
+          <p>01 / SPECS</p>
           <h2 id="ffs-specs-title">スペック</h2>
           <span>標準稼働時の数値です。</span>
         </header>
@@ -353,14 +364,14 @@ export function FarFromSaga() {
         </dl>
       </section>
 
-      {/* 03 — #performance: the comparison console (far-from-comparison.tsx). */}
+      {/* 01, continued — #performance: the comparison console (far-from-comparison.tsx). */}
       <section
         id="performance"
-        className="rxs-section ffs-performance"
+        className="rxs-section ffs-performance ffs-subchapter"
         aria-labelledby="ffs-performance-title"
       >
         <header className="rxs-section-heading rxs-reveal">
-          <p>03 / PERFORMANCE</p>
+          <p>01 / PERFORMANCE</p>
           <h2 id="ffs-performance-title">性能比較</h2>
           <span>
             ファーフロムサーガを、ヴィンクルムサーガ、エクスプリームサーガ、レクソナンスサーガと比較します。
@@ -369,39 +380,47 @@ export function FarFromSaga() {
         <FarFromComparison />
       </section>
 
-      {/* 03, continued — #report: the owner's comparison text in full
-          (far-from-report.tsx). A sub-chapter: it keeps 03's number. */}
+      {/* 01, continued — #report: the owner's comparison text in full
+          (far-from-report.tsx). A sub-chapter: it keeps 01's number. */}
       <section
         id="report"
         className="rxs-section ffs-report-section ffs-subchapter"
         aria-labelledby="ffs-report-title"
       >
         <header className="rxs-section-heading rxs-reveal">
-          <p>03 / REPORT</p>
+          <p>01 / REPORT</p>
           <h2 id="ffs-report-title">比較資料</h2>
           <span>性能比較の設定資料を、全文で掲載します。</span>
         </header>
         <FarFromReport />
       </section>
 
-      {/* 04 — #p16: the owner's two P16 chapters (far-from-p16.tsx). */}
+      {/* 02 — #p16: the owner's two P16 chapters (far-from-p16.tsx). */}
       <section id="p16" className="rxs-section ffs-p16" aria-labelledby="ffs-p16-title">
         <header className="rxs-section-heading rxs-reveal">
-          <p>04 / PROCESSOR</p>
+          <small className="ffs-index" aria-hidden="true">
+            <b>02</b>
+            {" / 05"}
+          </small>
+          <p>02 / PROCESSOR</p>
           <h2 id="ffs-p16-title">『P16』</h2>
           <span>レクソナンスサーガの『P14』を基礎とした、第16世代演算加速機構です。</span>
         </header>
         <FarFromP16 />
       </section>
 
-      {/* 05 — #suitup: the scroll suit-up (far-from-suitup.tsx), ending on
+      {/* 03 — #suitup: the scroll suit-up (far-from-suitup.tsx), ending on
           the form chosen in the selector right after its runway. */}
       <FarFromSuitUp stage={stage} onChoose={setStage} />
 
-      {/* 06 — the five forms. */}
+      {/* 04 — the five forms. */}
       <section id="stages" className="rxs-stages rxs-section" aria-labelledby="ffs-stages-title">
         <header className="rxs-section-heading rxs-reveal">
-          <p>06 / STAGES</p>
+          <small className="ffs-index" aria-hidden="true">
+            <b>04</b>
+            {" / 05"}
+          </small>
+          <p>04 / STAGES</p>
           <h2 id="ffs-stages-title">形態</h2>
           <span>{FAR_FROM_SAGA.stagesLine}</span>
         </header>
@@ -479,24 +498,34 @@ export function FarFromSaga() {
         <FarFromFormComparison selected={stage} onChoose={setStage} />
       </section>
 
-      {/* 07 — the four theories. */}
+      {/* 05 — the system: the four theories, then the armour and OS, the
+          authorities, the weapons and the finishers as its sub-chapters (the
+          Rexonance site's 05 SYSTEM). */}
       <section
         id="theories"
         className="rxs-section ffs-theories"
         aria-labelledby="ffs-theories-title"
       >
         <header className="rxs-section-heading rxs-reveal">
-          <p>07 / MECHANISM</p>
+          <small className="ffs-index" aria-hidden="true">
+            <b>05</b>
+            {" / 05"}
+          </small>
+          <p>05 / MECHANISM</p>
           <h2 id="ffs-theories-title">中核機構</h2>
           <span>FARFROM DRIVEをはじめとする、4つの新規理論・中核機構。</span>
         </header>
         <Articles items={FAR_FROM_SAGA.theories} columns={2} label="新規理論・中核機構" />
       </section>
 
-      {/* 08 — the floating unit and the OS. */}
-      <section id="system" className="rxs-section ffs-system" aria-labelledby="ffs-system-title">
+      {/* 05, continued — the floating unit and the OS. */}
+      <section
+        id="system"
+        className="rxs-section ffs-system ffs-subchapter"
+        aria-labelledby="ffs-system-title"
+      >
         <header className="rxs-section-heading rxs-reveal">
-          <p>08 / ARMOR & OS</p>
+          <p>05 / ARMOR & OS</p>
           <h2 id="ffs-system-title">装甲・OS</h2>
           <span>浮遊ユニット『ファーフロムビット』と、統合OS『SA-GA OS 6.1』。</span>
         </header>
@@ -507,24 +536,28 @@ export function FarFromSaga() {
         />
       </section>
 
-      {/* 09 — the authorities. */}
+      {/* 05, continued — the authorities. */}
       <section
         id="authority"
-        className="rxs-section ffs-authority"
+        className="rxs-section ffs-authority ffs-subchapter"
         aria-labelledby="ffs-authority-title"
       >
         <header className="rxs-section-heading rxs-reveal">
-          <p>09 / AUTHORITY</p>
+          <p>05 / AUTHORITY</p>
           <h2 id="ffs-authority-title">神属権限</h2>
           <span>FAR FROM DEUSと、Exception World。</span>
         </header>
         <Articles items={FAR_FROM_SAGA.powers} columns={2} label="神属権限・継承能力" />
       </section>
 
-      {/* 10 — the weapons, numbered. */}
-      <section id="arsenal" className="rxs-section ffs-arsenal" aria-labelledby="ffs-arsenal-title">
+      {/* 05, continued — the weapons, numbered. */}
+      <section
+        id="arsenal"
+        className="rxs-section ffs-arsenal ffs-subchapter"
+        aria-labelledby="ffs-arsenal-title"
+      >
         <header className="rxs-section-heading rxs-reveal">
-          <p>10 / WEAPONS</p>
+          <p>05 / WEAPONS</p>
           <h2 id="ffs-arsenal-title">武装</h2>
           <span>追加武装は全10種。</span>
         </header>
@@ -539,14 +572,14 @@ export function FarFromSaga() {
         <p className="ffs-note ffs-arsenal-note">{FAR_FROM_SAGA.arsenalNote}</p>
       </section>
 
-      {/* 11 — the finishers. */}
+      {/* 05, continued — the finishers. */}
       <section
         id="finishers"
-        className="rxs-section ffs-finishers"
+        className="rxs-section ffs-finishers ffs-subchapter"
         aria-labelledby="ffs-finishers-title"
       >
         <header className="rxs-section-heading rxs-reveal">
-          <p>11 / FINISHER</p>
+          <p>05 / FINISHER</p>
           <h2 id="ffs-finishers-title">必殺技</h2>
           <span>最高位必殺技は2種。発動音声とともに掲載します。</span>
         </header>

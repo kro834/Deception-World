@@ -264,7 +264,8 @@ test("#suitup is built on the Rexonance runway; no chapter wears a 準備中 mar
   // text; see the tests below.
   assert.match(
     component,
-    /id="performance"\s+className="rxs-section ffs-performance"\s/,
+    // Owner (2026-10-23): a sub-chapter of 01 on the Rexonance five-chapter structure.
+    /id="performance"\s+className="rxs-section ffs-performance ffs-subchapter"\s/,
     "performance is no longer prepared",
   );
   assert.match(
@@ -305,14 +306,16 @@ test("the page follows the Rexonance structure: numbered bar, split hero, CONTEN
       (m) => [m[1], m[2]],
     ),
     [
+      // Owner (2026-10-23): the Rexonance site's five chapters.
       ["overview", "01"],
-      ["performance", "03"],
-      ["p16", "04"],
-      ["suitup", "05"],
-      // Owner (2026-10-23): #ultra folded into #suitup; 形態 is 06.
-      ["stages", "06"],
+      ["p16", "02"],
+      ["suitup", "03"],
+      ["stages", "04"],
+      ["theories", "05"],
     ],
   );
+  assert.match(bar, /href="#overview" data-local-nav-through="specs performance report"/);
+  assert.match(bar, /href="#theories" data-local-nav-through="system authority arsenal finishers"/);
   assert.match(bar, /data-local-nav-through="far-from-assembly-runway"/);
   // The hero: the key visual in its stage (slate, aperture, read-outs from
   // the spec table), the copy with its two doors, the name's ghost, the cue.
@@ -336,15 +339,16 @@ test("the page follows the Rexonance structure: numbered bar, split hero, CONTEN
   assert.match(editorial, /spec\("パンチ力"\)/);
   assert.match(editorial, /spec\("ジャンプ力"\)/);
   assert.doesNotMatch(editorial, /405\.5|8000m/);
-  // CONTENTS: eleven chapters, numbered 01–11 (Owner (2026-10-23): #ultra folded into #suitup), each a real anchor on the
-  // page (or in its mounted components), in the registry's order.
+  // CONTENTS: five chapters, numbered 01–05 (Owner (2026-10-23): the Rexonance
+  // structure), each a real anchor on the page, in the registry's order; the
+  // registry also lists their sub-chapters, each a sub-chapter section.
   const chapters = [...editorial.matchAll(/href: "#([a-z0-9]+)",\s*number: "(\d\d)"/g)].map(
     (m) => [m[1], m[2]],
   );
-  assert.equal(chapters.length, 11);
+  assert.equal(chapters.length, 5);
   assert.deepEqual(
     chapters.map(([, number]) => number),
-    Array.from({ length: 11 }, (_, i) => String(i + 1).padStart(2, "0")),
+    Array.from({ length: 5 }, (_, i) => String(i + 1).padStart(2, "0")),
   );
   const mounted = component + read("src/components/far-from-saga/far-from-suitup.tsx");
   const registry = sections
@@ -354,11 +358,13 @@ test("the page follows the Rexonance structure: numbered bar, split hero, CONTEN
     .filter((hash) => hash !== "top" && !hash.startsWith("report-"));
   assert.deepEqual(
     chapters.map(([hash]) => hash),
-    registry,
+    registry.filter((hash) => ["overview", "p16", "suitup", "stages", "theories"].includes(hash)),
   );
-  for (const [hash] of chapters) assert.match(mounted, new RegExp(`id="${hash}"`), hash);
+  for (const hash of registry) assert.match(mounted, new RegExp(`id="${hash}"`), hash);
+  for (const hash of ["specs", "performance", "report", "system", "authority", "arsenal", "finishers"])
+    assert.match(component, new RegExp(`id="${hash}"\\s+className="[^"]*ffs-subchapter`), hash);
   assert.match(editorial, /<nav className="rxs-chapter-index ffs-chapter-map"/);
-  assert.match(editorial, /<span lang="en">CONTENTS<\/span>\s*<small>01 — 11<\/small>/);
+  assert.match(editorial, /<span lang="en">CONTENTS<\/span>\s*<small>01 — 05<\/small>/);
   // The chapters count themselves (a CSS counter over the page's direct
   // sections), so the mounted chapters' own kickers stay as they are; the
   // report is 03's second half and does not count.
@@ -386,8 +392,10 @@ test("the page follows the Rexonance structure: numbered bar, split hero, CONTEN
     "<footer",
   ].map((mark) => component.indexOf(mark.startsWith("<") ? mark : `id="${mark}"`));
   assert.ok(order.every((at, i) => at > 0 && (i === 0 || at > order[i - 1])), "chapter order");
-  for (const mark of ["01 / OVERVIEW", "02 / SPECS", "03 / PERFORMANCE", "03 / REPORT", "04 / PROCESSOR"])
+  // Owner (2026-10-23): the Rexonance site's five chapters; the chapter heads carry its index.
+  for (const mark of ["01 / OVERVIEW", "01 / SPECS", "01 / PERFORMANCE", "01 / REPORT", "02 / PROCESSOR"])
     assert.ok(component.includes(`<p>${mark}</p>`), mark);
+  assert.equal((component.match(/className="ffs-index" aria-hidden="true"/g) || []).length, 4);
   // The stage chapter: the form-sequence status and the five-form drawer
   // beside the liquid rail, the outlined form code behind the copy.
   assert.match(component, /<FarFromFormStatus stage=\{stage\} \/>/);
@@ -706,14 +714,20 @@ test("ウルトラ is one of #suitup's forms: the selector after the runway pick
   const suitup = component.indexOf("<FarFromSuitUp stage={stage} onChoose={setStage} />");
   const stages = component.indexOf('id="stages"');
   assert.ok(suitup > 0 && stages > suitup, "suitup, then stages");
-  assert.match(suitupSource, /<p>05 \/ SUIT-UP<\/p>/);
+  // Owner (2026-10-23): numbered as the Rexonance site's five chapters.
+  assert.match(suitupSource, /<p>03 \/ SUIT-UP<\/p>/);
   for (const mark of [
-    "06 / STAGES",
-    "07 / MECHANISM",
-    "08 / ARMOR & OS",
-    "09 / AUTHORITY",
-    "10 / WEAPONS",
-    "11 / FINISHER",
+    "01 / OVERVIEW",
+    "01 / SPECS",
+    "01 / PERFORMANCE",
+    "01 / REPORT",
+    "02 / PROCESSOR",
+    "04 / STAGES",
+    "05 / MECHANISM",
+    "05 / ARMOR & OS",
+    "05 / AUTHORITY",
+    "05 / WEAPONS",
+    "05 / FINISHER",
   ])
     assert.ok(component.includes(`<p>${mark}</p>`), mark);
   // The selector comes right after the runway, as a tablist over the five forms.

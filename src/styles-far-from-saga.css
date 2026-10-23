@@ -2272,3 +2272,69 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
     display: none;
   }
 }
+
+/* ================================================================
+   The Rexonance site's five chapters (owner, 2026-10-23: 「サイトの構造も
+   レクソナンス準拠にして」): the chapter index at the head's right, as the
+   Rexonance heads carry it (rxa-index), and CONTENTS as five doors.
+   ================================================================ */
+.rxs-page.rxs-page.ffs-page > .rxs-section > .rxs-section-heading > .ffs-index {
+  position: absolute;
+  z-index: 1;
+  grid-area: 1 / 1 / -1 / -1;
+  top: 1px;
+  right: 0;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  margin: 0;
+  color: var(--fft-text-3);
+  font-family: var(--fft-etch);
+  font-size: 12px;
+  letter-spacing: var(--fft-track-label);
+  font-variant-numeric: tabular-nums lining-nums;
+  pointer-events: none;
+}
+
+.rxs-page.rxs-page.ffs-page > .rxs-section > .rxs-section-heading > .ffs-index > b {
+  color: var(--fft-gold);
+  font: 600 15px / 1 var(--fft-forge);
+  letter-spacing: 0.02em;
+}
+
+.rxs-page.rxs-page.ffs-page > .rxs-section > .rxs-section-heading {
+  position: relative;
+}
+
+/* The suit-up's head sits inside its section's own padding. */
+.rxs-page.rxs-page.ffs-page > .ffs-suitup > .rxs-section-heading > .ffs-index {
+  right: 0;
+}
+
+/* Desktop: the tracklist, one row per chapter (five rows, full width). */
+@media (min-width: 1100px) {
+  .rxs-page.rxs-page.ffs-page .ffs-chapter-map {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .rxs-page.rxs-page.ffs-page .ffs-chapter-map a:nth-of-type(n) {
+    border-left: 0;
+  }
+
+  .rxs-page.rxs-page.ffs-page .ffs-chapter-map a:nth-of-type(n + 2) {
+    border-top: 1px solid var(--fft-line-soft);
+  }
+}
+
+@media (min-width: 761px) and (max-width: 1099.98px) {
+  /* Two columns: the fifth door takes the whole row. */
+  .rxs-page.rxs-page.ffs-page .ffs-chapter-map a:last-of-type:nth-of-type(odd) {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 760px) {
+  .rxs-page.rxs-page.ffs-page > .rxs-section > .rxs-section-heading > .ffs-index {
+    display: none;
+  }
+}
