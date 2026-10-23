@@ -12,6 +12,7 @@ import motionEditionCssUrl from "@/styles-motion-edition.css?url";
 import farFromSagaCssUrl from "@/styles-far-from-saga.css?url";
 import farFromSuitupCssUrl from "@/styles-far-from-suitup.css?url";
 import assemblyMovieCssUrl from "@/styles-assembly-movie.css?url";
+import farFromZenithCssUrl from "@/styles-far-from-zenith.css?url";
 import { FAR_FROM_SAGA_KEY_VISUAL, farFromImage } from "@/lib/far-from-saga-artwork";
 import { syncRexonanceLayoutGate } from "@/lib/rexonance-layout-gate.js";
 
@@ -57,6 +58,9 @@ export const Route = createFileRoute("/far-from-saga")({
       // The auto transformation movie's control: where it stands, clear of
       // the figure (styles-assembly-movie.css; the sheet above draws its sheet).
       { rel: "stylesheet", href: assemblyMovieCssUrl },
+      // The page brought up to the Extreme and Rexonance sites (owner,
+      // 2026-10-24): plates and heads, page-scoped, after the page's sheets.
+      { rel: "stylesheet", href: farFromZenithCssUrl },
       CINEMATIC_STYLESHEET_LINK,
       {
         rel: "preload",
