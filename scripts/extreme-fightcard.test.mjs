@@ -14,6 +14,7 @@ import { CLASH_MS, mountExtremeFightCard } from "../src/lib/extreme-fightcard.js
    forced-colours and reduced-transparency paths; the markup it relies on;
    and the engine's lifecycle. */
 
+const slider = readFileSync(new URL("../src/components/special/form-slider.tsx", import.meta.url), "utf8");
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 const strip = (css) => css.replace(/\/\*[\s\S]*?\*\//g, "");
 const source = read("src/styles-extreme-fightcard.css");
@@ -525,7 +526,9 @@ test("both stage-tab names and codes fit on one line at 320px", () => {
   assert.match(narrow, /\.exs-stage-tabs\s*>\s*button\[role="tab"\]\s*>\s*small\s*\{[^}]*white-space:\s*nowrap;/);
   // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）: a tab holds its
   // form's name alone (the English code under it went).
-  assert.match(component, /<span>\{EXTREME_STAGES\[key\]\.label\}<\/span>\s*<\/button>/);
+  // Owner (2026-10-24): one form-slider shape (src/components/special/form-slider.tsx).
+  assert.match(component, /label: EXTREME_STAGES\[key\]\.label,/);
+  assert.match(slider, /<span>\{label\}<\/span>\s*<\/button>/);
   assert.doesNotMatch(component, /<small>\{EXTREME_STAGES\[key\]\.code\}<\/small>/);
 });
 

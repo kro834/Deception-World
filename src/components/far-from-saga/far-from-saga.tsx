@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { GuardedLink } from "@/components/load-gate";
 import { DisplayName } from "@/components/name-text";
-import { LiquidLens } from "@/components/world/liquid-rail";
+import { FormSlider } from "@/components/special/form-slider";
 import { SideMenuLayer, SideMenuTrigger } from "@/components/world/world-chrome";
 import { useWorldMode } from "@/components/world/use-world-mode";
 import { FINAL_STAGE_ENTER_ASSETS, WORLD_ENTER_ASSETS } from "@/lib/asset-loader";
@@ -643,34 +643,22 @@ export function FarFromSaga() {
         </header>
 
         <div className="rxs-stage-switcher rxs-reveal">
-          <div
+          <FormSlider
             ref={stageTabsRef}
-            className="rxs-stage-tabs liquid-swipe-tabs ffs-stage-tabs"
-            role="tablist"
-            aria-label="ファーフロムサーガの形態段階"
-            aria-describedby="ffs-stage-hint"
-            data-liquid-glass="true"
-            data-stage={stage}
-          >
-            <LiquidLens />
-            {FAR_FROM_SAGA_STAGE_ORDER.map((key) => (
-              <button
-                key={key}
-                id={`ffs-stage-tab-${key}`}
-                type="button"
-                role="tab"
-                aria-selected={stage === key}
-                aria-controls="ffs-stage-panel"
-                tabIndex={stage === key ? 0 : -1}
-                className={stage === key ? "is-active" : ""}
-                style={{ ["--liquid-accent" as string]: FAR_FROM_SAGA.stages[key].accent }}
-                onClick={() => selectStage(key)}
-                onPointerUp={(event) => releaseControlFocus(event.currentTarget)}
-              >
-                <span>{FAR_FROM_SAGA.stages[key].label}</span>
-              </button>
-            ))}
-          </div>
+            items={FAR_FROM_SAGA_STAGE_ORDER.map((key) => ({
+              key,
+              label: FAR_FROM_SAGA.stages[key].label,
+              accent: FAR_FROM_SAGA.stages[key].accent,
+            }))}
+            value={stage}
+            onSelect={selectStage}
+            idPrefix="ffs-stage-tab"
+            panelId="ffs-stage-panel"
+            className="ffs-stage-tabs"
+            ariaLabel="ファーフロムサーガの形態段階"
+            ariaDescribedBy="ffs-stage-hint"
+            onTabPointerUp={(event) => releaseControlFocus(event.currentTarget)}
+          />
           {/* The rail says what it is; its gestures stay named for assistive
               tech (owner, 2026-10-23: no secondary labels). */}
           <p id="ffs-stage-hint" className="rxs-stage-hint visually-hidden">

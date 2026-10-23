@@ -149,7 +149,8 @@ test("the pinned ids, entry calls and rails keep their elements", async () => {
     for (const id of ["top", "performance", "p14", "stages", "system"]) {
       assert.match(source, new RegExp(`id="${id}"`));
     }
-    assert.match(source, /className="rxs-stage-tabs liquid-swipe-tabs/);
+  // Owner (2026-10-24): one form-slider shape (src/components/special/form-slider.tsx).
+    assert.match(source, /<FormSlider/);
   }
   for (const id of ["top", "story", "characters", "riders"])
     assert.match(fs, new RegExp(`id="${id}"`));

@@ -1,7 +1,7 @@
 import { memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { GuardedLink } from "@/components/load-gate";
 import { DisplayName } from "@/components/name-text";
-import { LiquidLens } from "@/components/world/liquid-rail";
+import { FormSlider } from "@/components/special/form-slider";
 import { SideMenuLayer, SideMenuTrigger } from "@/components/world/world-chrome";
 import { useWorldMode } from "@/components/world/use-world-mode";
 import { WORLD_ENTER_ASSETS } from "@/lib/asset-loader";
@@ -831,34 +831,22 @@ export function ExtremeSaga() {
         </header>
 
         <div className="rxs-stage-switcher rxs-reveal">
-          <div
+          <FormSlider
             ref={stageTabsRef}
-            className="rxs-stage-tabs liquid-swipe-tabs exs-stage-tabs"
-            role="tablist"
-            aria-label="エクスプリームの運用段階"
-            aria-describedby="exs-stage-hint"
-            data-liquid-glass="true"
-            data-stage={stage}
-          >
-            <LiquidLens />
-            {(Object.keys(EXTREME_STAGES) as ExtremeStage[]).map((key) => (
-              <button
-                key={key}
-                id={`exs-stage-tab-${key}`}
-                type="button"
-                role="tab"
-                aria-selected={stage === key}
-                aria-controls="exs-stage-panel"
-                tabIndex={stage === key ? 0 : -1}
-                className={stage === key ? "is-active" : ""}
-                style={{ ["--liquid-accent" as string]: EXTREME_STAGES[key].accent }}
-                onClick={() => selectStage(key)}
-                onPointerUp={(event) => releaseControlFocus(event.currentTarget)}
-              >
-                <span>{EXTREME_STAGES[key].label}</span>
-              </button>
-            ))}
-          </div>
+            items={(Object.keys(EXTREME_STAGES) as ExtremeStage[]).map((key) => ({
+              key,
+              label: EXTREME_STAGES[key].label,
+              accent: EXTREME_STAGES[key].accent,
+            }))}
+            value={stage}
+            onSelect={selectStage}
+            idPrefix="exs-stage-tab"
+            panelId="exs-stage-panel"
+            className="exs-stage-tabs"
+            ariaLabel="エクスプリームの運用段階"
+            ariaDescribedBy="exs-stage-hint"
+            onTabPointerUp={(event) => releaseControlFocus(event.currentTarget)}
+          />
           {/* The tabs name the forms and the panel shows the one chosen
               (owner, 2026-10-23: no secondary labels): the gestures and the
               resting status speak to assistive tech only; a form still on

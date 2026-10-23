@@ -20,7 +20,7 @@ import {
 import { planStageCall, type RexonanceStageEntrance } from "@/lib/rexonance-stage-call";
 import { GuardedLink } from "@/components/load-gate";
 import { DisplayName } from "@/components/name-text";
-import { LiquidLens } from "@/components/world/liquid-rail";
+import { FormSlider } from "@/components/special/form-slider";
 import { SideMenuLayer, SideMenuTrigger } from "@/components/world/world-chrome";
 import { useWorldMode } from "@/components/world/use-world-mode";
 import { WORLD_ENTER_ASSETS } from "@/lib/asset-loader";
@@ -2144,34 +2144,17 @@ export function RexonanceSaga() {
             </header>
 
             <div className="rxs-stage-switcher rxs-reveal">
-              <div
+              <FormSlider
                 ref={stageTabsRef}
-                className="rxs-stage-tabs liquid-swipe-tabs"
-                role="tablist"
-                aria-label="レクソナンスの運用段階"
-                aria-describedby="rxs-stage-hint"
-                data-liquid-glass="true"
-                data-stage={stage}
-              >
-                <LiquidLens />
-                {SHOWN_STAGES.map((key) => (
-                  <button
-                    key={key}
-                    id={`rxs-stage-tab-${key}`}
-                    type="button"
-                    role="tab"
-                    aria-selected={stage === key}
-                    aria-controls="rxs-stage-panel"
-                    tabIndex={stage === key ? 0 : -1}
-                    className={stage === key ? "is-active" : ""}
-                    style={{ ["--liquid-accent" as string]: STAGES[key].accent }}
-                    onClick={() => selectStage(key)}
-                    onPointerUp={(event) => releaseControlFocus(event.currentTarget)}
-                  >
-                    <span>{STAGES[key].label}</span>
-                  </button>
-                ))}
-              </div>
+                items={SHOWN_STAGES.map((key) => ({ key, label: STAGES[key].label, accent: STAGES[key].accent }))}
+                value={stage}
+                onSelect={selectStage}
+                idPrefix="rxs-stage-tab"
+                panelId="rxs-stage-panel"
+                ariaLabel="レクソナンスの運用段階"
+                ariaDescribedBy="rxs-stage-hint"
+                onTabPointerUp={(event) => releaseControlFocus(event.currentTarget)}
+              />
               {/* Owner (2026-10-23): no secondary labels. The tabs name the
                   forms; the outlined code behind the copy marks the one shown;
                   the rail's gestures stay named for assistive tech. */}
