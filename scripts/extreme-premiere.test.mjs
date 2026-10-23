@@ -431,7 +431,8 @@ test("the component adds only textless, hidden ornaments, line wrappers and the 
     /onDisplay: \(next: ExtremeStage\) => \{[\s\S]*?setShownStage\(next\);\s*setStageCut\(true\);/,
   );
   assert.match(component, /selection\.dispose\(\)/);
-  assert.match(component, /onClick=\{\(\) => selectStage\(key\)\}/);
+  // Owner (2026-10-24): one form-slider shape (src/components/special/form-slider.tsx).
+  assert.match(component, /onSelect=\{selectStage\}/);
   assert.match(component, /if \(nextStage\) selectStage\(nextStage\);/);
   assert.match(component, /data-exo-cut=\{stageCut \? "true" : undefined\}/);
   assert.match(component, /<figure key=\{shownStage\} data-form=\{shownStage\}>/);

@@ -165,7 +165,8 @@ test("every switch back to ウルトラ deploys again: the figure is keyed by fo
   assert.match(deploySource, /observer\.observe\(figure\);\s*return \(\) => observer\.disconnect\(\);\s*\}, \[\]\);/);
   assert.match(page, /const STAGE_LINK = \/\^#stages-\(middle\|high\|xhigh\|max\|ultra\)\$\/;/);
   assert.match(page, /window\.addEventListener\("hashchange", follow\)/);
-  assert.match(page, /onClick=\{\(\) => selectStage\(key\)\}/);
+  // Owner (2026-10-24): one form-slider shape (src/components/special/form-slider.tsx).
+  assert.match(page, /onSelect=\{selectStage\}/);
   assert.match(page, /if \(next\) selectStage\(next\);/);
   assert.match(page, /<FarFromFormComparison selected=\{stage\} onChoose=\{selectStage\} \/>/);
   assert.match(page, /<FarFromSuitUp stage=\{stage\} onChoose=\{chooseQuietly\} \/>/);

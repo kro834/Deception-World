@@ -174,7 +174,8 @@ test("Extreme stage profiles use the full-size versioned reference artwork", () 
 });
 
 test("Extreme stage rail supports liquid long-press and swipe selection", () => {
-  assert.match(component, /className="rxs-stage-tabs liquid-swipe-tabs exs-stage-tabs"/);
+  // Owner (2026-10-24): one form-slider shape (src/components/special/form-slider.tsx).
+  assert.match(component, /<FormSlider[\s\S]*?className="exs-stage-tabs"/);
   assert.match(component, /middle: \{[\s\S]*?label: "ミドル"/);
   assert.match(component, /ultra: \{[\s\S]*?label: "ウルトラ"/);
   assert.match(component, /initRail\(rail\)/);
@@ -210,7 +211,7 @@ test("visible opponent choices expose selection and retain keyboard focus", () =
 });
 
 test("stage panel is named by the displayed stage while selection prepares", () => {
-  assert.match(component, /id=\{`exs-stage-tab-\$\{key\}`\}/);
+  assert.match(component, /idPrefix="exs-stage-tab"/);
   assert.match(component, /aria-labelledby=\{`exs-stage-tab-\$\{shownStage\}`\}/);
   assert.match(component, /aria-busy=\{stagePending\}/);
   assert.match(component, /const activeStage = EXTREME_STAGES\[shownStage\]/);

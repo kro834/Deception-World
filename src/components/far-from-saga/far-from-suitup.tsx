@@ -1,5 +1,5 @@
 import { memo, useEffect, useRef, useState, type RefObject } from "react";
-import { LiquidLens } from "@/components/world/liquid-rail";
+import { FormSlider } from "@/components/special/form-slider";
 import { initRail } from "@/lib/liquid/boot.js";
 import {
   FAR_FROM_ASSEMBLY_FORMS,
@@ -336,33 +336,21 @@ export const FarFromSuitUp = memo(function FarFromSuitUp({
         <h3 id="ffs-ending-title" className="visually-hidden">
           変身後の形態
         </h3>
-        <div
+        <FormSlider
           ref={tabsRef}
-          className="rxs-stage-tabs liquid-swipe-tabs ffs-stage-tabs ffs-ending-tabs"
-          role="tablist"
-          aria-labelledby="ffs-ending-title"
-          aria-describedby="ffs-ending-hint"
-          data-liquid-glass="true"
-          data-stage={stage}
-        >
-          <LiquidLens />
-          {FAR_FROM_ASSEMBLY_FORMS.map((key) => (
-            <button
-              key={key}
-              id={`ffs-ending-tab-${key}`}
-              type="button"
-              role="tab"
-              aria-selected={stage === key}
-              aria-controls="ffs-ending-panel"
-              tabIndex={stage === key ? 0 : -1}
-              className={stage === key ? "is-active" : ""}
-              style={{ ["--liquid-accent" as string]: FAR_FROM_SAGA.stages[key].accent }}
-              onClick={() => onChoose(key)}
-            >
-              <span>{FAR_FROM_SAGA.stages[key].label}</span>
-            </button>
-          ))}
-        </div>
+          items={FAR_FROM_ASSEMBLY_FORMS.map((key) => ({
+            key,
+            label: FAR_FROM_SAGA.stages[key].label,
+            accent: FAR_FROM_SAGA.stages[key].accent,
+          }))}
+          value={stage}
+          onSelect={onChoose}
+          idPrefix="ffs-ending-tab"
+          panelId="ffs-ending-panel"
+          className="ffs-stage-tabs ffs-ending-tabs"
+          ariaLabelledBy="ffs-ending-title"
+          ariaDescribedBy="ffs-ending-hint"
+        />
         <p id="ffs-ending-hint" className="rxs-stage-hint visually-hidden">
           タップ・長押し・左右スライド・矢印キーで切り替え
         </p>

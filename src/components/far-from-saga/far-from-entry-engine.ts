@@ -111,6 +111,8 @@ export const FAR_FROM_ENTRY_WIRE = Object.freeze({
   fade: 90,
 });
 const WIRE_ICE = "#7fe6ff";
+/** The driver's plates: worn from the start, never constructed. */
+const DRIVER: ReadonlySet<string> = new Set(["belt"]);
 const WIRE_WHITE = "#f4fbff";
 
 /** The engine takes over only if it is ready before the first tile is due. */
@@ -691,6 +693,9 @@ export function createFarFromEntryEngine({
       }
       if (t >= FAR_FROM_ENTRY_MATERIAL - 80) drawChips(t, 0);
       for (let p = 0; p < plates; p += 1) {
+        // The driver is worn from the first frame (owner, 2026-10-24:
+        // 「最初からドライバーを装着」): settled at once, never formed.
+        if (!done[p] && DRIVER.has(plan.pieces[p].id)) settle(p);
         if (done[p] || t < plan.spawn[p]) continue;
         if (t >= plan.fit[p] + 40) settle(p);
         else drawPlate(p, t);

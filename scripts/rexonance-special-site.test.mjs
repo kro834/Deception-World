@@ -235,7 +235,8 @@ test("long numeric values reserve glyph height and narrow-screen width", () => {
 });
 
 test("stage panel is named by the selected stage tab", () => {
-  assert.match(component, /id=\{`rxs-stage-tab-\$\{key\}`\}/);
+  // Owner (2026-10-24): one form-slider shape (src/components/special/form-slider.tsx).
+  assert.match(component, /idPrefix="rxs-stage-tab"/);
   assert.match(component, /aria-labelledby=\{`rxs-stage-tab-\$\{stage\}`\}/);
 });
 
@@ -379,15 +380,16 @@ test("Rexonance navigation uses its dedicated cyan-pink route dive", () => {
 
 test("Rexonance stage switching uses one animated Liquid Glass selector", () => {
   assert.match(component, /label: "レクソナンス"/);
-  assert.match(component, /import \{ LiquidLens \}/);
+  // Owner (2026-10-24): one form-slider shape (src/components/special/form-slider.tsx).
+  assert.match(component, /import \{ FormSlider \} from "@\/components\/special\/form-slider"/);
   assert.match(component, /import \{ initRail \}/);
-  assert.match(component, /data-liquid-glass="true"/);
-  assert.match(component, /data-stage=\{stage\}/);
-  assert.match(component, /className="rxs-stage-tabs liquid-swipe-tabs"/);
-  assert.match(component, /<LiquidLens \/>/);
+  assert.match(readFileSync(new URL("../src/components/special/form-slider.tsx", import.meta.url), "utf8"), /data-liquid-glass="true"/);
+  assert.match(component, /value=\{stage\}/);
+  assert.match(component, /<FormSlider/);
+  assert.match(readFileSync(new URL("../src/components/special/form-slider.tsx", import.meta.url), "utf8"), /<LiquidLens \/>/);
   assert.match(component, /rail\.addEventListener\("railselect", onSelect\)/);
   assert.match(component, /const dispose = initRail\(rail\)/);
-  assert.match(component, /--liquid-accent/);
+  assert.match(readFileSync(new URL("../src/components/special/form-slider.tsx", import.meta.url), "utf8"), /--liquid-accent/);
   assert.doesNotMatch(component, /rxs-stage-liquid-indicator/);
   assert.match(styles, /-webkit-backdrop-filter: blur\(26px\) saturate\(165%\)/);
   assert.match(styles, /backdrop-filter: blur\(30px\) saturate\(185%\)/);
