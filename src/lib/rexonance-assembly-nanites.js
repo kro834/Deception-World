@@ -4817,38 +4817,44 @@ export function createAssemblyNanites({
       }
     }
     // The rivers' gates: two ice posts where each plate's stream narrows
-    // (round 3, review N4: they were not visible), each lit at its tip.
-    let posts = false;
+    // (round 3, review N4: they were not visible), each lit at its tip. They
+    // rise with the stream through them and sink as it thins (owner,
+    // 2026-10-23: posts that popped in and out whole read as stray dashes
+    // round the body), in four strength bands so the strokes stay batched.
     const half = 0.012 * H;
-    for (let p = 0; p < NP; p += 1) {
-      if (laneCount[p] < 3) continue;
-      const pc = P[p];
-      if (!posts) {
-        ctx.beginPath();
-        posts = true;
+    for (let band = 1; band <= 4; band += 1) {
+      let posts = false;
+      for (let p = 0; p < NP; p += 1) {
+        const lanes = laneCount[p];
+        if (lanes < 3 || Math.min(4, Math.ceil((lanes - 2) / 3)) !== band) continue;
+        const pc = P[p];
+        if (!posts) {
+          ctx.beginPath();
+          posts = true;
+        }
+        for (let side = -1; side <= 1; side += 2) {
+          const x = pc.gateX - pc.ny * half * side;
+          const y = pc.gateY + pc.nx * half * side;
+          ctx.moveTo(x - pc.nx * 5, y - pc.ny * 5);
+          ctx.lineTo(x + pc.nx * 5, y + pc.ny * 5);
+        }
       }
-      for (let side = -1; side <= 1; side += 2) {
-        const x = pc.gateX - pc.ny * half * side;
-        const y = pc.gateY + pc.nx * half * side;
-        ctx.moveTo(x - pc.nx * 6, y - pc.ny * 6);
-        ctx.lineTo(x + pc.nx * 6, y + pc.ny * 6);
-      }
-    }
-    if (posts) {
-      ctx.globalAlpha = 0.85;
+      if (!posts) continue;
+      ctx.globalAlpha = 0.2 * band;
       ctx.strokeStyle = "rgb(196 244 255)";
-      ctx.lineWidth = 1.6;
+      ctx.lineWidth = 1.3;
       ctx.stroke();
       if (cells && !coarse) {
         ctx.globalCompositeOperation = "lighter";
-        ctx.globalAlpha = 0.5;
+        ctx.globalAlpha = 0.12 * band;
         for (let p = 0; p < NP; p += 1) {
-          if (laneCount[p] < 3) continue;
+          const lanes = laneCount[p];
+          if (lanes < 3 || Math.min(4, Math.ceil((lanes - 2) / 3)) !== band) continue;
           const pc = P[p];
           for (let side = -1; side <= 1; side += 2) {
-            const x = pc.gateX - pc.ny * half * side + pc.nx * 6;
-            const y = pc.gateY + pc.nx * half * side + pc.ny * 6;
-            ctx.drawImage(cells, BKX[0], BKY[0], 32, 32, x - 5, y - 5, 10, 10);
+            const x = pc.gateX - pc.ny * half * side + pc.nx * 5;
+            const y = pc.gateY + pc.nx * half * side + pc.ny * 5;
+            ctx.drawImage(cells, BKX[0], BKY[0], 32, 32, x - 4, y - 4, 8, 8);
             sprites_ += 1;
           }
         }
