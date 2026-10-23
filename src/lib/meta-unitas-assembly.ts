@@ -2,8 +2,8 @@
  *
  * /meta-unitas-saga's #suitup (src/components/meta-unitas-saga/
  * meta-unitas-suitup.tsx) mounts this on its runway. The scene is the page's
- * own partition engine (src/lib/meta-unitas-partition.ts, driven by
- * meta-unitas-assembly-engine.ts); this module stays light: the calls as the
+ * Rexonance scroll engine with Meta Unitas' suit
+ * (src/lib/meta-unitas-rx-engine.ts); this module stays light: the calls as the
  * HUD prints them and the mount, which imports the engine chunk only under
  * the motion gate, after the page is idle — never on the startup path, never
  * for the still tiers (prefers-reduced-motion, forced colours, economy,
@@ -68,7 +68,7 @@ export function mountMetaUnitasAssembly(
   const html = host.ownerDocument.documentElement;
   const reduced = environment.matchMedia("(prefers-reduced-motion: reduce)");
   const forced = environment.matchMedia("(forced-colors: active)");
-  const load = options.load ?? (() => import("./meta-unitas-assembly-engine"));
+  const load = options.load ?? (() => import("./meta-unitas-rx-engine"));
   let disposed = false;
   let loading = false;
   let dispose: (() => void) | null = null;
@@ -90,7 +90,7 @@ export function mountMetaUnitasAssembly(
       },
       () => {
         loading = false;
-        if (!disposed) host.dataset.musLoad = "error";
+        if (!disposed) host.dataset.rznLoad = "error";
       },
     );
   };
@@ -105,11 +105,11 @@ export function mountMetaUnitasAssembly(
     if (!allowed()) {
       cancelIdle();
       stop();
-      host.dataset.musLoad = "static";
+      host.dataset.rznLoad = "static";
       return;
     }
     if (dispose || loading) return;
-    host.dataset.musLoad = "waiting";
+    host.dataset.rznLoad = "waiting";
     if (idleId || idleTimer) return;
     if (typeof environment.requestIdleCallback === "function")
       idleId = environment.requestIdleCallback(
@@ -140,6 +140,6 @@ export function mountMetaUnitasAssembly(
     reduced.removeEventListener?.("change", sync);
     forced.removeEventListener?.("change", sync);
     stop();
-    delete host.dataset.musLoad;
+    delete host.dataset.rznLoad;
   };
 }

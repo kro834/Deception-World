@@ -7,17 +7,22 @@ import {
   mountMetaUnitasAssembly,
   type MetaUnitasAssemblyForm,
 } from "@/lib/meta-unitas-assembly";
-import { META_UNITAS_SUIT, META_UNITAS_SUIT_SIZE } from "@/lib/meta-unitas-suit";
-import { META_UNITAS_BEATS } from "@/lib/meta-unitas-timeline";
+import {
+  META_UNITAS_RX_DRIVER_STANDIN,
+  META_UNITAS_RX_FIGURE,
+  META_UNITAS_RX_FORMS,
+  META_UNITAS_RX_SIZE,
+  META_UNITAS_RX_UNDERSUIT,
+} from "@/lib/meta-unitas-rx-suit";
 import { META_UNITAS_SAGA } from "./meta-unitas-data";
-import { CallLine } from "./meta-unitas-parts";
 
 /* META UNITAS SAGA — #suitup, the scroll suit-up (2026-10-23).
 
-   A tall runway with a sticky frame: the canvas (the partition engine,
-   src/lib/meta-unitas-assembly.ts → meta-unitas-assembly-engine.ts), the
-   undersuit standing in until it is ready, the five calls lighting in turn
-   and the form's name. The scroll builds ミドル; the selector right after the
+   The Rexonance runway (owner: 「メタ・ウニタスはレクソナンスと同じ装着です」):
+   the same frame, layers and HUD the engine reads by their rzn- classes
+   (src/lib/meta-unitas-assembly.ts → meta-unitas-rx-engine.ts, the Rexonance
+   scroll engine with Meta Unitas' SAM-cut suit), the undersuit standing in
+   until it is ready, the five calls lighting in turn and the form's name. The scroll builds ミドル; the selector right after the
    runway chooses what the end of it becomes (ミドル, or ウルトラ partitioning
    it again), as the Rexonance and Far From pages do. Without motion the
    runway is one screen: the chosen form finished, every call lit. */
@@ -31,15 +36,20 @@ export const FORM_ACCENTS: Record<MetaUnitasAssemblyForm, string> = {
   ultra: "#e9d8ff",
 };
 
-/** Where "watch it" lands: just before the seal (ミドル) or ウルトラ's turn. */
-const REPLAY_AT: Record<MetaUnitasAssemblyForm, number> = {
-  middle: META_UNITAS_BEATS.bits[0] - 0.02,
-  ultra: META_UNITAS_BEATS.ultra[0] - 0.03,
+/** Where "watch it" lands: just before the seal (the engine's beats), so the
+ * lock, the ignition and the chosen form's change play next. */
+const REPLAY_AT: Record<MetaUnitasAssemblyForm, number> = { middle: 0.835, ultra: 0.835 };
+/** The still tiers' picture: the chosen form, finished. */
+const STILLS: Record<MetaUnitasAssemblyForm, string> = {
+  middle: META_UNITAS_RX_FIGURE,
+  ultra: META_UNITAS_RX_FORMS.ultra,
 };
+/** The engine's data-form: ミドル is its "standard" (the base figure). */
+const runwayForm = (form: MetaUnitasAssemblyForm) => (form === "middle" ? "standard" : form);
 
 function watchEnding(runway: HTMLElement | null, form: MetaUnitasAssemblyForm) {
   if (!runway) return;
-  const frame = runway.querySelector<HTMLElement>(".mus-frame");
+  const frame = runway.querySelector<HTMLElement>(".rzn-frame");
   const smooth =
     !window.matchMedia("(prefers-reduced-motion: reduce)").matches &&
     document.documentElement.dataset.worldEffects !== "economy";
@@ -49,7 +59,9 @@ function watchEnding(runway: HTMLElement | null, form: MetaUnitasAssemblyForm) {
     runway.scrollIntoView({ behavior, block: "start" });
     return;
   }
-  const top = runway.getBoundingClientRect().top + window.scrollY + travel * REPLAY_AT[form];
+  const pinTop = Number.parseFloat(window.getComputedStyle(frame).top) || 0;
+  const top =
+    runway.getBoundingClientRect().top + window.scrollY - pinTop + travel * REPLAY_AT[form];
   window.scrollTo({ top: Math.max(0, Math.round(top)), behavior });
 }
 
@@ -61,14 +73,14 @@ function SuitUpStatus({ runwayRef }: { runwayRef: RefObject<HTMLDivElement | nul
     const runway = runwayRef.current;
     if (!runway) return;
     const update = () => {
-      setLoad(runway.dataset.musLoad || "waiting");
-      setComplete(runway.dataset.musComplete === "true");
+      setLoad(runway.dataset.rznLoad || "waiting");
+      setComplete(runway.dataset.rznFormComplete === "true");
     };
     update();
     const observer = new MutationObserver(update);
     observer.observe(runway, {
       attributes: true,
-      attributeFilter: ["data-mus-load", "data-mus-complete"],
+      attributeFilter: ["data-rzn-load", "data-rzn-form-complete"],
     });
     return () => observer.disconnect();
   }, [runwayRef]);
@@ -89,9 +101,7 @@ function SuitUpStatus({ runwayRef }: { runwayRef: RefObject<HTMLDivElement | nul
           <p>変身演出の素材を読み込めませんでした。</p>
           <button
             type="button"
-            onClick={() =>
-              runwayRef.current?.dispatchEvent(new Event("meta-unitas:assembly-retry"))
-            }
+            onClick={() => runwayRef.current?.dispatchEvent(new Event("rexonance:assembly-retry"))}
           >
             再読み込み
           </button>
@@ -139,50 +149,76 @@ export const MetaUnitasSuitUp = memo(function MetaUnitasSuitUp({
       <div
         ref={runwayRef}
         id="meta-unitas-runway"
-        className="mus-runway"
+        className="mus-runway rzn-suitup"
         aria-hidden="true"
-        data-form={stage}
+        data-form={runwayForm(stage)}
         style={{
-          ["--mus-aspect" as string]: `${META_UNITAS_SUIT_SIZE.width} / ${META_UNITAS_SUIT_SIZE.height}`,
+          ["--rzn-aspect" as string]: `${META_UNITAS_RX_SIZE.width} / ${META_UNITAS_RX_SIZE.height}`,
         }}
       >
-        <div className="mus-frame">
-          <i className="mus-frame-ground" />
-          <i className="mus-frame-orbit is-a" />
-          <i className="mus-frame-orbit is-b" />
-          {/* The still tiers' picture: the chosen form, finished. */}
+        <div className="rzn-frame">
+          <i className="rzn-light" />
+          <i className="rzn-depth" />
+          <i className="rzn-aura" />
+          <i className="rzn-crown" />
+          <i className="rzn-floor" />
           <img
-            className="mus-still"
-            src={META_UNITAS_SUIT[stage].figure}
+            className="rzn-still"
+            src={STILLS[stage]}
             alt=""
-            width={META_UNITAS_SUIT_SIZE.width}
-            height={META_UNITAS_SUIT_SIZE.height}
+            width={META_UNITAS_RX_SIZE.width}
+            height={META_UNITAS_RX_SIZE.height}
             loading="lazy"
             decoding="async"
           />
-          {/* While the scene prepares, the wearer stands in. */}
           <img
-            className="mus-under"
-            src={META_UNITAS_SUIT.undersuit}
+            className="rzn-under"
+            src={META_UNITAS_RX_UNDERSUIT}
             alt=""
-            width={META_UNITAS_SUIT_SIZE.width}
-            height={META_UNITAS_SUIT_SIZE.height}
+            width={META_UNITAS_RX_SIZE.width}
+            height={META_UNITAS_RX_SIZE.height}
             loading="lazy"
             decoding="async"
           />
-          <canvas className="mus-canvas" width={0} height={0} />
-          <ol className="mus-call-lines">
-            {META_UNITAS_CALL_LINES.map((units, index) => (
-              <li key={index} className="mus-call-line" data-chant={units.length > 1 || undefined}>
-                <CallLine units={units} />
-              </li>
-            ))}
-          </ol>
-          <p className="mus-stamp">
-            <b className="is-middle">{FORM_LABELS.middle}</b>
-            <b className="is-ultra">{FORM_LABELS.ultra}</b>
-          </p>
-          <i className="mus-rail">
+          <img
+            className="rzn-driver-standin"
+            src={META_UNITAS_RX_DRIVER_STANDIN}
+            alt=""
+            width={META_UNITAS_RX_SIZE.width}
+            height={META_UNITAS_RX_SIZE.height}
+            loading="lazy"
+            decoding="async"
+          />
+          <canvas className="rzn-canvas" width={0} height={0} />
+          {/* The calls, lit on the engine's beats. The engine's own read-outs
+              (phase, percent, parts) are kept for it and never shown. */}
+          <div className="rzn-call">
+            <p className="rzn-phase" hidden />
+            <ol className="rzn-lines">
+              {META_UNITAS_CALL_LINES.map((units, index) => (
+                <li key={index} className="rzn-line" data-chant={units.length > 1 || undefined}>
+                  {units.map((unit, unitIndex) => (
+                    <span key={`${unit}-${unitIndex}`} className="rzn-chip">
+                      {unitIndex === 0 ? <span className="mus-bracket">【</span> : null}
+                      {unit}
+                      {unitIndex === units.length - 1 ? (
+                        <span className="mus-bracket">】</span>
+                      ) : null}
+                    </span>
+                  ))}
+                </li>
+              ))}
+            </ol>
+          </div>
+          <div className="rzn-hud">
+            <p className="rzn-readout" hidden>
+              <b className="rzn-percent">100</b>
+            </p>
+            <p className="rzn-stamp">
+              <b>{FORM_LABELS[stage]}</b>
+            </p>
+          </div>
+          <i className="rzn-rail">
             <i />
           </i>
         </div>

@@ -11,7 +11,7 @@ import type { MetaUnitasEntrySequence } from "../components/meta-unitas-saga/met
 
 /** The gate covers the page this long (the five calls, ミドル complete),
  * then reveals it over `reveal`. */
-export const META_UNITAS_ENTRY_TIMINGS = { cover: 3000, reveal: 520 } as const;
+export const META_UNITAS_ENTRY_TIMINGS = { cover: 3800, reveal: 520 } as const;
 
 export type MetaUnitasTransitionRenderer = typeof MetaUnitasEntrySequence;
 type CallModule = { MetaUnitasEntrySequence: MetaUnitasTransitionRenderer };
@@ -47,10 +47,31 @@ export function prepareMetaUnitasTransition(deadlineMs = 1800) {
   return { promise, cancel };
 }
 
-/** Decodes ミドル's pictures for the sequence (true once they are in). */
+/** Fetches and decodes the suit's pictures for the sequence (true once
+ * they are in): the engine's own loads then come from the cache. */
+let warm: Promise<boolean> | null = null;
 export function warmMetaUnitasEntry(): Promise<boolean> {
-  return import("./meta-unitas-entry-pictures.ts").then(
-    (module) => module.warmMetaUnitasPictures(),
-    () => false,
-  );
+  if (!warm)
+    warm = Promise.all([import("./meta-unitas-rx-suit.ts"), import("./rexonance-nanites.ts")])
+      .then(([suit, kit]) =>
+        Promise.all(
+          [
+            ...suit.META_UNITAS_RX_ASSETS,
+            suit.META_UNITAS_RX_DRIVER_STANDIN,
+            ...kit.REXONANCE_NANITE_ASSETS,
+          ].map((src) => {
+            const image = new Image();
+            image.src = src;
+            return image.decode();
+          }),
+        ),
+      )
+      .then(
+        () => true,
+        () => {
+          warm = null;
+          return false;
+        },
+      );
+  return warm;
 }
