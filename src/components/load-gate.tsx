@@ -287,6 +287,21 @@ function navigateUnderCover(router: AppRouter, start: () => Promise<void>, to: s
   return Promise.race([rendered, settled]).finally(() => stop());
 }
 
+// Each element's own animations under a root, pseudo-elements left out.
+// Not getAnimations({ subtree: true }): WebKit crashed the page ("Page
+// crashed", EXC_BREAKPOINT in compareAnimationsByCompositeOrder) sorting a
+// subtree's list that held stale pseudo-element style animations, the same
+// crash zeus-button.tsx's readEntrance had (b253070e); seen on phones loading
+// /illusionculum-saga.
+function ownAnimations(root: Element | null | undefined): Animation[] {
+  if (!root || typeof root.getAnimations !== "function") return [];
+  const found: Animation[] = [...root.getAnimations()];
+  for (const element of root.querySelectorAll("*")) {
+    if (typeof element.getAnimations === "function") found.push(...element.getAnimations());
+  }
+  return found;
+}
+
 // The page's own entrance starts on the hand-over (data-loading goes) and
 // may hold its first beat (the dossier's --dm-arrive-delay). A cover with no
 // file to dock stays still until that beat, so it opens onto a page that is
@@ -294,7 +309,7 @@ function navigateUnderCover(router: AppRouter, start: () => Promise<void>, to: s
 async function entranceLead(cap = 160) {
   const from = performance.now();
   await nextFrame();
-  const delays = (document.querySelector("main")?.getAnimations({ subtree: true }) ?? [])
+  const delays = ownAnimations(document.querySelector("main"))
     .filter((animation) => {
       const end = animation.effect?.getComputedTiming().endTime;
       return (
@@ -333,14 +348,12 @@ async function revealRan(duration: number, onStart?: () => void, cap = 1400) {
     // layers are timed to the reveal, and a stage's leftovers (Leddic's
     // motes) are already faded out with it.
     const gate = document.querySelector(".load-gate.has-cine.is-revealing");
-    const handing = gate
-      ?.getAnimations({ subtree: true })
-      .some(
-        (animation) =>
-          !(animation instanceof CSSAnimation) &&
-          !(animation instanceof CSSTransition) &&
-          finiteRunning(animation),
-      );
+    const handing = ownAnimations(gate).some(
+      (animation) =>
+        !(animation instanceof CSSAnimation) &&
+        !(animation instanceof CSSTransition) &&
+        finiteRunning(animation),
+    );
     if (!handing) return;
     await nextFrame();
   }
