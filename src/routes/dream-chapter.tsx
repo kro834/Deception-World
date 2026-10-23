@@ -23,6 +23,9 @@ import stageDreamCssUrl from "@/styles-stage-dream.css?url";
 import dreamLamplightCssUrl from "@/styles-dream-lamplight.css?url";
 import dreamKarakuriCssUrl from "@/styles-dream-karakuri.css?url";
 import dreamZenithCssUrl from "@/styles-dream-zenith.css?url";
+import dreamGlossarySearchCssUrl from "@/styles-dream-glossary-search.css?url";
+import dreamArchiveExploreCssUrl from "@/styles-dream-archive-explore.css?url";
+import dreamDossierGuideCssUrl from "@/styles-dream-dossier-guide.css?url";
 
 // Shippori Mincho carries the Taisho letterpress voice of the film site.
 const DREAM_FONTS_URL =
@@ -72,6 +75,9 @@ export const Route = createFileRoute("/dream-chapter")({
       { rel: "stylesheet", href: dreamZenithCssUrl },
       // Craft objects refine the programme after its shared reading surfaces.
       { rel: "stylesheet", href: dreamKarakuriCssUrl },
+      { rel: "stylesheet", href: dreamGlossarySearchCssUrl },
+      { rel: "stylesheet", href: dreamArchiveExploreCssUrl },
+      { rel: "stylesheet", href: dreamDossierGuideCssUrl },
       CINEMATIC_STYLESHEET_LINK,
       // The same files the dive warms and the hero shows.
       { rel: "preload", as: "image", href: DREAM_CHAPTER_HERO_ART },

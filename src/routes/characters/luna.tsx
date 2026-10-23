@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { RelatedPage } from "@/components/world/related-page";
 import { DOSSIER_STYLESHEET_LINKS, createWorldHead } from "@/lib/world-head";
+import characterReadingCssUrl from "@/styles-character-reading-tools.css?url";
 
 export const Route = createFileRoute("/characters/luna")({
   component: () => <RelatedPage id="luna" />,
@@ -9,6 +10,9 @@ export const Route = createFileRoute("/characters/luna")({
       title: "ルナ・アレイン｜人物資料｜Deception World",
       description: "ルナ・アレインとレルム ムーンフォームの人物・能力記録。",
       image: "/character-luna.jpeg",
-      stylesheetLinks: DOSSIER_STYLESHEET_LINKS,
+      stylesheetLinks: [
+        ...DOSSIER_STYLESHEET_LINKS,
+        { rel: "stylesheet", href: characterReadingCssUrl },
+      ],
     }),
 });

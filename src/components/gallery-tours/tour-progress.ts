@@ -43,10 +43,17 @@ function parseProgress(raw: string | null): TourProgress {
 }
 
 export function readTourProgress(storage: ReadStorage): TourProgress {
+  return readTourProgressState(storage).progress;
+}
+
+export function readTourProgressState(storage: ReadStorage): {
+  progress: TourProgress;
+  available: boolean;
+} {
   try {
-    return parseProgress(storage.getItem(TOUR_PROGRESS_KEY));
+    return { progress: parseProgress(storage.getItem(TOUR_PROGRESS_KEY)), available: true };
   } catch {
-    return {};
+    return { progress: {}, available: false };
   }
 }
 

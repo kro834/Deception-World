@@ -245,6 +245,17 @@ dialog.quick-search kbd {
   color: var(--qs-faint);
   font-weight: 400;
 }
+dialog.quick-search .quick-search-clear {
+  flex: 0 0 44px;
+  min-width: 44px;
+  min-height: 44px;
+  margin-right: -10px;
+  padding: 0;
+  border: 0;
+  color: var(--qs-muted);
+  background: transparent;
+  font-size: 24px;
+}
 /* ---------- The list: kickers and lit rows ---------- */
 .quick-search-list {
   flex: 1 1 auto;
@@ -438,6 +449,7 @@ dialog.quick-search mark {
 /* ---------- The foot: keys and the count ---------- */
 .quick-search-foot {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
@@ -447,11 +459,27 @@ dialog.quick-search mark {
 }
 .quick-search-foot > p {
   display: flex;
+  flex: 1 1 100%;
+  flex-wrap: wrap;
   align-items: center;
   gap: 14px;
   margin: 0;
   color: var(--qs-faint);
   font-size: 12px;
+}
+.quick-search-full {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  color: var(--qs-ice);
+  font-size: 13px;
+  text-underline-offset: 4px;
+}
+.quick-search-foot > .quick-search-recent-notice {
+  color: var(--qs-muted);
+  line-height: 1.8;
+  overflow-wrap: anywhere;
 }
 .quick-search-count {
   color: var(--qs-ice);
@@ -518,6 +546,15 @@ dialog.quick-search :is(button, a):focus-visible {
   }
   .quick-search-field {
     margin: 10px 12px;
+  }
+  .quick-search-option {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .quick-search-option-place {
+    text-align: left;
+  }
+  .quick-search-option-snippet {
+    grid-column: 1;
   }
 }
 /* The sheet arrives once: a short rise, under no-preference and outside

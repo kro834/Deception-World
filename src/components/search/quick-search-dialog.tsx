@@ -18,7 +18,7 @@ import {
 } from "./search-engine";
 import { clearRecentSearches, rememberSearch, useRecentSearches } from "./search-recent";
 import { Highlighted, HighlightedName, ResultOption } from "./search-ui";
-import { placeLabel, stepActive } from "./search-ui-helpers";
+import { isSearchCompositionKey, placeLabel, stepActive } from "./search-ui-helpers";
 import { useOpenResult } from "./use-open-result";
 import quickSearchCssUrl from "../../styles-quick-search.css?url";
 
@@ -57,9 +57,11 @@ export default function QuickSearchDialog({
   const [draft, setDraft] = useState("");
   const [active, setActive] = useState(-1);
   const [composing, setComposing] = useState(false);
+  const compositionEndedRef = useRef(-Infinity);
   const typed = useDeferredValue(draft);
   const trimmed = typed.trim();
   const recent = useRecentSearches();
+  const [recentNotice, setRecentNotice] = useState("");
   const openResult = useOpenResult();
   const { go } = useLoadGate();
   const router = useRouter();
@@ -68,6 +70,8 @@ export default function QuickSearchDialog({
     const dialog = dialogRef.current;
     if (!dialog) return;
     if (open && !dialog.open) {
+      setComposing(false);
+      compositionEndedRef.current = -Infinity;
       dialog.showModal();
       inputRef.current?.focus();
       if (seed) {
@@ -129,6 +133,7 @@ export default function QuickSearchDialog({
   }, [recent, results, trimmed]);
 
   useEffect(() => setActive(-1), [trimmed]);
+  const visibleCount = options.filter((option) => option.kind === "result").length;
   const activeOption = active >= 0 ? options[active] : undefined;
   useEffect(() => {
     if (activeOption)
@@ -165,7 +170,10 @@ export default function QuickSearchDialog({
 
   const onKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     const native = event.nativeEvent;
-    if (composing || native.isComposing || native.keyCode === 229) return;
+    if (isSearchCompositionKey(native, composing, compositionEndedRef.current, performance.now())) {
+      if (event.key === "Enter" || event.key === "Escape") event.preventDefault();
+      return;
+    }
     if (event.key === "ArrowDown" || event.key === "ArrowUp") {
       event.preventDefault();
       setActive((current) =>
@@ -195,9 +203,14 @@ export default function QuickSearchDialog({
       aria-labelledby="quick-search-title"
       onClose={onClose}
       onCancel={(event) => {
+        if (composing || performance.now() - compositionEndedRef.current < 50) {
+          event.preventDefault();
+          return;
+        }
         if (draft) {
           event.preventDefault();
           setDraft("");
+          inputRef.current?.focus();
         }
       }}
       onClick={(event) => {
@@ -247,10 +260,24 @@ export default function QuickSearchDialog({
             onCompositionStart={() => setComposing(true)}
             onCompositionEnd={(event) => {
               setComposing(false);
+              compositionEndedRef.current = performance.now();
               setDraft(event.currentTarget.value);
             }}
             onKeyDown={onKeyDown}
           />
+          {draft ? (
+            <button
+              type="button"
+              className="quick-search-clear"
+              aria-label="検索語を消す"
+              onClick={() => {
+                setDraft("");
+                inputRef.current?.focus();
+              }}
+            >
+              <span aria-hidden="true">×</span>
+            </button>
+          ) : null}
         </div>
         <div
           id="quick-search-list"
@@ -359,15 +386,42 @@ export default function QuickSearchDialog({
         ) : null}
         <div className="quick-search-foot">
           <p id="quick-search-hint">
-            <span className="quick-search-keys">↑↓で選択・Enterで開く・Escで閉じる</span>
+            <span className="quick-search-keys">
+              ↑↓で選択・Enterで開く・Escで消去、もう一度で閉じる
+            </span>
             <span className="quick-search-count" role="status">
-              {trimmed ? `${results.length}件` : ""}
+              {trimmed
+                ? `${results.length}件${results.length > visibleCount ? `・${visibleCount}件を表示` : ""}`
+                : ""}
             </span>
           </p>
+          <a
+            className="quick-search-full"
+            href={trimmed ? `/search?q=${encodeURIComponent(trimmed)}` : "/search"}
+            onClick={linkClick({ kind: "all", id: "qs-footer-search", count: results.length })}
+          >
+            資料検索を開く<span aria-hidden="true">↗</span>
+          </a>
           {!trimmed && recent.length ? (
-            <button type="button" onClick={clearRecentSearches}>
+            <button
+              type="button"
+              onClick={() => {
+                const persisted = clearRecentSearches();
+                setRecentNotice(
+                  persisted
+                    ? "検索履歴を消去しました。"
+                    : "この画面の履歴を消去しました。保存先を更新できないため、再読み込みすると戻る場合があります。",
+                );
+                inputRef.current?.focus();
+              }}
+            >
               検索履歴を消す
             </button>
+          ) : null}
+          {recentNotice ? (
+            <p className="quick-search-recent-notice" role="status">
+              {recentNotice}
+            </p>
           ) : null}
         </div>
       </div>

@@ -21,9 +21,14 @@ import {
   suggestSearchQueries,
   type SearchResult,
 } from "./search-engine";
-import { clearRecentSearches, rememberSearch, useRecentSearches } from "./search-recent";
+import {
+  clearRecentSearches,
+  forgetSearch,
+  rememberSearch,
+  useRecentSearches,
+} from "./search-recent";
 import { Highlighted, HighlightedName, ResultOption } from "./search-ui";
-import { placeLabel, stepActive } from "./search-ui-helpers";
+import { isSearchCompositionKey, placeLabel, stepActive } from "./search-ui-helpers";
 import { useOpenResult } from "./use-open-result";
 import { recordReturnCardId } from "@/lib/record-return-state";
 
@@ -88,6 +93,7 @@ export function SearchPage({
   const resultsRef = useRef<HTMLHeadingElement>(null);
   const listboxId = useId().replace(/:/g, "") + "-records";
   const recent = useRecentSearches();
+  const [recentNotice, setRecentNotice] = useState("");
   const openResult = useOpenResult();
   const onQueryChangeRef = useRef(onQueryChange);
   useEffect(() => {
@@ -167,6 +173,8 @@ export function SearchPage({
   }, [composing, draft]);
 
   const flushQuery = () => {
+    window.clearTimeout(queryTimerRef.current);
+    queryTimerRef.current = undefined;
     if (draft !== writtenRef.current) {
       writtenRef.current = draft;
       onQueryChange(draft);
@@ -222,8 +230,8 @@ export function SearchPage({
 
   const onKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     const native = event.nativeEvent;
-    if (composing || native.isComposing || native.keyCode === 229) {
-      if (event.key === "Enter") event.preventDefault();
+    if (isSearchCompositionKey(native, composing, compositionEndedRef.current, performance.now())) {
+      if (event.key === "Enter" || event.key === "Escape") event.preventDefault();
       return;
     }
     if (event.key === "ArrowDown" || event.key === "ArrowUp") {
@@ -247,6 +255,7 @@ export function SearchPage({
 
   const selectedLabel = categoryLabel(category) || "すべて";
   const total = category === "all" ? all.length : filtered.length;
+  const visibleCount = options.filter((option) => option.kind === "result").length;
 
   return (
     <div className="world search-page" data-search-page="true">
@@ -348,11 +357,41 @@ export function SearchPage({
             <div className="search-suggestions search-recent" aria-label="最近の検索">
               <span>最近の検索</span>
               {recent.map((term) => (
-                <button key={term} type="button" onClick={() => setQuery(term)}>
-                  {term}
-                </button>
+                <div key={term} className="search-recent-term">
+                  <button type="button" onClick={() => setQuery(term)}>
+                    {term}
+                  </button>
+                  <button
+                    type="button"
+                    className="search-recent-remove"
+                    aria-label={`最近の検索から「${term}」を削除`}
+                    onClick={() => {
+                      const persisted = forgetSearch(term);
+                      setRecentNotice(
+                        persisted
+                          ? `最近の検索から「${term}」を削除しました。`
+                          : "この画面の履歴から削除しました。保存先を更新できないため、再読み込みすると戻る場合があります。",
+                      );
+                      inputRef.current?.focus({ preventScroll: true });
+                    }}
+                  >
+                    <span aria-hidden="true">×</span>
+                  </button>
+                </div>
               ))}
-              <button type="button" className="search-recent-clear" onClick={clearRecentSearches}>
+              <button
+                type="button"
+                className="search-recent-clear"
+                onClick={() => {
+                  const persisted = clearRecentSearches();
+                  setRecentNotice(
+                    persisted
+                      ? "検索履歴を消去しました。"
+                      : "この画面の履歴を消去しました。保存先を更新できないため、再読み込みすると戻る場合があります。",
+                  );
+                  inputRef.current?.focus({ preventScroll: true });
+                }}
+              >
                 履歴を消す
               </button>
             </div>
@@ -367,6 +406,11 @@ export function SearchPage({
               ))}
             </div>
           )}
+          {recentNotice ? (
+            <p className="search-recent-notice" role="status">
+              {recentNotice}
+            </p>
+          ) : null}
           <div className="search-categories" role="group" aria-label="資料の分類">
             {SEARCH_CATEGORIES.map((item) => (
               <button
@@ -380,6 +424,19 @@ export function SearchPage({
               </button>
             ))}
           </div>
+          {category !== "all" ? (
+            <div className="search-active-filter">
+              <span>分類で絞り込み中</span>
+              <button
+                type="button"
+                aria-label={`${selectedLabel}の絞り込みを解除`}
+                onClick={() => onCategoryChange("all")}
+              >
+                {selectedLabel}
+                <span aria-hidden="true">×</span>
+              </button>
+            </div>
+          ) : null}
         </section>
 
         <section className="search-results" aria-labelledby="record-results-heading">
@@ -392,6 +449,16 @@ export function SearchPage({
               <strong>{total}</strong> 件{trimmed && <span>「{trimmed}」</span>}
             </p>
           </div>
+          {total > 0 ? (
+            <p className="search-display-summary">
+              {visibleCount} / {total} 件を表示。
+              {category === "all" && visibleCount < total
+                ? "分類ごとの抜粋です。「すべて見る」から、その分類の全件を確認できます。"
+                : visibleCount < total
+                  ? "続きは「さらに表示」から確認できます。"
+                  : "すべての検索結果を表示しています。"}
+            </p>
+          ) : null}
           <div
             id={listboxId}
             role="listbox"

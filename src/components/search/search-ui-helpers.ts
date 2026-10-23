@@ -33,3 +33,18 @@ export function stepActive(current: number, count: number, step: 1 | -1): number
   if (step < 0 && current === 0) return -1;
   return (current + step + count) % count;
 }
+
+/** Safari may end composition just before delivering its confirmation key. */
+export function isSearchCompositionKey(
+  event: { key: string; isComposing?: boolean; keyCode?: number },
+  composing: boolean,
+  endedAt: number,
+  now: number,
+): boolean {
+  return (
+    composing ||
+    Boolean(event.isComposing) ||
+    event.keyCode === 229 ||
+    ((event.key === "Enter" || event.key === "Escape") && now - endedAt < 50)
+  );
+}

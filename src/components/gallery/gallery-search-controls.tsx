@@ -9,6 +9,7 @@ export function GallerySearchControls({ query, onQueryChange }: GallerySearchCon
   const inputId = useId();
   const helpId = `${inputId}-help`;
   const inputRef = useRef<HTMLInputElement>(null);
+  const composingRef = useRef(false);
 
   return (
     <div className="gallery-search">
@@ -19,7 +20,29 @@ export function GallerySearchControls({ query, onQueryChange }: GallerySearchCon
           id={inputId}
           type="search"
           value={query}
+          autoComplete="off"
+          spellCheck={false}
+          enterKeyHint="search"
           onChange={(event) => onQueryChange(event.target.value)}
+          onCompositionStart={() => {
+            composingRef.current = true;
+          }}
+          onCompositionEnd={() => {
+            composingRef.current = false;
+          }}
+          onKeyDown={(event) => {
+            if (
+              event.key !== "Escape" ||
+              composingRef.current ||
+              event.nativeEvent.isComposing ||
+              event.nativeEvent.keyCode === 229 ||
+              !query
+            ) {
+              return;
+            }
+            event.preventDefault();
+            onQueryChange("");
+          }}
           placeholder="青 金 ／ 003 ／ 080–089"
           aria-label="作品を番号、画像の説明、公開タイトルで検索"
           aria-describedby={helpId}
@@ -37,9 +60,12 @@ export function GallerySearchControls({ query, onQueryChange }: GallerySearchCon
           </button>
         )}
       </div>
+      <p className="gallery-search-description" id={helpId}>
+        番号・画像の説明・公開タイトルから検索できます。
+      </p>
       <details className="gallery-search-tips">
         <summary>検索のヒント</summary>
-        <p className="gallery-search-help" id={helpId}>
+        <p className="gallery-search-help">
           空白で区切ると、すべての語を含む作品を検索します（例：青 金）。番号は完全一致で、
           080–089のような範囲も指定できます。投稿の番号はU001の形式です。
         </p>

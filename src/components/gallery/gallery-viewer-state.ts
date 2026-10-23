@@ -7,6 +7,100 @@ export type GalleryViewerRecord = {
   mode?: GalleryViewerMode;
 };
 
+export type GalleryImageViewport = {
+  width: number;
+  height: number;
+  scrollWidth: number;
+  scrollHeight: number;
+  left: number;
+  top: number;
+};
+
+/** Retain the artwork point at the viewport centre when its available space changes. */
+export function galleryImageResizePosition(
+  previous: GalleryImageViewport | null,
+  next: GalleryImageViewport,
+  artwork?: { width: number; height: number },
+): GalleryReadingPosition {
+  const contained = (viewport: GalleryImageViewport | null) => {
+    const width = viewport?.scrollWidth ?? 0;
+    const height = viewport?.scrollHeight ?? 0;
+    if (!artwork || artwork.width <= 0 || artwork.height <= 0) return { width, height };
+    const scale = Math.min(width / artwork.width, height / artwork.height);
+    return { width: artwork.width * scale, height: artwork.height * scale };
+  };
+  const before = contained(previous);
+  const after = contained(next);
+  const axis = (
+    previousSize: number,
+    previousExtent: number,
+    previousOffset: number,
+    previousImage: number,
+    size: number,
+    extent: number,
+    image: number,
+  ) => {
+    const centre =
+      previousImage > 0
+        ? (previousOffset + previousSize / 2 - (previousExtent - previousImage) / 2) / previousImage
+        : 0.5;
+    return Math.max(0, Math.min(extent - size, (extent - image) / 2 + centre * image - size / 2));
+  };
+  return {
+    left: axis(
+      previous?.width ?? 0,
+      previous?.scrollWidth ?? 0,
+      previous?.left ?? 0,
+      before.width,
+      next.width,
+      next.scrollWidth,
+      after.width,
+    ),
+    top: axis(
+      previous?.height ?? 0,
+      previous?.scrollHeight ?? 0,
+      previous?.top ?? 0,
+      before.height,
+      next.height,
+      next.scrollHeight,
+      after.height,
+    ),
+  };
+}
+
+export function galleryImagePanPosition(
+  viewport: GalleryImageViewport,
+  key: string,
+): GalleryReadingPosition | null {
+  const horizontal = key === "ArrowLeft" ? -1 : key === "ArrowRight" ? 1 : 0;
+  const vertical = key === "ArrowUp" ? -1 : key === "ArrowDown" ? 1 : 0;
+  if (!horizontal && !vertical) return null;
+  return {
+    left: Math.max(
+      0,
+      Math.min(
+        viewport.scrollWidth - viewport.width,
+        viewport.left + horizontal * Math.max(40, Math.min(120, viewport.width * 0.15)),
+      ),
+    ),
+    top: Math.max(
+      0,
+      Math.min(
+        viewport.scrollHeight - viewport.height,
+        viewport.top + vertical * Math.max(40, Math.min(120, viewport.height * 0.15)),
+      ),
+    ),
+  };
+}
+
+export function galleryImageRetrySource(source: string, attempt: number): string {
+  if (!attempt) return source;
+  const hash = source.indexOf("#");
+  const url = hash < 0 ? source : source.slice(0, hash);
+  const fragment = hash < 0 ? "" : source.slice(hash);
+  return `${url}${url.includes("?") ? "&" : "?"}retry=${attempt}${fragment}`;
+}
+
 /** Document layout, excluding the frozen body's offset and entrance transforms. */
 export function galleryLayoutTop(element: HTMLElement): number {
   const body = element.ownerDocument.body;

@@ -3,7 +3,8 @@ import { DossierNav } from "./dossier-nav";
 import { DossierTopbar } from "./world-chrome";
 import { DossierContents, DossierReader, PhrasedText } from "./dossier-reader";
 import { FormPickup } from "./manager-stub";
-import { VARG_FACTS } from "./varg-data";
+import { VARG_FACTS, VARG_SECTIONS } from "./varg-data";
+import { CharacterChapterTools, CharacterRelatedRecords } from "./character-reading-tools";
 import {
   DANTE_FACTS,
   DANTE_FORMS,
@@ -82,7 +83,11 @@ export function DantePage() {
         </div>
       </section>
       <DossierReader name="ダンテ／ヴァルグ" forms />
-      <section className="manager-dossier" id="dossier-index" aria-label="ダンテ／ヴァルグの人物資料">
+      <section
+        className="manager-dossier"
+        id="dossier-index"
+        aria-label="ダンテ／ヴァルグの人物資料"
+      >
         <div className="manager-section-index">
           <span>01</span>
           <small>CHARACTER DOSSIER</small>
@@ -115,13 +120,20 @@ export function DantePage() {
                       loading="lazy"
                       decoding="async"
                     />
-                    <figcaption>第二の犬・ヴァルグ ／ 本来形態<br /><a href="/character-varg-20261021-original.webp">原寸画像を見る</a></figcaption>
+                    <figcaption>
+                      第二の犬・ヴァルグ ／ 本来形態
+                      <br />
+                      <a href="/character-varg-20261021-original.webp">原寸画像を見る</a>
+                    </figcaption>
                   </figure>
                 ) : null}
                 {section.no === "04" ? (
                   <dl className="manager-facts" aria-label="ヴァルグの人物録">
                     {VARG_FACTS.map((fact) => (
-                      <div key={fact.dt}><dt>{fact.dt}</dt><dd>{fact.dd}</dd></div>
+                      <div key={fact.dt}>
+                        <dt>{fact.dt}</dt>
+                        <dd>{fact.dd}</dd>
+                      </div>
                     ))}
                   </dl>
                 ) : null}
@@ -129,18 +141,42 @@ export function DantePage() {
                   <p key={body}>{body}</p>
                 ))}
               </div>
+              <CharacterChapterTools
+                sections={DANTE_SECTIONS}
+                currentNo={section.no}
+                continuation={{ href: "#form-records", title: "ルーラーの変身記録" }}
+              />
             </article>
           ))}
         </div>
+        <CharacterRelatedRecords
+          records={[
+            {
+              href: `#character-section-${VARG_SECTIONS[0].no}`,
+              title: VARG_SECTIONS[0].title,
+              context: "第二の犬・ヴァルグの記録へ",
+            },
+            ...DANTE_FORMS.map((form) => ({
+              href: `#${form.id}`,
+              title: form.name,
+              context: "変身記録へ",
+            })),
+          ]}
+        />
       </section>
       <div id="form-records">
         {DANTE_FORMS.map((rider) => (
-          <div id={rider.id} key={rider.id}>
+          <div id={rider.id} key={rider.id} className="character-reading-target">
             <FormPickup rider={rider} />
           </div>
         ))}
       </div>
-      <DossierNav items={UNMANAGED_NAV} currentHref="/characters/dante" indexLabel="犬" returnHash="manager-archive-dogs" />
+      <DossierNav
+        items={UNMANAGED_NAV}
+        currentHref="/characters/dante"
+        indexLabel="犬"
+        returnHash="manager-archive-dogs"
+      />
     </main>
   );
 }
