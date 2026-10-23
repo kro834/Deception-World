@@ -40,7 +40,7 @@ test("the site has a route, its sheets in order, a menu tile, a route family and
     assert.match(component + suitup + comparison, new RegExp(`id="${hash}"`), hash);
   }
   assert.match(read("src/lib/route-family.js"), /path === "\/illusionculum-saga"/);
-  assert.match(read("src/lib/asset-loader.ts"), /export const ILLUSIONCULUM_SAGA_ENTER_ASSETS = \[ILLUSIONCULUM_HERO\.src\]/);
+  assert.match(read("src/lib/asset-loader.ts"), /export const ILLUSIONCULUM_SAGA_ENTER_ASSETS = \[\s*ILLUSIONCULUM_HERO\.src,\s*"\/illusionculum-suit-20261023\/undersuit\.webp"/);
   assert.match(read("src/styles-stage-shell.css"), /a\[href\^="\/illusionculum-saga"\]/);
 });
 

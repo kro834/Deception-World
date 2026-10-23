@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { GuardedLink } from "@/components/load-gate";
 import { DisplayName } from "@/components/name-text";
 import { LiquidLens } from "@/components/world/liquid-rail";
@@ -21,7 +21,8 @@ import {
 import { warmRexonanceStages } from "@/lib/warm-rexonance-stages";
 import { ILLUSIONCULUM_FORMS, ILLUSIONCULUM_SAGA, type IcArticle } from "./illusionculum-data";
 import { IllusionculumComparison } from "./illusionculum-comparison";
-import { phrase } from "./illusionculum-phrase";
+import { phrase, prose } from "./illusionculum-phrase";
+import { IllusionculumRail } from "./illusionculum-rail";
 import { withCallBreaks } from "@/components/far-from-saga/far-from-phrase";
 import { IllusionculumSuitUp } from "./illusionculum-suitup";
 import { IllusionculumEntryTransition } from "./illusionculum-entry-transition";
@@ -89,6 +90,22 @@ const RIDER_PREFIX = "仮面ライダー";
 const ULTRA_WORD = "ウルトラ";
 const ultraStem = ILLUSIONCULUM_SAGA.ultraName.slice(0, -ULTRA_WORD.length);
 
+/** An article's title in its 『』, each word whole on its line and the
+ * brackets kept with the first and the last word (never a line of their own). */
+function bracketed(title: string) {
+  const words = title.split(/(?<=・)|(?<= )/u);
+  return words.map((word, index) => (
+    <Fragment key={index}>
+      {index > 0 ? <wbr /> : null}
+      <span className="ics-nb">
+        {index === 0 ? <i aria-hidden="true">『</i> : null}
+        {word}
+        {index === words.length - 1 ? <i aria-hidden="true">』</i> : null}
+      </span>
+    </Fragment>
+  ));
+}
+
 /** A record's articles (装甲・外観, 専用武装, 能力): the title, then the
  * owner's paragraphs; the first article of a chapter may carry a detail. */
 function Articles({
@@ -127,12 +144,10 @@ function Articles({
             ) : null}
             <div className="ics-article-copy">
               <h3 lang={/^[\x20-\x7e]+$/.test(item.title) ? "en" : undefined}>
-                <i aria-hidden="true">『</i>
-                {phrase(item.title)}
-                <i aria-hidden="true">』</i>
+                {bracketed(item.title)}
               </h3>
               {item.body.map((paragraph, paragraphIndex) => (
-                <p key={paragraphIndex}>{paragraph}</p>
+                <p key={paragraphIndex}>{prose(paragraph)}</p>
               ))}
             </div>
           </article>
@@ -364,6 +379,7 @@ export function IllusionculumSaga() {
       </header>
 
       <SideMenuLayer context="illusionculum" open={menuOpen} onOpenChange={setMenuOpen} />
+      <IllusionculumRail />
 
       <section className="rxs-hero ics-hero" aria-labelledby="ics-title">
         <div className="rxs-hero-ambient" aria-hidden="true">
@@ -459,17 +475,18 @@ export function IllusionculumSaga() {
             01
           </b>
           <h2 id="ics-overview-title">概要</h2>
+          <span className="ics-heading-plate" data-plate="figure" aria-hidden="true" />
         </header>
         <div className="ics-overview-body">
           <div className="ics-prose ics-lead rxs-reveal">
             {ILLUSIONCULUM_SAGA.overview.slice(0, 4).map((paragraph, index) => (
-              <p key={index}>{paragraph}</p>
+              <p key={index}>{prose(paragraph)}</p>
             ))}
           </div>
           <IllusionculumProjection />
           <div className="ics-prose rxs-reveal">
             {ILLUSIONCULUM_SAGA.overview.slice(4).map((paragraph, index) => (
-              <p key={index}>{paragraph}</p>
+              <p key={index}>{prose(paragraph)}</p>
             ))}
           </div>
         </div>
@@ -604,7 +621,7 @@ export function IllusionculumSaga() {
                 </p>
               ) : null}
               {active.body.map((paragraph, index) => (
-                <p key={index}>{paragraph}</p>
+                <p key={index}>{prose(paragraph)}</p>
               ))}
             </div>
           </div>
@@ -622,6 +639,7 @@ export function IllusionculumSaga() {
             04
           </b>
           <h2 id="ics-armour-title">装甲・外観</h2>
+          <span className="ics-heading-plate" data-plate="helm" aria-hidden="true" />
         </header>
         <Articles items={ILLUSIONCULUM_SAGA.armour} label="装甲・外観" details={{ 0: "helm" }} />
       </section>
@@ -637,6 +655,7 @@ export function IllusionculumSaga() {
             05
           </b>
           <h2 id="ics-arsenal-title">専用武装</h2>
+          <span className="ics-heading-plate" data-plate="orb" aria-hidden="true" />
         </header>
         <Articles
           items={ILLUSIONCULUM_SAGA.arsenal}
@@ -656,6 +675,7 @@ export function IllusionculumSaga() {
             06
           </b>
           <h2 id="ics-abilities-title">能力</h2>
+          <span className="ics-heading-plate" data-plate="reactor" aria-hidden="true" />
         </header>
         <Articles items={ILLUSIONCULUM_SAGA.abilities} label="能力" />
       </section>
@@ -678,7 +698,7 @@ export function IllusionculumSaga() {
               <Calls calls={finisher.calls} label={`${finisher.name} 発動音声`} />
               <div className="ics-prose">
                 {finisher.body.map((paragraph, paragraphIndex) => (
-                  <p key={paragraphIndex}>{paragraph}</p>
+                  <p key={paragraphIndex}>{prose(paragraph)}</p>
                 ))}
               </div>
             </article>

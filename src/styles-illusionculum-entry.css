@@ -96,19 +96,70 @@
   animation: ice-under 2400ms ease both;
 }
 
-/* The nanite cells: a grid of small squares in ice, gold and pink inside
-   the armour's silhouette, gathering forward of the body. */
+/* The nanite cells: small chips with gaps, each a dark gunmetal face with
+   a lit edge (ice, gold, pink), packing into the armour's silhouette
+   forward of the body — the plates forming before they are worn. */
 .ice-entry-cells {
   display: block;
   background:
-    repeating-linear-gradient(90deg, rgb(2 3 10 / 85%) 0 2px, transparent 2px 7px),
-    repeating-linear-gradient(0deg, rgb(2 3 10 / 85%) 0 2px, transparent 2px 7px),
-    linear-gradient(180deg, rgb(166 230 255), rgb(233 184 102) 46%, rgb(255 143 210));
+    repeating-linear-gradient(90deg, transparent 0 4px, rgb(2 3 10) 4px 6px),
+    repeating-linear-gradient(0deg, transparent 0 4px, rgb(2 3 10) 4px 6px),
+    repeating-linear-gradient(90deg, rgb(166 230 255 / 55%) 0 1px, transparent 1px 6px),
+    repeating-linear-gradient(0deg, rgb(233 184 102 / 45%) 0 1px, transparent 1px 6px),
+    linear-gradient(180deg, #1b2236, #2a2418 50%, #2b1a2a);
   mask: var(--ice-cutout) 50% 0 / contain no-repeat;
   -webkit-mask: var(--ice-cutout) 50% 0 / contain no-repeat;
   opacity: 0;
   transform-origin: 50% 40%;
   animation: ice-cells 1500ms cubic-bezier(0.2, 0.7, 0.1, 1) 0ms both;
+}
+
+/* The chips streaming in to the forming plates. */
+.ice-entry-chips {
+  position: absolute;
+  inset: 0;
+  transform: translateY(-7%) scale(1.14);
+  transform-origin: 50% 40%;
+}
+
+.ice-entry-chips > i {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: 7px;
+  height: 7px;
+  background: #20283a;
+  box-shadow: inset 0 0 0 1px rgb(166 230 255 / 90%);
+  opacity: 0;
+  animation: ice-chip 900ms cubic-bezier(0.2, 0.7, 0.1, 1) var(--d) both;
+}
+
+.ice-entry-chips > i[data-tone="1"] {
+  box-shadow: inset 0 0 0 1px rgb(233 184 102 / 90%);
+}
+
+.ice-entry-chips > i[data-tone="2"] {
+  box-shadow: inset 0 0 0 1px rgb(255 143 210 / 90%);
+}
+
+@keyframes ice-chip {
+  0% {
+    opacity: 0;
+    translate: var(--fx) var(--fy);
+    rotate: 140deg;
+  }
+  30% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+    translate: 0 0;
+    rotate: 0deg;
+  }
+  100% {
+    opacity: 0;
+    translate: 0 0;
+  }
 }
 
 .ice-entry-real {
@@ -219,11 +270,11 @@
 /* The cells gather into the armour forward of the body (larger, higher). */
 @keyframes ice-cells {
   0% {
-    opacity: 0.45;
+    opacity: 0.5;
     transform: translateY(-7%) scale(1.14);
   }
   55% {
-    opacity: 0.7;
+    opacity: 0.95;
     transform: translateY(-7%) scale(1.14);
   }
   80% {
@@ -335,6 +386,7 @@
 
 @media (forced-colors: active) {
   .ice-entry-cells,
+  .ice-entry-chips,
   .ice-entry-core {
     display: none;
   }

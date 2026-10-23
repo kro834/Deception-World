@@ -35,6 +35,9 @@ const KNOWN_BYTES: Record<string, number> = {
   "/final-stage-logo.webp": 106600,
   [FAR_FROM_SAGA_KEY_VISUAL.src]: 475884,
   [ILLUSIONCULUM_HERO.src]: 315494,
+  "/illusionculum-suit-20261023/undersuit.webp": 45110,
+  "/illusionculum-saga-20261023/orb-left-standard-256.webp": 19416,
+  "/illusionculum-saga-20261023/orb-right-standard-256.webp": 19212,
   [META_UNITAS_KEY_VISUAL.src]: 323252,
 };
 
@@ -57,7 +60,14 @@ export const FINAL_STAGE_ENTER_ASSETS = ["/final-stage-logo.webp"] as const;
 
 export const FAR_FROM_SAGA_ENTER_ASSETS = [FAR_FROM_SAGA_KEY_VISUAL.src] as const;
 
-export const ILLUSIONCULUM_SAGA_ENTER_ASSETS = [ILLUSIONCULUM_HERO.src] as const;
+// The hero's figure, and the entry transformation's other art (the bare
+// undersuit the armour locks onto, the two orbs), so its first play is not late.
+export const ILLUSIONCULUM_SAGA_ENTER_ASSETS = [
+  ILLUSIONCULUM_HERO.src,
+  "/illusionculum-suit-20261023/undersuit.webp",
+  "/illusionculum-saga-20261023/orb-left-standard-256.webp",
+  "/illusionculum-saga-20261023/orb-right-standard-256.webp",
+] as const;
 // META UNITAS SAGA (2026-10-23): its key visual, ミドル (meta-unitas-saga-artwork.ts).
 export const META_UNITAS_SAGA_ENTER_ASSETS = [META_UNITAS_KEY_VISUAL.src] as const;
 

@@ -17,7 +17,41 @@ export function phrase(text: string): ReactNode {
   return parts.map((part, index) => (
     <Fragment key={index}>
       {index > 0 ? <wbr /> : null}
-      {part}
+      {/* An opening bracket stays with what follows it (WebKit broke after 『). */}
+      {/^[『「（《]./u.test(part) ? (
+        <>
+          <span className="ics-nb">{part.slice(0, 2)}</span>
+          {part.slice(2)}
+        </>
+      ) : (
+        part
+      )}
+    </Fragment>
+  ));
+}
+
+/** The owner's prose with <wbr> at its phrase seams, for keep-all (WebKit has
+ * no auto-phrase and otherwise splits 「関係／性」): after a run of kana that
+ * closes a phrase (a particle, an ending) before a new word, after 、。and a
+ * closing bracket, and before an opening one. The words are unchanged. */
+const PROSE_SEAM =
+  /(?<=[\p{Script=Hiragana}])(?=[\p{Script=Han}\p{Script=Katakana}A-Za-z0-9『「（《])|(?<=[、。])(?=[^、。』」）》])|(?<=[』」）》])(?=[^\p{Script=Hiragana}、。』」）》])/gu;
+
+export function prose(text: string): ReactNode {
+  const parts = text.split(PROSE_SEAM);
+  if (parts.length < 2) return text;
+  return parts.map((part, index) => (
+    <Fragment key={index}>
+      {index > 0 ? <wbr /> : null}
+      {/* An opening bracket stays with what follows it (WebKit broke after 『). */}
+      {/^[『「（《]./u.test(part) ? (
+        <>
+          <span className="ics-nb">{part.slice(0, 2)}</span>
+          {part.slice(2)}
+        </>
+      ) : (
+        part
+      )}
     </Fragment>
   ));
 }

@@ -21,6 +21,27 @@ import { ILLUSIONCULUM_ENTRY_UNDERSUIT as REXONANCE_SUIT_UNDERSUIT } from "@/lib
    warms as the link's asset, so the cover never waits on a picture. Runs
    once: no loop, no flash (the reactor's light is a small, slow glow). */
 
+/** The nanite chips that stream in to form the plates: where each lands on
+ * the armour's (raised) place, where it comes from, its tone and its delay —
+ * a fixed, hashed spread, so every play is the same. */
+const CHIPS = Array.from({ length: 36 }, (_, i) => {
+  const h = (n: number) => {
+    const v = Math.sin((i + 1) * 12.9898 + n * 78.233) * 43758.5453;
+    return v - Math.floor(v);
+  };
+  const x = 28 + h(1) * 44;
+  const y = 8 + h(2) * 80;
+  const angle = h(3) * Math.PI * 2;
+  return [
+    Math.round(x * 10) / 10,
+    Math.round(y * 10) / 10,
+    Math.round(Math.cos(angle) * 60),
+    Math.round(Math.sin(angle) * 60),
+    i % 3,
+    Math.round(h(4) * 700),
+  ] as const;
+});
+
 const seat = (side: "left" | "right") => {
   const orb = ILLUSIONCULUM_ORBS[side];
   return {
@@ -50,6 +71,21 @@ export function IllusionculumEntrySequence({ phase }: { phase: "covering" | "rev
           />
           {/* The armour generated from nanite cells away from the body
               (forward and above), then flown in and locked on. */}
+          <span className="ice-entry-chips">
+            {CHIPS.map(([x, y, fx, fy, tone, delay], index) => (
+              <i
+                key={index}
+                style={{
+                  ["--x" as string]: `${x}%`,
+                  ["--y" as string]: `${y}%`,
+                  ["--fx" as string]: `${fx}vmax`,
+                  ["--fy" as string]: `${fy}vmax`,
+                  ["--d" as string]: `${delay}ms`,
+                }}
+                data-tone={tone}
+              />
+            ))}
+          </span>
           <span
             className="ice-entry-cells"
             style={{ ["--ice-cutout" as string]: `url("${ILLUSIONCULUM_ENTRY_FIGURE}")` }}

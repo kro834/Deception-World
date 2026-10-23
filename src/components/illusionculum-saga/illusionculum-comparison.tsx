@@ -1,5 +1,5 @@
 import { ILLUSIONCULUM_COMPARISON, type IcPassage } from "./illusionculum-data";
-import { phrase } from "./illusionculum-phrase";
+import { phrase, prose } from "./illusionculum-phrase";
 
 /* ILLUSIONCULUM SAGA — #comparison, the owner's 究極形態総合性能比較 for this
    form (2026-10-23): the two tables, then the four passages (性能評価, 支援・
@@ -96,7 +96,7 @@ function ComparisonTable({
       </div>
       {table.note.map((note) => (
         <p key={note} className="ics-note">
-          {note}
+          {prose(note)}
         </p>
       ))}
     </div>
@@ -128,7 +128,7 @@ export function IllusionculumComparison() {
           <article key={section.title} className="ics-evaluation rxs-reveal">
             <h3>{phrase(section.title)}</h3>
             {section.body.map((passage, index) => (
-              <p key={index}>{text(passage)}</p>
+              <p key={index}>{prose(text(passage))}</p>
             ))}
           </article>
         ))}
