@@ -150,7 +150,8 @@ test("the five stage illustrations are one versioned, budgeted WebP set in the d
 });
 
 test("the stage rail is the liquid rail with five 44px tabs, and the page keeps the owner's rules", () => {
-  assert.match(component, /className="rxs-stage-tabs liquid-swipe-tabs ffs-stage-tabs"/);
+  // Owner (2026-10-24): one form-slider shape (src/components/special/form-slider.tsx).
+  assert.match(component, /<FormSlider[\s\S]*?className="ffs-stage-tabs"/);
   assert.match(component, /initRail\(rail\)/);
   assert.match(component, /railselect/);
   assert.match(component, /タップ・長押し・左右スライド・矢印キーで切り替え/);
@@ -760,11 +761,11 @@ test("ウルトラ is one of #suitup's forms: the selector after the runway pick
     assert.doesNotMatch(source, /<p>0\d \/ [A-Z]/);
   // The selector comes right after the runway, as a tablist over the five forms.
   const runwayAt = suitupSource.indexOf('id="far-from-assembly-runway"');
-  const selectorAt = suitupSource.indexOf('role="tablist"');
+  const selectorAt = suitupSource.indexOf("<FormSlider");
   assert.ok(runwayAt > 0 && selectorAt > runwayAt, "the selector follows the runway");
   assert.match(suitupSource, /FAR_FROM_ASSEMBLY_FORMS\.map\(\(key\) => \(/);
-  assert.match(suitupSource, /aria-selected=\{stage === key\}/);
-  assert.match(suitupSource, /tabIndex=\{stage === key \? 0 : -1\}/);
+  assert.match(suitupSource, /value=\{stage\}/);
+  assert.match(readFileSync(new URL("../src/components/special/form-slider.tsx", import.meta.url), "utf8"), /tabIndex=\{value === key \? 0 : -1\}/);
   assert.match(suitupSource, /data-form=\{farFromRunwayForm\(stage\)\}/);
   // The old segment's words, moved verbatim into ウルトラ's ending.
   assert.ok(
@@ -1756,14 +1757,15 @@ test("the five forms are named in katakana only wherever the page's own labels n
       source,
       /stages\[key\]\.code|activeStage\.code|form\.code|ultra\.code|max\.code/,
     );
-  assert.match(component, /<span>\{FAR_FROM_SAGA\.stages\[key\]\.label\}<\/span>\n\s*<\/button>/);
+  // Owner (2026-10-24): one form-slider shape (src/components/special/form-slider.tsx).
+  assert.match(component, /label: FAR_FROM_SAGA\.stages\[key\]\.label,/);
   assert.match(
     component,
     /<i className="ffs-form-code" aria-hidden="true">\s*\{activeStage\.label\}/,
   );
   // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）: the key visual's slate (ミドル / STANDARD) went.
   assert.doesNotMatch(editorial, /STANDARD/);
-  assert.match(suitupSource, /<span>\{FAR_FROM_SAGA\.stages\[key\]\.label\}<\/span>\n\s*<\/button>/);
+  assert.match(suitupSource, /label: FAR_FROM_SAGA\.stages\[key\]\.label,/);
   assert.match(ultraArt, /\{ phase: "max", step: "01", label: "マックス" \}/);
   // /final-stage's Far From selector (its tabs and the panel) prints the katakana only.
   const finalStage = read("src/components/final-stage/final-stage.tsx");

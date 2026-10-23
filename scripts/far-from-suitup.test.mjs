@@ -665,8 +665,9 @@ test("budgets and the touch tier are the engine's; the markup is the Rexonance r
     'src={FAR_FROM_SUIT_UNDERSUIT}',
     'src={FAR_FROM_SUIT_DRIVER_STANDIN}',
     "<b>{form.label}</b>",
-    'role="tablist"',
-    "aria-selected={stage === key}",
+    // Owner (2026-10-24): the selector is the shared FormSlider.
+    "<FormSlider",
+    "onSelect={onChoose}",
     'role="tabpanel"',
     "initRail(rail)",
     "FAR_FROM_ASSEMBLY_PARTS.map((part)",
