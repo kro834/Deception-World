@@ -52,7 +52,7 @@ function rotatingPage({ movieState = null } = {}) {
       disconnect() {}
     },
   };
-  for (const [key, value] of Object.entries(stubs)) {
+  for (const key of Object.keys(stubs)) {
     saved[key] = Object.getOwnPropertyDescriptor(globalThis, key);
     Object.defineProperty(globalThis, key, {
       configurable: true,
