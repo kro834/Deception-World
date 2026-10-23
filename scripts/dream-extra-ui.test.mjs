@@ -185,7 +185,8 @@ test("folds are native details with a 48px summary, a drawn cell, the fuji ring 
     extra,
     /<details\s+className="dream-archive-fold"\s+id=\{`dream-chronicle-case-\$\{episode.no\}`\}\s+open=\{index === 0\}\s*>/,
   );
-  assert.match(extra, /<details key=\{group\.group\} className="dream-archive-fold">/);
+  assert.match(extra, /id=\{`dream-arsenal-group-\$\{groupIndex \+ 1\}`\}/);
+  assert.match(extra, /id=\{`dream-relations-circle-\$\{index \+ 1\}`\}/);
   // ADDITIONAL AGENTS and INDEX are closed leaf folds (twelve rows / fifteen entries would
   // make the phone ledger and the dictionary a third longer again).
   assert.equal(extra.match(/<details className="dream-archive-fold is-leaf">/g)?.length, 2);
@@ -245,11 +246,15 @@ test("the corners mount as annexes between 章の言葉 and 用語集; VOICES is
   assert.doesNotMatch(extra, /id="voices"/);
   const quotes = slice(page, '<section id="quotes"', "<footer");
   assert.match(quotes, /<\/ol>\s*<VoicesLeaf \/>\s*<\/section>/);
-  // Pure render: no effects, handlers, images or dialogs in the archive.
+  // The two local indexes may filter and open native folds; the archive does not
+  // install global effects, intercept native navigation or use overlay media.
   assert.doesNotMatch(
     extra,
-    /<img|<dialog|onPointer|onTouch|onClick|preventDefault|acquireViewportScrollLock|useEffect|useState|useRef/,
+    /<img|<dialog|onPointer|onTouch|preventDefault|acquireViewportScrollLock|useEffect|useRef/,
   );
+  assert.match(extra, /href=\{`#dream-atlas-\$\{index \+ 1\}`\}/);
+  assert.match(extra, /href=\{`#dream-relations-circle-\$\{index \+ 1\}`\}/);
+  assert.match(extra, /href=\{`#dream-arsenal-group-\$\{index \+ 1\}`\}/);
   assert.ok(
     !extra.includes(String.fromCharCode(0x3000)),
     "no ideographic space in the archive markup",
