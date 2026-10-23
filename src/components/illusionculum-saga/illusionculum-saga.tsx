@@ -215,6 +215,31 @@ export function IllusionculumSaga() {
 
   useEffect(() => mountLocalNavCurrent(pageRef.current?.querySelector(".rxs-local-nav nav")), []);
 
+  // The page's top reserve follows the bar's real height (text enlargement,
+  // a wrapped brand), as on the Rexonance and Final Stage pages.
+  useEffect(() => {
+    const page = pageRef.current;
+    const nav = page?.querySelector<HTMLElement>(".rxs-local-nav");
+    if (!page || !nav) return;
+    const syncNavReserve = () => {
+      const reserve = `${Math.ceil(nav.getBoundingClientRect().height)}px`;
+      if (page.style.getPropertyValue("--rxs-local-nav-reserve") !== reserve)
+        page.style.setProperty("--rxs-local-nav-reserve", reserve);
+    };
+    const observer =
+      typeof ResizeObserver === "undefined" ? null : new ResizeObserver(syncNavReserve);
+    observer?.observe(nav);
+    window.addEventListener("resize", syncNavReserve, { passive: true });
+    window.visualViewport?.addEventListener("resize", syncNavReserve, { passive: true });
+    syncNavReserve();
+    return () => {
+      observer?.disconnect();
+      window.removeEventListener("resize", syncNavReserve);
+      window.visualViewport?.removeEventListener("resize", syncNavReserve);
+      page.style.removeProperty("--rxs-local-nav-reserve");
+    };
+  }, []);
+
   // The other forms' pictures, decoded in idle time once #forms is near.
   useEffect(() => {
     const target = document.getElementById("forms");
