@@ -66,8 +66,10 @@ export function LejasPage() {
         <div className="manager-grid" />
         <div className="manager-glow" />
       </div>
+      {/* A file shows no file line in its top bar (2026-10-23, the dossier
+          sheets); the label names the brand link's way back. */}
       <DossierTopbar
-        fileLabel="MANAGER ARCHIVE / IV"
+        fileLabel="レジャスの資料"
         returnHash="manager-archive"
         returnLabel="六詠一覧へ戻る"
       />
@@ -111,34 +113,43 @@ export function LejasPage() {
             />
             <i className="dossier-arrive-scan" aria-hidden="true" />
             <div className="manager-portrait-shade" aria-hidden="true" />
-            <span className="manager-numeral" aria-hidden="true">
-              IV
-            </span>
-            <div className="manager-portrait-meta">
-              <span>{closeUp ? "FACE CLOSE-UP" : "VISUAL CONFIRMED"}</span>
-              <b>RIKUEI / IV</b>
-            </div>
             <i className="manager-scanline" aria-hidden="true" />
-            <span className="lejas-tap-hint">
-              {closeUp ? "タップで引きショット" : "タップで顔アップ"}
+            {/* The other shot, small in the plate's corner: the picture says
+                a press changes the shot (2026-10-23: no タップで… hint). The
+                button keeps its name and its pressed state. */}
+            <span className="lejas-shot-inset" aria-hidden="true">
+              <img
+                className="lejas-shot-face"
+                src="/manager-lejas-portrait-thumb-480.webp"
+                alt=""
+                width={480}
+                height={599}
+                loading="lazy"
+                decoding="async"
+              />
+              <img
+                className="lejas-shot-wide"
+                src="/manager-lejas-240.webp"
+                alt=""
+                width={240}
+                height={300}
+                loading="lazy"
+                decoding="async"
+              />
             </span>
           </button>
         </div>
         <div className="manager-introduction">
           <header className="dossier-identity">
-            <p className="manager-eyebrow">
-              <span>TOP-LEVEL MANAGER / BOARD / CHOICE</span>
-              <i />
-            </p>
-            <p className="manager-file-number">ARCHIVE ACCESS // IV</p>
+            {/* The file's numeral in outline over the name, as on the end
+                card (decorative). */}
+            <span className="dossier-file-numeral" data-numerals="roman" aria-hidden="true">
+              IV
+            </span>
             <h1>
-              <small>RIKUEI IV</small>
               <span className="manager-display-name">レジャス</span>
             </h1>
             <p className="manager-title"># 真実だけで破滅を組み上げる盤面の管理人</p>
-            <a className="dossier-read-link" href="#dossier-index">
-              人物資料を読む <span aria-hidden="true">↓</span>
-            </a>
           </header>
           <div className="manager-quotes" aria-label="レジャスの台詞">
             <q>私は一度も嘘を吐いていない</q>
@@ -171,19 +182,11 @@ export function LejasPage() {
               <dd>六詠・第四位</dd>
             </div>
           </dl>
-          <div className="manager-scroll-cue">
-            <span>SCROLL / DOSSIER CONTINUES</span>
-            <i />
-          </div>
         </div>
       </section>
 
       <DossierReader name="レジャス" forms />
       <section className="manager-dossier" id="dossier-index" aria-label="レジャスの人物資料">
-        <div className="manager-section-index">
-          <span>IV</span>
-          <small>CHARACTER DOSSIER</small>
-        </div>
         <DossierContents
           sections={[
             {

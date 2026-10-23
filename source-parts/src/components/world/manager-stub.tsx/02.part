@@ -168,8 +168,10 @@ function ManagerDossier({ profile }: { profile: Profile }) {
           </div>
         ) : null}
       </div>
+      {/* A file shows no file line in its top bar (2026-10-23, the dossier
+          sheets); the label names the brand link's way back. */}
       <DossierTopbar
-        fileLabel={`MANAGER ARCHIVE / ${profile.numeral}`}
+        fileLabel={`${profile.name}の資料`}
         returnHash="manager-archive"
         returnLabel="六詠一覧へ戻る"
       />
@@ -193,26 +195,33 @@ function ManagerDossier({ profile }: { profile: Profile }) {
             ) : null}
             {profile.sovereign ? (
               <div className="sovereign-apex-seal" role="img" aria-label="六詠第一位、主権の管理人">
-                <small>SOVEREIGNTY</small>
                 <strong>I</strong>
-                <span>RIKUEI // PRIMARY</span>
               </div>
             ) : null}
             {profile.sovereign ? null : <i className="dossier-arrive-scan" aria-hidden="true" />}
-            <span className="manager-numeral">{profile.numeral}</span>
           </div>
         </div>
         <div className="manager-introduction">
           {profile.sovereign ? (
             <p className="sovereign-dominance">
-              <span>AUTHORITY TRACE</span>
+              {/* The lit diamond and the prism rule before 主権 (drawn). */}
+              <span aria-hidden="true" />
               <b>主権</b>
             </p>
           ) : null}
           <header className="dossier-identity">
-            <p className="manager-file-number">ARCHIVE ACCESS // {profile.numeral}</p>
+            {/* The file's numeral in outline over the name, as on the end
+                card; the first rank's is its seal (decorative). */}
+            {profile.sovereign ? null : (
+              <span
+                className="dossier-file-numeral"
+                data-numerals="roman"
+                aria-hidden="true"
+              >
+                {profile.numeral}
+              </span>
+            )}
             <h1>
-              <small>RIKUEI {profile.numeral}</small>
               <span
                 className="manager-display-name"
                 style={{ ["--name-len" as string]: [...profile.name].length }}
@@ -221,9 +230,6 @@ function ManagerDossier({ profile }: { profile: Profile }) {
               </span>
             </h1>
             <p className="manager-title"># {profile.title}</p>
-            <a className="dossier-read-link" href="#dossier-index">
-              人物資料を読む <span aria-hidden="true">↓</span>
-            </a>
           </header>
           {profile.sovereign ? (
             <section className="sovereign-status" aria-label="六詠第一位・主権の管理人">
@@ -232,9 +238,7 @@ function ManagerDossier({ profile }: { profile: Profile }) {
                 <span>I</span>
               </div>
               <div className="sovereign-status-copy">
-                <small>AUTHORITY PROTOCOL // RANK I</small>
                 <strong>第一位</strong>
-                <p>SOVEREIGNTY CONFIRMED</p>
               </div>
               <div className="sovereign-scale" aria-hidden="true">
                 <span>
@@ -287,10 +291,6 @@ function ManagerDossier({ profile }: { profile: Profile }) {
         id="dossier-index"
         aria-label={`${profile.name}の人物資料`}
       >
-        <div className="manager-section-index">
-          <span>{profile.numeral}</span>
-          <small>CHARACTER DOSSIER</small>
-        </div>
         <DossierContents sections={profile.sections} />
         <div className="manager-sections">
           {profile.sections.map((s) => (

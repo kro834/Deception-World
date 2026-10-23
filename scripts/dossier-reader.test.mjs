@@ -63,7 +63,9 @@ test("the bespoke Lejas dossier offers the same reading anchors as other manager
   for (const id of ["dossier-profile", "dossier-index", "form-records"]) {
     assert.equal(lejas.split(`id="${id}"`).length - 1, 1, `unique target: ${id}`);
   }
-  assert.match(lejas, /className="dossier-read-link" href="#dossier-index"/);
+  // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）
+  // No 人物資料を読む link in the hero: the ruler's 人物資料 is the same jump.
+  assert.doesNotMatch(lejas, /dossier-read-link/);
   assert.match(lejas, /<DossierContents/);
   assert.match(lejas, /<header className="dossier-identity">[\s\S]*?<h1>/);
   assert.doesNotMatch(lejas, /className="manager-section-nav"/);

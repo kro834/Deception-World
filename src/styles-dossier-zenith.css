@@ -2396,3 +2396,139 @@ html[data-family="dossier"]
   > h2:first-child {
   margin-top: 0;
 }
+
+/* レジャス: his portrait is a button that cuts between the full figure
+   and the close-up. The other shot sits small in the plate's corner, so
+   the picture says what a press does (the button keeps its name and its
+   pressed state). */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #dossier-profile
+  button.manager-portrait-frame
+  > .lejas-shot-inset {
+  position: absolute;
+  z-index: 5;
+  top: 16px;
+  right: 16px;
+  display: block;
+  width: clamp(64px, 17vw, 96px);
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--sd-accent) 58%, transparent);
+  border-radius: 3px;
+  background: #04070d;
+  box-shadow:
+    0 10px 28px rgb(0 0 0 / 46%),
+    inset 0 0 0 1px rgb(255 255 255 / 6%);
+  pointer-events: none;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #dossier-profile
+  button.manager-portrait-frame
+  > .lejas-shot-inset
+  > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: cover;
+  object-position: 50% 10%;
+  opacity: 1;
+  filter: none;
+  transform: none;
+  clip-path: none;
+  -webkit-mask-image: none;
+  mask-image: none;
+  animation: none;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #dossier-profile
+  button.manager-portrait-frame
+  > .lejas-shot-inset
+  > .lejas-shot-wide,
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #dossier-profile
+  button.manager-portrait-frame.is-closeup
+  > .lejas-shot-inset
+  > .lejas-shot-face {
+  opacity: 0;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #dossier-profile
+  button.manager-portrait-frame.is-closeup
+  > .lejas-shot-inset
+  > .lejas-shot-wide {
+  opacity: 1;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    #dossier-profile
+    button.manager-portrait-frame:hover
+    > .lejas-shot-inset {
+    border-color: var(--sd-accent);
+  }
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #dossier-profile
+  button.manager-portrait-frame:focus-visible
+  > .lejas-shot-inset {
+  border-color: var(--sd-accent);
+}
+
+@supports (grid-template-rows: subgrid) {
+  @media (min-width: 1100px) and (min-height: 540px),
+    (min-width: 900px) and (min-height: 600px) and (orientation: landscape) {
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      #dossier-profile
+      button.manager-portrait-frame
+      > .lejas-shot-inset {
+      top: 24px;
+      right: 24px;
+      width: clamp(80px, 7vw, 112px);
+    }
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    #dossier-profile
+    button.manager-portrait-frame
+    > .lejas-shot-inset {
+    border-color: CanvasText;
+  }
+}
+
+/* The first rank's plate: its light covers the whole plate, as on every
+   file. An old corner rule (styles-world/20.css) held the light to a 72px
+   square at the top left, which read as an empty tag once the numeral
+   chip left it. */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page.is-sovereign
+  #dossier-profile
+  .manager-portrait-frame::after {
+  width: auto;
+  height: auto;
+}
+
+/* Its status plate stands clear of the epithet (the read link used to
+   hold that space). */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page.is-sovereign
+  #dossier-profile
+  .sovereign-status {
+  margin-top: clamp(24px, 5vw, 32px);
+}
