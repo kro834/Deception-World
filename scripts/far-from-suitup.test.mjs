@@ -111,7 +111,7 @@ test("the suit is the owner's whole cutout frame at the engine's figure height, 
   const caps = {
     "figure.webp": 200_000,
     "undersuit.webp": 60_000,
-    "driver-standin.webp": 60_000,
+    "driver-standin.webp": 36_000,
     "plates.webp": 300_000,
     "gold.webp": 160_000,
     "guide.webp": 150_000,

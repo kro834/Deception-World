@@ -27,7 +27,11 @@
 // (public/rexonance-suit-20261016/undersuit-20261021.webp), composited into
 // this frame so its soles and its reactor socket sit where ミドル's soles and
 // chest core are; the エクスサーガドライバー (the belt plates) is on the body
-// from the start, baked into driver-standin.webp like Rexonance's.
+// from the start, baked into driver-standin.webp like Rexonance's. The driver
+// is cut by its own traced outline (scripts/far-from-belt-outline.mjs, feathered
+// half a pixel, claimed before any other piece), its soft-edge colours are the
+// belt's own (no dark or light fringe), and its five plates overlap across
+// their cuts so no hairline opens between them.
 //
 // For the nanite engine (src/lib/rexonance-assembly-nanites.js) the script
 // also derives what scripts/build-rexonance-nanites.mjs derives for
@@ -50,6 +54,8 @@ const { REXONANCE_SUIT_MARKS, REXONANCE_SUIT_UNDERSUIT } = await importTs("src/l
 const { separateDriverPixels } = await import(
   pathToFileURL(join(ROOT, "src/lib/rexonance-unlit.js")).href
 );
+
+const { BELT_OUTLINE } = await import(pathToFileURL(join(ROOT, "scripts/far-from-belt-outline.mjs")).href);
 
 const VERSION = "20261022";
 const DESIGN = join(ROOT, `design/far-from-suit-${VERSION}`);
@@ -617,6 +623,8 @@ const SPLITS = {
 /** The driver's plates: on the body, finished, from the start (as the
  * owner's rule for Rexonance's; the same wearer, the same driver's place). */
 const DRIVER = ["belt-l2", "belt-r2", "belt-l1", "belt-r1", "belt-jewel"];
+/** How far (cutout px) each driver plate reaches past its cuts. */
+const BELT_OVERLAP = 5;
 const ORNAMENT_GROUPS = new Set(["tail", "ribbon", "bits"]);
 
 // --- The source ----------------------------------------------------------------
@@ -640,10 +648,15 @@ for (let i = 0; i < N; i += 1) {
 }
 
 const svgPath = (points) => `M${points.map(([x, y]) => `${x} ${y}`).join("L")}Z`;
-async function rasterise(polys, grow = 0, blur = 0) {
-  const d = polys.map(svgPath).join("");
+async function rasterise(polys, grow = 0, blur = 0, union = false) {
   const stroke = grow ? ` stroke="#fff" stroke-width="${grow * 2}" stroke-linejoin="round"` : "";
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}"><rect width="${W}" height="${H}" fill="#000"/><path d="${d}" fill="#fff"${stroke}/></svg>`;
+  // One path (the pieces' own polygons) or, for a union of shapes that overlap
+  // and wind either way, one path each: in a single path opposite windings
+  // cancel where they overlap and leave a hole.
+  const shapes = union
+    ? polys.map((poly) => `<path d="${svgPath(poly)}" fill="#fff"${stroke}/>`).join("")
+    : `<path d="${polys.map(svgPath).join("")}" fill="#fff"${stroke}/>`;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}"><rect width="${W}" height="${H}" fill="#000"/>${shapes}</svg>`;
   let image = sharp(Buffer.from(svg)).greyscale();
   if (blur) image = image.blur(blur);
   const { data } = await image.raw().toBuffer({ resolveWithObject: true });
@@ -898,10 +911,35 @@ for (let i = 0; i < N; i += 1) {
 
 // --- Partition -----------------------------------------------------------------------
 const remaining = new Float32Array(N).fill(1);
-const regionFields = [];
+const regionFields = new Array(REGIONS.length);
 const claimed = new Float32Array(N);
-for (const region of REGIONS) {
-  const poly = await rasterise([region.poly]);
+// The driver claims first, by its own outline (BELT_OUTLINE, feathered half a
+// pixel), so no polygon of another piece cuts through the belt and no stray of
+// the armour around it rides on the belt; what the outline leaves goes to the
+// plates it belongs to, below.
+const BELT_INDEX = REGIONS.findIndex((region) => region.id === "belt");
+const beltMask = await rasterise(BELT_OUTLINE, 0, 0.5, true);
+// The driver's colours at its soft edge are the belt's own: a half-covered
+// pixel of the cutout carries the dark glow or the neighbouring armour it was
+// cut from, which reads as a fringe once the belt stands alone. Where the
+// belt is not fully opaque its colour is the opaque belt's nearest colour
+// (a normalised blur of the opaque pixels), so the edge fades in alpha only.
+const beltColours = await (async () => {
+  const solid = Float32Array.from({ length: N }, (_, i) => (beltMask[i] > 0.97 && alpha[i] > 0.97 ? 1 : 0));
+  const weight = await blurField(solid, 1.4);
+  const channels = [];
+  for (let c = 0; c < 3; c += 1)
+    channels.push(await blurField(Float32Array.from({ length: N }, (_, i) => (solid[i] * rgb[i * 3 + c]) / 255), 1.4));
+  const out = Buffer.from(rgb);
+  for (let i = 0; i < N; i += 1) {
+    if (solid[i] || !beltMask[i] || weight[i] < 0.03) continue;
+    for (let c = 0; c < 3; c += 1) out[i * 3 + c] = Math.round(Math.min(255, (channels[c][i] / weight[i]) * 255));
+  }
+  return out;
+})();
+for (const index of [BELT_INDEX, ...REGIONS.keys()].filter((v, k, a) => a.indexOf(v) === k)) {
+  const region = REGIONS[index];
+  const poly = index === BELT_INDEX ? beltMask : await rasterise([region.poly]);
   const field = new Float32Array(N);
   for (let i = 0; i < N; i += 1) {
     const take = poly[i] * remaining[i];
@@ -910,11 +948,12 @@ for (const region of REGIONS) {
     field[i] = take * alpha[i];
     claimed[i] += field[i];
   }
-  regionFields.push(field);
+  regionFields[index] = field;
 }
 // What no polygon reaches: the nearest region's, by its polygon's reach
 // (ornaments reach farther: a wing's strand beside the arm), then by seat.
 for (const [index, region] of REGIONS.entries()) {
+  if (index === BELT_INDEX) continue; // the driver takes only its outline
   const ornament = ORNAMENT_GROUPS.has(region.group);
   const reach = await blurField(await rasterise([region.poly]), ornament ? 24 : 14);
   const field = regionFields[index];
@@ -935,6 +974,7 @@ for (const [index, region] of REGIONS.entries()) {
     let best = 0;
     let nearest = Number.POSITIVE_INFINITY;
     REGIONS.forEach((region, k) => {
+      if (k === BELT_INDEX) return;
       const d = (region.seat[0] - x) ** 2 + (region.seat[1] - y) ** 2;
       if (d < nearest) {
         nearest = d;
@@ -955,6 +995,7 @@ for (const [index, region] of REGIONS.entries()) {
   const splits = SPLITS[region.id];
   if (!splits) throw new Error(`${region.id}: no split`);
   const left = Float32Array.from(regionFields[index]);
+  let lastRight = 0;
   for (const split of splits) {
     const clip = split.clip ? await rasterise([split.clip]) : null;
     const plate = new Float32Array(N);
@@ -963,6 +1004,23 @@ for (const [index, region] of REGIONS.entries()) {
       const take = clip ? left[i] * clip[i] : left[i];
       plate[i] = take;
       left[i] -= take;
+    }
+    if (region.id === "belt") {
+      // The driver's plates overlap across their cuts: a cut that splits an
+      // opaque pixel between two cells leaves a hairline of the undersuit
+      // between them when the cells are composited (and the delivery's
+      // resampling widens it). Each plate carries the belt's opaque pixels
+      // OVERLAP px past its cut on both sides; the soft silhouette stays
+      // with one plate, so it is never doubled.
+      const right = split.clip ? Math.max(...split.clip.map(([x]) => x)) : W;
+      const from = lastRight - BELT_OVERLAP;
+      const to = right + BELT_OVERLAP;
+      lastRight = right;
+      const whole = regionFields[index];
+      for (let i = 0; i < N; i += 1) {
+        const x = i % W;
+        if (x >= from && x < to && !plate[i] && whole[i] > 0.985) plate[i] = whole[i];
+      }
     }
     plates.push({ ...split, region: region.id, field: plate });
   }
@@ -1076,7 +1134,7 @@ for (const plate of plates) {
     continue;
   }
   const box = deliveryBox(found, Math.ceil(MARGIN / SCALE) + 1);
-  const colours = plate.region === "helmet" ? unlit : rgb;
+  const colours = plate.region === "helmet" ? unlit : plate.region === "belt" ? beltColours : rgb;
   const art = extractRaw(await toDelivery(rgba(plate.field, colours)), box);
   const { width: w, height: h } = box;
   const gold = extractRaw(
@@ -1187,11 +1245,16 @@ const GOLD_ATLAS = await writeWebp("gold.webp", goldAtlasRaw, ATLAS_W, ATLAS_H, 
         const s = (y * piece.w + x) * 4;
         const a = cell.art[s + 3];
         if (!a) continue;
+        // Source-over, as the engine lays the same cells on its driver sheet.
         const d = ((piece.y + y) * FIG_W + piece.x + x) * 4;
-        driverRaw[d] = cell.art[s];
-        driverRaw[d + 1] = cell.art[s + 1];
-        driverRaw[d + 2] = cell.art[s + 2];
-        driverRaw[d + 3] = a;
+        const below = driverRaw[d + 3] / 255;
+        const over = a / 255;
+        const total = over + below * (1 - over);
+        for (let c = 0; c < 3; c += 1)
+          driverRaw[d + c] = Math.round(
+            (cell.art[s + c] * over + driverRaw[d + c] * below * (1 - over)) / total,
+          );
+        driverRaw[d + 3] = Math.round(total * 255);
       }
   }
   separateDriverPixels(driverRaw);
