@@ -221,7 +221,12 @@ test("the library page puts the hub before the guides and offers export and a co
   const hub = read("src/components/library/library-hub.tsx");
   assert.match(hub, /書き出す（JSON）/);
   assert.match(hub, /本当に消去する/);
-  assert.match(hub, /clearLibraryAll\(\);\s*clearRecentSearches\(\);/);
+  assert.match(
+    hub,
+    /const libraryCleared = kind === "all" \? clearLibraryAll\(\) : clearLibraryBookmarks\(\);/,
+  );
+  assert.match(hub, /const searchesCleared = clearRecentSearches\(\);/);
+  assert.match(hub, /libraryCleared && searchesCleared/);
 });
 
 test("keys typed while the overlay first loads are kept and seeded into the field", () => {
