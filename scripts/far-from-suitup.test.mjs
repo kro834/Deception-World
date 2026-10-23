@@ -625,7 +625,7 @@ test("budgets and the touch tier are the engine's; the markup is the Rexonance r
     'src={FAR_FROM_SUIT_FORMS.max}',
     'src={FAR_FROM_SUIT_UNDERSUIT}',
     'src={FAR_FROM_SUIT_DRIVER_STANDIN}',
-    "{FAR_FROM_SAGA.stages.max.code}",
+    "{FAR_FROM_SAGA.stages.max.label}",
     "FAR_FROM_ASSEMBLY_PARTS.map((part)",
     "FAR_FROM_ASSEMBLY_PHASES.map(",
     'role="status" aria-live="polite"',

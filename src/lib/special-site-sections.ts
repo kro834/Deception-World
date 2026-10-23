@@ -47,7 +47,7 @@ export const SPECIAL_SITE_SECTIONS: Record<SpecialSiteId, readonly SpecialSiteSe
     ["report-saga", "究極形態の比較資料", "REPORT 02"],
     ["p16", "P16", "PROCESSOR"],
     ["suitup", "変身シークエンス", "SUIT-UP"],
-    ["ultra", "ウルトラ", "ULTRA"],
+    ["ultra", "ウルトラ", "SEQUENCE"],
     ["stages", "形態", "5 STAGES"],
     ["theories", "中核機構", "MECHANISM"],
     ["system", "装甲・OS", "ARMOR & OS"],

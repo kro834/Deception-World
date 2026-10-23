@@ -32,7 +32,7 @@ export function FarFromUltra() {
   return (
     <section id="ultra" className="rxs-section ffs-ultra" aria-labelledby="ffs-ultra-title">
       <header className="rxs-section-heading rxs-reveal">
-        <p>06 / ULTRA</p>
+        <p>06 / SEQUENCE</p>
         <h2 id="ffs-ultra-title">ウルトラ</h2>
         <span>
           マックスから移行する、60秒間の最上位形態。全身が白に染まった後、ウルトラ専用のナノマシンが追加機構を生成し、腕の外側などに補助インターフェースが展開します。
@@ -79,7 +79,7 @@ export function FarFromUltra() {
           <canvas className="ffu-canvas" width={0} height={0} />
           <div className="ffu-call">
             <p className="ffu-kicker">
-              <span>ULTRA</span>
+              <span>{ultra.label}</span>
               <span>SPECIAL SEQUENCE</span>
             </p>
             <ol className="ffu-phase">
@@ -103,7 +103,7 @@ export function FarFromUltra() {
             </p>
             <p className="ffu-stamp">
               <span>FAR FROM SAGA</span>
-              <b>{ultra.code}</b>
+              <b>{ultra.label}</b>
             </p>
           </div>
         </div>

@@ -27,10 +27,10 @@ html[data-family="special"] body .rxs-page.ffs-page :is(.ffs-suitup, .rzn-suitup
   --dxs-nav: var(--rxs-local-nav-reserve, 62px);
   --dx-text: #f2f7fb;
   --dx-text-2: #bccbd8;
-  --dx-display: "Zen Kaku Gothic New", "Noto Sans JP", sans-serif;
-  --dx-body: "Noto Sans JP", "Zen Kaku Gothic New", sans-serif;
-  --dx-hud: "Michroma", "Oxanium", "Noto Sans JP", sans-serif;
-  --dx-mono: "Oxanium", "Noto Sans JP", sans-serif;
+  --dx-display: var(--fft-display);
+  --dx-body: var(--fft-text);
+  --dx-hud: "Michroma", "Oxanium", var(--fft-jp-display);
+  --dx-mono: var(--fft-mono);
 }
 
 html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup {

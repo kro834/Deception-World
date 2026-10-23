@@ -24,7 +24,7 @@ export const FAR_FROM_CHAPTERS = [
   },
   { href: "#p16", number: "04", code: "P16", label: "演算加速機構", detail: "第16世代演算加速機構" },
   { href: "#suitup", number: "05", code: "SUIT-UP", label: "変身", detail: "スクロールで装着、マックスまで" },
-  { href: "#ultra", number: "06", code: "ULTRA", label: "ウルトラ", detail: "マックスからの移行シークエンス" },
+  { href: "#ultra", number: "06", code: "SEQUENCE", label: "ウルトラ", detail: "マックスからの移行シークエンス" },
   { href: "#stages", number: "07", code: "5 STAGES", label: "形態", detail: FAR_FROM_SAGA.stagesLine },
   { href: "#theories", number: "08", code: "MECHANISM", label: "中核機構", detail: "4つの新規理論・中核機構" },
   { href: "#system", number: "09", code: "ARMOR & OS", label: "装甲・OS", detail: "ファーフロムビットとSA-GA OS 6.1" },
@@ -75,7 +75,9 @@ export function FarFromStageSlate() {
   return (
     <span className="ffs-stage-slate">
       <b>01</b>
-      <span lang="en">MIDDLE / STANDARD</span>
+      <span>
+        ミドル <span lang="en">/ STANDARD</span>
+      </span>
       <small lang="en">KEY VISUAL</small>
     </span>
   );
@@ -172,7 +174,6 @@ export function FarFromFormStatus({ stage }: { stage: FarFromStageKey }) {
       <p>
         <span>選択中の形態</span>
         <strong>{form.label}</strong>
-        <small lang="en">{form.code}</small>
       </p>
     </div>
   );

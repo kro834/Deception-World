@@ -290,7 +290,7 @@ export function FarFromP16() {
       </div>
 
       <aside className="ffs-p16-note rxs-reveal" aria-labelledby="ffs-p16-note-title">
-        <h3 id="ffs-p16-note-title">熱負荷とULTRAの60秒制限</h3>
+        <h3 id="ffs-p16-note-title">熱負荷とウルトラの60秒制限</h3>
         <p>{P16_HEAT_NOTE}</p>
       </aside>
     </>

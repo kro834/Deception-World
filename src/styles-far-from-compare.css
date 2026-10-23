@@ -3,9 +3,11 @@
    (far-from-comparison.tsx, far-from-report.tsx, far-from-p16.tsx)
 
    Imported by styles-far-from-saga.css. Every rule is scoped to
-   .ffs-page. Type follows the Rexonance chapters: Mincho for chapter,
-   document and plate titles (and the documents' opening paragraphs), the
-   page's gothic for reading text, tabular figures for every number.
+   .ffs-page. Type is the page's CYBER system (styles-far-from-saga.css,
+   --fft-*): the forged display (Saira Expanded + M PLUS 1) for
+   chapter, document and plate titles, Michroma for kickers, Saira for the
+   figures and Oxanium for the small data, all tabular; the system gothic
+   for reading text (the documents' opening paragraphs included). No Mincho.
    The chart's four form hues were checked as a set against the console's
    surface (lightness band, colour-blind separation, contrast); identity is
    never colour alone (every bar is named and its value printed).
@@ -15,13 +17,6 @@
    ================================================================ */
 
 .ffs-page {
-  /* Latin and figures come from a sans face with no Japanese glyphs (the
-     Rexonance titles forge theirs the same way), so a P16 or a 6.1 never
-     reads as serif; the Japanese falls through to the Mincho faces. */
-  --ffs-mincho:
-    "Helvetica Neue", "Segoe UI", Roboto, Arial, "Shippori Mincho B1", "Shippori Mincho",
-    "Hiragino Mincho ProN", "Hiragino Mincho Pro", "Yu Mincho", "YuMincho", "Noto Serif JP",
-    "Noto Serif CJK JP", "Source Han Serif JP", "BIZ UDPMincho", serif;
   --ffs-text-2: #d3dbe5;
   --ffs-text-3: #a7b2c0;
   --ffs-line: rgb(255 255 255 / 9%);
@@ -54,7 +49,7 @@
   margin-inline: auto;
 }
 
-/* Mincho titles, cut close (palt), as on the Rexonance chapters. */
+/* Titles in the display gothic, cut close (palt). */
 .ffs-page .ffs-panel-head h3,
 .ffs-page .ffs-report-head h3,
 .ffs-page .ffs-report summary h4,
@@ -65,7 +60,7 @@
 .ffs-page .ffs-p16-note h3 {
   margin: 0;
   color: var(--ffs-text);
-  font-family: var(--ffs-mincho);
+  font-family: var(--fft-display);
   font-weight: 700;
   font-feature-settings: "palt" 1;
   letter-spacing: 0.04em;
@@ -85,10 +80,11 @@
 .ffs-page .ffs-p16-topics header small {
   display: block;
   color: var(--ffs-accent);
-  font-family: var(--rxs-font-display);
+  font-family: var(--fft-etch);
   font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.22em;
+  font-weight: 400;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
 }
 
 /* The 暫定 mark: wherever a provisional figure is printed. */
@@ -336,7 +332,7 @@
 
 .ffs-page .ffs-metric > header strong {
   color: var(--ffs-text);
-  font-family: var(--rxs-font-display);
+  font-family: var(--fft-forge);
   font-size: clamp(22px, 2.2vw, 28px);
   font-weight: 760;
   font-variant-numeric: tabular-nums;
@@ -367,7 +363,7 @@
 
 .ffs-page .ffs-metric-result b {
   color: var(--ffs-accent);
-  font-family: var(--rxs-font-display);
+  font-family: var(--fft-forge);
   font-size: 20px;
   font-weight: 760;
   font-variant-numeric: tabular-nums;
@@ -466,7 +462,7 @@
 
 .ffs-page .ffs-all b {
   color: var(--ffs-text);
-  font-family: var(--rxs-font-display);
+  font-family: var(--fft-mono);
   font-size: 14px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
@@ -536,7 +532,7 @@
 .ffs-page .ffs-text-row dd {
   margin: 0;
   color: var(--ffs-text);
-  font-family: var(--rxs-font-display);
+  font-family: var(--fft-display);
   font-size: 14px;
   font-weight: 700;
   line-height: 1.5;
@@ -662,7 +658,7 @@
 
 .ffs-page .ffs-bench-delta b {
   color: var(--ffs-accent);
-  font-family: var(--rxs-font-display);
+  font-family: var(--fft-forge);
   font-size: 18px;
   font-weight: 760;
   font-variant-numeric: tabular-nums;
@@ -704,7 +700,7 @@
 
 .ffs-page .ffs-bench-rows ul li > b {
   color: var(--ffs-text);
-  font-family: var(--rxs-font-display);
+  font-family: var(--fft-mono);
   font-size: 13px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
@@ -796,10 +792,10 @@
 .ffs-page .ffs-report-sub {
   margin: 0;
   color: var(--ffs-text-3);
-  font-family: var(--rxs-font-display);
+  font-family: var(--fft-etch);
   font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.18em;
+  font-weight: 400;
+  letter-spacing: 0.2em;
   line-height: 1.7;
 }
 
@@ -810,7 +806,7 @@
   letter-spacing: 0.08em;
 }
 
-/* The opening paragraphs: the document's lede, in Mincho text. */
+/* The opening paragraphs: the document's lede, in the reading gothic. */
 .ffs-page .ffs-report-intro {
   max-width: 44em;
   padding-top: clamp(20px, 3vw, 28px);
@@ -819,7 +815,7 @@
 .ffs-page .ffs-report-intro p {
   margin: 0 0 1.2em;
   color: var(--ffs-text);
-  font-family: var(--ffs-mincho);
+  font-family: var(--fft-text);
   font-size: clamp(15px, 1.2vw + 10px, 17px);
   font-weight: 500;
   letter-spacing: 0.04em;
@@ -901,7 +897,7 @@
 
 .ffs-page .ffs-report summary > span {
   color: var(--ffs-accent);
-  font-family: var(--rxs-font-display);
+  font-family: var(--fft-forge);
   font-size: 12px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
@@ -1019,7 +1015,7 @@
 
 .ffs-page .ffs-report-table td {
   color: var(--ffs-text-2);
-  font-family: var(--rxs-font-display);
+  font-family: var(--fft-mono);
   font-weight: 600;
 }
 
@@ -1105,7 +1101,7 @@
 
 .ffs-page .ffs-p16-label {
   fill: #f2f8ff;
-  font-family: var(--rxs-font-display);
+  font-family: var(--fft-forge);
   font-size: 30px;
   font-weight: 780;
   letter-spacing: 0.04em;
@@ -1211,7 +1207,7 @@
   align-items: baseline;
   margin: 0;
   color: var(--ffs-text);
-  font-family: var(--rxs-font-display);
+  font-family: var(--fft-forge);
   font-size: clamp(22px, 2.1vw, 28px);
   font-weight: 760;
   font-variant-numeric: tabular-nums;
@@ -1309,7 +1305,7 @@
 
 .ffs-page .ffs-p16-values b {
   color: var(--ffs-text-3);
-  font-family: var(--rxs-font-display);
+  font-family: var(--fft-mono);
   font-size: 16px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
@@ -1317,7 +1313,7 @@
 
 .ffs-page .ffs-p16-values strong {
   color: var(--ffs-text);
-  font-family: var(--rxs-font-display);
+  font-family: var(--fft-forge);
   font-size: clamp(26px, 2.6vw, 34px);
   font-weight: 760;
   font-variant-numeric: tabular-nums;
@@ -1355,7 +1351,7 @@
 
 .ffs-page .ffs-p16-metric > p b {
   color: var(--ffs-accent);
-  font-family: var(--rxs-font-display);
+  font-family: var(--fft-forge);
   font-size: 15px;
   font-weight: 760;
   font-variant-numeric: tabular-nums;
@@ -1414,7 +1410,7 @@
 
 .ffs-page .ffs-p16-withheld b {
   color: var(--ffs-text);
-  font-family: var(--ffs-mincho);
+  font-family: var(--fft-display);
   font-size: 26px;
   font-weight: 800;
   letter-spacing: 0.1em;
@@ -1476,7 +1472,7 @@
 
 .ffs-page .ffs-p16-lineage ol b {
   color: var(--ffs-text);
-  font-family: var(--rxs-font-display);
+  font-family: var(--fft-forge);
   font-size: clamp(22px, 2.4vw, 30px);
   font-weight: 780;
 }
@@ -1522,9 +1518,9 @@
 
 .ffs-page .ffs-p16-topics header span {
   color: var(--ffs-accent);
-  font-family: var(--rxs-font-display);
+  font-family: var(--fft-etch);
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 400;
   letter-spacing: 0.2em;
 }
 

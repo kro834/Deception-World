@@ -216,7 +216,7 @@ export const FarFromSuitUp = memo(function FarFromSuitUp() {
             </ol>
             <p className="rzn-stamp">
               <span>FAR FROM SAGA</span>
-              <b>{FAR_FROM_SAGA.stages.max.code}</b>
+              <b>{FAR_FROM_SAGA.stages.max.label}</b>
             </p>
           </div>
           <i className="rzn-rail">
