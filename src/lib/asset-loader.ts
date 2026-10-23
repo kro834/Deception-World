@@ -36,6 +36,7 @@ const KNOWN_BYTES: Record<string, number> = {
   [FAR_FROM_SAGA_KEY_VISUAL.src]: 475884,
   [ILLUSIONCULUM_HERO.src]: 315494,
   "/illusionculum-suit-20261023/undersuit.webp": 45110,
+  "/illusionculum-suit-20261023/driver-standin.webp": 27038,
   "/illusionculum-saga-20261023/orb-left-standard-256.webp": 19416,
   "/illusionculum-saga-20261023/orb-right-standard-256.webp": 19212,
   [META_UNITAS_KEY_VISUAL.src]: 323252,
@@ -65,6 +66,7 @@ export const FAR_FROM_SAGA_ENTER_ASSETS = [FAR_FROM_SAGA_KEY_VISUAL.src] as cons
 export const ILLUSIONCULUM_SAGA_ENTER_ASSETS = [
   ILLUSIONCULUM_HERO.src,
   "/illusionculum-suit-20261023/undersuit.webp",
+  "/illusionculum-suit-20261023/driver-standin.webp",
   "/illusionculum-saga-20261023/orb-left-standard-256.webp",
   "/illusionculum-saga-20261023/orb-right-standard-256.webp",
 ] as const;
