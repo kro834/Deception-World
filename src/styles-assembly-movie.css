@@ -91,10 +91,17 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie > * {
   pointer-events: auto;
 }
 
-/* The still tiers (data-load="static": reduced motion, forced colours,
-   economy) have no sequence to play: no control. */
+/* The still tiers have no sequence to play: no control. The controller
+   names them (data-tier="still": the engine's motion gate — reduced
+   motion, forced colours, economy, Save-Data, 2G — reads data-rzn-load
+   "static", or the runway has no pinned travel); the rules beside it are
+   the same gate before the controller arrives (the runway's own layout
+   rules: economy and the entry's Save-Data/2G snapshot, data-rzn-constrained,
+   lay the runway out as one still screen). */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie[data-tier="still"],
 html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie[data-load="static"],
-html[data-family="special"][data-world-effects="economy"] body .rxs-page.rxs-page.rxs-page .rzn-movie {
+html[data-family="special"][data-world-effects="economy"] body .rxs-page.rxs-page.rxs-page .rzn-movie,
+html[data-family="special"][data-rzn-constrained] body .rxs-page.rxs-page.rxs-page .rzn-movie {
   display: none;
 }
 
@@ -201,6 +208,143 @@ html[data-family="special"]
   border-width: 0 3px;
   border-color: currentcolor;
   transform: translate(-50%, -50%);
+}
+
+/* 再生 pressed before the scene is ready (読み込み中, aria-busy): the ring
+   turns until the movie starts by itself. (No control under reduced
+   motion, so the turn needs no gate of its own.) */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page
+  .rzn-movie[data-state="loading"]
+  .rzn-movie-mini {
+  background: conic-gradient(from var(--mc-spin, 0deg), var(--mc-accent) 0 22%, var(--mc-track) 0);
+  animation: rzn-movie-spin 1.1s linear infinite;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page
+  .rzn-movie[data-state="loading"]
+  .rzn-movie-mini::after {
+  width: 6px;
+  height: 6px;
+  border: 0;
+  border-radius: 50%;
+  background: currentcolor;
+  transform: translate(-50%, -50%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page
+  .rzn-movie[data-state="loading"]
+  .rzn-movie-play {
+  animation: rzn-movie-wait 1.2s ease-in-out infinite alternate;
+  cursor: progress;
+}
+
+/* The retries ran out (再読み込み: a press reloads the page): the pill's
+   glyph turns to a reload arrow, in the lit colour. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page
+  .rzn-movie[data-state="error"]
+  .rzn-movie-mini {
+  color: var(--mc-lit);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page
+  .rzn-movie[data-state="error"]
+  .rzn-movie-mini::after {
+  content: "\21bb";
+  width: auto;
+  height: auto;
+  border: 0;
+  font: 700 19px/1 system-ui, sans-serif;
+  transform: translate(-50%, -54%);
+}
+
+/* The pill says so in words too, beside its glyph: 読み込み中 while a 再生
+   waits for the scene, 再読み込み when the retries ran out (the sheet's
+   再生 button reads the same). The words are the buttons' names already:
+   the caption is silent to assistive tech (the empty alternative; a
+   browser without it shows the words all the same). */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-movie-toggle {
+  order: 2;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page
+  .rzn-movie:is([data-state="loading"], [data-state="error"])
+  .rzn-movie-pill::after {
+  order: 1;
+  padding: 0 0 0 6px;
+  color: var(--mc-ink);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page
+  .rzn-movie[data-state="loading"]
+  .rzn-movie-pill::after {
+  content: "読み込み中";
+  content: "読み込み中" / "";
+  animation: rzn-movie-wait 1.2s ease-in-out infinite alternate;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page
+  .rzn-movie[data-state="error"]
+  .rzn-movie-pill::after {
+  content: "再読み込み";
+  content: "再読み込み" / "";
+  color: var(--mc-lit);
+}
+
+/* The controller itself could not be loaded (data-failed): only 再読み込み is
+   live, so only it shows — no disabled speeds, seek or 最初から beside it. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page
+  .rzn-movie[data-failed]
+  :is(.rzn-movie-restart, .rzn-movie-speeds, .rzn-movie-seek, .rzn-movie-toggle) {
+  display: none;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie[data-failed] .rzn-movie-pill::after {
+  padding-inline-end: 14px;
+}
+
+@property --mc-spin {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@keyframes rzn-movie-spin {
+  to {
+    --mc-spin: 360deg;
+  }
+}
+
+@keyframes rzn-movie-wait {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.55;
+  }
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-movie-mini:disabled,

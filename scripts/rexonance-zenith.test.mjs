@@ -2166,7 +2166,14 @@ test("transient required-image failure retries and explicit/online recovery rest
           () => t.runway.dataset.rznLoad === "error",
           "terminal error is visible to the accessible status",
         );
-        assert.equal(requests, 3, "initial request plus two bounded retries");
+        // A request that only outlived its wait keeps loading and is taken
+        // by the automatic retries (a slow network's progress is kept,
+        // owner 2026-10-23); a failed one is requested again.
+        assert.equal(
+          requests,
+          failure === "timeout" ? 1 : 3,
+          "initial request plus two bounded retries (a slow one reused)",
+        );
         failing = false;
         const retry = t.listeners.get(
           failure === "online" ? "window:online" : "runway:rexonance:assembly-retry",
@@ -2179,7 +2186,12 @@ test("transient required-image failure retries and explicit/online recovery rest
         () => t.runway.dataset.rznState === "live",
         "image request recovery reaches a live scene",
       );
-      assert.equal(requests, permanent ? 4 : 2, "duplicate retry does not start parallel requests");
+      // The reader's retry (or the network) starts the hung one over, once.
+      assert.equal(
+        requests,
+        permanent ? (failure === "timeout" ? 2 : 4) : 2,
+        "duplicate retry does not start parallel requests",
+      );
       assert.equal(t.runway.dataset.rznLoad, "ready");
     } finally {
       dispose();

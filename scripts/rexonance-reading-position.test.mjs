@@ -1,9 +1,112 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  mountRexonanceReadingPosition,
+  rexonanceMoviePlaying,
   rexonanceReadingAnchor,
   rexonanceReadingOffset,
 } from "../src/lib/rexonance-reading-position.ts";
+
+/** A page whose runway moves when the window turns, under stub globals. */
+function rotatingPage({ movieState = null } = {}) {
+  const saved = {};
+  const globals = {
+    innerWidth: 390,
+    innerHeight: 844,
+    scrollY: 9000,
+    visualViewport: { scale: 1 },
+  };
+  const listeners = new Map();
+  const frames = [];
+  const scrolls = [];
+  let runwayTop = 8000;
+  const section = (id, top, height) => ({
+    id,
+    get offsetHeight() {
+      return height();
+    },
+    getBoundingClientRect: () => ({ top: top() - globals.scrollY }),
+  });
+  const sections = [
+    section("assembly", () => runwayTop - 700, () => 700),
+    section("assembly-runway", () => runwayTop, () => 3000),
+  ];
+  const control = { dataset: { state: movieState ?? "idle" } };
+  const page = {
+    querySelectorAll: () => sections,
+    querySelector: (selector) =>
+      selector === '.rzn-movie[data-state="playing"]' && control.dataset.state === "playing" ? control : null,
+  };
+  const stubs = {
+    ...globals,
+    requestAnimationFrame: (callback) => frames.push(callback),
+    cancelAnimationFrame: () => {},
+    scrollTo: ({ top }) => {
+      scrolls.push(top);
+      stubs.scrollY = top;
+    },
+    addEventListener: (type, callback) => listeners.set(type, callback),
+    removeEventListener: (type) => listeners.delete(type),
+    ResizeObserver: class {
+      observe() {}
+      disconnect() {}
+    },
+  };
+  for (const key of Object.keys(stubs)) {
+    saved[key] = Object.getOwnPropertyDescriptor(globalThis, key);
+    Object.defineProperty(globalThis, key, {
+      configurable: true,
+      get: () => (key in globals ? globals[key] : stubs[key]),
+      set: (next) => {
+        if (key in globals) globals[key] = next;
+        else stubs[key] = next;
+      },
+    });
+  }
+  saved.window = Object.getOwnPropertyDescriptor(globalThis, "window");
+  Object.defineProperty(globalThis, "window", { configurable: true, value: globalThis });
+  const restore = () => {
+    for (const [key, descriptor] of Object.entries(saved))
+      if (descriptor) Object.defineProperty(globalThis, key, descriptor);
+      else delete globalThis[key];
+  };
+  return {
+    page,
+    control,
+    globals,
+    scrolls,
+    listeners,
+    restore,
+    /** The window turns: wider, the runway higher up. */
+    rotate() {
+      globals.innerWidth = 844;
+      globals.innerHeight = 390;
+      runwayTop = 6000;
+      listeners.get("resize")?.();
+    },
+    flushFrames() {
+      for (let k = 0; k < 4 && frames.length; k += 1) frames.splice(0).forEach((frame) => frame(0));
+    },
+  };
+}
+
+test("a turned window keeps the reader's place in the suit-up — unless the auto transformation movie plays, which keeps it itself", () => {
+  for (const movieState of ["idle", "paused", "playing"]) {
+    const t = rotatingPage({ movieState });
+    try {
+      const dispose = mountRexonanceReadingPosition(t.page);
+      t.rotate();
+      t.flushFrames();
+      if (movieState === "playing")
+        assert.deepEqual(t.scrolls, [], "the movie places the page each frame: no restore under it");
+      else assert.equal(t.scrolls.length, 1, `${movieState}: the place is restored`);
+      dispose();
+    } finally {
+      t.restore();
+    }
+  }
+  assert.equal(rexonanceMoviePlaying({ querySelector: () => null }), false);
+});
 
 test("orientation restores the suit-up fraction, not portrait pixels", () => {
   const portrait = [

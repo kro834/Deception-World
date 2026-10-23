@@ -6,11 +6,18 @@ import {
   MOVIE_DURATION_MS,
   MOVIE_FIGURE_ASPECT,
   MOVIE_IDLE_COLLAPSE_MS,
+  MOVIE_LOAD_RETRY_DELAYS,
+  MOVIE_MAX_STEP_MS,
   MOVIE_PLAY_LABELS,
+  MOVIE_RESIZE_GRACE_MS,
+  MOVIE_RETRY_EVENT,
   MOVIE_SCROLL_KEYS,
   MOVIE_SCROLL_TOLERANCE,
   MOVIE_SEEK_STEPS,
   MOVIE_SHOW_AT,
+  MOVIE_SHOW_THRESHOLDS,
+  MOVIE_WAKE_EVENT,
+  MOVIE_WAKE_INTERVAL_MS,
   mountAssemblyMovie,
 } from "../src/lib/assembly-movie.ts";
 
@@ -134,6 +141,13 @@ function environment({
   figure = { "--rzn-fig-h": "0.86", "--rzn-fig-w": "0.92", "--rzn-fig-x": "0.5", "--rzn-fig-b": "0.035" },
 } = {}) {
   const runway = element("div", { class: "rzn-suitup", "data-rzn-load": load });
+  // The events the movie sends the engine (wake, retry).
+  const sent = [];
+  runway.dispatchEvent = (event) => {
+    sent.push(event.type);
+    runway.listeners.get(event.type)?.(event);
+    return true;
+  };
   const frame = element("div", { class: "rzn-frame" });
   runway.append(frame);
   runway.offsetHeight = travel + 800;
@@ -243,7 +257,15 @@ function environment({
   const progress = () => (pinTop - runway.getBoundingClientRect().top) / travel;
   const user = {
     wheel: () => windowListeners.get("wheel")?.({ type: "wheel", target: runway }),
-    touch: (target = runway) => windowListeners.get("touchstart")?.({ type: "touchstart", target }),
+    touch: (target = runway, y = 400) =>
+      windowListeners.get("touchstart")?.({ type: "touchstart", target, touches: [{ clientX: 100, clientY: y }] }),
+    // A finger moving on the page (it scrolls), or resting (a tap).
+    move: (y, target = runway) =>
+      windowListeners.get("touchmove")?.({ type: "touchmove", target, touches: [{ clientX: 100, clientY: y }] }),
+    drag: (target = runway) => {
+      windowListeners.get("touchstart")?.({ type: "touchstart", target, touches: [{ clientX: 100, clientY: 400 }] });
+      windowListeners.get("touchmove")?.({ type: "touchmove", target, touches: [{ clientX: 100, clientY: 340 }] });
+    },
     pointer: (target = runway) =>
       windowListeners.get("pointerdown")?.({ type: "pointerdown", target }),
     key: (key, target = runway) =>
@@ -284,6 +306,7 @@ function environment({
     scrollY: () => scrollY,
     windowListeners,
     documentListeners,
+    sent,
     setLoad: (next) => {
       runway.dataset.rznLoad = next;
       for (const observer of mutations) observer.callback([]);
@@ -385,7 +408,7 @@ test("the speeds: 0.5×, 1×, 1.5× and 2× scale the clock, a radio group with 
 test("the reader's own input pauses the movie and hands the scroll back: wheel, touch, scroll keys, a scroll of their own", () => {
   for (const [name, act] of [
     ["wheel", (t) => t.user.wheel()],
-    ["touch", (t) => t.user.touch()],
+    ["touch", (t) => t.user.drag()],
     ["ArrowDown", (t) => t.user.key("ArrowDown")],
     ["PageDown", (t) => t.user.key("PageDown")],
     ["Space", (t) => t.user.key(" ")],
@@ -449,22 +472,32 @@ test("input on the control itself is not a scroll: keys and touches inside it, a
   dispose();
 });
 
-test("the control shows while the frame is pinned, is disabled until the scene is ready, and the still tiers hide it", () => {
+test("the control shows while the frame is pinned, is live before the scene is ready (a 再生 waits for it), and the still tiers hide it", () => {
   const t = environment({ load: "waiting" });
+  // (The markup's buttons are disabled until the controller is here.)
+  for (const radio of t.radios) radio.disabled = true;
   const dispose = mountAssemblyMovie(t.control, t.runway, t.env);
-  assert.equal(t.play.disabled, true);
-  assert.equal(t.restart.disabled, true);
-  assert.equal(t.seek.disabled, true);
+  assert.equal(t.play.disabled, false, "never a dead button: live once the controller is here");
+  assert.equal(t.restart.disabled, false);
+  assert.equal(t.seek.disabled, false);
+  assert.ok(t.radios.every((radio) => !radio.disabled), "the speeds too");
   assert.equal(t.control.dataset.load, "waiting");
+  assert.equal(t.control.dataset.tier, "motion");
+  // Mounted at idle, far from the runway: no speculative preparation…
+  assert.deepEqual(t.sent, [], "nothing is asked of the engine before the runway is here");
   t.play.fire("click");
-  assert.equal(t.control.dataset.state, "idle", "nothing plays before the scene is ready");
-  assert.equal(t.scrolls.length, 0);
-  // The frame comes into view: shown (and the seek reads the scroll).
+  assert.equal(t.control.dataset.state, "loading", "queued until the scene is ready");
+  assert.equal(t.scrolls.length, 0, "nothing scrolls before the scene is ready");
+  // Dropped by the frame unpinning (below); first, shown.
   const [observer] = t.observers;
   assert.equal(observer.target, t.frame);
-  assert.deepEqual(observer.options, { threshold: [MOVIE_SHOW_AT] });
+  assert.deepEqual(observer.options, { threshold: [...MOVIE_SHOW_THRESHOLDS] });
+  assert.ok(MOVIE_SHOW_THRESHOLDS.includes(MOVIE_SHOW_AT));
+  t.sent.length = 0;
   observer.callback([{ isIntersecting: true }]);
   assert.equal(t.control.dataset.shown, "true");
+  // …in view, the scene is asked to prepare now.
+  assert.deepEqual(t.sent, [MOVIE_WAKE_EVENT]);
   observer.callback([{ isIntersecting: false }]);
   assert.equal(t.control.dataset.shown, undefined);
   observer.callback([{ isIntersecting: true }]);
@@ -485,11 +518,13 @@ test("the control shows while the frame is pinned, is disabled until the scene i
   t.play.fire("click");
   assert.equal(t.control.dataset.state, "playing");
   // Reduced motion (or economy, forced colours) takes the scene away mid-movie:
-  // the control pauses and reads static — the sheets hide it.
+  // the control pauses and reads static, the still tier — the sheets hide it.
   t.setLoad("static");
   assert.equal(t.control.dataset.state, "paused");
   assert.equal(t.control.dataset.load, "static");
+  assert.equal(t.control.dataset.tier, "still");
   assert.equal(t.play.disabled, true);
+  assert.ok(t.radios.every((radio) => radio.disabled));
   dispose();
 });
 
@@ -514,6 +549,9 @@ test("the control's markup: a named group, 再生／一時停止 and 最初か�
   assert.match(source, /role="radio"/);
   assert.match(source, /aria-checked=\{speed === ASSEMBLY_MOVIE_DEFAULT_SPEED\}/);
   assert.match(source, /tabIndex=\{speed === ASSEMBLY_MOVIE_DEFAULT_SPEED \? 0 : -1\}/);
+  // Every button waits for the controller: a radio focused before it (the
+  // control shows on focus) is never one that does nothing.
+  assert.match(source, /data-speed=\{speed\}[\s\S]{0,200}?\n\s*disabled\n\s*>/);
   assert.match(source, /aria-label=\{`\$\{speed\}倍速`\}/);
   assert.match(source, /ASSEMBLY_MOVIE_SPEEDS = Object\.freeze\(\[0\.5, 1, 1\.5, 2\] as const\)/);
   assert.match(source, /<span className="rzn-movie-sr">位置<\/span>/);
@@ -589,7 +627,7 @@ function pillEnvironment(options) {
 test("the pill: the speed button opens and closes the sheet with aria-expanded; the toggle is live as soon as the controller mounts", () => {
   const t = pillEnvironment({ load: "waiting" });
   assert.equal(t.toggle.disabled, false, "the toggle needs only the controller");
-  assert.equal(t.mini.disabled, true, "再生 waits for the scene");
+  assert.equal(t.mini.disabled, false, "再生 is live too: pressed early, it waits for the scene");
   assert.equal(t.toggle.getAttribute("aria-expanded"), "false");
   assert.equal(t.isOpen(), false);
   t.toggle.fire("click");
@@ -718,8 +756,17 @@ test("the sheet closes on the reader's own scroll, wheel, a touch or press outsi
     if (!t.isOpen()) t.toggle.fire("click");
     assert.equal(t.isOpen(), true);
   };
-  // The reader scrolls the page themselves.
+  // The page above settles and the browser keeps the content in place
+  // (scroll anchoring): the runway stands where it stood — not the reader.
   open();
+  const rect = t.runway.getBoundingClientRect;
+  const standing = rect().top;
+  const y0 = t.scrollY();
+  t.runway.getBoundingClientRect = () => ({ top: standing });
+  t.user.scroll(y0 + 300);
+  assert.equal(t.isOpen(), true, "a scroll that leaves the content where it was is the layout's");
+  t.runway.getBoundingClientRect = () => ({ top: standing + y0 + 300 - t.scrollY() });
+  // The reader scrolls the page themselves.
   t.user.scroll(1234);
   assert.equal(t.isOpen(), false, "a scroll of the reader's own");
   // The movie's own scrolling (and the seek's) does not close it.
@@ -880,6 +927,25 @@ test("placement rules: hidden in the still tiers and with the menu or a dialog o
   assert.match(css, /conic-gradient\(\s*var\(--mc-accent\) calc\(var\(--rzn-movie-p, 0\) \* 1%\)/);
   assert.match(css, /\.rzn-movie\[data-state="playing"\]\s*\.rzn-movie-mini::after/);
   assert.match(css, /\.rzn-movie-toggle\[aria-expanded="true"\]\s*\.rzn-movie-chevron/);
+  // The pill says 読み込み中 and 再読み込み in words beside its glyph (the
+  // buttons' names already: silent to assistive tech), and turns its glyph to
+  // a turning ring and a reload arrow.
+  for (const [state, words] of [
+    ["loading", MOVIE_PLAY_LABELS.loading],
+    ["error", MOVIE_PLAY_LABELS.retry],
+  ]) {
+    const rule = new RegExp(
+      `\\.rzn-movie\\[data-state="${state}"\\]\\s*\\.rzn-movie-pill::after \\{\\s*content: "${words}";\\s*content: "${words}" / "";`,
+    );
+    assert.match(css, rule, state);
+    assert.match(css, new RegExp(`\\.rzn-movie\\[data-state="${state}"\\]\\s*\\.rzn-movie-mini::after \\{`), state);
+  }
+  assert.match(css, /\.rzn-movie\[data-state="error"\]\s*\.rzn-movie-mini::after \{\s*content: "\\21bb";/);
+  // Without its controller only 再読み込み is live, and only it shows.
+  assert.match(
+    css,
+    /\.rzn-movie\[data-failed\]\s*:is\(\.rzn-movie-restart, \.rzn-movie-speeds, \.rzn-movie-seek, \.rzn-movie-toggle\) \{\s*display: none;/,
+  );
   // The page sheets draw the sheet only: no fixed positioning left in them,
   // and nothing of the old phone dock.
   for (const sheet of ["src/styles-rexonance-editorial.css", "src/styles-far-from-suitup.css"]) {
@@ -899,4 +965,396 @@ test("placement rules: hidden in the still tiers and with the menu or a dialog o
   const farFrom = read("src/routes/far-from-saga.tsx");
   assert.match(farFrom, /import assemblyMovieCssUrl from "@\/styles-assembly-movie\.css\?url";/);
   assert.ok(farFrom.indexOf("href: farFromSuitupCssUrl") < farFrom.indexOf("href: assemblyMovieCssUrl"));
+});
+
+/* ---------------- reliability (owner, 2026-10-23: 「自動変身再生が必ず読み込まれ、
+   正常に動作する様にして。」) ---------------- */
+/* A 再生 pressed before the scene's assets are ready is queued (読み込み中),
+   the engine is asked to prepare at once, and the movie starts by itself
+   when the runway reads ready; a failed preparation is retried with a
+   backoff, then 再読み込み; the controller leaves nothing behind when it
+   goes, and a second mount replaces the first. */
+function withTimers(run) {
+  mock.timers.enable({ apis: ["setTimeout", "setInterval", "Date"], now: 1_000_000 });
+  try {
+    return run();
+  } finally {
+    mock.timers.reset();
+  }
+}
+
+test("a 再生 before the scene is ready waits for it: 読み込み中 (aria-busy), the engine woken, then it plays by itself", () =>
+  withTimers(() => {
+    for (const site of ["sheet", "pill"]) {
+      const t = environment({ load: "waiting" });
+      const dispose = mountAssemblyMovie(t.control, t.runway, t.env);
+      t.observers[0].callback([{ isIntersecting: true }]);
+      t.sent.length = 0;
+      (site === "pill" ? t.mini : t.play).fire("click");
+      assert.equal(t.control.dataset.state, "loading", site);
+      assert.equal(t.play.textContent, MOVIE_PLAY_LABELS.loading);
+      assert.equal(t.mini.getAttribute("aria-label"), MOVIE_PLAY_LABELS.loading);
+      assert.equal(t.control.getAttribute("aria-busy"), "true");
+      assert.equal(t.play.disabled, false, "the button stays live: it reads 読み込み中");
+      assert.deepEqual(t.sent, [MOVIE_WAKE_EVENT], "the engine is asked to prepare now");
+      // A second press while it waits keeps the wait (no toggle back to idle).
+      t.play.fire("click");
+      assert.equal(t.control.dataset.state, "loading");
+      // The engine is reminded while the scene prepares.
+      mock.timers.tick(MOVIE_WAKE_INTERVAL_MS);
+      assert.deepEqual(t.sent, [MOVIE_WAKE_EVENT, MOVIE_WAKE_EVENT]);
+      t.setLoad("loading");
+      t.setLoad("preparing");
+      assert.equal(t.control.dataset.state, "loading");
+      assert.equal(t.scrolls.length, 0);
+      // Ready: it plays at once, from where the page stands.
+      t.setLoad("ready");
+      assert.equal(t.control.dataset.state, "playing");
+      assert.equal(t.play.textContent, MOVIE_PLAY_LABELS.pause);
+      assert.equal(t.control.getAttribute("aria-busy"), null);
+      for (let k = 0; k < 60; k += 1) t.tick();
+      assert.ok(t.progress() > 0.03 && t.progress() < 0.05, `progress ${t.progress()}`);
+      // No reminder is left behind once it plays.
+      const sent = t.sent.length;
+      mock.timers.tick(MOVIE_WAKE_INTERVAL_MS * 3);
+      assert.equal(t.sent.length, sent);
+      dispose();
+    }
+    // 最初から before ready: queued from the start.
+    const t = environment({ load: "waiting" });
+    const dispose = mountAssemblyMovie(t.control, t.runway, t.env);
+    t.observers[0].callback([{ isIntersecting: true }]);
+    t.user.scroll(t.top - t.pinTop + t.travel / 2);
+    t.restart.fire("click");
+    assert.equal(t.control.dataset.state, "loading");
+    t.setLoad("ready");
+    assert.equal(t.control.dataset.state, "playing");
+    t.tick();
+    assert.ok(t.progress() < 0.01, "最初から starts at the runway's start");
+    dispose();
+  }));
+
+test("a failed preparation is retried while 再生 waits, with a backoff; when the retries run out 再読み込み, and a press reloads the page", () =>
+  withTimers(() => {
+    const t = environment({ load: "error" });
+    let reloads = 0;
+    t.env.location = { reload: () => (reloads += 1) };
+    const dispose = mountAssemblyMovie(t.control, t.runway, t.env);
+    t.observers[0].callback([{ isIntersecting: true }]);
+    t.sent.length = 0;
+    // The engine answers a retry by preparing again, and fails again.
+    let retried = 0;
+    const kept = [];
+    t.runway.addEventListener(MOVIE_RETRY_EVENT, (event) => {
+      retried += 1;
+      kept.push(Boolean(event.detail?.keep));
+      t.setLoad("loading");
+      t.setLoad("error");
+    });
+    t.play.fire("click");
+    assert.equal(t.control.dataset.state, "loading");
+    assert.equal(retried, 1, "a preparation that already failed is retried at once");
+    assert.ok(t.sent.includes(MOVIE_WAKE_EVENT));
+    for (const delay of MOVIE_LOAD_RETRY_DELAYS) {
+      assert.equal(t.control.dataset.state, "loading");
+      const before = retried;
+      mock.timers.tick(delay - 1);
+      assert.equal(retried, before, `not before its backoff (${delay} ms)`);
+      mock.timers.tick(1);
+      assert.equal(retried, before + 1, `retried after ${delay} ms`);
+    }
+    assert.equal(t.control.dataset.state, "error", "the retries ran out: never silent");
+    // The press starts the engine's requests over; the backoff keeps a slow
+    // request going (the engine reuses it: rexonance-resonance.js).
+    assert.deepEqual(kept, [false, ...MOVIE_LOAD_RETRY_DELAYS.map(() => true)]);
+    assert.equal(t.play.textContent, MOVIE_PLAY_LABELS.retry);
+    assert.equal(t.mini.getAttribute("aria-label"), MOVIE_PLAY_LABELS.retry);
+    assert.equal(t.control.getAttribute("aria-busy"), null);
+    assert.equal(t.play.disabled, false);
+    const count = retried;
+    mock.timers.tick(60000);
+    assert.equal(retried, count, "no retry runs on by itself after that");
+    // 再読み込み: a fresh document (a failed chunk, or one it imports, stays
+    // failed for this one), from the sheet's button, the pill's and 最初から.
+    t.play.fire("click");
+    assert.equal(reloads, 1);
+    t.mini.fire("click");
+    t.restart.fire("click");
+    assert.equal(reloads, 3);
+    assert.equal(retried, count, "a reload, not another round in this document");
+    dispose();
+  }));
+
+test("a scene that recovers by itself after the retries ran out (the network back) reads 再生 again, and plays", () =>
+  withTimers(() => {
+    const t = environment({ load: "error" });
+    let reloads = 0;
+    t.env.location = { reload: () => (reloads += 1) };
+    const dispose = mountAssemblyMovie(t.control, t.runway, t.env);
+    t.observers[0].callback([{ isIntersecting: true }]);
+    t.runway.addEventListener(MOVIE_RETRY_EVENT, () => {
+      t.setLoad("loading");
+      t.setLoad("error");
+    });
+    t.play.fire("click");
+    for (const delay of MOVIE_LOAD_RETRY_DELAYS) mock.timers.tick(delay);
+    assert.equal(t.control.dataset.state, "error");
+    // The engine's own online retry brings the scene up.
+    t.setLoad("preparing");
+    t.setLoad("ready");
+    assert.equal(t.control.dataset.state, "idle");
+    assert.equal(t.play.textContent, MOVIE_PLAY_LABELS.play);
+    t.play.fire("click");
+    assert.equal(reloads, 0);
+    assert.equal(t.control.dataset.state, "playing");
+    // A later failure starts its own full backoff (a fresh press).
+    t.user.wheel();
+    t.setLoad("error");
+    t.play.fire("click");
+    assert.equal(t.control.dataset.state, "loading");
+    for (const delay of MOVIE_LOAD_RETRY_DELAYS.slice(0, -1)) mock.timers.tick(delay);
+    assert.equal(t.control.dataset.state, "loading", "the whole backoff again");
+    dispose();
+  }));
+
+test("a waiting 再生 is dropped by the reader's own scroll, the frame unpinning or the still tier — it never starts behind their back", () =>
+  withTimers(() => {
+    for (const [name, act] of [
+      ["wheel", (t) => t.user.wheel()],
+      ["drag", (t) => t.user.drag()],
+      ["key", (t) => t.user.key("PageDown")],
+      ["unpinned", (t) => t.observers[0].callback([{ isIntersecting: false }])],
+      ["static", (t) => t.setLoad("static")],
+    ]) {
+      const t = environment({ load: "waiting" });
+      const dispose = mountAssemblyMovie(t.control, t.runway, t.env);
+      t.observers[0].callback([{ isIntersecting: true }]);
+      t.play.fire("click");
+      assert.equal(t.control.dataset.state, "loading", name);
+      act(t);
+      assert.equal(t.control.dataset.state, "idle", name);
+      assert.equal(t.control.getAttribute("aria-busy"), null, name);
+      if (name !== "static") t.setLoad("ready");
+      for (let k = 0; k < 5; k += 1) t.tick();
+      assert.equal(t.scrolls.length, 0, `${name}: nothing plays later`);
+      dispose();
+    }
+  }));
+
+test("the scene going away mid-movie (the engine preparing again) holds the movie, which continues from where it was", () => {
+  const t = environment();
+  const dispose = mountAssemblyMovie(t.control, t.runway, t.env);
+  t.observers[0].callback([{ isIntersecting: true }]);
+  t.restart.fire("click");
+  for (let k = 0; k < 120; k += 1) t.tick();
+  const held = t.progress();
+  t.setLoad("preparing");
+  assert.equal(t.control.dataset.state, "loading");
+  for (let k = 0; k < 10; k += 1) t.tick();
+  assert.ok(Math.abs(t.progress() - held) < 1e-6, "held while the scene prepares");
+  t.setLoad("ready");
+  assert.equal(t.control.dataset.state, "playing");
+  t.tick();
+  assert.ok(Math.abs(t.progress() - held) < 0.002, "continues from where it was");
+  dispose();
+});
+
+test("lifecycle: dispose removes every listener, observer and timer, returns the control to its markup, and a second mount replaces the first", () =>
+  withTimers(() => {
+    const t = environment({ load: "waiting" });
+    const dispose = mountAssemblyMovie(t.control, t.runway, t.env);
+    t.observers[0].callback([{ isIntersecting: true }]);
+    t.play.fire("click");
+    assert.equal(t.control.dataset.state, "loading");
+    for (const type of ["scroll", "resize", "wheel", "touchstart", "touchmove", "keydown", "pagehide", "pageshow", "orientationchange"])
+      assert.ok(t.windowListeners.has(type), type);
+    dispose();
+    assert.equal(t.windowListeners.size, 0, `window listeners left: ${[...t.windowListeners.keys()]}`);
+    assert.equal(t.documentListeners.size, 0);
+    assert.ok(t.observers.every((observer) => observer.target === null));
+    assert.ok(t.mutations.every((observer) => observer.target === null));
+    assert.equal(t.frames.size, 0);
+    assert.equal(t.control.dataset.state, "idle");
+    assert.equal(t.control.dataset.shown, undefined);
+    assert.equal(t.control.dataset.tier, undefined);
+    assert.equal(t.control.getAttribute("aria-busy"), null);
+    assert.equal(t.play.textContent, MOVIE_PLAY_LABELS.play);
+    assert.equal(t.play.disabled, true, "no live button without its controller");
+    assert.equal(t.mini.disabled, true);
+    assert.ok(t.radios.every((radio) => radio.disabled), "the speeds neither");
+    // The scene coming up after the controller went plays nothing.
+    t.runway.dataset.rznLoad = "ready";
+    t.sent.length = 0;
+    mock.timers.tick(MOVIE_WAKE_INTERVAL_MS * 4);
+    assert.deepEqual(t.sent, [], "no reminder left running");
+    assert.equal(t.scrolls.length, 0);
+    dispose();
+    // A second mount on the same control (a remount before the first one's
+    // cleanup, React StrictMode's double effect) replaces the first.
+    const first = mountAssemblyMovie(t.control, t.runway, t.env);
+    const second = mountAssemblyMovie(t.control, t.runway, t.env);
+    t.observers.at(-1).callback([{ isIntersecting: true }]);
+    first();
+    t.play.fire("click");
+    assert.equal(t.control.dataset.state, "playing", "the stale disposer leaves the live one alone");
+    t.tick();
+    assert.equal(t.scrolls.length, 2, "one controller scrolls, once a frame");
+    second();
+    assert.equal(t.windowListeners.size, 0);
+  }));
+
+test("a hidden page holds the movie and resumes it on return; the page leaving and coming back from the back/forward cache too", () => {
+  const t = environment();
+  const dispose = mountAssemblyMovie(t.control, t.runway, t.env);
+  t.observers[0].callback([{ isIntersecting: true }]);
+  t.restart.fire("click");
+  for (let k = 0; k < 60; k += 1) t.tick();
+  const held = t.progress();
+  t.document.hidden = true;
+  t.documentListeners.get("visibilitychange")();
+  assert.equal(t.control.dataset.state, "paused");
+  t.document.hidden = false;
+  t.documentListeners.get("visibilitychange")();
+  assert.equal(t.control.dataset.state, "playing", "resumed on return");
+  t.tick();
+  assert.ok(Math.abs(t.progress() - held) < 0.002);
+  // The page leaves (pagehide) and is restored from the back/forward cache.
+  t.windowListeners.get("pagehide")({ type: "pagehide", persisted: true });
+  assert.equal(t.control.dataset.state, "paused");
+  t.windowListeners.get("pageshow")({ type: "pageshow", persisted: true });
+  assert.equal(t.control.dataset.state, "playing");
+  // A pause of the reader's own is not resumed by a tab switch.
+  t.play.fire("click");
+  t.document.hidden = true;
+  t.documentListeners.get("visibilitychange")();
+  t.document.hidden = false;
+  t.documentListeners.get("visibilitychange")();
+  assert.equal(t.control.dataset.state, "paused");
+  dispose();
+});
+
+test("a tap on the page is not a scroll (the movie plays on); a drag is; a resize's settling scrolls are not the reader's", () =>
+  withTimers(() => {
+    const t = environment();
+    const dispose = mountAssemblyMovie(t.control, t.runway, t.env);
+    t.observers[0].callback([{ isIntersecting: true }]);
+    t.play.fire("click");
+    t.user.touch(t.runway, 400);
+    t.user.move(404);
+    t.windowListeners.get("touchend")({ type: "touchend", target: t.runway });
+    assert.equal(t.control.dataset.state, "playing", "a tap");
+    t.user.touch(t.runway, 400);
+    t.user.move(380);
+    assert.equal(t.control.dataset.state, "paused", "a drag");
+    // A resize mid-play: the layout's scrolls while it settles are not the reader's.
+    t.play.fire("click");
+    for (let k = 0; k < 10; k += 1) t.tick();
+    t.windowListeners.get("resize")({ type: "resize" });
+    t.user.scroll(t.scrollY() + 140);
+    t.user.scroll(t.scrollY() + 140);
+    assert.equal(t.control.dataset.state, "playing", "the layout settling");
+    t.tick();
+    assert.ok(Math.abs(t.scrolls.at(-1) - t.scrollY()) <= MOVIE_SCROLL_TOLERANCE, "back where the movie is");
+    mock.timers.tick(MOVIE_RESIZE_GRACE_MS + 1);
+    t.user.scroll(t.scrollY() + 140);
+    t.user.scroll(t.scrollY() + 140);
+    assert.equal(t.control.dataset.state, "paused", "after the grace, the reader's again");
+    dispose();
+  }));
+
+test("a slow frame is caught up (the movie keeps its length), a stall is not jumped over", () => {
+  const t = environment();
+  const dispose = mountAssemblyMovie(t.control, t.runway, t.env);
+  t.observers[0].callback([{ isIntersecting: true }]);
+  t.restart.fire("click");
+  t.tick();
+  const a = t.progress();
+  t.tick(200);
+  assert.ok(Math.abs(t.progress() - a - 200 / MOVIE_DURATION_MS) < 1e-4, "a 200 ms frame advances 200 ms");
+  const b = t.progress();
+  t.tick(MOVIE_MAX_STEP_MS * 5);
+  assert.ok(Math.abs(t.progress() - b - MOVIE_MAX_STEP_MS / MOVIE_DURATION_MS) < 1e-4, "a stall advances at most one step");
+  dispose();
+});
+
+test("shown by the share of the frame that fits the window: a frame taller than a short landscape window shows while pinned, and hides on its way out", () => {
+  const t = environment();
+  const dispose = mountAssemblyMovie(t.control, t.runway, t.env);
+  const [observer] = t.observers;
+  const entry = (seen, height = 620, root = 390) => ({
+    isIntersecting: seen > 0,
+    boundingClientRect: { height },
+    intersectionRect: { height: seen },
+    rootBounds: { height: root },
+  });
+  observer.callback([entry(328)]);
+  assert.equal(t.control.dataset.shown, "true", "pinned under a 62 px bar in a 390 px window");
+  observer.callback([entry(150)]);
+  assert.equal(t.control.dataset.shown, undefined, "still intersecting, but on its way out");
+  observer.callback([entry(800, 800, 900)]);
+  assert.equal(t.control.dataset.shown, "true");
+  dispose();
+});
+
+test("the still tier: a runway with no pinned travel hides the control (data-tier), as the static load does; the sheets hide it by the same rules", () => {
+  const t = environment({ travel: 0 });
+  const dispose = mountAssemblyMovie(t.control, t.runway, t.env);
+  assert.equal(t.control.dataset.tier, "still");
+  assert.equal(t.play.disabled, true);
+  t.play.fire("click");
+  assert.equal(t.control.dataset.state, "idle");
+  dispose();
+  const css = read("src/styles-assembly-movie.css");
+  assert.match(css, /\.rzn-movie\[data-tier="still"\],/);
+  assert.match(css, /html\[data-family="special"\]\[data-rzn-constrained\] body[^{]*\.rzn-movie \{\s*display: none;/);
+  // The loading state is drawn (a turning ring, a waiting label).
+  assert.match(css, /\.rzn-movie\[data-state="loading"\]\s*\.rzn-movie-mini \{[^}]*animation: rzn-movie-spin/);
+  assert.match(css, /\.rzn-movie\[data-state="loading"\]\s*\.rzn-movie-play \{[^}]*cursor: progress;/);
+  // Both routes read the layout gate on entry (the runway's layout, the
+  // engine's gate and the control agree).
+  for (const route of ["src/routes/rexonance-saga.tsx", "src/routes/far-from-saga.tsx"])
+    assert.match(
+      read(route),
+      /beforeLoad: \(\{ cause, preload \}\) => \{\s*if \(typeof window !== "undefined" && !preload && cause === "enter"\) syncRexonanceLayoutGate\(\);/,
+      route,
+    );
+});
+
+test("the control's chunk: retried, imported early on approach or intent, never silent; the engine answers the movie's wake and retry", () => {
+  const source = read("src/components/rexonance-saga/rexonance-assembly-movie.tsx");
+  assert.match(source, /importWithRetry\(\(\) => import\("@\/lib\/assembly-movie"\)/);
+  assert.match(source, /rootMargin: ASSEMBLY_MOVIE_PRELOAD_MARGIN/);
+  assert.match(source, /window\.addEventListener\("online", start\)/);
+  assert.match(source, /control\.addEventListener\("pointerenter", start\)/);
+  assert.match(source, /console\.error\("\[movie\] the controller could not be loaded"/);
+  // Its retries run out: never an absent control — over the pinned frame (the
+  // controller's own show rule) it reads 再読み込み, and a press reloads the
+  // page; the rest of the control stays disabled; a later mount takes over.
+  assert.match(source, /showFallback\(\);\s*timer = window\.setTimeout\(start, ASSEMBLY_MOVIE_RETRY_LATER_MS\);/);
+  assert.match(source, /const reload = \(\) => window\.location\.reload\(\);/);
+  assert.match(source, /for \(const button of buttons\) button\.disabled = !actions\.includes\(button\);/);
+  assert.match(source, /fallback\?\.\(\);\s*delete control\.dataset\.failed;\s*try \{\s*dispose = module\.mountAssemblyMovie\(control, runway\);/);
+  // A controller that throws as it mounts is no controller: the same 再読み込み.
+  assert.match(
+    source,
+    /console\.error\("\[movie\] the controller could not be mounted", error\);\s*control\.dataset\.failed = "true";\s*showFallback\(\);/,
+  );
+  assert.equal(Number(source.match(/ASSEMBLY_MOVIE_SHOW_AT = ([\d.]+);/)?.[1]), MOVIE_SHOW_AT);
+  assert.equal(source.match(/ASSEMBLY_MOVIE_RELOAD_LABEL = "([^"]+)";/)?.[1], MOVIE_PLAY_LABELS.retry);
+  const engine = read("src/lib/rexonance-resonance.js");
+  assert.match(engine, /runway\.addEventListener\?\.\("rexonance:assembly-wake", wakeAssembly\)/);
+  assert.match(engine, /runway\.removeEventListener\?\.\("rexonance:assembly-wake", wakeAssembly\)/);
+  assert.equal(MOVIE_WAKE_EVENT, "rexonance:assembly-wake");
+  assert.equal(MOVIE_RETRY_EVENT, "rexonance:assembly-retry");
+  // A slow connection's late first render keeps a reader who already scrolled
+  // (to the runway, say) where they are: a fresh entry, no #section.
+  const router = read("src/router.tsx");
+  assert.match(router, /\? !readerScrolledBeforeFirstRender\(\)\s*: false,/);
+  assert.match(router, /\(navigation\?\.type \?\? "navigate"\) === "navigate" && window\.scrollY > 0/);
+  assert.match(router, /if \(window\.location\.hash\.length > 1\) return false;/);
+  // The guide's retry no longer needs the runway near (its button stands above it).
+  assert.match(
+    engine,
+    /const retryAssembly = \(event\) => \{\s*if \(runway\.dataset\.rznLoad !== "error" \|\| !pageActive \|\| document\.hidden \|\| disposed\) return;/,
+  );
 });

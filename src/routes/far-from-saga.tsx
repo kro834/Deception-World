@@ -13,12 +13,20 @@ import farFromSagaCssUrl from "@/styles-far-from-saga.css?url";
 import farFromSuitupCssUrl from "@/styles-far-from-suitup.css?url";
 import assemblyMovieCssUrl from "@/styles-assembly-movie.css?url";
 import { FAR_FROM_SAGA_KEY_VISUAL, farFromImage } from "@/lib/far-from-saga-artwork";
+import { syncRexonanceLayoutGate } from "@/lib/rexonance-layout-gate.js";
 
 // The FAR FROM SAGA special site (owner's record, 2026-10-22; the Rexonance
 // site's structure since 2026-10-23). The shared special-site sheets draw the
 // chrome; styles-far-from-saga.css is this page's own and loads last before
 // the cinematic sheet.
 export const Route = createFileRoute("/far-from-saga")({
+  // The runway's layout gate (Save-Data/2G, data-rzn-constrained) is read
+  // again on each entry, as /rexonance-saga does: an in-site entry would
+  // otherwise keep the first page's snapshot, and the runway's layout, the
+  // engine's gate and the movie's control could disagree.
+  beforeLoad: ({ cause, preload }) => {
+    if (typeof window !== "undefined" && !preload && cause === "enter") syncRexonanceLayoutGate();
+  },
   component: FarFromSaga,
   head: () => ({
     meta: [
