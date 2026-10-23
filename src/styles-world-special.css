@@ -1315,3 +1315,16 @@ html[data-family="world"]:root body #episode-pickup-dialog .episode-pickup-open 
   margin: 0;
   padding: 0;
 }
+
+/* ----------------------------------------------------------------
+   11. The episode cards: the title alone under the frame (its number
+       rides the frame's EP chip), held in the middle of the card's foot
+   ---------------------------------------------------------------- */
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #records
+  .episode-card
+  .episode-card-copy {
+  justify-content: center;
+}
