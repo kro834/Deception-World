@@ -213,26 +213,28 @@ const CAPE_L = [
   [48, 1100],
 ];
 // The belt: the driver, by its outline (claims first; never SAM's).
+// The driver's prompt (owner, 2026-10-23: 「ドライバーの切り抜きが甘い」):
+// SAM segments it like the other plates now, from this generous outline (the
+// medallion's point and the side gems included); the build then decontaminates
+// its edge colours, as FAR FROM's belt.
 const BELT_OUTLINE = [
   [
-    [356, 650],
-    [400, 640],
-    [440, 648],
-    [470, 640],
-    [512, 628],
-    [554, 640],
-    [584, 648],
-    [624, 640],
-    [668, 650],
-    [668, 705],
-    [624, 712],
-    [584, 700],
-    [554, 712],
-    [512, 720],
-    [470, 712],
-    [440, 700],
-    [400, 712],
-    [356, 705],
+    [350, 640],
+    [400, 628],
+    [470, 626],
+    [512, 616],
+    [554, 626],
+    [624, 628],
+    [674, 640],
+    [676, 702],
+    [622, 708],
+    [562, 702],
+    [542, 738],
+    [512, 746],
+    [482, 738],
+    [462, 702],
+    [402, 708],
+    [348, 702],
   ],
 ];
 const HALO = circle(512, 222, 236, 40).map(([x, y]) => [x, Math.min(y, 334)]);
@@ -410,7 +412,8 @@ if (process.argv.includes("--sam-prompts")) {
     ornamentGroups: ["tail", "bits"],
     regions: REGIONS.map(({ id, group, poly, seat }) => ({ id, group, poly, seat })),
     splits: SPLITS,
-    belt: { region: "belt", outline: BELT_OUTLINE, driver: DRIVER },
+    // The driver is a SAM region like the rest (no traced outline claims it).
+    belt: { region: "__none__", outline: [], driver: DRIVER },
     face: FACE_GLOW,
     reactor: REACTOR_GLOW,
     marks: MARKS,
@@ -665,7 +668,22 @@ async function goldLayersOf(colours) {
 const { goldTrim, goldSoft, rawGold } = await goldLayersOf(rgb);
 
 // --- Partition: the belt by its outline, the rest by SAM's shares --------------
-const beltMask = await rasterise(BELT_OUTLINE);
+// The driver's own SAM mask (decontaminated below), claiming first.
+const beltMask = await (async () => {
+  const outline = await rasterise(BELT_OUTLINE);
+  if (!manifest.plates.belt) return outline;
+  // SAM's mask, inside the prompt's outline, without the dark bodysuit and
+  // cape it reaches into: a pixel stays the driver where the metal is lit or
+  // within 3 px of lit metal (the belt's dark gaps between its plates).
+  const sam = await samShare("plates/belt.png");
+  const lit = new Float32Array(N);
+  for (let i = 0; i < N; i += 1) {
+    const v = Math.max(src[i * 4], src[i * 4 + 1], src[i * 4 + 2]) / 255;
+    lit[i] = v > 0.3 ? 1 : 0;
+  }
+  const near = await blurField(lit, 1.6);
+  return Float32Array.from(sam, (v, i) => (v / 255) * outline[i] * (lit[i] || near[i] > 0.3 ? 1 : 0));
+})();
 const plateIds = REGIONS.flatMap((region) => SPLITS[region.id].map((split) => ({ ...split, region: region.id })));
 const fields = new Map();
 const shares = [];
@@ -736,6 +754,22 @@ for (const { plate, share } of shares) {
   console.log(`partition: ${fields.size} plates; ${given} px given to their nearest plate; worst sum error ${worst.toFixed(4)}`);
   if (worst > 0.01) throw new Error("the plates do not tile the figure");
 }
+
+// The driver's edge colours: its soft edge takes the belt's own opaque
+// colours (no dark suit or light fringe), as FAR FROM's belt.
+const beltColours = await (async () => {
+  const solid = Float32Array.from({ length: N }, (_, i) => (beltMask[i] > 0.97 && alpha[i] > 0.97 ? 1 : 0));
+  const weight = await blurField(solid, 1.4);
+  const channels = [];
+  for (let c = 0; c < 3; c += 1)
+    channels.push(await blurField(Float32Array.from({ length: N }, (_, i) => (solid[i] * rgb[i * 3 + c]) / 255), 1.4));
+  const out = Buffer.from(rgb);
+  for (let i = 0; i < N; i += 1) {
+    if (solid[i] || !beltMask[i] || weight[i] < 0.03) continue;
+    for (let c = 0; c < 3; c += 1) out[i * 3 + c] = Math.round(Math.min(255, (channels[c][i] / weight[i]) * 255));
+  }
+  return out;
+})();
 
 // --- Delivery (the whole frame at 693 x 1040) ----------------------------------
 const FIG_W = 693;
@@ -868,7 +902,7 @@ for (const plate of plateIds) {
   const found = field && bounds(field);
   if (!found) continue;
   const box = deliveryBox(found, Math.ceil(MARGIN / SCALE) + 1);
-  const art = extractRaw(await toDelivery(rgba(field)), box);
+  const art = extractRaw(await toDelivery(rgba(field, plate.region === "belt" ? beltColours : rgb)), box);
   if (plate.region === "belt") for (let i = 3; i < art.length; i += 4) if (art[i] < 16) art[i] = 0;
   const { width: w, height: h } = box;
   // Its gold, unformed (the raw gunmetal under the trims' soft mask), at the
