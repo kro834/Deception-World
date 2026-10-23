@@ -2037,3 +2037,30 @@ html[data-family="dossier"]
     letter-spacing: 0.1em;
   }
 }
+
+/* RIKUEI ZENITH (2026-10-23): the 六詠's dossier names and facts. */
+/* ---- The dossier: the name sized to its line ----------------------- */
+html[data-family="dossier"] main.manager-page #dossier-profile .dossier-identity {
+  container-type: inline-size;
+}
+
+html[data-family="dossier"] main.manager-page #dossier-profile .dossier-identity .manager-display-name {
+  white-space: nowrap;
+}
+
+/* The atoms take the name's own size (1em) unless the line is too short
+   for every character (~1.08em each with the tracking). */
+html[data-family="dossier"] main.manager-page #dossier-profile .dossier-identity .manager-display-name .jp-atom {
+  font-size: min(1em, calc(100cqi / (var(--name-len, 4) * 1.08)));
+}
+
+/* ---- The dossier's facts: values wrap, never cut ------------------- */
+html[data-family="dossier"] main.manager-page .manager-facts > div {
+  min-width: 0;
+}
+
+html[data-family="dossier"] main.manager-page .manager-facts dd {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
