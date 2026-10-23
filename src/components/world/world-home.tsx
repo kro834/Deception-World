@@ -7,7 +7,7 @@ import { GuardedLink, useLoadGate } from "@/components/load-gate";
 import { useWorldMode } from "./use-world-mode";
 import { LiquidLens, LiquidPointerGlow } from "./liquid-rail";
 import { SideMenuLayer, SideMenuTrigger } from "./world-chrome";
-import { RELATED_NAV, RIDER_NAV, NameText } from "./dossier-nav";
+import { RELATED_NAV, RIDER_NAV, RIKUEI_NAV, NameText } from "./dossier-nav";
 import { SlideOpenControl } from "./slide-open-control";
 import { UiVectorIcon } from "./ui-vector-icon";
 import { resetPickupScroll, settlePickupScroll } from "./pickup-scroll-reset";
@@ -28,6 +28,14 @@ import { useDialogHistoryDismiss } from "./use-dialog-history-dismiss";
 import { WorldAtmosphere } from "./world-atmosphere";
 import { WORLD_COLUMNS } from "./world-columns-data";
 import { MysteryColumnProse } from "./mystery-column-prose";
+import {
+  pad2,
+  WORLD_CHAPTER_TOTAL,
+  WorldChapterRail,
+  WorldContents,
+  WorldSpecialDoors,
+} from "./world-special";
+import { WORLD_CAST_ROSTER } from "./world-annex-data";
 
 const POSTERS = [
   {
@@ -802,6 +810,16 @@ const FINALE_TITLE = (
     まだ終わらない。
   </>
 );
+
+/* The CONTENTS readouts (world-special.tsx): every figure is read from the
+   page's own records. */
+const WORLD_READOUTS = [
+  { value: RIKUEI_NAV.length, label: "MANAGERS" },
+  { value: RIDERS.length, label: "RIDERS" },
+  { value: EPISODES.length, label: "EPISODES" },
+  { value: WORLD_CAST_ROSTER.length, label: "PERSONS" },
+  { value: POSTERS.length, label: "KEY VISUALS" },
+] as const;
 
 type WorldSectionId = "story" | "riders" | "records";
 
@@ -1837,6 +1855,12 @@ export function WorldHome() {
           <i className="zn-trail zn-trail-b" />
           <i className="zn-bloom" />
         </div>
+        {/* The special sites' HUD over the stage: a scan grid, corner
+            brackets and a scale bar (styles-world-special.css). */}
+        <div className="ws-hero-hud" aria-hidden="true">
+          <i className="ws-hero-bracket" />
+          <i className="ws-hero-scale" />
+        </div>
         <div className="film-hero-identity" data-film-reveal>
           <FilmTextScan />
           <p className="anime-work-title">
@@ -2131,11 +2155,16 @@ export function WorldHome() {
 
       <MirageTicker variant="open" records={EPISODES.length} />
 
+      <WorldContents readouts={WORLD_READOUTS} />
+
       <section className="story-section" id="story">
         <div className="section-index" data-film-reveal>
           <span>01</span>
           <small>WORLD / STORY</small>
           <i className="film-boundary-line" aria-hidden="true" />
+          <b className="ws-slate-count" aria-hidden="true">
+            01 / {pad2(WORLD_CHAPTER_TOTAL)}
+          </b>
         </div>
         <div className="story-layout">
           <div className="story-heading">
@@ -2616,6 +2645,9 @@ export function WorldHome() {
           <span>02</span>
           <small>EIGHT RIDERS</small>
           <i className="film-boundary-line" aria-hidden="true" />
+          <b className="ws-slate-count" aria-hidden="true">
+            02 / {pad2(WORLD_CHAPTER_TOTAL)}
+          </b>
         </div>
         <div className="section-title">
           <p className="eyebrow">
@@ -2705,6 +2737,9 @@ export function WorldHome() {
           <span>03</span>
           <small>NEW RECORDS</small>
           <i className="film-boundary-line" aria-hidden="true" />
+          <b className="ws-slate-count" aria-hidden="true">
+            03 / {pad2(WORLD_CHAPTER_TOTAL)}
+          </b>
         </div>
         <div className="records-heading">
           <p className="eyebrow">
@@ -2877,6 +2912,9 @@ export function WorldHome() {
       <MirageTicker variant="close" records={EPISODES.length} />
 
       <footer>
+        <b className="ws-billing" aria-hidden="true">
+          DECEPTION
+        </b>
         <div className="mr-endmark" aria-hidden="true">
           <span>END OF RECORD</span>
           <b>終端</b>
@@ -2886,10 +2924,13 @@ export function WorldHome() {
           <b>DECEPTION WORLD</b>
         </div>
         <p>ORIGINAL PROJECT / CONCEPT VISUAL EXPERIENCE</p>
+        <WorldSpecialDoors />
         <a href="#top">BACK TO TOP ↑</a>
       </footer>
 
       <RisingWorld />
+
+      <WorldChapterRail />
 
       <dialog
         ref={episodePickupDialogRef}

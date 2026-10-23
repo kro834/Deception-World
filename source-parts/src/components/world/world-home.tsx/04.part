@@ -1,6 +1,3 @@
-      const swapIndex = randomBelow(index + 1);
-      [posterSequence[index], posterSequence[swapIndex]] = [
-        posterSequence[swapIndex],
         posterSequence[index],
       ];
     }
@@ -286,6 +283,12 @@
           <i className="zn-trail zn-trail-b" />
           <i className="zn-bloom" />
         </div>
+        {/* The special sites' HUD over the stage: a scan grid, corner
+            brackets and a scale bar (styles-world-special.css). */}
+        <div className="ws-hero-hud" aria-hidden="true">
+          <i className="ws-hero-bracket" />
+          <i className="ws-hero-scale" />
+        </div>
         <div className="film-hero-identity" data-film-reveal>
           <FilmTextScan />
           <p className="anime-work-title">
@@ -515,3 +518,7 @@
                     </svg>
                   ) : (
                     <svg viewBox="0 0 24 24" width="14" height="14">
+                      <path
+                        d="M8 10V8a4 4 0 0 1 7.5-2"
+                        fill="none"
+                        stroke="currentColor"

@@ -1,9 +1,3 @@
-                ))}
-              </div>
-              <div className="world-column-summary-stack">
-                {COLUMNS.map((item, index) => (
-                  <div
-                    key={item.no}
                     className={`world-column-summary-pane world-column-stack-item${index === columnTab ? " is-active" : ""}`}
                     aria-hidden={index !== columnTab}
                   >
@@ -31,6 +25,9 @@
           <span>02</span>
           <small>EIGHT RIDERS</small>
           <i className="film-boundary-line" aria-hidden="true" />
+          <b className="ws-slate-count" aria-hidden="true">
+            02 / {pad2(WORLD_CHAPTER_TOTAL)}
+          </b>
         </div>
         <div className="section-title">
           <p className="eyebrow">
@@ -120,6 +117,9 @@
           <span>03</span>
           <small>NEW RECORDS</small>
           <i className="film-boundary-line" aria-hidden="true" />
+          <b className="ws-slate-count" aria-hidden="true">
+            03 / {pad2(WORLD_CHAPTER_TOTAL)}
+          </b>
         </div>
         <div className="records-heading">
           <p className="eyebrow">
@@ -292,6 +292,9 @@
       <MirageTicker variant="close" records={EPISODES.length} />
 
       <footer>
+        <b className="ws-billing" aria-hidden="true">
+          DECEPTION
+        </b>
         <div className="mr-endmark" aria-hidden="true">
           <span>END OF RECORD</span>
           <b>終端</b>
@@ -301,10 +304,13 @@
           <b>DECEPTION WORLD</b>
         </div>
         <p>ORIGINAL PROJECT / CONCEPT VISUAL EXPERIENCE</p>
+        <WorldSpecialDoors />
         <a href="#top">BACK TO TOP ↑</a>
       </footer>
 
       <RisingWorld />
+
+      <WorldChapterRail />
 
       <dialog
         ref={episodePickupDialogRef}

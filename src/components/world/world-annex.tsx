@@ -9,6 +9,7 @@ import { UiVectorIcon } from "./ui-vector-icon";
 import { QuoteTranscript } from "./quote-transcript";
 import { mountQuoteTranscript } from "@/lib/quote-transcript.js";
 import { WorldBriefArt } from "./world-brief-art";
+import { pad2, WORLD_CHAPTER_TOTAL } from "./world-special";
 import {
   WORLD_BRIEF,
   WORLD_CAST_ROSTER,
@@ -206,6 +207,9 @@ function ChapterOpener({ no, label }: { no: string; label: string }) {
       <span>{no}</span>
       <small>{label}</small>
       <i />
+      <b className="ws-slate-count">
+        {no} / {pad2(WORLD_CHAPTER_TOTAL)}
+      </b>
     </div>
   );
 }

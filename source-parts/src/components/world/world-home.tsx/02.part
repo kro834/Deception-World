@@ -1,3 +1,4 @@
+  },
   {
     no: "05",
     title: "FARCE",
@@ -286,6 +287,16 @@ const FINALE_TITLE = (
   </>
 );
 
+/* The CONTENTS readouts (world-special.tsx): every figure is read from the
+   page's own records. */
+const WORLD_READOUTS = [
+  { value: RIKUEI_NAV.length, label: "MANAGERS" },
+  { value: RIDERS.length, label: "RIDERS" },
+  { value: EPISODES.length, label: "EPISODES" },
+  { value: WORLD_CAST_ROSTER.length, label: "PERSONS" },
+  { value: POSTERS.length, label: "KEY VISUALS" },
+] as const;
+
 type WorldSectionId = "story" | "riders" | "records";
 
 /* The location marker changes at three scroll boundaries. Owning it here keeps
@@ -511,7 +522,3 @@ export function WorldHome() {
     setManagerTab(1);
     syncRail(managerRail.current, 1);
   }, [locationHash]);
-
-  useLayoutEffect(() => {
-    if (locationHash !== "manager-archive-dogs") return;
-    setManagerTab(3);
