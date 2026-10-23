@@ -56,3 +56,11 @@
   line-break: strict;
   overflow-wrap: anywhere;
 }
+
+.gallery-image-viewport > .gallery-image-error {
+  box-sizing: border-box;
+  max-height: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  align-content: safe center;
+}

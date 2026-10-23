@@ -2878,6 +2878,102 @@ html[data-mode="world"]:not([data-world-effects="economy"])
 }
 
 /* ================================================================
+   RIKUEI ZENITH (2026-10-23) — the 六詠's screens: the World page's
+   manager archive (tabs and the six signals) and the manager dossiers.
+
+   Owner: 「六詠達のタブや画面の改善に取り組んでください。」
+   - Each of the six carries its own light (a rank plate in its colour, a
+     lit hairline that wakes on hover/focus, corner ticks), as the special
+     sites' plates do.
+   - Phones read every name and label on one line: two signals a row,
+     OPEN DOSSIER unbroken.
+   - The dossier's name is sized to its line (--name-len, set from the
+     name), so a name never breaks after its 「・」 (レックス・ロワ).
+   - The dossier's facts wrap their values instead of being cut.
+   Layout and light only: no copy, no Japanese faces, no motion loops.
+   ================================================================ */
+
+/* ---- The archive's six signals ------------------------------------ */
+.site-shell.film-edition.mirage-edition #manager-archive#manager-archive#manager-archive .manager-slot-grid > .signal {
+  --rk-light: 168 200 255;
+  isolation: isolate;
+}
+.site-shell.film-edition.mirage-edition #manager-archive#manager-archive#manager-archive .manager-slot-grid > .signal:nth-child(1) {
+  --rk-light: 240 207 134; /* ゼウス: sovereign gold */
+}
+.site-shell.film-edition.mirage-edition #manager-archive#manager-archive#manager-archive .manager-slot-grid > .signal:nth-child(2) {
+  --rk-light: 122 176 255; /* レックス・ロワ: order's blue */
+}
+.site-shell.film-edition.mirage-edition #manager-archive#manager-archive#manager-archive .manager-slot-grid > .signal:nth-child(3) {
+  --rk-light: 255 92 128; /* シュザ: desire's crimson */
+}
+.site-shell.film-edition.mirage-edition #manager-archive#manager-archive#manager-archive .manager-slot-grid > .signal:nth-child(4) {
+  --rk-light: 232 236 244; /* レジャス: the mask's white */
+}
+.site-shell.film-edition.mirage-edition #manager-archive#manager-archive#manager-archive .manager-slot-grid > .signal:nth-child(5) {
+  --rk-light: 190 132 255; /* オパス: violet */
+}
+.site-shell.film-edition.mirage-edition #manager-archive#manager-archive#manager-archive .manager-slot-grid > .signal:nth-child(6) {
+  --rk-light: 120 236 220; /* リームー: teal */
+}
+
+/* The rank numeral in the file's light. */
+.site-shell.film-edition.mirage-edition #manager-archive#manager-archive#manager-archive .manager-slot-grid > .signal > span:first-of-type {
+  color: rgb(var(--rk-light));
+  text-shadow: 0 0 14px rgb(var(--rk-light) / 65%);
+}
+
+/* A lit hairline in the file's light; brighter on hover and focus. */
+.site-shell.film-edition.mirage-edition #manager-archive#manager-archive#manager-archive .manager-slot-grid > .signal {
+  box-shadow:
+    inset 0 0 0 1px rgb(var(--rk-light) / 30%),
+    inset 0 -2px 0 rgb(var(--rk-light) / 45%);
+  transition: box-shadow 220ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .site-shell.film-edition.mirage-edition #manager-archive#manager-archive#manager-archive .manager-slot-grid > .signal:hover {
+    box-shadow:
+      inset 0 0 0 1px rgb(var(--rk-light) / 70%),
+      inset 0 -2px 0 rgb(var(--rk-light) / 90%),
+      0 18px 40px -22px rgb(var(--rk-light) / 75%);
+  }
+}
+.site-shell.film-edition.mirage-edition #manager-archive#manager-archive#manager-archive .manager-slot-grid > .signal:focus-visible {
+  box-shadow:
+    inset 0 0 0 1px rgb(var(--rk-light) / 70%),
+    inset 0 -2px 0 rgb(var(--rk-light) / 90%),
+    0 18px 40px -22px rgb(var(--rk-light) / 75%);
+}
+
+/* The name and the action on one line each. */
+.site-shell.film-edition.mirage-edition #manager-archive#manager-archive#manager-archive .manager-slot-grid > .signal > b,
+.site-shell.film-edition.mirage-edition #manager-archive#manager-archive#manager-archive .manager-slot-grid > .signal > small {
+  white-space: nowrap;
+}
+
+/* ---- Phones: two signals a row, every label unbroken --------------- */
+@media (max-width: 560px) {
+  /* (Three ids out-rank the stage sheet's 3-column phone grid.) */
+  .site-shell.film-edition.mirage-edition #manager-archive#manager-archive#manager-archive .manager-slot-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    row-gap: 12px;
+  }
+
+  .site-shell.film-edition.mirage-edition #manager-archive#manager-archive#manager-archive .manager-slot-grid > .signal > b {
+    font-size: clamp(14px, 4.4vw, 18px);
+    letter-spacing: 0.04em;
+  }
+
+  .site-shell.film-edition.mirage-edition #manager-archive#manager-archive#manager-archive .manager-slot-grid > .signal > small {
+    font-size: 12px;
+    letter-spacing: 0.08em;
+  }
+
+}
+
+
+/* ================================================================
    Android lite tier
    Scope: html:not([data-world-effects="economy"])[data-android-renderer],
    every capable Android renderer (economy has its own, stricter path).

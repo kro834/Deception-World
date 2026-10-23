@@ -113,7 +113,7 @@ export function GalleryTourEntrance({
             const stopIndex = hasSavedPosition ? getTourStopIndex(tour, saved.workId) : 0;
             const reachedEnd = hasSavedPosition && stopIndex === tour.stops.length - 1;
             const startLabel = reachedEnd
-              ? "最初から巡る"
+              ? "最後の作品をもう一度"
               : hasSavedPosition
                 ? "続きから巡る"
                 : "このコースを巡る";
@@ -195,17 +195,14 @@ export function GalleryTourEntrance({
                         className="gallery-tour-action gallery-tour-action-primary"
                         type="button"
                         onClick={() =>
-                          onStart(
-                            tour.id,
-                            hasSavedPosition && !reachedEnd ? saved.workId : undefined,
-                          )
+                          onStart(tour.id, hasSavedPosition ? saved.workId : undefined)
                         }
                         aria-label={`${startLabel}：${tour.title}`}
                       >
                         {startLabel}
                         <span aria-hidden="true">→</span>
                       </button>
-                      {hasSavedPosition && !reachedEnd && stopIndex > 0 && (
+                      {hasSavedPosition && stopIndex > 0 && (
                         <button
                           className="gallery-tour-action gallery-tour-action-text"
                           type="button"

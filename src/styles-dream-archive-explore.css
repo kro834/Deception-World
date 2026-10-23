@@ -1,0 +1,212 @@
+/* Archive navigation and local discovery for 舞台 / 繋がり / 武装. */
+.dream-page.dream-page .dream-archive-index {
+  min-width: 0;
+  margin: 0 0 clamp(18px, 2.5vw, 28px);
+  padding: clamp(14px, 2vw, 22px);
+  border: 1px solid var(--dr-rule-2, var(--ts-hair));
+  background: var(--dr-plate-fill, var(--ts-night));
+}
+
+.dream-page.dream-page .dream-archive-index > p,
+.dream-page.dream-page .dream-archive-explore > label {
+  display: block;
+  margin: 0 0 12px;
+  color: var(--ts-kin-light);
+  font-family: var(--ts-display);
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.5;
+  letter-spacing: 0.06em;
+}
+
+.dream-page.dream-page .dream-archive-index ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dream-page.dream-page .dream-archive-index li {
+  min-width: 0;
+}
+
+.dream-page.dream-page .dream-archive-index a,
+.dream-page.dream-page .dream-archive-related a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 9px 13px;
+  border: 1px solid var(--ts-hair);
+  color: var(--ts-kinari);
+  background: rgb(15 13 25 / 75%);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.4;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.dream-page.dream-page .dream-archive-index a:hover,
+.dream-page.dream-page .dream-archive-related a:hover {
+  border-color: var(--ts-kin-light);
+  background: rgb(70 46 51 / 74%);
+}
+
+.dream-page.dream-page .dream-archive-index a:focus-visible,
+.dream-page.dream-page .dream-archive-related a:focus-visible,
+.dream-page.dream-page .dream-archive-explore :is(input, select):focus-visible {
+  outline: 2px solid var(--ts-fuji);
+  outline-offset: 2px;
+}
+
+.dream-page.dream-page .dream-archive-explore {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0 18px;
+  align-items: end;
+  min-width: 0;
+  margin: 0 0 12px;
+  padding: clamp(14px, 2vw, 20px);
+  border: 1px solid var(--dr-rule-2, var(--ts-hair));
+  background: var(--dr-plate-fill, var(--ts-night));
+}
+
+.dream-page.dream-page .dream-archive-explore > label {
+  grid-column: 1 / -1;
+}
+
+.dream-page.dream-page .dream-archive-explore :is(input, select) {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  padding: 9px 14px;
+  border: 1px solid var(--ts-hair);
+  border-radius: 0;
+  color: var(--ts-kinari);
+  background: rgb(12 10 20 / 92%);
+  font: inherit;
+  font-size: 16px;
+  line-height: 1.5;
+  scroll-margin-top: 140px;
+}
+
+.dream-page.dream-page .dream-archive-explore input::placeholder {
+  color: var(--ts-ginnezu);
+  opacity: 1;
+}
+
+.dream-page.dream-page .dream-archive-explore > p {
+  margin: 0 0 9px;
+  color: var(--ts-zoge);
+  font-size: 14px;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+.dream-page.dream-page .dream-archive-related {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--ts-hair-soft);
+}
+
+.dream-page.dream-page .dream-archive-related > span {
+  width: 100%;
+  color: var(--ts-ginnezu);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.dream-page.dream-page .dream-relations-tie > .dream-archive-related {
+  grid-column: 1 / -1;
+  grid-row: auto;
+  margin-top: 0;
+}
+
+.dream-page.dream-page .dream-archive-empty {
+  margin: 0;
+  padding: 12px 18px 18px;
+  color: var(--ts-zoge);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.dream-page.dream-page .dream-archive-empty button {
+  display: block;
+  min-height: 44px;
+  margin-top: 10px;
+  padding: 8px 12px;
+  border: 1px solid var(--ts-hair);
+  color: var(--ts-kinari);
+  background: rgb(15 13 25 / 75%);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.dream-page.dream-page .dream-archive-empty button:focus-visible {
+  outline: 2px solid var(--ts-fuji);
+  outline-offset: 2px;
+}
+
+.dream-page.dream-page .dream-archive-no-results {
+  margin-bottom: 12px;
+  border: 1px solid var(--ts-hair-soft);
+}
+
+@media (min-width: 1181px) and (min-height: 700px) {
+  html[data-family="dream"] main.dream-page.dream-page > .dream-annex#atlas {
+    grid-template-rows: auto auto minmax(0, 1fr);
+  }
+}
+
+.dream-page.dream-page
+  :is(.dream-atlas-grid article, .dream-relations-circles details, .dream-arsenal-groups details) {
+  scroll-margin-top: 140px;
+}
+
+.dream-page.dream-page .dream-atlas-grid article:target,
+.dream-page.dream-page .dream-archive-fold:target > summary {
+  outline: 2px solid var(--ts-fuji);
+  outline-offset: 4px;
+}
+
+@media (max-width: 640px) {
+  .dream-page.dream-page .dream-archive-index ol {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dream-page.dream-page .dream-archive-index a {
+    width: 100%;
+    height: 100%;
+  }
+
+  .dream-page.dream-page .dream-archive-explore {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .dream-page.dream-page .dream-archive-explore > label {
+    grid-column: 1;
+  }
+
+  .dream-page.dream-page .dream-archive-explore > p {
+    margin: 10px 0 0;
+    white-space: normal;
+  }
+}
+
+@media (forced-colors: active) {
+  .dream-page.dream-page .dream-archive-index a,
+  .dream-page.dream-page .dream-archive-related a,
+  .dream-page.dream-page .dream-archive-explore :is(input, select) {
+    forced-color-adjust: auto;
+  }
+}

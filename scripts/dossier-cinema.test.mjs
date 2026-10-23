@@ -47,7 +47,7 @@ test("the dossier routes load the cinema sheet after the edition sheet, before p
   // Page sheets still come after every dossier sheet.
   assert.match(
     await read("src/routes/characters/ciel.tsx"),
-    /\[\.\.\.DOSSIER_STYLESHEET_LINKS, \{ rel: "stylesheet", href: cielCssUrl \}\]/,
+    /\[\s*\.\.\.DOSSIER_STYLESHEET_LINKS,\s*\{ rel: "stylesheet", href: cielCssUrl \},\s*\{ rel: "stylesheet", href: characterReadingCssUrl \},?\s*\]/,
   );
 });
 

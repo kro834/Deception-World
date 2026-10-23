@@ -58,6 +58,7 @@ function update(action: (saved: LibrarySaved) => LibrarySaved) {
     // Re-read before every write so another tab's last successful change is preserved.
     const saved = writeLibrarySaved(window.localStorage, action);
     publish({ saved, ready: true, error: "" });
+    return true;
   } catch (error) {
     publish({
       ...snapshot,
@@ -67,6 +68,7 @@ function update(action: (saved: LibrarySaved) => LibrarySaved) {
           ? error.message
           : "保存できませんでした。ブラウザーの保存設定・空き容量を確認してください。既存の保存データは変更していません。",
     });
+    return false;
   }
 }
 export function toggleBookmark(id: string) {
@@ -76,11 +78,11 @@ export function recordLibraryVisit(id: string) {
   update((saved) => addLibraryVisit(saved, id, Date.now()));
 }
 export function clearLibraryRecent() {
-  update((saved) => ({ ...saved, recent: [] }));
+  return update((saved) => ({ ...saved, recent: [] }));
 }
 export function clearLibraryBookmarks() {
-  update((saved) => ({ ...saved, bookmarks: [] }));
+  return update((saved) => ({ ...saved, bookmarks: [] }));
 }
 export function clearLibraryAll() {
-  update(() => emptyLibrarySaved());
+  return update(() => emptyLibrarySaved());
 }

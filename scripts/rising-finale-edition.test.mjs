@@ -219,8 +219,8 @@ test("the 404 record plate: its own sheet, linked only where it renders", async 
   const words = [
     '<span aria-hidden="true">404 / LOST RECORD</span>',
     "<p>DECEPTION WORLD</p>",
-    "<h1>記録が見つかりません。</h1>",
-    "<p>指定された資料は存在しないか、まだ公開されていません。</p>",
+    '<h1 id="not-found-heading">記録が見つかりません。</h1>',
+    '<p id="not-found-description">',
     "<RecoveryTiles />",
   ];
   let at = 0;
