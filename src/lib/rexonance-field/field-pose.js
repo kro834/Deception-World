@@ -50,8 +50,11 @@ export const FIELD_SHAPE = Object.freeze({
   /** The detonation's throw (figure heights). */
   throw: 0.5,
   /** The streak: how far back along the line a trail reaches (phase units);
-   * a line marker's trail is this many times longer. */
-  streak: 0.0045,
+   * a line marker's trail is this many times longer. Owner (2026-10-23:
+   * 「ナノマシンや装着をブラッシュアップ」): the trails were long enough to
+   * weave a slab of hairlines over the plates being fitted; at half the
+   * length each particle reads as a machine on its line. */
+  streak: 0.0022,
   marker: 3,
   /** Depth: how much bigger and dimmer a particle gets behind the body. */
   bokeh: 0.8,
