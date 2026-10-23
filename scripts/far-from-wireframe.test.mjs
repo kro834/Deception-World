@@ -414,3 +414,31 @@ test("a live mount prepares the wireframe (no swarm module, no kit sheets) and d
     releaseBodyFlame();
   }
 });
+
+test("the entry transition's plates have their own conforming meshes, made from its cut", async () => {
+  const entry = await import("../src/lib/far-from-entry-suit.ts");
+  const wireEntry = await import("../src/lib/far-from-wireframe-entry.ts");
+  assert.equal(
+    wireEntry.FAR_FROM_WIREFRAME_ENTRY_SOURCE.pieces,
+    wireSuitFingerprint(entry.FAR_FROM_ENTRY_PIECES),
+    `the entry's plates changed: run ${REBUILD}`,
+  );
+  assert.equal(
+    wireEntry.FAR_FROM_WIREFRAME_ENTRY_SOURCE.atlas,
+    hashFile(entry.FAR_FROM_ENTRY_ATLAS.src),
+    `the entry's atlas changed: run ${REBUILD}`,
+  );
+  assert.deepEqual(
+    Object.keys(wireEntry.FAR_FROM_WIREFRAME_ENTRY).sort(),
+    entry.FAR_FROM_ENTRY_PIECES.map((piece) => piece.id).sort(),
+  );
+  for (const [id, text] of Object.entries(wireEntry.FAR_FROM_WIREFRAME_ENTRY)) {
+    const mesh = decodeWireMesh(text);
+    const check = checkWireMesh(mesh, triangulateWireMesh(mesh));
+    assert.equal(check.folded + check.missing + check.open, 0, id);
+  }
+  // The entry engine draws the wire with the plates (no composite, batched).
+  const engine = read("src/components/far-from-saga/far-from-entry-engine.ts");
+  assert.match(engine, /const wire = wireOf\(p\);/);
+  assert.doesNotMatch(engine, /A nanite mote, streaming in/);
+});
