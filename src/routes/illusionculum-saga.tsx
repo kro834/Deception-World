@@ -17,6 +17,7 @@ import {
   ILLUSIONCULUM_KEY_VISUAL,
   illusionculumCutoutImage,
 } from "@/lib/illusionculum-saga-artwork";
+import { syncRexonanceLayoutGate } from "@/lib/rexonance-layout-gate.js";
 
 // The ILLUSIONCULUM SAGA special site (owner, 2026-10-23: 「イリュージョンクルム
 // サーガを追加。レクソナンスを参考に。」), on the Rexonance site's structure as
@@ -24,6 +25,11 @@ import {
 // styles-illusionculum-saga.css is this page's own and loads after them, the
 // scroll suit-up's sheet after it, the cinematic sheet last.
 export const Route = createFileRoute("/illusionculum-saga")({
+  // The suit-up runway's length is decided before layout (the Save-Data /
+  // 2G snapshot), as on the Rexonance route.
+  beforeLoad: ({ cause, preload }) => {
+    if (typeof window !== "undefined" && !preload && cause === "enter") syncRexonanceLayoutGate();
+  },
   component: IllusionculumSaga,
   head: () => ({
     meta: [

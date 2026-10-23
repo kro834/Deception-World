@@ -38,7 +38,7 @@ export function AssemblyMovie({
 }: {
   runwayRef: RefObject<HTMLDivElement | null>;
   /** The page, for its sheet. */
-  site: "rexonance" | "far-from";
+  site: "rexonance" | "far-from" | "illusionculum";
 }) {
   const ref = useRef<HTMLDivElement | null>(null);
   useEffect(() => {

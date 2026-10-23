@@ -102,9 +102,12 @@ ROOT = Path(__file__).resolve().parents[2]
 SITES = {
     "rexonance": ROOT / "design/rexonance-suit" / f"sam-masks-{VERSION}",
     "far-from": ROOT / "design/far-from-suit-20261022" / f"sam-masks-{VERSION}",
+    # ILLUSIONCULUM (2026-10-23, owner: 「イリュージョンとメタにも装甲切り出しは
+    # SAMを用いて」): one picture, its driver by its outline, as FAR FROM.
+    "illusionculum": ROOT / "design/illusionculum-saga-20261023" / "sam-masks",
 }
 # How far (frame px) a plate's boundary may leave its straight clip.
-BAND = {"rexonance": 40, "far-from": 32}
+BAND = {"rexonance": 40, "far-from": 32, "illusionculum": 32}
 # The polygon prior's weight against SAM's probability (0..1) in the partition.
 PRIOR = 0.3
 # The edge-aware smoothing of the partition's scores (guided filter radius, px).
@@ -115,12 +118,13 @@ SMOOTH = 5
 EXTRA = {
     "rexonance": {"core": {"pos": [[527, 632], [527, 652]], "neg": []}},
     "far-from": {},
+    "illusionculum": {},
 }
 # Plates the polygon build left empty, kept empty: their pixels go to the next
 # plate of their region (FAR FROM's plume root stays behind the shoulder pad
 # with the plume's first section, as it was; a plate of its own there landed
 # last, after the wings).
-MERGE = {"rexonance": {}, "far-from": {"tail-0": "tail-1"}}
+MERGE = {"rexonance": {}, "far-from": {"tail-0": "tail-1"}, "illusionculum": {}}
 # Below this IoU estimate SAM's best candidate for a region is not trusted.
 WEAK_IOU = 0.3
 # SAM's sub-parts (atoms) count from this IoU estimate up.
@@ -927,7 +931,7 @@ def run_site(site: str, sam: Sam | None, debug: Path | None, only=None):
     results = {}
     for layer, regs, picture, positive_support in layers:
         priors = claimed([r["poly"] for r in regs], shape)
-        if site == "far-from":
+        if site != "rexonance":
             priors = [p & ~m.belt for p in priors]
         probs = []
         for i, r in enumerate(regs):
@@ -942,7 +946,7 @@ def run_site(site: str, sam: Sam | None, debug: Path | None, only=None):
             neg += [tuple(p) for p in extra.get("neg", [])]
             # A hand-placed positive outweighs a sampled negative beside it.
             neg = [q for q in neg if all(math.hypot(q[0] - x, q[1] - y) > 30 for x, y in extra.get("pos", []))]
-            if site == "far-from":
+            if site != "rexonance":
                 neg += farthest_points(erode(m.belt, 3) & dilate(priors[i], 50), 1, min_depth=3)
             if layer == "ornaments":
                 # The armour the ornament's polygon reaches over (the art shows

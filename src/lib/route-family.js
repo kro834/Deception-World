@@ -25,6 +25,7 @@ export function getRouteFamily(pathname) {
     path === "/rexonance-saga" ||
     path === "/extreme-saga" ||
     path === "/far-from-saga" ||
+    path === "/illusionculum-saga" ||
     path === "/final-stage" ||
     path === "/saga-cinema"
   ) {
