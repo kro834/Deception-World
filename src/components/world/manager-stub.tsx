@@ -651,11 +651,7 @@ function ManagerDossier({ profile }: { profile: Profile }) {
             {/* The file's numeral in outline over the name, as on the end
                 card; the first rank's is its seal (decorative). */}
             {profile.sovereign ? null : (
-              <span
-                className="dossier-file-numeral"
-                data-numerals="roman"
-                aria-hidden="true"
-              >
+              <span className="dossier-file-numeral" data-numerals="roman" aria-hidden="true">
                 {profile.numeral}
               </span>
             )}

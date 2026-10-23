@@ -115,7 +115,6 @@ export function YoakeMamoriPage() {
               to: "/managers/shuza",
               assets: ["/manager-shuza.jpeg"],
               title: "シュザ",
-              context: "性格と闘い方の章に登場する人物の資料",
             },
           ]}
         />

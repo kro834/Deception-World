@@ -169,7 +169,6 @@ export function CielPage() {
               to: "/riders/saga",
               assets: [SAGA.civilianImg],
               title: "仮面ライダーサーガ",
-              context: `${SAGA.civilian.name}の人物資料と変身記録`,
             },
             ...(SAGA.special
               ? [
@@ -178,7 +177,6 @@ export function CielPage() {
                     hash: SAGA.special.hash,
                     assets: SAGA.special.assets,
                     title: `仮面ライダー${SAGA.special.name}`,
-                    context: SAGA.special.label,
                   },
                 ]
               : []),

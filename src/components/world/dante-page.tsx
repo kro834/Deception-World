@@ -157,12 +157,10 @@ export function DantePage() {
             {
               href: `#character-section-${VARG_SECTIONS[0].no}`,
               title: VARG_SECTIONS[0].title,
-              context: "第二の犬・ヴァルグの記録へ",
             },
             ...DANTE_FORMS.map((form) => ({
               href: `#${form.id}`,
               title: form.name,
-              context: "変身記録へ",
             })),
           ]}
         />
