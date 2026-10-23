@@ -46,6 +46,12 @@ const FIREBRANDS = 24;
 const FIREBRANDS_TOUCH = 8;
 const clamp01 = (value) => (value < 0 ? 0 : value > 1 ? 1 : value);
 const smooth = (u) => u * u * (3 - 2 * u);
+// A machine's insertion stroke: 0 → 1 from rest to rest, its speed peaking
+// a fifth of the way in, then a long brake onto the key ((1 − u)⁴(1 + 4u)).
+const insertStroke = (u) => {
+  const r = 1 - u;
+  return 1 - r * r * r * r * (1 + 4 * u);
+};
 const easeOut = (u) => 1 - (1 - u) * (1 - u) * (1 - u);
 
 /** Staged shell distance from its seat: approach, magnetic capture, lock.
@@ -98,6 +104,7 @@ export const ASSEMBLY_NANITES = Object.freeze({
   seamGlow: 0.006,
   shock: 0.008,
   paint: 0.01,
+  ribbonPaint: 0.032,
   lacquer: 0.0015,
   print: 0.004,
   recoil: 0.006,
@@ -750,10 +757,14 @@ export function* assemblyNanitePlanSteps({
     gateJ[i] = (naniteHash(i, 21) - 0.5) * 0.024 * H;
     hsh[i] = naniteHash(i, 22);
     if (piece?.helm) helmD[i] = Math.hypot(CX[i] - eyeX, CY[i] - eyeY) / helmReach;
-    // Paint develops from the seat outward after contact.
+    // Paint develops from the seat outward after contact; a ribbon's flows
+    // from its root down to its tip over a longer stretch of the scroll
+    // (owner, 2026-10-23: the muffler went from lattice to painted at one
+    // notch).
     if (piece) {
       const d = Math.hypot(CX[i] - piece.seatX, CY[i] - piece.seatY) / piece.reach;
-      tp[i] = Math.max(piece.contact + 0.001 + (piece.helm ? 0.004 : N.paint) * d, T1[i] + 0.0005);
+      const sweep = piece.helm ? 0.004 : piece.kind === 2 ? N.ribbonPaint : N.paint;
+      tp[i] = Math.max(piece.contact + 0.001 + sweep * d, T1[i] + 0.0005);
     } else tp[i] = T1[i] + 0.0005;
     if (tick()) yield;
   }
@@ -2952,10 +2963,14 @@ export function createAssemblyNanites({
       fr += helm ? rate * 1.5 * dive * span : rate * (2 * 0.55 * span + 0.5 * 0.25 * span);
       const w = (u - dive) / (1 - dive);
       // N14, leaders and followers: a plate's first tiles dive at once; the
-      // rest hesitate at the hover point — backing off a breath along the
-      // plate's normal, sniffing sideways — then dart in, faster, to land at
-      // the same moment. (Rank: when the tile lands within its plate's
-      // flights; the hesitation grows with it, per-chip varied.)
+      // rest hold at the hover point, then dart in, faster, to land at the
+      // same moment. (Rank: when the tile lands within its plate's flights;
+      // the hold grows with it, per-chip varied.) The hold is dead still
+      // and the insertion one decelerating stroke onto the key (owner,
+      // 2026-10-23: precise machines — no sideways sniff or mid-stroke
+      // stop, which read as jitter): from rest it accelerates hard, spends
+      // most of its time braking, and touches the socket at rest, where the
+      // lock's recoil takes over.
       let hes = 0;
       if (!helm && p >= 0) {
         const pc = P[p];
@@ -2963,31 +2978,16 @@ export function createAssemblyNanites({
         hes = (0.12 + 0.16 * HSH[i]) * smooth(clamp01((rank - 0.12) / 0.3));
       }
       if (w < hes) {
-        const sn = w / hes;
-        const bob = Math.sin(Math.PI * sn);
-        const sniff = 2.5 * Math.sin(TAU * (sn + HSH[i])) * bob;
-        x = hx + nx * 6 * bob + qx * sniff;
-        y = hy + ny * 6 * bob + qy * sniff;
+        x = hx;
+        y = hy;
       } else {
         const wd = hes > 0 ? (w - hes) / (1 - hes) : w;
-        const e = helm
-          ? hes > 0
-            ? wd * wd * wd
-            : wd * wd * wd * wd
-          : wd < 0.7
-            ? 0.8 * smooth(wd / 0.7)
-            : 0.8 + 0.2 * smooth((wd - 0.7) / 0.3);
+        const e = helm ? (hes > 0 ? wd * wd * wd : wd * wd * wd * wd) : insertStroke(wd);
         x = hx + (cx - hx) * e;
         y = hy + (cy - hy) * e;
         // N16: its tracer, as long as it is fast.
         const wb = wd > 0.1 ? wd - 0.1 : 0;
-        const eb = helm
-          ? hes > 0
-            ? wb * wb * wb
-            : wb * wb * wb * wb
-          : wb < 0.7
-            ? 0.8 * smooth(wb / 0.7)
-            : 0.8 + 0.2 * smooth((wb - 0.7) / 0.3);
+        const eb = helm ? (hes > 0 ? wb * wb * wb : wb * wb * wb * wb) : insertStroke(wb);
         const tx = hx + (cx - hx) * eb;
         const ty = hy + (cy - hy) * eb;
         if (Math.abs(x - tx) + Math.abs(y - ty) > 2) {
@@ -4817,38 +4817,44 @@ export function createAssemblyNanites({
       }
     }
     // The rivers' gates: two ice posts where each plate's stream narrows
-    // (round 3, review N4: they were not visible), each lit at its tip.
-    let posts = false;
+    // (round 3, review N4: they were not visible), each lit at its tip. They
+    // rise with the stream through them and sink as it thins (owner,
+    // 2026-10-23: posts that popped in and out whole read as stray dashes
+    // round the body), in four strength bands so the strokes stay batched.
     const half = 0.012 * H;
-    for (let p = 0; p < NP; p += 1) {
-      if (laneCount[p] < 3) continue;
-      const pc = P[p];
-      if (!posts) {
-        ctx.beginPath();
-        posts = true;
+    for (let band = 1; band <= 4; band += 1) {
+      let posts = false;
+      for (let p = 0; p < NP; p += 1) {
+        const lanes = laneCount[p];
+        if (lanes < 3 || Math.min(4, Math.ceil((lanes - 2) / 3)) !== band) continue;
+        const pc = P[p];
+        if (!posts) {
+          ctx.beginPath();
+          posts = true;
+        }
+        for (let side = -1; side <= 1; side += 2) {
+          const x = pc.gateX - pc.ny * half * side;
+          const y = pc.gateY + pc.nx * half * side;
+          ctx.moveTo(x - pc.nx * 5, y - pc.ny * 5);
+          ctx.lineTo(x + pc.nx * 5, y + pc.ny * 5);
+        }
       }
-      for (let side = -1; side <= 1; side += 2) {
-        const x = pc.gateX - pc.ny * half * side;
-        const y = pc.gateY + pc.nx * half * side;
-        ctx.moveTo(x - pc.nx * 6, y - pc.ny * 6);
-        ctx.lineTo(x + pc.nx * 6, y + pc.ny * 6);
-      }
-    }
-    if (posts) {
-      ctx.globalAlpha = 0.85;
+      if (!posts) continue;
+      ctx.globalAlpha = 0.2 * band;
       ctx.strokeStyle = "rgb(196 244 255)";
-      ctx.lineWidth = 1.6;
+      ctx.lineWidth = 1.3;
       ctx.stroke();
       if (cells && !coarse) {
         ctx.globalCompositeOperation = "lighter";
-        ctx.globalAlpha = 0.5;
+        ctx.globalAlpha = 0.12 * band;
         for (let p = 0; p < NP; p += 1) {
-          if (laneCount[p] < 3) continue;
+          const lanes = laneCount[p];
+          if (lanes < 3 || Math.min(4, Math.ceil((lanes - 2) / 3)) !== band) continue;
           const pc = P[p];
           for (let side = -1; side <= 1; side += 2) {
-            const x = pc.gateX - pc.ny * half * side + pc.nx * 6;
-            const y = pc.gateY + pc.nx * half * side + pc.ny * 6;
-            ctx.drawImage(cells, BKX[0], BKY[0], 32, 32, x - 5, y - 5, 10, 10);
+            const x = pc.gateX - pc.ny * half * side + pc.nx * 5;
+            const y = pc.gateY + pc.nx * half * side + pc.ny * 5;
+            ctx.drawImage(cells, BKX[0], BKY[0], 32, 32, x - 4, y - 4, 8, 8);
             sprites_ += 1;
           }
         }

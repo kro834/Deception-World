@@ -13,7 +13,7 @@
 export const FAR_FROM_SUIT_GUIDE = {
   src: "/far-from-suit-20261022/guide.webp",
   width: 1024,
-  height: 1030,
+  height: 1042,
 } as const;
 
 /** Each non-driver plate's real outline, in figure px: base64 of Int16
@@ -44,22 +44,23 @@ export const FAR_FROM_SUIT_SEAMS: Readonly<Record<string, string>> = {
   "crystal-mount": "AQAKAGoFWgX+BAoFmQR2BIcEmgP6BHwDagVoA0oGlwNLBsIDOwZ2BNYFCgU=",
   "tasset-pendant": "AQANAGoFJwqwBSoKnAVmCogF5gqqBT4LlQVmC3YFugtmBb8LXwW6CyoFPgtNBeoKOgVnCigFKgo=",
   "tasset-low": "AQAMAGoFQAjnBUIIzwWCCcQFigm/Be4JsQUmCqoFKQonBSYKFAXmCRAFhgkEBXoJ7QRCCA==",
-  "tasset-top": "AQAHAHIFBAfoBe4G8gW6B+gFPgjuBEAI4gS6B+sE7gY=",
+  "tasset-top":
+    "AQAYAFIFuAZqBeYGhgW4BqIFrwauBbwGxgW6BsYFpga+BZ0GAgacBhAGpgboBb4G8gW6B+YFQAjsBD4I4gS6B+wEvgbEBKYG4gSRBhIFkQYeBZ4GFwWmBhsFugYqBbwGNgWvBg==",
   "tasset-l":
-    "AgAMAOoEHgfkBLoH7gRbCEIEIwiFA4oHswNKB+MD6gbEA9YGwQO+BtYDeQbyA8sG6gTsBgwAmQNqBogDigZiA7MGUgPPBkcDqgZXAwIGWgP9BYYDFQaIA/IFngPiBZkDHgatAy4G",
+    "AgAPAOoEHgfkBLoH7gRbCEIEIwiFA4oHswNKB84DFgfjA+oG2wPiBgoEwAZiBKgGbgSUBt8EkgbFBKYG7gS+Bg0AmQNqBogDigZiA7MGUgPPBkcDqgZXAwIGWgP9BYYDFQaIA/IFogPfBa0D5gWvAxIGqwM2Bg==",
   "tasset-r":
-    "AgANAOoFHgfqBewG4gbLBvkGggb+Bn8GEAe6Bg8H1gbuBuoGHQdGB08HigeSBiQI5gVbCPAFugcMADsHagYnBy4GOwceBjYH4gVMB/IFTgcVBnoH/QV9BwIGjQeqBoIHzgZ2B7QGVQeWBg==",
+    "AgARAOoFHgfoBboGDAaqBgoGnAY+BpwGRgaPBm4GlAZ6BqsG1ga6Bt4G0AbxBuIG8gbyBh0HRgdPB4oHkgYkCOYFWwjwBboHDAA7B2oGJQcmBiUH6gUyB98FTAfyBU4HFQZ6B/0FfQcCBo0HqgaCB84Gdge0BlUHlgY=",
   "arm-upper-l":
     "AQAjAPoCbASqA2YErwNqBLIDswTtA6oE8APiBP8DCgXpA+4E1wMiBcADSgWuA2IFkQN6BYUDmgWFA8oFCgLMBQMCsgUIAoIFHAI+BToC+wQ/AvoESAIOBWICZAV6Ai4FlgJdBaQCRgWmAjIFmgIeBaMCygSEAsoEggKsBE4C3AT2ARkF8wHOBDICuwQ2AnQE",
   "arm-bracer-l":
-    "AQARANYCzAWrA84FqAPaBYkD8gWGAxcGWAMCBkgDpgZSA9IGTAPeBkID5wYWAuYGCQLOBvkBkgb8Ae4F/gHnBQYC5QUJAs4F",
+    "AQASANYCzAWrA84FrAPiBZ4D4gWJA/IFhgMXBlgDAgZIA6YGUgPSBkwD3gZCA+cGFgLmBgkCzgb5AZIG/AHuBf4B5wUGAuUFCQLOBQ==",
   "arm-cuff-l": "AQAMAKIC5QZDA+YGGgMTBw4DNgcNA0YHHQNeBx4DhgcDAoYHBQJeBx0CPgchAhYHGALmBg==",
   "arm-fist-l":
     "AgASALoCiAcdA4oHHAOmBw4DugcyA+IHUAM6CEADegg2A4QIJgOGCBoDngjmArsIwgLHCJoCzAhCAqMIMwKWCDICCggFAp4HAwKKBwgAZgMzCHYDmghzA74IbgPECDoDqQgyA9IIFgPfCBQD2gg=",
   "arm-upper-r":
     "AQAiANoHbASeCHQEogi7BOEIzgTeCBgFlgjjBFIIpQRPCMoELQjKBDoIFgU2CCYFLgguBS8IQgU+CF0FWggvBXIIXgWVCPoEnAj6BLsITgXLCIoF0wiyBcoIywVSB8oFUQeeBUIHeAUhB14FCAc2BewG7gTVBgoF5AbiBOcGqgQiB7MEJQdqBCoHZgQ=",
   "arm-bracer-r":
-    "AQAVAP4HzAXKCM4FzgjqBdYI6AXYCO4F1wh6BtsIigbPCL4GvgjlBpYH5waKB94GgwfOBowHpgZ8BwIGTgcXBksH8gUqB9gFKAfOBUYHzAVSB9wFVgfMBQ==",
+    "AQAWAP4HzAXKCM4FzgjqBdYI6AXYCO4F1wh6BtsIigbPCL4GvgjlBpYH5waKB94GgwfOBowHpgZ8BwIGTgcXBksH8gU2B+IFJgfiBSgHzgVGB8wFUgfcBVYHzAU=",
   "arm-cuff-r": "AQAMADYI5Qa8COYGtAj+BrYIPgfQCGIH0giGB7YHhwe3B2IHxwdGB8YHMAe6BxIHlAfmBg==",
   "arm-fist-r":
     "AQAcABoIiAfRCIoHzwieB6IICgihCJYIkgiiCDYIzAgSCMcI4ge3CLYHnAiqB4QIlgeCCJ0Hngi8B9oItgfcCKIH0giaB6kIZgfECGEHvgheB5oIbAc6CI8HegiSB3IIhAc2CKIH4gfFB7oHuAemB7UHigc=",
@@ -82,13 +83,13 @@ export const FAR_FROM_SUIT_SEAMS: Readonly<Record<string, string>> = {
   "chest-pec-l": "AQAJALoErQQeBK0EFASaBFUEegR6BJID+gR9A4gEmgOYBHIEvgSqBA==",
   "chest-pec-r": "AQAKABoGrQQWBqoEPAZyBEwGmgPZBX4D3gV9A1oGkgN/BnoEwAaaBLYGrQQ=",
   "chest-abs-l":
-    "AQAQAK4EvwV2BMEFWgRyBTsESgUqBEQFFgQvBQAEDgXxA+oE9gPjBCcE0gQeBK0EvgSsBAAFCgVpBVoFawWyBWYFuAU=",
+    "AQAbAKoE+wWKBPoFhgTuBXIE4AVFBOIFUwTOBVsEdgU7BEoFKgREBRUELgUABA4F8QPqBPYD4wQnBNIEHgStBL4ErAQABQoFaQVaBWsFpgVWBc4FLgXdBRkF0gUeBeoFDgX8BQIF/QXuBOwFsgTvBQ==",
   "chest-abs-r":
-    "AQAQACYGvwVuBbgFaQWyBWsFWgXUBQoFFgasBLYGrQStBtIE3gbjBOMG6gTUBg4FvgYtBaoGQwWaBkwFewZyBV4GwQU=",
-  "thigh-top-l": "AQAMAMoDEAh6AxAIdgMOCHwD+gdsAwIIbAPaB4wDogeKA58HdgOpB3MDpgeCA4wHKQQOCA==",
+    "AQAaAC4G+wUmBu0F5gXtBc4F/QW7BeoFvgXRBaoF3QV+BcwFaQWiBWsFWgXUBQoFFgasBLYGrQStBtIE3gbjBOMG6gTHBiIFqgZDBZgGTgV6BnMFfQa2BYEGzgWNBuIFYgbhBVIG7AVKBvsF",
+  "thigh-top-l": "AQAMANoDEAh6AxAIdgMOCHwD+gdsAwIIbAPaB4wDogeKA58HdgOpB3MDpgeCA4wHKQQOCA==",
   "thigh-plate-l":
     "AQASADoE2QmmA8IJmgONCW0DiglpA2YJiwMuCXwDzghvA8IIdAOaCGcDNgh2AxAIKgQPCEoEJgjuBFkI8QReCAcFZgn8BJIJegTgCQ==",
-  "thigh-top-r": "AQALAA4HEAirBg4ITgeLB18HpgdHB6IHZwfaB2oH/gdmBwIIWgf5B14HDghaBxAI",
+  "thigh-top-r": "AQALAAIHEAirBg4ITgeLB18HpgdHB6IHZwfaB2oH/gdmBwIIWgf5B14HDghaBxAI",
   "thigh-plate-r":
     "AQATAJ4G2AlaBuAJ4gWbCdIFiAnNBWYJ4wVeCOYFWQiKBiYIqgYPCF4HEAhsBzYIYAeaCGUHwghYB84ISQcuCWoHZglmB4oJOgeNCS4Hwgk=",
   "knee-disc-l":
@@ -150,7 +151,7 @@ export const FAR_FROM_SUIT_GOLD_BOXES: Readonly<
   "crystal-mount": [287, 219, 116, 104],
   "tasset-pendant": [329, 651, 36, 104],
   "tasset-low": [320, 525, 52, 112],
-  "tasset-top": [314, 440, 68, 88],
+  "tasset-top": [305, 417, 84, 112],
   "tasset-l": [211, 385, 104, 148],
   "tasset-r": [378, 385, 104, 148],
   "arm-upper-l": [141, 282, 112, 92],
@@ -171,11 +172,11 @@ export const FAR_FROM_SUIT_GOLD_BOXES: Readonly<
   "shoulder-lower-r": [407, 184, 108, 124],
   "chest-pec-l": [269, 219, 56, 80],
   "chest-pec-r": [391, 227, 36, 72],
-  "chest-abs-l": [265, 296, 84, 72],
-  "chest-abs-r": [347, 296, 80, 72],
-  "thigh-top-l": [219, 483, 16, 28],
+  "chest-abs-l": [265, 296, 80, 88],
+  "chest-abs-r": [347, 296, 80, 88],
+  "thigh-top-l": [219, 481, 16, 32],
   "thigh-plate-l": [219, 517, 96, 112],
-  "thigh-top-r": [463, 483, 12, 32],
+  "thigh-top-r": [461, 481, 16, 32],
   "thigh-plate-r": [377, 517, 96, 112],
   "knee-disc-l": [216, 632, 88, 88],
   "knee-point-l": [178, 624, 132, 144],

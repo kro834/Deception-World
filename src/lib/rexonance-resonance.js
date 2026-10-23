@@ -970,6 +970,61 @@ function* assemblyPlanSteps({
   for (const item of tiles)
     if (item.owner?.beat === 5)
       helmReach = Math.max(helmReach, Math.hypot(item.cx - eyeX, item.cy - eyeY));
+  // Each plate grows as one connected front from its seat (owner,
+  // 2026-10-23: 「ナノマシンや装着をブラッシュアップ」 — no lone cell locking
+  // ahead of its neighbours): a tile's reach is its path through the
+  // plate's own cells from the seat (8-neighbours), not the straight line
+  // across a gap; a detached island starts at its own straight-line reach.
+  {
+    const byOwner = new Map();
+    for (const item of tiles) {
+      if (!item.owner) continue;
+      let cells = byOwner.get(item.owner);
+      if (!cells) byOwner.set(item.owner, (cells = new Map()));
+      cells.set(Math.round(item.sy / tile) * cols + Math.round(item.sx / tile), item);
+    }
+    let work = 0;
+    for (const [owner, cells] of byOwner) {
+      const list = [...cells.values()].sort((a, b) => a.reach - b.reach);
+      const geo = new Map();
+      let queue = [];
+      let reach = 1;
+      for (const start of list) {
+        if (geo.has(start)) continue;
+        geo.set(start, start.reach);
+        queue.push(start);
+        // Dijkstra over the grid (steps 1 and √2 tiles): small plates, a
+        // sorted frontier is plenty.
+        while (queue.length) {
+          let best = 0;
+          for (let k = 1; k < queue.length; k += 1)
+            if (geo.get(queue[k]) < geo.get(queue[best])) best = k;
+          const item = queue[best];
+          queue[best] = queue[queue.length - 1];
+          queue.pop();
+          const d = geo.get(item);
+          if (d > reach) reach = d;
+          const col = Math.round(item.sx / tile);
+          const row = Math.round(item.sy / tile);
+          for (let dy = -1; dy <= 1; dy += 1)
+            for (let dx = -1; dx <= 1; dx += 1) {
+              if (!dx && !dy) continue;
+              const next = cells.get((row + dy) * cols + col + dx);
+              if (!next) continue;
+              const nd = d + tile * (dx && dy ? Math.SQRT2 : 1);
+              if (nd < (geo.get(next) ?? Infinity)) {
+                if (!geo.has(next)) queue.push(next);
+                geo.set(next, nd);
+              }
+            }
+          if (++work % 2048 === 0) yield;
+        }
+        queue = [];
+      }
+      for (const [item, d] of geo) item.reach = d;
+      owner.reach = reach;
+    }
+  }
   const partDone = ASSEMBLY_PARTS.map(() => 0);
   const centroids = ASSEMBLY_PARTS.map(() => [0, 0, 0]);
   // Each beat's last tile to land: its lock strikes where that tile's plate
@@ -995,8 +1050,8 @@ function* assemblyPlanSteps({
       beat === 5
         ? (1 - Math.hypot(item.cx - eyeX, item.cy - eyeY) / helmReach) * 0.9 + random() * 0.1
         : (item.owner?.rank ?? 0) * 0.36 +
-            (item.reach / (item.owner?.reach ?? 1)) * 0.54 +
-            random() * 0.1,
+            (item.reach / (item.owner?.reach ?? 1)) * 0.62 +
+            random() * 0.02,
     );
     item.beat = beat;
     item.t0 = from + key * (to - from - flight);
@@ -1472,7 +1527,7 @@ const facePixels = (glow, visor) => glowPixels(glow, visor);
 // a moment before the light runs out from the core, hold while it lights
 // under them, then scatter outward (the BURSTS' scales and turns) behind
 // the wipe, so the whole body reads as one wave out from the reactor.
-const LIGHT_PIXELS = { lead: 0.014, fill: 0.006, hold: 0.004, burst: 0.014, drift: 9 };
+const LIGHT_PIXELS = { lead: 0.014, fill: 0.006, hold: 0.004, burst: 0.014, drift: 16 };
 const lightPixels = (lights, core, W, H, document) => {
   if (!lights?.width || !core) return [];
   const cell = 6;
@@ -1494,8 +1549,22 @@ const lightPixels = (lights, core, W, H, document) => {
     for (let x = 0; x < cw; x += 1) {
       const i = (y * cw + x) * 4;
       if (data[i + 3] < 70) continue;
-      // Keep the squares sparse (the eyes' density), never every cell.
-      if (random() > 0.42) continue;
+      // Keep the squares sparse (the eyes' density), never every cell, and
+      // trace the lights' lines rather than flooding their broad fields
+      // (owner, 2026-10-23: at .89–.91 the squares massed over the
+      // muffler's lit cloth): a cell's chance falls with how much of the
+      // 5 × 5 cells round it is lit, so a thin line keeps the eyes' density
+      // and a wide lit field only a scatter.
+      const keep = random();
+      let around = 0;
+      for (let dy = -2; dy <= 2; dy += 1)
+        for (let dx = -2; dx <= 2; dx += 1) {
+          const nx = x + dx;
+          const ny = y + dy;
+          if (nx >= 0 && ny >= 0 && nx < cw && ny < ch && data[(ny * cw + nx) * 4 + 3] >= 24)
+            around += 1;
+        }
+      if (keep > 0.42 * Math.min(1, 5 / around)) continue;
       const px = (x + random()) * (W / cw);
       const py = (y + random()) * (H / ch);
       if (Math.hypot(px - cx, py - cy) < REACTOR_RADIUS) continue;
@@ -1507,13 +1576,17 @@ const lightPixels = (lights, core, W, H, document) => {
     }
   return squares;
 };
+// Each burst group's scatter: how far it opens (scale about its centre) and
+// its turn (degrees). Owner (2026-10-23): the eyes' squares flew out up to
+// 5.2× — far past the face; they now open just beyond the outline they
+// formed, a crisp release rather than an explosion.
 const BURSTS = [
-  [3.4, -14],
-  [4.6, 10],
-  [3, 22],
-  [5.2, -6],
-  [3.9, -24],
-  [4.8, 16],
+  [1.42, -6],
+  [1.68, 4],
+  [1.34, 9],
+  [1.82, -3],
+  [1.55, -10],
+  [1.74, 7],
 ];
 
 // The same combustion choreography as the entrance's 2400 ms clock, mapped
