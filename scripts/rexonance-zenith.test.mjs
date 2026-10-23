@@ -2486,9 +2486,10 @@ test("the gold forms by nanites right after each plate lands; the driver is on f
   // (ASSEMBLY_GOLD.delay .003 → .008); each cell names its plate (`piece`).)
   // (Round 3: the helmet's gold from .005 after its last tile, over .010.)
   // Owner (2026-10-23): each plate's tiles land along their path through the plate from its seat (one connected front, no lone early cells), so the locks moved.
+  // Owner (2026-10-23): SAMで切り抜きを改善 — the plates re-cut by SAM's masks, so their gold cells and locks moved.
   assert.equal(
     createHash("sha256").update(JSON.stringify(gold)).digest("hex"),
-    "72907efe79ede3319e5f7bb25cb7a8af00072583f8178dd3008a5699ff6056ee",
+    "2b587796f6f8ef6087fa1bd17a4277bc435d0c4942541e15ad88ec364ca1a259",
   );
   const steps = assemblyGoldPlanSteps({
     pieces,
@@ -3200,8 +3201,9 @@ test("an armour tile never carries an ornament's pixels: the ribbon beside the k
       .toBuffer({ resolveWithObject: true });
     return { data: new Uint8ClampedArray(data) };
   };
-  const sample = await sampleOf("../public/rexonance-suit-20261016/figure.webp");
-  const baseSample = await sampleOf("../public/rexonance-suit-base-20261016/base.webp");
+  // Owner (2026-10-23): SAMで切り抜きを改善 (the suit and its base figure re-cut by SAM's masks, new folders).
+  const sample = await sampleOf("../public/rexonance-suit-20261023/figure.webp");
+  const baseSample = await sampleOf("../public/rexonance-suit-base-20261023/base.webp");
   const pieces = REXONANCE_SUIT_PIECES.map((piece) => ({
     ...piece,
     preset: REXONANCE_SUIT_DRIVER.includes(piece.id),

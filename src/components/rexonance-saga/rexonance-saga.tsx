@@ -538,7 +538,7 @@ const RexonanceSuitUp = memo(function RexonanceSuitUp({ stage }: { stage: Rexona
           />
           <img
             className="rzn-driver-standin"
-            src="/rexonance-zenith-20261017/driver-standin.webp"
+            src="/rexonance-zenith-20261023/driver-standin.webp"
             alt=""
             width={REXONANCE_SUIT_SIZE.width}
             height={REXONANCE_SUIT_SIZE.height}

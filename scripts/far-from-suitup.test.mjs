@@ -121,7 +121,8 @@ test("the suit is the owner's whole cutout frame at the engine's figure height, 
     "max.webp": 200_000,
   };
   for (const [name, cap] of Object.entries(caps)) {
-    const path = file(`public/far-from-suit-20261022/${name}`);
+    // Owner (2026-10-23): SAMで切り抜きを改善 (the suit re-cut by SAM's masks, in its new folder).
+    const path = file(`public/far-from-suit-20261023/${name}`);
     assert.ok(existsSync(path), name);
     assert.ok(statSync(path).size <= cap, `${name} within ${cap} bytes`);
   }
@@ -133,7 +134,8 @@ test("the suit is the owner's whole cutout frame at the engine's figure height, 
     FAR_FROM_SUIT_GUIDE.src,
     ...Object.values(FAR_FROM_SUIT_FORMS),
   ])
-    assert.match(src, /^\/far-from-suit-20261022\//);
+    // Owner (2026-10-23): SAMで切り抜きを改善.
+    assert.match(src, /^\/far-from-suit-20261023\//);
   // The owner's cutouts are the sources, kept with the design files.
   for (const stage of ["middle", "high", "xhigh", "max"])
     assert.ok(existsSync(file(`design/far-from-suit-20261022/${stage}.webp`)), stage);
@@ -208,7 +210,8 @@ test("the plates partition the figure in the engine's groups, every one with its
 });
 
 test("the same wearer: Rexonance's undersuit stands in the frame with its soles and reactor socket on ミドル's", () => {
-  assert.ok(FAR_FROM_SUIT_UNDERSUIT.startsWith("/far-from-suit-20261022/"));
+  // Owner (2026-10-23): SAMで切り抜きを改善.
+  assert.ok(FAR_FROM_SUIT_UNDERSUIT.startsWith("/far-from-suit-20261023/"));
   const build = read("scripts/build-far-from-suit.mjs");
   assert.match(build, /REXONANCE_SUIT_UNDERSUIT/);
   assert.match(build, /REXONANCE_SUIT_MARKS/);

@@ -16,7 +16,8 @@ test("driver stand-in matches the live unlit composite within native rounding", 
   const expected = await sharp({ create: { width, height, channels: 4, background: "#00000000" } })
     .composite(layers).raw().toBuffer();
   separateDriverPixels(expected);
-  const { data, info } = await sharp("public/rexonance-zenith-20261017/driver-standin.webp")
+  // Owner (2026-10-23): SAMで切り抜きを改善 (the driver re-cut, its stand-in in a new folder).
+  const { data, info } = await sharp("public/rexonance-zenith-20261023/driver-standin.webp")
     .raw().toBuffer({ resolveWithObject: true });
   assert.equal(info.width, width);
   assert.equal(info.height, height);
