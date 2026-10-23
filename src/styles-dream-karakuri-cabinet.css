@@ -601,3 +601,37 @@ html[data-family="dream"]
     display: none;
   }
 }
+
+/* Owner (2026-10-23): with the 見取り図 tallies gone, a wide sheet sets its three
+   ways on in the side column the tallies held — the opening reads on the left,
+   the next steps stand on a hairline at the right. Narrow sheets keep the row. */
+@media (min-width: 1001px) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-opening {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(200px, 232px);
+    grid-template-areas:
+      "lead actions"
+      "excerpt actions";
+    align-items: start;
+    column-gap: clamp(28px, 3.5vw, 52px);
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-lead {
+    grid-area: lead;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-excerpt {
+    grid-area: excerpt;
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-actions {
+    grid-area: actions;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+    margin-top: 0;
+    padding: 2px 0 4px 22px;
+    border-top: 0;
+    border-left: 1px solid #88724e66;
+  }
+}

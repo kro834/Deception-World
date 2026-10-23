@@ -738,7 +738,10 @@ function DolminenceContent({
         <DreamDossierGuide scope={dossierRef} recordId={record.id} name={record.name} />
 
         <header className="dream-dossier-title">
-          <h2>{record.name}</h2>
+          {/* The name breaks at its seam (仮面ライダー / ルパン), never before its last kana. */}
+          <h2>
+            <DisplayName value={record.name} />
+          </h2>
           <small>{record.agent}</small>
         </header>
 
