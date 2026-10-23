@@ -220,6 +220,65 @@ export interface RexonanceAssemblyAccents {
   ): void;
 }
 
+/** A page's own armour generation's layer (FAR FROM, 2026-10-23: the
+ * wireframe, far-from-wireframe-layer.ts). Allocation-free, closed-form in
+ * the progress; the context is in figure px, `vs` device px per figure px,
+ * `ratio` device px per CSS px. */
+export interface RexonanceAssemblyGenerationLayer {
+  /** The armour at `progress`: called each frame until the seal is whole. */
+  draw(
+    context: CanvasRenderingContext2D,
+    progress: number,
+    calm: boolean,
+    vs: number,
+    ratio: number,
+  ): void;
+  /** One change of a page's chain of forms (`from` overwritten by `to`, by
+   * their keys; "standard" the base figure) at `u` (0–1). False when it
+   * cannot (the scene's square cells then draw it). */
+  form(
+    context: CanvasRenderingContext2D,
+    from: CanvasImageSource,
+    to: CanvasImageSource,
+    fromKey: string,
+    toKey: string,
+    u: number,
+    tone: string,
+    calm: boolean,
+    vs: number,
+    ratio: number,
+  ): boolean;
+  release(): void;
+}
+
+/** A page's own armour generation (FAR FROM: 「ワイヤーフレーム風の生成方式」):
+ * prepared once the plan is made (a generator the scene steps in idle
+ * slices), its layer draws the armour in place of the nanite swarm, the
+ * plates' paint, the gold's pour and the field. */
+export interface RexonanceAssemblyGeneration {
+  prepare(input: {
+    document: Document;
+    size: { readonly width: number; readonly height: number };
+    pieces: readonly RexonanceAssemblyPiece[];
+    plan: {
+      readonly tiles: readonly RexonanceAssemblyTile[];
+      readonly cols: number;
+      readonly rows: number;
+      readonly tile: number;
+    };
+    core: readonly [number, number];
+    visor: readonly [number, number];
+    coarse: boolean;
+    reactorGlow?: readonly (readonly [number, number])[];
+    /** The figure with its lights held back. */
+    unlit: CanvasImageSource;
+    /** The gold atlas (each plate's raw gunmetal channel), if any. */
+    gold?: CanvasImageSource | null;
+    /** The chain's form keys to prepare ("standard" first). */
+    forms: readonly string[];
+  }): Generator<undefined, RexonanceAssemblyGenerationLayer | null, unknown>;
+}
+
 export interface RexonanceAssemblyConfig {
   figure: string;
   undersuit: string;
@@ -239,6 +298,9 @@ export interface RexonanceAssemblyConfig {
   fireTone?: number;
   palette?: RexonanceAssemblyPalette;
   accents?: RexonanceAssemblyAccents;
+  /** A page's own armour generation (FAR FROM: the wireframe). Without it
+   * the nanite swarm builds the armour (Rexonance). */
+  generation?: RexonanceAssemblyGeneration;
   gold?: RexonanceAssemblyGold;
   /** The plates' atlas (art | mosaic), for the driver's cut-outs. */
   atlas?: string;
