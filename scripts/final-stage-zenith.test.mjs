@@ -292,12 +292,13 @@ test("on phones the end card keeps the Zeus corner clear and the strip's ring in
 
 test("the records' eyebrows wrap at their seam and the cast still fills its pass", async () => {
   const page = await read("src/components/final-stage/final-stage.tsx");
-  assert.match(page, /const \[head, \.\.\.rest\] = value\.split\(" \/ "\);/);
-  assert.match(page, /<span>\{head\}<\/span> <span>\/ \{rest\.join\(" \/ "\)\}<\/span>/);
-  assert.equal((page.match(/<EyebrowParts value=\{eyebrow\} \/>/g) ?? []).length, 2);
+  // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）: the records' eyebrows
+  // (RIDER RECORD 0N / …, RIDER PICKUP, PICKUP, RIDER) went; the card and the dialog
+  // open on the rider's name.
+  const code = page.replace(/\{\/\*[\s\S]*?\*\/\}|\/\*[\s\S]*?\*\//g, "");
+  assert.doesNotMatch(code, /EyebrowParts|RIDER RECORD|RIDER PICKUP|<small>PICKUP<\/small>|<span>RIDER<\/span>/);
+  assert.match(page, /<div className="fst-pickup-heading">\s*<h2>/);
   const { rules } = parse(await read(SHEET));
-  const seam = rules.find(({ selector }) => /\.fst-pickup-heading small\) > span$/.test(selector));
-  assert.ok(seam && declarations(seam.body, "white-space").includes("nowrap"));
   // Stacked, the still is as wide as the pass (its 4:5 under a 420px cap
   // had sized it 336px wide), and the tear sits on the seam it marks.
   const still = rules.find(
@@ -317,7 +318,9 @@ test("delayed stepped runs end on the element's own style (WebKit stops them a s
   // a forwards fill left the cast stub at half opacity and some calls tilted.
   for (const [path, names] of [
     ["src/styles-final-stage-kiro.css", ["fsk-stamp", "fsk-flap-in"]],
-    ["src/styles-final-stage-lamplight.css", ["fsl-sign", "fsl-flip"]],
+    // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）: the record's sign
+    // (RIDER PICKUP) and its fsl-sign drop went; the flip stays.
+    ["src/styles-final-stage-lamplight.css", ["fsl-flip"]],
     ["src/styles-final-stage-cinema.css", ["fsc-lock"]],
   ]) {
     const css = strip(await read(path));
