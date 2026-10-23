@@ -1621,6 +1621,15 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   // The fire's end tone (rexonance-fire/fire-tuning.js FIRE_TONES): the
   // clean combustion Rexonance ends in by default, gold for FAR FROM.
   const FIRE_TONE = config.fireTone ?? 0;
+  // A page's own armour generation (FAR FROM, 2026-10-23: 「ファーフロムは
+  // ワイヤーフレーム風の生成方式を採るように」 — its wireframe layer,
+  // far-from-wireframe-layer.ts): prepared with the plan, it draws the armour
+  // until the seal is whole and each change of the chain, in place of the
+  // nanite swarm, the plates' paint, the gold's pour and the field; the scan,
+  // the fire, the seal, the light, the pixel squares, the rings and the
+  // accents stay the scene's. Rexonance has none: everything below is as it was.
+  const armourGeneration = config.generation ?? null;
+  let wire = null;
   const reduced = environment.matchMedia("(prefers-reduced-motion: reduce)");
   const forcedColors = environment.matchMedia("(forced-colors: active)");
   const coarse = environment.matchMedia("(pointer: coarse)");
@@ -1814,10 +1823,13 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   let modulesLoading = null;
   const modules = () => {
     modulesLoading ??= Promise.all([
-      boundedImage(import("./rexonance-assembly-nanites.js"), null, 8000).then((module) => {
-        if (!module) throw new Error("assembly module request timed out");
-        return module;
-      }),
+      // (A page's own generation draws no swarm: its module is never fetched.)
+      armourGeneration
+        ? null
+        : boundedImage(import("./rexonance-assembly-nanites.js"), null, 8000).then((module) => {
+            if (!module) throw new Error("assembly module request timed out");
+            return module;
+          }),
       boundedImage(
         Promise.resolve().then(() =>
           typeof config.nanites === "function" ? config.nanites() : (config.nanites ?? null),
@@ -1826,11 +1838,14 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         2000,
       ),
       // The field's module is optional: without it the scene plays as before.
-      boundedImage(
-        import("./rexonance-field/index.js").catch(() => null),
-        null,
-        4000,
-      ),
+      // (A page's own generation plays without it.)
+      armourGeneration
+        ? null
+        : boundedImage(
+            import("./rexonance-field/index.js").catch(() => null),
+            null,
+            4000,
+          ),
     ]).catch((error) => {
       modulesLoading = null;
       throw error;
@@ -2417,15 +2432,16 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         if (!active() || !nextPlan) return;
         // Gold planning includes its overlap graph; neither planning phase
         // becomes visible until both have finished for this generation.
-        const nextGold = images.gold
-          ? await buildSteps(
-              assemblyGoldPlanSteps({
-                pieces: planningPieces,
-                gold: config.gold,
-                tiles: nextPlan.tiles,
-              }),
-            )
-          : null;
+        const nextGold =
+          images.gold && !armourGeneration
+            ? await buildSteps(
+                assemblyGoldPlanSteps({
+                  pieces: planningPieces,
+                  gold: config.gold,
+                  tiles: nextPlan.tiles,
+                }),
+              )
+            : null;
         if (!active()) return;
         const nextPixels = facePixels(config.glow, config.visor);
         // The reactor's pixel squares: Rexonance's own disc (owner,
@@ -2436,7 +2452,10 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         mark("cpu-preparation-probe");
         cpuPreparation = await idleTask(() => active() && supportsCpuPreparation(document));
         if (!active()) return;
-        const nextSettled = await makeSheet("settled-sheet");
+        // (A page's own generation keeps no welded plates: no sheet.)
+        const nextSettled = armourGeneration
+          ? { width: 0, height: 0 }
+          : await makeSheet("settled-sheet");
         if (!nextSettled || !active()) return;
         // (No mote layers: the scene no longer reads them — round 3, memory.)
         const nextLights = await splitLightsIdle(images.figure, "figure-lights");
@@ -2598,6 +2617,61 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         }
 
         if (!active()) return;
+        // A page's own generation (FAR FROM's wireframe): its layer, from the
+        // plan, the unlit art and the plates' raw gold, in idle slices; then
+        // the scene is ready — no swarm, no conduit, no gold pour.
+        if (armourGeneration) {
+          mark("generation");
+          const nextWire = await buildSteps(
+            armourGeneration.prepare({
+              document,
+              size: config.size,
+              pieces: config.pieces,
+              plan: nextPlan,
+              core: config.core,
+              visor: config.visor,
+              coarse: coarse.matches,
+              reactorGlow: config.reactorGlow,
+              unlit: nextLights?.unlit || images.figure,
+              gold: images.gold,
+              forms: formChain ? ["standard", ...formChain] : [],
+            }),
+          );
+          if (!active() || !nextWire) {
+            nextWire?.release();
+            return;
+          }
+          const nextBuffers = await allocateIdle(
+            nextPlan,
+            null,
+            nextPixels,
+            active,
+            mark,
+            config.reactorGlow ? nextReactorPixels : [],
+          );
+          if (!active() || !nextBuffers) {
+            nextWire.release();
+            return;
+          }
+          mark("ready");
+          wire = nextWire;
+          plan = nextPlan;
+          goldPlan = null;
+          pixels = nextPixels;
+          reactorSquares = nextReactorPixels;
+          lightSquares = nextLightPixels;
+          settled = nextSettled;
+          settledCount = 0;
+          lights = nextLights;
+          reactor = nextReactor;
+          driver = nextDriver;
+          buffers = nextBuffers;
+          complete = true;
+          retryCount = 0;
+          runway.dataset.rznLoad = "ready";
+          if (partialBuild === state) partialBuild = null;
+          return;
+        }
         // The nanite swarm (owner, 2026-10-16: 超大幅な改善). Raw nanite
         // metal (and the art's silhouette) for the armour and the
         // ornaments, from the art with its gold unformed.
@@ -3360,14 +3434,21 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     // The painted plates (welded in paint order), then the seal into the
     // finished figure.
     const { tiles } = plan;
-    const painted = paintedBy(progress);
-    syncSettled(painted, seal >= 1);
+    const painted = wire ? 0 : paintedBy(progress);
+    if (!wire) syncSettled(painted, seal >= 1);
     context.globalAlpha = 1;
     // A plate's art carries its gold unformed: the armour's from the base
     // figure, the ornaments' from the full figure (owner, 2026-10-16).
     const plates = raw || lights?.unlit || figure;
     const baseArt = baseRaw || baseLights?.unlit || images.base || plates;
-    if (seal < 1) {
+    if (wire && seal < 1) {
+      // A page's own generation (FAR FROM's wireframe) builds the armour;
+      // the driver is on the body from the start.
+      wire.draw(context, progress, calm, vs, view.ratio);
+      context.globalAlpha = 1;
+      context.globalCompositeOperation = "source-over";
+      if (driver) context.drawImage(driver, 0, 0, W, H);
+    } else if (seal < 1) {
       context.drawImage(settled, 0, 0, W, H);
       // Painted, not yet welded (the welds catch up a budget a frame): the
       // art itself through one clip per source.
@@ -3532,16 +3613,32 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
           const key = formChain[k];
           const from = k === 0 ? forms.fig : forms.sheets[formChain[k - 1]];
           const start = a + k * seg;
-          drawOverwrite(
-            context,
-            forms.plans[key],
-            from,
-            forms.sheets[key],
-            span(progress, [start, start + seg - 0.004]),
-            span(progress, [start + seg * 0.45, start + seg]),
-            forms.tones[key],
-            calm,
-          );
+          // A page's own generation draws the change its way (FAR FROM: the
+          // next form's wireframe over the last, then its facets filling).
+          if (
+            !wire?.form(
+              context,
+              from,
+              forms.sheets[key],
+              k === 0 ? "standard" : formChain[k - 1],
+              key,
+              span(progress, [start, start + seg - 0.004]),
+              forms.tones[key],
+              calm,
+              vs,
+              view.ratio,
+            )
+          )
+            drawOverwrite(
+              context,
+              forms.plans[key],
+              from,
+              forms.sheets[key],
+              span(progress, [start, start + seg - 0.004]),
+              span(progress, [start + seg * 0.45, start + seg]),
+              forms.tones[key],
+              calm,
+            );
         }
       }
     } else if (
@@ -4632,6 +4729,8 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     naniteSheets = [];
     swarm?.release?.();
     nano = swarm = goldVisible = null;
+    wire?.release();
+    wire = null;
     releasePrimers();
     goldCount = 0;
     goldReverse.dirty = -1;
@@ -4648,6 +4747,8 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   // catching up from the start a budget a frame (R-1 19/60). Far away or at
   // the start there is nothing to catch up and the scene goes live at once.
   const caughtUp = (progress) =>
+    // (A page's own generation draws every frame whole: nothing to catch up.)
+    Boolean(wire) ||
     progress >= ASSEMBLY_BEATS.seal[1] ||
     (settledCount === paintedBy(progress) &&
       (!goldLayer || (goldCount === goldBy(progress) && goldReverse.dirty < 0)));
@@ -5011,6 +5112,8 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     naniteSheets = [];
     swarm?.release?.();
     nano = swarm = goldVisible = null;
+    wire?.release();
+    wire = null;
     releasePrimers();
   };
 }
