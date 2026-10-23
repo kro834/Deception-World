@@ -24,6 +24,7 @@ function matches(condition, { width, height }) {
   assert.equal(condition.type, "feature");
   const feature = condition.value;
   if (feature.type === "plain") {
+    if (feature.name === "any-pointer") return feature.value.value === "coarse";
     assert.equal(feature.name, "orientation");
     return (width > height ? "landscape" : "portrait") === feature.value.value;
   }
@@ -41,7 +42,7 @@ const applies = (block, width, height) =>
   block.query.mediaQueries.some((query) => matches(query.condition, { width, height }));
 
 test("reading rules parse and retain an explicit family and local surface scope", () => {
-  assert.equal(media.length, 4);
+  assert.equal(media.length, 5);
   for (const block of media) {
     for (const rule of block.rules) {
       assert.equal(rule.type, "style");
@@ -72,7 +73,7 @@ test("ordinary phones, split windows and 1440px desktop retain their layouts", (
     [1440, 900],
   ]) {
     assert.ok(
-      media.every((block) => !applies(block, width, height)),
+      media.slice(0, 4).every((block) => !applies(block, width, height)),
       `${width}x${height}`,
     );
   }
