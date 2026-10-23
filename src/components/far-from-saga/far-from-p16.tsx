@@ -41,43 +41,19 @@ function ProvisionalTag() {
 
 /** The drawn stand-in for P16's artwork: a package, its pins and a die. */
 function P16Core() {
-  const pins = Array.from({ length: 9 }, (_, index) => 46 + index * 13.5);
+  // The owner's P16 artwork (2026-10-23), as Rexonance shows its P14 core.
   return (
     <figure className="ffs-p16-core">
-      <svg viewBox="0 0 240 240" aria-hidden="true" focusable="false">
-        <defs>
-          <radialGradient id="ffs-p16-glow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#7fe6ff" stopOpacity="0.32" />
-            <stop offset="100%" stopColor="#7fe6ff" stopOpacity="0" />
-          </radialGradient>
-          <linearGradient id="ffs-p16-die" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="#12304a" />
-            <stop offset="100%" stopColor="#06111d" />
-          </linearGradient>
-        </defs>
-        <circle cx="120" cy="120" r="112" fill="url(#ffs-p16-glow)" />
-        <g className="ffs-p16-pins">
-          {pins.map((at) => (
-            <g key={at}>
-              <rect x={at} y="22" width="6" height="16" rx="1.5" />
-              <rect x={at} y="202" width="6" height="16" rx="1.5" />
-              <rect x="22" y={at} width="16" height="6" rx="1.5" />
-              <rect x="202" y={at} width="16" height="6" rx="1.5" />
-            </g>
-          ))}
-        </g>
-        <rect className="ffs-p16-package" x="38" y="38" width="164" height="164" rx="16" />
-        <rect className="ffs-p16-die" x="64" y="64" width="112" height="112" rx="10" />
-        <path
-          className="ffs-p16-trace"
-          d="M64 92h-18M64 148h-18M176 92h18M176 148h18M92 64v-18M148 64v-18M92 176v18M148 176v18"
-        />
-        <circle className="ffs-p16-ring" cx="120" cy="120" r="40" />
-        <text x="120" y="129" textAnchor="middle" className="ffs-p16-label">
-          P16
-        </text>
-      </svg>
-      <figcaption>イメージ図（P16のビジュアルは準備中です）</figcaption>
+      <img
+        src="/far-from-p16-core-20261023-720.webp"
+        srcSet="/far-from-p16-core-20261023-720.webp 720w, /far-from-p16-core-20261023.webp 1254w"
+        sizes="(max-width: 760px) 92vw, min(46vw, 560px)"
+        alt="青と紫の光に囲まれたP16演算コア"
+        width="1254"
+        height="1254"
+        loading="lazy"
+        decoding="async"
+      />
     </figure>
   );
 }

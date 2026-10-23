@@ -101,10 +101,9 @@ async function installScreeningInputTrace(page) {
               return {
                 name,
                 nodeId: window.__screeningNodeIds.get(element),
-                sameAsPointerdown:
-                  window.__screeningPointerDownNodes.has(name)
-                    ? window.__screeningPointerDownNodes.get(name) === element
-                    : null,
+                sameAsPointerdown: window.__screeningPointerDownNodes.has(name)
+                  ? window.__screeningPointerDownNodes.get(name) === element
+                  : null,
                 connected: element.isConnected,
                 rect: {
                   top: Math.round(rect.top * 10) / 10,
@@ -149,9 +148,9 @@ async function installScreeningInputTrace(page) {
               currentPoster: document
                 .querySelector("#dream-poster-panel")
                 ?.getAttribute("aria-labelledby"),
-              selectedPosterTab: document
-                .querySelector(".dream-poster-thumbnails [aria-selected='true']")
-                ?.id,
+              selectedPosterTab: document.querySelector(
+                ".dream-poster-thumbnails [aria-selected='true']",
+              )?.id,
               nodes,
               defaultPrevented: event.defaultPrevented,
               time: Math.round(performance.now()),
@@ -301,15 +300,26 @@ async function testScreeningRoom(context, viewport) {
     const bounds = image.getBoundingClientRect();
     const frame = image.parentElement.getBoundingClientRect();
     return {
-      contained: bounds.top >= frame.top - 1 && bounds.left >= frame.left - 1 &&
-        bounds.bottom <= frame.bottom + 1 && bounds.right <= frame.right + 1,
+      contained:
+        bounds.top >= frame.top - 1 &&
+        bounds.left >= frame.left - 1 &&
+        bounds.bottom <= frame.bottom + 1 &&
+        bounds.right <= frame.right + 1,
       objectFit: getComputedStyle(image).objectFit,
       width: bounds.width,
       height: bounds.height,
     };
   });
-  assert.equal(fit.contained, true, `${viewport.name}: fitted art stays completely inside its frame`);
-  assert.equal(fit.objectFit, "contain", `${viewport.name}: fitted art retains its whole composition`);
+  assert.equal(
+    fit.contained,
+    true,
+    `${viewport.name}: fitted art stays completely inside its frame`,
+  );
+  assert.equal(
+    fit.objectFit,
+    "contain",
+    `${viewport.name}: fitted art retains its whole composition`,
+  );
   await page.screenshot({ path: `${output}/${viewport.name}-screening-fit.png` });
   await page.waitForFunction(() =>
     document.activeElement?.classList.contains("dream-screening-close"),
@@ -547,6 +557,32 @@ async function testRecordExplorer(context, viewport) {
   await page.waitForFunction((id) => {
     const target = document.getElementById(id);
     return target?.closest("details")?.open && document.activeElement === target;
+  }, targetId);
+  // Focus is intentionally transferred before native smooth scrolling finishes.
+  // In WebKit it precedes arrival by ~200ms; measuring on focus alone samples
+  // an intermediate frame thousands of pixels from the destination. Preserve
+  // normal motion and wait for a stable, in-viewport landing, never force a jump.
+  await page.evaluate(async (id) => {
+    const deadline = performance.now() + 5000;
+    let previousTop = null;
+    let previousY = null;
+    let settled = 0;
+    while (performance.now() < deadline) {
+      await new Promise(requestAnimationFrame);
+      const target = document.getElementById(id);
+      const top = target?.getBoundingClientRect().top;
+      const inView = typeof top === "number" && top >= 0 && top < innerHeight;
+      const still =
+        previousTop !== null &&
+        Math.abs(top - previousTop) < 1 &&
+        previousY !== null &&
+        Math.abs(scrollY - previousY) < 1;
+      settled = inView && still ? settled + 1 : 0;
+      if (settled >= 6) return;
+      previousTop = top ?? null;
+      previousY = scrollY;
+    }
+    throw new Error(`The event ${id} did not settle in the viewport`);
   }, targetId);
   const landing = await page.evaluate((id) => {
     const target = document.getElementById(id);

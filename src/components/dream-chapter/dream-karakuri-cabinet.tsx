@@ -1,16 +1,29 @@
-import { useId, useRef, useState, type KeyboardEvent } from "react";
+import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
+import {
+  describeDreamCabinetChapter,
+  watchDreamCabinetBookmark,
+  type DreamCabinetBookmark,
+} from "@/lib/dream-cabinet-guide.js";
 import { DREAM_CASES } from "./dream-chapter-data";
+import { DREAM_CHRONICLE } from "./dream-chapter-extra-data";
 
 const VOLUMES = ["零", "一", "二", "三", "四", "五"] as const;
+const CHAPTER_GUIDES = DREAM_CASES.map((chapter) =>
+  describeDreamCabinetChapter(chapter, DREAM_CHRONICLE),
+);
 
 /** An optional preview desk: every destination remains a regular document link. */
 export function DreamKarakuriCabinet() {
   const [selected, setSelected] = useState(0);
   const [reveal, setReveal] = useState(0);
+  const [reader, setReader] = useState<DreamCabinetBookmark>({ bookmark: null, available: true });
+  const cabinet = useRef<HTMLElement>(null);
   const tabs = useRef<(HTMLButtonElement | null)[]>([]);
   const identity = useId();
   const panelId = (index: number) => `${identity}-chapter-${index}`;
   const tabId = (index: number) => `${identity}-volume-${index}`;
+  const savedChapter = DREAM_CASES.find((chapter) => chapter.no === reader.bookmark?.caseNo);
+  useEffect(() => watchDreamCabinetBookmark(cabinet.current, DREAM_CASES, setReader), []);
 
   const selectChapter = (index: number, focus = false) => {
     if (index !== selected) {
@@ -39,6 +52,7 @@ export function DreamKarakuriCabinet() {
 
   return (
     <section
+      ref={cabinet}
       className="dream-karakuri-cabinet"
       id="dream-karakuri-cabinet"
       data-dream-karakuri
@@ -49,10 +63,42 @@ export function DreamKarakuriCabinet() {
           <p lang="en">SIX CHAPTERS / KARAKURI INDEX</p>
           <h2 id={`${identity}-title`}>からくり章案内</h2>
         </div>
-        <p>章の札を引くと、障子の奥に物語の入口が開きます。</p>
+        <p>六枚の札から、読みたい章を選ぶ。障子の奥で冒頭と章の見取り図を確かめられます。</p>
       </header>
 
       <div className="dream-karakuri-woodwork">
+        <div className="dream-karakuri-resume" data-has-bookmark={Boolean(savedChapter)}>
+          <div className="dream-karakuri-resume-mark" aria-hidden="true">
+            栞
+          </div>
+          <div className="dream-karakuri-resume-copy">
+            <p>{savedChapter ? "しおりのある場所" : "六章の入口"}</p>
+            {savedChapter && reader.bookmark ? (
+              <span>
+                CASE {savedChapter.no}「{savedChapter.title}」・{reader.bookmark.paragraph}段落目
+              </span>
+            ) : (
+              <span>
+                {reader.available
+                  ? "最初から読むときも、気になる章から読むときも、下の札から。"
+                  : "しおりを読み出せない場合も、下の札から各章のあらすじを読めます。"}
+              </span>
+            )}
+          </div>
+          {savedChapter && reader.bookmark ? (
+            <a
+              className="dream-karakuri-resume-link"
+              href={`#dream-case-${savedChapter.no}-paragraph-${reader.bookmark.paragraph}`}
+              aria-label={`CASE ${savedChapter.no}「${savedChapter.title}」の${reader.bookmark.paragraph}段落目、しおりから再開`}
+            >
+              しおりから再開<span aria-hidden="true"> ↗</span>
+            </a>
+          ) : (
+            <a className="dream-karakuri-resume-link" href="#dream-case-0">
+              CASE 0から読む<span aria-hidden="true"> ↗</span>
+            </a>
+          )}
+        </div>
         <div className="dream-karakuri-drawer-label" aria-hidden="true">
           <span>物語之匣</span>
           <span>六章収録</span>
@@ -75,8 +121,14 @@ export function DreamKarakuriCabinet() {
               onClick={() => selectChapter(index)}
               onKeyDown={(event) => moveChapter(event, index)}
             >
-              <span className="dream-karakuri-tab-number">巻之{VOLUMES[index]}</span>
+              <span className="dream-karakuri-tab-number">
+                巻之{VOLUMES[index]}
+                <span className="dream-karakuri-tab-position"> / 0{index + 1}</span>
+              </span>
               <strong>{chapter.title}</strong>
+              <span className="dream-karakuri-tab-count">
+                {CHAPTER_GUIDES[index].paragraphs}段落
+              </span>
               <span className="dream-karakuri-handle" aria-hidden="true" />
             </button>
           ))}
@@ -111,16 +163,49 @@ export function DreamKarakuriCabinet() {
                   <h3>{episode.title}</h3>
                 </div>
               </div>
-              <p className="dream-karakuri-lead">{episode.lead}</p>
-              <p className="dream-karakuri-excerpt">{episode.paragraphs[0]}</p>
-              <div className="dream-karakuri-actions">
-                <a href={`#dream-case-${episode.no}`}>
-                  CASE {episode.no} のあらすじへ<span aria-hidden="true"> ↗</span>
-                </a>
-                <a href="#dream-reading-room-entry">
-                  読書室の入口へ<span aria-hidden="true"> ↗</span>
-                </a>
+              <div className="dream-karakuri-reading-layout">
+                <div className="dream-karakuri-opening">
+                  <p className="dream-karakuri-lead">{episode.lead}</p>
+                  <p className="dream-karakuri-excerpt">{episode.paragraphs[0]}</p>
+                  <div className="dream-karakuri-actions">
+                    <a href={`#dream-case-${episode.no}`}>
+                      CASE {episode.no} のあらすじへ<span aria-hidden="true"> ↗</span>
+                    </a>
+                    <a href="#dream-reading-room-entry">
+                      読書室の入口へ<span aria-hidden="true"> ↗</span>
+                    </a>
+                  </div>
+                </div>
+                <aside className="dream-karakuri-guide" aria-label={`CASE ${episode.no}の見取り図`}>
+                  <h4>この章の見取り図</h4>
+                  <dl>
+                    <div>
+                      <dt>あらすじ</dt>
+                      <dd>
+                        <b>{CHAPTER_GUIDES[index].paragraphs}</b>段落
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>本文量</dt>
+                      <dd>
+                        <b>{CHAPTER_GUIDES[index].characters.toLocaleString("ja-JP")}</b>字
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>出来事</dt>
+                      <dd>
+                        <b>{CHAPTER_GUIDES[index].events}</b>件
+                      </dd>
+                    </div>
+                  </dl>
+                  <a href={`#dream-chronicle-case-${episode.no}`}>
+                    この章の出来事を辿る<span aria-hidden="true"> ↗</span>
+                  </a>
+                </aside>
               </div>
+              <p className="dream-karakuri-scope">
+                冒頭・あらすじ・出来事には、物語の展開を含みます。
+              </p>
             </div>
           ))}
           <div

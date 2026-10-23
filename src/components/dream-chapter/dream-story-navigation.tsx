@@ -9,7 +9,11 @@ import { DREAM_CASES, DREAM_CAST_ROSTER } from "./dream-chapter-data";
 import { DREAM_CHRONICLE, type DreamChronicleEvent } from "./dream-chapter-extra-data";
 
 /** Local reading preferences affect only the canonical synopsis paragraphs. */
-export function DreamReaderSupport() {
+export function DreamReaderSupport({
+  onChange,
+}: {
+  onChange?: (reader: DreamReaderState) => void;
+}) {
   const supportRef = useRef<HTMLDivElement>(null);
   const controller = useRef<ReturnType<typeof mountDreamReader> | null>(null);
   const [reader, setReader] = useState<DreamReaderState>({
@@ -20,14 +24,17 @@ export function DreamReaderSupport() {
     const current = mountDreamReader(
       supportRef.current?.closest<HTMLElement>(".dream-reader") ?? null,
       DREAM_CASES,
-      setReader,
+      (next) => {
+        setReader(next);
+        onChange?.(next);
+      },
     );
     controller.current = current;
     return () => {
       current.dispose();
       controller.current = null;
     };
-  }, []);
+  }, [onChange]);
   const savedCase = DREAM_CASES.find((episode) => episode.no === reader.bookmark?.caseNo);
   return (
     <div
@@ -90,6 +97,10 @@ export function DreamReaderSupport() {
               </span>
               <small>{reader.bookmark.paragraph}段落目</small>
             </p>
+            <blockquote className="dream-reader-bookmark-excerpt">
+              <small>しおりの段落より</small>
+              {paragraphExcerpt(savedCase.paragraphs[reader.bookmark.paragraph - 1])}
+            </blockquote>
             <div className="dream-reader-bookmark-actions">
               <a href={`#dream-case-${savedCase.no}-paragraph-${reader.bookmark.paragraph}`}>
                 続きから読む
@@ -172,6 +183,12 @@ type ChapterCastLink = {
 const ROSTER_PREFIX = "#dream-roster-";
 const ROSTER_IDS = new Set(DREAM_CAST_ROSTER.map((entry) => entry.id));
 
+/** A preview is a literal prefix of the synopsis, never a new plot summary. */
+function paragraphExcerpt(text: string) {
+  const characters = Array.from(text);
+  return characters.length > 72 ? `${characters.slice(0, 72).join("")}…` : text;
+}
+
 /** A cast chip lands on its roster plate when the roster files that person;
     otherwise on the first canonical event of this chapter they appear in, so
     no chip ever points at an id the page does not render. */
@@ -194,6 +211,13 @@ export function DreamStoryIndex() {
     current: null,
     open: [],
   });
+  const [reader, setReader] = useState<DreamReaderState>({
+    ...DREAM_READER_DEFAULTS,
+    available: true,
+  });
+  const [guideChoice, setGuideChoice] = useState<string | null>(null);
+  const guideNo = guideChoice ?? location.current ?? reader.bookmark?.caseNo ?? "0";
+  const guideCase = DREAM_CASES.find((episode) => episode.no === guideNo) ?? DREAM_CASES[0];
   useLayoutEffect(
     () => mountDreamChapterNavigation(navRef.current?.closest(".dream-page"), setLocation),
     [],
@@ -215,7 +239,7 @@ export function DreamStoryIndex() {
 
   return (
     <>
-      <DreamReaderSupport />
+      <DreamReaderSupport onChange={setReader} />
       <nav
         ref={navRef}
         id="dream-chapter-index"
@@ -248,6 +272,11 @@ export function DreamStoryIndex() {
                     <small>
                       {eventCount}件 · {charCount.toLocaleString("ja-JP")}字
                     </small>
+                    {reader.bookmark?.caseNo === episode.no ? (
+                      <small className="dream-reader-index-bookmark">
+                        しおり · {reader.bookmark.paragraph}段落
+                      </small>
+                    ) : null}
                     <small>{location.open.includes(episode.no) ? "開いている" : "あらすじ"}</small>
                   </span>
                 </a>
@@ -266,6 +295,47 @@ export function DreamStoryIndex() {
             全章を閉じる
           </button>
         </div>
+        <details className="dream-reader-paragraph-guide">
+          <summary>
+            <span>段落から読む</span>
+            <small>本文の書き出しを手掛かりに</small>
+          </summary>
+          <div className="dream-reader-paragraph-guide-body">
+            <label>
+              章を選ぶ
+              <select value={guideCase.no} onChange={(event) => setGuideChoice(event.target.value)}>
+                {DREAM_CASES.map((episode) => (
+                  <option key={episode.no} value={episode.no}>
+                    CASE {episode.no}「{episode.title}」 · {episode.paragraphs.length}段落
+                  </option>
+                ))}
+              </select>
+            </label>
+            <p>本文の一部を表示しています。段落を選ぶと、その章を開いて本文へ移動します。</p>
+            <ol aria-label={`CASE ${guideCase.no}「${guideCase.title}」の段落`}>
+              {guideCase.paragraphs.map((text, index) => {
+                const no = index + 1;
+                const saved =
+                  reader.bookmark?.caseNo === guideCase.no && reader.bookmark.paragraph === no;
+                return (
+                  <li key={`${guideCase.no}-${no}`}>
+                    <a href={`#dream-case-${guideCase.no}-paragraph-${no}`}>
+                      <span className="dream-reader-paragraph-guide-number">
+                        {String(no).padStart(2, "0")}
+                      </span>
+                      <span className="dream-reader-paragraph-guide-copy">
+                        <strong>
+                          {no}段落目{saved ? <em>しおり</em> : null}
+                        </strong>
+                        <span>{paragraphExcerpt(text)}</span>
+                      </span>
+                    </a>
+                  </li>
+                );
+              })}
+            </ol>
+          </div>
+        </details>
       </nav>
     </>
   );

@@ -2014,3 +2014,53 @@ html[data-family="special"] body .rxs-page.ffs-page .rzn-movie-seek > input::-mo
     font-size: 11px;
   }
 }
+
+/* Very small phones: the call's header is one tight row and the phase a
+   single short line, so the chant rows end above the figure's box (its top
+   sits only about 100 px under the call's first row at 320 px). The owner's
+   call text is unchanged; only the header's spacing gives way. */
+@media (max-width: 419.98px) and (orientation: portrait) {
+  html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-call {
+    top: 8px;
+  }
+
+  html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-kicker {
+    flex-wrap: nowrap;
+    gap: 0 10px;
+    margin-bottom: 0;
+    font-size: 11px;
+    line-height: 1.4;
+    letter-spacing: 0.1em;
+    white-space: nowrap;
+  }
+
+  html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-kicker > span:first-child::before {
+    width: 14px;
+    margin-right: 8px;
+  }
+
+  html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-phase {
+    min-height: 0;
+    margin-bottom: 1px;
+    line-height: 1.5;
+  }
+
+  html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-lines {
+    gap: 2px;
+  }
+  /* The scroll cue rides the phase row's right edge instead of taking a row
+     of its own under the chant (where it would stand across the figure). */
+  html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-hint {
+    position: absolute;
+    top: 19px;
+    right: 0;
+    margin: 0;
+    font-size: 11px;
+    line-height: 1.5;
+    letter-spacing: 0.06em;
+  }
+
+  html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-hint::after {
+    display: none;
+  }
+}

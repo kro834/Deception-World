@@ -543,7 +543,7 @@ html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm
 }
 
 /* (2026-10-22, round 2) In those six, the compute figure is the long one
-   (150TOPS / 50Core（Spark G2）, KHAOS 10,000YOPS / ∞Core + KOSMOS …) and
+   (150TOPS / 50Core（Spark G2）, KHAOS 10,000YOPS / 500Core + KOSMOS …) and
    EMP the short one (300E, 無制限): the pair shares the row two to one, so
    the compute figure stops breaking into three lines beside an empty EMP
    tile. Same order, same rows. */

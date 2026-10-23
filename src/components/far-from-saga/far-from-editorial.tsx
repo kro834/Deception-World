@@ -29,7 +29,7 @@ export const FAR_FROM_CHAPTERS = [
     number: "05",
     code: "SYSTEM",
     label: "中核機構",
-    detail: "4つの新規理論・中核機構、装甲・OS、神属権限、武装、必殺技",
+    detail: "4つの新規理論・中核機構、装甲・OS、能力、武装、必殺技",
   },
 ] as const;
 

@@ -551,7 +551,7 @@ export function FarFromSaga() {
             {" / 05"}
           </small>
           <p>01 / OVERVIEW</p>
-          <h2 id="ffs-overview-title">概要</h2>
+          <h2 id="ffs-overview-title">届かない距離は、もう無い。</h2>
           <span>
             ファイナルステージ限定の超究極フォーム。変身音声と、記録の概要を掲載します。
           </span>
@@ -572,7 +572,7 @@ export function FarFromSaga() {
       >
         <header className="rxs-section-heading rxs-reveal">
           <p>01 / SPECS</p>
-          <h2 id="ffs-specs-title">スペック</h2>
+          <h2 id="ffs-specs-title">数字が、追いつかない。</h2>
           <span>標準稼働時の数値です。</span>
         </header>
         <dl className="ffs-specs rxs-reveal" aria-label="ファーフロムサーガ スペック">
@@ -593,7 +593,7 @@ export function FarFromSaga() {
       >
         <header className="rxs-section-heading rxs-reveal">
           <p>01 / PERFORMANCE</p>
-          <h2 id="ffs-performance-title">性能比較</h2>
+          <h2 id="ffs-performance-title">レクソナンス？通過点だ。</h2>
           <span>
             ファーフロムサーガを、ヴィンクルムサーガ、エクスプリームサーガ、レクソナンスサーガと比較します。
           </span>
@@ -610,7 +610,7 @@ export function FarFromSaga() {
       >
         <header className="rxs-section-heading rxs-reveal">
           <p>01 / REPORT</p>
-          <h2 id="ffs-report-title">比較資料</h2>
+          <h2 id="ffs-report-title">差は、桁で見せる。</h2>
           <span>性能比較の設定資料を、全文で掲載します。</span>
         </header>
         <FarFromReport />
@@ -624,7 +624,7 @@ export function FarFromSaga() {
             {" / 05"}
           </small>
           <p>02 / PROCESSOR</p>
-          <h2 id="ffs-p16-title">『P16』</h2>
+          <h2 id="ffs-p16-title">韋駄天？遅過ぎる</h2>
           <span>レクソナンスサーガの『P14』を基礎とした、第16世代演算加速機構です。</span>
         </header>
         <FarFromP16 />
@@ -642,7 +642,7 @@ export function FarFromSaga() {
             {" / 05"}
           </small>
           <p>04 / STAGES</p>
-          <h2 id="ffs-stages-title">形態</h2>
+          <h2 id="ffs-stages-title">選べ。どこまで遠くへ行くか。</h2>
           <span>{FAR_FROM_SAGA.stagesLine}</span>
         </header>
 
@@ -760,7 +760,7 @@ export function FarFromSaga() {
             {" / 05"}
           </small>
           <p>05 / MECHANISM</p>
-          <h2 id="ffs-theories-title">中核機構</h2>
+          <h2 id="ffs-theories-title">離れた力を、一つの拳に。</h2>
           <span>FARFROM DRIVEをはじめとする、4つの新規理論・中核機構。</span>
         </header>
         <Articles items={FAR_FROM_SAGA.theories} columns={2} label="新規理論・中核機構" />
@@ -774,7 +774,7 @@ export function FarFromSaga() {
       >
         <header className="rxs-section-heading rxs-reveal">
           <p>05 / ARMOR & OS</p>
-          <h2 id="ffs-system-title">装甲・OS</h2>
+          <h2 id="ffs-system-title">鎧も頭脳も、最終版。</h2>
           <span>浮遊ユニット『ファーフロムビット』と、統合OS『SA-GA OS 6.1』。</span>
         </header>
         <Articles
@@ -791,11 +791,11 @@ export function FarFromSaga() {
         aria-labelledby="ffs-authority-title"
       >
         <header className="rxs-section-heading rxs-reveal">
-          <p>05 / AUTHORITY</p>
-          <h2 id="ffs-authority-title">神属権限</h2>
+          <p>05 / ABILITY</p>
+          <h2 id="ffs-authority-title">神の力は、借りない。</h2>
           <span>FAR FROM DEUSと、Exception World。</span>
         </header>
-        <Articles items={FAR_FROM_SAGA.powers} columns={2} label="神属権限・継承能力" />
+        <Articles items={FAR_FROM_SAGA.powers} columns={2} label="能力" />
       </section>
 
       {/* 05, continued — the weapons, numbered. */}
@@ -806,7 +806,7 @@ export function FarFromSaga() {
       >
         <header className="rxs-section-heading rxs-reveal">
           <p>05 / WEAPONS</p>
-          <h2 id="ffs-arsenal-title">武装</h2>
+          <h2 id="ffs-arsenal-title">届く場所すべてが、射程。</h2>
           <span>追加武装は全10種。</span>
         </header>
         <ul className="ffs-weapons rxs-reveal" aria-label="ファーフロムサーガ 追加武装">
@@ -828,7 +828,7 @@ export function FarFromSaga() {
       >
         <header className="rxs-section-heading rxs-reveal">
           <p>05 / FINISHER</p>
-          <h2 id="ffs-finishers-title">必殺技</h2>
+          <h2 id="ffs-finishers-title">終幕は、彼方から。</h2>
           <span>最高位必殺技は2種。発動音声とともに掲載します。</span>
         </header>
         <div className="ffs-finisher-list">

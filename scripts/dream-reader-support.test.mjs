@@ -584,7 +584,8 @@ test("reader support stays outside the chapter index focus path and preferences 
   );
   const css = readFileSync(new URL("../src/styles-dream-reader.css", import.meta.url), "utf8");
   assert.ok(
-    component.indexOf("<DreamReaderSupport />") < component.indexOf('id="dream-chapter-index"'),
+    component.indexOf("<DreamReaderSupport onChange={setReader} />") <
+      component.indexOf('id="dream-chapter-index"'),
   );
   assert.match(
     component,

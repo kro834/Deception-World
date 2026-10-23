@@ -220,6 +220,180 @@
   font-size: 13px;
   line-height: 1.75;
 }
+/* The saved paragraph and the optional paragraph guide share the one reader
+   bookmark; an open fold or URL location is never presented as reading progress. */
+.dream-page.dream-page .dream-reader-bookmark-excerpt {
+  display: grid;
+  gap: 6px;
+  margin: 14px 0 0;
+  padding: 10px 14px;
+  border-inline-start: 2px solid #c8a45c;
+  background: rgb(243 224 176 / 5%);
+  color: #e8dfd5;
+  font-size: 16px;
+  line-height: 1.9;
+  overflow-wrap: anywhere;
+}
+.dream-page.dream-page .dream-reader-index .dream-reader-index-bookmark {
+  padding: 2px 6px;
+  border: 1px solid #c8a45c;
+  color: #f3e0b0;
+  font-weight: 700;
+}
+.dream-page.dream-page #dream-chapter-index .dream-reader-index-actions button {
+  min-height: 44px;
+  font-size: 16px;
+  white-space: nowrap;
+}
+.dream-page.dream-page .dream-reader-index .dream-reader-paragraph-guide {
+  margin-top: 18px;
+  border-top: 1px solid #967e5b;
+  color: #f2e8d5;
+  font-family: var(--ts-text);
+}
+.dream-page.dream-page .dream-reader-paragraph-guide > summary {
+  min-height: 52px;
+  padding: 12px 0;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1.7;
+}
+.dream-page.dream-page .dream-reader-paragraph-guide > summary > span {
+  display: inline-block;
+  white-space: nowrap;
+}
+.dream-page.dream-page .dream-reader-paragraph-guide > summary small {
+  display: inline-block;
+  margin-inline-start: 12px;
+  color: #d1c2b7;
+  font-size: 13px;
+}
+.dream-page.dream-page .dream-reader-paragraph-guide-body > label {
+  position: relative;
+  display: grid;
+  gap: 8px;
+  font-size: 16px;
+}
+.dream-page.dream-page .dream-reader-paragraph-guide-body > label::after {
+  content: "";
+  position: absolute;
+  right: 16px;
+  bottom: 19px;
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
+  pointer-events: none;
+}
+.dream-page.dream-page .dream-reader-paragraph-guide-body select {
+  -webkit-appearance: none;
+  appearance: none;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: 8px 36px 8px 10px;
+  border: 1px solid #967e5b;
+  border-radius: 2px;
+  background: #241a2b;
+  color: #f2e8d5;
+  font: 16px/1.6 var(--ts-text);
+  color-scheme: dark;
+}
+.dream-page.dream-page .dream-reader-paragraph-guide-body > p {
+  margin: 12px 0;
+  color: #d1c2b7;
+  font-size: 14px;
+  line-height: 1.9;
+}
+.dream-page.dream-page .dream-reader-index .dream-reader-paragraph-guide ol {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.dream-page.dream-page .dream-reader-index .dream-reader-paragraph-guide a {
+  grid-template-columns: 26px minmax(0, 1fr);
+  grid-template-rows: auto;
+  align-items: start;
+  min-height: 44px;
+  height: 100%;
+  padding: 14px;
+  gap: 10px;
+  background: #241a2b;
+  box-shadow: none;
+  translate: none;
+  font-family: var(--ts-text);
+}
+.dream-page.dream-page .dream-reader-paragraph-guide-number {
+  color: #e6c28e;
+  font: 16px/1.8 var(--ts-latin);
+}
+.dream-page.dream-page .dream-reader-paragraph-guide-copy {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+.dream-page.dream-page .dream-reader-paragraph-guide-copy > strong {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  color: #f3e0b0;
+  font-size: 14px;
+  line-height: 1.8;
+}
+.dream-page.dream-page .dream-reader-paragraph-guide-copy em {
+  padding: 0 6px;
+  border: 1px solid currentColor;
+  font-size: 12px;
+  font-style: normal;
+}
+.dream-page.dream-page .dream-reader-paragraph-guide-copy > span {
+  color: #f2e8d5;
+  font-size: 16px;
+  line-height: 1.9;
+  letter-spacing: 0.02em;
+  overflow-wrap: anywhere;
+}
+.dream-page.dream-page .dream-reader-paragraph-guide :is(summary, select, a):focus-visible {
+  outline: 3px solid #d1a2e4;
+  outline-offset: 3px;
+}
+@media (max-width: 760px) {
+  .dream-page.dream-page .dream-reader-index .dream-reader-paragraph-guide ol {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 380px) {
+  .dream-page.dream-page #dream-chapter-index .dream-reader-index-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: stretch;
+  }
+  .dream-page.dream-page .dream-reader-paragraph-guide > summary small {
+    display: block;
+    margin-inline-start: 0;
+  }
+}
+@media (forced-colors: active) {
+  .dream-page.dream-page .dream-reader-bookmark-excerpt,
+  .dream-page.dream-page .dream-reader-index .dream-reader-index-bookmark,
+  .dream-page.dream-page .dream-reader-index .dream-reader-paragraph-guide,
+  .dream-page.dream-page .dream-reader-index .dream-reader-paragraph-guide a,
+  .dream-page.dream-page .dream-reader-paragraph-guide-body select,
+  .dream-page.dream-page .dream-reader-paragraph-guide-copy :is(strong, span),
+  .dream-page.dream-page .dream-reader-paragraph-guide-number,
+  .dream-page.dream-page .dream-reader-paragraph-guide-body > p,
+  .dream-page.dream-page .dream-reader-paragraph-guide > summary small {
+    color: CanvasText;
+    border-color: CanvasText;
+    background: Canvas;
+    box-shadow: none;
+  }
+  .dream-page.dream-page .dream-reader-paragraph-guide :is(summary, select, a):focus-visible {
+    outline-color: Highlight;
+  }
+}
 .dream-page.dream-page
   .dream-reader[data-dream-reader-size="large"]
   .dream-story-case-body

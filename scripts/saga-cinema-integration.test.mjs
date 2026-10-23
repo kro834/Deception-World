@@ -1,3 +1,4 @@
+import { fileURLToPath } from "node:url";
 import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
 import { test } from "node:test";
@@ -78,7 +79,7 @@ test("cinema menu uses native-resolution poster art without loading it while clo
   const asset = new URL("../public/saga-cinema-assets/menu-thumbnail-20261012.webp", import.meta.url);
   const bytes = readFileSync(asset);
   const meta = await sharp(bytes).metadata();
-  const original = await sharp(new URL("../public/saga-cinema-assets/chapter-4.jpg", import.meta.url).pathname).metadata();
+  const original = await sharp(fileURLToPath(new URL("../public/saga-cinema-assets/chapter-4.jpg", import.meta.url))).metadata();
   assert.equal(meta.format, "webp");
   assert.equal(meta.width, original.width);
   assert.equal(meta.height, original.height);

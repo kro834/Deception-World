@@ -25,6 +25,8 @@ export function DreamScreeningRoom({ initialIndex, trigger, onClose }: DreamScre
   const [ambience, setAmbience] = useState<"theatre" | "darkroom">("theatre");
   const dialogRef = useRef<HTMLDialogElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
+  const zoomRef = useRef<HTMLButtonElement>(null);
+  const zoomReturnFocusRef = useRef<HTMLElement | null>(null);
   const imageViewportRef = useRef<HTMLDivElement>(null);
   const filmstripRef = useRef<HTMLDivElement>(null);
   const loaderRef = useRef<ReturnType<typeof createReadyPosterLoader> | null>(null);
@@ -123,15 +125,82 @@ export function DreamScreeningRoom({ initialIndex, trigger, onClose }: DreamScre
     });
   }, [index]);
 
+  useEffect(() => {
+    const viewport = imageViewportRef.current;
+    if (zoomed && viewport) {
+      // The full picture is centred before enlargement; start inspecting the
+      // same centre, rather than the artwork's potentially empty upper corner.
+      viewport.scrollTo({
+        left: (viewport.scrollWidth - viewport.clientWidth) / 2,
+        top: (viewport.scrollHeight - viewport.clientHeight) / 2,
+        behavior: "instant",
+      });
+      viewport.focus({ preventScroll: true });
+    } else if (document.activeElement === viewport) {
+      const previous = zoomReturnFocusRef.current;
+      (previous?.isConnected ? previous : zoomRef.current)?.focus({ preventScroll: true });
+    }
+  }, [zoomed]);
+
+  const toggleZoom = () => {
+    if (!imageReady) return;
+    if (!zoomed) {
+      const active = document.activeElement;
+      zoomReturnFocusRef.current =
+        active instanceof HTMLElement && dialogRef.current?.contains(active)
+          ? active
+          : zoomRef.current;
+    }
+    setZoomed((value) => !value);
+    imageViewportRef.current?.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  };
+
   const handleKeys = (event: KeyboardEvent<HTMLDialogElement>) => {
     if (event.altKey || event.ctrlKey || event.metaKey) return;
-    if ((event.key === "z" || event.key === "Z") && imageReady) {
+    if (event.key === "Tab") {
+      // WebKit can skip native buttons according to the system's keyboard
+      // preference. Keep every viewing control reachable within this modal.
+      const controls = Array.from(
+        event.currentTarget.querySelectorAll<HTMLElement>("button:not(:disabled), [tabindex='0']"),
+      ).filter((control) => control.getClientRects().length > 0);
+      if (!controls.length) return;
       event.preventDefault();
-      setZoomed((value) => !value);
-      imageViewportRef.current?.scrollTo({ top: 0, left: 0, behavior: "instant" });
+      const current = controls.indexOf(document.activeElement as HTMLElement);
+      const nextIndex =
+        current < 0
+          ? event.shiftKey
+            ? controls.length - 1
+            : 0
+          : current + (event.shiftKey ? -1 : 1);
+      const next = controls[(nextIndex + controls.length) % controls.length];
+      next.focus({ preventScroll: true });
+      const filmstrip = filmstripRef.current;
+      if (filmstrip?.contains(next)) {
+        filmstrip.scrollTo({
+          left: next.offsetLeft - (filmstrip.clientWidth - next.clientWidth) / 2,
+          behavior: "instant",
+        });
+      }
       return;
     }
-    if (zoomed) return;
+    if ((event.key === "z" || event.key === "Z") && imageReady) {
+      event.preventDefault();
+      if (!event.repeat) toggleZoom();
+      return;
+    }
+    if (zoomed) {
+      const viewport = imageViewportRef.current;
+      if (event.target !== viewport || !event.key.startsWith("Arrow")) return;
+      // Keep keyboard inspection inside the image, including at its edges;
+      // native arrow scrolling is not consistently available in WebKit dialogs.
+      event.preventDefault();
+      viewport?.scrollBy({
+        left: event.key === "ArrowRight" ? 80 : event.key === "ArrowLeft" ? -80 : 0,
+        top: event.key === "ArrowDown" ? 80 : event.key === "ArrowUp" ? -80 : 0,
+        behavior: "instant",
+      });
+      return;
+    }
     if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
       event.preventDefault();
       select(currentIndexRef.current + (event.key === "ArrowRight" ? 1 : -1));
@@ -188,6 +257,12 @@ export function DreamScreeningRoom({ initialIndex, trigger, onClose }: DreamScre
           <div
             ref={imageViewportRef}
             className={`dream-screening-picture${zoomed ? " is-zoomed" : ""}`}
+            tabIndex={zoomed ? 0 : -1}
+            role={zoomed ? "region" : undefined}
+            aria-label={zoomed ? "拡大ポスター" : undefined}
+            aria-description={
+              zoomed ? "矢印キーやスクロールで画像を移動し、Zキーで全体表示に戻ります。" : undefined
+            }
           >
             {imageReady ? (
               <img
@@ -218,8 +293,17 @@ export function DreamScreeningRoom({ initialIndex, trigger, onClose }: DreamScre
 
         <div className="dream-screening-controls">
           <p className="dream-screening-caption" aria-live="polite">
-            <small className="dream-screening-spec" lang="en">
-              REEL {String(index + 1).padStart(2, "0")} · {poster.width}×{poster.height}
+            <small className="dream-screening-spec" lang={zoomed ? undefined : "en"}>
+              {zoomed ? (
+                <>
+                  <span className="dream-screening-zoom-state">拡大鑑賞</span>
+                  <span className="dream-screening-pan-hint"> · スクロールで移動</span>
+                </>
+              ) : (
+                <>
+                  REEL {String(index + 1).padStart(2, "0")} · {poster.width}×{poster.height}
+                </>
+              )}
             </small>
             <span>{poster.alt}</span>
           </p>
@@ -235,14 +319,14 @@ export function DreamScreeningRoom({ initialIndex, trigger, onClose }: DreamScre
               {ambience === "darkroom" ? "照明：暗室" : "照明：劇場灯"}
             </button>
             <button
+              ref={zoomRef}
               type="button"
               className="dream-screening-zoom"
               aria-pressed={zoomed}
+              aria-keyshortcuts="Z"
+              title="Zキーで拡大と全体表示を切り替えます。拡大中は矢印キーで画像を移動できます。"
               disabled={!imageReady}
-              onClick={() => {
-                setZoomed((value) => !value);
-                imageViewportRef.current?.scrollTo({ top: 0, left: 0, behavior: "instant" });
-              }}
+              onClick={toggleZoom}
             >
               {zoomed ? "全体表示" : "100% / 拡大"}
             </button>

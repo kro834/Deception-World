@@ -50,7 +50,7 @@ export const SPECIAL_SITE_SECTIONS: Record<SpecialSiteId, readonly SpecialSiteSe
     ["stages", "形態", "5 STAGES"],
     ["theories", "中核機構", "MECHANISM"],
     ["system", "装甲・OS", "ARMOR & OS"],
-    ["authority", "神属権限", "AUTHORITY"],
+    ["authority", "能力", "ABILITY"],
     ["arsenal", "武装", "WEAPONS"],
     ["finishers", "必殺技", "FINISHER"],
   ],

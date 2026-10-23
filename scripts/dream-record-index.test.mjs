@@ -2,8 +2,10 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   buildDreamRecordOptions,
+  buildDreamRecordFacets,
   dreamRecordExcerpt,
   dreamRecordHighlight,
+  dreamRecordNeighbours,
   dreamRecordPassageText,
   dreamRecordSearchTerms,
   filterDreamRecords,
@@ -34,6 +36,52 @@ test("filter options derive unique canonical values in stable order", () => {
     places: ["人里", "永遠亭"],
     people: ["シエル", "怪作"],
   });
+});
+
+test("facet counts omit only their own selection and keep the query and other conditions", () => {
+  const facets = buildDreamRecordFacets(records, { case: "1", person: "シエル", place: "人里" });
+  assert.equal(facets.cases["0"], 1);
+  assert.equal(facets.cases["1"] ?? 0, 0);
+  assert.equal(facets.people["怪作"], 1);
+  assert.equal(facets.people["シエル"] ?? 0, 0);
+  assert.equal(facets.places["永遠亭"], 1);
+  assert.equal(facets.places["人里"] ?? 0, 0);
+  const queried = buildDreamRecordFacets(records, { query: "団子", person: "シエル" });
+  assert.equal(queried.people["怪作"], 1);
+  assert.equal(Object.keys(queried.cases).length, 0);
+  assert.equal(Object.keys(queried.places).length, 0);
+  const duplicated = buildDreamRecordFacets([{ ...records[0], cast: ["シエル", "シエル"] }]);
+  assert.equal(duplicated.people["シエル"], 1, "count records, not repeated cast mentions");
+});
+
+test("record neighbours use source position across CASE boundaries and handle missing endpoints", () => {
+  assert.deepEqual(dreamRecordNeighbours(records, 1), { previous: null, next: records[1] });
+  assert.deepEqual(dreamRecordNeighbours(records, 2), { previous: records[0], next: records[2] });
+  assert.deepEqual(dreamRecordNeighbours(records, 3), { previous: records[1], next: null });
+  assert.deepEqual(dreamRecordNeighbours(records, 99), { previous: null, next: null });
+  const sparse = [
+    { ...records[0], no: 7 },
+    { ...records[2], no: 40 },
+  ];
+  assert.equal(dreamRecordNeighbours(sparse, 7).next, sparse[1]);
+  assert.deepEqual(dreamRecordNeighbours([], 1), { previous: null, next: null });
+});
+
+test("saved-pool facets count only retained records while chronological neighbours keep the full source", () => {
+  const savedIds = new Set([1, 3]);
+  const pool = records.filter((record) => savedIds.has(record.no));
+  const facets = buildDreamRecordFacets(pool, { case: "1", person: "シエル" });
+  assert.equal(facets.cases["0"], 1);
+  assert.equal(facets.cases["1"], 1);
+  assert.equal(facets.people["シエル"], 1);
+  assert.equal(facets.people["怪作"] ?? 0, 0);
+  assert.equal(facets.places["永遠亭"], 1);
+  assert.equal(facets.places["人里"] ?? 0, 0);
+  assert.equal(dreamRecordNeighbours(records, 1).next, records[1]);
+  const empty = buildDreamRecordFacets([], { person: "シエル" });
+  assert.deepEqual(Object.keys(empty.cases), []);
+  assert.deepEqual(Object.keys(empty.people), []);
+  assert.deepEqual(Object.keys(empty.places), []);
 });
 
 test("keyword spelling normalizes kana, width and case and splits unique AND terms", () => {

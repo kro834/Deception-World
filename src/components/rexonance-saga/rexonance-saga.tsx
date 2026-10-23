@@ -257,7 +257,7 @@ const PERFORMANCE_BASELINES: Record<
     ],
     processing: {
       baseline: [
-        "10,000YOPS / ∞Core · KHAOS",
+        "10,000YOPS / 500Core · KHAOS",
         "300TOPS / 300Core · KOSMOS",
         "P2",
         "Paranormal Realizer Pro",
@@ -271,7 +271,7 @@ const PERFORMANCE_BASELINES: Record<
         "Neural Resonancer Ultra",
       ],
       verdict:
-        "基準値比ではKHAOS系YOPSが5.0倍、KOSMOS系TOPSが30.0倍です。KHAOSの50,000YOPSは標準稼働時の基準値で、固定された最大性能を示しません。Core数と補助機構は構成差として併記し、異なる指標を一つの倍率へ合算していません。",
+        "基準値比ではKHAOS系YOPSが5.0倍、KOSMOS系TOPSが30.0倍です。KHAOSの50,000〜YOPSは標準稼働時の基準値で、固定された最大性能を示しません。Core数と補助機構は構成差として併記し、異なる指標を一つの倍率へ合算していません。",
     },
   },
   extreme: {
@@ -324,7 +324,7 @@ const PERFORMANCE_BASELINES: Record<
       ],
       rexonance: ["50,000〜YOPS / ∞Core · KHAOS DeuX", "9,000TOPS / 300Core · KOSMOS DeuX", "P14"],
       verdict:
-        "基準値比ではKHAOS系YOPSが2.5倍、KOSMOS系TOPSが1.8倍です。KHAOSの50,000YOPSは標準稼働時の基準値で、固定された最大性能を示しません。YOPSとTOPSを合算した総合倍率には換算していません。",
+        "基準値比ではKHAOS系YOPSが2.5倍、KOSMOS系TOPSが1.8倍です。KHAOSの50,000〜YOPSは標準稼働時の基準値で、固定された最大性能を示しません。YOPSとTOPSを合算した総合倍率には換算していません。",
     },
   },
 };

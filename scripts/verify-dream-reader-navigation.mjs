@@ -93,7 +93,7 @@ try {
     await page.waitForFunction(() => document.getElementById("dream-case-2")?.open);
     await current(page, "2");
     await landed(page, "dream-case-2");
-    assert.equal(await page.locator(".dream-reader-index a").count(), 6);
+    assert.equal(await page.locator(".dream-reader-index > ol > li > a").count(), 6);
 
     await page
       .locator('#dream-case-2 .dream-reader-pagination a[href="#dream-case-3"]')

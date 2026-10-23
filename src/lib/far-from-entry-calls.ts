@@ -197,7 +197,7 @@ export const FAR_FROM_SUIT_PART_LINE = { LEGS: 0, ARMS: 2, CHEST: 3, HEAD: 3 } a
 export const FAR_FROM_SUIT_SYSTEMS = [
   ["SA-GA OS 6.1", "ONLINE"],
   ["P16", "LINK"],
-  ["KHAOS DeuX", "60000YOPS / ∞Core"],
+  ["KHAOS DeuX", "60000〜YOPS / ∞Core"],
   ["KOSMOS DeuX", "9000TOPS / 300Core"],
   ["Paranormal Realizer Ultra", "ONLINE"],
   ["Neural Resonancer Ultra", "ONLINE"],

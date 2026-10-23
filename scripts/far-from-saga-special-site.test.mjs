@@ -191,7 +191,7 @@ test("the record carries the owner's 2026-10-22 values, verbatim, and none of th
     ["ジャンプ力", "8000m"],
     ["走力", "0.00018s／100m"],
     ["飛行速度", "測定不能"],
-    ["主演算", "60000YOPS／∞Core『KHAOS DeuX』"],
+    ["主演算", "60000〜YOPS／∞Core『KHAOS DeuX』"],
     ["副演算", "9000TOPS／300Core『KOSMOS DeuX』"],
     ["統合OS", "『SA-GA OS 6.1』"],
     ["EMP", "無制限"],
@@ -229,7 +229,7 @@ test("the record carries the owner's 2026-10-22 values, verbatim, and none of th
   assert.match(record, /name: "デウスシフト・ファー・グランドフィナーレ"/);
   assert.match(record, /"FAR！GRAND FINALE！！"/);
   assert.match(record, /title: "SA-GA OS 6.1"/);
-  assert.match(record, /表記の60000YOPSは標準稼働時の基準値にあたる/);
+  assert.match(record, /表記の60000〜YOPSは標準稼働時の基準値にあたる/);
   // The Final Stage's own chapter no longer prints a provisional note.
   assert.doesNotMatch(read("src/components/final-stage/final-stage.tsx"), /specNote/);
   assert.match(read("src/components/search/search-data.ts"), /description: "SA-GA OS 6\.1"/);
@@ -496,9 +496,12 @@ const section = (id, next) =>
 test("the owner's comparison text is kept verbatim and read whole into the two documents", () => {
   // sha256 of the owner's text as supplied (2026-10-22). Any edit fails here.
   // Owner (2026-10-23): the two sentences naming レックス・ロワ and ゼウス are removed.
+  // Owner (2026-10-23): spec notation unified — ヴィンクルム's body values carry
+  // （est.）, ジャンプ力 reads 5000.0m, and the main compute of レクソナンス /
+  // ファーフロム reads 50000〜YOPS / 60000〜YOPS (lower bounds).
   assert.equal(
     createHash("sha256").update(TEXT).digest("hex"),
-    "6ab2aaa989fcb13f567b142a9873f33dc6442a23cd6764fcddb3dddb534f678c",
+    "41e50e109597c2e869ec4ac26f2ead6c838155add8f3b70a2b43097424ab69ed",
   );
   const [first, second] = report.REPORT_PARTS;
   assert.equal(first.title, "対レクソナンスサーガ・性能比較及び効率改善");
@@ -569,7 +572,8 @@ test("the owner's comparison text is kept verbatim and read whole into the two d
 test("#report shows both documents as accessible disclosure panels", () => {
   const block = section("report", "p16");
   assert.match(block, /<FarFromReport \/>/);
-  assert.match(block, /<h2 id="ffs-report-title">比較資料<\/h2>/);
+  // Owner (2026-10-23): chapter headings are catchphrases (「韋駄天？遅過ぎる」 and the like).
+  assert.match(block, /<h2 id="ffs-report-title">差は、桁で見せる。<\/h2>/);
   // Native <details>/<summary>: keyboard, screen readers and find-in-page.
   assert.match(reportView, /<details\s+id=\{chapter\.id\}/);
   assert.match(reportView, /<summary>/);
@@ -610,11 +614,11 @@ test("#performance draws on the owner's two tables only, and each keeps its ※ 
   assert.deepEqual(
     basic.rows.map((row) => [row.label, ...row.values]),
     [
-      ["パンチ力", "98.8t", "205.6t〜", "372.2t", "405.5t"],
-      ["キック力", "198.8t", "308.9t〜", "483.5t", "502.9t"],
-      ["ジャンプ力", "5000m", "1033.5m", "6000m", "8000m"],
-      ["100m走力", "0.1秒", "0.002秒", "0.00021秒", "0.00018秒"],
-      ["主演算", "10000YOPS", "20000YOPS", "50000YOPS", "60000YOPS"],
+      ["パンチ力", "98.8t（est.）", "205.6t〜", "372.2t", "405.5t"],
+      ["キック力", "198.8t（est.）", "308.9t〜", "483.5t", "502.9t"],
+      ["ジャンプ力", "5000.0m（est.）", "1033.5m", "6000m", "8000m"],
+      ["100m走力", "0.1秒（est.）", "0.002秒", "0.00021秒", "0.00018秒"],
+      ["主演算", "10000YOPS", "20000YOPS", "50000〜YOPS", "60000〜YOPS"],
       ["副演算", "300TOPS", "5000TOPS", "9000TOPS", "9000TOPS"],
       ["加速機構", "P2", "個別比較値未確定", "P14", "P16"],
       ["戦闘OS", "従来型", "従来型", "SA-GA OS 5.5", "SA-GA OS 6.1"],
@@ -728,7 +732,7 @@ test("ウルトラ is one of #suitup's forms: the selector after the runway pick
     "04 / STAGES",
     "05 / MECHANISM",
     "05 / ARMOR & OS",
-    "05 / AUTHORITY",
+    "05 / ABILITY", // Owner (2026-10-23): 神属権限 → 能力
     "05 / WEAPONS",
     "05 / FINISHER",
   ])
@@ -1061,7 +1065,7 @@ test("the HUD rebuilds the owner's interfaces as vector panels placed by the ref
     "KOSMOS DeuX",
     "FARFROM DRIVE",
     "P16",
-    "60000YOPS",
+    "60000〜YOPS",
     "9000TOPS",
     "300Core",
     "60秒",
@@ -1618,11 +1622,9 @@ test("#p16 prints the owner's P16 chapters, with 暫定ベンチマーク on eve
   assert.match(p16View, /\{ key: "p2", label: "P2比" \}/);
   assert.match(p16View, /\{ key: "extreme", label: "エクスプリーム" \}/);
   assert.match(p16View, /type="radio"/);
-  // No P16 artwork yet: a drawn core, labelled as such.
-  assert.match(p16View, /<figcaption>イメージ図（P16のビジュアルは準備中です）<\/figcaption>/);
-  assert.doesNotMatch(p16View, /<img/);
-  assert.match(compareStyles, /\.ffs-p16-ring \{[^}]*animation: ffs-p16-ring/);
-  assert.match(compareStyles, /\.ffs-page \.ffs-p16-ring \{\s*animation: none;/);
+  // Owner (2026-10-23): the owner's P16 artwork replaces the drawn core.
+  assert.match(p16View, /src="\/far-from-p16-core-20261023-720\.webp"/);
+  assert.doesNotMatch(p16View, /P16のビジュアルは準備中です/);
 });
 
 // Owner (2026-10-23): 「ファーフロムのページのフォントは未来風なサイバー風なものにして。」
@@ -1710,6 +1712,10 @@ test("the five forms are named in katakana only wherever the page's own labels n
   assert.match(editorial, /ミドル <span lang="en">\/ STANDARD<\/span>/);
   assert.match(suitupSource, /<span>\{FAR_FROM_SAGA\.stages\[key\]\.label\}<\/span>\n\s*<\/button>/);
   assert.match(ultraArt, /\{ phase: "max", step: "01", label: "マックス" \}/);
+  // /final-stage's Far From selector (its tabs and the panel) prints the katakana only.
+  const finalStage = read("src/components/final-stage/final-stage.tsx");
+  assert.doesNotMatch(finalStage, /stages\[key\]\.code|activeStage\.code/);
+  assert.match(finalStage, /<span>\{FAR_FROM_SAGA\.stages\[key\]\.label\}<\/span>\n\s*<\/button>/);
   // The owner's own words keep their English: the calls and the report text.
   assert.match(
     read("src/components/final-stage/final-stage-data.ts"),
